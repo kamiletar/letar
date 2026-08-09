@@ -100,7 +100,9 @@ export function expectFieldValue(name: string, value: unknown): void {
 function findFieldContainer(name: string): HTMLElement | null {
   // Ищем элемент поля
   const fieldElement = document.querySelector<HTMLElement>(`[data-field-name="${name}"]`)
-  if (!fieldElement) return null
+  if (!fieldElement) {
+    return null
+  }
 
   // Поднимаемся к Field.Root (Chakra ставит data-scope="field")
   let current: HTMLElement | null = fieldElement

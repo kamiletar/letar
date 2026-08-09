@@ -1,8 +1,8 @@
 'use client'
 
 import { Box, HStack, Separator, Text, VStack } from '@chakra-ui/react'
-import type { ReactElement } from 'react'
 import { deepEqual, safeStringify } from '@letar/forms-core/utils'
+import type { ReactElement } from 'react'
 
 export interface FormComparisonProps<T extends Record<string, unknown> = Record<string, unknown>> {
   /** Оригинальные данные (до изменений) */
@@ -39,7 +39,9 @@ export function FormComparison<T extends Record<string, unknown>>({
       const shape = s._def.shape()
       for (const [key, fieldSchema] of Object.entries(shape)) {
         const title = fieldSchema?._def?.meta?.ui?.title
-        if (title) schemaLabels[key] = title
+        if (title) {
+          schemaLabels[key] = title
+        }
       }
     }
   } catch {}

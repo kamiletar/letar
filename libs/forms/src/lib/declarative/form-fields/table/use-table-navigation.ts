@@ -50,7 +50,9 @@ export function useTableNavigation({
    */
   const focusCell = useCallback((row: number, col: number) => {
     const container = containerRef.current
-    if (!container) return
+    if (!container) {
+      return
+    }
 
     // Ищем input/select внутри ячейки
     const cell = container.querySelector(`[data-row="${row}"][data-col="${col}"]`)
@@ -69,10 +71,14 @@ export function useTableNavigation({
    */
   const moveToNext = useCallback(
     (currentRow: number, currentCol: number, reverse = false) => {
-      if (readOnly || editableIndices.length === 0) return
+      if (readOnly || editableIndices.length === 0) {
+        return
+      }
 
       const currentEditIdx = editableIndices.indexOf(currentCol)
-      if (currentEditIdx === -1) return
+      if (currentEditIdx === -1) {
+        return
+      }
 
       if (!reverse) {
         // Вперёд
@@ -116,7 +122,9 @@ export function useTableNavigation({
    */
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (!editingCell) return
+      if (!editingCell) {
+        return
+      }
 
       const { row, col } = editingCell
 

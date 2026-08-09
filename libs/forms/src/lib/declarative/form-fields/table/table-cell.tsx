@@ -39,13 +39,17 @@ export function TableCell({ rowIndex, colIndex, column, rowData }: TableCellProp
 
   // Хуки ДО условного return (rules of hooks)
   const startEdit = useCallback(() => {
-    if (isReadOnly) return
+    if (isReadOnly) {
+      return
+    }
     setEditingCell({ row: rowIndex, col: colIndex })
   }, [isReadOnly, setEditingCell, rowIndex, colIndex])
 
   const handleCellKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (isReadOnly) return
+      if (isReadOnly) {
+        return
+      }
       if (e.key === 'Enter' || e.key === 'F2') {
         e.preventDefault()
         startEdit()
@@ -118,7 +122,7 @@ export function TableCell({ rowIndex, colIndex, column, rowData }: TableCellProp
 /**
  * Ячейка в режиме редактирования
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 function EditingCell({
   column,
   value,

@@ -12,8 +12,12 @@ export const FieldBIK = createDocumentField({
   icon: <LuLandmark />,
   validate: (value) => {
     const digits = value.replace(/\D/g, '')
-    if (!digits) return undefined
-    if (digits.length !== 9) return 'БИК должен содержать 9 цифр'
+    if (!digits) {
+      return undefined
+    }
+    if (digits.length !== 9) {
+      return 'БИК должен содержать 9 цифр'
+    }
     return validateBik(digits) ? undefined : 'БИК должен начинаться с "04"'
   },
 })

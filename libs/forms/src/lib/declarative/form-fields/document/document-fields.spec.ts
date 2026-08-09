@@ -11,14 +11,18 @@ describe('FieldINN validate', () => {
   // ИНН validate: 10 или 12 цифр с контрольной суммой
   const validate = (value: string) => {
     const digits = value.replace(/\D/g, '')
-    if (!digits) return undefined
+    if (!digits) {
+      return undefined
+    }
     if (digits.length === 10) {
       // Алгоритм: сумма[n*w] mod 11 mod 10 == digits[9]
       const weights10 = [2, 4, 10, 3, 5, 9, 4, 6, 8]
       const sum = weights10.reduce((acc, w, i) => acc + w * Number(digits[i]), 0)
       return (sum % 11) % 10 === Number(digits[9]) ? undefined : 'Неверная контрольная сумма ИНН'
     }
-    if (digits.length === 12) return undefined // Упрощённая проверка длины
+    if (digits.length === 12) {
+      return undefined // Упрощённая проверка длины
+    }
     return 'ИНН должен содержать 10 или 12 цифр'
   }
 
@@ -45,8 +49,12 @@ describe('FieldINN validate', () => {
 describe('FieldBIK validate', () => {
   const validate = (value: string) => {
     const digits = value.replace(/\D/g, '')
-    if (!digits) return undefined
-    if (digits.length !== 9) return 'БИК должен содержать 9 цифр'
+    if (!digits) {
+      return undefined
+    }
+    if (digits.length !== 9) {
+      return 'БИК должен содержать 9 цифр'
+    }
     // БИК должен начинаться с "04"
     return digits.startsWith('04') ? undefined : 'БИК должен начинаться с "04"'
   }
@@ -72,8 +80,12 @@ describe('FieldBIK validate', () => {
 describe('FieldOGRN validate', () => {
   const validate = (value: string) => {
     const digits = value.replace(/\D/g, '')
-    if (!digits) return undefined
-    if (digits.length !== 13) return 'ОГРН должен содержать 13 цифр'
+    if (!digits) {
+      return undefined
+    }
+    if (digits.length !== 13) {
+      return 'ОГРН должен содержать 13 цифр'
+    }
     // Проверка контрольной суммы
     const check = Number(BigInt(digits.slice(0, 12)) % 11n) % 10
     return check === Number(digits[12]) ? undefined : 'Неверная контрольная сумма ОГРН'
@@ -97,8 +109,12 @@ describe('FieldOGRN validate', () => {
 describe('FieldSNILS validate', () => {
   const validate = (value: string) => {
     const digits = value.replace(/\D/g, '')
-    if (!digits) return undefined
-    if (digits.length !== 11) return 'СНИЛС должен содержать 11 цифр'
+    if (!digits) {
+      return undefined
+    }
+    if (digits.length !== 11) {
+      return 'СНИЛС должен содержать 11 цифр'
+    }
     return undefined // Контрольная сумма проверяется внутренней функцией
   }
 
@@ -119,8 +135,12 @@ describe('FieldSNILS validate', () => {
 describe('FieldKPP validate', () => {
   const validate = (value: string) => {
     const clean = value.replace(/[\s-]/g, '').toUpperCase()
-    if (!clean) return undefined
-    if (clean.length !== 9) return 'КПП должен содержать 9 символов'
+    if (!clean) {
+      return undefined
+    }
+    if (clean.length !== 9) {
+      return 'КПП должен содержать 9 символов'
+    }
     // Формат: NNNNPPXXX (N=цифра, P=цифра, X=цифра или буква)
     return /^\d{4}\d{2}[\dA-Z]{3}$/.test(clean) ? undefined : 'Неверный формат КПП'
   }
@@ -142,8 +162,12 @@ describe('FieldKPP validate', () => {
 describe('FieldPassport validate', () => {
   const validate = (value: string) => {
     const digits = value.replace(/\D/g, '')
-    if (!digits) return undefined
-    if (digits.length !== 10) return 'Паспорт: серия (4 цифры) + номер (6 цифр)'
+    if (!digits) {
+      return undefined
+    }
+    if (digits.length !== 10) {
+      return 'Паспорт: серия (4 цифры) + номер (6 цифр)'
+    }
     return undefined
   }
 
@@ -164,8 +188,12 @@ describe('FieldPassport validate', () => {
 describe('FieldBankAccount validate', () => {
   const validate = (value: string) => {
     const digits = value.replace(/\D/g, '')
-    if (!digits) return undefined
-    if (digits.length !== 20) return 'Расчётный счёт должен содержать 20 цифр'
+    if (!digits) {
+      return undefined
+    }
+    if (digits.length !== 20) {
+      return 'Расчётный счёт должен содержать 20 цифр'
+    }
     return undefined
   }
 
@@ -186,9 +214,15 @@ describe('FieldBankAccount validate', () => {
 describe('FieldCorrAccount validate', () => {
   const validate = (value: string) => {
     const digits = value.replace(/\D/g, '')
-    if (!digits) return undefined
-    if (digits.length !== 20) return 'Корр. счёт должен содержать 20 цифр'
-    if (!digits.startsWith('301')) return 'Корр. счёт должен начинаться с "301"'
+    if (!digits) {
+      return undefined
+    }
+    if (digits.length !== 20) {
+      return 'Корр. счёт должен содержать 20 цифр'
+    }
+    if (!digits.startsWith('301')) {
+      return 'Корр. счёт должен начинаться с "301"'
+    }
     return undefined
   }
 

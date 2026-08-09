@@ -42,11 +42,15 @@ export interface AsyncFieldValidators {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getAsyncValidateFromSchema(schema: any, fieldPath: string): AsyncValidateConfig | undefined {
-  if (!schema) return undefined
+  if (!schema) {
+    return undefined
+  }
 
   try {
     const unwrapped = unwrapSchema(schema)
-    if (!unwrapped?._zod?.def?.shape) return undefined
+    if (!unwrapped?._zod?.def?.shape) {
+      return undefined
+    }
 
     // Навигация по dot-path к нужному полю
     const parts = fieldPath.split('.')
@@ -54,9 +58,13 @@ function getAsyncValidateFromSchema(schema: any, fieldPath: string): AsyncValida
     let current: any = unwrapped._zod.def.shape
     for (const part of parts) {
       // Пропускаем числовые индексы массива
-      if (/^\d+$/.test(part)) continue
+      if (/^\d+$/.test(part)) {
+        continue
+      }
       const fieldSchema = current[part]
-      if (!fieldSchema) return undefined
+      if (!fieldSchema) {
+        return undefined
+      }
 
       const fieldUnwrapped = unwrapSchema(fieldSchema)
       const fieldType = fieldUnwrapped?._zod?.def?.type
@@ -126,10 +134,14 @@ export function useAsyncFieldValidation(
   // Обёрнутая async-функция с abort + cache + offline check
   const wrappedAsyncFn = useCallback(
     async ({ value }: { value: unknown }): Promise<string | undefined> => {
-      if (!asyncFn) return undefined
+      if (!asyncFn) {
+        return undefined
+      }
 
       // Пропускаем в офлайне
-      if (typeof navigator !== 'undefined' && !navigator.onLine) return undefined
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        return undefined
+      }
 
       // Кэш
       const cacheKey = String(value)
@@ -145,13 +157,17 @@ export function useAsyncFieldValidation(
       try {
         const result = await asyncFn(value)
         // Проверяем не был ли запрос отменён
-        if (controller.signal.aborted) return undefined
+        if (controller.signal.aborted) {
+          return undefined
+        }
 
         cacheRef.current.set(cacheKey, result)
         return result
       } catch (err) {
         // Отменённый запрос — не ошибка
-        if (err instanceof DOMException && err.name === 'AbortError') return undefined
+        if (err instanceof DOMException && err.name === 'AbortError') {
+          return undefined
+        }
         return undefined
       }
     },
@@ -160,7 +176,9 @@ export function useAsyncFieldValidation(
 
   // Собираем validators
   const validators = useMemo(() => {
-    if (!asyncFn) return undefined
+    if (!asyncFn) {
+      return undefined
+    }
 
     if (trigger === 'onChange') {
       return { onChangeAsync: wrappedAsyncFn }

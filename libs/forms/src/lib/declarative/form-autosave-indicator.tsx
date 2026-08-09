@@ -31,7 +31,9 @@ export interface AutosaveIndicatorProps {
  * ```
  */
 export function AutosaveIndicator({ status, lastSavedAt, error, labels }: AutosaveIndicatorProps): ReactElement | null {
-  if (status === 'idle') return null
+  if (status === 'idle') {
+    return null
+  }
 
   const defaultLabels = {
     idle: '',

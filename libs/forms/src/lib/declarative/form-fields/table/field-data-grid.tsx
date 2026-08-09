@@ -274,7 +274,9 @@ export function FieldDataGrid({
             .filter((c) => c.filter)
             .map((colDef) => {
               const column = table.getColumn(colDef.name)
-              if (!column) return null
+              if (!column) {
+                return null
+              }
               return (
                 <Input
                   key={colDef.name}
@@ -320,13 +322,17 @@ export function FieldDataGrid({
                       e.preventDefault()
                       const fromId = e.dataTransfer.getData('text/plain')
                       const toId = header.column.id
-                      if (fromId === toId) return
+                      if (fromId === toId) {
+                        return
+                      }
                       const currentOrder = columnOrder.length > 0
                         ? columnOrder
                         : table.getAllLeafColumns().map((c) => c.id)
                       const fromIdx = currentOrder.indexOf(fromId)
                       const toIdx = currentOrder.indexOf(toId)
-                      if (fromIdx === -1 || toIdx === -1) return
+                      if (fromIdx === -1 || toIdx === -1) {
+                        return
+                      }
                       const next = [...currentOrder]
                       next.splice(fromIdx, 1)
                       next.splice(toIdx, 0, fromId)

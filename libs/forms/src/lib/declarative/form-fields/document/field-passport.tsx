@@ -11,8 +11,12 @@ export const FieldPassport = createDocumentField({
   icon: <LuBookOpen />,
   validate: (value) => {
     const digits = value.replace(/\D/g, '')
-    if (!digits) return undefined
-    if (digits.length !== 10) return 'Паспорт: серия (4 цифры) + номер (6 цифр)'
+    if (!digits) {
+      return undefined
+    }
+    if (digits.length !== 10) {
+      return 'Паспорт: серия (4 цифры) + номер (6 цифр)'
+    }
     return undefined
   },
 })

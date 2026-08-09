@@ -95,7 +95,9 @@ export function CreditCardField({
 
   // Проверяем допустимость бренда
   const isBrandAllowed = useMemo(() => {
-    if (!brands || brands.length === 0) return true
+    if (!brands || brands.length === 0) {
+      return true
+    }
     return brands.includes(brandInfo.brand)
   }, [brands, brandInfo.brand])
 
@@ -124,7 +126,9 @@ export function CreditCardField({
   // Валидация номера на blur (Baymard: 53% сайтов ошибаются тут)
   const handleNumberBlur = useCallback(() => {
     const raw = stripCardNumber(numberDisplay)
-    if (!raw) return
+    if (!raw) {
+      return
+    }
 
     if (raw.length < 12) {
       setNumberStatus('error')
@@ -170,7 +174,9 @@ export function CreditCardField({
 
   // Валидация expiry на blur
   const handleExpiryBlur = useCallback(() => {
-    if (!expiryDisplay) return
+    if (!expiryDisplay) {
+      return
+    }
 
     if (expiryDisplay.length < 5) {
       setExpiryStatus('error')
@@ -200,7 +206,9 @@ export function CreditCardField({
 
   // Валидация CVC на blur
   const handleCvcBlur = useCallback(() => {
-    if (!cvcValue) return
+    if (!cvcValue) {
+      return
+    }
 
     if (cvcValue.length < brandInfo.cvcLength) {
       setCvcStatus('error')
@@ -213,13 +221,19 @@ export function CreditCardField({
 
   // Стили для статуса валидации (зелёная ✓ или красная рамка)
   const statusBorder = (status: FieldStatus) => {
-    if (status === 'valid') return '1px solid var(--chakra-colors-green-500, #38a169)'
-    if (status === 'error') return '1px solid var(--chakra-colors-red-500, #e53e3e)'
+    if (status === 'valid') {
+      return '1px solid var(--chakra-colors-green-500, #38a169)'
+    }
+    if (status === 'error') {
+      return '1px solid var(--chakra-colors-red-500, #e53e3e)'
+    }
     return undefined
   }
 
   const statusIcon = (status: FieldStatus) => {
-    if (status === 'valid') return '✓'
+    if (status === 'valid') {
+      return '✓'
+    }
     return null
   }
 

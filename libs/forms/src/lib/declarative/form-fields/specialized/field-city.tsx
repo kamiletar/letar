@@ -15,13 +15,21 @@ function useCityProvider(propProvider?: AddressProvider, token?: string): Addres
   const formContext = useDeclarativeFormOptional()
 
   // Priority: prop > createForm context > token > env
-  if (propProvider) return propProvider
-  if (formContext?.addressProvider) return formContext.addressProvider
-  if (token) return createDaDataProvider({ token })
+  if (propProvider) {
+    return propProvider
+  }
+  if (formContext?.addressProvider) {
+    return formContext.addressProvider
+  }
+  if (token) {
+    return createDaDataProvider({ token })
+  }
 
   // Backward compatible: try env variable
   const envKey = typeof window !== 'undefined' ? process.env.NEXT_PUBLIC_DADATA_API_KEY : ''
-  if (envKey) return createDaDataProvider({ token: envKey })
+  if (envKey) {
+    return createDaDataProvider({ token: envKey })
+  }
 
   return null
 }

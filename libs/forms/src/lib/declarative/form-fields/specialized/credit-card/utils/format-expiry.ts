@@ -7,7 +7,9 @@
  */
 export function formatExpiry(raw: string): string {
   const digits = raw.replace(/\D/g, '')
-  if (!digits) return ''
+  if (!digits) {
+    return ''
+  }
 
   if (digits.length <= 2) {
     return digits
@@ -25,20 +27,28 @@ export function formatExpiry(raw: string): string {
  */
 export function isExpiryValid(expiry: string): boolean {
   const match = expiry.match(/^(\d{2})\/(\d{2})$/)
-  if (!match) return false
+  if (!match) {
+    return false
+  }
 
   const month = Number(match[1])
   const year = Number(match[2])
 
-  if (month < 1 || month > 12) return false
+  if (month < 1 || month > 12) {
+    return false
+  }
 
   // Проверяем что карта не просрочена
   const now = new Date()
   const currentYear = now.getFullYear() % 100 // Двузначный год
   const currentMonth = now.getMonth() + 1
 
-  if (year < currentYear) return false
-  if (year === currentYear && month < currentMonth) return false
+  if (year < currentYear) {
+    return false
+  }
+  if (year === currentYear && month < currentMonth) {
+    return false
+  }
 
   return true
 }

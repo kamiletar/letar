@@ -12,7 +12,9 @@ export const FieldINN = createDocumentField({
   icon: <LuFileText />,
   validate: (value) => {
     const digits = value.replace(/\D/g, '')
-    if (!digits) return undefined // Пустое — пропускаем (required проверит Zod)
+    if (!digits) {
+      return undefined // Пустое — пропускаем (required проверит Zod)
+    }
     if (digits.length === 10) {
       return validateInn10(digits) ? undefined : 'Неверная контрольная сумма ИНН'
     }

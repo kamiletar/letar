@@ -36,9 +36,13 @@ function getDepsSnapshot(values: Record<string, unknown>, deps: string[]): unkno
  * Сравнить два снапшота зависимостей поэлементно.
  */
 function areDepsEqual(a: unknown[], b: unknown[]): boolean {
-  if (a.length !== b.length) return false
+  if (a.length !== b.length) {
+    return false
+  }
   for (let i = 0; i < a.length; i++) {
-    if (!Object.is(a[i], b[i])) return false
+    if (!Object.is(a[i], b[i])) {
+      return false
+    }
   }
   return true
 }

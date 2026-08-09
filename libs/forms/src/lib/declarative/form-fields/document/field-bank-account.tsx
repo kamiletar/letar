@@ -11,8 +11,12 @@ export const FieldBankAccount = createDocumentField({
   icon: <LuLandmark />,
   validate: (value) => {
     const digits = value.replace(/\D/g, '')
-    if (!digits) return undefined
-    if (digits.length !== 20) return 'Расчётный счёт должен содержать 20 цифр'
+    if (!digits) {
+      return undefined
+    }
+    if (digits.length !== 20) {
+      return 'Расчётный счёт должен содержать 20 цифр'
+    }
     return undefined
   },
 })
@@ -25,9 +29,15 @@ export const FieldCorrAccount = createDocumentField({
   icon: <LuLandmark />,
   validate: (value) => {
     const digits = value.replace(/\D/g, '')
-    if (!digits) return undefined
-    if (digits.length !== 20) return 'Корр. счёт должен содержать 20 цифр'
-    if (!digits.startsWith('301')) return 'Корр. счёт должен начинаться с "301"'
+    if (!digits) {
+      return undefined
+    }
+    if (digits.length !== 20) {
+      return 'Корр. счёт должен содержать 20 цифр'
+    }
+    if (!digits.startsWith('301')) {
+      return 'Корр. счёт должен начинаться с "301"'
+    }
     return undefined
   },
 })

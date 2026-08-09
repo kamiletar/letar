@@ -52,7 +52,9 @@ export function useUrlPrefill(options: UrlPrefillOptions): Record<string, unknow
 
   const result = useMemo(() => {
     const params = customSearchParams ?? getSearchParams()
-    if (!params) return {}
+    if (!params) {
+      return {}
+    }
 
     return extractParams(params, fields, mapping, schema)
   }, [fields, mapping, schema, customSearchParams])
@@ -99,7 +101,9 @@ export function generatePrefillUrl(path: string, params: Record<string, unknown>
   const searchParams = new URLSearchParams()
 
   for (const [key, value] of Object.entries(params)) {
-    if (value === null || value === undefined) continue
+    if (value === null || value === undefined) {
+      continue
+    }
 
     if (Array.isArray(value)) {
       // Массивы: ?tag=react&tag=forms
@@ -126,7 +130,9 @@ export function generatePrefillUrl(path: string, params: Record<string, unknown>
 
 /** Получить URLSearchParams из текущего URL */
 function getSearchParams(): URLSearchParams | null {
-  if (typeof window === 'undefined') return null
+  if (typeof window === 'undefined') {
+    return null
+  }
   return new URLSearchParams(window.location.search)
 }
 
@@ -151,7 +157,9 @@ function extractParams(
   const processedKeys = new Set<string>()
 
   for (const [urlKey, _value] of params.entries()) {
-    if (processedKeys.has(urlKey)) continue
+    if (processedKeys.has(urlKey)) {
+      continue
+    }
     processedKeys.add(urlKey)
 
     // Определяем имя поля
@@ -160,7 +168,9 @@ function extractParams(
     // Проверяем whitelist
     // Для вложенных (address.city) проверяем корневое поле (address)
     const rootField = fieldName.split('.')[0]
-    if (!fields.includes(fieldName) && !fields.includes(rootField)) continue
+    if (!fields.includes(fieldName) && !fields.includes(rootField)) {
+      continue
+    }
 
     // Получаем все значения (для массивов)
     const allValues = params.getAll(urlKey)

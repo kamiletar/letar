@@ -7,7 +7,9 @@
  */
 export function luhn(cardNumber: string): boolean {
   const digits = cardNumber.replace(/\D/g, '')
-  if (digits.length < 12 || digits.length > 19) return false
+  if (digits.length < 12 || digits.length > 19) {
+    return false
+  }
 
   let sum = 0
   let isDouble = false
@@ -16,7 +18,9 @@ export function luhn(cardNumber: string): boolean {
     let digit = Number(digits[i])
     if (isDouble) {
       digit *= 2
-      if (digit > 9) digit -= 9
+      if (digit > 9) {
+        digit -= 9
+      }
     }
     sum += digit
     isDouble = !isDouble

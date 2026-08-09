@@ -103,7 +103,9 @@ export function FormSimple<TData extends object>({
     persistence,
     offline,
     onlineSubmit: async (value) => {
-      if (onSubmit) await onSubmit(value)
+      if (onSubmit) {
+        await onSubmit(value)
+      }
     },
   })
 
@@ -113,10 +115,14 @@ export function FormSimple<TData extends object>({
     validators: buildValidators(schema, validateOn),
     onSubmit: async ({ value, formApi }) => {
       // Honeypot — блокировка ботов
-      if (isBot()) return
+      if (isBot()) {
+        return
+      }
 
       // Rate limiting — проверка лимита
-      if (rateLimitState && !rateLimitState.recordAttempt()) return
+      if (rateLimitState && !rateLimitState.recordAttempt()) {
+        return
+      }
 
       let dataToSubmit = value as TData
 
@@ -155,7 +161,9 @@ export function FormSimple<TData extends object>({
 
   // Передаём инстанс формы во внешний ref (useFormRef)
   useEffect(() => {
-    if (formRef) formRef.current = form
+    if (formRef) {
+      formRef.current = form
+    }
   }, [form, formRef])
 
   // Subscribe to changes for persistence

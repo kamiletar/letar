@@ -83,7 +83,9 @@ export function FieldImageChoice({
         }
 
         const handleSelect = (optValue: string) => {
-          if (resolvedDisabled || resolvedReadOnly) return
+          if (resolvedDisabled || resolvedReadOnly) {
+            return
+          }
 
           if (multiple) {
             const current = Array.isArray(value) ? value : []

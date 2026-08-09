@@ -203,9 +203,13 @@ export const FieldSignature = createField<SignatureFieldProps, string, Signature
     // Инициализация canvas фоном
     const initCanvas = useCallback(() => {
       const canvas = canvasRef.current
-      if (!canvas) return
+      if (!canvas) {
+        return
+      }
       const ctx = canvas.getContext('2d')
-      if (!ctx) return
+      if (!ctx) {
+        return
+      }
       ctx.fillStyle = backgroundColor
       ctx.fillRect(0, 0, canvas.width, canvas.height)
     }, [backgroundColor])
@@ -219,13 +223,19 @@ export const FieldSignature = createField<SignatureFieldProps, string, Signature
     const startDrawing = useCallback(
       (e: React.MouseEvent | React.TouchEvent) => {
         const canvas = canvasRef.current
-        if (!canvas) return
+        if (!canvas) {
+          return
+        }
 
         // Предотвращаем scroll на touch
-        if ('touches' in e) e.preventDefault()
+        if ('touches' in e) {
+          e.preventDefault()
+        }
 
         const ctx = canvas.getContext('2d')
-        if (!ctx) return
+        if (!ctx) {
+          return
+        }
 
         isDrawingRef.current = true
         const { x, y } = getCoords(e, canvas)
@@ -245,14 +255,22 @@ export const FieldSignature = createField<SignatureFieldProps, string, Signature
 
     // Рисовать
     const draw = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-      if (!isDrawingRef.current) return
+      if (!isDrawingRef.current) {
+        return
+      }
       const canvas = canvasRef.current
-      if (!canvas) return
+      if (!canvas) {
+        return
+      }
 
-      if ('touches' in e) e.preventDefault()
+      if ('touches' in e) {
+        e.preventDefault()
+      }
 
       const ctx = canvas.getContext('2d')
-      if (!ctx) return
+      if (!ctx) {
+        return
+      }
 
       const { x, y } = getCoords(e, canvas)
       currentPointsRef.current.push({ x, y })
@@ -264,7 +282,9 @@ export const FieldSignature = createField<SignatureFieldProps, string, Signature
     const stopDrawing = useCallback((): string => {
       isDrawingRef.current = false
       const canvas = canvasRef.current
-      if (!canvas) return ''
+      if (!canvas) {
+        return ''
+      }
 
       // Сохранить штрих для SVG
       if (currentPointsRef.current.length > 0) {
@@ -295,9 +315,13 @@ export const FieldSignature = createField<SignatureFieldProps, string, Signature
     const renderTypedSignature = useCallback(
       (text: string): string => {
         const canvas = canvasRef.current
-        if (!canvas) return ''
+        if (!canvas) {
+          return ''
+        }
         const ctx = canvas.getContext('2d')
-        if (!ctx) return ''
+        if (!ctx) {
+          return ''
+        }
 
         // Очистить и нарисовать текст курсивом
         ctx.fillStyle = backgroundColor
@@ -447,13 +471,17 @@ export const FieldSignature = createField<SignatureFieldProps, string, Signature
               onMouseUp={mode === 'draw'
                 ? () => {
                   const dataUrl = stopDrawing()
-                  if (dataUrl) field.handleChange(dataUrl)
+                  if (dataUrl) {
+                    field.handleChange(dataUrl)
+                  }
                 }
                 : undefined}
               onMouseLeave={mode === 'draw'
                 ? () => {
                   const dataUrl = stopDrawing()
-                  if (dataUrl) field.handleChange(dataUrl)
+                  if (dataUrl) {
+                    field.handleChange(dataUrl)
+                  }
                 }
                 : undefined}
               onTouchStart={mode === 'draw' ? startDrawing : undefined}
@@ -461,7 +489,9 @@ export const FieldSignature = createField<SignatureFieldProps, string, Signature
               onTouchEnd={mode === 'draw'
                 ? () => {
                   const dataUrl = stopDrawing()
-                  if (dataUrl) field.handleChange(dataUrl)
+                  if (dataUrl) {
+                    field.handleChange(dataUrl)
+                  }
                 }
                 : undefined}
             />

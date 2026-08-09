@@ -47,17 +47,23 @@ export function useActiveFiltersCount<TData extends object>(defaults: TData): nu
 function countDiff<TData extends object>(values: TData, defaults: TData): number {
   let count = 0
   for (const key of Object.keys(defaults) as (keyof TData)[]) {
-    if (!isEqual(values[key], defaults[key])) count++
+    if (!isEqual(values[key], defaults[key])) {
+      count++
+    }
   }
   return count
 }
 
 /** Глубокое сравнение для примитивов, массивов и простых объектов */
 function isEqual(a: unknown, b: unknown): boolean {
-  if (a === b) return true
+  if (a === b) {
+    return true
+  }
 
   if (Array.isArray(a) && Array.isArray(b)) {
-    if (a.length !== b.length) return false
+    if (a.length !== b.length) {
+      return false
+    }
     // Для фильтров (массивы строк) порядок обычно не важен
     const sortedA = [...a].map(String).sort()
     const sortedB = [...b].map(String).sort()
@@ -67,7 +73,9 @@ function isEqual(a: unknown, b: unknown): boolean {
   if (a !== null && b !== null && typeof a === 'object' && typeof b === 'object') {
     const keysA = Object.keys(a as object)
     const keysB = Object.keys(b as object)
-    if (keysA.length !== keysB.length) return false
+    if (keysA.length !== keysB.length) {
+      return false
+    }
     return keysA.every((k) => isEqual((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k]))
   }
 

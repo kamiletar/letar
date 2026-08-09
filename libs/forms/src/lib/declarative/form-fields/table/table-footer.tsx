@@ -19,7 +19,9 @@ interface TableFooterProps {
 export function TableEditorFooter({ footerDefs, selectable, sortable }: TableFooterProps) {
   const { columns, rows, readOnly } = useTableEditorContext()
 
-  if (footerDefs.length === 0 || rows.length === 0) return null
+  if (footerDefs.length === 0 || rows.length === 0) {
+    return null
+  }
 
   // Собираем маппинг columnName → aggregate result
   const aggregates = new Map<string, { value: number; def: TableFooterDef }>()

@@ -6,7 +6,7 @@
  */
 import type { ReactNode } from 'react'
 import { expectTypeOf, test } from 'vitest'
-import { useTypedFormSubscribe } from './context'
+import type { useTypedFormSubscribe } from './context'
 import type { DeepKeys, DeepValue } from './types'
 
 // ============================================================================

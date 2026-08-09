@@ -27,8 +27,12 @@ export function countPhoneMaskDigits(mask: string): number {
 function leadingLiteralDigits(mask: string): string {
   let result = ''
   for (const char of mask) {
-    if (char === '9') break
-    if (char >= '0' && char <= '9') result += char
+    if (char === '9') {
+      break
+    }
+    if (char >= '0' && char <= '9') {
+      result += char
+    }
   }
   return result
 }
@@ -44,7 +48,9 @@ function leadingLiteralDigits(mask: string): string {
  * каждый keystroke) — эти цифры пропускаются, а не занимают первый плейсхолдер.
  */
 export function formatPhoneNumber(rawDigits: string, mask: string): string {
-  if (!rawDigits) return ''
+  if (!rawDigits) {
+    return ''
+  }
 
   const literal = leadingLiteralDigits(mask)
   const digits = literal && rawDigits.startsWith(literal) ? rawDigits.slice(literal.length) : rawDigits
@@ -52,7 +58,9 @@ export function formatPhoneNumber(rawDigits: string, mask: string): string {
   let result = ''
   let digitIndex = 0
   for (const char of mask) {
-    if (digitIndex >= digits.length) break
+    if (digitIndex >= digits.length) {
+      break
+    }
     if (char === '9') {
       result += digits[digitIndex]
       digitIndex++

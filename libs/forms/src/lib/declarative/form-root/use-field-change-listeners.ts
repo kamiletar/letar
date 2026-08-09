@@ -66,7 +66,9 @@ export function useFieldChangeListeners(form: AppFormApi, onFieldChange?: OnFiel
   // Инициализация начальных значений отслеживаемых полей
   const initPrevValues = useCallback(() => {
     const callbacks = callbacksRef.current
-    if (!callbacks) return
+    if (!callbacks) {
+      return
+    }
 
     const values = form.state.values as Record<string, unknown>
     const snapshot: Record<string, unknown> = {}
@@ -82,7 +84,9 @@ export function useFieldChangeListeners(form: AppFormApi, onFieldChange?: OnFiel
 
     const subscription = form.store.subscribe(() => {
       const callbacks = callbacksRef.current
-      if (!callbacks) return
+      if (!callbacks) {
+        return
+      }
 
       const values = form.state.values as Record<string, unknown>
       const prev = prevValuesRef.current

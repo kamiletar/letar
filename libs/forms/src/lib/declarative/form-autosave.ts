@@ -81,7 +81,9 @@ export function useFormAutosave(
       const serialized = JSON.stringify(data)
 
       // Не сохраняем если данные не изменились
-      if (serialized === lastSavedDataRef.current) return
+      if (serialized === lastSavedDataRef.current) {
+        return
+      }
 
       // Fallback на localStorage если нет сети
       if (typeof navigator !== 'undefined' && !navigator.onLine) {
@@ -154,7 +156,9 @@ export function useFormAutosave(
 
   /** Загрузить черновик с сервера */
   const loadDraft = useCallback(async (): Promise<Record<string, unknown> | null> => {
-    if (!draftId) return null
+    if (!draftId) {
+      return null
+    }
 
     // Сначала пробуем сервер
     if (typeof navigator === 'undefined' || navigator.onLine) {
@@ -173,7 +177,9 @@ export function useFormAutosave(
     // Fallback на localStorage
     try {
       const stored = localStorage.getItem(`autosave:${draftId}`)
-      if (stored) return JSON.parse(stored) as Record<string, unknown>
+      if (stored) {
+        return JSON.parse(stored) as Record<string, unknown>
+      }
     } catch {
       /* ничего */
     }
@@ -185,7 +191,9 @@ export function useFormAutosave(
   useEffect(() => {
     const tick = () => {
       // Debounce: не сохраняем чаще чем debounce мс
-      if (debounceRef.current) clearTimeout(debounceRef.current)
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
       debounceRef.current = setTimeout(() => {
         const values = form.state.values
         save(values)
@@ -195,8 +203,12 @@ export function useFormAutosave(
     timerRef.current = setInterval(tick, interval)
 
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current)
-      if (debounceRef.current) clearTimeout(debounceRef.current)
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+      }
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
     }
   }, [form, save, interval, debounce])
 

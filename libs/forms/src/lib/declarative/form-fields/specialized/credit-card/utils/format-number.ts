@@ -10,7 +10,9 @@ import { detectBrand } from './detect-brand'
  */
 export function formatCardNumber(raw: string): string {
   const digits = raw.replace(/\D/g, '')
-  if (!digits) return ''
+  if (!digits) {
+    return ''
+  }
 
   const brand = detectBrand(digits)
   const { gaps } = brand
@@ -19,7 +21,9 @@ export function formatCardNumber(raw: string): string {
   let pos = 0
 
   for (const gap of gaps) {
-    if (pos >= digits.length) break
+    if (pos >= digits.length) {
+      break
+    }
     parts.push(digits.slice(pos, pos + gap))
     pos += gap
   }

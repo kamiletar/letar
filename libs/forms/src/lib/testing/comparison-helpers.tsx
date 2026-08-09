@@ -30,7 +30,7 @@ export function renderComparison(
   options?: Record<string, unknown>,
 ): RenderResult {
   // Ленивый импорт — FormComparison из основного пакета
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
+
   const { FormComparison } = require('../../index') as { FormComparison: React.ComponentType<Record<string, unknown>> }
 
   return render(createElement(TestWrapper, null, createElement(FormComparison, { original, current, ...options })))
@@ -55,7 +55,6 @@ export function renderComparison(
  * ```
  */
 export function renderReadOnlyView(data: Record<string, unknown>, options?: Record<string, unknown>): RenderResult {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { FormReadOnlyView } = require('../../index') as {
     FormReadOnlyView: React.ComponentType<Record<string, unknown>>
   }

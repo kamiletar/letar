@@ -51,7 +51,9 @@ function CalculatedFieldInner({
     }
   }, [computedValue, field])
 
-  if (hidden) return null
+  if (hidden) {
+    return null
+  }
 
   const displayValue = format ? format(computedValue) : String(computedValue ?? '')
 

@@ -85,7 +85,9 @@ export function FieldMatrixChoice({
 
         /** Установить значение для строки */
         const setRowValue = (rowValue: string, colValue: string) => {
-          if (resolvedDisabled || resolvedReadOnly) return
+          if (resolvedDisabled || resolvedReadOnly) {
+            return
+          }
 
           if (variant === 'checkbox') {
             // Множественный выбор — toggle в массиве
@@ -137,7 +139,9 @@ export function FieldMatrixChoice({
                     <RadioGroup.Root
                       value={String(value[row.value] ?? '')}
                       onValueChange={(details) => {
-                        if (details.value) setRowValue(row.value, details.value)
+                        if (details.value) {
+                          setRowValue(row.value, details.value)
+                        }
                       }}
                       disabled={!!resolvedDisabled}
                       size="sm"
@@ -162,7 +166,9 @@ export function FieldMatrixChoice({
         const handleMatrixKeyDown = (e: React.KeyboardEvent) => {
           const target = e.target as HTMLElement
           const cell = target.closest('[data-matrix-row][data-matrix-col]') as HTMLElement | null
-          if (!cell) return
+          if (!cell) {
+            return
+          }
 
           const currentRow = cell.dataset.matrixRow!
           const currentCol = cell.dataset.matrixCol!

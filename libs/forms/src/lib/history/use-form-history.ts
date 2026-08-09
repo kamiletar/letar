@@ -41,7 +41,9 @@ export function useFormHistory<T>(
     if (persist && typeof window !== 'undefined') {
       try {
         const saved = sessionStorage.getItem(persistKey)
-        if (saved) return JSON.parse(saved)
+        if (saved) {
+          return JSON.parse(saved)
+        }
       } catch {
         /* игнорируем ошибки парсинга */
       }
@@ -53,7 +55,9 @@ export function useFormHistory<T>(
     if (persist && typeof window !== 'undefined') {
       try {
         const saved = sessionStorage.getItem(`${persistKey}-index`)
-        if (saved) return parseInt(saved, 10)
+        if (saved) {
+          return parseInt(saved, 10)
+        }
       } catch {
         /* игнорируем */
       }
@@ -87,9 +91,13 @@ export function useFormHistory<T>(
   // Подписка на изменения формы с debounce
   useEffect(() => {
     const unsub = form.store.subscribe(() => {
-      if (isUndoRedoRef.current) return // Не записываем изменения от undo/redo
+      if (isUndoRedoRef.current) {
+        return // Не записываем изменения от undo/redo
+      }
 
-      if (debounceRef.current) clearTimeout(debounceRef.current)
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
       debounceRef.current = setTimeout(() => {
         pushSnapshot(form.state.values)
       }, debounceMs)
@@ -102,13 +110,17 @@ export function useFormHistory<T>(
       } else {
         unsub.unsubscribe()
       }
-      if (debounceRef.current) clearTimeout(debounceRef.current)
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
     }
   }, [form.store, form.state.values, debounceMs, pushSnapshot])
 
   // Persist в sessionStorage
   useEffect(() => {
-    if (!persist) return
+    if (!persist) {
+      return
+    }
     try {
       sessionStorage.setItem(persistKey, JSON.stringify(history))
       sessionStorage.setItem(`${persistKey}-index`, String(currentIndex))
@@ -134,14 +146,18 @@ export function useFormHistory<T>(
   )
 
   const undo = useCallback(() => {
-    if (currentIndex <= 0) return
+    if (currentIndex <= 0) {
+      return
+    }
     const newIndex = currentIndex - 1
     setCurrentIndex(newIndex)
     applySnapshot(history[newIndex])
   }, [currentIndex, history, applySnapshot])
 
   const redo = useCallback(() => {
-    if (currentIndex >= history.length - 1) return
+    if (currentIndex >= history.length - 1) {
+      return
+    }
     const newIndex = currentIndex + 1
     setCurrentIndex(newIndex)
     applySnapshot(history[newIndex])
@@ -163,11 +179,15 @@ export function useFormHistory<T>(
 
   // Keyboard shortcuts
   useEffect(() => {
-    if (!keyboard || typeof window === 'undefined') return
+    if (!keyboard || typeof window === 'undefined') {
+      return
+    }
 
     const handler = (e: KeyboardEvent) => {
       const isCtrl = e.ctrlKey || e.metaKey
-      if (!isCtrl) return
+      if (!isCtrl) {
+        return
+      }
 
       if (e.key === 'z' && !e.shiftKey) {
         e.preventDefault()

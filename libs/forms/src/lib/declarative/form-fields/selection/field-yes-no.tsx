@@ -78,7 +78,9 @@ export function FieldYesNo({
         const value = field.state.value as boolean | undefined
 
         const handleSelect = (val: boolean) => {
-          if (resolvedDisabled || resolvedReadOnly) return
+          if (resolvedDisabled || resolvedReadOnly) {
+            return
+          }
           field.handleChange(val)
         }
 

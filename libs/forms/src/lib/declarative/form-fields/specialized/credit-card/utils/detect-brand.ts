@@ -90,41 +90,61 @@ const UNKNOWN_BRAND: CardBrandInfo = {
  */
 export function detectBrand(number: string): CardBrandInfo {
   const digits = number.replace(/\D/g, '')
-  if (!digits) return UNKNOWN_BRAND
+  if (!digits) {
+    return UNKNOWN_BRAND
+  }
 
   const n2 = Number(digits.slice(0, 2))
   const n4 = Number(digits.slice(0, 4))
   const n6 = Number(digits.slice(0, 6))
 
   // МИР: 2200-2204
-  if (n4 >= 2200 && n4 <= 2204) return BRANDS.mir
+  if (n4 >= 2200 && n4 <= 2204) {
+    return BRANDS.mir
+  }
 
   // Amex: 34, 37
-  if (n2 === 34 || n2 === 37) return BRANDS.amex
+  if (n2 === 34 || n2 === 37) {
+    return BRANDS.amex
+  }
 
   // Visa: начинается с 4
-  if (digits[0] === '4') return BRANDS.visa
+  if (digits[0] === '4') {
+    return BRANDS.visa
+  }
 
   // Mastercard: 51-55, 2221-2720
-  if ((n2 >= 51 && n2 <= 55) || (n4 >= 2221 && n4 <= 2720)) return BRANDS.mastercard
+  if ((n2 >= 51 && n2 <= 55) || (n4 >= 2221 && n4 <= 2720)) {
+    return BRANDS.mastercard
+  }
 
   // Discover: 6011, 622126-622925, 644-649, 65
-  if (n4 === 6011 || (n6 >= 622126 && n6 <= 622925) || (n2 >= 64 && n2 <= 65)) return BRANDS.discover
+  if (n4 === 6011 || (n6 >= 622126 && n6 <= 622925) || (n2 >= 64 && n2 <= 65)) {
+    return BRANDS.discover
+  }
 
   // JCB: 3528-3589
-  if (n4 >= 3528 && n4 <= 3589) return BRANDS.jcb
+  if (n4 >= 3528 && n4 <= 3589) {
+    return BRANDS.jcb
+  }
 
   // UnionPay: 62 (не пересекается с Discover выше)
-  if (n2 === 62) return BRANDS.unionpay
+  if (n2 === 62) {
+    return BRANDS.unionpay
+  }
 
   // Maestro: 50, 56-69
-  if (n2 === 50 || (n2 >= 56 && n2 <= 69)) return BRANDS.maestro
+  if (n2 === 50 || (n2 >= 56 && n2 <= 69)) {
+    return BRANDS.maestro
+  }
 
   return UNKNOWN_BRAND
 }
 
 /** Получить информацию о бренде по имени */
 export function getBrandInfo(brand: CardBrand): CardBrandInfo {
-  if (brand === 'unknown') return UNKNOWN_BRAND
+  if (brand === 'unknown') {
+    return UNKNOWN_BRAND
+  }
   return BRANDS[brand] ?? UNKNOWN_BRAND
 }

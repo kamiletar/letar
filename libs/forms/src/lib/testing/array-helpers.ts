@@ -72,7 +72,9 @@ export function expectItemCount(listName: string, count: number): void {
   const container = findListContainer(listName)
 
   if (!container) {
-    if (count === 0) return
+    if (count === 0) {
+      return
+    }
     throw new Error(`expectItemCount: контейнер списка "${listName}" не найден`)
   }
 

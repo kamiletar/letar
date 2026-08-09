@@ -18,8 +18,12 @@ function useAddressProvider(propProvider?: AddressProvider, token?: string): Add
   // что вызывает re-render loop через fetchSuggestions → useEffect → запросы к DaData
   const tokenProvider = useMemo(() => (token ? createDaDataProvider({ token }) : null), [token])
 
-  if (propProvider) return propProvider
-  if (formContext?.addressProvider) return formContext.addressProvider
+  if (propProvider) {
+    return propProvider
+  }
+  if (formContext?.addressProvider) {
+    return formContext.addressProvider
+  }
   return tokenProvider
 }
 
@@ -113,11 +117,15 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
             filters: locations ? Object.assign({}, ...locations) : undefined,
           })
           // Игнорируем результат если запрос был отменён
-          if (controller.signal.aborted) return
+          if (controller.signal.aborted) {
+            return
+          }
           setSuggestions(results)
           setIsOpen(true)
         } catch (error) {
-          if (controller.signal.aborted) return
+          if (controller.signal.aborted) {
+            return
+          }
           console.error('Error loading address suggestions:', error)
           setSuggestions([])
         } finally {

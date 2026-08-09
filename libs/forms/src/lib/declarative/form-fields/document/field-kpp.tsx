@@ -12,8 +12,12 @@ export const FieldKPP = createDocumentField({
   icon: <LuFileText />,
   validate: (value) => {
     const clean = value.replace(/[\s-]/g, '').toUpperCase()
-    if (!clean) return undefined
-    if (clean.length !== 9) return 'КПП должен содержать 9 символов'
+    if (!clean) {
+      return undefined
+    }
+    if (clean.length !== 9) {
+      return 'КПП должен содержать 9 символов'
+    }
     return validateKpp(clean) ? undefined : 'Неверный формат КПП'
   },
 })

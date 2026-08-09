@@ -68,7 +68,9 @@ export function ConversationalMode({
       if (e.key === 'Enter' && !e.shiftKey) {
         // Enter без Shift → следующее поле (кроме textarea)
         const target = e.target as HTMLElement
-        if (target.tagName === 'TEXTAREA') return
+        if (target.tagName === 'TEXTAREA') {
+          return
+        }
         e.preventDefault()
         if (state.isLast) {
           onComplete?.()

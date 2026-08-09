@@ -22,7 +22,9 @@ export async function goToStep(step: number, options?: { nextLabel?: string; pre
   const prevLabel = options?.prevLabel ?? /назад|back|prev/i
 
   const currentStep = getCurrentStep()
-  if (currentStep === step) return
+  if (currentStep === step) {
+    return
+  }
 
   const direction = step > currentStep ? 'forward' : 'backward'
   const clicks = Math.abs(step - currentStep)

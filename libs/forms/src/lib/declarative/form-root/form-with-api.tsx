@@ -127,10 +127,14 @@ export function FormWithApi<TData extends object>({
     validators: buildValidators(schema, validateOn),
     onSubmit: async ({ value, formApi: tanstackFormApi }) => {
       // Honeypot — блокировка ботов
-      if (isBot()) return
+      if (isBot()) {
+        return
+      }
 
       // Rate limiting — проверка лимита
-      if (rateLimitState && !rateLimitState.recordAttempt()) return
+      if (rateLimitState && !rateLimitState.recordAttempt()) {
+        return
+      }
 
       let dataToSubmit = value as TData
 

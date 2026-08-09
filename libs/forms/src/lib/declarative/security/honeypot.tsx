@@ -44,7 +44,9 @@ export function useHoneypotCheck(enabled: boolean | undefined): {
   isBot: () => boolean
 } {
   const checkBot = useCallback((): boolean => {
-    if (!enabled) return false
+    if (!enabled) {
+      return false
+    }
 
     // Ищем все скрытые honeypot-поля формы
     const honeypotInputs = document.querySelectorAll<HTMLInputElement>('input[name^="hp_"][tabindex="-1"]')

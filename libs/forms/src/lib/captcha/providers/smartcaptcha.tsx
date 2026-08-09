@@ -61,7 +61,9 @@ export function SmartCaptchaProvider({
     let unsubscribeTokenExpired: (() => void) | undefined
 
     const renderWidget = () => {
-      if (!containerRef.current || !window.smartCaptcha || widgetIdRef.current !== null) return
+      if (!containerRef.current || !window.smartCaptcha || widgetIdRef.current !== null) {
+        return
+      }
 
       const hl = SUPPORTED_LANGUAGES.includes(language as SmartCaptchaLanguage)
         ? (language as SmartCaptchaLanguage)

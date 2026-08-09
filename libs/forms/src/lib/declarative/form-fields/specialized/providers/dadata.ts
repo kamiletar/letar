@@ -34,8 +34,12 @@ export function createDaDataProvider(config: DaDataConfig): AddressProvider {
 
       // DaData-specific: from_bound/to_bound for city-level restriction
       if (options?.bounds) {
-        if (options.bounds.from) body.from_bound = { value: options.bounds.from }
-        if (options.bounds.to) body.to_bound = { value: options.bounds.to }
+        if (options.bounds.from) {
+          body.from_bound = { value: options.bounds.from }
+        }
+        if (options.bounds.to) {
+          body.to_bound = { value: options.bounds.to }
+        }
       }
 
       // DaData-specific: locations filter

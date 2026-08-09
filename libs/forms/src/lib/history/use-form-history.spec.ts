@@ -24,7 +24,9 @@ function createMockForm<T>(initialValues: T) {
       values = { ...initialValues } as T
     },
     _notify: () => {
-      for (const cb of listeners) cb()
+      for (const cb of listeners) {
+        cb()
+      }
     },
     _setValues: (v: T) => {
       values = v

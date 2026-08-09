@@ -56,7 +56,9 @@ export function createDocumentField(config: DocumentFieldConfig) {
     // useFieldState вызывается ДО form.Field (hooks-safe), в отличие от render callback
     useFieldState: () => {
       const maskRef = useCallback((element: HTMLInputElement | null) => {
-        if (!element) return
+        if (!element) {
+          return
+        }
         withMask(config.mask, {
           showMaskOnFocus: false,
           clearIncomplete: true,

@@ -50,7 +50,9 @@ function findSubmitButton(buttonText?: string): HTMLElement | null {
 
   // 2. По type="submit"
   const submitBtn = document.querySelector<HTMLElement>('button[type="submit"]')
-  if (submitBtn) return submitBtn
+  if (submitBtn) {
+    return submitBtn
+  }
 
   // 3. По типичным текстам
   const patterns = [/отправить/i, /сохранить/i, /submit/i, /save/i, /создать/i]

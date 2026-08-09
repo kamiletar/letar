@@ -21,7 +21,9 @@ export function useFormAnalytics(config?: FormAnalyticsConfig): UseFormAnalytics
   // Отправить событие во все адаптеры + callbacks
   const emit = useCallback(
     (event: FormAnalyticsEvent) => {
-      if (!enabled) return
+      if (!enabled) {
+        return
+      }
       for (const adapter of adapters) {
         try {
           adapter.track(event, formId)
@@ -54,7 +56,9 @@ export function useFormAnalytics(config?: FormAnalyticsConfig): UseFormAnalytics
 
   // Инициализация адаптеров
   useEffect(() => {
-    if (!enabled) return
+    if (!enabled) {
+      return
+    }
     for (const adapter of adapters) {
       try {
         adapter.init?.()
@@ -72,7 +76,9 @@ export function useFormAnalytics(config?: FormAnalyticsConfig): UseFormAnalytics
   // Трекинг focus на поле
   const trackFocus = useCallback(
     (field: string) => {
-      if (!enabled) return
+      if (!enabled) {
+        return
+      }
       const now = Date.now()
       focusTimeRef.current.set(field, now)
       setLastFocusedField(field)
@@ -107,7 +113,9 @@ export function useFormAnalytics(config?: FormAnalyticsConfig): UseFormAnalytics
   // Трекинг blur
   const trackBlur = useCallback(
     (field: string) => {
-      if (!enabled) return
+      if (!enabled) {
+        return
+      }
       const now = Date.now()
       const focusTime = focusTimeRef.current.get(field)
       const timeSpentMs = focusTime ? now - focusTime : 0
@@ -128,7 +136,9 @@ export function useFormAnalytics(config?: FormAnalyticsConfig): UseFormAnalytics
   // Трекинг ошибки
   const trackError = useCallback(
     (field: string, error: string) => {
-      if (!enabled) return
+      if (!enabled) {
+        return
+      }
       setFieldAnalytics((prev) => {
         const next = new Map(prev)
         const existing = next.get(field) ?? createEmptyAnalytics()
@@ -142,16 +152,22 @@ export function useFormAnalytics(config?: FormAnalyticsConfig): UseFormAnalytics
 
   // Глобальный перехват focus/blur на инпутах формы
   useEffect(() => {
-    if (!enabled || typeof document === 'undefined') return
+    if (!enabled || typeof document === 'undefined') {
+      return
+    }
     const handleFocus = (e: FocusEvent) => {
       const target = e.target as HTMLElement
       const name = target.getAttribute('name')
-      if (name) trackFocus(name)
+      if (name) {
+        trackFocus(name)
+      }
     }
     const handleBlur = (e: FocusEvent) => {
       const target = e.target as HTMLElement
       const name = target.getAttribute('name')
-      if (name) trackBlur(name)
+      if (name) {
+        trackBlur(name)
+      }
     }
     document.addEventListener('focusin', handleFocus, true)
     document.addEventListener('focusout', handleBlur, true)
@@ -163,7 +179,9 @@ export function useFormAnalytics(config?: FormAnalyticsConfig): UseFormAnalytics
 
   // Трекинг abandon при уходе со страницы
   useEffect(() => {
-    if (!enabled || typeof window === 'undefined') return
+    if (!enabled || typeof window === 'undefined') {
+      return
+    }
     const handleBeforeUnload = () => {
       if (lastFocusedField && fieldAnalytics.size > 0) {
         emit({

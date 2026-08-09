@@ -52,9 +52,13 @@ function findFieldByPath(fields: SchemaFieldInfo[], path: string): SchemaFieldIn
   let current = fields
   for (let i = 0; i < parts.length; i++) {
     const found = current.find((f) => f.name === parts[i])
-    if (!found) return undefined
+    if (!found) {
+      return undefined
+    }
 
-    if (i === parts.length - 1) return found
+    if (i === parts.length - 1) {
+      return found
+    }
 
     if (found.children) {
       current = found.children

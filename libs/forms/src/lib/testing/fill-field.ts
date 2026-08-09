@@ -69,7 +69,9 @@ export async function fillField(name: string, value: unknown): Promise<void> {
 function findFieldElement(name: string): HTMLElement | null {
   // 1. По data-field-name (самый надёжный)
   const byAttr = document.querySelector<HTMLElement>(`[data-field-name="${name}"]`)
-  if (byAttr) return byAttr
+  if (byAttr) {
+    return byAttr
+  }
 
   // 2. По label text (fallback)
   try {

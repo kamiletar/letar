@@ -12,8 +12,12 @@ export const FieldOGRN = createDocumentField({
   icon: <LuFileText />,
   validate: (value) => {
     const digits = value.replace(/\D/g, '')
-    if (!digits) return undefined
-    if (digits.length !== 13) return 'ОГРН должен содержать 13 цифр'
+    if (!digits) {
+      return undefined
+    }
+    if (digits.length !== 13) {
+      return 'ОГРН должен содержать 13 цифр'
+    }
     return validateOgrn(digits) ? undefined : 'Неверная контрольная сумма ОГРН'
   },
 })

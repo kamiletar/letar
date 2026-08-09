@@ -111,7 +111,9 @@ function FormSubscribeDebounced({ delay, children }: DebouncedProps): ReactNode 
         isSubmitting: state.isSubmitting as boolean,
       }
 
-      if (timerRef.current) clearTimeout(timerRef.current)
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+      }
       timerRef.current = setTimeout(() => setSnapshot(next), delay)
     }) as (() => void) | { unsubscribe: () => void }
 
@@ -122,7 +124,9 @@ function FormSubscribeDebounced({ delay, children }: DebouncedProps): ReactNode 
       } else {
         unsubscribe.unsubscribe()
       }
-      if (timerRef.current) clearTimeout(timerRef.current)
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+      }
     }
   }, [form, delay])
 

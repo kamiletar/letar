@@ -126,7 +126,6 @@ export function FieldTableEditor({
     <form.Field name={fullPath} mode="array">
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       {(arrayField: any) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const rows = (arrayField.state.value as Record<string, unknown>[] | undefined) ?? []
 
         const canAdd = maxRows === undefined || rows.length < maxRows
@@ -137,20 +136,27 @@ export function FieldTableEditor({
         canAddRef.current = canAdd
 
         const addRow = () => {
-          if (!canAdd) return
+          if (!canAdd) {
+            return
+          }
           arrayField.pushValue(getDefaultRow(columns))
         }
         addRowRef.current = addRow
 
         const removeRow = (index: number) => {
-          if (!canRemove) return
+          if (!canRemove) {
+            return
+          }
           arrayField.removeValue(index)
           // Очищаем selection для удалённых индексов
           setSelectedRows((prev) => {
             const next = new Set<number>()
             for (const i of prev) {
-              if (i < index) next.add(i)
-              else if (i > index) next.add(i - 1)
+              if (i < index) {
+                next.add(i)
+              } else if (i > index) {
+                next.add(i - 1)
+              }
             }
             return next
           })
@@ -199,7 +205,7 @@ export function FieldTableEditor({
               </Box>
 
               {/* Десктопный вид — таблица */}
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {}
               <Box
                 ref={containerRef as any}
                 display={{ base: 'none', md: 'block' }}
@@ -211,17 +217,27 @@ export function FieldTableEditor({
                   ? (e) => {
                     // Не перехватываем paste внутри input
                     const target = e.target as HTMLElement
-                    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return
-                    if (disabled || readOnly || !canAdd) return
+                    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+                      return
+                    }
+                    if (disabled || readOnly || !canAdd) {
+                      return
+                    }
                     // Парсинг TSV из clipboard (Excel/Sheets)
                     const text = e.clipboardData?.getData('text/plain')
-                    if (!text) return
+                    if (!text) {
+                      return
+                    }
                     const parsed = parseTSV(text)
-                    if (parsed.length === 0) return
+                    if (parsed.length === 0) {
+                      return
+                    }
                     e.preventDefault()
                     const editableCols = columns.filter((col) => !col.computed && !col.readOnly)
                     for (const rawRow of parsed) {
-                      if (maxRows !== undefined && rows.length >= maxRows) break
+                      if (maxRows !== undefined && rows.length >= maxRows) {
+                        break
+                      }
                       const row: Record<string, unknown> = {}
                       for (let i = 0; i < editableCols.length && i < rawRow.length; i++) {
                         row[editableCols[i].name] = coerceValue(rawRow[i], editableCols[i])

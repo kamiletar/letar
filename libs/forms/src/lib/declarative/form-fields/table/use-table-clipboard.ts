@@ -47,13 +47,19 @@ export function useTableClipboard({
    */
   const handlePaste = useCallback(
     (e: ClipboardEvent) => {
-      if (disabled || readOnly || !canAdd) return
+      if (disabled || readOnly || !canAdd) {
+        return
+      }
 
       const text = e.clipboardData?.getData('text/plain')
-      if (!text) return
+      if (!text) {
+        return
+      }
 
       const parsed = parseTSV(text)
-      if (parsed.length === 0) return
+      if (parsed.length === 0) {
+        return
+      }
 
       e.preventDefault()
 
@@ -63,7 +69,9 @@ export function useTableClipboard({
       let added = 0
       for (const rawRow of parsed) {
         // Проверяем лимит строк
-        if (maxRows !== undefined && currentRowCount + added >= maxRows) break
+        if (maxRows !== undefined && currentRowCount + added >= maxRows) {
+          break
+        }
 
         const row: Record<string, unknown> = {}
         for (let i = 0; i < editableCols.length && i < rawRow.length; i++) {
@@ -89,7 +97,9 @@ export function useTableClipboard({
   const handleCopy = useCallback(
     (e: ClipboardEvent) => {
       // Копируем только если есть выбранные строки
-      if (selectedRows.size === 0) return
+      if (selectedRows.size === 0) {
+        return
+      }
 
       e.preventDefault()
       const tsv = buildTSV(rows, columns, selectedRows)

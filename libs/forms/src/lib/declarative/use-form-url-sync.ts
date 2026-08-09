@@ -83,21 +83,27 @@ export function readUrlValues<TData extends object>(
   defaults: TData,
   searchParams?: URLSearchParams,
 ): TData {
-  if (typeof window === 'undefined' && !searchParams) return defaults
+  if (typeof window === 'undefined' && !searchParams) {
+    return defaults
+  }
 
   const params = searchParams ?? new URLSearchParams(window.location.search)
   const extracted: Record<string, unknown> = {}
 
   for (const field of fields) {
     const allValues = params.getAll(field)
-    if (allValues.length === 0) continue
+    if (allValues.length === 0) {
+      continue
+    }
 
     const defaultVal = defaults[field]
     if (Array.isArray(defaultVal)) {
       extracted[field] = allValues
     } else if (typeof defaultVal === 'number') {
       const num = Number(allValues[0])
-      if (!isNaN(num)) extracted[field] = num
+      if (!isNaN(num)) {
+        extracted[field] = num
+      }
     } else if (typeof defaultVal === 'boolean') {
       extracted[field] = allValues[0] === 'true'
     } else {
@@ -110,7 +116,7 @@ export function readUrlValues<TData extends object>(
 
 // --- Form.UrlSync component ---
 
-export interface FormUrlSyncProps<TData extends object> extends FormUrlSyncOptions<TData> {}
+export type FormUrlSyncProps<TData extends object> = FormUrlSyncOptions<TData>
 
 /**
  * Renderless component that subscribes to form values and writes them to the URL.
@@ -142,7 +148,9 @@ export function FormUrlSync<TData extends object>({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const values = (form.state as any).values as Record<string, unknown>
 
-      if (timerRef.current) clearTimeout(timerRef.current)
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+      }
 
       timerRef.current = setTimeout(() => {
         // Оставляем только поля из whitelist, отличающиеся от defaults
@@ -161,7 +169,9 @@ export function FormUrlSync<TData extends object>({
         const otherParams: Record<string, string[]> = {}
         for (const [key, value] of currentParams.entries()) {
           if (!formParamKeys.has(key as keyof TData & string)) {
-            if (!otherParams[key]) otherParams[key] = []
+            if (!otherParams[key]) {
+              otherParams[key] = []
+            }
             otherParams[key].push(value)
           }
         }
@@ -198,7 +208,9 @@ export function FormUrlSync<TData extends object>({
       } else {
         unsubscribe.unsubscribe()
       }
-      if (timerRef.current) clearTimeout(timerRef.current)
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+      }
     }
   }, [form, fields, defaults, delay, replace, router])
 
@@ -207,9 +219,13 @@ export function FormUrlSync<TData extends object>({
 
 /** Проверяет, совпадает ли значение с дефолтным (с поддержкой массивов) */
 function isDefaultValue(value: unknown, defaultValue: unknown): boolean {
-  if (value === defaultValue) return true
+  if (value === defaultValue) {
+    return true
+  }
   if (Array.isArray(value) && Array.isArray(defaultValue)) {
-    if (value.length !== defaultValue.length) return false
+    if (value.length !== defaultValue.length) {
+      return false
+    }
     return value.every((v, i) => v === defaultValue[i])
   }
   return false

@@ -47,10 +47,14 @@ export function useRateLimit(config: RateLimitConfig | undefined, formId?: strin
 
   // Получить timestamps попыток из sessionStorage
   const getAttempts = useCallback((): number[] => {
-    if (!config) return []
+    if (!config) {
+      return []
+    }
     try {
       const raw = sessionStorage.getItem(storageKey)
-      if (!raw) return []
+      if (!raw) {
+        return []
+      }
       const attempts = JSON.parse(raw) as number[]
       const now = Date.now()
       // Отфильтровать устаревшие
@@ -75,14 +79,18 @@ export function useRateLimit(config: RateLimitConfig | undefined, formId?: strin
   // Запустить таймер обратного отсчёта
   const startCountdown = useCallback(
     (blockUntil: number) => {
-      if (timerRef.current) clearInterval(timerRef.current)
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+      }
 
       const updateTimer = () => {
         const remaining = Math.ceil((blockUntil - Date.now()) / 1000)
         if (remaining <= 0) {
           setIsBlocked(false)
           setSecondsLeft(0)
-          if (timerRef.current) clearInterval(timerRef.current)
+          if (timerRef.current) {
+            clearInterval(timerRef.current)
+          }
           timerRef.current = null
           // Очистить устаревшие записи
           saveAttempts(getAttempts())
@@ -99,7 +107,9 @@ export function useRateLimit(config: RateLimitConfig | undefined, formId?: strin
 
   // Зарегистрировать попытку — возвращает true если разрешено
   const recordAttempt = useCallback((): boolean => {
-    if (!config) return true
+    if (!config) {
+      return true
+    }
 
     const attempts = getAttempts()
     if (attempts.length >= config.maxSubmits) {
@@ -136,13 +146,17 @@ export function useRateLimit(config: RateLimitConfig | undefined, formId?: strin
   // Очистка таймера при unmount
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current)
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+      }
     }
   }, [])
 
   // Проверить блокировку при монтировании
   useEffect(() => {
-    if (!config) return
+    if (!config) {
+      return
+    }
     const attempts = getAttempts()
     if (attempts.length >= config.maxSubmits) {
       setIsBlocked(true)
@@ -154,7 +168,9 @@ export function useRateLimit(config: RateLimitConfig | undefined, formId?: strin
     }
   }, [config, getAttempts, startCountdown])
 
-  if (!config) return null
+  if (!config) {
+    return null
+  }
 
   const attempts = getAttempts()
 

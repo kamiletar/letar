@@ -6,7 +6,9 @@ import type { ResolvedColumn } from './table-types'
  * Форматировать значение ячейки для отображения.
  */
 export function formatCellValue(value: unknown, column: ResolvedColumn): string {
-  if (value === null || value === undefined || value === '') return ''
+  if (value === null || value === undefined || value === '') {
+    return ''
+  }
 
   // Вычисляемая колонка с кастомным форматом
   if (column.format) {
@@ -35,7 +37,9 @@ export function getDefaultRow(columns: ResolvedColumn[]): Record<string, unknown
   const row: Record<string, unknown> = {}
 
   for (const col of columns) {
-    if (col.computed) continue // вычисляемые не в данных
+    if (col.computed) {
+      continue // вычисляемые не в данных
+    }
 
     switch (col.fieldType) {
       case 'string':
@@ -111,7 +115,9 @@ export function buildTSV(
     .map((row) =>
       columns
         .map((col) => {
-          if (col.computed) return String(col.computed(row) ?? '')
+          if (col.computed) {
+            return String(col.computed(row) ?? '')
+          }
           return String(row[col.name] ?? '')
         })
         .join('\t')
@@ -136,7 +142,9 @@ export function computeAggregate(
     })
     .filter((v) => !Number.isNaN(v))
 
-  if (values.length === 0) return 0
+  if (values.length === 0) {
+    return 0
+  }
 
   switch (type) {
     case 'sum':

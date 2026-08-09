@@ -65,7 +65,9 @@ export function FieldLikert({
         const value = field.state.value as number | undefined
 
         const handleSelect = (point: number) => {
-          if (resolvedDisabled || resolvedReadOnly) return
+          if (resolvedDisabled || resolvedReadOnly) {
+            return
+          }
           field.handleChange(point)
         }
 

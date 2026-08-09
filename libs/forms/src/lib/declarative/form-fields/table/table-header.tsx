@@ -26,7 +26,9 @@ export function TableEditorHeader({ selectable, sortable }: { selectable?: boole
               type="checkbox"
               checked={allSelected}
               ref={(el) => {
-                if (el) el.indeterminate = someSelected
+                if (el) {
+                  el.indeterminate = someSelected
+                }
               }}
               onChange={(e) => {
                 e.stopPropagation()

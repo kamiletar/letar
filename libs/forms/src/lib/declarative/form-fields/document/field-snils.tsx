@@ -12,8 +12,12 @@ export const FieldSNILS = createDocumentField({
   icon: <LuShield />,
   validate: (value) => {
     const digits = value.replace(/\D/g, '')
-    if (!digits) return undefined
-    if (digits.length !== 11) return 'СНИЛС должен содержать 11 цифр'
+    if (!digits) {
+      return undefined
+    }
+    if (digits.length !== 11) {
+      return 'СНИЛС должен содержать 11 цифр'
+    }
     return validateSnils(digits) ? undefined : 'Неверная контрольная сумма СНИЛС'
   },
 })
