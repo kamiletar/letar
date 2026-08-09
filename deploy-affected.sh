@@ -119,6 +119,10 @@ LAST_DEPLOY_DIR="$WORKSPACE_ROOT/.last-deploy"
 S1_APPS=""
 # s2.letar.best apps
 S2_APPS="dashboard dashboard-agent driving-school auth-hub archetest time form-docs form-example grandslamcup aira-web mandala kami pravda umami animatrona-landing animatrona-tracker kami-key-the-landing letar-landing dsperevod aboi svoichuzhie aprel8008 studio domwellbes"
+# s3.letar.best — staging-приложения (через --staging, SERVER_APPS для них не действует) +
+# отдельные production-инстансы, у которых порт конфликтует с s2 (напр. dashboard-agent,
+# см. PLAN-INFRA.md §66 п.2). Пусто = разрешить любое explicit --app (как раньше для "unknown").
+S3_APPS=""
 
 # Detect current server by hostname
 CURRENT_HOST=$(hostname -f 2>/dev/null || hostname)
@@ -130,6 +134,10 @@ case "$CURRENT_HOST" in
   *s2.letar.best*|s2|server2)
     SERVER_APPS="$S2_APPS"
     SERVER_NAME="s2"
+    ;;
+  *s3.letar.best*|s3|server3)
+    SERVER_APPS="$S3_APPS"
+    SERVER_NAME="s3"
     ;;
   *)
     # Unknown server - allow all apps (for local testing)
@@ -215,19 +223,23 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Staging/Production конфигурация
+# BASE_COMPOSE_FILE — общее имя compose-файла по умолчанию. Конкретное приложение может
+# переопределить его собственным docker-compose.<SERVER_NAME>.yml (см. резолв ниже, в цикле
+# деплоя, PLAN-INFRA.md §66 п.2) — поэтому именно там читай/пиши $COMPOSE_FILE, а не здесь.
 if [ "$STAGING" = true ]; then
-  COMPOSE_FILE="docker-compose.staging.yml"
+  BASE_COMPOSE_FILE="docker-compose.staging.yml"
   ENV_FILE_NAME=".env.staging"
   DOCKER_TAG_SUFFIX=":staging"
   DEPLOY_ENV="staging"
   # При staging игнорируем SERVER_APPS — деплоим на любом сервере
   SERVER_APPS=""
 else
-  COMPOSE_FILE="docker-compose.production.yml"
+  BASE_COMPOSE_FILE="docker-compose.production.yml"
   ENV_FILE_NAME=".env.docker"
   DOCKER_TAG_SUFFIX=":latest"
   DEPLOY_ENV="production"
 fi
+COMPOSE_FILE="$BASE_COMPOSE_FILE"
 
 echo -e "${BLUE}╔════════════════════════════════════════════════════════╗${NC}"
 if [ "$STAGING" = true ]; then
@@ -603,6 +615,20 @@ for app in $AFFECTED_APPS; do
   echo ""
 
   APP_DIR="apps/${app}"
+
+  # Серверный override compose-файла (PLAN-INFRA.md §66 п.2). Раньше скрипт различал только
+  # --staging → docker-compose.staging.yml, иначе всегда docker-compose.production.yml — на s3
+  # это привело к тому, что --app dashboard-agent молча взял продовый compose с портом,
+  # занятым media-api ("port is already allocated" — симптом не подсказывал первопричину).
+  # Если для приложения на этом сервере лежит собственный docker-compose.<SERVER_NAME>.yml
+  # (сейчас — только apps/dashboard-agent/docker-compose.s3.yml) — используем его вместо
+  # общего $BASE_COMPOSE_FILE. Staging всегда идёт через docker-compose.staging.yml независимо
+  # от сервера — override здесь не применяется.
+  COMPOSE_FILE="$BASE_COMPOSE_FILE"
+  if [ "$STAGING" != true ] && [ -f "${APP_DIR}/docker-compose.${SERVER_NAME}.yml" ]; then
+    COMPOSE_FILE="docker-compose.${SERVER_NAME}.yml"
+    echo -e "${BLUE}ℹ️  ${app}: серверный override ${COMPOSE_FILE} (сервер ${SERVER_NAME})${NC}"
+  fi
 
   # Расшифровка .env.docker.enc → .env.docker (если используется SOPS)
   if ! decrypt_sops_env "$APP_DIR"; then
