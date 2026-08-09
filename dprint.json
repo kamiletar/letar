@@ -10,7 +10,8 @@
     "trailingCommas": "onlyMultiLine",
     "arrowFunction.useParentheses": "force",
     "quoteProps": "asNeeded",
-    "jsx.quoteStyle": "preferDouble"
+    "jsx.quoteStyle": "preferDouble",
+    "useBraces": "always"
   },
   "json": {
     "indentWidth": 2,
