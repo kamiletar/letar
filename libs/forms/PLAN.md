@@ -930,8 +930,27 @@ React, а React-адаптер зависит от абстракций ядра
       (`Image`, `document`, `canvas`) напрямую — понадобился `"lib": ["dom", ...]` в
       `tsconfig.lib.json`/`tsconfig.spec.json` ядра (не только `es2022`, которого по
       умолчанию хватало остальным модулям). Framework-free ≠ platform-free — это разные оси.
-      - Следующий шаг (Этап 3б-3г): `offline/`+`captcha/`+`analytics/adapters/`,
-      credit-card/format-phone/table-utils/dadata «хвост», `i18n/create-form-error-map.ts`.
+      - ✅ **Этап 3б закрыт (2026-08-09):** второй батч — `offline/` (только
+      `offline-service.ts`+`types.ts`; React-хуки `use-offline-form.ts`,
+      `use-offline-status.ts`, `use-sync-queue.ts` и компоненты-индикаторы остались в
+      адаптере), `captcha/` (только `verify.ts`+`types.ts`; `captcha-context.tsx`,
+      `captcha-field.tsx` остались — React), `analytics/` (`types.ts` + все 4 адаптера
+      `adapters/*.ts`; `use-form-analytics.ts` и `analytics-panel.tsx` остались — React).
+      Новые subpath'ы: `@letar/forms-core/offline`, `/captcha`, `/analytics`.
+      **Находка, крупнее предыдущих:** `offline-service.ts` framework-free, но делает
+      `await import('idb-keyval')` — **динамический** импорт реального npm-пакета, который
+      статический грep по `from '...'` в исходном аудите Фазы 7 не ловил вообще. Тесты
+      падали не из-за резолва (idb-keyval хоистится в root `node_modules`), а из-за
+      отсутствия окружения: `canUseIDB()` проверяет `typeof indexedDB !== 'undefined'`, а
+      голый jsdom не реализует IndexedDB — нужен `fake-indexeddb/auto` (был в
+      `libs/forms/vitest.setup.ts`, но `forms-core` не имел вообще никакого setup-файла).
+      Заодно понадобился и localStorage-полифилл оттуда же. **Вывод для будущих батчей:**
+      аудит на «framework-free» по статическим импортам недостаточен — платформенные API
+      (DOM, IndexedDB, localStorage, `fetch`) и **динамические** импорты npm-пакетов нужно
+      проверять раздельно, тестовый прогон — единственный надёжный сигнал полноты миграции
+      окружения, само по себе успешное `typecheck` этого не ловит.
+      - Следующий шаг (Этап 3в-3г): credit-card/format-phone/table-utils/dadata «хвост»,
+      `i18n/create-form-error-map.ts`.
 - [ ] **7.2 Standalone-проверка** — `npm i @letar/forms` в чистом Vite/Next вне монорепо (workspace-зависимости).
 - [ ] **7.3 `@letar/forms-shadcn` beta** — 15–20 ходовых полей (Input/Textarea/Number/Select/Checkbox/Radio/Date).
       Покрывает ~80% форм. Тяжёлые (RichText/Table/Signature/Combobox) — «Chakra-only пока».

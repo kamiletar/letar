@@ -40,6 +40,24 @@
       "import": "./src/lib/security/index.ts",
       "default": "./src/lib/security/index.ts"
     },
+    "./offline": {
+      "@letar/source": "./src/lib/offline/index.ts",
+      "types": "./src/lib/offline/index.ts",
+      "import": "./src/lib/offline/index.ts",
+      "default": "./src/lib/offline/index.ts"
+    },
+    "./captcha": {
+      "@letar/source": "./src/lib/captcha/index.ts",
+      "types": "./src/lib/captcha/index.ts",
+      "import": "./src/lib/captcha/index.ts",
+      "default": "./src/lib/captcha/index.ts"
+    },
+    "./analytics": {
+      "@letar/source": "./src/lib/analytics/index.ts",
+      "types": "./src/lib/analytics/index.ts",
+      "import": "./src/lib/analytics/index.ts",
+      "default": "./src/lib/analytics/index.ts"
+    },
     "./package.json": "./package.json"
   }
 }

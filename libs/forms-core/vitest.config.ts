@@ -5,8 +5,11 @@ export default defineConfig({
   cacheDir: '../../node_modules/.vitest/forms-core',
   test: {
     name: '@letar/forms-core',
-    environment: 'node',
+    // jsdom, не node: file-security.ts (Image/document/canvas) и offline-service.ts
+    // (window/navigator) — framework-free, но не platform-free (см. PLAN.md, Этап 3).
+    environment: 'jsdom',
     globals: true,
+    setupFiles: ['./vitest.setup.ts'],
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['node_modules', 'dist'],
     coverage: {

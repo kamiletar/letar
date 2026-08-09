@@ -27,7 +27,10 @@
       "@letar/forms-core/schema": ["../forms-core/src/lib/schema/index.ts"],
       "@letar/forms-core/server-errors": ["../forms-core/src/lib/server-errors/index.ts"],
       "@letar/forms-core/utils": ["../forms-core/src/lib/utils/index.ts"],
-      "@letar/forms-core/security": ["../forms-core/src/lib/security/index.ts"]
+      "@letar/forms-core/security": ["../forms-core/src/lib/security/index.ts"],
+      "@letar/forms-core/offline": ["../forms-core/src/lib/offline/index.ts"],
+      "@letar/forms-core/captcha": ["../forms-core/src/lib/captcha/index.ts"],
+      "@letar/forms-core/analytics": ["../forms-core/src/lib/analytics/index.ts"]
     }
   },
   "exclude": ["dist", "**/*.spec.ts", "**/*.spec.tsx", "**/*.test.ts", "**/*.test.tsx"],
