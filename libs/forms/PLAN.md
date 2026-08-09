@@ -876,8 +876,18 @@ React, а React-адаптер зависит от абстракций ядра
       `validators/ru`, граница без React/Chakra проверена негативной пробой линта), Этап 2
       (Zod-мета-движок, ~2030 строк — самая ценная часть ядра), Этапы 3а/3б (`server-errors/`,
       `utils/`, `security/file-security.ts`, `offline/`, `captcha/`, `analytics/adapters/`), Этапы
-      3в-3г (credit-card, format-phone, table-utils + чистые table-types, dadata address provider,
-      i18n error map — детали в `PLAN_COMPLETED.md`).
+      3в-3г (коммит `80545685`) — пять новых subpath-экспортов `forms-core`: `./credit-card`
+      (luhn, detectBrand/getBrandInfo, formatExpiry/isExpiryValid, formatCardNumber,
+      creditCardSchema), `./phone` (WebKit-safe форматтер из v1.4.4), `./table` (table-utils +
+      Chakra-free часть table-types), `./address` (createDaDataProvider),
+      `./i18n` (createFormErrorMap). `nx typecheck:tsgo,test --projects=forms,forms-core`:
+      750/750 тестов зелёные, affected-typecheck по потребителям (form-develop-app, form-docs,
+      form-example, dashboard, animatrona, grandslamcup, label-printer-desktop) — все ошибки
+      pre-existing, не связаны с переносом.
+      ⚠️ **Находка:** `libs/forms/vitest.config.ts` резолвит `@letar/forms-core/*` через явный
+      `resolve.alias` per-subpath (симлинка в node_modules нет) — новый subpath в
+      `forms-core/package.json` без зеркальной записи в этом alias-массиве ломает разом
+      66/98 файлов тестов `libs/forms` (почти каждый спек транзитивно тянет `src/index.ts`).
       Публичный API `@letar/forms` не менялся — реэкспорт-шимы. Остаток на следующую сессию:
       Этап 4 (UIKit-контракт ~20 примитивов + перевод 3 пилотных полей), Этап 5 (документация 6
       групп + отчёт координатору). Итог сессии — `libs/forms/PLAN_COMPLETED.md`.
