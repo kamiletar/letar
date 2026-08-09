@@ -4,6 +4,36 @@
 
 ---
 
+## Backlog (запросы от агентов)
+
+### [2026-08-09] Checkbox: клик по label/тексту не переключает состояние (от svoichuzhie)
+
+- **Запросил:** SunnyTower
+- **Приоритет:** high
+- **Описание:** `FieldCheckbox` (`src/lib/declarative/form-fields/boolean/field-checkbox.tsx`)
+  рендерит Chakra v3 `Checkbox.Root` как `<label data-part="root">` вокруг скрытого `<input>` +
+  `<div data-part="control">` (визуальный квадратик) + `<span data-part="label">` (текст). Клик
+  по `<label>` целиком — включая клик прямо по тексту рядом с чекбоксом — **не переключает
+  checked-состояние вообще**. Работает только клик именно по `[data-part="control"]` (или
+  напрямую по `<input>` с `force`). Реальный пользователь, кликающий интуитивно по тексту
+  (стандартное ожидание для `<label>`), не сможет отметить чекбокс. Не гонка/timing —
+  воспроизведено детерминированно через Playwright trace (0 успехов из множества попыток за
+  15с). Похоже, Zag.js checkbox-машина (через Ark UI) вешает обработчик клика конкретно на
+  `control`, не на `root`/`label`, и не полагается на нативное browser-поведение label→input
+  forwarding. Найдено на `svoichuzhie` (`03-subscription.spec.ts`, форма подписки в footer) —
+  деплой был заблокирован e2e-гейтом, диагностика через `trace.zip` на staging (BlackCove,
+  Deploy Agent). Обход на уровне теста — клик по `[data-part="control"]` вместо `label`
+  (`apps/svoichuzhie-e2e/src/03-subscription.spec.ts`, коммит `241802c9`) — но сам компонент
+  остаётся сломан для живых пользователей во всех приложениях на `@letar/forms` `Field.Checkbox`.
+- **Статус:** ожидание
+- **Примечание:** отправить agent-mail репорт `forms-coordinator` не удалось —
+  `send_message` отклоняет получателя `forms-coordinator` как «looks like a descriptive role
+  name», хотя это легитимно зарегистрированное фиксированное имя координатора (агент существует,
+  id подтверждён через `resource://agents/c-web-letar`). Похоже на регрессию валидации на
+  стороне MCP-сервера agent-mail — стоит проверить отдельно и/или сообщить куда следует.
+
+---
+
 ## ✅ v1.4.2 (2026-07-16) — фикс GET-утечки данных в URL до hydration
 
 Найдено кросс-приложенческим аудитом логин-форм монорепо (находка auth-hub v0.6.4): корневой
