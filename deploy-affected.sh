@@ -542,8 +542,26 @@ else
       # Already deployed at current HEAD - skip
       echo -e "  • ${APP_FOLDER} ${GREEN}(already at HEAD, skipping)${NC}"
     else
-      # Check if app has changes since its own last deployment using Nx affected
-      APP_AFFECTED=$(nx show projects --affected --base=$APP_LAST_DEPLOY --head=HEAD --type=app 2>/dev/null | grep -E "^(@[^/]*/)?${APP_FOLDER}$" || echo "")
+      # Check if app has changes since its own last deployment using Nx affected.
+      # Текущий Nx (22.6) при непривязанном к TTY stdout печатает JSON-массив одной строкой
+      # (`["app1","app2"]`), НЕ по одному имени на строку — построчный grep с якорями "^$"
+      # никогда не совпадал со строкой массива, APP_AFFECTED был всегда пуст (найдено
+      # 2026-08-09, PLAN-INFRA.md §51 «Смежная находка»). Разбираем вывод через node —
+      # тот же приём, что isAffectedSince() в libs/deploy-mcp/src/config.ts. Фоллбэк на
+      # построчный список сохранён на случай другой версии/конфигурации nx на сервере.
+      APP_AFFECTED_RAW=$(nx show projects --affected --base=$APP_LAST_DEPLOY --head=HEAD --type=app 2>/dev/null)
+      APP_AFFECTED=$(node -e '
+        const raw = process.argv[1] || ""
+        const app = process.argv[2]
+        let list
+        try {
+          list = JSON.parse(raw)
+        } catch {
+          list = raw.split(/\r?\n/).map((s) => s.trim()).filter(Boolean)
+        }
+        const hit = Array.isArray(list) && list.some((p) => p === app || p.endsWith("/" + app))
+        process.stdout.write(hit ? app : "")
+      ' "$APP_AFFECTED_RAW" "$APP_FOLDER" 2>/dev/null || echo "")
       if [ -n "$APP_AFFECTED" ]; then
         echo -e "  • ${APP_FOLDER} ${YELLOW}(changed since ${APP_LAST_DEPLOY:0:8})${NC}"
         AFFECTED_APPS="$AFFECTED_APPS $APP_FOLDER"
