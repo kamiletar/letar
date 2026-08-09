@@ -38,13 +38,10 @@ http:
         # уже провалился роутер дашборда, см. infra/acme-dns/README.md.
         certResolver: dns
 
-    gateway:
-      rule: 'Host(`gateway.letar.best`)'
-      entryPoints:
-        - websecure
-      service: kubo-gateway
-      tls:
-        certResolver: dns
+  # Роутер `gateway` (Host(`gateway.letar.best`)) убран 2026-08-09, BlackCove — §57 доехал:
+  # прокси-кеш поднят на mail (31.56.180.161), проверен снаружи (HTTP и HTTPS), DNS
+  # переставлен владельцем. См. infra/gateway-cache/README.md. per-name аккаунт acme-dns
+  # `gateway` тоже снесён этим же коммитом.
 
   services:
     kubo-gateway:
