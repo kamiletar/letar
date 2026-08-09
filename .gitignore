@@ -6,6 +6,7 @@ dist-electron
 tmp
 out-tsc
 *.tsbuildinfo
+output/
 
 # dependencies
 node_modules
