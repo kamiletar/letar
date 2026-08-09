@@ -1,5 +1,6 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -110,6 +111,24 @@ describe('FieldPhone', () => {
       const input = screen.getByRole('textbox')
       // Маска форматирует номер автоматически
       expect(input).toHaveValue('+7 (900) 123-45-67')
+    })
+
+    it('форматирует номер при посимвольном вводе (регрессия WebKit-бага dsperevod-e2e)', async () => {
+      // Раньше маска накладывалась через `use-mask-input` (imask), мутирующий DOM в обход
+      // React — конфликтовало с controlled value именно при посимвольном вводе в WebKit,
+      // Chromium/Firefox проходили. `userEvent.type` эмулирует тот же посимвольный ввод.
+      const user = userEvent.setup()
+      render(
+        <Form initialValue={{ phone: '' }} onSubmit={vi.fn()}>
+          <Form.Field.Phone name="phone" />
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      const input = screen.getByRole('textbox')
+      await user.type(input, '9185568172')
+
+      expect(input).toHaveValue('+7 (918) 556-81-72')
     })
 
     it('наследует disabled из формы', () => {

@@ -4,6 +4,20 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.4.4] - 2026-08-09
+
+### Fixed
+
+- **`Form.Field.Phone` не работал в WebKit при посимвольном вводе.** Компонент использовал
+  `use-mask-input` (imask) — библиотека мутирует DOM-элемент напрямую в обход React, и это
+  конфликтовало с controlled `value` конкретно при быстром посимвольном вводе в WebKit
+  (Chromium/Firefox проходили). Найдено в `apps/dsperevod-e2e/src/callback-drawer.spec.ts` —
+  все 4 теста падали на шаге ввода телефона (`--project=webkit`). Фикс — маска теперь
+  форматируется чистым JS на каждый `onChange` (новый `specialized/utils/format-phone.ts`),
+  без сторонних DOM-мутирующих библиотек — тот же паттерн, что уже используется в
+  `credit-card-field.tsx`. Добавлен регрессионный тест на посимвольный ввод через
+  `userEvent.type` в `field-phone.spec.tsx`.
+
 ## [1.4.3] - 2026-07-22
 
 ### Fixed
