@@ -387,7 +387,7 @@
     },
     "apps/aprel8008": {
       "name": "@letar/aprel8008",
-      "version": "0.12.14",
+      "version": "0.12.17",
     },
     "apps/aprel8008-e2e": {
       "name": "@letar/aprel8008-e2e",
@@ -570,14 +570,16 @@
     },
     "apps/poster-microtext-desktop": {
       "name": "@letar/poster-microtext-desktop",
-      "version": "0.9.2",
+      "version": "0.9.5",
       "dependencies": {
         "detect-libc": "^2.1.2",
         "font-list": "^2.1.0",
+        "qrcode": "^1.5.4",
         "semver": "^7.8.5",
         "sharp": "^0.35.3",
       },
       "devDependencies": {
+        "@types/qrcode": "^1.5.6",
         "electron": "43.3.0",
         "electron-builder": "^26.15.3",
       },
@@ -846,7 +848,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "1.4.5",
+      "version": "1.4.9",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
         "@tanstack/react-table": "^8.21.3",
