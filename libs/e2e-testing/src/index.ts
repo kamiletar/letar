@@ -1,3 +1,3 @@
-export { clickWithHydrationRetry } from './lib/hydration-retry'
+export { checkWithHydrationRetry, clickWithHydrationRetry, fillWithHydrationRetry } from './lib/hydration-retry'
 export { devSessionLogin, requireDevSessionToken, storagePaths } from './lib/staging-auth'
 export type { DevSessionLoginOptions } from './lib/staging-auth'

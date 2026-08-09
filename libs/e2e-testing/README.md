@@ -28,7 +28,8 @@ staging используется отдельный staging-only роут `/api/
   actionability. Хелпер кликает, коротко ждёт условие (`waitFor.state`: `'enabled'` или
   `'visible'` у `waitFor.locator`), и если оно не наступило — кликает ещё раз и ждёт дольше
   (к этому моменту гидратация уже гарантированно завершена). Найдено 2026-07-29 в archetest на
-  controlled-чекбоксе согласия.
+  controlled-чекбоксе согласия. Использовать, когда ожидаемый эффект клика виден на ДРУГОМ
+  элементе (например кнопка становится enabled).
 
   ```ts
   import { clickWithHydrationRetry } from '@letar/e2e-testing'
@@ -36,6 +37,35 @@ staging используется отдельный staging-only роут `/api/
   const startButton = page.getByRole('button', { name: 'Начать тест' })
   const consentCheckbox = page.locator('[data-part="control"]').first()
   await clickWithHydrationRetry(consentCheckbox, { locator: startButton, state: 'enabled' })
+  ```
+
+- `fillWithHydrationRetry(locator, value, timeoutMs?)` — заполняет controlled-инпут с ретраем до
+  подтверждения значения через `toHaveValue()`. Тот же класс гонки, что и у `clickWithHydrationRetry`,
+  но применительно к тексту: `.fill()` может сработать до навешивания `onChange` во время
+  гидратации, либо соседний `.fill()`/клик в той же форме триггерит re-render, откатывающий уже
+  введённое значение. Найдено 2026-08-08 в aboi (WebKit), затем независимо переоткрыто в
+  svoichuzhie — обе локальные копии консолидированы сюда 2026-08-09.
+
+  ```ts
+  import { fillWithHydrationRetry } from '@letar/e2e-testing'
+
+  await fillWithHydrationRetry(page.locator('#email'), 'user@example.com')
+  ```
+
+- `checkWithHydrationRetry(clickTarget, checkboxLocator, timeoutMs?)` — устанавливает
+  checked-состояние controlled-чекбокса с ретраем, идемпотентным относительно уже достигнутого
+  состояния (перед каждой попыткой проверяет `isChecked()`, кликает только если ещё не checked —
+  в отличие от `clickWithHydrationRetry` здесь повторный клик был бы неверен, он снял бы уже
+  выставленную галочку). `clickTarget` — обычно `[data-part="control"]` (Zag.js вешает toggle
+  именно на control-часть, не на `<label>` целиком). Найдено 2026-08-09 в svoichuzhie,
+  подтверждено трейсом на staging.
+
+  ```ts
+  import { checkWithHydrationRetry } from '@letar/e2e-testing'
+
+  const control = footer.locator('[data-part="control"]').first()
+  const checkbox = footer.locator('input[type="checkbox"]').first()
+  await checkWithHydrationRetry(control, checkbox)
   ```
 
 ## Пример
