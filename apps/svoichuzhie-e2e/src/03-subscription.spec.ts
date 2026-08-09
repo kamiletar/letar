@@ -1,4 +1,17 @@
-import { expect, test } from '@playwright/test'
+import { expect, type Locator, test } from '@playwright/test'
+
+/**
+ * `.fill()` иногда не долетает до controlled-инпута под нагрузкой (staging — холодный
+ * контейнер, гидратация может не успеть отработать между fill и следующим действием, значение
+ * откатывается на пустое) — тот же класс проблемы, что задокументирован для aboi
+ * (email-verification.spec.ts). Retry идемпотентен для .fill(), в отличие от toggle-клика.
+ */
+async function fillStable(locator: Locator, value: string) {
+  await expect(async () => {
+    await locator.fill(value)
+    await expect(locator).toHaveValue(value)
+  }).toPass({ timeout: 10_000 })
+}
 
 test.describe('03 — Подписка на новости', () => {
   test('форма подписки в footer принимает email', async ({ page }) => {
@@ -15,14 +28,19 @@ test.describe('03 — Подписка на новости', () => {
     }
 
     const uniqueEmail = `e2e-sub-${Date.now()}@test.local`
-    await emailInput.fill(uniqueEmail)
+    await fillStable(emailInput, uniqueEmail)
 
     // Форма требует согласие на ПДн — Chakra UI checkbox, кликаем через label
     const consentLabel = footer.locator('label:has(input[type="checkbox"])').first()
     const consentCheckbox = footer.locator('input[type="checkbox"]').first()
     if (await consentCheckbox.count()) {
       await consentLabel.click()
+      await expect(consentCheckbox).toBeChecked()
     }
+
+    // Переподтверждаем email прямо перед сабмитом — на случай если клик по чекбоксу вызвал
+    // ре-рендер, откативший значение (см. комментарий у fillStable).
+    await expect(emailInput).toHaveValue(uniqueEmail)
 
     const submitBtn = footer.locator('button[type="submit"]')
     await submitBtn.click()
