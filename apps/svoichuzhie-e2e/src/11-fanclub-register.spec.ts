@@ -50,7 +50,10 @@ test.describe('11 — Регистрация в фан-клуб', () => {
     // Обязательный чекбокс согласия на ПДн — .check()/.click() ненадёжно переключают этот
     // конкретный чекбокс (тот же класс проблемы, что задокументирован для aboi, см. PLAN.md
     // §18.7): focus() + Space работает стабильно.
-    const consentCheckbox = page.locator('input[type="checkbox"]').first()
+    // Локатор ОБЯЗАТЕЛЬНО скопирован формой: неограниченный `input[type="checkbox"]` на всей
+    // странице попадает на чекбокс cookie-баннера («Необходимые» — disabled, всегда checked),
+    // который рендерится раньше формы в DOM — .first() выбирал его, а не согласие формы.
+    const consentCheckbox = page.locator('form:has(#join-email) input[type="checkbox"]').first()
     await consentCheckbox.focus()
     await page.keyboard.press('Space')
     await expect(consentCheckbox).toBeChecked()
@@ -75,7 +78,7 @@ test.describe('11 — Регистрация в фан-клуб', () => {
     await passwordInput.click()
     await passwordInput.fill('AnyPass123!')
 
-    const consentCheckbox = page.locator('input[type="checkbox"]').first()
+    const consentCheckbox = page.locator('form:has(#join-email) input[type="checkbox"]').first()
     await consentCheckbox.focus()
     await page.keyboard.press('Space')
     await expect(consentCheckbox).toBeChecked()
