@@ -411,6 +411,36 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
 ]
 
 /**
+ * Задачи, выводимые из эксплуатации через репозиторий (PLAN-INFRA.md §56). `loadAllCronJobs()`
+ * добавляет недостающие дефолты, но никогда не удаляет записи — задача, убранная из
+ * `DEFAULT_CRON_JOBS`, раньше продолжала жить на проде вечно (DELETE-ручки у API агента нет).
+ * Перечисли сюда `id` задачи, которую нужно снять — она будет удалена из `cron-jobs.json`
+ * при следующей загрузке конфигурации на каждом сервере, где она встретится. Держать здесь
+ * долго не нужно: после того как задача реально пропала со всех серверов, id можно убрать
+ * из этого списка (или оставить — повторная фильтрация над уже пустым множеством безвредна).
+ */
+const RETIRED_JOB_IDS: string[] = []
+
+/**
+ * Убирает из списка задачи с id из `retiredIds` — чистая функция, вынесена отдельно от
+ * `loadAllCronJobs()` ради юнит-теста без мока файловой системы.
+ */
+export function applyRetirement(
+  jobs: CronJob[],
+  retiredIds: readonly string[],
+): { jobs: CronJob[]; removed: string[] } {
+  if (retiredIds.length === 0) {
+    return { jobs, removed: [] }
+  }
+  const retired = new Set(retiredIds)
+  const removed = jobs.filter((j) => retired.has(j.id)).map((j) => j.id)
+  if (removed.length === 0) {
+    return { jobs, removed: [] }
+  }
+  return { jobs: jobs.filter((j) => !retired.has(j.id)), removed }
+}
+
+/**
  * Читает файл конфигурации как есть, без бутстрапа дефолтов и без побочных эффектов.
  * `null` — файла нет или он не читается/не парсится. Единственная точка чтения с диска —
  * `loadAllCronJobs()` и `saveCronConfig()` шарят её вместо того, чтобы вызывать друг друга
@@ -477,12 +507,24 @@ function loadAllCronJobs(): CronJob[] {
   const existingIds = new Set(updatedJobs.map((j) => j.id))
   const newDefaults = DEFAULT_CRON_JOBS.filter((j) => !existingIds.has(j.id))
 
-  if (newDefaults.length > 0 || hasChanges) {
-    const merged = [...updatedJobs, ...newDefaults]
+  let merged = [...updatedJobs, ...newDefaults]
+  let mergedHasChanges = hasChanges || newDefaults.length > 0
+  if (newDefaults.length > 0) {
+    console.warn(`[Cron] Добавлено ${newDefaults.length} новых задач: ${newDefaults.map((j) => j.id).join(', ')}`)
+  }
+
+  // Вывод задач из эксплуатации (PLAN-INFRA.md §56) — после добавления дефолтов, чтобы задача,
+  // одновременно и переехавшая в RETIRED_JOB_IDS, и всё ещё числящаяся в DEFAULT_CRON_JOBS по
+  // ошибке, гарантированно не пережила фильтр (ретир побеждает).
+  const retirement = applyRetirement(merged, RETIRED_JOB_IDS)
+  if (retirement.removed.length > 0) {
+    console.warn(`[Cron] Выведены из эксплуатации: ${retirement.removed.join(', ')}`)
+    merged = retirement.jobs
+    mergedHasChanges = true
+  }
+
+  if (mergedHasChanges) {
     writeCronJobsFile(merged)
-    if (newDefaults.length > 0) {
-      console.warn(`[Cron] Добавлено ${newDefaults.length} новых задач: ${newDefaults.map((j) => j.id).join(', ')}`)
-    }
     return merged
   }
 
