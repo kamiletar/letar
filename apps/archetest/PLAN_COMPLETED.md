@@ -1,6 +1,6 @@
 # Выполненные задачи: Archetest
 
-> **Версия:** 0.27.1 | **Обновлено:** 2026-08-07
+> **Версия:** 0.27.1 | **Обновлено:** 2026-08-09
 >
 > **Основной план:** [PLAN.md](./PLAN.md)
 
@@ -2096,3 +2096,17 @@ production-деплоем, не только теоретически реали
 ---
 
 **Последнее обновление:** 2026-07-29
+
+---
+
+## Мелкий техдолг: dprint-нормализация, OIDC offline_access, MobileAuthSection
+
+> Перенесено из PLAN.md: 2026-08-09
+
+- **Нормализация формата dprint** (2026-07-05) — `nx format:write` причесал 6 файлов этапа
+  5.6.3 (disclaimer/quiz-intro/express-container/privacy/settings): схлопнуты переносы перед
+  template-строками. Вынесено в отдельный `style`-коммит, чтобы не засорять feat-коммит 5.6.1.
+- **OIDC `offline_access` scope** — добавлен в `src/lib/auth.ts` → refresh_token теперь
+  сохраняется в `account`.
+- **MobileAuthSection** — самодельная auth-секция в `mobile-drawer.tsx` заменена на
+  `MobileAuthSection` из `@letar/ui`.
