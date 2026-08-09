@@ -1,7 +1,21 @@
 /// <reference types="vitest" />
 import react from '@vitejs/plugin-react'
+import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import { defineConfig } from 'vitest/config'
+
+const formsCoreExports = JSON.parse(
+  readFileSync(resolve(__dirname, '../forms-core/package.json'), 'utf-8'),
+).exports
+
+const formsCoreAlias = Object.fromEntries(
+  Object.entries(formsCoreExports)
+    .filter(([subpath]) => subpath !== './package.json')
+    .map(([subpath, target]) => [
+      subpath === '.' ? '@letar/forms-core' : `@letar/forms-core${subpath.slice(1)}`,
+      resolve(__dirname, '../forms-core', target['@letar/source']),
+    ]),
+)
 
 export default defineConfig({
   plugins: [react()],
