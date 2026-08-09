@@ -111,6 +111,40 @@ function writeLastStatus(app: string, status: LastE2eStatus): void {
   writeFileSync(path.join(STATUS_DIR, `${app}.json`), JSON.stringify(status, null, 2))
 }
 
+const REPORTS_DIR = path.join(STATUS_DIR, 'reports')
+
+/** Статистика из JSON-отчёта Playwright (`--reporter=json`, только поля, которые нужны для вердикта). */
+interface PlaywrightReportStats {
+  expected: number
+  unexpected: number
+  flaky: number
+  skipped: number
+}
+
+/**
+ * Читает вердикт из отчёта Playwright, а не из кода возврата `nx` (PLAN-INFRA.md §55).
+ *
+ * Найдено на живом прогоне `time` на s3: тесты прошли (`3 passed`), но `nx e2e` вернул код 1
+ * из-за отдельного сбоя записи `.nx/cache/terminalOutputs/*` (гонка с параллельным деплоем,
+ * общий `.nx/cache`, см. разбор §55) — и это превратилось в ложно-красный `.last-e2e-status`,
+ * который читает hard e2e-gate перед прод-деплоем. Сбой тулинга вокруг прогона не должен
+ * портить вердикт о самих тестах — отчёт Playwright независим от внутреннего кэша Nx.
+ *
+ * Возвращает `null`, если отчёт не найден/не распарсился (тулинг не смог даже написать отчёт —
+ * тогда вызывающий код возвращается к старому поведению, коду возврата `nx`, fail-closed).
+ */
+function readE2eReportStats(reportFile: string): PlaywrightReportStats | null {
+  if (!existsSync(reportFile)) {
+    return null
+  }
+  try {
+    const report = JSON.parse(readFileSync(reportFile, 'utf8')) as { stats?: PlaywrightReportStats }
+    return report.stats ?? null
+  } catch {
+    return null
+  }
+}
+
 export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * GET /api/e2e/status — статус e2e-прогона
@@ -228,6 +262,12 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
       }
 
       const run = createRun({ running: true, app, project, grep, workers, startTime: new Date().toISOString() })
+      if (!existsSync(REPORTS_DIR)) {
+        mkdirSync(REPORTS_DIR, { recursive: true })
+      }
+      // runId в имени — на случай если прошлый отчёт того же приложения не удалился (не критично
+      // для гейта: читаем именно этот файл ниже, а не «последний по имени app»).
+      const reportFile = path.join(REPORTS_DIR, `${app}-${run.runId}.json`)
       appendOutput(
         run,
         `🧪 Running e2e: ${app}${project ? ` (project=${project})` : ''}${grep ? ` (grep=${grep})` : ''}${
@@ -251,10 +291,15 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
       // одинарных кавычек в nxCommand ниже (`bash -c '${e2eCommand}'`) — одинарная кавычка здесь
       // преждевременно закрыла бы ту внешнюю обёртку. Deny-лист выше уже исключает `"` из grep,
       // так что вложенные двойные кавычки безопасны.
+      // --reporter=json (PLAN-INFRA.md §55): источник истины для вердикта — отчёт Playwright,
+      // не код возврата nx (см. readE2eReportStats выше). Заменяет собой html/blob-репортёры
+      // из nxE2EPreset ТОЛЬКО для этого прогона — приемлемая цена, вывод команды и так пишется
+      // построчно в run.output (appendOutput ниже).
       const extraArgs = [
         project ? `--project=${project}` : '',
         grep ? `--grep "${grep}"` : '',
         workers !== undefined ? `--workers=${workers}` : '',
+        '--reporter=json',
       ]
         .filter(Boolean)
         .join(' ')
@@ -276,7 +321,8 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
       // webServer.reuseExistingServer:true в конфигах означает: раз baseUrl уже отвечает
       // (staging-контейнер поднят), Playwright НЕ запускает `nx dev <app>` — бьёт напрямую.
       // nsenter наследует env спавна (тот же приём, что SOPS_AGE_KEY_FILE в deploy.ts).
-      const env = { ...process.env, BASE_URL: baseUrl }
+      // PLAYWRIGHT_JSON_OUTPUT_NAME — куда --reporter=json пишет отчёт (см. §55 выше).
+      const env = { ...process.env, BASE_URL: baseUrl, PLAYWRIGHT_JSON_OUTPUT_NAME: reportFile }
 
       currentProcess = spawn('nsenter', args, { stdio: ['ignore', 'pipe', 'pipe'], env })
 
@@ -324,14 +370,42 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         run.exitCode = code
         run.running = false
         run.endTime = new Date().toISOString()
-        const passed = !timedOut && code === 0
+
+        let passed: boolean
         if (timedOut) {
+          passed = false
           appendOutput(run, '❌ E2E остановлен по таймауту')
           run.error = `Timed out after ${E2E_RUN_TIMEOUT_MS / 60000} min`
         } else {
-          appendOutput(run, passed ? '✅ E2E passed' : `❌ E2E failed with exit code ${code}`)
-          if (!passed) {
-            run.error = `Process exited with code ${code}`
+          const stats = readE2eReportStats(reportFile)
+          if (stats) {
+            // Источник истины — отчёт Playwright (§55), не код возврата nx: сбой тулинга
+            // вокруг прогона (напр. ENOENT записи .nx/cache/terminalOutputs) не должен портить
+            // зелёный вердикт, если сами тесты прошли.
+            passed = stats.unexpected === 0
+            if (passed) {
+              appendOutput(run, `✅ E2E passed (${stats.expected} tests, flaky: ${stats.flaky})`)
+              if (code !== 0) {
+                appendOutput(
+                  run,
+                  `ℹ️ nx завершился с кодом ${code}, но отчёт Playwright зелёный — считаю сбоем тулинга вокруг прогона, не тестов (PLAN-INFRA.md §55)`,
+                )
+              }
+            } else {
+              appendOutput(run, `❌ E2E failed: ${stats.unexpected} упавших тестов (nx exit code ${code})`)
+              run.error = `${stats.unexpected} failed tests (report: ${reportFile})`
+            }
+          } else {
+            // Отчёта нет/не распарсился — тулинг не смог даже его написать. Возврат к старому
+            // поведению (код возврата nx), fail-closed: не считаем зелёным без подтверждения.
+            passed = code === 0
+            appendOutput(
+              run,
+              `⚠️ Отчёт Playwright (${reportFile}) не найден/не прочитан — вердикт по коду возврата nx (${code})`,
+            )
+            if (!passed) {
+              run.error = `Process exited with code ${code}, no report`
+            }
           }
         }
 
