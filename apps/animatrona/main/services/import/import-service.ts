@@ -156,8 +156,11 @@ export class ImportService {
       let ffmpegVersion: string | undefined
       try {
         ffmpegVersion = await getFFmpegVersion()
-      } catch {
-        /* не критично */
+      } catch (err) {
+        log.warn('Не удалось определить версию FFmpeg, поле останется пустым в манифесте', {
+          queueItemId: entry.id,
+          error: String(err),
+        })
       }
 
       // 1. Создаём аниме в БД (или используем существующее при retranscode)
@@ -671,12 +674,21 @@ export class ImportService {
       // 9. AnimeManifest
       this.setStage('generating_manifests')
       this.emitProgress(95, 'Генерация AnimeManifest...', 'generating_manifests')
-      await this.generateAndPublishAnimeManifest(animeId)
+      const animeManifestResult = await this.generateAndPublishAnimeManifest(animeId)
 
       this.setStage('done')
 
       // Собираем все предупреждения
       const warnings: string[] = []
+
+      // AnimeManifest (directoryCid) не опубликован — критично для contentHealth и раздачи по CID
+      if (!animeManifestResult.success) {
+        warnings.push(
+          `AnimeManifest не опубликован (directoryCid не обновлён): ${
+            animeManifestResult.error ?? 'неизвестная ошибка'
+          }`,
+        )
+      }
 
       // Частичный успех — часть видео не транскодирована
       const failedCount = failedItemIds?.size ?? 0
@@ -1296,8 +1308,16 @@ export class ImportService {
         if (spriteData) {
           try {
             await updateManifestThumbnails(manifestPath, spriteData)
-          } catch {
-            /* ignore */
+          } catch (err) {
+            log.warn(
+              'Не удалось записать превью-спрайт в манифест — sprite/vtt CID уже в IPFS, но манифест их не содержит',
+              {
+                episodeId: data.episodeId,
+                episodeNumber: data.episodeNumber,
+                spriteData,
+                error: String(err),
+              },
+            )
           }
         }
 
@@ -1313,8 +1333,15 @@ export class ImportService {
             try {
               const stats = fs.statSync(data.videoOutputPath)
               transcodedSizeNum = stats.size
-            } catch {
-              /* ignore */
+            } catch (err) {
+              log.warn(
+                'Не удалось получить размер транскодированного видео — compressionRatio в манифесте не будет посчитан',
+                {
+                  episodeId: data.episodeId,
+                  episodeNumber: data.episodeNumber,
+                  error: String(err),
+                },
+              )
             }
 
             await updateManifestEncoding(manifestPath, {
@@ -1341,8 +1368,12 @@ export class ImportService {
               sourceBitrate: data.demuxResult.video?.bitrate,
               sourceBitDepth: data.demuxResult.video?.bitDepth,
             })
-          } catch {
-            /* ignore */
+          } catch (err) {
+            log.warn('Не удалось записать encoding info в манифест эпизода', {
+              episodeId: data.episodeId,
+              episodeNumber: data.episodeNumber,
+              error: String(err),
+            })
           }
         }
 
@@ -1414,8 +1445,15 @@ export class ImportService {
             subtitleTrackCids,
             sizes,
           })
-        } catch {
-          /* ignore */
+        } catch (err) {
+          log.warn(
+            'Не удалось записать CID медиа (видео/аудио/субтитры) в манифест эпизода — манифест останется без ссылок на IPFS-контент',
+            {
+              episodeId: data.episodeId,
+              episodeNumber: data.episodeNumber,
+              error: String(err),
+            },
+          )
         }
 
         // Rebuild tracks из БД (полные данные для манифеста)
@@ -1423,8 +1461,15 @@ export class ImportService {
           const audioForManifest = await db.findAudioTracksForManifest(data.episodeId)
           const subsForManifest = await db.findSubtitleTracksForManifest(data.episodeId)
           rebuildManifestTracksFromFile(manifestPath, audioForManifest, subsForManifest)
-        } catch {
-          /* ignore */
+        } catch (err) {
+          log.warn(
+            'Не удалось перестроить дорожки манифеста из БД — манифест может содержать неполный список аудио/субтитров',
+            {
+              episodeId: data.episodeId,
+              episodeNumber: data.episodeNumber,
+              error: String(err),
+            },
+          )
         }
 
         // Metadata JSON
@@ -1435,8 +1480,13 @@ export class ImportService {
           if (metadataCid) {
             try {
               await updateManifestMediaCids(manifestPath, { metadataCid })
-            } catch {
-              /* ignore */
+            } catch (err) {
+              log.warn('Не удалось записать metadataCid в манифест эпизода', {
+                episodeId: data.episodeId,
+                episodeNumber: data.episodeNumber,
+                metadataCid,
+                error: String(err),
+              })
             }
             try {
               fs.unlinkSync(metadataJsonPath)
@@ -1579,12 +1629,18 @@ export class ImportService {
     }
   }
 
-  private async generateAndPublishAnimeManifest(animeId: string): Promise<void> {
+  private async generateAndPublishAnimeManifest(animeId: string): Promise<{ success: boolean; error?: string }> {
     try {
       await updateAnimeManifest(animeId)
       log.info('AnimeManifest опубликован')
+      return { success: true }
     } catch (error) {
-      log.warn('Ошибка генерации AnimeManifest', { error: String(error) })
+      const errorMessage = String(error)
+      log.warn('Ошибка генерации AnimeManifest — directoryCid не обновлён, импорт продолжится без него', {
+        animeId,
+        error: errorMessage,
+      })
+      return { success: false, error: errorMessage }
     }
   }
 }
