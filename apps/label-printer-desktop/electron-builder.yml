@@ -1,7 +1,7 @@
 appId: com.letar.label-printer-desktop
 productName: Label Printer Desktop
 copyright: Copyright © 2025
-electronVersion: 39.2.7
+electronVersion: 43.3.0
 
 # Автообновление через GitHub Releases
 publish:

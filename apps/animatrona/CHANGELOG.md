@@ -4,6 +4,16 @@
 
 ## [Unreleased]
 
+## [0.55.18] - 2026-08-09
+
+### Changed
+
+- **Electron 42.8.1 → 43.3.0** — вместе с этим animatrona получила собственный точный пин
+  `electron` в `devDependencies` вместо неявного наследования версии из корневого
+  `package.json` (как у остальных Electron-приложений монорепо). Обновлены `electron-builder.yml`
+  (`electronVersion`) и ABI-версия в `@electron/rebuild` для `classic-level` (была застрявшая
+  `41.0.0`, хотя root уже был на 42.8.1 — рассинхрон существовал ещё до этого апдейта).
+
 ## [0.55.16] - 2026-07-29
 
 ### Fixed

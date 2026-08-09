@@ -110,7 +110,7 @@
     "decimal.js": "^10.6.0",
     "dockerode": "5.0.1",
     "dompurify": "^3.4.13",
-    "electron": "^42.8.1",
+    "electron": "^43.3.0",
     "electron-updater": "^6.8.9",
     "fastify": "^5.11.3",
     "fetch-blob": "^4.0.0",

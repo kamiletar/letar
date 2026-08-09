@@ -4,6 +4,13 @@
 
 ## [Unreleased]
 
+## [0.5.6] - 2026-08-09
+
+### Changed
+
+- Electron 39.2.7 → 43.3.0. `canvas` пересобран под новый ABI и проверен headless-запросом
+  (`ELECTRON_RUN_AS_NODE=1 electron -e "require('canvas')"`).
+
 ## [0.5.5] - 2026-02-28
 
 ### Added
