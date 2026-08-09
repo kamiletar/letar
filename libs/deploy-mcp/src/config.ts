@@ -99,6 +99,57 @@ export function originMainSha(): string {
   return execFileSync('git', ['-C', REPO_ROOT, 'rev-parse', 'origin/main'], { encoding: 'utf8' }).trim()
 }
 
+/**
+ * Корневые файлы вне графа Nx, которые тем не менее управляют деплоем/сборкой ВСЕХ
+ * приложений разом — правка любого из них обязана сбрасывать e2e-гейт всем hard-gated
+ * приложениям, даже тем, кто по `nx affected` формально не задет (PLAN-INFRA.md §51, DoD).
+ * `deploy-affected.sh`/`bun.lock` не входят ни в один `project.json` как input, поэтому Nx
+ * сам их не учитывает.
+ */
+export const ROOT_FILES_INVALIDATE_ALL = [
+  'deploy-affected.sh',
+  'nx.json',
+  'bun.lock',
+  'tsconfig.base.json',
+]
+
+/**
+ * Проверяет, затронуто ли приложение изменениями между `sinceSha` (коммит прогона e2e) и
+ * `origin/main` (то, что реально задеплоится) — PLAN-INFRA.md §51. Раньше `evaluateE2eGate`
+ * сравнивал буквальный HEAD репозитория: любой посторонний коммит (доки, инфра другого
+ * приложения) инвалидировал гейт для ВСЕХ hard-gated приложений сразу, вынуждая повторять
+ * цикл staging→e2e→prod без причины (BlackCove, семь повторов за один деплой, 2026-08-06).
+ *
+ * Консерватизм сохранён по конструкции: правка любого файла из `ROOT_FILES_INVALIDATE_ALL`
+ * считается затрагивающей всех, а любая ошибка `git`/`nx` (например неглубокий клон без
+ * `sinceSha`) трактуется как «затронут» — fail-closed, не fail-open.
+ */
+export function isAffectedSince(app: string, sinceSha: string): boolean {
+  const changedFiles = execFileSync(
+    'git',
+    ['-C', REPO_ROOT, 'diff', '--name-only', sinceSha, 'origin/main'],
+    { encoding: 'utf8' },
+  )
+    .split('\n')
+    .map((f) => f.trim())
+    .filter(Boolean)
+
+  if (changedFiles.some((f) => ROOT_FILES_INVALIDATE_ALL.includes(f))) {
+    return true
+  }
+
+  const affected = execFileSync(
+    'npx',
+    ['nx', 'show', 'projects', '--affected', '--base', sinceSha, '--head', 'origin/main', '--type', 'app'],
+    { encoding: 'utf8', cwd: REPO_ROOT },
+  )
+    .split('\n')
+    .map((p) => p.trim())
+    .filter(Boolean)
+
+  return affected.some((p) => p === app || p.endsWith(`/${app}`))
+}
+
 /** Базовые данные подключения к агенту на сервере. */
 export function serverConnection(server: InfraServer): {
   host: string

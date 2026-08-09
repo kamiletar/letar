@@ -47,11 +47,26 @@ describe('evaluateE2eGate', () => {
     expect(result.reasons.some((r) => r.includes('УПАЛ'))).toBe(true)
   })
 
-  it('блокирует hard-gated приложение, если e2e прогонялся не на том коммите', async () => {
+  it('блокирует hard-gated приложение, если e2e прогонялся не на том коммите И приложение affected (§51)', async () => {
     const fetchStatus = async () => okStatus({ commitSha: OTHER_SHA })
-    const result = await evaluateE2eGate('archetest', true, fetchStatus, () => HEAD)
+    const result = await evaluateE2eGate('archetest', true, fetchStatus, () => HEAD, () => true)
     expect(result.blocked).toBe(true)
-    expect(result.reasons.some((r) => r.includes('не тот же коммит'))).toBe(true)
+    expect(result.reasons.some((r) => r.includes('изменился с прогона'))).toBe(true)
+  })
+
+  it('НЕ блокирует hard-gated приложение при другом коммите, если приложение НЕ affected (§51, посторонний коммит)', async () => {
+    const fetchStatus = async () => okStatus({ commitSha: OTHER_SHA })
+    const result = await evaluateE2eGate('archetest', true, fetchStatus, () => HEAD, () => false)
+    expect(result).toEqual({ blocked: false, reasons: [] })
+  })
+
+  it('блокирует hard-gated приложение (fail-closed), если isAffectedSince сам бросает исключение', async () => {
+    const fetchStatus = async () => okStatus({ commitSha: OTHER_SHA })
+    const result = await evaluateE2eGate('archetest', true, fetchStatus, () => HEAD, () => {
+      throw new Error('git diff failed: shallow clone')
+    })
+    expect(result.blocked).toBe(true)
+    expect(result.reasons.some((r) => r.includes('не удалось проверить nx affected'))).toBe(true)
   })
 
   it('блокирует hard-gated приложение с прогоном старше 24 часов', async () => {
@@ -88,7 +103,7 @@ describe('evaluateE2eGate', () => {
 
   it('НЕ блокирует не-hard-gated приложение при тех же условиях провала (warn-only остаётся прежним)', async () => {
     const fetchStatus = async () => okStatus({ passed: false, commitSha: OTHER_SHA, timestamp: STALE_TIMESTAMP })
-    const result = await evaluateE2eGate('mandala', false, fetchStatus, () => HEAD)
+    const result = await evaluateE2eGate('mandala', false, fetchStatus, () => HEAD, () => true)
     expect(result.blocked).toBe(false)
     expect(result.reasons.length).toBeGreaterThanOrEqual(3)
   })

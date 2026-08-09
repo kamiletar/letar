@@ -21,7 +21,7 @@ import { errorText, pretty, text } from '@letar/mcp-server-kit'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
 import { agentRequest, type AgentResponse } from './client.js'
-import { originMainSha } from './config.js'
+import { isAffectedSince, originMainSha } from './config.js'
 
 const serverEnum = z.enum(['s2', 's3'])
 const E2E_GATE_MAX_AGE_MS = 24 * 60 * 60 * 1000
@@ -49,8 +49,14 @@ interface E2eGateResult {
  * (`blocked: true`, fail-closed). Для остальных — те же причины остаются предупреждениями, деплой
  * продолжается (`blocked: false`) — старое warn-only поведение Фазы 2 не меняется.
  *
- * Зависимости (`fetchStatus`/`getHeadSha`) инжектируются — позволяет тестировать логику
- * гейта без реального SSH-туннеля/git (см. `server.spec.ts`).
+ * Коммит e2e-прогона может расходиться с `origin/main` (несвязанные посторонние коммиты
+ * прилетают в main постоянно — это нормальный режим монорепо, не аномалия) — тогда сверка
+ * идёт не буквальным SHA, а замыканием зависимостей приложения через `isAffectedSince`
+ * (PLAN-INFRA.md §51): если ни само приложение, ни его `libs/*`-зависимости, ни корневые
+ * файлы деплоя не менялись с прогона — гейт не сбрасывается посторонним коммитом.
+ *
+ * Зависимости (`fetchStatus`/`getHeadSha`/`isAffectedSince`) инжектируются — позволяет
+ * тестировать логику гейта без реального SSH-туннеля/git/nx (см. `server.spec.ts`).
  */
 export async function evaluateE2eGate(
   app: string,
@@ -58,6 +64,7 @@ export async function evaluateE2eGate(
   fetchStatus: (app: string) => Promise<AgentResponse<E2eStatusResponse>> = (a) =>
     agentRequest<E2eStatusResponse>('s3', { path: `/api/e2e/status?app=${encodeURIComponent(a)}`, timeoutMs: 10000 }),
   getHeadSha: () => string = originMainSha,
+  isAppAffectedSince: (app: string, sinceSha: string) => boolean = isAffectedSince,
 ): Promise<E2eGateResult> {
   const reasons: string[] = []
   try {
@@ -77,9 +84,24 @@ export async function evaluateE2eGate(
     try {
       const head = getHeadSha()
       if (last.commitSha !== head) {
-        reasons.push(
-          `e2e прогонялся на ${last.commitSha.slice(0, 7)}, а деплоится ${head.slice(0, 7)} — не тот же коммит`,
-        )
+        let affected: boolean
+        try {
+          affected = isAppAffectedSince(app, last.commitSha)
+        } catch (err) {
+          // Не удалось посчитать nx affected (неглубокий клон, отсутствующий sinceSha и т.п.) —
+          // fail-closed: считаем приложение затронутым, как и раньше при буквальном сравнении SHA.
+          affected = true
+          reasons.push(
+            `не удалось проверить nx affected между ${last.commitSha.slice(0, 7)} и ${head.slice(0, 7)} `
+              + `(${err instanceof Error ? err.message : String(err)}) — считаю приложение затронутым`,
+          )
+        }
+        if (affected) {
+          reasons.push(
+            `e2e прогонялся на ${last.commitSha.slice(0, 7)}, а деплоится ${head.slice(0, 7)} — `
+              + `код приложения (или его зависимостей) изменился с прогона`,
+          )
+        }
       }
     } catch {
       // Не удалось определить локальный HEAD. Для warn-only приложений просто пропускаем сверку
