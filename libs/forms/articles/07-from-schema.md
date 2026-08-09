@@ -47,7 +47,7 @@
 // Упрощённая версия schema-traversal.ts
 function enumerateFields(schema) {
   const shape = unwrapToBaseSchema(schema)._zod?.def?.shape
-  if (!shape) return []
+  if (!shape) { return [] }
 
   return Object.entries(shape).map(([name, fieldSchema]) => ({
     name,

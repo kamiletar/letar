@@ -8,7 +8,7 @@ export function createYandexMetrikaAdapter(counterId: number): AnalyticsAdapter 
       const ym = (
         globalThis as { ym?: (id: number, action: string, goal: string, params?: Record<string, unknown>) => void }
       ).ym
-      if (!ym) {return}
+      if (!ym) { return }
 
       const goalPrefix = formId ? `form_${formId}` : 'form'
 

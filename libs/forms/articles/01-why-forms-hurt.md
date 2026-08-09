@@ -33,10 +33,10 @@ function LoginForm() {
 
   const validate = () => {
     const newErrors = {}
-    if (!email) newErrors.email = 'Обязательное поле'
-    else if (!/\S+@\S+/.test(email)) newErrors.email = 'Некорректный email'
-    if (!password) newErrors.password = 'Обязательное поле'
-    else if (password.length < 8) newErrors.password = 'Минимум 8 символов'
+    if (!email) { newErrors.email = 'Обязательное поле' }
+    else if (!/\S+@\S+/.test(email)) { newErrors.email = 'Некорректный email' }
+    if (!password) { newErrors.password = 'Обязательное поле' }
+    else if (password.length < 8) { newErrors.password = 'Минимум 8 символов' }
     return newErrors
   }
 

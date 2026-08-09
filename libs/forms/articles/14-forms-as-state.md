@@ -35,8 +35,8 @@ const [status, setStatus] = useState<string[]>([])
 // URL-синхронизация — ещё 30 строк
 useEffect(() => {
   const params = new URLSearchParams()
-  if (search) params.set('search', search)
-  if (category !== 'all') params.set('category', category)
+  if (search) { params.set('search', search) }
+  if (category !== 'all') { params.set('category', category) }
   // ...
   router.replace(`?${params}`)
 }, [search, category, minPrice, maxPrice, status])
@@ -126,7 +126,7 @@ function ActiveFiltersBar() {
 
   const activeCount = [value.search !== '', value.category !== 'all', value.status.length > 0].filter(Boolean).length
 
-  if (activeCount === 0) return null
+  if (activeCount === 0) { return null }
 
   return <Badge colorScheme="blue">Фильтры активны: {activeCount}</Badge>
 }
@@ -209,9 +209,9 @@ function FilterUrlSync() {
       {(values) => {
         // Синхронизируем URL при изменении фильтров
         const params = new URLSearchParams()
-        if (values.search) params.set('search', String(values.search))
-        if (values.category !== 'all') params.set('category', String(values.category))
-        if (values.minPrice !== 0) params.set('minPrice', String(values.minPrice))
+        if (values.search) { params.set('search', String(values.search)) }
+        if (values.category !== 'all') { params.set('category', String(values.category)) }
+        if (values.minPrice !== 0) { params.set('minPrice', String(values.minPrice)) }
         if (values.status?.length) {
           ;(values.status as string[]).forEach((s) => params.append('status', s))
         }

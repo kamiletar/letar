@@ -53,7 +53,7 @@ export interface FileSecurityResult {
  * @example parseFileSize(1024) // 1024
  */
 export function parseFileSize(size: string | number): number {
-  if (typeof size === 'number') {return size}
+  if (typeof size === 'number') { return size }
 
   const match = size.match(/^(\d+(?:\.\d+)?)\s*(B|KB|MB|GB)$/i)
   if (!match) {
@@ -248,7 +248,7 @@ export async function processFileWithSecurity(file: File, config: FileSecurityCo
  * Форматирует размер файла для отображения в сообщениях об ошибках.
  */
 function formatSize(bytes: number): string {
-  if (bytes < 1024) {return `${bytes} B`}
-  if (bytes < 1024 * 1024) {return `${(bytes / 1024).toFixed(1)} KB`}
+  if (bytes < 1024) { return `${bytes} B` }
+  if (bytes < 1024 * 1024) { return `${(bytes / 1024).toFixed(1)} KB` }
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }

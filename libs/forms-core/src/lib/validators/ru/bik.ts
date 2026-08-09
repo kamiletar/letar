@@ -11,7 +11,7 @@ import { isDigitsOfLength } from './checksum'
  */
 export function validateBik(value: string): boolean {
   const digits = value.replace(/\D/g, '')
-  if (!isDigitsOfLength(digits, 9)) {return false}
+  if (!isDigitsOfLength(digits, 9)) { return false }
   return digits.startsWith('04')
 }
 

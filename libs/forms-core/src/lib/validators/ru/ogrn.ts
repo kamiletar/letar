@@ -12,7 +12,7 @@ import { extractDigits, isDigitsOfLength } from './checksum'
  */
 export function validateOgrn(value: string): boolean {
   const digits = extractDigits(value)
-  if (digits.length !== 13) {return false}
+  if (digits.length !== 13) { return false }
 
   const number = Number(value.replace(/\D/g, '').slice(0, 12))
   const check = number % 11
@@ -24,7 +24,7 @@ export function validateOgrn(value: string): boolean {
  */
 export function validateOgrnip(value: string): boolean {
   const digits = extractDigits(value)
-  if (digits.length !== 15) {return false}
+  if (digits.length !== 15) { return false }
 
   const number = Number(value.replace(/\D/g, '').slice(0, 14))
   const check = number % 13

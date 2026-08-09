@@ -202,7 +202,7 @@ function generateStringHint(
   locale: string,
   t: ConstraintHintTranslations,
 ): string | undefined {
-  if (!constraints) {return undefined}
+  if (!constraints) { return undefined }
 
   const { minLength, maxLength, inputType } = constraints
 
@@ -237,7 +237,7 @@ function generateNumberHint(
   locale: string,
   t: ConstraintHintTranslations,
 ): string | undefined {
-  if (!constraints) {return undefined}
+  if (!constraints) { return undefined }
 
   const { min, max, isInteger } = constraints
   const suffix = isInteger ? t.number_integer_suffix : ''
@@ -266,7 +266,7 @@ function generateDateHint(
   locale: string,
   t: ConstraintHintTranslations,
 ): string | undefined {
-  if (!constraints) {return undefined}
+  if (!constraints) { return undefined }
 
   const { min, max } = constraints
 
@@ -290,7 +290,7 @@ function generateArrayHint(
   locale: string,
   t: ConstraintHintTranslations,
 ): string | undefined {
-  if (!constraints) {return undefined}
+  if (!constraints) { return undefined }
 
   const { minItems, maxItems } = constraints
 

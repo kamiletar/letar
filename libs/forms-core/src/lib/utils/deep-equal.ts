@@ -5,12 +5,12 @@
  */
 export function deepEqual(a: unknown, b: unknown, seen = new WeakSet()): boolean {
   // Примитивы и referential equality
-  if (Object.is(a, b)) {return true}
+  if (Object.is(a, b)) { return true }
 
   // null/undefined или разные типы
-  if (a === null || a === undefined || b === null || b === undefined) {return false}
-  if (typeof a !== typeof b) {return false}
-  if (typeof a !== 'object') {return false}
+  if (a === null || a === undefined || b === null || b === undefined) { return false }
+  if (typeof a !== typeof b) { return false }
+  if (typeof a !== 'object') { return false }
 
   // Date
   if (a instanceof Date && b instanceof Date) {
@@ -25,20 +25,20 @@ export function deepEqual(a: unknown, b: unknown, seen = new WeakSet()): boolean
   // Защита от циклических ссылок
   const objA = a as object
   const objB = b as object
-  if (seen.has(objA) || seen.has(objB)) {return false}
+  if (seen.has(objA) || seen.has(objB)) { return false }
   seen.add(objA)
   seen.add(objB)
 
   // Массивы
   if (Array.isArray(a)) {
-    if (!Array.isArray(b) || a.length !== b.length) {return false}
+    if (!Array.isArray(b) || a.length !== b.length) { return false }
     return a.every((item, i) => deepEqual(item, b[i], seen))
   }
 
   // Plain objects
   const keysA = Object.keys(a as Record<string, unknown>)
   const keysB = Object.keys(b as Record<string, unknown>)
-  if (keysA.length !== keysB.length) {return false}
+  if (keysA.length !== keysB.length) { return false }
 
   const recA = a as Record<string, unknown>
   const recB = b as Record<string, unknown>

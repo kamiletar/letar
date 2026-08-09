@@ -10,7 +10,7 @@ describe('Паспорт', () => {
   it('принимает паспорт с пробелами', () => {
     const result = zRu.passport().safeParse('45 06 123456')
     expect(result.success).toBe(true)
-    if (result.success) {expect(result.data).toBe('4506123456')}
+    if (result.success) { expect(result.data).toBe('4506123456') }
   })
 
   it('отклоняет паспорт неправильной длины', () => {

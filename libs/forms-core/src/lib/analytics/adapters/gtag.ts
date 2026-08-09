@@ -6,10 +6,10 @@ export function createGtagAdapter(): AnalyticsAdapter {
     name: 'gtag',
     track(event: FormAnalyticsEvent, formId?: string) {
       const gtag = (globalThis as { gtag?: (...args: unknown[]) => void }).gtag
-      if (!gtag) {return}
+      if (!gtag) { return }
 
       const params: Record<string, unknown> = { form_id: formId }
-      if ('field' in event) {params.field_name = event.field}
+      if ('field' in event) { params.field_name = event.field }
 
       switch (event.type) {
         case 'field_blur':

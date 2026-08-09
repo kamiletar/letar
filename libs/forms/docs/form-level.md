@@ -439,7 +439,8 @@ function CustomNavigation() {
   onSubmit={handleSubmit}
   middleware={{
     beforeSubmit: async (data) => {
-      if (!(await validateWithServer(data))) return undefined // отмена
+      if (!(await validateWithServer(data))) { return undefined // отмена
+       }
       return { ...data, timestamp: Date.now() }
     },
 

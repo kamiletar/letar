@@ -12,7 +12,7 @@ describe('СНИЛС', () => {
   it('принимает СНИЛС с маской', () => {
     const result = zRu.snils().safeParse('112-017-454 90')
     expect(result.success).toBe(true)
-    if (result.success) {expect(result.data).toBe('11201745490')}
+    if (result.success) { expect(result.data).toBe('11201745490') }
   })
 
   it('принимает специальный номер <= 001-001-998', () => {
