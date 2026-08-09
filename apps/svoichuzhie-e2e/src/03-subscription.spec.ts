@@ -14,15 +14,20 @@ async function fillStable(locator: Locator, value: string) {
 }
 
 /**
- * Тот же класс гонки, что у fillStable, но для чекбокса: клик по лейблу иногда не долетает
- * (BlackCove на staging, 2026-08-09 — `toBeChecked()` падал 33 раза подряд за 15с). Клик по
- * уже отмеченному чекбоксу снял бы его — поэтому ретраим клик только когда чекбокс ещё не
- * отмечен, а не безусловно как fillStable.
+ * НЕ гонка — реальный баг компонента, найден и подтверждён на staging трейсом (BlackCove,
+ * 2026-08-09). Zag.js-машина чекбокса (`@letar/forms` FieldCheckbox → Chakra v3 Checkbox.Root)
+ * вешает обработчик toggle конкретно на `[data-part="control"]` (визуальный квадратик), а не
+ * полагается на нативное поведение браузера «клик по `<label>` → клик по связанному `<input>`».
+ * Клик по `<label data-part="root">` целиком — в т.ч. по тексту согласия — НЕ переключает
+ * чекбокс вообще, ни разу, ни у Playwright, ни у живого пользователя. Реальный клик по тексту
+ * "Согласен(на)..." (интуитивно ожидаемое поведение для `<label>`) молча не работает — заведено
+ * отдельным репортом `@letar/forms` (форма-координатор), здесь — обход на уровне теста: кликаем
+ * по `[data-part="control"]`, не по `label`.
  */
-async function checkStable(labelLocator: Locator, checkboxLocator: Locator) {
+async function checkStable(controlLocator: Locator, checkboxLocator: Locator) {
   await expect(async () => {
     if (!(await checkboxLocator.isChecked())) {
-      await labelLocator.click()
+      await controlLocator.click()
     }
     await expect(checkboxLocator).toBeChecked()
   }).toPass({ timeout: 15_000 })
@@ -45,11 +50,12 @@ test.describe('03 — Подписка на новости', () => {
     const uniqueEmail = `e2e-sub-${Date.now()}@test.local`
     await fillStable(emailInput, uniqueEmail)
 
-    // Форма требует согласие на ПДн — Chakra UI checkbox, кликаем через label
-    const consentLabel = footer.locator('label:has(input[type="checkbox"])').first()
+    // Форма требует согласие на ПДн — Chakra UI checkbox. Клик именно по [data-part="control"]
+    // (визуальный квадратик), не по <label> целиком — см. комментарий у checkStable.
+    const consentControl = footer.locator('[data-part="control"]').first()
     const consentCheckbox = footer.locator('input[type="checkbox"]').first()
     if (await consentCheckbox.count()) {
-      await checkStable(consentLabel, consentCheckbox)
+      await checkStable(consentControl, consentCheckbox)
     }
 
     // Переподтверждаем email прямо перед сабмитом — на случай если клик по чекбоксу вызвал
