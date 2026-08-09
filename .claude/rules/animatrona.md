@@ -75,4 +75,5 @@ nx db:template animatrona        # Обновить template.db
 - См. `apps/animatrona/CLAUDE.md` — **инструкции по БД и миграциям**
 - См. `apps/animatrona/PLAN.md` для roadmap
 - См. `.claude/docs/electron-sqlite.md` — архитектура миграций
+- См. [animatrona-db-manifest-dual-source.md](/.claude/docs/animatrona-db-manifest-dual-source.md) — поля `Episode.spriteCid`/`vttCid`/`chaptersCid`, дублированные в БД и в IPFS-манифесте: билдер directoryCid читает с приоритетом БД, а retranscode не обновляет колонки, из-за чего в directoryCid может уехать устаревший CID
 - → Skill: `pwa-offline` для offline паттернов (будущее)
