@@ -138,14 +138,32 @@ export function isAffectedSince(app: string, sinceSha: string): boolean {
     return true
   }
 
-  const affected = execFileSync(
-    'npx',
-    ['nx', 'show', 'projects', '--affected', '--base', sinceSha, '--head', 'origin/main', '--type', 'app'],
-    { encoding: 'utf8', cwd: REPO_ROOT },
-  )
-    .split('\n')
-    .map((p) => p.trim())
-    .filter(Boolean)
+  // Глобальный `nx`, НЕ `npx nx`/`bunx nx` — конвенция монорепо (CLAUDE.md, environment.md).
+  // `npx nx` здесь и было реальным багом (найден живым прогоном BlackCove, aprel8008,
+  // 2026-08-09): на машине, где запущен deploy-mcp, `npx` резолвит nx иначе (или не резолвит
+  // вовсе) — execFileSync бросает, isAffectedSince уходит в catch evaluateE2eGate,
+  // fail-closed считает приложение затронутым независимо от реальной affected-принадлежности,
+  // и гейт блокируется посторонними коммитами ровно как до фикса §51. `shell: true` — nx на
+  // Windows ставится как `nx.cmd`, execFileSync без shell не резолвит `.cmd`-обёртку (ENOENT).
+  // NX_DAEMON=false — та же защита, что deploy-affected.sh (комментарий там: «крашит plugin
+  // workers на серверах, isolated-plugin fork bug»). Замечена нестабильность живьём 2026-08-09:
+  // тот же вызов с теми же base/head дал один раз "не затронут" среди трёх верных "затронут"
+  // подряд — похоже на гонку демона. Без daemon дольше на холодную, но детерминированно.
+  const rawOutput = execFileSync(
+    'nx',
+    ['show', 'projects', '--affected', '--base', sinceSha, '--head', 'origin/main', '--type', 'app'],
+    { encoding: 'utf8', cwd: REPO_ROOT, shell: true, env: { ...process.env, NX_DAEMON: 'false' } },
+  ).trim()
+
+  // Текущий Nx (22.6) при непривязанном к TTY stdout печатает JSON-массив одной строкой
+  // (`["app1","app2"]`), НЕ по одному имени на строку — проверено живым вызовом 2026-08-09.
+  // Наивный `split('\n')` строку с массивом никогда бы не сматчил ни с одним именем проекта —
+  // `isAffectedSince` вернула бы `false` всегда, независимо от реальной затронутости
+  // (fail-open в другую сторону: гейт перестал бы блокировать вообще что-либо не по своему
+  // коммиту). `deploy-affected.sh` полагается на построчный grep для того же вызова — тот же
+  // формат вывода мог сломать и его автообнаружение affected-приложений без `--app`, это
+  // отдельная находка, см. PLAN-INFRA.md.
+  const affected: string[] = JSON.parse(rawOutput)
 
   return affected.some((p) => p === app || p.endsWith(`/${app}`))
 }
