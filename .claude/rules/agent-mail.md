@@ -21,6 +21,37 @@ mcp__agent-mail__macro_start_session(
 
 Возвращает `{project, agent, file_reservations, inbox}` — сразу видно inbox и резервации.
 
+### ⚠️ Без `agent_name`/`registration_token` сервер выдаёт случайную identity — это не нейтрально
+
+Если вызвать `macro_start_session` без `agent_name`, agent-mail сгенерирует случайное
+adjective+noun имя (`SunnyTower`, `WhiteMountain` и т.п.) и зарегистрирует **новую** identity —
+без истории, без принятых контактов, незнакомую другим агентам/координаторам. Найдено
+2026-08-09: сессия `svoichuzhie` стартовала как `SunnyTower` вместо фиксированного
+`svoichuzhie-dev`, из-за чего первые `send_message` к `forms-coordinator`/`BlackCove` упирались
+в `Contact approval required` и путаницу с диагностикой (см. ниже).
+
+**Перед вызовом `macro_start_session` проверь, есть ли у этого приложения фиксированная
+identity** — таблица `<app>-dev` + `registration_token` хранится в приватной cross-session
+памяти (не в репозитории — токены не публикуются, см. `public-repo-hygiene.md`). Если запись
+для приложения есть — передай её явно:
+
+```
+macro_start_session(
+  human_key: "C:/web/letar",
+  program: "claude-code",
+  model: "claude-sonnet-5",
+  task_description: "<кратко что делаешь>",
+  agent_name: "<app>-dev",
+  registration_token: "<токен из памяти>",
+  file_reservation_paths: ["apps/<твоё-приложение>/**"],
+  file_reservation_reason: "<приложение> development"
+)
+```
+
+Если фиксированной identity для приложения ещё нет — заведи её штатно (`register_agent` с
+kebab-case именем `<app>-dev`) и сохрани `registration_token` в памяти для будущих сессий, а не
+оставляй сервер генерировать случайное имя молча.
+
 ## Пример для animatrona-tracker
 
 ```
@@ -110,6 +141,42 @@ release_file_reservations(
   agent_name: "<твоё-имя>"
 )
 ```
+
+### ⚠️ `send_message` первый раз к незнакомому агенту → `Contact approval required`
+
+Это **не баг валидации имени** и не требование «случайного» имени — сообщения об ошибке,
+упоминающие пример вида `WhiteMountain`, вводят в заблуждение (найдено 2026-08-09, сессия
+`svoichuzhie-dev` → `forms-coordinator`). Реальная причина: agent-mail требует явного
+подтверждения контакта между двумя агентами, ранее не переписывавшимися. Первый `send_message`
+автоматически создаёт pending-заявку и **блокирует** сам себя — сообщение не уходит.
+
+**Что делать:**
+
+1. Если получил ошибку `Contact approval required for recipients: <имя>` — заявка уже создана
+   автоматически, ждать не нужно повторять `send_message` до апрува. Либо явно:
+   ```
+   request_contact(
+     project_key: "c-web-letar",
+     from_agent: "<твоё-имя>",
+     to_agent: "<получатель>",
+     reason: "<коротко зачем>"
+   )
+   ```
+2. Получатель подтверждает:
+   ```
+   respond_contact(
+     project_key: "c-web-letar",
+     to_agent: "<получатель>",
+     from_agent: "<твоё-имя>",
+     accept: true
+   )
+   ```
+3. После апрува `send_message` между этими двумя агентами проходит без повторной заявки (TTL
+   контакта — 30 дней по умолчанию).
+
+Это не связано с тем, зарегистрирован ли получатель под фиксированным kebab-case именем
+(`agent_fixed_names_tokens` в памяти) — контакт-апрув требуется даже между двумя легитимными
+фиксированными identity, если они ещё не переписывались.
 
 ## Фиксированные имена координаторов
 
