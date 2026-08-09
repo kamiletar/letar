@@ -75,7 +75,22 @@ export async function POST(request: Request) {
 
     const settings = await getAlertSettings()
     if (settings.enabled) {
-      await sendNotification(alert, settings.telegramEnabled, settings.telegramBotToken, settings.telegramChatId)
+      const sent = await sendNotification(
+        alert,
+        settings.telegramEnabled,
+        settings.telegramBotToken,
+        settings.telegramChatId,
+      )
+      if (!sent) {
+        // sendNotification() уже залогировал причину (канал не настроен либо реальная ошибка
+        // отправки) — здесь фиксируем сам факт «алерт создан, но уведомление не ушло», чтобы
+        // это было видно в логах именно этого запроса, а не только внутри notifications.ts.
+        console.warn(`[POST /api/alerts] Уведомление НЕ отправлено для alert ${alert.id} (type=${alert.type})`)
+      }
+    } else {
+      console.warn(
+        `[POST /api/alerts] AlertSettings.enabled=false — alert ${alert.id} (type=${alert.type}) создан, уведомление не отправлялось`,
+      )
     }
 
     return NextResponse.json({ success: true, alert })

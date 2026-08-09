@@ -116,6 +116,15 @@ async function getLocalServerId(): Promise<string | null> {
  * Создание нового алерта
  * Если активный алерт такого типа уже существует — обновляет его
  * serverId автоматически определяется как локальный сервер если не указан
+ *
+ * PLAN-INFRA.md §52: раньше дедуп шёл только по `type` (+ `serverId`) — для `CRON_FAILED`,
+ * общего для ВСЕХ cron-задач монорепо, это схлопывало шесть разных сломанных задач у двух
+ * разных приложений в один алерт, где `message` — от той, что упала последней. Пять остальных
+ * были не видны нигде: чинишь одну — алерт остаётся активным от других. Если вызывающий код
+ * передал `metadata.jobId` (как это делает `dashboard-agent` для `CRON_FAILED` — см.
+ * `notifyDashboardAlert()` в `apps/dashboard-agent/src/lib/cron.ts`) — дедуп сужается до
+ * `type` + этого `jobId`, и у каждой задачи свой активный алерт. Алерты без `jobId` в metadata
+ * (например по CPU/памяти/диску) дедуплицируются как раньше — по `type` (+`serverId`).
  */
 export async function createAlert(
   type: Alert['type'],
@@ -128,13 +137,17 @@ export async function createAlert(
   try {
     // Если serverId не указан, используем локальный сервер
     const resolvedServerId = serverId ?? (await getLocalServerId())
+    const jobId = typeof metadata?.['jobId'] === 'string' ? metadata['jobId'] : undefined
 
-    // Проверяем существующий активный алерт такого типа на этом сервере
+    // Проверяем существующий активный алерт такого типа (+ jobId, если он есть) на этом сервере
     const existingAlert = await prisma.alert.findFirst({
       where: {
         type,
         status: 'ACTIVE',
         ...(resolvedServerId ? { serverId: resolvedServerId } : {}),
+        // path — JSONPath (Postgres-диалект ZenStack строит его через jsonb_path_query_first),
+        // а не голое имя ключа: обязателен префикс `$.`.
+        ...(jobId ? { metadata: { path: '$.jobId', equals: jobId } } : {}),
       },
     })
 

@@ -181,6 +181,13 @@ export async function sendHeartbeatTelegram(botToken: string, chatId: string): P
 
 /**
  * Отправка уведомления (выбирает метод на основе настроек)
+ *
+ * PLAN-INFRA.md §52: раньше «отправить некуда» (Telegram выключен/не хватает токена) была
+ * неотличима от «отправка провалилась» — обе тихо возвращали `false`, вызывающий код результат
+ * не проверял. Алерты восемь дней копились в БД никого не разбудив, а причина молчания
+ * выяснилась только ручной проверкой прод-БД. Теперь причина логируется здесь же, а не только
+ * у вызывающего кода — так это видно и там, где `sendNotification()` вызван без последующей
+ * проверки результата (см. `ssl-monitor.ts`).
  */
 export async function sendNotification(
   alert: Alert,
@@ -193,6 +200,11 @@ export async function sendNotification(
   }
 
   // В будущем здесь могут быть другие методы уведомлений (Email, Webhook, etc.)
+  console.warn(
+    `[Notifications] Отправить некуда (alert type=${alert.type}): `
+      + `telegramEnabled=${telegramEnabled}, botToken=${telegramBotToken ? 'есть' : 'нет'}, `
+      + `chatId=${telegramChatId ? 'есть' : 'нет'}. Алерт создан в БД, но никуда не отправлен.`,
+  )
 
   return false
 }
