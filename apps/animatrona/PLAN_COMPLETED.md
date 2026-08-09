@@ -29,6 +29,45 @@
 — зелёный. Реальный запуск GUI (окно, IPC, автообновление) не проверялся — на это закладывается
 первый живой запуск у пользователя.
 
+## Фикс `ntsuspend` — пауза транскодирования не работала вообще на Windows (2026-08-09)
+
+Найден побочно при апдейте Electron (см. выше): `require('ntsuspend')` падал и в headless Node,
+и под Electron 43.3.0 — `Cannot find module './win32-x64_lib.node'`. Баг предсуществующий, не
+связан с версией Electron.
+
+**Root cause:** `ntsuspend` — единственный native-модуль в animatrona, устанавливаемый не через
+`@electron/rebuild` (как `classic-level`/`libsql`), а через собственный npm `install`-скрипт
+(`install.cjs`), который при установке скачивает готовый `.node`-бинарник с GitHub Releases.
+В репозитории **нет `trustedDependencies`** ни в корневом `package.json`, ни в `bunfig.toml`
+(его тоже нет) — а bun по умолчанию не запускает lifecycle-скрипты (`install`/`postinstall`)
+сторонних зависимостей, если они не в этом списке (доверяет только собственным
+workspace-пакетам). Поэтому `install.cjs` никогда не отрабатывал — файл `win32-x64_lib.node`
+просто не появлялся в `node_modules/.bun/ntsuspend@1.0.2/.../ntsuspend/`. Тот же класс проблемы,
+что уже был решён для `classic-level` (ручной вызов `@electron/rebuild` в `postinstall`), просто
+не был распространён на `ntsuspend`, у которого стратегия починки другая (скачивание, не
+пересборка).
+
+**Что было в проде:** `getNtsuspend()` в
+[process-control.ts](main/utils/process-control.ts) ловит исключение и деградирует тихо —
+`suspendProcess`/`resumeProcess` возвращают `false` без креша, `pauseItem`/`resumeItem` в
+[transcode-manager.ts](main/services/transcode-manager.ts) просто не переводят элемент очереди в
+статус `paused`/`transcoding`. То есть фича «пауза энкода» (заявленная в release notes
+`electron-builder.yml`) была нерабочей молча — без видимой ошибки пользователю, только лог
+`ntsuspend не загружен — пауза процессов недоступна`.
+
+**Фикс:** в `postinstall`/`postinstall:dev` (`apps/animatrona/package.json`) добавлен явный вызов
+`node ../../node_modules/ntsuspend/install.cjs` на Windows — тем же путём, что уже
+используется в `electron-builder.yml` для `extraResources` (`../../node_modules/.bun/ntsuspend@1.0.2/...`
+резолвится через симлинк `node_modules/ntsuspend`, два уровня вверх от `apps/animatrona`).
+Проверено воспроизводимо: удалён скачанный `.node`-файл → `require('ntsuspend')` падает с той же
+ошибкой → прогнан обновлённый `postinstall:dev`-шаг → `require('ntsuspend')` снова успешен headless
+(`node -e "require('ntsuspend')"`, без Electron).
+
+**Не сделано:** сама фича паузы (клик в UI → реальная приостановка GPU-энкода) не проверялась в
+живом приложении — GUI в сендбоксе Claude Code недоступен (см. `electron.md`). Проверить при
+следующем живом запуске: индикатор доступности паузы в UI, реальный suspend/resume процесса
+ffmpeg через диспетчер задач.
+
 ## Декомпозиция `import-service.ts` по фазам пайплайна (2026-08-09)
 
 Чистый рефакторинг, без изменения поведения. Повод: файл разросся до ~1650 строк и держал в
