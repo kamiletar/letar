@@ -42,4 +42,3 @@ nx lint animatrona-franchise-graph
 
 ---
 
-**Версия:** 0.1.0

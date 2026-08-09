@@ -23,4 +23,3 @@ import { isSupportedLocale, numberToOrdinal, numberToWords } from '@letar/number
 
 ---
 
-**Версия:** 0.1.0

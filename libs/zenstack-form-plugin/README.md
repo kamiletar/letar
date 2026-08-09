@@ -326,4 +326,4 @@ MCP сервер [`@letar/form-mcp`](../form-mcp/README.md) предоставл
 
 ## Версия
 
-v2.1.0
+Версия — в [package.json](package.json) и [CHANGELOG.md](CHANGELOG.md).

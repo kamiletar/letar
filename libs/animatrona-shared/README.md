@@ -46,4 +46,3 @@ nx lint animatrona-shared
 
 ---
 
-**Версия:** 0.2.1

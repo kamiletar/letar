@@ -16,4 +16,3 @@ import { AnimeHeroBase, EpisodeCardBase, PosterLightbox } from '@letar/animatron
 
 ---
 
-**Версия:** 0.1.0

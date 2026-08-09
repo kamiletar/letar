@@ -164,7 +164,3 @@ export const RegisterSchema = withPasswordConfirmation(
   }),
 ).strip()
 ```
-
-## Версия
-
-- **0.1.0** - Первый релиз с базовыми схемами валидации

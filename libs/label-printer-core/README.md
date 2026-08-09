@@ -179,4 +179,3 @@ nx lint label-printer-core
 
 ---
 
-**Версия:** 0.1.0

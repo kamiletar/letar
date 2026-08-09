@@ -107,4 +107,3 @@ nx lint contract-generator
 
 ---
 
-**Версия:** 0.2.0

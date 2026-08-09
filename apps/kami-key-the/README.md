@@ -2,7 +2,6 @@
 
 Системная утилита для ввода типографских символов через AltGr (ремейк TypeItEasy). Работает в фоновом режиме, живёт в трее. Node.js + TypeScript, без Electron.
 
-> **Текущая версия:** 1.2.3
 > **Технологический стек:** Node.js, TypeScript, keysender, systray2, esbuild
 
 ---

@@ -66,4 +66,4 @@ docker-compose -f apps/animatrona-landing/docker-compose.production.yml up -d
 
 ---
 
-**Версия:** 0.2.0 | **Последнее обновление:** 2026-01-10
+**Последнее обновление:** 2026-01-10

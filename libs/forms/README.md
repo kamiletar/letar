@@ -442,5 +442,4 @@ import { FieldString, FieldTextarea } from '@letar/forms/fields/text'
 
 ---
 
-**Версия:** 1.3.0
 **Последнее обновление:** 2026-04-10

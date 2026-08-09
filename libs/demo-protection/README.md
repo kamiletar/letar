@@ -16,4 +16,3 @@ import { checkRateLimit, checkRecordLimit, getClientIp } from '@letar/demo-prote
 
 ---
 
-**Версия:** 0.1.0
