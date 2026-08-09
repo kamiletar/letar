@@ -1,6 +1,6 @@
 {
   "name": "@letar/zenstack-form-plugin",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "ZenStack plugin for generating Zod schemas with UI metadata from schema.zmodel",
   "type": "module",
   "main": "./dist/index.js",
