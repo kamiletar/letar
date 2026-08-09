@@ -1003,7 +1003,54 @@ React, а React-адаптер зависит от абстракций ядра
       - **🎉 Фаза 7.1 полностью завершена.** Итог: `libs/forms-core` — самостоятельный
       dependency-free пакет с 15 subpath-экспортами + типовым UIKit-контрактом, готовый фундамент
       под 7.3 (shadcn-скин) и 7.8 (Vue-пруф).
-- [ ] **7.2 Standalone-проверка** — `npm i @letar/forms` в чистом Vite/Next вне монорепо (workspace-зависимости).
+- [x] **7.2 Standalone-проверка** — ✅ диагностика проведена 2026-08-09 (forms-dev), **найдена
+      реальная проблема, не починено — решение за координатором/Ками**.
+      - **Метод:** `nx run "@letar/forms:build:npm"` → `npm pack` дистрибутив → чистый scratch-проект
+      ВНЕ монорепо (`C:\Users\Kami\...\Temp\...\scratchpad\forms-standalone-check`, свой
+      `node_modules`, без `@letar/source` condition) → `npm install <tarball>` → минимальная форма
+      с `Form.Field.Phone` (тянет `@letar/forms-core/phone`) → `tsc --noEmit` + рантайм-резолв
+      через `node --input-type=module -e "import('@letar/forms/fields/specialized')"`.
+      - **Рантайм (JS) — работает из коробки.** `noExternal: ['@letar/forms-core']` в
+      `tsup.config.ts` инлайнит весь `forms-core` внутрь бандла `forms` — в `dist/*.js` нет ни
+      одного нерезолвленного `import`/`require` на `@letar/forms-core` (только оставленные
+      esbuild source-комментарии с путём). ESM-резолв subpath `@letar/forms/fields/specialized`
+      через обычный `node_modules` подтверждён живым импортом в Node — экспорты (`FieldPhone` и
+      другие) приходят корректно.
+      - **🔴 `.d.ts`-генерация для публикации СЛОМАНА — до этой сессии, не мной внесено.**
+      `nx run "@letar/forms:build:npm"` падает на шаге `tsc --project tsconfig.publish.json`:
+      80 ошибок TS6059 (`forms-core` не под `rootDir: "src"` пакета `forms`) + TS6307 (файлы
+      `forms-core` не входят в `include` `tsconfig.publish.json`). Из-за этого `tsc`-шаг падает
+      ДО того как отработают `cp package.publish.json dist/package.json` и остальные —
+      `dist/package.json`/`README`/`LICENSE` тоже не создаются при обычном прогоне таргета.
+      Итог — если бы кто-то опубликовал `@letar/forms` на npm прямо сейчас через
+      `nx run "@letar/forms:build:npm" && npm publish`, публикация вообще не прошла бы (build
+      падает с ненулевым кодом); при принудительном/частичном прогоне ушёл бы пакет без единого
+      `.d.ts` — TS-потребитель получил бы `TS7016: Could not find a declaration file`, что и
+      воспроизведено в scratch-проекте (единственная оставшаяся ошибка `tsc --noEmit` после того,
+      как я вручную дособрал `dist/` через `cp`-шаги и добавила `@types/react` в сам scratch,
+      чтобы не путать чужую ошибку со своей).
+      - **Корень:** `tsconfig.publish.json` пакета `forms` не обновлялся вместе с ростом
+      subpath-экспортов `forms-core` за Фазу 7.1 — в `paths` всего 8 записей (`validators/ru`,
+      `schema`, `server-errors`, `utils`, `security`, `offline`, `captcha`, `analytics`), а
+      `forms-core` сейчас отдаёт 15 (плюс `credit-card`/`phone`/`table`/`address`/`i18n`/`uikit`
+      появились уже после того, как `tsconfig.publish.json` в последний раз правили). `rootDir`
+      жёстко `"src"` — то же семейство TS6059/TS6307, что задокументировано в
+      `.claude/docs/libs.md` для приложений-потребителей библиотек, только здесь внутри самой
+      публикующей библиотеки.
+      - **НЕ чинила** — по инструкции координатора это архитектурный вопрос (два варианта решения:
+      (а) `rootDir` пакета `forms` расширить до общего корня + догнать `paths` до всех 15
+      подпутей, либо (б) раз `forms-core` физически инлайнится и не существует для потребителя
+      как отдельный пакет — можно генерировать `.d.ts` иначе, например через `dts: true` в самом
+      `tsup` вместо отдельного `tsc`-прохода, что заодно избавит от рассинхрона `paths`). Решение
+      — за координатором/Ками.
+      - **Отдельно:** `forms-core` **не имеет и не должен получить свой `build:npm`** — комментарий
+      в `tsup.config.ts` («`@letar/forms-core` — не npm-пакет, Фаза 7.1, ядро без публикации —
+      вбандливается внутрь») говорит, что архитектурно пакет задуман только как internal-зависимость
+      `forms` (и будущих `forms-shadcn`/`forms-vue`), не как самостоятельный npm-пакет. Заводить
+      для него `build:npm`/`publish:npm` «по аналогии» с `forms`, как буквально просил первый
+      пункт задачи, значило бы противоречить уже принятому архитектурному решению — не стала
+      этого делать, зафиксировала расхождение здесь.
+      - Полный отчёт — в тред `forms-phase7-1-core-split` (agent-mail).
 - [ ] **7.3 `@letar/forms-shadcn` beta** — 15–20 ходовых полей (Input/Textarea/Number/Select/Checkbox/Radio/Date).
       Покрывает ~80% форм. Тяжёлые (RichText/Table/Signature/Combobox) — «Chakra-only пока».
 - [ ] **7.4 Замер трафика** → решение: доносить сложные поля или нет.
