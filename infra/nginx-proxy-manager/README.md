@@ -228,32 +228,14 @@ proxy_set_header Connection "upgrade";
 proxy_read_timeout 86400s;
 ```
 
-### IPFS Gateway (proxy_cache)
+### IPFS Gateway (proxy_cache) — ⛔ УСТАРЕЛО, схема не существует в проде
 
-Кэширует мелкие файлы (шрифты, JSON, субтитры ≤ 5MB), видео (200MB-2GB) только проксирует.
-
-**http_top.conf** (в `/data/nginx/custom/`):
-
-```nginx
-proxy_cache_path /data/nginx/ipfs-cache levels=1:2 keys_zone=ipfs:10m max_size=2g inactive=30d use_temp_path=off;
-```
-
-**Advanced tab** для `gateway.letar.best`:
-
-```nginx
-proxy_cache ipfs;
-proxy_cache_valid 200 206 365d;
-proxy_cache_key $uri;
-proxy_buffering on;
-proxy_buffer_size 128k;
-proxy_buffers 8 256k;
-proxy_busy_buffers_size 512k;
-proxy_max_temp_file_size 5m;
-proxy_read_timeout 120s;
-client_max_body_size 0;
-add_header Cache-Control "public, max-age=31536000, immutable" always;
-add_header X-Cache-Status $upstream_cache_status always;
-```
+Этот блок описывал кеш на s2 (порог по размеру `≤ 5MB`), который был снесён вместе с
+`animatrona-gateway` ещё в июне 2026 — сама эта дока и была той «несуществующей схемой», из-за
+которой заведён [PLAN-INFRA.md §57](/PLAN-INFRA.md). Актуальное решение: фильтр по Content-Type
+(не по размеру), видео/аудио не кешируются вообще, прокси едет на **mail-сервер**, не на NPM —
+конфиг и чеклист деплоя в [infra/gateway-cache/](/infra/gateway-cache/README.md). Блок ниже
+оставлен зачёркнутым для истории до момента, пока `gateway-cache` не заменит его в проде.
 
 ### IMOT (IP Whitelist)
 

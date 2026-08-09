@@ -1,0 +1,48 @@
+# Кеширующий прокси gateway.letar.best — PLAN-INFRA.md §57.
+#
+# Живёт на mail-сервере (31.56.180.161), отдельно от NPM там же (`/root/nginx-proxy-manager`,
+# не в git — см. §60). Это НЕ Traefik-приложение: mail ещё не переехал с NPM (§48 M3 — только s2,
+# mail вообще не в его скоупе на 2026-08-08). NPM и этот compose — разные проекты, разные Docker
+# сети, поэтому NPM достаёт досюда через хост-гейтвей `172.17.0.1:<порт>` — тот же приём, что NPM
+# на s3 использует для staging-приложений (infra/nginx-proxy-manager/README.md).
+#
+# ⛔ ПЕРЕД ПЕРВЫМ `up -d` НА СЕРВЕРЕ:
+#   1. Проверить порт свободен: `ss -tlnp | grep 8098` (заменить при конфликте, поправить и здесь,
+#      и в NPM Forward Port, и в infra/firewall/ports.mail.env).
+#   2. Добавить 8098 в TCP_PORTS `infra/firewall/ports.mail.env` — DOCKER-USER фильтрует
+#      FORWARD-трафик к опубликованным портам Docker независимо от ufw (.claude/docs/firewall.md),
+#      без этого хост-гейтвей от NPM до контейнера будет молча резаться.
+#   3. Завести Proxy Host в NPM на mail (`http://31.56.180.161:81`) — `gateway.letar.best` →
+#      Forward Host `172.17.0.1`, Forward Port `8098`, без SSL до выпуска сертификата отдельным
+#      шагом (см. README рядом).
+#
+# ⛔ DNS `gateway.letar.best` → mail переключать ТОЛЬКО после того, как это поднято и проверено
+# СНАРУЖИ (не с рабочей машины — под TUN-VPN резолвер врёт, см. electron-net-fetch-tun-vpn.md).
+# Раньше уже ловили именно эту поломку — см. «Инцидент 2026-08-07» в §57.
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: gateway-cache-nginx
+    ports:
+      # 0.0.0.0 намеренно — NPM (другой compose-проект, другая сеть) достаёт по хост-гейтвею,
+      # не по имени контейнера. Публичный доступ к самому порту закрывается DOCKER-USER
+      # (см. чеклист выше), а не публикацией на 127.0.0.1.
+      - '8098:80'
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - gateway-cache-data:/var/cache/nginx/ipfs
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1/nginx-health']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+
+volumes:
+  gateway-cache-data:
