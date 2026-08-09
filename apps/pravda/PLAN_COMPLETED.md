@@ -135,4 +135,143 @@ locator.getAttribute('href')` перед `.slice()`. Коммит `6d4833aa`.
 
 ---
 
-**Последнее обновление:** 2026-07-28
+## Фазы 1–7 — полностью выполненные разделы PLAN.md
+
+> Перенесено из PLAN.md: 2026-08-09
+
+### Фаза 1: Инициализация
+
+- [x] Создать проект Next.js
+- [x] Настроить project.json (format, oxlint, typecheck:tsgo)
+- [x] Создать документацию (README, PLAN, CHANGELOG)
+- [x] Настроить Chakra UI Provider
+- [x] Настроить базовый layout
+- [x] Настроить поддержку тёмной/светлой темы
+- [x] Настроить MDX
+- [x] Настроить Vitest для unit-тестов
+- [x] Создать кастомную систему темы (tokens, semanticTokens)
+
+### Фаза 2: Сайт законодательства
+
+- [x] Создать MDX компоненты для законов (Article, Section, Chapter, LawTable, CrossRef, Quote, Penalty)
+- [x] Создать DocsLayout с header, sidebar, main content, TOC
+- [x] Создать Sidebar навигацию с 22 документами (4 категории)
+- [x] Создать Table of Contents (sticky справа)
+- [x] Создать Breadcrumbs для навигации
+- [x] Создать главную страницу с hero и карточками категорий
+- [x] Создать страницы категорий (Кодексы, Уставы, Регламенты)
+- [x] Конвертировать документы в MDX (3 документа-образца)
+- [x] Создать скрипт автоматической конвертации документов
+- [x] Создать поиск с Fuse.js (fuzzy search)
+- [x] Создать страницу поиска с UI
+- [x] ~~Настроить русские URL~~ Мигрировать на ASCII URL (из-за бага Next.js #10084)
+
+Структура роутов:
+
+```
+app/
+├── page.tsx                    # Главная страница
+├── search/page.tsx             # Страница поиска
+├── bookmarks/page.tsx          # Страница закладок
+└── (docs)/
+    ├── layout.tsx              # DocsLayout
+    ├── constitution/page.mdx
+    ├── pravda/page.mdx
+    ├── codes/
+    │   ├── page.tsx            # Список кодексов
+    │   ├── tax/page.mdx
+    │   ├── criminal/page.mdx
+    │   ├── family/page.mdx
+    │   ├── labor/page.mdx
+    │   ├── digital/page.mdx
+    │   ├── medical/page.mdx
+    │   ├── ordeals/page.mdx
+    │   ├── criminal-procedure/page.mdx
+    │   ├── penal/page.mdx
+    │   ├── construction/page.mdx
+    │   └── state-secrets/page.mdx
+    ├── statutes/
+    │   ├── page.tsx            # Список уставов
+    │   ├── church/page.mdx
+    │   ├── trade/page.mdx
+    │   ├── military/page.mdx
+    │   ├── education/page.mdx
+    │   ├── road/page.mdx
+    │   ├── postal/page.mdx
+    │   └── fair/page.mdx
+    └── regulations/
+        ├── page.tsx            # Список регламентов
+        ├── duel/page.mdx
+        ├── veche/page.mdx
+        └── volost/page.mdx
+```
+
+### Фаза 3: Расширение контента
+
+- [x] Конвертировать все 22 документа в MDX (скрипт convert-docs.ts)
+- [x] Расширить поисковый индекс на все статьи (скрипт generate-search-index.ts, 1337 статей)
+- [x] Добавить полнотекстовый поиск (Fuse.js fuzzy search)
+- [x] Добавить подсветку найденных фрагментов (компонент Highlight)
+
+### Фаза 4: Оптимизация и качество
+
+Задачи v0.9.0:
+
+- [x] Тесты для хуков (useSearch, useBookmarks)
+- [x] Единый реестр документов lib/documents.ts
+- [x] Константы lib/constants.ts
+- [x] Компонент HomeLink (DRY)
+- [x] Dynamic import для search-index (bundle size)
+- [x] Объединение useEffect в toc.tsx
+- [x] Server Components (убрать 'use client' где не нужно)
+- [x] Accessibility roles
+
+Задачи v1.0.0:
+
+- [x] useDebounce хук для оптимизации поиска (300ms)
+- [x] React.memo мемоизация (NavItem, NavSection, Highlight, BookmarkButton)
+- [x] SidebarNav compound component (DRY)
+- [x] requestAnimationFrame throttle для scroll в toc.tsx
+- [x] aria-current и aria-expanded для accessibility
+- [x] Footer использует navData (DRY)
+- [x] Тесты для isPending состояния
+
+### Фаза 5: SEO оптимизация
+
+Задачи v1.5.0:
+
+- [x] robots.ts — инструкции для поисковых роботов
+- [x] sitemap.ts — карта сайта (22 документа + категории)
+- [x] metadataBase и title template в root layout
+- [x] OpenGraph и Twitter Cards теги
+- [x] JSON-LD структурированные данные (WebSite, Article, BreadcrumbList)
+- [x] Уникальные title/description для каждого документа
+- [x] OG Image для главной страницы (Edge Runtime)
+- [x] Динамические OG Images через API (22 документа)
+- [x] noindex для служебных страниц (search, bookmarks)
+- [x] SearchAction в JSON-LD для поиска по сайту в Google
+
+### Фаза 6: Перекрёстные ссылки
+
+Задачи v1.6.0:
+
+- [x] Скрипт `convert-cross-refs.ts` для автоматической конвертации
+- [x] Маппинг названий документов → slug (30+ вариантов)
+- [x] Преобразование 36 текстовых ссылок в компонент `CrossRef`
+- [x] Поддержка "см. также" (проп `also`)
+- [x] Якорные ссылки на статьи (`#article-N`)
+- [x] E2E тесты для перекрёстных ссылок (6 тестов)
+
+### Фаза 7: Переименование страны — Русь
+
+Задачи v1.8.0:
+
+- [x] Страна переименована из «Российская Федерация» во всех формах на «Русь» (Конституция, кодексы, уставы, регламенты — 22 документа)
+- [x] Столица перенесена из Москвы в Киев (Конституция, все упоминания в кодексах)
+- [x] Обновлены заголовки, метаданные (SEO), OG Images, manifest.json, header/layout
+- [x] Перегенерирован поисковый индекс (`generate-search-index.ts`)
+- [x] Обновлён e2e-тест навигации под новый текст заголовка
+
+---
+
+**Последнее обновление:** 2026-08-09
