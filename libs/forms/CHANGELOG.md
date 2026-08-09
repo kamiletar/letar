@@ -4,6 +4,43 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.6.0] - 2026-08-09
+
+### Changed
+
+- **Композиционный слой вынесен в `@letar/forms-react` (Фаза 7.3, шаги 3-4).** `createField`,
+  `FieldWrapper`, `FieldErrorBoundary`, контекст формы, `FormGroup`, хуки поля
+  (`useResolvedFieldProps`, `useAsyncFieldValidation`, `useAsyncSearch`, `useDebounce`),
+  React-часть i18n и не зависящие от UI типы (`BaseFieldProps`, `DeclarativeFormContextValue`)
+  переехали в новый пакет — React и TanStack Form там есть, UI-библиотеки нет. `@letar/forms`
+  стал тонким потребителем: связывает слой со своим `chakraUIKit` одной строкой в
+  `form-fields/base/primitives.ts`.
+- **Публичный API не изменился.** Все старые пути импорта работают: на местах переехавших
+  модулей оставлены реэкспорт-шимы, поэтому ни одно из 56 полей не правилось. Проверено на
+  потребителях (`form-develop-app`, `form-docs`, `dashboard`, `form-example`, `archetest`,
+  `grandslamcup`, `mandala`, `kami`, `auth-hub`, `animatrona*`, `label-printer-desktop` и шесть
+  приватных приложений) — `typecheck:tsgo` зелёный.
+- **Ядро не зависит от нового слоя.** `type:core` теперь не зависит ни от `type:ui`, ни от
+  `type:core-react`; у самого `forms-react` своя линт-граница против UI-библиотек. Обе проверены
+  негативной пробой.
+
+### Fixed
+
+- **Потребители получили полный набор `paths` на подпути `@letar/forms-core`.** Было прописано
+  9 подпутей из 15 — недостающие (`/uikit`, `/i18n`, `/address`, `/table`, `/phone`,
+  `/credit-card`) всплыли сразу, как только композиционный слой начал их импортировать.
+  Дописаны во все 17 приложений-потребителей, чтобы следующее такое использование не ломало их
+  заново.
+
+### Known issues
+
+- **Публикуемые `.d.ts` ссылаются на внутренние `@letar/*`.** `noExternal` в `tsup.config.ts`
+  инлайнит внутренние пакеты только в JS-бандл; декларации собирает отдельный проход
+  (`rollup-plugin-dts`), и в `dist/*.d.ts` остаются импорты `@letar/forms-core/...`, которых в
+  npm нет. Дефект **не** связан с `forms-react` — `forms-core` торчит там же с Фазы 7.1;
+  попытка `dts: { resolve: [/^@letar\//] }` числа упоминаний не изменила. Сборка при этом
+  успешна, ломается только установка опубликованного пакета.
+
 ## [1.5.0] - 2026-08-09
 
 ### Changed

@@ -17,7 +17,7 @@ function Boom(): ReactElement {
 describe('FieldErrorBoundary', () => {
   beforeEach(() => {
     // React логирует пойманную ошибку в console.error — глушим, чтобы не шуметь в выводе тестов
-    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
   })
 
   afterEach(() => {

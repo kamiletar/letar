@@ -1,31 +1,24 @@
 'use client'
 
+import type {
+  AppFormApi,
+  DeclarativeFormContextValue,
+  FormApiState,
+  FormOfflineState,
+  ValidateOn,
+  ZodSchema,
+} from '@letar/forms-react'
 import type { ReactNode } from 'react'
-import type { $ZodType } from 'zod/v4/core'
 import type { FormOfflineConfig } from '../../offline'
 import type { FormPersistenceConfig } from '../form-persistence'
 import type { RateLimitConfig } from '../security'
 
 /**
- * Form API type returned by useAppForm
- * Contains Field, Subscribe and other components
- *
- * Note: Uses any because createFormHook adds
- * additional methods (Field, Subscribe, etc.) that are not part of
- * the base FormApi type from @tanstack/react-form
+ * Типы формы, не зависящие от UI-библиотеки, переехали в `@letar/forms-react` (Фаза 7.3) —
+ * их одинаково потребляют и Chakra-скин, и shadcn-скин. Здесь остаётся только реэкспорт,
+ * чтобы относительные импорты по всей `libs/forms` не переписывать.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type AppFormApi = any
-
-/**
- * Base Zod schema type (Zod v4)
- */
-export type ZodSchema = $ZodType
-
-/**
- * Form validation modes
- */
-export type ValidateOn = 'change' | 'blur' | 'submit' | 'mount'
+export type { AppFormApi, DeclarativeFormContextValue, FormApiState, FormOfflineState, ValidateOn, ZodSchema }
 
 /**
  * API доступное в onFieldChange callback.
@@ -84,57 +77,6 @@ export interface FormMiddleware<TData = unknown> {
    * Called on submission error.
    */
   onError?: (error: Error) => void | Promise<void>
-}
-
-/**
- * API state available in form context
- */
-export interface FormApiState {
-  /** Form is in edit mode (has id) */
-  isEditMode: boolean
-  /** Data is loading */
-  isLoading: boolean
-  /** Mutation is in progress */
-  isMutating: boolean
-  /** Query error (TanStack Query error) */
-  error: Error | null
-  /** Mutation error (create/update) */
-  mutationError: Error | null
-}
-
-/**
- * Offline state available in form context
- */
-export interface FormOfflineState {
-  /** Form is in offline mode */
-  isOffline: boolean
-  /** Number of pending actions in sync queue */
-  pendingCount: number
-  /** Sync queue is being processed */
-  isProcessing: boolean
-  /** Clear persistence data (called after successful sync) */
-  clearPersistence?: () => void
-}
-
-/**
- * Declarative form context value
- */
-export interface DeclarativeFormContextValue {
-  form: AppFormApi
-  /** Zod schema for extracting field metadata */
-  schema?: ZodSchema
-  /** Index for primitive arrays (tags: string[]) */
-  primitiveArrayIndex?: number
-  /** API state (only when using api prop) */
-  apiState?: FormApiState
-  /** Offline state (only when using offline prop) */
-  offlineState?: FormOfflineState
-  /** Globally disable all form fields */
-  disabled?: boolean
-  /** Global read-only mode for all fields */
-  readOnly?: boolean
-  /** Address suggestion provider (set via createForm or Form props) */
-  addressProvider?: import('../form-fields/specialized/providers').AddressProvider
 }
 
 /**

@@ -1,16 +1,15 @@
-import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { createElement } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { z } from 'zod/v4'
-import { DeclarativeFormContext } from '../../form-context'
-import type { DeclarativeFormContextValue } from '../../types'
+import { DeclarativeFormContext } from '../context/form-context'
+import type { DeclarativeFormContextValue } from '../types'
 import { useResolvedFieldProps } from './use-resolved-field-props'
 
-// Обёртка для тестов с Chakra UI
-const TestWrapper = ({ children }: { children: ReactNode }) =>
-  createElement(ChakraProvider, { value: defaultSystem }, children)
+// Обёртки `ChakraProvider` здесь больше нет: хук ничего не берёт из UI-библиотеки, она стояла
+// в исходном спеке по инерции от соседних тестов на компоненты. Если тесты зелёные без неё —
+// это и есть подтверждение, что зависимости не было.
 
 // Создаём мок контекста формы
 function createMockFormContext(
@@ -29,7 +28,7 @@ function createMockFormContext(
 // Обёртка с контекстом формы
 function createContextWrapper(context: DeclarativeFormContextValue) {
   return ({ children }: { children: ReactNode }) =>
-    createElement(TestWrapper, null, createElement(DeclarativeFormContext.Provider, { value: context }, children))
+    createElement(DeclarativeFormContext.Provider, { value: context }, children)
 }
 
 describe('useResolvedFieldProps', () => {

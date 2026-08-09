@@ -1121,17 +1121,43 @@ React, а React-адаптер зависит от абстракций ядра
       `Select`/`Combobox`/`Listbox`. Примитивом UIKit это не подменяется: у shadcn такой функции
       нет вовсе. Чистая группировка вынесена в `@letar/forms-core/uikit`
       (`groupOptions`/`hasGroups`/`getOptionLabel`), построение коллекции осталось адаптеру.
-      - 🔴 **Шаги 3-5 заблокированы вопросом размещения React-слоя.** Инструкция «перенести
-      `createField`/`createForm`/form-context в `forms-core`» невыполнима как написана: это React
-      (хуки, JSX, `@tanstack/react-form`), а `forms-core` защищён от React двумя независимыми
-      механизмами (`depConstraints` для `type:core` + `no-restricted-imports` на
-      `**/forms-core/src/**/*.ts`), поставленными намеренно по решению Ками 2026-07-08
-      («не импортирует ни один фреймворк — а точка»). Предложен третий пакет
-      **`@letar/forms-react`** (React + TanStack Form, UI-library-free) между ядром и скинами —
-      ждёт подтверждения координатора/Ками. Тред `forms-phase7-1-core-split`.
-      - Осталось вне контракта до этого решения: `create-field.tsx` (дефолтный
-      `FieldError`-хелпер на `Field.HelperText`/`ErrorText`/`Spinner`), `field-tooltip.tsx`,
-      `selection-field-label.tsx`.
+      - ✅ **Шаги 3-4 закрыты** — v1.6.0, новый пакет `@letar/forms-react` v0.1.0. Блокер снят
+      решением Ками 2026-08-09: заводим третий пакет, правило «`forms-core` не импортирует ни
+      один фреймворк» (2026-07-08) остаётся неприкосновенным. Инструкция «перенести в
+      `forms-core`» была невыполнима как написана — это React (хуки, JSX,
+      `@tanstack/react-form`), а ядро защищено двумя независимыми механизмами.
+      - **Что переехало:** `createField`, `FieldWrapper`, `FieldErrorBoundary`, контекст формы,
+      `FormGroup`, хуки поля (`useResolvedFieldProps`, `useDeclarativeField`,
+      `useAsyncFieldValidation`, `useAsyncSearch`, `useDebounce`), `field-utils`,
+      `autocomplete-map`, React-часть i18n, UI-независимые типы (`BaseFieldProps`,
+      `DeclarativeFormContextValue`, `ResolvedFieldProps`).
+      - **Что осталось в скине — намеренно:** `uikit-chakra.tsx`, `field-label.tsx`,
+      `field-tooltip.tsx`, `selection-field-label.tsx`, `field-error.tsx` (вынесен из
+      `create-field.tsx`), `use-grouped-options.ts`, `form-group-list-sortable.tsx`. Это Chakra-код,
+      он и есть реализация контракта — в UI-library-free пакет он физически не может переехать,
+      иначе новая линт-граница упала бы на первом же импорте.
+      - **Механизм связывания:** `createFieldPrimitives(uikit)` — фабрика, вызываемая один раз на
+      уровне модуля скина (`form-fields/base/primitives.ts`). Не контекст и не проп: компоненты
+      должны быть стабильны по ссылке, иначе React размонтирует поддерево поля на каждой
+      перерисовке формы.
+      - **Ни одно из 56 полей не правилось** — на местах переехавших модулей стоят
+      реэкспорт-шимы. Публичный API `@letar/forms` не изменился.
+      - **Проверки:** 678 тестов в `forms` + 76 в `forms-react` (было 754 в одном — сходится
+      файл-в-файл); `typecheck:tsgo` зелёный на 20 потребителях, включая шесть приватных;
+      обе линт-границы `forms-react` (тег + `no-restricted-imports`) подтверждены негативной
+      пробой; живая проверка в Chromium — рендер `fields-demo`, валидация с `data-invalid` +
+      `error-text`, async-путь (`Username занят`).
+      - **Побочная находка — техдолг 7.1.** Потребители держали 9 подпутей `forms-core` из 15.
+      Всплыло сразу, как только композиционный слой начал импортировать `/uikit`, `/i18n`,
+      `/address`. Дописан полный набор во все 17 приложений, чтобы следующее такое использование
+      не ломало их заново.
+      - ⚠️ **Открытый дефект публикации (не блокирует 7.3).** `noExternal` в `tsup.config.ts`
+      инлайнит внутренние `@letar/*` только в JS; декларации собирает `rollup-plugin-dts`, и в
+      `dist/*.d.ts` остаются импорты `@letar/forms-core/...`, которых в npm нет. **Это не регресс
+      от `forms-react`** — `forms-core` торчит там же с Фазы 7.1, то есть 7.2 закрыла проход
+      сборки, но не проверила содержимое `.d.ts`. Попытка `dts: { resolve: [/^@letar\//] }`
+      результата не дала. Проверять только установкой в scratch-проект: сборка при дефекте
+      успешна.
 - [ ] **7.4 Замер трафика** → решение: доносить сложные поля или нет.
 - [ ] **7.5 Docs-сайт на отдельном домене** + живые демо. SEO под `zod forms react`, `prisma form generator`.
 - [ ] **7.6 `llms.txt` + усиление MCP** — недоиспользованный козырь №1 (дёшево, уникально).

@@ -93,6 +93,15 @@ export default [
             // `**/forms-core/src/**/*.ts` ниже с `no-restricted-imports`.
             {
               sourceTag: 'type:core',
+              notDependOnLibsWithTags: ['type:ui', 'type:core-react'],
+            },
+            // Фаза 7.3 (@letar/forms-react): композиционный слой форм между ядром и скинами.
+            // Знает React и TanStack Form, но не знает ни одной UI-библиотеки — конкретные
+            // примитивы приходят снаружи через UIKit-контракт. Тот же приём, что и строкой
+            // выше: npm-импорты (@chakra-ui и т.п.) это правило не ловит, для них —
+            // блок `**/forms-react/src/**` с `no-restricted-imports` ниже.
+            {
+              sourceTag: 'type:core-react',
               notDependOnLibsWithTags: ['type:ui'],
             },
           ],
@@ -165,6 +174,36 @@ export default [
             },
           ],
           // allowTypeImports намеренно не ставим: ядро должно быть чистым и по типам тоже.
+        },
+      ],
+    },
+  },
+  // === @letar/forms-react — UI-library-free композиционный слой (Фаза 7.3) ===
+  // Отличие от `forms-core` выше: React и TanStack Form здесь РАЗРЕШЕНЫ — это React-пакет.
+  // Запрещены конкретные UI-библиотеки: всё, что рисует, приходит через UIKit-контракт
+  // параметром, иначе Chakra снова окажется зашита в сборку поля и второй скин (shadcn)
+  // будет вынужден дублировать композиционный слой вместо переиспользования.
+  // ⚠️ Глоб с `**/` по той же причине, что и `src/server/` выше — см. комментарий там.
+  {
+    files: ['**/forms-react/src/**/*.ts', '**/forms-react/src/**/*.tsx'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@chakra-ui/*', '@ark-ui/*', '@radix-ui/*', 'react-icons/*', 'lucide-react'],
+              message:
+                '@letar/forms-react не знает ни одной UI-библиотеки — примитивы приходят через UIKit-контракт из @letar/forms-core/uikit. Реализация примитива — дело скина (@letar/forms, @letar/forms-shadcn).',
+            },
+            {
+              group: ['@letar/forms', '@letar/forms/*', '@letar/forms-shadcn', '@letar/forms-shadcn/*'],
+              message:
+                'Зависимость идёт от скина к композиционному слою, не наоборот (DIP). Нужное из скина — принимай параметром.',
+            },
+          ],
+          // allowTypeImports не ставим: тип из Chakra в сигнатуре — та же протечка границы,
+          // просто отложенная до момента, когда её кто-то попробует реализовать на shadcn.
         },
       ],
     },

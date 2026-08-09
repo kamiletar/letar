@@ -19,6 +19,7 @@
     "ignoreDeprecations": "6.0",
     "paths": {
       "@letar/forms-core": ["../forms-core/src/index.ts"],
+      "@letar/forms-react": ["../forms-react/src/index.ts"],
       "@letar/forms-core/validators/ru": ["../forms-core/src/lib/validators/ru/index.ts"],
       "@letar/forms-core/schema": ["../forms-core/src/lib/schema/index.ts"],
       "@letar/forms-core/server-errors": ["../forms-core/src/lib/server-errors/index.ts"],

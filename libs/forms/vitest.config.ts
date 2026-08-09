@@ -44,6 +44,10 @@ export default defineConfig({
   resolve: {
     alias: {
       ...formsCoreAlias,
+      // `@letar/forms-react` обязан стоять ДО `@letar/forms`: alias матчится по префиксу,
+      // первый подошедший выигрывает — иначе короткий ключ перехватит и композиционный слой
+      // отрезолвится внутрь скина. Та же грабля, что и с bare-ключом `forms-core` выше.
+      '@letar/forms-react': resolve(__dirname, '../forms-react/src'),
       '@letar/forms': resolve(__dirname, './src'),
     },
   },

@@ -17,11 +17,10 @@
  * ```
  */
 
-export { FormI18nProvider, getLocalizedValue, useFormI18n } from './form-i18n-provider'
-export type { TranslateFunction, TranslateParams } from './form-i18n-provider'
-
-export { useLocalizedOptions } from './use-localized-options'
-export type { LocalizableOption } from './use-localized-options'
+// React-часть i18n переехала в `@letar/forms-react` (Фаза 7.3) — она нужна и Chakra-скину,
+// и shadcn-скину одинаково. Словари и error map остались в `@letar/forms-core/i18n`.
+export { FormI18nProvider, getLocalizedValue, useFormI18n, useLocalizedOptions } from '@letar/forms-react'
+export type { LocalizableOption, TranslateFunction, TranslateParams } from '@letar/forms-react'
 
 export { createFormErrorMap, SIZE_ORIGINS, STRING_FORMATS, ZOD_ERROR_CODES } from './create-form-error-map'
 export type { FormErrorMapConfig, ZodErrorCode } from './create-form-error-map'

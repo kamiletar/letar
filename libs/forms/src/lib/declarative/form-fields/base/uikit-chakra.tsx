@@ -16,7 +16,7 @@ import {
 import type { UIKitCorePrimitives, UIKitExtendedPrimitives, UIKitTone } from '@letar/forms-core/uikit'
 import type { ReactElement, ReactNode } from 'react'
 import { useMemo } from 'react'
-import { FieldError } from './create-field'
+import { FieldError } from './field-error'
 import { FieldLabel } from './field-label'
 import { FieldTooltip } from './field-tooltip'
 

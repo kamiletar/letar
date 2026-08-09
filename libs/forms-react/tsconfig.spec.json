@@ -1,0 +1,32 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/spec",
+    "types": ["vitest/globals", "node"],
+    "rootDir": ".",
+    "jsx": "react-jsx",
+    "paths": {
+      "@letar/forms-core": ["../../libs/forms-core/src/index.ts"],
+      "@letar/forms-core/validators/ru": ["../../libs/forms-core/src/lib/validators/ru/index.ts"],
+      "@letar/forms-core/schema": ["../../libs/forms-core/src/lib/schema/index.ts"],
+      "@letar/forms-core/server-errors": ["../../libs/forms-core/src/lib/server-errors/index.ts"],
+      "@letar/forms-core/utils": ["../../libs/forms-core/src/lib/utils/index.ts"],
+      "@letar/forms-core/security": ["../../libs/forms-core/src/lib/security/index.ts"],
+      "@letar/forms-core/offline": ["../../libs/forms-core/src/lib/offline/index.ts"],
+      "@letar/forms-core/captcha": ["../../libs/forms-core/src/lib/captcha/index.ts"],
+      "@letar/forms-core/analytics": ["../../libs/forms-core/src/lib/analytics/index.ts"],
+      "@letar/forms-core/credit-card": ["../../libs/forms-core/src/lib/credit-card/index.ts"],
+      "@letar/forms-core/phone": ["../../libs/forms-core/src/lib/phone/index.ts"],
+      "@letar/forms-core/table": ["../../libs/forms-core/src/lib/table/index.ts"],
+      "@letar/forms-core/address": ["../../libs/forms-core/src/lib/address/index.ts"],
+      "@letar/forms-core/i18n": ["../../libs/forms-core/src/lib/i18n/index.ts"],
+      "@letar/forms-core/uikit": ["../../libs/forms-core/src/lib/uikit/index.ts"]
+    }
+  },
+  "include": ["vitest.setup.ts", "vitest.config.ts", "src/**/*.ts", "src/**/*.tsx"],
+  "references": [
+    {
+      "path": "../forms-core/tsconfig.lib.json"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@letar/forms-react",
+  "version": "0.1.0",
+  "description": "UI-library-free React composition layer for @letar/forms — createField/createForm/context bound to a UIKit contract",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "@letar/source": "./src/index.ts",
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "@tanstack/react-form": "^1.0.0",
+    "react": "^19.0.0",
+    "zod": "^4.0.0"
+  },
+  "dependencies": {
+    "@letar/forms-core": "workspace:*"
+  }
+}

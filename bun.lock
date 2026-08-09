@@ -448,7 +448,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.31.0",
+      "version": "0.32.0",
     },
     "apps/domwellbes-e2e": {
       "name": "@letar/domwellbes-e2e",
@@ -570,7 +570,7 @@
     },
     "apps/poster-microtext-desktop": {
       "name": "@letar/poster-microtext-desktop",
-      "version": "0.9.5",
+      "version": "0.9.7",
       "dependencies": {
         "detect-libc": "^2.1.2",
         "font-list": "^2.1.0",
@@ -836,7 +836,7 @@
     },
     "libs/form-mcp": {
       "name": "@letar/form-mcp",
-      "version": "0.1.0",
+      "version": "1.0.2",
       "dependencies": {
         "@modelcontextprotocol/sdk": "1.29.0",
         "zod": "4.3.6",
@@ -848,9 +848,10 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "1.4.9",
+      "version": "1.5.0",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
+        "@letar/forms-react": "workspace:*",
         "@tanstack/react-table": "^8.21.3",
         "@tanstack/react-virtual": "^3.13.23",
       },
@@ -868,7 +869,19 @@
     },
     "libs/forms-core": {
       "name": "@letar/forms-core",
+      "version": "0.2.0",
+    },
+    "libs/forms-react": {
+      "name": "@letar/forms-react",
       "version": "0.1.0",
+      "dependencies": {
+        "@letar/forms-core": "workspace:*",
+      },
+      "peerDependencies": {
+        "@tanstack/react-form": "^1.0.0",
+        "react": "^19.0.0",
+        "zod": "^4.0.0",
+      },
     },
     "libs/generators": {
       "name": "@letar/generators",
@@ -1011,7 +1024,7 @@
     },
     "libs/zenstack-form-plugin": {
       "name": "@letar/zenstack-form-plugin",
-      "version": "2.2.0",
+      "version": "2.2.1",
       "peerDependencies": {
         "@zenstackhq/sdk": ">=3.0.0",
       },
@@ -1988,6 +2001,8 @@
     "@letar/forms": ["@letar/forms@workspace:libs/forms"],
 
     "@letar/forms-core": ["@letar/forms-core@workspace:libs/forms-core"],
+
+    "@letar/forms-react": ["@letar/forms-react@workspace:libs/forms-react"],
 
     "@letar/generators": ["@letar/generators@workspace:libs/generators"],
 

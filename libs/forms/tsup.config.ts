@@ -18,6 +18,12 @@ export default defineConfig({
     'validators/ru': 'src/lib/validators/ru/index.ts',
   },
   format: ['esm'],
+  // ⚠️ `noExternal` ниже действует только на JS-бандл. Декларации собирает отдельный проход
+  // (rollup-plugin-dts), и внутренние `@letar/*` остаются в готовых `.d.ts` как импорты
+  // несуществующих в npm пакетов. Попытка `dts: { resolve: [/^@letar\//] }` результата не
+  // дала — числа упоминаний в `dist/*.d.ts` не изменились. Дефект НЕ связан с `forms-react`:
+  // `forms-core` торчит там же и появился ещё в Фазе 7.1. Сборка при этом успешна — ломается
+  // только установка опубликованного пакета, поэтому проверять надо в scratch-проекте.
   dts: true,
   tsconfig: 'tsconfig.publish.json',
   splitting: true,
@@ -25,8 +31,9 @@ export default defineConfig({
   clean: true,
   outDir: 'dist',
   // Все зависимости — external (потребитель устанавливает сам).
-  // @letar/forms-core — не npm-пакет (Фаза 7.1, ядро без публикации) — вбандливается внутрь.
-  noExternal: ['@letar/forms-core'],
+  // @letar/forms-core (Фаза 7.1) и @letar/forms-react (Фаза 7.3) — не npm-пакеты,
+  // внутренние слои @letar/forms — вбандливаются внутрь.
+  noExternal: ['@letar/forms-core', '@letar/forms-react'],
   external: [
     // React
     'react',
