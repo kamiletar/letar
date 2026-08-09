@@ -4,10 +4,6 @@
  * Маппинг серверных ошибок на поля формы.
  * Автоматический детект формата: Prisma, ZenStack, Zod, ActionResult.
  *
- * Реализация вынесена в @letar/forms-core/server-errors (Фаза 7.1, dependency-free
- * ядро) — этот файл только реэкспортирует, публичный путь `@letar/forms/server-errors`
- * не меняется.
- *
  * @example
  * ```tsx
  * import { mapServerErrors, applyServerErrors } from '@letar/forms'
@@ -22,14 +18,14 @@
  * ```
  */
 
-export { applyServerErrors, mapServerErrors } from '@letar/forms-core/server-errors'
+export { applyServerErrors, mapServerErrors } from './map-server-errors'
 export {
   parseActionResultError,
   parseErrorObject,
   parsePrismaError,
   parseZenStackError,
   parseZodFlatError,
-} from '@letar/forms-core/server-errors'
+} from './parsers'
 export type {
   ActionResultError,
   FieldError,
@@ -39,4 +35,4 @@ export type {
   PrismaError,
   ZenStackError,
   ZodFlatError,
-} from '@letar/forms-core/server-errors'
+} from './types'

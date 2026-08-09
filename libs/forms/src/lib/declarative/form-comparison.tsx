@@ -2,8 +2,7 @@
 
 import { Box, HStack, Separator, Text, VStack } from '@chakra-ui/react'
 import type { ReactElement } from 'react'
-import { deepEqual } from '../utils/deep-equal'
-import { safeStringify } from '../utils/safe-stringify'
+import { deepEqual, safeStringify } from '@letar/forms-core/utils'
 
 export interface FormComparisonProps<T extends Record<string, unknown> = Record<string, unknown>> {
   /** Оригинальные данные (до изменений) */

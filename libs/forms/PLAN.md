@@ -916,10 +916,22 @@ React, а React-адаптер зависит от абстракций ядра
       механизм резолва из Этапа 1 (`paths` в ~20 `apps/*/tsconfig.json` + subpath в
       `package.json`) повторён для `@letar/forms-core/schema`. `nx run-many -t typecheck:tsgo
         --all` — те же 5 предсуществующих несвязанных падений, что после Этапа 1, регрессий нет.
-      - Следующий шаг (Этап 3): перенос остальных чистых модулей батчами —
-      `server-errors/`+`utils/`+`security/file-security.ts`, `offline/`+`captcha/`+
-      `analytics/adapters/`, credit-card/format-phone/table-utils/dadata «хвост»,
-      `i18n/create-form-error-map.ts`.
+      - ✅ **Этап 3а закрыт (2026-08-09):** первый батч остальных чистых модулей —
+      `server-errors/` (существующий публичный subpath `@letar/forms/server-errors`,
+      переехал целиком, включая bench), `utils/` (только `deepEqual`+`safeStringify`;
+      `useFormStoreSubscribe` остался в адаптере — React-хук) и
+      `declarative/security/file-security.ts` (только он; `honeypot.tsx`/`rate-limiter.ts`
+      остались — React-хуки). Новые subpath'ы: `@letar/forms-core/server-errors`,
+      `@letar/forms-core/utils`, `@letar/forms-core/security`. **Находка:** 5 файлов в
+      `libs/forms` импортировали `deepEqual`/`safeStringify`/`processFileWithSecurity`
+      напрямую по относительному пути в обход барreля (`../utils/deep-equal` и т.п.) —
+      пришлось поправить каждый отдельно, реэкспорт-шим их не подхватывает. **Находка 2:**
+      `file-security.ts` framework-free (без React/Chakra), но использует DOM API
+      (`Image`, `document`, `canvas`) напрямую — понадобился `"lib": ["dom", ...]` в
+      `tsconfig.lib.json`/`tsconfig.spec.json` ядра (не только `es2022`, которого по
+      умолчанию хватало остальным модулям). Framework-free ≠ platform-free — это разные оси.
+      - Следующий шаг (Этап 3б-3г): `offline/`+`captcha/`+`analytics/adapters/`,
+      credit-card/format-phone/table-utils/dadata «хвост», `i18n/create-form-error-map.ts`.
 - [ ] **7.2 Standalone-проверка** — `npm i @letar/forms` в чистом Vite/Next вне монорепо (workspace-зависимости).
 - [ ] **7.3 `@letar/forms-shadcn` beta** — 15–20 ходовых полей (Input/Textarea/Number/Select/Checkbox/Radio/Date).
       Покрывает ~80% форм. Тяжёлые (RichText/Table/Signature/Combobox) — «Chakra-only пока».

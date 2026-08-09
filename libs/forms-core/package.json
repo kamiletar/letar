@@ -22,6 +22,24 @@
       "import": "./src/lib/schema/index.ts",
       "default": "./src/lib/schema/index.ts"
     },
+    "./server-errors": {
+      "@letar/source": "./src/lib/server-errors/index.ts",
+      "types": "./src/lib/server-errors/index.ts",
+      "import": "./src/lib/server-errors/index.ts",
+      "default": "./src/lib/server-errors/index.ts"
+    },
+    "./utils": {
+      "@letar/source": "./src/lib/utils/index.ts",
+      "types": "./src/lib/utils/index.ts",
+      "import": "./src/lib/utils/index.ts",
+      "default": "./src/lib/utils/index.ts"
+    },
+    "./security": {
+      "@letar/source": "./src/lib/security/index.ts",
+      "types": "./src/lib/security/index.ts",
+      "import": "./src/lib/security/index.ts",
+      "default": "./src/lib/security/index.ts"
+    },
     "./package.json": "./package.json"
   }
 }

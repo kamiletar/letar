@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from 'react'
-import { deepEqual } from '../utils/deep-equal'
+import { deepEqual } from '@letar/forms-core/utils'
 
 /**
  * Option for selection field

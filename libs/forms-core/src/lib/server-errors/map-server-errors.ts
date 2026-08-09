@@ -52,7 +52,7 @@ export function mapServerErrors(error: unknown, config?: MapServerErrorsConfig):
     formErrors: [defaultMessage ?? (locale === 'ru' ? 'Произошла ошибка' : 'An error occurred')],
   }
 
-  if (error === null || error === undefined) return fallback
+  if (error === null || error === undefined) {return fallback}
 
   // Строковая ошибка → глобальная
   if (typeof error === 'string') {
@@ -76,7 +76,7 @@ export function mapServerErrors(error: unknown, config?: MapServerErrorsConfig):
 
   for (const parse of parsers) {
     const result = parse()
-    if (result) return result
+    if (result) {return result}
   }
 
   return fallback

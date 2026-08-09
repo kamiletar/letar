@@ -2,7 +2,7 @@
 
 import { Box, HStack, Separator, Text, VStack } from '@chakra-ui/react'
 import type { ReactElement } from 'react'
-import { safeStringify } from '../utils/safe-stringify'
+import { safeStringify } from '@letar/forms-core/utils'
 
 export interface FormReadOnlyViewProps<T extends Record<string, unknown> = Record<string, unknown>> {
   /** Данные для отображения */

@@ -24,7 +24,10 @@
     "paths": {
       "@letar/forms-core": ["../forms-core/src/index.ts"],
       "@letar/forms-core/validators/ru": ["../forms-core/src/lib/validators/ru/index.ts"],
-      "@letar/forms-core/schema": ["../forms-core/src/lib/schema/index.ts"]
+      "@letar/forms-core/schema": ["../forms-core/src/lib/schema/index.ts"],
+      "@letar/forms-core/server-errors": ["../forms-core/src/lib/server-errors/index.ts"],
+      "@letar/forms-core/utils": ["../forms-core/src/lib/utils/index.ts"],
+      "@letar/forms-core/security": ["../forms-core/src/lib/security/index.ts"]
     }
   },
   "exclude": ["dist", "**/*.spec.ts", "**/*.spec.tsx", "**/*.test.ts", "**/*.test.tsx"],

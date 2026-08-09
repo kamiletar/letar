@@ -1,3 +1,2 @@
-export { deepEqual } from './deep-equal'
-export { safeStringify } from './safe-stringify'
+export { deepEqual, safeStringify } from '@letar/forms-core/utils'
 export { useFormStoreSubscribe } from './use-form-store-subscribe'

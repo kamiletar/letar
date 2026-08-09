@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseFileSize, sanitizeFileName, validateMimeType } from '../file-security'
+import { parseFileSize, sanitizeFileName, validateMimeType } from './file-security'
 
 describe('parseFileSize', () => {
   it('парсит MB', () => {

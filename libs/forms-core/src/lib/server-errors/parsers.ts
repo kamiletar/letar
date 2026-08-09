@@ -89,7 +89,7 @@ export function parsePrismaError(
   fieldMap?: FieldErrorMap,
   locale: Locale = 'ru',
 ): MappedServerErrors | null {
-  if (!isPrismaError(error)) return null
+  if (!isPrismaError(error)) {return null}
 
   const msgs = PRISMA_MESSAGES[locale]
   const result: MappedServerErrors = { fieldErrors: [], formErrors: [] }
@@ -154,7 +154,7 @@ export function parseZenStackError(
   fieldMap?: FieldErrorMap,
   locale: Locale = 'ru',
 ): MappedServerErrors | null {
-  if (!isZenStackError(error)) return null
+  if (!isZenStackError(error)) {return null}
 
   const result: MappedServerErrors = { fieldErrors: [], formErrors: [] }
 
@@ -180,7 +180,7 @@ export function parseZenStackError(
           meta: error.meta,
         }
         const prismaResult = parsePrismaError(prismaLike, fieldMap, locale)
-        if (prismaResult) return prismaResult
+        if (prismaResult) {return prismaResult}
       }
       result.formErrors.push(error.message ?? (locale === 'ru' ? 'Ошибка базы данных' : 'Database error'))
       break
@@ -202,7 +202,7 @@ export function parseZenStackError(
  * { formErrors: string[], fieldErrors: { email: ['msg1'], name: ['msg2'] } }
  */
 export function parseZodFlatError(error: unknown): MappedServerErrors | null {
-  if (!isZodFlatError(error)) return null
+  if (!isZodFlatError(error)) {return null}
 
   const result: MappedServerErrors = { fieldErrors: [], formErrors: [] }
 
@@ -230,7 +230,7 @@ export function parseZodFlatError(error: unknown): MappedServerErrors | null {
  * { success: false, error: string | { fieldErrors, formErrors } }
  */
 export function parseActionResultError(error: unknown): MappedServerErrors | null {
-  if (!isActionResultError(error)) return null
+  if (!isActionResultError(error)) {return null}
 
   const result: MappedServerErrors = { fieldErrors: [], formErrors: [] }
 
@@ -240,7 +240,7 @@ export function parseActionResultError(error: unknown): MappedServerErrors | nul
   } else if (typeof error.error === 'object') {
     // Вложенный Zod flatten формат
     const zodResult = parseZodFlatError(error.error)
-    if (zodResult) return zodResult
+    if (zodResult) {return zodResult}
   }
 
   // Дополнительное message
@@ -260,20 +260,20 @@ export function parseErrorObject(
   fieldMap?: FieldErrorMap,
   locale: Locale = 'ru',
 ): MappedServerErrors | null {
-  if (!(error instanceof Error)) return null
+  if (!(error instanceof Error)) {return null}
 
   // ZenStack-стиль: Error с .info
   const info = (error as Error & { info?: unknown }).info
   if (info) {
     const zenResult = parseZenStackError(info, fieldMap, locale)
-    if (zenResult) return zenResult
+    if (zenResult) {return zenResult}
   }
 
   // Error с .cause (цепочка ошибок)
   const cause = (error as Error & { cause?: unknown }).cause
   if (cause) {
     const prismaResult = parsePrismaError(cause, fieldMap, locale)
-    if (prismaResult) return prismaResult
+    if (prismaResult) {return prismaResult}
   }
 
   return { fieldErrors: [], formErrors: [error.message] }

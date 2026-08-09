@@ -8,6 +8,9 @@
       "@letar/forms-core": ["../../libs/forms-core/src/index.ts"],
       "@letar/forms-core/validators/ru": ["../../libs/forms-core/src/lib/validators/ru/index.ts"],
       "@letar/forms-core/schema": ["../../libs/forms-core/src/lib/schema/index.ts"],
+      "@letar/forms-core/server-errors": ["../../libs/forms-core/src/lib/server-errors/index.ts"],
+      "@letar/forms-core/utils": ["../../libs/forms-core/src/lib/utils/index.ts"],
+      "@letar/forms-core/security": ["../../libs/forms-core/src/lib/security/index.ts"],
       "@letar/format-utils": ["../../libs/format-utils/src/index.ts"],
       "@letar/query-provider": ["../../libs/query-provider/src/index.ts"],
       "@letar/zenstack-form-plugin": ["../../libs/zenstack-form-plugin/src/index.ts"]
