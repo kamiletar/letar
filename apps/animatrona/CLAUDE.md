@@ -197,3 +197,4 @@ await db.createRecord({ filePath: tempFilePath, cid })
 ## Документация
 
 - [react-effect-stable-ref-pitfall](/.claude/docs/react-effect-stable-ref-pitfall.md) — эффект с deps на ref/DOM-элемент не перезапускается повторно: либо навешивается до монтирования реального узла при условном skeleton-рендере (`useVirtualizedGrid`), либо зависит от персистентного объекта, стабильного всё время жизни приложения (`globalVideoElement` в `VideoPlayer`) — callback-ref вместо `useRef`+`useLayoutEffect([])`, событие как источник повторного срабатывания вместо самого объекта.
+- [animatrona-db-manifest-dual-source](/.claude/docs/animatrona-db-manifest-dual-source.md) — `Episode.spriteCid`/`vttCid`/`chaptersCid` дублируются в БД и в IPFS-манифесте, билдер directoryCid читает с приоритетом БД; retranscode пишет свежий CID только в манифест и не обновляет колонки — старый CID из БД молча побеждает.
