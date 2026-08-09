@@ -16,11 +16,11 @@ import { extractDigits, isDigitsOfLength } from './checksum'
  */
 export function validateSnils(value: string): boolean {
   const digits = extractDigits(value)
-  if (digits.length !== 11) return false
+  if (digits.length !== 11) {return false}
 
   // СНИЛС 001-001-998 и ниже — специальные номера, не проверяем
   const number = Number(digits.slice(0, 9).join(''))
-  if (number <= 1001998) return true
+  if (number <= 1001998) {return true}
 
   let sum = 0
   for (let i = 0; i < 9; i++) {
@@ -34,7 +34,7 @@ export function validateSnils(value: string): boolean {
     checkNumber = 0
   } else {
     checkNumber = sum % 101
-    if (checkNumber === 100) checkNumber = 0
+    if (checkNumber === 100) {checkNumber = 0}
   }
 
   const actualCheck = digits[9] * 10 + digits[10]

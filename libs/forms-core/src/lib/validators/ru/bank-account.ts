@@ -21,8 +21,8 @@ export function validateBankAccountWithBik(account: string, bik: string, isCorrA
   const accountDigits = account.replace(/\D/g, '')
   const bikDigits = bik.replace(/\D/g, '')
 
-  if (!isDigitsOfLength(accountDigits, 20)) return false
-  if (!isDigitsOfLength(bikDigits, 9)) return false
+  if (!isDigitsOfLength(accountDigits, 20)) {return false}
+  if (!isDigitsOfLength(bikDigits, 9)) {return false}
 
   // Формируем 23-значную строку для проверки
   let prefix: string

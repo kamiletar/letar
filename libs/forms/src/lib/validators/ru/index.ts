@@ -2,6 +2,9 @@
  * zRu — Zod-валидаторы для российских документов.
  *
  * Headless: работают без UI, можно использовать на сервере.
+ * Реализация вынесена в @letar/forms-core (Фаза 7.1, dependency-free ядро) —
+ * этот файл только реэкспортирует, чтобы публичный путь `@letar/forms/validators/ru`
+ * не менялся для потребителей.
  *
  * @example
  * ```typescript
@@ -22,50 +25,4 @@
  * ```
  */
 
-import {
-  bankAccountSchema,
-  bankAccountWithBikSchema,
-  corrAccountSchema,
-  corrAccountWithBikSchema,
-} from './bank-account'
-import { bikSchema } from './bik'
-import { innIndividualSchema, innLegalSchema, innSchema } from './inn'
-import { kppSchema } from './kpp'
-import { ogrnipSchema, ogrnSchema } from './ogrn'
-import { passportSchema } from './passport'
-import { snilsSchema } from './snils'
-
-export const zRu = {
-  /** ИНН (10 или 12 цифр) */
-  inn: Object.assign(() => innSchema(), {
-    /** ИНН юрлица (10 цифр) */
-    legal: () => innLegalSchema(),
-    /** ИНН физлица (12 цифр) */
-    individual: () => innIndividualSchema(),
-  }),
-  /** КПП (9 символов) */
-  kpp: () => kppSchema(),
-  /** ОГРН (13 цифр) */
-  ogrn: () => ogrnSchema(),
-  /** ОГРНИП (15 цифр) */
-  ogrnip: () => ogrnipSchema(),
-  /** БИК (9 цифр) */
-  bik: () => bikSchema(),
-  /** Расчётный счёт (20 цифр), опционально с проверкой по БИК */
-  bankAccount: (bikValue?: string) => (bikValue ? bankAccountWithBikSchema(bikValue) : bankAccountSchema()),
-  /** Корр. счёт (20 цифр, начинается с "301"), опционально с проверкой по БИК */
-  corrAccount: (bikValue?: string) => (bikValue ? corrAccountWithBikSchema(bikValue) : corrAccountSchema()),
-  /** СНИЛС (11 цифр) */
-  snils: () => snilsSchema(),
-  /** Паспорт (серия + номер, 10 цифр) */
-  passport: () => passportSchema(),
-}
-
-// Re-export для прямого использования
-export { validateBankAccountWithBik } from './bank-account'
-export { validateBik } from './bik'
-export { validateInn10, validateInn12 } from './inn'
-export { validateKpp } from './kpp'
-export { validateOgrn, validateOgrnip } from './ogrn'
-export { validatePassport } from './passport'
-export { validateSnils } from './snils'
+export * from '@letar/forms-core/validators/ru'

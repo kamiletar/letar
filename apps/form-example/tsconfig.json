@@ -4,6 +4,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "@letar/forms": ["../../libs/forms/src/index.ts"],
+      "@letar/forms-core": ["../../libs/forms-core/src/index.ts"],
+      "@letar/forms-core/validators/ru": ["../../libs/forms-core/src/lib/validators/ru/index.ts"],
       "@letar/demo-protection": ["../../libs/demo-protection/src/index.ts"],
       "@letar/analytics": ["../../libs/analytics/src/index.ts"],
       "@letar/seo": ["../../libs/seo/src/index.ts"]

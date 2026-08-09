@@ -11,7 +11,9 @@
       "@letar/auth": ["../../libs/auth/src/index.ts"],
       "@letar/auth/client": ["../../libs/auth/src/client/index.ts"],
       "@letar/auth/server": ["../../libs/auth/src/server/index.ts"],
-      "@letar/forms": ["../../libs/forms/src/index.ts"]
+      "@letar/forms": ["../../libs/forms/src/index.ts"],
+      "@letar/forms-core": ["../../libs/forms-core/src/index.ts"],
+      "@letar/forms-core/validators/ru": ["../../libs/forms-core/src/lib/validators/ru/index.ts"]
     }
   },
   "references": [

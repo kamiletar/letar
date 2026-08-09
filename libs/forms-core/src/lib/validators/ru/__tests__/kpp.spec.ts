@@ -45,20 +45,20 @@ describe('kppSchema', () => {
   it('должен принять валидный КПП', () => {
     const result = schema.safeParse('770701001')
     expect(result.success).toBe(true)
-    if (result.success) expect(result.data).toBe('770701001')
+    if (result.success) {expect(result.data).toBe('770701001')}
   })
 
   it('должен привести к верхнему регистру', () => {
     const result = schema.safeParse('7707az001')
     // После toUpperCase() → '7707AZ001' — валидный формат
     expect(result.success).toBe(true)
-    if (result.success) expect(result.data).toBe('7707AZ001')
+    if (result.success) {expect(result.data).toBe('7707AZ001')}
   })
 
   it('должен убрать пробелы и дефисы', () => {
     const result = schema.safeParse('770 701-001')
     expect(result.success).toBe(true)
-    if (result.success) expect(result.data).toBe('770701001')
+    if (result.success) {expect(result.data).toBe('770701001')}
   })
 
   it('должен отклонить строку неверной длины', () => {

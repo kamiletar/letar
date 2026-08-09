@@ -1,0 +1,108 @@
+{
+  "name": "@letar/forms-core",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/forms-core/src",
+  "projectType": "library",
+  "tags": ["scope:shared", "type:core", "owner:letar"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/forms-core"
+      },
+      "dependsOn": ["^typecheck"],
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production",
+        "{projectRoot}/tsconfig.json",
+        "{projectRoot}/tsconfig.lib.json",
+        "{workspaceRoot}/tsconfig.base.json"
+      ],
+      "outputs": [
+        "{projectRoot}/dist/**/*.d.ts",
+        "{projectRoot}/dist/**/*.d.ts.map",
+        "{projectRoot}/dist/tsconfig.lib.tsbuildinfo"
+      ],
+      "metadata": {
+        "description": "Type-check library and generate declarations",
+        "technologies": ["typescript"]
+      }
+    },
+    "typecheck:tsgo": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsgo --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/forms-core"
+      },
+      "dependsOn": ["^typecheck:tsgo"],
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production",
+        "{projectRoot}/tsconfig.json",
+        "{projectRoot}/tsconfig.lib.json",
+        "{workspaceRoot}/tsconfig.base.json"
+      ],
+      "outputs": [
+        "{projectRoot}/dist/**/*.d.ts",
+        "{projectRoot}/dist/**/*.d.ts.map",
+        "{projectRoot}/dist/tsconfig.lib.tsbuildinfo"
+      ],
+      "metadata": {
+        "description": "Type-check library with tsgo (faster)",
+        "technologies": ["typescript", "tsgo"]
+      }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "config": "libs/forms-core/vitest.config.ts"
+      }
+    },
+    "oxlint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "libs/forms-core"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
+      "metadata": {
+        "description": "Fast lint with oxlint",
+        "technologies": ["oxlint"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "dependsOn": ["oxlint"]
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint fmt \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "libs/forms-core"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint (~30x faster than Prettier)",
+        "technologies": ["dprint"]
+      }
+    },
+    "format:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bunx dprint check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "libs/forms-core"
+      },
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/dprint.json"],
+      "metadata": {
+        "description": "Check file formatting with dprint",
+        "technologies": ["dprint"]
+      }
+    }
+  }
+}

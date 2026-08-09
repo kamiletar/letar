@@ -24,6 +24,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      '@letar/forms-core/validators/ru': resolve(__dirname, '../forms-core/src/lib/validators/ru/index.ts'),
+      '@letar/forms-core': resolve(__dirname, '../forms-core/src/index.ts'),
       '@letar/forms': resolve(__dirname, './src'),
     },
   },

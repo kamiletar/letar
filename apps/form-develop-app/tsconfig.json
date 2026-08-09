@@ -5,6 +5,8 @@
       "@/*": ["./src/*"],
       "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
       "@letar/forms": ["../../libs/forms/src/index.ts"],
+      "@letar/forms-core": ["../../libs/forms-core/src/index.ts"],
+      "@letar/forms-core/validators/ru": ["../../libs/forms-core/src/lib/validators/ru/index.ts"],
       "@letar/format-utils": ["../../libs/format-utils/src/index.ts"],
       "@letar/query-provider": ["../../libs/query-provider/src/index.ts"],
       "@letar/zenstack-form-plugin": ["../../libs/zenstack-form-plugin/src/index.ts"]

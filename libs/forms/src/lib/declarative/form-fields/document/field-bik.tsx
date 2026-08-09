@@ -1,7 +1,7 @@
 'use client'
 
+import { validateBik } from '@letar/forms-core/validators/ru'
 import { LuLandmark } from 'react-icons/lu'
-import { validateBik } from '../../../validators/ru/bik'
 import { createDocumentField } from './document-field-base'
 
 /** Form.Document.BIK — поле ввода БИК (9 цифр) */

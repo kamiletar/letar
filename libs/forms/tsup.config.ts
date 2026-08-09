@@ -24,8 +24,9 @@ export default defineConfig({
   treeshake: true,
   clean: true,
   outDir: 'dist',
-  // Все зависимости — external (потребитель устанавливает сам)
-  noExternal: [],
+  // Все зависимости — external (потребитель устанавливает сам).
+  // @letar/forms-core — не npm-пакет (Фаза 7.1, ядро без публикации) — вбандливается внутрь.
+  noExternal: ['@letar/forms-core'],
   external: [
     // React
     'react',

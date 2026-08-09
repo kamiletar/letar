@@ -86,6 +86,15 @@ export default [
             //   sourceTag: 'type:ui',
             //   notDependOnLibsWithTags: ['type:data-access'],
             // },
+            // Фаза 7.1 (@letar/forms-core): dependency-free ядро не зависит от UI-слоя.
+            // Зависимость идёт внутрь (Clean Architecture / DIP) — @letar/forms (type:ui)
+            // зависит от ядра, не наоборот. Само по себе это правило не ловит внешние
+            // npm-импорты (react/@chakra-ui) внутри ядра — для них см. блок
+            // `**/forms-core/src/**/*.ts` ниже с `no-restricted-imports`.
+            {
+              sourceTag: 'type:core',
+              notDependOnLibsWithTags: ['type:ui'],
+            },
           ],
         },
       ],
@@ -125,6 +134,37 @@ export default [
               allowTypeImports: true,
             },
           ],
+        },
+      ],
+    },
+  },
+  // === @letar/forms-core — dependency-free ядро (Фаза 7.1) ===
+  // `@nx/enforce-module-boundaries` (выше) не видит внешние npm-импорты вообще — граница
+  // «ядро не тянет ни один фреймворк» (решение Ками, 2026-07-08) держится только здесь.
+  // ⚠️ Глоб с `**/` по той же причине, что и `src/server/` выше — см. комментарий там.
+  {
+    files: ['**/forms-core/src/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'react',
+              message: '@letar/forms-core не импортирует ни один фреймворк — React-адаптер над ядром, не наоборот.',
+            },
+            {
+              name: 'react-dom',
+              message: '@letar/forms-core не импортирует ни один фреймворк — React-адаптер над ядром, не наоборот.',
+            },
+          ],
+          patterns: [
+            {
+              group: ['@chakra-ui/*', '@tanstack/react-*', 'react-icons/*'],
+              message: '@letar/forms-core не импортирует ни один фреймворк — React-адаптер над ядром, не наоборот.',
+            },
+          ],
+          // allowTypeImports намеренно не ставим: ядро должно быть чистым и по типам тоже.
         },
       ],
     },

@@ -1,7 +1,7 @@
 'use client'
 
+import { validateKpp } from '@letar/forms-core/validators/ru'
 import { LuFileText } from 'react-icons/lu'
-import { validateKpp } from '../../../validators/ru/kpp'
 import { createDocumentField } from './document-field-base'
 
 /** Form.Document.KPP — поле ввода КПП (9 символов) */

@@ -20,7 +20,11 @@
     "jsx": "react-jsx",
     "types": ["node"],
     "noUncheckedSideEffectImports": false,
-    "ignoreDeprecations": "6.0"
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@letar/forms-core": ["../forms-core/src/index.ts"],
+      "@letar/forms-core/validators/ru": ["../forms-core/src/lib/validators/ru/index.ts"]
+    }
   },
   "exclude": ["dist", "**/*.spec.ts", "**/*.spec.tsx", "**/*.test.ts", "**/*.test.tsx"],
   "include": ["src/**/*.ts", "src/**/*.tsx"]

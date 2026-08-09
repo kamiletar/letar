@@ -1,0 +1,21 @@
+{
+  "name": "@letar/forms-core",
+  "version": "0.1.0",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "@letar/source": "./src/index.ts",
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./validators/ru": {
+      "@letar/source": "./src/lib/validators/ru/index.ts",
+      "types": "./src/lib/validators/ru/index.ts",
+      "import": "./src/lib/validators/ru/index.ts",
+      "default": "./src/lib/validators/ru/index.ts"
+    },
+    "./package.json": "./package.json"
+  }
+}

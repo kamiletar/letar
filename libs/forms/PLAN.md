@@ -568,13 +568,16 @@ Do not call Hooks inside useEffect(...), useMemo(...), or other built-in Hooks.
   `dsperevod-e2e --project=webkit` со стороны root-weaver/dsperevod (thread
   `form-dsperevod-phone-webkit`, ответ forms-dev 2026-08-09)
 
-#### [2026-06-12] Провайдер Yandex SmartCaptcha для Form.Captcha (от svoichuzhie)
+#### [2026-06-12] Провайдер Yandex SmartCaptcha для Form.Captcha (от svoichuzhie) ✅ ГОТОВО
 
 - **Запросил:** MagentaRaven
 - **Приоритет:** high
 - **Описание:** новый провайдер `smartcaptcha` рядом с turnstile/recaptcha/hcaptcha (`libs/forms/src/lib/captcha/`). Причина: РФ-проект (152-ФЗ) — Turnstile/reCAPTCHA отправляют IP и телеметрию браузера на зарубежные серверы (трансграничная передача ПДн), SmartCaptcha хранит данные в РФ. Серверная верификация: `POST https://smartcaptcha.yandexcloud.net/validate`. Нужно к Фазе 1–2 svoichuzhie (регистрация фан-клуба, подписка) — сейчас не блокирует (идёт Фаза 0, дизайн).
-- **Статус:** ожидание — не начато, forms-dev берёт следующим сразу после checkbox-бага
-  (thread `form-svoichuzhie-smartcaptcha`, статус подтверждён 2026-08-09)
+- **Статус:** ✅ готово — v1.4.5 (коммит `4c99c228`), провайдер `smartcaptcha` рядом с
+  turnstile/recaptcha/hcaptcha, `<Form.Captcha provider="smartcaptcha">` +
+  `verifyCaptcha(token, { provider: 'smartcaptcha', ... })`. `theme` проп не поддерживается
+  Yandex SmartCaptcha (игнорируется). Документация: form-docs guides/captcha.mdx, демо в
+  form-develop-app/form-example. Готово к использованию в svoichuzhie (Фаза 1–2)
 
 #### [2026-08-04] Серверный код forms не под `src/server/` — граница `no-restricted-imports` его не видит
 
@@ -868,6 +871,37 @@ React, а React-адаптер зависит от абстракций ядра
 
 - [ ] **7.1 Расслоение `forms-core`** — вынести Chakra-free логику + определить UIKit-интерфейс.
       Ценно само по себе (чистит архитектуру), даже оставаясь только на Chakra.
+      🚧 **В работе** — делегировано forms-dev 2026-08-09 (координатор дал добро, очередь запросов
+      от агентов была пуста), thread `forms-phase7-1-core-split`.
+      - ✅ **Этап 1 закрыт (2026-08-09):** каркас `libs/forms-core` (Nx-проект, теги
+      `scope:shared`/`type:core`/`owner:letar`), пилотный модуль `validators/ru` (476 строк, 9
+      файлов) перенесён из `libs/forms` целиком, `@letar/forms/validators/ru` теперь тонкий
+      реэкспорт — публичный API не изменился. Граница ядра держится на двух независимых
+      ESLint-правилах (`depConstraints` для `type:core` + `no-restricted-imports` на
+      `**/forms-core/src/**/*.ts` против `react`/`@chakra-ui/*`/`@tanstack/react-*`) —
+      подтверждено негативной пробой (временный импорт `Box` из Chakra в ядро валит `nx lint
+        forms-core`, без импорта — зелёный). `nx run-many -t typecheck:tsgo --all` зелёный по
+      всему монорепо (кроме 5 предсуществующих несвязанных проблем — Prisma-дрейф в
+      `form-example`, `webkitRequestFullscreen` в `grandslamcup`, TS6310 project-references в
+      `animatrona-main`/`-renderer`, не относящиеся к forms-core падения в
+      `label-printer-desktop`).
+      - **Находка при внедрении:** резолв `@letar/forms-core` в приложениях-потребителях идёт
+      ДВУМЯ независимыми механизмами одновременно, оба пришлось завести — иначе часть
+      приложений не собирается: (1) `paths` в `apps/*/tsconfig.json` (~20 приложений,
+      механически) — нужен для приложений, у которых `@letar/forms` разрешается через явный
+      alias; (2) реальная workspace-зависимость `"@letar/forms-core": "workspace:*"` в
+      `libs/forms/package.json` + `bun install` — материализует symlink
+      `libs/forms/node_modules/@letar/forms-core`, нужен для приложений вроде `dashboard`,
+      которые резолвят `@letar/forms` вообще без `paths`, только через
+      `customConditions: ["@letar/source"]` + `exports` в `package.json` (см.
+      `.claude/rules/libs.md` § «Подключение к приложению»). Три приложения
+      (`label-printer-desktop`, `animatrona`) с «смешанной моделью» `include`
+      (`../../libs/forms/src/**/*.ts` в списке) дополнительно требовали такой же строки для
+      `forms-core` — иначе TS6307, ровно ловушка из
+      [lib-entry-points.md](/.claude/docs/lib-entry-points.md).
+      - Следующий шаг (Этап 2): перенос Zod-мета-движка (`schema-constraints.ts`,
+      `schema-traversal.ts`, `constraint-hints.ts` и др., ~1900 строк) — самый ценный кусок
+      ядра, требует снятия карго-культного `'use client'` с 28 файлов.
 - [ ] **7.2 Standalone-проверка** — `npm i @letar/forms` в чистом Vite/Next вне монорепо (workspace-зависимости).
 - [ ] **7.3 `@letar/forms-shadcn` beta** — 15–20 ходовых полей (Input/Textarea/Number/Select/Checkbox/Radio/Date).
       Покрывает ~80% форм. Тяжёлые (RichText/Table/Signature/Combobox) — «Chakra-only пока».

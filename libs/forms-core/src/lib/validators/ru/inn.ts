@@ -19,7 +19,7 @@ const WEIGHTS_12_2 = [3, 7, 2, 4, 10, 3, 5, 9, 4, 6, 8]
  */
 export function validateInn10(value: string): boolean {
   const digits = extractDigits(value)
-  if (digits.length !== 10) return false
+  if (digits.length !== 10) {return false}
 
   const check = weightedChecksum(digits, WEIGHTS_10)
   return check === digits[9]
@@ -30,7 +30,7 @@ export function validateInn10(value: string): boolean {
  */
 export function validateInn12(value: string): boolean {
   const digits = extractDigits(value)
-  if (digits.length !== 12) return false
+  if (digits.length !== 12) {return false}
 
   const check1 = weightedChecksum(digits, WEIGHTS_12_1)
   const check2 = weightedChecksum(digits, WEIGHTS_12_2)
@@ -70,8 +70,8 @@ export function innSchema() {
     .refine((v) => isDigitsOfLengths(v, [10, 12]), { message: 'ИНН должен содержать 10 или 12 цифр' })
     .refine(
       (v) => {
-        if (v.length === 10) return validateInn10(v)
-        if (v.length === 12) return validateInn12(v)
+        if (v.length === 10) {return validateInn10(v)}
+        if (v.length === 12) {return validateInn12(v)}
         return false
       },
       { message: 'Неверная контрольная сумма ИНН' },

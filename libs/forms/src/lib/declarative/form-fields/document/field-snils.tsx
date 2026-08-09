@@ -1,7 +1,7 @@
 'use client'
 
+import { validateSnils } from '@letar/forms-core/validators/ru'
 import { LuShield } from 'react-icons/lu'
-import { validateSnils } from '../../../validators/ru/snils'
 import { createDocumentField } from './document-field-base'
 
 /** Form.Document.SNILS — поле СНИЛС (XXX-XXX-XXX YY) */

@@ -50,7 +50,7 @@ describe('zRu.inn() — Zod-схема', () => {
   it('убирает пробелы и дефисы (transform)', () => {
     const result = zRu.inn().safeParse('7707 083 893')
     expect(result.success).toBe(true)
-    if (result.success) expect(result.data).toBe('7707083893')
+    if (result.success) {expect(result.data).toBe('7707083893')}
   })
 
   it('отклоняет невалидный ИНН', () => {

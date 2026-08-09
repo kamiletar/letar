@@ -1,7 +1,7 @@
 'use client'
 
+import { validateInn10, validateInn12 } from '@letar/forms-core/validators/ru'
 import { LuFileText } from 'react-icons/lu'
-import { validateInn10, validateInn12 } from '../../../validators/ru/inn'
 import { createDocumentField } from './document-field-base'
 
 /** Form.Document.INN — поле ввода ИНН (10 или 12 цифр) */

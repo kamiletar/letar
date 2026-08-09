@@ -1,7 +1,7 @@
 'use client'
 
+import { validateOgrn } from '@letar/forms-core/validators/ru'
 import { LuFileText } from 'react-icons/lu'
-import { validateOgrn } from '../../../validators/ru/ogrn'
 import { createDocumentField } from './document-field-base'
 
 /** Form.Document.OGRN — поле ввода ОГРН (13 цифр) */
