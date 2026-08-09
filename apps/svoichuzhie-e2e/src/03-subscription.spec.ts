@@ -13,6 +13,21 @@ async function fillStable(locator: Locator, value: string) {
   }).toPass({ timeout: 10_000 })
 }
 
+/**
+ * Тот же класс гонки, что у fillStable, но для чекбокса: клик по лейблу иногда не долетает
+ * (BlackCove на staging, 2026-08-09 — `toBeChecked()` падал 33 раза подряд за 15с). Клик по
+ * уже отмеченному чекбоксу снял бы его — поэтому ретраим клик только когда чекбокс ещё не
+ * отмечен, а не безусловно как fillStable.
+ */
+async function checkStable(labelLocator: Locator, checkboxLocator: Locator) {
+  await expect(async () => {
+    if (!(await checkboxLocator.isChecked())) {
+      await labelLocator.click()
+    }
+    await expect(checkboxLocator).toBeChecked()
+  }).toPass({ timeout: 15_000 })
+}
+
 test.describe('03 — Подписка на новости', () => {
   test('форма подписки в footer принимает email', async ({ page }) => {
     await page.goto('/')
@@ -34,13 +49,12 @@ test.describe('03 — Подписка на новости', () => {
     const consentLabel = footer.locator('label:has(input[type="checkbox"])').first()
     const consentCheckbox = footer.locator('input[type="checkbox"]').first()
     if (await consentCheckbox.count()) {
-      await consentLabel.click()
-      await expect(consentCheckbox).toBeChecked()
+      await checkStable(consentLabel, consentCheckbox)
     }
 
     // Переподтверждаем email прямо перед сабмитом — на случай если клик по чекбоксу вызвал
     // ре-рендер, откативший значение (см. комментарий у fillStable).
-    await expect(emailInput).toHaveValue(uniqueEmail)
+    await fillStable(emailInput, uniqueEmail)
 
     const submitBtn = footer.locator('button[type="submit"]')
     await submitBtn.click()
