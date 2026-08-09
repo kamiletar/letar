@@ -65,6 +65,27 @@ macro_start_session(
 )
 ```
 
+### ⚠️ Работа внутри git submodule — file reservation ОБЯЗАТЕЛЬНА, но она НЕ физический замок
+
+`file_reservation_paths` не блокирует ничьи действия — «Конфликты не блокируют работу — сервер
+сообщает, грант всё равно выдаёт» (см. ниже). Для обычного `apps/<x>/**` в корне letar это
+терпимо, потому что там есть технический барьер второго уровня — `pre-commit-scope-guard.sh`
+(`.claude/rules/git.md` § «Технический барьер: pre-commit scope-guard»).
+
+Для файлов **внутри** submodule (`apps/<x>/src/**` и т.п., где `<x>` — aboi, driving-school,
+premium-rosstil, imot, dsperevod, studio, svoichuzhie, aprel8008, domwellbes,
+poster-microtext-desktop и их e2e) этого второго барьера по умолчанию нет — submodule
+это отдельный `.git`, и установка хука в корне letar его не покрывает. Разбор инцидента,
+где это привело к перемешиванию правок двух сессий в одном коммите (2026-08-09), и способ
+поставить тот же scope-guard хук внутрь submodule (`install.sh --all-submodules`) — в
+[git.md § «Два агента одновременно коммитят в ОДИН submodule»](/.claude/rules/git.md).
+
+**Пока хук не установлен во всех submodule** (проверка/установка — задача для человека или
+отдельной сессии, не делай это молча по ходу другой задачи), `file_reservation_paths` —
+единственный сигнал, что кто-то ещё уже работает в том же submodule. Он не помешает случиться
+гонке, но даст шанс её заметить: перед началом правок внутри submodule **обязательно** проверь
+`fetch_inbox` и существующие резервации на путь этого submodule, а не только зарегистрируй свою.
+
 ## Во время работы
 
 ### Проверка inbox
@@ -144,11 +165,10 @@ release_file_reservations(
 
 ### ⚠️ `send_message` первый раз к незнакомому агенту → `Contact approval required`
 
-Это **не баг валидации имени** и не требование «случайного» имени — сообщения об ошибке,
-упоминающие пример вида `WhiteMountain`, вводят в заблуждение (найдено 2026-08-09, сессия
-`svoichuzhie-dev` → `forms-coordinator`). Реальная причина: agent-mail требует явного
-подтверждения контакта между двумя агентами, ранее не переписывавшимися. Первый `send_message`
-автоматически создаёт pending-заявку и **блокирует** сам себя — сообщение не уходит.
+Это отдельная история от бага ниже («`to` отклоняет kebab-case имя») — здесь причина не в
+формате имени, а в том, что agent-mail требует явного подтверждения контакта между двумя
+агентами, ранее не переписывавшимися. Первый `send_message` автоматически создаёт pending-заявку
+и **блокирует** сам себя — сообщение не уходит.
 
 **Что делать:**
 
@@ -177,6 +197,38 @@ release_file_reservations(
 Это не связано с тем, зарегистрирован ли получатель под фиксированным kebab-case именем
 (`agent_fixed_names_tokens` в памяти) — контакт-апрув требуется даже между двумя легитимными
 фиксированными identity, если они ещё не переписывались.
+
+### ⛔ `send_message(to: [...])` отдельно отклоняет kebab-case/описательные имена получателя — баг сервера
+
+Отдельный от contact-approval баг (найдено и трижды воспроизведено 2026-08-09, сессия
+`svoichuzhie-dev` → `forms-coordinator`, **после** одобренного контакта — воспроизводится
+независимо от статуса контакта). Точный текст ошибки:
+
+```
+Error calling tool 'send_message': Invalid recipient 'forms-coordinator': 'forms-coordinator'
+looks like a descriptive role name. Agent names must be randomly generated adjective+noun
+combinations like 'WhiteMountain' or 'BrownCreek', NOT descriptive of the agent's task. Omit
+the 'name' parameter to auto-generate a valid name.
+```
+
+Ключевой факт: `request_contact(to_agent: "forms-coordinator")` и
+`reply_message(to: ["forms-coordinator"])` с **тем же самым** именем получателя проходят без
+проблем — валидация формата имени применяется только к полю `to` в `send_message` (первичном,
+не reply), не к `request_contact`/`reply_message`. Это касается любого фиксированного
+kebab-case/составного имени, похожего на «описательную роль» (`forms-coordinator`,
+предположительно `deploy-agent`-подобные тоже под риском) — не только `forms-coordinator`.
+
+**Обход:**
+
+- Если это первое сообщение в переписке — использовать `request_contact` (он же отправляет
+  intro-сообщение) вместо голого `send_message`.
+- Если уже есть предыдущее сообщение в треде (от получателя или third-party broadcast) —
+  `reply_message` вместо `send_message`.
+- `send_message` **с** `to`, где получатель — рандомное adjective+noun имя (`AzureGate` и
+  т.п.), проблемы не имеет — баг специфичен для kebab-case/описательных имён в позиции `to`.
+
+Баг не в этом репозитории — это регрессия/особенность самого MCP-сервера agent-mail. Если он
+пропадёт при апдейте сервера — переоценить актуальность этого раздела.
 
 ## Фиксированные имена координаторов
 
