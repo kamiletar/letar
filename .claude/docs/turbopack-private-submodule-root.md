@@ -46,5 +46,7 @@ const nextConfig = {
 
 ## Где применено
 
-`apps/studio`, `apps/dsperevod`, `apps/svoichuzhie`. При заведении нового приватного submodule
-с Next.js — сразу добавлять этот `turbopack.root`, не дожидаясь падения `nx dev`.
+`apps/studio`, `apps/dsperevod`, `apps/svoichuzhie`, `apps/poster-microtext-desktop` (CJS
+`next.config.js`, не ESM — `path.resolve(__dirname, '../../..')` вместо `import.meta.url`,
+здесь падал не `nx dev`, а `nx build:win`). При заведении нового приватного submodule с
+Next.js — сразу добавлять этот `turbopack.root`, не дожидаясь падения `nx dev`/`build`.
