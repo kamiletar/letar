@@ -139,7 +139,6 @@
       "options": {
         "commands": [
           "tsup",
-          "tsc --project tsconfig.publish.json",
           "cp package.publish.json dist/package.json",
           "cp README.en.md dist/README.md",
           "cp README.md dist/README.ru.md",

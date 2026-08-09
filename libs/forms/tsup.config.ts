@@ -18,7 +18,7 @@ export default defineConfig({
     'validators/ru': 'src/lib/validators/ru/index.ts',
   },
   format: ['esm'],
-  dts: false,
+  dts: true,
   tsconfig: 'tsconfig.publish.json',
   splitting: true,
   treeshake: true,

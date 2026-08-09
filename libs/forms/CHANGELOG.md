@@ -4,6 +4,22 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.4.8] - 2026-08-09
+
+### Fixed
+
+- **`build:npm` был сломан — публикация на npm не проходила.** `tsconfig.publish.json` не
+  обновлялся вместе с ростом subpath-экспортов `forms-core` за Фазу 7.1 (`paths` покрывал 8 из
+  15, `rootDir: "src"` исключал `forms-core` из программы) — отдельный проход
+  `tsc --project tsconfig.publish.json` в `build:npm` падал на 80 ошибках TS6059/TS6307,
+  `.d.ts` не генерировались вовсе. Найдено диагностикой Фазы 7.2 (standalone-проверка вне
+  монорепо — TS-потребитель получал `TS7016: Could not find a declaration file`).
+  Фикс — декларации теперь генерирует сам `tsup` (`dts: true`) синхронно со списком `entry`,
+  отдельный `tsc`-проход убран из `build:npm`; `composite`/`outDir`/`rootDir` в
+  `tsconfig.publish.json` больше не нужны (они принадлежали tsc-project-build режиму).
+  Рассинхрон `paths` со списком subpath-экспортов `forms-core` теперь структурно невозможен —
+  тот же принцип, что и у vitest-alias фикса в 1.4.7.
+
 ## [1.4.7] - 2026-08-09
 
 ### Changed

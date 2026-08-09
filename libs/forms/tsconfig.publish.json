@@ -1,7 +1,5 @@
 {
   "compilerOptions": {
-    "composite": true,
-    "declarationMap": true,
     "emitDeclarationOnly": true,
     "importHelpers": true,
     "isolatedModules": true,
@@ -15,8 +13,6 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "outDir": "dist",
-    "rootDir": "src",
     "jsx": "react-jsx",
     "types": ["node"],
     "noUncheckedSideEffectImports": false,
@@ -30,9 +26,15 @@
       "@letar/forms-core/security": ["../forms-core/src/lib/security/index.ts"],
       "@letar/forms-core/offline": ["../forms-core/src/lib/offline/index.ts"],
       "@letar/forms-core/captcha": ["../forms-core/src/lib/captcha/index.ts"],
-      "@letar/forms-core/analytics": ["../forms-core/src/lib/analytics/index.ts"]
+      "@letar/forms-core/analytics": ["../forms-core/src/lib/analytics/index.ts"],
+      "@letar/forms-core/credit-card": ["../forms-core/src/lib/credit-card/index.ts"],
+      "@letar/forms-core/phone": ["../forms-core/src/lib/phone/index.ts"],
+      "@letar/forms-core/table": ["../forms-core/src/lib/table/index.ts"],
+      "@letar/forms-core/address": ["../forms-core/src/lib/address/index.ts"],
+      "@letar/forms-core/i18n": ["../forms-core/src/lib/i18n/index.ts"],
+      "@letar/forms-core/uikit": ["../forms-core/src/lib/uikit/index.ts"]
     }
   },
   "exclude": ["dist", "**/*.spec.ts", "**/*.spec.tsx", "**/*.test.ts", "**/*.test.tsx"],
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "../forms-core/src/**/*.ts"]
 }

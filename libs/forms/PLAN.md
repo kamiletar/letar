@@ -1003,8 +1003,10 @@ React, а React-адаптер зависит от абстракций ядра
       - **🎉 Фаза 7.1 полностью завершена.** Итог: `libs/forms-core` — самостоятельный
       dependency-free пакет с 15 subpath-экспортами + типовым UIKit-контрактом, готовый фундамент
       под 7.3 (shadcn-скин) и 7.8 (Vue-пруф).
-- [x] **7.2 Standalone-проверка** — ✅ диагностика проведена 2026-08-09 (forms-dev), **найдена
-      реальная проблема, не починено — решение за координатором/Ками**.
+- [x] **7.2 Standalone-проверка** — ✅ диагностика + фикс завершены 2026-08-09 (forms-dev). Ками
+      выбрал вариант (б): `tsup dts: true` вместо отдельного `tsc --project tsconfig.publish.json`
+      прохода (тот же structural-fix принцип, что и у vitest-alias находки). Thread
+      `forms-phase7-1-core-split`.
       - **Метод:** `nx run "@letar/forms:build:npm"` → `npm pack` дистрибутив → чистый scratch-проект
       ВНЕ монорепо (`C:\Users\Kami\...\Temp\...\scratchpad\forms-standalone-check`, свой
       `node_modules`, без `@letar/source` condition) → `npm install <tarball>` → минимальная форма
@@ -1050,6 +1052,44 @@ React, а React-адаптер зависит от абстракций ядра
       для него `build:npm`/`publish:npm` «по аналогии» с `forms`, как буквально просил первый
       пункт задачи, значило бы противоречить уже принятому архитектурному решению — не стала
       этого делать, зафиксировала расхождение здесь.
+      - **✅ Фикс (вариант б) реализован и проверен 2026-08-09:**
+      - `tsup.config.ts`: `dts: false` → `dts: true` — декларации теперь генерирует сам tsup
+      (rollup-plugin-dts) per-entry, синхронно со списком `entry`, структурный рассинхрон
+      `paths` больше невозможен по построению.
+      - `project.json` → `build:npm`: убран отдельный шаг `tsc --project tsconfig.publish.json`
+      из списка команд — декларации больше не генерируются вторым проходом.
+      - `tsconfig.publish.json`: убраны `composite`/`outDir`/`rootDir` — они принадлежали
+      tsc-project-build режиму (`composite: true` включал строгую проверку TS6307 «файл не в
+      явном списке проекта», `rootDir: "src"` давал TS6059 на файлы `forms-core` вне
+      `libs/forms/src`); ни одно из этих полей tsup не использует для `dts: true`. `paths`
+      догнан до всех 15 subpath-экспортов `forms-core` (было 8), `include` явно добавил
+      `../forms-core/src/**/*.ts` — на случай если rollup-plugin-dts начнёт учитывать
+      `include` для отсутствующих в графе файлов.
+      - Промежуточная находка при отладке: сразу после включения `dts: true` (ещё с
+      `composite: true` в конфиге) сборка падала на **другом** TS6307 — уже не по
+      `forms-core`, а по соседним файлам внутри самого `libs/forms/src` (например
+      `field-editable.tsx` из `form-fields/text/index.ts`). Причина — `composite: true`
+      заставляет TS требовать явный список файлов даже для tsup'ного мульти-entry прохода,
+      где каждый entry обрабатывается как собственный синтетический "project ''". Снятие
+      `composite` убрало сразу оба класса ошибок (и по `forms-core`, и по соседним файлам
+      `forms`), не только тот, что был найден в диагностике.
+      - **Проверка:** `nx run "@letar/forms:build:npm"` проходит целиком — 12 `.d.ts` для всех
+      entry points (`index`, `offline`, `i18n`, `fields/*` ×6, `server-errors`, `analytics`,
+      `validators/ru`), все `cp`-шаги (`package.json`/`README`/`LICENSE`/`CHANGELOG`)
+      отрабатывают. `nx run "@letar/forms:typecheck:tsgo"` и `nx run "@letar/forms:test"`
+      (весь тестовый набор) — зелёные, обычный workspace-путь не задет (`tsconfig.lib.json`
+      отдельный от `tsconfig.publish.json`, тестировавшийся файл не участвует в build:npm).
+      - **Финальная проверка в чистом scratch-проекте** (тот же вне монорепо, что и в
+      диагностике): `npm pack` нового `dist/` → чистая переустановка (`rm -rf node_modules
+          package-lock.json && npm install` — первая переустановка без чистки лока молча
+      использовала закешированный по integrity-хешу старый tarball, версия `1.2.0` не менялась
+      между итерациями теста, это артефакт тестового стенда, не продукта) → `tsc --noEmit`
+      зелёный, exit code 0, `TS7016` больше нет. Негативный контроль — намеренно добавленный
+      несуществующий проп `thisPropDoesNotExist` на `Form.Field.Phone` даёт `TS2322` с точным
+      списком реальных пропсов поля: типы не `any`-заглушка, а настоящие сгенерированные
+      декларации.
+      - Изменённые файлы: `libs/forms/tsup.config.ts`, `libs/forms/project.json`,
+      `libs/forms/tsconfig.publish.json`.
       - Полный отчёт — в тред `forms-phase7-1-core-split` (agent-mail).
 - [ ] **7.3 `@letar/forms-shadcn` beta** — 15–20 ходовых полей (Input/Textarea/Number/Select/Checkbox/Radio/Date).
       Покрывает ~80% форм. Тяжёлые (RichText/Table/Signature/Combobox) — «Chakra-only пока».
