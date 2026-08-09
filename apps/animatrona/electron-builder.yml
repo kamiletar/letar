@@ -92,7 +92,11 @@ win:
       filter:
         - '**/*'
     # libsql — native SQLite driver для Prisma 7 (N-API pre-built)
-    - from: ../../node_modules/.bun/libsql@0.5.29/node_modules/libsql
+    # Якоря ниже (&libsql-*) переиспользуются в linux.extraResources — платформо-независимые
+    # native-модули OrbitDB/Prisma не дублируются между блоками win/linux (YAML aliases,
+    # js-yaml резолвит их в идентичные объекты, проверено против версии из app-builder-lib)
+    - &libsql-common
+      from: ../../node_modules/.bun/libsql@0.5.29/node_modules/libsql
       to: node_modules/libsql
       filter:
         - '**/*'
@@ -100,49 +104,60 @@ win:
       to: node_modules/@libsql/win32-x64-msvc
       filter:
         - '**/*'
-    - from: ../../node_modules/.bun/@neon-rs+load@0.0.4/node_modules/@neon-rs/load
+    - &neon-rs-load
+      from: ../../node_modules/.bun/@neon-rs+load@0.0.4/node_modules/@neon-rs/load
       to: node_modules/@neon-rs/load
       filter:
         - '**/*'
-    - from: ../../node_modules/.bun/detect-libc@2.0.2/node_modules/detect-libc
+    - &detect-libc
+      from: ../../node_modules/.bun/detect-libc@2.0.2/node_modules/detect-libc
       to: node_modules/detect-libc
       filter:
         - '**/*'
     # sql.js (WASM) для применения миграций БД
-    - from: ../../node_modules/.bun/fts5-sql-bundle@1.0.2/node_modules/fts5-sql-bundle
+    - &fts5-sql-bundle
+      from: ../../node_modules/.bun/fts5-sql-bundle@1.0.2/node_modules/fts5-sql-bundle
       to: node_modules/fts5-sql-bundle
       filter:
         - '**/*'
     # classic-level и зависимости для OrbitDB
-    - from: ../../node_modules/.bun/classic-level@3.0.0/node_modules/classic-level
+    - &classic-level
+      from: ../../node_modules/.bun/classic-level@3.0.0/node_modules/classic-level
       to: node_modules/classic-level
       filter:
         - '**/*'
-    - from: ../../node_modules/.bun/abstract-level@3.1.1/node_modules/abstract-level
+    - &abstract-level
+      from: ../../node_modules/.bun/abstract-level@3.1.1/node_modules/abstract-level
       to: node_modules/abstract-level
       filter:
         - '**/*'
-    - from: ../../node_modules/.bun/level-supports@6.2.0/node_modules/level-supports
+    - &level-supports
+      from: ../../node_modules/.bun/level-supports@6.2.0/node_modules/level-supports
       to: node_modules/level-supports
       filter:
         - '**/*'
-    - from: ../../node_modules/.bun/level-transcoder@1.0.1/node_modules/level-transcoder
+    - &level-transcoder
+      from: ../../node_modules/.bun/level-transcoder@1.0.1/node_modules/level-transcoder
       to: node_modules/level-transcoder
       filter:
         - '**/*'
-    - from: ../../node_modules/.bun/module-error@1.0.2/node_modules/module-error
+    - &module-error
+      from: ../../node_modules/.bun/module-error@1.0.2/node_modules/module-error
       to: node_modules/module-error
       filter:
         - '**/*'
-    - from: ../../node_modules/.bun/maybe-combine-errors@1.0.0/node_modules/maybe-combine-errors
+    - &maybe-combine-errors
+      from: ../../node_modules/.bun/maybe-combine-errors@1.0.0/node_modules/maybe-combine-errors
       to: node_modules/maybe-combine-errors
       filter:
         - '**/*'
-    - from: ../../node_modules/.bun/is-buffer@2.0.5/node_modules/is-buffer
+    - &is-buffer
+      from: ../../node_modules/.bun/is-buffer@2.0.5/node_modules/is-buffer
       to: node_modules/is-buffer
       filter:
         - '**/*'
-    - from: ../../node_modules/.bun/node-gyp-build@4.8.4/node_modules/node-gyp-build
+    - &node-gyp-build
+      from: ../../node_modules/.bun/node-gyp-build@4.8.4/node_modules/node-gyp-build
       to: node_modules/node-gyp-build
       filter:
         - '**/*'
@@ -192,60 +207,24 @@ linux:
       filter:
         - kubo
     # libsql — native SQLite driver для Prisma 7 (N-API pre-built)
-    - from: ../../node_modules/.bun/libsql@0.5.29/node_modules/libsql
-      to: node_modules/libsql
-      filter:
-        - '**/*'
+    - *libsql-common
     - from: ../../node_modules/.bun/@libsql+linux-x64-gnu@0.5.29/node_modules/@libsql/linux-x64-gnu
       to: node_modules/@libsql/linux-x64-gnu
       filter:
         - '**/*'
-    - from: ../../node_modules/.bun/@neon-rs+load@0.0.4/node_modules/@neon-rs/load
-      to: node_modules/@neon-rs/load
-      filter:
-        - '**/*'
-    - from: ../../node_modules/.bun/detect-libc@2.0.2/node_modules/detect-libc
-      to: node_modules/detect-libc
-      filter:
-        - '**/*'
+    - *neon-rs-load
+    - *detect-libc
     # sql.js (WASM) для применения миграций БД
-    - from: ../../node_modules/.bun/fts5-sql-bundle@1.0.2/node_modules/fts5-sql-bundle
-      to: node_modules/fts5-sql-bundle
-      filter:
-        - '**/*'
+    - *fts5-sql-bundle
     # classic-level и зависимости для OrbitDB
-    - from: ../../node_modules/.bun/classic-level@3.0.0/node_modules/classic-level
-      to: node_modules/classic-level
-      filter:
-        - '**/*'
-    - from: ../../node_modules/.bun/abstract-level@3.1.1/node_modules/abstract-level
-      to: node_modules/abstract-level
-      filter:
-        - '**/*'
-    - from: ../../node_modules/.bun/level-supports@6.2.0/node_modules/level-supports
-      to: node_modules/level-supports
-      filter:
-        - '**/*'
-    - from: ../../node_modules/.bun/level-transcoder@1.0.1/node_modules/level-transcoder
-      to: node_modules/level-transcoder
-      filter:
-        - '**/*'
-    - from: ../../node_modules/.bun/module-error@1.0.2/node_modules/module-error
-      to: node_modules/module-error
-      filter:
-        - '**/*'
-    - from: ../../node_modules/.bun/maybe-combine-errors@1.0.0/node_modules/maybe-combine-errors
-      to: node_modules/maybe-combine-errors
-      filter:
-        - '**/*'
-    - from: ../../node_modules/.bun/is-buffer@2.0.5/node_modules/is-buffer
-      to: node_modules/is-buffer
-      filter:
-        - '**/*'
-    - from: ../../node_modules/.bun/node-gyp-build@4.8.4/node_modules/node-gyp-build
-      to: node_modules/node-gyp-build
-      filter:
-        - '**/*'
+    - *classic-level
+    - *abstract-level
+    - *level-supports
+    - *level-transcoder
+    - *module-error
+    - *maybe-combine-errors
+    - *is-buffer
+    - *node-gyp-build
 
 # macOS конфигурация
 mac:
