@@ -88,6 +88,12 @@
       "import": "./src/lib/i18n/index.ts",
       "default": "./src/lib/i18n/index.ts"
     },
+    "./uikit": {
+      "@letar/source": "./src/lib/uikit/index.ts",
+      "types": "./src/lib/uikit/index.ts",
+      "import": "./src/lib/uikit/index.ts",
+      "default": "./src/lib/uikit/index.ts"
+    },
     "./package.json": "./package.json"
   }
 }

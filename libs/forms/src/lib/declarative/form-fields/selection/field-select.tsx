@@ -1,11 +1,11 @@
 'use client'
 
-import { createListCollection, Field, Portal, Select } from '@chakra-ui/react'
-import { type ReactElement, useMemo } from 'react'
+import type { ReactElement } from 'react'
+import { useMemo } from 'react'
 import type { BaseFieldProps, BaseOption, FieldSize } from '../../types'
-import { createField, FieldError, getOptionLabel, type ResolvedFieldProps, SelectionFieldLabel } from '../base'
+import { chakraUIKit, createField, getOptionLabel, type ResolvedFieldProps, SelectionFieldLabel } from '../base'
 
-/** Normalized option (value is always string for Chakra) */
+/** Normalized option (value is always string for the UIKit Select contract) */
 interface NormalizedOption {
   label: React.ReactNode
   value: string
@@ -30,7 +30,6 @@ export interface SelectFieldProps extends BaseFieldProps {
 
 /** State type for useFieldState */
 interface SelectFieldState {
-  collection: ReturnType<typeof createListCollection<NormalizedOption>>
   normalizedOptions: NormalizedOption[]
   resolvedClearable: boolean
 }
@@ -56,6 +55,10 @@ interface SelectFieldState {
  *   clearable
  * />
  * ```
+ *
+ * Uses the `UIKit` contract (`@letar/forms-core/uikit`) instead of importing Chakra directly —
+ * Фаза 7.1, Этап 4 proof that the seam covers a selection field with an options list and
+ * a portal-rendered dropdown, the most structurally different of the three proof fields.
  */
 export const FieldSelect = createField<SelectFieldProps, string | number, SelectFieldState>({
   displayName: 'FieldSelect',
@@ -66,7 +69,7 @@ export const FieldSelect = createField<SelectFieldProps, string | number, Select
     // Options: props take priority, fallback to schema meta
     const sourceOptions = componentProps.options ?? resolved.options ?? []
 
-    // Normalize options — value always string for Chakra
+    // Normalize options — value always string for the UIKit contract
     const normalizedOptions: NormalizedOption[] = useMemo(
       () =>
         sourceOptions.map((opt) => ({
@@ -77,36 +80,21 @@ export const FieldSelect = createField<SelectFieldProps, string | number, Select
       [sourceOptions],
     )
 
-    // Create collection from normalized options
-    const collection = useMemo(
-      () =>
-        createListCollection({
-          items: normalizedOptions,
-          itemToString: getOptionLabel,
-          itemToValue: (item) => item.value,
-        }),
-      [normalizedOptions],
-    )
-
     // Auto-determine clearable: show clear button if field is optional
     const resolvedClearable = componentProps.clearable ?? !resolved.required
 
-    return { collection, normalizedOptions, resolvedClearable }
+    return { normalizedOptions, resolvedClearable }
   },
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
-    // Convert current value to string for Chakra
+    // Convert current value to string for the UIKit contract
     const currentValue = field.state.value
     const stringValue = currentValue !== null && currentValue !== undefined ? String(currentValue) : undefined
 
     return (
-      <Field.Root invalid={hasError} required={resolved.required} disabled={resolved.disabled}>
-        <Select.Root
-          collection={fieldState.collection}
-          size={componentProps.size ?? 'md'}
-          variant={componentProps.variant ?? 'outline'}
-          value={stringValue ? [stringValue] : []}
-          onValueChange={(details) => {
-            const newStringValue = details.value[0] as string | undefined
+      <chakraUIKit.FieldRoot invalid={hasError} required={resolved.required} disabled={resolved.disabled}>
+        <chakraUIKit.Select
+          value={stringValue}
+          onValueChange={(newStringValue) => {
             // Convert back to needed type
             if (componentProps.valueType === 'number') {
               field.handleChange(newStringValue ? Number(newStringValue) : 0)
@@ -114,40 +102,24 @@ export const FieldSelect = createField<SelectFieldProps, string | number, Select
               field.handleChange(newStringValue ?? '')
             }
           }}
-          onInteractOutside={() => field.handleBlur()}
+          onBlur={field.handleBlur}
+          options={fieldState.normalizedOptions.map((opt) => ({
+            value: opt.value,
+            label: getOptionLabel(opt),
+            disabled: opt.disabled,
+          }))}
+          label={resolved.label
+            ? <SelectionFieldLabel label={resolved.label} tooltip={resolved.tooltip} required={resolved.required} />
+            : undefined}
+          placeholder={resolved.placeholder}
           disabled={resolved.disabled}
+          clearable={fieldState.resolvedClearable}
+          size={componentProps.size ?? 'md'}
+          variant={componentProps.variant ?? 'outline'}
           data-field-name={fullPath}
-        >
-          <Select.HiddenSelect />
-          {resolved.label && (
-            <Select.Label>
-              <SelectionFieldLabel label={resolved.label} tooltip={resolved.tooltip} required={resolved.required} />
-            </Select.Label>
-          )}
-          <Select.Control>
-            <Select.Trigger>
-              <Select.ValueText placeholder={resolved.placeholder} />
-            </Select.Trigger>
-            <Select.IndicatorGroup>
-              {fieldState.resolvedClearable && <Select.ClearTrigger />}
-              <Select.Indicator />
-            </Select.IndicatorGroup>
-          </Select.Control>
-          <Portal>
-            <Select.Positioner>
-              <Select.Content>
-                {fieldState.normalizedOptions.map((opt) => (
-                  <Select.Item item={opt} key={opt.value}>
-                    {getOptionLabel(opt)}
-                    <Select.ItemIndicator />
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Positioner>
-          </Portal>
-        </Select.Root>
-        <FieldError hasError={hasError} errorMessage={errorMessage} helperText={resolved.helperText} />
-      </Field.Root>
+        />
+        <chakraUIKit.FieldError hasError={hasError} errorMessage={errorMessage} helperText={resolved.helperText} />
+      </chakraUIKit.FieldRoot>
     )
   },
 })

@@ -41,3 +41,6 @@ export type { SelectionFieldLabelProps } from './selection-field-label'
 // Grouping options for selection fields
 export { getOptionLabel, useGroupedOptions } from './use-grouped-options'
 export type { GroupedOptionsResult } from './use-grouped-options'
+
+// UIKit contract (forms-core) — Chakra implementation (Фаза 7.1, Этап 4)
+export { chakraUIKit } from './uikit-chakra'

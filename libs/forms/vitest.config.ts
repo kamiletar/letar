@@ -8,13 +8,18 @@ const formsCoreExports = JSON.parse(
   readFileSync(resolve(__dirname, '../forms-core/package.json'), 'utf-8'),
 ).exports
 
+// Vite/rollup-plugin-alias matches object-form aliases by prefix, first match wins — the bare
+// `@letar/forms-core` key MUST sort after every subpath key, or it hijacks `/schema`, `/utils`
+// etc. before their own (more specific) entry is ever reached. `exports` lists `.` first, so
+// sort by key length descending rather than relying on `Object.entries` order.
 const formsCoreAlias = Object.fromEntries(
   Object.entries(formsCoreExports)
     .filter(([subpath]) => subpath !== './package.json')
     .map(([subpath, target]) => [
       subpath === '.' ? '@letar/forms-core' : `@letar/forms-core${subpath.slice(1)}`,
       resolve(__dirname, '../forms-core', target['@letar/source']),
-    ]),
+    ])
+    .sort(([a], [b]) => b.length - a.length),
 )
 
 export default defineConfig({
@@ -38,20 +43,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@letar/forms-core/validators/ru': resolve(__dirname, '../forms-core/src/lib/validators/ru/index.ts'),
-      '@letar/forms-core/schema': resolve(__dirname, '../forms-core/src/lib/schema/index.ts'),
-      '@letar/forms-core/server-errors': resolve(__dirname, '../forms-core/src/lib/server-errors/index.ts'),
-      '@letar/forms-core/utils': resolve(__dirname, '../forms-core/src/lib/utils/index.ts'),
-      '@letar/forms-core/security': resolve(__dirname, '../forms-core/src/lib/security/index.ts'),
-      '@letar/forms-core/offline': resolve(__dirname, '../forms-core/src/lib/offline/index.ts'),
-      '@letar/forms-core/captcha': resolve(__dirname, '../forms-core/src/lib/captcha/index.ts'),
-      '@letar/forms-core/analytics': resolve(__dirname, '../forms-core/src/lib/analytics/index.ts'),
-      '@letar/forms-core/credit-card': resolve(__dirname, '../forms-core/src/lib/credit-card/index.ts'),
-      '@letar/forms-core/phone': resolve(__dirname, '../forms-core/src/lib/phone/index.ts'),
-      '@letar/forms-core/table': resolve(__dirname, '../forms-core/src/lib/table/index.ts'),
-      '@letar/forms-core/address': resolve(__dirname, '../forms-core/src/lib/address/index.ts'),
-      '@letar/forms-core/i18n': resolve(__dirname, '../forms-core/src/lib/i18n/index.ts'),
-      '@letar/forms-core': resolve(__dirname, '../forms-core/src/index.ts'),
+      ...formsCoreAlias,
       '@letar/forms': resolve(__dirname, './src'),
     },
   },

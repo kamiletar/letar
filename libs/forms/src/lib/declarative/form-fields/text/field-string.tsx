@@ -1,9 +1,8 @@
 'use client'
 
-import { Input } from '@chakra-ui/react'
 import type { ReactElement } from 'react'
 import type { StringFieldProps } from '../../types'
-import { createField, FieldWrapper } from '../base'
+import { chakraUIKit, createField } from '../base'
 
 /**
  * Form.Field.String - String input field
@@ -37,6 +36,9 @@ import { createField, FieldWrapper } from '../base'
  *   <Form.Field.String placeholder="Tag" />
  * </Form.Group.List>
  * ```
+ *
+ * Uses the `UIKit` contract (`@letar/forms-core/uikit`) instead of importing Chakra directly —
+ * Фаза 7.1, Этап 4 proof that the seam is sufficient for a simple text field.
  */
 /**
  * Automatic inputMode based on field type for mobile keyboards
@@ -68,18 +70,18 @@ export const FieldString = createField<StringFieldProps, string>({
     const inputMode = componentProps.inputMode ?? getInputModeFromType(type)
 
     return (
-      <FieldWrapper
-        resolved={resolved}
-        hasError={hasError}
-        errorMessage={errorMessage}
-        isValidating={isValidating}
-        fullPath={fullPath}
+      <chakraUIKit.FieldRoot
+        invalid={hasError}
+        required={resolved.required}
+        disabled={resolved.disabled}
+        readOnly={resolved.readOnly}
       >
-        <Input
+        <chakraUIKit.FieldLabel label={resolved.label} required={resolved.required} />
+        <chakraUIKit.Input
           type={type}
           inputMode={inputMode}
           value={(field.state.value as string) ?? ''}
-          onChange={(e) => field.handleChange((e.target as HTMLInputElement).value)}
+          onChange={(value) => field.handleChange(value)}
           onBlur={field.handleBlur}
           placeholder={resolved.placeholder}
           maxLength={maxLength}
@@ -88,7 +90,13 @@ export const FieldString = createField<StringFieldProps, string>({
           autoComplete={componentProps.autoComplete ?? resolved.autocomplete}
           data-field-name={fullPath}
         />
-      </FieldWrapper>
+        <chakraUIKit.FieldError
+          hasError={hasError}
+          errorMessage={errorMessage}
+          helperText={resolved.helperText}
+          isValidating={isValidating}
+        />
+      </chakraUIKit.FieldRoot>
     )
   },
 })
