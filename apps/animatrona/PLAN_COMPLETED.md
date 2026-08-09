@@ -6,6 +6,34 @@
 
 ---
 
+## Дедупликация extraResources в electron-builder.yml через YAML-якоря (2026-08-09)
+
+Найдено побочно предыдущей сессией (апдейт Electron, см. §67 в `PLAN-INFRA.md`): `win:` и
+`linux:` блоки `electron-builder.yml` дублировали ~65 строк списка `extraResources` — 11
+native-модулей OrbitDB/Prisma (`libsql`, `@neon-rs/load`, `detect-libc`, `fts5-sql-bundle`,
+`classic-level` и 5 его зависимостей). Платформо-специфичные записи (`ntsuspend` — только win,
+`@libsql/win32-x64-msvc` vs `@libsql/linux-x64-gnu`) остались без изменений.
+
+Дедуплицировано через стандартные YAML-якоря/алиасы (`&anchor` на элементе списка в `win:`,
+`*anchor` в `linux:`) — не electron-builder-специфичный механизм, а обычная возможность YAML,
+которую `js-yaml` (парсер конфига в `app-builder-lib`) поддерживает из коробки. 338 строк → 316.
+
+**Проверка без полной сборки** (`nx build:win`/`build:linux` дорого для сессии):
+
+- резолвленный JSON конфига до и после правки сверен напрямую через `js-yaml@4.1.1` (версия из
+  реально используемого в монорепо `app-builder-lib@26.15.2`) — побайтово идентичен;
+- реальный загрузчик конфига electron-builder (`getConfig()` + `validateConfiguration()` из
+  `app-builder-lib`) на новом файле проходит без ошибок схемы.
+
+**Нюанс на будущее:** `js-yaml` резолвит алиас в тот же объект-референс, не клон — проверено
+явно (`win.extraResources[i] === linux.extraResources[j]` → `true`). В данном случае это
+безопасно, потому что `getFileMatchers()` в `app-builder-lib` только читает поля `from`/`to`/
+`filter` и не мутирует объект. Если в будущей версии electron-builder появится код, мутирующий
+элементы `extraResources` после парсинга — эта техника дедупликации перестанет быть безопасной
+без явного клонирования (`... в JS/YAML нет generic deep-clone для алиасов`).
+
+---
+
 ## Electron 42.8.1 → 43.3.0 разом во всех Electron-приложениях монорепо (2026-08-09)
 
 Затронуты animatrona, kami-key-the, label-printer-desktop, poster-microtext-desktop и корневой
