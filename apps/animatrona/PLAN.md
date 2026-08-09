@@ -138,8 +138,8 @@
   ([import-db.ts:33](main/services/import/import-db.ts)) и возвращает id **существующей** записи,
   который тут же попадает в `this.createdAnimeId`
   ([import-service.ts:185](main/services/import/import-service.ts)). Дальше при любой ошибке или
-  отмене cleanup вызывает `db.deleteAnime(this.createdAnimeId)`
-  ([import-service.ts:786](main/services/import/import-service.ts)) — это `prisma.anime.delete`
+  отмене cleanup вызывает `db.deleteAnime(createdAnimeId)`
+  ([import-failure-cleanup.ts:76](main/services/import/import-failure-cleanup.ts)) — это `prisma.anime.delete`
   с полным каскадом: `WatchProgress` (обе связи), `Episode`, `AudioTrack`, `SubtitleTrack`,
   `SubtitleFont`, `Season`, `GenreOnAnime`, `ThemeOnAnime`, `AnimeRelation`, плюс поля самой
   строки — `watchStatus`, `userRating`, `watchedAt`.
@@ -159,14 +159,15 @@
   ### 🚫 Блокер 2 — старый спрайт перебивает новый (то самое «положили не то»)
 
   Сброс CID в retranscode-ветке
-  ([import-service.ts:326-339](main/services/import/import-service.ts)) обнуляет
+  ([episode-file-processor.ts:122-135](main/services/import/episode-file-processor.ts)) обнуляет
   `transcodedCid`, `manifestCid`, `ipfsSize`, `thumbnailCids`, `screenshotCids`, `metadataCid` —
   но **не** `spriteCid`, `vttCid`, `chaptersCid`.
 
   А билдер читает БД **раньше** манифеста:
   `if (ep.spriteCid || ep.vttCid)` — [anime-directory-builder.ts:758-762](main/services/ipfs/anime-directory-builder.ts).
   Свежий спрайт импорт кладёт только в манифест эпизода (в `updateEpisode` полей
-  `spriteCid`/`vttCid` нет вовсе — [import-service.ts:1462](main/services/import/import-service.ts)).
+  `spriteCid`/`vttCid` нет вовсе —
+  [post-process-runner.ts:357-368](main/services/import/post-process-runner.ts)).
 
   Итог для аниме, где эти поля когда-то заполнил recovery: в новый `directoryCid` уедет **старый
   спрайт со старой раздачи**, а свежесгенерированный — не уедет никуда. Если старый CID мёртв,
@@ -183,7 +184,7 @@
 
   ### 🚫 Блокер 3 — поля, которые Shikimori отдаёт, а импорт не сохраняет
 
-  `createAnimeRecord` ([import-service.ts:930](main/services/import/import-service.ts)) шлёт
+  `createAnimeRecord` ([anime-record-setup.ts:106](main/services/import/anime-record-setup.ts)) шлёт
   `nameEn: null` жёстко, а `synonyms` и `rating` не передаёт вовсе — хотя `upsertAnime` их
   принимает, а Shikimori отдаёт (`english`, `synonyms`, `score` в `ShikimoriAnimeDetails`).
   `Episode.name` не заполняется никогда.
@@ -201,7 +202,7 @@
   ### ⚠️ Важное, но не блокирующее
 
   - **`detectIntros` при импорте работает вхолостую.** Шаг
-    [import-service.ts:549-601](main/services/import/import-service.ts) честно считает главы, но
+    [import-service.ts:326-379](main/services/import/import-service.ts) честно считает главы, но
     сохраняет их через `updateChaptersInManifest`, а та первым делом читает `Episode.manifestCid`
     ([chapter-creator.ts:63-72](main/services/chapter-creator.ts)) — которого на этой фазе ещё
     нет. Ранний `return`, потеря без ошибки. Спасает pre-pass в билдере
@@ -210,14 +211,14 @@
     глав навсегда) и **ни у одного** эпизода не должно быть живых глав (смешанная раздача, где
     часть серий имеет главы в контейнере, оставит остальные без них).
   - **`needsReupload` может сняться, когда не должен.** Условие снятия —
-    [import-service.ts:721-728](main/services/import/import-service.ts), считает `failedCount` от
+    [import-service.ts:511-518](main/services/import/import-service.ts), считает `failedCount` от
     файлов **текущего** entry. Долив 2 серий из 12 через `retryMissingEpisodes` снимет флаг со
     всего аниме, хотя 10 серий остались на старой раздаче. То же при подтверждении `window.confirm`
     о расхождении числа серий.
   - **Осиротевшие эпизоды.** Если в новой раздаче серий меньше, старые `Episode` остаются в БД со
     старыми мёртвыми CID, их никто не чистит — утянут `contentHealth` в `broken`.
   - **`updateAnimeManifest` целиком под `log.warn`**
-    ([import-service.ts:1586](main/services/import/import-service.ts)) — импорт вернёт
+    ([relations-and-manifest.ts:96-108](main/services/import/relations-and-manifest.ts)) — импорт вернёт
     `success: true` у аниме **без `directoryCid`**. После прогона проверять отдельно.
   - **`rutrackerUrl`/`sourceTorrentCid` заполняются только при импорте со страницы торрентов** —
     совпадает с Блокером 1 и усиливает его: при заливке «по папкам» папка `source/` не появится
@@ -342,6 +343,11 @@ franchise-api}.ts` на глобальный `fetch` (Node/undici). Заодно
       `handleImport` — проверка + confirm + прокидка `existingAnimeId` в `ImportWizardDialog`;
       [import-service.ts](main/services/import/import-service.ts) — сброс `needsReupload` в конце
       `process()` при чистом успехе retranscode-режима.
+
+      **Обновление (2026-08-09):** `import-service.ts` разросся до ~1650 строк и был разбит на
+      модули по фазам пайплайна — см. запись «Декомпозиция `import-service.ts` по фазам
+      пайплайна» в [PLAN_COMPLETED.md](PLAN_COMPLETED.md). Строчные ссылки на код в этом файле
+      выше уже указывают на актуальные модули.
 
 - [x] **Аудит `buildAnimeDirectory` — молчаливые потери не попадали в contentHealth** (v0.52.3)
       — при переходе на новый pinner-сервер и полной перезаливке важно, чтобы regenerateAll честно
@@ -2642,4 +2648,4 @@ model Torrent {
 
 ---
 
-**Последнее обновление:** 2026-07-29
+**Последнее обновление:** 2026-08-09

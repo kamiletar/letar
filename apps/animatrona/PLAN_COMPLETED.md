@@ -6,6 +6,57 @@
 
 ---
 
+## Декомпозиция `import-service.ts` по фазам пайплайна (2026-08-09)
+
+Чистый рефакторинг, без изменения поведения. Повод: файл разросся до ~1650 строк и держал в
+одном классе создание записи Anime/Season, demux+БД одного файла эпизода, оркестрацию
+параллельного транскодирования, весь постпроцесс (скриншоты/спрайт/манифест/IPFS-загрузка),
+финальные шаги (связи Shikimori/навигация/публикация AnimeManifest) и cleanup при ошибке —
+именно поэтому три бага из аудита `directoryCid` (см. выше, «Аудит полноты `directoryCid`»)
+остались незамеченными: рассинхрон полей между местом сброса и местом записи было трудно
+увидеть в одном файле на 1600+ строк.
+
+Выделено шесть модулей рядом с `import-service.ts`, каждый — одна фаза пайплайна:
+
+- `anime-record-setup.ts` — профиль кодирования, постер, Anime/Season в БД, жанры, внешние
+  субтитры (`loadEncodingProfile`, `downloadAndSavePoster`, `createAnimeRecord`,
+  `createSeasonRecord`, `saveGenresIfAvailable`, `scanExternalSubs`). Не использовали `this` —
+  перенесены как есть.
+- `episode-file-processor.ts` — бывшее замыкание `processFile` внутри `process()`: demux,
+  создание/обновление Episode (включая retranscode-ветку со сбросом CID — Блокер 2 аудита),
+  аудио/субтитры/главы, сборка `BatchImportItem`. Опиралось на `this` (emitProgress/isCancelled)
+  и на общий для всех параллельных файлов счётчик `completedFiles` — теперь то и другое
+  передаётся явным контекстом (`EpisodeFileProcessingContext`), включая мутируемый
+  `fileCounter: { completed }` вместо замыкания над `let`.
+- `transcode-runner.ts` — `runParallelTranscode`: запуск батча через
+  `ParallelTranscodeManager`, отслеживание прогресса и stalled-таймаута. Один неиспользуемый
+  параметр (`postProcessDataMap`, не читался в теле функции) убран при переносе — это не влияет
+  на поведение, просто была мёртвая часть сигнатуры.
+- `post-process-runner.ts` — `runPostProcess`: скриншоты, превью-спрайт, манифест эпизода,
+  загрузка видео/манифеста в IPFS, финальный `updateEpisode` (та самая точка, где `spriteCid`/
+  `vttCid` не записываются в БД — Блокер 2).
+- `relations-and-manifest.ts` — `syncRelations`, `updateEpisodeNavigation`,
+  `generateAndPublishAnimeManifest` (публикация `directoryCid`). Не использовали `this`.
+- `import-failure-cleanup.ts` — двухуровневый cleanup при ошибке/отмене (открепление CID из БД
+  и tracked-CID, удаление аниме и папки). Та самая точка, где `createdAnimeId` может указывать
+  на чужое аниме — Блокер 1 аудита.
+
+`import-service.ts` сократился с ~1650 до 566 строк — остался класс с состоянием
+(`createdAnimeId`/`createdAnimeFolder`/`_isCancelled`/`videoEncodingMeta`), прогресс-хелперы
+(`emitProgress`/`setStage`/`setFileProgress`) и `process()`/`cancel()`, которые оркестрируют
+вызовы выделенных модулей.
+
+**Три бага из аудита `directoryCid` не исправлены** — задача была явно про чистый рефакторинг.
+После декомпозиции все три живут в куда более узком контексте: Блокер 1 — целиком в
+`import-failure-cleanup.ts` (90 строк), Блокер 2 — на стыке `episode-file-processor.ts` (сброс)
+и `post-process-runner.ts` (запись), Блокер 3 — целиком в `anime-record-setup.ts` (199 строк).
+Строчные ссылки в `PLAN.md` на находки аудита обновлены на новые файлы/строки.
+
+Проверено: `nx typecheck:tsgo animatrona` зелёный, `nx lint animatrona` — единственная ошибка в
+`import-service.ts` (`preserve-caught-error` в pre-encode-блоке) существовала в файле и до
+рефакторинга (код перенесён без изменений), не относится к декомпозиции; `nx build animatrona`
+собирается без новых предупреждений/ошибок (webpack + Next.js production build).
+
 ## Документирован паттерн dual-source CID-полей (2026-08-09)
 
 Формализовал находку из Блокера 2 аудита `directoryCid` (см. ниже) как отдельный кросс-репо
