@@ -1,5 +1,50 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-08-09 — Фаза 7.1: расслоение forms-core, Этапы 1–3б
+
+Делегировано `forms-coordinator` (thread `forms-phase7-1-core-split`). Создан новый Nx-проект
+`libs/forms-core` — dependency-free ядро `@letar/forms` (Clean Architecture / DIP, решение Ками
+2026-07-08). Три этапа закрыты, каждый отдельным коммитом с полным гейтом
+(`typecheck:tsgo`/`test`/`lint` + `nx run-many -t typecheck:tsgo --all` по всему монорепо).
+
+**Этап 1** — каркас `libs/forms-core` (теги `scope:shared`/`type:core`/`owner:letar`), пилотный
+модуль `validators/ru` (476 строк, 9 файлов) перенесён целиком. Граница ядра держится на двух
+ESLint-правилах: `depConstraints` (`type:core notDependOnLibsWithTags: ['type:ui']`) +
+`no-restricted-imports` на `**/forms-core/src/**/*.ts` против `react`/`@chakra-ui/*`/
+`@tanstack/react-*` — подтверждена негативной пробой (временный импорт Chakra в ядро валит
+`nx lint forms-core`, без него — зелёный).
+
+**Этап 2** — Zod-мета-движок (~2030 строк, 9 файлов: `schema-constraints`, `schema-traversal`,
+`constraint-hints`, `common-meta`, `with-ui-meta`, `schema-meta`, `zod-utils`, `types/meta-types`,
+`types/size-types`) под `@letar/forms-core/schema`. Карго-культный `'use client'` снят со всех —
+чистые TS-функции без единого runtime-импорта фреймворка.
+
+**Этап 3а/3б** — `server-errors/`, `utils/` (deepEqual+safeStringify), `security/file-security.ts`,
+`offline/` (offline-service+types), `captcha/` (verify+types), `analytics/` (types+4 адаптера).
+React-зависимые части (хуки, компоненты) остались в `libs/forms`.
+
+**Ключевые находки** (детали и объяснения — в `PLAN.md` § Фаза 7.1):
+
+- резолв `@letar/forms-core` в приложениях-потребителях требует ДВА независимых механизма
+  одновременно: `paths` в `tsconfig.json` (~20 приложений) И реальная workspace-зависимость
+  `"@letar/forms-core": "workspace:*"` в `libs/forms/package.json` + `bun install` — приложения
+  вроде `dashboard` резолвят `@letar/forms` вообще без `paths`, только через `customConditions`;
+- «framework-free» ≠ «platform-free»: `file-security.ts` (DOM API — Image/document/canvas) и
+  `offline-service.ts` (динамический `await import('idb-keyval')`, не пойманный статическим
+  грепом аудита) — framework-free, но требуют `lib: dom` в tsconfig ядра и `fake-indexeddb/auto`
+  в его vitest-окружении, которого у `forms-core` изначально не было вовсе;
+- ловушка TS6307 у приложений со «смешанной моделью» `include` (`animatrona`,
+  `label-printer-desktop`) — нужен явный glob на `../../libs/forms-core/src/**/*.ts`.
+
+Публичный API `@letar/forms` не изменился — все перенесённые модули стали тонкими
+реэкспорт-шимами. Побочно найден и зафиксирован отдельной задачей (уже закрыт, см. запись выше)
+баг Rules of Hooks в `document-field-base.tsx`.
+
+**Остаток Фазы 7.1** (записан в `PLAN.md`, следующая сессия `/forms-dev`): Этапы 3в-3г
+(credit-card/format-phone/table-utils/dadata «хвост», `i18n/create-form-error-map.ts`), Этап 4
+(UIKit-контракт ~20 примитивов + перевод 3 пилотных полей), Этап 5 (документация 6 групп +
+отчёт координатору).
+
 ## 2026-08-09 — Техдолг: rules-of-hooks в document-field-base.tsx (не false-positive)
 
 - **`createDocumentField`** (`document/document-field-base.tsx`, используется FieldInn/FieldOgrn/
