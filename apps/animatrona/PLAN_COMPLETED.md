@@ -6,6 +6,29 @@
 
 ---
 
+## Electron 42.8.1 → 43.3.0 разом во всех Electron-приложениях монорепо (2026-08-09)
+
+Затронуты animatrona, kami-key-the, label-printer-desktop, poster-microtext-desktop и корневой
+`package.json` — единая сессия, один коммит на весь летар (submodule `poster-microtext-desktop`
+закоммичен и запушен отдельно, per правила submodule).
+
+**animatrona раньше не пиновала свою версию electron вовсе** — неявно наследовала из корневого
+`package.json` (`^42.8.1`), в отличие от остальных трёх Electron-приложений, каждое из которых
+уже пинило точную версию в собственном `devDependencies` (конвенция из
+[electron.md](/.claude/rules/electron.md)). Заведён явный пин `"electron": "43.3.0"` в
+`apps/animatrona/package.json`, приведено к общей конвенции.
+
+Заодно найден и починен рассинхрон, существовавший ещё до этой сессии: `electron-builder.yml`
+(`electronVersion`) и ABI-версия в `@electron/rebuild` для `classic-level`
+(`postinstall`/`postinstall:dev` в `package.json`) были застрявшие на `41.0.0`, хотя root уже
+был на `42.8.1` — то есть native-модуль пересобирался под версию на два мажора младше реально
+используемой. Оба места синхронизированы с новой версией `43.3.0`.
+
+**Проверка headless** (GUI в сендбоксе Claude Code недоступен, см. electron.md): пересборка
+`classic-level` через `@electron/rebuild -v 43.3.0` — без ошибок. `nx typecheck:tsgo animatrona`
+— зелёный. Реальный запуск GUI (окно, IPC, автообновление) не проверялся — на это закладывается
+первый живой запуск у пользователя.
+
 ## Декомпозиция `import-service.ts` по фазам пайплайна (2026-08-09)
 
 Чистый рефакторинг, без изменения поведения. Повод: файл разросся до ~1650 строк и держал в

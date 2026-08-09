@@ -2,6 +2,15 @@
 
 Детальное описание всех реализованных фич Label Printer Desktop.
 
+## Electron 39.2.7 → 43.3.0 (2026-08-09)
+
+Часть сессии-апдейта Electron разом во всех Electron-приложениях монорепо (см.
+`apps/animatrona/PLAN_COMPLETED.md` за детали проверки и общий контекст). Самый большой скачок
+версии среди четырёх приложений (3 мажора). `canvas` (native-модуль) проверен headless-запросом
+`ELECTRON_RUN_AS_NODE=1 electron -e "require('canvas')"` под новым Node ABI — загружается без
+ошибок. `nx typecheck:tsgo` зелёный (те же 17 предсуществующих ошибок на несгенерённые
+`src/generated/*`, не связаны с этой правкой).
+
 ## tsconfig.json — убраны `references` на `libs/*` (смешанная модель, 2026-08-07)
 
 Убраны 5 ссылок (`forms`, `query-provider`, `chakra-provider`, `label-printer-core`,
