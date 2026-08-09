@@ -58,6 +58,36 @@
       "import": "./src/lib/analytics/index.ts",
       "default": "./src/lib/analytics/index.ts"
     },
+    "./credit-card": {
+      "@letar/source": "./src/lib/credit-card/index.ts",
+      "types": "./src/lib/credit-card/index.ts",
+      "import": "./src/lib/credit-card/index.ts",
+      "default": "./src/lib/credit-card/index.ts"
+    },
+    "./phone": {
+      "@letar/source": "./src/lib/phone/index.ts",
+      "types": "./src/lib/phone/index.ts",
+      "import": "./src/lib/phone/index.ts",
+      "default": "./src/lib/phone/index.ts"
+    },
+    "./table": {
+      "@letar/source": "./src/lib/table/index.ts",
+      "types": "./src/lib/table/index.ts",
+      "import": "./src/lib/table/index.ts",
+      "default": "./src/lib/table/index.ts"
+    },
+    "./address": {
+      "@letar/source": "./src/lib/address/index.ts",
+      "types": "./src/lib/address/index.ts",
+      "import": "./src/lib/address/index.ts",
+      "default": "./src/lib/address/index.ts"
+    },
+    "./i18n": {
+      "@letar/source": "./src/lib/i18n/index.ts",
+      "types": "./src/lib/i18n/index.ts",
+      "import": "./src/lib/i18n/index.ts",
+      "default": "./src/lib/i18n/index.ts"
+    },
     "./package.json": "./package.json"
   }
 }

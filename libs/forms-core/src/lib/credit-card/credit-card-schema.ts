@@ -1,6 +1,6 @@
 import { z } from 'zod/v4'
-import { isExpiryValid } from './utils/format-expiry'
-import { luhn } from './utils/luhn'
+import { isExpiryValid } from './format-expiry'
+import { luhn } from './luhn'
 
 /**
  * Готовая Zod-схема для данных банковской карты.

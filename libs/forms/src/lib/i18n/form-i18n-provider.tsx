@@ -1,22 +1,15 @@
 'use client'
 
+import type { TranslateFunction, TranslateParams } from '@letar/forms-core/i18n'
+import { createFormErrorMap } from '@letar/forms-core/i18n'
 import { createContext, type ReactNode, useContext, useEffect } from 'react'
 import { z } from 'zod/v4'
-import { createFormErrorMap } from './create-form-error-map'
 
 /**
- * Параметры для интерполяции в сообщениях об ошибках
- * @example { minimum: 5, maximum: 100 }
+ * Реэкспорт типов из @letar/forms-core (Фаза 7.1, Этап 3в, dependency-free ядро) —
+ * публичный путь `@letar/forms/i18n` не меняется для потребителей.
  */
-export type TranslateParams = Record<string, string | number | boolean | undefined>
-
-/**
- * Функция перевода (совместима с next-intl useTranslations)
- * @param key - Ключ перевода в формате "ModelName.fieldName.property"
- * @param params - Опциональные параметры для интерполяции
- * @returns Переведённая строка или fallback
- */
-export type TranslateFunction = (key: string, params?: TranslateParams) => string
+export type { TranslateFunction, TranslateParams }
 
 /**
  * Контекст для i18n в формах

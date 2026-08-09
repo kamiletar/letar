@@ -1,10 +1,10 @@
 'use client'
 
 import { Field, Group, Input, Text } from '@chakra-ui/react'
+import { formatPhoneNumber, stripPhoneNumber } from '@letar/forms-core/phone'
 import type { ChangeEvent, ReactElement } from 'react'
 import type { PhoneCountry, PhoneFieldProps } from '../../types'
 import { createField, FieldError, FieldLabel } from '../base'
-import { formatPhoneNumber, stripPhoneNumber } from './utils/format-phone'
 
 /**
  * Phone masks by country
@@ -48,7 +48,7 @@ const COUNTRY_FLAGS: Record<PhoneCountry, string> = {
  * Form.Field.Phone - Phone input with country mask
  *
  * Форматирование маски — чистый JS на каждый `onChange` (без сторонних
- * DOM-мутирующих mask-библиотек, см. `utils/format-phone.ts`). Раньше использовался
+ * DOM-мутирующих mask-библиотек, см. `@letar/forms-core/phone`). Раньше использовался
  * `use-mask-input` (imask), который мутирует DOM в обход React и конфликтует
  * с controlled `value` при быстром посимвольном вводе в WebKit.
  *

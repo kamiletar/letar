@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { z } from 'zod/v4'
 import { createFormErrorMap, SIZE_ORIGINS, STRING_FORMATS, ZOD_ERROR_CODES } from './create-form-error-map'
-import type { TranslateFunction } from './form-i18n-provider'
+import type { TranslateFunction } from './types'
 
 /**
  * Мок функция перевода для тестов

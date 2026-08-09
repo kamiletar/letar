@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { detectBrand } from './utils/detect-brand'
-import { formatExpiry, isExpiryValid } from './utils/format-expiry'
-import { formatCardNumber, maxFormattedLength, stripCardNumber } from './utils/format-number'
-import { luhn } from './utils/luhn'
+import { detectBrand } from './detect-brand'
+import { formatExpiry, isExpiryValid } from './format-expiry'
+import { formatCardNumber, maxFormattedLength, stripCardNumber } from './format-number'
+import { luhn } from './luhn'
 
 describe('luhn', () => {
   it('должен пройти для валидного номера Visa', () => {

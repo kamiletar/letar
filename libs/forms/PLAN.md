@@ -871,8 +871,16 @@ React, а React-адаптер зависит от абстракций ядра
 
 - [ ] **7.1 Расслоение `forms-core`** — вынести Chakra-free логику + определить UIKit-интерфейс.
       Ценно само по себе (чистит архитектуру), даже оставаясь только на Chakra.
-      🚧 **В работе** — делегировано forms-dev 2026-08-09 (координатор дал добро, очередь запросов
-      от агентов была пуста), thread `forms-phase7-1-core-split`.
+      🚧 **В работе, 4 из 5 этапов готовы** (делегировано forms-dev 2026-08-09, thread
+      `forms-phase7-1-core-split`). Готово: Этап 1 (каркас `libs/forms-core`, пилот
+      `validators/ru`, граница без React/Chakra проверена негативной пробой линта), Этап 2
+      (Zod-мета-движок, ~2030 строк — самая ценная часть ядра), Этапы 3а/3б (`server-errors/`,
+      `utils/`, `security/file-security.ts`, `offline/`, `captcha/`, `analytics/adapters/`), Этапы
+      3в-3г (credit-card, format-phone, table-utils + чистые table-types, dadata address provider,
+      i18n error map — детали в `PLAN_COMPLETED.md`).
+      Публичный API `@letar/forms` не менялся — реэкспорт-шимы. Остаток на следующую сессию:
+      Этап 4 (UIKit-контракт ~20 примитивов + перевод 3 пилотных полей), Этап 5 (документация 6
+      групп + отчёт координатору). Итог сессии — `libs/forms/PLAN_COMPLETED.md`.
       - ✅ **Этап 1 закрыт (2026-08-09):** каркас `libs/forms-core` (Nx-проект, теги
       `scope:shared`/`type:core`/`owner:letar`), пилотный модуль `validators/ru` (476 строк, 9
       файлов) перенесён из `libs/forms` целиком, `@letar/forms/validators/ru` теперь тонкий

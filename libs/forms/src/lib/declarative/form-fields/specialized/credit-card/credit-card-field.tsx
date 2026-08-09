@@ -1,14 +1,19 @@
 'use client'
 
 import { Box, Field, Flex, Group, Input, Text, Tooltip } from '@chakra-ui/react'
+import type { CardBrand } from '@letar/forms-core/credit-card'
+import {
+  detectBrand,
+  formatCardNumber,
+  formatExpiry,
+  isExpiryValid,
+  luhn,
+  maxFormattedLength,
+  stripCardNumber,
+} from '@letar/forms-core/credit-card'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { useDeclarativeFormOptional } from '../../../form-context'
 import { CardBrandIcon } from './card-brand-icon'
-import type { CardBrand } from './utils/detect-brand'
-import { detectBrand } from './utils/detect-brand'
-import { formatExpiry, isExpiryValid } from './utils/format-expiry'
-import { formatCardNumber, maxFormattedLength, stripCardNumber } from './utils/format-number'
-import { luhn } from './utils/luhn'
 
 /** Раскладка компонента */
 export type CreditCardLayout = 'inline' | 'stacked'

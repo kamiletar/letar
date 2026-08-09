@@ -1,6 +1,6 @@
 'use client'
 
-import type { CardBrand } from './utils/detect-brand'
+import type { CardBrand } from '@letar/forms-core/credit-card'
 
 interface CardBrandIconProps {
   brand: CardBrand

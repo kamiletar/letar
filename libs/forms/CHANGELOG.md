@@ -4,6 +4,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.4.6] - 2026-08-09
+
+### Changed
+
+- **Внутренний рефакторинг (Фаза 7.1, Этап 3в-3г) — без изменений публичного API и поведения.**
+  Chakra/React-free утилиты `credit-card` (luhn, detectBrand, formatExpiry, formatCardNumber,
+  creditCardSchema), `format-phone`, `table-utils` (+ чистые типы из `table-types`), DaData
+  address provider и `create-form-error-map` вынесены в `@letar/forms-core` (dependency-free
+  ядро). Все прежние пути импорта (`@letar/forms`, `@letar/forms/i18n`, локальные `./providers`,
+  `./table-types`/`./table-utils`) продолжают работать — реэкспорт-шимы.
+
 ## [1.4.5] - 2026-08-09
 
 ### Added

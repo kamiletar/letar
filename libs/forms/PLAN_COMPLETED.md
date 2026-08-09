@@ -45,6 +45,44 @@ React-зависимые части (хуки, компоненты) остал�
 (UIKit-контракт ~20 примитивов + перевод 3 пилотных полей), Этап 5 (документация 6 групп +
 отчёт координатору).
 
+## 2026-08-09 — Фаза 7.1: расслоение forms-core, Этап 3в-3г
+
+Продолжение (thread `forms-phase7-1-core-split`). Перенесены пять оставшихся Chakra-free/React-free
+модулей под новые subpath-экспорты `@letar/forms-core`:
+
+- `./credit-card` — `luhn`, `detectBrand`/`getBrandInfo`, `formatExpiry`/`isExpiryValid`,
+  `formatCardNumber`/`stripCardNumber`/`maxFormattedLength`, `creditCardSchema`. В `libs/forms`
+  остались только Chakra-компоненты `CreditCardField`/`CardBrandIcon` (импортируют утилиты из
+  `@letar/forms-core/credit-card` напрямую).
+- `./phone` — `format-phone.ts` (чистый JS форматтер по маске, добавлен в v1.4.4 для фикса
+  WebKit-бага с DOM-мутирующими mask-библиотеками). `field-phone.tsx` импортирует из
+  `@letar/forms-core/phone`.
+- `./table` — `table-utils.ts` целиком + Chakra/React-free часть `table-types.ts` (`TableColumnDef`,
+  `CellFieldType`, `ResolvedColumn`, `TableFooterDef`, `CellCoord`, `TableNavigationState`).
+  `TableEditorFieldProps`/`TableEditorContextValue` (используют `ReactNode`) остались в
+  `libs/forms` и реэкспортируют чистые типы обратно — то же разделение, что и раньше для похожих
+  React+Chakra компонентов.
+- `./address` — `createDaDataProvider` + `AddressProvider`/`AddressSuggestion`/`SuggestionOptions`.
+  `providers/index.ts` в `libs/forms` стал тонким реэкспорт-шимом (потребители `field-address.tsx`/
+  `field-city.tsx`/`create-form.tsx` не поменялись — импортируют из локального `./providers`).
+- `./i18n` — `createFormErrorMap` + `TranslateFunction`/`TranslateParams` (тип функции перевода).
+  React Context (`FormI18nProvider`/`useFormI18n`) остался в `libs/forms/i18n`, импортирует типы и
+  `createFormErrorMap` из `@letar/forms-core/i18n` и реэкспортирует их для обратной совместимости
+  публичного пути `@letar/forms/i18n`.
+
+**Находка:** `libs/forms/vitest.config.ts` резолвит `@letar/forms-core/*` НЕ через `node_modules`
+(там симлинка вообще нет — резолв в приложениях идёт через `customConditions`/`exports`, но
+`vitest.config.ts` библиотеки использует явный `resolve.alias` per-subpath), а вручную прописанным
+`resolve.alias` на каждый subpath. Добавление нового subpath-экспорта в `forms-core/package.json`
+без зеркальной записи в этом alias-массиве ломает **все** тесты `libs/forms` разом (66 из 98 файлов
+упали на одной ошибке `Failed to resolve import "@letar/forms-core/i18n"") — потому что почти
+каждый спек транзитивно тянет`libs/forms/src/index.ts`, а тот тянет`i18n`. Починка — добавить
+alias`'@letar/forms-core/<subpath>': resolve(__dirname, '../forms-core/src/lib/<subpath>/index.ts')`одновременно с добавлением subpath в`forms-core/package.json`. Гейт:`nx run-many -t
+typecheck:tsgo,test --projects=forms,forms-core` — 750/750 тестов, typecheck зелёный.
+
+Публичный API `@letar/forms` не изменился — реэкспорт-шимы. Остаток: Этап 4 (UIKit-контракт) и
+Этап 5 (документация 6 групп).
+
 ## 2026-08-09 — Техдолг: rules-of-hooks в document-field-base.tsx (не false-positive)
 
 - **`createDocumentField`** (`document/document-field-base.tsx`, используется FieldInn/FieldOgrn/
