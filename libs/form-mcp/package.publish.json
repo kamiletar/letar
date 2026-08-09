@@ -1,6 +1,5 @@
 {
   "name": "@letar/form-mcp",
-  "version": "1.0.1",
   "description": "MCP server for @letar/forms — provides AI assistants with component docs, field types, form patterns, and code generation for 40+ declarative form fields",
   "type": "module",
   "main": "./index.js",

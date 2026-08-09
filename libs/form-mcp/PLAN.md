@@ -25,19 +25,20 @@ MCP сервер для AI-ассистентов, работающих с @leta
 
 ## Phase 2: NPM пакет (@letar/form-mcp) ✅
 
-| Задача                                                    | Статус               |
-| --------------------------------------------------------- | -------------------- |
-| tsup.config.ts — бандл CLI (38 KB)                        | ✅                   |
-| package.publish.json с bin, keywords, files               | ✅                   |
-| cli.ts с авто-обнаружением docs (bundled/monorepo/env)    | ✅                   |
-| scripts/copy-docs.ts для сборки                           | ✅                   |
-| Nx targets: build:npm, publish:npm                        | ✅                   |
-| tsconfig.publish.json                                     | ✅                   |
-| README.md с инструкциями для Claude Code, Cursor, VS Code | ✅                   |
-| CHANGELOG.md                                              | ✅                   |
-| Тест bundled CLI из dist/                                 | ✅                   |
-| Публикация на npm                                         | ⬜ Когда обкатаем    |
-| Регистрация в MCP Registry                                | ⬜ После npm publish |
+| Задача                                                                                       | Статус               |
+| -------------------------------------------------------------------------------------------- | -------------------- |
+| tsup.config.ts — бандл CLI (38 KB)                                                           | ✅                   |
+| package.publish.json с bin, keywords, files                                                  | ✅                   |
+| cli.ts с авто-обнаружением docs (bundled/monorepo/env)                                       | ✅                   |
+| scripts/copy-docs.ts для сборки                                                              | ✅                   |
+| Nx targets: build:npm, publish:npm                                                           | ✅                   |
+| tsconfig.publish.json                                                                        | ✅                   |
+| README.md с инструкциями для Claude Code, Cursor, VS Code                                    | ✅                   |
+| CHANGELOG.md                                                                                 | ✅                   |
+| Тест bundled CLI из dist/                                                                    | ✅                   |
+| Публикация на npm                                                                            | ⬜ Когда обкатаем    |
+| Регистрация в MCP Registry                                                                   | ⬜ После npm publish |
+| build:npm — убрать рассинхрон version между package.json и package.publish.json (2026-08-09) | ✅                   |
 
 ---
 

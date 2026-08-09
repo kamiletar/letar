@@ -115,7 +115,7 @@
         "commands": [
           "bunx tsup",
           "bunx tsx scripts/copy-docs.ts",
-          "cp package.publish.json dist/package.json",
+          "node scripts/write-publish-package-json.mjs",
           "cp README.md dist/README.md",
           "cp README.ru.md dist/README.ru.md",
           "cp CHANGELOG.md dist/ 2>/dev/null || true"
@@ -128,6 +128,7 @@
         "default",
         "{projectRoot}/tsup.config.ts",
         "{projectRoot}/package.publish.json",
+        "{projectRoot}/scripts/write-publish-package-json.mjs",
         "{workspaceRoot}/libs/forms/docs/**/*.md"
       ],
       "outputs": ["{projectRoot}/dist"],
