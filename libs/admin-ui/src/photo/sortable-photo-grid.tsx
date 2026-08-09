@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Box, Grid, IconButton, SimpleGrid, type SimpleGridProps, Text } from '@chakra-ui/react'
+import { Badge, Box, Grid, IconButton, Input, SimpleGrid, type SimpleGridProps, Text } from '@chakra-ui/react'
 import {
   closestCenter,
   DndContext,
@@ -32,6 +32,8 @@ export interface SortablePhotoGridProps {
   onSetCover?: (id: string) => Promise<{ error?: string }>
   /** Удалить фото. */
   onDelete: (id: string) => Promise<{ error?: string }>
+  /** Сохранить alt-текст фото. Если не передано — поле не показывается. */
+  onEditAlt?: (id: string, alt: string) => Promise<{ error?: string }>
   /** Вызывается после любой успешной мутации — обычно `router.refresh()`. */
   onChanged?: () => void
   columns?: SimpleGridProps['columns']
@@ -41,17 +43,19 @@ export interface SortablePhotoGridProps {
 }
 
 /**
- * Сетка фото с drag&drop-сортировкой (@dnd-kit, мышь/тач/клавиатура) и опциональной
- * кнопкой «Сделать главной» — первое фото в порядке считается cover.
+ * Сетка фото с drag&drop-сортировкой (@dnd-kit, мышь/тач/клавиатура), опциональной
+ * кнопкой «Сделать главной» (первое фото в порядке считается cover) и опциональным
+ * полем alt-текста под каждой карточкой.
  *
  * Загрузку файлов и сам список фото (source of truth) держит вызывающий компонент —
- * эта сетка только сортирует/удаляет/помечает главное через переданные экшны.
+ * эта сетка только сортирует/удаляет/помечает главное/правит alt через переданные экшны.
  */
 export function SortablePhotoGrid({
   items,
   onReorder,
   onSetCover,
   onDelete,
+  onEditAlt,
   onChanged,
   columns = { base: 2, sm: 3, md: 4 },
   colorPalette = 'brand',
@@ -99,6 +103,25 @@ export function SortablePhotoGrid({
     })
   }
 
+  function handleEditAlt(id: string, alt: string) {
+    if (!onEditAlt) {
+      return
+    }
+    setError(null)
+    const previous = photos
+    setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, alt } : p))) // оптимистичное обновление
+
+    startTransition(async () => {
+      const result = await onEditAlt(id, alt)
+      if (result.error) {
+        setError(result.error)
+        setPhotos(previous) // откат
+        return
+      }
+      onChanged?.()
+    })
+  }
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
     if (!over || active.id === over.id) {
@@ -140,10 +163,12 @@ export function SortablePhotoGrid({
                 isCover={index === 0}
                 isPending={isPending}
                 showCoverButton={!!onSetCover}
+                showAltInput={!!onEditAlt}
                 colorPalette={colorPalette}
                 imageSizes={imageSizes}
                 onSetCover={() => handleSetCover(photo.id)}
                 onDelete={() => handleDelete(photo.id)}
+                onEditAlt={(alt) => handleEditAlt(photo.id, alt)}
               />
             ))}
           </SimpleGrid>
@@ -158,10 +183,12 @@ interface SortablePhotoCardProps {
   isCover: boolean
   isPending: boolean
   showCoverButton: boolean
+  showAltInput: boolean
   colorPalette: string
   imageSizes: string
   onSetCover: () => void
   onDelete: () => void
+  onEditAlt: (alt: string) => void
 }
 
 function SortablePhotoCard({
@@ -169,11 +196,18 @@ function SortablePhotoCard({
   isCover,
   isPending,
   showCoverButton,
+  showAltInput,
   colorPalette,
   imageSizes,
   onSetCover,
   onDelete,
+  onEditAlt,
 }: SortablePhotoCardProps) {
+  const [altDraft, setAltDraft] = useState(photo.alt ?? '')
+
+  useEffect(() => {
+    setAltDraft(photo.alt ?? '')
+  }, [photo.alt])
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: photo.id })
 
   const style = {
@@ -242,6 +276,22 @@ function SortablePhotoCard({
           <PiTrash />
         </IconButton>
       </Grid>
+      {showAltInput && (
+        <Box px={1} pb={1}>
+          <Input
+            size="2xs"
+            placeholder="Alt-текст"
+            value={altDraft}
+            disabled={isPending}
+            onChange={(e) => setAltDraft(e.target.value)}
+            onBlur={() => {
+              if (altDraft !== (photo.alt ?? '')) {
+                onEditAlt(altDraft)
+              }
+            }}
+          />
+        </Box>
+      )}
     </Box>
   )
 }
