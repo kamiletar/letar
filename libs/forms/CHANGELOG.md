@@ -4,6 +4,29 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.4.7] - 2026-08-09
+
+### Changed
+
+- **UIKit-контракт `forms-core` + пруф на 3 полях (Фаза 7.1, Этап 4) — завершает расслоение
+  ядра.** Новый subpath `@letar/forms-core/uikit` — типы-only интерфейс (~20 примитивов из
+  аудита связанности 2026-07-05), описывающий, что полю нужно от UI-библиотеки: `FieldRoot`,
+  `FieldLabel`, `FieldError`, `Input`, `Checkbox`, `Select` реализованы и используются;
+  `NumberInput`, `NativeSelect`, `Combobox`, `RadioGroup`, `SegmentGroup`, `PinInput` и layout
+  (`Box`/`HStack`/`VStack`/`Text`/`Button`/`IconButton`) — типизированы, но пока без адаптера
+  (не мигрировали поля). `Form.Field.String`, `Form.Field.Checkbox`, `Form.Field.Select`
+  переведены на потребление контракта через `chakraUIKit` (`libs/forms`) вместо прямого импорта
+  Chakra — это единственное место, где контракт связывается с конкретной UI-библиотекой; будущий
+  `forms-shadcn` реализует тот же контракт без изменений в самих полях. Публичный API
+  `@letar/forms` не изменился, 750/750 тестов зелёные.
+- **Fix:** `libs/forms/vitest.config.ts` резолвил `@letar/forms-core/*` через ручной
+  per-subpath alias-список, рассинхронизировавшийся при добавлении нового subpath (падало 66/98
+  тестов, см. 1.4.6). Заменено на программную генерацию из `forms-core/package.json` → `exports`
+  — рассинхрон теперь структурно невозможен. Попутно найден и исправлен второй баг того же
+  участка: `rollup-plugin-alias` матчит объектные алиасы по префиксу, и ключ `@letar/forms-core`
+  без подпути обязан сортироваться после всех подпутей — иначе перехватывает `/schema`, `/utils`
+  и т.д. раньше их собственной записи.
+
 ## [1.4.6] - 2026-08-09
 
 ### Changed

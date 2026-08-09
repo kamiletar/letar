@@ -1,5 +1,39 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-08-09 — Фаза 7.1: расслоение forms-core, Этапы 4–5 (завершение фазы)
+
+Продолжение (thread `forms-phase7-1-core-split`). Закрывают Фазу 7.1 целиком.
+
+**Этап 4** — зафиксирован TS-интерфейс `UIKit` под `@letar/forms-core/uikit` (~20 примитивов из
+аудита связанности 2026-07-05). Реализованы и используются (`UIKitCorePrimitives`): `FieldRoot`,
+`FieldLabel`, `FieldError`, `Input`, `Checkbox`, `Select`. Типизированы, но без адаптера
+(`UIKitExtendedPrimitives`, опциональны в составе `UIKit`): `NumberInput`, `NativeSelect`,
+`Combobox`, `RadioGroup`, `SegmentGroup`, `PinInput`, layout-примитивы. Три показательных поля
+(`Field.String` — текстовое, `Field.Checkbox` — бинарное, `Field.Select` — выборное со сложным
+compound-API и порталом) переведены на потребление контракта вместо прямого импорта Chakra;
+`chakraUIKit` (`libs/forms/.../base/uikit-chakra.tsx`) — единственное место, где контракт
+связывается с конкретной UI-библиотекой. Публичный API `@letar/forms` не изменился, 750/750
+тестов зелёные, `nx run-many -t typecheck:tsgo --projects=forms,forms-core` зелёный.
+
+**Побочная находка и фикс** (не про Этап 4 напрямую, но обнаружена при работе с той же
+`vitest.config.ts`): предыдущая сессия закоммитила (`ad318324`) вычисление `formsCoreAlias` из
+`forms-core/package.json` → `exports`, но не подключила его — старый ручной alias-список
+остался активным, а вычисленная переменная висела неиспользуемой (ESLint warning). При
+подключении (`...formsCoreAlias` вместо ручного списка) вскрылась вторая, более глубокая
+проблема: `rollup-plugin-alias` (через который Vite резолвит объектные `resolve.alias`) матчит
+по префиксу, и ключ `@letar/forms-core` без подпути обязан идти **после** всех подпутей — иначе
+перехватывает `/schema`, `/utils` и т.д. до того, как до них доходит очередь. `Object.entries`
+на `exports` даёт `.` первым (объект exports так и оформлен), поэтому наивное подключение
+`formsCoreAlias` без сортировки ломало 70 из 98 тестовых файлов разом. Фикс — сортировка по
+длине ключа по убыванию перед сборкой alias-объекта.
+
+**Этап 5** — документация: `libs/forms/README.md` (раздел «Архитектура: framework-free ядро +
+Chakra-адаптер»), `libs/forms/CHANGELOG.md` + версия 1.4.7, `libs/forms-core/README.md`
+(написан с нуля — генератор оставил только заглушку `<!-- Опиши публичный API здесь -->`, README
+описывает архитектурный принцип, таблицу всех 15 subpath-экспортов и раздел про UIKit-контракт).
+`apps/form-develop-app`/`form-docs`/`form-example` не тронуты — Этап 4 внутренний рефакторинг
+без нового пользовательского API, наглядного демо-эффекта нет.
+
 ## 2026-08-09 — Фаза 7.1: расслоение forms-core, Этапы 1–3б
 
 Делегировано `forms-coordinator` (thread `forms-phase7-1-core-split`). Создан новый Nx-проект

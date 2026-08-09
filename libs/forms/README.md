@@ -432,6 +432,19 @@ import { FieldString, FieldTextarea } from '@letar/forms/fields/text'
 
 При вводе текста в одно поле формы из 10 полей — **остальные 9 полей НЕ ре-рендерятся** (0 лишних рендеров). TanStack Form обеспечивает field-level подписки — каждое поле изолировано.
 
+## Архитектура: framework-free ядро + Chakra-адаптер
+
+`@letar/forms` — React/Chakra-адаптер над [`@letar/forms-core`](../forms-core/README.md), пакетом,
+который не импортирует ни один UI-фреймворк (Zod-мета, валидаторы, i18n-словари, серверные ошибки,
+security-утилиты, offline-логика — всё Chakra-free и React-free). Зависимость идёт внутрь (Clean
+Architecture / DIP): не ядро зависит от React, а адаптер — от абстракций ядра.
+
+Часть полей (`Field.String`, `Field.Checkbox`, `Field.Select`) построена поверх типового
+контракта `UIKit` (`@letar/forms-core/uikit`) вместо прямого импорта Chakra-компонентов —
+конкретную реализацию контракта даёт `chakraUIKit` внутри `libs/forms`. Это подготавливает почву
+для альтернативных UI-скинов (`forms-shadcn`), которым не нужно менять сами поля — только дать
+свою реализацию контракта. Публичный API `@letar/forms` при этом не меняется.
+
 ## Связанные документы
 
 - [/.claude/docs/forms.md](../../.claude/docs/forms.md) — документация по формам

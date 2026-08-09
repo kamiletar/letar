@@ -869,9 +869,9 @@ React, а React-адаптер зависит от абстракций ядра
 
 ### Roadmap
 
-- [ ] **7.1 Расслоение `forms-core`** — вынести Chakra-free логику + определить UIKit-интерфейс.
+- [x] **7.1 Расслоение `forms-core`** — вынести Chakra-free логику + определить UIKit-интерфейс.
       Ценно само по себе (чистит архитектуру), даже оставаясь только на Chakra.
-      🚧 **В работе, 4 из 5 этапов готовы** (делегировано forms-dev 2026-08-09, thread
+      ✅ **Завершено 2026-08-09** (делегировано forms-dev, thread
       `forms-phase7-1-core-split`). Готово: Этап 1 (каркас `libs/forms-core`, пилот
       `validators/ru`, граница без React/Chakra проверена негативной пробой линта), Этап 2
       (Zod-мета-движок, ~2030 строк — самая ценная часть ядра), Этапы 3а/3б (`server-errors/`,
@@ -884,10 +884,16 @@ React, а React-адаптер зависит от абстракций ядра
       750/750 тестов зелёные, affected-typecheck по потребителям (form-develop-app, form-docs,
       form-example, dashboard, animatrona, grandslamcup, label-printer-desktop) — все ошибки
       pre-existing, не связаны с переносом.
-      ⚠️ **Находка:** `libs/forms/vitest.config.ts` резолвит `@letar/forms-core/*` через явный
-      `resolve.alias` per-subpath (симлинка в node_modules нет) — новый subpath в
-      `forms-core/package.json` без зеркальной записи в этом alias-массиве ломает разом
-      66/98 файлов тестов `libs/forms` (почти каждый спек транзитивно тянет `src/index.ts`).
+      ✅ **Находка закрыта окончательно** (коммит `ad318324` добавил вычисление
+      `formsCoreAlias` из `exports`, но не подключил его — старый ручной список остался
+      активным, отсюда ESLint-warning про неиспользуемую переменную; довершено в рамках
+      Этапа 4, 2026-08-09): `resolve.alias` теперь `...formsCoreAlias` вместо ручного списка.
+      Подключение вскрыло вторую, более глубокую проблему — `rollup-plugin-alias` матчит
+      объектные алиасы по префиксу, и bare `@letar/forms-core` (без подпути, идёт первым в
+      `Object.entries(exports)` из-за `.` в начале) перехватывал `/schema`, `/utils` и другие
+      подпути раньше их собственной записи, ломая 70/98 тестов. Фикс — сортировка ключей по
+      длине по убыванию перед сборкой alias-объекта. Рассинхрон между `exports` и alias теперь
+      структурно невозможен, а не просто починен разово.
       Публичный API `@letar/forms` не менялся — реэкспорт-шимы. Остаток на следующую сессию:
       Этап 4 (UIKit-контракт ~20 примитивов + перевод 3 пилотных полей), Этап 5 (документация 6
       групп + отчёт координатору). Итог сессии — `libs/forms/PLAN_COMPLETED.md`.
@@ -967,8 +973,25 @@ React, а React-адаптер зависит от абстракций ядра
       (DOM, IndexedDB, localStorage, `fetch`) и **динамические** импорты npm-пакетов нужно
       проверять раздельно, тестовый прогон — единственный надёжный сигнал полноты миграции
       окружения, само по себе успешное `typecheck` этого не ловит.
-      - Следующий шаг (Этап 3в-3г): credit-card/format-phone/table-utils/dadata «хвост»,
-      `i18n/create-form-error-map.ts`.
+      - ✅ **Этап 4 закрыт (2026-08-09):** зафиксирован TS-интерфейс `UIKit` под
+      `@letar/forms-core/uikit` (~20 примитивов). Реализованы и используются:
+      `FieldRoot`/`FieldLabel`/`FieldError`/`Input`/`Checkbox`/`Select`. Типизированы без
+      адаптера: `NumberInput`/`NativeSelect`/`Combobox`/`RadioGroup`/`SegmentGroup`/`PinInput` +
+      layout. Три показательных поля (`Field.String`, `Field.Checkbox`, `Field.Select` —
+      текстовое/бинарное/выборное со сложным compound-API) переведены на потребление контракта
+      через `chakraUIKit` вместо прямого импорта Chakra. Публичный API не менялся, 750/750
+      тестов зелёные. Побочно найден и исправлен баг предыдущей сессии: вычисленный
+      `formsCoreAlias` в `vitest.config.ts` был добавлен, но не подключён; при подключении
+      вскрылась вторая проблема — `rollup-plugin-alias` матчит по префиксу, bare
+      `@letar/forms-core` обязан сортироваться после всех подпутей. Детали —
+      `PLAN_COMPLETED.md`.
+      - ✅ **Этап 5 закрыт (2026-08-09):** документация всех 6 групп — `libs/forms/README.md`
+      (раздел про архитектуру ядра), `CHANGELOG.md` + версия 1.4.7, `libs/forms-core/README.md`
+      (написан с нуля, был заглушкой генератора). Demo-приложения не тронуты — внутренний
+      рефакторинг без нового пользовательского API.
+      - **🎉 Фаза 7.1 полностью завершена.** Итог: `libs/forms-core` — самостоятельный
+      dependency-free пакет с 15 subpath-экспортами + типовым UIKit-контрактом, готовый фундамент
+      под 7.3 (shadcn-скин) и 7.8 (Vue-пруф).
 - [ ] **7.2 Standalone-проверка** — `npm i @letar/forms` в чистом Vite/Next вне монорепо (workspace-зависимости).
 - [ ] **7.3 `@letar/forms-shadcn` beta** — 15–20 ходовых полей (Input/Textarea/Number/Select/Checkbox/Radio/Date).
       Покрывает ~80% форм. Тяжёлые (RichText/Table/Signature/Combobox) — «Chakra-only пока».
