@@ -332,6 +332,48 @@ import Link from 'next/link'
 
 - `apps/premium-rosstil/src/app/admin/error.tsx`
 - `apps/premium-rosstil/src/app/admin/admin-dashboard-client.tsx`
+
+### ⚠️ `asChild` + условный рендер веток: не оборачивай альтернативы в `<>...</>`
+
+Компонент с `asChild` (например `Card.Root asChild`) внутри себя вызывает `React.Children.only`
+на единственном ожидаемом потомке-слоте. Если этот потомок (скажем, `NextLink`) в свою очередь
+получает **разные наборы дочерних элементов** в зависимости от условия, соблазн — обернуть каждую
+ветку тернарника в JSX-фрагмент:
+
+```tsx
+// ❌ Fragment как единственный children — ломает React.Children.only где-то выше по дереву
+<NextLink href={href}>
+  {condition
+    ? (
+      <>
+        <AspectRatio>...</AspectRatio>
+        <Card.Body>...</Card.Body>
+      </>
+    )
+    : <Card.Body>...</Card.Body>}
+</NextLink>
+```
+
+Такой код проходит `typecheck`/`lint`/`build` без единой ошибки — падает только в рантайме браузера
+(`React.Children.only expected to receive a single React element child`), потому что Fragment
+превращается в один React-элемент вместо плоского списка детей, который слот `asChild` ожидает
+раскрыть до исходного количества.
+
+**Фикс** — не оборачивать альтернативы в Fragment, а расставлять условный рендер как независимые
+прямые дети родителя (`{cond && (...)}` рядом с обязательным элементом, а не единый тернарник с
+Fragment по обеим веткам):
+
+```tsx
+// ✅ независимые прямые children, без общей обёртки
+<NextLink href={href}>
+  {condition && <AspectRatio>...</AspectRatio>}
+  <Card.Body>...</Card.Body>
+</NextLink>
+```
+
+Найдено в `apps/domwellbes/src/app/_components/catalog-card.tsx` (2026-08-09,
+`PLAN_COMPLETED.md` соответствующая запись).
+
 - `apps/premium-rosstil/src/app/not-found.tsx`
 
 ## ⚠️ КРИТИЧНО - Изменения API Chakra UI v3
