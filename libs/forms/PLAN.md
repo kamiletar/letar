@@ -25,12 +25,38 @@
   Deploy Agent). Обход на уровне теста — клик по `[data-part="control"]` вместо `label`
   (`apps/svoichuzhie-e2e/src/03-subscription.spec.ts`, коммит `241802c9`) — но сам компонент
   остаётся сломан для живых пользователей во всех приложениях на `@letar/forms` `Field.Checkbox`.
-- **Статус:** ожидание
-- **Примечание:** отправить agent-mail репорт `forms-coordinator` не удалось —
-  `send_message` отклоняет получателя `forms-coordinator` как «looks like a descriptive role
-  name», хотя это легитимно зарегистрированное фиксированное имя координатора (агент существует,
-  id подтверждён через `resource://agents/c-web-letar`). Похоже на регрессию валидации на
-  стороне MCP-сервера agent-mail — стоит проверить отдельно и/или сообщить куда следует.
+- **Статус:** ✅ расследовано 2026-08-09 (forms-dev) — **не баг `FieldCheckbox`**, закрыто без
+  изменений в `libs/forms`. Реальная причина найдена и подтверждена и в jsdom (RTL/vitest), и в
+  реальном Chromium (Claude Browser pane, dev-сервер svoichuzhie на месте):
+  - Плоский текстовый `Form.Field.Checkbox` (без вложенных элементов в `label`) переключается
+    штатно кликом в ЛЮБУЮ точку `<label>`, включая текст — воспроизведено юнит-тестом
+    (`userEvent.click` по тексту лейбла) и реальным кликом в Chromium на `form-develop-app`
+    (`newsletter` чекбокс). Исходное предположение «Zag.js вешает toggle только на `control`,
+    не на `root`/`label`» — неверно: `getRootProps()` из `@zag-js/checkbox` действительно не
+    делает toggle сама, но нативное browser-поведение `<label>`→`<input>` forwarding работает и
+    переключает скрытый `<input>`, откуда идёт `onChange`/`onCheckedChange` в форму.
+  - Настоящая причина именно у `svoichuzhie` — `SubscribeForm` (`apps/svoichuzhie/src/app/_components/subscribe-form.tsx`)
+    оборачивает часть текста согласия в `<a href="/privacy">`. Текст переносится на 2 строки, и
+    геометрический ЦЕНТР bounding box всего `<label>` (куда `Playwright.click()` кликает по
+    умолчанию) физически попадает ВНУТРЬ этой ссылки — подтверждено вычислением
+    `getBoundingClientRect()` прямо на dev-сервере (`centerIsInsideLink: true`). Клик по ссылке
+    **тоже переключает чекбокс** (проверено), но **ОДНОВременно уводит навигацией на `/privacy`**
+    (реальный клик по `<a href>`), после чего Playwright-локаторы на исходной странице
+    (`consentCheckbox.isChecked()`/`toBeChecked()`) обращаются к отсутствующим/detached элементам
+    и падают детерминированно на каждой попытке — это и дало «0 успехов за 15с», а не отказ
+    toggle-логики.
+  - **Рекомендация владельцу svoichuzhie:** добавить `target="_blank" rel="noopener"` на `<a
+    href="/privacy">` внутри `Checkbox.Label` в `subscribe-form.tsx` — убирает уводящую навигацию
+    с текущей страницы (заодно человечнее: пользователь не теряет заполненную форму, кликнув
+    политику). Обход в `03-subscription.spec.ts` (клик по `[data-part="control"]`, коммит
+    `241802c9`) можно оставить как есть — он корректен и не создаёт проблем, откатывать не
+    обязательно.
+  - Общий вывод для всех потребителей `@letar/forms`: `Form.Field.Checkbox` с обычным текстовым
+    `label` — безопасен и работает предсказуемо. Вкладывать в `label` навигирующую ссылку без
+    `target="_blank"` — общий footgun (клик по ссылке одновременно переключает чекбокс И уводит
+    со страницы), стоит иметь в виду при консент-чекбоксах в других приложениях (152-ФЗ паттерн
+    встречается не только у svoichuzhie).
+  - Полная переписка и цепочка экспериментов — в agent-mail, тред `form-svoichuzhie-checkbox-label`.
 
 ---
 
@@ -531,19 +557,24 @@ Do not call Hooks inside useEffect(...), useMemo(...), or other built-in Hooks.
 
 ### Запросы от агентов
 
-#### [2026-07-22] `Form.Field.Phone` — не проходит ввод в WebKit e2e (от dsperevod)
+#### [2026-07-22] `Form.Field.Phone` — не проходит ввод в WebKit e2e (от dsperevod) ✅ ГОТОВО
 
 - **Запросил:** root-weaver
 - **Приоритет:** high
 - **Описание:** `apps/dsperevod-e2e/src/callback-drawer.spec.ts` — все 4 теста (маска телефона + 3 сценария отправки) падают **только в WebKit**, все — на шаге ввода телефона (`phoneInput.pressSequentially('9185568172', { delay: 20 })` не приводит к ожидаемому значению маски). Chromium/Firefox проходят. Обнаружено §18.7 Тираж M1 batch2 (staging-e2e-гейт), не диагностировано глубоко — не в скоупе root-weaver (компонент `FieldPhone`, `libs/forms/src/lib/declarative/form-fields/specialized/field-phone.tsx`, использует `use-mask-input`/`withMask`, юнит-тестов на реальный ввод клавиш нет, только рендер/начальное значение — `field-phone.spec.tsx`). Подозрение: `withMask`/событийная модель WebKit (Safari) не синхронизируется с `pressSequentially` так же, как Chromium/Firefox — известный класс проблем у masked-input библиотек в WebKit.
-- **Статус:** в работе → forms-dev (thread `form-dsperevod-phone-webkit`, 2026-08-04)
+- **Статус:** ✅ готово — v1.4.4 (коммит `58eb9d1b`), маска телефона переписана на чистый JS
+  форматтер вместо `use-mask-input` (imask мутировал DOM в обход React, конфликтовало с
+  controlled `value` при быстром посимвольном вводе в WebKit). Готово к перепроверке
+  `dsperevod-e2e --project=webkit` со стороны root-weaver/dsperevod (thread
+  `form-dsperevod-phone-webkit`, ответ forms-dev 2026-08-09)
 
 #### [2026-06-12] Провайдер Yandex SmartCaptcha для Form.Captcha (от svoichuzhie)
 
 - **Запросил:** MagentaRaven
 - **Приоритет:** high
 - **Описание:** новый провайдер `smartcaptcha` рядом с turnstile/recaptcha/hcaptcha (`libs/forms/src/lib/captcha/`). Причина: РФ-проект (152-ФЗ) — Turnstile/reCAPTCHA отправляют IP и телеметрию браузера на зарубежные серверы (трансграничная передача ПДн), SmartCaptcha хранит данные в РФ. Серверная верификация: `POST https://smartcaptcha.yandexcloud.net/validate`. Нужно к Фазе 1–2 svoichuzhie (регистрация фан-клуба, подписка) — сейчас не блокирует (идёт Фаза 0, дизайн).
-- **Статус:** в работе → forms-dev (thread `form-svoichuzhie-smartcaptcha`, 2026-08-04)
+- **Статус:** ожидание — не начато, forms-dev берёт следующим сразу после checkbox-бага
+  (thread `form-svoichuzhie-smartcaptcha`, статус подтверждён 2026-08-09)
 
 #### [2026-08-04] Серверный код forms не под `src/server/` — граница `no-restricted-imports` его не видит
 
