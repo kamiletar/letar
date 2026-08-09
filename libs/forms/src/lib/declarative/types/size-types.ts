@@ -1,26 +1,6 @@
-'use client'
-
 /**
- * Standard field size (xs, sm, md, lg)
- *
- * Used in most components:
- * Select, Combobox, Autocomplete, RadioGroup, SegmentedGroup,
- * Rating, Tags, DateRange
+ * Реализация вынесена в @letar/forms-core (Фаза 7.1, dependency-free ядро) —
+ * этот файл только реэкспортирует, чтобы внутренние относительные импорты
+ * (`./types/size-types`) по всей `libs/forms` не пришлось переписывать.
  */
-export type FieldSize = 'xs' | 'sm' | 'md' | 'lg'
-
-/**
- * Field size without xs (sm, md, lg)
- *
- * Used in components that don't support xs:
- * RadioCard, CheckboxCard, Listbox, Slider
- */
-export type FieldSizeWithoutXs = 'sm' | 'md' | 'lg'
-
-/**
- * Extended field size (2xs to 2xl)
- *
- * Used in components with a full range of sizes:
- * PinInput, ColorPicker
- */
-export type FieldSizeExtended = '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'
+export type { FieldSize, FieldSizeExtended, FieldSizeWithoutXs } from '@letar/forms-core/schema'

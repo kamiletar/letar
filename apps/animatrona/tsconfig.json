@@ -23,6 +23,7 @@
       "@letar/forms": ["../../libs/forms/src/index.ts"],
       "@letar/forms-core": ["../../libs/forms-core/src/index.ts"],
       "@letar/forms-core/validators/ru": ["../../libs/forms-core/src/lib/validators/ru/index.ts"],
+      "@letar/forms-core/schema": ["../../libs/forms-core/src/lib/schema/index.ts"],
       "@letar/ui": ["../../libs/ui/src/index.ts"],
       "@letar/video-player-react": ["../../libs/video-player-react/src/index.ts"],
       "@letar/video-player-core": ["../../libs/video-player-core/src/index.ts"],

@@ -899,9 +899,27 @@ React, а React-адаптер зависит от абстракций ядра
       (`../../libs/forms/src/**/*.ts` в списке) дополнительно требовали такой же строки для
       `forms-core` — иначе TS6307, ровно ловушка из
       [lib-entry-points.md](/.claude/docs/lib-entry-points.md).
-      - Следующий шаг (Этап 2): перенос Zod-мета-движка (`schema-constraints.ts`,
-      `schema-traversal.ts`, `constraint-hints.ts` и др., ~1900 строк) — самый ценный кусок
-      ядра, требует снятия карго-культного `'use client'` с 28 файлов.
+      - ✅ **Этап 2 закрыт (2026-08-09):** Zod-мета-движок перенесён целиком (9 файлов,
+      ~2030 строк: `schema-constraints.ts`, `schema-traversal.ts`, `constraint-hints.ts`,
+      `common-meta.ts`, `with-ui-meta.ts`, `schema-meta.ts`, `zod-utils.ts`,
+      `types/meta-types.ts`, `types/size-types.ts`) под новый subpath
+      `@letar/forms-core/schema`. Карго-культный `'use client'` снят со всех — они чистые TS
+      без единого runtime-импорта фреймворка (были просто помечены директивой без причины).
+      Все 7 flat-файлов в `libs/forms` стали тонкими реэкспорт-шимами (тот же паттерн, что
+      `validators/ru/index.ts` в Этапе 1) — внутренние относительные импорты (`./zod-utils`,
+      `./schema-constraints` и т.п.) по всей `declarative/` не пришлось трогать. Единственная
+      находка при переносе: `schema-meta.ts` импортировал `FieldUIMeta` через барrel `./types`
+      (тянущий `field-types.ts` с `ReactNode` — React-зависимый), пришлось переключить на
+      прямой `./types/meta-types` — иначе ядро унесло бы React-тип транзитивно. 4 spec-файла
+      (`schema-constraints`, `schema-traversal`, `constraint-hints`, `with-ui-meta`) переехали
+      вместе с реализацией — тестировать через реэкспорт-шим смысла нет. Тот же двойной
+      механизм резолва из Этапа 1 (`paths` в ~20 `apps/*/tsconfig.json` + subpath в
+      `package.json`) повторён для `@letar/forms-core/schema`. `nx run-many -t typecheck:tsgo
+        --all` — те же 5 предсуществующих несвязанных падений, что после Этапа 1, регрессий нет.
+      - Следующий шаг (Этап 3): перенос остальных чистых модулей батчами —
+      `server-errors/`+`utils/`+`security/file-security.ts`, `offline/`+`captcha/`+
+      `analytics/adapters/`, credit-card/format-phone/table-utils/dadata «хвост»,
+      `i18n/create-form-error-map.ts`.
 - [ ] **7.2 Standalone-проверка** — `npm i @letar/forms` в чистом Vite/Next вне монорепо (workspace-зависимости).
 - [ ] **7.3 `@letar/forms-shadcn` beta** — 15–20 ходовых полей (Input/Textarea/Number/Select/Checkbox/Radio/Date).
       Покрывает ~80% форм. Тяжёлые (RichText/Table/Signature/Combobox) — «Chakra-only пока».

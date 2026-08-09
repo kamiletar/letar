@@ -6,7 +6,8 @@
     "rootDir": ".",
     "paths": {
       "@letar/forms-core": ["../../libs/forms-core/src/index.ts"],
-      "@letar/forms-core/validators/ru": ["../../libs/forms-core/src/lib/validators/ru/index.ts"]
+      "@letar/forms-core/validators/ru": ["../../libs/forms-core/src/lib/validators/ru/index.ts"],
+      "@letar/forms-core/schema": ["../../libs/forms-core/src/lib/schema/index.ts"]
     }
   },
   "include": ["vitest.setup.ts", "src/**/*.ts", "src/**/*.tsx"],

@@ -16,6 +16,12 @@
       "import": "./src/lib/validators/ru/index.ts",
       "default": "./src/lib/validators/ru/index.ts"
     },
+    "./schema": {
+      "@letar/source": "./src/lib/schema/index.ts",
+      "types": "./src/lib/schema/index.ts",
+      "import": "./src/lib/schema/index.ts",
+      "default": "./src/lib/schema/index.ts"
+    },
     "./package.json": "./package.json"
   }
 }
