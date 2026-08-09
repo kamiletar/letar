@@ -176,6 +176,11 @@
   - [ ] Фикс: добавить `spriteCid`/`vttCid`/`chaptersCid` в сброс retranscode **и** писать
         `spriteCid`/`vttCid` в `updateEpisode` постпроцесса.
 
+  Паттерн формализован отдельным кросс-репо документом —
+  [animatrona-db-manifest-dual-source.md](/.claude/docs/animatrona-db-manifest-dual-source.md)
+  (2026-08-09) — таблица порядка чтения/записи по всем трём полям + правило для новых
+  dual-source-полей. Сам фикс из чеклиста выше документ не закрывает.
+
   ### 🚫 Блокер 3 — поля, которые Shikimori отдаёт, а импорт не сохраняет
 
   `createAnimeRecord` ([import-service.ts:930](main/services/import/import-service.ts)) шлёт
