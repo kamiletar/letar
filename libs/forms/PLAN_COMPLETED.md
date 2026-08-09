@@ -1,5 +1,21 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-08-09 — Фикс рассинхрона версии в build:npm (dist/package.json vs package.json)
+
+Найдено при диагностике Фазы 7.2 (сессия forms-dev), зафиксировано отдельно от самого фикса
+`.d.ts`-генерации: `build:npm` копировал `package.publish.json` → `dist/package.json` голым
+`cp`, а у `package.publish.json` было своё поле `version` (`1.2.0`), не связанное с
+`libs/forms/package.json` (`1.4.8`) — прямая публикация ушла бы на npm с устаревшей версией.
+
+**Фикс.** `version` убрано из `package.publish.json`. `dist/package.json` теперь собирает
+`scripts/write-publish-package-json.mjs` — читает `version` из `package.json` (источник истины)
+и мёржит его с шаблоном `package.publish.json`. Шаг в `project.json` (`build:npm`) заменён с
+`cp package.publish.json dist/package.json` на `node scripts/write-publish-package-json.mjs`.
+
+**Проверено:** `nx run "@letar/forms:build:npm" --skip-nx-cache` зелёный целиком (tsup + DTS +
+все `cp`-шаги), `dist/package.json` содержит `version: "1.4.9"`, совпадающую с
+`libs/forms/package.json`.
+
 ## 2026-08-09 — Фаза 7.2: standalone-проверка вне монорепо + фикс сломанной npm-публикации
 
 Thread `forms-phase7-1-core-split`, логическое продолжение Фазы 7.1.

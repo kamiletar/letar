@@ -139,7 +139,7 @@
       "options": {
         "commands": [
           "tsup",
-          "cp package.publish.json dist/package.json",
+          "node scripts/write-publish-package-json.mjs",
           "cp README.en.md dist/README.md",
           "cp README.md dist/README.ru.md",
           "cp CHANGELOG.md dist/",
@@ -149,7 +149,12 @@
         "parallel": false
       },
       "cache": true,
-      "inputs": ["default", "{projectRoot}/tsup.config.ts", "{projectRoot}/package.publish.json"],
+      "inputs": [
+        "default",
+        "{projectRoot}/tsup.config.ts",
+        "{projectRoot}/package.publish.json",
+        "{projectRoot}/scripts/write-publish-package-json.mjs"
+      ],
       "outputs": ["{projectRoot}/dist"],
       "metadata": {
         "description": "Сборка @letar/forms для публикации на npm",

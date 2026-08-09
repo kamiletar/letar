@@ -4,6 +4,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.4.9] - 2026-08-09
+
+### Fixed
+
+- **`build:npm` мог опубликовать пакет со старой версией.** `dist/package.json` копировался
+  голым `cp` из `package.publish.json`, у которого было собственное поле `version`, независимое
+  от `libs/forms/package.json` — на момент находки разошлись на два минора (`1.2.0` против
+  `1.4.8`). Тот же класс ошибки, что и рассинхрон `paths`/vitest-alias/tsconfig — вручную
+  синхронизируемое поле рано или поздно расходится. Фикс — `version` убрано из
+  `package.publish.json` вовсе, `dist/package.json` теперь собирает
+  `scripts/write-publish-package-json.mjs` (мёржит шаблон `package.publish.json` с актуальной
+  версией из `package.json`), рассинхрон структурно невозможен.
+
 ## [1.4.8] - 2026-08-09
 
 ### Fixed
