@@ -20,27 +20,44 @@ OSS-аудитории.
 Библиотека уже включена в монорепозиторий.
 
 ```tsx
-import { FieldCheckbox, FieldSelect, FieldString } from '@letar/forms-shadcn'
+import {
+  FieldCheckbox,
+  FieldDate,
+  FieldNumber,
+  FieldRadioGroup,
+  FieldSegmentGroup,
+  FieldSelect,
+  FieldString,
+  FieldTextarea,
+} from '@letar/forms-shadcn'
 ```
 
-## Поля (beta — 3 из 15–20 запланированных)
+## Поля (beta — 8 из 15–20 запланированных)
 
-| Поле            | Radix-примитив             |
-| --------------- | -------------------------- |
-| `FieldString`   | нативный `<input>`         |
-| `FieldCheckbox` | `@radix-ui/react-checkbox` |
-| `FieldSelect`   | `@radix-ui/react-select`   |
+| Поле                | Radix-примитив                   |
+| ------------------- | -------------------------------- |
+| `FieldString`       | нативный `<input>`               |
+| `FieldCheckbox`     | `@radix-ui/react-checkbox`       |
+| `FieldSelect`       | `@radix-ui/react-select`         |
+| `FieldTextarea`     | нативный `<textarea>`            |
+| `FieldNumber`       | нативный `<input type="number">` |
+| `FieldRadioGroup`   | `@radix-ui/react-radio-group`    |
+| `FieldSegmentGroup` | `@radix-ui/react-toggle-group`   |
+| `FieldDate`         | нативный `<input type="date">`   |
 
-Остальные ходовые поля (Textarea/Number/RadioGroup/Date и т.д.) — по мере миграции, каждое
-почти бесплатно благодаря готовому `UIKit`-контракту.
+Остальные ходовые поля (Combobox/NativeSelect/PinInput/Password и т.д.) — по мере миграции,
+каждое почти бесплатно благодаря готовому `UIKit`-контракту.
 
 ## `shadcnUIKit`
 
 Реализует `UIKitCorePrimitives` (`FieldRoot`/`FieldLabel`/`FieldError`/`Input`/`Checkbox`/`Select`)
 
-- `ErrorFallback` из extended-набора — минимум, нужный `createFieldPrimitives`. Остальные
-  extended-примитивы (`Button`, `Tooltip` и т.д.) появятся по мере миграции полей, которым они
-  нужны.
+- `ErrorFallback`/`NumberInput`/`RadioGroup`/`SegmentGroup` из extended-набора. Остальные
+  extended-примитивы (`Combobox`, `Button`, `Tooltip` и т.д.) появятся по мере миграции полей,
+  которым они нужны.
+- `Textarea` и дата-инпут намеренно НЕ вошли в UIKit-примитив — тот же паттерн, что у
+  Chakra-скина: многострочный текст и дата не входят в core-контракт, поле рисует свою разметку
+  напрямую внутри skin-agnostic `FieldWrapper`.
 
 ## Известные упрощения beta
 

@@ -3,8 +3,10 @@
 import type { UIKitCorePrimitives, UIKitExtendedPrimitives } from '@letar/forms-core/uikit'
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox'
 import * as LabelPrimitive from '@radix-ui/react-label'
+import * as RadioGroupPrimitive from '@radix-ui/react-radio-group'
 import * as SelectPrimitive from '@radix-ui/react-select'
-import { Check, ChevronDown, X } from 'lucide-react'
+import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group'
+import { Check, ChevronDown, Circle, X } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { cn } from '../utils/cn'
 
@@ -18,7 +20,7 @@ import { cn } from '../utils/cn'
  * Реализованы только core-примитивы + минимум extended, нужный `createFieldPrimitives`
  * (`ErrorFallback`) — beta покрывает 3 поля (String/Checkbox/Select), не весь контракт.
  */
-type ImplementedExtendedPrimitives = 'ErrorFallback'
+type ImplementedExtendedPrimitives = 'ErrorFallback' | 'NumberInput' | 'RadioGroup' | 'SegmentGroup'
 
 export type ShadcnUIKit =
   & UIKitCorePrimitives<ReactNode>
@@ -209,6 +211,100 @@ export const shadcnUIKit: ShadcnUIKit = {
           </SelectPrimitive.Content>
         </SelectPrimitive.Portal>
       </SelectPrimitive.Root>
+    )
+  },
+
+  NumberInput({ value, onChange, onBlur, min, max, step, disabled, readOnly, ...rest }) {
+    return (
+      <input
+        data-slot="number-input"
+        type="number"
+        inputMode="decimal"
+        value={value ?? ''}
+        onChange={(e) => {
+          const raw = e.target.value
+          onChange(raw === '' ? null : Number(raw))
+        }}
+        onBlur={onBlur}
+        min={min}
+        max={max}
+        step={step}
+        disabled={disabled}
+        readOnly={readOnly}
+        data-field-name={rest['data-field-name']}
+        className={cn(
+          'border-input placeholder:text-muted-foreground flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs transition-[color,box-shadow] outline-none',
+          'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+          'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
+          'aria-invalid:border-destructive aria-invalid:ring-destructive/20',
+        )}
+      />
+    )
+  },
+
+  RadioGroup({ value, onValueChange, options, disabled, ...rest }) {
+    return (
+      <RadioGroupPrimitive.Root
+        data-slot="radio-group"
+        value={value}
+        onValueChange={onValueChange}
+        disabled={disabled}
+        data-field-name={rest['data-field-name']}
+        className="flex flex-col gap-2"
+      >
+        {options.map((opt) => (
+          <label key={opt.value} className="flex items-center gap-2 text-sm">
+            <RadioGroupPrimitive.Item
+              value={opt.value}
+              disabled={opt.disabled}
+              className={cn(
+                'border-input text-primary aspect-square size-4 shrink-0 rounded-full border shadow-xs outline-none',
+                'focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+                'disabled:cursor-not-allowed disabled:opacity-50',
+              )}
+            >
+              <RadioGroupPrimitive.Indicator className="flex items-center justify-center">
+                <Circle className="fill-primary size-2" />
+              </RadioGroupPrimitive.Indicator>
+            </RadioGroupPrimitive.Item>
+            {opt.label}
+          </label>
+        ))}
+      </RadioGroupPrimitive.Root>
+    )
+  },
+
+  SegmentGroup({ value, onValueChange, options, disabled, ...rest }) {
+    return (
+      <ToggleGroupPrimitive.Root
+        data-slot="segment-group"
+        type="single"
+        value={value}
+        onValueChange={(next) => {
+          // Radix ToggleGroup снимает выбор кликом по активному элементу — контракт SegmentGroup
+          // это не предполагает (одно значение всегда выбрано), поэтому пустой next игнорируется.
+          if (next) { onValueChange(next) }
+        }}
+        disabled={disabled}
+        data-field-name={rest['data-field-name']}
+        className="bg-muted inline-flex items-center gap-1 rounded-md p-1"
+      >
+        {options.map((opt) => (
+          <ToggleGroupPrimitive.Item
+            key={opt.value}
+            value={opt.value}
+            disabled={opt.disabled}
+            className={cn(
+              'rounded-sm px-3 py-1 text-sm outline-none transition-colors',
+              'data-[state=on]:bg-background data-[state=on]:shadow-xs',
+              'focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+              'disabled:cursor-not-allowed disabled:opacity-50',
+            )}
+          >
+            {opt.label}
+          </ToggleGroupPrimitive.Item>
+        ))}
+      </ToggleGroupPrimitive.Root>
     )
   },
 

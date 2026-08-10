@@ -34,3 +34,36 @@ export interface SelectFieldProps extends BaseFieldProps {
   /** Show clear button (auto-determined: true if optional, false if required) */
   clearable?: boolean
 }
+
+/** Props for Form.Field.Textarea (shadcn-скин). */
+export interface TextareaFieldProps extends BaseFieldProps {
+  rows?: number
+  maxLength?: number
+  autoComplete?: string
+}
+
+/** Props for Form.Field.Number (shadcn-скин). */
+export interface NumberFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
+  min?: number
+  max?: number
+  step?: number
+}
+
+export interface RadioOption {
+  label: ReactNode
+  value: string
+  disabled?: boolean
+}
+
+/** Props for Form.Field.RadioGroup (shadcn-скин). */
+export interface RadioGroupFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
+  options: RadioOption[]
+}
+
+/** Props for Form.Field.SegmentGroup (shadcn-скин). */
+export interface SegmentGroupFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
+  options: RadioOption[]
+}
+
+/** Props for Form.Field.Date (shadcn-скин). Beta: нативный `<input type="date">`. */
+export type DateFieldProps = BaseFieldProps
