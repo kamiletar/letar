@@ -1,6 +1,8 @@
 'use client'
 
+import type { AddressProvider } from '@letar/forms-core/address'
 import {
+  FieldAddress,
   FieldCheckbox,
   FieldCombobox,
   FieldDate,
@@ -21,6 +23,16 @@ import {
 } from '@letar/forms-shadcn'
 
 import { DemoForm } from './_components/demo-form'
+
+// Мок-провайдер вместо DaData — в песочнице нет токена, демонстрирует только сам UI/интеграцию.
+const mockAddressProvider: AddressProvider = {
+  async getSuggestions(query) {
+    const streets = ['ул Тверская', 'ул Арбат', 'пр-кт Ленина', 'ул Мира']
+    return streets
+      .filter((s) => s.toLowerCase().includes(query.toLowerCase()))
+      .map((s) => ({ label: `г Москва, ${s}`, value: `г Москва, ${s}`, data: { street: s } }))
+  },
+}
 
 const frameworkOptions = [
   { label: 'React', value: 'react' },
@@ -57,6 +69,7 @@ interface DemoFormValues {
   utm: string
   rating: number
   tags: string[]
+  address: string
 }
 
 const defaultValues: DemoFormValues = {
@@ -77,6 +90,7 @@ const defaultValues: DemoFormValues = {
   utm: '',
   rating: 0,
   tags: [],
+  address: '',
 }
 
 export default function HomePage() {
@@ -84,7 +98,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Form Develop App (shadcn)</h1>
       <p className="text-muted-foreground mt-2 text-sm">
-        Песочница для разработки @letar/forms-shadcn — 17 полей, Фаза 7.3 Шаг 5.
+        Песочница для разработки @letar/forms-shadcn — 18 полей, Фаза 7.3 Шаг 5+.
       </p>
 
       <DemoForm<DemoFormValues>
@@ -119,6 +133,7 @@ export default function HomePage() {
         <FieldRating name="rating" label="Оценка" count={5} />
         <FieldTags name="tags" label="Теги" placeholder="Enter — добавить" />
         <FieldPinInput name="pin" label="PIN-код" length={4} />
+        <FieldAddress name="address" label="Адрес" provider={mockAddressProvider} minChars={1} />
 
         <button
           type="submit"
