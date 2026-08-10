@@ -225,3 +225,48 @@ export interface DateTimePickerFieldProps extends BaseFieldProps {
   /** Шаг времени в минутах (по умолчанию 15) */
   timeStep?: number
 }
+
+/** Коды стран для маски телефона. */
+export type PhoneCountry = 'RU' | 'US' | 'UK' | 'DE' | 'FR' | 'IT' | 'ES' | 'CN' | 'JP' | 'KR' | 'BY' | 'KZ' | 'UA'
+
+/** Props for Form.Field.Phone (shadcn-скин). */
+export interface PhoneFieldProps extends BaseFieldProps {
+  /** Код страны для формата номера (по умолчанию 'RU') */
+  country?: PhoneCountry
+  /** Показывать флаг страны */
+  showFlag?: boolean
+  /** Возвращать значение без маски */
+  autoUnmask?: boolean
+}
+
+/**
+ * Props for Form.Field.Currency (shadcn-скин).
+ *
+ * Beta-упрощение: без живого Intl-форматирования значения внутри инпута при вводе — символ
+ * валюты рядом с полем, не встроен в маску текста (Chakra-версия форматирует посимвольно через
+ * `NumberInput.Root formatOptions`, у UIKit-контракта такого примитива нет).
+ */
+export interface CurrencyFieldProps extends BaseFieldProps {
+  /** Код валюты (по умолчанию 'RUB') */
+  currency?: string
+  /** Стиль отображения валюты (по умолчанию 'symbol') */
+  currencyDisplay?: 'symbol' | 'narrowSymbol' | 'code' | 'name'
+  /** Минимальное значение */
+  min?: number
+  /** Максимальное значение */
+  max?: number
+  /** Шаг изменения (по умолчанию 0.01) */
+  step?: number
+}
+
+/**
+ * Props for Form.Field.Percentage (shadcn-скин). Значение хранится как есть (50 = 50%).
+ */
+export interface PercentageFieldProps extends BaseFieldProps {
+  /** Минимальное значение (по умолчанию 0) */
+  min?: number
+  /** Максимальное значение (по умолчанию 100) */
+  max?: number
+  /** Шаг изменения (по умолчанию 1) */
+  step?: number
+}

@@ -8,6 +8,7 @@ export { createField, FieldErrorBoundary, FieldWrapper } from './lib/uikit/primi
 export { FieldAddress } from './lib/fields/field-address'
 export { FieldCheckbox } from './lib/fields/field-checkbox'
 export { FieldCombobox } from './lib/fields/field-combobox'
+export { FieldCurrency } from './lib/fields/field-currency'
 export { FieldDate } from './lib/fields/field-date'
 export { FieldDateRange } from './lib/fields/field-date-range'
 export { FieldDateTimePicker } from './lib/fields/field-datetime-picker'
@@ -16,6 +17,8 @@ export { FieldHidden, type HiddenFieldProps } from './lib/fields/field-hidden'
 export { FieldNativeSelect } from './lib/fields/field-native-select'
 export { FieldNumber } from './lib/fields/field-number'
 export { FieldPassword } from './lib/fields/field-password'
+export { FieldPercentage } from './lib/fields/field-percentage'
+export { FieldPhone } from './lib/fields/field-phone'
 export { FieldPinInput } from './lib/fields/field-pin-input'
 export { FieldRadioGroup } from './lib/fields/field-radio-group'
 export { FieldRating } from './lib/fields/field-rating'
@@ -31,6 +34,7 @@ export type {
   AddressValue,
   CheckboxFieldProps,
   ComboboxFieldProps,
+  CurrencyFieldProps,
   DateFieldProps,
   DateRangeFieldProps,
   DateRangePreset,
@@ -40,6 +44,9 @@ export type {
   NativeSelectFieldProps,
   NumberFieldProps,
   PasswordFieldProps,
+  PercentageFieldProps,
+  PhoneCountry,
+  PhoneFieldProps,
   PinInputFieldProps,
   RadioGroupFieldProps,
   RadioOption,

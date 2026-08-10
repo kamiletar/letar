@@ -4,6 +4,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.9.0] - 2026-08-10
+
+### Added
+
+- `FieldPhone` — 22-е поле. Тот же чистый JS-форматтер маски, что у Chakra-версии
+  (`@letar/forms-core/phone`, WebKit-safe с v1.4.4). Флаг страны (`showFlag`) — соседний `<span>`,
+  не «приклеенный» бордер (в UIKit-контракте нет примитива для составных инпутов).
+- `FieldCurrency` — 23-е поле. `NumberInput` + символ валюты рядом (через
+  `Intl.NumberFormat().formatToParts`). Beta-упрощение: без живого форматирования значения
+  внутри инпута при вводе.
+- `FieldPercentage` — 24-е поле. `NumberInput` + `%` рядом, значение хранится как есть
+  (50 = 50%). Тот же beta-принцип, что у `FieldCurrency`.
+
 ## [0.8.0] - 2026-08-10
 
 ### Added

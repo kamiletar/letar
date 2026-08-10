@@ -40,6 +40,7 @@ import {
   FieldAddress,
   FieldCheckbox,
   FieldCombobox,
+  FieldCurrency,
   FieldDate,
   FieldDateRange,
   FieldDateTimePicker,
@@ -48,6 +49,8 @@ import {
   FieldNativeSelect,
   FieldNumber,
   FieldPassword,
+  FieldPercentage,
+  FieldPhone,
   FieldPinInput,
   FieldRadioGroup,
   FieldRating,
@@ -61,7 +64,7 @@ import {
 } from '@letar/forms-shadcn'
 ```
 
-## Поля (beta — 21 из 56, продолжаем к паритету с `@letar/forms`)
+## Поля (beta — 24 из 56, продолжаем к паритету с `@letar/forms`)
 
 | Поле                  | Radix-примитив                                |
 | --------------------- | --------------------------------------------- |
@@ -86,6 +89,9 @@ import {
 | `FieldDateRange`      | два нативных `<input type="date">`            |
 | `FieldDuration`       | `NumberInput` ×1 или ×2 (HH:MM)               |
 | `FieldDateTimePicker` | `<input type="date">` + `<input type="time">` |
+| `FieldPhone`          | нативный `<input type="tel">` + маска         |
+| `FieldCurrency`       | `NumberInput` + символ валюты рядом           |
+| `FieldPercentage`     | `NumberInput` + `%` рядом                     |
 
 `FieldCombobox` — упрощённая beta-версия: только статичные `options`, фильтрация по вхождению
 подстроки в `label`. Без `useQuery` (async-поиск) и группировки — Chakra-версия их поддерживает,
@@ -95,7 +101,8 @@ import {
 `FieldCombobox`, с async-подгрузкой из `AddressProvider` (`@letar/forms-core/address`); без
 клавиатурной навигации стрелками по списку и без визуального спиннера в инпуте. `FieldDateRange`
 — пресеты рядом кнопок вместо выпадающего меню (нет `@radix-ui/react-dropdown-menu` в
-peer-зависимостях, не нужна ради 7 текстовых пунктов).
+peer-зависимостях, не нужна ради 7 текстовых пунктов). `FieldCurrency`/`FieldPercentage` — без
+живого Intl-форматирования значения внутри инпута при вводе, символ рядом с полем.
 
 Остальные ходовые поля (RichText, FileUpload и т.д.) — по мере
 миграции, каждое почти бесплатно благодаря готовому `UIKit`-контракту.
