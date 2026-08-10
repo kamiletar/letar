@@ -3,6 +3,7 @@
 #
 # Ставит:
 #   - pre-commit-scope-guard.sh — блокирует голый commit, затянувший несвязанные scope
+#   - pre-commit-semgrep.sh     — статический анализ безопасности по staged-файлам
 #   - pre-commit-sops.sh        — авто-шифрование .env.docker/.env.staging → *.enc
 #
 # Использование:
@@ -30,7 +31,9 @@ install_into() {
   mkdir -p "$hooks_dir"
   cp "$SRC_DIR/pre-commit-scope-guard.sh" "$hooks_dir/_pre-commit-scope-guard.sh"
   cp "$SRC_DIR/pre-commit-sops.sh" "$hooks_dir/_pre-commit-sops.sh"
-  chmod +x "$hooks_dir/_pre-commit-scope-guard.sh" "$hooks_dir/_pre-commit-sops.sh"
+  cp "$SRC_DIR/pre-commit-semgrep.sh" "$hooks_dir/_pre-commit-semgrep.sh"
+  chmod +x "$hooks_dir/_pre-commit-scope-guard.sh" "$hooks_dir/_pre-commit-sops.sh" \
+    "$hooks_dir/_pre-commit-semgrep.sh"
 
   cat > "$hooks_dir/pre-commit" <<'DISPATCH'
 #!/usr/bin/env bash
@@ -39,6 +42,9 @@ set -uo pipefail
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 status=0
 bash "$DIR/_pre-commit-scope-guard.sh" || status=$?
+if [[ $status -eq 0 ]]; then
+  bash "$DIR/_pre-commit-semgrep.sh" || status=$?
+fi
 if [[ $status -eq 0 ]]; then
   bash "$DIR/_pre-commit-sops.sh" || status=$?
 fi

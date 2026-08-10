@@ -116,6 +116,29 @@ async function main() {
     }
   }
 
+  // --pro запускает Postgres MCP Pro (crystaldba/postgres-mcp) вместо голого server-postgres:
+  // EXPLAIN-планы, health-checks, подбор индексов. Оба читают одну и ту же строку подключения,
+  // поэтому переключение — один флаг в .mcp.json.
+  //
+  // ⚠️ `mcp<2` — не перестраховка, а обязательный пин. Postgres MCP Pro не обновлялся с января
+  // 2026 и импортирует `mcp.server.fastmcp`, которого нет во 2.x Python-SDK: без пина сервер
+  // падает на старте с ModuleNotFoundError.
+  const proIdx = args.indexOf('--pro')
+  if (proIdx !== -1) {
+    // restricted — read-only с защитами; unrestricted допустим только на dev-БД
+    const accessMode = args[proIdx + 1] && !args[proIdx + 1].startsWith('--')
+      ? args[proIdx + 1]
+      : 'restricted'
+    // без shell: true — на Windows обёртка в cmd рвёт stdin, и MCP-хендшейк молча не проходит
+    const pro = spawn(
+      'uvx',
+      ['--with', 'mcp<2', 'postgres-mcp', '--access-mode', accessMode, dbUrl],
+      { stdio: 'inherit' },
+    )
+    pro.on('exit', (code) => process.exit(code ?? 0))
+    return
+  }
+
   const mcp = spawn('bunx', ['@modelcontextprotocol/server-postgres', dbUrl], { stdio: 'inherit' })
   mcp.on('exit', (code) => process.exit(code ?? 0))
 }

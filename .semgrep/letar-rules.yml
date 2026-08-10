@@ -1,0 +1,77 @@
+# Правила semgrep, специфичные для letar.
+#
+# Зачем свои: готовые наборы (p/typescript, p/javascript, p/secrets) ловят захардкоженные
+# ключи, но ничего не знают про Prisma/ZenStack. Проверено на положительном контроле
+# 2026-08-10: `$queryRawUnsafe('... ' + userId)` базовыми наборами НЕ ловится.
+#
+# Каждое правило здесь — исполняемая версия запрета, который до этого жил только текстом
+# в .claude/rules/security.md. Текст остаётся (он объясняет «почему»), правило проверяет.
+#
+# Запускается из scripts/hooks/pre-commit-semgrep.sh по staged-файлам.
+# Ручной прогон по всему репо:
+#   uvx semgrep scan --config .semgrep/letar-rules.yml apps libs
+
+rules:
+  - id: letar-prisma-raw-unsafe-concat
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: >-
+      Конкатенация в $queryRawUnsafe/$executeRawUnsafe — SQL-инъекция. Используй тегированный
+      шаблон ($queryRaw`...`), который параметризует значения, либо обычные методы ORM
+      (findUnique/findMany). См. .claude/rules/security.md § SQL Injection защита.
+    patterns:
+      - pattern-either:
+          - pattern: $DB.$queryRawUnsafe($X + $Y, ...)
+          - pattern: $DB.$executeRawUnsafe($X + $Y, ...)
+          - pattern: $DB.$queryRawUnsafe(`...${$X}...`, ...)
+          - pattern: $DB.$executeRawUnsafe(`...${$X}...`, ...)
+
+  - id: letar-dangerously-set-inner-html-unsanitized
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: >-
+      dangerouslySetInnerHTML без санитизации — XSS. Пропусти через DOMPurify.sanitize()
+      либо отдай текстом, React сам экранирует. См. .claude/rules/security.md § XSS защита.
+    # ⚠️ Паттерны — блочными скалярами: двоеточие в `__html:` ломает инлайновый YAML
+    # («mapping values are not allowed here»).
+    patterns:
+      - pattern: |
+          <$EL dangerouslySetInnerHTML={{ __html: $HTML }} />
+      - pattern-not: |
+          <$EL dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(...) }} />
+      - pattern-not: |
+          <$EL dangerouslySetInnerHTML={{ __html: sanitize(...) }} />
+
+  # Та же дыра, но записанная через промежуточную переменную:
+  #   const dangerProp = { __html: html }
+  #   <script dangerouslySetInnerHTML={dangerProp} />
+  # Узкий паттерн выше её не видит (проверено на apps/aboi catalog/[slug]/page.tsx).
+  # Здесь нельзя понять, санитизирован ли html, поэтому WARNING: коммит не блокируется,
+  # но место попадает в глаза. Легитимный случай — JSON-LD из JSON.stringify.
+  - id: letar-dangerously-set-inner-html-indirect
+    languages: [typescript, javascript]
+    severity: WARNING
+    message: >-
+      dangerouslySetInnerHTML через переменную — проверь, что источник санитизирован
+      (DOMPurify) или сгенерирован кодом (JSON.stringify для JSON-LD), а не пришёл от
+      пользователя. См. .claude/rules/security.md § XSS защита.
+    patterns:
+      - pattern: |
+          <$EL dangerouslySetInnerHTML={$PROP} />
+      - pattern-not: |
+          <$EL dangerouslySetInnerHTML={{ __html: $HTML }} />
+
+  - id: letar-dev-session-vars-in-prod-env
+    languages: [generic]
+    paths:
+      include:
+        - '*.env.docker'
+        - '*.env.production'
+    severity: ERROR
+    message: >-
+      ALLOW_DEV_SESSION/DEV_SESSION_TOKEN в прод-конфиге открывают бэкдор-эндпоинт
+      /api/auth/dev-session — создание сессии для любого email без пароля. Эта пара живёт
+      ТОЛЬКО в .env.staging. См. .claude/rules/env-files.md.
+    pattern-either:
+      - pattern: ALLOW_DEV_SESSION=$X
+      - pattern: DEV_SESSION_TOKEN=$X
