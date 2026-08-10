@@ -6,6 +6,7 @@ import {
   FieldAutocomplete,
   FieldCheckbox,
   FieldCheckboxCard,
+  FieldCity,
   FieldCombobox,
   FieldDate,
   FieldDateRange,
@@ -90,6 +91,7 @@ interface DemoFormValues {
   features: string[]
   plan: string
   addons: string[]
+  cityDadata: string
 }
 
 const defaultValues: DemoFormValues = {
@@ -121,6 +123,7 @@ const defaultValues: DemoFormValues = {
   features: [],
   plan: '',
   addons: [],
+  cityDadata: '',
 }
 
 export default function HomePage() {
@@ -128,7 +131,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Form Develop App (shadcn)</h1>
       <p className="text-muted-foreground mt-2 text-sm">
-        Песочница для разработки @letar/forms-shadcn — 28 полей, Фаза 7.3 Шаг 5+.
+        Песочница для разработки @letar/forms-shadcn — 29 полей, Фаза 7.3 Шаг 5+.
       </p>
 
       <DemoForm<DemoFormValues>
@@ -201,6 +204,7 @@ export default function HomePage() {
             { label: 'Backup', value: 'backup', description: 'Автобэкапы' },
           ]}
         />
+        <FieldCity name="cityDadata" label="Город (DaData)" provider={mockAddressProvider} minChars={1} />
 
         <button
           type="submit"
