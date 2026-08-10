@@ -8,7 +8,7 @@
 ## Регистрация в Agent Mail
 
 Фиксированное имя агента: `aira-web-dev`. Общий шаблон вызова `macro_start_session` — см.
-`.claude/rules/app-workflow.md`. Модель — `claude-opus-5` (не дефолтная `claude-sonnet-4-6`).
+`.claude/rules/app-workflow.md`. Модель — `claude-opus-5` (не дефолтная `claude-sonnet-5`).
 
 ## Действия
 

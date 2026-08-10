@@ -9,7 +9,7 @@
 macro_start_session(
   human_key: "C:/web/letar",
   program: "claude-code",
-  model: "claude-sonnet-4-6",
+  model: "claude-sonnet-5",
   agent_name: "dashboard-agent-dev",
   registration_token: "<токен из agent_fixed_names_tokens.md>",
   task_description: "Dashboard Agent — разработка apps/dashboard-agent",

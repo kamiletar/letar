@@ -27,7 +27,7 @@ print('token:', row[1])
 macro_start_session(
   human_key: "C:/web/letar",
   program: "claude-code",
-  model: "claude-sonnet-4-6",
+  model: "claude-sonnet-5",
   task_description: "Deploy Agent — координатор деплоя всех приложений",
   agent_name: "BlackCove",
   registration_token: "<токен из шага 1>"

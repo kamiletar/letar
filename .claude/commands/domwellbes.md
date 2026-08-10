@@ -11,7 +11,7 @@
 ## Регистрация в Agent Mail
 
 Фиксированное имя агента: `domwellbes-dev`. Общий шаблон вызова `macro_start_session` —
-см. `.claude/rules/app-workflow.md`. Модель — `claude-opus-5` (не дефолтная `claude-sonnet-4-6`).
+см. `.claude/rules/app-workflow.md`. Модель — `claude-opus-5` (не дефолтная `claude-sonnet-5`).
 Если токена в `agent_fixed_names_tokens.md` не окажется — работай без координации (конфликтов
 нет — приватный submodule правит только его же агент).
 

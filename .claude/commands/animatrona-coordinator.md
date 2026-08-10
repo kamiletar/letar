@@ -10,7 +10,7 @@
 macro_start_session(
   human_key: "C:/web/letar",
   program: "claude-code",
-  model: "claude-sonnet-4-6",
+  model: "claude-sonnet-5",
   task_description: "Animatrona Coordinator — координация между animatrona приложениями",
   agent_name: "GrayMill",
   file_reservation_paths: ["libs/animatrona-types/**"],

@@ -16,7 +16,7 @@
 ## Регистрация в Agent Mail
 
 Фиксированное имя агента: `aboi-dev`. Общий шаблон вызова `macro_start_session` — см.
-`.claude/rules/app-workflow.md`. Модель — `opus-4.7` (не дефолтная `claude-sonnet-4-6`).
+`.claude/rules/app-workflow.md`. Модель — `claude-opus-5` (не дефолтная `claude-sonnet-5`).
 
 При изменениях в `libs/**` — резервируй конкретные пути и уведомляй владельцев через `send_message`.
 

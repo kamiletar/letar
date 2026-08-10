@@ -12,7 +12,7 @@
 mcp__agent-mail__macro_start_session(
   human_key: "C:/web/letar",
   program: "claude-code",
-  model: "claude-sonnet-4-6",
+  model: "claude-sonnet-5",
   task_description: "<кратко что делаешь>",
   file_reservation_paths: ["apps/<твоё-приложение>/**"],
   file_reservation_reason: "<приложение> development"
@@ -43,7 +43,7 @@ kebab-case именем `<app>-dev`) и сохрани `registration_token` в �
 macro_start_session(
   human_key: "C:/web/letar",
   program: "claude-code",
-  model: "claude-sonnet-4-6",
+  model: "claude-sonnet-5",
   task_description: "Разработка animatrona-tracker: синхронизация пинов",
   file_reservation_paths: ["apps/animatrona-tracker/**"],
   file_reservation_reason: "animatrona-tracker development"
