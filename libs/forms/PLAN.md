@@ -1172,8 +1172,8 @@ React, а React-адаптер зависит от абстракций ядра
       `/server-errors`, `/testing`, `/validators/ru`) — та же схема, что чинила аналогичный пробел
       у `forms-core`. Шесть private submodule (aboi, domwellbes, driving-school, dsperevod,
       studio, svoichuzhie) закоммичены и запушены отдельно внутри своих репо.
-      - 🟡 **Шаг 5 (`forms-shadcn`) — не начат, почва подготовлена.** Добро координатора получено
-      2026-08-10. Зависимости установлены в корневой `package.json` по конвенции репо (реальные
+      - ✅ **Шаг 5 (`forms-shadcn`) — в работе, 32 из 56 полей на 2026-08-10** (детали каждого поля
+      и находки — ниже по разделу). Добро координатора получено 2026-08-10. Зависимости установлены в корневой `package.json` по конвенции репо (реальные
       версии в корне, у библиотеки — `peerDependencies` с диапазоном): десять Radix-примитивов
       (`checkbox`, `select`, `radio-group`, `label`, `slot`, `popover`, `tooltip`, `switch`,
       `toggle-group`, `slider`) + `class-variance-authority` 0.7.1, `clsx` 2.1.1,
