@@ -13,25 +13,10 @@
    - `.claude/artifacts/aboi-questions-for-vitaliy.md` (с ответами Виталия)
    - `.claude/artifacts/aboi-plan-research.md` (best practices)
 
-## Координация
+## Регистрация в Agent Mail
 
-ОБЯЗАТЕЛЬНО при старте сессии вызови `macro_start_session` (см. `.claude/rules/agent-mail.md`):
-
-Фиксированное имя `aboi-dev`, токен — в памяти `agent_fixed_names_tokens.md`
-(таблица «Приложение → agent_name → registration_token»).
-
-```
-macro_start_session(
-  human_key: "C:/web/letar",
-  program: "claude-code",
-  model: "opus-4.7",
-  agent_name: "aboi-dev",
-  registration_token: "<токен из agent_fixed_names_tokens.md>",
-  task_description: "Разработка aboi: <что делаешь>",
-  file_reservation_paths: ["apps/aboi/**"],
-  file_reservation_reason: "aboi development"
-)
-```
+Фиксированное имя агента: `aboi-dev`. Общий шаблон вызова `macro_start_session` — см.
+`.claude/rules/app-workflow.md`. Модель — `opus-4.7` (не дефолтная `claude-sonnet-4-6`).
 
 При изменениях в `libs/**` — резервируй конкретные пути и уведомляй владельцев через `send_message`.
 
@@ -54,21 +39,14 @@ macro_start_session(
 
 ## После завершения задачи
 
-1. Обнови `apps/aboi/PLAN.md` — отметь задачу `[x]`, перенеси сделанное из «Дальше» в «Сделано»
-2. Обнови `apps/aboi/CHANGELOG.md` — добавь запись с версией (semver)
-3. Обнови `apps/aboi/PLAN_TESTING.md` — если добавил тесты
-4. Обнови `apps/aboi/package.json` — увеличь версию (patch для багфикса, minor для фичи)
-5. Прогнать `nx format aboi` → `nx lint aboi` → `nx typecheck:tsgo aboi` → `nx test aboi`
-6. Запусти `preview_start aboi` и визуально проверь изменения, если они UI-наблюдаемы
-7. Закоммить осмысленным сообщением (см. `.claude/rules/git.md`)
+Общий чек-лист — `.claude/rules/app-workflow.md`. Дополнительно для aboi:
+
+- Прогнать `nx test aboi` (помимо format/lint/typecheck)
+- Запусти `preview_start aboi` и визуально проверь изменения, если они UI-наблюдаемы
 
 ## Деплой
 
-⛔ **ЗАПРЕЩЕНО деплоить самостоятельно** — ни SSH, ни `deploy-affected.sh`, ни `docker compose`.
-Даже если пользователь скажет «деплой» — отправь запрос BlackCove через Agent Mail с
-`subject: "deploy-request: aboi"`.
-
-Шаблон вызова и что делать, если BlackCove молчит 10 минут — `.claude/rules/deploy-coordination.md`.
+Запрещено деплоить самостоятельно — см. `.claude/rules/app-workflow.md`.
 
 ## Проект
 

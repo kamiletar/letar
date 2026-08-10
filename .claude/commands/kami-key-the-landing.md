@@ -7,21 +7,8 @@
 
 ## Регистрация в Agent Mail
 
-ОБЯЗАТЕЛЬНО при старте сессии зарегистрируйся под фиксированным именем `kami-key-the-landing-dev`.
-Токен — в памяти `agent_fixed_names_tokens.md` (таблица «Приложение → agent_name → registration_token»).
-
-```
-macro_start_session(
-  human_key: "C:/web/letar",
-  program: "claude-code",
-  model: "claude-sonnet-4-6",
-  agent_name: "kami-key-the-landing-dev",
-  registration_token: "<токен из agent_fixed_names_tokens.md>",
-  task_description: "Разработка kami-key-the-landing: <что делаешь>",
-  file_reservation_paths: ["apps/kami-key-the-landing/**"],
-  file_reservation_reason: "kami-key-the-landing development"
-)
-```
+Фиксированное имя агента: `kami-key-the-landing-dev`. Общий шаблон вызова `macro_start_session` —
+см. `.claude/rules/app-workflow.md`.
 
 ## Действия
 
@@ -33,17 +20,11 @@ macro_start_session(
 
 ## После завершения задачи
 
-1. Обнови `PLAN.md` — отметь задачу как выполненную
-2. Обнови `CHANGELOG.md` — добавь запись об изменениях
-3. Обнови `package.json` — увеличь версию (semver)
+Общий чек-лист — `.claude/rules/app-workflow.md`.
 
 ## Деплой
 
-⛔ **ЗАПРЕЩЕНО деплоить самостоятельно** — ни SSH, ни `deploy-affected.sh`, ни `docker compose`.
-Даже если пользователь скажет «деплой» — отправь запрос BlackCove через Agent Mail с
-`subject: "deploy-request: kami-key-the-landing"`.
-
-Шаблон вызова и что делать, если BlackCove молчит 10 минут — `.claude/rules/deploy-coordination.md`.
+Запрещено деплоить самостоятельно — см. `.claude/rules/app-workflow.md`.
 
 ## Проект
 

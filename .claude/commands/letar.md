@@ -72,11 +72,7 @@ CI по тегу (`forms-v*`, `form-mcp-v*`, `zenstack-form-plugin-v*`) публ
 
 ## Деплой
 
-⛔ **ЗАПРЕЩЕНО деплоить самостоятельно** — ни SSH, ни `deploy-affected.sh`, ни `docker compose`.
-Даже если пользователь скажет «деплой» — отправь запрос BlackCove через Agent Mail с
-`subject: "deploy-request: <app>"`.
-
-Шаблон вызова и что делать, если BlackCove молчит 10 минут — `.claude/rules/deploy-coordination.md`.
+Запрещено деплоить самостоятельно — см. `.claude/rules/app-workflow.md`.
 
 ## Репозиторий
 

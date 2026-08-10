@@ -2,21 +2,8 @@
 
 ## Регистрация в Agent Mail
 
-ОБЯЗАТЕЛЬНО при старте сессии зарегистрируйся под фиксированным именем `synth-dev`.
-Токен — в памяти `agent_fixed_names_tokens.md` (таблица «Приложение → agent_name → registration_token»).
-
-```
-macro_start_session(
-  human_key: "C:/web/letar",
-  program: "claude-code",
-  model: "claude-sonnet-4-6",
-  agent_name: "synth-dev",
-  registration_token: "<токен из agent_fixed_names_tokens.md>",
-  task_description: "Разработка synth: <что делаешь>",
-  file_reservation_paths: ["apps/synth/**"],
-  file_reservation_reason: "synth development"
-)
-```
+Фиксированное имя агента: `synth-dev`. Общий шаблон вызова `macro_start_session` —
+см. `.claude/rules/app-workflow.md`.
 
 ## Читать первым
 
@@ -78,12 +65,9 @@ macro_start_session(
 
 ## После завершения задачи
 
-1. Обнови `PLAN.md` — отметь задачу `[x]`
-2. Обнови `PLAN_COMPLETED.md` — добавь сессию
-3. Обнови `CHANGELOG.md` — добавь запись
-4. Обнови `JOURNAL.md` — термин + метафора (ОБЯЗАТЕЛЬНО)
-5. Обнови `package.json` — bump версии (semver)
-6. Перед коммитом: `nx format synth` → `nx lint synth` → `nx typecheck:tsgo synth`
+Общий чек-лист — `.claude/rules/app-workflow.md`. Дополнительно для synth:
+
+- Обнови `JOURNAL.md` — термин + метафора (ОБЯЗАТЕЛЬНО)
 
 ## Не делать
 
@@ -95,11 +79,7 @@ macro_start_session(
 
 ## Деплой
 
-⛔ **ЗАПРЕЩЕНО деплоить самостоятельно** — ни SSH, ни `deploy-affected.sh`, ни `docker compose`.
-Даже если пользователь скажет «деплой» — отправь запрос BlackCove через Agent Mail с
-`subject: "deploy-request: synth"`.
-
-Шаблон вызова и что делать, если BlackCove молчит 10 минут — `.claude/rules/deploy-coordination.md`.
+Запрещено деплоить самостоятельно — см. `.claude/rules/app-workflow.md`.
 
 ## Проект
 

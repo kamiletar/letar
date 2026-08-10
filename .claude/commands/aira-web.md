@@ -7,21 +7,8 @@
 
 ## Регистрация в Agent Mail
 
-ОБЯЗАТЕЛЬНО при старте сессии зарегистрируйся под фиксированным именем `aira-web-dev`.
-Токен — в памяти `agent_fixed_names_tokens.md` (добавлен 2026-07-30).
-
-```
-macro_start_session(
-  human_key: "C:/web/letar",
-  program: "claude-code",
-  model: "claude-opus-5",
-  agent_name: "aira-web-dev",
-  registration_token: "<токен из agent_fixed_names_tokens.md>",
-  task_description: "Разработка aira-web: <что делаешь>",
-  file_reservation_paths: ["apps/aira-web/**"],
-  file_reservation_reason: "aira-web development"
-)
-```
+Фиксированное имя агента: `aira-web-dev`. Общий шаблон вызова `macro_start_session` — см.
+`.claude/rules/app-workflow.md`. Модель — `claude-opus-5` (не дефолтная `claude-sonnet-4-6`).
 
 ## Действия
 
@@ -33,19 +20,11 @@ macro_start_session(
 
 ## После завершения задачи
 
-1. Обнови `PLAN.md` — отметь задачу как выполненную
-2. Обнови `PLAN_COMPLETED.md` — добавь детали реализации
-3. Обнови `CHANGELOG.md` — добавь запись об изменениях
-4. Обнови `PLAN_TESTING.md` — если добавил тесты
-5. Обнови `package.json` — увеличь версию (semver)
+Общий чек-лист — `.claude/rules/app-workflow.md`.
 
 ## Деплой
 
-⛔ **ЗАПРЕЩЕНО деплоить самостоятельно** — ни SSH, ни `deploy-affected.sh`, ни `docker compose`.
-Даже если пользователь скажет «деплой» — отправь запрос BlackCove через Agent Mail с
-`subject: "deploy-request: aira-web"`.
-
-Шаблон вызова и что делать, если BlackCove молчит 10 минут — `.claude/rules/deploy-coordination.md`.
+Запрещено деплоить самостоятельно — см. `.claude/rules/app-workflow.md`.
 
 ## Проект
 

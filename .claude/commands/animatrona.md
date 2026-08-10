@@ -7,21 +7,8 @@
 
 ## Регистрация в Agent Mail
 
-ОБЯЗАТЕЛЬНО при старте сессии зарегистрируйся под фиксированным именем `animatrona-dev`.
-Токен — в памяти `agent_fixed_names_tokens.md` (таблица «Приложение → agent_name → registration_token»).
-
-```
-macro_start_session(
-  human_key: "C:/web/letar",
-  program: "claude-code",
-  model: "claude-sonnet-4-6",
-  agent_name: "animatrona-dev",
-  registration_token: "<токен из agent_fixed_names_tokens.md>",
-  task_description: "Разработка animatrona: <что делаешь>",
-  file_reservation_paths: ["apps/animatrona/**"],
-  file_reservation_reason: "animatrona development"
-)
-```
+Фиксированное имя агента: `animatrona-dev`. Общий шаблон вызова `macro_start_session` —
+см. `.claude/rules/app-workflow.md`.
 
 ## Действия
 
@@ -46,11 +33,7 @@ send_message(to: ["GrayMill"], subject: "change: <описание>", topic: "an
 
 ## После завершения задачи
 
-1. Обнови `PLAN.md` — отметь задачу как выполненную
-2. Обнови `PLAN_COMPLETED.md` — добавь детали реализации
-3. Обнови `CHANGELOG.md` — добавь запись об изменениях
-4. Обнови `PLAN_TESTING.md` — если добавил тесты
-5. Обнови `package.json` — увеличь версию (semver)
+Общий чек-лист — `.claude/rules/app-workflow.md`.
 
 ## Проект
 

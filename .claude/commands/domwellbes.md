@@ -10,23 +10,10 @@
 
 ## Регистрация в Agent Mail
 
-ОБЯЗАТЕЛЬНО при старте сессии зарегистрируйся под фиксированным именем `domwellbes-dev`.
-Токен есть в таблице `agent_fixed_names_tokens.md` (память, вне репо) — передавай его
-`registration_token`. Если по какой-то причине токена там не окажется — работай без координации
-(конфликтов нет — приватный submodule правит только его же агент).
-
-```
-macro_start_session(
-  human_key: "C:/web/letar",
-  program: "claude-code",
-  model: "claude-opus-5",
-  agent_name: "domwellbes-dev",
-  registration_token: "<из agent_fixed_names_tokens.md>",
-  task_description: "Разработка domwellbes: <что делаешь>",
-  file_reservation_paths: ["apps/domwellbes/**"],
-  file_reservation_reason: "domwellbes development"
-)
-```
+Фиксированное имя агента: `domwellbes-dev`. Общий шаблон вызова `macro_start_session` —
+см. `.claude/rules/app-workflow.md`. Модель — `claude-opus-5` (не дефолтная `claude-sonnet-4-6`).
+Если токена в `agent_fixed_names_tokens.md` не окажется — работай без координации (конфликтов
+нет — приватный submodule правит только его же агент).
 
 ## Действия
 
@@ -38,19 +25,11 @@ macro_start_session(
 
 ## После завершения задачи
 
-1. Обнови `PLAN.md` — отметь задачу как выполненную
-2. Обнови `PLAN_COMPLETED.md` — добавь детали реализации
-3. Обнови `CHANGELOG.md` — добавь запись об изменениях
-4. Обнови `PLAN_TESTING.md` — если добавил тесты
-5. Обнови `package.json` — увеличь версию (semver)
+Общий чек-лист — `.claude/rules/app-workflow.md`.
 
 ## Деплой
 
-⛔ **ЗАПРЕЩЕНО деплоить самостоятельно** — ни SSH, ни `deploy-affected.sh`, ни `docker compose`.
-Даже если пользователь скажет «деплой» — отправь запрос BlackCove через Agent Mail с
-`subject: "deploy-request: domwellbes"`.
-
-Шаблон вызова и что делать, если BlackCove молчит 10 минут — `.claude/rules/deploy-coordination.md`.
+Запрещено деплоить самостоятельно — см. `.claude/rules/app-workflow.md`.
 
 ## Работа с submodule
 
