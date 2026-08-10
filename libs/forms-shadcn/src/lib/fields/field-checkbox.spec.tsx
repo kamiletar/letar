@@ -1,6 +1,6 @@
+import { TestForm } from '@letar/forms-react/testing'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { TestForm } from '../testing/test-form'
 import { FieldCheckbox } from './field-checkbox'
 
 describe('FieldCheckbox (shadcn)', () => {

@@ -28,6 +28,7 @@ export default defineConfig({
   resolve: {
     alias: {
       ...formsCoreAlias,
+      '@letar/forms-react/testing': resolve(__dirname, '../forms-react/src/lib/testing/index.ts'),
       '@letar/forms-react': resolve(__dirname, '../forms-react/src/index.ts'),
     },
   },

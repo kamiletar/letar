@@ -1,6 +1,6 @@
+import { TestForm } from '@letar/forms-react/testing'
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { TestForm } from '../testing/test-form'
 import { FieldSelect } from './field-select'
 
 describe('FieldSelect (shadcn)', () => {

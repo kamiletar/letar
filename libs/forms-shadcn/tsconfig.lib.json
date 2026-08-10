@@ -24,6 +24,7 @@
       "@letar/forms-core/address": ["../../libs/forms-core/src/lib/address/index.ts"],
       "@letar/forms-core/i18n": ["../../libs/forms-core/src/lib/i18n/index.ts"],
       "@letar/forms-core/uikit": ["../../libs/forms-core/src/lib/uikit/index.ts"],
+      "@letar/forms-react/testing": ["../../libs/forms-react/src/lib/testing/index.ts"],
       "@letar/forms-react": ["../../libs/forms-react/src/index.ts"]
     }
   },
