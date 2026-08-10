@@ -1541,6 +1541,40 @@ React, а React-адаптер зависит от абстракций ядра
     подтверждён фолбэк на `suggestion.value`): ввод → debounce → подсказки → выбор → значение
     обновилось.
   - CHANGELOG/версия (`0.11.0` → `0.12.0`), README — обновлены.
+- ✅ **`FieldOTPInput`, `FieldEditable`, `FieldColorPicker` добавлены — 30-е/31-е/32-е поля
+  (2026-08-10, forms-dev), одним заходом.** Три поля, у каждого свой уровень переиспользования
+  готового.
+  - `FieldOTPInput`: переиспользует `shadcnUIKit.PinInput` (тот же примитив, что
+    `FieldPinInput`) + таймер повторной отправки поверх. Beta: только числовой ввод —
+    `inputMode="numeric"` зашит в сам примитив, `type="alphanumeric"` из Chakra-версии не
+    поддержан контрактом `UIKitPinInputProps`.
+  - `FieldEditable`: клик по превью (кнопка) переключает в режим редактирования (нативный
+    `<input>`/`<textarea>`). Beta: без `showControls` (набора Edit/Cancel/Submit-кнопок) —
+    `submitOnBlur` + Enter/Escape покрывают тот же сценарий проще; только `activationMode`
+    `click`/`none`, без `dblclick`/`focus`.
+  - `FieldColorPicker`: нативный `<input type="color">` (системный picker браузера) + hex-инпут
+    - свотчи — не полный Ark UI `ColorPicker.Root` с областью насыщенности/яркости и
+      hue/alpha-слайдерами. Сознательное решение по объёму, не техническое ограничение контракта:
+      портировать такой compound под Radix/tailwind — отдельная задача существенно большего
+      размера, чем остальные 31 поле.
+  - **Находка (поймана линтом, не в проде):** `useState`/`useDeclarativeForm`, вызванные внутри
+    `render()` (а не `useFieldState()`), валят `react-hooks/rules-of-hooks` — ESLint распознаёт
+    хуки по имени функции-обёртки (`useFieldState` матчит, `render` нет), тот же класс находки,
+    что была на `FieldDateRange` с `useId()`. Обе исправлены переносом состояния в
+    `useFieldState`.
+  - Протечек границы `forms-core`/`forms-react` не найдено.
+  - **Проверки:** 14 новых RTL-тестов (107/107 в пакете, было 93), негативные контроли
+    (`activationMode="dblclick"` → `TS2322` на Editable, `swatches="red"` → `TS2322` на
+    ColorPicker, `length="6"` → `TS2322` на OTPInput), `typecheck:tsgo`/`lint` зелёные после
+    фикса находки выше. Отдельная находка в собственном тесте OTPInput — асинхронный клик
+    resend без `waitFor` давал `act()`-warning в консоли (не баг компонента, только незавершённый
+    промис в тесте) — исправлено добавлением `waitFor` на пост-условие.
+  - Живая проверка в Chromium на `form-develop-app-shadcn`: Editable — клик → ввод → Enter →
+    возврат в превью с новым текстом; ColorPicker — смена `<input type="color">` синхронизирует
+    hex-инпут; OTPInput — посимвольный ввод во все 6 ячеек с автопереходом, подтверждено что это
+    именно поле `smsCode` (не спутано с соседним `FieldPinInput` на той же странице — оба рядом
+    используют один `data-slot="pin-input"`).
+  - CHANGELOG/версия (`0.12.0` → `0.13.0`), README — обновлены.
 - [ ] **7.4 Замер трафика** → решение: доносить сложные поля или нет.
 - [ ] **7.5 Docs-сайт на отдельном домене** + живые демо. SEO под `zod forms react`, `prisma form generator`.
 - [ ] **7.6 `llms.txt` + усиление MCP** — недоиспользованный козырь №1 (дёшево, уникально).
