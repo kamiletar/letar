@@ -18,7 +18,9 @@
 [nextjs16-agent-guide-files](/.claude/docs/nextjs16-agent-guide-files.md) `next dev` сам пишет
 `apps/<app>/AGENTS.md` ·
 [git-multi-agent-incidents](/.claude/docs/git-multi-agent-incidents.md) разборы гонок между
-агентами: почему правила git такие строгие
+агентами: почему правила git такие строгие ·
+[git-pathspec-commit-ignored-deletion](/.claude/docs/git-pathspec-commit-ignored-deletion.md) ⚠️
+`git commit -- <path>` молча теряет `git rm --cached`, если путь уже в `.gitignore`
 
 **MCP-серверы:** [mcp-servers](/.claude/docs/mcp-servers.md) состав и назначение ·
 [mcp-server-pattern](/.claude/docs/mcp-server-pattern.md) тонкий локальный сервер по stdio ·
