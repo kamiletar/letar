@@ -1223,9 +1223,37 @@ React, а React-адаптер зависит от абстракций ядра
       этом шаге; визуальная — когда появится `form-develop-app-shadcn`.
       - **Известные упрощения beta** (см. `libs/forms-shadcn/README.md`): tooltip у `FieldLabel` —
       нативный `title`, не полноценный Radix Tooltip; нет группировки опций в `Select`.
-      - **Дальше:** остальные ~12-17 ходовых полей (Textarea/Number/RadioGroup/Date и т.д.) —
-      каждое почти бесплатно на готовом контракте; либо дев-харнесс для визуальной проверки —
-      порядок на усмотрение forms-dev, ничего не блокирует.
+      - ✅ **+5 полей (2026-08-10): Textarea/Number/RadioGroup/SegmentGroup/Date — 8 из 15-20.**
+      Приоритет — по указанию координатора (покрыть ещё не проверенные UIKit-примитивы, а не
+      плодить варианты String).
+      - `NumberInput`/`RadioGroup`/`SegmentGroup` добавлены в `shadcnUIKit` (extended-контракт
+      `forms-core` их уже типизировал в Этапе 4 — реализация только дописана, не менялся);
+      `Textarea` и `Date` намеренно НЕ пошли через UIKit-примитив — тот же паттерн, что и у
+      Chakra-скина (`libs/forms/.../form-fields/text/field-textarea.tsx` рисует Chakra
+      `Textarea` напрямую внутри `FieldWrapper`, не через контракт): многострочный текст не
+      входит в core-контракт, а `FieldWrapper` (Root+Label+Error) и так skin-agnostic сам по
+      себе — оборачивать в отдельный примитив ради одного скина смысла не было.
+      - `RadioGroup` — `@radix-ui/react-radio-group`; `SegmentGroup` — `@radix-ui/react-toggle-group`
+      (`type="single"`, с защитой от снятия выбора кликом по активному сегменту — Radix
+      ToggleGroup умеет выключать активный элемент, контракт `SegmentGroupProps` этого не
+      предполагает). Оба пакета уже стояли в корневом `package.json` (установка Шага 5),
+      добавлены в `peerDependencies` `libs/forms-shadcn/package.json` — были пропущены при
+      установке, потому что тогда ещё ни одно поле их не использовало.
+      - `FieldDate` — beta-упрощение, нативный `<input type="date">` через существующий core
+      `Input` (контракт уже поддерживает `type`), не полноценный date picker с попапом —
+      соразмерно тому, что уже документировано как beta-упрощение для `Select`/`FieldLabel`.
+      - **Протечек границы не найдено** — все 5 полей легли на контракт без правок `forms-core`
+      или `forms-react`.
+      - **Проверки:** 18/18 тестов (RTL + jsdom, `npx vitest run` в `libs/forms-shadcn`, было
+      6 → 18); `typecheck:tsgo` зелёный; негативный контроль на всех 5 новых полях одним
+      прогоном (`min="rainbow"` → `TS2322`, `options` обязателен у RadioGroup/SegmentGroup,
+      `rows="rainbow"` → `TS2322`, лишний проп у `FieldDate` → `TS2322`) — временный файл вне
+      индекса, прогнан `tsgo --noEmit` и удалён, в git не попал.
+      - **Дальше:** Combobox (async-поиск, самый сложный из оставшихся — Radix не даёт готового
+      combobox-примитива, нужен `popover` + фильтрация опций вручную) — следующий кандидат из
+      приоритетного списка координатора. Затем NativeSelect/PinInput/Password и остальные
+      ~7-10 полей до 15-20; либо дев-харнесс для визуальной проверки — порядок на усмотрение
+      forms-dev, ничего не блокирует.
 - [ ] **7.4 Замер трафика** → решение: доносить сложные поля или нет.
 - [ ] **7.5 Docs-сайт на отдельном домене** + живые демо. SEO под `zod forms react`, `prisma form generator`.
 - [ ] **7.6 `llms.txt` + усиление MCP** — недоиспользованный козырь №1 (дёшево, уникально).
