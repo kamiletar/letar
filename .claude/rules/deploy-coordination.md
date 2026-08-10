@@ -1,8 +1,9 @@
----
-alwaysApply: true
----
-
 # Координация деплоя через Deploy Agent
+
+> ⚠️ Файл намеренно без frontmatter — правило без `paths:` грузится всегда, это и нужно.
+> Раньше здесь стоял `alwaysApply: true` — поле **из Cursor**, Claude Code его не знает
+> ([docs/memory](https://code.claude.com/docs/en/memory)). Эффект был правильный, но случайно:
+> не из-за `alwaysApply`, а из-за отсутствия `paths:`. Не возвращай это поле.
 
 ## ⛔ Прямой деплой ЗАПРЕЩЁН
 
