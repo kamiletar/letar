@@ -7,6 +7,8 @@ import {
   FieldCombobox,
   FieldDate,
   FieldDateRange,
+  FieldDateTimePicker,
+  FieldDuration,
   FieldHidden,
   FieldNativeSelect,
   FieldNumber,
@@ -72,6 +74,8 @@ interface DemoFormValues {
   tags: string[]
   address: string
   period: { start: string; end: string }
+  duration: number
+  appointmentAt: string
 }
 
 const defaultValues: DemoFormValues = {
@@ -94,6 +98,8 @@ const defaultValues: DemoFormValues = {
   tags: [],
   address: '',
   period: { start: '', end: '' },
+  duration: 90,
+  appointmentAt: '',
 }
 
 export default function HomePage() {
@@ -101,7 +107,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Form Develop App (shadcn)</h1>
       <p className="text-muted-foreground mt-2 text-sm">
-        Песочница для разработки @letar/forms-shadcn — 19 полей, Фаза 7.3 Шаг 5+.
+        Песочница для разработки @letar/forms-shadcn — 21 поле, Фаза 7.3 Шаг 5+.
       </p>
 
       <DemoForm<DemoFormValues>
@@ -138,6 +144,8 @@ export default function HomePage() {
         <FieldPinInput name="pin" label="PIN-код" length={4} />
         <FieldAddress name="address" label="Адрес" provider={mockAddressProvider} minChars={1} />
         <FieldDateRange name="period" label="Период" presets={['today', 'thisWeek', 'thisMonth']} />
+        <FieldDuration name="duration" label="Длительность" />
+        <FieldDateTimePicker name="appointmentAt" label="Встреча" />
 
         <button
           type="submit"
