@@ -1652,6 +1652,31 @@ React, а React-адаптер зависит от абстракций ядра
     draw↔typed корректно.
   - CHANGELOG/версия (`0.13.2` → `0.14.0`), README (таблица полей, «Известные упрощения») —
     обновлены. Демо-страница `form-develop-app-shadcn` дополнена (счётчик 32→33).
+- ✅ **`FieldFileUpload` добавлен — 34-е поле (2026-08-10, forms-dev), второе из приоритетного
+  списка координатора (Signature ✅ → FileUpload ✅ → Steps → Table → RichText, тред
+  `forms-phase7-3-shadcn`).** Значение — `File[]`. Три варианта отображения (`button`/`dropzone`/
+  `input`), портированы все из Chakra-версии. Не входит в UIKit-контракт (нет примитива
+  `FileUpload` — у Chakra-версии это Ark UI `FileUpload.Root`, здесь нет ни Radix, ни Ark UI
+  аналога) — вместо него скрытый нативный `<input type="file">`, триггер по клику на кнопку/
+  дропзону, drag&drop через нативные `onDragOver`/`onDrop`. Превью изображений — `<img
+  src={URL.createObjectURL(file)}>` вместо `FileUpload.ItemPreviewImage`. Security-проверка
+  (`processFileWithSecurity` из `@letar/forms-core/security`) портирована без изменений —
+  framework-free утилита, общая с Chakra-скином, протечек границы не найдено. Добавлена
+  собственная клиентская проверка `maxFileSize` (без `security` тоже работает — Chakra-версия
+  такой возможности не имела, `FileUpload.Root` Ark UI её делает сам).
+  - **Проверки:** 5 новых RTL-тестов (117/117 в пакете, было 112) — jsdom не реализует
+    `URL.createObjectURL`, поэтому тесты избегают `accept="image/*"` (та же стратегия обхода
+    пробела jsdom, что у `FieldSignature`/canvas); покрыты выбор файла через `fireEvent.change`
+    на скрытом инпуте, оба варианта (`button`/`dropzone`), `clearable=false`, удаление файла из
+    списка. Негативный контроль (`variant="bogus"` → `TS2322`), `typecheck:tsgo`/`lint` (в т.ч.
+    `oxlint(react-hooks/rules-of-hooks)` за `useRef` вне `useFieldState` и
+    `next/no-img-element` за превью-`<img>`, оба исправлены) зелёные.
+  - CHANGELOG/версия (`0.14.0` → `0.15.0`), README (таблица полей, «Известные упрощения») —
+    обновлены. Демо-страница `form-develop-app-shadcn` дополнена (счётчик 33→34,
+    `variant="dropzone" maxFiles={3} showSize`).
+  - Живая проверка в Chromium: `DataTransfer`+`change`-событие на скрытом инпуте (реальный путь
+    браузера для выбора файла) дало `field.handleChange` → в списке появились иконка, имя
+    (`notes.txt`) и размер (`11 B`); клик по кнопке удаления вернул поле в пустое состояние.
 - [ ] **7.4 Замер трафика** → решение: доносить сложные поля или нет.
 - [ ] **7.5 Docs-сайт на отдельном домене** + живые демо. SEO под `zod forms react`, `prisma form generator`.
 - [ ] **7.6 `llms.txt` + усиление MCP** — недоиспользованный козырь №1 (дёшево, уникально).
