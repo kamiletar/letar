@@ -26,6 +26,7 @@ export type {
   FieldPrimitivesUIKit,
   FieldRenderFn,
   FieldRenderProps,
+  FieldStateContext,
   FieldWrapperProps,
 } from './lib/field/create-field-primitives'
 export type { ResolvedFieldProps } from './lib/field/resolved-field-props'

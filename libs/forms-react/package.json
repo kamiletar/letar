@@ -1,6 +1,6 @@
 {
   "name": "@letar/forms-react",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "UI-library-free React composition layer for @letar/forms — createField/createForm/context bound to a UIKit contract",
   "type": "module",
   "main": "./src/index.ts",

@@ -4,7 +4,7 @@ import type { UIKitCorePrimitives, UIKitExtendedPrimitives } from '@letar/forms-
 import type { AnyFieldApi } from '@tanstack/react-form'
 import { Component, type ErrorInfo, memo, type ReactElement, type ReactNode } from 'react'
 import { useDeclarativeFormOptional } from '../context/form-context'
-import type { BaseFieldProps } from '../types'
+import type { AppFormApi, BaseFieldProps } from '../types'
 import { formatFieldErrors, hasFieldErrors } from './field-utils'
 import type { ResolvedFieldProps } from './resolved-field-props'
 import { useAsyncFieldValidation } from './use-async-field-validation'
@@ -54,6 +54,22 @@ export type FieldRenderFn<P extends BaseFieldProps, TValue = unknown, TState = R
 ) => ReactElement
 
 /**
+ * Контекст поля, доступный `useFieldState` ещё до монтирования `<form.Field>`.
+ *
+ * Нужен полям, которым требуется текущее значение поля (или сам `form`) на этапе
+ * инициализации локального состояния — например, чтобы синхронизировать `inputValue`
+ * с значением из `defaultValues` через `useStore(form.store, ...)` + `useEffect`,
+ * оставаясь при этом в рамках правил хуков (`useFieldState` вызывается в теле
+ * `FieldComponent`, а не внутри render-prop `<form.Field>`).
+ */
+export interface FieldStateContext {
+  /** Экземпляр формы (TanStack Form `AppFormApi`) */
+  form: AppFormApi
+  /** Полный путь поля (например, "user.address.city") */
+  fullPath: string
+}
+
+/**
  * Options for createField
  *
  * @template P - Component props type (extends BaseFieldProps)
@@ -72,9 +88,14 @@ export interface CreateFieldOptions<P extends BaseFieldProps, TValue = unknown, 
    *
    * @param props - Component props (without BaseFieldProps)
    * @param resolved - Resolved props (label, placeholder, etc.)
+   * @param context - `form`/`fullPath` — доступны здесь, а не только в render-prop
    * @returns State object that will be passed to render as fieldState
    */
-  useFieldState?: (componentProps: Omit<P, keyof BaseFieldProps>, resolved: ResolvedFieldProps) => TState
+  useFieldState?: (
+    componentProps: Omit<P, keyof BaseFieldProps>,
+    resolved: ResolvedFieldProps,
+    context: FieldStateContext,
+  ) => TState
 
   /** Render function (full control over JSX) */
   render: FieldRenderFn<P, TValue, TState>
@@ -258,7 +279,7 @@ export function createFieldPrimitives(uikit: FieldPrimitivesUIKit): FieldPrimiti
 
       // Call useFieldState at the top level (before form.Field)
       // This allows using hooks inside useFieldState
-      const fieldState = useFieldState(componentProps as Omit<P, keyof BaseFieldProps>, resolved)
+      const fieldState = useFieldState(componentProps as Omit<P, keyof BaseFieldProps>, resolved, { form, fullPath })
 
       // Async validation (from props or schema meta)
       const declarativeCtx = useDeclarativeFormOptional()
