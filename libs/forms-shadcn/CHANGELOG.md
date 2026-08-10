@@ -4,6 +4,23 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.0] - 2026-08-10
+
+### Added
+
+- `FieldAddress` — 18-е поле, начало продолжения к паритету с `@letar/forms` (Chakra-скин).
+  Переиспользует `shadcnUIKit.Combobox` (Popover + input, тот же примитив, что `FieldCombobox`) с
+  async-подгрузкой подсказок из `AddressProvider` (`@letar/forms-core/address`, DaData встроен).
+  Beta-упрощения: нет клавиатурной навигации стрелками по списку подсказок (Combobox-примитив
+  UIKit её не поддерживает — только клик и Enter/Escape самого Popover) и нет визуального
+  спиннера внутри инпута.
+
+### Fixed
+
+- Унаследованный `@nx/enforce-module-boundaries` в `vitest.config.ts` — импорт
+  `buildFormsCoreAlias` шёл относительным путём через границу пакета. Общий фикс для
+  `forms`/`forms-react`/`forms-shadcn`, новый subpath `@letar/forms-core/testing`.
+
 ## [0.5.1] - 2026-08-10
 
 ### Added

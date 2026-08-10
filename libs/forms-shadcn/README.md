@@ -37,6 +37,7 @@ Chakra-провайдера, а не отдельный статический C
 
 ```tsx
 import {
+  FieldAddress,
   FieldCheckbox,
   FieldCombobox,
   FieldDate,
@@ -57,7 +58,7 @@ import {
 } from '@letar/forms-shadcn'
 ```
 
-## Поля (beta — 17 из 15–20 запланированных, план перевыполнен)
+## Поля (beta — 18 из 56, продолжаем к паритету с `@letar/forms`)
 
 | Поле                | Radix-примитив                     |
 | ------------------- | ---------------------------------- |
@@ -78,15 +79,18 @@ import {
 | `FieldHidden`       | без DOM (синхронизация значения)   |
 | `FieldRating`       | звёзды-кнопки (`lucide-react`)     |
 | `FieldTags`         | нативный `<input>` + чипы          |
+| `FieldAddress`      | `@radix-ui/react-popover` (beta)   |
 
 `FieldCombobox` — упрощённая beta-версия: только статичные `options`, фильтрация по вхождению
 подстроки в `label`. Без `useQuery` (async-поиск) и группировки — Chakra-версия их поддерживает,
 здесь не портировано. `FieldPinInput` — без вставки кода из буфера одним действием, только
 посимвольный ввод с автопереходом. `FieldTags` — только Enter добавляет тег, без вставки со
-множественным разделителем.
+множественным разделителем. `FieldAddress` — переиспользует тот же Popover-примитив, что
+`FieldCombobox`, с async-подгрузкой из `AddressProvider` (`@letar/forms-core/address`); без
+клавиатурной навигации стрелками по списку и без визуального спиннера в инпуте.
 
-Остальные ходовые поля (RichText, FileUpload, Address, DateRange, Duration и т.д.) — по мере
-миграции, каждое почти бесплатно благодаря готовому `UIKit`-контракту.
+Остальные ходовые поля (RichText, FileUpload, DateRange, DateTimePicker, Duration и т.д.) — по
+мере миграции, каждое почти бесплатно благодаря готовому `UIKit`-контракту.
 
 ## `shadcnUIKit`
 

@@ -1,5 +1,6 @@
 'use client'
 
+import type { AddressProvider } from '@letar/forms-core/address'
 import type { BaseFieldProps } from '@letar/forms-react'
 import type { ReactNode } from 'react'
 
@@ -70,7 +71,7 @@ export type DateFieldProps = BaseFieldProps
 
 /** Props for Form.Field.NativeSelect (shadcn-скин). Label — только `string` (нативный `<option>`). */
 export interface NativeSelectFieldProps extends BaseFieldProps {
-  options: { label: string, value: string, disabled?: boolean }[]
+  options: { label: string; value: string; disabled?: boolean }[]
 }
 
 /** Props for Form.Field.Switch (shadcn-скин). */
@@ -138,4 +139,34 @@ export interface TagsFieldProps extends BaseFieldProps {
   maxTags?: number
   /** Минимальная длина тега (по умолчанию 1) */
   minTagLength?: number
+}
+
+/** Значение поля адреса. */
+export interface AddressValue {
+  /** Полная строка адреса */
+  value: string
+  /** Разобранные компоненты адреса (специфично для провайдера) */
+  data?: Record<string, unknown>
+}
+
+/**
+ * Props for Form.Field.Address (shadcn-скин).
+ *
+ * Beta-упрощение относительно Chakra-версии: нет клавиатурной навигации стрелками по списку
+ * подсказок (`shadcnUIKit.Combobox` — общий примитив с `FieldCombobox`, только клик/Enter/Escape
+ * самого Popover) и нет визуального спиннера внутри инпута.
+ */
+export interface AddressFieldProps extends BaseFieldProps {
+  /** Провайдер подсказок адреса (рекомендуется) */
+  provider?: AddressProvider
+  /** DaData API token (обратная совместимость — создаёт DaData-провайдер внутри) */
+  token?: string
+  /** Минимум символов перед поиском (по умолчанию 3) */
+  minChars?: number
+  /** Задержка debounce в мс (по умолчанию 300) */
+  debounceMs?: number
+  /** Ограничить конкретными локациями (регион, город) */
+  locations?: Array<{ region?: string; city?: string }>
+  /** Возвращать только строку (по умолчанию false — возвращает AddressValue) */
+  valueOnly?: boolean
 }

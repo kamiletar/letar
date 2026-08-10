@@ -4,7 +4,8 @@ export { type ShadcnUIKit, shadcnUIKit } from './lib/uikit/uikit-shadcn'
 // Композиционный слой, связанный со shadcnUIKit
 export { createField, FieldErrorBoundary, FieldWrapper } from './lib/uikit/primitives'
 
-// Поля (Шаг 5 — 17 из 15-20, план перевыполнен)
+// Поля (Шаг 5 — 17 из 15-20, план перевыполнен; продолжение к паритету)
+export { FieldAddress } from './lib/fields/field-address'
 export { FieldCheckbox } from './lib/fields/field-checkbox'
 export { FieldCombobox } from './lib/fields/field-combobox'
 export { FieldDate } from './lib/fields/field-date'
@@ -23,6 +24,8 @@ export { FieldSwitch } from './lib/fields/field-switch'
 export { FieldTags } from './lib/fields/field-tags'
 export { FieldTextarea } from './lib/fields/field-textarea'
 export type {
+  AddressFieldProps,
+  AddressValue,
   CheckboxFieldProps,
   ComboboxFieldProps,
   DateFieldProps,
