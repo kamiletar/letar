@@ -105,3 +105,18 @@ export interface ComboboxFieldProps extends BaseFieldProps {
   /** Минимум символов для показа списка (по умолчанию 0 — показывать сразу) */
   minChars?: number
 }
+
+/**
+ * Props for Form.Field.PinInput (shadcn-скин).
+ *
+ * Beta-упрощение: без вставки кода из буфера обмена одним действием (paste-across-boxes) —
+ * только посимвольный ввод с автопереходом между ячейками.
+ */
+export interface PinInputFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
+  /** Число ячеек (по умолчанию 4) */
+  length?: number
+  /** Маскировать ввод как пароль */
+  mask?: boolean
+  /** Вызывается, когда заполнены все ячейки */
+  onComplete?: (value: string) => void
+}

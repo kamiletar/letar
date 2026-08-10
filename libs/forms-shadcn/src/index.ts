@@ -4,13 +4,14 @@ export { type ShadcnUIKit, shadcnUIKit } from './lib/uikit/uikit-shadcn'
 // Композиционный слой, связанный со shadcnUIKit
 export { createField, FieldErrorBoundary, FieldWrapper } from './lib/uikit/primitives'
 
-// Поля (Шаг 5 — 13 из 15-20)
+// Поля (Шаг 5 — 14 из 15-20)
 export { FieldCheckbox } from './lib/fields/field-checkbox'
 export { FieldCombobox } from './lib/fields/field-combobox'
 export { FieldDate } from './lib/fields/field-date'
 export { FieldNativeSelect } from './lib/fields/field-native-select'
 export { FieldNumber } from './lib/fields/field-number'
 export { FieldPassword } from './lib/fields/field-password'
+export { FieldPinInput } from './lib/fields/field-pin-input'
 export { FieldRadioGroup } from './lib/fields/field-radio-group'
 export { FieldSegmentGroup } from './lib/fields/field-segment-group'
 export { FieldSelect } from './lib/fields/field-select'
@@ -25,6 +26,7 @@ export type {
   NativeSelectFieldProps,
   NumberFieldProps,
   PasswordFieldProps,
+  PinInputFieldProps,
   RadioGroupFieldProps,
   RadioOption,
   SegmentGroupFieldProps,
