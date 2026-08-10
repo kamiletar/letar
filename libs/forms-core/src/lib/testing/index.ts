@@ -4,7 +4,12 @@ import { resolve } from 'path'
 /**
  * Строит Vite `resolve.alias` для всех подпутей `@letar/forms-core`, читая их из `exports`
  * пакета — используется в `vitest.config.ts` пакетов, зависящих от исходников forms-core
- * напрямую (forms, forms-react, будущий forms-shadcn).
+ * напрямую (forms, forms-react, forms-shadcn).
+ *
+ * Реализация лежит прямо в этом файле, а не в отдельном `vitest-alias.ts` с реэкспортом из
+ * `index.ts` — `vitest.config.ts` резолвится нативным Node-загрузчиком Nx (не бандлером Vite),
+ * который не умеет extensionless относительные импорты внутри `.ts`-модуля, полученного через
+ * bare-специфайер пакета. Прямой импорт без промежуточного реэкспорта эту ловушку обходит.
  *
  * @param formsCoreDir — абсолютный путь до `libs/forms-core` (обычно `resolve(__dirname, '../forms-core')`)
  */
