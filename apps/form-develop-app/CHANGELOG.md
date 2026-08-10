@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## Unreleased (2026-08-10)
+
+- `advanced-demo`: `initialData.addressSimple` заполнено непустым значением (было `''`) — этот
+  путь раньше не проверялся живьём и маскировал React-warning «Cannot update a component while
+  rendering a different component» в `Form.Field.Address` (пофикшен в `@letar/forms` 2.0.1).
+  Оставлено заполненным как регрессионная демонстрация; e2e (`advanced-demo.spec.ts`) не задет —
+  тесты используют `.fill()`, который переопределяет значение.
+
 ## [0.1.0] - 2026-04-04
 
 ### Added

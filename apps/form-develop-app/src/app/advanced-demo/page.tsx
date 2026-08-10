@@ -41,7 +41,7 @@ type AdvancedFormData = z.infer<typeof AdvancedSchema>
 
 const initialData: AdvancedFormData = {
   address: undefined,
-  addressSimple: '',
+  addressSimple: 'г Москва, ул Тверская, д 1',
   duration: 60,
   durationMinutes: 30,
   appointmentAt: '',
