@@ -1499,6 +1499,19 @@ React, а React-адаптер зависит от абстракций ядра
     кликами оба выбора применились корректно), Autocomplete принял текст `Владивосток`,
     не входящий в `suggestions` — allowCustomValue подтверждён вживую.
   - CHANGELOG/версия (`0.9.0` → `0.10.0`), README — обновлены.
+- ✅ **`FieldRadioCard` и `FieldCheckboxCard` добавлены — 27-е и 28-е поля (2026-08-10,
+  forms-dev), одним заходом.** Тот же принцип, что у `FieldListbox` — вместо нового
+  Radix-примитива обычные кнопки с ARIA-ролями (`role="radio"`/`role="radiogroup"` для
+  RadioCard, `role="checkbox"`/`role="group"` для CheckboxCard), визуально card-стиль
+  (border+ring на выборе) вместо мелких кружков/квадратов.
+  - Beta: без `keyboardNavigation` (циклическая навигация стрелками, опциональна у
+    Chakra-версии `FieldRadioCard`) — не портирована.
+  - Протечек границы не найдено.
+  - **Проверки:** 8 новых RTL-тестов (88/88 в пакете, было 80), негативные контроли
+    (`orientation="diagonal"` → `TS2322` на обоих полях), `typecheck:tsgo`/`lint` зелёные с
+    первого прогона. Живая проверка в Chromium на `form-develop-app-shadcn`: клик по карточке
+    RadioCard/CheckboxCard переключает `aria-checked` вживую через `dispatchEvent`.
+  - CHANGELOG/версия (`0.10.0` → `0.11.0`), README — обновлены.
 - [ ] **7.4 Замер трафика** → решение: доносить сложные поля или нет.
 - [ ] **7.5 Docs-сайт на отдельном домене** + живые демо. SEO под `zod forms react`, `prisma form generator`.
 - [ ] **7.6 `llms.txt` + усиление MCP** — недоиспользованный козырь №1 (дёшево, уникально).
