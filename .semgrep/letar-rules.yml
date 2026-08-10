@@ -61,6 +61,25 @@ rules:
       - pattern-not: |
           <$EL dangerouslySetInnerHTML={{ __html: $HTML }} />
 
+  - id: letar-path-traversal-naive-startswith-guard
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: >-
+      path.join()/path.resolve() + .startsWith() как защита от path traversal не работает:
+      join/resolve сами схлопывают '..' до самой проверки, а startsWith сравнивает строки, не
+      пути ('/uploads-evil' проходит startsWith('/uploads')). Используй resolveUploadPath() из
+      @letar/image-upload/server. См. .claude/docs/upload-path-traversal.md.
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $TARGET = path.join($ROOT, ...)
+              ...
+              if (!$TARGET.startsWith($ROOT)) { ... }
+          - pattern: |
+              $TARGET = path.resolve($ROOT, ...)
+              ...
+              if (!$TARGET.startsWith($ROOT)) { ... }
+
   - id: letar-dev-session-vars-in-prod-env
     languages: [generic]
     paths:
