@@ -1630,6 +1630,28 @@ React, а React-адаптер зависит от абстракций ядра
     `field-address.tsx`/`field-city.tsx` (из отдельного, не связанного с этим рефакторингом
     исправления `useEffect` в `render()`) остались как есть — вне скоупа этой задачи, не трогала.
   - CHANGELOG/версия (`0.13.0` → `0.13.1`, patch — внутренний рефакторинг без изменения публичного API).
+- ✅ **`FieldSignature` добавлен — 33-е поле (2026-08-10, forms-dev), первое из приоритетного
+  списка координатора (Signature → FileUpload → Steps → Table → RichText, тред
+  `forms-phase7-3-shadcn`).** Canvas-рисование мышью/пальцем + typed mode (текстовый ввод
+  курсивом), переключатель режимов — две обычные кнопки, без нового Radix-примитива (у Chakra-версии
+  это `SegmentGroup`, здесь не заводили новую зависимость ради переключателя из двух пунктов — тот
+  же принцип, что у пресетов `FieldDateRange`). Логика геометрии штрихов и SVG-сборки
+  (`escapeXml`/`buildSvgString`/`buildTypedSvgString`/`getCoords`) портирована из Chakra-версии
+  как есть — заменена только UI-обвязка. Значение — data URI (`image/png` или `image/svg+xml`
+  base64). Не входит в UIKit-контракт (нет примитива для canvas), тот же принцип, что у
+  `Rating`/`Tags`/`ColorPicker`. Протечек границы `forms-core`/`forms-react` не найдено.
+  - **Проверки:** 5 новых RTL-тестов (112/112 в пакете, было 107) — jsdom не реализует
+    `HTMLCanvasElement.getContext`, поэтому тесты покрывают переключение режимов/видимость
+    контролов, а не пиксельную отрисовку (тот же класс ограничения, что уже был у `ResizeObserver`
+    для `Slider`). Негативный контроль (`exportFormat="jpeg"` → `TS2322`, `width="rainbow"` →
+    `TS2322`), `typecheck:tsgo`/`lint` зелёные. Живая проверка в Chromium на
+    `form-develop-app-shadcn` компенсирует пробел jsdom: реальный `MouseEvent`-штрих на canvas
+    (`mousedown`→`mousemove`→`mouseup` через `dispatchEvent`) дал валидный `canvas.toDataURL()`
+    (`data:image/png;base64,...`) и показал кнопку «Очистить»; typed mode — ввод текста показал
+    «Очистить», клик по нему вернул canvas в пустое состояние с плейсхолдером; переключение
+    draw↔typed корректно.
+  - CHANGELOG/версия (`0.13.2` → `0.14.0`), README (таблица полей, «Известные упрощения») —
+    обновлены. Демо-страница `form-develop-app-shadcn` дополнена (счётчик 32→33).
 - [ ] **7.4 Замер трафика** → решение: доносить сложные поля или нет.
 - [ ] **7.5 Docs-сайт на отдельном домене** + живые демо. SEO под `zod forms react`, `prisma form generator`.
 - [ ] **7.6 `llms.txt` + усиление MCP** — недоиспользованный козырь №1 (дёшево, уникально).
