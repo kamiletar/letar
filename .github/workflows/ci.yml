@@ -1,0 +1,72 @@
+# CI-гейт качества: lint + typecheck + unit-тесты на затронутых проектах.
+#
+# Зачем: до 2026-08-10 в репозитории не было ни одного workflow, проверяющего код —
+# только publish/release. Всё качество держалось на том, что агент не забыл прогнать
+# проверки локально перед коммитом. Этот workflow ловит то, что забыли.
+#
+# ⚠️ Проверяется ТОЛЬКО публичная часть монорепо. Приватные submodule (aboi,
+# driving-school, studio и др.) намеренно не выкачиваются — их checkout требует PAT,
+# а публичный CI не должен иметь к ним доступ. Без них Nx просто не видит эти проекты
+# в графе, и `affected` их не трогает. Гейт для приватных приложений — локальные
+# прогоны + e2e перед деплоем, см. .claude/rules/deploy-coordination.md.
+#
+# E2E здесь НЕ запускаются: им нужны БД, поднятые сервисы и браузеры — это отдельный
+# конвейер (`nx e2e <app>-e2e`, pre-deploy gate у deploy-agent).
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Новый push отменяет предыдущий незавершённый прогон той же ветки.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout (без приватных submodule — см. шапку файла)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: false
+
+      # Определяет base/head для `nx affected`: base — последний коммит, на котором
+      # этот workflow был зелёным, а не HEAD~1. Иначе после красного прогона
+      # сломанные проекты выпадают из affected и ошибка «зарастает».
+      - name: Derive SHAs for nx affected
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # oxlint отрабатывает первым внутри таргета lint (fast-fail), затем ESLint.
+      - name: Lint
+        run: bunx nx affected -t lint --parallel=3
+
+      # tsgo в 9–38x быстрее обычного typecheck (см. CLAUDE.md § Перед коммитом).
+      - name: Typecheck
+        if: always()
+        run: bunx nx affected -t typecheck:tsgo --parallel=3
+
+      - name: Unit tests
+        if: always()
+        run: bunx nx affected -t test --parallel=3
