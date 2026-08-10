@@ -2,6 +2,7 @@
 
 import type { AddressSuggestion } from '@letar/forms-core/address'
 import { useDebounce } from '@letar/forms-react'
+import { useStore } from '@tanstack/react-form'
 import type { ReactElement } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
@@ -32,7 +33,7 @@ interface CityFieldState {
 export const FieldCity = createField<CityFieldProps, string, CityFieldState>({
   displayName: 'FieldCity',
 
-  useFieldState: (props): CityFieldState => {
+  useFieldState: (props, _resolved, { form, fullPath }): CityFieldState => {
     const { provider: propProvider, token, minChars = 2, debounceMs = 300 } = props
     const provider = useResolvedAddressProvider(propProvider, token)
 
@@ -43,6 +44,19 @@ export const FieldCity = createField<CityFieldProps, string, CityFieldState>({
     const justSelectedRef = useRef(false)
 
     const debouncedQuery = useDebounce(inputValue, debounceMs)
+
+    // Инициализация `inputValue` из значения поля (сценарий `defaultValues` при редактировании) —
+    // хук вызывается здесь, на верхнем уровне `FieldComponent`, а не внутри render-prop
+    // `<form.Field>`: синхронный `setInputValue()` там обновлял бы состояние `FieldCity` во
+    // время рендера чужого компонента (React: «Cannot update a component while rendering a
+    // different component»). `useStore` даёт живое значение поля до монтирования `<form.Field>`.
+    const fieldValue = useStore(form.store, () => form.getFieldValue(fullPath)) as string | undefined
+    useEffect(() => {
+      if (!initializedRef.current && fieldValue && fieldValue !== inputValue) {
+        initializedRef.current = true
+        setInputValue(fieldValue)
+      }
+    }, [fieldValue])
 
     const fetchSuggestions = useCallback(
       async (query: string) => {
@@ -81,21 +95,7 @@ export const FieldCity = createField<CityFieldProps, string, CityFieldState>({
   },
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, fieldState }): ReactElement => {
-    const { inputValue, setInputValue, suggestions, isLoading, initializedRef } = fieldState
-    const fieldValue = field.state.value as string | undefined
-
-    // `render` вызывается внутри рендера `<form.Field>` — синхронный `setInputValue()` здесь
-    // обновлял бы состояние `FieldCity` во время рендера чужого компонента (TanStack Form
-    // ругался «Cannot update a component while rendering a different component»). Инициализация
-    // `inputValue` из значения поля перенесена в эффект: он относится к тому же render-prop
-    // вызову (React регистрирует хуки по месту вызова, а не по владельцу замыкания), но выполняется
-    // после коммита — там setState уже безопасен.
-    useEffect(() => {
-      if (!initializedRef.current && fieldValue && fieldValue !== inputValue) {
-        initializedRef.current = true
-        setInputValue(fieldValue)
-      }
-    }, [fieldValue])
+    const { inputValue, setInputValue, suggestions, isLoading } = fieldState
 
     const options = suggestions.map((s) => ({ label: s.label, value: s.value }))
 

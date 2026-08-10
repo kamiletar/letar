@@ -2,6 +2,7 @@
 
 import type { AddressSuggestion } from '@letar/forms-core/address'
 import { useDebounce } from '@letar/forms-react'
+import { useStore } from '@tanstack/react-form'
 import type { ReactElement } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
@@ -30,7 +31,7 @@ interface AddressFieldState {
 export const FieldAddress = createField<AddressFieldProps, AddressValue | string, AddressFieldState>({
   displayName: 'FieldAddress',
 
-  useFieldState: (props): AddressFieldState => {
+  useFieldState: (props, _resolved, { form, fullPath }): AddressFieldState => {
     const { provider: propProvider, token, minChars = 3, debounceMs = 300, locations } = props
     const provider = useResolvedAddressProvider(propProvider, token)
 
@@ -42,6 +43,20 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
     const justSelectedRef = useRef(false)
 
     const debouncedQuery = useDebounce(inputValue, debounceMs)
+
+    // Инициализация `inputValue` из значения поля — на верхнем уровне `FieldComponent`, не
+    // внутри render-prop `<form.Field>`. См. подробный комментарий в field-city.tsx: синхронный
+    // `setInputValue()` в `render` обновлял бы состояние во время рендера чужого компонента.
+    const fieldValue = useStore(form.store, () => form.getFieldValue(fullPath)) as AddressValue | string | undefined
+    useEffect(() => {
+      if (!initializedRef.current && fieldValue) {
+        const displayValue = typeof fieldValue === 'string' ? fieldValue : fieldValue.value
+        if (displayValue && displayValue !== inputValue) {
+          setInputValue(displayValue)
+        }
+        initializedRef.current = true
+      }
+    }, [fieldValue])
 
     useEffect(() => {
       return () => {
@@ -109,22 +124,7 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const { valueOnly = false } = componentProps
-    const { inputValue, setInputValue, suggestions, isLoading, initializedRef } = fieldState
-
-    const fieldValue = field.state.value as AddressValue | string | undefined
-
-    // См. комментарий в field-city.tsx: инициализация `inputValue` из значения поля перенесена
-    // в эффект, чтобы `setInputValue()` не вызывался синхронно во время рендера `<form.Field>`
-    // (React ругался «Cannot update a component while rendering a different component»).
-    useEffect(() => {
-      if (!initializedRef.current && fieldValue) {
-        const displayValue = typeof fieldValue === 'string' ? fieldValue : fieldValue.value
-        if (displayValue && displayValue !== inputValue) {
-          setInputValue(displayValue)
-        }
-        initializedRef.current = true
-      }
-    }, [fieldValue])
+    const { inputValue, setInputValue, suggestions, isLoading } = fieldState
 
     const options = suggestions.map((s) => ({ label: s.label, value: s.value }))
 

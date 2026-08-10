@@ -4,6 +4,20 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.13.2] - 2026-08-10
+
+### Fixed
+
+- **`FieldAddress`/`FieldCity`: убран React-warning «Cannot update a component while rendering a
+  different component» на непустых `defaultValues`.** Инициализация `inputValue` из значения поля
+  (сценарий редактирования существующей записи) вызывала `setInputValue()` синхронно в теле
+  `render()`, которое исполняется внутри рендера `<form.Field>` — чужого компонента. Перенесена в
+  `useEffect` на верхнем уровне `useFieldState`, куда теперь прокидывается `form`/`fullPath` через
+  новый параметр `@letar/forms-react`'s `useFieldState` (см. CHANGELOG `@letar/forms-react`
+  0.2.0). Значение поля читается реактивно через `useStore(form.store, () =>
+  form.getFieldValue(fullPath))`. Поведение полей не изменилось — только устранён консольный
+  warning, тесты не менялись.
+
 ## [0.13.1] - 2026-08-10
 
 ### Changed
