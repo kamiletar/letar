@@ -2,6 +2,8 @@
 
 ## Unreleased (2026-08-10, продолжение)
 
+- Демо `FormSteps` (`@letar/forms-shadcn` 0.16.0) — изолированная 2-шаговая форма
+  (`firstName`/`email`) с `Indicator`/`Navigation`/`CompletedContent`.
 - Демо-поле `FieldFileUpload` (`@letar/forms-shadcn` 0.15.0) — `variant="dropzone"`, `maxFiles={3}`,
   `showSize`.
 - Демо-поле `FieldSignature` (`@letar/forms-shadcn` 0.14.0) — canvas-рисование/typed mode,

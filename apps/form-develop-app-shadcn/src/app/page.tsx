@@ -36,6 +36,7 @@ import {
   FieldSwitch,
   FieldTags,
   FieldTextarea,
+  FormSteps,
 } from '@letar/forms-shadcn'
 
 import { DemoForm } from './_components/demo-form'
@@ -246,6 +247,32 @@ export default function HomePage() {
         >
           Отправить
         </button>
+      </DemoForm>
+
+      <h2 className="mt-16 text-xl font-semibold">FormSteps (beta, отдельная форма)</h2>
+      <p className="text-muted-foreground mt-1 text-sm">
+        Compound-компонент форм-уровня, не Field — изолированная песочница, не завязана на поля выше.
+      </p>
+      <DemoForm<{ firstName: string; email: string }>
+        defaultValues={{ firstName: '', email: '' }}
+        onSubmit={(value) => {
+          // eslint-disable-next-line no-console
+          console.log('steps submit', value)
+        }}
+      >
+        <FormSteps>
+          <FormSteps.Indicator showDescriptions />
+          <FormSteps.Step title="Личное" description="Как к вам обращаться">
+            <FieldString name="firstName" label="Имя" required />
+          </FormSteps.Step>
+          <FormSteps.Step title="Контакты" description="Как с вами связаться">
+            <FieldString name="email" label="Email" type="email" />
+          </FormSteps.Step>
+          <FormSteps.CompletedContent>
+            <p className="text-sm">Все шаги пройдены — можно отправлять.</p>
+          </FormSteps.CompletedContent>
+          <FormSteps.Navigation />
+        </FormSteps>
       </DemoForm>
     </main>
   )
