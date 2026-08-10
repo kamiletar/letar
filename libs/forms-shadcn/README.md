@@ -42,6 +42,8 @@ import {
   FieldCombobox,
   FieldDate,
   FieldDateRange,
+  FieldDateTimePicker,
+  FieldDuration,
   FieldHidden,
   FieldNativeSelect,
   FieldNumber,
@@ -59,29 +61,31 @@ import {
 } from '@letar/forms-shadcn'
 ```
 
-## Поля (beta — 19 из 56, продолжаем к паритету с `@letar/forms`)
+## Поля (beta — 21 из 56, продолжаем к паритету с `@letar/forms`)
 
-| Поле                | Radix-примитив                     |
-| ------------------- | ---------------------------------- |
-| `FieldString`       | нативный `<input>`                 |
-| `FieldCheckbox`     | `@radix-ui/react-checkbox`         |
-| `FieldSelect`       | `@radix-ui/react-select`           |
-| `FieldTextarea`     | нативный `<textarea>`              |
-| `FieldNumber`       | нативный `<input type="number">`   |
-| `FieldRadioGroup`   | `@radix-ui/react-radio-group`      |
-| `FieldSegmentGroup` | `@radix-ui/react-toggle-group`     |
-| `FieldDate`         | нативный `<input type="date">`     |
-| `FieldNativeSelect` | нативный `<select>`                |
-| `FieldSwitch`       | `@radix-ui/react-switch`           |
-| `FieldSlider`       | `@radix-ui/react-slider`           |
-| `FieldPassword`     | нативный `<input>` + toggle-кнопка |
-| `FieldCombobox`     | `@radix-ui/react-popover` (beta)   |
-| `FieldPinInput`     | нативные `<input maxLength=1>`     |
-| `FieldHidden`       | без DOM (синхронизация значения)   |
-| `FieldRating`       | звёзды-кнопки (`lucide-react`)     |
-| `FieldTags`         | нативный `<input>` + чипы          |
-| `FieldAddress`      | `@radix-ui/react-popover` (beta)   |
-| `FieldDateRange`    | два нативных `<input type="date">` |
+| Поле                  | Radix-примитив                                |
+| --------------------- | --------------------------------------------- |
+| `FieldString`         | нативный `<input>`                            |
+| `FieldCheckbox`       | `@radix-ui/react-checkbox`                    |
+| `FieldSelect`         | `@radix-ui/react-select`                      |
+| `FieldTextarea`       | нативный `<textarea>`                         |
+| `FieldNumber`         | нативный `<input type="number">`              |
+| `FieldRadioGroup`     | `@radix-ui/react-radio-group`                 |
+| `FieldSegmentGroup`   | `@radix-ui/react-toggle-group`                |
+| `FieldDate`           | нативный `<input type="date">`                |
+| `FieldNativeSelect`   | нативный `<select>`                           |
+| `FieldSwitch`         | `@radix-ui/react-switch`                      |
+| `FieldSlider`         | `@radix-ui/react-slider`                      |
+| `FieldPassword`       | нативный `<input>` + toggle-кнопка            |
+| `FieldCombobox`       | `@radix-ui/react-popover` (beta)              |
+| `FieldPinInput`       | нативные `<input maxLength=1>`                |
+| `FieldHidden`         | без DOM (синхронизация значения)              |
+| `FieldRating`         | звёзды-кнопки (`lucide-react`)                |
+| `FieldTags`           | нативный `<input>` + чипы                     |
+| `FieldAddress`        | `@radix-ui/react-popover` (beta)              |
+| `FieldDateRange`      | два нативных `<input type="date">`            |
+| `FieldDuration`       | `NumberInput` ×1 или ×2 (HH:MM)               |
+| `FieldDateTimePicker` | `<input type="date">` + `<input type="time">` |
 
 `FieldCombobox` — упрощённая beta-версия: только статичные `options`, фильтрация по вхождению
 подстроки в `label`. Без `useQuery` (async-поиск) и группировки — Chakra-версия их поддерживает,
@@ -93,7 +97,7 @@ import {
 — пресеты рядом кнопок вместо выпадающего меню (нет `@radix-ui/react-dropdown-menu` в
 peer-зависимостях, не нужна ради 7 текстовых пунктов).
 
-Остальные ходовые поля (RichText, FileUpload, DateTimePicker, Duration и т.д.) — по мере
+Остальные ходовые поля (RichText, FileUpload и т.д.) — по мере
 миграции, каждое почти бесплатно благодаря готовому `UIKit`-контракту.
 
 ## `shadcnUIKit`

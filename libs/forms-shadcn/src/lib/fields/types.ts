@@ -200,3 +200,28 @@ export interface DateRangeFieldProps extends BaseFieldProps {
   /** Ориентация полей начала/конца */
   orientation?: 'horizontal' | 'vertical'
 }
+
+/** Props for Form.Field.Duration (shadcn-скин). Значение — число минут. */
+export interface DurationFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
+  /** Формат отображения (по умолчанию "HH:MM") */
+  format?: 'HH:MM' | 'minutes'
+  /** Минимум минут (по умолчанию 0) */
+  min?: number
+  /** Максимум минут (по умолчанию 1440 — сутки) */
+  max?: number
+  /** Шаг минут (по умолчанию 15) */
+  step?: number
+}
+
+/**
+ * Props for Form.Field.DateTimePicker (shadcn-скин). Значение — строка ISO
+ * (`YYYY-MM-DDTHH:MM:00`).
+ */
+export interface DateTimePickerFieldProps extends BaseFieldProps {
+  /** Минимальные дата+время */
+  minDateTime?: Date | string
+  /** Максимальные дата+время */
+  maxDateTime?: Date | string
+  /** Шаг времени в минутах (по умолчанию 15) */
+  timeStep?: number
+}

@@ -4,6 +4,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.8.0] - 2026-08-10
+
+### Added
+
+- `FieldDuration` — 20-е поле. Значение — число минут, формат `HH:MM` (два `NumberInput`) или
+  `minutes` (один `NumberInput`), с клампом по `min`/`max`. Полностью на UIKit-контракте — без
+  обходов.
+- `FieldDateTimePicker` — 21-е поле. Значение — строка ISO (`YYYY-MM-DDTHH:MM:00`), два нативных
+  инпута (`type="date"` + `type="time"`) рядом — тот же обход `UIKitInputProps` без `min`/`max`/
+  `step`, что у `FieldDateRange`.
+
 ## [0.7.0] - 2026-08-10
 
 ### Added
