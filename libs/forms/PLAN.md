@@ -1712,6 +1712,41 @@ React, а React-адаптер зависит от абстракций ядра
   - Живая проверка в Chromium: заполнение `firstName` + клик «Далее» → показался `email`-инпут
     второго шага, индикатор отметил первый шаг завершённым (галочка, `bg-primary`); на втором шаге
     кнопка «Далее» стала «Отправить»; клик «Назад» вернул на первый шаг с `firstName`-инпутом.
+  - ✅ **Дедуп FormSteps-хуков в `@letar/forms-react` (2026-08-10, forms-dev).** Портирование
+    `FormSteps` в shadcn-скин продублировало `use-step-state.ts`/`use-step-navigation.ts`/
+    `use-step-persistence.ts` почти дословно (framework-free, не зависят ни от Chakra, ни от
+    Radix — уже работали только с React + `@tanstack/react-form`). Построчное сравнение нашло
+    один реальный сущностный разрыв: `hiddenFields`/`hideFieldsFromValidation`/
+    `showFieldsForValidation` (интеграция с `Form.When`, условное скрытие полей от валидации) —
+    есть только в Chakra-версии, у shadcn нет `Form.When` вовсе (см. beta-упрощения в
+    `libs/forms-shadcn/README.md`).
+    - Решение — вынести все три хука + типы `StepInfo`/`StepDirection` в `@letar/forms-react`,
+      не дублировать. Разрыв не потребовал ветвления сигнатур: `hiddenFields` в
+      `useStepNavigation` стал optional-параметром (`undefined` → фильтрация по пустому
+      `Set`, поведение как было у shadcn — валидируются все поля шага); `useStepState`
+      как и раньше всегда несёт `hiddenFields`-состояние — скины без `Form.When` просто не
+      вызывают сеттеры, лишней абстракции/флага «включить hiddenFields» не потребовалось.
+    - Второе найденное отличие — `STORAGE_PREFIX` в `useStepPersistence` (`'form-steps:'` у
+      Chakra, `'form-steps-shadcn:'` у shadcn — чтобы оба скина одной формы не затирали друг
+      другу прогресс в `localStorage`). Стало полем `storagePrefix?: string` конфига,
+      по умолчанию `'form-steps:'`; `FormStepsRoot` (`forms-shadcn`) передаёт
+      `'form-steps-shadcn:'` явно.
+    - `FormStepsContextValue` **не унифицирован** — осознанно: у Chakra-версии в контексте
+      ещё 6 chakra-специфичных полей (`orientation`/`size`/`variant`/`colorPalette`/`animated`/
+      `animationDuration`), которых у shadcn нет и не будет (нативная разметка вместо
+      `Steps.Root`). Обобщать под общий тип означало бы либо делать эти поля опциональными
+      (падение типобезопасности без выигрыша), либо городить generic — не стоит экономии на
+      двух похожих, но разных интерфейсах. `StepInfo`/`StepDirection` (без UI-специфики)
+      вынесены как общие типы, `FormStepsContextValue` — как был, по одному на скин.
+    - Публичный API обоих пакетов не изменился — `StepInfo`/`StepDirection` реэкспортируются
+      из `form-steps-context.tsx` каждого скина, как раньше. Версии: `@letar/forms` `2.0.1` →
+      `2.0.2`, `@letar/forms-shadcn` `0.16.0` → `0.16.1`, `@letar/forms-react` `0.2.0` → `0.2.1`
+      (все три — patch, внутренний рефакторинг).
+    - **Проверки:** `nx test forms` (без изменений в счёте), `nx test forms-shadcn` (без
+      изменений в счёте), `typecheck:tsgo`/`lint` зелёные на всех трёх пакетах. Lint `forms`
+      репортит 23 предсуществующих ошибки в несвязанных файлах (`form-comparison.tsx`,
+      `use-form-analytics.ts`, `render-count.spec.tsx` и т.д.) — не в диффе этой задачи, не
+      трогались.
 - [ ] **7.4 Замер трафика** → решение: доносить сложные поля или нет.
 - [ ] **7.5 Docs-сайт на отдельном домене** + живые демо. SEO под `zod forms react`, `prisma form generator`.
 - [ ] **7.6 `llms.txt` + усиление MCP** — недоиспользованный козырь №1 (дёшево, уникально).

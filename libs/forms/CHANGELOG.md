@@ -4,6 +4,21 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.0.2] - 2026-08-10
+
+### Changed
+
+- **`FormSteps`: логика навигации/состояния/персистенции шагов (`use-step-state.ts`,
+  `use-step-navigation.ts`, `use-step-persistence.ts`) переехала в `@letar/forms-react`
+  (0.2.1) — было продублировано почти дословно в `@letar/forms-shadcn` при портировании
+  `FormSteps` на shadcn-скин (0.16.0). Единственное реальное отличие между версиями —
+  `hiddenFields`-интеграция с `Form.When`, которой нет в shadcn-скине — сохранено:
+  `hiddenFields` в `useStepNavigation` теперь опциональный параметр (по умолчанию пустое
+  множество), `useStepState` по-прежнему всегда несёт `hiddenFields`/`hideFieldsFromValidation`/
+  `showFieldsForValidation` — скины без Form.When просто их не используют. Публичный API
+  `@letar/forms` не изменился: `StepInfo`/`StepDirection` из `form-steps-context.tsx`
+  реэкспортируются из `@letar/forms-react`, `index.ts` пакета — без изменений.
+
 ## [2.0.1] - 2026-08-10
 
 ### Fixed

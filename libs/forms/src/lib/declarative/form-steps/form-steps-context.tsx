@@ -1,29 +1,9 @@
 'use client'
 
-import { createContext, type ReactNode, type RefObject, useContext } from 'react'
+import type { StepDirection, StepInfo } from '@letar/forms-react'
+import { createContext, type RefObject, useContext } from 'react'
 
-/**
- * Information about a single step
- */
-export interface StepInfo {
-  /** Step index (0-based) */
-  index: number
-  /** Step title */
-  title: string
-  /** Optional description */
-  description?: string
-  /** Optional icon */
-  icon?: ReactNode
-  /** Field names in this step (for validation) */
-  fieldNames: string[]
-  /** Callback when entering the step */
-  onEnter?: () => void
-  /** Callback when leaving the step (can cancel transition) */
-  onLeave?: (direction: StepDirection) => Promise<boolean> | boolean
-}
-
-/** Animation direction */
-export type StepDirection = 'forward' | 'backward'
+export type { StepDirection, StepInfo }
 
 /**
  * Context value for Form.Steps
