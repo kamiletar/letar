@@ -240,7 +240,7 @@ const ollama = createOpenAICompatible({
 })
 const localModel = ollama('qwen2.5-coder:14b')
 
-// llama.cpp server (letar-consultant)
+// llama.cpp server (локальный OpenAI-совместимый эндпоинт)
 const llamaCpp = createOpenAICompatible({
   name: 'llama-cpp',
   baseURL: 'http://localhost:8080/v1',
@@ -278,10 +278,9 @@ const result = await generateText({
 
 ---
 
-## Использование вне letar-consultant
+## Интеграция AI в приложения letar
 
 ```typescript
-// В letar letar-consultant MCP использует OpenAI-compatible API
 // Для интеграции AI в приложения letar:
 
 // Server Action с AI
