@@ -1221,6 +1221,18 @@ production)` — теперь технически возможен (staging-к�
 - [x] `.gitignore` `domwellbes`/`aboi` — уже корректны (`.env.staging` игнорируется,
       `.env.staging.enc` нет) — оказалось починено параллельным треком до этой сессии, отдельная
       правка не потребовалась.
+- [x] **`.gitignore` остальных пяти submodule со staging (2026-08-10)** — `aprel8008`,
+      `driving-school`, `dsperevod`, `studio`, `svoichuzhie` **не** игнорировали `.env.staging`
+      явно: `driving-school` держал только `!.env.staging.example` (исключение из игнора шаблона —
+      само по себе не игнорирует реальный файл), `dsperevod`/`studio` держали `.env.*.local`
+      (матчит только файлы с суффиксом `.local`, `.env.staging` под этот паттерн не подпадает),
+      `aprel8008`/`svoichuzhie` не упоминали `.env.staging` вообще ни в каком виде. Добавлена
+      явная строка `.env.staging` во все пять — свой коммит в каждом приватном репозитории, SHA
+      подняты в корне. Найдено при уборке грязного дерева на s3 (см. также
+      [git-pathspec-commit-ignored-deletion](/.claude/docs/git-pathspec-commit-ignored-deletion.md),
+      обнаружено в той же сессии). ⚠️ Это закрывает только риск случайного `git add .` — реальная
+      SOPS-шифровка (`.env.staging.enc`) для этих пяти по-прежнему не заведена, см. пункт тиража
+      ниже.
 - [x] Хук установлен во **всех** приватных submodule монорепо, не только в `domwellbes`:
       `apps/aboi`, `apps/aboi-e2e`, `apps/aprel8008`, `apps/domwellbes-e2e`,
       `apps/driving-school`, `apps/driving-school-e2e`, `apps/dsperevod`,
