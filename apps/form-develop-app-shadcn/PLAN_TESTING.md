@@ -1,0 +1,16 @@
+# Form Develop App (shadcn) — план тестирования
+
+## Unit-тесты (Vitest)
+
+Настроены (`vitest.config.ts`, `vitest.setup.tsx`), тестов пока нет — добавляй по мере появления
+логики в `src/`.
+
+## E2E-тесты (Playwright)
+
+Не подключены. Когда появится первая фича, достойная e2e-покрытия:
+
+```bash
+nx g @letar/generators:e2e-suite form-develop-app-shadcn
+```
+
+См. `.claude/docs/e2e-testing.md` за особенностями WebKit/Portal-компонентов.

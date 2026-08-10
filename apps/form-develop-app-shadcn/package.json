@@ -1,0 +1,9 @@
+{
+  "name": "@letar/form-develop-app-shadcn",
+  "version": "0.1.0",
+  "private": true,
+  "nx": {
+    "name": "form-develop-app-shadcn",
+    "implicitDependencies": ["@letar/analytics", "@letar/forms-shadcn"]
+  }
+}
