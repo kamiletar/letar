@@ -209,7 +209,19 @@ age-ключ; подробнее — [secret-manager](/.claude/docs/secret-manag
 
 **Окружение:** Windows (нативный), `nx` и `bun` глобальные (❌ НЕ `bunx nx`/`npx nx`). При передаче аргументов в underlying tool: `nx e2e app-e2e -- --project=chromium`
 
-**MCP серверы:** nx-mcp, next-devtools, chakra-ui, **form-mcp**, **deploy-mcp**, inkeepMcp, context7, sequential-thinking, context-mode, agent-mail, **postgres-\*** (driving-school, kami, grandslamcup, studio), playwright, studio-time-mcp, synth-mcp. Подробнее: [MCP серверы](/.claude/docs/mcp-servers.md)
+**MCP серверы:** nx-mcp, next-devtools, chakra-ui, **form-mcp**, **deploy-mcp**, context7, context-mode (плагин), agent-mail, **postgres-\*** (driving-school, kami, grandslamcup, studio), studio-time-mcp, synth-mcp. Подробнее: [MCP серверы](/.claude/docs/mcp-servers.md)
+
+⚠️ **Ревизия 2026-08-10: состав серверов сокращён с 23 до 15 по фактической статистике вызовов**
+(подсчёт по 487 транскриптам сессий). Удалены `socraticode`, `letar-consultant`, `prisma`,
+`sequential-thinking`, `inkeepMcp`, `playwright`, `postgres-kami-prod-write`, дубли `context-mode`
+и `context7`. Прежде чем возвращать что-то из этого списка — проверь, что инструмент будет
+вызываться, а не просто числиться. Браузерная работа идёт через встроенный Claude Browser,
+семантический поиск — через Grep и субагента Explore.
+
+**Postgres MCP Pro:** dev-базы `studio` и `driving-school` подключены флагом `--pro` у
+`.claude/mcp/pg-wrapper.mjs` — вместо одного `query` доступны EXPLAIN, health-checks и подбор
+индексов (9 инструментов). Подбор индексов пока не работает: нужны расширения `pg_stat_statements`
+и `hypopg`, см. [PLAN-INFRA §71](/PLAN-INFRA.md).
 
 ⚠️ **`nx-mcp` запускается с `--minimal false`.** По умолчанию флаг `--minimal` у сервера равен
 `true`, и он прячет ровно те инструменты, ради которых его ставят: `nx_workspace`,
