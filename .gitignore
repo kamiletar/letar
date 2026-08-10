@@ -159,6 +159,12 @@ apps/animatrona/resources/template.db
 infra/agent-mail/mcp_agent_mail/
 infra/agent-mail/.env
 
+# infra/*/.env — реальные секреты сервисов (AUTH_TOKEN и т.п.), только на сервере.
+# Отдельно от .env.* выше: голый .env паттерном ".env.*" не покрывается (нужен суффикс
+# после точки), а именно голый .env хранит секреты в infra/* (в отличие от apps/*, где
+# .env коммитится и содержит только порт — см. .claude/rules/env-files.md).
+infra/*/.env
+
 # Nginx Proxy Manager local data (per-server)
 infra/nginx-proxy-manager/data/
 infra/nginx-proxy-manager/letsencrypt/
