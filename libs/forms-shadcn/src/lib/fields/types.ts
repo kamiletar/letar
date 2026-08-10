@@ -270,3 +270,34 @@ export interface PercentageFieldProps extends BaseFieldProps {
   /** Шаг изменения (по умолчанию 1) */
   step?: number
 }
+
+/**
+ * Props for Form.Field.Autocomplete (shadcn-скин).
+ *
+ * Beta: только статичные `suggestions`, без `useQuery` (Chakra-версия поддерживает
+ * асинхронный поиск через ZenStack hooks — здесь не портировано).
+ */
+export interface AutocompleteFieldProps extends BaseFieldProps {
+  /** Статичные подсказки */
+  suggestions?: string[]
+  /** Минимум символов перед показом подсказок (по умолчанию 1) */
+  minChars?: number
+}
+
+export interface ListboxOption {
+  label: ReactNode
+  value: string | number
+  disabled?: boolean
+  /** Ключ группы — опции с одинаковым `group` рендерятся под общим заголовком */
+  group?: string
+}
+
+/**
+ * Props for Form.Field.Listbox (shadcn-скин). Все опции видны сразу (не выпадающий список).
+ */
+export interface ListboxFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
+  /** Опции списка */
+  options: ListboxOption[]
+  /** Режим выбора: одиночный (по умолчанию) или множественный */
+  selectionMode?: 'single' | 'multiple'
+}

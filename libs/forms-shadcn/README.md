@@ -38,6 +38,7 @@ Chakra-провайдера, а не отдельный статический C
 ```tsx
 import {
   FieldAddress,
+  FieldAutocomplete,
   FieldCheckbox,
   FieldCombobox,
   FieldCurrency,
@@ -46,6 +47,7 @@ import {
   FieldDateTimePicker,
   FieldDuration,
   FieldHidden,
+  FieldListbox,
   FieldNativeSelect,
   FieldNumber,
   FieldPassword,
@@ -64,7 +66,7 @@ import {
 } from '@letar/forms-shadcn'
 ```
 
-## Поля (beta — 24 из 56, продолжаем к паритету с `@letar/forms`)
+## Поля (beta — 26 из 56, продолжаем к паритету с `@letar/forms`)
 
 | Поле                  | Radix-примитив                                |
 | --------------------- | --------------------------------------------- |
@@ -92,6 +94,8 @@ import {
 | `FieldPhone`          | нативный `<input type="tel">` + маска         |
 | `FieldCurrency`       | `NumberInput` + символ валюты рядом           |
 | `FieldPercentage`     | `NumberInput` + `%` рядом                     |
+| `FieldAutocomplete`   | `@radix-ui/react-popover` (beta)              |
+| `FieldListbox`        | обычные кнопки, без Radix                     |
 
 `FieldCombobox` — упрощённая beta-версия: только статичные `options`, фильтрация по вхождению
 подстроки в `label`. Без `useQuery` (async-поиск) и группировки — Chakra-версия их поддерживает,
@@ -103,6 +107,9 @@ import {
 — пресеты рядом кнопок вместо выпадающего меню (нет `@radix-ui/react-dropdown-menu` в
 peer-зависимостях, не нужна ради 7 текстовых пунктов). `FieldCurrency`/`FieldPercentage` — без
 живого Intl-форматирования значения внутри инпута при вводе, символ рядом с полем.
+`FieldAutocomplete` — переиспользует тот же Combobox-примитив, но всегда принимает произвольный
+текст (`allowCustomValue`); только статичные `suggestions`, без `useQuery`. `FieldListbox` — все
+опции видны сразу, ряд кнопок с `aria-selected` вместо выпадающего списка.
 
 Остальные ходовые поля (RichText, FileUpload и т.д.) — по мере
 миграции, каждое почти бесплатно благодаря готовому `UIKit`-контракту.

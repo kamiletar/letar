@@ -6,6 +6,7 @@ export { createField, FieldErrorBoundary, FieldWrapper } from './lib/uikit/primi
 
 // Поля (Шаг 5 — 17 из 15-20, план перевыполнен; продолжение к паритету)
 export { FieldAddress } from './lib/fields/field-address'
+export { FieldAutocomplete } from './lib/fields/field-autocomplete'
 export { FieldCheckbox } from './lib/fields/field-checkbox'
 export { FieldCombobox } from './lib/fields/field-combobox'
 export { FieldCurrency } from './lib/fields/field-currency'
@@ -14,6 +15,7 @@ export { FieldDateRange } from './lib/fields/field-date-range'
 export { FieldDateTimePicker } from './lib/fields/field-datetime-picker'
 export { FieldDuration } from './lib/fields/field-duration'
 export { FieldHidden, type HiddenFieldProps } from './lib/fields/field-hidden'
+export { FieldListbox } from './lib/fields/field-listbox'
 export { FieldNativeSelect } from './lib/fields/field-native-select'
 export { FieldNumber } from './lib/fields/field-number'
 export { FieldPassword } from './lib/fields/field-password'
@@ -32,6 +34,7 @@ export { FieldTextarea } from './lib/fields/field-textarea'
 export type {
   AddressFieldProps,
   AddressValue,
+  AutocompleteFieldProps,
   CheckboxFieldProps,
   ComboboxFieldProps,
   CurrencyFieldProps,
@@ -41,6 +44,8 @@ export type {
   DateRangeValue,
   DateTimePickerFieldProps,
   DurationFieldProps,
+  ListboxFieldProps,
+  ListboxOption,
   NativeSelectFieldProps,
   NumberFieldProps,
   PasswordFieldProps,

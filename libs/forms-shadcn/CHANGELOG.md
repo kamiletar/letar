@@ -4,6 +4,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.10.0] - 2026-08-10
+
+### Added
+
+- `FieldAutocomplete` — 25-е поле. Упрощённая версия `FieldCombobox`, которая всегда принимает
+  произвольный текст (`allowCustomValue`), не только значение из списка. Beta: только статичные
+  `suggestions`, без `useQuery` (тот же статус, что у `FieldCombobox`).
+- `FieldListbox` — 26-е поле. Все опции видны сразу (не выпадающий список) — ряд кнопок с
+  `aria-selected`, одиночный или множественный выбор. Группировка через `groupOptions`
+  (`@letar/forms-core/uikit`, framework-free).
+
 ## [0.9.0] - 2026-08-10
 
 ### Added
