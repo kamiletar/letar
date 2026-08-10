@@ -2,6 +2,12 @@
 paths: apps/**/_actions/**
 ---
 
+> ⚠️ **`paths:`-правила Claude Code инжектит только при чтении подходящего файла и НЕ инжектит
+> при `Write`** ([claude-code#23478](https://github.com/anthropics/claude-code/issues/23478)) —
+> то есть ровно в момент создания нового server action правило недоступно. Проверяемые пункты
+> отсюда (валидация Zod + `.strip()`, access control) — кандидаты на semgrep-правило
+> (`.semgrep/letar-rules.yml`), остальное работает как справочник при повторном чтении файла.
+
 # Правила для Server Actions
 
 ## Структура
