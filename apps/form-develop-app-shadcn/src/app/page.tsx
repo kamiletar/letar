@@ -15,6 +15,7 @@ import {
   FieldDateTimePicker,
   FieldDuration,
   FieldEditable,
+  FieldFileUpload,
   FieldHidden,
   FieldListbox,
   FieldNativeSelect,
@@ -100,6 +101,7 @@ interface DemoFormValues {
   brandColor: string
   smsCode: string
   signature: string
+  attachments: File[]
 }
 
 const defaultValues: DemoFormValues = {
@@ -136,6 +138,7 @@ const defaultValues: DemoFormValues = {
   brandColor: '#4299E1',
   smsCode: '',
   signature: '',
+  attachments: [],
 }
 
 export default function HomePage() {
@@ -143,7 +146,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Form Develop App (shadcn)</h1>
       <p className="text-muted-foreground mt-2 text-sm">
-        Песочница для разработки @letar/forms-shadcn — 33 поля, Фаза 7.3 Шаг 5+.
+        Песочница для разработки @letar/forms-shadcn — 34 поля, Фаза 7.3 Шаг 5+.
       </p>
 
       <DemoForm<DemoFormValues>
@@ -220,6 +223,14 @@ export default function HomePage() {
         <FieldEditable name="bio2" label="Кликабельный текст" />
         <FieldColorPicker name="brandColor" label="Цвет бренда" />
         <FieldSignature name="signature" label="Подпись" width={320} height={120} />
+        <FieldFileUpload
+          name="attachments"
+          label="Вложения"
+          variant="dropzone"
+          maxFiles={3}
+          showSize
+          dropzoneDescription="До 3 файлов"
+        />
         <FieldOTPInput
           name="smsCode"
           label="SMS-код"
