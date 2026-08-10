@@ -22,7 +22,9 @@
 
 **MCP-серверы:** [mcp-servers](/.claude/docs/mcp-servers.md) состав и назначение ·
 [mcp-server-pattern](/.claude/docs/mcp-server-pattern.md) тонкий локальный сервер по stdio ·
-[mcp-sse-bridge](/.claude/docs/mcp-sse-bridge.md) мост stdio-процесс ↔ открытая страница
+[mcp-sse-bridge](/.claude/docs/mcp-sse-bridge.md) мост stdio-процесс ↔ открытая страница ·
+[agent-mail-server-quirks](/.claude/docs/agent-mail-server-quirks.md) баги координации: contact
+approval, kebab-case в `to`, обнулённая база
 
 **База данных и ZenStack:** [database](/.claude/docs/database.md) ·
 [seed-scripts](/.claude/docs/seed-scripts.md) идемпотентный `prisma/seed.ts` ·
