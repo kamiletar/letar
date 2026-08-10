@@ -9,6 +9,7 @@ export { FieldAddress } from './lib/fields/field-address'
 export { FieldAutocomplete } from './lib/fields/field-autocomplete'
 export { FieldCheckbox } from './lib/fields/field-checkbox'
 export { FieldCheckboxCard } from './lib/fields/field-checkbox-card'
+export { FieldCity } from './lib/fields/field-city'
 export { FieldCombobox } from './lib/fields/field-combobox'
 export { FieldCurrency } from './lib/fields/field-currency'
 export { FieldDate } from './lib/fields/field-date'
@@ -39,6 +40,7 @@ export type {
   AutocompleteFieldProps,
   CheckboxCardFieldProps,
   CheckboxFieldProps,
+  CityFieldProps,
   ComboboxFieldProps,
   CurrencyFieldProps,
   DateFieldProps,

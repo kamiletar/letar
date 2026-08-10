@@ -4,7 +4,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
-## [0.11.0] - 2026-08-10
+## [0.12.0] - 2026-08-10
+
+### Added
+
+- `FieldCity` — 29-е поле. Тот же `AddressProvider`/`shadcnUIKit.Combobox`-паттерн, что и
+  `FieldAddress`, значение — простая строка (имя города), `bounds` ограничивает подсказки
+  уровнем city/settlement.
+
+### Known limitations
+
+- `FieldCity`: значение обновляется только через выбор подсказки или полное стирание текста —
+  без сохранения набранного вручную текста на `blur` (Chakra-версия это умеет,
+  `UIKitComboboxProps` не даёт колбэк `onBlur`).
 
 ### Added
 

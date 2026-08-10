@@ -171,6 +171,23 @@ export interface AddressFieldProps extends BaseFieldProps {
   valueOnly?: boolean
 }
 
+/**
+ * Props for Form.Field.City (shadcn-скин). Значение — простая строка (имя города).
+ *
+ * Beta: значение поля обновляется только через выбор подсказки или полное стирание текста —
+ * без сохранения набранного вручную текста на `blur` (см. JSDoc `field-city.tsx`).
+ */
+export interface CityFieldProps extends BaseFieldProps {
+  /** Провайдер подсказок адреса (рекомендуется) */
+  provider?: AddressProvider
+  /** DaData API token (обратная совместимость — создаёт DaData-провайдер внутри) */
+  token?: string
+  /** Минимум символов перед поиском (по умолчанию 2) */
+  minChars?: number
+  /** Задержка debounce в мс (по умолчанию 300) */
+  debounceMs?: number
+}
+
 /** Значение поля диапазона дат. */
 export interface DateRangeValue {
   start: string
