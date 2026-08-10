@@ -39,6 +39,8 @@ export { FieldString } from './lib/fields/field-string'
 export { FieldSwitch } from './lib/fields/field-switch'
 export { FieldTags } from './lib/fields/field-tags'
 export { FieldTextarea } from './lib/fields/field-textarea'
+
+// Form.Steps — compound-компонент форм-уровня (beta), не createField()-поле
 export type {
   AddressFieldProps,
   AddressValue,
@@ -84,6 +86,15 @@ export type {
   TagsFieldProps,
   TextareaFieldProps,
 } from './lib/fields/types'
+export { FormSteps } from './lib/steps'
+export type {
+  FormStepsCompletedContentProps,
+  FormStepsIndicatorProps,
+  FormStepsNavigationProps,
+  FormStepsProps,
+  FormStepsStepProps,
+  StepPersistenceConfig,
+} from './lib/steps'
 
 // cn() — clsx + tailwind-merge, стандартный shadcn-хелпер
 export { cn } from './lib/utils/cn'

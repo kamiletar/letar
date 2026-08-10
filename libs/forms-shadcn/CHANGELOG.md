@@ -4,6 +4,22 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.16.0] - 2026-08-10
+
+### Added
+
+- `FormSteps` — мультистеп compound-компонент форм-уровня (beta), третий из приоритетного списка
+  координатора (Signature → FileUpload → **Steps** → Table → RichText). Не `createField()`-поле —
+  та же категория, что `Form.Steps` у Chakra-версии: `FormSteps`, `FormSteps.Step`,
+  `FormSteps.Indicator`, `FormSteps.Navigation`, `FormSteps.CompletedContent`. Работает поверх
+  `useDeclarativeForm()` из `@letar/forms-react` напрямую — не требует `createForm()`/`Form`
+  (у `forms-shadcn` его пока нет, backlog). Навигация/валидация/localStorage-персистенция
+  портированы из Chakra-версии без изменений — framework-free логика (`use-step-state.ts`,
+  `use-step-navigation.ts`, `use-step-persistence.ts`). UI (индикатор, кнопки) — нативная разметка
+  вместо Chakra `Steps.Root`/`Button`. Beta: без интеграции с `Form.When` (условное скрытие полей
+  от валидации), без `segment` (авто-обёртка `Form.Group` — модуля `FormGroupDeclarative` в
+  `forms-react` нет) и без анимаций перехода (`framer-motion` не добавлен как зависимость).
+
 ## [0.15.0] - 2026-08-10
 
 ### Added

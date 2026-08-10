@@ -75,6 +75,8 @@ import {
 
 ## Поля (beta — 34 из 56, продолжаем к паритету с `@letar/forms`)
 
+Плюс `FormSteps` — мультистеп compound-компонент форм-уровня, не Field (см. раздел ниже).
+
 | Поле                  | Radix-примитив                                |
 | --------------------- | --------------------------------------------- |
 | `FieldString`         | нативный `<input>`                            |
@@ -141,8 +143,37 @@ Radix), логика геометрии штрихов/SVG-сборки порт
 `FileUpload.ItemPreviewImage`. Security-проверка (`processFileWithSecurity`) — общая
 framework-free утилита с Chakra-версией, без изменений.
 
-Остальные ходовые поля (RichText, Table, Steps и т.д.) — по мере миграции, каждое почти
-бесплатно благодаря готовому `UIKit`-контракту.
+Остальные ходовые поля (RichText, Table и т.д.) — по мере миграции, каждое почти бесплатно
+благодаря готовому `UIKit`-контракту.
+
+## `FormSteps` — мультистеп (beta, не Field)
+
+```tsx
+import { FieldString, FormSteps } from '@letar/forms-shadcn'
+<FormSteps>
+  <FormSteps.Indicator showDescriptions />
+  <FormSteps.Step title="Личное" description="Как к вам обращаться">
+    <FieldString name="firstName" label="Имя" required />
+  </FormSteps.Step>
+  <FormSteps.Step title="Контакты">
+    <FieldString name="email" label="Email" />
+  </FormSteps.Step>
+  <FormSteps.CompletedContent>Готово!</FormSteps.CompletedContent>
+  <FormSteps.Navigation />
+</FormSteps>
+```
+
+`FormSteps` — не `createField()`-поле, а compound-компонент форм-уровня (та же категория, что
+`Form.Steps` у Chakra-версии): работает поверх `useDeclarativeForm()` из `@letar/forms-react`
+напрямую, не требует `createForm()`/`Form` (у `forms-shadcn` его пока нет — backlog). Навигация,
+валидация текущего шага и localStorage-персистенция (`stepPersistence`) портированы из
+Chakra-версии без изменений — framework-free логика. UI (индикатор с прогрессом, кнопки
+Назад/Далее/Отправить) — нативная разметка вместо Chakra `Steps.Root`.
+
+**Beta-упрощения:** без интеграции с `Form.When` (условное скрытие полей от валидации на шаге —
+в Chakra-версии это `hiddenFields`), без пропа `segment` (авто-обёртка `Form.Group` — модуля
+`FormGroupDeclarative` в `@letar/forms-react` ещё нет) и без анимаций перехода между шагами
+(`framer-motion` не добавлен как peer-зависимость — не оправдана для первого прохода).
 
 ## `shadcnUIKit`
 
