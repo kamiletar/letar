@@ -9,6 +9,7 @@ export { FieldAddress } from './lib/fields/field-address'
 export { FieldCheckbox } from './lib/fields/field-checkbox'
 export { FieldCombobox } from './lib/fields/field-combobox'
 export { FieldDate } from './lib/fields/field-date'
+export { FieldDateRange } from './lib/fields/field-date-range'
 export { FieldHidden, type HiddenFieldProps } from './lib/fields/field-hidden'
 export { FieldNativeSelect } from './lib/fields/field-native-select'
 export { FieldNumber } from './lib/fields/field-number'
@@ -29,6 +30,9 @@ export type {
   CheckboxFieldProps,
   ComboboxFieldProps,
   DateFieldProps,
+  DateRangeFieldProps,
+  DateRangePreset,
+  DateRangeValue,
   NativeSelectFieldProps,
   NumberFieldProps,
   PasswordFieldProps,

@@ -170,3 +170,33 @@ export interface AddressFieldProps extends BaseFieldProps {
   /** Возвращать только строку (по умолчанию false — возвращает AddressValue) */
   valueOnly?: boolean
 }
+
+/** Значение поля диапазона дат. */
+export interface DateRangeValue {
+  start: string
+  end: string
+}
+
+/** Пресеты быстрого выбора диапазона. */
+export type DateRangePreset = 'today' | 'yesterday' | 'thisWeek' | 'lastWeek' | 'thisMonth' | 'lastMonth' | 'thisYear'
+
+/**
+ * Props for Form.Field.DateRange (shadcn-скин).
+ *
+ * Beta-упрощение относительно Chakra-версии: пресеты — ряд кнопок, а не выпадающее меню
+ * (нет `@radix-ui/react-dropdown-menu` в peer-зависимостях).
+ */
+export interface DateRangeFieldProps extends BaseFieldProps {
+  /** Лейбл начала диапазона (по умолчанию "С") */
+  startLabel?: string
+  /** Лейбл конца диапазона (по умолчанию "По") */
+  endLabel?: string
+  /** Минимальная дата (YYYY-MM-DD) */
+  min?: string
+  /** Максимальная дата (YYYY-MM-DD) */
+  max?: string
+  /** Кнопки быстрого выбора */
+  presets?: DateRangePreset[]
+  /** Ориентация полей начала/конца */
+  orientation?: 'horizontal' | 'vertical'
+}

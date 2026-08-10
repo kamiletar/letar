@@ -41,6 +41,7 @@ import {
   FieldCheckbox,
   FieldCombobox,
   FieldDate,
+  FieldDateRange,
   FieldHidden,
   FieldNativeSelect,
   FieldNumber,
@@ -58,7 +59,7 @@ import {
 } from '@letar/forms-shadcn'
 ```
 
-## Поля (beta — 18 из 56, продолжаем к паритету с `@letar/forms`)
+## Поля (beta — 19 из 56, продолжаем к паритету с `@letar/forms`)
 
 | Поле                | Radix-примитив                     |
 | ------------------- | ---------------------------------- |
@@ -80,6 +81,7 @@ import {
 | `FieldRating`       | звёзды-кнопки (`lucide-react`)     |
 | `FieldTags`         | нативный `<input>` + чипы          |
 | `FieldAddress`      | `@radix-ui/react-popover` (beta)   |
+| `FieldDateRange`    | два нативных `<input type="date">` |
 
 `FieldCombobox` — упрощённая beta-версия: только статичные `options`, фильтрация по вхождению
 подстроки в `label`. Без `useQuery` (async-поиск) и группировки — Chakra-версия их поддерживает,
@@ -87,10 +89,12 @@ import {
 посимвольный ввод с автопереходом. `FieldTags` — только Enter добавляет тег, без вставки со
 множественным разделителем. `FieldAddress` — переиспользует тот же Popover-примитив, что
 `FieldCombobox`, с async-подгрузкой из `AddressProvider` (`@letar/forms-core/address`); без
-клавиатурной навигации стрелками по списку и без визуального спиннера в инпуте.
+клавиатурной навигации стрелками по списку и без визуального спиннера в инпуте. `FieldDateRange`
+— пресеты рядом кнопок вместо выпадающего меню (нет `@radix-ui/react-dropdown-menu` в
+peer-зависимостях, не нужна ради 7 текстовых пунктов).
 
-Остальные ходовые поля (RichText, FileUpload, DateRange, DateTimePicker, Duration и т.д.) — по
-мере миграции, каждое почти бесплатно благодаря готовому `UIKit`-контракту.
+Остальные ходовые поля (RichText, FileUpload, DateTimePicker, Duration и т.д.) — по мере
+миграции, каждое почти бесплатно благодаря готовому `UIKit`-контракту.
 
 ## `shadcnUIKit`
 
