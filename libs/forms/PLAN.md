@@ -1747,6 +1747,64 @@ React, а React-адаптер зависит от абстракций ядра
       репортит 23 предсуществующих ошибки в несвязанных файлах (`form-comparison.tsx`,
       `use-form-analytics.ts`, `render-count.spec.tsx` и т.д.) — не в диффе этой задачи, не
       трогались.
+- ✅ **`FieldTableEditor` добавлен (2026-08-10, forms-dev), четвёртое из приоритетного списка
+  координатора (Signature ✅ → FileUpload ✅ → Steps ✅ → Table ✅ → RichText, тред
+  `forms-phase7-3-shadcn`).** Как и `FormSteps` — не `createField()`-поле, а compound-компонент,
+  компонующий `form.Field(mode="array")` напрямую. Портирован из `@letar/forms` (Chakra-скин)
+  практически без изменений логики: `use-table-columns.ts`/`use-table-navigation.ts` (обе —
+  framework-free, ни одной Chakra-зависимости в оригинале) скопированы дословно, `table-utils.ts`
+  вообще не понадобился отдельным файлом — `@letar/forms-core/table` уже экспортирует
+  `buildTSV`/`coerceValue`/`computeAggregate`/`formatCellValue`/`getDefaultRow`/`parseTSV`
+  напрямую, а `@letar/forms-core/schema` даёт `traverseSchema`/`getZodConstraints` с тем же API,
+  что использовала Chakra-версия. Сменилась только разметка: native `<table>`/`<thead>`/`<tbody>`/
+  `<tfoot>` + Tailwind вместо `Table.Root`/`Table.Header`/`Table.Body`/`Table.Footer`, `FieldRoot`/
+  `FieldLabel`/`FieldError` — те же примитивы UIKit-скина, что использует `createField()` (прямой
+  импорт из `../uikit/primitives/*`, не `createField()`-обёртка, т.к. это не single-value поле).
+  8 файлов в `libs/forms-shadcn/src/lib/table/` (types, context, cell, row, header, footer,
+  toolbar, mobile-view, root) + `use-table-columns.ts`/`use-table-navigation.ts`.
+  - **Beta-упрощение (осознанно, не протечка границы):** `sortable` — нативный HTML5 drag&drop
+    (`draggable` на `<tr>` + `onDragStart`/`onDragOver`/`onDrop`, состояние перетаскиваемой строки
+    — `useRef`, ячейка под курсором — `useState` для подсветки `border-t-primary`), не
+    `@dnd-kit/sortable` — тот же принцип, что у `FormSteps` без `framer-motion`: не тянуть новый
+    peer ради одной фичи в первом проходе (у `forms-shadcn` `@dnd-kit` вообще не было peer'ом,
+    в отличие от `@letar/forms`, где `SortableWrapper`/`SortableItem`/`DragHandle` уже тянут его
+    транзитивно через `FormGroupList`). Функционально эквивалентно (перетаскивание строк работает,
+    вызывает `moveRow` → `arrayField.moveValue`), но без keyboard-DnD и анимации перестроения
+    списка, которые даёт `@dnd-kit/sortable`. Задокументировано в README `forms-shadcn`.
+  - **Cell-level редактирование:** enum-колонки — нативный `<select>` (не Radix `Select` — та же
+    причина, что у Chakra-версии с `NativeSelect`: слишком тяжёлый примитив для inline-ячейки),
+    boolean — нативный `<input type="checkbox">`, number/string — нативный `<input>`. Навигация
+    Tab/Shift+Tab/Enter/Escape/стрелки между ячейками — `useTableNavigation`, портирован без
+    изменений (работает через `data-row`/`data-col` DOM-атрибуты и `document.querySelector`
+    внутри `containerRef`, framework-free независимо от UI-библиотеки).
+  - **Проверки:** 11 новых RTL-тестов (133/133 в пакете, было 122) — рендер колонок/строк,
+    computed-ячейка (не открывает inline-редактирование), inline-редактирование обычной ячейки
+    (клик → `input` → `change` → `blur` → значение сохранено), пустая таблица (`emptyText`),
+    добавление/удаление строки, `minRows`/`maxRows` (disabled-состояние кнопок), `selectable`
+    (число чекбоксов), `readOnly` (скрыты toolbar/удаление), footer с `aggregate: 'sum'`.
+    **Находка теста:** jsdom не применяет media queries — mobile-карточки и desktop `<table>`
+    рендерятся в DOM одновременно (различаются только классами `hidden`/`md:block`, не реальным
+    display), поэтому текстовые запросы дают дубли (лейбл колонки в шапке таблицы совпадает с
+    лейблом поля в мобильной карточке) — решение: скоуп через `within(table)`, не общий
+    `screen.getByText`. Негативный контроль (`size="bogus"` → `TS2322`), `typecheck:tsgo`/`lint`
+    зелёные (один фикс по ходу: `no-empty-function` на плейсхолдер-рефе `addRowRef` — тот же
+    паттерн, что в оригинале Chakra-версии, там просто другой eslint-конфиг это не ловил).
+  - CHANGELOG/версия (`0.16.1` → `0.17.0`), README (таблица полей, новый раздел
+    `FieldTableEditor`) — обновлены.
+  - Живая проверка в реальном браузере (Chromium, `form-develop-app-shadcn`): изолированная форма
+    с array-полем `items` (позиции заказа), computed-колонка «Итого» = `qty × price` с
+    `format` в рубли, footer-сумма — 8970 ₽ по двум строкам. Добавление строки через toolbar-кнопку
+    — новая пустая строка с `computed` = 0 ₽. Escape в режиме редактирования — откат без
+    сохранения (проверено через настоящий `KeyboardEvent`, не эмуляцию). Удаление строки, чекбокс
+    select-all → появление кнопки «Удалить выбранные (N)» со счётчиком, `draggable=true` на
+    `<tr>` при `sortable`. **Находка:** программный `blur()`/`dispatchEvent(new Event('blur'))` из
+    `javascript_tool` не закрывал inline-редактирование в этой сессии (Browser pane был свёрнут —
+    `computer{action:"screenshot"}` отдельно вернул ошибку «pane is not displayed, not compositing
+    frames») — вероятно документ без реального фокуса
+    не доставляет focus/blur-события так же, как в активной вкладке. Не протечка границы: RTL-тест
+    того же сценария (`fireEvent.blur`) зелёный, `KeyboardEvent`/`click()`-события в той же живой
+    сессии отработали корректно (Escape, add/remove row, select-all) — похоже на артефакт
+    свёрнутой панели превью, не баг компонента.
 - [ ] **7.4 Замер трафика** → решение: доносить сложные поля или нет.
 - [ ] **7.5 Docs-сайт на отдельном домене** + живые демо. SEO под `zod forms react`, `prisma form generator`.
 - [ ] **7.6 `llms.txt` + усиление MCP** — недоиспользованный козырь №1 (дёшево, уникально).
