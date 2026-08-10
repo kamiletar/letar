@@ -1,0 +1,72 @@
+# GlitchTip — self-hosted трекинг ошибок (PLAN-INFRA.md §70).
+# Секреты — в соседнем .env (не в git, см. .gitignore infra/*/.env).
+#
+# Версия 6 объединяет web+worker в SERVER_ROLE: all_in_one — отдельный celery-контейнер
+# не нужен при нашей нагрузке (одно приложение на старте). Масштабирование на отдельный worker —
+# смена SERVER_ROLE и добавление сервиса, без миграции данных.
+
+x-environment: &default-environment
+  DATABASE_URL: postgres://glitchtip:${DB_PASSWORD}@postgres:5432/glitchtip
+  VALKEY_URL: redis://valkey:6379
+  SECRET_KEY: ${SECRET_KEY}
+  EMAIL_URL: consolemail:// # писем нет — вывод в лог контейнера. Подключить SMTP Maddy — отдельная задача
+  GLITCHTIP_DOMAIN: https://errors.s3.letar.best
+  DEFAULT_FROM_EMAIL: noreply@letar.best
+  ENABLE_ADMIN: 'False'
+  ENABLE_OPENAPI: 'False'
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: glitchtip-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: glitchtip
+      POSTGRES_USER: glitchtip
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - glitchtip_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U glitchtip -d glitchtip']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  valkey:
+    image: valkey/valkey:9-alpine
+    container_name: glitchtip-valkey
+    restart: unless-stopped
+
+  web:
+    image: glitchtip/glitchtip:6
+    container_name: glitchtip-web
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_started
+    environment:
+      <<: *default-environment
+      SERVER_ROLE: all_in_one
+    ports:
+      # Хостовый порт — следующий свободный после studio-stage (3032), см. NPM proxy_host на s3.
+      # NPM форвардит errors.s3.letar.best → 172.17.0.1:3033 (host-gateway, тот же паттерн, что
+      # у всех staging-доменов s3 — см. infra/nginx-proxy-manager/README.md). Traefik-labels не
+      # добавлены: пилот §48 сейчас не держит реальный внешний трафик (NPM держит 80/443), значит
+      # обычный NPM proxy host — единственный путь, которым домен реально станет доступен.
+      - '3033:8000'
+    volumes:
+      - glitchtip_uploads:/code/uploads
+    healthcheck:
+      # Официальный docker-образ не документирует отдельный /health — берём тот же паттерн
+      # spider-запроса на /, что уже используется у studio-staging-app.
+      test: ['CMD-SHELL', 'wget -q --spider http://localhost:8000/ || exit 1']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  glitchtip_pg_data:
+  glitchtip_uploads:
