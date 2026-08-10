@@ -11,15 +11,12 @@ model: haiku
 
 ### 1. Код готов
 
+Базовый чек-лист (коммит/пуш/lint/typecheck) — канонический в
+`.claude/rules/deploy-coordination.md` § «Перед запросом деплоя», не дублируй его здесь. Ниже —
+только affected-версия команд для быстрой проверки перед этим гейтом:
+
 ```bash
-# Lint
-nx affected -t lint --base=main
-
-# Typecheck
-nx affected -t typecheck:tsgo --base=main
-
-# Тесты
-nx affected -t test --base=main
+nx affected -t lint,typecheck:tsgo,test --base=main
 
 # E2E (опционально)
 nx affected -t e2e --base=main
@@ -133,7 +130,7 @@ Code Quality:
   test:       ✗ 2 failed
 
 Security:
-  secrets:    ✗ Found in apps/premium-rosstil/lib/api.ts:15
+  secrets:    ✗ Found in apps/<app>/lib/api.ts:15
 
 Fix issues before deploying.
 ```
@@ -148,17 +145,20 @@ nx run-many -t lint,typecheck:tsgo,test --projects=<app>
 nx affected -t lint,typecheck:tsgo,test --base=main
 
 # Docker build
-docker compose -f docker-compose.prod.yml build <app>
-
-# Деплой
-./deploy-affected.sh
+docker compose -f docker-compose.production.yml build <app>
 ```
+
+⛔ Этот агент только проверяет готовность — сам `deploy-affected.sh` не запускает и деплой не
+выполняет. Модель координации (только BlackCove деплоит) — `.claude/rules/deploy-coordination.md`.
 
 ## Rollback план
 
+Откат — тоже прерогатива BlackCove, не этого агента. Команды ниже — справочно, для отчёта о
+готовности плана отката, не для выполнения:
+
 ```bash
 # Откат к предыдущей версии
-docker compose -f docker-compose.prod.yml up -d --no-deps <app>
+docker compose -f docker-compose.production.yml up -d --no-deps <app>
 
 # Откат миграции БД
 npx prisma migrate resolve --rolled-back <migration_name>
