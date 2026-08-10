@@ -1167,6 +1167,35 @@ React, а React-адаптер зависит от абстракций ядра
       `forms-react` (`label?: ReactNode`, с `tooltip`/`asyncValidate`). Внешний потребитель не
       может присвоить `StringFieldProps` в `BaseFieldProps`. Не регресс; переименование
       публичного типа — breaking change, нужно отдельное решение.
+      - 🟡 **Шаг 5 (`forms-shadcn`) — не начат, почва подготовлена.** Добро координатора получено
+      2026-08-10. Зависимости установлены в корневой `package.json` по конвенции репо (реальные
+      версии в корне, у библиотеки — `peerDependencies` с диапазоном): десять Radix-примитивов
+      (`checkbox`, `select`, `radio-group`, `label`, `slot`, `popover`, `tooltip`, `switch`,
+      `toggle-group`, `slider`) + `class-variance-authority` 0.7.1, `clsx` 2.1.1,
+      `tailwind-merge` 3.6.0. `tailwindcss` 4.3.3 и `lucide-react` 1.30.0 уже были. Установка
+      проверена компиляционной пробой (`Radix` + `cva` + `twMerge` + иконка) с негативным
+      контролем: `tone="rainbow"` даёт `TS2322`, то есть типы настоящие, а не `any`.
+      - **Решение по организации скина: прямые Radix-примитивы + `cva`/`tailwind-merge`, а НЕ
+      `shadcn` CLI.** Причины: (1) CLI копирует готовые компоненты в проект и требует
+      `components.json` со своим алиас-резолвом — для библиотеки в Nx это лишний слой генерации,
+      который CLI потом не умеет обновлять; (2) нам нужны не компоненты shadcn как таковые, а
+      реализация UIKit-контракта, поэтому копия shadcn-компонента была бы промежуточным слоем
+      без пользы; (3) Radix + cva + tailwind-merge — ровно то, из чего shadcn и состоит, классы
+      те же, визуальная совместимость сохраняется.
+      - ⚠️ **Цена решения, которую надо задокументировать потребителю:** скин требует Tailwind 4 на
+      стороне приложения, и в Tailwind 4 сканирование контента идёт через `@source` — без записи
+      на путь пакета классы будут вычищены как неиспользуемые. Для наших приложений скин
+      бесполезен (все на Chakra) — это пакет для внешней OSS-аудитории.
+      - **Демо-площадка есть:** `apps/form-docs` уже на Tailwind 4 (`@import 'tailwindcss'` в
+      `globals.css`, Fumadocs). `form-develop-app` и `form-example` — на Chakra, туда shadcn-демо
+      не поставить без отдельной настройки.
+      - **С чего начинать следующей сессии:** `nx g @letar/generators:new-lib forms-shadcn` →
+      каркас под React (jsx/jsdom/`@vitejs/plugin-react`, `paths` на `forms-core` + `forms-react`,
+      см. как это сделано в `libs/forms-react`) → `shadcnUIKit` как реализация
+      `FieldPrimitivesUIKit` (достаточно 4 примитивов: `FieldRoot`/`FieldLabel`/`FieldError`/
+      `ErrorFallback`) → `createFieldPrimitives(shadcnUIKit)` → поля. Главная проверка
+      архитектуры: если контракт спроектирован верно, ни `forms-core`, ни `forms-react` править
+      не придётся — любая такая правка это находка, её фиксировать и сообщать координатору.
 - [ ] **7.4 Замер трафика** → решение: доносить сложные поля или нет.
 - [ ] **7.5 Docs-сайт на отдельном домене** + живые демо. SEO под `zod forms react`, `prisma form generator`.
 - [ ] **7.6 `llms.txt` + усиление MCP** — недоиспользованный козырь №1 (дёшево, уникально).
