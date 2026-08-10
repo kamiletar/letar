@@ -1161,12 +1161,17 @@ React, а React-адаптер зависит от абстракций ядра
       Фикс structural, а не точечный: внутренние слои переехали в `devDependencies`, где им и
       место — потребитель их не устанавливает. Проверено установкой `npm pack`-тарбола в чистый
       проект вне монорепо: `tsc --noEmit` зелёный, негативный контроль `name={42}` → `TS2322`.
-      - ⚠️ **Побочная находка scratch-проверки: два разных `BaseFieldProps`.** Публично из
-      `@letar/forms` торчит legacy-тип из `src/lib/types.ts` (`label?: string`, есть с первого
-      коммита, относится к старому `ChakraFormField`-API), а поля используют другой — из
-      `forms-react` (`label?: ReactNode`, с `tooltip`/`asyncValidate`). Внешний потребитель не
-      может присвоить `StringFieldProps` в `BaseFieldProps`. Не регресс; переименование
-      публичного типа — breaking change, нужно отдельное решение.
+      - ✅ **Побочная находка scratch-проверки закрыта (2026-08-10): два разных `BaseFieldProps`.**
+      Решение Ками — переименовать легаси-тип. `src/lib/types.ts` (`label?: string`, старый
+      `ChakraFormField`-API) → `LegacyFieldProps`; имя `BaseFieldProps` освобождено и теперь
+      публично экспортирует реальный тип из `forms-react` (`label?: ReactNode`, `tooltip`,
+      `asyncValidate`), от которого фактически наследуются все 56 полей. Мажорный бамп — v2.0.0.
+      Проверено: ни одно приложение монорепо не импортировало `BaseFieldProps` напрямую.
+      - ✅ **paths-находка letar-dev закрыта (2026-08-10): те же 6 подпутей `@letar/forms`
+      (не `forms-core`) были неполными в 19 приложениях** (`/analytics`, `/i18n`, `/offline`,
+      `/server-errors`, `/testing`, `/validators/ru`) — та же схема, что чинила аналогичный пробел
+      у `forms-core`. Шесть private submodule (aboi, domwellbes, driving-school, dsperevod,
+      studio, svoichuzhie) закоммичены и запушены отдельно внутри своих репо.
       - 🟡 **Шаг 5 (`forms-shadcn`) — не начат, почва подготовлена.** Добро координатора получено
       2026-08-10. Зависимости установлены в корневой `package.json` по конвенции репо (реальные
       версии в корне, у библиотеки — `peerDependencies` с диапазоном): десять Radix-примитивов
