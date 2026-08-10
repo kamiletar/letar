@@ -12,11 +12,14 @@ Self-hosted трекинг ошибок (PLAN-INFRA.md §70). Sentry-совме�
 
 ## Домен и маршрут
 
-`https://errors.s3.letar.best` — NPM proxy host на s3 (host-gateway `172.17.0.1:3033`, тот же
-паттерн, что у всех `*-stage.s3.letar.best`, см.
-[nginx-proxy-manager/README.md](/infra/nginx-proxy-manager/README.md)). **Не через Traefik**:
-пилот §48 сейчас слушает нестандартные `8090`/`8443`, реальный внешний трафик 443 держит NPM —
-маршрут через Traefik ничего не покажет снаружи, пока порты не переключены.
+`https://errors.s3.letar.best` — через Traefik (labels на контейнере `web`, сеть
+`traefik-network`, тот же паттерн, что у `studio-staging-app`). Сертификат — существующий
+wildcard `*.s3.letar.best` (DNS-01, собственный acme-dns), отдельно ничего выпускать не нужно.
+
+NPM на s3 **не используется** — контейнера нет вообще, Traefik сам держит `80`/`443` с
+2026-08-08 (проверено `ss -tlnp`/`docker ps` 2026-08-10). См. также обновлённые
+[infra/traefik/README.md](/infra/traefik/README.md) и
+[infra/nginx-proxy-manager/README.md](/infra/nginx-proxy-manager/README.md).
 
 ## Секреты — `.env` (не в git)
 

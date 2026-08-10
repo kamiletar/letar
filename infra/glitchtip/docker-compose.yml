@@ -52,13 +52,21 @@ services:
     environment:
       <<: *default-environment
       SERVER_ROLE: all_in_one
-    ports:
-      # Хостовый порт — следующий свободный после studio-stage (3032), см. NPM proxy_host на s3.
-      # NPM форвардит errors.s3.letar.best → 172.17.0.1:3033 (host-gateway, тот же паттерн, что
-      # у всех staging-доменов s3 — см. infra/nginx-proxy-manager/README.md). Traefik-labels не
-      # добавлены: пилот §48 сейчас не держит реальный внешний трафик (NPM держит 80/443), значит
-      # обычный NPM proxy host — единственный путь, которым домен реально станет доступен.
-      - '3033:8000'
+    networks:
+      - default
+      - traefik-network
+    labels:
+      # ⚠️ NPM на s3 больше не существует (проверено 2026-08-10: ни контейнера, ни занятых
+      # 80/443 за ним — Traefik держит оба порта сам, с настоящим wildcard `*.s3.letar.best` по
+      # DNS-01). infra/traefik/README.md и infra/nginx-proxy-manager/README.md на момент этой
+      # правки всё ещё описывают «пилот, NPM держит 80/443» — устарели, миграция на боевые порты
+      # прошла 2026-08-08 (см. traefik.yml, комментарий про advertisedPort), доки не обновили.
+      traefik.enable: 'true'
+      traefik.docker.network: 'traefik-network'
+      traefik.http.routers.glitchtip.rule: 'Host(`errors.s3.letar.best`)'
+      traefik.http.routers.glitchtip.entrypoints: 'websecure'
+      traefik.http.routers.glitchtip.tls: 'true'
+      traefik.http.services.glitchtip.loadbalancer.server.port: '8000'
     volumes:
       - glitchtip_uploads:/code/uploads
     healthcheck:
@@ -74,3 +82,7 @@ services:
 volumes:
   glitchtip_pg_data:
   glitchtip_uploads:
+
+networks:
+  traefik-network:
+    external: true
