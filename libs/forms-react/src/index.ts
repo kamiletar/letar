@@ -51,6 +51,16 @@ export { useResolvedFieldProps } from './lib/field/use-resolved-field-props'
 export { FormI18nProvider, getLocalizedValue, useFormI18n, useLocalizedOptions } from './lib/i18n'
 export type { LocalizableOption, TranslateFunction, TranslateParams } from './lib/i18n'
 
+// Form.Steps — общая логика навигации/состояния/персистенции шагов (framework-free, без UI)
+export type { StepDirection, StepInfo } from './lib/steps/step-types'
+export {
+  useStepNavigation,
+  type UseStepNavigationParams,
+  type UseStepNavigationResult,
+} from './lib/steps/use-step-navigation'
+export { type StepPersistenceConfig, useStepPersistence } from './lib/steps/use-step-persistence'
+export { useStepState, type UseStepStateResult } from './lib/steps/use-step-state'
+
 // Типы композиционного слоя
 export type {
   AppFormApi,
