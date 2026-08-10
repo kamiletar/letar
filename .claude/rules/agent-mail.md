@@ -21,36 +21,21 @@ mcp__agent-mail__macro_start_session(
 
 Возвращает `{project, agent, file_reservations, inbox}` — сразу видно inbox и резервации.
 
-### ⚠️ Без `agent_name`/`registration_token` сервер выдаёт случайную identity — это не нейтрально
+### ⚠️ Всегда передавай `agent_name` + `registration_token`
 
-Если вызвать `macro_start_session` без `agent_name`, agent-mail сгенерирует случайное
-adjective+noun имя (`SunnyTower`, `WhiteMountain` и т.п.) и зарегистрирует **новую** identity —
-без истории, без принятых контактов, незнакомую другим агентам/координаторам. Найдено
-2026-08-09: сессия `svoichuzhie` стартовала как `SunnyTower` вместо фиксированного
-`svoichuzhie-dev`, из-за чего первые `send_message` к `forms-coordinator`/`BlackCove` упирались
-в `Contact approval required` и путаницу с диагностикой (см. ниже).
+Без них сервер молча заведёт **новую** identity со случайным именем (`SunnyTower`, `WhiteMountain`)
+— без истории, без принятых контактов, незнакомую другим агентам. Фиксированные имена
+`<app>-dev` и токены к ним хранятся в приватной cross-session памяти (не в репозитории).
 
-**Перед вызовом `macro_start_session` проверь, есть ли у этого приложения фиксированная
-identity** — таблица `<app>-dev` + `registration_token` хранится в приватной cross-session
-памяти (не в репозитории — токены не публикуются, см. `public-repo-hygiene.md`). Если запись
-для приложения есть — передай её явно:
+Если для приложения фиксированной identity ещё нет — заведи её штатно (`register_agent` с
+kebab-case именем `<app>-dev`) и сохрани `registration_token` в памяти. Не оставляй серверу
+генерировать имя.
 
-```
-macro_start_session(
-  human_key: "C:/web/letar",
-  program: "claude-code",
-  model: "claude-sonnet-5",
-  task_description: "<кратко что делаешь>",
-  agent_name: "<app>-dev",
-  registration_token: "<токен из памяти>",
-  file_reservation_paths: ["apps/<твоё-приложение>/**"],
-  file_reservation_reason: "<приложение> development"
-)
-```
-
-Если фиксированной identity для приложения ещё нет — заведи её штатно (`register_agent` с
-kebab-case именем `<app>-dev`) и сохрани `registration_token` в памяти для будущих сессий, а не
-оставляй сервер генерировать случайное имя молча.
+⚠️ **Токен из памяти может не подойти: база сервера иногда обнуляется.** Признак — в ответе
+`macro_start_session` приходит `id: 1` и **новый** `registration_token`, а `whois` по знакомому
+имени отвечает «not found». Тогда все старые токены мертвы, идентичности нужно заводить заново,
+а память — обновлять. Проверено 2026-08-10: пропали `BlackCove` и все 30 `<app>-dev`. Разбор —
+[agent-mail-server-quirks](/.claude/docs/agent-mail-server-quirks.md).
 
 ## Пример для animatrona-tracker
 
@@ -65,26 +50,17 @@ macro_start_session(
 )
 ```
 
-### ⚠️ Работа внутри git submodule — file reservation ОБЯЗАТЕЛЬНА, но она НЕ физический замок
+### ⚠️ Работа внутри submodule — резервация обязательна, но это не замок
 
-`file_reservation_paths` не блокирует ничьи действия — «Конфликты не блокируют работу — сервер
-сообщает, грант всё равно выдаёт» (см. ниже). Для обычного `apps/<x>/**` в корне letar это
-терпимо, потому что там есть технический барьер второго уровня — `pre-commit-scope-guard.sh`
-(`.claude/rules/git.md` § «Технический барьер: pre-commit scope-guard»).
+`file_reservation_paths` ничьих действий не блокирует: сервер сообщает о конфликте и всё равно
+выдаёт грант. Технический барьер — pre-commit scope-guard, он установлен во всех 14 submodule
+(`bash scripts/hooks/install.sh --all-submodules`), но ловит только коммит из нескольких scope
+сразу и не различает «две сессии правят разные файлы внутри одного `src/`».
 
-Для файлов **внутри** submodule (`apps/<x>/src/**` и т.п., где `<x>` — aboi, driving-school,
-premium-rosstil, imot, dsperevod, studio, svoichuzhie, aprel8008, domwellbes,
-poster-microtext-desktop и их e2e) этого второго барьера по умолчанию нет — submodule
-это отдельный `.git`, и установка хука в корне letar его не покрывает. Ставится он одной командой
-`bash scripts/hooks/install.sh --all-submodules`; разбор инцидента, где отсутствие этого барьера
-привело к перемешиванию правок двух сессий в одном коммите (2026-08-09), — в
+Поэтому перед правками внутри submodule **проверь `fetch_inbox` и чужие резервации на
+`apps/<submodule>/**`**, а не только зарегистрируй свою. Это единственный способ узнать, что
+рядом уже кто-то работает. Разбор инцидента —
 [git-multi-agent-incidents](/.claude/docs/git-multi-agent-incidents.md).
-
-**Даже когда хук установлен во всех submodule** (на 2026-08-10 — да, проверено во всех 14),
-`file_reservation_paths` —
-единственный сигнал, что кто-то ещё уже работает в том же submodule. Он не помешает случиться
-гонке, но даст шанс её заметить: перед началом правок внутри submodule **обязательно** проверь
-`fetch_inbox` и существующие резервации на путь этого submodule, а не только зарегистрируй свою.
 
 ## Во время работы
 
@@ -163,77 +139,19 @@ release_file_reservations(
 )
 ```
 
-### ⚠️ `send_message` первый раз к незнакомому агенту → `Contact approval required`
+### ⚠️ Известные особенности сервера при отправке сообщений
 
-Это отдельная история от бага ниже («`to` отклоняет kebab-case имя») — здесь причина не в
-формате имени, а в том, что agent-mail требует явного подтверждения контакта между двумя
-агентами, ранее не переписывавшимися. Первый `send_message` автоматически создаёт pending-заявку
-и **блокирует** сам себя — сообщение не уходит.
+Три вещи ломают первый `send_message` и выглядят как разные проблемы:
 
-**Что делать:**
+1. **`Contact approval required`** — первое сообщение незнакомому агенту блокирует само себя,
+   заявка создаётся автоматически. Дальше нужен `respond_contact` от получателя.
+2. **`Invalid recipient '<имя>': looks like a descriptive role name`** — валидация поля `to` в
+   `send_message` отвергает kebab-case имена (`forms-coordinator`). При этом `request_contact` и
+   `reply_message` то же имя принимают.
+3. **Обнулённая база** — знакомого получателя просто нет, `whois` отвечает «not found».
 
-1. Если получил ошибку `Contact approval required for recipients: <имя>` — заявка уже создана
-   автоматически, ждать не нужно повторять `send_message` до апрува. Либо явно:
-   ```
-   request_contact(
-     project_key: "c-web-letar",
-     from_agent: "<твоё-имя>",
-     to_agent: "<получатель>",
-     reason: "<коротко зачем>"
-   )
-   ```
-2. Получатель подтверждает:
-   ```
-   respond_contact(
-     project_key: "c-web-letar",
-     to_agent: "<получатель>",
-     from_agent: "<твоё-имя>",
-     accept: true
-   )
-   ```
-3. После апрува `send_message` между этими двумя агентами проходит без повторной заявки (TTL
-   контакта — 30 дней по умолчанию).
-
-Это не связано с тем, зарегистрирован ли получатель под фиксированным kebab-case именем
-(`agent_fixed_names_tokens` в памяти) — контакт-апрув требуется даже между двумя легитимными
-фиксированными identity, если они ещё не переписывались.
-
-### ⛔ `send_message(to: [...])` отдельно отклоняет kebab-case/описательные имена получателя — баг сервера
-
-Отдельный от contact-approval баг (найдено и трижды воспроизведено 2026-08-09, сессия
-`svoichuzhie-dev` → `forms-coordinator`, **после** одобренного контакта — воспроизводится
-независимо от статуса контакта). Точный текст ошибки:
-
-```
-Error calling tool 'send_message': Invalid recipient 'forms-coordinator': 'forms-coordinator'
-looks like a descriptive role name. Agent names must be randomly generated adjective+noun
-combinations like 'WhiteMountain' or 'BrownCreek', NOT descriptive of the agent's task. Omit
-the 'name' parameter to auto-generate a valid name.
-```
-
-Ключевой факт: `request_contact(to_agent: "forms-coordinator")` и
-`reply_message(to: ["forms-coordinator"])` с **тем же самым** именем получателя проходят без
-проблем — валидация формата имени применяется только к полю `to` в `send_message` (первичном,
-не reply), не к `request_contact`/`reply_message`. Это касается любого фиксированного
-kebab-case/составного имени, похожего на «описательную роль» (`forms-coordinator`,
-предположительно `deploy-agent`-подобные тоже под риском) — не только `forms-coordinator`.
-
-**Обход:**
-
-- Если это первое сообщение в переписке — использовать `request_contact` (он же отправляет
-  intro-сообщение) вместо голого `send_message`.
-- Если уже есть предыдущее сообщение в треде (от получателя или third-party broadcast) —
-  `reply_message` вместо `send_message`.
-- `send_message` **с** `to`, где получатель — рандомное adjective+noun имя (`AzureGate` и
-  т.п.), проблемы не имеет — баг специфичен для kebab-case/описательных имён в позиции `to`.
-
-Баг не в этом репозитории — это регрессия/особенность самого MCP-сервера agent-mail. Если он
-пропадёт при апдейте сервера — переоценить актуальность этого раздела.
-
-⚠️ **2026-08-10: `forms-coordinator` переименован в `QuietRidge`** — настоящее adjective+noun
-имя вместо kebab-case, которое и вызывало баг выше. `BlackCove` с самого начала строился по этой
-же схеме — не совпадение, а единственный рабочий обход. Упоминания `forms-coordinator` в
-примерах бага выше — исторический контекст диагностики, оставлены как есть.
+Обходы, точные тексты ошибок и история воспроизведения —
+[agent-mail-server-quirks](/.claude/docs/agent-mail-server-quirks.md).
 
 ## Фиксированные имена координаторов
 
