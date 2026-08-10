@@ -3,11 +3,12 @@
 import type { UIKitCorePrimitives, UIKitExtendedPrimitives } from '@letar/forms-core/uikit'
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox'
 import * as LabelPrimitive from '@radix-ui/react-label'
+import * as PopoverPrimitive from '@radix-ui/react-popover'
 import * as RadioGroupPrimitive from '@radix-ui/react-radio-group'
 import * as SelectPrimitive from '@radix-ui/react-select'
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group'
 import { Check, ChevronDown, Circle, X } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { type ReactNode, useState } from 'react'
 import { cn } from '../utils/cn'
 
 /**
@@ -20,7 +21,13 @@ import { cn } from '../utils/cn'
  * Реализованы только core-примитивы + минимум extended, нужный `createFieldPrimitives`
  * (`ErrorFallback`) — beta покрывает 3 поля (String/Checkbox/Select), не весь контракт.
  */
-type ImplementedExtendedPrimitives = 'ErrorFallback' | 'NumberInput' | 'RadioGroup' | 'SegmentGroup'
+type ImplementedExtendedPrimitives =
+  | 'ErrorFallback'
+  | 'NumberInput'
+  | 'RadioGroup'
+  | 'SegmentGroup'
+  | 'NativeSelect'
+  | 'Combobox'
 
 export type ShadcnUIKit =
   & UIKitCorePrimitives<ReactNode>
@@ -305,6 +312,102 @@ export const shadcnUIKit: ShadcnUIKit = {
           </ToggleGroupPrimitive.Item>
         ))}
       </ToggleGroupPrimitive.Root>
+    )
+  },
+
+  NativeSelect({ value, onChange, onBlur, options, placeholder, disabled, ...rest }) {
+    return (
+      <select
+        data-slot="native-select"
+        value={value ?? ''}
+        onChange={(e) => onChange(e.target.value)}
+        onBlur={onBlur}
+        disabled={disabled}
+        data-field-name={rest['data-field-name']}
+        className={cn(
+          'border-input flex h-9 w-full items-center rounded-md border bg-transparent px-3 text-sm shadow-xs outline-none',
+          'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+          'disabled:cursor-not-allowed disabled:opacity-50',
+        )}
+      >
+        {placeholder && (
+          <option value="" disabled>
+            {placeholder}
+          </option>
+        )}
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value} disabled={opt.disabled}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+    )
+  },
+
+  Combobox({ value, inputValue, onInputChange, onValueChange, options, loading, placeholder, disabled, ...rest }) {
+    const [open, setOpen] = useState(false)
+
+    return (
+      <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
+        <PopoverPrimitive.Anchor asChild>
+          <input
+            data-slot="combobox-input"
+            type="text"
+            role="combobox"
+            aria-expanded={open}
+            value={inputValue}
+            onChange={(e) => {
+              onInputChange(e.target.value)
+              setOpen(true)
+            }}
+            onFocus={() => setOpen(true)}
+            placeholder={placeholder}
+            disabled={disabled}
+            data-field-name={rest['data-field-name']}
+            className={cn(
+              'border-input placeholder:text-muted-foreground flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs outline-none',
+              'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+              'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
+            )}
+          />
+        </PopoverPrimitive.Anchor>
+        <PopoverPrimitive.Portal>
+          <PopoverPrimitive.Content
+            onOpenAutoFocus={(e) => e.preventDefault()}
+            onInteractOutside={() => setOpen(false)}
+            align="start"
+            sideOffset={4}
+            className={cn(
+              'bg-popover text-popover-foreground z-50 max-h-60 w-[var(--radix-popover-trigger-width)] overflow-auto rounded-md border p-1 shadow-md',
+            )}
+          >
+            {loading && <div className="text-muted-foreground px-2 py-1.5 text-sm">Загрузка...</div>}
+            {!loading && options.length === 0 && (
+              <div className="text-muted-foreground px-2 py-1.5 text-sm">Ничего не найдено</div>
+            )}
+            {!loading && options.map((opt) => (
+              <div
+                key={opt.value}
+                role="option"
+                aria-selected={opt.value === value}
+                data-disabled={opt.disabled || undefined}
+                onClick={() => {
+                  if (opt.disabled) { return }
+                  onValueChange(opt.value)
+                  setOpen(false)
+                }}
+                className={cn(
+                  'relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none',
+                  'hover:bg-accent hover:text-accent-foreground',
+                  'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+                )}
+              >
+                {opt.label}
+              </div>
+            ))}
+          </PopoverPrimitive.Content>
+        </PopoverPrimitive.Portal>
+      </PopoverPrimitive.Root>
     )
   },
 

@@ -67,3 +67,41 @@ export interface SegmentGroupFieldProps extends Omit<BaseFieldProps, 'placeholde
 
 /** Props for Form.Field.Date (shadcn-скин). Beta: нативный `<input type="date">`. */
 export type DateFieldProps = BaseFieldProps
+
+/** Props for Form.Field.NativeSelect (shadcn-скин). Label — только `string` (нативный `<option>`). */
+export interface NativeSelectFieldProps extends BaseFieldProps {
+  options: { label: string, value: string, disabled?: boolean }[]
+}
+
+/** Props for Form.Field.Switch (shadcn-скин). */
+export type SwitchFieldProps = Omit<BaseFieldProps, 'placeholder'>
+
+/** Props for Form.Field.Slider (shadcn-скин). */
+export interface SliderFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
+  min?: number
+  max?: number
+  step?: number
+  /** Показать текущее значение рядом с меткой */
+  showValue?: boolean
+}
+
+/** Props for Form.Field.Password (shadcn-скин). */
+export interface PasswordFieldProps extends BaseFieldProps {
+  maxLength?: number
+  autoComplete?: string
+  /** Показывать пароль открытым текстом по умолчанию */
+  defaultVisible?: boolean
+}
+
+/**
+ * Props for Form.Field.Combobox (shadcn-скин).
+ *
+ * Beta-упрощение: только статичные `options`, без `useQuery` (асинхронный поиск) и без
+ * группировки — оба требуют больше инфраструктуры, чем нужно для доказательства контракта.
+ * Фильтрация — по вхождению подстроки в `label` (регистронезависимо), на стороне поля.
+ */
+export interface ComboboxFieldProps extends BaseFieldProps {
+  options: SelectOption[]
+  /** Минимум символов для показа списка (по умолчанию 0 — показывать сразу) */
+  minChars?: number
+}

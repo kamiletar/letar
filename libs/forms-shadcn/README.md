@@ -22,42 +22,57 @@ OSS-аудитории.
 ```tsx
 import {
   FieldCheckbox,
+  FieldCombobox,
   FieldDate,
+  FieldNativeSelect,
   FieldNumber,
+  FieldPassword,
   FieldRadioGroup,
   FieldSegmentGroup,
   FieldSelect,
+  FieldSlider,
   FieldString,
+  FieldSwitch,
   FieldTextarea,
 } from '@letar/forms-shadcn'
 ```
 
-## Поля (beta — 8 из 15–20 запланированных)
+## Поля (beta — 13 из 15–20 запланированных)
 
-| Поле                | Radix-примитив                   |
-| ------------------- | -------------------------------- |
-| `FieldString`       | нативный `<input>`               |
-| `FieldCheckbox`     | `@radix-ui/react-checkbox`       |
-| `FieldSelect`       | `@radix-ui/react-select`         |
-| `FieldTextarea`     | нативный `<textarea>`            |
-| `FieldNumber`       | нативный `<input type="number">` |
-| `FieldRadioGroup`   | `@radix-ui/react-radio-group`    |
-| `FieldSegmentGroup` | `@radix-ui/react-toggle-group`   |
-| `FieldDate`         | нативный `<input type="date">`   |
+| Поле                | Radix-примитив                     |
+| ------------------- | ---------------------------------- |
+| `FieldString`       | нативный `<input>`                 |
+| `FieldCheckbox`     | `@radix-ui/react-checkbox`         |
+| `FieldSelect`       | `@radix-ui/react-select`           |
+| `FieldTextarea`     | нативный `<textarea>`              |
+| `FieldNumber`       | нативный `<input type="number">`   |
+| `FieldRadioGroup`   | `@radix-ui/react-radio-group`      |
+| `FieldSegmentGroup` | `@radix-ui/react-toggle-group`     |
+| `FieldDate`         | нативный `<input type="date">`     |
+| `FieldNativeSelect` | нативный `<select>`                |
+| `FieldSwitch`       | `@radix-ui/react-switch`           |
+| `FieldSlider`       | `@radix-ui/react-slider`           |
+| `FieldPassword`     | нативный `<input>` + toggle-кнопка |
+| `FieldCombobox`     | `@radix-ui/react-popover` (beta)   |
 
-Остальные ходовые поля (Combobox/NativeSelect/PinInput/Password и т.д.) — по мере миграции,
+`FieldCombobox` — упрощённая beta-версия: только статичные `options`, фильтрация по вхождению
+подстроки в `label`. Без `useQuery` (async-поиск) и группировки — Chakra-версия их поддерживает,
+здесь не портировано.
+
+Остальные ходовые поля (PinInput, RichText, FileUpload, Address и т.д.) — по мере миграции,
 каждое почти бесплатно благодаря готовому `UIKit`-контракту.
 
 ## `shadcnUIKit`
 
 Реализует `UIKitCorePrimitives` (`FieldRoot`/`FieldLabel`/`FieldError`/`Input`/`Checkbox`/`Select`)
 
-- `ErrorFallback`/`NumberInput`/`RadioGroup`/`SegmentGroup` из extended-набора. Остальные
-  extended-примитивы (`Combobox`, `Button`, `Tooltip` и т.д.) появятся по мере миграции полей,
-  которым они нужны.
-- `Textarea` и дата-инпут намеренно НЕ вошли в UIKit-примитив — тот же паттерн, что у
-  Chakra-скина: многострочный текст и дата не входят в core-контракт, поле рисует свою разметку
-  напрямую внутри skin-agnostic `FieldWrapper`.
+- `ErrorFallback`/`NumberInput`/`RadioGroup`/`SegmentGroup`/`NativeSelect`/`Combobox` из
+  extended-набора. Остальные extended-примитивы (`Button`, `Tooltip`, `PinInput` и т.д.) появятся
+  по мере миграции полей, которым они нужны.
+- `Textarea`, дата-инпут, `Switch`, `Slider` намеренно НЕ вошли в UIKit-примитив — этих
+  примитивов нет и в самом контракте `forms-core` (`UIKitExtendedPrimitives`), тот же паттерн,
+  что у Chakra-скина: поле рисует свою разметку напрямую внутри skin-agnostic `FieldWrapper`, а
+  не через `UIKit`.
 
 ## Известные упрощения beta
 
@@ -65,6 +80,7 @@ import {
   установлен, доведём при миграции полей, где это важнее).
 - Нет группировки опций в `Select` (`groupOptions` из `forms-core/uikit` не подключена) — не
   нужна для 2 демо-опций, подключим вместе с полем, которому это действительно требуется.
+- `FieldCombobox` — только статичные опции, без async-поиска (`useQuery`) и группировки.
 
 ## Команды
 

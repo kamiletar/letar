@@ -1,6 +1,6 @@
 {
   "name": "@letar/forms-shadcn",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "shadcn/ui-скин @letar/forms — реализация UIKit-контракта на Radix + cva + tailwind-merge",
   "type": "module",
   "main": "./src/index.ts",
@@ -17,8 +17,11 @@
   "peerDependencies": {
     "@radix-ui/react-checkbox": ">=1.0.0",
     "@radix-ui/react-label": ">=2.0.0",
+    "@radix-ui/react-popover": ">=1.0.0",
     "@radix-ui/react-radio-group": ">=1.0.0",
     "@radix-ui/react-select": ">=2.0.0",
+    "@radix-ui/react-slider": ">=1.0.0",
+    "@radix-ui/react-switch": ">=1.0.0",
     "@radix-ui/react-toggle-group": ">=1.0.0",
     "@tanstack/react-form": ">=1.0.0",
     "class-variance-authority": ">=0.7.0",
