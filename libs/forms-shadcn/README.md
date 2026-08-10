@@ -24,21 +24,24 @@ import {
   FieldCheckbox,
   FieldCombobox,
   FieldDate,
+  FieldHidden,
   FieldNativeSelect,
   FieldNumber,
   FieldPassword,
   FieldPinInput,
   FieldRadioGroup,
+  FieldRating,
   FieldSegmentGroup,
   FieldSelect,
   FieldSlider,
   FieldString,
   FieldSwitch,
+  FieldTags,
   FieldTextarea,
 } from '@letar/forms-shadcn'
 ```
 
-## Поля (beta — 14 из 15–20 запланированных)
+## Поля (beta — 17 из 15–20 запланированных, план перевыполнен)
 
 | Поле                | Radix-примитив                     |
 | ------------------- | ---------------------------------- |
@@ -56,14 +59,18 @@ import {
 | `FieldPassword`     | нативный `<input>` + toggle-кнопка |
 | `FieldCombobox`     | `@radix-ui/react-popover` (beta)   |
 | `FieldPinInput`     | нативные `<input maxLength=1>`     |
+| `FieldHidden`       | без DOM (синхронизация значения)   |
+| `FieldRating`       | звёзды-кнопки (`lucide-react`)     |
+| `FieldTags`         | нативный `<input>` + чипы          |
 
 `FieldCombobox` — упрощённая beta-версия: только статичные `options`, фильтрация по вхождению
 подстроки в `label`. Без `useQuery` (async-поиск) и группировки — Chakra-версия их поддерживает,
 здесь не портировано. `FieldPinInput` — без вставки кода из буфера одним действием, только
-посимвольный ввод с автопереходом.
+посимвольный ввод с автопереходом. `FieldTags` — только Enter добавляет тег, без вставки со
+множественным разделителем.
 
-Остальные ходовые поля (RichText, FileUpload, Address и т.д.) — по мере миграции, каждое почти
-бесплатно благодаря готовому `UIKit`-контракту.
+Остальные ходовые поля (RichText, FileUpload, Address, DateRange, Duration и т.д.) — по мере
+миграции, каждое почти бесплатно благодаря готовому `UIKit`-контракту.
 
 ## `shadcnUIKit`
 
@@ -72,10 +79,10 @@ import {
 - `ErrorFallback`/`NumberInput`/`RadioGroup`/`SegmentGroup`/`NativeSelect`/`Combobox`/`PinInput`
   из extended-набора. Остальные extended-примитивы (`Button`, `Tooltip` и т.д.) появятся по мере
   миграции полей, которым они нужны.
-- `Textarea`, дата-инпут, `Switch`, `Slider` намеренно НЕ вошли в UIKit-примитив — этих
-  примитивов нет и в самом контракте `forms-core` (`UIKitExtendedPrimitives`), тот же паттерн,
-  что у Chakra-скина: поле рисует свою разметку напрямую внутри skin-agnostic `FieldWrapper`, а
-  не через `UIKit`.
+- `Textarea`, дата-инпут, `Switch`, `Slider`, `Rating`, `Tags` намеренно НЕ вошли в UIKit-примитив
+  — этих примитивов нет и в самом контракте `forms-core` (`UIKitExtendedPrimitives`), тот же
+  паттерн, что у Chakra-скина: поле рисует свою разметку напрямую внутри skin-agnostic
+  `FieldWrapper`, а не через `UIKit`.
 
 ## Известные упрощения beta
 
@@ -85,6 +92,7 @@ import {
   нужна для 2 демо-опций, подключим вместе с полем, которому это действительно требуется.
 - `FieldCombobox` — только статичные опции, без async-поиска (`useQuery`) и группировки.
 - `FieldPinInput` — без вставки кода из буфера одним действием на первую ячейку.
+- `FieldTags` — только Enter добавляет тег, без кастомного `delimiter`/`addOnPaste`.
 
 ## Команды
 

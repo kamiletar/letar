@@ -120,3 +120,22 @@ export interface PinInputFieldProps extends Omit<BaseFieldProps, 'placeholder'> 
   /** Вызывается, когда заполнены все ячейки */
   onComplete?: (value: string) => void
 }
+
+/** Props for Form.Field.Rating (shadcn-скин). */
+export interface RatingFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
+  /** Число звёзд (по умолчанию 5) */
+  count?: number
+}
+
+/**
+ * Props for Form.Field.Tags (shadcn-скин).
+ *
+ * Beta-упрощение: только Enter добавляет тег (нет `delimiter`/`addOnPaste` — вставка со
+ * множественным разделителем не разбирается автоматически).
+ */
+export interface TagsFieldProps extends BaseFieldProps {
+  /** Максимум тегов */
+  maxTags?: number
+  /** Минимальная длина тега (по умолчанию 1) */
+  minTagLength?: number
+}
