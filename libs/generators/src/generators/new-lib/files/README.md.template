@@ -7,13 +7,15 @@
 Библиотека уже включена в монорепозиторий.
 
 ```typescript
-import { feature } from '@letar/<%= name %>'
-```
+<% if (react) { %>import { Feature } from '@letar/<%= name %>'
+<% } else { %>import { feature } from '@letar/<%= name %>'
+<% } %>```
 
 ## API
 
-### `feature()`
-
+<% if (react) { %>### `<Feature />`
+<% } else { %>### `feature()`
+<% } %>
 <!-- Опиши публичный API здесь -->
 
 ## Команды

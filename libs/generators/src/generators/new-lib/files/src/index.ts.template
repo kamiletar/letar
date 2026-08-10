@@ -1,1 +1,3 @@
-export { feature } from './lib/feature'
+<% if (react) { %>export { Feature } from './lib/feature'
+<% } else { %>export { feature } from './lib/feature'
+<% } %>

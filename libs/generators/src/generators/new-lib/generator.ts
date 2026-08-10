@@ -11,11 +11,25 @@ export default async function newLibGenerator(tree: Tree, options: NewLibGenerat
   assertTargetIsFree(tree, libDir, 'библиотеки')
 
   const description = options.description ?? `${name} — shared-библиотека монорепо letar`
+  const react = options.react ?? false
 
   generateFiles(tree, templatesDir, libDir, {
     name,
     description,
+    react,
   })
+
+  if (react) {
+    tree.delete(joinPathFragments(libDir, 'src/lib/feature.ts'))
+    tree.delete(joinPathFragments(libDir, 'src/lib/feature.spec.ts'))
+
+    const reactTemplatesDir = templatesDirFor(import.meta.url, 'files-react')
+    generateFiles(tree, reactTemplatesDir, libDir, {
+      name,
+      description,
+      react,
+    })
+  }
 
   await formatFiles(tree)
 

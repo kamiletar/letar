@@ -10,5 +10,8 @@
       "default": "./src/index.ts"
     },
     "./package.json": "./package.json"
-  }
+  }<% if (react) { %>,
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  }<% } %>
 }

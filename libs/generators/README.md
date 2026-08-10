@@ -97,7 +97,17 @@ nx g @letar/generators:electron-app <name> --displayName="Моё приложе�
 nx g @letar/generators:new-lib <name>
 # с описанием для README:
 nx g @letar/generators:new-lib <name> --description="Утилиты для X"
+# React-каркас (jsx/dom в tsconfig, jsdom + @vitejs/plugin-react в vitest.config.ts, .tsx-компонент):
+nx g @letar/generators:new-lib <name> --react
 ```
+
+По умолчанию каркас framework-free (Node-окружение в `vitest.config.ts`, только `.ts`-файлы) — это
+верный дефолт для utility-библиотек. **`--react`** переключает на React-вариант, которого без флага
+приходилось каждый раз дописывать руками (`libs/forms-react`, `libs/ui`): `jsx: "react-jsx"` и
+`lib: [..., "dom", "dom.iterable"]` в `tsconfig.lib.json`/`tsconfig.spec.json`, `environment: "jsdom"` +
+`plugins: [react()]` в `vitest.config.ts`, `vitest.setup.ts` с `@testing-library/jest-dom/vitest`,
+`peerDependencies.react` в `package.json`, и стартовый `src/lib/feature.tsx` — минимальный React-компонент
+вместо чистой функции (тест — через `@testing-library/react`).
 
 **Генератор не перезаписывает существующие библиотеки** — если `libs/<name>` уже есть, падает с понятной
 ошибкой.

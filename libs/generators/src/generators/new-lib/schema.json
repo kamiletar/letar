@@ -16,6 +16,11 @@
     "description": {
       "type": "string",
       "description": "Короткое описание для README.md. По умолчанию — заглушка"
+    },
+    "react": {
+      "type": "boolean",
+      "description": "React-каркас библиотеки: jsx/dom в tsconfig, jsdom + @vitejs/plugin-react в vitest.config.ts, .tsx-компонент вместо чистой функции",
+      "default": false
     }
   },
   "required": ["name"]

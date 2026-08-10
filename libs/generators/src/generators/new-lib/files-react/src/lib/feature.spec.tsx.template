@@ -1,0 +1,10 @@
+import { render, screen } from '@testing-library/react'
+import { describe, expect, it } from 'vitest'
+import { Feature } from './feature'
+
+describe('Feature', () => {
+  it('отображает имя библиотеки', () => {
+    render(<Feature />)
+    expect(screen.getByText('<%= name %>')).toBeInTheDocument()
+  })
+})

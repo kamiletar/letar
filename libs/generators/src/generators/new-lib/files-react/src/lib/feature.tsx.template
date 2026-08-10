@@ -1,0 +1,7 @@
+export interface FeatureProps {
+  name?: string
+}
+
+export function Feature({ name = '<%= name %>' }: FeatureProps) {
+  return <span>{name}</span>
+}

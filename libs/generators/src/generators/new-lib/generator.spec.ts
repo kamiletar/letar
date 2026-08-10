@@ -61,4 +61,61 @@ describe('new-lib generator', () => {
     const readme = tree.read('libs/my-lib/README.md', 'utf-8')
     expect(readme).toContain('my-lib — shared-библиотека монорепо letar')
   })
+
+  describe('--react', () => {
+    it('генерирует .tsx вместо .ts и не оставляет framework-free feature.ts', async () => {
+      await newLibGenerator(tree, { name: 'my-react-lib', react: true })
+
+      expect(tree.exists('libs/my-react-lib/src/lib/feature.tsx')).toBe(true)
+      expect(tree.exists('libs/my-react-lib/src/lib/feature.spec.tsx')).toBe(true)
+      expect(tree.exists('libs/my-react-lib/vitest.setup.ts')).toBe(true)
+      expect(tree.exists('libs/my-react-lib/src/lib/feature.ts')).toBe(false)
+      expect(tree.exists('libs/my-react-lib/src/lib/feature.spec.ts')).toBe(false)
+    })
+
+    it('package.json содержит peerDependencies.react', async () => {
+      await newLibGenerator(tree, { name: 'my-react-lib', react: true })
+
+      const pkg = JSON.parse(tree.read('libs/my-react-lib/package.json', 'utf-8') ?? '{}')
+      expect(pkg.peerDependencies).toEqual({ react: '>=18.0.0' })
+    })
+
+    it('tsconfig.lib.json включает jsx и dom lib', async () => {
+      await newLibGenerator(tree, { name: 'my-react-lib', react: true })
+
+      const tsconfig = JSON.parse(tree.read('libs/my-react-lib/tsconfig.lib.json', 'utf-8') ?? '{}')
+      expect(tsconfig.compilerOptions.jsx).toBe('react-jsx')
+      expect(tsconfig.compilerOptions.lib).toEqual(['es2022', 'dom', 'dom.iterable'])
+      expect(tsconfig.include).toEqual(['src/**/*.ts', 'src/**/*.tsx'])
+    })
+
+    it('vitest.config.ts переключается на jsdom + @vitejs/plugin-react', async () => {
+      await newLibGenerator(tree, { name: 'my-react-lib', react: true })
+
+      const vitestConfig = tree.read('libs/my-react-lib/vitest.config.ts', 'utf-8')
+      expect(vitestConfig).toContain(`environment: 'jsdom'`)
+      expect(vitestConfig).toContain(`import react from '@vitejs/plugin-react'`)
+      expect(vitestConfig).toContain(`setupFiles: ['./vitest.setup.ts']`)
+    })
+
+    it('index.ts экспортирует Feature, а не feature', async () => {
+      await newLibGenerator(tree, { name: 'my-react-lib', react: true })
+
+      const index = tree.read('libs/my-react-lib/src/index.ts', 'utf-8')
+      expect(index).toContain(`export { Feature } from './lib/feature'`)
+    })
+  })
+
+  it('без --react не генерирует React-каркас (дефолтное поведение не меняется)', async () => {
+    await newLibGenerator(tree, { name: 'my-lib' })
+
+    expect(tree.exists('libs/my-lib/src/lib/feature.tsx')).toBe(false)
+    expect(tree.exists('libs/my-lib/vitest.setup.ts')).toBe(false)
+
+    const pkg = JSON.parse(tree.read('libs/my-lib/package.json', 'utf-8') ?? '{}')
+    expect(pkg.peerDependencies).toBeUndefined()
+
+    const vitestConfig = tree.read('libs/my-lib/vitest.config.ts', 'utf-8')
+    expect(vitestConfig).toContain(`environment: 'node'`)
+  })
 })
