@@ -2,17 +2,9 @@
 
 import type { ReactElement } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
+import { NATIVE_INPUT_CLASS } from '../uikit/primitives/native-input-class'
 import { cn } from '../utils/cn'
 import type { DateTimePickerFieldProps } from './types'
-
-// Те же классы, что у shadcnUIKit.Input (uikit/primitives/input.tsx) — нативный <input>, а не
-// примитив контракта: date-инпуту нужен min/max, time-инпуту нужен step, UIKitInputProps их не
-// пропускает (тот же случай, что у FieldDateRange).
-const DATETIME_INPUT_CLASS = cn(
-  'border-input placeholder:text-muted-foreground flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs transition-[color,box-shadow] outline-none',
-  'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
-  'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
-)
 
 function parseDateTime(value: string | undefined): { date: string; time: string } {
   if (!value) { return { date: '', time: '' } }
@@ -73,7 +65,7 @@ export const FieldDateTimePicker = createField<DateTimePickerFieldProps, string>
             disabled={resolved.disabled}
             readOnly={resolved.readOnly}
             data-field-name={`${fullPath}-date`}
-            className={cn(DATETIME_INPUT_CLASS, 'flex-1')}
+            className={cn(NATIVE_INPUT_CLASS, 'flex-1')}
           />
           <input
             type="time"
@@ -84,7 +76,7 @@ export const FieldDateTimePicker = createField<DateTimePickerFieldProps, string>
             disabled={resolved.disabled}
             readOnly={resolved.readOnly}
             data-field-name={`${fullPath}-time`}
-            className={cn(DATETIME_INPUT_CLASS, 'w-[150px]')}
+            className={cn(NATIVE_INPUT_CLASS, 'w-[150px]')}
           />
         </div>
       </FieldWrapper>

@@ -1,23 +1,13 @@
 'use client'
 
-import type { AddressProvider, AddressSuggestion } from '@letar/forms-core/address'
-import { createDaDataProvider } from '@letar/forms-core/address'
-import { useDebounce, useDeclarativeFormOptional } from '@letar/forms-react'
+import type { AddressSuggestion } from '@letar/forms-core/address'
+import { useDebounce } from '@letar/forms-react'
 import type { ReactElement } from 'react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
+import { useResolvedAddressProvider } from '../utils/use-address-provider'
 import type { AddressFieldProps, AddressValue } from './types'
-
-/** Резолв провайдера: проп → контекст формы → token-фолбэк. Тот же приоритет, что у Chakra-версии. */
-function useAddressProvider(propProvider?: AddressProvider, token?: string): AddressProvider | null {
-  const formContext = useDeclarativeFormOptional()
-  const tokenProvider = useMemo(() => (token ? createDaDataProvider({ token }) : null), [token])
-
-  if (propProvider) { return propProvider }
-  if (formContext?.addressProvider) { return formContext.addressProvider }
-  return tokenProvider
-}
 
 interface AddressFieldState {
   inputValue: string
@@ -42,7 +32,7 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
 
   useFieldState: (props): AddressFieldState => {
     const { provider: propProvider, token, minChars = 3, debounceMs = 300, locations } = props
-    const provider = useAddressProvider(propProvider, token)
+    const provider = useResolvedAddressProvider(propProvider, token)
 
     const [inputValue, setInputValue] = useState('')
     const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
@@ -123,13 +113,18 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
 
     const fieldValue = field.state.value as AddressValue | string | undefined
 
-    if (!initializedRef.current && fieldValue) {
-      const displayValue = typeof fieldValue === 'string' ? fieldValue : fieldValue.value
-      if (displayValue && displayValue !== inputValue) {
-        setInputValue(displayValue)
+    // См. комментарий в field-city.tsx: инициализация `inputValue` из значения поля перенесена
+    // в эффект, чтобы `setInputValue()` не вызывался синхронно во время рендера `<form.Field>`
+    // (React ругался «Cannot update a component while rendering a different component»).
+    useEffect(() => {
+      if (!initializedRef.current && fieldValue) {
+        const displayValue = typeof fieldValue === 'string' ? fieldValue : fieldValue.value
+        if (displayValue && displayValue !== inputValue) {
+          setInputValue(displayValue)
+        }
+        initializedRef.current = true
       }
-      initializedRef.current = true
-    }
+    }, [fieldValue])
 
     const options = suggestions.map((s) => ({ label: s.label, value: s.value }))
 

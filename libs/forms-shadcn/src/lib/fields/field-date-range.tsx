@@ -2,18 +2,9 @@
 
 import type { ReactElement } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
+import { NATIVE_INPUT_CLASS } from '../uikit/primitives/native-input-class'
 import { cn } from '../utils/cn'
 import type { DateRangeFieldProps, DateRangePreset, DateRangeValue } from './types'
-
-// Те же классы, что у shadcnUIKit.Input (uikit/primitives/input.tsx) — рендерим нативный
-// <input>, а не примитив контракта, потому что UIKitInputProps не пропускает min/max
-// (не нужны обычному текстовому полю), а диапазону дат они обязательны для перекрёстного
-// ограничения (max начала = значение конца и наоборот).
-const DATE_INPUT_CLASS = cn(
-  'border-input placeholder:text-muted-foreground flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs transition-[color,box-shadow] outline-none',
-  'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
-  'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
-)
 
 const PRESET_LABELS: Record<DateRangePreset, string> = {
   today: 'Сегодня',
@@ -121,7 +112,7 @@ export const FieldDateRange = createField<DateRangeFieldProps, DateRangeValue>({
               disabled={resolved.disabled}
               readOnly={resolved.readOnly}
               data-field-name={`${fullPath}.start`}
-              className={DATE_INPUT_CLASS}
+              className={NATIVE_INPUT_CLASS}
             />
           </div>
           <div className="flex-1 space-y-1">
@@ -136,7 +127,7 @@ export const FieldDateRange = createField<DateRangeFieldProps, DateRangeValue>({
               disabled={resolved.disabled}
               readOnly={resolved.readOnly}
               data-field-name={`${fullPath}.end`}
-              className={DATE_INPUT_CLASS}
+              className={NATIVE_INPUT_CLASS}
             />
           </div>
         </div>

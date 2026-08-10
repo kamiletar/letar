@@ -4,6 +4,21 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.13.1] - 2026-08-10
+
+### Changed
+
+- Дедупликация кода, накопившегося за серию из 15 новых полей — без изменения поведения:
+  - `useAddressProvider`/`useCityProvider` (идентичная логика резолва `AddressProvider`:
+    проп → контекст формы → token-фолбэк) → общий `useResolvedAddressProvider` в
+    `lib/utils/use-address-provider.ts`, используется `FieldAddress` и `FieldCity`.
+  - `DATE_INPUT_CLASS`/`DATETIME_INPUT_CLASS` (буквально та же строка tailwind-классов, что у
+    `shadcnUIKit.Input`) → общий `NATIVE_INPUT_CLASS` в
+    `lib/uikit/primitives/native-input-class.ts`, используется `Input`, `FieldDateRange`,
+    `FieldDateTimePicker`.
+  - `cardClass` (идентичная реализация border+ring/opacity) → общий `lib/utils/card-class.ts`,
+    используется `FieldRadioCard` и `FieldCheckboxCard`.
+
 ## [0.13.0] - 2026-08-10
 
 ### Added

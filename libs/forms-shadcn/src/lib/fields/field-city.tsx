@@ -1,23 +1,13 @@
 'use client'
 
-import type { AddressProvider, AddressSuggestion } from '@letar/forms-core/address'
-import { createDaDataProvider } from '@letar/forms-core/address'
-import { useDebounce, useDeclarativeFormOptional } from '@letar/forms-react'
+import type { AddressSuggestion } from '@letar/forms-core/address'
+import { useDebounce } from '@letar/forms-react'
 import type { ReactElement } from 'react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
+import { useResolvedAddressProvider } from '../utils/use-address-provider'
 import type { CityFieldProps } from './types'
-
-/** Резолв провайдера: проп → контекст формы → token-фолбэк. Тот же приоритет, что у Chakra-версии. */
-function useCityProvider(propProvider?: AddressProvider, token?: string): AddressProvider | null {
-  const formContext = useDeclarativeFormOptional()
-  const tokenProvider = useMemo(() => (token ? createDaDataProvider({ token }) : null), [token])
-
-  if (propProvider) { return propProvider }
-  if (formContext?.addressProvider) { return formContext.addressProvider }
-  return tokenProvider
-}
 
 interface CityFieldState {
   inputValue: string
@@ -44,7 +34,7 @@ export const FieldCity = createField<CityFieldProps, string, CityFieldState>({
 
   useFieldState: (props): CityFieldState => {
     const { provider: propProvider, token, minChars = 2, debounceMs = 300 } = props
-    const provider = useCityProvider(propProvider, token)
+    const provider = useResolvedAddressProvider(propProvider, token)
 
     const [inputValue, setInputValue] = useState('')
     const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
@@ -94,10 +84,18 @@ export const FieldCity = createField<CityFieldProps, string, CityFieldState>({
     const { inputValue, setInputValue, suggestions, isLoading, initializedRef } = fieldState
     const fieldValue = field.state.value as string | undefined
 
-    if (!initializedRef.current && fieldValue && fieldValue !== inputValue) {
-      initializedRef.current = true
-      setInputValue(fieldValue)
-    }
+    // `render` вызывается внутри рендера `<form.Field>` — синхронный `setInputValue()` здесь
+    // обновлял бы состояние `FieldCity` во время рендера чужого компонента (TanStack Form
+    // ругался «Cannot update a component while rendering a different component»). Инициализация
+    // `inputValue` из значения поля перенесена в эффект: он относится к тому же render-prop
+    // вызову (React регистрирует хуки по месту вызова, а не по владельцу замыкания), но выполняется
+    // после коммита — там setState уже безопасен.
+    useEffect(() => {
+      if (!initializedRef.current && fieldValue && fieldValue !== inputValue) {
+        initializedRef.current = true
+        setInputValue(fieldValue)
+      }
+    }, [fieldValue])
 
     const options = suggestions.map((s) => ({ label: s.label, value: s.value }))
 

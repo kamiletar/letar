@@ -2,16 +2,9 @@
 
 import type { ReactElement } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
+import { cardClass } from '../utils/card-class'
 import { cn } from '../utils/cn'
 import type { RadioCardFieldProps, RichOption } from './types'
-
-function cardClass(selected: boolean, disabled: boolean | undefined): string {
-  return cn(
-    'flex flex-1 flex-col gap-1 rounded-md border p-3 text-left text-sm outline-none',
-    selected ? 'border-primary ring-primary/50 ring-2' : 'border-input hover:bg-accent/50',
-    disabled && 'pointer-events-none opacity-50',
-  )
-}
 
 /**
  * Form.Field.RadioCard — shadcn-скин.
