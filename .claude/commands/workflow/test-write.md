@@ -1,3 +1,7 @@
+---
+description: Написание unit и e2e тестов по методологии TDD (Red → Green → Refactor)
+---
+
 # Test Write - Написание тестов
 
 Напиши тесты по методологии TDD (Red → Green → Refactor).

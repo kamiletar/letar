@@ -1,3 +1,7 @@
+---
+description: Создание нового Server Action или API endpoint по паттернам монорепо
+---
+
 # New API - Создание API endpoint
 
 Создай новый Server Action или API endpoint.

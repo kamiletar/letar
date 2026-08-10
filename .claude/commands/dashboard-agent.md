@@ -1,3 +1,7 @@
+---
+description: Воркфлоу разработки dashboard-agent — регистрация в Agent Mail, задачи, деплой через BlackCove
+---
+
 # Dashboard Agent - Воркфлоу разработки
 
 ## Инициализация

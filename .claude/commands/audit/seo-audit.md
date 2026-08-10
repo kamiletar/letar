@@ -1,3 +1,7 @@
+---
+description: Аудит SEO и метаданных приложения — canonical, hreflang, OG, structured data
+---
+
 # SEO Audit — Аудит SEO и метаданных
 
 Проведи полный SEO аудит приложения $ARGUMENTS (или текущего, если не указано).

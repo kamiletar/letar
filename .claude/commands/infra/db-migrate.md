@@ -1,3 +1,8 @@
+---
+description: Миграции схемы БД через ZenStack/Prisma — генерация, push/migrate и @form.* директивы
+allowed-tools: Bash, Read, Grep, Glob
+---
+
 # DB Migrate - Миграции базы данных
 
 Выполни изменения схемы базы данных через ZenStack/Prisma.

@@ -1,3 +1,8 @@
+---
+description: Проверка и создание недостающих файлов документации приложения (README, PLAN, CHANGELOG)
+allowed-tools: Read, Write, Edit, Glob, Grep
+---
+
 # Быстрое наведение порядка в документации
 
 Проанализируй документацию текущего проекта и создай/обнови недостающие файлы согласно [documentation-guidelines.md](/.claude/docs/documentation-guidelines.md).

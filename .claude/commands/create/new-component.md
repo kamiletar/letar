@@ -1,3 +1,7 @@
+---
+description: Создание React-компонента с Chakra UI v3 — паттерны, размещение и чеклист
+---
+
 # New Component - Создание компонента
 
 Создай новый React компонент с Chakra UI v3.

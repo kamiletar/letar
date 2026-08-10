@@ -1,3 +1,8 @@
+---
+description: Ревью кода на качество, безопасность и специфику проекта с прогоном format/lint/typecheck
+allowed-tools: Bash(nx format:*), Bash(nx lint:*), Bash(nx typecheck:*), Bash(git diff:*), Read, Grep, Glob
+---
+
 # Code Review - Ревью кода
 
 Проведи ревью кода для указанных файлов или последних изменений.

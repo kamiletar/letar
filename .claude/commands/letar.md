@@ -1,3 +1,8 @@
+---
+description: Воркфлоу верхнего уровня для задач по всему монорепо letar — инфра, общие библиотеки, релизы
+allowed-tools: Bash(nx format:*), Bash(nx lint:*), Bash(nx typecheck:*), Bash(nx affected:*), Bash(nx release:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*)
+---
+
 # Letar - Воркфлоу монорепо (весь репозиторий)
 
 Команда верхнего уровня для работы со **всем монорепо** `letar`, а не с одним приложением.

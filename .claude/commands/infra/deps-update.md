@@ -1,3 +1,8 @@
+---
+description: Систематическое обновление зависимостей монорепо через bun с проверкой безопасности и сборки
+allowed-tools: Bash(bun outdated:*), Bash(bun update:*), Bash(bun add:*), Bash(bun audit:*), Bash(bun install:*), Bash(nx run-many:*)
+---
+
 # Deps Update - Обновление зависимостей
 
 Обнови зависимости проекта безопасно и систематически.

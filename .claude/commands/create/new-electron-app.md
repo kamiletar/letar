@@ -1,3 +1,8 @@
+---
+description: Генерация каркаса Electron-приложения — протокол, ассоциации файлов, грабли платформы
+allowed-tools: Bash, Read, Grep, Glob
+---
+
 # New Electron App — создание десктопного приложения
 
 Создай новое Electron-приложение (Electron main + Next.js renderer).

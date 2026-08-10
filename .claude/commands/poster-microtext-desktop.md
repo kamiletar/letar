@@ -1,3 +1,7 @@
+---
+description: Воркфлоу разработки Electron-приложения poster-microtext-desktop — микротекст на постерах
+---
+
 # Poster Microtext Desktop - Воркфлоу разработки
 
 **Submodule:** `kamiletar/letar-private-poster-microtext-desktop`

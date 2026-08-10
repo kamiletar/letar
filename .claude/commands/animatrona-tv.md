@@ -1,3 +1,7 @@
+---
+description: Воркфлоу разработки TV-плеера Animatrona (React Native, Android TV)
+---
+
 # Animatrona TV - Воркфлоу разработки
 
 ## Инициализация

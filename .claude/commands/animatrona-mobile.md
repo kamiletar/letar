@@ -1,3 +1,7 @@
+---
+description: Воркфлоу разработки мобильного плеера Animatrona (React Native, Android)
+---
+
 # Animatrona Mobile - Воркфлоу разработки
 
 ## Инициализация

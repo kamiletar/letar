@@ -1,3 +1,7 @@
+---
+description: Глубокий UI/UX аудит интерфейса — design system, accessibility, responsive, формы, UX
+---
+
 # UI/UX Audit - Аудит интерфейса с Extended Thinking
 
 Проведи глубокий аудит UI/UX приложения с использованием extended thinking для детального анализа.
