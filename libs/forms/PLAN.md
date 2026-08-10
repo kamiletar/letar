@@ -1372,6 +1372,32 @@ React, а React-адаптер зависит от абстракций ядра
   `test` зелёные на всех четырёх пакетах (65с суммарно на тестах); остальные 38
   pre-existing проблем `nx lint forms` (`react-hooks/exhaustive-deps` и т.п.) — не в скоупе,
   не трогала.
+- ✅ **`FieldAddress` добавлен — 18-е поле (2026-08-10, forms-dev), начало продолжения к
+  паритету.** По уточнению координатора 17 полей — не финальный скоуп (см. выше). Переиспользует
+  `shadcnUIKit.Combobox` (Popover + input, тот же примитив, что `FieldCombobox`) с
+  async-подгрузкой подсказок из `AddressProvider` (`@letar/forms-core/address`) вместо
+  статичного списка — провайдер резолвится в том же порядке, что у Chakra-версии (проп →
+  `DeclarativeFormContext.addressProvider` → `token`-фолбэк на `createDaDataProvider`).
+  Beta-упрощения: нет клавиатурной навигации стрелками/Escape по списку подсказок
+  (Combobox-примитив UIKit её не поддерживает — только клик и Enter/Escape самого Popover) и
+  нет визуального спиннера внутри инпута (`loading` прокинут как есть, текст «Загрузка...» в
+  выпадающем списке). Протечек границы не найдено — легло на существующий `UIKit`-контракт без
+  правок `forms-core`/`forms-react`.
+  - Единственная находка: `eslint-disable-next-line react-hooks/exhaustive-deps` (портировано
+    из Chakra-версии как есть) валит `nx lint forms-shadcn` — плагин `react-hooks` не
+    зарегистрирован в этом воркспейсе, поэтому disable-комментарий на несуществующее правило сам
+    по себе ошибка (`Definition for rule ... was not found`), тот же баг уже есть в
+    `libs/forms/src/lib/utils/use-form-store-subscribe.ts` и в Chakra `field-address.tsx` (не
+    чинила — не в скоупе). Обошла добавлением `fetchSuggestions` в зависимости эффекта вместо
+    disable-комментария — `fetchSuggestions` стабилен по ссылке, пока не меняются
+    `provider`/`minChars`/`locations`, включение в deps не добавляет лишних срабатываний.
+  - **Проверки:** 5 новых RTL-тестов (44/44 в пакете, было 39), негативный контроль
+    (`token={42}` → `TS2322`), `typecheck:tsgo`/`lint` зелёные. Живая проверка в Chromium на
+    `apps/form-develop-app-shadcn` (мок-провайдер вместо DaData — токена в песочнице нет): ввод
+    текста → debounce → подсказки в Popover → клик по подсказке → значение инпута обновилось,
+    список закрылся — весь путь воспроизведён через `dispatchEvent`, а не только unit-тестами.
+  - CHANGELOG/версия (`0.5.1` → `0.6.0`), README (таблица полей, «Известные упрощения») —
+    обновлены.
 - [ ] **7.4 Замер трафика** → решение: доносить сложные поля или нет.
 - [ ] **7.5 Docs-сайт на отдельном домене** + живые демо. SEO под `zod forms react`, `prisma form generator`.
 - [ ] **7.6 `llms.txt` + усиление MCP** — недоиспользованный козырь №1 (дёшево, уникально).
