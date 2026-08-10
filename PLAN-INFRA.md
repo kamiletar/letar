@@ -7920,15 +7920,34 @@ GlitchTip нет, но REST API есть: если приживётся, тон�
 Без них работают EXPLAIN, `list_objects`, `get_object_details` и часть `analyze_db_health` —
 уже полезно, но не то, ради чего инструмент ставился.
 
-### Что сделать
+### Что сделано (2026-08-10) — только studio, только dev
 
-1. Добавить `pg_stat_statements` в `shared_preload_libraries` dev-Postgres, перезапустить,
-   выполнить `CREATE EXTENSION`.
-2. Решить по `hypopg`: собрать свой образ на базе текущего либо перейти на образ, где расширение
-   уже есть. Проверить, что версия Postgres совпадает с продовой — расхождение сделает
-   рекомендации индексов нерелевантными.
+- [x] `apps/studio/docker-compose.dev.yml` (`studio-postgres-dev`, локальный dev-контейнер,
+      порт 5446): `command: postgres -c shared_preload_libraries=pg_stat_statements` +
+      пересоздание контейнера + `CREATE EXTENSION pg_stat_statements` (через `docker exec psql` —
+      MCP в `--access-mode restricted` сам DDL не пропускает, `cannot execute CREATE EXTENSION in
+      a read-only transaction`). Проверено рабочим запросом через `postgres-studio` MCP:
+      `SELECT count(*) FROM pg_stat_statements` → 7 строк.
+- [ ] `hypopg` для studio по-прежнему недоступен — проверено (`pg_available_extensions` пуст для
+      `hypopg` на образе `postgres:16-alpine`), подтверждает исходную находку. Решение не принято:
+      нужен либо кастомный образ (собрать `hypopg` из исходников поверх alpine — на alpine нет
+      готового пакета в отличие от Debian-based `postgres:16` + `apt install postgresql-16-hypopg`),
+      либо смена базового образа на Debian-вариант. Смена базового образа — не мелкая правка:
+      затрагивает и `docker-compose.production.yml`/`docker-compose.staging.yml` (см. риск версии
+      расхождения с продом ниже), решение владельца.
+- [ ] **`driving-school` не тронут.** Его dev-БД слушает `localhost:5432` без
+      `docker-compose.dev.yml` в самом приложении — `docker ps` показал, что порт держит контейнер
+      **`premium-rosstil-postgres`** (`POSTGRES_DB=lena_premium`, `POSTGRES_USER=lena_user`), то
+      есть база `driving_school` живёт как **вторая база внутри инстанса деприкейтнутого
+      premium-rosstil** (снят с поддержки 2026-07-05, см. `project_premium_rosstil_imot_removed` в
+      памяти), а не в своём изолированном контейнере. Рестарт с новым `shared_preload_libraries`
+      затронул бы этот общий инстанс целиком — не блокирующий риск (premium-rosstil мёртв), но вне
+      исходного скоупа §71 и заслуживает отдельного решения: держать driving-school на чужом
+      контейнере — само по себе долг, а не только вопрос одного расширения.
+2. Решить по `hypopg` (см. выше — открытый вопрос).
 3. **Прод трогать в последнюю очередь и только read-only.** `pg_stat_statements` на проде даёт
-   реальную картину нагрузки, но это рестарт продового Postgres — отдельное окно работ.
+   реальную картину нагрузки, но это рестарт продового Postgres — отдельное окно работ, не входит
+   в эту сессию.
 
 ⚠️ Проект `postgres-mcp` не обновлялся с января 2026. Из-за этого в `pg-wrapper.mjs` зафиксирован
 пин `mcp<2`: без него сервер падает на старте с `ModuleNotFoundError: mcp.server.fastmcp`. Если
