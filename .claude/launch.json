@@ -111,6 +111,12 @@
       "runtimeExecutable": "nx",
       "runtimeArgs": ["dev", "domwellbes"],
       "port": 3025
+    },
+    {
+      "name": "form-develop-app",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "form-develop-app"],
+      "port": 3006
     }
   ]
 }
