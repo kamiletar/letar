@@ -117,6 +117,12 @@
       "runtimeExecutable": "nx",
       "runtimeArgs": ["dev", "form-develop-app"],
       "port": 3006
+    },
+    {
+      "name": "form-develop-app-shadcn",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "form-develop-app-shadcn"],
+      "port": 3026
     }
   ]
 }
