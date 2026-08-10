@@ -1,5 +1,103 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-08-10 — Фаза 7.3, шаги 3-5: `@letar/forms-react`, фикс публикации типов, подготовка shadcn
+
+Thread `forms-phase7-1-core-split`. Коммиты `858a000b`, `7fbd1b5d`, `d1c755fa` + шесть коммитов
+внутри приватных submodule (по одному `tsconfig.json` в каждом).
+
+### Шаги 3-4 — композиционный слой вынесен в новый пакет (`858a000b`, v1.6.0)
+
+Блокер прошлой сессии снят решением Ками: заводим третий пакет, правило «`forms-core` не
+импортирует ни один фреймворк» (2026-07-08) не ослабляем. Инструкция координатора «перенести
+`createField` в `forms-core`» была невыполнима как написана — это React-код.
+
+```
+forms-core  →  forms-react  →  forms (Chakra) / forms-shadcn
+```
+
+**Переехало:** `createField`, `FieldWrapper`, `FieldErrorBoundary`, контекст формы, `FormGroup`,
+хуки поля (`useResolvedFieldProps`, `useDeclarativeField`, `useAsyncFieldValidation`,
+`useAsyncSearch`, `useDebounce`), `field-utils`, `autocomplete-map`, React-часть i18n,
+UI-независимые типы (`BaseFieldProps`, `DeclarativeFormContextValue`, `ResolvedFieldProps`).
+
+**Осталось в скине сознательно** (отклонение от буквы задания, координатор одобрил задним
+числом, письмо 1452): `uikit-chakra.tsx`, `field-label.tsx`, `field-tooltip.tsx`,
+`selection-field-label.tsx`, `field-error.tsx` (вынесен из `create-field.tsx`, чтобы развязать
+цикл с `uikit-chakra`), `use-grouped-options.ts`, `form-group-list-sortable.tsx`. Это Chakra-код,
+он и есть реализация контракта — в UI-library-free пакет он физически не может переехать.
+
+**Механизм связывания — фабрика `createFieldPrimitives(uikit)`, вызываемая один раз на уровне
+модуля скина** (`form-fields/base/primitives.ts`). Не контекст и не проп: компоненты должны быть
+стабильны по ссылке, иначе React размонтирует поддерево поля на каждой перерисовке формы.
+`FieldPrimitivesUIKit` намеренно уже полного `UIKit` — скину хватит четырёх примитивов
+(`FieldRoot`/`FieldLabel`/`FieldError`/`ErrorFallback`), остальные он подключает по мере
+миграции своих полей.
+
+**Ни одно из 56 полей не правилось** — реэкспорт-шимы на местах переехавших модулей, публичный
+API не изменился.
+
+**Граница `forms-react`** — тег `type:core-react` (`depConstraints`) + `no-restricted-imports`
+против `@chakra-ui/*`, `@ark-ui/*`, `@radix-ui/*`, иконок и против самих скинов. Обе половины
+подтверждены негативной пробой. Ядро закрыто и от нового слоя: `type:core` не зависит ни от
+`type:ui`, ни от `type:core-react`.
+
+**Проверки:** 678 тестов `forms` + 76 `forms-react` (было 754 в одном; файлов 99 → 95 + 4 —
+сходится файл-в-файл); `typecheck:tsgo` зелёный на 20 потребителях, включая шесть приватных;
+живая проверка в Chromium на `form-develop-app` — рендер `fields-demo`, валидация
+(`data-invalid` + `error-text`), async-путь (`Username занят`).
+
+### Побочно закрыт техдолг 7.1 — неполные `paths` у потребителей
+
+Приложения держали 9 подпутей `forms-core` из 15. Пока библиотека их не импортировала, всё было
+зелёное; первое же использование `/uikit`, `/i18n`, `/address` из нового слоя положило всех
+разом. Диагностика при этом вводит в заблуждение: где тип попадает в сигнатуру поля, `TS2307`
+превращается в каскад `TS2322` вида «`{ name: string }` не совместим с `StringFieldProps`».
+
+Дописан полный набор во все 17 приложений. Попутно выяснено: симлинк создаёт `bun install` и
+лежит он в `<пакете>/node_modules/@letar/` (корневого `node_modules/@letar` в репо нет вовсе); а
+приложения на «смешанной модели» `include` (`animatrona`, `label-printer-desktop`) требуют ещё и
+glob, иначе `TS6307`. Записано в `.claude/rules/libs.md` — это общая механика монорепо.
+
+### Фикс публикации типов (`7fbd1b5d`)
+
+Дефект жил с Фазы 7.1: `noExternal` инлайнит внутренние `@letar/*` только в JS-бандл, а в
+`dist/*.d.ts` оставались импорты `@letar/forms-core/...`, которых в npm нет. Сборка при этом
+успешна — ломается только установка опубликованного пакета, поэтому 7.2 его не заметила.
+
+**Почему `dts: { resolve: [...] }` выглядел неработающей опцией:** tsup строит `external` для
+dts-прохода как `dependencies + peerDependencies` (`getProductionDeps`), и всё оттуда rollup
+помечает внешним **до** плагинов — резолвер не вызывается вовсе. Подтверждено замером: под
+`DEBUG=tsup:ts-resolve` в логе на 1310 строк нет ни одного bare-пакета, только относительные
+пути.
+
+**Фикс structural:** `@letar/forms-core`/`@letar/forms-react` переехали в `devDependencies` —
+это внутренние слои, а не npm-пакеты, потребитель их не устанавливает. Пока они в
+`dependencies`, любой флаг резолва мёртв.
+
+**Проверено путём настоящего потребителя:** `npm pack` → установка тарбола в чистый проект вне
+монорепо → `tsc --noEmit` зелёный. Позитивный контроль — внешние зависимости остались импортами;
+негативный — `name={42}` даёт `TS2322`, то есть типы настоящие, а не `any`. Nx-граф цел (рёбра
+строятся по импортам в коде).
+
+### Шаг 5 — подготовка (`d1c755fa`)
+
+Установлены десять Radix-примитивов + `class-variance-authority`, `clsx`, `tailwind-merge`
+(`tailwindcss` 4.3.3 и `lucide-react` уже были). Проверено компиляционной пробой с негативным
+контролем (`tone="rainbow"` → `TS2322`).
+
+Решение по организации скина — прямые Radix + `cva`/`tailwind-merge`, **не** `shadcn` CLI;
+обоснование, цена (потребителю нужен Tailwind 4 + `@source` на путь пакета) и порядок работ
+записаны в `PLAN.md` §7.3.
+
+### Открытые вопросы (ждут решения координатора/Ками)
+
+1. **Два разных `BaseFieldProps`.** Наружу экспортируется legacy-тип из `src/lib/types.ts`
+   (`label?: string`, существует с первого коммита, от старого `ChakraFormField`-API), а поля
+   используют другой — из `forms-react`. Внешний потребитель не может присвоить
+   `StringFieldProps` в `BaseFieldProps`. Не регресс; переименование — breaking change.
+2. **Площадка для shadcn-демо.** `form-docs` уже на Tailwind 4 (Fumadocs), `form-develop-app` и
+   `form-example` на Chakra и потребуют отдельной настройки.
+
 ## 2026-08-09 — Фикс рассинхрона версии в build:npm (dist/package.json vs package.json)
 
 Найдено при диагностике Фазы 7.2 (сессия forms-dev), зафиксировано отдельно от самого фикса
