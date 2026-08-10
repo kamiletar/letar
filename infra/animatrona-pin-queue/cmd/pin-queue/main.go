@@ -235,7 +235,7 @@ func loadConfig() config {
 	return config{
 		BindAddr:      envStr("BIND_ADDR", "127.0.0.1"),
 		HTTPPort:      envInt("HTTP_PORT", 8080),
-		KuboAPIURL:    envStr("KUBO_API_URL", "http://localhost:5011"),
+		KuboAPIURL:    envStr("KUBO_API_URL", "http://localhost:5001"),
 		KuboAuthToken: envStr("KUBO_AUTH_TOKEN", ""),
 		AuthToken:     envStr("AUTH_TOKEN", ""),
 		StatePath:     envStr("STATE_PATH", "/data/state.json"),

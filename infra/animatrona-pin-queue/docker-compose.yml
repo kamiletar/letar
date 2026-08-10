@@ -3,7 +3,9 @@ services:
     build: .
     container_name: animatrona-pin-queue
     restart: unless-stopped
-    # host network — доступ к Kubo на localhost:5011
+    # host network — доступ к Kubo на localhost:5001 (pinner3, стандартный порт API,
+    # см. apps/animatrona/main/services/kubo/kubo-config.ts — не путать с animatrona-pinner,
+    # у которого API вынесен наружу на нестандартный 5011)
     network_mode: host
     volumes:
       - queue_data:/data
@@ -14,7 +16,7 @@ services:
       # токена. Разбор — PLAN-INFRA.md §57.
       BIND_ADDR: '127.0.0.1'
       HTTP_PORT: '42080'
-      KUBO_API_URL: 'http://localhost:5011'
+      KUBO_API_URL: 'http://localhost:5001'
       KUBO_AUTH_TOKEN: '${KUBO_AUTH_TOKEN}'
       AUTH_TOKEN: '${AUTH_TOKEN}'
       STATE_PATH: '/data/state.json'
