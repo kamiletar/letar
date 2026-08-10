@@ -96,6 +96,16 @@ scripts/backup/.env
 /playwright/.auth/student.json
 /test-results/
 
+# Playwright auth state (root + не-submodule приложения вроде auth-hub-e2e) —
+# регенерируется локально при e2e-прогоне, коммитить не нужно (см. e2e-testing.md,
+# генератор e2e-suite сам заводит такой .gitignore для новых сьютов). Не покрывает
+# submodule-репозитории — там свой .gitignore, правится отдельно.
+**/playwright/.auth/*.json
+
+# Runtime-состояние dashboard-agent (write-only, не коммитится)
+/.last-e2e-status/
+/traefik-backup-freshness-state.json
+
 
 
 **/.sync
