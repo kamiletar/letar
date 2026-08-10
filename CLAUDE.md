@@ -209,9 +209,15 @@ age-ключ; подробнее — [secret-manager](/.claude/docs/secret-manag
 
 **Окружение:** Windows (нативный), `nx` и `bun` глобальные (❌ НЕ `bunx nx`/`npx nx`). При передаче аргументов в underlying tool: `nx e2e app-e2e -- --project=chromium`
 
-**MCP серверы:** nx-mcp, next-devtools, chakra-ui, **form-mcp**, **deploy-mcp**, inkeepMcp, context7, chrome-devtools, sequential-thinking, context-mode, agent-mail, **postgres-\*** (driving-school, kami, grandslamcup, studio), **prisma**, **socraticode**. Подробнее: [MCP серверы](/.claude/docs/mcp-servers.md)
+**MCP серверы:** nx-mcp, next-devtools, chakra-ui, **form-mcp**, **deploy-mcp**, inkeepMcp, context7, sequential-thinking, context-mode, agent-mail, **postgres-\*** (driving-school, kami, grandslamcup, studio), playwright, studio-time-mcp, synth-mcp. Подробнее: [MCP серверы](/.claude/docs/mcp-servers.md)
 
-**SocratiCode** — MCP-сервер семантического поиска по кодовой базе (Qdrant + Ollama + ast-grep). При первом запуске поднимает Docker-контейнеры (~5 мин). После: «Проиндексируй кодовую базу» → спрашивай «What is the codebase index status?». Контекстные артефакты (схемы БД, docs) — [`.socraticodecontextartifacts.json`](/.socraticodecontextartifacts.json). **Правило использования:** [socraticode-first](/.claude/rules/socraticode-first.md) — когда и какой инструмент вызывать (codebase_search vs codebase_context_search vs codebase_symbol vs codebase_impact). Используй вместо grep для семантического поиска.
+⚠️ **`nx-mcp` запускается с `--minimal false`.** По умолчанию флаг `--minimal` у сервера равен
+`true`, и он прячет ровно те инструменты, ради которых его ставят: `nx_workspace`,
+`nx_project_details`, `nx_workspace_path`, `nx_generators`, `nx_generator_schema`,
+`nx_available_plugins` — остаются только `nx_docs` и три `ci_*`. Именно поэтому за 487 сессий
+`nx_workspace` не был вызван ни разу: инструмента просто не было в списке, хотя инструкция его
+требовала. Если увидишь, что workspace-инструменты снова пропали, — проверь этот флаг, а не
+инструкцию.
 
 **⚠️ WebFetch заблокирован context-mode:** хук `pretooluse.mjs` блокирует `WebFetch` и перенаправляет на `mcp__context-mode__fetch_and_index(url, source)` + `mcp__context-mode__search(queries)`. Используй именно эти инструменты для загрузки внешних URL.
 
