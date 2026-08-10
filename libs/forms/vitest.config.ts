@@ -1,8 +1,8 @@
 /// <reference types="vitest" />
+import { buildFormsCoreAlias } from '@letar/forms-core/testing'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 import { defineConfig } from 'vitest/config'
-import { buildFormsCoreAlias } from '../forms-core/testing/vitest-alias'
 
 const formsCoreAlias = buildFormsCoreAlias(resolve(__dirname, '../forms-core'))
 
