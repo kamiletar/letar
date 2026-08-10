@@ -4,6 +4,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.15.0] - 2026-08-10
+
+### Added
+
+- `FieldFileUpload` — 34-е поле. Значение — `File[]`. Три варианта отображения (`button`,
+  `dropzone`, `input`), portировано с Chakra-версии. Beta: без Radix/Ark UI `FileUpload.Root`
+  (нет такого примитива в UIKit-контракте) — скрытый нативный `<input type="file">` + drag&drop
+  через `onDragOver`/`onDrop` на `variant="dropzone"`; превью изображений через
+  `URL.createObjectURL` вместо `FileUpload.ItemPreviewImage`. Security-проверка
+  (`processFileWithSecurity` из `@letar/forms-core/security`) портирована как есть —
+  framework-free утилита, общая с Chakra-скином. Не входит в UIKit-контракт — тот же принцип,
+  что у `Signature`/`Rating`/`Tags`.
+
 ## [0.14.0] - 2026-08-10
 
 ### Added

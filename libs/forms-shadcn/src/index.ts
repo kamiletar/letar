@@ -18,6 +18,7 @@ export { FieldDateRange } from './lib/fields/field-date-range'
 export { FieldDateTimePicker } from './lib/fields/field-datetime-picker'
 export { FieldDuration } from './lib/fields/field-duration'
 export { FieldEditable } from './lib/fields/field-editable'
+export { FieldFileUpload } from './lib/fields/field-file-upload'
 export { FieldHidden, type HiddenFieldProps } from './lib/fields/field-hidden'
 export { FieldListbox } from './lib/fields/field-listbox'
 export { FieldNativeSelect } from './lib/fields/field-native-select'
@@ -55,6 +56,7 @@ export type {
   DateTimePickerFieldProps,
   DurationFieldProps,
   EditableFieldProps,
+  FileUploadFieldProps,
   ListboxFieldProps,
   ListboxOption,
   NativeSelectFieldProps,

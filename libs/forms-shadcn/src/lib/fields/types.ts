@@ -1,6 +1,7 @@
 'use client'
 
 import type { AddressProvider } from '@letar/forms-core/address'
+import type { FileSecurityConfig } from '@letar/forms-core/security'
 import type { BaseFieldProps } from '@letar/forms-react'
 import type { ReactNode } from 'react'
 
@@ -421,6 +422,42 @@ export interface SignatureFieldProps extends Omit<BaseFieldProps, 'placeholder'>
   typedFont?: string
   /** Формат экспорта: 'png' (по умолчанию) или 'svg' */
   exportFormat?: 'png' | 'svg'
+}
+
+/**
+ * Props for Form.Field.FileUpload (shadcn-скин). Значение — `File[]`.
+ *
+ * Beta: без Radix/Ark UI `FileUpload.Root` (нет такого примитива в контракте) — нативный
+ * `<input type="file">` (скрытый) + drag&drop через нативные `onDragOver`/`onDrop` на
+ * `variant="dropzone"`. Security-проверка (`@letar/forms-core/security`) портирована как есть —
+ * framework-free, доступна обоим скинам.
+ */
+export interface FileUploadFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
+  /** Принимаемые типы файлов (атрибут `accept` инпута), например `"image/*"` или `".pdf,.doc"` */
+  accept?: string
+  /** Максимальный размер файла в байтах */
+  maxFileSize?: number
+  /** Максимум файлов (по умолчанию 1) */
+  maxFiles?: number
+  /** Вариант отображения (по умолчанию 'button') */
+  variant?: 'button' | 'dropzone' | 'input'
+  /** Показывать размер файла в списке */
+  showSize?: boolean
+  /** Разрешить удаление файлов из списка (по умолчанию true) */
+  clearable?: boolean
+  /** Текст в dropzone-варианте (по умолчанию «Перетащите файлы сюда») */
+  dropzoneLabel?: string
+  /** Описание под текстом dropzone */
+  dropzoneDescription?: string
+  /** Текст кнопки (для variant='button', по умолчанию «Загрузить файл») */
+  buttonText?: string
+  /** Placeholder для variant='input' */
+  placeholder?: string
+  /**
+   * Конфигурация проверки безопасности файлов — размер, MIME по magic bytes, EXIF, переименование.
+   * См. `FileSecurityConfig` из `@letar/forms-core/security`.
+   */
+  security?: FileSecurityConfig
 }
 
 /**
