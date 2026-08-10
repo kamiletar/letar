@@ -4,7 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
-## [0.10.0] - 2026-08-10
+## [0.11.0] - 2026-08-10
+
+### Added
+
+- `FieldRadioCard` — 27-е поле. Одиночный выбор карточками (label/description/icon), без
+  нового Radix-примитива — кнопки с `role="radio"` в `role="radiogroup"`. Beta: без
+  `keyboardNavigation` (циклическая навигация стрелками).
+- `FieldCheckboxCard` — 28-е поле. Множественный выбор карточками, тот же визуальный подход,
+  `role="checkbox"`/`aria-checked`, значение — массив.
 
 ### Added
 

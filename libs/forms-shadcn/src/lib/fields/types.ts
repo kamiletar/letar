@@ -301,3 +301,33 @@ export interface ListboxFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
   /** Режим выбора: одиночный (по умолчанию) или множественный */
   selectionMode?: 'single' | 'multiple'
 }
+
+/** Опция для RadioCard/CheckboxCard — с описанием и иконкой. */
+export interface RichOption {
+  label: ReactNode
+  value: string | number
+  disabled?: boolean
+  description?: ReactNode
+  icon?: ReactNode
+}
+
+/**
+ * Props for Form.Field.RadioCard (shadcn-скин).
+ *
+ * Beta: без `keyboardNavigation` (циклическая навигация стрелками) — Chakra-версия её
+ * поддерживает опционально, здесь не портировано.
+ */
+export interface RadioCardFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
+  /** Опции карточек */
+  options: RichOption[]
+  /** Ориентация (по умолчанию 'horizontal') */
+  orientation?: 'horizontal' | 'vertical'
+}
+
+/** Props for Form.Field.CheckboxCard (shadcn-скин). */
+export interface CheckboxCardFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
+  /** Опции карточек */
+  options: RichOption[]
+  /** Ориентация (по умолчанию 'horizontal') */
+  orientation?: 'horizontal' | 'vertical'
+}

@@ -8,6 +8,7 @@ export { createField, FieldErrorBoundary, FieldWrapper } from './lib/uikit/primi
 export { FieldAddress } from './lib/fields/field-address'
 export { FieldAutocomplete } from './lib/fields/field-autocomplete'
 export { FieldCheckbox } from './lib/fields/field-checkbox'
+export { FieldCheckboxCard } from './lib/fields/field-checkbox-card'
 export { FieldCombobox } from './lib/fields/field-combobox'
 export { FieldCurrency } from './lib/fields/field-currency'
 export { FieldDate } from './lib/fields/field-date'
@@ -22,6 +23,7 @@ export { FieldPassword } from './lib/fields/field-password'
 export { FieldPercentage } from './lib/fields/field-percentage'
 export { FieldPhone } from './lib/fields/field-phone'
 export { FieldPinInput } from './lib/fields/field-pin-input'
+export { FieldRadioCard } from './lib/fields/field-radio-card'
 export { FieldRadioGroup } from './lib/fields/field-radio-group'
 export { FieldRating } from './lib/fields/field-rating'
 export { FieldSegmentGroup } from './lib/fields/field-segment-group'
@@ -35,6 +37,7 @@ export type {
   AddressFieldProps,
   AddressValue,
   AutocompleteFieldProps,
+  CheckboxCardFieldProps,
   CheckboxFieldProps,
   ComboboxFieldProps,
   CurrencyFieldProps,
@@ -53,9 +56,11 @@ export type {
   PhoneCountry,
   PhoneFieldProps,
   PinInputFieldProps,
+  RadioCardFieldProps,
   RadioGroupFieldProps,
   RadioOption,
   RatingFieldProps,
+  RichOption,
   SegmentGroupFieldProps,
   SelectFieldProps,
   SelectOption,

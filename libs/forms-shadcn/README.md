@@ -40,6 +40,7 @@ import {
   FieldAddress,
   FieldAutocomplete,
   FieldCheckbox,
+  FieldCheckboxCard,
   FieldCombobox,
   FieldCurrency,
   FieldDate,
@@ -54,6 +55,7 @@ import {
   FieldPercentage,
   FieldPhone,
   FieldPinInput,
+  FieldRadioCard,
   FieldRadioGroup,
   FieldRating,
   FieldSegmentGroup,
@@ -66,7 +68,7 @@ import {
 } from '@letar/forms-shadcn'
 ```
 
-## Поля (beta — 26 из 56, продолжаем к паритету с `@letar/forms`)
+## Поля (beta — 28 из 56, продолжаем к паритету с `@letar/forms`)
 
 | Поле                  | Radix-примитив                                |
 | --------------------- | --------------------------------------------- |
@@ -96,6 +98,8 @@ import {
 | `FieldPercentage`     | `NumberInput` + `%` рядом                     |
 | `FieldAutocomplete`   | `@radix-ui/react-popover` (beta)              |
 | `FieldListbox`        | обычные кнопки, без Radix                     |
+| `FieldRadioCard`      | обычные кнопки, без Radix                     |
+| `FieldCheckboxCard`   | обычные кнопки, без Radix                     |
 
 `FieldCombobox` — упрощённая beta-версия: только статичные `options`, фильтрация по вхождению
 подстроки в `label`. Без `useQuery` (async-поиск) и группировки — Chakra-версия их поддерживает,
@@ -109,7 +113,10 @@ peer-зависимостях, не нужна ради 7 текстовых п�
 живого Intl-форматирования значения внутри инпута при вводе, символ рядом с полем.
 `FieldAutocomplete` — переиспользует тот же Combobox-примитив, но всегда принимает произвольный
 текст (`allowCustomValue`); только статичные `suggestions`, без `useQuery`. `FieldListbox` — все
-опции видны сразу, ряд кнопок с `aria-selected` вместо выпадающего списка.
+опции видны сразу, ряд кнопок с `aria-selected` вместо выпадающего списка. `FieldRadioCard`/
+`FieldCheckboxCard` — карточки (label/description/icon) вместо мелких кружков/квадратов,
+`role="radio"`/`role="checkbox"` на обычных кнопках; без `keyboardNavigation` (циклическая
+навигация стрелками у `FieldRadioCard`).
 
 Остальные ходовые поля (RichText, FileUpload и т.д.) — по мере
 миграции, каждое почти бесплатно благодаря готовому `UIKit`-контракту.
