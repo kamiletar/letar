@@ -4,6 +4,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.14.0] - 2026-08-10
+
+### Added
+
+- `FieldSignature` — 33-е поле. Canvas-рисование мышью/пальцем + typed mode (текстовый ввод
+  курсивом), переключатель режимов — две обычные кнопки (не Radix-примитив). Значение — data URI
+  (`image/png` или `image/svg+xml` base64). Логика геометрии штрихов и SVG-сборки портирована из
+  Chakra-версии как есть (`escapeXml`/`buildSvgString`/`buildTypedSvgString`), заменена только
+  UI-обвязка. Не входит в UIKit-контракт (нет примитива для canvas) — тот же принцип, что у
+  `Rating`/`Tags`/`ColorPicker`. Протечек границы `forms-core`/`forms-react` не найдено.
+
 ## [0.13.2] - 2026-08-10
 
 ### Fixed

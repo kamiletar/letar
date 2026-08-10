@@ -72,7 +72,7 @@ import {
 } from '@letar/forms-shadcn'
 ```
 
-## Поля (beta — 32 из 56, продолжаем к паритету с `@letar/forms`)
+## Поля (beta — 33 из 56, продолжаем к паритету с `@letar/forms`)
 
 | Поле                  | Radix-примитив                                |
 | --------------------- | --------------------------------------------- |
@@ -108,6 +108,7 @@ import {
 | `FieldOTPInput`       | нативные `<input>` (числовой)                 |
 | `FieldEditable`       | нативный `<input>`/`<textarea>`               |
 | `FieldColorPicker`    | нативный `<input type="color">` (beta)        |
+| `FieldSignature`      | `<canvas>` + typed mode (без Radix)           |
 
 `FieldCombobox` — упрощённая beta-версия: только статичные `options`, фильтрация по вхождению
 подстроки в `label`. Без `useQuery` (async-поиск) и группировки — Chakra-версия их поддерживает,
@@ -130,8 +131,10 @@ peer-зависимостях, не нужна ради 7 текстовых п�
 `shadcnUIKit.PinInput`, только числовой ввод (`type="alphanumeric"` не поддержан). `FieldEditable`
 — без `showControls` (Edit/Cancel/Submit-кнопок), только режимы активации `click`/`none`.
 `FieldColorPicker` — системный color picker браузера вместо полного Ark UI `ColorPicker.Root`.
+`FieldSignature` — canvas-рисование + typed mode, переключатель режимов — обычные кнопки (не
+Radix), логика геометрии штрихов/SVG-сборки портирована из Chakra-версии как есть.
 
-Остальные ходовые поля (RichText, FileUpload и т.д.) — по мере
+Остальные ходовые поля (RichText, FileUpload, Table, Steps и т.д.) — по мере
 миграции, каждое почти бесплатно благодаря готовому `UIKit`-контракту.
 
 ## `shadcnUIKit`

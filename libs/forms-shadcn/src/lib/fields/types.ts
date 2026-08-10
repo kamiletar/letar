@@ -385,6 +385,44 @@ export interface EditableFieldProps extends Omit<BaseFieldProps, 'placeholder'> 
   submitOnBlur?: boolean
 }
 
+/** Точка штриха подписи. */
+export interface StrokePoint {
+  x: number
+  y: number
+}
+
+/** Один штрих (от начала до конца жеста). */
+export interface SignatureStroke {
+  points: StrokePoint[]
+}
+
+/**
+ * Props for Form.Field.Signature (shadcn-скин). Значение — data URI (`image/png` или
+ * `image/svg+xml` base64).
+ */
+export interface SignatureFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
+  /** Placeholder поверх пустого canvas (по умолчанию «Подпишите здесь») */
+  placeholder?: string
+  /** Ширина canvas (по умолчанию 400) */
+  width?: number
+  /** Высота canvas (по умолчанию 150) */
+  height?: number
+  /** Цвет линии (по умолчанию 'black') */
+  strokeColor?: string
+  /** Толщина линии (по умолчанию 2) */
+  strokeWidth?: number
+  /** Фон canvas (по умолчанию 'white') */
+  backgroundColor?: string
+  /** Текст кнопки очистки (по умолчанию 'Очистить') */
+  clearLabel?: string
+  /** Разрешить typed mode (по умолчанию true) */
+  allowTyped?: boolean
+  /** Шрифт для typed mode */
+  typedFont?: string
+  /** Формат экспорта: 'png' (по умолчанию) или 'svg' */
+  exportFormat?: 'png' | 'svg'
+}
+
 /**
  * Props for Form.Field.ColorPicker (shadcn-скин).
  *

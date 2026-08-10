@@ -32,6 +32,7 @@ export { FieldRadioGroup } from './lib/fields/field-radio-group'
 export { FieldRating } from './lib/fields/field-rating'
 export { FieldSegmentGroup } from './lib/fields/field-segment-group'
 export { FieldSelect } from './lib/fields/field-select'
+export { FieldSignature } from './lib/fields/field-signature'
 export { FieldSlider } from './lib/fields/field-slider'
 export { FieldString } from './lib/fields/field-string'
 export { FieldSwitch } from './lib/fields/field-switch'
@@ -72,8 +73,11 @@ export type {
   SegmentGroupFieldProps,
   SelectFieldProps,
   SelectOption,
+  SignatureFieldProps,
+  SignatureStroke,
   SliderFieldProps,
   StringFieldProps,
+  StrokePoint,
   SwitchFieldProps,
   TagsFieldProps,
   TextareaFieldProps,
