@@ -9,7 +9,7 @@ export interface HiddenFieldProps {
   value?: unknown
 }
 
-function HiddenFieldInner({ field, value }: { field: AnyFieldApi, value?: unknown }): null {
+function HiddenFieldInner({ field, value }: { field: AnyFieldApi; value?: unknown }): null {
   useEffect(() => {
     if (value !== undefined && !Object.is(field.state.value, value)) {
       field.handleChange(value)

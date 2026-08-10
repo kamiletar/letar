@@ -22,7 +22,8 @@ export const FieldSwitch = createField<SwitchFieldProps, boolean>({
         <SwitchPrimitive.Root
           data-slot="switch"
           checked={!!field.state.value}
-          onCheckedChange={(checked) => field.handleChange(checked)}
+          onCheckedChange={(checked) =>
+            field.handleChange(checked)}
           onBlur={field.handleBlur}
           disabled={resolved.disabled}
           data-field-name={fullPath}

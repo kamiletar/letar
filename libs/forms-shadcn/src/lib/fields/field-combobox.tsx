@@ -31,7 +31,8 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
   useFieldState: (componentProps): ComboboxFieldState => {
     const [inputValue, setInputValue] = useState('')
     const normalized: NormalizedOption[] = useMemo(
-      () => componentProps.options.map((opt) => ({ label: opt.label, value: String(opt.value), disabled: opt.disabled })),
+      () =>
+        componentProps.options.map((opt) => ({ label: opt.label, value: String(opt.value), disabled: opt.disabled })),
       [componentProps.options],
     )
     const filteredOptions = useMemo(() => {

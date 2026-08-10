@@ -12,7 +12,8 @@ export const FieldPinInput = createField<PinInputFieldProps, string>({
     <FieldWrapper resolved={resolved} hasError={hasError} errorMessage={errorMessage} fullPath={fullPath}>
       <shadcnUIKit.PinInput
         value={(field.state.value as string) ?? ''}
-        onChange={(value) => field.handleChange(value)}
+        onChange={(value) =>
+          field.handleChange(value)}
         onComplete={componentProps.onComplete}
         length={componentProps.length ?? 4}
         mask={componentProps.mask}

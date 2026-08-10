@@ -12,7 +12,8 @@ export const FieldNativeSelect = createField<NativeSelectFieldProps, string>({
     <FieldWrapper resolved={resolved} hasError={hasError} errorMessage={errorMessage} fullPath={fullPath}>
       <shadcnUIKit.NativeSelect
         value={(field.state.value as string) ?? ''}
-        onChange={(value) => field.handleChange(value)}
+        onChange={(value) =>
+          field.handleChange(value)}
         onBlur={field.handleBlur}
         options={componentProps.options}
         placeholder={resolved.placeholder}
