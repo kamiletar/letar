@@ -2157,7 +2157,7 @@ if (pathname === '/api/deps/scan' && request.method === 'POST') { return NextRes
 
 ---
 
-## §26 — Непоследовательный frontmatter у слэш-команд 🆕
+## §26 — Непоследовательный frontmatter у слэш-команд ✅ ЗАКРЫТО (2026-08-10)
 
 > Найдено 2026-07-28, при проектировании §25.
 
@@ -2173,20 +2173,28 @@ if (pathname === '/api/deps/scan' && request.method === 'POST') { return NextRes
 
 ### Что предлагается
 
-- [ ] Пройтись по `.claude/commands/**/*.md` и добавить `description` всем, у кого его нет
+- [x] Пройтись по `.claude/commands/**/*.md` и добавить `description` всем, у кого его нет
       (сейчас используется как минимум для отображения в списке доступных команд).
-- [ ] Для команд, которые систематически дёргают конкретные Bash-инструменты (git, nx, bun) —
+- [x] Для команд, которые систематически дёргают конкретные Bash-инструменты (git, nx, bun) —
       добавить `allowed-tools` с точечными разрешениями (`Bash(git log:*)` и т.п.), а не оставлять
       это на усмотрение каждой новой правки.
-- [ ] Зафиксировать ожидаемый frontmatter-шаблон одной строкой в `.claude/commands/README.md`
+- [x] Зафиксировать ожидаемый frontmatter-шаблон одной строкой в `.claude/commands/README.md`
       (если такого файла нет — создать) или в `.claude/docs/`, чтобы новые команды писались
       единообразно с самого начала.
 
-### ✓ DoD §26
+### ✓ DoD §26 — выполнено
 
-- [ ] Все файлы `.claude/commands/**/*.md` имеют `description` во frontmatter
-- [ ] Команды с регулярными Bash-вызовами имеют `allowed-tools`
-- [ ] Шаблон/конвенция задокументированы, на неё можно сослаться при создании новой команды
+- [x] Все файлы `.claude/commands/**/*.md` имеют `description` во frontmatter — 56 файлов
+      получили frontmatter (были без него вообще), 4 уже имели.
+- [x] Команды с регулярными Bash-вызовами имеют `allowed-tools` — `audit/backup-audit.md`,
+      `create/new-app.md`, `create/new-electron-app.md`, `create/new-lib.md`, `deploy-agent.md`,
+      `docs-fix.md`, `end-session.md`, `infra/db-migrate.md`, `infra/deps-update.md`, `letar.md`,
+      `workflow/code-review.md`.
+- [x] Шаблон/конвенция задокументированы — `.claude/commands/README.md`.
+
+`forms-coordinator.md`/`forms-dev.md` на момент правки содержали чужие незакоммиченные правки
+(ротация agent-mail identity) — закоммичен только frontmatter поверх HEAD, рабочее дерево не
+тронуто.
 
 ---
 
