@@ -34,6 +34,7 @@ import {
   FieldSlider,
   FieldString,
   FieldSwitch,
+  FieldTableEditor,
   FieldTags,
   FieldTextarea,
   FormSteps,
@@ -147,7 +148,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Form Develop App (shadcn)</h1>
       <p className="text-muted-foreground mt-2 text-sm">
-        Песочница для разработки @letar/forms-shadcn — 34 поля, Фаза 7.3 Шаг 5+.
+        Песочница для разработки @letar/forms-shadcn — 35 полей, Фаза 7.3 Шаг 5+.
       </p>
 
       <DemoForm<DemoFormValues>
@@ -273,6 +274,58 @@ export default function HomePage() {
           </FormSteps.CompletedContent>
           <FormSteps.Navigation />
         </FormSteps>
+      </DemoForm>
+
+      <h2 className="mt-16 text-xl font-semibold">FieldTableEditor (beta, отдельная форма)</h2>
+      <p className="text-muted-foreground mt-1 text-sm">
+        Не `createField()`-поле, компонует `form.Field(mode=&quot;array&quot;)` напрямую — изолированная песочница со
+        своим array-полем `items`. `sortable` — native HTML5 drag&amp;drop (без `@dnd-kit`, beta- упрощение).
+      </p>
+      <DemoForm<{ items: { product: string; qty: number; price: number }[] }>
+        defaultValues={{
+          items: [
+            { product: 'Клавиатура', qty: 1, price: 5990 },
+            { product: 'Мышь', qty: 2, price: 1490 },
+          ],
+        }}
+        onSubmit={(value) => {
+          // eslint-disable-next-line no-console
+          console.log('table submit', value)
+        }}
+      >
+        <FieldTableEditor
+          name="items"
+          label="Позиции заказа"
+          sortable
+          selectable
+          columns={[
+            { name: 'product', label: 'Товар', width: '50%' },
+            { name: 'qty', label: 'Кол-во', width: '15%', align: 'right' },
+            { name: 'price', label: 'Цена', width: '15%', align: 'right' },
+            {
+              name: 'total',
+              label: 'Итого',
+              width: '20%',
+              align: 'right',
+              computed: (row) => (Number(row.qty) || 0) * (Number(row.price) || 0),
+              format: (v) => `${Number(v).toLocaleString('ru-RU')} ₽`,
+            },
+          ]}
+          addLabel="Добавить позицию"
+          footer={[{
+            column: 'total',
+            aggregate: 'sum',
+            label: 'Итого:',
+            format: (v) => `${v.toLocaleString('ru-RU')} ₽`,
+          }]}
+        />
+
+        <button
+          type="submit"
+          className="bg-primary text-primary-foreground mt-4 rounded-md px-4 py-2 text-sm font-medium"
+        >
+          Отправить
+        </button>
       </DemoForm>
     </main>
   )

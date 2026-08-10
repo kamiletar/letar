@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased (2026-08-10, продолжение 2)
+
+- Демо `FieldTableEditor` (`@letar/forms-shadcn` 0.17.0) — изолированная форма с array-полем
+  `items` (позиции заказа), кастомные колонки с `computed`/`format`, `sortable`, `selectable`,
+  footer с `aggregate: 'sum'`.
+
 ## Unreleased (2026-08-10, продолжение)
 
 - Демо `FormSteps` (`@letar/forms-shadcn` 0.16.0) — изолированная 2-шаговая форма

@@ -50,6 +50,11 @@ RichText.
 - [x] `FormSteps` — отдельная изолированная демо-форма (2 шага, `firstName`/`email`), живая
       проверка в Chromium (заполнение → «Далее» → индикатор отметил шаг завершённым → «Отправить»
       на последнем шаге → «Назад» вернул на первый) — детали в `libs/forms/PLAN.md` §7.3
+- [x] `FieldTableEditor` — отдельная изолированная демо-форма (array-поле `items`, кастомные
+      колонки с `computed`/`format`, `sortable`, `selectable`, footer `aggregate: 'sum'`), живая
+      проверка в Chromium (добавление строки, inline-редактирование через `input`-события,
+      удаление строки, select-all → bulk-delete кнопка с счётчиком) — детали в
+      `libs/forms/PLAN.md` §7.3
 
 ## Бэклог
 
