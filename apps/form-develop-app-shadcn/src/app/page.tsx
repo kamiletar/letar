@@ -29,6 +29,7 @@ import {
   FieldRating,
   FieldSegmentGroup,
   FieldSelect,
+  FieldSignature,
   FieldSlider,
   FieldString,
   FieldSwitch,
@@ -98,6 +99,7 @@ interface DemoFormValues {
   bio2: string
   brandColor: string
   smsCode: string
+  signature: string
 }
 
 const defaultValues: DemoFormValues = {
@@ -133,6 +135,7 @@ const defaultValues: DemoFormValues = {
   bio2: 'Кликните для редактирования',
   brandColor: '#4299E1',
   smsCode: '',
+  signature: '',
 }
 
 export default function HomePage() {
@@ -140,7 +143,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Form Develop App (shadcn)</h1>
       <p className="text-muted-foreground mt-2 text-sm">
-        Песочница для разработки @letar/forms-shadcn — 32 поля, Фаза 7.3 Шаг 5+.
+        Песочница для разработки @letar/forms-shadcn — 33 поля, Фаза 7.3 Шаг 5+.
       </p>
 
       <DemoForm<DemoFormValues>
@@ -216,6 +219,7 @@ export default function HomePage() {
         <FieldCity name="cityDadata" label="Город (DaData)" provider={mockAddressProvider} minChars={1} />
         <FieldEditable name="bio2" label="Кликабельный текст" />
         <FieldColorPicker name="brandColor" label="Цвет бренда" />
+        <FieldSignature name="signature" label="Подпись" width={320} height={120} />
         <FieldOTPInput
           name="smsCode"
           label="SMS-код"

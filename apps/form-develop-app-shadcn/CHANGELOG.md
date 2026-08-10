@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased (2026-08-10, продолжение)
+
+- Демо-поле `FieldSignature` (`@letar/forms-shadcn` 0.14.0) — canvas-рисование/typed mode,
+  `width={320} height={120}`.
+
 ## Unreleased (2026-08-10)
 
 - `defaultValues.address`/`defaultValues.cityDadata` заполнены непустыми значениями (было `''`)

@@ -5,7 +5,7 @@
 Dev-харнесс для `@letar/forms-shadcn` (Фаза 7.3, `libs/forms/PLAN.md` §7.3). Каркас Chakra от
 генератора заменён на Tailwind 4 + shadcn CSS-переменные (`src/app/globals.css`) — Chakra и
 Tailwind 4 не уживаются в одном глобальном стиле. Демо-страница синхронизирована с полями
-`@letar/forms-shadcn`: 32 из 56 (v0.13.0), продолжаем к паритету с `@letar/forms`.
+`@letar/forms-shadcn`: 33 из 56 (v0.14.0), продолжаем к паритету с `@letar/forms`.
 
 ## Фаза 0 — Фундамент ✅
 
@@ -36,6 +36,15 @@ Tailwind 4 не уживаются в одном глобальном стиле
 - [x] Живая проверка каждого нового поля в Chromium по ходу добавления (не одним прогоном в
       конце) — детали и находки по каждому полю в `libs/forms/PLAN.md` §7.3
 - [x] `typecheck:tsgo`/`lint` зелёные после каждого добавления
+
+## Фаза 2 — Продолжение к паритету (приоритет координатора) — в работе
+
+Приоритет от `QuietRidge` (тред `forms-phase7-3-shadcn`): Signature → FileUpload → Steps → Table →
+RichText.
+
+- [x] `FieldSignature` — демо-поле с `width={320} height={120}`, живая проверка в Chromium (draw
+      mode через настоящий `MouseEvent` `dispatchEvent`, typed mode, очистка) — детали в
+      `libs/forms/PLAN.md` §7.3
 
 ## Бэклог
 
