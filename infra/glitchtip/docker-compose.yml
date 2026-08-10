@@ -62,9 +62,10 @@ services:
     volumes:
       - glitchtip_uploads:/code/uploads
     healthcheck:
-      # Официальный docker-образ не документирует отдельный /health — берём тот же паттерн
-      # spider-запроса на /, что уже используется у studio-staging-app.
-      test: ['CMD-SHELL', 'wget -q --spider http://localhost:8000/ || exit 1']
+      # В образе glitchtip/glitchtip нет wget/curl (только python3) — паттерн studio-staging-app
+      # (wget --spider) здесь не работает молча: контейнер уходит в unhealthy без единой строки
+      # в логах, потому что сам сервис поднялся штатно, просто healthcheck-команда не находится.
+      test: ['CMD', 'python3', '-c', 'import urllib.request as u; u.urlopen("http://localhost:8000/")']
       interval: 15s
       timeout: 5s
       retries: 5
