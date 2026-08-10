@@ -49,7 +49,7 @@ Thumbs.db
 # Claude Code local settings (not shared)
 .claude/settings.local.json
 .claude/*.local.md
-.mcp.json
+.env.mcp
 
 # Next.js
 .next

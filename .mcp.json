@@ -1,0 +1,152 @@
+{
+  "mcpServers": {
+    "nx-mcp": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "bunx",
+        "nx-mcp@latest",
+        "C:/web/letar",
+        "--minimal",
+        "false"
+      ]
+    },
+    "chakra-ui": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "bunx",
+        "@chakra-ui/react-mcp"
+      ]
+    },
+    "next-devtools": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "bunx",
+        "next-devtools-mcp@latest"
+      ]
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "bunx",
+        "@upstash/context7-mcp",
+        "--api-key",
+        "${CONTEXT7_API_KEY}"
+      ]
+    },
+    "form-mcp": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "bunx",
+        "tsx",
+        "libs/form-mcp/src/cli.ts"
+      ]
+    },
+    "deploy-mcp": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "bunx",
+        "tsx",
+        "libs/deploy-mcp/src/cli.ts"
+      ]
+    },
+    "studio-time-mcp": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "bunx",
+        "tsx",
+        "libs/studio-time-mcp/src/cli.ts"
+      ]
+    },
+    "synth-mcp": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "bunx",
+        "tsx",
+        "apps/synth/src/mcp/cli.ts"
+      ]
+    },
+    "agent-mail": {
+      "type": "http",
+      "url": "http://127.0.0.1:8765/mcp"
+    },
+    "postgres-driving-school": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        ".claude/mcp/pg-wrapper.mjs",
+        "apps/driving-school/.env.local",
+        "--pro",
+        "restricted"
+      ]
+    },
+    "postgres-kami": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        ".claude/mcp/pg-wrapper.mjs",
+        "apps/kami/.env.local",
+        "MCP_LOCAL_URL"
+      ]
+    },
+    "postgres-kami-prod": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        ".claude/mcp/pg-wrapper.mjs",
+        "apps/kami/.env.docker",
+        "MCP_PROD_RO_URL",
+        "--tunnel",
+        "5455",
+        "root@s2.letar.best",
+        "5437"
+      ]
+    },
+    "postgres-grandslamcup": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        ".claude/mcp/pg-wrapper.mjs",
+        "apps/grandslamcup/.env.local"
+      ]
+    },
+    "postgres-studio": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        ".claude/mcp/pg-wrapper.mjs",
+        "apps/studio/.env.local",
+        "--pro",
+        "restricted"
+      ]
+    },
+    "postgres-studio-prod": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        ".claude/mcp/pg-wrapper.mjs",
+        "apps/studio/.env.docker",
+        "MCP_PROD_RO_URL",
+        "--tunnel",
+        "5456",
+        "root@s2.letar.best",
+        "5455"
+      ]
+    }
+  }
+}
