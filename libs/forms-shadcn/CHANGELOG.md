@@ -4,6 +4,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.16.1] - 2026-08-10
+
+### Changed
+
+- **`FormSteps`: `use-step-state.ts`/`use-step-navigation.ts`/`use-step-persistence.ts`
+  удалены из пакета** — та же логика (framework-free, продублирована почти дословно при
+  портировании 0.16.0) теперь в `@letar/forms-react` (0.2.1), импортируется оттуда.
+  `useStepPersistence` получил параметр `storagePrefix` — `FormStepsRoot` передаёт
+  `'form-steps-shadcn:'` явно вместо захардкоженной константы в самом хуке (поведение для
+  потребителей не изменилось, ключи localStorage те же). Публичный API `FormSteps` без
+  изменений.
+
 ## [0.16.0] - 2026-08-10
 
 ### Added

@@ -1,15 +1,20 @@
 'use client'
 
-import { useDeclarativeForm } from '@letar/forms-react'
+import {
+  type StepPersistenceConfig,
+  useDeclarativeForm,
+  useStepNavigation,
+  useStepPersistence,
+  useStepState,
+} from '@letar/forms-react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { cn } from '../utils/cn'
 import { FormStepsContext, type FormStepsContextValue } from './form-steps-context'
-import { useStepNavigation } from './use-step-navigation'
-import { type StepPersistenceConfig, useStepPersistence } from './use-step-persistence'
-import { useStepState } from './use-step-state'
 
 export type { StepPersistenceConfig }
+
+const SHADCN_STORAGE_PREFIX = 'form-steps-shadcn:'
 
 export interface FormStepsProps {
   children: ReactNode
@@ -55,14 +60,21 @@ export function FormStepsRoot({
 }: FormStepsProps) {
   const { form } = useDeclarativeForm()
 
-  const { getPersistedStep, clearPersistence } = useStepPersistence(0, stepPersistence)
+  // storagePrefix свой (`form-steps-shadcn:`, не `form-steps:`) — не путать с сохранённым
+  // прогрессом Chakra-скина той же формы; явный storagePrefix в props имеет приоритет.
+  const persistenceConfig = useMemo(
+    () => (stepPersistence ? { storagePrefix: SHADCN_STORAGE_PREFIX, ...stepPersistence } : undefined),
+    [stepPersistence],
+  )
+
+  const { getPersistedStep, clearPersistence } = useStepPersistence(0, persistenceConfig)
 
   const [internalStep, setInternalStep] = useState(() => getPersistedStep() ?? defaultStep)
   const currentStep = controlledStep ?? internalStep
 
   const { sortedSteps, stepCount, registerStep, unregisterStep, claimedIndicesRef } = useStepState()
 
-  useStepPersistence(currentStep, stepPersistence)
+  useStepPersistence(currentStep, persistenceConfig)
 
   const { direction, goToNext, goToPrev, goToStep, skipToEnd, triggerSubmit } = useStepNavigation({
     form,

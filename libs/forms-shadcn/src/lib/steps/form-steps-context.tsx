@@ -1,19 +1,9 @@
 'use client'
 
-import { createContext, type ReactNode, type RefObject, useContext } from 'react'
+import type { StepDirection, StepInfo } from '@letar/forms-react'
+import { createContext, type RefObject, useContext } from 'react'
 
-/** Информация об одном шаге. */
-export interface StepInfo {
-  index: number
-  title: string
-  description?: string
-  icon?: ReactNode
-  fieldNames: string[]
-  onEnter?: () => void
-  onLeave?: (direction: StepDirection) => Promise<boolean> | boolean
-}
-
-export type StepDirection = 'forward' | 'backward'
+export type { StepDirection, StepInfo }
 
 export interface FormStepsContextValue {
   currentStep: number
