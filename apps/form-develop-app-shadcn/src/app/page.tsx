@@ -7,16 +7,19 @@ import {
   FieldCheckbox,
   FieldCheckboxCard,
   FieldCity,
+  FieldColorPicker,
   FieldCombobox,
   FieldDate,
   FieldDateRange,
   FieldDateTimePicker,
   FieldCurrency,
   FieldDuration,
+  FieldEditable,
   FieldHidden,
   FieldListbox,
   FieldNativeSelect,
   FieldNumber,
+  FieldOTPInput,
   FieldPassword,
   FieldPercentage,
   FieldPhone,
@@ -92,6 +95,9 @@ interface DemoFormValues {
   plan: string
   addons: string[]
   cityDadata: string
+  bio2: string
+  brandColor: string
+  smsCode: string
 }
 
 const defaultValues: DemoFormValues = {
@@ -124,6 +130,9 @@ const defaultValues: DemoFormValues = {
   plan: '',
   addons: [],
   cityDadata: '',
+  bio2: 'Кликните для редактирования',
+  brandColor: '#4299E1',
+  smsCode: '',
 }
 
 export default function HomePage() {
@@ -131,7 +140,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Form Develop App (shadcn)</h1>
       <p className="text-muted-foreground mt-2 text-sm">
-        Песочница для разработки @letar/forms-shadcn — 29 полей, Фаза 7.3 Шаг 5+.
+        Песочница для разработки @letar/forms-shadcn — 32 поля, Фаза 7.3 Шаг 5+.
       </p>
 
       <DemoForm<DemoFormValues>
@@ -205,6 +214,16 @@ export default function HomePage() {
           ]}
         />
         <FieldCity name="cityDadata" label="Город (DaData)" provider={mockAddressProvider} minChars={1} />
+        <FieldEditable name="bio2" label="Кликабельный текст" />
+        <FieldColorPicker name="brandColor" label="Цвет бренда" />
+        <FieldOTPInput
+          name="smsCode"
+          label="SMS-код"
+          onResend={async () => {
+            // eslint-disable-next-line no-console
+            console.log('resend otp')
+          }}
+        />
 
         <button
           type="submit"
