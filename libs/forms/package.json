@@ -62,9 +62,11 @@
     "zod": ">=3.24.0"
   },
   "dependencies": {
-    "@letar/forms-core": "workspace:*",
-    "@letar/forms-react": "workspace:*",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.13.23"
+  },
+  "devDependencies": {
+    "@letar/forms-core": "workspace:*",
+    "@letar/forms-react": "workspace:*"
   }
 }
