@@ -1,9 +1,10 @@
 import type { DeepKeys, DeepValue, FieldApi, FormApi } from '@tanstack/react-form'
 
 /**
- * Generic field props for custom field components
+ * @deprecated Легаси-тип старого ChakraFormField-API. Для полей библиотеки используй
+ * `BaseFieldProps` из `@letar/forms` (реэкспорт реального типа из `@letar/forms-react`).
  */
-export interface BaseFieldProps {
+export interface LegacyFieldProps {
   /** Field label */
   label?: string
   /** Placeholder text */

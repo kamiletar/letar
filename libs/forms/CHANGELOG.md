@@ -4,6 +4,22 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.0.0] - 2026-08-10
+
+### Breaking
+
+- **`BaseFieldProps`, публично экспортируемый из `@letar/forms`, теперь другой тип.** Старый
+  легаси-тип (`src/lib/types.ts`, минимальный набор полей старого `ChakraFormField`-API:
+  `label?: string`, без `tooltip`/`asyncValidate`) переименован в `LegacyFieldProps`. Имя
+  `BaseFieldProps` освобождено под реальный тип, от которого фактически наследуются все
+  56 полей библиотеки (`label?: ReactNode`, `tooltip`, `asyncValidate` и т.д.) — он и раньше
+  использовался внутри (`StringFieldProps extends BaseFieldProps` и т.д.), но публично не
+  экспортировался под этим именем, из-за чего `BaseFieldProps` и реальные field-props типы были
+  структурно несовместимы (нельзя было присвоить `StringFieldProps` в `BaseFieldProps`).
+  Потребители, импортирующие `BaseFieldProps` напрямую из `@letar/forms` для типизации старого
+  `ChakraFormField`-API — используйте `LegacyFieldProps`. Проверено: ни одно приложение
+  монорепо не импортирует `BaseFieldProps` из `@letar/forms` напрямую.
+
 ## [1.6.0] - 2026-08-09
 
 ### Changed

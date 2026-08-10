@@ -37,7 +37,7 @@ export {
 } from './lib/form-group-list'
 
 // Types
-export type { BaseFieldProps, DeepKeys, DeepValue, FieldApi, FormApi } from './lib/types'
+export type { DeepKeys, DeepValue, FieldApi, FormApi, LegacyFieldProps } from './lib/types'
 
 // Declarative forms API
 export {
@@ -83,6 +83,7 @@ export {
 export type { FormSubscribeProps, FormUrlSyncOptions, FormUrlSyncProps } from './lib/declarative'
 
 export type {
+  BaseFieldProps,
   ComboboxFieldProps,
   ComboboxOption,
   DeclarativeFormContextValue,
