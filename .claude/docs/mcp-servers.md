@@ -4,25 +4,20 @@
 
 ## Доступные MCP серверы
 
-| MCP Сервер                   | Пакет                                               | Назначение                                                                                      |
-| ---------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| **nx-mcp**                   | `nx mcp`                                            | Операции с Nx воркспейсом, проекты, таргеты, документация                                       |
-| **next-devtools**            | `next-devtools-mcp`                                 | Документация Next.js 16, рантайм dev сервера, ошибки                                            |
-| **chakra-ui**                | `@chakra-ui/react-mcp`                              | Компоненты Chakra UI v3, props, примеры, темизация                                              |
-| **inkeepMcp**                | `mcp-remote` → `mcp.inkeep.com/zod`                 | Документация Zod v4, схемы валидации                                                            |
-| **context7**                 | `@upstash/context7-mcp`                             | Документация любых библиотек (React, TanStack, etc.)                                            |
-| **chrome-devtools**          | `chrome-devtools-mcp`                               | Браузерная автоматизация, скриншоты, консоль, сеть                                              |
-| **form-mcp**                 | `@letar/form-mcp` (local) / `@letar/form-mcp` (npm) | 40+ field-компонентов, паттерны форм, @form.\* директивы                                        |
-| **deploy-mcp**               | `@letar/deploy-mcp` (local)                         | Деплой через dashboard-agent (SSH-туннель): deploy_app, deploy_status, git_status, agent_health |
-| **sequential-thinking**      | `@modelcontextprotocol/server-sequential-thinking`  | Структурированное пошаговое рассуждение для сложных задач                                       |
-| **postgres-driving-school**  | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД driving-school (read-only)                                                     |
-| **postgres-kami**            | `@modelcontextprotocol/server-postgres`             | SQL запросы к dev-БД kami (read-only)                                                           |
-| **postgres-kami-prod**       | `@modelcontextprotocol/server-postgres`             | Прод-БД kami через SSH-туннель, read-only юзер                                                  |
-| **postgres-kami-prod-write** | `@modelcontextprotocol/server-postgres`             | Прод-БД kami, полный доступ — каждый вызов с permission prompt                                  |
-| **postgres-grandslamcup**    | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД grandslamcup (read-only)                                                       |
-| **postgres-studio**          | `@modelcontextprotocol/server-postgres`             | SQL запросы к dev-БД studio (read-only)                                                         |
-| **postgres-studio-prod**     | `@modelcontextprotocol/server-postgres`             | Прод-БД studio через SSH-туннель, read-only юзер                                                |
-| **prisma**                   | `@prisma/mcp`                                       | Работа через Prisma schema, генерация запросов                                                  |
+| MCP Сервер                  | Пакет                                               | Назначение                                                                                      |
+| --------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| **nx-mcp**                  | `nx mcp`                                            | Операции с Nx воркспейсом, проекты, таргеты, документация                                       |
+| **next-devtools**           | `next-devtools-mcp`                                 | Документация Next.js 16, рантайм dev сервера, ошибки                                            |
+| **chakra-ui**               | `@chakra-ui/react-mcp`                              | Компоненты Chakra UI v3, props, примеры, темизация                                              |
+| **context7**                | `@upstash/context7-mcp`                             | Документация любых библиотек (React, TanStack, etc.)                                            |
+| **form-mcp**                | `@letar/form-mcp` (local) / `@letar/form-mcp` (npm) | 40+ field-компонентов, паттерны форм, @form.\* директивы                                        |
+| **deploy-mcp**              | `@letar/deploy-mcp` (local)                         | Деплой через dashboard-agent (SSH-туннель): deploy_app, deploy_status, git_status, agent_health |
+| **postgres-driving-school** | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД driving-school (read-only)                                                     |
+| **postgres-kami**           | `@modelcontextprotocol/server-postgres`             | SQL запросы к dev-БД kami (read-only)                                                           |
+| **postgres-kami-prod**      | `@modelcontextprotocol/server-postgres`             | Прод-БД kami через SSH-туннель, read-only юзер                                                  |
+| **postgres-grandslamcup**   | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД grandslamcup (read-only)                                                       |
+| **postgres-studio**         | `@modelcontextprotocol/server-postgres`             | SQL запросы к dev-БД studio (read-only)                                                         |
+| **postgres-studio-prod**    | `@modelcontextprotocol/server-postgres`             | Прод-БД studio через SSH-туннель, read-only юзер                                                |
 
 ## Воркфлоу работы с Context7
 
@@ -143,12 +138,10 @@ mcp_nextjs_runtime({
 
 ### Получить документацию Zod v4
 
-```typescript
-// Используй inkeepMcp
-ask_question_about_zod_v4({
-  query: 'How to use z.object with optional fields?',
-})
-```
+Отдельный сервер под Zod (`inkeepMcp`) удалён 2026-08-10 за ненадобностью — документация Zod
+берётся через context7: сначала `resolve-library-id` с `libraryName: "zod"`, затем `query-docs`
+с полученным id. Инструменты пишутся с дефисами, поэтому в примере кода их не привожу —
+dprint форматирует такую строку как вычитание.
 
 ### Получить документацию Chakra UI компонента
 
@@ -188,56 +181,6 @@ query_docs({
 - Настроены в `.mcp.json` в корне проекта
 - Запускаются через `bunx` при старте Claude Code
 - Доступны после перезапуска CLI
-
----
-
-## Chrome DevTools MCP
-
-Браузерная автоматизация через Chrome DevTools Protocol. Позволяет управлять браузером, делать скриншоты, анализировать сеть и консоль.
-
-### Инструменты
-
-| Инструмент              | Описание                                   |
-| ----------------------- | ------------------------------------------ |
-| `take_screenshot`       | Сделать скриншот страницы                  |
-| `take_snapshot`         | Получить DOM snapshot (accessibility tree) |
-| `navigate_page`         | Перейти на URL                             |
-| `click`                 | Клик по элементу                           |
-| `fill`                  | Заполнить input                            |
-| `fill_form`             | Заполнить форму несколькими полями         |
-| `hover`                 | Навести курсор на элемент                  |
-| `press_key`             | Нажать клавишу                             |
-| `evaluate_script`       | Выполнить JavaScript в контексте страницы  |
-| `list_console_messages` | Получить сообщения консоли                 |
-| `list_network_requests` | Получить сетевые запросы                   |
-| `emulate`               | Эмуляция устройства (mobile, tablet)       |
-| `handle_dialog`         | Обработать alert/confirm/prompt            |
-
-### Когда использовать
-
-- **E2E тестирование** — проверка UI после изменений
-- **Отладка** — скриншоты проблемных состояний
-- **Анализ сети** — проверка API запросов
-- **Автоматизация** — заполнение форм, клики
-
-### Пример
-
-```typescript
-// Сделать скриншот страницы
-take_screenshot({ url: 'http://localhost:3000/login' })
-
-// Заполнить форму логина
-fill_form({
-  url: 'http://localhost:3000/login',
-  fields: [
-    { selector: 'input[name="email"]', value: 'test@example.com' },
-    { selector: 'input[name="password"]', value: 'password123' },
-  ],
-})
-
-// Проверить консоль на ошибки
-list_console_messages({ url: 'http://localhost:3000' })
-```
 
 ---
 
@@ -293,57 +236,6 @@ generate_form({
   ],
   formName: 'ProductForm',
 })
-```
-
----
-
-## Sequential Thinking MCP
-
-Структурированное пошаговое рассуждение для сложных задач. Помогает разбить проблему на шаги и отслеживать ход мысли.
-
-### Инструменты
-
-| Инструмент                | Описание                                 |
-| ------------------------- | ---------------------------------------- |
-| `create_thinking_session` | Начать новую сессию рассуждения          |
-| `add_thought`             | Добавить шаг рассуждения                 |
-| `revise_thought`          | Пересмотреть предыдущий шаг              |
-| `branch_thought`          | Создать альтернативную ветку рассуждения |
-| `get_thinking_summary`    | Получить резюме всех шагов               |
-
-### Когда использовать
-
-- **Архитектурные решения** — взвешивание альтернатив
-- **Отладка сложных багов** — пошаговый анализ
-- **Планирование фич** — разбиение на подзадачи
-- **Code review** — структурированный анализ
-
-### Пример
-
-```typescript
-// Начать анализ архитектуры
-create_thinking_session({
-  topic: 'Выбор стратегии кеширования для API',
-})
-
-// Добавить шаги рассуждения
-add_thought({
-  thought: 'Текущая проблема: API отвечает медленно при высокой нагрузке',
-  thought_type: 'observation',
-})
-
-add_thought({
-  thought: 'Вариант 1: Redis кеш — быстро, но требует инфраструктуры',
-  thought_type: 'hypothesis',
-})
-
-add_thought({
-  thought: 'Вариант 2: In-memory кеш — просто, но не масштабируется',
-  thought_type: 'hypothesis',
-})
-
-// Получить резюме
-get_thinking_summary()
 ```
 
 ---
@@ -476,19 +368,6 @@ mcp__postgres_kami__query({
 
 ---
 
-## Prisma MCP
-
-Работа с Prisma schema — генерация запросов, анализ моделей, помощь с миграциями.
-
-### Пример
-
-```typescript
-// Получить информацию о schema
-mcp__prisma__getDatabaseModels()
-```
-
----
-
 ## Конфигурация
 
 Все MCP серверы настроены в `.mcp.json`:
@@ -496,17 +375,29 @@ mcp__prisma__getDatabaseModels()
 ```json
 {
   "mcpServers": {
-    "nx-mcp": { "command": "bunx", "args": ["nx", "mcp"] },
-    "chakra-ui": { "command": "bunx", "args": ["@chakra-ui/react-mcp"] },
-    "sequential-thinking": {
-      "command": "bunx",
-      "args": ["@modelcontextprotocol/server-sequential-thinking"]
+    "nx-mcp": {
+      "command": "cmd",
+      "args": ["/c", "bunx", "nx-mcp@latest", "C:/web/letar", "--minimal", "false"]
+    },
+    "chakra-ui": { "command": "cmd", "args": ["/c", "bunx", "@chakra-ui/react-mcp"] },
+    "postgres-studio": {
+      "command": "node",
+      "args": [".claude/mcp/pg-wrapper.mjs", "apps/studio/.env.local", "--pro", "restricted"]
     }
   }
 }
 ```
 
 После изменения `.mcp.json` требуется перезапуск Claude Code.
+
+⚠️ **`--minimal false` у `nx-mcp` — не украшение.** По умолчанию флаг равен `true`, и сервер
+отдаёт только `nx_docs` и три `ci_*`; `nx_workspace`, `nx_project_details`, `nx_generators` при
+этом отсутствуют в списке инструментов, хотя инструкции их требуют.
+
+⚠️ **`.mcp.json` не версионируется** — он в `.gitignore`, потому что содержит API-ключ Context7
+открытым текстом. Из-за этого новый клон репозитория получает пустую конфигурацию MCP. Чинится
+подстановкой `${CONTEXT7_API_KEY}` (Claude Code её поддерживает) и коммитом файла — задача
+пока не сделана.
 
 ## Deploy MCP (@letar/deploy-mcp)
 
