@@ -1355,6 +1355,23 @@ React, а React-адаптер зависит от абстракций ядра
       и т.д.) у потребителя нет; `apps/form-develop-app-shadcn` временно обходится локальным
       `useForm()+DeclarativeFormContext`. Не блокирует 7.4/7.5 — нужен ближе к тому, как скин станет
       публичным npm-пакетом для внешних пользователей.
+- ✅ **Унаследованный lint-баг `@nx/enforce-module-boundaries` в `vitest.config.ts` починен
+  (2026-08-10, forms-dev).** Задача от координатора (тред `forms-phase7-3-shadcn`), баг был
+  общий для `forms`/`forms-react`/`forms-shadcn` — все три относительным путём импортировали
+  `buildFormsCoreAlias` из `libs/forms-core/testing/vitest-alias.ts`, лежавшего вне `src/` без
+  записи в `exports`. Функция перенесена в `libs/forms-core/src/lib/testing/index.ts`, новый
+  subpath-экспорт `@letar/forms-core/testing`. **Находка:** промежуточный реэкспорт-шим
+  (`index.ts` → `export from './vitest-alias'`) не сработал — `vitest.config.ts` резолвится
+  нативным Node-загрузчиком плагина `@nx/vitest` при построении графа проектов, а не
+  Vite-бандлером; тот не умеет extensionless относительные импорты внутри `.ts`-модуля,
+  полученного через bare-специфайер пакета (`Cannot find module '...vitest-alias'`), хотя
+  прямой относительный импорт в самом `vitest.config.ts` это же самое разрешает без проблем.
+  Фикс — вся реализация в одном файле `index.ts`, без внутреннего реэкспорта. Коммиты:
+  `8dc49f3c` (forms-core), `7cc9cb46` (forms-react), `015fb539` (forms-shadcn), `68705f4c`
+  (forms) — четыре отдельных, каждый по своему scope. Проверено: `nx lint`/`typecheck:tsgo`/
+  `test` зелёные на всех четырёх пакетах (65с суммарно на тестах); остальные 38
+  pre-existing проблем `nx lint forms` (`react-hooks/exhaustive-deps` и т.п.) — не в скоупе,
+  не трогала.
 - [ ] **7.4 Замер трафика** → решение: доносить сложные поля или нет.
 - [ ] **7.5 Docs-сайт на отдельном домене** + живые демо. SEO под `zod forms react`, `prisma form generator`.
 - [ ] **7.6 `llms.txt` + усиление MCP** — недоиспользованный козырь №1 (дёшево, уникально).
