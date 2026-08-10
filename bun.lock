@@ -861,7 +861,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "1.6.0",
+      "version": "2.0.0",
       "dependencies": {
         "@tanstack/react-table": "^8.21.3",
         "@tanstack/react-virtual": "^3.13.23",
@@ -896,6 +896,26 @@
         "@tanstack/react-form": "^1.0.0",
         "react": "^19.0.0",
         "zod": "^4.0.0",
+      },
+    },
+    "libs/forms-shadcn": {
+      "name": "@letar/forms-shadcn",
+      "version": "0.1.0",
+      "devDependencies": {
+        "@letar/forms-core": "workspace:*",
+        "@letar/forms-react": "workspace:*",
+      },
+      "peerDependencies": {
+        "@radix-ui/react-checkbox": ">=1.0.0",
+        "@radix-ui/react-label": ">=2.0.0",
+        "@radix-ui/react-select": ">=2.0.0",
+        "@tanstack/react-form": ">=1.0.0",
+        "class-variance-authority": ">=0.7.0",
+        "clsx": ">=2.0.0",
+        "lucide-react": ">=1.0.0",
+        "react": ">=18.0.0",
+        "tailwind-merge": ">=3.0.0",
+        "zod": ">=4.0.0",
       },
     },
     "libs/generators": {
@@ -2018,6 +2038,8 @@
     "@letar/forms-core": ["@letar/forms-core@workspace:libs/forms-core"],
 
     "@letar/forms-react": ["@letar/forms-react@workspace:libs/forms-react"],
+
+    "@letar/forms-shadcn": ["@letar/forms-shadcn@workspace:libs/forms-shadcn"],
 
     "@letar/generators": ["@letar/generators@workspace:libs/generators"],
 

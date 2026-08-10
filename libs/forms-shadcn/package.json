@@ -1,0 +1,33 @@
+{
+  "name": "@letar/forms-shadcn",
+  "version": "0.1.0",
+  "description": "shadcn/ui-скин @letar/forms — реализация UIKit-контракта на Radix + cva + tailwind-merge",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "@letar/source": "./src/index.ts",
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "@radix-ui/react-checkbox": ">=1.0.0",
+    "@radix-ui/react-label": ">=2.0.0",
+    "@radix-ui/react-select": ">=2.0.0",
+    "@tanstack/react-form": ">=1.0.0",
+    "class-variance-authority": ">=0.7.0",
+    "clsx": ">=2.0.0",
+    "lucide-react": ">=1.0.0",
+    "react": ">=18.0.0",
+    "tailwind-merge": ">=3.0.0",
+    "zod": ">=4.0.0"
+  },
+  "devDependencies": {
+    "@letar/forms-core": "workspace:*",
+    "@letar/forms-react": "workspace:*"
+  }
+}

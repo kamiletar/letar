@@ -1194,13 +1194,38 @@ React, а React-адаптер зависит от абстракций ядра
       - **Демо-площадка есть:** `apps/form-docs` уже на Tailwind 4 (`@import 'tailwindcss'` в
       `globals.css`, Fumadocs). `form-develop-app` и `form-example` — на Chakra, туда shadcn-демо
       не поставить без отдельной настройки.
-      - **С чего начинать следующей сессии:** `nx g @letar/generators:new-lib forms-shadcn` →
-      каркас под React (jsx/jsdom/`@vitejs/plugin-react`, `paths` на `forms-core` + `forms-react`,
-      см. как это сделано в `libs/forms-react`) → `shadcnUIKit` как реализация
-      `FieldPrimitivesUIKit` (достаточно 4 примитивов: `FieldRoot`/`FieldLabel`/`FieldError`/
-      `ErrorFallback`) → `createFieldPrimitives(shadcnUIKit)` → поля. Главная проверка
-      архитектуры: если контракт спроектирован верно, ни `forms-core`, ни `forms-react` править
-      не придётся — любая такая правка это находка, её фиксировать и сообщать координатору.
+      - ✅ **Каркас + первые 3 поля готовы (2026-08-10).** `libs/forms-shadcn` создан
+      (`nx g @letar/generators:new-lib forms-shadcn --react`), `paths` на все 15 подпутей
+      `forms-core` + `forms-react` в `tsconfig.lib.json`, `resolve.alias` в `vitest.config.ts`
+      (та же `buildFormsCoreAlias`, что у `forms-react`, + вручную добавленный алиас на
+      `forms-react`), тег `type:ui` (депендс-констрейнты те же, что у `@letar/forms`).
+      - **`shadcnUIKit`** (`src/lib/uikit/uikit-shadcn.tsx`) реализует `UIKitCorePrimitives`
+      целиком (`FieldRoot`/`FieldLabel`/`FieldError`/`Input`/`Checkbox`/`Select`) + `ErrorFallback`
+      из extended — минимум, нужный `createFieldPrimitives` и трём полям. Прямые Radix-примитивы
+      (`@radix-ui/react-checkbox`, `-label`, `-select`) + `cva`-стиль классов Tailwind (без cva
+      как runtime-зависимости пока не понадобились варианты — только statiс-классы + `cn()`).
+      - **Главная проверка архитектуры подтверждена: ни `forms-core`, ни `forms-react` не
+      потребовалось менять.** `FieldString`/`FieldCheckbox`/`FieldSelect` — прямые аналоги
+      Chakra-версий, тот же `createField`/`resolved`/`componentProps` API, только другой UIKit.
+      - **Тесты:** 6 тестов (RTL + jsdom) на 3 поля через собственный `TestForm` (минимальный
+      `useForm()` + `DeclarativeFormContext.Provider`, без полного `createForm()` — тот живёт в
+      UI-скинах). Негативный контроль пройден (`type="rainbow"` → `TS2322` под `@ts-expect-error`).
+      `Select`-тест не открывает выпадающий список (Radix `hasPointerCapture` не эмулируется в
+      jsdom без мока) — проверяет только триггер/label.
+      - ⚠️ **Известный пре-существующий лint-баг унаследован, не мой регресс:** `vitest.config.ts`
+      падает на `@nx/enforce-module-boundaries` из-за относительного импорта
+      `../forms-core/testing/vitest-alias` — та же ошибка уже есть у `forms-react` (не чинила,
+      не в скоупе Шага 5).
+      - ⚠️ **Живая браузерная проверка отложена до дев-харнесса.** `form-docs` технически на
+      Tailwind 4, но там же живёт `ChakraProvider` для остальных демо — класть туда shadcn-демо
+      сейчас означало бы ровно тот конфликт стилей, ради которого Ками решил не расширять
+      `form-develop-app` (см. решение выше). Type-check + RTL-тесты — единственная проверка на
+      этом шаге; визуальная — когда появится `form-develop-app-shadcn`.
+      - **Известные упрощения beta** (см. `libs/forms-shadcn/README.md`): tooltip у `FieldLabel` —
+      нативный `title`, не полноценный Radix Tooltip; нет группировки опций в `Select`.
+      - **Дальше:** остальные ~12-17 ходовых полей (Textarea/Number/RadioGroup/Date и т.д.) —
+      каждое почти бесплатно на готовом контракте; либо дев-харнесс для визуальной проверки —
+      порядок на усмотрение forms-dev, ничего не блокирует.
 - [ ] **7.4 Замер трафика** → решение: доносить сложные поля или нет.
 - [ ] **7.5 Docs-сайт на отдельном домене** + живые демо. SEO под `zod forms react`, `prisma form generator`.
 - [ ] **7.6 `llms.txt` + усиление MCP** — недоиспользованный козырь №1 (дёшево, уникально).
