@@ -40,6 +40,10 @@ export { FieldSwitch } from './lib/fields/field-switch'
 export { FieldTags } from './lib/fields/field-tags'
 export { FieldTextarea } from './lib/fields/field-textarea'
 
+// Form.Field.TableEditor — не createField()-поле, компонует form.Field(mode="array") напрямую
+export { FieldTableEditor } from './lib/table'
+export type { TableEditorContextValue, TableEditorFieldProps } from './lib/table'
+
 // Form.Steps — compound-компонент форм-уровня (beta), не createField()-поле
 export type {
   AddressFieldProps,

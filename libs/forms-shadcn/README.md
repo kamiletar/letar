@@ -73,9 +73,10 @@ import {
 } from '@letar/forms-shadcn'
 ```
 
-## Поля (beta — 34 из 56, продолжаем к паритету с `@letar/forms`)
+## Поля (beta — 35 из 56, продолжаем к паритету с `@letar/forms`)
 
-Плюс `FormSteps` — мультистеп compound-компонент форм-уровня, не Field (см. раздел ниже).
+Плюс `FormSteps` и `FieldTableEditor` — compound-компоненты форм-уровня, не `createField()`-поля
+(см. разделы ниже).
 
 | Поле                  | Radix-примитив                                |
 | --------------------- | --------------------------------------------- |
@@ -113,6 +114,7 @@ import {
 | `FieldColorPicker`    | нативный `<input type="color">` (beta)        |
 | `FieldSignature`      | `<canvas>` + typed mode (без Radix)           |
 | `FieldFileUpload`     | нативный `<input type="file">` (без Radix)    |
+| `FieldTableEditor`    | native `<table>` (без Radix, compound)        |
 
 `FieldCombobox` — упрощённая beta-версия: только статичные `options`, фильтрация по вхождению
 подстроки в `label`. Без `useQuery` (async-поиск) и группировки — Chakra-версия их поддерживает,
@@ -143,8 +145,8 @@ Radix), логика геометрии штрихов/SVG-сборки порт
 `FileUpload.ItemPreviewImage`. Security-проверка (`processFileWithSecurity`) — общая
 framework-free утилита с Chakra-версией, без изменений.
 
-Остальные ходовые поля (RichText, Table и т.д.) — по мере миграции, каждое почти бесплатно
-благодаря готовому `UIKit`-контракту.
+Остальные ходовые поля (RichText и т.д.) — по мере миграции, каждое почти бесплатно благодаря
+готовому `UIKit`-контракту.
 
 ## `FormSteps` — мультистеп (beta, не Field)
 
@@ -174,6 +176,52 @@ Chakra-версии без изменений — framework-free логика. U
 в Chakra-версии это `hiddenFields`), без пропа `segment` (авто-обёртка `Form.Group` — модуля
 `FormGroupDeclarative` в `@letar/forms-react` ещё нет) и без анимаций перехода между шагами
 (`framer-motion` не добавлен как peer-зависимость — не оправдана для первого прохода).
+
+## `FieldTableEditor` — инлайн-таблица (beta, не `createField()`-поле)
+
+```tsx
+import { FieldTableEditor } from '@letar/forms-shadcn'
+
+<FieldTableEditor
+  name="items"
+  label="Позиции заказа"
+  sortable
+  selectable
+  columns={[
+    { name: 'product', label: 'Товар', width: '50%' },
+    { name: 'qty', label: 'Кол-во', width: '15%', align: 'right' },
+    { name: 'price', label: 'Цена', width: '15%', align: 'right' },
+    {
+      name: 'total',
+      label: 'Итого',
+      computed: (row) => (Number(row.qty) || 0) * (Number(row.price) || 0),
+      format: (v) => `${Number(v).toLocaleString('ru-RU')} ₽`,
+    },
+  ]}
+  addLabel="Добавить позицию"
+  footer={[{ column: 'total', aggregate: 'sum', label: 'Итого:' }]}
+/>
+```
+
+`FieldTableEditor` — не `createField()`-поле, а compound-компонент, компонующий
+`form.Field(mode="array")` напрямую (та же категория, что `Form.Field.TableEditor` у
+Chakra-версии). Инлайн-редактируемая таблица для array-полей: каждая ячейка — отдельный
+`form.Field`, per-cell Zod-валидация автоматическая. Портирована из `@letar/forms` без изменений
+в логике — `use-table-columns`/`use-table-navigation` и утилиты `@letar/forms-core/table`/
+`@letar/forms-core/schema` framework-free, общие с Chakra-скином; отличается только разметка
+(native `<table>` + Tailwind вместо Chakra `Table.Root`).
+
+Поддерживает: авто-колонки из Zod schema (или кастомные `columns` с `computed`/`format`),
+footer-агрегаты (`sum`/`avg`/`count`/`min`/`max`), copy-paste из Excel/Sheets (TSV через
+`onPaste`), keyboard-навигацию (Tab/Shift+Tab/Enter/Escape/стрелки между ячейками),
+чекбокс-выбор строк с bulk-delete, мобильный вид карточками (ниже брейкпоинта `md`),
+`minRows`/`maxRows` (override `.min()`/`.max()` схемы).
+
+**Beta-упрощение:** `sortable` — нативный HTML5 drag&drop (`draggable` на `<tr>` +
+`onDragStart`/`onDragOver`/`onDrop`), не `@dnd-kit/sortable` — тот же принцип, что у `FormSteps`
+без `framer-motion`: не тянуть новый peer-зависимость ради одной фичи в первом проходе.
+Функционально эквивалентно (перетаскивание строк работает и вызывает `moveRow`), но без
+keyboard-DnD и анимации перестроения списка при перетаскивании.
 
 ## `shadcnUIKit`
 

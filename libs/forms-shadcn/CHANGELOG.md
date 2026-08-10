@@ -4,6 +4,25 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.17.0] - 2026-08-10
+
+### Added
+
+- **`FieldTableEditor`** — четвёртое из приоритетного списка координатора (Signature ✅ →
+  FileUpload ✅ → Steps ✅ → **Table** ✅ → RichText, тред `forms-phase7-3-shadcn`). Инлайн-
+  редактируемая таблица для array-полей, портирована из `@letar/forms` (Chakra-скин): та же
+  логика (`use-table-columns`, `use-table-navigation`, `@letar/forms-core/table` и
+  `@letar/forms-core/schema` утилиты, все без изменений), другая разметка (native `<table>` +
+  Tailwind вместо Chakra `Table.Root`). Поддерживает авто-колонки из schema, кастомные колонки
+  с `computed`/`format`, footer-агрегаты (sum/avg/count/min/max), copy-paste из Excel/Sheets
+  (TSV), keyboard-навигацию (Tab/Enter/Escape/стрелки), чекбокс-выбор строк с bulk-delete,
+  мобильный вид карточками (ниже `md`), `minRows`/`maxRows`.
+  - **Beta-упрощение:** `sortable` — нативный HTML5 drag&drop (`draggable` +
+    `onDragStart`/`onDragOver`/`onDrop`), не `@dnd-kit` — тот же принцип, что у `FormSteps` без
+    `framer-motion`: не тянуть новый peer ради одной фичи в первом проходе. Функционально
+    эквивалентно (перетаскивание строк работает), но без keyboard-DnD и анимации перестроения,
+    которые даёт `@dnd-kit/sortable`.
+
 ## [0.16.1] - 2026-08-10
 
 ### Changed
