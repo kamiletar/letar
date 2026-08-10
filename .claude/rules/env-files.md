@@ -90,13 +90,9 @@ SSH до перехода на SOPS. Сейчас доставку делает 
 ## ⚠️ `NODE_ENV === 'production'` — та же ловушка бьёт не только секреты
 
 Правило выше про `ALLOW_DEV_SESSION` — частный случай общего класса ошибки: **`NODE_ENV`
-всегда `production` в собранном `next build`/`next start`**, в том числе на staging.
-Любая проверка вида `x: process.env.NODE_ENV === 'production'` не отличает staging от прода.
-
-Найдено второй раз (2026-07-28, `aboi`): `meta robots` в `generateMetadata()` был завязан
-на `NODE_ENV === 'production'`, из-за чего на staging (`aboi.letar.best`) meta-тег разрешал
-`index, follow`, а `robots.ts` в том же приложении честно проверял `BASE_URL` и отдавал
-`Disallow: /` — два файла противоречили друг другу на одном домене.
+всегда `production` в собранном `next build`/`next start`**, в том числе на staging и на
+локальной сборке разработчика. Любая проверка вида `x: process.env.NODE_ENV === 'production'`
+их не различает.
 
 **Правило:** для любого решения, зависящего от «это прод или нет» (индексация, дев-бэкдоры,
 debug-панели, verbose-логи), проверять **явный домен/URL** (`BASE_URL`/`NEXT_PUBLIC_BASE_URL`
@@ -104,13 +100,6 @@ debug-панели, verbose-логи), проверять **явный доме�
 проверка (как `IS_PRODUCTION_DOMAIN` в `robots.ts`) — выносить её в общую константу и
 переиспользовать во всех местах, а не писать вторую похожую проверку рядом.
 
-Третий случай (2026-08-05, `kami`) — тот же корень, другое следствие: не расхождение
-prod/staging, а расхождение **локальная сборка vs рантайм**. `keystatic.config.ts` и
-`src/lib/keystatic.ts` переключают `storage`/`reader` на GitHub через `isProd = NODE_ENV ===
-'production'`. Поскольку `next build` выставляет `NODE_ENV=production` и при обычном локальном
-запуске, GitHub-ветка конфига включается уже на `nx build kami` на машине разработчика — без
-`KEYSTATIC_GITHUB_CLIENT_ID`/`_SECRET`, `KEYSTATIC_SECRET` и `GITHUB_PAT` в `.env.local` сборка
-падает на `Failed to collect page data`, хотя разработчик не собирался трогать прод-хранилище.
-Деталь сессии — `apps/kami/PLAN_COMPLETED.md`. Урок тот же: `NODE_ENV` не говорит, где на самом
-деле выполняется код — ни staging от прода не отличает, ни прод-сборку разработчика от
-прод-сервера.
+Найдено трижды с разными следствиями (открытый бэкдор, противоречивая индексация, падающая
+локальная сборка) — разбор каждого случая:
+[node-env-not-production-signal.md](/.claude/docs/node-env-not-production-signal.md).
