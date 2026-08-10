@@ -5,6 +5,7 @@ import {
   FieldAddress,
   FieldAutocomplete,
   FieldCheckbox,
+  FieldCheckboxCard,
   FieldCombobox,
   FieldDate,
   FieldDateRange,
@@ -19,6 +20,7 @@ import {
   FieldPercentage,
   FieldPhone,
   FieldPinInput,
+  FieldRadioCard,
   FieldRadioGroup,
   FieldRating,
   FieldSegmentGroup,
@@ -86,6 +88,8 @@ interface DemoFormValues {
   discount: number
   city: string
   features: string[]
+  plan: string
+  addons: string[]
 }
 
 const defaultValues: DemoFormValues = {
@@ -115,6 +119,8 @@ const defaultValues: DemoFormValues = {
   discount: 15,
   city: '',
   features: [],
+  plan: '',
+  addons: [],
 }
 
 export default function HomePage() {
@@ -122,7 +128,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Form Develop App (shadcn)</h1>
       <p className="text-muted-foreground mt-2 text-sm">
-        Песочница для разработки @letar/forms-shadcn — 26 полей, Фаза 7.3 Шаг 5+.
+        Песочница для разработки @letar/forms-shadcn — 28 полей, Фаза 7.3 Шаг 5+.
       </p>
 
       <DemoForm<DemoFormValues>
@@ -177,6 +183,22 @@ export default function HomePage() {
             { label: 'TypeScript', value: 'ts', group: 'Frontend' },
             { label: 'React', value: 'react', group: 'Frontend' },
             { label: 'Python', value: 'py', group: 'Backend' },
+          ]}
+        />
+        <FieldRadioCard
+          name="plan"
+          label="Тариф"
+          options={[
+            { label: 'Free', value: 'free', description: 'Базовые функции' },
+            { label: 'Pro', value: 'pro', description: 'Все функции' },
+          ]}
+        />
+        <FieldCheckboxCard
+          name="addons"
+          label="Дополнения"
+          options={[
+            { label: 'SSL', value: 'ssl', description: 'HTTPS-сертификат' },
+            { label: 'Backup', value: 'backup', description: 'Автобэкапы' },
           ]}
         />
 
