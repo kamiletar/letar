@@ -1,6 +1,7 @@
 'use client'
 
 import { Box, Field, Input, List, Spinner, Text } from '@chakra-ui/react'
+import { useStore } from '@tanstack/react-form'
 import { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDeclarativeFormOptional } from '../../form-context'
 import type { AddressFieldProps, AddressValue } from '../../types'
@@ -73,7 +74,7 @@ interface AddressFieldState {
 export const FieldAddress = createField<AddressFieldProps, AddressValue | string, AddressFieldState>({
   displayName: 'FieldAddress',
 
-  useFieldState: (props) => {
+  useFieldState: (props, _resolved, { form, fullPath }) => {
     const { provider: propProvider, token, minChars = 3, debounceMs = 300, locations } = props
     const provider = useAddressProvider(propProvider, token)
 
@@ -89,6 +90,22 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
     const justSelectedRef = useRef(false)
 
     const debouncedQuery = useDebounce(inputValue, debounceMs)
+
+    // Инициализация `inputValue` из значения поля (сценарий `defaultValues` при редактировании).
+    // Хук вызывается здесь, на верхнем уровне `FieldComponent`, а не внутри render-prop
+    // `<form.Field>` — синхронный `setInputValue()` там обновлял бы состояние `FieldAddress` во
+    // время рендера чужого компонента (React: «Cannot update a component while rendering a
+    // different component»). `useStore` даёт живое значение поля до монтирования `<form.Field>`.
+    const fieldValue = useStore(form.store, () => form.getFieldValue(fullPath)) as AddressValue | string | undefined
+    useEffect(() => {
+      if (!initializedRef.current && fieldValue) {
+        const displayValue = typeof fieldValue === 'string' ? fieldValue : fieldValue.value
+        if (displayValue && displayValue !== inputValue) {
+          setInputValue(displayValue)
+        }
+        initializedRef.current = true
+      }
+    }, [fieldValue])
 
     // Отмена in-flight запросов при unmount
     useEffect(() => {
@@ -199,20 +216,8 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
       highlightedIndex,
       setHighlightedIndex,
       containerRef,
-      initializedRef,
       justSelectedRef,
     } = fieldState
-
-    const fieldValue = field.state.value as AddressValue | string | undefined
-
-    // Initialize input value from field (only on first render)
-    if (!initializedRef.current && fieldValue) {
-      const displayValue = typeof fieldValue === 'string' ? fieldValue : fieldValue.value
-      if (displayValue && displayValue !== inputValue) {
-        setInputValue(displayValue)
-      }
-      initializedRef.current = true
-    }
 
     // Handler for suggestion selection
     const handleSelect = (suggestion: AddressSuggestion) => {

@@ -4,6 +4,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.0.1] - 2026-08-10
+
+### Fixed
+
+- **`FieldAddress`/`FieldCity`: убран React-warning «Cannot update a component while rendering a
+  different component» на непустых `defaultValues`.** Тот же баг, что был найден и исправлен в
+  `@letar/forms-shadcn` 0.13.2 (симметричный код в Chakra-версии, не унаследован, обнаружен
+  отдельно) — синхронный `setInputValue()` в теле `render()` переехал в `useEffect` на верхнем
+  уровне `useFieldState`, куда теперь прокидывается `form`/`fullPath` через новый параметр
+  `@letar/forms-react`'s `useFieldState` (CHANGELOG `@letar/forms-react` 0.2.0). Поведение полей
+  не изменилось.
+
 ## [2.0.0] - 2026-08-10
 
 ### Breaking

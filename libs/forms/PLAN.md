@@ -1541,6 +1541,42 @@ React, а React-адаптер зависит от абстракций ядра
     подтверждён фолбэк на `suggestion.value`): ввод → debounce → подсказки → выбор → значение
     обновилось.
   - CHANGELOG/версия (`0.11.0` → `0.12.0`), README — обновлены.
+- ✅ **Фикс находки выше (2026-08-10, forms-dev, задача от Ками, не из очереди `QuietRidge`):
+  render-time `setState` в `FieldAddress`/`FieldCity` (обе версии — Chakra и shadcn) убран
+  архитектурно, не патчем.** Симптом: React-warning «Cannot update a component while rendering a
+  different component» на непустых `defaultValues` — `setInputValue()` вызывался синхронно в
+  теле `render()`, которое исполняется внутри рендера `<form.Field>` (чужого компонента).
+  - **Рассмотренные варианты и почему выбран не самый очевидный:**
+    1. `useEffect` прямо внутри `render()` — технически исполняется в контексте `<form.Field>`
+       (хук регистрируется по месту вызова), но нарушает Rules of Hooks: `<form.Field>` вызывает
+       `children()` не на верхнем уровне своего рендера, а изнутри `useStore`/`useSyncExternalStore`
+       — React ругается «Do not call Hooks inside useEffect(...), useMemo(...), or other built-in
+       Hooks». Проверено эмпирически (полный тестовый прогон), отклонено.
+    2. **Выбрано:** `CreateFieldOptions.useFieldState` теперь получает третий параметр —
+       `FieldStateContext { form, fullPath }` — доступный уже на верхнем уровне `FieldComponent`,
+       до монтирования `<form.Field>` (`libs/forms-react/src/lib/field/create-field-primitives.tsx`).
+       `FieldAddress`/`FieldCity` читают живое значение поля через `useStore(form.store, () =>
+       form.getFieldValue(fullPath))` (реэкспорт `@tanstack/react-store` из `@tanstack/react-form`)
+       и синхронизируют `inputValue` в обычном `useEffect` внутри `useFieldState` — легальный
+       хук на верхнем уровне компонента.
+  - **Совместимость:** параметр добавлен третьим и опциональным по использованию — все ~30
+    остальных полей `forms-shadcn`/`@letar/forms`, чей `useFieldState` объявлен с 2 параметрами,
+    не меняются (TS допускает функцию с меньшим числом параметров там, где ожидается большее).
+    `render()` обоих полей больше не читает `field.state.value` для инициализации — убрана
+    мёртвая переменная и связанный `initializedRef`-паттерн в render-scope.
+  - **Проверки:** `nx test forms,forms-react,forms-shadcn` — 0 предупреждений «Cannot update»/
+    «Do not call Hooks» в полном прогоне (промежуточный вариант 1 выше давал предупреждение на
+    каждый рендер обоих полей во всех их тестах — легко воспроизводимый негативный контроль),
+    все тесты зелёные без изменения ассертов (тест
+    «стирание текста сразу очищает значение поля» с непустым `defaultValues` — тот же, только
+    warning больше не всплывает). `typecheck:tsgo`/`lint` зелёные на `forms`, `forms-react`,
+    `forms-shadcn` (в `forms` есть 23 не связанных с этой правкой lint-ошибки — унаследованный
+    долг, отдельная задача от `QuietRidge`, не мои файлы). Живая проверка в Chromium —
+    `form-develop-app-shadcn`, City/Address с непустым `defaultValues`.
+  - Не понадобилось трогать Chakra-версии сверх `field-address.tsx`/`field-city.tsx` — у них тот
+    же баг был независимо (не унаследован от shadcn, симметричный паттерн), фикс идентичен через
+    тот же новый `FieldStateContext`.
+  - CHANGELOG/версия обоих пакетов — обновлены (см. ниже).
 - ✅ **`FieldOTPInput`, `FieldEditable`, `FieldColorPicker` добавлены — 30-е/31-е/32-е поля
   (2026-08-10, forms-dev), одним заходом.** Три поля, у каждого свой уровень переиспользования
   готового.

@@ -1,6 +1,7 @@
 'use client'
 
 import { Box, Field, Input, List, Spinner, Text } from '@chakra-ui/react'
+import { useStore } from '@tanstack/react-form'
 import { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 import { useDeclarativeFormOptional } from '../../form-context'
 import type { CityFieldProps } from '../../types'
@@ -77,7 +78,7 @@ interface CityFieldState {
 export const FieldCity = createField<CityFieldProps, string, CityFieldState>({
   displayName: 'FieldCity',
 
-  useFieldState: (props) => {
+  useFieldState: (props, _resolved, { form, fullPath }) => {
     const { provider: propProvider, token, minChars = 2, debounceMs = 300 } = props
     const provider = useCityProvider(propProvider, token)
 
@@ -92,6 +93,19 @@ export const FieldCity = createField<CityFieldProps, string, CityFieldState>({
     const justSelectedRef = useRef(false)
     // Flag: inputValue already initialized from field value
     const initializedRef = useRef(false)
+
+    // Инициализация `inputValue` из значения поля (сценарий `defaultValues` при редактировании) —
+    // на верхнем уровне `FieldComponent`, а не в render-prop `<form.Field>`: синхронный
+    // `setInputValue()` там обновлял бы состояние `FieldCity` во время рендера чужого компонента
+    // (React: «Cannot update a component while rendering a different component»). `useStore` даёт
+    // живое значение поля до монтирования `<form.Field>`.
+    const fieldValue = useStore(form.store, () => form.getFieldValue(fullPath)) as string | undefined
+    useEffect(() => {
+      if (!initializedRef.current && fieldValue && fieldValue !== inputValue) {
+        initializedRef.current = true
+        setInputValue(fieldValue)
+      }
+    }, [fieldValue])
 
     // Fetch city suggestions from provider
     const fetchSuggestions = useCallback(
@@ -177,17 +191,9 @@ export const FieldCity = createField<CityFieldProps, string, CityFieldState>({
       setHighlightedIndex,
       containerRef,
     } = fieldState
-    const { justSelectedRef, initializedRef } = fieldState as CityFieldState & {
+    const { justSelectedRef } = fieldState as CityFieldState & {
       justSelectedRef: React.RefObject<boolean>
       initializedRef: React.RefObject<boolean>
-    }
-
-    const fieldValue = field.state.value as string | undefined
-
-    // Initialize input value from field (once, without useEffect)
-    if (!initializedRef.current && fieldValue && fieldValue !== inputValue) {
-      initializedRef.current = true
-      setInputValue(fieldValue)
     }
 
     // Handler for city selection
