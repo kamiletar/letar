@@ -10,16 +10,19 @@ export { FieldAutocomplete } from './lib/fields/field-autocomplete'
 export { FieldCheckbox } from './lib/fields/field-checkbox'
 export { FieldCheckboxCard } from './lib/fields/field-checkbox-card'
 export { FieldCity } from './lib/fields/field-city'
+export { FieldColorPicker } from './lib/fields/field-color-picker'
 export { FieldCombobox } from './lib/fields/field-combobox'
 export { FieldCurrency } from './lib/fields/field-currency'
 export { FieldDate } from './lib/fields/field-date'
 export { FieldDateRange } from './lib/fields/field-date-range'
 export { FieldDateTimePicker } from './lib/fields/field-datetime-picker'
 export { FieldDuration } from './lib/fields/field-duration'
+export { FieldEditable } from './lib/fields/field-editable'
 export { FieldHidden, type HiddenFieldProps } from './lib/fields/field-hidden'
 export { FieldListbox } from './lib/fields/field-listbox'
 export { FieldNativeSelect } from './lib/fields/field-native-select'
 export { FieldNumber } from './lib/fields/field-number'
+export { FieldOTPInput } from './lib/fields/field-otp-input'
 export { FieldPassword } from './lib/fields/field-password'
 export { FieldPercentage } from './lib/fields/field-percentage'
 export { FieldPhone } from './lib/fields/field-phone'
@@ -41,6 +44,7 @@ export type {
   CheckboxCardFieldProps,
   CheckboxFieldProps,
   CityFieldProps,
+  ColorPickerFieldProps,
   ComboboxFieldProps,
   CurrencyFieldProps,
   DateFieldProps,
@@ -49,10 +53,12 @@ export type {
   DateRangeValue,
   DateTimePickerFieldProps,
   DurationFieldProps,
+  EditableFieldProps,
   ListboxFieldProps,
   ListboxOption,
   NativeSelectFieldProps,
   NumberFieldProps,
+  OTPInputFieldProps,
   PasswordFieldProps,
   PercentageFieldProps,
   PhoneCountry,

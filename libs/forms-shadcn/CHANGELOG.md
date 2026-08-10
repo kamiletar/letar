@@ -4,6 +4,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.13.0] - 2026-08-10
+
+### Added
+
+- `FieldOTPInput` — 30-е поле. Переиспользует `shadcnUIKit.PinInput` (тот же примитив, что
+  `FieldPinInput`) + таймер повторной отправки. Beta: только числовой ввод
+  (`type="alphanumeric"` из Chakra-версии не поддержан).
+- `FieldEditable` — 31-е поле. Клик по превью переключает в режим редактирования. Beta: без
+  `showControls` (Edit/Cancel/Submit-кнопок), только режимы активации `click`/`none`.
+- `FieldColorPicker` — 32-е поле. Нативный `<input type="color">` + hex-инпут + свотчи, вместо
+  полного Ark UI `ColorPicker.Root` с областью насыщенности и hue/alpha-слайдерами.
+
 ## [0.12.0] - 2026-08-10
 
 ### Added

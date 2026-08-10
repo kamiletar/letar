@@ -348,3 +348,52 @@ export interface CheckboxCardFieldProps extends Omit<BaseFieldProps, 'placeholde
   /** Ориентация (по умолчанию 'horizontal') */
   orientation?: 'horizontal' | 'vertical'
 }
+
+/**
+ * Props for Form.Field.OTPInput (shadcn-скин).
+ *
+ * Beta: только числовой ввод — `type="alphanumeric"` из Chakra-версии не поддержан
+ * (`inputMode="numeric"` зашит в `shadcnUIKit.PinInput`).
+ */
+export interface OTPInputFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
+  /** Число ячеек (по умолчанию 6) */
+  length?: number
+  /** Автосабмит формы при заполнении всех ячеек (по умолчанию false) */
+  autoSubmit?: boolean
+  /** Маскировать ввод как пароль */
+  mask?: boolean
+  /** Таймаут повторной отправки в секундах (по умолчанию 60) */
+  resendTimeout?: number
+  /** Колбэк повторной отправки кода — показывает кнопку/таймер, если задан */
+  onResend?: () => Promise<void>
+}
+
+/**
+ * Props for Form.Field.Editable (shadcn-скин).
+ *
+ * Beta: нет `showControls` (набор Edit/Cancel/Submit-кнопок из Chakra) и режимов активации
+ * `dblclick`/`focus` — только `click` (по умолчанию) и `none`.
+ */
+export interface EditableFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
+  /** Плейсхолдер, когда пусто */
+  placeholder?: string
+  /** Многострочное редактирование через textarea (по умолчанию false) */
+  multiline?: boolean
+  /** Режим активации: клик (по умолчанию) или без активации (превью всегда в режиме ввода) */
+  activationMode?: 'click' | 'none'
+  /** Сохранять при потере фокуса (по умолчанию true) */
+  submitOnBlur?: boolean
+}
+
+/**
+ * Props for Form.Field.ColorPicker (shadcn-скин).
+ *
+ * Beta: нативный `<input type="color">` вместо полного Ark UI `ColorPicker.Root` с областью
+ * насыщенности/яркости и hue/alpha-слайдерами.
+ */
+export interface ColorPickerFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
+  /** Палитра быстрого выбора */
+  swatches?: string[]
+  /** Показывать hex-инпут (по умолчанию true) */
+  showInput?: boolean
+}
