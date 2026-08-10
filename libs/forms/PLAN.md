@@ -1575,6 +1575,25 @@ React, а React-адаптер зависит от абстракций ядра
     именно поле `smsCode` (не спутано с соседним `FieldPinInput` на той же странице — оба рядом
     используют один `data-slot="pin-input"`).
   - CHANGELOG/версия (`0.12.0` → `0.13.0`), README — обновлены.
+- ✅ **Дедупликация кода после 15 новых полей — рефакторинг без изменения поведения (2026-08-10,
+  forms-dev).** По итогам серии заходов (17→32 поля) накопились три идентичные копии:
+  - `useAddressProvider` (`field-address.tsx`) и `useCityProvider` (`field-city.tsx`) — byte-for-byte
+    одинаковый резолв провайдера (проп → `DeclarativeFormContext.addressProvider` → `token`-фолбэк).
+    Вынесены в `useResolvedAddressProvider` (`lib/utils/use-address-provider.ts`).
+  - `DATE_INPUT_CLASS`/`DATETIME_INPUT_CLASS` (`field-date-range.tsx`/`field-datetime-picker.tsx`) —
+    та же строка tailwind-классов, что и у `shadcnUIKit.Input` (обход UIKit-контракта ради
+    `min`/`max`/`step`, задокументированного «Находкой 1» на `FieldDateRange` выше). Вынесены в
+    `NATIVE_INPUT_CLASS` (`lib/uikit/primitives/native-input-class.ts`), используется теперь и
+    самим `Input`-примитивом — визуальный стиль синхронен при будущей смене темы.
+  - `cardClass` (`field-radio-card.tsx`/`field-checkbox-card.tsx`) — идентичная реализация
+    border+ring/opacity. Вынесена в `lib/utils/card-class.ts`.
+  - Ни один из трёх случаев не был протечкой границы — все три копии жили внутри `forms-shadcn`,
+    `forms-core`/`forms-react` не затронуты.
+  - **Проверки:** 107/107 тестов (без изменений — рефакторинг переносит реализацию, не поведение),
+    `typecheck:tsgo` зелёный. `lint` — 2 pre-existing `react-hooks/rules-of-hooks` ошибки в
+    `field-address.tsx`/`field-city.tsx` (из отдельного, не связанного с этим рефакторингом
+    исправления `useEffect` в `render()`) остались как есть — вне скоупа этой задачи, не трогала.
+  - CHANGELOG/версия (`0.13.0` → `0.13.1`, patch — внутренний рефакторинг без изменения публичного API).
 - [ ] **7.4 Замер трафика** → решение: доносить сложные поля или нет.
 - [ ] **7.5 Docs-сайт на отдельном домене** + живые демо. SEO под `zod forms react`, `prisma form generator`.
 - [ ] **7.6 `llms.txt` + усиление MCP** — недоиспользованный козырь №1 (дёшево, уникально).
