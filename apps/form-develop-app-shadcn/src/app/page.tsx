@@ -3,6 +3,7 @@
 import type { AddressProvider } from '@letar/forms-core/address'
 import {
   FieldAddress,
+  FieldAutocomplete,
   FieldCheckbox,
   FieldCombobox,
   FieldDate,
@@ -11,6 +12,7 @@ import {
   FieldCurrency,
   FieldDuration,
   FieldHidden,
+  FieldListbox,
   FieldNativeSelect,
   FieldNumber,
   FieldPassword,
@@ -82,6 +84,8 @@ interface DemoFormValues {
   phone: string
   price: number
   discount: number
+  city: string
+  features: string[]
 }
 
 const defaultValues: DemoFormValues = {
@@ -109,6 +113,8 @@ const defaultValues: DemoFormValues = {
   phone: '',
   price: 1500,
   discount: 15,
+  city: '',
+  features: [],
 }
 
 export default function HomePage() {
@@ -116,7 +122,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Form Develop App (shadcn)</h1>
       <p className="text-muted-foreground mt-2 text-sm">
-        Песочница для разработки @letar/forms-shadcn — 24 поля, Фаза 7.3 Шаг 5+.
+        Песочница для разработки @letar/forms-shadcn — 26 полей, Фаза 7.3 Шаг 5+.
       </p>
 
       <DemoForm<DemoFormValues>
@@ -158,6 +164,21 @@ export default function HomePage() {
         <FieldPhone name="phone" label="Телефон" showFlag />
         <FieldCurrency name="price" label="Цена" />
         <FieldPercentage name="discount" label="Скидка" />
+        <FieldAutocomplete
+          name="city"
+          label="Город"
+          suggestions={['Москва', 'Санкт-Петербург', 'Казань', 'Новосибирск']}
+        />
+        <FieldListbox
+          name="features"
+          label="Особенности"
+          selectionMode="multiple"
+          options={[
+            { label: 'TypeScript', value: 'ts', group: 'Frontend' },
+            { label: 'React', value: 'react', group: 'Frontend' },
+            { label: 'Python', value: 'py', group: 'Backend' },
+          ]}
+        />
 
         <button
           type="submit"
