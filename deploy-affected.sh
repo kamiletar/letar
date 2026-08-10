@@ -322,9 +322,17 @@ if [ "$SKIP_GIT" = false ]; then
   # Get current branch
   CURRENT_BRANCH=$(git branch --show-current)
 
+  # §50: не уничтожаем улику вслепую. bun.lock мог разойтись с закоммиченной версией на
+  # предыдущем деплое (фолбэк bun install без --frozen-lockfile, ниже) — если так, эта
+  # разница единственный шанс её увидеть, до checkout она пропадёт безвозвратно.
+  if ! git diff --quiet -- bun.lock 2>/dev/null; then
+    echo -e "${YELLOW}⚠️  bun.lock расходится с закоммиченной версией (см. PLAN-INFRA.md §50). Разница перед сбросом:${NC}"
+    git diff --stat -- bun.lock 2>/dev/null || true
+  fi
   # Сбрасываем bun.lock перед pull — bun install без --frozen-lockfile обновляет
   # его на сервере (убирает записи для неинициализированных submodule), и git pull
-  # упал бы с "local changes would be overwritten". Реальные версии пакетов не меняются.
+  # упал бы с "local changes would be overwritten". Реальные версии пакетов не меняются
+  # в безобидном случае — но безобидность теперь видна по логу выше, а не предполагается.
   git checkout -- bun.lock 2>/dev/null || true
 
   # Pull changes
@@ -404,12 +412,24 @@ if [ -f "bun.lock" ]; then
     else
       if ! run_bun_install --frozen-lockfile; then
         # Fallback: --frozen-lockfile может падать если некоторые workspace-пути
-        # (uninitialized submodules) отсутствуют на этом сервере. Это не меняет
-        # реальные версии пакетов — повторяем без флага.
+        # (uninitialized submodules) отсутствуют на этом сервере — возможная, но НЕ
+        # подтверждённая причина (PLAN-INFRA.md §50: на s3, где инициализирован весь
+        # набор submodule, фолбэк тоже срабатывает на каждом прогоне). Повторяем без флага.
         echo -e "${YELLOW}⚠️  --frozen-lockfile failed (возможно uninitialized submodules). Повторяю без флага...${NC}"
         if ! run_bun_install; then
           echo -e "${RED}❌ Failed to install dependencies with bun${NC}"
           exit 1
+        fi
+        # §50: фолбэк диагностируемый — сравниваем bun.lock с закоммиченной версией и
+        # печатаем РЕАЛЬНОЕ отличие, а не общую жёлтую строку. Не хардблокируем деплой:
+        # решение "останавливать ли прод на непустом diff" ещё не принято (см. §50) —
+        # пока только делаем расхождение видимым вместо того, чтобы оно исчезало молча
+        # при git checkout -- bun.lock на следующем деплое.
+        if ! git diff --quiet -- bun.lock 2>/dev/null; then
+          echo -e "${RED}⚠️  bun.lock изменился после фолбэка — версии пакетов разошлись с закоммиченными (см. PLAN-INFRA.md §50):${NC}"
+          git diff --stat -- bun.lock
+        else
+          echo -e "${GREEN}✅ Фолбэк не изменил bun.lock — на этот раз расхождение было безобидным (submodule-пути)${NC}"
         fi
       fi
     fi
