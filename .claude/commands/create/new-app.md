@@ -91,8 +91,8 @@ git commit -m "chore: add <name> as private submodule"
 монорепо на вложенный репозиторий **не действует**, и без своего в initial commit уедут
 `node_modules/`, `.next/`, `dist/`, `*.tsbuildinfo`. Генератор кладёт его сам при `--private`, но
 если приложение генерировалось без флага — скопируй из любого существующего submodule
-(`apps/domwellbes/.gitignore`). Разбор — [git.md](/.claude/rules/git.md) § «Каждому submodule нужен
-СВОЙ `.gitignore`».
+(`apps/domwellbes/.gitignore`). Требования к файлу — [git.md § Работа с приватными submodule](/.claude/rules/git.md); разбор инцидента —
+[git-multi-agent-incidents](/.claude/docs/git-multi-agent-incidents.md).
 
 ⚠️ **Windows: `rm -rf apps/<name>` падает с `Device or resource busy`** (шаг 3) — папку держит
 Nx-демон или dev-сервер. `nx reset` помогает не всегда. Обход — удалить содержимое, потом саму

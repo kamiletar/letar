@@ -47,7 +47,7 @@ they aren't used.» Однострочная форма `if (x) { return 1 }` (�
 ```
 
 ⚠️ **Каждый submodule ведёт свой независимый `dprint.json`** (см.
-[git.md § «Каждому submodule нужен СВОЙ `dprint.json`»](/.claude/rules/git.md)) — фикс в
+[git.md § Работа с приватными submodule](/.claude/rules/git.md)) — фикс в
 корневом конфиге не действует на код внутри submodule. При следующей работе с curly-долгом в
 приватном приложении добавить туда ту же строку, если `eslint.config.mjs` этого приложения тоже
 требует `curly: 'all'`.

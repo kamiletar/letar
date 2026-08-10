@@ -67,8 +67,8 @@ git push                        # пуш в публичный letar
 Корневой `.gitignore` монорепо на вложенный независимый репозиторий **не действует** — submodule
 видит только собственный. Заводишь новый — клади `.gitignore` до первого `git add .`, иначе в
 initial commit уедут `node_modules/`, `.next/`, `dist/`. Генератор `new-app --private` кладёт его
-сам. Подробности и образец — [git.md](/.claude/rules/git.md) § «Каждому submodule нужен СВОЙ
-`.gitignore`».
+сам. Образец и список того, что должно быть в файле, — [git.md § Работа с приватными submodule](/.claude/rules/git.md); разбор инцидента, из-за которого это записано, — в
+[git-multi-agent-incidents](/.claude/docs/git-multi-agent-incidents.md).
 
 ### Обновить все submodules до последних версий
 

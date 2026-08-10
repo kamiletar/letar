@@ -16,7 +16,9 @@
 [tsconfig-presets](/.claude/docs/tsconfig-presets.md) общий пресет Next.js-приложений, `${configDir}` ·
 [agent-skills-mirror](/.claude/docs/agent-skills-mirror.md) зеркало `.claude/skills/` для Codex ·
 [nextjs16-agent-guide-files](/.claude/docs/nextjs16-agent-guide-files.md) `next dev` сам пишет
-`apps/<app>/AGENTS.md`
+`apps/<app>/AGENTS.md` ·
+[git-multi-agent-incidents](/.claude/docs/git-multi-agent-incidents.md) разборы гонок между
+агентами: почему правила git такие строгие
 
 **MCP-серверы:** [mcp-servers](/.claude/docs/mcp-servers.md) состав и назначение ·
 [mcp-server-pattern](/.claude/docs/mcp-server-pattern.md) тонкий локальный сервер по stdio ·
@@ -140,7 +142,7 @@ bash scripts/hooks/install.sh
 Ставит связку из двух хуков: `pre-commit-scope-guard.sh` (блокирует голый `git commit`/`git add -A`,
 затянувший файлы из нескольких несвязанных `apps/*`/`libs/*` — типовая причина, по которой один
 агент коммитит чужую незакоммиченную работу другого; подробнее и обход для легитимных multi-scope
-коммитов — [git.md § Работа в монорепозитории](/.claude/rules/git.md)) и `pre-commit-sops.sh`
+коммитов — [git.md § Работа рядом с другими агентами](/.claude/rules/git.md)) и `pre-commit-sops.sh`
 (авто-шифрует `.env.docker` → `.env.docker.enc` перед каждым коммитом, если доступен sops +
 age-ключ; подробнее — [secret-manager](/.claude/docs/secret-manager.md)).
 

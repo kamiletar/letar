@@ -2009,7 +2009,7 @@ timeout: 300_000, maxBuffer: 32*1024*1024, stdio: ['ignore','pipe','pipe'] })`.
 алертов (~строки 33–37):
 
 ```ts
-if (pathname === '/api/deps/scan' && request.method === 'POST') return NextResponse.next()
+if (pathname === '/api/deps/scan' && request.method === 'POST') { return NextResponse.next() }
 ```
 
 **`GET /api/deps/latest`** — последний скан + пакеты + возраст lockfile, под сессией (proxy).
@@ -2969,7 +2969,7 @@ JSX-комментарий в форме `{/* ... */}`, которую dprint р
 
 ```ts
 let port = 3000
-while (usedPorts.has(port)) port++
+while (usedPorts.has(port)) { port++ }
 ```
 
 Порт 3000 в монорепо не занят никем — его намеренно обходят, это дефолт `next dev` без `-p`.
@@ -7741,7 +7741,8 @@ PLAN_TESTING/CHANGELOG) по всем ~30 приложениям и ~40 библ
 (отдельный `.git`, без риска гонки с корневым репо); для 11 обычных приложений — только
 редактировали, финальный коммит в корневой `letar` сделан оператором последовательно (по одному
 `git commit -- <пути>` на приложение), чтобы не столкнуться с гонкой параллельных `git commit` в
-одном `.git`, задокументированной в `.claude/rules/git.md` § «Работа в монорепозитории».
+одном `.git`, задокументированной в `.claude/rules/git.md` § «Работа рядом с другими агентами»
+(разбор — `.claude/docs/git-multi-agent-incidents.md`).
 
 ⚠️ **6 из 18 агентов оборвались по сетевой ошибке API (`Connection closed mid-response`)**
 на середине правки файла. Все были возобновлены через `SendMessage` с указанием текущего
