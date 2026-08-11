@@ -38,6 +38,7 @@ import {
   FieldTableEditor,
   FieldTags,
   FieldTextarea,
+  FieldYesNo,
   FormSteps,
 } from '@letar/forms-shadcn'
 
@@ -105,6 +106,7 @@ interface DemoFormValues {
   smsCode: string
   signature: string
   attachments: File[]
+  newsletterConsent: boolean | undefined
 }
 
 const defaultValues: DemoFormValues = {
@@ -142,6 +144,7 @@ const defaultValues: DemoFormValues = {
   smsCode: '',
   signature: '',
   attachments: [],
+  newsletterConsent: undefined,
 }
 
 export default function HomePage() {
@@ -149,7 +152,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Form Develop App (shadcn)</h1>
       <p className="text-muted-foreground mt-2 text-sm">
-        Песочница для разработки @letar/forms-shadcn — 36 полей, Фаза 7.3 Шаг 5+.
+        Песочница для разработки @letar/forms-shadcn — 37 полей, Фаза 7.3 Шаг 5+.
       </p>
 
       <DemoForm<DemoFormValues>
@@ -242,6 +245,7 @@ export default function HomePage() {
             console.log('resend otp')
           }}
         />
+        <FieldYesNo name="newsletterConsent" label="Подписаться на рассылку?" variant="thumbs" />
 
         <button
           type="submit"

@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased (2026-08-11, продолжение)
+
+- Демо `FieldYesNo` (`@letar/forms-shadcn` 0.19.0) — `variant="thumbs"`, бинарный выбор согласия
+  на рассылку.
+
 ## Unreleased (2026-08-11)
 
 - Демо `FieldRichText` (`@letar/forms-shadcn` 0.18.0) — изолированная форма с Tiptap-редактором,
