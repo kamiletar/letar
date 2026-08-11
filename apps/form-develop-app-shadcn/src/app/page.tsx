@@ -12,6 +12,7 @@ import {
   FieldColorPicker,
   FieldCombobox,
   FieldCurrency,
+  FieldDataGrid,
   FieldDate,
   FieldDateRange,
   FieldDateTimePicker,
@@ -208,7 +209,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Form Develop App (shadcn)</h1>
       <p className="text-muted-foreground mt-2 text-sm">
-        Песочница для разработки @letar/forms-shadcn — 45 полей, Фаза 7.3 Шаг 5+.
+        Песочница для разработки @letar/forms-shadcn — 46 полей, Фаза 7.3 Шаг 5+.
       </p>
 
       <DemoForm<DemoFormValues>
@@ -470,6 +471,37 @@ export default function HomePage() {
         >
           Отправить
         </button>
+      </DemoForm>
+
+      <h2 className="mt-16 text-xl font-semibold">FieldDataGrid (beta, отдельная форма)</h2>
+      <p className="text-muted-foreground mt-1 text-sm">
+        Большая таблица на `@tanstack/react-table` — изолированная песочница со своим array-полем `employees`.
+        Сортировка (клик по заголовку), текстовый фильтр по имени, инлайн-редактирование (клик по ячейке), выбор строк +
+        bulk-удаление, CSV-экспорт.
+      </p>
+      <DemoForm<{ employees: { name: string; department: string; salary: number }[] }>
+        defaultValues={{
+          employees: [
+            { name: 'Иван Петров', department: 'Разработка', salary: 150000 },
+            { name: 'Мария Сидорова', department: 'Дизайн', salary: 120000 },
+            { name: 'Пётр Иванов', department: 'Продажи', salary: 90000 },
+          ],
+        }}
+        onSubmit={(value) => {
+          // eslint-disable-next-line no-console
+          console.log('data-grid submit', value)
+        }}
+      >
+        <FieldDataGrid
+          name="employees"
+          label="Сотрудники"
+          rowSelection
+          columns={[
+            { name: 'name', label: 'Имя', filter: true },
+            { name: 'department', label: 'Отдел', filter: true },
+            { name: 'salary', label: 'Зарплата', align: 'right' },
+          ]}
+        />
       </DemoForm>
     </main>
   )
