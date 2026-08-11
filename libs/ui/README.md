@@ -50,19 +50,222 @@ import { RatingDisplay, RatingStars } from '@letar/ui'
 <RatingDisplay value={4.5} />
 ```
 
-### FilterPanel
+### StatusBadge
 
-Панель фильтров с URL-синхронизацией.
+Универсальный статус-бейдж с конфигурируемыми цветами и лейблами — одна карта конфигурации
+на все значения enum'а статуса, не свитч в каждом месте использования.
 
 ```tsx
-import { FilterField, FilterPanel, FilterRow } from '@letar/ui'
-<FilterPanel>
-  <FilterRow>
-    <FilterField name="status" label="Статус">
-      <Select options={statusOptions} />
-    </FilterField>
-  </FilterRow>
-</FilterPanel>
+import { StatusBadge, type StatusConfig } from '@letar/ui'
+
+const ORDER_STATUS_CONFIG: Record<OrderStatus, StatusConfig> = {
+  PENDING: { label: 'Ожидает', colorPalette: 'yellow' },
+  CONFIRMED: { label: 'Подтверждён', colorPalette: 'blue' },
+  COMPLETED: { label: 'Завершён', colorPalette: 'green' },
+  CANCELLED: { label: 'Отменён', colorPalette: 'red' },
+}
+
+<StatusBadge status={order.status} config={ORDER_STATUS_CONFIG} />
+```
+
+### QuantityStepper
+
+Степпер количества «− N +» для корзины. Поля свободного ввода намеренно нет — набор кликами
+не даёт написать опечатку вроде «11» вместо «1»; значение всегда целое и зажато в `[min, max]`.
+
+```tsx
+import { QuantityStepper } from '@letar/ui'
+<QuantityStepper value={qty} onChange={setQty} min={1} max={99} ariaLabel="Количество товара" />
+```
+
+### Tooltip
+
+Обёртка над Chakra `Tooltip` с портализацией по умолчанию, стрелкой и `disabled`-состоянием
+(когда `disabled` — рендерит только `children`, без триггера тултипа).
+
+```tsx
+import { Tooltip } from '@letar/ui'
+<Tooltip content="Скопировать в буфер">
+  <IconButton aria-label="Копировать"><LuCopy /></IconButton>
+</Tooltip>
+```
+
+### AppEmptyState
+
+Пустое состояние для списков и результатов поиска — обёртка над Chakra `EmptyState` с иконкой
+(по умолчанию `LuInbox`), заголовком, описанием и опциональной кнопкой действия (`onAction` или
+`actionHref`).
+
+```tsx
+import { AppEmptyState } from '@letar/ui'
+<AppEmptyState title="Нет записей" description="Добавьте первую запись" actionLabel="Добавить" onAction={openModal} />
+```
+
+### ExternalLink
+
+Иконка-ссылка на внешний ресурс (соцсети, email, GitHub) — квадратная кнопка с ripple-эффектом
+(`Pressable`), открывает в новой вкладке с `rel="noopener noreferrer"`.
+
+```tsx
+import { ExternalLink } from '@letar/ui'
+<ExternalLink href="https://vk.com/example" aria-label="ВКонтакте" size="lg">
+  <FaVk />
+</ExternalLink>
+```
+
+### CoverImage
+
+Клиентская граница `AspectRatio` + `Image`/иконка-фолбэк для карточек товаров/объектов, у
+которых обложка может отсутствовать (`imageUrl: null` → рендерится `icon`, не сломанная
+картинка). Уже объявляет `'use client'` — Server Component-родитель может рендерить её
+напрямую без собственной обёртки (`AspectRatio`/`Image` в Chakra v3 клиентские, при пересечении
+Server→Client границы `Children.only` внутри `AspectRatio` иначе падает).
+
+```tsx
+import { CoverImage } from '@letar/ui'
+<CoverImage imageUrl={house.coverUrl} alt={house.title} icon={<LuHome />} ratio={4 / 3} />
+```
+
+### DeleteAccountZone
+
+Секция «Опасная зона» с подтверждаемым удалением аккаунта (152-ФЗ ст. 21) — обёртка над
+`TriggerConfirmDialog` с готовым текстом предупреждения.
+
+```tsx
+import { DeleteAccountZone } from '@letar/ui'
+<DeleteAccountZone onDelete={deleteAccountAction} redirectUrl="/sign-in" />
+```
+
+### PasswordInput / PasswordStrengthMeter
+
+Поле пароля с кнопкой видимости (`LuEye`/`LuEyeOff`, `mousedown`-safe — не сбивает фокус
+инпута) и опциональный индикатор надёжности пароля рядом.
+
+```tsx
+import { PasswordInput, PasswordStrengthMeter } from '@letar/ui'
+<PasswordInput placeholder="Пароль" {...field.getInputProps()} />
+<PasswordStrengthMeter value={password} />
+```
+
+### Pressable / PressableButton
+
+Box- и Button-обёртки с position-aware ripple на десктопе (эффект расходится от точки клика
+мышью) и CSS spring-анимацией на тач-устройствах. `PressableButton` — готовая кнопка;
+`Pressable` — обёртка для произвольного контента (например `Button asChild` с `Link` внутри,
+где сам `asChild`-паттерн не даёт использовать `PressableButton` напрямую). Требуют
+`pressableConfig` в `defineConfig()` приложения (ключевые кадры `ripple-expand`/`pressable-spring`).
+
+```tsx
+import { Pressable, PressableButton } from '@letar/ui'
+
+<PressableButton colorPalette="brand" onClick={handleClick}>Сохранить</PressableButton>
+
+<Pressable borderRadius="md" display="inline-flex">
+  <Button asChild><Link href="/about">О нас</Link></Button>
+</Pressable>
+```
+
+### CookieBanner / CookieSettingsButton
+
+Баннер cookie-согласий (152-ФЗ) с тремя категориями (необходимые/аналитика/маркетинг),
+`localStorage` + опциональный POST на `consentApiUrl` для лога согласия в БД.
+`CookieSettingsButton` — кнопка в подвале для повторного открытия баннера (шлёт `CustomEvent`,
+баннер сам подписан). Namespace localStorage/событий строится через `createConsentConfig`
+(см. ниже) — на нём же завязан `useAnalyticsConsent`/`AnalyticsGate`.
+
+```tsx
+import { CookieBanner, CookieSettingsButton } from '@letar/ui'
+<CookieBanner appKey="my-app" privacyUrl="/privacy" />
+// в подвале:
+<CookieSettingsButton appKey="my-app" />
+```
+
+⚠️ У `CookieBanner` и `StickyActionBar` общая CSS-переменная высоты — если оба на экране
+одновременно (`position: fixed/sticky; bottom: 0`), `StickyActionBar` сам приподнимается над
+баннером, координация уже встроена.
+
+### createConsentConfig / readConsentState
+
+Не React-компоненты — утилиты для namespace cookie-согласий, которыми пользуются
+`CookieBanner`/`CookieSettingsButton`/`useAnalyticsConsent` внутри себя. Нужны напрямую только
+для нестандартных случаев (например server-side чтение согласия для SSR-гейта).
+
+```tsx
+import { createConsentConfig, readConsentState } from '@letar/ui'
+const config = createConsentConfig('my-app') // storageKey, event-имена, policyVersion
+const state = readConsentState(config.storageKey) // CookieConsentState | null, только на клиенте
+```
+
+### BuildVersion / StudioCredit
+
+Утилитарные строки для подвала сайта. `BuildVersion` — версия сборки (не рендерится, если
+`version` не передан — удобно для условного вывода из `package.json`/env). `StudioCredit` —
+ссылка «Сделано в studio.letar.best» с UTM-меткой источника для трекинга переходов в Umami
+студии.
+
+```tsx
+import { BuildVersion, StudioCredit } from '@letar/ui'
+import pkg from '../../package.json'
+
+<BuildVersion version={pkg.version} />
+<StudioCredit app="kami" />
+```
+
+### Header
+
+Compound-компонент для адаптивного хедера: логотип, навигация, действия, мобильное меню.
+Sticky + blur-фон по умолчанию.
+
+```tsx
+import { Header } from '@letar/ui'
+
+const navItems = [
+  { href: '/', label: 'Главная', exact: true },
+  { href: '/catalog', label: 'Каталог' },
+]
+
+<Header blurBackdrop sticky>
+  <Header.Logo>My Brand</Header.Logo>
+  <Header.Nav items={navItems} />
+  <Header.Spacer />
+  <Header.Actions>
+    <UserMenu {...userMenuProps} />
+  </Header.Actions>
+  <Header.MobileActions>
+    <Header.MobileMenu items={navItems} />
+  </Header.MobileActions>
+</Header>
+```
+
+### UserMenu / MobileAuthSection
+
+Меню пользователя: кнопка «Войти», когда сессии нет; dropdown с профилем, доп. пунктами,
+ссылкой на аккаунт в Ключнице и выходом — когда есть. `MobileAuthSection` — та же логика,
+но как список пунктов для мобильного drawer (`Header.MobileMenu`/`footerSlot`), не dropdown.
+
+```tsx
+import { UserMenu } from '@letar/ui'
+<UserMenu
+  session={session}
+  onSignIn={() => authClient.signIn.social({ provider: 'letar-auth' })}
+  onSignOut={() => authClient.signOut()}
+  profileHref="/profile"
+/>
+```
+
+### LightboxViewer
+
+Низкоуровневый лайтбокс (`yet-another-react-lightbox` + Zoom + Fullscreen) для случаев, когда
+не подходит готовый `PhotoGallery` (например свой триггер открытия вместо сетки превью).
+
+```tsx
+import { LightboxViewer } from '@letar/ui'
+<LightboxViewer
+  open={isOpen}
+  index={currentIndex}
+  close={() => setIsOpen(false)}
+  slides={[{ src: '/image1.jpg', alt: 'Изображение 1' }]}
+/>
 ```
 
 ### StatCard / RoleStat
@@ -314,18 +517,6 @@ import { AnalyticsGate, CookieBanner } from '@letar/ui'
 (например, Umami + Yandex Metrika), не требует по обёртке на каждый. Хук `useAnalyticsConsent`
 экспортируется отдельно для нестандартных случаев (напр. когда компонент аналитики сам принимает
 `hasConsent` пропом, как `@letar/yandex-metrika`).
-
-### useUrlFilters
-
-Хук для синхронизации фильтров с URL.
-
-```tsx
-import { useUrlFilters } from '@letar/ui'
-
-const { filters, setFilter, resetFilters } = useUrlFilters({
-  defaultFilters: { status: 'active' },
-})
-```
 
 ## Команды
 
