@@ -1805,6 +1805,41 @@ React, а React-адаптер зависит от абстракций ядра
     того же сценария (`fireEvent.blur`) зелёный, `KeyboardEvent`/`click()`-события в той же живой
     сессии отработали корректно (Escape, add/remove row, select-all) — похоже на артефакт
     свёрнутой панели превью, не баг компонента.
+  - **`FieldRichText`** — пятое, последнее из приоритетного списка координатора (Signature ✅ →
+    FileUpload ✅ → Steps ✅ → Table ✅ → **RichText** ✅) — паритет по этому списку закрыт.
+    WYSIWYG-редактор на Tiptap, портирован из `@letar/forms` (Chakra-скин): тот же домен
+    (`StarterKit`+`Underline`+`Link`+`Placeholder` extensions, `onUpdate` → `field.handleChange`,
+    синхронизация `value` при внешнем изменении без прыжка курсора, `outputFormat: 'html' | 'json'`),
+    другая обвязка — native `<button>`-тулбар вместо Chakra `IconButton`/`HStack`, Tailwind
+    arbitrary-selector'ы (`[&_.tiptap_h1]:...`, `content-[attr(data-placeholder)]`) вместо Chakra
+    `css`-пропа для стилизации содержимого и placeholder.
+    - **Beta-упрощения:** без `imageUpload`/`ImagePopover` — вставка изображений с загрузкой на
+      сервер не портирована (требует app-specific upload endpoint, не framework-free логика).
+      Кнопка `link` — `window.prompt` вместо Popover-формы с полем ввода; тот же фолбэк уже
+      существовал в Chakra `TOOLBAR_CONFIG.link.action` как запасной вариант без отдельного
+      `LinkPopover` — здесь он стал основным путём, не запасным.
+    - **Проверки:** 8 новых RTL-тестов (141/141 в пакете, было 133) — рендер contenteditable,
+      label, тулбар по умолчанию/ограниченный `toolbarButtons`/скрытый `showToolbar={false}`,
+      `readOnly` скрывает тулбар, `disabled` блокирует кнопки, негативный контроль типов.
+      **Находка теста:** клик по кнопке форматирования (`toggleBold()`) не проверяется на реальное
+      переключение `aria-pressed` — jsdom не реализует DOM Selection API до состояния, нужного
+      ProseMirror, чтобы команда применилась к выделению; тест ограничен проверкой отсутствия
+      краша. Тот же класс находки, что blur-события в `FieldTableEditor` — среда, не баг
+      компонента.
+    - CHANGELOG/версия (`0.17.0` → `0.18.0`), README (таблица полей, новый раздел
+      `FieldRichText`), peer-зависимости `@tiptap/react`/`@tiptap/starter-kit`/
+      `@tiptap/extension-link`/`@tiptap/extension-underline`/`@tiptap/extension-placeholder`
+      (уже установлены в корне монорепо для `@letar/forms`, здесь заявлены как peer) — обновлены.
+    - Живая проверка в реальном браузере (Chromium, `form-develop-app-shadcn`): изолированная
+      форма с `defaultValues.content` непустым HTML — рендер `<strong>`/`<em>` подтверждён через
+      `innerHTML` редактора, все кнопки тулбара присутствуют в DOM. Вставка текста через
+      `document.execCommand('insertText', ...)` изменила содержимое и **не была откачена**
+      эффектом синхронизации внешнего `value` — подтверждает, что `onUpdate` реально доходит до
+      `field.handleChange` и обратно (petля `value` ↔ `editor` работает). Клик по кнопке
+      «Полужирный» и `computer{action:"screenshot"}` не удалось проверить визуально в этой
+      сессии — Browser pane не композитил кадры (`the Browser pane is not displayed`), тот же
+      известный артефакт свёрнутой панели, что и в проверке `FieldTableEditor`; DOM/JS-проверки
+      остаются валидными независимо от него.
 - [ ] **7.4 Замер трафика** → решение: доносить сложные поля или нет.
 - [ ] **7.5 Docs-сайт на отдельном домене** + живые демо. SEO под `zod forms react`, `prisma form generator`.
 - [ ] **7.6 `llms.txt` + усиление MCP** — недоиспользованный козырь №1 (дёшево, уникально).
