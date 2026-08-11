@@ -302,6 +302,56 @@ export interface DateRangeFieldProps extends BaseFieldProps {
   orientation?: 'horizontal' | 'vertical'
 }
 
+/** Временной слот для `Form.Field.Schedule`. */
+export interface ScheduleTimeSlot {
+  open: string
+  close: string
+}
+
+/** Расписание на день (`null` — выходной). */
+export type ScheduleDaySchedule = ScheduleTimeSlot | null
+
+/** Недельное расписание для `Form.Field.Schedule`. */
+export interface WeeklySchedule {
+  monday: ScheduleDaySchedule
+  tuesday: ScheduleDaySchedule
+  wednesday: ScheduleDaySchedule
+  thursday: ScheduleDaySchedule
+  friday: ScheduleDaySchedule
+  saturday: ScheduleDaySchedule
+  sunday: ScheduleDaySchedule
+}
+
+/** День недели — ключ `WeeklySchedule`. */
+export type DayOfWeek = keyof WeeklySchedule
+
+/**
+ * Props for Form.Field.Schedule (shadcn-скин). Значение — `WeeklySchedule`.
+ *
+ * Портирован из Chakra-версии без изменений логики (toggle дня, изменение времени, копирование
+ * понедельника на будни, проверка `close > open`). Переключатель дня — `@radix-ui/react-switch`
+ * (тот же примитив, что `FieldSwitch`), время — нативные `<input type="time">`
+ * (`NATIVE_INPUT_CLASS`, как у `FieldDateRange`/`FieldTime`).
+ */
+export interface ScheduleFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
+  /** Кастомные названия дней (локализация) */
+  dayNames?: Partial<Record<DayOfWeek, string>>
+  /** Расписание по умолчанию, когда значение пусто */
+  defaultSchedule?: WeeklySchedule
+  /** Какие дни показывать (по умолчанию — все 7) */
+  days?: DayOfWeek[]
+  /** Показывать кнопку «скопировать на будни» (по умолчанию true) */
+  showCopyToWeekdays?: boolean
+  /** Текст для состояния «выходной» (по умолчанию «Выходной») */
+  offLabel?: string
+  /** Текст кнопки копирования (по умолчанию «Скопировать Пн на будни») */
+  copyToWeekdaysLabel?: string
+  /** Время открытия по умолчанию при включении дня (по умолчанию '09:00') */
+  defaultOpenTime?: string
+  /** Время закрытия по умолчанию при включении дня (по умолчанию '18:00') */
+  defaultCloseTime?: string
+}
+
 /** Props for Form.Field.Duration (shadcn-скин). Значение — число минут. */
 export interface DurationFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
   /** Формат отображения (по умолчанию "HH:MM") */

@@ -36,6 +36,7 @@ export { FieldRadioCard } from './lib/fields/field-radio-card'
 export { FieldRadioGroup } from './lib/fields/field-radio-group'
 export { FieldRating } from './lib/fields/field-rating'
 export { FieldRichText } from './lib/fields/field-rich-text'
+export { FieldSchedule } from './lib/fields/field-schedule'
 export { FieldSegmentGroup } from './lib/fields/field-segment-group'
 export { FieldSelect } from './lib/fields/field-select'
 export { FieldSignature } from './lib/fields/field-signature'
@@ -64,6 +65,7 @@ export type {
   ComboboxFieldProps,
   CurrencyFieldProps,
   DateFieldProps,
+  DayOfWeek,
   DateRangeFieldProps,
   DateRangePreset,
   DateRangeValue,
@@ -92,6 +94,9 @@ export type {
   RatingFieldProps,
   RichOption,
   RichTextFieldProps,
+  ScheduleDaySchedule,
+  ScheduleFieldProps,
+  ScheduleTimeSlot,
   SegmentGroupFieldProps,
   SelectFieldProps,
   SelectOption,
@@ -104,6 +109,7 @@ export type {
   TagsFieldProps,
   TextareaFieldProps,
   TimeFieldProps,
+  WeeklySchedule,
   YesNoFieldProps,
 } from './lib/fields/types'
 export { FormSteps } from './lib/steps'
