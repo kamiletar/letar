@@ -2,8 +2,8 @@
 
 import type { ReactElement } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
-import { NATIVE_INPUT_CLASS } from '../uikit/primitives/native-input-class'
-import { cn } from '../utils/cn'
+import { NATIVE_INPUT_CLASS } from '@letar/tailwind-utils'
+import { cn } from '@letar/tailwind-utils'
 import type { DateRangeFieldProps, DateRangePreset, DateRangeValue } from './types'
 
 const PRESET_LABELS: Record<DateRangePreset, string> = {

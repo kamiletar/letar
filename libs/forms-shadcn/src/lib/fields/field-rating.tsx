@@ -4,7 +4,7 @@ import { Star } from 'lucide-react'
 import type { ReactElement } from 'react'
 import { createField } from '../uikit/primitives'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
-import { cn } from '../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 import type { RatingFieldProps } from './types'
 
 /**

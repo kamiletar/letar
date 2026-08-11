@@ -4,7 +4,7 @@ import { Eraser, Pen, Type } from 'lucide-react'
 import type { ReactElement } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
-import { cn } from '../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 import type { SignatureFieldProps, SignatureStroke, StrokePoint } from './types'
 
 /** Экранирование XML спецсимволов (защита от инъекций в typed mode) */

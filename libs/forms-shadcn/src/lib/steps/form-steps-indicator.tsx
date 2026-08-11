@@ -2,7 +2,7 @@
 
 import { Check } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { cn } from '../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 import { useFormStepsContext } from './form-steps-context'
 
 export interface FormStepsIndicatorProps {

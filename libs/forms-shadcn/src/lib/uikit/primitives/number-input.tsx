@@ -1,7 +1,7 @@
 'use client'
 
 import type { UIKitNumberInputProps } from '@letar/forms-core/uikit'
-import { cn } from '../../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 
 export function NumberInput(
   { value, onChange, onBlur, min, max, step, disabled, readOnly, ...rest }: UIKitNumberInputProps,

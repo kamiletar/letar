@@ -24,7 +24,8 @@
   },
   "dependencies": {
     "@letar/forms-core": "workspace:*",
-    "@letar/forms-vue": "workspace:*"
+    "@letar/forms-vue": "workspace:*",
+    "@letar/tailwind-utils": "workspace:*"
   },
   "devDependencies": {
     "@tanstack/vue-form": "^1.0.0",

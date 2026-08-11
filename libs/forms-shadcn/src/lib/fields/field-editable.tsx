@@ -3,7 +3,7 @@
 import type { ReactElement } from 'react'
 import { useState } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
-import { cn } from '../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 import type { EditableFieldProps } from './types'
 
 const inputClass = cn(

@@ -1,7 +1,7 @@
 import { h } from 'vue'
 import { createField, FieldWrapper } from '../uikit/primitives'
-import { NATIVE_INPUT_CLASS } from '../uikit/primitives/native-input-class'
-import { cn } from '../utils/cn'
+import { NATIVE_INPUT_CLASS } from '@letar/tailwind-utils'
+import { cn } from '@letar/tailwind-utils'
 
 /**
  * Нативный `<textarea>` — как и в React-скине, многострочный текст не входит в core-контракт

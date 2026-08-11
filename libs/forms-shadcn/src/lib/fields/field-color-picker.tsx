@@ -2,7 +2,7 @@
 
 import type { ReactElement } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
-import { cn } from '../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 import type { ColorPickerFieldProps } from './types'
 
 const DEFAULT_SWATCHES = [

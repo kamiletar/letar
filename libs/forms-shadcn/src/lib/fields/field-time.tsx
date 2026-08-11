@@ -2,7 +2,7 @@
 
 import type { ReactElement } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
-import { NATIVE_INPUT_CLASS } from '../uikit/primitives/native-input-class'
+import { NATIVE_INPUT_CLASS } from '@letar/tailwind-utils'
 import type { TimeFieldProps } from './types'
 
 /**

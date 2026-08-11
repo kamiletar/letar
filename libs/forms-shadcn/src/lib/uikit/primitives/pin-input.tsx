@@ -2,7 +2,7 @@
 
 import type { UIKitPinInputProps } from '@letar/forms-core/uikit'
 import { useRef } from 'react'
-import { cn } from '../../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 
 export function PinInput({ value, onChange, onComplete, length, mask, disabled, ...rest }: UIKitPinInputProps) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])

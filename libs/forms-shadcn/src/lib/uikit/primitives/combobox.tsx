@@ -3,7 +3,7 @@
 import type { UIKitComboboxProps } from '@letar/forms-core/uikit'
 import * as PopoverPrimitive from '@radix-ui/react-popover'
 import { type ReactNode, useState } from 'react'
-import { cn } from '../../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 
 export function Combobox(
   { value, inputValue, onInputChange, onValueChange, options, loading, placeholder, disabled, ...rest }:

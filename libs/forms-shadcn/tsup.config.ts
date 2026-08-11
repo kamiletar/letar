@@ -25,7 +25,7 @@ export default defineConfig({
   treeshake: true,
   clean: true,
   outDir: 'dist',
-  noExternal: ['@letar/forms-core', '@letar/forms-react'],
+  noExternal: ['@letar/forms-core', '@letar/forms-react', '@letar/tailwind-utils'],
   external: [
     // React
     'react',

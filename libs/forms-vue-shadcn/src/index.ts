@@ -21,4 +21,4 @@ export { FieldString } from './lib/fields/field-string'
 export { FieldTextarea } from './lib/fields/field-textarea'
 
 // cn() — clsx + tailwind-merge, стандартный shadcn-хелпер
-export { cn } from './lib/utils/cn'
+export { cn } from '@letar/tailwind-utils'

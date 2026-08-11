@@ -4,7 +4,7 @@ import type { UIKitCheckboxProps } from '@letar/forms-core/uikit'
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox'
 import { Check } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { cn } from '../../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 
 export function Checkbox(
   { checked, onCheckedChange, onBlur, disabled, readOnly, label, ...rest }: UIKitCheckboxProps<ReactNode>,

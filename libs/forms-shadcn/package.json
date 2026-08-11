@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "@letar/forms-core": "workspace:*",
-    "@letar/forms-react": "workspace:*"
+    "@letar/forms-react": "workspace:*",
+    "@letar/tailwind-utils": "workspace:*"
   }
 }

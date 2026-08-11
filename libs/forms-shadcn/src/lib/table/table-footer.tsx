@@ -2,7 +2,7 @@
 
 import type { TableFooterDef } from '@letar/forms-core/table'
 import { computeAggregate } from '@letar/forms-core/table'
-import { cn } from '../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 import { useTableEditorContext } from './table-editor-context'
 
 interface TableFooterProps {

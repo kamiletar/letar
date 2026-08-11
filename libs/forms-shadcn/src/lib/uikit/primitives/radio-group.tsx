@@ -4,7 +4,7 @@ import type { UIKitRadioGroupProps } from '@letar/forms-core/uikit'
 import * as RadioGroupPrimitive from '@radix-ui/react-radio-group'
 import { Circle } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { cn } from '../../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 
 export function RadioGroup({ value, onValueChange, options, disabled, ...rest }: UIKitRadioGroupProps<ReactNode>) {
   return (

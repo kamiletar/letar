@@ -913,6 +913,7 @@
       "devDependencies": {
         "@letar/forms-core": "workspace:*",
         "@letar/forms-react": "workspace:*",
+        "@letar/tailwind-utils": "workspace:*",
       },
       "peerDependencies": {
         "@radix-ui/react-checkbox": ">=1.0.0",
@@ -961,6 +962,7 @@
       "dependencies": {
         "@letar/forms-core": "workspace:*",
         "@letar/forms-vue": "workspace:*",
+        "@letar/tailwind-utils": "workspace:*",
       },
       "devDependencies": {
         "@tanstack/vue-form": "^1.0.0",
@@ -1087,6 +1089,14 @@
         "@letar/mcp-server-kit": "workspace:*",
         "@modelcontextprotocol/sdk": "1.29.0",
         "zod": "4.3.6",
+      },
+    },
+    "libs/tailwind-utils": {
+      "name": "@letar/tailwind-utils",
+      "version": "0.1.0",
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.6.0",
       },
     },
     "libs/ui": {
@@ -2174,6 +2184,8 @@
     "@letar/svoichuzhie": ["@letar/svoichuzhie@workspace:apps/svoichuzhie"],
 
     "@letar/synth": ["@letar/synth@workspace:apps/synth"],
+
+    "@letar/tailwind-utils": ["@letar/tailwind-utils@workspace:libs/tailwind-utils"],
 
     "@letar/time": ["@letar/time@workspace:apps/time"],
 

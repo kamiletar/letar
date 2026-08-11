@@ -173,10 +173,16 @@ project-references-модели на путь-алиасы, применимые
 
 | Библиотека                | Описание                                                                                                                                                                 |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| @letar/forms              | Формы (TanStack Form)                                                                                                                                                    |
+| @letar/forms              | Формы, Chakra-скин (TanStack Form)                                                                                                                                       |
+| @letar/forms-core         | Формы — framework-free ядро (Фаза 7.1): Zod-мета-движок, UIKit-контракт, форматтеры                                                                                      |
+| @letar/forms-react        | Формы — React-композиционный слой (Фаза 7.3): `createField`, `FormGroup`, хуки поля                                                                                      |
+| @letar/forms-shadcn       | Формы — shadcn/Radix-скин (Фаза 7.3), 47/56 полей                                                                                                                        |
+| @letar/forms-vue          | Формы — headless Vue-пруф границы (Фаза 7.8), 5 полей поверх `@tanstack/vue-form`                                                                                        |
+| @letar/forms-vue-shadcn   | Формы — Reka UI/Vue-скин (Фаза 7.8), 6 полей                                                                                                                             |
 | @letar/chakra-provider    | Chakra UI провайдер                                                                                                                                                      |
 | @letar/yandex-metrika     | Яндекс Метрика                                                                                                                                                           |
 | @letar/format-utils       | Форматирование дат, телефонов                                                                                                                                            |
+| @letar/tailwind-utils     | `cn()` (clsx+twMerge) и общие Tailwind-классы примитивов — общий код `forms-shadcn`/`forms-vue-shadcn`                                                                   |
 | @letar/ui                 | Shared UI компоненты                                                                                                                                                     |
 | @letar/validation-utils   | Zod схемы валидации                                                                                                                                                      |
 | @letar/email              | Email отправка через Maddy                                                                                                                                               |

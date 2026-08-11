@@ -1,4 +1,4 @@
-import { cn } from './cn'
+import { cn } from '@letar/tailwind-utils'
 
 /** Стиль карточки выбора (border+ring при выборе, opacity при disabled) — общий для FieldRadioCard и FieldCheckboxCard. */
 export function cardClass(selected: boolean, disabled: boolean | undefined): string {

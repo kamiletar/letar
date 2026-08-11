@@ -15,7 +15,7 @@ import {
 } from '@tanstack/react-table'
 import { type ReactElement, useMemo, useState } from 'react'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
-import { cn } from '../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 import type { DataGridColumnDef, DataGridFieldProps } from './field-data-grid-types'
 
 function camelToTitle(str: string): string {

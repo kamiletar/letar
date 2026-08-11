@@ -1,7 +1,7 @@
 'use client'
 
 import type { UIKitNativeSelectProps } from '@letar/forms-core/uikit'
-import { cn } from '../../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 
 export function NativeSelect(
   { value, onChange, onBlur, options, placeholder, disabled, ...rest }: UIKitNativeSelectProps,

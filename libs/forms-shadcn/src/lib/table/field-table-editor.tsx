@@ -8,7 +8,7 @@ import { type ClipboardEvent, type DragEvent, type ReactElement, useCallback, us
 import { FieldError } from '../uikit/primitives/field-error'
 import { FieldLabel } from '../uikit/primitives/field-label'
 import { FieldRoot } from '../uikit/primitives/field-root'
-import { cn } from '../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 import { TableEditorContext } from './table-editor-context'
 import type { TableEditorContextValue, TableEditorFieldProps } from './table-editor-types'
 import { TableEditorFooter } from './table-footer'

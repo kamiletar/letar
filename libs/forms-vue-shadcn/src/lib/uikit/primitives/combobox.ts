@@ -12,9 +12,9 @@ import {
   ComboboxViewport,
 } from 'reka-ui'
 import { h, type VNode } from 'vue'
-import { cn } from '../../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 import type { UINode } from '../ui-node'
-import { NATIVE_INPUT_CLASS } from './native-input-class'
+import { NATIVE_INPUT_CLASS } from '@letar/tailwind-utils'
 
 export function Combobox(
   { value, inputValue, onInputChange, onValueChange, options, loading, placeholder, disabled, ...rest }:

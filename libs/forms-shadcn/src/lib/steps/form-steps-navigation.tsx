@@ -2,7 +2,7 @@
 
 import { useDeclarativeForm } from '@letar/forms-react'
 import { type ReactNode, useCallback, useState } from 'react'
-import { cn } from '../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 import { useFormStepsContext } from './form-steps-context'
 
 export interface FormStepsNavigationProps {

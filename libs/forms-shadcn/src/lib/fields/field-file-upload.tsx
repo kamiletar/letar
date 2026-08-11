@@ -5,7 +5,7 @@ import { File as FileIcon, Upload, X } from 'lucide-react'
 import type { ChangeEvent, DragEvent, ReactElement } from 'react'
 import { useRef, useState } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
-import { cn } from '../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 import type { FileUploadFieldProps } from './types'
 
 function formatFileSize(bytes: number): string {

@@ -4,7 +4,7 @@ import type { ResolvedColumn } from '@letar/forms-core/table'
 import { formatCellValue } from '@letar/forms-core/table'
 import { formatFieldErrors, hasFieldErrors, useDeclarativeForm } from '@letar/forms-react'
 import { type KeyboardEvent, type RefObject, useCallback, useEffect, useRef, useState } from 'react'
-import { cn } from '../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 import { useTableEditorContext } from './table-editor-context'
 
 interface TableCellProps {

@@ -3,7 +3,7 @@
 import { getOptionLabel, groupOptions } from '@letar/forms-core/uikit'
 import type { ReactElement } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
-import { cn } from '../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 import type { ListboxFieldProps, ListboxOption } from './types'
 
 function optionButtonClass(selected: boolean, disabled: boolean | undefined): string {

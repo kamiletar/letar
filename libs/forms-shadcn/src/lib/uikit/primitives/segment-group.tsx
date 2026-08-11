@@ -3,7 +3,7 @@
 import type { UIKitSegmentGroupProps } from '@letar/forms-core/uikit'
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group'
 import type { ReactNode } from 'react'
-import { cn } from '../../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 
 export function SegmentGroup({ value, onValueChange, options, disabled, ...rest }: UIKitSegmentGroupProps<ReactNode>) {
   return (

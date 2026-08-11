@@ -133,4 +133,4 @@ export type {
 } from './lib/steps'
 
 // cn() — clsx + tailwind-merge, стандартный shadcn-хелпер
-export { cn } from './lib/utils/cn'
+export { cn } from '@letar/tailwind-utils'

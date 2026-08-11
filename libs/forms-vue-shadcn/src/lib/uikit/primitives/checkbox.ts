@@ -2,7 +2,7 @@ import type { UIKitCheckboxProps } from '@letar/forms-core/uikit'
 import { Check } from 'lucide-vue-next'
 import { CheckboxIndicator, CheckboxRoot } from 'reka-ui'
 import { h, type VNode } from 'vue'
-import { cn } from '../../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 import type { UINode } from '../ui-node'
 
 export function Checkbox(

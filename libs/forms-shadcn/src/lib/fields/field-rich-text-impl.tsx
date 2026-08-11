@@ -8,7 +8,7 @@ import StarterKit from '@tiptap/starter-kit'
 import type { ReactElement } from 'react'
 import { useEffect, useMemo } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
-import { cn } from '../utils/cn'
+import { cn } from '@letar/tailwind-utils'
 import { DEFAULT_TOOLBAR_BUTTONS, TOOLBAR_CONFIG, type ToolbarButton } from './rich-text-toolbar-config'
 import type { RichTextFieldProps } from './types'
 
