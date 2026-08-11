@@ -42,7 +42,7 @@ const CATEGORY_MAP: Record<string, FieldCategory> = {
   'Платёжные поля': 'payment',
   'Защитные поля': 'security',
   'Утилитарные поля': 'utility',
-  'Российские документы': 'document',
+  'Документные поля (Россия)': 'document',
 }
 
 /** Parses a markdown table row: | `Component` | Description | */
