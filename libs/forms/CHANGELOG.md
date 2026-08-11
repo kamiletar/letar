@@ -4,6 +4,32 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.0.3] - 2026-08-11
+
+### Changed
+
+- **Изолированы тяжёлые peer-deps четырёх полей через `lazy()` + dynamic `import()`** — паттерн
+  `Form.Captcha` (`captcha-field.tsx`) применён к `FieldRichText`, `FieldMaskedInput`,
+  `Form.Document.*` (`createDocumentField`) и `FieldDataGrid`/`FieldTableEditor`. До этого
+  форма с двумя простыми полями (например строка + пароль) требовала резолва `@tiptap/*` в
+  графе сборки — `FieldRichText` и `FieldMaskedInput` лежали в одном tsup-entry `fields/text`,
+  что `use-mask-input` для `Form.Document.*` резолвился для ЛЮБОГО потребителя `@letar/forms`
+  (реэкспорт из корневого barrel `lib/declarative/index.ts`), а `@tanstack/react-table`/
+  `@tanstack/react-virtual` — для любого потребителя `FieldTableEditor`, даже не использующего
+  `FieldDataGrid` (общий барrel `form-fields/table/index.ts`).
+  - `FieldRichText`: реализация вынесена в `field-rich-text-impl.tsx`, экспорт —
+    `createLazyComponent()` (общий хелпер `lazy-component.tsx`, ранее использовался только в
+    `createForm`'s `extraSelects`/`extraComboboxes`).
+  - `FieldDataGrid`/`FieldTableEditor`: та же обёртка в `form-fields/table/index.ts`.
+  - `FieldMaskedInput`/`createDocumentField`: компонент лёгкий (обычный `Input`), поэтому вместо
+    `React.lazy`+`Suspense` — точечный dynamic `import('use-mask-input')` внутри ref-колбэка
+    (маска применяется на первый рендер асинхронно, без визуальной задержки самого поля).
+  - Публичный API не изменился — импорт `Form.Field.RichText`/`Form.Field.DataGrid`/
+    `Form.Field.TableEditor`/`Form.Document.*` тот же, пропсы те же.
+  - Тесты, синхронно проверявшие DOM сразу после `render()` (`field-rich-text.spec.tsx`,
+    `table-selection.spec.tsx`), переведены на `waitFor`/`findBy` — резолв ленивого чанка
+    занимает как минимум один микротаск.
+
 ## [2.0.2] - 2026-08-10
 
 ### Changed

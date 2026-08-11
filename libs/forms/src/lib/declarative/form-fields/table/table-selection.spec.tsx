@@ -1,5 +1,5 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
-import { render } from '@testing-library/react'
+import { render, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { describe, expect, it } from 'vitest'
 import { Form } from '../../index'
@@ -66,8 +66,13 @@ describe('TableEditor row selection', () => {
     expect(next3.has(2)).toBe(true)
   })
 
-  it('рендерит таблицу с selectable чекбоксами', () => {
+  it('рендерит таблицу с selectable чекбоксами', async () => {
     const { container } = renderTable()
+
+    // FieldTableEditor загружается лениво (lazy() + dynamic import) — ждём резолва чанка
+    await waitFor(() => {
+      expect(container.innerHTML).toContain('Laptop')
+    })
 
     // Чекбоксы рендерятся как hidden inputs внутри Chakra Checkbox
     const hiddenCheckboxes = container.querySelectorAll('input[type="checkbox"]')
@@ -75,17 +80,16 @@ describe('TableEditor row selection', () => {
     // На мобильном виде таблица скрыта, проверяем хотя бы мобильный вид
     expect(hiddenCheckboxes.length).toBeGreaterThanOrEqual(0)
 
-    // Проверяем что таблица вообще рендерится
-    const table = container.querySelector('table')
-    // Может быть null если responsive скрывает десктопную таблицу
-    // Но мобильный вид должен быть
-    expect(container.innerHTML).toContain('Laptop')
     expect(container.innerHTML).toContain('Mouse')
     expect(container.innerHTML).toContain('Keyboard')
   })
 
-  it('каждый чекбокс строки имеет уникальную привязку к своему индексу', () => {
+  it('каждый чекбокс строки имеет уникальную привязку к своему индексу', async () => {
     const { container } = renderTable()
+
+    await waitFor(() => {
+      expect(container.innerHTML).toContain('Laptop')
+    })
 
     // Проверяем data-row-index атрибуты на строках
     const rows = container.querySelectorAll('[data-row-index]')

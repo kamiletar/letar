@@ -1,5 +1,5 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -9,9 +9,11 @@ const TestWrapper = ({ children }: { children: ReactNode }) => (
   <ChakraProvider value={defaultSystem}>{children}</ChakraProvider>
 )
 
+// FieldRichText загружается лениво (lazy() + dynamic import) — реализация с @tiptap/*
+// резолвится асинхронно, поэтому проверки после render() требуют waitFor/findBy.
 describe('FieldRichText', () => {
   describe('rendering', () => {
-    it('рендерит rich text editor', () => {
+    it('рендерит rich text editor', async () => {
       render(
         <TestWrapper>
           <Form initialValue={{ content: '' }} onSubmit={vi.fn()}>
@@ -21,11 +23,12 @@ describe('FieldRichText', () => {
       )
 
       // Tiptap рендерит contenteditable div
-      const editor = document.querySelector('[contenteditable]')
-      expect(editor).toBeInTheDocument()
+      await waitFor(() => {
+        expect(document.querySelector('[contenteditable]')).toBeInTheDocument()
+      })
     })
 
-    it('рендерит label', () => {
+    it('рендерит label', async () => {
       render(
         <TestWrapper>
           <Form initialValue={{ content: '' }} onSubmit={vi.fn()}>
@@ -34,7 +37,7 @@ describe('FieldRichText', () => {
         </TestWrapper>,
       )
 
-      expect(screen.getByText('Описание')).toBeInTheDocument()
+      expect(await screen.findByText('Описание')).toBeInTheDocument()
     })
   })
 })

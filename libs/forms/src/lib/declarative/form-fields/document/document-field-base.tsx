@@ -3,7 +3,6 @@
 import { Field, Icon, Input, InputGroup } from '@chakra-ui/react'
 import type { ReactElement, ReactNode } from 'react'
 import { useCallback } from 'react'
-import { withMask } from 'use-mask-input'
 import type { FieldTooltipMeta } from '../../types'
 import { createField, FieldError, FieldLabel } from '../base'
 
@@ -55,15 +54,19 @@ export function createDocumentField(config: DocumentFieldConfig) {
 
     // useFieldState вызывается ДО form.Field (hooks-safe), в отличие от render callback
     useFieldState: () => {
+      // use-mask-input подгружается динамически — иначе резолв требуется для ЛЮБОГО
+      // потребителя @letar/forms (createDocumentField реэкспортируется из корневого barrel)
       const maskRef = useCallback((element: HTMLInputElement | null) => {
         if (!element) {
           return
         }
-        withMask(config.mask, {
-          showMaskOnFocus: false,
-          clearIncomplete: true,
-          autoUnmask: false,
-        })(element)
+        import('use-mask-input').then(({ withMask }) => {
+          withMask(config.mask, {
+            showMaskOnFocus: false,
+            clearIncomplete: true,
+            autoUnmask: false,
+          })(element)
+        })
       }, [])
 
       return { maskRef }

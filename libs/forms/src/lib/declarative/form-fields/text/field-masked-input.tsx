@@ -2,7 +2,6 @@
 
 import { Input } from '@chakra-ui/react'
 import { type ReactElement, useCallback } from 'react'
-import { withMask } from 'use-mask-input'
 import type { MaskedInputFieldProps } from '../../types'
 import { createField, FieldWrapper } from '../base'
 
@@ -53,17 +52,21 @@ export const FieldMaskedInput = createField<MaskedInputFieldProps, string, Maske
     } = props
 
     // Create ref callback for applying mask
+    // use-mask-input подгружается динамически — тяжёлый peer-dep не должен резолвиться
+    // для всех потребителей fields/text, только для реально используемого MaskedInput
     const maskRef = useCallback(
       (element: HTMLInputElement | null) => {
         if (element && mask) {
-          const maskCallback = withMask(mask, {
-            placeholder: placeholderChar,
-            showMaskOnFocus,
-            showMaskOnHover,
-            clearIncomplete,
-            autoUnmask,
+          import('use-mask-input').then(({ withMask }) => {
+            const maskCallback = withMask(mask, {
+              placeholder: placeholderChar,
+              showMaskOnFocus,
+              showMaskOnHover,
+              clearIncomplete,
+              autoUnmask,
+            })
+            maskCallback(element)
           })
-          maskCallback(element)
         }
       },
       [mask, placeholderChar, showMaskOnFocus, showMaskOnHover, clearIncomplete, autoUnmask],
