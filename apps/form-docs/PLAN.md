@@ -48,6 +48,13 @@
       документацию (не автогенерация из Fumadocs source API — список должен остаться компактным).
       Фаза 7.6 `libs/forms/PLAN.md`, задача от координатора `QuietRidge` (msg #54).
 
+## P6 — гайды по портированию ✅
+
+- [x] `custom-uikit.mdx` + `.ru.mdx` — реализация `UIKit`-контракта голым HTML/CSS без Chakra/shadcn
+- [x] `porting-framework.mdx` + `.ru.mdx` — процессный разбор переноса на Vue (`forms-vue`/
+      `forms-vue-shadcn` как живой кейс, не причёсанный reference постфактум)
+      Фаза 7.8 → Поток 2 `libs/forms/PLAN.md`, задача от координатора `QuietRidge` (msg #61).
+
 ---
 
-**Последнее обновление:** 2026-08-11 (v0.1.9)
+**Последнее обновление:** 2026-08-12
