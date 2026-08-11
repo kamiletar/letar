@@ -5,7 +5,7 @@
 Dev-харнесс для `@letar/forms-shadcn` (Фаза 7.3, `libs/forms/PLAN.md` §7.3). Каркас Chakra от
 генератора заменён на Tailwind 4 + shadcn CSS-переменные (`src/app/globals.css`) — Chakra и
 Tailwind 4 не уживаются в одном глобальном стиле. Демо-страница синхронизирована с полями
-`@letar/forms-shadcn`: 34 из 56 (v0.16.0), продолжаем к паритету с `@letar/forms`.
+`@letar/forms-shadcn`: 36 из 56 (v0.18.0), продолжаем к паритету с `@letar/forms`.
 
 ## Фаза 0 — Фундамент ✅
 
@@ -37,7 +37,7 @@ Tailwind 4 не уживаются в одном глобальном стиле
       конце) — детали и находки по каждому полю в `libs/forms/PLAN.md` §7.3
 - [x] `typecheck:tsgo`/`lint` зелёные после каждого добавления
 
-## Фаза 2 — Продолжение к паритету (приоритет координатора) — в работе
+## Фаза 2 — Продолжение к паритету (приоритет координатора) ✅
 
 Приоритет от `QuietRidge` (тред `forms-phase7-3-shadcn`): Signature → FileUpload → Steps → Table →
 RichText.

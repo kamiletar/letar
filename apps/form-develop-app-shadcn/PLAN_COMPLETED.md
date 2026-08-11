@@ -1,5 +1,21 @@
 # Form Develop App (shadcn) — выполненные задачи
 
+## Фаза 2 — Table/RichText (2026-08-10…11, forms-dev, приоритет координатора закрыт)
+
+Завершение приоритетного списка `QuietRidge` (Signature → FileUpload → Steps → **Table → RichText**).
+Демо-страница дополнена 34→36 полями плюс двумя не-Field compound/beta-компонентами.
+
+- Демо `FieldTableEditor` (v0.17.0) — **не Field**, отдельная изолированная форма с array-полем
+  `items` (позиции заказа), кастомные колонки с `computed`/`format`, `sortable`, `selectable`,
+  footer `aggregate: 'sum'`. Коммиты: `b5fa70a3` (forms-shadcn), `ba67dab2`
+  (form-develop-app-shadcn), `82fa8b3f` (forms/PLAN.md).
+- Демо `FieldRichText` (v0.18.0) — отдельная изолированная форма с Tiptap-редактором,
+  `defaultValues.content` заполнен непустым HTML для проверки начального рендера. Коммиты:
+  `24491976` (forms-shadcn), `33d7ab63` (form-develop-app-shadcn), `2dfed284` (forms/PLAN.md).
+- Детали реализации (протечки границы, beta-упрощения, находки тестов, живая проверка) — в
+  `libs/forms/PLAN.md` §7.3, источник истины, не дублируется здесь.
+- `typecheck:tsgo`/`lint` зелёные на каждом шаге.
+
 ## Фаза 2 — Signature/FileUpload/Steps (2026-08-10, forms-dev, приоритет координатора)
 
 Продолжение к паритету с `@letar/forms-shadcn` по приоритету координатора `QuietRidge`
