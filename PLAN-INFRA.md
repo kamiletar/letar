@@ -8359,24 +8359,54 @@ submodule (WSL): `Install dependencies` → `Lint` → `Typecheck` → `Unit tes
       решение с потенциально широким блэст-радиусом (`exhaustive-deps` в режиме `warn` может
       всплыть заметным числом предупреждений по всему репо, не проверено).
 
-### Что осталось (после дифолт-прогона 2026-08-12, `--skip-nx-cache`, публичный репо)
+### ✅ Основной техдолг закрыт (2026-08-12, продолжение той же сессии)
 
-19 проектов всё ещё падают на lint. По категориям (счёт по строкам ошибок, не по проектам):
+- [x] `no-empty-function`/`no-empty` (~82) — разобрано по сайтам, без автофикса:
+      spec/test/bench/`lib/testing/**` файлы получили file-scope override в `eslint.config.mjs`
+      (пустые моки типа `IntersectionObserver` там легитимны по конструкции); в боевом коде
+      (`animatrona`, `grandslamcup`, `@letar/forms`) каждый `catch(() => {})`/пустой блок получил
+      поясняющий комментарий **внутри тела** — этого достаточно ESLint, чтобы не считать функцию
+      пустой (эквивалент `no-empty` для блоков). Два `useRef`-плейсхолдера (переприсваиваются
+      ниже) и два module-augmentation `interface` (React Navigation, Tamagui — пустой interface
+      обязателен для declaration merging) получили `eslint-disable-next-line` с пояснением.
+      Коммиты `a34067b6`, `97d2dad7`, `87ae927b`.
+- [x] `preserve-caught-error` (23 строки → 12 уникальных мест) — добавлен `{ cause: error }` в
+      `throw new Error(...)` на каждом сайте, где перехваченная ошибка терялась при перевыбросе
+      новой. Коммит `268f5fb6`.
+- [x] `no-useless-assignment` (8 строк → 6 мест) — везде один и тот же паттерн: `let x = <дефолт>`
+      перед исчерпывающим `if/else`, который всегда переприсваивает до первого чтения. Убран
+      мёртвый инициализатор (`let x: T` вместо `let x = default`). Коммит `268f5fb6`.
+- [x] `no-empty-object-type`/`no-empty-interface` (4 строки → 2 места) — оба module augmentation
+      (React Navigation `RootParamList`, Tamagui `TamaguiCustomConfig`), пустой `interface`
+      обязателен для declaration merging, `type` не подходит. `eslint-disable-next-line` с
+      пояснением. Коммит `268f5fb6`.
+- [x] `@nx/enforce-module-boundaries` (1 случай, `useSubtitles.spec.ts`) — ложное срабатывание:
+      тест дёргал `await import('@letar/video-player-core')` внутри `it()` при уже
+      замоканном (`vi.mock`) на верхнем уровне модуле — Nx решил, что библиотека «лениво
+      загружена», и начал ругаться на статический импорт в `useSubtitles.ts`. Заменено на
+      обычный top-level import (стандартный vitest-паттерн для домоканного модуля), тесты
+      зелёные. Коммит `a34067b6`.
+- [x] Решение про централизованную регистрацию `react-hooks` плагина — **сознательно отложено**,
+      не входило в скоуп этого захода (потенциально широкий блэст-радиус, нужна отдельная сессия).
 
-| Правило                                                        | Кол-во | Природа                                                                                                                                          |
-| -------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `@typescript-eslint/no-empty-function`                         | ~82    | В основном тестовые моки (`IntersectionObserver` и т.п.) — нужен ручной просмотр каждого, автофикс рискован именно там (см. предупреждение ниже) |
-| `preserve-caught-error`                                        | 23     | Нужно добавлять `cause` в перевыброшенные ошибки — решение на каждом сайте, не автофикс                                                          |
-| `playwright/no-networkidle`                                    | 5      | Известная категория, не разбиралась в этом заходе                                                                                                |
-| `no-useless-assignment`                                        | 8      | Мёртвые присваивания — нужен просмотр, не всегда безопасный автофикс                                                                             |
-| `@typescript-eslint/no-empty-object-type`/`no-empty-interface` | 4      | Пустые интерфейсы — тривиально, но не сделано                                                                                                    |
-| `next/no-img-element`                                          | 3      | Предсуществующее в `libs/ui/src/lib/header/header-logo.spec.tsx` (spec-файл, не тронут этой сессией) — техдолг из прошлых сессий, не новый       |
-| Прочее (по 1 разу)                                             | ~3     | `Static imports of lazy-loaded libraries are forbidden` и др.                                                                                    |
+Итог трёх прогонов `nx run-many -t lint --projects=<98 публичных>` (до фикса → после dprint/curly
+→ после этого захода): **22 → 19 → 7** падающих проектов.
 
-- [ ] Разобрать `no-empty-function` по пакетам — не чистить втихую большим коммитом
-      (`no-empty-function` в тестовых моках особенно легко сломать автофиксом).
-- [ ] `preserve-caught-error` — по одному сайту, добавлять реальный `cause`.
-- [ ] Решить про централизованную регистрацию `react-hooks` плагина (см. выше).
-- [ ] `@nx/enforce-module-boundaries` из первоначальной находки в этом прогоне не всплыл — возможно
-      уже неактуален или скрыт другими падениями (`--nx-bail` останавливает граф раньше). Перепроверить
-      отдельно, когда `no-empty-function`/`preserve-caught-error` будут разобраны.
+### Осталось (вне скоупа `no-empty-function`/`preserve-caught-error`, отдельные причины)
+
+- [ ] `playwright/no-networkidle` (5, `animatrona-landing-e2e`, `letar-landing-e2e`) — не
+      разбиралось ни в одном из заходов, отдельная категория.
+- [ ] `next/no-img-element` в `libs/ui/src/lib/header/header-logo.spec.tsx` (3) —
+      предсуществующий техдолг из прошлых сессий, не новый.
+- [ ] 🆕 **Новая находка (2026-08-12):** `nx run @letar/chakra-provider:lint` и
+      `nx run @letar/yandex-metrika:lint` падают не на правиле, а на самом ESLint —
+      `TypeError: Error while loading rule 'react/no-direct-mutation-state':
+      contextOrFilename.getFilename is not a function`. Похоже на несовместимость версии плагина
+      `eslint-plugin-react` с ESLint 10.6.0 (flat config), проявляется именно на этих двух
+      проектах — не проверено, почему не на остальных, использующих тот же плагин. Требует
+      отдельного расследования версий, не тривиальный фикс.
+- [ ] 🆕 **Новая находка (2026-08-12):** `nx run @letar/source:lint` → `No files matching the
+      pattern "./src" were found` — у проекта `@letar/source` нет каталога `src/` вообще.
+      Похоже на «фантомный»/неправильно сконфигурированный проект (опечатка в имени при
+      генерации? заброшенный каркас?) — нужно решить, реален ли этот проект, а не чинить
+      таргет `lint`.
