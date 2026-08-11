@@ -26,6 +26,7 @@ export { FieldNumber } from './lib/fields/field-number'
 export { FieldNumberInput } from './lib/fields/field-number-input'
 export { FieldOTPInput } from './lib/fields/field-otp-input'
 export { FieldPassword } from './lib/fields/field-password'
+export { FieldPasswordStrength } from './lib/fields/field-password-strength'
 export { FieldPercentage } from './lib/fields/field-percentage'
 export { FieldPhone } from './lib/fields/field-phone'
 export { FieldPinInput } from './lib/fields/field-pin-input'
@@ -73,6 +74,8 @@ export type {
   NumberInputFieldProps,
   OTPInputFieldProps,
   PasswordFieldProps,
+  PasswordRequirement,
+  PasswordStrengthFieldProps,
   PercentageFieldProps,
   PhoneCountry,
   PhoneFieldProps,

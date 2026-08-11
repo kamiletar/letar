@@ -121,6 +121,27 @@ export interface PasswordFieldProps extends BaseFieldProps {
   defaultVisible?: boolean
 }
 
+/** Требование к паролю для `Form.Field.PasswordStrength`. */
+export type PasswordRequirement = 'minLength:8' | 'uppercase' | 'lowercase' | 'number' | 'special'
+
+/**
+ * Props for Form.Field.PasswordStrength (shadcn-скин).
+ *
+ * Портирован из Chakra-версии без изменений логики расчёта силы пароля (доля выполненных
+ * требований × 100) — своя реализация цветной полосы прогресса вместо Chakra `Progress.Root`
+ * (нет такого примитива в UIKit-контракте, простой `<div>` с шириной в процентах).
+ */
+export interface PasswordStrengthFieldProps extends BaseFieldProps {
+  maxLength?: number
+  autoComplete?: string
+  /** Показывать пароль открытым текстом по умолчанию */
+  defaultVisible?: boolean
+  /** Список требований (по умолчанию — все 5) */
+  requirements?: PasswordRequirement[]
+  /** Показывать чеклист требований под полем (по умолчанию true) */
+  showRequirements?: boolean
+}
+
 /**
  * Props for Form.Field.Combobox (shadcn-скин).
  *
