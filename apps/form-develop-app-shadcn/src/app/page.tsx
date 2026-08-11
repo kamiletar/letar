@@ -5,6 +5,7 @@ import type { WeeklySchedule } from '@letar/forms-shadcn'
 import {
   FieldAddress,
   FieldAutocomplete,
+  FieldCalculated,
   FieldCascadingSelect,
   FieldCheckbox,
   FieldCheckboxCard,
@@ -125,6 +126,7 @@ interface DemoFormValues {
   productStyle: string
   npsScore: number | undefined
   satisfaction: Record<string, string | string[]>
+  finalPrice: number
 }
 
 const defaultValues: DemoFormValues = {
@@ -171,6 +173,7 @@ const defaultValues: DemoFormValues = {
   productStyle: '',
   npsScore: undefined,
   satisfaction: {},
+  finalPrice: 0,
 }
 
 const matrixRows = [
@@ -209,7 +212,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Form Develop App (shadcn)</h1>
       <p className="text-muted-foreground mt-2 text-sm">
-        Песочница для разработки @letar/forms-shadcn — 46 полей, Фаза 7.3 Шаг 5+.
+        Песочница для разработки @letar/forms-shadcn — 47 полей, Фаза 7.3 Шаг 5+.
       </p>
 
       <DemoForm<DemoFormValues>
@@ -331,6 +334,13 @@ export default function HomePage() {
           label="Оцените аспекты заказа"
           rows={matrixRows}
           columns={matrixColumns}
+        />
+        <FieldCalculated
+          name="finalPrice"
+          label="Цена со скидкой"
+          compute={(v) => (v.price as number) * (1 - (v.discount as number) / 100)}
+          format={(v) => `${Number(v).toLocaleString('ru-RU')} ₽`}
+          deps={['price', 'discount']}
         />
 
         <button

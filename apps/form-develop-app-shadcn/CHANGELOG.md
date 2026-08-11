@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (2026-08-11, продолжение 11)
+
+- Демо `FieldCalculated` (`@letar/forms-shadcn` 0.29.0) — цена со скидкой из `price`/`discount`.
+
 ## Unreleased (2026-08-11, продолжение 10)
 
 - Демо `FieldDataGrid` (`@letar/forms-shadcn` 0.28.0) — таблица сотрудников: сортировка, фильтр,
