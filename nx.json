@@ -52,6 +52,7 @@
     },
     {
       "plugin": "@nx/eslint/plugin",
+      "exclude": ["eslint.config.mjs"],
       "options": {
         "targetName": "lint"
       }
