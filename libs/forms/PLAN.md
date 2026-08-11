@@ -1880,6 +1880,44 @@ React, а React-адаптер зависит от абстракций ядра
       сессии — Browser pane не композитил кадры (`the Browser pane is not displayed`), тот же
       известный артефакт свёрнутой панели, что и в проверке `FieldTableEditor`; DOM/JS-проверки
       остаются валидными независимо от него.
+- ✅ **Шаг 5 — полный паритет `forms-shadcn` с `@letar/forms` достигнут (2026-08-11, forms-dev),
+  56 из 56 полей, `@letar/forms-shadcn` 0.30.0.** Одна непрерывная сессия дожала оставшиеся 12
+  полей вслед за приоритетным списком координатора (Signature→FileUpload→Steps→Table→RichText,
+  все ✅ ранее): `FieldYesNo`, `FieldNumberInput`, `FieldPasswordStrength`, `FieldTime`,
+  `FieldCascadingSelect`, `FieldImageChoice`, `FieldSchedule`, `FieldLikert`,
+  `FieldMatrixChoice`, `FieldDataGrid`, `FieldCalculated`, `FieldAuto` — каждое отдельным
+  коммитом (lib + демо), с тестами, README/CHANGELOG/версией по ходу.
+  - **`FieldCascadingSelect`** — не `createField()`-поле (как `FormSteps`/`FieldTableEditor`),
+    компонует `form.Subscribe` напрямую: рендер зависит от значения ДРУГОГО поля (`dependsOn`).
+  - **`FieldDataGrid`** — первое поле, добавившее `@tanstack/react-table` в `peerDependencies`
+    (`bun install` перерезолвил `libs/forms-shadcn/node_modules/@tanstack/react-table`).
+    Изолировано через `lazy()` + dynamic `import()` (`field-data-grid-impl.tsx`) — тот же
+    паттерн, что `FieldRichText` для `@tiptap/*`. Beta: без виртуализации
+    (`@tanstack/react-virtual` — второй тяжёлый peer, тот же принцип отказа, что у
+    `FieldTableEditor`), без resize/drag-reorder колонок, без auto-резолва из schema.
+  - **`FieldCalculated`** — `useComputedValue` (`useSyncExternalStore` на `form.store`, защита
+    от циклических зависимостей) скопирован framework-free дословно из Chakra-версии,
+    `useDebounce` переиспользован из уже публичного экспорта `@letar/forms-react`.
+  - **`FieldAuto`** (последнее, замкнуло паритет) — `traverseSchema` + поиск по dot-path,
+    диспетчеризация на уже существующие поля пакета по базовому Zod-типу. Beta: без
+    `renderFieldByType`/`meta.fieldType`-диспетчеризации на ~50 типов, которую даёт
+    Chakra-версия — только string/number/boolean/date/enum.
+  - Общий паттерн beta-упрощений по всем 12: одна разметка на все брейкпоинты (без раздельных
+    мобильных/десктопных DOM-деревьев — `FieldLikert`/`FieldMatrixChoice`), без стрелочной
+    клавиатурной навигации по ячейкам/точкам, без auto-резолва колонок/полей из schema там, где
+    Chakra-версия это делает.
+  - `FieldAuto` живая проверка — в Chromium (Browser pane): изолированная форма со своей
+    Zod-схемой (`DemoForm` расширен опциональным `schema`-пропом под эту задачу — раньше был
+    только `form`), все 5 веток диспетчеризации (string/textarea/number/switch/enum) подтверждены
+    через `read_page`/`javascript_tool`, консоль чистая (только HMR WebSocket-шум прокси).
+    `FieldDataGrid` — рендер/данные/rowSelection подтверждены в Browser pane; сортировка по
+    клику заголовка проверена через RTL (`fireEvent.click`), не через Browser pane — известный
+    класс артефактов JS-харнесса (raw `dispatchEvent(MouseEvent)` не триггерит React-обработчик
+    так же, как реальный клик в этой сессии), не баг компонента.
+  - `apps/form-develop-app-shadcn` синхронизирован по ходу — по демо-коммиту на каждое поле,
+    финальный счётчик страницы «56 из 56 полей, полный паритет с `@letar/forms`».
+  - Следующий шаг — 7.4 (замер трафика) или докрутка README/CHANGELOG-цикла для release-ready
+    состояния пакета (ещё не решено, см. письмо координатора #3 в треде `forms-phase7-3-shadcn`).
 - [ ] **7.4 Замер трафика** → решение: доносить сложные поля или нет.
 - [ ] **7.5 Docs-сайт на отдельном домене** + живые демо. SEO под `zod forms react`, `prisma form generator`.
 - [ ] **7.6 `llms.txt` + усиление MCP** — недоиспользованный козырь №1 (дёшево, уникально).
