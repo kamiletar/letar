@@ -4,7 +4,6 @@ import type { SchemaFieldInfo } from '@letar/forms-core/schema'
 import { traverseSchema } from '@letar/forms-core/schema'
 import { useDeclarativeForm, useFormGroup } from '@letar/forms-react'
 import type { ReactElement } from 'react'
-import type { BaseFieldProps } from './types'
 import { FieldCheckbox } from './field-checkbox'
 import { FieldDate } from './field-date'
 import { FieldNativeSelect } from './field-native-select'
@@ -12,6 +11,7 @@ import { FieldNumber } from './field-number'
 import { FieldString } from './field-string'
 import { FieldSwitch } from './field-switch'
 import { FieldTextarea } from './field-textarea'
+import type { BaseFieldProps } from './types'
 
 /** Конфигурация авто-детекции для `Form.Field.Auto` (shadcn-скин). */
 export interface AutoFieldConfig {

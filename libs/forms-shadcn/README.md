@@ -85,10 +85,17 @@ import {
 } from '@letar/forms-shadcn'
 ```
 
-## Поля (56 из 56 — полный паритет с `@letar/forms`)
+## Поля (47 из 56 портировано с `@letar/forms`)
 
 Плюс `FormSteps` и `FieldTableEditor` — compound-компоненты форм-уровня, не `createField()`-поля
 (см. разделы ниже).
+
+**9 полей осознанно не портированы** и остаются в backlog до отдельной исследовательской сессии
+(своя реализация масок вместо `use-mask-input` — см. `libs/forms/PLAN.md` backlog): `FieldMaskedInput`,
+`FieldCreditCard`, `FieldInn`, `FieldKpp`, `FieldOgrn`, `FieldSnils`, `FieldPassport`, `FieldBik`,
+`FieldBankAccount`. Все девять в Chakra-версии (`@letar/forms`) используют `use-mask-input`, у
+которого уже был WebKit-баг (мутация DOM в обход React, поймано на `FieldPhone`) — тащить ту же
+зависимость в новый скин до пересмотра масочного движка не имеет смысла.
 
 | Поле                    | Radix-примитив                                      |
 | ----------------------- | --------------------------------------------------- |
@@ -227,8 +234,8 @@ Chakra-версии без изменений домена (extensions, `onUpdat
 диспетчеризации по `meta.fieldType` на ~50 типов полей (в Chakra-версии позволяет
 `.meta({ ui: { fieldType: 'richText' } })` явно переопределить компонент) — только базовый
 Zod-тип (string/number/boolean/date/enum) определяет поле, тот же fallback-путь, что
-`renderFieldByType` использовал бы в отсутствие явного `fieldType`. **Последнее поле для полного
-паритета с `@letar/forms` — 56 из 56.**
+`renderFieldByType` использовал бы в отсутствие явного `fieldType`. **Последнее из 47
+портированных полей — см. список 9 отложенных выше.**
 
 `FieldYesNo` — два кликабельных блока (`role="radio"` в `role="radiogroup"`), тот же подход, что
 `FieldRadioCard`/`FieldListbox`; портирован из Chakra-версии без изменений логики, значение —

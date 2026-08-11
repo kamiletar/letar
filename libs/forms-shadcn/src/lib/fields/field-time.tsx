@@ -18,7 +18,8 @@ export const FieldTime = createField<TimeFieldProps, string>({
       <input
         type="time"
         value={(field.state.value as string) ?? ''}
-        onChange={(e) => field.handleChange(e.target.value)}
+        onChange={(e) =>
+          field.handleChange(e.target.value)}
         onBlur={field.handleBlur}
         min={componentProps.min}
         max={componentProps.max}

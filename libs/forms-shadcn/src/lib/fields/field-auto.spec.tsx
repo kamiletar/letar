@@ -1,6 +1,6 @@
 import { DeclarativeFormContext } from '@letar/forms-react'
-import { render, screen } from '@testing-library/react'
 import { useForm } from '@tanstack/react-form'
+import { render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod/v4'
@@ -103,6 +103,12 @@ describe('FieldAuto (shadcn)', () => {
   it('бросает ошибку без name', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Broken = () => <FieldAuto {...({} as any)} />
-    expect(() => render(<SchemaTestForm><Broken /></SchemaTestForm>)).toThrow('Form.Field.Auto requires a name prop')
+    expect(() =>
+      render(
+        <SchemaTestForm>
+          <Broken />
+        </SchemaTestForm>,
+      )
+    ).toThrow('Form.Field.Auto requires a name prop')
   })
 })
