@@ -41,7 +41,6 @@ export function ScorerVoteInput({ matchId, performanceId, dimension, judges, onS
     setSelectedScores({})
     setError(null)
     onScoresChange?.({})
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [performanceId, dimension])
 
   // Refs для актуальных значений в обработчике клавиш (не нужно перерегистрировать listener)
@@ -106,15 +105,15 @@ export function ScorerVoteInput({ matchId, performanceId, dimension, judges, onS
     const onKeyDown = (e: KeyboardEvent) => {
       // Не перехватываем если фокус в input/textarea/select
       const tag = (e.target as HTMLElement).tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') { return }
 
       // Только цифры 1-5 (isNaN защищает от стрелок и других клавиш)
       const score = parseInt(e.key, 10)
-      if (isNaN(score) || score < 1 || score > 5) return
+      if (isNaN(score) || score < 1 || score > 5) { return }
 
       // Первый ручной судья без выбранной оценки (берём из ref — всегда актуально)
       const target = manualJudges.find((j) => !selectedScoresRef.current[j.judgeNumber])
-      if (!target) return
+      if (!target) { return }
 
       e.preventDefault()
       void handleVoteRef.current(target, score)
@@ -207,7 +206,7 @@ export function ScorerVoteInput({ matchId, performanceId, dimension, judges, onS
                         bg: isSelected ? `${accent}.solid` : `${accent}.subtle`,
                       }}
                     onClick={() => {
-                      if (!isJudgeLoading) void handleVote(judge, score)
+                      if (!isJudgeLoading) { void handleVote(judge, score) }
                     }}
                   >
                     {isLoading ? '…' : score}

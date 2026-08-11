@@ -64,7 +64,7 @@ export function EditPlayerCoachDialog({ player, onClose }: EditPlayerCoachDialog
 
   /** Привязать User */
   async function handleLink() {
-    if (!linkEmail.trim()) return
+    if (!linkEmail.trim()) { return }
     setLinking(true)
     try {
       const result = await linkPlayerToUserAction({

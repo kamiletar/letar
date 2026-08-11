@@ -67,8 +67,8 @@ export function MatchPhotoSection({
   }
 
   function canDeletePhoto(photo: PhotoItem): boolean {
-    if (!session?.user) return false
-    if (canDeleteAll) return true
+    if (!session?.user) { return false }
+    if (canDeleteAll) { return true }
     return photo.uploadedById === currentUserId
   }
 

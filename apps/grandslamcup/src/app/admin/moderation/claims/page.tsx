@@ -67,7 +67,7 @@ export default function ClaimsPage() {
   }, [loadClaims])
 
   const handleConfirm = async () => {
-    if (!confirmAction) return
+    if (!confirmAction) { return }
     setProcessing(true)
     try {
       if (confirmAction.type === 'approve') {

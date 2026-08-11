@@ -96,29 +96,29 @@ Module['onRuntimeInitialized'] = function() {
   }
 }
 Module['print'] = function(text) {
-  if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ')
+  if (arguments.length > 1) { text = Array.prototype.slice.call(arguments).join(' ') }
   console.log(text)
 }
 Module['printErr'] = function(text) {
-  if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ')
+  if (arguments.length > 1) { text = Array.prototype.slice.call(arguments).join(' ') }
   console.error(text)
 }
 if (!hasNativeConsole) {
   var console = {
     log: function(x) {
-      if (typeof dump === 'function') dump('log: ' + x + '\n')
+      if (typeof dump === 'function') { dump('log: ' + x + '\n') }
     },
     debug: function(x) {
-      if (typeof dump === 'function') dump('debug: ' + x + '\n')
+      if (typeof dump === 'function') { dump('debug: ' + x + '\n') }
     },
     info: function(x) {
-      if (typeof dump === 'function') dump('info: ' + x + '\n')
+      if (typeof dump === 'function') { dump('info: ' + x + '\n') }
     },
     warn: function(x) {
-      if (typeof dump === 'function') dump('warn: ' + x + '\n')
+      if (typeof dump === 'function') { dump('warn: ' + x + '\n') }
     },
     error: function(x) {
-      if (typeof dump === 'function') dump('error: ' + x + '\n')
+      if (typeof dump === 'function') { dump('error: ' + x + '\n') }
     },
   }
 }
@@ -1860,7 +1860,7 @@ function BrotliDecodeClosure() {
     return a <= b ? a : b
   }
   function readInput(src, dst, offset, length) {
-    if (src == null) return -1
+    if (src == null) { return -1 }
     const end = min(src.offset + length, src.data.length)
     const bytesRead = end - src.offset
     dst.set(src.data.subarray(src.offset, end), offset)
@@ -1893,7 +1893,7 @@ function BrotliDecodeClosure() {
       s.outputUsed = 0
       decompress(s)
       totalOutput += s.outputUsed
-      if (s.outputUsed < 16384) break
+      if (s.outputUsed < 16384) { break }
     }
     close(s)
     const result = new Int8Array(totalOutput)
@@ -1982,11 +1982,11 @@ const out = Module['print'] || console.log.bind(console)
 const err = Module['printErr'] || console.warn.bind(console)
 Object.assign(Module, moduleOverrides)
 moduleOverrides = null
-if (Module['arguments']) arguments_ = Module['arguments']
-if (Module['thisProgram']) thisProgram = Module['thisProgram']
-if (Module['quit']) quit_ = Module['quit']
+if (Module['arguments']) { arguments_ = Module['arguments'] }
+if (Module['thisProgram']) { thisProgram = Module['thisProgram'] }
+if (Module['quit']) { quit_ = Module['quit'] }
 function warnOnce(text) {
-  if (!warnOnce.shown) warnOnce.shown = {}
+  if (!warnOnce.shown) { warnOnce.shown = {} }
   if (!warnOnce.shown[text]) {
     warnOnce.shown[text] = 1
     err(text)
@@ -1998,7 +1998,7 @@ const setTempRet0 = (value) => {
 }
 const getTempRet0 = () => tempRet0
 let wasmBinary
-if (Module['wasmBinary']) wasmBinary = Module['wasmBinary']
+if (Module['wasmBinary']) { wasmBinary = Module['wasmBinary'] }
 const noExitRuntime = Module['noExitRuntime'] || true
 if (typeof WebAssembly != 'object') {
   abort('no native wasm support detected')
@@ -2036,7 +2036,7 @@ function ccall(ident, returnType, argTypes, args, opts) {
     if (returnType === 'string') {
       return UTF8ToString(ret)
     }
-    if (returnType === 'boolean') return Boolean(ret)
+    if (returnType === 'boolean') { return Boolean(ret) }
     return ret
   }
   const func = getCFunc(ident)
@@ -2046,7 +2046,7 @@ function ccall(ident, returnType, argTypes, args, opts) {
     for (let i = 0; i < args.length; i++) {
       const converter = toC[argTypes[i]]
       if (converter) {
-        if (stack === 0) stack = stackSave()
+        if (stack === 0) { stack = stackSave() }
         cArgs[i] = converter(args[i])
       } else {
         cArgs[i] = args[i]
@@ -2055,7 +2055,7 @@ function ccall(ident, returnType, argTypes, args, opts) {
   }
   let ret = func.apply(null, cArgs)
   function onDone(ret) {
-    if (stack !== 0) stackRestore(stack)
+    if (stack !== 0) { stackRestore(stack) }
     return convertReturnValue(ret)
   }
   ret = onDone(ret)
@@ -2078,7 +2078,7 @@ const UTF8Decoder = typeof TextDecoder != 'undefined' ? new TextDecoder('utf8') 
 function UTF8ArrayToString(heapOrArray, idx, maxBytesToRead) {
   const endIdx = idx + maxBytesToRead
   let endPtr = idx
-  while (heapOrArray[endPtr] && !(endPtr >= endIdx)) ++endPtr
+  while (heapOrArray[endPtr] && !(endPtr >= endIdx)) { ++endPtr }
   if (endPtr - idx > 16 && heapOrArray.buffer && UTF8Decoder) {
     return UTF8Decoder.decode(heapOrArray.subarray(idx, endPtr))
   } else {
@@ -2114,7 +2114,7 @@ function UTF8ToString(ptr, maxBytesToRead) {
   return ptr ? UTF8ArrayToString(HEAPU8, ptr, maxBytesToRead) : ''
 }
 function stringToUTF8Array(str, heap, outIdx, maxBytesToWrite) {
-  if (!(maxBytesToWrite > 0)) return 0
+  if (!(maxBytesToWrite > 0)) { return 0 }
   const startIdx = outIdx
   const endIdx = outIdx + maxBytesToWrite - 1
   for (let i = 0; i < str.length; ++i) {
@@ -2124,19 +2124,19 @@ function stringToUTF8Array(str, heap, outIdx, maxBytesToWrite) {
       u = (65536 + ((u & 1023) << 10)) | (u1 & 1023)
     }
     if (u <= 127) {
-      if (outIdx >= endIdx) break
+      if (outIdx >= endIdx) { break }
       heap[outIdx++] = u
     } else if (u <= 2047) {
-      if (outIdx + 1 >= endIdx) break
+      if (outIdx + 1 >= endIdx) { break }
       heap[outIdx++] = 192 | (u >> 6)
       heap[outIdx++] = 128 | (u & 63)
     } else if (u <= 65535) {
-      if (outIdx + 2 >= endIdx) break
+      if (outIdx + 2 >= endIdx) { break }
       heap[outIdx++] = 224 | (u >> 12)
       heap[outIdx++] = 128 | ((u >> 6) & 63)
       heap[outIdx++] = 128 | (u & 63)
     } else {
-      if (outIdx + 3 >= endIdx) break
+      if (outIdx + 3 >= endIdx) { break }
       heap[outIdx++] = 240 | (u >> 18)
       heap[outIdx++] = 128 | ((u >> 12) & 63)
       heap[outIdx++] = 128 | ((u >> 6) & 63)
@@ -2153,11 +2153,11 @@ function lengthBytesUTF8(str) {
   let len = 0
   for (let i = 0; i < str.length; ++i) {
     let u = str.charCodeAt(i)
-    if (u >= 55296 && u <= 57343) u = (65536 + ((u & 1023) << 10)) | (str.charCodeAt(++i) & 1023)
-    if (u <= 127) ++len
-    else if (u <= 2047) len += 2
-    else if (u <= 65535) len += 3
-    else len += 4
+    if (u >= 55296 && u <= 57343) { u = (65536 + ((u & 1023) << 10)) | (str.charCodeAt(++i) & 1023) }
+    if (u <= 127) { ++len }
+    else if (u <= 2047) { len += 2 }
+    else if (u <= 65535) { len += 3 }
+    else { len += 4 }
   }
   return len
 }
@@ -2174,7 +2174,7 @@ function writeAsciiToMemory(str, buffer, dontAddNull) {
   for (let i = 0; i < str.length; ++i) {
     HEAP8[buffer++ >> 0] = str.charCodeAt(i)
   }
-  if (!dontAddNull) HEAP8[buffer >> 0] = 0
+  if (!dontAddNull) { HEAP8[buffer >> 0] = 0 }
 }
 let buffer, HEAP8, HEAPU8, HEAP16, HEAPU16, HEAP32, HEAPU32, HEAPF32, HEAPF64
 function updateGlobalBufferAndViews(buf) {
@@ -2200,7 +2200,7 @@ function keepRuntimeAlive() {
 }
 function preRun() {
   if (Module['preRun']) {
-    if (typeof Module['preRun'] == 'function') Module['preRun'] = [Module['preRun']]
+    if (typeof Module['preRun'] == 'function') { Module['preRun'] = [Module['preRun']] }
     while (Module['preRun'].length) {
       addOnPreRun(Module['preRun'].shift())
     }
@@ -2209,7 +2209,7 @@ function preRun() {
 }
 function initRuntime() {
   runtimeInitialized = true
-  if (!Module['noFSInit'] && !FS.init.initialized) FS.init()
+  if (!Module['noFSInit'] && !FS.init.initialized) { FS.init() }
   FS.ignorePermissions = false
   TTY.init()
   callRuntimeCallbacks(__ATINIT__)
@@ -2219,7 +2219,7 @@ function preMain() {
 }
 function postRun() {
   if (Module['postRun']) {
-    if (typeof Module['postRun'] == 'function') Module['postRun'] = [Module['postRun']]
+    if (typeof Module['postRun'] == 'function') { Module['postRun'] = [Module['postRun']] }
     while (Module['postRun'].length) {
       addOnPostRun(Module['postRun'].shift())
     }
@@ -2431,10 +2431,10 @@ function _emscripten_set_main_loop_timing(mode, value) {
       setImmediate = function Browser_emulated_setImmediate(func) {
         setImmediates.push(func)
         if (ENVIRONMENT_IS_WORKER) {
-          if (Module['setImmediates'] === undefined) Module['setImmediates'] = []
+          if (Module['setImmediates'] === undefined) { Module['setImmediates'] = [] }
           Module['setImmediates'].push(func)
           postMessage({ target: emscriptenMainLoopMessageId })
-        } else postMessage(emscriptenMainLoopMessageId, '*')
+        } else { postMessage(emscriptenMainLoopMessageId, '*') }
       }
     }
     Browser.mainLoop.scheduler = function Browser_mainLoop_scheduler_setImmediate() {
@@ -2473,7 +2473,7 @@ function setMainLoop(browserIterationFunc, fps, simulateInfiniteLoop, arg, noSet
   }
   Browser.mainLoop.running = false
   Browser.mainLoop.runner = function Browser_mainLoop_runner() {
-    if (ABORT) return
+    if (ABORT) { return }
     if (Browser.mainLoop.queue.length > 0) {
       const start = Date.now()
       const blocker = Browser.mainLoop.queue.shift()
@@ -2490,11 +2490,11 @@ function setMainLoop(browserIterationFunc, fps, simulateInfiniteLoop, arg, noSet
       }
       out('main loop blocker "' + blocker.name + '" took ' + (Date.now() - start) + ' ms')
       Browser.mainLoop.updateStatus()
-      if (!checkIsRunning()) return
+      if (!checkIsRunning()) { return }
       setTimeout(Browser.mainLoop.runner, 0)
       return
     }
-    if (!checkIsRunning()) return
+    if (!checkIsRunning()) { return }
     Browser.mainLoop.currentFrameNumber = (Browser.mainLoop.currentFrameNumber + 1) | 0
     if (
       Browser.mainLoop.timingMode == 1
@@ -2507,13 +2507,13 @@ function setMainLoop(browserIterationFunc, fps, simulateInfiniteLoop, arg, noSet
       Browser.mainLoop.tickStartTime = _emscripten_get_now()
     }
     Browser.mainLoop.runIter(browserIterationFunc)
-    if (!checkIsRunning()) return
-    if (typeof SDL == 'object' && SDL.audio && SDL.audio.queueNewAudioData) SDL.audio.queueNewAudioData()
+    if (!checkIsRunning()) { return }
+    if (typeof SDL == 'object' && SDL.audio && SDL.audio.queueNewAudioData) { SDL.audio.queueNewAudioData() }
     Browser.mainLoop.scheduler()
   }
   if (!noSetTiming) {
-    if (fps && fps > 0) _emscripten_set_main_loop_timing(0, 1e3 / fps)
-    else _emscripten_set_main_loop_timing(1, 1)
+    if (fps && fps > 0) { _emscripten_set_main_loop_timing(0, 1e3 / fps) }
+    else { _emscripten_set_main_loop_timing(1, 1) }
     Browser.mainLoop.scheduler()
   }
   if (simulateInfiniteLoop) {
@@ -2582,7 +2582,7 @@ var Browser = {
       }
     },
     runIter: function(func) {
-      if (ABORT) return
+      if (ABORT) { return }
       if (Module['preMainLoop']) {
         const preRet = Module['preMainLoop']()
         if (preRet === false) {
@@ -2590,7 +2590,7 @@ var Browser = {
         }
       }
       callUserCallback(func)
-      if (Module['postMainLoop']) Module['postMainLoop']()
+      if (Module['postMainLoop']) { Module['postMainLoop']() }
     },
   },
   isFullscreen: false,
@@ -2598,8 +2598,8 @@ var Browser = {
   moduleContextCreatedCallbacks: [],
   workers: [],
   init: function() {
-    if (!Module['preloadPlugins']) Module['preloadPlugins'] = []
-    if (Browser.initted) return
+    if (!Module['preloadPlugins']) { Module['preloadPlugins'] = [] }
+    if (Browser.initted) { return }
     Browser.initted = true
     try {
       new Blob()
@@ -2654,11 +2654,11 @@ var Browser = {
         ctx.drawImage(img, 0, 0)
         preloadedImages[name] = canvas
         Browser.URLObject.revokeObjectURL(url)
-        if (onload) onload(byteArray)
+        if (onload) { onload(byteArray) }
       }
       img.onerror = (event) => {
         out('Image ' + url + ' could not be decoded')
-        if (onerror) onerror()
+        if (onerror) { onerror() }
       }
       img.src = url
     }
@@ -2670,16 +2670,16 @@ var Browser = {
     audioPlugin['handle'] = function audioPlugin_handle(byteArray, name, onload, onerror) {
       let done = false
       function finish(audio) {
-        if (done) return
+        if (done) { return }
         done = true
         preloadedAudios[name] = audio
-        if (onload) onload(byteArray)
+        if (onload) { onload(byteArray) }
       }
       function fail() {
-        if (done) return
+        if (done) { return }
         done = true
         preloadedAudios[name] = new Audio()
-        if (onerror) onerror()
+        if (onerror) { onerror() }
       }
       if (Browser.hasBlobConstructor) {
         try {
@@ -2697,7 +2697,7 @@ var Browser = {
           false,
         )
         audio.onerror = function audio_onerror(event) {
-          if (done) return
+          if (done) { return }
           out('warning: browser could not fully decode audio ' + name + ', trying slower base64 approach')
           function encode64(data) {
             const BASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
@@ -2776,7 +2776,7 @@ var Browser = {
     Browser.init()
     let handled = false
     Module['preloadPlugins'].forEach(function(plugin) {
-      if (handled) return
+      if (handled) { return }
       if (plugin['canHandle'](fullname)) {
         plugin['handle'](byteArray, fullname, finish, onerror)
         handled = true
@@ -2785,7 +2785,7 @@ var Browser = {
     return handled
   },
   createContext: function(canvas, useWebGL, setInModule, webGLContextAttributes) {
-    if (useWebGL && Module.ctx && canvas == Module.canvas) return Module.ctx
+    if (useWebGL && Module.ctx && canvas == Module.canvas) { return Module.ctx }
     let ctx
     let contextHandle
     if (useWebGL) {
@@ -2804,7 +2804,7 @@ var Browser = {
     } else {
       ctx = canvas.getContext('2d')
     }
-    if (!ctx) return null
+    if (!ctx) { return null }
     if (setInModule) {
       if (!useWebGL) {
         assert(
@@ -2813,7 +2813,7 @@ var Browser = {
         )
       }
       Module.ctx = ctx
-      if (useWebGL) GL.makeContextCurrent(contextHandle)
+      if (useWebGL) { GL.makeContextCurrent(contextHandle) }
       Module.useWebGL = useWebGL
       Browser.moduleContextCreatedCallbacks.forEach(function(callback) {
         callback()
@@ -2829,8 +2829,8 @@ var Browser = {
   requestFullscreen: function(lockPointer, resizeCanvas) {
     Browser.lockPointer = lockPointer
     Browser.resizeCanvas = resizeCanvas
-    if (typeof Browser.lockPointer == 'undefined') Browser.lockPointer = true
-    if (typeof Browser.resizeCanvas == 'undefined') Browser.resizeCanvas = false
+    if (typeof Browser.lockPointer == 'undefined') { Browser.lockPointer = true }
+    if (typeof Browser.resizeCanvas == 'undefined') { Browser.resizeCanvas = false }
     const canvas = Module['canvas']
     function fullscreenChange() {
       Browser.isFullscreen = false
@@ -2843,7 +2843,7 @@ var Browser = {
           || document['webkitCurrentFullScreenElement']) === canvasContainer
       ) {
         canvas.exitFullscreen = Browser.exitFullscreen
-        if (Browser.lockPointer) canvas.requestPointerLock()
+        if (Browser.lockPointer) { canvas.requestPointerLock() }
         Browser.isFullscreen = true
         if (Browser.resizeCanvas) {
           Browser.setFullscreenCanvasSize()
@@ -2859,8 +2859,8 @@ var Browser = {
           Browser.updateCanvasDimensions(canvas)
         }
       }
-      if (Module['onFullScreen']) Module['onFullScreen'](Browser.isFullscreen)
-      if (Module['onFullscreen']) Module['onFullscreen'](Browser.isFullscreen)
+      if (Module['onFullScreen']) { Module['onFullScreen'](Browser.isFullscreen) }
+      if (Module['onFullscreen']) { Module['onFullscreen'](Browser.isFullscreen) }
     }
     if (!Browser.fullscreenHandlersInstalled) {
       Browser.fullscreenHandlersInstalled = true
@@ -3024,7 +3024,7 @@ var Browser = {
           Browser.touches[touch.identifier] = coords
         } else if (event.type === 'touchend' || event.type === 'touchmove') {
           let last = Browser.touches[touch.identifier]
-          if (!last) last = coords
+          if (!last) { last = coords }
           Browser.lastTouches[touch.identifier] = last
           Browser.touches[touch.identifier] = coords
         }
@@ -3050,7 +3050,7 @@ var Browser = {
   setCanvasSize: function(width, height, noUpdates) {
     const canvas = Module['canvas']
     Browser.updateCanvasDimensions(canvas, width, height)
-    if (!noUpdates) Browser.updateResizeListeners()
+    if (!noUpdates) { Browser.updateResizeListeners() }
   },
   windowedWidth: 0,
   windowedHeight: 0,
@@ -3102,15 +3102,15 @@ var Browser = {
       h = Math.round(h * factor)
     }
     if (Browser.resizeCanvas) {
-      if (canvas.width != w) canvas.width = w
-      if (canvas.height != h) canvas.height = h
+      if (canvas.width != w) { canvas.width = w }
+      if (canvas.height != h) { canvas.height = h }
       if (typeof canvas.style != 'undefined') {
         canvas.style.removeProperty('width')
         canvas.style.removeProperty('height')
       }
     } else {
-      if (canvas.width != wNative) canvas.width = wNative
-      if (canvas.height != hNative) canvas.height = hNative
+      if (canvas.width != wNative) { canvas.width = wNative }
+      if (canvas.height != hNative) { canvas.height = hNative }
       if (typeof canvas.style != 'undefined') {
         if (w != wNative || h != hNative) {
           canvas.style.setProperty('width', w + 'px', 'important')
@@ -3129,7 +3129,7 @@ function callRuntimeCallbacks(callbacks) {
   }
 }
 function getValue(ptr, type = 'i8') {
-  if (type.endsWith('*')) type = '*'
+  if (type.endsWith('*')) { type = '*' }
   switch (type) {
     case 'i1':
       return HEAP8[ptr >> 0]
@@ -3156,7 +3156,7 @@ const wasmTableMirror = []
 function getWasmTableEntry(funcPtr) {
   let func = wasmTableMirror[funcPtr]
   if (!func) {
-    if (funcPtr >= wasmTableMirror.length) wasmTableMirror.length = funcPtr + 1
+    if (funcPtr >= wasmTableMirror.length) { wasmTableMirror.length = funcPtr + 1 }
     wasmTableMirror[funcPtr] = func = wasmTable.get(funcPtr)
   }
   return func
@@ -3224,11 +3224,11 @@ var PATH = {
     return root + dir
   },
   basename: (path) => {
-    if (path === '/') return '/'
+    if (path === '/') { return '/' }
     path = PATH.normalize(path)
     path = path.replace(/\/$/, '')
     const lastSlash = path.lastIndexOf('/')
-    if (lastSlash === -1) return path
+    if (lastSlash === -1) { return path }
     return path.substr(lastSlash + 1)
   },
   join: function() {
@@ -3278,13 +3278,13 @@ var PATH_FS = {
     function trim(arr) {
       let start = 0
       for (; start < arr.length; start++) {
-        if (arr[start] !== '') break
+        if (arr[start] !== '') { break }
       }
       let end = arr.length - 1
       for (; end >= 0; end--) {
-        if (arr[end] !== '') break
+        if (arr[end] !== '') { break }
       }
-      if (start > end) return []
+      if (start > end) { return [] }
       return arr.slice(start, end - start + 1)
     }
     const fromParts = trim(from.split('/'))
@@ -3343,7 +3343,7 @@ var TTY = {
         if (result === undefined && bytesRead === 0) {
           throw new FS.ErrnoError(6)
         }
-        if (result === null || result === undefined) break
+        if (result === null || result === undefined) { break }
         bytesRead++
         buffer[offset + i] = result
       }
@@ -3396,7 +3396,7 @@ var TTY = {
         out(UTF8ArrayToString(tty.output, 0))
         tty.output = []
       } else {
-        if (val != 0) tty.output.push(val)
+        if (val != 0) { tty.output.push(val) }
       }
     },
     flush: function(tty) {
@@ -3412,7 +3412,7 @@ var TTY = {
         err(UTF8ArrayToString(tty.output, 0))
         tty.output = []
       } else {
-        if (val != 0) tty.output.push(val)
+        if (val != 0) { tty.output.push(val) }
       }
     },
     flush: function(tty) {
@@ -3432,7 +3432,7 @@ function alignMemory(size, alignment) {
 function mmapAlloc(size) {
   size = alignMemory(size, 65536)
   const ptr = _emscripten_builtin_memalign(65536, size)
-  if (!ptr) return 0
+  if (!ptr) { return 0 }
   zeroMemory(ptr, size)
   return ptr
 }
@@ -3507,22 +3507,22 @@ var MEMFS = {
     return node
   },
   getFileDataAsTypedArray: function(node) {
-    if (!node.contents) return new Uint8Array(0)
-    if (node.contents.subarray) return node.contents.subarray(0, node.usedBytes)
+    if (!node.contents) { return new Uint8Array(0) }
+    if (node.contents.subarray) { return node.contents.subarray(0, node.usedBytes) }
     return new Uint8Array(node.contents)
   },
   expandFileStorage: function(node, newCapacity) {
     const prevCapacity = node.contents ? node.contents.length : 0
-    if (prevCapacity >= newCapacity) return
+    if (prevCapacity >= newCapacity) { return }
     const CAPACITY_DOUBLING_MAX = 1024 * 1024
     newCapacity = Math.max(newCapacity, (prevCapacity * (prevCapacity < CAPACITY_DOUBLING_MAX ? 2 : 1.125)) >>> 0)
-    if (prevCapacity != 0) newCapacity = Math.max(newCapacity, 256)
+    if (prevCapacity != 0) { newCapacity = Math.max(newCapacity, 256) }
     const oldContents = node.contents
     node.contents = new Uint8Array(newCapacity)
-    if (node.usedBytes > 0) node.contents.set(oldContents.subarray(0, node.usedBytes), 0)
+    if (node.usedBytes > 0) { node.contents.set(oldContents.subarray(0, node.usedBytes), 0) }
   },
   resizeFileStorage: function(node, newSize) {
-    if (node.usedBytes == newSize) return
+    if (node.usedBytes == newSize) { return }
     if (newSize == 0) {
       node.contents = null
       node.usedBytes = 0
@@ -3634,12 +3634,12 @@ var MEMFS = {
   stream_ops: {
     read: function(stream, buffer, offset, length, position) {
       const contents = stream.node.contents
-      if (position >= stream.node.usedBytes) return 0
+      if (position >= stream.node.usedBytes) { return 0 }
       const size = Math.min(stream.node.usedBytes - position, length)
       if (size > 8 && contents.subarray) {
         buffer.set(contents.subarray(position, position + size), offset)
       } else {
-        for (let i = 0; i < size; i++) buffer[offset + i] = contents[position + i]
+        for (let i = 0; i < size; i++) { buffer[offset + i] = contents[position + i] }
       }
       return size
     },
@@ -3647,7 +3647,7 @@ var MEMFS = {
       if (buffer.buffer === HEAP8.buffer) {
         canOwn = false
       }
-      if (!length) return 0
+      if (!length) { return 0 }
       const node = stream.node
       node.timestamp = Date.now()
       if (buffer.subarray && (!node.contents || node.contents.subarray)) {
@@ -3739,7 +3739,7 @@ function asyncLoad(url, onload, onerror, noRunDep) {
     function(arrayBuffer) {
       assert(arrayBuffer, 'Loading data file "' + url + '" failed (no arrayBuffer).')
       onload(new Uint8Array(arrayBuffer))
-      if (dep) removeRunDependency(dep)
+      if (dep) { removeRunDependency(dep) }
     },
     function(event) {
       if (onerror) {
@@ -3749,7 +3749,7 @@ function asyncLoad(url, onload, onerror, noRunDep) {
       }
     },
   )
-  if (dep) addRunDependency(dep)
+  if (dep) { addRunDependency(dep) }
 }
 var FS = {
   root: null,
@@ -3767,7 +3767,7 @@ var FS = {
   syncFSRequests: 0,
   lookupPath: (path, opts = {}) => {
     path = PATH_FS.resolve(FS.cwd(), path)
-    if (!path) return { path: '', node: null }
+    if (!path) { return { path: '', node: null } }
     const defaults = { follow_mount: true, recurse_count: 0 }
     opts = Object.assign(defaults, opts)
     if (opts.recurse_count > 8) {
@@ -3811,7 +3811,7 @@ var FS = {
     while (true) {
       if (FS.isRoot(node)) {
         const mount = node.mount.mountpoint
-        if (!path) return mount
+        if (!path) { return mount }
         return mount[mount.length - 1] !== '/' ? mount + '/' + path : mount + path
       }
       path = path ? node.name + '/' + path : node.name
@@ -3924,8 +3924,8 @@ var FS = {
   },
   mayLookup: (dir) => {
     const errCode = FS.nodePermissions(dir, 'x')
-    if (errCode) return errCode
-    if (!dir.node_ops.lookup) return 2
+    if (errCode) { return errCode }
+    if (!dir.node_ops.lookup) { return 2 }
     return 0
   },
   mayCreate: (dir, name) => {
@@ -4191,12 +4191,12 @@ var FS = {
     const dirs = path.split('/')
     let d = ''
     for (let i = 0; i < dirs.length; ++i) {
-      if (!dirs[i]) continue
+      if (!dirs[i]) { continue }
       d += '/' + dirs[i]
       try {
         FS.mkdir(d, mode)
       } catch (e) {
-        if (e.errno != 20) throw e
+        if (e.errno != 20) { throw e }
       }
     }
   },
@@ -4237,7 +4237,7 @@ var FS = {
     old_dir = lookup.node
     lookup = FS.lookupPath(new_path, { parent: true })
     new_dir = lookup.node
-    if (!old_dir || !new_dir) throw new FS.ErrnoError(44)
+    if (!old_dir || !new_dir) { throw new FS.ErrnoError(44) }
     if (old_dir.mount !== new_dir.mount) {
       throw new FS.ErrnoError(75)
     }
@@ -4511,7 +4511,7 @@ var FS = {
       stream.stream_ops.open(stream)
     }
     if (Module['logReadFiles'] && !(flags & 1)) {
-      if (!FS.readFiles) FS.readFiles = {}
+      if (!FS.readFiles) { FS.readFiles = {} }
       if (!(path in FS.readFiles)) {
         FS.readFiles[path] = 1
       }
@@ -4522,7 +4522,7 @@ var FS = {
     if (FS.isClosed(stream)) {
       throw new FS.ErrnoError(8)
     }
-    if (stream.getdents) stream.getdents = null
+    if (stream.getdents) { stream.getdents = null }
     try {
       if (stream.stream_ops.close) {
         stream.stream_ops.close(stream)
@@ -4574,7 +4574,7 @@ var FS = {
       throw new FS.ErrnoError(70)
     }
     const bytesRead = stream.stream_ops.read(stream, buffer, offset, length, position)
-    if (!seeking) stream.position += bytesRead
+    if (!seeking) { stream.position += bytesRead }
     return bytesRead
   },
   write: (stream, buffer, offset, length, position, canOwn) => {
@@ -4603,7 +4603,7 @@ var FS = {
       throw new FS.ErrnoError(70)
     }
     const bytesWritten = stream.stream_ops.write(stream, buffer, offset, length, position, canOwn)
-    if (!seeking) stream.position += bytesWritten
+    if (!seeking) { stream.position += bytesWritten }
     return bytesWritten
   },
   allocate: (stream, offset, length) => {
@@ -4729,7 +4729,7 @@ var FS = {
             lookup: (parent, name) => {
               const fd = +name
               const stream = FS.getStream(fd)
-              if (!stream) throw new FS.ErrnoError(8)
+              if (!stream) { throw new FS.ErrnoError(8) }
               const ret = { parent: null, mount: { mountpoint: 'fake' }, node_ops: { readlink: () => stream.path } }
               ret.parent = ret
               return ret
@@ -4763,7 +4763,7 @@ var FS = {
     const stderr = FS.open('/dev/stderr', 1)
   },
   ensureErrnoError: () => {
-    if (FS.ErrnoError) return
+    if (FS.ErrnoError) { return }
     FS.ErrnoError = function ErrnoError(errno, node) {
       this.node = node
       this.setErrno = function(errno) {
@@ -4808,8 +4808,8 @@ var FS = {
   },
   getMode: (canRead, canWrite) => {
     let mode = 0
-    if (canRead) mode |= 292 | 73
-    if (canWrite) mode |= 146
+    if (canRead) { mode |= 292 | 73 }
+    if (canWrite) { mode |= 146 }
     return mode
   },
   findObject: (path, dontResolveLastLink) => {
@@ -4858,7 +4858,7 @@ var FS = {
     const parts = path.split('/').reverse()
     while (parts.length) {
       const part = parts.pop()
-      if (!part) continue
+      if (!part) { continue }
       var current = PATH.join2(parent, part)
       try {
         FS.mkdir(current)
@@ -4883,7 +4883,7 @@ var FS = {
     if (data) {
       if (typeof data == 'string') {
         const arr = new Array(data.length)
-        for (let i = 0, len = data.length; i < len; ++i) arr[i] = data.charCodeAt(i)
+        for (let i = 0, len = data.length; i < len; ++i) { arr[i] = data.charCodeAt(i) }
         data = arr
       }
       FS.chmod(node, mode | 146)
@@ -4897,7 +4897,7 @@ var FS = {
   createDevice: (parent, name, input, output) => {
     const path = PATH.join2(typeof parent == 'string' ? parent : FS.getPath(parent), name)
     const mode = FS.getMode(!!input, !!output)
-    if (!FS.createDevice.major) FS.createDevice.major = 64
+    if (!FS.createDevice.major) { FS.createDevice.major = 64 }
     const dev = FS.makedev(FS.createDevice.major++, 0)
     FS.registerDevice(dev, {
       open: (stream) => {
@@ -4920,7 +4920,7 @@ var FS = {
           if (result === undefined && bytesRead === 0) {
             throw new FS.ErrnoError(6)
           }
-          if (result === null || result === undefined) break
+          if (result === null || result === undefined) { break }
           bytesRead++
           buffer[offset + i] = result
         }
@@ -4946,7 +4946,7 @@ var FS = {
     return FS.mkdev(path, mode, dev)
   },
   forceLoadFile: (obj) => {
-    if (obj.isDevice || obj.isFolder || obj.link || obj.contents) return true
+    if (obj.isDevice || obj.isFolder || obj.link || obj.contents) { return true }
     if (typeof XMLHttpRequest != 'undefined') {
       throw new Error(
         'Lazy loading should have been performed (contents set) in createLazyFile, but it was not. Lazy loading only works in web workers. Use --embed-file or --preload-file in emcc on the main thread.',
@@ -4990,13 +4990,13 @@ var FS = {
       const hasByteServing = (header = xhr.getResponseHeader('Accept-Ranges')) && header === 'bytes'
       const usesGzip = (header = xhr.getResponseHeader('Content-Encoding')) && header === 'gzip'
       let chunkSize = 1024 * 1024
-      if (!hasByteServing) chunkSize = datalength
+      if (!hasByteServing) { chunkSize = datalength }
       const doXHR = (from, to) => {
-        if (from > to) throw new Error('invalid range (' + from + ', ' + to + ') or no bytes requested!')
-        if (to > datalength - 1) throw new Error('only ' + datalength + ' bytes available! programmer error!')
+        if (from > to) { throw new Error('invalid range (' + from + ', ' + to + ') or no bytes requested!') }
+        if (to > datalength - 1) { throw new Error('only ' + datalength + ' bytes available! programmer error!') }
         const xhr = new XMLHttpRequest()
         xhr.open('GET', url, false)
-        if (datalength !== chunkSize) xhr.setRequestHeader('Range', 'bytes=' + from + '-' + to)
+        if (datalength !== chunkSize) { xhr.setRequestHeader('Range', 'bytes=' + from + '-' + to) }
         xhr.responseType = 'arraybuffer'
         if (xhr.overrideMimeType) {
           xhr.overrideMimeType('text/plain; charset=x-user-defined')
@@ -5019,7 +5019,7 @@ var FS = {
         if (typeof lazyArray.chunks[chunkNum] == 'undefined') {
           lazyArray.chunks[chunkNum] = doXHR(start, end)
         }
-        if (typeof lazyArray.chunks[chunkNum] == 'undefined') throw new Error('doXHR failed!')
+        if (typeof lazyArray.chunks[chunkNum] == 'undefined') { throw new Error('doXHR failed!') }
         return lazyArray.chunks[chunkNum]
       })
       if (usesGzip || !datalength) {
@@ -5084,7 +5084,7 @@ var FS = {
     })
     function writeChunks(stream, buffer, offset, length, position) {
       const contents = stream.node.contents
-      if (position >= contents.length) return 0
+      if (position >= contents.length) { return 0 }
       const size = Math.min(contents.length - position, length)
       if (contents.slice) {
         for (var i = 0; i < size; i++) {
@@ -5118,16 +5118,16 @@ var FS = {
     const dep = getUniqueRunDependency('cp ' + fullname)
     function processData(byteArray) {
       function finish(byteArray) {
-        if (preFinish) preFinish()
+        if (preFinish) { preFinish() }
         if (!dontCreateFile) {
           FS.createDataFile(parent, name, byteArray, canRead, canWrite, canOwn)
         }
-        if (onload) onload()
+        if (onload) { onload() }
         removeRunDependency(dep)
       }
       if (
         Browser.handledByPreloadPlugin(byteArray, fullname, finish, () => {
-          if (onerror) onerror()
+          if (onerror) { onerror() }
           removeRunDependency(dep)
         })
       ) {
@@ -5172,18 +5172,18 @@ var FS = {
         fail = 0,
         total = paths.length
       function finish() {
-        if (fail == 0) onload()
-        else onerror()
+        if (fail == 0) { onload() }
+        else { onerror() }
       }
       paths.forEach((path) => {
         const putRequest = files.put(FS.analyzePath(path).object.contents, path)
         putRequest.onsuccess = () => {
           ok++
-          if (ok + fail == total) finish()
+          if (ok + fail == total) { finish() }
         }
         putRequest.onerror = () => {
           fail++
-          if (ok + fail == total) finish()
+          if (ok + fail == total) { finish() }
         }
       })
       transaction.onerror = onerror
@@ -5213,8 +5213,8 @@ var FS = {
         fail = 0,
         total = paths.length
       function finish() {
-        if (fail == 0) onload()
-        else onerror()
+        if (fail == 0) { onload() }
+        else { onerror() }
       }
       paths.forEach((path) => {
         const getRequest = files.get(path)
@@ -5224,11 +5224,11 @@ var FS = {
           }
           FS.createDataFile(PATH.dirname(path), PATH.basename(path), getRequest.result, true, true, true)
           ok++
-          if (ok + fail == total) finish()
+          if (ok + fail == total) { finish() }
         }
         getRequest.onerror = () => {
           fail++
-          if (ok + fail == total) finish()
+          if (ok + fail == total) { finish() }
         }
       })
       transaction.onerror = onerror
@@ -5247,7 +5247,7 @@ var SYSCALLS = {
       dir = FS.cwd()
     } else {
       const dirstream = FS.getStream(dirfd)
-      if (!dirstream) throw new FS.ErrnoError(8)
+      if (!dirstream) { throw new FS.ErrnoError(8) }
       dir = dirstream.path
     }
     if (path.length == 0) {
@@ -5324,7 +5324,7 @@ var SYSCALLS = {
   },
   getStreamFromFD: function(fd) {
     const stream = FS.getStream(fd)
-    if (!stream) throw new FS.ErrnoError(8)
+    if (!stream) { throw new FS.ErrnoError(8) }
     return stream
   },
 }
@@ -5334,7 +5334,7 @@ function ___syscall_chmod(path, mode) {
     FS.chmod(path, mode)
     return 0
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return -e.errno
   }
 }
@@ -5351,15 +5351,15 @@ function ___syscall_faccessat(dirfd, path, amode, flags) {
       return -44
     }
     let perms = ''
-    if (amode & 4) perms += 'r'
-    if (amode & 2) perms += 'w'
-    if (amode & 1) perms += 'x'
+    if (amode & 4) { perms += 'r' }
+    if (amode & 2) { perms += 'w' }
+    if (amode & 1) { perms += 'x' }
     if (perms && FS.nodePermissions(node, perms)) {
       return -2
     }
     return 0
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return -e.errno
   }
 }
@@ -5411,7 +5411,7 @@ function ___syscall_fcntl64(fd, cmd, varargs) {
       }
     }
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return -e.errno
   }
 }
@@ -5420,7 +5420,7 @@ function ___syscall_fstat64(fd, buf) {
     const stream = SYSCALLS.getStreamFromFD(fd)
     return SYSCALLS.doStat(FS.stat, stream.path, buf)
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return -e.errno
   }
 }
@@ -5439,7 +5439,7 @@ function ___syscall_statfs64(path, size, buf) {
     HEAP32[(buf + 36) >> 2] = 255
     return 0
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return -e.errno
   }
 }
@@ -5448,20 +5448,20 @@ function ___syscall_fstatfs64(fd, size, buf) {
     const stream = SYSCALLS.getStreamFromFD(fd)
     return ___syscall_statfs64(0, size, buf)
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return -e.errno
   }
 }
 function ___syscall_getcwd(buf, size) {
   try {
-    if (size === 0) return -28
+    if (size === 0) { return -28 }
     const cwd = FS.cwd()
     const cwdLengthInBytes = lengthBytesUTF8(cwd) + 1
-    if (size < cwdLengthInBytes) return -68
+    if (size < cwdLengthInBytes) { return -68 }
     stringToUTF8(cwd, buf, size)
     return cwdLengthInBytes
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return -e.errno
   }
 }
@@ -5522,7 +5522,7 @@ function ___syscall_getdents64(fd, dirp, count) {
     FS.llseek(stream, idx * struct_size, 0)
     return pos
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return -e.errno
   }
 }
@@ -5533,7 +5533,7 @@ function ___syscall_ioctl(fd, op, varargs) {
     switch (op) {
       case 21509:
       case 21505: {
-        if (!stream.tty) return -59
+        if (!stream.tty) { return -59 }
         return 0
       }
       case 21510:
@@ -5542,17 +5542,17 @@ function ___syscall_ioctl(fd, op, varargs) {
       case 21506:
       case 21507:
       case 21508: {
-        if (!stream.tty) return -59
+        if (!stream.tty) { return -59 }
         return 0
       }
       case 21519: {
-        if (!stream.tty) return -59
+        if (!stream.tty) { return -59 }
         var argp = SYSCALLS.get()
         HEAP32[argp >> 2] = 0
         return 0
       }
       case 21520: {
-        if (!stream.tty) return -59
+        if (!stream.tty) { return -59 }
         return -28
       }
       case 21531: {
@@ -5560,18 +5560,18 @@ function ___syscall_ioctl(fd, op, varargs) {
         return FS.ioctl(stream, op, argp)
       }
       case 21523: {
-        if (!stream.tty) return -59
+        if (!stream.tty) { return -59 }
         return 0
       }
       case 21524: {
-        if (!stream.tty) return -59
+        if (!stream.tty) { return -59 }
         return 0
       }
       default:
         abort('bad ioctl syscall ' + op)
     }
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return -e.errno
   }
 }
@@ -5580,7 +5580,7 @@ function ___syscall_lstat64(path, buf) {
     path = SYSCALLS.getStr(path)
     return SYSCALLS.doStat(FS.lstat, path, buf)
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return -e.errno
   }
 }
@@ -5589,11 +5589,11 @@ function ___syscall_mkdirat(dirfd, path, mode) {
     path = SYSCALLS.getStr(path)
     path = SYSCALLS.calculateAt(dirfd, path)
     path = PATH.normalize(path)
-    if (path[path.length - 1] === '/') path = path.substr(0, path.length - 1)
+    if (path[path.length - 1] === '/') { path = path.substr(0, path.length - 1) }
     FS.mkdir(path, mode, 0)
     return 0
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return -e.errno
   }
 }
@@ -5606,7 +5606,7 @@ function ___syscall_newfstatat(dirfd, path, buf, flags) {
     path = SYSCALLS.calculateAt(dirfd, path, allowEmpty)
     return SYSCALLS.doStat(nofollow ? FS.lstat : FS.stat, path, buf)
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return -e.errno
   }
 }
@@ -5618,7 +5618,7 @@ function ___syscall_openat(dirfd, path, flags, varargs) {
     const mode = varargs ? SYSCALLS.get() : 0
     return FS.open(path, flags, mode).fd
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return -e.errno
   }
 }
@@ -5626,7 +5626,7 @@ function ___syscall_readlinkat(dirfd, path, buf, bufsize) {
   try {
     path = SYSCALLS.getStr(path)
     path = SYSCALLS.calculateAt(dirfd, path)
-    if (bufsize <= 0) return -28
+    if (bufsize <= 0) { return -28 }
     const ret = FS.readlink(path)
     const len = Math.min(bufsize, lengthBytesUTF8(ret))
     const endChar = HEAP8[buf + len]
@@ -5634,7 +5634,7 @@ function ___syscall_readlinkat(dirfd, path, buf, bufsize) {
     HEAP8[buf + len] = endChar
     return len
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return -e.errno
   }
 }
@@ -5647,7 +5647,7 @@ function ___syscall_renameat(olddirfd, oldpath, newdirfd, newpath) {
     FS.rename(oldpath, newpath)
     return 0
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return -e.errno
   }
 }
@@ -5657,7 +5657,7 @@ function ___syscall_rmdir(path) {
     FS.rmdir(path)
     return 0
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return -e.errno
   }
 }
@@ -5666,7 +5666,7 @@ function ___syscall_stat64(path, buf) {
     path = SYSCALLS.getStr(path)
     return SYSCALLS.doStat(FS.stat, path, buf)
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return -e.errno
   }
 }
@@ -5677,7 +5677,7 @@ function ___syscall_symlink(target, linkpath) {
     FS.symlink(target, linkpath)
     return 0
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return -e.errno
   }
 }
@@ -5694,7 +5694,7 @@ function ___syscall_unlinkat(dirfd, path, flags) {
     }
     return 0
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return -e.errno
   }
 }
@@ -5775,8 +5775,8 @@ function getEnvStrings() {
       _: getExecutableName(),
     }
     for (var x in ENV) {
-      if (ENV[x] === undefined) delete env[x]
-      else env[x] = ENV[x]
+      if (ENV[x] === undefined) { delete env[x] }
+      else { env[x] = ENV[x] }
     }
     const strings = []
     for (var x in env) {
@@ -5812,7 +5812,7 @@ function _fd_close(fd) {
     FS.close(stream)
     return 0
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return e.errno
   }
 }
@@ -5823,9 +5823,9 @@ function doReadv(stream, iov, iovcnt, offset) {
     const len = HEAPU32[(iov + 4) >> 2]
     iov += 8
     const curr = FS.read(stream, HEAP8, ptr, len, offset)
-    if (curr < 0) return -1
+    if (curr < 0) { return -1 }
     ret += curr
-    if (curr < len) break
+    if (curr < len) { break }
   }
   return ret
 }
@@ -5836,7 +5836,7 @@ function _fd_read(fd, iov, iovcnt, pnum) {
     HEAP32[pnum >> 2] = num
     return 0
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return e.errno
   }
 }
@@ -5846,7 +5846,7 @@ function convertI32PairToI53Checked(lo, hi) {
 function _fd_seek(fd, offset_low, offset_high, whence, newOffset) {
   try {
     const offset = convertI32PairToI53Checked(offset_low, offset_high)
-    if (isNaN(offset)) return 61
+    if (isNaN(offset)) { return 61 }
     const stream = SYSCALLS.getStreamFromFD(fd)
     FS.llseek(stream, offset, whence)
     ;((tempI64 = [
@@ -5860,10 +5860,10 @@ function _fd_seek(fd, offset_low, offset_high, whence, newOffset) {
     ]),
       (HEAP32[newOffset >> 2] = tempI64[0]),
       (HEAP32[(newOffset + 4) >> 2] = tempI64[1]))
-    if (stream.getdents && offset === 0 && whence === 0) stream.getdents = null
+    if (stream.getdents && offset === 0 && whence === 0) { stream.getdents = null }
     return 0
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return e.errno
   }
 }
@@ -5874,7 +5874,7 @@ function doWritev(stream, iov, iovcnt, offset) {
     const len = HEAPU32[(iov + 4) >> 2]
     iov += 8
     const curr = FS.write(stream, HEAP8, ptr, len, offset)
-    if (curr < 0) return -1
+    if (curr < 0) { return -1 }
     ret += curr
   }
   return ret
@@ -5886,7 +5886,7 @@ function _fd_write(fd, iov, iovcnt, pnum) {
     HEAPU32[pnum >> 2] = num
     return 0
   } catch (e) {
-    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+    if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) { throw e }
     return e.errno
   }
 }
@@ -5977,7 +5977,7 @@ function intArrayFromString(stringy, dontAddNull, length) {
   const len = length > 0 ? length : lengthBytesUTF8(stringy) + 1
   const u8array = new Array(len)
   const numBytesWritten = stringToUTF8Array(stringy, u8array, 0, u8array.length)
-  if (dontAddNull) u8array.length = numBytesWritten
+  if (dontAddNull) { u8array.length = numBytesWritten }
   return u8array
 }
 var asmLibraryArg = {
@@ -7428,7 +7428,7 @@ function invoke_iii(index, a1, a2) {
     return getWasmTableEntry(index)(a1, a2)
   } catch (e) {
     stackRestore(sp)
-    if (e !== e + 0) throw e
+    if (e !== e + 0) { throw e }
     _setThrew(1, 0)
   }
 }
@@ -7438,7 +7438,7 @@ function invoke_iiiii(index, a1, a2, a3, a4) {
     return getWasmTableEntry(index)(a1, a2, a3, a4)
   } catch (e) {
     stackRestore(sp)
-    if (e !== e + 0) throw e
+    if (e !== e + 0) { throw e }
     _setThrew(1, 0)
   }
 }
@@ -7448,7 +7448,7 @@ function invoke_iiii(index, a1, a2, a3) {
     return getWasmTableEntry(index)(a1, a2, a3)
   } catch (e) {
     stackRestore(sp)
-    if (e !== e + 0) throw e
+    if (e !== e + 0) { throw e }
     _setThrew(1, 0)
   }
 }
@@ -7471,8 +7471,8 @@ function ExitStatus(status) {
 }
 let calledMain = false
 dependenciesFulfilled = function runCaller() {
-  if (!calledRun) run()
-  if (!calledRun) dependenciesFulfilled = runCaller
+  if (!calledRun) { run() }
+  if (!calledRun) { dependenciesFulfilled = runCaller }
 }
 function callMain(args) {
   const entryFunction = Module['_main']
@@ -7505,14 +7505,14 @@ function run(args) {
     return
   }
   function doRun() {
-    if (calledRun) return
+    if (calledRun) { return }
     calledRun = true
     Module['calledRun'] = true
-    if (ABORT) return
+    if (ABORT) { return }
     initRuntime()
     preMain()
-    if (Module['onRuntimeInitialized']) Module['onRuntimeInitialized']()
-    if (shouldRunNow) callMain(args)
+    if (Module['onRuntimeInitialized']) { Module['onRuntimeInitialized']() }
+    if (shouldRunNow) { callMain(args) }
     postRun()
   }
   if (Module['setStatus']) {
@@ -7535,19 +7535,19 @@ function exit(status, implicit) {
 function procExit(code) {
   EXITSTATUS = code
   if (!keepRuntimeAlive()) {
-    if (Module['onExit']) Module['onExit'](code)
+    if (Module['onExit']) { Module['onExit'](code) }
     ABORT = true
   }
   quit_(code, new ExitStatus(code))
 }
 if (Module['preInit']) {
-  if (typeof Module['preInit'] == 'function') Module['preInit'] = [Module['preInit']]
+  if (typeof Module['preInit'] == 'function') { Module['preInit'] = [Module['preInit']] }
   while (Module['preInit'].length > 0) {
     Module['preInit'].pop()()
   }
 }
 var shouldRunNow = true
-if (Module['noInitialRun']) shouldRunNow = false
+if (Module['noInitialRun']) { shouldRunNow = false }
 run()
 function WrapperObject() {}
 WrapperObject.prototype = Object.create(WrapperObject.prototype)
@@ -7562,7 +7562,7 @@ Module['getCache'] = getCache
 function wrapPointer(ptr, __class__) {
   const cache = getCache(__class__)
   let ret = cache[ptr]
-  if (ret) return ret
+  if (ret) { return ret }
   ret = Object.create((__class__ || WrapperObject).prototype)
   ret.ptr = ptr
   return (cache[ptr] = ret)
@@ -7574,7 +7574,7 @@ function castObject(obj, __class__) {
 Module['castObject'] = castObject
 Module['NULL'] = wrapPointer(0)
 function destroy(obj) {
-  if (!obj['__destroy__']) throw 'Error: Cannot destroy object. (Did you create it yourself?)'
+  if (!obj['__destroy__']) { throw 'Error: Cannot destroy object. (Did you create it yourself?)' }
   obj['__destroy__']()
   delete getCache(obj.__class__)[obj.ptr]
 }
@@ -7709,7 +7709,7 @@ ASS_Image.prototype['get_w'] = ASS_Image.prototype.get_w = function() {
 }
 ASS_Image.prototype['set_w'] = ASS_Image.prototype.set_w = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Image_set_w_1(self, arg0)
 }
 Object.defineProperty(ASS_Image.prototype, 'w', { get: ASS_Image.prototype.get_w, set: ASS_Image.prototype.set_w })
@@ -7719,7 +7719,7 @@ ASS_Image.prototype['get_h'] = ASS_Image.prototype.get_h = function() {
 }
 ASS_Image.prototype['set_h'] = ASS_Image.prototype.set_h = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Image_set_h_1(self, arg0)
 }
 Object.defineProperty(ASS_Image.prototype, 'h', { get: ASS_Image.prototype.get_h, set: ASS_Image.prototype.set_h })
@@ -7729,7 +7729,7 @@ ASS_Image.prototype['get_stride'] = ASS_Image.prototype.get_stride = function() 
 }
 ASS_Image.prototype['set_stride'] = ASS_Image.prototype.set_stride = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Image_set_stride_1(self, arg0)
 }
 Object.defineProperty(ASS_Image.prototype, 'stride', {
@@ -7743,8 +7743,8 @@ ASS_Image.prototype['get_bitmap'] = ASS_Image.prototype.get_bitmap = function() 
 ASS_Image.prototype['set_bitmap'] = ASS_Image.prototype.set_bitmap = function(arg0) {
   const self = this.ptr
   ensureCache.prepare()
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
-  else arg0 = ensureString(arg0, false)
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
+  else { arg0 = ensureString(arg0, false) }
   _emscripten_bind_ASS_Image_set_bitmap_1(self, arg0)
 }
 Object.defineProperty(ASS_Image.prototype, 'bitmap', {
@@ -7757,7 +7757,7 @@ ASS_Image.prototype['get_color'] = ASS_Image.prototype.get_color = function() {
 }
 ASS_Image.prototype['set_color'] = ASS_Image.prototype.set_color = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Image_set_color_1(self, arg0)
 }
 Object.defineProperty(ASS_Image.prototype, 'color', {
@@ -7770,7 +7770,7 @@ ASS_Image.prototype['get_dst_x'] = ASS_Image.prototype.get_dst_x = function() {
 }
 ASS_Image.prototype['set_dst_x'] = ASS_Image.prototype.set_dst_x = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Image_set_dst_x_1(self, arg0)
 }
 Object.defineProperty(ASS_Image.prototype, 'dst_x', {
@@ -7783,7 +7783,7 @@ ASS_Image.prototype['get_dst_y'] = ASS_Image.prototype.get_dst_y = function() {
 }
 ASS_Image.prototype['set_dst_y'] = ASS_Image.prototype.set_dst_y = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Image_set_dst_y_1(self, arg0)
 }
 Object.defineProperty(ASS_Image.prototype, 'dst_y', {
@@ -7796,7 +7796,7 @@ ASS_Image.prototype['get_next'] = ASS_Image.prototype.get_next = function() {
 }
 ASS_Image.prototype['set_next'] = ASS_Image.prototype.set_next = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Image_set_next_1(self, arg0)
 }
 Object.defineProperty(ASS_Image.prototype, 'next', {
@@ -7818,8 +7818,8 @@ ASS_Style.prototype['get_Name'] = ASS_Style.prototype.get_Name = function() {
 ASS_Style.prototype['set_Name'] = ASS_Style.prototype.set_Name = function(arg0) {
   const self = this.ptr
   ensureCache.prepare()
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
-  else arg0 = ensureString(arg0, true)
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
+  else { arg0 = ensureString(arg0, true) }
   _emscripten_bind_ASS_Style_set_Name_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'Name', {
@@ -7833,8 +7833,8 @@ ASS_Style.prototype['get_FontName'] = ASS_Style.prototype.get_FontName = functio
 ASS_Style.prototype['set_FontName'] = ASS_Style.prototype.set_FontName = function(arg0) {
   const self = this.ptr
   ensureCache.prepare()
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
-  else arg0 = ensureString(arg0, true)
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
+  else { arg0 = ensureString(arg0, true) }
   _emscripten_bind_ASS_Style_set_FontName_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'FontName', {
@@ -7847,7 +7847,7 @@ ASS_Style.prototype['get_FontSize'] = ASS_Style.prototype.get_FontSize = functio
 }
 ASS_Style.prototype['set_FontSize'] = ASS_Style.prototype.set_FontSize = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_FontSize_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'FontSize', {
@@ -7860,7 +7860,7 @@ ASS_Style.prototype['get_PrimaryColour'] = ASS_Style.prototype.get_PrimaryColour
 }
 ASS_Style.prototype['set_PrimaryColour'] = ASS_Style.prototype.set_PrimaryColour = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_PrimaryColour_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'PrimaryColour', {
@@ -7873,7 +7873,7 @@ ASS_Style.prototype['get_SecondaryColour'] = ASS_Style.prototype.get_SecondaryCo
 }
 ASS_Style.prototype['set_SecondaryColour'] = ASS_Style.prototype.set_SecondaryColour = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_SecondaryColour_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'SecondaryColour', {
@@ -7886,7 +7886,7 @@ ASS_Style.prototype['get_OutlineColour'] = ASS_Style.prototype.get_OutlineColour
 }
 ASS_Style.prototype['set_OutlineColour'] = ASS_Style.prototype.set_OutlineColour = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_OutlineColour_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'OutlineColour', {
@@ -7899,7 +7899,7 @@ ASS_Style.prototype['get_BackColour'] = ASS_Style.prototype.get_BackColour = fun
 }
 ASS_Style.prototype['set_BackColour'] = ASS_Style.prototype.set_BackColour = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_BackColour_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'BackColour', {
@@ -7912,7 +7912,7 @@ ASS_Style.prototype['get_Bold'] = ASS_Style.prototype.get_Bold = function() {
 }
 ASS_Style.prototype['set_Bold'] = ASS_Style.prototype.set_Bold = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_Bold_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'Bold', {
@@ -7925,7 +7925,7 @@ ASS_Style.prototype['get_Italic'] = ASS_Style.prototype.get_Italic = function() 
 }
 ASS_Style.prototype['set_Italic'] = ASS_Style.prototype.set_Italic = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_Italic_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'Italic', {
@@ -7938,7 +7938,7 @@ ASS_Style.prototype['get_Underline'] = ASS_Style.prototype.get_Underline = funct
 }
 ASS_Style.prototype['set_Underline'] = ASS_Style.prototype.set_Underline = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_Underline_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'Underline', {
@@ -7951,7 +7951,7 @@ ASS_Style.prototype['get_StrikeOut'] = ASS_Style.prototype.get_StrikeOut = funct
 }
 ASS_Style.prototype['set_StrikeOut'] = ASS_Style.prototype.set_StrikeOut = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_StrikeOut_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'StrikeOut', {
@@ -7964,7 +7964,7 @@ ASS_Style.prototype['get_ScaleX'] = ASS_Style.prototype.get_ScaleX = function() 
 }
 ASS_Style.prototype['set_ScaleX'] = ASS_Style.prototype.set_ScaleX = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_ScaleX_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'ScaleX', {
@@ -7977,7 +7977,7 @@ ASS_Style.prototype['get_ScaleY'] = ASS_Style.prototype.get_ScaleY = function() 
 }
 ASS_Style.prototype['set_ScaleY'] = ASS_Style.prototype.set_ScaleY = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_ScaleY_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'ScaleY', {
@@ -7990,7 +7990,7 @@ ASS_Style.prototype['get_Spacing'] = ASS_Style.prototype.get_Spacing = function(
 }
 ASS_Style.prototype['set_Spacing'] = ASS_Style.prototype.set_Spacing = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_Spacing_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'Spacing', {
@@ -8003,7 +8003,7 @@ ASS_Style.prototype['get_Angle'] = ASS_Style.prototype.get_Angle = function() {
 }
 ASS_Style.prototype['set_Angle'] = ASS_Style.prototype.set_Angle = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_Angle_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'Angle', {
@@ -8016,7 +8016,7 @@ ASS_Style.prototype['get_BorderStyle'] = ASS_Style.prototype.get_BorderStyle = f
 }
 ASS_Style.prototype['set_BorderStyle'] = ASS_Style.prototype.set_BorderStyle = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_BorderStyle_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'BorderStyle', {
@@ -8029,7 +8029,7 @@ ASS_Style.prototype['get_Outline'] = ASS_Style.prototype.get_Outline = function(
 }
 ASS_Style.prototype['set_Outline'] = ASS_Style.prototype.set_Outline = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_Outline_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'Outline', {
@@ -8042,7 +8042,7 @@ ASS_Style.prototype['get_Shadow'] = ASS_Style.prototype.get_Shadow = function() 
 }
 ASS_Style.prototype['set_Shadow'] = ASS_Style.prototype.set_Shadow = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_Shadow_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'Shadow', {
@@ -8055,7 +8055,7 @@ ASS_Style.prototype['get_Alignment'] = ASS_Style.prototype.get_Alignment = funct
 }
 ASS_Style.prototype['set_Alignment'] = ASS_Style.prototype.set_Alignment = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_Alignment_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'Alignment', {
@@ -8068,7 +8068,7 @@ ASS_Style.prototype['get_MarginL'] = ASS_Style.prototype.get_MarginL = function(
 }
 ASS_Style.prototype['set_MarginL'] = ASS_Style.prototype.set_MarginL = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_MarginL_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'MarginL', {
@@ -8081,7 +8081,7 @@ ASS_Style.prototype['get_MarginR'] = ASS_Style.prototype.get_MarginR = function(
 }
 ASS_Style.prototype['set_MarginR'] = ASS_Style.prototype.set_MarginR = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_MarginR_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'MarginR', {
@@ -8094,7 +8094,7 @@ ASS_Style.prototype['get_MarginV'] = ASS_Style.prototype.get_MarginV = function(
 }
 ASS_Style.prototype['set_MarginV'] = ASS_Style.prototype.set_MarginV = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_MarginV_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'MarginV', {
@@ -8107,7 +8107,7 @@ ASS_Style.prototype['get_Encoding'] = ASS_Style.prototype.get_Encoding = functio
 }
 ASS_Style.prototype['set_Encoding'] = ASS_Style.prototype.set_Encoding = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_Encoding_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'Encoding', {
@@ -8122,7 +8122,7 @@ ASS_Style.prototype['set_treat_fontname_as_pattern'] = ASS_Style.prototype.set_t
   arg0,
 ) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_treat_fontname_as_pattern_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'treat_fontname_as_pattern', {
@@ -8135,7 +8135,7 @@ ASS_Style.prototype['get_Blur'] = ASS_Style.prototype.get_Blur = function() {
 }
 ASS_Style.prototype['set_Blur'] = ASS_Style.prototype.set_Blur = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_Blur_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'Blur', {
@@ -8148,7 +8148,7 @@ ASS_Style.prototype['get_Justify'] = ASS_Style.prototype.get_Justify = function(
 }
 ASS_Style.prototype['set_Justify'] = ASS_Style.prototype.set_Justify = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Style_set_Justify_1(self, arg0)
 }
 Object.defineProperty(ASS_Style.prototype, 'Justify', {
@@ -8169,7 +8169,7 @@ ASS_Event.prototype['get_Start'] = ASS_Event.prototype.get_Start = function() {
 }
 ASS_Event.prototype['set_Start'] = ASS_Event.prototype.set_Start = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Event_set_Start_1(self, arg0)
 }
 Object.defineProperty(ASS_Event.prototype, 'Start', {
@@ -8182,7 +8182,7 @@ ASS_Event.prototype['get_Duration'] = ASS_Event.prototype.get_Duration = functio
 }
 ASS_Event.prototype['set_Duration'] = ASS_Event.prototype.set_Duration = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Event_set_Duration_1(self, arg0)
 }
 Object.defineProperty(ASS_Event.prototype, 'Duration', {
@@ -8195,7 +8195,7 @@ ASS_Event.prototype['get_ReadOrder'] = ASS_Event.prototype.get_ReadOrder = funct
 }
 ASS_Event.prototype['set_ReadOrder'] = ASS_Event.prototype.set_ReadOrder = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Event_set_ReadOrder_1(self, arg0)
 }
 Object.defineProperty(ASS_Event.prototype, 'ReadOrder', {
@@ -8208,7 +8208,7 @@ ASS_Event.prototype['get_Layer'] = ASS_Event.prototype.get_Layer = function() {
 }
 ASS_Event.prototype['set_Layer'] = ASS_Event.prototype.set_Layer = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Event_set_Layer_1(self, arg0)
 }
 Object.defineProperty(ASS_Event.prototype, 'Layer', {
@@ -8221,7 +8221,7 @@ ASS_Event.prototype['get_Style'] = ASS_Event.prototype.get_Style = function() {
 }
 ASS_Event.prototype['set_Style'] = ASS_Event.prototype.set_Style = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Event_set_Style_1(self, arg0)
 }
 Object.defineProperty(ASS_Event.prototype, 'Style', {
@@ -8235,8 +8235,8 @@ ASS_Event.prototype['get_Name'] = ASS_Event.prototype.get_Name = function() {
 ASS_Event.prototype['set_Name'] = ASS_Event.prototype.set_Name = function(arg0) {
   const self = this.ptr
   ensureCache.prepare()
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
-  else arg0 = ensureString(arg0, true)
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
+  else { arg0 = ensureString(arg0, true) }
   _emscripten_bind_ASS_Event_set_Name_1(self, arg0)
 }
 Object.defineProperty(ASS_Event.prototype, 'Name', {
@@ -8249,7 +8249,7 @@ ASS_Event.prototype['get_MarginL'] = ASS_Event.prototype.get_MarginL = function(
 }
 ASS_Event.prototype['set_MarginL'] = ASS_Event.prototype.set_MarginL = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Event_set_MarginL_1(self, arg0)
 }
 Object.defineProperty(ASS_Event.prototype, 'MarginL', {
@@ -8262,7 +8262,7 @@ ASS_Event.prototype['get_MarginR'] = ASS_Event.prototype.get_MarginR = function(
 }
 ASS_Event.prototype['set_MarginR'] = ASS_Event.prototype.set_MarginR = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Event_set_MarginR_1(self, arg0)
 }
 Object.defineProperty(ASS_Event.prototype, 'MarginR', {
@@ -8275,7 +8275,7 @@ ASS_Event.prototype['get_MarginV'] = ASS_Event.prototype.get_MarginV = function(
 }
 ASS_Event.prototype['set_MarginV'] = ASS_Event.prototype.set_MarginV = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Event_set_MarginV_1(self, arg0)
 }
 Object.defineProperty(ASS_Event.prototype, 'MarginV', {
@@ -8289,8 +8289,8 @@ ASS_Event.prototype['get_Effect'] = ASS_Event.prototype.get_Effect = function() 
 ASS_Event.prototype['set_Effect'] = ASS_Event.prototype.set_Effect = function(arg0) {
   const self = this.ptr
   ensureCache.prepare()
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
-  else arg0 = ensureString(arg0, true)
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
+  else { arg0 = ensureString(arg0, true) }
   _emscripten_bind_ASS_Event_set_Effect_1(self, arg0)
 }
 Object.defineProperty(ASS_Event.prototype, 'Effect', {
@@ -8304,8 +8304,8 @@ ASS_Event.prototype['get_Text'] = ASS_Event.prototype.get_Text = function() {
 ASS_Event.prototype['set_Text'] = ASS_Event.prototype.set_Text = function(arg0) {
   const self = this.ptr
   ensureCache.prepare()
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
-  else arg0 = ensureString(arg0, true)
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
+  else { arg0 = ensureString(arg0, true) }
   _emscripten_bind_ASS_Event_set_Text_1(self, arg0)
 }
 Object.defineProperty(ASS_Event.prototype, 'Text', {
@@ -8326,7 +8326,7 @@ ASS_Track.prototype['get_n_styles'] = ASS_Track.prototype.get_n_styles = functio
 }
 ASS_Track.prototype['set_n_styles'] = ASS_Track.prototype.set_n_styles = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Track_set_n_styles_1(self, arg0)
 }
 Object.defineProperty(ASS_Track.prototype, 'n_styles', {
@@ -8339,7 +8339,7 @@ ASS_Track.prototype['get_max_styles'] = ASS_Track.prototype.get_max_styles = fun
 }
 ASS_Track.prototype['set_max_styles'] = ASS_Track.prototype.set_max_styles = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Track_set_max_styles_1(self, arg0)
 }
 Object.defineProperty(ASS_Track.prototype, 'max_styles', {
@@ -8352,7 +8352,7 @@ ASS_Track.prototype['get_n_events'] = ASS_Track.prototype.get_n_events = functio
 }
 ASS_Track.prototype['set_n_events'] = ASS_Track.prototype.set_n_events = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Track_set_n_events_1(self, arg0)
 }
 Object.defineProperty(ASS_Track.prototype, 'n_events', {
@@ -8365,7 +8365,7 @@ ASS_Track.prototype['get_max_events'] = ASS_Track.prototype.get_max_events = fun
 }
 ASS_Track.prototype['set_max_events'] = ASS_Track.prototype.set_max_events = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Track_set_max_events_1(self, arg0)
 }
 Object.defineProperty(ASS_Track.prototype, 'max_events', {
@@ -8374,14 +8374,14 @@ Object.defineProperty(ASS_Track.prototype, 'max_events', {
 })
 ASS_Track.prototype['get_styles'] = ASS_Track.prototype.get_styles = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   return wrapPointer(_emscripten_bind_ASS_Track_get_styles_1(self, arg0), ASS_Style)
 }
 ASS_Track.prototype['set_styles'] = ASS_Track.prototype.set_styles = function(arg0, arg1) {
   const self = this.ptr
   ensureCache.prepare()
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
-  if (arg1 && typeof arg1 === 'object') arg1 = arg1.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
+  if (arg1 && typeof arg1 === 'object') { arg1 = arg1.ptr }
   _emscripten_bind_ASS_Track_set_styles_2(self, arg0, arg1)
 }
 Object.defineProperty(ASS_Track.prototype, 'styles', {
@@ -8390,14 +8390,14 @@ Object.defineProperty(ASS_Track.prototype, 'styles', {
 })
 ASS_Track.prototype['get_events'] = ASS_Track.prototype.get_events = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   return wrapPointer(_emscripten_bind_ASS_Track_get_events_1(self, arg0), ASS_Event)
 }
 ASS_Track.prototype['set_events'] = ASS_Track.prototype.set_events = function(arg0, arg1) {
   const self = this.ptr
   ensureCache.prepare()
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
-  if (arg1 && typeof arg1 === 'object') arg1 = arg1.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
+  if (arg1 && typeof arg1 === 'object') { arg1 = arg1.ptr }
   _emscripten_bind_ASS_Track_set_events_2(self, arg0, arg1)
 }
 Object.defineProperty(ASS_Track.prototype, 'events', {
@@ -8411,8 +8411,8 @@ ASS_Track.prototype['get_style_format'] = ASS_Track.prototype.get_style_format =
 ASS_Track.prototype['set_style_format'] = ASS_Track.prototype.set_style_format = function(arg0) {
   const self = this.ptr
   ensureCache.prepare()
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
-  else arg0 = ensureString(arg0, true)
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
+  else { arg0 = ensureString(arg0, true) }
   _emscripten_bind_ASS_Track_set_style_format_1(self, arg0)
 }
 Object.defineProperty(ASS_Track.prototype, 'style_format', {
@@ -8426,8 +8426,8 @@ ASS_Track.prototype['get_event_format'] = ASS_Track.prototype.get_event_format =
 ASS_Track.prototype['set_event_format'] = ASS_Track.prototype.set_event_format = function(arg0) {
   const self = this.ptr
   ensureCache.prepare()
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
-  else arg0 = ensureString(arg0, true)
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
+  else { arg0 = ensureString(arg0, true) }
   _emscripten_bind_ASS_Track_set_event_format_1(self, arg0)
 }
 Object.defineProperty(ASS_Track.prototype, 'event_format', {
@@ -8440,7 +8440,7 @@ ASS_Track.prototype['get_PlayResX'] = ASS_Track.prototype.get_PlayResX = functio
 }
 ASS_Track.prototype['set_PlayResX'] = ASS_Track.prototype.set_PlayResX = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Track_set_PlayResX_1(self, arg0)
 }
 Object.defineProperty(ASS_Track.prototype, 'PlayResX', {
@@ -8453,7 +8453,7 @@ ASS_Track.prototype['get_PlayResY'] = ASS_Track.prototype.get_PlayResY = functio
 }
 ASS_Track.prototype['set_PlayResY'] = ASS_Track.prototype.set_PlayResY = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Track_set_PlayResY_1(self, arg0)
 }
 Object.defineProperty(ASS_Track.prototype, 'PlayResY', {
@@ -8466,7 +8466,7 @@ ASS_Track.prototype['get_Timer'] = ASS_Track.prototype.get_Timer = function() {
 }
 ASS_Track.prototype['set_Timer'] = ASS_Track.prototype.set_Timer = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Track_set_Timer_1(self, arg0)
 }
 Object.defineProperty(ASS_Track.prototype, 'Timer', {
@@ -8479,7 +8479,7 @@ ASS_Track.prototype['get_WrapStyle'] = ASS_Track.prototype.get_WrapStyle = funct
 }
 ASS_Track.prototype['set_WrapStyle'] = ASS_Track.prototype.set_WrapStyle = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Track_set_WrapStyle_1(self, arg0)
 }
 Object.defineProperty(ASS_Track.prototype, 'WrapStyle', {
@@ -8492,7 +8492,7 @@ ASS_Track.prototype['get_ScaledBorderAndShadow'] = ASS_Track.prototype.get_Scale
 }
 ASS_Track.prototype['set_ScaledBorderAndShadow'] = ASS_Track.prototype.set_ScaledBorderAndShadow = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Track_set_ScaledBorderAndShadow_1(self, arg0)
 }
 Object.defineProperty(ASS_Track.prototype, 'ScaledBorderAndShadow', {
@@ -8505,7 +8505,7 @@ ASS_Track.prototype['get_Kerning'] = ASS_Track.prototype.get_Kerning = function(
 }
 ASS_Track.prototype['set_Kerning'] = ASS_Track.prototype.set_Kerning = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Track_set_Kerning_1(self, arg0)
 }
 Object.defineProperty(ASS_Track.prototype, 'Kerning', {
@@ -8519,8 +8519,8 @@ ASS_Track.prototype['get_Language'] = ASS_Track.prototype.get_Language = functio
 ASS_Track.prototype['set_Language'] = ASS_Track.prototype.set_Language = function(arg0) {
   const self = this.ptr
   ensureCache.prepare()
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
-  else arg0 = ensureString(arg0, true)
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
+  else { arg0 = ensureString(arg0, true) }
   _emscripten_bind_ASS_Track_set_Language_1(self, arg0)
 }
 Object.defineProperty(ASS_Track.prototype, 'Language', {
@@ -8533,7 +8533,7 @@ ASS_Track.prototype['get_default_style'] = ASS_Track.prototype.get_default_style
 }
 ASS_Track.prototype['set_default_style'] = ASS_Track.prototype.set_default_style = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_ASS_Track_set_default_style_1(self, arg0)
 }
 Object.defineProperty(ASS_Track.prototype, 'default_style', {
@@ -8547,8 +8547,8 @@ ASS_Track.prototype['get_name'] = ASS_Track.prototype.get_name = function() {
 ASS_Track.prototype['set_name'] = ASS_Track.prototype.set_name = function(arg0) {
   const self = this.ptr
   ensureCache.prepare()
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
-  else arg0 = ensureString(arg0, true)
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
+  else { arg0 = ensureString(arg0, true) }
   _emscripten_bind_ASS_Track_set_name_1(self, arg0)
 }
 Object.defineProperty(ASS_Track.prototype, 'name', {
@@ -8606,114 +8606,114 @@ libass.prototype['oct_library_init'] = libass.prototype.oct_library_init = funct
 }
 libass.prototype['oct_library_done'] = libass.prototype.oct_library_done = function(priv) {
   const self = this.ptr
-  if (priv && typeof priv === 'object') priv = priv.ptr
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
   _emscripten_bind_libass_oct_library_done_1(self, priv)
 }
 libass.prototype['oct_set_fonts_dir'] = libass.prototype.oct_set_fonts_dir = function(priv, fonts_dir) {
   const self = this.ptr
   ensureCache.prepare()
-  if (priv && typeof priv === 'object') priv = priv.ptr
-  if (fonts_dir && typeof fonts_dir === 'object') fonts_dir = fonts_dir.ptr
-  else fonts_dir = ensureString(fonts_dir, false)
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
+  if (fonts_dir && typeof fonts_dir === 'object') { fonts_dir = fonts_dir.ptr }
+  else { fonts_dir = ensureString(fonts_dir, false) }
   _emscripten_bind_libass_oct_set_fonts_dir_2(self, priv, fonts_dir)
 }
 libass.prototype['oct_set_extract_fonts'] = libass.prototype.oct_set_extract_fonts = function(priv, extract) {
   const self = this.ptr
-  if (priv && typeof priv === 'object') priv = priv.ptr
-  if (extract && typeof extract === 'object') extract = extract.ptr
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
+  if (extract && typeof extract === 'object') { extract = extract.ptr }
   _emscripten_bind_libass_oct_set_extract_fonts_2(self, priv, extract)
 }
 libass.prototype['oct_set_style_overrides'] = libass.prototype.oct_set_style_overrides = function(priv, list) {
   const self = this.ptr
   ensureCache.prepare()
-  if (priv && typeof priv === 'object') priv = priv.ptr
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
   _emscripten_bind_libass_oct_set_style_overrides_2(self, priv, list)
 }
 libass.prototype['oct_process_force_style'] = libass.prototype.oct_process_force_style = function(track) {
   const self = this.ptr
-  if (track && typeof track === 'object') track = track.ptr
+  if (track && typeof track === 'object') { track = track.ptr }
   _emscripten_bind_libass_oct_process_force_style_1(self, track)
 }
 libass.prototype['oct_renderer_init'] = libass.prototype.oct_renderer_init = function(priv) {
   const self = this.ptr
-  if (priv && typeof priv === 'object') priv = priv.ptr
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
   return wrapPointer(_emscripten_bind_libass_oct_renderer_init_1(self, priv), ASS_Renderer)
 }
 libass.prototype['oct_renderer_done'] = libass.prototype.oct_renderer_done = function(priv) {
   const self = this.ptr
-  if (priv && typeof priv === 'object') priv = priv.ptr
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
   _emscripten_bind_libass_oct_renderer_done_1(self, priv)
 }
 libass.prototype['oct_set_frame_size'] = libass.prototype.oct_set_frame_size = function(priv, w, h) {
   const self = this.ptr
-  if (priv && typeof priv === 'object') priv = priv.ptr
-  if (w && typeof w === 'object') w = w.ptr
-  if (h && typeof h === 'object') h = h.ptr
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
+  if (w && typeof w === 'object') { w = w.ptr }
+  if (h && typeof h === 'object') { h = h.ptr }
   _emscripten_bind_libass_oct_set_frame_size_3(self, priv, w, h)
 }
 libass.prototype['oct_set_storage_size'] = libass.prototype.oct_set_storage_size = function(priv, w, h) {
   const self = this.ptr
-  if (priv && typeof priv === 'object') priv = priv.ptr
-  if (w && typeof w === 'object') w = w.ptr
-  if (h && typeof h === 'object') h = h.ptr
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
+  if (w && typeof w === 'object') { w = w.ptr }
+  if (h && typeof h === 'object') { h = h.ptr }
   _emscripten_bind_libass_oct_set_storage_size_3(self, priv, w, h)
 }
 libass.prototype['oct_set_shaper'] = libass.prototype.oct_set_shaper = function(priv, level) {
   const self = this.ptr
-  if (priv && typeof priv === 'object') priv = priv.ptr
-  if (level && typeof level === 'object') level = level.ptr
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
+  if (level && typeof level === 'object') { level = level.ptr }
   _emscripten_bind_libass_oct_set_shaper_2(self, priv, level)
 }
 libass.prototype['oct_set_margins'] = libass.prototype.oct_set_margins = function(priv, t, b, l, r) {
   const self = this.ptr
-  if (priv && typeof priv === 'object') priv = priv.ptr
-  if (t && typeof t === 'object') t = t.ptr
-  if (b && typeof b === 'object') b = b.ptr
-  if (l && typeof l === 'object') l = l.ptr
-  if (r && typeof r === 'object') r = r.ptr
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
+  if (t && typeof t === 'object') { t = t.ptr }
+  if (b && typeof b === 'object') { b = b.ptr }
+  if (l && typeof l === 'object') { l = l.ptr }
+  if (r && typeof r === 'object') { r = r.ptr }
   _emscripten_bind_libass_oct_set_margins_5(self, priv, t, b, l, r)
 }
 libass.prototype['oct_set_use_margins'] = libass.prototype.oct_set_use_margins = function(priv, use) {
   const self = this.ptr
-  if (priv && typeof priv === 'object') priv = priv.ptr
-  if (use && typeof use === 'object') use = use.ptr
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
+  if (use && typeof use === 'object') { use = use.ptr }
   _emscripten_bind_libass_oct_set_use_margins_2(self, priv, use)
 }
 libass.prototype['oct_set_pixel_aspect'] = libass.prototype.oct_set_pixel_aspect = function(priv, par) {
   const self = this.ptr
-  if (priv && typeof priv === 'object') priv = priv.ptr
-  if (par && typeof par === 'object') par = par.ptr
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
+  if (par && typeof par === 'object') { par = par.ptr }
   _emscripten_bind_libass_oct_set_pixel_aspect_2(self, priv, par)
 }
 libass.prototype['oct_set_aspect_ratio'] = libass.prototype.oct_set_aspect_ratio = function(priv, dar, sar) {
   const self = this.ptr
-  if (priv && typeof priv === 'object') priv = priv.ptr
-  if (dar && typeof dar === 'object') dar = dar.ptr
-  if (sar && typeof sar === 'object') sar = sar.ptr
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
+  if (dar && typeof dar === 'object') { dar = dar.ptr }
+  if (sar && typeof sar === 'object') { sar = sar.ptr }
   _emscripten_bind_libass_oct_set_aspect_ratio_3(self, priv, dar, sar)
 }
 libass.prototype['oct_set_font_scale'] = libass.prototype.oct_set_font_scale = function(priv, font_scale) {
   const self = this.ptr
-  if (priv && typeof priv === 'object') priv = priv.ptr
-  if (font_scale && typeof font_scale === 'object') font_scale = font_scale.ptr
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
+  if (font_scale && typeof font_scale === 'object') { font_scale = font_scale.ptr }
   _emscripten_bind_libass_oct_set_font_scale_2(self, priv, font_scale)
 }
 libass.prototype['oct_set_hinting'] = libass.prototype.oct_set_hinting = function(priv, ht) {
   const self = this.ptr
-  if (priv && typeof priv === 'object') priv = priv.ptr
-  if (ht && typeof ht === 'object') ht = ht.ptr
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
+  if (ht && typeof ht === 'object') { ht = ht.ptr }
   _emscripten_bind_libass_oct_set_hinting_2(self, priv, ht)
 }
 libass.prototype['oct_set_line_spacing'] = libass.prototype.oct_set_line_spacing = function(priv, line_spacing) {
   const self = this.ptr
-  if (priv && typeof priv === 'object') priv = priv.ptr
-  if (line_spacing && typeof line_spacing === 'object') line_spacing = line_spacing.ptr
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
+  if (line_spacing && typeof line_spacing === 'object') { line_spacing = line_spacing.ptr }
   _emscripten_bind_libass_oct_set_line_spacing_2(self, priv, line_spacing)
 }
 libass.prototype['oct_set_line_position'] = libass.prototype.oct_set_line_position = function(priv, line_position) {
   const self = this.ptr
-  if (priv && typeof priv === 'object') priv = priv.ptr
-  if (line_position && typeof line_position === 'object') line_position = line_position.ptr
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
+  if (line_position && typeof line_position === 'object') { line_position = line_position.ptr }
   _emscripten_bind_libass_oct_set_line_position_2(self, priv, line_position)
 }
 libass.prototype['oct_set_fonts'] = libass.prototype.oct_set_fonts = function(
@@ -8726,23 +8726,23 @@ libass.prototype['oct_set_fonts'] = libass.prototype.oct_set_fonts = function(
 ) {
   const self = this.ptr
   ensureCache.prepare()
-  if (priv && typeof priv === 'object') priv = priv.ptr
-  if (default_font && typeof default_font === 'object') default_font = default_font.ptr
-  else default_font = ensureString(default_font, false)
-  if (default_family && typeof default_family === 'object') default_family = default_family.ptr
-  else default_family = ensureString(default_family, false)
-  if (dfp && typeof dfp === 'object') dfp = dfp.ptr
-  if (config && typeof config === 'object') config = config.ptr
-  else config = ensureString(config, false)
-  if (update && typeof update === 'object') update = update.ptr
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
+  if (default_font && typeof default_font === 'object') { default_font = default_font.ptr }
+  else { default_font = ensureString(default_font, false) }
+  if (default_family && typeof default_family === 'object') { default_family = default_family.ptr }
+  else { default_family = ensureString(default_family, false) }
+  if (dfp && typeof dfp === 'object') { dfp = dfp.ptr }
+  if (config && typeof config === 'object') { config = config.ptr }
+  else { config = ensureString(config, false) }
+  if (update && typeof update === 'object') { update = update.ptr }
   _emscripten_bind_libass_oct_set_fonts_6(self, priv, default_font, default_family, dfp, config, update)
 }
 libass.prototype['oct_set_selective_style_override_enabled'] =
   libass.prototype.oct_set_selective_style_override_enabled =
     function(priv, bits) {
       const self = this.ptr
-      if (priv && typeof priv === 'object') priv = priv.ptr
-      if (bits && typeof bits === 'object') bits = bits.ptr
+      if (priv && typeof priv === 'object') { priv = priv.ptr }
+      if (bits && typeof bits === 'object') { bits = bits.ptr }
       _emscripten_bind_libass_oct_set_selective_style_override_enabled_2(self, priv, bits)
     }
 libass.prototype['oct_set_selective_style_override'] = libass.prototype.oct_set_selective_style_override = function(
@@ -8750,8 +8750,8 @@ libass.prototype['oct_set_selective_style_override'] = libass.prototype.oct_set_
   style,
 ) {
   const self = this.ptr
-  if (priv && typeof priv === 'object') priv = priv.ptr
-  if (style && typeof style === 'object') style = style.ptr
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
+  if (style && typeof style === 'object') { style = style.ptr }
   _emscripten_bind_libass_oct_set_selective_style_override_2(self, priv, style)
 }
 libass.prototype['oct_set_cache_limits'] = libass.prototype.oct_set_cache_limits = function(
@@ -8760,87 +8760,87 @@ libass.prototype['oct_set_cache_limits'] = libass.prototype.oct_set_cache_limits
   bitmap_max_size,
 ) {
   const self = this.ptr
-  if (priv && typeof priv === 'object') priv = priv.ptr
-  if (glyph_max && typeof glyph_max === 'object') glyph_max = glyph_max.ptr
-  if (bitmap_max_size && typeof bitmap_max_size === 'object') bitmap_max_size = bitmap_max_size.ptr
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
+  if (glyph_max && typeof glyph_max === 'object') { glyph_max = glyph_max.ptr }
+  if (bitmap_max_size && typeof bitmap_max_size === 'object') { bitmap_max_size = bitmap_max_size.ptr }
   _emscripten_bind_libass_oct_set_cache_limits_3(self, priv, glyph_max, bitmap_max_size)
 }
 libass.prototype['oct_render_frame'] = libass.prototype.oct_render_frame = function(priv, track, now, detect_change) {
   const self = this.ptr
-  if (priv && typeof priv === 'object') priv = priv.ptr
-  if (track && typeof track === 'object') track = track.ptr
-  if (now && typeof now === 'object') now = now.ptr
-  if (detect_change && typeof detect_change === 'object') detect_change = detect_change.ptr
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
+  if (track && typeof track === 'object') { track = track.ptr }
+  if (now && typeof now === 'object') { now = now.ptr }
+  if (detect_change && typeof detect_change === 'object') { detect_change = detect_change.ptr }
   return wrapPointer(_emscripten_bind_libass_oct_render_frame_4(self, priv, track, now, detect_change), ASS_Image)
 }
 libass.prototype['oct_new_track'] = libass.prototype.oct_new_track = function(priv) {
   const self = this.ptr
-  if (priv && typeof priv === 'object') priv = priv.ptr
+  if (priv && typeof priv === 'object') { priv = priv.ptr }
   return wrapPointer(_emscripten_bind_libass_oct_new_track_1(self, priv), ASS_Track)
 }
 libass.prototype['oct_free_track'] = libass.prototype.oct_free_track = function(track) {
   const self = this.ptr
-  if (track && typeof track === 'object') track = track.ptr
+  if (track && typeof track === 'object') { track = track.ptr }
   _emscripten_bind_libass_oct_free_track_1(self, track)
 }
 libass.prototype['oct_alloc_style'] = libass.prototype.oct_alloc_style = function(track) {
   const self = this.ptr
-  if (track && typeof track === 'object') track = track.ptr
+  if (track && typeof track === 'object') { track = track.ptr }
   return _emscripten_bind_libass_oct_alloc_style_1(self, track)
 }
 libass.prototype['oct_alloc_event'] = libass.prototype.oct_alloc_event = function(track) {
   const self = this.ptr
-  if (track && typeof track === 'object') track = track.ptr
+  if (track && typeof track === 'object') { track = track.ptr }
   return _emscripten_bind_libass_oct_alloc_event_1(self, track)
 }
 libass.prototype['oct_free_style'] = libass.prototype.oct_free_style = function(track, sid) {
   const self = this.ptr
-  if (track && typeof track === 'object') track = track.ptr
-  if (sid && typeof sid === 'object') sid = sid.ptr
+  if (track && typeof track === 'object') { track = track.ptr }
+  if (sid && typeof sid === 'object') { sid = sid.ptr }
   _emscripten_bind_libass_oct_free_style_2(self, track, sid)
 }
 libass.prototype['oct_free_event'] = libass.prototype.oct_free_event = function(track, eid) {
   const self = this.ptr
-  if (track && typeof track === 'object') track = track.ptr
-  if (eid && typeof eid === 'object') eid = eid.ptr
+  if (track && typeof track === 'object') { track = track.ptr }
+  if (eid && typeof eid === 'object') { eid = eid.ptr }
   _emscripten_bind_libass_oct_free_event_2(self, track, eid)
 }
 libass.prototype['oct_flush_events'] = libass.prototype.oct_flush_events = function(track) {
   const self = this.ptr
-  if (track && typeof track === 'object') track = track.ptr
+  if (track && typeof track === 'object') { track = track.ptr }
   _emscripten_bind_libass_oct_flush_events_1(self, track)
 }
 libass.prototype['oct_read_file'] = libass.prototype.oct_read_file = function(library, fname, codepage) {
   const self = this.ptr
   ensureCache.prepare()
-  if (library && typeof library === 'object') library = library.ptr
-  if (fname && typeof fname === 'object') fname = fname.ptr
-  else fname = ensureString(fname, false)
-  if (codepage && typeof codepage === 'object') codepage = codepage.ptr
-  else codepage = ensureString(codepage, false)
+  if (library && typeof library === 'object') { library = library.ptr }
+  if (fname && typeof fname === 'object') { fname = fname.ptr }
+  else { fname = ensureString(fname, false) }
+  if (codepage && typeof codepage === 'object') { codepage = codepage.ptr }
+  else { codepage = ensureString(codepage, false) }
   return wrapPointer(_emscripten_bind_libass_oct_read_file_3(self, library, fname, codepage), ASS_Track)
 }
 libass.prototype['oct_add_font'] = libass.prototype.oct_add_font = function(library, name, data, data_size) {
   const self = this.ptr
   ensureCache.prepare()
-  if (library && typeof library === 'object') library = library.ptr
-  if (name && typeof name === 'object') name = name.ptr
-  else name = ensureString(name, false)
-  if (data && typeof data === 'object') data = data.ptr
-  else data = ensureString(data, false)
-  if (data_size && typeof data_size === 'object') data_size = data_size.ptr
+  if (library && typeof library === 'object') { library = library.ptr }
+  if (name && typeof name === 'object') { name = name.ptr }
+  else { name = ensureString(name, false) }
+  if (data && typeof data === 'object') { data = data.ptr }
+  else { data = ensureString(data, false) }
+  if (data_size && typeof data_size === 'object') { data_size = data_size.ptr }
   _emscripten_bind_libass_oct_add_font_4(self, library, name, data, data_size)
 }
 libass.prototype['oct_clear_fonts'] = libass.prototype.oct_clear_fonts = function(library) {
   const self = this.ptr
-  if (library && typeof library === 'object') library = library.ptr
+  if (library && typeof library === 'object') { library = library.ptr }
   _emscripten_bind_libass_oct_clear_fonts_1(self, library)
 }
 libass.prototype['oct_step_sub'] = libass.prototype.oct_step_sub = function(track, now, movement) {
   const self = this.ptr
-  if (track && typeof track === 'object') track = track.ptr
-  if (now && typeof now === 'object') now = now.ptr
-  if (movement && typeof movement === 'object') movement = movement.ptr
+  if (track && typeof track === 'object') { track = track.ptr }
+  if (now && typeof now === 'object') { now = now.ptr }
+  if (movement && typeof movement === 'object') { movement = movement.ptr }
   return _emscripten_bind_libass_oct_step_sub_3(self, track, now, movement)
 }
 function RenderBlendResult() {
@@ -8857,7 +8857,7 @@ RenderBlendResult.prototype['get_changed'] = RenderBlendResult.prototype.get_cha
 }
 RenderBlendResult.prototype['set_changed'] = RenderBlendResult.prototype.set_changed = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_RenderBlendResult_set_changed_1(self, arg0)
 }
 Object.defineProperty(RenderBlendResult.prototype, 'changed', {
@@ -8870,7 +8870,7 @@ RenderBlendResult.prototype['get_blend_time'] = RenderBlendResult.prototype.get_
 }
 RenderBlendResult.prototype['set_blend_time'] = RenderBlendResult.prototype.set_blend_time = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_RenderBlendResult_set_blend_time_1(self, arg0)
 }
 Object.defineProperty(RenderBlendResult.prototype, 'blend_time', {
@@ -8883,7 +8883,7 @@ RenderBlendResult.prototype['get_dest_x'] = RenderBlendResult.prototype.get_dest
 }
 RenderBlendResult.prototype['set_dest_x'] = RenderBlendResult.prototype.set_dest_x = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_RenderBlendResult_set_dest_x_1(self, arg0)
 }
 Object.defineProperty(RenderBlendResult.prototype, 'dest_x', {
@@ -8896,7 +8896,7 @@ RenderBlendResult.prototype['get_dest_y'] = RenderBlendResult.prototype.get_dest
 }
 RenderBlendResult.prototype['set_dest_y'] = RenderBlendResult.prototype.set_dest_y = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_RenderBlendResult_set_dest_y_1(self, arg0)
 }
 Object.defineProperty(RenderBlendResult.prototype, 'dest_y', {
@@ -8909,7 +8909,7 @@ RenderBlendResult.prototype['get_dest_width'] = RenderBlendResult.prototype.get_
 }
 RenderBlendResult.prototype['set_dest_width'] = RenderBlendResult.prototype.set_dest_width = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_RenderBlendResult_set_dest_width_1(self, arg0)
 }
 Object.defineProperty(RenderBlendResult.prototype, 'dest_width', {
@@ -8922,7 +8922,7 @@ RenderBlendResult.prototype['get_dest_height'] = RenderBlendResult.prototype.get
 }
 RenderBlendResult.prototype['set_dest_height'] = RenderBlendResult.prototype.set_dest_height = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_RenderBlendResult_set_dest_height_1(self, arg0)
 }
 Object.defineProperty(RenderBlendResult.prototype, 'dest_height', {
@@ -8936,8 +8936,8 @@ RenderBlendResult.prototype['get_image'] = RenderBlendResult.prototype.get_image
 RenderBlendResult.prototype['set_image'] = RenderBlendResult.prototype.set_image = function(arg0) {
   const self = this.ptr
   ensureCache.prepare()
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
-  else arg0 = ensureString(arg0, false)
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
+  else { arg0 = ensureString(arg0, false) }
   _emscripten_bind_RenderBlendResult_set_image_1(self, arg0)
 }
 Object.defineProperty(RenderBlendResult.prototype, 'image', {
@@ -8955,12 +8955,12 @@ SubtitleOctopus.__cache__ = {}
 Module['SubtitleOctopus'] = SubtitleOctopus
 SubtitleOctopus.prototype['setLogLevel'] = SubtitleOctopus.prototype.setLogLevel = function(level) {
   const self = this.ptr
-  if (level && typeof level === 'object') level = level.ptr
+  if (level && typeof level === 'object') { level = level.ptr }
   _emscripten_bind_SubtitleOctopus_setLogLevel_1(self, level)
 }
 SubtitleOctopus.prototype['setDropAnimations'] = SubtitleOctopus.prototype.setDropAnimations = function(value) {
   const self = this.ptr
-  if (value && typeof value === 'object') value = value.ptr
+  if (value && typeof value === 'object') { value = value.ptr }
   _emscripten_bind_SubtitleOctopus_setDropAnimations_1(self, value)
 }
 SubtitleOctopus.prototype['initLibrary'] = SubtitleOctopus.prototype.initLibrary = function(
@@ -8970,25 +8970,25 @@ SubtitleOctopus.prototype['initLibrary'] = SubtitleOctopus.prototype.initLibrary
 ) {
   const self = this.ptr
   ensureCache.prepare()
-  if (frame_w && typeof frame_w === 'object') frame_w = frame_w.ptr
-  if (frame_h && typeof frame_h === 'object') frame_h = frame_h.ptr
-  if (default_font && typeof default_font === 'object') default_font = default_font.ptr
-  else default_font = ensureString(default_font, false)
+  if (frame_w && typeof frame_w === 'object') { frame_w = frame_w.ptr }
+  if (frame_h && typeof frame_h === 'object') { frame_h = frame_h.ptr }
+  if (default_font && typeof default_font === 'object') { default_font = default_font.ptr }
+  else { default_font = ensureString(default_font, false) }
   _emscripten_bind_SubtitleOctopus_initLibrary_3(self, frame_w, frame_h, default_font)
 }
 SubtitleOctopus.prototype['createTrack'] = SubtitleOctopus.prototype.createTrack = function(subfile) {
   const self = this.ptr
   ensureCache.prepare()
-  if (subfile && typeof subfile === 'object') subfile = subfile.ptr
-  else subfile = ensureString(subfile, false)
+  if (subfile && typeof subfile === 'object') { subfile = subfile.ptr }
+  else { subfile = ensureString(subfile, false) }
   _emscripten_bind_SubtitleOctopus_createTrack_1(self, subfile)
 }
 SubtitleOctopus.prototype['createTrackMem'] = SubtitleOctopus.prototype.createTrackMem = function(buf, bufsize) {
   const self = this.ptr
   ensureCache.prepare()
-  if (buf && typeof buf === 'object') buf = buf.ptr
-  else buf = ensureString(buf, false)
-  if (bufsize && typeof bufsize === 'object') bufsize = bufsize.ptr
+  if (buf && typeof buf === 'object') { buf = buf.ptr }
+  else { buf = ensureString(buf, false) }
+  if (bufsize && typeof bufsize === 'object') { bufsize = bufsize.ptr }
   _emscripten_bind_SubtitleOctopus_createTrackMem_2(self, buf, bufsize)
 }
 SubtitleOctopus.prototype['removeTrack'] = SubtitleOctopus.prototype.removeTrack = function() {
@@ -8997,14 +8997,14 @@ SubtitleOctopus.prototype['removeTrack'] = SubtitleOctopus.prototype.removeTrack
 }
 SubtitleOctopus.prototype['resizeCanvas'] = SubtitleOctopus.prototype.resizeCanvas = function(frame_w, frame_h) {
   const self = this.ptr
-  if (frame_w && typeof frame_w === 'object') frame_w = frame_w.ptr
-  if (frame_h && typeof frame_h === 'object') frame_h = frame_h.ptr
+  if (frame_w && typeof frame_w === 'object') { frame_w = frame_w.ptr }
+  if (frame_h && typeof frame_h === 'object') { frame_h = frame_h.ptr }
   _emscripten_bind_SubtitleOctopus_resizeCanvas_2(self, frame_w, frame_h)
 }
 SubtitleOctopus.prototype['renderImage'] = SubtitleOctopus.prototype.renderImage = function(time, changed) {
   const self = this.ptr
-  if (time && typeof time === 'object') time = time.ptr
-  if (changed && typeof changed === 'object') changed = changed.ptr
+  if (time && typeof time === 'object') { time = time.ptr }
+  if (changed && typeof changed === 'object') { changed = changed.ptr }
   return wrapPointer(_emscripten_bind_SubtitleOctopus_renderImage_2(self, time, changed), ASS_Image)
 }
 SubtitleOctopus.prototype['quitLibrary'] = SubtitleOctopus.prototype.quitLibrary = function() {
@@ -9021,10 +9021,10 @@ SubtitleOctopus.prototype['reloadFonts'] = SubtitleOctopus.prototype.reloadFonts
 }
 SubtitleOctopus.prototype['setMargin'] = SubtitleOctopus.prototype.setMargin = function(top, bottom, left, right) {
   const self = this.ptr
-  if (top && typeof top === 'object') top = top.ptr
-  if (bottom && typeof bottom === 'object') bottom = bottom.ptr
-  if (left && typeof left === 'object') left = left.ptr
-  if (right && typeof right === 'object') right = right.ptr
+  if (top && typeof top === 'object') { top = top.ptr }
+  if (bottom && typeof bottom === 'object') { bottom = bottom.ptr }
+  if (left && typeof left === 'object') { left = left.ptr }
+  if (right && typeof right === 'object') { right = right.ptr }
   _emscripten_bind_SubtitleOctopus_setMargin_4(self, top, bottom, left, right)
 }
 SubtitleOctopus.prototype['getEventCount'] = SubtitleOctopus.prototype.getEventCount = function() {
@@ -9041,7 +9041,7 @@ SubtitleOctopus.prototype['allocStyle'] = SubtitleOctopus.prototype.allocStyle =
 }
 SubtitleOctopus.prototype['removeEvent'] = SubtitleOctopus.prototype.removeEvent = function(eid) {
   const self = this.ptr
-  if (eid && typeof eid === 'object') eid = eid.ptr
+  if (eid && typeof eid === 'object') { eid = eid.ptr }
   _emscripten_bind_SubtitleOctopus_removeEvent_1(self, eid)
 }
 SubtitleOctopus.prototype['getStyleCount'] = SubtitleOctopus.prototype.getStyleCount = function() {
@@ -9051,13 +9051,13 @@ SubtitleOctopus.prototype['getStyleCount'] = SubtitleOctopus.prototype.getStyleC
 SubtitleOctopus.prototype['getStyleByName'] = SubtitleOctopus.prototype.getStyleByName = function(name) {
   const self = this.ptr
   ensureCache.prepare()
-  if (name && typeof name === 'object') name = name.ptr
-  else name = ensureString(name, false)
+  if (name && typeof name === 'object') { name = name.ptr }
+  else { name = ensureString(name, false) }
   return _emscripten_bind_SubtitleOctopus_getStyleByName_1(self, name)
 }
 SubtitleOctopus.prototype['removeStyle'] = SubtitleOctopus.prototype.removeStyle = function(eid) {
   const self = this.ptr
-  if (eid && typeof eid === 'object') eid = eid.ptr
+  if (eid && typeof eid === 'object') { eid = eid.ptr }
   _emscripten_bind_SubtitleOctopus_removeStyle_1(self, eid)
 }
 SubtitleOctopus.prototype['removeAllEvents'] = SubtitleOctopus.prototype.removeAllEvents = function() {
@@ -9069,14 +9069,14 @@ SubtitleOctopus.prototype['setMemoryLimits'] = SubtitleOctopus.prototype.setMemo
   bitmap_cache_limit,
 ) {
   const self = this.ptr
-  if (glyph_limit && typeof glyph_limit === 'object') glyph_limit = glyph_limit.ptr
-  if (bitmap_cache_limit && typeof bitmap_cache_limit === 'object') bitmap_cache_limit = bitmap_cache_limit.ptr
+  if (glyph_limit && typeof glyph_limit === 'object') { glyph_limit = glyph_limit.ptr }
+  if (bitmap_cache_limit && typeof bitmap_cache_limit === 'object') { bitmap_cache_limit = bitmap_cache_limit.ptr }
   _emscripten_bind_SubtitleOctopus_setMemoryLimits_2(self, glyph_limit, bitmap_cache_limit)
 }
 SubtitleOctopus.prototype['renderBlend'] = SubtitleOctopus.prototype.renderBlend = function(tm, force) {
   const self = this.ptr
-  if (tm && typeof tm === 'object') tm = tm.ptr
-  if (force && typeof force === 'object') force = force.ptr
+  if (tm && typeof tm === 'object') { tm = tm.ptr }
+  if (force && typeof force === 'object') { force = force.ptr }
   return wrapPointer(_emscripten_bind_SubtitleOctopus_renderBlend_2(self, tm, force), RenderBlendResult)
 }
 SubtitleOctopus.prototype['get_track'] = SubtitleOctopus.prototype.get_track = function() {
@@ -9085,7 +9085,7 @@ SubtitleOctopus.prototype['get_track'] = SubtitleOctopus.prototype.get_track = f
 }
 SubtitleOctopus.prototype['set_track'] = SubtitleOctopus.prototype.set_track = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_SubtitleOctopus_set_track_1(self, arg0)
 }
 Object.defineProperty(SubtitleOctopus.prototype, 'track', {
@@ -9098,7 +9098,7 @@ SubtitleOctopus.prototype['get_ass_renderer'] = SubtitleOctopus.prototype.get_as
 }
 SubtitleOctopus.prototype['set_ass_renderer'] = SubtitleOctopus.prototype.set_ass_renderer = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_SubtitleOctopus_set_ass_renderer_1(self, arg0)
 }
 Object.defineProperty(SubtitleOctopus.prototype, 'ass_renderer', {
@@ -9111,7 +9111,7 @@ SubtitleOctopus.prototype['get_ass_library'] = SubtitleOctopus.prototype.get_ass
 }
 SubtitleOctopus.prototype['set_ass_library'] = SubtitleOctopus.prototype.set_ass_library = function(arg0) {
   const self = this.ptr
-  if (arg0 && typeof arg0 === 'object') arg0 = arg0.ptr
+  if (arg0 && typeof arg0 === 'object') { arg0 = arg0.ptr }
   _emscripten_bind_SubtitleOctopus_set_ass_library_1(self, arg0)
 }
 Object.defineProperty(SubtitleOctopus.prototype, 'ass_library', {
@@ -9145,8 +9145,8 @@ SubtitleOctopus.prototype['__destroy__'] = SubtitleOctopus.prototype.__destroy__
     Module['ASS_OVERRIDE_FULL_STYLE'] = _emscripten_enum_ASS_OverrideBits_ASS_OVERRIDE_FULL_STYLE()
     Module['ASS_OVERRIDE_BIT_JUSTIFY'] = _emscripten_enum_ASS_OverrideBits_ASS_OVERRIDE_BIT_JUSTIFY()
   }
-  if (runtimeInitialized) setupEnums()
-  else addOnInit(setupEnums)
+  if (runtimeInitialized) { setupEnums() }
+  else { addOnInit(setupEnums) }
 })()
 Module['FS'] = FS
 self.delay = 0
@@ -9167,9 +9167,9 @@ self.writeFontToFS = function(font) {
   if (font.startsWith('@')) {
     font = font.substr(1)
   }
-  if (self.fontMap_.hasOwnProperty(font)) return
+  if (self.fontMap_.hasOwnProperty(font)) { return }
   self.fontMap_[font] = true
-  if (!self.availableFonts.hasOwnProperty(font)) return
+  if (!self.availableFonts.hasOwnProperty(font)) { return }
   self.loadFontFile('font' + self.fontId++ + '-', self.availableFonts[font])
 }
 self.loadFontFile = function(fontId, path) {
@@ -9180,7 +9180,7 @@ self.loadFontFile = function(fontId, path) {
   }
 }
 self.writeAvailableFontsToFS = function(content) {
-  if (!self.availableFonts) return
+  if (!self.availableFonts) { return }
   const sections = parseAss(content)
   for (let i = 0; i < sections.length; i++) {
     for (let j = 0; j < sections[i].body.length; j++) {
@@ -9440,8 +9440,8 @@ function parseAss(content) {
       format = null
       sections.push({ name: m[1], body: [] })
     } else {
-      if (/^\s*$/.test(lines[i])) continue
-      if (sections.length === 0) continue
+      if (/^\s*$/.test(lines[i])) { continue }
+      if (sections.length === 0) { continue }
       body = sections[sections.length - 1].body
       if (lines[i][0] === ';') {
         body.push({ type: 'comment', value: lines[i].substring(1) })
@@ -9503,7 +9503,7 @@ let clientFrameId = 0
 let commandBuffer = []
 const postMainLoop = Module['postMainLoop']
 Module['postMainLoop'] = function() {
-  if (postMainLoop) postMainLoop()
+  if (postMainLoop) { postMainLoop() }
   postMessage({ target: 'tick', id: frameId++ })
   commandBuffer = []
 }
@@ -9555,7 +9555,7 @@ function onMessageFromMainEmscriptenThread(message) {
         }
         self.resize(message.data.width, message.data.height)
         self.getRenderMethod()()
-      } else throw 'ey?'
+      } else { throw 'ey?' }
       break
     }
     case 'video': {
@@ -9724,7 +9724,7 @@ function onMessageFromMainEmscriptenThread(message) {
       break
     }
     case 'setimmediate': {
-      if (Module['setImmediates']) Module['setImmediates'].shift()()
+      if (Module['setImmediates']) { Module['setImmediates'].shift()() }
       break
     }
     default:

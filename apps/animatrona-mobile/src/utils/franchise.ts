@@ -109,11 +109,11 @@ function groupByGraph(anime: AnimeListItem[]): FranchiseGroup[] {
   // 2. Строим неориентированный граф смежности (только сильные связи между загруженными)
   const adj = new Map<string, Set<string>>()
   for (const item of anime) {
-    if (!item.relations) continue
+    if (!item.relations) { continue }
     for (const rel of item.relations) {
-      if (!STRONG_RELATION_KINDS.has(rel.relationKind)) continue
-      if (!rel.targetAnimeId) continue
-      if (!animeById.has(rel.targetAnimeId)) continue
+      if (!STRONG_RELATION_KINDS.has(rel.relationKind)) { continue }
+      if (!rel.targetAnimeId) { continue }
+      if (!animeById.has(rel.targetAnimeId)) { continue }
 
       // Добавляем рёбра в обе стороны
       let neighbors = adj.get(item.id)
@@ -137,7 +137,7 @@ function groupByGraph(anime: AnimeListItem[]): FranchiseGroup[] {
   const components: AnimeListItem[][] = []
 
   for (const item of anime) {
-    if (visited.has(item.id)) continue
+    if (visited.has(item.id)) { continue }
 
     const component: AnimeListItem[] = []
     const queue = [item.id]
@@ -146,12 +146,12 @@ function groupByGraph(anime: AnimeListItem[]): FranchiseGroup[] {
     while (queue.length > 0) {
       const currentId = queue.shift()!
       const current = animeById.get(currentId)
-      if (current) component.push(current)
+      if (current) { component.push(current) }
 
       const neighbors = adj.get(currentId)
-      if (!neighbors) continue
+      if (!neighbors) { continue }
       for (const neighborId of neighbors) {
-        if (visited.has(neighborId)) continue
+        if (visited.has(neighborId)) { continue }
         visited.add(neighborId)
         queue.push(neighborId)
       }
@@ -212,7 +212,7 @@ function buildGroups(components: AnimeListItem[][]): FranchiseGroup[] {
   result.sort((a, b) => {
     const aWatching = a.items.some((i) => i.watchStatus === 'WATCHING') ? 0 : 1
     const bWatching = b.items.some((i) => i.watchStatus === 'WATCHING') ? 0 : 1
-    if (aWatching !== bWatching) return aWatching - bWatching
+    if (aWatching !== bWatching) { return aWatching - bWatching }
     return a.name.localeCompare(b.name)
   })
 

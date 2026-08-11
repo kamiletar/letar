@@ -94,8 +94,8 @@ export async function sendPushToUser(userId: string, payload: PushPayload): Prom
 
   for (const sub of subscriptions) {
     const success = await sendToSubscription(sub, payload)
-    if (success) sent++
-    else failed++
+    if (success) { sent++ }
+    else { failed++ }
   }
 
   return { sent, failed }

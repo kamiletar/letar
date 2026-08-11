@@ -242,7 +242,7 @@ type ActiveSeason = Awaited<
 >
 
 async function computeStandings(activeSeason: ActiveSeason): Promise<StandingsRow[]> {
-  if (!activeSeason) return []
+  if (!activeSeason) { return [] }
 
   const seasonMatches = await prisma.match.findMany({
     where: {

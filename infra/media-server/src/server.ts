@@ -56,13 +56,13 @@ app.addContentTypeParser('application/offset+octet-stream', (_req, payload, done
 
 // Auth hook — пропускаем /health и upload по токену
 app.addHook('onRequest', async (req, reply) => {
-  if (req.url === '/health') return
+  if (req.url === '/health') { return }
 
   const appId = (req.params as Record<string, string>).appId
-  if (!appId) return
+  if (!appId) { return }
 
   // TUS роуты: /video/tus — авторизация внутри роут-хендлеров
-  if (req.url.includes('/video/tus')) return
+  if (req.url.includes('/video/tus')) { return }
 
   // Прямой аплоад от браузера — проверяем одноразовый токен
   if (req.url.includes('/video/upload') && req.method === 'POST') {
@@ -114,7 +114,7 @@ app.post<{ Params: { appId: string } }>('/api/v1/:appId/video/upload', async (re
   const webhookUrl = tokenPayload?.webhookUrl ?? (req.query as Record<string, string>).webhookUrl
 
   const data = await req.file()
-  if (!data) return reply.code(400).send({ error: 'No file' })
+  if (!data) { return reply.code(400).send({ error: 'No file' }) }
 
   const videoId = tokenPayload?.videoId ?? createId()
   const ext = extname(data.filename).slice(1) || 'mp4'
@@ -137,7 +137,7 @@ app.get<{ Params: { appId: string; videoId: string } }>('/api/v1/:appId/video/:v
   const { appId, videoId } = req.params
   const jobs = await transcodeQueue.getJobs(['waiting', 'active', 'completed', 'failed'])
   const job = jobs.find((j) => j.data.videoId === videoId && j.data.appId === appId)
-  if (!job) return reply.code(404).send({ error: 'Not found' })
+  if (!job) { return reply.code(404).send({ error: 'Not found' }) }
   const status = await getJobStatus(job.id!)
   return { videoId, status }
 })
@@ -149,7 +149,7 @@ app.delete<{ Params: { appId: string; videoId: string } }>('/api/v1/:appId/video
   await removeDir(processedDir(appId, videoId))
   const jobs = await transcodeQueue.getJobs(['waiting', 'active'])
   const job = jobs.find((j) => j.data.videoId === videoId && j.data.appId === appId)
-  if (job) await job.remove()
+  if (job) { await job.remove() }
   return reply.code(204).send()
 })
 
@@ -160,7 +160,7 @@ app.post<{ Params: { appId: string; videoId: string } }>('/api/v1/:appId/video/:
   const dir = processedDir(appId, videoId)
   const glob = new Bun.Glob('source.*')
   const files = [...glob.scanSync(rawDir(appId, videoId))]
-  if (!files.length) return reply.code(404).send({ error: 'Source not found' })
+  if (!files.length) { return reply.code(404).send({ error: 'Source not found' }) }
   const src = `${rawDir(appId, videoId)}/${files[0]}`
   const out = `${dir}/poster.jpg`
   await ensureDir(dir)

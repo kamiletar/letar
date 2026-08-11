@@ -10,13 +10,13 @@ export const GET = createUploadsRoute({
   headers: async ({ segments, relPath }) => {
     // Произвольные файлы (uploads/files/<name>) отдаём с оригинальным именем из БД —
     // на диске они лежат под сгенерированным именем.
-    if (segments[0] !== 'files' || segments.length !== 2) return undefined
+    if (segments[0] !== 'files' || segments.length !== 2) { return undefined }
 
     const record = await prisma.uploadedFile.findUnique({
       where: { path: relPath },
       select: { filename: true },
     })
-    if (!record?.filename) return undefined
+    if (!record?.filename) { return undefined }
 
     return {
       // RFC 5987 — поддержка UTF-8 имён (пробелы, кириллица и т.д.)

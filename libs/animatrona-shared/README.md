@@ -45,4 +45,3 @@ nx lint animatrona-shared
 ```
 
 ---
-

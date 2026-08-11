@@ -29,7 +29,7 @@ function parseArgs(argv) {
   const args = {}
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
-    if (!arg.startsWith('--')) continue
+    if (!arg.startsWith('--')) { continue }
     const key = arg.slice(2)
     const value = argv[i + 1]
     args[key] = value
@@ -45,7 +45,9 @@ const afterKey = args.after ?? null
 const anchorPackage = args['anchor-package'] ?? '@letar/forms'
 
 if (!packageName || !target) {
-  console.error('Использование: node scripts/add-lib-tsconfig-path.mjs --package "<alias>" --target "<путь от корня репо>" [--after "<ключ>"] [--anchor-package "<alias>"]')
+  console.error(
+    'Использование: node scripts/add-lib-tsconfig-path.mjs --package "<alias>" --target "<путь от корня репо>" [--after "<ключ>"] [--anchor-package "<alias>"]',
+  )
   process.exit(1)
 }
 
@@ -53,7 +55,7 @@ const targetAbs = path.resolve(repoRoot, target)
 
 function findTsconfigs(dir, depth) {
   const found = []
-  if (depth < 0) return found
+  if (depth < 0) { return found }
   let entries
   try {
     entries = readdirSync(dir)
@@ -61,7 +63,7 @@ function findTsconfigs(dir, depth) {
     return found
   }
   for (const entry of entries) {
-    if (entry === 'node_modules' || entry === '.next' || entry === 'dist' || entry === 'out') continue
+    if (entry === 'node_modules' || entry === '.next' || entry === 'dist' || entry === 'out') { continue }
     const fullPath = path.join(dir, entry)
     let stats
     try {
@@ -83,18 +85,18 @@ const tsconfigFiles = findTsconfigs(appsDir, 2).sort()
 
 function extractPathsBlock(text) {
   const keyMatch = text.match(/"paths"\s*:\s*\{/)
-  if (!keyMatch) return null
+  if (!keyMatch) { return null }
   const blockStart = keyMatch.index + keyMatch[0].length // сразу после '{'
   let depth = 1
   let i = blockStart
   for (; i < text.length; i++) {
-    if (text[i] === '{') depth++
+    if (text[i] === '{') { depth++ }
     else if (text[i] === '}') {
       depth--
-      if (depth === 0) break
+      if (depth === 0) { break }
     }
   }
-  if (depth !== 0) return null
+  if (depth !== 0) { return null }
   return {
     headerStart: keyMatch.index,
     innerStart: blockStart,
@@ -144,8 +146,8 @@ for (const tsconfigPath of tsconfigFiles) {
     let depth = 0
     let buf = ''
     for (const ch of inner) {
-      if (ch === '[') depth++
-      else if (ch === ']') depth--
+      if (ch === '[') { depth++ }
+      else if (ch === ']') { depth-- }
       if (ch === ',' && depth === 0) {
         entries.push(buf)
         buf = ''
@@ -153,7 +155,7 @@ for (const tsconfigPath of tsconfigFiles) {
         buf += ch
       }
     }
-    if (buf.trim().length > 0) entries.push(buf)
+    if (buf.trim().length > 0) { entries.push(buf) }
   }
   const trimmedEntries = entries.map((e) => e.trim()).filter((e) => e.length > 0)
 
@@ -162,14 +164,14 @@ for (const tsconfigPath of tsconfigFiles) {
 
   const tsconfigDir = path.dirname(tsconfigPath)
   let relPath = path.relative(tsconfigDir, targetAbs).split(path.sep).join('/')
-  if (!relPath.startsWith('.')) relPath = './' + relPath
+  if (!relPath.startsWith('.')) { relPath = './' + relPath }
 
   const newEntry = `"${packageName}": ["${relPath}"]`
 
   let insertIndex = trimmedEntries.length
   if (afterKey) {
     const idx = trimmedEntries.findIndex((e) => e.startsWith(`"${afterKey}":`))
-    if (idx !== -1) insertIndex = idx + 1
+    if (idx !== -1) { insertIndex = idx + 1 }
   }
 
   const newEntries = [
@@ -197,24 +199,28 @@ for (const tsconfigPath of tsconfigFiles) {
 const rel = (p) => path.relative(repoRoot, p).split(path.sep).join('/')
 
 console.log(`\nДобавлено "${packageName}" в ${updated.length} файл(ов):`)
-for (const f of updated) console.log(`  ✅ ${rel(f)}`)
+for (const f of updated) { console.log(`  ✅ ${rel(f)}`) }
 
 if (skippedAlready.length > 0) {
   console.log(`\nУже было (пропущено, идемпотентность): ${skippedAlready.length}`)
-  for (const f of skippedAlready) console.log(`  ⏭️  ${rel(f)}`)
+  for (const f of skippedAlready) { console.log(`  ⏭️  ${rel(f)}`) }
 }
 
 if (invalidJson.length > 0) {
   console.log(`\n⚠️  Пропущено из-за невалидного результата JSON: ${invalidJson.length}`)
-  for (const f of invalidJson) console.log(`  ❌ ${rel(f)}`)
+  for (const f of invalidJson) { console.log(`  ❌ ${rel(f)}`) }
 }
 
 console.log(`\nВсего проверено tsconfig.json: ${tsconfigFiles.length}`)
-console.log(`Найдено потребителей "${anchorPackage}": ${updated.length + skippedAlready.length + noMatch.length + invalidJson.length}`)
+console.log(
+  `Найдено потребителей "${anchorPackage}": ${
+    updated.length + skippedAlready.length + noMatch.length + invalidJson.length
+  }`,
+)
 
 if (noMatch.length > 0) {
   console.log(`\n⚠️  Есть anchor-ключ "${anchorPackage}", но блок "paths" не распознан (не тронуто): ${noMatch.length}`)
-  for (const f of noMatch) console.log(`  ❓ ${rel(f)}`)
+  for (const f of noMatch) { console.log(`  ❓ ${rel(f)}`) }
 }
 
-if (invalidJson.length > 0) process.exit(1)
+if (invalidJson.length > 0) { process.exit(1) }

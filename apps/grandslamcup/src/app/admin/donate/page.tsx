@@ -47,7 +47,7 @@ export default function AdminDonatePage() {
 
   const loadLinks = async () => {
     const result = await getDonateLinksAction()
-    if ('data' in result) setLinks(result.data as LinkItem[])
+    if ('data' in result) { setLinks(result.data as LinkItem[]) }
     setLoading(false)
   }
 
@@ -58,7 +58,7 @@ export default function AdminDonatePage() {
   const handleCreate = async () => {
     setSaving(true)
     const result = await createDonateLinkAction(form)
-    if ('error' in result) toaster.error({ title: String(result.error) })
+    if ('error' in result) { toaster.error({ title: String(result.error) }) }
     else {
       toaster.success({ title: 'Ссылка добавлена' })
       setCreateOpen(false)
@@ -69,9 +69,9 @@ export default function AdminDonatePage() {
   }
 
   const handleDelete = async () => {
-    if (!deleteTarget) return
+    if (!deleteTarget) { return }
     const result = await deleteDonateLinkAction(deleteTarget.id)
-    if ('error' in result) toaster.error({ title: result.error })
+    if ('error' in result) { toaster.error({ title: result.error }) }
     else {
       toaster.success({ title: 'Ссылка удалена' })
       loadLinks()

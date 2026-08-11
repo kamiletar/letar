@@ -31,7 +31,7 @@ export function PhotoUploader({ matchId }: PhotoUploaderProps) {
   const addFiles = useCallback((files: FileList | File[]) => {
     const newFiles: PendingFile[] = []
     for (const file of files) {
-      if (!file.type.startsWith('image/')) continue
+      if (!file.type.startsWith('image/')) { continue }
       if (file.size > 15 * 1024 * 1024) {
         toaster.error({ title: `${file.name} превышает 15 МБ` })
         continue
@@ -57,7 +57,7 @@ export function PhotoUploader({ matchId }: PhotoUploaderProps) {
   }
 
   const handleUpload = async () => {
-    if (pending.length === 0) return
+    if (pending.length === 0) { return }
     setUploading(true)
 
     let successCount = 0
@@ -65,7 +65,7 @@ export function PhotoUploader({ matchId }: PhotoUploaderProps) {
       const formData = new FormData()
       formData.append('file', item.file)
       formData.append('matchId', matchId)
-      if (item.caption) formData.append('caption', item.caption)
+      if (item.caption) { formData.append('caption', item.caption) }
 
       try {
         const res = await fetch('/api/upload', { method: 'POST', body: formData })
@@ -83,7 +83,7 @@ export function PhotoUploader({ matchId }: PhotoUploaderProps) {
     if (successCount > 0) {
       toaster.success({ title: `Загружено ${successCount} фото` })
       // Очищаем previews
-      for (const item of pending) URL.revokeObjectURL(item.preview)
+      for (const item of pending) { URL.revokeObjectURL(item.preview) }
       setPending([])
       router.refresh()
     }
@@ -93,7 +93,7 @@ export function PhotoUploader({ matchId }: PhotoUploaderProps) {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     setDragOver(false)
-    if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files)
+    if (e.dataTransfer.files.length) { addFiles(e.dataTransfer.files) }
   }
 
   return (

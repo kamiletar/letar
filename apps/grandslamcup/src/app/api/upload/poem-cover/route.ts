@@ -16,13 +16,13 @@ import { join } from 'path'
 export async function POST(request: NextRequest) {
   try {
     const auth = await requirePoetAction()
-    if (!auth.success) return NextResponse.json({ error: auth.error }, { status: 401 })
+    if (!auth.success) { return NextResponse.json({ error: auth.error }, { status: 401 }) }
 
     const result = await extractAndValidateFile(request, 'file', {
       maxSize: MAX_UPLOAD_SIZE,
       allowedTypes: 'image/',
     })
-    if (result.error) return result.error
+    if (result.error) { return result.error }
 
     const { file, formData } = result
     const poemId = formData.get('poemId') as string | null
@@ -33,11 +33,11 @@ export async function POST(request: NextRequest) {
         where: { id: poemId },
         select: { playerId: true, coverImage: true },
       })
-      if (!poem) return NextResponse.json({ error: 'Стихотворение не найдено' }, { status: 404 })
+      if (!poem) { return NextResponse.json({ error: 'Стихотворение не найдено' }, { status: 404 }) }
       if (poem.playerId !== auth.poet.playerId) {
         return NextResponse.json({ error: 'Нет прав на редактирование' }, { status: 403 })
       }
-      if (poem.coverImage) await deleteFileFromDisk(poem.coverImage)
+      if (poem.coverImage) { await deleteFileFromDisk(poem.coverImage) }
     }
 
     // Ресайз (сохраняет пропорции, макс 1920px)

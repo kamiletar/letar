@@ -17,7 +17,7 @@ import { SchedulePoster } from './schedule-poster'
 /** Сгенерировать PNG постер для анонса матча */
 export async function generateAnnouncementPoster(matchId: string): Promise<Buffer | null> {
   const match = await loadMatchData(matchId)
-  if (!match) return null
+  if (!match) { return null }
 
   const city = getMatchCity(match)
   const cityName = city?.name ?? ''
@@ -28,7 +28,7 @@ export async function generateAnnouncementPoster(matchId: string): Promise<Buffe
 /** Сгенерировать PNG постер для результата матча */
 export async function generateResultPoster(matchId: string): Promise<Buffer | null> {
   const match = await loadMatchData(matchId)
-  if (!match) return null
+  if (!match) { return null }
 
   const city = getMatchCity(match)
   const cityName = city?.name ?? ''
@@ -42,7 +42,7 @@ const MAX_MATCHES_ON_POSTER = 7
 /** Сгенерировать PNG постер расписания на неделю */
 export async function generateSchedulePoster(cityId: string): Promise<Buffer | null> {
   const city = await prisma.city.findUnique({ where: { id: cityId } })
-  if (!city) return null
+  if (!city) { return null }
 
   // Понедельник — воскресенье текущей недели
   const now = new Date()
@@ -66,7 +66,7 @@ export async function generateSchedulePoster(cityId: string): Promise<Buffer | n
     orderBy: { scheduledAt: 'asc' },
   })
 
-  if (matches.length === 0) return null
+  if (matches.length === 0) { return null }
 
   // Группируем по дате
   type DayGroup = { date: string; matches: typeof matches }
@@ -95,10 +95,10 @@ export async function generateSchedulePoster(cityId: string): Promise<Buffer | n
 
   let shown = 0
   for (const [, group] of dayMap) {
-    if (shown >= visibleCount) break
+    if (shown >= visibleCount) { break }
     const dayMatches = []
     for (const m of group.matches) {
-      if (shown >= visibleCount) break
+      if (shown >= visibleCount) { break }
       dayMatches.push({
         homeTeam: m.homeTeam.team.name,
         awayTeam: m.awayTeam.team.name,

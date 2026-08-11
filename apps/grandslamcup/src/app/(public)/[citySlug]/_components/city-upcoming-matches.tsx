@@ -27,7 +27,7 @@ interface CityUpcomingMatchesProps {
 
 /** Ближайшие запланированные матчи */
 export function CityUpcomingMatches({ matches, citySlug }: CityUpcomingMatchesProps) {
-  if (matches.length === 0) return null
+  if (matches.length === 0) { return null }
 
   return (
     <Box className="fade-in-up stagger-2">

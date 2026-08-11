@@ -37,7 +37,7 @@ export function StaffPicker({ matchId, field, currentUser }: StaffPickerProps) {
 
   // Загрузка частых при открытии
   useEffect(() => {
-    if (!open) return
+    if (!open) { return }
     startLoading(async () => {
       const res = await searchStaffUsersAction('', role)
       if ('data' in res && res.data) {

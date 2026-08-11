@@ -197,7 +197,7 @@ export function KeyboardDemo() {
                 const name = shiftLayer && key.shiftName ? key.shiftName : key.name
 
                 /* Если shift-слой активен, но у клавиши нет shift-маппинга — не показываем */
-                if (shiftLayer && !key.shift) return null
+                if (shiftLayer && !key.shift) { return null }
 
                 return (
                   <Box key={key.label} display="contents">

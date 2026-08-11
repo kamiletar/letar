@@ -50,7 +50,7 @@ export function FeaturesSection() {
   /* Появление секции при входе в viewport */
   useEffect(() => {
     const el = sectionRef.current
-    if (!el) return
+    if (!el) { return }
 
     const observer = new IntersectionObserver(
       (entries) => {

@@ -58,7 +58,7 @@ function findModuleInRootNodeModules(modulePath: string): string | null {
   const moduleName = parts.length > 1 ? parts.join('+') : parts[0]
   const bunDir = path.join(process.cwd(), '../../node_modules/.bun')
 
-  if (!fs.existsSync(bunDir)) return null
+  if (!fs.existsSync(bunDir)) { return null }
 
   const entries = fs.readdirSync(bunDir)
   for (const entry of entries) {
@@ -76,7 +76,7 @@ function findModuleInRootNodeModules(modulePath: string): string | null {
 }
 
 function fixSymlinks(dir: string, depth = 0): number {
-  if (!fs.existsSync(dir)) return 0
+  if (!fs.existsSync(dir)) { return 0 }
 
   let fixedCount = 0
   const entries = fs.readdirSync(dir, { withFileTypes: true })

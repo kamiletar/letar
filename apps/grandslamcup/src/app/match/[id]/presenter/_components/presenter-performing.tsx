@@ -92,7 +92,7 @@ export function PresenterPerforming({ match, matchState }: PresenterPerformingPr
 
     let running = true
     const tick = () => {
-      if (!running) return
+      if (!running) { return }
       const now = Date.now()
       const currentElapsed = timer.accumulatedSec + (now - effectiveStartedAt) / 1000
       setElapsed(currentElapsed)
@@ -109,7 +109,7 @@ export function PresenterPerforming({ match, matchState }: PresenterPerformingPr
 
   // Вибрация
   useEffect(() => {
-    if (!timer.isRunning) return
+    if (!timer.isRunning) { return }
     if (elapsed >= WARNING_SEC && !vibratedWarningRef.current) {
       vibratedWarningRef.current = true
       navigator.vibrate?.(300)

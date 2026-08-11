@@ -38,7 +38,7 @@ export function StepVictoryPoem({ match }: StepVictoryPoemProps) {
   const winnerTeam = winnerIsHome ? match.homeTeam : winnerIsAway ? match.awayTeam : null
 
   const handleConfirm = useCallback(async () => {
-    if (!selectedId) return
+    if (!selectedId) { return }
     setPending(true)
     setError(null)
     const res = await setVictoryPoemAction(match.id, selectedId)

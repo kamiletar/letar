@@ -28,7 +28,7 @@ const KEYS = {
 export async function getCachedLibrary(serverId: string): Promise<AnimeListItem[] | null> {
   try {
     const json = await AsyncStorage.getItem(KEYS.library(serverId))
-    if (!json) return null
+    if (!json) { return null }
     return JSON.parse(json) as AnimeListItem[]
   } catch (error) {
     console.warn('[cache] Ошибка чтения кэша библиотеки:', error)
@@ -62,7 +62,7 @@ export async function getLibraryCacheAge(serverId: string): Promise<number | nul
 export async function getCachedAnimeDetails(serverId: string, animeId: string): Promise<AnimeDetails | null> {
   try {
     const json = await AsyncStorage.getItem(KEYS.anime(serverId, animeId))
-    if (!json) return null
+    if (!json) { return null }
     return JSON.parse(json) as AnimeDetails
   } catch (error) {
     console.warn('[cache] Ошибка чтения кэша аниме:', animeId, error)
@@ -85,7 +85,7 @@ export async function setCachedAnimeDetails(serverId: string, animeId: string, d
 export async function getCachedLastWatched(serverId: string): Promise<LastWatched | null> {
   try {
     const json = await AsyncStorage.getItem(KEYS.lastWatched(serverId))
-    if (!json) return null
+    if (!json) { return null }
     return JSON.parse(json) as LastWatched
   } catch {
     return null
@@ -110,7 +110,7 @@ export type PosterMap = Record<string, string>
 export async function getPosterMap(): Promise<PosterMap> {
   try {
     const json = await AsyncStorage.getItem(KEYS.posterMap)
-    if (!json) return {}
+    if (!json) { return {} }
     return JSON.parse(json) as PosterMap
   } catch {
     return {}

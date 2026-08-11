@@ -90,12 +90,12 @@ export default function ModerationPage() {
   useEffect(() => {
     loadApps(filter)
     getPendingClaimsCountAction().then((r) => {
-      if ('count' in r) setClaimsCount(r.count)
+      if ('count' in r) { setClaimsCount(r.count) }
     })
   }, [filter])
 
   const handleAction = async () => {
-    if (!actionTarget) return
+    if (!actionTarget) { return }
     setProcessing(true)
     try {
       const { app, action } = actionTarget

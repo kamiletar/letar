@@ -68,8 +68,8 @@ async function collectFiles(dir: string, base: string = dir): Promise<string[]> 
 
   for (const entry of entries) {
     const full = join(dir, entry.name)
-    if (entry.isDirectory()) files.push(...(await collectFiles(full, base)))
-    else if (entry.isFile()) files.push(toPosix(relative(base, full)))
+    if (entry.isDirectory()) { files.push(...(await collectFiles(full, base))) }
+    else if (entry.isFile()) { files.push(toPosix(relative(base, full))) }
   }
 
   return files
@@ -78,7 +78,7 @@ async function collectFiles(dir: string, base: string = dir): Promise<string[]> 
 /** Отрезает YAML-frontmatter, возвращая описание и тело команды. */
 function parseFrontmatter(raw: string): { description: string; body: string } {
   const frontmatter = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/)
-  if (!frontmatter) return { description: '', body: raw.replace(/^[\r\n]+/, '') }
+  if (!frontmatter) { return { description: '', body: raw.replace(/^[\r\n]+/, '') } }
 
   const description = frontmatter[1].match(/^description:\s*(.*)$/m)?.[1]?.trim() ?? ''
   return { description, body: raw.slice(frontmatter[0].length).replace(/^[\r\n]+/, '') }
@@ -133,20 +133,20 @@ async function buildDesired(): Promise<Map<string, Buffer>> {
 
 /** Удаляет пустые каталоги снизу вверх, не трогая сам корень зеркала. */
 async function pruneEmptyDirs(dir: string): Promise<boolean> {
-  if (!existsSync(dir)) return true
+  if (!existsSync(dir)) { return true }
 
   const entries = await readdir(dir, { withFileTypes: true })
   let empty = true
 
   for (const entry of entries) {
     if (entry.isDirectory()) {
-      if (!(await pruneEmptyDirs(join(dir, entry.name)))) empty = false
+      if (!(await pruneEmptyDirs(join(dir, entry.name)))) { empty = false }
     } else {
       empty = false
     }
   }
 
-  if (empty && dir !== MIRROR_SKILLS) await rmdir(dir)
+  if (empty && dir !== MIRROR_SKILLS) { await rmdir(dir) }
   return empty
 }
 
@@ -163,7 +163,7 @@ async function main(): Promise<void> {
   // Текущее состояние: удалять можно только внутри skills/, остальное в .agents/ не наше
   const existing = new Set<string>()
   if (existsSync(MIRROR_SKILLS)) {
-    for (const rel of await collectFiles(MIRROR_SKILLS)) existing.add(`skills/${rel}`)
+    for (const rel of await collectFiles(MIRROR_SKILLS)) { existing.add(`skills/${rel}`) }
   }
 
   const written: string[] = []
@@ -173,25 +173,25 @@ async function main(): Promise<void> {
     const target = join(MIRROR_ROOT, rel)
     const current = existsSync(target) ? await readFile(target) : null
 
-    if (current && current.equals(content)) continue
+    if (current && current.equals(content)) { continue }
 
     written.push(rel)
-    if (checkOnly) continue
+    if (checkOnly) { continue }
 
     await mkdir(dirname(target), { recursive: true })
     await writeFile(target, content)
   }
 
   for (const rel of existing) {
-    if (desired.has(rel)) continue
+    if (desired.has(rel)) { continue }
 
     removed.push(rel)
-    if (checkOnly) continue
+    if (checkOnly) { continue }
 
     await rm(join(MIRROR_ROOT, rel))
   }
 
-  if (!checkOnly && removed.length > 0) await pruneEmptyDirs(MIRROR_SKILLS)
+  if (!checkOnly && removed.length > 0) { await pruneEmptyDirs(MIRROR_SKILLS) }
 
   const total = desired.size
   const inSync = written.length === 0 && removed.length === 0
@@ -203,8 +203,8 @@ async function main(): Promise<void> {
     }
 
     console.error(chalk.red('✖ зеркало .agents/ разошлось с .claude/'))
-    for (const rel of written) console.error(chalk.yellow(`  устарел или отсутствует: ${rel}`))
-    for (const rel of removed) console.error(chalk.yellow(`  лишний файл: ${rel}`))
+    for (const rel of written) { console.error(chalk.yellow(`  устарел или отсутствует: ${rel}`)) }
+    for (const rel of removed) { console.error(chalk.yellow(`  лишний файл: ${rel}`)) }
     console.error(chalk.dim('\n  почини: bun scripts/sync-agent-skills.ts'))
     process.exit(1)
   }
@@ -214,8 +214,8 @@ async function main(): Promise<void> {
     return
   }
 
-  for (const rel of written) console.log(chalk.cyan(`  обновлён: ${rel}`))
-  for (const rel of removed) console.log(chalk.magenta(`  удалён:   ${rel}`))
+  for (const rel of written) { console.log(chalk.cyan(`  обновлён: ${rel}`)) }
+  for (const rel of removed) { console.log(chalk.magenta(`  удалён:   ${rel}`)) }
   console.log(
     chalk.green(
       `✓ зеркало .agents/ пересобрано: ${written.length} записано, ${removed.length} удалено, всего ${total} файлов`,

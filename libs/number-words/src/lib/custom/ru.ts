@@ -90,10 +90,10 @@ const ORDINAL_HUNDREDS = [
 /** Выбор формы существительного по числу (1/2-4/5-20) */
 function pluralForm(n: number, one: string, few: string, many: string): string {
   const abs = Math.abs(n) % 100
-  if (abs >= 11 && abs <= 19) return many
+  if (abs >= 11 && abs <= 19) { return many }
   const lastDigit = abs % 10
-  if (lastDigit === 1) return one
-  if (lastDigit >= 2 && lastDigit <= 4) return few
+  if (lastDigit === 1) { return one }
+  if (lastDigit >= 2 && lastDigit <= 4) { return few }
   return many
 }
 
@@ -102,7 +102,7 @@ function pluralForm(n: number, one: string, few: string, many: string): string {
  * @param feminine — использовать женский род для 1 и 2
  */
 function cardinalUpTo999(n: number, feminine: boolean): string {
-  if (n === 0) return ''
+  if (n === 0) { return '' }
 
   const parts: string[] = []
   const ones = feminine ? ONES_F : ONES_M
@@ -131,8 +131,8 @@ function cardinalUpTo999(n: number, feminine: boolean): string {
 
 /** Кардинальное числительное (русский) */
 export function cardinal(n: number): string {
-  if (n === 0) return 'ноль'
-  if (n < 0) return `минус ${cardinal(-n)}`
+  if (n === 0) { return 'ноль' }
+  if (n < 0) { return `минус ${cardinal(-n)}` }
 
   const parts: string[] = []
 
@@ -210,7 +210,7 @@ const THOUSAND_ORDINAL_PREFIX: Record<number, string> = {
 /** Получить приставку для составного порядкового ("пятисот" + "тысячный") */
 function thousandPrefix(n: number): string {
   // Простые случаи — lookup
-  if (THOUSAND_ORDINAL_PREFIX[n]) return THOUSAND_ORDINAL_PREFIX[n]
+  if (THOUSAND_ORDINAL_PREFIX[n]) { return THOUSAND_ORDINAL_PREFIX[n] }
 
   // Составные: 500 = пятисот, 492 = четырёхсотдевяностодвух
   const parts: string[] = []
@@ -241,8 +241,8 @@ function thousandPrefix(n: number): string {
 
 /** Порядковое числительное (русский) */
 export function ordinal(n: number): string {
-  if (n === 0) return 'нулевой'
-  if (n < 0) return `минус ${ordinal(-n)}`
+  if (n === 0) { return 'нулевой' }
+  if (n < 0) { return `минус ${ordinal(-n)}` }
 
   // Для чисел > 999: кардинальная часть + порядковый суффикс последнего разряда
   const parts: string[] = []
@@ -253,7 +253,7 @@ export function ordinal(n: number): string {
     // Если остаток = 0, порядковый от миллиона
     if (remaining % 1_000_000 === 0) {
       const millions = Math.floor(remaining / 1_000_000)
-      if (millions === 1) return 'миллионный'
+      if (millions === 1) { return 'миллионный' }
       return `${cardinalUpTo999(millions, false)} миллионный`
     }
     // Иначе кардинальная часть миллионов
@@ -268,7 +268,7 @@ export function ordinal(n: number): string {
     const thousandsPart = Math.floor(remaining / 1000)
     if (remaining % 1000 === 0) {
       // "тысячный", "двухтысячный" и т.д.
-      if (thousandsPart === 1) return [...parts, 'тысячный'].join(' ')
+      if (thousandsPart === 1) { return [...parts, 'тысячный'].join(' ') }
       // Для круглых тысяч: приставка + тысячный
       return [...parts, `${thousandPrefix(thousandsPart)}тысячный`].join(' ')
     }
@@ -287,7 +287,7 @@ export function ordinal(n: number): string {
 
 /** Порядковое числительное до 999 */
 function ordinalUpTo999(n: number): string {
-  if (n === 0) return ''
+  if (n === 0) { return '' }
 
   // Если есть сотни и есть остаток — сотни кардинально + порядковый остаток
   if (n >= 100) {

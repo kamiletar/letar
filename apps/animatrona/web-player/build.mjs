@@ -37,8 +37,8 @@ async function buildPlayer() {
       ? {
         watch: {
           onRebuild(error, result) {
-            if (error) console.error('Rebuild failed:', error)
-            else console.log('Rebuild succeeded')
+            if (error) { console.error('Rebuild failed:', error) }
+            else { console.log('Rebuild succeeded') }
           },
         },
       }

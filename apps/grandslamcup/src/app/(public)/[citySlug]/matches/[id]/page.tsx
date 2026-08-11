@@ -138,11 +138,11 @@ export default async function MatchPage({ params }: { params: Params }) {
 
   type LineupItem = (typeof match)['lineups'][number]
   function filterLineup(lineup: LineupItem[], teamSeasonId: string) {
-    if (!lineupsLocked) return lineup
+    if (!lineupsLocked) { return lineup }
     // Тренер видит состав только своей команды
-    if (coachTeamSeasonId === teamSeasonId) return lineup
+    if (coachTeamSeasonId === teamSeasonId) { return lineup }
     // Организаторы/адмиmы видят всё
-    if (canEditMatch) return lineup
+    if (canEditMatch) { return lineup }
     // Все остальные — пусто до -6ч
     return []
   }

@@ -1990,7 +1990,6 @@ for (const [hash, torrent] of Object.entries(sync.torrents ?? {})) {
   - `discover/page.tsx`: две кнопки — «Импорт» (pin) и «В облако» (no-pin)
   - IPC/preload: параметр `pin?: boolean` в `animeManifest:import`
 
-
 > Перенесено из PLAN.md: 2026-08-09
 
 #### Плеер: клик по видео и двойной клик (§18.1 бывшего PLAN.md)

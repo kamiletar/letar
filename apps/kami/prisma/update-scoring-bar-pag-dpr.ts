@@ -20,9 +20,9 @@ try {
   const envContent = readFileSync(envPath, 'utf-8')
   for (const line of envContent.split('\n')) {
     const trimmed = line.trim()
-    if (!trimmed || trimmed.startsWith('#')) continue
+    if (!trimmed || trimmed.startsWith('#')) { continue }
     const eqIndex = trimmed.indexOf('=')
-    if (eqIndex === -1) continue
+    if (eqIndex === -1) { continue }
     const key = trimmed.slice(0, eqIndex).trim()
     const value = trimmed
       .slice(eqIndex + 1)
@@ -135,7 +135,7 @@ async function updateExistingQuestions(): Promise<{ updated: number; skipped: nu
       let hasChanges = false
 
       for (let i = 0; i < 4; i++) {
-        if (!options[i]) continue
+        if (!options[i]) { continue }
 
         const key = optionKeys[i]
         const scores = questionScoring[key]
@@ -211,9 +211,9 @@ async function seedNewQuestions(): Promise<{ created: number; skipped: number; e
 
         // Объединяем existingScoring с BAR/PAG/DPR (только ненулевые)
         const scoring: Record<string, number> = { ...opt.existingScoring }
-        if (opt.BAR > 0) scoring.BAR = opt.BAR
-        if (opt.PAG > 0) scoring.PAG = opt.PAG
-        if (opt.DPR > 0) scoring.DPR = opt.DPR
+        if (opt.BAR > 0) { scoring.BAR = opt.BAR }
+        if (opt.PAG > 0) { scoring.PAG = opt.PAG }
+        if (opt.DPR > 0) { scoring.DPR = opt.DPR }
 
         return {
           text: opt.text,

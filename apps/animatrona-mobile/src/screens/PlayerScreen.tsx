@@ -446,7 +446,7 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
   // Обработчик прогресса (игнорирует обновления сразу после seek)
   const handleProgress = useCallback(
     (data: OnProgressData) => {
-      if (Date.now() < seekLockUntilRef.current) return
+      if (Date.now() < seekLockUntilRef.current) { return }
       setCurrentTime(data.currentTime)
 
       // Показать NextEpisodeOverlay за 30 сек до конца

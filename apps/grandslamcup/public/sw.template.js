@@ -69,18 +69,18 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url)
 
   // Пропускаем non-GET
-  if (request.method !== 'GET') return
+  if (request.method !== 'GET') { return }
 
   // Пропускаем non-http
-  if (!request.url.startsWith('http')) return
+  if (!request.url.startsWith('http')) { return }
 
   // Пропускаем API (кроме /api/files/ — изображения)
-  if (url.pathname.startsWith('/api/') && !url.pathname.startsWith('/api/files/')) return
+  if (url.pathname.startsWith('/api/') && !url.pathname.startsWith('/api/files/')) { return }
 
   event.respondWith(
     fetch(request)
       .then((response) => {
-        if (!response.ok) return response
+        if (!response.ok) { return response }
 
         // Кешируем ответ
         const responseClone = response.clone()
@@ -93,12 +93,12 @@ self.addEventListener('fetch', (event) => {
       .catch(async () => {
         // Fallback на кэш
         const cached = await caches.match(request)
-        if (cached) return cached
+        if (cached) { return cached }
 
         // Для навигации — offline страница
         if (request.destination === 'document') {
           const offlinePage = await caches.match('/offline')
-          if (offlinePage) return offlinePage
+          if (offlinePage) { return offlinePage }
         }
 
         return new Response('Нет подключения к сети', {

@@ -110,7 +110,7 @@ import { useOnlineStatus } from '@letar/hooks'
 function OfflineBanner() {
   const isOnline = useOnlineStatus()
 
-  if (isOnline) return null
+  if (isOnline) { return null }
 
   return <Banner colorPalette="red">Нет подключения к интернету</Banner>
 }
@@ -124,7 +124,7 @@ import { usePendingMutations } from '@letar/hooks'
 function SyncIndicator() {
   const pendingCount = usePendingMutations()
 
-  if (pendingCount === 0) return null
+  if (pendingCount === 0) { return null }
 
   return <Badge>Синхронизация ({pendingCount})</Badge>
 }

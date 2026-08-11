@@ -40,6 +40,5 @@ export function useFormStoreSubscribe(form: FormStoreLike, callback: () => void,
         subscription.unsubscribe()
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps)
 }

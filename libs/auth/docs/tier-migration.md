@@ -54,7 +54,7 @@ export default async function AuthModeSettingsPage() {
 'use server'
 export async function requestAuthModeMigration(acknowledgedRisks: boolean) {
   const user = await requireAdmin()
-  if (!acknowledgedRisks) return { error: 'Нужно подтвердить ознакомление с рисками перехода' }
+  if (!acknowledgedRisks) { return { error: 'Нужно подтвердить ознакомление с рисками перехода' } }
   await db.auditLog.create({
     data: { action: 'REQUEST_AUTH_MODE_MIGRATION', userId: user.id /* ... */ },
   })

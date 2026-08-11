@@ -23,10 +23,10 @@ interface SwissGroupCardProps {
 /** Цвет по соотношению W-L */
 function getGroupColor(wins: number, losses: number): string {
   const diff = wins - losses
-  if (diff >= 2) return 'green'
-  if (diff === 1) return 'teal'
-  if (diff === 0) return 'gray'
-  if (diff === -1) return 'orange'
+  if (diff >= 2) { return 'green' }
+  if (diff === 1) { return 'teal' }
+  if (diff === 0) { return 'gray' }
+  if (diff === -1) { return 'orange' }
   return 'red'
 }
 

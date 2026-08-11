@@ -17,9 +17,9 @@ try {
   const envContent = readFileSync(envPath, 'utf-8')
   for (const line of envContent.split('\n')) {
     const trimmed = line.trim()
-    if (!trimmed || trimmed.startsWith('#')) continue
+    if (!trimmed || trimmed.startsWith('#')) { continue }
     const eqIndex = trimmed.indexOf('=')
-    if (eqIndex === -1) continue
+    if (eqIndex === -1) { continue }
     const key = trimmed.slice(0, eqIndex).trim()
     const value = trimmed
       .slice(eqIndex + 1)
@@ -64,12 +64,12 @@ function parseTranslationFile(filePath: string): ParsedQuestion[] {
   for (const block of blocks) {
     // Ищем заголовок вопроса
     const headerMatch = block.match(/###\s*Вопрос\s+(\d+)/)
-    if (!headerMatch) continue
+    if (!headerMatch) { continue }
 
     const questionNumber = parseInt(headerMatch[1], 10)
 
     // Фильтруем только нужный диапазон
-    if (questionNumber < 1666 || questionNumber > 1955) continue
+    if (questionNumber < 1666 || questionNumber > 1955) { continue }
 
     // Извлекаем английский сценарий
     const scenarioMatch = block.match(/\*\*Scenario:\*\*\s*(.+)/)
@@ -90,14 +90,14 @@ function parseTranslationFile(filePath: string): ParsedQuestion[] {
 
       // Ищем русскую строку варианта (первое вхождение буквы)
       const ruMatch = line.match(/^([ABCD])\)\s+.+/)
-      if (!ruMatch) continue
+      if (!ruMatch) { continue }
 
       const letter = ruMatch[1]
 
       // Следующая непустая строка должна быть английским переводом с той же буквой
       for (let j = i + 1; j < lines.length; j++) {
         const nextLine = lines[j].trim()
-        if (!nextLine) continue
+        if (!nextLine) { continue }
 
         const enMatch = nextLine.match(new RegExp(`^${letter}\\)\\s+(.+)`))
         if (enMatch) {

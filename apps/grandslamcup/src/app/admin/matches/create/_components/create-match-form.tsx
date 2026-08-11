@@ -89,7 +89,7 @@ export function CreateMatchForm({
 
   // Доступные города (все для админа, только свои для организатора)
   const availableCities = useMemo(() => {
-    if (organizerCityIds === null) return cities
+    if (organizerCityIds === null) { return cities }
     return cities.filter((c) => organizerCityIds.includes(c.id))
   }, [cities, organizerCityIds])
 
@@ -130,7 +130,8 @@ export function CreateMatchForm({
   const toursWithSlots = useMemo(
     () =>
       activeTours.filter((t) => {
-        if (t.stageId) return true // плей-офф туры не ограничиваем
+        if (t.stageId) { return true // плей-офф туры не ограничиваем
+         }
         const expected = getExpected(t.seasonId)
         return expected === 0 || t.matchCount < expected
       }),
@@ -139,8 +140,8 @@ export function CreateMatchForm({
 
   // Автопредвыбор актуального тура при смене города (REGULAR)
   useEffect(() => {
-    if (!cityId || matchType !== 'REGULAR' || tourId) return
-    if (toursWithSlots.length === 0) return
+    if (!cityId || matchType !== 'REGULAR' || tourId) { return }
+    if (toursWithSlots.length === 0) { return }
     const sorted = [...toursWithSlots].sort((a, b) =>
       a.roundNumber !== b.roundNumber ? a.roundNumber - b.roundNumber : a.number - b.number
     )

@@ -69,7 +69,7 @@ export function EditPlayerButton({
   const [links, setLinks] = useState<SocialLink[]>(socialLinks.length > 0 ? socialLinks : [])
   const [saving, setSaving] = useState(false)
 
-  if (!session?.user) return null
+  if (!session?.user) { return null }
 
   // Если canEdit передан с сервера — используем его, иначе fallback на клиентскую проверку
   const user = session.user
@@ -77,7 +77,7 @@ export function EditPlayerButton({
   const isSelf = playerUserId === user.id
   const canEdit = canEditProp ?? (isAdmin || isSelf)
 
-  if (!canEdit) return null
+  if (!canEdit) { return null }
 
   /** Добавить пустую ссылку */
   function addLink() {

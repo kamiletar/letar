@@ -249,10 +249,10 @@ export function getEpisodeAudioUrl(episodeId: string, trackId: string, audioCid:
 export function getDownloadedFontDir(episodeId: string): string | null {
   const downloads = useDownloadsStore.getState()
   const downloaded = downloads.downloaded[episodeId]
-  if (!downloaded) return null
+  if (!downloaded) { return null }
 
   const fontPaths = Object.values(downloaded.fontFilePaths)
-  if (fontPaths.length === 0) return null
+  if (fontPaths.length === 0) { return null }
 
   const firstPath = fontPaths[0]
   return firstPath.substring(0, firstPath.lastIndexOf('/'))
@@ -262,7 +262,7 @@ export function getDownloadedFontDir(episodeId: string): string | null {
 export function getDownloadedSubtitlePaths(episodeId: string): Record<string, string> {
   const downloads = useDownloadsStore.getState()
   const downloaded = downloads.downloaded[episodeId]
-  if (!downloaded) return {}
+  if (!downloaded) { return {} }
 
   const result: Record<string, string> = {}
   for (const [trackId, path] of Object.entries(downloaded.subtitleFilePaths)) {

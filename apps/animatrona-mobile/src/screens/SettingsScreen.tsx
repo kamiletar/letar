@@ -28,7 +28,7 @@ export function SettingsScreen({ navigation }: SettingsScreenProps) {
   const [hapticEnabled, setHapticEnabled] = useState(true)
 
   const handleRemoveServer = useCallback(() => {
-    if (!activeServer) return
+    if (!activeServer) { return }
     Alert.alert('Удалить сервер?', `${activeServer.name} будет удалён из списка.`, [
       { text: 'Отмена', style: 'cancel' },
       {

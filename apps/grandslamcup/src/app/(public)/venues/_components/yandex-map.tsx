@@ -37,11 +37,11 @@ export function YandexMap({ center, zoom = 12, markers = [], height = '400px' }:
   const mapRef = useRef<unknown>(null)
 
   const initMap = useCallback(async () => {
-    if (!containerRef.current || mapRef.current) return
+    if (!containerRef.current || mapRef.current) { return }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const ymaps3 = (window as any).ymaps3
-    if (!ymaps3) return
+    if (!ymaps3) { return }
 
     await ymaps3.ready
 

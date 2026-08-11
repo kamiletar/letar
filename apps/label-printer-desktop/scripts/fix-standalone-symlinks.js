@@ -81,7 +81,7 @@ function findModuleInRootNodeModules(modulePath) {
   const moduleName = parts.length > 1 ? parts.join('+') : parts[0]
   const bunDir = path.join(rootNm, '.bun')
 
-  if (!fs.existsSync(bunDir)) return null
+  if (!fs.existsSync(bunDir)) { return null }
 
   try {
     const entries = fs.readdirSync(bunDir)
@@ -104,7 +104,7 @@ function findModuleInRootNodeModules(modulePath) {
  * Рекурсивно исправить симлинки и удалить .bun директории
  */
 function fixSymlinks(dir) {
-  if (!fs.existsSync(dir)) return 0
+  if (!fs.existsSync(dir)) { return 0 }
 
   let fixedCount = 0
   let entries

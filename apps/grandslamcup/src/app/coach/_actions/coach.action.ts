@@ -23,10 +23,10 @@ const UpdateTeamSchema = z
 
 export async function updateTeamProfileAction(input: unknown) {
   const auth = await requireCoachAction()
-  if (!auth.success) return { error: auth.error }
+  if (!auth.success) { return { error: auth.error } }
 
   const parsed = UpdateTeamSchema.safeParse(input)
-  if (!parsed.success) return { error: parsed.error.flatten() }
+  if (!parsed.success) { return { error: parsed.error.flatten() } }
 
   try {
     await prisma.team.update({
@@ -57,10 +57,10 @@ const SubmitLineupSchema = z
 
 export async function submitMatchLineupAction(input: unknown) {
   const auth = await requireCoachAction()
-  if (!auth.success) return { error: auth.error }
+  if (!auth.success) { return { error: auth.error } }
 
   const parsed = SubmitLineupSchema.safeParse(input)
-  if (!parsed.success) return { error: 'Нужно выбрать минимум 5 игроков' }
+  if (!parsed.success) { return { error: 'Нужно выбрать минимум 5 игроков' } }
 
   const { matchId, playerIds } = parsed.data
 
@@ -77,13 +77,13 @@ export async function submitMatchLineupAction(input: unknown) {
       },
     })
 
-    if (!match) return { error: 'Матч не найден' }
-    if (match.status !== 'SCHEDULED') return { error: 'Матч уже начался или завершён' }
+    if (!match) { return { error: 'Матч не найден' } }
+    if (match.status !== 'SCHEDULED') { return { error: 'Матч уже начался или завершён' } }
 
     // Проверяем что это матч нашей команды
     const isHome = match.homeTeamId === auth.coach.teamSeasonId
     const isAway = match.awayTeamId === auth.coach.teamSeasonId
-    if (!isHome && !isAway) return { error: 'Это не матч вашей команды' }
+    if (!isHome && !isAway) { return { error: 'Это не матч вашей команды' } }
 
     // Проверяем что заявка подаётся за 6+ часов до матча
     if (match.scheduledAt) {

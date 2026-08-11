@@ -20,8 +20,8 @@ const HUNDREDS_PREFIX = [
 
 /** Кардинальное числительное (кыргызский) */
 export function cardinal(n: number): string {
-  if (n === 0) return 'нөл'
-  if (n < 0) return `минус ${cardinal(-n)}`
+  if (n === 0) { return 'нөл' }
+  if (n < 0) { return `минус ${cardinal(-n)}` }
 
   const parts: string[] = []
 

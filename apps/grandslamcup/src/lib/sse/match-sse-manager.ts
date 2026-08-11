@@ -74,13 +74,13 @@ class MatchSSEManager {
 
   /** Запускает GC мёртвых подписок */
   private startGC() {
-    if (this.gcIntervalId) return
+    if (this.gcIntervalId) { return }
     this.gcIntervalId = setInterval(() => this.cleanupDeadControllers(), GC_INTERVAL_MS)
   }
 
   /** Запускает heartbeat для всех каналов */
   private startHeartbeat() {
-    if (this.heartbeatIntervalId) return
+    if (this.heartbeatIntervalId) { return }
     this.heartbeatIntervalId = setInterval(() => {
       this.channels.forEach((_, channel) => {
         this.broadcast(channel, { type: 'ping', payload: null, timestamp: Date.now() })
@@ -129,7 +129,7 @@ class MatchSSEManager {
   /** Отписать клиента от всех каналов */
   unsubscribe(controller: ReadableStreamDefaultController) {
     const channels = this.controllerChannels.get(controller)
-    if (!channels) return
+    if (!channels) { return }
 
     channels.forEach((channel) => {
       const channelClients = this.channels.get(channel)
@@ -147,7 +147,7 @@ class MatchSSEManager {
   /** Отправить событие всем подписчикам канала */
   broadcast(channel: string, event: MatchEventData) {
     const clients = this.channels.get(channel)
-    if (!clients || clients.size === 0) return
+    if (!clients || clients.size === 0) { return }
 
     const data = this.encoder.encode(`event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`)
 

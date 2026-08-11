@@ -34,7 +34,7 @@ export default function AdminNewsPage() {
 
   const loadNews = async () => {
     const result = await getNewsAction()
-    if ('data' in result) setNews(result.data as unknown as NewsItem[])
+    if ('data' in result) { setNews(result.data as unknown as NewsItem[]) }
     setLoading(false)
   }
 
@@ -43,9 +43,9 @@ export default function AdminNewsPage() {
   }, [])
 
   const handleDelete = async () => {
-    if (!deleteTarget) return
+    if (!deleteTarget) { return }
     const result = await deleteNewsAction(deleteTarget.id)
-    if ('error' in result) toaster.error({ title: result.error })
+    if ('error' in result) { toaster.error({ title: result.error }) }
     else {
       toaster.success({ title: 'Новость удалена' })
       loadNews()

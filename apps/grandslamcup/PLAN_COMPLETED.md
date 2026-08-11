@@ -1130,7 +1130,6 @@ apps/grandslamcup/
 
 ---
 
-
 ---
 
 ## Фаза 6 — Обратная связь 2026-04-10 (v3.22.0+)
@@ -1188,7 +1187,6 @@ apps/grandslamcup/
     **Стратегия отката:** `?mode=classic` → возврат к старому `scorer-client.tsx` (не трогался, остаётся для emergency).
 
 15. ~~**Поле «победное стихотворение» в модели Match**~~ ✅ v3.25.0 — добавлено `Match.victoryPoemPlayerId: String?` с relation `victoryPoemPlayer Player?`. Миграция `add_victory_poem`. Используется в шаге VICTORY_POEM + отображается в MATCH_FINISHED.
-
 
 ---
 
@@ -1443,7 +1441,6 @@ PLAN_COMPLETED.md` v0.7.4, тред agent-mail `grandslamcup-staging-pilot`.
 
 ---
 
-
 ---
 
 ## 10. Фазы реализации
@@ -1516,7 +1513,6 @@ PLAN_COMPLETED.md` v0.7.4, тред agent-mail `grandslamcup-staging-pilot`.
 **Auth:** `/api/auth/dev-session` (dev-only, описано ниже)
 
 ---
-
 
 ---
 

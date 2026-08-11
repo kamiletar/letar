@@ -51,7 +51,7 @@ export function SeekBar({ currentTime, duration, onSeek }: SeekBarProps) {
 
   // Сброс seekTarget через таймер — вызывается из UI thread через runOnJS
   const scheduleSeekReset = useCallback(() => {
-    if (seekTimerRef.current) clearTimeout(seekTimerRef.current)
+    if (seekTimerRef.current) { clearTimeout(seekTimerRef.current) }
     seekTimerRef.current = setTimeout(() => {
       seekTargetRatio.value = -1
     }, 800) // Даём плееру 800ms на seek
@@ -60,13 +60,13 @@ export function SeekBar({ currentTime, duration, onSeek }: SeekBarProps) {
   // Очистка таймера при размонтировании
   useEffect(() => {
     return () => {
-      if (seekTimerRef.current) clearTimeout(seekTimerRef.current)
+      if (seekTimerRef.current) { clearTimeout(seekTimerRef.current) }
     }
   }, [])
 
   const commitSeek = useCallback(
     (ratio: number) => {
-      if (duration > 0) onSeek(ratio * duration)
+      if (duration > 0) { onSeek(ratio * duration) }
     },
     [duration, onSeek],
   )

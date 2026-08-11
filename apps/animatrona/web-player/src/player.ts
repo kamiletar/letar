@@ -154,12 +154,12 @@ class WebPlayer {
   }
 
   private updateAnimeInfo(): void {
-    if (!this.manifest) return
+    if (!this.manifest) { return }
 
     const titleEl = document.getElementById('anime-title')
     const yearEl = document.getElementById('anime-year')
 
-    if (titleEl) titleEl.textContent = this.manifest.anime.name
+    if (titleEl) { titleEl.textContent = this.manifest.anime.name }
     if (yearEl && this.manifest.anime.year) {
       yearEl.textContent = String(this.manifest.anime.year)
     }
@@ -169,7 +169,7 @@ class WebPlayer {
   }
 
   private renderEpisodeList(): void {
-    if (!this.manifest) return
+    if (!this.manifest) { return }
 
     // Очищаем список безопасно
     while (this.episodeList.firstChild) {
@@ -184,7 +184,7 @@ class WebPlayer {
   }
 
   private async loadEpisode(index: number): Promise<void> {
-    if (!this.manifest || index < 0 || index >= this.manifest.episodes.length) return
+    if (!this.manifest || index < 0 || index >= this.manifest.episodes.length) { return }
 
     const episode = this.manifest.episodes[index]
     this.currentEpisodeIndex = index
@@ -236,7 +236,7 @@ class WebPlayer {
   }
 
   private getResourceUrl(src: string): string {
-    if (!this.manifest) return src
+    if (!this.manifest) { return src }
 
     // If embedded mode or relative path, return as-is
     if (this.manifest.resourceMode === 'embedded' || src.startsWith('./') || src.startsWith('../')) {
@@ -249,11 +249,11 @@ class WebPlayer {
   }
 
   private async selectAudioTrack(key: string): Promise<void> {
-    if (!this.manifest) return
+    if (!this.manifest) { return }
 
     const episode = this.manifest.episodes[this.currentEpisodeIndex]
     const track = episode.audio.find((a) => `${a.language}:${a.title}` === key)
-    if (!track) return
+    if (!track) { return }
 
     this.currentAudioTrack = key
     const audioUrl = this.getResourceUrl(track.src)
@@ -277,7 +277,7 @@ class WebPlayer {
   }
 
   private async selectSubtitleTrack(key: string | null): Promise<void> {
-    if (!this.manifest) return
+    if (!this.manifest) { return }
 
     this.currentSubtitleTrack = key
     this.subtitleOverlay.textContent = ''
@@ -289,7 +289,7 @@ class WebPlayer {
 
     const episode = this.manifest.episodes[this.currentEpisodeIndex]
     const track = episode.subtitles.find((s) => `${s.language}:${s.title}` === key)
-    if (!track) return
+    if (!track) { return }
 
     // Примечание: этот dev-плеер не используется в production.
     // Экспортируемый плеер (asset-bundler.ts) использует SubtitlesOctopus для ASS субтитров.
@@ -309,10 +309,10 @@ class WebPlayer {
   }
 
   private updateAudioMenu(): void {
-    if (!this.manifest) return
+    if (!this.manifest) { return }
 
     const menu = document.getElementById('audio-menu')
-    if (!menu) return
+    if (!menu) { return }
 
     const episode = this.manifest.episodes[this.currentEpisodeIndex]
 
@@ -336,10 +336,10 @@ class WebPlayer {
   }
 
   private updateSubtitleMenu(): void {
-    if (!this.manifest) return
+    if (!this.manifest) { return }
 
     const menu = document.getElementById('subtitle-menu')
-    if (!menu) return
+    if (!menu) { return }
 
     const episode = this.manifest.episodes[this.currentEpisodeIndex]
 
@@ -397,7 +397,7 @@ class WebPlayer {
     this.progressBar.addEventListener('mousedown', () => (this.isSeeking = true))
     document.addEventListener('mouseup', () => (this.isSeeking = false))
     document.addEventListener('mousemove', (e) => {
-      if (this.isSeeking) this.seekToPosition(e)
+      if (this.isSeeking) { this.seekToPosition(e) }
     })
 
     // Volume
@@ -489,7 +489,7 @@ class WebPlayer {
 
   private toggleDropdown(id: string): void {
     const dropdown = document.getElementById(id)
-    if (!dropdown) return
+    if (!dropdown) { return }
 
     const isOpen = dropdown.classList.contains('open')
     this.closeDropdowns()
@@ -503,17 +503,17 @@ class WebPlayer {
   }
 
   private updateProgress(): void {
-    if (!this.video.duration) return
+    if (!this.video.duration) { return }
     const percent = (this.video.currentTime / this.video.duration) * 100
     this.progressPlayed.style.width = `${percent}%`
 
     // Update time display
     const current = document.getElementById('time-current')
-    if (current) current.textContent = this.formatTime(this.video.currentTime)
+    if (current) { current.textContent = this.formatTime(this.video.currentTime) }
   }
 
   private updateBuffered(): void {
-    if (!this.video.duration || this.video.buffered.length === 0) return
+    if (!this.video.duration || this.video.buffered.length === 0) { return }
     const bufferedEnd = this.video.buffered.end(this.video.buffered.length - 1)
     const percent = (bufferedEnd / this.video.duration) * 100
     this.progressBuffered.style.width = `${percent}%`
@@ -521,7 +521,7 @@ class WebPlayer {
 
   private updateDuration(): void {
     const duration = document.getElementById('time-duration')
-    if (duration) duration.textContent = this.formatTime(this.video.duration)
+    if (duration) { duration.textContent = this.formatTime(this.video.duration) }
   }
 
   private onEnded(): void {
@@ -532,7 +532,7 @@ class WebPlayer {
   }
 
   private formatTime(seconds: number): string {
-    if (!isFinite(seconds)) return '0:00'
+    if (!isFinite(seconds)) { return '0:00' }
     const mins = Math.floor(seconds / 60)
     const secs = Math.floor(seconds % 60)
     return `${mins}:${secs.toString().padStart(2, '0')}`
@@ -554,7 +554,7 @@ class WebPlayer {
 
   private handleKeyboard(e: KeyboardEvent): void {
     // Ignore if typing in input
-    if ((e.target as HTMLElement).tagName === 'INPUT') return
+    if ((e.target as HTMLElement).tagName === 'INPUT') { return }
 
     switch (e.key) {
       case ' ':
@@ -595,7 +595,7 @@ class WebPlayer {
 
   private showError(message: string): void {
     const titleEl = document.getElementById('anime-title')
-    if (titleEl) titleEl.textContent = message
+    if (titleEl) { titleEl.textContent = message }
   }
 }
 

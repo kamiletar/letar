@@ -22,4 +22,3 @@ import { isSupportedLocale, numberToOrdinal, numberToWords } from '@letar/number
 - `to-words` v5.3.0
 
 ---
-

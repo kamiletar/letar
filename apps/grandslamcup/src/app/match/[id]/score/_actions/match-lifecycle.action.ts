@@ -195,8 +195,8 @@ export async function setVictoryPoemAction(matchId: string, playerId: string) {
     let homeScore = 0
     let awayScore = 0
     for (const p of performances) {
-      if (p.teamSeasonId === match.homeTeamId) homeScore += p.totalScore ?? 0
-      else if (p.teamSeasonId === match.awayTeamId) awayScore += p.totalScore ?? 0
+      if (p.teamSeasonId === match.homeTeamId) { homeScore += p.totalScore ?? 0 }
+      else if (p.teamSeasonId === match.awayTeamId) { awayScore += p.totalScore ?? 0 }
     }
 
     const winnerTeamSeasonId = homeScore > awayScore
@@ -244,7 +244,7 @@ async function checkTourComplete(matchId: string): Promise<void> {
     where: { id: matchId },
     select: { tourId: true },
   })
-  if (!match?.tourId) return
+  if (!match?.tourId) { return }
 
   // Проверяем что все матчи тура завершены
   const tourMatches = await prisma.match.findMany({
@@ -252,7 +252,7 @@ async function checkTourComplete(matchId: string): Promise<void> {
     select: { status: true },
   })
   const allFinished = tourMatches.length > 0 && tourMatches.every((m) => m.status === 'FINISHED')
-  if (!allFinished) return
+  if (!allFinished) { return }
 
   // Отправляем итоги тура
   const { sendTourSummary } = await import('@/lib/telegram/senders')

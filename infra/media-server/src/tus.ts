@@ -28,7 +28,7 @@ function tusKey(appId: string, videoId: string) {
 
 async function getTusState(appId: string, videoId: string): Promise<TusState | null> {
   const raw = await redis.get(tusKey(appId, videoId))
-  if (!raw) return null
+  if (!raw) { return null }
   return JSON.parse(raw) as TusState
 }
 
@@ -42,7 +42,7 @@ async function deleteTusState(appId: string, videoId: string): Promise<void> {
 
 /** Разбирает Upload-Metadata: "filename dGVzdC5tcDQ=,filetype dmlkZW8vbXA0" */
 function parseMetadata(header: string | undefined): Record<string, string> {
-  if (!header) return {}
+  if (!header) { return {} }
   const result: Record<string, string> = {}
   for (const part of header.split(',')) {
     const trimmed = part.trim()
@@ -66,7 +66,7 @@ function parseExt(filename: string, filetype: string): string {
         .slice(dot + 1)
         .toLowerCase()
         .replace(/[^a-z0-9]/g, '')
-      if (ext) return ext
+      if (ext) { return ext }
     }
   }
   if (filetype?.startsWith('video/')) {
@@ -91,7 +91,7 @@ export function registerTusRoutes(app: FastifyInstance): void {
   app.post<{ Params: { appId: string } }>('/api/v1/:appId/video/tus', async (req, reply) => {
     const { appId } = req.params
     const uploadToken = req.headers['x-upload-token'] as string | undefined
-    if (!uploadToken) return reply.code(401).send({ error: 'X-Upload-Token required' })
+    if (!uploadToken) { return reply.code(401).send({ error: 'X-Upload-Token required' }) }
 
     const tokenPayload = await consumeUploadToken(uploadToken)
     if (!tokenPayload || tokenPayload.appId !== appId) {
@@ -129,7 +129,7 @@ export function registerTusRoutes(app: FastifyInstance): void {
   app.head<{ Params: { appId: string; videoId: string } }>('/api/v1/:appId/video/tus/:videoId', async (req, reply) => {
     const { appId, videoId } = req.params
     const state = await getTusState(appId, videoId)
-    if (!state) return reply.code(404).send()
+    if (!state) { return reply.code(404).send() }
 
     reply.header('Upload-Offset', String(state.offset))
     reply.header('Upload-Length', String(state.length))
@@ -142,7 +142,7 @@ export function registerTusRoutes(app: FastifyInstance): void {
   app.patch<{ Params: { appId: string; videoId: string } }>('/api/v1/:appId/video/tus/:videoId', async (req, reply) => {
     const { appId, videoId } = req.params
     const state = await getTusState(appId, videoId)
-    if (!state) return reply.code(404).send({ error: 'Upload not found' })
+    if (!state) { return reply.code(404).send({ error: 'Upload not found' }) }
 
     const uploadOffset = parseInt(req.headers['upload-offset'] as string, 10)
     if (isNaN(uploadOffset) || uploadOffset !== state.offset) {
@@ -186,7 +186,7 @@ export function registerTusRoutes(app: FastifyInstance): void {
     async (req, reply) => {
       const { appId, videoId } = req.params
       const state = await getTusState(appId, videoId)
-      if (state) await deleteTusState(appId, videoId)
+      if (state) { await deleteTusState(appId, videoId) }
       reply.header('Tus-Resumable', '1.0.0')
       return reply.code(204).send()
     },

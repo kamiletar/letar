@@ -40,4 +40,3 @@ import {
 - `ANIME_STATUS_CONFIG`, `PUBLISH_STATUS_CONFIG`
 
 ---
-

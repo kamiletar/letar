@@ -54,7 +54,7 @@ const PROCESS_ORDER = [5, 4, 3, 2, 1, 0]
 // rate (0–99) → время перехода в секундах (логарифмическая шкала)
 // rate 99 ≈ 1 мс; rate 0 ≈ 10 с
 function rateToSec(r) {
-  if (r >= 99) return 0.001
+  if (r >= 99) { return 0.001 }
   const t = 1 - r / 99
   return 0.001 + t * t * 10
 }
@@ -94,13 +94,14 @@ class Voice {
 
   noteOff() {
     for (let i = 0; i < 6; i++) {
-      if (this.egStages[i] < 3) this.egStages[i] = 3 // → Release
+      if (this.egStages[i] < 3) { this.egStages[i] = 3 // → Release
+       }
     }
   }
 
   isIdle() {
     for (let i = 0; i < 6; i++) {
-      if (this.egStages[i] !== 4) return false
+      if (this.egStages[i] !== 4) { return false }
     }
     return true
   }
@@ -108,7 +109,7 @@ class Voice {
   // Один шаг EG для оператора i; возвращает текущий уровень
   stepEG(i, eg, sr) {
     const s = this.egStages[i]
-    if (s === 4) return this.egValues[i]
+    if (s === 4) { return this.egValues[i] }
 
     const target = eg.levels[s] / 99
     const time = rateToSec(eg.rates[s])
@@ -123,7 +124,8 @@ class Voice {
       } else if (s === 1) {
         this.egStages[i] = 2 // Decay1 → Decay2/sustain
       } // s=2: держим L3 до noteOff (DX7-behaviour)
-      else if (s === 3 && target <= 0.0005) this.egStages[i] = 4 // Release → Idle
+      else if (s === 3 && target <= 0.0005) { this.egStages[i] = 4 // Release → Idle
+       }
     } else {
       this.egValues[i] = cur + Math.sign(diff) * delta
     }
@@ -160,7 +162,7 @@ class Voice {
 
       // Шаг фазы (нормализованная [0,1))
       this.phases[i] += freq / sr
-      if (this.phases[i] >= 1) this.phases[i] -= 1
+      if (this.phases[i] >= 1) { this.phases[i] -= 1 }
 
       // Синус с фазовой модуляцией
       this.outputs[i] = Math.sin(2 * Math.PI * this.phases[i] + modRad) * level
@@ -168,7 +170,7 @@ class Voice {
 
     // Сумма несущих → аудио-сэмпл
     let out = 0
-    for (const c of alg.carriers) out += this.outputs[c]
+    for (const c of alg.carriers) { out += this.outputs[c] }
 
     // Мягкое ограничение (tanh) против клиппинга при глубокой модуляции
     return Math.tanh(out)
@@ -198,7 +200,7 @@ class FmProcessor extends AudioWorkletProcessor {
           break
         case 'allOff':
           this.voices.forEach((v) => {
-            if (v.active) v.noteOff()
+            if (v.active) { v.noteOff() }
           })
           break
       }
@@ -206,7 +208,7 @@ class FmProcessor extends AudioWorkletProcessor {
   }
 
   _on(note, vel) {
-    if (!this.patch) return
+    if (!this.patch) { return }
 
     // Ищем свободный или простаивающий голос
     let v = this.voices.find((v) => !v.active || v.isIdle())
@@ -220,12 +222,12 @@ class FmProcessor extends AudioWorkletProcessor {
 
   _off(note) {
     this.voices.forEach((v) => {
-      if (v.active && v.midiNote === note) v.noteOff()
+      if (v.active && v.midiNote === note) { v.noteOff() }
     })
   }
 
   process(_inputs, outputs) {
-    if (!this.patch) return true
+    if (!this.patch) { return true }
 
     const algIdx = Math.min(31, Math.max(0, this.patch.algorithm - 1))
     const alg = ALGORITHMS[algIdx]
@@ -240,13 +242,13 @@ class FmProcessor extends AudioWorkletProcessor {
       let s = 0
 
       for (const v of this.voices) {
-        if (!v.active) continue
+        if (!v.active) { continue }
         s += v.tick(ops, alg, sr)
-        if (v.isIdle()) v.active = false
+        if (v.isIdle()) { v.active = false }
       }
 
       L[f] = s
-      if (R !== L) R[f] = s
+      if (R !== L) { R[f] = s }
     }
 
     return true

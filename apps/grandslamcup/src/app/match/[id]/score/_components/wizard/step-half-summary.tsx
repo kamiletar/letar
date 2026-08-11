@@ -251,7 +251,7 @@ function TeamScoreCard({
 type PerfItem = MatchData['performances'][number]
 
 function TeamStatsBox({ teamName, perfs, palette }: { teamName: string; perfs: PerfItem[]; palette: string }) {
-  if (perfs.length === 0) return null
+  if (perfs.length === 0) { return null }
   const avg = (arr: number[]) => (arr.length ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 10) / 10 : 0)
 
   const totals = perfs.map((p) => p.totalScore ?? 0)

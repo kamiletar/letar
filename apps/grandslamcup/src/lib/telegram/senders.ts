@@ -25,7 +25,7 @@ const SEND_OPTIONS = { parse_mode: 'HTML' as const, link_preview_options: { is_d
 /** Вспомогательная: получить citySlug и matchUrl для кнопок */
 async function getMatchContext(matchId: string) {
   const match = await loadMatchData(matchId)
-  if (!match) return null
+  if (!match) { return null }
   const city = getMatchCity(match)
   const citySlug = city?.slug ?? ''
   return {

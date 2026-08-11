@@ -19,7 +19,7 @@ export async function consumeUploadToken(
 ): Promise<{ appId: string; videoId: string; webhookUrl: string } | null> {
   const key = `upload_token:${token}`
   const raw = await redis.get(key)
-  if (!raw) return null
+  if (!raw) { return null }
   await redis.del(key)
   return JSON.parse(raw) as { appId: string; videoId: string; webhookUrl: string }
 }

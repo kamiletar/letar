@@ -60,7 +60,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
   const grouped = new Map<string, typeof matches>()
   for (const m of matches) {
     const key = m.tour ? `${m.tour.round.name} — Тур ${m.tour.number}` : 'Товарищеские матчи'
-    if (!grouped.has(key)) grouped.set(key, [])
+    if (!grouped.has(key)) { grouped.set(key, []) }
     grouped.get(key)!.push(m)
   }
 

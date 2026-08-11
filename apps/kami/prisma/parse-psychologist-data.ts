@@ -116,7 +116,7 @@ function parseMarkdownFile(content: string): ParsedQuestion[] {
   for (let i = 1; i < questionBlocks.length; i += 2) {
     const num = parseInt(questionBlocks[i], 10)
     const block = questionBlocks[i + 1]
-    if (!block) continue
+    if (!block) { continue }
 
     const lines = block.split('\n')
 
@@ -162,7 +162,7 @@ function parseMarkdownFile(content: string): ParsedQuestion[] {
         continue
       }
 
-      if (!currentOption) continue
+      if (!currentOption) { continue }
 
       // Строка с текущим скорингом: _Текущий скоринг: PAR:3, ANT:1_
       const scoringMatch = line.match(/_Текущий скоринг:\s*(.+)_/)
@@ -245,9 +245,9 @@ async function main() {
 
       // Проверяем ненулевые шкалы
       for (const opt of q.options) {
-        if (opt.BAR > 0) barNonzeroQuestions.add(q.number)
-        if (opt.PAG > 0) pagNonzeroQuestions.add(q.number)
-        if (opt.DPR > 0) dprNonzeroQuestions.add(q.number)
+        if (opt.BAR > 0) { barNonzeroQuestions.add(q.number) }
+        if (opt.PAG > 0) { pagNonzeroQuestions.add(q.number) }
+        if (opt.DPR > 0) { dprNonzeroQuestions.add(q.number) }
       }
 
       if (isExistingQuestion(q.number)) {

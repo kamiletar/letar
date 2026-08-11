@@ -39,10 +39,10 @@ export async function formatTourSummary(tourId: string): Promise<{ text: string;
     },
   })
 
-  if (!tour) return null
+  if (!tour) { return null }
 
   const city = tour.round?.season?.city
-  if (!city) return null
+  if (!city) { return null }
   const citySlug = city.slug
 
   const leagueName = tour.matches[0]?.league?.name ?? ''

@@ -62,7 +62,7 @@ export function RosterClient({ roster, pendingCount, citySlug }: RosterClientPro
   const [editTarget, setEditTarget] = useState<RosterPlayer | null>(null)
 
   const handleRemove = async () => {
-    if (!removeTarget) return
+    if (!removeTarget) { return }
     setRemoving(true)
     try {
       const result = await removePlayerAction({ playerTeamSeasonId: removeTarget.id })

@@ -81,7 +81,7 @@ export function EntityPhotoUploader({
         toaster.error({ title: 'Ошибка загрузки' })
       } finally {
         setUploading(false)
-        if (inputRef.current) inputRef.current.value = ''
+        if (inputRef.current) { inputRef.current.value = '' }
       }
     },
     [entityType, entityId, router],
@@ -90,7 +90,7 @@ export function EntityPhotoUploader({
   /** Обработка выбора файла */
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (!file) return
+    if (!file) { return }
 
     if (!file.type.startsWith('image/')) {
       toaster.error({ title: 'Файл должен быть изображением' })
@@ -131,7 +131,7 @@ export function EntityPhotoUploader({
   const handleCropCancel = useCallback(() => {
     setCropOpen(false)
     setCropImageSrc(null)
-    if (inputRef.current) inputRef.current.value = ''
+    if (inputRef.current) { inputRef.current.value = '' }
   }, [])
 
   /** Удаление фото */

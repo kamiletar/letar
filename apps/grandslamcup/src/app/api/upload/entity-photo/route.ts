@@ -16,14 +16,14 @@ export async function POST(request: NextRequest) {
   try {
     const { getSession, getDbUser } = await import('@/lib/auth')
     const session = await getSession()
-    if (!session) return NextResponse.json({ error: 'Не авторизован' }, { status: 401 })
+    if (!session) { return NextResponse.json({ error: 'Не авторизован' }, { status: 401 }) }
     const user = await getDbUser(session)
 
     const result = await extractAndValidateFile(request, 'file', {
       maxSize: MAX_UPLOAD_SIZE,
       allowedTypes: 'image/',
     })
-    if (result.error) return result.error
+    if (result.error) { return result.error }
 
     const { file, formData } = result
     const entityType = formData.get('entityType') as string
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
           },
         },
       })
-      if (!player) return NextResponse.json({ error: 'Поэт не найден' }, { status: 404 })
+      if (!player) { return NextResponse.json({ error: 'Поэт не найден' }, { status: 404 }) }
 
       if (!isAdmin) {
         const isCoach = player.playerTeamSeasons.some(
@@ -65,10 +65,10 @@ export async function POST(request: NextRequest) {
             pts.teamSeason.season.status === 'ACTIVE'
             && pts.teamSeason.playerTeamSeasons.some((c) => c.player.userId === user.id),
         )
-        if (!isCoach) return NextResponse.json({ error: 'Нет доступа' }, { status: 403 })
+        if (!isCoach) { return NextResponse.json({ error: 'Нет доступа' }, { status: 403 }) }
       }
 
-      if (player.photo) await deleteFileFromDisk(player.photo)
+      if (player.photo) { await deleteFileFromDisk(player.photo) }
       const filename = generateFilename(file.name)
       // Ресайз аватара игрока (квадратный кроп 400x400)
       const buffer = await resizeAvatar(Buffer.from(await file.arrayBuffer()))
@@ -82,15 +82,15 @@ export async function POST(request: NextRequest) {
     }
 
     if (entityType === 'venue') {
-      if (!isAdmin) return NextResponse.json({ error: 'Нет доступа' }, { status: 403 })
+      if (!isAdmin) { return NextResponse.json({ error: 'Нет доступа' }, { status: 403 }) }
 
       const venue = await prisma.venue.findUnique({
         where: { id: entityId },
         select: { id: true, photo: true },
       })
-      if (!venue) return NextResponse.json({ error: 'Стадион не найден' }, { status: 404 })
+      if (!venue) { return NextResponse.json({ error: 'Стадион не найден' }, { status: 404 }) }
 
-      if (venue.photo) await deleteFileFromDisk(venue.photo)
+      if (venue.photo) { await deleteFileFromDisk(venue.photo) }
       const filename = generateFilename(file.name)
       // Ресайз фото стадиона (сохраняет пропорции, макс 1920px)
       const buffer = await resizeImage(Buffer.from(await file.arrayBuffer()))
@@ -114,16 +114,16 @@ export async function POST(request: NextRequest) {
             leftAt: null,
           },
         })
-        if (!coachCheck) return NextResponse.json({ error: 'Нет доступа' }, { status: 403 })
+        if (!coachCheck) { return NextResponse.json({ error: 'Нет доступа' }, { status: 403 }) }
       }
 
       const team = await prisma.team.findUnique({
         where: { id: entityId },
         select: { id: true, logo: true },
       })
-      if (!team) return NextResponse.json({ error: 'Команда не найдена' }, { status: 404 })
+      if (!team) { return NextResponse.json({ error: 'Команда не найдена' }, { status: 404 }) }
 
-      if (team.logo) await deleteFileFromDisk(team.logo)
+      if (team.logo) { await deleteFileFromDisk(team.logo) }
       const filename = generateFilename(file.name)
       // Ресайз логотипа (квадратный кроп 400x400)
       const buffer = await resizeAvatar(Buffer.from(await file.arrayBuffer()))
@@ -148,7 +148,7 @@ export async function DELETE(request: NextRequest) {
   try {
     const { getSession, getDbUser } = await import('@/lib/auth')
     const session = await getSession()
-    if (!session) return NextResponse.json({ error: 'Не авторизован' }, { status: 401 })
+    if (!session) { return NextResponse.json({ error: 'Не авторизован' }, { status: 401 }) }
     const user = await getDbUser(session)
     const isAdmin = user.roles?.includes('ADMIN')
 
@@ -160,28 +160,28 @@ export async function DELETE(request: NextRequest) {
     }
 
     if (entityType === 'player') {
-      if (!isAdmin) return NextResponse.json({ error: 'Нет доступа' }, { status: 403 })
+      if (!isAdmin) { return NextResponse.json({ error: 'Нет доступа' }, { status: 403 }) }
       const player = await prisma.player.findUnique({ where: { id: entityId }, select: { photo: true } })
-      if (!player) return NextResponse.json({ error: 'Поэт не найден' }, { status: 404 })
-      if (player.photo) await deleteFileFromDisk(player.photo)
+      if (!player) { return NextResponse.json({ error: 'Поэт не найден' }, { status: 404 }) }
+      if (player.photo) { await deleteFileFromDisk(player.photo) }
       await prisma.player.update({ where: { id: entityId }, data: { photo: null } })
       return NextResponse.json({ success: true })
     }
 
     if (entityType === 'venue') {
-      if (!isAdmin) return NextResponse.json({ error: 'Нет доступа' }, { status: 403 })
+      if (!isAdmin) { return NextResponse.json({ error: 'Нет доступа' }, { status: 403 }) }
       const venue = await prisma.venue.findUnique({ where: { id: entityId }, select: { photo: true } })
-      if (!venue) return NextResponse.json({ error: 'Стадион не найден' }, { status: 404 })
-      if (venue.photo) await deleteFileFromDisk(venue.photo)
+      if (!venue) { return NextResponse.json({ error: 'Стадион не найден' }, { status: 404 }) }
+      if (venue.photo) { await deleteFileFromDisk(venue.photo) }
       await prisma.venue.update({ where: { id: entityId }, data: { photo: null } })
       return NextResponse.json({ success: true })
     }
 
     if (entityType === 'team') {
-      if (!isAdmin) return NextResponse.json({ error: 'Нет доступа' }, { status: 403 })
+      if (!isAdmin) { return NextResponse.json({ error: 'Нет доступа' }, { status: 403 }) }
       const team = await prisma.team.findUnique({ where: { id: entityId }, select: { logo: true } })
-      if (!team) return NextResponse.json({ error: 'Команда не найдена' }, { status: 404 })
-      if (team.logo) await deleteFileFromDisk(team.logo)
+      if (!team) { return NextResponse.json({ error: 'Команда не найдена' }, { status: 404 }) }
+      if (team.logo) { await deleteFileFromDisk(team.logo) }
       await prisma.team.update({ where: { id: entityId }, data: { logo: null } })
       return NextResponse.json({ success: true })
     }

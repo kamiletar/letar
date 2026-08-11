@@ -105,7 +105,7 @@ export function StepFinalResults({ match, onConfirm }: StepFinalResultsProps) {
               )
               const hs = hp.reduce((s, p) => s + (p.totalScore ?? 0), 0)
               const as_ = ap.reduce((s, p) => s + (p.totalScore ?? 0), 0)
-              if (hp.length === 0 && ap.length === 0) return null
+              if (hp.length === 0 && ap.length === 0) { return null }
               return (
                 <Table.Row key={half}>
                   <Table.Cell>Тайм {half}</Table.Cell>
@@ -207,7 +207,7 @@ export function StepFinalResults({ match, onConfirm }: StepFinalResultsProps) {
 type PerfItem = MatchData['performances'][number]
 
 function TeamStatsFull({ teamName, perfs, palette }: { teamName: string; perfs: PerfItem[]; palette: string }) {
-  if (perfs.length === 0) return null
+  if (perfs.length === 0) { return null }
 
   const avg = (arr: number[]) => (arr.length ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 10) / 10 : 0)
 

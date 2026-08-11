@@ -15,4 +15,3 @@ import { checkRateLimit, checkRecordLimit, getClientIp } from '@letar/demo-prote
 - `checkRecordLimit()` — проверка лимита записей в БД (`DEFAULT_RECORD_LIMIT`)
 
 ---
-

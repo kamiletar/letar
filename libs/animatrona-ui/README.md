@@ -15,4 +15,3 @@ import { AnimeHeroBase, EpisodeCardBase, PosterLightbox } from '@letar/animatron
 - `PosterLightbox` — модальное окно постера
 
 ---
-

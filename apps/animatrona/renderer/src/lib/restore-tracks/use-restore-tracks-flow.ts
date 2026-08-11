@@ -372,7 +372,6 @@ export function useRestoreTracksFlow(options: UseRestoreTracksFlowOptions) {
     } catch (error) {
       stateManagerSetError(`Ошибка анализа: ${error}`)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- stateManager.state читается как snapshot при вызове
   }, [stateManagerSetState, stateManagerSetError, stateManagerSetStage, proceedToCalibration, allEpisodes])
 
   // === Подтверждение → формирование задач → отправка в main process ===
@@ -477,7 +476,6 @@ export function useRestoreTracksFlow(options: UseRestoreTracksFlowOptions) {
     // Отправляем задачи в main process — он управляет очередью
     await api.restoreTracks.start(restoreTasks, fontTasksList, config)
     setRestoreStage('processing')
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- stateManager.state читается как snapshot, не нужен в deps
   }, [comparison, allEpisodes, animeFolderPath])
 
   // === Очистка битых записей (вызывается из ComparisonStep) ===

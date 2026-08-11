@@ -84,8 +84,8 @@ function getTargetPlatforms(): Platform[] {
   }
 
   // Автоопределение текущей платформы
-  if (process.platform === 'win32') return ['win']
-  if (process.platform === 'linux') return ['linux']
+  if (process.platform === 'win32') { return ['win'] }
+  if (process.platform === 'linux') { return ['linux'] }
 
   console.error('macOS не поддерживается (нет официальных сборок fpcalc)')
   return []
@@ -196,7 +196,7 @@ function findFile(dir: string, filename: string): string | null {
     const fullPath = path.join(dir, entry.name)
     if (entry.isDirectory()) {
       const found = findFile(fullPath, filename)
-      if (found) return found
+      if (found) { return found }
     } else if (entry.name === filename) {
       return fullPath
     }

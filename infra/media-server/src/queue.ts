@@ -16,7 +16,7 @@ export const transcodeQueue = new Queue<TranscodeJob>('transcode', { connection 
 
 export async function getJobStatus(jobId: string): Promise<JobStatus> {
   const job = await transcodeQueue.getJob(jobId)
-  if (!job) return 'unknown'
+  if (!job) { return 'unknown' }
   const state = await job.getState()
   switch (state) {
     case 'waiting':

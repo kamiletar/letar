@@ -301,8 +301,8 @@ const videoOptimizedConfig = {
        // Учитываем cache hit ratio
        const adjustedBandwidth = effectiveBandwidth * (0.5 + 0.5 * cacheHit)
 
-       if (adjustedBandwidth > 5000) return '1080p'
-       if (adjustedBandwidth > 2500) return '720p'
+       if (adjustedBandwidth > 5000) { return '1080p' }
+       if (adjustedBandwidth > 2500) { return '720p' }
        return '480p'
      }
    }
@@ -324,7 +324,7 @@ async function pinAnime(anime: AnimeSeries, options: PinOptions): Promise<PinRes
   const pinnedCIDs: string[] = []
 
   for (const episode of anime.episodes) {
-    if (!options.episodes.includes(episode.number)) continue
+    if (!options.episodes.includes(episode.number)) { continue }
 
     // Закрепляем видео
     const videoCID = episode.qualities[options.quality]
@@ -369,7 +369,7 @@ class StorageManager {
         await this.db.markAsUnpinned(candidate.id)
 
         const newUsage = await this.calculateUsage()
-        if (newUsage <= this.maxStorageGB * 1024 ** 3) break
+        if (newUsage <= this.maxStorageGB * 1024 ** 3) { break }
       }
     }
   }
@@ -809,10 +809,11 @@ class TrackerTrustScoring {
     const score = this.calculateTrustScore(reputation)
 
     let newLevel: TrustLevel
-    if (score >= 0.8) newLevel = TrustLevel.TRUSTED
-    else if (score >= 0.6) newLevel = TrustLevel.KNOWN
-    else if (score < 0.3) newLevel = TrustLevel.UNTRUSTED
-    else newLevel = reputation.trustLevel // не меняем
+    if (score >= 0.8) { newLevel = TrustLevel.TRUSTED }
+    else if (score >= 0.6) { newLevel = TrustLevel.KNOWN }
+    else if (score < 0.3) { newLevel = TrustLevel.UNTRUSTED }
+    else { newLevel = reputation.trustLevel // не меняем
+     }
 
     await this.db.updateTrackerTrustLevel(trackerId, newLevel)
   }
@@ -1049,9 +1050,12 @@ class BonusPointsSystem {
   private async getRarenessMultiplier(cid: string): Promise<number> {
     const seeders = await this.getSeederCount(cid)
 
-    if (seeders < 2) return 3.0 // Критически редкий
-    if (seeders < 5) return 2.0 // Редкий
-    if (seeders < 10) return 1.5 // Малораспространенный
+    if (seeders < 2) { return 3.0 // Критически редкий
+     }
+    if (seeders < 5) { return 2.0 // Редкий
+     }
+    if (seeders < 10) { return 1.5 // Малораспространенный
+     }
     return 1.0 // Обычный
   }
 
@@ -1748,7 +1752,7 @@ class CollectionManager {
     const followed = await this.db.getFollowedCollections(userId)
 
     for (const collection of followed) {
-      if (!collection.autoSync) continue
+      if (!collection.autoSync) { continue }
 
       const source = await this.db.getPublicCollection(collection.sourceCollectionId)
 
@@ -1804,7 +1808,7 @@ class RecommendationEngine {
 
     const similarities = await Promise.all(
       allUsers.map(async (otherUser) => {
-        if (otherUser.id === userId) return null
+        if (otherUser.id === userId) { return null }
 
         const otherLibrary = await this.db.getLibrary(otherUser.id)
         const similarity = this.jaccardSimilarity(
@@ -2458,7 +2462,7 @@ class IPFSSecurityManager {
 async function loadUntrustedContent(cid: string) {
   const userConfirmed = await showWarningDialog('This content is from an untrusted source. Load anyway?')
 
-  if (!userConfirmed) return
+  if (!userConfirmed) { return }
 
   // Загружаем в изолированную среду
   await ipfs.cat(cid, { timeout: 10000 })
@@ -2754,8 +2758,8 @@ services:
 function getUserShard(userId: string): string {
   const user = await db.getUser(userId)
 
-  if (user.country === 'RU') return 'shard-ru'
-  if (user.country === 'US') return 'shard-us'
+  if (user.country === 'RU') { return 'shard-ru' }
+  if (user.country === 'US') { return 'shard-us' }
   return 'shard-default'
 }
 ```

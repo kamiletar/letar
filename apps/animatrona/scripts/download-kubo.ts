@@ -113,8 +113,8 @@ function getTargetPlatforms(): Platform[] {
   }
 
   // Автоопределение текущей платформы
-  if (process.platform === 'win32') return ['win']
-  if (process.platform === 'linux') return ['linux']
+  if (process.platform === 'win32') { return ['win'] }
+  if (process.platform === 'linux') { return ['linux'] }
   if (process.platform === 'darwin') {
     return process.arch === 'arm64' ? ['darwin-arm64'] : ['darwin']
   }

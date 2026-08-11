@@ -76,7 +76,7 @@ export async function cached<T>(key: string, ttlSec: number, fn: () => Promise<T
   if (r) {
     try {
       const hit = await r.get(key)
-      if (hit) return JSON.parse(hit) as T
+      if (hit) { return JSON.parse(hit) as T }
     } catch {
       // fallback на fn()
     }

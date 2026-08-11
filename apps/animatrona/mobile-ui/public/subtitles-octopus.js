@@ -1032,7 +1032,7 @@ const SubtitlesOctopus = function(options) {
       const height = arguments[i]
 
       const imageData = ctx.createImageData(width, height)
-      if (data) imageData.data.set(data)
+      if (data) { imageData.data.set(data) }
       return imageData
     }
   })()
@@ -1206,8 +1206,8 @@ const SubtitlesOctopus = function(options) {
     const elementRatio = width / height
     let realWidth = width,
       realHeight = height
-    if (elementRatio > videoRatio) realWidth = Math.floor(height * videoRatio)
-    else realHeight = Math.floor(width / videoRatio)
+    if (elementRatio > videoRatio) { realWidth = Math.floor(height * videoRatio) }
+    else { realHeight = Math.floor(width / videoRatio) }
 
     const x = (width - realWidth) / 2
     const y = (height - realHeight) / 2
@@ -1416,10 +1416,10 @@ const SubtitlesOctopus = function(options) {
     } else {
       const sgn = scalefactor < 1 ? -1 : 1
       let newH = height
-      if (sgn * newH * scalefactor <= sgn * self.prescaleHeightLimit) newH *= scalefactor
-      else if (sgn * newH < sgn * self.prescaleHeightLimit) newH = self.prescaleHeightLimit
+      if (sgn * newH * scalefactor <= sgn * self.prescaleHeightLimit) { newH *= scalefactor }
+      else if (sgn * newH < sgn * self.prescaleHeightLimit) { newH = self.prescaleHeightLimit }
 
-      if (self.maxRenderHeight > 0 && newH > self.maxRenderHeight) newH = self.maxRenderHeight
+      if (self.maxRenderHeight > 0 && newH > self.maxRenderHeight) { newH = self.maxRenderHeight }
 
       width *= newH / height
       height = newH
@@ -1480,7 +1480,7 @@ const SubtitlesOctopus = function(options) {
     self.resize()
     // Проверяем workerActive перед отложенным resize (fix для React Strict Mode)
     setTimeout(function() {
-      if (self.workerActive) self.resize()
+      if (self.workerActive) { self.resize() }
     }, 100)
   }
 

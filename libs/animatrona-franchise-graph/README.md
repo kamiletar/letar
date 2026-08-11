@@ -41,4 +41,3 @@ nx lint animatrona-franchise-graph
 ```
 
 ---
-

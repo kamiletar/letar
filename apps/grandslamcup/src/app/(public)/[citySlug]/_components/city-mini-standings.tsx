@@ -30,7 +30,7 @@ interface CityMiniStandingsProps {
 
 /** Компактная таблица лиги — топ-5 */
 export function CityMiniStandings({ standings, seasonName, citySlug }: CityMiniStandingsProps) {
-  if (standings.length === 0) return null
+  if (standings.length === 0) { return null }
 
   const cityPrefix = `/${citySlug}`
 

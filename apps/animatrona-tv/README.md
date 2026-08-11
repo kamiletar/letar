@@ -83,4 +83,3 @@ src/
 - [exoplayer-sync](../../libs/exoplayer-sync) — Видеоплеер
 
 ---
-

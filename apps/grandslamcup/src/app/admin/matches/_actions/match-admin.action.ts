@@ -19,7 +19,7 @@ const AssignStaffSchema = z
 /** Обновить назначение ведущего и/или счетовода */
 export const assignMatchStaffAction = adminGuard(async (input: unknown): Promise<ActionResult> => {
   const parsed = AssignStaffSchema.safeParse(input)
-  if (!parsed.success) return { success: false, error: 'Некорректные данные' }
+  if (!parsed.success) { return { success: false, error: 'Некорректные данные' } }
 
   const { matchId, scorerUserId, presenterUserId } = parsed.data
 
@@ -156,11 +156,11 @@ export const createMatchAction = adminGuard(async (input: unknown): Promise<Acti
 
 /** Удалить матч — только в статусе SCHEDULED */
 export const deleteMatchAction = adminGuard(async (matchId: unknown): Promise<ActionResult> => {
-  if (typeof matchId !== 'string' || !matchId) return { success: false, error: 'Некорректный ID' }
+  if (typeof matchId !== 'string' || !matchId) { return { success: false, error: 'Некорректный ID' } }
 
   const match = await prisma.match.findUnique({ where: { id: matchId }, select: { status: true } })
-  if (!match) return { success: false, error: 'Матч не найден' }
-  if (match.status !== 'SCHEDULED') return { success: false, error: 'Удалить можно только запланированный матч' }
+  if (!match) { return { success: false, error: 'Матч не найден' } }
+  if (match.status !== 'SCHEDULED') { return { success: false, error: 'Удалить можно только запланированный матч' } }
 
   await prisma.match.delete({ where: { id: matchId } })
   revalidatePath('/admin/matches')

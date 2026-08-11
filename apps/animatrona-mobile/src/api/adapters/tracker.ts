@@ -192,7 +192,7 @@ export function createTrackerAdapter(server: ServerConfig): ServerAdapter {
 
   /** Конвертирует ipfs:// URI в HTTP URL через proxy трекера */
   function resolveIpfsUrl(ipfsUri: string | null): string | null {
-    if (!ipfsUri) return null
+    if (!ipfsUri) { return null }
     if (ipfsUri.startsWith('ipfs://')) {
       return `${baseUrl}/api/ipfs/${ipfsUri.slice(7)}`
     }
@@ -203,7 +203,7 @@ export function createTrackerAdapter(server: ServerConfig): ServerAdapter {
   async function fetchIpfs<T>(cid: string): Promise<T> {
     const url = `${baseUrl}/api/ipfs/${cid}`
     const res = await fetch(url)
-    if (!res.ok) throw new Error(`IPFS fetch failed: ${res.status}`)
+    if (!res.ok) { throw new Error(`IPFS fetch failed: ${res.status}`) }
     return res.json()
   }
 
@@ -214,22 +214,22 @@ export function createTrackerAdapter(server: ServerConfig): ServerAdapter {
   async function enrichEpisodesFromIpfs(episodes: Episode[], directoryCid: string): Promise<void> {
     // 1. Загружаем анимe-манифест → episodesCid
     const manifest = await fetchIpfs<IpfsAnimeManifest>(`${directoryCid}/manifest.json`)
-    if (!manifest.episodesCid) return
+    if (!manifest.episodesCid) { return }
 
     // 2. Загружаем episodes document → массив записей с manifestCid
     const epsDoc = await fetchIpfs<IpfsEpisodesDocument>(manifest.episodesCid)
-    if (!epsDoc.episodes?.length) return
+    if (!epsDoc.episodes?.length) { return }
 
     // Маппинг номер → manifestCid
     const manifestMap = new Map<number, string>()
     for (const entry of epsDoc.episodes) {
-      if (entry.manifestCid) manifestMap.set(entry.number, entry.manifestCid)
+      if (entry.manifestCid) { manifestMap.set(entry.number, entry.manifestCid) }
     }
 
     // 3. Загружаем манифесты эпизодов параллельно
     const promises = episodes.map(async (episode) => {
       const manifestCid = manifestMap.get(episode.number)
-      if (!manifestCid) return
+      if (!manifestCid) { return }
 
       try {
         const epManifest = await fetchIpfs<IpfsEpisodeManifest>(manifestCid)
@@ -350,7 +350,7 @@ export function createTrackerAdapter(server: ServerConfig): ServerAdapter {
 
         for (const item of response.data) {
           const resolved = resolveIpfsUrl(item.coverUrl)
-          if (resolved) posterCache.set(item.id, resolved)
+          if (resolved) { posterCache.set(item.id, resolved) }
         }
         result.push(
           ...response.data.map((item) => {
@@ -360,7 +360,7 @@ export function createTrackerAdapter(server: ServerConfig): ServerAdapter {
           }),
         )
 
-        if (page >= response.pagination.totalPages) break
+        if (page >= response.pagination.totalPages) { break }
         page++
       }
 
@@ -398,7 +398,7 @@ export function createTrackerAdapter(server: ServerConfig): ServerAdapter {
 
       // Кэшируем coverUrl (конвертированный в HTTP)
       const resolvedCover = resolveIpfsUrl(response.data.coverUrl)
-      if (resolvedCover) posterCache.set(animeId, resolvedCover)
+      if (resolvedCover) { posterCache.set(animeId, resolvedCover) }
 
       // Кэшируем маппинг episodeId → { animeId, episodeNumber }
       for (const ep of detail.episodes) {
@@ -463,17 +463,17 @@ export function createTrackerAdapter(server: ServerConfig): ServerAdapter {
     },
 
     async getProgress(episodeId: string): Promise<WatchProgress | null> {
-      if (!server.apiKey) return null
+      if (!server.apiKey) { return null }
 
       const cached = episodeCache.get(episodeId)
-      if (!cached) return null
+      if (!cached) { return null }
 
       try {
         const response = await fetchApi<{ episodes: TrackerWatchProgress[] }>(
           `/watch-progress?animeId=${cached.animeId}`,
         )
         const progress = response.episodes.find((p) => p.episodeNumber === cached.episodeNumber)
-        if (!progress) return null
+        if (!progress) { return null }
 
         return {
           currentTime: progress.currentTime,
@@ -486,7 +486,7 @@ export function createTrackerAdapter(server: ServerConfig): ServerAdapter {
     },
 
     async saveProgress(episodeId: string, data) {
-      if (!server.apiKey) return
+      if (!server.apiKey) { return }
 
       const cached = episodeCache.get(episodeId)
       if (!cached) {
@@ -531,7 +531,7 @@ export function createTrackerAdapter(server: ServerConfig): ServerAdapter {
     },
 
     getSubtitleUrlFromCid(track: SubtitleTrack): string | null {
-      if (!track.fileCid) return null
+      if (!track.fileCid) { return null }
       return `${baseUrl}/api/ipfs/${track.fileCid}`
     },
 

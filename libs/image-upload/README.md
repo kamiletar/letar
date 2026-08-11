@@ -267,9 +267,9 @@ export const GET = createUploadsRoute()
 ```ts
 export const GET = createUploadsRoute({
   headers: async ({ segments, relPath }) => {
-    if (segments[0] !== 'files' || segments.length !== 2) return undefined
+    if (segments[0] !== 'files' || segments.length !== 2) { return undefined }
     const record = await prisma.uploadedFile.findUnique({ where: { path: relPath }, select: { filename: true } })
-    if (!record?.filename) return undefined
+    if (!record?.filename) { return undefined }
     return { 'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(record.filename)}` }
   },
 })

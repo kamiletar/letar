@@ -33,8 +33,8 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 
 // pg возвращает enum[] как строку "{ADMIN,USER}" — парсим в массив
 function pgArray(val: string | string[] | null | undefined): string[] {
-  if (!val) return []
-  if (Array.isArray(val)) return val
+  if (!val) { return [] }
+  if (Array.isArray(val)) { return val }
   return val.replace(/^{|}$/g, '').split(',').filter(Boolean)
 }
 
@@ -103,7 +103,7 @@ async function main() {
         'UPDATE "QuizSession" SET "userId" = $1 WHERE "userId" = $2',
         [newUser.id, oldUser.id],
       )
-      if (sessionsMoved) console.log(`  ✅ QuizSession перенесено: ${sessionsMoved}`)
+      if (sessionsMoved) { console.log(`  ✅ QuizSession перенесено: ${sessionsMoved}`) }
 
       // Переносим UserQuizAchievement (проверяем дубли по achievementCode)
       const { rows: achievements } = await client.query<{ id: string; achievementCode: string }>(
@@ -161,7 +161,7 @@ async function main() {
         }
       }
 
-      if (pgArray(oldUser.roles).includes('ADMIN')) needsAdmin = true
+      if (pgArray(oldUser.roles).includes('ADMIN')) { needsAdmin = true }
 
       await client.query('DELETE FROM "User" WHERE id = $1', [oldUser.id])
       console.log(`  ✅ Удалён: ${oldUser.email}`)

@@ -37,8 +37,8 @@ export function computeCardStats(performances: PerformanceLike[]): CardStats {
   for (const p of performances) {
     for (const c of p.cards) {
       total++
-      if (c.type === 'YELLOW') yellow++
-      if (c.type === 'RED') red++
+      if (c.type === 'YELLOW') { yellow++ }
+      if (c.type === 'RED') { red++ }
     }
   }
 
@@ -47,7 +47,7 @@ export function computeCardStats(performances: PerformanceLike[]): CardStats {
 
 /** Определение MVP матча (только для завершённых) */
 export function computeMvp(performances: PerformanceLike[], isFinished: boolean): MvpInfo | null {
-  if (!isFinished) return null
+  if (!isFinished) { return null }
 
   const result = findMatchMVP(
     performances.map((p) => ({

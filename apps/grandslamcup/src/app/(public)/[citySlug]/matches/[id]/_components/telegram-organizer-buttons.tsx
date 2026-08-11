@@ -22,7 +22,7 @@ interface TelegramOrganizerButtonsProps {
 export function TelegramOrganizerButtons({ matchId, isFinished, canPublish }: TelegramOrganizerButtonsProps) {
   const [loading, setLoading] = useState(false)
 
-  if (!canPublish) return null
+  if (!canPublish) { return null }
 
   async function handleAnnouncement() {
     setLoading(true)

@@ -43,7 +43,7 @@ export function StepCoinFlip({ match }: StepCoinFlipProps) {
   }, [])
 
   const handleConfirm = useCallback(async () => {
-    if (!pendingChoice) return
+    if (!pendingChoice) { return }
     setError(null)
     setSaving(true)
     const res = await setFirstHalfStartTeamAction(match.id, pendingChoice)

@@ -58,7 +58,7 @@ export function ConnectScreen() {
     // (иначе RootNavigator переключит экран при servers.length > 0)
     try {
       const headers: Record<string, string> = { Accept: 'application/json' }
-      if (key) headers['Authorization'] = `Bearer ${key}`
+      if (key) { headers['Authorization'] = `Bearer ${key}` }
 
       const endpoint = serverType === 'desktop' ? `${url}/api/status` : `${url}/api/anime?limit=1`
 
@@ -106,7 +106,7 @@ export function ConnectScreen() {
     setShowScanner(false)
     setServerType(result.type)
     setServerUrl(result.url)
-    if (result.apiKey) setApiKey(result.apiKey)
+    if (result.apiKey) { setApiKey(result.apiKey) }
   }, [])
 
   return (

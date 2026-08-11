@@ -169,7 +169,6 @@ export const FieldAddress = createField<AddressFieldProps, AddressValue | string
         setIsOpen(false)
       }
       // fetchSuggestions намеренно не в зависимостях — единственный триггер это debouncedQuery.
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [debouncedQuery])
 
     // Close on click outside

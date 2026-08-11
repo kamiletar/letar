@@ -20,7 +20,7 @@ export const config = {
 
 export function validateApiKey(appId: string, key: string): boolean {
   const expected = config.apiKeys.get(appId.toLowerCase())
-  if (!expected) return false
+  if (!expected) { return false }
   // X-Media-Key: {appId}:{secret}
   const [, secret] = key.split(':')
   return secret === expected

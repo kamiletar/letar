@@ -56,9 +56,9 @@ export function StepPairResults({ match, matchState }: StepPairResultsProps) {
   handleNextRef.current = handleNext
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'Enter') return
+      if (e.key !== 'Enter') { return }
       const tag = (e.target as HTMLElement).tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'BUTTON') return
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'BUTTON') { return }
       e.preventDefault()
       void handleNextRef.current()
     }

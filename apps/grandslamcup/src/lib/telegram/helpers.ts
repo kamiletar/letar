@@ -23,7 +23,7 @@ export function playerLink(
 /** Ссылка на страницу команды */
 export function teamLink(team: { name: string; slug: string }, citySlug: string): string {
   const display = escapeHtml(team.name)
-  if (!citySlug) return display
+  if (!citySlug) { return display }
   return `<a href="${SITE_URL}/${citySlug}/teams/${team.slug}">${display}</a>`
 }
 

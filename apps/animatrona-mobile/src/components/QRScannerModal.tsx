@@ -74,9 +74,9 @@ export function QRScannerModal({ visible, onClose, onScan }: QRScannerModalProps
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
     onCodeScanned: (codes) => {
-      if (scanned) return
+      if (scanned) { return }
       const code = codes[0]
-      if (!code?.value) return
+      if (!code?.value) { return }
 
       const result = parseQRCode(code.value)
       if (result) {

@@ -78,8 +78,8 @@ export default function StagesPage() {
       getStagesAction(seasonId),
       getSwissProgressAction(seasonId),
     ])
-    if ('data' in stagesResult) setStages(stagesResult.data as StageData[])
-    if ('data' in progressResult) setProgress(progressResult.data as SwissProgress | null)
+    if ('data' in stagesResult) { setStages(stagesResult.data as StageData[]) }
+    if ('data' in progressResult) { setProgress(progressResult.data as SwissProgress | null) }
     setLoading(false)
   }, [seasonId])
 
@@ -90,7 +90,7 @@ export default function StagesPage() {
   const handleCreateStages = async () => {
     setActionLoading('create')
     const result = await createSwissStagesAction(seasonId)
-    if ('error' in result) toaster.error({ title: String(result.error) })
+    if ('error' in result) { toaster.error({ title: String(result.error) }) }
     else {
       toaster.success({ title: 'Этапы созданы' })
       loadData()
@@ -140,7 +140,7 @@ export default function StagesPage() {
   const handleGenerateBracket = async () => {
     setActionLoading('bracket')
     const result = await generatePlayoffBracketAction(seasonId)
-    if ('error' in result) toaster.error({ title: String(result.error) })
+    if ('error' in result) { toaster.error({ title: String(result.error) }) }
     else {
       toaster.success({ title: `Сетка создана: ${result.data?.slotsCreated} слотов` })
       loadData()

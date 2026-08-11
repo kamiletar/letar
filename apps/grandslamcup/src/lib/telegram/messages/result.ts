@@ -105,9 +105,9 @@ export async function formatMatchResult(matchId: string): Promise<string | null>
       entries.map(([, { player, total }]) => `  ${playerLink(player, citySlug)} — ${total}`).join('\n')
 
     parts.push('', `🏠 <b>${homeLink}</b>`)
-    if (homePerfs.length > 0) parts.push(formatPerf(homePerfs))
+    if (homePerfs.length > 0) { parts.push(formatPerf(homePerfs)) }
     parts.push('', `🏁 <b>${awayLink}</b>`)
-    if (awayPerfs.length > 0) parts.push(formatPerf(awayPerfs))
+    if (awayPerfs.length > 0) { parts.push(formatPerf(awayPerfs)) }
   } else if (match.lineups.length > 0) {
     // Fallback: составы из lineups (без баллов)
     const homeLineup = match.lineups.filter((l) => l.teamSeason.id === match.homeTeamId)
@@ -117,9 +117,9 @@ export async function formatMatchResult(matchId: string): Promise<string | null>
       lineup.map((l) => `  ${playerLink(l.player, citySlug)}`).join('\n')
 
     parts.push('', `🏠 <b>${homeLink}</b>`)
-    if (homeLineup.length > 0) parts.push(formatLineup(homeLineup))
+    if (homeLineup.length > 0) { parts.push(formatLineup(homeLineup)) }
     parts.push('', `🏁 <b>${awayLink}</b>`)
-    if (awayLineup.length > 0) parts.push(formatLineup(awayLineup))
+    if (awayLineup.length > 0) { parts.push(formatLineup(awayLineup)) }
   }
 
   if (mvp) {

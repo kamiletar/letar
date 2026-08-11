@@ -20,8 +20,8 @@ const HUNDREDS_PREFIX = [
 
 /** Кардинальное числительное (казахский) */
 export function cardinal(n: number): string {
-  if (n === 0) return 'нөл'
-  if (n < 0) return `минус ${cardinal(-n)}`
+  if (n === 0) { return 'нөл' }
+  if (n < 0) { return `минус ${cardinal(-n)}` }
 
   const parts: string[] = []
 
@@ -72,8 +72,8 @@ export function ordinal(n: number): string {
   const softVowels = 'еёиіөүэю'
   const hardVowels = 'аоуұыя'
   const isSoft = [...card].reverse().some((ch) => {
-      if (softVowels.includes(ch)) return true
-      if (hardVowels.includes(ch)) return true
+      if (softVowels.includes(ch)) { return true }
+      if (hardVowels.includes(ch)) { return true }
       return false
     }) && [...card].reverse().find((ch) => softVowels.includes(ch) || hardVowels.includes(ch))
     ? softVowels.includes([...card].reverse().find((ch) => softVowels.includes(ch) || hardVowels.includes(ch))!)

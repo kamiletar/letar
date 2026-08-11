@@ -110,10 +110,10 @@ export function StepVoting({ match, matchState, dimension }: StepVotingProps) {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'Enter') return
+      if (e.key !== 'Enter') { return }
       const tag = (e.target as HTMLElement).tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'BUTTON') return
-      if (!canGoNextRef.current) return
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'BUTTON') { return }
+      if (!canGoNextRef.current) { return }
       e.preventDefault()
       void handleNextDimensionRef.current()
     }

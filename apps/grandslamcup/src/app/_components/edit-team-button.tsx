@@ -58,7 +58,7 @@ export function EditTeamButton({
   const [links, setLinks] = useState<SocialLink[]>(socialLinks.length > 0 ? socialLinks : [])
   const [saving, setSaving] = useState(false)
 
-  if (!canEdit) return null
+  if (!canEdit) { return null }
 
   function addLink() {
     setLinks([...links, { platform: 'telegram', url: '' }])

@@ -48,7 +48,7 @@ export function FullscreenTimer({ matchId, timer, onClose, performerName }: Full
 
     let running = true
     const tick = () => {
-      if (!running) return
+      if (!running) { return }
       const now = Date.now()
       const currentElapsed = timer.accumulatedSec + (now - timer.startedAt!) / 1000
       setElapsed(currentElapsed)
@@ -65,7 +65,7 @@ export function FullscreenTimer({ matchId, timer, onClose, performerName }: Full
 
   // Вибрация на предупреждении и лимите
   useEffect(() => {
-    if (!timer.isRunning) return
+    if (!timer.isRunning) { return }
 
     if (elapsed >= WARNING_SEC && !vibratedWarningRef.current) {
       vibratedWarningRef.current = true
@@ -88,7 +88,7 @@ export function FullscreenTimer({ matchId, timer, onClose, performerName }: Full
   // Выход по ESC
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') { onClose() }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)

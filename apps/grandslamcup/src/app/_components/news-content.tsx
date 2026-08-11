@@ -58,9 +58,9 @@ export async function NewsContent({ citySlug, cityId, cityName }: NewsContentPro
 
   /** Бейдж города — только в глобальном режиме */
   function getCityBadge(post: (typeof posts)[number]) {
-    if (cityId) return null
+    if (cityId) { return null }
     const city = 'city' in post ? (post as { city: { name: string } | null }).city : null
-    if (!city) return null
+    if (!city) { return null }
     return (
       <Badge colorPalette="purple" size="sm">
         {city.name}

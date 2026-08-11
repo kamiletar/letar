@@ -178,4 +178,3 @@ nx lint label-printer-core
 | winston | Логирование           |
 
 ---
-

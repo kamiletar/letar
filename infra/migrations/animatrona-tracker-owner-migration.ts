@@ -166,12 +166,12 @@ async function main() {
         'UPDATE "ModerationLog" SET "moderatorId" = $1 WHERE "moderatorId" = $2',
         [newUser.id, oldUser.id],
       )
-      if (modLogCount) console.log(`  ✅ ModerationLog перенесено: ${modLogCount}`)
+      if (modLogCount) { console.log(`  ✅ ModerationLog перенесено: ${modLogCount}`) }
 
       // Rating и Report (userId — CASCADE delete) — удалятся вместе с User
       // Если нужно сохранить — добавить UPDATE здесь, но дубли по (contentId, userId) запрещены
 
-      if (oldUser.role === 'ADMIN') needsAdmin = true
+      if (oldUser.role === 'ADMIN') { needsAdmin = true }
 
       await client.query('DELETE FROM "User" WHERE id = $1', [oldUser.id])
       console.log(`  ✅ Удалён: ${oldUser.email} (Rating/Report/Account/Session каскадом)`)

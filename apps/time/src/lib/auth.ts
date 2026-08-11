@@ -20,6 +20,6 @@ export { getCurrentUser, getSession }
 export async function requireAuth(): Promise<Session> {
   const { redirect } = await import('next/navigation')
   const session = await getSession()
-  if (!session) redirect('/sign-in')
+  if (!session) { redirect('/sign-in') }
   return session as Session
 }

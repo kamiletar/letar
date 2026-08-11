@@ -39,8 +39,8 @@ export async function GET(request: Request) {
     for (const match of upcomingMatches) {
       const results = await sendCoachLineupReminder(match.id)
       for (const r of results) {
-        if (r.success) sent++
-        else errors++
+        if (r.success) { sent++ }
+        else { errors++ }
       }
     }
 

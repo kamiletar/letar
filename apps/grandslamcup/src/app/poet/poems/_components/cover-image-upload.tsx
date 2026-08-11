@@ -41,7 +41,7 @@ export function CoverImageUpload({ value, onChange, poemId }: CoverImageUploadPr
       try {
         const formData = new FormData()
         formData.append('file', file)
-        if (poemId) formData.append('poemId', poemId)
+        if (poemId) { formData.append('poemId', poemId) }
 
         const res = await fetch('/api/upload/poem-cover', { method: 'POST', body: formData })
         const data = await res.json()
@@ -62,7 +62,7 @@ export function CoverImageUpload({ value, onChange, poemId }: CoverImageUploadPr
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) upload(file)
+    if (file) { upload(file) }
     // Сбрасываем input чтобы можно было загрузить тот же файл повторно
     e.target.value = ''
   }
@@ -71,7 +71,7 @@ export function CoverImageUpload({ value, onChange, poemId }: CoverImageUploadPr
     e.preventDefault()
     setDragOver(false)
     const file = e.dataTransfer.files[0]
-    if (file) upload(file)
+    if (file) { upload(file) }
   }
 
   const handleRemove = () => {

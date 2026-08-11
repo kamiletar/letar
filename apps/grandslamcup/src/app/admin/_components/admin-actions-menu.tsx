@@ -30,7 +30,7 @@ interface AdminActionsMenuProps {
  * - Mobile (base): одна кнопка ⋮ → выпадающее меню
  */
 export function AdminActionsMenu({ actions }: AdminActionsMenuProps) {
-  if (actions.length === 0) return null
+  if (actions.length === 0) { return null }
 
   return (
     <>

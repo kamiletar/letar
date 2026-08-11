@@ -30,7 +30,7 @@ export function EditMatchButton({ matchId, posterUrl, canEdit }: EditMatchButton
   // Ctrl+V — вставка изображения из буфера обмена
   // Хук должен вызываться безусловно (rules-of-hooks), guard внутри callback
   useEffect(() => {
-    if (!open) return
+    if (!open) { return }
     function handlePaste(e: ClipboardEvent) {
       const item = Array.from(e.clipboardData?.items ?? []).find((i) => i.type.startsWith('image/'))
       if (item) {
@@ -59,7 +59,7 @@ export function EditMatchButton({ matchId, posterUrl, canEdit }: EditMatchButton
     return () => document.removeEventListener('paste', handlePaste)
   }, [open, matchId, router])
 
-  if (!session?.user || !canEdit) return null
+  if (!session?.user || !canEdit) { return null }
 
   async function handleUpload(file: File) {
     setUploading(true)
@@ -84,13 +84,13 @@ export function EditMatchButton({ matchId, posterUrl, canEdit }: EditMatchButton
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (file) handleUpload(file)
+    if (file) { handleUpload(file) }
   }
 
   function handleDrop(e: React.DragEvent) {
     e.preventDefault()
     const file = e.dataTransfer.files[0]
-    if (file?.type.startsWith('image/')) handleUpload(file)
+    if (file?.type.startsWith('image/')) { handleUpload(file) }
   }
 
   async function handleRemovePoster() {

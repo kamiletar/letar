@@ -55,11 +55,11 @@ export function PlayersClient({
   function navigate(updates: Record<string, string>) {
     const params = new URLSearchParams(searchParams.toString())
     for (const [key, value] of Object.entries(updates)) {
-      if (value) params.set(key, value)
-      else params.delete(key)
+      if (value) { params.set(key, value) }
+      else { params.delete(key) }
     }
     // Сброс на первую страницу при смене фильтров
-    if ('q' in updates || 'city' in updates) params.delete('page')
+    if ('q' in updates || 'city' in updates) { params.delete('page') }
     router.push(`/admin/players?${params.toString()}`)
   }
 

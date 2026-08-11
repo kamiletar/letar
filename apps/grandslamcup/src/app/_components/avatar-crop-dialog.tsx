@@ -51,8 +51,8 @@ async function getCroppedImage(imageSrc: string, pixelCrop: Area): Promise<Blob>
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
       (blob) => {
-        if (blob) resolve(blob)
-        else reject(new Error('Не удалось обрезать изображение'))
+        if (blob) { resolve(blob) }
+        else { reject(new Error('Не удалось обрезать изображение')) }
       },
       'image/jpeg',
       0.9,
@@ -70,7 +70,7 @@ export function AvatarCropDialog({ imageSrc, onCrop, onCancel, open, cropShape =
   }, [])
 
   const handleSave = useCallback(async () => {
-    if (!croppedAreaPixels) return
+    if (!croppedAreaPixels) { return }
     const blob = await getCroppedImage(imageSrc, croppedAreaPixels)
     onCrop(blob)
   }, [croppedAreaPixels, imageSrc, onCrop])

@@ -57,7 +57,7 @@ interface SocialLinksProps {
 }
 
 export function SocialLinks({ socialLinks, variant = 'compact' }: SocialLinksProps) {
-  if (!socialLinks || socialLinks.length === 0) return null
+  if (!socialLinks || socialLinks.length === 0) { return null }
 
   if (variant === 'compact') {
     return (

@@ -78,7 +78,7 @@ export const getSwissProgressAction = adminGuard(async (seasonId: string) => {
       orderBy: { number: 'desc' },
       select: { id: true, number: true, name: true },
     })
-    if (!lastRound) return { data: null }
+    if (!lastRound) { return { data: null } }
 
     // Матчи последнего раунда с командами
     const matches = await prisma.match.findMany({
@@ -98,8 +98,8 @@ export const getSwissProgressAction = adminGuard(async (seasonId: string) => {
     // Подсчёт W-L каждой команды до текущего тура
     const wlMap = new Map<string, { wins: number; losses: number }>()
     for (const m of prevMatches) {
-      if (!wlMap.has(m.homeTeamId)) wlMap.set(m.homeTeamId, { wins: 0, losses: 0 })
-      if (!wlMap.has(m.awayTeamId)) wlMap.set(m.awayTeamId, { wins: 0, losses: 0 })
+      if (!wlMap.has(m.homeTeamId)) { wlMap.set(m.homeTeamId, { wins: 0, losses: 0 }) }
+      if (!wlMap.has(m.awayTeamId)) { wlMap.set(m.awayTeamId, { wins: 0, losses: 0 }) }
       const home = wlMap.get(m.homeTeamId)!
       const away = wlMap.get(m.awayTeamId)!
       if (m.homePoints === 1) {
@@ -116,11 +116,11 @@ export const getSwissProgressAction = adminGuard(async (seasonId: string) => {
     for (const m of matches) {
       const rec = wlMap.get(m.homeTeamId) ?? { wins: 0, losses: 0 }
       const cellKey = `${rec.wins}-${rec.losses}`
-      if (!cellMap.has(cellKey)) cellMap.set(cellKey, { total: 0, finished: 0, live: 0 })
+      if (!cellMap.has(cellKey)) { cellMap.set(cellKey, { total: 0, finished: 0, live: 0 }) }
       const cell = cellMap.get(cellKey)!
       cell.total++
-      if (m.status === 'FINISHED') cell.finished++
-      else if (m.status === 'LIVE') cell.live++
+      if (m.status === 'FINISHED') { cell.finished++ }
+      else if (m.status === 'LIVE') { cell.live++ }
     }
 
     // Сортируем ячейки: сначала по победам (убывание), потом по поражениям
@@ -219,13 +219,13 @@ async function _buildSwissContext(seasonId: string) {
     const away = records.get(m.awayTeamId)
     if (home) {
       home.totalScored += m.homeScore
-      if (m.homePoints === 1) home.wins++
-      else home.losses++
+      if (m.homePoints === 1) { home.wins++ }
+      else { home.losses++ }
     }
     if (away) {
       away.totalScored += m.awayScore
-      if (m.awayPoints === 1) away.wins++
-      else away.losses++
+      if (m.awayPoints === 1) { away.wins++ }
+      else { away.losses++ }
     }
   }
 
@@ -396,20 +396,20 @@ export const generatePlayoffBracketAction = adminGuard(async (seasonId: string) 
       if (def.source1) {
         const sourceKey = def.source1.replace(':loser', '')
         const sourceId = slotMap.get(sourceKey)
-        if (sourceId) updateData.sourceSlot1Id = sourceId
+        if (sourceId) { updateData.sourceSlot1Id = sourceId }
       }
 
       // Резолвим source2 (откуда приходит команда 2)
       if (def.source2) {
         const sourceKey = def.source2.replace(':loser', '')
         const sourceId = slotMap.get(sourceKey)
-        if (sourceId) updateData.sourceSlot2Id = sourceId
+        if (sourceId) { updateData.sourceSlot2Id = sourceId }
       }
 
       // Резолвим loserGoesTo
       if (def.loserGoesTo) {
         const loserId = slotMap.get(def.loserGoesTo)
-        if (loserId) updateData.loserGoesToId = loserId
+        if (loserId) { updateData.loserGoesToId = loserId }
       }
 
       if (Object.keys(updateData).length > 0) {

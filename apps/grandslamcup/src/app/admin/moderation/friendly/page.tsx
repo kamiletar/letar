@@ -106,7 +106,7 @@ export default function FriendlyModerationPage() {
   }
 
   const handleReject = async () => {
-    if (!rejectTarget) return
+    if (!rejectTarget) { return }
     setProcessing(rejectTarget.id)
     try {
       const result = await rejectFriendlyRequestAction({ id: rejectTarget.id })

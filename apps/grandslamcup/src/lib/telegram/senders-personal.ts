@@ -49,13 +49,14 @@ export async function sendCoachLineupReminder(matchId: string): Promise<SendResu
 
   for (const coach of coaches) {
     const chatId = coach.player.user?.telegramChatId
-    if (!chatId) continue
+    if (!chatId) { continue }
 
     // Проверяем: заявлен ли состав этой команды?
     const lineup = await prisma.matchLineup.findFirst({
       where: { matchId, teamSeasonId: coach.teamSeasonId },
     })
-    if (lineup) continue // Состав уже заявлен — не напоминаем
+    if (lineup) { continue // Состав уже заявлен — не напоминаем
+     }
 
     const teamName = coach.teamSeason.team.name
     const dateStr = match.scheduledAt

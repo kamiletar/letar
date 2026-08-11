@@ -106,4 +106,3 @@ nx lint contract-generator
 - `@react-pdf/renderer` (peer, optional) — для React PDF
 
 ---
-

@@ -72,7 +72,7 @@ export function PlayerRatingChart({ perfs }: PlayerRatingChartProps) {
     })
   }, [perfs])
 
-  if (perfs.length < 3) return null
+  if (perfs.length < 3) { return null }
 
   const avgScore = Math.round(data.reduce((s, d) => s + d.score, 0) / data.length)
 
@@ -131,7 +131,7 @@ function ChartTooltip({
   active?: boolean
   payload?: Array<{ payload: Record<string, unknown> }>
 }) {
-  if (!active || !payload?.length) return null
+  if (!active || !payload?.length) { return null }
   const d = payload[0].payload as { match: string; score: number; text: number; delivery: number; ma: number | null }
   return (
     <Box bg="bg.panel" borderWidth="1px" borderColor="border.muted" borderRadius="md" p={3} shadow="lg" fontSize="sm">

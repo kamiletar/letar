@@ -14,7 +14,7 @@ import { sendHalfTimeResult, sendMatchAnnouncement, sendMatchResult } from './se
 /** Автопубликация анонса (при заполнении составов обеих команд) */
 export async function autoPublishAnnouncement(matchId: string): Promise<void> {
   const config = await prisma.telegramConfig.findUnique({ where: { id: 'default' } })
-  if (!config?.enabled || !config.autoAnnouncement) return
+  if (!config?.enabled || !config.autoAnnouncement) { return }
 
   try {
     await sendMatchAnnouncement(matchId)
@@ -26,7 +26,7 @@ export async function autoPublishAnnouncement(matchId: string): Promise<void> {
 /** Автопубликация итога тайма */
 export async function autoPublishHalfTime(matchId: string, half: number): Promise<void> {
   const config = await prisma.telegramConfig.findUnique({ where: { id: 'default' } })
-  if (!config?.enabled || !config.autoHalfTime) return
+  if (!config?.enabled || !config.autoHalfTime) { return }
 
   try {
     await sendHalfTimeResult(matchId, half)
@@ -38,7 +38,7 @@ export async function autoPublishHalfTime(matchId: string, half: number): Promis
 /** Автопубликация результата матча */
 export async function autoPublishResult(matchId: string): Promise<void> {
   const config = await prisma.telegramConfig.findUnique({ where: { id: 'default' } })
-  if (!config?.enabled || !config.autoResult) return
+  if (!config?.enabled || !config.autoResult) { return }
 
   try {
     await sendMatchResult(matchId)

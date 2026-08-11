@@ -73,7 +73,7 @@ export default async function CreateMatchPage() {
   // wins/losses = только FINISHED → определяет выбывших/прошедших
   const swissRecords = new Map<string, { total: number; wins: number; losses: number }>()
   const ensure = (id: string) => {
-    if (!swissRecords.has(id)) swissRecords.set(id, { total: 0, wins: 0, losses: 0 })
+    if (!swissRecords.has(id)) { swissRecords.set(id, { total: 0, wins: 0, losses: 0 }) }
     return swissRecords.get(id)!
   }
   for (const m of swissMatches) {

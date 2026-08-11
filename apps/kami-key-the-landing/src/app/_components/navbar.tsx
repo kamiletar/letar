@@ -37,7 +37,7 @@ export function Navbar() {
 
     for (const section of NAV_SECTIONS) {
       const el = document.getElementById(section.id)
-      if (!el) continue
+      if (!el) { continue }
 
       const observer = new IntersectionObserver(
         (entries) => {
@@ -54,7 +54,7 @@ export function Navbar() {
     }
 
     return () => {
-      for (const obs of observers) obs.disconnect()
+      for (const obs of observers) { obs.disconnect() }
     }
   }, [])
 

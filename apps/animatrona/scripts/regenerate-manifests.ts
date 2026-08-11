@@ -18,7 +18,7 @@ const DB_PATH = 'file:C:/Users/Kami/AppData/Roaming/@letar/animatrona/data/app.d
 /** Kubo cat — получить содержимое по CID */
 async function ipfsCat(cid: string): Promise<Buffer> {
   const res = await fetch(`${KUBO_API}/cat?arg=${cid}`, { method: 'POST' })
-  if (!res.ok) throw new Error(`cat ${cid}: ${res.status} ${res.statusText}`)
+  if (!res.ok) { throw new Error(`cat ${cid}: ${res.status} ${res.statusText}`) }
   return Buffer.from(await res.arrayBuffer())
 }
 
@@ -30,7 +30,7 @@ async function ipfsAdd(data: Buffer): Promise<string> {
     method: 'POST',
     body: formData,
   })
-  if (!res.ok) throw new Error(`add: ${res.status} ${res.statusText}`)
+  if (!res.ok) { throw new Error(`add: ${res.status} ${res.statusText}`) }
   const result = (await res.json()) as { Hash: string }
   return result.Hash
 }
@@ -84,7 +84,7 @@ async function main() {
   // Проверяем Kubo
   try {
     const idRes = await fetch(`${KUBO_API}/id`, { method: 'POST' })
-    if (!idRes.ok) throw new Error('Kubo не отвечает')
+    if (!idRes.ok) { throw new Error('Kubo не отвечает') }
     console.log('✅ Kubo работает')
   } catch {
     console.error('❌ Kubo не доступен! Запустите Animatrona Desktop.')

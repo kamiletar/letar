@@ -52,7 +52,7 @@ async function organizerGuard(matchId: string): Promise<{ error: ActionResult } 
 /** Опубликовать анонс матча в Telegram-канал города */
 export async function publishMatchAnnouncementAction(matchId: string): Promise<ActionResult> {
   const guard = await organizerGuard(matchId)
-  if ('error' in guard) return guard.error
+  if ('error' in guard) { return guard.error }
 
   const result = await sendMatchAnnouncement(matchId)
   if (!result.success) {
@@ -64,7 +64,7 @@ export async function publishMatchAnnouncementAction(matchId: string): Promise<A
 /** Опубликовать финальный результат матча в Telegram */
 export async function publishMatchResultAction(matchId: string): Promise<ActionResult> {
   const guard = await organizerGuard(matchId)
-  if ('error' in guard) return guard.error
+  if ('error' in guard) { return guard.error }
 
   const result = await sendMatchResult(matchId)
   if (!result.success) {

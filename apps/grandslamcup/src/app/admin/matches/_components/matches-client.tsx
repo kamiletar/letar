@@ -75,7 +75,7 @@ export function MatchesClient({
   const [deleteLoading, setDeleteLoading] = useState(false)
 
   async function handleDelete() {
-    if (!deleteTarget) return
+    if (!deleteTarget) { return }
     setDeleteLoading(true)
     setDeleteError(null)
     const res = await deleteMatchAction(deleteTarget.id)

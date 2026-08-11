@@ -21,7 +21,7 @@
 // (список выводится в консоль). Годится для ручного прогона и для CI/pre-commit —
 // подключение в обязательный хук оставлено на усмотрение пользователя.
 
-import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import ts from 'typescript'
@@ -51,12 +51,12 @@ function collectLibSubpaths() {
       continue // библиотека без package.json (генерируемая/служебная папка) — пропускаем
     }
     const exportsField = pkg.exports
-    if (!exportsField || typeof exportsField !== 'object') continue
+    if (!exportsField || typeof exportsField !== 'object') { continue }
 
     const pkgAlias = pkg.name ?? `@letar/${libName}`
     const subpaths = new Set()
     for (const exportKey of Object.keys(exportsField)) {
-      if (exportKey === './package.json') continue
+      if (exportKey === './package.json') { continue }
       const alias = exportKey === '.' ? pkgAlias : `${pkgAlias}${exportKey.slice(1)}`
       subpaths.add(alias)
     }
@@ -72,7 +72,7 @@ function collectLibSubpaths() {
 
 function findTsconfigs(dir, depth) {
   const found = []
-  if (depth < 0) return found
+  if (depth < 0) { return found }
   let entries
   try {
     entries = readdirSync(dir)
@@ -104,9 +104,9 @@ function findTsconfigs(dir, depth) {
 function readTsconfigPaths(tsconfigPath) {
   const text = readFileSync(tsconfigPath, 'utf8')
   const result = ts.parseConfigFileTextToJson(tsconfigPath, text)
-  if (result.error || !result.config) return null
+  if (result.error || !result.config) { return null }
   const paths = result.config.compilerOptions?.paths ?? result.config.paths
-  if (!paths || typeof paths !== 'object') return null
+  if (!paths || typeof paths !== 'object') { return null }
   return paths
 }
 
@@ -122,7 +122,7 @@ function main() {
 
   for (const tsconfigPath of tsconfigFiles) {
     const paths = readTsconfigPaths(tsconfigPath)
-    if (!paths) continue
+    if (!paths) { continue }
 
     const pathKeys = new Set(Object.keys(paths))
 
@@ -130,7 +130,7 @@ function main() {
       const referencesLib = [...pathKeys].some(
         (key) => key === pkgAlias || key.startsWith(`${pkgAlias}/`),
       )
-      if (!referencesLib) continue
+      if (!referencesLib) { continue }
 
       checkedConsumers++
       const missing = [...subpaths].filter((alias) => !pathKeys.has(alias)).sort()
@@ -153,7 +153,7 @@ function main() {
     console.log(`${rel(tsconfigPath)}`)
     console.log(`  библиотека: ${pkgAlias}`)
     console.log(`  не хватает подпутей (${missing.length}):`)
-    for (const alias of missing) console.log(`    - ${alias}`)
+    for (const alias of missing) { console.log(`    - ${alias}`) }
     console.log('')
   }
 

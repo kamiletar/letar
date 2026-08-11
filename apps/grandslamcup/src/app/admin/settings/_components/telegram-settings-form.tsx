@@ -101,7 +101,7 @@ export function TelegramSettingsForm({ initialConfig }: TelegramSettingsFormProp
         toaster.success({ title: 'Webhook установлен', description: result.url })
         // Обновляем информацию
         const info = await getWebhookInfoAction()
-        if (info.success) setWebhookInfo(info.info)
+        if (info.success) { setWebhookInfo(info.info) }
       } else {
         toaster.error({ title: result.error ?? 'Ошибка установки webhook' })
       }

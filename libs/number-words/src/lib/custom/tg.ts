@@ -10,8 +10,8 @@ const HUNDREDS_PREFIX = ['', 'сад', 'дусад', 'сесад', 'чорсад
 
 /** Кардинальное числительное (таджикский) */
 export function cardinal(n: number): string {
-  if (n === 0) return 'сифр'
-  if (n < 0) return `минус ${cardinal(-n)}`
+  if (n === 0) { return 'сифр' }
+  if (n < 0) { return `минус ${cardinal(-n)}` }
 
   const parts: string[] = []
 
@@ -60,9 +60,9 @@ export function cardinal(n: number): string {
  * Исключения: якум, дуюм, сеюм.
  */
 export function ordinal(n: number): string {
-  if (n === 1) return 'якум'
-  if (n === 2) return 'дуюм'
-  if (n === 3) return 'сеюм'
+  if (n === 1) { return 'якум' }
+  if (n === 2) { return 'дуюм' }
+  if (n === 3) { return 'сеюм' }
 
   const card = cardinal(n)
   const lastChar = card.at(-1) ?? ''

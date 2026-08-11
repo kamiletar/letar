@@ -27,17 +27,17 @@ const CreatePoemSchema = z
 
 export async function createPoemAction(input: unknown) {
   const auth = await requirePoetAction()
-  if (!auth.success) return { error: auth.error }
+  if (!auth.success) { return { error: auth.error } }
 
   const parsed = CreatePoemSchema.safeParse(input)
-  if (!parsed.success) return { error: 'Проверьте заполнение формы' }
+  if (!parsed.success) { return { error: 'Проверьте заполнение формы' } }
 
   const { title, text, coverImage, published } = parsed.data
 
   // Генерация slug из названия
   let slug = transliterate(title)
   const existing = await prisma.poem.findUnique({ where: { slug } })
-  if (existing) slug = `${slug}-${Date.now().toString(36)}`
+  if (existing) { slug = `${slug}-${Date.now().toString(36)}` }
 
   try {
     await prisma.poem.create({
@@ -73,10 +73,10 @@ const UpdatePoemSchema = z
 
 export async function updatePoemAction(input: unknown) {
   const auth = await requirePoetAction()
-  if (!auth.success) return { error: auth.error }
+  if (!auth.success) { return { error: auth.error } }
 
   const parsed = UpdatePoemSchema.safeParse(input)
-  if (!parsed.success) return { error: 'Проверьте заполнение формы' }
+  if (!parsed.success) { return { error: 'Проверьте заполнение формы' } }
 
   const { id, title, text, coverImage, published } = parsed.data
 
@@ -86,13 +86,13 @@ export async function updatePoemAction(input: unknown) {
     select: { playerId: true },
   })
 
-  if (!poem) return { error: 'Стихотворение не найдено' }
-  if (poem.playerId !== auth.poet.playerId) return { error: 'Нет прав на редактирование' }
+  if (!poem) { return { error: 'Стихотворение не найдено' } }
+  if (poem.playerId !== auth.poet.playerId) { return { error: 'Нет прав на редактирование' } }
 
   // Обновление slug при изменении названия
   let slug = transliterate(title)
   const existingSlug = await prisma.poem.findUnique({ where: { slug } })
-  if (existingSlug && existingSlug.id !== id) slug = `${slug}-${Date.now().toString(36)}`
+  if (existingSlug && existingSlug.id !== id) { slug = `${slug}-${Date.now().toString(36)}` }
 
   try {
     await prisma.poem.update({
@@ -120,10 +120,10 @@ const DeletePoemSchema = z.object({ id: z.string().min(1) }).strip()
 
 export async function deletePoemAction(input: unknown) {
   const auth = await requirePoetAction()
-  if (!auth.success) return { error: auth.error }
+  if (!auth.success) { return { error: auth.error } }
 
   const parsed = DeletePoemSchema.safeParse(input)
-  if (!parsed.success) return { error: 'Некорректные данные' }
+  if (!parsed.success) { return { error: 'Некорректные данные' } }
 
   // Проверяем принадлежность
   const poem = await prisma.poem.findUnique({
@@ -131,8 +131,8 @@ export async function deletePoemAction(input: unknown) {
     select: { playerId: true },
   })
 
-  if (!poem) return { error: 'Стихотворение не найдено' }
-  if (poem.playerId !== auth.poet.playerId) return { error: 'Нет прав на удаление' }
+  if (!poem) { return { error: 'Стихотворение не найдено' } }
+  if (poem.playerId !== auth.poet.playerId) { return { error: 'Нет прав на удаление' } }
 
   try {
     await prisma.poem.delete({ where: { id: parsed.data.id } })

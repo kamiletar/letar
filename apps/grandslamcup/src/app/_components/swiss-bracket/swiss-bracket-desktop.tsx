@@ -54,13 +54,13 @@ export function SwissBracketDesktop({ data, citySlug }: SwissBracketDesktopProps
 
   // Вычисляем позиции коннекторов после рендеринга
   const updateConnectors = useCallback(() => {
-    if (!gridRef.current) return
+    if (!gridRef.current) { return }
 
     const lines: ConnectorLine[] = []
     for (const conn of SWISS_16_CONNECTORS) {
       const fromEl = gridRef.current.querySelector(`[data-wl="${conn.fromWl}"]`)
       const toEl = gridRef.current.querySelector(`[data-wl="${conn.toWl}"]`)
-      if (!fromEl || !toEl) continue
+      if (!fromEl || !toEl) { continue }
 
       const gridRect = gridRef.current.getBoundingClientRect()
       const fromRect = fromEl.getBoundingClientRect()

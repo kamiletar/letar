@@ -114,7 +114,7 @@ export function LibraryScreen({ navigation }: LibraryScreenProps) {
         getPosterMap(),
       ])
       setAnime(libraryData)
-      if (!searchQuery) setLastWatched(lastWatchedData)
+      if (!searchQuery) { setLastWatched(lastWatchedData) }
       setPosterMap(cachedPosters)
 
       // Фоновое кэширование постеров (не блокирует UI)
@@ -207,7 +207,7 @@ export function LibraryScreen({ navigation }: LibraryScreenProps) {
 
   // Группировка по франшизам
   const franchiseGroups = useMemo(() => {
-    if (viewMode !== 'franchise') return []
+    if (viewMode !== 'franchise') { return [] }
     return groupByFranchise(filteredAnime)
   }, [filteredAnime, viewMode])
 

@@ -52,19 +52,19 @@ function isInCuratedRange(cp: number): boolean {
 function parseLine(line: string): SymbolEntry | null {
   // Убрать BOM если есть
   const clean = line.replace(/^\uFEFF/, '').trim()
-  if (!clean) return null
+  if (!clean) { return null }
 
   // Формат: XXXX: Название[: синонимы]
   const colonIndex = clean.indexOf(':')
-  if (colonIndex === -1) return null
+  if (colonIndex === -1) { return null }
 
   const codepoint = clean.slice(0, colonIndex).trim()
 
   // Валидация codepoint (4-5 hex символов)
-  if (!/^[\dA-Fa-f]{4,5}$/.test(codepoint)) return null
+  if (!/^[\dA-Fa-f]{4,5}$/.test(codepoint)) { return null }
 
   const rest = clean.slice(colonIndex + 1).trim()
-  if (!rest) return null
+  if (!rest) { return null }
 
   // Разделить название и синонимы по второму ":"
   const secondColon = rest.indexOf(':')
@@ -81,7 +81,7 @@ function parseLine(line: string): SymbolEntry | null {
     name = rest
   }
 
-  if (!name) return null
+  if (!name) { return null }
 
   const entry: SymbolEntry = { c: codepoint.toUpperCase(), n: name }
   if (synonyms) {
@@ -116,17 +116,17 @@ for (const file of files) {
 
   for (const line of lines) {
     const entry = parseLine(line)
-    if (!entry) continue
+    if (!entry) { continue }
     totalLines++
 
     const cp = parseInt(entry.c, 16)
     const inCurated = isInCuratedRange(cp)
     const hasSynonyms = !!entry.s
 
-    if (hasSynonyms) withSynonyms++
+    if (hasSynonyms) { withSynonyms++ }
 
     // Пропустить контрольные символы (0000-001F, 007F, 0080-009F)
-    if (cp <= 0x1f || cp === 0x7f || (cp >= 0x80 && cp <= 0x9f)) continue
+    if (cp <= 0x1f || cp === 0x7f || (cp >= 0x80 && cp <= 0x9f)) { continue }
 
     if (inCurated || hasSynonyms) {
       symbols.set(entry.c, entry)

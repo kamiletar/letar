@@ -15,7 +15,8 @@ const WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET
 
 /** Проверка секрета webhook */
 function validateSecret(request: Request): boolean {
-  if (!WEBHOOK_SECRET) return true // Если секрет не настроен — пропускаем
+  if (!WEBHOOK_SECRET) { return true // Если секрет не настроен — пропускаем
+   }
   const secret = request.headers.get('X-Telegram-Bot-Api-Secret-Token')
   return secret === WEBHOOK_SECRET
 }
@@ -142,7 +143,7 @@ async function handleReactionCount(reactionCount: {
 
   // Обновляем реакции (upsert каждую)
   for (const r of reactionCount.reactions) {
-    if (r.type.type !== 'emoji' || !r.type.emoji) continue
+    if (r.type.type !== 'emoji' || !r.type.emoji) { continue }
 
     await prisma.telegramReaction.upsert({
       where: {
