@@ -4,7 +4,6 @@
   "projectType": "application",
   "sourceRoot": "apps/dsperevod-e2e/src",
   "tags": ["type:e2e", "scope:dsperevod", "owner:commercial"],
-  "implicitDependencies": ["dsperevod"],
   "targets": {
     "format": {
       "executor": "nx:run-commands",

@@ -4,7 +4,6 @@
   "projectType": "application",
   "sourceRoot": "apps/svoichuzhie-e2e/src",
   "tags": ["type:e2e", "scope:svoichuzhie", "owner:letar"],
-  "implicitDependencies": ["svoichuzhie"],
   "targets": {
     "format": {
       "executor": "nx:run-commands",
