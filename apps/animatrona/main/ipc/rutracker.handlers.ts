@@ -52,7 +52,7 @@ async function fetchRutrackerPage(url: string): Promise<string> {
   } catch (err) {
     const elapsed = Date.now() - startMs
     log.error('Ошибка загрузки страницы', { url, error: String(err), elapsed })
-    throw new Error(await describeNetErrorWithDiagnostics(err, url))
+    throw new Error(await describeNetErrorWithDiagnostics(err, url), { cause: err })
   }
 }
 

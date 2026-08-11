@@ -1302,7 +1302,7 @@ async function buildImagesEntriesWithRecovery(
     entity: AnimeManifestStudio | AnimeManifestPerson | AnimeManifestCharacter,
   ): Promise<{ category: 'studios' | 'persons' | 'characters'; entity: typeof entity; finalCid: string | null }> {
     const oldCid = entity.imageCid ?? null
-    let finalCid: string | null = null
+    let finalCid: string | null
 
     if (!oldCid) {
       // imageCid нет — первичная загрузка с Shikimori если есть imageUrl

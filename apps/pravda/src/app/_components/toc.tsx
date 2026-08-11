@@ -48,7 +48,7 @@ export function TableOfContents() {
     const elements = Array.from(document.querySelectorAll('h2[id], h3[id], [id^="section-"], [id^="chapter-"]'))
 
     const items: TocItem[] = elements.map((el) => {
-      let text = ''
+      let text: string
 
       // Для Section/Chapter ищем заголовок внутри
       if (el.id.startsWith('section-') || el.id.startsWith('chapter-')) {

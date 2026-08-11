@@ -247,7 +247,7 @@ async function executeQuery<T>(query: string, variables: Record<string, unknown>
 
         // TypeError: terminated — приложение закрывается, не фоллбэчить
         if (error instanceof TypeError && error.message === 'terminated') {
-          throw new Error('Соединение прервано')
+          throw new Error('Соединение прервано', { cause: error })
         }
 
         // Сетевая ошибка или таймаут — пробуем следующий endpoint

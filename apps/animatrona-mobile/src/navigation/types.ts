@@ -68,6 +68,9 @@ export type FranchiseScreenProps = NativeStackScreenProps<RootStackParamList, 'F
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace ReactNavigation {
+    // Пустой interface — обязательная форма для module augmentation в React Navigation,
+    // type alias здесь не работает (нужно declaration merging).
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-empty-interface
     interface RootParamList extends RootStackParamList {}
   }
 }

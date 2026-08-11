@@ -67,11 +67,11 @@ export function createApiClient(getStore: GetConnectionStore) {
     } catch (error) {
       if (error instanceof Error) {
         if (error.message.includes('Network request failed')) {
-          throw new Error('Нет соединения с сервером')
+          throw new Error('Нет соединения с сервером', { cause: error })
         }
         throw error
       }
-      throw new Error('Неизвестная ошибка')
+      throw new Error('Неизвестная ошибка', { cause: error })
     }
   }
 

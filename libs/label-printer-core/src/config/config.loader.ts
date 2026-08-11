@@ -77,11 +77,13 @@ export class ConfigLoader {
       return validatedConfig
     } catch (error) {
       if (error instanceof SyntaxError) {
-        throw new Error(`Invalid JSON in configuration file: ${finalConfigPath}\n` + `Error: ${error.message}`)
+        throw new Error(`Invalid JSON in configuration file: ${finalConfigPath}\n` + `Error: ${error.message}`, {
+          cause: error,
+        })
       }
 
       if (error instanceof Error && error.name === 'ZodError') {
-        throw new Error(`Configuration validation failed:\n${error.message}`)
+        throw new Error(`Configuration validation failed:\n${error.message}`, { cause: error })
       }
 
       throw error

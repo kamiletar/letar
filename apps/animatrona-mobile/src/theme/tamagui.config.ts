@@ -173,6 +173,8 @@ export type AppConfig = typeof config
 
 // Регистрация типа конфига для типизации Tamagui
 declare module '@tamagui/core' {
+  // Пустой interface — обязательная форма для module augmentation (Tamagui), type alias не подходит.
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-empty-interface
   interface TamaguiCustomConfig extends AppConfig {}
 }
 

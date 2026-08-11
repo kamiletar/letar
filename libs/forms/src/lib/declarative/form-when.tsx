@@ -210,7 +210,7 @@ export function FormWhen<TValue = unknown>({
   return (
     <form.Subscribe selector={selector}>
       {(value: TValue) => {
-        let shouldRender = false
+        let shouldRender: boolean
 
         if (condition !== undefined) {
           // Custom condition function

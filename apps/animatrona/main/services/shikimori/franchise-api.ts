@@ -105,7 +105,7 @@ export async function getFranchiseGraph(shikimoriId: number): Promise<ShikimoriF
     return data
   } catch (error) {
     log.error('Error fetching franchise graph', { shikimoriId, error })
-    throw new Error(await describeNetErrorWithDiagnostics(error, url))
+    throw new Error(await describeNetErrorWithDiagnostics(error, url), { cause: error })
   }
 }
 

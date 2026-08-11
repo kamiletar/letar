@@ -85,7 +85,9 @@ export async function validateKuboBinary(kuboBin: string): Promise<void> {
     log.info('Kubo бинарник найден', { size: stat.size })
   } catch (err) {
     log.error('Kubo бинарник не найден', { kuboBin, error: String(err) })
-    throw new Error(`Kubo бинарник не найден: ${kuboBin}\n` + 'Запустите: npx tsx scripts/download-kubo.ts')
+    throw new Error(`Kubo бинарник не найден: ${kuboBin}\n` + 'Запустите: npx tsx scripts/download-kubo.ts', {
+      cause: err,
+    })
   }
 }
 

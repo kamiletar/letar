@@ -262,6 +262,7 @@ export class ImportService {
               `Pre-encode эпизода #${file.episodeNumber} не удался: ${
                 err instanceof Error ? err.message : String(err)
               }`,
+              { cause: err },
             )
           }
         }

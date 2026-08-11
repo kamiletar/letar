@@ -160,7 +160,7 @@ export class BarcodeService {
       })
       return await image.getBuffer('image/png')
     } catch (error) {
-      throw new Error(`Failed to generate DataMatrix: ${error}`)
+      throw new Error(`Failed to generate DataMatrix: ${error}`, { cause: error })
     }
   }
 
@@ -187,7 +187,7 @@ export class BarcodeService {
 
       return buffer
     } catch (error) {
-      throw new Error(`Failed to generate GTIN barcode: ${error}`)
+      throw new Error(`Failed to generate GTIN barcode: ${error}`, { cause: error })
     }
   }
 }

@@ -39,7 +39,7 @@ export function getLocalIP(): string | null {
       }
 
       const ip = info.address
-      let priority = 0
+      let priority: number
 
       // Определяем приоритет по типу адреса
       if (ip.startsWith('192.168.')) {
@@ -147,7 +147,7 @@ export async function generateQRCode(url: string): Promise<string> {
     return dataUrl
   } catch (error) {
     log.error('Failed to generate QR code', { error: String(error) })
-    throw new Error('Failed to generate QR code')
+    throw new Error('Failed to generate QR code', { cause: error })
   }
 }
 

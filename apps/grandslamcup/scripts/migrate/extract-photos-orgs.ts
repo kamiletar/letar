@@ -192,7 +192,7 @@ function extractTeamPhotos(messages: TgMessage[]): TeamPhoto[] {
     // Посты с командами
     if (/^(команда |знакомьтесь|играющий тренер|неиграющий тренер|тренер команды)/im.test(text)) {
       // Извлечь имя команды или тренера
-      let label = ''
+      let label: string
       const teamMatch = text.match(/[Кк]оманда\s*[«""]?([^»""]+?)[»""]?\s*[\n.!]/i)
       const trainerMatch = text.match(
         /(?:играющий |неиграющий )?тренер(?:\s+команды)?\s*[«""]?([^»""]+?)[»""]?\s*[–—-]\s*(.+?)(?:\.|$|\n)/i,

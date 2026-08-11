@@ -155,7 +155,7 @@ export async function upsertAnimeByShikimoriId(data: Prisma.AnimeUncheckedCreate
     console.error('[upsertAnimeByShikimoriId] Error:', error)
     // Бросаем ошибку с понятным сообщением
     const message = error instanceof Error ? error.message : 'Неизвестная ошибка при создании аниме'
-    throw new Error(`Ошибка создания аниме: ${message}`)
+    throw new Error(`Ошибка создания аниме: ${message}`, { cause: error })
   }
 }
 

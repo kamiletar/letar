@@ -100,7 +100,7 @@ export async function getAnimeRestData(shikimoriId: number): Promise<ShikimoriAn
     return data
   } catch (error) {
     log.error('Error fetching anime REST data', { shikimoriId, error })
-    throw new Error(await describeNetErrorWithDiagnostics(error, url))
+    throw new Error(await describeNetErrorWithDiagnostics(error, url), { cause: error })
   }
 }
 
