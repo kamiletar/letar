@@ -40,6 +40,7 @@ import {
   FieldTableEditor,
   FieldTags,
   FieldTextarea,
+  FieldTime,
   FieldYesNo,
   FormSteps,
 } from '@letar/forms-shadcn'
@@ -111,6 +112,7 @@ interface DemoFormValues {
   newsletterConsent: boolean | undefined
   stock: number | undefined
   strongPassword: string
+  openingTime: string
 }
 
 const defaultValues: DemoFormValues = {
@@ -151,6 +153,7 @@ const defaultValues: DemoFormValues = {
   newsletterConsent: undefined,
   stock: 10,
   strongPassword: '',
+  openingTime: '09:00',
 }
 
 export default function HomePage() {
@@ -158,7 +161,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Form Develop App (shadcn)</h1>
       <p className="text-muted-foreground mt-2 text-sm">
-        Песочница для разработки @letar/forms-shadcn — 39 полей, Фаза 7.3 Шаг 5+.
+        Песочница для разработки @letar/forms-shadcn — 40 полей, Фаза 7.3 Шаг 5+.
       </p>
 
       <DemoForm<DemoFormValues>
@@ -254,6 +257,7 @@ export default function HomePage() {
         <FieldYesNo name="newsletterConsent" label="Подписаться на рассылку?" variant="thumbs" />
         <FieldNumberInput name="stock" label="Остаток на складе" min={0} max={999} />
         <FieldPasswordStrength name="strongPassword" label="Новый пароль" />
+        <FieldTime name="openingTime" label="Время открытия" min="06:00" max="23:00" />
 
         <button
           type="submit"

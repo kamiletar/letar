@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (2026-08-11, продолжение 4)
+
+- Демо `FieldTime` (`@letar/forms-shadcn` 0.22.0).
+
 ## Unreleased (2026-08-11, продолжение 3)
 
 - Демо `FieldPasswordStrength` (`@letar/forms-shadcn` 0.21.0).
