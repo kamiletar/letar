@@ -63,7 +63,9 @@ ECONNREFUSED/ERR_DLOPEN_FAILED при зелёном билде ·
 [turbopack-private-submodule-root](/.claude/docs/turbopack-private-submodule-root.md) «Could not find
 the Next.js package» ·
 [nextjs-rsc-aspectratio-children-only](/.claude/docs/nextjs-rsc-aspectratio-children-only.md) ⚠️
-`AspectRatio` в Server Component → 500, но страница визуально ОК
+`AspectRatio` в Server Component → 500, но страница визуально ОК ·
+[nextjs-public-env-build-time-inlining](/.claude/docs/nextjs-public-env-build-time-inlining.md) ⚠️
+`NEXT_PUBLIC_*` литералом в `docker-compose.yml` не попадает в клиентский бандл — нужен `.env.docker`
 
 **Библиотеки и публикация:** [lib-entry-points](/.claude/docs/lib-entry-points.md) подпути
 `./server`/`./client`, границы, ESLint-ловушки ·
