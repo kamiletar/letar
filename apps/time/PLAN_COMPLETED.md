@@ -1,5 +1,24 @@
 # Time — Выполненные задачи
 
+## Подключение к GlitchTip (2026-08-11)
+
+Через новый генератор `nx g @letar/generators:glitchtip-integrate time` (PLAN-INFRA.md §70 п.8) —
+первый прогон генератора на приложении с реальным staging-контуром
+(`docker-compose.staging.yml` + `.env.staging.example`).
+
+- [x] `src/instrumentation.ts`/`instrumentation-client.ts` — созданы с нуля (файлов не было)
+- [x] `package.json` — `@letar/glitchtip` в `dependencies` и `nx.implicitDependencies`
+- [x] `tsconfig.json` — `paths` на `@letar/glitchtip`, `/client`, `/server`
+- [x] `.env.staging.example` — 4 переменные добавлены (значение `GLITCHTIP_ENVIRONMENT=staging`,
+      генератор различает production/staging по тому, какой env-файл дополняет)
+- [x] `docker-compose.production.yml` и `docker-compose.staging.yml` — оба через `${VAR}` в
+      `services.app.environment`, не литералом
+- [x] `nx typecheck:tsgo time && nx lint time` — зелёные (pre-existing lint-ошибка в
+      `src/lib/auth.ts:23` не относится к этой задаче, не трогалась)
+
+**Не завершено:** GlitchTip-проект `time` ещё не создан в UI, `GLITCHTIP_DSN` пустой — деплоить
+рано, см. `infra/glitchtip/README.md`.
+
 ## 2026-08-08 (техдолг: latent-баг vitest alias для @letar/seo)
 
 `vitest.config.ts` резолвил `@` через `resolve.alias`, но не имел записи для `@letar/seo` — путь

@@ -15,6 +15,10 @@
 - [x] Better Auth + OIDC (auth.letar.best)
 - [x] ZenStack ORM (schema.zmodel, 3 модели: User, NotificationSubscription, NotificationLog)
 - [x] Подключение @letar/auth и @letar/email
+- [ ] **GlitchTip** — код подключён (2026-08-11, `nx g @letar/generators:glitchtip-integrate
+      time`, детали в `PLAN_COMPLETED.md`), но проект `time` ещё не создан в
+      `errors.s3.letar.best`. Дальше: создать проект → вписать DSN в `.env.docker`/`.env.staging`
+      → `sops --encrypt` → deploy-request BlackCove.
 
 ## Функциональность
 
