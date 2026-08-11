@@ -1,5 +1,38 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-08-12 — Фаза 7.8 → Поток 1+2: Reka UI-скин для Vue + гайды по портированию
+
+Задача Ками через координатора `QuietRidge` (тред `forms-phase7-3-shadcn`, письмо #61) —
+продолжение письма #58 (Vue-пруф границы, `libs/forms-vue`): полноценный Reka UI-скин + гайд по
+портированию на свой фреймворк/стили.
+
+**Поток 1 — `libs/forms-vue-shadcn` (`@letar/forms-vue-shadcn` 0.1.0).** Vue-аналог
+`@letar/forms-shadcn`: `UIKit`-контракт из `forms-core` реализован на Reka UI (бывший Radix Vue) +
+Tailwind + cva, 6 полей (Input/Number/Checkbox/Textarea/Select/Combobox).
+
+- **Контракт не потребовал изменений.** `UIKitCorePrimitives<TNode>`/`UIKitExtendedPrimitives<TNode>`
+  в `forms-core` уже были обобщены (`TNode = unknown`) — инстанцированы как
+  `UIKitCorePrimitives<UINode>`, `UINode = VNode | string | null` (единственная типовая деталь,
+  специфичная Vue: `VNode`, в отличие от React-овского `ReactNode`, не включает `string`).
+- Примитивы (`rekaUIKit`) — обычные функции `(props) => VNode`, не `defineComponent`: контракт
+  `(props) => TNode` совпадает буквально, без обёртки под компонент.
+- Композиционный слой (`createFieldPrimitives`) — не копия React-версии: ошибку рендера поля ловит
+  `onErrorCaptured` в `setup()`, не классовый `ErrorBoundary` (паттерна которого в Vue нет).
+  `FieldSelect`/`FieldCombobox` (доп. проп `options`, вне контракта фабрики) собраны напрямую по
+  `useAppFormContext`.
+- Тесты — vitest + `@vue/test-utils`, 5 сценариев. Полифиллы `ResizeObserver`/
+  `hasPointerCapture`/`scrollIntoView` — стандартный минимум для Radix/Reka-компонентов в jsdom.
+- Демо — минимальный dev-харнесс на голом Vite (`nx run @letar/forms-vue-shadcn:demo`, порт 5173,
+  `.claude/launch.json`), не Nx-приложение. Продакшн-сборка чистая (2322 модуля).
+
+**Поток 2 — гайды в `apps/form-docs`** (`content/docs/guides/custom-uikit.mdx` +
+`porting-framework.mdx`, оба EN+RU). Первый — как реализовать `UIKit`-контракт голым HTML/CSS без
+Chakra/shadcn. Второй — честный процессный разбор переноса на Vue (решения из Потока 1 как есть,
+включая то, что не перенеслось 1:1 — error boundary, обход `createField` для Select/Combobox).
+Проверено в Browser pane — все 4 страницы рендерятся.
+
+Коммиты: `a5c494bf` (forms-vue-shadcn), `ff993569` (гайды form-docs), `f8aa4cb8` (PLAN.md).
+
 ## 2026-08-11 (2) — Фаза 7.6: `llms.txt` + фикс `form-mcp`/`docs/fields.md`
 
 Задача координатора `QuietRidge` (тред `forms-phase7-3-shadcn`, msg #54), два независимых потока.
