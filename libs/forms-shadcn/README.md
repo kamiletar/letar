@@ -39,6 +39,7 @@ Chakra-провайдера, а не отдельный статический C
 import {
   FieldAddress,
   FieldAutocomplete,
+  FieldCalculated,
   FieldCascadingSelect,
   FieldCheckbox,
   FieldCheckboxCard,
@@ -83,7 +84,7 @@ import {
 } from '@letar/forms-shadcn'
 ```
 
-## Поля (beta — 46 из 56, продолжаем к паритету с `@letar/forms`)
+## Поля (beta — 47 из 56, продолжаем к паритету с `@letar/forms`)
 
 Плюс `FormSteps` и `FieldTableEditor` — compound-компоненты форм-уровня, не `createField()`-поля
 (см. разделы ниже).
@@ -136,6 +137,7 @@ import {
 | `FieldLikert`           | обычные кнопки, без Radix                           |
 | `FieldMatrixChoice`     | native `<table>`, без Radix                         |
 | `FieldDataGrid`         | `@tanstack/react-table` (lazy), native `<table>`    |
+| `FieldCalculated`       | без DOM-примитива, только текст (readOnly)          |
 
 `FieldCombobox` — упрощённая beta-версия: только статичные `options`, фильтрация по вхождению
 подстроки в `label`. Без `useQuery` (async-поиск) и группировки — Chakra-версия их поддерживает,
@@ -210,6 +212,12 @@ Chakra-версии без изменений домена (extensions, `onUpdat
 же принцип, что у `FieldTableEditor`), без resize/drag-reorder колонок, без auto-резолва колонок
 из schema (`columns` обязателен явно), тип редактируемой ячейки определяется рантайм-типом
 значения (`typeof`), не Zod-схемой.
+
+`FieldCalculated` — вычисляемое поле формы, значение readonly (пересчитывается автоматически из
+других полей и синхронизируется в form state через `field.handleChange`). `useComputedValue`
+(`useSyncExternalStore` на `form.store` + защита от циклических зависимостей) — framework-free,
+портирован из Chakra-версии дословно, общий для обоих скинов. `useDebounce` переиспользован из
+`@letar/forms-react` (был уже публичным экспортом).
 
 `FieldYesNo` — два кликабельных блока (`role="radio"` в `role="radiogroup"`), тот же подход, что
 `FieldRadioCard`/`FieldListbox`; портирован из Chakra-версии без изменений логики, значение —

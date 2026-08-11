@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.29.0] - 2026-08-11
+
+### Added
+
+- **`FieldCalculated`** — вычисляемое поле (readonly, автопересчёт из других полей формы).
+  `useComputedValue` (framework-free) портирован из Chakra-версии дословно, `useDebounce`
+  переиспользован из уже публичного экспорта `@letar/forms-react`. Паритет с `@letar/forms`: 47
+  из 56.
+
 ## [0.28.0] - 2026-08-11
 
 ### Added
