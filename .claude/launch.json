@@ -2,6 +2,13 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "forms-vue-shadcn-demo",
+      "runtimeExecutable": "bunx",
+      "runtimeArgs": ["vite", "demo", "--config", "demo/vite.config.ts", "--port", "5173"],
+      "cwd": "libs/forms-vue-shadcn",
+      "port": 5173
+    },
+    {
       "name": "animatrona-renderer",
       "runtimeExecutable": "bun",
       "runtimeArgs": ["x", "next", "dev", "-p", "3007"],

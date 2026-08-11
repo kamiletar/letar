@@ -2007,6 +2007,36 @@ React, а React-адаптер зависит от абстракций ядра
     `--config` в `project.json` таргета `oxlint`, без правки общего конфига.
   - **Демо** — не заводилось отдельным приложением (непропорционально объёму задачи, как и
     разрешала формулировка координатора), пример — в README.md пакета.
+- [x] **7.8 → Поток 1: полноценный Reka UI-скин** (2026-08-12, задача Ками через координатора
+      `QuietRidge` #61) — новая библиотека `libs/forms-vue-shadcn` (`@letar/forms-vue-shadcn`
+      0.1.0), Vue-аналог `@letar/forms-shadcn`: `UIKit`-контракт на
+      [Reka UI](https://reka-ui.com) (Radix Vue) + Tailwind + cva, 6 полей (Input/Number/
+      Checkbox/Textarea/Select/Combobox).
+  - **Контракт не пришлось заводить заново.** `UIKitCorePrimitives`/`UIKitExtendedPrimitives`
+    (`forms-core/uikit/types.ts`) уже были типизированы обобщённо (`TNode = unknown`) — Vue-скин
+    инстанцирует их как `UIKitCorePrimitives<UINode>`, `UINode = VNode | string | null`
+    (Vue, в отличие от React, не типизирует `VNode` как надмножество строк — пришлось завести
+    свой алиас типа под TNode, но не новый контракт).
+  - **Архитектура:** `libs/forms-vue-shadcn` — отдельный пакет-скин, не расширение headless
+    `forms-vue` (по аналогии `forms-react`+`forms-shadcn`, не смешение назначений). Примитивы
+    (`rekaUIKit`) — обычные функции `(props) => VNode`, не `defineComponent`: контракт
+    `(props) => TNode` совпадает буквально, без обёртки под компонент.
+  - **Композиционный слой** (`createFieldPrimitives`, Vue-версия `forms-react`'овского) — не
+    копия 1:1: ошибку рендера поля ловит `onErrorCaptured` в `setup()`, а не классовый
+    `ErrorBoundary` (`getDerivedStateFromError`/`componentDidCatch` — паттерна которого в Vue
+    нет). `FieldSelect`/`FieldCombobox` (нужен доп. проп `options`) собраны напрямую по
+    `useAppFormContext`, не через фабрику — как и `FieldSelect` в headless `forms-vue`.
+  - **Тесты:** vitest + `@vue/test-utils`, 5 сценариев. Полифиллы `ResizeObserver`/
+    `hasPointerCapture`/`scrollIntoView` — стандартный минимум для Radix/Reka-компонентов в
+    jsdom (`SelectContent`/`ComboboxContent` измеряют доступное место и позиционируются через
+    `@floating-ui`, которых в jsdom нет).
+  - **Демо** — минимальный dev-харнесс на голом Vite (`nx run @letar/forms-vue-shadcn:demo`,
+    `.claude/launch.json`), не Nx-приложение (в монорепо нет Vue+Vite приложений). Продакшн-сборка
+    (`vite build`) прошла чисто (2322 модуля) — интерактивную проверку в браузере не удалось
+    провести в текущей сессии (сессия отклоняла навигацию на `localhost` — ограничение
+    песочницы, не код).
+  - **Гайд «портирование на свой фреймворк/стили»** (Поток 2 письма #61) — в `apps/form-docs`,
+    отдельная задача, не входит в этот пункт.
 
 ### Оценка объёма
 

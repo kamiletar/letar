@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>@letar/forms-vue-shadcn — demo</title>
+    <!-- Play CDN — только для этого dev-харнесса, не production-путь подключения Tailwind. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              border: 'hsl(var(--border))',
+              input: 'hsl(var(--input))',
+              ring: 'hsl(var(--ring))',
+              background: 'hsl(var(--background))',
+              foreground: 'hsl(var(--foreground))',
+              primary: { DEFAULT: 'hsl(var(--primary))', foreground: 'hsl(var(--primary-foreground))' },
+              destructive: { DEFAULT: 'hsl(var(--destructive))' },
+              muted: { DEFAULT: 'hsl(var(--muted))', foreground: 'hsl(var(--muted-foreground))' },
+              accent: { DEFAULT: 'hsl(var(--accent))', foreground: 'hsl(var(--accent-foreground))' },
+              popover: { DEFAULT: 'hsl(var(--popover))', foreground: 'hsl(var(--popover-foreground))' },
+            },
+          },
+        },
+      }
+    </script>
+    <style>
+      /* Минимальная light-тема shadcn для демо — не часть библиотеки, только этого харнесса. */
+      :root {
+        --border: 214 32% 91%;
+        --input: 214 32% 91%;
+        --ring: 215 20% 65%;
+        --background: 0 0% 100%;
+        --foreground: 222 47% 11%;
+        --primary: 222 47% 11%;
+        --primary-foreground: 210 40% 98%;
+        --destructive: 0 84% 60%;
+        --muted: 210 40% 96%;
+        --muted-foreground: 215 16% 47%;
+        --accent: 210 40% 96%;
+        --accent-foreground: 222 47% 11%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 222 47% 11%;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-background p-8 text-foreground">
+    <div id="app" class="mx-auto max-w-md"></div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
