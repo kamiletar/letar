@@ -50,6 +50,14 @@ MCP сервер для AI-ассистентов, работающих с @leta
 
 ## Техдолг
 
+### 2026-08-11 — Фикс `CATEGORY_MAP` (7 документных полей терялись) ✅
+
+`field-registry.ts` ждал ключ секции `'Российские документы'`, реальный заголовок в
+`libs/forms/docs/fields.md` — `## Документные поля (Россия)`. Несовпадение строк — секция
+пропускалась парсером целиком, `list_fields`/`get_field_props`/`get_field_example` не знали про
+`INN`/`KPP`/`OGRN`/`BIK`/`BankAccount`/`SNILS`/`Passport`. Фикс — одна строка в `CATEGORY_MAP`.
+Задача координатора форм (Фаза 7.6, `libs/forms/PLAN.md`). v1.0.2 → v1.0.3.
+
 ### 2026-07-07 — Фикс типов Zod (несовместимость версий)
 
 `typecheck:tsgo` падал 14 ошибками вида `Type 'ZodString' is not assignable to type 'AnySchema'` —
