@@ -26,7 +26,7 @@ export function useColorMode(): UseColorModeReturn {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true) // eslint-disable-line -- стандартный паттерн hydration
+    setMounted(true)
   }, [])
 
   const colorMode = (mounted ? theme : 'system') as ColorMode
