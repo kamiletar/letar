@@ -1,0 +1,88 @@
+{
+  "name": "@letar/forms-shadcn",
+  "description": "shadcn/ui skin for @letar/forms — 47 declarative form field components on Radix primitives + cva/tailwind-merge, powered by TanStack Form and Zod v4",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "files": [
+    "**/*.js",
+    "**/*.js.map",
+    "**/*.d.ts",
+    "**/*.d.ts.map",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "react",
+    "forms",
+    "form-components",
+    "tanstack-form",
+    "shadcn",
+    "shadcn-ui",
+    "radix",
+    "radix-ui",
+    "tailwind",
+    "tailwindcss",
+    "zod",
+    "declarative",
+    "typescript",
+    "validation"
+  ],
+  "homepage": "https://forms.letar.best",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamiletar/letar.git",
+    "directory": "libs/forms-shadcn"
+  },
+  "bugs": {
+    "url": "https://github.com/kamiletar/letar/issues"
+  },
+  "peerDependencies": {
+    "@radix-ui/react-checkbox": ">=1.0.0",
+    "@radix-ui/react-label": ">=2.0.0",
+    "@radix-ui/react-popover": ">=1.0.0",
+    "@radix-ui/react-radio-group": ">=1.0.0",
+    "@radix-ui/react-select": ">=2.0.0",
+    "@radix-ui/react-slider": ">=1.0.0",
+    "@radix-ui/react-switch": ">=1.0.0",
+    "@radix-ui/react-toggle-group": ">=1.0.0",
+    "@tanstack/react-form": ">=1.0.0",
+    "@tanstack/react-table": ">=8.0.0",
+    "@tiptap/extension-link": ">=3.0.0",
+    "@tiptap/extension-placeholder": ">=3.0.0",
+    "@tiptap/extension-underline": ">=3.0.0",
+    "@tiptap/react": ">=3.0.0",
+    "@tiptap/starter-kit": ">=3.0.0",
+    "class-variance-authority": ">=0.7.0",
+    "clsx": ">=2.0.0",
+    "lucide-react": ">=1.0.0",
+    "react": ">=18.0.0",
+    "tailwind-merge": ">=3.0.0",
+    "zod": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@radix-ui/react-checkbox": { "optional": true },
+    "@radix-ui/react-popover": { "optional": true },
+    "@radix-ui/react-radio-group": { "optional": true },
+    "@radix-ui/react-select": { "optional": true },
+    "@radix-ui/react-slider": { "optional": true },
+    "@radix-ui/react-switch": { "optional": true },
+    "@radix-ui/react-toggle-group": { "optional": true },
+    "@tanstack/react-table": { "optional": true },
+    "@tiptap/extension-link": { "optional": true },
+    "@tiptap/extension-placeholder": { "optional": true },
+    "@tiptap/extension-underline": { "optional": true },
+    "@tiptap/react": { "optional": true },
+    "@tiptap/starter-kit": { "optional": true }
+  }
+}

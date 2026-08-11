@@ -103,6 +103,45 @@
         "description": "Check file formatting with dprint",
         "technologies": ["dprint"]
       }
+    },
+    "build:npm": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "tsup",
+          "node scripts/write-publish-package-json.mjs",
+          "cp README.md dist/",
+          "cp CHANGELOG.md dist/",
+          "cp LICENSE dist/"
+        ],
+        "cwd": "libs/forms-shadcn",
+        "parallel": false
+      },
+      "cache": true,
+      "inputs": [
+        "default",
+        "{projectRoot}/tsup.config.ts",
+        "{projectRoot}/package.publish.json",
+        "{projectRoot}/scripts/write-publish-package-json.mjs"
+      ],
+      "outputs": ["{projectRoot}/dist"],
+      "metadata": {
+        "description": "Сборка @letar/forms-shadcn для публикации на npm",
+        "technologies": ["tsup"]
+      }
+    },
+    "publish:npm": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm publish --access public",
+        "cwd": "libs/forms-shadcn/dist"
+      },
+      "dependsOn": ["build:npm"],
+      "cache": false,
+      "metadata": {
+        "description": "Публикация @letar/forms-shadcn на npmjs.com",
+        "technologies": ["npm"]
+      }
     }
   }
 }

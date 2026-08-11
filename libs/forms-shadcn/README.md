@@ -390,7 +390,26 @@ Chakra `css`-пропа для стилизации заголовков/спи�
 nx test forms-shadcn
 nx lint forms-shadcn
 nx typecheck:tsgo forms-shadcn
+nx run @letar/forms-shadcn:build:npm   # сборка dist/ для публикации (tsup)
 ```
+
+## Публикация (npm) — технически готово, не опубликовано
+
+Пакет собирается в самодостаточный `dist/` через `tsup.config.ts` + `package.publish.json` (тот
+же паттерн, что `@letar/forms`, см. `libs/forms/tsup.config.ts`): один entry point `.` (не
+категорийные подпути, как у Chakra-версии — `src/lib/fields/**` здесь плоская, без категорийных
+подпапок; тяжёлые поля `FieldRichText`/`FieldDataGrid` уже изолированы через `lazy()` внутри
+самого поля, что даёт рантайм-код-сплиттинг у любого бандлера потребителя независимо от числа
+tsup-entry). Все `peerDependencies` — `external`, `@letar/forms-core`/`@letar/forms-react`
+(внутренние слои, `devDependencies`) — вбандлены внутрь через `noExternal` + `dts.resolve`.
+`peerDependenciesMeta` помечает per-field Radix-примитивы, `@tiptap/*` и `@tanstack/react-table`
+как `optional: true` — обязательны только `@tanstack/react-form`, `react`, `zod`,
+`class-variance-authority`/`clsx`/`tailwind-merge` (используются `cn()`-утилитой во всех полях) и
+`@radix-ui/react-label` (базовый `FieldLabel`-примитив).
+
+`npm publish` не запускался — цель этой докрутки была только техническая готовность
+(`nx run @letar/forms-shadcn:build:npm` даёт рабочий `dist/`), решение о реальной публикации не
+принято.
 
 ## Подключение к приложению
 

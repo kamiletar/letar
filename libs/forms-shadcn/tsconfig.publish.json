@@ -1,0 +1,48 @@
+{
+  "compilerOptions": {
+    "emitDeclarationOnly": true,
+    "importHelpers": true,
+    "isolatedModules": true,
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "es2022",
+    "jsx": "react-jsx",
+    "types": ["node"],
+    "noUncheckedSideEffectImports": false,
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@letar/forms-core": ["../forms-core/src/index.ts"],
+      "@letar/forms-core/validators/ru": ["../forms-core/src/lib/validators/ru/index.ts"],
+      "@letar/forms-core/schema": ["../forms-core/src/lib/schema/index.ts"],
+      "@letar/forms-core/server-errors": ["../forms-core/src/lib/server-errors/index.ts"],
+      "@letar/forms-core/utils": ["../forms-core/src/lib/utils/index.ts"],
+      "@letar/forms-core/security": ["../forms-core/src/lib/security/index.ts"],
+      "@letar/forms-core/offline": ["../forms-core/src/lib/offline/index.ts"],
+      "@letar/forms-core/captcha": ["../forms-core/src/lib/captcha/index.ts"],
+      "@letar/forms-core/analytics": ["../forms-core/src/lib/analytics/index.ts"],
+      "@letar/forms-core/credit-card": ["../forms-core/src/lib/credit-card/index.ts"],
+      "@letar/forms-core/phone": ["../forms-core/src/lib/phone/index.ts"],
+      "@letar/forms-core/table": ["../forms-core/src/lib/table/index.ts"],
+      "@letar/forms-core/address": ["../forms-core/src/lib/address/index.ts"],
+      "@letar/forms-core/i18n": ["../forms-core/src/lib/i18n/index.ts"],
+      "@letar/forms-core/uikit": ["../forms-core/src/lib/uikit/index.ts"],
+      "@letar/forms-react": ["../forms-react/src/index.ts"],
+      "@letar/forms-react/testing": ["../forms-react/src/lib/testing/index.ts"]
+    }
+  },
+  "exclude": ["dist", "**/*.spec.ts", "**/*.spec.tsx", "**/*.test.ts", "**/*.test.tsx"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "../forms-core/src/**/*.ts",
+    "../forms-react/src/**/*.ts",
+    "../forms-react/src/**/*.tsx"
+  ]
+}

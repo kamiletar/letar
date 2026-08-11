@@ -4,6 +4,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.31.0] - 2026-08-11
+
+### Added
+
+- **Publish-prep** — пакет технически готов к публикации на npm (без реальной публикации): `tsup.config.ts`
+  (один entry `.`, все peer'ы `external`, `@letar/forms-core`/`@letar/forms-react` вбандлены через
+  `noExternal` + `dts.resolve`), `package.publish.json` (`peerDependenciesMeta` с `optional: true`
+  для per-field Radix/`@tiptap/*`/`@tanstack/react-table`), `scripts/write-publish-package-json.mjs`,
+  `tsconfig.publish.json`, `LICENSE`. Nx-таргеты `build:npm`/`publish:npm` по образцу `libs/forms`.
+  Проверено: `nx run @letar/forms-shadcn:build:npm` даёт рабочий `dist/` (index.js 167 KB + 2
+  lazy-чанка для RichText/DataGrid, декларации 81 KB).
+
 ## [0.30.1] - 2026-08-11
 
 ### Fixed
