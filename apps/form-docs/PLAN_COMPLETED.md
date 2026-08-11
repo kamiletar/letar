@@ -1,5 +1,24 @@
 # Выполненные задачи — form-docs
 
+## Сессия 2026-08-11 (2) — `/llms.txt` (llmstxt.org)
+
+Задача координатора форм `QuietRidge` (Фаза 7.6 `libs/forms/PLAN.md`, тред
+`forms-phase7-3-shadcn`, msg #54).
+
+- `src/app/llms.txt/route.ts` — Route Handler, не статический файл в `public/`: содержимое
+  ручное курируемое, генерировать его на каждый билд незачем, а держать логику рядом с
+  `robots.ts`/`sitemap.ts` (тоже Route/Metadata-файлы) последовательнее файла в `public/`.
+- Список — 11 ссылок на ключевые доки (Getting Started, Installation, Quick Start, createForm(),
+  Field.\* Reference, Form/Hooks API, ZenStack Plugin, Offline, i18n, MCP Server) + demo + npm.
+  Сознательно НЕ автогенерация из `source.getLanguages()` (как в `sitemap.ts`) — формат llms.txt
+  требует компактного обзора, полное дерево из 90+ MDX-файлов с RU-дублями превратило бы указатель
+  в дубликат карты сайта.
+- Без гейта `isProductionDomain` (в отличие от `robots.ts`) — контент не зависит от домена,
+  ссылки абсолютные на прод-URL.
+- Проверено живым `nx dev form-docs` (порт добавлен в `.claude/launch.json`, конфигурации не
+  было) — `localhost:3020/llms.txt` отдаёт корректный markdown через Browser pane.
+- v0.1.8 → v0.1.9.
+
 ## Сессия 2026-08-11 — `sitemap.ts` через Fumadocs source API
 
 Закрывает пункт PLAN-INFRA.md §33 «SEO-фундамент»: единственная из 10 приложений без
