@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (2026-08-11, продолжение 5)
+
+- Демо `FieldCascadingSelect` (`@letar/forms-shadcn` 0.23.0) — страна → город доставки.
+
 ## Unreleased (2026-08-11, продолжение 4)
 
 - Демо `FieldTime` (`@letar/forms-shadcn` 0.22.0).

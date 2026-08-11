@@ -4,6 +4,7 @@ import type { AddressProvider } from '@letar/forms-core/address'
 import {
   FieldAddress,
   FieldAutocomplete,
+  FieldCascadingSelect,
   FieldCheckbox,
   FieldCheckboxCard,
   FieldCity,
@@ -113,6 +114,8 @@ interface DemoFormValues {
   stock: number | undefined
   strongPassword: string
   openingTime: string
+  shippingCountry: string
+  shippingCity: string
 }
 
 const defaultValues: DemoFormValues = {
@@ -154,6 +157,18 @@ const defaultValues: DemoFormValues = {
   stock: 10,
   strongPassword: '',
   openingTime: '09:00',
+  shippingCountry: '',
+  shippingCity: '',
+}
+
+const shippingCountryOptions = [
+  { label: 'Россия', value: 'ru' },
+  { label: 'Казахстан', value: 'kz' },
+]
+
+const CITIES_BY_COUNTRY: Record<string, { label: string; value: string }[]> = {
+  ru: [{ label: 'Москва', value: 'msk' }, { label: 'Казань', value: 'kzn' }],
+  kz: [{ label: 'Алматы', value: 'alm' }, { label: 'Астана', value: 'ast' }],
 }
 
 export default function HomePage() {
@@ -161,7 +176,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Form Develop App (shadcn)</h1>
       <p className="text-muted-foreground mt-2 text-sm">
-        Песочница для разработки @letar/forms-shadcn — 40 полей, Фаза 7.3 Шаг 5+.
+        Песочница для разработки @letar/forms-shadcn — 41 поле, Фаза 7.3 Шаг 5+.
       </p>
 
       <DemoForm<DemoFormValues>
@@ -258,6 +273,14 @@ export default function HomePage() {
         <FieldNumberInput name="stock" label="Остаток на складе" min={0} max={999} />
         <FieldPasswordStrength name="strongPassword" label="Новый пароль" />
         <FieldTime name="openingTime" label="Время открытия" min="06:00" max="23:00" />
+        <FieldSelect name="shippingCountry" label="Страна доставки" options={shippingCountryOptions} placeholder="Выберите" />
+        <FieldCascadingSelect
+          name="shippingCity"
+          label="Город доставки"
+          dependsOn="shippingCountry"
+          loadOptions={async (country) => CITIES_BY_COUNTRY[country ?? ''] ?? []}
+          placeholderWhenDisabled="Сначала выберите страну"
+        />
 
         <button
           type="submit"
