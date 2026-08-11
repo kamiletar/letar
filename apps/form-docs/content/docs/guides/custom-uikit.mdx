@@ -1,0 +1,127 @@
+---
+title: Custom UIKit — Your Own Styles
+description: Implement the UIKit contract with plain HTML/CSS or your own design system instead of Chakra or shadcn
+---
+
+## When to Use
+
+`@letar/forms` ships two ready-made skins — Chakra (`@letar/forms`) and shadcn
+(`@letar/forms-shadcn`). Neither is the only option. The field-building logic
+(`createField`, `FieldWrapper`, error handling, schema-meta resolution) lives in a
+framework-and-UI-free core, `@letar/forms-core`, and talks to whatever renders pixels through
+one seam: the `UIKit` contract.
+
+Use this guide when you want to:
+
+- Style fields with your own CSS or design tokens, no Chakra/shadcn dependency at all
+- Swap in a different component library (Mantine, Ant Design, your in-house kit) without
+  touching field logic
+- Understand what a "skin" actually has to implement before building one
+
+## The contract
+
+`@letar/forms-core/uikit` exports `UIKit<TNode>` — an interface, not a class to extend. `TNode`
+is generic: `ReactNode` for a React skin, a Vue `VNode` for a Vue skin, anything your renderer
+produces. Two groups of primitives:
+
+```ts
+// Core — required, used by every field
+interface UIKitCorePrimitives<TNode> {
+  FieldRoot: (props: UIKitFieldRootProps<TNode>) => TNode
+  FieldLabel: (props: UIKitFieldLabelProps<TNode>) => TNode
+  FieldError: (props: UIKitFieldErrorProps<TNode>) => TNode
+  Input: (props: UIKitInputProps) => TNode
+  Checkbox: (props: UIKitCheckboxProps<TNode>) => TNode
+  Select: (props: UIKitSelectProps<TNode>) => TNode
+}
+
+// Extended — implement only what the fields you build actually need
+interface UIKitExtendedPrimitives<TNode> {
+  NumberInput, NativeSelect, Combobox, RadioGroup, SegmentGroup, PinInput,
+  Box, HStack, VStack, Text, Button, IconButton, Tooltip,
+  RequiredIndicator, ErrorFallback
+}
+```
+
+You don't have to implement all ~20 extended primitives before anything works. The
+[`@letar/forms-shadcn`](/) skin itself started with core + `ErrorFallback` only, and added
+`NumberInput`/`Combobox` when the fields that needed them were written — see the
+`ImplementedExtendedPrimitives` union in `libs/forms-shadcn/src/lib/uikit/uikit-shadcn.tsx` for
+that pattern. Implement what your fields use; the type system will tell you what's missing.
+
+## Minimal example — plain HTML, no library
+
+A skin can be as small as raw `<div>`/`<input>` markup with your own class names:
+
+```tsx
+// my-uikit.tsx
+import type { UIKitCorePrimitives } from '@letar/forms-core/uikit'
+import type { ReactNode } from 'react'
+
+export const myUIKit: UIKitCorePrimitives<ReactNode> = {
+  FieldRoot: ({ invalid, disabled, children }) => (
+    <div className="field" data-invalid={invalid || undefined} data-disabled={disabled || undefined}>
+      {children}
+    </div>
+  ),
+  FieldLabel: ({ label, required }) =>
+    label ? <label className="field-label">{label}{required && <span className="required">*</span>}</label> : null,
+  FieldError: ({ hasError, errorMessage, helperText }) =>
+    hasError && errorMessage
+      ? <p className="field-error" role="alert">{errorMessage}</p>
+      : helperText ? <p className="field-helper">{helperText}</p> : null,
+  Input: ({ value, onChange, onBlur, ...rest }) => (
+    <input className="field-input" value={value} onChange={(e) => onChange(e.target.value)} onBlur={onBlur} {...rest} />
+  ),
+  Checkbox: ({ checked, onCheckedChange, label, ...rest }) => (
+    <label className="field-checkbox">
+      <input type="checkbox" checked={checked} onChange={(e) => onCheckedChange(e.target.checked)} {...rest} />
+      {label}
+    </label>
+  ),
+  Select: ({ value, onValueChange, options, placeholder, ...rest }) => (
+    <select className="field-select" value={value ?? ''} onChange={(e) => onValueChange(e.target.value || undefined)} {...rest}>
+      <option value="" disabled>{placeholder}</option>
+      {options.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+    </select>
+  ),
+}
+```
+
+Wire it into the composition layer once, at module scope (not inside a render — the returned
+components must be referentially stable):
+
+```tsx
+// primitives.ts
+import { createFieldPrimitives } from '@letar/forms-react'
+import { myUIKit } from './my-uikit'
+
+export const { createField, FieldWrapper, FieldErrorBoundary } = createFieldPrimitives(myUIKit)
+```
+
+Then build fields the same way `forms-shadcn` does — see `libs/forms-shadcn/src/lib/fields/field-string.tsx`
+for the canonical shape (`createField({ displayName, render })`, reading `field.state`/`resolved`
+from the render args).
+
+## Where the seam actually is (and isn't)
+
+- `@letar/forms-core` — `createField`/`FieldWrapper`/schema-meta reading. **Never imports React,
+  Chakra, or any renderer.** This is what makes the seam real, not aspirational — see the "Where
+  this gets tested" section in the [porting-framework guide](/docs/guides/porting-framework)
+  for how that claim was verified in practice, not just documented.
+- Your `UIKit` implementation — owns every pixel: colors, spacing, animation, dark mode. The
+  contract passes *intent* (`invalid`, `required`, `tone: 'danger'`), never CSS values — compare
+  `UIKitButtonProps.tone` (`'neutral' | 'danger'`) to a raw `colorPalette="red"` prop; the former
+  survives a skin swap, the latter doesn't.
+- Fields (`FieldString`, `FieldSelect`, ...) — call `uikit.X(...)`, never reach past it into a
+  specific library. If a field imports `@radix-ui/*` or `@chakra-ui/*` directly, the seam has
+  already leaked for that field.
+
+## Common trap: styling detail leaking through props
+
+If you find yourself adding a prop like `borderColor` or `className` that only makes sense for
+one specific UI library, stop — that value belongs *inside* your `UIKit` implementation, not in
+the contract. The contract evolved this way already: `UIKitFieldRootProps.validating` used to be
+a raw `css` prop carrying Chakra color tokens; it's now a semantic boolean, and each adapter
+decides what "validating" looks like. Same idea for `UIKitErrorFallbackProps` — no hardcoded
+`red.500`, just `fieldName`/`message`.

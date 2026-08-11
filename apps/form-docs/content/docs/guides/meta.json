@@ -44,6 +44,8 @@
     "testing-utilities",
     "url-prefill",
     "filters-state",
-    "mcp"
+    "mcp",
+    "custom-uikit",
+    "porting-framework"
   ]
 }

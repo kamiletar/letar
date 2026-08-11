@@ -1,0 +1,108 @@
+---
+title: Porting to Another Framework
+description: What it actually takes to bring @letar/forms to a framework other than React — a Vue case study
+---
+
+## When to Use
+
+The [custom-uikit guide](/docs/guides/custom-uikit) covers restyling within React. This guide is
+for a bigger move: bringing the field-building logic to a *different* framework entirely.
+`@letar/forms-vue` and `@letar/forms-vue-shadcn` are the real, shipped result — this is the
+honest account of building them, not a cleaned-up reference after the fact. Read it if you're
+evaluating whether the same move is realistic for Svelte, Solid, or anything else.
+
+## Where this gets tested
+
+`@letar/forms-core` claims to be framework-agnostic: no React import anywhere in it, generic
+`TNode` standing in for "whatever your renderer produces." That claim is easy to write and easy
+to leave unverified — a "framework-agnostic core" that has never actually run under a second
+framework is a hypothesis, not a fact.
+
+Porting to Vue was the test. The result: **zero changes to `forms-core`.** `getFieldMeta()` (schema
+meta reading) and the `UIKit<TNode>` type contract worked from Vue without modification — `TNode`
+being generic (not hardcoded to `ReactNode`) meant it could be instantiated as a Vue `VNode` and
+nothing broke. If porting had required so much as a one-line change to `forms-core`, that would
+have been the headline finding, not a footnote — a seam that only holds for the framework it was
+built against isn't a seam.
+
+## What has to be rebuilt vs. what doesn't
+
+| Layer | React (`forms-react`/`forms-shadcn`) | Vue (`forms-vue`/`forms-vue-shadcn`) |
+| --- | --- | --- |
+| `forms-core` (schema, meta, validators, i18n) | shared | **unchanged, reused as-is** |
+| `UIKit<TNode>` contract (`forms-core/uikit/types.ts`) | shared | **unchanged, reused as-is** |
+| UIKit implementation (Chakra/shadcn vs. Reka UI) | framework-specific | rebuilt — different component library, different props |
+| `createField`/`createFieldPrimitives` composition layer | React hooks + JSX | rebuilt — Composition API, different idiom (see below) |
+| Individual fields (`FieldString`, `FieldSelect`, ...) | React components | rebuilt — same shape, new syntax |
+
+Two layers carry over untouched; two don't. That ratio is the actual answer to "how much of a
+port is this" — not "everything" and not "just the styling."
+
+## Decisions that weren't obvious in advance
+
+### `defineComponent` + `h()`, not `.vue` single-file components
+
+Vue's idiomatic authoring format is `.vue` files with `<script setup>`. We didn't use them. The
+repo's TypeScript tooling (`tsc --build` / `tsgo`) type-checks `.ts` files directly; `.vue` files
+need `vue-tsc`, a separate toolchain the monorepo didn't already have. Writing components as
+`defineComponent({ setup() { return () => h(...) } })` in plain `.ts` files kept every Vue
+component checkable by the exact same command as everything else. The tradeoff is real — render
+functions are more verbose than templates — and worth naming explicitly rather than presenting
+`.ts`-only as simply "how it's done."
+
+### UIKit primitives as plain functions, not Vue components
+
+The contract type is `FieldRoot: (props: UIKitFieldRootProps<TNode>) => TNode` — a plain function
+signature. In React, a function component *is* exactly that signature, so `forms-shadcn`'s
+primitives are just functions. Vue doesn't require the same match — primitives could have been
+`defineComponent` wrappers — but writing them as plain `(props) => VNode` functions turned out to
+satisfy the contract more literally and avoided a component-instance boundary around every single
+primitive call. This only became visible once the contract's actual shape (not "a UIKit `Select`
+component" but literally "a function") was taken seriously.
+
+### One string/VNode wrinkle: `TNode` isn't quite free in Vue
+
+React's `ReactNode` includes `string` — a component prop typed `label?: ReactNode` happily accepts
+a plain string. Vue's `VNode` type does not. Instantiating the contract as
+`UIKitCorePrimitives<VNode>` broke the moment a field passed a string label straight through.
+Fix: a small local type, `UINode = VNode | string | null`, used wherever the contract's `TNode`
+flows through the Vue skin. Not a change to `forms-core` — the contract's `TNode` generic already
+allowed any type; this is a Vue-side detail of *which* type to plug in.
+
+### Error boundaries: `onErrorCaptured`, not a class component
+
+React's field-level error boundary (`FieldErrorBoundary` in `forms-react`) is a class component —
+`getDerivedStateFromError`/`componentDidCatch` is a React-only pattern with no Vue equivalent to
+copy. Vue has its own mechanism, `onErrorCaptured`, called inside a component's `setup()`. Porting
+this 1:1 wasn't possible and wasn't the goal — the *behavior* (a broken field renders a fallback
+instead of crashing the whole form) ported; the *mechanism* didn't, because it couldn't.
+
+### `FieldSelect`/`FieldCombobox` bypass the field factory
+
+`createField()` (both the React and Vue versions) has a fixed prop contract:
+`name`/`label`/`placeholder`. Fields needing an extra prop — `options`, for `Select`/`Combobox` —
+don't fit that factory. In React this is solved with a generic type parameter on `createField<P>`.
+In Vue, the simpler and more idiomatic fix was to skip the factory for these two fields and
+compose `useAppFormContext()` + `form.Field` directly, matching the pattern the factory itself
+uses internally. Neither is "more correct" — the point is that copying the React solution
+mechanically (fighting Vue's type system to bolt on a generic parameter) would have been worse
+than just admitting the factory doesn't cover every case and building around it.
+
+## Testing across the framework boundary
+
+Radix (React) and Reka UI (Vue, the same underlying primitives ported to Vue by the Reka
+maintainers) both position dropdowns using `ResizeObserver` and floating-UI positioning logic that
+jsdom doesn't implement. Under Vitest + `@vue/test-utils`, `Select`/`Combobox` tests need
+`ResizeObserver`, `Element.prototype.hasPointerCapture`, and `Element.prototype.scrollIntoView`
+stubbed before mount — a standard requirement for testing Radix-family components outside a real
+browser, not something specific to this port. If you're porting to a framework whose component
+library wraps Radix/Reka-equivalent primitives, expect the same stubs.
+
+## What this doesn't tell you
+
+This guide covers a UI-skin port (Vue + a headless field-composition layer). It does not cover:
+porting a whole application's state management, porting to a framework with a fundamentally
+different reactivity model (fine-grained signals vs. Vue's proxy reactivity vs. React's
+re-render-the-tree model — the seam held for Vue's model specifically, not proven for others),
+or reaching field-for-field parity (`forms-vue-shadcn` ships 6 of the 56 fields the Chakra skin
+has — see its README's "out of scope" section for what that boundary actually is and why).

@@ -1,0 +1,128 @@
+---
+title: Свой UIKit — собственные стили
+description: Реализация UIKit-контракта голым HTML/CSS или своей дизайн-системой вместо Chakra или shadcn
+---
+
+## Когда использовать
+
+`@letar/forms` поставляется с двумя готовыми скинами — Chakra (`@letar/forms`) и shadcn
+(`@letar/forms-shadcn`). Ни один из них не единственный вариант. Логика сборки поля
+(`createField`, `FieldWrapper`, обработка ошибок, чтение meta схемы) живёт в независимом от
+фреймворка и UI-библиотеки ядре, `@letar/forms-core`, и общается с тем, что реально рисует пиксели,
+через один шов — контракт `UIKit`.
+
+Используйте этот гайд, если хотите:
+
+- стилизовать поля своим CSS или дизайн-токенами, вообще без зависимости от Chakra/shadcn;
+- подключить другую библиотеку компонентов (Mantine, Ant Design, свой внутренний кит) без правки
+  логики полей;
+- понять, что именно должен реализовать «скин», прежде чем строить свой.
+
+## Контракт
+
+`@letar/forms-core/uikit` экспортирует `UIKit<TNode>` — интерфейс, не класс для наследования.
+`TNode` — обобщённый параметр: `ReactNode` для React-скина, Vue `VNode` для Vue-скина, что угодно,
+что производит ваш рендерер. Две группы примитивов:
+
+```ts
+// Core — обязательные, используются каждым полем
+interface UIKitCorePrimitives<TNode> {
+  FieldRoot: (props: UIKitFieldRootProps<TNode>) => TNode
+  FieldLabel: (props: UIKitFieldLabelProps<TNode>) => TNode
+  FieldError: (props: UIKitFieldErrorProps<TNode>) => TNode
+  Input: (props: UIKitInputProps) => TNode
+  Checkbox: (props: UIKitCheckboxProps<TNode>) => TNode
+  Select: (props: UIKitSelectProps<TNode>) => TNode
+}
+
+// Extended — реализуйте только то, что реально нужно вашим полям
+interface UIKitExtendedPrimitives<TNode> {
+  NumberInput, NativeSelect, Combobox, RadioGroup, SegmentGroup, PinInput,
+  Box, HStack, VStack, Text, Button, IconButton, Tooltip,
+  RequiredIndicator, ErrorFallback
+}
+```
+
+Не нужно реализовывать все ~20 extended-примитивов, чтобы что-то заработало. Сам скин
+[`@letar/forms-shadcn`](/) начинался с core + `ErrorFallback` — остальное (`NumberInput`/
+`Combobox`) добавлялось по мере того, как появлялись поля, которым это требовалось: см. union
+`ImplementedExtendedPrimitives` в `libs/forms-shadcn/src/lib/uikit/uikit-shadcn.tsx`. Реализуйте то,
+что используют ваши поля — система типов сама подскажет, чего не хватает.
+
+## Минимальный пример — голый HTML, без библиотеки
+
+Скин может быть таким маленьким, как сырая разметка `<div>`/`<input>` со своими классами:
+
+```tsx
+// my-uikit.tsx
+import type { UIKitCorePrimitives } from '@letar/forms-core/uikit'
+import type { ReactNode } from 'react'
+
+export const myUIKit: UIKitCorePrimitives<ReactNode> = {
+  FieldRoot: ({ invalid, disabled, children }) => (
+    <div className="field" data-invalid={invalid || undefined} data-disabled={disabled || undefined}>
+      {children}
+    </div>
+  ),
+  FieldLabel: ({ label, required }) =>
+    label ? <label className="field-label">{label}{required && <span className="required">*</span>}</label> : null,
+  FieldError: ({ hasError, errorMessage, helperText }) =>
+    hasError && errorMessage
+      ? <p className="field-error" role="alert">{errorMessage}</p>
+      : helperText ? <p className="field-helper">{helperText}</p> : null,
+  Input: ({ value, onChange, onBlur, ...rest }) => (
+    <input className="field-input" value={value} onChange={(e) => onChange(e.target.value)} onBlur={onBlur} {...rest} />
+  ),
+  Checkbox: ({ checked, onCheckedChange, label, ...rest }) => (
+    <label className="field-checkbox">
+      <input type="checkbox" checked={checked} onChange={(e) => onCheckedChange(e.target.checked)} {...rest} />
+      {label}
+    </label>
+  ),
+  Select: ({ value, onValueChange, options, placeholder, ...rest }) => (
+    <select className="field-select" value={value ?? ''} onChange={(e) => onValueChange(e.target.value || undefined)} {...rest}>
+      <option value="" disabled>{placeholder}</option>
+      {options.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+    </select>
+  ),
+}
+```
+
+Подключите его к композиционному слою один раз, на уровне модуля (не внутри рендера —
+возвращаемые компоненты должны быть стабильны по ссылке):
+
+```tsx
+// primitives.ts
+import { createFieldPrimitives } from '@letar/forms-react'
+import { myUIKit } from './my-uikit'
+
+export const { createField, FieldWrapper, FieldErrorBoundary } = createFieldPrimitives(myUIKit)
+```
+
+Дальше поля собираются так же, как в `forms-shadcn` — каноническая форма
+(`createField({ displayName, render })`, чтение `field.state`/`resolved` из аргументов рендера) —
+см. `libs/forms-shadcn/src/lib/fields/field-string.tsx`.
+
+## Где на самом деле шов (и где его нет)
+
+- `@letar/forms-core` — чтение `createField`/`FieldWrapper`/meta схемы. **Никогда не импортирует
+  React, Chakra или какой-либо рендерер.** Именно это делает шов настоящим, а не декларативным —
+  как это было проверено на практике, а не только задокументировано, см. раздел «Где это
+  реально проверяется» в [гайде о портировании на другой фреймворк](/docs/guides/porting-framework).
+- Ваша реализация `UIKit` — владеет каждым пикселем: цвета, отступы, анимация, тёмная тема.
+  Контракт передаёт *намерение* (`invalid`, `required`, `tone: 'danger'`), никогда CSS-значения —
+  сравните `UIKitButtonProps.tone` (`'neutral' | 'danger'`) с сырым проп `colorPalette="red"`:
+  первое переживает смену скина, второе — нет.
+- Поля (`FieldString`, `FieldSelect`, ...) — вызывают `uikit.X(...)`, никогда не тянутся мимо него
+  к конкретной библиотеке. Если поле импортирует `@radix-ui/*` или `@chakra-ui/*` напрямую — шов
+  для этого поля уже протёк.
+
+## Типичная ловушка: деталь стилизации протекает через пропы
+
+Если ловите себя на добавлении пропа вроде `borderColor` или `className`, имеющего смысл только
+для одной конкретной UI-библиотеки — остановитесь: это значение принадлежит *внутрь* вашей
+реализации `UIKit`, не в контракт. Контракт уже эволюционировал именно так:
+`UIKitFieldRootProps.validating` раньше был сырым `css`-пропом с цветовыми токенами Chakra —
+теперь это семантический булев флаг, и каждый адаптер сам решает, как выглядит «идёт валидация».
+Та же идея у `UIKitErrorFallbackProps` — никакого захардкоженного `red.500`, только `fieldName`/
+`message`.
