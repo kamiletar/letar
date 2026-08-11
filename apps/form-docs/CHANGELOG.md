@@ -2,6 +2,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.9] - 2026-08-11
+
+### Added
+
+- `/llms.txt` (Route Handler, `src/app/llms.txt/route.ts`) — стандарт llmstxt.org: плоский
+  markdown-указатель на ключевую документацию для LLM-краулеров/агентов (Getting Started,
+  Installation, Quick Start, createForm(), Field.\* Reference, API, ZenStack Plugin, Offline,
+  i18n, MCP Server, demo, changelog, npm-пакеты). Список курируется руками, не автогенерируется
+  из Fumadocs source API — 90+ MDX-файлов с RU-дублями превратили бы компактный указатель в
+  карту сайта (для карты сайта уже есть `sitemap.ts`). Без гейта по `isProductionDomain` —
+  содержимое не чувствительно к домену, все ссылки абсолютные на прод-URL.
+
 ## [0.1.8] - 2026-08-11
 
 ### Added
