@@ -33,9 +33,13 @@ function requestFullscreenSafe(el: HTMLElement) {
   type FullscreenEl = HTMLElement & { webkitRequestFullscreen?: () => Promise<void> }
   const elem = el as FullscreenEl
   if (elem.requestFullscreen) {
-    elem.requestFullscreen().catch(() => {})
+    elem.requestFullscreen().catch(() => {
+      // намеренно игнорируем — fullscreen API может отказать без критичных последствий
+    })
   } else if (elem.webkitRequestFullscreen) {
-    elem.webkitRequestFullscreen().catch?.(() => {})
+    elem.webkitRequestFullscreen().catch?.(() => {
+      // намеренно игнорируем — fullscreen API может отказать без критичных последствий
+    })
   }
   // iOS Safari не поддерживает fullscreen API — пропускаем молча
 }

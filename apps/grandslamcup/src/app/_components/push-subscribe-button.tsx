@@ -74,7 +74,9 @@ export function PushSubscribeButton() {
         const errorData = (await saveRes.json().catch(() => ({}))) as { error?: string }
         const errorMessage = errorData.error ?? `HTTP ${saveRes.status}`
         // Откатываем браузерную подписку чтобы не оставлять оркфан
-        await sub.unsubscribe().catch(() => {})
+        await sub.unsubscribe().catch(() => {
+          // намеренно игнорируем — подписка и так не сохранена на сервере
+        })
         toaster.error({
           title: 'Не удалось сохранить подписку',
           description: errorMessage,

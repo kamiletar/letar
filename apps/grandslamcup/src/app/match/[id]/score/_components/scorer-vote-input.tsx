@@ -68,7 +68,9 @@ export function ScorerVoteInput({ matchId, performanceId, dimension, judges, onS
           onScoresChange?.(next)
           return next
         })
-        startTransition(() => {})
+        startTransition(() => {
+          // пустой колбэк — помечает уже случившееся обновление состояния как low-priority transition
+        })
         return
       }
 
@@ -86,7 +88,9 @@ export function ScorerVoteInput({ matchId, performanceId, dimension, judges, onS
         onScoresChange?.(next)
         return next
       })
-      startTransition(() => {})
+      startTransition(() => {
+        // пустой колбэк — помечает уже случившееся обновление состояния как low-priority transition
+      })
     },
     [matchId, performanceId, dimension],
   )

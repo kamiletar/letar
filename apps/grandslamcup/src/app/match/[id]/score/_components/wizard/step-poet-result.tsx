@@ -43,6 +43,7 @@ export function StepPoetResult({ match, matchState }: StepPoetResultProps) {
   const isFirstPoet = performerIndex === 0
 
   // Enter нажимает кнопку «Следующий поэт / Итоги пары»
+  // eslint-disable-next-line @typescript-eslint/no-empty-function -- плейсхолдер, переприсваивается ниже
   const handleNextRef = useRef<() => Promise<void>>(async () => {})
 
   useEffect(() => {

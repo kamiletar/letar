@@ -38,7 +38,9 @@ export async function startMatchAction(matchId: string) {
   broadcastState(matchId)
 
   // Отправляем ссылку на голосование в Telegram (Mini App)
-  import('@/lib/telegram/senders').then((m) => m.sendVotingLink(matchId)).catch(() => {})
+  import('@/lib/telegram/senders').then((m) => m.sendVotingLink(matchId)).catch(() => {
+    // намеренно игнорируем — публикация в Telegram необязательна для основного флоу
+  })
 
   return { success: true }
 }
@@ -60,7 +62,9 @@ export async function finishHalfAction(matchId: string) {
   broadcastState(matchId)
 
   // Автопубликация итога 1-го тайма в Telegram (если включено)
-  autoPublishHalfTime(matchId, 1).catch(() => {})
+  autoPublishHalfTime(matchId, 1).catch(() => {
+    // намеренно игнорируем — публикация в Telegram необязательна для основного флоу
+  })
 
   return { success: true }
 }
@@ -134,10 +138,14 @@ export async function finishMatchAction(matchId: string) {
   }
 
   // Автопубликация результата в Telegram (если включено)
-  autoPublishResult(matchId).catch(() => {})
+  autoPublishResult(matchId).catch(() => {
+    // намеренно игнорируем — публикация в Telegram необязательна для основного флоу
+  })
 
   // Проверяем: все матчи тура завершены → итоги тура
-  checkTourComplete(matchId).catch(() => {})
+  checkTourComplete(matchId).catch(() => {
+    // намеренно игнорируем — итоги тура не блокируют завершение матча
+  })
 
   return { success: true, homeScore, awayScore, homePoints, awayPoints }
 }

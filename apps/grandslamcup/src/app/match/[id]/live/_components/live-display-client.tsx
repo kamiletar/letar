@@ -97,12 +97,24 @@ export function LiveDisplayClient({ match, donateLinks = [] }: LiveDisplayClient
     const doc = document as FullscreenDoc
     const isFs = doc.fullscreenElement ?? doc.webkitFullscreenElement
     if (isFs) {
-      if (doc.exitFullscreen) { doc.exitFullscreen().catch(() => {}) }
-      else if (doc.webkitExitFullscreen) { doc.webkitExitFullscreen() }
+      if (doc.exitFullscreen) {
+        doc.exitFullscreen().catch(() => {
+          // намеренно игнорируем — fullscreen API может отказать без критичных последствий
+        })
+      } else if (doc.webkitExitFullscreen) {
+        doc.webkitExitFullscreen()
+      }
     } else {
       const el = containerRef.current as FullscreenEl
-      if (el.requestFullscreen) { el.requestFullscreen().catch(() => {}) }
-      else if (el.webkitRequestFullscreen) { el.webkitRequestFullscreen().catch?.(() => {}) }
+      if (el.requestFullscreen) {
+        el.requestFullscreen().catch(() => {
+          // намеренно игнорируем — fullscreen API может отказать без критичных последствий
+        })
+      } else if (el.webkitRequestFullscreen) {
+        el.webkitRequestFullscreen().catch?.(() => {
+          // намеренно игнорируем — fullscreen API может отказать без критичных последствий
+        })
+      }
     }
   }, [])
 

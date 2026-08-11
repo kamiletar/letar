@@ -155,7 +155,9 @@ export async function submitMatchLineupAction(input: unknown) {
       })
       if (otherLineup) {
         // Обе команды заявили составы — автопубликация анонса
-        import('@/lib/telegram/auto-publish').then((m) => m.autoPublishAnnouncement(matchId)).catch(() => {})
+        import('@/lib/telegram/auto-publish').then((m) => m.autoPublishAnnouncement(matchId)).catch(() => {
+          // намеренно игнорируем — публикация в Telegram необязательна для основного флоу
+        })
       }
     }
 

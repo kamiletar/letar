@@ -55,7 +55,9 @@ async function sendToSubscription(
         .delete({
           where: { endpoint: subscription.endpoint },
         })
-        .catch(() => {})
+        .catch(() => {
+          // намеренно игнорируем — запись уже могла быть удалена
+        })
       console.warn('Удалена истёкшая подписка:', subscription.endpoint)
     } else {
       console.error('Ошибка отправки push:', error)
