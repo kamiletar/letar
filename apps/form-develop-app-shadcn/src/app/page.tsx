@@ -28,6 +28,7 @@ import {
   FieldRadioCard,
   FieldRadioGroup,
   FieldRating,
+  FieldRichText,
   FieldSegmentGroup,
   FieldSelect,
   FieldSignature,
@@ -148,7 +149,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Form Develop App (shadcn)</h1>
       <p className="text-muted-foreground mt-2 text-sm">
-        Песочница для разработки @letar/forms-shadcn — 35 полей, Фаза 7.3 Шаг 5+.
+        Песочница для разработки @letar/forms-shadcn — 36 полей, Фаза 7.3 Шаг 5+.
       </p>
 
       <DemoForm<DemoFormValues>
@@ -319,6 +320,28 @@ export default function HomePage() {
             format: (v) => `${v.toLocaleString('ru-RU')} ₽`,
           }]}
         />
+
+        <button
+          type="submit"
+          className="bg-primary text-primary-foreground mt-4 rounded-md px-4 py-2 text-sm font-medium"
+        >
+          Отправить
+        </button>
+      </DemoForm>
+
+      <h2 className="mt-16 text-xl font-semibold">FieldRichText (beta, отдельная форма)</h2>
+      <p className="text-muted-foreground mt-1 text-sm">
+        Tiptap WYSIWYG-редактор — изолированная песочница, без интеграции с полями выше. Без вставки изображений (нужен
+        upload endpoint) — кнопка «Ссылка» использует <code>window.prompt</code>.
+      </p>
+      <DemoForm<{ content: string }>
+        defaultValues={{ content: '<p>Начальный <strong>текст</strong> с <em>форматированием</em>.</p>' }}
+        onSubmit={(value) => {
+          // eslint-disable-next-line no-console
+          console.log('richtext submit', value)
+        }}
+      >
+        <FieldRichText name="content" label="Содержимое" minHeight="180px" />
 
         <button
           type="submit"

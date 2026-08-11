@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased (2026-08-11)
+
+- Демо `FieldRichText` (`@letar/forms-shadcn` 0.18.0) — изолированная форма с Tiptap-редактором,
+  `defaultValues.content` заполнен непустым HTML для проверки начального рендера. Приоритетный
+  список координатора (Signature → FileUpload → Steps → Table → RichText) закрыт.
+
 ## Unreleased (2026-08-10, продолжение 2)
 
 - Демо `FieldTableEditor` (`@letar/forms-shadcn` 0.17.0) — изолированная форма с array-полем

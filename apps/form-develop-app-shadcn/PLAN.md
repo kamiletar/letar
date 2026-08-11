@@ -55,6 +55,9 @@ RichText.
       проверка в Chromium (добавление строки, inline-редактирование через `input`-события,
       удаление строки, select-all → bulk-delete кнопка с счётчиком) — детали в
       `libs/forms/PLAN.md` §7.3
+- [x] `FieldRichText` — отдельная изолированная демо-форма (Tiptap-редактор, `defaultValues`
+      с непустым HTML), приоритетный список координатора (Signature → FileUpload → Steps →
+      Table → RichText) закрыт — детали в `libs/forms/PLAN.md` §7.3
 
 ## Бэклог
 
