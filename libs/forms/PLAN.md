@@ -16,6 +16,19 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
 
 ## Backlog (запросы от агентов)
 
+### [2026-08-11] tsup роняет `'use client'` в lazy-чанках (forms + forms-shadcn) — не чинить без сигнала
+
+- **Запросил:** forms-dev (найдено при publish-prep `forms-shadcn`, письмо #49)
+- **Приоритет:** low — вероятно безвредно, не подтверждённая проблема
+- **Описание:** tsup выбрасывает директиву `'use client'` из собранных lazy-чанков
+  (`field-rich-text-impl.js`, `field-data-grid-impl.js` и т.п.) с предупреждением "Module level
+  directives cause errors when bundled". Не новое и не специфичное для `forms-shadcn` — `dist/*.js`
+  уже опубликованного `@letar/forms` страдает тем же. Скорее всего безвредно: директива нужна на
+  границе клиент/сервер, а `React.lazy`+`import()` внутри поля срабатывает уже из клиентского
+  поддерева (обёртка поля directive сохраняет) — новую границу чанк не создаёт.
+- **Статус:** backlog, не назначено. Не чинить проактивно — ждать реального репорта от Next.js
+  App Router потребителя (пока такого не было ни у одного из ~20 приложений на `@letar/forms`).
+
 ### [2026-08-11] Рассинхрон источников истины по числу полей: form-mcp/docs/fields.md (49) vs реальность (56)
 
 - **Запросил:** forms-dev (найдено при докрутке `forms-shadcn` до release-ready, тред
@@ -1949,7 +1962,22 @@ React, а React-адаптер зависит от абстракций ядра
     (`tsup.config.ts`/`package.publish.json`/entry-сплиттинг, задача координатора #47).
 - [ ] **7.4 Замер трафика** → решение: доносить сложные поля или нет.
 - [ ] **7.5 Docs-сайт на отдельном домене** + живые демо. SEO под `zod forms react`, `prisma form generator`.
-- [ ] **7.6 `llms.txt` + усиление MCP** — недоиспользованный козырь №1 (дёшево, уникально).
+- [x] **7.6 `llms.txt` + усиление MCP** (2026-08-11, задача координатора `QuietRidge` #54) —
+      недоиспользованный козырь №1 закрыт:
+  - **Фикс `form-mcp` (v1.0.3).** `field-registry.ts` терял 7 российских документных полей —
+    `CATEGORY_MAP` ждал ключ `'Российские документы'`, реальный заголовок секции в
+    `libs/forms/docs/fields.md` — `## Документные поля (Россия)`. Несовпадение строк, парсер
+    молча пропускал секцию целиком. `list_fields`/`get_field_props`/`get_field_example` (все три
+    читают общий `fieldRegistry`) теперь видят `INN`/`KPP`/`OGRN`/`BIK`/`BankAccount`/`SNILS`/
+    `Passport`. Заодно найдено: `FieldCity` отсутствовал в `docs/fields.md` целиком (не баг
+    парсера — поле было не задокументировано, хотя экспортируется как `Form.Field.City`) —
+    добавлена строка в таблицу «Специализированные», счётчик в шапке файла поправлен 56 → 57.
+  - **`llms.txt` (`apps/form-docs`, v0.1.9).** Route Handler `src/app/llms.txt/route.ts`, формат
+    llmstxt.org — ручной курируемый список ключевых доков (Getting Started, Installation, Quick
+    Start, createForm(), Field.\* Reference, API, ZenStack Plugin, Offline, i18n, MCP Server,
+    demo, changelog, npm). Не автогенерация из Fumadocs source API — 90+ MDX-файлов с RU-дублями
+    превратили бы компактный указатель в карту сайта (для карты сайта уже есть `sitemap.ts`).
+    Проверено в Browser pane: `http://localhost:3020/llms.txt` отдаёт корректный markdown.
 - [ ] **7.7 Open-core сервис** — hosted-приём сабмитов + дашборд ответов + аналитика (синергия со studio/Tochka).
       Free — вся библиотека и оба скина; платно — сервис вокруг форм, не урезание кода.
 - [ ] **7.8 Тонкий Vue-адаптер (архитектурный пруф границы)** — 5–8 базовых полей
