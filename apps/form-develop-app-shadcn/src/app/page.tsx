@@ -22,6 +22,7 @@ import {
   FieldImageChoice,
   FieldLikert,
   FieldListbox,
+  FieldMatrixChoice,
   FieldNativeSelect,
   FieldNumber,
   FieldNumberInput,
@@ -122,6 +123,7 @@ interface DemoFormValues {
   shippingCity: string
   productStyle: string
   npsScore: number | undefined
+  satisfaction: Record<string, string | string[]>
 }
 
 const defaultValues: DemoFormValues = {
@@ -167,7 +169,19 @@ const defaultValues: DemoFormValues = {
   shippingCity: '',
   productStyle: '',
   npsScore: undefined,
+  satisfaction: {},
 }
+
+const matrixRows = [
+  { value: 'speed', label: 'Скорость доставки' },
+  { value: 'quality', label: 'Качество товара' },
+]
+
+const matrixColumns = [
+  { value: '1', label: 'Плохо' },
+  { value: '3', label: 'Нормально' },
+  { value: '5', label: 'Отлично' },
+]
 
 const imageChoiceOptions = [
   { value: 'modern', label: 'Современный', image: 'https://placehold.co/200x120?text=Modern' },
@@ -194,7 +208,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Form Develop App (shadcn)</h1>
       <p className="text-muted-foreground mt-2 text-sm">
-        Песочница для разработки @letar/forms-shadcn — 44 поля, Фаза 7.3 Шаг 5+.
+        Песочница для разработки @letar/forms-shadcn — 45 полей, Фаза 7.3 Шаг 5+.
       </p>
 
       <DemoForm<DemoFormValues>
@@ -310,6 +324,12 @@ export default function HomePage() {
           label="Насколько вы довольны сервисом?"
           anchors={['Совсем не доволен', 'Не доволен', 'Нейтрально', 'Доволен', 'Полностью доволен']}
           showNumbers
+        />
+        <FieldMatrixChoice
+          name="satisfaction"
+          label="Оцените аспекты заказа"
+          rows={matrixRows}
+          columns={matrixColumns}
         />
 
         <button

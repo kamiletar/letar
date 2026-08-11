@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (2026-08-11, продолжение 9)
+
+- Демо `FieldMatrixChoice` (`@letar/forms-shadcn` 0.27.0) — оценка аспектов заказа.
+
 ## Unreleased (2026-08-11, продолжение 8)
 
 - Демо `FieldLikert` (`@letar/forms-shadcn` 0.26.0) — NPS-опрос удовлетворённости.
