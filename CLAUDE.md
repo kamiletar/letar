@@ -61,7 +61,9 @@ ECONNREFUSED/ERR_DLOPEN_FAILED при зелёном билде ·
 [nextjs16-turbopack-default-emotion-hydration](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md)
 ⚠️ Turbopack по умолчанию + Chakra `<Global>` → hydration mismatch, флаки в e2e ·
 [turbopack-private-submodule-root](/.claude/docs/turbopack-private-submodule-root.md) «Could not find
-the Next.js package»
+the Next.js package» ·
+[nextjs-rsc-aspectratio-children-only](/.claude/docs/nextjs-rsc-aspectratio-children-only.md) ⚠️
+`AspectRatio` в Server Component → 500, но страница визуально ОК
 
 **Библиотеки и публикация:** [lib-entry-points](/.claude/docs/lib-entry-points.md) подпути
 `./server`/`./client`, границы, ESLint-ловушки ·
