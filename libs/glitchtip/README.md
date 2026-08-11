@@ -72,16 +72,33 @@ initClient({
 
 ## Переменные окружения приложения
 
-| Переменная                          | Где                            | Секрет?                                                                        |
-| ----------------------------------- | ------------------------------ | ------------------------------------------------------------------------------ |
-| `GLITCHTIP_DSN`                     | `docker-compose.*.yml`, сервер | Нет — тот же DSN, что и у клиента, ключ проекта не даёт доступа к чужим данным |
-| `NEXT_PUBLIC_GLITCHTIP_DSN`         | `docker-compose.*.yml`, клиент | Нет                                                                            |
-| `GLITCHTIP_ENVIRONMENT`             | сервер                         | Нет                                                                            |
-| `NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT` | клиент                         | Нет                                                                            |
+| Переменная                          | Где    | Секрет?                                                                        |
+| ----------------------------------- | ------ | ------------------------------------------------------------------------------ |
+| `GLITCHTIP_DSN`                     | сервер | Нет — тот же DSN, что и у клиента, ключ проекта не даёт доступа к чужим данным |
+| `NEXT_PUBLIC_GLITCHTIP_DSN`         | клиент | Нет                                                                            |
+| `GLITCHTIP_ENVIRONMENT`             | сервер | Нет                                                                            |
+| `NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT` | клиент | Нет                                                                            |
 
-DSN не секрет (как и у настоящего Sentry — ключ предназначен именно для клиентского бандла),
-поэтому все четыре можно держать литералом прямо в `docker-compose.*.yml`, без похода через
-`.env.docker.enc`.
+DSN не секрет (как и у настоящего Sentry — ключ предназначен именно для клиентского бандла), но
+⚠️ **обе `NEXT_PUBLIC_*`-переменные всё равно нельзя держать литералом в `docker-compose.*.yml`** —
+Next.js инлайнит `NEXT_PUBLIC_*` в клиентский бандл на этапе `nx build`, который выполняется ДО
+`docker compose up` и до литерала в compose-файле физически не добирается. Все четыре — в
+`apps/<app>/.env.docker`/`.env.docker.enc` (прод) и `.env.staging` (staging), а
+`docker-compose.*.yml` читает их через `${VAR}`:
+
+```yaml
+environment:
+  GLITCHTIP_DSN: ${GLITCHTIP_DSN}
+  GLITCHTIP_ENVIRONMENT: ${GLITCHTIP_ENVIRONMENT}
+  NEXT_PUBLIC_GLITCHTIP_DSN: ${NEXT_PUBLIC_GLITCHTIP_DSN}
+  NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT: ${NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT}
+```
+
+Найдено и исправлено на живом инциденте (`studio`, 2026-08-11, PLAN-INFRA.md §70) — клиентские
+ошибки на проде молча не долетали до GlitchTip несколько часов после первого деплоя, пока
+серверные доходили исправно. Полный разбор класса бага (не специфичного для GlitchTip — касается
+любой `NEXT_PUBLIC_*`) —
+[nextjs-public-env-build-time-inlining.md](/.claude/docs/nextjs-public-env-build-time-inlining.md).
 
 ## Команды
 
@@ -101,6 +118,7 @@ nx lint glitchtip
 [lib-entry-points.md](/.claude/docs/lib-entry-points.md).
 
 Дальше — создать `src/instrumentation.ts` и `src/instrumentation-client.ts` по образцу выше и
-прописать четыре переменные окружения в `docker-compose.*.yml` приложения (значения — реальный
-DSN, см. `infra/glitchtip/README.md` § «Подключённые приложения» или GlitchTip UI → Settings →
+прописать четыре переменные в `.env.docker`/`.env.staging` приложения (не в `docker-compose.*.yml`
+литералом — см. предупреждение выше), значения — реальный DSN, см. `infra/glitchtip/README.md`
+§ «Подключённые приложения» или GlitchTip UI → Settings →
 Client Keys нужного проекта).
