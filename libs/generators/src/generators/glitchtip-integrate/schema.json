@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "GlitchtipIntegrate",
+  "title": "GlitchTip Integrate Generator",
+  "type": "object",
+  "properties": {
+    "app": {
+      "type": "string",
+      "description": "Имя Next.js-приложения в apps/, которое подключается к GlitchTip",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "Какое приложение (apps/<app>) подключить к GlitchTip?"
+    },
+    "allowPrivate": {
+      "type": "boolean",
+      "description": "Разрешить запуск на приватном submodule (коммерческое/ПДн-приложение). Без флага генератор отказывает — GlitchTip живёт на s3 и шлёт события через интернет, не в изолированном контуре (см. PLAN-INFRA.md §70 п.5, infra/glitchtip/README.md § «Что не сделано»). Решение об изоляции принимается отдельно, до подключения ПДн-приложения",
+      "default": false
+    },
+    "skipChecks": {
+      "type": "boolean",
+      "description": "Не запускать nx typecheck:tsgo/lint после генерации файлов (например, при недоступном nx в CI-окружении генератора)",
+      "default": false
+    }
+  },
+  "required": ["app"]
+}
