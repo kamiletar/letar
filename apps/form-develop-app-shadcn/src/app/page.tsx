@@ -18,6 +18,7 @@ import {
   FieldEditable,
   FieldFileUpload,
   FieldHidden,
+  FieldImageChoice,
   FieldListbox,
   FieldNativeSelect,
   FieldNumber,
@@ -116,6 +117,7 @@ interface DemoFormValues {
   openingTime: string
   shippingCountry: string
   shippingCity: string
+  productStyle: string
 }
 
 const defaultValues: DemoFormValues = {
@@ -159,7 +161,18 @@ const defaultValues: DemoFormValues = {
   openingTime: '09:00',
   shippingCountry: '',
   shippingCity: '',
+  productStyle: '',
 }
+
+const imageChoiceOptions = [
+  { value: 'modern', label: 'Современный', image: 'https://placehold.co/200x120?text=Modern' },
+  {
+    value: 'classic',
+    label: 'Классический',
+    image: 'https://placehold.co/200x120?text=Classic',
+    description: 'Строгие линии',
+  },
+]
 
 const shippingCountryOptions = [
   { label: 'Россия', value: 'ru' },
@@ -176,7 +189,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Form Develop App (shadcn)</h1>
       <p className="text-muted-foreground mt-2 text-sm">
-        Песочница для разработки @letar/forms-shadcn — 41 поле, Фаза 7.3 Шаг 5+.
+        Песочница для разработки @letar/forms-shadcn — 42 поля, Фаза 7.3 Шаг 5+.
       </p>
 
       <DemoForm<DemoFormValues>
@@ -273,7 +286,12 @@ export default function HomePage() {
         <FieldNumberInput name="stock" label="Остаток на складе" min={0} max={999} />
         <FieldPasswordStrength name="strongPassword" label="Новый пароль" />
         <FieldTime name="openingTime" label="Время открытия" min="06:00" max="23:00" />
-        <FieldSelect name="shippingCountry" label="Страна доставки" options={shippingCountryOptions} placeholder="Выберите" />
+        <FieldSelect
+          name="shippingCountry"
+          label="Страна доставки"
+          options={shippingCountryOptions}
+          placeholder="Выберите"
+        />
         <FieldCascadingSelect
           name="shippingCity"
           label="Город доставки"
@@ -281,6 +299,7 @@ export default function HomePage() {
           loadOptions={async (country) => CITIES_BY_COUNTRY[country ?? ''] ?? []}
           placeholderWhenDisabled="Сначала выберите страну"
         />
+        <FieldImageChoice name="productStyle" label="Стиль товара" options={imageChoiceOptions} columns={2} />
 
         <button
           type="submit"

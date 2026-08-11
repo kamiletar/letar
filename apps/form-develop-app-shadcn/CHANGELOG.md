@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (2026-08-11, продолжение 6)
+
+- Демо `FieldImageChoice` (`@letar/forms-shadcn` 0.24.0) — выбор стиля товара.
+
 ## Unreleased (2026-08-11, продолжение 5)
 
 - Демо `FieldCascadingSelect` (`@letar/forms-shadcn` 0.23.0) — страна → город доставки.
