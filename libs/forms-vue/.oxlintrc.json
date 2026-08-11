@@ -1,0 +1,9 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+  "extends": ["../../.oxlintrc.json"],
+  "rules": {
+    // Пакет Vue, не React — `react-hooks/rules-of-hooks` ложно триггерится на Vue composables
+    // (useForm, useAppFormContext), названных по конвенции `use*`, но не являющихся React Hook.
+    "react-hooks/rules-of-hooks": "off"
+  }
+}

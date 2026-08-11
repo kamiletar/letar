@@ -1,0 +1,28 @@
+/// <reference types="vitest" />
+import { buildFormsCoreAlias } from '@letar/forms-core/testing'
+import { resolve } from 'path'
+import { defineConfig } from 'vitest/config'
+
+const formsCoreAlias = buildFormsCoreAlias(resolve(__dirname, '../forms-core'))
+
+export default defineConfig({
+  cacheDir: '../../node_modules/.vitest/forms-vue',
+  root: __dirname,
+  test: {
+    name: '@letar/forms-vue',
+    environment: 'jsdom',
+    globals: true,
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    exclude: ['node_modules', 'dist'],
+    coverage: {
+      provider: 'v8',
+      reportsDirectory: '../../coverage/libs/forms-vue',
+      reporter: ['text', 'json', 'html'],
+    },
+    clearMocks: true,
+    restoreMocks: true,
+  },
+  resolve: {
+    alias: formsCoreAlias,
+  },
+})
