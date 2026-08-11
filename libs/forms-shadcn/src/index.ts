@@ -22,6 +22,7 @@ export { FieldEditable } from './lib/fields/field-editable'
 export { FieldFileUpload } from './lib/fields/field-file-upload'
 export { FieldHidden, type HiddenFieldProps } from './lib/fields/field-hidden'
 export { FieldImageChoice } from './lib/fields/field-image-choice'
+export { FieldLikert } from './lib/fields/field-likert'
 export { FieldListbox } from './lib/fields/field-listbox'
 export { FieldNativeSelect } from './lib/fields/field-native-select'
 export { FieldNumber } from './lib/fields/field-number'
@@ -75,6 +76,7 @@ export type {
   FileUploadFieldProps,
   ImageChoiceFieldProps,
   ImageChoiceOption,
+  LikertFieldProps,
   ListboxFieldProps,
   ListboxOption,
   NativeSelectFieldProps,

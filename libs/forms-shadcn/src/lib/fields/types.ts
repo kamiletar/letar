@@ -272,6 +272,21 @@ export interface CityFieldProps extends BaseFieldProps {
   debounceMs?: number
 }
 
+/**
+ * Props for Form.Field.Likert (shadcn-скин). Значение — `number` (1-based индекс точки).
+ *
+ * Портирован из Chakra-версии без изменений логики. Beta: одна разметка на все брейкпоинты
+ * (горизонтальный ряд с `flex-wrap`), без отдельного мобильного вертикального вида — Chakra-версия
+ * рендерила два независимых DOM-дерева (`display: none` на разных брейкпоинтах), здесь один и
+ * тот же ряд переносится сам через `flex-wrap`.
+ */
+export interface LikertFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
+  /** Текстовые якоря — по одному на каждую точку шкалы */
+  anchors: string[]
+  /** Показывать номера точек (по умолчанию false) */
+  showNumbers?: boolean
+}
+
 /** Значение поля диапазона дат. */
 export interface DateRangeValue {
   start: string

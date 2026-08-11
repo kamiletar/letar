@@ -54,6 +54,7 @@ import {
   FieldFileUpload,
   FieldHidden,
   FieldImageChoice,
+  FieldLikert,
   FieldListbox,
   FieldNativeSelect,
   FieldNumber,
@@ -80,7 +81,7 @@ import {
 } from '@letar/forms-shadcn'
 ```
 
-## Поля (beta — 43 из 56, продолжаем к паритету с `@letar/forms`)
+## Поля (beta — 44 из 56, продолжаем к паритету с `@letar/forms`)
 
 Плюс `FormSteps` и `FieldTableEditor` — compound-компоненты форм-уровня, не `createField()`-поля
 (см. разделы ниже).
@@ -130,6 +131,7 @@ import {
 | `FieldCascadingSelect`  | `shadcnUIKit.Select` + `form.Subscribe`             |
 | `FieldImageChoice`      | обычные кнопки + `<img>`, без Radix                 |
 | `FieldSchedule`         | `@radix-ui/react-switch` + `<input type="time">` ×7 |
+| `FieldLikert`           | обычные кнопки, без Radix                           |
 
 `FieldCombobox` — упрощённая beta-версия: только статичные `options`, фильтрация по вхождению
 подстроки в `label`. Без `useQuery` (async-поиск) и группировки — Chakra-версия их поддерживает,
@@ -184,6 +186,11 @@ Chakra-версии без изменений домена (extensions, `onUpdat
 примитив, что `FieldSwitch`), время open/close (нативные `<input type="time">`,
 `NATIVE_INPUT_CLASS`), копирование понедельника на будни, предупреждение при `close <= open`.
 Портирован из Chakra-версии без изменений логики.
+
+`FieldLikert` — шкала Лайкерта, `role="radio"` в `role="radiogroup"`, тот же подход, что
+`FieldYesNo`/`FieldRadioCard`. Портирован из Chakra-версии без изменений логики. Beta: один
+горизонтальный ряд с `flex-wrap` на все брейкпоинты, без раздельного мобильного вертикального
+вида (Chakra-версия рендерила два независимых DOM-дерева, переключаемых `display: none`).
 
 `FieldYesNo` — два кликабельных блока (`role="radio"` в `role="radiogroup"`), тот же подход, что
 `FieldRadioCard`/`FieldListbox`; портирован из Chakra-версии без изменений логики, значение —
