@@ -31,6 +31,7 @@ export { FieldPinInput } from './lib/fields/field-pin-input'
 export { FieldRadioCard } from './lib/fields/field-radio-card'
 export { FieldRadioGroup } from './lib/fields/field-radio-group'
 export { FieldRating } from './lib/fields/field-rating'
+export { FieldRichText } from './lib/fields/field-rich-text'
 export { FieldSegmentGroup } from './lib/fields/field-segment-group'
 export { FieldSelect } from './lib/fields/field-select'
 export { FieldSignature } from './lib/fields/field-signature'
@@ -78,6 +79,7 @@ export type {
   RadioOption,
   RatingFieldProps,
   RichOption,
+  RichTextFieldProps,
   SegmentGroupFieldProps,
   SelectFieldProps,
   SelectOption,

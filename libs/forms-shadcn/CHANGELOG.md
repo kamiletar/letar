@@ -4,6 +4,31 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.18.0] - 2026-08-11
+
+### Added
+
+- **`FieldRichText`** — пятое, последнее из приоритетного списка координатора (Signature ✅ →
+  FileUpload ✅ → Steps ✅ → Table ✅ → **RichText** ✅, тред `forms-phase7-3-shadcn`) — паритет
+  по этому списку закрыт. WYSIWYG-редактор на Tiptap (`StarterKit` + `Underline` + `Link` +
+  `Placeholder`), портирован из `@letar/forms` (Chakra-скин): тот же домен (extensions, `onUpdate`,
+  синхронизация `value` при внешнем изменении, `outputFormat: 'html' | 'json'`), другая обвязка —
+  native `<button>`-тулбар вместо `IconButton`/`HStack`, Tailwind arbitrary-selector'ы вместо
+  Chakra `css`-проп для стилизации содержимого редактора (заголовки/списки/цитаты/код/ссылки) и
+  placeholder (`content-[attr(data-placeholder)]`).
+  - **Beta-упрощения:** без `imageUpload`/`ImagePopover` (загрузка изображений на сервер — не
+    портирована, требует app-specific upload endpoint); кнопка `link` — `window.prompt` вместо
+    Popover-формы (тот же фолбэк уже был в Chakra `TOOLBAR_CONFIG.link.action` на случай
+    использования без отдельного `LinkPopover`).
+  - Новые peer-зависимости: `@tiptap/react`, `@tiptap/starter-kit`, `@tiptap/extension-link`,
+    `@tiptap/extension-underline`, `@tiptap/extension-placeholder` (уже установлены в корне
+    монорепо как зависимости `@letar/forms`, здесь просто заявлены как peer).
+  - Тесты: рендер contenteditable, label, тулбар по умолчанию/ограниченный/скрытый,
+    disabled/readOnly, негативный контроль типов `toolbarButtons`. Клик по кнопке форматирования
+    проверяется только на отсутствие краша — jsdom не реализует DOM Selection API до состояния,
+    нужного ProseMirror, чтобы `toggleBold()` реально применился (аналог находки про
+    blur-события в `FieldTableEditor`, см. `libs/forms/PLAN.md` §7.3).
+
 ## [0.17.0] - 2026-08-10
 
 ### Added

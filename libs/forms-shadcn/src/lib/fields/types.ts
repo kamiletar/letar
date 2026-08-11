@@ -4,6 +4,7 @@ import type { AddressProvider } from '@letar/forms-core/address'
 import type { FileSecurityConfig } from '@letar/forms-core/security'
 import type { BaseFieldProps } from '@letar/forms-react'
 import type { ReactNode } from 'react'
+import type { ToolbarButton } from './rich-text-toolbar-config'
 
 export type { BaseFieldProps }
 
@@ -471,4 +472,23 @@ export interface ColorPickerFieldProps extends Omit<BaseFieldProps, 'placeholder
   swatches?: string[]
   /** Показывать hex-инпут (по умолчанию true) */
   showInput?: boolean
+}
+
+/**
+ * Props for Form.Field.RichText (shadcn-скин).
+ *
+ * Beta: без `imageUpload`/`ImagePopover` (загрузка изображений на сервер) и без Popover-формы
+ * для ссылок — кнопка `link` использует `window.prompt`. См. README `FieldRichText`.
+ */
+export interface RichTextFieldProps extends BaseFieldProps {
+  /** Минимальная высота редактора (по умолчанию '150px') */
+  minHeight?: string | number
+  /** Максимальная высота редактора (со скроллом) */
+  maxHeight?: string | number
+  /** Показывать тулбар (по умолчанию true) */
+  showToolbar?: boolean
+  /** Кнопки тулбара (по умолчанию все, см. `DEFAULT_TOOLBAR_BUTTONS`) */
+  toolbarButtons?: ToolbarButton[]
+  /** Формат значения: 'html' или 'json' (по умолчанию 'html') */
+  outputFormat?: 'html' | 'json'
 }

@@ -73,7 +73,7 @@ import {
 } from '@letar/forms-shadcn'
 ```
 
-## Поля (beta — 35 из 56, продолжаем к паритету с `@letar/forms`)
+## Поля (beta — 36 из 56, продолжаем к паритету с `@letar/forms`)
 
 Плюс `FormSteps` и `FieldTableEditor` — compound-компоненты форм-уровня, не `createField()`-поля
 (см. разделы ниже).
@@ -115,6 +115,7 @@ import {
 | `FieldSignature`      | `<canvas>` + typed mode (без Radix)           |
 | `FieldFileUpload`     | нативный `<input type="file">` (без Radix)    |
 | `FieldTableEditor`    | native `<table>` (без Radix, compound)        |
+| `FieldRichText`       | Tiptap, native `<button>`-тулбар (без Radix)  |
 
 `FieldCombobox` — упрощённая beta-версия: только статичные `options`, фильтрация по вхождению
 подстроки в `label`. Без `useQuery` (async-поиск) и группировки — Chakra-версия их поддерживает,
@@ -145,8 +146,14 @@ Radix), логика геометрии штрихов/SVG-сборки порт
 `FileUpload.ItemPreviewImage`. Security-проверка (`processFileWithSecurity`) — общая
 framework-free утилита с Chakra-версией, без изменений.
 
-Остальные ходовые поля (RichText и т.д.) — по мере миграции, каждое почти бесплатно благодаря
-готовому `UIKit`-контракту.
+`FieldRichText` — Tiptap-редактор (`StarterKit`+`Underline`+`Link`+`Placeholder`), портирован из
+Chakra-версии без изменений домена (extensions, `onUpdate`, синхронизация `value`); без
+`imageUpload`/`ImagePopover` (загрузка изображений на сервер не портирована) и без Popover-формы
+для ссылки (`window.prompt`) — см. отдельный раздел ниже.
+
+Остальные ходовые поля — по мере миграции, каждое почти бесплатно благодаря готовому
+`UIKit`-контракту. Приоритетный список координатора (Signature → FileUpload → Steps → Table →
+RichText) закрыт полностью.
 
 ## `FormSteps` — мультистеп (beta, не Field)
 
@@ -222,6 +229,38 @@ footer-агрегаты (`sum`/`avg`/`count`/`min`/`max`), copy-paste из Excel
 без `framer-motion`: не тянуть новый peer-зависимость ради одной фичи в первом проходе.
 Функционально эквивалентно (перетаскивание строк работает и вызывает `moveRow`), но без
 keyboard-DnD и анимации перестроения списка при перетаскивании.
+
+## `FieldRichText` — WYSIWYG-редактор (beta)
+
+```tsx
+import { FieldRichText } from '@letar/forms-shadcn'
+
+<FieldRichText
+  name="content"
+  label="Содержимое"
+  minHeight="200px"
+  toolbarButtons={['bold', 'italic', 'underline', 'link', 'bulletList', 'orderedList']}
+/>
+```
+
+Tiptap-редактор (`StarterKit` + `Underline` + `Link` + `Placeholder`), портирован из
+`@letar/forms` без изменений домена: те же extensions, `onUpdate` → `field.handleChange`
+(`outputFormat: 'html'` — по умолчанию, или `'json'` для `editor.getJSON()`), синхронизация
+`value` при внешнем изменении без прыжка курсора (`setContent(..., { emitUpdate: false })` только
+если контент реально отличается). Отличается только обвязка — native `<button>`-тулбар вместо
+Chakra `IconButton`/`HStack`, Tailwind arbitrary-selector'ы (`[&_.tiptap_h1]:...`) вместо
+Chakra `css`-пропа для стилизации заголовков/списков/цитат/кода/ссылок внутри редактора, и
+`content-[attr(data-placeholder)]` вместо `_before`-стиля для placeholder.
+
+**Beta-упрощения:**
+
+- без `imageUpload`/`ImagePopover` — вставка изображений с загрузкой на сервер (Chakra-версия
+  принимает `imageUpload: { endpoint, category?, maxSize?, acceptTypes? }`) не портирована:
+  требует app-specific upload endpoint, не framework-free логика для первого прохода;
+- кнопка `link` — `window.prompt('URL ссылки')` вместо Popover-формы с полем ввода и кнопкой
+  «удалить ссылку» (Chakra `LinkPopover`). Тот же фолбэк уже существовал в Chakra
+  `TOOLBAR_CONFIG.link.action` как запасной вариант без отдельного Popover-компонента — здесь он
+  стал основным путём, не запасным.
 
 ## `shadcnUIKit`
 
