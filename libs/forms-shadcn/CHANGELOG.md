@@ -4,6 +4,13 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.22.0] - 2026-08-11
+
+### Added
+
+- **`FieldTime`** — нативный `<input type="time">` с поддержкой `min`/`max`/`step` (в обход
+  `UIKitInputProps`, `NATIVE_INPUT_CLASS`). Паритет с `@letar/forms`: 40 из 56.
+
 ## [0.21.0] - 2026-08-11
 
 ### Added

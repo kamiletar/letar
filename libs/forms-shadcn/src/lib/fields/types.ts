@@ -86,6 +86,16 @@ export interface SegmentGroupFieldProps extends Omit<BaseFieldProps, 'placeholde
 /** Props for Form.Field.Date (shadcn-скин). Beta: нативный `<input type="date">`. */
 export type DateFieldProps = BaseFieldProps
 
+/** Props for Form.Field.Time (shadcn-скин). Beta: нативный `<input type="time">`. */
+export interface TimeFieldProps extends BaseFieldProps {
+  /** Минимальное время (`HH:MM`) */
+  min?: string
+  /** Максимальное время (`HH:MM`) */
+  max?: string
+  /** Шаг в секундах */
+  step?: number
+}
+
 /** Props for Form.Field.NativeSelect (shadcn-скин). Label — только `string` (нативный `<option>`). */
 export interface NativeSelectFieldProps extends BaseFieldProps {
   options: { label: string; value: string; disabled?: boolean }[]
