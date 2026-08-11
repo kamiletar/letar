@@ -14,6 +14,8 @@ export { FieldCity } from './lib/fields/field-city'
 export { FieldColorPicker } from './lib/fields/field-color-picker'
 export { FieldCombobox } from './lib/fields/field-combobox'
 export { FieldCurrency } from './lib/fields/field-currency'
+export { FieldDataGrid } from './lib/fields/field-data-grid'
+export type { DataGridColumnDef, DataGridFieldProps } from './lib/fields/field-data-grid-types'
 export { FieldDate } from './lib/fields/field-date'
 export { FieldDateRange } from './lib/fields/field-date-range'
 export { FieldDateTimePicker } from './lib/fields/field-datetime-picker'
@@ -67,11 +69,11 @@ export type {
   ComboboxFieldProps,
   CurrencyFieldProps,
   DateFieldProps,
-  DayOfWeek,
   DateRangeFieldProps,
   DateRangePreset,
   DateRangeValue,
   DateTimePickerFieldProps,
+  DayOfWeek,
   DurationFieldProps,
   EditableFieldProps,
   FileUploadFieldProps,

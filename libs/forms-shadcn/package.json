@@ -1,6 +1,6 @@
 {
   "name": "@letar/forms-shadcn",
-  "version": "0.27.0",
+  "version": "0.28.0",
   "description": "shadcn/ui-скин @letar/forms — реализация UIKit-контракта на Radix + cva + tailwind-merge",
   "type": "module",
   "main": "./src/index.ts",
@@ -24,6 +24,7 @@
     "@radix-ui/react-switch": ">=1.0.0",
     "@radix-ui/react-toggle-group": ">=1.0.0",
     "@tanstack/react-form": ">=1.0.0",
+    "@tanstack/react-table": ">=8.0.0",
     "@tiptap/extension-link": ">=3.0.0",
     "@tiptap/extension-placeholder": ">=3.0.0",
     "@tiptap/extension-underline": ">=3.0.0",

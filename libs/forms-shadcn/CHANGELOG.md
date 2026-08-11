@@ -4,6 +4,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.28.0] - 2026-08-11
+
+### Added
+
+- **`FieldDataGrid`** — большая таблица на `@tanstack/react-table` (новый peer-dep, `>=8.0.0`):
+  сортировка, текстовая фильтрация, пагинация, инлайн-редактирование, CSV-экспорт, bulk-удаление.
+  Реализация изолирована через `lazy()` + dynamic `import()` (`field-data-grid-impl.tsx`) — тот же
+  паттерн, что у `FieldRichText`, `@tanstack/react-table` резолвится только при рендере поля.
+  Beta: без виртуализации, resize/drag-reorder колонок и auto-резолва из schema. Паритет с
+  `@letar/forms`: 46 из 56.
+
 ## [0.27.0] - 2026-08-11
 
 ### Added

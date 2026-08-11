@@ -46,6 +46,7 @@ import {
   FieldColorPicker,
   FieldCombobox,
   FieldCurrency,
+  FieldDataGrid,
   FieldDate,
   FieldDateRange,
   FieldDateTimePicker,
@@ -82,7 +83,7 @@ import {
 } from '@letar/forms-shadcn'
 ```
 
-## Поля (beta — 45 из 56, продолжаем к паритету с `@letar/forms`)
+## Поля (beta — 46 из 56, продолжаем к паритету с `@letar/forms`)
 
 Плюс `FormSteps` и `FieldTableEditor` — compound-компоненты форм-уровня, не `createField()`-поля
 (см. разделы ниже).
@@ -134,6 +135,7 @@ import {
 | `FieldSchedule`         | `@radix-ui/react-switch` + `<input type="time">` ×7 |
 | `FieldLikert`           | обычные кнопки, без Radix                           |
 | `FieldMatrixChoice`     | native `<table>`, без Radix                         |
+| `FieldDataGrid`         | `@tanstack/react-table` (lazy), native `<table>`    |
 
 `FieldCombobox` — упрощённая beta-версия: только статичные `options`, фильтрация по вхождению
 подстроки в `label`. Без `useQuery` (async-поиск) и группировки — Chakra-версия их поддерживает,
@@ -198,6 +200,16 @@ Chakra-версии без изменений домена (extensions, `onUpdat
 варианты, портирован из Chakra-версии без изменений логики (per-row required-подсветка). Beta:
 одна разметка на все брейкпоинты (без мобильных карточек), без стрелочной клавиатурной
 навигации по ячейкам.
+
+`FieldDataGrid` — большая таблица на `@tanstack/react-table` (сортировка, текстовая фильтрация,
+пагинация, инлайн-редактирование, CSV-экспорт, bulk-удаление выбранных строк). Реализация вынесена
+в `field-data-grid-impl.tsx` и подгружается через `lazy()` + dynamic `import()` — тот же паттерн,
+что у `FieldRichText`: пакет резолвит `@tanstack/react-table` только при реальном рендере поля, не
+для любого импорта из `@letar/forms-shadcn`. Beta-упрощения относительно Chakra-версии: без
+виртуализации (`@tanstack/react-virtual` — второй тяжёлый peer, не тянем ради первого прохода, тот
+же принцип, что у `FieldTableEditor`), без resize/drag-reorder колонок, без auto-резолва колонок
+из schema (`columns` обязателен явно), тип редактируемой ячейки определяется рантайм-типом
+значения (`typeof`), не Zod-схемой.
 
 `FieldYesNo` — два кликабельных блока (`role="radio"` в `role="radiogroup"`), тот же подход, что
 `FieldRadioCard`/`FieldListbox`; портирован из Chakra-версии без изменений логики, значение —
