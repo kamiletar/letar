@@ -79,6 +79,16 @@ export interface NativeSelectFieldProps extends BaseFieldProps {
 /** Props for Form.Field.Switch (shadcn-скин). */
 export type SwitchFieldProps = Omit<BaseFieldProps, 'placeholder'>
 
+/** Props for Form.Field.YesNo (shadcn-скин). Значение — `boolean`. */
+export interface YesNoFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
+  /** Текст кнопки "Да" (по умолчанию 'Да') */
+  yesLabel?: string
+  /** Текст кнопки "Нет" (по умолчанию 'Нет') */
+  noLabel?: string
+  /** Визуальный вариант (по умолчанию 'buttons') */
+  variant?: 'buttons' | 'thumbs' | 'emoji'
+}
+
 /** Props for Form.Field.Slider (shadcn-скин). */
 export interface SliderFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
   min?: number

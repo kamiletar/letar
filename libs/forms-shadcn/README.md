@@ -70,10 +70,11 @@ import {
   FieldSwitch,
   FieldTags,
   FieldTextarea,
+  FieldYesNo,
 } from '@letar/forms-shadcn'
 ```
 
-## Поля (beta — 36 из 56, продолжаем к паритету с `@letar/forms`)
+## Поля (beta — 37 из 56, продолжаем к паритету с `@letar/forms`)
 
 Плюс `FormSteps` и `FieldTableEditor` — compound-компоненты форм-уровня, не `createField()`-поля
 (см. разделы ниже).
@@ -116,6 +117,7 @@ import {
 | `FieldFileUpload`     | нативный `<input type="file">` (без Radix)    |
 | `FieldTableEditor`    | native `<table>` (без Radix, compound)        |
 | `FieldRichText`       | Tiptap, native `<button>`-тулбар (без Radix)  |
+| `FieldYesNo`          | обычные кнопки, без Radix                     |
 
 `FieldCombobox` — упрощённая beta-версия: только статичные `options`, фильтрация по вхождению
 подстроки в `label`. Без `useQuery` (async-поиск) и группировки — Chakra-версия их поддерживает,
@@ -150,6 +152,10 @@ framework-free утилита с Chakra-версией, без изменени�
 Chakra-версии без изменений домена (extensions, `onUpdate`, синхронизация `value`); без
 `imageUpload`/`ImagePopover` (загрузка изображений на сервер не портирована) и без Popover-формы
 для ссылки (`window.prompt`) — см. отдельный раздел ниже.
+
+`FieldYesNo` — два кликабельных блока (`role="radio"` в `role="radiogroup"`), тот же подход, что
+`FieldRadioCard`/`FieldListbox`; портирован из Chakra-версии без изменений логики, значение —
+`boolean`. `variant="thumbs"`/`"emoji"` добавляют эмодзи-иконки поверх текста кнопок.
 
 Остальные ходовые поля — по мере миграции, каждое почти бесплатно благодаря готовому
 `UIKit`-контракту. Приоритетный список координатора (Signature → FileUpload → Steps → Table →

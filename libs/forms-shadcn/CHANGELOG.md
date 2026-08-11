@@ -4,6 +4,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.19.0] - 2026-08-11
+
+### Added
+
+- **`FieldYesNo`** — бинарный выбор (согласие/подтверждение) двумя кликабельными блоками
+  (`role="radio"` в `role="radiogroup"`), тот же паттерн, что `FieldRadioCard`/`FieldListbox`.
+  Портирован из Chakra-версии (`field-yes-no.tsx`) без изменений логики. Варианты `variant`:
+  `'buttons'` (текст), `'thumbs'` (👍/👎), `'emoji'` (😊/😞). Значение — `boolean`. Продолжение
+  паритета с `@letar/forms` (37 из 56 полей).
+
 ## [0.18.1] - 2026-08-11
 
 ### Changed

@@ -40,6 +40,7 @@ export { FieldString } from './lib/fields/field-string'
 export { FieldSwitch } from './lib/fields/field-switch'
 export { FieldTags } from './lib/fields/field-tags'
 export { FieldTextarea } from './lib/fields/field-textarea'
+export { FieldYesNo } from './lib/fields/field-yes-no'
 
 // Form.Field.TableEditor — не createField()-поле, компонует form.Field(mode="array") напрямую
 export { FieldTableEditor } from './lib/table'
@@ -91,6 +92,7 @@ export type {
   SwitchFieldProps,
   TagsFieldProps,
   TextareaFieldProps,
+  YesNoFieldProps,
 } from './lib/fields/types'
 export { FormSteps } from './lib/steps'
 export type {
