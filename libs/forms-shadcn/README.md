@@ -39,6 +39,7 @@ Chakra-провайдера, а не отдельный статический C
 import {
   FieldAddress,
   FieldAutocomplete,
+  FieldCascadingSelect,
   FieldCheckbox,
   FieldCheckboxCard,
   FieldCity,
@@ -77,7 +78,7 @@ import {
 } from '@letar/forms-shadcn'
 ```
 
-## Поля (beta — 40 из 56, продолжаем к паритету с `@letar/forms`)
+## Поля (beta — 41 из 56, продолжаем к паритету с `@letar/forms`)
 
 Плюс `FormSteps` и `FieldTableEditor` — compound-компоненты форм-уровня, не `createField()`-поля
 (см. разделы ниже).
@@ -124,6 +125,7 @@ import {
 | `FieldRichText`         | Tiptap, native `<button>`-тулбар (без Radix)  |
 | `FieldYesNo`            | обычные кнопки, без Radix                     |
 | `FieldTime`             | нативный `<input type="time">`                |
+| `FieldCascadingSelect`  | `shadcnUIKit.Select` + `form.Subscribe`       |
 
 `FieldCombobox` — упрощённая beta-версия: только статичные `options`, фильтрация по вхождению
 подстроки в `label`. Без `useQuery` (async-поиск) и группировки — Chakra-версия их поддерживает,
@@ -161,6 +163,13 @@ Chakra-версии без изменений домена (extensions, `onUpdat
 
 `FieldTime` — нативный `<input type="time">` в обход `UIKitInputProps` (не пропускает
 `min`/`max`/`step`), тот же приём `NATIVE_INPUT_CLASS`, что у `FieldDateRange`.
+
+`FieldCascadingSelect` — не `createField()`-поле (как `FormSteps`/`FieldTableEditor`), компонует
+`form.Subscribe` напрямую: рендер зависит от значения ДРУГОГО поля (`dependsOn`), не только от
+своего. Портирован из Chakra-версии без изменений логики (загрузка опций по значению родителя,
+сброс при смене родителя, disable пока родитель пуст). Beta: без generic-параметров
+`<TParent, TValue>` (только `string`), без визуального спиннера загрузки (только disabled-state
+на время `loadOptions`).
 
 `FieldYesNo` — два кликабельных блока (`role="radio"` в `role="radiogroup"`), тот же подход, что
 `FieldRadioCard`/`FieldListbox`; портирован из Chakra-версии без изменений логики, значение —

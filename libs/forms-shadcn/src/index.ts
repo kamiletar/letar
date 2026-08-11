@@ -7,6 +7,7 @@ export { createField, FieldErrorBoundary, FieldWrapper } from './lib/uikit/primi
 // Поля (Шаг 5 — 17 из 15-20, план перевыполнен; продолжение к паритету)
 export { FieldAddress } from './lib/fields/field-address'
 export { FieldAutocomplete } from './lib/fields/field-autocomplete'
+export { FieldCascadingSelect } from './lib/fields/field-cascading-select'
 export { FieldCheckbox } from './lib/fields/field-checkbox'
 export { FieldCheckboxCard } from './lib/fields/field-checkbox-card'
 export { FieldCity } from './lib/fields/field-city'
@@ -54,6 +55,7 @@ export type {
   AddressFieldProps,
   AddressValue,
   AutocompleteFieldProps,
+  CascadingSelectFieldProps,
   CheckboxCardFieldProps,
   CheckboxFieldProps,
   CityFieldProps,

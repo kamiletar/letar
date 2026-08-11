@@ -4,6 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.23.0] - 2026-08-11
+
+### Added
+
+- **`FieldCascadingSelect`** — каскадный select (страна→город), не `createField()`-поле —
+  компонует `form.Subscribe` напрямую. Портирован из Chakra-версии без изменений логики. Beta:
+  только `string`-generic, без спиннера загрузки. Паритет с `@letar/forms`: 41 из 56.
+
 ## [0.22.0] - 2026-08-11
 
 ### Added

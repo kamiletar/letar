@@ -28,6 +28,32 @@ export interface SelectOption {
   disabled?: boolean
 }
 
+/**
+ * Props for Form.Field.CascadingSelect (shadcn-скин). Значение — `string`.
+ *
+ * Портирован из Chakra-версии без изменений логики (загрузка опций по значению родительского
+ * поля через `form.Subscribe`, сброс значения при смене родителя, disable пока родитель пуст).
+ * Beta: generic-параметры `<TParent, TValue>` не портированы — только `string`/`string` (нет
+ * нужды в дженериках для доказательства UIKit-контракта), рендер через `shadcnUIKit.Select`,
+ * без спиннера загрузки (простой disabled-state триггера на время `loadOptions`).
+ */
+export interface CascadingSelectFieldProps extends BaseFieldProps {
+  /** Имя родительского поля, от значения которого зависит список опций */
+  dependsOn: string
+  /** Загрузка опций по значению родительского поля */
+  loadOptions: (parentValue: string | undefined) => Promise<SelectOption[]>
+  /** Опции до выбора значения родителя (по умолчанию []) */
+  initialOptions?: SelectOption[]
+  /** Сбрасывать значение при смене родителя (по умолчанию true) */
+  clearOnParentChange?: boolean
+  /** Дизейблить поле, пока родитель пуст (по умолчанию true) */
+  disableWhenParentEmpty?: boolean
+  /** Показать clear-кнопку (по умолчанию — true если поле не required) */
+  clearable?: boolean
+  /** Placeholder, пока родитель пуст */
+  placeholderWhenDisabled?: string
+}
+
 /** Props for Form.Field.Select (shadcn-скин). */
 export interface SelectFieldProps extends BaseFieldProps {
   /** Options for selection. If not specified, taken from schema meta */
