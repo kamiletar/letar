@@ -16,6 +16,25 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
 
 ## Backlog (запросы от агентов)
 
+### [2026-08-11] Рассинхрон источников истины по числу полей: form-mcp/docs/fields.md (49) vs реальность (56)
+
+- **Запросил:** forms-dev (найдено при докрутке `forms-shadcn` до release-ready, тред
+  `forms-phase7-3-shadcn`, письмо #45)
+- **Приоритет:** medium — вводит в заблуждение внешних потребителей и AI-агентов, но не блокирует
+  разработку
+- **Описание:** `mcp__form-mcp__list_fields` и `libs/forms/docs/fields.md` отдают **49** полей —
+  без `FieldCity` и всех 7 document-полей (`FieldInn`/`Kpp`/`Ogrn`/`Snils`/`Passport`/`Bik`/
+  `BankAccount`). Реальный подсчёт по файлам `src/lib/declarative/form-fields/**/field-*.tsx`
+  (минус инфраструктурные error/label/tooltip/wrapper/type-mapper) даёт **56** — с City и
+  document-полями. `form-mcp` — авторитетный источник именно для AI-ассистентов (`list_fields`
+  используется во всех формах согласно `.claude/rules/forms.md`), так что расхождение реально
+  вводит в заблуждение агентов, не только людей.
+- **Не в зоне резервации forms-dev по forms-shadcn** — `file_reservation_paths` не включает
+  `libs/form-mcp`. Нужна отдельная резервация на `libs/form-mcp` + `libs/forms/docs/fields.md`.
+- **Статус:** backlog, не назначено. Пофиксить — добавить City и 7 document-полей в
+  `list_fields`/`docs/fields.md`, свериться, что остальные 4 группы (`get_field_props`,
+  `get_field_example`, `get_form_pattern`, `get_directives`) их тоже знают.
+
 ### [2026-08-11] Свой mask-движок вместо use-mask-input — НУЖНА ОТДЕЛЬНАЯ ИССЛЕДОВАТЕЛЬСКАЯ СЕССИЯ
 
 - **Запросил:** Ками (через QuietRidge)
@@ -1880,8 +1899,8 @@ React, а React-адаптер зависит от абстракций ядра
       сессии — Browser pane не композитил кадры (`the Browser pane is not displayed`), тот же
       известный артефакт свёрнутой панели, что и в проверке `FieldTableEditor`; DOM/JS-проверки
       остаются валидными независимо от него.
-- ✅ **Шаг 5 — полный паритет `forms-shadcn` с `@letar/forms` достигнут (2026-08-11, forms-dev),
-  56 из 56 полей, `@letar/forms-shadcn` 0.30.0.** Одна непрерывная сессия дожала оставшиеся 12
+- ✅ **Шаг 5 — 47 из 56 полей `forms-shadcn` портировано (2026-08-11, forms-dev),
+  `@letar/forms-shadcn` 0.30.0.** Одна непрерывная сессия дожала оставшиеся 12
   полей вслед за приоритетным списком координатора (Signature→FileUpload→Steps→Table→RichText,
   все ✅ ранее): `FieldYesNo`, `FieldNumberInput`, `FieldPasswordStrength`, `FieldTime`,
   `FieldCascadingSelect`, `FieldImageChoice`, `FieldSchedule`, `FieldLikert`,
@@ -1915,9 +1934,19 @@ React, а React-адаптер зависит от абстракций ядра
     класс артефактов JS-харнесса (raw `dispatchEvent(MouseEvent)` не триггерит React-обработчик
     так же, как реальный клик в этой сессии), не баг компонента.
   - `apps/form-develop-app-shadcn` синхронизирован по ходу — по демо-коммиту на каждое поле,
-    финальный счётчик страницы «56 из 56 полей, полный паритет с `@letar/forms`».
-  - Следующий шаг — 7.4 (замер трафика) или докрутка README/CHANGELOG-цикла для release-ready
-    состояния пакета (ещё не решено, см. письмо координатора #3 в треде `forms-phase7-3-shadcn`).
+    финальный счётчик страницы «47 из 56 полей портировано».
+  - ⚠️ **Формулировка "56 из 56 / полный паритет" — исправлена на "47 из 56" (2026-08-11,
+    v0.30.1).** 56 — верный знаменатель (реальный подсчёт по файлам `@letar/forms`, включая
+    `City` и 7 document-полей), но числитель ошибочно включал 9 полей, которые не портированы:
+    `FieldMaskedInput`, `FieldCreditCard`, `FieldInn`, `FieldKpp`, `FieldOgrn`, `FieldSnils`,
+    `FieldPassport`, `FieldBik`, `FieldBankAccount` — все ждут исследовательскую сессию по
+    замене `use-mask-input` (backlog выше). Найдено при release-ready ревизии, решение
+    зафиксировано координатором `QuietRidge` (тред `forms-phase7-3-shadcn`): знаменатель не
+    занижать. Заодно найден попутный баг синхронизации источников истины на Chakra-стороне —
+    `form-mcp`/`docs/fields.md` дают только 49 полей (без `City` и document-полей) — вне
+    резервации `forms-shadcn`, координатор заводит отдельной backlog-записью.
+  - Следующий шаг — 7.4 (замер трафика, всё ещё не начат — трафика нет) или publish-prep
+    (`tsup.config.ts`/`package.publish.json`/entry-сплиттинг, задача координатора #47).
 - [ ] **7.4 Замер трафика** → решение: доносить сложные поля или нет.
 - [ ] **7.5 Docs-сайт на отдельном домене** + живые демо. SEO под `zod forms react`, `prisma form generator`.
 - [ ] **7.6 `llms.txt` + усиление MCP** — недоиспользованный козырь №1 (дёшево, уникально).
