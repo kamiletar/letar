@@ -52,6 +52,21 @@ export interface NumberFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
   step?: number
 }
 
+/**
+ * Props for Form.Field.NumberInput (shadcn-скин). Как `Form.Field.Number`, но с видимыми
+ * степпер-кнопками (increment/decrement).
+ *
+ * Beta-упрощение относительно Chakra-версии: без `formatOptions` (Intl-форматирование внутри
+ * инпута), `allowMouseWheel`, `clampValueOnBlur` — только min/max/step с клампом при клике по
+ * степпер-кнопкам (не при ручном вводе за пределы диапазона, как и у нативного
+ * `<input type="number">`).
+ */
+export interface NumberInputFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
+  min?: number
+  max?: number
+  step?: number
+}
+
 export interface RadioOption {
   label: ReactNode
   value: string

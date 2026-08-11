@@ -23,6 +23,7 @@ export { FieldHidden, type HiddenFieldProps } from './lib/fields/field-hidden'
 export { FieldListbox } from './lib/fields/field-listbox'
 export { FieldNativeSelect } from './lib/fields/field-native-select'
 export { FieldNumber } from './lib/fields/field-number'
+export { FieldNumberInput } from './lib/fields/field-number-input'
 export { FieldOTPInput } from './lib/fields/field-otp-input'
 export { FieldPassword } from './lib/fields/field-password'
 export { FieldPercentage } from './lib/fields/field-percentage'
@@ -69,6 +70,7 @@ export type {
   ListboxOption,
   NativeSelectFieldProps,
   NumberFieldProps,
+  NumberInputFieldProps,
   OTPInputFieldProps,
   PasswordFieldProps,
   PercentageFieldProps,

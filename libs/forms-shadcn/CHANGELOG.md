@@ -4,6 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.20.0] - 2026-08-11
+
+### Added
+
+- **`FieldNumberInput`** — числовое поле со степпер-кнопками (increment/decrement) поверх
+  `shadcnUIKit.NumberInput`. Beta: без `formatOptions`/`allowMouseWheel`/`clampValueOnBlur`.
+  Паритет с `@letar/forms`: 38 из 56.
+
 ## [0.19.0] - 2026-08-11
 
 ### Added

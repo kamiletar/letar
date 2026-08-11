@@ -55,6 +55,7 @@ import {
   FieldListbox,
   FieldNativeSelect,
   FieldNumber,
+  FieldNumberInput,
   FieldOTPInput,
   FieldPassword,
   FieldPercentage,
@@ -74,7 +75,7 @@ import {
 } from '@letar/forms-shadcn'
 ```
 
-## Поля (beta — 37 из 56, продолжаем к паритету с `@letar/forms`)
+## Поля (beta — 38 из 56, продолжаем к паритету с `@letar/forms`)
 
 Плюс `FormSteps` и `FieldTableEditor` — compound-компоненты форм-уровня, не `createField()`-поля
 (см. разделы ниже).
@@ -86,6 +87,7 @@ import {
 | `FieldSelect`         | `@radix-ui/react-select`                      |
 | `FieldTextarea`       | нативный `<textarea>`                         |
 | `FieldNumber`         | нативный `<input type="number">`              |
+| `FieldNumberInput`    | нативный `<input type="number">` + степпер    |
 | `FieldRadioGroup`     | `@radix-ui/react-radio-group`                 |
 | `FieldSegmentGroup`   | `@radix-ui/react-toggle-group`                |
 | `FieldDate`           | нативный `<input type="date">`                |
@@ -156,6 +158,11 @@ Chakra-версии без изменений домена (extensions, `onUpdat
 `FieldYesNo` — два кликабельных блока (`role="radio"` в `role="radiogroup"`), тот же подход, что
 `FieldRadioCard`/`FieldListbox`; портирован из Chakra-версии без изменений логики, значение —
 `boolean`. `variant="thumbs"`/`"emoji"` добавляют эмодзи-иконки поверх текста кнопок.
+
+`FieldNumberInput` — тот же `shadcnUIKit.NumberInput`, что у `FieldNumber`, плюс видимые
+степпер-кнопки (increment/decrement, `lucide-react` иконки), поверх инпута абсолютным
+позиционированием. Beta: без `formatOptions` (Intl-форматирование внутри инпута),
+`allowMouseWheel`, `clampValueOnBlur` — клампинг min/max только при клике по степперу.
 
 Остальные ходовые поля — по мере миграции, каждое почти бесплатно благодаря готовому
 `UIKit`-контракту. Приоритетный список координатора (Signature → FileUpload → Steps → Table →
