@@ -301,6 +301,22 @@ export default [
       'no-console': 'off',
     },
   },
+  // Тесты/бенчмарки/тестовые утилиты — пустые моки (IntersectionObserver, no-op колбэки)
+  // легитимны и не являются багом, в отличие от того же паттерна в боевом коде
+  {
+    files: [
+      '**/*.spec.ts',
+      '**/*.spec.tsx',
+      '**/*.test.ts',
+      '**/*.test.tsx',
+      '**/*.bench.tsx',
+      '**/__tests__/**',
+      '**/lib/testing/**',
+    ],
+    rules: {
+      '@typescript-eslint/no-empty-function': 'off',
+    },
+  },
   // Playwright e2e — отключаем шумные правила
   {
     files: ['**/*.spec.ts'],

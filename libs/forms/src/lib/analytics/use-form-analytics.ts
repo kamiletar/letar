@@ -27,7 +27,9 @@ export function useFormAnalytics(config?: FormAnalyticsConfig): UseFormAnalytics
       for (const adapter of adapters) {
         try {
           adapter.track(event, formId)
-        } catch {}
+        } catch {
+          // намеренно игнорируем — сбой аналитики не должен ронять форму
+        }
       }
       // Callbacks
       switch (event.type) {
@@ -62,13 +64,17 @@ export function useFormAnalytics(config?: FormAnalyticsConfig): UseFormAnalytics
     for (const adapter of adapters) {
       try {
         adapter.init?.()
-      } catch {}
+      } catch {
+        // намеренно игнорируем — сбой адаптера не должен ронять форму
+      }
     }
     return () => {
       for (const adapter of adapters) {
         try {
           adapter.destroy?.()
-        } catch {}
+        } catch {
+          // намеренно игнорируем — сбой адаптера не должен ронять форму
+        }
       }
     }
   }, [enabled, adapters])

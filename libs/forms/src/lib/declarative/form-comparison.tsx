@@ -44,7 +44,9 @@ export function FormComparison<T extends Record<string, unknown>>({
         }
       }
     }
-  } catch {}
+  } catch {
+    // schema может быть не Zod-объектом — заголовки полей опциональны
+  }
 
   const allKeys = [...new Set([...Object.keys(original), ...Object.keys(current)])].filter(
     (key) => !exclude.includes(key),

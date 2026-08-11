@@ -1,6 +1,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { srtToVtt } from '@letar/video-player-core'
 import { useSubtitles } from './useSubtitles'
 
 import type { UseSubtitlesOptions } from './useSubtitles'
@@ -67,7 +68,6 @@ describe('useSubtitles', () => {
   })
 
   it('loadNative() конвертирует SRT в VTT перед созданием track', async () => {
-    const { srtToVtt } = await import('@letar/video-player-core')
     vi.stubGlobal(
       'fetch',
       vi.fn(async () => ({ text: async () => '1\n00:00:00,000 --> 00:00:01,000\nHello' })),

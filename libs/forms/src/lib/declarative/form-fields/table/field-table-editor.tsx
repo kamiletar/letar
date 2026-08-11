@@ -108,6 +108,8 @@ export function FieldTableEditor({
 
   // Стейт для addRow (будет определён внутри render callback)
   // Хук навигации вызываем здесь, передаём addRow через ref
+  // Плейсхолдер — реальная функция переприсваивается ниже перед использованием
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   const addRowRef = { current: () => {} }
   const rowCountRef = { current: 0 }
   const canAddRef = { current: false }

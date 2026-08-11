@@ -47,7 +47,9 @@ export function FormReadOnlyView<T extends Record<string, unknown>>({
         }
       }
     }
-  } catch {}
+  } catch {
+    // schema может быть не Zod-объектом — заголовки полей опциональны
+  }
 
   const entries = Object.entries(data).filter(([key]) => {
     if (exclude.includes(key)) {
