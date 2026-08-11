@@ -7975,7 +7975,9 @@ SaaS-Sentry отпадает отдельно: тело ошибки тащит 
    (`GLITCHTIP_DSN`/`GLITCHTIP_ENVIRONMENT`/`NEXT_PUBLIC_GLITCHTIP_DSN`/
    `NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT`) перенесены в `.env.docker`/`.env.docker.enc`, compose
    читает их через `${VAR}`. Проверено локально: пересборка с тем же `set -a; source .env.docker`
-   перед `nx build` — DSN появляется в `.next/static/chunks/*.js`. Ждёт повторного деплоя.
+   перед `nx build` — DSN появляется в `.next/static/chunks/*.js`. ✅ Задеплоено и проверено
+   живьём (2026-08-11) — тестовая ошибка через браузер на `studio.letar.best` дошла до GlitchTip
+   (issue id=2). Клиентский и серверный пути теперь оба подтверждены рабочими на проде.
    ⚠️ **Тот же баг остаётся на staging** — `NEXT_PUBLIC_GLITCHTIP_DSN` в
    `docker-compose.staging.yml` тоже литерал, а `apps/studio/.env.staging` существует только на
    сервере (§18.8, не в этом чекауте) — агент не может отредактировать его напрямую. Нужен
