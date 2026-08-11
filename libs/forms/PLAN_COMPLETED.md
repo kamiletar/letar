@@ -1,5 +1,24 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-08-11 (2) — Фаза 7.6: `llms.txt` + фикс `form-mcp`/`docs/fields.md`
+
+Задача координатора `QuietRidge` (тред `forms-phase7-3-shadcn`, msg #54), два независимых потока.
+
+**`form-mcp` v1.0.3.** `field-registry.ts` → `CATEGORY_MAP` ждал ключ `'Российские документы'`,
+реальный заголовок секции в `docs/fields.md` — `## Документные поля (Россия)`. Несовпадение строк
+молча роняло всю секцию из парсера — `list_fields`/`get_field_props`/`get_field_example` (общий
+`fieldRegistry`) не знали про `INN`/`KPP`/`OGRN`/`BIK`/`BankAccount`/`SNILS`/`Passport`. Заодно
+найдено: `FieldCity` отсутствовал в `docs/fields.md` целиком, хотя экспортируется как
+`Form.Field.City` — не парсер-баг, поле не было задокументировано. Добавлена строка в
+«Специализированные», счётчик в шапке файла поправлен 56 → 57. Ручная проверка (`bun run` с
+реальными путями): `total: 57, has city/inn/bik: true, document count: 7`.
+
+**`llms.txt` для `apps/form-docs`** — см. `apps/form-docs/PLAN_COMPLETED.md`, сессия
+2026-08-11 (2).
+
+Коммиты: `9d2b9fc5` (form-mcp), `a029f6f9` (forms docs/PLAN), `043f764c` (form-docs llms.txt),
+`e258912c` (launch.json).
+
 ## 2026-08-10 — Фаза 7.3, шаги 3-5: `@letar/forms-react`, фикс публикации типов, подготовка shadcn
 
 Thread `forms-phase7-1-core-split`. Коммиты `858a000b`, `7fbd1b5d`, `d1c755fa` + шесть коммитов
