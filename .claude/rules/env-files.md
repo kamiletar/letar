@@ -77,6 +77,12 @@ SSH до перехода на SOPS. Сейчас доставку делает 
 
 > Прецедент: Этап 8 auth-hub добавил `AUTH_ENCRYPTION_KEY` в `.env.docker.enc`, но не в `environment:` compose → `db.ts` бросал throw в production → 500 на всех страницах SSO (commit `225fb4f`).
 
+⚠️ **Для `NEXT_PUBLIC_*` этих двух мест недостаточно.** Правило выше закрывает обычные серверные
+переменные; клиентские требуют дополнительно физического присутствия значения в `.env.docker`
+(не только литерала в `environment:` compose) ещё **до** сборки — иначе Next.js инлайнит в
+клиентский бандл `undefined`, без единой ошибки в логах. Разбор класса бага и фикс —
+[nextjs-public-env-build-time-inlining.md](/.claude/docs/nextjs-public-env-build-time-inlining.md).
+
 ## ⛔ `ALLOW_DEV_SESSION` / `DEV_SESSION_TOKEN` — ТОЛЬКО в `.env.staging`
 
 Приложения со staging-e2e через `@letar/auth/server` `createDevSessionRoute` (см. grandslamcup) держат в `.env.staging` пару переменных, открывающую бэкдор-эндпоинт `/api/auth/dev-session` — создание сессии для **любого** email без пароля/OIDC.
