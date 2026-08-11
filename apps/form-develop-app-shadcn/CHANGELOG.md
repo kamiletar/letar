@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (2026-08-11, продолжение 3)
+
+- Демо `FieldPasswordStrength` (`@letar/forms-shadcn` 0.21.0).
+
 ## Unreleased (2026-08-11, продолжение 2)
 
 - Демо `FieldNumberInput` (`@letar/forms-shadcn` 0.20.0) — остаток на складе, min/max.

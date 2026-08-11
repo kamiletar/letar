@@ -23,6 +23,7 @@ import {
   FieldNumberInput,
   FieldOTPInput,
   FieldPassword,
+  FieldPasswordStrength,
   FieldPercentage,
   FieldPhone,
   FieldPinInput,
@@ -109,6 +110,7 @@ interface DemoFormValues {
   attachments: File[]
   newsletterConsent: boolean | undefined
   stock: number | undefined
+  strongPassword: string
 }
 
 const defaultValues: DemoFormValues = {
@@ -148,6 +150,7 @@ const defaultValues: DemoFormValues = {
   attachments: [],
   newsletterConsent: undefined,
   stock: 10,
+  strongPassword: '',
 }
 
 export default function HomePage() {
@@ -155,7 +158,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Form Develop App (shadcn)</h1>
       <p className="text-muted-foreground mt-2 text-sm">
-        Песочница для разработки @letar/forms-shadcn — 38 полей, Фаза 7.3 Шаг 5+.
+        Песочница для разработки @letar/forms-shadcn — 39 полей, Фаза 7.3 Шаг 5+.
       </p>
 
       <DemoForm<DemoFormValues>
@@ -250,6 +253,7 @@ export default function HomePage() {
         />
         <FieldYesNo name="newsletterConsent" label="Подписаться на рассылку?" variant="thumbs" />
         <FieldNumberInput name="stock" label="Остаток на складе" min={0} max={999} />
+        <FieldPasswordStrength name="strongPassword" label="Новый пароль" />
 
         <button
           type="submit"
