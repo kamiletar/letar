@@ -1,6 +1,6 @@
 # План развития Dashboard
 
-> **Версия:** 1.24.0
+> **Версия:** 1.24.1
 > **Последнее обновление:** 2026-08-11
 
 ---
@@ -33,6 +33,10 @@
 - Запись env на SiteCard с мульти-серверной маршрутизацией (s1 agent + s2 nsenter)
 - Контроль зависимостей (§25 PLAN-INFRA.md, Этап 1 MVP) — `scripts/deps-scan.ts` +
   `/deps` + алерт `DEPS_VULNERABLE`, детали — `PLAN-INFRA.md` §25, `CHANGELOG.md` 1.24.0
+- Dev-session bypass для preview-верификации без OIDC (`/api/auth/dev-session`,
+  `@letar/auth/server` `createDevSessionRoute` — тот же паттерн, что в `domwellbes`/
+  `grandslamcup`). `ALLOW_DEV_SESSION`/`DEV_SESSION_TOKEN` только в `.env.local`,
+  **никогда в `.env.docker`** (см. `.claude/rules/env-files.md`)
 
 ---
 

@@ -2,6 +2,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.24.1] — 2026-08-11
+
+### Feature: dev-session bypass для preview-верификации
+
+Дашборд входит только через OIDC Ключницы — headless-браузер не может пройти этот флоу,
+поэтому UI-изменения было невозможно проверить вживую без ручного логина. Добавлен
+`/api/auth/dev-session` через `@letar/auth/server` `createDevSessionRoute` — тот же паттерн,
+что уже используют `domwellbes` и `grandslamcup`. Двойная защита `ALLOW_DEV_SESSION=true` +
+`DEV_SESSION_TOKEN` (constant-time сравнение), обе переменные — **только в `.env.local`**,
+никогда в `.env.docker`/`.env.docker.enc`. `NODE_ENV` не годится индикатором окружения
+(`next build`/`next start` всегда `'production'`), поэтому единственная защита — эта пара
+переменных, которая физически не попадает в прод-конфиг.
+
 ## [1.24.0] — 2026-08-11
 
 ### Feature: контроль зависимостей (§25 PLAN-INFRA.md, Этап 1 — MVP)

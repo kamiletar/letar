@@ -80,6 +80,16 @@ const containers = await docker.listContainers()
 const stats = await container.stats({ stream: false })
 ```
 
+## Preview-верификация без OIDC
+
+Вход в дашборд — только через OIDC Ключницы, headless-браузер такой флоу пройти не может.
+Для живой проверки UI в dev есть `GET /api/auth/dev-session?token=<DEV_SESSION_TOKEN>&redirect=<path>`
+(`@letar/auth/server` `createDevSessionRoute`, тот же паттерн, что в `domwellbes`/`grandslamcup`).
+Токен и флаг `ALLOW_DEV_SESSION=true` — постоянно в `apps/dashboard/.env.local` (не коммитится,
+не переносить в `.env.docker`). `+`/`/` в base64-токене обязательно URL-кодировать в query
+(`%2B`/`%2F`) — иначе браузер/`fetch` декодирует `+` в пробел, и constant-time сравнение не
+пройдёт.
+
 ## Правила
 
 - **MUST** использовать SSE для real-time обновлений
