@@ -72,6 +72,38 @@ import { SortablePhotoGrid } from '@letar/admin-ui'
 (первый элемент в порядке) через переданные server actions. `onReorder`/`onSetCover`/`onDelete`
 должны вернуть `{ error?: string }` — при ошибке UI откатывает оптимистичное обновление.
 
+#### `createImageGalleryActions` (`@letar/admin-ui/server`)
+
+Фабрика 5 Server Actions под `SortablePhotoGrid` — add/delete/reorder/setCover/updateAlt для
+модели галереи с полями `id`/`order`/`alt` и одним FK. Не завязана на конкретный ZenStack-клиент
+приложения — `getContext(user)` возвращает делегат модели + `$transaction` вызывающей стороны:
+
+```ts
+// house-image.action.ts
+'use server'
+import { createImageGalleryActions } from '@letar/admin-ui/server'
+
+const actions = createImageGalleryActions({
+  fkField: 'houseId',
+  requireRole,
+  roles: HOUSE_ADMIN_ROLES,
+  getContext: (user) => {
+    const db = getEnhancedPrisma(user as never)
+    return { model: db.houseImage, transaction: (ops) => db.$transaction(ops) }
+  },
+  revalidatePathFor: (houseId) => `/admin/houses/${houseId}/`,
+  revalidatePath,
+})
+
+export async function addHouseImageAction(houseId: string, url: string) {
+  return actions.addImageAction(houseId, url)
+}
+// ...deleteImageAction, reorderImagesAction, setCoverImageAction, updateImageAltAction
+```
+
+Образец — `apps/domwellbes` (`house-image.action.ts`, `material-image.action.ts`,
+`portfolio-image.action.ts`).
+
 ### Form Fields
 
 | Компонент   | Описание                                |
