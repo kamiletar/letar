@@ -14,6 +14,7 @@ export {
 export { type ConsentConfig, type CookieConsentState, createConsentConfig, readConsentState } from './lib/consent-types'
 export { CookieBanner, type CookieBannerProps } from './lib/cookie-banner'
 export { CookieSettingsButton, type CookieSettingsButtonProps } from './lib/cookie-settings-button'
+export { CoverImage, type CoverImageProps } from './lib/cover-image'
 export { DeleteAccountZone, type DeleteAccountZoneProps } from './lib/delete-account-zone'
 export { AppEmptyState, type AppEmptyStateProps } from './lib/empty-state'
 export { ExternalLink, type ExternalLinkProps } from './lib/external-link'
