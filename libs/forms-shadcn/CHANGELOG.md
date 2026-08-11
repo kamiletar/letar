@@ -4,6 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.24.0] - 2026-08-11
+
+### Added
+
+- **`FieldImageChoice`** — grid карточек с изображениями (single/multiple selection),
+  портирован из Chakra-версии без изменений логики. Beta: фиксированные колонки через inline
+  `gridTemplateColumns`, без `SimpleGrid`-responsive. Паритет с `@letar/forms`: 42 из 56.
+
 ## [0.23.0] - 2026-08-11
 
 ### Added

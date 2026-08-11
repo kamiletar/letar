@@ -53,6 +53,7 @@ import {
   FieldEditable,
   FieldFileUpload,
   FieldHidden,
+  FieldImageChoice,
   FieldListbox,
   FieldNativeSelect,
   FieldNumber,
@@ -78,7 +79,7 @@ import {
 } from '@letar/forms-shadcn'
 ```
 
-## Поля (beta — 41 из 56, продолжаем к паритету с `@letar/forms`)
+## Поля (beta — 42 из 56, продолжаем к паритету с `@letar/forms`)
 
 Плюс `FormSteps` и `FieldTableEditor` — compound-компоненты форм-уровня, не `createField()`-поля
 (см. разделы ниже).
@@ -126,6 +127,7 @@ import {
 | `FieldYesNo`            | обычные кнопки, без Radix                     |
 | `FieldTime`             | нативный `<input type="time">`                |
 | `FieldCascadingSelect`  | `shadcnUIKit.Select` + `form.Subscribe`       |
+| `FieldImageChoice`      | обычные кнопки + `<img>`, без Radix           |
 
 `FieldCombobox` — упрощённая beta-версия: только статичные `options`, фильтрация по вхождению
 подстроки в `label`. Без `useQuery` (async-поиск) и группировки — Chakra-версия их поддерживает,
@@ -170,6 +172,11 @@ Chakra-версии без изменений домена (extensions, `onUpdat
 сброс при смене родителя, disable пока родитель пуст). Beta: без generic-параметров
 `<TParent, TValue>` (только `string`), без визуального спиннера загрузки (только disabled-state
 на время `loadOptions`).
+
+`FieldImageChoice` — grid карточек с изображениями (`role="radio"`/`role="checkbox"` на обычных
+кнопках), портирован из Chakra-версии без изменений логики single/multiple selection. Beta:
+`columns` — фиксированное число колонок через inline `gridTemplateColumns`, без Chakra
+`SimpleGrid`-responsive (`base=1, sm=2, md=columns`).
 
 `FieldYesNo` — два кликабельных блока (`role="radio"` в `role="radiogroup"`), тот же подход, что
 `FieldRadioCard`/`FieldListbox`; портирован из Chakra-версии без изменений логики, значение —

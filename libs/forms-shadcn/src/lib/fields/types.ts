@@ -403,6 +403,31 @@ export interface ListboxFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
   selectionMode?: 'single' | 'multiple'
 }
 
+/** Опция для `Form.Field.ImageChoice`. */
+export interface ImageChoiceOption {
+  value: string
+  label: string
+  image: string
+  /** Описание под label */
+  description?: string
+}
+
+/**
+ * Props for Form.Field.ImageChoice (shadcn-скин). Grid карточек с изображениями (стили,
+ * продукты, категории). Значение — `string` (single) или `string[]` (multiple).
+ *
+ * Портирован из Chakra-версии без изменений логики. `columns` — фиксированное число колонок на
+ * `md`+ (Chakra-версия давала полноценный responsive `SimpleGrid`, здесь — Tailwind `grid-cols`
+ * по брейкпоинту `md`, `sm`/`base` всегда 1/2 колонки).
+ */
+export interface ImageChoiceFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
+  options: ImageChoiceOption[]
+  /** Число колонок на десктопе (по умолчанию 3) */
+  columns?: number
+  /** Множественный выбор (по умолчанию false) */
+  multiple?: boolean
+}
+
 /** Опция для RadioCard/CheckboxCard — с описанием и иконкой. */
 export interface RichOption {
   label: ReactNode
