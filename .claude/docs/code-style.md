@@ -40,12 +40,13 @@
 - **`prefer-const`**: использовать const где возможно
 - **`no-var`**: не использовать var
 
-### ⚠️ `curly` + dprint: `eslint --fix` не помогает, скобки ставим руками
+### ✅ `curly` + dprint — закрыто, скобки ставит форматтер сам
 
-`curly: ['error', 'all']` требует скобки всегда, а у dprint по умолчанию
-`ifStatement.useBraces: "whenNotSingleLine"` — он снимает скобки, если тело влезает в строку.
-Инструменты гоняют код по кругу:
+`curly: ['error', 'all']` требует скобки всегда. До 2026-08-09 это конфликтовало с dprint
+(`useBraces: "whenNotSingleLine"` по умолчанию снимал скобки у однострочных `if`, `eslint --fix`
+ставил их обратно — инструменты гоняли код по кругу). Раньше это выглядело так:
 
+<!-- dprint-ignore -->
 ```ts
 if (!header) return undefined // ← curly: error
 
@@ -58,7 +59,9 @@ if (!header) {
 if (!header) return undefined // ← снова curly: error
 ```
 
-**Пиши скобки сразу и в три строки** — такую форму dprint не трогает:
+**Фикс:** `"useBraces": "always"` в корневом `dprint.json` (2026-08-09), пропагирован во все 12
+приватных submodule со своим `dprint.json` (2026-08-12, §20 `PLAN-INFRA.md`). Писать скобки
+руками больше не нужно — `bunx dprint fmt` расставляет их сам и больше не снимает:
 
 ```ts
 if (!header) {
