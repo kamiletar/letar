@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (2026-08-11, продолжение 7)
+
+- Демо `FieldSchedule` (`@letar/forms-shadcn` 0.25.0) — изолированная форма, недельное расписание.
+
 ## Unreleased (2026-08-11, продолжение 6)
 
 - Демо `FieldImageChoice` (`@letar/forms-shadcn` 0.24.0) — выбор стиля товара.

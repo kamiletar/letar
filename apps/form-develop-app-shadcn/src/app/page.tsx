@@ -1,6 +1,7 @@
 'use client'
 
 import type { AddressProvider } from '@letar/forms-core/address'
+import type { WeeklySchedule } from '@letar/forms-shadcn'
 import {
   FieldAddress,
   FieldAutocomplete,
@@ -33,6 +34,7 @@ import {
   FieldRadioGroup,
   FieldRating,
   FieldRichText,
+  FieldSchedule,
   FieldSegmentGroup,
   FieldSelect,
   FieldSignature,
@@ -189,7 +191,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Form Develop App (shadcn)</h1>
       <p className="text-muted-foreground mt-2 text-sm">
-        Песочница для разработки @letar/forms-shadcn — 42 поля, Фаза 7.3 Шаг 5+.
+        Песочница для разработки @letar/forms-shadcn — 43 поля, Фаза 7.3 Шаг 5+.
       </p>
 
       <DemoForm<DemoFormValues>
@@ -400,6 +402,38 @@ export default function HomePage() {
         }}
       >
         <FieldRichText name="content" label="Содержимое" minHeight="180px" />
+
+        <button
+          type="submit"
+          className="bg-primary text-primary-foreground mt-4 rounded-md px-4 py-2 text-sm font-medium"
+        >
+          Отправить
+        </button>
+      </DemoForm>
+
+      <h2 className="mt-16 text-xl font-semibold">FieldSchedule (beta, отдельная форма)</h2>
+      <p className="text-muted-foreground mt-1 text-sm">
+        Редактор недельного расписания — изолированная песочница, значение объектное (`WeeklySchedule`), не завязана на
+        поля выше.
+      </p>
+      <DemoForm<{ hours: WeeklySchedule }>
+        defaultValues={{
+          hours: {
+            monday: { open: '09:00', close: '18:00' },
+            tuesday: { open: '09:00', close: '18:00' },
+            wednesday: { open: '09:00', close: '18:00' },
+            thursday: { open: '09:00', close: '18:00' },
+            friday: { open: '09:00', close: '18:00' },
+            saturday: null,
+            sunday: null,
+          },
+        }}
+        onSubmit={(value) => {
+          // eslint-disable-next-line no-console
+          console.log('schedule submit', value)
+        }}
+      >
+        <FieldSchedule name="hours" label="Часы работы" />
 
         <button
           type="submit"
