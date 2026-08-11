@@ -36,6 +36,12 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // POST /api/deps/scan вызывается scripts/deps-scan.ts с машины разработчика (X-Cron-Secret) —
+  // GET /api/deps/latest остаётся под сессией (§25 PLAN-INFRA.md)
+  if (pathname === '/api/deps/scan' && request.method === 'POST') {
+    return NextResponse.next()
+  }
+
   // Проверяем сессию через Better Auth
   const session = await auth.api.getSession({
     headers: request.headers,

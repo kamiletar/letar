@@ -116,6 +116,10 @@ enum AlertType {
   CRON_FAILED
   /// SSL сертификат скоро истекает или уже истёк
   SSL_EXPIRING
+  /// Найдены уязвимые зависимости (§25 PLAN-INFRA.md)
+  DEPS_VULNERABLE
+  /// Lock-файл давно не обновлялся (§25 PLAN-INFRA.md)
+  DEPS_STALE
 }
 
 /// Уровни серьёзности алертов
@@ -166,6 +170,40 @@ enum AppType {
   CLI
   /// Фоновый сервис
   SERVICE
+}
+
+/// Тип доступного обновления пакета (§25 PLAN-INFRA.md)
+enum DepUpdateKind {
+  MAJOR
+  MINOR
+  PATCH
+  NONE
+}
+
+/// Уровень серьёзности уязвимости по шкале npm/bun audit (low/moderate/high/critical) —
+/// отдельный enum, не переиспользует AlertSeverity: шкалы не совпадают, маппинг делается в коде
+enum DepVulnSeverity {
+  LOW
+  MODERATE
+  HIGH
+  CRITICAL
+}
+
+/// Итоговый уровень риска пакета (устаревание + уязвимости + критичность пакета)
+enum DepRiskLevel {
+  NONE
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+/// Статус разбора changelog моделью для пакета с высоким риском
+enum DepAnalysisStatus {
+  NOT_REQUIRED
+  PENDING
+  DONE
+  FAILED
 }
 
 // ============================================================================
@@ -387,4 +425,87 @@ model DeployedApp {
   @@allow('read', auth() != null)
   @@allow('create,update,delete', auth() != null && auth().role == 'ADMIN')
   @@index([serverId])
+}
+
+// ============================================================================
+// §25 PLAN-INFRA.md — еженедельный контроль зависимостей
+// ============================================================================
+
+/// Снапшот одного запуска `scripts/deps-scan.ts` (агрегаты денормализованы — карточки и
+/// порог алерта считаются без чтения `DepPackage[]`)
+model DepScan {
+  id                  String             @id @default(cuid())
+  createdAt           DateTime           @default(now())
+  /// Время запуска на машине разработчика (может отличаться от createdAt — POST с задержкой)
+  scannedAt           DateTime
+  /// Источник данных: `local` (bun outdated/audit) или `local-fallback` (npm registry, Этап 3)
+  source              String             @default("local")
+  gitCommit           String
+  gitBranch           String
+  /// Дата последнего изменения bun.lock — сигнал «давно не обновляли» (см. риски §25 п.2)
+  lockfileUpdatedAt   DateTime?
+  lockfileCommit      String?
+  bunVersion          String
+  /// Версия самого скрипта-сканера — чтобы при поломке парсера было видно, где сменился формат
+  scannerVersion      String
+  totalPackages       Int
+  outdatedCount       Int
+  majorCount          Int
+  minorCount           Int
+  patchCount          Int
+  vulnCount           Int
+  vulnCritical        Int                @default(0)
+  vulnHigh            Int                @default(0)
+  vulnModerate        Int                @default(0)
+  vulnLow             Int                @default(0)
+  pinnedOutdatedCount Int                @default(0)
+  riskScore           Int
+  durationMs          Int
+  analysisStatus      DepAnalysisStatus  @default(NOT_REQUIRED)
+  analysisSummary     String?            @db.Text
+  analysisAt          DateTime?
+  analysisModel       String?
+  reviewedAt          DateTime?
+  reviewedBy          String?
+  /// Сырой вывод `bun audit --json` — позволяет переразобрать историю без повторного скана
+  rawAudit            Json?
+
+  packages            DepPackage[]
+
+  @@allow('all', auth() != null)
+  @@index([createdAt(sort: Desc)])
+  @@index([analysisStatus])
+}
+
+/// Строка внутри скана — один пакет
+model DepPackage {
+  id                  String            @id @default(cuid())
+  createdAt           DateTime          @default(now())
+  scan                DepScan           @relation(fields: [scanId], references: [id], onDelete: Cascade)
+  scanId              String
+  name                String
+  /// null у транзитивных пакетов, которые видит только audit, не outdated
+  currentVersion      String?
+  wantedVersion       String?
+  latestVersion       String?
+  updateKind          DepUpdateKind     @default(NONE)
+  /// dependencies / devDependencies / transitive
+  depType             String
+  /// В `resolutions`/`overrides` корневого package.json
+  isPinned            Boolean           @default(false)
+  vulnerable          Boolean           @default(false)
+  maxSeverity         DepVulnSeverity?
+  advisoryCount       Int               @default(0)
+  advisories          Json?
+  riskLevel           DepRiskLevel      @default(NONE)
+  analysisNote        String?           @db.Text
+  analysisAt          DateTime?
+  /// ID скана, из которого перенесена заметка анализа (Этап 2) — показывается в UI как «не свежая»
+  analysisCarriedFrom String?
+  breakingChanges     Boolean?
+
+  @@unique([scanId, name])
+  @@index([scanId, riskLevel])
+  @@index([name, createdAt])
+  @@allow('all', auth() != null)
 }
