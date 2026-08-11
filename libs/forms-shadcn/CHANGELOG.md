@@ -4,6 +4,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.18.1] - 2026-08-11
+
+### Changed
+
+- **`FieldRichText` изолирован через `lazy()` + dynamic `import()`.** Пакет пока чистый
+  workspace-пакет без tsup/entry-сплиттинга — до этого изменения любой импорт из
+  `@letar/forms-shadcn` требовал резолва `@tiptap/*` в графе сборки, даже если реально
+  используются только текстовые/числовые поля. Реализация вынесена в
+  `field-rich-text-impl.tsx`, `field-rich-text.tsx` стал тонкой `lazy()`-обёрткой (тот же
+  паттерн, что применён в `@letar/forms` 2.0.3 к `FieldRichText`/`FieldMaskedInput`/
+  `Form.Document.*`/`FieldDataGrid`/`FieldTableEditor`). Публичный API не изменился.
+
 ## [0.18.0] - 2026-08-11
 
 ### Added

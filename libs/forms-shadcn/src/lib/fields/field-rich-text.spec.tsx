@@ -11,9 +11,11 @@ describe('FieldRichText (shadcn)', () => {
       </TestForm>,
     )
 
+    // Первый рендер в файле оплачивает холодный dynamic import() implementation-чанка
+    // (парсинг @tiptap/*) — дефолтного таймаута waitFor (1000ms) на это не хватает.
     await waitFor(() => {
       expect(document.querySelector('[contenteditable]')).toBeInTheDocument()
-    })
+    }, { timeout: 5000 })
   })
 
   it('рендерит label', async () => {
@@ -23,7 +25,7 @@ describe('FieldRichText (shadcn)', () => {
       </TestForm>,
     )
 
-    expect(screen.getByText('Описание')).toBeInTheDocument()
+    expect(await screen.findByText('Описание')).toBeInTheDocument()
     await waitFor(() => {
       expect(document.querySelector('[contenteditable]')).toBeInTheDocument()
     })
