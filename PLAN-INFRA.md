@@ -8018,6 +8018,46 @@ SaaS-Sentry отпадает отдельно: тело ошибки тащит 
    ПЕРЕД правкой `docker-compose.*.yml` — баг из п.5 иначе повторится на каждом следующем
    приложении по отдельности.
 
+   ✅ **Ручное тиражирование заменено генератором (2026-08-11):** 17 повторов вручную — почти
+   гарантированная гонка на баг из п.5 (кто-то забудет `.env.docker` вместо литерала в compose).
+   `nx g @letar/generators:glitchtip-integrate <app>` — см. п.8 ниже.
+8. ✅ **Генератор `glitchtip-integrate` (2026-08-11)**,
+   `libs/generators/src/generators/glitchtip-integrate/`. Делает 5 из 6 шагов подключения
+   автоматически, шестой (создание проекта в GlitchTip UI) печатает инструкцией — генератор
+   намеренно не хранит админ-токен GlitchTip и не создаёт проект через Django-shell по образцу
+   п.5 (тот путь требовал root-доступа к серверу и ручного запуска агентом, воспроизводить это в
+   генераторе, который может запустить кто угодно локально, — лишняя поверхность для ошибки):
+
+   - `src/instrumentation.ts`/`instrumentation-client.ts` — создаёт по образцу `studio`, если их
+     нет; если есть и заняты другой логикой (пример — `dashboard`, где `instrumentation.ts` уже
+     держит автостарт мониторинга) — **не перезаписывает**, печатает снипет для ручного слияния;
+     идемпотентен, если файл уже подключает `@letar/glitchtip`.
+   - `package.json` — `@letar/glitchtip` в `dependencies` и `nx.implicitDependencies`.
+   - `tsconfig.json` — три `paths` (`@letar/glitchtip`, `/client`, `/server`).
+   - `.env.docker`/`.env.docker.example` (прод) и `.env.staging`/`.env.staging.example` (staging,
+     если `docker-compose.staging.yml` существует) — дописывает 4 переменные, не трогая остальное;
+     `.env.docker.enc` не трогает (зашифрован), печатает команду `sops --encrypt` после того, как
+     DSN будет вписан.
+   - `docker-compose.production.yml`/`docker-compose.staging.yml` — точечная текстовая вставка
+     (не YAML-парсер) `${VAR}` в `services.app.environment`, ровно баг из п.5 структурно
+     невозможен: генератор физически не умеет писать литерал. Идемпотентен (проверяет, что все
+     4 ключа уже есть); при частичном совпадении или нестандартной структуре (нет сервиса `app`)
+     не трогает файл и печатает блок для ручной вставки — не гадает.
+   - Приватные submodule (коммерческие/ПДн-приложения) — отказывает по умолчанию со ссылкой на
+     п.5, требует `--allowPrivate` как явное подтверждение, что решение об изоляции уже принято.
+   - После генерации сам прогоняет `nx run-many -t typecheck:tsgo lint --projects <app>,glitchtip`
+     (можно отключить `--skipChecks`).
+   - 97 тестов (`nx test generators`), `nx typecheck generators && nx lint generators` — зелёные.
+
+   **Первый прогон тиража (2026-08-11): `dashboard` и `time`.** Оба — код готов и закоммичен
+   (instrumentation, tsconfig, package.json, `.env.docker`/`.env.staging` с пустым `GLITCHTIP_DSN`,
+   compose через `${VAR}`), но GlitchTip-проекты для них ещё не созданы в UI — DSN не заполнен,
+   деплоить рано. Следующий шаг: зайти в `https://errors.s3.letar.best`, создать проекты
+   `dashboard`/`time`, вписать DSN в `.env.docker`/`.env.staging`, `sops --encrypt`, deploy-request
+   BlackCove. `dashboard/src/instrumentation.ts` — пример ручного слияния (мониторинг + GlitchTip
+   в одном `register()`), сохранён как образец для следующих приложений со своей логикой в этом
+   файле.
+
 ### Что это даёт агентам
 
 Диагностика инцидента вместо «посмотрю логи контейнера» начинается с файла, строки и релиза.
