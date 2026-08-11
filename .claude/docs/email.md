@@ -52,6 +52,7 @@ SMTP_FROM_NAME="Название приложения"
 | mandala         | noreply@mandala.letar.best     | Mandala                   |
 | dashboard       | noreply@dashboard.letar.best   | Dashboard                 |
 | animatrona      | noreply@animatrona.letar.best  | Animatrona                |
+| domwellbes      | noreply@domwellbes.letar.best  | DomWellbes                |
 
 ## Использование
 
