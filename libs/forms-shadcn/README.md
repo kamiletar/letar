@@ -38,6 +38,7 @@ Chakra-провайдера, а не отдельный статический C
 ```tsx
 import {
   FieldAddress,
+  FieldAuto,
   FieldAutocomplete,
   FieldCalculated,
   FieldCascadingSelect,
@@ -84,7 +85,7 @@ import {
 } from '@letar/forms-shadcn'
 ```
 
-## Поля (beta — 47 из 56, продолжаем к паритету с `@letar/forms`)
+## Поля (56 из 56 — полный паритет с `@letar/forms`)
 
 Плюс `FormSteps` и `FieldTableEditor` — compound-компоненты форм-уровня, не `createField()`-поля
 (см. разделы ниже).
@@ -138,6 +139,7 @@ import {
 | `FieldMatrixChoice`     | native `<table>`, без Radix                         |
 | `FieldDataGrid`         | `@tanstack/react-table` (lazy), native `<table>`    |
 | `FieldCalculated`       | без DOM-примитива, только текст (readOnly)          |
+| `FieldAuto`             | диспетчер на другие поля по Zod-типу                |
 
 `FieldCombobox` — упрощённая beta-версия: только статичные `options`, фильтрация по вхождению
 подстроки в `label`. Без `useQuery` (async-поиск) и группировки — Chakra-версия их поддерживает,
@@ -218,6 +220,15 @@ Chakra-версии без изменений домена (extensions, `onUpdat
 (`useSyncExternalStore` на `form.store` + защита от циклических зависимостей) — framework-free,
 портирован из Chakra-версии дословно, общий для обоих скинов. `useDebounce` переиспользован из
 `@letar/forms-react` (был уже публичным экспортом).
+
+`FieldAuto` — автоопределение типа поля из Zod-схемы (`traverseSchema` + поиск по dot-path),
+диспетчеризация на уже существующие поля пакета (`FieldString`/`FieldTextarea`/`FieldNumber`/
+`FieldCheckbox`/`FieldSwitch`/`FieldDate`/`FieldNativeSelect`). Beta: без `renderFieldByType` —
+диспетчеризации по `meta.fieldType` на ~50 типов полей (в Chakra-версии позволяет
+`.meta({ ui: { fieldType: 'richText' } })` явно переопределить компонент) — только базовый
+Zod-тип (string/number/boolean/date/enum) определяет поле, тот же fallback-путь, что
+`renderFieldByType` использовал бы в отсутствие явного `fieldType`. **Последнее поле для полного
+паритета с `@letar/forms` — 56 из 56.**
 
 `FieldYesNo` — два кликабельных блока (`role="radio"` в `role="radiogroup"`), тот же подход, что
 `FieldRadioCard`/`FieldListbox`; портирован из Chakra-версии без изменений логики, значение —
