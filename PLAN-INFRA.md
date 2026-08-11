@@ -7960,6 +7960,26 @@ SaaS-Sentry отпадает отдельно: тело ошибки тащит 
    (последний e2e для studio был старше 24ч) — BlackCove прогнала полный цикл сама: staging (s3) →
    e2e против `studio-stage.s3.letar.best` (16/16 passed, `commitSha` совпал с `4187cd62`) →
    прод (s2). Прод-контейнер поднялся штатно (`✓ Ready in 0ms`).
+   ⚠️ **Найден и исправлен баг сразу после деплоя (2026-08-11), живой проверкой в браузере:**
+   тестовая ошибка через клиентский код на `studio.letar.best` **не** доходила до GlitchTip, хотя
+   серверная того же класса — доходила. Причина: `NEXT_PUBLIC_GLITCHTIP_DSN` лежал литералом
+   только в `docker-compose.production.yml` `environment:` — это доступно контейнеру в рантайме,
+   но Next.js инлайнит `NEXT_PUBLIC_*` в клиентский бандл на этапе `nx build`, который
+   `deploy-affected.sh` выполняет ДО `docker compose up`, сорсируя переменные из `.env.docker`
+   (`set -a; source .env.docker`) — литерал в compose-файле в этот момент ещё не существует как
+   переменная окружения. `initClient({ dsn: undefined })` в `libs/glitchtip` no-op'ился молча (по
+   дизайну — без ошибки), поэтому баг не проявлялся ни в билд-логах, ни в рантайме, только
+   отсутствием событий. Тот же паттерн (`NEXT_PUBLIC_VAPID_PUBLIC_KEY`) уже был в
+   `apps/studio/.env.docker` с explicit-комментарием об этом ограничении — исправление просто
+   последовало тому же, уже задокументированному в файле, соглашению. Все 4 переменные
+   (`GLITCHTIP_DSN`/`GLITCHTIP_ENVIRONMENT`/`NEXT_PUBLIC_GLITCHTIP_DSN`/
+   `NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT`) перенесены в `.env.docker`/`.env.docker.enc`, compose
+   читает их через `${VAR}`. Проверено локально: пересборка с тем же `set -a; source .env.docker`
+   перед `nx build` — DSN появляется в `.next/static/chunks/*.js`. Ждёт повторного деплоя.
+   ⚠️ **Тот же баг остаётся на staging** — `NEXT_PUBLIC_GLITCHTIP_DSN` в
+   `docker-compose.staging.yml` тоже литерал, а `apps/studio/.env.staging` существует только на
+   сервере (§18.8, не в этом чекауте) — агент не может отредактировать его напрямую. Нужен
+   отдельный запрос BlackCove на добавление этих же четырёх строк в серверный `.env.staging`.
 6. **Загрузка sourcemaps в CI** — без них стектрейс приходит из минифицированного кода и
    бесполезен. Это половина ценности всей затеи, не откладывать «на потом». Не начато — стало
    более заметно нужным именно из-за решения в п.4 (без `@sentry/nextjs` нет и его плагина
