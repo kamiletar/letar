@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.8] - 2026-08-11
+
+### Added
+
+- `sitemap.ts` — страницы документации через `source.getLanguages()` (Fumadocs source API),
+  главная на обоих языках и все демо-страницы `/demo/*`; `alternates.languages` для docs/home,
+  чтобы EN/RU не конкурировали как дубли (PLAN-INFRA.md §33)
+
 ## [0.1.6] - 2026-04-04
 
 ### Added
