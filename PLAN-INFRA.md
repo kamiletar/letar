@@ -7980,15 +7980,42 @@ SaaS-Sentry отпадает отдельно: тело ошибки тащит 
    (issue id=2). Клиентский и серверный пути теперь оба подтверждены рабочими на проде.
    ⚠️ **Тот же баг остаётся на staging** — `NEXT_PUBLIC_GLITCHTIP_DSN` в
    `docker-compose.staging.yml` тоже литерал, а `apps/studio/.env.staging` существует только на
-   сервере (§18.8, не в этом чекауте) — агент не может отредактировать его напрямую. Нужен
-   отдельный запрос BlackCove на добавление этих же четырёх строк в серверный `.env.staging`.
+   сервере (§18.8, не в этом чекауте) — агент не может отредактировать его напрямую.
+   Запрос BlackCove отправлен (2026-08-11, тред `deploy-studio-glitchtip`, `topic: infra`) —
+   добавить те же 4 строки в серверный `.env.staging` с `staging` вместо `production`, ответ ждём.
+   **Найденный класс бага задокументирован отдельно** (не специфичен для GlitchTip — касается
+   любой `NEXT_PUBLIC_*` переменной в любом приложении монорепо) —
+   [nextjs-public-env-build-time-inlining.md](/.claude/docs/nextjs-public-env-build-time-inlining.md),
+   проиндексирован в `CLAUDE.md`.
 6. **Загрузка sourcemaps в CI** — без них стектрейс приходит из минифицированного кода и
    бесполезен. Это половина ценности всей затеи, не откладывать «на потом». Не начато — стало
    более заметно нужным именно из-за решения в п.4 (без `@sentry/nextjs` нет и его плагина
    автозагрузки).
 7. Подключать по одному приложению, начиная с некоммерческого, и смотреть на объём событий: при
    шумном приложении бесплатный self-hosted быстро упирается в диск. `studio` (п.5) — первое,
-   остальные не начаты.
+   остальные не начаты. Список кандидатов (снят с `apps/*`, 2026-08-11):
+
+   **Некоммерческие Next.js-приложения — можно подключать следующими, в любом порядке:**
+   `dashboard`, `dashboard-agent`, `archetest`, `grandslamcup`, `time`, `form-docs`,
+   `form-example`, `aira-web`, `mandala`, `kami`, `pravda`, `animatrona-landing`,
+   `animatrona-tracker`, `kami-key-the-landing`, `letar-landing`, `umami`, `auth-hub` (Ключница —
+   не коммерческое приложение, но SSO для всех остальных: подключать аккуратно, ошибка в
+   `beforeSend`/инициализации не должна ронять логин).
+
+   **Коммерческие/ПДн-приложения — требуют решения из п.5 (GlitchTip только на s3) перед
+   продакшен-подключением**, staging можно раньше: `aboi`, `driving-school`, `dsperevod`,
+   `svoichuzhie`, `aprel8008`, `domwellbes`.
+
+   **Не Next.js — `@letar/glitchtip` в текущем виде не подходит, нужна другая интеграция:**
+   `animatrona`/`label-printer-desktop`/`poster-microtext-desktop` (Electron main-процесс —
+   `@sentry/electron`, не `@sentry/node`/`@sentry/browser`), `animatrona-mobile`/`animatrona-tv`
+   (React Native — `@sentry/react-native`). Отдельная задача, не начата.
+
+   Каждое новое подключение — по чек-листу `libs/glitchtip/README.md` § «Подключение к
+   приложению» и обязательно с чтением
+   [nextjs-public-env-build-time-inlining.md](/.claude/docs/nextjs-public-env-build-time-inlining.md)
+   ПЕРЕД правкой `docker-compose.*.yml` — баг из п.5 иначе повторится на каждом следующем
+   приложении по отдельности.
 
 ### Что это даёт агентам
 
