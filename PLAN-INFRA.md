@@ -8405,8 +8405,12 @@ submodule (WSL): `Install dependencies` → `Lint` → `Typecheck` → `Unit tes
       `eslint-plugin-react` с ESLint 10.6.0 (flat config), проявляется именно на этих двух
       проектах — не проверено, почему не на остальных, использующих тот же плагин. Требует
       отдельного расследования версий, не тривиальный фикс.
-- [ ] 🆕 **Новая находка (2026-08-12):** `nx run @letar/source:lint` → `No files matching the
-      pattern "./src" were found` — у проекта `@letar/source` нет каталога `src/` вообще.
-      Похоже на «фантомный»/неправильно сконфигурированный проект (опечатка в имени при
-      генерации? заброшенный каркас?) — нужно решить, реален ли этот проект, а не чинить
-      таргет `lint`.
+- [x] ✅ **Закрыто (2026-08-12).** `nx run @letar/source:lint` → `No files matching the pattern
+      "./src" were found`. Разбор: `@letar/source` — не реальный проект, а корневой
+      `package.json` (`"name": "@letar/source"`), который Nx подхватывает как проект сам по
+      себе; `@nx/eslint/plugin` навешивал на него `lint`, а `src/` у корня монорепо нет.
+      Фикс — `exclude: ["eslint.config.mjs"]` у `@nx/eslint/plugin` в `nx.json` (коммит
+      `3778b0d8`): проект `@letar/source` перестал создаваться вовсе, `nx show project
+      @letar/source` теперь отвечает «Could not find project». На остальные проекты не влияет
+      (проверено на `@letar/ui:lint` — таргет на месте, падает только на предсуществующем
+      `next/no-img-element`, см. выше).
