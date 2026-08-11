@@ -11,7 +11,8 @@
     "implicitDependencies": [
       "@letar/query-provider",
       "@letar/analytics",
-      "@letar/api-server"
+      "@letar/api-server",
+      "@letar/glitchtip"
     ]
   },
   "dependencies": {
@@ -19,6 +20,7 @@
     "@letar/forms": "workspace:*",
     "@letar/analytics": "workspace:*",
     "@letar/chakra-provider": "workspace:*",
-    "@letar/infra-config": "workspace:*"
+    "@letar/infra-config": "workspace:*",
+    "@letar/glitchtip": "workspace:*"
   }
 }

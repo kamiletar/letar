@@ -8,10 +8,27 @@
  * Автозапуск реализован через первый запрос к /api/monitoring/auto-start
  */
 
+import type { Instrumentation } from 'next'
+
 export async function register() {
   // Instrumentation регистрируется, но мониторинг запускается через API
   if (process.env.NODE_ENV === 'production') {
     console.log('[Instrumentation] Dashboard server starting...')
     console.log('[Instrumentation] Monitoring will auto-start on first API request')
+  }
+
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    const { initServer } = await import('@letar/glitchtip/server')
+    initServer({
+      dsn: process.env.GLITCHTIP_DSN,
+      environment: process.env.GLITCHTIP_ENVIRONMENT ?? 'development',
+    })
+  }
+}
+
+export const onRequestError: Instrumentation.onRequestError = async (...args) => {
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    const { captureRequestError } = await import('@letar/glitchtip/server')
+    await captureRequestError(...args)
   }
 }

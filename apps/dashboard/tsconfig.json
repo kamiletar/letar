@@ -1,16 +1,43 @@
 {
   "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@letar/auth": ["../../libs/auth/src/index.ts"],
-      "@letar/auth/client": ["../../libs/auth/src/client/index.ts"],
-      "@letar/auth/server": ["../../libs/auth/src/server/index.ts"],
-      "@letar/query-provider": ["../../libs/query-provider/src/index.ts"],
-      "@letar/analytics": ["../../libs/analytics/src/index.ts"],
-      "@letar/api-server": ["../../libs/api-server/src/index.ts"],
-      "@letar/infra-config": ["../../libs/infra-config/src/index.ts"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@letar/auth": [
+        "../../libs/auth/src/index.ts"
+      ],
+      "@letar/auth/client": [
+        "../../libs/auth/src/client/index.ts"
+      ],
+      "@letar/auth/server": [
+        "../../libs/auth/src/server/index.ts"
+      ],
+      "@letar/query-provider": [
+        "../../libs/query-provider/src/index.ts"
+      ],
+      "@letar/analytics": [
+        "../../libs/analytics/src/index.ts"
+      ],
+      "@letar/api-server": [
+        "../../libs/api-server/src/index.ts"
+      ],
+      "@letar/infra-config": [
+        "../../libs/infra-config/src/index.ts"
+      ],
+      "@letar/glitchtip": [
+        "../../libs/glitchtip/src/index.ts"
+      ],
+      "@letar/glitchtip/client": [
+        "../../libs/glitchtip/src/client/index.ts"
+      ],
+      "@letar/glitchtip/server": [
+        "../../libs/glitchtip/src/server/index.ts"
+      ]
     }
   },
   "references": [
