@@ -2,6 +2,25 @@
 
 Детальное описание всех реализованных фич.
 
+## Подключение к GlitchTip (2026-08-11)
+
+Через новый генератор `nx g @letar/generators:glitchtip-integrate dashboard` (PLAN-INFRA.md §70
+п.8). `src/instrumentation.ts` уже держал автостарт мониторинга (не native-модуль — через API,
+см. комментарий в файле) — генератор не перезаписал файл, а напечатал снипет для ручного
+слияния; glitchtip `register()`/`onRequestError` домержены рядом с существующей логикой, ничего
+не удалено.
+
+- [x] `src/instrumentation.ts` — домержен вручную (мониторинг + `@letar/glitchtip/server`)
+- [x] `src/instrumentation-client.ts` — создан генератором
+- [x] `package.json` — `@letar/glitchtip` в `dependencies` и `nx.implicitDependencies`
+- [x] `tsconfig.json` — `paths` на `@letar/glitchtip`, `/client`, `/server`
+- [x] `.env.docker`/`.env.docker.example` — 4 переменные через `${VAR}` в
+      `docker-compose.production.yml` (не литералом — баг из инцидента `studio`)
+- [x] `nx typecheck:tsgo dashboard && nx lint dashboard` — зелёные
+
+**Не завершено:** GlitchTip-проект `dashboard` ещё не создан в UI (`errors.s3.letar.best`),
+`GLITCHTIP_DSN` в `.env.docker` пустой — деплоить рано, см. `infra/glitchtip/README.md`.
+
 ## 1.23.1 → 1.23.2: дедуп CRON_FAILED алертов по jobId, тихие провалы уведомлений логируются (2026-08-09)
 
 Найдено попутно при разборе `PLAN-INFRA.md` §52 (cron-задачи агента падали 401, восемь дней

@@ -49,6 +49,13 @@
 
 (пока пусто)
 
+## В процессе
+
+- [ ] **GlitchTip** — код подключён (2026-08-11, `nx g @letar/generators:glitchtip-integrate
+      dashboard`, детали в `PLAN_COMPLETED.md`), но GlitchTip-проект `dashboard` ещё не создан в
+      `errors.s3.letar.best`. Дальше: создать проект → вписать DSN в `.env.docker` →
+      `sops --encrypt` → deploy-request BlackCove.
+
 ---
 
 ## Архив
