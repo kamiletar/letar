@@ -112,6 +112,31 @@ export interface GenericEmailParams {
   footer?: string
 }
 
+// === Lead Notification ===
+
+/** Один пункт контактных данных лида (например `{ label: 'Email', value: 'a@b.com' }`) */
+export interface LeadContact {
+  label: string
+  value: string
+}
+
+export interface LeadNotificationParams {
+  /** Email-адреса получателей — уже отобранный список, поиск получателей в БД не входит в зону ответственности либы */
+  to: string[]
+  /** Название сайта-источника заявки, например `studio.letar.best` */
+  siteLabel: string
+  /** Имя лида */
+  leadName: string
+  /** Контактные данные лида в порядке отображения (email, телефон и т.п.) */
+  leadContacts: LeadContact[]
+  /** Сообщение лида, если было заполнено */
+  message?: string
+  /** URL раздела заявок в админке */
+  buttonUrl: string
+  /** Текст в подвале письма */
+  footer: string
+}
+
 // === Branding ===
 
 export interface BrandingConfig {

@@ -16,6 +16,7 @@ import type {
   BrandingConfig,
   GenericEmailParams,
   InvitationEmailParams,
+  LeadNotificationParams,
   MagicLinkEmailParams,
   PasswordResetEmailParams,
   SendEmailResult,
@@ -288,4 +289,53 @@ export async function sendGenericEmail(
     text: text.trim(),
     meta: { type: 'generic' },
   })
+}
+
+/**
+ * Уведомляет список получателей о новой заявке с сайта (Lead).
+ *
+ * Кому именно слать — решает приложение (роль/массив ролей зависит от его схемы),
+ * сюда передаётся уже готовый список email-адресов. Ошибка отправки одному получателю
+ * не прерывает рассылку остальным — каждое письмо гасит исключение самостоятельно.
+ *
+ * @example
+ * ```ts
+ * await sendLeadNotification({
+ *   to: ['owner@example.com'],
+ *   siteLabel: 'studio.letar.best',
+ *   leadName: 'Иван',
+ *   leadContacts: [{ label: 'Email', value: 'ivan@example.com' }],
+ *   message: 'Хочу заказать...',
+ *   buttonUrl: 'https://studio.letar.best/owner/leads',
+ *   footer: 'Студия Letar · studio.letar.best',
+ * })
+ * ```
+ */
+export async function sendLeadNotification(
+  params: LeadNotificationParams,
+  branding?: Partial<BrandingConfig>,
+): Promise<SendEmailResult[]> {
+  const contactsText = params.leadContacts.map((contact) => `**${contact.label}:** ${contact.value}`).join('\n')
+  const messageText = params.message ? `\n**Сообщение:** ${params.message}` : ''
+
+  const results = await Promise.all(
+    params.to.map((to) =>
+      sendGenericEmail(
+        {
+          to,
+          subject: `Новая заявка с сайта — ${params.leadName}`,
+          heading: 'Новая заявка',
+          greeting: 'Здравствуйте!',
+          body:
+            `Поступила новая заявка с сайта ${params.siteLabel}.\n\n**Имя:** ${params.leadName}\n${contactsText}${messageText}`,
+          buttonText: 'Открыть заявки',
+          buttonUrl: params.buttonUrl,
+          footer: params.footer,
+        },
+        branding,
+      ).catch((): SendEmailResult => ({ success: false, error: 'send-lead-notification-failed' }))
+    ),
+  )
+
+  return results
 }
