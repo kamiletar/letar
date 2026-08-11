@@ -38,6 +38,10 @@ services:
     env_file:
       - .env.staging
     environment:
+      GLITCHTIP_DSN: ${GLITCHTIP_DSN}
+      GLITCHTIP_ENVIRONMENT: ${GLITCHTIP_ENVIRONMENT}
+      NEXT_PUBLIC_GLITCHTIP_DSN: ${NEXT_PUBLIC_GLITCHTIP_DSN}
+      NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT: ${NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT}
       DATABASE_URL: postgresql://time:${DB_PASSWORD:-postgres}@time-staging-db:5432/time_staging
       # time — hub-client (OIDC через Ключницу, clientId time-prod). На staging OAuth-редирект
       # реально заходит — auth-hub принимает redirect URI time-stage.s3.letar.best (см.

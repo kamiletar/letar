@@ -11,7 +11,11 @@
       "@letar/email",
       "@letar/number-words",
       "@letar/consent",
-      "@letar/seo"
+      "@letar/seo",
+      "@letar/glitchtip"
     ]
+  },
+  "dependencies": {
+    "@letar/glitchtip": "workspace:*"
   }
 }
