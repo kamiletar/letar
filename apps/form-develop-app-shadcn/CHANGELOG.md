@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased (2026-08-11, продолжение 2)
+
+- Демо `FieldNumberInput` (`@letar/forms-shadcn` 0.20.0) — остаток на складе, min/max.
+
 ## Unreleased (2026-08-11, продолжение)
 
 - Демо `FieldYesNo` (`@letar/forms-shadcn` 0.19.0) — `variant="thumbs"`, бинарный выбор согласия
