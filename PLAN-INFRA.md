@@ -8398,13 +8398,18 @@ submodule (WSL): `Install dependencies` → `Lint` → `Typecheck` → `Unit tes
       разбиралось ни в одном из заходов, отдельная категория.
 - [ ] `next/no-img-element` в `libs/ui/src/lib/header/header-logo.spec.tsx` (3) —
       предсуществующий техдолг из прошлых сессий, не новый.
-- [ ] 🆕 **Новая находка (2026-08-12):** `nx run @letar/chakra-provider:lint` и
-      `nx run @letar/yandex-metrika:lint` падают не на правиле, а на самом ESLint —
+- [x] ✅ **Закрыто (2026-08-12).** `nx run @letar/chakra-provider:lint` и
+      `nx run @letar/yandex-metrika:lint` падали не на правиле, а на самом ESLint —
       `TypeError: Error while loading rule 'react/no-direct-mutation-state':
-      contextOrFilename.getFilename is not a function`. Похоже на несовместимость версии плагина
-      `eslint-plugin-react` с ESLint 10.6.0 (flat config), проявляется именно на этих двух
-      проектах — не проверено, почему не на остальных, использующих тот же плагин. Требует
-      отдельного расследования версий, не тривиальный фикс.
+      contextOrFilename.getFilename is not a function`. Выглядело как несовместимость версии
+      `eslint-plugin-react` с ESLint 10.6.0, на деле — не версия плагина, а неверный пресет: из
+      24 React-проектов монорепо эти два единственные сидели на JS-only
+      `nx.configs['flat/react']`, а не на `flat/react-typescript`, хотя обе библиотеки целиком
+      TS/TSX. Пресет без TS-scoping матчит и собственный `eslint.config.mjs` проекта —
+      React-эвристика компонентов натыкается на его `export default [...]` и падает внутри
+      `usedPropTypesInstructions`. Фикс — сменить пресет на `flat/react-typescript` в обоих
+      `eslint.config.mjs` (коммит `338a2810`); заодно ушёл протухший `eslint-disable-line` в
+      `use-color-mode.ts`, который правило теперь реально проверяет и нарушений не находит.
 - [x] ✅ **Закрыто (2026-08-12).** `nx run @letar/source:lint` → `No files matching the pattern
       "./src" were found`. Разбор: `@letar/source` — не реальный проект, а корневой
       `package.json` (`"name": "@letar/source"`), который Nx подхватывает как проект сам по
