@@ -7,9 +7,10 @@
 - 41 MDX-страниц руководств (EN)
 - 41 MDX-страниц (RU) — **100% coverage**
 - 3 API reference страницы (EN + RU)
-- 33 interactive demo-страницы
+- 35 interactive demo-страниц
 - Fumadocs MDX + Next.js 16
 - Поиск по документации (Fumadocs flexsearch)
+- `sitemap.ts` — docs через Fumadocs source API + demo-страницы (PLAN-INFRA.md §33)
 
 ## P0 — Критичное ✅
 
@@ -35,6 +36,12 @@
 - [x] Исправлены 4 сломанных демо: analytics, undo-redo, comparison, depends-on (standalone imports)
 - [x] tsconfig path для @letar/forms/analytics
 
+## P4 — SEO ✅ (v0.1.8)
+
+- [x] `sitemap.ts` — источник данных `source.getLanguages()` (Fumadocs source API), а не
+      статический список путей: docs-страницы с `alternates.languages` (EN/RU), главная на
+      обоих языках, 35 демо-страниц `/demo/*` без локализации. Закрывает PLAN-INFRA.md §33.
+
 ---
 
-**Последнее обновление:** 2026-04-04 (v0.1.6)
+**Последнее обновление:** 2026-08-11 (v0.1.8)

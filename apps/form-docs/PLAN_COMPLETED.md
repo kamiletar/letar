@@ -1,5 +1,24 @@
 # Выполненные задачи — form-docs
 
+## Сессия 2026-08-11 — `sitemap.ts` через Fumadocs source API
+
+Закрывает пункт PLAN-INFRA.md §33 «SEO-фундамент»: единственная из 10 приложений без
+`robots.ts`/`sitemap.ts`, где недостача была отмечена «требует отдельного исследования» —
+страницы документации приходят из Fumadocs `source` (MDX через `loader()`), а не из статического
+списка путей, как в остальных приложениях монорепо (`form-example`, `time` и др.).
+
+- `source.getLanguages()` (типы — `fumadocs-core/dist/source`, `LoaderOutput.getLanguages()`)
+  отдаёт `{language, pages}[]`, каждая `page` несёт `slugs: string[]` и `url: string`. Построена
+  карта slug → url по обоим языкам (`en`/`ru` из `defineI18n` в `src/lib/i18n.ts`), из неё —
+  `alternates.languages` для каждой docs-страницы, чтобы EN/RU не конкурировали как дубли.
+- Главная страница (`[lang]/(home)/page.tsx`) добавлена на обоих языках тем же способом.
+- 35 демо-страниц `/demo/*` (client-only, без `[lang]`) — статичный список, как в `form-example`
+  для `/examples/*`: `fs.readdirSync` в build-time сравнивали и отклонили — риск молча разъехаться
+  с реальным роутингом того не стоит при 35 стабильных путях.
+- Проверено живым `nx dev form-docs` + `/sitemap.xml`: 93 записи (2 home + 56 docs + 35 demo),
+  `xhtml:link rel="alternate"` присутствует. `typecheck:tsgo`/`lint` зелёные.
+- Заодно поправлен устаревший счётчик демо-страниц в `PLAN.md` (33 → 35 — код обогнал доку).
+
 ## Сессия 2026-08-06 — `nx.implicitDependencies` в package.json
 
 По правилу [libs.md](/.claude/rules/libs.md) («Подключение к приложению»): каждая `@letar/*`-
