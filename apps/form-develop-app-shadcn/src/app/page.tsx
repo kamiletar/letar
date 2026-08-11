@@ -4,6 +4,7 @@ import type { AddressProvider } from '@letar/forms-core/address'
 import type { WeeklySchedule } from '@letar/forms-shadcn'
 import {
   FieldAddress,
+  FieldAuto,
   FieldAutocomplete,
   FieldCalculated,
   FieldCascadingSelect,
@@ -52,6 +53,7 @@ import {
   FieldYesNo,
   FormSteps,
 } from '@letar/forms-shadcn'
+import { z } from 'zod/v4'
 
 import { DemoForm } from './_components/demo-form'
 
@@ -176,6 +178,14 @@ const defaultValues: DemoFormValues = {
   finalPrice: 0,
 }
 
+const autoDemoSchema = z.object({
+  fullName: z.string(),
+  bio: z.string().max(500),
+  age: z.number(),
+  subscribed: z.boolean(),
+  plan: z.enum(['free', 'pro', 'enterprise']),
+})
+
 const matrixRows = [
   { value: 'speed', label: 'Скорость доставки' },
   { value: 'quality', label: 'Качество товара' },
@@ -212,7 +222,7 @@ export default function HomePage() {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Form Develop App (shadcn)</h1>
       <p className="text-muted-foreground mt-2 text-sm">
-        Песочница для разработки @letar/forms-shadcn — 47 полей, Фаза 7.3 Шаг 5+.
+        Песочница для разработки @letar/forms-shadcn — 56 из 56 полей, полный паритет с @letar/forms.
       </p>
 
       <DemoForm<DemoFormValues>
@@ -512,6 +522,33 @@ export default function HomePage() {
             { name: 'salary', label: 'Зарплата', align: 'right' },
           ]}
         />
+      </DemoForm>
+
+      <h2 className="mt-16 text-xl font-semibold">FieldAuto (beta, отдельная форма)</h2>
+      <p className="text-muted-foreground mt-1 text-sm">
+        Автоопределение типа поля из Zod-схемы — изолированная песочница со своей схемой (единственная демо-форма на
+        странице, где `DemoForm` получает `schema`). Последнее поле для паритета — 56 из 56.
+      </p>
+      <DemoForm<{ fullName: string; bio: string; age: number; subscribed: boolean; plan: string }>
+        schema={autoDemoSchema}
+        defaultValues={{ fullName: '', bio: '', age: 18, subscribed: false, plan: 'free' }}
+        onSubmit={(value) => {
+          // eslint-disable-next-line no-console
+          console.log('auto submit', value)
+        }}
+      >
+        <FieldAuto name="fullName" />
+        <FieldAuto name="bio" />
+        <FieldAuto name="age" />
+        <FieldAuto name="subscribed" config={{ booleanAsSwitch: true }} />
+        <FieldAuto name="plan" />
+
+        <button
+          type="submit"
+          className="bg-primary text-primary-foreground mt-4 rounded-md px-4 py-2 text-sm font-medium"
+        >
+          Отправить
+        </button>
       </DemoForm>
     </main>
   )

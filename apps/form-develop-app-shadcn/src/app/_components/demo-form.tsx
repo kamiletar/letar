@@ -11,9 +11,12 @@ import type { ReactElement, ReactNode } from 'react'
  * реальным `onSubmit` — для визуальной песочницы, а не unit-тестов.
  */
 export function DemoForm<TData extends object>(
-  { defaultValues, onSubmit, children }: {
+  { defaultValues, onSubmit, schema, children }: {
     defaultValues: TData
     onSubmit?: (value: TData) => void
+    /** Zod-схема — нужна только `Form.Field.Auto` для авто-детекции типа поля */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    schema?: any
     children: ReactNode
   },
 ): ReactElement {
@@ -23,7 +26,7 @@ export function DemoForm<TData extends object>(
   })
 
   return (
-    <DeclarativeFormContext.Provider value={{ form }}>
+    <DeclarativeFormContext.Provider value={{ form, schema }}>
       <form
         onSubmit={(e) => {
           e.preventDefault()

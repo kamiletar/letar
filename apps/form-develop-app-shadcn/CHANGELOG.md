@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased (2026-08-11, продолжение 12)
+
+- Демо `FieldAuto` (`@letar/forms-shadcn` 0.30.0) — изолированная форма со своей Zod-схемой
+  (единственное место на странице, где `DemoForm` получает `schema`; `DemoForm` расширен опциональным
+  пропом `schema` под эту задачу). 5 полей демонстрируют все ветки диспетчеризации: string → input,
+  string (maxLength>200) → textarea, number → input type=number, boolean+booleanAsSwitch → Radix
+  Switch, enum → нативный select с Title Case опциями. **Паритет с `@letar/forms` достигнут — 56 из
+  56 полей.** Живая проверка в Chromium (Browser pane): все 5 тегов элементов и enum-опции
+  подтверждены через `read_page`/`javascript_tool`, консоль без ошибок (только безвредные HMR
+  WebSocket-предупреждения прокси).
+
 ## Unreleased (2026-08-11, продолжение 11)
 
 - Демо `FieldCalculated` (`@letar/forms-shadcn` 0.29.0) — цена со скидкой из `price`/`discount`.
