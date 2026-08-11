@@ -376,13 +376,17 @@ export class ImportQueueController extends EventEmitter {
 
           log.warn(`Аудит: ${animeName} — ${warning}`)
           item.error = warning
-          this.saveItemToDb(item).catch(() => {})
+          this.saveItemToDb(item).catch(() => {
+            // намеренно игнорируем — статус актуален в памяти, БД синхронизируется позже
+          })
           markedFailed++
         } else if (item.error) {
           // Все эпизоды полные — снять устаревший warning
           log.info('Аудит: warning снят, все эпизоды полные', { itemId: item.id })
           item.error = undefined
-          this.saveItemToDb(item).catch(() => {})
+          this.saveItemToDb(item).catch(() => {
+            // намеренно игнорируем — статус актуален в памяти, БД синхронизируется позже
+          })
           stateChanged = true
         }
       } catch (err) {
@@ -473,7 +477,9 @@ export class ImportQueueController extends EventEmitter {
       log.info('Ре-аудит: все эпизоды полные, warning снят', { animeId: item.createdAnimeId })
     }
 
-    this.saveItemToDb(item).catch(() => {})
+    this.saveItemToDb(item).catch(() => {
+      // намеренно игнорируем — статус актуален в памяти, БД синхронизируется позже
+    })
     this.emitStateChanged()
   }
 

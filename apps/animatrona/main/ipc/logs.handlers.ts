@@ -119,7 +119,12 @@ export function registerLogsHandlers(): void {
     }, 500)
 
     // Создаём заглушечный watcher для совместимости (хотя реально используем polling)
-    watcher = { close: () => {} } as unknown as fs.FSWatcher
+    // close — заглушка для совместимости типа, реально используется polling (watchTimer)
+    watcher = {
+      close: () => {
+        // намеренно пусто — polling останавливает watchTimer, а не этот close
+      },
+    } as unknown as fs.FSWatcher
 
     return { success: true }
   })

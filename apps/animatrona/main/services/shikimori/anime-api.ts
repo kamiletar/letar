@@ -155,7 +155,9 @@ export async function getAnimeRoles(shikimoriId: number): Promise<ShikimoriAnime
     clearTimeout(timer)
 
     if (!response.ok) {
-      await response.body?.cancel().catch(() => {})
+      await response.body?.cancel().catch(() => {
+        // намеренно игнорируем — тело всё равно не будет прочитано
+      })
       throw new Error(`Shikimori REST roles error: ${response.status} ${response.statusText}`)
     }
     rawRoles = (await response.json()) as ShikimoriRestRole[]

@@ -315,7 +315,9 @@ export class RestoreTracksManager extends EventEmitter {
 
     if (this.cancelled) {
       task.status = 'cancelled'
-      await rm(destPath, { force: true }).catch(() => {})
+      await rm(destPath, { force: true }).catch(() => {
+        // намеренно игнорируем — temp файл мог не быть создан
+      })
       return
     }
 
@@ -325,7 +327,9 @@ export class RestoreTracksManager extends EventEmitter {
 
     const ipfsResult = await uploadToIpfs(destPath)
     // Cleanup temp — удаляем в любом случае (успех или ошибка IPFS)
-    await rm(destPath, { force: true }).catch(() => {})
+    await rm(destPath, { force: true }).catch(() => {
+      // намеренно игнорируем — temp файл мог не быть создан
+    })
 
     if (!ipfsResult?.cid) {
       task.status = 'error'
@@ -393,7 +397,9 @@ export class RestoreTracksManager extends EventEmitter {
 
     if (this.cancelled) {
       task.status = 'cancelled'
-      await rm(destPath, { force: true }).catch(() => {})
+      await rm(destPath, { force: true }).catch(() => {
+        // намеренно игнорируем — temp файл мог не быть создан
+      })
       return
     }
 
@@ -405,7 +411,9 @@ export class RestoreTracksManager extends EventEmitter {
     this.emitProgress()
 
     const ipfsResult = await uploadToIpfs(destPath)
-    await rm(destPath, { force: true }).catch(() => {})
+    await rm(destPath, { force: true }).catch(() => {
+      // намеренно игнорируем — temp файл мог не быть создан
+    })
 
     if (!ipfsResult?.cid) {
       task.status = 'error'
@@ -530,7 +538,9 @@ export class RestoreTracksManager extends EventEmitter {
         fontTask.error = String(err)
         log.error('Ошибка обработки шрифтов', { donorPath: fontTask.donorPath, error: String(err) })
       } finally {
-        await rm(tempDir, { recursive: true, force: true }).catch(() => {})
+        await rm(tempDir, { recursive: true, force: true }).catch(() => {
+          // намеренно игнорируем — temp dir мог не быть создан
+        })
       }
 
       this.emitProgress()

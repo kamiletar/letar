@@ -210,7 +210,9 @@ export default function AnimePage({ params }: AnimePageProps) {
         await saveGenresAndThemes(anime.id, genres)
       }
       if (window.electronAPI?.animeManifest) {
-        await window.electronAPI.animeManifest.update(anime.id).catch(() => {})
+        await window.electronAPI.animeManifest.update(anime.id).catch(() => {
+          // намеренно игнорируем — манифест пересоберётся при следующем изменении
+        })
       }
       const posterUrl = result.data.poster?.originalUrl || result.data.poster?.mainUrl
       if (posterUrl && anime.folderPath) {
@@ -234,7 +236,9 @@ export default function AnimePage({ params }: AnimePageProps) {
             })
             await updateAnime(anime.id, { posterId: fileRecord.id })
             if (posterCid) {
-              window.electronAPI?.fs?.delete(posterResult.localPath, false).catch(() => {})
+              window.electronAPI?.fs?.delete(posterResult.localPath, false).catch(() => {
+                // намеренно игнорируем — temp файл, уже загружен в IPFS
+              })
             }
           }
         } catch {

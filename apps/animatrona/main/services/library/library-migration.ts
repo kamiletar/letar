@@ -146,9 +146,13 @@ export async function runLibraryMigration(
 
     // 5. Удаляем пустые директории при перемещении
     if (mode === 'move') {
-      await removeEmptyDirs(fromLibraryPath).catch(() => {})
+      await removeEmptyDirs(fromLibraryPath).catch(() => {
+        // намеренно игнорируем — директория могла быть уже удалена
+      })
       if (fromIpfsPath !== fromLibraryPath) {
-        await removeEmptyDirs(fromIpfsPath).catch(() => {})
+        await removeEmptyDirs(fromIpfsPath).catch(() => {
+          // намеренно игнорируем — директория могла быть уже удалена
+        })
       }
     }
 

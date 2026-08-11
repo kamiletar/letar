@@ -120,7 +120,9 @@ export function createRelayHeartbeat(getPeerId: () => string | null): ReturnType
       if (!retryTimeout) {
         retryTimeout = setTimeout(() => {
           retryTimeout = null
-          doHeartbeat().catch(() => {})
+          doHeartbeat().catch(() => {
+            // ошибка уже залогирована внутри doHeartbeat, здесь только предотвращаем unhandled rejection
+          })
         }, HEARTBEAT_RETRY_MS)
       }
     }
@@ -128,7 +130,9 @@ export function createRelayHeartbeat(getPeerId: () => string | null): ReturnType
 
   const interval = setInterval(
     () => {
-      doHeartbeat().catch(() => {})
+      doHeartbeat().catch(() => {
+        // ошибка уже залогирована внутри doHeartbeat, здесь только предотвращаем unhandled rejection
+      })
     },
     30 * 60 * 1000,
   ) as ReturnType<typeof setInterval> & { __stopHeartbeat?: () => void }
@@ -273,12 +277,16 @@ export function createRelayMonitor(
 
   // Первая проверка через 45 секунд (после ConnMgr GracePeriod + запас)
   const initialDelay = setTimeout(() => {
-    checkAndRecover().catch(() => {})
+    checkAndRecover().catch(() => {
+      // ошибка уже залогирована внутри checkAndRecover, здесь только предотвращаем unhandled rejection
+    })
   }, 45_000)
 
   // Затем каждые 30 секунд
   const interval = setInterval(() => {
-    checkAndRecover().catch(() => {})
+    checkAndRecover().catch(() => {
+      // ошибка уже залогирована внутри checkAndRecover, здесь только предотвращаем unhandled rejection
+    })
   }, 30_000)
 
   // Обернём для cleanup обоих таймеров

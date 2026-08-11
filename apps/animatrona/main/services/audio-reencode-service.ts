@@ -317,7 +317,9 @@ export async function reencodeAnimeAudio(
     } finally {
       // Удаляем temp файлы
       for (const f of [tempInput, tempOutput]) {
-        fs.promises.unlink(f).catch(() => {})
+        fs.promises.unlink(f).catch(() => {
+          // намеренно игнорируем — файл мог не быть создан
+        })
       }
     }
   }
@@ -351,7 +353,9 @@ export async function reencodeAnimeAudio(
   }
 
   // Удаляем temp директорию
-  fs.promises.rm(tempDir, { recursive: true, force: true }).catch(() => {})
+  fs.promises.rm(tempDir, { recursive: true, force: true }).catch(() => {
+    // намеренно игнорируем — temp dir мог не быть создан
+  })
 
   const result: ReencodeResult = {
     reencoded,

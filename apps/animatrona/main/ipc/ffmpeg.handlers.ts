@@ -97,7 +97,9 @@ export function registerFFmpegHandlers(): void {
       return { fonts: uploadedFonts }
     } finally {
       // Cleanup temp dir — main process может удалить любой путь
-      await rm(tempDir, { recursive: true, force: true }).catch(() => {})
+      await rm(tempDir, { recursive: true, force: true }).catch(() => {
+        // намеренно игнорируем — temp dir мог быть уже удалён
+      })
     }
   })
 
