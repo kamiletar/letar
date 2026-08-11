@@ -1,5 +1,31 @@
 # Form Develop App (shadcn) — выполненные задачи
 
+## Фаза 3 — Полный паритет 56/56 (2026-08-11, одна сессия, forms-dev)
+
+`@letar/forms-shadcn` достиг полного паритета с `@letar/forms` (Chakra-скин) — 44→56 из 56 полей.
+12 полей, каждое отдельным коммитом (lib + demo) с тестами и полным doc-циклом: `FieldYesNo`,
+`FieldNumberInput`, `FieldPasswordStrength`, `FieldTime`, `FieldCascadingSelect`,
+`FieldImageChoice`, `FieldSchedule`, `FieldLikert`, `FieldMatrixChoice`, `FieldDataGrid`,
+`FieldCalculated`, `FieldAuto` (0.19.0→0.30.0).
+
+- `FieldCascadingSelect` — не `createField()`-поле (как `FormSteps`/`FieldTableEditor`),
+  компонует `form.Subscribe` напрямую.
+- `FieldDataGrid` — первое поле с новым peer-dep `@tanstack/react-table`, изолировано через
+  `lazy()` + dynamic `import()` (тот же паттерн, что `FieldRichText`). Демо — изолированная
+  форма с таблицей сотрудников (сортировка, фильтр, инлайн-редактирование, rowSelection,
+  CSV-экспорт). Живая проверка рендера/данных — в Chromium; сортировка по клику заголовка —
+  через RTL (`fireEvent.click`), не через Browser pane (raw `dispatchEvent(MouseEvent)` не
+  триггерит React-обработчик в JS-харнессе — известный класс артефакта, не баг компонента).
+- `FieldCalculated` — `useComputedValue` framework-free скопирован дословно из Chakra-версии.
+- `FieldAuto` (последнее, замкнуло паритет) — `DemoForm` расширен опциональным `schema`-пропом
+  (нужен только этому полю), демо — изолированная форма с 5 полями на все ветки
+  диспетчеризации (string/textarea/number/switch/enum). Живая проверка в Chromium подтвердила
+  все теги элементов и enum-опции.
+- Детали реализации каждого поля (протечки границы, beta-упрощения, находки тестов) —
+  в `libs/forms/PLAN.md` §7.3, источник истины, не дублируется здесь.
+- `typecheck:tsgo`/`lint`/`test` зелёные на каждом шаге. Счётчик страницы: «56 из 56 полей,
+  полный паритет с `@letar/forms`».
+
 ## Фаза 2 — Table/RichText (2026-08-10…11, forms-dev, приоритет координатора закрыт)
 
 Завершение приоритетного списка `QuietRidge` (Signature → FileUpload → Steps → **Table → RichText**).
