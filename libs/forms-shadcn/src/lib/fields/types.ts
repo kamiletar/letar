@@ -287,6 +287,34 @@ export interface LikertFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
   showNumbers?: boolean
 }
 
+/** Строка матрицы (вопрос) для `Form.Field.MatrixChoice`. */
+export interface MatrixRow {
+  value: string
+  label: string
+}
+
+/** Колонка матрицы (вариант ответа) для `Form.Field.MatrixChoice`. */
+export interface MatrixColumn {
+  value: string
+  label: string
+}
+
+/**
+ * Props for Form.Field.MatrixChoice (shadcn-скин). Значение —
+ * `Record<string, string | string[]>` (`{ speed: '4', quality: '5' }`).
+ *
+ * Портирован из Chakra-версии без изменений логики (radio/checkbox/rating варианты, per-row
+ * required-подсветка). Beta: одна разметка (native `<table>`) на все брейкпоинты, без
+ * раздельного мобильного вида карточками и без стрелочной клавиатурной навигации по ячейкам —
+ * Chakra-версия рендерила оба вида и `ArrowUp/Down/Left/Right` между `[data-matrix-row]`.
+ */
+export interface MatrixChoiceFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
+  rows: MatrixRow[]
+  columns: MatrixColumn[]
+  /** Вариант: radio (одиночный, по умолчанию), checkbox (множественный), rating (звёзды) */
+  variant?: 'radio' | 'checkbox' | 'rating'
+}
+
 /** Значение поля диапазона дат. */
 export interface DateRangeValue {
   start: string

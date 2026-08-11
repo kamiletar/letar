@@ -24,6 +24,7 @@ export { FieldHidden, type HiddenFieldProps } from './lib/fields/field-hidden'
 export { FieldImageChoice } from './lib/fields/field-image-choice'
 export { FieldLikert } from './lib/fields/field-likert'
 export { FieldListbox } from './lib/fields/field-listbox'
+export { FieldMatrixChoice } from './lib/fields/field-matrix-choice'
 export { FieldNativeSelect } from './lib/fields/field-native-select'
 export { FieldNumber } from './lib/fields/field-number'
 export { FieldNumberInput } from './lib/fields/field-number-input'
@@ -79,6 +80,9 @@ export type {
   LikertFieldProps,
   ListboxFieldProps,
   ListboxOption,
+  MatrixChoiceFieldProps,
+  MatrixColumn,
+  MatrixRow,
   NativeSelectFieldProps,
   NumberFieldProps,
   NumberInputFieldProps,
