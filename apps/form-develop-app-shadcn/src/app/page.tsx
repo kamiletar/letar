@@ -222,7 +222,8 @@ export default function HomePage() {
     <main className="mx-auto max-w-2xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Form Develop App (shadcn)</h1>
       <p className="text-muted-foreground mt-2 text-sm">
-        Песочница для разработки @letar/forms-shadcn — 56 из 56 полей, полный паритет с @letar/forms.
+        Песочница для разработки @letar/forms-shadcn — 47 из 56 полей портировано с @letar/forms (9 в backlog:
+        MaskedInput, CreditCard, 7 document-полей — ждут исследовательскую сессию по замене use-mask-input).
       </p>
 
       <DemoForm<DemoFormValues>
@@ -527,7 +528,7 @@ export default function HomePage() {
       <h2 className="mt-16 text-xl font-semibold">FieldAuto (beta, отдельная форма)</h2>
       <p className="text-muted-foreground mt-1 text-sm">
         Автоопределение типа поля из Zod-схемы — изолированная песочница со своей схемой (единственная демо-форма на
-        странице, где `DemoForm` получает `schema`). Последнее поле для паритета — 56 из 56.
+        странице, где `DemoForm` получает `schema`). Последнее из 47 портированных полей.
       </p>
       <DemoForm<{ fullName: string; bio: string; age: number; subscribed: boolean; plan: string }>
         schema={autoDemoSchema}
