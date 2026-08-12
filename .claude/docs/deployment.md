@@ -40,14 +40,18 @@ cd /home/deploy/letar
 
 ### Распределение приложений по серверам
 
-| Сервер            | Приложения                                                                                                                                                                                                                                                     |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ~~s1.letar.best~~ | ~~выведен из эксплуатации~~                                                                                                                                                                                                                                    |
-| **s2.letar.best** | dashboard, dashboard-agent, driving-school, animatrona-web, auth-hub, archetest, time, form-docs, form-example, grandslamcup, mandala, kami, pravda, animatrona-landing, animatrona-tracker, umami, kami-key-the-landing, letar-landing, premium-rosstil, imot |
+| Сервер            | Приложения                                                                                                                                                                                                                                                                                     |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ~~s1.letar.best~~ | ~~выведен из эксплуатации~~                                                                                                                                                                                                                                                                    |
+| **s2.letar.best** | dashboard, dashboard-agent, driving-school, auth-hub, archetest, time, form-docs, form-example, grandslamcup, aira-web, mandala, kami, pravda, umami, animatrona-landing, animatrona-tracker, kami-key-the-landing, letar-landing, dsperevod, aboi, svoichuzhie, aprel8008, studio, domwellbes |
 
 ⚠️ **ВАЖНО:** При деплое убедись, что подключаешься к правильному серверу!
 
-> **Каноничный источник:** `deploy-affected.sh` → массивы `S1_APPS` / `S2_APPS`
+> **Каноничный источник:** `deploy-affected.sh` → массивы `S1_APPS` / `S2_APPS` / `S3_APPS`. Таблица
+> выше — снимок с 2026-08-12 (сверена построчно с живым `S2_APPS`, до этого держала
+> `premium-rosstil`/`imot`, удалённые из монорепо 2026-07-05, и несуществующий пункт
+> `animatrona-web`, при этом не зная про 7 приложений, добавленных позже) — при расхождении верь
+> скрипту, не таблице.
 
 ## E2E-ранер и деплой — staging-gated пайплайн (PLAN.md §18)
 
