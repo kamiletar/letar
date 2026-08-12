@@ -86,3 +86,4 @@ export {
 } from './lib/use-copy-to-clipboard'
 export { useScrollGate, type UseScrollGateOptions, type UseScrollGateResult } from './lib/use-scroll-gate'
 export { useServiceWorker, type UseServiceWorkerOptions } from './lib/use-service-worker'
+export { type ShareData, type ShareOutcome, useShare, type UseShareOptions, type UseShareResult } from './lib/use-share'

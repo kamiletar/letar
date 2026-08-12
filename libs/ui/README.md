@@ -547,6 +547,24 @@ const { copied, copy } = useCopyToClipboard()
 // <Button onClick={() => copy(url)}>{copied ? 'Скопировано' : 'Копировать'}</Button>
 ```
 
+### useShare
+
+`navigator.share` с деградацией до `useCopyToClipboard`. Вынесен после того, как один и тот же
+паттерн (share с fallback-копированием) независимо появился в `archetest/ShareResultButton` и
+`aprel8008/ShareComic` — с расхождением: только один из двух ловил `AbortError` при отмене
+диалога пользователем, у второго это улетало в консоль необработанным reject.
+
+`share()` возвращает исход (`shared`/`copied`/`aborted`), чтобы вызывающая сторона показывала
+UI-фидбек (тост, текст) только при фактическом fallback-копировании.
+
+```tsx
+import { useShare } from '@letar/ui'
+
+const { share } = useShare()
+const outcome = await share({ title, text, url }, `${text} ${url}`)
+if (outcome === 'copied') toaster.success({ title: 'Ссылка скопирована' })
+```
+
 ## Команды
 
 ```bash
