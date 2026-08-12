@@ -1087,6 +1087,14 @@ DoD батча: `deploy_app(staging)` → `run_e2e` → `e2e_status` зелён�
    заменено на `Boolean(process.env.KEYSTATIC_GITHUB_CLIENT_ID)` — сборка не зависит от
    NODE_ENV/домена, только от факта наличия кредов (`0598571a`). Тот же
    `project.json`/`webServer.url` фикс применён и к `kami-e2e`.
+   > ⚠️ **Продолжение (2026-08-12, тот же день):** точечный фикс не заметил дубль —
+   > `apps/kami/src/lib/keystatic.ts` (`reader`) содержал тот же `isProd = NODE_ENV ===
+   > 'production'`, что и починенный `keystatic.config.ts`. Фикс тот же (`Boolean(GITHUB_PAT)`).
+   > Заведён системный барьер: `no-restricted-syntax` в корневом `eslint.config.mjs` ловит
+   > `NODE_ENV === /!== 'production'` (обе стороны сравнения) во всём репо, с allow-list на
+   > разобранные точечно легитимные случаи (build-тулинг, Electron main, cookie `secure`,
+   > Prisma dev-cache, rate-limit storage). Полный разбор всех 34 найденных вхождений —
+   > `.claude/docs/node-env-not-production-signal.md` § Ревизия ESLint-правила.
 
 ✅ **Системный гэп закрыт полностью, аудит 2026-08-12.** Полный обход всех `apps/*-e2e/playwright.config.ts`
 (не только подозреваемых) на оба дефекта (отсутствующий `project.json` с явным executor +
@@ -8495,6 +8503,38 @@ SaaS-Sentry отпадает отдельно: тело ошибки тащит 
      Правило теперь фактически ложно срабатывает на **любом новом** консьюмере `@letar/glitchtip/
    client`+`/server` пары — обходится точечным `eslint-disable-next-line` на каждом новом
      приложении тиража, без дальнейших попыток чинить порядок конфига.
+
+   ✅ **Закрыто (2026-08-12, отдельная сессия).** Углублённый разбор источника
+   `@nx/eslint-plugin` (`enforce-module-boundaries.js` → `hasStaticImportOfDynamicResource` →
+   `getSecondaryEntryPointPath` → `resolveModuleByImport` из `@nx/js`) подтвердил, что сам граф
+   зависимостей Nx одинаков для всех приложений (implicit+static+dynamic рёбра на
+   `@letar/glitchtip` идентичны), а прямая симуляция TS-резолвинга `resolveModuleName('@letar/
+   glitchtip/client', ...)` вне рантайма ESLint резолвит секундарную точку входа успешно и
+   одинаково для `dashboard` (никогда не падал) и `grandslamcup` (падал стабильно). Значит причина
+   не в статической конфигурации проекта, а в состоянии процесса линтинга.
+
+   Решающая проверка: `nx reset` (полная очистка кеша задач + перезапуск демона Nx) с последующим
+   `nx lint grandslamcup` в изоляции — правило **не сработало**, `eslint-disable-next-line
+   @nx/enforce-module-boundaries` стал `Unused eslint-disable directive`. Повторено ещё дважды
+   подряд (после повторных `nx reset`), затем прогнано пакетно (`nx run-many -t lint`) по всем 9
+   ранее падавшим приложениям (`grandslamcup`, `mandala`, `pravda`, `aira-web`, `auth-hub`,
+   `animatrona-landing`, `letar-landing`, `kami-key-the-landing`, `form-docs`) и по `archetest` —
+   0 ошибок везде, во всех прогонах, трижды подряд с полным `nx reset` между прогонами.
+
+   **Вывод:** ложная блокировка была артефактом состояния Nx-демона/кеша графа проектов,
+   накопленного за время самого тиража §70 (демон работал непрерывно много часов подряд, пока
+   `@letar/glitchtip` инкрементально добавлялся как консьюмер в 17 приложений одно за другим —
+   вероятно, кеш `resolveModuleByImport`/`moduleResolutionCache` где-то в `@nx/js` или
+   project-graph кеш самого Nx не инвалидировался корректно между добавлением новых consumers).
+   Структурной проблемы в `libs/glitchtip` или в порядке `eslint.config.mjs` нет и не было — обе
+   гипотезы («порядок спредов», «отсутствующий symlink») были опровергнуты ранее и это
+   подтверждает: искать причину стоило не в статике проекта, а в рантайм-состоянии линтера.
+
+   Все 9 `eslint-disable-next-line @nx/enforce-module-boundaries` на `@letar/glitchtip/client`
+   убраны (коммиты `38fa2a36`, `568a7194`, `325d8f8a`, `3e7bc487`, `1479ce3d`, `5db5190e`,
+   `160a30bd`, `4d73064a`, `622935e7`). Если блокировка вернётся на новом приложении тиража —
+   первым шагом пробовать `nx reset`, а не сразу писать обход; обход оправдан только если
+   ошибка переживает `nx reset` (как казалось в момент этой записи, но не подтвердилось).
 
    ✅ **Третий прогон тиража (2026-08-12): `mandala`, `pravda`, `aira-web`.** Тот же цикл, тот же
    eslint-disable обход (без экспериментов с порядком). У `aira-web` `.env.staging.enc` не
