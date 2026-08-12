@@ -309,6 +309,7 @@ export default function AdminLayout({ children }) {
 `materials/categories/_components/attribute-definitions-section.tsx`,
 `cases/_components/case-stages-section.tsx`, `estimates/_components/estimate-limited-costs-section.tsx`.
 
-`houses/_components/house-option-groups-section.tsx` в этот проход не вошёл (не был в исходном
-списке кандидатов) — не проверялось, ложится ли он на тот же каркас; следующий кандидат, если
-вложенность групп/опций совпадает по форме с остальными.
+`houses/_components/house-option-groups-section.tsx` проверен отдельно (2026-08-13) и **не
+подходит**: двухуровневая структура (группа → опции), два независимых `editingId`-состояния
+вместо одного, вложенная `Table.Root` внутри строки группы вместо плоского списка. Компонент
+не переведён — детали в `apps/domwellbes/PLAN_COMPLETED.md`.
