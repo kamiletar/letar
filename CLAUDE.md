@@ -20,7 +20,9 @@
 [git-multi-agent-incidents](/.claude/docs/git-multi-agent-incidents.md) разборы гонок между
 агентами: почему правила git такие строгие ·
 [git-pathspec-commit-ignored-deletion](/.claude/docs/git-pathspec-commit-ignored-deletion.md) ⚠️
-`git commit -- <path>` молча теряет `git rm --cached`, если путь уже в `.gitignore`
+`git commit -- <path>` молча теряет `git rm --cached`, если путь уже в `.gitignore` ·
+[bun-lockfile-private-submodules](/.claude/docs/bun-lockfile-private-submodules.md) ⚠️
+`--frozen-lockfile` падает везде, где submodule не выкачаны; чистка `bun.lock` не держится
 
 **MCP-серверы:** [mcp-servers](/.claude/docs/mcp-servers.md) состав и назначение ·
 [mcp-server-pattern](/.claude/docs/mcp-server-pattern.md) тонкий локальный сервер по stdio ·
