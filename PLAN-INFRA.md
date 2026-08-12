@@ -941,13 +941,17 @@ rollout-механизм с `DEPLOY_TAG=<sha>` без пересборки, то
 rollback автономно (обратимая операция — agentic-практика); восстановление дампа — только
 человек (уничтожает данные после миграции).
 
-**Healthcheck-стандартизация через doctor.** Факт: app-healthcheck есть только у 5/23 приложений
-(dashboard, dashboard-agent, grandslamcup, svoichuzhie, umami). Стандарт — профиль grandslamcup
-(`wget --spider`, interval 5s, retries 30, start_period 15s; при подключении желателен выделенный
-`/api/health`, чтобы не зависеть от тяжёлой главной). `deploy-engine doctor --app X` валидирует
-compose (healthcheck, alias, нет container_name/ports, DEPLOY_TAG, label); **rollout отказывается
-работать без пройденного doctor**. Healthcheck добавляется per-app в той же пачке, что и
-включение rollout — не big-bang.
+**Healthcheck-стандартизация через doctor.** ~~Факт: app-healthcheck есть только у 5/23
+приложений~~ — устарело, тираж J (blue-green rollout) добавлял healthcheck попутно почти
+везде. Перепроверено 2026-08-12: **23/24 production compose имеют healthcheck**, последний
+пробел (`aira-web`) закрыт в той же сессии (профиль grandslamcup — `wget --spider`, interval
+5s, retries 30, start_period 15s), заодно с волной деплоя §70 GlitchTip — приложение уже
+трогали, добавление трёх строк почти бесплатно. Стандарт — профиль grandslamcup (при
+подключении к rollout желателен выделенный `/api/health`, чтобы не зависеть от тяжёлой
+главной). `deploy-engine doctor --app X` валидирует compose (healthcheck, alias, нет
+container_name/ports, DEPLOY_TAG, label); **rollout отказывается работать без пройденного
+doctor**. Healthcheck добавляется per-app в той же пачке, что и включение rollout — не
+big-bang.
 
 **Ключевые файлы будущей реализации:** `deploy-affected.sh:930-1040` (шов интеграции rollout),
 `libs/infra-config/src/index.ts` (`E2E_GATED_APPS`), `libs/deploy-mcp/src/server.ts:46-91`

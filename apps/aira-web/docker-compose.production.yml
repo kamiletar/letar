@@ -18,6 +18,12 @@ services:
       PORT: 3017
     networks:
       - kami-network
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q --spider http://0.0.0.0:3017/ || exit 1']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 15s
     logging:
       driver: 'json-file'
       options:
