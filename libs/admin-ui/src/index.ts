@@ -20,6 +20,9 @@ export {
   type DataTableProps,
   GenericAdminTable,
   type GenericAdminTableProps,
+  InlineEditableTable,
+  type InlineEditableTableColumn,
+  type InlineEditableTableProps,
   TableSkeleton,
 } from './table'
 
@@ -37,7 +40,7 @@ export { SortablePhotoGrid, type SortablePhotoGridProps, type SortablePhotoItem 
 export { SeoField, SlugField } from './form-fields'
 
 // Hooks
-export { useSelection } from './hooks'
+export { useInlineCrudList, type UseInlineCrudListOptions, useSelection } from './hooks'
 
 // Jobs (крон-задачи, PLAN-INFRA §75)
 export { JobsTable, type JobsTableProps, type JobStatusItem } from './jobs'

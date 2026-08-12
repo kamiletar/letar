@@ -29,13 +29,14 @@ bun add @tanstack/react-table
 
 ### Table
 
-| Компонент           | Описание                                                   |
-| ------------------- | ---------------------------------------------------------- |
-| `GenericAdminTable` | Универсальная таблица с DnD-порядком и bulk actions        |
-| `DataTable`         | Таблица на `@tanstack/react-table` с серверной сортировкой |
-| `BulkActionsBar`    | Панель массовых действий                                   |
-| `TableSkeleton`     | Skeleton при загрузке                                      |
-| `commonBulkActions` | Предустановленные действия (publish, delete)               |
+| Компонент             | Описание                                                   |
+| --------------------- | ---------------------------------------------------------- |
+| `GenericAdminTable`   | Универсальная таблица с DnD-порядком и bulk actions        |
+| `DataTable`           | Таблица на `@tanstack/react-table` с серверной сортировкой |
+| `InlineEditableTable` | Инлайн-CRUD таблица (форма редактирования прямо в строке)  |
+| `BulkActionsBar`      | Панель массовых действий                                   |
+| `TableSkeleton`       | Skeleton при загрузке                                      |
+| `commonBulkActions`   | Предустановленные действия (publish, delete)               |
 
 #### `DataTable`
 
@@ -57,6 +58,55 @@ const columns: ColumnDef<Client>[] = [
 <DataTable data={clients} columns={columns} />
 <Pagination total={total} pageSize={PAGE_SIZE} />
 ```
+
+#### `InlineEditableTable` + `useInlineCrudList`
+
+Инлайн-CRUD секция админки (позиции состава, нормы расхода, уровни упаковки и т.п.): список в
+карточке, строка редактирования разворачивается в форму на всю ширину таблицы, создание — форма
+под таблицей. `useInlineCrudList` держит state (`items`, `editingId`) и create/update/delete —
+Server Action пишется вызывающим кодом и возвращает элемент, готовый для отображения в списке.
+`InlineEditableTable` строит саму разметку — колонки и обе формы (create/edit) остаются за
+вызывающей секцией, у каждой свой набор полей и Zod-схема.
+
+```tsx
+import { InlineEditableTable, useInlineCrudList } from '@letar/admin-ui'
+
+const list = useInlineCrudList({
+  initialItems: initialExtras,
+  getId: (extra) => extra.id,
+  sortBy: (extra) => extra.order,
+  onCreate: (data) => createHouseExtra(houseId, data),
+  onUpdate: (id, data) => updateHouseExtra(houseId, id, data),
+  onDelete: (id) => deleteHouseExtra(houseId, id),
+})
+
+<InlineEditableTable
+  title="Не входит в цену"
+  items={list.items}
+  getId={(extra) => extra.id}
+  editingId={list.editingId}
+  onEdit={list.setEditingId}
+  onDelete={list.handleDelete}
+  onAdd={() => list.setEditingId('new')}
+  emptyMessage="Пока пусто"
+  columns={[
+    { header: 'Название', render: (extra) => extra.title },
+    { header: 'Цена', render: (extra) => formatKopecks(extra.priceKopecks) },
+  ]}
+  renderEditForm={(extra) => (
+    <ExtraForm initialValue={extra} onSubmit={(data) => list.handleUpdate(extra.id, data)} onCancel={() => list.setEditingId(null)} />
+  )}
+  renderCreateForm={() => (
+    <ExtraForm initialValue={EMPTY_EXTRA} onSubmit={list.handleCreate} onCancel={() => list.setEditingId(null)} />
+  )}
+/>
+```
+
+`onCreate`/`onUpdate` не обязаны возвращать Server Action как есть — если ответ действия не
+совпадает по форме с элементом списка (например, нужно домешать label выбранной опции или
+привести `Decimal` к `number`), внутри колбэка можно собрать нужную форму вручную. Образец — 8
+секций `apps/domwellbes/src/app/(admin)/admin/` (`house-extras-section.tsx` — простой случай,
+`house-items-section.tsx` — с маппингом ответа).
 
 ### Filters
 
@@ -247,3 +297,18 @@ export default function AdminLayout({ children }) {
 <GenericAdminTable colorPalette="blue" />
 <StatusFilter colorPalette="green" />
 ```
+
+## Бэклог
+
+### [2026-08-12→2026-08-13] CRUD-inline-list — извлечён как `InlineEditableTable` + `useInlineCrudList`
+
+Кандидат на извлечение из бэклога реализован (см. раздел «Table» выше). Переведено 8 секций
+`apps/domwellbes/src/app/(admin)/admin/`: `houses/_components/house-extras-section.tsx`,
+`house-items-section.tsx`, `works/_components/work-material-norms-section.tsx`,
+`work-machine-norms-section.tsx`, `materials/_components/material-packaging-section.tsx`,
+`materials/categories/_components/attribute-definitions-section.tsx`,
+`cases/_components/case-stages-section.tsx`, `estimates/_components/estimate-limited-costs-section.tsx`.
+
+`houses/_components/house-option-groups-section.tsx` в этот проход не вошёл (не был в исходном
+списке кандидатов) — не проверялось, ложится ли он на тот же каркас; следующий кандидат, если
+вложенность групп/опций совпадает по форме с остальными.
