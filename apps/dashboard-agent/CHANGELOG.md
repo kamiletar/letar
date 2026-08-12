@@ -17,6 +17,9 @@
 
 - **`aboi-birthday-promo`** — новая cron-задача в `DEFAULT_CRON_JOBS` (`0 8 * * *`), вызывает
   `aboi:/api/cron/birthday-promo`.
+- **`aboi-approve-referrals`** — новая cron-задача (`0 3 * * *`), вызывает
+  `aboi:/api/cron/approve-referrals`. Миграция последнего cron-эндпоинта aboi со старого
+  паттерна (внешний crontab + `Authorization: Bearer`) на `verifyCronSecret()`.
 
 ### Fixed
 

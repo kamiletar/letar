@@ -221,6 +221,19 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's2',
   },
   {
+    id: 'aboi-approve-referrals',
+    name: 'Approve Referrals (aboi)',
+    app: 'aboi',
+    endpoint: '/api/cron/approve-referrals',
+    // Мигрирован со старого паттерна (внешний crontab, "Authorization: Bearer") на
+    // verifyCronSecret() — раньше расписание 0 3 * * * жило только в комментарии
+    // .env.docker.example, не факт, что crontab был когда-либо реально настроен на сервере.
+    schedule: '0 3 * * *',
+    description: 'Переводит реферальные earnings из PENDING в APPROVED по истечении pendingUntil',
+    enabled: true,
+    server: 's2',
+  },
+  {
     id: 'aboi-birthday-promo',
     name: 'Birthday Promo (aboi)',
     app: 'aboi',
