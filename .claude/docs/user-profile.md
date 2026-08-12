@@ -276,13 +276,18 @@
 
 ## Эталонные реализации
 
-**Лучшие примеры в кодовой базе:**
+**Лучшие примеры в кодовой базе** (обновлено 2026-08-12 — все пути ниже раньше указывали на
+`apps/premium-rosstil`, удалённый из монорепо 2026-07-05; заменены на проверенные живые пути в
+`apps/aboi`, ближайшем по структуре активном e-commerce приложении):
 
-- Обзор профиля: `apps/premium-rosstil/src/app/profile/page.tsx`
-- Загрузка аватара: `apps/premium-rosstil/src/app/profile/edit/page.tsx`
-- Мерки: `apps/premium-rosstil/src/app/profile/measurements/`
-- Адреса: `apps/premium-rosstil/src/app/profile/addresses/`
-- Корзина: `apps/premium-rosstil/src/app/cart/`
-- Список желаний: `apps/premium-rosstil/src/app/profile/wishlist/`
-- Заказы: `apps/premium-rosstil/src/app/profile/orders/`
-- Настройки: `apps/premium-rosstil/src/app/profile/settings/`
+- Обзор профиля: `apps/aboi/src/app/[locale]/profile/page.tsx`
+- Адреса: `apps/aboi/src/app/[locale]/profile/addresses/`
+- Корзина: `apps/aboi/src/app/[locale]/(shop)/cart/`
+- Список желаний: `apps/aboi/src/app/[locale]/profile/favorites/` (аналог «wishlist», другое имя)
+- Заказы: `apps/aboi/src/app/[locale]/profile/orders/`
+- Настройки: `apps/aboi/src/app/[locale]/profile/settings/`
+
+⚠️ Без проверенной замены: «Мерки» (замеры одежды — специфика premium-rosstil как магазина
+одежды, у aboi, магазина обоев/постеров, такой сущности нет и быть не должно) и «Загрузка
+аватара» (отдельной страницы `/profile/edit` с этой функцией в aboi не нашла — возможно, входит в
+`settings/page.tsx` без выделенного пути).
