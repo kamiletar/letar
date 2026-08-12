@@ -8430,16 +8430,30 @@ SaaS-Sentry отпадает отдельно: тело ошибки тащит 
    (`docker-compose.production.yml` без `package.json`/`src/`), не Next.js-приложение в этом
    репозитории, генератор неприменим в принципе.
 
-   **Список кандидатов (`PLAN-INFRA.md`, актуализирован 2026-08-12) — сделано 11 из ~18:**
+   ✅ **Пятый прогон тиража (2026-08-12): `animatrona-landing`, `kami-key-the-landing`,
+   `letar-landing`.** Все три — только production (лендинги без staging-инстанса), тот же
+   eslint-disable обход. DSN в `.env.docker.enc`, round-trip проверен.
+
+   ⚠️ **`animatrona-tracker` пропущен — единственное приложение в монорепо без собственного
+   `package.json`.** Генератор требует `apps/<app>/package.json` (версия, `nx.implicitDependencies`,
+   линковка `@letar/*` через `workspace:*`) — у всех остальных 53 приложений он есть, у этого нет
+   с самого `69fdf2ea` (initial commit, «fresh start from lena»). Похоже на утерю при переносе
+   кодовой базы, не осознанное решение — сборка (`next build --webpack`) работает и без него,
+   зависимости резолвятся из корневого `node_modules`. Не чинить попутно: заведение
+   `package.json` для приложения — отдельная задача (сопоставить версию, implicitDependencies и
+   пр. с тем, что делает generator для остальных приложений), не блокирует остаток тиража §70.
+
+   **Список кандидатов (`PLAN-INFRA.md`, актуализирован 2026-08-12) — сделано 14 из ~18:**
    `studio` ✅ деплой, `dashboard` ✅ деплой+проверка, `time` ✅ деплой+проверка, `archetest` ✅
    код+секреты (деплой ждёт ответа), `grandslamcup` ✅ код+секреты (деплой ждёт ответа),
    `mandala`/`pravda`/`aira-web` ✅ код+секреты (деплой-запрос отправлен), `auth-hub`/`form-docs`/
    `form-example` ✅ код+секреты (деплой-запрос отправлен, `deploy-glitchtip-authhub-formdocs-
-   formexample-s70`).
+   formexample-s70`), `animatrona-landing`/`kami-key-the-landing`/`letar-landing` ✅ код+секреты
+   (деплой-запрос ещё не отправлен — следующий шаг).
    Осталось из некоммерческих: `dashboard-agent` (не Next.js — Fastify, генератор не подходит,
-   нужна отдельная интеграция), `kami` (не Next.js — библиотека Prisma), `animatrona-landing`,
-   `animatrona-tracker`, `kami-key-the-landing`, `letar-landing`. Коммерческие/ПДн (`aboi`,
-   `driving-school`, `dsperevod`, `svoichuzhie`, `aprel8008`, `domwellbes`) и не-Next.js
+   нужна отдельная интеграция), `kami` (не Next.js — библиотека Prisma), `animatrona-tracker`
+   (нет `package.json`, см. выше — генератор неприменим без отдельного фикса). Коммерческие/ПДн
+   (`aboi`, `driving-school`, `dsperevod`, `svoichuzhie`, `aprel8008`, `domwellbes`) и не-Next.js
    (Electron/React Native) — как в исходном плане п.7, без изменений.
 
 ### Что это даёт агентам
