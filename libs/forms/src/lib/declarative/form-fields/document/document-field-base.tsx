@@ -1,8 +1,9 @@
 'use client'
 
 import { Field, Icon, Input, InputGroup } from '@chakra-ui/react'
+import { useMaskField } from '@letar/forms-react'
+import { useStore } from '@tanstack/react-form'
 import type { ReactElement, ReactNode } from 'react'
-import { useCallback } from 'react'
 import type { FieldTooltipMeta } from '../../types'
 import { createField, FieldError, FieldLabel } from '../base'
 
@@ -30,8 +31,16 @@ export interface DocumentFieldProps {
 export interface DocumentFieldConfig {
   /** Имя для React DevTools */
   displayName: string
-  /** Маска ввода (use-mask-input синтаксис: 9=цифра, a=буква, *=любой) */
+  /** Маска движка `@letar/forms-core/mask` (9=цифра, a=буква, *=любой) */
   mask: string
+  /**
+   * `'live'` (по умолчанию) — группировка литералами маски на каждое нажатие. `'off'` — только
+   * фильтрация по алфавиту токенов, без группировки: для полей переменной длины (ИНН — 10 или
+   * 12 цифр), где структурная маска дала бы ложный отказ (MASK_ENGINE.md §5.3).
+   */
+  formatMode?: 'live' | 'off'
+  /** HTML `maxLength` — актуален вместе с `formatMode: 'off'`, где сама маска длину не ограничивает. */
+  maxLength?: number
   /** Placeholder с примером */
   placeholder: string
   /** Иконка слева */
@@ -40,36 +49,38 @@ export interface DocumentFieldConfig {
   validate?: (value: string) => string | undefined
 }
 
+interface DocumentFieldState {
+  inputProps: ReturnType<typeof useMaskField>['inputProps']
+  onFocus: () => void
+  onBlur: () => void
+}
+
 /**
  * Фабрика для создания document-полей с маской + иконкой + валидацией.
  *
  * Все документные поля (ИНН, ОГРН, БИК и т.д.) используют одинаковую структуру:
  * - InputGroup с иконкой слева
- * - Маска ввода через use-mask-input
+ * - Маска ввода через `@letar/forms-core/mask` (Фаза 8, Этап 4 — заменяет `use-mask-input`)
  * - Realtime валидация
  */
 export function createDocumentField(config: DocumentFieldConfig) {
-  return createField<DocumentFieldProps, string, { maskRef: (element: HTMLInputElement | null) => void }>({
+  return createField<DocumentFieldProps, string, DocumentFieldState>({
     displayName: config.displayName,
 
-    // useFieldState вызывается ДО form.Field (hooks-safe), в отличие от render callback
-    useFieldState: () => {
-      // use-mask-input подгружается динамически — иначе резолв требуется для ЛЮБОГО
-      // потребителя @letar/forms (createDocumentField реэкспортируется из корневого barrel)
-      const maskRef = useCallback((element: HTMLInputElement | null) => {
-        if (!element) {
-          return
-        }
-        import('use-mask-input').then(({ withMask }) => {
-          withMask(config.mask, {
-            showMaskOnFocus: false,
-            clearIncomplete: true,
-            autoUnmask: false,
-          })(element)
-        })
-      }, [])
+    // useFieldState вызывается ДО form.Field (hooks-safe), в отличие от render callback —
+    // тот же приём, что в Form.Field.MaskedInput (см. её комментарий про useStore).
+    useFieldState: (_props, _resolved, context) => {
+      const { form, fullPath } = context
+      const rawValue = (useStore(form.store, () => form.getFieldValue(fullPath)) as string | undefined) ?? ''
 
-      return { maskRef }
+      const { inputProps, onFocus, onBlur } = useMaskField({
+        mask: config.mask,
+        value: rawValue,
+        onValueChange: (raw) => form.setFieldValue(fullPath, raw),
+        formatMode: config.formatMode,
+      })
+
+      return { inputProps, onFocus, onBlur }
     },
 
     render: ({ field, resolved, hasError, errorMessage, fieldState }): ReactElement => {
@@ -84,11 +95,14 @@ export function createDocumentField(config: DocumentFieldConfig) {
 
           <InputGroup startElement={<Icon color="fg.muted">{config.icon}</Icon>}>
             <Input
-              ref={fieldState.maskRef}
-              value={String(field.state.value ?? '')}
-              onChange={(e) => field.handleChange(e.target.value)}
-              onBlur={field.handleBlur}
+              {...fieldState.inputProps}
+              onFocus={fieldState.onFocus}
+              onBlur={() => {
+                fieldState.onBlur()
+                field.handleBlur()
+              }}
               placeholder={config.placeholder}
+              maxLength={config.maxLength}
             />
           </InputGroup>
 

@@ -196,7 +196,6 @@
         "tailwindcss": "^4.3.3",
         "to-words": "^5.7.0",
         "use-debounce": "^10.1.1",
-        "use-mask-input": "^3.13.0",
         "utf-8-validate": "^6.0.6",
         "uuid": "14.0.1",
         "web-push": "^3.6.7",
@@ -330,7 +329,7 @@
     },
     "apps/aboi": {
       "name": "@letar/aboi",
-      "version": "0.30.6",
+      "version": "0.30.7",
       "dependencies": {
         "leaflet": "^1.9.4",
         "react-leaflet": "^5.0.0",
@@ -481,7 +480,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.38.9",
+      "version": "0.38.14",
     },
     "apps/domwellbes-e2e": {
       "name": "@letar/domwellbes-e2e",
@@ -919,7 +918,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.0.5",
+      "version": "2.1.0",
       "dependencies": {
         "@tanstack/react-table": "^8.21.3",
         "@tanstack/react-virtual": "^3.13.23",
@@ -936,17 +935,16 @@
         "@tanstack/react-form": ">=1.0.0",
         "framer-motion": ">=10.0.0",
         "react": ">=18.0.0",
-        "use-mask-input": ">=3.0.0",
         "zod": ">=3.24.0",
       },
     },
     "libs/forms-core": {
       "name": "@letar/forms-core",
-      "version": "0.2.2",
+      "version": "0.5.0",
     },
     "libs/forms-react": {
       "name": "@letar/forms-react",
-      "version": "0.2.1",
+      "version": "0.3.0",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },
@@ -1164,6 +1162,15 @@
         "react": ">=18.0.0",
         "react-dom": ">=18.0.0",
         "yet-another-react-lightbox": "^3.0.0",
+      },
+    },
+    "libs/umami-mcp": {
+      "name": "@letar/umami-mcp",
+      "version": "0.1.0",
+      "dependencies": {
+        "@letar/mcp-server-kit": "workspace:*",
+        "@modelcontextprotocol/sdk": "1.29.0",
+        "zod": "4.3.6",
       },
     },
     "libs/validation-utils": {
@@ -2253,6 +2260,8 @@
     "@letar/time-e2e": ["@letar/time-e2e@workspace:apps/time-e2e"],
 
     "@letar/ui": ["@letar/ui@workspace:libs/ui"],
+
+    "@letar/umami-mcp": ["@letar/umami-mcp@workspace:libs/umami-mcp"],
 
     "@letar/validation-utils": ["@letar/validation-utils@workspace:libs/validation-utils"],
 
@@ -7780,8 +7789,6 @@
 
     "use-latest-callback": ["use-latest-callback@0.2.6", "", { "peerDependencies": { "react": ">=16.8" } }, "sha512-FvRG9i1HSo0wagmX63Vrm8SnlUU3LMM3WyZkQ76RnslpBrX694AdG4A0zQBx2B3ZifFA0yv/BaEHGBnEax5rZg=="],
 
-    "use-mask-input": ["use-mask-input@3.13.0", "", { "peerDependencies": { "antd": ">=5", "react": ">=17", "react-dom": ">=17", "vee-validate": ">=4", "vue": ">=3.4" }, "optionalPeers": ["antd", "react", "react-dom", "vee-validate", "vue"] }, "sha512-xz7Uah6UbZDUn45/WWMb0Kyh2ydPhuwEWSbsDpkxaEIdjqKaLcAUZi2TfCeZ8WeHBDBPTtQRVwIUt5mcIXNwpw=="],
-
     "use-sidecar": ["use-sidecar@1.1.3", "", { "dependencies": { "detect-node-es": "^1.1.0", "tslib": "^2.0.0" }, "peerDependencies": { "@types/react": "*", "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc" }, "optionalPeers": ["@types/react"] }, "sha512-Fedw0aZvkhynoPYlA5WXrMCAMm+nSWdZt6lzJQ7Ok8S6Q+VsHmHpRWndVRJ8Be0ZbkfPc5LRYH+5XrzXcEeLRQ=="],
 
     "use-sync-external-store": ["use-sync-external-store@1.6.0", "", { "peerDependencies": { "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w=="],
@@ -8547,6 +8554,8 @@
     "@letar/studio-time-mcp/zod": ["zod@4.3.6", "", {}, "sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg=="],
 
     "@letar/synth/@modelcontextprotocol/sdk": ["@modelcontextprotocol/sdk@1.30.0", "", { "dependencies": { "@hono/node-server": "^1.19.9 || ^2.0.5", "ajv": "^8.17.1", "ajv-formats": "^3.0.1", "content-type": "^1.0.5", "cors": "^2.8.5", "cross-spawn": "^7.0.5", "eventsource": "^3.0.2", "eventsource-parser": "^3.0.0", "express": "^5.2.1", "express-rate-limit": "^8.2.1", "hono": "^4.11.4", "jose": "^6.1.3", "json-schema-typed": "^8.0.2", "pkce-challenge": "^5.0.0", "raw-body": "^3.0.0", "zod": "^3.25 || ^4.0", "zod-to-json-schema": "^3.25.1" }, "peerDependencies": { "@cfworker/json-schema": "^4.1.1" }, "optionalPeers": ["@cfworker/json-schema"] }, "sha512-xKd8OIzlqNzcqcNumGAa6g+PW2kjD5vrpcKOnfldAUPP3j7lnqMPwlTXQm8gF+UwH72z0lqaRbjr9hqGz0eITA=="],
+
+    "@letar/umami-mcp/zod": ["zod@4.3.6", "", {}, "sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg=="],
 
     "@libp2p/crypto/@noble/hashes": ["@noble/hashes@2.2.0", "", {}, "sha512-IYqDGiTXab6FniAgnSdZwgWbomxpy9FtYvLKs7wCUs2a8RkITG+DFGO1DM9cr+E3/RgADRpFjrKVaJ1z6sjtEg=="],
 

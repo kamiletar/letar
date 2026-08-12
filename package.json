@@ -210,7 +210,6 @@
     "tailwindcss": "^4.3.3",
     "to-words": "^5.7.0",
     "use-debounce": "^10.1.1",
-    "use-mask-input": "^3.13.0",
     "utf-8-validate": "^6.0.6",
     "uuid": "14.0.1",
     "web-push": "^3.6.7",

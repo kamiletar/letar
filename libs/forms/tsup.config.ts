@@ -58,8 +58,6 @@ export default defineConfig({
     '@dnd-kit/core',
     '@dnd-kit/sortable',
     '@dnd-kit/utilities',
-    // Маски (optional)
-    'use-mask-input',
     // RichText (optional)
     /^@tiptap\//,
     // JSON viewer (optional, for DebugValues)

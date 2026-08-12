@@ -55,14 +55,16 @@ forms-core  →  forms-react  →  forms (Chakra) / forms-shadcn
 | `@letar/forms-core/uikit`         | Типовой контракт UIKit (~20 примитивов) — см. ниже                             |
 | `@letar/forms-core/mask`          | Mask-движок + DOM-контроллер (замена `use-mask-input`, Фаза 8) — см. ниже      |
 
-## Mask-движок (Фаза 8, Этапы 1-3)
+## Mask-движок (Фаза 8, Этапы 1-4 частично)
 
 `@letar/forms-core/mask` — собственный framework-free движок масок ввода, замена
 `use-mask-input`/Inputmask (весит больше самой библиотеки, 645 открытых issue у апстрима,
-не чинит undo/paste/Android — разбор в [MASK_ENGINE.md](../forms/MASK_ENGINE.md)). Ядро (чистые
-функции), DOM-контроллер и React-биндинг (`@letar/forms-react` → `useMaskField`) готовы;
-`Form.Field.MaskedInput` в `@letar/forms` переведён на движок. Миграция остальных существующих
-полей (`FieldPhone`, `FieldCreditCard`) — Этап 4.
+не чинит undo/paste/Android — разбор в [MASK_ENGINE.md](../forms/MASK_ENGINE.md)), которая
+теперь полностью удалена из `@letar/forms` (`package.json`/`package.publish.json`/`tsup.config.ts`).
+Ядро (чистые функции), DOM-контроллер и React-биндинг (`@letar/forms-react` → `useMaskField`)
+готовы; `Form.Field.MaskedInput` и все 8 документных полей (`createDocumentField` — паспорт,
+СНИЛС, ОГРН, КПП, БИК, расчётный/корр. счёт, ИНН) переведены на движок. `FieldPhone`/
+`FieldCreditCard` остаются на собственных JS-форматтерах — открытый хвост Этапа 4.
 
 ```typescript
 import { applyChange, caretBoundary, format, formatToParts, unformat } from '@letar/forms-core/mask'
