@@ -1,0 +1,72 @@
+name: form-example-staging
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: form-example-staging-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: form_example_staging
+      POSTGRES_USER: forms
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - form-example-staging-data:/var/lib/postgresql/data
+    # Хостовый порт на s3 — следующий свободный после studio(5465).
+    # ⚠️ Комментарий НЕ должен стоять между `ports:` и первой записью порта — deploy-affected.sh
+    # извлекает DB_PORT через `grep -A 1 "ports:"`, захватывая первую строку после `ports:`
+    # буквально.
+    ports:
+      - '5466:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U forms -d form_example_staging']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: form-example:staging
+    container_name: form-example-staging-app
+    restart: unless-stopped
+    ports:
+      # Внутренний 3022 — из Dockerfile.production (ENV PORT=3022), тот же образ что и прод.
+      # Хостовый 3033 — следующий свободный после studio(3032).
+      - '3033:3022'
+    env_file:
+      - .env.staging
+    environment:
+      GLITCHTIP_DSN: ${GLITCHTIP_DSN}
+      GLITCHTIP_ENVIRONMENT: ${GLITCHTIP_ENVIRONMENT}
+      NEXT_PUBLIC_GLITCHTIP_DSN: ${NEXT_PUBLIC_GLITCHTIP_DSN}
+      NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT: ${NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT}
+      DATABASE_URL: postgresql://forms:${DB_PASSWORD:-postgres}@form-example-staging-db:5432/form_example_staging
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - default
+      - traefik-network
+    labels:
+      traefik.enable: 'true'
+      traefik.docker.network: 'traefik-network'
+      traefik.http.routers.form-example-stage.rule: 'Host(`form-example-stage.s3.letar.best`)'
+      traefik.http.routers.form-example-stage.entrypoints: 'websecure'
+      # ⛔ Без `certresolver` — сертификат уже выпущен (wildcard `*.s3.letar.best`), роутер его
+      # только использует.
+      traefik.http.routers.form-example-stage.tls: 'true'
+      # Порт КОНТЕЙНЕРА, не хостовый: Traefik ходит напрямую по сети traefik-network
+      traefik.http.services.form-example-stage.loadbalancer.server.port: '3022'
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q --spider http://0.0.0.0:3022/ || exit 1']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 15s
+
+volumes:
+  form-example-staging-data:
+
+networks:
+  # Traefik маршрутизирует только контейнеры в своей сети: docker-провайдер читает label'ы
+  # контейнеров, а не адреса. Сеть создаётся один раз на сервере (docker network create).
+  traefik-network:
+    external: true

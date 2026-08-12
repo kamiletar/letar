@@ -1,0 +1,84 @@
+name: kami-staging
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: kami-staging-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kami_staging
+      POSTGRES_USER: lena_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - kami-staging-data:/var/lib/postgresql/data
+    # Хостовый порт на s3 — следующий свободный после form-example(5466).
+    # ⚠️ Комментарий НЕ должен стоять между `ports:` и первой записью порта — deploy-affected.sh
+    # извлекает DB_PORT через `grep -A 1 "ports:"`, захватывая первую строку после `ports:`
+    # буквально.
+    ports:
+      - '5467:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U lena_user -d kami_staging']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: kami:staging
+    container_name: kami-staging-app
+    restart: unless-stopped
+    ports:
+      # Внутренний 3005 — из Dockerfile.production (ENV PORT=3005), тот же образ что и прод.
+      # Хостовый 3034 — следующий свободный после form-example(3033).
+      - '3034:3005'
+    env_file:
+      - .env.staging
+    environment:
+      GLITCHTIP_DSN: ${GLITCHTIP_DSN}
+      GLITCHTIP_ENVIRONMENT: ${GLITCHTIP_ENVIRONMENT}
+      NEXT_PUBLIC_GLITCHTIP_DSN: ${NEXT_PUBLIC_GLITCHTIP_DSN}
+      NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT: ${NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT}
+      DATABASE_URL: postgresql://lena_user:${DB_PASSWORD:-postgres}@kami-staging-db:5432/kami_staging
+      # OIDC (Ключница), Keystatic GitHub Storage, Telegram, Yandex Metrica — сознательно не
+      # настроены на staging: kami-e2e (5 спеков — navigation/about/skills/projects/blog)
+      # тестирует только публичные страницы, авторизация и админка не покрыты. auth.ts включает
+      # OIDC-провайдер только если OIDC_CLIENT_ID/SECRET оба заданы (genericOAuth config: [] без
+      # них, см. libs/auth/src/server/create-auth/index.ts:145) — без них приложение не падает,
+      # просто нет кнопки входа.
+      # ⚠️ Реальный публичный домен, не localhost — kami/auth.ts (createAuth mode: 'hub-client')
+      # не задаёт свой trustedOrigins, Better Auth по умолчанию доверяет только Origin,
+      # совпадающему с baseURL; тот же класс бага, что на mandala/aboi (PLAN.md §18.7).
+      BETTER_AUTH_URL: https://kami-stage.s3.letar.best
+    volumes:
+      - ./uploads:/app/apps/kami/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - default
+      - traefik-network
+    labels:
+      traefik.enable: 'true'
+      traefik.docker.network: 'traefik-network'
+      traefik.http.routers.kami-stage.rule: 'Host(`kami-stage.s3.letar.best`)'
+      traefik.http.routers.kami-stage.entrypoints: 'websecure'
+      # ⛔ Без `certresolver` — сертификат уже выпущен (wildcard `*.s3.letar.best`), роутер его
+      # только использует.
+      traefik.http.routers.kami-stage.tls: 'true'
+      # Порт КОНТЕЙНЕРА, не хостовый: Traefik ходит напрямую по сети traefik-network
+      traefik.http.services.kami-stage.loadbalancer.server.port: '3005'
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q --spider http://0.0.0.0:3005/ || exit 1']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 15s
+
+volumes:
+  kami-staging-data:
+
+networks:
+  # Traefik маршрутизирует только контейнеры в своей сети: docker-провайдер читает label'ы
+  # контейнеров, а не адреса. Сеть создаётся один раз на сервере (docker network create).
+  traefik-network:
+    external: true

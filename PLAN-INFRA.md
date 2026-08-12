@@ -1047,13 +1047,27 @@ BlackCove заодно прогнать `run_e2e`/`e2e_status` (тред `deploy
 не поднимать стейдж дважды. `E2E_GATED_APPS` обновится только по факту зелёного результата —
 сейчас в реестре их ещё нет.
 
-**⚠️ M2 (`form-example`, `kami`) — не «без доп. условий», как считалось.** У обоих нет вообще
-staging-инфраструктуры: ни `docker-compose.staging.yml`, ни `.env.staging.enc`, ни домена в
-Traefik (проверено 2026-08-12 при попытке подключить их к волне GlitchTip — только у `form-example`
-внешне похожий `docker-compose.yml`, но это локальный `docker compose up` для разработки, не
-стейдж). M2 на деле требует того же объёма работы, что первичная настройка нового приложения на
-стейдже (как делалось для остальных M1-приложений раньше) — отдельная задача, не «взять сьют и
-подключить». Не начато.
+**⏳ M2 (`form-example`, `kami`) — staging-инфраструктура заведена 2026-08-12, ждёт деплоя.**
+У обоих не было вообще ничего (не «без доп. условий», как считалось): ни `docker-compose.staging.yml`,
+ни `.env.staging.enc`, ни домена в Traefik. Заведено по образцу `mandala` (Traefik-лейблы,
+`traefik-network`, healthcheck, `db`+`app`), порты — следующие свободные после `studio`
+(`5465`/`3032`): `form-example-stage` → DB `5466`, app `3033`; `kami-stage` → DB `5467`, app
+`3034`. Оба `docker-compose.staging.yml` провалидированы локально (`docker compose config` с
+реальными расшифрованными секретами, plaintext удалён сразу после).
+
+- **`form-example`** — БД (`Product`/`Contact`, демо-данные, не ПДн), без auth. e2e-сьют
+  (`basic`/`conditional`/`groups`/`multi-step`/`table-editor`/`validation.spec.ts`) тестирует
+  поведение форм напрямую, не полагается на предзаполненные записи — сид не нужен.
+- **`kami`** — сознательно НЕ настроен OIDC (Ключница)/Keystatic GitHub Storage/Telegram/Yandex
+  Metrica на стейдже: `kami-e2e` (5 спеков — navigation/about/skills/projects/blog) тестирует
+  только публичные страницы, авторизация не покрыта. `createAuth` (`libs/auth/src/server/
+  create-auth/index.ts:145`) не падает без `OIDC_CLIENT_ID`/`SECRET` — `genericOAuth` config
+  просто пустой массив, кнопки входа нет, остальное приложение работает. У `kami` есть
+  `db:seed` (`project.json`) — **на первом стейдж-деплое нужен `seed: true`**, иначе
+  `05-blog.spec.ts`/`04-projects.spec.ts`/`03-skills.spec.ts` не на чем проверять (пустая БД).
+
+Осталось: BlackCove — `deploy_app(staging)` для обоих (`kami` — c `seed: true`), затем
+`run_e2e`/`e2e_status`. `E2E_GATED_APPS` обновится по факту зелёного результата, как и для M1.
 
 **Тираж N — приложения без e2e, сначала пишем сьюты.** ✅ **6/6 закрыто (2026-07-18):**
 `animatrona-landing` (14 тестов), `animatrona-tracker` (15), `kami-key-the-landing` (9),
