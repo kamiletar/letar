@@ -80,10 +80,11 @@ test.describe('Оформление заказа', () => {
       const isSuccess = url.includes('/checkout/success')
 
       if (isSuccess) {
-        // Страница успеха должна показать какую-то информацию
-        const successMessage = page.getByText(/заказ|спасибо|оформлен|успешно/i)
-        const hasMessage = (await successMessage.count()) > 0
-        expect(hasMessage).toBeTruthy()
+        // Страница успеха — 'use client' компонент (SuccessContent) внутри <Suspense>
+        // без fallback: сразу после goto() он ещё не гидратирован, count() не ждёт
+        // этого (в отличие от toBeVisible()) и стабильно ловит 0 совпадений.
+        const successMessage = page.getByText(/заказ|спасибо|оформлен|успешно/i).first()
+        await expect(successMessage).toBeVisible()
       }
     })
   })
