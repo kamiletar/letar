@@ -1,29 +1,10 @@
 'use client'
 
 import { Field, Group, Input, Text } from '@chakra-ui/react'
-import { formatPhoneNumber, stripPhoneNumber } from '@letar/forms-core/phone'
+import { formatPhoneNumber, PHONE_MASKS, stripPhoneNumber } from '@letar/forms-core/phone'
 import type { ChangeEvent, ReactElement } from 'react'
 import type { PhoneCountry, PhoneFieldProps } from '../../types'
 import { createField, FieldError, FieldLabel } from '../base'
-
-/**
- * Phone masks by country
- */
-const PHONE_MASKS: Record<PhoneCountry, string> = {
-  RU: '+7 (999) 999-99-99',
-  US: '+1 (999) 999-9999',
-  UK: '+44 9999 999999',
-  DE: '+49 999 99999999',
-  FR: '+33 9 99 99 99 99',
-  IT: '+39 999 999 9999',
-  ES: '+34 999 99 99 99',
-  CN: '+86 999 9999 9999',
-  JP: '+81 99 9999 9999',
-  KR: '+82 99 9999 9999',
-  BY: '+375 (99) 999-99-99',
-  KZ: '+7 (999) 999-99-99',
-  UA: '+380 (99) 999-99-99',
-}
 
 /**
  * Country flags

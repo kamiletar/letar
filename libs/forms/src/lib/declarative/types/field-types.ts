@@ -1,5 +1,6 @@
 'use client'
 
+import type { PhoneCountry } from '@letar/forms-core/phone'
 import type { BaseFieldProps } from '@letar/forms-react'
 
 /**
@@ -261,9 +262,9 @@ export interface MaskedInputFieldProps extends BaseFieldProps {
 }
 
 /**
- * Country codes for phone field
+ * Country codes for phone field — единый источник истины в `@letar/forms-core/phone`.
  */
-export type PhoneCountry = 'RU' | 'US' | 'UK' | 'DE' | 'FR' | 'IT' | 'ES' | 'CN' | 'JP' | 'KR' | 'BY' | 'KZ' | 'UA'
+export type { PhoneCountry }
 
 /**
  * Props for phone field
