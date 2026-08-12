@@ -32,37 +32,35 @@ dashboard UI
 ```
 <app>_<type>_<YYYY-MM-DDTHH-MM-SS>.sql.gz
 
-premium-rosstil_auto_2026-03-01T03-00-00.sql.gz
-imot_manual_2026-03-01T10-45-00.sql.gz
+driving-school_auto_2026-03-01T03-00-00.sql.gz
+studio_manual_2026-03-01T10-45-00.sql.gz
 ```
 
 ### Приложения и серверы
 
-| Приложение         | Сервер | Контейнер БД             | БД                  |
-| ------------------ | ------ | ------------------------ | ------------------- |
-| premium-rosstil    | s2     | premium-rosstil-postgres | lena_premium        |
-| imot               | s2     | imot-postgres            | lena_imot           |
-| mandala            | s2     | mandala-db               | mandala             |
-| kami               | s2     | kami-db                  | lena_kami           |
-| umami              | s2     | umami-db                 | umami               |
-| animatrona-tracker | s2     | animatrona-tracker-db    | animatrona_tracker  |
-| driving-school     | s2     | driving-school-db        | lena_driving_school |
-| dashboard          | s2     | dashboard-db             | dashboard           |
-| archetest          | s2     | archetest-db             | archetest           |
-| auth-hub           | s2     | auth-hub-db              | lena_auth           |
-| time               | s2     | time-db                  | time                |
-| form-example       | s2     | form-example-db          | forms_example       |
-| grandslamcup       | s2     | grandslamcup-db          | grandslamcup        |
-| dsperevod          | s2     | dsperevod-db             | dsperevod           |
-| studio             | s2     | studio-db                | studio              |
-| domwellbes         | s2     | domwellbes-db            | domwellbes          |
+| Приложение         | Сервер | Контейнер БД          | БД                  |
+| ------------------ | ------ | --------------------- | ------------------- |
+| mandala            | s2     | mandala-db            | mandala             |
+| kami               | s2     | kami-db               | lena_kami           |
+| umami              | s2     | umami-db              | umami               |
+| animatrona-tracker | s2     | animatrona-tracker-db | animatrona_tracker  |
+| driving-school     | s2     | driving-school-db     | lena_driving_school |
+| dashboard          | s2     | dashboard-db          | dashboard           |
+| archetest          | s2     | archetest-db          | archetest           |
+| auth-hub           | s2     | auth-hub-db           | lena_auth           |
+| time               | s2     | time-db               | time                |
+| form-example       | s2     | form-example-db       | forms_example       |
+| grandslamcup       | s2     | grandslamcup-db       | grandslamcup        |
+| dsperevod          | s2     | dsperevod-db          | dsperevod           |
+| studio             | s2     | studio-db             | studio              |
+| domwellbes         | s2     | domwellbes-db         | domwellbes          |
 
 ### API (в dashboard-agent)
 
 ```
-POST /api/database/backup?db=imot    — бэкап конкретной БД
-GET  /api/database/backups           — список всех бэкапов
-GET  /api/database/backups?db=imot   — бэкапы конкретной БД
+POST /api/database/backup?db=driving-school    — бэкап конкретной БД
+GET  /api/database/backups                     — список всех бэкапов
+GET  /api/database/backups?db=driving-school   — бэкапы конкретной БД
 ```
 
 ### Cron (автоматический)
@@ -174,7 +172,6 @@ Credentials БД берутся из файлов секретов (read-only mo
 ```yaml
 # apps/dashboard-agent/docker-compose.production.yml (s2 — прод)
 volumes:
-  - ${WORKSPACE_PATH}/apps/premium-rosstil/.env.docker:/secrets/premium-rosstil.env:ro
   - ${WORKSPACE_PATH}/apps/driving-school/.env.docker:/secrets/driving-school.env:ro
   - ${WORKSPACE_PATH}/apps/svoichuzhie/.env.docker:/secrets/svoichuzhie.env:ro
   # ... по одному на каждое прод-приложение
@@ -440,11 +437,11 @@ s2 и база выданных поддоменов, здесь s3 и файл 
 
 ### Что архивируется
 
-| Путь                                       | Содержимое                                   | Восстановимо?                                                                                     |
-| ------------------------------------------ | -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `/home/deploy/lego/acme-dns-accounts.json` | 3 per-name аккаунта (`media`/`ipfs`/`gateway`) | ⛔ **нет, и хуже обычного:** нужен владелец — переделать три `CNAME` у регистратора вручную      |
-| `infra/traefik/acme/acme.json`             | приватные ключи всех сертификатов s3         | да, перевыпуском — но упирается в лимит LE на дубликаты (5/неделю на набор имён)                  |
-| `infra/traefik/auth/`                      | `basicAuth` дашборда                         | да, генерацией новой пары                                                                          |
+| Путь                                       | Содержимое                                     | Восстановимо?                                                                               |
+| ------------------------------------------ | ---------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `/home/deploy/lego/acme-dns-accounts.json` | 3 per-name аккаунта (`media`/`ipfs`/`gateway`) | ⛔ **нет, и хуже обычного:** нужен владелец — переделать три `CNAME` у регистратора вручную |
+| `infra/traefik/acme/acme.json`             | приватные ключи всех сертификатов s3           | да, перевыпуском — но упирается в лимит LE на дубликаты (5/неделю на набор имён)            |
+| `infra/traefik/auth/`                      | `basicAuth` дашборда                           | да, генерацией новой пары                                                                   |
 
 Все три обязательны — тот же инвариант, что у acme-dns: отсутствие любого источника даёт **ошибку**,
 а не неполный архив.
