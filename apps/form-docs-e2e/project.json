@@ -1,0 +1,28 @@
+{
+  "name": "form-docs-e2e",
+  "projectType": "application",
+  "sourceRoot": "apps/form-docs-e2e/src",
+  "tags": ["type:e2e", "scope:form-docs", "owner:letar"],
+  "implicitDependencies": ["form-docs"],
+  "targets": {
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "apps/form-docs-e2e"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
+      }
+    },
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/playwright-report/{projectName}"],
+      "options": {
+        "config": "apps/form-docs-e2e/playwright.config.ts"
+      }
+    }
+  }
+}
