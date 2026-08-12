@@ -2,7 +2,6 @@
 
 import { logoutAction } from '@/app/_actions/auth.actions'
 import { Button } from '@/app/_components/ui/button'
-import { ColorModeButton } from '@/app/_components/ui/color-mode'
 import { useSession } from '@/lib/auth-client'
 import type { UserRole } from '@/lib/auth.types'
 import {
@@ -18,6 +17,7 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
+import { ColorModeButton } from '@letar/chakra-provider'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'

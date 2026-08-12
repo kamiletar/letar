@@ -1,9 +1,8 @@
 'use client'
 import { createSystem, defaultConfig, defineConfig } from '@chakra-ui/react'
-import { RootChakraProvider } from '@letar/chakra-provider'
+import { ColorModeProvider, RootChakraProvider } from '@letar/chakra-provider'
 import { FormI18nProvider } from '@letar/forms'
 import type { PropsWithChildren } from 'react'
-import { ColorModeProvider } from './ui/color-mode'
 
 const config = defineConfig({
   theme: {
