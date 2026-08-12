@@ -23,25 +23,34 @@
 
 ### OIDC Provider — как подключить клиентское приложение
 
-#### 1. Зарегистрировать клиент в `trustedClients` (apps/auth-hub/src/lib/auth.ts)
+#### 1. Зарегистрировать клиент
 
-```typescript
-// В конфигурации oidcProvider
-trustedClients: [
-  {
-    clientId: 'my-app-prod',
-    clientSecret: '<сгенерированный секрет>',
-    name: 'Моё приложение',
-    type: 'web',
-    disabled: false,
-    metadata: {},
-    redirectUrls: ['https://myapp.letar.best/api/auth/oauth2/callback/letar-auth'],
-    skipConsent: true, // Пропустить экран согласия для своих приложений
-  },
-],
-```
+⚠️ **Раздел ниже описывает несуществующий путь — проверено 2026-08-12, не исправлено.**
+`trustedClients` в примере — не реальная опция текущего кода. `apps/auth-hub/src/lib/auth.ts`
+больше не настраивает `oidcProvider` напрямую («oidcProvider и nextCookies добавляются фабрикой
+автоматически») — фактическая точка конфигурации теперь
+`libs/auth/src/server/create-auth/index.ts`, и вызов `oidcProviderPlugin({...})` там **не
+принимает** `trustedClients` вообще (только `loginPage`/`consentPage`/`requirePKCE`/
+`allowDynamicClientRegistration`/`accessTokenExpiresIn`/`refreshTokenExpiresIn`/`scopes`) — грепом
+по `libs/auth/src` и `apps/auth-hub/src` `trustedClients` не встречается ни разу как код, только
+как текст в комментариях и в helper-тексте админки.
 
-> ⚠️ **ВАЖНО:** `skipConsent` работает **только** для `trustedClients` в конфигурации плагина, **НЕ** для клиентов из БД (таблица `oauthApplication`). Клиенты из БД всегда показывают экран согласия.
+**Реально работающий путь на сегодня — только через админку** (`apps/auth-hub/src/app/admin/clients/`):
+создаётся запись `OauthApplication` в БД. Чекбокс «Пропустить экран consent» в форме
+(`client-form.tsx`) при этом честно предупреждает пользователя, что поле не действует — то есть
+`skipConsent` для этого пути **гарантированно не работает**, и экран согласия покажется всегда,
+независимо от значения чекбокса.
+
+Формулировка «работает только через `trustedClients`, не через БД» технически верна как
+диагноз, но вводит в заблуждение как инструкция: `trustedClients` не «альтернативный», а
+**недоступный** путь — реализации, куда его можно было бы передать, в коде просто нет. Причина
+привязана к «Better Auth v1.6.11» — фактически используемая версия сейчас `1.6.26` (`bun.lock`),
+проверить, снята ли эта конкретная ограниченность в новых версиях, в этой сессии не успели.
+
+**Что делать, если нужен реально бесшовный вход (без экрана согласия) для нового клиента:**
+решение владельца — либо реализовать `trustedClients` в `libs/auth/src/server/create-auth/index.ts`
+(передать опцию в `oidcProviderPlugin`), либо перепроверить актуальность ограничения на
+`better-auth@1.6.26`. Не решено, не сделано.
 
 #### 2. Настроить клиентское приложение (genericOAuth)
 
@@ -1044,7 +1053,7 @@ export function VerifyPinForm({ email }: VerifyPinFormProps) {
   // 3. Проверка PIN
   const handleVerify = useCallback(
     async (pinValue: string) => {
-      if (pinValue.length !== 6) return
+      if (pinValue.length !== 6) { return }
       setIsVerifying(true)
       setError('')
 
@@ -1195,7 +1204,7 @@ export async function verifyPinAction(email: string, pin: string) {
     orderBy: { expires: 'desc' },
   })
 
-  if (!verificationToken) return { success: false, error: 'NOT_FOUND' }
+  if (!verificationToken) { return { success: false, error: 'NOT_FOUND' } }
 
   // 2. Проверить лимит попыток
   if (verificationToken.pinAttempts >= MAX_PIN_ATTEMPTS) {
@@ -1331,8 +1340,8 @@ export function PasswordStrengthMeter({ value, max = 4, ...props }: PasswordStre
 
 // Расчёт надёжности
 function calculatePasswordStrength(password: string): number {
-  if (!password) return 0
-  if (password.length < 8) return 1
+  if (!password) { return 0 }
+  if (password.length < 8) { return 1 }
 
   let strength = 2
   const hasLower = /[a-z]/.test(password)
@@ -1340,8 +1349,8 @@ function calculatePasswordStrength(password: string): number {
   const hasDigit = /\d/.test(password)
   const hasSpecial = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)
 
-  if (hasLower && hasUpper && hasDigit) strength = 3
-  if (hasLower && hasUpper && hasDigit && hasSpecial && password.length >= 12) strength = 4
+  if (hasLower && hasUpper && hasDigit) { strength = 3 }
+  if (hasLower && hasUpper && hasDigit && hasSpecial && password.length >= 12) { strength = 4 }
 
   return strength
 }
@@ -1438,7 +1447,7 @@ import { headers } from 'next/headers'
 
 export async function updateProject(projectId: string, data: ProjectData) {
   const session = await auth.api.getSession({ headers: await headers() })
-  if (!session?.user) throw new Error('Unauthorized')
+  if (!session?.user) { throw new Error('Unauthorized') }
 
   // ZenStack автоматически проверяет membership через политики
   const db = getEnhancedPrisma(session.user)
