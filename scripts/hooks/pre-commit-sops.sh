@@ -23,15 +23,18 @@ fi
 
 ENCRYPTED=0
 
-# Находим все .env.docker.enc/.env.staging.enc которые должны быть обновлены.
+# Находим все .env.docker.enc/.env.staging.enc/infra-секреты, которые должны быть обновлены.
 # Два набора паттернов: из корня суперпроекта (apps/<app>/...) — для обычных приложений
 # монорепо; из корня самого приложения (./...) — для коммита ВНУТРИ приватного submodule,
 # где хук устанавливается отдельно в .git/modules/apps/<app>/hooks/pre-commit и запускается
 # с cwd = корень submodule, так что префикса apps/*/ там не существует (§18.8 PLAN-INFRA.md).
+# infra/*/secrets/*.enc — тот же принцип для infra-сервисов (§18.8.1 PLAN-INFRA.md): у них
+# нет apps/*/-префикса и нет submodule-варианта, secrets/ всегда живёт в корне letar.
 for enc_file in \
   apps/*/.env.docker.enc apps/*/*/.env.docker.enc \
   apps/*/.env.staging.enc apps/*/*/.env.staging.enc \
-  .env.docker.enc .env.staging.enc; do
+  .env.docker.enc .env.staging.enc \
+  infra/*/secrets/*.enc; do
   [[ -f "$enc_file" ]] || continue
 
   plain_file="${enc_file%.enc}"

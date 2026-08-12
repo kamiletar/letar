@@ -3,3 +3,7 @@ creation_rules:
     age: age1v0vhymhfxupa66zvrmqxv2yz4q0d8xxazh2m4k87tl0wk3ccmu4sftywza
   - path_regex: \.env\.staging(\.enc)?$
     age: age1v0vhymhfxupa66zvrmqxv2yz4q0d8xxazh2m4k87tl0wk3ccmu4sftywza
+  # §18.8.1 PLAN-INFRA.md — секреты infra/*, не app/*: файлы (не KEY=value), путь и права
+  # заданы в infra/<сервис>/secrets/deploy.conf, расшифровка — scripts/deploy-infra.sh.
+  - path_regex: ^infra/[^/]+/secrets/.+\.enc$
+    age: age1v0vhymhfxupa66zvrmqxv2yz4q0d8xxazh2m4k87tl0wk3ccmu4sftywza

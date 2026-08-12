@@ -185,6 +185,13 @@ infra/acme-dns/data/
 # Traefik — секреты и выпущенные сертификаты (per-server, не в git)
 infra/traefik/acme/
 infra/traefik/auth/
+
+# §18.8.1 PLAN-INFRA.md — плейнтекст секретов infra/*/secrets/: коммитится только
+# зашифрованный *.enc и манифест deploy.conf (см. scripts/deploy-infra.sh)
+infra/*/secrets/*
+!infra/*/secrets/*.enc
+!infra/*/secrets/deploy.conf
+!infra/*/secrets/README.md
 apps/animatrona/dist*/
 
 # Android build artifacts

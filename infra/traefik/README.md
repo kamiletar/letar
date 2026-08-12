@@ -87,9 +87,13 @@ chmod 600 /home/deploy/lego/acme-dns-accounts.json
 Что остаётся правдой: ключ ограничен зоной `s3.letar.best`, поэтому худший случай — сертификат на
 staging-домены, не на прод. Ради этого второй ключ сюда и не кладётся.
 
-⚠️ В git этот файл не кладём даже зашифрованным — пока. Конвейер `.enc` для инфра-сервисов ещё не
-заведён, см. [§18.8.1](/PLAN-INFRA.md). Как заведётся — перевести сюда, а ручной `scp` убрать:
-сейчас восстановление s3 с нуля требует помнить про этот шаг, а помнить его будет некому.
+✅ Конвейер `.enc` для инфра-секретов заведён ([§18.8.1](/PLAN-INFRA.md)) —
+[infra/traefik/secrets/](/infra/traefik/secrets/README.md) + `scripts/deploy-infra.sh traefik`.
+⚠️ **Разовая миграция ещё не сделана**: `acme-dns-accounts.json` пока существует только на s3,
+заведённым по инструкции выше руками. До миграции (см. чеклист в `secrets/README.md`) ручной
+`scp` остаётся единственным рабочим путём для уже поднятого сервера — после миграции
+`deploy-infra.sh` расшифрует файл сам при каждом деплое, и этот раздел можно будет сократить до
+одной строки.
 
 ### 4. Дашборд
 
@@ -106,7 +110,23 @@ chmod 600 auth/dashboard-users
 `auth/` в `.gitignore`. Дашборд после запуска — `https://traefik.s3.letar.best` (порт `8443` был
 только в пилотной фазе, снят при переезде на боевые `80`/`443`, см. пометку в начале файла).
 
+✅ Тот же файл (`dashboard-users`) теперь тоже входит в конвейер `.enc`
+([infra/traefik/secrets/](/infra/traefik/secrets/README.md)) — после разовой миграции
+генерировать его вручную командой выше не нужно, `deploy-infra.sh` разложит его из `.enc`.
+
 ## Запуск
+
+Через новый путь деплоя ([§18.8.1](/PLAN-INFRA.md)) — расшифровывает секреты по
+[infra/traefik/secrets/deploy.conf](/infra/traefik/secrets/deploy.conf), затем поднимает compose:
+
+```bash
+cd /home/deploy/letar
+scripts/deploy-infra.sh traefik
+docker logs traefik | grep -iE 'error|certificate'
+```
+
+Пока разовая миграция секретов (см. `secrets/README.md`) не сделана, `secrets/deploy.conf`
+указывает на файлы, которых ещё нет в `.enc`-виде — в этом случае используй прямой путь:
 
 ```bash
 cd /home/deploy/letar/infra/traefik
