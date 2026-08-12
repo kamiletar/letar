@@ -2,7 +2,7 @@
 
 import { system } from '@/app/theme'
 import { ChakraProvider } from '@chakra-ui/react'
-import { ColorModeProvider, type ColorModeProviderProps } from './color-mode'
+import { ColorModeProvider, type ColorModeProviderProps } from '@letar/chakra-provider'
 
 /**
  * Главный провайдер приложения
