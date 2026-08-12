@@ -72,6 +72,7 @@ test-output
 !**/.env.docker.example
 !**/.env.staging.example
 !**/.env.docker.enc
+!**/.env.staging.enc
 null
 nul
 
