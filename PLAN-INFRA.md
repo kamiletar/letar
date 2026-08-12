@@ -1932,10 +1932,10 @@ README (`libs/ui/README.md`) доведён до полноты вручную �
 
 **Проверено:** `typecheck:tsgo`/`lint`/`test` (66/66, включая
 `use-shipping-calculation.test.ts`, потребовавший добавить alias `@letar/cdek` в
-`vitest.config.ts`) зелёные. `nx build aboi` запущен, результат — в отдельной пометке ниже
-(эта сессия не имеет доступа к прод-серверам, живой проверкой реальных вызовов CDEK API не
-проверялось — только typecheck/mock-режим). Commit `89a6cdb` в `letar-private-aboi`
-(запушен/не запушен — см. пометку ниже), bump SHA в `letar` — отдельным коммитом.
+`vitest.config.ts`) зелёные. **`nx build aboi` — зелёный** (2m 35s, все роуты собраны, включая
+`/api/webhooks/cdek`) — живой проверкой реальных вызовов CDEK API не проверялось (нет доступа
+к прод-серверам из этой сессии), только typecheck/build/mock-режим. Commit `89a6cdb` в
+`letar-private-aboi`, запушен (`a40304f..89a6cdb`), bump SHA в `letar` — коммит `4ce632db`.
 
 **Не сделано:** п.2 (поднять тонкую часть расчёта упаковки — `CdekPackageDims` + конвертация
 см — в `@letar/cdek`) и п.3 — за пределами решения владельца в этой сессии (запрошена только
