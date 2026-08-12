@@ -24,8 +24,14 @@ export default defineConfig({
   },
   /* Run your local dev server before starting the tests */
   webServer: {
+    // baseURL, не хардкод localhost — иначе readiness-проверка стучится в localhost:3005,
+    // не видит там ничего (даже когда передан реальный staging/prod BASE_URL) и тихо поднимает
+    // локальный dev-сервер вместо прогона против настоящего окружения. Второй, более глубокий
+    // баг того же класса — Nx-инференс без явного executor в project.json добавлял dependsOn
+    // на dev-таск ДО этой проверки вообще (найдено 2026-07-19 на time/aboi/grandslamcup,
+    // PLAN.md §18.7) — kami-e2e/project.json заведён явным executor'ом по тому же образцу.
     command: 'bun nx run kami:dev',
-    url: 'http://localhost:3005',
+    url: baseURL,
     reuseExistingServer: true,
     cwd: workspaceRoot,
   },

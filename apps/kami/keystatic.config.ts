@@ -1,6 +1,12 @@
 import { collection, config, fields } from '@keystatic/core'
 
-const isProd = process.env.NODE_ENV === 'production'
+// NODE_ENV всегда 'production' в собранном next build, включая стейдж (см.
+// .claude/rules/env-files.md § NODE_ENV === 'production' — та же ловушка бьёт не только секреты) —
+// проверка по нему определяла github-хранилище и на стейдже тоже, где KEYSTATIC_GITHUB_CLIENT_ID/
+// SECRET сознательно не заведены (PLAN-INFRA.md §18.7 M2), и весь `next build` падал на
+// collectPageData для /api/keystatic. Настоящее условие — не домен, а наличие GitHub-кредов:
+// решает именно то, может ли storage: 'github' вообще работать.
+const isProd = Boolean(process.env.KEYSTATIC_GITHUB_CLIENT_ID)
 
 export default config({
   storage: isProd
