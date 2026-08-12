@@ -77,7 +77,13 @@ export async function getMemoryInfo(): Promise<MemoryInfo> {
       free: mem.free,
       active: mem.active,
       available: mem.available,
-      usedPercent: (mem.used / mem.total) * 100,
+      // `mem.used` от `systeminformation` — сырое `total - free`, куда попадает весь дисковый
+      // buff/cache: на Linux он занимает почти всю свободную память и мгновенно отдаётся под
+      // реальные нужды, поэтому это НЕ признак нехватки памяти. `available` — то же значение,
+      // что колонка `available` у `free -h`, уже учитывает освобождаемый кэш. Раньше формула на
+      // сырых 15Гб/6.6Гб used давала честные 90% при 60% реально свободной памяти — ложный
+      // MEMORY_HIGH алерт каждые несколько минут при полностью здоровом сервере.
+      usedPercent: ((mem.total - mem.available) / mem.total) * 100,
     }
 
     memoryCache = { data: result, timestamp: now }
