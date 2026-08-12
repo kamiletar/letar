@@ -5,9 +5,33 @@ export { type ShadcnUIKit, shadcnUIKit } from './lib/uikit/uikit-shadcn'
 export { createField, FieldErrorBoundary, FieldWrapper } from './lib/uikit/primitives'
 
 // Поля (Шаг 5 — 17 из 15-20, план перевыполнен; продолжение к паритету)
+export {
+  type CardBrand,
+  CardBrandIcon,
+  type CardBrandInfo,
+  CreditCardField,
+  type CreditCardFieldProps,
+  type CreditCardLayout,
+  creditCardSchema,
+  detectBrand,
+  formatCardNumber,
+  formatExpiry,
+  getBrandInfo,
+  isExpiryValid,
+  luhn,
+  maxFormattedLength,
+  stripCardNumber,
+} from './lib/fields/credit-card'
+export {
+  createDocumentField,
+  type DocumentFieldConfig,
+  type DocumentFieldProps,
+} from './lib/fields/document-field-base'
 export { FieldAddress } from './lib/fields/field-address'
 export { type AutoFieldConfig, type AutoFieldProps, camelCaseToLabel, FieldAuto } from './lib/fields/field-auto'
 export { FieldAutocomplete } from './lib/fields/field-autocomplete'
+export { FieldBankAccount, FieldCorrAccount } from './lib/fields/field-bank-account'
+export { FieldBIK } from './lib/fields/field-bik'
 export { type CalculatedFieldProps, FieldCalculated } from './lib/fields/field-calculated'
 export { FieldCascadingSelect } from './lib/fields/field-cascading-select'
 export { FieldCheckbox } from './lib/fields/field-checkbox'
@@ -26,13 +50,18 @@ export { FieldEditable } from './lib/fields/field-editable'
 export { FieldFileUpload } from './lib/fields/field-file-upload'
 export { FieldHidden, type HiddenFieldProps } from './lib/fields/field-hidden'
 export { FieldImageChoice } from './lib/fields/field-image-choice'
+export { FieldINN } from './lib/fields/field-inn'
+export { FieldKPP } from './lib/fields/field-kpp'
 export { FieldLikert } from './lib/fields/field-likert'
 export { FieldListbox } from './lib/fields/field-listbox'
+export { FieldMaskedInput } from './lib/fields/field-masked-input'
 export { FieldMatrixChoice } from './lib/fields/field-matrix-choice'
 export { FieldNativeSelect } from './lib/fields/field-native-select'
 export { FieldNumber } from './lib/fields/field-number'
 export { FieldNumberInput } from './lib/fields/field-number-input'
+export { FieldOGRN } from './lib/fields/field-ogrn'
 export { FieldOTPInput } from './lib/fields/field-otp-input'
+export { FieldPassport } from './lib/fields/field-passport'
 export { FieldPassword } from './lib/fields/field-password'
 export { FieldPasswordStrength } from './lib/fields/field-password-strength'
 export { FieldPercentage } from './lib/fields/field-percentage'
@@ -47,6 +76,7 @@ export { FieldSegmentGroup } from './lib/fields/field-segment-group'
 export { FieldSelect } from './lib/fields/field-select'
 export { FieldSignature } from './lib/fields/field-signature'
 export { FieldSlider } from './lib/fields/field-slider'
+export { FieldSNILS } from './lib/fields/field-snils'
 export { FieldString } from './lib/fields/field-string'
 export { FieldSwitch } from './lib/fields/field-switch'
 export { FieldTags } from './lib/fields/field-tags'
@@ -84,6 +114,7 @@ export type {
   LikertFieldProps,
   ListboxFieldProps,
   ListboxOption,
+  MaskedInputFieldProps,
   MatrixChoiceFieldProps,
   MatrixColumn,
   MatrixRow,

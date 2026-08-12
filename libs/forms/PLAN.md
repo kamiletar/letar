@@ -2501,14 +2501,25 @@ DOM-поведении минимален. Юнит/компонентные т�
 
 ---
 
-### Этап 6. shadcn-скин
+### Этап 6. shadcn-скин ✅ закрыт [2026-08-12]
 
-- [ ] Портировать 9 полей, отложенных именно из-за `use-mask-input`: `FieldMaskedInput`,
+- [x] Портировать 9 полей, отложенных именно из-за `use-mask-input`: `FieldMaskedInput`,
       `FieldCreditCard`, `FieldInn`, `FieldKpp`, `FieldOgrn`, `FieldSnils`, `FieldPassport`,
-      `FieldBik`, `FieldBankAccount`.
-- [ ] Обновить счётчик паритета в README и демо-приложении.
-
-Это снимает главную причину, по которой скин застрял на 47/56.
+      `FieldBik`, `FieldBankAccount` (+ `FieldCorrAccount`, тот же модуль в Chakra-версии).
+      Реализация: `createDocumentField` (`libs/forms-shadcn/src/lib/fields/document-field-base.tsx`) —
+      новая фабрика для shadcn, аналог Chakra-версии; 7 конфигов полей 1:1 (маска/placeholder/
+      validate из `@letar/forms-core/validators/ru` framework-агностичны). `FieldMaskedInput` —
+      прямой перенос. `FieldCreditCard` — не через `useMaskField` (тот вообще не используется этим
+      полем ни в одном скине), портирован на голые `<input>`/Tailwind, форматтеры
+      `@letar/forms-core/credit-card` переиспользованы 1:1.
+      Ключевая находка: `useMaskField('live')` отдаёт неконтролируемый `<input>` (`ref`+
+      `defaultValue`, DOM — источник истины для `MaskController`), а контракт `UIKitInputProps`
+      shadcn-скина требует `value`/`onChange` — оба скина одинаково обходят свой UIKit для этой
+      группы полей, рендеря сырой `<input>` (Chakra — напрямую из `@chakra-ui/react`, shadcn —
+      нативный `<input>` + `NATIVE_INPUT_CLASS` из `@letar/tailwind-utils`).
+- [x] Обновить счётчик паритета в README (`libs/forms-shadcn/README.md`: 47/56 → 56/56).
+      Демо-приложение (`apps/form-develop-app`/`apps/form-example`) — не обновлено, остаётся
+      в Этапе 7 (документация/демо).
 
 ---
 

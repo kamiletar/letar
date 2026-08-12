@@ -693,3 +693,29 @@ export interface RichTextFieldProps extends BaseFieldProps {
   /** Формат значения: 'html' или 'json' (по умолчанию 'html') */
   outputFormat?: 'html' | 'json'
 }
+
+/**
+ * Props for Form.Field.MaskedInput (shadcn-скин, Фаза 8, Этап 6) — движок масок
+ * `@letar/forms-core/mask`, опции `use-mask-input` (imask) не переносятся (см. MASK_ENGINE.md §8).
+ */
+export interface MaskedInputFieldProps extends BaseFieldProps {
+  /**
+   * Шаблон маски. `string[]` — движок сам выбирает вариант, под который сырое значение
+   * раскладывается лучше остальных. Функция — маска зависит от уже введённого значения
+   * (телефон по коду страны и т.п.); `null` означает «для этого ввода маски нет».
+   */
+  mask?: string | string[] | ((raw: string) => string | null)
+  /**
+   * Режим форматирования. `'live'` (по умолчанию) — маска на каждое нажатие; `'blur'` —
+   * формат при уходе из поля, снятие при возврате; `'off'` — только нормализация по алфавиту
+   * токенов, без группировки литералами.
+   */
+  formatMode?: 'live' | 'blur' | 'off'
+  /**
+   * Текстовое описание формата ввода (например, «Формат: XXX-XXX»), обязательное по WCAG 3.3.2.
+   * Без него — ошибка в dev-консоли.
+   */
+  formatDescription?: string
+  /** Что делать при вставке текста, не проходящего фильтр алфавита токенов маски. */
+  onPaste?: 'normalize' | 'reject'
+}

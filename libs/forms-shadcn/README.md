@@ -85,68 +85,78 @@ import {
 } from '@letar/forms-shadcn'
 ```
 
-## Поля (47 из 56 портировано с `@letar/forms`)
+## Поля (56 из 56 портировано с `@letar/forms`)
 
 Плюс `FormSteps` и `FieldTableEditor` — compound-компоненты форм-уровня, не `createField()`-поля
 (см. разделы ниже).
 
-**9 полей осознанно не портированы** и остаются в backlog до отдельной исследовательской сессии
-(своя реализация масок вместо `use-mask-input` — см. `libs/forms/PLAN.md` backlog): `FieldMaskedInput`,
-`FieldCreditCard`, `FieldInn`, `FieldKpp`, `FieldOgrn`, `FieldSnils`, `FieldPassport`, `FieldBik`,
-`FieldBankAccount`. Все девять в Chakra-версии (`@letar/forms`) используют `use-mask-input`, у
-которого уже был WebKit-баг (мутация DOM в обход React, поймано на `FieldPhone`) — тащить ту же
-зависимость в новый скин до пересмотра масочного движка не имеет смысла.
+**Паритет закрыт (Фаза 8, Этап 6, 2026-08-12).** Девять полей (`FieldMaskedInput`,
+`FieldCreditCard`, `FieldINN`, `FieldKPP`, `FieldOGRN`, `FieldSNILS`, `FieldPassport`, `FieldBIK`,
+`FieldBankAccount`/`FieldCorrAccount`) до этого оставались в backlog — Chakra-версия использовала
+`use-mask-input` (WebKit-баг, мутация DOM в обход React, поймано на `FieldPhone`), тащить ту же
+зависимость в новый скин смысла не было. Собственный движок масок `@letar/forms-core/mask`
+(`MaskController`, `useMaskField`) снял блокировку: документные поля — тонкая фабрика
+`createDocumentField` (аналог Chakra-версии) поверх сырого `<input>` в обход `shadcnUIKit.Input` —
+`useMaskField('live')` отдаёт неконтролируемый инпут (`ref`+`defaultValue`, DOM-контроллер пишет
+через `setRangeText`), а контракт `UIKitInputProps` требует `value`/`onChange`, поэтому Chakra- и
+shadcn-версии одинаково обходят свой UIKit именно для этой группы полей, стилизуя `NATIVE_INPUT_CLASS`
+напрямую. `FieldCreditCard` — не через `useMaskField` вовсе (локальный `useState` + чистые
+форматтеры `@letar/forms-core/credit-card`), портирован на голые `<input>`/Tailwind без изменения
+логики.
 
-| Поле                    | Radix-примитив                                      |
-| ----------------------- | --------------------------------------------------- |
-| `FieldString`           | нативный `<input>`                                  |
-| `FieldCheckbox`         | `@radix-ui/react-checkbox`                          |
-| `FieldSelect`           | `@radix-ui/react-select`                            |
-| `FieldTextarea`         | нативный `<textarea>`                               |
-| `FieldNumber`           | нативный `<input type="number">`                    |
-| `FieldNumberInput`      | нативный `<input type="number">` + степпер          |
-| `FieldRadioGroup`       | `@radix-ui/react-radio-group`                       |
-| `FieldSegmentGroup`     | `@radix-ui/react-toggle-group`                      |
-| `FieldDate`             | нативный `<input type="date">`                      |
-| `FieldNativeSelect`     | нативный `<select>`                                 |
-| `FieldSwitch`           | `@radix-ui/react-switch`                            |
-| `FieldSlider`           | `@radix-ui/react-slider`                            |
-| `FieldPassword`         | нативный `<input>` + toggle-кнопка                  |
-| `FieldPasswordStrength` | `<input>` + прогресс-бар + чеклист требований       |
-| `FieldCombobox`         | `@radix-ui/react-popover` (beta)                    |
-| `FieldPinInput`         | нативные `<input maxLength=1>`                      |
-| `FieldHidden`           | без DOM (синхронизация значения)                    |
-| `FieldRating`           | звёзды-кнопки (`lucide-react`)                      |
-| `FieldTags`             | нативный `<input>` + чипы                           |
-| `FieldAddress`          | `@radix-ui/react-popover` (beta)                    |
-| `FieldDateRange`        | два нативных `<input type="date">`                  |
-| `FieldDuration`         | `NumberInput` ×1 или ×2 (HH:MM)                     |
-| `FieldDateTimePicker`   | `<input type="date">` + `<input type="time">`       |
-| `FieldPhone`            | нативный `<input type="tel">` + маска               |
-| `FieldCurrency`         | `NumberInput` + символ валюты рядом                 |
-| `FieldPercentage`       | `NumberInput` + `%` рядом                           |
-| `FieldAutocomplete`     | `@radix-ui/react-popover` (beta)                    |
-| `FieldListbox`          | обычные кнопки, без Radix                           |
-| `FieldRadioCard`        | обычные кнопки, без Radix                           |
-| `FieldCheckboxCard`     | обычные кнопки, без Radix                           |
-| `FieldCity`             | `@radix-ui/react-popover` (beta)                    |
-| `FieldOTPInput`         | нативные `<input>` (числовой)                       |
-| `FieldEditable`         | нативный `<input>`/`<textarea>`                     |
-| `FieldColorPicker`      | нативный `<input type="color">` (beta)              |
-| `FieldSignature`        | `<canvas>` + typed mode (без Radix)                 |
-| `FieldFileUpload`       | нативный `<input type="file">` (без Radix)          |
-| `FieldTableEditor`      | native `<table>` (без Radix, compound)              |
-| `FieldRichText`         | Tiptap, native `<button>`-тулбар (без Radix)        |
-| `FieldYesNo`            | обычные кнопки, без Radix                           |
-| `FieldTime`             | нативный `<input type="time">`                      |
-| `FieldCascadingSelect`  | `shadcnUIKit.Select` + `form.Subscribe`             |
-| `FieldImageChoice`      | обычные кнопки + `<img>`, без Radix                 |
-| `FieldSchedule`         | `@radix-ui/react-switch` + `<input type="time">` ×7 |
-| `FieldLikert`           | обычные кнопки, без Radix                           |
-| `FieldMatrixChoice`     | native `<table>`, без Radix                         |
-| `FieldDataGrid`         | `@tanstack/react-table` (lazy), native `<table>`    |
-| `FieldCalculated`       | без DOM-примитива, только текст (readOnly)          |
-| `FieldAuto`             | диспетчер на другие поля по Zod-типу                |
+| Поле                                                                                                            | Radix-примитив                                            |
+| --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `FieldString`                                                                                                   | нативный `<input>`                                        |
+| `FieldCheckbox`                                                                                                 | `@radix-ui/react-checkbox`                                |
+| `FieldSelect`                                                                                                   | `@radix-ui/react-select`                                  |
+| `FieldTextarea`                                                                                                 | нативный `<textarea>`                                     |
+| `FieldNumber`                                                                                                   | нативный `<input type="number">`                          |
+| `FieldNumberInput`                                                                                              | нативный `<input type="number">` + степпер                |
+| `FieldRadioGroup`                                                                                               | `@radix-ui/react-radio-group`                             |
+| `FieldSegmentGroup`                                                                                             | `@radix-ui/react-toggle-group`                            |
+| `FieldDate`                                                                                                     | нативный `<input type="date">`                            |
+| `FieldNativeSelect`                                                                                             | нативный `<select>`                                       |
+| `FieldSwitch`                                                                                                   | `@radix-ui/react-switch`                                  |
+| `FieldSlider`                                                                                                   | `@radix-ui/react-slider`                                  |
+| `FieldPassword`                                                                                                 | нативный `<input>` + toggle-кнопка                        |
+| `FieldPasswordStrength`                                                                                         | `<input>` + прогресс-бар + чеклист требований             |
+| `FieldCombobox`                                                                                                 | `@radix-ui/react-popover` (beta)                          |
+| `FieldPinInput`                                                                                                 | нативные `<input maxLength=1>`                            |
+| `FieldHidden`                                                                                                   | без DOM (синхронизация значения)                          |
+| `FieldRating`                                                                                                   | звёзды-кнопки (`lucide-react`)                            |
+| `FieldTags`                                                                                                     | нативный `<input>` + чипы                                 |
+| `FieldAddress`                                                                                                  | `@radix-ui/react-popover` (beta)                          |
+| `FieldDateRange`                                                                                                | два нативных `<input type="date">`                        |
+| `FieldDuration`                                                                                                 | `NumberInput` ×1 или ×2 (HH:MM)                           |
+| `FieldDateTimePicker`                                                                                           | `<input type="date">` + `<input type="time">`             |
+| `FieldPhone`                                                                                                    | нативный `<input type="tel">` + маска                     |
+| `FieldCurrency`                                                                                                 | `NumberInput` + символ валюты рядом                       |
+| `FieldPercentage`                                                                                               | `NumberInput` + `%` рядом                                 |
+| `FieldAutocomplete`                                                                                             | `@radix-ui/react-popover` (beta)                          |
+| `FieldListbox`                                                                                                  | обычные кнопки, без Radix                                 |
+| `FieldRadioCard`                                                                                                | обычные кнопки, без Radix                                 |
+| `FieldCheckboxCard`                                                                                             | обычные кнопки, без Radix                                 |
+| `FieldCity`                                                                                                     | `@radix-ui/react-popover` (beta)                          |
+| `FieldOTPInput`                                                                                                 | нативные `<input>` (числовой)                             |
+| `FieldEditable`                                                                                                 | нативный `<input>`/`<textarea>`                           |
+| `FieldColorPicker`                                                                                              | нативный `<input type="color">` (beta)                    |
+| `FieldSignature`                                                                                                | `<canvas>` + typed mode (без Radix)                       |
+| `FieldFileUpload`                                                                                               | нативный `<input type="file">` (без Radix)                |
+| `FieldTableEditor`                                                                                              | native `<table>` (без Radix, compound)                    |
+| `FieldRichText`                                                                                                 | Tiptap, native `<button>`-тулбар (без Radix)              |
+| `FieldYesNo`                                                                                                    | обычные кнопки, без Radix                                 |
+| `FieldTime`                                                                                                     | нативный `<input type="time">`                            |
+| `FieldCascadingSelect`                                                                                          | `shadcnUIKit.Select` + `form.Subscribe`                   |
+| `FieldImageChoice`                                                                                              | обычные кнопки + `<img>`, без Radix                       |
+| `FieldSchedule`                                                                                                 | `@radix-ui/react-switch` + `<input type="time">` ×7       |
+| `FieldLikert`                                                                                                   | обычные кнопки, без Radix                                 |
+| `FieldMatrixChoice`                                                                                             | native `<table>`, без Radix                               |
+| `FieldDataGrid`                                                                                                 | `@tanstack/react-table` (lazy), native `<table>`          |
+| `FieldCalculated`                                                                                               | без DOM-примитива, только текст (readOnly)                |
+| `FieldAuto`                                                                                                     | диспетчер на другие поля по Zod-типу                      |
+| `FieldMaskedInput`                                                                                              | нативный `<input>` + движок масок (без Radix)             |
+| `FieldINN`/`FieldKPP`/`FieldOGRN`/`FieldSNILS`/`FieldPassport`/`FieldBIK`/`FieldBankAccount`/`FieldCorrAccount` | нативный `<input>` + движок масок (`createDocumentField`) |
+| `FieldCreditCard`                                                                                               | нативные `<input>` ×3, без Radix (compound)               |
 
 `FieldCombobox` — упрощённая beta-версия: только статичные `options`, фильтрация по вхождению
 подстроки в `label`. Без `useQuery` (async-поиск) и группировки — Chakra-версия их поддерживает,
@@ -234,8 +244,14 @@ Chakra-версии без изменений домена (extensions, `onUpdat
 диспетчеризации по `meta.fieldType` на ~50 типов полей (в Chakra-версии позволяет
 `.meta({ ui: { fieldType: 'richText' } })` явно переопределить компонент) — только базовый
 Zod-тип (string/number/boolean/date/enum) определяет поле, тот же fallback-путь, что
-`renderFieldByType` использовал бы в отсутствие явного `fieldType`. **Последнее из 47
-портированных полей — см. список 9 отложенных выше.**
+`renderFieldByType` использовал бы в отсутствие явного `fieldType`.
+
+`FieldINN`/`FieldKPP`/`FieldOGRN`/`FieldSNILS`/`FieldPassport`/`FieldBIK`/`FieldBankAccount`/
+`FieldCorrAccount` — фабрика `createDocumentField` (`fields/document-field-base.tsx`), маска +
+иконка + контрольная сумма (`@letar/forms-core/validators/ru`), 1:1 конфиги с Chakra-версией.
+`FieldMaskedInput` — прямой доступ к движку масок с произвольной маской, `formatDescription`
+обязателен по WCAG 3.3.2. `FieldCreditCard` — compound-компонент (номер/срок/CVC), auto-tab между
+подполями, Luhn на blur, smart-expiry — см. `fields/credit-card/`.
 
 `FieldYesNo` — два кликабельных блока (`role="radio"` в `role="radiogroup"`), тот же подход, что
 `FieldRadioCard`/`FieldListbox`; портирован из Chakra-версии без изменений логики, значение —

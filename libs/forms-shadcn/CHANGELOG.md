@@ -4,6 +4,27 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.32.0] - 2026-08-12
+
+### Added
+
+- **Паритет с `@letar/forms` закрыт: 56/56 полей (Фаза 8, Этап 6).** Девять полей, отложенных
+  из-за `use-mask-input` (WebKit-баг, см. CHANGELOG `@letar/forms`), портированы поверх
+  собственного движка масок `@letar/forms-core/mask`: `FieldMaskedInput`, `FieldCreditCard`,
+  `FieldINN`, `FieldKPP`, `FieldOGRN`, `FieldSNILS`, `FieldPassport`, `FieldBIK`,
+  `FieldBankAccount`/`FieldCorrAccount`.
+- **`createDocumentField`** (`fields/document-field-base.tsx`) — фабрика для 8 документных полей,
+  аналог Chakra-версии. `useMaskField('live')` отдаёт неконтролируемый `<input>` (`ref`+
+  `defaultValue`, DOM — источник истины) — контракт `UIKitInputProps` требует `value`/`onChange`,
+  поэтому документные поля рендерят сырой `<input>` в обход `shadcnUIKit.Input`, стилизованный
+  `NATIVE_INPUT_CLASS`. Валидаторы контрольных сумм — `@letar/forms-core/validators/ru`, 1:1 с
+  Chakra-версией.
+- **`FieldCreditCard`** — compound-компонент (номер/срок/CVC), портирован на голые `<input>`/
+  Tailwind. Не использует `useMaskField`/`MaskController` — форматтеры `@letar/forms-core/credit-card`
+  (`detectBrand`, `formatCardNumber`, `formatExpiry`, `luhn`, `isExpiryValid`) переиспользованы
+  1:1, поменялась только разметка (Chakra `Input`/`Flex`/`Group`/`Tooltip` → нативные `<input>` +
+  Tailwind, CVC-подсказка — атрибут `title` вместо `Tooltip.Root`, в пакете нет Radix tooltip-примитива).
+
 ## [0.31.2] - 2026-08-12
 
 ### Changed
