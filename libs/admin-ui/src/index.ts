@@ -16,6 +16,8 @@ export { AdminBreadcrumbs, AdminNav, AdminSidebar, MobileAdminDrawer } from './l
 export {
   BulkActionsBar,
   commonBulkActions,
+  DataTable,
+  type DataTableProps,
   GenericAdminTable,
   type GenericAdminTableProps,
   TableSkeleton,

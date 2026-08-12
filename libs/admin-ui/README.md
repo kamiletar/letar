@@ -10,6 +10,7 @@
 # Обязательные
 bun add @chakra-ui/react react react-icons next
 bun add @dnd-kit/core @dnd-kit/modifiers @dnd-kit/sortable @dnd-kit/utilities
+bun add @tanstack/react-table
 
 # Опциональные (для SlugField, SeoField)
 # Если используете @letar/forms
@@ -28,12 +29,34 @@ bun add @dnd-kit/core @dnd-kit/modifiers @dnd-kit/sortable @dnd-kit/utilities
 
 ### Table
 
-| Компонент           | Описание                                     |
-| ------------------- | -------------------------------------------- |
-| `GenericAdminTable` | Универсальная таблица с DnD и bulk actions   |
-| `BulkActionsBar`    | Панель массовых действий                     |
-| `TableSkeleton`     | Skeleton при загрузке                        |
-| `commonBulkActions` | Предустановленные действия (publish, delete) |
+| Компонент           | Описание                                                   |
+| ------------------- | ---------------------------------------------------------- |
+| `GenericAdminTable` | Универсальная таблица с DnD-порядком и bulk actions        |
+| `DataTable`         | Таблица на `@tanstack/react-table` с серверной сортировкой |
+| `BulkActionsBar`    | Панель массовых действий                                   |
+| `TableSkeleton`     | Skeleton при загрузке                                      |
+| `commonBulkActions` | Предустановленные действия (publish, delete)               |
+
+#### `DataTable`
+
+Для списков без ручной пересортировки (DnD) — клиенты, заказы, логи. Сортировка по клику на
+заголовок обновляет URL-параметр (`sort=field` / `sort=-field`) через `router.push`, а сами
+данные в нужном порядке готовит вызывающий Server Component — компонент их не хранит и не
+пересчитывает сам. Пагинация — соседний `<Pagination>`.
+
+```tsx
+import { DataTable, Pagination } from '@letar/admin-ui'
+import type { ColumnDef } from '@tanstack/react-table'
+
+const columns: ColumnDef<Client>[] = [
+  { accessorKey: 'name', header: 'Имя' },
+  { accessorKey: 'phone', header: 'Телефон', enableSorting: false },
+  { accessorKey: 'createdAt', header: 'Дата', cell: (c) => formatDate(c.getValue()) },
+]
+
+<DataTable data={clients} columns={columns} />
+<Pagination total={total} pageSize={PAGE_SIZE} />
+```
 
 ### Filters
 
