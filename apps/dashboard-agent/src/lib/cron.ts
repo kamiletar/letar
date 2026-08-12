@@ -496,7 +496,7 @@ function loadAllCronJobs(): CronJob[] {
     return DEFAULT_CRON_JOBS
   }
 
-  // Обновляем существующие задачи если их app/endpoint/server изменились в дефолтах
+  // Обновляем существующие задачи если их app/endpoint/server/timeoutMs изменились в дефолтах
   let hasChanges = false
   const updatedJobs = existingJobs.map((existing) => {
     const defaultJob = DEFAULT_CRON_JOBS.find((d) => d.id === existing.id)
@@ -504,13 +504,20 @@ function loadAllCronJobs(): CronJob[] {
       defaultJob
       && (defaultJob.app !== existing.app
         || defaultJob.endpoint !== existing.endpoint
-        || defaultJob.server !== existing.server)
+        || defaultJob.server !== existing.server
+        || defaultJob.timeoutMs !== existing.timeoutMs)
     ) {
       console.warn(
-        `[Cron] Обновление задачи "${existing.id}": app=${existing.app}→${defaultJob.app}, endpoint=${existing.endpoint}→${defaultJob.endpoint}`,
+        `[Cron] Обновление задачи "${existing.id}": app=${existing.app}→${defaultJob.app}, endpoint=${existing.endpoint}→${defaultJob.endpoint}, timeoutMs=${existing.timeoutMs}→${defaultJob.timeoutMs}`,
       )
       hasChanges = true
-      return { ...existing, app: defaultJob.app, endpoint: defaultJob.endpoint, server: defaultJob.server }
+      return {
+        ...existing,
+        app: defaultJob.app,
+        endpoint: defaultJob.endpoint,
+        server: defaultJob.server,
+        timeoutMs: defaultJob.timeoutMs,
+      }
     }
     return existing
   })
