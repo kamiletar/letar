@@ -89,7 +89,7 @@ docker compose -f apps/dashboard-agent/docker-compose.production.yml up -d --bui
 
 - **PostgreSQL DB/user `lena_*`** (`lena_user`, `lena_premium`, `lena_auth`, `lena_password`) — production identity, оставлены как исторические имена. Видны только в `docker-compose.production.yml` и `.env.docker`, никаких операционных проблем не вызывают.
 - **Resilio Sync** (`/etc/systemd/system/resilio-sync.service.d/deploy-user.conf`) — переопределяет user на `deploy`, путь к workspace не указан, миграции не требует.
-- **Container names** в docker-compose — оставлены как есть (`premium-rosstil-postgres`, `auth-hub-postgres` и т.д., без `lena` префикса).
+- **Container names** в docker-compose — оставлены как есть (`driving-school-postgres`, `auth-hub-postgres` и т.д., без `lena` префикса).
 
 ## Crontab на серверах
 
