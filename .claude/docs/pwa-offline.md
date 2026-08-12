@@ -104,7 +104,7 @@ export async function POST(request: Request) {
 
 ## Обзор
 
-Приложение `premium-rosstil` использует PWA (Progressive Web App) архитектуру для работы в оффлайн режиме.
+Приложение `grandslamcup` использует PWA (Progressive Web App) архитектуру для работы в оффлайн режиме.
 
 **Ключевые технологии:**
 
@@ -389,7 +389,7 @@ import { useOnlineStatus } from '@letar/hooks'
 function OfflineBanner() {
   const isOnline = useOnlineStatus()
 
-  if (isOnline) return null
+  if (isOnline) { return null }
 
   return <Banner colorPalette="red">Нет подключения к интернету</Banner>
 }
@@ -405,7 +405,7 @@ import { usePendingMutations } from '@letar/hooks'
 function SyncIndicator() {
   const pendingCount = usePendingMutations()
 
-  if (pendingCount === 0) return null
+  if (pendingCount === 0) { return null }
 
   return <Badge>Синхронизация ({pendingCount})</Badge>
 }
@@ -474,7 +474,7 @@ export function useNetworkQuality(): NetworkQuality {
 import { get, set } from 'idb-keyval'
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 
-const STORAGE_KEY = 'premium-rosstil-feature-name'
+const STORAGE_KEY = '<app>-feature-name'
 
 // Глобальное состояние ВНЕ React
 let globalState: FeatureState = { items: [] }
@@ -1067,7 +1067,6 @@ const { submit } = useOfflineForm({
 
 ## Связанные документы
 
-- [PWA_PLAN.md](../../../apps/premium-rosstil/PWA_PLAN.md) — план реализации и чеклисты
 - [UI компоненты](./ui-components.md) — Chakra UI паттерны
 - [Архитектура](./architecture.md) — общая структура проекта
 - [Формы и валидация](./forms.md) — TanStack Form, Conform, Zod
