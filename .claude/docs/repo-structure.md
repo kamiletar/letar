@@ -11,17 +11,15 @@ letar/ (public)
 │   ├── aboi-e2e/              → submodule (private: letar-private-aboi-e2e)
 │   ├── driving-school/        → submodule (private: letar-private-driving-school)
 │   ├── driving-school-e2e/    → submodule (private)
-│   ├── premium-rosstil/       → submodule (private)
-│   ├── premium-rosstil-e2e/   → submodule (private)
-│   ├── imot/                  → submodule (private)
-│   ├── imot-e2e/              → submodule (private)
 │   └── (остальные публичные: animatrona, dashboard, kami, и т.д.)
 └── libs/
     ├── driving-school-db/     → submodule (private: letar-private-driving-school-db)
     └── (остальные публичные: forms, ui, auth, и т.д.)
 ```
 
-**Приватных submodule всего 9** — по одному на каждый Nx-проект (Вариант A: 1 submodule = 1 Nx project).
+Приватных submodule — по одному на каждый Nx-проект (Вариант A: 1 submodule = 1 Nx project).
+Актуальный список и число — в корневом `.gitmodules`, не дублируем его здесь во избежание
+рассинхрона.
 
 ## Клонирование
 
