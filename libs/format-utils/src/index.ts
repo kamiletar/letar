@@ -1,6 +1,3 @@
-// Phone utilities
-export { formatPhone, getDigitsOnly, normalizePhone, validatePhone } from './lib/phone'
-
 // Date utilities
 export {
   calculateYearsFromDate,

@@ -1,34 +1,21 @@
 # @letar/format-utils
 
-Утилиты форматирования данных: телефоны, даты и деньги.
+Утилиты форматирования данных: даты и деньги.
+
+⚠️ Форматирование телефонов сюда не входит — единый источник истины `@letar/forms-core/phone`
+(`formatPhoneNumber`/`stripPhoneNumber`/`PHONE_MASKS`, framework-free mask-движок). Локальный
+дубликат `formatPhone`/`getDigitsOnly` был удалён 2026-08-12; app-specific обёртка для RU —
+`apps/driving-school/src/lib/phone.ts`.
 
 ## Установка
 
 Библиотека уже включена в монорепозиторий.
 
 ```typescript
-import { formatDate, formatPhone } from '@letar/format-utils'
+import { formatDate } from '@letar/format-utils'
 ```
 
 ## API
-
-### Телефоны
-
-```typescript
-import { formatPhone, getDigitsOnly, normalizePhone, validatePhone } from '@letar/format-utils'
-
-// Форматирование для отображения
-formatPhone('79001234567') // +7 (900) 123-45-67
-
-// Нормализация (только цифры с +7)
-normalizePhone('8 900 123 45 67') // 79001234567
-
-// Валидация
-validatePhone('79001234567') // true
-
-// Только цифры
-getDigitsOnly('+7 (900) 123-45-67') // 79001234567
-```
 
 ### Деньги
 
@@ -82,13 +69,6 @@ calculateYearsFromDate(new Date('1990-05-15')) // 34
 ```
 
 ## Экспорты
-
-### Телефоны
-
-- `formatPhone` — форматирование для отображения
-- `normalizePhone` — нормализация номера
-- `validatePhone` — валидация номера
-- `getDigitsOnly` — извлечение цифр
 
 ### Деньги
 
