@@ -58,14 +58,12 @@ Context7 используется для получения актуальной
 
 Порт настроен в `.env` файле каждого приложения:
 
-| Приложение      | Файл                        | Порт |
-| --------------- | --------------------------- | ---- |
-| premium-rosstil | `apps/premium-rosstil/.env` | 3000 |
-| imot            | `apps/imot/.env`            | 3001 |
-| dashboard       | `apps/dashboard/.env`       | 3002 |
-| driving-school  | `apps/driving-school/.env`  | 3003 |
-| mandala         | `apps/mandala/.env`         | 3004 |
-| kami            | `apps/kami/.env`            | 3005 |
+| Приложение     | Файл                       | Порт |
+| -------------- | -------------------------- | ---- |
+| dashboard      | `apps/dashboard/.env`      | 3002 |
+| driving-school | `apps/driving-school/.env` | 3003 |
+| mandala        | `apps/mandala/.env`        | 3004 |
+| kami           | `apps/kami/.env`           | 3005 |
 
 ⚠️ **НЕ предполагай порт 3000** - всегда проверяй .env файл!
 
