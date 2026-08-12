@@ -34,6 +34,14 @@ test.describe('Table of Contents (TOC)', () => {
 
     const toc = page.locator('nav[aria-label="Содержание документа"]')
 
+    // TOC — клиентский компонент: заголовки собираются из DOM после гидратации, а не приходят
+    // в исходном SSR-HTML. `locator.count()` не ждёт — снимает DOM-снимок сразу и гонится с
+    // React-гидратацией, которая на момент `domcontentloaded` может ещё не начаться (скрипт
+    // Next.js исполняется как deferred module). Дожидаемся видимости самого nav (auto-retry
+    // локатор Playwright) — тот же сигнал готовности, что уже используется в тесте выше
+    // ("TOC отображается на десктопе"), и только потом читаем количество ссылок.
+    await expect(toc).toBeVisible()
+
     // Должны быть ссылки на разделы
     const tocLinks = toc.locator('a[href^="#"]')
     const count = await tocLinks.count()
