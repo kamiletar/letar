@@ -121,7 +121,6 @@ Claude Code автоматически загружает правила из `.
 ├── forms.md               # Правила для форм (*-form.tsx, schemas/)
 ├── database.md            # Правила для работы с БД (schema.zmodel)
 ├── testing.md             # Правила для тестов (specs/, *-e2e/)
-├── premium-rosstil.md     # Специфика premium-rosstil
 ├── driving-school.md      # Специфика driving-school
 └── libs.md                # Правила для библиотек (libs/)
 ```
@@ -130,14 +129,13 @@ Claude Code автоматически загружает правила из `.
 
 ```markdown
 ---
-paths: apps/premium-rosstil/**/*
+paths: apps/driving-school/**/*
 ---
 
-# Правила для Premium Rosstil
+# Правила для Driving School
 
 ## Фирменный стиль
 
-- Золотой цвет: `#CA9E67`
 - Используй `colorPalette="fg"` для кнопок
 ```
 
