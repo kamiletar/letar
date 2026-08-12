@@ -8434,7 +8434,8 @@ SaaS-Sentry отпадает отдельно: тело ошибки тащит 
    `studio` ✅ деплой, `dashboard` ✅ деплой+проверка, `time` ✅ деплой+проверка, `archetest` ✅
    код+секреты (деплой ждёт ответа), `grandslamcup` ✅ код+секреты (деплой ждёт ответа),
    `mandala`/`pravda`/`aira-web` ✅ код+секреты (деплой-запрос отправлен), `auth-hub`/`form-docs`/
-   `form-example` ✅ код+секреты (деплой-запрос ещё не отправлен — следующий шаг).
+   `form-example` ✅ код+секреты (деплой-запрос отправлен, `deploy-glitchtip-authhub-formdocs-
+   formexample-s70`).
    Осталось из некоммерческих: `dashboard-agent` (не Next.js — Fastify, генератор не подходит,
    нужна отдельная интеграция), `kami` (не Next.js — библиотека Prisma), `animatrona-landing`,
    `animatrona-tracker`, `kami-key-the-landing`, `letar-landing`. Коммерческие/ПДн (`aboi`,
