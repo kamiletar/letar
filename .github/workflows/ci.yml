@@ -55,18 +55,32 @@ jobs:
         with:
           node-version: 24
 
+      # ⚠️ Намеренно БЕЗ --frozen-lockfile. bun.lock собирается локально, где приватные
+      # submodule выкачаны, поэтому в нём есть их workspace-записи (apps/aboi,
+      # apps/driving-school, apps/dsperevod и др. — вместе с их эксклюзивными
+      # зависимостями). В CI submodule не выкачиваются (см. шапку), эти каталоги пусты,
+      # bun выкидывает записи из lockfile и с --frozen-lockfile падает на
+      # «lockfile had changes, but lockfile is frozen».
+      # Разовая ручная чистка lockfile (949b81c6) не держится: первый же локальный
+      # `bun install` возвращает записи обратно — так и случилось в f8545c54.
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        id: install
+        run: bun install
 
       # oxlint отрабатывает первым внутри таргета lint (fast-fail), затем ESLint.
       - name: Lint
         run: bunx nx affected -t lint --parallel=3
 
       # tsgo в 9–38x быстрее обычного typecheck (см. CLAUDE.md § Перед коммитом).
+      #
+      # `always()` здесь — чтобы падение lint не скрывало ошибки типов и тестов: за один
+      # прогон видно весь список проблем. Но условие на install обязательно: без него
+      # упавшая установка давала три ошибки подряд, где две последние —
+      # «Could not find Nx modules» вместо настоящей причины.
       - name: Typecheck
-        if: always()
+        if: always() && steps.install.outcome == 'success'
         run: bunx nx affected -t typecheck:tsgo --parallel=3
 
       - name: Unit tests
-        if: always()
+        if: always() && steps.install.outcome == 'success'
         run: bunx nx affected -t test --parallel=3
