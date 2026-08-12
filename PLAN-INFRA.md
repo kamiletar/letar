@@ -1088,12 +1088,49 @@ DoD батча: `deploy_app(staging)` → `run_e2e` → `e2e_status` зелён�
    NODE_ENV/домена, только от факта наличия кредов (`0598571a`). Тот же
    `project.json`/`webServer.url` фикс применён и к `kami-e2e`.
 
-⚠️ **Обнаружен системный гэп: 6 e2e-сьютов без `project.json`** (`animatrona-landing-e2e`,
-`letar-landing-e2e`, `form-docs-e2e`, `kami-key-the-landing-e2e`, `archetest-e2e` — плюс уже
-починенные выше). Не тронуты в этом коммите — `archetest-e2e` прошёл 21/21 несмотря на пробел
-(механизм расхождения не разобран, возможно баг Nx-инференса условный, не всегда срабатывает),
-остальные три (`animatrona-landing`/`letar-landing`/`form-docs`/`kami-key-the-landing`) не в
-активном тираже M/N прямо сейчас — не блокирует, но стоит пройтись перед их гейтованием.
+✅ **Системный гэп закрыт полностью, аудит 2026-08-12.** Полный обход всех `apps/*-e2e/playwright.config.ts`
+(не только подозреваемых) на оба дефекта (отсутствующий `project.json` с явным executor +
+хардкод `webServer.url` вместо `baseURL`):
+
+| Приложение                 | `project.json` было | `webServer.url` было      | Дефект(ы)                             | Статус                        |
+| -------------------------- | ------------------- | ------------------------- | ------------------------------------- | ----------------------------- |
+| `animatrona-landing-e2e`   | ❌ отсутствовал     | `'http://localhost:3008'` | оба                                   | ✅ починено                   |
+| `letar-landing-e2e`        | ❌ отсутствовал     | `'http://localhost:3015'` | оба                                   | ✅ починено                   |
+| `form-develop-app-e2e`     | ❌ отсутствовал     | `'http://localhost:3006'` | оба                                   | ✅ починено                   |
+| `form-docs-e2e`            | ❌ отсутствовал     | уже `baseURL`             | только project.json                   | ✅ починено                   |
+| `kami-key-the-landing-e2e` | ❌ отсутствовал     | уже `baseURL`             | только project.json                   | ✅ починено                   |
+| `archetest-e2e`            | ❌ отсутствовал     | уже `baseURL`             | только project.json (см. разбор ниже) | ✅ починено (консистентность) |
+| остальные 18 e2e-сьютов    | ✅ был              | ✅ уже `baseURL`          | ни одного                             | без изменений                 |
+
+`form-develop-app-e2e` — шестое приложение с гэпом, не входившее в предварительный список
+(инвентаризация `apps/*-e2e` целиком, не только подозреваемых из батча M2). Для каждого
+починенного `project.json` добавлен по образцу `apps/time-e2e` (явный
+`executor: '@nx/playwright:playwright'` для таргета `e2e` — обходит инференс-`dependsOn` на
+dev-таск через `@nx/playwright/plugin`, см. врезку в `time-e2e/playwright.config.ts`). Хардкод
+`url` заменён на ссылку на ту же переменную `baseURL`, что уже используется в `use.baseURL` того
+же файла. Проверено `nx show project <app>-e2e --json`: у всех шести `targets.e2e.dependsOn`
+теперь `undefined` (как у `time-e2e`), в отличие от отдельных атомизированных `e2e-ci--*`
+таргетов, где `dependsOn` на `dev` остаётся — это ожидаемо, они не участвуют в обычном `nx e2e`.
+Живой прогон `nx e2e <app>-e2e -- --project=chromium` подтверждён на двух приложениях:
+`letar-landing-e2e` (11/11 зелёных) и `animatrona-landing-e2e` (14/14 зелёных).
+
+**Разбор `archetest-e2e` (почему 21/21 проходил без `project.json`):** это было совпадение, не
+защита. `webServer.url` там уже ссылался на `baseURL` (не хардкод), поэтому единственный
+оставшийся дефект — отсутствие `project.json` — не проявлялся: без `BASE_URL` в окружении
+`baseURL` резолвится в тот же `http://localhost:3012`, куда инференс-`dependsOn` и так поднимает
+dev-сервер. Если бы CI/агент когда-либо прогнал `archetest-e2e` с `BASE_URL=https://archetest-
+stage.s3.letar.best` (как задумано для тиража M3), сработал бы тот же race, что уже чинили в
+`kami-e2e`/`form-example-e2e` (`0598571a`): Nx поднимает локальный dev ДО того, как Playwright
+успевает проверить `reuseExistingServer`, и тест идёт против пустого локального окружения вместо
+стейджа — молча, без ошибки. `project.json` добавлен для консистентности и на будущее (M3
+использует именно `BASE_URL`-паттерн), подтверждено `nx show project archetest-e2e --json`.
+
+**Генератор `@letar/generators:e2e-suite` — не является источником бага, чинить не пришлось.**
+Оба его шаблона (`files/playwright.config.ts.template`, `files/project.json.template`) уже
+генерируют правильный паттерн из коробки: `url: baseURL` в `webServer` и явный
+`executor: '@nx/playwright:playwright'` в `project.json`. Все 6 починенных приложений либо
+старше генератора (создан 2026-07-18), либо созданы не через него — проверено по отсутствию
+`project.json`, который генератор всегда создаёт.
 
 Осталось: BlackCove — повторный `run_e2e` для `form-example`, `deploy_app(staging, seed: true)` +
 `run_e2e` для `kami`. `E2E_GATED_APPS` обновится по факту зелёного результата.
