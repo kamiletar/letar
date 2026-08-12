@@ -13,26 +13,30 @@
   попадает** (см. `.gitignore`) и в этом каталоге не хранится: скрипт пишет его сразу в целевой
   путь на сервере, минуя рабочее дерево.
 
-## Статус (2026-08-12): манифест готов, `*.enc` ещё нет
+## Статус (2026-08-12): разовая миграция выполнена
 
-Оба секрета сейчас существуют только на серверах, заведены вручную до этого трека:
+Оба `.enc` в этом каталоге получены с s3 (`acme-dns-accounts.json` был на
+`/home/deploy/lego/`, `dashboard-users` — на `/home/deploy/letar/infra/traefik/auth/`,
+см. [infra/traefik/README.md](/infra/traefik/README.md)), зашифрованы и **проверены
+round-trip'ом** (`sops -d` содержимого совпало байт-в-байт с оригиналом до удаления
+плейнтекста). Ручной `scp` из README теперь избыточен для _обновления_ этих файлов —
+`scripts/deploy-infra.sh traefik` разложит их из `.enc` при следующем деплое. Он остаётся
+нужен только для _первого_ заведения аккаунта acme-dns на новом сервере (сама регистрация,
+не последующая доставка файла) — см. «Регистрация аккаунта» в `infra/acme-dns/README.md`.
 
-- `acme-dns-accounts.json` — на s3, `/home/deploy/lego/acme-dns-accounts.json` (см.
-  [infra/traefik/README.md](/infra/traefik/README.md), раздел «Учётные данные acme-dns»).
-- `dashboard-users` (htpasswd) — на s3, `/home/deploy/letar/infra/traefik/auth/dashboard-users`
-  (раздел «Дашборд» там же).
+### ⚠️ Две ловушки при шифровании инфра-секретов (найдены при этой миграции)
 
-**Разовая миграция, которую ещё нужно сделать** (на сервере, с `SOPS_AGE_KEY_FILE` в окружении):
-
-```bash
-# на s3, из существующих файлов
-sops --encrypt /home/deploy/lego/acme-dns-accounts.json > infra/traefik/secrets/acme-dns-accounts.json.enc
-sops --encrypt /home/deploy/letar/infra/traefik/auth/dashboard-users > infra/traefik/secrets/dashboard-users.enc
-git add infra/traefik/secrets/*.enc
-git commit -m "chore(traefik): секреты в SOPS-конвейер (§18.8.1)" -- infra/traefik/secrets/
-git push
-```
-
-После этого `scripts/deploy-infra.sh traefik` расшифрует их автоматически при следующем деплое —
-ручной `scp` из README можно убирать. До миграции ручной путь остаётся рабочим и является
-единственным источником истины для уже поднятых серверов.
+1. **`.sops.yaml` на Windows: `path_regex` с `/` не матчит реальный путь.** `sops` резолвит путь
+   файла через `os.Getwd()`/`filepath.Join` — на Windows это бэкслеши
+   (`C:\web\letar\infra\traefik\secrets\...`), а не прямые слеши. Регэксп `infra/[^/]+/secrets/…`
+   не матчился никогда, хотя выглядел рабочим. Фикс — `infra[/\\][^/\\]+[/\\]secrets[/\\]…`
+   (класс символов на оба разделителя). У остальных правил `.sops.yaml` (`\.env\.docker…`) этой
+   проблемы нет, потому что они матчат только имя файла без разделителей пути — поэтому баг не
+   всплывал раньше.
+2. **`sops --encrypt --output X` матчит правило по пути ВХОДНОГО файла, не по `--output`.**
+   Интуитивно кажется, что раз `--output infra/traefik/secrets/foo.enc` совпадает с правилом —
+   этого достаточно. На деле `sops` ищет `creation_rules` по пути _источника_: файл с
+   произвольным именем во временном каталоге (например в scratchpad) не матчит ничего, даже если
+   его будущий `--output` матчит идеально. Рабочий способ — положить плейнтекст временно **по
+   финальному пути** (`infra/traefik/secrets/foo.enc`, ещё как плейнтекст) и зашифровать
+   `--in-place`, а не гонять через промежуточный файл с другим именем.
