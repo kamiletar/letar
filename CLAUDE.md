@@ -79,6 +79,9 @@ alias матчится по префиксу
 [unit-testing](/.claude/docs/unit-testing.md) ⚠️ обязательный `tsconfig.spec.json` ·
 [dprint-worktree-submodule-scope](/.claude/docs/dprint-worktree-submodule-scope.md) ⚠️ dprint не видит
 границ worktree/submodule ·
+[dprint-format-project-scope-not-file-scope](/.claude/docs/dprint-format-project-scope-not-file-scope.md)
+⚠️ `--projects` не даёт файловой гранулярности — `format` внутри проекта задевает весь submodule,
+включая чужие незакоммиченные правки ·
 [dprint-eslint-curly-conflict](/.claude/docs/dprint-eslint-curly-conflict.md) `--fix` и `fmt`
 откатывают друг друга
 
