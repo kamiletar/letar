@@ -1,11 +1,11 @@
 'use client'
 
 import { useDeclarativeForm } from '@letar/forms-react'
+import { cn } from '@letar/tailwind-utils'
 import type { ReactElement } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
-import { cn } from '@letar/tailwind-utils'
 import type { OTPInputFieldProps } from './types'
 
 interface OTPFieldState {

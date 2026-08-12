@@ -1,9 +1,9 @@
 'use client'
 
 import type { UIKitSegmentGroupProps } from '@letar/forms-core/uikit'
+import { cn } from '@letar/tailwind-utils'
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group'
 import type { ReactNode } from 'react'
-import { cn } from '@letar/tailwind-utils'
 
 export function SegmentGroup({ value, onValueChange, options, disabled, ...rest }: UIKitSegmentGroupProps<ReactNode>) {
   return (

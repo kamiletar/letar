@@ -1,9 +1,9 @@
 'use client'
 
+import { cn } from '@letar/tailwind-utils'
 import { Star } from 'lucide-react'
 import type { ReactElement } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
-import { cn } from '@letar/tailwind-utils'
 import type { MatrixChoiceFieldProps, MatrixColumn, MatrixRow } from './types'
 
 /**

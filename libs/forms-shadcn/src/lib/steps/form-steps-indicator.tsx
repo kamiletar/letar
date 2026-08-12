@@ -1,8 +1,8 @@
 'use client'
 
+import { cn } from '@letar/tailwind-utils'
 import { Check } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { cn } from '@letar/tailwind-utils'
 import { useFormStepsContext } from './form-steps-context'
 
 export interface FormStepsIndicatorProps {

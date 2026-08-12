@@ -1,10 +1,10 @@
 'use client'
 
+import { NATIVE_INPUT_CLASS } from '@letar/tailwind-utils'
+import { cn } from '@letar/tailwind-utils'
 import * as SwitchPrimitive from '@radix-ui/react-switch'
 import type { ReactElement } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
-import { NATIVE_INPUT_CLASS } from '@letar/tailwind-utils'
-import { cn } from '@letar/tailwind-utils'
 import type { DayOfWeek, ScheduleFieldProps, WeeklySchedule } from './types'
 
 const DAYS_OF_WEEK: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']

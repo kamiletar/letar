@@ -1,8 +1,8 @@
 'use client'
 
+import { cn } from '@letar/tailwind-utils'
 import { GripVertical, X } from 'lucide-react'
 import type { DragEvent } from 'react'
-import { cn } from '@letar/tailwind-utils'
 import { TableCell } from './table-cell'
 import { useTableEditorContext } from './table-editor-context'
 

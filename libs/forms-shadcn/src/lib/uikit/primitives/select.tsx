@@ -1,10 +1,10 @@
 'use client'
 
 import type { UIKitSelectProps } from '@letar/forms-core/uikit'
+import { cn } from '@letar/tailwind-utils'
 import * as SelectPrimitive from '@radix-ui/react-select'
 import { Check, ChevronDown, X } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { cn } from '@letar/tailwind-utils'
 
 export function Select(
   { value, onValueChange, onBlur, options, label, placeholder, disabled, clearable, ...rest }: UIKitSelectProps<

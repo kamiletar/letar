@@ -1,10 +1,10 @@
 'use client'
 
+import { cn } from '@letar/tailwind-utils'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import type { ReactElement } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
-import { cn } from '@letar/tailwind-utils'
 import type { NumberInputFieldProps } from './types'
 
 /**

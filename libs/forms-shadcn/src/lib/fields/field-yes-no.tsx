@@ -1,8 +1,8 @@
 'use client'
 
+import { cn } from '@letar/tailwind-utils'
 import type { ReactElement } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
-import { cn } from '@letar/tailwind-utils'
 import type { YesNoFieldProps } from './types'
 
 const VARIANT_CONTENT: Record<NonNullable<YesNoFieldProps['variant']>, { yes: string | null; no: string | null }> = {

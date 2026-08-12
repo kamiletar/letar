@@ -1,10 +1,10 @@
 'use client'
 
+import { cn } from '@letar/tailwind-utils'
 import { Check, Eye, EyeOff, X } from 'lucide-react'
 import { type ReactElement, useState } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
-import { cn } from '@letar/tailwind-utils'
 import type { PasswordRequirement, PasswordStrengthFieldProps } from './types'
 
 const DEFAULT_REQUIREMENTS: PasswordRequirement[] = ['minLength:8', 'uppercase', 'lowercase', 'number', 'special']

@@ -1,5 +1,6 @@
 'use client'
 
+import { cn } from '@letar/tailwind-utils'
 import TiptapLink from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import Underline from '@tiptap/extension-underline'
@@ -8,7 +9,6 @@ import StarterKit from '@tiptap/starter-kit'
 import type { ReactElement } from 'react'
 import { useEffect, useMemo } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
-import { cn } from '@letar/tailwind-utils'
 import { DEFAULT_TOOLBAR_BUTTONS, TOOLBAR_CONFIG, type ToolbarButton } from './rich-text-toolbar-config'
 import type { RichTextFieldProps } from './types'
 

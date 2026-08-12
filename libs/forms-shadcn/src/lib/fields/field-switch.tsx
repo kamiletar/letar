@@ -1,10 +1,10 @@
 'use client'
 
+import { cn } from '@letar/tailwind-utils'
 import * as SwitchPrimitive from '@radix-ui/react-switch'
 import type { ReactElement } from 'react'
 import { createField } from '../uikit/primitives'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
-import { cn } from '@letar/tailwind-utils'
 import type { SwitchFieldProps } from './types'
 
 /**
