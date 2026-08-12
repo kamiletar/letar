@@ -68,18 +68,21 @@ const Schema = z.object({
 
 Поле с маской формата для структурированных данных. Требует peer-зависимость `use-mask-input`.
 
+Маска задаётся пропом `mask` самого компонента, а не через `ui` в Zod `meta()` — ключа `mask` в
+`FieldUIMeta` нет.
+
 ```tsx
 const Schema = z.object({
   phone: z.string().meta({
-    ui: { title: 'Телефон', mask: '+7 (999) 999-99-99' },
+    ui: { title: 'Телефон' },
   }),
   creditCard: z.string().meta({
-    ui: { title: 'Номер карты', mask: '9999 9999 9999 9999' },
+    ui: { title: 'Номер карты' },
   }),
 })
 
-<Form.Field.MaskedInput name="phone" />
-<Form.Field.MaskedInput name="creditCard" />
+<Form.Field.MaskedInput name="phone" mask="+7 (999) 999-99-99" />
+<Form.Field.MaskedInput name="creditCard" mask="9999 9999 9999 9999" />
 ```
 
 ## Form.Field.RichText

@@ -34,8 +34,8 @@ test.describe('Masked Fields Demo', () => {
 
   test('should display section headings', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Phone Fields' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Documents (Mask from Zod Schema)' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Payment (Mask from Props)' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Documents' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Payment' })).toBeVisible()
   })
 
   test('should display country flags for phone fields', async ({ page }) => {
@@ -74,7 +74,7 @@ test.describe('Masked Fields Demo', () => {
     expect(value).toMatch(/\+1.*\(?\d{3}\)?.*\d{3}.*\d{4}/)
   })
 
-  test('should format passport with mask from Zod schema', async ({ page }) => {
+  test('should format passport with mask prop', async ({ page }) => {
     const passportField = getField(page, 'passport')
 
     // Type digits
@@ -86,7 +86,7 @@ test.describe('Masked Fields Demo', () => {
     expect(value).toMatch(/\d{2}\s\d{2}\s\d{6}/)
   })
 
-  test('should format SNILS with mask from Zod schema', async ({ page }) => {
+  test('should format SNILS with mask prop', async ({ page }) => {
     const snilsField = getField(page, 'snils')
 
     // Type digits

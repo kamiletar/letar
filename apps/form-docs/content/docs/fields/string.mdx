@@ -68,18 +68,21 @@ const Schema = z.object({
 
 Input with format mask for structured data. Requires `use-mask-input` peer dependency.
 
+The mask is set via the component's own `mask` prop, not through `ui` in Zod `meta()` — there is
+no `mask` key in `FieldUIMeta`.
+
 ```tsx
 const Schema = z.object({
   phone: z.string().meta({
-    ui: { title: 'Phone', mask: '+1 (999) 999-9999' },
+    ui: { title: 'Phone' },
   }),
   creditCard: z.string().meta({
-    ui: { title: 'Card Number', mask: '9999 9999 9999 9999' },
+    ui: { title: 'Card Number' },
   }),
 })
 
-<Form.Field.MaskedInput name="phone" />
-<Form.Field.MaskedInput name="creditCard" />
+<Form.Field.MaskedInput name="phone" mask="+1 (999) 999-9999" />
+<Form.Field.MaskedInput name="creditCard" mask="9999 9999 9999 9999" />
 ```
 
 ## Form.Field.RichText

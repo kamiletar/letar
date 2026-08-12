@@ -40,7 +40,6 @@ const MaskedSchema = z.object({
       ui: {
         title: 'Passport (RU)',
         description: 'Format: 99 99 999999',
-        mask: '99 99 999999',
       },
     }),
 
@@ -51,7 +50,6 @@ const MaskedSchema = z.object({
       ui: {
         title: 'INN',
         description: 'Tax ID (12 digits)',
-        mask: '999999999999',
       },
     }),
 
@@ -62,7 +60,6 @@ const MaskedSchema = z.object({
       ui: {
         title: 'SNILS',
         description: 'Format: 999-999-999 99',
-        mask: '999-999-999 99',
       },
     }),
 
@@ -130,10 +127,9 @@ export default function MaskedDemoPage() {
           {/* Documents Section */}
           <Box>
             <Heading size="md" mb={4}>
-              Documents (Mask from Zod Schema)
+              Documents
             </Heading>
             <VStack gap={4} align="stretch">
-              {/* Mask specified in props (also in Zod meta for documentation) */}
               <Form.Field.MaskedInput name="passport" mask="99 99 999999" />
               <Form.Field.MaskedInput name="inn" mask="999999999999" />
               <Form.Field.MaskedInput name="snils" mask="999-999-999 99" />
@@ -143,7 +139,7 @@ export default function MaskedDemoPage() {
           {/* Payment Section */}
           <Box>
             <Heading size="md" mb={4}>
-              Payment (Mask from Props)
+              Payment
             </Heading>
             <VStack gap={4} align="stretch">
               <Form.Field.MaskedInput name="creditCard" mask="9999 9999 9999 9999" />
