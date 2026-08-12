@@ -31,6 +31,10 @@ services:
     env_file:
       - .env.staging
     environment:
+      GLITCHTIP_DSN: ${GLITCHTIP_DSN}
+      GLITCHTIP_ENVIRONMENT: ${GLITCHTIP_ENVIRONMENT}
+      NEXT_PUBLIC_GLITCHTIP_DSN: ${NEXT_PUBLIC_GLITCHTIP_DSN}
+      NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT: ${NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT}
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@grandslamcup-staging-db:5432/grandslamcup
     volumes:
       - ./uploads:/app/apps/grandslamcup/uploads

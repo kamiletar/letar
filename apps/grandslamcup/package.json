@@ -13,7 +13,11 @@
       "@letar/analytics",
       "@letar/auth",
       "@letar/hooks",
-      "@letar/consent"
+      "@letar/consent",
+      "@letar/glitchtip"
     ]
+  },
+  "dependencies": {
+    "@letar/glitchtip": "workspace:*"
   }
 }

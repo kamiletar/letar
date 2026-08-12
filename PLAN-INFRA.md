@@ -8366,6 +8366,42 @@ SaaS-Sentry отпадает отдельно: тело ошибки тащит 
    `GLITCHTIP_ENVIRONMENT` `production`/`staging` соответственно). Деплой не выполнялся — только
    подготовка секретов, живой прогон ждёт BlackCove.
 
+   ✅ **Второй прогон тиража (2026-08-12): `archetest`, `grandslamcup`.** Полный цикл — генератор →
+   typecheck+lint → GlitchTip-проекты через тот же Django-shell → DSN в `.env.docker.enc` +
+   `.env.staging.enc` обоих окружений. Деплой не выполнялся, деплой-запрос ещё не отправлен
+   (сделать в следующей итерации тиража).
+
+   ⚠️ **Найдена и не до конца объяснена ложная блокировка `@nx/enforce-module-boundaries`
+   («Static imports of lazy-loaded libraries are forbidden»)** — та же пара
+   static(`/client`)+dynamic(`/server`) подпутей `@letar/glitchtip`, что чисто проходит в
+   `studio`/`dashboard`/`time`, у `archetest` и `grandslamcup` изначально давала ошибку линта.
+   Граф зависимостей Nx (`nx graph`) идентичен для всех приложений (implicit+static+dynamic
+   рёбра на `@letar/glitchtip` есть везде), `tsconfig.json`-paths и содержимое
+   `instrumentation-client.ts` побайтово совпадают с рабочими случаями — причина не в коде.
+   - **`archetest`:** фикс нашёлся — `apps/archetest/eslint.config.mjs` спредил `...baseConfig`
+     **до** `...nx.configs['flat/react-typescript']` (у большинства приложений порядок обратный).
+     После смены порядка на канонический (как в `studio`/`grandslamcup`/др.) — 0 ошибок,
+     воспроизведено дважды подряд после `nx reset`, не флуктуация.
+   - **`grandslamcup`:** та же (уже канонический) порядок спредов, тот же графа/tsconfig — и
+     всё равно падает, стабильно на 3 повторных прогонах после `nx reset`. Порядок спредов явно
+     не единственный фактор. Внутренняя причина в `@nx/eslint-plugin`
+     (`hasStaticImportOfDynamicResource` → `getSecondaryEntryPointPath` → `resolveModuleByImport`
+     не резолвит secondary entry point именно для этого консьюмера) не найдена за разумное
+     время — обойдено точечным `// eslint-disable-next-line @nx/enforce-module-boundaries` с
+     комментарием на самом импорте, не подавлением правила глобально.
+   - **Не расследовано дальше** — воспроизводится ли на следующих приложениях тиража; если да и
+     паттерн повторится 3+ раз, стоит завести отдельную задачу и разобраться в первопричине
+     вместо накопления точечных disable-комментариев.
+
+   **Список кандидатов (`PLAN-INFRA.md`, актуализирован 2026-08-12) — сделано 5 из ~19:**
+   `studio` ✅, `dashboard` ✅ (код+секреты, не задеплоен), `time` ✅ (код+секреты, не задеплоен),
+   `archetest` ✅ (код+секреты, не задеплоен), `grandslamcup` ✅ (код+секреты, не задеплоен).
+   Осталось из некоммерческих: `dashboard-agent`, `form-docs`, `form-example`, `aira-web`,
+   `mandala`, `kami`, `pravda`, `animatrona-landing`, `animatrona-tracker`,
+   `kami-key-the-landing`, `letar-landing`, `umami`, `auth-hub`. Коммерческие/ПДн (`aboi`,
+   `driving-school`, `dsperevod`, `svoichuzhie`, `aprel8008`, `domwellbes`) и не-Next.js
+   (Electron/React Native) — как в исходном плане п.7, без изменений.
+
 ### Что это даёт агентам
 
 Диагностика инцидента вместо «посмотрю логи контейнера» начинается с файла, строки и релиза.
