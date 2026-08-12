@@ -4,6 +4,13 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.31.1] - 2026-08-12
+
+### Fixed
+
+- **`FieldPhone` терял цифру при вводе номера с ведущей `8`** — исправление в общем форматтере
+  `@letar/forms-core/phone`, скин правок не потребовал. Подробности — CHANGELOG `@letar/forms` 2.0.4.
+
 ## [0.31.0] - 2026-08-11
 
 ### Added
