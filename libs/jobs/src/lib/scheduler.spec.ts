@@ -230,4 +230,95 @@ describe('createJobScheduler', () => {
     expect(mockBoss.unschedule).toHaveBeenCalledWith('job-b')
     expect(mockBoss.createQueue).toHaveBeenCalledTimes(2)
   })
+
+  it('autoSchedule=false: очередь и воркер регистрируются, но schedule()/unschedule() не вызываются', async () => {
+    const scheduler = createJobScheduler({
+      connectionString: 'postgres://test',
+      jobs: [job(), job({ id: 'job-disabled', enabled: false })],
+      overrides: [],
+      autoSchedule: false,
+    })
+
+    await scheduler.start()
+
+    expect(mockBoss.createQueue).toHaveBeenCalledTimes(2)
+    expect(mockBoss.work).toHaveBeenCalledTimes(2)
+    expect(mockBoss.schedule).not.toHaveBeenCalled()
+    expect(mockBoss.unschedule).not.toHaveBeenCalled()
+  })
+
+  it('autoSchedule=false: runNow() всё равно работает — ручной запуск не зависит от автотика', async () => {
+    const scheduler = createJobScheduler({
+      connectionString: 'postgres://test',
+      jobs: [job()],
+      overrides: [],
+      autoSchedule: false,
+    })
+    await scheduler.start()
+
+    const runId = await scheduler.runNow('demo-job')
+
+    expect(runId).toBe('run-id-123')
+  })
+
+  it('setOverride(): применяет новое расписание сразу, без рестарта процесса', async () => {
+    const scheduler = createJobScheduler({
+      connectionString: 'postgres://test',
+      jobs: [job()],
+      overrides: [],
+    })
+    await scheduler.start()
+    mockBoss.schedule.mockClear()
+
+    await scheduler.setOverride('demo-job', { schedule: '0 6 * * *', enabled: null })
+
+    expect(mockBoss.schedule).toHaveBeenCalledWith('demo-job', '0 6 * * *', undefined, {
+      tz: 'Europe/Moscow',
+    })
+
+    const [status] = await scheduler.getStatuses()
+    expect(status.schedule).toBe('0 6 * * *')
+    expect(status.hasOverride).toBe(true)
+  })
+
+  it('setOverride(): enabled=false снимает задачу с расписания сразу', async () => {
+    const scheduler = createJobScheduler({
+      connectionString: 'postgres://test',
+      jobs: [job()],
+      overrides: [],
+    })
+    await scheduler.start()
+    mockBoss.unschedule.mockClear()
+
+    await scheduler.setOverride('demo-job', { schedule: null, enabled: false })
+
+    expect(mockBoss.unschedule).toHaveBeenCalledWith('demo-job')
+    const [status] = await scheduler.getStatuses()
+    expect(status.enabled).toBe(false)
+  })
+
+  it('setOverride(): до start() не трогает pg-boss, но обновляет эффективное состояние', async () => {
+    const scheduler = createJobScheduler({
+      connectionString: 'postgres://test',
+      jobs: [job()],
+      overrides: [],
+    })
+
+    await scheduler.setOverride('demo-job', { schedule: '0 6 * * *', enabled: null })
+
+    expect(mockBoss.schedule).not.toHaveBeenCalled()
+  })
+
+  it('setOverride(): падает с понятной ошибкой для id вне реестра', async () => {
+    const scheduler = createJobScheduler({
+      connectionString: 'postgres://test',
+      jobs: [job()],
+      overrides: [],
+    })
+    await scheduler.start()
+
+    await expect(scheduler.setOverride('unknown-job', { schedule: null, enabled: false })).rejects.toThrow(
+      'неизвестная задача "unknown-job"',
+    )
+  })
 })

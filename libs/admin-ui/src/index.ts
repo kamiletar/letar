@@ -38,5 +38,8 @@ export { SeoField, SlugField } from './form-fields'
 // Hooks
 export { useSelection } from './hooks'
 
+// Jobs (крон-задачи, PLAN-INFRA §75)
+export { JobsTable, type JobsTableProps, type JobStatusItem } from './jobs'
+
 // Utils
 export { slugify } from './utils'

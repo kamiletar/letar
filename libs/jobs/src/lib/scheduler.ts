@@ -21,6 +21,15 @@ export interface JobSchedulerOptions {
    * сам при первом `start()`, живёт рядом с основной схемой ZenStack, ей не подчиняется.
    */
   schema?: string
+  /**
+   * По умолчанию `true` — `start()` регистрирует cron-расписание, задачи тикают сами.
+   * `false`: очереди и обработчики всё равно регистрируются (доступны `runNow`/`getStatuses`),
+   * но `schedule()`/`unschedule()` не вызываются — ничего не запускается автоматически.
+   * Для явного opt-in автозапуска в конкретном окружении (dev по умолчанию не должен слать
+   * реальные письма каждые 5 минут) и для безопасного миграционного окна, когда старый и новый
+   * планировщик не должны тикать одновременно.
+   */
+  autoSchedule?: boolean
 }
 
 export interface JobScheduler {
@@ -31,6 +40,12 @@ export interface JobScheduler {
   runNow(jobId: string): Promise<string | null>
   /** Снимок состояния всех задач реестра — для админки и `/api/jobs/status`. */
   getStatuses(): Promise<JobStatus[]>
+  /**
+   * Применяет новый оверрайд задачи немедленно, без рестарта процесса — правка через админку
+   * (`JobOverride` в БД) должна подействовать сразу, а не только на следующем деплое. Вызывать
+   * ПОСЛЕ того, как оверрайд уже записан в БД (эта функция саму запись не делает).
+   */
+  setOverride(jobId: string, override: { schedule: string | null; enabled: boolean | null }): Promise<void>
 }
 
 interface LastRunRow {
@@ -53,12 +68,14 @@ export function createJobScheduler(options: JobSchedulerOptions): JobScheduler {
       retryDelay: job.definition.retryDelaySeconds ?? 0,
     })
 
-    if (job.enabled) {
-      await boss.schedule(job.definition.id, job.schedule, undefined, {
-        tz: job.definition.timezone ?? DEFAULT_TIMEZONE,
-      })
-    } else {
-      await boss.unschedule(job.definition.id)
+    if (options.autoSchedule ?? true) {
+      if (job.enabled) {
+        await boss.schedule(job.definition.id, job.schedule, undefined, {
+          tz: job.definition.timezone ?? DEFAULT_TIMEZONE,
+        })
+      } else {
+        await boss.unschedule(job.definition.id)
+      }
     }
 
     const timeoutMs = job.definition.timeoutMs ?? DEFAULT_JOB_TIMEOUT_MS
@@ -155,5 +172,24 @@ export function createJobScheduler(options: JobSchedulerOptions): JobScheduler {
     return statuses
   }
 
-  return { start, stop, runNow, getStatuses }
+  async function setOverride(
+    jobId: string,
+    override: { schedule: string | null; enabled: boolean | null },
+  ): Promise<void> {
+    const job = byId.get(jobId)
+    if (!job) {
+      throw new Error(`setOverride: неизвестная задача "${jobId}" (нет в реестре @letar/jobs этого приложения)`)
+    }
+
+    const [merged] = mergeJobsWithOverrides([job.definition], [{ jobId, ...override }])
+    job.schedule = merged.schedule
+    job.enabled = merged.enabled
+    job.hasOverride = merged.hasOverride
+
+    if (started) {
+      await applyJob(job)
+    }
+  }
+
+  return { start, stop, runNow, getStatuses, setOverride }
 }
