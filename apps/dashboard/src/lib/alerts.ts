@@ -152,11 +152,16 @@ export async function createAlert(
     })
 
     if (existingAlert) {
-      // Обновляем существующий
+      // Обновляем существующий. `title` и `lastOccurredAt` тоже обновляются — раньше обновлялся
+      // только `message`, и заголовок + время первого срабатывания (например, от давно
+      // неактуальной задачи) навсегда прилипали к записи, пока она остаётся ACTIVE, даже когда
+      // причина провала сменилась или алерт сработал заново сильно позже.
       return await prisma.alert.update({
         where: { id: existingAlert.id },
         data: {
+          title,
           message,
+          lastOccurredAt: new Date(),
           ...(metadata !== undefined && { metadata }),
         },
       })
@@ -170,6 +175,7 @@ export async function createAlert(
         status: 'ACTIVE',
         title,
         message,
+        lastOccurredAt: new Date(),
         ...(metadata !== undefined && { metadata }),
         ...(resolvedServerId && { serverId: resolvedServerId }),
       },

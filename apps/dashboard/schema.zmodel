@@ -220,6 +220,12 @@ model Alert {
   message        String
   metadata       Json?
   createdAt      DateTime      @default(now())
+  /// Момент последнего срабатывания — обновляется при каждом повторном алерте, дедуплицированном
+  /// в существующую ACTIVE-запись (createAlert() в lib/alerts.ts). `createdAt` остаётся датой
+  /// первого срабатывания и не годится для уведомлений о текущем инциденте: без этого поля
+  /// повторяющийся алерт (например email-canary или порог памяти) вечно показывал в Telegram
+  /// дату месячной давности вместо времени реального провала.
+  lastOccurredAt DateTime      @default(now())
   acknowledgedAt DateTime?
   resolvedAt     DateTime?
 

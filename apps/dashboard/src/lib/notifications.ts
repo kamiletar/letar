@@ -64,7 +64,7 @@ export async function sendTelegramNotification(botToken: string, chatId: string,
  * Форматирование сообщения для Telegram
  */
 function formatTelegramMessage(alert: Alert, emoji: string): string {
-  const timestamp = alert.createdAt.toLocaleString('ru-RU')
+  const timestamp = alert.lastOccurredAt.toLocaleString('ru-RU')
   const serverName = getServerName()
 
   let message = `${emoji} <b>[${serverName}] ${alert.title}</b>\n\n`
