@@ -11,6 +11,16 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.15.6] — 2026-08-12
+
+### Removed
+
+- 6 задач `studio-*` (send-reminders, recurring-invoices, close-stale-timers,
+  check-budget-alerts, biweekly-hourly-invoices, check-long-timers) убраны из
+  `DEFAULT_CRON_JOBS` и добавлены в `RETIRED_JOB_IDS` — переехали в планировщик
+  `@letar/jobs` внутри самого studio (PLAN-INFRA.md §75). ⚠️ Деплоить не раньше studio
+  с `JOBS_ENABLED=true` — иначе окно, где задачи не выполняет никто.
+
 ## [0.15.2] — 2026-08-08
 
 ### Changed

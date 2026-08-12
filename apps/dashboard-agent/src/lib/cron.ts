@@ -242,32 +242,6 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     // письма и сетевые издержки.
     timeoutMs: 130_000,
   },
-  // ⚠️ Три записи ниже (`studio-send-reminders`, `studio-recurring-invoices`,
-  // `dashboard-heartbeat`) до 2026-08-07 существовали ТОЛЬКО в `cron-jobs.json` на s2 — их завели
-  // прямо на сервере, минуя git (PLAN-INFRA.md §56). Перенесены сюда точь-в-точь со значениями с
-  // прода, включая расписания. Опасность была не в том, что они «лишние», а в том, что они
-  // работают: пропади файл на сервере — агент поднялся бы, отработал задачи из кода и промолчал,
-  // а у studio молча перестали бы уходить напоминания об оплате и выставляться счета.
-  {
-    id: 'studio-send-reminders',
-    name: 'Payment Reminders (studio)',
-    app: 'studio',
-    endpoint: '/api/cron/send-reminders',
-    schedule: '0 9 * * *',
-    description: 'Напоминания об оплате: за 3 дня до срока + просроченные счета',
-    enabled: true,
-    server: 's2',
-  },
-  {
-    id: 'studio-recurring-invoices',
-    name: 'Recurring Invoices (studio)',
-    app: 'studio',
-    endpoint: '/api/cron/recurring-invoices',
-    schedule: '0 8 * * *',
-    description: 'Автовыставление абонентских счетов (RecurringInvoice) по наступившим nextRunAt',
-    enabled: true,
-    server: 's2',
-  },
   {
     id: 'dashboard-heartbeat',
     name: 'Heartbeat (dashboard)',
@@ -275,49 +249,6 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     endpoint: '/api/cron/heartbeat',
     schedule: '0 21 * * *',
     description: 'Если за 24ч не было ни одного Alert — уведомление в Telegram о живости канала',
-    enabled: true,
-    server: 's2',
-  },
-  {
-    id: 'studio-close-stale-timers',
-    name: 'Close Stale Timers (studio)',
-    app: 'studio',
-    endpoint: '/api/cron/close-stale-timers',
-    schedule: '*/5 * * * *',
-    description: 'Закрывает зависшие активные записи TimeEntry по отсечке бездействия 20 мин (Фаза 11 §11.3)',
-    enabled: true,
-    server: 's2',
-  },
-  {
-    id: 'studio-check-budget-alerts',
-    name: 'Check Budget Alerts (studio)',
-    app: 'studio',
-    endpoint: '/api/cron/check-budget-alerts',
-    schedule: '*/30 * * * *',
-    description:
-      'Алерты 75/90/100% по потолку часов HOURLY-проектов, письмо владельцу и (по договорённости) клиенту (Фаза 11 блок D)',
-    enabled: true,
-    server: 's2',
-  },
-  {
-    id: 'studio-biweekly-hourly-invoices',
-    name: 'Biweekly Hourly Invoices (studio)',
-    app: 'studio',
-    endpoint: '/api/cron/biweekly-hourly-invoices',
-    schedule: '0 9 1,16 * *',
-    description:
-      'Автовыставление накопленных утверждённых часов по HOURLY-проектам, периоды 1–15 и 16–конец месяца (Фаза 11 блок E, §11.15)',
-    enabled: true,
-    server: 's2',
-  },
-  {
-    id: 'studio-check-long-timers',
-    name: 'Check Long Timers (studio)',
-    app: 'studio',
-    endpoint: '/api/cron/check-long-timers',
-    schedule: '*/15 * * * *',
-    description:
-      'Web Push владельцу «таймер идёт дольше 2 часов» — одно уведомление на запись через TimeEntry.longTimerNotifiedAt (Фаза 11 §11.7, блок H)',
     enabled: true,
     server: 's2',
   },
@@ -431,7 +362,21 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
  * долго не нужно: после того как задача реально пропала со всех серверов, id можно убрать
  * из этого списка (или оставить — повторная фильтрация над уже пустым множеством безвредна).
  */
-const RETIRED_JOB_IDS: string[] = []
+const RETIRED_JOB_IDS: string[] = [
+  // Пилот @letar/jobs (PLAN-INFRA §75) — 6 задач studio переехали из HTTP-ручек
+  // /api/cron/* (удалены из кода studio) в планировщик поверх pg-boss внутри самого
+  // приложения. ⚠️ ПОРЯДОК ДЕПЛОЯ ВАЖЕН: этот список не должен уйти на прод раньше, чем
+  // studio задеплоена с новым планировщиком и `JOBS_ENABLED=true` — иначе есть окно, где
+  // задачи не выполняет никто. Деплоить студию и dashboard-agent в одном окне, студию
+  // первой (её роуты `/api/cron/*` уже удалены — старые вызовы агента будут получать 404
+  // до этого момента, если деплой dashboard-agent случайно окажется раньше).
+  'studio-send-reminders',
+  'studio-recurring-invoices',
+  'studio-close-stale-timers',
+  'studio-check-budget-alerts',
+  'studio-biweekly-hourly-invoices',
+  'studio-check-long-timers',
+]
 
 /**
  * Убирает из списка задачи с id из `retiredIds` — чистая функция, вынесена отдельно от
