@@ -98,6 +98,24 @@ describe('applyChange', () => {
     expect(result.selectionStart).toBe(result.value.length)
   })
 
+  it('регресс: правка уже заполненного значения с литеральными цифрами в маске (код страны «7») не съедает литерал', () => {
+    // Найдено живой проверкой в браузере (Этап 2): наивная раскладка previousValue как
+    // raw-потока принимала литеральную '7' кода страны за цифру и сдвигала всё вправо.
+    // Каретка сразу после ") " (позиция 9) в "+7 (900) 123-45-67" — Backspace должен снять
+    // последнюю цифру области ('0' из "900"), не тронув код страны.
+    const result = applyChange({
+      previousValue: '+7 (900) 123-45-67',
+      inputType: 'deleteBackward',
+      addedValue: '',
+      changeStart: 9,
+      changeEnd: 9,
+      mask: PHONE_MASK,
+    })
+    expect(result.value).toBe('+7 (901) 234-56-7')
+    expect(result.value.startsWith('+7 (90')).toBe(true)
+    expect(result.selectionStart).toBe(6)
+  })
+
   it('Backspace в самом начале (нечего удалять слева) — значение не меняется, каретка остаётся на месте', () => {
     const result = applyChange({
       previousValue: '770-123',

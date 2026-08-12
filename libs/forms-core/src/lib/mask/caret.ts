@@ -1,34 +1,5 @@
-import { parseMask } from './parse-mask'
+import { classifyValue } from './classify-value'
 import type { MaskOptions } from './types'
-
-/**
- * Классифицирует символы уже отформатированного `value` (продукта `format()`) как
- * `'input'`/`'literal'`, идя по слотам маски и потребляя по одному символу `value`
- * на слот. `value` предполагается построенным этим же движком — литералы совпадают
- * с маской позиционно.
- */
-function classifyFormattedValue(value: string, mask: string, options?: MaskOptions): Array<'input' | 'literal'> {
-  const slots = parseMask(mask, options)
-  const classes: Array<'input' | 'literal'> = []
-  let vi = 0
-
-  for (const slot of slots) {
-    if (vi >= value.length) {
-      break
-    }
-    if (slot.kind === 'literal') {
-      if (value[vi] === slot.char) {
-        classes.push('literal')
-        vi++
-      }
-      continue
-    }
-    classes.push('input')
-    vi++
-  }
-
-  return classes
-}
 
 /**
  * Карта допустимых позиций каретки для отформатированного `value`: `true` на
@@ -44,14 +15,14 @@ export function caretBoundary(value: string, mask: string, options?: MaskOptions
     return options.caretBoundary(value, mask)
   }
 
-  const classes = classifyFormattedValue(value, mask, options)
+  const classes = classifyValue(value, mask, options)
   const n = classes.length
   const boundary = new Array<boolean>(n + 1).fill(false)
   boundary[0] = true
   boundary[n] = true
 
   for (let i = 0; i < n; i++) {
-    if (classes[i] === 'input') {
+    if (classes[i].type === 'input') {
       boundary[i] = true
       boundary[i + 1] = true
     }

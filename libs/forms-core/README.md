@@ -53,15 +53,15 @@ forms-core  →  forms-react  →  forms (Chakra) / forms-shadcn
 | `@letar/forms-core/address`       | DaData address provider (Chakra-free часть)                                    |
 | `@letar/forms-core/i18n`          | `createFormErrorMap` — словари перевода ошибок валидации                       |
 | `@letar/forms-core/uikit`         | Типовой контракт UIKit (~20 примитивов) — см. ниже                             |
-| `@letar/forms-core/mask`          | Собственный mask-движок (замена `use-mask-input`, Фаза 8) — см. ниже           |
+| `@letar/forms-core/mask`          | Mask-движок + DOM-контроллер (замена `use-mask-input`, Фаза 8) — см. ниже      |
 
-## Mask-движок (Фаза 8, Этап 1)
+## Mask-движок (Фаза 8, Этапы 1-2)
 
 `@letar/forms-core/mask` — собственный framework-free движок масок ввода, замена
 `use-mask-input`/Inputmask (весит больше самой библиотеки, 645 открытых issue у апстрима,
-не чинит undo/paste/Android — разбор в [MASK_ENGINE.md](../forms/MASK_ENGINE.md)). Пока
-реализовано только ядро (чистые функции, без DOM) — React-биндинг и `Form.Field.MaskedInput` —
-Этапы 2-3, ещё не начаты.
+не чинит undo/paste/Android — разбор в [MASK_ENGINE.md](../forms/MASK_ENGINE.md)). Ядро (чистые
+функции) и DOM-контроллер готовы — React-биндинг и `Form.Field.MaskedInput` (Этап 3) ещё не
+начаты.
 
 ```typescript
 import { applyChange, caretBoundary, format, formatToParts, unformat } from '@letar/forms-core/mask'
@@ -98,6 +98,36 @@ DSL маски: `9` цифра, `a` буква, `*` буква/цифра, `\X` 
 ⚠️ `applyChange` пока не отличает цифры вставленного текста от цифр, дублирующих литералы маски
 (пасченный целиком номер с кодом страны в поле с этим же кодом в маске) — препроцессор
 вставки/автозаполнения открыт в Этапе 4, см. `PLAN.md`.
+
+### DOM-контроллер (Этап 2)
+
+`MaskController` — события, каретка, undo/redo, автозаполнение, IME. Без React, работает
+напрямую с `<input>`:
+
+```typescript
+import { MaskController } from '@letar/forms-core/mask'
+
+const controller = new MaskController(inputElement, {
+  mask: '+7 (999) 999-99-99',
+  onChange: (value) => console.log(value),
+})
+controller.attach() // вешает beforeinput/input/composition*/keydown/animationstart
+// ...
+controller.setMask('+1 (999) 999-9999') // смена маски (например по стране) — переформатирует
+controller.setValue(externalValue) // программная гидратация — не попадает в undo-стек
+controller.detach()
+```
+
+Модель событий: `input` (с composition-guard) — основной путь, `compositionend` — единственная
+точка применения маски при IME, `beforeinput` — только `historyUndo`/`historyRedo`, `keydown` —
+только запасные undo-хоткеи. Запись значения — `setRangeText` (сохраняет нативный undo-стек)
+для правок пользователя, прямое присвоение `.value` — только для внешнего `setValue()`.
+
+⚠️ **Найдено живой проверкой в браузере, не jsdom:** `applyChange` изначально классифицировал
+`previousValue` тем же raw-сканированием, что и свежий ввод — а литеральная цифра в маске (код
+страны «7» в «+7 (999)…») проходит паттерн токена `9` и съедалась как будто введена пользователем,
+сдвигая всё вправо. Починено — `previousValue` классифицируется позиционно (`classifyValue`), не
+как raw-поток. Регресс-тест — `apply-change.spec.ts`.
 
 ## UIKit-контракт (Фаза 7.1, Этап 4)
 

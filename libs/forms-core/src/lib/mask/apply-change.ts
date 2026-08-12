@@ -1,3 +1,4 @@
+import { classifyValue } from './classify-value'
 import { computeMaskParts, unformat } from './parts'
 import type { ApplyChangeInput, ApplyChangeResult, MaskPart } from './types'
 
@@ -81,7 +82,7 @@ export function applyChange(input: ApplyChangeInput): ApplyChangeResult {
   const { previousValue, inputType, addedValue, mask, options } = input
   let { changeStart, changeEnd } = input
 
-  const prevParts = classifyPrevious(previousValue, mask, options)
+  const prevParts = classifyValue(previousValue, mask, options)
 
   // Backspace/Delete без выделения — раздвигаем диапазон удаления до ближайшего
   // input-символа в соответствующем направлении, перескакивая литералы.
@@ -114,11 +115,4 @@ export function applyChange(input: ApplyChangeInput): ApplyChangeResult {
   const caret = valuePositionAfterRawIndex(newParts, targetRawIndex)
 
   return { value, selectionStart: caret, selectionEnd: caret }
-}
-
-/** `previousValue` разбирается как raw-поток самого себя (уже подтверждённый) через тот же движок. */
-function classifyPrevious(previousValue: string, mask: string, options?: ApplyChangeInput['options']): MaskPart[] {
-  // previousValue построен этим же движком, поэтому раскладка 1:1: прогоняем его
-  // как raw-поток — все символы, что были input, снова пройдут как input.
-  return computeMaskParts(previousValue, mask, options).parts
 }
