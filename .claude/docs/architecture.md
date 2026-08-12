@@ -6,24 +6,9 @@
 
 ### Приложения
 
-**`apps/premium-rosstil/`** - Next.js 16 интернет-магазин одежды
-
-- Сайт на русском языке (`lang="ru"`)
-- Chakra UI v3 + Next.js Google Fonts (Cormorant_Garamond, Tenor_Sans)
-- Интеграция аналитики Яндекс Метрика
-- Полный e-commerce: каталог, корзина, оформление заказа, профили пользователей, админ-панель
-- Авторизация: Better Auth с OAuth провайдерами
-- База данных: PostgreSQL + Prisma + ZenStack
-- См. раздел Роуты ниже для полной структуры маршрутов
-
-**`apps/imot/`** - Next.js 16 психотерапевтическая платформа
-
-- "Интегративная Матрица Осознанной Трансформации" (ИМОТ)
-- Мультиролевая система: Клиенты, Специалисты, Админы
-- Функции: диагностика, планы терапии, практики, отслеживание прогресса, аналитика
-- Chakra UI v3 + Conform формы + Zod валидация
-- База данных: PostgreSQL + Prisma + ZenStack
-- См. раздел Роуты IMOT ниже
+> ⚠️ **`premium-rosstil` и `imot` выведены из эксплуатации 2026-07-05** и физически отсутствуют
+> в `apps/` — все упоминания ниже актуализированы на живые приложения-аналоги. Подробности решения
+> об удалении — в приватных доках (не в публичном репо).
 
 **`apps/dashboard/`** - Next.js 16 дашборд мониторинга сервера
 
@@ -72,7 +57,7 @@
 - База данных: PostgreSQL + Prisma + ZenStack
 - Домен: `archetest.letar.best`
 
-**`apps/time/`** - Next.js 16 таймер обратного отсчёта (порт 3013, s1)
+**`apps/time/`** - Next.js 16 таймер обратного отсчёта (порт 3013, s2)
 
 - Персональный таймер с вехами и подписками
 - i18n: русский и английский
@@ -86,7 +71,7 @@
 
 ### Общие библиотеки
 
-**`libs/shared/chakra-provider/`**
+**`libs/chakra-provider/`**
 
 - Переиспользуемая обёртка Chakra UI провайдера
 - Публикуемая библиотека (npm:public)
@@ -118,24 +103,24 @@
 
 ### E2E тесты
 
-**`apps/premium-rosstil-e2e/`**
+**`apps/aboi-e2e/`**
 
-- Cypress тесты для приложения premium-rosstil
+- Playwright тесты для приложения aboi
 
-**`apps/imot-e2e/`**
+**`apps/driving-school-e2e/`**
 
-- Cypress тесты для приложения imot
+- Playwright тесты для приложения driving-school
 
 ### Граф зависимостей
 
 ```
-premium-rosstil (Next.js app)
+aboi (Next.js app)
 ├── @letar/chakra-provider (lib)
-├── @letar/yandex-metrika (lib)
 └── @letar/forms (lib)
 
-imot (Next.js app)
+kami (Next.js app)
 ├── @letar/chakra-provider (lib)
+├── @letar/yandex-metrika (lib)
 └── @letar/forms (lib)
 
 driving-school (Next.js app)
@@ -152,7 +137,7 @@ label-printer-desktop (Electron app)
 
 **Соглашение об именовании:**
 
-- Приложения — без префикса: `premium-rosstil`, `imot`, `dashboard`, `kami`, `label-printer-desktop`
+- Приложения — без префикса: `aboi`, `driving-school`, `dashboard`, `kami`, `label-printer-desktop`
 - Библиотеки — с префиксом `@letar/`: `@letar/chakra-provider`, `@letar/yandex-metrika`
 
 ## Тестирование и E2E-пайплайн
@@ -165,6 +150,14 @@ E2E-тесты (Playwright) не гоняются локально при раз
 - Как e2e соотносится с процессом деплоя (сейчас — никак) и что запланировано (pre-deploy gate) — [deployment.md](/.claude/docs/deployment.md#e2e-ранер-и-деплой--разделены)
 
 ## Роуты
+
+⚠️ **Раздел описывает `apps/premium-rosstil` — приложение удалено из монорепо 2026-07-05, ни один
+путь ниже не резолвится.** Сама структура (публичные/защищённые/админские/API роуты Next.js App
+Router) остаётся методически корректным примером конвенции, но конкретные бизнес-роуты
+(`/profile/measurements`, `/admin/sizes`, `/admin/test-models` и т.д.) были специфичны для
+удалённого e-commerce приложения. Живой аналог с полным набором эквивалентных фич (мерки, вишлист,
+тестовые модели) в этой сессии не искали — для актуальной структуры роутов конкретного приложения
+смотри `apps/<app>/src/app/` напрямую.
 
 ### Публичные роуты
 
@@ -221,7 +214,15 @@ E2E-тесты (Playwright) не гоняются локально при раз
 
 ## Роуты IMOT
 
-"Интегративная Матрица Осознанной Трансформации" - психотерапевтическая платформа с системой ролей.
+⚠️ **Раздел описывает `apps/imot` — приложение удалено из монорепо 2026-07-05, ни один путь ниже не
+резолвится.** Мультиролевая группировка роутов через route groups (`(auth)`, `(client)`,
+`(specialist)`, `(admin)`) остаётся корректным паттерном — живой пример того же паттерна (роли
+студент/инструктор/владелец школы через `(student)`, `(instructor)`, `(school-admin)`, `(owner)`) —
+`apps/driving-school/src/app/`. Конкретные бизнес-роуты ниже (диагностика, планы терапии, практики)
+были специфичны для удалённой психотерапевтической платформы и замены не имеют.
+
+"Интегративная Матрица Осознанной Трансформации" - психотерапевтическая платформа с системой ролей
+(историческое описание удалённого приложения).
 
 ### Публичные роуты
 
@@ -278,20 +279,20 @@ E2E-тесты (Playwright) не гоняются локально при раз
 
 ## Конфигурация Next.js
 
-Из `apps/premium-rosstil/next.config.js`:
+Из `apps/aboi/next.config.mjs` (пример варьируется по приложению — некоторые бывшие настройки
+`premium-rosstil` вроде SVGR/`optimizePackageImports`/кастомных качеств изображений не были
+проверены ни в одном живом приложении и убраны из примера ниже):
 
 - **Nx интеграция:** Использует плагин `@nx/next` с `withNx`
-- **Trailing Slash:** `trailingSlash: true` — **обязательно во всех проектах** (добавляет `/` в конец URL: `/about` → `/about/`)
-- **SVG обработка:** SVGR отключен (`nx.svgr: false`) - используй обычные импорты или react-icons
-- **Оптимизация изображений:** Кастомные качества изображений: [25, 50, 75, 90]
-- **TypeScript:** Ошибки сборки игнорируются (`ignoreBuildErrors: true`) для ускорения билдов
-- **Импорты пакетов:** Экспериментальная оптимизация для `@chakra-ui/react` и `react-icons`
-- **Транспиляция:** Явно транспилирует библиотеки воркспейса: `@letar/chakra-provider`, `@letar/yandex-metrika`
+- **Trailing Slash:** `trailingSlash: true` + `skipTrailingSlashRedirect: true` (отключает 308-редирект для POST — важно для Better Auth)
+- **TypeScript:** Ошибки сборки игнорируются (`ignoreBuildErrors: true`) — typecheck вынесен в отдельный `nx typecheck:tsgo`
+- **Output:** `standalone` для production Docker-сборки
+- **outputFileTracingIncludes:** явный include для `libvips-cpp.so` — sharp грузит его через `dlopen()`, трейсер такие динамические загрузки не видит (инцидент mandala 2026-07-12, `ERR_DLOPEN_FAILED` на проде)
 
 ## Конфигурация TypeScript
 
 - **Базовая конфигурация:** `tsconfig.base.json` использует строгий режим с composite builds для библиотек
-- **Конфигурация приложения:** `apps/premium-rosstil/tsconfig.json` отключает composite режим для работы с исходными файлами напрямую
+- **Конфигурация приложения:** `apps/aboi/tsconfig.json` (extends `tsconfig.next-app.json`) отключает composite режим для работы с исходными файлами напрямую
 - **Custom Conditions:** `customConditions: ["@letar/source"]` для разрешения пакетов
 - **Модульная система:** ESNext с bundler module resolution
 - **Target:** ES2022
@@ -301,24 +302,22 @@ E2E-тесты (Playwright) не гоняются локально при раз
 
 ```json
 {
-  "@/*": ["apps/premium-rosstil/src/*"],
-  "@/../*": ["apps/premium-rosstil/*"]
+  "@/*": ["apps/aboi/src/*"]
 }
 ```
 
 **Использование:**
 
 - `@/*` - Файлы внутри директории `src/` (включая `@/generated/`)
-- `@/../*` - Файлы выше `src/` (напр., `prisma/migrations/` для файлов миграций)
 
-**Примечание:** Все генерируемые файлы теперь в `src/generated/`, поэтому используй `@/generated/` для импортов.
+**Примечание:** Все генерируемые файлы теперь в `src/generated/`, поэтому используй `@/generated/` для импортов. Алиас `@/../*` для файлов выше `src/` был особенностью удалённого `premium-rosstil` — в живых приложениях (`aboi`, `driving-school`) не встречается.
 
 ## Конфигурация ESLint
 
 Использует **ESLint 9 Flat Config** формат:
 
 - **Конфигурация воркспейса:** `eslint.config.mjs` в корне - Базовые правила для всего монорепозитория
-- **Конфигурация приложения:** `apps/premium-rosstil/eslint.config.mjs` - Расширяет базовую с Next.js специфичными правилами
+- **Конфигурация приложения:** `apps/driving-school/eslint.config.mjs` - Расширяет базовую с Next.js специфичными правилами
   - Правила Next.js Core Web Vitals
   - Конфигурация Nx React TypeScript (`nx.configs['flat/react-typescript']`)
   - Игнорирует директории `.next/**/*` и `out-tsc`
@@ -344,24 +343,24 @@ E2E-тесты (Playwright) не гоняются локально при раз
 
 ## Кастомные Nx таргеты
 
-### Next.js приложения (premium-rosstil, imot)
+### Next.js приложения (aboi, driving-school)
 
-Оба Next.js приложения имеют похожие воркфлоу базы данных и разработки.
+Next.js приложения с базой данных имеют похожие воркфлоу базы данных и разработки.
 
 #### Команды базы данных (Prisma + ZenStack)
 
 ```bash
-# Premium RosStil
-nx zenstack:generate premium-rosstil  # Генерация Prisma схемы + Zod типов
-nx db:push premium-rosstil            # Отправить в БД (dev)
-nx db:migrate premium-rosstil         # Создать миграцию (prod)
-nx db:studio premium-rosstil          # Открыть Prisma Studio
+# aboi
+nx zenstack:generate aboi  # Генерация Prisma схемы + Zod типов
+nx db:push aboi            # Отправить в БД (dev)
+nx db:migrate aboi         # Создать миграцию (prod)
+nx db:studio aboi          # Открыть Prisma Studio
 
-# IMOT
-nx zenstack:generate imot
-nx db:push imot
-nx db:migrate imot
-nx db:studio imot
+# driving-school
+nx zenstack:generate driving-school
+nx db:push driving-school
+nx db:migrate driving-school
+nx db:studio driving-school
 ```
 
 **Доступные database таргеты:**
@@ -381,13 +380,13 @@ nx db:studio imot
 
 ```bash
 # Dev сервер
-nx dev premium-rosstil    # или: nx dev imot
-nx build premium-rosstil  # или: nx build imot
+nx dev aboi    # или: nx dev driving-school
+nx build aboi  # или: nx build driving-school
 
 # Линтинг и тестирование
-nx lint premium-rosstil   # или: nx lint imot
-nx test premium-rosstil   # или: nx test imot
-nx e2e premium-rosstil-e2e # или: nx e2e imot-e2e
+nx lint aboi   # или: nx lint driving-school
+nx test aboi   # или: nx test driving-school
+nx e2e aboi-e2e # или: nx e2e driving-school-e2e
 ```
 
 ### CLI приложение (label-printer)
@@ -428,9 +427,9 @@ nx validate label-printer           # Запуск всех проверок
 
 Все приложения деплоятся на один сервер с Docker.
 
-### Docker-based деплой (Premium RosStil, IMOT, Dashboard)
+### Docker-based деплой (aboi, driving-school, Dashboard)
 
-Оба Next.js приложения используют **Docker Compose** для production деплоя через скрипт `deploy-affected.sh`.
+Next.js приложения используют **Docker Compose** для production деплоя через скрипт `deploy-affected.sh`.
 
 #### Быстрый деплой
 
@@ -439,8 +438,8 @@ nx validate label-printer           # Запуск всех проверок
 ./deploy-affected.sh
 
 # Деплой конкретного приложения
-./deploy-affected.sh --app premium-rosstil
-./deploy-affected.sh --app imot
+./deploy-affected.sh --app aboi
+./deploy-affected.sh --app driving-school
 ./deploy-affected.sh --app dashboard
 
 # Dry run (показать что будет задеплоено)
@@ -521,7 +520,7 @@ VK_CLIENT_SECRET=<vk-secret>
 
 ```bash
 # Просмотр логов
-cd apps/premium-rosstil  # или apps/imot
+cd apps/aboi  # или apps/driving-school
 docker compose -f docker-compose.production.yml logs -f app
 
 # Перезапуск конкретного сервиса
