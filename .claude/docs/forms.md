@@ -664,7 +664,7 @@ export async function createClientAction(data: ClientFormData): Promise<ClientAc
     const fieldErrors: Record<string, string[]> = {}
     for (const issue of parsed.error.issues) {
       const field = issue.path[0]?.toString() ?? 'form'
-      if (!fieldErrors[field]) fieldErrors[field] = []
+      if (!fieldErrors[field]) { fieldErrors[field] = [] }
       fieldErrors[field].push(issue.message)
     }
     return { success: false, fieldErrors }
@@ -784,11 +784,11 @@ const handleSubmit = async (value: ClientFormData) => {
 
 ### Эталонные примеры обработки ошибок
 
-| Пример                 | Файл                                                                                    |
-| ---------------------- | --------------------------------------------------------------------------------------- |
-| Простые ошибки (toast) | `apps/driving-school/src/app/(instructor)/vehicles/_components/vehicle-form.tsx`        |
-| Field-level ошибки     | `apps/imot/src/app/_actions/client.actions.ts`                                          |
-| Prisma P2002 (unique)  | `apps/premium-rosstil/src/app/[locale]/admin/sizes/new/_actions/create-product-size.ts` |
+| Пример                 | Файл                                                                                                   |
+| ---------------------- | ------------------------------------------------------------------------------------------------------ |
+| Простые ошибки (toast) | `apps/driving-school/src/app/(instructor)/vehicles/_components/vehicle-form.tsx`                       |
+| Field-level ошибки     | `apps/driving-school/src/app/(school-admin)/school/students/_actions/create-student-account.action.ts` |
+| Prisma P2002 (unique)  | `apps/svoichuzhie/src/app/_actions/admin-product.action.ts`                                            |
 
 ---
 
