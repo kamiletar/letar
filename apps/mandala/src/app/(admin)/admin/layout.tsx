@@ -34,16 +34,13 @@ export default async function AdminLayout({ children }: { children: ReactNode })
 
       {/* Main content */}
       <Box flex={1} p={{ base: 4, md: 6 }} overflow="auto">
-        {/* Мобильный header с гамбургер-меню */}
-        <HStack display={{ base: 'flex', md: 'none' }} mb={4} justify="space-between">
-          <MobileAdminDrawerClient userEmail={session?.user?.email} onLogout={logoutAction} />
+        {/* Гамбургер-меню только на мобильном, breadcrumbs — единственный рендер для обоих размеров */}
+        <HStack mb={4} justify="space-between">
+          <Box display={{ base: 'flex', md: 'none' }}>
+            <MobileAdminDrawerClient userEmail={session?.user?.email} onLogout={logoutAction} />
+          </Box>
           <AdminBreadcrumbs pathNames={PATH_NAMES} />
         </HStack>
-
-        {/* Breadcrumbs (на десктопе) */}
-        <Box display={{ base: 'none', md: 'block' }}>
-          <AdminBreadcrumbs pathNames={PATH_NAMES} />
-        </Box>
 
         {children}
       </Box>
