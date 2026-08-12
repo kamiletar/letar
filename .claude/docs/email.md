@@ -43,16 +43,14 @@ SMTP_FROM_NAME="Название приложения"
 
 ### Таблица конфигураций
 
-| Приложение      | SMTP_FROM_EMAIL                | SMTP_FROM_NAME            |
-| --------------- | ------------------------------ | ------------------------- |
-| premium-rosstil | noreply@_(коммерческий домен)_ | _(коммерческое название)_ |
-| driving-school  | noreply@_(коммерческий домен)_ | _(коммерческое название)_ |
-| imot            | noreply@imot.letar.best        | IMOT                      |
-| kami            | noreply@kami.letar.best        | Kami                      |
-| mandala         | noreply@mandala.letar.best     | Mandala                   |
-| dashboard       | noreply@dashboard.letar.best   | Dashboard                 |
-| animatrona      | noreply@animatrona.letar.best  | Animatrona                |
-| domwellbes      | noreply@domwellbes.letar.best  | DomWellbes                |
+| Приложение     | SMTP_FROM_EMAIL                | SMTP_FROM_NAME            |
+| -------------- | ------------------------------ | ------------------------- |
+| driving-school | noreply@_(коммерческий домен)_ | _(коммерческое название)_ |
+| kami           | noreply@kami.letar.best        | Kami                      |
+| mandala        | noreply@mandala.letar.best     | Mandala                   |
+| dashboard      | noreply@dashboard.letar.best   | Dashboard                 |
+| animatrona     | noreply@animatrona.letar.best  | Animatrona                |
+| domwellbes     | noreply@domwellbes.letar.best  | DomWellbes                |
 
 ## Использование
 
