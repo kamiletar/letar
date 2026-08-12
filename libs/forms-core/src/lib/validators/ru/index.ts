@@ -29,6 +29,9 @@ import {
   corrAccountWithBikSchema,
 } from './bank-account'
 import { bikSchema } from './bik'
+import { birthCertificateSchema } from './birth-certificate'
+import { departmentCodeSchema } from './department-code'
+import { foreignPassportSchema } from './foreign-passport'
 import { innIndividualSchema, innLegalSchema, innSchema } from './inn'
 import { kppSchema } from './kpp'
 import { ogrnipSchema, ogrnSchema } from './ogrn'
@@ -59,11 +62,20 @@ export const zRu = {
   snils: () => snilsSchema(),
   /** Паспорт (серия + номер, 10 цифр) */
   passport: () => passportSchema(),
+  /** Загранпаспорт (серия 2 + номер 7, 9 цифр) */
+  foreignPassport: () => foreignPassportSchema(),
+  /** Код подразделения (6 цифр, `999-999`) */
+  departmentCode: () => departmentCodeSchema(),
+  /** Свидетельство о рождении (нормализация гомоглифов + формат `II-МЮ № 123456`) */
+  birthCertificate: () => birthCertificateSchema(),
 }
 
 // Re-export для прямого использования
 export { validateBankAccountWithBik } from './bank-account'
 export { validateBik } from './bik'
+export { normalizeBirthCertificate, validateBirthCertificate } from './birth-certificate'
+export { validateDepartmentCode } from './department-code'
+export { validateForeignPassport } from './foreign-passport'
 export { validateInn10, validateInn12 } from './inn'
 export { validateKpp } from './kpp'
 export { validateOgrn, validateOgrnip } from './ogrn'

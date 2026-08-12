@@ -1,6 +1,9 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import {
   validateBik,
+  validateBirthCertificate,
+  validateDepartmentCode,
+  validateForeignPassport,
   validateInn10,
   validateInn12,
   validateKpp,
@@ -507,5 +510,196 @@ describe('FieldCorrAccount', () => {
     await user.type(screen.getByRole('textbox'), '30101810')
 
     expect(screen.getByText('Корр. счёт должен содержать 20 цифр')).toBeInTheDocument()
+  })
+})
+
+// --- Загранпаспорт (Фаза 8, Этап 5) ---
+describe('FieldForeignPassport', () => {
+  it('рендерит label и input', () => {
+    render(
+      <Form initialValue={{ foreignPassport: '' }} onSubmit={vi.fn()}>
+        <Form.Document.ForeignPassport name="foreignPassport" label="Загранпаспорт" />
+      </Form>,
+      { wrapper: TestWrapper },
+    )
+
+    expect(screen.getByText('Загранпаспорт')).toBeInTheDocument()
+    expect(screen.getByRole('textbox')).toBeInTheDocument()
+  })
+
+  it('принимает валидный номер (серия 2 + номер 7, 9 цифр)', async () => {
+    expect(validateForeignPassport('750123456')).toBe(true)
+
+    const user = userEvent.setup()
+    render(
+      <Form initialValue={{ foreignPassport: '' }} onSubmit={vi.fn()}>
+        <Form.Document.ForeignPassport name="foreignPassport" label="Загранпаспорт" />
+      </Form>,
+      { wrapper: TestWrapper },
+    )
+
+    await user.type(screen.getByRole('textbox'), '750123456')
+
+    expect(screen.queryByText('Загранпаспорт должен содержать 9 цифр (серия + номер)')).not.toBeInTheDocument()
+  })
+
+  it('отклоняет короткий номер', async () => {
+    const user = userEvent.setup()
+    render(
+      <Form initialValue={{ foreignPassport: '' }} onSubmit={vi.fn()}>
+        <Form.Document.ForeignPassport name="foreignPassport" label="Загранпаспорт" />
+      </Form>,
+      { wrapper: TestWrapper },
+    )
+
+    await user.type(screen.getByRole('textbox'), '7501234')
+
+    expect(screen.getByText('Загранпаспорт должен содержать 9 цифр (серия + номер)')).toBeInTheDocument()
+  })
+})
+
+// --- Код подразделения (Фаза 8, Этап 5) ---
+describe('FieldDepartmentCode', () => {
+  it('рендерит label и input', () => {
+    render(
+      <Form initialValue={{ departmentCode: '' }} onSubmit={vi.fn()}>
+        <Form.Document.DepartmentCode name="departmentCode" label="Код подразделения" />
+      </Form>,
+      { wrapper: TestWrapper },
+    )
+
+    expect(screen.getByText('Код подразделения')).toBeInTheDocument()
+    expect(screen.getByRole('textbox')).toBeInTheDocument()
+  })
+
+  it('принимает эталонный код (770-001)', async () => {
+    expect(validateDepartmentCode('770001')).toBe(true)
+
+    const user = userEvent.setup()
+    render(
+      <Form initialValue={{ departmentCode: '' }} onSubmit={vi.fn()}>
+        <Form.Document.DepartmentCode name="departmentCode" label="Код подразделения" />
+      </Form>,
+      { wrapper: TestWrapper },
+    )
+
+    await user.type(screen.getByRole('textbox'), '770001')
+
+    expect(screen.queryByText('Код подразделения должен содержать 6 цифр')).not.toBeInTheDocument()
+  })
+
+  it('НЕ отклоняет третью цифру вне списка 0-3 (реальные данные содержат 4, 5, 9)', async () => {
+    const user = userEvent.setup()
+    render(
+      <Form initialValue={{ departmentCode: '' }} onSubmit={vi.fn()}>
+        <Form.Document.DepartmentCode name="departmentCode" label="Код подразделения" />
+      </Form>,
+      { wrapper: TestWrapper },
+    )
+
+    await user.type(screen.getByRole('textbox'), '774001')
+
+    expect(screen.queryByText('Код подразделения должен содержать 6 цифр')).not.toBeInTheDocument()
+  })
+
+  it('отклоняет короткий код', async () => {
+    const user = userEvent.setup()
+    render(
+      <Form initialValue={{ departmentCode: '' }} onSubmit={vi.fn()}>
+        <Form.Document.DepartmentCode name="departmentCode" label="Код подразделения" />
+      </Form>,
+      { wrapper: TestWrapper },
+    )
+
+    await user.type(screen.getByRole('textbox'), '7700')
+
+    expect(screen.getByText('Код подразделения должен содержать 6 цифр')).toBeInTheDocument()
+  })
+})
+
+// --- Свидетельство о рождении (Фаза 8, Этап 5) — без маски, нормализация на blur ---
+describe('FieldBirthCertificate', () => {
+  it('рендерит label и input', () => {
+    render(
+      <Form initialValue={{ birthCertificate: '' }} onSubmit={vi.fn()}>
+        <Form.Document.BirthCertificate name="birthCertificate" label="Свидетельство о рождении" />
+      </Form>,
+      { wrapper: TestWrapper },
+    )
+
+    expect(screen.getByText('Свидетельство о рождении')).toBeInTheDocument()
+    expect(screen.getByRole('textbox')).toBeInTheDocument()
+  })
+
+  it('не показывает ошибку для пустого значения', () => {
+    render(
+      <Form initialValue={{ birthCertificate: '' }} onSubmit={vi.fn()}>
+        <Form.Document.BirthCertificate name="birthCertificate" label="Свидетельство о рождении" />
+      </Form>,
+      { wrapper: TestWrapper },
+    )
+
+    expect(screen.queryByText(/Формат:/)).not.toBeInTheDocument()
+  })
+
+  it('не форматирует ввод сразу — только по потере фокуса (blur)', async () => {
+    const user = userEvent.setup()
+    render(
+      <Form initialValue={{ birthCertificate: '' }} onSubmit={vi.fn()}>
+        <Form.Document.BirthCertificate name="birthCertificate" label="Свидетельство о рождении" />
+      </Form>,
+      { wrapper: TestWrapper },
+    )
+
+    const input = screen.getByRole('textbox')
+    await user.type(input, '|||МЮ123456')
+
+    expect(input).toHaveValue('|||МЮ123456')
+  })
+
+  it('нормализует гомоглифы на blur (|||→III) и принимает результат', async () => {
+    expect(validateBirthCertificate('|||МЮ123456')).toBe(true)
+
+    const user = userEvent.setup()
+    render(
+      <Form initialValue={{ birthCertificate: '' }} onSubmit={vi.fn()}>
+        <Form.Document.BirthCertificate name="birthCertificate" label="Свидетельство о рождении" />
+      </Form>,
+      { wrapper: TestWrapper },
+    )
+
+    const input = screen.getByRole('textbox')
+    await user.type(input, '|||МЮ123456')
+    await user.tab()
+
+    expect(input).toHaveValue('III-МЮ № 123456')
+    expect(screen.queryByText(/Формат:/)).not.toBeInTheDocument()
+  })
+
+  it('отклоняет неполный ввод после нормализации на blur', async () => {
+    const user = userEvent.setup()
+    render(
+      <Form initialValue={{ birthCertificate: '' }} onSubmit={vi.fn()}>
+        <Form.Document.BirthCertificate name="birthCertificate" label="Свидетельство о рождении" />
+      </Form>,
+      { wrapper: TestWrapper },
+    )
+
+    const input = screen.getByRole('textbox')
+    await user.type(input, 'II-МЮ')
+    await user.tab()
+
+    expect(screen.getByText(/Формат:/)).toBeInTheDocument()
+  })
+
+  it('устанавливает disabled', () => {
+    render(
+      <Form initialValue={{ birthCertificate: '' }} onSubmit={vi.fn()}>
+        <Form.Document.BirthCertificate name="birthCertificate" disabled />
+      </Form>,
+      { wrapper: TestWrapper },
+    )
+
+    expect(screen.getByRole('textbox')).toBeDisabled()
   })
 })

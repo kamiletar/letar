@@ -61,7 +61,10 @@ import {
 import {
   FieldBankAccount,
   FieldBIK,
+  FieldBirthCertificate,
   FieldCorrAccount,
+  FieldDepartmentCode,
+  FieldForeignPassport,
   FieldINN,
   FieldKPP,
   FieldOGRN,
@@ -180,6 +183,9 @@ const FormDocument = {
   CorrAccount: FieldCorrAccount,
   SNILS: FieldSNILS,
   Passport: FieldPassport,
+  ForeignPassport: FieldForeignPassport,
+  DepartmentCode: FieldDepartmentCode,
+  BirthCertificate: FieldBirthCertificate,
 }
 
 const FormButton = {
@@ -619,11 +625,14 @@ export {
   createDocumentField,
   FieldBankAccount,
   FieldBIK,
+  FieldBirthCertificate,
   FieldCorrAccount,
+  FieldDepartmentCode,
+  FieldForeignPassport,
   FieldINN,
   FieldKPP,
   FieldOGRN,
   FieldPassport,
   FieldSNILS,
 } from './form-fields/document'
-export type { DocumentFieldConfig, DocumentFieldProps } from './form-fields/document'
+export type { BirthCertificateFieldProps, DocumentFieldConfig, DocumentFieldProps } from './form-fields/document'

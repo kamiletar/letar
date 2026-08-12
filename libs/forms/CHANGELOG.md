@@ -4,6 +4,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.3.0] - 2026-08-12
+
+### Added
+
+- **Фаза 8, Этап 5 — три новых документных поля** (MASK_ENGINE.md §7.1):
+  `Form.Document.ForeignPassport` (загранпаспорт, `99 9999999`), `Form.Document.DepartmentCode`
+  (код подразделения, `999-999`) — оба на движке `@letar/forms-core/mask`; и
+  `Form.Document.BirthCertificate` (свидетельство о рождении) — **без маски** (переменная длина
+  римской части серии, критерий §5.3), свободный ввод с нормализацией гомоглифов и разделителей
+  на потере фокуса (`|||`→`III`, позиционное разведение латиница/кириллица `X`/`Х`).
+- Три новых `zRu`-валидатора: `zRu.foreignPassport()`, `zRu.departmentCode()`,
+  `zRu.birthCertificate()` (+ `normalizeBirthCertificate` для прямого использования).
+
 ## [2.0.5] - 2026-08-12
 
 ### Fixed

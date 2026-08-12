@@ -92,15 +92,19 @@
 
 ## Документные поля (Россия)
 
-| Компонент                   | Описание                                  | Маска            |
-| --------------------------- | ----------------------------------------- | ---------------- |
-| `Form.Document.INN`         | ИНН (10 или 12 цифр с контрольной суммой) | `999999999999`   |
-| `Form.Document.BIK`         | БИК (9 цифр, начинается с "04")           | `999999999`      |
-| `Form.Document.OGRN`        | ОГРН (13 цифр с контрольной суммой)       | `9999999999999`  |
-| `Form.Document.SNILS`       | СНИЛС (11 цифр, формат XXX-XXX-XXX YY)    | `999-999-999 99` |
-| `Form.Document.KPP`         | КПП (9 символов)                          | `*********`      |
-| `Form.Document.Passport`    | Паспорт РФ (серия + номер)                | `99 99 999999`   |
-| `Form.Document.BankAccount` | Расчётный счёт (20 цифр)                  | 20 цифр          |
+| Компонент                        | Описание                                                   | Маска            |
+| -------------------------------- | ---------------------------------------------------------- | ---------------- |
+| `Form.Document.INN`              | ИНН (10 или 12 цифр с контрольной суммой)                  | `999999999999`   |
+| `Form.Document.BIK`              | БИК (9 цифр, начинается с "04")                            | `999999999`      |
+| `Form.Document.OGRN`             | ОГРН (13 цифр с контрольной суммой)                        | `9999999999999`  |
+| `Form.Document.SNILS`            | СНИЛС (11 цифр, формат XXX-XXX-XXX YY)                     | `999-999-999 99` |
+| `Form.Document.KPP`              | КПП (9 символов)                                           | `*********`      |
+| `Form.Document.Passport`         | Паспорт РФ (серия + номер)                                 | `99 99 999999`   |
+| `Form.Document.BankAccount`      | Расчётный счёт (20 цифр)                                   | 20 цифр          |
+| `Form.Document.CorrAccount`      | Корр. счёт (20 цифр, начинается с "301")                   | 20 цифр          |
+| `Form.Document.ForeignPassport`  | Загранпаспорт (серия 2 + номер 7)                          | `99 9999999`     |
+| `Form.Document.DepartmentCode`   | Код подразделения (6 цифр)                                 | `999-999`        |
+| `Form.Document.BirthCertificate` | Свидетельство о рождении (без маски, нормализация на blur) | —                |
 
 ## Утилитарные поля
 
@@ -391,14 +395,21 @@ import { zRu } from '@letar/forms/validators/ru'
 <Form.Document.KPP name="kpp" label="КПП" />
 <Form.Document.Passport name="passport" label="Паспорт" />
 <Form.Document.BankAccount name="account" label="Расчётный счёт" />
+<Form.Document.CorrAccount name="corrAccount" label="Корр. счёт" />
+<Form.Document.ForeignPassport name="foreignPassport" label="Загранпаспорт" />
+<Form.Document.DepartmentCode name="departmentCode" label="Код подразделения" />
+<Form.Document.BirthCertificate name="birthCertificate" label="Свидетельство о рождении" />
 ```
 
-Каждое поле автоматически добавляет маску ввода, иконку и проверку контрольной суммы.
+Каждое поле автоматически добавляет маску ввода (кроме `BirthCertificate` — переменная длина
+римской части серии делает структурную маску вредной, MASK_ENGINE.md §5.3/§7.1; нормализация
+гомоглифов и разделителей происходит на потере фокуса), иконку и проверку формата.
 
-**Zod-валидаторы** (9 штук) доступны через `zRu`:
+**Zod-валидаторы** (12 штук) доступны через `zRu`:
 
 - `zRu.inn()`, `zRu.bik()`, `zRu.ogrn()`, `zRu.snils()`, `zRu.kpp()`
 - `zRu.passport()`, `zRu.bankAccount()`, `zRu.corrAccount()`, `zRu.ogrnip()`
+- `zRu.foreignPassport()`, `zRu.departmentCode()`, `zRu.birthCertificate()`
 
 ---
 
