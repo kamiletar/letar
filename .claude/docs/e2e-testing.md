@@ -171,7 +171,7 @@ const TEST_IMAGES_DIR = path.resolve(__dirname, '../fixtures/images')
 // ✅ ПРАВИЛЬНЫЙ путь (к основному приложению)
 const TEST_IMAGES_DIR = path.resolve(
   __dirname,
-  '../../../../premium-rosstil/src/app/[locale]/catalog/_components/_images',
+  '../../../../<app>/src/app/[locale]/catalog/_components/_images',
 )
 ```
 
@@ -313,19 +313,19 @@ kill %1
 
 ```bash
 # Запуск конкретного проекта (setup, admin-chromium, guest-chromium и т.д.)
-nx e2e premium-rosstil-e2e -- --project=setup
+nx e2e mandala-e2e -- --project=setup
 
 # Один тест по имени в конкретном браузере
-nx e2e premium-rosstil-e2e -- --grep="название теста" --project=webkit
+nx e2e mandala-e2e -- --grep="название теста" --project=chromium
 
 # С UI режимом
-nx e2e premium-rosstil-e2e -- --ui
+nx e2e mandala-e2e -- --ui
 
 # С headed режимом (видимый браузер)
-nx e2e premium-rosstil-e2e -- --headed
+nx e2e mandala-e2e -- --headed
 
 # Комбинация параметров
-nx e2e premium-rosstil-e2e -- --project=admin-chromium --headed --grep="создание"
+nx e2e mandala-e2e -- --project=admin-chromium --headed --grep="создание"
 ```
 
 **БЕЗ `--` аргументы не передаются в Playwright!**
