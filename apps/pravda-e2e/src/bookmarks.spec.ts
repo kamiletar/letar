@@ -1,4 +1,27 @@
-import { expect, test } from '@playwright/test'
+import { expect, type Page, test } from '@playwright/test'
+
+/**
+ * Кликает по кнопке "Добавить в закладки" и дожидается реального переключения состояния
+ * (aria-label меняется на "Удалить из закладок"), при необходимости повторяя клик.
+ *
+ * На страницах с большим числом статей (Конституция — ~107 <Article>) WebKit в первые ~750мс
+ * после domcontentloaded/гидратации тихо отменяет синтетический клик Playwright: событие
+ * доходит до pointerdown/mousedown, но браузер не эмитит финальный click (обычное дело для
+ * WebKit — он строже других движков к вводу во время загруженного главного потока; Chromium и
+ * Firefox тот же клик отрабатывают штатно). Это НЕ гонка в духе "элемент ещё не отрисован" —
+ * кнопка уже `toBeVisible()`, но WebKit отменяет событие целиком. `toBeVisible()` перед кликом
+ * это не ловит, а фиксированная пауза была бы произвольным числом, подобранным под dev-сервер.
+ * Вместо этого — retry самого клика, пока состояние действительно не переключится.
+ */
+async function addBookmark(page: Page) {
+  const addButton = page.locator('[aria-label="Добавить в закладки"]').first()
+  const removeButton = page.locator('[aria-label="Удалить из закладок"]').first()
+
+  await expect(async () => {
+    await addButton.click()
+    await expect(removeButton).toBeVisible({ timeout: 700 })
+  }).toPass({ timeout: 10000 })
+}
 
 test.describe('Закладки', () => {
   test.beforeEach(async ({ page }) => {
@@ -15,14 +38,8 @@ test.describe('Закладки', () => {
     // Ждём загрузки контента (с большим таймаутом для гидратации)
     await expect(page.locator('h1')).toBeVisible({ timeout: 10000 })
 
-    // Ищём кнопку закладки (первую на странице)
-    const bookmarkButton = page.locator('[aria-label="Добавить в закладки"]').first()
-
-    // Проверяем, что кнопка видна
-    await expect(bookmarkButton).toBeVisible()
-
-    // Кликаем для добавления
-    await bookmarkButton.click()
+    // Кликаем для добавления (с retry — см. JSDoc addBookmark)
+    await addBookmark(page)
 
     // Проверяем, что aria-label изменился
     await expect(page.locator('[aria-label="Удалить из закладок"]').first()).toBeVisible()
@@ -33,12 +50,8 @@ test.describe('Закладки', () => {
     await page.waitForLoadState('domcontentloaded')
     await expect(page.locator('h1')).toBeVisible({ timeout: 10000 })
 
-    // Добавляем закладку
-    const bookmarkButton = page.locator('[aria-label="Добавить в закладки"]').first()
-    await bookmarkButton.click()
-
-    // Ждём пока UI обновится (появится кнопка "Удалить")
-    await expect(page.locator('[aria-label="Удалить из закладок"]').first()).toBeVisible()
+    // Добавляем закладку (с retry — см. JSDoc addBookmark)
+    await addBookmark(page)
 
     // Проверяем localStorage
     const bookmarks = await page.evaluate(() => {
@@ -65,11 +78,7 @@ test.describe('Закладки', () => {
     await page.waitForLoadState('domcontentloaded')
     await expect(page.locator('h1')).toBeVisible({ timeout: 10000 })
 
-    const bookmarkButton = page.locator('[aria-label="Добавить в закладки"]').first()
-    await bookmarkButton.click()
-
-    // Ждём пока закладка сохранится
-    await expect(page.locator('[aria-label="Удалить из закладок"]').first()).toBeVisible()
+    await addBookmark(page)
 
     // Проверяем что закладка сохранилась в localStorage
     const savedBookmarks = await page.evaluate(() => {
@@ -99,11 +108,7 @@ test.describe('Закладки', () => {
     await page.waitForLoadState('domcontentloaded')
     await expect(page.locator('h1')).toBeVisible({ timeout: 10000 })
 
-    const addButton = page.locator('[aria-label="Добавить в закладки"]').first()
-    await addButton.click()
-
-    // Ждём пока закладка добавится
-    await expect(page.locator('[aria-label="Удалить из закладок"]').first()).toBeVisible()
+    await addBookmark(page)
 
     // Переходим на страницу закладок
     await page.goto('/bookmarks/')
@@ -130,8 +135,7 @@ test.describe('Закладки', () => {
     await page.waitForLoadState('domcontentloaded')
     await expect(page.locator('h1')).toBeVisible({ timeout: 10000 })
 
-    const bookmarkButton = page.locator('[aria-label="Добавить в закладки"]').first()
-    await bookmarkButton.click()
+    await addBookmark(page)
 
     // Перезагружаем страницу
     await page.reload()

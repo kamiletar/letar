@@ -2,6 +2,7 @@
 
 import { Badge, Box, Flex, Text } from '@chakra-ui/react'
 import { usePathname } from 'next/navigation'
+import { useMemo } from 'react'
 import type { ReactNode } from 'react'
 
 import { SCROLL_MARGIN_TOP } from '@/lib/constants'
@@ -36,13 +37,22 @@ export function Article({ number, children }: ArticleProps) {
   const title = doc?.shortTitle || doc?.title || slug
   const category = getCategoryFromPath(pathname)
 
-  const bookmark = {
-    id: `${slug}-${number}`,
-    title,
-    articleNumber: String(number),
-    href: `${pathname}#${id}`,
-    category,
-  }
+  // useMemo — стабильная ссылка на объект между рендерами документов с большим числом статей
+  // (Конституция и кодексы — до сотни <Article> на странице). Без него BookmarkButton = memo(...)
+  // не срабатывает: `bookmark` пересоздаётся как новый литерал на каждом рендере родителя,
+  // shallow-сравнение memo всегда проваливается — все BookmarkButton на странице ре-рендерятся
+  // синхронно при любом чужом обновлении состояния, увеличивая стоимость гидратации именно на
+  // "тяжёлых" документах.
+  const bookmark = useMemo(
+    () => ({
+      id: `${slug}-${number}`,
+      title,
+      articleNumber: String(number),
+      href: `${pathname}#${id}`,
+      category,
+    }),
+    [slug, number, title, pathname, id, category],
+  )
 
   return (
     <Box
@@ -76,32 +86,24 @@ export function Article({ number, children }: ArticleProps) {
         },
       }}
     >
-      {/* Мобильный лейаут: Badge и закладка сверху */}
-      <Flex display={{ base: 'flex', md: 'none' }} justify="space-between" align="center" mb={1}>
+      {/*
+        Единственный рендер Badge/текста/кнопки закладки — раньше здесь было ДВА независимых
+        Flex-блока (мобильный и десктопный), каждый со своей копией `{children}` и своим
+        <BookmarkButton>, переключаемых через display:{base,md}. Оба оставались в DOM
+        одновременно (просто один из них display:none), поэтому:
+        - локатор `[aria-label="Добавить в закладки"]` матчил ДВА элемента на статью — `.first()`
+          в e2e резолвился в скрытый (display:none) мобильный экземпляр → `toBeVisible()`
+          падал / `.click()` таймаутился (apps/pravda-e2e/src/bookmarks.spec.ts);
+        - вложенный <CrossRef> (и любой другой контент из `children`) дублировался в DOM —
+          локатор без `.first()` на внутреннюю ссылку статьи ловил strict mode violation
+          (apps/pravda-e2e/src/cross-refs.spec.ts, `a[href="#article-72"]`).
+        Адаптивность (мобильный: Badge+закладка в одной строке, текст на следующей; десктоп: всё
+        в одну строку) теперь достигается CSS-переносом (`wrap`) и `order`, без дублирования
+        разметки.
+      */}
+      <Flex align="flex-start" gap={3} wrap={{ base: 'wrap', md: 'nowrap' }}>
         <Badge
           id={labelId}
-          colorPalette="red"
-          variant="subtle"
-          fontSize="xs"
-          fontWeight="bold"
-          px={2}
-          py={0.5}
-          borderRadius="md"
-        >
-          Ст. {number}
-        </Badge>
-        <BookmarkButton bookmark={bookmark} />
-      </Flex>
-
-      {/* Мобильный: только текст */}
-      <Box display={{ base: 'block', md: 'none' }} lineHeight="tall">
-        <Text as="span">{children}</Text>
-      </Box>
-
-      {/* Десктопный лейаут: Badge | Текст | Закладка в ряд */}
-      <Flex display={{ base: 'none', md: 'flex' }} align="flex-start" gap={3}>
-        <Badge
-          id={`${labelId}-desktop`}
           colorPalette="red"
           variant="subtle"
           fontSize="xs"
@@ -115,12 +117,21 @@ export function Article({ number, children }: ArticleProps) {
           Ст. {number}
         </Badge>
 
-        <Box flex="1" lineHeight="tall" minW={0}>
-          <Text as="span">{children}</Text>
+        {/* На мобильных кнопка видна всегда (нет hover), на десктопе — по наведению на статью */}
+        <Box
+          className="bookmark-btn"
+          order={{ base: 2, md: 3 }}
+          ml="auto"
+          flexShrink={0}
+          opacity={{ base: 1, md: 0 }}
+          transform={{ base: 'none', md: 'translateX(8px)' }}
+          transition="all 0.2s ease"
+        >
+          <BookmarkButton bookmark={bookmark} />
         </Box>
 
-        <Box className="bookmark-btn" opacity={0} transform="translateX(8px)" transition="all 0.2s ease" flexShrink={0}>
-          <BookmarkButton bookmark={bookmark} />
+        <Box flex="1" minW={0} lineHeight="tall" order={{ base: 3, md: 2 }}>
+          <Text as="span">{children}</Text>
         </Box>
       </Flex>
     </Box>
