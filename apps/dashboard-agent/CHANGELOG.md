@@ -11,6 +11,22 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.15.8] — 2026-08-12
+
+### Added
+
+- **`aboi-birthday-promo`** — новая cron-задача в `DEFAULT_CRON_JOBS` (`0 8 * * *`), вызывает
+  `aboi:/api/cron/birthday-promo`.
+
+### Fixed
+
+- **`aboi` не имел `port`/`host` в `APP_REGISTRY`/`APP_PORTS`/`APP_HOSTS`** — был зарегистрирован
+  только с `server: 's2'`, поэтому `getAppUrl('aboi', ...)` бросал бы «Неизвестное приложение»
+  при любой попытке dashboard-agent вызвать `aboi` по HTTP (cron/алерты). Не всплывало раньше,
+  потому что ни одна cron-задача aboi не была зарегистрирована в этой системе. Добавлено
+  `port: 3018, host: 'aboi-app'` в канон (`libs/infra-config`) и локальную копию
+  (`server-config.ts`), guard-тесты обоих зелёные.
+
 ## [0.15.6] — 2026-08-12
 
 ### Removed

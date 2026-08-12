@@ -221,6 +221,16 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's2',
   },
   {
+    id: 'aboi-birthday-promo',
+    name: 'Birthday Promo (aboi)',
+    app: 'aboi',
+    endpoint: '/api/cron/birthday-promo',
+    schedule: '0 8 * * *',
+    description: 'Промокод на скидку клиентам, у которых день рождения через 14 дней (PLAN.md §8)',
+    enabled: true,
+    server: 's2',
+  },
+  {
     id: 'email-canary-check',
     name: 'Email Canary Check',
     app: 'dashboard-agent',

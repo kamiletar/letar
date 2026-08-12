@@ -50,7 +50,7 @@ const APP_REGISTRY: Record<string, AppRegistryEntry> = {
   'animatrona-landing': { server: 's2' },
   'animatrona-tracker': { server: 's2' },
   umami: { server: 's2' },
-  aboi: { server: 's2' },
+  aboi: { server: 's2', port: 3018, host: process.env.ABOI_HOST ?? 'aboi-app' },
   svoichuzhie: { server: 's2' },
   aprel8008: { server: 's2' },
   'kami-key-the-landing': { server: 's2' },

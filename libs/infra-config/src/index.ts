@@ -180,6 +180,7 @@ export const APP_PORTS: Record<string, number> = {
   kami: 3005,
   'animatrona-landing': 3008,
   dsperevod: 3019,
+  aboi: 3018,
   studio: 3024,
   'dashboard-agent': 3100,
 }
@@ -214,6 +215,7 @@ export const APP_HOSTS: Record<string, string> = {
   kami: 'kami-app',
   'animatrona-landing': 'animatrona-landing-app',
   dsperevod: 'dsperevod-app',
+  aboi: 'aboi-app',
   studio: 'studio-app',
   'dashboard-agent': 'dashboard-agent',
 }
