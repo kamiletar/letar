@@ -1,6 +1,5 @@
 'use client'
 
-import { ColorModeProvider } from '@/app/_components/ui/color-mode'
 import {
   ChakraProvider,
   createSystem,
@@ -9,9 +8,9 @@ import {
   defineRecipe,
   defineSlotRecipe,
 } from '@chakra-ui/react'
+import { ColorModeProvider, type ColorModeProviderProps } from '@letar/chakra-provider'
 import { FormI18nProvider } from '@letar/forms'
 import { pressableConfig } from '@letar/ui'
-import type { ThemeProviderProps } from 'next-themes'
 import { useEffect } from 'react'
 
 // ─── Recipes с :active тактильной обратной связью ──────────────────────
@@ -252,7 +251,7 @@ const animatronaConfig = defineConfig({
 
 const system = createSystem(defaultConfig, animatronaConfig)
 
-export function Provider(props: ThemeProviderProps) {
+export function Provider(props: ColorModeProviderProps) {
   // iOS-фикс: без touchstart-листенера :active не срабатывает
   useEffect(() => {
     document.addEventListener('touchstart', () => undefined, { passive: true })
