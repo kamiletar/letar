@@ -1,5 +1,15 @@
 # Time — Выполненные задачи
 
+## `noindex` для `/profile`, `/sign-in`, `/unsubscribe` (2026-08-12, PLAN-INFRA.md §33)
+
+Часть кросс-приложенческого захода по инфраструктурным трекам. `robots.ts` уже блокировал эти
+пути в `/robots.txt`, но краулер, зашедший по внешней ссылке в обход `robots.txt`, всё равно мог
+их проиндексировать. Все три страницы — клиентские компоненты (`'use client'`), объявить
+`metadata` напрямую в них нельзя. Добавлены server `layout.tsx` только ради `robots: { index:
+false, follow: false }`, по образцу `archetest/settings/layout.tsx`.
+
+`typecheck:tsgo`/`nx lint` зелёные. Commit `86368d69`.
+
 ## Подключение к GlitchTip (2026-08-11)
 
 Через новый генератор `nx g @letar/generators:glitchtip-integrate time` (PLAN-INFRA.md §70 п.8) —
