@@ -197,7 +197,7 @@ Tier 1/Tier 2 с informed-consent) — `apps/dsperevod/src/app/(admin)/admin/soc
 
 ### Ключевые компоненты
 
-- **Схема:** `apps/premium-rosstil/schema.zmodel` - ZenStack схема с политиками доступа
+- **Схема:** `apps/driving-school/schema.zmodel` - ZenStack схема с политиками доступа
 - **База данных:** PostgreSQL с Prisma адаптером для хранения пользователей и сессий
 - **Конфиг Auth:** `src/lib/auth.ts` - Конфигурация Better Auth с провайдерами
 - **Auth Client:** `src/lib/auth-client.ts` - Клиентский инстанс Better Auth
