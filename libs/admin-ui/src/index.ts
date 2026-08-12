@@ -30,6 +30,7 @@ export { Pagination, SearchFilter, StatusFilter } from './filters'
 export { createStatusBadge, DeleteConfirmation, EmptyState, StatusBadge } from './feedback'
 
 // Photo components
+export { SinglePhotoUpload, type SinglePhotoUploadProps } from './photo'
 export { SortablePhotoGrid, type SortablePhotoGridProps, type SortablePhotoItem } from './photo'
 
 // Form fields

@@ -76,9 +76,45 @@ const columns: ColumnDef<Client>[] = [
 
 ### Photo
 
-| Компонент           | Описание                                                                             |
-| ------------------- | ------------------------------------------------------------------------------------ |
-| `SortablePhotoGrid` | Сетка фото с drag&drop-сортировкой (мышь/тач/клавиатура) и кнопкой «Сделать главной» |
+| Компонент           | Описание                                                                                   |
+| ------------------- | ------------------------------------------------------------------------------------------ |
+| `SinglePhotoUpload` | Карточка загрузки одной картинки (обложка/аватар) — превью + кнопка через `useImageUpload` |
+| `SortablePhotoGrid` | Сетка фото с drag&drop-сортировкой (мышь/тач/клавиатура) и кнопкой «Сделать главной»       |
+
+#### `SinglePhotoUpload`
+
+Для одной картинки (обложка поста, фото сотрудника) — не путать с `SortablePhotoGrid` (галерея
+из нескольких фото). Сам вызывает `useImageUpload({ category })` и после успешной загрузки
+отдаёт URL вызывающей стороне — сохранение (server action конкретного приложения) и
+`router.refresh()` остаются на стороне вызывающего компонента, библиотека не знает о Prisma/схеме.
+
+```tsx
+import { SinglePhotoUpload } from '@letar/admin-ui'
+
+<SinglePhotoUpload
+  imageUrl={coverImageUrl}
+  category="blog"
+  onUpload={async (url) => {
+    await setBlogPostCoverAction(id, url)
+    router.refresh()
+  }}
+/>
+
+// Круглый аватар вместо прямоугольной обложки — variant="avatar" + свои подписи
+<SinglePhotoUpload
+  imageUrl={photoUrl}
+  category="team"
+  variant="avatar"
+  title="Фото"
+  emptyText="Пока нет фото"
+  uploadLabel="Загрузить фото"
+  replaceLabel="Заменить фото"
+  onUpload={async (url) => {
+    await setTeamMemberPhotoAction(id, url)
+    router.refresh()
+  }}
+/>
+```
 
 ```tsx
 import { SortablePhotoGrid } from '@letar/admin-ui'
