@@ -482,11 +482,11 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.41.0",
+      "version": "0.41.2",
     },
     "apps/domwellbes-e2e": {
       "name": "@letar/domwellbes-e2e",
-      "version": "0.0.3",
+      "version": "0.0.4",
     },
     "apps/driving-school": {
       "name": "driving-school",
