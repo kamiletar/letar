@@ -28,6 +28,8 @@ export interface CronJob {
   enabled: boolean
   /** Сервер на котором выполнять задачу (опционально) */
   server?: CronServer
+  /** Таймаут HTTP-запроса к эндпоинту задачи, мс. По умолчанию — DEFAULT_TIMEOUT_MS. */
+  timeoutMs?: number
 }
 
 export interface CronExecutionLog {
@@ -88,6 +90,9 @@ const scheduledTasks = new Map<string, cron.ScheduledTask>()
 // Backlog «Логи cron-задач в памяти, CronExecutionLog в БД dashboard — мёртвая модель»:
 // dashboard-agent пишет в свою Redis-персистентность вместо БД dashboard (та модель никем
 // не читалась и не писалась — по-прежнему остаётся мёртвой, решение по ней отдельное).
+/** Таймаут HTTP-запроса к эндпоинту задачи по умолчанию — переопределяется `CronJob.timeoutMs`. */
+const DEFAULT_TIMEOUT_MS = 60_000
+
 const MAX_LOGS_PER_JOB = 50
 const executionLogs = new Map<string, CronExecutionLog[]>()
 
@@ -229,6 +234,13 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
       'Канареечный round-trip доставки email (Этап 0.7): SMTP-отправка через canary@letar.best + IMAP-проверка внутренней и внешней ноги',
     enabled: true,
     server: 's2',
+    // Дефолтный DEFAULT_TIMEOUT_MS (60с) короче собственного бюджета проверки: internal/external
+    // ноги идут параллельно, каждая ждёт письмо до 105с (waitForCanaryMessage: POLL_TIMEOUT_MS 90с +
+    // hard deadline 15с — см. apps/dashboard-agent/src/lib/email-canary.ts). Раннер обрывал HTTP-запрос
+    // раньше, чем проверка успевала закончиться сама, и это выглядело как провал ("This operation
+    // was aborted"), хотя внутри письмо могло дойти вовремя. 130с — 105с ноги + запас на отправку
+    // письма и сетевые издержки.
+    timeoutMs: 130_000,
   },
   // ⚠️ Три записи ниже (`studio-send-reminders`, `studio-recurring-invoices`,
   // `dashboard-heartbeat`) до 2026-08-07 существовали ТОЛЬКО в `cron-jobs.json` на s2 — их завели
@@ -723,7 +735,7 @@ export async function executeJob(job: CronJob): Promise<CronExecutionLog> {
   try {
     const url = getAppUrl(job.app, job.endpoint)
     const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 60000)
+    const timeout = setTimeout(() => controller.abort(), job.timeoutMs ?? DEFAULT_TIMEOUT_MS)
 
     // Секрет берётся у ПРИЛОЖЕНИЯ, к которому идём, а не у агента: `CRON_SECRET` у каждого
     // приложения свой (PLAN-INFRA.md §52). Раньше здесь стоял единый секрет агента с откатом
