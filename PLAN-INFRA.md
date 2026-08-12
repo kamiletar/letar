@@ -8449,7 +8449,7 @@ SaaS-Sentry отпадает отдельно: тело ошибки тащит 
    `mandala`/`pravda`/`aira-web` ✅ код+секреты (деплой-запрос отправлен), `auth-hub`/`form-docs`/
    `form-example` ✅ код+секреты (деплой-запрос отправлен, `deploy-glitchtip-authhub-formdocs-
    formexample-s70`), `animatrona-landing`/`kami-key-the-landing`/`letar-landing` ✅ код+секреты
-   (деплой-запрос ещё не отправлен — следующий шаг).
+   (деплой-запрос отправлен, `deploy-glitchtip-landings-s70`).
    Осталось из некоммерческих: `dashboard-agent` (не Next.js — Fastify, генератор не подходит,
    нужна отдельная интеграция), `kami` (не Next.js — библиотека Prisma), `animatrona-tracker`
    (нет `package.json`, см. выше — генератор неприменим без отдельного фикса). Коммерческие/ПДн
