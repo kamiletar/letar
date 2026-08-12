@@ -25,7 +25,9 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'bun nx run form-develop-app:dev',
-    url: 'http://localhost:3006',
+    // baseURL, не хардкод localhost — иначе readiness-проверка стучится в localhost:3006,
+    // игнорируя BASE_URL (staging/prod), и Playwright тихо поднимает локальный dev-сервер.
+    url: baseURL,
     reuseExistingServer: true,
     cwd: workspaceRoot,
   },
