@@ -6,6 +6,7 @@
   "tags": ["type:app", "scope:time", "owner:letar"],
   "targets": {
     "typecheck": {
+      "dependsOn": ["zenstack:generate"],
       "executor": "nx:run-commands",
       "options": {
         "command": "tsc --noEmit",
@@ -24,6 +25,7 @@
       }
     },
     "typecheck:tsgo": {
+      "dependsOn": ["zenstack:generate"],
       "executor": "nx:run-commands",
       "options": {
         "command": "tsgo --noEmit",
@@ -113,6 +115,7 @@
       }
     },
     "test": {
+      "dependsOn": ["zenstack:generate"],
       "executor": "@nx/vitest:test",
       "options": {
         "config": "apps/time/vitest.config.ts"

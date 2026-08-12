@@ -204,6 +204,7 @@
     },
     "test": {
       "executor": "@nx/vitest:test",
+      "dependsOn": ["zenstack:generate"],
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
         "config": "apps/animatrona/vitest.config.ts"
@@ -220,7 +221,8 @@
       }
     },
     "typecheck:tsgo": {
-      "command": "tsgo --project apps/animatrona/tsconfig.json --noEmit"
+      "command": "tsgo --project apps/animatrona/tsconfig.json --noEmit",
+      "dependsOn": ["zenstack:generate"]
     },
     "format": {
       "executor": "nx:run-commands",

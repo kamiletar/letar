@@ -62,6 +62,7 @@
       }
     },
     "typecheck:tsgo": {
+      "dependsOn": ["zenstack:generate"],
       "command": "tsgo --project apps/label-printer-desktop/tsconfig.json --noEmit"
     },
     "format": {
@@ -110,6 +111,7 @@
       "dependsOn": ["zenstack:generate"]
     },
     "test": {
+      "dependsOn": ["zenstack:generate"],
       "executor": "@nx/vitest:test",
       "options": {
         "config": "apps/label-printer-desktop/vitest.config.ts",

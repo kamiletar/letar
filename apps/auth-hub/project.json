@@ -80,6 +80,7 @@
       }
     },
     "test": {
+      "dependsOn": ["zenstack:generate"],
       "executor": "@nx/vitest:test",
       "options": {
         "config": "apps/auth-hub/vitest.config.ts"
@@ -90,6 +91,7 @@
       }
     },
     "typecheck": {
+      "dependsOn": ["zenstack:generate"],
       "executor": "nx:run-commands",
       "options": {
         "command": "tsc --noEmit",
@@ -108,6 +110,7 @@
       }
     },
     "typecheck:tsgo": {
+      "dependsOn": ["zenstack:generate"],
       "executor": "nx:run-commands",
       "options": {
         "command": "tsgo --noEmit",
