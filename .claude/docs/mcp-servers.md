@@ -20,6 +20,7 @@
 | **postgres-studio-prod**    | `@modelcontextprotocol/server-postgres`             | Прод-БД studio через SSH-туннель, read-only юзер                                                                                                                                                                             |
 | **studio-time-mcp**         | `libs/studio-time-mcp` (local)                      | Тайм-трекер studio: `time_start`/`time_switch`/`time_stop`/`time_pause`/`time_status`/`time_note`/`time_log`. Когда стартовать/останавливать — см. [time-tracking.md](/.claude/rules/time-tracking.md)                       |
 | **synth-mcp**               | `apps/synth/src/mcp` (local)                        | Демонстрация синтезатора агентом-ментором для владельца: `load_patch`/`play_demo`/`send_midi_sequence`/`generate_chord_pattern`/`highlight_param`/`focus_section`/`dim_all`. Контекст роли — см. `.claude/commands/synth.md` |
+| **umami-mcp**               | `libs/umami-mcp` (local)                            | Self-hosted аналитика Umami через REST API (без ручного логина в панель): `umami_list_websites`/`umami_find_website`/`umami_get_website_stats`/`umami_create_website`                                                        |
 
 ## Воркфлоу работы с Context7
 
@@ -442,3 +443,31 @@ mcp__postgres_kami__query({
 - Модель доверия процедурная (см. [deploy-coordination](/.claude/rules/deploy-coordination.md)) —
   деплоит только BlackCove по конвенции, технического ограничения по вызывающему нет.
 - Полный список инструментов, воркфлоу и e2e-gate — [libs/deploy-mcp/README.md](/libs/deploy-mcp/README.md).
+
+## Umami MCP (@letar/umami-mcp)
+
+Доступ к self-hosted Umami (`stats.letar.best`) через её REST API — без браузерной
+автоматизации и без ручного ввода пароля агентом (правила безопасности запрещают агенту вводить
+пароли в формы, даже свои собственные). Логин по username/password (тот же механизм, что
+`apps/dashboard/src/app/api/analytics` использует для проксирования Umami в дашборд), токен
+кэшируется на весь stdio-сеанс. Полная документация: [libs/umami-mcp/README.md](/libs/umami-mcp/README.md).
+
+**Локально:** `libs/umami-mcp/`
+
+### Tools
+
+| Инструмент                                        | Описание                                                      |
+| ------------------------------------------------- | ------------------------------------------------------------- |
+| `umami_list_websites`                             | Все сайты, заведённые в Umami (имя, домен, id, дата создания) |
+| `umami_find_website({ domain })`                  | Проверить, заведён ли домен (точное совпадение)               |
+| `umami_get_website_stats({ websiteId, period? })` | Статистика сайта за период (1h/24h/7d/30d)                    |
+| `umami_create_website({ name, domain })`          | Завести новый сайт в Umami                                    |
+
+### Соединение и секреты
+
+- `UMAMI_API_URL`/`UMAMI_API_USER`/`UMAMI_API_PASSWORD` — из `process.env`, иначе из
+  `apps/dashboard/.env.docker` (тот же паттерн, что `studio-time-mcp` использует для
+  `apps/studio/.env.local`).
+- `umami_create_website` только создаёт сайт и возвращает `websiteId` — прописать его в
+  `.env.docker.enc`/`docker-compose.production.yml` приложения нужно отдельно, вручную (см.
+  «Новая переменная окружения» в [env-files.md](/.claude/rules/env-files.md)).
