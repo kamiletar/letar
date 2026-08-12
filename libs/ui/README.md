@@ -468,6 +468,22 @@ import { FileTrigger } from '@letar/ui'
 </FileTrigger>
 ```
 
+### CopyToClipboardButton
+
+Тонкая кнопка-обёртка над `useCopyToClipboard`. Вынесена после того, как один и тот же ручной
+паттерн (`useState(copied)` + `navigator.clipboard.writeText` + `setTimeout` сброса подписи,
+без единой реализации fallback на `execCommand`) независимо появился в domwellbes,
+driving-school, aboi, mandala, archetest и aprel8008.
+
+`text` принимает и строку, и функцию — функция нужна там, где значение нельзя вычислить во
+время рендера (например `window.location.href` в клиентском компоненте: вычисление в рендере
+даёт hydration mismatch, вычисление по клику — нет).
+
+```tsx
+import { CopyToClipboardButton } from '@letar/ui'
+<CopyToClipboardButton text={() => window.location.href} label="Скопировать ссылку" />
+```
+
 ## Хуки
 
 ### useServiceWorker
@@ -517,6 +533,19 @@ import { AnalyticsGate, CookieBanner } from '@letar/ui'
 (например, Umami + Yandex Metrika), не требует по обёртке на каждый. Хук `useAnalyticsConsent`
 экспортируется отдельно для нестандартных случаев (напр. когда компонент аналитики сам принимает
 `hasConsent` пропом, как `@letar/yandex-metrika`).
+
+### useCopyToClipboard
+
+Копирование текста в буфер обмена с fallback на `execCommand('copy')` через временный
+`<textarea>` — `navigator.clipboard.writeText` требует секьюрный контекст и фокус документа и
+падает, например, сразу после клика, снявшего фокус с вкладки.
+
+```tsx
+import { useCopyToClipboard } from '@letar/ui'
+
+const { copied, copy } = useCopyToClipboard()
+// <Button onClick={() => copy(url)}>{copied ? 'Скопировано' : 'Копировать'}</Button>
+```
 
 ## Команды
 

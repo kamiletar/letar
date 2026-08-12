@@ -64,6 +64,7 @@ export { type ReviewAuthor, ReviewCard, type ReviewCardProps, type ReviewData } 
 export { RoleStat, type RoleStatProps, StatCard, type StatCardProps } from './lib/stat-card'
 
 // Интерактивность и обратная связь
+export { CopyToClipboardButton, type CopyToClipboardButtonProps } from './lib/copy-to-clipboard-button'
 export { AppEmptyState, type AppEmptyStateProps } from './lib/empty-state'
 export { FaqAccordion, type FaqAccordionProps, type FaqItem } from './lib/faq-accordion'
 export { Pressable, pressableConfig, type PressableProps, RippleEl, useRipple } from './lib/pressable'
@@ -78,5 +79,10 @@ export { DeleteAccountZone, type DeleteAccountZoneProps } from './lib/delete-acc
 export { ExternalLink, type ExternalLinkProps } from './lib/external-link'
 export { StudioCredit, type StudioCreditProps } from './lib/studio-credit'
 export { TopLoader, type TopLoaderProps } from './lib/top-loader'
+export {
+  useCopyToClipboard,
+  type UseCopyToClipboardOptions,
+  type UseCopyToClipboardResult,
+} from './lib/use-copy-to-clipboard'
 export { useScrollGate, type UseScrollGateOptions, type UseScrollGateResult } from './lib/use-scroll-gate'
 export { useServiceWorker, type UseServiceWorkerOptions } from './lib/use-service-worker'
