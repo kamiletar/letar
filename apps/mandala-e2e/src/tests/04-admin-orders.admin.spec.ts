@@ -32,8 +32,12 @@ test.describe('Админ: Заказы', () => {
     test('можно открыть заказ из списка', async ({ adminPage }) => {
       await adminPage.goto('/admin/orders')
 
-      // Кликаем на первый заказ в списке
-      const orderLink = adminPage.locator('tr a, [data-testid="order-item"] a').first()
+      // Кликаем на первый заказ в списке.
+      // getByRole('link', ...), а не CSS-локатор 'tr a' — последний матчит ПЕРВУЮ ссылку в
+      // DOM-порядке среди всех строк таблицы без разбора, и ловит любой посторонний <a>,
+      // который окажется в разметке раньше ссылки "Подробнее" (см. 09-admin-order-status.spec.ts,
+      // где уже используется getByRole).
+      const orderLink = adminPage.getByRole('link', { name: /подробнее/i }).first()
       const hasLink = (await orderLink.count()) > 0
 
       if (hasLink) {
