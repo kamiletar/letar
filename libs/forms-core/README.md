@@ -53,6 +53,51 @@ forms-core  →  forms-react  →  forms (Chakra) / forms-shadcn
 | `@letar/forms-core/address`       | DaData address provider (Chakra-free часть)                                    |
 | `@letar/forms-core/i18n`          | `createFormErrorMap` — словари перевода ошибок валидации                       |
 | `@letar/forms-core/uikit`         | Типовой контракт UIKit (~20 примитивов) — см. ниже                             |
+| `@letar/forms-core/mask`          | Собственный mask-движок (замена `use-mask-input`, Фаза 8) — см. ниже           |
+
+## Mask-движок (Фаза 8, Этап 1)
+
+`@letar/forms-core/mask` — собственный framework-free движок масок ввода, замена
+`use-mask-input`/Inputmask (весит больше самой библиотеки, 645 открытых issue у апстрима,
+не чинит undo/paste/Android — разбор в [MASK_ENGINE.md](../forms/MASK_ENGINE.md)). Пока
+реализовано только ядро (чистые функции, без DOM) — React-биндинг и `Form.Field.MaskedInput` —
+Этапы 2-3, ещё не начаты.
+
+```typescript
+import { applyChange, caretBoundary, format, formatToParts, unformat } from '@letar/forms-core/mask'
+
+format('770123', '999-999') // → '770-123'
+format('900', '999-999') // → '900' — хвост без введённых цифр не дорисовывается
+
+// Пользовательский алфавит + transform (госномер РФ: буква, 3 цифры, 2 буквы, 2-3 цифры региона)
+// LATIN_TO_CYRILLIC — таблица A→А, B→В и т.д., см. parts.spec.ts
+format('A123BC77', 'л999лл99[9]', {
+  customTokens: {
+    л: {
+      pattern: (c) => 'АВЕКМНОРСТУХ'.includes(c.toUpperCase()) || 'ABEKMHOPCTYX'.includes(c.toUpperCase()),
+      transform: (c) => LATIN_TO_CYRILLIC[c.toUpperCase()] ?? c.toUpperCase(),
+    },
+  },
+}) // → 'А123ВС77'
+
+// Центральная функция — одно редактирование (вставка/удаление) → новое значение + каретка
+applyChange({
+  previousValue: '770-123',
+  inputType: 'deleteBackward',
+  addedValue: '',
+  changeStart: 4,
+  changeEnd: 4,
+  mask: '999-999',
+}) // → { value: '771-23', selectionStart: 2, selectionEnd: 2 }
+```
+
+DSL маски: `9` цифра, `a` буква, `*` буква/цифра, `\X` литерал (экранирование), `[...]` —
+необязательный участок (переменная длина хвоста). Токены `pattern`/`transform` — свои алфавиты
+без ограничения набором из трёх встроенных (не переопределяют их).
+
+⚠️ `applyChange` пока не отличает цифры вставленного текста от цифр, дублирующих литералы маски
+(пасченный целиком номер с кодом страны в поле с этим же кодом в маске) — препроцессор
+вставки/автозаполнения открыт в Этапе 4, см. `PLAN.md`.
 
 ## UIKit-контракт (Фаза 7.1, Этап 4)
 

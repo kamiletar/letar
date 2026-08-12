@@ -1,6 +1,6 @@
 {
   "name": "@letar/forms-core",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
@@ -69,6 +69,12 @@
       "types": "./src/lib/phone/index.ts",
       "import": "./src/lib/phone/index.ts",
       "default": "./src/lib/phone/index.ts"
+    },
+    "./mask": {
+      "@letar/source": "./src/lib/mask/index.ts",
+      "types": "./src/lib/mask/index.ts",
+      "import": "./src/lib/mask/index.ts",
+      "default": "./src/lib/mask/index.ts"
     },
     "./table": {
       "@letar/source": "./src/lib/table/index.ts",
