@@ -246,6 +246,115 @@ export default [
       ],
     },
   },
+  // === NODE_ENV === 'production' — не признак прод-окружения ===
+  // `next build`/`next start` ВСЕГДА выставляет NODE_ENV=production — в том числе на
+  // staging-сборках и на обычном `nx build <app>` разработчика. Три инцидента (открытый
+  // ALLOW_DEV_SESSION-бэкдор, противоречивая индексация aboi, упавшая сборка kami
+  // keystatic.config.ts) — разбор в .claude/docs/node-env-not-production-signal.md.
+  // Замена для decision-веток (индексация/бэкдоры/креды/фичефлаги) — проверка явного
+  // домена (`isProductionDomain()`-паттерн из libs/seo, если применимо) или наличия нужного
+  // credential/конфига (`Boolean(process.env.SOME_CRED)`), а не NODE_ENV.
+  {
+    files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx', '**/*.mjs', '**/*.cjs'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "BinaryExpression[operator=/^(===|!==)$/][left.type='MemberExpression'][left.property.name='NODE_ENV'][left.object.property.name='env'][left.object.object.name='process'][right.type='Literal'][right.value='production']",
+          message:
+            "NODE_ENV === 'production' не отличает прод от staging/dev-сборки — next build всегда ставит production. См. .claude/docs/node-env-not-production-signal.md. Замена: проверка явного домена (isProductionDomain) или наличия credential/конфига.",
+        },
+        {
+          selector:
+            "BinaryExpression[operator=/^(===|!==)$/][right.type='MemberExpression'][right.property.name='NODE_ENV'][right.object.property.name='env'][right.object.object.name='process'][left.type='Literal'][left.value='production']",
+          message:
+            "NODE_ENV === 'production' не отличает прод от staging/dev-сборки — next build всегда ставит production. См. .claude/docs/node-env-not-production-signal.md. Замена: проверка явного домена (isProductionDomain) или наличия credential/конфига.",
+        },
+      ],
+    },
+  },
+  // Allow-list: build-тулинг, где NODE_ENV задаётся explicit самим тулингом сборки
+  // (electron-builder/cross-env/webpack), а не расползается из `next build` в рантайм —
+  // сравнение здесь корректно по своей природе.
+  {
+    files: [
+      '**/next.config.js',
+      '**/next.config.mjs',
+      '**/next.config.cjs',
+      '**/main/webpack.config.js',
+      '**/generators/electron-app/files/**',
+    ],
+    rules: {
+      'no-restricted-syntax': 'off',
+    },
+  },
+  // Allow-list: Electron main-процесс — не Next.js рантайм, границы прод/стейджа не
+  // существует в принципе. Первичный сигнал — `app.isPackaged`, NODE_ENV только fallback
+  // (проверено на месте перед allow-list, .claude/docs/node-env-not-production-signal.md).
+  {
+    // Два варианта одного пути: часть проектов резолвит `files` от cwd=каталог приложения
+    // (голый `main/**`), часть — от корня репо через явный `lintFilePatterns` в project.json
+    // (`apps/*/main/**`, см. `apps/animatrona/project.json`). Нужны оба, иначе allow-list
+    // работает не для всех приложений сразу — см. комментарий у следующего блока.
+    files: ['main/**/*.ts', 'apps/*/main/**/*.ts'],
+    rules: {
+      'no-restricted-syntax': 'off',
+    },
+  },
+  // Allow-list: разобранные точечно случаи, где паттерн безопасен (проверено 2026-08-12,
+  // см. .claude/docs/node-env-not-production-signal.md § Ревизия ESLint-правила):
+  // — `secure: NODE_ENV === 'production'` для cookie — корректно для ЛЮБОЙ собранной
+  //   сборки (staging тоже https), доменное различие тут не нужно;
+  // — Prisma/Pool dev-singleton-cache (`if (NODE_ENV !== 'production') globalForX.x = x`) —
+  //   стандартный паттерн из документации Prisma, на staging просто не кэширует (безвредно);
+  // — выбор backend для rate-limit storage (database/memory) — не security-decision;
+  // — dev-only console.error/debug-панели в @letar/forms — тише на staging, не риск.
+  {
+    files: [
+      // ⚠️ Два варианта каждого пути — см. комментарий у allow-list `main/**` блока выше:
+      // одни проекты (nx:run-commands `eslint .`, cwd=каталог приложения) резолвят `files`
+      // от каталога приложения — нужен голый project-relative путь без имени app/lib. Другие
+      // (`@nx/eslint:lint` executor с явным `lintFilePatterns` в project.json, см.
+      // `apps/animatrona/project.json`) резолвят от корня репо — нужен путь с `apps/*/`/
+      // `libs/*/`. Совпадения project-relative путей между проектами (несколько
+      // `src/lib/prisma.ts`) осознанные и безопасные: каждый матчащийся файл уже разобран
+      // точечно, см. .claude/docs/node-env-not-production-signal.md § Ревизия ESLint-правила.
+      'src/lib/db.ts',
+      'apps/*/src/lib/db.ts',
+      'src/app/api/oidc-capture/route.ts',
+      'apps/*/src/app/api/oidc-capture/route.ts',
+      'src/app/api/auth/oauth2/authorize/route.ts',
+      'apps/*/src/app/api/auth/oauth2/authorize/route.ts',
+      'src/app/*/_components/service-worker-registration.tsx',
+      'apps/*/src/app/*/_components/service-worker-registration.tsx',
+      'src/app/*/dev/layout.tsx',
+      'apps/*/src/app/*/dev/layout.tsx',
+      'src/app/*/(auth)/_actions/verify-login.action.ts',
+      'apps/*/src/app/*/(auth)/_actions/verify-login.action.ts',
+      'src/app/(auth)/_actions/verify-login.action.ts',
+      'apps/*/src/app/(auth)/_actions/verify-login.action.ts',
+      'src/lib/prisma.ts',
+      'apps/*/src/lib/prisma.ts',
+      'src/index.ts',
+      'apps/*/src/index.ts',
+      'src/instrumentation.ts',
+      'apps/*/src/instrumentation.ts',
+      'src/lib/auth.ts',
+      'apps/*/src/lib/auth.ts',
+      'src/server/create-auth/index.ts',
+      'libs/*/src/server/create-auth/index.ts',
+      'src/lib/declarative/form-debug-values.tsx',
+      'libs/*/src/lib/declarative/form-debug-values.tsx',
+      'src/lib/declarative/form-fields/utility/use-computed-value.ts',
+      'libs/*/src/lib/declarative/form-fields/utility/use-computed-value.ts',
+      'src/lib/fields/use-computed-value.ts',
+      'libs/*/src/lib/fields/use-computed-value.ts',
+    ],
+    rules: {
+      'no-restricted-syntax': 'off',
+    },
+  },
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.cts', '**/*.mts'],
     rules: {
