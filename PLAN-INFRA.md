@@ -8406,10 +8406,18 @@ SaaS-Sentry отпадает отдельно: тело ошибки тащит 
    eslint-disable обход (без экспериментов с порядком). У `aira-web` `.env.staging.enc` не
    существовал вообще (staging для этого приложения не заводился раньше) — создан впервые,
    минимальный, только `GLITCHTIP_*` (по образцу `pravda`, где staging тоже не несёт БД/auth).
+   Деплой-запрос отправлен BlackCove (`deploy-glitchtip-mandala-pravda-airaweb-s70`).
+
+   ✅ **`dashboard`/`time` задеплоены и проверены живьём (2026-08-12).** BlackCove подтвердила не
+   только сборку, но и доставку клиентских ошибок (не только серверных) — `throw` в браузере на
+   `dash.letar.best`/`time.letar.best` дошёл до GlitchTip за ~2 мин, тестовые issue помечены
+   `is_deleted` после проверки. `archetest`/`grandslamcup` — деплой-запрос отправлен в прошлой
+   сессии, ответа от BlackCove пока нет (не в inbox на 2026-08-12 13:02 UTC).
 
    **Список кандидатов (`PLAN-INFRA.md`, актуализирован 2026-08-12) — сделано 8 из ~19:**
-   `studio` ✅, `dashboard` ✅, `time` ✅, `archetest` ✅, `grandslamcup` ✅, `mandala` ✅,
-   `pravda` ✅, `aira-web` ✅ — все код+секреты готовы, ни один не задеплоен.
+   `studio` ✅ деплой, `dashboard` ✅ деплой+проверка, `time` ✅ деплой+проверка, `archetest` ✅
+   код+секреты (деплой ждёт ответа), `grandslamcup` ✅ код+секреты (деплой ждёт ответа),
+   `mandala`/`pravda`/`aira-web` ✅ код+секреты (деплой-запрос отправлен только что).
    Осталось из некоммерческих: `dashboard-agent` (не Next.js — Fastify, генератор не подходит,
    нужна отдельная интеграция), `form-docs`, `form-example`, `kami` (не Next.js — библиотека
    Prisma), `animatrona-landing`, `animatrona-tracker`, `kami-key-the-landing`, `letar-landing`,
