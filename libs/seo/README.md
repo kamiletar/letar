@@ -48,6 +48,31 @@ export default function robots(): MetadataRoute.Robots {
 (т.е. локальная разработка без переменной резолвится как «прод») — поведение унаследовано от
 исходной реализации в `aboi`, не переосмыслено при выносе.
 
+### `breadcrumbJsonLd(baseUrl: string, items: BreadcrumbJsonLdItem[]): Record<string, unknown>`
+
+`BreadcrumbList` JSON-LD (Schema.org) для навигации поисковиков. Вынесена из `apps/aboi` (§22
+PLAN-INFRA.md) — была app-agnostic pure function, ждала только параметризации `baseUrl`.
+
+```typescript
+import { breadcrumbJsonLd } from '@letar/seo'
+
+breadcrumbJsonLd('https://example.com', [
+  { name: 'Главная', path: '/' },
+  { name: 'Каталог', path: '/catalog' },
+])
+```
+
+### `organizationJsonLd(params: OrganizationJsonLdParams): Record<string, unknown>`
+
+`Organization` JSON-LD для главной страницы. `params: { name, url, description? }` — либа не
+хранит бренд конкретного приложения.
+
+⚠️ **`productJsonLd` сюда не вынесен.** При сравнении `aboi` (вариантные цены →
+`AggregateOffer`/`Offer`) и `svoichuzhie` (простой `Offer` для мерча) форма `offers` расходится
+по существу — общая функция была бы неправильной абстракцией (тот же вывод, что для
+`estimatePackage()` в `@letar/cdek`, см. PLAN-INFRA.md §23). Каждое приложение пишет свой
+`productJsonLd` локально.
+
 ## Команды
 
 ```bash
