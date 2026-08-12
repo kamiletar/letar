@@ -2,7 +2,7 @@
 
 import { toaster } from '@/app/_components/ui/toaster'
 import { Button, type ButtonProps, Icon } from '@chakra-ui/react'
-import { useCopyToClipboard } from '@letar/ui'
+import { useShare } from '@letar/ui'
 import { useTranslations } from 'next-intl'
 import { useCallback } from 'react'
 import { LuShare2 } from 'react-icons/lu'
@@ -25,34 +25,21 @@ interface ShareResultButtonProps extends Omit<ButtonProps, 'onClick'> {
  */
 export function ShareResultButton({ shareText, url, shareTitle, children, ...props }: ShareResultButtonProps) {
   const t = useTranslations('common.share')
-  const { copy } = useCopyToClipboard()
+  const { share } = useShare()
 
   const handleShare = useCallback(async () => {
     const shareUrl = url ?? (typeof window !== 'undefined' ? window.location.href : '')
     const title = shareTitle ?? 'Archetest'
 
-    // Нативный шеринг (мобильные) — приоритет
-    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
-      try {
-        await navigator.share({ title, text: shareText, url: shareUrl })
-        return
-      } catch (err) {
-        // Пользователь отменил диалог — молча выходим
-        if (err instanceof DOMException && err.name === 'AbortError') {
-          return
-        }
-        // Иная ошибка — падаем в фолбэк копирования
-      }
-    }
-
-    // Фолбэк: копируем ссылку в буфер
     try {
-      await copy(`${shareText} ${shareUrl}`.trim())
-      toaster.success({ title: t('copied') })
+      const outcome = await share({ title, text: shareText, url: shareUrl }, `${shareText} ${shareUrl}`.trim())
+      if (outcome === 'copied') {
+        toaster.success({ title: t('copied') })
+      }
     } catch {
       toaster.error({ title: t('error') })
     }
-  }, [shareText, url, shareTitle, t, copy])
+  }, [shareText, url, shareTitle, t, share])
 
   return (
     <Button variant="outline" onClick={handleShare} {...props}>

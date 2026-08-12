@@ -5,6 +5,14 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.27.3] - 2026-08-12
+
+### Changed
+
+- **`ShareResultButton` переведён на общий `useShare` из `@letar/ui`** — тот же паттерн
+  (`navigator.share` + молчаливый выход на `AbortError` + fallback-копирование), что был
+  реализован здесь и независимо продублирован в `aprel8008/ShareComic`, вынесен в хук.
+
 ## [0.27.2] - 2026-08-12
 
 ### Changed
