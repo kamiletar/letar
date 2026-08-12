@@ -2,6 +2,9 @@
 
 ## Выполненные задачи
 
+- [x] GlitchTip (staging + production) + первый `.env.staging.enc` (не существовал вообще) +
+      healthcheck в прод-compose — последний пробел из 24 приложений монорепо (2026-08-12,
+      PLAN-INFRA.md §70)
 - [x] `tsconfig.json`: убраны `references` на библиотеки — TS6305/TS6059 (2026-08-07)
   - Тот же баг, что в `dashboard-agent` (0.11.1, `.claude/rules/libs.md` § «Тот же редирект под
     обычным `tsc`»): `references` на `../../libs/*` вели на solution-конфиг библиотек и

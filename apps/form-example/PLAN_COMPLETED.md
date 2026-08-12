@@ -1,5 +1,24 @@
 # Выполненные задачи — form-example
 
+## Сессия 2026-08-12 — GlitchTip + первый staging + фикс невалидного e2e-прогона
+
+Подключение к GlitchTip (`nx g @letar/generators:glitchtip-integrate form-example`,
+PLAN-INFRA.md §70) — только production (нет `docker-compose.staging.yml` на тот момент), DSN
+проекта id=11.
+
+Заведён **первый staging** (§18.7 Тираж M2) — `docker-compose.staging.yml` (Traefik-лейблы,
+`form-example-stage.s3.letar.best`, порты 5466/3033), `.env.staging.enc`. БД (`Product`/`Contact`,
+демо-данные) — e2e-сьют тестирует поведение форм напрямую, сид не понадобился.
+
+Первый прогон e2e (BlackCove) оказался невалидным — `apps/form-example-e2e/playwright.config.ts`
+хардкодил `webServer.url: 'http://localhost:3022'` вместо `baseURL`: readiness-проверка стучалась
+в localhost, не видела там ничего и тихо поднимала `next dev` на `localhost:3000` (Turbopack) —
+все 48 тестов упали против него, не против стейджа. Плюс `form-example-e2e` не имел
+`project.json` — та же категория бага, что чинили на `time`/`aboi`/`grandslamcup-e2e` 2026-07-19:
+без явного `executor: '@nx/playwright:playwright'` Nx-инференс через `@nx/playwright/plugin`
+добавляет `dependsOn` на dev-таск ДО проверки `reuseExistingServer`/`url`, обходя
+`playwright.config.ts`. Оба фикса внесены, `project.json` заведён.
+
 ## Сессия 2026-08-06 — package.json создан + lint-ошибки в демо-страницах починены
 
 ### `package.json` + `nx.implicitDependencies`

@@ -1,5 +1,28 @@
 # Выполненные задачи — Kami
 
+## GlitchTip + первичный staging + фикс Keystatic на NODE_ENV (2026-08-12)
+
+Подключение к GlitchTip (`nx g @letar/generators:glitchtip-integrate kami`, PLAN-INFRA.md §70) —
+`instrumentation.ts`/`instrumentation-client.ts`, DSN проекта id=17 в `.env.docker.enc`.
+
+Заодно заведён **первый staging для kami вообще** (§18.7 Тираж M2) — раньше не было ни
+`docker-compose.staging.yml`, ни `.env.staging.enc`, ни домена в Traefik. `kami-stage.s3.letar.best`,
+порты 5467 (DB)/3034 (app). OIDC (Ключница)/Keystatic GitHub Storage/Telegram/Yandex Metrica на
+стейдже сознательно не настроены — `kami-e2e` (5 спеков) тестирует только публичные страницы.
+
+При первом staging-деплое `next build` падал целиком (не просто скрывалась кнопка входа, как у
+OIDC) — `keystatic.config.ts` определял `storage: 'github'` через `NODE_ENV === 'production'`,
+а `NODE_ENV` всегда `production` в собранном билде, включая стейдж (см.
+`.claude/rules/env-files.md` § «NODE_ENV === 'production' — та же ловушка бьёт не только
+секреты»). Решение владельца — graceful degradation, не отдельный GitHub OAuth App для стейджа:
+условие заменено на `Boolean(process.env.KEYSTATIC_GITHUB_CLIENT_ID)` — билд не зависит от
+домена/окружения, только от факта наличия кредов.
+
+Попутно: `kami-e2e` не имел `project.json` (полагался на Nx-инференс через
+`@nx/playwright/plugin`, который добавляет `dependsOn` на dev-таск до проверки `webServer.url`) —
+заведён явный `executor: '@nx/playwright:playwright'`, тот же паттерн, что у `time`/`aboi`/
+`grandslamcup-e2e` (найдено 2026-07-19).
+
 ## tsconfig.json — убраны `references` на `libs/*`, добавлен явный `rootDir` (2026-08-07)
 
 Убраны 10 ссылок на `../../libs/*` из `references` (тот же хрупкий редирект на

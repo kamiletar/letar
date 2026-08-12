@@ -2,6 +2,34 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 0.15.6 → 0.15.7 — GlitchTip: первая не-Next.js интеграция тиража §70 (2026-08-12)
+
+Первое приложение монорепо на Fastify, подключённое к GlitchTip — генератор
+(`nx g @letar/generators:glitchtip-integrate`) на него не рассчитан (ждёт `instrumentation.ts` +
+Next.js-конвенции), подключено вручную:
+
+- `@letar/glitchtip` в `dependencies`/`implicitDependencies`, `tsconfig.json` path на `/server`
+  подпуть (клиентского бандла у Fastify-бэкенда нет — только серверная пара).
+- `initServer({ dsn: GLITCHTIP_DSN, environment: GLITCHTIP_ENVIRONMENT })` в начале `main()`,
+  до регистрации роутов.
+- Ошибки запросов — `fastify.addHook('onError', ...)` → `captureException(error)`. Осознанно
+  `onError` (наблюдающий хук), не `setErrorHandler` (подменяет ответ клиенту).
+- В саму библиотеку `@letar/glitchtip` добавлена новая функция `captureException(err)`
+  (`./server`, v0.2.0) — обобщение `captureRequestError` без Next.js-специфичной сигнатуры
+  `Instrumentation.onRequestError`, для любых не-Next.js бэкендов.
+- `Dockerfile.production` дополнен `COPY libs/glitchtip` в мини-workspace builder-стейджа (по
+  образцу уже существующих `libs/email`/`libs/redis-client`) — без этого изолированный
+  `bun install` в билдере не резолвит приватный workspace-пакет и падает 404 на публичном
+  registry. Смоделирован локально (копия только нужных `libs/*` + `package.json`, как делает
+  сам Dockerfile) — резолвится штатно.
+- Проверено: `nx build` (esbuild, дев-путь) НЕ инлайнит `@sentry/node` (внешний `require`, не
+  прод-путь сборки) — реальный прод-путь `bun build` из `Dockerfile.production` инлайнит
+  полностью (174 вхождения `Sentry.*`, ноль внешних `require`).
+
+`dashboard-agent` не на SOPS-пайплайне секретов (`.env.docker.enc` никогда не заводился, только
+plaintext на сервере) — DSN передан BlackCove текстом для ручного добавления, не через git.
+Разбор — `PLAN-INFRA.md` §70 п.7.
+
 ## Версия 0.15.1 → 0.15.2 — миграция acme-dns-backup/nginx-backup на tar-backup.ts (2026-08-08)
 
 Продолжение работы из 0.15.0 (см. запись ниже) — там `tar-backup.ts` был вынесен, но старые
