@@ -8389,18 +8389,33 @@ SaaS-Sentry отпадает отдельно: тело ошибки тащит 
      не резолвит secondary entry point именно для этого консьюмера) не найдена за разумное
      время — обойдено точечным `// eslint-disable-next-line @nx/enforce-module-boundaries` с
      комментарием на самом импорте, не подавлением правила глобально.
-   - **Не расследовано дальше** — воспроизводится ли на следующих приложениях тиража; если да и
-     паттерн повторится 3+ раз, стоит завести отдельную задачу и разобраться в первопричине
-     вместо накопления точечных disable-комментариев.
+     ⚠️ **Гипотеза «дело в порядке спредов» опровергнута третьим прогоном (2026-08-12).**
+     `mandala`/`pravda`/`aira-web` падали на том же линте **независимо от порядка** —
+     `mandala` до фикса порядка совпадала с `dashboard`/`time` (`baseConfig` до `flat/react-
+   typescript`, у тех порядок рабочий), после смены на «канонический» порядок ошибка осталась.
+     Свод по всем 6 задетым приложениям: `dashboard`/`time`/`studio` чисто с одним порядком,
+     `grandslamcup`/`mandala`/`pravda`/`aira-web` падают с другим порядком независимо от того, на
+     какой его поменять. Значит порядок спредов в `eslint.config.mjs` — не причина, фикс для
+     `archetest` был совпадением (что именно там сработало — не установлено). Причина по-прежнему
+     не найдена; расследование в исходнике `@nx/eslint-plugin` (см. выше) не дало результата.
+     Правило теперь фактически ложно срабатывает на **любом новом** консьюмере `@letar/glitchtip/
+   client`+`/server` пары — обходится точечным `eslint-disable-next-line` на каждом новом
+     приложении тиража, без дальнейших попыток чинить порядок конфига.
 
-   **Список кандидатов (`PLAN-INFRA.md`, актуализирован 2026-08-12) — сделано 5 из ~19:**
-   `studio` ✅, `dashboard` ✅ (код+секреты, не задеплоен), `time` ✅ (код+секреты, не задеплоен),
-   `archetest` ✅ (код+секреты, не задеплоен), `grandslamcup` ✅ (код+секреты, не задеплоен).
-   Осталось из некоммерческих: `dashboard-agent`, `form-docs`, `form-example`, `aira-web`,
-   `mandala`, `kami`, `pravda`, `animatrona-landing`, `animatrona-tracker`,
-   `kami-key-the-landing`, `letar-landing`, `umami`, `auth-hub`. Коммерческие/ПДн (`aboi`,
-   `driving-school`, `dsperevod`, `svoichuzhie`, `aprel8008`, `domwellbes`) и не-Next.js
-   (Electron/React Native) — как в исходном плане п.7, без изменений.
+   ✅ **Третий прогон тиража (2026-08-12): `mandala`, `pravda`, `aira-web`.** Тот же цикл, тот же
+   eslint-disable обход (без экспериментов с порядком). У `aira-web` `.env.staging.enc` не
+   существовал вообще (staging для этого приложения не заводился раньше) — создан впервые,
+   минимальный, только `GLITCHTIP_*` (по образцу `pravda`, где staging тоже не несёт БД/auth).
+
+   **Список кандидатов (`PLAN-INFRA.md`, актуализирован 2026-08-12) — сделано 8 из ~19:**
+   `studio` ✅, `dashboard` ✅, `time` ✅, `archetest` ✅, `grandslamcup` ✅, `mandala` ✅,
+   `pravda` ✅, `aira-web` ✅ — все код+секреты готовы, ни один не задеплоен.
+   Осталось из некоммерческих: `dashboard-agent` (не Next.js — Fastify, генератор не подходит,
+   нужна отдельная интеграция), `form-docs`, `form-example`, `kami` (не Next.js — библиотека
+   Prisma), `animatrona-landing`, `animatrona-tracker`, `kami-key-the-landing`, `letar-landing`,
+   `umami`, `auth-hub`. Коммерческие/ПДн (`aboi`, `driving-school`, `dsperevod`, `svoichuzhie`,
+   `aprel8008`, `domwellbes`) и не-Next.js (Electron/React Native) — как в исходном плане п.7,
+   без изменений.
 
 ### Что это даёт агентам
 

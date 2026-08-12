@@ -1,13 +1,37 @@
 {
   "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
-    "lib": ["dom", "dom.iterable", "esnext", "webworker"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext",
+      "webworker"
+    ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
-      "@letar/ui": ["../../libs/ui/src/index.ts"],
-      "@letar/hooks": ["../../libs/hooks/src/index.ts"],
-      "@letar/analytics": ["../../libs/analytics/src/index.ts"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@letar/chakra-provider": [
+        "../../libs/chakra-provider/src/index.ts"
+      ],
+      "@letar/ui": [
+        "../../libs/ui/src/index.ts"
+      ],
+      "@letar/hooks": [
+        "../../libs/hooks/src/index.ts"
+      ],
+      "@letar/analytics": [
+        "../../libs/analytics/src/index.ts"
+      ],
+      "@letar/glitchtip": [
+        "../../libs/glitchtip/src/index.ts"
+      ],
+      "@letar/glitchtip/client": [
+        "../../libs/glitchtip/src/client/index.ts"
+      ],
+      "@letar/glitchtip/server": [
+        "../../libs/glitchtip/src/server/index.ts"
+      ]
     }
   },
   "references": [

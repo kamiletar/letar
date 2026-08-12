@@ -12,7 +12,11 @@
       "@letar/consent",
       "@letar/format-utils",
       "@letar/image-upload",
-      "@letar/ui"
+      "@letar/ui",
+      "@letar/glitchtip"
     ]
+  },
+  "dependencies": {
+    "@letar/glitchtip": "workspace:*"
   }
 }

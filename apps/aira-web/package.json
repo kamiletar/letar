@@ -8,7 +8,11 @@
       "chakra-provider",
       "ui",
       "analytics",
-      "github-releases"
+      "github-releases",
+      "@letar/glitchtip"
     ]
+  },
+  "dependencies": {
+    "@letar/glitchtip": "workspace:*"
   }
 }

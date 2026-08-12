@@ -6,6 +6,10 @@ services:
     container_name: pravda-staging-app
     restart: unless-stopped
     environment:
+      GLITCHTIP_DSN: ${GLITCHTIP_DSN}
+      GLITCHTIP_ENVIRONMENT: ${GLITCHTIP_ENVIRONMENT}
+      NEXT_PUBLIC_GLITCHTIP_DSN: ${NEXT_PUBLIC_GLITCHTIP_DSN}
+      NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT: ${NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT}
       TZ: Europe/Moscow
     ports:
       # Внутренний 3007 — nginx отдаёт статический экспорт (см. Dockerfile.production, без

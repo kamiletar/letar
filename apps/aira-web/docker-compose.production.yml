@@ -8,6 +8,10 @@ services:
       # (aira.letar.best → aira-web-app:3017, проверено в data/nginx/proxy_host/19.conf).
       - '127.0.0.1:3017:3017'
     environment:
+      GLITCHTIP_DSN: ${GLITCHTIP_DSN}
+      GLITCHTIP_ENVIRONMENT: ${GLITCHTIP_ENVIRONMENT}
+      NEXT_PUBLIC_GLITCHTIP_DSN: ${NEXT_PUBLIC_GLITCHTIP_DSN}
+      NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT: ${NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT}
       TZ: Europe/Moscow
       FORCE_COLOR: '1'
       NODE_ENV: production

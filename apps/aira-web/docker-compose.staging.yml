@@ -6,6 +6,10 @@ services:
     container_name: aira-web-staging-app
     restart: unless-stopped
     environment:
+      GLITCHTIP_DSN: ${GLITCHTIP_DSN}
+      GLITCHTIP_ENVIRONMENT: ${GLITCHTIP_ENVIRONMENT}
+      NEXT_PUBLIC_GLITCHTIP_DSN: ${NEXT_PUBLIC_GLITCHTIP_DSN}
+      NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT: ${NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT}
       TZ: Europe/Moscow
       NODE_ENV: production
       # Внутренний PORT=3017 — из Dockerfile.production, тот же образ что и прод. Без БД и без

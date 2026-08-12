@@ -37,6 +37,10 @@ services:
     env_file:
       - .env.staging
     environment:
+      GLITCHTIP_DSN: ${GLITCHTIP_DSN}
+      GLITCHTIP_ENVIRONMENT: ${GLITCHTIP_ENVIRONMENT}
+      NEXT_PUBLIC_GLITCHTIP_DSN: ${NEXT_PUBLIC_GLITCHTIP_DSN}
+      NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT: ${NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT}
       DATABASE_URL: postgresql://lena_user:${DB_PASSWORD:-postgres}@mandala-staging-db:5432/mandala_staging
       # Google/Yandex OAuth на staging сознательно не настраивается — mandala/auth.ts включает
       # соц-провайдер в конфиг только если оба AUTH_*_ID/AUTH_*_SECRET заданы (без них блок

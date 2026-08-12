@@ -8,6 +8,10 @@ services:
     image: pravda:${DEPLOY_TAG:-latest}
     restart: unless-stopped
     environment:
+      GLITCHTIP_DSN: ${GLITCHTIP_DSN}
+      GLITCHTIP_ENVIRONMENT: ${GLITCHTIP_ENVIRONMENT}
+      NEXT_PUBLIC_GLITCHTIP_DSN: ${NEXT_PUBLIC_GLITCHTIP_DSN}
+      NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT: ${NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT}
       TZ: Europe/Moscow
     healthcheck:
       test: ['CMD-SHELL', 'wget -q --spider http://0.0.0.0:3007/ || exit 1']
