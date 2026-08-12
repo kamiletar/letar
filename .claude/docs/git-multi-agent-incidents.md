@@ -152,7 +152,7 @@ GIT_ALLOW_MULTI_SCOPE_COMMIT=1 git commit -m "..."
 
 ## Работа с приватными submodule
 
-Приватные приложения (aboi, driving-school, premium-rosstil, imot + их e2e и driving-school-db) — это **git submodules**, указывающие на репо `kamiletar/letar-private-*`. Подробнее: [repo-structure](/.claude/docs/repo-structure.md).
+Приватные приложения (aboi, driving-school, dsperevod, domwellbes + их e2e и driving-school-db) — это **git submodules**, указывающие на репо `kamiletar/letar-private-*`. Подробнее: [repo-structure](/.claude/docs/repo-structure.md).
 
 ### Изменение кода в submodule
 
