@@ -56,6 +56,14 @@ export interface FormPersistenceConfig {
    * @default 'Clear draft'
    */
   clearDraftButtonText?: string
+
+  /**
+   * Field keys that must NEVER be written to the saved snapshot
+   * (password, card number, CVV, expiry date and similar sensitive data).
+   * Shallow omit only — nested sensitive fields are out of scope until a real case shows up.
+   * @default undefined — nothing excluded
+   */
+  excludeFields?: string[]
 }
 
 /**
@@ -156,6 +164,8 @@ const STORAGE_PREFIX = 'form-persistence:'
  * const persistence = useFormPersistence<MyFormData>({
  *   key: 'my-form',
  *   debounceMs: 500,
+ *   // Никогда не сохранять пароль/CVV в localStorage
+ *   excludeFields: ['password', 'cvv'],
  * })
  *
  * // In form onSubmit:
@@ -182,6 +192,7 @@ export function useFormPersistence<TData extends object>(config: FormPersistence
     restoreButtonText = 'Restore',
     discardButtonText = 'Start fresh',
     clearDraftButtonText = 'Clear draft',
+    excludeFields,
   } = config
 
   const storageKey = `${STORAGE_PREFIX}${key}`
@@ -260,8 +271,14 @@ export function useFormPersistence<TData extends object>(config: FormPersistence
       debounceTimerRef.current = setTimeout(() => {
         try {
           const now = Date.now()
+          // Чувствительные поля (пароль, номер карты, CVV и т.п.) никогда не попадают в снимок
+          const dataToStore = excludeFields?.length
+            ? (Object.fromEntries(
+              Object.entries(values).filter(([fieldKey]) => !excludeFields.includes(fieldKey)),
+            ) as TData)
+            : values
           const storedData: StoredData<TData> = {
-            data: values,
+            data: dataToStore,
             savedAt: now,
             version: 1,
           }
@@ -273,7 +290,7 @@ export function useFormPersistence<TData extends object>(config: FormPersistence
         }
       }, debounceMs)
     },
-    [storageKey, debounceMs, isDialogOpen],
+    [storageKey, debounceMs, isDialogOpen, excludeFields],
   )
 
   // Clear saved data

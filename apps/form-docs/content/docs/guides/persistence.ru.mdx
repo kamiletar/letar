@@ -37,13 +37,39 @@ description: Автосохранение данных формы в localStorag
 ```tsx
 persistence={{
   key: 'my-form',              // ключ localStorage (обязательно)
-  debounceMs: 500,             // дебаунс сохранения в мс (по умолчанию: 300)
+  debounceMs: 500,             // дебаунс сохранения в мс (по умолчанию: 500)
   dialogTitle: 'Восстановить черновик?',
   dialogDescription: 'У вас есть несохранённые изменения.',
-  restoreLabel: 'Восстановить',
-  discardLabel: 'Отменить',
+  restoreButtonText: 'Восстановить',
+  discardButtonText: 'Отменить',
+  excludeFields: ['password', 'cvv'], // никогда не попадают в снимок — см. ниже
 }}
 ```
+
+## Исключение чувствительных полей
+
+Пароль, номер карты, CVV, срок действия и другие auth/платёжные данные **никогда** не должны
+попадать в localStorage, даже если остальная форма персистится. `excludeFields` вычищает эти
+ключи из объекта перед сериализацией (только shallow omit). При восстановлении исключённые поля
+просто отсутствуют в `savedData` — форма их не перезаписывает и оставляет значение из
+`initialValue` как есть.
+
+```tsx
+<Form
+  schema={PaymentSchema}
+  initialValue={defaults}
+  onSubmit={handleSubmit}
+  persistence={{
+    key: 'payment-form',
+    excludeFields: ['cardNumber', 'cvv', 'expiryDate'],
+  }}
+>
+  ...
+</Form>
+```
+
+Тот же параметр доступен и на низкоуровневом хуке `useFormPersistence` напрямую — для форм,
+которые собирают persistence вручную вместо использования `<Form>`.
 
 ## Кастомное сохранение
 

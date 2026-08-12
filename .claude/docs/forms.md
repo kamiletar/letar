@@ -193,7 +193,10 @@ import { Form } from '@letar/forms'
 
 ### localStorage Persistence (v0.16.0+)
 
-Автоматическое сохранение данных формы с диалогом восстановления:
+Автоматическое сохранение данных формы с диалогом восстановления. Подключай по умолчанию для
+любой нетривиальной формы (создание/редактирование сущности, длинная форма — не одноразовый
+auth-экран), не по напоминанию — принцип [Ководство §188](https://www.artlebedev.ru/kovodstvo/sections/188/):
+пользовательский ввод священен, закрытие вкладки/краш/перезагрузка не должны его стирать.
 
 ```tsx
 <Form
@@ -207,6 +210,7 @@ import { Form } from '@letar/forms'
     dialogDescription: 'Найдены сохранённые данные',
     restoreButtonText: 'Восстановить',
     discardButtonText: 'Начать заново',
+    excludeFields: ['password', 'cvv'], // Чувствительные поля — см. ниже
   }}
 >
   <Form.Field.String name="title" />
@@ -221,6 +225,12 @@ import { Form } from '@letar/forms'
 3. Если данные найдены — показывается диалог восстановления
 4. При успешном submit данные автоматически удаляются из localStorage
 
+⛔ **`excludeFields` (v2.4.0+) — чувствительные поля никогда не попадают в снимок.** Пароль,
+номер карты, CVV, срок действия и другие auth/платёжные данные **обязаны** быть в этом списке
+для любой формы, где они встречаются (см. `.claude/rules/forms.md` § Правила). Поле вычищается
+из объекта перед сериализацией (shallow omit) — при восстановлении оно просто отсутствует в
+`savedData`, форма его не перезаписывает и оставляет значение из `initialValue` как есть.
+
 **Хук `useFormPersistence` для кастомных сценариев:**
 
 ```tsx
@@ -229,10 +239,11 @@ import { useFormPersistence } from '@letar/forms'
 const persistence = useFormPersistence<MyFormData>({
   key: 'my-form',
   debounceMs: 500,
+  excludeFields: ['password', 'cvv'],
 })
 
 // API:
-persistence.saveValues(values) // Сохранить вручную
+persistence.saveValues(values) // Сохранить вручную (excludeFields применится автоматически)
 persistence.clearSavedData() // Очистить сохранённые данные
 persistence.hasSavedData // Есть ли сохранённые данные
 persistence.savedData // Сохранённые данные

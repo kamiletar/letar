@@ -14,6 +14,12 @@ interface TestFormData {
   email: string
 }
 
+interface SensitiveFormData {
+  name: string
+  password: string
+  cvv: string
+}
+
 const STORAGE_PREFIX = 'form-persistence:'
 const TEST_KEY = 'test-form'
 const STORAGE_KEY = `${STORAGE_PREFIX}${TEST_KEY}`
@@ -165,6 +171,73 @@ describe('useFormPersistence', () => {
 
       // Данные не должны быть сохранены
       expect(localStorage.getItem(STORAGE_KEY)).toBeNull()
+    })
+
+    it('не пишет excludeFields в снимок localStorage', () => {
+      const SENSITIVE_KEY = 'sensitive-form'
+      const SENSITIVE_STORAGE_KEY = `${STORAGE_PREFIX}${SENSITIVE_KEY}`
+
+      const { result } = renderHook(
+        () =>
+          useFormPersistence<SensitiveFormData>({
+            key: SENSITIVE_KEY,
+            debounceMs: 100,
+            excludeFields: ['password', 'cvv'],
+          }),
+        { wrapper: TestWrapper },
+      )
+
+      act(() => {
+        result.current.saveValues({ name: 'Test', password: 'super-secret', cvv: '123' })
+      })
+
+      act(() => {
+        vi.advanceTimersByTime(100)
+      })
+
+      const stored = JSON.parse(localStorage.getItem(SENSITIVE_STORAGE_KEY) ?? '{}')
+      expect(stored.data).toEqual({ name: 'Test' })
+      expect(stored.data.password).toBeUndefined()
+      expect(stored.data.cvv).toBeUndefined()
+    })
+
+    it('восстанавливает только незащищённые поля — excludeFields отсутствуют в savedData', () => {
+      const SENSITIVE_KEY = 'sensitive-form-2'
+      const SENSITIVE_STORAGE_KEY = `${STORAGE_PREFIX}${SENSITIVE_KEY}`
+
+      const first = renderHook(
+        () =>
+          useFormPersistence<SensitiveFormData>({
+            key: SENSITIVE_KEY,
+            debounceMs: 100,
+            excludeFields: ['password', 'cvv'],
+          }),
+        { wrapper: TestWrapper },
+      )
+
+      act(() => {
+        first.result.current.saveValues({ name: 'Test', password: 'super-secret', cvv: '123' })
+      })
+
+      act(() => {
+        vi.advanceTimersByTime(100)
+      })
+
+      expect(localStorage.getItem(SENSITIVE_STORAGE_KEY)).not.toBeNull()
+      first.unmount()
+
+      // Симулируем свежий монтаж формы (например повторный визит) — savedData грузится из localStorage
+      const second = renderHook(
+        () => useFormPersistence<SensitiveFormData>({ key: SENSITIVE_KEY, excludeFields: ['password', 'cvv'] }),
+        { wrapper: TestWrapper },
+      )
+
+      let restored: SensitiveFormData | null = null
+      act(() => {
+        restored = second.result.current.acceptRestore()
+      })
+
+      expect(restored).toEqual({ name: 'Test' })
     })
   })
 

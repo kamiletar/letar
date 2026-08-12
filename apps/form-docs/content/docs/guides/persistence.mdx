@@ -37,13 +37,38 @@ Forms can automatically save their state to localStorage and restore it when the
 ```tsx
 persistence={{
   key: 'my-form',              // localStorage key (required)
-  debounceMs: 500,             // save debounce in ms (default: 300)
+  debounceMs: 500,             // save debounce in ms (default: 500)
   dialogTitle: 'Restore draft?',
   dialogDescription: 'You have unsaved changes from your last session.',
-  restoreLabel: 'Restore',
-  discardLabel: 'Discard',
+  restoreButtonText: 'Restore',
+  discardButtonText: 'Discard',
+  excludeFields: ['password', 'cvv'], // never written to the snapshot — see below
 }}
 ```
+
+## Excluding sensitive fields
+
+Password, card number, CVV, expiry date and other auth/payment data must **never** be written to
+localStorage, even when the rest of the form is persisted. `excludeFields` strips those keys from
+the object before serialization (shallow omit only). On restore the excluded fields are simply
+absent from `savedData` — the form doesn't overwrite them and keeps whatever is in `initialValue`.
+
+```tsx
+<Form
+  schema={PaymentSchema}
+  initialValue={defaults}
+  onSubmit={handleSubmit}
+  persistence={{
+    key: 'payment-form',
+    excludeFields: ['cardNumber', 'cvv', 'expiryDate'],
+  }}
+>
+  ...
+</Form>
+```
+
+The same option is available on the low-level `useFormPersistence` hook directly, for forms that
+assemble persistence manually instead of using `<Form>`.
 
 ## Custom Persistence
 

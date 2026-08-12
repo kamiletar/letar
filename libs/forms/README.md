@@ -468,6 +468,28 @@ export const { createField, FieldErrorBoundary, FieldWrapper } = createFieldPrim
 Публичный API `@letar/forms` при этом не меняется: на местах переехавших модулей стоят
 реэкспорт-шимы.
 
+## Черновики форм (localStorage Persistence)
+
+Проп `persistence` на `<Form>` — автосохранение введённых данных в localStorage с диалогом
+восстановления при следующем визите. Принцип — [Ководство §188](https://www.artlebedev.ru/kovodstvo/sections/188/):
+пользовательский ввод священен, закрытие вкладки/краш не должны его стирать. Подключай по
+умолчанию для любой нетривиальной формы (создание/редактирование сущности, длинная форма), не
+только по напоминанию.
+
+```tsx
+<Form
+  initialValue={data}
+  onSubmit={handleSubmit}
+  persistence={{ key: 'my-form', excludeFields: ['password', 'cvv'] }}
+>
+  ...
+</Form>
+```
+
+⛔ **Чувствительные поля** (пароль, номер карты, CVV, срок действия) — через `excludeFields`,
+они никогда не попадают в сохранённый снимок. Подробнее и полный список опций —
+[docs/form-level.md § localStorage Persistence](./docs/form-level.md#localstorage-persistence-v0160).
+
 ## Связанные документы
 
 - [/.claude/docs/forms.md](../../.claude/docs/forms.md) — документация по формам

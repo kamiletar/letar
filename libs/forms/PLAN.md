@@ -4,6 +4,23 @@
 
 ---
 
+## ✅ [2026-08-12] `useFormPersistence` — `excludeFields` для чувствительных полей + документация — закрыто
+
+Задача QuietRidge (письмо #166, тред `form-feature-request`): у `useFormPersistence`
+(`libs/forms/src/lib/declarative/form-persistence.tsx`) не было способа исключить поля из
+снимка localStorage — недопустимо для паролей/номеров карт/CVV/срока действия. Плюс хук вообще
+не был задокументирован в `libs/forms/README.md` — только JSDoc в файле, на практике не
+подключался, потому что про него не вспоминали.
+
+Реализовано: `FormPersistenceConfig.excludeFields?: string[]`, `saveValues` вычищает эти ключи
+перед сериализацией (shallow omit), при восстановлении исключённые поля просто отсутствуют в
+`savedData`. Тип пробрасывается автоматически через `<Form persistence={{...}}>` — правок в
+`form-types.ts`/`use-form-features.ts` не потребовалось. Задокументировано в трёх местах:
+`docs/form-level.md` (полное описание опции), `libs/forms/README.md` (новый раздел «Черновики
+форм», как явно просила QuietRidge), `.claude/docs/forms.md` (по прямому запросу Ками в этом же
+заходе). Версия `2.3.1` → `2.4.0`. Тесты — 2 новых в `form-persistence.spec.tsx` (не пишет
+excludeFields в снимок; при восстановлении отсутствуют в `savedData`), `nx test forms` зелёный.
+
 ## ✅ [2026-08-11] `lazy()`-изоляция тяжёлых peer-deps четырёх полей — закрыто
 
 По аудиту QuietRidge (тред `forms-phase7-3-shadcn`, письмо #33): `FieldRichText`, `FieldMaskedInput`,
