@@ -212,6 +212,38 @@ describe('MaskController', () => {
     expect(input.value).toBe('770-123')
   })
 
+  it('onRejectedInput: символ, не подходящий ни под один токен маски, объявляется отдельно', () => {
+    const rejected: string[] = []
+    controller = new MaskController(input, { mask: DEPT_MASK, onRejectedInput: (r) => rejected.push(r) })
+    controller.attach()
+    typeChar(input, '7')
+    typeChar(input, 'a') // не цифра — DEPT_MASK состоит только из токена '9'
+
+    expect(rejected).toEqual(['a'])
+    expect(controller.getValue()).toBe('7') // отвергнутый символ не попал в значение
+  })
+
+  it('onRejectedInput не срабатывает для принятого символа', () => {
+    const rejected: string[] = []
+    controller = new MaskController(input, { mask: DEPT_MASK, onRejectedInput: (r) => rejected.push(r) })
+    controller.attach()
+    typeChar(input, '7')
+
+    expect(rejected).toEqual([])
+  })
+
+  it('onPasteMode: "reject" полностью блокирует вставку из буфера', () => {
+    controller = new MaskController(input, { mask: DEPT_MASK, onPasteMode: 'reject' })
+    controller.attach()
+    typeChar(input, '7')
+
+    input.dispatchEvent(
+      new InputEvent('beforeinput', { inputType: 'insertFromPaste', data: '770123', bubbles: true, cancelable: true }),
+    )
+    // beforeinput отменён — input-события с этим pendingEdit не последует, значение не меняется
+    expect(controller.getValue()).toBe('7')
+  })
+
   it('setValue: программная установка форматирует и не создаёт точку в истории пользователя', () => {
     controller = new MaskController(input, { mask: DEPT_MASK })
     controller.attach()

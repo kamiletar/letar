@@ -2316,23 +2316,70 @@ Backspace в уже заполненном номере телефона дав�
 
 ---
 
-### Этап 3. React-биндинг и `Form.Field.MaskedInput`
+### Этап 3. React-биндинг и `Form.Field.MaskedInput` — ✅ [2026-08-12]
 
-- [ ] Хук/биндинг в `forms-react` — ядро в DOM не пишет само, значение отдаётся наружу.
-- [ ] Новый `Form.Field.MaskedInput` (API с нуля, MASK_ENGINE.md §6.6).
-- [ ] **Режимы**: `'live'` (дефолт) / `'blur'` / `'off'`.
-- [ ] **`mask: string | string[] | ((raw) => string | null)`** — возврат `null` означает «для
-      этого ввода маски нет, ведём себя как свободное поле».
-- [ ] **Разделение `value` / `displayValue`** — валидация всегда по сырому значению.
-- [ ] **Обязательный `formatDescription`** (WCAG 3.3.2) — без него ошибка в dev.
-- [ ] **Объявление отвергнутого символа** через `aria-live="polite"`, включено по умолчанию.
-      Только `polite`, никогда `assertive`. Объявлять отказ, а не форматирование.
-- [ ] **`onPaste: 'normalize' | 'reject'`** — варианта `truncate` в типах нет.
-- [ ] Шаблон маски **не попадает в `value`** — визуальная подсказка отдельным слоем с
-      `aria-hidden` (приём USWDS) либо текст формата у label.
+- [x] Хук/биндинг в `forms-react` (`useMaskField`, `libs/forms-react/src/lib/field/use-mask-field.ts`)
+      — ядро в DOM не пишет само, наружу отдаётся только сырое значение (`onValueChange`).
+- [x] Новый `Form.Field.MaskedInput` (API с нуля, MASK_ENGINE.md §6.6) —
+      `libs/forms/src/lib/declarative/form-fields/text/field-masked-input.tsx`. Опции imask
+      (`showMaskOnFocus`, `placeholderChar`, `clearIncomplete`, `autoUnmask`) не перенесены —
+      решение §8.3, продуктовых потребителей не было.
+- [x] **Режимы**: `'live'` (дефолт) / `'blur'` / `'off'`. `'live'` держит `MaskController`
+      (Этап 2) на неконтролируемом React `<input>` (`defaultValue`, DOM — источник истины);
+      `'blur'`/`'off'` — обычный контролируемый инпут без DOM-контроллера (упрощение: там нет
+      проблемы «каретка прыгает на каждое нажатие», ради которой Этап 2 вообще писан).
+- [x] **`mask: string | string[] | ((raw) => string | null)`** — `string[]` резолвится выбором
+      варианта с максимальным `unformat(raw, candidate).length`; функция и `null` — как в
+      MASK_ENGINE.md §6.6 («для этого ввода маски нет, свободное поле»).
+- [x] **Разделение `value` / `displayValue`** — `field.state.value` (сырое, из `useStore`) идёт
+      в валидацию; `displayValue`/DOM-значение — только отображение.
+- [x] **Обязательный `formatDescription`** (WCAG 3.3.2) — без него `console.error` в любой
+      сборке (без `NODE_ENV`-гейта — см. предупреждение ниже) и без aria-describedby.
+- [x] **Объявление отвергнутого символа** через `aria-live="polite"`, включено по умолчанию —
+      `MaskController.onRejectedInput` (Этап 2, дополнено сейчас) → `useMaskField` →
+      визуально-скрытый `<span aria-live="polite">` в поле. Только `polite`, недоступно снаружи
+      переключить на `assertive`.
+- [x] **`onPaste: 'normalize' | 'reject'`** — `'reject'` блокирует `insertFromPaste` на уровне
+      `beforeinput` в самом `MaskController` (`onPasteMode`). Варианта `truncate` в типах нет.
+- [x] Шаблон маски **не попадает в `value`** (структурно невозможно — `value`/`displayValue`
+      разделены на уровне типов). Визуальная подсказка формата — **упрощённый вариант**: текст
+      `formatDescription` рядом с label, а не позиционированный по символам `aria-hidden`-слой
+      поверх `<input>` (приём USWDS). Полный слой остался нерешённым пунктом MASK_ENGINE.md §8
+      («Судьба showMaskOnFocus») — не блокирует критерий готовности этапа, но и не закрыт.
 
-**Критерий готовности:** a11y-чеклист MASK_ENGINE.md §8 закрыт целиком; поле работает в
-`form-develop-app`.
+**Статус:** 6 новых тестов `use-mask-field.spec.tsx` (forms-react) + 2 новых теста
+`controller.spec.ts` (onRejectedInput/onPasteMode, forms-core) + 12 тестов
+`field-masked-input.spec.tsx` (forms, переписаны под новый API) — все зелёные.
+`nx typecheck:tsgo`/`nx lint` чисты на `forms-core`/`forms-react`/`forms`. Версии: `forms-core`
+0.4.0→0.5.0, `forms-react` 0.2.1→0.3.0, `forms` 2.0.5→2.1.0.
+
+⚠️ **`mask` в типе `MaskedInputFieldProps` — формально опционален**, не по решению API, а из-за
+schema-driven `field-type-mapper.tsx` (`case 'maskedInput'`), где пропсы поля приходят единым
+слабо типизированным `Record` из меты `ui.mask` — TS не может доказать, что `mask` там есть.
+Без явного `mask` поле логирует `console.error` и работает как `Form.Field.String` (не зависает
+в неопределённом состоянии). Сам `ui.mask` в Zod-мете по-прежнему нереализован — Этап 4.
+
+⚠️ **`onValueChange`/`onRejectedInput` в зависимостях `useCallback` ref-колбэка** (`use-mask-field.ts`)
+— смена их идентичности между рендерами пересоздаёт `MaskController` и теряет undo-стек. На
+практике `field.handleChange` от TanStack Form достаточно стабилен, но это не гарантия API,
+задокументированное как известное ограничение, не проверенное живой браузерной сессией (в
+отличие от Этапа 2, где именно живая проверка нашла реальный баг).
+
+✅ **Живая браузерная проверка (Browser pane, реальный Chromium) — проведена**, на `/masked-demo`
+(`form-develop-app`, существующая демо-страница, не переписана под новый API — используется как
+есть). Проверено: посимвольный live-ввод и форматирование (`passport` — `99 99 999999`, `snils` —
+`999-999-999 99`), отказ символа не по алфавиту маски с объявлением через
+`aria-live="polite"` (`liveText: "Символ не соответствует формату поля"`, значение поля не
+изменилось), Backspace (через ручной `InputEvent('beforeinput'/'input', {inputType:
+'deleteContentBackward'})` — та же ограниченность тулинга, что и в Этапе 2: `computer{action:
+"key"}` не бьёт по нативному `beforeinput`). Багов не найдено. `useEffect`-синхронизация внешнего
+`value` (сброс формы) живым Chromium не проверялась — только jsdom-тестами; стоит перепроверить
+перед Этапом 4, если там появится реальный сценарий сброса формы с маской.
+
+**Критерий готовности:** a11y-таблица MASK_ENGINE.md §6.6 закрыта (все 6 строк реализованы, кроме
+позиционированного `aria-hidden`-оверлея — сознательно упрощён до текста у label). Поле работает
+в `form-develop-app` (`/masked-demo`, существующая демо-страница, без переноса на новый API —
+предупреждения в dev-консоли ожидаемы до Этапа 4/7).
 
 ---
 

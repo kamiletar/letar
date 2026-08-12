@@ -336,14 +336,14 @@ import { Form } from '@letar/forms'
 
 ### Опциональные зависимости (npm)
 
-| Пакет                       | Для чего                          |
-| --------------------------- | --------------------------------- |
-| `@dnd-kit/*`                | Drag & drop сортировка в массивах |
-| `use-mask-input`            | Phone, MaskedInput                |
-| `@tiptap/*`                 | RichText редактор                 |
-| `@uiw/react-json-view`      | Form.DebugValues (JSON инспектор) |
-| `next-intl`                 | i18n интеграция                   |
-| `@marsidev/react-turnstile` | CAPTCHA (Cloudflare Turnstile)    |
+| Пакет                       | Для чего                                                                                                                                                  |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@dnd-kit/*`                | Drag & drop сортировка в массивах                                                                                                                         |
+| `use-mask-input`            | 8 документных полей (`createDocumentField`) — до миграции на `@letar/forms-core/mask`, Фаза 8 Этап 4. `Field.Phone`/`Field.MaskedInput` уже не используют |
+| `@tiptap/*`                 | RichText редактор                                                                                                                                         |
+| `@uiw/react-json-view`      | Form.DebugValues (JSON инспектор)                                                                                                                         |
+| `next-intl`                 | i18n интеграция                                                                                                                                           |
+| `@marsidev/react-turnstile` | CAPTCHA (Cloudflare Turnstile)                                                                                                                            |
 
 ---
 

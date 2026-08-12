@@ -244,21 +244,39 @@ export interface SwitchFieldProps extends Omit<BaseFieldProps, 'placeholder'> {
 // ============================================================================
 
 /**
- * Props for masked input field
+ * Props for masked input field (Фаза 8, Этап 3 — API спроектирован заново поверх
+ * `@letar/forms-core/mask`, опции `use-mask-input` (imask) не переносятся, см. MASK_ENGINE.md §8).
  */
 export interface MaskedInputFieldProps extends BaseFieldProps {
-  /** Mask pattern (e.g., '99 99 999999' for passport) */
-  mask?: string | string[]
-  /** Placeholder character for unfilled positions (default: '_') */
-  placeholderChar?: string
-  /** Show mask on focus */
-  showMaskOnFocus?: boolean
-  /** Show mask on hover */
-  showMaskOnHover?: boolean
-  /** Clear incomplete input on blur */
-  clearIncomplete?: boolean
-  /** Return value without mask (without mask characters) */
-  autoUnmask?: boolean
+  /**
+   * Шаблон маски. `string[]` — движок сам выбирает вариант, под который сырое значение
+   * раскладывается лучше остальных. Функция — маска зависит от уже введённого значения
+   * (телефон по коду страны и т.п.); `null` означает «для этого ввода маски нет, ведём себя
+   * как свободное поле» (MASK_ENGINE.md §6.6).
+   *
+   * Формально опционально — только чтобы совпасть с сигнатурой schema-driven маппера
+   * (`field-type-mapper.tsx`, `case 'maskedInput'`), где пропсы приходят единым `Record`
+   * из `ui.mask` меты. Без явного `mask` поле работает как обычный `Form.Field.String` и
+   * предупреждает в dev-консоли — при прямом использовании компонента `mask` обязателен
+   * по смыслу.
+   */
+  mask?: string | string[] | ((raw: string) => string | null)
+  /**
+   * Режим форматирования. `'live'` (по умолчанию) — маска на каждое нажатие; `'blur'` —
+   * формат при уходе из поля, снятие при возврате; `'off'` — только нормализация по алфавиту
+   * токенов, без группировки литералами.
+   */
+  formatMode?: 'live' | 'blur' | 'off'
+  /**
+   * Текстовое описание формата ввода (например, «Формат: XXX-XXX»), обязательное по WCAG 3.3.2 —
+   * формат должен быть известен до начала ввода. Без него — ошибка в dev-консоли.
+   */
+  formatDescription?: string
+  /**
+   * `'reject'` — вставка из буфера полностью блокируется. По умолчанию `'normalize'` — движок
+   * сам отфильтрует недопустимые символы. Варианта `truncate` нет (MASK_ENGINE.md §6.6).
+   */
+  onPaste?: 'normalize' | 'reject'
 }
 
 /**

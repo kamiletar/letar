@@ -45,6 +45,13 @@ export type {
   UseAsyncSearchResult,
 } from './lib/field/use-async-search'
 export { useDebounce } from './lib/field/use-debounce'
+export type {
+  MaskFieldFormatMode,
+  MaskFieldMask,
+  UseMaskFieldOptions,
+  UseMaskFieldResult,
+} from './lib/field/use-mask-field'
+export { useMaskField } from './lib/field/use-mask-field'
 export { useResolvedFieldProps } from './lib/field/use-resolved-field-props'
 
 // i18n форм (React-часть; словари и error map — в @letar/forms-core/i18n)

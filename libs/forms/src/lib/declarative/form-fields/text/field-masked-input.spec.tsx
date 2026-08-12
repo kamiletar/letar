@@ -2,7 +2,7 @@ import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { Form } from '../../'
 
@@ -15,7 +15,7 @@ describe('FieldMaskedInput', () => {
     it('рендерит input с маской', () => {
       render(
         <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
-          <Form.Field.MaskedInput name="code" label="Код" mask="999-999" />
+          <Form.Field.MaskedInput name="code" label="Код" mask="999-999" formatDescription="3 цифры - 3 цифры" />
         </Form>,
         { wrapper: TestWrapper },
       )
@@ -27,7 +27,7 @@ describe('FieldMaskedInput', () => {
     it('устанавливает data-field-name', () => {
       render(
         <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
-          <Form.Field.MaskedInput name="code" mask="999-999" />
+          <Form.Field.MaskedInput name="code" mask="999-999" formatDescription="Формат: XXX-XXX" />
         </Form>,
         { wrapper: TestWrapper },
       )
@@ -38,12 +38,30 @@ describe('FieldMaskedInput', () => {
     it('рендерит placeholder', () => {
       render(
         <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
-          <Form.Field.MaskedInput name="code" mask="999-999" placeholder="___-___" />
+          <Form.Field.MaskedInput
+            name="code"
+            mask="999-999"
+            placeholder="___-___"
+            formatDescription="Формат: XXX-XXX"
+          />
         </Form>,
         { wrapper: TestWrapper },
       )
 
       expect(screen.getByPlaceholderText('___-___')).toBeInTheDocument()
+    })
+
+    it('рендерит formatDescription и связывает его через aria-describedby (WCAG 3.3.2)', () => {
+      render(
+        <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
+          <Form.Field.MaskedInput name="code" mask="999-999" formatDescription="Формат: 3 цифры, дефис, 3 цифры" />
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      const description = screen.getByText('Формат: 3 цифры, дефис, 3 цифры')
+      const input = screen.getByRole('textbox')
+      expect(input).toHaveAttribute('aria-describedby', description.id)
     })
   })
 
@@ -52,7 +70,7 @@ describe('FieldMaskedInput', () => {
       const user = userEvent.setup()
       render(
         <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
-          <Form.Field.MaskedInput name="code" label="Код" mask="999-999" />
+          <Form.Field.MaskedInput name="code" label="Код" mask="999-999" formatDescription="Формат: XXX-XXX" />
         </Form>,
         { wrapper: TestWrapper },
       )
@@ -67,7 +85,7 @@ describe('FieldMaskedInput', () => {
       const user = userEvent.setup()
       render(
         <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
-          <Form.Field.MaskedInput name="code" label="Код" mask="aa-999" />
+          <Form.Field.MaskedInput name="code" label="Код" mask="aa-999" formatDescription="Формат: буквы-цифры" />
         </Form>,
         { wrapper: TestWrapper },
       )
@@ -78,35 +96,48 @@ describe('FieldMaskedInput', () => {
       expect(input).toHaveValue('AB-123')
     })
 
-    it('отклоняет символы не подходящие под маску', async () => {
+    it('пропускает символы не по маске, не дописывая незаполненный хвост', async () => {
       const user = userEvent.setup()
       render(
         <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
-          <Form.Field.MaskedInput name="code" label="Код" mask="999-999" />
+          <Form.Field.MaskedInput name="code" label="Код" mask="999-999" formatDescription="Формат: XXX-XXX" />
         </Form>,
         { wrapper: TestWrapper },
       )
 
       const input = screen.getByRole('textbox')
-      // "a" — не цифра, маска '9' её не пропускает; незаполненные позиции показывают placeholder
+      // "a"/"b" — не цифры, движок их отбрасывает; незаполненный хвост маски не дорисовывается
       await user.type(input, 'a12b34')
 
-      expect(input).toHaveValue('123-4__')
+      expect(input).toHaveValue('123-4')
     })
 
-    it('форматирует начальное значение по маске при фокусе', async () => {
+    it('объявляет отвергнутый символ через aria-live="polite"', async () => {
       const user = userEvent.setup()
       render(
-        <Form initialValue={{ code: '123456' }} onSubmit={vi.fn()}>
-          <Form.Field.MaskedInput name="code" label="Код" mask="999-999" />
+        <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
+          <Form.Field.MaskedInput name="code" label="Код" mask="999-999" formatDescription="Формат: XXX-XXX" />
         </Form>,
         { wrapper: TestWrapper },
       )
 
       const input = screen.getByRole('textbox')
-      await user.click(input)
+      await user.type(input, 'a')
 
-      expect(input).toHaveValue('123-456')
+      const liveRegion = document.querySelector('[aria-live="polite"]')
+      expect(liveRegion).not.toBeNull()
+      expect(liveRegion?.textContent).not.toBe('')
+    })
+
+    it('форматирует начальное значение по маске при монтировании', () => {
+      render(
+        <Form initialValue={{ code: '123456' }} onSubmit={vi.fn()}>
+          <Form.Field.MaskedInput name="code" label="Код" mask="999-999" formatDescription="Формат: XXX-XXX" />
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      expect(screen.getByRole('textbox')).toHaveValue('123-456')
     })
   })
 
@@ -114,7 +145,7 @@ describe('FieldMaskedInput', () => {
     it('рендерит в disabled состоянии', () => {
       render(
         <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
-          <Form.Field.MaskedInput name="code" mask="999-999" disabled />
+          <Form.Field.MaskedInput name="code" mask="999-999" disabled formatDescription="Формат: XXX-XXX" />
         </Form>,
         { wrapper: TestWrapper },
       )
@@ -125,12 +156,40 @@ describe('FieldMaskedInput', () => {
     it('рендерит helperText', () => {
       render(
         <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
-          <Form.Field.MaskedInput name="code" mask="999-999" helperText="Формат: XXX-XXX" />
+          <Form.Field.MaskedInput
+            name="code"
+            mask="999-999"
+            helperText="Формат: XXX-XXX"
+            formatDescription="Формат: XXX-XXX"
+          />
         </Form>,
         { wrapper: TestWrapper },
       )
 
-      expect(screen.getByText('Формат: XXX-XXX')).toBeInTheDocument()
+      expect(screen.getAllByText('Формат: XXX-XXX').length).toBeGreaterThan(0)
+    })
+  })
+
+  describe('a11y-контракт (MASK_ENGINE.md §6.6)', () => {
+    let consoleErrorSpy: ReturnType<typeof vi.spyOn>
+
+    beforeEach(() => {
+      consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+      consoleErrorSpy.mockRestore()
+    })
+
+    it('без formatDescription — ошибка в dev-консоли (WCAG 3.3.2)', () => {
+      render(
+        <Form initialValue={{ code: '' }} onSubmit={vi.fn()}>
+          <Form.Field.MaskedInput name="code" mask="999-999" />
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('formatDescription'))
     })
   })
 })

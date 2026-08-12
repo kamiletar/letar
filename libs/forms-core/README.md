@@ -55,13 +55,14 @@ forms-core  →  forms-react  →  forms (Chakra) / forms-shadcn
 | `@letar/forms-core/uikit`         | Типовой контракт UIKit (~20 примитивов) — см. ниже                             |
 | `@letar/forms-core/mask`          | Mask-движок + DOM-контроллер (замена `use-mask-input`, Фаза 8) — см. ниже      |
 
-## Mask-движок (Фаза 8, Этапы 1-2)
+## Mask-движок (Фаза 8, Этапы 1-3)
 
 `@letar/forms-core/mask` — собственный framework-free движок масок ввода, замена
 `use-mask-input`/Inputmask (весит больше самой библиотеки, 645 открытых issue у апстрима,
 не чинит undo/paste/Android — разбор в [MASK_ENGINE.md](../forms/MASK_ENGINE.md)). Ядро (чистые
-функции) и DOM-контроллер готовы — React-биндинг и `Form.Field.MaskedInput` (Этап 3) ещё не
-начаты.
+функции), DOM-контроллер и React-биндинг (`@letar/forms-react` → `useMaskField`) готовы;
+`Form.Field.MaskedInput` в `@letar/forms` переведён на движок. Миграция остальных существующих
+полей (`FieldPhone`, `FieldCreditCard`) — Этап 4.
 
 ```typescript
 import { applyChange, caretBoundary, format, formatToParts, unformat } from '@letar/forms-core/mask'
@@ -128,6 +129,53 @@ controller.detach()
 страны «7» в «+7 (999)…») проходит паттерн токена `9` и съедалась как будто введена пользователем,
 сдвигая всё вправо. Починено — `previousValue` классифицируется позиционно (`classifyValue`), не
 как raw-поток. Регресс-тест — `apply-change.spec.ts`.
+
+`MaskControllerOptions` (Этап 3) дополнительно принимает:
+
+- `onRejectedInput?: (rejected: string) => void` — вставка целиком не прошла ни одного токена
+  маски (обычно — одно нажатие не по алфавиту). Основа для `aria-live="polite"`-объявления в
+  React-биндинге (MASK_ENGINE.md §6.6). ⚠️ Ловит только полный отказ вставки — частичный отказ
+  смешанного текста посимвольно не различается, тот же класс ограничения, что и препроцессор
+  вставки/автозаполнения (открытая часть Этапа 4).
+- `onPasteMode?: 'normalize' | 'reject'` — `'reject'` полностью блокирует `insertFromPaste` на
+  уровне `beforeinput`, вместо нормализации по маске. По умолчанию `'normalize'`.
+
+### React-биндинг (Этап 3, `@letar/forms-react`)
+
+`useMaskField` — хук, отдающий наружу только сырое значение (`onValueChange`); ядро само в DOM
+не пишет. Три режима форматирования — не варианты одной реализации, а разная степень нагрузки:
+
+```typescript
+import { useMaskField } from '@letar/forms-react'
+
+const { inputProps, onFocus, onBlur, displayValue, resolvedMask } = useMaskField({
+  mask: '+7 (999) 999-99-99', // string | string[] | ((raw: string) => string | null)
+  value: rawValue, // сырое значение поля формы — источник истины для валидации
+  onValueChange: (raw) => field.handleChange(raw),
+  formatMode: 'live', // 'live' (дефолт) | 'blur' | 'off'
+  onPasteMode: 'normalize',
+  onRejectedInput: () => announceRejection(),
+})
+
+return <input {...inputProps} onFocus={onFocus} onBlur={onBlur} />
+```
+
+- **`'live'`** — держит `MaskController` (undo/IME/autofill из Этапа 2). Пока он активен,
+  `<input>` **неконтролируемый** React'ом (`defaultValue`, без `value`/`onChange`): DOM —
+  источник истины, `setRangeText`-запись контроллера конфликтует с управляемым `value` (тот
+  самый WebKit-баг, из-за которого `FieldPhone` в своё время отказался от `use-mask-input`).
+- **`'blur'`/`'off'`** — обычный контролируемый `<input>` без DOM-контроллера: в `'blur'`
+  форматирование применяется только при потере фокуса (во время редактирования показывается
+  сырое значение), в `'off'` — только фильтрация по алфавиту токенов, без группировки литералами.
+  Это осознанное упрощение: каретка не «прыгает» на каждое нажатие вне `'live'`, поэтому там не
+  нужна вся подсистема Этапа 2.
+- `mask: string[]` — движок выбирает вариант, под который сырое значение раскладывается лучше
+  остальных (`unformat(value, candidate).length` максимален). `mask: (raw) => string | null` —
+  `null` означает «маски нет, свободный ввод» (телефонный кейс, MASK_ENGINE.md §6.6).
+
+⚠️ Смена идентичности `onValueChange`/`onRejectedInput` между рендерами пересоздаёт
+`MaskController` (теряя undo-стек) — колбэки должны быть стабильны по ссылке
+(`useCallback`/стабильный `field.handleChange` от TanStack Form).
 
 ## UIKit-контракт (Фаза 7.1, Этап 4)
 

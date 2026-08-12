@@ -7,6 +7,23 @@ export interface MaskControllerOptions {
   maskOptions?: MaskOptions
   /** Вызывается после каждого закоммиченного изменения значения (включая undo/redo). */
   onChange?: (value: string) => void
+  /**
+   * Вызывается, когда вставляемый текст целиком не прошёл ни одного паттерна токена маски
+   * (MASK_ENGINE.md §6.6 — «отвергнутый символ должен быть объявлен», основа для
+   * `aria-live="polite"` в React-биндинге). Получает отвергнутую строку как есть.
+   *
+   * ⚠️ Обнаруживает только полный отказ всей вставки (обычный случай — одно нажатие клавиши
+   * не по маске). Частичный отказ при вставке смешанного текста (часть символов подходит,
+   * часть нет) не различается посимвольно — открытая часть Этапа 4 наравне с препроцессором
+   * вставки/автозаполнения (см. `apply-change.ts`).
+   */
+  onRejectedInput?: (rejected: string) => void
+  /**
+   * `'reject'` — вставка из буфера обмена (`insertFromPaste`) полностью блокируется на уровне
+   * `beforeinput`, вместо нормализации по маске. По умолчанию `'normalize'` — движок сам
+   * отфильтрует символы, не подходящие под маску (варианта `truncate` нет, MASK_ENGINE.md §6.6).
+   */
+  onPasteMode?: 'normalize' | 'reject'
   /** Максимальный размер стека undo (по умолчанию 100 записей). */
   historyLimit?: number
 }
@@ -76,6 +93,8 @@ export class MaskController {
   private mask: string
   private readonly maskOptions: MaskOptions | undefined
   private readonly onChange: ((value: string) => void) | undefined
+  private readonly onRejectedInput: ((rejected: string) => void) | undefined
+  private readonly onPasteMode: 'normalize' | 'reject'
   private readonly historyLimit: number
 
   private value = ''
@@ -91,6 +110,8 @@ export class MaskController {
     this.mask = options.mask
     this.maskOptions = options.maskOptions
     this.onChange = options.onChange
+    this.onRejectedInput = options.onRejectedInput
+    this.onPasteMode = options.onPasteMode ?? 'normalize'
     this.historyLimit = options.historyLimit ?? 100
   }
 
@@ -176,6 +197,10 @@ export class MaskController {
     if (event.inputType === 'historyRedo') {
       event.preventDefault()
       this.redo()
+      return
+    }
+    if (this.onPasteMode === 'reject' && event.inputType === 'insertFromPaste') {
+      event.preventDefault()
       return
     }
     this.pendingEdit = {
@@ -296,6 +321,12 @@ export class MaskController {
   }
 
   private commit(input: ApplyChangeInput): void {
+    if (input.inputType === 'insert' && input.addedValue.length > 0) {
+      const accepted = unformat(input.addedValue, this.mask, this.maskOptions)
+      if (accepted.length === 0) {
+        this.onRejectedInput?.(input.addedValue)
+      }
+    }
     const before = this.snapshot()
     const result = applyChange(input)
     this.pushHistory(before)

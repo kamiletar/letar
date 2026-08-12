@@ -69,14 +69,14 @@ export const FieldString = createField<StringFieldProps, string>({
 
 ## Что внутри
 
-| Область     | Содержимое                                                                                                 |
-| ----------- | ---------------------------------------------------------------------------------------------------------- |
-| Контекст    | `DeclarativeFormContext`, `useDeclarativeForm(Optional)`, `FormGroup`/`useFormGroup`                       |
-| Сборка поля | `createFieldPrimitives` → `createField`, `FieldWrapper`, `FieldErrorBoundary`                              |
-| Хуки поля   | `useResolvedFieldProps`, `useDeclarativeField`, `useAsyncFieldValidation`, `useAsyncSearch`, `useDebounce` |
-| Утилиты     | `formatFieldErrors`, `hasFieldErrors`, `getFieldErrors`, `resolveAutoComplete`                             |
-| i18n        | `FormI18nProvider`, `useFormI18n`, `useLocalizedOptions`, `getLocalizedValue`                              |
-| Типы        | `BaseFieldProps`, `DeclarativeFormContextValue`, `ResolvedFieldProps`, `AppFormApi`                        |
+| Область     | Содержимое                                                                                                                 |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Контекст    | `DeclarativeFormContext`, `useDeclarativeForm(Optional)`, `FormGroup`/`useFormGroup`                                       |
+| Сборка поля | `createFieldPrimitives` → `createField`, `FieldWrapper`, `FieldErrorBoundary`                                              |
+| Хуки поля   | `useResolvedFieldProps`, `useDeclarativeField`, `useAsyncFieldValidation`, `useAsyncSearch`, `useDebounce`, `useMaskField` |
+| Утилиты     | `formatFieldErrors`, `hasFieldErrors`, `getFieldErrors`, `resolveAutoComplete`                                             |
+| i18n        | `FormI18nProvider`, `useFormI18n`, `useLocalizedOptions`, `getLocalizedValue`                                              |
+| Типы        | `BaseFieldProps`, `DeclarativeFormContextValue`, `ResolvedFieldProps`, `AppFormApi`                                        |
 
 `BaseFieldProps` живёт здесь, а не в скине, именно потому, что в нём нет ни одного пропа про
 оформление. `size`, `variant`, `colorPalette` — словарь конкретной библиотеки, они остаются в
@@ -94,6 +94,14 @@ export const FieldString = createField<StringFieldProps, string>({
 
 `allowTypeImports` намеренно не ставится: тип из UI-библиотеки в сигнатуре — та же протечка
 границы, просто отложенная до момента, когда её кто-то попробует реализовать на другом скине.
+
+## Mask-движок — React-биндинг (Фаза 8, Этап 3)
+
+`useMaskField` — единственный хук здесь, который пишет напрямую в DOM (в `formatMode: 'live'`
+через `MaskController` из `@letar/forms-core/mask`, неконтролируемый `<input>`). Подробности
+API, три режима форматирования и почему `'live'` не может быть управляемым React — в
+[`@letar/forms-core/README.md`](../forms-core/README.md#react-биндинг-этап-3-letarforms-react).
+Chakra-потребитель — `Form.Field.MaskedInput` в `@letar/forms`.
 
 ## Команды
 
