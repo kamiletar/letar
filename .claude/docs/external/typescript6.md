@@ -77,7 +77,7 @@ type CSSProperty = `--${string}`
 type Route = `/${string}`
 
 // Паттерн letar
-type AppName = 'driving-school' | 'premium-rosstil' | 'imot'
+type AppName = 'driving-school' | 'aboi' | 'svoichuzhie'
 type EnvKey = `${Uppercase<AppName>}_DATABASE_URL`
 // 'DRIVING-SCHOOL_DATABASE_URL' | ...
 
@@ -173,7 +173,7 @@ function isUser(value: unknown): value is User {
 
 // asserts — assertion function
 function assertDefined<T>(value: T | null | undefined): asserts value is T {
-  if (value == null) throw new Error('Value is null or undefined')
+  if (value == null) { throw new Error('Value is null or undefined') }
 }
 
 // Использование
