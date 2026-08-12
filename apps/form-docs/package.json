@@ -5,6 +5,15 @@
   "type": "module",
   "nx": {
     "name": "form-docs",
-    "implicitDependencies": ["@letar/forms", "@letar/chakra-provider", "@letar/analytics", "@letar/seo"]
+    "implicitDependencies": [
+      "@letar/forms",
+      "@letar/chakra-provider",
+      "@letar/analytics",
+      "@letar/seo",
+      "@letar/glitchtip"
+    ]
+  },
+  "dependencies": {
+    "@letar/glitchtip": "workspace:*"
   }
 }

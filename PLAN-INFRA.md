@@ -8414,16 +8414,32 @@ SaaS-Sentry отпадает отдельно: тело ошибки тащит 
    `is_deleted` после проверки. `archetest`/`grandslamcup` — деплой-запрос отправлен в прошлой
    сессии, ответа от BlackCove пока нет (не в inbox на 2026-08-12 13:02 UTC).
 
-   **Список кандидатов (`PLAN-INFRA.md`, актуализирован 2026-08-12) — сделано 8 из ~19:**
+   ✅ **Четвёртый прогон тиража (2026-08-12): `auth-hub`, `form-docs`, `form-example`.**
+   `auth-hub` — тот же цикл, тот же eslint-disable обход, staging+production. `form-docs` и
+   `form-example` — только production (у обоих нет `docker-compose.staging.yml`; у `form-example`
+   есть `docker-compose.yml`, но это локальный `docker compose up` для разработки, не staging —
+   GlitchTip туда не подключался). `form-example` упёрся в 11 pre-existing typecheck-ошибок
+   (`Property 'contact'/'product' does not exist on type 'PrismaClient'`) — не связаны с этим
+   изменением: `src/generated/` у приложения содержит только `form-schemas/`, Prisma-клиент
+   никогда не генерировался (`zenstack:generate` не запускался), это состояние окружения
+   приложения, не регрессия. У `form-docs`/`form-example` вообще нет `eslint.config.mjs` —
+   лишний повод не наступить на ложную блокировку `@nx/enforce-module-boundaries`: без
+   ESLint-конфига нет и лint-таргета, правило просто не запускается.
+
+   `umami` исключён из списка кандидатов — это сторонний Docker-образ
+   (`docker-compose.production.yml` без `package.json`/`src/`), не Next.js-приложение в этом
+   репозитории, генератор неприменим в принципе.
+
+   **Список кандидатов (`PLAN-INFRA.md`, актуализирован 2026-08-12) — сделано 11 из ~18:**
    `studio` ✅ деплой, `dashboard` ✅ деплой+проверка, `time` ✅ деплой+проверка, `archetest` ✅
    код+секреты (деплой ждёт ответа), `grandslamcup` ✅ код+секреты (деплой ждёт ответа),
-   `mandala`/`pravda`/`aira-web` ✅ код+секреты (деплой-запрос отправлен только что).
+   `mandala`/`pravda`/`aira-web` ✅ код+секреты (деплой-запрос отправлен), `auth-hub`/`form-docs`/
+   `form-example` ✅ код+секреты (деплой-запрос ещё не отправлен — следующий шаг).
    Осталось из некоммерческих: `dashboard-agent` (не Next.js — Fastify, генератор не подходит,
-   нужна отдельная интеграция), `form-docs`, `form-example`, `kami` (не Next.js — библиотека
-   Prisma), `animatrona-landing`, `animatrona-tracker`, `kami-key-the-landing`, `letar-landing`,
-   `umami`, `auth-hub`. Коммерческие/ПДн (`aboi`, `driving-school`, `dsperevod`, `svoichuzhie`,
-   `aprel8008`, `domwellbes`) и не-Next.js (Electron/React Native) — как в исходном плане п.7,
-   без изменений.
+   нужна отдельная интеграция), `kami` (не Next.js — библиотека Prisma), `animatrona-landing`,
+   `animatrona-tracker`, `kami-key-the-landing`, `letar-landing`. Коммерческие/ПДн (`aboi`,
+   `driving-school`, `dsperevod`, `svoichuzhie`, `aprel8008`, `domwellbes`) и не-Next.js
+   (Electron/React Native) — как в исходном плане п.7, без изменений.
 
 ### Что это даёт агентам
 

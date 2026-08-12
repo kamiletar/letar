@@ -48,16 +48,19 @@ docker compose logs -f web   # ждать "Application startup complete"
 
 ## Подключённые приложения
 
-| Приложение     | Проект (slug)  | Окружения                                                                                                          |
-| -------------- | -------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `studio`       | `studio`       | staging + production                                                                                               |
-| `dashboard`    | `dashboard`    | production (staging-инстанса нет) — DSN в `.env.docker.enc` (2026-08-12), не задеплоено                            |
-| `time`         | `time`         | staging + production — DSN в `.env.docker.enc`/`.env.staging.enc` (2026-08-12), не задеплоено                      |
-| `archetest`    | `archetest`    | staging + production — DSN в `.env.docker.enc`/`.env.staging.enc` (2026-08-12), не задеплоено                      |
-| `grandslamcup` | `grandslamcup` | staging + production — DSN в `.env.docker.enc`/`.env.staging.enc` (2026-08-12), не задеплоено                      |
-| `mandala`      | `mandala`      | staging + production — DSN в `.env.docker.enc`/`.env.staging.enc` (2026-08-12), не задеплоено                      |
-| `pravda`       | `pravda`       | staging + production — DSN в `.env.docker.enc`/`.env.staging.enc` (2026-08-12), не задеплоено                      |
-| `aira-web`     | `aira-web`     | staging + production — `.env.staging.enc` заведён впервые (файла не было), DSN в обоих (2026-08-12), не задеплоено |
+| Приложение     | Проект (slug)  | Окружения                                                                                                                                            |
+| -------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `studio`       | `studio`       | staging + production                                                                                                                                 |
+| `dashboard`    | `dashboard`    | production (staging-инстанса нет) — задеплоено и проверено живьём (клиентская ошибка дошла), 2026-08-12                                              |
+| `time`         | `time`         | staging + production — задеплоено и проверено живьём (клиентская ошибка дошла), 2026-08-12                                                           |
+| `archetest`    | `archetest`    | staging + production — DSN в `.env.docker.enc`/`.env.staging.enc` (2026-08-12), деплой-запрос отправлен, ответа нет                                  |
+| `grandslamcup` | `grandslamcup` | staging + production — DSN в `.env.docker.enc`/`.env.staging.enc` (2026-08-12), деплой-запрос отправлен, ответа нет                                  |
+| `mandala`      | `mandala`      | staging + production — DSN в `.env.docker.enc`/`.env.staging.enc` (2026-08-12), деплой-запрос отправлен                                              |
+| `pravda`       | `pravda`       | staging + production — DSN в `.env.docker.enc`/`.env.staging.enc` (2026-08-12), деплой-запрос отправлен                                              |
+| `aira-web`     | `aira-web`     | staging + production — `.env.staging.enc` заведён впервые (файла не было), DSN в обоих (2026-08-12), деплой-запрос отправлен                         |
+| `auth-hub`     | `auth-hub`     | staging + production — DSN в `.env.docker.enc`/`.env.staging.enc` (2026-08-12), не задеплоено                                                        |
+| `form-docs`    | `form-docs`    | только production (staging-compose нет) — DSN в `.env.docker.enc` (2026-08-12), не задеплоено                                                        |
+| `form-example` | `form-example` | только production (staging-compose нет, есть локальный dev `docker-compose.yml` без GlitchTip) — DSN в `.env.docker.enc` (2026-08-12), не задеплоено |
 
 DSN приложения выдаёт `ProjectKey` при создании проекта в организации — не секрет (тот же принцип,
 что у настоящего Sentry: ключ предназначен для клиентского бандла), но с 2026-08-11 хранится в

@@ -37,6 +37,10 @@ services:
     env_file:
       - .env.staging
     environment:
+      GLITCHTIP_DSN: ${GLITCHTIP_DSN}
+      GLITCHTIP_ENVIRONMENT: ${GLITCHTIP_ENVIRONMENT}
+      NEXT_PUBLIC_GLITCHTIP_DSN: ${NEXT_PUBLIC_GLITCHTIP_DSN}
+      NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT: ${NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT}
       DATABASE_URL: postgresql://lena_user:${DB_PASSWORD:-postgres}@auth-hub-staging-db:5432/lena_auth
       # На staging OAuth/passkeys/magic-link по-настоящему не заходят (тесты покрывают только
       # рендер форм + dev-session admin-флоу) — BETTER_AUTH_URL/NEXT_PUBLIC_APP_URL указывают на

@@ -4,6 +4,15 @@
   "private": true,
   "nx": {
     "name": "form-example",
-    "implicitDependencies": ["@letar/forms", "@letar/demo-protection", "@letar/analytics", "@letar/seo"]
+    "implicitDependencies": [
+      "@letar/forms",
+      "@letar/demo-protection",
+      "@letar/analytics",
+      "@letar/seo",
+      "@letar/glitchtip"
+    ]
+  },
+  "dependencies": {
+    "@letar/glitchtip": "workspace:*"
   }
 }

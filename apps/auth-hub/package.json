@@ -7,13 +7,15 @@
       "@letar/chakra-provider",
       "@letar/analytics",
       "@letar/ui",
-      "@letar/consent"
+      "@letar/consent",
+      "@letar/glitchtip"
     ]
   },
   "dependencies": {
     "@simplewebauthn/browser": "^13.3.0",
     "@simplewebauthn/server": "^13.3.1",
-    "geoip-lite": "^2.0.2"
+    "geoip-lite": "^2.0.2",
+    "@letar/glitchtip": "workspace:*"
   },
   "devDependencies": {
     "@types/geoip-lite": "^1.4.4"

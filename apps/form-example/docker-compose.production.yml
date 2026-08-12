@@ -34,6 +34,10 @@ services:
     env_file:
       - .env.docker
     environment:
+      GLITCHTIP_DSN: ${GLITCHTIP_DSN}
+      GLITCHTIP_ENVIRONMENT: ${GLITCHTIP_ENVIRONMENT}
+      NEXT_PUBLIC_GLITCHTIP_DSN: ${NEXT_PUBLIC_GLITCHTIP_DSN}
+      NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT: ${NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT}
       TZ: Europe/Moscow
       FORCE_COLOR: '1'
       NODE_ENV: production
