@@ -41,6 +41,10 @@ approval, kebab-case в `to`, обнулённая база
 [tree-model-parent-select](/.claude/docs/tree-model-parent-select.md) self-referencing `parentId`
 
 **Формы, UI, компоненты:** [forms](/.claude/docs/forms.md) ⭐ ·
+[react-duplicate-responsive-dom](/.claude/docs/react-duplicate-responsive-dom.md) ⚠️ два JSX-блока
+на `display={{ base:/md: }}` с одинаковым интерактивным контентом — дубль в DOM, не адаптивность ·
+[form-analytics-goals](/.claude/docs/form-analytics-goals.md) цели формы в Метрике/Umami через
+`useFormAnalytics`, consent-aware бесплатно ·
 [ui-components](/.claude/docs/ui-components.md) · [images](/.claude/docs/images.md) ·
 [gallery-pattern](/.claude/docs/gallery-pattern.md) Dropzone + SortablePhotoGrid ·
 [period-navigation-pattern](/.claude/docs/period-navigation-pattern.md) навигация по периоду без JS ·
