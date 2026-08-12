@@ -1,0 +1,28 @@
+{
+  "name": "archetest-e2e",
+  "projectType": "application",
+  "sourceRoot": "apps/archetest-e2e/src",
+  "tags": ["type:e2e", "scope:archetest", "owner:letar"],
+  "implicitDependencies": ["archetest"],
+  "targets": {
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "apps/archetest-e2e"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
+      }
+    },
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/playwright-report/{projectName}"],
+      "options": {
+        "config": "apps/archetest-e2e/playwright.config.ts"
+      }
+    }
+  }
+}
