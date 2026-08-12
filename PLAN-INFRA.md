@@ -1767,7 +1767,7 @@ README (`libs/ui/README.md`) доведён до полноты вручную �
 
 ---
 
-## §22 — JSON-LD (schema.org) дублируется между приложениями 🆕
+## §22 — JSON-LD (schema.org) дублируется между приложениями 🟡 ЧАСТИЧНО (2026-08-12)
 
 > Найдено 2026-07-28 при SEO-аудите `aboi` (маркетинговая сессия, §S у `apps/aboi/PLAN.md`).
 
@@ -1790,7 +1790,7 @@ README (`libs/ui/README.md`) доведён до полноты вручную �
 - Любой следующий интернет-магазин в монорепо (или третий магазинный раздел в существующем
   приложении) с большой вероятностью напишет третью копию тех же функций схемы.org.
 
-### Что предлагается (решение не принято)
+### Что предлагается
 
 1. **`libs/seo` → `@letar/seo`.** Генераторы `productJsonLd`/`breadcrumbJsonLd`/
    `organizationJsonLd`/`faqJsonLd` как чистые функции (вход — плоский DTO, не Prisma-модель,
@@ -1801,13 +1801,46 @@ README (`libs/ui/README.md`) доведён до полноты вручную �
 3. **Ничего не делать сейчас, вернуться после S6.2/S3.5** — если к тому моменту наберётся
    4–5 функций в каждом приложении, перенос всё равно будет дешевле копирования.
 
+### Что сделано (2026-08-12, letar-dev) и что изменилось после разбора
+
+**Решение владельца: вынести сейчас (п.2).** Но при сравнении фактического кода `aboi` и
+`svoichuzhie` оказалось, что дублирование тоньше, чем описано выше:
+
+- `svoichuzhie` не имеет ни `breadcrumbJsonLd`, ни `organizationJsonLd` вообще — только
+  `musicGroupJsonLd`/`eventJsonLd`/`productJsonLd`/`articleJsonLd`/`albumJsonLd`, ни один из
+  которых текстуально не совпадает с генераторами `aboi`.
+- `productJsonLd` у `aboi` (вариантные цены → `AggregateOffer`/`Offer`) и у `svoichuzhie`
+  (простой `Offer` для мерча) расходятся по форме ровно так же, как `estimatePackage()` в §23
+  — это тот же класс ошибки: функция кажется общей по имени, но специфична по товару.
+  **Не выносить `productJsonLd` — та же логика, что вывод §23 про упаковку.**
+- Реально общее — только «конверт» (`@context`/`@type`/`itemListElement` и т.п.) двух
+  генераторов, которые у `aboi` уже были app-agnostic pure functions: `breadcrumbJsonLd` и
+  `organizationJsonLd`. Они параметризованы (`baseUrl`, бренд) и подняты в `@letar/seo`,
+  `aboi/src/lib/seo.ts` переведён на тонкие обёртки (тот же паттерн, что уже был для
+  `getBaseUrl`/`isProductionDomain`). Публичный API `aboi` не менялся — вызовы и тесты
+  (`seo.test.ts`) не тронуты. `svoichuzhie` пока не мигрирован — ему пока нечего мигрировать
+  (нет своих `breadcrumbJsonLd`/`organizationJsonLd`), но при появлении — сразу на общую версию.
+- Инлайн-компонент `JsonLdScript` (`aboi`, `dangerouslySetInnerHTML`) и 6 инлайн-`<script>` в
+  `svoichuzhie` (`JSON.stringify` в текстовом узле, без `dangerouslySetInnerHTML` — осознанный
+  выбор по комментарию в коде) **не объединены** — реальное дублирование (7 копий одного и
+  того же 2-строчного паттерна), но `libs/seo` сейчас чистый `.ts` без JSX/React
+  (`tsconfig.lib.json` не включает `.tsx`, `package.json` без `react` в `peerDependencies`) —
+  добавление компонента требует реконфигурации всей либы, отдельная задача, не походя.
+- typecheck/lint/test (`nx test seo`, `nx test aboi`) зелёные. Commits: `681dd6d1` (libs/seo),
+  `a40304f` (aboi, запушен в `letar-private-aboi`), `b51bd1ee` (bump SHA в letar).
+
 ### ✓ DoD §22
 
-- [ ] Выбран вариант
-- [ ] Если вынесено — `aboi` и `svoichuzhie` мигрированы на `@letar/seo`, локальные
-      `seo.ts`/`jsonld.ts` удалены
-- [ ] `productJsonLd` в `@letar/seo` поддерживает `AggregateOffer` (нужно `aboi` §S3.5
-      после перехода на варианты, §P)
+- [x] Выбран вариант (п.2, вынести сейчас) — решение владельца 2026-08-12
+- [x] `breadcrumbJsonLd`/`organizationJsonLd` в `@letar/seo`, `aboi` мигрирован (тонкие обёртки,
+      не удаление — публичный API `aboi/src/lib/seo.ts` не менялся)
+- [ ] `svoichuzhie` — нечего мигрировать сейчас (нет собственных `breadcrumbJsonLd`/
+      `organizationJsonLd`); если появятся — использовать общую версию сразу
+- [x] **Решено (не переносить):** `productJsonLd` остаётся локальным в каждом приложении —
+      форма `Offer` товароспецифична (см. разбор выше), общая функция была бы неправильной
+      абстракцией
+- [ ] `JsonLdScript`-компонент не объединён — `libs/seo` без JSX-инфраструктуры, отдельная
+      структурная задача
 
 ---
 
