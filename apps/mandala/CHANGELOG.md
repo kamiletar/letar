@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+## [0.40.7] - 2026-08-12
+
+### Changed
+
+- **`ShareButton` — копирование ссылки переведено на `useCopyToClipboard` из `@letar/ui`**
+  (пункт меню «Скопировать ссылку»), получил общий с остальными приложениями fallback на
+  `execCommand('copy')`.
+
 ## [0.40.5] - 2026-08-04
 
 ### Security

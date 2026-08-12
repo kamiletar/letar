@@ -1,8 +1,9 @@
 'use client'
 
 import { Box, Button, HStack, IconButton, Menu, Text, VStack } from '@chakra-ui/react'
+import { useCopyToClipboard } from '@letar/ui'
 import { useTranslations } from 'next-intl'
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { LuCheck, LuCopy, LuDownload, LuShare2 } from 'react-icons/lu'
 import type { ViewerSettings } from '../_schemas/viewer-settings.schema'
 
@@ -34,7 +35,7 @@ export function ShareButton({
   variant = 'normal',
 }: ShareButtonProps) {
   const t = useTranslations('viewer.aria')
-  const [copied, setCopied] = useState(false)
+  const { copied, copy } = useCopyToClipboard()
 
   // Генерация URL с настройками
   const generateShareUrl = useCallback(() => {
@@ -59,11 +60,8 @@ export function ShareButton({
 
   // Копирование ссылки
   const handleCopyLink = useCallback(async () => {
-    const url = generateShareUrl()
-    await navigator.clipboard.writeText(url)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }, [generateShareUrl])
+    await copy(generateShareUrl())
+  }, [generateShareUrl, copy])
 
   // Скачивание изображения
   const handleDownload = useCallback(
