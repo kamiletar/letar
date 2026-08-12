@@ -359,9 +359,8 @@ cd /home/deploy/letar
 # 2. Аналитика
 ./deploy-affected.sh --app umami
 
-# 3. Основные приложения
-./deploy-affected.sh --app premium-rosstil
-./deploy-affected.sh --app imot
+# 3. Основные приложения сервера (список — в таблице `docker ps` до инцидента или в apps/*)
+./deploy-affected.sh --app <app-name>
 ```
 
 ### Восстановление БД из бэкапов
@@ -372,8 +371,8 @@ cd /home/deploy/letar
 # Скопировать дампы на сервер
 scp C:\BackupSync\lena\s1\backups\db-backup-5432-*.sql deploy@s1.letar.best:~/
 
-# Восстановить (пример для premium-rosstil на порту 5432)
-docker exec -i premium-rosstil-db psql -U postgres postgres < ~/db-backup-5432-20260221.sql
+# Восстановить (пример для приложения на порту 5432)
+docker exec -i <app-name>-db psql -U postgres postgres < ~/db-backup-5432-20260221.sql
 ```
 
 ### Проверка работы сайтов
@@ -383,8 +382,6 @@ docker exec -i premium-rosstil-db psql -U postgres postgres < ~/db-backup-5432-2
 docker ps
 
 # Проверить доступность сайтов
-curl -I https://premium-rosstil.ru
-curl -I https://imot.ru
 curl -I https://mandala.ru
 ```
 
@@ -392,11 +389,13 @@ curl -I https://mandala.ru
 
 ## Справочник: Приложения s1
 
-| Приложение          | Порт        | БД порт | Домен                  |
-| ------------------- | ----------- | ------- | ---------------------- |
-| nginx-proxy-manager | 80, 443, 81 | —       | (прокси для всех)      |
-| premium-rosstil     | 3000        | 5432    | _(коммерческий домен)_ |
-| imot                | 3001        | 5433    | _(коммерческий домен)_ |
+| Приложение          | Порт        | БД порт | Домен             |
+| ------------------- | ----------- | ------- | ----------------- |
+| nginx-proxy-manager | 80, 443, 81 | —       | (прокси для всех) |
+| umami               | —           | —       | (аналитика)       |
+
+> Коммерческие приложения, которые ранее держал s1 (`premium-rosstil`, `imot`), выведены из
+> эксплуатации 2026-07-05. Актуальный список приложений сервера — `docker ps` на самом сервере.
 
 > **s2.letar.best** (основной сервер): dashboard, driving-school, mandala, kami, pravda, animatrona-landing, animatrona-tracker, umami, auth-hub, archetest, time, grandslamcup и др.
 
