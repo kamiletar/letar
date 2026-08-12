@@ -4,7 +4,7 @@
   "sourceRoot": "apps/dashboard-agent/src",
   "projectType": "application",
   "tags": ["type:app", "scope:infra", "owner:letar"],
-  "implicitDependencies": ["@letar/email", "@letar/redis-client"],
+  "implicitDependencies": ["@letar/email", "@letar/glitchtip", "@letar/redis-client"],
   "targets": {
     "format": {
       "executor": "nx:run-commands",

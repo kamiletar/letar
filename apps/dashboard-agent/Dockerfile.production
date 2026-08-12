@@ -18,13 +18,14 @@ FROM base AS builder
 # Устанавливаем bun
 RUN npm install -g bun
 
-# Мини-workspace для резолва внутренних @letar/*-зависимостей. @letar/email и @letar/redis-client —
-# private:true, никогда не публикуются в npm — bun install в изоляции (только package.json
-# dashboard-agent) искал бы их на публичном registry и падал 404.
+# Мини-workspace для резолва внутренних @letar/*-зависимостей. @letar/email, @letar/glitchtip и
+# @letar/redis-client — private:true, никогда не публикуются в npm — bun install в изоляции
+# (только package.json dashboard-agent) искал бы их на публичном registry и падал 404.
 COPY libs/email ./libs/email
+COPY libs/glitchtip ./libs/glitchtip
 COPY libs/redis-client ./libs/redis-client
 COPY apps/dashboard-agent/package.json ./apps/dashboard-agent/package.json
-RUN printf '{"name":"dashboard-agent-docker-build","private":true,"workspaces":["apps/dashboard-agent","libs/email","libs/redis-client"]}' > package.json
+RUN printf '{"name":"dashboard-agent-docker-build","private":true,"workspaces":["apps/dashboard-agent","libs/email","libs/glitchtip","libs/redis-client"]}' > package.json
 
 # Устанавливаем зависимости
 RUN bun install

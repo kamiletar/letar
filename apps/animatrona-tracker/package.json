@@ -1,22 +1,19 @@
 {
-  "name": "kami",
-  "version": "0.33.2",
+  "name": "@letar/animatrona-tracker",
+  "version": "0.11.3",
   "private": true,
   "nx": {
+    "name": "animatrona-tracker",
     "implicitDependencies": [
       "@letar/chakra-provider",
-      "@letar/yandex-metrika",
       "@letar/analytics",
       "@letar/consent",
-      "@letar/image-upload",
+      "animatrona-ui",
+      "@letar/redis-client",
       "@letar/glitchtip"
     ]
   },
-  "prisma": {
-    "seed": "npx tsx prisma/seed.ts"
-  },
   "dependencies": {
-    "shiki": "^4.1.0",
     "@letar/glitchtip": "workspace:*"
   }
 }

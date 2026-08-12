@@ -45,6 +45,29 @@ export const onRequestError: Instrumentation.onRequestError = async (...args) =>
 }
 ```
 
+### `./server` — `captureException(err)`
+
+Для бэкендов без Next.js (Fastify/Express/CLI) — вызывать из своего error-хука после
+`initServer()`. `captureRequestError` (выше) — Next.js-специфичная сигнатура
+`Instrumentation.onRequestError`, эта функция для всего остального:
+
+```ts
+// src/index.ts (Fastify, см. dashboard-agent)
+import { captureException, initServer } from '@letar/glitchtip/server'
+
+initServer({ dsn: process.env.GLITCHTIP_DSN, environment: process.env.GLITCHTIP_ENVIRONMENT ?? 'development' })
+
+fastify.addHook('onError', async (_request, _reply, error) => {
+  captureException(error)
+})
+```
+
+`onError` — наблюдающий хук (не подменяет ответ клиенту), в отличие от `setErrorHandler`.
+Не-Next.js приложения не проходят через генератор (`nx g @letar/generators:glitchtip-integrate`
+рассчитан на `apps/<app>/package.json` + `instrumentation.ts`) — путь + `paths` в `tsconfig.json`
+и запись в `package.json`/`project.json` (`dependencies`/`implicitDependencies`) добавляются
+руками, `bun install` после — обязателен (создаёт symlink в `node_modules/@letar/`).
+
 ### `./client` — `initClient({ dsn, environment })`
 
 Вызывать из `instrumentation-client.ts` на верхнем уровне модуля (не в функции — см. доку Next.js

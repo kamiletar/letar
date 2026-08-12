@@ -38,6 +38,10 @@ services:
       # ⛔ Без `:-` дефолта намеренно (PLAN-INFRA §53) — `letar-redis` требует пароль с §37,
       # а беспарольный дефолт fails open. Подробный разбор — в auth-hub/docker-compose.production.yml.
       REDIS_URL: ${REDIS_URL}
+      # Трекинг ошибок (§70 PLAN-INFRA) — только серверная пара, у Fastify-бэкенда нет клиентского
+      # бандла и NEXT_PUBLIC_* здесь не при чём.
+      GLITCHTIP_DSN: ${GLITCHTIP_DSN}
+      GLITCHTIP_ENVIRONMENT: ${GLITCHTIP_ENVIRONMENT}
       # Этап 0.7 — канареечный мониторинг доставки email (см. lib/email-canary.ts)
       EMAIL_CANARY_SMTP_HOST: ${EMAIL_CANARY_SMTP_HOST}
       EMAIL_CANARY_SMTP_PORT: ${EMAIL_CANARY_SMTP_PORT}

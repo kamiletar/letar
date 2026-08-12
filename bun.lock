@@ -346,6 +346,9 @@
     "apps/aira-web": {
       "name": "@letar/aira-web",
       "version": "0.3.1",
+      "dependencies": {
+        "@letar/glitchtip": "workspace:*",
+      },
     },
     "apps/aira-web-e2e": {
       "name": "@letar/aira-web-e2e",
@@ -364,6 +367,9 @@
     "apps/animatrona-landing": {
       "name": "@letar/animatrona-landing",
       "version": "0.4.0",
+      "dependencies": {
+        "@letar/glitchtip": "workspace:*",
+      },
     },
     "apps/animatrona-landing-e2e": {
       "name": "@letar/animatrona-landing-e2e",
@@ -382,6 +388,13 @@
         "react-native-reanimated": "^4.3.0",
         "react-native-vision-camera": "^4.7.3",
         "react-native-worklets": "0.8.1",
+      },
+    },
+    "apps/animatrona-tracker": {
+      "name": "@letar/animatrona-tracker",
+      "version": "0.11.2",
+      "dependencies": {
+        "@letar/glitchtip": "workspace:*",
       },
     },
     "apps/animatrona-tracker-e2e": {
@@ -422,6 +435,7 @@
       "name": "auth-hub",
       "version": "0.7.4",
       "dependencies": {
+        "@letar/glitchtip": "workspace:*",
         "@simplewebauthn/browser": "^13.3.0",
         "@simplewebauthn/server": "^13.3.1",
         "geoip-lite": "^2.0.2",
@@ -448,11 +462,12 @@
     },
     "apps/dashboard-agent": {
       "name": "dashboard-agent",
-      "version": "0.15.5",
+      "version": "0.15.6",
       "dependencies": {
         "@fastify/cors": "^11.0.0",
         "@fastify/rate-limit": "^10",
         "@letar/email": "workspace:*",
+        "@letar/glitchtip": "workspace:*",
         "@letar/redis-client": "workspace:*",
         "cron-parser": "^5.0.0",
         "dockerode": "^4.0.6",
@@ -466,7 +481,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.36.0",
+      "version": "0.38.1",
     },
     "apps/domwellbes-e2e": {
       "name": "@letar/domwellbes-e2e",
@@ -516,6 +531,9 @@
     "apps/form-docs": {
       "name": "form-docs",
       "version": "0.1.9",
+      "dependencies": {
+        "@letar/glitchtip": "workspace:*",
+      },
     },
     "apps/form-docs-e2e": {
       "name": "@letar/form-docs-e2e",
@@ -524,6 +542,9 @@
     "apps/form-example": {
       "name": "form-example",
       "version": "0.1.1",
+      "dependencies": {
+        "@letar/glitchtip": "workspace:*",
+      },
     },
     "apps/form-example-e2e": {
       "name": "form-example-e2e",
@@ -532,6 +553,9 @@
     "apps/grandslamcup": {
       "name": "@letar/grandslamcup",
       "version": "3.38.4",
+      "dependencies": {
+        "@letar/glitchtip": "workspace:*",
+      },
     },
     "apps/grandslamcup-e2e": {
       "name": "@letar/grandslamcup-e2e",
@@ -558,6 +582,9 @@
     "apps/kami-key-the-landing": {
       "name": "@letar/kami-key-the-landing",
       "version": "0.2.0",
+      "dependencies": {
+        "@letar/glitchtip": "workspace:*",
+      },
     },
     "apps/kami-key-the-landing-e2e": {
       "name": "kami-key-the-landing-e2e",
@@ -577,6 +604,9 @@
     "apps/letar-landing": {
       "name": "@letar/letar-landing",
       "version": "0.3.0",
+      "dependencies": {
+        "@letar/glitchtip": "workspace:*",
+      },
     },
     "apps/letar-landing-e2e": {
       "name": "@letar/letar-landing-e2e",
@@ -585,6 +615,9 @@
     "apps/mandala": {
       "name": "@letar/mandala",
       "version": "0.40.6",
+      "dependencies": {
+        "@letar/glitchtip": "workspace:*",
+      },
     },
     "apps/mandala-e2e": {
       "name": "mandala-e2e",
@@ -609,6 +642,9 @@
     "apps/pravda": {
       "name": "@letar/pravda",
       "version": "1.9.0",
+      "dependencies": {
+        "@letar/glitchtip": "workspace:*",
+      },
     },
     "apps/pravda-e2e": {
       "name": "pravda-e2e",
@@ -616,10 +652,12 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.31.0",
+      "version": "0.32.0",
       "dependencies": {
+        "@letar/admin-ui": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/hooks": "workspace:*",
+        "@letar/jobs": "workspace:*",
         "@react-pdf/renderer": "^4.5.1",
         "@serwist/next": "^9.5.12",
         "idb-keyval": "^6.3.0",
@@ -685,7 +723,9 @@
         "@dnd-kit/sortable": ">=10.0.0",
         "@dnd-kit/utilities": ">=3.0.0",
         "@letar/forms": ">=0.50.0",
+        "@letar/image-upload": ">=0.1.0",
         "@tanstack/react-table": ">=8.0.0",
+        "lucide-react": ">=0.400.0",
         "next": ">=15.0.0",
         "react": ">=18.0.0",
         "react-icons": ">=5.0.0",
@@ -2066,6 +2106,8 @@
     "@letar/animatrona-mobile": ["@letar/animatrona-mobile@workspace:apps/animatrona-mobile"],
 
     "@letar/animatrona-shared": ["@letar/animatrona-shared@workspace:libs/animatrona-shared"],
+
+    "@letar/animatrona-tracker": ["@letar/animatrona-tracker@workspace:apps/animatrona-tracker"],
 
     "@letar/animatrona-tracker-e2e": ["@letar/animatrona-tracker-e2e@workspace:apps/animatrona-tracker-e2e"],
 

@@ -1,43 +1,127 @@
 {
   "extends": "../../tsconfig.next-app.json",
   "compilerOptions": {
-    "lib": ["dom", "dom.iterable", "esnext", "webworker"],
-    "types": ["node"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext",
+      "webworker"
+    ],
+    "types": [
+      "node"
+    ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@letar/consent": ["../../libs/consent/src/index.ts"],
-      "@letar/auth": ["../../libs/auth/src/index.ts"],
-      "@letar/auth/client": ["../../libs/auth/src/client/index.ts"],
-      "@letar/auth/server": ["../../libs/auth/src/server/index.ts"],
-      "@letar/analytics": ["../../libs/analytics/src/index.ts"],
-      "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
-      "@letar/image-upload/server": ["../../libs/image-upload/src/server/index.ts"],
-      "@letar/yandex-metrika": ["../../libs/yandex-metrika/src/index.ts"],
-      "@letar/forms": ["../../libs/forms/src/index.ts"],
-      "@letar/forms/analytics": ["../../libs/forms/src/lib/analytics/index.ts"],
-      "@letar/forms/i18n": ["../../libs/forms/src/lib/i18n/index.ts"],
-      "@letar/forms/offline": ["../../libs/forms/src/lib/offline/index.ts"],
-      "@letar/forms/server-errors": ["../../libs/forms/src/lib/server-errors/index.ts"],
-      "@letar/forms/testing": ["../../libs/forms/src/lib/testing/index.ts"],
-      "@letar/forms/validators/ru": ["../../libs/forms/src/lib/validators/ru/index.ts"],
-      "@letar/forms-core": ["../../libs/forms-core/src/index.ts"],
-      "@letar/forms-core/credit-card": ["../../libs/forms-core/src/lib/credit-card/index.ts"],
-      "@letar/forms-core/phone": ["../../libs/forms-core/src/lib/phone/index.ts"],
-      "@letar/forms-core/table": ["../../libs/forms-core/src/lib/table/index.ts"],
-      "@letar/forms-core/address": ["../../libs/forms-core/src/lib/address/index.ts"],
-      "@letar/forms-core/i18n": ["../../libs/forms-core/src/lib/i18n/index.ts"],
-      "@letar/forms-core/uikit": ["../../libs/forms-core/src/lib/uikit/index.ts"],
-      "@letar/forms-react": ["../../libs/forms-react/src/index.ts"],
-      "@letar/forms-core/validators/ru": ["../../libs/forms-core/src/lib/validators/ru/index.ts"],
-      "@letar/forms-core/schema": ["../../libs/forms-core/src/lib/schema/index.ts"],
-      "@letar/forms-core/server-errors": ["../../libs/forms-core/src/lib/server-errors/index.ts"],
-      "@letar/forms-core/utils": ["../../libs/forms-core/src/lib/utils/index.ts"],
-      "@letar/forms-core/security": ["../../libs/forms-core/src/lib/security/index.ts"],
-      "@letar/forms-core/offline": ["../../libs/forms-core/src/lib/offline/index.ts"],
-      "@letar/forms-core/captcha": ["../../libs/forms-core/src/lib/captcha/index.ts"],
-      "@letar/forms-core/analytics": ["../../libs/forms-core/src/lib/analytics/index.ts"],
-      "@letar/email": ["../../libs/email/src/index.ts"],
-      "@letar/ui": ["../../libs/ui/src/index.ts"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@letar/consent": [
+        "../../libs/consent/src/index.ts"
+      ],
+      "@letar/auth": [
+        "../../libs/auth/src/index.ts"
+      ],
+      "@letar/auth/client": [
+        "../../libs/auth/src/client/index.ts"
+      ],
+      "@letar/auth/server": [
+        "../../libs/auth/src/server/index.ts"
+      ],
+      "@letar/analytics": [
+        "../../libs/analytics/src/index.ts"
+      ],
+      "@letar/chakra-provider": [
+        "../../libs/chakra-provider/src/index.ts"
+      ],
+      "@letar/image-upload/server": [
+        "../../libs/image-upload/src/server/index.ts"
+      ],
+      "@letar/yandex-metrika": [
+        "../../libs/yandex-metrika/src/index.ts"
+      ],
+      "@letar/forms": [
+        "../../libs/forms/src/index.ts"
+      ],
+      "@letar/forms/analytics": [
+        "../../libs/forms/src/lib/analytics/index.ts"
+      ],
+      "@letar/forms/i18n": [
+        "../../libs/forms/src/lib/i18n/index.ts"
+      ],
+      "@letar/forms/offline": [
+        "../../libs/forms/src/lib/offline/index.ts"
+      ],
+      "@letar/forms/server-errors": [
+        "../../libs/forms/src/lib/server-errors/index.ts"
+      ],
+      "@letar/forms/testing": [
+        "../../libs/forms/src/lib/testing/index.ts"
+      ],
+      "@letar/forms/validators/ru": [
+        "../../libs/forms/src/lib/validators/ru/index.ts"
+      ],
+      "@letar/forms-core": [
+        "../../libs/forms-core/src/index.ts"
+      ],
+      "@letar/forms-core/credit-card": [
+        "../../libs/forms-core/src/lib/credit-card/index.ts"
+      ],
+      "@letar/forms-core/phone": [
+        "../../libs/forms-core/src/lib/phone/index.ts"
+      ],
+      "@letar/forms-core/table": [
+        "../../libs/forms-core/src/lib/table/index.ts"
+      ],
+      "@letar/forms-core/address": [
+        "../../libs/forms-core/src/lib/address/index.ts"
+      ],
+      "@letar/forms-core/i18n": [
+        "../../libs/forms-core/src/lib/i18n/index.ts"
+      ],
+      "@letar/forms-core/uikit": [
+        "../../libs/forms-core/src/lib/uikit/index.ts"
+      ],
+      "@letar/forms-react": [
+        "../../libs/forms-react/src/index.ts"
+      ],
+      "@letar/forms-core/validators/ru": [
+        "../../libs/forms-core/src/lib/validators/ru/index.ts"
+      ],
+      "@letar/forms-core/schema": [
+        "../../libs/forms-core/src/lib/schema/index.ts"
+      ],
+      "@letar/forms-core/server-errors": [
+        "../../libs/forms-core/src/lib/server-errors/index.ts"
+      ],
+      "@letar/forms-core/utils": [
+        "../../libs/forms-core/src/lib/utils/index.ts"
+      ],
+      "@letar/forms-core/security": [
+        "../../libs/forms-core/src/lib/security/index.ts"
+      ],
+      "@letar/forms-core/offline": [
+        "../../libs/forms-core/src/lib/offline/index.ts"
+      ],
+      "@letar/forms-core/captcha": [
+        "../../libs/forms-core/src/lib/captcha/index.ts"
+      ],
+      "@letar/forms-core/analytics": [
+        "../../libs/forms-core/src/lib/analytics/index.ts"
+      ],
+      "@letar/email": [
+        "../../libs/email/src/index.ts"
+      ],
+      "@letar/ui": [
+        "../../libs/ui/src/index.ts"
+      ],
+      "@letar/glitchtip": [
+        "../../libs/glitchtip/src/index.ts"
+      ],
+      "@letar/glitchtip/client": [
+        "../../libs/glitchtip/src/client/index.ts"
+      ],
+      "@letar/glitchtip/server": [
+        "../../libs/glitchtip/src/server/index.ts"
+      ]
     }
   },
   "include": [

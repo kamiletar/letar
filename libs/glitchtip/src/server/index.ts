@@ -31,4 +31,12 @@ export const captureRequestError: Instrumentation.onRequestError = async (err) =
   Sentry.captureException(err)
 }
 
+/**
+ * Для не-Next.js бэкендов (Fastify/Express/CLI) — вызывать из своего error-хука после
+ * initServer(). Next.js-приложения используют captureRequestError, не эту функцию.
+ */
+export function captureException(err: unknown): void {
+  Sentry.captureException(err)
+}
+
 export { scrubPii }

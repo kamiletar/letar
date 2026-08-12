@@ -18,6 +18,7 @@
  *                 обычно 127.0.0.1/localhost контейнера), иначе они начнут падать 403.
  */
 
+import { captureException, initServer } from '@letar/glitchtip/server'
 import Fastify from 'fastify'
 import { authMiddleware } from './lib/auth'
 import { rehydrateExecutionLogsFromRedis, startScheduler } from './lib/cron'
@@ -46,6 +47,11 @@ const PORT = parseInt(process.env.PORT || '3100', 10)
 const HOST = process.env.HOST || '0.0.0.0'
 
 async function main(): Promise<void> {
+  initServer({
+    dsn: process.env.GLITCHTIP_DSN,
+    environment: process.env.GLITCHTIP_ENVIRONMENT ?? 'development',
+  })
+
   const fastify = Fastify({
     logger: {
       level: process.env.LOG_LEVEL || 'info',
@@ -90,6 +96,11 @@ async function main(): Promise<void> {
       error: 'Too many requests',
       timestamp: new Date().toISOString(),
     }),
+  })
+
+  // Отправка ошибок в GlitchTip — не подменяет ответ, только наблюдает (§70 PLAN-INFRA)
+  fastify.addHook('onError', async (_request, _reply, error) => {
+    captureException(error)
   })
 
   // IP whitelist (опционально, ALLOWED_IPS) — до аутентификации, см. lib/ip-whitelist.ts

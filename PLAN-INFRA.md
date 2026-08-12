@@ -8443,18 +8443,62 @@ SaaS-Sentry отпадает отдельно: тело ошибки тащит 
    `package.json` для приложения — отдельная задача (сопоставить версию, implicitDependencies и
    пр. с тем, что делает generator для остальных приложений), не блокирует остаток тиража §70.
 
-   **Список кандидатов (`PLAN-INFRA.md`, актуализирован 2026-08-12) — сделано 14 из ~18:**
+   ✅ **Шестой прогон тиража, финальный (2026-08-12): `animatrona-tracker`, `kami`,
+   `dashboard-agent`.** Закрывает список некоммерческих кандидатов целиком.
+
+   `animatrona-tracker` — не пропущен, а исправлен: `apps/animatrona-tracker/package.json`
+   заведён (владелец подтвердил — забытый файл, не архитектурное решение), после чего генератор
+   отработал штатно. `kami` — тоже не «библиотека», это опечатка предыдущего прогона: неверная
+   эвристика классификации (grep по `next.config.mjs`/`.ts`, без `.js`) пропустила его как и
+   `mandala`/`pravda`/др. в третьем прогоне — `apps/kami/next.config.js` существовал всё время,
+   `kami` полноценное Next.js-приложение.
+
+   ⚠️ **Ещё один аргумент против гипотезы «порядок спредов» — на этот раз в другую сторону.**
+   `animatrona-tracker` прошёл линт БЕЗ eslint-disable вообще (в отличие от всех 10 предыдущих
+   приложений тиража) — `Unused eslint-disable directive`, когда обход был добавлен по инерции и
+   снят после проверки. Проверена гипотеза «дело в отсутствующем symlink
+   `node_modules/@letar/glitchtip`» (у `animatrona-tracker` его не было до первого `bun install`
+   в рамках этого прогона) — опровергнута: `mandala`/`grandslamcup` (падают) и `dashboard`
+   (не падает) имеют идентичный симлинк. Причина остаётся неустановленной; тираж §70 закрыт, эта
+   ложная блокировка (и обход) остаются открытым вопросом на будущее — не блокирует.
+
+   `dashboard-agent` — первая не-Next.js интеграция тиража, другой путь целиком (генератор не
+   применим): `@letar/glitchtip` подключён вручную (package.json/tsconfig.json/project.json,
+   `bun install` под симлинк), инициализация `initServer()` в начале `main()` (перед регистрацией
+   роутов), ошибки запросов идут через `fastify.addHook('onError', ...)` — не подменяет ответ
+   клиенту, только отправляет в GlitchTip. Для этого в библиотеку добавлена новая функция
+   `captureException(err)` (`libs/glitchtip/src/server/index.ts`, v0.2.0) — обобщение
+   `captureRequestError` без Next.js-специфичной сигнатуры `Instrumentation.onRequestError`,
+   задокументирована в `libs/glitchtip/README.md`. Проверено: `nx build dashboard-agent` (esbuild)
+   не инлайнит `@sentry/node` (внешний `require`, не критично — это не прод-путь сборки), но
+   реальный прод-путь — `bun build` из `Dockerfile.production` — инлайнит полностью (174
+   вхождения `Sentry.*`, ноль внешних `require`). Смоделирован изолированный `bun install`
+   Docker-билдера (копия только `libs/email`+`libs/glitchtip`+`libs/redis-client` +
+   `apps/dashboard-agent/package.json`, как делает сам `Dockerfile.production`) — резолвится
+   штатно, `Dockerfile.production` дополнен строкой `COPY libs/glitchtip`.
+
+   ⚠️ **`animatrona-tracker`/`kami`/`dashboard-agent` не на SOPS-пайплайне секретов** — ни одно
+   не имеет `.env.docker.enc` в git (`.env.docker` только plaintext на сервере,
+   `decrypt_sops_env()` в `deploy-affected.sh` тихо `return 0` без `.enc`-файла). Заводить
+   шифрование для трёх приложений заодно с GlitchTip — риск: нет видимости текущего
+   серверного `.env.docker`, свежесозданный `.enc` при следующем деплое молча перезапишет то,
+   что реально на сервере, если что-то упущено при переносе. DSN — не секрет по нашей же
+   документации (`libs/glitchtip/README.md`), поэтому решение — передать значения BlackCove для
+   ручного добавления в существующий plaintext `.env.docker` на сервере, не через git.
+   Миграция этих трёх на SOPS — отдельная задача, не входит в тираж §70.
+
+   **Тираж §70 закрыт: 17/17 некоммерческих Next.js/Node-кандидатов.**
    `studio` ✅ деплой, `dashboard` ✅ деплой+проверка, `time` ✅ деплой+проверка, `archetest` ✅
    код+секреты (деплой ждёт ответа), `grandslamcup` ✅ код+секреты (деплой ждёт ответа),
    `mandala`/`pravda`/`aira-web` ✅ код+секреты (деплой-запрос отправлен), `auth-hub`/`form-docs`/
-   `form-example` ✅ код+секреты (деплой-запрос отправлен, `deploy-glitchtip-authhub-formdocs-
-   formexample-s70`), `animatrona-landing`/`kami-key-the-landing`/`letar-landing` ✅ код+секреты
-   (деплой-запрос отправлен, `deploy-glitchtip-landings-s70`).
-   Осталось из некоммерческих: `dashboard-agent` (не Next.js — Fastify, генератор не подходит,
-   нужна отдельная интеграция), `kami` (не Next.js — библиотека Prisma), `animatrona-tracker`
-   (нет `package.json`, см. выше — генератор неприменим без отдельного фикса). Коммерческие/ПДн
-   (`aboi`, `driving-school`, `dsperevod`, `svoichuzhie`, `aprel8008`, `domwellbes`) и не-Next.js
-   (Electron/React Native) — как в исходном плане п.7, без изменений.
+   `form-example` ✅ код+секреты (деплой-запрос отправлен), `animatrona-landing`/
+   `kami-key-the-landing`/`letar-landing` ✅ код+секреты (деплой-запрос отправлен),
+   `animatrona-tracker`/`kami`/`dashboard-agent` ✅ код готов, DSN передан BlackCove напрямую
+   (деплой-запрос — следующий шаг). Коммерческие/ПДн (`aboi`, `driving-school`, `dsperevod`,
+   `svoichuzhie`, `aprel8008`, `domwellbes`) и не-Next.js десктоп/мобильные (Electron/React
+   Native — `animatrona`, `label-printer-desktop`, `poster-microtext-desktop`,
+   `animatrona-mobile`, `animatrona-tv`) — как в исходном плане п.7, без изменений, отдельная
+   работа (другой SDK: `@sentry/electron`/`@sentry/react-native`).
 
 ### Что это даёт агентам
 
