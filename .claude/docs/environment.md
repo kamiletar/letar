@@ -35,12 +35,12 @@ ssh deploy@s2.letar.best "command"
 
 ```bash
 # ✅ Правильно - запуск напрямую в директории проекта
-nx lint premium-rosstil
-nx build premium-rosstil
+nx lint driving-school
+nx build driving-school
 git add . && git commit -m "message"
 
 # ❌ Неправильно - не нужны абсолютные пути
-cd C:\web\letar && nx lint premium-rosstil
+cd C:\web\letar && nx lint driving-school
 ```
 
 ## Технологический стек
@@ -101,7 +101,7 @@ cd C:\web\letar && nx lint premium-rosstil
 **Пример запуска тестов:**
 
 ```bash
-nx test premium-rosstil       # Запустить тесты проекта
+nx test driving-school       # Запустить тесты проекта
 nx run-many -t test           # Запустить все тесты
 ```
 
@@ -208,28 +208,28 @@ netstat -ano | findstr :3003 | findstr LISTENING
 ### Разработка
 
 ```bash
-nx dev premium-rosstil        # Запустить dev сервер
-nx build premium-rosstil      # Собрать продакшн бандл
-nx start premium-rosstil      # Запустить продакшн сервер
+nx dev driving-school        # Запустить dev сервер
+nx build driving-school      # Собрать продакшн бандл
+nx start driving-school      # Запустить продакшн сервер
 ```
 
 ### База данных и Prisma
 
 ```bash
-nx zenstack:generate premium-rosstil  # Генерация Prisma + Zod схем
-nx db:push premium-rosstil            # Отправить схему в БД (dev)
-nx db:migrate premium-rosstil         # Создать миграцию (prod)
-nx db:studio premium-rosstil          # Открыть Prisma Studio
+nx zenstack:generate driving-school  # Генерация Prisma + Zod схем
+nx db:push driving-school            # Отправить схему в БД (dev)
+nx db:migrate driving-school         # Создать миграцию (prod)
+nx db:studio driving-school          # Открыть Prisma Studio
 ```
 
 ### Форматирование, линтинг и тесты
 
 ```bash
-nx dprint premium-rosstil         # Форматирование кода (dprint)
-nx lint premium-rosstil           # Запустить линтинг
-nx typecheck:tsgo premium-rosstil # Проверка типов (быстро!)
-nx test premium-rosstil           # Запустить тесты
-nx e2e premium-rosstil-e2e        # Запустить E2E тесты
+nx dprint driving-school         # Форматирование кода (dprint)
+nx lint driving-school           # Запустить линтинг
+nx typecheck:tsgo driving-school # Проверка типов (быстро!)
+nx test driving-school           # Запустить тесты
+nx e2e driving-school-e2e        # Запустить E2E тесты
 ```
 
 ### Nx Sync — в letar отключён, синхронизировать references нечем
