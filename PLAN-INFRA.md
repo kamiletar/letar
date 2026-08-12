@@ -8354,13 +8354,17 @@ SaaS-Sentry отпадает отдельно: тело ошибки тащит 
    - 97 тестов (`nx test generators`), `nx typecheck generators && nx lint generators` — зелёные.
 
    **Первый прогон тиража (2026-08-11): `dashboard` и `time`.** Оба — код готов и закоммичен
-   (instrumentation, tsconfig, package.json, `.env.docker`/`.env.staging` с пустым `GLITCHTIP_DSN`,
-   compose через `${VAR}`), но GlitchTip-проекты для них ещё не созданы в UI — DSN не заполнен,
-   деплоить рано. Следующий шаг: зайти в `https://errors.s3.letar.best`, создать проекты
-   `dashboard`/`time`, вписать DSN в `.env.docker`/`.env.staging`, `sops --encrypt`, deploy-request
-   BlackCove. `dashboard/src/instrumentation.ts` — пример ручного слияния (мониторинг + GlitchTip
-   в одном `register()`), сохранён как образец для следующих приложений со своей логикой в этом
-   файле.
+   (instrumentation, tsconfig, package.json, compose через `${VAR}`).
+   `dashboard/src/instrumentation.ts` — пример ручного слияния (мониторинг + GlitchTip в одном
+   `register()`), сохранён как образец для следующих приложений со своей логикой в этом файле.
+
+   ✅ **DSN заполнен, деплой-запрос отправлен (2026-08-12).** Проекты `dashboard`/`time` созданы в
+   GlitchTip через Django-shell на s3 (`Project.objects.get_or_create` + `ProjectKey.objects.create`
+   в организации `kami`, тем же способом, что и `studio` в п.5 — не через веб-логин, доступ только
+   root к серверу). DSN вписаны в `apps/dashboard/.env.docker.enc` (production, у `dashboard` нет
+   staging-инстанса) и `apps/time/.env.docker.enc` + `.env.staging.enc` (оба окружения,
+   `GLITCHTIP_ENVIRONMENT` `production`/`staging` соответственно). Деплой не выполнялся — только
+   подготовка секретов, живой прогон ждёт BlackCove.
 
 ### Что это даёт агентам
 
