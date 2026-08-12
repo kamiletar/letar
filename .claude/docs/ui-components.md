@@ -2,7 +2,7 @@
 
 ## Тема Chakra UI v3
 
-Приложение использует кастомную систему Chakra UI v3, определённую в `apps/premium-rosstil/src/app/_components/theme-provider.tsx`:
+Приложение использует кастомную систему Chakra UI v3, определённую в `apps/kami/src/app/_components/theme-provider.tsx`:
 
 - **Паттерн Theme Provider:** Создаёт кастомную систему через `createSystem(defaultConfig, config)` с шрифтами, переданными как пропсы
 - **Токены шрифтов:** Шрифты heading, text и body динамически устанавливаются из объектов Next.js font
@@ -229,8 +229,17 @@ import { Dialog, Portal } from '@chakra-ui/react'
 
 **Правильная реализация:**
 
-- `apps/premium-rosstil/src/app/admin/test-models/_components/gender-select.tsx` - Select с useControl
-- `apps/premium-rosstil/src/app/admin/sizes/[id]/edit/_components/delete-size-button.tsx` - Dialog (коммит f90c7d5f)
+- `apps/driving-school/src/app/_components/vehicle-form-dialog.tsx` - Dialog с `Portal` +
+  `Dialog.Positioner`, `Dialog.CloseTrigger asChild`
+- `apps/dsperevod/src/app/(admin)/admin/users/_components/user-role-selector.tsx` - управляемый
+  Select (`NativeSelect.Root`/`NativeSelect.Field`, значение из пропа, `onChange` triggers Server
+  Action через `useTransition`)
+
+⚠️ Пример именно с хуком `useControllableState` (внутреннее состояние Select с fallback на
+внешний controlled-проп) в кодовой базе на 2026-08-12 не найден — `gender-select.tsx` из
+удалённого `premium-rosstil` использовал именно этот хук, живой замены с идентичным паттерном
+нет. Приведённый выше `user-role-selector.tsx` — просто controlled-компонент через `value`/
+`onChange`, не эталон именно `useControllableState`.
 
 **Ключевые правила:**
 
@@ -254,7 +263,8 @@ import { Dialog, Portal } from '@chakra-ui/react'
 
 **ВАЖНО:** Всегда используй компонент `<OnlyFor>` для ролевого условного рендеринга в клиентских компонентах.
 
-Компонент `OnlyFor` находится в `apps/premium-rosstil/src/app/_components/only-for.tsx` и обеспечивает типобезопасный ролевой контроль доступа.
+Компонент `OnlyFor` находится в `apps/kami/src/app/_components/only-for.tsx` (аналог —
+`apps/dashboard/src/app/_components/only-for.tsx`) и обеспечивает типобезопасный ролевой контроль доступа.
 
 **Когда использовать:**
 
@@ -345,8 +355,8 @@ import Link from 'next/link'
 
 **Эталонные примеры в кодовой базе:**
 
-- `apps/premium-rosstil/src/app/admin/error.tsx`
-- `apps/premium-rosstil/src/app/admin/admin-dashboard-client.tsx`
+- `apps/kami/src/app/[locale]/admin/error.tsx`
+- `apps/kami/src/app/[locale]/error.tsx`
 
 ### ⚠️ `asChild` + условный рендер веток: не оборачивай альтернативы в `<>...</>`
 
@@ -389,7 +399,7 @@ Fragment по обеим веткам):
 Найдено в `apps/domwellbes/src/app/_components/catalog-card.tsx` (2026-08-09,
 `PLAN_COMPLETED.md` соответствующая запись).
 
-- `apps/premium-rosstil/src/app/not-found.tsx`
+- `apps/kami/src/app/[locale]/not-found.tsx`
 
 ## ⚠️ КРИТИЧНО - Изменения API Chakra UI v3
 
