@@ -52,3 +52,12 @@ export function useColorMode(): UseColorModeReturn {
     toggleColorMode,
   }
 }
+
+/**
+ * Выбирает значение в зависимости от текущей цветовой темы.
+ * До монтирования и на сервере возвращает light-значение.
+ */
+export function useColorModeValue<T>(light: T, dark: T): T {
+  const { resolvedColorMode } = useColorMode()
+  return resolvedColorMode === 'dark' ? dark : light
+}
