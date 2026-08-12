@@ -104,6 +104,22 @@ function ThemeToggle() {
 | `setColorMode`      | `(mode) => void`                 | Установить режим               |
 | `toggleColorMode`   | `() => void`                     | Переключить между light и dark |
 
+#### `useColorModeValue(light, dark)`
+
+Выбирает значение в зависимости от текущей цветовой темы. До монтирования и на сервере
+возвращает `light`.
+
+```tsx
+'use client'
+
+import { useColorModeValue } from '@letar/chakra-provider'
+
+function Card() {
+  const bg = useColorModeValue('white', 'gray.800')
+  return <div style={{ background: bg }}>...</div>
+}
+```
+
 ### Компоненты
 
 #### `ColorModeButton`
