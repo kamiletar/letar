@@ -218,8 +218,9 @@ export type {
   CaptchaVerifyResult,
 } from './lib/captcha'
 
-// Серверная верификация CAPTCHA (server-only)
-export { verifyCaptcha } from './lib/captcha/verify'
+// Серверная верификация CAPTCHA (server-only, физически в src/server/ — граница
+// no-restricted-imports от случайной утечки React в серверный код)
+export { verifyCaptcha } from './server/captcha/verify'
 
 // CreditCard (форматирование, валидация, определение бренда)
 export {
@@ -239,8 +240,8 @@ export type {
   CreditCardLayout,
 } from './lib/declarative/form-fields/specialized/credit-card'
 
-// Server Error Mapping (Prisma, ZenStack, Zod, ActionResult)
-export { applyServerErrors, mapServerErrors } from './lib/server-errors'
+// Server Error Mapping (Prisma, ZenStack, Zod, ActionResult) — физически в src/server/
+export { applyServerErrors, mapServerErrors } from './server/server-errors'
 export type {
   ActionResultError,
   FieldError,
@@ -250,7 +251,7 @@ export type {
   PrismaError,
   ZenStackError,
   ZodFlatError,
-} from './lib/server-errors'
+} from './server/server-errors'
 
 // Form History (Undo/Redo)
 export { HistoryControls, useFormHistory } from './lib/history'

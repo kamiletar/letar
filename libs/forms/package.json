@@ -1,6 +1,6 @@
 {
   "name": "@letar/forms",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "description": "Reusable form components library with TanStack Form and Chakra UI integration",
   "type": "module",
   "main": "./src/index.ts",
@@ -32,10 +32,16 @@
       "default": "./src/lib/validators/ru/index.ts"
     },
     "./server-errors": {
-      "@letar/source": "./src/lib/server-errors/index.ts",
-      "types": "./src/lib/server-errors/index.ts",
-      "import": "./src/lib/server-errors/index.ts",
-      "default": "./src/lib/server-errors/index.ts"
+      "@letar/source": "./src/server/server-errors/index.ts",
+      "types": "./src/server/server-errors/index.ts",
+      "import": "./src/server/server-errors/index.ts",
+      "default": "./src/server/server-errors/index.ts"
+    },
+    "./captcha/server": {
+      "@letar/source": "./src/server/captcha/verify.ts",
+      "types": "./src/server/captcha/verify.ts",
+      "import": "./src/server/captcha/verify.ts",
+      "default": "./src/server/captcha/verify.ts"
     },
     "./analytics": {
       "@letar/source": "./src/lib/analytics/index.ts",

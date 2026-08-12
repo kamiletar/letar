@@ -6,6 +6,20 @@
 
 ## [Unreleased]
 
+## [2.4.1] - 2026-08-12
+
+### Changed
+
+- **Серверный код перенесён под `src/server/`** — `src/lib/captcha/verify.ts` →
+  `src/server/captcha/verify.ts`, `src/lib/server-errors/*` → `src/server/server-errors/*`. Даёт
+  реальную защиту `no-restricted-imports` (React/Chakra) для этих файлов — раньше правило
+  матчило только `**/src/server/**` и их не видело. `exports["./server-errors"]` в
+  `package.json` физически указывает на новый путь, имя экспорта не изменилось. Новый подпуть
+  `exports["./captcha/server"]` — `verifyCaptcha` раньше был доступен только из корневого
+  барreля без явного subpath, хотя документация уже (ошибочно) ссылалась на несуществующий
+  `@letar/forms/captcha` — исправлено на `@letar/forms/captcha/server` везде. `paths` обновлены
+  в 19 приложениях-потребителях. Публичный API не изменился — только физическое расположение.
+
 ## [2.4.0] - 2026-08-12
 
 ### Added

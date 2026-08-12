@@ -35,7 +35,7 @@ const AppForm = createForm({
 </AppForm>
 
 // Серверная верификация
-import { verifyCaptcha } from '@letar/forms/captcha'
+import { verifyCaptcha } from '@letar/forms/captcha/server'
 
 const result = await verifyCaptcha(token, {
   provider: 'turnstile',

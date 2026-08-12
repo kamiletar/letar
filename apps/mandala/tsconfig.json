@@ -99,7 +99,7 @@
         "../../libs/forms/src/lib/i18n/index.ts"
       ],
       "@letar/forms/server-errors": [
-        "../../libs/forms/src/lib/server-errors/index.ts"
+        "../../libs/forms/src/server/server-errors/index.ts"
       ],
       "@letar/forms/testing": [
         "../../libs/forms/src/lib/testing/index.ts"

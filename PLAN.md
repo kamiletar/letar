@@ -2403,9 +2403,11 @@ Turbopack на `aboi` не эскалируется в фатальную оши
 
 ### Не в скоупе
 
-- [ ] Перенос серверного кода `forms` (`captcha/verify.ts`, `server-errors/*`) в `src/server/` —
-      сломает существующие подпути `exports`, требует отдельной задачи и координации с
-      форма-экосистемой (`FormsCoord`).
+- [x] ✅ [2026-08-12] Перенос серверного кода `forms` (`captcha/verify.ts`, `server-errors/*`) в
+      `src/server/` — сделано отдельной задачей (`forms-dev`, координация через `QuietRidge`,
+      письмо #171). `exports["./server-errors"]` обновлён на новый физический путь без смены
+      имени, добавлен новый подпуть `exports["./captcha/server"]`. Детали —
+      `libs/forms/PLAN.md` (пункт закрыт 2026-08-12), `libs/forms/CHANGELOG.md` (2.4.1).
 
 ## §36 — Next.js 16 Turbopack по умолчанию ломает гидратацию Chakra v3 + next-themes (2026-08-04)
 

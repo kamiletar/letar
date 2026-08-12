@@ -13,7 +13,8 @@ export default defineConfig({
     'fields/boolean': 'src/lib/declarative/form-fields/boolean/index.ts',
     'fields/specialized': 'src/lib/declarative/form-fields/specialized/index.ts',
     // DX фичи (v0.80.0)
-    'server-errors': 'src/lib/server-errors/index.ts',
+    'server-errors': 'src/server/server-errors/index.ts',
+    'captcha/server': 'src/server/captcha/verify.ts',
     analytics: 'src/lib/analytics/index.ts',
     'validators/ru': 'src/lib/validators/ru/index.ts',
   },

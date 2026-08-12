@@ -37,7 +37,7 @@ const AppForm = createForm({
 ## Серверная проверка
 
 ```tsx
-import { verifyCaptcha } from '@letar/forms/captcha'
+import { verifyCaptcha } from '@letar/forms/captcha/server'
 
 export async function submitAction(data: FormData) {
   const token = data.__captchaToken

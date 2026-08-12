@@ -6,7 +6,8 @@
  *
  * Реализация вынесена в @letar/forms-core/server-errors (Фаза 7.1, dependency-free
  * ядро) — этот файл только реэкспортирует, публичный путь `@letar/forms/server-errors`
- * не меняется.
+ * не меняется. Физически в `src/server/` — граница `no-restricted-imports` в
+ * eslint.config.mjs матчит `src/server/**` и не пустит сюда React/Chakra.
  *
  * @example
  * ```tsx

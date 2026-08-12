@@ -719,12 +719,26 @@ Do not call Hooks inside useEffect(...), useMemo(...), or other built-in Hooks.
   Yandex SmartCaptcha (игнорируется). Документация: form-docs guides/captcha.mdx, демо в
   form-develop-app/form-example. Готово к использованию в svoichuzhie (Фаза 1–2)
 
-#### [2026-08-04] Серверный код forms не под `src/server/` — граница `no-restricted-imports` его не видит
+#### [2026-08-04→2026-08-12] Серверный код forms не под `src/server/` — граница `no-restricted-imports` его не видит — ✅ закрыто
 
-- **Запросил:** GoldCreek (аудит границ `src/server/` на auth/pin-auth/cdek/forms)
+- **Запросил:** GoldCreek (аудит границ `src/server/` на auth/pin-auth/cdek/forms), назначено
+  QuietRidge (письмо #171)
 - **Приоритет:** low
-- **Описание:** `src/lib/captcha/verify.ts` (серверная верификация CAPTCHA) и `src/lib/server-errors/*` (экспортируется как `./server-errors` в `exports`) лежат в `src/lib/`, а не в `src/server/`. Правило `no-restricted-imports` в корневом `eslint.config.mjs` матчит только `**/src/server/**` — эти файлы вне его области. Нарушений сейчас нет (React/Chakra не тянут), но граница не защищает от будущей регрессии. Перенос меняет публичную поверхность API (`exports["./server-errors"]` в `libs/forms/package.json`, JSDoc-пример в `verify.ts` → `@letar/forms/captcha/server`) — паттерн есть готовый, образец `@letar/auth` (`src/server/` + `./server` в `exports` + `paths` на подпуть в каждом приложении-потребителе).
-- **Статус:** ожидание (не блокирует)
+- **Описание:** `src/lib/captcha/verify.ts` (серверная верификация CAPTCHA) и `src/lib/server-errors/*` (экспортируется как `./server-errors` в `exports`) лежали в `src/lib/`, а не в `src/server/`. Правило `no-restricted-imports` в корневом `eslint.config.mjs` матчит только `**/src/server/**` — эти файлы были вне его области. Нарушений не было (React/Chakra не тянули), но граница не защищала от будущей регрессии.
+- **Статус:** реализовано по паттерну `@letar/auth`. Файлы перенесены физически:
+  `src/lib/captcha/verify.ts` → `src/server/captcha/verify.ts`,
+  `src/lib/server-errors/*` → `src/server/server-errors/*`. `exports["./server-errors"]` в
+  `libs/forms/package.json` обновлён на новый физический путь (имя экспорта не изменилось —
+  `@letar/forms/server-errors` работает как раньше). Добавлен новый подпуть
+  `exports["./captcha/server"]` — `verifyCaptcha` раньше был доступен только из корневого
+  барreля (`@letar/forms`, там и остался), явного subpath не существовало вовсе, хотя доки
+  (`form-docs/guides/captcha.mdx`) уже ошибочно ссылались на несуществующий `@letar/forms/captcha`
+  — исправлено на реальный `@letar/forms/captcha/server` везде (доки en+ru, демо
+  `form-develop-app/captcha-demo`, JSDoc в `verify.ts`). `tsup.config.ts` — новый entry
+  `captcha/server`, путь `server-errors` обновлён. `paths` на `@letar/forms/server-errors`
+  обновлены во всех 19 приложениях-потребителях (batch sed, проверено `typecheck:tsgo` на
+  `form-develop-app`/`driving-school`, `nx build form-docs`). `@letar/forms-core` не тронут —
+  у него нет React нигде в принципе, граница `src/server/` актуальна только для Chakra-скина.
 
 ### Документация и DX
 

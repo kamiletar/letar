@@ -37,7 +37,7 @@ The CAPTCHA token is automatically included in the form data as `__captchaToken`
 ## Server Verification
 
 ```tsx
-import { verifyCaptcha } from '@letar/forms/captcha'
+import { verifyCaptcha } from '@letar/forms/captcha/server'
 
 export async function submitAction(data: FormData) {
   const token = data.__captchaToken
