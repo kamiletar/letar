@@ -145,7 +145,6 @@ MCP-инструменты `run_e2e`/`e2e_status` — `libs/deploy-mcp/README.md
 - **kami-network** - общая сеть для большинства production-приложений на s2 (kami, dashboard,
   driving-school, archetest и др.) и Nginx Proxy Manager. Переименована из `premium-network`
   (название осталось от decommissioned `premium-rosstil`/`imot`, сняты с поддержки 2026-07-05).
-- **imot-network** - использовалась приложением imot (decommissioned)
 - **mandala-network** - используется приложением mandala (если есть)
 - **driving-school-network** - используется приложением driving-school (если есть)
 
@@ -314,8 +313,8 @@ KeePassXC):
 ./deploy-affected.sh
 
 # Деплой конкретного приложения
-./deploy-affected.sh --app premium-rosstil
-./deploy-affected.sh --app imot
+./deploy-affected.sh --app svoichuzhie
+./deploy-affected.sh --app aprel8008
 ./deploy-affected.sh --app dashboard
 ./deploy-affected.sh --app mandala
 ./deploy-affected.sh --app driving-school
@@ -509,7 +508,7 @@ VK_CLIENT_SECRET=<vk-secret>
 
 ```bash
 # Просмотр логов
-cd apps/premium-rosstil # или apps/imot, apps/dashboard
+cd apps/svoichuzhie # или apps/aprel8008, apps/dashboard
 docker compose -f docker-compose.production.yml logs -f app
 
 # Перезапуск конкретного сервиса
@@ -637,10 +636,14 @@ services:
 
 ### Таблица портов (актуально 2026-06-20, синхронизировано с `docker ps`)
 
+⚠️ **Строки `premium-rosstil` (3000) и `imot` (3001) удалены из таблицы** — оба приложения
+выведены из монорепо 2026-07-05. Освободились ли порты 3000/3001 фактически на сервере или
+были переиспользованы другим приложением без обновления этой таблицы — не проверено (то же
+ограничение, что и у таблицы Proxy Host выше, § «Текущие хосты»). Не считай 3000/3001
+автоматически свободными — сверься с `docker ps` на сервере перед тем как их занимать.
+
 | Приложение           | Внешний порт                                                                      | Внутренний порт | Сервер |
 | -------------------- | --------------------------------------------------------------------------------- | --------------- | ------ |
-| premium-rosstil      | 3000                                                                              | 3000            | s2     |
-| imot                 | 3001                                                                              | 3001            | s2     |
 | dashboard            | 3002                                                                              | 3002            | s2     |
 | driving-school       | 3003–3004                                                                         | 3003–3004       | s2     |
 | kami                 | 3005                                                                              | 3005            | s2     |
