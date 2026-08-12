@@ -4,6 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.31.2] - 2026-08-12
+
+### Changed
+
+- **`PHONE_MASKS` вынесен в `@letar/forms-core/phone`** — раньше словарь масок по 13 странам был
+  продублирован дословно в `FieldPhone` этого скина и Chakra-скина (`@letar/forms`). `PhoneCountry`
+  теперь тоже реэкспортируется из `@letar/forms-core/phone`, а не объявляется локально в `types.ts`.
+
 ## [0.31.1] - 2026-08-12
 
 ### Fixed

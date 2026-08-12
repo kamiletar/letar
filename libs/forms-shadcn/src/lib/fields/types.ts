@@ -1,6 +1,7 @@
 'use client'
 
 import type { AddressProvider } from '@letar/forms-core/address'
+import type { PhoneCountry } from '@letar/forms-core/phone'
 import type { FileSecurityConfig } from '@letar/forms-core/security'
 import type { BaseFieldProps } from '@letar/forms-react'
 import type { ReactNode } from 'react'
@@ -420,8 +421,8 @@ export interface DateTimePickerFieldProps extends BaseFieldProps {
   timeStep?: number
 }
 
-/** Коды стран для маски телефона. */
-export type PhoneCountry = 'RU' | 'US' | 'UK' | 'DE' | 'FR' | 'IT' | 'ES' | 'CN' | 'JP' | 'KR' | 'BY' | 'KZ' | 'UA'
+/** Коды стран для маски телефона — единый источник истины в `@letar/forms-core/phone`. */
+export type { PhoneCountry }
 
 /** Props for Form.Field.Phone (shadcn-скин). */
 export interface PhoneFieldProps extends BaseFieldProps {
