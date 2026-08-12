@@ -7,6 +7,8 @@ description: INN, OGRN, BIK, SNILS, passport fields with checksum validation
 
 Every B2B form in Russia requires INN, OGRN, BIK, bank account numbers. These fields have **checksums** — a simple mask is useless without validation. @letar/forms provides both headless validators and ready-to-use UI components.
 
+For how the underlying masking works (token model, formatting modes, when a mask should be skipped) see the [Input Mask Engine](/docs/guides/masks) guide.
+
 ## Architecture: Two Layers
 
 ### Layer 1: zRu Validators (headless)

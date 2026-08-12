@@ -92,6 +92,15 @@ const Schema = z.object({
 
 [Полный список → docs/fields.md](./docs/fields.md)
 
+### Маски ввода (Фаза 8, 2026-08-12)
+
+`Phone`, `MaskedInput`, все `Form.Document.*` (ИНН/КПП/ОГРН/СНИЛС/БИК/паспорт/расчётный счёт и
+т.д.) работают на собственном framework-free движке масок (`@letar/forms-core/mask`) —
+токен-модель + DOM-контроллер, без сторонних зависимостей. `CreditCard` маску не использует
+вовсе — чистые форматтеры `@letar/forms-core/credit-card`. Подробности токенов, режимов
+(`live`/`off`) и когда маска не подходит (критерий фиксированной длины) —
+[MASK_ENGINE.md](./MASK_ENGINE.md).
+
 ### Form-level компоненты
 
 ```tsx
@@ -464,9 +473,10 @@ export const { createField, FieldErrorBoundary, FieldWrapper } = createFieldPrim
 - [/.claude/docs/forms.md](../../.claude/docs/forms.md) — документация по формам
 - [/.claude/docs/pwa-offline.md](../../.claude/docs/pwa-offline.md) — оффлайн-формы
 - [/libs/form-mcp](../form-mcp/) — MCP сервер для AI-ассистентов
+- [MASK_ENGINE.md](./MASK_ENGINE.md) — движок масок ввода (токены, слои, режимы)
 - [PLAN.md](./PLAN.md) — план развития библиотеки
 - [TESTING_PLAN.md](./TESTING_PLAN.md) — план тестирования
 
 ---
 
-**Последнее обновление:** 2026-04-10
+**Последнее обновление:** 2026-08-12

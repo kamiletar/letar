@@ -1,0 +1,153 @@
+---
+title: Input Mask Engine
+description: Token model, formatting modes, when a mask hurts, accessibility requirements
+---
+
+## Overview
+
+`Form.Field.Phone`, `Form.Field.MaskedInput`, and every `Form.Document.*` field run on a
+framework-free mask engine (`@letar/forms-core/mask`) — no third-party dependency such as
+`use-mask-input`/`imask`. `Form.Field.CreditCard` does not use this engine at all: it has its
+own algorithmic grouping (`@letar/forms-core/credit-card`), which is not a mask in the sense of
+this page.
+
+This guide covers the engine's mechanics. For the ready-made Russian document fields (INN,
+OGRN, BIK, etc.) see [Russian Documents](/docs/guides/russian-documents).
+
+## Token model
+
+A mask is a string of tokens and literals. Three built-in tokens:
+
+| Token | Meaning                    |
+| ----- | --------------------------- |
+| `9`   | digit                       |
+| `a`   | letter (Latin/Cyrillic)     |
+| `*`   | letter or digit             |
+
+Everything else in the pattern is a literal — inserted automatically, not directly editable
+(hyphens, spaces, parentheses).
+
+```
+SNILS               999-999-999 99
+Russian dept. code   999-999
+Russian passport     99 99 999999
+```
+
+### Custom tokens
+
+The three built-in tokens are not enough where a field needs its own character alphabet or a
+character transform on input (e.g. Latin-to-Cyrillic substitution for a Russian license plate).
+`MaskOptions.customTokens` accepts a token with a `pattern` (which characters are accepted) and
+an optional `transform` (how to rewrite the character before it is written):
+
+```tsx
+const plateNumberTokens = {
+  l: {
+    pattern: (char: string) => 'АВЕКМНОРСТУХABEKMHOPCTYX'.includes(char),
+    transform: (char: string) => LATIN_TO_CYRILLIC[char.toUpperCase()] ?? char.toUpperCase(),
+  },
+}
+```
+
+Custom tokens cannot override the built-in ones (`9`/`a`/`*`).
+
+### Variable length and mask selection
+
+`mask` is not necessarily a single string:
+
+```ts
+mask: string | string[] | ((raw: string) => string | null)
+```
+
+- **Array** — the engine picks whichever variant the raw value decomposes into best (most
+  accepted characters). Example: a license plate region code that is 2 or 3 digits long — two
+  patterns in the array.
+- **Function** — the mask depends on the value itself (e.g. a phone number: decide from the
+  first digit whether `8` is a valid prefix or an error). `null` means "no mask applies to this
+  input", and the field behaves as a free-text input.
+
+## Formatting modes (`formatMode`)
+
+```ts
+formatMode:
+  | 'live'   // mask applied on every keystroke — DEFAULT
+  | 'blur'   // formatting applied on blur, stripped again on focus
+  | 'off'    // token-alphabet filtering only, no grouping
+```
+
+`'live'` is this library's default (a deliberate choice, not the industry-consensus
+recommendation — see
+[MASK_ENGINE.md](https://github.com/kamiletar/letar/blob/main/libs/forms/MASK_ENGINE.md) §6.6
+and §8 for the research context). Live mode has a cost: the DOM controller owns caret placement
+across three distinct branches (insert / delete-backward / delete-forward), an IME-composition
+guard, autofill detection, and its own undo stack — without those a live mask breaks the
+browser's native Ctrl+Z and makes the cursor jump. All of this already lives in
+`MaskController`, not left for field authors to reimplement.
+
+`'live'` mode technically produces an **uncontrolled** `<input>` (`ref`+`defaultValue`, no
+`value`/`onChange`) — the DOM is the source of truth, and the controller writes into it via
+`setRangeText()`, which preserves the browser's native undo stack. If you build a custom field
+on top of `useMaskField`, account for this in your markup — passing `value`+`onChange` together
+with `'live'` conflicts with the controller's character-by-character writes.
+
+## When a mask hurts
+
+Criterion from the Kontur design system, confirmed by the analysis in MASK_ENGINE.md §5.3:
+
+> Show a mask when a fixed number of characters is expected and the format includes separators.
+> If the character count can vary, don't show a mask.
+
+In practice: **fixed length + separators → mask. Variable length → the mask hurts** (truncation
+risk on paste/autofill, not an aid).
+
+Concrete decisions this produced for the ready-made fields:
+
+| Field                            | Mask?  | Why                                                          |
+| --------------------------------- | ------ | -------------------------------------------------------------- |
+| `Form.Document.SNILS`             | yes    | fixed length, has separators                                   |
+| `Form.Document.DepartmentCode`    | yes    | `999-999`, fixed length                                        |
+| `Form.Document.INN`               | **no** | 10 or 12 digits — variable length, no separators                |
+| `Form.Document.BirthCertificate`  | **no** | the Roman-numeral part is variable length (1–5 chars) — a fixed mask can't express it |
+
+Fields without a mask (`INN`, birth certificate) don't attach the engine at all — only
+normalization and checksum validation through `zRu` schemas.
+
+## Accessibility requirements
+
+`formatMode: 'live'` without these requirements reproduces the WCAG 3.3.3 failure found during
+USWDS's own usability testing (4 of 5 screen-reader participants didn't understand that a
+character had been rejected). That's why in `Form.Field.MaskedInput` they are not optional:
+
+1. **`formatDescription` is required** (WCAG 3.3.2 — the format must be known before typing
+   starts). Missing it triggers a `console.error` in every build, not only dev (`NODE_ENV` is
+   never used as a gate — see the repo rule against that anti-pattern).
+2. **A rejected character is announced via `aria-live="polite"`** — never `"assertive"`. On by
+   default, cannot be turned off through the API.
+3. **The mask template never leaks into `value`.** Otherwise a screen reader reads placeholder
+   underscores as field content, and Chrome autofill won't offer a suggestion (the field looks
+   non-empty).
+4. **`type="text"` + `inputmode="numeric"`** for digit masks, never `type="number"` — a numeric
+   input has no Selection API, which the caret logic depends on.
+
+```tsx
+<Form.Field.MaskedInput
+  name="departmentCode"
+  label="Department code"
+  mask="999-999"
+  formatDescription="Format: 3 digits, hyphen, 3 digits"
+/>
+```
+
+## Building a custom field on the engine
+
+The ready-made document fields are built on `createDocumentField`, a thin factory over
+`useMaskField` (see [Russian Documents](/docs/guides/russian-documents) for an example). For
+fields outside `Form.Document.*`, use `Form.Field.MaskedInput` directly, or the `useMaskField`
+hook from `@letar/forms-react` if you need fully custom markup.
+
+---
+
+## Live example
+
+Try the interactive example at
+[forms-example.letar.best](https://forms-example.letar.best/examples/documents).

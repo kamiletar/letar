@@ -296,12 +296,14 @@ export interface FormComponent {
     INN: (props: { name?: string; label?: string; required?: boolean }) => ReactElement
     KPP: (props: { name?: string; label?: string; required?: boolean }) => ReactElement
     OGRN: (props: { name?: string; label?: string; required?: boolean }) => ReactElement
-    OGRNIP: (props: { name?: string; label?: string; required?: boolean }) => ReactElement
     BIK: (props: { name?: string; label?: string; required?: boolean }) => ReactElement
     BankAccount: (props: { name?: string; label?: string; required?: boolean }) => ReactElement
     CorrAccount: (props: { name?: string; label?: string; required?: boolean }) => ReactElement
     SNILS: (props: { name?: string; label?: string; required?: boolean }) => ReactElement
     Passport: (props: { name?: string; label?: string; required?: boolean }) => ReactElement
+    ForeignPassport: (props: { name?: string; label?: string; required?: boolean }) => ReactElement
+    DepartmentCode: (props: { name?: string; label?: string; required?: boolean }) => ReactElement
+    BirthCertificate: (props: { name?: string; label?: string; required?: boolean }) => ReactElement
   }
 
   /**

@@ -2156,7 +2156,7 @@ React, а React-адаптер зависит от абстракций ядра
 
 ---
 
-## Фаза 8: Собственный mask-движок 🎯
+## Фаза 8: Собственный mask-движок ✅ закрыта [2026-08-12]
 
 > Исследование проведено 2026-08-12, результат и вся доказательная база — **[MASK_ENGINE.md](./MASK_ENGINE.md)**.
 > Здесь только план реализации. Решения по развилкам приняты Ками (MASK_ENGINE.md §8) и
@@ -2523,16 +2523,34 @@ DOM-поведении минимален. Юнит/компонентные т�
 
 ---
 
-### Этап 7. Документация и MCP
+### Этап 7. Документация и MCP ✅ закрыт [2026-08-12]
 
-- [ ] `libs/forms/README.md` + `docs/fields.md` — новые поля, убрать упоминания `use-mask-input`
+- [x] `libs/forms/README.md` + `docs/fields.md` — новые поля, убрать упоминания `use-mask-input`
       как зависимости (они уже устарели для Phone и CreditCard).
-- [ ] `apps/form-docs` — гайд по маскам: модель токенов, режимы, когда маска **не** нужна
+      `fields.md` уже был полон (все 12 полей движка масок документированы по ходу Этапов
+      4/5/6) — правок не потребовалось. `README.md`: добавлен раздел «Маски ввода» + ссылка на
+      `MASK_ENGINE.md`, обновлена дата.
+- [x] `apps/form-docs` — гайд по маскам: модель токенов, режимы, когда маска **не** нужна
       (критерий фиксированной длины), a11y-требования.
-- [ ] `apps/form-example`, `apps/form-develop-app` — демо новых полей.
-- [ ] **`libs/form-mcp`** — `list_fields`, `get_field_props`, `get_field_example` для новых полей
+      Новый гайд `docs/guides/masks` (en+ru), отдельно от `russian-documents` (тот про готовые
+      поля, этот — про механику движка). Сборка `nx build form-docs` подтвердила обе локали.
+- [x] `apps/form-example`, `apps/form-develop-app` — демо новых полей.
+      `CreditCard`/`MaskedInput`/`Phone` демо уже существовали и были полными. Документные демо
+      (`form-example/examples/documents`, `form-develop-app/documents-demo`) не хватало 5 полей
+      Этапов 5/6 (`CorrAccount`, `Passport`, `ForeignPassport`, `DepartmentCode`,
+      `BirthCertificate`) — добавлены в оба приложения.
+      **Побочная находка при typecheck `form-develop-app`:** ручной тип `FormComponent['Document']`
+      (`form-compound-types.ts`, на него кастуется рантайм-объект `Form`) не обновили при
+      добавлении Этапа 5 — `ForeignPassport`/`DepartmentCode`/`BirthCertificate` отсутствовали
+      (TS2339 для любого TS-потребителя библиотеки), плюс фантомный `OGRNIP` без реализации.
+      Исправлено, `nx typecheck:tsgo forms`/`form-develop-app` зелёные.
+- [x] **`libs/form-mcp`** — `list_fields`, `get_field_props`, `get_field_example` для новых полей
       (координатор проверяет этот пункт отдельно).
-- [ ] `libs/forms/CHANGELOG.md`, версии пакетов.
+      Все три тула читают `fields.md` динамически — код менять не пришлось. Добавлен
+      регрессионный тест против реального `docsPath` (`field-registry.integration.spec.ts`),
+      закрывающий класс инцидента «49 vs 56» из бэклога на будущее.
+- [x] `libs/forms/CHANGELOG.md`, версии пакетов.
+      `@letar/forms` 2.3.0 → 2.3.1 (patch — фикс типа + доки, без нового публичного API).
 
 ---
 

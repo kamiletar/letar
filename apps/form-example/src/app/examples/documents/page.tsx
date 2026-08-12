@@ -18,7 +18,19 @@ export default function DocumentsExamplePage() {
       </Stack>
 
       <Form
-        initialValue={{ inn: '', kpp: '', ogrn: '', bik: '', account: '', snils: '' }}
+        initialValue={{
+          inn: '',
+          kpp: '',
+          ogrn: '',
+          bik: '',
+          account: '',
+          corrAccount: '',
+          snils: '',
+          passport: '',
+          foreignPassport: '',
+          departmentCode: '',
+          birthCertificate: '',
+        }}
         onSubmit={(data) => setResult(JSON.stringify(data, null, 2))}
       >
         <Heading size="md">Company Details</Heading>
@@ -31,11 +43,16 @@ export default function DocumentsExamplePage() {
         </Heading>
         <Form.Document.BIK name="bik" label="BIK" />
         <Form.Document.BankAccount name="account" label="Bank Account" />
+        <Form.Document.CorrAccount name="corrAccount" label="Correspondent Account" />
 
         <Heading size="md" mt={4}>
           Personal
         </Heading>
         <Form.Document.SNILS name="snils" label="SNILS" />
+        <Form.Document.Passport name="passport" label="Passport" />
+        <Form.Document.ForeignPassport name="foreignPassport" label="Foreign Passport" />
+        <Form.Document.DepartmentCode name="departmentCode" label="Department Code" />
+        <Form.Document.BirthCertificate name="birthCertificate" label="Birth Certificate" />
 
         <Form.Button.Submit>Register Company</Form.Button.Submit>
       </Form>

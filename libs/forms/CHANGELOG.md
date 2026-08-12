@@ -6,6 +6,34 @@
 
 ## [Unreleased]
 
+## [2.3.1] - 2026-08-12
+
+### Fixed
+
+- **`FormComponent['Document']` (тип, на который кастуется `Form`) не содержал три поля из
+  Этапа 5** (`ForeignPassport`, `DepartmentCode`, `BirthCertificate`) — рантайм-объект
+  `FormDocument` их содержал, но ручной интерфейс в `form-compound-types.ts` не обновили при их
+  добавлении в 2.3.0. Следствие: TS-потребители `@letar/forms` не могли написать
+  `<Form.Document.ForeignPassport />` — `TS2339`. Найдено при обновлении демо-страницы
+  `apps/form-develop-app/documents-demo`. Заодно убран фантомный `OGRNIP` — типовая запись без
+  соответствующего поля (никогда не было реализовано).
+
+### Added
+
+- Гайд по движку масок в `apps/form-docs` (`docs/guides/masks`, en+ru): модель токенов,
+  режимы форматирования (`live`/`blur`/`off`), критерий «когда маска не нужна» (переменная
+  длина), обязательные a11y-требования `Form.Field.MaskedInput`.
+- `libs/form-mcp` — регрессионный тест против реального `libs/forms/docs/fields.md`
+  (`field-registry.integration.spec.ts`), закрывающий класс инцидента «49 vs 56 полей» из
+  бэклога: `list_fields`/`get_field_props`/`get_field_example` уже читали данные из markdown
+  корректно (код не менялся), тест — только страховка от будущего рассинхрона.
+- Демо документных полей (`apps/form-example/examples/documents`,
+  `apps/form-develop-app/documents-demo`) дополнены пятью полями Этапа 5/6:
+  `CorrAccount`, `Passport`, `ForeignPassport`, `DepartmentCode`, `BirthCertificate`.
+- `libs/forms/README.md` — раздел «Маски ввода» со ссылкой на `MASK_ENGINE.md`.
+
+Закрывает Фазу 8, Этап 7 (документация/MCP) — PLAN.md.
+
 ### Changed
 
 - **`FieldPhone`/`FieldCreditCard` — форматтеры переведены на общий движок

@@ -43,9 +43,21 @@ export default function DocumentsDemoPage() {
       <VStack gap={4} align="stretch" mt={8}>
         <Heading size="lg">Документы физлица</Heading>
 
-        <Form initialValue={{ snils: '', passport: '' }} onSubmit={(data) => setResult(data)}>
+        <Form
+          initialValue={{
+            snils: '',
+            passport: '',
+            foreignPassport: '',
+            departmentCode: '',
+            birthCertificate: '',
+          }}
+          onSubmit={(data) => setResult(data)}
+        >
           <Form.Document.SNILS name="snils" label="СНИЛС" />
           <Form.Document.Passport name="passport" label="Паспорт" />
+          <Form.Document.ForeignPassport name="foreignPassport" label="Загранпаспорт" />
+          <Form.Document.DepartmentCode name="departmentCode" label="Код подразделения" />
+          <Form.Document.BirthCertificate name="birthCertificate" label="Свидетельство о рождении" />
           <Form.Button.Submit>Сохранить</Form.Button.Submit>
         </Form>
       </VStack>
