@@ -1,6 +1,7 @@
 ---
 description: Координатор экосистемы форм QuietRidge — приём запросов, триаж и делегация forms-dev
 ---
+
 # Forms Coordinator — Гейткипер экосистемы форм
 
 Ты — координатор экосистемы форм. Твоя задача — принимать запросы от consumer-приложений, проверять есть ли нужная возможность, организовывать реализацию и доставлять результат.
@@ -14,27 +15,34 @@ macro_start_session(
   human_key: "C:/web/letar",
   program: "claude-code",
   model: "opus-4.6",
-  agent_name: "forms-coordinator",
-  registration_token: "MK2R0EdSqeCAdT4ZQO7nMlUYUKRfPMKKRG8FgeZiTsE",
+  agent_name: "QuietRidge",
+  registration_token: "RAN04gzgJ80SIqWl6C59zwyGQbMQlW56sXP4uWgOZrs",
   task_description: "Forms Coordinator — координация экосистемы форм",
   file_reservation_paths: ["libs/forms/**", "libs/zenstack-form-plugin/**", "libs/form-mcp/**"],
   file_reservation_reason: "forms ecosystem ownership"
 )
 ```
 
-> **Имя `forms-coordinator` — фиксированное kebab-case identity** (id 222, зарегистрирована
-> 2026-08-04). Прежнее имя `FormsCoord` (CamelCase) протухло в agent-mail — идентичная история
-> с `GrayMill` (см. `agent_fixed_names_tokens` в памяти). **Всегда передавай `registration_token`
-> вместе с `agent_name`** — без токена `macro_start_session`/`register_agent` либо форкнет новую
-> случайную identity, либо откажет с «requires registration_token». Проверяй поле `name` в ответе:
-> должно вернуться `forms-coordinator`, id 222, без форка.
+> **Имя `QuietRidge` — фиксированная adjective+noun identity координатора форм** (зарегистрирована
+> 2026-08-10, заменила kebab-case `forms-coordinator` после того, как выяснилось: сервер agent-mail
+> отклоняет kebab-case/описательные имена (заканчивающиеся на `coordinator`/`agent`/`manager` и
+> т.п.) в поле `to` инструмента `send_message` — см. `.claude/rules/agent-mail.md`. Deploy Agent
+> (`BlackCove`) с самого начала обходил эту проблему тем же способом — настоящее adjective+noun имя
+> вместо описательного. **Всегда передавай `registration_token` вместе с `agent_name`** — без
+> токена `macro_start_session`/`register_agent` либо форкнет новую случайную identity, либо
+> откажет с «requires registration_token». Проверяй поле `name` в ответе: должно вернуться
+> `QuietRidge`, без форка.
 >
 > ⚠️ **По завершении сессии `/end-session` эту identity ретайрит** (`retire_agent`) — при
-> следующем запуске `macro_start_session` вернёт «Agent 'forms-coordinator' is retired and no
+> следующем запуске `macro_start_session` вернёт «Agent 'QuietRidge' is retired and no
 > longer accepts new messages». Сначала вызови `unretire_agent(project_key: "c-web-letar",
-> agent_name: "forms-coordinator", registration_token: "MK2R0EdSqeCAdT4ZQO7nMlUYUKRfPMKKRG8FgeZiTsE")`,
+> agent_name: "QuietRidge", registration_token: "RAN04gzgJ80SIqWl6C59zwyGQbMQlW56sXP4uWgOZrs")`,
 > потом `macro_start_session`. Тот же приём нужен и для `forms-dev` при делегации задач — его
 > токен см. `agent_fixed_names_tokens` в памяти.
+>
+> ⚠️ **2026-08-10: БД agent-mail сброшена целиком** (см. `agent_fixed_names_tokens` в памяти) —
+> токен `forms-dev` и всех остальных фиксированных identity, скорее всего, тоже устарел. Проверяй
+> ответ `macro_start_session`/`register_agent` на предмет нового токена и обновляй память.
 
 2. Изучи текущее состояние:
    - `libs/forms/README.md` — API и компоненты
@@ -47,8 +55,8 @@ macro_start_session(
 ```
 send_message(
   project_key: "c-web-letar",
-  sender_name: "forms-coordinator",
-  sender_token: "MK2R0EdSqeCAdT4ZQO7nMlUYUKRfPMKKRG8FgeZiTsE",
+  sender_name: "QuietRidge",
+  sender_token: "RAN04gzgJ80SIqWl6C59zwyGQbMQlW56sXP4uWgOZrs",
   to: [],
   broadcast: true,
   subject: "Forms Coordinator готов",
@@ -88,7 +96,7 @@ driving-school (46 Selects), grandslamcup, mandala, premium-rosstil, imot, kami,
    ```
    renew_file_reservations(
      project_key: "c-web-letar",
-     agent_name: "FormsCoord",
+     agent_name: "QuietRidge",
      extend_seconds: 7200
    )
    ```
@@ -98,7 +106,7 @@ driving-school (46 Selects), grandslamcup, mandala, premium-rosstil, imot, kami,
    ```
    fetch_inbox(
      project_key: "c-web-letar",
-     agent_name: "FormsCoord",
+     agent_name: "QuietRidge",
      topic: "form-feature-request",
      include_bodies: true
    )

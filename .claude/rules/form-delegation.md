@@ -25,13 +25,13 @@ form-mcp → get_directives     # Есть ли нужная директива?
 form-mcp → get_field_props    # Может, поле есть но с другим названием?
 ```
 
-### 2. Отправь запрос forms-coordinator через agent-mail
+### 2. Отправь запрос координатору форм (`QuietRidge`) через agent-mail
 
 ```typescript
 send_message({
   project_key: 'C:/web/letar',
   sender_name: '<твоё имя агента>',
-  to: ['forms-coordinator'], // координатор форм (НЕ broadcast!)
+  to: ['QuietRidge'], // координатор форм, бывш. forms-coordinator (НЕ broadcast!)
   topic: 'form-feature-request',
   importance: 'high',
   ack_required: true,

@@ -1,6 +1,7 @@
 ---
 description: Воркфлоу разработки @letar/forms — приоритизация задач и обязательный цикл синхронизации из 6 групп
 ---
+
 # Forms Dev - Воркфлоу разработки
 
 ## Инициализация
@@ -52,7 +53,10 @@ description: Воркфлоу разработки @letar/forms — приори
 fetch_inbox(project_key: "c-web-letar", agent_name: "<твоё-имя>", topic: "forms-task", include_bodies: true)
 ```
 
-После завершения задачи от координатора — **отвечай через reply_message** с результатом.
+После завершения задачи от координатора — **отвечай через reply_message** с результатом (сохраняет
+тред). Координатор форм — `QuietRidge` (переименован 2026-08-10 из `forms-coordinator`; старое
+kebab-case имя ловило баг сервера agent-mail в `send_message` — см. `.claude/rules/agent-mail.md`,
+новое имя этой проблемы не имеет, но `reply_message` для продолжения треда всё равно предпочтительнее).
 
 **⚠️ После добавления компонента ОБЯЗАТЕЛЬНО обнови `libs/form-mcp`** — list_fields, get_field_props, get_field_example. Координатор проверит!
 
@@ -60,7 +64,7 @@ fetch_inbox(project_key: "c-web-letar", agent_name: "<твоё-имя>", topic: 
 
 После изучения документации:
 
-- Если есть задачи от forms-coordinator (topic: `forms-task`) — **обработай их первыми**
+- Если есть задачи от координатора форм `QuietRidge` (topic: `forms-task`) — **обработай их первыми**
 - Если есть входящие запросы (topic: `form-feature-request`) — обработай следующими
 - Если есть backlog запросы в PLAN.md — обработай следующими
 - Иначе — определи текущую фазу и выбери задачу из плана
