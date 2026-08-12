@@ -1313,10 +1313,16 @@ production)` — теперь технически возможен (staging-к�
       `infra/<сервис>/secrets/deploy.conf`, формат `<файл>.enc:<целевой_путь>:<права_chmod>`,
       трекается в git рядом с самими `.enc`. `.gitignore` держит плейнтекст вне git
       (`infra/*/secrets/*` игнорируется, `*.enc`/`deploy.conf`/`README.md` — исключения).
-- [ ] Ручка в `deploy-mcp`, чтобы BlackCove звал инструмент, а не набор команд по памяти. **Не
-      сделано** — вне скоупа сессии 2026-08-12: `deploy-mcp` (`libs/deploy-mcp`) сейчас устроен
-      вокруг `apps/<app>` (REST к dashboard-agent), добавление инфра-цели требует отдельного
-      проектирования API, не только вызова нового скрипта.
+- [x] Ручка в `deploy-mcp` (2026-08-12) — `POST /api/deploy/infra` в `dashboard-agent`
+      (`apps/dashboard-agent/src/routes/deploy.ts`), тот же nsenter-путь на хост и тот же
+      DeployStatus/Redis-конвейер, что у `/api/deploy/app` (обработчики stdout/stderr/close/error
+      вынесены в общий `attachDeployProcessHandlers`, чтобы не дублировать между двумя роутами).
+      Инструмент `deploy_infra({ service, server })` в `libs/deploy-mcp/src/server.ts` — без
+      e2e-гейта и без staging/production выбора (не применимо к infra-сервисам), `server`
+      обязателен явно: единого маппинга «сервис → сервер» для `infra/*`, в отличие от `apps/*`,
+      нет (`traefik` — s3, `acme-dns` — s2). Typecheck+lint зелёные на обоих проектах, но **живой
+      прогон на сервере не выполнялся** — до первого реального `deploy_infra` считать
+      непроверенным тем же способом, что и остальной API (build ≠ доказательство работы на s2/s3).
 - [x] Первые потребители размечены (2026-08-12): `infra/traefik/secrets/` с манифестом на два
       секрета (`acme-dns-accounts.json`, `dashboard-users` htpasswd) и
       [README с чеклистом миграции](/infra/traefik/secrets/README.md). `infra/acme-dns` секретов

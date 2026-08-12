@@ -42,7 +42,7 @@ interface DeployStatus {
   appName?: string
   staging?: boolean
   containerId?: string
-  action?: 'pull' | 'restart' | 'pull-restart' | 'deploy-app'
+  action?: 'pull' | 'restart' | 'pull-restart' | 'deploy-app' | 'deploy-infra'
   startTime?: string
   endTime?: string
   exitCode?: number | null
@@ -244,6 +244,59 @@ function getLatestDeploy(): DeployStatus | undefined {
 /** Есть ли сейчас работающий деплой */
 function isDeployRunning(): boolean {
   return deployHistory.some((d) => d.running)
+}
+
+/** Регистрирует stdout/stderr/close/error обработчики для long-running деплой-процесса
+ * (nsenter-спавн на хосте). Общий код для /api/deploy/app и /api/deploy/infra — оба
+ * запускают один и тот же жизненный цикл процесса, различается только сама команда. */
+function attachDeployProcessHandlers(deploy: DeployStatus, proc: ChildProcess): void {
+  proc.stdout?.on('data', (data: Buffer) => {
+    const lines = data
+      .toString()
+      .split('\n')
+      .filter((line) => line.trim())
+    for (const line of lines) {
+      appendOutput(deploy, line)
+    }
+  })
+
+  proc.stderr?.on('data', (data: Buffer) => {
+    const lines = data
+      .toString()
+      .split('\n')
+      .filter((line) => line.trim())
+    for (const line of lines) {
+      appendOutput(deploy, `⚠️ ${line}`)
+    }
+  })
+
+  proc.on('close', (code) => {
+    deploy.exitCode = code
+    if (code === 0) {
+      appendOutput(deploy, `✅ Deploy completed successfully`)
+    } else {
+      appendOutput(deploy, `❌ Deploy failed with exit code ${code}`)
+      deploy.error = `Process exited with code ${code}`
+    }
+    deploy.running = false
+    deploy.endTime = new Date().toISOString()
+    currentProcess = null
+    flushPersist(deploy)
+    // appendOutput выше уже разбудил ожидающих deploy_wait, но синхронно ДО этой строки —
+    // deploy.running там ещё был true. Будим ещё раз теперь, когда running реально false,
+    // иначе deploy_wait не отпускается раньше таймаута на терминальном статусе.
+    emitDeployEvent(deploy.deployId)
+  })
+
+  proc.on('error', (error) => {
+    appendOutput(deploy, `❌ Process error: ${error.message}`)
+    deploy.error = error.message
+    deploy.running = false
+    deploy.endTime = new Date().toISOString()
+    currentProcess = null
+    flushPersist(deploy)
+    emitDeployEvent(deploy.deployId)
+  })
 }
 
 /**
@@ -713,58 +766,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         stdio: ['ignore', 'pipe', 'pipe'],
         env: { ...process.env, SOPS_AGE_KEY_FILE: sopsKeyFile },
       })
-
-      // Обрабатываем stdout построчно
-      currentProcess.stdout?.on('data', (data: Buffer) => {
-        const lines = data
-          .toString()
-          .split('\n')
-          .filter((line) => line.trim())
-        for (const line of lines) {
-          appendOutput(deploy, line)
-        }
-      })
-
-      // Обрабатываем stderr построчно
-      currentProcess.stderr?.on('data', (data: Buffer) => {
-        const lines = data
-          .toString()
-          .split('\n')
-          .filter((line) => line.trim())
-        for (const line of lines) {
-          appendOutput(deploy, `⚠️ ${line}`)
-        }
-      })
-
-      // Обрабатываем завершение
-      currentProcess.on('close', (code) => {
-        deploy.exitCode = code
-        if (code === 0) {
-          appendOutput(deploy, `✅ Deploy completed successfully`)
-        } else {
-          appendOutput(deploy, `❌ Deploy failed with exit code ${code}`)
-          deploy.error = `Process exited with code ${code}`
-        }
-        deploy.running = false
-        deploy.endTime = new Date().toISOString()
-        currentProcess = null
-        flushPersist(deploy)
-        // appendOutput выше уже разбудил ожидающих deploy_wait, но синхронно ДО этой строки —
-        // deploy.running там ещё был true. Будим ещё раз теперь, когда running реально false,
-        // иначе deploy_wait не отпускается раньше таймаута на терминальном статусе.
-        emitDeployEvent(deploy.deployId)
-      })
-
-      // Обрабатываем ошибки
-      currentProcess.on('error', (error) => {
-        appendOutput(deploy, `❌ Process error: ${error.message}`)
-        deploy.error = error.message
-        deploy.running = false
-        deploy.endTime = new Date().toISOString()
-        currentProcess = null
-        flushPersist(deploy)
-        emitDeployEvent(deploy.deployId)
-      })
+      attachDeployProcessHandlers(deploy, currentProcess)
 
       // Возвращаем сразу — клиент будет опрашивать статус через /api/deploy/status
       return {
@@ -774,6 +776,83 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
           appName,
           staging,
           seed,
+          started: true,
+        },
+        timestamp: new Date().toISOString(),
+      }
+    },
+  )
+
+  /**
+   * POST /api/deploy/infra — деплой инфраструктурного сервиса infra/<service> через
+   * scripts/deploy-infra.sh (PLAN-INFRA.md §18.8.1). В отличие от /api/deploy/app:
+   * нет staging/production выбора (сервис живёт на конкретном сервере), нет e2e-гейта
+   * (инфра не гоняет e2e), нет серверного guard'а по staging — все guard'ы вокруг
+   * app-деплоя специфичны для пары app+сервер, у infra-сервисов такой пары нет.
+   * Body: { service: string }
+   */
+  fastify.post<{ Body: { service: string } }>(
+    '/api/deploy/infra',
+    async (request): Promise<ApiResponse<{ deployId: string; service: string; started: boolean }>> => {
+      const REPO_PATH = process.env.REPO_PATH || '/home/deploy/letar'
+
+      const { service } = request.body
+
+      if (!service) {
+        return {
+          success: false,
+          error: 'Service name is required',
+          timestamp: new Date().toISOString(),
+        }
+      }
+
+      if (!/^[a-z0-9-]+$/.test(service)) {
+        return {
+          success: false,
+          error: 'Invalid service name format',
+          timestamp: new Date().toISOString(),
+        }
+      }
+
+      if (isDeployRunning()) {
+        return {
+          success: false,
+          error: 'Another deploy is already in progress',
+          timestamp: new Date().toISOString(),
+        }
+      }
+
+      const deploy = createDeploy({
+        running: true,
+        appName: service,
+        action: 'deploy-infra',
+        startTime: new Date().toISOString(),
+      })
+
+      appendOutput(deploy, `🚀 Deploying infra service: ${service}`)
+
+      // Тот же nsenter-путь на хост, что и /api/deploy/app — scripts/deploy-infra.sh лежит
+      // в корне репозитория рядом с deploy-affected.sh.
+      const scriptPath = `${REPO_PATH}/scripts/deploy-infra.sh`
+      const command = [scriptPath, service]
+      const args = hostExecArgs(command)
+      appendOutput(deploy, `📋 Command: nsenter ${args.join(' ')}`)
+
+      // SOPS_AGE_KEY_FILE нужен, только если у сервиса есть secrets/deploy.conf — сам скрипт
+      // это проверяет и падает с понятной ошибкой, если ключа нет, а секреты есть.
+      const sopsKeyFile = process.env['SOPS_AGE_KEY_FILE'] || '/home/deploy/.age/letar-key.txt'
+
+      currentProcess = spawn('nsenter', args, {
+        stdio: ['ignore', 'pipe', 'pipe'],
+        env: { ...process.env, SOPS_AGE_KEY_FILE: sopsKeyFile },
+      })
+      attachDeployProcessHandlers(deploy, currentProcess)
+
+      return {
+        success: true,
+        data: {
+          deployId: deploy.deployId,
+          service,
           started: true,
         },
         timestamp: new Date().toISOString(),

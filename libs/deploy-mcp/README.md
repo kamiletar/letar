@@ -18,12 +18,15 @@ MCP-сервер: структурированный слой над REST API da
 | `deploy_wait({ server, deployId?, waitSeconds? })` | Long-poll вместо ручного опроса по таймеру — отпускает раньше `waitSeconds` (≤120с) при терминальном статусе/смене фазы/смене `stalled` | `GET /api/deploy/wait`    |
 | `deploy_cancel({ server })`                        | Отмена текущего деплоя (SIGTERM)                                                                                                        | `POST /api/deploy/cancel` |
 | `deploy_app({ app, target, seed? })`               | Запуск деплоя (`target`: `production`\|`staging`, `seed`: `--seed`) + e2e-gate (warn-only, hard для `HARD_GATED_APPS`)                  | `POST /api/deploy/app`    |
+| `deploy_infra({ service, server })`                | Деплой `infra/<service>` (Traefik, acme-dns, ...) — расшифровка `secrets/deploy.conf` + `docker compose up -d`, без e2e-gate (§18.8.1)  | `POST /api/deploy/infra`  |
 | `run_e2e({ app, baseUrl, project?, grep? })`       | Запуск Playwright e2e на s3 против `baseUrl`; `grep` — точечный прогон вместо всего набора                                              | `POST /api/e2e/run`       |
 | `e2e_status({ app?, runId?, sinceLine? })`         | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)                                                                       | `GET /api/e2e/status`     |
 
 `server` — `s2` (прод, по умолчанию) или `s3` (staging). В `deploy_app` сервер резолвится
 автоматически из `app` + `target` (staging → всегда s3). `run_e2e`/`e2e_status` всегда ходят
-на s3 — это единственный e2e-раннер (см. `e2e-testing.md`).
+на s3 — это единственный e2e-раннер (см. `e2e-testing.md`). `deploy_infra` не резолвит сервер
+автоматически — в отличие от приложений, у infra-сервисов нет единого маппинга «сервис →
+сервер» (`traefik` живёт на s3, `acme-dns` — на s2), `server` в `deploy_infra` обязателен.
 
 ### e2e-gate в deploy_app(production)
 

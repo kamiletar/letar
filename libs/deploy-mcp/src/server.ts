@@ -7,6 +7,7 @@
  *
  * Фаза 1: deploy_app, deploy_status, deploy_cancel, git_status, list_servers, agent_health.
  * Фаза 2 (Сессия D): run_e2e, e2e_status + e2e-gate в deploy_app(production).
+ * Фаза 3 (§18.8.1 PLAN-INFRA): deploy_infra — деплой infra/<service> (Traefik, acme-dns, ...).
  */
 
 import {
@@ -348,6 +349,56 @@ export function createDeployMcpServer(): McpServer {
             ...gatePrefix,
             `❌ deploy_app ${app} (${target}) на ${server}: ${err instanceof Error ? err.message : String(err)}`,
           ].join('\n'),
+        )
+      }
+    },
+  )
+
+  // ─── deploy_infra ──────────────────────────────────────────────────────────────
+  server.tool(
+    'deploy_infra',
+    [
+      'Деплой инфраструктурного сервиса infra/<service> (POST /api/deploy/infra) — запускает',
+      'scripts/deploy-infra.sh на сервере: расшифровывает секреты по',
+      'infra/<service>/secrets/deploy.conf (если он есть у сервиса) и поднимает docker compose up -d.',
+      'PLAN-INFRA.md §18.8.1.',
+      'В отличие от deploy_app: нет staging/production выбора и нет e2e-гейта — infra-сервис живёт',
+      'на одном конкретном сервере (например traefik — s3, acme-dns — s2), server обязателен.',
+      '⚠️ Изменяет инфраструктуру сервера напрямую. Перед деплоем убедись, что коммиты запушены',
+      '(git_status) — как и для deploy_app, скрипт поднимает то, что уже в рабочем дереве сервера.',
+    ].join('\n'),
+    {
+      service: z
+        .string()
+        .regex(/^[a-z0-9-]+$/, 'Имя сервиса: строчные буквы, цифры, дефис')
+        .describe('Имя infra/<service>, например "traefik" или "acme-dns"'),
+      server: serverEnum.describe('Сервер, на котором живёт сервис (traefik — s3, acme-dns — s2)'),
+    },
+    async ({ service, server }) => {
+      try {
+        const res = await agentRequest(server as InfraServer, {
+          method: 'POST',
+          path: '/api/deploy/infra',
+          body: { service },
+        })
+        if (!res.success) {
+          return errorText(`❌ Не удалось запустить деплой инфра-сервиса ${service} на ${server}: ${res.error}`)
+        }
+        const data = res.data as { deployId?: string } | undefined
+        return text(
+          [
+            `🚀 Деплой инфра-сервиса **${service}** запущен на **${server}**.`,
+            '',
+            `Опрашивай прогресс: \`deploy_status({ server: "${server}", deployId: "${
+              data?.deployId ?? ''
+            }", sinceLine: 0 })\``,
+            '',
+            pretty(res.data),
+          ].join('\n'),
+        )
+      } catch (err) {
+        return errorText(
+          `❌ deploy_infra ${service} на ${server}: ${err instanceof Error ? err.message : String(err)}`,
         )
       }
     },
