@@ -1045,33 +1045,58 @@ DoD батча: `deploy_app(staging)` → `run_e2e` → `e2e_status` зелён�
 `E2E_GATED_APPS` обновлён, warn-only минимум неделю на новом приложении перед тем, как рассчитывать
 на него как на реальную защиту (та же осторожность, что и с F).
 
-**⏳ M1 (`mandala`, `pravda`) — запущен 2026-08-12, попутно с волной деплоя §70 GlitchTip.**
-Оба уже в очереди на staging-деплой ради GlitchTip — раз стейдж всё равно поднимается, попросили
-BlackCove заодно прогнать `run_e2e`/`e2e_status` (тред `deploy-glitchtip-mandala-pravda-airaweb-s70`),
-не поднимать стейдж дважды. `E2E_GATED_APPS` обновится только по факту зелёного результата —
-сейчас в реестре их ещё нет.
+**⚠️ M1 (`mandala`, `pravda`) — задеплоены, e2e прогнан 2026-08-12, оба с реальными красными.**
+Не флейк — воспроизводимые кластеры, `E2E_GATED_APPS` **не обновлён**, DoD (зелёный прогон) не
+выполнен:
 
-**⏳ M2 (`form-example`, `kami`) — staging-инфраструктура заведена 2026-08-12, ждёт деплоя.**
-У обоих не было вообще ничего (не «без доп. условий», как считалось): ни `docker-compose.staging.yml`,
-ни `.env.staging.enc`, ни домена в Traefik. Заведено по образцу `mandala` (Traefik-лейблы,
-`traefik-network`, healthcheck, `db`+`app`), порты — следующие свободные после `studio`
-(`5465`/`3032`): `form-example-stage` → DB `5466`, app `3033`; `kami-stage` → DB `5467`, app
-`3034`. Оба `docker-compose.staging.yml` провалидированы локально (`docker compose config` с
-реальными расшифрованными секретами, plaintext удалён сразу после).
+- **`mandala`** (116/123 зелёных, 7 красных): гостевой checkout не находит кнопку «Добавить в
+  корзину»/не переходит на `/shop/...` (`04-checkout.guest.spec.ts`,
+  `05-full-checkout.guest.spec.ts`, 4 теста) — похоже, разметка/текст кнопки разошлись с
+  селектором в тесте или сам flow изменился. Клик по заказу в admin-таблице не переводит на
+  `/admin/orders/[id]` (`04-admin-orders.admin.spec.ts`, `09-admin-order-status.admin.spec.ts`,
+  3 теста) — похоже на сломанную ссылку/роутинг в таблице. Интеграционный full-flow тест
+  (admin-путь) при этом прошёл целиком.
+- **`pravda`** (189/240 зелёных, 44 красных, 4 flaky): TOC не рендерится (счётчик ссылок = 0,
+  `aria-current` не проставляется), bookmarks (весь файл красный на webkit — кнопка скрыта/не
+  кликается), cross-refs (весь файл красный на webkit — элементы скрыты либо дублируются, strict
+  mode violation), RSC-навигация в Firefox (тот же паттерн, что уже видели на mandala — клик по
+  ссылке не меняет URL корректно), Command Palette не закрывается по Escape на webkit.
 
-- **`form-example`** — БД (`Product`/`Contact`, демо-данные, не ПДн), без auth. e2e-сьют
-  (`basic`/`conditional`/`groups`/`multi-step`/`table-editor`/`validation.spec.ts`) тестирует
-  поведение форм напрямую, не полагается на предзаполненные записи — сид не нужен.
-- **`kami`** — сознательно НЕ настроен OIDC (Ключница)/Keystatic GitHub Storage/Telegram/Yandex
-  Metrica на стейдже: `kami-e2e` (5 спеков — navigation/about/skills/projects/blog) тестирует
-  только публичные страницы, авторизация не покрыта. `createAuth` (`libs/auth/src/server/
-  create-auth/index.ts:145`) не падает без `OIDC_CLIENT_ID`/`SECRET` — `genericOAuth` config
-  просто пустой массив, кнопки входа нет, остальное приложение работает. У `kami` есть
-  `db:seed` (`project.json`) — **на первом стейдж-деплое нужен `seed: true`**, иначе
-  `05-blog.spec.ts`/`04-projects.spec.ts`/`03-skills.spec.ts` не на чем проверять (пустая БД).
+Скриншоты/трейсы — в `test-output` на s3. Чинить — отдельная задача (баг-трекинг конкретных UI
+регрессий, не входит в скоуп подключения к гейту); можно параллельно тиражу.
 
-Осталось: BlackCove — `deploy_app(staging)` для обоих (`kami` — c `seed: true`), затем
-`run_e2e`/`e2e_status`. `E2E_GATED_APPS` обновится по факту зелёного результата, как и для M1.
+**✅ M2 (`form-example`, `kami`) — staging-инфраструктура заведена 2026-08-12, два блокера
+найдены и починены при первом деплое.**
+
+1. **`form-example` staging задеплоен.** Первый e2e-прогон — **невалидный, не баг стейджа**:
+   `apps/form-example-e2e/playwright.config.ts` хардкодил `webServer.url: 'http://localhost:3022'`
+   вместо `baseURL` — readiness-проверка стучалась в localhost, не видела там ничего и тихо
+   поднимала `next dev` на `localhost:3000` (Turbopack), 48/48 тестов упали против него, не
+   против стейджа. Плюс у `form-example-e2e` не было `project.json` вообще — та же категория
+   бага, что уже чинили на `time`/`aboi`/`grandslamcup` 2026-07-19 (без явного
+   `executor: '@nx/playwright:playwright'` Nx-инференс через `@nx/playwright/plugin` добавляет
+   `dependsOn` на dev-таск ДО проверки `reuseExistingServer`/`url`). Оба фикса внесены
+   (`0598571a`) — `run_e2e` нужно перезапустить.
+2. **`kami` staging НЕ собирался.** Причина — не OIDC/Telegram/Yandex Metrica (это и
+   предполагалось), а `keystatic.config.ts`: `isProd = NODE_ENV === 'production'` — та же
+   известная ловушка (`node-env-not-production-signal.md`) — на стейдже (тот же собранный
+   `next build`, что и на проде) включала `storage: 'github'`, `next build` падал целиком на
+   `collectPageData` для `/api/keystatic/[...params]` без `KEYSTATIC_GITHUB_CLIENT_ID`/`SECRET`.
+   В отличие от OIDC (там просто нет кнопки входа), это ломало весь билд. **Решение владельца
+   (2026-08-12): graceful degradation**, не отдельный GitHub OAuth App для стейджа. Условие
+   заменено на `Boolean(process.env.KEYSTATIC_GITHUB_CLIENT_ID)` — сборка не зависит от
+   NODE_ENV/домена, только от факта наличия кредов (`0598571a`). Тот же
+   `project.json`/`webServer.url` фикс применён и к `kami-e2e`.
+
+⚠️ **Обнаружен системный гэп: 6 e2e-сьютов без `project.json`** (`animatrona-landing-e2e`,
+`letar-landing-e2e`, `form-docs-e2e`, `kami-key-the-landing-e2e`, `archetest-e2e` — плюс уже
+починенные выше). Не тронуты в этом коммите — `archetest-e2e` прошёл 21/21 несмотря на пробел
+(механизм расхождения не разобран, возможно баг Nx-инференса условный, не всегда срабатывает),
+остальные три (`animatrona-landing`/`letar-landing`/`form-docs`/`kami-key-the-landing`) не в
+активном тираже M/N прямо сейчас — не блокирует, но стоит пройтись перед их гейтованием.
+
+Осталось: BlackCove — повторный `run_e2e` для `form-example`, `deploy_app(staging, seed: true)` +
+`run_e2e` для `kami`. `E2E_GATED_APPS` обновится по факту зелёного результата.
 
 **Тираж N — приложения без e2e, сначала пишем сьюты.** ✅ **6/6 закрыто (2026-07-18):**
 `animatrona-landing` (14 тестов), `animatrona-tracker` (15), `kami-key-the-landing` (9),
