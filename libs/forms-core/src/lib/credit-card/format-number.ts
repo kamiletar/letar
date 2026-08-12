@@ -1,9 +1,17 @@
+import { format } from '../mask'
 import { detectBrand } from './detect-brand'
 
 /**
  * Форматирует номер карты с пробелами по группам бренда.
  * Visa/MC: 4444 4444 4444 4444
  * Amex:    4444 444444 44444
+ *
+ * Фаза 8, Этап 4 (хвост, миграция FieldCreditCard): группы бренда (`gaps`) собираются в
+ * маску движка `@letar/forms-core/mask` (`9` на цифру гэпа, разделитель — пробел) и
+ * раскладка цифр по слотам делегируется общему `format()` вместо ручного цикла среза.
+ * Цифры сверх суммы `gaps` (Visa 18/19-значная) движок не знает — маска фиксированной
+ * длины, лишние цифры в неё физически не входят — поэтому хвост по-прежнему
+ * дописывается вручную без разделителя, как и раньше.
  *
  * @param raw - Сырые цифры номера
  * @returns Отформатированная строка
@@ -14,26 +22,13 @@ export function formatCardNumber(raw: string): string {
     return ''
   }
 
-  const brand = detectBrand(digits)
-  const { gaps } = brand
+  const { gaps } = detectBrand(digits)
+  const groupedLength = gaps.reduce((sum, gap) => sum + gap, 0)
+  const mask = gaps.map((gap) => '9'.repeat(gap)).join(' ')
 
-  const parts: string[] = []
-  let pos = 0
-
-  for (const gap of gaps) {
-    if (pos >= digits.length) {
-      break
-    }
-    parts.push(digits.slice(pos, pos + gap))
-    pos += gap
-  }
-
-  // Оставшиеся цифры (если длина > суммы gaps)
-  if (pos < digits.length) {
-    parts.push(digits.slice(pos))
-  }
-
-  return parts.join(' ')
+  const formatted = format(digits, mask)
+  const leftover = digits.slice(groupedLength)
+  return leftover ? `${formatted} ${leftover}` : formatted
 }
 
 /**

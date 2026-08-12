@@ -1,6 +1,13 @@
+import { format } from '../mask'
+
 /**
  * Форматирует ввод срока действия карты в формат MM/YY.
  * Автоматически вставляет слэш после двух цифр месяца.
+ *
+ * Фаза 8, Этап 4 (хвост, миграция FieldCreditCard): раскладка по маске `99/99`
+ * делегирована общему движку `@letar/forms-core/mask` вместо ручного среза строки —
+ * хвост без введённых цифр не дорисовывается сам (тот же эффект, что раньше давала
+ * ветка `digits.length <= 2`), а цифры сверх 4 движок просто не читает.
  *
  * @param raw - Сырой ввод пользователя
  * @returns Отформатированная строка MM/YY
@@ -11,11 +18,7 @@ export function formatExpiry(raw: string): string {
     return ''
   }
 
-  if (digits.length <= 2) {
-    return digits
-  }
-
-  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}`
+  return format(digits, '99/99')
 }
 
 /**

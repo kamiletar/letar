@@ -6,7 +6,22 @@
  * (Playwright `pressSequentially`), тесты `dsperevod-e2e` падали только там.
  * Тот же паттерн (форматирование на каждый onChange без DOM-мутаций) уже используется
  * в `credit-card-field.tsx` и работает во всех браузерах.
+ *
+ * Фаза 8, Этап 4 (хвост, миграция FieldPhone): группировка цифр по слотам маски делегирована общему
+ * движку `@letar/forms-core/mask` (`format()`) — раньше был отдельный ручной цикл,
+ * дублирующий его логику. `normalizePhoneDigits()` (снятие кода страны/междугороднего
+ * префикса) остаётся здесь: это телефонная семантика, а не общая маска, и движок её
+ * не знает и не должен — см. MASK_ENGINE.md §6.6 (переменная длина/трансформация как
+ * первоклассный случай, но только там, где это генерализуется).
+ *
+ * ⚠️ Живой DOM-контроллер движка (`MaskController`/`useMaskField`) здесь НЕ используется
+ * осознанно: он заполняет слоты посимвольно и не может ретроактивно «передумать» про уже
+ * принятую первую цифру, когда становится ясно, что это был междугородний префикс, а не
+ * часть номера (11-я цифра просто отклонится, воспроизводя ровно тот баг, который
+ * `normalizePhoneDigits` чинит). Форматирование остаётся controlled-`onChange`-пересчётом
+ * всей строки на каждое нажатие — так же, как было, только теперь через общий `format()`.
  */
+import { format } from '../mask'
 
 /** Оставляет только цифры */
 export function stripPhoneNumber(value: string): string {
@@ -50,10 +65,7 @@ function leadingLiteralDigits(mask: string): string {
 }
 
 /**
- * Форматирует сырые цифры по маске (`9` — плейсхолдер цифры, всё остальное — литерал).
- *
- * Хвост маски без введённых цифр не дорисовывается (аналог `clearIncomplete` у imask) —
- * при неполном вводе получаем `+7 (900` вместо `+7 (900) ___-__-__`.
+ * Снимает код страны и междугородний префикс из сырых цифр перед раскладкой по маске.
  *
  * Если `rawDigits` начинается с литеральных цифр маски (например код страны "7",
  * повторно попавший в цифры при переформатировании уже отображённого значения на
@@ -66,11 +78,7 @@ function leadingLiteralDigits(mask: string): string {
  * общему числу цифр, поэтому при посимвольном вводе группировка становится
  * окончательной на последней цифре; при вставке из буфера — сразу.
  */
-export function formatPhoneNumber(rawDigits: string, mask: string): string {
-  if (!rawDigits) {
-    return ''
-  }
-
+export function normalizePhoneDigits(rawDigits: string, mask: string): string {
   const literal = leadingLiteralDigits(mask)
   let digits = literal && rawDigits.startsWith(literal) ? rawDigits.slice(literal.length) : rawDigits
 
@@ -79,18 +87,21 @@ export function formatPhoneNumber(rawDigits: string, mask: string): string {
     digits = digits.slice(trunk.length)
   }
 
-  let result = ''
-  let digitIndex = 0
-  for (const char of mask) {
-    if (digitIndex >= digits.length) {
-      break
-    }
-    if (char === '9') {
-      result += digits[digitIndex]
-      digitIndex++
-    } else {
-      result += char
-    }
+  return digits
+}
+
+/**
+ * Форматирует сырые цифры по маске (`9` — плейсхолдер цифры, всё остальное — литерал).
+ *
+ * Снятие кода страны/междугороднего префикса — `normalizePhoneDigits()` (телефонная
+ * семантика). Раскладка нормализованных цифр по слотам маски — общий движок
+ * `@letar/forms-core/mask` (`format()`): хвост без введённых цифр не дорисовывается
+ * (аналог `clearIncomplete` у imask) — при неполном вводе получаем `+7 (900` вместо
+ * `+7 (900) ___-__-__`, ровно как раньше в ручной реализации.
+ */
+export function formatPhoneNumber(rawDigits: string, mask: string): string {
+  if (!rawDigits) {
+    return ''
   }
-  return result
+  return format(normalizePhoneDigits(rawDigits, mask), mask)
 }

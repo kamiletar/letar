@@ -1,7 +1,25 @@
 import { describe, expect, it } from 'vitest'
-import { countPhoneMaskDigits, formatPhoneNumber, stripPhoneNumber } from './format-phone'
+import { countPhoneMaskDigits, formatPhoneNumber, normalizePhoneDigits, stripPhoneNumber } from './format-phone'
 
 const RU_MASK = '+7 (999) 999-99-99'
+
+describe('normalizePhoneDigits (Фаза 8, Этап 4 — вынесена из formatPhoneNumber)', () => {
+  it('снимает код страны из литерала маски', () => {
+    expect(normalizePhoneDigits('79001234567', RU_MASK)).toBe('9001234567')
+  })
+
+  it('снимает междугородний префикс "8" только при переполнении маски', () => {
+    expect(normalizePhoneDigits('89185568172', RU_MASK)).toBe('9185568172')
+  })
+
+  it('НЕ трогает "8" как первую цифру кода региона (нет переполнения)', () => {
+    expect(normalizePhoneDigits('8123456789', RU_MASK)).toBe('8123456789')
+  })
+
+  it('не меняет цифры для маски без известного trunk-префикса', () => {
+    expect(normalizePhoneDigits('8005551234', '+1 (999) 999-9999')).toBe('8005551234')
+  })
+})
 
 describe('stripPhoneNumber', () => {
   it('оставляет только цифры', () => {
