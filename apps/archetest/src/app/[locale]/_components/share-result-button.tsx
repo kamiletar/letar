@@ -2,6 +2,7 @@
 
 import { toaster } from '@/app/_components/ui/toaster'
 import { Button, type ButtonProps, Icon } from '@chakra-ui/react'
+import { useCopyToClipboard } from '@letar/ui'
 import { useTranslations } from 'next-intl'
 import { useCallback } from 'react'
 import { LuShare2 } from 'react-icons/lu'
@@ -24,6 +25,7 @@ interface ShareResultButtonProps extends Omit<ButtonProps, 'onClick'> {
  */
 export function ShareResultButton({ shareText, url, shareTitle, children, ...props }: ShareResultButtonProps) {
   const t = useTranslations('common.share')
+  const { copy } = useCopyToClipboard()
 
   const handleShare = useCallback(async () => {
     const shareUrl = url ?? (typeof window !== 'undefined' ? window.location.href : '')
@@ -45,12 +47,12 @@ export function ShareResultButton({ shareText, url, shareTitle, children, ...pro
 
     // Фолбэк: копируем ссылку в буфер
     try {
-      await navigator.clipboard.writeText(`${shareText} ${shareUrl}`.trim())
+      await copy(`${shareText} ${shareUrl}`.trim())
       toaster.success({ title: t('copied') })
     } catch {
       toaster.error({ title: t('error') })
     }
-  }, [shareText, url, shareTitle, t])
+  }, [shareText, url, shareTitle, t, copy])
 
   return (
     <Button variant="outline" onClick={handleShare} {...props}>

@@ -5,6 +5,14 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.27.2] - 2026-08-12
+
+### Changed
+
+- **`ShareResultButton` — фолбэк-копирование переведено на `useCopyToClipboard` из `@letar/ui`**
+  (`navigator.share` остался приоритетным путём); попутно получил fallback на
+  `execCommand('copy')`, которого раньше не было.
+
 ## [0.27.0] - 2026-07-29
 
 ### Changed
