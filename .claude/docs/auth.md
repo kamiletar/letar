@@ -130,14 +130,14 @@ ${baseURL}/api/auth/oauth2/callback/${providerId}
 
 ### Ключевые файлы
 
-| Файл                                    | Назначение                                                       |
-| --------------------------------------- | ---------------------------------------------------------------- |
-| `apps/auth-hub/src/lib/auth.ts`         | Конфигурация Better Auth + OIDC Provider + trustedClients        |
-| `apps/auth-hub/schema.zmodel`           | Модели: User, Account, Session, OauthApplication, ProjectProfile |
-| `apps/auth-hub/src/app/oauth/consent/`  | Экран согласия OAuth (для нетруsted клиентов)                    |
-| `apps/auth-hub/src/app/(auth)/sign-in/` | Страница входа                                                   |
-| `apps/auth-hub/src/app/admin/`          | Админка: клиенты, пользователи                                   |
-| `apps/auth-hub/src/app/profile/`        | Профиль, привязка аккаунтов, смена пароля                        |
+| Файл                                    | Назначение                                                                                                                                                                                        |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/auth-hub/src/lib/auth.ts`         | Точка входа `createAuth({ mode: 'hub-provider' })` — сама конфигурация `oidcProvider` в `libs/auth/src/server/create-auth/index.ts` (`trustedClients` там не реализован, см. предупреждение выше) |
+| `apps/auth-hub/schema.zmodel`           | Модели: User, Account, Session, OauthApplication, ProjectProfile                                                                                                                                  |
+| `apps/auth-hub/src/app/oauth/consent/`  | Экран согласия OAuth (для нетруsted клиентов)                                                                                                                                                     |
+| `apps/auth-hub/src/app/(auth)/sign-in/` | Страница входа                                                                                                                                                                                    |
+| `apps/auth-hub/src/app/admin/`          | Админка: клиенты, пользователи                                                                                                                                                                    |
+| `apps/auth-hub/src/app/profile/`        | Профиль, привязка аккаунтов, смена пароля                                                                                                                                                         |
 
 ---
 
@@ -684,7 +684,9 @@ export function OnlyFor({ role, children, fallback = null }: OnlyForProps) {
 администраторам. Проверка `isAdmin()` идёт на сервере в самом page-компоненте, без клиентского
 JS для обычных посетителей (в отличие от `OnlyFor` выше, который клиентский и требует `useSession`).
 
-**Эталон:** `apps/aprel8008/src/app/page.tsx` (карточки баз) и `src/app/baza/[slug]/page.tsx` (hero).
+**Эталон:** `apps/aprel8008/src/app/(public)/page.tsx` (карточки баз) и
+`src/app/(public)/baza/[slug]/page.tsx` (hero) — проверено 2026-08-12, приложение с тех пор
+переехало на route group `(public)`, путь без неё (`src/app/page.tsx`) больше не существует.
 
 ```tsx
 // Server Component — page.tsx
