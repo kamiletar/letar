@@ -42,6 +42,14 @@
 `LIVE_MENTIONS` — это доля портированных полей, часть этой же Фазы 9, правь их вместе с самой
 Vue-работой и добавляй туда же в `LIVE_MENTIONS`, когда числа станут актуальными.
 
+**Найдена ещё одна точка того же рассинхрона, вне scope этой правки:** таблица библиотек в
+`.claude/rules/libs.md` хардкодит «47/56 полей» (forms-shadcn), «5 полей» (forms-vue), «6 полей»
+(forms-vue-shadcn) — те же числа, что путаются в README, но guard-тест их не покрывает (это не
+README `@letar/forms*`, а служебный rules-файл). Делать сейчас рано — числа всё ещё в движении
+из-за этой же Фазы 9. Когда Vue-паритет устаканится: либо убрать числа из `libs.md` в пользу общей
+фразы («Vue-скин, headless» без счётчика), либо расширить `LIVE_MENTIONS` в
+`doc-field-count.integration.spec.ts` на этот файл тоже.
+
 **Связанная задача в документации:** [`apps/form-docs/PLAN.md` → P7](/apps/form-docs/PLAN.md) —
 переключатели Framework (React/Vue) × Skin (Chakra/shadcn), спроектированы 2026-08-13 по ресёрчу
 чужих решений (TanStack, Ark UI, shadcn, Radix, Zag, Nuxt UI, Park UI, Docusaurus). Три следствия
