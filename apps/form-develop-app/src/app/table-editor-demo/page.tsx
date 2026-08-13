@@ -89,6 +89,7 @@ export default function TableEditorDemoPage() {
               ]}
               addLabel="Добавить контакт"
               size="md"
+              sortable
             />
             <Form.Button.Submit>Сохранить</Form.Button.Submit>
           </Form>
