@@ -35,11 +35,43 @@ interface SortableItemContextValue {
 
 const SortableItemContext = createContext<SortableItemContextValue | null>(null)
 
+export { SortableItemContext }
+
 /**
  * Hook to access sortable item context (for drag handle)
  */
 export function useSortableItemContext(): SortableItemContextValue | null {
   return useContext(SortableItemContext)
+}
+
+/**
+ * Низкоуровневый хук sortable-состояния без обёртывающего DOM-элемента.
+ *
+ * В отличие от `SortableItem` (рендерит `Box`), ничего не рендерит сам —
+ * нужен там, где элемент управления (`ref`/`style`) обязан оказаться на уже
+ * существующем узле (например `Table.Row`), а не на дополнительной обёртке.
+ * Валидная HTML-таблица не допускает `<div>`/лишний `<tr>` между `<tbody>` и
+ * `<tr>` — двойная обёртка ломает hydration.
+ */
+export function useSortableRow(id: string): {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  attributes: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  listeners: any
+  setNodeRef: (node: HTMLElement | null) => void
+  style: CSSProperties
+  isDragging: boolean
+} {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
+
+  const style: CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    position: 'relative',
+  }
+
+  return { attributes, listeners, setNodeRef, style, isDragging }
 }
 
 /**
@@ -126,14 +158,7 @@ export interface SortableItemProps {
  * ```
  */
 export function SortableItem({ id, children }: SortableItemProps): ReactElement {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
-
-  const style: CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-    position: 'relative',
-  }
+  const { attributes, listeners, setNodeRef, style, isDragging } = useSortableRow(id)
 
   const contextValue: SortableItemContextValue = {
     attributes,

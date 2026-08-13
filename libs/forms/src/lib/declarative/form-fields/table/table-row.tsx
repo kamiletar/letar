@@ -1,7 +1,7 @@
 'use client'
 
 import { IconButton, Table } from '@chakra-ui/react'
-import { DragHandle } from '../../form-group/form-group-list-sortable'
+import { DragHandle, SortableItemContext, useSortableRow } from '../../form-group/form-group-list-sortable'
 import { TableCell } from './table-cell'
 import { useTableEditorContext } from './table-editor-context'
 
@@ -14,20 +14,30 @@ interface TableRowProps {
   selectable?: boolean
   /** Показывать drag handle */
   sortable?: boolean
+  /** Уникальный id строки для dnd-kit (обязателен при sortable) */
+  sortId?: string
 }
 
 /**
  * Строка таблицы TableEditor.
  * Содержит ячейки, чекбокс выбора и кнопку удаления.
+ *
+ * При sortable=true применяет ref/style dnd-kit напрямую к `Table.Row`
+ * (не оборачивает `<tr>` в `<div>`/лишний `<tr>` — это невалидный HTML внутри
+ * `<tbody>` и ломает hydration).
  */
-export function TableEditorRow({ rowIndex, rowData, selectable, sortable }: TableRowProps) {
+export function TableEditorRow({ rowIndex, rowData, selectable, sortable, sortId }: TableRowProps) {
   const { columns, removeRow, canRemove, selectedRows, toggleRowSelection, readOnly, disabled } =
     useTableEditorContext()
 
   const isSelected = selectedRows.has(rowIndex)
 
-  return (
+  const { attributes, listeners, setNodeRef, style, isDragging } = useSortableRow(sortId ?? `row-${rowIndex}`)
+
+  const row = (
     <Table.Row
+      ref={sortable ? setNodeRef : undefined}
+      style={sortable ? style : undefined}
       data-row-index={rowIndex}
       bg={isSelected ? 'blue.50' : undefined}
       _dark={isSelected ? { bg: 'blue.900/20' } : undefined}
@@ -75,5 +85,15 @@ export function TableEditorRow({ rowIndex, rowData, selectable, sortable }: Tabl
         </Table.Cell>
       )}
     </Table.Row>
+  )
+
+  if (!sortable) {
+    return row
+  }
+
+  return (
+    <SortableItemContext.Provider value={{ attributes, listeners, isDragging }}>
+      {row}
+    </SortableItemContext.Provider>
   )
 }

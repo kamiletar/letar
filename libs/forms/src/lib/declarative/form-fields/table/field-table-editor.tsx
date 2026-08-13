@@ -4,7 +4,7 @@ import { Box, Field, Table, Text } from '@chakra-ui/react'
 import { type ReactElement, useCallback, useState } from 'react'
 import { useFormGroup } from '../../../form-group'
 import { useDeclarativeForm } from '../../form-context'
-import { SortableItem, SortableWrapper } from '../../form-group/form-group-list-sortable'
+import { SortableWrapper } from '../../form-group/form-group-list-sortable'
 import { getZodConstraints } from '../../schema-constraints'
 import { TableEditorContext } from './table-editor-context'
 import { TableEditorFooter } from './table-footer'
@@ -275,14 +275,14 @@ export function FieldTableEditor({
                           onReorder={(oldIdx, newIdx) => moveRow(oldIdx, newIdx)}
                         >
                           {rows.map((rowData, rowIndex) => (
-                            <SortableItem key={`${fullPath}-${rowIndex}`} id={`${fullPath}-${rowIndex}`}>
-                              <TableEditorRow
-                                rowIndex={rowIndex}
-                                rowData={rowData}
-                                selectable={selectable}
-                                sortable={sortable}
-                              />
-                            </SortableItem>
+                            <TableEditorRow
+                              key={`${fullPath}-${rowIndex}`}
+                              rowIndex={rowIndex}
+                              rowData={rowData}
+                              selectable={selectable}
+                              sortable={sortable}
+                              sortId={`${fullPath}-${rowIndex}`}
+                            />
                           ))}
                         </SortableWrapper>
                       )
