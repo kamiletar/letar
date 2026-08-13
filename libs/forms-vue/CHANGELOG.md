@@ -1,5 +1,29 @@
 # Changelog @letar/forms-vue
 
+## 0.15.0 (2026-08-13)
+
+Фаза 9, Этап 8 (часть 2, финал) — оставшиеся 14 полей: полный паритет с React-скином, **61/61**.
+
+- **Select-семейство (9):** `FieldAutocomplete`, `FieldCombobox`, `FieldListbox`,
+  `FieldCascadingSelect`, `FieldCheckboxCard`, `FieldRadioCard`, `FieldSegmentedGroup`,
+  `FieldImageChoice`, `FieldTags`.
+- **Специализированные (5):** `FieldAuto`, `FieldCalculated`, `FieldEditable`,
+  `FieldPasswordStrength`, `FieldSchedule`.
+- `FieldCascadingSelect` — зависимый select собран через `form.useStore(selector)`
+  (Vue-аналог React `form.Subscribe`, у `@tanstack/vue-form` нет прямого эквивалента с тем же
+  API для чтения значения постороннего поля).
+- `FieldCalculated` — реактивный пересчёт через `form.useStore` + `watch(..., { deep: true })`
+  вместо React `useSyncExternalStore`/`useDebounce` — Vue-идиоматичный путь без доп. хука.
+- `FieldSegmentedGroup` не имел React-референса в `forms-shadcn` (только Chakra-оригинал) —
+  логика single-select портирована напрямую на `role="radiogroup"`/`role="radio"`.
+  `FieldCombobox` в `forms-vue-shadcn` уже существовал (незаэкспортированный WIP) — добавлен
+  экспорт, headless-версия в `forms-vue` написана с нуля по тому же контракту.
+- Новых peer-зависимостей не потребовалось — всё поверх уже подключённых `reka-ui`/
+  `lucide-vue-next`/`@letar/tailwind-utils`.
+- Тесты — `app-form.stage8-part2.spec.ts` в обоих пакетах.
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный на обоих пакетах.
+
 ## 0.14.0 (2026-08-13)
 
 Фаза 9, Этап 8 (часть 1) — три документных поля, пропущенных при исходной декомпозиции на 7

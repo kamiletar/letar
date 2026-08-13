@@ -18,6 +18,25 @@
   --projects=@letar/forms-vue-shadcn` зелёный — `demo/` вне scope этих таргетов
   (`tsconfig.lib.json`/`oxlint` покрывают только `src/`), поведение то же, что и до правки.
 
+## 0.16.0 (2026-08-13)
+
+Фаза 9, Этап 8 (часть 2, финал) — оставшиеся 14 полей: полный паритет с React-скином, **61/61**.
+
+- **Select-семейство (9):** `FieldAutocomplete`, `FieldCombobox` (уже существовал
+  незаэкспортированным, добавлен экспорт), `FieldListbox`, `FieldCascadingSelect`,
+  `FieldCheckboxCard`, `FieldRadioCard`, `FieldSegmentedGroup`, `FieldImageChoice`, `FieldTags`.
+  `FieldCheckboxCard`/`FieldRadioCard` делят новую `lib/utils/card-class.ts`.
+- **Специализированные (5):** `FieldAuto`, `FieldCalculated`, `FieldEditable`,
+  `FieldPasswordStrength`, `FieldSchedule` — редактор недельного расписания с Reka
+  `SwitchRoot`/`SwitchThumb` для day-toggle, копированием понедельника на будни, валидацией
+  `close > open`.
+- `FieldSegmentedGroup` без React-референса в `forms-shadcn` (только Chakra-оригинал) —
+  портирован напрямую с Reka-примитивами по тому же контракту, что и остальные select-поля.
+- Новых peer-зависимостей не потребовалось.
+- Тесты — `app-form.stage8-part2.spec.ts`.
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный на обоих пакетах.
+
 ## 0.15.0 (2026-08-13)
 
 Фаза 9, Этап 8 (часть 1) — три документных поля, пропущенных при исходной декомпозиции на 7
