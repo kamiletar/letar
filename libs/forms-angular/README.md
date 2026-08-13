@@ -9,7 +9,7 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
 валидация — подключаться через нативные примитивы `@angular/forms` (Reactive Forms), не через
 имитацию `@tanstack/angular-form`.
 
-Пруф подтверждён: `forms-core` не потребовал ни одной правки. 28/61 полей закрыто:
+Пруф подтверждён: `forms-core` не потребовал ни одной правки. 29/61 полей закрыто:
 
 - **Этап 1–2** (зеркало Vue-порта): String, Textarea, Number, Password, Checkbox, Switch,
   RadioGroup, NativeSelect, Date, YesNo.
@@ -17,6 +17,7 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
   Rating, Hidden, Time.
 - **Stage B** (Фаза 11, +11 документных полей РФ — движок масок): INN, BIK, OGRN, SNILS, KPP,
   Passport, BankAccount, CorrAccount, ForeignPassport, DepartmentCode, BirthCertificate.
+- **Stage C** (Фаза 11, +1 поле — чистый JS-форматтер вместо движка масок): Phone.
 
 ## Поля
 
@@ -50,6 +51,7 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
 | `FieldForeignPassportComponent`  | `letar-field-foreign-passport`  | —                                                                           |
 | `FieldDepartmentCodeComponent`   | `letar-field-department-code`   | —                                                                           |
 | `FieldBirthCertificateComponent` | `letar-field-birth-certificate` | — (без маски — свободный ввод + нормализация гомоглифов на `blur`)          |
+| `FieldPhoneComponent`            | `letar-field-phone`             | `country` (по умолчанию `RU`), `autoUnmask` (по умолчанию `false`)          |
 
 Разметка у всех — голый HTML, без CSS: классы `letar-field`, `letar-field__label`,
 `letar-field__control`, `letar-field__error` (тот же принцип, что у `libs/forms-vue`, раздел
@@ -86,6 +88,17 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
   `ControlValueAccessor` (иначе в `FormControl` попадало бы отформатированное значение, а не raw).
   Подробности и почему двойной источник ошибки (Zod-схема формы + собственная контрольная сумма
   поля) — комментарий класса в `document-field-base.ts`.
+- **`FieldPhoneComponent`** (`src/lib/fields/field-phone.component.ts`, Stage C) — единственное
+  «масочное» поле во всех трёх скинах (React/Vue/Angular), которое сознательно обходит движок
+  масок целиком: форматирует через чистый JS-форматтер `@letar/forms-core/phone`
+  (`formatPhoneNumber`/`stripPhoneNumber`), не через `MaskController` — тот не может ретроактивно
+  распознать междугородний trunk-префикс (ведущая `8` в РФ), см. комментарий в
+  `format-phone.ts`. Как и документные поля — не `[formControl]`, а `@ViewChild('inputEl')` +
+  ручной `(input)`/`(blur)`, но проще: без `MaskController` весь пересчёт (`stripPhoneNumber` →
+  `formatPhoneNumber` → запись в DOM и в контрол) — в одном обработчике `input`, без отдельного
+  `ngAfterViewInit`-attach. Контракт `autoUnmask` — 1-в-1 с Vue/React (не как у
+  `DocumentFieldBase`, где `FormControl` всегда получает raw): `false` (default) — контрол хранит
+  форматированную строку; `true` — только цифры.
 
 ## Тестирование без Karma
 
@@ -126,8 +139,8 @@ nx typecheck:tsgo forms-angular
 - `FieldBase.name`/`label`/`placeholder` не реактивны к изменению после первого рендера
   (не сигналы, `@Input()`) — приемлемо, так как в реальном использовании `name` не меняется после
   монтирования поля.
-- `Field.Phone` (особый non-mask-engine форматтер, Stage C) и `Field.MaskedInput` (универсальная
-  произвольная маска, Stage J) — вне скоупа Stage B, тяжёлые peer-deps по-прежнему не портируются.
+- `Field.MaskedInput` (универсальная произвольная маска, Stage J) — не портируется, вне скоупа;
+  тяжёлые peer-deps по-прежнему не портируются.
 
 ## Подключение к приложению
 
