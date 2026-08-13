@@ -1,7 +1,7 @@
 import type { UIKitNumberInputProps } from '@letar/forms-core/uikit'
-import { h, type VNode } from 'vue'
 import { cn } from '@letar/tailwind-utils'
 import { NATIVE_INPUT_CLASS } from '@letar/tailwind-utils'
+import { h, type VNode } from 'vue'
 
 export function NumberInput(
   { value, onChange, onBlur, min, max, step, disabled, readOnly, ...rest }: UIKitNumberInputProps,

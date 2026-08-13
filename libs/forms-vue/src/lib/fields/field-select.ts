@@ -1,6 +1,6 @@
 import { getFieldMeta } from '@letar/forms-core/schema'
 import { defineComponent, h, type PropType } from 'vue'
-import { useAppFormContext } from '../form-context'
+import { useAppFormContext } from '../core/form-context'
 import { fieldWrapper } from './field-utils'
 
 export interface FieldSelectOption {

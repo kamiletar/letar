@@ -1,5 +1,5 @@
 import { h } from 'vue'
-import { createField } from '../create-field'
+import { createField } from '../core/create-field'
 import { fieldWrapper } from './field-utils'
 
 export const FieldInput = createField('FieldInput', (args) =>

@@ -1,4 +1,5 @@
 import type { UIKitSelectProps } from '@letar/forms-core/uikit'
+import { cn } from '@letar/tailwind-utils'
 import { Check, ChevronDown, X } from 'lucide-vue-next'
 import {
   SelectContent,
@@ -13,7 +14,6 @@ import {
   SelectViewport,
 } from 'reka-ui'
 import { h, type VNode } from 'vue'
-import { cn } from '@letar/tailwind-utils'
 import type { UINode } from '../ui-node'
 
 export function Select(

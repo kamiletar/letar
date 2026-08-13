@@ -1,7 +1,6 @@
-import { getFieldMeta } from '@letar/forms-core/schema'
 import type { UIKitCorePrimitives, UIKitExtendedPrimitives } from '@letar/forms-core/uikit'
-import { useAppFormContext } from '@letar/forms-vue'
-import { defineComponent, h, onErrorCaptured, type PropType, ref } from 'vue'
+import { resolveFieldMeta, useAppFormContext, withFieldValidation } from '@letar/forms-vue/core'
+import { defineComponent, onErrorCaptured, type PropType, ref } from 'vue'
 import type { UINode } from '../uikit/ui-node'
 
 /**
@@ -48,6 +47,10 @@ export interface FieldPrimitives {
  * (`getDerivedStateFromError`/`componentDidCatch` — паттерн, которого в Vue нет). Здесь та же
  * задача решена идиоматично для Composition API — хуком `onErrorCaptured` прямо в `setup()`
  * компонента поля, без отдельного класса-обёртки.
+ *
+ * Разбор Zod-меты и обёртка `form.Field` (`resolveFieldMeta`/`withFieldValidation`) —
+ * переиспользованы из `@letar/forms-vue/core` (Фаза 9), не дублированы: та же логика нужна
+ * простым полям headless-пакета, а раньше была скопирована сюда дословно.
  */
 export function createFieldPrimitives(uikit: FieldPrimitivesUIKit): FieldPrimitives {
   const FieldWrapper = (
@@ -78,9 +81,12 @@ export function createFieldPrimitives(uikit: FieldPrimitivesUIKit): FieldPrimiti
       },
       setup(props) {
         const { form, schema } = useAppFormContext()
-        const meta = getFieldMeta(schema, props.name)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Zod-объект без публичного .shape в типах
-        const fieldSchema = (schema as any).shape?.[props.name]
+        const { fieldSchema, label, placeholder, required } = resolveFieldMeta(
+          schema,
+          props.name,
+          props.label,
+          props.placeholder,
+        )
 
         // Ошибка рендера внутри render() поля не должна класть всю форму — fallback вместо
         // краша, как и в React-версии, но через нативный Vue-механизм.
@@ -96,30 +102,12 @@ export function createFieldPrimitives(uikit: FieldPrimitivesUIKit): FieldPrimiti
             return uikit.ErrorFallback({ fieldName: props.name, message: renderError.value.message })
           }
 
-          return h(
-            form.Field,
-            { name: props.name, validators: fieldSchema ? { onChange: fieldSchema } : undefined },
-            {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TanStack Form field slot-параметр
-              default: ({ field }: { field: any }) => {
-                const errors = (field.state.meta.errors ?? []) as unknown[]
-                const hasError = errors.length > 0
-                const firstError = errors[0] as { message?: string } | string | undefined
-                const errorMessage = hasError
-                  ? typeof firstError === 'string' ? firstError : firstError?.message ?? ''
-                  : ''
-
-                return render({
-                  field,
-                  name: props.name,
-                  label: props.label ?? meta.ui?.title,
-                  placeholder: props.placeholder ?? meta.ui?.placeholder,
-                  required: meta.required,
-                  hasError,
-                  errorMessage,
-                })
-              },
-            },
+          return withFieldValidation(
+            form,
+            props.name,
+            fieldSchema,
+            (field, hasError, errorMessage) =>
+              render({ field, name: props.name, label, placeholder, required, hasError, errorMessage }),
           )
         }
       },

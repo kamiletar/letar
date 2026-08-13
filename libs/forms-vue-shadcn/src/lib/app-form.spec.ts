@@ -1,4 +1,4 @@
-import { AppForm } from '@letar/forms-vue'
+import { AppForm } from '@letar/forms-vue/core'
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, nextTick } from 'vue'

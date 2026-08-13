@@ -1,5 +1,5 @@
 import { h, type VNode } from 'vue'
-import type { FieldRenderArgs } from '../create-field'
+import type { FieldRenderArgs } from '../core/create-field'
 
 /** Общая обвязка Label → Control → Error, без UIKit-абстракции — см. заметку в create-field.ts. */
 export function fieldWrapper(

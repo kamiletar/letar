@@ -1,5 +1,6 @@
-import { getFieldMeta } from '@letar/forms-core/schema'
-import { defineComponent, h, type VNode } from 'vue'
+import { type VNode } from 'vue'
+import { defineComponent } from 'vue'
+import { resolveFieldMeta, withFieldValidation } from './field-wiring'
 import { useAppFormContext } from './form-context'
 
 /** То, что render-функция поля получает на руки — Vue-аналог `FieldRenderProps` из forms-react. */
@@ -24,6 +25,9 @@ export type FieldRenderFn = (args: FieldRenderArgs) => VNode
  *
  * Валидация — по подсхеме поля (`schema.shape[name]`) как `onChange`-валидатор
  * `@tanstack/vue-form`: библиотека принимает Zod-схему напрямую (Standard Schema).
+ *
+ * Обвязка (`resolveFieldMeta`/`withFieldValidation`) — общая с `createFieldPrimitives`
+ * (`@letar/forms-vue-shadcn`, Фаза 9), не копия: оба живут в `./field-wiring`.
  */
 export function createField(displayName: string, render: FieldRenderFn) {
   return defineComponent({
@@ -35,38 +39,20 @@ export function createField(displayName: string, render: FieldRenderFn) {
     },
     setup(props) {
       const { form, schema } = useAppFormContext()
-      const meta = getFieldMeta(schema, props.name)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const fieldSchema = (schema as any).shape?.[props.name]
-
-      const label = props.label ?? meta.ui?.title
-      const placeholder = props.placeholder ?? meta.ui?.placeholder
+      const { fieldSchema, label, placeholder, required } = resolveFieldMeta(
+        schema,
+        props.name,
+        props.label,
+        props.placeholder,
+      )
 
       return () =>
-        h(
-          form.Field,
-          { name: props.name, validators: fieldSchema ? { onChange: fieldSchema } : undefined },
-          {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            default: ({ field }: { field: any }) => {
-              const errors = (field.state.meta.errors ?? []) as unknown[]
-              const hasError = errors.length > 0
-              const firstError = errors[0] as { message?: string } | string | undefined
-              const errorMessage = hasError
-                ? typeof firstError === 'string' ? firstError : firstError?.message ?? ''
-                : ''
-
-              return render({
-                field,
-                name: props.name,
-                label,
-                placeholder,
-                required: meta.required,
-                hasError,
-                errorMessage,
-              })
-            },
-          },
+        withFieldValidation(
+          form,
+          props.name,
+          fieldSchema,
+          (field, hasError, errorMessage) =>
+            render({ field, name: props.name, label, placeholder, required, hasError, errorMessage }),
         )
     },
   })

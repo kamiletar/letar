@@ -67,6 +67,39 @@ README `@letar/forms*`, а служебный rules-файл). Делать се
   именам, что React-аналоги, доки получат паритет структурно, без ручной синхронизации. Учесть
   при планировании раскладки — переделывать потом дороже.
 
+**Этап 1 — отчёт (2026-08-13): архитектурная база готова, координатор ушёл в retired.**
+`QuietRidge` подтвердила план (письмо #201, тред `forms-vue-parity-phase9`), уточнила вариант A
+(подпуть `@letar/forms-vue/core`, не модуль внутри пакета) и разрешила старт, затем ушла в
+retired (письмо #202) — дальнейшие отчёты идут сюда, в `PLAN.md`, не в agent-mail.
+
+Сделано:
+
+- **Новый подпуть `@letar/forms-vue/core`** (`forms-vue` 0.1.0 → 0.2.0) — `AppForm`, `createField`,
+  `provideAppForm`, `useAppFormContext` переехали физически в `src/lib/core/`; корневой `.`
+  реэкспорт не изменился. Композиционная логика разбора Zod-меты и обёртки `form.Field`
+  дополнительно вынесена в новые `resolveFieldMeta`/`withFieldValidation` (`src/lib/core/field-wiring.ts`).
+- **ESLint-барьер** (`eslint.config.mjs`) — файлам `forms-vue/src/core.ts`/`src/lib/core/**`
+  запрещено импортировать что-либо из `src/lib/fields/**`, тем же механизмом
+  (`no-restricted-imports` + негативная проба), что уже держит границу `forms-core`/`forms-react`.
+- **`forms-vue-shadcn` переключён на реальное переиспользование** (0.1.0 → 0.2.0, ломающее —
+  согласовано, пакет в beta): `createFieldPrimitives`, `FieldSelect`, `FieldCombobox` теперь
+  вызывают `resolveFieldMeta`/`withFieldValidation` из `@letar/forms-vue/core` вместо
+  продублированной копии той же логики. Своя специфика скина (`onErrorCaptured`,
+  `uikit.ErrorFallback`) осталась на месте — это не подошло бы под общую обвязку.
+- Интеграционный тест `AppForm` + все поля вместе (`app-form.spec.ts`) остался вне `core/` — он
+  законно пересекает границу core/fields, барьер бы его заблокировал.
+- Vitest-алиасы (`vitest.config.ts` обоих пакетов + `demo/vite.config.ts`) дополнены записью на
+  подпуть `/core` — порядок ключей важен (подпуть перед голым пакетом, тот же нюанс, что и с
+  `forms-core` в README).
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный.
+
+Дальше по плану Этапа 1 (нативные HTML-поля, ∼14 штук) — реализация в следующем заходе:
+`String, Textarea, Number, NumberInput, Password, Checkbox, Switch, RadioGroup, NativeSelect,
+Hidden, YesNo, Date, Time, Currency, Percentage`. Архитектурная база (подпуть + барьер + общая
+обвязка) была предпосылкой для этого — без неё каждое новое поле в `forms-vue-shadcn` копировало
+бы `resolveFieldMeta`/`withFieldValidation` заново.
+
 ---
 
 ## ✅ [2026-08-12] `useFormPersistence` — `excludeFields` для чувствительных полей + документация — закрыто

@@ -25,6 +25,10 @@ export default defineConfig({
   resolve: {
     alias: {
       ...formsCoreAlias,
+      // Подпуть перед голым пакетом — rollup-plugin-alias матчит по префиксу (см. предупреждение
+      // в forms-core/README.md), иначе '@letar/forms-vue/core' резолвился бы как
+      // '@letar/forms-vue' + '/core' в файловой системе, не в './core.ts'.
+      '@letar/forms-vue/core': resolve(__dirname, '../forms-vue/src/core.ts'),
       '@letar/forms-vue': resolve(__dirname, '../forms-vue/src/index.ts'),
     },
   },

@@ -208,6 +208,28 @@ export default [
       ],
     },
   },
+  // === @letar/forms-vue/core — композиционный слой без конкретных полей (Фаза 9) ===
+  // Vue-аналог `forms-react`: `AppForm`/`createField`/`useAppFormContext`, но без референсных
+  // HTML-полей (`src/lib/fields/**`). Граница — подпуть экспорта `./core`, проверяемая, не
+  // подразумеваемая: `forms-vue-shadcn` импортирует именно его, не корневой `.`, и не должен
+  // получить голую HTML-разметку полей транзитивно. Решение координатора форм, 2026-08-13.
+  {
+    files: ['**/forms-vue/src/core.ts', '**/forms-vue/src/lib/core/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/fields/*', '../fields/*', './fields/*'],
+              message:
+                '@letar/forms-vue/core — общая обвязка формы, не должна знать о конкретных полях. Полям положено импортировать core, не наоборот — иначе граница с forms-vue-shadcn размоется.',
+            },
+          ],
+        },
+      ],
+    },
+  },
   {
     // `**/src/client.ts` и `**/src/ui/**/*.tsx` — точка входа `@letar/cdek/client` не
     // папка, а один файл, реэкспортирующий `src/ui/*`; без этих двух глобов клиентский

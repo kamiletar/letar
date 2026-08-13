@@ -1,6 +1,18 @@
 # Changelog @letar/forms-vue-shadcn
 
-## 0.1.0 (2026-08-12)
+## 0.2.0 (2026-08-13)
+
+Фаза 9 (`libs/forms/PLAN.md`, тред `forms-vue-parity-phase9`), Этап 1.
+
+- ⚠️ **Ломающее изменение (пакет в beta, внешних потребителей нет — согласовано координатором):**
+  `useAppFormContext`, `AppForm` и вся композиционная логика теперь берутся из
+  `@letar/forms-vue/core`, не из корневого `@letar/forms-vue`. `createFieldPrimitives` (в
+  `field/create-field-primitives.ts`) и поля `FieldSelect`/`FieldCombobox` (собранные напрямую,
+  не через фабрику) переиспользуют `resolveFieldMeta`/`withFieldValidation` из `forms-vue/core`
+  вместо копии той же логики — дублирование обвязки (разбор Zod-меты, обёртка `form.Field`,
+  извлечение ошибки валидации) устранено.
+- Публичный API самого `@letar/forms-vue-shadcn` (`createField`, `FieldWrapper`, 6 полей,
+  `rekaUIKit`) не изменился — поменялся только внутренний источник композиционной логики.
 
 Первый релиз — Поток 1 письма координатора форм `QuietRidge` (тред `forms-phase7-3-shadcn`,
 письмо #61): полноценный Reka UI-скин `UIKit`-контракта из `forms-core` для Vue, аналог

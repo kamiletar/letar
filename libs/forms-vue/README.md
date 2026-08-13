@@ -93,6 +93,22 @@ function handleSubmit(value: Record<string, unknown>) {
   реализация на голом HTML, без свопаемого дизайн-скина. Для пруфа границы этого достаточно.
 - **Нет `Form.Group`/`Form.Steps`/массивов** — только плоские top-level поля.
 
+## Подпуть `@letar/forms-vue/core` (Фаза 9)
+
+Композиционный слой без единого конкретного поля — `AppForm`, `createField`, `provideAppForm`,
+`useAppFormContext`, `resolveFieldMeta`, `withFieldValidation`. Vue-аналог роли, которую для React
+играет `@letar/forms-react`: второй Vue-скин (`@letar/forms-vue-shadcn`) импортирует именно этот
+подпуть, а не корневой `.` — так он не тянет референсные HTML-поля этого пакета.
+
+```typescript
+import { AppForm, createField, useAppFormContext } from '@letar/forms-vue/core'
+```
+
+Граница проверяется ESLint-правилом (`eslint.config.mjs`): файлам `src/core.ts`/`src/lib/core/**`
+запрещено импортировать что-либо из `src/lib/fields/**` — тот же принцип, что уже защищает
+границу `forms-core`/`forms-react` (`no-restricted-imports` + негативная проба линта, не
+соглашение на честном слове).
+
 ## Команды
 
 ```bash

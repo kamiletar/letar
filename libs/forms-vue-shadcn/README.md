@@ -50,8 +50,10 @@ export default defineComponent({
 })
 ```
 
-`AppForm`/`useAppFormContext` — из `@letar/forms-vue` (headless-слой, Фаза 7.8), не отсюда: этот
-пакет несёт только UIKit-скин и поля поверх него, не форму целиком.
+`AppForm`/`useAppFormContext` — из `@letar/forms-vue/core` (композиционный слой, Фаза 9; до неё —
+корневой `@letar/forms-vue`, см. CHANGELOG 0.2.0), не отсюда: этот пакет несёт только UIKit-скин и
+поля поверх него, не форму целиком. Импорт именно подпути `/core`, не корневого `.` —
+`forms-vue-shadcn` не должен тянуть референсные HTML-поля headless-пакета.
 
 ## API
 
@@ -68,6 +70,10 @@ Vue-версия `createFieldPrimitives` из `@letar/forms-react` (Фаза 7.3
 слоя, привязанная к конкретному UIKit. `libs/forms-vue-shadcn/src/lib/uikit/primitives.ts` вызывает
 её один раз со своим `rekaUIKit`; экспортируемые `createField`/`FieldWrapper` из этого пакета —
 готовый результат, для написания нового Reka-поля обычно не нужно вызывать фабрику самому.
+
+Разбор Zod-меты и обёртку `form.Field` (`resolveFieldMeta`/`withFieldValidation`) фабрика берёт из
+`@letar/forms-vue/core` (Фаза 9) — не дублирует: та же логика нужна простым полям headless-пакета.
+Сверх неё здесь только специфика скина — `onErrorCaptured`-обвязка и вызов `uikit.ErrorFallback`.
 
 Отличия от React-версии не косметические:
 

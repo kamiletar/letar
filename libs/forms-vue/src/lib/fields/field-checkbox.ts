@@ -1,5 +1,5 @@
 import { h } from 'vue'
-import { createField } from '../create-field'
+import { createField } from '../core/create-field'
 
 /** Чекбокс — метка стоит справа от контрола, а не сверху, отсюда свой мини-layout. */
 export const FieldCheckbox = createField(

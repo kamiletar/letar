@@ -14,6 +14,7 @@ export default defineConfig({
   resolve: {
     alias: {
       ...formsCoreAlias,
+      '@letar/forms-vue/core': resolve(__dirname, '../../forms-vue/src/core.ts'),
       '@letar/forms-vue': resolve(__dirname, '../../forms-vue/src/index.ts'),
     },
   },
