@@ -70,12 +70,15 @@ export function useChapterNav({ manifestChapters, currentTime, videoRef }: UseCh
   const chapters = useMemo<Chapter[]>(() => manifestChaptersToChapters(manifestChapters), [manifestChapters])
   const chapterInfos = useMemo<ChapterInfo[]>(() => chaptersToChapterInfos(chapters), [chapters])
 
-  const [autoSkipEnabled, setAutoSkipEnabled] = useState(() => {
-    if (typeof window === 'undefined') {
-      return false
+  // Дефолт совпадает на сервере и при первом клиентском рендере — localStorage
+  // читается только в useEffect ниже (см. .claude/docs/ssr-hydration-persisted-state.md)
+  const [autoSkipEnabled, setAutoSkipEnabled] = useState(false)
+
+  useEffect(() => {
+    if (localStorage.getItem(AUTOSKIP_KEY) === 'true') {
+      setAutoSkipEnabled(true)
     }
-    return localStorage.getItem(AUTOSKIP_KEY) === 'true'
-  })
+  }, [])
 
   const [showChapterList, setShowChapterList] = useState(false)
 

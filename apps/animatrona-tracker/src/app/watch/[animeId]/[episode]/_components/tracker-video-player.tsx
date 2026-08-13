@@ -153,15 +153,15 @@ export function TrackerVideoPlayer({
   // State: дорожки
   const [audioTrackIndex, setAudioTrackIndex] = useState(initialAudioTrack)
   const [subtitleTrackIndex, setSubtitleTrackIndex] = useState(initialSubtitleTrack)
-  const [trackMode, setTrackMode] = useState<TrackMode>(() => {
-    if (initialTrackMode) {
-      return initialTrackMode
-    }
-    if (typeof window === 'undefined') {
-      return 'RUSSIAN_DUB'
-    }
-    return (localStorage.getItem(TRACK_MODE_KEY) as TrackMode) || 'RUSSIAN_DUB'
-  })
+  // Дефолт совпадает на сервере и при первом клиентском рендере — localStorage
+  // читается только в useEffect ниже (см. .claude/docs/ssr-hydration-persisted-state.md)
+  const [trackMode, setTrackMode] = useState<TrackMode>(initialTrackMode ?? 'RUSSIAN_DUB')
+
+  useEffect(() => {
+    if (initialTrackMode) { return }
+    const saved = localStorage.getItem(TRACK_MODE_KEY) as TrackMode | null
+    if (saved) { setTrackMode(saved) }
+  }, [initialTrackMode])
 
   // Вычисляемые URL
   const videoUrl = useMemo(() => getVideoUrl(manifest.video), [manifest.video])
