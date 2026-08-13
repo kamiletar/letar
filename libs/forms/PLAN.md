@@ -32,6 +32,16 @@
 `list_fields` отдаёт **61**, не 57 (3 document-поля добавились после Фазы 8, число «57/57» в
 заголовке этой записи устарело). Ждёт подтверждения перед стартом Этапа 1.
 
+**Системная защита прозы (2026-08-13):** тест-страж `field-registry.integration.spec.ts` защищает
+код (`fields.md` ↔ реестр), но не руками написанные числа в README — они разошлись дважды
+(«49 vs 56», затем «56/57 vs 61»). Добавлен второй страж —
+`libs/form-mcp/src/data/doc-field-count.integration.spec.ts` — сверяет число в
+`libs/forms/README.md` (диаграмма архитектуры, уже поправлено на 61) с реальным размером реестра.
+Числа в README Vue-скинов (`forms-vue`, `forms-vue-shadcn`) и в
+`apps/form-docs/content/docs/guides/porting-framework.mdx` намеренно НЕ включены в
+`LIVE_MENTIONS` — это доля портированных полей, часть этой же Фазы 9, правь их вместе с самой
+Vue-работой и добавляй туда же в `LIVE_MENTIONS`, когда числа станут актуальными.
+
 **Связанная задача в документации:** [`apps/form-docs/PLAN.md` → P7](/apps/form-docs/PLAN.md) —
 переключатели Framework (React/Vue) × Skin (Chakra/shadcn), спроектированы 2026-08-13 по ресёрчу
 чужих решений (TanStack, Ark UI, shadcn, Radix, Zag, Nuxt UI, Park UI, Docusaurus). Три следствия
