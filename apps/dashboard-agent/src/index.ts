@@ -31,6 +31,7 @@ import { cronRoutes } from './routes/cron'
 import { databaseRoutes } from './routes/database'
 import { deployRoutes } from './routes/deploy'
 import { dockerRoutes } from './routes/docker'
+import { dockerPruneRoutes } from './routes/docker-prune'
 import { e2eRoutes } from './routes/e2e'
 import { emailCanaryRoutes } from './routes/email-canary'
 import { envRoutes } from './routes/env'
@@ -127,6 +128,7 @@ async function main(): Promise<void> {
   await fastify.register(backupFreshnessRoutes)
   await fastify.register(healthCheckRoutes)
   await fastify.register(logScanRoutes)
+  await fastify.register(dockerPruneRoutes)
   await fastify.register(metricsRoutes)
 
   // Graceful shutdown

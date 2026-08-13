@@ -342,6 +342,17 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's2',
   },
   {
+    id: 'docker-prune',
+    name: 'Docker Prune (dangling-образы + builder-кэш)',
+    app: 'dashboard-agent',
+    endpoint: '/api/cron/docker-prune',
+    schedule: '0 4 * * *',
+    description:
+      'Ежедневная безопасная чистка Docker: `pruneImages` без `-a` удаляет только dangling-образы (осиротевшие слои после того, как `deploy-affected.sh` переставил тег `:latest`/`:staging` на новый билд), `pruneBuilder` без фильтров — только неиспользуемый build-кэш. Не трогает ничего, на что есть тег или ссылка контейнера — SHA-теги для отката (последние 3, retention в deploy-affected.sh) не задевает. Без этой задачи dangling-слои копились неограниченно: диск s2 дошёл до 91% (см. `health-check.ts` — DISK_HIGH дедуп по mount вместо fs).',
+    enabled: true,
+    server: 's2',
+  },
+  {
     id: 'log-scan',
     name: 'Log Scan (сканирование логов контейнеров на ошибки)',
     app: 'dashboard-agent',
