@@ -144,7 +144,8 @@ TUN-VPN; DNS-проверки с рабочей машины врут ·
 
 **Правила репозитория:** [public-repo-hygiene](/.claude/rules/public-repo-hygiene.md) ⭐ что нельзя
 писать в публичные файлы · [time-tracking](/.claude/rules/time-tracking.md) ⚠️ когда стартовать и
-останавливать таймер studio
+останавливать таймер studio · [formatting](/.claude/rules/formatting.md) ⚠️ голая `nx format`
+молча зашита на Prettier — не падает, не то же самое, что `nx run-many -t format`
 
 ## Быстрый старт
 
