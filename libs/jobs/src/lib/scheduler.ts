@@ -119,7 +119,7 @@ export function createJobScheduler(options: JobSchedulerOptions): JobScheduler {
   function computeNextRunAt(job: EffectiveJob): Date | null {
     // Без автотика расписание в pg-boss не зарегистрировано вовсе — обещать следующий запуск
     // нельзя, иначе админка показывает время, в которое заведомо ничего не произойдёт
-    // (так невыставленный JOBS_ENABLED на проде studio выглядел как исправно работающий крон).
+    // (так невыставленный JOBS_ENABLED на проде выглядел как исправно работающий крон).
     if (!autoSchedule || !job.enabled) {
       return null
     }
