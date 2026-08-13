@@ -531,6 +531,54 @@ shadcn-пару (оба приложения реально содержат с�
 Angular рендерится, честные `disabled`-вкладки с пометкой "скоро" там, где Vue/Angular-примера нет,
 без ошибок консоли (кроме фоновых HMR-websocket сообщений dev-сервера, не связанных с правкой).
 
+**Этап 4, второй батч гайдов (2026-08-14).** Вторая половина алфавитного списка (24 гайда,
+непересекающийся с первым батчем список — параллельная сессия). Смигрировано **16 из 24** (32
+файла EN+RU), плюс `multi-step` (уже был частично тронут для нейтрализации заголовка `Form.Steps`
+— теперь получил `SkinCodeFile` целиком):
+
+- `multi-step` — chakra=`steps-demo`, shadcn=`steps-demo` (оба приложения); shadcn-сторона — beta
+  compound-компонент `FormSteps` с более компактной двухшаговой схемой, не идентичный сценарий, но
+  та же механика.
+- `matrix-choice`, `signature`, `survey-fields` — получили пару chakra+shadcn. Во всех трёх shadcn
+  честно задокументирован как **общая многополевая демо-страница**, не отдельная под гайд:
+  `survey-demo` (FieldMatrixChoice/FieldImageChoice/FieldLikert — покрывает и `matrix-choice`, и
+  `survey-fields`), `specialized-demo` (FieldSignature вместе с Editable/ColorPicker/FileUpload —
+  покрывает `signature`).
+- `i18n`, `masks`, `offline`, `persistence`, `relation-fields`, `russian-documents`, `security`,
+  `server-errors`, `smart-autofill`, `undo-redo`, `utility-components`, `validation` — только
+  chakra (`i18n-demo`, `masked-demo`, `offline-demo`, `persistence-demo`, `relation-demo`,
+  `documents-demo`, `security-demo`, `server-errors-demo`, `autofill-demo`, `undo-redo-demo`,
+  `utility-demo`, `constraints-demo` соответственно) — для этих тем нет отдельной shadcn
+  sandbox-страницы в `form-develop-app-shadcn` (16 страниц покрывают другой набор фич). Vue/Angular
+  нигде не подключены — нет живого примера в `forms-vue-shadcn/demo/examples` или
+  `forms-angular/demo/examples` для этих тем; вкладки рисуются `disabled` автоматически.
+
+8 гайдов пропущены — концептуальные/конфигурационные, без sandbox-демо-файла, показывающего
+именно то, что описывает гайд (`table-editor` из списка задачи фактически не в счёте — уже был
+полностью смигрирован до старта этой сессии, Этап 2):
+
+- `mcp` — про установку MCP-сервера для AI-ассистентов (Claude Code/Cursor/Copilot), не про
+  форму в браузере.
+- `porting-framework` — прозаический кейс-стади о переносе библиотеки на Vue, не демонстрация
+  конкретного поля.
+- `readonly-view` — `Form.ReadOnlyView` не используется ни в одном файле `form-develop-app`/
+  `-shadcn`.
+- `tanstack-query` — паттерн интеграции с TanStack Query на уровне `useQuery`/`useMutation`, не
+  про конкретное поле формы.
+- `testing-utilities` — `renderForm`/`fillField` из `@letar/forms/testing` не используются ни в
+  одном файле `form-develop-app`/`-shadcn` (они про тестовый код, не про демо-страницу).
+- `url-prefill` — `useUrlPrefill` не используется ни в одном файле `form-develop-app`/`-shadcn`.
+- `zenstack-plugin` — про конфигурацию `schema.zmodel`/генератор, не про интерактивную демо-форму.
+- `table-editor` — не пропущен, а уже был полностью смигрирован (Этап 2, chakra+shadcn+vue) до
+  старта этой сессии; в задании числился в списке, но правок не потребовал.
+
+Проверено: `nx lint form-docs` и `nx typecheck:tsgo form-docs` — зелёные. В браузере
+(`nx dev form-docs`): `guides/signature` (en) и `guides/i18n` (en) — секция "Full example"
+рендерится, React-вкладка активна, Vue/Angular — честные `disabled` с пометкой "скоро", без
+ошибок консоли, относящихся к правке (в консоли были посторонние HMR-websocket сообщения и
+уже задокументированный несвязанный баг hydration в live-демо `table-editor`, не в scope этой
+сессии).
+
 ### Что осталось непроверенным
 
 - **FormKit** — рендерер доков (`formkit/docs-ui-2`) приватный, 404. Их механику переключателя
