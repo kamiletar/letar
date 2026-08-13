@@ -6,6 +6,7 @@ description: Create step-by-step form wizards with validation
 ## Live Demo
 
 import { DemoContainer } from '@/components/demo-container'
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
 
 <DemoContainer demo="multi-step" height={400} />
 
@@ -39,6 +40,17 @@ Break a long form into manageable steps:
   </Form.Steps>
 </Form>
 ```
+
+### Full example
+
+The complete sandbox example, read directly from the `form-develop-app` / `form-develop-app-shadcn`
+source at build time. The shadcn side ships the same compound component as `FormSteps` (beta,
+form-level, not a `Field`) with a smaller two-step schema — same mechanics, different scale.
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/steps-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/steps-demo/page.tsx"
+/>
 
 ## Features
 

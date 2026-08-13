@@ -6,6 +6,7 @@ description: Пошаговые мастера с валидацией
 ## Живой пример
 
 import { DemoContainer } from '@/components/demo-container'
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
 
 <DemoContainer demo="multi-step" height={400} />
 
@@ -39,6 +40,17 @@ import { DemoContainer } from '@/components/demo-container'
   </Form.Steps>
 </Form>
 ```
+
+### Полный пример
+
+Полный пример из песочницы `form-develop-app` / `form-develop-app-shadcn`, прочитан напрямую из
+исходников на сборке. У shadcn тот же compound-компонент (`FormSteps`, beta, уровня формы, не
+`Field`) с более компактной двухшаговой схемой — механика та же, масштаб меньше.
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/steps-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/steps-demo/page.tsx"
+/>
 
 ## Возможности
 

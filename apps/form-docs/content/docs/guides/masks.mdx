@@ -3,6 +3,8 @@ title: Input Mask Engine
 description: Token model, formatting modes, when a mask hurts, accessibility requirements
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
 ## Overview
 
 `Form.Field.Phone`, `Form.Field.MaskedInput`, and every `Form.Document.*` field run on a
@@ -13,6 +15,13 @@ this page.
 
 This guide covers the engine's mechanics. For the ready-made Russian document fields (INN,
 OGRN, BIK, etc.) see [Russian Documents](/docs/guides/russian-documents).
+
+### Full example
+
+The complete sandbox example, read directly from the `form-develop-app` source at build time —
+phone masks for three countries plus passport/INN masked inputs.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/masked-demo/page.tsx" />
 
 ## Token model
 

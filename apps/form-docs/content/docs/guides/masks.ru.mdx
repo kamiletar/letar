@@ -3,6 +3,8 @@ title: Движок масок ввода
 description: Модель токенов, режимы форматирования, когда маска не нужна, требования доступности
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
 ## Обзор
 
 `Form.Field.Phone`, `Form.Field.MaskedInput` и все `Form.Document.*` работают на собственном
@@ -13,6 +15,13 @@ framework-free движке масок (`@letar/forms-core/mask`) — без с�
 
 Этот гайд — про механику самого движка. Про готовые российские документные поля (ИНН, ОГРН,
 БИК и т.д.) — см. [Российские документы](/docs/guides/russian-documents).
+
+### Полный пример
+
+Полный пример из песочницы `form-develop-app`, прочитан напрямую из исходников на сборке —
+маски телефона для трёх стран плюс маскированные поля паспорта/ИНН.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/masked-demo/page.tsx" />
 
 ## Модель токенов
 
