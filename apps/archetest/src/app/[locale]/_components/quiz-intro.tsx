@@ -26,16 +26,18 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
   const locale = useLocale()
   const isRu = locale === 'ru'
   const [showProfile, setShowProfile] = useState(false)
-  const [disclaimerAccepted, setDisclaimerAccepted] = useState(() => {
-    // Приоритет: сервер (БД) → localStorage
-    if (initialDisclaimerAccepted) {
-      return true
+  // Дефолт совпадает на сервере и при первом клиентском рендере — localStorage
+  // читается только в useEffect ниже, иначе гидратация "поженит" DOM с чужим
+  // значением и клик по чекбоксу перестанет срабатывать
+  // (см. .claude/docs/ssr-hydration-persisted-state.md)
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState(() => Boolean(initialDisclaimerAccepted))
+
+  // Приоритет: сервер (БД) → localStorage — подтягиваем сохранённое согласие после монтирования
+  useEffect(() => {
+    if (!initialDisclaimerAccepted && localStorage.getItem(DISCLAIMER_CONSENT_KEY) === '1') {
+      setDisclaimerAccepted(true)
     }
-    if (typeof window === 'undefined') {
-      return false
-    }
-    return localStorage.getItem(DISCLAIMER_CONSENT_KEY) === '1'
-  })
+  }, [initialDisclaimerAccepted])
 
   // Сохраняем согласие в localStorage + БД
   useEffect(() => {
