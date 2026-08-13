@@ -1,6 +1,7 @@
 'use client'
 
 import { type Framework, FRAMEWORK_VALUES } from '@/lib/skin'
+import { useI18n } from 'fumadocs-ui/contexts/i18n'
 import type { MouseEvent } from 'react'
 import { useSkin } from './skin-context'
 import styles from './skin-switcher.module.css'
@@ -9,6 +10,16 @@ const FRAMEWORK_LABELS: Record<Framework, string> = {
   react: 'React',
   vue: 'Vue',
   angular: 'Angular',
+}
+
+const NAV_LABEL: Record<string, string> = {
+  en: 'Code example framework',
+  ru: 'Фреймворк примеров кода',
+}
+
+const SOON_LABEL: Record<string, string> = {
+  en: 'soon',
+  ru: 'скоро',
 }
 
 export interface FrameworkSwitcherProps {
@@ -23,6 +34,9 @@ export interface FrameworkSwitcherProps {
  */
 export function FrameworkSwitcher({ unavailable = [] }: FrameworkSwitcherProps) {
   const { framework, setFramework } = useSkin()
+  const { locale } = useI18n()
+  const navLabel = NAV_LABEL[locale ?? 'en'] ?? NAV_LABEL.en
+  const soonLabel = SOON_LABEL[locale ?? 'en'] ?? SOON_LABEL.en
 
   function handleClick(event: MouseEvent<HTMLAnchorElement>, next: Framework) {
     if (
@@ -35,7 +49,7 @@ export function FrameworkSwitcher({ unavailable = [] }: FrameworkSwitcherProps) 
   }
 
   return (
-    <nav aria-label="Фреймворк примеров кода" className={styles.switcher}>
+    <nav aria-label={navLabel} className={styles.switcher}>
       {FRAMEWORK_VALUES.map((value) => {
         const isUnavailable = unavailable.includes(value)
         const isActive = value === framework
@@ -43,7 +57,7 @@ export function FrameworkSwitcher({ unavailable = [] }: FrameworkSwitcherProps) 
         if (isUnavailable) {
           return (
             <span key={value} aria-disabled="true" className={styles.disabled}>
-              {FRAMEWORK_LABELS[value]} <em>(скоро)</em>
+              {FRAMEWORK_LABELS[value]} <em>({soonLabel})</em>
             </span>
           )
         }

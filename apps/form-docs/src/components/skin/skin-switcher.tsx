@@ -1,6 +1,7 @@
 'use client'
 
 import { type Skin, SKIN_VALUES } from '@/lib/skin'
+import { useI18n } from 'fumadocs-ui/contexts/i18n'
 import type { MouseEvent } from 'react'
 import { useSkin } from './skin-context'
 import styles from './skin-switcher.module.css'
@@ -8,6 +9,16 @@ import styles from './skin-switcher.module.css'
 const SKIN_LABELS: Record<Skin, string> = {
   chakra: 'Chakra UI',
   shadcn: 'shadcn/ui',
+}
+
+const NAV_LABEL: Record<string, string> = {
+  en: 'Code example skin',
+  ru: 'Оформление примеров кода',
+}
+
+const SOON_LABEL: Record<string, string> = {
+  en: 'soon',
+  ru: 'скоро',
 }
 
 export interface SkinSwitcherProps {
@@ -22,6 +33,9 @@ export interface SkinSwitcherProps {
  */
 export function SkinSwitcher({ unavailable = [] }: SkinSwitcherProps) {
   const { skin, setSkin } = useSkin()
+  const { locale } = useI18n()
+  const navLabel = NAV_LABEL[locale ?? 'en'] ?? NAV_LABEL.en
+  const soonLabel = SOON_LABEL[locale ?? 'en'] ?? SOON_LABEL.en
 
   function handleClick(event: MouseEvent<HTMLAnchorElement>, next: Skin) {
     if (
@@ -34,7 +48,7 @@ export function SkinSwitcher({ unavailable = [] }: SkinSwitcherProps) {
   }
 
   return (
-    <nav aria-label="Оформление примеров кода" className={styles.switcher}>
+    <nav aria-label={navLabel} className={styles.switcher}>
       {SKIN_VALUES.map((value) => {
         const isUnavailable = unavailable.includes(value)
         const isActive = value === skin
@@ -42,7 +56,7 @@ export function SkinSwitcher({ unavailable = [] }: SkinSwitcherProps) {
         if (isUnavailable) {
           return (
             <span key={value} aria-disabled="true" className={styles.disabled}>
-              {SKIN_LABELS[value]} <em>(скоро)</em>
+              {SKIN_LABELS[value]} <em>({soonLabel})</em>
             </span>
           )
         }

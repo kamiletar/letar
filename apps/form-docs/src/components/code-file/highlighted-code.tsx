@@ -18,6 +18,13 @@ export async function HighlightedCode({ code, lang = 'tsx', title }: Highlighted
   const rendered = await highlight(code, {
     lang,
     themes: { light: 'github-light', dark: 'github-dark' },
+    // defaultColor: false — без этого Shiki печатает цвета light-темы буквально в
+    // background-color/color, а --shiki-dark(-bg) остаются неиспользуемыми custom
+    // properties: тёмная тема не подхватывается, блок навсегда светлый. Обычные
+    // ```-блоки MDX работают верно, потому что fumadocs-mdx сам передаёт этот флаг
+    // в свой rehype-code пресет по умолчанию — здесь вызываем highlight() напрямую,
+    // тот же флаг нужен явно.
+    defaultColor: false,
     components: { pre: Pre },
   })
 
