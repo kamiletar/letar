@@ -9,7 +9,7 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
 валидация — подключаться через нативные примитивы `@angular/forms` (Reactive Forms), не через
 имитацию `@tanstack/angular-form`.
 
-Пруф подтверждён: `forms-core` не потребовал ни одной правки. 33/61 полей закрыто:
+Пруф подтверждён: `forms-core` не потребовал ни одной правки. 41/61 полей закрыто:
 
 - **Этап 1–2** (зеркало Vue-порта): String, Textarea, Number, Password, Checkbox, Switch,
   RadioGroup, NativeSelect, Date, YesNo.
@@ -20,6 +20,8 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
 - **Stage C** (Фаза 11, +1 поле — чистый JS-форматтер вместо движка масок): Phone.
 - **Stage D** (Фаза 11, +4 поля с составным значением): DateRange, DateTimePicker, Duration,
   Schedule.
+- **Stage E** (Фаза 11, +8 полей семейства «выбор»): Select, CascadingSelect, Combobox,
+  Autocomplete, Listbox, RadioCard, SegmentedGroup, ImageChoice.
 
 ## Поля
 
@@ -58,6 +60,14 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
 | `FieldDateTimePickerComponent`   | `letar-field-datetime-picker`   | `minDateTime`, `maxDateTime`, `timeStep` (15)                                                                                                                      |
 | `FieldDurationComponent`         | `letar-field-duration`          | `format` (`HH:MM`/`minutes`), `min` (0), `max` (1440), `step` (15)                                                                                                 |
 | `FieldScheduleComponent`         | `letar-field-schedule`          | `dayNames`, `defaultSchedule`, `days`, `showCopyToWeekdays` (`true`), `offLabel`, `copyToWeekdaysLabel`, `defaultOpenTime` (`09:00`), `defaultCloseTime` (`18:00`) |
+| `FieldSelectComponent`           | `letar-field-select`            | `options: FieldSelectOption[]` (`placeholder` рендерится пустой опцией — в отличие от `NativeSelect`)                                                              |
+| `FieldCascadingSelectComponent`  | `letar-field-cascading-select`  | `dependsOn`, `loadOptions`, `initialOptions`, `clearOnParentChange` (`true`), `disableWhenParentEmpty` (`true`), `placeholderWhenDisabled`                         |
+| `FieldComboboxComponent`         | `letar-field-combobox`          | `options: FieldComboboxOption[]`, `minChars` (0)                                                                                                                   |
+| `FieldAutocompleteComponent`     | `letar-field-autocomplete`      | `suggestions: string[]`, `minChars` (1)                                                                                                                            |
+| `FieldListboxComponent`          | `letar-field-listbox`           | `options: ListboxOption[]`, `selectionMode` (`single`/`multiple`)                                                                                                  |
+| `FieldRadioCardComponent`        | `letar-field-radio-card`        | `options: RadioCardOption[]`, `orientation` (`horizontal`)                                                                                                         |
+| `FieldSegmentedGroupComponent`   | `letar-field-segmented-group`   | `options: SegmentedGroupOption[]`, `orientation` (`horizontal`)                                                                                                    |
+| `FieldImageChoiceComponent`      | `letar-field-image-choice`      | `options: ImageChoiceOption[]`, `columns` (3), `multiple` (`false`)                                                                                                |
 
 Разметка у всех — голый HTML, без CSS: классы `letar-field`, `letar-field__label`,
 `letar-field__control`, `letar-field__error` (тот же принцип, что у `libs/forms-vue`, раздел
@@ -119,6 +129,32 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
   портированы локально (как и в Vue-версии — они не вынесены в `forms-core`, живут в каждом скине
   отдельно), логика toggle/copy-to-weekdays/`close>open`-предупреждение — 1-в-1 с
   `libs/forms-vue/src/lib/fields/field-schedule.ts`.
+- **Stage E — семейство «выбор», 8 полей.** `FieldSelectComponent` — единственное поле стадии на
+  чистом `[formControl]="ctrl"` (обычный `<select>`, тот же примитив, что `FieldNativeSelectComponent`
+  — разница только в опциональной пустой опции из `resolvedPlaceholder()`). Остальные семь — те же
+  два приёма, что и в Stage A/D: `[formControl]` там, где значение контрола совпадает с тем, что
+  показывает единственный нативный элемент (`FieldCascadingSelectComponent`,
+  `FieldAutocompleteComponent` — `<select>`/`<input>` напрямую), и свой `signal` + ручной
+  `ctrl.setValue()` там, где отображаемое состояние (текст поиска, набор выбранных карточек) не
+  совпадает 1:1 со значением контрола (`FieldComboboxComponent`, `FieldListboxComponent`,
+  `FieldRadioCardComponent`, `FieldSegmentedGroupComponent`, `FieldImageChoiceComponent`).
+  - **`FieldCascadingSelectComponent`** — единственное поле пакета, которому нужно значение ДРУГОГО
+    поля формы. Vue-версия читает его через `form.useStore(selector)` (`@tanstack/vue-form` даёт
+    полностью реактивный snapshot всех значений формы) — у Angular `FormGroup` такого снапшот-сигнала
+    нет. Вместо правки `FormRootService` — подписка на `formRoot.form.valueChanges`:
+    `FormGroup.addControl` сам вызывает `updateValueAndValidity()` (эмитит `valueChanges` по
+    умолчанию), поэтому одна подписка на value changes всей формы ловит и «поле-родитель
+    (`dependsOn`) ещё не смонтировано на момент конструирования этого поля» (порядок конструкторов
+    content-projected детей не гарантирован — см. `field-base.ts`), и «родитель сменил значение» —
+    без ручного опроса графа полей. Disable-состояние — `ctrl.disable()`/`ctrl.enable()`, не
+    `[attr.disabled]`: смешивать нативный атрибут с `[formControl]` Angular считает ошибкой
+    конфигурации (консольное предупреждение), disabled — прерогатива самого контрола в Reactive
+    Forms.
+  - **`FieldListboxComponent`** (multi/single) и `FieldImageChoiceComponent` (multi/single) —
+    контрол держит `string | string[]` целиком, тот же принцип, что Stage D (один `FormControl` на
+    составное значение). Кнопки-опции (`role="option"`/`role="checkbox"`) не имеют нативного
+    `ControlValueAccessor`, поэтому синхронизация — тот же `effect()` + `ctrl.events.subscribe()`,
+    что у `FieldDateRangeComponent`, а не имитация чек-листа через несколько `FormControl`.
 
 ## Тестирование без Karma
 

@@ -8,10 +8,16 @@ export { FieldBase } from './lib/core/field-base'
 export { type ResolvedFieldMeta, resolveFieldMeta } from './lib/core/field-meta'
 export { FormRootService } from './lib/core/form-root.service'
 export { zodValidator } from './lib/core/zod-validator'
+export { FieldAutocompleteComponent } from './lib/fields/field-autocomplete.component'
 export { FieldBankAccountComponent } from './lib/fields/field-bank-account.component'
 export { FieldBikComponent } from './lib/fields/field-bik.component'
 export { FieldBirthCertificateComponent } from './lib/fields/field-birth-certificate.component'
+export {
+  type CascadingSelectOption,
+  FieldCascadingSelectComponent,
+} from './lib/fields/field-cascading-select.component'
 export { FieldCheckboxComponent } from './lib/fields/field-checkbox.component'
+export { FieldComboboxComponent, type FieldComboboxOption } from './lib/fields/field-combobox.component'
 export { FieldCorrAccountComponent } from './lib/fields/field-corr-account.component'
 export { FieldCurrencyComponent } from './lib/fields/field-currency.component'
 export {
@@ -25,8 +31,10 @@ export { FieldDepartmentCodeComponent } from './lib/fields/field-department-code
 export { FieldDurationComponent } from './lib/fields/field-duration.component'
 export { FieldForeignPassportComponent } from './lib/fields/field-foreign-passport.component'
 export { FieldHiddenComponent } from './lib/fields/field-hidden.component'
+export { FieldImageChoiceComponent, type ImageChoiceOption } from './lib/fields/field-image-choice.component'
 export { FieldInnComponent } from './lib/fields/field-inn.component'
 export { FieldKppComponent } from './lib/fields/field-kpp.component'
+export { FieldListboxComponent, type ListboxOption } from './lib/fields/field-listbox.component'
 export { FieldNativeSelectComponent, type FieldNativeSelectOption } from './lib/fields/field-native-select.component'
 export { FieldNumberInputComponent } from './lib/fields/field-number-input.component'
 export { FieldNumberComponent } from './lib/fields/field-number.component'
@@ -35,6 +43,7 @@ export { FieldPassportComponent } from './lib/fields/field-passport.component'
 export { FieldPasswordComponent } from './lib/fields/field-password.component'
 export { FieldPercentageComponent } from './lib/fields/field-percentage.component'
 export { FieldPhoneComponent } from './lib/fields/field-phone.component'
+export { FieldRadioCardComponent, type RadioCardOption } from './lib/fields/field-radio-card.component'
 export { FieldRadioGroupComponent, type FieldRadioGroupOption } from './lib/fields/field-radio-group.component'
 export { FieldRatingComponent } from './lib/fields/field-rating.component'
 export {
@@ -43,6 +52,8 @@ export {
   type ScheduleDaySchedule,
   type WeeklySchedule,
 } from './lib/fields/field-schedule.component'
+export { FieldSegmentedGroupComponent, type SegmentedGroupOption } from './lib/fields/field-segmented-group.component'
+export { FieldSelectComponent, type FieldSelectOption } from './lib/fields/field-select.component'
 export { FieldSliderComponent } from './lib/fields/field-slider.component'
 export { FieldSnilsComponent } from './lib/fields/field-snils.component'
 export { FieldStringComponent } from './lib/fields/field-string.component'
