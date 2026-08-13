@@ -210,37 +210,34 @@ shadcn делает `permanent: false` намеренно — чтобы сме�
 ⚠️ В Fumadocs 16 **нет** встроенного `remark-code-import` — есть `remark-code-tab`
 (`fumadocs-core/mdx-plugins`). Плагин чтения с диска надо добавить или написать свой.
 
-⚠️ **Гранулярность источника разная у трёх sandbox-приложений — механика «читать файл с диска»
-технически возможна пока только для `form-develop-app`.** Проверено 2026-08-13:
+✅ **Гранулярность источника у всех трёх sandbox-приложений выровнена 2026-08-13** — механика
+«читать файл с диска» технически возможна для всех. Проверено 2026-08-13:
 
 | Приложение                   | Структура                                                                                        | Годится для чтения-с-диска |
 | ---------------------------- | ------------------------------------------------------------------------------------------------ | -------------------------- |
 | `form-develop-app`           | 35 файлов, один пример на файл (`*-demo/page.tsx`)                                               | ✅ да, уже сейчас          |
-| `form-develop-app-shadcn`    | **1** файл `page.tsx` на все 47 полей сразу                                                      | ❌ нет                     |
+| `form-develop-app-shadcn`    | 16 файлов, один пример/группа на файл (`*-demo/page.tsx`)                                        | ✅ да (2026-08-13)         |
 | `libs/forms-vue-shadcn/demo` | ✅ разбит 2026-08-13 — `demo/examples/*.ts`, один файл на пример (6 файлов) + `App.ts`-навигация | ✅ да, готово              |
 
 Дублирование между ними реальное, не мнимое: сценарий `Calculated` (цена × количество − скидка)
-независимо написан в `form-develop-app/calculated-demo`, в `form-develop-app-shadcn/page.tsx`
-(один `FieldCalculated` внутри общей формы) и в `form-docs/demo/calculated` — уже разошёлся в
-деталях (язык, формат валюты, набор сценариев).
+независимо написан в `form-develop-app/calculated-demo`, в `form-develop-app-shadcn/numeric-demo`
+и в `form-docs/demo/calculated` — уже разошёлся в деталях (язык, формат валюты, набор сценариев).
 
-Прежде чем Этап 1 сможет читать shadcn-примеры с диска, `form-develop-app-shadcn` и
-`libs/forms-vue-shadcn/demo` нужно разбить на отдельные файлы-примеры — той же гранулярности,
-что уже есть у `form-develop-app` (один файл/страница на пример, а не одна мега-страница на все
-поля). Это реструктуризация двух существующих приложений, не новый пакет с примерами — «не
-заводить пятое место» (см. выше) остаётся в силе. Объём: `form-develop-app-shadcn` — ~47 файлов
-вместо одного (или группировка по темам), `forms-vue-shadcn/demo` — ~6 файлов вместо одного.
+**Оба приложения разбиты (2026-08-13) — Этап 0 закрыт целиком.**
 
-✅ **`libs/forms-vue-shadcn/demo` закрыт (2026-08-13).** `App.ts` (59 строк, все 6 полей сразу)
-разбит на `demo/examples/{string,number,select,combobox,textarea,checkbox}-demo.ts` — по файлу
-на поле, каждый самодостаточен (своя Zod-схема, свой `AppForm`). `demo/examples/index.ts` —
-реестр `demoExamples`. `App.ts` стал навигационной оболочкой (`<select>` + `ref`, без
-роутер-либы). Проверено: `bunx vite build demo` зелёный, `nx run-many -t lint typecheck:tsgo
-test --projects=@letar/forms-vue-shadcn` зелёный. Подробности — CHANGELOG
-`libs/forms-vue-shadcn`.
+✅ **`libs/forms-vue-shadcn/demo`.** `App.ts` (59 строк, все 6 полей сразу) разбит на
+`demo/examples/{string,number,select,combobox,textarea,checkbox}-demo.ts` — по файлу на поле,
+каждый самодостаточен (своя Zod-схема, свой `AppForm`). `demo/examples/index.ts` — реестр
+`demoExamples`. `App.ts` стал навигационной оболочкой (`<select>` + `ref`, без роутер-либы).
+Проверено: `bunx vite build demo` зелёный, `nx run-many -t lint typecheck:tsgo
+test --projects=@letar/forms-vue-shadcn` зелёный. Подробности — CHANGELOG `libs/forms-vue-shadcn`.
 
-`form-develop-app-shadcn` не сделан — ждёт решения, входит ли это в Этап 0 или в отдельную
-подзадачу Этапа 1.
+✅ **`form-develop-app-shadcn`.** Разбит на отдельные файлы-примеры той же гранулярности, что
+`form-develop-app`: 10 страниц группируют простые поля по смыслу (3–5 на страницу —
+`basic-fields-demo`, `select-demo`, `choice-demo`, `date-time-demo`, `numeric-demo`,
+`interactive-demo`, `contact-demo`, `specialized-demo`, `auth-fields-demo`, `survey-demo`) + 6
+страниц по одному beta/compound-компоненту (`steps-demo`, `table-editor-demo`, `rich-text-demo`,
+`schedule-demo`, `data-grid-demo`, `auto-fields-demo`). Детали — `apps/form-develop-app-shadcn/PLAN.md`.
 
 Замер, зачем это нужно: в TanStack Form при ручном дублировании Vue-гайд `validation.md` отстал
 от React **на три месяца** (два React-only улучшения 2026 года не доехали — видно по git-истории).

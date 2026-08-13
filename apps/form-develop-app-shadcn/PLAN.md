@@ -63,10 +63,41 @@ RichText.
       с непустым HTML), приоритетный список координатора (Signature → FileUpload → Steps →
       Table → RichText) закрыт — детали в `libs/forms/PLAN.md` §7.3
 
+## Фаза 3 — Разбивка на отдельные демо-страницы ✅ (Этап 0, Фаза 9 P7 `form-docs`)
+
+Единая мега-страница `src/app/page.tsx` (556 строк, все 47 полей + 6 beta-компонентов в одной
+форме) разбита на 16 отдельных страниц-примеров `src/app/<name>-demo/page.tsx` — той же
+гранулярности, что у `apps/form-develop-app` (эталон). Причина — техническая: чтение-с-диска
+документацией `form-docs` (P7) работает только там, где один файл = один пример.
+
+- [x] `_components/demo-page-layout.tsx` — `DemoPageLayout`/`SubmittedDataPreview` на Tailwind
+      (аналог Chakra-версии из `form-develop-app`, но без Chakra — приложение на Tailwind 4)
+- [x] `_components/index.ts` — barrel-экспорт `DemoForm` + layout-компонентов
+- [x] 10 страниц с группировкой простых полей по смыслу (3–5 полей на страницу):
+      `basic-fields-demo`, `select-demo`, `choice-demo`, `date-time-demo`, `numeric-demo`,
+      `interactive-demo`, `contact-demo`, `specialized-demo`, `auth-fields-demo`, `survey-demo`
+- [x] 6 страниц — по одному beta/compound-компоненту на страницу (как и было раньше, они и в
+      мега-странице были отдельными изолированными формами): `steps-demo`, `table-editor-demo`,
+      `rich-text-demo`, `schedule-demo`, `data-grid-demo`, `auto-fields-demo`
+- [x] `src/app/page.tsx` — теперь список ссылок на все 16 демо (было — сама мега-форма)
+- [x] Попутный фикс двух пробелов в `tsconfig.json`: `@letar/tailwind-utils` и
+      `@letar/forms-core/mask` не были прописаны в `paths` (библиотека `forms-shadcn` начала их
+      импортировать после того, как приложение было заведено — тот же класс проблемы, что описан
+      в `.claude/rules/libs.md` § «Потребителю нужны paths и на транзитивные `@letar/*`»). Без
+      фикса `typecheck:tsgo` был красным ещё до этой сессии.
+- [x] `typecheck:tsgo`/`oxlint` зелёные. `nx build`/`next build` не верифицированы в этой
+      сессии — среда worktree без слинкованных `node_modules` (`@letar/*` резолвятся только через
+      `paths`, которых Turbopack для собственного поиска пакета `next` не использует) даёт
+      «Could not find the Next.js package», не связанную с содержимым правки; см. коммит.
+
 ## Бэклог
 
 - [ ] `createForm()`/`Form`-root для `@letar/forms-shadcn` (если понадобится за пределами этого
       харнесса) — отдельная задача, зафиксирована в `libs/forms/PLAN.md` §7.3
 - [ ] E2E-тесты (по аналогии с `form-develop-app-e2e`), если харнесс станет постоянным
       регрессионным гейтом, а не только визуальной песочницей
-- [ ] Демо для оставшихся 24 полей паритета по мере их добавления в `forms-shadcn`
+- [ ] Демо для оставшихся 9 полей backlog (`MaskedInput`, `CreditCard`, 7 document-полей) по мере
+      их портирования в `forms-shadcn`
+- [ ] Живая проверка `nx build`/`next build` в обычном (не worktree) окружении — подтвердить, что
+      попутный фикс `tsconfig.json` (`@letar/tailwind-utils`, `@letar/forms-core/mask`) закрывает
+      прод-билд полностью, не только `typecheck:tsgo`

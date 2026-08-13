@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.0 (2026-08-13)
+
+- Мега-страница `src/app/page.tsx` (556 строк, 47 полей + 6 beta-компонентов в одной форме)
+  разбита на 16 страниц-примеров `src/app/<name>-demo/page.tsx` — Этап 0 Фазы 9 P7 `form-docs`
+  (единый источник кода примеров для чтения-с-диска документацией: один файл = один пример).
+  10 страниц группируют простые поля по смыслу (3–5 на страницу), 6 — по одному
+  beta/compound-компоненту. Новый `_components/demo-page-layout.tsx`
+  (`DemoPageLayout`/`SubmittedDataPreview` на Tailwind) + барrel `_components/index.ts`.
+  `src/app/page.tsx` теперь список ссылок.
+- Попутный фикс `tsconfig.json`: добавлены `paths` на `@letar/tailwind-utils` и
+  `@letar/forms-core/mask` — оба подключились к библиотекам-зависимостям уже после заведения
+  приложения, `typecheck:tsgo` был красным до этой правки.
+
 ## Unreleased (2026-08-11, продолжение 12)
 
 - Демо `FieldAuto` (`@letar/forms-shadcn` 0.30.0) — изолированная форма со своей Zod-схемой
