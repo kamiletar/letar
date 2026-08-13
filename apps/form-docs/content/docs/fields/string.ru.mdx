@@ -4,8 +4,23 @@ description: Поля ввода текста — String, Textarea, Password, Ma
 ---
 
 import { DemoContainer } from '@/components/demo-container'
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
 
 <DemoContainer demo="string" height={500} />
+
+## Полный пример
+
+Полный sandbox-пример, прочитанный напрямую из исходников `form-develop-app` /
+`form-develop-app-shadcn` на сборке — переключите фреймворк/скин, чтобы увидеть те же поля в
+разных реализациях. Оба источника показывают String, Textarea и Password вместе (пример
+`form-develop-app` заодно показывает и другие типы полей в том же файле; у MaskedInput/RichText/
+Editable свои отдельные демо-файлы, здесь не задействованы).
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/fields-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/basic-fields-demo/page.tsx"
+  vue="libs/forms-vue-shadcn/demo/examples/string-demo.ts"
+/>
 
 ## String
 

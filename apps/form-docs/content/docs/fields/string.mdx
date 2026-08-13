@@ -4,8 +4,23 @@ description: Text input fields — String, Textarea, Password, MaskedInput, Rich
 ---
 
 import { DemoContainer } from '@/components/demo-container'
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
 
 <DemoContainer demo="string" height={500} />
+
+## Full example
+
+The complete sandbox example, read directly from the `form-develop-app` / `form-develop-app-shadcn`
+source at build time — switch framework/skin to see the same fields across implementations. Both
+sources demonstrate String, Textarea, and Password together (`form-develop-app`'s example also
+shows other field types in the same file; MaskedInput/RichText/Editable have their own separate
+demo files not covered here).
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/fields-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/basic-fields-demo/page.tsx"
+  vue="libs/forms-vue-shadcn/demo/examples/string-demo.ts"
+/>
 
 ## String
 
