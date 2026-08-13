@@ -9251,3 +9251,37 @@ found» — они не были перерегистрированы после
 
 `typecheck:tsgo`/`typecheck` и `lint` по всем трём затронутым проектам (`archetest`,
 `animatrona-tracker`, `@letar/hooks`) — зелёные.
+
+## §78 — Учёт времени §72 закрыт кодом, но не докс-слоем: 30 команд `/<app>` не запускали таймер ✅ ЗАКРЫТО в скоупе сессии (2026-08-13)
+
+Владелец спросил, ведётся ли учёт времени по всем сессиям/проектам. Проверка показала:
+`apps/studio/PLAN.md` §11.21 («Тотальный учёт времени по всем проектам») закрыт кодом ещё
+2026-08-06 (`Project.isCommercial`, параллельные таймеры через `sessionRef`, сид всех приложений
+монорепо), но сами команды `.claude/commands/<app>.md` шаг «стартуй таймер» так и не получили —
+его вручную завели только `domwellbes.md`/`svoichuzhie.md` (почасовые клиенты). Общий шаблон
+`app-workflow.md`, извлечённый в §72, не покрывает время — команды дублируют раздел
+самостоятельно, `time_start` в них не унифицирован через shared-блок (техдолг, см. ниже).
+
+**Фикс:** раздел «Учёт времени» добавлен в 30 из 35 команд (коммиты `6dcac546`, `1e84cb70`).
+Первый проход (27 команд) ошибочно исключил `forms-dev`/`repo`/`dashboard-agent` как
+«meta-команды, не запускают сессию разработки» — владелец поправил: `forms-dev` ведёт полноценную
+разработку `@letar/forms`, `dashboard-agent` — `apps/dashboard-agent`, а `/repo` часто и есть
+точка входа в рабочую сессию. Оставшиеся 5 (`end-session`, `sync-env`, `deploy-agent`,
+`forms-coordinator`, `animatrona-coordinator`, `docs-fix`, `letar`) сознательно не тронуты.
+
+**Вторая, независимая дыра:** `time_start`/`time_switch` жёстко резолвят `app` через
+`Project.repoSlug` (`requireProjectByRepoSlug`, `apps/studio/src/lib/time-mcp.ts`) — а
+`INTERNAL_APP_TITLES` (`apps/studio/prisma/seed.ts`) сканирует только `apps/*/project.json`.
+`libs/forms` — библиотека без своей `apps/`-папки, поэтому `Project(repoSlug: "forms")` не
+существовала ни на проде, ни в dev; `/forms-dev` целится именно в этот слаг. Добавлен
+`forms` в `INTERNAL_APP_TITLES` (studio-коммит `3cbba02`, bump в letar `d35b2175`/`6dc94e7f`),
+задеплоено BlackCove с `seed: true` (прод-коммит `abb7dde3`).
+
+**Не проверено:** независимая SQL-сверка `Project(repoSlug: "forms")` на проде —
+`postgres-studio-prod` MCP временно недоступен (`Command failed with no output` даже на
+`SELECT 1`, воспроизведено и BlackCove, и отдельно этой сессией — похоже на сбой самого
+MCP-подключения, не БД).
+
+**Техдолг на будущее:** раздел «Учёт времени» продублирован в каждом из 30 файлов с подстановкой
+имени приложения, а не вынесен в `app-workflow.md` как «Регистрация в Agent Mail»/«После
+завершения задачи» — при следующей правке шаблона стоит унифицировать.
