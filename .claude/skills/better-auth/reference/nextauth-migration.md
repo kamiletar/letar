@@ -185,7 +185,7 @@ import { auth } from '@/lib/auth'
 
 export async function serverAction() {
   const session = await auth()
-  if (!session) throw new Error('Unauthorized')
+  if (!session) { throw new Error('Unauthorized') }
 } // СТАЛО (Better Auth)
 
 'use server'
@@ -196,7 +196,7 @@ export async function serverAction() {
   const session = await auth.api.getSession({
     headers: await headers(),
   })
-  if (!session) throw new Error('Unauthorized')
+  if (!session) { throw new Error('Unauthorized') }
 }
 ```
 

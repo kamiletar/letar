@@ -84,7 +84,7 @@ useEffect(() => {
 // ✅ слушатель живёт всё время жизни video-элемента, срабатывает на каждый новый src
 useEffect(() => {
   const video = globalVideoElement
-  if (!video) return
+  if (!video) { return }
 
   const onLoadedData = () => {
     setIsVideoReady(true)

@@ -274,7 +274,7 @@ export default function PaymentPage({ params }: { params: Promise<{ id: string }
     }
   }
 
-  if (isLoading) return <Spinner />
+  if (isLoading) { return <Spinner /> }
 
   if (order.status !== 'PENDING') {
     return (
@@ -353,7 +353,7 @@ export default function PaymentStatusPage({ params }: { params: Promise<{ id: st
     }
   }, [order?.status, id, router])
 
-  if (isLoading) return <Spinner />
+  if (isLoading) { return <Spinner /> }
 
   if (order.status === 'PENDING') {
     return (

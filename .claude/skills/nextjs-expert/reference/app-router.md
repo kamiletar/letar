@@ -301,7 +301,7 @@ import { notFound } from 'next/navigation'
 
 export default async function Page({ params }) {
   const product = await getProduct(params.id)
-  if (!product) notFound()
+  if (!product) { notFound() }
   return <ProductView product={product} />
 }
 ```
@@ -356,7 +356,7 @@ import { redirect } from 'next/navigation'
 
 export default async function Page() {
   const session = await auth()
-  if (!session) redirect('/sign-in')
+  if (!session) { redirect('/sign-in') }
 
   return <Dashboard />
 }

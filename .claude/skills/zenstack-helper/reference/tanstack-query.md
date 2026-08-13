@@ -51,8 +51,8 @@ function OrderList() {
     orderBy: { createdAt: 'desc' },
   })
 
-  if (isLoading) return <Spinner />
-  if (error) return <Error message={error.message} />
+  if (isLoading) { return <Spinner /> }
+  if (error) { return <Error message={error.message} /> }
 
   return (
     <ul>
@@ -93,7 +93,7 @@ function ProductList() {
     orderBy: { createdAt: 'desc' },
   }, {
     getNextPageParam: (lastPage, pages) => {
-      if (lastPage.length < 20) return undefined
+      if (lastPage.length < 20) { return undefined }
       return pages.length * 20 // offset
     },
   })

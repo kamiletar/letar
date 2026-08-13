@@ -202,7 +202,7 @@ const intlMiddleware = createMiddleware(routing)
 export async function proxy(request: NextRequest) {
   // Сначала next-intl
   const response = intlMiddleware(request)
-  if (response) return response
+  if (response) { return response }
 
   // Потом другая логика
   // ...

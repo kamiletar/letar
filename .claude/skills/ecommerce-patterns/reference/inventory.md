@@ -327,7 +327,7 @@ export function InventoryTable() {
 
   async function handleAdjust(productId: string, action: 'RECEIVED' | 'ADJUSTED') {
     const quantity = adjustment[productId]
-    if (!quantity) return
+    if (!quantity) { return }
 
     await updateStock.mutateAsync({ productId, action, quantity })
     setAdjustment((prev) => ({ ...prev, [productId]: 0 }))

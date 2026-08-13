@@ -53,8 +53,8 @@ function OrderList() {
     take: 20,
   })
 
-  if (isLoading) return <Spinner />
-  if (error) return <ErrorMessage error={error} />
+  if (isLoading) { return <Spinner /> }
+  if (error) { return <ErrorMessage error={error} /> }
 
   return (
     <ul>
@@ -78,8 +78,8 @@ function OrderDetails({ id }: { id: string }) {
     },
   })
 
-  if (isLoading) return <Spinner />
-  if (!order) return <NotFound />
+  if (isLoading) { return <Spinner /> }
+  if (!order) { return <NotFound /> }
 
   return <OrderView order={order} />
 }
@@ -102,7 +102,7 @@ function ProductList() {
     },
     {
       getNextPageParam: (lastPage, allPages) => {
-        if (lastPage.length < 20) return undefined
+        if (lastPage.length < 20) { return undefined }
         return allPages.length * 20 // offset
       },
     },
@@ -195,7 +195,7 @@ function DeleteOrderButton({ orderId }: { orderId: string }) {
   const queryClient = useQueryClient()
 
   const handleDelete = async () => {
-    if (!confirm('Удалить заказ?')) return
+    if (!confirm('Удалить заказ?')) { return }
 
     await deleteOrder.mutateAsync({
       where: { id: orderId },

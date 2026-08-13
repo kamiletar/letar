@@ -113,7 +113,7 @@ export async function calculateOrderTotal(
 
   for (const item of items) {
     const product = products.find((p) => p.id === item.productId)
-    if (!product) continue
+    if (!product) { continue }
 
     const currentPrice = calculateItemPrice(product)
     subtotal += currentPrice * item.quantity

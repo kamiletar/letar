@@ -83,7 +83,7 @@ const CreateProductSchema = z
 
 export async function createProductAction(input: unknown) {
   const parsed = CreateProductSchema.safeParse(input)
-  if (!parsed.success) return { error: parsed.error.flatten() }
+  if (!parsed.success) { return { error: parsed.error.flatten() } }
 
   const db = await getDb()
   await db.product.create({ data: parsed.data })

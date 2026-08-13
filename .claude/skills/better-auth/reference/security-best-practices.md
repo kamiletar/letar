@@ -224,11 +224,11 @@ export const auth = betterAuth({
       validate: (password) => {
         const errors = []
 
-        if (password.length < 8) errors.push('Минимум 8 символов')
-        if (!/[A-Z]/.test(password)) errors.push('Нужна заглавная буква')
-        if (!/[a-z]/.test(password)) errors.push('Нужна строчная буква')
-        if (!/[0-9]/.test(password)) errors.push('Нужна цифра')
-        if (!/[!@#$%^&*]/.test(password)) errors.push('Нужен спецсимвол')
+        if (password.length < 8) { errors.push('Минимум 8 символов') }
+        if (!/[A-Z]/.test(password)) { errors.push('Нужна заглавная буква') }
+        if (!/[a-z]/.test(password)) { errors.push('Нужна строчная буква') }
+        if (!/[0-9]/.test(password)) { errors.push('Нужна цифра') }
+        if (!/[!@#$%^&*]/.test(password)) { errors.push('Нужен спецсимвол') }
 
         return errors.length > 0 ? { valid: false, message: errors.join(', ') } : { valid: true }
       },

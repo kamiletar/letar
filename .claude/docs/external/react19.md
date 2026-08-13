@@ -16,7 +16,7 @@ function UpdateName() {
     setIsPending(true)
     const error = await updateName(name)
     setIsPending(false)
-    if (error) setError(error)
+    if (error) { setError(error) }
   }
 }
 
@@ -27,7 +27,7 @@ function UpdateName() {
   const handleSubmit = () => {
     startTransition(async () => {
       const error = await updateName(name)
-      if (error) setError(error)
+      if (error) { setError(error) }
     })
   }
 }
@@ -47,7 +47,7 @@ import { useActionState } from 'react'
 async function updateNameAction(prevState, formData) {
   const name = formData.get('name')
   const error = await updateName(name)
-  if (error) return { error }
+  if (error) { return { error } }
   redirect('/profile')
   return { error: null }
 }
@@ -109,7 +109,7 @@ function UserProfile({ userPromise }) {
 
 // Context — можно использовать условно (в отличие от useContext)
 function Heading({ children }) {
-  if (!children) return null
+  if (!children) { return null }
   const theme = use(ThemeContext) // ✅ после early return
   return <h1 style={{ color: theme.color }}>{children}</h1>
 }

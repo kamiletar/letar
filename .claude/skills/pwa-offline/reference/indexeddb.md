@@ -145,7 +145,7 @@ export function useWishlist() {
   }, [])
 
   const addItem = useCallback(async (productId: number): Promise<void> => {
-    if (globalState.items.includes(productId)) return
+    if (globalState.items.includes(productId)) { return }
 
     globalState = {
       ...globalState,

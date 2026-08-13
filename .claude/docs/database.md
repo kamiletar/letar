@@ -470,7 +470,7 @@ import { headers } from 'next/headers'
 
 export async function createOrder(data: OrderData) {
   const session = await auth.api.getSession({ headers: await headers() })
-  if (!session?.user) throw new Error('Unauthorized')
+  if (!session?.user) { throw new Error('Unauthorized') }
 
   const db = getEnhancedPrisma(session.user)
 
@@ -1155,7 +1155,7 @@ const { data } = useInfiniteFindManyLesson({
 
 // ZenStack v3: приводим к типу с relations
 const allLessons = useMemo(() => {
-  if (!data?.pages) return []
+  if (!data?.pages) { return [] }
   return data.pages.flat() as unknown as LessonWithDetails[]
 }, [data])
 ```

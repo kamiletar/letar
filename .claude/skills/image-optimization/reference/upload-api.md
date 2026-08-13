@@ -114,7 +114,7 @@ export function ImageDropzone({ folder, onUpload }: ImageDropzoneProps) {
       setIsDragging(false)
 
       const file = e.dataTransfer.files[0]
-      if (!file?.type.startsWith('image/')) return
+      if (!file?.type.startsWith('image/')) { return }
 
       setIsUploading(true)
       try {

@@ -65,7 +65,7 @@ export function useHapticFeedback() {
 
   const trigger = useCallback(
     (pattern: keyof HapticPatterns | number | number[] = 'medium') => {
-      if (!canVibrate) return false
+      if (!canVibrate) { return false }
 
       const vibrationPattern = typeof pattern === 'string' ? patterns[pattern] : pattern
 
@@ -265,7 +265,7 @@ function SwipeableCard({ onSwipe }: { onSwipe: () => void }) {
    const [hapticEnabled, setHapticEnabled] = useState(true)
 
    const trigger = (pattern) => {
-     if (hapticEnabled) haptic.trigger(pattern)
+     if (hapticEnabled) { haptic.trigger(pattern) }
    }
    ```
 

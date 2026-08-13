@@ -62,7 +62,7 @@ export default async function ProductPage({ params }: Props) {
     include: { category: true, images: true },
   })
 
-  if (!product) notFound()
+  if (!product) { notFound() }
 
   return <ProductView product={product} />
 }
@@ -361,7 +361,7 @@ export function ProductList() {
     },
   })
 
-  if (isLoading) return <Spinner />
+  if (isLoading) { return <Spinner /> }
 
   return (
     <List>

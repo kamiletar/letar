@@ -213,7 +213,7 @@ import { FocusTrap } from '@chakra-ui/react'
 // Escape для закрытия
 useEffect(() => {
   const handleEscape = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') onClose()
+    if (e.key === 'Escape') { onClose() }
   }
   document.addEventListener('keydown', handleEscape)
   return () => document.removeEventListener('keydown', handleEscape)

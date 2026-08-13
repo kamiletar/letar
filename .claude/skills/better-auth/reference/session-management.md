@@ -109,9 +109,9 @@ import { useSession } from '@/lib/auth-client'
 export function UserProfile() {
   const { data: session, isPending, error } = useSession()
 
-  if (isPending) return <Spinner />
-  if (error) return <div>Ошибка: {error.message}</div>
-  if (!session) return <div>Не авторизован</div>
+  if (isPending) { return <Spinner /> }
+  if (error) { return <div>Ошибка: {error.message}</div> }
+  if (!session) { return <div>Не авторизован</div> }
 
   return <div>Привет, {session.user.name}</div>
 }

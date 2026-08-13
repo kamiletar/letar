@@ -36,8 +36,8 @@ const { data, isPending, isError, error, isFetching, refetch } = useQuery({
   queryFn: () => fetchTodos(), // Функция, возвращающая Promise
 })
 
-if (isPending) return <Spinner />
-if (isError) return <Text>Ошибка: {error.message}</Text>
+if (isPending) { return <Spinner /> }
+if (isError) { return <Text>Ошибка: {error.message}</Text> }
 return <TodoList todos={data} />
 ```
 

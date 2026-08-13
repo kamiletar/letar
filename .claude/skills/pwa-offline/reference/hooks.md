@@ -147,14 +147,14 @@ export function useNetworkQuality(): NetworkQuality {
       }
     },
     () => {
-      if (!navigator.onLine) return 'offline'
+      if (!navigator.onLine) { return 'offline' }
 
       const connection = (navigator as any).connection
       if (connection) {
         // effectiveType: '4g', '3g', '2g', 'slow-2g'
         const type = connection.effectiveType
-        if (type === '4g') return 'fast'
-        if (type === '3g') return 'slow'
+        if (type === '4g') { return 'fast' }
+        if (type === '3g') { return 'slow' }
         return 'slow' // 2g, slow-2g
       }
 

@@ -245,7 +245,7 @@ export function useMyOrders() {
     queryKey: ['orders', 'my'],
     queryFn: async () => {
       const res = await fetch('/api/orders/my')
-      if (!res.ok) throw new Error('Ошибка загрузки заказов')
+      if (!res.ok) { throw new Error('Ошибка загрузки заказов') }
       return res.json()
     },
   })
@@ -256,7 +256,7 @@ export function useOrder(id: string) {
     queryKey: ['orders', id],
     queryFn: async () => {
       const res = await fetch(`/api/orders/${id}`)
-      if (!res.ok) throw new Error('Заказ не найден')
+      if (!res.ok) { throw new Error('Заказ не найден') }
       return res.json()
     },
     enabled: !!id,
@@ -311,8 +311,8 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 export function OrderHistory() {
   const { data: orders, isLoading } = useMyOrders()
 
-  if (isLoading) return <Spinner />
-  if (!orders?.length) return <Text>У вас пока нет заказов</Text>
+  if (isLoading) { return <Spinner /> }
+  if (!orders?.length) { return <Text>У вас пока нет заказов</Text> }
 
   return (
     <VStack gap={4} align="stretch">
@@ -377,7 +377,7 @@ export async function sendOrderStatusNotification(order: Order) {
   }
 
   const config = templates[order.status]
-  if (!config) return
+  if (!config) { return }
 
   await resend.emails.send({
     from: 'Premium Rosstil <orders@premium-rosstil.ru>',

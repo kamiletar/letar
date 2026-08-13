@@ -98,8 +98,8 @@ import { auth } from '@/lib/auth'
 
 export default async function AdminPage() {
   const session = await auth()
-  if (!session) redirect('/login')
-  if (session.user.role !== 'ADMIN') redirect('/')
+  if (!session) { redirect('/login') }
+  if (session.user.role !== 'ADMIN') { redirect('/') }
   // ...
 }
 ```

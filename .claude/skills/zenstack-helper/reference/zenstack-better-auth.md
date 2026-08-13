@@ -147,7 +147,7 @@ import { headers } from 'next/headers'
 
 export async function updateProject(projectId: string, data: ProjectData) {
   const session = await auth.api.getSession({ headers: await headers() })
-  if (!session?.user) throw new Error('Unauthorized')
+  if (!session?.user) { throw new Error('Unauthorized') }
 
   // Формируем контекст с организацией
   const userContext = await getUserContextWithOrg(session)

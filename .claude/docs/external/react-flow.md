@@ -311,7 +311,7 @@ function AutoLayout() {
   const initialized = useNodesInitialized()
 
   useEffect(() => {
-    if (!initialized) return
+    if (!initialized) { return }
     // Запустить алгоритм раскладки (dagre, elk, d3-hierarchy)
     setNodes((nodes) => nodes.map((n, i) => ({ ...n, position: { x: i * 200, y: 0 } })))
     fitView({ duration: 400, padding: 0.2 })

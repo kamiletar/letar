@@ -109,7 +109,7 @@ const useStore = create(
     updateItem: (id: string, data: Partial<Item>) =>
       set((state) => {
         const item = state.items.find((i) => i.id === id)
-        if (item) Object.assign(item, data)
+        if (item) { Object.assign(item, data) }
       }),
   })),
 )

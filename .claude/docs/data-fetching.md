@@ -215,7 +215,7 @@ export default function WishlistPage() {
     optimisticUpdate: true,
   })
 
-  if (isLoading) return <Spinner />
+  if (isLoading) { return <Spinner /> }
 
   return (
     <Container>
@@ -277,7 +277,7 @@ export function CatalogInfinite({ categoryId }: { categoryId?: string }) {
     {
       initialPageParam: 0,
       getNextPageParam: (lastPage, allPages) => {
-        if (lastPage.length < 20) return undefined
+        if (lastPage.length < 20) { return undefined }
         return allPages.length * 20
       },
     },
@@ -292,7 +292,7 @@ export function CatalogInfinite({ categoryId }: { categoryId?: string }) {
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
 
-  if (isLoading) return <Spinner size="xl" />
+  if (isLoading) { return <Spinner size="xl" /> }
 
   const products = data?.pages.flat() ?? []
 
@@ -486,7 +486,7 @@ export function ApiLogsList() {
     overscan: 10, // Рендерим 10 элементов за пределами viewport
   })
 
-  if (isLoading) return <Spinner />
+  if (isLoading) { return <Spinner /> }
 
   return (
     <Box
@@ -567,7 +567,7 @@ export function ApiLogsVirtualInfinite() {
     },
     {
       getNextPageParam: (lastPage, allPages) => {
-        if (lastPage.length < PAGE_SIZE) return undefined
+        if (lastPage.length < PAGE_SIZE) { return undefined }
         return allPages.length * PAGE_SIZE
       },
     },
@@ -589,7 +589,7 @@ export function ApiLogsVirtualInfinite() {
     const virtualItems = rowVirtualizer.getVirtualItems()
     const lastItem = virtualItems[virtualItems.length - 1]
 
-    if (!lastItem) return
+    if (!lastItem) { return }
 
     // Если видим последний элемент и есть ещё данные — загружаем
     if (
@@ -607,7 +607,7 @@ export function ApiLogsVirtualInfinite() {
     fetchNextPage,
   ])
 
-  if (isLoading) return <Spinner size="xl" />
+  if (isLoading) { return <Spinner size="xl" /> }
 
   return (
     <Box

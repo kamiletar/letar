@@ -361,8 +361,8 @@ export function AdminUsersTable() {
     }
   }, [isAdmin])
 
-  if (!isAdmin) return <div>Доступ запрещён</div>
-  if (loading) return <div>Загрузка...</div>
+  if (!isAdmin) { return <div>Доступ запрещён</div> }
+  if (loading) { return <div>Загрузка...</div> }
 
   return (
     <table>

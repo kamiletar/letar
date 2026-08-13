@@ -39,7 +39,7 @@ export function DateTime() {
     setDate(new Date().toLocaleString())
   }, [])
 
-  if (!date) return null
+  if (!date) { return null }
   return <p>{date}</p>
 }
 ```
@@ -61,7 +61,8 @@ export function ThemeToggle() {
     setTheme(localStorage.getItem('theme') || 'light')
   }, [])
 
-  if (!theme) return null // Избегаем hydration mismatch
+  if (!theme) { return null // Избегаем hydration mismatch
+   }
   return <Toggle value={theme} />
 }
 ```

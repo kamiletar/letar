@@ -22,9 +22,9 @@ function parseEnv(filePath) {
   const env = {}
   for (const line of content.split('\n')) {
     const trimmed = line.trim()
-    if (!trimmed || trimmed.startsWith('#')) continue
+    if (!trimmed || trimmed.startsWith('#')) { continue }
     const eqIdx = trimmed.indexOf('=')
-    if (eqIdx === -1) continue
+    if (eqIdx === -1) { continue }
     const key = trimmed.slice(0, eqIdx).trim()
     let value = trimmed.slice(eqIdx + 1).trim()
     if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
@@ -53,7 +53,7 @@ function isPortOpen(port) {
 async function waitForPort(port, timeout = 20000) {
   const start = Date.now()
   while (Date.now() - start < timeout) {
-    if (await isPortOpen(port)) return true
+    if (await isPortOpen(port)) { return true }
     await new Promise((r) => setTimeout(r, 500))
   }
   return false

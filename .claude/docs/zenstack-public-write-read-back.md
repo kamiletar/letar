@@ -39,7 +39,7 @@ import { prisma } from '@/lib/db'
 // единственный вход в это действие — публичная форма, вход уже провалидирован Zod-схемой выше.
 export async function createPublicLeadAction(input: unknown) {
   const parsed = LeadRequestSchema.safeParse(input)
-  if (!parsed.success) return { error: parsed.error.flatten() }
+  if (!parsed.success) { return { error: parsed.error.flatten() } }
 
   const lead = await prisma.$transaction(async (tx) => {
     const consentLog = await tx.consentLog.create({ data: {/* ... */} })

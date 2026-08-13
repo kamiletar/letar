@@ -247,7 +247,7 @@ import { useEffect, useState } from 'react'
 function readAnalyticsConsent(): boolean {
   try {
     const raw = window.localStorage.getItem(CONSENT_STORAGE_KEY)
-    if (!raw) return false
+    if (!raw) { return false }
     return (JSON.parse(raw) as CookieConsentState).analytics === true
   } catch {
     return false

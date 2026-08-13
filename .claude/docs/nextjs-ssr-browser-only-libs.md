@@ -62,7 +62,7 @@ export function VideoProvider() {
       // Динамический import() выполняется только здесь — строго в браузере,
       // после гидратации, никогда на сервере при SSR/SSG
       const shaka = (await import('shaka-player')).default
-      if (cancelled) return
+      if (cancelled) { return }
 
       shaka.polyfill.installAll()
       const player = new shaka.Player()

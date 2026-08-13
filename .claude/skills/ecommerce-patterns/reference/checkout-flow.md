@@ -166,7 +166,7 @@ export function ContactsStep({ form, onNext, onBack }: ContactsStepProps) {
 
   async function handleNext() {
     const valid = await form.trigger(['email', 'phone', 'firstName', 'lastName'])
-    if (valid) onNext()
+    if (valid) { onNext() }
   }
 
   return (
@@ -238,7 +238,7 @@ export function ShippingStep({ form, onNext, onBack }: ShippingStepProps) {
     const fields = method === 'PICKUP' ? ['shippingMethod', 'pickupPointId'] : ['shippingMethod', 'address']
 
     const valid = await form.trigger(fields as any)
-    if (valid) onNext()
+    if (valid) { onNext() }
   }
 
   return (

@@ -113,7 +113,7 @@ export function useCart() {
     queryKey: ['cart'],
     queryFn: async () => {
       const res = await fetch('/api/cart')
-      if (!res.ok) throw new Error('Ошибка загрузки корзины')
+      if (!res.ok) { throw new Error('Ошибка загрузки корзины') }
       return res.json()
     },
   })
@@ -129,7 +129,7 @@ export function useAddToCart() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
-      if (!res.ok) throw new Error('Ошибка добавления')
+      if (!res.ok) { throw new Error('Ошибка добавления') }
       return res.json()
     },
     onSuccess: () => {
@@ -144,7 +144,7 @@ export function useRemoveFromCart() {
   return useMutation({
     mutationFn: async (itemId: string) => {
       const res = await fetch(`/api/cart/items/${itemId}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error('Ошибка удаления')
+      if (!res.ok) { throw new Error('Ошибка удаления') }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cart'] })
@@ -167,8 +167,8 @@ export function CartDrawer() {
   const removeItem = useRemoveFromCart()
   const updateItem = useUpdateCartItem()
 
-  if (isLoading) return <Spinner />
-  if (!cart?.items?.length) return <Text>Корзина пуста</Text>
+  if (isLoading) { return <Spinner /> }
+  if (!cart?.items?.length) { return <Text>Корзина пуста</Text> }
 
   const total = cart.items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
 
@@ -241,7 +241,7 @@ export function useUpdateCartItem() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quantity }),
       })
-      if (!res.ok) throw new Error('Ошибка обновления')
+      if (!res.ok) { throw new Error('Ошибка обновления') }
       return res.json()
     },
     // Оптимистичное обновление
@@ -280,7 +280,7 @@ interface LocalCartItem {
 }
 
 export function getLocalCart(): LocalCartItem[] {
-  if (typeof window === 'undefined') return []
+  if (typeof window === 'undefined') { return [] }
   const data = localStorage.getItem(CART_KEY)
   return data ? JSON.parse(data) : []
 }
@@ -301,7 +301,7 @@ export function addToLocalCart(item: LocalCartItem) {
 // Синхронизация при авторизации
 export async function syncLocalCartWithServer() {
   const localCart = getLocalCart()
-  if (!localCart.length) return
+  if (!localCart.length) { return }
 
   await Promise.all(
     localCart.map((item) =>

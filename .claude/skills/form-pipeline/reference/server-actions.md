@@ -110,8 +110,8 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
     where: { id: params.id },
   })
 
-  if (isLoading) return <Spinner />
-  if (!product) return <NotFound />
+  if (isLoading) { return <Spinner /> }
+  if (!product) { return <NotFound /> }
 
   const handleSubmit = async (data: ProductUpdateForm) => {
     const result = await updateProductAction(params.id, data)

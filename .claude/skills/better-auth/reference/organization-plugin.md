@@ -316,7 +316,7 @@ export function OrgSettings() {
   const canManageMembers = role === 'owner' || role === 'admin'
   const canDeleteOrg = role === 'owner'
 
-  if (!activeOrg) return <div>Выберите организацию</div>
+  if (!activeOrg) { return <div>Выберите организацию</div> }
 
   return (
     <div>

@@ -244,7 +244,7 @@ import { signIn, signOut, useSession } from '@/lib/auth-client'
 export function AuthButton() {
   const { data: session, isPending } = useSession()
 
-  if (isPending) return <Spinner />
+  if (isPending) { return <Spinner /> }
 
   if (session) {
     return (

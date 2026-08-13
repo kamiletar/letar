@@ -86,7 +86,8 @@ export function Article({ number, children }: ArticleProps) {
         },
       }}
     >
-      {/*
+      {
+        /*
         Единственный рендер Badge/текста/кнопки закладки — раньше здесь было ДВА независимых
         Flex-блока (мобильный и десктопный), каждый со своей копией `{children}` и своим
         <BookmarkButton>, переключаемых через display:{base,md}. Оба оставались в DOM
@@ -100,7 +101,8 @@ export function Article({ number, children }: ArticleProps) {
         Адаптивность (мобильный: Badge+закладка в одной строке, текст на следующей; десктоп: всё
         в одну строку) теперь достигается CSS-переносом (`wrap`) и `order`, без дублирования
         разметки.
-      */}
+      */
+      }
       <Flex align="flex-start" gap={3} wrap={{ base: 'wrap', md: 'nowrap' }}>
         <Badge
           id={labelId}

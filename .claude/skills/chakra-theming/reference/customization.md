@@ -302,7 +302,7 @@ const config = defineConfig({
     truncate: {
       values: { type: 'boolean' },
       transform(value) {
-        if (!value) return {}
+        if (!value) { return {} }
         return {
           overflow: 'hidden',
           textOverflow: 'ellipsis',

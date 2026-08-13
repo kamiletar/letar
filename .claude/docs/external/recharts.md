@@ -224,7 +224,7 @@ function ComposedExample() {
 
 ```tsx
 function CustomTooltip({ active, payload, label }) {
-  if (!active || !payload?.length) return null
+  if (!active || !payload?.length) { return null }
 
   return (
     <div style={{ background: 'white', padding: 12, border: '1px solid #ccc', borderRadius: 8 }}>
