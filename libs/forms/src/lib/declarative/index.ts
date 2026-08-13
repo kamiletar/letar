@@ -232,7 +232,22 @@ const FormSteps = Object.assign(FormStepsRoot, {
  * </Form>
  * ```
  */
+import { type AssertSameKeys, assertSameKeys } from './assert-same-keys'
 import type { FormComponent } from './form-root'
+
+// ⚠️ `as unknown as FormComponent` ниже полностью отключает структурную проверку
+// Object.assign(...) — TypeScript ничего не сверяет ни для одного из вложенных
+// compound-объектов. Эти вызовы ловят рассинхрон набора ключей между реализацией
+// и form-compound-types.ts до того, как об него споткнётся внешний потребитель
+// (прецедент 2026-08-12: FormDocument пополнился 3 полями, которых не было в типе,
+// плюс тип обещал фантомный OGRNIP, которого не было в реализации никогда).
+// Ограничено плоскими compound-объектами (без call signature) — у Group/Steps/Form
+// целиком реальная сигнатура компонента может расходиться с упрощённым inline-типом
+// не по вине рассинхрона полей, а из-за forwardRef/generic-обёрток, это дало бы шум.
+assertSameKeys<AssertSameKeys<typeof FormField, FormComponent['Field']>>()
+assertSameKeys<AssertSameKeys<typeof FormDocument, FormComponent['Document']>>()
+assertSameKeys<AssertSameKeys<typeof FormButton, FormComponent['Button']>>()
+assertSameKeys<AssertSameKeys<typeof ListButton, FormComponent['Group']['List']['Button']>>()
 
 export const Form = Object.assign(FormRoot, {
   Group: FormGroup,
