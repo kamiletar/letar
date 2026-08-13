@@ -136,6 +136,12 @@
       "runtimeExecutable": "nx",
       "runtimeArgs": ["dev", "form-docs"],
       "port": 3020
+    },
+    {
+      "name": "form-docs-prod",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["run", "form-docs:start"],
+      "port": 3020
     }
   ]
 }
