@@ -51,7 +51,7 @@
       "options": {
         "cwd": "apps/form-docs",
         "tty": false,
-        "command": "next build"
+        "command": "next build --webpack"
       },
       "dependsOn": ["^build"],
       "cache": true,
@@ -73,7 +73,7 @@
       "continuous": true,
       "options": {
         "cwd": "apps/form-docs",
-        "command": "next dev"
+        "command": "next dev --webpack"
       },
       "syncGenerators": ["@nx/js:typescript-sync"]
     },
