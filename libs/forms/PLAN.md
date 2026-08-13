@@ -186,6 +186,35 @@ Hidden, YesNo, Date, Time, Currency, Percentage`. Архитектурная б�
 - Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
   зелёный на обоих пакетах.
 
+**Этап 5 (часть 2) — отчёт (2026-08-13): Signature/Address/City закрыты в обоих Vue-пакетах.**
+Из восьми полей Этапа 5 остался только `FieldRichText` — единственное, требующее нового
+тяжёлого peer-dep (`@tiptap/vue-3`), намеренно вынесено в отдельный заход.
+
+- **`@letar/forms-vue` 0.7.0 → 0.8.0, 39 полей (было 36):** `useSignatureField`
+  (`@letar/forms-vue/core`) — 1:1 порт `useFieldState` React `field-signature.tsx` (рисование
+  мышью/пальцем + typed-режим, экспорт PNG/SVG data URI); `useAddressSuggestions`
+  (`@letar/forms-vue/core`) — общий для `FieldAddress`/`FieldCity`. `createDaDataProvider`/
+  `AddressProvider` (`@letar/forms-core/address`) уже framework-agnostic — существовали до
+  Фазы 9, порт не потребовался вовсе, Vue-специфика только в debounce/click-outside/клавиатуре.
+- **`@letar/forms-vue-shadcn` 0.8.0 → 0.9.0, 40 полей (было 37):** тот же набор на Reka-скине,
+  переиспользует оба composable, только Tailwind-разметка.
+- **Находка, тот же класс, что в части 1:** оба composable (`useSignatureField`,
+  `useAddressSuggestions`) должны вызываться один раз в `setup()`, не в render-замыкании
+  `withFieldValidation` — иначе теряют стабильную идентичность `ref()`-состояния на каждый
+  ре-рендер. Запись значения — через `form.setFieldValue` напрямую, `field` из render-замыкания
+  composable не передаётся.
+- **Осознанно не дедуплено:** чистые SVG-функции подписи (`buildSvgString`/`buildTypedSvgString`/
+  `escapeXml`) не вынесены в `forms-core`, в отличие от дата/число-хелперов Этапа 4 — единственный
+  потребитель здесь эта пара Vue-полей, выносить некуда переиспользовать.
+- Тесты — `app-form.spec.ts` обоих пакетов, блок «Этап 5 (часть 2)»: рендер трёх полей,
+  draw/typed-переключение подписи, рисование на canvas (2D-контекст замокан — jsdom его не
+  реализует) + очистка, запрос адреса/города через мок-провайдер + выбор подсказки.
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный на обоих пакетах.
+
+Дальше: Этап 5 (продолжение) — `FieldRichText` (Tiptap, `@tiptap/vue-3` — новый peer-dep,
+`lazy()`-паттерн по прецеденту `Form.Captcha`) закрывает Этап 5 целиком → Этап 6 (survey/table).
+
 **Этап 5 (часть 1) — отчёт (2026-08-13): PinInput/OTPInput/ColorPicker/FileUpload закрыты в обоих
 Vue-пакетах.** Координатор в retired, отчёт сразу в план. Скоуп части ограничен намеренно (не
 «слепая реализация всех восьми разом») — 4 поля без тяжёлых внешних peer-dep;
