@@ -1,10 +1,23 @@
 # Выполненные задачи: Archetest
 
-> **Версия:** 0.27.3 | **Обновлено:** 2026-08-12
+> **Версия:** 0.27.4 | **Обновлено:** 2026-08-13
 >
 > **Основной план:** [PLAN.md](./PLAN.md)
 
 ---
+
+## Гидратационный мисматч в `QuizIntro` — согласие с дисклеймером (v0.27.4, 2026-08-13)
+
+Найдено попутным аудитом при исследовании best practices для form-docs P7 (устойчивый
+задокументированный вовне класс бага: docusaurus#5653, Nuxt UI `FrameworkTabs.vue`, TanStack
+`usePersistedEnumStore.ts`). `disclaimerAccepted` читал `localStorage.getItem(DISCLAIMER_CONSENT_KEY)`
+прямо в инициализаторе `useState` — на клиенте это происходит уже на первом (гидратирующем)
+рендере, а сервер рендерит дефолт из БД (`initialDisclaimerAccepted`). Расхождение без
+предупреждения в консоли: React может «поженить» DOM с чужим значением, и клик по чекбоксу/кнопке
+«Начать тест» перестаёт совпадать с видимым состоянием. Фикс: дефолт `useState` теперь
+`Boolean(initialDisclaimerAccepted)` на сервере и первом клиентском рендере одинаково, сохранённое
+в `localStorage` согласие подтягивается отдельным `useEffect`. Новый паттерн-документ —
+`.claude/docs/ssr-hydration-persisted-state.md`.
 
 ## `ShareResultButton` переведён на общий `useShare` (v0.27.3, 2026-08-12)
 

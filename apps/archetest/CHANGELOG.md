@@ -5,6 +5,15 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.27.4] - 2026-08-13
+
+### Fixed
+
+- **`QuizIntro`: гидратационный мисматч `disclaimerAccepted`** — `useState`-инициализатор читал
+  `localStorage` синхронно (на первом клиентском рендере), а сервер рендерил дефолт из БД.
+  Теперь дефолт совпадает на сервере и первом клиентском рендере, сохранённое согласие
+  подтягивается в `useEffect`. См. [ssr-hydration-persisted-state.md](/.claude/docs/ssr-hydration-persisted-state.md).
+
 ## [0.27.3] - 2026-08-12
 
 ### Changed
