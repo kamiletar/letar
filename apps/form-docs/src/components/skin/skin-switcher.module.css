@@ -1,5 +1,7 @@
 .switcher {
   display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 4px;
   padding: 4px;
   margin: 12px 0;
@@ -9,6 +11,11 @@
 }
 
 .link {
+  display: inline-flex;
+  align-items: center;
+  /* min-height 44px — минимальный touch target (Apple HIG/WCAG 2.5.5) вместо
+     фактических ~38px, замер на мобильном 375px в задаче P7 Этап 6 */
+  min-height: 44px;
   padding: 4px 12px;
   border-radius: 6px;
   font-size: 0.85rem;
@@ -29,6 +36,9 @@
 }
 
 .disabled {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   padding: 4px 12px;
   border-radius: 6px;
   font-size: 0.85rem;
