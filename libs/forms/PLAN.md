@@ -246,6 +246,40 @@ Hidden, YesNo, Date, Time, Currency, Percentage`. Архитектурная б�
 (survey/table: Likert/MatrixChoice/TableEditor/DataGrid, `Form.Group`/`Form.Steps`) — следующий
 заход.
 
+**Этап 3 (продолжение) — отчёт (2026-08-13): `FieldCreditCard` закрыт в обоих Vue-пакетах.**
+Координатор ушёл в retired между предыдущим отчётом и этим — согласовывать не с кем, отчёт сразу
+сюда.
+
+- **Новый общий composable `useCreditCardField`** (`libs/forms-vue/src/lib/core/use-credit-card-field.ts`,
+  экспорт через `@letar/forms-vue/core`) — вся логика (форматирование номера/срока/CVC, Luhn,
+  автопереход фокуса `expiry`→`cvc`) в одном месте, переиспользуется `forms-vue-shadcn` без
+  дублирования — тот же принцип, что `useMaskField` (Этап 3, основной заход). Поле не участвует в
+  Zod-валидации через `withFieldValidation` (это составной виджет с тремя subfields, не одиночное
+  schema-поле) — пишет напрямую через `form.setFieldValue`, как и обе React-версии.
+- **`cardBrandIcon`** (тот же подпуть `core`) — Vue-порт `card-brand-icon.tsx` (Visa/Mastercard/
+  Amex/МИР inline SVG, `h()` вместо JSX, разметка 1:1). Общий для обоих скинов — чистая
+  презентация без формы, ESLint-барьер `core/**` этому не мешает (запрещён только импорт из
+  `fields/**` внутрь `core/**`, не наоборот).
+- **`@letar/forms-vue` 0.5.1 → 0.6.0, 32 поля (было 31):** `FieldCreditCard` — референсная
+  HTML-разметка без UIKit-абстракции, как у остальных полей headless-пакета.
+- **`@letar/forms-vue-shadcn` 0.6.1 → 0.7.0, 33 поля (было 32):** `FieldCreditCard` — Tailwind-
+  разметка на голых `<input>` (мульти-part виджет не укладывается в `UIKitInputProps`, тот же
+  приём, что у документных полей), `onErrorCaptured`+`rekaUIKit.ErrorFallback` для защиты рендера.
+- **Находка при написании теста:** `formatExpiry('02')` (движок масок, mask `'99/99'`) отдаёт
+  `'02'`, не `'02/'` — литерал-разделитель не дорисовывается, пока не подтверждён следующей
+  цифрой (см. комментарий в `libs/forms-core/src/lib/mask/parts.ts:61`, «дорисовывается» — нет).
+  Не баг, ожидаемое поведение движка (тот же принцип у обычных масок с телефоном/документами);
+  первая версия теста ошибочно предполагала автодорисовку — поймано прогоном, не задокументировано
+  отдельно, т.к. поведение уже описано в самом коде движка.
+- Тесты — `app-form.spec.ts` обоих пакетов, блок «Этап 3 (продолжение)»: форматирование номера +
+  определение бренда по номеру, Luhn-валидация на blur, smart month (`2` → `02`) + автопереход
+  фокуса к CVC при заполнении срока, ограничение длины CVC по бренду (3 цифры для Visa).
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный на обоих пакетах.
+
+Дальше: Этап 5 (тяжёлые peer-dep поля: RichText/Address/City/ColorPicker/PinInput/OTPInput/
+Signature/FileUpload) — следующий заход.
+
 ---
 
 ## ✅ [2026-08-12] `useFormPersistence` — `excludeFields` для чувствительных полей + документация — закрыто
