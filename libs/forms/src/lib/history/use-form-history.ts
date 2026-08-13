@@ -36,37 +36,36 @@ export function useFormHistory<T>(
     keyboard = true,
   } = config ?? {}
 
-  const [history, setHistory] = useState<HistoryEntry<T>[]>(() => {
-    // Восстановление из sessionStorage
-    if (persist && typeof window !== 'undefined') {
-      try {
-        const saved = sessionStorage.getItem(persistKey)
-        if (saved) {
-          return JSON.parse(saved)
-        }
-      } catch {
-        /* игнорируем ошибки парсинга */
-      }
-    }
-    return [{ values: form.state.values, timestamp: Date.now() }]
-  })
+  // Дефолт совпадает на сервере и при первом клиентском рендере — реальное значение
+  // из sessionStorage подставляется только в useEffect ниже, иначе гидратация "поженит"
+  // DOM с чужим значением (см. .claude/docs/ssr-hydration-persisted-state.md)
+  const [history, setHistory] = useState<HistoryEntry<T>[]>(() => [
+    { values: form.state.values, timestamp: Date.now() },
+  ])
 
-  const [currentIndex, setCurrentIndex] = useState(() => {
-    if (persist && typeof window !== 'undefined') {
-      try {
-        const saved = sessionStorage.getItem(`${persistKey}-index`)
-        if (saved) {
-          return parseInt(saved, 10)
-        }
-      } catch {
-        /* игнорируем */
-      }
-    }
-    return 0
-  })
+  const [currentIndex, setCurrentIndex] = useState(0)
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isUndoRedoRef = useRef(false)
+
+  // Восстановление из sessionStorage (уже после гидратации)
+  useEffect(() => {
+    if (!persist || typeof window === 'undefined') {
+      return
+    }
+    try {
+      const savedHistory = sessionStorage.getItem(persistKey)
+      if (savedHistory) {
+        setHistory(JSON.parse(savedHistory))
+      }
+      const savedIndex = sessionStorage.getItem(`${persistKey}-index`)
+      if (savedIndex) {
+        setCurrentIndex(parseInt(savedIndex, 10))
+      }
+    } catch {
+      /* игнорируем ошибки парсинга */
+    }
+  }, [persist, persistKey])
 
   // Записать новый снапшот в историю
   const pushSnapshot = useCallback(

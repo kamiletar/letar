@@ -4,6 +4,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.4.3] - 2026-08-13
+
+### Fixed
+
+- **`useFormHistory`: гидратационный мисматч при `persist: true`** — `sessionStorage`
+  читался прямо в инициализаторе `useState` вместо `useEffect`. На SSR-странице это тот же
+  класс бага, что уже чинили в `useLocalStorage`: сервер и первый клиентский рендер должны
+  совпадать, реальное значение из `sessionStorage` подставляется только после гидратации
+  (см. `.claude/docs/ssr-hydration-persisted-state.md`). Живых вызовов с `persist: true` в
+  SSR-контексте в монорепо не найдено — фикс превентивный.
+
 ## [2.4.2] - 2026-08-13
 
 ### Added
