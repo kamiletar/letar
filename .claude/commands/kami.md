@@ -16,9 +16,8 @@ description: Воркфлоу разработки приложения kami —
 
 ## Учёт времени
 
-Сразу стартуй таймер — `time_start({ app: "kami", description: "изучение плана и постановка задачи" })`.
-Когда направление работы прояснится — обнови через `time_switch`. Правила переключения и
-остановки — `.claude/rules/time-tracking.md`, шаблон — `.claude/rules/app-workflow.md`.
+Сразу стартуй таймер `time_start({ app: "kami", ... })` — общий шаблон и правила
+переключения/остановки см. `.claude/rules/app-workflow.md` и `.claude/rules/time-tracking.md`.
 
 ## Действия
 

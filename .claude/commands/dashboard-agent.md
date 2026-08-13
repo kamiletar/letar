@@ -22,9 +22,8 @@ macro_start_session(
 )
 ```
 
-2. **Стартуй таймер** — `time_start({ app: "dashboard-agent", description: "изучение плана и постановка задачи" })`.
-   Когда направление работы прояснится — обнови через `time_switch`. Правила переключения и
-   остановки — `.claude/rules/time-tracking.md`.
+2. **Стартуй таймер** `time_start({ app: "dashboard-agent", ... })` — общий шаблон и правила
+   переключения/остановки см. `.claude/rules/app-workflow.md` и `.claude/rules/time-tracking.md`.
 
 3. Прочитай `apps/dashboard-agent/PLAN.md` для текущего состояния задач (если есть)
 

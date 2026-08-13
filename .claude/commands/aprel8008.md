@@ -15,9 +15,8 @@ description: Воркфлоу разработки приложения aprel800
 
 ## Учёт времени
 
-Сразу стартуй таймер — `time_start({ app: "aprel8008", description: "изучение плана и постановка задачи" })`.
-Когда направление работы прояснится — обнови через `time_switch`. Правила переключения и
-остановки — `.claude/rules/time-tracking.md`, шаблон — `.claude/rules/app-workflow.md`.
+Сразу стартуй таймер `time_start({ app: "aprel8008", ... })` — общий шаблон и правила
+переключения/остановки см. `.claude/rules/app-workflow.md` и `.claude/rules/time-tracking.md`.
 
 ## Действия
 

@@ -16,9 +16,8 @@ description: Воркфлоу разработки лендинга дескто
 
 ## Учёт времени
 
-Сразу стартуй таймер — `time_start({ app: "animatrona-landing", description: "изучение плана и постановка задачи" })`.
-Когда направление работы прояснится — обнови через `time_switch`. Правила переключения и
-остановки — `.claude/rules/time-tracking.md`, шаблон — `.claude/rules/app-workflow.md`.
+Сразу стартуй таймер `time_start({ app: "animatrona-landing", ... })` — общий шаблон и правила
+переключения/остановки см. `.claude/rules/app-workflow.md` и `.claude/rules/time-tracking.md`.
 
 ## Действия
 

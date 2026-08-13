@@ -16,9 +16,8 @@ description: Воркфлоу разработки form-example — витрин
 
 ## Учёт времени
 
-Сразу стартуй таймер — `time_start({ app: "form-example", description: "изучение плана и постановка задачи" })`.
-Когда направление работы прояснится — обнови через `time_switch`. Правила переключения и
-остановки — `.claude/rules/time-tracking.md`, шаблон — `.claude/rules/app-workflow.md`.
+Сразу стартуй таймер `time_start({ app: "form-example", ... })` — общий шаблон и правила
+переключения/остановки см. `.claude/rules/app-workflow.md` и `.claude/rules/time-tracking.md`.
 
 ## Координация (Forms Coordinator)
 
