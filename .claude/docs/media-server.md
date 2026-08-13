@@ -53,23 +53,17 @@ https://media.letar.best/v/{appId}/{videoId}/poster.jpg  — постер
 
 Аутентификация: заголовок `X-Media-Key: {appId}:{secret}`
 
-| Метод    | Путь                                   | Описание                               |
-| -------- | -------------------------------------- | -------------------------------------- |
-| `POST`   | `/api/v1/:appId/video/upload`          | Загрузить файл → `{ videoId, jobId }`  |
-| `GET`    | `/api/v1/:appId/video/:videoId/status` | `queued\|processing\|ready\|error`     |
-| `DELETE` | `/api/v1/:appId/video/:videoId`        | Удалить файлы + job                    |
-| `POST`   | `/api/v1/:appId/video/:videoId/poster` | Переген постер (`?timestamp=00:00:05`) |
-| `GET`    | `/health`                              | `{ ok: true }`                         |
+| Метод  | Путь                                    | Описание                                                                                                  |
+| ------ | --------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `POST` | `/api/v1/:appId/video/request-upload`   | Запросить upload-токен (тело `{ videoId, webhookUrl }`) → `{ uploadToken, uploadUrl, tusUrl, expiresIn }` |
+| TUS    | `{tusUrl}` (заголовок `X-Upload-Token`) | Резюмируемая загрузка файла напрямую в `tusUrl`, минуя основной API-сервер                                |
+| `GET`  | `/api/v1/:appId/video/status/:jobId`    | `queued` / `processing` / `ready` / `error`                                                               |
+| `GET`  | `/health`                               | `{ ok: true }`                                                                                            |
 
-⚠️ **Таблица выше устарела относительно кода.** Реальные интеграции (`svoichuzhie`,
-`domwellbes`) используют **resumable TUS**-загрузку, не одноразовый `POST /upload`:
-`POST /api/v1/:appId/video/request-upload` (тело `{ videoId, webhookUrl }`) возвращает
-`{ uploadToken, uploadUrl, tusUrl, expiresIn }`, дальше файл льётся напрямую в `tusUrl`
-заголовком `X-Upload-Token`. `videoId` генерирует **приложение** (не сервер) до начала
-загрузки — им же вебхук `video.ready` находит свою запись обратно. Актуальный референс —
-`apps/svoichuzhie/src/lib/media.ts` + `src/app/admin/video/new/page.tsx` (полный TUS-клиент с
-докачкой) и `apps/domwellbes/src/lib/media.ts` (минимальная версия без Web Share Target).
-Обновить саму таблицу — отдельная задача (нужно свериться с `infra/media-server/src/server.ts`).
+Загрузка — **resumable TUS**, не одноразовый `POST /upload`: `videoId` генерирует
+**приложение** (не сервер) до начала загрузки — им же вебхук `video.ready` находит свою запись
+обратно. Клиент — общая библиотека `@letar/media-client` (`createMediaClient({ appId })`), см.
+раздел «5. Подключить `@letar/media-client` в приложении» ниже.
 
 ### Webhook при готовности
 
@@ -124,53 +118,35 @@ environment:
   MEDIA_API_KEY: ${MEDIA_API_KEY}
 ```
 
-### 5. Создать `src/lib/media.ts` в приложении
+### 5. Подключить `@letar/media-client` в приложении
+
+Клиент вынесен в общую библиотеку `libs/media-client` (Shared-first, см. корневой `CLAUDE.md`) —
+не копировать функции руками, а импортировать `createMediaClient`. Подключение библиотеки —
+`.claude/rules/libs.md` § «Подключение к приложению» (`implicitDependencies` в `package.json`
+приложения + опционально `paths` в его `tsconfig.json`).
+
+`src/lib/media.ts` приложения:
 
 ```typescript
-const MEDIA_API = process.env.MEDIA_SERVER_URL!
-const MEDIA_KEY = process.env.MEDIA_API_KEY!
+import { createMediaClient } from '@letar/media-client'
 
-export async function uploadVideo(
-  file: File,
-  appId: string,
-  webhookUrl?: string,
-): Promise<{ videoId: string; jobId: string }> {
-  const form = new FormData()
-  form.append('file', file)
-  const url = `${MEDIA_API}/api/v1/${appId}/video/upload${
-    webhookUrl ? `?webhookUrl=${encodeURIComponent(webhookUrl)}` : ''
-  }`
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'X-Media-Key': MEDIA_KEY },
-    body: form,
-  })
-  if (!res.ok) { throw new Error(`Media upload failed: ${res.status}`) }
-  return res.json()
-}
+export const mediaClient = createMediaClient({ appId: '<app>' })
 
-export async function getVideoStatus(
-  appId: string,
-  videoId: string,
-): Promise<'queued' | 'processing' | 'ready' | 'error' | 'unknown'> {
-  const res = await fetch(`${MEDIA_API}/api/v1/${appId}/video/${videoId}/status`, {
-    headers: { 'X-Media-Key': MEDIA_KEY },
-  })
-  if (!res.ok) { return 'unknown' }
-  const { status } = await res.json()
-  return status
-}
-
-export function getVideoUrls(appId: string, videoId: string) {
-  const base = `https://media.letar.best/v/${appId}/${videoId}`
-  return {
-    '320p': `${base}/320p.mp4`,
-    '720p': `${base}/720p.mp4`,
-    '1080p': `${base}/1080p.mp4`,
-    poster: `${base}/poster.jpg`,
-  }
-}
+export const isMediaConfigured = mediaClient.isConfigured
+export const requestUploadToken = mediaClient.requestUploadToken
+export const getTranscodeStatus = mediaClient.getTranscodeStatus
 ```
+
+`createMediaClient` по умолчанию читает `MEDIA_SERVER_URL`/`MEDIA_API_KEY` из `process.env`
+(см. шаги 2–4 выше) — передавать их явным `baseUrl`/`apiKey` нужно только для тестов или
+нестандартного окружения. `requestUploadToken(videoId, webhookUrl)` вызывается **с сервера**
+(Route Handler, есть `apiKey`) и возвращает `{ uploadToken, uploadUrl, tusUrl, expiresIn }` —
+`uploadToken`/`tusUrl` уходят в браузер, дальше файл льётся напрямую в `tusUrl` через
+`tus-js-client` с заголовком `X-Upload-Token` (см. `apps/svoichuzhie/src/app/api/video/init-upload/route.ts`
+и `apps/domwellbes/src/app/api/houses/[id]/video-tour/init-upload/route.ts` как референс, а
+клиентский TUS-аплоад — в `apps/svoichuzhie/src/app/admin/video/new/page.tsx`, полная версия
+с докачкой и Web Share Target, или `apps/domwellbes/.../house-video-tour-section.tsx`,
+минимальная версия). Полный API библиотеки — `libs/media-client/README.md`.
 
 ### 6. Схема БД — поле videoId
 
