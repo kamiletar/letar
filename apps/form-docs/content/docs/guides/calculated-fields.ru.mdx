@@ -3,6 +3,21 @@ title: Вычисляемые поля
 description: Автоматически вычисляемые поля, обновляющиеся при изменении зависимых полей
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
+## Полный пример
+
+Полный sandbox-пример, прочитанный напрямую из исходников `form-develop-app` /
+`form-develop-app-shadcn` на сборке. Оба источника уже разошлись в деталях (`calculated-demo` в
+`form-develop-app` против сценария «Calculated» внутри `numeric-demo` в shadcn-приложении) — оба
+демонстрируют `Form.Field.Calculated`/`FieldCalculated`, но не идентичный сценарий. Аналога для
+Vue/Angular пока нет — эти вкладки показаны как disabled.
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/calculated-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/numeric-demo/page.tsx"
+/>
+
 ## Обзор
 
 `Form.Field.Calculated` предоставляет декларативные вычисляемые поля, которые автоматически пересчитываются при изменении зависимых значений формы. Вместо ручного использования `Form.Watch` + `setFieldValue` один компонент обрабатывает всю реактивную логику.

@@ -6,8 +6,17 @@ description: Показ и скрытие полей на основе знач�
 ## Живой пример
 
 import { DemoContainer } from '@/components/demo-container'
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
 
 <DemoContainer demo="conditional" height={500} />
+
+## Полный пример
+
+Полный sandbox-пример, прочитанный напрямую из исходников `form-develop-app` на сборке —
+переключите фреймворк/скин, чтобы увидеть `Form.When`, подключённый к реальной форме. Аналога для
+shadcn/Vue/Angular пока нет — эти вкладки показаны как disabled.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/when-demo/page.tsx" />
 
 ## Form.When
 

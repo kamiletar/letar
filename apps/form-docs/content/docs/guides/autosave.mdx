@@ -3,6 +3,16 @@ title: Autosave to Server
 description: Automatic server-side form data saving with debounce, offline fallback, and draft recovery
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
+## Full example
+
+The complete sandbox example, read directly from the `form-develop-app` source at build time —
+switch framework/skin to see `useFormAutosave` wired to a real form. No shadcn/Vue/Angular
+equivalent exists yet — those tabs show as disabled.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/autosave-demo/page.tsx" />
+
 ## Overview
 
 `useFormAutosave` periodically saves form data to a server endpoint. If the network is unavailable, data is stored in localStorage and synced when connectivity returns.

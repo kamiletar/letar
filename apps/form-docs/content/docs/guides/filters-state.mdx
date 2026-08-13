@@ -3,6 +3,16 @@ title: Forms as State Manager
 description: Use Form without submit — filters, URL sync, settings panels, dashboard controls
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
+## Full example
+
+The complete sandbox example, read directly from the `form-develop-app` source at build time —
+switch framework/skin to see `Form` used as a submit-less state container for filters. No
+shadcn/Vue/Angular equivalent exists yet — those tabs show as disabled.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/filters-state-demo/page.tsx" />
+
 ## Overview
 
 A form doesn't have to end with a submit button. `Form` is a subscription-based state machine — it works equally well as a state container for filters, settings panels, and dashboard controls.

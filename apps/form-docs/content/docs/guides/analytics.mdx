@@ -3,6 +3,16 @@ title: Form Analytics
 description: Built-in field-level analytics — track drop-offs, time per field, and completion rates
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
+## Full example
+
+The complete sandbox example, read directly from the `form-develop-app` source at build time —
+switch framework/skin to see `useFormAnalytics` wired to a real form. No shadcn/Vue/Angular
+equivalent exists yet — those tabs show as disabled.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/analytics-demo/page.tsx" />
+
 ## Overview
 
 67% of forms are abandoned before completion. The password field alone has a 10.5% drop-off rate. `useFormAnalytics()` gives you visibility into exactly where users struggle.

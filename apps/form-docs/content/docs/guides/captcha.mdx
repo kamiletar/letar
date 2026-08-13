@@ -3,6 +3,16 @@ title: CAPTCHA
 description: Bot protection with Cloudflare Turnstile, Google reCAPTCHA, hCaptcha, or Yandex SmartCaptcha
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
+## Full example
+
+The complete sandbox example, read directly from the `form-develop-app` source at build time —
+switch framework/skin to see `Form.Captcha` wired to a real form. No shadcn/Vue/Angular
+equivalent exists yet — those tabs show as disabled.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/captcha-demo/page.tsx" />
+
 ## Overview
 
 `Form.Captcha` adds bot protection to forms. Supports four providers: Cloudflare Turnstile (recommended, free), Google reCAPTCHA, hCaptcha, and Yandex SmartCaptcha (data stays in Russia — useful for 152-FZ compliance).

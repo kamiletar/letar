@@ -3,6 +3,16 @@ title: Автосохранение на сервер
 description: Автоматическое сохранение данных формы на сервер с debounce, офлайн-фолбэком и восстановлением черновиков
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
+## Полный пример
+
+Полный sandbox-пример, прочитанный напрямую из исходников `form-develop-app` на сборке —
+переключите фреймворк/скин, чтобы увидеть `useFormAutosave`, подключённый к реальной форме.
+Аналога для shadcn/Vue/Angular пока нет — эти вкладки показаны как disabled.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/autosave-demo/page.tsx" />
+
 ## Обзор
 
 `useFormAutosave` периодически сохраняет данные формы на серверный эндпоинт. Если сеть недоступна, данные сохраняются в localStorage и синхронизируются при восстановлении соединения.

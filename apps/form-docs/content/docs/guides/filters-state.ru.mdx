@@ -3,6 +3,16 @@ title: Форма как менеджер состояния
 description: Форма без submit — фильтры, URL-синхронизация, панели настроек, dashboard-контролы
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
+## Полный пример
+
+Полный sandbox-пример, прочитанный напрямую из исходников `form-develop-app` на сборке —
+переключите фреймворк/скин, чтобы увидеть `Form` без submit в роли контейнера состояния для
+фильтров. Аналога для shadcn/Vue/Angular пока нет — эти вкладки показаны как disabled.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/filters-state-demo/page.tsx" />
+
 ## Обзор
 
 Форма не обязана заканчиваться кнопкой «Отправить». `Form` — это subscription-based state machine, которая одинаково хорошо работает как контейнер состояния для фильтров, панелей настроек и dashboard-контролов.

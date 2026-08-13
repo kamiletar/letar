@@ -3,6 +3,16 @@ title: Отладка значений
 description: Интерактивный JSON-инспектор состояния формы — значения обновляются в реальном времени
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
+## Полный пример
+
+Полный sandbox-пример, прочитанный напрямую из исходников `form-develop-app` на сборке —
+`fields-demo` это мега-демо, покрывающее много типов полей, `Form.DebugValues` смонтирован внизу
+него. Аналога для shadcn/Vue/Angular пока нет — эти вкладки показаны как disabled.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/fields-demo/page.tsx" />
+
 ## Обзор
 
 `Form.DebugValues` отображает живое JSON-дерево всех значений формы. Компонент автоматически определяет тёмную/светлую тему и по умолчанию скрыт в production.

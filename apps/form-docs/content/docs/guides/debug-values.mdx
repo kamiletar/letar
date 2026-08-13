@@ -3,6 +3,16 @@ title: Debug Values
 description: Interactive JSON inspector for form state — see values update in real time
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
+## Full example
+
+The complete sandbox example, read directly from the `form-develop-app` source at build time —
+`fields-demo` is a mega-demo covering many field types, `Form.DebugValues` is mounted at the bottom
+of it. No shadcn/Vue/Angular equivalent exists yet — those tabs show as disabled.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/fields-demo/page.tsx" />
+
 ## Overview
 
 `Form.DebugValues` renders a live JSON tree of all form values. It auto-detects dark/light theme and is hidden in production by default.

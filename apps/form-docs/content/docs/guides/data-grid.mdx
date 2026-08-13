@@ -3,6 +3,20 @@ title: DataGrid
 description: Editable data grid with sorting, filtering, pagination, and inline editing powered by TanStack Table
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
+## Full example
+
+The complete sandbox example, read directly from the `form-develop-app` / `form-develop-app-shadcn`
+source at build time — switch framework/skin to see `Form.Field.DataGrid`/`FieldDataGrid` (both
+mark it as beta) across implementations. No Vue/Angular equivalent exists yet — those tabs show as
+disabled.
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/data-grid-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/data-grid-demo/page.tsx"
+/>
+
 ## Overview
 
 `Form.Field.DataGrid` is for editing large datasets (100+ rows) with sorting, filtering, and pagination. Unlike `TableEditor` (which is for creating new rows), DataGrid is for editing existing data.

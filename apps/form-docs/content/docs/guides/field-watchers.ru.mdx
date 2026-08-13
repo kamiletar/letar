@@ -25,8 +25,17 @@ interface FieldChangeApi {
 ## Живое демо
 
 import { DemoContainer } from '@/components/demo-container'
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
 
 <DemoContainer demo="field-watchers" height={600} />
+
+## Полный пример
+
+Полный sandbox-пример, прочитанный напрямую из исходников `form-develop-app` на сборке —
+переключите фреймворк/скин, чтобы увидеть `onFieldChange`, подключённый к реальной форме. Аналога
+для shadcn/Vue/Angular пока нет — эти вкладки показаны как disabled.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/field-change-demo/page.tsx" />
 
 ## onFieldChange
 

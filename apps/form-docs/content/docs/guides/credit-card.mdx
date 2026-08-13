@@ -3,6 +3,16 @@ title: Credit Card
 description: Card number input with brand detection, expiry, and CVC
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
+## Full example
+
+The complete sandbox example, read directly from the `form-develop-app` source at build time —
+switch framework/skin to see `Form.Field.CreditCard` wired to a real form. No shadcn/Vue/Angular
+equivalent exists yet — those tabs show as disabled.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/credit-card-demo/page.tsx" />
+
 ## Overview
 
 `Form.Field.CreditCard` is a compound input for payment card data: number (with auto-detection of Visa, MasterCard, Mir, etc.), expiry date, and CVC.

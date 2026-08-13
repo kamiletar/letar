@@ -3,6 +3,16 @@ title: Управляемое состояние
 description: Форма как менеджер состояния — live preview, фильтры
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
+## Полный пример
+
+Полный sandbox-пример, прочитанный напрямую из исходников `form-develop-app` на сборке —
+переключите фреймворк/скин, чтобы увидеть `Form` в роли контейнера управляемого состояния. Аналога
+для shadcn/Vue/Angular пока нет — эти вкладки показаны как disabled.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/controlled-state-demo/page.tsx" />
+
 ## Обзор
 
 Формы не всегда требуют кнопку отправки. Используйте `Form` как контейнер управляемого состояния для live-обновлений UI, фильтров, панелей настроек и поисковых форм.

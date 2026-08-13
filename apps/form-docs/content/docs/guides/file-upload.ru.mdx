@@ -3,6 +3,21 @@ title: Загрузка файлов
 description: Загрузка файлов через кнопку, зону перетаскивания или input
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
+## Полный пример
+
+Полный sandbox-пример, прочитанный напрямую из исходников `form-develop-app` /
+`form-develop-app-shadcn` на сборке. Оба источника показывают `Form.Field.FileUpload`;
+shadcn-источник (`specialized-demo`) заодно показывает ColorPicker, Editable и Signature (вне
+скоупа этого гайда) — та же пара с пересечением, что и на категорийной странице
+«Поля → Специализированные». Аналога для Vue/Angular пока нет — эти вкладки показаны как disabled.
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/file-upload-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/specialized-demo/page.tsx"
+/>
+
 ## Базовая загрузка
 
 ```tsx

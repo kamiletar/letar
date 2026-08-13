@@ -3,6 +3,16 @@ title: Аналитика форм
 description: Встроенная аналитика на уровне полей — отслеживание отказов, времени на поле и конверсии
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
+## Полный пример
+
+Полный sandbox-пример, прочитанный напрямую из исходников `form-develop-app` на сборке —
+переключите фреймворк/скин, чтобы увидеть `useFormAnalytics`, подключённый к реальной форме.
+Аналога для shadcn/Vue/Angular пока нет — эти вкладки показаны как disabled.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/analytics-demo/page.tsx" />
+
 ## Обзор
 
 67% форм бросают до завершения. Поле пароля — 10,5% отказов. `useFormAnalytics()` даёт видимость того, где именно пользователи испытывают трудности.

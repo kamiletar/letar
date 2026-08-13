@@ -4,8 +4,21 @@ description: Генерация форм из Zod-схемы — от нулев
 ---
 
 import { DemoContainer } from '@/components/demo-container'
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
 
 <DemoContainer demo="auto-fields" height={600} />
+
+## Полный пример
+
+Полный sandbox-пример, прочитанный напрямую из исходников `form-develop-app` /
+`form-develop-app-shadcn` на сборке. Chakra-источник использует `Form.AutoFields`; shadcn-источник
+использует `FieldAuto` — другой уровень иерархии контроля ниже, но та же идея автогенерации полей
+из Zod-схемы. Аналога для Vue/Angular пока нет — эти вкладки показаны как disabled.
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/auto-fields-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/auto-fields-demo/page.tsx"
+/>
 
 ## 4 уровня контроля
 

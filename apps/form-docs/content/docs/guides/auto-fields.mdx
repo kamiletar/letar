@@ -4,8 +4,21 @@ description: Generate forms automatically from Zod schemas — from zero-JSX to 
 ---
 
 import { DemoContainer } from '@/components/demo-container'
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
 
 <DemoContainer demo="auto-fields" height={600} />
+
+## Full example
+
+The complete sandbox example, read directly from the `form-develop-app` / `form-develop-app-shadcn`
+source at build time. The chakra source uses `Form.AutoFields`; the shadcn source uses `FieldAuto`
+— a different level of the control hierarchy below, but the same idea of generating fields
+automatically from a Zod schema. No Vue/Angular equivalent exists yet — those tabs show as disabled.
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/auto-fields-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/auto-fields-demo/page.tsx"
+/>
 
 ## The 4-Level Control Hierarchy
 

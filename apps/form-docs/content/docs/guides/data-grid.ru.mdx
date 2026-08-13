@@ -3,6 +3,20 @@ title: DataGrid
 description: Редактируемая таблица данных с сортировкой, фильтрацией, пагинацией и инлайн-редактированием на базе TanStack Table
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
+## Полный пример
+
+Полный sandbox-пример, прочитанный напрямую из исходников `form-develop-app` /
+`form-develop-app-shadcn` на сборке — переключите фреймворк/скин, чтобы увидеть
+`Form.Field.DataGrid`/`FieldDataGrid` (в обоих отмечен как beta) в разных реализациях. Аналога для
+Vue/Angular пока нет — эти вкладки показаны как disabled.
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/data-grid-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/data-grid-demo/page.tsx"
+/>
+
 ## Обзор
 
 `Form.Field.DataGrid` предназначен для редактирования больших наборов данных (100+ строк) с сортировкой, фильтрацией и пагинацией. В отличие от `TableEditor` (для создания новых строк), DataGrid — для редактирования существующих данных.

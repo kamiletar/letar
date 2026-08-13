@@ -3,6 +3,21 @@ title: Calculated Fields
 description: Automatically computed fields that update when dependent fields change
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
+## Full example
+
+The complete sandbox example, read directly from the `form-develop-app` / `form-develop-app-shadcn`
+source at build time. The two sources already diverged in details (`calculated-demo` in
+`form-develop-app` vs the "Calculated" scenario inside `numeric-demo` in the shadcn app) — both
+demonstrate `Form.Field.Calculated`/`FieldCalculated`, but not the identical scenario. No Vue/Angular
+equivalent exists yet — those tabs show as disabled.
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/calculated-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/numeric-demo/page.tsx"
+/>
+
 ## Overview
 
 `Form.Field.Calculated` provides declarative computed fields that automatically recalculate when dependent form values change. Instead of manually using `Form.Watch` + `setFieldValue`, a single component handles the entire reactive computation.
