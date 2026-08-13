@@ -39,14 +39,14 @@ const Schema = z.object({
 ## Dropzone Variant
 
 ```tsx
-<Form.Field.FileUpload name="files" variant="dropzone" accept="image/*,.pdf" maxSize={5 * 1024 * 1024} />
+<Form.Field.FileUpload name="files" variant="dropzone" accept="image/*,.pdf" maxFileSize={5 * 1024 * 1024} />
 ```
 
 ## Props
 
-| Prop       | Type                     | Description                             |
-| ---------- | ------------------------ | --------------------------------------- |
-| `accept`   | `string`                 | Accepted file types (`image/*`, `.pdf`) |
-| `maxFiles` | `number`                 | Maximum number of files                 |
-| `maxSize`  | `number`                 | Maximum file size in bytes              |
-| `variant`  | `'button' \| 'dropzone'` | Upload UI variant                       |
+| Prop          | Type                                  | Description                             |
+| ------------- | ------------------------------------- | ---------------------------------------- |
+| `accept`      | `string \| string[]`                  | Accepted file types (`image/*`, `.pdf`) |
+| `maxFiles`    | `number`                              | Maximum number of files (default: 1)    |
+| `maxFileSize` | `number`                              | Maximum file size in bytes              |
+| `variant`     | `'button' \| 'dropzone' \| 'input'`   | Upload UI variant                       |

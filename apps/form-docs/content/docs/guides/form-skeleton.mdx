@@ -5,60 +5,53 @@ description: Auto-generate loading skeletons from your Zod schema
 
 ## Overview
 
-`Form.Skeleton` generates a loading placeholder that mirrors your form's structure. It reads the schema to produce correctly-sized skeleton bars for each field type.
+`Form.Skeleton` generates a loading placeholder for a form. `fields` accepts either a plain
+number of skeleton rows, or a Zod object schema — when a schema is passed, the field count is
+read from its shape automatically.
 
 ```tsx
 import { Form } from '@letar/forms'
 
-// While data is loading
-<Form.Skeleton schema={UserSchema} showSubmit />
+// Fixed number of skeleton rows
+<Form.Skeleton fields={3} />
 
-// Or inline: form itself shows skeleton while loading
-<Form schema={UserSchema} loading={isLoading} initialValue={data} onSubmit={save}>
-  <Form.Field.String name="name" />
-  <Form.Field.String name="email" />
-  <Form.Button.Submit>Save</Form.Button.Submit>
-</Form>
+// Auto-detect field count from a Zod schema
+<Form.Skeleton fields={UserSchema} showSubmit />
 ```
 
 ## Props
 
-| Prop         | Type        | Default  | Description                        |
-| ------------ | ----------- | -------- | ---------------------------------- |
-| `schema`     | `ZodObject` | required | Schema to generate skeleton from   |
-| `showSubmit` | `boolean`   | `false`  | Show skeleton button at the bottom |
-| `fields`     | `number`    | auto     | Override number of skeleton fields |
+| Prop          | Type                   | Default  | Description                                                |
+| ------------- | ---------------------- | -------- | ------------------------------------------------------------ |
+| `fields`      | `number \| ZodObject`  | `5`      | Number of skeleton rows, or a schema to count fields from |
+| `showSubmit`  | `boolean`              | `true`   | Show a skeleton submit button at the bottom               |
+| `fieldHeight` | `string`               | `'60px'` | Height of each field's skeleton bar                       |
+| `gap`         | `number`               | `4`      | Gap between skeleton rows                                  |
 
-## Standalone vs Inline
+## Usage While Data Loads
 
-**Standalone** — render skeleton as a separate component:
+Render `Form.Skeleton` in place of the form until data arrives — `@letar/forms` has no built-in
+`loading` prop on `<Form>` itself, so the swap is done by the consuming component:
 
 ```tsx
 {
   isLoading ? (
-    <Form.Skeleton schema={Schema} showSubmit />
+    <Form.Skeleton fields={Schema} showSubmit />
   ) : (
     <Form schema={Schema} initialValue={data} onSubmit={save}>
-      ...
+      <Form.Field.String name="name" />
+      <Form.Field.String name="email" />
+      <Form.Button.Submit>Save</Form.Button.Submit>
     </Form>
   )
 }
 ```
 
-**Inline** — use `loading` prop on the form itself:
-
-```tsx
-<Form schema={Schema} loading={!data} initialValue={data ?? {}} onSubmit={save}>
-  <Form.Field.String name="name" />
-  <Form.Button.Submit />
-</Form>
-```
-
-When `loading` is `true`, the form renders skeletons instead of fields.
-
 ## How It Works
 
-The schema is analyzed to count fields and determine their types. Each field type maps to a skeleton bar of appropriate height (text inputs → single line, textareas → multi-line, etc.).
+When `fields` is a number, that many skeleton rows are rendered directly. When `fields` is a Zod
+object schema, the component reads the number of keys in its shape and renders that many rows —
+it does not (yet) vary row height per field type.
 
 ---
 

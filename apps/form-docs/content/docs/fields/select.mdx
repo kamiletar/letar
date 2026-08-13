@@ -74,16 +74,20 @@ const Schema = z.object({
 
 ### Async Search
 
-Load options from an API as the user types:
+Load options from a query hook as the user types via `useQuery` — signature matches
+TanStack Query (`{ data, isLoading, error }`):
 
 ```tsx
 <Form.Field.Combobox
   name="user"
-  asyncSearch={async (query) => {
-    const res = await fetch(`/api/users?q=${query}`)
-    const users = await res.json()
-    return users.map((u) => ({ value: u.id, label: u.name }))
-  }}
+  useQuery={(search) =>
+    useFindManyUser({
+      where: { name: { contains: search, mode: 'insensitive' } },
+      take: 20,
+    })
+  }
+  getLabel={(u) => u.name}
+  getValue={(u) => u.id}
 />
 ```
 
@@ -198,7 +202,7 @@ Dropdown list for single or multiple selection. Alternative to Select for larger
 <Form.Field.Listbox name="timezone" options={timezoneOptions} />
 
 // Multiple selection
-<Form.Field.Listbox name="permissions" options={permissionOptions} multiple />
+<Form.Field.Listbox name="permissions" options={permissionOptions} selectionMode="multiple" />
 ```
 
 ## NativeSelect

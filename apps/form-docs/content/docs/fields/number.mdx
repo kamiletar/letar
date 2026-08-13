@@ -66,16 +66,17 @@ const Schema = z.object({
 
 **API:** `Form.Field.Currency`
 
-Money input with currency symbol formatting.
+Money input with currency symbol formatting. `currency` is a component prop, not part of the
+Zod `meta().ui` block — it defaults to `'RUB'`.
 
 ```tsx
 const Schema = z.object({
   price: z.number().min(0).meta({
-    ui: { title: 'Price', currency: 'USD' },
+    ui: { title: 'Price' },
   }),
 })
 
-<Form.Field.Currency name="price" />
+<Form.Field.Currency name="price" currency="USD" />
 ```
 
 ## Percentage

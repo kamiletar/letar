@@ -15,13 +15,15 @@ import { Form } from '@letar/forms'
 
 ## Props
 
-| Prop      | Type                      | Default  | Description                            |
-| --------- | ------------------------- | -------- | -------------------------------------- |
-| `data`    | `Record<string, unknown>` | required | Data to display                        |
-| `schema`  | `ZodObject`               | required | Schema for labels via `.meta()`        |
-| `compact` | `boolean`                 | `false`  | Compact layout (single line per field) |
-| `exclude` | `string[]`                | `[]`     | Fields to hide                         |
-| `labels`  | `Record<string, string>`  | `{}`     | Manual label overrides                 |
+| Prop         | Type                                     | Default  | Description                             |
+| ------------ | ----------------------------------------- | -------- | ----------------------------------------- |
+| `data`       | `Record<string, unknown>`                | required | Data to display                         |
+| `schema`     | `ZodObject`                               | —        | Schema for labels via `.meta()`         |
+| `compact`    | `boolean`                                 | `false`  | Compact layout (single line per field)  |
+| `exclude`    | `string[]`                                | `[]`     | Fields to hide                          |
+| `include`    | `string[]`                                | —        | Show only these fields (overrides `exclude`) |
+| `labels`     | `Record<string, string>`                 | `{}`     | Manual label overrides                  |
+| `formatters` | `Record<string, (value: unknown) => string>` | —    | Custom value formatters per field       |
 
 ## Compact Mode
 

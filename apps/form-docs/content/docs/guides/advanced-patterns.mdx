@@ -68,10 +68,11 @@ Generate forms from JSON configuration:
   config={{
     fields: [
       { name: 'name', type: 'string', label: 'Name', required: true },
-      { name: 'email', type: 'string', label: 'Email', validation: 'email' },
+      { name: 'email', type: 'string', label: 'Email' },
       { name: 'role', type: 'select', label: 'Role', options: roles },
     ],
   }}
+  initialValue={{ name: '', email: '', role: '' }}
   onSubmit={handleSubmit}
 />
 ```

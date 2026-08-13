@@ -52,7 +52,7 @@ const Schema = z.object({
 <Form.Field.FileUpload
   name="avatar"
   accept="image/*"
-  maxSize={5 * 1024 * 1024}
+  maxFileSize={5 * 1024 * 1024}
 />
 ```
 
@@ -69,7 +69,7 @@ const Schema = z.object({
   }),
 })
 
-<Form.Field.PinInput name="pin" length={4} />
+<Form.Field.PinInput name="pin" count={4} />
 ```
 
 ## OTPInput

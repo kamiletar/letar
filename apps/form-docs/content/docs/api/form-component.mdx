@@ -313,13 +313,14 @@ Generate form from JSON configuration:
 
 ```tsx
 <Form.Builder
-  schema={Schema}
+  config={{
+    fields: [
+      { name: 'title', type: 'string' },
+      { name: 'price', type: 'currency' },
+    ],
+  }}
   initialValue={data}
   onSubmit={handleSubmit}
-  fields={[
-    { name: 'title', type: 'string' },
-    { name: 'price', type: 'currency', section: 'Pricing' },
-  ]}
 />
 ```
 
