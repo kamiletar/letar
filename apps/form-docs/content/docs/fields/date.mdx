@@ -4,8 +4,22 @@ description: Date, DateRange, Time, Duration, and Schedule fields
 ---
 
 import { DemoContainer } from '@/components/demo-container'
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
 
 <DemoContainer demo="date" height={400} />
+
+## Full example
+
+The complete sandbox example, read directly from the `form-develop-app` / `form-develop-app-shadcn`
+source at build time — switch skins to see the same fields across implementations. The Chakra
+source demonstrates Date, Time, and Schedule together (in the same file as other field types); the
+shadcn source is a dedicated date/time page covering Date, DateRange, Duration, DateTimePicker, and
+Time.
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/fields-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/date-time-demo/page.tsx"
+/>
 
 ## Date
 

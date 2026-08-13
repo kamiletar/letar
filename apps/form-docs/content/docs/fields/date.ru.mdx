@@ -4,8 +4,22 @@ description: Выбор даты и времени — Date, DateRange, Time
 ---
 
 import { DemoContainer } from '@/components/demo-container'
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
 
 <DemoContainer demo="date" height={400} />
+
+## Полный пример
+
+Полный sandbox-пример, прочитанный напрямую из исходников `form-develop-app` /
+`form-develop-app-shadcn` на сборке — переключите скин, чтобы увидеть те же поля в разных
+реализациях. Chakra-источник показывает Date, Time и Schedule вместе (в том же файле, что и
+другие типы полей); shadcn-источник — отдельная страница даты/времени с Date, DateRange, Duration,
+DateTimePicker и Time.
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/fields-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/date-time-demo/page.tsx"
+/>
 
 ## Date
 
