@@ -1,5 +1,23 @@
 # Changelog @letar/forms-vue-shadcn
 
+## Unreleased
+
+Фаза 9, Этап 7/0 (form-docs P7, «единый источник кода примеров») — `demo/` разбит с одного
+файла `App.ts` (все 6 полей сразу) на отдельные примеры, читаемые с диска по одному (будущий
+Этап 1 P7 будет парсить их напрямую, минуя дублирование кода в MDX). Версия пакета не поднята —
+`demo/` не публикуется в npm (нет в `exports`/`.npmignore` не нужен).
+
+- `demo/examples/{string,number,select,combobox,textarea,checkbox}-demo.ts` — по одному файлу на
+  поле (`FieldString`/`FieldNumber`/`FieldSelect`/`FieldCombobox`/`FieldTextarea`/
+  `FieldCheckbox`), каждый самодостаточен: своя Zod-схема, свой `AppForm`, рендерится в изоляции.
+  `demo/examples/index.ts` — реестр `demoExamples` (id/title/component).
+- `demo/App.ts` — теперь только навигационная оболочка: `<select>` + `ref` переключают активный
+  пример из реестра, без роутер-либы (харнесс маленький, роутер избыточен).
+- Проверено: `bunx vite build demo --config demo/vite.config.ts` зелёный (2548 модулей, тот же
+  набор чанков, что и до разбиения). `nx run-many -t lint typecheck:tsgo test
+  --projects=@letar/forms-vue-shadcn` зелёный — `demo/` вне scope этих таргетов
+  (`tsconfig.lib.json`/`oxlint` покрывают только `src/`), поведение то же, что и до правки.
+
 ## 0.10.0 (2026-08-13)
 
 Фаза 9, Этап 5 закрыт целиком — тот же `FieldRichText`, что в headless `forms-vue` 0.9.0,
