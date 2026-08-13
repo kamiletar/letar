@@ -1,5 +1,45 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-08-13 — Фаза 9, Этап 5 (часть 2): Signature/Address/City на Vue
+
+Продолжение Этапа 5 (тяжёлые peer-dep поля) для `@letar/forms-vue` (0.7.0→0.8.0, 36→39/61 полей) и
+`@letar/forms-vue-shadcn` (0.8.0→0.9.0, 37→40/61 полей). `FieldRichText` сознательно отложен —
+единственное оставшееся поле Этапа 5, требует нового peer-dep `@tiptap/vue-3` и `lazy()`-паттерна
+по прецеденту `Form.Captcha`, архитектурно отдельный шаг.
+
+**`FieldAddress`/`FieldCity`** — порт `field-address.tsx`/`field-city.tsx`. `@letar/forms-core/address`
+(`createDaDataProvider`, `AddressProvider`, `AddressSuggestion`) уже framework-agnostic — портировать
+саму интеграцию с DaData не потребовалось, только Vue-обвязку. Новый композабл
+`useAddressSuggestions` (`libs/forms-vue/src/lib/core/use-address-suggestions.ts`): debounce через
+ручной `setTimeout`/`clearTimeout`, `requestId`-счётчик против устаревших ответов, click-outside
+через `document.addEventListener('mousedown', ...)` в `onMounted`/снят в `onBeforeUnmount`.
+
+**`FieldSignature`** — порт `field-signature.tsx` (canvas-подпись, draw/typed режимы, PNG/SVG
+экспорт). Новый композабл `useSignatureField` (`libs/forms-vue/src/lib/core/use-signature-field.ts`),
+SVG-хелперы (`buildSvgString`, `buildTypedSvgString`, `escapeXml`, `svgToDataUri`) — 1:1 порт из
+React, сознательно НЕ вынесены в `forms-core`: используются только этой парой Vue-полей.
+
+**Находка (тот же класс, что в Этапе 5 часть 1):** композаблы на `ref()` обязаны вызываться ровно
+один раз в `setup()`, не внутри render-колбэка `withFieldValidation` — иначе состояние теряет
+стабильную идентичность между рендерами. Черновик `field-address.ts` наступил на эту грабли (звал
+`useAddressSuggestions` в render-колбэке), пойман до прогона тестов, исправлен: композабл — в
+`setup()`, запись значения — через `form.setFieldValue()` напрямую (не через `field.handleChange`
+из render-замыкания, которое из `setup()` не видно).
+
+**Оба Vue-пакета** зеркалят структуру: headless-логика в `forms-vue` (composables + raw DOM),
+Tailwind-скин в `forms-vue-shadcn` (те же composables, `NATIVE_INPUT_CLASS`/`cn()` из
+`@letar/tailwind-utils`, `onErrorCaptured`/`rekaUIKit.ErrorFallback`).
+
+**Тесты:** jsdom не реализует canvas 2D context — `HTMLCanvasElement.prototype.getContext`/
+`toDataURL` застаблены в `beforeEach`. Debounce с `debounceMs: 0` всё равно использует реальный
+`setTimeout` (макротаск) — `nextTick()` (только микротаски) его не дожидается, тесты ждут явно:
+`await new Promise((resolve) => setTimeout(resolve, 0))`.
+
+Верификация: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+— зелено (35/35 тестов в каждом пакете). Публичный API `@letar/forms` (React) не затронут.
+
+Коммиты: `7e723a4e`, `7d077957`, `50eb5f55`.
+
 ## 2026-08-13 — Compile-time проверка рассинхрона `form-compound-types.ts`
 
 Задача Ками напрямую: `libs/forms/src/lib/declarative/index.ts` собирает `Form` через
