@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/node'
 import type { Instrumentation } from 'next'
+import { isIgnorableRequestError } from '../lib/ignore-noise'
 import { scrubPii } from '../lib/scrub-event'
 
 export interface InitServerOptions {
@@ -28,6 +29,7 @@ export function initServer({ dsn, environment }: InitServerOptions): void {
  * при любой серверной ошибке (см. Instrumentation.onRequestError в доках Next.js).
  */
 export const captureRequestError: Instrumentation.onRequestError = async (err) => {
+  if (isIgnorableRequestError(err)) { return }
   Sentry.captureException(err)
 }
 
