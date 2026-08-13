@@ -841,6 +841,34 @@ DOM, `MaskController` пишет туда напрямую через `setRangeT
 рождении на blur), host-компонент `testing/stage-b-host.component.ts`. `nx run-many -t lint
 typecheck:tsgo test --projects=@letar/forms-angular` зелёный, `nx format` (dprint) применён.
 
+### Stage C: +1 поле (Phone) — done [2026-08-14]
+
+Третий этап — одно поле, `FieldPhoneComponent`. Отличается от всех Stage A/B полей: форматирует
+через чистый JS-форматтер `@letar/forms-core/phone` (`formatPhoneNumber`/`stripPhoneNumber`), не
+через движок масок (`MaskController`) — единственное «масочное» поле во всех трёх скинах
+(React/Vue/Angular), которое обходит движок сознательно: `MaskController` заполняет слоты
+посимвольно и не может ретроактивно распознать междугородний trunk-префикс (ведущая `8` в РФ),
+см. комментарий в `libs/forms-core/src/lib/phone/format-phone.ts`. Вместо этого — пересчёт всей
+строки на каждый `input` (controlled `onChange`, тот же приём, что в React/Vue).
+
+`[formControl]` не используется — тот же выбор, что у `DocumentFieldBase` (Stage B): в `<input>`
+отображается форматированное значение, в `FormControl` — то, что диктует `autoUnmask`. Но, в
+отличие от `DocumentFieldBase` (там `FormControl` всегда получает raw), контракт `autoUnmask`
+здесь 1-в-1 с Vue/React (`libs/forms-vue/src/lib/fields/field-phone.ts`,
+`libs/forms-shadcn/src/lib/fields/field-phone.tsx`): `false` (default) — `FormControl` хранит
+форматированную строку (совпадает с `<input>.value`); `true` — только цифры
+(`stripPhoneNumber(formatted)`, включая код страны, вшитый в маску литералом — `autoUnmask` не
+гоняет значение через `normalizePhoneDigits` повторно). Сознательное расхождение с
+`DocumentFieldBase`: Phone обязан остаться совместимым с уже задокументированным Vue/React API
+(`forms-vue/README.md`), на который ориентируются потребители, портирующие форму между скинами.
+
+Текущий счёт: **29/61** (17 из Этапа 1–2 + Stage A + Stage B + Stage C). Тесты —
+`app-form.stage-c.spec.ts` (5 тестов: рендер `input[type="tel"]`, форматирование в DOM,
+`autoUnmask: false` → `FormControl` хранит форматированную строку, `autoUnmask: true` →
+`FormControl` хранит raw-цифры, снятие trunk-префикса), host-компонент
+`testing/stage-c-host.component.ts`. `nx run-many -t lint typecheck:tsgo test
+--projects=@letar/forms-angular` зелёный, `nx format` (dprint) — без изменений.
+
 ### [2026-08-11] tsup роняет `'use client'` в lazy-чанках (forms + forms-shadcn) — не чинить без сигнала
 
 - **Запросил:** forms-dev (найдено при publish-prep `forms-shadcn`, письмо #49)
