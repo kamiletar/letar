@@ -1,6 +1,6 @@
 {
   "name": "@letar/forms-vue-shadcn",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "shadcn-vue-скин @letar/forms-vue — реализация UIKit-контракта из @letar/forms-core на Reka UI + Tailwind + cva",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

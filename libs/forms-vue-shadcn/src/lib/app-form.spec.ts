@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { FieldBankAccount, FieldCorrAccount } from './fields/field-bank-account'
 import { FieldCheckbox } from './fields/field-checkbox'
 import { FieldCombobox } from './fields/field-combobox'
+import { FieldCreditCard } from './fields/field-credit-card'
 import { FieldCurrency } from './fields/field-currency'
 import { FieldDate } from './fields/field-date'
 import { FieldDateRange } from './fields/field-date-range'
@@ -494,5 +495,76 @@ describe('forms-vue-shadcn: Этап 4 — дата/число-виджеты н
     expect(stars[2]?.attributes('aria-checked')).toBe('true')
 
     wrapper.unmount()
+  })
+})
+
+const creditCardSchema = z.object({
+  card: z.any().optional().meta({ ui: { title: 'Данные карты' } }),
+})
+
+function CreditCardTestForm() {
+  return defineComponent({
+    setup() {
+      return () =>
+        h(
+          AppForm,
+          { schema: creditCardSchema, initialValue: {}, onSubmit: vi.fn() },
+          { default: () => [h(FieldCreditCard, { name: 'card' })] },
+        )
+    },
+  })
+}
+
+describe('Этап 3 (продолжение) — FieldCreditCard', () => {
+  it('форматирует номер карты пробелами каждые 4 цифры и определяет бренд Visa', async () => {
+    const wrapper = mount(CreditCardTestForm())
+    const number = wrapper.find('input[name="cardnumber"]')
+
+    await number.setValue('4111111111111111')
+    await nextTick()
+
+    expect((number.element as HTMLInputElement).value).toBe('4111 1111 1111 1111')
+    expect(wrapper.find('[aria-label="Visa"]').exists()).toBe(true)
+  })
+
+  it('валидирует номер по Luhn на blur — валидный номер снимает ошибку', async () => {
+    const wrapper = mount(CreditCardTestForm())
+    const number = wrapper.find('input[name="cardnumber"]')
+
+    await number.setValue('4111111111111112')
+    await number.trigger('blur')
+    await nextTick()
+    expect(wrapper.find('p[role="alert"]').text()).toBe('Некорректный номер карты')
+
+    await number.setValue('4111111111111111')
+    await number.trigger('blur')
+    await nextTick()
+    expect(wrapper.find('p[role="alert"]').exists()).toBe(false)
+  })
+
+  it('автоформатирует срок действия (smart month) и автопереходит к CVC при заполнении', async () => {
+    const wrapper = mount(CreditCardTestForm(), { attachTo: document.body })
+    const expiry = wrapper.find('input[name="cc-exp"]')
+    const cvc = wrapper.find('input[name="cvc"]')
+
+    await expiry.setValue('2')
+    expect((expiry.element as HTMLInputElement).value).toBe('02')
+
+    await expiry.setValue('1225')
+    await nextTick()
+    expect((expiry.element as HTMLInputElement).value).toBe('12/25')
+    expect(document.activeElement).toBe(cvc.element)
+
+    wrapper.unmount()
+  })
+
+  it('CVC принимает только цифры, ограничен длиной бренда (3 для Visa)', async () => {
+    const wrapper = mount(CreditCardTestForm())
+    const cvc = wrapper.find('input[name="cvc"]')
+
+    await cvc.setValue('12a3')
+    await nextTick()
+
+    expect((cvc.element as HTMLInputElement).value).toBe('123')
   })
 })

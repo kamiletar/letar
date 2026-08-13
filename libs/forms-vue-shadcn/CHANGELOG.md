@@ -1,5 +1,19 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.7.0 (2026-08-13)
+
+Фаза 9, Этап 3 (продолжение) — `FieldCreditCard` (compound-поле, отложено с основного захода
+Этапа 3), Reka/Tailwind-скин. Итог: 33 поля (было 32).
+
+- Логика полностью переиспользована из `useCreditCardField`/`cardBrandIcon`
+  (`@letar/forms-vue/core`) — здесь только Tailwind-разметка на голых `<input>` (мульти-part
+  виджет не укладывается в `UIKitInputProps`, тот же приём, что у документных полей Этапа 3).
+- `onErrorCaptured` + `rekaUIKit.ErrorFallback` — тот же паттерн защиты рендера, что у остальных
+  полей пакета.
+- Тесты — `app-form.spec.ts`, блок «Этап 3 (продолжение)»: те же сценарии, что в headless-версии.
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный.
+
 ## 0.6.1 (2026-08-13)
 
 Рефакторинг без изменения публичного API: та же дедупликация, что в `forms-vue` 0.5.1 — общие

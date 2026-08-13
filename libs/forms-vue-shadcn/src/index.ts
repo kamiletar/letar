@@ -17,6 +17,7 @@ export { FieldBankAccount, FieldCorrAccount } from './lib/fields/field-bank-acco
 export { FieldBIK } from './lib/fields/field-bik'
 export { FieldCheckbox } from './lib/fields/field-checkbox'
 export { FieldCombobox } from './lib/fields/field-combobox'
+export { type CreditCardLayout, FieldCreditCard } from './lib/fields/field-credit-card'
 export { FieldCurrency } from './lib/fields/field-currency'
 export { FieldDate } from './lib/fields/field-date'
 export { type DateRangePreset, type DateRangeValue, FieldDateRange } from './lib/fields/field-date-range'
