@@ -92,6 +92,9 @@ alias матчится по префиксу
 [dprint-format-project-scope-not-file-scope](/.claude/docs/dprint-format-project-scope-not-file-scope.md)
 ⚠️ `--projects` не даёт файловой гранулярности — `format` внутри проекта задевает весь submodule,
 включая чужие незакоммиченные правки ·
+[dprint-windows-bin-shim-missing](/.claude/docs/dprint-windows-bin-shim-missing.md) ⚠️ пропавший
+`node_modules/.bin/dprint.exe` при целом пакете — чинит `bun install`; резолвер
+pre-commit-хука не видел `.exe`-shim на Windows ·
 [dprint-eslint-curly-conflict](/.claude/docs/dprint-eslint-curly-conflict.md) `--fix` и `fmt`
 откатывают друг друга ·
 [prettier-dprint-conflict-root-cause](/.claude/docs/prettier-dprint-conflict-root-cause.md) ⚠️

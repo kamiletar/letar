@@ -483,7 +483,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.52.0",
+      "version": "0.53.0",
       "dependencies": {
         "tus-js-client": "^4.3.1",
       },
@@ -531,11 +531,11 @@
     },
     "apps/form-develop-app-shadcn": {
       "name": "@letar/form-develop-app-shadcn",
-      "version": "0.1.0",
+      "version": "0.2.0",
     },
     "apps/form-docs": {
       "name": "form-docs",
-      "version": "0.1.10",
+      "version": "0.2.0",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
       },
@@ -658,7 +658,7 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.32.1",
+      "version": "0.32.2",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -718,7 +718,7 @@
     },
     "libs/admin-ui": {
       "name": "@letar/admin-ui",
-      "version": "0.7.0",
+      "version": "0.8.0",
       "devDependencies": {
         "@tanstack/react-table": "^8.21.3",
       },
@@ -994,7 +994,7 @@
     },
     "libs/forms-vue": {
       "name": "@letar/forms-vue",
-      "version": "0.11.0",
+      "version": "0.13.0",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },
@@ -1019,7 +1019,7 @@
     },
     "libs/forms-vue-shadcn": {
       "name": "@letar/forms-vue-shadcn",
-      "version": "0.12.0",
+      "version": "0.14.0",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
         "@letar/forms-vue": "workspace:*",
@@ -1104,7 +1104,7 @@
     },
     "libs/jobs": {
       "name": "@letar/jobs",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "cron-parser": "^5.7.0",
         "pg-boss": "^12.27.0",

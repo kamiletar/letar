@@ -31,6 +31,13 @@ resolve_dprint() {
   local dir
   dir="$(pwd)"
   while [[ "$dir" != "/" && "$dir" != "" ]]; do
+    # На Windows bun кладёт в node_modules/.bin бинарник с расширением .exe,
+    # а не голый "dprint" — без этой ветки резолв на Windows не срабатывал
+    # никогда, если dprint не оказался в PATH (см. .claude/docs/dprint-windows-bin-shim-missing.md).
+    if [[ -x "$dir/node_modules/.bin/dprint.exe" ]]; then
+      echo "$dir/node_modules/.bin/dprint.exe"
+      return 0
+    fi
     if [[ -x "$dir/node_modules/.bin/dprint" ]]; then
       echo "$dir/node_modules/.bin/dprint"
       return 0
