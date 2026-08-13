@@ -798,6 +798,49 @@ rating,hidden,time}.ts`):
 `*.spec.ts`, что у stage1/stage2). `nx run-many -t lint typecheck:tsgo test
 --projects=@letar/forms-angular` зелёный.
 
+### Stage B: +11 документных полей РФ (движок масок) — done [2026-08-14]
+
+Второй, архитектурно самый сложный этап: INN, BIK, OGRN, SNILS, KPP, Passport, BankAccount,
+CorrAccount, ForeignPassport, DepartmentCode, BirthCertificate. Портированы с зеркалом Vue-версии
+(`libs/forms-vue/src/lib/fields/field-{inn,bik,ogrn,snils,kpp,passport,bank-account,
+foreign-passport,department-code,birth-certificate}.ts` + `document-field-base.ts`), контрольные
+суммы — `@letar/forms-core/validators/ru` напрямую (`validateInn10/12`, `validateBik`,
+`validateOgrn`, `validateSnils`, `validateKpp`, `validateForeignPassport`,
+`validateDepartmentCode`, `validateBirthCertificate`/`normalizeBirthCertificate`).
+
+Ключевое архитектурное решение — `DocumentFieldBase` (`src/lib/core/document-field-base.ts`),
+abstract-класс для 10 из 11 полей (не `BirthCertificate` — у него нет структурной маски, тот же
+выбор что в Vue). Angular не может, в отличие от Vue, писать поля как функциональную фабрику
+компонента (`createDocumentField(config)`) — `@Component` обязан висеть на классе, поэтому конфиг
+Vue распался на `abstract readonly mask` + `readonly formatMode` (`'live'`/`'off'`) +
+`readonly maxLength` + `@Input() override placeholder` (свой default в каждом из 10 тонких
+наследников) + `abstract validateDocument()`. Общая разметка — не копия в 10 файлах, а одна
+константа `DOCUMENT_FIELD_TEMPLATE`, подставляемая в `template:` каждого наследника.
+
+Второе решение, отличающее эти поля от всех остальных `Field*` в пакете: шаблон **не** биндит
+`[formControl]="ctrl"`. `FormControlDirective` (`ControlValueAccessor`) записывала бы в контрол
+ровно то, что видно в `<input>.value` — то есть отформатированную строку, а не raw, что сломало
+бы инвариант «в `FormControl`/Zod-схему уходит unformatted значение» (тот же приём, что в Vue
+`use-mask-field.ts`: `'live'`-режим рендерит `<input>` без `value`/`onInput`, источник истины —
+DOM, `MaskController` пишет туда напрямую через `setRangeText` и сам вызывает `ctrl.setValue(raw)`
+в колбэке `onChange`). Вместо `ControlValueAccessor` — `@ViewChild('inputEl')` + ручной
+`attach()`/`detach()` контроллера в `ngAfterViewInit`/`ngOnDestroy`.
+
+Третье: двойной источник ошибки. `hasError`/`errorMessage` базового `FieldBase` валидируют
+против Zod-подсхемы, которую подставило приложение-потребитель (может быть простым `z.string()`,
+без `zRu.inn()`). Контрольная сумма документа не должна зависеть от того, что написал потребитель
+в своей схеме (defence-in-depth, тот же принцип, что у `config.validate` в Vue/React-скинах) —
+поэтому `documentErrorMessage` (свой сигнал, пересчитывается на `ctrl.valueChanges`) и
+`hasDocumentError`/`displayErrorMessage`, приоритет над ошибкой из Zod, 1-в-1 порядок
+`showError = hasError || !!customError` из Vue-версии.
+
+Текущий счёт: **28/61** (17 из Этапа 1–2 + Stage A + 11 Stage B). Тесты —
+`app-form.stage-b.spec.ts` (17 тестов: рендер всех 11 полей, маска группирует ввод у СНИЛС/
+паспорта/кода подразделения, контрольная сумма валидная/невалидная у ИНН/БИК/ОГРН/СНИЛС,
+формат-проверки у КПП/загранпаспорта/расчётного и корр. счетов, нормализация свидетельства о
+рождении на blur), host-компонент `testing/stage-b-host.component.ts`. `nx run-many -t lint
+typecheck:tsgo test --projects=@letar/forms-angular` зелёный, `nx format` (dprint) применён.
+
 ### [2026-08-11] tsup роняет `'use client'` в lazy-чанках (forms + forms-shadcn) — не чинить без сигнала
 
 - **Запросил:** forms-dev (найдено при publish-prep `forms-shadcn`, письмо #49)
