@@ -9,7 +9,7 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
 валидация — подключаться через нативные примитивы `@angular/forms` (Reactive Forms), не через
 имитацию `@tanstack/angular-form`.
 
-Пруф подтверждён: `forms-core` не потребовал ни одной правки. 29/61 полей закрыто:
+Пруф подтверждён: `forms-core` не потребовал ни одной правки. 33/61 полей закрыто:
 
 - **Этап 1–2** (зеркало Vue-порта): String, Textarea, Number, Password, Checkbox, Switch,
   RadioGroup, NativeSelect, Date, YesNo.
@@ -18,40 +18,46 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
 - **Stage B** (Фаза 11, +11 документных полей РФ — движок масок): INN, BIK, OGRN, SNILS, KPP,
   Passport, BankAccount, CorrAccount, ForeignPassport, DepartmentCode, BirthCertificate.
 - **Stage C** (Фаза 11, +1 поле — чистый JS-форматтер вместо движка масок): Phone.
+- **Stage D** (Фаза 11, +4 поля с составным значением): DateRange, DateTimePicker, Duration,
+  Schedule.
 
 ## Поля
 
-| Компонент                        | Селектор                        | Доп. `@Input()` сверх `name`/`label`/`placeholder`                          |
-| -------------------------------- | ------------------------------- | --------------------------------------------------------------------------- |
-| `FieldStringComponent`           | `letar-field-string`            | —                                                                           |
-| `FieldTextareaComponent`         | `letar-field-textarea`          | —                                                                           |
-| `FieldNumberComponent`           | `letar-field-number`            | —                                                                           |
-| `FieldNumberInputComponent`      | `letar-field-number-input`      | `min`, `max`, `step`                                                        |
-| `FieldCurrencyComponent`         | `letar-field-currency`          | `currency` (по умолчанию `RUB`), `min`, `max`, `step` (по умолчанию `0.01`) |
-| `FieldPercentageComponent`       | `letar-field-percentage`        | `min` (0), `max` (100), `step` (1)                                          |
-| `FieldSliderComponent`           | `letar-field-slider`            | `min` (0), `max` (100), `step` (1), `showValue`                             |
-| `FieldRatingComponent`           | `letar-field-rating`            | `count` (5)                                                                 |
-| `FieldHiddenComponent`           | `letar-field-hidden`            | `value` — без label/error UI, без рендера DOM                               |
-| `FieldTimeComponent`             | `letar-field-time`              | `min`, `max`, `step`                                                        |
-| `FieldPasswordComponent`         | `letar-field-password`          | —                                                                           |
-| `FieldCheckboxComponent`         | `letar-field-checkbox`          | —                                                                           |
-| `FieldSwitchComponent`           | `letar-field-switch`            | —                                                                           |
-| `FieldRadioGroupComponent`       | `letar-field-radio-group`       | `options: FieldRadioGroupOption[]`                                          |
-| `FieldNativeSelectComponent`     | `letar-field-native-select`     | `options: FieldNativeSelectOption[]`                                        |
-| `FieldDateComponent`             | `letar-field-date`              | —                                                                           |
-| `FieldYesNoComponent`            | `letar-field-yes-no`            | —                                                                           |
-| `FieldInnComponent`              | `letar-field-inn`               | — (`formatMode: 'off'`, без группировки — длина переменная, 10 или 12)      |
-| `FieldBikComponent`              | `letar-field-bik`               | —                                                                           |
-| `FieldOgrnComponent`             | `letar-field-ogrn`              | —                                                                           |
-| `FieldSnilsComponent`            | `letar-field-snils`             | —                                                                           |
-| `FieldKppComponent`              | `letar-field-kpp`               | —                                                                           |
-| `FieldPassportComponent`         | `letar-field-passport`          | — (без контрольной суммы — паспорт РФ её не несёт)                          |
-| `FieldBankAccountComponent`      | `letar-field-bank-account`      | —                                                                           |
-| `FieldCorrAccountComponent`      | `letar-field-corr-account`      | — (доп. проверка префикса `"301"`)                                          |
-| `FieldForeignPassportComponent`  | `letar-field-foreign-passport`  | —                                                                           |
-| `FieldDepartmentCodeComponent`   | `letar-field-department-code`   | —                                                                           |
-| `FieldBirthCertificateComponent` | `letar-field-birth-certificate` | — (без маски — свободный ввод + нормализация гомоглифов на `blur`)          |
-| `FieldPhoneComponent`            | `letar-field-phone`             | `country` (по умолчанию `RU`), `autoUnmask` (по умолчанию `false`)          |
+| Компонент                        | Селектор                        | Доп. `@Input()` сверх `name`/`label`/`placeholder`                                                                                                                 |
+| -------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `FieldStringComponent`           | `letar-field-string`            | —                                                                                                                                                                  |
+| `FieldTextareaComponent`         | `letar-field-textarea`          | —                                                                                                                                                                  |
+| `FieldNumberComponent`           | `letar-field-number`            | —                                                                                                                                                                  |
+| `FieldNumberInputComponent`      | `letar-field-number-input`      | `min`, `max`, `step`                                                                                                                                               |
+| `FieldCurrencyComponent`         | `letar-field-currency`          | `currency` (по умолчанию `RUB`), `min`, `max`, `step` (по умолчанию `0.01`)                                                                                        |
+| `FieldPercentageComponent`       | `letar-field-percentage`        | `min` (0), `max` (100), `step` (1)                                                                                                                                 |
+| `FieldSliderComponent`           | `letar-field-slider`            | `min` (0), `max` (100), `step` (1), `showValue`                                                                                                                    |
+| `FieldRatingComponent`           | `letar-field-rating`            | `count` (5)                                                                                                                                                        |
+| `FieldHiddenComponent`           | `letar-field-hidden`            | `value` — без label/error UI, без рендера DOM                                                                                                                      |
+| `FieldTimeComponent`             | `letar-field-time`              | `min`, `max`, `step`                                                                                                                                               |
+| `FieldPasswordComponent`         | `letar-field-password`          | —                                                                                                                                                                  |
+| `FieldCheckboxComponent`         | `letar-field-checkbox`          | —                                                                                                                                                                  |
+| `FieldSwitchComponent`           | `letar-field-switch`            | —                                                                                                                                                                  |
+| `FieldRadioGroupComponent`       | `letar-field-radio-group`       | `options: FieldRadioGroupOption[]`                                                                                                                                 |
+| `FieldNativeSelectComponent`     | `letar-field-native-select`     | `options: FieldNativeSelectOption[]`                                                                                                                               |
+| `FieldDateComponent`             | `letar-field-date`              | —                                                                                                                                                                  |
+| `FieldYesNoComponent`            | `letar-field-yes-no`            | —                                                                                                                                                                  |
+| `FieldInnComponent`              | `letar-field-inn`               | — (`formatMode: 'off'`, без группировки — длина переменная, 10 или 12)                                                                                             |
+| `FieldBikComponent`              | `letar-field-bik`               | —                                                                                                                                                                  |
+| `FieldOgrnComponent`             | `letar-field-ogrn`              | —                                                                                                                                                                  |
+| `FieldSnilsComponent`            | `letar-field-snils`             | —                                                                                                                                                                  |
+| `FieldKppComponent`              | `letar-field-kpp`               | —                                                                                                                                                                  |
+| `FieldPassportComponent`         | `letar-field-passport`          | — (без контрольной суммы — паспорт РФ её не несёт)                                                                                                                 |
+| `FieldBankAccountComponent`      | `letar-field-bank-account`      | —                                                                                                                                                                  |
+| `FieldCorrAccountComponent`      | `letar-field-corr-account`      | — (доп. проверка префикса `"301"`)                                                                                                                                 |
+| `FieldForeignPassportComponent`  | `letar-field-foreign-passport`  | —                                                                                                                                                                  |
+| `FieldDepartmentCodeComponent`   | `letar-field-department-code`   | —                                                                                                                                                                  |
+| `FieldBirthCertificateComponent` | `letar-field-birth-certificate` | — (без маски — свободный ввод + нормализация гомоглифов на `blur`)                                                                                                 |
+| `FieldPhoneComponent`            | `letar-field-phone`             | `country` (по умолчанию `RU`), `autoUnmask` (по умолчанию `false`)                                                                                                 |
+| `FieldDateRangeComponent`        | `letar-field-date-range`        | `startLabel` (`С`), `endLabel` (`По`), `min`, `max`, `presets`, `orientation` (`horizontal`)                                                                       |
+| `FieldDateTimePickerComponent`   | `letar-field-datetime-picker`   | `minDateTime`, `maxDateTime`, `timeStep` (15)                                                                                                                      |
+| `FieldDurationComponent`         | `letar-field-duration`          | `format` (`HH:MM`/`minutes`), `min` (0), `max` (1440), `step` (15)                                                                                                 |
+| `FieldScheduleComponent`         | `letar-field-schedule`          | `dayNames`, `defaultSchedule`, `days`, `showCopyToWeekdays` (`true`), `offLabel`, `copyToWeekdaysLabel`, `defaultOpenTime` (`09:00`), `defaultCloseTime` (`18:00`) |
 
 Разметка у всех — голый HTML, без CSS: классы `letar-field`, `letar-field__label`,
 `letar-field__control`, `letar-field__error` (тот же принцип, что у `libs/forms-vue`, раздел
@@ -99,6 +105,20 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
   `ngAfterViewInit`-attach. Контракт `autoUnmask` — 1-в-1 с Vue/React (не как у
   `DocumentFieldBase`, где `FormControl` всегда получает raw): `false` (default) — контрол хранит
   форматированную строку; `true` — только цифры.
+- **Stage D — составное значение поля в одном `FormControl`, не `FormGroup`** (DateRange
+  `{start,end}`, DateTimePicker — ISO-строка из двух инпутов, Duration — минуты из HH+MM,
+  Schedule — `WeeklySchedule` из 7 дней). `FieldBase.control` изначально рассчитан на один
+  `FormControl` на всё значение поля независимо от того, примитив это или объект — Stage D просто
+  использует это буквально, без отдельного механизма. Все четыре поля НЕ используют
+  `[formControl]="ctrl"` ни на одном под-инпуте (каждый инпут отражает только часть составного
+  значения, `FormControlDirective` этого не умеет) — вместо этого свой `signal`, синхронизируемый
+  через `effect()` + `ctrl.events.subscribe()` (тот же приём, что `FieldRatingComponent`/
+  `FieldSliderComponent`, Stage A), и ручные `ctrl.setValue()`/`ctrl.markAsTouched()` по
+  `input`/`change`/`click`. `FieldScheduleComponent` — самое сложное поле пакета: типы
+  `WeeklySchedule`/`ScheduleDaySchedule`/`DayOfWeek` и константы (дни недели, дефолтный график)
+  портированы локально (как и в Vue-версии — они не вынесены в `forms-core`, живут в каждом скине
+  отдельно), логика toggle/copy-to-weekdays/`close>open`-предупреждение — 1-в-1 с
+  `libs/forms-vue/src/lib/fields/field-schedule.ts`.
 
 ## Тестирование без Karma
 

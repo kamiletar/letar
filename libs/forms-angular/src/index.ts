@@ -14,8 +14,15 @@ export { FieldBirthCertificateComponent } from './lib/fields/field-birth-certifi
 export { FieldCheckboxComponent } from './lib/fields/field-checkbox.component'
 export { FieldCorrAccountComponent } from './lib/fields/field-corr-account.component'
 export { FieldCurrencyComponent } from './lib/fields/field-currency.component'
+export {
+  type DateRangePreset,
+  type DateRangeValue,
+  FieldDateRangeComponent,
+} from './lib/fields/field-date-range.component'
 export { FieldDateComponent } from './lib/fields/field-date.component'
+export { FieldDateTimePickerComponent } from './lib/fields/field-datetime-picker.component'
 export { FieldDepartmentCodeComponent } from './lib/fields/field-department-code.component'
+export { FieldDurationComponent } from './lib/fields/field-duration.component'
 export { FieldForeignPassportComponent } from './lib/fields/field-foreign-passport.component'
 export { FieldHiddenComponent } from './lib/fields/field-hidden.component'
 export { FieldInnComponent } from './lib/fields/field-inn.component'
@@ -30,6 +37,12 @@ export { FieldPercentageComponent } from './lib/fields/field-percentage.componen
 export { FieldPhoneComponent } from './lib/fields/field-phone.component'
 export { FieldRadioGroupComponent, type FieldRadioGroupOption } from './lib/fields/field-radio-group.component'
 export { FieldRatingComponent } from './lib/fields/field-rating.component'
+export {
+  type DayOfWeek,
+  FieldScheduleComponent,
+  type ScheduleDaySchedule,
+  type WeeklySchedule,
+} from './lib/fields/field-schedule.component'
 export { FieldSliderComponent } from './lib/fields/field-slider.component'
 export { FieldSnilsComponent } from './lib/fields/field-snils.component'
 export { FieldStringComponent } from './lib/fields/field-string.component'
