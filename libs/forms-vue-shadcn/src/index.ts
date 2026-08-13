@@ -12,6 +12,24 @@ export {
 } from './lib/field/create-field-primitives'
 export { createField, FieldWrapper } from './lib/uikit/primitives'
 
+// Form.Group — без своего skin-файла (у него нет визуального представления, только контекст
+// пути), реэкспорт headless-реализации из `@letar/forms-vue/core` — та же роль, что у
+// `FormGroup` в `@letar/forms` (реэкспорт из `@letar/forms-react` без отдельного файла в
+// `@letar/forms-shadcn`).
+export { FormGroup, type FormGroupContextValue, type FormGroupProps, useFormGroup } from '@letar/forms-vue/core'
+
+// Form.Steps — Tailwind-скин, композиционная логика переиспользована из `@letar/forms-vue/core`
+export { type FormStepsContextValue, useFormStepsContext } from '@letar/forms-vue/core'
+export {
+  FormSteps,
+  FormStepsCompleted,
+  FormStepsIndicator,
+  FormStepsNavigation,
+  FormStepsStep,
+  type StepInfo,
+  type StepPersistenceConfig,
+} from './lib/steps'
+
 // Поля
 export { FieldAddress } from './lib/fields/field-address'
 export { FieldBankAccount, FieldCorrAccount } from './lib/fields/field-bank-account'

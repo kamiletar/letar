@@ -22,7 +22,7 @@ export const FieldPinInput = defineComponent({
   },
   setup(props) {
     const { form, schema } = useAppFormContext()
-    const { fieldSchema, label, required } = resolveFieldMeta(schema, props.name, props.label, undefined)
+    const { fieldSchema, label, required, fullPath } = resolveFieldMeta(schema, props.name, props.label, undefined)
 
     const { setInputRef, handleInput, handleKeydown, handlePaste } = usePinInputField({
       count: props.count,
@@ -33,7 +33,7 @@ export const FieldPinInput = defineComponent({
     })
 
     return () =>
-      withFieldValidation(form, props.name, fieldSchema, (field, hasError, errorMessage) =>
+      withFieldValidation(form, fullPath, fieldSchema, (field, hasError, errorMessage) =>
         fieldWrapper(
           { name: props.name, label, required, hasError, errorMessage },
           h(

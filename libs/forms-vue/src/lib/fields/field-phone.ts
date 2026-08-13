@@ -19,10 +19,15 @@ export const FieldPhone = defineComponent({
   },
   setup(props) {
     const { form, schema } = useAppFormContext()
-    const { fieldSchema, label, placeholder, required } = resolveFieldMeta(schema, props.name, props.label, undefined)
+    const { fieldSchema, label, placeholder, required, fullPath } = resolveFieldMeta(
+      schema,
+      props.name,
+      props.label,
+      undefined,
+    )
 
     return () =>
-      withFieldValidation(form, props.name, fieldSchema, (field, hasError, errorMessage) => {
+      withFieldValidation(form, fullPath, fieldSchema, (field, hasError, errorMessage) => {
         const mask = PHONE_MASKS[props.country]
         const rawValue = (field.state.value as string) ?? ''
         const displayValue = formatPhoneNumber(stripPhoneNumber(rawValue), mask)

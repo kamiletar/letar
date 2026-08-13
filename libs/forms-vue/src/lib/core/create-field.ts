@@ -23,11 +23,14 @@ export type FieldRenderFn = (args: FieldRenderArgs) => VNode
  * поля из той же Zod-схемы через `@letar/forms-core/schema` (`getFieldMeta`) — **ноль** нового
  * кода в `forms-core` под это не потребовалось, схема уже framework-agnostic.
  *
- * Валидация — по подсхеме поля (`schema.shape[name]`) как `onChange`-валидатор
- * `@tanstack/vue-form`: библиотека принимает Zod-схему напрямую (Standard Schema).
+ * Валидация — по подсхеме поля (`schema.shape[name]`, с учётом `FormGroup`-вложенности через
+ * `fullPath`) как `onChange`-валидатор `@tanstack/vue-form`: библиотека принимает Zod-схему
+ * напрямую (Standard Schema).
  *
  * Обвязка (`resolveFieldMeta`/`withFieldValidation`) — общая с `createFieldPrimitives`
- * (`@letar/forms-vue-shadcn`, Фаза 9), не копия: оба живут в `./field-wiring`.
+ * (`@letar/forms-vue-shadcn`, Фаза 9), не копия: оба живут в `./field-wiring`. `fullPath`
+ * учитывает вложенный `FormGroup` (`./form-group`) — без этого группа была бы бесполезна,
+ * поля внутри неё не получали бы префикс пути.
  */
 export function createField(displayName: string, render: FieldRenderFn) {
   return defineComponent({
@@ -39,7 +42,7 @@ export function createField(displayName: string, render: FieldRenderFn) {
     },
     setup(props) {
       const { form, schema } = useAppFormContext()
-      const { fieldSchema, label, placeholder, required } = resolveFieldMeta(
+      const { fieldSchema, label, placeholder, required, fullPath } = resolveFieldMeta(
         schema,
         props.name,
         props.label,
@@ -49,7 +52,7 @@ export function createField(displayName: string, render: FieldRenderFn) {
       return () =>
         withFieldValidation(
           form,
-          props.name,
+          fullPath,
           fieldSchema,
           (field, hasError, errorMessage) =>
             render({ field, name: props.name, label, placeholder, required, hasError, errorMessage }),

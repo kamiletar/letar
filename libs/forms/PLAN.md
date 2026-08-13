@@ -363,7 +363,56 @@ Vue-пакетах.** Первые два поля Этапа 6 (survey/table) �
 - **Осталось от Этапа 6 в целом:** `Form.Group`/`Form.Steps` — form-level компоненты (не поля),
   отдельный заход.
 
-Дальше: Этап 6 (продолжение) — `Form.Group`/`Form.Steps`.
+**Этап 6 (часть 4, финал) — отчёт (2026-08-13): Form.Group/Form.Steps закрывают Этап 6 целиком в
+обоих Vue-пакетах.** Портированы из `libs/forms-react/src/lib/context/form-group.tsx` +
+`libs/forms-react/src/lib/steps/*` (хуки) и `libs/forms-shadcn/src/lib/steps/*.tsx` (Tailwind-скин).
+
+- **`Form.Group`** — `libs/forms-vue/src/lib/core/form-group.ts`, `defineComponent` с
+  `provide`/`inject` (`InjectionKey<FormGroupContextValue>`), экспортирован из `@letar/forms-vue`
+  и из `@letar/forms-vue/core`. `libs/forms-vue-shadcn` не заводит свою версию — одна
+  ре-экспорт-строка в `index.ts` из `@letar/forms-vue/core`, по аналогии с React-shadcn.
+- **Находка, изменившая план по ходу работы:** ручное вычисление `fullPath` только в
+  `create-field.ts`/`create-field-primitives.ts` (двух фабричных функциях) не сработало бы —
+  ~56 других field-файлов вызывают `resolveFieldMeta`/`withFieldValidation` напрямую, минуя
+  фабрики, и остались бы не в курсе вложенности `FormGroup`. Вместо точечного фикса вызов
+  `useFormGroup()` централизован внутри самой `resolveFieldMeta` (`field-wiring.ts`) — она теперь
+  возвращает `fullPath` в составе результата. Это свело правку каждого зависимого поля к
+  механической замене двух строк (деструктуризация + аргумент `withFieldValidation`). Применено
+  к 52 field-файлам в обоих пакетах (плюс вручную к двум фабрикам — 54 файла итого).
+  `FieldDataGrid`/`FieldTableEditor` (array-mode поля) сознательно оставлены без учёта
+  `FormGroup` — тот же уровень поддержки, что и в React-версии.
+- **`Form.Steps`** — композаблы в `libs/forms-vue/src/lib/core/` (`step-types.ts`,
+  `use-step-state.ts`, `use-step-navigation.ts`, `use-step-persistence.ts`,
+  `form-steps-context.ts`), headless-разметка в `libs/forms-vue/src/lib/fields/form-steps/`
+  (`FormSteps`, `FormStepsStep`, `FormStepsIndicator`, `FormStepsNavigation`,
+  `FormStepsCompleted`, BEM-классы `letar-form-steps*`), Tailwind-скин в
+  `libs/forms-vue-shadcn/src/lib/steps/` поверх тех же композаблов из `@letar/forms-vue/core`.
+  Работает поверх собственного form-контекста Vue-пакетов (`useAppFormContext`/`AppForm`), без
+  порта `useDeclarativeForm`.
+- **Сохранённые beta-упрощения React-shadcn версии:** без интеграции с `Form.When`
+  (`hiddenFields`/`segment`), без анимаций перехода (без `framer-motion`), индикатор — нативная
+  разметка `<ol>`/`<button>`, не компонент UI-кита.
+  - **Находка (Vue проще React здесь):** `setup()` в Vue выполняется один раз на экземпляр
+    компонента (не на каждый рендер, как React function component) — в порт хуков не понадобилась
+    `useRef`-мимикрия «последнего значения» для защиты замыканий от протухания, которая занимает
+    заметную часть их React-реализации.
+  - **Находка (Node 25 + jsdom + vitest):** встроенный глобальный `localStorage` в Node 25.2.1
+    подменяет собой `window.localStorage` даже в jsdom-окружении заглушкой без `getItem`/
+    `setItem`/`clear` (`localStorage === window.localStorage`, но методы `undefined`). В обоих
+    Vue-пакетах не было `vitest.setup.ts` — добавлены (с полифиллом на `Map`, скопированным по
+    паттерну `libs/forms/vitest.setup.ts`) и подключены через `test.setupFiles` в
+    `vitest.config.ts`.
+- **`@letar/forms-vue` 0.12.0 → 0.13.0** (без изменения числа полей — `Form.Group`/`Form.Steps`
+  не поля). **`@letar/forms-vue-shadcn` 0.13.0 → 0.14.0** (аналогично).
+- Тесты — новый файл `app-form.stage6d.spec.ts` в обоих пакетах (8 тестов каждый): вложенный путь
+  поля через `FormGroup`, отсутствие регрессии для плоских полей без `FormGroup`, рендер только
+  активного шага, блокировка перехода "Далее" невалидным полем, успешный переход при валидном
+  поле, нелинейный `goToStep` через `Indicator`, `skipToEnd` → `Form.Steps.Completed`,
+  персистенция текущего шага в `localStorage` между перемонтированиями.
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный на обоих пакетах.
+
+Дальше: Этап 7 (последний по списку, отправленному QuietRidge) — `form-docs`.
 
 **Этап 5 (часть 1) — отчёт (2026-08-13): PinInput/OTPInput/ColorPicker/FileUpload закрыты в обоих
 Vue-пакетах.** Координатор в retired, отчёт сразу в план. Скоуп части ограничен намеренно (не

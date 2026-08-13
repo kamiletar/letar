@@ -17,10 +17,10 @@ export const FieldDuration = defineComponent({
   },
   setup(props) {
     const { form, schema } = useAppFormContext()
-    const { fieldSchema, label, required } = resolveFieldMeta(schema, props.name, props.label, undefined)
+    const { fieldSchema, label, required, fullPath } = resolveFieldMeta(schema, props.name, props.label, undefined)
 
     return () =>
-      withFieldValidation(form, props.name, fieldSchema, (field, hasError, errorMessage) => {
+      withFieldValidation(form, fullPath, fieldSchema, (field, hasError, errorMessage) => {
         const value = (field.state.value as number | undefined) ?? 0
         const { hours, mins } = minutesToHHMM(value)
         const clamp = (next: number) => field.handleChange(Math.max(props.min, Math.min(props.max, next)))

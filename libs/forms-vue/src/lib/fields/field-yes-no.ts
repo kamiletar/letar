@@ -13,10 +13,10 @@ export const FieldYesNo = defineComponent({
   },
   setup(props) {
     const { form, schema } = useAppFormContext()
-    const { fieldSchema, label, required } = resolveFieldMeta(schema, props.name, props.label, undefined)
+    const { fieldSchema, label, required, fullPath } = resolveFieldMeta(schema, props.name, props.label, undefined)
 
     return () =>
-      withFieldValidation(form, props.name, fieldSchema, (field, hasError, errorMessage) => {
+      withFieldValidation(form, fullPath, fieldSchema, (field, hasError, errorMessage) => {
         const value = field.state.value as boolean | undefined
         const select = (val: boolean) => field.handleChange(val)
 

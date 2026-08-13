@@ -19,7 +19,7 @@ export const FieldCombobox = defineComponent({
   },
   setup(props) {
     const { form, schema } = useAppFormContext()
-    const { fieldSchema, label, placeholder: metaPlaceholder, required } = resolveFieldMeta(
+    const { fieldSchema, label, placeholder: metaPlaceholder, required, fullPath } = resolveFieldMeta(
       schema,
       props.name,
       props.label,
@@ -46,7 +46,7 @@ export const FieldCombobox = defineComponent({
         return rekaUIKit.ErrorFallback({ fieldName: props.name, message: renderError.value.message })
       }
 
-      return withFieldValidation(form, props.name, fieldSchema, (field, hasError, errorMessage) => {
+      return withFieldValidation(form, fullPath, fieldSchema, (field, hasError, errorMessage) => {
         const value = (field.state.value as string | undefined) || undefined
 
         return FieldWrapper({

@@ -21,7 +21,7 @@ export const FieldCurrency = defineComponent({
   },
   setup(props) {
     const { form, schema } = useAppFormContext()
-    const { fieldSchema, label, placeholder, required } = resolveFieldMeta(
+    const { fieldSchema, label, placeholder, required, fullPath } = resolveFieldMeta(
       schema,
       props.name,
       props.label,
@@ -29,7 +29,7 @@ export const FieldCurrency = defineComponent({
     )
 
     return () =>
-      withFieldValidation(form, props.name, fieldSchema, (field, hasError, errorMessage) =>
+      withFieldValidation(form, fullPath, fieldSchema, (field, hasError, errorMessage) =>
         fieldWrapper(
           { name: props.name, label, required, hasError, errorMessage },
           h('input', {

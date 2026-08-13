@@ -22,7 +22,7 @@ export const FieldFileUpload = defineComponent({
   },
   setup(props) {
     const { form, schema } = useAppFormContext()
-    const { fieldSchema, label, required } = resolveFieldMeta(schema, props.name, props.label, undefined)
+    const { fieldSchema, label, required, fullPath } = resolveFieldMeta(schema, props.name, props.label, undefined)
 
     const isDragOver = ref(false)
     const rejectionReason = ref('')
@@ -60,7 +60,7 @@ export const FieldFileUpload = defineComponent({
     }
 
     return () =>
-      withFieldValidation(form, props.name, fieldSchema, (field, hasError, errorMessage) => {
+      withFieldValidation(form, fullPath, fieldSchema, (field, hasError, errorMessage) => {
         const files = (field.state.value as File[] | undefined) ?? []
 
         return fieldWrapper(

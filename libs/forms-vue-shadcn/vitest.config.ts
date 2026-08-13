@@ -12,6 +12,7 @@ export default defineConfig({
     name: '@letar/forms-vue-shadcn',
     environment: 'jsdom',
     globals: true,
+    setupFiles: ['./vitest.setup.ts'],
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['node_modules', 'dist'],
     coverage: {

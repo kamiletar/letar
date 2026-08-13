@@ -18,12 +18,12 @@ export const FieldRadioGroup = defineComponent({
   },
   setup(props) {
     const { form, schema } = useAppFormContext()
-    const { fieldSchema, label, required } = resolveFieldMeta(schema, props.name, props.label, undefined)
+    const { fieldSchema, label, required, fullPath } = resolveFieldMeta(schema, props.name, props.label, undefined)
 
     return () =>
       withFieldValidation(
         form,
-        props.name,
+        fullPath,
         fieldSchema,
         (field, hasError, errorMessage) =>
           h('div', { class: 'letar-field', 'data-field-name': props.name }, [

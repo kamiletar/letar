@@ -29,7 +29,7 @@ export const FieldOTPInput = defineComponent({
   },
   setup(props) {
     const { form, schema } = useAppFormContext()
-    const { fieldSchema, label, required } = resolveFieldMeta(schema, props.name, props.label, undefined)
+    const { fieldSchema, label, required, fullPath } = resolveFieldMeta(schema, props.name, props.label, undefined)
 
     const countdown = ref(0)
     const isResending = ref(false)
@@ -90,7 +90,7 @@ export const FieldOTPInput = defineComponent({
         return rekaUIKit.ErrorFallback({ fieldName: props.name, message: renderError.value.message })
       }
 
-      return withFieldValidation(form, props.name, fieldSchema, (field, hasError, errorMessage) =>
+      return withFieldValidation(form, fullPath, fieldSchema, (field, hasError, errorMessage) =>
         FieldWrapper({
           label,
           required,

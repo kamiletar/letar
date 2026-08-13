@@ -17,7 +17,7 @@ export const FieldNumberInput = defineComponent({
   },
   setup(props) {
     const { form, schema } = useAppFormContext()
-    const { fieldSchema, label, required } = resolveFieldMeta(schema, props.name, props.label, undefined)
+    const { fieldSchema, label, required, fullPath } = resolveFieldMeta(schema, props.name, props.label, undefined)
 
     const renderError = ref<Error | null>(null)
     onErrorCaptured((error) => {
@@ -31,7 +31,7 @@ export const FieldNumberInput = defineComponent({
         return rekaUIKit.ErrorFallback({ fieldName: props.name, message: renderError.value.message })
       }
 
-      return withFieldValidation(form, props.name, fieldSchema, (field, hasError, errorMessage) =>
+      return withFieldValidation(form, fullPath, fieldSchema, (field, hasError, errorMessage) =>
         FieldWrapper({
           label,
           required,

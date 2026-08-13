@@ -81,7 +81,7 @@ export function createFieldPrimitives(uikit: FieldPrimitivesUIKit): FieldPrimiti
       },
       setup(props) {
         const { form, schema } = useAppFormContext()
-        const { fieldSchema, label, placeholder, required } = resolveFieldMeta(
+        const { fieldSchema, label, placeholder, required, fullPath } = resolveFieldMeta(
           schema,
           props.name,
           props.label,
@@ -104,7 +104,7 @@ export function createFieldPrimitives(uikit: FieldPrimitivesUIKit): FieldPrimiti
 
           return withFieldValidation(
             form,
-            props.name,
+            fullPath,
             fieldSchema,
             (field, hasError, errorMessage) =>
               render({ field, name: props.name, label, placeholder, required, hasError, errorMessage }),

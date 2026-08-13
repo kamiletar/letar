@@ -41,7 +41,7 @@ export function createDocumentField(config: DocumentFieldConfig) {
     },
     setup(props) {
       const { form, schema } = useAppFormContext()
-      const { fieldSchema, label, required } = resolveFieldMeta(schema, props.name, props.label, undefined)
+      const { fieldSchema, label, required, fullPath } = resolveFieldMeta(schema, props.name, props.label, undefined)
 
       const getValue = () => (form.getFieldValue(props.name) as string | undefined) ?? ''
       const { uncontrolled, displayValue, inputRef, onInput, onFocus, onBlur } = useMaskField({
@@ -52,7 +52,7 @@ export function createDocumentField(config: DocumentFieldConfig) {
       })
 
       return () =>
-        withFieldValidation(form, props.name, fieldSchema, (field, hasError, errorMessage) => {
+        withFieldValidation(form, fullPath, fieldSchema, (field, hasError, errorMessage) => {
           const customError = config.validate ? config.validate(String(field.state.value ?? '')) : undefined
           const showError = hasError || !!customError
           const displayError = customError ?? errorMessage

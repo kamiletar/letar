@@ -24,7 +24,7 @@ export const FieldSelect = defineComponent({
   },
   setup(props) {
     const { form, schema } = useAppFormContext()
-    const { fieldSchema, label, placeholder, required } = resolveFieldMeta(
+    const { fieldSchema, label, placeholder, required, fullPath } = resolveFieldMeta(
       schema,
       props.name,
       props.label,
@@ -43,7 +43,7 @@ export const FieldSelect = defineComponent({
         return rekaUIKit.ErrorFallback({ fieldName: props.name, message: renderError.value.message })
       }
 
-      return withFieldValidation(form, props.name, fieldSchema, (field, hasError, errorMessage) => {
+      return withFieldValidation(form, fullPath, fieldSchema, (field, hasError, errorMessage) => {
         const clearable = props.clearable ?? !required
         const value = (field.state.value as string | undefined) || undefined
 

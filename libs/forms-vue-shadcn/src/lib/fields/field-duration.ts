@@ -18,7 +18,7 @@ export const FieldDuration = defineComponent({
   },
   setup(props) {
     const { form, schema } = useAppFormContext()
-    const { fieldSchema, label, required } = resolveFieldMeta(schema, props.name, props.label, undefined)
+    const { fieldSchema, label, required, fullPath } = resolveFieldMeta(schema, props.name, props.label, undefined)
 
     const renderError = ref<Error | null>(null)
     onErrorCaptured((error) => {
@@ -32,7 +32,7 @@ export const FieldDuration = defineComponent({
         return rekaUIKit.ErrorFallback({ fieldName: props.name, message: renderError.value.message })
       }
 
-      return withFieldValidation(form, props.name, fieldSchema, (field, hasError, errorMessage) => {
+      return withFieldValidation(form, fullPath, fieldSchema, (field, hasError, errorMessage) => {
         const value = (field.state.value as number | undefined) ?? 0
         const { hours, mins } = minutesToHHMM(value)
         const clamp = (next: number) => field.handleChange(Math.max(props.min, Math.min(props.max, next)))

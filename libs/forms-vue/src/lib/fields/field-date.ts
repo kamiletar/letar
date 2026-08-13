@@ -14,7 +14,7 @@ export const FieldDate = defineComponent({
   },
   setup(props) {
     const { form, schema } = useAppFormContext()
-    const { fieldSchema, label, placeholder, required } = resolveFieldMeta(
+    const { fieldSchema, label, placeholder, required, fullPath } = resolveFieldMeta(
       schema,
       props.name,
       props.label,
@@ -22,7 +22,7 @@ export const FieldDate = defineComponent({
     )
 
     return () =>
-      withFieldValidation(form, props.name, fieldSchema, (field, hasError, errorMessage) => {
+      withFieldValidation(form, fullPath, fieldSchema, (field, hasError, errorMessage) => {
         const rawValue = field.state.value
         const value = rawValue instanceof Date ? rawValue.toISOString().split('T')[0] : (rawValue as string) ?? ''
 

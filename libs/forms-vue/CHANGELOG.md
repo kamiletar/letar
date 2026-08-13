@@ -1,5 +1,84 @@
 # Changelog @letar/forms-vue
 
+## 0.13.0 (2026-08-13)
+
+Фаза 9, Этап 6 (часть 4, финал) — `Form.Group`/`Form.Steps`, form-level compound-компоненты (не
+поля — счётчик 44 полей не меняется). Закрывает Этап 6 целиком в обоих Vue-пакетах.
+
+- **`Form.Group`/`useFormGroup`** (`lib/core/form-group.ts`) — Vue-порт React `FormGroup`
+  (`@letar/forms-react`): `provide`/`inject`-контекст, `originalName`/`name` (полный dot-путь).
+  Как и в React, у него нет визуального представления — рендерит `slots.default()` как есть,
+  поэтому отдельного skin-файла в `@letar/forms-vue-shadcn` нет, только реэкспорт.
+- **`fullPath` теперь считает `resolveFieldMeta` сама, не вызывающий код.** Изначальный план
+  (см. промпт задачи) — прокидывать `fullPath` вручную в каждый `field-*.ts`, вычисляя его через
+  `useFormGroup()` в `create-field.ts`/`create-field-primitives.ts`. Оказалось недостаточно:
+  52 из ~90 headless+shadcn field-файлов (оба пакета вместе) вызывают `resolveFieldMeta`/
+  `withFieldValidation` напрямую, минуя эти две фабрики (`FieldRating`, `FieldRadioGroup`,
+  `FieldAddress` и т.д. — везде, где нужен нестандартный layout или сторонний composable). Ручная
+  правка каждого файла раздула бы диф почти на все поля пакета. Вместо этого
+  `resolveFieldMeta(schema, name, ...)` сама читает `useFormGroup()` и возвращает `fullPath` в
+  составе `ResolvedFieldMeta` — вызывающий код меняет только одну строку (второй аргумент
+  `withFieldValidation`: было `props.name`, стало `fullPath` из деструктуризации). Применено
+  скриптом к этим 52 файлам в обоих пакетах разом (destructure + вызов withFieldValidation) плюс
+  вручную к `create-field.ts`/`create-field-primitives.ts` (54 файла итого), проверено
+  `typecheck:tsgo`/`lint`/`test` — зелёные без ручных правок каждого поля по отдельности.
+  **Ограничение:** `useFormGroup()` — Vue `inject()`, обязана вызываться синхронно из `setup()`.
+  Все существующие поля это соблюдают (ни одно не вызывает `resolveFieldMeta` из render-замыкания),
+  поэтому рефактор безопасен; но новое поле, которое попробует вызвать `resolveFieldMeta` внутри
+  `return () => ...`, получит `inject() can only be used inside setup()`-предупреждение Vue.
+  **Не покрыто:** `FieldDataGrid`/`FieldTableEditor` — array-режим `form.Field({ name, mode:
+  'array' })` вызывается напрямую, без `resolveFieldMeta`, `FormGroup` вокруг табличных полей
+  пока не даёт префикса пути (тот же уровень поддержки, что и в React-версии).
+- **`Form.Steps`** (`lib/core/{step-types,use-step-state,use-step-navigation,use-step-persistence,
+  form-steps-context}.ts` + `lib/fields/form-steps/*.ts`) — Vue-порт `useStepState`/
+  `useStepNavigation`/`useStepPersistence` из `@letar/forms-react` и UI-слоя `FormStepsRoot`/
+  `FormStepsStep`/`FormStepsIndicator`/`FormStepsNavigation`/`FormStepsCompletedContent` из
+  `@letar/forms-shadcn` (React shadcn-скин — headless-пакет `Form.Steps` для React не существует).
+  Контекст (`form-steps-context.ts`) и композиционные composable живут в `@letar/forms-vue/core`,
+  общие для headless- и Reka-скина — не дублированы, в отличие от React, где Chakra- и
+  shadcn-версия несут каждая свой контекст независимо.
+  - **Находка — Vue `setup()` радикально упрощает React-хуки.** React-версия держит
+    `sortedSteps`/`stepCount`/`currentStep`/колбэки в `useRef`, чтобы не пересоздавать функции
+    навигации при каждой регистрации шага (иначе бесконечный цикл ре-рендеров — регистрация меняет
+    `sortedSteps`, что меняет колбэки, что меняет `contextValue`, что вызывает ре-рендер и
+    повторную регистрацию). В Vue `setup()` выполняется один раз за инстанс компонента; параметры
+    приходят уже `Ref`/`ComputedRef`, функции читают актуальное `.value` при каждом вызове —
+    реф-обёртки под колбэки не нужны вовсе, `use-step-navigation.ts` заметно короче оригинала.
+  - **Находка — `claimedIndicesRef` не нужен как `ref()`.** React использует `useRef` для
+    атомарного назначения индексов шагам, потому что `useEffect` каждого `Step` может отработать
+    в любой момент после коммита. Vue `setup()` каждого `FormStepsStep` гарантированно
+    выполняется один раз, синхронно, в порядке обхода дерева — обычный замкнутый `Set` (без
+    обёртки в `ref()`) уже стабилен, индекс claim'ится прямо в `setup()`, а не в `onMounted`.
+  - **Упрощение персистенции (не баг-в-баг с React).** React `useStepPersistence` вызывается
+    дважды в `FormStepsRoot`: `useStepPersistence(0, config)` — только чтобы вытащить
+    `getPersistedStep()` до инициализации `useState`, и отдельно `useStepPersistence(currentStep,
+    config)` — для записи. Первый вызов заводит собственный `useEffect([currentStep=0])`, который
+    отрабатывает на mount и планирует debounce-запись `"0"` поверх только что восстановленного
+    значения; итоговый результат не портится только благодаря порядку выполнения двух `setTimeout`
+    (первый регистрируется раньше вторго — соответственно раньше и стреляет, второй перезаписывает
+    правильным значением). В Vue `setup()` не имеет ограничения «хуки только на верхнем уровне
+    безусловно» — `getPersistedStep(config)` вынесена в обычную синхронную функцию без
+    реактивности, `useStepPersistence(currentStep, config)` вызывается один раз и отвечает только
+    за запись. Гонки таймеров нет.
+  - **Извлечение имён полей шага** (`extractFieldNames`, `lib/core/field-name-extraction.ts`) —
+    Vue-аналог React `extractFieldNames` (`libs/forms-shadcn`, `Children.forEach` по `ReactNode`).
+    Vue vnode-дерево устроено иначе: элемент-vnode хранит детей как массив в `.children`, а
+    vnode компонента со слотами — как объект `{ default: () => VNode[] }`. Функция рекурсивно
+    обходит оба случая.
+  - Те же beta-упрощения, что унаследовал React shadcn-скин: без `Form.When`-интеграции
+    (`hiddenFields`/`segment`), без анимаций перехода между шагами (`framer-motion` не тянем),
+    индикатор — нативная разметка (headless: голый `<ol>`/`<button>` без стилей).
+- Тест `app-form.stage6d.spec.ts` — `FormGroup` (вложенный путь, регрессия для плоских полей без
+  группы), `FormSteps` (рендер активного шага, блокировка `goToNext` невалидным полем, успешный
+  переход, нелинейный `goToStep` через `Indicator`, `Form.Steps.Completed` после `skipToEnd`,
+  персистенция шага в localStorage между монтированиями).
+  - **Находка окружения — `window.localStorage` в этом jsdom+Node 22+ стеке без `getItem`/
+    `setItem`/`clear`.** Node сам подставляет глобальный `localStorage`-заглушку (предупреждение
+    `--localstorage-file was provided without a valid path`), которая перекрывает настоящий jsdom
+    `Storage`. Тот же полифилл, что уже стоял в `libs/forms/vitest.setup.ts` для React-пакета,
+    добавлен в новый `libs/forms-vue/vitest.setup.ts` (подключён через `test.setupFiles`) — без
+    него `use-step-persistence.ts` тихо не работал бы и в проде под тем же Node.
+
 ## 0.12.0 (2026-08-13)
 
 Фаза 9, Этап 6 (часть 3) — `FieldDataGrid`, портирован из

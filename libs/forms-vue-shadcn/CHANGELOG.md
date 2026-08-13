@@ -1,5 +1,31 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.14.0 (2026-08-13)
+
+Фаза 9, Этап 6 (часть 4, финал) — `Form.Group`/`Form.Steps`. Закрывает Этап 6 целиком (44 поля,
+счётчик не меняется — это form-level compound-компоненты, не поля).
+
+- **`Form.Group`/`useFormGroup`** — без своего файла, реэкспорт из `@letar/forms-vue/core` одной
+  строкой (`export { FormGroup, useFormGroup, ... } from '@letar/forms-vue/core'`). Та же логика,
+  что у React `@letar/forms` (реэкспорт `FormGroup`/`useFormGroup` из `@letar/forms-react` без
+  файла в `@letar/forms-shadcn`) — `FormGroup` не имеет визуального представления, второй скин ей
+  не нужен.
+- **`Form.Steps` (`lib/steps/*.ts`)** — Tailwind-разметка, Vue-порт `@letar/forms-shadcn`
+  (`FormStepsRoot`/`FormStepsStep`/`FormStepsIndicator`/`FormStepsNavigation`/
+  `FormStepsCompletedContent`). Композиционная логика (`useStepState`/`useStepNavigation`/
+  `useStepPersistence`/`provideFormSteps`/`extractFieldNames`) не своя — целиком из
+  `@letar/forms-vue/core`, тот же экспорт использует headless-версия `@letar/forms-vue`. Разбор
+  Vue-специфичных упрощений относительно React-хуков (`setup()` вместо `useRef`, без гонки
+  debounce-таймеров персистенции) — `libs/forms-vue/CHANGELOG.md` 0.13.0, идентичен обоим пакетам.
+- Своя — только Tailwind-классы: индикатор (`lucide-vue-next` `Check` по умолчанию для
+  завершённого шага, тот же паттерн иконок, что у `FieldRating`/`FieldTableEditor`), кнопки
+  навигации (`cn(buttonBase, ...)`).
+- Те же beta-упрощения, что у React shadcn-скина: без `Form.When`, без анимаций перехода.
+- Тест `app-form.stage6d.spec.ts` — тот же набор сценариев, что в headless-пакете
+  (`FieldString` вместо `FieldInput`, индикатор ищется по `ol.flex button`, а не по BEM-классу
+  headless-версии). `vitest.setup.ts`/`localStorage`-полифилл — свой (тот же код, что у
+  `libs/forms-vue`), нужен для теста персистенции шага в этом пакете отдельно.
+
 ## 0.13.0 (2026-08-13)
 
 Фаза 9, Этап 6 (часть 3) — тот же `FieldDataGrid`, что в headless `forms-vue` 0.12.0,

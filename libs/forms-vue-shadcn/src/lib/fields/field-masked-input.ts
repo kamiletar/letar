@@ -33,7 +33,7 @@ export const FieldMaskedInput = defineComponent({
   },
   setup(props) {
     const { form, schema } = useAppFormContext()
-    const { fieldSchema, label, placeholder, required } = resolveFieldMeta(
+    const { fieldSchema, label, placeholder, required, fullPath } = resolveFieldMeta(
       schema,
       props.name,
       props.label,
@@ -65,7 +65,7 @@ export const FieldMaskedInput = defineComponent({
         return rekaUIKit.ErrorFallback({ fieldName: props.name, message: renderError.value.message })
       }
 
-      return withFieldValidation(form, props.name, fieldSchema, (field, hasError, errorMessage) => {
+      return withFieldValidation(form, fullPath, fieldSchema, (field, hasError, errorMessage) => {
         const descriptionId = `${props.name}-format-description`
 
         return FieldWrapper({
