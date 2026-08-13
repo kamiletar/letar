@@ -1,5 +1,23 @@
 # Changelog @letar/forms-vue
 
+## 0.6.0 (2026-08-13)
+
+Фаза 9, Этап 3 (продолжение) — `FieldCreditCard` (compound-поле, отложено с основного захода
+Этапа 3). Итог: 32 поля (было 31).
+
+- Общий composable `useCreditCardField` (`@letar/forms-vue/core`) — форматирование номера/срока/CVC,
+  Luhn-валидация, автопереход фокуса между подполями. Переиспользуется `forms-vue-shadcn`, только
+  разметка своя в каждом пакете (тот же принцип, что у `useMaskField`).
+- `cardBrandIcon` (`@letar/forms-vue/core`) — Vue-порт React `card-brand-icon.tsx` (Visa/Mastercard/
+  Amex/МИР inline SVG), тоже общий для обоих скинов.
+- Поле не участвует в Zod-валидации через `withFieldValidation` — это составной виджет с тремя
+  subfields (`.number`/`.expiry`/`.cvc`), пишет напрямую через `form.setFieldValue`, как и обе
+  React-версии (`@letar/forms`, `forms-shadcn`).
+- Тесты — `app-form.spec.ts`, блок «Этап 3 (продолжение)»: форматирование номера + определение
+  бренда, Luhn-валидация на blur, smart month + автопереход к CVC, ограничение длины CVC по бренду.
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный.
+
 ## 0.5.1 (2026-08-13)
 
 Рефакторинг без изменения публичного API: `formatDate`/`getPresetRange` (`field-date-range.ts`),

@@ -4,6 +4,7 @@ export { type AppFormContext, provideAppForm, useAppFormContext } from './lib/co
 export { FieldBankAccount, FieldCorrAccount } from './lib/fields/field-bank-account'
 export { FieldBIK } from './lib/fields/field-bik'
 export { FieldCheckbox } from './lib/fields/field-checkbox'
+export { type CreditCardLayout, FieldCreditCard } from './lib/fields/field-credit-card'
 export { FieldCurrency } from './lib/fields/field-currency'
 export { FieldDate } from './lib/fields/field-date'
 export { type DateRangePreset, type DateRangeValue, FieldDateRange } from './lib/fields/field-date-range'

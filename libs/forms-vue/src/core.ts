@@ -6,9 +6,16 @@
  * корневой `.` — второй скин не должен тянуть референсную HTML-реализацию полей.
  */
 export { AppForm } from './lib/core/app-form'
+export { cardBrandIcon } from './lib/core/card-brand-icon'
 export { createField, type FieldRenderArgs, type FieldRenderFn } from './lib/core/create-field'
 export { type ResolvedFieldMeta, resolveFieldMeta, withFieldValidation } from './lib/core/field-wiring'
 export { type AppFormContext, provideAppForm, useAppFormContext } from './lib/core/form-context'
+export {
+  type CreditCardFieldStatus,
+  useCreditCardField,
+  type UseCreditCardFieldOptions,
+  type UseCreditCardFieldResult,
+} from './lib/core/use-credit-card-field'
 export {
   type MaskFieldFormatMode,
   type MaskFieldMask,
