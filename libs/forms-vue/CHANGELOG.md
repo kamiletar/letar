@@ -1,5 +1,22 @@
 # Changelog @letar/forms-vue
 
+## 0.14.0 (2026-08-13)
+
+Фаза 9, Этап 8 (часть 1) — три документных поля, пропущенных при исходной декомпозиции на 7
+этапов (47 полей, было 44). Найдены сверкой полного списка `docs/fields.md` с фактической
+реализацией — предыдущий отчёт «Фаза 9 завершена всеми 7 этапами» был неверным, см. поправку в
+`libs/forms/PLAN.md`.
+
+- **`FieldForeignPassport`/`FieldDepartmentCode`** — 1:1 порт через существующую фабрику
+  `createDocumentField` (тот же паттерн, что документные поля Этапа 3), без нового кода в `core`.
+- **`FieldBirthCertificate`** — БЕЗ маски (свободный ввод, нормализация гомоглифов `|||`→`III` и
+  разделителей на `blur`, не на каждый символ) — 1:1 порт `forms/field-birth-certificate.tsx`,
+  собран напрямую через `resolveFieldMeta`/`withFieldValidation`, как `FieldPassword`.
+- Тесты — новый файл `app-form.stage8.spec.ts`: рендер контролов, нормализация на blur,
+  форматирование масками ForeignPassport/DepartmentCode.
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный на обоих пакетах.
+
 ## 0.13.0 (2026-08-13)
 
 Фаза 9, Этап 6 (часть 4, финал) — `Form.Group`/`Form.Steps`, form-level compound-компоненты (не
