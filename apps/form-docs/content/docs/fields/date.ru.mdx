@@ -1,6 +1,6 @@
 ---
 title: Поля даты и времени
-description: Выбор даты и времени — Date, DateRange, Time
+description: Выбор даты и времени — Date, DateRange, DateTimePicker, Time
 ---
 
 import { DemoContainer } from '@/components/demo-container'
@@ -54,6 +54,22 @@ const Schema = z.object({
 })
 
 <Form.Field.DateRange name="period" />
+```
+
+## DateTimePicker
+
+**API:** `Form.Field.DateTimePicker`
+
+Совмещённый выбор даты и времени.
+
+```tsx
+const Schema = z.object({
+  eventDate: z.string().meta({
+    ui: { title: 'Дата и время события' },
+  }),
+})
+
+<Form.Field.DateTimePicker name="eventDate" />
 ```
 
 ## Time

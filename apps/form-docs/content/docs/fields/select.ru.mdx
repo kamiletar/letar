@@ -52,6 +52,25 @@ const options = [
 <Form.Field.Combobox name="city" options={cityOptions} placeholder="Начните вводить город..." />
 ```
 
+### Асинхронный поиск
+
+Загрузка опций из query-хука по мере ввода через `useQuery` — сигнатура совпадает с
+TanStack Query (`{ data, isLoading, error }`):
+
+```tsx
+<Form.Field.Combobox
+  name="user"
+  useQuery={(search) =>
+    useFindManyUser({
+      where: { name: { contains: search, mode: 'insensitive' } },
+      take: 20,
+    })
+  }
+  getLabel={(u) => u.name}
+  getValue={(u) => u.id}
+/>
+```
+
 ## RadioGroup
 
 **API:** `Form.Field.RadioGroup`
@@ -69,7 +88,7 @@ const options = [
 
 **API:** `Form.Field.RadioCard`
 
-Карточки для выбора одного варианта — визуально богаче чем RadioGroup.
+Карточки для выбора одного варианта — визуально богаче, чем RadioGroup.
 
 ```tsx
 const options = [
@@ -143,7 +162,7 @@ const options = [
 
 **API:** `Form.Field.NativeSelect`
 
-Стандартный HTML `<select>`. Легче чем Select, использует нативный UI браузера.
+Стандартный HTML `<select>`. Легче, чем Select, использует нативный UI браузера.
 
 ```tsx
 <Form.Field.NativeSelect name="country" options={countryOptions} />

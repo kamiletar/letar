@@ -1,6 +1,6 @@
 ---
 title: Числовые поля
-description: Числовой ввод — Number, Slider, Currency, Rating
+description: Числовой ввод — Number, Slider, Currency, Percentage, Rating
 ---
 
 import { DemoContainer } from '@/components/demo-container'
@@ -37,6 +37,16 @@ const Schema = z.object({
 <Form.Field.Number name="quantity" />
 ```
 
+### Автоматические ограничения
+
+```tsx
+z.number().min(0).max(100)
+// → min={0} max={100} step={1} на <input>
+
+z.number().int()
+// → step={1} (только целые числа)
+```
+
 ## Slider
 
 **API:** `Form.Field.Slider`
@@ -63,7 +73,8 @@ const Schema = z.object({
 
 **API:** `Form.Field.Currency`
 
-Поле для ввода денежных сумм.
+Поле для ввода денежных сумм. `currency` — проп самого компонента, а не часть блока
+`meta().ui` в Zod; по умолчанию `'RUB'`.
 
 ```tsx
 const Schema = z.object({
@@ -72,7 +83,23 @@ const Schema = z.object({
   }),
 })
 
-<Form.Field.Currency name="price" />
+<Form.Field.Currency name="price" currency="USD" />
+```
+
+## Percentage
+
+**API:** `Form.Field.Percentage`
+
+Процентное поле (0-100%) с суффиксом `%`.
+
+```tsx
+const Schema = z.object({
+  discount: z.number().min(0).max(100).meta({
+    ui: { title: 'Скидка' },
+  }),
+})
+
+<Form.Field.Percentage name="discount" />
 ```
 
 ## Rating

@@ -1,6 +1,6 @@
 ---
 title: Специализированные поля
-description: Phone, PinInput, ColorPicker, Tags, FileUpload, Address
+description: Phone, PinInput, ColorPicker, FileUpload, Address
 ---
 
 import { DemoContainer } from '@/components/demo-container'
@@ -66,25 +66,6 @@ const Schema = z.object({
 })
 
 <Form.Field.ColorPicker name="color" />
-```
-
-## Tags
-
-**API:** `Form.Field.Tags`
-
-Ввод тегов — множественные текстовые значения.
-
-```tsx
-const Schema = z.object({
-  skills: z.array(z.string()).meta({
-    ui: { title: 'Навыки' },
-  }),
-})
-
-<Form.Field.Tags name="skills" />
-
-// С ограничением количества
-<Form.Field.Tags name="skills" maxTags={5} />
 ```
 
 ## FileUpload
