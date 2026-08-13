@@ -14,7 +14,7 @@ import { getSession, isAdmin } from '@/lib/auth'
 import { Box, Flex } from '@chakra-ui/react'
 import { UmamiScript } from '@letar/analytics'
 import { ColorModeProvider } from '@letar/chakra-provider'
-import { AnalyticsGate } from '@letar/ui'
+import { AnalyticsGate, HeaderScrollPadding } from '@letar/ui'
 import { YandexMetrika } from '@letar/yandex-metrika'
 import type { Metadata } from 'next'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
@@ -143,6 +143,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             <NextIntlClientProvider messages={messages}>
               <UserProvider value={userContext}>
                 <SkipLink />
+                <HeaderScrollPadding cssVar="--kami-header-h" />
                 <Flex direction="column" minH="100vh">
                   <Header />
                   <Box as="main" id="main-content" flex="1" tabIndex={-1} outline="none">

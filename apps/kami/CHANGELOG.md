@@ -7,6 +7,16 @@
 
 ## [Unreleased]
 
+## [0.33.3] - 2026-08-13
+
+### Fixed
+
+- **Клавиатурный фокус мог прятаться под sticky-шапкой** (WCAG 2.4.11 Focus Not Obscured) —
+  найдено при аудите sticky-шапок по монорепо (образец бага — `domwellbes`): у `html` не было
+  `scroll-padding-top`, а шапка (`SkipLink` на `#main-content`, TOC блога) переносится между
+  мобильным и десктопным блоком с разной высотой. Подключён общий `HeaderScrollPadding` из
+  `@letar/ui` (`cssVar="--kami-header-h"`).
+
 ## [0.33.1] - 2026-07-28
 
 ### Fixed

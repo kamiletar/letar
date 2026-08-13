@@ -72,6 +72,9 @@ export const ThemeProvider = ({ children, fonts }: Props) => {
     const config = defineConfig({
       globalCss: {
         ...pressableConfig.globalCss,
+        html: {
+          scrollPaddingTop: 'var(--kami-header-h, 5rem)',
+        },
       },
       theme: {
         keyframes: {
