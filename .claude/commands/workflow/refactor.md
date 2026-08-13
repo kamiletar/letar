@@ -75,7 +75,7 @@ nx test <app> --coverage
 ### 4. Финальная проверка
 
 ```bash
-nx format <app>
+nx run-many -t format --projects=<app>
 nx lint <app>
 nx typecheck:tsgo <app>
 nx test <app>

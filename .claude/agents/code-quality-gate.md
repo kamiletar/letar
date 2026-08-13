@@ -12,8 +12,8 @@ model: haiku
 Запускай проверки в порядке скорости (быстрые сначала):
 
 ```bash
-# 1. Форматирование (dprint, ~30x быстрее Prettier)
-nx format <app>
+# 1. Форматирование (dprint) — НЕ голая `nx format`, она жёстко зашита на Prettier
+nx run-many -t format --projects=<app>
 
 # 2. Линтинг (oxlint → ESLint автоматически)
 nx lint <app>
@@ -84,7 +84,7 @@ nx run-many -t format,lint,typecheck
 
 ## Чеклист
 
-- [ ] `nx format` без ошибок
+- [ ] `nx run-many -t format --projects=<app>` без ошибок
 - [ ] `nx lint` без errors (oxlint + ESLint)
 - [ ] `nx typecheck:tsgo` без ошибок
 - [ ] `nx test` все тесты проходят

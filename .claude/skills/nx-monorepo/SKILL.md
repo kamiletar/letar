@@ -23,11 +23,9 @@ nx build <project>         # Сборка проекта
 nx lint <project>          # Линтинг (oxlint + ESLint)
 nx test <project>          # Тесты
 nx typecheck:tsgo <project> # Проверка типов (9-38x быстрее!)
-nx format <project>        # Форматирование (dprint)
 
-# Форматирование
-nx format:write            # Отформатировать все файлы
-nx format:check            # Проверить форматирование
+# Форматирование — ТОЛЬКО так, голая `nx format`/`nx format:write` жёстко зашита на Prettier
+nx run-many -t format --projects=<project>
 
 # Множественные задачи
 nx run-many -t build       # Собрать все проекты
@@ -91,9 +89,9 @@ nx show project <name>     # Информация о проекте
 ## Перед коммитом
 
 ```bash
-nx format <project>         # Форматирование
-nx lint <project>           # Линтинг (oxlint + ESLint)
-nx typecheck:tsgo <project> # Проверка типов
+nx run-many -t format --projects=<project>  # Форматирование (dprint)
+nx lint <project>                           # Линтинг (oxlint + ESLint)
+nx typecheck:tsgo <project>                 # Проверка типов
 ```
 
 ---

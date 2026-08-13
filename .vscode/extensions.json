@@ -1,10 +1,11 @@
 {
   "recommendations": [
     "nrwl.angular-console",
-    "esbenp.prettier-vscode",
+    "dprint.dprint",
     "dbaeumer.vscode-eslint",
     "firsttris.vscode-jest-runner",
     "ms-playwright.playwright",
     "thanhtunguet.qwen-code-vscode"
-  ]
+  ],
+  "unwantedRecommendations": ["esbenp.prettier-vscode"]
 }

@@ -1,6 +1,6 @@
 ---
 description: Воркфлоу верхнего уровня для задач по всему монорепо letar — инфра, общие библиотеки, релизы
-allowed-tools: Bash(nx format:*), Bash(nx lint:*), Bash(nx typecheck:*), Bash(nx affected:*), Bash(nx release:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*)
+allowed-tools: Bash(nx run-many -t format:*), Bash(nx lint:*), Bash(nx typecheck:*), Bash(nx affected:*), Bash(nx release:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*)
 ---
 
 # Letar - Воркфлоу монорепо (весь репозиторий)
@@ -42,8 +42,13 @@ allowed-tools: Bash(nx format:*), Bash(nx lint:*), Bash(nx typecheck:*), Bash(nx
 ## Качество (перед коммитом)
 
 ```
-nx format → nx lint → nx typecheck:tsgo
+nx run-many -t format --projects=<затронутые проекты> → nx lint → nx typecheck:tsgo
 ```
+
+⚠️ **Никогда не запускай голую `nx format`/`nx format:write`** — это встроенная команда Nx,
+жёстко зашитая на Prettier, конфликтующий с dprint (единственным форматтером репозитория, см.
+корневой `CLAUDE.md`). Всегда `nx run-many -t format --projects=<...>` — кастомный таргет,
+вызывающий `dprint fmt`.
 
 Для сквозных изменений запускай по затронутым проектам:
 

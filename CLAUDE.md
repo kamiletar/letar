@@ -93,7 +93,9 @@ alias матчится по префиксу
 ⚠️ `--projects` не даёт файловой гранулярности — `format` внутри проекта задевает весь submodule,
 включая чужие незакоммиченные правки ·
 [dprint-eslint-curly-conflict](/.claude/docs/dprint-eslint-curly-conflict.md) `--fix` и `fmt`
-откатывают друг друга
+откатывают друг друга ·
+[prettier-dprint-conflict-root-cause](/.claude/docs/prettier-dprint-conflict-root-cause.md) ⚠️
+голая `nx format` — это Prettier, не dprint; `NX_SKIP_FORMAT` её не гасит
 
 **Деплой и инфраструктура:** [deployment](/.claude/docs/deployment.md) ·
 [verification-pitfalls](/.claude/docs/verification-pitfalls.md) ⭐ проверки, которые врут в

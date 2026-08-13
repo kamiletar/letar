@@ -1,6 +1,6 @@
 ---
 description: Ревью кода на качество, безопасность и специфику проекта с прогоном format/lint/typecheck
-allowed-tools: Bash(nx format:*), Bash(nx lint:*), Bash(nx typecheck:*), Bash(git diff:*), Read, Grep, Glob
+allowed-tools: Bash(nx run-many -t format:*), Bash(nx lint:*), Bash(nx typecheck:*), Bash(git diff:*), Read, Grep, Glob
 ---
 
 # Code Review - Ревью кода
@@ -34,9 +34,9 @@ allowed-tools: Bash(nx format:*), Bash(nx lint:*), Bash(nx typecheck:*), Bash(gi
 4. **Запусти автоматические проверки**
 
    ```bash
-   nx format <app>           # Форматирование
-   nx lint <app>             # oxlint → ESLint (автоматически)
-   nx typecheck:tsgo <app>   # Проверка типов
+   nx run-many -t format --projects=<app>   # Форматирование (dprint, НЕ голая nx format)
+   nx lint <app>                            # oxlint → ESLint (автоматически)
+   nx typecheck:tsgo <app>                  # Проверка типов
    ```
 
 5. **Проверь специфику проекта**

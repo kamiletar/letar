@@ -1,4 +1,7 @@
 {
+  "env": {
+    "NX_SKIP_FORMAT": "true"
+  },
   "hooks": {
     "SessionStart": [
       {

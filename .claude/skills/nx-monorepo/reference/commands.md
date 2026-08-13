@@ -43,22 +43,21 @@ nx affected:graph                    # Граф затронутых
 
 ## Форматирование
 
-### Встроенные команды Nx
+⛔ **`nx format`/`nx format:write`/`nx format:check` (без `run-many -t`) — ВСТРОЕННАЯ команда Nx,
+жёстко зашитая на Prettier изнутри пакета `nx` (не настраивается на dprint, `NX_SKIP_FORMAT` её не
+гасит — это разные механизмы). Prettier физически лежит в `node_modules` как транзитивная
+зависимость, поэтому команда отрабатывает молча и без ошибок — выглядит как «сработало», но
+переписывает код в чужой стиль. НИКОГДА не запускать напрямую.
+
+### dprint — единственный форматтер (используется в проекте Letar)
 
 ```bash
-nx format:write                      # Отформатировать все изменённые файлы
-nx format:check                      # Проверить форматирование
-nx format:write --projects=premium-rosstil  # Конкретный проект
-nx format:write --all                # Все файлы в workspace
-nx format:write --uncommitted        # Только незакоммиченные
+nx run-many -t format --projects=<project>   # target из project.json → dprint fmt
+nx run-many -t format --projects=<p1>,<p2>   # несколько проектов
 ```
 
-### dprint (используется в проекте Letar)
-
-```bash
-nx format premium-rosstil            # target из project.json (~30x быстрее Prettier)
-nx format:check premium-rosstil      # Проверка через dprint
-```
+Прогон по всему публичному репо (не submodule) — `dprint fmt` из корня репозитория (не через
+`nx run-many` без `--projects`, см. корневой `CLAUDE.md`).
 
 **Конфигурация target в project.json:**
 

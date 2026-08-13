@@ -141,8 +141,8 @@ function ProductList() {
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) return <Spinner />
-  if (error) return <Text color="red">{error.message}</Text>
+  if (loading) { return <Spinner /> }
+  if (error) { return <Text color="red">{error.message}</Text> }
   return <List items={products} />
 }
 
@@ -166,8 +166,8 @@ function useProducts() {
 function ProductList() {
   const { products, loading, error } = useProducts()
 
-  if (loading) return <Spinner />
-  if (error) return <Text color="red">{error.message}</Text>
+  if (loading) { return <Spinner /> }
+  if (error) { return <Text color="red">{error.message}</Text> }
   return <List items={products} />
 }
 ```
@@ -182,7 +182,7 @@ function ProductList() {
 async function createProduct(data) {
   'use server'
   const parsed = ProductSchema.safeParse(data)
-  if (!parsed.success) return { error: parsed.error }
+  if (!parsed.success) { return { error: parsed.error } }
   await db.product.create({ data: parsed.data })
   revalidatePath('/products')
 } // ✅ После: выделено в _actions/
@@ -321,7 +321,7 @@ nx test <app>
 
 ```bash
 # Полный pipeline
-nx format <app>
+nx run-many -t format --projects=<app>
 nx lint <app>
 nx typecheck:tsgo <app>
 nx test <app>
