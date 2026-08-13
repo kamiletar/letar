@@ -1,59 +1,31 @@
-import { AppForm } from '@letar/forms-vue'
-import { defineComponent, h, ref } from 'vue'
-import { z } from 'zod'
-import { FieldCheckbox, FieldCombobox, FieldNumber, FieldSelect, FieldString, FieldTextarea } from '../src/index'
+import { computed, defineComponent, h, ref } from 'vue'
+import { demoExamples } from './examples/index'
 
-const schema = z.object({
-  title: z.string().min(3, 'Минимум 3 символа').meta({ ui: { title: 'Название', placeholder: 'Введите название' } }),
-  rating: z.number().min(1).max(10).meta({ ui: { title: 'Рейтинг (1-10)' } }),
-  agree: z.boolean().meta({ ui: { title: 'Согласен с условиями' } }),
-  category: z.string().meta({ ui: { title: 'Категория' } }),
-  notes: z.string().optional().meta({ ui: { title: 'Комментарий' } }),
-  tag: z.string().optional().meta({ ui: { title: 'Тег' } }),
-})
-
-const CATEGORY_OPTIONS = [
-  { value: 'furniture', label: 'Мебель' },
-  { value: 'electronics', label: 'Электроника' },
-  { value: 'books', label: 'Книги' },
-]
-
+/**
+ * Навигационная оболочка демо-харнесса — сам код полей живёт в `examples/*.ts` (по одному примеру
+ * на файл, Этап 0 P7 form-docs). Роутер-либа избыточна для 6 примеров — переключение через `ref`.
+ */
 export const App = defineComponent({
   name: 'App',
   setup() {
-    const submitted = ref<Record<string, unknown> | null>(null)
+    const activeId = ref(demoExamples[0]!.id)
+    const active = computed(() => demoExamples.find((example) => example.id === activeId.value) ?? demoExamples[0]!)
 
     return () =>
       h('div', { class: 'space-y-6' }, [
         h('h1', { class: 'text-xl font-semibold' }, '@letar/forms-vue-shadcn — demo'),
         h(
-          AppForm,
+          'select',
           {
-            schema,
-            initialValue: { title: '', rating: 5, agree: false, category: '', notes: '', tag: '' },
-            onSubmit: (value: Record<string, unknown>) => {
-              submitted.value = value
+            class: 'border-input rounded-md border px-3 py-2 text-sm',
+            value: activeId.value,
+            onChange: (event: Event) => {
+              activeId.value = (event.target as HTMLSelectElement).value
             },
           },
-          {
-            default: () => [
-              h(FieldString, { name: 'title' }),
-              h(FieldNumber, { name: 'rating' }),
-              h(FieldSelect, { name: 'category', options: CATEGORY_OPTIONS }),
-              h(FieldCombobox, { name: 'tag', options: CATEGORY_OPTIONS }),
-              h(FieldTextarea, { name: 'notes' }),
-              h(FieldCheckbox, { name: 'agree' }),
-              h(
-                'button',
-                { type: 'submit', class: 'bg-primary text-primary-foreground rounded-md px-4 py-2 text-sm' },
-                'Сохранить',
-              ),
-            ],
-          },
+          demoExamples.map((example) => h('option', { value: example.id }, example.title)),
         ),
-        submitted.value
-          ? h('pre', { class: 'bg-muted mt-4 rounded-md p-3 text-xs' }, JSON.stringify(submitted.value, null, 2))
-          : null,
+        h(active.value.component),
       ])
   },
 })
