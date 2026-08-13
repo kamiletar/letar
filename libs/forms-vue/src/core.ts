@@ -9,3 +9,10 @@ export { AppForm } from './lib/core/app-form'
 export { createField, type FieldRenderArgs, type FieldRenderFn } from './lib/core/create-field'
 export { type ResolvedFieldMeta, resolveFieldMeta, withFieldValidation } from './lib/core/field-wiring'
 export { type AppFormContext, provideAppForm, useAppFormContext } from './lib/core/form-context'
+export {
+  type MaskFieldFormatMode,
+  type MaskFieldMask,
+  useMaskField,
+  type UseMaskFieldOptions,
+  type UseMaskFieldResult,
+} from './lib/core/use-mask-field'

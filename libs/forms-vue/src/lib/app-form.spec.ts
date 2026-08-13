@@ -3,16 +3,21 @@ import { describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, nextTick } from 'vue'
 import { z } from 'zod'
 import { AppForm } from './core/app-form'
+import { FieldBankAccount, FieldCorrAccount } from './fields/field-bank-account'
 import { FieldCheckbox } from './fields/field-checkbox'
 import { FieldCurrency } from './fields/field-currency'
 import { FieldDate } from './fields/field-date'
 import { FieldHidden } from './fields/field-hidden'
+import { FieldINN } from './fields/field-inn'
 import { FieldInput } from './fields/field-input'
+import { FieldMaskedInput } from './fields/field-masked-input'
 import { FieldNativeSelect } from './fields/field-native-select'
 import { FieldNumber } from './fields/field-number'
 import { FieldNumberInput } from './fields/field-number-input'
+import { FieldPassport } from './fields/field-passport'
 import { FieldPassword } from './fields/field-password'
 import { FieldPercentage } from './fields/field-percentage'
+import { FieldPhone } from './fields/field-phone'
 import { FieldRadioGroup } from './fields/field-radio-group'
 import { FieldSelect } from './fields/field-select'
 import { FieldSwitch } from './fields/field-switch'
@@ -221,5 +226,122 @@ describe('Этап 1 — новые нативные поля', () => {
     await secondRadio.setValue()
 
     expect((secondRadio.element as HTMLInputElement).checked).toBe(true)
+  })
+})
+
+const stage3Schema = z.object({
+  passport: z.string().optional().meta({ ui: { title: 'Паспорт' } }),
+  inn: z.string().optional().meta({ ui: { title: 'ИНН' } }),
+  bankAccount: z.string().optional().meta({ ui: { title: 'Расчётный счёт' } }),
+  corrAccount: z.string().optional().meta({ ui: { title: 'Корр. счёт' } }),
+  phone: z.string().optional().meta({ ui: { title: 'Телефон' } }),
+  departmentCode: z.string().optional().meta({ ui: { title: 'Код подразделения' } }),
+})
+
+function Stage3TestForm() {
+  return defineComponent({
+    setup() {
+      return () =>
+        h(
+          AppForm,
+          { schema: stage3Schema, initialValue: {}, onSubmit: vi.fn() },
+          {
+            default: () => [
+              h(FieldPassport, { name: 'passport' }),
+              h(FieldINN, { name: 'inn' }),
+              h(FieldBankAccount, { name: 'bankAccount' }),
+              h(FieldCorrAccount, { name: 'corrAccount' }),
+              h(FieldPhone, { name: 'phone' }),
+              h(FieldMaskedInput, {
+                name: 'departmentCode',
+                mask: '999-999',
+                formatDescription: 'Формат: 3 цифры, дефис, 3 цифры',
+              }),
+            ],
+          },
+        )
+    },
+  })
+}
+
+describe('Этап 3 — маски/документы через forms-core/mask', () => {
+  it('рендерят метку и контрол для каждого поля', () => {
+    const wrapper = mount(Stage3TestForm(), { attachTo: document.body })
+
+    expect(wrapper.find('input[data-field-name="passport"]').exists()).toBe(true)
+    expect(wrapper.find('input[data-field-name="inn"]').exists()).toBe(true)
+    expect(wrapper.find('input[data-field-name="bankAccount"]').exists()).toBe(true)
+    expect(wrapper.find('input[data-field-name="corrAccount"]').exists()).toBe(true)
+    expect(wrapper.find('input[data-field-name="phone"]').exists()).toBe(true)
+    expect(wrapper.find('input[data-field-name="departmentCode"]').exists()).toBe(true)
+
+    wrapper.unmount()
+  })
+
+  it('FieldPassport: ввод цифр форматируется маской "XX XX XXXXXX" (live, MaskController)', async () => {
+    const wrapper = mount(Stage3TestForm(), { attachTo: document.body })
+    const input = wrapper.find('input[data-field-name="passport"]')
+
+    await input.setValue('4506123456')
+    await nextTick()
+
+    expect((input.element as HTMLInputElement).value).toBe('45 06 123456')
+    wrapper.unmount()
+  })
+
+  it('FieldINN: formatMode "off" — без группировки, ошибка при длине не 10/12', async () => {
+    const wrapper = mount(Stage3TestForm(), { attachTo: document.body })
+    const input = wrapper.find('input[data-field-name="inn"]')
+
+    await input.setValue('12345')
+    await input.trigger('blur')
+    await nextTick()
+
+    expect(wrapper.find('[data-field-name="inn"] .letar-field__error').text()).toBe(
+      'ИНН должен содержать 10 или 12 цифр',
+    )
+    wrapper.unmount()
+  })
+
+  it('FieldBankAccount: 20 цифр без ошибки, FieldCorrAccount требует префикс "301"', async () => {
+    const wrapper = mount(Stage3TestForm(), { attachTo: document.body })
+
+    const bankAccount = wrapper.find('input[data-field-name="bankAccount"]')
+    await bankAccount.setValue('40702810038000000001')
+    await bankAccount.trigger('blur')
+    await nextTick()
+    expect(wrapper.find('[data-field-name="bankAccount"] .letar-field__error').exists()).toBe(false)
+
+    const corrAccount = wrapper.find('input[data-field-name="corrAccount"]')
+    await corrAccount.setValue('40702810038000000001')
+    await corrAccount.trigger('blur')
+    await nextTick()
+    expect(wrapper.find('[data-field-name="corrAccount"] .letar-field__error').text()).toBe(
+      'Корр. счёт должен начинаться с "301"',
+    )
+
+    wrapper.unmount()
+  })
+
+  it('FieldPhone: форматирует цифры маской RU-телефона (чистый форматтер, не MaskController)', async () => {
+    const wrapper = mount(Stage3TestForm(), { attachTo: document.body })
+    const input = wrapper.find('input[data-field-name="phone"]')
+
+    await input.setValue('9161234567')
+    await nextTick()
+
+    expect((input.element as HTMLInputElement).value).toContain('916')
+    wrapper.unmount()
+  })
+
+  it('FieldMaskedInput: произвольная маска "999-999" применяется через MaskController', async () => {
+    const wrapper = mount(Stage3TestForm(), { attachTo: document.body })
+    const input = wrapper.find('input[data-field-name="departmentCode"]')
+
+    await input.setValue('770123')
+    await nextTick()
+
+    expect((input.element as HTMLInputElement).value).toBe('770-123')
+    wrapper.unmount()
   })
 })

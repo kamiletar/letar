@@ -154,8 +154,41 @@ Hidden, YesNo, Date, Time, Currency, Percentage`. Архитектурная б�
 - Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue-shadcn` зелёный.
 - `@letar/forms-vue` (headless) без изменений — все 3 поля были реализованы там ещё на Этапе 1.
 
-Дальше: Этап 3 (маски/документы через `forms-core/mask`, ~12 полей, `useMaskField`-composable для
-Vue) — следующий заход.
+**Этап 3 — отчёт (2026-08-13): маски/документы через `@letar/forms-core/mask`, 10 полей закрыты в
+обоих Vue-пакетах.**
+
+- **Новый composable `useMaskField`** — `libs/forms-vue/src/lib/core/use-mask-field.ts`, экспорт
+  через `@letar/forms-vue/core`, единый для headless и Reka-скина. Vue-аналог React `useMaskField`
+  (`forms-react`), оборачивает `MaskController`/`format`/`unformat` из `forms-core/mask`.
+  `'live'`-режим — неконтролируемый `<input>` (`inputRef` без `value`/`onInput` в vnode-данных,
+  DOM источник истины); `'blur'`/`'off'` — обычный контролируемый `<input>`.
+  ⚠️ **Обязательно вызывать один раз в `setup()`**, не в render-замыкании — иначе `inputRef`
+  терял бы стабильную идентичность между ре-рендерами (нет React `useCallback` с зависимостями,
+  стабильность даёт сам факт однократного выполнения `setup()`) и `MaskController` пересоздавался
+  бы на каждое нажатие клавиши, теряя каретку.
+- **`@letar/forms-vue` 0.3.0 → 0.4.0, 26 полей (было 16):** `createDocumentField` (headless) +
+  `FieldMaskedInput`, `FieldPassport`, `FieldINN` (`formatMode: 'off'`, переменная длина 10/12),
+  `FieldKPP`, `FieldOGRN`, `FieldSNILS`, `FieldBIK`, `FieldBankAccount`, `FieldCorrAccount`,
+  `FieldPhone` (форматтер `forms-core/phone`, НЕ через `useMaskField` — WebKit-safe, тот же выбор,
+  что в React `field-phone.tsx`). Контрольные суммы — `@letar/forms-core/validators/ru`, 1:1 с
+  React-версией.
+- **`@letar/forms-vue-shadcn` 0.4.0 → 0.5.0, 27 полей (было 17):** тот же набор на Reka-скине,
+  `document-field-base.ts` рисует сырой `<input>` в обход `rekaUIKit.Input` (`'live'`
+  неконтролируемый, `UIKitInputProps` требует `value`/`onChange`) — тот же приём, что у
+  `FieldPassword`. `FieldPhone` — контролируемое поле через `rekaUIKit.Input`.
+- **`FieldCreditCard` сознательно отложен** — компаунд-поле (номер+expiry+CVC, автопереход
+  фокуса, Luhn-валидация), без `useMaskField` вовсе (свои форматтеры `forms-core/credit-card`),
+  объёмнее остальных девяти полей вместе — отдельный заход, не входит в Этап 3.
+- Тесты — `app-form.spec.ts` обоих пакетов, блок «Этап 3»: живое форматирование через реальный
+  `MaskController` (не мок — `@vue/test-utils` `.setValue()` идёт по пути `commitFullReplace` в
+  `controller.ts`, т.к. jsdom не шлёт `beforeinput` при программной установке `.value`), ошибки
+  валидации (ИНН, корр. счёт), форматирование телефона.
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный на обоих пакетах.
+
+Дальше: `FieldCreditCard` (компаунд, оба пакета) → Этап 4 (дата/число-виджеты, требует
+предварительного сравнения Vue-библиотек дат — `@vuepic/vue-datepicker` vs `v-calendar` — с
+отчётом координатору ДО реализации) — следующий заход.
 
 ---
 

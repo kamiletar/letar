@@ -1,5 +1,35 @@
 # Changelog @letar/forms-vue
 
+## 0.4.0 (2026-08-13)
+
+Фаза 9, Этап 3 — маски/документы через `@letar/forms-core/mask` (10 новых полей).
+
+- **Новый composable `useMaskField`** (`src/lib/core/use-mask-field.ts`, экспорт через
+  `@letar/forms-vue/core`) — Vue-аналог React `useMaskField` (`forms-react`). Оборачивает
+  `MaskController`/`format`/`unformat` из `forms-core/mask`. `'live'`-режим рендерит
+  **неконтролируемый** `<input>` (`inputRef`, без `value`/`onInput` в vnode-данных) — DOM
+  источник истины, `MaskController` пишет напрямую через `setRangeText`; `'blur'`/`'off'` —
+  обычный контролируемый `<input>`. **Обязательно вызывать один раз в `setup()`**, не в
+  render-замыкании — иначе `inputRef` терял бы идентичность между ре-рендерами и
+  `MaskController` пересоздавался бы на каждое нажатие клавиши (в React ту же роль стабильности
+  играет `useCallback` с зависимостями; в Vue её даёт сам `setup()`, выполняющийся один раз).
+- **`createDocumentField(config)`** (`src/lib/fields/document-field-base.ts`) — фабрика
+  документных полей, Vue-аналог `libs/forms-shadcn/.../document-field-base.tsx`.
+- **10 новых полей:** `FieldMaskedInput` (маска общего назначения, WCAG 3.3.2
+  `formatDescription` обязателен), `FieldPassport`, `FieldINN` (`formatMode: 'off'` — длина
+  переменная, 10/12 цифр), `FieldKPP`, `FieldOGRN`, `FieldSNILS`, `FieldBIK`, `FieldBankAccount`,
+  `FieldCorrAccount`, `FieldPhone` (форматтер `forms-core/phone`, НЕ через `useMaskField` — тот
+  же выбор, что в React `field-phone.tsx`, WebKit-safe чистый JS).
+- Контрольные суммы (ИНН/КПП/ОГРН/СНИЛС/БИК) — `@letar/forms-core/validators/ru`, портированы
+  1:1 из React `document-field-base.tsx`-полей.
+- Итог: 26 полей в headless-пакете (было 16). `FieldCreditCard` — компаунд-поле без
+  `useMaskField` (форматтеры `forms-core/credit-card`) — сознательно отложено на отдельный заход,
+  не входит в Этап 3.
+- Тесты — `src/lib/app-form.spec.ts`, блок «Этап 3»: живое форматирование `FieldPassport`/
+  `FieldMaskedInput` через реальный `MaskController` (не мок — `setValue()` из
+  `@vue/test-utils` идёт по пути `commitFullReplace`, см. `controller.ts`), ошибка валидации
+  `FieldINN`/`FieldCorrAccount`, форматирование `FieldPhone`.
+
 ## 0.3.0 (2026-08-13)
 
 Фаза 9, Этап 1 (продолжение) — 11 новых нативных HTML-полей поверх `@letar/forms-vue/core`,

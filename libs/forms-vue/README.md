@@ -5,7 +5,7 @@ Vue-адаптер `@letar/forms` поверх `@tanstack/vue-form`. Начин�
 С Фазы 9 (`libs/forms/PLAN.md`, 2026-08-13) координатор форм расширил задачу до полного паритета
 с React-скином (61 поле) — не только пруф.
 
-⚠️ **Ещё не полный порт** — 16 из 61 поля React-скина (Этап 1 в процессе). Прогресс и план
+⚠️ **Ещё не полный порт** — 26 из 61 поля React-скина (Этапы 1–3 закрыты). Прогресс и план
 оставшихся этапов — `libs/forms/PLAN.md`.
 
 ## Установка
@@ -56,26 +56,43 @@ function handleSubmit(value: Record<string, unknown>) {
 Корневой компонент. Заводит `@tanstack/vue-form` через `useForm`, отдаёт `form`+`schema` полям
 через `provide`/`inject`. Сабмит — обычный `<form @submit>` с `preventDefault`.
 
-### Поля (16 штук)
+### Поля (26 штук)
 
-| Компонент           | Пропсы                                              | Значение схемы |
-| ------------------- | --------------------------------------------------- | -------------- |
-| `FieldInput`        | `name`, `label?`, `placeholder?`                    | `string`       |
-| `FieldTextarea`     | `name`, `label?`, `placeholder?`                    | `string`       |
-| `FieldNumber`       | `name`, `label?`, `placeholder?`                    | `number`       |
-| `FieldNumberInput`  | `name`, `label?`, `placeholder?`, `min?/max?/step?` | `number`       |
-| `FieldCheckbox`     | `name`, `label?`                                    | `boolean`      |
-| `FieldSwitch`       | `name`, `label?`                                    | `boolean`      |
-| `FieldSelect`       | `name`, `label?`, `placeholder?`, `options`         | `string`       |
-| `FieldNativeSelect` | `name`, `label?`, `placeholder?`, `options`         | `string`       |
-| `FieldRadioGroup`   | `name`, `label?`, `options`, `orientation?`         | `string`       |
-| `FieldPassword`     | `name`, `label?`, `placeholder?`, `defaultVisible?` | `string`       |
-| `FieldHidden`       | `name`, `value?`                                    | любое          |
-| `FieldYesNo`        | `name`, `label?`, `yesLabel?`, `noLabel?`           | `boolean`      |
-| `FieldDate`         | `name`, `label?`, `placeholder?`, `min?/max?`       | `string`       |
-| `FieldTime`         | `name`, `label?`, `placeholder?`, `min?/max?/step?` | `string`       |
-| `FieldCurrency`     | `name`, `label?`, `placeholder?`, `currency?`       | `number`       |
-| `FieldPercentage`   | `name`, `label?`, `placeholder?`, `min?/max?/step?` | `number`       |
+| Компонент           | Пропсы                                                       | Значение схемы |
+| ------------------- | ------------------------------------------------------------ | -------------- |
+| `FieldInput`        | `name`, `label?`, `placeholder?`                             | `string`       |
+| `FieldTextarea`     | `name`, `label?`, `placeholder?`                             | `string`       |
+| `FieldNumber`       | `name`, `label?`, `placeholder?`                             | `number`       |
+| `FieldNumberInput`  | `name`, `label?`, `placeholder?`, `min?/max?/step?`          | `number`       |
+| `FieldCheckbox`     | `name`, `label?`                                             | `boolean`      |
+| `FieldSwitch`       | `name`, `label?`                                             | `boolean`      |
+| `FieldSelect`       | `name`, `label?`, `placeholder?`, `options`                  | `string`       |
+| `FieldNativeSelect` | `name`, `label?`, `placeholder?`, `options`                  | `string`       |
+| `FieldRadioGroup`   | `name`, `label?`, `options`, `orientation?`                  | `string`       |
+| `FieldPassword`     | `name`, `label?`, `placeholder?`, `defaultVisible?`          | `string`       |
+| `FieldHidden`       | `name`, `value?`                                             | любое          |
+| `FieldYesNo`        | `name`, `label?`, `yesLabel?`, `noLabel?`                    | `boolean`      |
+| `FieldDate`         | `name`, `label?`, `placeholder?`, `min?/max?`                | `string`       |
+| `FieldTime`         | `name`, `label?`, `placeholder?`, `min?/max?/step?`          | `string`       |
+| `FieldCurrency`     | `name`, `label?`, `placeholder?`, `currency?`                | `number`       |
+| `FieldPercentage`   | `name`, `label?`, `placeholder?`, `min?/max?/step?`          | `number`       |
+| `FieldMaskedInput`  | `name`, `label?`, `mask`, `formatMode?`, `formatDescription` | `string`       |
+| `FieldPassport`     | `name`, `label?`                                             | `string`       |
+| `FieldINN`          | `name`, `label?`                                             | `string`       |
+| `FieldKPP`          | `name`, `label?`                                             | `string`       |
+| `FieldOGRN`         | `name`, `label?`                                             | `string`       |
+| `FieldSNILS`        | `name`, `label?`                                             | `string`       |
+| `FieldBIK`          | `name`, `label?`                                             | `string`       |
+| `FieldBankAccount`  | `name`, `label?`                                             | `string`       |
+| `FieldCorrAccount`  | `name`, `label?`                                             | `string`       |
+| `FieldPhone`        | `name`, `label?`, `country?`, `autoUnmask?`                  | `string`       |
+
+Документные поля (`FieldPassport`…`FieldCorrAccount`) собраны через общую фабрику
+`createDocumentField` (`src/lib/fields/document-field-base.ts`) поверх `useMaskField`
+(`@letar/forms-vue/core`, движок `@letar/forms-core/mask`, контрольные суммы —
+`@letar/forms-core/validators/ru`). `FieldPhone` — единственное исключение среди «масочных»
+полей: форматирует через чистый JS-форматтер `@letar/forms-core/phone`, не через
+`useMaskField`/`MaskController` (WebKit-safe, тот же выбор, что в React-скине).
 
 `label`/`placeholder` необязательны — по умолчанию берутся из `schema.meta({ ui: {...} })` по
 пути `name` (`getFieldMeta`, тот же вызов, что у React-скина). Валидация — `onChange` по
@@ -95,11 +112,23 @@ function handleSubmit(value: Record<string, unknown>) {
 Низкоуровневый доступ к `{ form, schema }` — для полей, которым `createField` не подходит
 (как `FieldSelect`).
 
+### `useMaskField(options)` (Этап 3)
+
+Composable движка масок `@letar/forms-core/mask` — Vue-аналог `useMaskField` из
+`@letar/forms-react`. `'live'`-режим отдаёт неконтролируемый `<input>` (`inputRef` без
+`value`/`onInput` в vnode-данных — DOM источник истины, `MaskController` пишет напрямую).
+**Обязательно вызывать один раз в `setup()`** поля, не в render-замыкании — иначе `inputRef`
+терял бы стабильную идентичность между ре-рендерами и `MaskController` пересоздавался бы на
+каждое нажатие клавиши. Используется `createDocumentField` и `FieldMaskedInput`; экспортируется
+через `@letar/forms-vue/core`.
+
 ## Что НЕ входит в скоуп
 
-- **Не все 61 поле React-скина** — 16 (Фаза 9, Этап 1: базовые + нативные HTML-поля).
-  Остальные (маски/документы, дата/число-виджеты, тяжёлые peer-dep поля, survey/table) —
-  следующие этапы плана Фазы 9 (`libs/forms/PLAN.md`).
+- **Не все 61 поле React-скина** — 26 (Фаза 9, Этапы 1–3: базовые/нативные HTML-поля,
+  select-family, маски/документы). Остальные (дата/число-виджеты, тяжёлые peer-dep поля,
+  survey/table) — следующие этапы плана Фазы 9 (`libs/forms/PLAN.md`).
+- **`FieldCreditCard`** сознательно отложен из Этапа 3 (компаунд-поле без `useMaskField`,
+  больше по объёму работы, чем остальные девять полей вместе) — следующий заход.
 - **Нет UIKit-абстракции** (в отличие от `forms-react`+`forms`/`forms-shadcn`) — одна референсная
   реализация на голом HTML, без свопаемого дизайн-скина. Для пруфа границы этого достаточно.
 - **Нет `Form.Group`/`Form.Steps`/массивов** — только плоские top-level поля.

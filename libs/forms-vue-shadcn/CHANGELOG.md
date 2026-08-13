@@ -1,5 +1,24 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.5.0 (2026-08-13)
+
+Фаза 9, Этап 3 — маски/документы (10 новых полей), Reka-скин поверх нового
+`useMaskField` из `@letar/forms-vue/core` (см. CHANGELOG `forms-vue` 0.4.0 — composable общий,
+здесь только стилизация).
+
+- `document-field-base.ts` (Reka-версия `createDocumentField`) + 10 полей: `FieldMaskedInput`,
+  `FieldPassport`, `FieldINN`, `FieldKPP`, `FieldOGRN`, `FieldSNILS`, `FieldBIK`,
+  `FieldBankAccount`, `FieldCorrAccount`, `FieldPhone`.
+- Как и `FieldPassword`, эти поля рисуют сырой `<input>` в обход `rekaUIKit.Input` (стилизация
+  `NATIVE_INPUT_CLASS`) — `'live'`-режим `useMaskField` неконтролируемый, а `UIKitInputProps`
+  требует `value`/`onChange`. `FieldPhone` — исключение, использует `rekaUIKit.Input` напрямую
+  (контролируемое поле, форматтер `forms-core/phone`, не `useMaskField`).
+- Каждое поле — `onErrorCaptured` + `rekaUIKit.ErrorFallback`, тот же паттерн, что у остальных
+  полей пакета, собранных напрямую (не через `createField`).
+- Итог: 27 полей (было 17). `FieldCreditCard` отложен — см. CHANGELOG `forms-vue` 0.4.0.
+- Тесты — `src/lib/app-form.spec.ts`, блок «Этап 3»: те же сценарии, что в headless-версии,
+  через `rekaUIKit`/`FieldWrapper`.
+
 ## 0.4.0 (2026-08-13)
 
 Фаза 9, Этап 2 — select-family на `rekaUIKit`: `FieldRadioGroup`, `FieldNativeSelect`,
