@@ -1,5 +1,31 @@
 # Changelog @letar/forms-vue
 
+## 0.7.0 (2026-08-13)
+
+Фаза 9, Этап 5 (часть 1) — 4 из 8 «тяжёлых» peer-dep полей: `FieldPinInput`, `FieldOTPInput`,
+`FieldColorPicker`, `FieldFileUpload`. Итог: 36 полей (было 32). Скоуп этой части ограничен
+намеренно — только поля без тяжёлых внешних зависимостей; `RichText` (Tiptap), `Signature`
+(canvas), `Address`/`City` (DaData) — в следующей части Этапа 5.
+
+- Общий composable `usePinInputField` (`@letar/forms-vue/core`) — обработчики ввода/backspace/
+  paste для N однобуквенных ячеек, переиспользован `FieldPinInput` и `FieldOTPInput`, а также
+  `forms-vue-shadcn`. Экспортирует и чистый хелпер `splitPinChars(value, count)`.
+- `FieldColorPicker` — Vue-идиоматичное упрощение относительно Chakra-версии: нативный
+  `<input type="color">` вместо Ark UI compound `ColorPicker.Root` (area/hue/alpha слайдеры) —
+  браузерный пикер уже даёт то же самое бесплатно. Плюс hex-инпут и палитра свотчей.
+- `FieldFileUpload` — нативный `<input type="file">` + drag&drop-зона, безопасность файлов через
+  `processFileWithSecurity` (`@letar/forms-core/security`) напрямую, порт не потребовался
+  (framework-agnostic).
+- **Находка:** `form.getFieldValue`/`form.setFieldValue` не являются Vue-реактивным источником —
+  `computed(() => splitPinChars(getValue(), count))` внутри composable не обновлялся при вводе.
+  Фикс — рендерить из `field.state.value` (реактивный объект внутри `withFieldValidation`), а не
+  из значения, прочитанного через `getValue()`. Composable оставляет `getValue()` только для
+  синхронного чтения внутри обработчиков событий (не завязано на реактивность рендера).
+- Тесты — `app-form.spec.ts`, блок «Этап 5 (часть 1)»: рендер всех 4 полей, ввод/фокус/backspace
+  PIN-ячеек, таймер повторной отправки OTP, выбор свотча, добавление/удаление файла.
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный на обоих пакетах.
+
 ## 0.6.0 (2026-08-13)
 
 Фаза 9, Этап 3 (продолжение) — `FieldCreditCard` (compound-поле, отложено с основного захода

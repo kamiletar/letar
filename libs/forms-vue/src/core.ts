@@ -23,3 +23,10 @@ export {
   type UseMaskFieldOptions,
   type UseMaskFieldResult,
 } from './lib/core/use-mask-field'
+export {
+  type PinInputCharType,
+  splitPinChars,
+  usePinInputField,
+  type UsePinInputFieldOptions,
+  type UsePinInputFieldResult,
+} from './lib/core/use-pin-input-field'

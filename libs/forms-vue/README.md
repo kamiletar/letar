@@ -5,8 +5,9 @@ Vue-адаптер `@letar/forms` поверх `@tanstack/vue-form`. Начин�
 С Фазы 9 (`libs/forms/PLAN.md`, 2026-08-13) координатор форм расширил задачу до полного паритета
 с React-скином (61 поле) — не только пруф.
 
-⚠️ **Ещё не полный порт** — 32 из 61 поля React-скина (Этап 3 закрыт целиком, включая
-`FieldCreditCard`). Прогресс и план оставшихся этапов — `libs/forms/PLAN.md`.
+⚠️ **Ещё не полный порт** — 36 из 61 поля React-скина (Этапы 1–4 закрыты целиком, Этап 5 —
+`FieldPinInput`/`FieldOTPInput`/`FieldColorPicker`/`FieldFileUpload` из восьми). Прогресс и план
+оставшихся этапов — `libs/forms/PLAN.md`.
 
 ## Установка
 
@@ -56,42 +57,52 @@ function handleSubmit(value: Record<string, unknown>) {
 Корневой компонент. Заводит `@tanstack/vue-form` через `useForm`, отдаёт `form`+`schema` полям
 через `provide`/`inject`. Сабмит — обычный `<form @submit>` с `preventDefault`.
 
-### Поля (32 штуки)
+### Поля (36 штук)
 
-| Компонент             | Пропсы                                                                              | Значение схемы        |
-| --------------------- | ----------------------------------------------------------------------------------- | --------------------- |
-| `FieldInput`          | `name`, `label?`, `placeholder?`                                                    | `string`              |
-| `FieldTextarea`       | `name`, `label?`, `placeholder?`                                                    | `string`              |
-| `FieldNumber`         | `name`, `label?`, `placeholder?`                                                    | `number`              |
-| `FieldNumberInput`    | `name`, `label?`, `placeholder?`, `min?/max?/step?`                                 | `number`              |
-| `FieldCheckbox`       | `name`, `label?`                                                                    | `boolean`             |
-| `FieldSwitch`         | `name`, `label?`                                                                    | `boolean`             |
-| `FieldSelect`         | `name`, `label?`, `placeholder?`, `options`                                         | `string`              |
-| `FieldNativeSelect`   | `name`, `label?`, `placeholder?`, `options`                                         | `string`              |
-| `FieldRadioGroup`     | `name`, `label?`, `options`, `orientation?`                                         | `string`              |
-| `FieldPassword`       | `name`, `label?`, `placeholder?`, `defaultVisible?`                                 | `string`              |
-| `FieldHidden`         | `name`, `value?`                                                                    | любое                 |
-| `FieldYesNo`          | `name`, `label?`, `yesLabel?`, `noLabel?`                                           | `boolean`             |
-| `FieldDate`           | `name`, `label?`, `placeholder?`, `min?/max?`                                       | `string`              |
-| `FieldTime`           | `name`, `label?`, `placeholder?`, `min?/max?/step?`                                 | `string`              |
-| `FieldCurrency`       | `name`, `label?`, `placeholder?`, `currency?`                                       | `number`              |
-| `FieldPercentage`     | `name`, `label?`, `placeholder?`, `min?/max?/step?`                                 | `number`              |
-| `FieldMaskedInput`    | `name`, `label?`, `mask`, `formatMode?`, `formatDescription`                        | `string`              |
-| `FieldPassport`       | `name`, `label?`                                                                    | `string`              |
-| `FieldINN`            | `name`, `label?`                                                                    | `string`              |
-| `FieldKPP`            | `name`, `label?`                                                                    | `string`              |
-| `FieldOGRN`           | `name`, `label?`                                                                    | `string`              |
-| `FieldSNILS`          | `name`, `label?`                                                                    | `string`              |
-| `FieldBIK`            | `name`, `label?`                                                                    | `string`              |
-| `FieldBankAccount`    | `name`, `label?`                                                                    | `string`              |
-| `FieldCorrAccount`    | `name`, `label?`                                                                    | `string`              |
-| `FieldPhone`          | `name`, `label?`, `country?`, `autoUnmask?`                                         | `string`              |
-| `FieldDateRange`      | `name`, `label?`, `startLabel?/endLabel?`, `min?/max?`, `presets?`, `orientation?`  | `{start,end}`         |
-| `FieldDateTimePicker` | `name`, `label?`, `minDateTime?/maxDateTime?`, `timeStep?`                          | `string`              |
-| `FieldDuration`       | `name`, `label?`, `format?`, `min?/max?/step?`                                      | `number`              |
-| `FieldSlider`         | `name`, `label?`, `min?/max?/step?`, `showValue?`                                   | `number`              |
-| `FieldRating`         | `name`, `label?`, `count?`                                                          | `number`              |
-| `FieldCreditCard`     | `name?`, `label?`, `brands?`, `showBrandIcon?`, `layout?`, `disabled?`, `readOnly?` | `{number,expiry,cvc}` |
+| Компонент             | Пропсы                                                                                      | Значение схемы        |
+| --------------------- | ------------------------------------------------------------------------------------------- | --------------------- |
+| `FieldInput`          | `name`, `label?`, `placeholder?`                                                            | `string`              |
+| `FieldTextarea`       | `name`, `label?`, `placeholder?`                                                            | `string`              |
+| `FieldNumber`         | `name`, `label?`, `placeholder?`                                                            | `number`              |
+| `FieldNumberInput`    | `name`, `label?`, `placeholder?`, `min?/max?/step?`                                         | `number`              |
+| `FieldCheckbox`       | `name`, `label?`                                                                            | `boolean`             |
+| `FieldSwitch`         | `name`, `label?`                                                                            | `boolean`             |
+| `FieldSelect`         | `name`, `label?`, `placeholder?`, `options`                                                 | `string`              |
+| `FieldNativeSelect`   | `name`, `label?`, `placeholder?`, `options`                                                 | `string`              |
+| `FieldRadioGroup`     | `name`, `label?`, `options`, `orientation?`                                                 | `string`              |
+| `FieldPassword`       | `name`, `label?`, `placeholder?`, `defaultVisible?`                                         | `string`              |
+| `FieldHidden`         | `name`, `value?`                                                                            | любое                 |
+| `FieldYesNo`          | `name`, `label?`, `yesLabel?`, `noLabel?`                                                   | `boolean`             |
+| `FieldDate`           | `name`, `label?`, `placeholder?`, `min?/max?`                                               | `string`              |
+| `FieldTime`           | `name`, `label?`, `placeholder?`, `min?/max?/step?`                                         | `string`              |
+| `FieldCurrency`       | `name`, `label?`, `placeholder?`, `currency?`                                               | `number`              |
+| `FieldPercentage`     | `name`, `label?`, `placeholder?`, `min?/max?/step?`                                         | `number`              |
+| `FieldMaskedInput`    | `name`, `label?`, `mask`, `formatMode?`, `formatDescription`                                | `string`              |
+| `FieldPassport`       | `name`, `label?`                                                                            | `string`              |
+| `FieldINN`            | `name`, `label?`                                                                            | `string`              |
+| `FieldKPP`            | `name`, `label?`                                                                            | `string`              |
+| `FieldOGRN`           | `name`, `label?`                                                                            | `string`              |
+| `FieldSNILS`          | `name`, `label?`                                                                            | `string`              |
+| `FieldBIK`            | `name`, `label?`                                                                            | `string`              |
+| `FieldBankAccount`    | `name`, `label?`                                                                            | `string`              |
+| `FieldCorrAccount`    | `name`, `label?`                                                                            | `string`              |
+| `FieldPhone`          | `name`, `label?`, `country?`, `autoUnmask?`                                                 | `string`              |
+| `FieldDateRange`      | `name`, `label?`, `startLabel?/endLabel?`, `min?/max?`, `presets?`, `orientation?`          | `{start,end}`         |
+| `FieldDateTimePicker` | `name`, `label?`, `minDateTime?/maxDateTime?`, `timeStep?`                                  | `string`              |
+| `FieldDuration`       | `name`, `label?`, `format?`, `min?/max?/step?`                                              | `number`              |
+| `FieldSlider`         | `name`, `label?`, `min?/max?/step?`, `showValue?`                                           | `number`              |
+| `FieldRating`         | `name`, `label?`, `count?`                                                                  | `number`              |
+| `FieldCreditCard`     | `name?`, `label?`, `brands?`, `showBrandIcon?`, `layout?`, `disabled?`, `readOnly?`         | `{number,expiry,cvc}` |
+| `FieldPinInput`       | `name`, `label?`, `count?`, `mask?`, `otp?`, `type?`, `onComplete?`                         | `string`              |
+| `FieldOTPInput`       | `name`, `label?`, `length?`, `type?`, `mask?`, `autoSubmit?`, `resendTimeout?`, `onResend?` | `string`              |
+| `FieldColorPicker`    | `name`, `label?`, `swatches?`                                                               | `string`              |
+| `FieldFileUpload`     | `name`, `label?`, `accept?`, `maxFiles?`, `security?`                                       | `File[]`              |
+
+`FieldColorPicker` — Vue-идиоматичное упрощение относительно Chakra `ColorPicker.Root` (Ark UI
+compound-компонент с area/hue/alpha слайдерами): нативный `<input type="color">` (браузерный
+пикер уже даёт то же самое бесплатно) + hex-инпут + палитра свотчей. `FieldPinInput`/
+`FieldOTPInput` — N ячеек `<input maxlength="1">` вместо Ark UI `PinInput.Root`, общая логика
+клавиатуры/paste — в composable `usePinInputField` (`@letar/forms-vue/core`).
 
 Документные поля (`FieldPassport`…`FieldCorrAccount`) собраны через общую фабрику
 `createDocumentField` (`src/lib/fields/document-field-base.ts`) поверх `useMaskField`
@@ -130,9 +141,10 @@ Composable движка масок `@letar/forms-core/mask` — Vue-аналог
 
 ## Что НЕ входит в скоуп
 
-- **Не все 61 поле React-скина** — 32 (Фаза 9, Этапы 1–4: базовые/нативные HTML-поля,
-  select-family, маски/документы включая `FieldCreditCard`, дата/число-виджеты). Остальные
-  (тяжёлые peer-dep поля, survey/table) — следующие этапы плана Фазы 9 (`libs/forms/PLAN.md`).
+- **Не все 61 поле React-скина** — 36 (Фаза 9, Этапы 1–4 целиком + 4 из 8 тяжёлых peer-dep полей
+  Этапа 5: `FieldPinInput`/`FieldOTPInput`/`FieldColorPicker`/`FieldFileUpload`). Остальные
+  (`RichText`/`Address`/`City`/`Signature` — Этап 5, survey/table — Этап 6) — следующие этапы
+  плана Фазы 9 (`libs/forms/PLAN.md`).
 - **Нет UIKit-абстракции** (в отличие от `forms-react`+`forms`/`forms-shadcn`) — одна референсная
   реализация на голом HTML, без свопаемого дизайн-скина. Для пруфа границы этого достаточно.
 - **Нет `Form.Group`/`Form.Steps`/массивов** — только плоские top-level поля.

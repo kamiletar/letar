@@ -5,12 +5,14 @@ import { z } from 'zod'
 import { AppForm } from './core/app-form'
 import { FieldBankAccount, FieldCorrAccount } from './fields/field-bank-account'
 import { FieldCheckbox } from './fields/field-checkbox'
+import { FieldColorPicker } from './fields/field-color-picker'
 import { FieldCreditCard } from './fields/field-credit-card'
 import { FieldCurrency } from './fields/field-currency'
 import { FieldDate } from './fields/field-date'
 import { FieldDateRange } from './fields/field-date-range'
 import { FieldDateTimePicker } from './fields/field-datetime-picker'
 import { FieldDuration } from './fields/field-duration'
+import { FieldFileUpload } from './fields/field-file-upload'
 import { FieldHidden } from './fields/field-hidden'
 import { FieldINN } from './fields/field-inn'
 import { FieldInput } from './fields/field-input'
@@ -18,10 +20,12 @@ import { FieldMaskedInput } from './fields/field-masked-input'
 import { FieldNativeSelect } from './fields/field-native-select'
 import { FieldNumber } from './fields/field-number'
 import { FieldNumberInput } from './fields/field-number-input'
+import { FieldOTPInput } from './fields/field-otp-input'
 import { FieldPassport } from './fields/field-passport'
 import { FieldPassword } from './fields/field-password'
 import { FieldPercentage } from './fields/field-percentage'
 import { FieldPhone } from './fields/field-phone'
+import { FieldPinInput } from './fields/field-pin-input'
 import { FieldRadioGroup } from './fields/field-radio-group'
 import { FieldRating } from './fields/field-rating'
 import { FieldSelect } from './fields/field-select'
@@ -518,5 +522,115 @@ describe('Этап 3 (продолжение) — FieldCreditCard', () => {
     await nextTick()
 
     expect((cvc.element as HTMLInputElement).value).toBe('123')
+  })
+})
+
+const stage5Schema = z.object({
+  pin: z.string().optional().meta({ ui: { title: 'PIN' } }),
+  code: z.string().optional().meta({ ui: { title: 'Код' } }),
+  color: z.string().optional().meta({ ui: { title: 'Цвет' } }),
+  file: z.any().optional().meta({ ui: { title: 'Файл' } }),
+})
+
+function Stage5TestForm(onResend?: () => Promise<void>) {
+  return defineComponent({
+    setup() {
+      return () =>
+        h(
+          AppForm,
+          { schema: stage5Schema, initialValue: {}, onSubmit: vi.fn() },
+          {
+            default: () => [
+              h(FieldPinInput, { name: 'pin', count: 4 }),
+              h(FieldOTPInput, { name: 'code', length: 4, resendTimeout: 30, onResend }),
+              h(FieldColorPicker, { name: 'color' }),
+              h(FieldFileUpload, { name: 'file' }),
+            ],
+          },
+        )
+    },
+  })
+}
+
+describe('Этап 5 (часть 1) — PinInput/OTPInput/ColorPicker/FileUpload', () => {
+  it('рендерят контролы всех четырёх полей', () => {
+    const wrapper = mount(Stage5TestForm())
+
+    expect(wrapper.findAll('input[data-field-name="pin"]')).toHaveLength(1)
+    expect(wrapper.find('.letar-field__pin-input').findAll('input')).toHaveLength(4)
+    expect(wrapper.find('input[type="color"][data-field-name="color"]').exists()).toBe(true)
+    expect(wrapper.find('input[type="file"][data-field-name="file"]').exists()).toBe(true)
+  })
+
+  it('FieldPinInput: ввод цифры переводит фокус на следующую ячейку и склеивает значение', async () => {
+    const wrapper = mount(Stage5TestForm(), { attachTo: document.body })
+    const boxes = wrapper.findAll('.letar-field__pin-input-box')
+
+    await boxes[0]?.setValue('1')
+    await boxes[1]?.setValue('2')
+    await boxes[2]?.setValue('3')
+    await boxes[3]?.setValue('4')
+    await nextTick()
+
+    expect((boxes[0]!.element as HTMLInputElement).value).toBe('1')
+    expect((boxes[3]!.element as HTMLInputElement).value).toBe('4')
+    wrapper.unmount()
+  })
+
+  it('FieldPinInput: Backspace на пустой ячейке очищает предыдущую и переводит на неё фокус', async () => {
+    const wrapper = mount(Stage5TestForm(), { attachTo: document.body })
+    const boxes = wrapper.findAll('.letar-field__pin-input-box')
+
+    await boxes[0]?.setValue('1')
+    await boxes[1]?.setValue('2')
+    await boxes[1]?.trigger('keydown', { key: 'Backspace' })
+    await boxes[1]?.trigger('keydown', { key: 'Backspace' })
+    await nextTick()
+
+    expect((boxes[1]!.element as HTMLInputElement).value).toBe('')
+    expect(document.activeElement).toBe(boxes[0]!.element)
+    wrapper.unmount()
+  })
+
+  it('FieldOTPInput: показывает таймер повторной отправки, после истечения — кнопку', async () => {
+    const onResend = vi.fn().mockResolvedValue(undefined)
+    const wrapper = mount(Stage5TestForm(onResend))
+
+    const button = wrapper.find('button')
+    expect(button.text()).toBe('Отправить повторно')
+
+    await button.trigger('click')
+    await nextTick()
+
+    expect(onResend).toHaveBeenCalledOnce()
+    expect(wrapper.find('[data-testid="otp-countdown"]').exists()).toBe(true)
+  })
+
+  it('FieldColorPicker: выбор свотча обновляет значение и отмечает его выбранным', async () => {
+    const wrapper = mount(Stage5TestForm())
+    const swatch = wrapper.find('.letar-field__color-swatch[aria-label="#F56565"]')
+
+    await swatch.trigger('click')
+    await nextTick()
+
+    expect((wrapper.find('input[type="color"]').element as HTMLInputElement).value).toBe('#f56565')
+    expect(swatch.attributes('data-selected')).toBe('true')
+  })
+
+  it('FieldFileUpload: выбор файла добавляет его в список, удаление убирает', async () => {
+    const wrapper = mount(Stage5TestForm())
+    const input = wrapper.find('input[type="file"]')
+    const file = new File(['hello'], 'note.txt', { type: 'text/plain' })
+
+    Object.defineProperty(input.element, 'files', { value: [file], configurable: true })
+    await input.trigger('change')
+    await nextTick()
+
+    expect(wrapper.find('.letar-field__file-item').text()).toContain('note.txt')
+
+    await wrapper.find('.letar-field__file-item button').trigger('click')
+    await nextTick()
+
+    expect(wrapper.find('.letar-field__file-item').exists()).toBe(false)
   })
 })
