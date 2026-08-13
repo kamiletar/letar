@@ -903,6 +903,51 @@ role="switch">` вместо отдельного примитива — тот 
 контроле, копирование понедельника на будни), host-компонент `testing/stage-d-host.component.ts`.
 `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-angular` зелёный.
 
+### Stage E: +8 полей семейства «выбор» (Select, CascadingSelect, Combobox, Autocomplete, Listbox, RadioCard, SegmentedGroup, ImageChoice) — done [2026-08-14]
+
+Пятый этап — зеркало `libs/forms-vue/src/lib/fields/field-{select,cascading-select,combobox,
+autocomplete,listbox,radio-card,segmented-group,image-choice}.ts`. `forms-core` снова не
+потребовал ни одной правки: `groupOptions`/`getOptionLabel` (`@letar/forms-core/uikit`)
+переиспользованы напрямую для группировки опций `FieldListboxComponent`, как и в Vue-версии.
+
+`FieldSelectComponent` — единственное поле стадии на чистом `[formControl]="ctrl"`; контракт
+совпадает с уже существующим `FieldNativeSelectComponent` (headless-скин без CSS/UIKit разводит их
+по пропсам, не по разметке — оба нативный `<select>`), разница только в опциональной пустой
+`<option>` из `resolvedPlaceholder()`, которую `NativeSelect` не рендерит.
+
+Самое нетривиальное поле — `FieldCascadingSelectComponent`: единственное во всём Angular-порте,
+которому нужно значение ДРУГОГО поля формы (`dependsOn`). Vue-версия читает его через
+`form.useStore(selector)` — `@tanstack/vue-form` даёт полностью реактивный snapshot всех значений
+формы, у Angular `FormGroup` такого нет. Вместо правки `FormRootService` (вне скоупа Stage E) —
+подписка на `formRoot.form.valueChanges`: `FormGroup.addControl` сам вызывает
+`updateValueAndValidity()` (эмитит `valueChanges` по умолчанию), поэтому одна подписка на value
+changes всей формы ловит и «поле-родитель ещё не смонтировано на момент конструирования этого
+поля» (порядок конструкторов content-projected детей не гарантирован), и «родитель сменил
+значение» — без ручного опроса графа полей. Disable-состояние переключается через
+`ctrl.disable()`/`ctrl.enable()`, не `[attr.disabled]` — смешивать нативный атрибут с
+`[formControl]` Angular считает ошибкой конфигурации формы (консольное предупреждение).
+
+`FieldListboxComponent` (single/multiple) и `FieldImageChoiceComponent` (single/multiple) держат
+`string | string[]` целиком в одном `FormControl` — тот же принцип, что Stage D. Кнопки-опции
+(`role="option"`/`"checkbox"`/`"radio"`) без нативного `ControlValueAccessor`, поэтому синк —
+`effect()` + `ctrl.events.subscribe()`, как у `FieldDateRangeComponent`/`FieldRadioCardComponent`/
+`FieldSegmentedGroupComponent`. `FieldComboboxComponent` — то же самое, но по другой причине:
+инпут показывает текст поиска/подпись выбранной опции, а контрол хранит `value` опции — два разных
+значения не могут делить один `FormControlDirective`. `FieldAutocompleteComponent` — единственное
+из «текстовых» полей стадии на прямом `[formControl]`, поскольку у него значение контрола ВСЕГДА
+совпадает с введённым текстом (подсказки — чисто визуальный оверлей, не источник другого значения).
+
+Текущий счёт: **41/61** (33 из Этапа 1–2 + Stage A/B/C/D + Stage E). Тесты —
+`app-form.stage-e.spec.ts` (8 тестов: Select — placeholder-опция и submit, CascadingSelect —
+список городов зависит от страны + disable пока родитель пуст + сброс значения при смене
+родителя, Combobox — фильтрация по подстроке и выбор по клику, Autocomplete — произвольный текст
+
+- подсказки, Listbox — multi-selection в массив, RadioCard — одиночный выбор карточкой,
+  SegmentedGroup — одиночный выбор сегментом, ImageChoice — одиночный выбор карточкой с
+  изображением), host-компонент `testing/stage-e-host.component.ts`.
+  `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-angular` зелёный (55/55 тестов
+  всего пакета).
+
 ### [2026-08-11] tsup роняет `'use client'` в lazy-чанках (forms + forms-shadcn) — не чинить без сигнала
 
 - **Запросил:** forms-dev (найдено при publish-prep `forms-shadcn`, письмо #49)
