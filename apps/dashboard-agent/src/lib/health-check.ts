@@ -84,11 +84,24 @@ async function checkMetricThresholds(state: HealthCheckState): Promise<{
     },
   ]
 
+  // Bind-mount'ы Docker (/etc/hostname, /etc/resolv.conf, /home/deploy/*) — это разные точки
+  // монтирования одного и того же физического раздела хоста. Дедуп по mount давал алерт на
+  // каждую точку монтирования при переполнении одного диска — до двух десятков одинаковых
+  // уведомлений за одно превышение порога. Дедупим по `disk.fs` (устройство), берём точку
+  // монтирования с самым коротким путём как самую понятную для заголовка алерта.
+  const uniqueDisks = new Map<string, { mount: string; usedPercent: number }>()
   for (const disk of disks) {
+    const existing = uniqueDisks.get(disk.fs)
+    if (!existing || disk.mount.length < existing.mount.length) {
+      uniqueDisks.set(disk.fs, { mount: disk.mount, usedPercent: disk.usedPercent ?? 0 })
+    }
+  }
+
+  for (const [fs, disk] of uniqueDisks) {
     checks.push({
-      key: `disk:${disk.mount}`,
+      key: `disk:${fs}`,
       label: `Диск ${disk.mount}`,
-      value: disk.usedPercent ?? 0,
+      value: disk.usedPercent,
       threshold: DISK_THRESHOLD,
       type: 'DISK_HIGH',
     })
