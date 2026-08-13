@@ -81,6 +81,16 @@
         "libs/umami-mcp/src/cli.ts"
       ]
     },
+    "glitchtip-mcp": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "bunx",
+        "tsx",
+        "libs/glitchtip-mcp/src/cli.ts"
+      ]
+    },
     "synth-mcp": {
       "type": "stdio",
       "command": "cmd",
