@@ -367,6 +367,32 @@ localStorage (`letar-forms-docs-framework`).
 (они не через `SkinCodeFile`). Не полный паритет UI между React и Vue-разделами документации —
 честный минимум-индикатор прогресса Фазы 9→10, как и было задумано.
 
+✅ **Этап 3 — Angular третьей опцией (2026-08-13).** `FRAMEWORK_VALUES` расширен до
+`['react', 'vue', 'angular']`, `FrameworkSwitcher`/`SkinCodeSwitcher`/`SkinCodeFile` обобщены —
+`unavailable` для Framework теперь собирается по факту наличия каждого пропа (`vue`/`angular`),
+не завязана на ровно два значения. У Angular-пруфа, как и у Vue, нет деления на скины.
+
+Выбор поля: из 10 полей Angular-пруфа (String/Textarea/Number/Password/Checkbox/Switch/
+RadioGroup/NativeSelect/Date/YesNo) ни одно не пересекалось с уже занятыми страницами
+(`fields/select` показывает Select/Combobox в живом примере, не NativeSelect; `guides/table-editor`
+вне скоупа пруфа вообще) — выбрано Number, у него уже была категорийная страница `fields/number`,
+но без секции "Full example" (Этап 1 подключил `SkinCodeFile` только к `select`/`table-editor`).
+Добавлена новая секция на `fields/number`(.ru).mdx:
+
+- React → `apps/form-develop-app{,-shadcn}/src/app/numeric-demo/page.tsx` (уже существовал)
+- Vue → `libs/forms-vue-shadcn/demo/examples/number-demo.ts` (уже существовал)
+- Angular → `libs/forms-angular/demo/examples/number-demo.ts` (новый файл, паттерн usage —
+  `<letar-app-form [schema] [initialValue] (formSubmit)>` + `<letar-field-number name="quantity" />`,
+  зеркалит `stage2-host.component.ts` из самого пакета)
+
+Остальные страницы (включая `select`/`table-editor`, у которых нет Angular-примера) показывают
+Angular-вкладку `disabled` автоматически — механизм общий, ничего не потребовалось трогать вручную
+на других страницах.
+
+Проверено: браузер (три вкладки переключаются, disabled честный на непокрытых страницах, Skin
+скрыт при Vue/Angular), `nx run-many -t lint typecheck:tsgo test --projects=form-docs` и
+`nx build form-docs` — зелёные.
+
 ⚠️ Точное число полей брать из `mcp__form-mcp__list_fields`, не из документов: на 2026-08-13 оно
 **61** (после Фазы 8 добавились 3 document-поля), и в разных файлах ещё встречаются устаревшие
 «56»/«57». Ни одно из них не считать источником истины.

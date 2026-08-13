@@ -8,6 +8,7 @@ import styles from './skin-switcher.module.css'
 const FRAMEWORK_LABELS: Record<Framework, string> = {
   react: 'React',
   vue: 'Vue',
+  angular: 'Angular',
 }
 
 export interface FrameworkSwitcherProps {
@@ -16,9 +17,9 @@ export interface FrameworkSwitcherProps {
 }
 
 /**
- * Переключатель React ↔ Vue — тот же паттерн, что `SkinSwitcher` (ссылки, не dropdown, решение 8,
- * P7 PLAN.md). Отдельная нав-группа: Framework и Skin — независимые оси (Vue-пример не имеет
- * chakra/shadcn-варианта в этом пруфе, см. `libs/forms/PLAN.md` Фаза 10).
+ * Переключатель React ↔ Vue ↔ Angular — тот же паттерн, что `SkinSwitcher` (ссылки, не dropdown,
+ * решение 8, P7 PLAN.md). Отдельная нав-группа: Framework и Skin — независимые оси (Vue/Angular
+ * не имеют chakra/shadcn-варианта — headless-пруфы, см. `libs/forms/PLAN.md` Фазы 9/10).
  */
 export function FrameworkSwitcher({ unavailable = [] }: FrameworkSwitcherProps) {
   const { framework, setFramework } = useSkin()

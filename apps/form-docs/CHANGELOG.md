@@ -2,6 +2,22 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.4.0] - 2026-08-13
+
+### Added
+
+- **P7 Этап 3 — Angular третьей опцией во `FrameworkSwitcher`.** `FRAMEWORK_VALUES` расширен до
+  `['react', 'vue', 'angular']`; `SkinCodeSwitcher`/`SkinCodeFile` получили опциональный проп
+  `angular`, та же логика disabled-вкладки, что у `vue` (независимая проверка каждого варианта —
+  `unavailable` собирается по факту наличия пропа, не привязана жёстко к двум значениям). У
+  Angular-пруфа нет деления на скины (headless), как и у Vue — Skin виден только внутри React.
+  Живой пример — новая страница `fields/number` (React `numeric-demo`, Vue `number-demo.ts`,
+  Angular — новый `libs/forms-angular/demo/examples/number-demo.ts`, зеркалит usage-паттерн из
+  `stage2-host.component.ts` пакета). Выбрано поле Number — единственное среди 10 полей
+  Angular-пруфа, не пересекающееся с уже занятыми страницами (`fields/select` — там
+  Select/Combobox, не NativeSelect; `guides/table-editor` вне скоупа пруфа). Остальные страницы
+  показывают Angular-вкладку disabled автоматически, без ручной правки каждой страницы.
+
 ## [0.3.0] - 2026-08-13
 
 ### Added

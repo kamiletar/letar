@@ -1,9 +1,8 @@
 /**
  * Общее состояние переключателей осей Framework × Skin (P7, PLAN.md).
  *
- * Публично сейчас включена только ось Skin (Chakra ↔ shadcn) — Framework типизирована
- * и учитывается механизмом (URL/localStorage), но UI-переключателя для неё ещё нет
- * (Этап 2, ждёт минимума Vue-полей).
+ * Framework — React ↔ Vue ↔ Angular (Этап 2/3). Skin (Chakra ↔ shadcn) виден только внутри
+ * React — у Vue/Angular-пруфов нет деления на скины (headless по конструкции).
  *
  * Хранение: URL query-параметр → localStorage → дефолт (решение 1, P7 PLAN.md).
  * ⛔ Cookie намеренно не используется — убивает индексацию не-дефолтных вариантов
@@ -14,8 +13,7 @@ export const SKIN_VALUES = ['chakra', 'shadcn'] as const
 export type Skin = (typeof SKIN_VALUES)[number]
 export const DEFAULT_SKIN: Skin = 'chakra'
 
-/** Не публикуется в UI на Этапе 1 — задел под Этап 2 (см. P7 PLAN.md). */
-export const FRAMEWORK_VALUES = ['react', 'vue'] as const
+export const FRAMEWORK_VALUES = ['react', 'vue', 'angular'] as const
 export type Framework = (typeof FRAMEWORK_VALUES)[number]
 export const DEFAULT_FRAMEWORK: Framework = 'react'
 

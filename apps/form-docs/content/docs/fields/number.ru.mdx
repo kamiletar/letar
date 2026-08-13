@@ -4,8 +4,22 @@ description: Числовой ввод — Number, Slider, Currency, Rating
 ---
 
 import { DemoContainer } from '@/components/demo-container'
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
 
 <DemoContainer demo="number" height={550} />
+
+## Полный пример
+
+Полный sandbox-пример, прочитанный напрямую из исходников `form-develop-app` /
+`form-develop-app-shadcn` на сборке — переключите фреймворк/скин, чтобы увидеть то же поле в
+разных реализациях.
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/numeric-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/numeric-demo/page.tsx"
+  vue="libs/forms-vue-shadcn/demo/examples/number-demo.ts"
+  angular="libs/forms-angular/demo/examples/number-demo.ts"
+/>
 
 ## Number
 

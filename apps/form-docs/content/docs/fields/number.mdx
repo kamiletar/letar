@@ -4,8 +4,21 @@ description: Numeric input fields — Number, Slider, Currency, Percentage, Rati
 ---
 
 import { DemoContainer } from '@/components/demo-container'
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
 
 <DemoContainer demo="number" height={550} />
+
+## Full example
+
+The complete sandbox example, read directly from the `form-develop-app` / `form-develop-app-shadcn`
+source at build time — switch framework/skin to see the same field across implementations.
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/numeric-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/numeric-demo/page.tsx"
+  vue="libs/forms-vue-shadcn/demo/examples/number-demo.ts"
+  angular="libs/forms-angular/demo/examples/number-demo.ts"
+/>
 
 ## Number
 

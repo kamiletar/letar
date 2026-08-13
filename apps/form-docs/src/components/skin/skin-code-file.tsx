@@ -12,20 +12,25 @@ export interface SkinCodeFileProps {
   shadcn?: string
   /**
    * Путь к Vue-примеру относительно корня монорепо (`libs/forms-vue-shadcn/demo/examples/*.ts`,
-   * Фаза 10). Не указан → вкладка Vue рисуется disabled с пометкой — Этап 2 P7 включает ось
-   * только там, где живой Vue-код уже есть, не мигрирует все страницы разом.
+   * Фаза 9). Не указан → вкладка Vue рисуется disabled с пометкой — ось включается только там,
+   * где живой код уже есть, не мигрирует все страницы разом.
    */
   vue?: string
+  /**
+   * Путь к Angular-примеру относительно корня монорепо (`libs/forms-angular/demo/examples/*.ts`,
+   * Фаза 10). Та же логика, что у `vue` — не указан → disabled-вкладка с пометкой.
+   */
+  angular?: string
   title?: string
   lang?: string
 }
 
 /**
- * Пример кода, переключаемый по осям Framework (React ↔ Vue) и Skin (Chakra ↔ shadcn) — все
- * варианты читаются с диска на сборке (`CodeFile`) и присутствуют в HTML; переключатель только
- * показывает/прячет через CSS (P7 PLAN.md, Этап 1/2).
+ * Пример кода, переключаемый по осям Framework (React ↔ Vue ↔ Angular) и Skin (Chakra ↔ shadcn)
+ * — все варианты читаются с диска на сборке (`CodeFile`) и присутствуют в HTML; переключатель
+ * только показывает/прячет через CSS (P7 PLAN.md, Этап 1/2/3).
  */
-export async function SkinCodeFile({ chakra, shadcn, vue, title, lang }: SkinCodeFileProps) {
+export async function SkinCodeFile({ chakra, shadcn, vue, angular, title, lang }: SkinCodeFileProps) {
   const chakraNode = await CodeFile({ path: chakra, title: title ? `${title} — Chakra UI` : undefined, lang })
   const shadcnNode = shadcn
     ? await CodeFile({ path: shadcn, title: title ? `${title} — shadcn/ui` : undefined, lang })
@@ -33,6 +38,9 @@ export async function SkinCodeFile({ chakra, shadcn, vue, title, lang }: SkinCod
   const vueNode = vue
     ? await CodeFile({ path: vue, title: title ? `${title} — Vue` : undefined, lang: lang ?? 'ts' })
     : null
+  const angularNode = angular
+    ? await CodeFile({ path: angular, title: title ? `${title} — Angular` : undefined, lang: lang ?? 'ts' })
+    : null
 
-  return <SkinCodeSwitcher chakra={chakraNode} shadcn={shadcnNode} vue={vueNode} />
+  return <SkinCodeSwitcher chakra={chakraNode} shadcn={shadcnNode} vue={vueNode} angular={angularNode} />
 }
