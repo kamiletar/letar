@@ -869,6 +869,40 @@ typecheck:tsgo test --projects=@letar/forms-angular` зелёный, `nx format`
 `testing/stage-c-host.component.ts`. `nx run-many -t lint typecheck:tsgo test
 --projects=@letar/forms-angular` зелёный, `nx format` (dprint) — без изменений.
 
+### Stage D: +4 поля с составным значением (DateRange, DateTimePicker, Duration, Schedule) — done [2026-08-14]
+
+Четвёртый этап — первые поля Angular-порта со значением-объектом, а не примитивом. Зеркало
+`libs/forms-vue/src/lib/fields/field-{date-range,datetime-picker,duration,schedule}.ts`, утилиты
+переиспользованы напрямую из `@letar/forms-core/field-widgets` (`getPresetRange`,
+`DATE_RANGE_PRESET_LABELS`, `combineDateTime`/`parseDateTime`, `hhmmToMinutes`/`minutesToHHMM`) —
+без единой правки в `forms-core`.
+
+Ключевое архитектурное решение: `FieldBase.control` уже даёт **один** `FormControl` на всё
+значение поля, независимо от того, примитив это или составной объект (`{start,end}` у DateRange,
+`WeeklySchedule` у Schedule) — Stage D не потребовал никакого нового механизма вроде вложенного
+`FormGroup`, просто использует существующий контракт буквально. Все четыре компонента НЕ вешают
+`[formControl]="ctrl"` ни на один из своих под-инпутов (у каждого своя часть составного значения,
+`FormControlDirective` этого не различает) — вместо этого собственный `signal`, синхронизируемый
+через `effect()` + `ctrl.events.subscribe()` (тот же приём, что `FieldRatingComponent`/
+`FieldSliderComponent`, Stage A: приложение zoneless, `FormControl.value` сам по себе не
+реактивен для шаблона), и ручные `ctrl.setValue()`/`ctrl.markAsTouched()` по
+`input`/`change`/`click`.
+
+`FieldScheduleComponent` — самое сложное поле пакета целиком (toggle дня, время open/close,
+копирование понедельника на будни, предупреждение `close > open`). Типы
+`WeeklySchedule`/`ScheduleDaySchedule`/`DayOfWeek` и константы (порядок дней, русские названия,
+дефолтный рабочий график) — портированы локально в файл компонента, не вынесены в `forms-core`:
+тот же выбор, что и в Vue-версии, они специфичны скину, а не ядру. `<input type="checkbox"
+role="switch">` вместо отдельного примитива — тот же приём, что у headless `FieldSwitchComponent`
+(Этап 1–2).
+
+Текущий счёт: **33/61** (29 из Этапа 1–2 + Stage A/B/C + Stage D). Тесты —
+`app-form.stage-d.spec.ts` (9 тестов: DateRange — сборка `{start,end}` из двух инпутов и клик по
+пресету, DateTimePicker — комбинирование date+time в ISO-строку, Duration — пересчёт часы+минуты
+→ суммарные минуты и Zod-валидация `min`, Schedule — рендер 7 дней, выключение дня даёт `null` в
+контроле, копирование понедельника на будни), host-компонент `testing/stage-d-host.component.ts`.
+`nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-angular` зелёный.
+
 ### [2026-08-11] tsup роняет `'use client'` в lazy-чанках (forms + forms-shadcn) — не чинить без сигнала
 
 - **Запросил:** forms-dev (найдено при publish-prep `forms-shadcn`, письмо #49)
