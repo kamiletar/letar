@@ -629,6 +629,65 @@ Angular рендерится, честные `disabled`-вкладки с пом
 были dprint-чистыми). Коммиты — тремя батчами по логическим кускам (`fields/*.ru.mdx`,
 `guides/*.ru.mdx` батч 1), путями `git commit -- <файлы>`, без `git add -A`.
 
+**Этап 5 — сквозная вычитка EN (2026-08-14, параллельная сессия).** Та же задача, что RU-вычитка
+выше, для `content/docs/**/*.mdx` (без `.ru.mdx`) — 6 `fields/*`, 48 `guides/*`, 3 `api/*`.
+Пересечений по файлам с RU-сессией не было.
+
+Найдено и исправлено — все находки реальные баги в примерах кода (несуществующие/неверные пропсы),
+не орфография; проверялось по исходникам `libs/forms/src`, не по памяти:
+
+- **Битые якоря — не найдены**, как и в RU (нейтрализация 87 заголовков не оставила ссылок на
+  старые якоря).
+- `fields/select.mdx` — Combobox «Async Search» использовал фиктивный проп `asyncSearch`, заменён
+  на реальный `useQuery`/`getLabel`/`getValue` (сверено с `field-combobox.tsx`, паттерн уже был
+  верно задокументирован в `guides/relation-fields.mdx`); Listbox `multiple` (boolean) → реальный
+  `selectionMode="multiple"`.
+- `fields/number.mdx` — Currency пример клал `currency: 'USD'` в `meta({ ui })` (несуществующий
+  ключ `FieldUIMeta`), на деле это проп самого компонента `<Form.Field.Currency currency="USD" />`.
+- `fields/specialized.mdx` — PinInput `length={4}` → `count={4}` (реальный проп); FileUpload
+  `maxSize` → `maxFileSize` (числовой проп в байтах; `maxSize`-ключа в `FileUploadFieldProps` нет).
+- `guides/file-upload.mdx` — та же ошибка `maxSize`→`maxFileSize`, плюс уточнена таблица пропсов
+  (`accept: string | string[]`, `variant` — 3 варианта, не 2).
+- `guides/depends-on.mdx` — `Form.Document.OGRNIP` не существует в библиотеке (есть только
+  `Form.Document.OGRN`, 13 цифр) — заменено.
+- `guides/form-skeleton.mdx` — переписан почти целиком: `schema` проп на `Form.Skeleton` не
+  существует (реальный API — `fields: number | ZodObject`, схема считает поля через shape), а
+  раздел «Inline — `loading` проп на `<Form>`» описывал фичу, которой в библиотеке нет вообще
+  (`<Form>` не принимает `loading`; loading-state есть только у `Form.WithApi`, другого
+  компонента). Заменено на паттерн «покажи `Form.Skeleton` вместо `<Form>` пока `isLoading`».
+- `guides/readonly-view.mdx` — добавлены реально существующие, но не задокументированные пропсы
+  `include`/`formatters` (сверено с `FormReadOnlyViewProps`); `schema` помечен как опциональный,
+  не required.
+- `guides/advanced-patterns.mdx`, `api/form-component.mdx` — `Form.Builder` пример клал `fields`
+  на верхний уровень пропсов и добавлял `validation`/`section` на отдельные поля — ни того, ни
+  другого нет в `FormBuilderProps`/`FieldConfig` (fields живут внутри `config.fields`,
+  `initialValue` — required проп, которого не было в примере).
+- `guides/mcp.mdx` — список категорий `list_fields` содержал `payment`/`security`, которых не
+  существует (проверено вызовом `list_fields({ category: ... })` — пустой массив на оба); заменён
+  на реальные 10 категорий.
+- `guides/filters-state.mdx` — тот же баг, что нашла параллельная RU-сессия в `.ru.mdx`:
+  `Form.Field.MultiSelect`/`SegmentedControl`/`CheckboxGroup` не существуют
+  (`get_field_props` → not found на все три). Заменены на `Form.Field.Listbox
+  selectionMode="multiple"` и `Form.Field.SegmentedGroup`.
+- `guides/porting-framework.mdx` — «6 из 56 полей» → «6 из 61 поля», синхронизировано с уже
+  исправленной RU-версией той же страницы.
+
+**Системная находка (не чинилась в этом заходе — архитектурное расхождение нарратива, не
+опечатка):** `guides/porting-framework.mdx` (EN и RU) по-прежнему утверждает, что
+`forms-vue-shadcn` «не достигает field-for-field паритета» — но по `libs/forms/README.md` и
+таблице библиотек этого репозитория (`libs.md`) `@letar/forms-vue-shadcn` закрыла Фазу 9 и достигла
+**полного паритета 61/61 полей** 2026-08-13, то есть весь абзац с рассуждением про 6/61 и ссылкой
+на README «out of scope» устарел концептуально, не только числом. Страница явно заявлена как
+«честный отчёт о разработке, не причёсанный reference постфактум» (см. её собственный intro) —
+решение, дописывать ли актуальный статус отдельным блоком или оставить как исторический срез,
+архитектурное, для координатора `QuietRidge`, не вычиточное.
+
+Проверено: `nx lint form-docs` и `nx typecheck:tsgo form-docs` — зелёные,
+`nx run-many -t format --projects=form-docs` не внёс изменений сверх правленых файлов. Коммиты —
+двумя батчами (`fields/*.mdx` + `guides/*.mdx` + `api/*.mdx` первая волна правок, затем
+`filters-state.mdx`+`porting-framework.mdx` после сверки с находками RU-сессии), путями
+`git commit -- <файлы>`, без `git add -A`.
+
 ### Что осталось непроверенным
 
 - **FormKit** — рендерер доков (`formkit/docs-ui-2`) приватный, 404. Их механику переключателя
