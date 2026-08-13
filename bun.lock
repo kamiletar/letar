@@ -483,14 +483,14 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.51.4",
+      "version": "0.52.0",
       "dependencies": {
         "tus-js-client": "^4.3.1",
       },
     },
     "apps/domwellbes-e2e": {
       "name": "@letar/domwellbes-e2e",
-      "version": "0.0.4",
+      "version": "0.0.5",
     },
     "apps/driving-school": {
       "name": "driving-school",
