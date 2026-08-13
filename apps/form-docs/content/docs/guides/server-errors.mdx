@@ -3,6 +3,8 @@ title: Server Error Mapping
 description: Auto-map Prisma, ZenStack, and Zod server errors to form fields
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
 ## Overview
 
 `mapServerErrors()` automatically detects the error format and maps it to form fields. No manual switch/case needed.
@@ -30,6 +32,12 @@ import { applyServerErrors, mapServerErrors } from '@letar/forms'
   <Form.Button.Submit>Create</Form.Button.Submit>
 </Form>
 ```
+
+## Full example
+
+The complete sandbox example, read directly from the `form-develop-app` source at build time.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/server-errors-demo/page.tsx" />
 
 ## With the declarative `<Form>`
 

@@ -3,9 +3,17 @@ title: Умное автозаполнение
 description: Автоматические HTML-атрибуты autocomplete для лучшего UX и доступности
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
 ## Обзор
 
 Правильные атрибуты `autocomplete` улучшают конверсию форм на **30%** (Google) и соответствуют **WCAG 1.3.5** для полей персональных данных. @letar/forms автоматически устанавливает `autocomplete` на основе имён полей — настройка не требуется.
+
+## Полный пример
+
+Полный пример из песочницы `form-develop-app`, прочитан напрямую из исходников на сборке.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/autofill-demo/page.tsx" />
 
 ## Как это работает
 

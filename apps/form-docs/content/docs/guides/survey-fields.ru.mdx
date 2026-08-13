@@ -3,6 +3,19 @@ title: Поля для опросов
 description: ImageChoice, Likert и YesNo — поля для опросов, анкет и форм обратной связи
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
+## Полный пример
+
+Полный пример из песочницы `form-develop-app` / `form-develop-app-shadcn`, прочитан напрямую из
+исходников на сборке. У shadcn (`survey-demo`) — ImageChoice и Likert; YesNo живёт в отдельной
+демо auth-полей, здесь не покрыт.
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/survey-fields-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/survey-demo/page.tsx"
+/>
+
 ## ImageChoice
 
 Визуальный выбор из карточек с изображениями. Идеально для выбора стилей, продуктов или категорий.

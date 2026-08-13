@@ -4,8 +4,17 @@ description: Schema-driven validation with Zod and custom error handling
 ---
 
 import { DemoContainer } from '@/components/demo-container'
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
 
 <DemoContainer demo="validation" height={550} />
+
+## Full example
+
+The complete sandbox example, read directly from the `form-develop-app` source at build time —
+automatic constraint extraction from the Zod schema (min/max, length, email/url, patterns, dates,
+array bounds) across every field type.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/constraints-demo/page.tsx" />
 
 ## Schema-Based Validation
 

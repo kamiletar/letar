@@ -3,9 +3,22 @@ title: Signature
 description: Digital signature field with canvas drawing and typed mode
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
 ## Overview
 
 `Form.Field.Signature` provides a digital signature input for legal forms, contracts, and consent documents. Users can draw with mouse/finger or type their name in cursive font.
+
+## Full example
+
+The complete sandbox example, read directly from the `form-develop-app` / `form-develop-app-shadcn`
+source at build time. The shadcn side (`FieldSignature`) lives inside the broader "specialized
+fields" demo, alongside Editable, ColorPicker, and FileUpload — not as a standalone page.
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/signature-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/specialized-demo/page.tsx"
+/>
 
 ## Basic Usage
 

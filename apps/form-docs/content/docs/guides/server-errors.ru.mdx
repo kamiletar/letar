@@ -3,6 +3,8 @@ title: Маппинг серверных ошибок
 description: Автоматический маппинг ошибок Prisma, ZenStack и Zod на поля формы
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
 ## Обзор
 
 `mapServerErrors()` автоматически определяет формат ошибки и маппит её на поля формы.
@@ -30,6 +32,12 @@ import { applyServerErrors, mapServerErrors } from '@letar/forms'
   <Form.Button.Submit>Создать</Form.Button.Submit>
 </Form>
 ```
+
+## Полный пример
+
+Полный пример из песочницы `form-develop-app`, прочитан напрямую из исходников на сборке.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/server-errors-demo/page.tsx" />
 
 ## С декларативным `<Form>`
 

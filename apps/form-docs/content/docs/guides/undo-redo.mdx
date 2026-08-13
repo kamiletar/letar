@@ -3,6 +3,8 @@ title: Undo / Redo
 description: Ctrl+Z/Ctrl+Y history for forms with useFormHistory
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
 ## Overview
 
 No form library offers built-in undo/redo. `useFormHistory()` fills that gap with debounced snapshots, keyboard shortcuts, and an optional visual controls component.
@@ -25,6 +27,12 @@ function ProductEditor() {
   )
 }
 ```
+
+## Full example
+
+The complete sandbox example, read directly from the `form-develop-app` source at build time.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/undo-redo-demo/page.tsx" />
 
 ## How It Works
 

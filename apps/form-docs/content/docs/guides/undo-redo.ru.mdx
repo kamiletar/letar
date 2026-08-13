@@ -3,6 +3,8 @@ title: Отмена / Повтор
 description: Ctrl+Z/Ctrl+Y история для форм с useFormHistory
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
 ## Обзор
 
 Ни одна библиотека форм не предоставляет встроенный undo/redo. `useFormHistory()` решает это — снимки с debounce, горячие клавиши и визуальный компонент управления.
@@ -25,6 +27,12 @@ function ProductEditor() {
   )
 }
 ```
+
+## Полный пример
+
+Полный пример из песочницы `form-develop-app`, прочитан напрямую из исходников на сборке.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/undo-redo-demo/page.tsx" />
 
 ## Как это работает
 

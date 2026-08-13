@@ -3,9 +3,17 @@ title: Security Patterns
 description: Honeypot, rate limiting, and secure file uploads for form protection
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
 ## Overview
 
 Forms are the primary attack surface for bots, spam, and malicious uploads. @letar/forms provides three built-in security mechanisms that require minimal configuration.
+
+## Full example
+
+The complete sandbox example, read directly from the `form-develop-app` source at build time.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/security-demo/page.tsx" />
 
 ## Honeypot — Bot Trap
 

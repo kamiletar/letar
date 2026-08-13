@@ -3,9 +3,22 @@ title: Подпись
 description: Поле цифровой подписи с рисованием на canvas и режимом ввода текста
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
 ## Обзор
 
 `Form.Field.Signature` предоставляет поле ввода цифровой подписи для юридических форм, контрактов и документов согласия. Пользователи могут рисовать мышью/пальцем или ввести своё имя курсивным шрифтом.
+
+## Полный пример
+
+Полный пример из песочницы `form-develop-app` / `form-develop-app-shadcn`, прочитан напрямую из
+исходников на сборке. У shadcn (`FieldSignature`) — внутри общей демо-страницы «специализированных
+полей», вместе с Editable, ColorPicker и FileUpload, не как отдельная страница.
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/signature-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/specialized-demo/page.tsx"
+/>
 
 ## Базовое использование
 

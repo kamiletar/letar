@@ -4,8 +4,17 @@ description: Схема-ориентированная валидация с Zod
 ---
 
 import { DemoContainer } from '@/components/demo-container'
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
 
 <DemoContainer demo="validation" height={550} />
+
+## Полный пример
+
+Полный пример из песочницы `form-develop-app`, прочитан напрямую из исходников на сборке —
+автоматическое извлечение ограничений из Zod-схемы (min/max, длина, email/url, паттерны, даты,
+границы массивов) по всем типам полей.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/constraints-demo/page.tsx" />
 
 ## Валидация через схему
 
