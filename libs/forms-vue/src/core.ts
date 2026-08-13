@@ -8,8 +8,16 @@
 export { AppForm } from './lib/core/app-form'
 export { cardBrandIcon } from './lib/core/card-brand-icon'
 export { createField, type FieldRenderArgs, type FieldRenderFn } from './lib/core/create-field'
+export { createLazyField } from './lib/core/create-lazy-field'
 export { type ResolvedFieldMeta, resolveFieldMeta, withFieldValidation } from './lib/core/field-wiring'
 export { type AppFormContext, provideAppForm, useAppFormContext } from './lib/core/form-context'
+export {
+  DEFAULT_RICH_TEXT_BUTTONS,
+  RICH_TEXT_ACTIONS,
+  RICH_TEXT_BUTTON_LABELS,
+  type RichTextButton,
+  type RichTextButtonAction,
+} from './lib/core/rich-text-actions'
 export {
   useAddressSuggestions,
   type UseAddressSuggestionsOptions,
@@ -35,6 +43,12 @@ export {
   type UsePinInputFieldOptions,
   type UsePinInputFieldResult,
 } from './lib/core/use-pin-input-field'
+export {
+  type RichTextOutputFormat,
+  useRichTextField,
+  type UseRichTextFieldOptions,
+  type UseRichTextFieldResult,
+} from './lib/core/use-rich-text-field'
 export {
   useSignatureField,
   type UseSignatureFieldOptions,

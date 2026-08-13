@@ -1,6 +1,6 @@
 {
   "name": "@letar/forms-vue-shadcn",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "shadcn-vue-скин @letar/forms-vue — реализация UIKit-контракта из @letar/forms-core на Reka UI + Tailwind + cva",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -14,6 +14,9 @@
     "./package.json": "./package.json"
   },
   "peerDependencies": {
+    "@tiptap/extension-placeholder": ">=3.0.0",
+    "@tiptap/starter-kit": ">=3.0.0",
+    "@tiptap/vue-3": ">=3.0.0",
     "class-variance-authority": ">=0.7.0",
     "clsx": ">=2.0.0",
     "lucide-vue-next": ">=0.400.0",
@@ -29,6 +32,9 @@
   },
   "devDependencies": {
     "@tanstack/vue-form": "^1.0.0",
+    "@tiptap/extension-placeholder": "^3.29.2",
+    "@tiptap/starter-kit": "^3.29.2",
+    "@tiptap/vue-3": "3.29.2",
     "@vue/test-utils": "^2.4.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

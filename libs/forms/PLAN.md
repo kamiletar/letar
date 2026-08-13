@@ -212,8 +212,51 @@ Hidden, YesNo, Date, Time, Currency, Percentage`. Архитектурная б�
 - Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
   зелёный на обоих пакетах.
 
-Дальше: Этап 5 (продолжение) — `FieldRichText` (Tiptap, `@tiptap/vue-3` — новый peer-dep,
-`lazy()`-паттерн по прецеденту `Form.Captcha`) закрывает Этап 5 целиком → Этап 6 (survey/table).
+**Этап 5 (продолжение) — отчёт (2026-08-13): `FieldRichText` закрывает Этап 5 целиком в обоих
+Vue-пакетах.** Последнее из восьми полей этапа — WYSIWYG на Tiptap (`@tiptap/vue-3`, новый
+peer-dep пакета).
+
+- **`@letar/forms-vue` 0.8.0 → 0.9.0, 40 полей (было 39):** `FieldRichText` грузится лениво через
+  новый `createLazyField` (`@letar/forms-vue/core`, на `defineAsyncComponent`) — Vue-идиоматичный
+  выбор вместо повторения React `lazy()`+`Suspense`: `defineAsyncComponent` не требует от
+  потребителя оборачивать поле в `<Suspense>` вручную, встроенный fallback-скелетон уже внутри.
+  Реализация — в отдельном чанке `field-rich-text-impl.ts`, сам файл `field-rich-text.ts` — тонкая
+  ленивая обёртка. Тулбар (жирный/курсив/подчёркнутый/зачёркнутый/код/H1-3/списки/цитата/
+  ссылка/undo/redo) вынесен в общий `rich-text-actions.ts` (`@letar/forms-vue/core`) — таблица
+  команд + русские `aria-label`, переиспользуется обоими скинами. Headless рисует кнопки
+  текстовыми глифами (B/I/U/…), как уже принято у `FieldRating` (★/☆) — без иконки-либы.
+- **`@letar/forms-vue-shadcn` 0.9.0 → 0.10.0, 41 поле (было 40):** тот же `FieldRichText` на
+  Reka/Tailwind-скине, переиспользует `useRichTextField`/`RICH_TEXT_ACTIONS`/
+  `RICH_TEXT_BUTTON_LABELS`/`createLazyField` из `@letar/forms-vue/core` без дублирования —
+  собственные только Tailwind-разметка тулбара (иконки `lucide-vue-next`) и содержимого.
+- **Тот же упрощённый scope, что у React `forms-shadcn`-версии** (Фаза 7.6, сама уже сокращение
+  от Chakra-оригинала): без `imageUpload`/`ImagePopover`, кнопка `link` — `window.prompt`, не
+  Popover-форма.
+- **Находка — StarterKit v3 уже включает `Link`/`Underline` сам.** Отдельные
+  `@tiptap/extension-link`/`@tiptap/extension-underline` в списке `extensions` дублировали то, что
+  `@tiptap/starter-kit` и так регистрирует (`Link.configure(...)`/`Underline.configure(...)`
+  внутри пакета) — `[tiptap warn]: Duplicate extension names found`. Убраны из зависимостей обоих
+  Vue-пакетов, ссылка конфигурируется через `StarterKit.configure({ link: {...} })`.
+- **Находка — версийный разъезд `@tiptap/vue-3`.** Caret `^3.29.2` у Bun резолвится в `3.30.1`,
+  чей `peerDependencies` требует точно `@tiptap/core@3.30.1`/`@tiptap/pm@3.30.1` — при остальном
+  tiptap-семействе воркспейса на `3.29.2` получаем рантайм-`SyntaxError` (`createWidgetDecoration`
+  не экспортирован), не TS-ошибку. Пин точной версией `"3.29.2"` (без `^`) в корневом
+  `package.json` и обоих `forms-vue*/package.json` — обязателен, пока апстрим не выровняет
+  диапазоны.
+- **Находка — двойная асинхронность в тестах.** Два независимых источника таймингов ловят
+  `flushPromises()`+`nextTick()` врасплох: (1) `defineAsyncComponent`'s реальный `import()` под
+  Vite/Vitest резолвится через несколько макротасков модульного графа, не микрозадачу — нужен
+  цикл с реальным `setTimeout`; (2) `@tiptap/vue-3`'s `editor.state`/`isActive()` живут за
+  `customRef`, чей `set()` вызывает `trigger()` только после двойного `requestAnimationFrame` —
+  обновление тулбара после клика видно тестам только после двух кадров. Оба хелпера
+  (`waitForLazyField`/`waitForEditorUpdate`) — в новом `app-form.stage5b.spec.ts` каждого пакета.
+- Тесты — отдельный файл `app-form.stage5b.spec.ts` в обоих пакетах (не общий `app-form.spec.ts`,
+  чтобы не раздувать его дальше): загрузка + рендер тулбара/редактора, клик по кнопке переключает
+  `aria-pressed`, `toolbarButtons` сужает набор отрисованных кнопок.
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный на обоих пакетах (38/38 тестов каждый).
+
+Дальше: Этап 6 (survey/table: Likert/MatrixChoice/TableEditor/DataGrid, `Form.Group`/`Form.Steps`).
 
 **Этап 5 (часть 1) — отчёт (2026-08-13): PinInput/OTPInput/ColorPicker/FileUpload закрыты в обоих
 Vue-пакетах.** Координатор в retired, отчёт сразу в план. Скоуп части ограничен намеренно (не
@@ -378,6 +421,24 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
 Публичный API не изменился. Детали — CHANGELOG обоих пакетов.
 
 ## Backlog (запросы от агентов)
+
+### [2026-08-13] Angular-порт — третий фреймворк экосистемы (после стабилизации Vue)
+
+- **Запросил:** Ками напрямую (через координатора), тред обсуждения — этот же разговор, не
+  agent-mail.
+- **Приоритет:** low — намеренно после Фазы 9, не параллельно ей.
+- **Цель:** охват всех трёх крупных фронтенд-лагерей (React/Vue/Angular) как часть той же
+  стратегии охвата OSS, что и Vue-порт ([[project_forms_distribution]]) — не заказ конкретного
+  приложения-потребителя, `@letar/forms` внутри монорепо остаётся только на React.
+- **Почему не сейчас:** Angular-разработчики по умолчанию ожидают Reactive Forms/сигналы, а не
+  headless-библиотеку поверх стороннего стейт-менеджера — рынок для headless-подхода там уже
+  сложился иначе, чем в React/Vue. Смысла запускать порт есть, но с более высокой ценой входа,
+  чем был у Vue; начинать до того как устоится паттерн `forms-core` + два готовых скина (React,
+  Vue) — рискованно дублировать архитектурные решения, которые ещё могут измениться в ходе
+  Фазы 9.
+- **Статус:** backlog, не назначено. Начинать после того, как Фаза 9 (Vue-паритет) закроется и
+  API `forms-core`/`createField`-контракт устаканится — тогда Angular-адаптер пишется по готовому
+  шаблону, а не с нуля.
 
 ### [2026-08-11] tsup роняет `'use client'` в lazy-чанках (forms + forms-shadcn) — не чинить без сигнала
 

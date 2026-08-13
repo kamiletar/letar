@@ -1,5 +1,51 @@
 # Changelog @letar/forms-vue
 
+## 0.9.0 (2026-08-13)
+
+Фаза 9, Этап 5 закрыт целиком — последнее из восьми полей, `FieldRichText`, WYSIWYG на Tiptap
+(`@tiptap/vue-3`, новый peer-dep). Итог: 40 полей (было 39).
+
+- **`FieldRichText`** — грузится лениво (`createLazyField`, новый Vue-идиоматичный хелпер на
+  `defineAsyncComponent`: не требует от потребителя оборачивать поле в `<Suspense>`, в отличие от
+  React `lazy()`+`Suspense`), реализация в отдельном чанке `field-rich-text-impl.ts`. Тулбар —
+  жирный/курсив/подчёркнутый/зачёркнутый/код/H1-3/списки/цитата/ссылка/undo/redo, headless-скин
+  рисует кнопки текстовыми глифами (B/I/U/…), как уже принято у `FieldRating` (★/☆) — пакет не
+  тянет иконку-либу.
+- Тот же упрощённый scope, что и React `forms-shadcn`-версия (Фаза 7.6, сама уже была
+  сокращением от Chakra-оригинала): без `imageUpload`/`ImagePopover`, кнопка `link` — через
+  `window.prompt`, не Popover-форма.
+- **`useRichTextField`** (`@letar/forms-vue/core`) — общий для headless и Reka-скина: жизненный
+  цикл Tiptap-редактора, синхронизация внешнего `value` (html/json), парсинг битого JSON без
+  падения редактора. `field.handleBlur` в composable намеренно не пробрасывается — DOM-фокус
+  contenteditable недоступен из `setup()` (только в scoped-слоте `form.Field`), поэтому blur
+  вешается на обёртку поля в render через `onFocusout` (в отличие от `blur`, `focusout` всплывает).
+- **`rich-text-actions.ts`** (`@letar/forms-vue/core`) — таблица команд тулбара
+  (`RICH_TEXT_ACTIONS`) и русских `aria-label` (`RICH_TEXT_BUTTON_LABELS`), общая для headless
+  (глифы) и Reka-скина (иконки `lucide-vue-next`).
+- ⚠️ **StarterKit v3 уже включает `Link`/`Underline` сам** (`extensions.push(Link.configure(...))`
+  внутри `@tiptap/starter-kit`) — отдельные `@tiptap/extension-link`/`@tiptap/extension-underline`
+  в составе `extensions: [...]` дают `[tiptap warn]: Duplicate extension names found`. Убраны из
+  зависимостей обоих Vue-пакетов, конфигурация ссылки — через `StarterKit.configure({ link: {...} })`.
+- ⚠️ **`@tiptap/vue-3` пиновать точной версией, не каретом.** `^3.29.2` у Bun резолвится в
+  `3.30.1`, чей `peerDependencies` требует ровно `@tiptap/core@3.30.1`/`@tiptap/pm@3.30.1` — при
+  остальном tiptap-семействе воркспейса на `3.29.2` рантайм падает `SyntaxError: ... does not
+  provide an export named 'createWidgetDecoration'` (не TS-ошибка, всплывает только в браузере/
+  тесте). Пин точной версией `"3.29.2"` (без `^`) во всех трёх `package.json` (корень,
+  `forms-vue`, `forms-vue-shadcn`) — обязателен, пока апстрим не выровняет caret-диапазоны.
+- ⚠️ **`editor.state`/`isActive()` в `@tiptap/vue-3` обновляются с задержкой в два кадра.**
+  `Editor.ts` пакета держит их за `customRef` с `set()` через двойной `requestAnimationFrame` перед
+  `trigger()` — обычного `nextTick()` после клика по кнопке тулбара недостаточно, тесты должны
+  ждать `requestAnimationFrame` дважды (см. `waitForEditorUpdate` в `app-form.stage5b.spec.ts`).
+- ⚠️ **`defineAsyncComponent`'s реальный `import()` под Vite/Vitest — не микрозадача.** Резолвится
+  через несколько макротасков модульного графа; `flushPromises()`/`nextTick()` из
+  `@vue/test-utils` в одиночку недостаточны для ожидания ленивого поля в тестах — нужен цикл с
+  реальным `setTimeout` (см. `waitForLazyField`).
+- Тесты — новый файл `app-form.stage5b.spec.ts` (не общий `app-form.spec.ts`, чтобы не раздувать
+  его дальше): загрузка + рендер тулбара/редактора, клик по "B" переключает `aria-pressed`,
+  `toolbarButtons` сужает набор кнопок.
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный на обоих пакетах.
+
 ## 0.8.0 (2026-08-13)
 
 Фаза 9, Этап 5 (часть 2) — ещё 3 «тяжёлых» peer-dep поля: `FieldSignature`, `FieldAddress`,

@@ -1,5 +1,27 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.10.0 (2026-08-13)
+
+Фаза 9, Этап 5 закрыт целиком — тот же `FieldRichText`, что в headless `forms-vue` 0.9.0,
+Reka/Tailwind-скин. Итог: 41 поле (было 40).
+
+- Переиспользует `useRichTextField`/`RICH_TEXT_ACTIONS`/`DEFAULT_RICH_TEXT_BUTTONS`/
+  `RICH_TEXT_BUTTON_LABELS` из `@letar/forms-vue/core` — здесь только Tailwind-разметка тулбара
+  (иконки `lucide-vue-next` вместо текстовых глифов headless-пакета) и содержимого редактора.
+  `createLazyField` тоже из `@letar/forms-vue/core` — тот же ленивый паттерн, без дублирования.
+  `onErrorCaptured` + `rekaUIKit.ErrorFallback` — тот же паттерн защиты рендера, что у остальных
+  полей пакета.
+  `@tiptap/extension-link`/`@tiptap/extension-underline` убраны из зависимостей — дублировали
+  расширения, уже включённые в `@tiptap/starter-kit` v3 (см. подробности в CHANGELOG
+  `@letar/forms-vue` 0.9.0).
+- Тесты — новый файл `app-form.stage5b.spec.ts`: загрузка + рендер тулбара/редактора, клик по
+  кнопке «Полужирный» переключает `aria-pressed`, `toolbarButtons` сужает набор кнопок. Те же две
+  ловушки ожидания, что у headless-пакета — двойной `requestAnimationFrame` после клика
+  (`editor.state` за debounced `customRef`) и цикл реальных `setTimeout` вместо одного
+  `flushPromises()` для резолва ленивого `import()`.
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный на обоих пакетах.
+
 ## 0.9.0 (2026-08-13)
 
 Фаза 9, Этап 5 (часть 2) — те же 3 поля, что в headless `forms-vue` 0.8.0, Reka/Tailwind-скин:
