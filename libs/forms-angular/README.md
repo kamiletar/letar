@@ -9,9 +9,38 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
 валидация — подключаться через нативные примитивы `@angular/forms` (Reactive Forms), не через
 имитацию `@tanstack/angular-form`.
 
-Пруф подтверждён: `forms-core` не потребовал ни одной правки. 10 полей закрыты (Этап 1–2, зеркало
-Vue-порта): String, Textarea, Number, Password, Checkbox, Switch, RadioGroup, NativeSelect, Date,
-YesNo.
+Пруф подтверждён: `forms-core` не потребовал ни одной правки. 17/61 полей закрыто:
+
+- **Этап 1–2** (зеркало Vue-порта): String, Textarea, Number, Password, Checkbox, Switch,
+  RadioGroup, NativeSelect, Date, YesNo.
+- **Stage A** (Фаза 11, +7 самых простых полей): NumberInput, Currency, Percentage, Slider,
+  Rating, Hidden, Time.
+
+## Поля
+
+| Компонент                    | Селектор                    | Доп. `@Input()` сверх `name`/`label`/`placeholder`                          |
+| ---------------------------- | --------------------------- | --------------------------------------------------------------------------- |
+| `FieldStringComponent`       | `letar-field-string`        | —                                                                           |
+| `FieldTextareaComponent`     | `letar-field-textarea`      | —                                                                           |
+| `FieldNumberComponent`       | `letar-field-number`        | —                                                                           |
+| `FieldNumberInputComponent`  | `letar-field-number-input`  | `min`, `max`, `step`                                                        |
+| `FieldCurrencyComponent`     | `letar-field-currency`      | `currency` (по умолчанию `RUB`), `min`, `max`, `step` (по умолчанию `0.01`) |
+| `FieldPercentageComponent`   | `letar-field-percentage`    | `min` (0), `max` (100), `step` (1)                                          |
+| `FieldSliderComponent`       | `letar-field-slider`        | `min` (0), `max` (100), `step` (1), `showValue`                             |
+| `FieldRatingComponent`       | `letar-field-rating`        | `count` (5)                                                                 |
+| `FieldHiddenComponent`       | `letar-field-hidden`        | `value` — без label/error UI, без рендера DOM                               |
+| `FieldTimeComponent`         | `letar-field-time`          | `min`, `max`, `step`                                                        |
+| `FieldPasswordComponent`     | `letar-field-password`      | —                                                                           |
+| `FieldCheckboxComponent`     | `letar-field-checkbox`      | —                                                                           |
+| `FieldSwitchComponent`       | `letar-field-switch`        | —                                                                           |
+| `FieldRadioGroupComponent`   | `letar-field-radio-group`   | `options: FieldRadioGroupOption[]`                                          |
+| `FieldNativeSelectComponent` | `letar-field-native-select` | `options: FieldNativeSelectOption[]`                                        |
+| `FieldDateComponent`         | `letar-field-date`          | —                                                                           |
+| `FieldYesNoComponent`        | `letar-field-yes-no`        | —                                                                           |
+
+Разметка у всех — голый HTML, без CSS: классы `letar-field`, `letar-field__label`,
+`letar-field__control`, `letar-field__error` (тот же принцип, что у `libs/forms-vue`, раздел
+«Что НЕ входит в скоуп» его README).
 
 ## Архитектурные решения
 
