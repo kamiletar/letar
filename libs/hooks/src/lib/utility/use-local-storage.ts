@@ -42,9 +42,12 @@ export function useLocalStorage<T>(
     }
   }, [initialValue, key])
 
-  const [storedValue, setStoredValue] = useState<T>(readValue)
+  // Дефолт совпадает на сервере и при первом клиентском рендере — реальное значение
+  // из localStorage подставляется только в useEffect ниже, иначе гидратация "поженит"
+  // DOM с чужим значением (см. .claude/docs/ssr-hydration-persisted-state.md)
+  const [storedValue, setStoredValue] = useState<T>(initialValue)
 
-  // Синхронизация при монтировании (для SSR)
+  // Синхронизация при монтировании (уже после гидратации)
   useEffect(() => {
     setStoredValue(readValue())
   }, [readValue])
