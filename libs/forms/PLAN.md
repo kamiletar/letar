@@ -100,6 +100,37 @@ Hidden, YesNo, Date, Time, Currency, Percentage`. Архитектурная б�
 обвязка) была предпосылкой для этого — без неё каждое новое поле в `forms-vue-shadcn` копировало
 бы `resolveFieldMeta`/`withFieldValidation` заново.
 
+**Этап 1 — отчёт (2026-08-13, продолжение): 11 нативных HTML-полей реализованы в headless-пакете,
+8 из них — на `rekaUIKit`.**
+
+- **`@letar/forms-vue` 0.2.0 → 0.3.0, 16 полей (было 5):** `FieldNumberInput`, `FieldPassword`,
+  `FieldSwitch`, `FieldRadioGroup`, `FieldNativeSelect`, `FieldHidden`, `FieldYesNo`, `FieldDate`,
+  `FieldTime`, `FieldCurrency`, `FieldPercentage` — плюс уже существовавшие Input/Textarea/Number/
+  Checkbox/Select. Имена файлов (`field-number-input.ts`, `field-native-select.ts`, …) подобраны
+  1:1 с React-скином (`libs/forms/src/lib/declarative/form-fields/**`) — требование координатора
+  для будущего P7 (`apps/form-docs`), матчинг примеров по диску.
+- **`@letar/forms-vue-shadcn` 0.2.0 → 0.3.0, 14 полей (было 6):** реализовано 8 из 11 новых —
+  `FieldNumberInput`, `FieldPassword`, `FieldDate`, `FieldTime`, `FieldCurrency`, `FieldPercentage`,
+  `FieldHidden`, `FieldYesNo`. Переиспользуют существующие Reka-примитивы (`Input`/`NumberInput`),
+  новых не понадобилось.
+- **Осознанно отложено на Этап 2:** `FieldSwitch`/`FieldRadioGroup`/`FieldNativeSelect` в
+  `forms-vue-shadcn` — нужны новые Reka UI-примитивы (`Switch`/`RadioGroup`/`NativeSelect`,
+  extended UIKit), которых пока нет в `rekaUIKit`. Этап 2 по плану и так посвящён
+  «select-family на Reka UI (~9 полей)» — три поля естественно туда переезжают, не отдельная
+  доработка.
+- **Находка:** `createField`-фабрика (headless и shadcn) не поддерживает поля с локальным
+  состоянием (`useFieldState` из React-версии нет) — `FieldPassword` в обоих пакетах пришлось
+  собирать напрямую через `resolveFieldMeta`/`withFieldValidation` внутри `defineComponent`,
+  чтобы `ref(visible)` жил в `setup()`, а не пересоздавался на каждый рендер внутри колбэка
+  `render`. Тот же паттерн понадобится любому будущему полю с локальным UI-состоянием
+  (например `FieldRating`, `FieldSlider` на Этапе 4).
+- Тесты — расширен `app-form.spec.ts` в обоих пакетах, блок «Этап 1»: 8 новых тестов в
+  `forms-vue`, 2 — в `forms-vue-shadcn` (рендер контролов + переключение видимости пароля).
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный.
+
+Дальше: Этап 2 (select-family на Reka UI, ~9 полей + три отложенных выше) — следующий заход.
+
 ---
 
 ## ✅ [2026-08-12] `useFormPersistence` — `excludeFields` для чувствительных полей + документация — закрыто

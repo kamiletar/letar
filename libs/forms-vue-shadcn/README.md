@@ -5,10 +5,10 @@ Reka UI-скин `@letar/forms-vue` — реализация `UIKit`-контр�
 `@letar/forms-shadcn` (Фаза 7.3, React): та же архитектура (`createFieldPrimitives(uikit)`),
 тот же стек примитивов (Radix-семейство), перенесённый на Vue.
 
-⚠️ **Не полный порт `@letar/forms-shadcn`** — 6 демонстрационных полей (Input/Number/Checkbox/
-Textarea/Select/Combobox), не 56/47. Задача (письмо координатора форм #61, Поток 1) — показать,
-как выглядит полноценный дизайн-скин с UIKit-контрактом на другом фреймворке, не догнать паритет
-полей. См. «Что не входит в скоуп» ниже.
+⚠️ **Не полный порт `@letar/forms-shadcn`** — 14 из 61 поля (Фаза 9, Этап 1 в процессе, план —
+`libs/forms/PLAN.md`). До Фазы 9 (2026-08-13) пакет был архитектурным пруфом на 6 полей (письмо
+координатора форм #61); решение координатора расширило скоуп до полного паритета. См. «Что не
+входит в скоуп» ниже — там актуальный список недостающего.
 
 ## Установка
 
@@ -83,20 +83,29 @@ Vue-версия `createFieldPrimitives` из `@letar/forms-react` (Фаза 7.3
 - Нет `useResolvedFieldProps`/`useFieldState` — минимальный набор аргументов рендера
   (`FieldRenderArgs`), достаточный для 6 простых полей; не абстракция под будущий рост.
 
-### Поля (6 штук)
+### Поля (14 штук)
 
-| Компонент       | Пропсы                                      | Значение схемы |
-| --------------- | ------------------------------------------- | -------------- |
-| `FieldString`   | `name`, `label?`, `placeholder?`            | `string`       |
-| `FieldNumber`   | `name`, `label?`                            | `number`       |
-| `FieldCheckbox` | `name`, `label?`                            | `boolean`      |
-| `FieldTextarea` | `name`, `label?`, `placeholder?`            | `string`       |
-| `FieldSelect`   | `name`, `label?`, `placeholder?`, `options` | `string`       |
-| `FieldCombobox` | `name`, `label?`, `placeholder?`, `options` | `string`       |
+| Компонент          | Пропсы                                      | Значение схемы |
+| ------------------ | ------------------------------------------- | -------------- |
+| `FieldString`      | `name`, `label?`, `placeholder?`            | `string`       |
+| `FieldNumber`      | `name`, `label?`                            | `number`       |
+| `FieldNumberInput` | `name`, `label?`, `min?/max?/step?`         | `number`       |
+| `FieldCheckbox`    | `name`, `label?`                            | `boolean`      |
+| `FieldTextarea`    | `name`, `label?`, `placeholder?`            | `string`       |
+| `FieldSelect`      | `name`, `label?`, `placeholder?`, `options` | `string`       |
+| `FieldCombobox`    | `name`, `label?`, `placeholder?`, `options` | `string`       |
+| `FieldPassword`    | `name`, `label?`, `placeholder?`            | `string`       |
+| `FieldHidden`      | `name`, `value?`                            | любое          |
+| `FieldYesNo`       | `name`, `label?`, `yesLabel?`, `noLabel?`   | `boolean`      |
+| `FieldDate`        | `name`, `label?`, `placeholder?`            | `string`       |
+| `FieldTime`        | `name`, `label?`, `placeholder?`            | `string`       |
+| `FieldCurrency`    | `name`, `label?`, `placeholder?`            | `number`       |
+| `FieldPercentage`  | `name`, `label?`, `placeholder?`            | `number`       |
 
-`FieldSelect`/`FieldCombobox` собраны не через `createField` (нужен доп. проп `options`, которого
-нет в контракте фабрики) — напрямую по `useAppFormContext`, тем же паттерном, что и в headless
-`@letar/forms-vue`.
+`FieldSelect`/`FieldCombobox`/`FieldNumberInput`/`FieldPassword`/`FieldHidden`/`FieldYesNo`
+собраны не через `createField` (нужен доп. проп сверх `name`/`label`/`placeholder`, либо
+локальное состояние, которого нет в контракте фабрики) — напрямую по `useAppFormContext`/
+`resolveFieldMeta`/`withFieldValidation`, тем же паттерном, что и в headless `@letar/forms-vue`.
 
 ### `cn()`
 
@@ -104,9 +113,11 @@ Vue-версия `createFieldPrimitives` из `@letar/forms-react` (Фаза 7.3
 
 ## Что не входит в скоуп
 
-- **Не 56/47 полей** — только 6. Остальные поля React-скинов (`RichText`/`FileUpload`/`Address`/…)
-  в этом пакете не появятся без отдельного решения расширить скоуп.
-- **RadioGroup/PinInput/NativeSelect и другой extended UIKit** — не реализованы, не нужны 6 полям.
+- **Не все 61 поле React-скина** — 14 (Фаза 9, Этап 1). Остальные — следующие этапы плана
+  Фазы 9 (`libs/forms/PLAN.md`).
+- **`Switch`/`RadioGroup`/`NativeSelect` в `rekaUIKit` не реализованы** — соответствующие поля
+  headless-пакета (`FieldSwitch`/`FieldRadioGroup`/`FieldNativeSelect`) здесь пока без Reka-скина,
+  ждут Этапа 2 («select-family на Reka UI»). `PinInput` и другой extended UIKit — тоже позже.
 - **Нет `Form.Group`/`Form.Steps`/табличных полей** — только плоские top-level поля.
 
 ## Demo

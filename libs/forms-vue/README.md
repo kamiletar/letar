@@ -1,12 +1,12 @@
 # @letar/forms-vue
 
-Тонкий Vue-адаптер `@letar/forms` — **архитектурный пруф**, а не полный порт (Фаза 7.8
-`libs/forms/PLAN.md`). Доказывает, что `@letar/forms-core` действительно framework-agnostic
-(DIP-граница, держится с 2026-07-08): 5 базовых полей поверх `@tanstack/vue-form`, ноль изменений
-в `forms-core` под это не потребовалось.
+Vue-адаптер `@letar/forms` поверх `@tanstack/vue-form`. Начинался как архитектурный пруф границы
+(Фаза 7.8, DIP держится с 2026-07-08: `forms-core` не потребовал ни одного изменения под Vue).
+С Фазы 9 (`libs/forms/PLAN.md`, 2026-08-13) координатор форм расширил задачу до полного паритета
+с React-скином (61 поле) — не только пруф.
 
-⚠️ **Это НЕ полный порт** — 56 полей React-скина сюда не переносились и не планируются в этом
-пакете. Здесь ровно то, что нужно для верификации границы + маленький подарок Vue-комьюнити.
+⚠️ **Ещё не полный порт** — 16 из 61 поля React-скина (Этап 1 в процессе). Прогресс и план
+оставшихся этапов — `libs/forms/PLAN.md`.
 
 ## Установка
 
@@ -56,15 +56,26 @@ function handleSubmit(value: Record<string, unknown>) {
 Корневой компонент. Заводит `@tanstack/vue-form` через `useForm`, отдаёт `form`+`schema` полям
 через `provide`/`inject`. Сабмит — обычный `<form @submit>` с `preventDefault`.
 
-### Поля (5 штук)
+### Поля (16 штук)
 
-| Компонент       | Пропсы                                      | Значение схемы |
-| --------------- | ------------------------------------------- | -------------- |
-| `FieldInput`    | `name`, `label?`, `placeholder?`            | `string`       |
-| `FieldTextarea` | `name`, `label?`, `placeholder?`            | `string`       |
-| `FieldNumber`   | `name`, `label?`, `placeholder?`            | `number`       |
-| `FieldCheckbox` | `name`, `label?`                            | `boolean`      |
-| `FieldSelect`   | `name`, `label?`, `placeholder?`, `options` | `string`       |
+| Компонент           | Пропсы                                              | Значение схемы |
+| ------------------- | --------------------------------------------------- | -------------- |
+| `FieldInput`        | `name`, `label?`, `placeholder?`                    | `string`       |
+| `FieldTextarea`     | `name`, `label?`, `placeholder?`                    | `string`       |
+| `FieldNumber`       | `name`, `label?`, `placeholder?`                    | `number`       |
+| `FieldNumberInput`  | `name`, `label?`, `placeholder?`, `min?/max?/step?` | `number`       |
+| `FieldCheckbox`     | `name`, `label?`                                    | `boolean`      |
+| `FieldSwitch`       | `name`, `label?`                                    | `boolean`      |
+| `FieldSelect`       | `name`, `label?`, `placeholder?`, `options`         | `string`       |
+| `FieldNativeSelect` | `name`, `label?`, `placeholder?`, `options`         | `string`       |
+| `FieldRadioGroup`   | `name`, `label?`, `options`, `orientation?`         | `string`       |
+| `FieldPassword`     | `name`, `label?`, `placeholder?`, `defaultVisible?` | `string`       |
+| `FieldHidden`       | `name`, `value?`                                    | любое          |
+| `FieldYesNo`        | `name`, `label?`, `yesLabel?`, `noLabel?`           | `boolean`      |
+| `FieldDate`         | `name`, `label?`, `placeholder?`, `min?/max?`       | `string`       |
+| `FieldTime`         | `name`, `label?`, `placeholder?`, `min?/max?/step?` | `string`       |
+| `FieldCurrency`     | `name`, `label?`, `placeholder?`, `currency?`       | `number`       |
+| `FieldPercentage`   | `name`, `label?`, `placeholder?`, `min?/max?/step?` | `number`       |
 
 `label`/`placeholder` необязательны — по умолчанию берутся из `schema.meta({ ui: {...} })` по
 пути `name` (`getFieldMeta`, тот же вызов, что у React-скина). Валидация — `onChange` по
@@ -86,9 +97,9 @@ function handleSubmit(value: Record<string, unknown>) {
 
 ## Что НЕ входит в скоуп
 
-- **Не 56 полей** — только 5 (Input/Textarea/Number/Checkbox/Select). Остальные 51 в этом пакете
-  не появятся без отдельного решения расширить скоуп (это был бы «второй Ark UI под Vue» —
-  месяцы работы, заказчика на это нет).
+- **Не все 61 поле React-скина** — 16 (Фаза 9, Этап 1: базовые + нативные HTML-поля).
+  Остальные (маски/документы, дата/число-виджеты, тяжёлые peer-dep поля, survey/table) —
+  следующие этапы плана Фазы 9 (`libs/forms/PLAN.md`).
 - **Нет UIKit-абстракции** (в отличие от `forms-react`+`forms`/`forms-shadcn`) — одна референсная
   реализация на голом HTML, без свопаемого дизайн-скина. Для пруфа границы этого достаточно.
 - **Нет `Form.Group`/`Form.Steps`/массивов** — только плоские top-level поля.

@@ -1,5 +1,23 @@
 # Changelog @letar/forms-vue
 
+## 0.3.0 (2026-08-13)
+
+Фаза 9, Этап 1 (продолжение) — 11 новых нативных HTML-полей поверх `@letar/forms-vue/core`,
+имена файлов подобраны 1:1 с React-скином (`libs/forms/src/lib/declarative/form-fields/**`) —
+требование координатора для будущего сопоставления примеров по диску в `apps/form-docs`
+(P7).
+
+- **Новые поля:** `FieldNumberInput` (min/max/step), `FieldPassword` (переключатель видимости,
+  локальный `ref`), `FieldSwitch`, `FieldRadioGroup`, `FieldNativeSelect`, `FieldHidden`
+  (не рендерит DOM, синхронизирует `value` через `watch`), `FieldYesNo` (два кликабельных
+  блока), `FieldDate`, `FieldTime`, `FieldCurrency`, `FieldPercentage`.
+- Поля с пропсами сверх `name`/`label`/`placeholder` (min/max/step/options) собраны напрямую
+  через `resolveFieldMeta`/`withFieldValidation` (как `FieldSelect` до них), не через
+  `createField` — тот же паттерн, не новая абстракция.
+- Итог: 16 полей в headless-пакете (было 5).
+- Тесты — `src/lib/app-form.spec.ts`, блок «Этап 1»: рендер меток/контролов всех 11 полей,
+  переключение видимости пароля, клик по `YesNo`, выбор в `RadioGroup`.
+
 ## 0.2.0 (2026-08-13)
 
 Фаза 9 (`libs/forms/PLAN.md`, тред `forms-vue-parity-phase9`), Этап 1 — начало паритета Vue-полей.

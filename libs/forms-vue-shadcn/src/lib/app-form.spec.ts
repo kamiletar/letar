@@ -5,10 +5,18 @@ import { defineComponent, h, nextTick } from 'vue'
 import { z } from 'zod'
 import { FieldCheckbox } from './fields/field-checkbox'
 import { FieldCombobox } from './fields/field-combobox'
+import { FieldCurrency } from './fields/field-currency'
+import { FieldDate } from './fields/field-date'
+import { FieldHidden } from './fields/field-hidden'
 import { FieldNumber } from './fields/field-number'
+import { FieldNumberInput } from './fields/field-number-input'
+import { FieldPassword } from './fields/field-password'
+import { FieldPercentage } from './fields/field-percentage'
 import { FieldSelect } from './fields/field-select'
 import { FieldString } from './fields/field-string'
 import { FieldTextarea } from './fields/field-textarea'
+import { FieldTime } from './fields/field-time'
+import { FieldYesNo } from './fields/field-yes-no'
 
 /**
  * `SelectContent`/`ComboboxContent` (Reka UI) измеряют доступное место через `ResizeObserver` и
@@ -132,5 +140,66 @@ describe('forms-vue-shadcn: AppForm + Field* на rekaUIKit', () => {
     expect(() => mount(FieldString, { props: { name: 'title' } })).toThrow('вне <AppForm>')
 
     consoleError.mockRestore()
+  })
+})
+
+const stage1Schema = z.object({
+  quantity: z.number().optional().meta({ ui: { title: 'Количество' } }),
+  password: z.string().optional().meta({ ui: { title: 'Пароль' } }),
+  birthDate: z.string().optional().meta({ ui: { title: 'Дата рождения' } }),
+  startTime: z.string().optional().meta({ ui: { title: 'Время начала' } }),
+  price: z.number().optional().meta({ ui: { title: 'Цена' } }),
+  discount: z.number().optional().meta({ ui: { title: 'Скидка' } }),
+  utm: z.string().optional(),
+  agree: z.boolean().optional().meta({ ui: { title: 'Согласны?' } }),
+})
+
+function Stage1TestForm() {
+  return defineComponent({
+    setup() {
+      return () =>
+        h(
+          AppForm,
+          { schema: stage1Schema, initialValue: {}, onSubmit: vi.fn() },
+          {
+            default: () => [
+              h(FieldNumberInput, { name: 'quantity', min: 1, max: 10 }),
+              h(FieldPassword, { name: 'password' }),
+              h(FieldDate, { name: 'birthDate' }),
+              h(FieldTime, { name: 'startTime' }),
+              h(FieldCurrency, { name: 'price' }),
+              h(FieldPercentage, { name: 'discount' }),
+              h(FieldHidden, { name: 'utm', value: 'ABC123' }),
+              h(FieldYesNo, { name: 'agree' }),
+            ],
+          },
+        )
+    },
+  })
+}
+
+describe('forms-vue-shadcn: Этап 1 — новые поля на rekaUIKit', () => {
+  it('рендерят метку и контрол для каждого поля', () => {
+    const wrapper = mount(Stage1TestForm(), { attachTo: document.body })
+
+    expect(wrapper.find('input[data-field-name="quantity"]').exists()).toBe(true)
+    expect(wrapper.find('input[type="password"]').exists()).toBe(true)
+    expect(wrapper.find('input[type="date"]').exists()).toBe(true)
+    expect(wrapper.find('input[type="time"]').exists()).toBe(true)
+    expect(wrapper.find('input[data-field-name="price"]').exists()).toBe(true)
+    expect(wrapper.find('input[data-field-name="discount"]').exists()).toBe(true)
+    expect(wrapper.findAll('[role="radio"]')).toHaveLength(2)
+
+    wrapper.unmount()
+  })
+
+  it('FieldPassword переключает видимость по клику', async () => {
+    const wrapper = mount(Stage1TestForm(), { attachTo: document.body })
+    const input = wrapper.find('input[type="password"]')
+
+    await wrapper.find('button[aria-label="Toggle password visibility"]').trigger('click')
+
+    expect(input.attributes('type')).toBe('text')
+    wrapper.unmount()
   })
 })

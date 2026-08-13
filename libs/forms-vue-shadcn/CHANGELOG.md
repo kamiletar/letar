@@ -1,5 +1,23 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.3.0 (2026-08-13)
+
+Фаза 9, Этап 1 (продолжение) — 8 новых полей на `rekaUIKit`, подмножество нового набора
+`@letar/forms-vue` (полностью: `FieldNumberInput`, `FieldPassword`, `FieldDate`, `FieldTime`,
+`FieldCurrency`, `FieldPercentage`, `FieldHidden`, `FieldYesNo`). `FieldSwitch`/`FieldRadioGroup`/
+`FieldNativeSelect` отложены на Этап 2 — нужны новые Reka UI-примитивы
+(`Switch`/`RadioGroup`/`NativeSelect`), которых пока нет в `rekaUIKit`.
+
+- Поля без своего Reka-примитива переиспользуют уже существующие (`Input` → Password/Date/Time,
+  `NumberInput` → NumberInput/Currency/Percentage).
+- `FieldPassword` — единственное поле, которому нужен локальный `ref` (видимость), поэтому оно
+  не через `createField` (нет `useFieldState`), а напрямую через `resolveFieldMeta`/
+  `withFieldValidation` + собственный `onErrorCaptured`, как `FieldSelect`.
+- `FieldHidden`/`FieldYesNo` не используют `rekaUIKit` вовсе (нет визуального контрола/своя
+  вёрстка на Tailwind-классах) — тот же выбор, что в headless-версии.
+- Тесты — `src/lib/app-form.spec.ts`, блок «Этап 1»: рендер контролов всех 8 полей,
+  переключение видимости пароля.
+
 ## 0.2.0 (2026-08-13)
 
 Фаза 9 (`libs/forms/PLAN.md`, тред `forms-vue-parity-phase9`), Этап 1.
