@@ -4,8 +4,21 @@ description: Phone, PinInput, ColorPicker, Tags, FileUpload, Address
 ---
 
 import { DemoContainer } from '@/components/demo-container'
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
 
 <DemoContainer demo="specialized" height={450} />
+
+## Полный пример
+
+Полный sandbox-пример, прочитанный напрямую из исходников `form-develop-app` /
+`form-develop-app-shadcn` на сборке — переключите скин, чтобы увидеть то же поле в разных
+реализациях. Оба источника показывают FileUpload (shadcn-источник заодно показывает ColorPicker,
+а также Editable и Signature, которые не входят в эту страницу).
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/file-upload-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/specialized-demo/page.tsx"
+/>
 
 ## Phone
 
