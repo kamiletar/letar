@@ -7,7 +7,9 @@ import { DemoContainer } from '@/components/demo-container'
 
 <DemoContainer demo="string" height={500} />
 
-## Form.Field.String
+## String
+
+**API:** `Form.Field.String`
 
 Standard single-line text input. The most common field type.
 
@@ -36,7 +38,9 @@ z.string().url()
 // → type="url"
 ```
 
-## Form.Field.Textarea
+## Textarea
+
+**API:** `Form.Field.Textarea`
 
 Multi-line text input for longer content.
 
@@ -50,7 +54,9 @@ const Schema = z.object({
 <Form.Field.Textarea name="description" />
 ```
 
-## Form.Field.Password
+## Password
+
+**API:** `Form.Field.Password`
 
 Password input with a visibility toggle button.
 
@@ -64,7 +70,9 @@ const Schema = z.object({
 <Form.Field.Password name="password" />
 ```
 
-## Form.Field.MaskedInput
+## MaskedInput
+
+**API:** `Form.Field.MaskedInput`
 
 Input with format mask for structured data. Requires `use-mask-input` peer dependency.
 
@@ -85,7 +93,9 @@ const Schema = z.object({
 <Form.Field.MaskedInput name="creditCard" mask="9999 9999 9999 9999" />
 ```
 
-## Form.Field.RichText
+## RichText
+
+**API:** `Form.Field.RichText`
 
 Rich text editor for HTML/markdown content.
 
@@ -101,7 +111,9 @@ const Schema = z.object({
 
 Requires `@tiptap/react` and `@tiptap/starter-kit` as peer dependencies.
 
-## Form.Field.Editable
+## Editable
+
+**API:** `Form.Field.Editable`
 
 Inline editing — click text to edit, press Enter or blur to save.
 

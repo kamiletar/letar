@@ -7,7 +7,9 @@ import { DemoContainer } from '@/components/demo-container'
 
 <DemoContainer demo="number" height={550} />
 
-## Form.Field.Number
+## Number
+
+**API:** `Form.Field.Number`
 
 Numeric input with increment/decrement stepper.
 
@@ -31,7 +33,9 @@ z.number().int()
 // → step={1} (integer only)
 ```
 
-## Form.Field.Slider
+## Slider
+
+**API:** `Form.Field.Slider`
 
 Range slider for selecting a value within a range.
 
@@ -45,7 +49,9 @@ const Schema = z.object({
 <Form.Field.Slider name="volume" />
 ```
 
-## Form.Field.Currency
+## Currency
+
+**API:** `Form.Field.Currency`
 
 Money input with currency symbol formatting.
 
@@ -59,7 +65,9 @@ const Schema = z.object({
 <Form.Field.Currency name="price" />
 ```
 
-## Form.Field.Percentage
+## Percentage
+
+**API:** `Form.Field.Percentage`
 
 Percentage input (0-100%) with `%` suffix.
 
@@ -73,7 +81,9 @@ const Schema = z.object({
 <Form.Field.Percentage name="discount" />
 ```
 
-## Form.Field.Rating
+## Rating
+
+**API:** `Form.Field.Rating`
 
 Star rating input for reviews and feedback.
 

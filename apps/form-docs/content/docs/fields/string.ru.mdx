@@ -7,7 +7,9 @@ import { DemoContainer } from '@/components/demo-container'
 
 <DemoContainer demo="string" height={500} />
 
-## Form.Field.String
+## String
+
+**API:** `Form.Field.String`
 
 Стандартное однострочное текстовое поле. Самый распространённый тип.
 
@@ -36,7 +38,9 @@ z.string().url()
 // → type="url"
 ```
 
-## Form.Field.Textarea
+## Textarea
+
+**API:** `Form.Field.Textarea`
 
 Многострочное поле для длинного текста.
 
@@ -50,7 +54,9 @@ const Schema = z.object({
 <Form.Field.Textarea name="description" />
 ```
 
-## Form.Field.Password
+## Password
+
+**API:** `Form.Field.Password`
 
 Поле пароля с кнопкой переключения видимости.
 
@@ -64,7 +70,9 @@ const Schema = z.object({
 <Form.Field.Password name="password" />
 ```
 
-## Form.Field.MaskedInput
+## MaskedInput
+
+**API:** `Form.Field.MaskedInput`
 
 Поле с маской формата для структурированных данных. Требует peer-зависимость `use-mask-input`.
 
@@ -85,7 +93,9 @@ const Schema = z.object({
 <Form.Field.MaskedInput name="creditCard" mask="9999 9999 9999 9999" />
 ```
 
-## Form.Field.RichText
+## RichText
+
+**API:** `Form.Field.RichText`
 
 Редактор форматированного текста для HTML/markdown контента.
 
@@ -101,7 +111,9 @@ const Schema = z.object({
 
 Требуются peer-зависимости: `@tiptap/react` и `@tiptap/starter-kit`.
 
-## Form.Field.Editable
+## Editable
+
+**API:** `Form.Field.Editable`
 
 Инлайн-редактирование — клик по тексту для редактирования, Enter или blur для сохранения.
 

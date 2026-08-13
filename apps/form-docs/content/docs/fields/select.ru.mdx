@@ -4,10 +4,24 @@ description: Компоненты выбора — Select, Combobox, RadioGroup,
 ---
 
 import { DemoContainer } from '@/components/demo-container'
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
 
 <DemoContainer demo="select" height={550} />
 
-## Form.Field.Select
+## Полный пример
+
+Полный sandbox-пример (все select-подобные поля на одной странице), прочитанный напрямую из
+исходников `form-develop-app` / `form-develop-app-shadcn` на сборке — переключи скин, чтобы
+увидеть те же поля в обеих реализациях.
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/select-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/select-demo/page.tsx"
+/>
+
+## Select
+
+**API:** `Form.Field.Select`
 
 Выпадающий список для выбора одного варианта.
 
@@ -27,7 +41,9 @@ const options = [
 <Form.Field.Select name="role" options={options} />
 ```
 
-## Form.Field.Combobox
+## Combobox
+
+**API:** `Form.Field.Combobox`
 
 Выпадающий список с поиском. Поддерживает асинхронную загрузку опций.
 
@@ -35,7 +51,9 @@ const options = [
 <Form.Field.Combobox name="city" options={cityOptions} placeholder="Начните вводить город..." />
 ```
 
-## Form.Field.RadioGroup
+## RadioGroup
+
+**API:** `Form.Field.RadioGroup`
 
 Группа радиокнопок для выбора одного варианта.
 
@@ -46,7 +64,9 @@ const options = [
 <Form.Field.RadioGroup name="plan" options={planOptions} orientation="horizontal" />
 ```
 
-## Form.Field.RadioCard
+## RadioCard
+
+**API:** `Form.Field.RadioCard`
 
 Карточки для выбора одного варианта — визуально богаче чем RadioGroup.
 
@@ -59,7 +79,9 @@ const options = [
 <Form.Field.RadioCard name="plan" options={options} />
 ```
 
-## Form.Field.Checkbox
+## Checkbox
+
+**API:** `Form.Field.Checkbox`
 
 Одиночный чекбокс (да/нет).
 
@@ -67,7 +89,9 @@ const options = [
 <Form.Field.Checkbox name="agree" />
 ```
 
-## Form.Field.Switch
+## Switch
+
+**API:** `Form.Field.Switch`
 
 Переключатель (вкл/выкл).
 
@@ -75,7 +99,9 @@ const options = [
 <Form.Field.Switch name="notifications" />
 ```
 
-## Form.Field.Tags
+## Tags
+
+**API:** `Form.Field.Tags`
 
 Ввод тегов — множественные текстовые значения.
 
@@ -86,7 +112,9 @@ const options = [
 <Form.Field.Tags name="skills" maxTags={5} />
 ```
 
-## Form.Field.CheckboxCard
+## CheckboxCard
+
+**API:** `Form.Field.CheckboxCard`
 
 Карточки для множественного выбора.
 
@@ -100,7 +128,9 @@ const options = [
 />
 ```
 
-## Form.Field.Listbox
+## Listbox
+
+**API:** `Form.Field.Listbox`
 
 Выпадающий список для единичного или множественного выбора.
 
@@ -108,7 +138,9 @@ const options = [
 <Form.Field.Listbox name="permissions" options={permissionOptions} multiple />
 ```
 
-## Form.Field.NativeSelect
+## NativeSelect
+
+**API:** `Form.Field.NativeSelect`
 
 Стандартный HTML `<select>`. Легче чем Select, использует нативный UI браузера.
 
@@ -116,7 +148,9 @@ const options = [
 <Form.Field.NativeSelect name="country" options={countryOptions} />
 ```
 
-## Form.Field.SegmentedGroup
+## SegmentedGroup
+
+**API:** `Form.Field.SegmentedGroup`
 
 Сегментированный контрол — переключатель для небольших наборов опций.
 

@@ -98,7 +98,9 @@ Group fields into a nested object:
 </Form.Group>
 ```
 
-## Form.Group.List
+## List
+
+**API:** `Form.Group.List`
 
 Dynamic array of items:
 
@@ -174,7 +176,9 @@ Horizontal separator for visual grouping. Based on Chakra UI Separator.
 | `size`         | `'xs' \| 'sm' \| 'md' \| 'lg'`    | `'xs'`    | Thickness         |
 | `colorPalette` | `string`                          | `'gray'`  | Color             |
 
-## Form.Field.Hidden
+## Hidden
+
+**API:** `Form.Field.Hidden`
 
 Hidden field — not rendered in DOM, only participates in form state.
 
@@ -189,7 +193,9 @@ Hidden field — not rendered in DOM, only participates in form state.
 
 See [Utility Components](/docs/guides/utility-components) for examples.
 
-## Form.Field.Calculated
+## Calculated
+
+**API:** `Form.Field.Calculated`
 
 Auto-computed read-only field that recalculates when dependent fields change.
 
@@ -223,7 +229,9 @@ Error summary component:
 <Form.Errors title="Please fix:" showFieldNames />
 ```
 
-## Form.Button.Submit
+## Submit
+
+**API:** `Form.Button.Submit`
 
 Submit button that **automatically shows a loading spinner** while the form is submitting. It subscribes to the form's `isSubmitting` state — when `onSubmit` returns a Promise, the button stays in loading state until it resolves.
 
@@ -279,7 +287,9 @@ The button automatically enters loading state when `onSubmit` is an async functi
 </Form>
 ```
 
-## Form.Button.Reset
+## Reset
+
+**API:** `Form.Button.Reset`
 
 Reset form to initial values:
 

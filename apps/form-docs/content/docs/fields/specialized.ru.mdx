@@ -7,7 +7,9 @@ import { DemoContainer } from '@/components/demo-container'
 
 <DemoContainer demo="specialized" height={450} />
 
-## Form.Field.Phone
+## Phone
+
+**API:** `Form.Field.Phone`
 
 Ввод номера телефона с маской формата.
 
@@ -21,7 +23,9 @@ const Schema = z.object({
 <Form.Field.Phone name="phone" />
 ```
 
-## Form.Field.PinInput
+## PinInput
+
+**API:** `Form.Field.PinInput`
 
 Ввод PIN-кода или OTP.
 
@@ -35,7 +39,9 @@ const Schema = z.object({
 <Form.Field.PinInput name="code" />
 ```
 
-## Form.Field.ColorPicker
+## ColorPicker
+
+**API:** `Form.Field.ColorPicker`
 
 Выбор цвета.
 
@@ -49,7 +55,9 @@ const Schema = z.object({
 <Form.Field.ColorPicker name="color" />
 ```
 
-## Form.Field.Tags
+## Tags
+
+**API:** `Form.Field.Tags`
 
 Ввод тегов — множественные текстовые значения.
 
@@ -66,7 +74,9 @@ const Schema = z.object({
 <Form.Field.Tags name="skills" maxTags={5} />
 ```
 
-## Form.Field.FileUpload
+## FileUpload
+
+**API:** `Form.Field.FileUpload`
 
 Загрузка файлов — кнопка или зона перетаскивания.
 
@@ -83,7 +93,9 @@ const Schema = z.object({
 <Form.Field.FileUpload name="documents" maxFiles={5} />
 ```
 
-## Form.Field.Address
+## Address
+
+**API:** `Form.Field.Address`
 
 Адресное поле с автодополнением.
 
@@ -97,7 +109,9 @@ const Schema = z.object({
 <Form.Field.Address name="address" />
 ```
 
-## Form.Field.City
+## City
+
+**API:** `Form.Field.City`
 
 Автодополнение города.
 
@@ -105,7 +119,9 @@ const Schema = z.object({
 <Form.Field.City name="city" />
 ```
 
-## Form.Field.Duration
+## Duration
+
+**API:** `Form.Field.Duration`
 
 Ввод длительности — часы, минуты, секунды.
 
@@ -113,7 +129,9 @@ const Schema = z.object({
 <Form.Field.Duration name="duration" />
 ```
 
-## Form.Field.Schedule
+## Schedule
+
+**API:** `Form.Field.Schedule`
 
 Расписание на неделю — выбор рабочих часов для каждого дня.
 
@@ -121,7 +139,9 @@ const Schema = z.object({
 <Form.Field.Schedule name="workingHours" />
 ```
 
-## Form.Field.OTPInput
+## OTPInput
+
+**API:** `Form.Field.OTPInput`
 
 Ввод одноразового пароля — оптимизирован для SMS/email кодов.
 

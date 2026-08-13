@@ -3,6 +3,8 @@ title: Табличный редактор
 description: Редактируемая таблица для полей-массивов — табличный ввод данных с навигацией, вычисляемыми колонками и поддержкой буфера обмена
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
 ## Обзор
 
 `Form.Field.TableEditor` — это редактируемая таблица для полей-массивов. Табличная альтернатива `Form.Group.List` — вместо карточной раскладки данные представлены в компактной таблице с редактированием ячеек по клику.
@@ -38,6 +40,15 @@ description: Редактируемая таблица для полей-мас�
   <Form.Button.Submit>Сохранить</Form.Button.Submit>
 </Form>
 ```
+
+### Полный пример
+
+Прочитан напрямую из исходников `form-develop-app` / `form-develop-app-shadcn` на сборке:
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/table-editor-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/table-editor-demo/page.tsx"
+/>
 
 Кликните по любой ячейке для начала редактирования. Нажмите **Tab** для перехода к следующей ячейке, **Enter** для перехода к следующей строке, **Escape** для отмены редактирования.
 

@@ -244,13 +244,87 @@ test --projects=@letar/forms-vue-shadcn` зелёный. Подробности 
 У shadcn паритет держится не тестом, а инструкцией для ИИ-агента в `.cursor/rules/registry-bases-parity.mdc`,
 и их собственный `registry/bases/README.md` уже устарел (говорит про две базы, а их три).
 
-**Этап 1 — механизм двух осей, включена только ось Skin.**
+**Этап 1 — механизм двух осей, включена только ось Skin.** ✅ (2026-08-13, v0.2.0)
 Паритет `forms-shadcn` с Chakra **закрыт** (Фаза 8, Этап 6, 2026-08-12) — ось Skin ничем не
 заблокирована. Строим полный механизм (обе оси, URL + storage, a11y, disabled-состояния), но
 публикуем пока только переключатель скинов. UI делается **один раз** — ось Framework потом просто
 включается в готовом механизме, переделки нет.
 Сюда же: нейтральные заголовки (решение 6), фильтрация поиска (решение 7), схлопывание
 дублирующихся демо (см. «четыре места» выше).
+
+**Что сделано:**
+
+- **Механизм чтения кода с диска на сборке** (Fumadocs 16 не имеет `remark-code-import`) —
+  реализован как асинхронный серверный компонент, а не remark-плагин (второй вариант, разрешённый
+  постановкой задачи): `src/components/code-file/{read-example-file.ts,highlighted-code.tsx,code-file.tsx}`.
+  `CodeFile` читает файл через `fs.readFileSync` (путь — от корня монорепо, вычисляется через
+  `process.cwd()`, а не `import.meta.url`, потому что после `next build` серверный бандл лежит в
+  `.next/server/...` и путь к исходнику компонента больше не совпадает со структурой репозитория)
+  и подсвечивает через `fumadocs-core/highlight` (Shiki) — тот же визуальный `CodeBlock`, что и у
+  ручных ```tsx-блоков в MDX. Проверено по исходникам `fumadocs-core`/`fumadocs-ui` 16.14.2 в
+  `node_modules` основного чекаута (в этом worktree `node_modules` нет) — не вживую.
+- **Переключатель Framework × Skin** — `src/lib/skin.ts` (типы, enum, ключи) +
+  `src/components/skin/{skin-context,skin-switcher,skin-code-switcher,skin-code-file}.tsx`.
+  Хранение: URL query (`?skin=`/`?fw=`) → localStorage → дефолт (Chakra/React), чтение **только**
+  в `useEffect` (решение 3). Оба варианта Chakra/shadcn — в HTML на сборке всегда, переключение —
+  через CSS `hidden`, без lazy-подгрузки (решение 2). UI — ссылки `<a href="?skin=...">` с
+  `aria-current`, обычный клик перехватывается JS, средний клик/Ctrl+клик отдаются браузеру
+  (решение 8). Framework типизирован и учитывается хранилищем, но UI-переключателя для него нет —
+  Этап 2. `SkinCodeFile` поддерживает `disabled`-вкладку через необязательный `shadcn`-путь
+  (решение 5) — не подставляет Chakra-вариант молча.
+  `SkinProvider` подключён в `src/app/[lang]/docs/layout.tsx` — общий на весь докс-раздел.
+- **Proof of concept на 2 страницах** (не все 516 блоков — следующая механическая миграция):
+  `fields/select.mdx`+`.ru.mdx` и `guides/table-editor.mdx`+`.ru.mdx`, оба читают
+  `select-demo`/`table-editor-demo` из `form-develop-app` и `form-develop-app-shadcn`.
+- **Нейтральные заголовки (решение 6)** — 86 заголовков в 16 файлах (`## Form.Field.Select` →
+  `## Select` + `**API:** \`Form.Field.Select\``строкой ниже). Двухсегментные namespace-заголовки
+  (`Form.Group`,`Form.When`,`Form.Watch`,`Form.Subscribe`,`Form.DirtyGuard`,`Form.FromSchema`,`Form.AutoFields`,`Form.DebugValues`,`Form.InfoBlock`,`Form.Divider`,`Form.Errors`,`Form.Steps`) намеренно **не** тронуты:`forms-shadcn`не экспортирует`Form`-неймспейс вовсе
+  (только плоские`FieldX`), поэтому неясно, различаются ли эти API между скинами — уточнить у
+  forms-dev/QuietRidge, прежде чем нейтрализовать.
+- **Поиск (решение 7)** — `route.ts` получил `buildIndex` с опциональным тегом `skins` из
+  frontmatter, механизм заведён, но клиент **не** фильтрует по тегу активного скина: сегодня ни
+  одна страница `skins:` не объявляет (весь контент валиден для обоих скинов — один URL с
+  переключаемым кодом внутри, не раздельные страницы per-skin), а `containsAll`-фильтр по тегу
+  исключает нетегированные документы — включить его сейчас означало бы пустой поиск для всего
+  сайта. Попутно исправлен реальный баг: `search.tsx` использовал `type: 'fetch'` (ждёт
+  серверной фильтрации по query), а `route.ts` экспортирует только `staticGET` (полный индекс без
+  фильтрации, кэш на сборке) — несовпадение означало, что поиск, вероятно, не фильтровал
+  результаты по `query` на сервере вовсе. Заменено на `client: staticClient(...)`
+  (`fumadocs-core/search/client/orama-static`), клиентскую фильтрацию.
+
+**Прагматичное решение по живому демо (пункт задания «Реши прагматично»):** iframe в
+`<DemoContainer>` остаётся Chakra-only в Этапе 1. Переключение iframe вместе с осью Skin
+(исключение из решения 4) не реализовано — у form-docs нет собственного shadcn-iframe-таргета,
+`form-develop-app-shadcn` не задеплоен и не встроен как iframe-источник; строить такую
+инфраструктуру untested в этом окружении (нет `node_modules`, нет способа визуально проверить)
+рискованнее, чем отложить. `SkinCodeFile` уже даёт переключаемый **код** для тех же примеров —
+компромисс для Этапа 1, доработка iframe — по мере необходимости, не блокирует.
+
+✅ **Проверено после мержа в обычный чекаут (2026-08-13):** `nx typecheck:tsgo form-docs` и
+`nx lint form-docs` — зелёные. По ходу проверки найдено и исправлено два реальных бага, не
+видных без реального `node_modules`:
+
+- `src/app/api/search/route.ts` — `buildIndex` типизировал `structuredData` как `unknown`,
+  несовместимо с ожидаемым `StructuredData` (`fumadocs-core/mdx-plugins`) — TS2322. Поправлено на
+  корректный тип.
+- `src/components/code-file/read-example-file.ts` — guard от выхода за пределы монорепо был
+  через `absolute.startsWith(MONOREPO_ROOT)` (сравнение строк на абсолютном пути пропускает
+  соседний каталог с совпадающим префиксом, `/repo` матчит `/repo-evil`) — заменено на
+  `relative()` + проверку на `..`/абсолютность, поймано semgrep-правилом
+  `letar-path-traversal-naive-startswith-guard` при коммите.
+
+⚠️ **`nx build form-docs` (prod, `next build --webpack`) падает — но это НЕ следствие этой
+задачи.** Ошибка — вебпак-парсинг `libs/glitchtip/src/client/index.ts` через
+`fumadocs-mdx/dist/webpack/macro.js`-loader (`Module parse failed: Unexpected token` на
+`export interface`). Воспроизведено на чистом `main` без единой правки этой задачи — сборка
+`form-docs` была красной уже до Этапа 1, значит и prod-billed этого приложения раньше не
+проверялся вживую. Не в скоупе P7 — отдельная задача (вероятно: fumadocs-mdx-лоадер применяется
+к `instrumentation-client.ts` слишком широко и цепляет транзитивный импорт `@letar/glitchtip`).
+
+⚠️ **`next dev`/визуальная проверка в браузере не выполнены** — не входило в эту сессию
+(верификация фокусировалась на typecheck/lint после переноса из worktree без `node_modules`).
+Обязательно перед деплоем: `nx dev form-docs`, визуально проверить переключатель на
+`fields/select`/`guides/table-editor` (оба языка), поиск, нейтральные заголовки.
 
 ⚠️ Точное число полей брать из `mcp__form-mcp__list_fields`, не из документов: на 2026-08-13 оно
 **61** (после Фазы 8 добавились 3 document-поля), и в разных файлах ещё встречаются устаревшие

@@ -2,6 +2,79 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.2.0] - 2026-08-13
+
+### Added
+
+- **P7 Этап 1 — механизм переключателей Framework × Skin** (публично включена только ось Skin,
+  Chakra ↔ shadcn). Подробности решений — `PLAN.md` P7.
+  - `src/lib/skin.ts` — типы `Skin`/`Framework`, enum-значения, ключи URL/localStorage.
+  - `src/components/skin/skin-context.tsx` (`SkinProvider`/`useSkin`) — состояние читается из
+    URL → localStorage → дефолт (Chakra/React) строго в `useEffect`, не в инициализаторе стора
+    (защита от рассинхрона SSR/CSR, docusaurus#5653).
+  - `src/components/skin/skin-switcher.tsx` — переключатель ссылками (`<a href="?skin=...">`),
+    не dropdown-ом; `aria-current`, обычный левый клик перехватывается, средний клик/Ctrl+клик
+    отдаются браузеру нативно. Поддерживает `unavailable` — неактивную вкладку с пометкой вместо
+    молчаливой подмены варианта.
+  - `src/components/code-file/` (`CodeFile`, `HighlightedCode`, `readExampleFile`) — механизм
+    чтения примера кода с диска на сборке: Fumadocs 16 не имеет `remark-code-import`, поэтому
+    вместо remark-плагина — асинхронный серверный компонент, читающий файл (`fs.readFileSync`) и
+    подсвечивающий его через `fumadocs-core/highlight` (Shiki) на сборке.
+  - `src/components/skin/skin-code-file.tsx` (`SkinCodeFile`) — пример, переключаемый по Skin:
+    оба варианта (Chakra/shadcn) читаются с диска и присутствуют в HTML одновременно, клиентский
+    компонент только переключает видимость через CSS (`hidden`), без lazy-подгрузки — критично
+    для индексации Google (все варианты видны краулеру).
+  - Proof of concept подключён на 2 страницах: `fields/select.mdx` (+ `.ru.mdx`) и
+    `guides/table-editor.mdx` (+ `.ru.mdx`) — читают `select-demo`/`table-editor-demo` из
+    `form-develop-app` и `form-develop-app-shadcn`. Остальные ~514 hand-written tsx-блоков —
+    последующая механическая миграция, не блокирует Этап 1.
+  - `SkinProvider` подключён в `src/app/[lang]/docs/layout.tsx` — общее состояние доступно на
+    всех страницах докс-раздела независимо от того, есть ли на конкретной странице `SkinCodeFile`.
+
+### Changed
+
+- Нейтрализованы заголовки разделов с конкретным API-именем (`## Form.Field.Select` →
+  `## Select` + `**API:** \`Form.Field.Select\``сразу под заголовком) — 86 заголовков в 16
+  MDX-файлах (`api/form-component.mdx(.ru)`,`fields/{date,number,select,specialized,string}.mdx(.ru)`,`guides/{groups-arrays,utility-components}.mdx(.ru)`). Двухсегментные заголовки namespace-уровня
+  (`Form.Group`,`Form.When`,`Form.Watch`,`Form.Subscribe`,`Form.DirtyGuard`,`Form.FromSchema`,`Form.AutoFields`,`Form.DebugValues`,`Form.InfoBlock`,`Form.Divider`,`Form.Errors`,`Form.Steps`)
+  намеренно не тронуты —`@letar/forms-shadcn`не экспортирует ни`createForm`, ни`Form`-неймспейс
+  (только плоские`FieldX`-компоненты), поэтому непонятно, действительно ли эти два-сегментные API
+  расходятся между скинами — трогать без подтверждения от forms-dev/QuietRidge не стал, чтобы не
+  написать вводящую в заблуждение документацию.
+- `src/app/api/search/route.ts` — добавлен `buildIndex` с опциональным тегом `skins` из
+  frontmatter (решение 7, P7 PLAN.md, механизм заведён заранее — сегодня ни одна страница тег не
+  объявляет).
+- `src/components/search.tsx` — клиент переведён с `type: 'fetch'` на `client: staticClient(...)`
+  (`fumadocs-core/search/client/orama-static`). Причина — попутный фикс: `route.ts` экспортирует
+  только `staticGET` (полный индекс без серверной фильтрации по query/tag/locale, кэшируется на
+  сборке), а `type: 'fetch'` ожидает обратного — сервер сам фильтрует по параметрам. Несовпадение
+  означало, что поиск, вероятно, не фильтровал результаты по `query` на сервере вовсе (не
+  проверено вживую — нет `node_modules` в этом worktree). Активная фильтрация по тегу skin в
+  клиент **не** подключена — `containsAll`-фильтр исключает нетегированные документы, включение
+  сегодня (без единой skin-тегированной страницы) вернуло бы пустой поиск для всего сайта.
+
+### Fixed
+
+- `content/docs/fields/specialized.mdx` — устранён дублирующийся раздел `## Form.Field.OTPInput`
+  (строки 132–138 повторяли 56–68 с чуть другим примером) — вероятно, копипаст-огрех, не связан с
+  P7; найден по коллизии заголовков при автоматической нейтрализации.
+
+### Known limitations (задел на будущее)
+
+- Живое демо (`<DemoContainer>`, iframe в `/demo/*`) остаётся Chakra-only — переключение iframe
+  вместе с осью Skin (решение 4, исключение для Skin) не реализовано в Этапе 1: у form-docs нет
+  собственного shadcn-iframe-таргета (`form-develop-app-shadcn` — dev-only sandbox, не
+  задеплоен), а строить его сейчас означало бы непроверяемый в этом окружении риск. `SkinCodeFile`
+  уже поддерживает переключаемый КОД для тех же примеров — компромисс на Этап 1.
+- Ни typecheck, ни lint, ни `next dev`/`next build` не запускались вживую — этот worktree не
+  имеет `node_modules` («Could not find the Next.js package», см. системное предупреждение
+  окружения). Все API (`fumadocs-core/highlight`, `fumadocs-ui/components/codeblock`,
+  `fumadocs-core/search/client/orama-static`, `createFromSource({ buildIndex })`) сверены по
+  исходникам `node_modules` основного чекаута репозитория (`C:\web\letar\node_modules`,
+  fumadocs-core/fumadocs-ui 16.14.2), не по документации из training data. Обязательно прогнать
+  `nx typecheck:tsgo form-docs` → `nx lint form-docs` → `nx dev form-docs` (визуальная проверка
+  переключателя, поиска, code-блоков) в среде с установленными зависимостями до мерджа/деплоя.
+
 ## [0.1.10] - 2026-08-13
 
 ### Changed

@@ -7,7 +7,9 @@ import { DemoContainer } from '@/components/demo-container'
 
 <DemoContainer demo="specialized" height={450} />
 
-## Form.Field.Phone
+## Phone
+
+**API:** `Form.Field.Phone`
 
 Phone number input with format mask.
 
@@ -21,7 +23,9 @@ const Schema = z.object({
 <Form.Field.Phone name="phone" />
 ```
 
-## Form.Field.FileUpload
+## FileUpload
+
+**API:** `Form.Field.FileUpload`
 
 File upload with preview support.
 
@@ -39,7 +43,9 @@ const Schema = z.object({
 />
 ```
 
-## Form.Field.PinInput
+## PinInput
+
+**API:** `Form.Field.PinInput`
 
 PIN code input for verification.
 
@@ -53,7 +59,9 @@ const Schema = z.object({
 <Form.Field.PinInput name="pin" length={4} />
 ```
 
-## Form.Field.OTPInput
+## OTPInput
+
+**API:** `Form.Field.OTPInput`
 
 One-time password input for two-factor authentication.
 
@@ -67,7 +75,9 @@ const Schema = z.object({
 <Form.Field.OTPInput name="otp" length={6} />
 ```
 
-## Form.Field.ColorPicker
+## ColorPicker
+
+**API:** `Form.Field.ColorPicker`
 
 Color selection input.
 
@@ -81,7 +91,9 @@ const Schema = z.object({
 <Form.Field.ColorPicker name="brandColor" />
 ```
 
-## Form.Field.Address
+## Address
+
+**API:** `Form.Field.Address`
 
 Address autocomplete with structured output.
 
@@ -99,7 +111,9 @@ const Schema = z.object({
 <Form.Field.Address name="address" />
 ```
 
-## Form.Field.City
+## City
+
+**API:** `Form.Field.City`
 
 City autocomplete — standalone city picker.
 
@@ -107,7 +121,9 @@ City autocomplete — standalone city picker.
 <Form.Field.City name="city" />
 ```
 
-## Form.Field.Duration
+## Duration
+
+**API:** `Form.Field.Duration`
 
 Duration input — hours, minutes, seconds.
 
@@ -121,18 +137,12 @@ const Schema = z.object({
 <Form.Field.Duration name="duration" />
 ```
 
-## Form.Field.Schedule
+## Schedule
+
+**API:** `Form.Field.Schedule`
 
 Weekly schedule picker — select working hours for each day.
 
 ```tsx
 <Form.Field.Schedule name="workingHours" />
-```
-
-## Form.Field.OTPInput
-
-One-time password input — similar to PinInput but optimized for SMS/email codes.
-
-```tsx
-<Form.Field.OTPInput name="otp" />
 ```

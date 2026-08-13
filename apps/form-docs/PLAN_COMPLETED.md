@@ -1,5 +1,29 @@
 # Выполненные задачи — form-docs
 
+## Сессия 2026-08-13 (2) — P7 Этап 1: механизм переключателей Framework × Skin
+
+Полный разбор решений и обоснований — `PLAN.md` раздел P7. Кратко:
+
+- Механизм чтения примера кода с диска на сборке (`src/components/code-file/`) — асинхронный
+  серверный компонент (`fs.readFileSync` + `fumadocs-core/highlight`), не remark-плагин (Fumadocs
+  16 не имеет `remark-code-import`).
+- Переключатель Skin (Chakra ↔ shadcn) — `src/lib/skin.ts` + `src/components/skin/*`. URL →
+  localStorage → дефолт, чтение только в `useEffect`, оба варианта в HTML на сборке, переключение
+  через CSS, ссылки вместо dropdown, `disabled`-вкладка вместо молчаливой подмены. Framework
+  типизирован, но UI не публикуется (Этап 2).
+- POC подключён на `fields/select.mdx` и `guides/table-editor.mdx` (+ RU) — читают
+  `select-demo`/`table-editor-demo` из `form-develop-app`/`form-develop-app-shadcn`.
+- 86 заголовков в 16 MDX-файлах нейтрализованы (`## Form.Field.X` → `## X` + `**API:**`-строка).
+- `route.ts`/`search.tsx` — тег `skins` в индексе (механизм, не активирован), попутно исправлен
+  latent-баг несовпадения `type: 'fetch'` (клиент) ↔ `staticGET`-only (сервер).
+- Побочный фикс: дублирующийся раздел `## Form.Field.OTPInput` в `fields/specialized.mdx`.
+- ⚠️ Ничего не проверялось вживую — сессия шла в git worktree без `node_modules`
+  («Could not find the Next.js package»). API сверены по исходникам `node_modules` основного
+  чекаута. **Перед деплоем обязательно:** `nx typecheck:tsgo form-docs` → `nx lint form-docs` →
+  `nx dev form-docs` (визуальная проверка переключателя/поиска/code-блоков).
+- Живое демо (iframe) осталось Chakra-only — решение задокументировано в `PLAN.md`, не
+  реализовывалось untested в этом окружении.
+
 ## Сессия 2026-08-13 — `loading="lazy"` на demo-iframe
 
 Точечная находка вне чеклиста P7 (переключатели Framework × Skin, см. `PLAN.md`): 32 MDX-страницы

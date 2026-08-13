@@ -1,0 +1,56 @@
+.switcher {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  margin: 12px 0;
+  border-radius: 8px;
+  background: var(--color-fd-secondary, #f1f5f9);
+  border: 1px solid var(--color-fd-border, #e2e8f0);
+}
+
+.link {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-fd-muted-foreground, #64748b);
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.link:hover {
+  background: var(--color-fd-accent, #e2e8f0);
+  color: var(--color-fd-foreground, #0f172a);
+}
+
+.link[data-active] {
+  background: var(--color-fd-primary, #0f172a);
+  color: var(--color-fd-primary-foreground, #f8fafc);
+}
+
+.disabled {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-fd-muted-foreground, #94a3b8);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.disabled em {
+  font-style: normal;
+  font-size: 0.75em;
+}
+
+.codeGroup {
+  margin: 16px 0;
+}
+
+.unavailableNote {
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px dashed var(--color-fd-border, #e2e8f0);
+  color: var(--color-fd-muted-foreground, #64748b);
+  font-size: 0.9rem;
+}

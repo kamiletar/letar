@@ -3,6 +3,8 @@ title: TableEditor
 description: Inline editable table for array fields — tabular data entry with navigation, computed columns, and clipboard support
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
 ## Overview
 
 `Form.Field.TableEditor` is an inline editable table for array fields. It's a tabular alternative to `Form.Group.List` — instead of card-based layout, data is presented in a compact table with click-to-edit cells.
@@ -40,6 +42,15 @@ Best for:
 ```
 
 Click any cell to start editing. Press **Tab** to move to next cell, **Enter** to move to next row, **Escape** to cancel editing.
+
+### Full example
+
+Read directly from the `form-develop-app` / `form-develop-app-shadcn` sandbox source at build time:
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/table-editor-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/table-editor-demo/page.tsx"
+/>
 
 ## Computed Columns
 
