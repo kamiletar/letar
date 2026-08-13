@@ -149,7 +149,6 @@
     "applyChanges": true,
     "disabledTaskSyncGenerators": ["@nx/js:typescript-sync"]
   },
-  "nxCloudId": "68fa01460376c3d05dadaf77",
   "parallel": 3,
   "daemon": {
     "enabled": true
