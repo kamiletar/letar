@@ -3,9 +3,17 @@ title: Связанные поля
 description: Select-поля, загружающие опции из связанных моделей БД
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
 ## Обзор
 
 Связанные поля автоматически загружают опции из связанных моделей базы данных. Работают через `RelationFieldProvider` и директиву `@form.relation` ZenStack.
+
+## Полный пример
+
+Полный пример из песочницы `form-develop-app`, прочитан напрямую из исходников на сборке.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/relation-demo/page.tsx" />
 
 ## Настройка схемы
 

@@ -3,9 +3,22 @@ title: MatrixChoice
 description: Матричное поле выбора для опросов, NPS-форм и анкет
 ---
 
+import { SkinCodeFile } from '@/components/skin/skin-code-file'
+
 ## Обзор
 
 `Form.Field.MatrixChoice` отображает таблицу «вопрос x ответ» — стандартный паттерн из Google Forms и SurveyMonkey. Поддерживает три варианта: radio (единственный выбор), checkbox (множественный выбор) и rating (звёзды).
+
+## Полный пример
+
+Полный пример из песочницы `form-develop-app` / `form-develop-app-shadcn`, прочитан напрямую из
+исходников на сборке. У shadcn `FieldMatrixChoice` показан внутри общей демо-страницы опросов
+(вместе с ImageChoice и Likert), не как отдельная страница.
+
+<SkinCodeFile
+  chakra="apps/form-develop-app/src/app/matrix-choice-demo/page.tsx"
+  shadcn="apps/form-develop-app-shadcn/src/app/survey-demo/page.tsx"
+/>
 
 ## Базовое использование (Radio)
 
