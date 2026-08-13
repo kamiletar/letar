@@ -948,6 +948,29 @@ changes всей формы ловит и «поле-родитель ещё н�
   `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-angular` зелёный (55/55 тестов
   всего пакета).
 
+### Stage F: +2 поля (CheckboxCard, Tags) — done [2026-08-14]
+
+Шестой этап — зеркало `libs/forms-vue/src/lib/fields/field-{checkbox-card,tags}.ts`. Без новых
+приёмов сверх уже найденных в Stage A/D/E: `forms-core` снова не потребовал ни одной правки.
+
+`FieldCheckboxCardComponent` — тот же `signal` + `effect()`/`ctrl.events.subscribe()`, что
+`FieldRadioCardComponent` (Stage E), но значение `string[]` и `role="checkbox"` на каждой
+карточке вместо `role="radio"` в `role="radiogroup"` — карточки независимы, поэтому обёртка
+`role="group"`, не `role="radiogroup"`.
+
+`FieldTagsComponent` — черновик ввода в отдельном `signal('')`, не связанном с `FormControl` (сам
+`<input>` не поле формы — только источник текста для следующего тега); список тегов — тот же
+синхронизируемый `signal<string[]>`, что у остальных полей с составным/множественным значением.
+Enter добавляет тег из черновика (проверка `minTagLength`/`maxTags`/дубликатов), Backspace на
+пустом черновике удаляет последний тег.
+
+Текущий счёт: **43/61** (33 из Этапа 1–2 + Stage A/B/C/D + Stage E + Stage F). Тесты —
+`app-form.stage-f.spec.ts` (2 теста: CheckboxCard — множественный выбор карточками, повторный
+клик снимает выбор; Tags — Enter добавляет тег, Backspace на пустом черновике удаляет последний),
+host-компонент `testing/stage-f-host.component.ts`.
+`nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-angular` зелёный (57/57 тестов
+всего пакета).
+
 ### [2026-08-11] tsup роняет `'use client'` в lazy-чанках (forms + forms-shadcn) — не чинить без сигнала
 
 - **Запросил:** forms-dev (найдено при publish-prep `forms-shadcn`, письмо #49)
