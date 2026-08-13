@@ -4,7 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
-## [Unreleased]
+## [2.4.2] - 2026-08-13
+
+### Added
+
+- Внутренняя compile-time проверка `assertSameKeys` (`src/lib/declarative/assert-same-keys.ts`) —
+  ловит рассинхрон набора ключей между реализацией `FormField`/`FormDocument`/`FormButton`/
+  `ListButton` и ручными типами в `form-compound-types.ts`, которые каст `as unknown as
+  FormComponent` иначе не проверяет. Не влияет на публичный API.
 
 ## [2.4.1] - 2026-08-12
 

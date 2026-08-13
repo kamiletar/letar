@@ -1,5 +1,29 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-08-13 — Compile-time проверка рассинхрона `form-compound-types.ts`
+
+Задача Ками напрямую: `libs/forms/src/lib/declarative/index.ts` собирает `Form` через
+`Object.assign(FormRoot, {...}) as unknown as FormComponent` — каст полностью отключает
+структурную проверку TypeScript. Уже стреляло дважды: Фаза 8 Этап 7 (`ForeignPassport`/
+`DepartmentCode`/`BirthCertificate` были в реализации `FormDocument`, но не в типе) и фантомный
+`OGRNIP` (тип обещал поле, которого в реализации не было никогда).
+
+**Решение:** `libs/forms/src/lib/declarative/assert-same-keys.ts` — compile-time-only
+`AssertSameKeys<Impl, Declared>` (сравнивает `keyof` двух типов, не форму пропсов по каждому
+полю) + generic-функция `assertSameKeys<AssertSameKeys<...>>()`, вызов которой не типизируется,
+если ключи разошлись — ошибка `TS2344` указывает точный список разошедшихся ключей
+(`onlyInImplementation`/`onlyInDeclaredType`) прямо в месте вызова.
+
+Подключено для `FormField`, `FormDocument`, `FormButton`, `ListButton` (`Group.List.Button`) —
+плоских compound-объектов без call signature. `Group`/`Steps`/сама форма исключены сознательно:
+у них реальная сигнатура (forwardRef/generic-обёртки) может расходиться с упрощённым inline-типом
+не по вине рассинхрона полей — точное сравнение дало бы шум на корректном коде.
+
+Проверено негативным тестом: временное удаление `ForeignPassport` из `FormDocument` валит
+`typecheck:tsgo` с точным указанием поля; возврат поля — снова зелено.
+
+Коммит: `0fdea746`.
+
 ## 2026-08-12 — Фаза 7.8 → Поток 1+2: Reka UI-скин для Vue + гайды по портированию
 
 Задача Ками через координатора `QuietRidge` (тред `forms-phase7-3-shadcn`, письмо #61) —
