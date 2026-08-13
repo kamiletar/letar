@@ -1,21 +1,9 @@
+import { combineDateTime, parseDateTime } from '@letar/forms-core/field-widgets'
 import { resolveFieldMeta, useAppFormContext, withFieldValidation } from '@letar/forms-vue/core'
 import { cn, NATIVE_INPUT_CLASS } from '@letar/tailwind-utils'
 import { defineComponent, h, onErrorCaptured, type PropType, ref } from 'vue'
 import { FieldWrapper } from '../uikit/primitives'
 import { rekaUIKit } from '../uikit/uikit-reka'
-
-function parseDateTime(value: string | undefined): { date: string; time: string } {
-  if (!value) { return { date: '', time: '' } }
-  const match = value.match(/^(\d{4}-\d{2}-\d{2})(?:T(\d{2}:\d{2}))?/)
-  if (match) { return { date: match[1], time: match[2] || '' } }
-  return { date: '', time: '' }
-}
-
-function combineDateTime(date: string, time: string): string {
-  if (!date) { return '' }
-  if (!time) { return date }
-  return `${date}T${time}:00`
-}
 
 /**
  * `minDateTime`/`maxDateTime`/`timeStep` — пропсы сверх контракта `createField`. Значение —

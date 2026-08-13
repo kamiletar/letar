@@ -219,6 +219,28 @@ Hidden, YesNo, Date, Time, Currency, Percentage`. Архитектурная б�
 - Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
   зелёный на обоих пакетах, включая прогон после `nx run-many -t format`.
 
+**Этап 4 — дедупликация хелперов (2026-08-13):** три пары чистых функций (без Vue-специфики)
+дублировались дословно между `forms-vue` и `forms-vue-shadcn` — `formatDate`/`getPresetRange` +
+типы `DateRangeValue`/`DateRangePreset` (`field-date-range.ts`), `parseDateTime`/`combineDateTime`
+(`field-datetime-picker.ts`), `minutesToHHMM`/`hhmmToMinutes` (`field-duration.ts`). Вынесены в
+новый подпуть `@letar/forms-core/field-widgets` — по аналогии с `forms-core/mask` (Фаза 8) и
+`forms-core/validators/ru`. Оба Vue-пакета импортируют хелперы оттуда, типы `DateRangeValue`/
+`DateRangePreset` по-прежнему реэкспортируются из `field-date-range.ts` каждого пакета — внешние
+импорты не ломаются.
+
+- `@letar/forms-core` 0.6.1 → 0.7.0 (minor — новый публичный экспорт).
+- `@letar/forms-vue` 0.5.0 → 0.5.1, `@letar/forms-vue-shadcn` 0.6.0 → 0.6.1 (patch — публичный API
+  полей не меняется, только источник внутренних хелперов).
+- **React-версии (`forms-shadcn/field-date-range.tsx` и т.д.) намеренно не тронуты.** Там та же
+  логика существует, но в другой структуре — типы вынесены в отдельный `./types.ts`, а не собраны
+  локально в файле поля. React-пакет стабилен и уже опубликован; выносить и его хелперы в тот же
+  подпуть — отдельное решение с более широким blast radius (придётся мигрировать типы через
+  `./types.ts`), которое не требовалось для закрытия Vue-дублирования. Если понадобится
+  React↔Vue-дедупликация — заводить отдельным пунктом плана, не задним числом к этому отчёту.
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-core,@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный (одно pre-existing предупреждение oxlint в `forms-core/analytics/adapters/umami.ts`, не
+  относится к этой правке).
+
 Дальше: `FieldCreditCard` (компаунд, оба пакета, отложен с Этапа 3) → Этап 5 (тяжёлые peer-dep
 поля: RichText/Address/City/ColorPicker/PinInput/OTPInput/Signature/FileUpload) → Этап 6
 (survey/table: Likert/MatrixChoice/TableEditor/DataGrid, `Form.Group`/`Form.Steps`) — следующий

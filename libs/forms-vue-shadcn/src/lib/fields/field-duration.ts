@@ -1,16 +1,9 @@
+import { hhmmToMinutes, minutesToHHMM } from '@letar/forms-core/field-widgets'
 import { resolveFieldMeta, useAppFormContext, withFieldValidation } from '@letar/forms-vue/core'
 import { defineComponent, h, onErrorCaptured, type PropType, ref } from 'vue'
 import { FieldWrapper } from '../uikit/primitives'
 import { NumberInput } from '../uikit/primitives/number-input'
 import { rekaUIKit } from '../uikit/uikit-reka'
-
-function minutesToHHMM(minutes: number): { hours: number; mins: number } {
-  return { hours: Math.floor(minutes / 60), mins: minutes % 60 }
-}
-
-function hhmmToMinutes(hours: number, mins: number): number {
-  return hours * 60 + mins
-}
 
 /** Значение — число минут. Два формата: `minutes` (один `NumberInput`) и `HH:MM` (по умолчанию, два рядом). */
 export const FieldDuration = defineComponent({

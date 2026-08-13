@@ -1,5 +1,13 @@
 # Changelog @letar/forms-vue
 
+## 0.5.1 (2026-08-13)
+
+Рефакторинг без изменения публичного API: `formatDate`/`getPresetRange` (`field-date-range.ts`),
+`parseDateTime`/`combineDateTime` (`field-datetime-picker.ts`), `minutesToHHMM`/`hhmmToMinutes`
+(`field-duration.ts`) дублировались дословно с `forms-vue-shadcn` — вынесены в
+`@letar/forms-core/field-widgets`. Типы `DateRangeValue`/`DateRangePreset` по-прежнему
+реэкспортируются из `field-date-range.ts`, чтобы не ломать существующие импорты.
+
 ## 0.5.0 (2026-08-13)
 
 Фаза 9, Этап 4 — дата/число-виджеты (5 новых полей): `FieldDateRange`, `FieldDateTimePicker`,
