@@ -110,6 +110,15 @@ function MyForm() {
 - **Server Actions** — вызывай напрямую из `onSubmit`, не через `<form action>`
 - **Массивы** — используй `FormGroupList`
 - **Оффлайн** — используй `useOfflineForm` из `@letar/forms/offline`
+- **Черновик в localStorage — по умолчанию, не по напоминанию.** Для любой нетривиальной формы
+  (создание/редактирование сущности, длинная форма — не одноразовый auth-экран) подключай
+  `useFormPersistence` (`@letar/forms`, `libs/forms/src/lib/declarative/form-persistence.tsx`):
+  подписка на `form.store.subscribe` → `saveValues(form.state.values)`, `clearSavedData()` на
+  успешный submit. Принцип — [Ководство §188](https://www.artlebedev.ru/kovodstvo/sections/188/):
+  пользовательский ввод священен, закрытие вкладки/краш/перезагрузка не должны его стирать.
+  ⛔ **Исключение — чувствительные поля** (пароль, номер карты/CVV/срок действия, другие
+  auth/платёжные данные) **никогда** не попадают в сохраняемый снимок — фильтруй их из объекта
+  перед `saveValues`, даже если остальная форма персистится.
 
 ## Не делай
 

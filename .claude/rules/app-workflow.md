@@ -23,6 +23,18 @@ macro_start_session(
 )
 ```
 
+Сразу следом выставь себе `contact_policy: "open"` — иначе первое сообщение от любого нового
+агента виснет заявкой `Contact request from <app>-dev`, требующей ручного `respond_contact`:
+
+```
+set_contact_policy(
+  project_key: "c-web-letar",
+  agent_name: "<app>-dev",
+  policy: "open",
+  registration_token: "<тот же токен>"
+)
+```
+
 ## После завершения задачи
 
 1. Обнови `apps/<app>/PLAN.md` — отметь задачу выполненной
