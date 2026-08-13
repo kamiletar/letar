@@ -6,7 +6,9 @@ import { FieldError } from './primitives/field-error'
 import { FieldLabel } from './primitives/field-label'
 import { FieldRoot } from './primitives/field-root'
 import { Input } from './primitives/input'
+import { NativeSelect } from './primitives/native-select'
 import { NumberInput } from './primitives/number-input'
+import { RadioGroup } from './primitives/radio-group'
 import { Select } from './primitives/select'
 import type { UINode } from './ui-node'
 
@@ -21,12 +23,16 @@ import type { UINode } from './ui-node'
  * render-контекста — реактивность приходит от родителя, а не от отдельного инстанса компонента
  * на каждый примитив.
  *
- * Реализованы core-примитивы + минимум extended, нужный 6 полям (Поток 1): `NumberInput` для
- * `FieldNumber`, `Combobox` для `FieldCombobox`, `ErrorFallback` для error-boundary
- * композиционного слоя. Остальные extended-примитивы (`RadioGroup`/`PinInput`/...) не
- * реализованы — не входят в скоуп 6 демонстрационных полей.
+ * Реализованы core-примитивы + extended, нужный полям Потока 1 и Этапа 2 (Фаза 9):
+ * `NumberInput` для `FieldNumberInput`/`FieldCurrency`/`FieldPercentage`, `Combobox` для
+ * `FieldCombobox`, `RadioGroup` для `FieldRadioGroup`, `NativeSelect` для `FieldNativeSelect`,
+ * `ErrorFallback` для error-boundary композиционного слоя. `Switch` в контракт не входит
+ * (`UIKitExtendedPrimitives` его не описывает) — `FieldSwitch` рисуется напрямую на
+ * `reka-ui`/`SwitchRoot`, как и в React-скине (`forms-shadcn/field-switch.tsx`). Остальные
+ * extended-примитивы (`PinInput`/`SegmentGroup`/...) не реализованы — следующие этапы плана
+ * Фазы 9 (`libs/forms/PLAN.md`).
  */
-type ImplementedExtendedPrimitives = 'ErrorFallback' | 'NumberInput' | 'Combobox'
+type ImplementedExtendedPrimitives = 'ErrorFallback' | 'NumberInput' | 'Combobox' | 'RadioGroup' | 'NativeSelect'
 
 export type RekaUIKit =
   & UIKitCorePrimitives<UINode>
@@ -41,5 +47,7 @@ export const rekaUIKit: RekaUIKit = {
   Select,
   NumberInput,
   Combobox,
+  RadioGroup,
+  NativeSelect,
   ErrorFallback,
 }

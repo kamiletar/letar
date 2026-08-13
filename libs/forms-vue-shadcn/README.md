@@ -5,7 +5,7 @@ Reka UI-скин `@letar/forms-vue` — реализация `UIKit`-контр�
 `@letar/forms-shadcn` (Фаза 7.3, React): та же архитектура (`createFieldPrimitives(uikit)`),
 тот же стек примитивов (Radix-семейство), перенесённый на Vue.
 
-⚠️ **Не полный порт `@letar/forms-shadcn`** — 14 из 61 поля (Фаза 9, Этап 1 в процессе, план —
+⚠️ **Не полный порт `@letar/forms-shadcn`** — 17 из 61 поля (Фаза 9, Этап 2 завершён, план —
 `libs/forms/PLAN.md`). До Фазы 9 (2026-08-13) пакет был архитектурным пруфом на 6 полей (письмо
 координатора форм #61); решение координатора расширило скоуп до полного паритета. См. «Что не
 входит в скоуп» ниже — там актуальный список недостающего.
@@ -60,9 +60,11 @@ export default defineComponent({
 ### `rekaUIKit`
 
 Реализация `UIKit`-контракта (`@letar/forms-core/uikit`) на Reka UI: `FieldRoot`/`FieldLabel`/
-`FieldError` (core) + `Input`/`Checkbox`/`Select` (core) + `NumberInput`/`Combobox`/`ErrorFallback`
-(extended, минимум под 6 полей). Каждый примитив — обычная функция `(props) => VNode`, не
-Vue-компонент (см. `createFieldPrimitives` ниже — почему это осознанный выбор, не упрощение).
+`FieldError` (core) + `Input`/`Checkbox`/`Select` (core) + `NumberInput`/`Combobox`/`RadioGroup`/
+`NativeSelect`/`ErrorFallback` (extended, 17 полей на 2026-08-13). `Switch` в контракт не входит
+(см. таблицу полей ниже) — `FieldSwitch` рисуется в обход UIKit. Каждый примитив — обычная функция
+`(props) => VNode`, не Vue-компонент (см. `createFieldPrimitives` ниже — почему это осознанный
+выбор, не упрощение).
 
 ### `createFieldPrimitives(uikit)` → `{ createField, FieldWrapper }`
 
@@ -83,29 +85,34 @@ Vue-версия `createFieldPrimitives` из `@letar/forms-react` (Фаза 7.3
 - Нет `useResolvedFieldProps`/`useFieldState` — минимальный набор аргументов рендера
   (`FieldRenderArgs`), достаточный для 6 простых полей; не абстракция под будущий рост.
 
-### Поля (14 штук)
+### Поля (17 штук)
 
-| Компонент          | Пропсы                                      | Значение схемы |
-| ------------------ | ------------------------------------------- | -------------- |
-| `FieldString`      | `name`, `label?`, `placeholder?`            | `string`       |
-| `FieldNumber`      | `name`, `label?`                            | `number`       |
-| `FieldNumberInput` | `name`, `label?`, `min?/max?/step?`         | `number`       |
-| `FieldCheckbox`    | `name`, `label?`                            | `boolean`      |
-| `FieldTextarea`    | `name`, `label?`, `placeholder?`            | `string`       |
-| `FieldSelect`      | `name`, `label?`, `placeholder?`, `options` | `string`       |
-| `FieldCombobox`    | `name`, `label?`, `placeholder?`, `options` | `string`       |
-| `FieldPassword`    | `name`, `label?`, `placeholder?`            | `string`       |
-| `FieldHidden`      | `name`, `value?`                            | любое          |
-| `FieldYesNo`       | `name`, `label?`, `yesLabel?`, `noLabel?`   | `boolean`      |
-| `FieldDate`        | `name`, `label?`, `placeholder?`            | `string`       |
-| `FieldTime`        | `name`, `label?`, `placeholder?`            | `string`       |
-| `FieldCurrency`    | `name`, `label?`, `placeholder?`            | `number`       |
-| `FieldPercentage`  | `name`, `label?`, `placeholder?`            | `number`       |
+| Компонент           | Пропсы                                      | Значение схемы |
+| ------------------- | ------------------------------------------- | -------------- |
+| `FieldString`       | `name`, `label?`, `placeholder?`            | `string`       |
+| `FieldNumber`       | `name`, `label?`                            | `number`       |
+| `FieldNumberInput`  | `name`, `label?`, `min?/max?/step?`         | `number`       |
+| `FieldCheckbox`     | `name`, `label?`                            | `boolean`      |
+| `FieldSwitch`       | `name`, `label?`                            | `boolean`      |
+| `FieldTextarea`     | `name`, `label?`, `placeholder?`            | `string`       |
+| `FieldSelect`       | `name`, `label?`, `placeholder?`, `options` | `string`       |
+| `FieldNativeSelect` | `name`, `label?`, `placeholder?`, `options` | `string`       |
+| `FieldCombobox`     | `name`, `label?`, `placeholder?`, `options` | `string`       |
+| `FieldRadioGroup`   | `name`, `label?`, `options`                 | `string`       |
+| `FieldPassword`     | `name`, `label?`, `placeholder?`            | `string`       |
+| `FieldHidden`       | `name`, `value?`                            | любое          |
+| `FieldYesNo`        | `name`, `label?`, `yesLabel?`, `noLabel?`   | `boolean`      |
+| `FieldDate`         | `name`, `label?`, `placeholder?`            | `string`       |
+| `FieldTime`         | `name`, `label?`, `placeholder?`            | `string`       |
+| `FieldCurrency`     | `name`, `label?`, `placeholder?`            | `number`       |
+| `FieldPercentage`   | `name`, `label?`, `placeholder?`            | `number`       |
 
-`FieldSelect`/`FieldCombobox`/`FieldNumberInput`/`FieldPassword`/`FieldHidden`/`FieldYesNo`
-собраны не через `createField` (нужен доп. проп сверх `name`/`label`/`placeholder`, либо
-локальное состояние, которого нет в контракте фабрики) — напрямую по `useAppFormContext`/
-`resolveFieldMeta`/`withFieldValidation`, тем же паттерном, что и в headless `@letar/forms-vue`.
+`FieldSelect`/`FieldCombobox`/`FieldRadioGroup`/`FieldNativeSelect`/`FieldNumberInput`/
+`FieldPassword`/`FieldHidden`/`FieldYesNo` собраны не через `createField` (нужен доп. проп сверх
+`name`/`label`/`placeholder`, либо локальное состояние, которого нет в контракте фабрики) —
+напрямую по `useAppFormContext`/`resolveFieldMeta`/`withFieldValidation`, тем же паттерном, что и
+в headless `@letar/forms-vue`. `FieldSwitch` собран через `createField`, но рисует `Switch` вне
+UIKit-контракта (см. выше «Поля») — тот же выбор, что у React `forms-shadcn`.
 
 ### `cn()`
 
@@ -113,11 +120,10 @@ Vue-версия `createFieldPrimitives` из `@letar/forms-react` (Фаза 7.3
 
 ## Что не входит в скоуп
 
-- **Не все 61 поле React-скина** — 14 (Фаза 9, Этап 1). Остальные — следующие этапы плана
-  Фазы 9 (`libs/forms/PLAN.md`).
-- **`Switch`/`RadioGroup`/`NativeSelect` в `rekaUIKit` не реализованы** — соответствующие поля
-  headless-пакета (`FieldSwitch`/`FieldRadioGroup`/`FieldNativeSelect`) здесь пока без Reka-скина,
-  ждут Этапа 2 («select-family на Reka UI»). `PinInput` и другой extended UIKit — тоже позже.
+- **Не все 61 поле React-скина** — 17 (Фаза 9, Этапы 1–2 закрыты). Остальные — следующие этапы
+  плана Фазы 9 (`libs/forms/PLAN.md`): маски/документы, дата/число-виджеты, тяжёлые peer-dep
+  поля, survey/table.
+- **`PinInput`/`SegmentGroup` и другой extended UIKit** — не реализованы, ждут своих этапов.
 - **Нет `Form.Group`/`Form.Steps`/табличных полей** — только плоские top-level поля.
 
 ## Demo

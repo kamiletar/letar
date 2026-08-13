@@ -131,6 +131,32 @@ Hidden, YesNo, Date, Time, Currency, Percentage`. Архитектурная б�
 
 Дальше: Этап 2 (select-family на Reka UI, ~9 полей + три отложенных выше) — следующий заход.
 
+**Этап 2 — отчёт (2026-08-13): три отложенных поля закрыты на `rekaUIKit` — `FieldRadioGroup`,
+`FieldNativeSelect`, `FieldSwitch`. Headless `@letar/forms-vue` их уже имел (Этап 1), доработка
+только в `forms-vue-shadcn`.**
+
+- **`@letar/forms-vue-shadcn` 0.3.0 → 0.4.0, 17 полей (было 14):**
+  - `RadioGroup`/`NativeSelect` добавлены в `UIKitExtendedPrimitives`-реализацию `rekaUIKit`
+    (`ImplementedExtendedPrimitives` расширен с 3 до 5) — новые файлы
+    `uikit/primitives/radio-group.ts` (`RadioGroupRoot`/`RadioGroupItem`/`RadioGroupIndicator` из
+    `reka-ui`) и `uikit/primitives/native-select.ts` (обычный `<select>`), паритет разметки с
+    React (`forms-shadcn/uikit/primitives/{radio-group,native-select}.tsx`).
+  - `FieldSwitch` — **не через UIKit-контракт**: `Switch` не описан в `UIKitExtendedPrimitives`
+    (тот же вывод, что уже был у React-скина — `forms-shadcn/field-switch.tsx` рисует
+    `@radix-ui/react-switch` напрямую), поэтому Vue-версия рисует `SwitchRoot`/`SwitchThumb` из
+    `reka-ui` напрямую внутри `createField`-рендера, не добавляя примитив в контракт.
+  - `FieldRadioGroup`/`FieldNativeSelect` собраны как `FieldSelect`/`FieldNumberInput` —
+    `options` вне контракта `createField`, напрямую через `useAppFormContext`/`resolveFieldMeta`/
+    `withFieldValidation` + `FieldWrapper`.
+- Тесты — `app-form.spec.ts`, блок «Этап 2» (4 новых): рендер контролов всех трёх полей, клик по
+  radio-опции, выбор в native `<select>`, переключение `Switch`. Итог пакета — 11 тестов, все
+  подтверждены прогоном `npx vitest run --reporter=verbose` (не только зелёный статус Nx).
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue-shadcn` зелёный.
+- `@letar/forms-vue` (headless) без изменений — все 3 поля были реализованы там ещё на Этапе 1.
+
+Дальше: Этап 3 (маски/документы через `forms-core/mask`, ~12 полей, `useMaskField`-composable для
+Vue) — следующий заход.
+
 ---
 
 ## ✅ [2026-08-12] `useFormPersistence` — `excludeFields` для чувствительных полей + документация — закрыто

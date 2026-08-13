@@ -1,5 +1,23 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.4.0 (2026-08-13)
+
+Фаза 9, Этап 2 — select-family на `rekaUIKit`: `FieldRadioGroup`, `FieldNativeSelect`,
+`FieldSwitch` (три поля, отложенные с Этапа 1). Закрывает недостающие 3 из 14→17 полей —
+теперь весь набор Этапа 1 полностью портирован и на Reka-скин, не только на headless.
+
+- Новые Reka-примитивы UIKit-контракта: `RadioGroup` (`RadioGroupRoot`/`RadioGroupItem`/
+  `RadioGroupIndicator` из `reka-ui`, паритет разметки с React `radio-group.tsx`) и
+  `NativeSelect` (обычный `<select>`, паритет с React `native-select.tsx`) —
+  `ImplementedExtendedPrimitives` в `uikit-reka.ts` расширен с 3 до 5.
+- `FieldSwitch` — **не через UIKit-контракт** (`Switch` не входит в `UIKitExtendedPrimitives`,
+  тот же вывод, что и в React `forms-shadcn/field-switch.tsx`): рисуется напрямую на
+  `SwitchRoot`/`SwitchThumb` из `reka-ui`, стилизация 1:1 с React-версией.
+- `FieldRadioGroup`/`FieldNativeSelect` собраны как `FieldSelect` — `options` вне контракта
+  `createField`, `useAppFormContext`/`resolveFieldMeta`/`withFieldValidation` напрямую.
+- Тесты — `src/lib/app-form.spec.ts`, блок «Этап 2»: рендер контролов, клик по
+  radio-опции, выбор в native `<select>`, переключение `Switch`.
+
 ## 0.3.0 (2026-08-13)
 
 Фаза 9, Этап 1 (продолжение) — 8 новых полей на `rekaUIKit`, подмножество нового набора
