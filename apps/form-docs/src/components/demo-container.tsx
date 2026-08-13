@@ -6,6 +6,7 @@ export function DemoContainer({ demo, height = 400 }: { demo: string; height?: n
     <div style={{ margin: '24px 0' }}>
       <iframe
         src={`/demo/${demo}`}
+        loading="lazy"
         style={{
           width: '100%',
           height: `${height}px`,
