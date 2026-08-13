@@ -9,34 +9,47 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
 валидация — подключаться через нативные примитивы `@angular/forms` (Reactive Forms), не через
 имитацию `@tanstack/angular-form`.
 
-Пруф подтверждён: `forms-core` не потребовал ни одной правки. 17/61 полей закрыто:
+Пруф подтверждён: `forms-core` не потребовал ни одной правки. 28/61 полей закрыто:
 
 - **Этап 1–2** (зеркало Vue-порта): String, Textarea, Number, Password, Checkbox, Switch,
   RadioGroup, NativeSelect, Date, YesNo.
 - **Stage A** (Фаза 11, +7 самых простых полей): NumberInput, Currency, Percentage, Slider,
   Rating, Hidden, Time.
+- **Stage B** (Фаза 11, +11 документных полей РФ — движок масок): INN, BIK, OGRN, SNILS, KPP,
+  Passport, BankAccount, CorrAccount, ForeignPassport, DepartmentCode, BirthCertificate.
 
 ## Поля
 
-| Компонент                    | Селектор                    | Доп. `@Input()` сверх `name`/`label`/`placeholder`                          |
-| ---------------------------- | --------------------------- | --------------------------------------------------------------------------- |
-| `FieldStringComponent`       | `letar-field-string`        | —                                                                           |
-| `FieldTextareaComponent`     | `letar-field-textarea`      | —                                                                           |
-| `FieldNumberComponent`       | `letar-field-number`        | —                                                                           |
-| `FieldNumberInputComponent`  | `letar-field-number-input`  | `min`, `max`, `step`                                                        |
-| `FieldCurrencyComponent`     | `letar-field-currency`      | `currency` (по умолчанию `RUB`), `min`, `max`, `step` (по умолчанию `0.01`) |
-| `FieldPercentageComponent`   | `letar-field-percentage`    | `min` (0), `max` (100), `step` (1)                                          |
-| `FieldSliderComponent`       | `letar-field-slider`        | `min` (0), `max` (100), `step` (1), `showValue`                             |
-| `FieldRatingComponent`       | `letar-field-rating`        | `count` (5)                                                                 |
-| `FieldHiddenComponent`       | `letar-field-hidden`        | `value` — без label/error UI, без рендера DOM                               |
-| `FieldTimeComponent`         | `letar-field-time`          | `min`, `max`, `step`                                                        |
-| `FieldPasswordComponent`     | `letar-field-password`      | —                                                                           |
-| `FieldCheckboxComponent`     | `letar-field-checkbox`      | —                                                                           |
-| `FieldSwitchComponent`       | `letar-field-switch`        | —                                                                           |
-| `FieldRadioGroupComponent`   | `letar-field-radio-group`   | `options: FieldRadioGroupOption[]`                                          |
-| `FieldNativeSelectComponent` | `letar-field-native-select` | `options: FieldNativeSelectOption[]`                                        |
-| `FieldDateComponent`         | `letar-field-date`          | —                                                                           |
-| `FieldYesNoComponent`        | `letar-field-yes-no`        | —                                                                           |
+| Компонент                        | Селектор                        | Доп. `@Input()` сверх `name`/`label`/`placeholder`                          |
+| -------------------------------- | ------------------------------- | --------------------------------------------------------------------------- |
+| `FieldStringComponent`           | `letar-field-string`            | —                                                                           |
+| `FieldTextareaComponent`         | `letar-field-textarea`          | —                                                                           |
+| `FieldNumberComponent`           | `letar-field-number`            | —                                                                           |
+| `FieldNumberInputComponent`      | `letar-field-number-input`      | `min`, `max`, `step`                                                        |
+| `FieldCurrencyComponent`         | `letar-field-currency`          | `currency` (по умолчанию `RUB`), `min`, `max`, `step` (по умолчанию `0.01`) |
+| `FieldPercentageComponent`       | `letar-field-percentage`        | `min` (0), `max` (100), `step` (1)                                          |
+| `FieldSliderComponent`           | `letar-field-slider`            | `min` (0), `max` (100), `step` (1), `showValue`                             |
+| `FieldRatingComponent`           | `letar-field-rating`            | `count` (5)                                                                 |
+| `FieldHiddenComponent`           | `letar-field-hidden`            | `value` — без label/error UI, без рендера DOM                               |
+| `FieldTimeComponent`             | `letar-field-time`              | `min`, `max`, `step`                                                        |
+| `FieldPasswordComponent`         | `letar-field-password`          | —                                                                           |
+| `FieldCheckboxComponent`         | `letar-field-checkbox`          | —                                                                           |
+| `FieldSwitchComponent`           | `letar-field-switch`            | —                                                                           |
+| `FieldRadioGroupComponent`       | `letar-field-radio-group`       | `options: FieldRadioGroupOption[]`                                          |
+| `FieldNativeSelectComponent`     | `letar-field-native-select`     | `options: FieldNativeSelectOption[]`                                        |
+| `FieldDateComponent`             | `letar-field-date`              | —                                                                           |
+| `FieldYesNoComponent`            | `letar-field-yes-no`            | —                                                                           |
+| `FieldInnComponent`              | `letar-field-inn`               | — (`formatMode: 'off'`, без группировки — длина переменная, 10 или 12)      |
+| `FieldBikComponent`              | `letar-field-bik`               | —                                                                           |
+| `FieldOgrnComponent`             | `letar-field-ogrn`              | —                                                                           |
+| `FieldSnilsComponent`            | `letar-field-snils`             | —                                                                           |
+| `FieldKppComponent`              | `letar-field-kpp`               | —                                                                           |
+| `FieldPassportComponent`         | `letar-field-passport`          | — (без контрольной суммы — паспорт РФ её не несёт)                          |
+| `FieldBankAccountComponent`      | `letar-field-bank-account`      | —                                                                           |
+| `FieldCorrAccountComponent`      | `letar-field-corr-account`      | — (доп. проверка префикса `"301"`)                                          |
+| `FieldForeignPassportComponent`  | `letar-field-foreign-passport`  | —                                                                           |
+| `FieldDepartmentCodeComponent`   | `letar-field-department-code`   | —                                                                           |
+| `FieldBirthCertificateComponent` | `letar-field-birth-certificate` | — (без маски — свободный ввод + нормализация гомоглифов на `blur`)          |
 
 Разметка у всех — голый HTML, без CSS: классы `letar-field`, `letar-field__label`,
 `letar-field__control`, `letar-field__error` (тот же принцип, что у `libs/forms-vue`, раздел
@@ -61,6 +74,18 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
   (`NG0303: Can't bind to 'schema'...`). Внутри полей (`FieldBase`) сигналы используются свободно
   (`computed`/`effect`) — проблема только в JIT-извлечении метаданных `inputs`/`outputs` из
   initializer API на границе. См. комментарии в `app-form.component.ts`/`field-base.ts`.
+- **`DocumentFieldBase`** (`src/lib/core/document-field-base.ts`, Stage B) — abstract-база 10 из
+  11 документных полей (не `BirthCertificate` — у него нет структурной маски). Angular-эквивалент
+  Vue-фабрики `createDocumentField(config)`, но не функция-фабрика (Angular компонент обязан быть
+  классом с `@Component`) — конфиг распался на `abstract readonly mask` + `readonly formatMode` +
+  `readonly maxLength` + `@Input() override placeholder` (свой default в каждом наследнике) +
+  `abstract validateDocument()`. Общая разметка десяти наследников — не копия в каждом файле, а
+  одна константа `DOCUMENT_FIELD_TEMPLATE`, подставляемая в `template:` каждого. Ключевое отличие
+  от остальных `Field*` — НЕ `[formControl]="ctrl"`: `MaskController` (`@letar/forms-core/mask`)
+  пишет напрямую в DOM через `setRangeText`, источник истины — `<input>`, а не Angular
+  `ControlValueAccessor` (иначе в `FormControl` попадало бы отформатированное значение, а не raw).
+  Подробности и почему двойной источник ошибки (Zod-схема формы + собственная контрольная сумма
+  поля) — комментарий класса в `document-field-base.ts`.
 
 ## Тестирование без Karma
 
@@ -101,7 +126,8 @@ nx typecheck:tsgo forms-angular
 - `FieldBase.name`/`label`/`placeholder` не реактивны к изменению после первого рендера
   (не сигналы, `@Input()`) — приемлемо, так как в реальном использовании `name` не меняется после
   монтирования поля.
-- Маски, документные поля (ИНН/паспорт), тяжёлые peer-deps — вне скоупа.
+- `Field.Phone` (особый non-mask-engine форматтер, Stage C) и `Field.MaskedInput` (универсальная
+  произвольная маска, Stage J) — вне скоупа Stage B, тяжёлые peer-deps по-прежнему не портируются.
 
 ## Подключение к приложению
 
