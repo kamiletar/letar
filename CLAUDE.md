@@ -70,6 +70,9 @@ ECONNREFUSED/ERR_DLOPEN_FAILED при зелёном билде ·
 the Next.js package» ·
 [nextjs-rsc-aspectratio-children-only](/.claude/docs/nextjs-rsc-aspectratio-children-only.md) ⚠️
 `AspectRatio` в Server Component → 500, но страница визуально ОК ·
+[ssr-hydration-persisted-state](/.claude/docs/ssr-hydration-persisted-state.md) ⚠️ чтение
+localStorage/cookie в инициализаторе `useState` — не ошибка гидратации в консоли, а тихо
+неработающий клик ·
 [nextjs-public-env-build-time-inlining](/.claude/docs/nextjs-public-env-build-time-inlining.md) ⚠️
 `NEXT_PUBLIC_*` литералом в `docker-compose.yml` не попадает в клиентский бандл — нужен `.env.docker`
 
