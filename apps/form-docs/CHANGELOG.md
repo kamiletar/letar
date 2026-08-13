@@ -2,6 +2,38 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.5.0] - 2026-08-14
+
+### Added
+
+- **P7 Этап 4 — первая волна миграции категорийных страниц полей на `SkinCodeFile`.** Добавлена
+  секция "Full example"/"Полный пример" на 3 из 4 запланированных страниц (`fields/string`,
+  `fields/date`, `fields/specialized`, EN+RU) — `fields/index` пропущена намеренно (обзорная
+  страница-таблица, не по одному полю на секцию, `SkinCodeFile` ей не подходит). Счёт страниц
+  категорий с Full example: было 2/6 (`select`, `number`), стало 5/6.
+  - `fields/string`: chakra=`fields-demo` (String/Textarea/Password среди прочих полей в том же
+    файле), shadcn=`basic-fields-demo`, vue=`string-demo.ts` (реальный самодостаточный пример).
+    MaskedInput/RichText/Editable не покрыты — у них свои отдельные демо-файлы
+    (`masked-demo`/`rich-text-demo`), в паре не участвуют.
+  - `fields/date`: chakra=`fields-demo` (Date/Time/Schedule), shadcn=`date-time-demo`
+    (Date/DateRange/Duration/DateTimePicker/Time). Нет живого Vue/Angular примера для этой группы.
+  - `fields/specialized`: chakra=`file-upload-demo`, shadcn=`specialized-demo` — оба показывают
+    FileUpload (общая точка пересечения), shadcn заодно показывает ColorPicker.
+  - Пары подобраны по максимальному пересечению полей между chakra/shadcn-источниками, а не по
+    буквальному совпадению имени страницы — гранулярность `form-develop-app` (по одному
+    узкоспециализированному демо-файлу на фичу) и `form-develop-app-shadcn` (по одной странице на
+    смысловую группу полей) не совпадает 1:1, ожидаемо согласно P7 PLAN.md.
+- **Нейтрализация заголовка `## Form.Steps` → `## Steps` + `**API:** \`Form.Steps\`\`.** 4 файла
+  (`api/form-component.mdx`+`.ru`, `guides/multi-step.mdx`+`.ru`) — тот же паттерн, что применён к
+  86 заголовкам в Этапе 1. `Form.Steps` — единственный из 12 namespace-API, реализованный в обоих
+  скинах (Chakra + `forms-shadcn`); остальные 11 намеренно не тронуты.
+
+### Fixed
+
+- Гонка с параллельным агентом (правки `libs/forms-angular`) откатила первую попытку этих правок
+  до коммита средствами git — файлы переприменены и закоммичены немедленно после обнаружения по
+  правилу "коммить сразу после каждого готового куска" (`.claude/rules/git.md`).
+
 ## [0.4.0] - 2026-08-13
 
 ### Added

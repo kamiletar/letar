@@ -440,6 +440,62 @@ Angular-вкладку `disabled` автоматически — механиз�
   [starlight#2746](https://github.com/withastro/starlight/issues/2746) (при `scroll-behavior: smooth`
   компенсация анимируется; фикс — `behavior: 'instant'`)
 
+**Этап 4 — первая волна миграции категорийных страниц полей на `SkinCodeFile` (2026-08-14).**
+Задача от координатора `QuietRidge`, по прямой просьбе Ками — механическая миграция ручных
+code-блоков на живой механизм. Сделаны 3 из 4 запланированных страниц (`fields/string`,
+`fields/date`, `fields/specialized`, EN+RU — 6 из 8 файлов); `fields/index` пропущена намеренно.
+
+- `fields/string` — chakra=`apps/form-develop-app/src/app/fields-demo/page.tsx` (мега-демо, но
+  реально содержит String/Textarea/Password среди прочего), shadcn=`basic-fields-demo`,
+  vue=`libs/forms-vue-shadcn/demo/examples/string-demo.ts` (изолированный самодостаточный пример).
+  MaskedInput/RichText/Editable не покрыты этой парой — у них свои узкоспециализированные
+  chakra-демо (`masked-demo`, `rich-text-demo`), но у shadcn нет прямых аналогов (MaskedInput в
+  backlog `form-develop-app-shadcn`, RichText/Editable живут на других shadcn-страницах) — сведение
+  всех шести в одну согласованную пару без создания новых демо-файлов невозможно.
+- `fields/date` — chakra=`fields-demo` (Date/Time/Schedule), shadcn=`date-time-demo`
+  (Date/DateRange/Duration/DateTimePicker/Time). Overlap по Date+Time. Нет живого Vue/Angular
+  примера для этой группы полей — вкладки disabled автоматически.
+- `fields/specialized` — chakra=`file-upload-demo`, shadcn=`specialized-demo`. Overlap по
+  FileUpload; shadcn заодно показывает ColorPicker (тоже в списке полей страницы), Editable и
+  Signature (не в списке).
+- `fields/index` — **пропущена сознательно.** Это обзорная страница-таблица (список всех 40+ полей
+  по категориям + "Basic Usage"/"Custom Props"), не структура "одно поле → одна секция с примером"
+  как у остальных пяти категорийных страниц — `SkinCodeFile` для неё не подходит по формату,
+  насиловать паттерн не стали (пункт задания "реши прагматично").
+
+**Причина неидеальных пар:** `form-develop-app` (chakra) организован по одному
+узкоспециализированному демо-файлу на фичу (35 файлов), `form-develop-app-shadcn` — по одной
+странице на смысловую группу полей (16 файлов, `apps/form-develop-app-shadcn/PLAN.md`). Для
+`select`/`number` (Этап 1/3) гранулярность совпала случайно (`select-demo`/`numeric-demo` — имена
+и состав полей идентичны в обоих приложениях). Для string/date/specialized такого совпадения нет —
+пары выбраны по максимальному пересечению полей между chakra- и shadcn-источником, не по
+буквальному совпадению имени файла. Задокументировано, а не подогнано молча.
+
+Проверено: `nx run-many -t lint typecheck:tsgo --projects=form-docs` и `nx build form-docs`
+(162 страницы) — зелёные. В браузере (`nx dev form-docs`): все 4 страницы (`fields/string` en,
+`fields/date` en, `fields/specialized` ru, `guides/multi-step` en) рендерятся без ошибок консоли,
+Full example показывает переключаемые React/Vue/Angular вкладки с честными disabled-пометками там,
+где живого примера нет, заголовок `## Steps` + `**API:** \`Form.Steps\`` виден на обеих страницах
+API-референса и гайда.
+
+Счёт страниц категорий с Full example: было 2/6 (`select`, `number`), стало **5/6** (+`string`,
+`date`, `specialized`). `fields/index` остаётся без него по формату страницы, не по недосмотру.
+
+⚠️ **Гонка с параллельным агентом.** В процессе работы правки этой сессии в `content/docs` были
+один раз откачены до `git HEAD` действием другого агента, работавшего параллельно над
+`libs/forms-angular` (замечено по появлению staged-файлов этой библиотеки в `git status` в момент,
+когда собственные несохранённые правки этой сессии внезапно исчезли). Файлы переприменены и
+закоммичены немедленно, как только замечено — по одному логическому куску за коммит, как требует
+`.claude/rules/git.md` "коммить сразу после каждого готового куска". Косвенное подтверждение того,
+почему это правило сформулировано так строго.
+
+**Что осталось на следующие этапы (вне скоупа этой сессии):**
+
+- Гайды (48 × 2 файла) — следующий агент/сессия.
+- Сквозная вычитка орфографии — следующий этап.
+- Визуальный полиш дизайна (admonition-блоки, dark mode) — следующий этап.
+- Остальные ~514 инлайн-блоков кода в MDX вне `SkinCodeFile` — не тронуты.
+
 ### Что осталось непроверенным
 
 - **FormKit** — рендерер доков (`formkit/docs-ui-2`) приватный, 404. Их механику переключателя
