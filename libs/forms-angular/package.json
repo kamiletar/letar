@@ -1,0 +1,33 @@
+{
+  "name": "@letar/forms-angular",
+  "version": "0.1.0",
+  "description": "Разведочный пруф headless Angular-слоя @letar/forms поверх @angular/forms (Reactive Forms) — доказывает, что forms-core читается напрямую в третьем фреймворке, не только в React/Vue. Статус: proof-of-concept, не для продакшена",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "@letar/source": "./src/index.ts",
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/forms": "^22.0.0",
+    "zod": "^4.0.0"
+  },
+  "dependencies": {
+    "@letar/forms-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@angular/common": "^22.1.2",
+    "@angular/compiler": "^22.1.2",
+    "@angular/core": "^22.1.2",
+    "@angular/forms": "^22.1.2",
+    "@angular/platform-browser": "^22.1.2",
+    "@angular/platform-browser-dynamic": "^22.1.2"
+  }
+}

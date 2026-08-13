@@ -483,7 +483,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.54.1",
+      "version": "0.56.1",
       "dependencies": {
         "tus-js-client": "^4.3.1",
       },
@@ -535,7 +535,7 @@
     },
     "apps/form-docs": {
       "name": "form-docs",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
       },
@@ -944,6 +944,27 @@
         "zod": ">=3.24.0",
       },
     },
+    "libs/forms-angular": {
+      "name": "@letar/forms-angular",
+      "version": "0.1.0",
+      "dependencies": {
+        "@letar/forms-core": "workspace:*",
+      },
+      "devDependencies": {
+        "@angular/common": "^22.1.2",
+        "@angular/compiler": "^22.1.2",
+        "@angular/core": "^22.1.2",
+        "@angular/forms": "^22.1.2",
+        "@angular/platform-browser": "^22.1.2",
+        "@angular/platform-browser-dynamic": "^22.1.2",
+      },
+      "peerDependencies": {
+        "@angular/common": "^22.0.0",
+        "@angular/core": "^22.0.0",
+        "@angular/forms": "^22.0.0",
+        "zod": "^4.0.0",
+      },
+    },
     "libs/forms-core": {
       "name": "@letar/forms-core",
       "version": "0.7.0",
@@ -994,7 +1015,7 @@
     },
     "libs/forms-vue": {
       "name": "@letar/forms-vue",
-      "version": "0.13.0",
+      "version": "0.15.0",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },
@@ -1019,7 +1040,7 @@
     },
     "libs/forms-vue-shadcn": {
       "name": "@letar/forms-vue-shadcn",
-      "version": "0.14.0",
+      "version": "0.16.0",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
         "@letar/forms-vue": "workspace:*",
@@ -1271,6 +1292,18 @@
     "@ai-sdk/react": ["@ai-sdk/react@4.0.61", "", { "dependencies": { "@ai-sdk/mcp": "2.0.29", "@ai-sdk/provider": "4.0.7", "@ai-sdk/provider-utils": "5.0.25", "ai": "7.0.58", "swr": "^2.4.1", "throttleit": "2.1.0" }, "peerDependencies": { "react": "^18 || ~19.0.1 || ~19.1.2 || ^19.2.1" } }, "sha512-iY59f4092oD3Px2xL5qCmfG5gC0ySHCw5d2Hzq5ReCvig/DIgwUQ6SZG49XIgc8Yg7leTQ4y41CXXY8nQ1eWrA=="],
 
     "@alloc/quick-lru": ["@alloc/quick-lru@5.2.0", "", {}, "sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw=="],
+
+    "@angular/common": ["@angular/common@22.1.2", "", { "dependencies": { "tslib": "^2.3.0" }, "peerDependencies": { "@angular/core": "22.1.2", "rxjs": "^6.5.3 || ^7.4.0" } }, "sha512-8TzyYPBDvSItV8Vqq8k5u8a9fWaomC9bMEr8z1vVLRZDIPhNQ/UcCyuTYbC7GZkeqrrKGu5m8tjUrA09RCwuaQ=="],
+
+    "@angular/compiler": ["@angular/compiler@22.1.2", "", { "dependencies": { "tslib": "^2.3.0" } }, "sha512-aQv0p5MeXuguCeftUUxK4H8Hbw1hC5Zyu+cFsGbsi025LZ9Ngw+BW+iUHDQZAcqHvWDw2wgGOdKh4e7IkcfRyQ=="],
+
+    "@angular/core": ["@angular/core@22.1.2", "", { "dependencies": { "tslib": "^2.3.0" }, "peerDependencies": { "@angular/compiler": "22.1.2", "rxjs": "^6.5.3 || ^7.4.0", "zone.js": "~0.15.0 || ~0.16.0" }, "optionalPeers": ["@angular/compiler", "zone.js"] }, "sha512-t7BrgfdeqbdSbFe3CsGX8ySMeKDlZNBPxFMCOanAAqd6W0H1Kh1WFILBs3DIg0NfjpybfSRJAzKcagOFQWNtiw=="],
+
+    "@angular/forms": ["@angular/forms@22.1.2", "", { "dependencies": { "@standard-schema/spec": "^1.0.0", "tslib": "^2.3.0", "zod": "^4.0.10" }, "peerDependencies": { "@angular/common": "22.1.2", "@angular/core": "22.1.2", "@angular/platform-browser": "22.1.2", "rxjs": "^6.5.3 || ^7.4.0" } }, "sha512-pKDYSNKje/jox74KzswBdX4sL7kJ8OFkJwLnqng8oc7a/NVl/Vf4/Xq4kyowRAdtPcZfLTUnZG6s0qbegfV5mg=="],
+
+    "@angular/platform-browser": ["@angular/platform-browser@22.1.2", "", { "dependencies": { "tslib": "^2.3.0" }, "peerDependencies": { "@angular/animations": "22.1.2", "@angular/common": "22.1.2", "@angular/core": "22.1.2" }, "optionalPeers": ["@angular/animations"] }, "sha512-MQO735ve/tk4gLsWbw8NyBD/DxPfbbmf1pM/vp6K7tZz2xyysMXilqF/k8PBdQBZVOofST8S13inZHQ35nHuRA=="],
+
+    "@angular/platform-browser-dynamic": ["@angular/platform-browser-dynamic@22.1.2", "", { "dependencies": { "tslib": "^2.3.0" }, "peerDependencies": { "@angular/common": "22.1.2", "@angular/compiler": "22.1.2", "@angular/core": "22.1.2", "@angular/platform-browser": "22.1.2" } }, "sha512-nNARbs9zXfoJL72zsTso6GHt1VuIGXWEpyZtzxcC32qQFG1YbzVqGkQTwZ0mZ2/Ctv8dAZ6PPiDo8sbYvAvUDw=="],
 
     "@apm-js-collab/code-transformer": ["@apm-js-collab/code-transformer@0.18.1", "", { "dependencies": { "@types/estree": "^1.0.8", "astring": "^1.9.0", "esquery": "^1.7.0", "meriyah": "^6.1.4", "semifies": "^1.0.0", "source-map": "^0.6.0" }, "bin": { "code-transformer": "cli.js" } }, "sha512-u1Hb6bHjWtkSpiprwVP6YaHC1DTN4RAU3zYkUDUe7WMnJwdyU1pwTL9dFKiSJB9IiLue/EQovmyx6xhU7FFtAQ=="],
 
@@ -2225,6 +2258,8 @@
     "@letar/format-utils": ["@letar/format-utils@workspace:libs/format-utils"],
 
     "@letar/forms": ["@letar/forms@workspace:libs/forms"],
+
+    "@letar/forms-angular": ["@letar/forms-angular@workspace:libs/forms-angular"],
 
     "@letar/forms-core": ["@letar/forms-core@workspace:libs/forms-core"],
 

@@ -701,11 +701,49 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
   чем был у Vue; начинать до того как устоится паттерн `forms-core` + два готовых скина (React,
   Vue) — рискованно дублировать архитектурные решения, которые ещё могут измениться в ходе
   Фазы 9.
-- **Статус:** ✅ разблокировано. Фаза 9 (Vue-паритет) закрыта 2026-08-13, реестр сверен
-  механически, реально 61/61 (см. запись Фазы 9 выше, Этап 8, часть 2). Координатор форм прислал
-  отдельное задание на Фазу 10 (тонкий пруф-адаптер `@letar/forms-angular`, ~10 нативных полей,
-  без skin/демо/доков, thread `forms-angular-proof-phase10`) — см. запись «Фаза 10» ниже/выше по
-  плану.
+- **Статус:** ✅ пруф закрыт (2026-08-13) — см. отчёт ниже.
+
+## Фаза 10: `@letar/forms-angular` — разведочный пруф ✅ закрыт [2026-08-13]
+
+Новый пакет `libs/forms-angular/` (`version 0.1.0`), headless, без skin/демо/доков. Пруф
+подтверждён: `forms-core` не потребовал ни одной правки под третий фреймворк.
+
+- **10 полей закрыто** (зеркало Этапа 1 Vue-порта): String, Textarea, Number, Password,
+  Checkbox, Switch, RadioGroup, NativeSelect, Date, YesNo.
+- **`getFieldMeta`/`unwrapSchema`** (`@letar/forms-core/schema`) читаются напрямую в
+  `field-meta.ts` — тот же контракт, что у React/Vue, без адаптации ядра.
+- **Валидатор** — нативный Angular `ValidatorFn` поверх `schema.safeParse()` (`zod-validator.ts`),
+  подключается как обычный validator `FormControl`. Осознанно **не** через `@tanstack/angular-form`
+  (хотя пакет существует) — задача была доказать границу именно на нативных Angular-примитивах
+  (Reactive Forms + signals), не повторить паттерн TanStack-семейства в третий раз.
+- **`FormRootService`** (Angular DI, `providers` не `viewProviders` — иначе не виден
+  content-projected полям) — эквивалент Vue `provide`/`inject` контекста формы.
+- **Реактивность — signals без Zone.js**, `provideZonelessChangeDetection()` (Angular 20+),
+  `zone.js` не в зависимостях.
+- **Peer/dev-deps:** `@angular/core`/`@angular/common`/`@angular/forms` `^22.0.0` (peer) +
+  `@angular/compiler`/`@angular/platform-browser`/`@angular/platform-browser-dynamic` (dev,
+  `22.1.2`), `zod ^4.0.0`.
+
+**Находки для будущего расширения (если решим идти дальше пруфа):**
+
+1. **Сигнальные `input()`/`output()` не резолвятся в JIT** на границе компонента, потребляемого
+   другим standalone-компонентом через property binding (`NG0303`) — используются legacy
+   `@Input()`/`@Output()`-декораторы. Расширение до полного порта потребует либо остаться на
+   legacy API, либо подключить `@angular/compiler-cli`/полноценный AOT-билд.
+2. **Тестирование Angular через Vitest (не Karma) работает** —
+   `provideZonelessChangeDetection()` + `TestBed` + Vitest + jsdom, 10/10 тестов зелёных. Два
+   технических нюанса: (а) Angular-декораторы нельзя объявлять инлайн в `*.spec.ts` (Vitest 4
+   транформирует спеки отдельным путём без поддержки decorator-синтаксиса) — только в обычных
+   `.ts`-хостах (`src/lib/testing/stage{1,2}-host.component.ts`); (б) Vite 8 использует `oxc` по
+   умолчанию — публичного эквивалента `experimentalDecorators` там нет, `vitest.config.ts`
+   форсирует `esbuild` (`oxc: false`) с `tsconfigRaw.experimentalDecorators`.
+3. Нет вложенности `FormGroup` (только плоские поля), нет skin — осознанно вне скоупа разведки.
+
+Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-angular --skip-nx-cache`
+зелёный (реализующим агентом и повторно вызывающей сессией).
+
+**Решение, требующее координатора/Ками:** расширять ли `forms-angular` до полного порта (как
+случилось с Vue после Фазы 7.8) или оставить пруфом — не принято в этой сессии, ждёт ответа.
 
 ### [2026-08-11] tsup роняет `'use client'` в lazy-чанках (forms + forms-shadcn) — не чинить без сигнала
 
