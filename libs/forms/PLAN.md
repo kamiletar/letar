@@ -767,6 +767,37 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
 **Решение, требующее координатора/Ками:** расширять ли `forms-angular` до полного порта (как
 случилось с Vue после Фазы 7.8) или оставить пруфом — не принято в этой сессии, ждёт ответа.
 
+## Фаза 11: `@letar/forms-angular` — полный порт до 61/61, тем же путём что Vue (Фаза 9)
+
+Решение принято: расширяем `forms-angular` до полного порта (Фаза 9 Vue — образец). Идёт
+поэтапно, зеркалом уже закрытых Vue-этапов.
+
+### Stage A: +7 полей (NumberInput, Currency, Percentage, Slider, Rating, Hidden, Time) — done [2026-08-14]
+
+Первый этап полного порта — 7 самых простых полей сверх уже закрытых 10 (Этап 1–2). Портированы
+как UI-обвязка поверх `@letar/forms-core` (без единой правки в самом ядре), контракт пропсов
+1:1 с Vue-версией (`libs/forms-vue/src/lib/fields/field-{number-input,currency,percentage,slider,
+rating,hidden,time}.ts`):
+
+- `FieldNumberInputComponent` (`min`/`max`/`step`), `FieldCurrencyComponent` (`currency`/`min`/
+  `max`/`step`), `FieldPercentageComponent` (`min`/`max`/`step` с дефолтами 0/100/1) — обычные
+  `[formControl]`-обёртки над `<input type="number">`, тот же паттерн, что `FieldNumberComponent`.
+- `FieldSliderComponent`/`FieldRatingComponent` — оба заводят собственный `signal` (`sliderValue`/
+  `ratingValue`), подписанный на `ctrl.events`: приложение zoneless
+  (`provideZonelessChangeDetection()`), а `FormControl.value` сам по себе не реактивен для
+  шаблона — без явной подписки интерполяция значения не обновлялась бы после первого рендера.
+  Тот же приём, что `FieldBase` уже применяет для `hasError`/`errorMessage`.
+- `FieldHiddenComponent` — не рендерит DOM (`template: ''`), значение `@Input() value`
+  применяется к контролу через `effect()` один раз при первом появлении `control()` — то же
+  принятое ограничение нереактивности `@Input()` после монтирования, что документировано для
+  `name`/`label`/`placeholder` в `FieldBase`.
+- `FieldTimeComponent` — `<input type="time">`, зеркало `FieldNumberComponent`.
+
+Текущий счёт: **17/61** (10 из Этапа 1–2 + 7 Stage A). Тесты — `app-form.stage-a.spec.ts`
+(host-компонент `testing/stage-a-host.component.ts`, тот же приём выноса `@Component` из
+`*.spec.ts`, что у stage1/stage2). `nx run-many -t lint typecheck:tsgo test
+--projects=@letar/forms-angular` зелёный.
+
 ### [2026-08-11] tsup роняет `'use client'` в lazy-чанках (forms + forms-shadcn) — не чинить без сигнала
 
 - **Запросил:** forms-dev (найдено при publish-prep `forms-shadcn`, письмо #49)
