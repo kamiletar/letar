@@ -1,5 +1,71 @@
 # Changelog @letar/forms-vue
 
+## 0.12.0 (2026-08-13)
+
+Фаза 9, Этап 6 (часть 3) — `FieldDataGrid`, портирован из
+`libs/forms-shadcn/src/lib/fields/field-data-grid-impl.tsx`. Итог: 44 поля (было 43). Этап 6
+(поля) завершён — остаются только `Form.Group`/`Form.Steps` (form-level компоненты, не поля).
+
+- **`@tanstack/vue-table` добавлен как peer/dev-зависимость** (`^8.21.3`, тот же мажор, что
+  `@tanstack/react-table` в `libs/forms-shadcn`) — официальный Vue-адаптер общего
+  `@tanstack/table-core`. Проверено по исходникам пакета (`node_modules/.../@tanstack/vue-table/src/index.ts`,
+  подтянуто `npm pack` для чтения — в воркспейсе его не было).
+- **Находка №1 — нет `flexRender` как функции.** В отличие от `@tanstack/react-table`
+  (`flexRender(comp, props)` — обычная функция, обёртка над `React.createElement`),
+  `@tanstack/vue-table` экспортирует только Vue-компонент `FlexRender`
+  (`h(FlexRender, { render, props })`) — у Vue нет низкоуровневого аналога `createElement` для
+  произвольных значений (строка/функция/VNode) вне компонентного дерева. Обёрнуто локальной
+  функцией `flexRender(renderable, props)` в обоих полях (headless и Reka-скин) для совпадения
+  с формой вызова React-порта.
+- **Находка №2 — реактивность `useVueTable` держится на property-геттерах, не на `MaybeRef`.**
+  Тип `TableOptionsWithReactiveData['data']` документирует `MaybeRef<TData[]>` только для
+  `data`, но фактически `useVueTable`'s `watchEffect` отслеживает **любое** чтение `.value`
+  внутри объекта опций, происходящее непосредственно в момент реального обращения — то есть
+  через `get columns() { return columnsRef.value }`, а не через значение, разыменованное
+  заранее при вызове `useVueTable`. Официальный паттерн (подтверждён по исходнику) — геттеры на
+  `data`/`columns`/`state.*`. Второе отличие: `onSortingChange`/`onColumnFiltersChange`/
+  `onRowSelectionChange` получают `updater: T | ((old: T) => T)` без автораспаковки (в React
+  `useReactTable` разворачивает апдейтер сам через переданный `useState`-сеттер) — разворачивать
+  `typeof updater === 'function'` нужно вручную в каждом обработчике. Подробности и код — JSDoc
+  `libs/forms-vue/src/lib/core/use-data-grid.ts` (`useDataGridTable`).
+- **Находка №3 (важная, стоила отдельного бага в первой версии теста) — `useField({ mode: 'array' })`
+  не реактивен к точечной записи вложенного скаляра.** `meta._arrayVersion` (общий
+  `@tanstack/form-core`, тот же контракт что у React) бампается только структурными мутациями
+  (`pushValue`/`removeValue`/`moveValue`), не `form.setFieldValue('items[i].col', v)`. В React
+  это незаметно: локальный `setEditingCell(null)` (несвязанный `useState`) форсирует ре-рендер
+  ВСЕГО компонента, и `arrayField.state.value` читается заново на каждом ре-рендере независимо
+  от причины — там это просто проперти без мемоизации. В Vue `computed()` кеширует результат по
+  графу зависимостей: несвязанный `ref` (`editingCell.value = null`) не инвалидирует чужой
+  `computed`, сколько бы раз ни перезапускался внешний `render()`. Без явного счётчика-обхода
+  `rows` после инлайн-редактирования показывал бы старое значение до следующей структурной
+  мутации массива. **Фикс:** `useDataGridField` держит собственный `editVersion` ref, бампаемый
+  внутри `setCellValue` после `form.setFieldValue`, и читает актуальное значение через
+  `form.getFieldValue(fullPath)` (а не через `fieldResult.state.value` напрямую) — `rows`
+  computed зависит от ОБОИХ счётчиков (`fieldResult.state.value` — структурные изменения,
+  `editVersion` — точечные правки). Framework-специфичная разница в модели ре-рендера, не
+  архитектурная ошибка порта.
+- **Архитектура (тот же принцип разделения, что у `FieldTableEditor`, Этап 6 часть 2):**
+  табличный wiring (`useVueTable`, обвязка `useField(mode:'array')`, сортировка/фильтр/
+  пагинация/row-selection, CSV-экспорт) вынесен в `@letar/forms-vue/core`
+  (`use-data-grid.ts`) — переиспользуется Reka-скином дословно. Разметка колонок (заголовки/
+  ячейки/чекбоксы/инлайн-input) — своя в каждом пакете, тот же принцип, что у подкомпонентов
+  `table-{header,row,footer,toolbar,cell}.ts`.
+- **`useField(mode:'array')` вызывается напрямую в `setup()`, не через слот `form.Field`** (в
+  отличие от `FieldTableEditor`) — `useVueTable` сама вызывает `ref`/`watchEffect`, и композаблы
+  Vue обязаны запускаться один раз при монтировании; вызов внутри render-prop слота (переисполняется
+  на каждый ре-рендер) пересоздавал бы внутренний `table`-инстанс и сбрасывал сортировку/пагинацию
+  при каждом несвязанном изменении.
+- **Найденное упрощение относительно React-порта:** Vue-реактивные коллекции (`ref(new Set())`)
+  поддерживают мутирующие методы (`.add`/`.delete`) напрямую — `modifiedCells.value.add(key)`
+  триггерит перерисовку без клонирования, в отличие от React, где иммутабельный state требует
+  `setModifiedCells(prev => new Set(prev).add(key))`.
+- **Сохранённые beta-упрощения React-версии:** без виртуализации (`@tanstack/*-virtual` не
+  тянем), без resize/drag-reorder колонок, `columns` обязателен явно (без auto-резолва из Zod-
+  схемы), фильтр только текстовый contains.
+- Тест `app-form.stage6c.spec.ts`: рендер после ленивой загрузки, сортировка по клику на
+  заголовок, текстовый фильтр по колонке, пагинация (prev/next), инлайн-редактирование ячейки,
+  row-selection + bulk-delete, наличие кнопки CSV-экспорта.
+
 ## 0.11.0 (2026-08-13)
 
 Фаза 9, Этап 6 (часть 2) — `FieldTableEditor`, портирован из

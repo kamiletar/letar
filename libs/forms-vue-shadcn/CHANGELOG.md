@@ -1,5 +1,28 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.13.0 (2026-08-13)
+
+Фаза 9, Этап 6 (часть 3) — тот же `FieldDataGrid`, что в headless `forms-vue` 0.12.0,
+Reka/Tailwind-скин. Итог: 45 полей (было 44). Этап 6 (поля) завершён — остаются только
+`Form.Group`/`Form.Steps` (form-level компоненты, не поля).
+
+- Табличный wiring (`useVueTable`, обвязка `useField(mode:'array')`, сортировка/фильтр/
+  пагинация/row-selection, CSV-экспорт) переиспользован из `@letar/forms-vue/core`
+  (`use-data-grid.ts`) — не дублирован, тот же экспорт использует и headless-версия. Находки
+  про API `@tanstack/vue-table` (нет функции `flexRender`, реактивность через геттеры, ручная
+  распаковка `updater`) и про `useField(mode:'array')` (нечувствительность `_arrayVersion` к
+  точечным правкам скаляра) — см. `libs/forms-vue/CHANGELOG.md` 0.12.0, идентичны обоим пакетам
+  (общая композабл-логика).
+- Своя — только Tailwind-разметка: заголовки/ячейки/чекбоксы (`rekaUIKit.Checkbox`), инлайн-
+  input (кастомные компактные классы, не `rekaUIKit.Input` — тот же выбор, что в React
+  shadcn-версии), `rekaUIKit.FieldRoot`/`FieldLabel`/`FieldError`, `onErrorCaptured` →
+  `rekaUIKit.ErrorFallback` (тот же паттерн защиты рендера, что у остальных полей Этапа 6).
+- Те же сохранённые beta-упрощения, что у headless-версии: без виртуализации, без
+  resize/drag-reorder колонок, `columns` обязателен явно, фильтр только текстовый contains.
+- Тест `app-form.stage6c.spec.ts` (тот же набор сценариев, что в headless-пакете, через
+  `setupRekaPolyfills()`; row-selection проверяется через `[role="checkbox"]`, не `input[type=checkbox]`
+  — `rekaUIKit.Checkbox` рендерит `CheckboxRoot`, кнопку, а не нативный чекбокс).
+
 ## 0.12.0 (2026-08-13)
 
 Фаза 9, Этап 6 (часть 2) — тот же `FieldTableEditor`, что в headless `forms-vue` 0.11.0,

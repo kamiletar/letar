@@ -1,6 +1,6 @@
 {
   "name": "@letar/forms-vue",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Тонкий Vue-адаптер @letar/forms — 5 базовых полей поверх @tanstack/vue-form, архитектурный пруф DIP-границы @letar/forms-core (не полный порт)",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -21,6 +21,7 @@
   },
   "peerDependencies": {
     "@tanstack/vue-form": "^1.0.0",
+    "@tanstack/vue-table": "^8.21.3",
     "@tiptap/extension-placeholder": ">=3.0.0",
     "@tiptap/starter-kit": ">=3.0.0",
     "@tiptap/vue-3": ">=3.0.0",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@tanstack/vue-form": "^1.0.0",
+    "@tanstack/vue-table": "^8.21.3",
     "@tiptap/extension-placeholder": "^3.29.2",
     "@tiptap/starter-kit": "^3.29.2",
     "@tiptap/vue-3": "3.29.2",

@@ -9,6 +9,7 @@ export { AppForm } from './lib/core/app-form'
 export { cardBrandIcon } from './lib/core/card-brand-icon'
 export { createField, type FieldRenderArgs, type FieldRenderFn } from './lib/core/create-field'
 export { createLazyField } from './lib/core/create-lazy-field'
+export type { DataGridColumnDef, DataGridFieldProps } from './lib/core/data-grid-types'
 export { type ResolvedFieldMeta, resolveFieldMeta, withFieldValidation } from './lib/core/field-wiring'
 export { type AppFormContext, provideAppForm, useAppFormContext } from './lib/core/form-context'
 export {
@@ -48,6 +49,17 @@ export {
   type UseCreditCardFieldOptions,
   type UseCreditCardFieldResult,
 } from './lib/core/use-credit-card-field'
+export {
+  type DataGridRow,
+  exportDataGridCsv,
+  inferDataGridFieldType,
+  useDataGridField,
+  type UseDataGridFieldOptions,
+  type UseDataGridFieldResult,
+  useDataGridTable,
+  type UseDataGridTableOptions,
+  type UseDataGridTableResult,
+} from './lib/core/use-data-grid'
 export {
   type MaskFieldFormatMode,
   type MaskFieldMask,

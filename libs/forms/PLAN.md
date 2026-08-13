@@ -318,7 +318,52 @@ Vue-пакетах.** Первые два поля Этапа 6 (survey/table) �
   зелёный на обоих пакетах (50/50 тестов каждый).
 - Осталось от Этапа 6: `DataGrid`/`Form.Group`/`Form.Steps` — отдельные заходы.
 
-Дальше: Этап 6 (продолжение) — `DataGrid`/`Form.Group`/`Form.Steps`.
+**Этап 6 (часть 3) — отчёт (2026-08-13): FieldDataGrid закрыт в обоих Vue-пакетах — Этап 6 полей
+завершён.** Портирован из `libs/forms-shadcn/src/lib/fields/field-data-grid-impl.tsx` (+
+`field-data-grid-types.ts`).
+
+- **`@tanstack/vue-table` добавлен как peer/dev-зависимость** (`^8.21.3`, тот же мажор, что
+  `@tanstack/react-table`) в оба Vue-пакета — не был установлен в воркспейсе, `npm pack`
+  использован только для чтения исходников перед реализацией.
+- **Три находки про API `@tanstack/vue-table`/`@tanstack/vue-form`, все задокументированы в
+  JSDoc `libs/forms-vue/src/lib/core/use-data-grid.ts` и в CHANGELOG.md обоих пакетов:**
+  1. Нет функции `flexRender` (в отличие от React) — только Vue-компонент `FlexRender`
+     (`h(FlexRender, { render, props })`), обёрнуто локальной функцией-адаптером в обоих полях.
+  2. Реактивность `useVueTable` держится на property-геттерах (`get columns() {...}`), не на
+     `MaybeRef`-типизации (та документирует реактивность только для `data`) — подтверждено
+     чтением исходника пакета. `onSortingChange`/`onColumnFiltersChange`/`onRowSelectionChange`
+     без автораспаковки апдейтера (в отличие от React `useReactTable`).
+  3. **Самая дорогая находка** (стоила падающего теста): `useField({ mode: 'array' })` не
+     реактивен к точечной записи вложенного скаляра (`form.setFieldValue('items[i].col', v)`) —
+     `meta._arrayVersion` бампается только структурными мутациями. В React это маскируется
+     полным ре-рендером компонента на любой локальный `useState` (значит и `arrayField.state.value`
+     читается заново каждый раз); в Vue `computed()` кеширует по графу зависимостей и не видит
+     несвязанный `ref`. Фикс — собственный `editVersion` ref в `useDataGridField`, бампаемый в
+     `setCellValue`, плюс чтение актуального значения через `form.getFieldValue(fullPath)`
+     вместо прямого `fieldResult.state.value`.
+- **`@letar/forms-vue` 0.11.0 → 0.12.0, 44 поля (было 43):** табличный wiring
+  (`useDataGridField`/`useDataGridTable`/`exportDataGridCsv` — CSV-экспорт, `Blob`+
+  `URL.createObjectURL`, чистая функция) в `lib/core/use-data-grid.ts`, разметка колонок —
+  в `field-data-grid-impl.ts` (нативные `<input>`/`<table>`, BEM-классы `letar-field__data-grid*`).
+- **`@letar/forms-vue-shadcn` 0.12.0 → 0.13.0, 45 полей (было 44):** та же логика из
+  `@letar/forms-vue/core`, Tailwind-разметка + `rekaUIKit.Checkbox`/`FieldRoot`/`FieldLabel`/
+  `FieldError`, `onErrorCaptured` → `rekaUIKit.ErrorFallback` (тот же паттерн, что у остальных
+  полей Этапа 6).
+- **Найденное упрощение относительно React-порта:** Vue-реактивные `Set` (`ref(new Set())`)
+  поддерживают `.add()`/`.delete()` напрямую — не нужен `new Set(prev).add(x)`, как в React с
+  иммутабельным state.
+- **Сохранённые beta-упрощения React-версии:** без виртуализации, без resize/drag-reorder
+  колонок, `columns` обязателен явно (без auto-резолва из schema), фильтр только текстовый
+  contains.
+- Тесты — новый файл `app-form.stage6c.spec.ts` в обоих пакетах: рендер после ленивой загрузки,
+  сортировка по клику на заголовок, текстовый фильтр, пагинация, инлайн-редактирование ячейки,
+  row-selection + bulk-delete, наличие кнопки CSV-экспорта.
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный на обоих пакетах (57/57 тестов каждый).
+- **Осталось от Этапа 6 в целом:** `Form.Group`/`Form.Steps` — form-level компоненты (не поля),
+  отдельный заход.
+
+Дальше: Этап 6 (продолжение) — `Form.Group`/`Form.Steps`.
 
 **Этап 5 (часть 1) — отчёт (2026-08-13): PinInput/OTPInput/ColorPicker/FileUpload закрыты в обоих
 Vue-пакетах.** Координатор в retired, отчёт сразу в план. Скоуп части ограничен намеренно (не
