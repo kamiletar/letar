@@ -971,6 +971,62 @@ host-компонент `testing/stage-f-host.component.ts`.
 `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-angular` зелёный (57/57 тестов
 всего пакета).
 
+### Stage G: +8 полей категории "special" — PinInput, OTPInput, ColorPicker, FileUpload, Address, City, Signature, CreditCard — done [2026-08-14]
+
+Седьмой, самый архитектурно тяжёлый этап Фазы 11 — зеркало
+`libs/forms-vue/src/lib/fields/field-{pin-input,otp-input,color-picker,file-upload,address,city,
+signature,credit-card}.ts`. `forms-core` снова не потребовал ни одной правки.
+
+`FieldPinInputComponent`/`FieldOtpInputComponent` — N ячеек `<input maxlength="1">`, общая
+клавиатурная логика (Backspace/стрелки/paste) вынесена в `core/pin-input-utils.ts`
+(`splitPinChars`/`PIN_INPUT_PATTERNS`). OTP добавляет таймер повторной отправки
+(`signal`+`setInterval`+`ngOnDestroy`) и `autoSubmit` через
+`elementRef.nativeElement.closest('form')?.requestSubmit()` — Angular-эквивалент вызова
+`form.handleSubmit()` (TanStack Form API в Vue-composable, для которого у `FormRootService` нет
+прямого аналога).
+
+`FieldColorPickerComponent`/`FieldFileUploadComponent` — без новых архитектурных приёмов: то же
+Vue-идиоматичное упрощение (нативный `<input type="color">` вместо Ark UI `ColorPicker.Root`) и
+переиспользование `processFileWithSecurity` (`@letar/forms-core/security`) без порта.
+
+`FieldAddressComponent`/`FieldCityComponent` — общий контроллер подсказок
+`createAddressSuggestions()` (`core/address-suggestions.ts`), Angular-эквивалент Vue composable
+`useAddressSuggestions`; `createDaDataProvider`/`AddressProvider` (`@letar/forms-core/address`)
+framework-agnostic, порт не потребовался. Единственная находка, специфичная для Angular:
+`createAddressSuggestions()` вызывается один раз как инициализатор поля класса, а Angular
+заполняет `@Input()` (`minChars`/`debounceMs`) только ПОСЛЕ возврата из конструктора — захват
+`this.debounceMs` по значению в момент создания контроллера навсегда зафиксировал бы дефолт
+(`300`), даже если шаблон передал `[debounceMs]="0"`. Опции контроллера принимают
+`getMinChars`/`getDebounceMs` как геттеры, читаемые лениво в момент вызова (`handleInput`), когда
+Angular уже применил биндинг — без этого фикса тест `FieldAddressComponent`/`FieldCityComponent` с
+`debounceMs: 0` падал (провайдер не вызывался в течение таймаута теста). Click-outside — через
+`document.addEventListener('mousedown', …)` + `DestroyRef.onDestroy()`, регистрируется из
+`ngAfterViewInit` (не конструктора — `@ViewChild`-ref контейнера ещё не существует до первого
+рендера DOM).
+
+`FieldSignatureComponent` — canvas-подпись (рисование мышью/тачем + typed-режим),
+`@ViewChild('canvasEl')` + `ngAfterViewInit` для 2D-контекста (тот же паттерн, что
+`DocumentFieldBase`). Экспорт в PNG/SVG data URI — чистые функции, 1:1 порт из
+`use-signature-field.ts` (Vue). В jsdom `canvas.getContext('2d')` обычно возвращает `null` — тест
+ограничен регистрацией контрола и базовым рендером кнопки очистки, не полноценным рисованием (тот
+же выбор, что у React/Vue-тестов этого поля).
+
+`FieldCreditCardComponent` — составное значение `{ number, expiry, cvc }` в одном `FormControl`
+(тот же принцип, что `FieldDateRangeComponent`, Stage E). Форматтеры/валидаторы — 1:1
+переиспользование `@letar/forms-core/credit-card`. Иконка бренда карты (SVG, Simple Icons) не
+портирована — Vue строит её через `h()` (`card-brand-icon.ts`), Angular-эквивалент потребовал бы
+набора inline-SVG шаблонов без явной пользы для headless-пруфа; вместо иконки — `data-brand`/
+текстовая подпись, вся логика определения бренда и валидации полнофункциональна.
+
+Текущий счёт: **51/61** (33 из Этапа 1–2 + Stage A/B/C/D + Stage E + Stage F + Stage G). Тесты —
+`app-form.stage-g.spec.ts` (9 тестов: рендер всех восьми контролов, PinInput — склейка значения,
+OTP — таймер + resend, ColorPicker — выбор свотча, FileUpload — добавление/удаление файла,
+Signature — рисование + очистка, Address — подсказки + выбор, City — извлечение города из данных
+провайдера, CreditCard — составное значение + определение бренда), host-компонент
+`testing/stage-g-host.component.ts`.
+`nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-angular` зелёный (66/66 тестов
+всего пакета).
+
 ### [2026-08-11] tsup роняет `'use client'` в lazy-чанках (forms + forms-shadcn) — не чинить без сигнала
 
 - **Запросил:** forms-dev (найдено при publish-prep `forms-shadcn`, письмо #49)
