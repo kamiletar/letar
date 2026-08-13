@@ -1,5 +1,42 @@
 # Changelog @letar/forms-vue
 
+## 0.11.0 (2026-08-13)
+
+Фаза 9, Этап 6 (часть 2) — `FieldTableEditor`, портирован из
+`libs/forms-shadcn/src/lib/table/field-table-editor.tsx`. Итог: 43 поля (было 42).
+
+- **Находка про `@tanstack/vue-form` array-API** (проверено по `node_modules/.bun/@tanstack+vue-form@1.33.5.../dist/esm/types.d.ts`
+  и `@tanstack/form-core@0.42.1/dist/esm/FieldApi.d.ts`): `useField`/`form.Field` принимает
+  `mode?: 'value' | 'array'`, а `FieldApi` — тот же общий `@tanstack/form-core` под React/Vue/Solid
+  — экспонирует `pushValue`/`insertValue`/`replaceValue`/`removeValue`/`swapValues`/`moveValue`
+  независимо от `mode`. Порт 1:1, ничего придумывать не пришлось — `h(form.Field, { name, mode:
+  'array' }, { default: ({ field }) => ... })` работает так же, как React `<form.Field name={...}
+  mode="array">{(arrayField) => ...}</form.Field>`.
+- **Рефакторинг границы `core`/`fields`**: `resolveTableColumns` (бывший `use-table-columns.ts`,
+  здесь без React `useMemo` — обычная функция, вызывается прямо в render-замыкании),
+  `useTableNavigation`/`createTableContainerRef` и типы `TableEditorController`/
+  `TableEditorFieldProps`/`ResolvedColumn`/... перенесены из `lib/fields/table/` в `lib/core/` и
+  экспортированы через `@letar/forms-vue/core` — они не специфичны headless-разметке, и
+  `@letar/forms-vue-shadcn` не должен (по границе пакета, см. `core.ts`) тянуть их из `.`, только
+  из `./core`. Визуальные подкомпоненты (`table-{header,row,footer,toolbar,cell}.ts`) остались
+  в `lib/fields/table/` — они как раз разные в двух скинах.
+- Каждая ячейка — отдельный `form.Field` по пути `${name}[i].col` (не единый объект-значение) —
+  тот же структурный контракт, что у React-версии, на нём будет строиться `DataGrid`.
+- Собственный компонент `TableCell` (не функция рендера, вызываемая напрямую) — иначе локальный
+  буфер редактирования (`localValue`) не пережил бы перерисовки. Автофокус при входе в
+  редактирование — через `onVnodeMounted` конкретного `<input>`/`<select>`, а не `onMounted` из
+  `setup()`: переключение `<td>` → `<input>` происходит внутри render-замыкания
+  `form.Field`-слота, вызывать хуки жизненного цикла оттуда нельзя (нет активного instance
+  Vue). Инициализация буфера — плоская переменная `wasEditing` в замыкании `setup()`, не `ref`
+  (не должна триггерить лишнюю реактивность), сброс синхронно до рендера `<input>`.
+- **Упрощения объёма (сверх уже принятых в React shadcn-версии — sortable через нативный HTML5
+  DnD, не `@dnd-kit`):** нет отдельного мобильного карточного вида (`TableMobileView`) — одна
+  таблица с горизонтальным скроллом на всех размерах экрана. Клавиатурная навигация (Tab/Enter/
+  Escape/стрелки) и copy-paste из Excel (TSV) — оставлены без урезания, `@letar/forms-core/table`
+  уже framework-agnostic, порт не потребовался.
+- Тест `app-form.stage6b.spec.ts`: рендер таблицы, добавление/удаление строки, редактирование
+  ячейки, drag&drop-сортировка, copy-paste TSV.
+
 ## 0.10.0 (2026-08-13)
 
 Фаза 9, Этап 6 (часть 1) — `FieldLikert`/`FieldMatrixChoice`, портированы 1:1 из

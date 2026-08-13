@@ -1,5 +1,23 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.12.0 (2026-08-13)
+
+Фаза 9, Этап 6 (часть 2) — тот же `FieldTableEditor`, что в headless `forms-vue` 0.11.0,
+Reka/Tailwind-скин. Итог: 44 поля (было 43).
+
+- Логика (резолв колонок, навигация клавиатурой, тип контроллера) переиспользована из
+  `@letar/forms-vue/core` — `resolveTableColumns`/`useTableNavigation`/`createTableContainerRef`/
+  `TableEditorController` не дублированы, тот же экспорт использует и headless-версия. Своя —
+  только Tailwind-разметка подкомпонентов (`lib/fields/table/table-{header,row,footer,toolbar,cell}.ts`)
+  и главный `field-table-editor.ts` (Reka `FieldRoot`/`FieldLabel`/`FieldError`, `onErrorCaptured`
+  - `rekaUIKit.ErrorFallback` — тот же паттерн защиты рендера, что у остальных полей Этапа 6).
+- Иконки — `lucide-vue-next` (`GripVertical` для drag handle, `X` для кнопки удаления строки),
+  тот же набор, что у React shadcn-версии.
+- Те же упрощения объёма, что у headless-версии (см. `libs/forms-vue/CHANGELOG.md` 0.11.0): без
+  отдельного мобильного вида, native HTML5 DnD вместо `@dnd-kit`.
+- Тест `app-form.stage6b.spec.ts` (тот же набор сценариев, что в headless-пакете, через
+  `setupRekaPolyfills()`).
+
 ## 0.11.0 (2026-08-13)
 
 Фаза 9, Этап 6 (часть 1) — тот же `FieldLikert`/`FieldMatrixChoice`, что в headless `forms-vue`

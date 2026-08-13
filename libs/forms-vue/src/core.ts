@@ -19,6 +19,25 @@ export {
   type RichTextButtonAction,
 } from './lib/core/rich-text-actions'
 export {
+  camelToTitle,
+  fieldInfoToColumn,
+  getArrayElementFields,
+  mapZodType,
+  mergeColumns,
+  resolveTableColumns,
+} from './lib/core/table-columns'
+export {
+  type CellCoord,
+  type CellFieldType,
+  type ResolvedColumn,
+  type TableColumnDef,
+  type TableEditorController,
+  type TableEditorFieldProps,
+  type TableFooterDef,
+  type ToolbarActionsSlot,
+} from './lib/core/table-editor-types'
+export { createTableContainerRef, useTableNavigation } from './lib/core/table-navigation'
+export {
   useAddressSuggestions,
   type UseAddressSuggestionsOptions,
   type UseAddressSuggestionsResult,

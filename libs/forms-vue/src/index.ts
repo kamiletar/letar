@@ -39,6 +39,12 @@ export { FieldSignature } from './lib/fields/field-signature'
 export { FieldSlider } from './lib/fields/field-slider'
 export { FieldSNILS } from './lib/fields/field-snils'
 export { FieldSwitch } from './lib/fields/field-switch'
+export {
+  FieldTableEditor,
+  type TableColumnDef,
+  type TableEditorFieldProps,
+  type TableFooterDef,
+} from './lib/fields/field-table-editor'
 export { FieldTextarea } from './lib/fields/field-textarea'
 export { FieldTime } from './lib/fields/field-time'
 export { FieldYesNo } from './lib/fields/field-yes-no'

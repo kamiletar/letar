@@ -280,7 +280,45 @@ Vue-пакетах.** Первые два поля Этапа 6 (survey/table) �
   зелёный на обоих пакетах.
 - Осталось от Этапа 6: `TableEditor`/`DataGrid`/`Form.Group`/`Form.Steps` — отдельный заход.
 
-Дальше: Этап 6 (продолжение) — `TableEditor`/`DataGrid`/`Form.Group`/`Form.Steps`.
+**Этап 6 (часть 2) — отчёт (2026-08-13): FieldTableEditor закрыт в обоих Vue-пакетах.**
+Портирован 1:1 из `libs/forms-shadcn/src/lib/table/field-table-editor.tsx` (+ подкомпоненты
+`table-{header,row,footer,toolbar,cell}.tsx`, `use-table-columns.ts`, `use-table-navigation.ts`).
+
+- **Находка про `@tanstack/vue-form` array-API** (проверялась перед стартом, не была очевидна
+  заранее): подтверждена по исходникам пакета (`node_modules/.bun/@tanstack+vue-form@1.33.5.../
+  dist/esm/types.d.ts` — `UseFieldOptions.mode?: 'value' | 'array'`, и `@tanstack/form-core@0.42.1/
+  dist/esm/FieldApi.d.ts` — `pushValue`/`insertValue`/`replaceValue`/`removeValue`/`swapValues`/
+  `moveValue` на любом `FieldApi` с массивным значением). Один и тот же `@tanstack/form-core` под
+  React/Vue/Solid-обёртками — array-режим работает идентично, порт логики 1:1, без обходных путей.
+- **`@letar/forms-vue` 0.10.0 → 0.11.0, 43 поля (было 42):** `h(form.Field, { name, mode: 'array'
+  }, { default: ({ field }) => ... })`, каждая ячейка — отдельный вложенный `form.Field` по пути
+  `${name}[i].col` (структурный контракт, на котором будет строиться `DataGrid`). Собственный
+  Vue-компонент `TableCell` (не функция рендера) — иначе локальный буфер редактирования не
+  переживёт перерисовку; автофокус — через `onVnodeMounted` конкретного `<input>`, не через
+  `onMounted`/`watch` из `setup()` (переключение display↔edit происходит внутри
+  render-замыкания `form.Field`-слота, где нет активного Vue-instance для обычных lifecycle-хуков).
+- **Рефакторинг границы `core`/`fields` headless-пакета**: `resolveTableColumns`,
+  `useTableNavigation`/`createTableContainerRef` и общие типы (`TableEditorController` и т.д.)
+  перенесены из `lib/fields/table/` в `lib/core/` и экспортированы через `@letar/forms-vue/core` —
+  иначе `@letar/forms-vue-shadcn` (по установленной границе пакетов — импортирует только
+  `./core`, не корневой `.`, чтобы не тянуть headless-разметку) не смог бы их переиспользовать и
+  задублировал бы логику резолва колонок и клавиатурной навигации.
+- **`@letar/forms-vue-shadcn` 0.11.0 → 0.12.0, 44 поля (было 43):** та же логика из
+  `@letar/forms-vue/core`, Tailwind-разметка подкомпонентов, `lucide-vue-next`
+  (`GripVertical`/`X`), `onErrorCaptured` + `rekaUIKit.ErrorFallback` (тот же паттерн, что у
+  остальных полей Этапа 6).
+- **Упрощения объёма (сверх уже принятых в React shadcn-версии — sortable через нативный HTML5
+  DnD, не `@dnd-kit`):** нет отдельного мобильного карточного вида (`TableMobileView`) — одна
+  таблица с горизонтальным скроллом на всех размерах экрана, задокументировано в CHANGELOG.md
+  обоих пакетов. Клавиатурная навигация (Tab/Enter/Escape/стрелки) и copy-paste из Excel (TSV) —
+  оставлены без урезания: `@letar/forms-core/table` уже framework-agnostic, порта не потребовалось.
+- Тесты — новый файл `app-form.stage6b.spec.ts` в обоих пакетах: рендер таблицы,
+  добавление/удаление строки, редактирование ячейки, drag&drop-сортировка, copy-paste TSV.
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный на обоих пакетах (50/50 тестов каждый).
+- Осталось от Этапа 6: `DataGrid`/`Form.Group`/`Form.Steps` — отдельные заходы.
+
+Дальше: Этап 6 (продолжение) — `DataGrid`/`Form.Group`/`Form.Steps`.
 
 **Этап 5 (часть 1) — отчёт (2026-08-13): PinInput/OTPInput/ColorPicker/FileUpload закрыты в обоих
 Vue-пакетах.** Координатор в retired, отчёт сразу в план. Скоуп части ограничен намеренно (не
