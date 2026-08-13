@@ -482,7 +482,10 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.47.0",
+      "version": "0.50.0",
+      "dependencies": {
+        "tus-js-client": "^4.3.1",
+      },
     },
     "apps/domwellbes-e2e": {
       "name": "@letar/domwellbes-e2e",
@@ -990,7 +993,7 @@
     },
     "libs/forms-vue": {
       "name": "@letar/forms-vue",
-      "version": "0.3.0",
+      "version": "0.5.0",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },
@@ -1007,7 +1010,7 @@
     },
     "libs/forms-vue-shadcn": {
       "name": "@letar/forms-vue-shadcn",
-      "version": "0.4.0",
+      "version": "0.6.0",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
         "@letar/forms-vue": "workspace:*",

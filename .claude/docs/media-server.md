@@ -61,6 +61,16 @@ https://media.letar.best/v/{appId}/{videoId}/poster.jpg  — постер
 | `POST`   | `/api/v1/:appId/video/:videoId/poster` | Переген постер (`?timestamp=00:00:05`) |
 | `GET`    | `/health`                              | `{ ok: true }`                         |
 
+⚠️ **Таблица выше устарела относительно кода.** Реальные интеграции (`svoichuzhie`,
+`domwellbes`) используют **resumable TUS**-загрузку, не одноразовый `POST /upload`:
+`POST /api/v1/:appId/video/request-upload` (тело `{ videoId, webhookUrl }`) возвращает
+`{ uploadToken, uploadUrl, tusUrl, expiresIn }`, дальше файл льётся напрямую в `tusUrl`
+заголовком `X-Upload-Token`. `videoId` генерирует **приложение** (не сервер) до начала
+загрузки — им же вебхук `video.ready` находит свою запись обратно. Актуальный референс —
+`apps/svoichuzhie/src/lib/media.ts` + `src/app/admin/video/new/page.tsx` (полный TUS-клиент с
+докачкой) и `apps/domwellbes/src/lib/media.ts` (минимальная версия без Web Share Target).
+Обновить саму таблицу — отдельная задача (нужно свериться с `infra/media-server/src/server.ts`).
+
 ### Webhook при готовности
 
 Передаётся как `?webhookUrl=...` при загрузке. Воркер вызывает POST:
@@ -135,7 +145,7 @@ export async function uploadVideo(
     headers: { 'X-Media-Key': MEDIA_KEY },
     body: form,
   })
-  if (!res.ok) throw new Error(`Media upload failed: ${res.status}`)
+  if (!res.ok) { throw new Error(`Media upload failed: ${res.status}`) }
   return res.json()
 }
 
@@ -146,7 +156,7 @@ export async function getVideoStatus(
   const res = await fetch(`${MEDIA_API}/api/v1/${appId}/video/${videoId}/status`, {
     headers: { 'X-Media-Key': MEDIA_KEY },
   })
-  if (!res.ok) return 'unknown'
+  if (!res.ok) { return 'unknown' }
   const { status } = await res.json()
   return status
 }
@@ -197,6 +207,7 @@ enum VideoStatus {
 | ------------- | ----------------------- |
 | `svoichuzhie` | `MEDIA_KEY_SVOICHUZHIE` |
 | `animatrona`  | `MEDIA_KEY_ANIMATRONA`  |
+| `domwellbes`  | `MEDIA_KEY_DOMWELLBES`  |
 
 ## Хранилище на s3
 
