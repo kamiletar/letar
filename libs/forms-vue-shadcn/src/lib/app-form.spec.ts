@@ -1,10 +1,13 @@
+import type { AddressProvider, AddressSuggestion } from '@letar/forms-core/address'
 import { AppForm } from '@letar/forms-vue/core'
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, nextTick } from 'vue'
 import { z } from 'zod'
+import { FieldAddress } from './fields/field-address'
 import { FieldBankAccount, FieldCorrAccount } from './fields/field-bank-account'
 import { FieldCheckbox } from './fields/field-checkbox'
+import { FieldCity } from './fields/field-city'
 import { FieldColorPicker } from './fields/field-color-picker'
 import { FieldCombobox } from './fields/field-combobox'
 import { FieldCreditCard } from './fields/field-credit-card'
@@ -29,6 +32,7 @@ import { FieldPinInput } from './fields/field-pin-input'
 import { FieldRadioGroup } from './fields/field-radio-group'
 import { FieldRating } from './fields/field-rating'
 import { FieldSelect } from './fields/field-select'
+import { FieldSignature } from './fields/field-signature'
 import { FieldSlider } from './fields/field-slider'
 import { FieldString } from './fields/field-string'
 import { FieldSwitch } from './fields/field-switch'
@@ -662,5 +666,115 @@ describe('Этап 5 (часть 1) — PinInput/OTPInput/ColorPicker/FileUpload
     await nextTick()
 
     expect(wrapper.find('[data-testid="file-item"]').exists()).toBe(false)
+  })
+})
+
+const stage5Part2Schema = z.object({
+  signature: z.string().optional().meta({ ui: { title: 'Подпись' } }),
+  address: z.any().optional().meta({ ui: { title: 'Адрес' } }),
+  city: z.string().optional().meta({ ui: { title: 'Город' } }),
+})
+
+const mockSuggestions: AddressSuggestion[] = [
+  { label: 'Москва, ул. Тверская, д. 1', value: 'Москва, ул. Тверская, д. 1', data: { city: 'Москва' } },
+  { label: 'Москва, ул. Тверская, д. 2', value: 'Москва, ул. Тверская, д. 2', data: { city: 'Москва' } },
+]
+
+function createMockProvider(): AddressProvider {
+  return { getSuggestions: vi.fn().mockResolvedValue(mockSuggestions) }
+}
+
+function Stage5Part2TestForm(provider: AddressProvider) {
+  return defineComponent({
+    setup() {
+      return () =>
+        h(
+          AppForm,
+          { schema: stage5Part2Schema, initialValue: {}, onSubmit: vi.fn() },
+          {
+            default: () => [
+              h(FieldSignature, { name: 'signature', width: 200, height: 80 }),
+              h(FieldAddress, { name: 'address', provider, debounceMs: 0 }),
+              h(FieldCity, { name: 'city', provider, debounceMs: 0 }),
+            ],
+          },
+        )
+    },
+  })
+}
+
+describe('Этап 5 (часть 2) — Signature/Address/City', () => {
+  beforeEach(() => {
+    // jsdom не реализует 2D-контекст canvas — стаб с методами, которые вызывает useSignatureField.
+    HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue({
+      fillRect: vi.fn(),
+      beginPath: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      stroke: vi.fn(),
+      fillText: vi.fn(),
+    }) as unknown as typeof HTMLCanvasElement.prototype.getContext
+    HTMLCanvasElement.prototype.toDataURL = vi.fn().mockReturnValue('data:image/png;base64,stub')
+  })
+
+  it('рендерят контролы всех трёх полей', () => {
+    const wrapper = mount(Stage5Part2TestForm(createMockProvider()))
+
+    expect(wrapper.find('canvas[data-field-name="signature"]').exists()).toBe(true)
+    expect(wrapper.find('input[data-field-name="address"]').exists()).toBe(true)
+    expect(wrapper.find('input[data-field-name="city"]').exists()).toBe(true)
+  })
+
+  it('FieldSignature: рисование на canvas показывает кнопку очистки', async () => {
+    const wrapper = mount(Stage5Part2TestForm(createMockProvider()), { attachTo: document.body })
+    const canvas = wrapper.find('canvas')
+
+    await canvas.trigger('mousedown', { clientX: 5, clientY: 5 })
+    await canvas.trigger('mousemove', { clientX: 15, clientY: 15 })
+    await canvas.trigger('mouseup')
+    await nextTick()
+
+    const clearButtons = wrapper.findAll('button').filter((b) => b.text() === 'Очистить')
+    expect(clearButtons).toHaveLength(1)
+
+    await clearButtons[0]!.trigger('click')
+    await nextTick()
+
+    expect(wrapper.findAll('button').filter((b) => b.text() === 'Очистить')).toHaveLength(0)
+    wrapper.unmount()
+  })
+
+  it('FieldAddress: ввод запроса показывает подсказки, выбор заполняет инпут', async () => {
+    const provider = createMockProvider()
+    const wrapper = mount(Stage5Part2TestForm(provider))
+    const input = wrapper.find('input[data-field-name="address"]')
+
+    await input.setValue('Тверская')
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    await nextTick()
+
+    expect(provider.getSuggestions).toHaveBeenCalledWith('Тверская', expect.anything())
+
+    const suggestion = wrapper.findAll('li')[0]!
+    await suggestion.trigger('mousedown')
+    await nextTick()
+
+    expect((input.element as HTMLInputElement).value).toBe('Москва, ул. Тверская, д. 1')
+  })
+
+  it('FieldCity: выбор подсказки извлекает название города из данных провайдера', async () => {
+    const provider = createMockProvider()
+    const wrapper = mount(Stage5Part2TestForm(provider))
+    const input = wrapper.find('input[data-field-name="city"]')
+
+    await input.setValue('Моск')
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    await nextTick()
+
+    const suggestion = wrapper.findAll('li')[0]!
+    await suggestion.trigger('mousedown')
+    await nextTick()
+
+    expect((input.element as HTMLInputElement).value).toBe('Москва')
   })
 })

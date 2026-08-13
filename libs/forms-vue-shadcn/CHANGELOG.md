@@ -1,5 +1,20 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.9.0 (2026-08-13)
+
+Фаза 9, Этап 5 (часть 2) — те же 3 поля, что в headless `forms-vue` 0.8.0, Reka/Tailwind-скин:
+`FieldSignature`, `FieldAddress`, `FieldCity`. Итог: 40 полей (было 37). Остался только
+`FieldRichText` из восьми полей Этапа 5.
+
+- Переиспользуют `useSignatureField`/`useAddressSuggestions` из `@letar/forms-vue/core` — здесь
+  только Tailwind-разметка (тулбар draw/typed, дропдаун подсказок вместо `letar-field__address-*`
+  классов headless-пакета).
+- `onErrorCaptured` + `rekaUIKit.ErrorFallback` — тот же паттерн защиты рендера, что у остальных
+  полей пакета.
+- Тесты — `app-form.spec.ts`, блок «Этап 5 (часть 2)».
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный на обоих пакетах.
+
 ## 0.8.0 (2026-08-13)
 
 Фаза 9, Этап 5 (часть 1) — те же 4 поля, что в headless `forms-vue` 0.7.0, Reka/Tailwind-скин:
