@@ -10,20 +10,29 @@ export interface SkinCodeFileProps {
    * молча подставляет Chakra-вариант.
    */
   shadcn?: string
+  /**
+   * Путь к Vue-примеру относительно корня монорепо (`libs/forms-vue-shadcn/demo/examples/*.ts`,
+   * Фаза 10). Не указан → вкладка Vue рисуется disabled с пометкой — Этап 2 P7 включает ось
+   * только там, где живой Vue-код уже есть, не мигрирует все страницы разом.
+   */
+  vue?: string
   title?: string
   lang?: string
 }
 
 /**
- * Пример кода, переключаемый по оси Skin (Chakra ↔ shadcn) — оба варианта читаются
- * с диска на сборке (`CodeFile`) и оба присутствуют в HTML; переключатель только
- * показывает/прячет через CSS (P7 PLAN.md, Этап 1).
+ * Пример кода, переключаемый по осям Framework (React ↔ Vue) и Skin (Chakra ↔ shadcn) — все
+ * варианты читаются с диска на сборке (`CodeFile`) и присутствуют в HTML; переключатель только
+ * показывает/прячет через CSS (P7 PLAN.md, Этап 1/2).
  */
-export async function SkinCodeFile({ chakra, shadcn, title, lang }: SkinCodeFileProps) {
+export async function SkinCodeFile({ chakra, shadcn, vue, title, lang }: SkinCodeFileProps) {
   const chakraNode = await CodeFile({ path: chakra, title: title ? `${title} — Chakra UI` : undefined, lang })
   const shadcnNode = shadcn
     ? await CodeFile({ path: shadcn, title: title ? `${title} — shadcn/ui` : undefined, lang })
     : null
+  const vueNode = vue
+    ? await CodeFile({ path: vue, title: title ? `${title} — Vue` : undefined, lang: lang ?? 'ts' })
+    : null
 
-  return <SkinCodeSwitcher chakra={chakraNode} shadcn={shadcnNode} />
+  return <SkinCodeSwitcher chakra={chakraNode} shadcn={shadcnNode} vue={vueNode} />
 }

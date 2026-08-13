@@ -7,10 +7,13 @@
 Этап 1 P7 будет парсить их напрямую, минуя дублирование кода в MDX). Версия пакета не поднята —
 `demo/` не публикуется в npm (нет в `exports`/`.npmignore` не нужен).
 
-- `demo/examples/{string,number,select,combobox,textarea,checkbox}-demo.ts` — по одному файлу на
-  поле (`FieldString`/`FieldNumber`/`FieldSelect`/`FieldCombobox`/`FieldTextarea`/
-  `FieldCheckbox`), каждый самодостаточен: своя Zod-схема, свой `AppForm`, рендерится в изоляции.
-  `demo/examples/index.ts` — реестр `demoExamples` (id/title/component).
+- `demo/examples/{string,number,select,combobox,textarea,checkbox,table-editor}-demo.ts` — по
+  одному файлу на поле (`FieldString`/`FieldNumber`/`FieldSelect`/`FieldCombobox`/`FieldTextarea`/
+  `FieldCheckbox`/`FieldTableEditor`), каждый самодостаточен: своя Zod-схема, свой `AppForm`,
+  рендерится в изоляции. `demo/examples/index.ts` — реестр `demoExamples` (id/title/component).
+  `table-editor-demo.ts` добавлен 2026-08-13 (form-docs P7 Этап 2) — те же данные/колонки, что
+  React-пример `table-editor-demo/page.tsx`, читается напрямую `SkinCodeFile` в
+  `apps/form-docs/content/docs/guides/table-editor.mdx`.
 - `demo/App.ts` — теперь только навигационная оболочка: `<select>` + `ref` переключают активный
   пример из реестра, без роутер-либы (харнесс маленький, роутер избыточен).
 - Проверено: `bunx vite build demo --config demo/vite.config.ts` зелёный (2548 модулей, тот же

@@ -2,6 +2,29 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.3.0] - 2026-08-13
+
+### Added
+
+- **P7 Этап 2 — ось Framework (React ↔ Vue).** `FrameworkSwitcher` — тот же паттерн, что
+  `SkinSwitcher` (ссылки, не dropdown). `SkinCodeSwitcher`/`SkinCodeFile` расширены новым
+  необязательным `vue`-вариантом: Framework — верхняя ось, Skin (Chakra/shadcn) видна только
+  внутри React (у Vue-пруфа нет деления на скины, см. `libs/forms/PLAN.md` Фаза 10). Страница без
+  `vue`-примера показывает Vue-вкладку disabled с пометкой, не подставляет React-код молча.
+  Включено на двух страницах с живым Vue-кодом — `fields/select` (переиспользован существующий
+  `libs/forms-vue-shadcn/demo/examples/select-demo.ts`) и `guides/table-editor` (новый файл
+  `table-editor-demo.ts` в том же пакете, зарегистрирован в `demo/examples/index.ts`). Везде
+  остальные ~514 инлайн-блоков кода в MDX не тронуты — не входит в этот заход, отдельная задача.
+
+### Fixed
+
+- **Невалидная вложенность `<html>`/`<body>` на `/demo/*`-страницах** — `app/demo/layout.tsx`
+  объявлял собственные `<html>`/`<body>`, хотя этот сегмент вложен в корневой `app/layout.tsx`
+  (сиблинг `[lang]/`, не отдельная root layout group) — hydration mismatch на каждой загрузке
+  live-демо (`/demo/select`, `/demo/table-editor` и т.д.). Заменено на `<div>`-обёртку с той же
+  стилизацией (padding/font). Найдено при обязательной визуальной проверке Этапа 1 (перенос из
+  worktree пропустил `next dev`), см. `PLAN.md`.
+
 ## [0.2.1] - 2026-08-13
 
 ### Fixed

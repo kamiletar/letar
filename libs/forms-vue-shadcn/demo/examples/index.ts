@@ -4,6 +4,7 @@ import { ComboboxDemo } from './combobox-demo'
 import { NumberDemo } from './number-demo'
 import { SelectDemo } from './select-demo'
 import { StringDemo } from './string-demo'
+import { TableEditorDemo } from './table-editor-demo'
 import { TextareaDemo } from './textarea-demo'
 
 /**
@@ -23,4 +24,5 @@ export const demoExamples: DemoExample[] = [
   { id: 'combobox', title: 'FieldCombobox', component: ComboboxDemo },
   { id: 'textarea', title: 'FieldTextarea', component: TextareaDemo },
   { id: 'checkbox', title: 'FieldCheckbox', component: CheckboxDemo },
+  { id: 'table-editor', title: 'FieldTableEditor', component: TableEditorDemo },
 ]
