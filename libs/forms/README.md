@@ -451,7 +451,7 @@ import { FieldString, FieldTextarea } from '@letar/forms/fields/text'
 @letar/forms-react   React + TanStack Form, ноль UI-библиотек — сборка поля (createField,
                      FieldWrapper, error boundary), контекст формы, хуки поля
         ↑
-@letar/forms         Chakra-скин — chakraUIKit + 56 полей
+@letar/forms         Chakra-скин — chakraUIKit + 61 поле
 ```
 
 Зависимость идёт внутрь (Clean Architecture / DIP): не ядро зависит от React, а скин — от
