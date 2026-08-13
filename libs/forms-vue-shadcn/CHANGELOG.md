@@ -1,5 +1,24 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.11.0 (2026-08-13)
+
+Фаза 9, Этап 6 (часть 1) — тот же `FieldLikert`/`FieldMatrixChoice`, что в headless `forms-vue`
+0.10.0, Reka/Tailwind-скин. Итог: 43 поля (было 41).
+
+- Портированы 1:1 из `libs/forms-shadcn/src/lib/fields/{field-likert,field-matrix-choice}.tsx` —
+  те же Tailwind-классы, что в React-версии.
+- **`FieldLikert`** — `FieldWrapper` из `../uikit/primitives`, ряд кнопок-точек с
+  `hover:scale-110`, `flex-wrap`, `showNumbers`.
+- **`FieldMatrixChoice`** — `<table>` в `FieldWrapper`, три варианта (`radio`/`checkbox`/`rating`).
+  Звезда в варианте `rating` — `lucide-vue-next` `Star`, тот же примитив, что уже используется в
+  `FieldRating`, а не собственный SVG.
+- `onErrorCaptured` + `rekaUIKit.ErrorFallback` — тот же паттерн защиты рендера, что у остальных
+  полей пакета. `disabled` — явный проп поля, тот же принцип, что у `FieldRadioGroup`/
+  `FieldCreditCard`.
+- Тесты — новый файл `app-form.stage6.spec.ts`.
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный на обоих пакетах.
+
 ## 0.10.0 (2026-08-13)
 
 Фаза 9, Этап 5 закрыт целиком — тот же `FieldRichText`, что в headless `forms-vue` 0.9.0,

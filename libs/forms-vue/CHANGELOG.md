@@ -1,5 +1,29 @@
 # Changelog @letar/forms-vue
 
+## 0.10.0 (2026-08-13)
+
+Фаза 9, Этап 6 (часть 1) — `FieldLikert`/`FieldMatrixChoice`, портированы 1:1 из
+`libs/forms-shadcn/src/lib/fields/{field-likert,field-matrix-choice}.tsx`. Итог: 42 поля (было 40).
+
+- **`FieldLikert`** — шкала Лайкерта, значение `number` (1-based индекс точки). `anchors:
+  string[]` и `showNumbers` — пропы сверх контракта `createField` (массив), собран напрямую как
+  `FieldRadioGroup`/`FieldYesNo`: `role="radiogroup"` на обёртке, `role="radio"`/`aria-checked`
+  на каждой точке.
+- **`FieldMatrixChoice`** — таблица «вопрос × вариант ответа» (`<table>`), значение
+  `Record<string, string | string[]>`. `rows`/`columns: MatrixRow[]/MatrixColumn[]` — пропы сверх
+  контракта. Три варианта `variant`: `radio` (одиночный, по умолчанию, кастомная
+  кнопка-кружок) / `checkbox` (множественный, `<input type="checkbox">`) / `rating` (звёздочка —
+  headless рисует `★` текстовым глифом, тот же принцип, что у `FieldRating`, без иконки-либы).
+  Per-row required-подсветка (`data-row-error`), как в React-версии.
+- Оба поля собраны напрямую через `defineComponent`+`h()`, не через `createField` — тот же
+  паттерн, что у `FieldRadioGroup`/`FieldYesNo` (пропы-массивы вне контракта). `disabled` — явный
+  проп поля (по умолчанию `false`), а не производный от контекста формы — так же, как у
+  `FieldCreditCard`/`FieldRadioGroup` в Reka-скине.
+- Тесты — новый файл `app-form.stage6.spec.ts` (не блок в едином `app-form.spec.ts` — с 0.9.0
+  тесты пакета разбиты на файлы по этапам).
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный на обоих пакетах.
+
 ## 0.9.0 (2026-08-13)
 
 Фаза 9, Этап 5 закрыт целиком — последнее из восьми полей, `FieldRichText`, WYSIWYG на Tiptap

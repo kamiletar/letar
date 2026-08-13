@@ -256,7 +256,31 @@ peer-dep пакета).
 - Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
   зелёный на обоих пакетах (38/38 тестов каждый).
 
-Дальше: Этап 6 (survey/table: Likert/MatrixChoice/TableEditor/DataGrid, `Form.Group`/`Form.Steps`).
+**Этап 6 (часть 1) — отчёт (2026-08-13): FieldLikert/FieldMatrixChoice закрыты в обоих
+Vue-пакетах.** Первые два поля Этапа 6 (survey/table) — портированы 1:1 из
+`libs/forms-shadcn/src/lib/fields/{field-likert,field-matrix-choice}.tsx`.
+
+- **`@letar/forms-vue` 0.9.0 → 0.10.0, 42 поля (было 40):** `FieldLikert` (значение `number`,
+  1-based индекс точки; `anchors: string[]`/`showNumbers` — пропы сверх контракта `createField`)
+  и `FieldMatrixChoice` (значение `Record<string, string | string[]>`; `rows`/`columns:
+  MatrixRow[]/MatrixColumn[]`, три варианта `radio`/`checkbox`/`rating`, per-row
+  required-подсветка). Оба собраны напрямую `defineComponent`+`h()`, тот же паттерн, что
+  `FieldRadioGroup`/`FieldYesNo` — пропы-массивы вне контракта `createField`. Rating-звезда —
+  текстовый глиф `★`, тот же принцип, что у `FieldRating`, без иконки-либы.
+- **`@letar/forms-vue-shadcn` 0.10.0 → 0.11.0, 43 поля (было 41):** тот же набор на
+  Reka/Tailwind-скине, те же Tailwind-классы, что в React-версии. Rating-звезда — `lucide-vue-next`
+  `Star`, переиспользован тот же примитив, что уже подключён у `FieldRating`.
+- **`disabled` — явный проп поля** (по умолчанию `false`), не производный от контекста формы —
+  так уже сделано у `FieldCreditCard`/`FieldRadioGroup`/`FieldNativeSelect` в Reka-скине; React-версия
+  берёт `disabled`/`readOnly` из `resolved` (`createField`), но у этих двух Vue-полей нет
+  `createField`-обвязки вовсе (пропы-массивы вне контракта), поэтому расхождение осознанное.
+- Тесты — новый файл `app-form.stage6.spec.ts` в обоих пакетах (с 0.9.0/0.10.0 тесты пакетов
+  разбиты на файлы по этапам, не единый `app-form.spec.ts`).
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный на обоих пакетах.
+- Осталось от Этапа 6: `TableEditor`/`DataGrid`/`Form.Group`/`Form.Steps` — отдельный заход.
+
+Дальше: Этап 6 (продолжение) — `TableEditor`/`DataGrid`/`Form.Group`/`Form.Steps`.
 
 **Этап 5 (часть 1) — отчёт (2026-08-13): PinInput/OTPInput/ColorPicker/FileUpload закрыты в обоих
 Vue-пакетах.** Координатор в retired, отчёт сразу в план. Скоуп части ограничен намеренно (не

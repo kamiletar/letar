@@ -177,8 +177,8 @@ project-references-модели на путь-алиасы, применимые
 | @letar/forms-core         | Формы — framework-free ядро (Фаза 7.1): Zod-мета-движок, UIKit-контракт, форматтеры                                                                                      |
 | @letar/forms-react        | Формы — React-композиционный слой (Фаза 7.3): `createField`, `FormGroup`, хуки поля                                                                                      |
 | @letar/forms-shadcn       | Формы — shadcn/Radix-скин (Фаза 7.3), 47/56 полей                                                                                                                        |
-| @letar/forms-vue          | Формы — headless Vue-слой (Фаза 9, паритет с React в процессе), 40/61 полей поверх `@tanstack/vue-form`                                                                  |
-| @letar/forms-vue-shadcn   | Формы — Reka UI/Vue-скин (Фаза 9, паритет в процессе), 41/61 полей                                                                                                       |
+| @letar/forms-vue          | Формы — headless Vue-слой (Фаза 9, паритет с React в процессе), 42/61 полей поверх `@tanstack/vue-form`                                                                  |
+| @letar/forms-vue-shadcn   | Формы — Reka UI/Vue-скин (Фаза 9, паритет в процессе), 43/61 полей                                                                                                       |
 | @letar/chakra-provider    | Chakra UI провайдер                                                                                                                                                      |
 | @letar/yandex-metrika     | Яндекс Метрика                                                                                                                                                           |
 | @letar/format-utils       | Форматирование дат, телефонов                                                                                                                                            |
