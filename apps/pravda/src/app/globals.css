@@ -2,6 +2,15 @@
  * Глобальные стили Pravda
  */
 
+/*
+ * Резервирует место под sticky-шапку (h="60px", фиксированная) при скролле к фокусу/якорю
+ * (WCAG 2.4.11 Focus Not Obscured) — без этого Tab и переход по #hash (SkipLink, TOC статьи)
+ * подводят элемент прямо под шапку. Высота статична, поэтому без ResizeObserver.
+ */
+html {
+  scroll-padding-top: 60px;
+}
+
 /**
  * Контроль overflow на мобильных.
  * НЕ используем overflow-x: hidden на html/body — это обрезает контент!

@@ -7,6 +7,16 @@
 
 ## [Unreleased]
 
+## [1.9.1] - 2026-08-13
+
+### Fixed
+
+- **Клавиатурный фокус мог прятаться под sticky-шапкой** (WCAG 2.4.11 Focus Not Obscured) —
+  найдено при аудите sticky-шапок по монорепо (образец бага — `domwellbes`): у `html` не было
+  `scroll-padding-top`, а шапка (`h="60px"`, фиксированная) скрывает цель `SkipLink` и якоря TOC
+  статьи при `Tab`/переходе по `#hash`. Фикс — статичный `scroll-padding-top: 60px` в
+  `globals.css` (без JS: высота шапки не меняется, в отличие от `domwellbes`/`kami`).
+
 ## [1.8.2] - 2026-07-21
 
 ### Fixed
