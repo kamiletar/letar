@@ -2,6 +2,21 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.2.1] - 2026-08-13
+
+### Fixed
+
+- **`nx build form-docs` падал на `libs/glitchtip/src/client/index.ts`** —
+  `Module parse failed: Unexpected token` на `export interface`, независимо от какой-либо задачи
+  (воспроизводилось на чистом `main`). Две причины, обе устранены в `next.config.mjs`:
+  - `createMDX({ macro: false })` — дефолтный `macro.include` у fumadocs-mdx (`**/*.ts`,
+    `**/*.tsx`, весь workspace, не только MDX-пайплайн) навешивал `fumadocs-mdx/webpack/macro`
+    loader на любой TS-файл в монорепо; фича макроса в form-docs нигде не используется.
+  - `transpilePackages: ['@letar/glitchtip']` — без него Next.js ограничивает свой ts/js loader
+    `include: [dir]` (см. `shouldIncludeExternalDirs` в `next/dist/build/webpack-config.js`) и не
+    обрабатывает `.ts` вне `apps/form-docs`, куда попадает импорт `@letar/glitchtip` из
+    `src/instrumentation-client.ts`.
+
 ## [0.2.0] - 2026-08-13
 
 ### Added

@@ -313,13 +313,20 @@ test --projects=@letar/forms-vue-shadcn` зелёный. Подробности 
   `relative()` + проверку на `..`/абсолютность, поймано semgrep-правилом
   `letar-path-traversal-naive-startswith-guard` при коммите.
 
-⚠️ **`nx build form-docs` (prod, `next build --webpack`) падает — но это НЕ следствие этой
-задачи.** Ошибка — вебпак-парсинг `libs/glitchtip/src/client/index.ts` через
-`fumadocs-mdx/dist/webpack/macro.js`-loader (`Module parse failed: Unexpected token` на
-`export interface`). Воспроизведено на чистом `main` без единой правки этой задачи — сборка
-`form-docs` была красной уже до Этапа 1, значит и prod-billed этого приложения раньше не
-проверялся вживую. Не в скоупе P7 — отдельная задача (вероятно: fumadocs-mdx-лоадер применяется
-к `instrumentation-client.ts` слишком широко и цепляет транзитивный импорт `@letar/glitchtip`).
+✅ **`nx build form-docs` починено (2026-08-13, отдельная сессия).** Было две наложившиеся
+причины, обе — в `next.config.mjs`:
+
+- `createMDX()` без `macro: false` — дефолтный `macro.include` у fumadocs-mdx (`**/*.ts`,
+  `**/*.tsx` по всему workspace, не только MDX) навешивал `fumadocs-mdx/webpack/macro`-loader на
+  любой TS-файл в монорепо, включая `libs/glitchtip/src/client/index.ts`; loader падал на
+  `export interface`. Фича макроса в form-docs нигде не используется — отключена.
+- Даже без macro-loader'а сборка всё равно падала на том же файле с «no loaders configured» —
+  без `transpilePackages`/`experimental.externalDir` Next.js ограничивает свой ts/js loader
+  `include: [dir]` (`shouldIncludeExternalDirs` в `next/dist/build/webpack-config.js`) и не
+  видит `.ts` вне `apps/form-docs`. Добавлен `transpilePackages: ['@letar/glitchtip']`.
+
+162/162 страниц собираются и пререндерятся, `typecheck:tsgo`/`lint` зелёные. Подробности —
+`CHANGELOG.md` 0.2.1.
 
 ⚠️ **`next dev`/визуальная проверка в браузере не выполнены** — не входило в эту сессию
 (верификация фокусировалась на typecheck/lint после переноса из worktree без `node_modules`).
