@@ -1,5 +1,35 @@
 # Changelog @letar/forms-vue
 
+## 0.8.0 (2026-08-13)
+
+Фаза 9, Этап 5 (часть 2) — ещё 3 «тяжёлых» peer-dep поля: `FieldSignature`, `FieldAddress`,
+`FieldCity`. Итог: 39 полей (было 36). Из восьми полей Этапа 5 остался только `FieldRichText`
+(Tiptap) — новый peer-dep для пакета, требует `lazy()`-паттерна (как у React `Form.Captcha`) и
+отдельного захода.
+
+- **`useSignatureField`** (`@letar/forms-vue/core`) — 1:1 порт `useFieldState` React
+  `field-signature.tsx`: рисование мышью/пальцем на canvas + typed-режим (курсивный текст),
+  экспорт в PNG (`canvas.toDataURL`) или SVG data URI по записанным штрихам. Чистые функции
+  экспорта (`buildSvgString`/`buildTypedSvgString`/`escapeXml`) не вынесены в `forms-core` —
+  единственный потребитель этой пары Vue-полей, дублирование признано оправданным (не
+  общеиспользуемая логика, в отличие от дата/число-хелперов Этапа 4).
+- **`useAddressSuggestions`** (`@letar/forms-vue/core`) — общий для `FieldAddress`/`FieldCity`,
+  обоих Vue-скинов. `createDaDataProvider`/`AddressProvider` (`@letar/forms-core/address`) уже
+  framework-agnostic (существовали до Фазы 9) — порт не потребовался вовсе, Vue-специфика только
+  в debounce/click-outside/клавиатурной навигации. `FieldAddress` возвращает `AddressValue`
+  (`{value, data?}`) либо строку при `valueOnly`; `FieldCity` — только строку, с извлечением
+  названия города из `data.city`/`data.settlement`.
+- И `useSignatureField`, и `useAddressSuggestions` вызываются один раз в `setup()`, не в
+  render-замыкании `withFieldValidation` — тот же принцип, что у `usePinInputField`/
+  `useMaskField`: composable с `ref()` внутри теряет стабильную идентичность состояния при вызове
+  на каждый рендер. Запись значения — через `form.setFieldValue` напрямую, не `field.handleChange`
+  (composable не имеет доступа к `field` из render-замыкания).
+- Тесты — `app-form.spec.ts`, блок «Этап 5 (часть 2)»: рендер трёх полей, переключение
+  draw/typed-режима подписи, рисование на canvas + очистка (canvas 2D-контекст замокан — jsdom
+  его не реализует), ввод запроса адреса/города через мок-провайдер, выбор подсказки.
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный на обоих пакетах.
+
 ## 0.7.0 (2026-08-13)
 
 Фаза 9, Этап 5 (часть 1) — 4 из 8 «тяжёлых» peer-dep полей: `FieldPinInput`, `FieldOTPInput`,

@@ -11,6 +11,11 @@ export { createField, type FieldRenderArgs, type FieldRenderFn } from './lib/cor
 export { type ResolvedFieldMeta, resolveFieldMeta, withFieldValidation } from './lib/core/field-wiring'
 export { type AppFormContext, provideAppForm, useAppFormContext } from './lib/core/form-context'
 export {
+  useAddressSuggestions,
+  type UseAddressSuggestionsOptions,
+  type UseAddressSuggestionsResult,
+} from './lib/core/use-address-suggestions'
+export {
   type CreditCardFieldStatus,
   useCreditCardField,
   type UseCreditCardFieldOptions,
@@ -30,3 +35,8 @@ export {
   type UsePinInputFieldOptions,
   type UsePinInputFieldResult,
 } from './lib/core/use-pin-input-field'
+export {
+  useSignatureField,
+  type UseSignatureFieldOptions,
+  type UseSignatureFieldResult,
+} from './lib/core/use-signature-field'
