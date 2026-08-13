@@ -9,7 +9,7 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
 валидация — подключаться через нативные примитивы `@angular/forms` (Reactive Forms), не через
 имитацию `@tanstack/angular-form`.
 
-Пруф подтверждён: `forms-core` не потребовал ни одной правки. 41/61 полей закрыто:
+Пруф подтверждён: `forms-core` не потребовал ни одной правки. 43/61 полей закрыто:
 
 - **Этап 1–2** (зеркало Vue-порта): String, Textarea, Number, Password, Checkbox, Switch,
   RadioGroup, NativeSelect, Date, YesNo.
@@ -22,6 +22,7 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
   Schedule.
 - **Stage E** (Фаза 11, +8 полей семейства «выбор»): Select, CascadingSelect, Combobox,
   Autocomplete, Listbox, RadioCard, SegmentedGroup, ImageChoice.
+- **Stage F** (Фаза 11, +2 поля): CheckboxCard, Tags.
 
 ## Поля
 
@@ -68,6 +69,8 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
 | `FieldRadioCardComponent`        | `letar-field-radio-card`        | `options: RadioCardOption[]`, `orientation` (`horizontal`)                                                                                                         |
 | `FieldSegmentedGroupComponent`   | `letar-field-segmented-group`   | `options: SegmentedGroupOption[]`, `orientation` (`horizontal`)                                                                                                    |
 | `FieldImageChoiceComponent`      | `letar-field-image-choice`      | `options: ImageChoiceOption[]`, `columns` (3), `multiple` (`false`)                                                                                                |
+| `FieldCheckboxCardComponent`     | `letar-field-checkbox-card`     | `options: CheckboxCardOption[]`, `orientation` (`horizontal`)                                                                                                      |
+| `FieldTagsComponent`             | `letar-field-tags`              | `maxTags`, `minTagLength` (1)                                                                                                                                      |
 
 Разметка у всех — голый HTML, без CSS: классы `letar-field`, `letar-field__label`,
 `letar-field__control`, `letar-field__error` (тот же принцип, что у `libs/forms-vue`, раздел
@@ -155,6 +158,15 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
     составное значение). Кнопки-опции (`role="option"`/`role="checkbox"`) не имеют нативного
     `ControlValueAccessor`, поэтому синхронизация — тот же `effect()` + `ctrl.events.subscribe()`,
     что у `FieldDateRangeComponent`, а не имитация чек-листа через несколько `FormControl`.
+- **Stage F — 2 поля, без новых приёмов.** `FieldCheckboxCardComponent` — тот же `signal` +
+  `effect()`/`ctrl.events.subscribe()`, что `FieldRadioCardComponent` (Stage E), но значение
+  `string[]` и `role="checkbox"` на каждой карточке вместо `role="radio"` в `role="radiogroup"` —
+  карточки независимы, поэтому обёртка — `role="group"`, не `role="radiogroup"`.
+  `FieldTagsComponent` — черновик ввода в отдельном `signal('')`, НЕ связанном с `FormControl`
+  (сам `<input>` не поле формы, источник текста для следующего тега); список тегов — тот же
+  синхронизируемый `signal<string[]>`, что у остальных полей с составным/множественным значением.
+  Enter добавляет тег из черновика (с проверкой `minTagLength`/`maxTags`/дубликатов), Backspace на
+  пустом черновике удаляет последний тег — 1-в-1 с `libs/forms-vue/src/lib/fields/field-tags.ts`.
 
 ## Тестирование без Karma
 

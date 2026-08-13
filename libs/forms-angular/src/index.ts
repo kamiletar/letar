@@ -16,6 +16,7 @@ export {
   type CascadingSelectOption,
   FieldCascadingSelectComponent,
 } from './lib/fields/field-cascading-select.component'
+export { type CheckboxCardOption, FieldCheckboxCardComponent } from './lib/fields/field-checkbox-card.component'
 export { FieldCheckboxComponent } from './lib/fields/field-checkbox.component'
 export { FieldComboboxComponent, type FieldComboboxOption } from './lib/fields/field-combobox.component'
 export { FieldCorrAccountComponent } from './lib/fields/field-corr-account.component'
@@ -58,6 +59,7 @@ export { FieldSliderComponent } from './lib/fields/field-slider.component'
 export { FieldSnilsComponent } from './lib/fields/field-snils.component'
 export { FieldStringComponent } from './lib/fields/field-string.component'
 export { FieldSwitchComponent } from './lib/fields/field-switch.component'
+export { FieldTagsComponent } from './lib/fields/field-tags.component'
 export { FieldTextareaComponent } from './lib/fields/field-textarea.component'
 export { FieldTimeComponent } from './lib/fields/field-time.component'
 export { FieldYesNoComponent } from './lib/fields/field-yes-no.component'
