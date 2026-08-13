@@ -14,6 +14,12 @@ description: Воркфлоу разработки form-docs — докумен�
 Фиксированное имя агента: `form-docs-dev`. Общий шаблон вызова `macro_start_session` —
 см. `.claude/rules/app-workflow.md`.
 
+## Учёт времени
+
+Сразу стартуй таймер — `time_start({ app: "form-docs", description: "изучение плана и постановка задачи" })`.
+Когда направление работы прояснится — обнови через `time_switch`. Правила переключения и
+остановки — `.claude/rules/time-tracking.md`, шаблон — `.claude/rules/app-workflow.md`.
+
 ## Координация (Forms Coordinator)
 
 **Проверяй inbox** на задачи от координатора (topic: `forms-task`):

@@ -14,6 +14,12 @@ description: Воркфлоу разработки Aira Web — сайт с ре
 Фиксированное имя агента: `aira-web-dev`. Общий шаблон вызова `macro_start_session` — см.
 `.claude/rules/app-workflow.md`. Модель — `claude-opus-5` (не дефолтная `claude-sonnet-5`).
 
+## Учёт времени
+
+Сразу стартуй таймер — `time_start({ app: "aira-web", description: "изучение плана и постановка задачи" })`.
+Когда направление работы прояснится — обнови через `time_switch`. Правила переключения и
+остановки — `.claude/rules/time-tracking.md`, шаблон — `.claude/rules/app-workflow.md`.
+
 ## Действия
 
 После изучения документации:

@@ -9,6 +9,12 @@ description: Воркфлоу разработки synth — двойная ро
 Фиксированное имя агента: `synth-dev`. Общий шаблон вызова `macro_start_session` —
 см. `.claude/rules/app-workflow.md`.
 
+## Учёт времени
+
+Сразу стартуй таймер — `time_start({ app: "synth", description: "изучение плана и постановка задачи" })`.
+Когда направление работы прояснится — обнови через `time_switch`. Правила переключения и
+остановки — `.claude/rules/time-tracking.md`, шаблон — `.claude/rules/app-workflow.md`.
+
 ## Читать первым
 
 1. `apps/synth/claude.md` — роль, профиль владельца, закрытые решения, «не делать»
