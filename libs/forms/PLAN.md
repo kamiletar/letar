@@ -186,6 +186,45 @@ Hidden, YesNo, Date, Time, Currency, Percentage`. Архитектурная б�
 - Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
   зелёный на обоих пакетах.
 
+**Этап 5 (часть 1) — отчёт (2026-08-13): PinInput/OTPInput/ColorPicker/FileUpload закрыты в обоих
+Vue-пакетах.** Координатор в retired, отчёт сразу в план. Скоуп части ограничен намеренно (не
+«слепая реализация всех восьми разом») — 4 поля без тяжёлых внешних peer-dep;
+`RichText`/`Address`/`City`/`Signature` — следующая часть Этапа 5.
+
+- **`@letar/forms-vue` 0.6.0 → 0.7.0, 36 полей (было 32):** общий composable `usePinInputField`
+  (`libs/forms-vue/src/lib/core/use-pin-input-field.ts`, экспорт через `@letar/forms-vue/core`) —
+  обработчики `input`/`keydown`(backspace)/`paste` для N однобуквенных ячеек, переиспользован
+  `FieldPinInput` и `FieldOTPInput`, а также обоими полями `forms-vue-shadcn`. Отдельно
+  экспортирован чистый хелпер `splitPinChars(value, count)`. `FieldColorPicker` — Vue-идиоматичное
+  упрощение: нативный `<input type="color">` вместо Ark UI compound `ColorPicker.Root`
+  (area/hue/alpha слайдеры Chakra-версии) — браузерный пикер уже даёт то же самое бесплатно, плюс
+  hex-инпут и палитра свотчей. `FieldFileUpload` — нативный `<input type="file">` + drag&drop-зона,
+  `processFileWithSecurity` (`@letar/forms-core/security`) переиспользован напрямую без порта
+  (framework-agnostic).
+- **`@letar/forms-vue-shadcn` 0.7.0 → 0.8.0, 37 полей (было 33):** тот же набор на Reka-скине.
+  PIN/OTP — Tailwind-разметка ячеек поверх того же `usePinInputField`. `FieldColorPicker`/
+  `FieldFileUpload` не входят в `ImplementedExtendedPrimitives` (`uikit-reka.ts`) — рисуются вне
+  UIKit-контракта, тот же принцип, что у `FieldSwitch`/`FieldSlider`/`FieldRating`.
+  `onErrorCaptured`+`rekaUIKit.ErrorFallback` — тот же паттерн защиты рендера, что у остальных
+  полей пакета.
+- **Находка, стоит зафиксировать для будущих полей:** `form.getFieldValue`/`form.setFieldValue` —
+  НЕ Vue-реактивный источник. Первая версия `usePinInputField` держала
+  `computed(() => splitPinChars(getValue(), count))`, где `getValue` читал `form.getFieldValue` —
+  ячейки PIN не обновлялись при вводе (тест ловил пустую строку вместо введённой цифры). Фикс —
+  рендерить массив символов из `field.state.value` (реактивный объект, доступный внутри
+  `withFieldValidation`'а callback-а), а не из значения, прочитанного через `getValue()`.
+  Composable оставляет `getValue()` только для синхронного чтения актуального значения внутри
+  самих обработчиков событий — это не завязано на реактивность рендера. Задокументировано прямо в
+  коде composable, чтобы не наступить повторно на масках/составных полях следующих этапов.
+- Тесты — `app-form.spec.ts` обоих пакетов, блок «Этап 5 (часть 1)»: рендер всех четырёх полей,
+  ввод цифры + автопереход фокуса между PIN-ячейками, backspace-навигация (headless), таймер
+  повторной отправки OTP, выбор свотча `ColorPicker`, добавление/удаление файла `FileUpload`.
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный на обоих пакетах (forms-vue: 30/30 тестов, forms-vue-shadcn: 31/31).
+
+Дальше: Этап 5 (продолжение) — `RichText` (Tiptap, лазy-загрузка по прецеденту Фазы 7.6),
+`Signature` (canvas), `Address`/`City` (DaData-провайдер) — следующий заход.
+
 **Этап 4 — отчёт (2026-08-13): дата/число-виджеты, 5 полей закрыты в обоих Vue-пакетах.**
 
 - **Находка на входе в этап, отменяющая часть плана:** предыдущий отчёт предполагал
