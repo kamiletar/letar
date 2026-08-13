@@ -153,6 +153,7 @@ describe('createJobScheduler', () => {
     expect(status.lastRunAt).toBeNull()
     expect(status.lastRunState).toBeNull()
     expect(status.nextRunAt).toBeInstanceOf(Date)
+    expect(status.autoSchedule).toBe(true)
     expect(status.hasOverride).toBe(false)
   })
 
@@ -259,6 +260,24 @@ describe('createJobScheduler', () => {
     const runId = await scheduler.runNow('demo-job')
 
     expect(runId).toBe('run-id-123')
+  })
+
+  it('autoSchedule=false: getStatuses() не обещает следующий запуск — тикать нечему', async () => {
+    const scheduler = createJobScheduler({
+      connectionString: 'postgres://test',
+      jobs: [job()],
+      overrides: [],
+      autoSchedule: false,
+    })
+    await scheduler.start()
+
+    const [status] = await scheduler.getStatuses()
+
+    // Раньше nextRunAt считался из cron-выражения независимо от автотика — админка показывала
+    // время, в которое ничего не произойдёт. Именно это скрыло невыставленный JOBS_ENABLED
+    // в проде studio (13.08.2026): «Следующий запуск 19:25» при мёртвом расписании.
+    expect(status.nextRunAt).toBeNull()
+    expect(status.autoSchedule).toBe(false)
   })
 
   it('setOverride(): применяет новое расписание сразу, без рестарта процесса', async () => {

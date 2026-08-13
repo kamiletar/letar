@@ -60,6 +60,7 @@ export function createJobScheduler(options: JobSchedulerOptions): JobScheduler {
   const effectiveJobs = mergeJobsWithOverrides(options.jobs, options.overrides)
   const byId = new Map(effectiveJobs.map((job) => [job.definition.id, job]))
   const boss = new PgBoss({ connectionString: options.connectionString, schema })
+  const autoSchedule = options.autoSchedule ?? true
   let started = false
 
   async function applyJob(job: EffectiveJob): Promise<void> {
@@ -68,7 +69,7 @@ export function createJobScheduler(options: JobSchedulerOptions): JobScheduler {
       retryDelay: job.definition.retryDelaySeconds ?? 0,
     })
 
-    if (options.autoSchedule ?? true) {
+    if (autoSchedule) {
       if (job.enabled) {
         await boss.schedule(job.definition.id, job.schedule, undefined, {
           tz: job.definition.timezone ?? DEFAULT_TIMEZONE,
@@ -116,7 +117,10 @@ export function createJobScheduler(options: JobSchedulerOptions): JobScheduler {
   }
 
   function computeNextRunAt(job: EffectiveJob): Date | null {
-    if (!job.enabled) {
+    // Без автотика расписание в pg-boss не зарегистрировано вовсе — обещать следующий запуск
+    // нельзя, иначе админка показывает время, в которое заведомо ничего не произойдёт
+    // (так невыставленный JOBS_ENABLED на проде studio выглядел как исправно работающий крон).
+    if (!autoSchedule || !job.enabled) {
       return null
     }
     try {
@@ -166,6 +170,7 @@ export function createJobScheduler(options: JobSchedulerOptions): JobScheduler {
           ? last.completedOn.getTime() - last.createdOn.getTime()
           : null,
         nextRunAt: computeNextRunAt(job),
+        autoSchedule,
       })
     }
 

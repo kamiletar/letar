@@ -70,4 +70,10 @@ export interface JobStatus {
   lastRunError: string | null
   lastRunDurationMs: number | null
   nextRunAt: Date | null
+  /**
+   * Тикает ли расписание в этом процессе (`autoSchedule` планировщика). При `false` задачи
+   * запускаются только вручную (`runNow`), а `nextRunAt` всегда `null` — админке есть что
+   * показать владельцу, иначе выключенный автотик неотличим от работающего.
+   */
+  autoSchedule: boolean
 }

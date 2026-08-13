@@ -15,4 +15,6 @@ export interface JobStatusItem {
   lastRunError: string | null
   lastRunDurationMs: number | null
   nextRunAt: Date | null
+  /** Тикает ли расписание в процессе приложения. При `false` `nextRunAt` всегда `null`. */
+  autoSchedule: boolean
 }
