@@ -1,5 +1,21 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.8.0 (2026-08-13)
+
+Фаза 9, Этап 5 (часть 1) — те же 4 поля, что в headless `forms-vue` 0.7.0, Reka/Tailwind-скин:
+`FieldPinInput`, `FieldOTPInput`, `FieldColorPicker`, `FieldFileUpload`. Итог: 37 полей (было 33).
+
+- PIN/OTP переиспользуют `usePinInputField`/`splitPinChars` из `@letar/forms-vue/core` — здесь
+  только Tailwind-разметка ячеек, тот же приём, что у `FieldCreditCard`.
+- `FieldColorPicker`/`FieldFileUpload` не входят в `ImplementedExtendedPrimitives` (см.
+  `uikit-reka.ts`) — рисуются вне UIKit-контракта напрямую на Tailwind, тот же выбор, что у
+  `FieldSwitch`/`FieldSlider`/`FieldRating`.
+- `onErrorCaptured` + `rekaUIKit.ErrorFallback` — тот же паттерн защиты рендера, что у остальных
+  полей пакета.
+- Тесты — `app-form.spec.ts`, блок «Этап 5 (часть 1)».
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный на обоих пакетах.
+
 ## 0.7.0 (2026-08-13)
 
 Фаза 9, Этап 3 (продолжение) — `FieldCreditCard` (compound-поле, отложено с основного захода
