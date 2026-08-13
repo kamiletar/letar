@@ -1,5 +1,29 @@
 # Form Develop App (shadcn) — выполненные задачи
 
+## Фаза 4 — Разбивка на отдельные демо-страницы (2026-08-13, Этап 0 Фазы 9 P7 `form-docs`)
+
+Единая мега-страница (556 строк, все 47 полей + 6 beta-компонентов в одной форме) разбита на 16
+отдельных страниц `src/app/<name>-demo/page.tsx` — паритет гранулярности с `form-develop-app`
+(Chakra-версия, эталон). Нужно для чтения-с-диска документацией `form-docs`: один файл = один
+пример, мега-страница этому не соответствовала.
+
+- 10 страниц с группировкой простых полей 3–5 шт. по смыслу (`basic-fields-demo`, `select-demo`,
+  `choice-demo`, `date-time-demo`, `numeric-demo`, `interactive-demo`, `contact-demo`,
+  `specialized-demo`, `auth-fields-demo`, `survey-demo`) + 6 страниц по одному beta/compound
+  компоненту (`steps-demo`, `table-editor-demo`, `rich-text-demo`, `schedule-demo`,
+  `data-grid-demo`, `auto-fields-demo`) — итого 16.
+- Новый `_components/demo-page-layout.tsx` (`DemoPageLayout`/`SubmittedDataPreview` на Tailwind,
+  аналог Chakra-версии из `form-develop-app`) + `_components/index.ts` барrel.
+- `src/app/page.tsx` — список ссылок вместо самой формы.
+- Попутный фикс: `tsconfig.json` не содержал `paths` на `@letar/tailwind-utils` и
+  `@letar/forms-core/mask` — оба подключились к `forms-shadcn`/`forms-react` уже после того, как
+  приложение было заведено, и `typecheck:tsgo` был красным ещё до этой сессии (тот же класс
+  проблемы, что `.claude/rules/libs.md` документирует как «новый внутренний слой ломает всех
+  потребителей сразу»).
+- `typecheck:tsgo`/`oxlint` зелёные. `next build` не верифицирован — блокирован worktree-средой
+  сессии (нет слинкованных `node_modules`, Turbopack не находит пакет `next` относительно
+  `turbopack.root`), не связано с содержимым правки. Подробности — `PLAN.md`.
+
 ## Фаза 3 — Полный паритет 56/56 (2026-08-11, одна сессия, forms-dev)
 
 `@letar/forms-shadcn` достиг полного паритета с `@letar/forms` (Chakra-скин) — 44→56 из 56 полей.
