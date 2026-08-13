@@ -92,6 +92,16 @@ multi-scope коммит — явным флагом:
 GIT_ALLOW_MULTI_SCOPE_COMMIT=1 git commit -m "..."
 ```
 
+⚠️ **Исключение:** корневые док-файлы одного приложения/submodule (`PLAN.md`,
+`PLAN_COMPLETED.md`, `PLAN_TESTING.md`, `CHANGELOG.md`, `README.md`) считаются одним scope
+`docs-root`, а не форкаются по имени файла. Без этого исключения обычное «обновить план +
+changelog после сессии» (см. `app-workflow.md` § «После завершения задачи») ловило бы ложное
+срабатывание — `PLAN.md` и `PLAN_COMPLETED.md` в корне submodule не имеют общего сегмента пути
+(`первый сегмент` = само имя файла), поэтому без спецкейса считались бы разными scope. Правило
+остаётся строгим для настоящего multi-scope — `apps/appA/PLAN.md` + `apps/appB/PLAN.md`
+по-прежнему блокируется, потому что их scope (`apps/appA`, `apps/appB`) вычисляется до попадания
+в спецкейс `docs-root`.
+
 Хук не автоустанавливается для новых клонов и не ловит случай «чужая правка внутри одного scope» —
 от этого защищает только file reservation через Agent Mail.
 

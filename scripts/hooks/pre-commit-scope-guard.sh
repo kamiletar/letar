@@ -30,6 +30,12 @@ for f in "${FILES[@]}"; do
     apps/*/*|libs/*/*|infra/*/*)
       scope="$(echo "$f" | cut -d/ -f1-2)"
       ;;
+    PLAN.md|PLAN_COMPLETED.md|PLAN_TESTING.md|CHANGELOG.md|README.md)
+      # Корневые док-файлы одного приложения/репозитория обновляются пачкой в конце
+      # сессии (см. CLAUDE.md «После завершения задачи») — это одна логическая правка,
+      # а не набор независимых scope по имени файла.
+      scope="docs-root"
+      ;;
     *)
       scope="$(echo "$f" | cut -d/ -f1)"
       ;;
