@@ -1,5 +1,25 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.6.0 (2026-08-13)
+
+Фаза 9, Этап 4 — дата/число-виджеты (5 новых полей), Reka-скин: `FieldDateRange`,
+`FieldDateTimePicker`, `FieldDuration`, `FieldSlider`, `FieldRating`. См. CHANGELOG `forms-vue`
+0.5.0 — находка про отсутствие внешней библиотеки дат в этой группе полей общая для обоих
+пакетов.
+
+- `FieldDateRange`/`FieldDateTimePicker`/`FieldDuration` — те же пропсы и логика, что в headless,
+  рисуют сырой `<input>` в обход `rekaUIKit.Input` (тот же приём, что у документных полей из
+  Этапа 3) либо переиспользуют существующий `NumberInput`-примитив (`FieldDuration`).
+- `FieldSlider` — `reka-ui` `SliderRoot`/`SliderTrack`/`SliderRange`/`SliderThumb`, не входит в
+  UIKit-контракт (нет `Slider` в `UIKitExtendedPrimitives`) — тот же принцип, что у `FieldSwitch`.
+- `FieldRating` — ряд кнопок-звёзд на иконке `Star` из `lucide-vue-next` (уже peer dependency
+  пакета), тоже вне UIKit-контракта.
+- Итог: 32 поля (было 27).
+- Тесты — `app-form.spec.ts`, блок «Этап 4»: те же сценарии, что в headless-версии, плюс
+  клавиатурное управление `Slider` (`ArrowRight` на сфокусированном `SliderThumb`).
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный.
+
 ## 0.5.0 (2026-08-13)
 
 Фаза 9, Этап 3 — маски/документы (10 новых полей), Reka-скин поверх нового

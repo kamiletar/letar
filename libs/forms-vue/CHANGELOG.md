@@ -1,5 +1,34 @@
 # Changelog @letar/forms-vue
 
+## 0.5.0 (2026-08-13)
+
+Фаза 9, Этап 4 — дата/число-виджеты (5 новых полей): `FieldDateRange`, `FieldDateTimePicker`,
+`FieldDuration`, `FieldSlider`, `FieldRating`.
+
+- **Находка на входе в этап:** исходный план предполагал предварительное сравнение
+  Vue-библиотек дат (`@vuepic/vue-datepicker` vs `v-calendar`) перед реализацией. При чтении
+  React-исходников (`forms-shadcn/field-date-range.tsx`, `field-datetime-picker.tsx`) оказалось,
+  что ни одно из пяти полей группы не использует внешнюю библиотеку дат вовсе — все пять
+  собраны на нативных `<input type="date"/"time">` + уже существующем `NumberInput` +
+  `<input type="range">`/иконках звёзд. Сравнение библиотек снято с повестки как основанное на
+  неверной посылке, не отложено.
+- `FieldDateRange` — два `<input type="date">` (start/end) + опциональный ряд кнопок-пресетов
+  (`today`/`yesterday`/`thisWeek`/`lastWeek`/`thisMonth`/`lastMonth`/`thisYear`), без
+  выпадающего меню — тот же выбор, что у React-версии.
+- `FieldDateTimePicker` — `<input type="date">` + `<input type="time">` рядом, значение —
+  строка ISO (`YYYY-MM-DDTHH:MM:00`).
+- `FieldDuration` — значение в минутах, два формата: `HH:MM` (два `<input type="number">`,
+  по умолчанию) и `minutes` (один).
+- `FieldSlider` — голый `<input type="range">` (headless-пакет без UIKit-абстракции, в отличие
+  от Reka-скина).
+- `FieldRating` — ряд кнопок-звёзд на текстовых символах `★`/`☆` (без иконки-либы в headless).
+- Итог: 31 поле (было 26).
+- Тесты — `app-form.spec.ts`, блок «Этап 4»: рендер контролов всех пяти полей, пресет
+  `DateRange`, комбинирование даты+времени, сложение часов/минут `Duration`, обновление
+  значения `Slider`, выбор звезды `Rating`.
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный.
+
 ## 0.4.0 (2026-08-13)
 
 Фаза 9, Этап 3 — маски/документы через `@letar/forms-core/mask` (10 новых полей).

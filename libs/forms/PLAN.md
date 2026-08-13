@@ -186,9 +186,43 @@ Hidden, YesNo, Date, Time, Currency, Percentage`. Архитектурная б�
 - Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
   зелёный на обоих пакетах.
 
-Дальше: `FieldCreditCard` (компаунд, оба пакета) → Этап 4 (дата/число-виджеты, требует
-предварительного сравнения Vue-библиотек дат — `@vuepic/vue-datepicker` vs `v-calendar` — с
-отчётом координатору ДО реализации) — следующий заход.
+**Этап 4 — отчёт (2026-08-13): дата/число-виджеты, 5 полей закрыты в обоих Vue-пакетах.**
+
+- **Находка на входе в этап, отменяющая часть плана:** предыдущий отчёт предполагал
+  предварительное сравнение Vue-библиотек дат (`@vuepic/vue-datepicker` vs `v-calendar`) с
+  отчётом координатору до реализации. При чтении исходников React
+  (`forms-shadcn/field-date-range.tsx`, `field-datetime-picker.tsx`, `field-duration.tsx`,
+  `field-slider.tsx`, `field-rating.tsx`) выяснилось: ни одно из пяти полей группы не использует
+  внешнюю библиотеку дат вовсе. `FieldDateRange`/`FieldDateTimePicker` — нативные
+  `<input type="date"/"time">`, `FieldDuration` — существующий `NumberInput`,
+  `FieldSlider` — Radix/Reka `Slider`-примитив (не датапикер), `FieldRating` — кнопки-звёзды.
+  Сравнение библиотек снято с повестки как основанное на неверной посылке (план 2026-08-13 был
+  составлен без чтения React-исходников группы) — координатору докладывать нечего, план скорректирован
+  по факту, не отложен.
+- **`@letar/forms-vue` 0.4.0 → 0.5.0, 31 поле (было 26):** `FieldDateRange` (два `<input
+  type="date">` + опциональные кнопки-пресеты, без выпадающего меню — тот же выбор, что у
+  React), `FieldDateTimePicker` (`date`+`time` рядом, значение — ISO-строка), `FieldDuration`
+  (минуты, форматы `HH:MM`/`minutes`), `FieldSlider` (голый `<input type="range">` — headless
+  без UIKit-абстракции), `FieldRating` (кнопки-звёзды на символах `★`/`☆`, без иконки-либы).
+- **`@letar/forms-vue-shadcn` 0.5.0 → 0.6.0, 32 поля (было 27):** тот же набор на Reka-скине.
+  `FieldDateRange`/`FieldDateTimePicker`/`FieldDuration` — сырой `<input>` в обход
+  `rekaUIKit.Input` (тот же приём, что у документных полей Этапа 3) либо существующий
+  `NumberInput`-примитив. `FieldSlider` — `reka-ui` `SliderRoot`/`SliderTrack`/`SliderRange`/
+  `SliderThumb`, вне UIKit-контракта (нет `Slider` в `UIKitExtendedPrimitives`) — тот же принцип,
+  что у `FieldSwitch`. `FieldRating` — иконка `Star` из `lucide-vue-next` (уже peer dependency
+  пакета), тоже вне контракта.
+- Тесты — `app-form.spec.ts` обоих пакетов, блок «Этап 4»: рендер контролов всех пяти полей,
+  клик по пресету `DateRange`, комбинирование даты+времени, сложение часов/минут `Duration`,
+  обновление `Slider` (headless — `setValue` на `<input type="range">`; Reka-скин —
+  `ArrowRight`-keydown на сфокусированном `SliderThumb`, т.к. `SliderRoot` не нативный input),
+  выбор звезды `Rating`.
+- Проверено: `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-vue,@letar/forms-vue-shadcn`
+  зелёный на обоих пакетах, включая прогон после `nx run-many -t format`.
+
+Дальше: `FieldCreditCard` (компаунд, оба пакета, отложен с Этапа 3) → Этап 5 (тяжёлые peer-dep
+поля: RichText/Address/City/ColorPicker/PinInput/OTPInput/Signature/FileUpload) → Этап 6
+(survey/table: Likert/MatrixChoice/TableEditor/DataGrid, `Form.Group`/`Form.Steps`) — следующий
+заход.
 
 ---
 
