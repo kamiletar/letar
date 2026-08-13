@@ -278,9 +278,13 @@ test --projects=@letar/forms-vue-shadcn` зелёный. Подробности 
   `select-demo`/`table-editor-demo` из `form-develop-app` и `form-develop-app-shadcn`.
 - **Нейтральные заголовки (решение 6)** — 86 заголовков в 16 файлах (`## Form.Field.Select` →
   `## Select` + `**API:** \`Form.Field.Select\``строкой ниже). Двухсегментные namespace-заголовки
-  (`Form.Group`,`Form.When`,`Form.Watch`,`Form.Subscribe`,`Form.DirtyGuard`,`Form.FromSchema`,`Form.AutoFields`,`Form.DebugValues`,`Form.InfoBlock`,`Form.Divider`,`Form.Errors`,`Form.Steps`) намеренно **не** тронуты:`forms-shadcn`не экспортирует`Form`-неймспейс вовсе
-  (только плоские`FieldX`), поэтому неясно, различаются ли эти API между скинами — уточнить у
-  forms-dev/QuietRidge, прежде чем нейтрализовать.
+  (`Form.Group`,`Form.When`,`Form.Watch`,`Form.Subscribe`,`Form.DirtyGuard`,`Form.FromSchema`,`Form.AutoFields`,`Form.DebugValues`,`Form.InfoBlock`,`Form.Divider`,`Form.Errors`,`Form.Steps`) намеренно **не** тронуты — вопрос закрыт
+  2026-08-13 (`forms-dev`): сверено грепом экспортов`libs/forms-shadcn/src`vs`libs/forms/src`.
+  Из 12 API`forms-shadcn`реально экспортирует **только`Form.Steps`** (`lib/steps/*`) — у
+  остальных 11 (`Group`/`When`/`Watch`/`Subscribe`/`DirtyGuard`/`FromSchema`/`AutoFields`/`DebugValues`/`InfoBlock`/`Divider`/`Errors`) в shadcn-скине реализации нет вообще — это не
+  «разный API одной фичи», а пробел паритета shadcn-скина (техдолг`libs/forms/PLAN.md`, Фаза 8,
+  отдельно от P7). Нейтрализовать заголовок можно только у`Form.Steps`(он один на оба скина);
+  11 остальных оставить как есть (`## Form.Group` и т.п.), пока shadcn их не реализует.
 - **Поиск (решение 7)** — `route.ts` получил `buildIndex` с опциональным тегом `skins` из
   frontmatter, механизм заведён, но клиент **не** фильтрует по тегу активного скина: сегодня ни
   одна страница `skins:` не объявляет (весь контент валиден для обоих скинов — один URL с
