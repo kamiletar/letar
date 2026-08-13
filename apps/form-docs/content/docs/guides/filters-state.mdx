@@ -50,7 +50,7 @@ function CatalogPage() {
         <Form.Field.String name="search" placeholder="Search..." />
         <Form.Field.NativeSelect name="category" options={categoryOptions} />
         <Form.Field.Slider name="minPrice" min={0} max={100000} />
-        <Form.Field.MultiSelect name="status" options={statusOptions} />
+        <Form.Field.Listbox name="status" options={statusOptions} selectionMode="multiple" />
         <Form.Button.Reset>Reset</Form.Button.Reset>
       </HStack>
 
@@ -222,9 +222,9 @@ function DashboardPage() {
       onSubmit={async () => {}}
     >
       <HStack mb={6}>
-        <Form.Field.SegmentedControl name="period" options={periodOptions} />
+        <Form.Field.SegmentedGroup name="period" options={periodOptions} />
         <Form.Field.NativeSelect name="groupBy" label="Group by" options={groupByOptions} />
-        <Form.Field.CheckboxGroup name="metrics" options={metricOptions} />
+        <Form.Field.Listbox name="metrics" options={metricOptions} selectionMode="multiple" />
       </HStack>
 
       <Form.Subscribe>{(controls) => <DashboardCharts controls={controls} />}</Form.Subscribe>
