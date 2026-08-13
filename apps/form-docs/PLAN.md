@@ -496,6 +496,41 @@ API-референса и гайда.
 - Визуальный полиш дизайна (admonition-блоки, dark mode) — следующий этап.
 - Остальные ~514 инлайн-блоков кода в MDX вне `SkinCodeFile` — не тронуты.
 
+**Этап 4, первый батч гайдов (2026-08-14).** Первая половина алфавитного списка (23 гайда,
+параллельно со вторым агентом на непересекающемся списке). Смигрировано **16 из 23** (32 файла
+EN+RU): `analytics`, `async-validation`, `auto-fields`, `autosave`, `calculated-fields`, `captcha`,
+`conditional-fields`, `controlled-state`, `conversational-mode`, `credit-card`, `data-grid`,
+`debug-values`, `field-watchers`, `file-upload`, `filters-state`, `form-templates` — все chakra=
+`apps/form-develop-app/src/app/<demo>/page.tsx`; `auto-fields` и `data-grid` дополнительно получили
+shadcn-пару (оба приложения реально содержат соответствующий демо-файл); `calculated-fields` и
+`file-upload` — shadcn-пару с честно задокументированным overlap (не идентичный сценарий/набор
+полей, как и `fields/string`/`fields/specialized` до этого). Vue/Angular нигде не подключены —
+для этих 16 тем нет живого примера ни в `forms-vue-shadcn/demo/examples`, ни в
+`forms-angular/demo/examples`, вкладки рисуются `disabled` автоматически.
+
+7 гайдов пропущены — нет sandbox-демо-файла, показывающего именно то, что описывает гайд:
+
+- `advanced-patterns` — гайд про композицию Steps+AutoFields+When+DebugValues разом; ближайший
+  реальный файл (`steps-demo`) показывает только `Form.Steps`, не всю комбинацию — насиловать пару
+  не стали.
+- `comparison` — `Form.Comparison` не используется ни в одном файле `form-develop-app`/
+  `-shadcn`.
+- `create-form` — гайд про `createForm()` как API-паттерн конфигурации, не про конкретное поле;
+  нет единого демо-файла, который был бы "тем самым" примером.
+- `custom-uikit` — концептуальный гайд про голый `UIKit`-контракт, из той же категории, что
+  `zenstack-plugin`/`testing-utilities` (см. постановку задачи) — не про песочницу.
+- `depends-on` — `Form.DependsOn` не используется ни в одном файле `form-develop-app`/`-shadcn`
+  (найден только `Form.When`, который уже занят гайдом `conditional-fields`).
+- `form-skeleton` — `Form.Skeleton` не используется ни в одном файле `form-develop-app`/`-shadcn`.
+- `groups-arrays` — `Form.Group`/`Form.Group.List` не используется ни в одном файле
+  `form-develop-app`/`-shadcn` (ближайшие по духу `relation-demo`/`advanced-demo` используют
+  другие фичи).
+
+Проверено: `nx run-many -t lint typecheck:tsgo --projects=form-docs` — зелёные. В браузере
+(`nx dev form-docs`): `guides/data-grid` (en) и `guides/captcha` (ru) — переключатель React/Vue/
+Angular рендерится, честные `disabled`-вкладки с пометкой "скоро" там, где Vue/Angular-примера нет,
+без ошибок консоли (кроме фоновых HMR-websocket сообщений dev-сервера, не связанных с правкой).
+
 ### Что осталось непроверенным
 
 - **FormKit** — рендерер доков (`formkit/docs-ui-2`) приватный, 404. Их механику переключателя
