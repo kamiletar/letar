@@ -468,6 +468,32 @@ import { FileTrigger } from '@letar/ui'
 </FileTrigger>
 ```
 
+### HeaderScrollPadding
+
+Резервирует место под sticky-шапку при скролле к фокусу/якорю (WCAG 2.4.11 Focus Not Obscured) —
+без этого `Tab` и переход по `#hash` подводят элемент прямо под шапку, и он оказывается визуально
+перекрыт. Меряет реальную высоту `<header>` через `ResizeObserver` (переносится строка, баннер) +
+`resize`/`orientationchange` (смена брейкпоинта) и пишет её в CSS-переменную на `documentElement`.
+Не рендерит DOM — только сайд-эффект. Вынесен после того, как один и тот же баг (шапка без
+`scroll-padding-top`, переменная высота по брейкпоинтам) независимо нашёлся в `domwellbes`,
+`aprel8008` и `kami` при аудите sticky-шапок по монорепо (2026-08-13). Если высота шапки
+фиксирована — компонент избыточен, достаточно статичного `scroll-padding-top` в CSS без JS
+(так закрыт `pravda`).
+
+```tsx
+import { HeaderScrollPadding } from '@letar/ui'
+
+// в layout/shell рядом с <Header />
+<HeaderScrollPadding cssVar="--my-app-header-h" />
+```
+
+```typescript
+// в theme/index.ts (defineConfig → globalCss)
+html: {
+  scrollPaddingTop: 'var(--my-app-header-h, 5rem)', // fallback — оценка высоты шапки до первого замера
+}
+```
+
 ### CopyToClipboardButton
 
 Тонкая кнопка-обёртка над `useCopyToClipboard`. Вынесена после того, как один и тот же ручной
@@ -562,7 +588,7 @@ import { useShare } from '@letar/ui'
 
 const { share } = useShare()
 const outcome = await share({ title, text, url }, `${text} ${url}`)
-if (outcome === 'copied') toaster.success({ title: 'Ссылка скопирована' })
+if (outcome === 'copied') { toaster.success({ title: 'Ссылка скопирована' }) }
 ```
 
 ## Команды

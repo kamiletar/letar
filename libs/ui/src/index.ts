@@ -12,6 +12,9 @@ export {
 } from './lib/confirm-dialog'
 export { type LightboxSlide, LightboxViewer, type LightboxViewerProps } from './lib/lightbox-viewer'
 
+// Доступность
+export { HeaderScrollPadding, type HeaderScrollPaddingProps } from './lib/header-scroll-padding'
+
 // Навигация
 export {
   Header,
