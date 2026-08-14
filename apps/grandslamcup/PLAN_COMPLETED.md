@@ -2,6 +2,15 @@
 
 Детальное описание всех реализованных фич.
 
+## v3.38.5 — 2026-08-14 (удалён мёртвый локальный `UserMenu`)
+
+Аудит по всему монорепо на предмет дублей меню аккаунта (`domwellbes`, `driving-school`,
+`mandala`, `grandslamcup` — все держали свои копии вместо `libs/ui/src/lib/user-menu.tsx`) нашёл,
+что у grandslamcup дубль оказался уже мёртвым кодом: `public-header.tsx` давно использует
+`UserMenu` из `@letar/ui` (с `extraItems` под роли тренера/поэта/счетовода/ведущего), мобильная
+версия — `MobileAuthSection` оттуда же. Локальный `_components/header/user-menu.tsx` нигде не
+импортировался — удалён. Функциональность не менялась, только очистка.
+
 ## v3.38.4 — 2026-08-05 (fix: 6 ошибок typecheck:tsgo + tsconfig.spec.json приведён к стандарту)
 
 **typecheck:** починены 6 предсуществующих ошибок `nx typecheck:tsgo grandslamcup` (не связаны с
