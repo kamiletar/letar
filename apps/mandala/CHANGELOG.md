@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+## [0.40.8] - 2026-08-14
+
+### Docs
+
+- **Пометка в `auth-button.tsx`, почему приложение не переведено на общий `UserMenu`
+  (`@letar/ui`)** — компонент хардкодит русский текст, а mandala двуязычно (ru/en, next-intl).
+  Разбор — `.claude/docs/ui-components.md` § UserMenu.
+
 ## [0.40.7] - 2026-08-12
 
 ### Changed

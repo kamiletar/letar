@@ -1,5 +1,7 @@
 'use client'
 
+// Не переведено на @letar/ui UserMenu: его текст захардкожен на русском, а mandala двуязычно
+// (ru/en, next-intl) — см. .claude/docs/ui-components.md § UserMenu.
 import { Link as LocalizedLink, useRouter } from '@/i18n/navigation'
 import { signOut, useSession } from '@/lib/auth-client'
 import { Button, Flex, Link, Text } from '@chakra-ui/react'
