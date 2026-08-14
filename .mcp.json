@@ -167,6 +167,19 @@
         "root@s2.letar.best",
         "5455"
       ]
+    },
+    "postgres-domwellbes-prod": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        ".claude/mcp/pg-wrapper.mjs",
+        "apps/domwellbes/.env.docker",
+        "MCP_PROD_RO_URL",
+        "--tunnel",
+        "5457",
+        "root@185.28.85.195",
+        "5456"
+      ]
     }
   }
 }
