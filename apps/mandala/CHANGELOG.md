@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+## [0.40.9] - 2026-08-14
+
+### Changed
+
+- **`auth-button.tsx` переведён на общий `UserMenu` (`@letar/ui`)** — библиотека получила
+  опциональный проп `labels` (частичное переопределение текста, русский дефолт сохранён),
+  локальная реализация меню аккаунта убрана. Тексты берутся из `next-intl`
+  (`auth.signIn`/`auth.signOut`/`auth.account`, `nav.admin`), добавлен ключ `auth.account`
+  в `messages/ru.json` и `messages/en.json`. `showAuthHub={false}` — mandala использует
+  standalone Better Auth, не Ключницу.
+
 ## [0.40.8] - 2026-08-14
 
 ### Docs
