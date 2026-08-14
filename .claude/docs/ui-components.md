@@ -961,27 +961,30 @@ globalCss: {
 
 `libs/ui/src/lib/user-menu.tsx` — универсальное меню пользователя (кнопка «Войти» для анонимных,
 dropdown с профилем/доп. пунктами/выходом для авторизованных). Принимает `session`, `onSignIn`,
-`onSignOut`, `profileHref`, `extraItems`, `triggerSlot`, `authHubUrl`, `showAuthHub`, `size`.
-`showAuthHub={false}` убирает пункт «Аккаунт в Ключнице» для standalone-приложений (свои ключи
-Better Auth, не делегируют вход Ключнице — см. `driving-school`, `domwellbes`).
+`onSignOut`, `profileHref`, `extraItems`, `triggerSlot`, `authHubUrl`, `showAuthHub`, `size`,
+`labels`. `showAuthHub={false}` убирает пункт «Аккаунт в Ключнице» для standalone-приложений
+(свои ключи Better Auth, не делегируют вход Ключнице — см. `driving-school`, `domwellbes`,
+`mandala`).
 
 **Сведены на компонент (2026-08-14):** `domwellbes` (`auth-nav.tsx`), `driving-school`
 (`landing/header.tsx`), `grandslamcup` (`public-header.tsx` — уже использовал `UserMenu` до этой
-сессии; локальный дубль `header/user-menu.tsx` был мёртвым кодом, удалён).
+сессии; локальный дубль `header/user-menu.tsx` был мёртвым кодом, удалён), `mandala`
+(`auth-button.tsx` — см. ниже).
 
-### ⚠️ `mandala` намеренно НЕ переведён на `UserMenu`
+### `mandala` — двуязычное приложение, потребовало прописать `labels`
 
-Текст внутри `UserMenu` захардкожен на русском («Войти», «Профиль», «Выйти», «Аккаунт в
-Ключнице») — компонент не принимает labels параметрами. `mandala` — двуязычное приложение
-(`src/i18n/routing.ts`: `locales: ['ru', 'en']`, обе локали активны), его `auth-button.tsx`
-использует `next-intl` (`useTranslations('auth')`/`useTranslations('nav')`) именно чтобы текст
-кнопок входа/выхода переключался на английской локали. Подключение `UserMenu` в текущем виде
-означало бы захардкоженный русский текст на `/en/*` — регресс локализации, а не консолидация.
+`mandala` — двуязычное приложение (`src/i18n/routing.ts`: `locales: ['ru', 'en']`, обе локали
+активны). До 2026-08-14 не было переведено на `UserMenu`, потому что весь текст компонента был
+захардкожен на русском («Войти», «Профиль», «Выйти», «Аккаунт в Ключнице») — подключение означало
+бы регресс локализации на `/en/*`.
 
-Компонент можно было бы обобщить (принимать `labels` пропом с дефолтом на русский), но это
-меняет публичный API `@letar/ui`, используемый уже тремя приложениями — не в рамках точечной
-задачи свести 4 приложения на общий компонент. Если появится второе двуязычное приложение с той
-же потребностью — тогда обобщать.
+`UserMenuProps` получил опциональный проп `labels: UserMenuLabels` (`signIn`, `fallbackName`,
+`anonymousName`, `profile`, `authHub`, `signOut`) с русским дефолтом (`DEFAULT_LABELS`) —
+обратно совместимо, три прежних потребителя не потребовали изменений. `mandala/auth-button.tsx`
+прокидывает `labels` из `useTranslations('auth')`/`useTranslations('nav')`; для `fallbackName`/
+`anonymousName` (редкий edge-case — сессия есть, а `name`/`email` нет) заведён новый ключ
+`auth.account` в `messages/ru.json`/`messages/en.json`, отдельного перевода под эти два случая
+не было и не нужно. `showAuthHub={false}` — `mandala` на standalone Better Auth, не на Ключнице.
 
 ### ⚠️ `driving-school` — `owner-nav.tsx` (`OwnerHeader`) НЕ сведён на `UserMenu`
 
