@@ -1089,6 +1089,61 @@ RichText, PasswordStrength — метр силы + чеклист требова
 `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-angular` зелёный (70/70 тестов
 всего пакета).
 
+### Stage I: +4 поля survey/table категорий — Likert, MatrixChoice, TableEditor, DataGrid — done [2026-08-14]
+
+Девятый этап Фазы 11 — зеркало `libs/forms-vue/src/lib/fields/field-{likert,matrix-choice,
+table-editor,data-grid}.ts`. `forms-core` снова не потребовал ни одной правки.
+
+`FieldLikertComponent`/`FieldMatrixChoiceComponent` — один `FormControl` на весь вопрос/матрицу
+(`number` и `Record<string, string | string[]>` соответственно) — логика 1:1 порт Vue-версии, без
+новых архитектурных приёмов (тот же `signal` + `effect()`/`ctrl.events.subscribe()`, что у
+остальных полей с составным значением, Stage D/F).
+
+`FieldTableEditorComponent`/`FieldDataGridComponent` — **упрощение относительно React/Vue-версий**:
+один `FormControl` на весь массив строк целиком (тот же принцип, что `FieldTagsComponent`, Stage F,
+уже применяет к `string[]`), а не отдельный `FormControl`/`form.Field` на каждую ячейку. Add/remove/
+move строк и правка ячейки — `ctrl.setValue([...новый массив])`; отдельного `FormArray` не
+заводится. Резолв колонок из Zod-схемы (`resolveTableColumns`, `src/lib/core/table-columns.ts`) —
+точный порт одноимённого модуля `@letar/forms-vue`: framework-free код (только `traverseSchema`/
+`getZodConstraints` из `@letar/forms-core`), но скопирован вручную — `@letar/forms-vue` не публикует
+этот файл через свои `exports` (внутренний модуль пакета). DOM `FieldTableEditorComponent`/
+`FieldMatrixChoiceComponent` — `<tr>` строго прямые дети `<tbody>`, без `<div>`-обёрток внутри
+строки/ячейки: известный баг Chakra-версии `TableEditor` (sortable-строки, невалидный HTML) — этот
+класс ошибки в Angular-порте исключён структурой шаблона, не отдельной проверкой.
+
+**`FieldDataGridComponent` — решение не лениво грузить `@tanstack/table-core`, в отличие от
+`FieldRichTextComponent` (Stage H, Tiptap).** `@tanstack/table-core` — framework-agnostic ядро без
+собственных `dependencies` в своём `package.json` (только `devDependencies` для сборки самого
+пакета), на порядок легче ProseMirror-стека, который тянет Tiptap. Тот же движок уже подключён
+**статически** (не лениво) в `@tanstack/vue-table`/`@tanstack/react-table` — оба скина
+`@letar/forms`, использующие тот же `@letar/forms-core`, не считают нужным откладывать загрузку
+именно этой зависимости; вводить асимметрию только в Angular-порте не было причины.
+`@tanstack/table-core` добавлен в `peerDependencies`/`devDependencies` `package.json`
+(`^8.21.3`, версия синхронизирована с `@tanstack/vue-table`/`@tanstack/react-table`, уже в репо).
+
+Технически `createTable()` (API `table-core`, не хук, framework-agnostic сборка таблицы) вызывается
+напрямую — официального Angular-адаптера нет, в отличие от `useVueTable`/`useReactTable`. Инстанс
+пересобирается **целиком** внутри `computed()` при каждом изменении `rows`/`sorting`/
+`columnFilters`/`rowSelectionState`/`pagination` — состояние держат Angular-сигналы снаружи, а не
+мутируемый `table` между рендерами (тот же принцип управления состоянием, что применяет
+`@tanstack/svelte-table`: `onSortingChange`/`onColumnFiltersChange`/`onRowSelectionChange`/
+`onPaginationChange` только обновляют сигнал, `state` передаётся в `createTable()` контролируемо).
+Заголовки/фильтр-инпуты/пагинация рендерятся напрямую из `resolvedColumns()` (`@Input()`), не через
+`table.getHeaderGroups()` — `table-core` используется только как чистый движок
+сортировки/фильтрации/пагинации (`table.getRowModel().rows`), без `flexRender`-подобного слоя
+рендер-функций колонок: в Angular таких общепринятых адаптеров для `table-core` нет, а сам
+headless-пруф не ставит целью его написать. CSV-экспорт (`Blob`+`URL.createObjectURL`) — порт
+`exportDataGridCsv` (`@letar/forms-vue`).
+
+Текущий счёт: **58/61** (33 из Этапа 1–2 + Stage A/B/C/D + Stage E + Stage F + Stage G + Stage H +
+Stage I). Тесты — `app-form.stage-i.spec.ts` (5 тестов: рендер контролов всех четырёх полей, Likert
+— клик по точке коммитит значение при submit, MatrixChoice — клик по radio-ячейке пишет составное
+значение строки, TableEditor — добавление строки + инлайн-редактирование ячейки + проверка DOM
+`<tr>`/`<td>` без обёрток, DataGrid — текстовый фильтр сужает строки + чекбокс включает
+bulk-панель), host-компонент `testing/stage-i-host.component.ts`.
+`nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-angular` зелёный (75/75 тестов
+всего пакета).
+
 ### [2026-08-11] tsup роняет `'use client'` в lazy-чанках (forms + forms-shadcn) — не чинить без сигнала
 
 - **Запросил:** forms-dev (найдено при publish-prep `forms-shadcn`, письмо #49)
