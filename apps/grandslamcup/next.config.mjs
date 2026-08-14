@@ -26,6 +26,18 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // @tanstack/devtools-ui (транзитивная зависимость @tanstack/react-devtools через
+  // @letar/query-provider) тянет solid-js. webpack не может статически определить именованный
+  // экспорт `use` при CJS/ESM интеропе solid-js/web — падает сборка даже когда devtools
+  // подключены через next/dynamic({ ssr: false }) и рантайм-флагом выключены в production
+  // (next/dynamic не убирает модуль из графа компиляции webpack). Алиас на false в production
+  // полностью убирает пакет из графа. См. тот же фикс в apps/driving-school/next.config.js.
+  webpack: (config, { dev }) => {
+    if (!dev) {
+      config.resolve.alias['@tanstack/devtools-ui'] = false
+    }
+    return config
+  },
 }
 
 const withMDX = createMDX({
