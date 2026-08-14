@@ -179,7 +179,7 @@ project-references-модели на путь-алиасы, применимые
 | @letar/forms-shadcn       | Формы — shadcn/Radix-скин (Фаза 7.3), 47/56 полей                                                                                                                        |
 | @letar/forms-vue          | Формы — headless Vue-слой поверх `@tanstack/vue-form`, полный паритет с React (Фаза 9 закрыта 2026-08-13), 61/61 полей                                                   |
 | @letar/forms-vue-shadcn   | Формы — Reka UI/Vue-скин, полный паритет с React (Фаза 9 закрыта 2026-08-13), 61/61 полей                                                                                |
-| @letar/forms-angular      | Формы — разведочный headless Angular-пруф (Фаза 10, 2026-08-13), 10 полей, статус proof-of-concept                                                                       |
+| @letar/forms-angular      | Формы — headless Angular-слой поверх нативных `@angular/forms`, полный паритет с React/Vue (Фаза 11 закрыта 2026-08-14), 61/61 полей                                     |
 | @letar/chakra-provider    | Chakra UI провайдер                                                                                                                                                      |
 | @letar/yandex-metrika     | Яндекс Метрика                                                                                                                                                           |
 | @letar/format-utils       | Форматирование дат, телефонов                                                                                                                                            |
