@@ -1027,6 +1027,68 @@ Signature — рисование + очистка, Address — подсказк�
 `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-angular` зелёный (66/66 тестов
 всего пакета).
 
+### Stage H: +3 поля — PasswordStrength, Editable, RichText — done [2026-08-14]
+
+Восьмой этап Фазы 11 — зеркало
+`libs/forms-vue/src/lib/fields/field-{password-strength,editable,rich-text}.ts`. `forms-core`
+снова не потребовал ни одной правки.
+
+`FieldPasswordStrengthComponent`/`FieldEditableComponent` — без новых архитектурных приёмов: тот
+же `signal` + `effect()`/`ctrl.events.subscribe()`, что у остальных полей с собственным
+UI-состоянием сверх `FormControl` (Stage D/F). Логика расчёта силы пароля
+(`checkRequirement`/`calculateStrength`/`getStrengthLabel`) — 1:1 порт Vue-версии, не вынесена в
+`forms-core` (единственный потребитель в каждом скине). Находка, специфичная для Angular:
+`defaultVisible`/`activationMode` читаются в `ngOnInit()`, а не в конструкторе — Angular
+присваивает `@Input()`-поля между конструктором и `ngOnInit()`, в отличие от Vue `setup()`,
+получающего уже заполненные `props`.
+
+**`FieldRichTextComponent` — самое архитектурно интересное поле стадии: ленивая загрузка тяжёлого
+peer-dep в Angular.** WYSIWYG-редактор на Tiptap (`@tiptap/*`) нужен только этому полю — остальные
+text-поля не обязаны его резолвить, та же цель, что `createLazyField`/`defineAsyncComponent` в
+`@letar/forms-vue` и `React.lazy`/`Form.Captcha` в React-скине. Реализация
+(`field-rich-text-impl.component.ts`) вынесена из тонкой обёртки (`field-rich-text.component.ts`)
+и подгружается явным `import()` в `ngAfterViewInit()`; компонент монтируется вручную через
+`ViewContainerRef.createComponent()` (Ivy не требует `NgModule`/`ComponentFactoryResolver` для
+standalone-компонентов) + `ComponentRef.setInput()` — единственный API, который и присваивает
+значение `@Input()`-полю, и вызывает `ngOnChanges()` на созданном экземпляре (обычное
+`ref.instance.x = y` этого не делает, а на `ngOnChanges` держится реактивность `FieldBase.meta`).
+
+Рассмотрели и отклонили `@defer` (Angular 17+ встроенный примитив ленивой загрузки блока
+шаблона): это трансформация **шаблонного компилятора** потребителя (его Angular CLI/esbuild
+находит компонент, использованный внутри блока, и вырезает его импорт из eager-чанка на этапе
+сборки), а не самой библиотеки — `forms-angular` раздаётся как сырой TS-исходник
+(`customConditions: ["@letar/source"]`), и какой инструмент в итоге компилирует этот файл, решает
+потребитель. Код-сплиттинг библиотечного поля не должен зависеть от того, включил ли и как
+настроил `@defer`-трансформ конкретный потребитель. Явный `import()` — рантайм-примитив
+ES-модулей, переносимый под любой бандлер; ровно то же обещание («резолвится лениво»), но не
+завязанное на чужую конфигурацию сборки.
+
+Сама реализация редактора использует `@tiptap/core` напрямую, не `@tiptap/vue-3`/`@tiptap/react`
+— у Tiptap нет официального Angular-биндинга. `Editor` из `@tiptap/core` framework-agnostic:
+монтирует `contenteditable`-DOM сам, получив `element` (DOM-узел) в конструктор — обёрточный
+компонент пакета не нужен. Активность кнопок тулбара не эмитится реактивно самим Tiptap —
+`onTransaction` инкрементирует сигнал-«тик» (`editorTick`), от которого читает `isActive()` в
+шаблоне (тот же приём, что `hasError`/`errorMessage` в `FieldBase`: `ctrl.events.subscribe()`,
+а не `computed` напрямую от `control()`). Синхронизация с внешними изменениями `FormControl.value`
+(программный reset формы) — подписка на `ctrl.valueChanges`, порт `watch(options.getValue, ...)`
+из `use-rich-text-field.ts` (Vue): пропускается, если содержимое фактически не изменилось (не
+тревожит курсор).
+
+Реальный Tiptap-редактор рендерится и тестируется в jsdom без моков — тот же прецедент, что уже
+подтверждён для `@tiptap/vue-3` в `forms-vue` (`app-form.stage5b.spec.ts`). `@tiptap/core`,
+`@tiptap/extension-placeholder`, `@tiptap/starter-kit` добавлены в `peerDependencies`/
+`devDependencies` `libs/forms-angular/package.json`, `bun install` слинковал их в
+`libs/forms-angular/node_modules/@tiptap/` (не хоистятся в корневой `node_modules` — вслед за
+`@tiptap/vue-3`/`starter-kit`, которые несут свой `@tiptap/core` вложенным транзитивно).
+
+Текущий счёт: **54/61** (33 из Этапа 1–2 + Stage A/B/C/D + Stage E + Stage F + Stage G + Stage H).
+Тесты — `app-form.stage-h.spec.ts` (4 теста: рендер всех трёх контролов включая ленивую загрузку
+RichText, PasswordStrength — метр силы + чеклист требований + переключатель видимости, Editable —
+клик→инпут→Enter-коммит→submit, повторный заход→Escape отменяет черновик, RichText — тулбар +
+`contenteditable` + клик по "B" переключает bold), host-компонент `testing/stage-h-host.component.ts`.
+`nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-angular` зелёный (70/70 тестов
+всего пакета).
+
 ### [2026-08-11] tsup роняет `'use client'` в lazy-чанках (forms + forms-shadcn) — не чинить без сигнала
 
 - **Запросил:** forms-dev (найдено при publish-prep `forms-shadcn`, письмо #49)
