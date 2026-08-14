@@ -27,6 +27,30 @@ export interface UserMenuSession {
   image?: string | null
 }
 
+export interface UserMenuLabels {
+  /** Текст кнопки для анонимного пользователя */
+  signIn?: string
+  /** Плейсхолдер имени, когда нет ни name, ни email */
+  fallbackName?: string
+  /** Плейсхолдер имени в шапке dropdown, когда нет session.name */
+  anonymousName?: string
+  /** Пункт «Профиль» */
+  profile?: string
+  /** Пункт «Аккаунт в Ключнице» */
+  authHub?: string
+  /** Пункт «Выйти» */
+  signOut?: string
+}
+
+const DEFAULT_LABELS: Required<UserMenuLabels> = {
+  signIn: 'Войти',
+  fallbackName: 'Профиль',
+  anonymousName: 'Пользователь',
+  profile: 'Профиль',
+  authHub: 'Аккаунт в Ключнице',
+  signOut: 'Выйти',
+}
+
 export interface UserMenuProps {
   /** Сессия текущего пользователя или null */
   session: UserMenuSession | null
@@ -46,6 +70,8 @@ export interface UserMenuProps {
   showAuthHub?: boolean
   /** Размер кнопки «Войти» */
   size?: 'sm' | 'md' | 'lg'
+  /** Тексты компонента (частичное переопределение) — по умолчанию русские */
+  labels?: UserMenuLabels
 }
 
 /**
@@ -76,18 +102,20 @@ export function UserMenu({
   authHubUrl = 'https://auth.letar.best',
   showAuthHub = true,
   size = 'sm',
+  labels,
 }: UserMenuProps) {
   const [isPending, startTransition] = useTransition()
+  const t = { ...DEFAULT_LABELS, ...labels }
 
   if (!session) {
     return (
       <Button variant="solid" size={size} colorPalette="brand" onClick={onSignIn}>
-        Войти
+        {t.signIn}
       </Button>
     )
   }
 
-  const displayName = session.name || session.email || 'Профиль'
+  const displayName = session.name || session.email || t.fallbackName
 
   return (
     <Menu.Root>
@@ -123,7 +151,7 @@ export function UserMenu({
             {/* Шапка: имя + email */}
             <Menu.Item value="_user-info" disabled px={3} py={2} cursor="default" _hover={{}}>
               <Text fontWeight="semibold" fontSize="sm" truncate maxW="170px">
-                {session.name || 'Пользователь'}
+                {session.name || t.anonymousName}
               </Text>
               {session.email && (
                 <Text fontSize="xs" color="fg.muted" truncate maxW="170px">
@@ -137,7 +165,7 @@ export function UserMenu({
             {/* Профиль */}
             {profileHref && (
               <Menu.Item value="profile" asChild>
-                <a href={profileHref}>Профиль</a>
+                <a href={profileHref}>{t.profile}</a>
               </Menu.Item>
             )}
 
@@ -184,7 +212,7 @@ export function UserMenu({
                 <Menu.Item value="auth-hub" asChild>
                   <a href={`${authHubUrl}/profile`} target="_blank" rel="noopener noreferrer">
                     <LuKeyRound size={16} />
-                    Аккаунт в Ключнице
+                    {t.authHub}
                   </a>
                 </Menu.Item>
                 <Separator />
@@ -199,7 +227,7 @@ export function UserMenu({
               onClick={() => startTransition(() => onSignOut())}
             >
               <LuLogOut size={16} />
-              Выйти
+              {t.signOut}
             </Menu.Item>
           </Menu.Content>
         </Menu.Positioner>
