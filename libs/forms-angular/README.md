@@ -9,7 +9,7 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
 валидация — подключаться через нативные примитивы `@angular/forms` (Reactive Forms), не через
 имитацию `@tanstack/angular-form`.
 
-Пруф подтверждён: `forms-core` не потребовал ни одной правки. 51/61 полей закрыто:
+Пруф подтверждён: `forms-core` не потребовал ни одной правки. 54/61 полей закрыто:
 
 - **Этап 1–2** (зеркало Vue-порта): String, Textarea, Number, Password, Checkbox, Switch,
   RadioGroup, NativeSelect, Date, YesNo.
@@ -25,6 +25,7 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
 - **Stage F** (Фаза 11, +2 поля): CheckboxCard, Tags.
 - **Stage G** (Фаза 11, +8 полей категории "special"): PinInput, OTPInput, ColorPicker,
   FileUpload, Address, City, Signature, CreditCard.
+- **Stage H** (Фаза 11, +3 поля): PasswordStrength, Editable, RichText (ленивая загрузка Tiptap).
 
 ## Поля
 
@@ -81,6 +82,9 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
 | `FieldCityComponent`             | `letar-field-city`              | `provider`, `token`, `minChars` (2), `debounceMs` (300)                                                                                                              |
 | `FieldSignatureComponent`        | `letar-field-signature`         | `width` (400), `height` (150), `strokeColor`, `strokeWidth` (2), `backgroundColor`, `clearLabel`, `placeholder`, `allowTyped` (`true`), `exportFormat` (`png`/`svg`) |
 | `FieldCreditCardComponent`       | `letar-field-credit-card`       | `brands: CardBrand[]`, `showBrandIcon`, `layout` (`inline`/`stacked`), `disabled`, `readOnly`, `numberPlaceholder`, `expiryPlaceholder`, `cvcPlaceholder`            |
+| `FieldPasswordStrengthComponent` | `letar-field-password-strength` | `requirements: PasswordRequirement[]`, `showRequirements` (`true`), `defaultVisible` (`false`)                                                                       |
+| `FieldEditableComponent`         | `letar-field-editable`          | `multiline`, `activationMode` (`click`/`none`), `submitOnBlur` (`true`)                                                                                              |
+| `FieldRichTextComponent`         | `letar-field-rich-text`         | `minHeight` (`150px`), `maxHeight`, `showToolbar` (`true`), `toolbarButtons: RichTextButton[]`, `outputFormat` (`html`/`json`) — ленивая загрузка, см. ниже          |
 
 Разметка у всех — голый HTML, без CSS: классы `letar-field`, `letar-field__label`,
 `letar-field__control`, `letar-field__error` (тот же принцип, что у `libs/forms-vue`, раздел
@@ -222,14 +226,46 @@ Zod-мета-движок `.meta({ ui: {...} })`) должно читаться 
     вся логика определения бренда и валидации полнофункциональна. Как и в Vue, поле не читает
     начальное значение `ctrl.value` в display-сигналы при монтировании — сознательное упрощение
     исходного composable, не Angular-специфичный пробел.
+- **Stage H — 3 поля, самый архитектурно интересный этап пруфа.**
+  `FieldPasswordStrengthComponent`/`FieldEditableComponent` — те же приёмы, что и в предыдущих
+  стадиях (свой `signal` + `effect()`/`ctrl.events.subscribe()` для синхронизации с `control()`),
+  логика расчёта силы пароля (`checkRequirement`/`calculateStrength`/`getStrengthLabel`) — 1:1
+  порт `field-password-strength.ts` (Vue). `defaultVisible`/`activationMode` инициализируются в
+  `ngOnInit()`, не в конструкторе/field-инициализаторе — Angular присваивает `@Input()`-поля
+  между конструктором и `ngOnInit()`, в отличие от Vue `setup()`, который получает уже заполненные
+  `props`.
+  - **`FieldRichTextComponent` — ленивая загрузка Tiptap.** WYSIWYG-редактор — тяжёлый peer-dep
+    (`@tiptap/*`), нужный только этому полю; остальные text-поля не обязаны его резолвить.
+    Реализация (`field-rich-text-impl.component.ts`) вынесена из обёртки (`field-rich-text.component.ts`)
+    и подгружается явным `import()` внутри `ngAfterViewInit()`, компонент монтируется вручную через
+    `ViewContainerRef.createComponent()` (Ivy не требует `NgModule`/`ComponentFactoryResolver` для
+    standalone-компонентов) + `ComponentRef.setInput()` — единственный API, который и присваивает
+    значение `@Input()`-полю, и вызывает `ngOnChanges()` на созданном экземпляре (обычное
+    `ref.instance.x = y` этого не делает, а на `ngOnChanges` держится реактивность
+    `FieldBase.meta`). **Не `@defer`**: этот встроенный Angular 17+ примитив ленивой загрузки —
+    трансформация шаблонного компилятора, которую выполняет сборка **потребителя** библиотеки, а
+    `forms-angular` раздаётся как сырой TS-исходник (`customConditions: ["@letar/source"]`) —
+    код-сплиттинг библиотечного поля не должен зависеть от того, включил ли и как настроил
+    `@defer`-трансформ конкретный потребитель. Явный `import()` — рантайм-примитив ES-модулей,
+    переносимый под любой бандлер; тот же принцип, что `createLazyField`/`defineAsyncComponent` в
+    `@letar/forms-vue` и `React.lazy`/`Form.Captcha` в React-скине — третий раз в этой библиотеке
+    форм, каждый раз на примитиве своего фреймворка. Сама реализация редактора использует
+    `@tiptap/core` напрямую (не `@tiptap/vue-3`/`@tiptap/react` — у Tiptap нет официального
+    Angular-биндинга): `Editor` из `@tiptap/core` framework-agnostic и монтирует
+    `contenteditable`-DOM сам, получив `element` в конструктор. Активность кнопок тулбара не
+    эмитится реактивно самим Tiptap — `onTransaction` инкрементирует сигнал-«тик», от которого
+    читает `isActive()` в шаблоне (тот же приём, что `hasError`/`errorMessage` в `FieldBase`
+    используют `ctrl.events.subscribe()`, а не `computed` напрямую от `control()`).
 
 ## Тестирование без Karma
 
 Разведка (главный технический риск задачи): в репозитории тесты идут через Vitest
 (`@nx/vitest`), а Angular-компоненты обычно тестируются через `TestBed` + Karma/Jest + zone.js.
 Связка **`provideZonelessChangeDetection()` + `TestBed` + Vitest + jsdom** реально работает —
-подтверждено 66 зелёными тестами (`nx test forms-angular`), без Karma-раннера и без `zone.js` в
-зависимостях.
+подтверждено 70 зелёными тестами (`nx test forms-angular`), без Karma-раннера и без `zone.js` в
+зависимостях. Реальный Tiptap-редактор (`@tiptap/core`) тоже рендерится и тестируется в jsdom —
+`FieldRichTextComponent`'s тест кликает по кнопке тулбара и проверяет `aria-pressed`, без моков
+редактора (тот же прецедент, что уже подтверждён для `@tiptap/vue-3` в `forms-vue`).
 
 Две находки по пути:
 
@@ -262,8 +298,10 @@ nx typecheck:tsgo forms-angular
 - `FieldBase.name`/`label`/`placeholder` не реактивны к изменению после первого рендера
   (не сигналы, `@Input()`) — приемлемо, так как в реальном использовании `name` не меняется после
   монтирования поля.
-- `Field.MaskedInput` (универсальная произвольная маска, Stage J) — не портируется, вне скоупа;
-  тяжёлые peer-deps по-прежнему не портируются.
+- `Field.MaskedInput` (универсальная произвольная маска, Stage J) — не портируется, вне скоупа.
+- Тяжёлые peer-deps сами по себе больше не блокер — `FieldRichTextComponent` (Stage H) доказал,
+  что ленивая загрузка (`import()` + `ViewContainerRef.createComponent()`) работает для Angular
+  так же, как `createLazyField`/`React.lazy` в Vue/React-скинах.
 
 ## Подключение к приложению
 

@@ -34,6 +34,7 @@ export { FieldDateComponent } from './lib/fields/field-date.component'
 export { FieldDateTimePickerComponent } from './lib/fields/field-datetime-picker.component'
 export { FieldDepartmentCodeComponent } from './lib/fields/field-department-code.component'
 export { FieldDurationComponent } from './lib/fields/field-duration.component'
+export { FieldEditableComponent } from './lib/fields/field-editable.component'
 export { FieldFileUploadComponent } from './lib/fields/field-file-upload.component'
 export { FieldForeignPassportComponent } from './lib/fields/field-foreign-passport.component'
 export { FieldHiddenComponent } from './lib/fields/field-hidden.component'
@@ -47,6 +48,10 @@ export { FieldNumberComponent } from './lib/fields/field-number.component'
 export { FieldOgrnComponent } from './lib/fields/field-ogrn.component'
 export { FieldOtpInputComponent } from './lib/fields/field-otp-input.component'
 export { FieldPassportComponent } from './lib/fields/field-passport.component'
+export {
+  FieldPasswordStrengthComponent,
+  type PasswordRequirement,
+} from './lib/fields/field-password-strength.component'
 export { FieldPasswordComponent } from './lib/fields/field-password.component'
 export { FieldPercentageComponent } from './lib/fields/field-percentage.component'
 export { FieldPhoneComponent } from './lib/fields/field-phone.component'
@@ -54,6 +59,7 @@ export { FieldPinInputComponent, type PinInputCharType } from './lib/fields/fiel
 export { FieldRadioCardComponent, type RadioCardOption } from './lib/fields/field-radio-card.component'
 export { FieldRadioGroupComponent, type FieldRadioGroupOption } from './lib/fields/field-radio-group.component'
 export { FieldRatingComponent } from './lib/fields/field-rating.component'
+export { FieldRichTextComponent, type RichTextButton } from './lib/fields/field-rich-text.component'
 export {
   type DayOfWeek,
   FieldScheduleComponent,
