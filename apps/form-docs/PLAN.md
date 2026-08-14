@@ -688,6 +688,60 @@ Angular рендерится, честные `disabled`-вкладки с пом
 `filters-state.mdx`+`porting-framework.mdx` после сверки с находками RU-сессии), путями
 `git commit -- <файлы>`, без `git add -A`.
 
+**Этап 6 — визуальный полиш (2026-08-14).** Задача от координатора `QuietRidge`, по прямой просьбе
+Ками — последний пункт overnight-чек-листа. **Весь чек-лист P7 (миграция на `SkinCodeFile`,
+namespace-заголовки, сквозная вычитка EN+RU, визуальный полиш) закрыт этой сессией.**
+
+1. **Консистентность admonition-блоков — нечего унифицировать.** Проверено grep'ом по
+   `content/docs/**/*.mdx` на emoji-маркеры (⚠️/💡/ℹ️), Fumadocs `<Callout>`, GFM alert-синтаксис
+   (`> [!WARNING]` и т.п.) и жирные подписи в blockquote (`**Note:**`/`**Важно**`) — ноль
+   совпадений по всем паттернам. `Callout` даже не подключён в `mdx-components`. Документация не
+   использует admonition-блоки нигде — предупреждения/советы выражены обычной прозой. Решение:
+   не вводить новый паттерн задним числом (это правка контента, вне скоупа этой сессии по
+   ограничению задания) — только зафиксировать факт для будущего.
+
+2. **Тёмная тема — найден и исправлен реальный баг.** `src/components/code-file/highlighted-code.tsx`
+   вызывал `highlight()` из `fumadocs-core/highlight` без `defaultColor: false`. Shiki при
+   двухтемном рендере без этого флага печатает цвета light-темы буквально в
+   `background-color`/`color` инлайн-стилем `<pre>`, а `--shiki-dark`/`--shiki-dark-bg` остаются
+   неиспользуемыми custom properties — переключение на `.dark` ничего не меняло. Итог: код внутри
+   `SkinCodeFile` (все смигрированные Этапами 1-4 страницы) был светлым независимо от темы сайта.
+   Обычные ```-блоки MDX (516 инлайн-блоков) не задеты — `fumadocs-mdx` передаёт этот флаг в свой
+   `rehype-code` пресет по умолчанию, поэтому баг был не виден вне `SkinCodeFile`.
+   Проверено на `fields/string`, `fields/date`, `guides/data-grid` через `resize_window({colorScheme:
+   "dark"})` — `computed.backgroundColor` у `<pre>` было `rgb(255,255,255)` до фикса, стало
+   `rgba(0,0,0,0)` (прозрачный, наследует тему обёртки) после.
+   Переключатель (активный пункт: `rgb(82,224,196)` фон / `rgb(12,23,29)` текст;
+   disabled-вкладка: `opacity: 0.6`, `cursor: not-allowed`) — контраст в тёмной теме в порядке,
+   правок не потребовал.
+
+3. **A11y-баг найден попутно (не входил в постановку, но проверялся при осмотре переключателя):**
+   `framework-switcher.tsx`/`skin-switcher.tsx` — `aria-label` навигации и текст `(скоро)` были
+   захардкожены по-русски независимо от языка страницы. На английских страницах screen reader
+   озвучивал русский accessible name. Исправлено через `useI18n()` из `fumadocs-ui/contexts/i18n`
+   (тот же хук, что уже использует `src/components/search.tsx`) — словари `NAV_LABEL`/`SOON_LABEL`
+   на `en`/`ru`. Проверено на `/en/docs/fields/string` (`"Code example framework"`/`"Code example
+   skin"`) и `/ru/docs/fields/string` (`"Фреймворк примеров кода"`/`"Оформление примеров кода"`).
+
+4. **Мобильная адаптивность (375×812) — один найденный и исправленный дефект, остальное чисто.**
+   Проверено 7 страниц разных типов: `fields/string`, `fields/date`, `fields/select` (категорийные),
+   `guides/data-grid`, `guides/table-editor` (гайды), `api/form-component` (reference), `/en`
+   (главная). `document.documentElement.scrollWidth` == `window.innerWidth` на всех — переполнения
+   страницы по горизонтали нет. Код-блоки (`<pre>`, класс `overflow-auto`) и таблицы (Fumadocs
+   `overflow-auto`-обёртка) скроллятся внутри себя, как задумано — это не баг, а штатное поведение
+   fumadocs-ui. Найдено: ссылки Framework/Skin-переключателя были ~38px высотой — ниже
+   рекомендованного минимума touch target (44px, Apple HIG / WCAG 2.5.5). Исправлено в
+   `skin-switcher.module.css` (`min-height: 44px` на `.link`/`.disabled`, `align-items: center`,
+   `flex-wrap: wrap` на контейнере на случай более длинных лейблов в будущем). Проверено:
+   `getBoundingClientRect().height` стало 44 на `/ru/docs/guides/table-editor`, страница по-прежнему
+   без горизонтального переполнения.
+
+Проверено: `nx lint form-docs`, `nx typecheck:tsgo form-docs` — зелёные после каждого коммита.
+`nx build form-docs` — зелёный, 162 страницы. Консоль браузера чистая на всех проверенных страницах
+(без ошибок, включая мобильный viewport). Коммиты — двумя логическими кусками (`highlighted-code.tsx`
+
+- оба switcher-компонента одним коммитом; CSS touch-target отдельным), путями `git commit -- <файлы>`.
+
 ### Что осталось непроверенным
 
 - **FormKit** — рендерер доков (`formkit/docs-ui-2`) приватный, 404. Их механику переключателя
