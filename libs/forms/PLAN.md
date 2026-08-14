@@ -1144,6 +1144,46 @@ bulk-панель), host-компонент `testing/stage-i-host.component.ts`.
 `nx run-many -t lint typecheck:tsgo test --projects=@letar/forms-angular` зелёный (75/75 тестов
 всего пакета).
 
+### Stage J: +3 поля — Auto, Calculated, MaskedInput — done [2026-08-14] — **Фаза 11 закрыта, 61/61**
+
+Последний этап полного порта. Зеркало
+`libs/forms-vue/src/lib/fields/field-{auto,calculated,masked-input}.ts`:
+
+- **`FieldAutoComponent`** — единственный компонент в Stage J, НЕ наследующий `FieldBase`: он не
+  регистрирует собственный `FormControl`, а определяет тип поля по `zodType` (`traverseSchema`,
+  `@letar/forms-core/schema`) и рендерит один из уже существующих `Field*`-компонентов через
+  `@switch` в шаблоне — тот же принцип диспетчеризации, что у Vue-версии
+  (`h(FieldInput/FieldNumber/...)` в render-функции), выраженный декларативно, поскольку Angular не
+  умеет рендерить компонент динамически по строковому имени без `NgComponentOutlet`.
+  string/number/boolean/date/enum, `useTextareaForLongStrings`+`textareaThreshold` для длинных
+  строк, `booleanAsSwitch` для чекбокс/свитч — 1:1 с Vue.
+- **`FieldCalculatedComponent`** — читает значения ВСЕЙ формы через `formRoot.form.valueChanges`,
+  тот же приём, что уже решал задачу «прочитать значение другого поля формы» в
+  `FieldCascadingSelectComponent` (Stage E). `name` опционален (как в Vue) — без него поле чисто
+  отображает вычисленную сводку, не уходит в submit; если задан — вычисленное значение пишется в
+  форму через `formRoot.registerField()`.
+- **`FieldMaskedInputComponent`** — наследует `DocumentFieldBase` (Stage B) вместо отдельного
+  движка масок: тот же `MaskController` (`@letar/forms-core/mask`), что уже используют 10
+  документных полей, `mask`/`formatMode`/`maxLength` переобъявлены как `@Input()` вместо констант
+  класса конкретного документа, `validateDocument()` всегда возвращает `undefined` (контрольной
+  суммы у универсальной маски нет, ошибка валидности целиком идёт из Zod-подсхемы формы). Ни одной
+  правки в `document-field-base.ts` — 10 уже работающих документных полей не затронуты.
+  `formatDescription` обязателен (WCAG 3.3.2 — формат ввода должен быть известен до начала ввода).
+
+Финальная сверка: `mcp__form-mcp__list_fields` вернул 61 запись, построчно сопоставлены с полным
+списком экспортов `libs/forms-angular/src/index.ts` — совпадение 1:1, расхождений не найдено (ни
+пропущенных, ни лишних экспортов).
+
+Текущий счёт: **61/61 — Фаза 11 закрыта.** Тесты — `app-form.stage-j.spec.ts` (9 тестов: FieldAuto
+на пяти Zod-типах — строка/textarea/number/boolean/enum с камелкейс-подписями опций,
+FieldCalculated — пересчёт `quantity × price` при изменении зависимости + значение в submit,
+FieldMaskedInput — маска "999-999" группирует ввод той же маской, что `FieldDepartmentCodeComponent`
+(Stage B) + `formatDescription`/`aria-describedby` видны до начала ввода), host-компонент
+`testing/stage-j-host.component.ts`. `nx run-many -t lint typecheck:tsgo test
+--projects=@letar/forms-angular` зелёный (84/84 тестов всего пакета). README `@letar/forms-angular`
+обновлён — статус "proof-of-concept" снят, шапка "✅ Полный порт — 61/61" (по аналогии с
+`forms-vue`/`forms-vue-shadcn`).
+
 ### [2026-08-11] tsup роняет `'use client'` в lazy-чанках (forms + forms-shadcn) — не чинить без сигнала
 
 - **Запросил:** forms-dev (найдено при publish-prep `forms-shadcn`, письмо #49)
