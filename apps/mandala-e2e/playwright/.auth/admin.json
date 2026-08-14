@@ -2,20 +2,20 @@
   "cookies": [
     {
       "name": "better-auth.session_token",
-      "value": "AKAAf0KpVe5buuTXmhQhIVmkDOVEmVoK.stHhe4O5bkZM45BgtzCSVuspRzbFSqPvRUVnx9SYCYY%3D",
+      "value": "5gfOAAxKrb9mP3pDffZnDrEuWOzCYLN5.kEh2EqA5qYjlD1oTUArOTPl1K5BeYnoBwnImZVPgSVI%3D",
       "domain": "localhost",
       "path": "/",
-      "expires": 1786461753.590437,
+      "expires": 1787170409.963034,
       "httpOnly": true,
       "secure": false,
       "sameSite": "Lax"
     },
     {
       "name": "better-auth.session_data",
-      "value": "eyJzZXNzaW9uIjp7InNlc3Npb24iOnsiZXhwaXJlc0F0IjoiMjAyNi0wOC0xMVQxNToyMjozMy41NTNaIiwidG9rZW4iOiJBS0FBZjBLcFZlNWJ1dVRYbWhRaElWbWtET1ZFbVZvSyIsImNyZWF0ZWRBdCI6IjIwMjYtMDgtMDRUMTU6MjI6MzMuNTUzWiIsInVwZGF0ZWRBdCI6IjIwMjYtMDgtMDRUMTU6MjI6MzMuNTUzWiIsImlwQWRkcmVzcyI6IjEyNy4wLjAuMSIsInVzZXJBZ2VudCI6Ik1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIEhlYWRsZXNzQ2hyb21lLzE1MS4wLjc5MjIuMzQgU2FmYXJpLzUzNy4zNiIsInVzZXJJZCI6ImNtc2VyaXB5bjAwMDBvZ214cjYwbDFrcWkiLCJpZCI6IkhhckhIa3FKUFpOV2RzT0ZJM0pXcVFLaG9MdmIzQjBNIn0sInVzZXIiOnsibmFtZSI6ItCt0LvRjNGE0LDRhNC10Y8iLCJlbWFpbCI6ImFkbWluQGVsZmFmZXlhLmFydCIsImVtYWlsVmVyaWZpZWQiOnRydWUsImltYWdlIjpudWxsLCJjcmVhdGVkQXQiOiIyMDI2LTA4LTA0VDE0OjM3OjQ1LjA3MloiLCJ1cGRhdGVkQXQiOiIyMDI2LTA4LTA0VDE0OjU5OjQwLjM3NVoiLCJyb2xlIjoiQURNSU4iLCJpZCI6ImNtc2VyaXB5bjAwMDBvZ214cjYwbDFrcWkifSwidXBkYXRlZEF0IjoxNzg1ODU2OTUzNTU4LCJ2ZXJzaW9uIjoiMSJ9LCJleHBpcmVzQXQiOjE3ODU4NTcyNTM1NTgsInNpZ25hdHVyZSI6Im4zaTlXby1kVk5QOFFCMlZZWU05NFpvdWt4NXNTUF9HaXFaUDNXaGF0TnMifQ",
+      "value": "eyJzZXNzaW9uIjp7InNlc3Npb24iOnsiZXhwaXJlc0F0IjoiMjAyNi0wOC0xOVQyMDoxMzoyOS45MjZaIiwidG9rZW4iOiI1Z2ZPQUF4S3JiOW1QM3BEZmZabkRyRXVXT3pDWUxONSIsImNyZWF0ZWRBdCI6IjIwMjYtMDgtMTJUMjA6MTM6MjkuOTI2WiIsInVwZGF0ZWRBdCI6IjIwMjYtMDgtMTJUMjA6MTM6MjkuOTI2WiIsImlwQWRkcmVzcyI6IjEyNy4wLjAuMSIsInVzZXJBZ2VudCI6Ik1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIEhlYWRsZXNzQ2hyb21lLzE1MS4wLjc5MjIuMzQgU2FmYXJpLzUzNy4zNiIsInVzZXJJZCI6ImNtcndmcnEwaDAwMDB1a214d25xMm9lNDMiLCJpZCI6ImpGS2lZWlFtaHhpQlVFY0NZMDlKUHlCRGpLWkdYZWJUIn0sInVzZXIiOnsibmFtZSI6ItCt0LvRjNGE0LDRhNC10Y8iLCJlbWFpbCI6ImFkbWluQGVsZmFmZXlhLmFydCIsImVtYWlsVmVyaWZpZWQiOnRydWUsImltYWdlIjpudWxsLCJjcmVhdGVkQXQiOiIyMDI2LTA3LTIyVDE4OjQ4OjU4LjQ4MloiLCJ1cGRhdGVkQXQiOiIyMDI2LTA3LTIzVDEzOjI0OjIyLjkzOFoiLCJyb2xlIjoiQURNSU4iLCJpZCI6ImNtcndmcnEwaDAwMDB1a214d25xMm9lNDMifSwidXBkYXRlZEF0IjoxNzg2NTY1NjA5OTU0LCJ2ZXJzaW9uIjoiMSJ9LCJleHBpcmVzQXQiOjE3ODY1NjU5MDk5NTQsInNpZ25hdHVyZSI6IkJLSWxVbUZfQUd3MVhCeDVqTEVZa3Z4TnlUaXQzYy1EUXd4T2pyN2lONmsifQ",
       "domain": "localhost",
       "path": "/",
-      "expires": 1785857253.591019,
+      "expires": 1786565909.963705,
       "httpOnly": true,
       "secure": false,
       "sameSite": "Lax"
@@ -31,7 +31,7 @@
         },
         {
           "name": "mandala-offline-consent",
-          "value": "{\"state\":\"declined\",\"declinedAt\":1785856952833}"
+          "value": "{\"state\":\"declined\",\"declinedAt\":1786565609148}"
         },
         {
           "name": "mandala-cart",
