@@ -25,6 +25,7 @@ export { FieldComboboxComponent, type FieldComboboxOption } from './lib/fields/f
 export { FieldCorrAccountComponent } from './lib/fields/field-corr-account.component'
 export { type CreditCardValue, FieldCreditCardComponent } from './lib/fields/field-credit-card.component'
 export { FieldCurrencyComponent } from './lib/fields/field-currency.component'
+export { type DataGridColumnDef, FieldDataGridComponent } from './lib/fields/field-data-grid.component'
 export {
   type DateRangePreset,
   type DateRangeValue,
@@ -41,7 +42,13 @@ export { FieldHiddenComponent } from './lib/fields/field-hidden.component'
 export { FieldImageChoiceComponent, type ImageChoiceOption } from './lib/fields/field-image-choice.component'
 export { FieldInnComponent } from './lib/fields/field-inn.component'
 export { FieldKppComponent } from './lib/fields/field-kpp.component'
+export { FieldLikertComponent } from './lib/fields/field-likert.component'
 export { FieldListboxComponent, type ListboxOption } from './lib/fields/field-listbox.component'
+export {
+  FieldMatrixChoiceComponent,
+  type MatrixColumn,
+  type MatrixRow,
+} from './lib/fields/field-matrix-choice.component'
 export { FieldNativeSelectComponent, type FieldNativeSelectOption } from './lib/fields/field-native-select.component'
 export { FieldNumberInputComponent } from './lib/fields/field-number-input.component'
 export { FieldNumberComponent } from './lib/fields/field-number.component'
@@ -73,6 +80,11 @@ export { FieldSliderComponent } from './lib/fields/field-slider.component'
 export { FieldSnilsComponent } from './lib/fields/field-snils.component'
 export { FieldStringComponent } from './lib/fields/field-string.component'
 export { FieldSwitchComponent } from './lib/fields/field-switch.component'
+export {
+  FieldTableEditorComponent,
+  type TableColumnDef,
+  type TableFooterDef,
+} from './lib/fields/field-table-editor.component'
 export { FieldTagsComponent } from './lib/fields/field-tags.component'
 export { FieldTextareaComponent } from './lib/fields/field-textarea.component'
 export { FieldTimeComponent } from './lib/fields/field-time.component'
