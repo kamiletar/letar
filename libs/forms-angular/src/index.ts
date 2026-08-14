@@ -9,10 +9,12 @@ export { type ResolvedFieldMeta, resolveFieldMeta } from './lib/core/field-meta'
 export { FormRootService } from './lib/core/form-root.service'
 export { zodValidator } from './lib/core/zod-validator'
 export { FieldAddressComponent } from './lib/fields/field-address.component'
+export { FieldAutoComponent } from './lib/fields/field-auto.component'
 export { FieldAutocompleteComponent } from './lib/fields/field-autocomplete.component'
 export { FieldBankAccountComponent } from './lib/fields/field-bank-account.component'
 export { FieldBikComponent } from './lib/fields/field-bik.component'
 export { FieldBirthCertificateComponent } from './lib/fields/field-birth-certificate.component'
+export { FieldCalculatedComponent } from './lib/fields/field-calculated.component'
 export {
   type CascadingSelectOption,
   FieldCascadingSelectComponent,
@@ -44,6 +46,7 @@ export { FieldInnComponent } from './lib/fields/field-inn.component'
 export { FieldKppComponent } from './lib/fields/field-kpp.component'
 export { FieldLikertComponent } from './lib/fields/field-likert.component'
 export { FieldListboxComponent, type ListboxOption } from './lib/fields/field-listbox.component'
+export { FieldMaskedInputComponent } from './lib/fields/field-masked-input.component'
 export {
   FieldMatrixChoiceComponent,
   type MatrixColumn,
