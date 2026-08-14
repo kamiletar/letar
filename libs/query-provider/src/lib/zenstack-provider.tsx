@@ -1,12 +1,14 @@
 'use client'
 
-import { TanStackDevtools } from '@tanstack/react-devtools'
-import { formDevtoolsPlugin } from '@tanstack/react-form-devtools'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
 import { QuerySettingsProvider } from '@zenstackhq/tanstack-query/react'
+import dynamic from 'next/dynamic'
 import type { ReactNode } from 'react'
 import { createQueryClient, type QueryClientConfig } from './create-query-client'
+
+// См. persist-provider.tsx: статический импорт devtools тянет transitively solid-js
+// (@tanstack/devtools-ui) в прод-бандл даже когда рантайм-флаг их не рендерит.
+const DevtoolsPanel = dynamic(() => import('./devtools-panel').then((m) => m.DevtoolsPanel), { ssr: false })
 
 export interface ZenStackQueryProviderProps extends QueryClientConfig {
   children: ReactNode
@@ -44,14 +46,7 @@ export function ZenStackQueryProvider({
     <QueryClientProvider client={queryClient}>
       <QuerySettingsProvider value={{ endpoint }}>
         {children}
-        {devtoolsEnabled && (
-          <TanStackDevtools
-            plugins={[
-              { name: 'TanStack Query', render: <ReactQueryDevtoolsPanel />, defaultOpen: false },
-              formDevtoolsPlugin(),
-            ]}
-          />
-        )}
+        {devtoolsEnabled && <DevtoolsPanel />}
       </QuerySettingsProvider>
     </QueryClientProvider>
   )

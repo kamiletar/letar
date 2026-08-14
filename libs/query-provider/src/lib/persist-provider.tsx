@@ -1,12 +1,16 @@
 'use client'
 
-import { TanStackDevtools } from '@tanstack/react-devtools'
-import { formDevtoolsPlugin } from '@tanstack/react-form-devtools'
-import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
+import dynamic from 'next/dynamic'
 import type { ReactNode } from 'react'
 import { createQueryClient, type QueryClientConfig } from './create-query-client'
 import { createIDBPersister, type IDBPersisterOptions } from './idb-persister'
+
+// Динамический импорт: devtools рендерятся только при devtoolsEnabled (по умолчанию — только
+// в development), но статический import подтягивал их транзитивные зависимости (solid-js через
+// @tanstack/devtools-ui) в прод-бандл всегда — компиляция падала при рассинхроне версий solid-js,
+// независимо от того, что рантайм-флаг всё равно их не рендерил (driving-school, 2026-08-14).
+const DevtoolsPanel = dynamic(() => import('./devtools-panel').then((m) => m.DevtoolsPanel), { ssr: false })
 
 export interface PersistQueryProviderProps extends QueryClientConfig {
   children: ReactNode
@@ -83,18 +87,7 @@ export function PersistQueryProvider({
       }}
     >
       {children}
-      {devtoolsEnabled && (
-        <TanStackDevtools
-          plugins={[
-            {
-              name: 'TanStack Query',
-              render: <ReactQueryDevtoolsPanel />,
-              defaultOpen: false,
-            },
-            formDevtoolsPlugin(),
-          ]}
-        />
-      )}
+      {devtoolsEnabled && <DevtoolsPanel />}
     </PersistQueryClientProvider>
   )
 }
