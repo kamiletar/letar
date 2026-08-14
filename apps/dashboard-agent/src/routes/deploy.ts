@@ -15,6 +15,7 @@ import type { FastifyInstance } from 'fastify'
 import { promisify } from 'util'
 import { applyPhaseLine, computeStalled, type DeployPhase } from '../lib/deploy-phases'
 import { hostExecArgs } from '../lib/host-exec'
+import { getHostLock, releaseHostLock, tryAcquireHostLock } from '../lib/host-lock'
 import { getRedis } from '../lib/redis'
 import { getCurrentServer } from '../lib/server-config'
 import { withTimeout } from '../lib/with-timeout'
@@ -281,6 +282,7 @@ function attachDeployProcessHandlers(deploy: DeployStatus, proc: ChildProcess): 
     deploy.running = false
     deploy.endTime = new Date().toISOString()
     currentProcess = null
+    releaseHostLock()
     flushPersist(deploy)
     // appendOutput выше уже разбудил ожидающих deploy_wait, но синхронно ДО этой строки —
     // deploy.running там ещё был true. Будим ещё раз теперь, когда running реально false,
@@ -294,6 +296,7 @@ function attachDeployProcessHandlers(deploy: DeployStatus, proc: ChildProcess): 
     deploy.running = false
     deploy.endTime = new Date().toISOString()
     currentProcess = null
+    releaseHostLock()
     flushPersist(deploy)
     emitDeployEvent(deploy.deployId)
   })
@@ -739,6 +742,18 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         }
       }
 
+      // Host-level lock (см. lib/host-lock.ts): деплой и e2e спавнят процессы на одном хосте
+      // и конкурируют за node_modules/сборку — блокируем и когда занято именно e2e-прогоном.
+      if (!tryAcquireHostLock('deploy', appName)) {
+        const lock = getHostLock()
+        return {
+          success: false,
+          error:
+            `Хост занят другой операцией: ${lock?.kind} (${lock?.label}), с ${lock?.since} — дождитесь завершения перед новым деплоем`,
+          timestamp: new Date().toISOString(),
+        }
+      }
+
       const deploy = createDeploy({
         running: true,
         appName,
@@ -822,6 +837,16 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         }
       }
 
+      if (!tryAcquireHostLock('deploy', service)) {
+        const lock = getHostLock()
+        return {
+          success: false,
+          error:
+            `Хост занят другой операцией: ${lock?.kind} (${lock?.label}), с ${lock?.since} — дождитесь завершения перед новым деплоем`,
+          timestamp: new Date().toISOString(),
+        }
+      }
+
       const deploy = createDeploy({
         running: true,
         appName: service,
@@ -881,6 +906,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       running.running = false
       running.endTime = new Date().toISOString()
       currentProcess = null
+      releaseHostLock()
       flushPersist(running)
       emitDeployEvent(running.deployId)
 

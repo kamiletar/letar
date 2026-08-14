@@ -22,6 +22,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import path from 'path'
 import { getCurrentCommit } from '../lib/git'
 import { hostShellArgs } from '../lib/host-exec'
+import { getHostLock, releaseHostLock, tryAcquireHostLock } from '../lib/host-lock'
 import { getCurrentServer } from '../lib/server-config'
 import type { ApiResponse } from '../types'
 
@@ -261,6 +262,18 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         return { success: false, error: 'Другой e2e-прогон уже выполняется', timestamp: new Date().toISOString() }
       }
 
+      // Host-level lock (см. lib/host-lock.ts): деплой и e2e спавнят процессы на одном хосте
+      // и конкурируют за node_modules/сборку — блокируем и когда занято именно деплоем.
+      if (!tryAcquireHostLock('e2e', app)) {
+        const lock = getHostLock()
+        return {
+          success: false,
+          error:
+            `Хост занят другой операцией: ${lock?.kind} (${lock?.label}), с ${lock?.since} — дождитесь завершения перед e2e-прогоном`,
+          timestamp: new Date().toISOString(),
+        }
+      }
+
       const run = createRun({ running: true, app, project, grep, workers, startTime: new Date().toISOString() })
       if (!existsSync(REPORTS_DIR)) {
         mkdirSync(REPORTS_DIR, { recursive: true })
@@ -413,6 +426,7 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         writeLastStatus(app, { commitSha, passed, timestamp: run.endTime, durationMs })
 
         currentProcess = null
+        releaseHostLock()
       })
 
       currentProcess.on('error', (error) => {
@@ -427,6 +441,7 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
         const durationMs = run.startTime ? Date.now() - new Date(run.startTime).getTime() : 0
         writeLastStatus(app, { commitSha, passed: false, timestamp: run.endTime, durationMs })
         currentProcess = null
+        releaseHostLock()
       })
 
       return {
