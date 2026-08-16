@@ -2964,3 +2964,49 @@ cron и SSH-ключ для rsync на s2. Проверка «через ~2 не
 случай если вопрос всплывёт снова.
 
 - [x] Проверено грепом, категоризировано, зафиксировано здесь — закрыто.
+
+## §50 — `deploy-affected.sh`: нет штатного пути передеплоить s3-инстанс dashboard-agent (2026-08-15, BlackCove) 🆕
+
+Найдено при попытке выкатить на s3 фикс host-lock в самом dashboard-agent через
+`deploy_app` (`libs/deploy-mcp`). Задача решена ручным SSH-воркэраундом (дважды за сессию), но
+штатного пути через MCP/скрипт нет — только для `dashboard-agent` два независимых механизма
+конфликтуют между собой.
+
+### Механизм
+
+- `deploy_app({app, target})` резолвит сервер через `resolveDeployServer()`
+  ([libs/infra-config/src/index.ts](/libs/infra-config/src/index.ts)): `target: "production"` →
+  сервер из канонического `SERVER_APPS` (для `dashboard-agent` это **s2**), `target: "staging"` →
+  всегда **s3**, и попутно передаёт в `deploy-affected.sh` флаг `--staging`.
+- У `dashboard-agent` физически ДВЕ рабочих инстанции: продовая на s2
+  (`docker-compose.production.yml`) и e2e-раннер/staging-агент на s3
+  (`docker-compose.s3.yml` — серверный override, применяется в `deploy-affected.sh` только
+  когда `STAGING != true`).
+- `docker-compose.staging.yml` у `dashboard-agent` **не существует** — только
+  `docker-compose.production.yml` и `docker-compose.s3.yml`.
+
+### Следствие
+
+- `target: "production"` резолвит верный флаг (без `--staging`, значит override сработал бы),
+  но не тот сервер (s2 вместо s3, где реально стоит нужная инстанция).
+- `target: "staging"` резолвит верный сервер (s3), но выставляет `--staging` → скрипт ищет
+  `docker-compose.staging.yml`, не находит, тихо пишет `⚠️ No docker-compose.staging.yml found
+  for dashboard-agent, skipping...` и завершается `exitCode: 0` — деплой отчитывается об успехе,
+  реально не трогая контейнер. Поймано не логом, а сверкой `docker inspect ... StartedAt` —
+  контейнер оказался пятидневной давности при «успешном» деплое.
+- Итог: ни одно значение `target` не даёт корректный результат для s3-инстанции
+  `dashboard-agent` через `deploy_app`. Обходной путь — сырой SSH.
+
+### Предполагаемое направление фикса (не сделано)
+
+`SERVER_NAME` в `deploy-affected.sh` определяется через `hostname -f`, которая на s3 отдаёт
+`s1694383.smartape-vps.com` — не матчится с ожидаемым паттерном (`*s3.letar.best*`/`s3`/`server3`),
+из-за чего серверный override для `dashboard-agent` не подхватывается автоматически даже без
+конфликта с `--staging`. Читать `SERVER_NAME` в первую очередь из явной env-переменной (если
+задана), и только потом падать на `hostname`-детекцию — устранит и эту часть проблемы.
+
+- [ ] Отделить в `deploy-mcp`/`deploy-affected.sh` понятия «на какой сервер» и «с каким
+      compose-профилем» — сейчас оба навязаны одним параметром `target`.
+- [ ] Починить/обойти детекцию `SERVER_NAME` на s3 (`hostname -f` не матчится с ожидаемым
+      паттерном).
+- [ ] До фикса: редеплой s3-инстанции `dashboard-agent` — только вручную по SSH.
