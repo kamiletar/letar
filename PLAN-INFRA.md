@@ -9544,3 +9544,71 @@ Resilio scope. Если сервер потеряется до того, как 
       «синхронизируются только uploads и backups», это больше не полная картина
 - [ ] Проверить `apps/aboi/print-sources/` конкретно — попадает ли уже в Resilio scope s2 после
       решения выше
+
+---
+
+## §83 — `@tanstack/react-table` v8→v9: апгрейд отложен, найден шире описанного скоупа 🆕 (2026-08-17)
+
+Задача на обновление `^8.21.3` → `^9.1.2` (latest) остановлена на этапе исследования — не
+доведена до кода. `package.json`/`bun.lock` возвращены к исходному состоянию
+(`git checkout -- package.json bun.lock` + `bun install`), `node_modules` подтверждён на
+`8.21.3`.
+
+### Почему не форсировано
+
+v9 — не рядовой minor: `@tanstack/table-core` (общее ядро `react-table`/`vue-table`/
+`table-core`-потребителей) перешёл на feature-gated архитектуру. Из официального
+migration-гайда (`raw.githubusercontent.com/TanStack/table/main/docs/framework/react/guide/migrating.md`
+— публичный `tanstack.com/table/latest/docs/.../migrating` из задачи оказался недоступен, 404,
+но тот же файл лежит и в самом npm-пакете: `node_modules/@tanstack/react-table/skills/migrate-v8-to-v9/SKILL.md`):
+
+1. **`useReactTable` → `useTable`**, обязательный новый опшн `features: tableFeatures({...})` —
+   каждая используемая фича (`rowSortingFeature`, `columnFilteringFeature`,
+   `rowPaginationFeature`, `rowSelectionFeature`, `columnOrderingFeature`, `columnSizingFeature`
+   - отдельно `columnResizingFeature` для drag-to-resize) и её row model
+     (`sortedRowModel: createSortedRowModel()` и т.п.) регистрируются явно. `stockFeatures`
+     (шорткат «всё как в v8») закрывает только список фич — row model factories всё равно нужно
+     регистрировать отдельно через `tableFeatures({ ...stockFeatures, sortedRowModel: ... })`,
+     проверено чтением `.d.ts` пакета (`stockFeatures.d.ts` не содержит row model слотов).
+2. **`ColumnDef<TData, TValue>` → `ColumnDef<TFeatures, TData, TValue>`** — новый generic
+   `TFeatures` первым параметром. Это ломает **публичный экспортируемый API**:
+   `DataTableProps<T>.columns: ColumnDef<T>[]` в `libs/admin-ui/src/table/data-table.tsx` —
+   каждое приложение-потребитель `DataTable`, пишущее `const columns: ColumnDef<Client>[] = [...]`,
+   потребует правки сигнатуры. Число реальных потребителей `DataTable` по монорепо не
+   аудировано (не входило в скоуп остановленной задачи) — но `ColumnDef` из
+   `@tanstack/react-table` импортируется в приложениях напрямую, не только через `admin-ui`.
+3. **`table.getState()` → `table.state`/`table.store.state`**, `sortingFn` → `sortFn`,
+   `columnSizingInfo` → `columnResizing` (Column Sizing и Column Resizing — теперь раздельные
+   фичи), destructured row/cell/column методы (`const { getValue } = row`) больше не работают —
+   методы переехали на прототип, нужен вызов через инстанс.
+4. **Блокер, не упомянутый в исходной постановке задачи:** нашёлся **четвёртый** потребитель
+   `@tanstack/table-core` (не `react-table`, но то же ядро с тем же feature-gated API) —
+   `libs/forms-angular/src/lib/fields/field-data-grid.component.ts`. Три файла из задачи
+   (`libs/admin-ui/src/table/data-table.tsx`, `libs/forms/src/lib/declarative/form-fields/table/field-data-grid.tsx`,
+   `libs/forms-shadcn/src/lib/fields/field-data-grid-impl.tsx`) — не полный список потребителей
+   в монорепо.
+
+### Итог
+
+Мелкая версия для трёх файлов на деле требует: (а) переписать состояние/архитектуру таблицы в
+4+ библиотеках `@letar/*` под новую feature-based модель, (б) поменять публичный generic-тип
+`ColumnDef`, что каскадом ломает typecheck каждого приложения-потребителя `DataTable`
+(`@letar/admin-ui`) — число которых не определено. Риск/объём правки непропорционален пользе
+(нет открытого бага/уязвимости в v8.21.3, только «обновить до latest»). Решено не форсировать
+и зафиксировать здесь, а не тратить бюджет сессии на инвазивный рефактор без утверждённого
+владельцем объёма.
+
+### DoD (если апгрейд решат делать)
+
+- [ ] Сначала аудит: `grep -rn "@tanstack/react-table\|@tanstack/table-core"` по всем `apps/*` —
+      сколько реальных потребителей `ColumnDef`/`useReactTable` вне трёх library-файлов
+- [ ] Решить: полная feature-based миграция (tree-shaking, целевая архитектура) или временный
+      `useLegacyTable` из `@tanstack/react-table/legacy` (deprecated shim, держит v8-style API,
+      но бандл больше — описан в том же migration-гайде, раздел "Quick Legacy Migration")
+- [ ] Если полная миграция — обновить `libs/admin-ui/src/table/data-table.tsx`,
+      `libs/forms/src/lib/declarative/form-fields/table/field-data-grid.tsx`,
+      `libs/forms-shadcn/src/lib/fields/field-data-grid-impl.tsx`,
+      `libs/forms-angular/src/lib/fields/field-data-grid.component.ts` одновременно (общее ядро)
+- [ ] Расширить peer-dependency диапазоны (`libs/admin-ui/package.json`,
+      `libs/forms-shadcn/package.json`: `@tanstack/react-table": ">=8.0.0"`) только после того,
+      как реально протестировано на v9 — не заранее
