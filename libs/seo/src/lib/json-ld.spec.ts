@@ -40,4 +40,22 @@ describe('organizationJsonLd', () => {
     const ld = organizationJsonLd({ name: 'X', url: 'https://x.example' })
     expect(ld.description).toBeUndefined()
   })
+
+  it('принимает legalName, контакты, соцсети и логотип', () => {
+    const ld = organizationJsonLd({
+      name: 'Тестовая компания',
+      url: 'https://example.com',
+      legalName: 'ИП Тестов Т.Т.',
+      email: 'info@example.com',
+      telephone: '+7 900 000-00-00',
+      sameAs: ['https://vk.com/example'],
+      logo: 'https://example.com/logo.png',
+    })
+
+    expect(ld.legalName).toBe('ИП Тестов Т.Т.')
+    expect(ld.email).toBe('info@example.com')
+    expect(ld.telephone).toBe('+7 900 000-00-00')
+    expect(ld.sameAs).toEqual(['https://vk.com/example'])
+    expect(ld.logo).toBe('https://example.com/logo.png')
+  })
 })

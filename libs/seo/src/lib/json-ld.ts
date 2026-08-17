@@ -24,6 +24,14 @@ export interface OrganizationJsonLdParams {
   name: string
   url: string
   description?: string
+  /** Юридическое наименование — отличается от `name` (бренда), если у бизнеса есть ИП/ООО. */
+  legalName?: string
+  email?: string
+  telephone?: string
+  /** Ссылки на профили в соцсетях/маркетплейсах — Schema.org `sameAs`. */
+  sameAs?: string[]
+  /** Абсолютный URL логотипа. */
+  logo?: string
 }
 
 /**
@@ -37,5 +45,10 @@ export function organizationJsonLd(params: OrganizationJsonLdParams): Record<str
     name: params.name,
     url: params.url,
     description: params.description,
+    legalName: params.legalName,
+    email: params.email,
+    telephone: params.telephone,
+    sameAs: params.sameAs,
+    logo: params.logo,
   }
 }
