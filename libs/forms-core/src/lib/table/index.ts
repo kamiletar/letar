@@ -1,3 +1,11 @@
+export {
+  camelToTitle,
+  fieldInfoToColumn,
+  getArrayElementFields,
+  mapZodType,
+  mergeColumns,
+  resolveTableColumns,
+} from './table-columns'
 export { createDataGridTableFeatures } from './table-features'
 export type {
   CellCoord,
