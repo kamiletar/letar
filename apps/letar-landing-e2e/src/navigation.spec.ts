@@ -10,7 +10,7 @@ test.describe('Внутренняя навигация и консистентн
     })
 
     await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('domcontentloaded')
 
     expect(consoleErrors).toEqual([])
   })

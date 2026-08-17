@@ -59,7 +59,7 @@ test.describe('Главная страница', () => {
     await expect(footer.getByText('© 2026 Letar')).toBeVisible()
   })
 
-  test('robots.txt и sitemap.xml отдаются корректно', async ({ page, request }) => {
+  test('robots.txt и sitemap.xml отдаются корректно', async ({ request }) => {
     const robotsResponse = await request.get('/robots.txt')
     expect(robotsResponse.ok()).toBeTruthy()
     const robotsBody = await robotsResponse.text()
