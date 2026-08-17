@@ -4,6 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.33.2] - 2026-08-17
+
+### Changed
+
+- **`use-table-columns.ts` — резолв колонок из schema вынесен в `resolveTableColumns()`
+  (`@letar/forms-core/table`)** — общая логика с `@letar/forms`/`@letar/forms-angular`/
+  `@letar/forms-vue`. Публичный контракт не изменился.
+
 ## [0.33.1] - 2026-08-17
 
 ### Changed
