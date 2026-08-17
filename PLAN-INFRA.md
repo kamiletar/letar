@@ -9638,3 +9638,18 @@ migration-гайда (`raw.githubusercontent.com/TanStack/table/main/docs/framew
 постобработки); единую Nx-абстракцию под это сознательно не заводили — риск хрупкости
 (см. `libs.md` про tsconfig references) не оправдан при не идентичной команде. Приватные детали
 по конкретным submodule — `.claude/private/PLAN-JOURNAL.md`.
+
+## §85 — Присмотреться к TanStack Charts 🆕 (2026-08-17)
+
+`@tanstack/charts` (`/tanstack/charts`) — новая декларативная библиотека графиков от команды
+TanStack: framework-agnostic грамматика (marks, scales, layout) в духе Observable Plot/Vega-Lite,
+а не набор готовых чарт-компонентов как старый `@tanstack/react-charts`. React/Vue-адаптеры,
+tree-shakeable subpath-импорты (tooltip, zoom/brush, focus/keyboard-навигация, geo-проекции,
+hierarchy: treemap/sunburst/tree, network: force/sankey), SSR и accessibility заложены на уровне
+архитектуры.
+
+Пока не применялась ни в одном приложении монорепо, потребности в графиках сейчас нет. Стоит
+рассмотреть подробнее, если появится задача с графиками (аналитика, dashboard) — обучающая
+кривая круче Recharts, но экосистема совпадает с уже используемым стеком (Query/Table/Form).
+
+**Чем блокирован:** ничем, не приоритет — ждёт конкретной задачи с графиками.
