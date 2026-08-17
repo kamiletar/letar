@@ -1,5 +1,11 @@
 # Changelog @letar/forms-vue-shadcn
 
+## 0.16.1 (2026-08-17)
+
+- **Fix:** `@tiptap/vue-3` пинился на точную `3.29.2`, тогда как `@tiptap/starter-kit`/
+  `@tiptap/extension-placeholder` резолвились в `3.30.1` — тот же дубль версий `@tiptap/core`,
+  что в `@letar/forms-vue` (см. её CHANGELOG). Все `@tiptap/*` подняты до `3.30.1`.
+
 ## Unreleased
 
 Фаза 9, Этап 7/0 (form-docs P7, «единый источник кода примеров») — `demo/` разбит с одного
