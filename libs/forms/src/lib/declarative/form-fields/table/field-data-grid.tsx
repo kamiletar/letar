@@ -1,19 +1,14 @@
 'use client'
 
 import { Box, Button, Checkbox, Field, HStack, Input, Table, Text } from '@chakra-ui/react'
+import { createDataGridTableFeatures } from '@letar/forms-core/table'
 import { useField } from '@tanstack/react-form'
 import {
   type ColumnDef,
   type ColumnFiltersState,
-  createFilteredRowModel,
-  createPaginatedRowModel,
-  createSortedRowModel,
-  filterFns,
   flexRender,
   type RowSelectionState,
   type SortingState,
-  stockFeatures,
-  tableFeatures,
   useTable,
 } from '@tanstack/react-table'
 import { useVirtualizer } from '@tanstack/react-virtual'
@@ -22,22 +17,8 @@ import { useFormGroup } from '../../../form-group'
 import { useDeclarativeForm } from '../../form-context'
 import { useTableColumns } from './use-table-columns'
 
-/**
- * Набор фич `@tanstack/react-table` v9. `stockFeatures` (все стоковые фичи, как в v8) —
- * сознательный выбор вместо точечного набора: часть методов, которые в v8 считались «core»,
- * в v9 распределены по фичам не всегда очевидным образом (пример — `row.getVisibleCells()`
- * висит на `columnVisibilityFeature`, не на core), а `columnResizingFeature` требует
- * `columnSizingFeature` рядом — обе есть в `stockFeatures`. Row model factories и `filterFns`
- * (полный реестр, deprecated но рабочий — колонки полагаются на `'auto'`-резолв по типу
- * значения, без реестра `'auto'` ничего не находит) регистрируются явно.
- */
-const fieldDataGridFeatures = tableFeatures({
-  ...stockFeatures,
-  sortedRowModel: createSortedRowModel(),
-  filteredRowModel: createFilteredRowModel(),
-  paginatedRowModel: createPaginatedRowModel(),
-  filterFns,
-})
+/** Набор фич `@tanstack/react-table` v9 — общий с `@letar/forms-shadcn`/`@letar/forms-angular`, см. `createDataGridTableFeatures`. */
+const fieldDataGridFeatures = createDataGridTableFeatures()
 
 /** Определение колонки DataGrid */
 export interface DataGridColumnDef {

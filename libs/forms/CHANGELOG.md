@@ -4,6 +4,23 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.5.1] - 2026-08-17
+
+### Changed
+
+- **`fieldDataGridFeatures` вынесен в `@letar/forms-core/table` (`createDataGridTableFeatures()`).**
+  `field-data-grid.tsx` больше не держит собственную конфигурацию `tableFeatures({...stockFeatures,
+  ...})` — она дублировалась почти дословно в `@letar/forms-shadcn` и `@letar/forms-angular` после
+  миграции на `react-table`/`table-core` v9 (см. `2.5.0`). Публичный контракт `Form.Field.DataGrid`
+  не изменился.
+
+### Added
+
+- Тесты для `Form.Field.DataGrid` (`field-data-grid.spec.tsx`) — рендер, сортировка, текстовый
+  фильтр (регистрация через `filterFns`), пагинация, `rowSelection` (включая indeterminate
+  чекбокс «выбрать всё» и bulk-удаление), рендер `virtualized` без падения. Раньше компонент был
+  прикрыт только typecheck.
+
 ## [2.5.0] - 2026-08-17
 
 ### Changed

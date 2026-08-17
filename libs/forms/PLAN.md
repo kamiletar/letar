@@ -4,6 +4,30 @@
 
 ---
 
+## ✅ [2026-08-17] Дедуп `tableFeatures()` DataGrid + тесты `field-data-grid.tsx` — закрыто
+
+Две находки по итогам миграции `@tanstack/react-table`/`table-core` v8→v9 (см. `2.5.0` в
+CHANGELOG): `fieldDataGridFeatures = tableFeatures({...stockFeatures, ...})` дублировался почти
+дословно в `@letar/forms`, `@letar/forms-shadcn` и `@letar/forms-angular`, а `field-data-grid.tsx`
+(самый большой и самый рискованный файл миграции — drag-drop колонок, resize, виртуализация) был
+единственным из четырёх мигрированных без `.spec.tsx`.
+
+- **Дедуп:** `createDataGridTableFeatures()` в `@letar/forms-core/table` (`table-features.ts`),
+  построена на `@tanstack/table-core` (framework-agnostic, тот же пакет уже был прямой
+  зависимостью `@letar/forms-angular`) — три потребителя заменили инлайновый `tableFeatures(...)`
+  на вызов фабрики; Angular передаёт `coreReactivityFeature: storeReactivityBindings()` вторым
+  аргументом (headless-специфика, React/shadcn его не используют).
+- **Тесты:** `libs/forms/src/lib/declarative/form-fields/table/field-data-grid.spec.tsx` — рендер,
+  сортировка по клику на заголовок, текстовый фильтр (`filterFns`-регистрация через `'auto'`),
+  пагинация, `rowSelection` (indeterminate на чекбоксе «выбрать всё», bulk-удаление),
+  `virtualized` не падает при рендере. 8 тестов, за образец взят
+  `libs/forms-shadcn/src/lib/fields/field-data-grid.spec.tsx`.
+- Версии: `@letar/forms-core` 0.7.0 → 0.8.0 (новый публичный экспорт), `@letar/forms` 2.5.0 →
+  2.5.1, `@letar/forms-shadcn` 0.33.0 → 0.33.1, `@letar/forms-angular` 0.1.1 → 0.1.2 (все —
+  внутренний рефакторинг, публичный контракт `Form.Field.DataGrid` не менялся).
+
+---
+
 ## 🔄 [2026-08-13] Фаза 9: паритет Vue-полей (57/57) — разворот решения Фазы 7.8
 
 **Запросил:** Ками напрямую (через координатора). Назначено forms-dev.
