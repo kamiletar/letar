@@ -54,48 +54,33 @@ Client.** Реальный клиент (`PrismaClient`, типы моделей
 `@/generated/prisma/client`), не обязателен, если код везде импортирует явный подпуть. Приложения,
 у которых Prisma Client используется и в браузере (SQLite/sql.js, Electron), экспортируют
 `./browser` вместо `./client` — смотри `generator client { output = "./prisma" }` в своей
-`schema.zmodel`, какие файлы (`client.ts` vs `browser.ts`) там реально появляются.
+`schema.zmodel`, какие файлы (`client.ts` vs `browser.ts`) там реально появляются. Есть и другие
+частные варианты (кастомный путь вывода вне `src/generated`, дополнительные шаги постобработки) —
+разница обоснована архитектурой конкретного приложения, полный список — в приватном журнале
+(ссылка внизу раздела).
 
-**Инцидент, который это выявил:** три приложения независимо ловили один и тот же баг —
-`label-printer-desktop` вообще не имел `generator client` в схеме (коммит `33af10ac`,
-2026-08-17), `dashboard` и `form-develop-app` имели `generator client`, но таргет
-`zenstack:generate` состоял из одной команды `"zenstack generate"` без `prisma generate` —
-`src/generated/prisma/*` у них существовал только потому, что кто-то когда-то запустил `prisma
-generate` вручную, и расходился со схемой при каждом следующем изменении модели (проверено:
-`schema.prisma` у `dashboard` от 17.08, `client.ts` — от 12.08, 5 дней рассинхрона). На свежем
-клоне (`src/generated/` в `.gitignore`) оба приложения падали бы сразу. Оба таргета почищены в
-этой же сессии по образцу `label-printer-desktop`.
+**Инцидент, который это выявил** (2026-08-17): несколько приложений независимо ловили один и тот
+же баг — `zenstack:generate` не включал `prisma generate` явно и/или `schema.zmodel` не имел
+`generator client`, из-за чего `src/generated/prisma/*` либо не генерировался вовсе, либо
+расходился со схемой при каждом следующем изменении модели, оставаясь рабочим только за счёт
+случайно устаревшего файла на диске. На свежем клоне (`src/generated/` — build-артефакт,
+не должен быть в git) такое приложение падает сразу. Один из случаев исправлен коммитом
+`33af10ac`. Полный список задетых приложений, включая приватные submodule, и деталь про
+второй вариант той же проблемы (`src/generated` случайно закоммичен в git submodule, что
+маскирует поломку куда полнее) — `.claude/private/PLAN-JOURNAL.md`.
 
 Единой Nx-абстракции (shared target default / кастомный executor / генератор) под этот рецепт
 сознательно не заводили: команда не идентична везде (`./client` vs `./browser` в реэкспорте,
-`driving-school` пишет в `libs/driving-school-db/...` вместо `src/generated`, `animatrona`
-добавляет junction-шаг вместо реэкспорта, `form-example` объединяет команды через `&&` без
-реэкспорта) — общий executor либо не покрыл бы эти варианты, либо сам стал бы источником той же
-хрупкости, от которой предостерегает [libs.md](/.claude/docs/libs.md) про tsconfig references.
-Разница между приложениями обоснована их архитектурой (браузерный клиент vs серверный, кастомный
-путь генерации у driving-school) — рецепт документирован здесь как единственный источник истины,
-а не автоматизирован.
+кастомный путь вывода у части приложений, дополнительные шаги постобработки) — общий executor
+либо не покрыл бы эти варианты, либо сам стал бы источником той же хрупкости, от которой
+предостерегает [libs.md](/.claude/docs/libs.md) про tsconfig references. Рецепт документирован
+здесь как единственный источник истины, а не автоматизирован.
 
-### ⚠️ Второй, более опасный вариант того же дрейфа: `src/generated` закоммичен в submodule
-
-Аудит всех 19 приложений (2026-08-17, после фикса выше) вскрыл ещё один живой случай — `studio`,
-плюс тот же паттерн в `svoichuzhie`, `aprel8008`, `libs/driving-school-db`. У всех четырёх
-`schema.zmodel` был в порядке, но их **собственный** `.gitignore` (у submodule корневой `.gitignore`
-letar не действует — см. `git.md`) не исключал `src/generated/`, поэтому сгенерированный Prisma
-Client коммитился в git как обычный файл.
-
-Это опаснее дрейфа выше: коммит маскирует поломку полностью, а не только временно. У `studio`
-`prisma generate` вообще не мог попасть в `src/generated/prisma` — `schema.zmodel` не имел
-`generator client`, плагин `prisma` подставлял дефолтный блок без `output`, и Prisma резолвила
-вывод в `node_modules/.bun/.../@prisma/client` (проверено: `rm -rf src/generated && nx run
-studio:zenstack:generate` падал на последнем шаге, `src/generated/prisma/` не создавался вовсе).
-На чистом окружении (CI, новый клон) это упало бы сразу — но в рабочем дереве лежал устаревший,
-но рабочий `client.ts`, закоммиченный 6 дней назад, и всё выглядело зелёным.
-
-**Чек-лист для нового/проверяемого submodule:** `grep -q generated apps/<app>/.gitignore` (или
-`libs/<lib>/.gitignore`) должен найти `src/generated/`. Если нет — `git rm -r --cached
-src/generated` + добавить строку в `.gitignore`, одним коммитом без pathspec (см. `git.md`
-про `git rm --cached` + `commit -- <path>`).
+**Чек-лист для любого приложения/submodule:** `grep -q generated apps/<app>/.gitignore` (или
+`libs/<lib>/.gitignore` — для submodule корневой `.gitignore` letar не действует, см. `git.md`)
+должен найти `src/generated/`. Если нет — `git rm -r --cached src/generated` + добавить строку
+в `.gitignore`, одним коммитом без pathspec (см. `git.md` про `git rm --cached` + `commit --
+<path>`).
 
 ### ⚠️ `zenstack:generate` зависит от собранного `libs/zenstack-form-plugin/dist/`
 
