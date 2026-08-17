@@ -4,6 +4,24 @@
 
 ---
 
+## ✅ [2026-08-17] Дублирующиеся версии `@tiptap/core` в forms-vue/forms-vue-shadcn — закрыто
+
+Побочная находка предыдущей сессии: `typecheck:tsgo forms-vue` падал на 17 ошибок в
+`rich-text-actions.ts`/`use-rich-text-field.ts`. Причина — `@tiptap/vue-3` был пинён точной
+`3.29.2` (корневой `package.json` + devDependencies `forms-vue`/`forms-vue-shadcn`), а
+`@tiptap/starter-kit`/`@tiptap/extension-placeholder` резолвились в `3.30.1` — два экземпляра
+`@tiptap/core` в одном `node_modules` ломали структурную совместимость типов `Node`/`Mark`.
+
+- **Фикс:** `@tiptap/vue-3` поднят до `3.30.1` (существующий релиз, peer-зависимость на
+  `@tiptap/core@3.30.1`) — в корневом `package.json`, `forms-vue`, `forms-vue-shadcn`. Заодно
+  выровнены пины `forms-angular` (активного конфликта не было, но `^3.29.2` расходился с
+  реальным резолвом `3.30.1`).
+- Проверено: `typecheck:tsgo` + `nx test` на всех трёх либах — зелёные (`forms-vue`: 17 ошибок → 0).
+- Версии: `forms-vue` 0.15.1 → 0.15.2, `forms-vue-shadcn` 0.16.0 → 0.16.1, `forms-angular`
+  0.1.3 → 0.1.4.
+
+---
+
 ## ✅ [2026-08-17] Дедуп `use-table-columns.ts` (резолв колонок из schema) — закрыто
 
 Продолжение находки выше: `mapZodType`/`findFieldByPath`/`getArrayElementFields`/
