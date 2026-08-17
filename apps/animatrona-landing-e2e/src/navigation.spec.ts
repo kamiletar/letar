@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 test.describe('Навигация', () => {
   test('клик по "Возможности" в Navbar скроллит к секции #features без 404', async ({ page }) => {
     await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('domcontentloaded')
 
     // Navbar делает preventDefault + scrollIntoView (см. navbar.tsx: scrollToSection) —
     // URL сознательно не меняется, поэтому проверяем факт скролла, а не toHaveURL
@@ -15,7 +15,7 @@ test.describe('Навигация', () => {
 
   test('клик по "FAQ" в Navbar скроллит к секции #faq без 404', async ({ page }) => {
     await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('domcontentloaded')
 
     const nav = page.locator('nav').first()
     await nav.getByRole('link', { name: 'FAQ' }).click()
@@ -25,7 +25,7 @@ test.describe('Навигация', () => {
 
   test('переход в документацию по ссылке "Документация" открывает /docs/quick-start', async ({ page }) => {
     await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('domcontentloaded')
 
     const nav = page.locator('nav').first()
     await nav.getByRole('link', { name: 'Документация' }).click()
@@ -44,7 +44,7 @@ test.describe('Навигация', () => {
 
   test('навигация по сайдбару документации на "Горячие клавиши" без 404', async ({ page }) => {
     await page.goto('/docs/quick-start')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('domcontentloaded')
 
     const sidebar = page.locator('nav').filter({ hasText: 'Документация' })
     await sidebar.getByRole('link', { name: 'Горячие клавиши' }).click()
