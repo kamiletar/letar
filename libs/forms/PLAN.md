@@ -4,6 +4,28 @@
 
 ---
 
+## ✅ [2026-08-17] Дедуп `use-table-columns.ts` (резолв колонок из schema) — закрыто
+
+Продолжение находки выше: `mapZodType`/`findFieldByPath`/`getArrayElementFields`/
+`fieldInfoToColumn`/`mergeColumns`/`camelToTitle` дублировались почти дословно в четырёх местах —
+`@letar/forms`, `@letar/forms-shadcn` (оба — React `useMemo`-хук), `@letar/forms-angular` и
+`@letar/forms-vue` (оба — обычная функция `resolveTableColumns`). У `forms-vue` все шесть имён,
+плюс сама функция — часть публичного API пакета (реэкспорт из `src/core.ts`), сохранены поимённо.
+
+- **Дедуп:** `resolveTableColumns()` + вспомогательные `mapZodType`/`camelToTitle`/
+  `fieldInfoToColumn`/`mergeColumns`/`getArrayElementFields` — все в `@letar/forms-core/table`
+  (`table-columns.ts`), framework-free (только `traverseSchema` из `@letar/forms-core/schema`).
+  `forms`/`forms-shadcn` оборачивают в `useMemo` (React-специфика), `forms-angular`/`forms-vue` —
+  тонкий реэкспорт без обёртки (headless, вызывается напрямую в `computed()`/render-замыкании).
+- Версии: `@letar/forms-core` 0.8.0 → 0.9.0, `@letar/forms` 2.5.1 → 2.5.2, `@letar/forms-shadcn`
+  0.33.1 → 0.33.2, `@letar/forms-angular` 0.1.2 → 0.1.3, `@letar/forms-vue` 0.15.0 → 0.15.1 —
+  везде внутренний рефакторинг, публичные контракты не менялись.
+- Проверено: `typecheck:tsgo` + `nx test` на всех пяти либах (`forms-vue` — типовые ошибки в
+  `rich-text-actions.ts`/`use-rich-text-field.ts` от дублирующихся версий `@tiptap/core` в
+  lockfile, не связаны с этим изменением, не трогал).
+
+---
+
 ## ✅ [2026-08-17] Дедуп `tableFeatures()` DataGrid + тесты `field-data-grid.tsx` — закрыто
 
 Две находки по итогам миграции `@tanstack/react-table`/`table-core` v8→v9 (см. `2.5.0` в
