@@ -13,6 +13,8 @@
 приватные submodules · [environment](/.claude/docs/environment.md) приложения, dev-порты, команды ·
 [architecture](/.claude/docs/architecture.md) · [code-style](/.claude/docs/code-style.md) ·
 [documentation-guidelines](/.claude/docs/documentation-guidelines.md) ·
+[plan-decomposition-pattern](/.claude/docs/plan-decomposition-pattern.md) когда и как резать
+разросшийся `PLAN.md`/`ROADMAP.md` на части с точкой входа ·
 [tsconfig-presets](/.claude/docs/tsconfig-presets.md) общий пресет Next.js-приложений, `${configDir}` ·
 [agent-skills-mirror](/.claude/docs/agent-skills-mirror.md) зеркало `.claude/skills/` для Codex ·
 [nextjs16-agent-guide-files](/.claude/docs/nextjs16-agent-guide-files.md) `next dev` сам пишет
@@ -100,6 +102,9 @@ alias матчится по префиксу
 pre-commit-хука не видел `.exe`-shim на Windows ·
 [dprint-eslint-curly-conflict](/.claude/docs/dprint-eslint-curly-conflict.md) `--fix` и `fmt`
 откатывают друг друга ·
+[dprint-markdown-table-reformat](/.claude/docs/dprint-markdown-table-reformat.md) ⚠️ dprint
+пересчитывает ширину столбцов при каждом прогоне — `Edit` по соседней строке таблицы падает на
+«верном» тексте ·
 [prettier-dprint-conflict-root-cause](/.claude/docs/prettier-dprint-conflict-root-cause.md) ⚠️
 голая `nx format` — это Prettier, не dprint; `NX_SKIP_FORMAT` её не гасит
 
