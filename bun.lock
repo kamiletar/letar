@@ -77,7 +77,7 @@
         "@tiptap/pm": "^3.30.1",
         "@tiptap/react": "^3.30.1",
         "@tiptap/starter-kit": "^3.30.1",
-        "@tiptap/vue-3": "3.29.2",
+        "@tiptap/vue-3": "3.30.1",
         "@types/dompurify": "^3.2.0",
         "@types/mdx": "^2.0.14",
         "@uiw/react-json-view": "^2.0.0-alpha.43",
@@ -957,9 +957,9 @@
         "@angular/platform-browser": "^22.1.2",
         "@angular/platform-browser-dynamic": "^22.1.2",
         "@tanstack/table-core": "^9.1.2",
-        "@tiptap/core": "^3.29.2",
-        "@tiptap/extension-placeholder": "^3.29.2",
-        "@tiptap/starter-kit": "^3.29.2",
+        "@tiptap/core": "^3.30.1",
+        "@tiptap/extension-placeholder": "^3.30.1",
+        "@tiptap/starter-kit": "^3.30.1",
       },
       "peerDependencies": {
         "@angular/common": "^22.0.0",
@@ -1032,9 +1032,9 @@
       "devDependencies": {
         "@tanstack/vue-form": "^1.0.0",
         "@tanstack/vue-table": "^8.21.3",
-        "@tiptap/extension-placeholder": "^3.29.2",
-        "@tiptap/starter-kit": "^3.29.2",
-        "@tiptap/vue-3": "3.29.2",
+        "@tiptap/extension-placeholder": "^3.30.1",
+        "@tiptap/starter-kit": "^3.30.1",
+        "@tiptap/vue-3": "3.30.1",
         "@vue/test-utils": "^2.4.6",
         "vue": "^3.5.13",
       },
@@ -1059,9 +1059,9 @@
       "devDependencies": {
         "@tanstack/vue-form": "^1.0.0",
         "@tanstack/vue-table": "^8.21.3",
-        "@tiptap/extension-placeholder": "^3.29.2",
-        "@tiptap/starter-kit": "^3.29.2",
-        "@tiptap/vue-3": "3.29.2",
+        "@tiptap/extension-placeholder": "^3.30.1",
+        "@tiptap/starter-kit": "^3.30.1",
+        "@tiptap/vue-3": "3.30.1",
         "@vue/test-utils": "^2.4.6",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
@@ -3581,7 +3581,7 @@
 
     "@tiptap/starter-kit": ["@tiptap/starter-kit@3.30.1", "", { "dependencies": { "@tiptap/core": "3.30.1", "@tiptap/extension-blockquote": "3.30.1", "@tiptap/extension-bold": "3.30.1", "@tiptap/extension-bullet-list": "3.30.1", "@tiptap/extension-code": "3.30.1", "@tiptap/extension-code-block": "3.30.1", "@tiptap/extension-document": "3.30.1", "@tiptap/extension-dropcursor": "3.30.1", "@tiptap/extension-gapcursor": "3.30.1", "@tiptap/extension-hard-break": "3.30.1", "@tiptap/extension-heading": "3.30.1", "@tiptap/extension-horizontal-rule": "3.30.1", "@tiptap/extension-italic": "3.30.1", "@tiptap/extension-link": "3.30.1", "@tiptap/extension-list": "3.30.1", "@tiptap/extension-list-item": "3.30.1", "@tiptap/extension-list-keymap": "3.30.1", "@tiptap/extension-ordered-list": "3.30.1", "@tiptap/extension-paragraph": "3.30.1", "@tiptap/extension-strike": "3.30.1", "@tiptap/extension-text": "3.30.1", "@tiptap/extension-underline": "3.30.1", "@tiptap/extensions": "3.30.1", "@tiptap/pm": "3.30.1" } }, "sha512-6P2WEp2ZHsx8LV6hQ3K/MB3n39oiVhKESlzh0v+KhK8RR/iKSKGxvTFbi1D/1fo4j3fZf+43PGHjyKXskn9ZmQ=="],
 
-    "@tiptap/vue-3": ["@tiptap/vue-3@3.29.2", "", { "optionalDependencies": { "@tiptap/extension-bubble-menu": "^3.29.2", "@tiptap/extension-floating-menu": "^3.29.2" }, "peerDependencies": { "@floating-ui/dom": "^1.0.0", "@tiptap/core": "3.29.2", "@tiptap/pm": "3.29.2", "vue": "^3.0.0" } }, "sha512-rLX+V+HXbsVlk+My8mslvbnbVXZiQZHYtbOiRgxugsqZ9SK1mr1FpgZ/ZNcotJAjecT8FJmPa45ccDnVu66eGA=="],
+    "@tiptap/vue-3": ["@tiptap/vue-3@3.30.1", "", { "optionalDependencies": { "@tiptap/extension-bubble-menu": "^3.30.1", "@tiptap/extension-floating-menu": "^3.30.1" }, "peerDependencies": { "@floating-ui/dom": "^1.0.0", "@tiptap/core": "3.30.1", "@tiptap/pm": "3.30.1", "vue": "^3.0.0" } }, "sha512-Y7YUkC+LpHcnraN0GwJtySh7XZnveqde5SsHV5X7h1erflp+WT7rG52sE0WKyFOSc3t9ZKSJ/4IBUtB3+ZQHrA=="],
 
     "@toeverything/y-indexeddb": ["@toeverything/y-indexeddb@0.10.0-canary.9", "", { "dependencies": { "idb": "^7.1.1", "nanoid": "^5.0.1", "y-provider": "0.10.0-canary.9" }, "peerDependencies": { "yjs": "^13" } }, "sha512-3hzktNuOaXut/RgRjKNeqQura1zeYF+tSLSlWDc0rDBOrEpwD/1EOpKVCbgtl8ke7f4oinLfgBNk4HcwqaQUYQ=="],
 
@@ -9028,8 +9028,6 @@
     "@testing-library/jest-dom/dom-accessibility-api": ["dom-accessibility-api@0.6.3", "", {}, "sha512-7ZgogeTnjuHbo+ct10G9Ffp0mif17idi0IyWNVA/wcwcm7NPOD/WEHVP3n7n3MhXqxoIYm8d6MuZohYWIZ4T3w=="],
 
     "@testing-library/react/@babel/runtime": ["@babel/runtime@7.29.2", "", {}, "sha512-JiDShH45zKHWyGe4ZNVRrCjBz8Nh9TMmZG1kh4QTK8hCBTWBi8Da+i7s1fJw7/lYpM4ccepSNfqzZ/QvABBi5g=="],
-
-    "@tiptap/vue-3/@tiptap/core": ["@tiptap/core@3.29.2", "", { "peerDependencies": { "@tiptap/pm": "3.29.2" } }, "sha512-oKUkiPUB7noilVYxI9lNzUD4rX17sHub+PYjMfHMWHG9A3nvIy+FdePIVIIhThKWF7ijhr3eIqHY51Bn+GAFtw=="],
 
     "@toeverything/y-indexeddb/idb": ["idb@7.1.1", "", {}, "sha512-gchesWBzyvGHRO9W8tzUWFDycow5gwjvFKfyV9FF32Y7F50yZMp7mP+T2mJIWFx49zicqyC4uefHM17o6xKIVQ=="],
 
