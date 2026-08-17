@@ -8,6 +8,10 @@
 # файлы относятся к более чем одному scope (apps/<x>, libs/<x>, infra/<x>, либо корневой
 # каталог/файл) — коммит блокируется.
 #
+# Исключение — scope `docs-root`: все корневые *.md одного репозитория (плюс корневой
+# package.json, когда хук стоит внутри submodule) считаются одной правкой. Подробности —
+# в комментариях у самого case ниже.
+#
 # Легитимный multi-scope коммит (например «bump all submodules», repo-wide format) —
 # явное подтверждение через переменную окружения:
 #   GIT_ALLOW_MULTI_SCOPE_COMMIT=1 git commit ...
@@ -24,20 +28,53 @@ mapfile -t FILES < <(git diff --cached --name-only --diff-filter=ACMRTUXB)
 
 [[ ${#FILES[@]} -eq 0 ]] && exit 0
 
+# Корневой package.json значит разное в зависимости от того, где стоит хук:
+#   - внутри submodule это манифест ОДНОГО приложения, и bump его версии едет вместе с
+#     CHANGELOG.md в каждом коммите конца сессии (.claude/rules/app-workflow.md
+#     «После завершения задачи», шаги 3 и 5) — значит это часть той же правки доков;
+#   - в корне letar это общий манифест монорепо, который параллельные агенты правят через
+#     bun install — его объединять с доками нельзя, иначе чужая зависимость молча уедет
+#     в чужой коммит.
+# Признак submodule — непустой superproject (у обычного клона letar он пуст).
+IN_SUBMODULE=0
+if [[ -n "$(git rev-parse --show-superproject-working-tree 2>/dev/null || true)" ]]; then
+  IN_SUBMODULE=1
+fi
+
 declare -A SCOPES
 for f in "${FILES[@]}"; do
   case "$f" in
     apps/*/*|libs/*/*|infra/*/*)
+      # Файл внутри приложения/библиотеки монорепо — scope до второго сегмента.
+      # Проверяется ПЕРВЫМ, поэтому apps/appA/PLAN.md и apps/appB/PLAN.md остаются
+      # разными scope и по-прежнему блокируются: спецкейс docs-root ниже до них не доходит.
       scope="$(echo "$f" | cut -d/ -f1-2)"
       ;;
-    PLAN.md|PLAN_COMPLETED.md|PLAN_TESTING.md|CHANGELOG.md|README.md)
-      # Корневые док-файлы одного приложения/репозитория обновляются пачкой в конце
-      # сессии (см. CLAUDE.md «После завершения задачи») — это одна логическая правка,
-      # а не набор независимых scope по имени файла.
+    */*)
+      # Прочий вложенный путь (scripts/**, .claude/**, src/** внутри submodule) — scope
+      # по первому сегменту.
+      scope="$(echo "$f" | cut -d/ -f1)"
+      ;;
+    *.md)
+      # Корневые markdown-файлы приложения/репозитория обновляются пачкой в конце сессии
+      # (см. CLAUDE.md «После завершения задачи») — это одна логическая правка, а не набор
+      # независимых scope по имени файла. Спецкейс намеренно задан ШАБЛОНОМ, а не списком
+      # имён: тематические планы верхнего уровня заводят по ходу работы (PLAN_SHOP.md,
+      # ROADMAP.md, PLAN_STICKY_CTA.md, CHANGELOG_<дата>.md), и фиксированный список
+      # отставал от практики — коммит «PLAN_SHOP.md + CHANGELOG.md» ловил ложное
+      # срабатывание (2026-08-17).
       scope="docs-root"
       ;;
+    package.json)
+      if [[ $IN_SUBMODULE -eq 1 ]]; then
+        scope="docs-root"
+      else
+        scope="$f"
+      fi
+      ;;
     *)
-      scope="$(echo "$f" | cut -d/ -f1)"
+      # Прочий файл в корне репозитория — сам себе scope.
+      scope="$f"
       ;;
   esac
   SCOPES["$scope"]=1
