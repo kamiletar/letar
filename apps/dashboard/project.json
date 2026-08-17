@@ -8,8 +8,13 @@
     "zenstack:generate": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "zenstack generate",
-        "cwd": "apps/dashboard"
+        "commands": [
+          "zenstack generate",
+          "prisma generate",
+          "node -e \"require('fs').writeFileSync('src/generated/prisma/index.ts', 'export * from \\'./client\\'\\n')\""
+        ],
+        "cwd": "apps/dashboard",
+        "parallel": false
       },
       "cache": true,
       "inputs": [
