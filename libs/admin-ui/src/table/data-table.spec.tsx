@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { DataTable } from './data-table'
+import { DataTable, type DataTableFeatures } from './data-table'
 
 function renderWithProvider(ui: ReactNode) {
   return render(<ChakraProvider value={defaultSystem}>{ui}</ChakraProvider>)
@@ -39,7 +39,7 @@ const clients: Client[] = [
   { id: 'c2', name: 'Петров', phone: '+7 900 000-00-02' },
 ]
 
-const columns: ColumnDef<Client>[] = [
+const columns: ColumnDef<DataTableFeatures, Client>[] = [
   { accessorKey: 'name', header: 'Имя' },
   { accessorKey: 'phone', header: 'Телефон', enableSorting: false },
 ]

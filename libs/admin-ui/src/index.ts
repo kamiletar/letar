@@ -17,6 +17,7 @@ export {
   BulkActionsBar,
   commonBulkActions,
   DataTable,
+  type DataTableFeatures,
   type DataTableProps,
   GenericAdminTable,
   type GenericAdminTableProps,

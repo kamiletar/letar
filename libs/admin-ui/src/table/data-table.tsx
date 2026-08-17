@@ -1,16 +1,29 @@
 'use client'
 
 import { Box, HStack, Table } from '@chakra-ui/react'
-import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { type ColumnDef, flexRender, type RowData, stockFeatures, useTable } from '@tanstack/react-table'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useTransition } from 'react'
 import { LuChevronDown, LuChevronsUpDown, LuChevronUp } from 'react-icons/lu'
 
-export interface DataTableProps<T> {
+/**
+ * Набор фич `@tanstack/react-table` v9 для `DataTable`. `stockFeatures` (все стоковые фичи, как
+ * в v8) — сознательный выбор вместо точечного набора: часть методов, которые в v8 считались
+ * «core» и работали без выбора фич (например `row.getVisibleCells()` — на деле висит на
+ * `columnVisibilityFeature`), в v9 распределены по фичам не всегда очевидным образом. Точечный
+ * подбор экономит бандл, но требует трекать межфичевые зависимости методов вручную — не тот
+ * компромисс для этой библиотеки. Модульная константа — не пересоздавать на каждый рендер.
+ */
+const dataTableFeatures = stockFeatures
+
+/** Тип фич `DataTable` — нужен потребителям, которые типизируют `columns` вне компонента. */
+export type DataTableFeatures = typeof dataTableFeatures
+
+export interface DataTableProps<T extends RowData> {
   /** Данные для рендера (страница уже отфильтрована/отсортирована/пагинирована на сервере) */
   data: T[]
   /** Определения колонок — стандартный тип `@tanstack/react-table`, поддерживает `accessorKey`/`cell` */
-  columns: ColumnDef<T>[]
+  columns: ColumnDef<DataTableFeatures, T>[]
   /** Имя query-параметра сортировки. Значение — `field` (asc) или `-field` (desc) */
   sortParamName?: string
   /** Цветовая палитра для индикатора активной сортировки */
@@ -38,7 +51,9 @@ export interface DataTableProps<T> {
  * <Pagination total={total} pageSize={PAGE_SIZE} />
  * ```
  */
-export function DataTable<T>({ data, columns, sortParamName = 'sort', colorPalette = 'purple' }: DataTableProps<T>) {
+export function DataTable<T extends RowData>(
+  { data, columns, sortParamName = 'sort', colorPalette = 'purple' }: DataTableProps<T>,
+) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -48,10 +63,10 @@ export function DataTable<T>({ data, columns, sortParamName = 'sort', colorPalet
   const sortDesc = rawSort.startsWith('-')
   const sortField = sortDesc ? rawSort.slice(1) : rawSort
 
-  const table = useReactTable({
+  const table = useTable({
+    features: dataTableFeatures,
     data,
     columns,
-    getCoreRowModel: getCoreRowModel(),
   })
 
   const toggleSort = (columnId: string) => {
