@@ -6,17 +6,37 @@ import { useField } from '@tanstack/react-form'
 import {
   type ColumnDef,
   type ColumnFiltersState,
+  createFilteredRowModel,
+  createPaginatedRowModel,
+  createSortedRowModel,
+  filterFns,
   flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
+  type RowSelectionState,
   type SortingState,
-  useReactTable,
+  stockFeatures,
+  tableFeatures,
+  useTable,
 } from '@tanstack/react-table'
 import { type ReactElement, useMemo, useState } from 'react'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
 import type { DataGridColumnDef, DataGridFieldProps } from './field-data-grid-types'
+
+/**
+ * Набор фич `@tanstack/react-table` v9. `stockFeatures` (все стоковые фичи, как в v8) —
+ * сознательный выбор вместо точечного набора: часть методов, которые в v8 считались «core»,
+ * в v9 распределены по фичам не всегда очевидным образом (пример — `row.getVisibleCells()`
+ * висит на `columnVisibilityFeature`, не на core). Row model factories регистрируются явно —
+ * `stockFeatures` их не включает. `filterFns` (полный реестр, deprecated но рабочий) — колонки
+ * не задают `filterFn` явно, полагаются на `'auto'`-резолв по типу значения; в v9 `'auto'`
+ * находит только зарегистрированные функции, без реестра фильтр молча ничего не делает.
+ */
+const fieldDataGridFeatures = tableFeatures({
+  ...stockFeatures,
+  sortedRowModel: createSortedRowModel(),
+  filteredRowModel: createFilteredRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
+  filterFns,
+})
 
 function camelToTitle(str: string): string {
   return str.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase()).trim()
@@ -94,12 +114,12 @@ export function FieldDataGrid({
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [rowSelectionState, setRowSelectionState] = useState<Record<string, boolean>>({})
+  const [rowSelectionState, setRowSelectionState] = useState<RowSelectionState>({})
   const [editingCell, setEditingCell] = useState<{ row: number; col: string } | null>(null)
   const [modifiedCells, setModifiedCells] = useState<Set<string>>(new Set())
 
-  const tableColumns: ColumnDef<Record<string, unknown>>[] = useMemo(() => {
-    const cols: ColumnDef<Record<string, unknown>>[] = []
+  const tableColumns: ColumnDef<typeof fieldDataGridFeatures, Record<string, unknown>>[] = useMemo(() => {
+    const cols: ColumnDef<typeof fieldDataGridFeatures, Record<string, unknown>>[] = []
 
     if (rowSelection) {
       cols.push({
@@ -177,18 +197,15 @@ export function FieldDataGrid({
     return cols
   }, [columnDefs, editingCell, disabled, fullPath, form, data, onRowSave, rowSelection, modifiedCells])
 
-  const table = useReactTable({
+  const table = useTable({
+    features: fieldDataGridFeatures,
     data,
     columns: tableColumns,
     state: { sorting, columnFilters, rowSelection: rowSelectionState },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onRowSelectionChange: setRowSelectionState,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    initialState: { pagination: { pageSize } },
+    initialState: { pagination: { pageIndex: 0, pageSize } },
     enableRowSelection: rowSelection,
   })
 
@@ -308,7 +325,7 @@ export function FieldDataGrid({
           </button>
         </div>
         <span className="text-muted-foreground text-xs">
-          Страница {table.getState().pagination.pageIndex + 1} из {table.getPageCount() || 1} ({data.length} записей)
+          Страница {table.state.pagination.pageIndex + 1} из {table.getPageCount() || 1} ({data.length} записей)
         </span>
       </div>
 

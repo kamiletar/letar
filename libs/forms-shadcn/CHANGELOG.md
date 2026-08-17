@@ -4,6 +4,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.33.0] - 2026-08-17
+
+### Changed
+
+- **`@tanstack/react-table` `8.21.3` → `9.1.2`.** `field-data-grid-impl.tsx` переведён на
+  `useTable` + `tableFeatures({ ...stockFeatures, sortedRowModel, filteredRowModel,
+  paginatedRowModel, filterFns })` — тот же паттерн, что в `@letar/forms` (см. её CHANGELOG
+  `2.5.0`). `RowSelectionState` теперь `Record<string, true>` (было `Record<string, boolean>`),
+  `initialState.pagination` требует `pageIndex` вместе с `pageSize`. Публичный контракт полей не
+  меняется. `peerDependencies["@tanstack/react-table"]`: `>=8.0.0` → `>=9.0.0 <10.0.0` — v8/v9
+  рантаймово несовместимы, диапазон явно режет v8.
+
 ## [0.32.0] - 2026-08-12
 
 ### Added
