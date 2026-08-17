@@ -4,6 +4,24 @@
 
 ## [Unreleased]
 
+## [0.5.7] - 2026-08-17
+
+### Fixed
+
+- Prisma 7 отвергал инлайновый `url` в `datasource` внутри `schema.zmodel` (`db:push` падал с
+  P1012). Убран `url` из `datasource`, добавлен `prisma.config.ts` (по образцу
+  `driving-school`) с путём к SQLite-файлу `./prisma/data/app.db`.
+- `schema.zmodel` не содержал `plugin typescript` и `generator client` — реальный
+  Prisma Client (`src/generated/prisma/`) никогда не генерировался, из-за чего
+  `typecheck:tsgo` падал на `Cannot find module '.../generated/prisma'`. Добавлены оба блока
+  (по образцу `driving-school`), таргет `zenstack:generate` в `project.json` теперь
+  дополнительно прогоняет `prisma generate` и пишет `index.ts`-реэкспорт.
+- Таргеты `db:push`/`db:migrate`/`db:studio`/`db:seed` в `project.json` получили
+  `cwd: apps/label-printer-desktop` — без него Prisma CLI искал `prisma.config.ts` в корне
+  монорепо, а не рядом со схемой.
+- 3 ошибки `implicitly has an 'any' type` в `renderer/app/settings/page.tsx` (параметр `prev`
+  в `setSettings((prev) => ...)`) — добавлена явная аннотация `AppSettings | null`.
+
 ## [0.5.6] - 2026-08-09
 
 ### Changed

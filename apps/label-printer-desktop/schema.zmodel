@@ -5,9 +5,21 @@ datasource db {
   provider = "sqlite"
 }
 
+// Prisma Client generator — генерирует клиент в src/generated/prisma/
+// Путь относительно сгенерированной schema.prisma в src/generated/
+generator client {
+  provider = "prisma-client"
+  output   = "./prisma"
+}
+
 plugin prisma {
   provider = "@core/prisma"
   output   = "./src/generated/schema.prisma"
+}
+
+plugin typescript {
+  provider = "@core/typescript"
+  output   = "./src/generated"
 }
 
 // Access control plugin (v3)

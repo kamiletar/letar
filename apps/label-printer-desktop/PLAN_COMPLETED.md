@@ -2,6 +2,50 @@
 
 Детальное описание всех реализованных фич Label Printer Desktop.
 
+## Prisma 7 datasource url + недостающий Prisma Client (2026-08-17)
+
+`nx db:push` падал с P1012 («The datasource property `url` is no longer supported in schema
+files»): `schema.zmodel` держал `url = "file:../../prisma/data/app.db"` прямо в `datasource`,
+плагин `@core/prisma` переносил его буквально в сгенерённый `schema.prisma`, а Prisma 7 CLI
+такое отклоняет — URL теперь только в `prisma.config.ts`.
+
+Заодно раскрылась более глубокая проблема, ранее зафиксированная как «предсуществующая» в двух
+записях этого файла (Electron 39→43, `tsconfig references`): `schema.zmodel` не содержал ни
+`plugin typescript`, ни `generator client` — реальный `src/generated/prisma/` не генерировался
+никогда, `renderer/**` и `prisma/seed.ts` импортировали несуществующий модуль. Причина, по
+которой это не ловилось раньше, — `typecheck:tsgo` падал ещё раньше на P1012-подобных
+сбоях/пропущенных шагах, а сами ошибки `TS2307` списывались на «несгенерённое», не проверяя,
+почему оно не генерируется.
+
+Фикс (по образцу `driving-school`, единственного приложения монорепо вне ZenStack-generated
+`schema.prisma`, где `db:push` уже работал под Prisma 7):
+
+- `datasource` в `schema.zmodel` — только `provider`, без `url`.
+- Добавлен `apps/label-printer-desktop/prisma.config.ts`: `schema: './src/generated/schema.prisma'`,
+  `datasource.url: 'file:./prisma/data/app.db'`.
+- Добавлены `plugin typescript` (`@core/typescript`, output `./src/generated`) и
+  `generator client` (`prisma-client`, output `./prisma` — относительно сгенерённого
+  `schema.prisma`, т.е. `src/generated/prisma/`) — второй специально с явным output, совпадающим
+  с директорией `@core/typescript`, как описано в
+  [zenstack-generated-prisma-client.md](/.claude/docs/zenstack-generated-prisma-client.md).
+- Таргет `zenstack:generate` в `project.json` был однокомандным (только `zenstack generate`);
+  стал составным — `zenstack generate` → `prisma generate` → запись `index.ts` (реэкспорт
+  `./client`), с `cwd: apps/label-printer-desktop`.
+- Таргеты `db:push`/`db:migrate`/`db:studio`/`db:seed` получили `cwd: apps/label-printer-desktop`
+  и избавились от `--schema <абсолютный-от-корня-путь>` — без `cwd` Prisma CLI искал
+  `prisma.config.ts` в корне монорепо, где его нет.
+- 3 ошибки `TS7006` (implicit any на `prev` в `setSettings((prev) => ...)`,
+  `renderer/app/settings/page.tsx`) — не связаны с Prisma, но ранее маскировались отказом
+  typecheck на более раннем шаге. Добавлена явная аннотация `AppSettings | null`.
+
+Проверено: `nx zenstack:generate` создаёт `src/generated/{schema.ts,models.ts,prisma/*}`, `nx
+db:push` создаёт `prisma/data/app.db` и синкает схему без ошибок, `nx typecheck:tsgo` —
+зелёный без единой оставшейся ошибки (были все 3 из выше, `Cannot find module` пропал).
+
+⚠️ **Не проверено закрытым:** `nx build` по записи выше падал на другом шаге
+(`@zenstackhq/tanstack-query` — конфликт версий, отсутствующий `exports.main`) — не трогалось в
+этой сессии, требует отдельного разбора.
+
 ## Electron 39.2.7 → 43.3.0 (2026-08-09)
 
 Часть сессии-апдейта Electron разом во всех Electron-приложениях монорепо (см.

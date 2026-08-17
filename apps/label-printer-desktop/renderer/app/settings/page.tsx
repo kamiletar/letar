@@ -288,7 +288,7 @@ export default function SettingsPage() {
         const result = await window.electronAPI.settings.save(DEFAULT_SETTINGS)
         if (result.success) {
           // Обновляем локальное состояние
-          setSettings((prev) => (prev ? { ...prev, ...DEFAULT_SETTINGS } : null))
+          setSettings((prev: AppSettings | null) => (prev ? { ...prev, ...DEFAULT_SETTINGS } : null))
           setSelectedPrinter('TSC_TE300')
           toaster.success({ title: 'Настройки сброшены', closable: true })
         } else {
@@ -300,7 +300,7 @@ export default function SettingsPage() {
         }
       } else {
         // Dev режим — просто обновляем состояние
-        setSettings((prev) => (prev ? { ...prev, ...DEFAULT_SETTINGS } : null))
+        setSettings((prev: AppSettings | null) => (prev ? { ...prev, ...DEFAULT_SETTINGS } : null))
         setSelectedPrinter('TSC_TE300')
         toaster.success({ title: 'Настройки сброшены (dev режим)', closable: true })
       }
@@ -406,7 +406,7 @@ export default function SettingsPage() {
     }
 
     // Обновляем локальное состояние (только настройки принтера)
-    setSettings((prev) =>
+    setSettings((prev: AppSettings | null) =>
       prev
         ? {
           ...prev,
