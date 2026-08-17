@@ -1,43 +1,28 @@
 import { Component, computed, effect, Input, signal } from '@angular/core'
 import { ReactiveFormsModule } from '@angular/forms'
+import { createDataGridTableFeatures } from '@letar/forms-core/table'
 import {
   type ColumnDef,
   type ColumnFiltersState,
   constructTable,
-  createFilteredRowModel,
-  createPaginatedRowModel,
-  createSortedRowModel,
-  filterFns,
   type PaginationState,
   type RowSelectionState,
   type SortingState,
-  stockFeatures,
   type Table,
-  tableFeatures,
 } from '@tanstack/table-core'
 import { storeReactivityBindings } from '@tanstack/table-core/store-reactivity-bindings'
 import { FieldBase } from '../core/field-base'
 
 /**
- * Набор фич `@tanstack/table-core` v9. `stockFeatures` (все стоковые фичи, как в v8) —
- * сознательный выбор вместо точечного набора: часть методов, которые в v8 считались «core» и
- * работали без выбора фич, в v9 распределены по фичам не всегда очевидным образом (пример —
- * `row.getVisibleCells()` висит на `columnVisibilityFeature`, не на core). Row model factories
- * и `filterFns` регистрируются явно — `stockFeatures` их не включает.
- *
  * `coreReactivityFeature: storeReactivityBindings()` — обязателен для headless `constructTable`
  * вне React/Vue/Solid-обёрток (`useTable` эти биндинги подставляет сама). Без него `constructTable`
  * падает с `Cannot read properties of undefined (reading 'wrapExternalAtoms')` — TanStack Store
  * реализация реактивности для «ванильного» использования, документирована в
- * `@tanstack/table-core/store-reactivity-bindings`.
+ * `@tanstack/table-core/store-reactivity-bindings`. Остальной набор фич — общий с React/Vue-скинами,
+ * см. `createDataGridTableFeatures` в `@letar/forms-core`.
  */
-const fieldDataGridFeatures = tableFeatures({
-  ...stockFeatures,
+const fieldDataGridFeatures = createDataGridTableFeatures({
   coreReactivityFeature: storeReactivityBindings(),
-  sortedRowModel: createSortedRowModel(),
-  filteredRowModel: createFilteredRowModel(),
-  paginatedRowModel: createPaginatedRowModel(),
-  filterFns,
 })
 
 /** Определение колонки `FieldDataGrid` — то же API, что у Vue/React-версий (`DataGridColumnDef`). */
