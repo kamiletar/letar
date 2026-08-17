@@ -749,6 +749,43 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
 
 ## Backlog (запросы от агентов)
 
+### [2026-08-18] Баг: TableEditor теряет введённое значение при Tab/Enter/Escape/стрелках (от aboi)
+
+- **Запросил:** aboi-dev
+- **Приоритет:** high
+- **Статус:** ожидание (agent-mail недоступен — координатор `QuietRidge` в статусе `retired`,
+  `send_message` отклонён с "Agent 'QuietRidge' is retired and no longer accepts new messages",
+  `unretire_agent` требует чужой `registration_token`, которого у aboi-dev нет — запись сюда
+  вместо письма, по шагу 3 `.claude/rules/form-delegation.md`)
+
+**Что нашёл:** `Form.Field.TableEditor` коммитит значение редактируемой ячейки только через
+нативный DOM `blur` (`libs/forms/src/lib/declarative/form-fields/table/table-cell.tsx`,
+`EditingCell.onBlur` → `field.handleChange(coerced)`). Но клавиатурная навигация
+(`libs/forms/src/lib/declarative/form-fields/table/use-table-navigation.ts`, `handleKeyDown`)
+на `Tab`/`Enter`/`Escape`/`ArrowUp`/`ArrowDown` выходит из режима редактирования через
+`setEditingCell(null)` напрямую — `<Input>` размонтируется без нативного `blur`, `onBlur`
+не вызывается, `field.handleChange` не срабатывает, введённое значение отбрасывается.
+
+**Как воспроизвёл:** товар `cmsqfk5op000008mxvrpzjvrp` в аdmin aboi, поле "Форматы"
+(`TableEditor`, `apps/aboi/src/app/[locale]/admin/products/_components/product-form.tsx`),
+ячейка "Цена, ₽" строки "Квадрат 91×91". Ввёл `2500`, нажал `Tab` — ячейка вернулась к старому
+значению `2 490`. Повторил: ввёл `2500`, кликнул мышью в другое место страницы (настоящий
+DOM-blur) — ячейка корректно обновилась до `2 500`. Разница только в способе выхода из ячейки —
+подтверждает, что баг именно в клавиатурном пути `use-table-navigation.ts`, не в общей логике
+коммита.
+
+**Почему это важно:** `TableEditor` — табличный компонент, основной способ редактирования в нём
+предполагается клавиатурный (Tab между ячейками, Enter вниз, как в Excel/Sheets). Сейчас
+единственный надёжный способ сохранить значение — кликнуть мышью в сторону, что не очевидно
+пользователю и легко теряет данные молча (без ошибки, без визуальной подсказки).
+
+**Предлагаемый фикс (для forms-dev, не реализовывал сам — see `.claude/rules/form-delegation.md`
+"ЗАПРЕЩЕНО писать кастомную реализацию"):** в каждом `case` `handleKeyDown`, где сейчас
+`setEditingCell(null)` без коммита, сначала закоммитить текущее `localValue` (тем же путём, что
+`EditingCell.onBlur`), затем уже снимать режим редактирования — либо поднять
+commit-функцию до `use-table-navigation.ts` через контекст/колбэк, либо синтетически
+дёрнуть blur перед `setEditingCell(null)`.
+
 ### [2026-08-13] Angular-порт — третий фреймворк экосистемы
 
 **Статус обновлён 2026-08-13 (тот же день): разворот.** Ками напрямую попросил не ждать
