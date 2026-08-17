@@ -9547,7 +9547,22 @@ Resilio scope. Если сервер потеряется до того, как 
 
 ---
 
-## §83 — `@tanstack/react-table` v8→v9: апгрейд отложен, найден шире описанного скоупа 🆕 (2026-08-17)
+## §83 — `@tanstack/react-table` v8→v9: полная миграция ✅ ЗАКРЫТО (2026-08-17)
+
+**Обновление 2026-08-17 (та же дата, вторая половина сессии):** после первичной остановки (текст
+ниже сохранён как есть — исследование, приведшее к решению) владелец запросил полную миграцию.
+Аудит уточнил периметр из DoD: реальных потребителей ядра — 4 библиотеки (третий пункт DoD
+подтверждён — `forms-angular` действительно требует правки), внешних потребителей `ColumnDef` из
+`@tanstack/react-table` — ровно один (`apps/domwellbes/.../leads-table.tsx`; похожие файлы в
+`apps/mandala` используют другой одноимённый тип `@letar/admin-ui`, к tanstack отношения не
+имеющий). Полная миграция выполнена по паттерну `useTable`/`constructTable` +
+`tableFeatures({ ...stockFeatures, sortedRowModel, filteredRowModel, paginatedRowModel, filterFns })`
+во всех 4 библиотеках + внешнем потребителе. Ключевая находка сверх DoD: implicit
+`filterFn: 'auto'` в v9 без явной регистрации `filterFns` резолвится в no-op молча (не ошибка
+типов) — пойман юнит-тестом в `forms-shadcn`, исправлен превентивно в `forms`/`forms-angular` по
+тому же паттерну. Версии/CHANGELOG библиотек обновлены, все затронутые проекты — typecheck/test/
+lint/format зелёные, 7 отдельных коммитов по scope. Строка ниже — исходное решение «отложить»,
+оставлена для истории аудита.
 
 Задача на обновление `^8.21.3` → `^9.1.2` (latest) остановлена на этапе исследования — не
 доведена до кода. `package.json`/`bun.lock` возвращены к исходному состоянию
@@ -9598,20 +9613,21 @@ migration-гайда (`raw.githubusercontent.com/TanStack/table/main/docs/framew
 и зафиксировать здесь, а не тратить бюджет сессии на инвазивный рефактор без утверждённого
 владельцем объёма.
 
-### DoD (если апгрейд решат делать)
+### DoD (если апгрейд решат делать) — выполнено 2026-08-17
 
-- [ ] Сначала аудит: `grep -rn "@tanstack/react-table\|@tanstack/table-core"` по всем `apps/*` —
+- [x] Сначала аудит: `grep -rn "@tanstack/react-table\|@tanstack/table-core"` по всем `apps/*` —
       сколько реальных потребителей `ColumnDef`/`useReactTable` вне трёх library-файлов
-- [ ] Решить: полная feature-based миграция (tree-shaking, целевая архитектура) или временный
+- [x] Решить: полная feature-based миграция (tree-shaking, целевая архитектура) или временный
       `useLegacyTable` из `@tanstack/react-table/legacy` (deprecated shim, держит v8-style API,
-      но бандл больше — описан в том же migration-гайде, раздел "Quick Legacy Migration")
-- [ ] Если полная миграция — обновить `libs/admin-ui/src/table/data-table.tsx`,
+      но бандл больше — описан в том же migration-гайде, раздел "Quick Legacy Migration") —
+      выбрана полная миграция по запросу владельца
+- [x] Если полная миграция — обновить `libs/admin-ui/src/table/data-table.tsx`,
       `libs/forms/src/lib/declarative/form-fields/table/field-data-grid.tsx`,
       `libs/forms-shadcn/src/lib/fields/field-data-grid-impl.tsx`,
       `libs/forms-angular/src/lib/fields/field-data-grid.component.ts` одновременно (общее ядро)
-- [ ] Расширить peer-dependency диапазоны (`libs/admin-ui/package.json`,
+- [x] Расширить peer-dependency диапазоны (`libs/admin-ui/package.json`,
       `libs/forms-shadcn/package.json`: `@tanstack/react-table": ">=8.0.0"`) только после того,
-      как реально протестировано на v9 — не заранее
+      как реально протестировано на v9 — не заранее (сужены до `>=9.0.0 <10.0.0`)
 
 ## §84 — Аудит дрейфа `zenstack:generate`: два независимых бага, канонический рецепт задокументирован ✅ ЗАКРЫТО (2026-08-17)
 
