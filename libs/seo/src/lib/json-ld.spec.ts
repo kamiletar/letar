@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { breadcrumbJsonLd, organizationJsonLd } from './json-ld'
+import { breadcrumbJsonLd, faqJsonLd, organizationJsonLd } from './json-ld'
 
 describe('breadcrumbJsonLd', () => {
   it('строит BreadcrumbList с абсолютными ссылками', () => {
@@ -57,5 +57,39 @@ describe('organizationJsonLd', () => {
     expect(ld.telephone).toBe('+7 900 000-00-00')
     expect(ld.sameAs).toEqual(['https://vk.com/example'])
     expect(ld.logo).toBe('https://example.com/logo.png')
+  })
+})
+
+describe('faqJsonLd', () => {
+  it('строит FAQPage с Question/Answer по каждому пункту', () => {
+    const ld = faqJsonLd([
+      { question: 'Вопрос 1?', answer: 'Ответ 1.' },
+      { question: 'Вопрос 2?', answer: 'Ответ 2.' },
+    ])
+
+    expect(ld).toEqual({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: [
+        {
+          '@type': 'Question',
+          name: 'Вопрос 1?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Ответ 1.' },
+        },
+        {
+          '@type': 'Question',
+          name: 'Вопрос 2?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Ответ 2.' },
+        },
+      ],
+    })
+  })
+
+  it('пустой список даёт пустой mainEntity', () => {
+    expect(faqJsonLd([])).toEqual({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: [],
+    })
   })
 })

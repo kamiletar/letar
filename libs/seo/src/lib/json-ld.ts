@@ -52,3 +52,28 @@ export function organizationJsonLd(params: OrganizationJsonLdParams): Record<str
     logo: params.logo,
   }
 }
+
+export interface FaqJsonLdItem {
+  question: string
+  answer: string
+}
+
+/**
+ * FAQPage JSON-LD (Schema.org) для страницы вопросов-ответов.
+ * `answer` попадает в разметку как есть — вызывающая сторона отвечает за то,
+ * чтобы текст был предназначен для публичного показа (не содержал внутренних заметок).
+ */
+export function faqJsonLd(items: FaqJsonLdItem[]): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
+  }
+}
