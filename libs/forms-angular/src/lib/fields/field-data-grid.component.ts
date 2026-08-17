@@ -3,17 +3,42 @@ import { ReactiveFormsModule } from '@angular/forms'
 import {
   type ColumnDef,
   type ColumnFiltersState,
-  createTable,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
+  constructTable,
+  createFilteredRowModel,
+  createPaginatedRowModel,
+  createSortedRowModel,
+  filterFns,
   type PaginationState,
   type RowSelectionState,
   type SortingState,
+  stockFeatures,
   type Table,
+  tableFeatures,
 } from '@tanstack/table-core'
+import { storeReactivityBindings } from '@tanstack/table-core/store-reactivity-bindings'
 import { FieldBase } from '../core/field-base'
+
+/**
+ * Набор фич `@tanstack/table-core` v9. `stockFeatures` (все стоковые фичи, как в v8) —
+ * сознательный выбор вместо точечного набора: часть методов, которые в v8 считались «core» и
+ * работали без выбора фич, в v9 распределены по фичам не всегда очевидным образом (пример —
+ * `row.getVisibleCells()` висит на `columnVisibilityFeature`, не на core). Row model factories
+ * и `filterFns` регистрируются явно — `stockFeatures` их не включает.
+ *
+ * `coreReactivityFeature: storeReactivityBindings()` — обязателен для headless `constructTable`
+ * вне React/Vue/Solid-обёрток (`useTable` эти биндинги подставляет сама). Без него `constructTable`
+ * падает с `Cannot read properties of undefined (reading 'wrapExternalAtoms')` — TanStack Store
+ * реализация реактивности для «ванильного» использования, документирована в
+ * `@tanstack/table-core/store-reactivity-bindings`.
+ */
+const fieldDataGridFeatures = tableFeatures({
+  ...stockFeatures,
+  coreReactivityFeature: storeReactivityBindings(),
+  sortedRowModel: createSortedRowModel(),
+  filteredRowModel: createFilteredRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
+  filterFns,
+})
 
 /** Определение колонки `FieldDataGrid` — то же API, что у Vue/React-версий (`DataGridColumnDef`). */
 export interface DataGridColumnDef {
@@ -226,7 +251,7 @@ export class FieldDataGridComponent extends FieldBase {
 
   protected readonly resolvedColumns = computed<DataGridColumnDef[]>(() => this.columns)
 
-  private readonly tableColumns = computed<ColumnDef<GridRow>[]>(() =>
+  private readonly tableColumns = computed<ColumnDef<typeof fieldDataGridFeatures, GridRow>[]>(() =>
     this.resolvedColumns().map((col) => ({
       id: col.name,
       accessorKey: col.name,
@@ -235,8 +260,9 @@ export class FieldDataGridComponent extends FieldBase {
     }))
   )
 
-  protected readonly table = computed<Table<GridRow>>(() =>
-    createTable<GridRow>({
+  protected readonly table = computed<Table<typeof fieldDataGridFeatures, GridRow>>(() =>
+    constructTable<typeof fieldDataGridFeatures, GridRow>({
+      features: fieldDataGridFeatures,
       data: this.rows(),
       columns: this.tableColumns(),
       state: {
@@ -245,8 +271,6 @@ export class FieldDataGridComponent extends FieldBase {
         rowSelection: this.rowSelectionState(),
         pagination: this.pagination(),
       },
-      // eslint-disable-next-line @typescript-eslint/no-empty-function -- состояние держат наши сигналы (on*Change ниже), table-core требует это поле в TableOptionsResolved
-      onStateChange: () => {},
       renderFallbackValue: null,
       onSortingChange: (updater) => {
         this.sorting.set(typeof updater === 'function' ? updater(this.sorting()) : updater)
@@ -260,10 +284,6 @@ export class FieldDataGridComponent extends FieldBase {
       onPaginationChange: (updater) => {
         this.pagination.set(typeof updater === 'function' ? updater(this.pagination()) : updater)
       },
-      getCoreRowModel: getCoreRowModel(),
-      getSortedRowModel: getSortedRowModel(),
-      getFilteredRowModel: getFilteredRowModel(),
-      getPaginationRowModel: getPaginationRowModel(),
       enableRowSelection: this.rowSelection,
     })
   )
