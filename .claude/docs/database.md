@@ -6,23 +6,75 @@
 
 **НИКОГДА не редактируй `src/generated/schema.prisma` напрямую. ВСЕГДА редактируй `schema.zmodel` вместо этого.**
 
-**⚠️ `generator client` устарел в ZenStack v3!** Используй только `plugin prisma` для генерации Prisma клиента. Если видишь `generator client` в schema.zmodel — удали его.
+**⚠️ `plugin prisma` генерирует только `schema.prisma` (текстовый файл), а не сам Prisma
+Client.** Реальный клиент (`PrismaClient`, типы моделей, `enums.ts` и т.д.) собирает CLI-команда
+`prisma generate` из этого `schema.prisma` — и для неё в самом `schema.zmodel` обязательно нужен
+блок `generator client { provider = "prisma-client" ... }`. Без него `prisma generate` генерирует
+пустышку. **`generator client` не устарел** — прошлая версия этого файла утверждала обратное, это
+было ошибкой (см. предупреждение ниже).
 
 ### Воркфлоу редактирования схемы
 
 1. Редактируй `apps/<app-name>/schema.zmodel` (источник истины)
 2. Запусти `nx zenstack:generate <app-name>` для генерации всего в `src/generated/`:
-   - `src/generated/schema.prisma` - Prisma схема
-   - `src/generated/prisma/` - Prisma Client
+   - `src/generated/schema.prisma` - Prisma схема (плагин `prisma`)
+   - `src/generated/schema.ts`, `models.ts` - типы для ZenStackClient (плагин `typescript`)
+   - `src/generated/prisma/` - Prisma Client (отдельная команда `prisma generate`, см. ниже)
    - `src/generated/zod/` - Zod схемы валидации для всех моделей
-   - `src/generated/zenstack/` - Enhanced Prisma клиент с политиками доступа
    - `src/generated/hooks/` - TanStack Query хуки (опционально)
 3. Обнови базу данных — `nx db:push <app-name>` только на **локальной** dev-базе для
    быстрого прототипирования, `nx db:migrate <app-name>` для создания migration file (обязателен
    для production). Разрушающие операции на production запрещены — единственный источник по
    этому воркфлоу: [database.md](/.claude/rules/database.md)
 
-**Важно:** `zenstack:generate` автоматически запускает `prisma generate`, поэтому отдельный `db:generate` обычно не нужен!
+### ⚠️ `zenstack generate` НЕ запускает `prisma generate` сам — раньше здесь было написано обратное
+
+Проверено по исходнику CLI (`node_modules/@zenstackhq/cli/dist/index.mjs`, регион
+`src/actions/generate.ts`): команда `zenstack generate` прогоняет только плагины схемы (`prisma`,
+`typescript`, `policy`, `formSchema`) и ни разу не вызывает `prisma generate`. Таргет
+`zenstack:generate` в `project.json` каждого приложения обязан включать оба шага явно —
+канонический рецепт (3 шага, `parallel: false`):
+
+```json
+"zenstack:generate": {
+  "executor": "nx:run-commands",
+  "options": {
+    "commands": [
+      "zenstack generate",
+      "prisma generate",
+      "node -e \"require('fs').writeFileSync('src/generated/prisma/index.ts', 'export * from \\'./client\\'\\n')\""
+    ],
+    "cwd": "apps/<app-name>",
+    "parallel": false
+  }
+}
+```
+
+Третий шаг — только удобство (даёт бэрарный импорт `@/generated/prisma` вместо
+`@/generated/prisma/client`), не обязателен, если код везде импортирует явный подпуть. Приложения,
+у которых Prisma Client используется и в браузере (SQLite/sql.js, Electron), экспортируют
+`./browser` вместо `./client` — смотри `generator client { output = "./prisma" }` в своей
+`schema.zmodel`, какие файлы (`client.ts` vs `browser.ts`) там реально появляются.
+
+**Инцидент, который это выявил:** три приложения независимо ловили один и тот же баг —
+`label-printer-desktop` вообще не имел `generator client` в схеме (коммит `33af10ac`,
+2026-08-17), `dashboard` и `form-develop-app` имели `generator client`, но таргет
+`zenstack:generate` состоял из одной команды `"zenstack generate"` без `prisma generate` —
+`src/generated/prisma/*` у них существовал только потому, что кто-то когда-то запустил `prisma
+generate` вручную, и расходился со схемой при каждом следующем изменении модели (проверено:
+`schema.prisma` у `dashboard` от 17.08, `client.ts` — от 12.08, 5 дней рассинхрона). На свежем
+клоне (`src/generated/` в `.gitignore`) оба приложения падали бы сразу. Оба таргета почищены в
+этой же сессии по образцу `label-printer-desktop`.
+
+Единой Nx-абстракции (shared target default / кастомный executor / генератор) под этот рецепт
+сознательно не заводили: команда не идентична везде (`./client` vs `./browser` в реэкспорте,
+`driving-school` пишет в `libs/driving-school-db/...` вместо `src/generated`, `animatrona`
+добавляет junction-шаг вместо реэкспорта, `form-example` объединяет команды через `&&` без
+реэкспорта) — общий executor либо не покрыл бы эти варианты, либо сам стал бы источником той же
+хрупкости, от которой предостерегает [libs.md](/.claude/docs/libs.md) про tsconfig references.
+Разница между приложениями обоснована их архитектурой (браузерный клиент vs серверный, кастомный
+путь генерации у driving-school) — рецепт документирован здесь как единственный источник истины,
+а не автоматизирован.
 
 ### ⚠️ `zenstack:generate` зависит от собранного `libs/zenstack-form-plugin/dist/`
 
@@ -63,6 +115,20 @@ Nx сам соберёт плагин перед генерацией, если 
 Если заводишь **новое** приложение вручную (не через генератор) или подключаешь форм-плагин к
 уже существующему приложению — не забудь добавить этот `dependsOn` в его `zenstack:generate`
 сам, генератор его не пересоздаст автоматически для уже существующего `project.json`.
+
+### `plugin typescript` не обязателен — без него типы генерируются в корень приложения
+
+`animatrona` и `form-example` — единственные два `schema.zmodel` в репозитории без блока `plugin
+typescript { provider = '@core/typescript'; output = './src/generated' }`. Это не дрейф от
+эталона (в отличие от отсутствующего `generator client` выше) — плагин `typescript` включён в
+ZenStack v3 всегда, блок в схеме нужен только чтобы **переопределить** путь вывода. Без него
+`zenstack generate` кладёт `schema.ts`/`models.ts`/`input.ts` в каталог самого `schema.zmodel`
+(корень приложения), а не в `src/generated/`. Оба приложения импортируют оттуда напрямую
+(`animatrona`: `'../../../schema'` из `renderer/src/lib/`; `form-example` аналогично из корня) —
+код и генерация согласованы, проверено полным прогоном `rm -rf` + `nx zenstack:generate`. Корневые
+`schema.ts`/`models.ts`/`input.ts` уже в `.gitignore` общим паттерном `apps/*/{schema,models,input}.ts`.
+Переносить эти два приложения на `src/generated/` не требуется — это осознанный, а не случайный
+вариант компоновки.
 
 ### Функции ZenStack
 
