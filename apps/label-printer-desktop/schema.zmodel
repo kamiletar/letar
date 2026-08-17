@@ -3,7 +3,6 @@
 
 datasource db {
   provider = "sqlite"
-  url      = "file:../../prisma/data/app.db"
 }
 
 plugin prisma {
@@ -17,7 +16,7 @@ plugin policy {
 }
 
 plugin hooks {
-  provider = "@zenstackhq/tanstack-query"
+  provider = "@zenstackhq/tanstack-query/react"
   output   = "./src/generated/hooks"
   target   = "react"
 }
