@@ -82,8 +82,13 @@
     "zenstack:generate": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "zenstack generate",
-        "cwd": "apps/form-develop-app"
+        "commands": [
+          "zenstack generate",
+          "prisma generate",
+          "node -e \"require('fs').writeFileSync('src/generated/prisma/index.ts', 'export * from \\'./client\\'\\n')\""
+        ],
+        "cwd": "apps/form-develop-app",
+        "parallel": false
       },
       "dependsOn": [
         {
