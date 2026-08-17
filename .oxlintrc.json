@@ -22,6 +22,7 @@
     // Next.js — отключаем, т.к. ESLint plugin next уже проверяет это,
     // а oxlint даёт ложные срабатывания в тестах и shared-библиотеках
     "nextjs/no-html-link-for-pages": "off",
+    "nextjs/no-img-element": "off",
 
     // Отключаем правила, не актуальные для React 17+
     "react/react-in-jsx-scope": "off",
