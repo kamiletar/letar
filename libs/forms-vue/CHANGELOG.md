@@ -1,5 +1,13 @@
 # Changelog @letar/forms-vue
 
+## 0.15.1 (2026-08-17)
+
+- **Рефакторинг:** `core/table-columns.ts` — тонкий реэкспорт `@letar/forms-core/table`
+  (`camelToTitle`, `fieldInfoToColumn`, `getArrayElementFields`, `mapZodType`, `mergeColumns`,
+  `resolveTableColumns`) вместо собственной копии. Логика дублировалась почти дословно в
+  `@letar/forms`, `@letar/forms-shadcn`, `@letar/forms-angular`. Публичный API `@letar/forms-vue`
+  (реэкспорт всех шести имён из `src/core.ts`) не изменился.
+
 ## 0.15.0 (2026-08-13)
 
 Фаза 9, Этап 8 (часть 2, финал) — оставшиеся 14 полей: полный паритет с React-скином, **61/61**.
