@@ -1,5 +1,12 @@
 # Changelog @letar/forms-vue
 
+## 0.15.2 (2026-08-17)
+
+- **Fix:** `@tiptap/vue-3` пинился на точную `3.29.2`, тогда как `@tiptap/starter-kit`/
+  `@tiptap/extension-placeholder` резолвились в `3.30.1` — два экземпляра `@tiptap/core` в
+  одном пакете ломали структурную совместимость типов (`typecheck:tsgo` падал в
+  `rich-text-actions.ts`/`use-rich-text-field.ts`). Все `@tiptap/*` подняты до `3.30.1`.
+
 ## 0.15.1 (2026-08-17)
 
 - **Рефакторинг:** `core/table-columns.ts` — тонкий реэкспорт `@letar/forms-core/table`
