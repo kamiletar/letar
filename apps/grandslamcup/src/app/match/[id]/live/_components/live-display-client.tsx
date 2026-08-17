@@ -111,7 +111,7 @@ export function LiveDisplayClient({ match, donateLinks = [] }: LiveDisplayClient
           // намеренно игнорируем — fullscreen API может отказать без критичных последствий
         })
       } else if (el.webkitRequestFullscreen) {
-        el.webkitRequestFullscreen().catch?.(() => {
+        Promise.resolve(el.webkitRequestFullscreen()).catch(() => {
           // намеренно игнорируем — fullscreen API может отказать без критичных последствий
         })
       }

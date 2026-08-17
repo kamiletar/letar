@@ -37,7 +37,7 @@ function requestFullscreenSafe(el: HTMLElement) {
       // намеренно игнорируем — fullscreen API может отказать без критичных последствий
     })
   } else if (elem.webkitRequestFullscreen) {
-    elem.webkitRequestFullscreen().catch?.(() => {
+    Promise.resolve(elem.webkitRequestFullscreen()).catch(() => {
       // намеренно игнорируем — fullscreen API может отказать без критичных последствий
     })
   }
