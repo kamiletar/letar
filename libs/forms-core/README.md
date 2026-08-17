@@ -36,25 +36,25 @@ forms-core  →  forms-react  →  forms (Chakra) / forms-shadcn
 
 ## Subpath-экспорты
 
-| Subpath                           | Что внутри                                                                                                                                                         |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `@letar/forms-core`               | Точка входа по умолчанию (реэкспорт основных типов)                                                                                                                |
-| `@letar/forms-core/validators/ru` | Валидаторы для РФ-специфичных форматов (ИНН, КПП, СНИЛС и т.д.)                                                                                                    |
-| `@letar/forms-core/schema`        | Zod-мета-движок: constraints, traversal, `withUIMeta`, типы meta                                                                                                   |
-| `@letar/forms-core/server-errors` | Маппинг серверных ошибок (Prisma/ZenStack/Zod) на поля формы                                                                                                       |
-| `@letar/forms-core/utils`         | `deepEqual`, `safeStringify`                                                                                                                                       |
-| `@letar/forms-core/security`      | Проверка файлов при загрузке (MIME, EXIF-стрип и т.д.) — использует DOM API                                                                                        |
-| `@letar/forms-core/offline`       | Offline-сервис синхронизации (`idb-keyval` под капотом)                                                                                                            |
-| `@letar/forms-core/captcha`       | Серверная верификация CAPTCHA (Turnstile/reCAPTCHA/hCaptcha/SmartCaptcha)                                                                                          |
-| `@letar/forms-core/analytics`     | Адаптеры аналитики форм (Umami, Яндекс Метрика, GA4, PostHog)                                                                                                      |
-| `@letar/forms-core/credit-card`   | Luhn-валидация, определение бренда карты, форматирование срока действия/номера                                                                                     |
-| `@letar/forms-core/phone`         | WebKit-safe форматтер телефона (замена `use-mask-input`, см. v1.4.4)                                                                                               |
-| `@letar/forms-core/table`         | Утилиты табличного редактора (агрегация, сортировка и т.д.)                                                                                                        |
-| `@letar/forms-core/address`       | DaData address provider (Chakra-free часть)                                                                                                                        |
-| `@letar/forms-core/i18n`          | `createFormErrorMap` — словари перевода ошибок валидации                                                                                                           |
-| `@letar/forms-core/uikit`         | Типовой контракт UIKit (~20 примитивов) — см. ниже                                                                                                                 |
-| `@letar/forms-core/mask`          | Mask-движок + DOM-контроллер (замена `use-mask-input`, Фаза 8) — см. ниже                                                                                          |
-| `@letar/forms-core/field-widgets` | Чистые хелперы дата/число-виджетов (пресеты диапазона дат, парсинг даты-времени, конвертация минут) — вынесены из `forms-vue`/`forms-vue-shadcn` в Фазе 9, Этапе 4 |
+| Subpath                           | Что внутри                                                                                                                                                                                          |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@letar/forms-core`               | Точка входа по умолчанию (реэкспорт основных типов)                                                                                                                                                 |
+| `@letar/forms-core/validators/ru` | Валидаторы для РФ-специфичных форматов (ИНН, КПП, СНИЛС и т.д.)                                                                                                                                     |
+| `@letar/forms-core/schema`        | Zod-мета-движок: constraints, traversal, `withUIMeta`, типы meta                                                                                                                                    |
+| `@letar/forms-core/server-errors` | Маппинг серверных ошибок (Prisma/ZenStack/Zod) на поля формы                                                                                                                                        |
+| `@letar/forms-core/utils`         | `deepEqual`, `safeStringify`                                                                                                                                                                        |
+| `@letar/forms-core/security`      | Проверка файлов при загрузке (MIME, EXIF-стрип и т.д.) — использует DOM API                                                                                                                         |
+| `@letar/forms-core/offline`       | Offline-сервис синхронизации (`idb-keyval` под капотом)                                                                                                                                             |
+| `@letar/forms-core/captcha`       | Серверная верификация CAPTCHA (Turnstile/reCAPTCHA/hCaptcha/SmartCaptcha)                                                                                                                           |
+| `@letar/forms-core/analytics`     | Адаптеры аналитики форм (Umami, Яндекс Метрика, GA4, PostHog)                                                                                                                                       |
+| `@letar/forms-core/credit-card`   | Luhn-валидация, определение бренда карты, форматирование срока действия/номера                                                                                                                      |
+| `@letar/forms-core/phone`         | WebKit-safe форматтер телефона (замена `use-mask-input`, см. v1.4.4)                                                                                                                                |
+| `@letar/forms-core/table`         | Утилиты табличного редактора (агрегация, сортировка и т.д.) + `createDataGridTableFeatures()` — общая конфигурация `@tanstack/table-core` v9 для `Form.Field.DataGrid` (React/shadcn/Angular-скины) |
+| `@letar/forms-core/address`       | DaData address provider (Chakra-free часть)                                                                                                                                                         |
+| `@letar/forms-core/i18n`          | `createFormErrorMap` — словари перевода ошибок валидации                                                                                                                                            |
+| `@letar/forms-core/uikit`         | Типовой контракт UIKit (~20 примитивов) — см. ниже                                                                                                                                                  |
+| `@letar/forms-core/mask`          | Mask-движок + DOM-контроллер (замена `use-mask-input`, Фаза 8) — см. ниже                                                                                                                           |
+| `@letar/forms-core/field-widgets` | Чистые хелперы дата/число-виджетов (пресеты диапазона дат, парсинг даты-времени, конвертация минут) — вынесены из `forms-vue`/`forms-vue-shadcn` в Фазе 9, Этапе 4                                  |
 
 ## Mask-движок (Фаза 8, Этапы 1-4 частично)
 

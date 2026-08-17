@@ -1,3 +1,4 @@
+export { createDataGridTableFeatures } from './table-features'
 export type {
   CellCoord,
   CellFieldType,
