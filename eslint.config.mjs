@@ -427,6 +427,7 @@ export default [
       '**/*.test.tsx',
       '**/fixtures/**',
       '**/helpers/**',
+      '**/deploy-engine/src/cli.ts',
     ],
     rules: {
       'no-console': 'off',
