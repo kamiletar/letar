@@ -47,6 +47,8 @@ approval, kebab-case в `to`, обнулённая база
 на `display={{ base:/md: }}` с одинаковым интерактивным контентом — дубль в DOM, не адаптивность ·
 [form-analytics-goals](/.claude/docs/form-analytics-goals.md) цели формы в Метрике/Umami через
 `useFormAnalytics`, consent-aware бесплатно ·
+[tristate-cascade-boolean-pattern](/.claude/docs/tristate-cascade-boolean-pattern.md) nullable
+boolean с явным «наследовать» через строковый энум + NativeSelect ·
 [ui-components](/.claude/docs/ui-components.md) · [images](/.claude/docs/images.md) ·
 [gallery-pattern](/.claude/docs/gallery-pattern.md) Dropzone + SortablePhotoGrid ·
 [period-navigation-pattern](/.claude/docs/period-navigation-pattern.md) навигация по периоду без JS ·
