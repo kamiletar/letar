@@ -4,6 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.33.1] - 2026-08-17
+
+### Changed
+
+- **`fieldDataGridFeatures` вынесен в `@letar/forms-core/table` (`createDataGridTableFeatures()`).**
+  `field-data-grid-impl.tsx` больше не держит собственную конфигурацию `tableFeatures({...})` —
+  общий код с `@letar/forms`/`@letar/forms-angular`. Публичный контракт не изменился.
+
 ## [0.33.0] - 2026-08-17
 
 ### Changed

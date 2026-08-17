@@ -1,42 +1,23 @@
 'use client'
 
+import { createDataGridTableFeatures } from '@letar/forms-core/table'
 import { useDeclarativeForm, useFormGroup } from '@letar/forms-react'
 import { cn } from '@letar/tailwind-utils'
 import { useField } from '@tanstack/react-form'
 import {
   type ColumnDef,
   type ColumnFiltersState,
-  createFilteredRowModel,
-  createPaginatedRowModel,
-  createSortedRowModel,
-  filterFns,
   flexRender,
   type RowSelectionState,
   type SortingState,
-  stockFeatures,
-  tableFeatures,
   useTable,
 } from '@tanstack/react-table'
 import { type ReactElement, useMemo, useState } from 'react'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
 import type { DataGridColumnDef, DataGridFieldProps } from './field-data-grid-types'
 
-/**
- * Набор фич `@tanstack/react-table` v9. `stockFeatures` (все стоковые фичи, как в v8) —
- * сознательный выбор вместо точечного набора: часть методов, которые в v8 считались «core»,
- * в v9 распределены по фичам не всегда очевидным образом (пример — `row.getVisibleCells()`
- * висит на `columnVisibilityFeature`, не на core). Row model factories регистрируются явно —
- * `stockFeatures` их не включает. `filterFns` (полный реестр, deprecated но рабочий) — колонки
- * не задают `filterFn` явно, полагаются на `'auto'`-резолв по типу значения; в v9 `'auto'`
- * находит только зарегистрированные функции, без реестра фильтр молча ничего не делает.
- */
-const fieldDataGridFeatures = tableFeatures({
-  ...stockFeatures,
-  sortedRowModel: createSortedRowModel(),
-  filteredRowModel: createFilteredRowModel(),
-  paginatedRowModel: createPaginatedRowModel(),
-  filterFns,
-})
+/** Набор фич `@tanstack/react-table` v9 — общий с `@letar/forms`/`@letar/forms-angular`, см. `createDataGridTableFeatures`. */
+const fieldDataGridFeatures = createDataGridTableFeatures()
 
 function camelToTitle(str: string): string {
   return str.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase()).trim()
