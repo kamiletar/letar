@@ -76,6 +76,27 @@ generate` вручную, и расходился со схемой при ка�
 путь генерации у driving-school) — рецепт документирован здесь как единственный источник истины,
 а не автоматизирован.
 
+### ⚠️ Второй, более опасный вариант того же дрейфа: `src/generated` закоммичен в submodule
+
+Аудит всех 19 приложений (2026-08-17, после фикса выше) вскрыл ещё один живой случай — `studio`,
+плюс тот же паттерн в `svoichuzhie`, `aprel8008`, `libs/driving-school-db`. У всех четырёх
+`schema.zmodel` был в порядке, но их **собственный** `.gitignore` (у submodule корневой `.gitignore`
+letar не действует — см. `git.md`) не исключал `src/generated/`, поэтому сгенерированный Prisma
+Client коммитился в git как обычный файл.
+
+Это опаснее дрейфа выше: коммит маскирует поломку полностью, а не только временно. У `studio`
+`prisma generate` вообще не мог попасть в `src/generated/prisma` — `schema.zmodel` не имел
+`generator client`, плагин `prisma` подставлял дефолтный блок без `output`, и Prisma резолвила
+вывод в `node_modules/.bun/.../@prisma/client` (проверено: `rm -rf src/generated && nx run
+studio:zenstack:generate` падал на последнем шаге, `src/generated/prisma/` не создавался вовсе).
+На чистом окружении (CI, новый клон) это упало бы сразу — но в рабочем дереве лежал устаревший,
+но рабочий `client.ts`, закоммиченный 6 дней назад, и всё выглядело зелёным.
+
+**Чек-лист для нового/проверяемого submodule:** `grep -q generated apps/<app>/.gitignore` (или
+`libs/<lib>/.gitignore`) должен найти `src/generated/`. Если нет — `git rm -r --cached
+src/generated` + добавить строку в `.gitignore`, одним коммитом без pathspec (см. `git.md`
+про `git rm --cached` + `commit -- <path>`).
+
 ### ⚠️ `zenstack:generate` зависит от собранного `libs/zenstack-form-plugin/dist/`
 
 Приложения, чей `schema.zmodel` подключает `plugin formSchema { provider = '../../libs/zenstack-form-plugin/dist/index.js' ... }`,
