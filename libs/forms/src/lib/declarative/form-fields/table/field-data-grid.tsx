@@ -5,19 +5,39 @@ import { useField } from '@tanstack/react-form'
 import {
   type ColumnDef,
   type ColumnFiltersState,
+  createFilteredRowModel,
+  createPaginatedRowModel,
+  createSortedRowModel,
+  filterFns,
   flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
+  type RowSelectionState,
   type SortingState,
-  useReactTable,
+  stockFeatures,
+  tableFeatures,
+  useTable,
 } from '@tanstack/react-table'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { type ReactElement, useMemo, useRef, useState } from 'react'
 import { useFormGroup } from '../../../form-group'
 import { useDeclarativeForm } from '../../form-context'
 import { useTableColumns } from './use-table-columns'
+
+/**
+ * Набор фич `@tanstack/react-table` v9. `stockFeatures` (все стоковые фичи, как в v8) —
+ * сознательный выбор вместо точечного набора: часть методов, которые в v8 считались «core»,
+ * в v9 распределены по фичам не всегда очевидным образом (пример — `row.getVisibleCells()`
+ * висит на `columnVisibilityFeature`, не на core), а `columnResizingFeature` требует
+ * `columnSizingFeature` рядом — обе есть в `stockFeatures`. Row model factories и `filterFns`
+ * (полный реестр, deprecated но рабочий — колонки полагаются на `'auto'`-резолв по типу
+ * значения, без реестра `'auto'` ничего не находит) регистрируются явно.
+ */
+const fieldDataGridFeatures = tableFeatures({
+  ...stockFeatures,
+  sortedRowModel: createSortedRowModel(),
+  filteredRowModel: createFilteredRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
+  filterFns,
+})
 
 /** Определение колонки DataGrid */
 export interface DataGridColumnDef {
@@ -111,15 +131,15 @@ export function FieldDataGrid({
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnOrder, setColumnOrder] = useState<string[]>([])
-  const [rowSelectionState, setRowSelectionState] = useState<Record<string, boolean>>({})
+  const [rowSelectionState, setRowSelectionState] = useState<RowSelectionState>({})
   const [editingCell, setEditingCell] = useState<{ row: number; col: string } | null>(null)
   // Трекинг изменённых ячеек для diff highlighting
   const [modifiedCells, setModifiedCells] = useState<Set<string>>(new Set())
 
   // Собираем TanStack Table колонки
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const tableColumns: ColumnDef<Record<string, unknown>, any>[] = useMemo(() => {
-    const cols: ColumnDef<Record<string, unknown>>[] = []
+  const tableColumns: ColumnDef<typeof fieldDataGridFeatures, Record<string, unknown>, any>[] = useMemo(() => {
+    const cols: ColumnDef<typeof fieldDataGridFeatures, Record<string, unknown>>[] = []
 
     // Чекбокс выбора
     if (rowSelection) {
@@ -228,7 +248,8 @@ export function FieldDataGrid({
     return cols
   }, [columnDefs, resolvedCols, editingCell, disabled, fullPath, form, data, onRowSave, rowSelection])
 
-  const table = useReactTable({
+  const table = useTable({
+    features: fieldDataGridFeatures,
     data,
     columns: tableColumns,
     state: {
@@ -241,12 +262,12 @@ export function FieldDataGrid({
     onColumnFiltersChange: setColumnFilters,
     onColumnOrderChange: setColumnOrder,
     onRowSelectionChange: setRowSelectionState,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    // Пагинация отключается при виртуализации
-    ...(virtualized ? {} : { getPaginationRowModel: getPaginationRowModel() }),
-    initialState: virtualized ? {} : { pagination: { pageSize } },
+    // Пагинация отключается при виртуализации — row model factory теперь регистрируется один
+    // раз для всех инстансов (см. `fieldDataGridFeatures`), поэтому переключатель v8 (условно
+    // не передавать `getPaginationRowModel`) заменён на `manualPagination`: `table.getRowModel()`
+    // возвращает пре-пагинированный (полный) набор строк, как и раньше при `virtualized`.
+    manualPagination: virtualized,
+    initialState: virtualized ? {} : { pagination: { pageIndex: 0, pageSize } },
     enableRowSelection: rowSelection,
     enableColumnResizing: columnResizing,
     columnResizeMode: 'onChange',
@@ -479,9 +500,7 @@ export function FieldDataGrid({
         <Text fontSize="xs" color="fg.muted">
           {virtualized
             ? `${data.length} записей`
-            : `Страница ${
-              table.getState().pagination.pageIndex + 1
-            } из ${table.getPageCount()} (${data.length} записей)`}
+            : `Страница ${table.state.pagination.pageIndex + 1} из ${table.getPageCount()} (${data.length} записей)`}
         </Text>
       </HStack>
 

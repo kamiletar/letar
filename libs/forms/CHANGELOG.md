@@ -4,6 +4,22 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.5.0] - 2026-08-17
+
+### Changed
+
+- **`@tanstack/react-table` `8.21.3` → `9.1.2` (полная миграция, не shim).** Затронут только
+  внутренний движок `field-data-grid.tsx` (`Form.Field.DataGrid`): `useReactTable` → `useTable`,
+  обязательный `features: tableFeatures({...})` (используется `stockFeatures` — весь набор фич
+  v8, минус ручной подбор per-feature), row model factories (`sortedRowModel`/`filteredRowModel`/
+  `paginatedRowModel`) регистрируются в `tableFeatures()`, а не как опции `useTable`. Строковый
+  `filterFn: 'auto'` теперь требует явной регистрации через `filterFns` — без неё в v9 молча
+  резолвится в no-op (не ошибка типов, поведенческий баг), зарегистрирован полный реестр
+  `filterFns`. Виртуализация: переключатель v8 «не передавать `getPaginationRowModel`» заменён на
+  `manualPagination: virtualized` — в v9 row model factories статичны на инстанс таблицы, не
+  передаются условно per-render. Публичный контракт (`DataGridColumnDef`, `Form.Field.DataGrid`
+  props) не изменился — потребители библиотеки ничего не меняют.
+
 ## [2.4.3] - 2026-08-13
 
 ### Fixed
