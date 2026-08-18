@@ -9669,3 +9669,41 @@ hierarchy: treemap/sunburst/tree, network: force/sankey), SSR и accessibility �
 кривая круче Recharts, но экосистема совпадает с уже используемым стеком (Query/Table/Form).
 
 **Чем блокирован:** ничем, не приоритет — ждёт конкретной задачи с графиками.
+
+## §86 — Миграция `@nx/vitest:test` → inferred-таргеты по всему монорепо ✅ ЗАКРЫТО (2026-08-18)
+
+`nx g @nx/vitest:convert-to-inferred` (deprecation-предупреждение при каждом тестовом прогоне,
+executor убирают в Nx v24) прогнан по всем 66 публичным `project.json` + 6 приватным submodule
+(`aprel8008`, `driving-school`, `dsperevod`, `poster-microtext-desktop`, `studio`, `svoichuzhie`).
+
+**Баг генератора, найден и исправлен:** он оставляет `options.config` репо-относительным
+(`apps/pravda/vitest.config.ts` либо `{projectRoot}/vitest.config.ts`), а inferred-таргет
+запускается с `cwd=projectRoot` — путь удваивался (`libs/hooks/libs/hooks/vitest.config.ts`),
+`vitest` падал на `UNRESOLVED_ENTRY`. Пофикшено регэкспом на путь-относительно-проекта во всех
+72 файлах. CRLF/форматирование генератора расходилось с `dprint.json` — `dprint fmt` пришлось
+гонять дважды (первый прогон молча не применился).
+
+**Регрессии после переключения `cwd` проверены по каждому проекту, часть — реальные баги,
+пофикшены в отдельной сессии (не задача миграции):**
+
+- `pravda` — не хватало `resolve.alias` для `@letar/hooks`/`@letar/chakra-provider`
+  (pre-existing); плюс отдельно найден баг окружения: Node 25 определяет собственный глобальный
+  `localStorage` (заглушка без `getItem`/`clear`, рабочая версия требует флаг
+  `--localstorage-file`), перекрывающий Storage от jsdom — полифил в `vitest.setup.tsx`.
+  `toc.test.tsx` тестировал уже удалённую IntersectionObserver-логику вместо текущего scroll-spy
+  на `getBoundingClientRect` — тест переписан под актуальное поведение.
+- `animatrona` — мок `../../torrent` не экспортировал `initTorrentService` (реальный код
+  использует именно её, не `getTorrentService`+`.init()`); тест дефолтного языка ожидал `'ru'`
+  для нераспознанных папок, код с первого коммита возвращает `'und'`.
+- `label-printer-desktop` — IPC-канал `print:preview` переименован в `print:printImage` (тест не
+  обновили); `settings.handlers.spec` не мокал `Logger` из `@letar/label-printer-core`, который
+  в проде требует `Logger.initialize()` до первого `getInstance()`.
+- `animatrona-tracker`, `time`, `form-develop-app-shadcn`, `dsperevod`, `svoichuzhie` — реальных
+  тестов нет ни у одного, `passWithNoTests` не был выставлен ни разу — добавлен во все пять.
+- `aboi`, `domwellbes` — не задеты миграцией (submodule был в процессе несвязанной работы
+  другого агента в момент прогона), оставлены нетронутыми.
+
+**⚠️ Про параллелизм тестовых прогонов при батч-проверке регрессий: НЕ запускать
+`nx run-many -t test` без `--parallel=N` на широком списке проектов** — безлимитный параллелизм
+на этой машине спровоцировал OOM (десятки одновременных vitest/node/esbuild процессов). Всегда
+`--parallel=2` (или прогон по одному проекту) на батчах из 5+ тестовых таргетов.
