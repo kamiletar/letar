@@ -9800,3 +9800,27 @@ executor убирают в Nx v24) прогнан по всем 66 публич�
 
 **Не проверено:** живой вызов инструментов `studio-mcp` из отдельной сессии агента (сервер
 только собран и задеплоен, сквозного теста через реальный MCP-клиент не было).
+
+## §89 — Дедупликация `client.ts` `studio-mcp`/`studio-time-mcp` в `@letar/mcp-server-kit` ✅ ЗАКРЫТО (2026-08-19)
+
+Повод: §88 завёл `libs/studio-mcp` копированием структуры `libs/studio-time-mcp` («Копия структуры
+studio-time-mcp/client.ts под другой заголовок/секрет», см. коммит §88) — `client.ts` обеих
+библиотек почти дословно дублировал fetch-обёртку с секретным заголовком, таймаутом через
+`AbortController` и различением сетевой/JSON-parse ошибки (throw) от HTTP 4xx/5xx с валидным
+JSON-телом (`ok: false`).
+
+- Новая `createSecretHttpClient({ baseUrl, secretHeaderName, secret, serviceLabel?, timeoutMs? })`
+  в `@letar/mcp-server-kit` — [libs/mcp-server-kit/src/lib/secret-http-client.ts](/libs/mcp-server-kit/src/lib/secret-http-client.ts).
+  `baseUrl`/`secret` — функции (ленивое чтение env/файла, могут бросать), не строки.
+- `libs/studio-mcp/src/client.ts` и `libs/studio-time-mcp/src/client.ts` стали тонкими обёртками
+  (45 строк → ~16 каждая) — публичный контракт (`studioAdminRequest`/`studioTimeRequest`, типы
+  `McpAdminResult`/`McpTimeResult`) не изменился, `server.ts` обеих библиотек правки не
+  потребовал.
+- `deploy-mcp` этот хелпер сознательно не использует — другой транспорт (SSH-туннель + Bearer,
+  не прямой fetch с секретным заголовком).
+- Обновлены README `mcp-server-kit` (новый API) и
+  [mcp-server-pattern.md](/.claude/docs/mcp-server-pattern.md) (список библиотек паттерна +
+  секция про `createSecretHttpClient`) — держали описание паттерна, отставшее от факта дублирования.
+- Три раздельных scoped-коммита (`mcp-server-kit`, `studio-mcp`, `studio-time-mcp`) — уже
+  запушены. Деплой не требуется: обе библиотеки — локальные stdio MCP-серверы (`nx run
+  studio-mcp:serve`), не деплоятся на сервер.
