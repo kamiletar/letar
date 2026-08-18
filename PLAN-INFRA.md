@@ -9707,3 +9707,66 @@ executor убирают в Nx v24) прогнан по всем 66 публич�
 `nx run-many -t test` без `--parallel=N` на широком списке проектов** — безлимитный параллелизм
 на этой машине спровоцировал OOM (десятки одновременных vitest/node/esbuild процессов). Всегда
 `--parallel=2` (или прогон по одному проекту) на батчах из 5+ тестовых таргетов.
+
+## §87 — CI-гейт (§73/§86) впервые дошёл до зелёного прогона целиком ✅ ЗАКРЫТО (2026-08-18)
+
+Продолжение §73: гейт уже доходил до `Lint`/`Typecheck`/`Unit tests`, но ни разу не проходил их
+все три подряд. Серия из пяти реальных, не косметических багов, каждый найден по факту красного
+прогона (`gh run view --log-failed`), не превентивно:
+
+- **OOM (exit 130) + `PrismaConfigEnvError`** — `zenstack:generate` внутри `test` требует
+  синтаксически валидный `DATABASE_URL` даже без реального коннекта; вместе с безлимитным
+  параллелизмом `nx affected -t test` × собственный пул воркеров vitest съедало память
+  раннера. Фикс — `DATABASE_URL` env-заглушка + `--parallel=2 --maxWorkers=2` в `ci.yml`.
+- **`@nx/eslint:lint` → inferred** (deprecated executor, как и `@nx/vitest:test` в §86) —
+  `nx g @nx/eslint:convert-to-inferred` по 55 `project.json`. Тот же класс регрессии, что в
+  §86 у vitest-конвертера: кодомод подменяет кастомный `lintFilePatterns` на `options.args`,
+  который **добавляется** к инферred-базе `eslint .`, а не заменяет её — 4 приложения с
+  нестандартными паттернами (`animatrona` и его вложенные Nx-подпроекты `animatrona-main`/
+  `animatrona-renderer`, `form-docs`, `kami-key-the`, `label-printer-desktop`) поймали
+  16→9232 проблем вместо родного скоупа. Фикс — явный `nx:run-commands` с точным списком
+  glob'ов + `--no-error-on-unmatched-pattern` (ESLint 10 иначе падает хардово на пустой
+  результат матчинга, а не предупреждает). ⚠️ Verification-ловушка: первая проверка сверяла
+  проекты по имени, извлечённому из пути файла (`apps/animatrona/main/project.json` →
+  `animatrona`), а не из поля `name` внутри — вложенные `animatrona-main`/`animatrona-renderer`
+  тихо выпали и всплыли только следующим CI-прогоном.
+- **`.env.template` генератора `new-app` никогда не был закоммичен** — корневой `.gitignore`
+  паттерн `.env.*` (защита секретов) случайно ловил легитимный EJS-шаблон
+  `libs/generators/src/generators/new-app/files/.env.template`. Файл существовал только на
+  диске у тех, кто его создавал — `tree.read()` в `generator.spec.ts` возвращал `null` только
+  в чистом CI-чекауте, локально баг не воспроизводился никогда. Подтверждено `git worktree` от
+  HEAD перед фиксом. Фикс — точечное исключение в `.gitignore` + коммит файла.
+- **`resolveUploadPath` (`@letar/image-upload`) — реальная дыра в проде, не тестовый артефакт.**
+  Проверка traversal на бэкслеш-путях (`C:\Windows\win.ini`) держалась на `path.resolve()`,
+  который по-разному ведёт себя на `path.win32` (дев-машина) и `path.posix` (прод, Linux) — на
+  Linux бэкслеш не распознаётся как разделитель, весь сегмент конкатенируется как одна
+  «безопасная» строка, и `path.relative()`-проверка ниже его не ловит. Существующий тест на
+  этот кейс был, но был красным только на Linux — под шумом остальных CI-багов терялся.
+  Фикс — явная проверка на `\\` в сегментах, независимая от ОС рантайма.
+- **`useSyncQueue` (`@letar/forms/offline`) — утечка async-эффекта.** `initialize().then(() =>
+  setIsLoading(false))` без cancelled-флага роняло React `window is not defined` при
+  размонтировании компонента до резолва промиса, усиленное module-level singleton-состоянием
+  (кросс-файловое загрязнение в Vitest). Фикс — стандартный cancelled-flag cleanup.
+- **`vitest.setup.*` не резолвился tsconfig-резолвером Vite 8 у 5 библиотек** (`ui`,
+  `animatrona-ui`, `forms-vue`, `forms-angular`, `forms-vue-shadcn`) — `[TSCONFIG_ERROR]
+  Tsconfig not found`, валит все тесты библиотеки разом (setup падает первым). Три разных
+  причины под одной ошибкой: (1) `forms-vue`/`forms-angular`/`forms-vue-shadcn` — файл
+  физически существовал, но не был в `include` их `tsconfig.spec.json`; (2) `ui` — сам
+  `tsconfig.spec.json` был написан верно, но solution-style `tsconfig.json` ссылался в
+  `references` только на `tsconfig.lib.json` — резолвер идёт по графу project references, не
+  просто по include-глобам, и `tsconfig.spec.json` вообще не видел; (3) `animatrona-ui` —
+  отдельного `tsconfig.spec.json` не было вовсе, единственный `tsconfig.json` включал только
+  `src/**/*.ts(x)`, а `vitest.setup.tsx` лежит в корне библиотеки. Раньше Vite резолвил tsconfig
+  мягче — в 8.x это стало жёсткой ошибкой транспиляции. Заодно заглушено безобидное, но шумное
+  предупреждение `configLoader: 'native'` про ESM-синтаксис без `"type": "module"` —
+  `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` в `ci.yml`, без правки 20+ `package.json`.
+
+Коммиты: `c3a61f53`, `07cb1c40`, `a4a9c821`, `a794ee26`, `1aba001b`, `542cc850`, `3d8c1928`,
+`96897b8f`.
+
+**Урок:** ни один из шести содержательных багов не был виден локально — все либо специфичны
+раннеру (OS, чистый checkout, отсутствие приватных submodule), либо тонули в шуме
+инфраструктурных сбоев (OOM, executor-миграция) до тех пор, пока не расчистился путь. CI,
+единожды заведённый (§72), продолжает окупаться не превентивными находками, а тем, что каждый
+следующий прогон — на чистой машине без локального состояния разработчика — двигает базу
+`nx affected` дальше и вскрывает следующий слой.
