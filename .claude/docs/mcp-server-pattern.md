@@ -1,13 +1,23 @@
 # Паттерн «тонкий локальный MCP-сервер по stdio»
 
-Три библиотеки в монорепо реализуют один и тот же архитектурный паттерн: `libs/deploy-mcp`
+Четыре библиотеки в монорепо реализуют один и тот же архитектурный паттерн: `libs/deploy-mcp`
 (эталон, деплой через dashboard-agent API), `libs/form-mcp` (справочник по полям/формам),
-`libs/studio-time-mcp` (тайм-трекер studio). Каждая — тонкая обёртка: вся бизнес-логика
-остаётся снаружи (в приложении/сервисе), библиотека только предоставляет к ней MCP-инструменты
-для Claude Code.
+`libs/studio-time-mcp` (тайм-трекер studio), `libs/studio-mcp` (админка studio — клиенты,
+проекты, счета). Каждая — тонкая обёртка: вся бизнес-логика остаётся снаружи (в приложении/
+сервисе), библиотека только предоставляет к ней MCP-инструменты для Claude Code.
 
-Общий для этих серверов boilerplate (парсер dotenv, формат ответа тула) вынесен в
-`libs/mcp-server-kit` — см. [«Формат ответа тула»](#формат-ответа-тула--letarmcp-server-kit) ниже.
+Общий для этих серверов boilerplate вынесен в `libs/mcp-server-kit`:
+
+- парсер dotenv, формат ответа тула — см.
+  [«Формат ответа тула»](#формат-ответа-тула--letarmcp-server-kit) ниже;
+- `createSecretHttpClient` — fetch-обёртка с секретным заголовком, таймаутом и различением
+  сетевой/JSON-ошибки от HTTP 4xx/5xx с валидным телом. `studio-mcp` и `studio-time-mcp` ходят
+  в **один и тот же** studio API под разными секретами (`X-Admin-Mcp-Secret`/
+  `X-Time-Mcp-Secret`) — их `client.ts` теперь тонкие обёртки над этой фабрикой (2026-08-19),
+  см. [libs/mcp-server-kit/src/lib/secret-http-client.ts](/libs/mcp-server-kit/src/lib/secret-http-client.ts).
+  `deploy-mcp` этот хелпер не использует — у него другой транспорт (SSH-туннель + Bearer, не
+  прямой fetch с секретным заголовком).
+
 `form-mcp` этот паттерн не разделяет (не читает dotenv, оборачивает `content`/`isError` инлайн
 без общих хелперов) — не переноси его на `@letar/mcp-server-kit` без явной необходимости.
 
@@ -77,8 +87,8 @@ await server.connect(transport)
    }
    ```
    (актуальную версию `zod` смотри в уже существующей MCP-либе — должна совпадать во всех трёх).
-   `@letar/mcp-server-kit` даёт `parseDotEnv`/`text`/`errorText`/`pretty` — не копируй их заново
-   в `config.ts`/`server.ts` новой библиотеки, импортируй.
+   `@letar/mcp-server-kit` даёт `parseDotEnv`/`text`/`errorText`/`pretty`/`createSecretHttpClient`
+   — не копируй их заново в `config.ts`/`client.ts`/`server.ts` новой библиотеки, импортируй.
 3. Донастрой `project.json`:
    - тег `"type:tool"` в `tags`
    - таргет `serve`:
