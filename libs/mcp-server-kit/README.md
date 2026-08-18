@@ -30,6 +30,26 @@ import { errorText, parseDotEnv, pretty, text } from '@letar/mcp-server-kit'
 
 Форматирует данные как markdown-блок `` ```json ... ``` `` для вывода в чат.
 
+### `createSecretHttpClient(options): (request) => Promise<{ ok, status, json }>`
+
+Фабрика fetch-клиента к сервису, защищённому секретным HTTP-заголовком (образец —
+`libs/studio-mcp`/`libs/studio-time-mcp`, оба ходят в studio API под разными секретами).
+
+```typescript
+const request = createSecretHttpClient({
+  baseUrl: studioUrl, // () => string — ленивое чтение (env/файл)
+  secretHeaderName: 'X-Admin-Mcp-Secret',
+  secret: adminMcpSecret, // () => string — может бросать при отсутствии конфигурации
+  serviceLabel: 'studio', // опционально — для текста ошибок
+})
+
+const { ok, status, json } = await request({ method: 'POST', path: '/api/mcp/admin/clients', body })
+```
+
+Таймаут (`AbortSignal.timeout`, по умолчанию 15с, переопределяется и на уровне клиента, и на
+уровне отдельного запроса) и различение сетевой/JSON-parse ошибки (throw) от HTTP 4xx/5xx с
+валидным JSON-телом (`{ ok: false, ... }`) — общие для всех клиентов на этой фабрике.
+
 ## Команды
 
 ```bash
