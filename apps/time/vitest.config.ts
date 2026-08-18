@@ -13,6 +13,7 @@ export default defineConfig({
     setupFiles: ['./vitest.setup.tsx'],
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['node_modules', 'dist', '.next', 'e2e'],
+    passWithNoTests: true,
     coverage: {
       provider: 'v8',
       reportsDirectory: '../../coverage/apps/time',
