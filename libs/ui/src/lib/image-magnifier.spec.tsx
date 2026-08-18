@@ -1,5 +1,5 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -90,5 +90,66 @@ describe('ImageMagnifier', () => {
 
     const container = screen.getByRole('img', { name: 'Постер' })
     expect(() => container.dispatchEvent(new MouseEvent('mousemove', { bubbles: true }))).not.toThrow()
+  })
+
+  describe('onInteract (§D.2 PLAN_MARKETING.md у aboi)', () => {
+    it('вызывается один раз при реальном движении мыши после загрузки картинки', () => {
+      const onInteract = vi.fn()
+      renderWithProvider(
+        <ImageMagnifier
+          src="/full.jpg"
+          naturalWidth={1000}
+          naturalHeight={800}
+          alt="Постер"
+          autoDemo={false}
+          onInteract={onInteract}
+        />,
+      )
+
+      const container = screen.getByRole('img', { name: 'Постер' })
+      fireEvent.load(container.querySelector('img')!)
+      fireEvent.mouseMove(container, { clientX: 10, clientY: 10 })
+      fireEvent.mouseMove(container, { clientX: 20, clientY: 20 })
+
+      expect(onInteract).toHaveBeenCalledTimes(1)
+    })
+
+    it('не вызывается автопоказом без реального взаимодействия пользователя', () => {
+      const onInteract = vi.fn()
+      renderWithProvider(
+        <ImageMagnifier
+          src="/full.jpg"
+          naturalWidth={1000}
+          naturalHeight={800}
+          alt="Постер"
+          autoDemo={true}
+          onInteract={onInteract}
+        />,
+      )
+
+      const container = screen.getByRole('img', { name: 'Постер' })
+      fireEvent.load(container.querySelector('img')!)
+
+      expect(onInteract).not.toHaveBeenCalled()
+    })
+
+    it('не вызывается до загрузки картинки', () => {
+      const onInteract = vi.fn()
+      renderWithProvider(
+        <ImageMagnifier
+          src="/full.jpg"
+          naturalWidth={1000}
+          naturalHeight={800}
+          alt="Постер"
+          autoDemo={false}
+          onInteract={onInteract}
+        />,
+      )
+
+      const container = screen.getByRole('img', { name: 'Постер' })
+      fireEvent.mouseMove(container, { clientX: 10, clientY: 10 })
+
+      expect(onInteract).not.toHaveBeenCalled()
+    })
   })
 })

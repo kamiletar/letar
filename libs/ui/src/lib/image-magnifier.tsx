@@ -33,6 +33,11 @@ export interface ImageMagnifierProps extends Omit<BoxProps, 'onClick'> {
   demoPath?: readonly MagnifierPoint[]
   /** Длительность автопоказа в миллисекундах (по умолчанию 4200) */
   demoDuration?: number
+  /**
+   * Вызывается один раз при первом РЕАЛЬНОМ взаимодействии пользователя (мышь/тач/клавиатура).
+   * Автопоказ (`autoDemo`) не считается — он срабатывает сам, без участия пользователя.
+   */
+  onInteract?: () => void
 }
 
 const DEFAULT_DEMO_PATH: readonly MagnifierPoint[] = [
@@ -96,11 +101,13 @@ export function ImageMagnifier({
   autoDemo = true,
   demoPath = DEFAULT_DEMO_PATH,
   demoDuration = 4200,
+  onInteract,
   ...boxProps
 }: ImageMagnifierProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const imageRef = useRef<HTMLImageElement>(null)
   const frameRef = useRef<number>(0)
+  const interactedRef = useRef(false)
 
   const [lens, setLens] = useState<{ x: number; y: number } | null>(null)
   const [pinned, setPinned] = useState(false)
@@ -115,6 +122,17 @@ export function ImageMagnifier({
       setLoaded(true)
     }
   }, [])
+
+  // `touched` выставляется только реальным взаимодействием (мышь/тач/клавиатура),
+  // автопоказ его не трогает — поэтому переход в true здесь и есть момент,
+  // когда пользователь САМ подвинул лупу (§D.2 PLAN_MARKETING.md у aboi). `interactedRef`
+  // страхует от повторного вызова, если `onInteract` у вызывающего кода не мемоизирован.
+  useEffect(() => {
+    if (touched && !interactedRef.current) {
+      interactedRef.current = true
+      onInteract?.()
+    }
+  }, [touched, onInteract])
 
   /** Перевод точки в долях изображения в CSS-координаты контейнера */
   const toLocal = useCallback((point: MagnifierPoint) => {
