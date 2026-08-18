@@ -40,32 +40,9 @@ function cleanupMockHeadings() {
 }
 
 describe('TableOfContents', () => {
-  let mockObserve: ReturnType<typeof vi.fn>
-  let mockDisconnect: ReturnType<typeof vi.fn>
-  let mockIntersectionCallback: IntersectionObserverCallback | null = null
-
   beforeEach(() => {
     vi.clearAllMocks()
     cleanupMockHeadings()
-
-    // Мокируем IntersectionObserver через класс
-    mockObserve = vi.fn()
-    mockDisconnect = vi.fn()
-
-    class MockIntersectionObserver {
-      constructor(callback: IntersectionObserverCallback) {
-        mockIntersectionCallback = callback
-      }
-      observe = mockObserve
-      unobserve = vi.fn()
-      disconnect = mockDisconnect
-      takeRecords = () => [] as IntersectionObserverEntry[]
-      root = null
-      rootMargin = ''
-      thresholds = [] as number[]
-    }
-
-    global.IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver
 
     // Мокируем scrollIntoView
     Element.prototype.scrollIntoView = vi.fn()
@@ -93,10 +70,13 @@ describe('TableOfContents', () => {
   })
 
   describe('рендеринг', () => {
-    it('должен возвращать null когда нет заголовков', () => {
+    it('должен рендерить nav без ссылок когда нет заголовков', () => {
+      // nav рендерится всегда (резервирует ширину колонки, см. комментарий в toc.tsx
+      // про layout shift и потерянные клики на WebKit) — но без ссылок на заголовки
       const { container } = renderWithChakra(<TableOfContents />)
 
-      expect(container.querySelector('nav')).not.toBeInTheDocument()
+      expect(container.querySelector('nav')).toBeInTheDocument()
+      expect(container.querySelectorAll('a')).toHaveLength(0)
     })
 
     it('должен рендерить nav с заголовками', async () => {
@@ -150,58 +130,28 @@ describe('TableOfContents', () => {
     })
   })
 
-  describe('IntersectionObserver', () => {
-    it('должен вызывать observe для заголовков', async () => {
-      setupMockHeadings()
-
-      const { container } = renderWithChakra(<TableOfContents />)
-
-      // Ждём пока компонент отрендерится
-      await waitFor(() => {
-        expect(container.querySelector('nav')).toBeInTheDocument()
-      })
-
-      // 2 элемента: h2, h3
-      expect(mockObserve).toHaveBeenCalledTimes(2)
-    })
-
-    it('должен обновлять activeId при intersection', async () => {
+  describe('scroll-spy (активный пункт по scroll)', () => {
+    it('должен обновлять activeId при скролле мимо заголовка', async () => {
       const elements = setupMockHeadings()
+      // Первый заголовок уже пересёк линию триггера (ACTIVE_THRESHOLD=80), второй — ещё нет
+      vi.spyOn(elements[0], 'getBoundingClientRect').mockReturnValue({ top: 0 } as DOMRect)
+      vi.spyOn(elements[1], 'getBoundingClientRect').mockReturnValue({ top: 500 } as DOMRect)
 
       const { container } = renderWithChakra(<TableOfContents />)
 
-      // Ждём пока компонент отрендерится
       await waitFor(() => {
         expect(container.querySelector('nav')).toBeInTheDocument()
       })
 
-      // Симулируем intersection с первым элементом
       act(() => {
-        mockIntersectionCallback?.(
-          [{ isIntersecting: true, target: elements[0] } as IntersectionObserverEntry],
-          {} as IntersectionObserver,
-        )
+        window.dispatchEvent(new Event('scroll'))
       })
 
       await waitFor(() => {
         const links = container.querySelectorAll('a')
         expect(links[0]).toHaveAttribute('aria-current', 'location')
+        expect(links[1]).not.toHaveAttribute('aria-current')
       })
-    })
-
-    it('должен отключать observer при unmount', async () => {
-      setupMockHeadings()
-
-      const { container, unmount } = renderWithChakra(<TableOfContents />)
-
-      // Ждём пока компонент отрендерится
-      await waitFor(() => {
-        expect(container.querySelector('nav')).toBeInTheDocument()
-      })
-
-      unmount()
-
-      expect(mockDisconnect).toHaveBeenCalled()
     })
   })
 
