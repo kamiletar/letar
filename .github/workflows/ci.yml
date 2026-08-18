@@ -35,8 +35,15 @@ jobs:
     # `zenstack:generate` (зависимость `test` у приложений с БД) вызывает `prisma generate`,
     # которому достаточно синтаксически валидного DATABASE_URL — реального коннекта к БД он
     # не делает. Без переменной падает с PrismaConfigEnvError и тянет за собой зависимый `test`.
+    #
+    # VITE_CONFIG_NATIVE_IGNORE_WARNING — глушит безобидное предупреждение Vite 8
+    # (`configLoader: 'native'`) про ESM-синтаксис в vitest.config.ts без "type": "module"
+    # в соседнем package.json. На сборку/тесты не влияет (Vite сам откатывается на bundle-загрузчик),
+    # но плодит по строке на каждый из ~20 проектов и захламляет лог. Массово чинить через
+    # "type": "module" не стали — риск для require() в другом коде монорепо ради косметики.
     env:
       DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      VITE_CONFIG_NATIVE_IGNORE_WARNING: 'true'
 
     steps:
       - name: Checkout (без приватных submodule — см. шапку файла)
