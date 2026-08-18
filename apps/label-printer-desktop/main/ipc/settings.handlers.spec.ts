@@ -18,6 +18,18 @@ vi.mock('../services/settings.service', () => ({
   },
 }))
 
+// Мокаем Logger — в проде требует Logger.initialize() до первого getInstance()
+vi.mock('@letar/label-printer-core', () => ({
+  Logger: {
+    getInstance: () => ({
+      error: vi.fn(),
+      warn: vi.fn(),
+      info: vi.fn(),
+      debug: vi.fn(),
+    }),
+  },
+}))
+
 import { ipcMain } from 'electron'
 import { settingsService } from '../services/settings.service'
 import { registerSettingsHandlers } from './settings.handlers'

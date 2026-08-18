@@ -40,7 +40,8 @@ describe('print.handlers', () => {
 
       expect(ipcMain.handle).toHaveBeenCalledWith('print:validate', expect.any(Function))
       expect(ipcMain.handle).toHaveBeenCalledWith('print:execute', expect.any(Function))
-      expect(ipcMain.handle).toHaveBeenCalledWith('print:preview', expect.any(Function))
+      expect(ipcMain.handle).toHaveBeenCalledWith('print:generateBarcodes', expect.any(Function))
+      expect(ipcMain.handle).toHaveBeenCalledWith('print:printImage', expect.any(Function))
     })
   })
 
