@@ -39,6 +39,7 @@ const mockTorrentService = Object.assign(new EventEmitter(), {
 
 vi.mock('../../torrent', () => ({
   getTorrentService: () => mockTorrentService,
+  initTorrentService: () => Promise.resolve(mockTorrentService),
 }))
 
 // Мок ImportQueueController
@@ -160,7 +161,7 @@ describe('RutrackerDownloadOrchestrator', () => {
 
       expect(result.infoHash).toBe('abc123def456')
       expect(result.torrent).toBe(torrentInfo)
-      expect(mockTorrentService.init).toHaveBeenCalled()
+      // init() qBittorrent-бэкенда теперь внутри initTorrentService(), не отдельный вызов
       expect(mockTorrentService.add).toHaveBeenCalledWith('magnet:?xt=urn:btih:abc123', {
         downloadPath: expect.stringContaining('Animatrona'),
         sequential: undefined,

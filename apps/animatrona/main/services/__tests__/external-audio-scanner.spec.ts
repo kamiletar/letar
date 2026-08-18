@@ -85,13 +85,13 @@ describe('detectLanguageFromFolder', () => {
     expect(detectLanguageFromFolder('Japanese')).toBe('ja')
   })
 
-  it('возвращает "ru" для неизвестных папок (дефолт — русская озвучка)', () => {
-    expect(detectLanguageFromFolder('Audio')).toBe('ru')
-    expect(detectLanguageFromFolder('[badPuss]')).toBe('ru')
-    expect(detectLanguageFromFolder('AniLibria')).toBe('ru')
-    expect(detectLanguageFromFolder('Sounds')).toBe('ru')
-    expect(detectLanguageFromFolder('JAM CLUB')).toBe('ru')
-    expect(detectLanguageFromFolder('Onibaku Group')).toBe('ru')
+  it('возвращает "und" для неизвестных папок (язык не определён по имени)', () => {
+    expect(detectLanguageFromFolder('Audio')).toBe('und')
+    expect(detectLanguageFromFolder('[badPuss]')).toBe('und')
+    expect(detectLanguageFromFolder('AniLibria')).toBe('und')
+    expect(detectLanguageFromFolder('Sounds')).toBe('und')
+    expect(detectLanguageFromFolder('JAM CLUB')).toBe('und')
+    expect(detectLanguageFromFolder('Onibaku Group')).toBe('und')
   })
 })
 
