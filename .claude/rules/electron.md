@@ -216,6 +216,18 @@ npx electron scripts/verify-pipeline.cjs <аргументы>
 Прецедент: так проверен весь пайплайн `poster-microtext-desktop` (апскейл → цвет →
 микротекст) на реальной картинке — без единого клика в GUI (2026-07-26).
 
+⚠️ **`npx electron ...` падает `EOVERRIDE`** («Override for kysely@0.29.5 conflicts with
+direct dependency») — npx резолвит пакет по-своему и спотыкается о override в корневом
+`package.json` монорепо. Не связано с кодом приложения, воспроизводится в любом
+Electron-приложении. Обход, подтверждённый минимум дважды (`poster-microtext-desktop`,
+2026-08-18) — звать уже установленный Electron-бинарник монорепо напрямую, минуя npx:
+
+```bash
+../../node_modules/.bin/electron.exe scripts/verify-*.cjs <аргументы>
+```
+
+Путь — относительно `apps/<app>/`, глубину `../../` поправить под реальное вложение.
+
 ## Паттерн: `shared/` — рантайм-код для main и renderer одновременно
 
 В `label-printer-desktop` `shared/` содержит только типы (стираются при компиляции, не
