@@ -84,7 +84,10 @@ localStorage/cookie в инициализаторе `useState` — не ошиб
 `NEXT_PUBLIC_*` литералом в `docker-compose.yml` не попадает в клиентский бандл — нужен `.env.docker` ·
 [nextjs-root-notfound-no-root-layout](/.claude/docs/nextjs-root-notfound-no-root-layout.md) ⚠️
 корневой `not-found.tsx` без `app/layout.tsx` сам рендерит `<html>/<body>` — дублирование тега,
-hydration mismatch на невалидном сегменте локали
+hydration mismatch на невалидном сегменте локали ·
+[nextjs-compound-component-server-boundary](/.claude/docs/nextjs-compound-component-server-boundary.md)
+⚠️ compound-экспорт (`Object.assign`) для клиентского компонента не резолвится через границу
+Server→Client — property-access ломается, `undefined`
 
 **Библиотеки и публикация:** [lib-entry-points](/.claude/docs/lib-entry-points.md) подпути
 `./server`/`./client`, границы, ESLint-ловушки ·
