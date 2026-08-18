@@ -146,6 +146,9 @@ TUN-VPN; DNS-проверки с рабочей машины врут ·
 [electron-sqlite](/.claude/docs/electron-sqlite.md)
 
 **Медиа, почта, звук:** [media-server](/.claude/docs/media-server.md) · [email](/.claude/docs/email.md) ·
+[transactional-email-cron-pattern](/.claude/docs/transactional-email-cron-pattern.md) паттерн
+cron-рассылок: найти кандидатов → отправить → пометить дедуп-поле; транзакционное письмо vs
+маркетинг с консент-гейтом ·
 [web-push](/.claude/docs/web-push.md) ·
 [offlineaudiocontext-suspend-render-race](/.claude/docs/offlineaudiocontext-suspend-render-race.md)
 
