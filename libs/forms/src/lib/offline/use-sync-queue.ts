@@ -72,9 +72,15 @@ export function useSyncQueue(): UseSyncQueueResult {
 
   // Initialize on mount
   useEffect(() => {
+    let cancelled = false
     initialize().then(() => {
-      setIsLoading(false)
+      if (!cancelled) {
+        setIsLoading(false)
+      }
     })
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   // Add action to queue
