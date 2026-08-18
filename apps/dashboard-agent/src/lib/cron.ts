@@ -244,6 +244,18 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's2',
   },
   {
+    id: 'aboi-abandoned-cart',
+    name: 'Abandoned Cart (aboi)',
+    app: 'aboi',
+    endpoint: '/api/cron/abandoned-cart',
+    // Порог брошенности — 24 часа (lib/abandoned-cart.ts), часовой прогон ловит корзину
+    // почти сразу как она пересекает порог, дедуп через Cart.abandonedEmailSentAt.
+    schedule: '0 * * * *',
+    description: 'Письмо клиентам с непустой корзиной, не тронутой 24 часа (§R.3 PLAN_MARKETING.md)',
+    enabled: true,
+    server: 's2',
+  },
+  {
     id: 'email-canary-check',
     name: 'Email Canary Check',
     app: 'dashboard-agent',
