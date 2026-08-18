@@ -73,6 +73,10 @@ test-output
 !**/.env.staging.example
 !**/.env.docker.enc
 !**/.env.staging.enc
+# Шаблон генератора @letar/generators:new-app (EJS, не реальный .env) — без этого исключения
+# файл молча выпадает из git, generateFiles на чистом чекауте (CI) не находит его, и .env
+# у сгенерированного приложения просто не создаётся (generator.spec.ts падает только в CI).
+!**/generators/new-app/files/.env.template
 null
 nul
 
