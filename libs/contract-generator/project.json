@@ -28,19 +28,15 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
       "dependsOn": [
         "oxlint"
       ],
       "metadata": {
-        "description": "Run ESLint on contract-generator library",
-        "technologies": [
-          "eslint"
-        ]
+        "description": "Run ESLint on contract-generator library"
       },
       "options": {
-        "lintFilePatterns": [
-          "libs/contract-generator/**/*.{ts,tsx}"
+        "args": [
+          "**/*.{ts,tsx}"
         ]
       }
     },

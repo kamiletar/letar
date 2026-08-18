@@ -1,20 +1,29 @@
 {
   "name": "kami-key-the",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "implicitDependencies": [
+    "@letar/electron-storage"
+  ],
   "sourceRoot": "apps/kami-key-the/src",
   "projectType": "application",
-  "tags": ["type:app", "scope:infra", "owner:letar"],
+  "tags": [
+    "type:app",
+    "scope:infra",
+    "owner:letar"
+  ],
   "targets": {
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "dprint fmt",
-        "cwd": "apps/kami-key-the"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "apps/kami-key-the"
       }
     },
     "dev": {
@@ -27,7 +36,10 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": ["npx webpack --config main/webpack.config.js", "npx vite build --config renderer/vite.config.ts"],
+        "commands": [
+          "npx webpack --config main/webpack.config.js",
+          "npx vite build --config renderer/vite.config.ts"
+        ],
         "cwd": "apps/kami-key-the",
         "parallel": false
       }
@@ -45,14 +57,22 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "^default",
+        "{workspaceRoot}/eslint.config.mjs",
+        "{projectRoot}/eslint.config.mjs",
+        {
+          "externalDependencies": [
+            "eslint"
+          ]
+        }
+      ],
       "options": {
-        "lintFilePatterns": [
-          "apps/kami-key-the/main/**/*.ts",
-          "apps/kami-key-the/renderer/src/**/*.{ts,tsx}",
-          "apps/kami-key-the/shared/**/*.ts",
-          "apps/kami-key-the/src/**/*.ts"
-        ]
+        "cwd": "apps/kami-key-the",
+        "command": "eslint --no-error-on-unmatched-pattern main/**/*.ts renderer/src/**/*.{ts,tsx} shared/**/*.ts src/**/*.ts"
       }
     },
     "typecheck:tsgo": {

@@ -234,13 +234,22 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "^default",
+        "{workspaceRoot}/eslint.config.mjs",
+        "{projectRoot}/eslint.config.mjs",
+        {
+          "externalDependencies": [
+            "eslint"
+          ]
+        }
+      ],
       "options": {
-        "lintFilePatterns": [
-          "apps/animatrona/main/**/*.{ts,tsx}",
-          "apps/animatrona/renderer/**/*.{ts,tsx}",
-          "apps/animatrona/shared/**/*.{ts,tsx}"
-        ]
+        "cwd": "apps/animatrona",
+        "command": "eslint --no-error-on-unmatched-pattern main/**/*.{ts,tsx} renderer/**/*.{ts,tsx} shared/**/*.{ts,tsx}"
       }
     },
     "typecheck:tsgo": {

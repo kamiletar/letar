@@ -3,11 +3,18 @@
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/animatrona/renderer/src",
-  "tags": ["type:app", "scope:animatrona", "platform:web", "owner:letar"],
+  "tags": [
+    "type:app",
+    "scope:animatrona",
+    "platform:web",
+    "owner:letar"
+  ],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["{projectRoot}/out"],
+      "outputs": [
+        "{projectRoot}/out"
+      ],
       "options": {
         "command": "next build",
         "cwd": "apps/animatrona/renderer"
@@ -27,16 +34,19 @@
     },
     "start": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "build"
+      ],
       "options": {
         "command": "npx serve out -p 3007",
         "cwd": "apps/animatrona/renderer"
-      },
-      "dependsOn": ["build"]
+      }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": ["apps/animatrona/renderer/**/*.{ts,tsx}"]
+        "args": [
+          "**/*.{ts,tsx}"
+        ]
       }
     },
     "typecheck": {

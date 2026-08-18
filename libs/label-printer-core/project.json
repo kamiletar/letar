@@ -28,13 +28,12 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
       "dependsOn": [
         "oxlint"
       ],
       "options": {
-        "lintFilePatterns": [
-          "libs/label-printer-core/**/*.ts"
+        "args": [
+          "**/*.ts"
         ]
       }
     },

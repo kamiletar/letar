@@ -24,10 +24,9 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": [
-          "libs/animatrona-shared/**/*.{ts,tsx}"
+        "args": [
+          "**/*.{ts,tsx}"
         ]
       }
     },

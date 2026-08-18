@@ -84,19 +84,15 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
       "dependsOn": [
         "oxlint"
       ],
       "metadata": {
-        "description": "Run ESLint on zenstack-form-plugin library",
-        "technologies": [
-          "eslint"
-        ]
+        "description": "Run ESLint on zenstack-form-plugin library"
       },
       "options": {
-        "lintFilePatterns": [
-          "libs/zenstack-form-plugin/**/*.ts"
+        "args": [
+          "**/*.ts"
         ]
       }
     },

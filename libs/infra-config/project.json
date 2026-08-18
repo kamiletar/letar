@@ -33,19 +33,15 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
       "dependsOn": [
         "oxlint"
       ],
       "metadata": {
-        "description": "Run ESLint on infra-config library",
-        "technologies": [
-          "eslint"
-        ]
+        "description": "Run ESLint on infra-config library"
       },
       "options": {
-        "lintFilePatterns": [
-          "libs/infra-config/**/*.{ts,tsx}"
+        "args": [
+          "**/*.{ts,tsx}"
         ]
       }
     },

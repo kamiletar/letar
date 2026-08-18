@@ -28,19 +28,15 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
       "dependsOn": [
         "oxlint"
       ],
       "metadata": {
-        "description": "Run ESLint on email library",
-        "technologies": [
-          "eslint"
-        ]
+        "description": "Run ESLint on email library"
       },
       "options": {
-        "lintFilePatterns": [
-          "libs/email/**/*.{ts,tsx}"
+        "args": [
+          "**/*.{ts,tsx}"
         ]
       }
     },

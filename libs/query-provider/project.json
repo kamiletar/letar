@@ -68,12 +68,8 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
       "dependsOn": [
         "oxlint"
-      ],
-      "outputs": [
-        "{options.outputFile}"
       ]
     }
   }

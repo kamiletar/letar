@@ -3,18 +3,24 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/animatrona-tv/src",
   "projectType": "application",
-  "tags": ["scope:animatrona", "type:tv", "owner:letar"],
+  "tags": [
+    "scope:animatrona",
+    "type:tv",
+    "owner:letar"
+  ],
   "targets": {
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "dprint fmt",
-        "cwd": "apps/animatrona-tv"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "apps/animatrona-tv"
       }
     },
     "start": {
@@ -51,9 +57,10 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": ["apps/animatrona-tv/**/*.{ts,tsx}"]
+        "args": [
+          "**/*.{ts,tsx}"
+        ]
       }
     },
     "typecheck": {

@@ -41,19 +41,15 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
       "dependsOn": [
         "oxlint"
       ],
       "metadata": {
-        "description": "Run ESLint on form-mcp library",
-        "technologies": [
-          "eslint"
-        ]
+        "description": "Run ESLint on form-mcp library"
       },
       "options": {
-        "lintFilePatterns": [
-          "libs/form-mcp/**/*.{ts,tsx}"
+        "args": [
+          "**/*.{ts,tsx}"
         ]
       }
     },

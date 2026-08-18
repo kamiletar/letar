@@ -3,24 +3,31 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/exoplayer-ass/src",
   "projectType": "library",
-  "tags": ["scope:shared", "type:native-module", "owner:letar"],
+  "tags": [
+    "scope:shared",
+    "type:native-module",
+    "owner:letar"
+  ],
   "targets": {
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "dprint fmt",
-        "cwd": "libs/exoplayer-ass"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "libs/exoplayer-ass"
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": ["libs/exoplayer-ass/**/*.{ts,tsx}"]
+        "args": [
+          "**/*.{ts,tsx}"
+        ]
       }
     },
     "typecheck": {

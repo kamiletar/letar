@@ -28,19 +28,15 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
       "dependsOn": [
         "oxlint"
       ],
       "metadata": {
-        "description": "Run ESLint on form-components library",
-        "technologies": [
-          "eslint"
-        ]
+        "description": "Run ESLint on form-components library"
       },
       "options": {
-        "lintFilePatterns": [
-          "libs/forms/**/*.{ts,tsx}"
+        "args": [
+          "**/*.{ts,tsx}"
         ]
       }
     },

@@ -46,19 +46,15 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
       "dependsOn": [
         "oxlint"
       ],
       "metadata": {
-        "description": "Run ESLint on deploy-mcp library",
-        "technologies": [
-          "eslint"
-        ]
+        "description": "Run ESLint on deploy-mcp library"
       },
       "options": {
-        "lintFilePatterns": [
-          "libs/deploy-mcp/**/*.{ts,tsx}"
+        "args": [
+          "**/*.{ts,tsx}"
         ]
       }
     },

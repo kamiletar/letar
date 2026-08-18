@@ -3,20 +3,33 @@
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/animatrona/main/src",
-  "tags": ["type:app", "scope:animatrona", "platform:electron", "owner:letar"],
+  "tags": [
+    "type:app",
+    "scope:animatrona",
+    "platform:electron",
+    "owner:letar"
+  ],
   "targets": {
     "build": {
       "executor": "@nx/esbuild:esbuild",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "platform": "node",
         "outputPath": "dist/apps/animatrona/main",
         "tsConfig": "apps/animatrona/main/tsconfig.json",
-        "format": ["cjs"],
+        "format": [
+          "cjs"
+        ],
         "bundle": true,
         "main": "apps/animatrona/main/src/index.ts",
-        "additionalEntryPoints": ["apps/animatrona/main/preload/index.ts"],
-        "external": ["electron"],
+        "additionalEntryPoints": [
+          "apps/animatrona/main/preload/index.ts"
+        ],
+        "external": [
+          "electron"
+        ],
         "esbuildOptions": {
           "sourcemap": true,
           "outExtension": {
@@ -35,24 +48,32 @@
     },
     "dev": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "animatrona-renderer:dev"
+      ],
       "options": {
-        "commands": ["nx build animatrona-main", "electron dist/apps/animatrona/main/index.js"],
+        "commands": [
+          "nx build animatrona-main",
+          "electron dist/apps/animatrona/main/index.js"
+        ],
         "parallel": false
-      },
-      "dependsOn": ["animatrona-renderer:dev"]
+      }
     },
     "serve": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "build"
+      ],
       "options": {
         "command": "electron dist/apps/animatrona/main/index.js",
         "cwd": "."
-      },
-      "dependsOn": ["build"]
+      }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": ["apps/animatrona/main/**/*.ts"]
+        "args": [
+          "**/*.ts"
+        ]
       }
     },
     "typecheck": {

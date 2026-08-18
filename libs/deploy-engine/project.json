@@ -41,19 +41,15 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
       "dependsOn": [
         "oxlint"
       ],
       "metadata": {
-        "description": "Run ESLint on deploy-engine library",
-        "technologies": [
-          "eslint"
-        ]
+        "description": "Run ESLint on deploy-engine library"
       },
       "options": {
-        "lintFilePatterns": [
-          "libs/deploy-engine/**/*.{ts,tsx}"
+        "args": [
+          "**/*.{ts,tsx}"
         ]
       }
     },

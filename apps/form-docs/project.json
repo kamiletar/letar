@@ -1,90 +1,138 @@
 {
   "name": "form-docs",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "implicitDependencies": [
+    "@letar/forms",
+    "@letar/chakra-provider",
+    "@letar/analytics",
+    "@letar/seo",
+    "@letar/glitchtip"
+  ],
   "sourceRoot": "apps/form-docs/src",
   "projectType": "application",
-  "tags": ["scope:docs", "type:app", "owner:letar"],
+  "tags": [
+    "scope:docs",
+    "type:app",
+    "owner:letar"
+  ],
   "targets": {
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "dprint fmt",
-        "cwd": "apps/form-docs"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "apps/form-docs"
       }
     },
     "oxlint": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.oxlintrc.json"
+      ],
+      "metadata": {
+        "description": "Fast lint with oxlint",
+        "technologies": [
+          "oxlint"
+        ]
+      },
       "options": {
         "command": "bunx oxlint src --config ../../.oxlintrc.json",
         "cwd": "apps/form-docs"
-      },
-      "cache": true,
-      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
-      "metadata": {
-        "description": "Fast lint with oxlint",
-        "technologies": ["oxlint"]
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "dependsOn": ["oxlint"],
+      "executor": "nx:run-commands",
+      "cache": true,
+      "dependsOn": [
+        "oxlint"
+      ],
+      "inputs": [
+        "default",
+        "^default",
+        "{workspaceRoot}/eslint.config.mjs",
+        "{projectRoot}/eslint.config.mjs",
+        {
+          "externalDependencies": [
+            "eslint"
+          ]
+        }
+      ],
       "options": {
-        "lintFilePatterns": ["apps/form-docs/**/*.{ts,tsx}"]
+        "cwd": "apps/form-docs",
+        "command": "eslint --no-error-on-unmatched-pattern **/*.{ts,tsx}"
       }
     },
     "typecheck:tsgo": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production",
+        "{projectRoot}/tsconfig.json",
+        "{workspaceRoot}/tsconfig.base.json"
+      ],
       "options": {
         "command": "tsgo --noEmit",
         "cwd": "apps/form-docs"
-      },
-      "cache": true,
-      "inputs": ["default", "^production", "{projectRoot}/tsconfig.json", "{workspaceRoot}/tsconfig.base.json"]
+      }
     },
     "build": {
       "executor": "nx:run-commands",
-      "options": {
-        "cwd": "apps/form-docs",
-        "tty": false,
-        "command": "next build --webpack"
-      },
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "cache": true,
       "inputs": [
         "default",
         "^production",
         {
-          "externalDependencies": ["next"]
+          "externalDependencies": [
+            "next"
+          ]
         }
       ],
       "outputs": [
         "{workspaceRoot}/apps/form-docs/.next/!(cache)/**/*",
         "{workspaceRoot}/apps/form-docs/.next/!(cache)"
       ],
-      "syncGenerators": ["@nx/js:typescript-sync"]
+      "syncGenerators": [
+        "@nx/js:typescript-sync"
+      ],
+      "options": {
+        "cwd": "apps/form-docs",
+        "tty": false,
+        "command": "next build --webpack"
+      }
     },
     "dev": {
       "executor": "nx:run-commands",
       "continuous": true,
+      "syncGenerators": [
+        "@nx/js:typescript-sync"
+      ],
       "options": {
         "cwd": "apps/form-docs",
         "command": "next dev --webpack"
-      },
-      "syncGenerators": ["@nx/js:typescript-sync"]
+      }
     },
     "start": {
       "executor": "nx:run-commands",
       "continuous": true,
+      "dependsOn": [
+        "build"
+      ],
       "options": {
         "cwd": "apps/form-docs",
         "command": "next start"
-      },
-      "dependsOn": ["build"]
+      }
     }
   }
 }

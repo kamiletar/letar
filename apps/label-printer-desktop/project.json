@@ -3,6 +3,8 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "implicitDependencies": [
     "@letar/query-provider",
+    "@letar/electron-storage",
+    "@letar/query-provider",
     "@letar/electron-storage"
   ],
   "sourceRoot": "apps/label-printer-desktop",
@@ -70,14 +72,22 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "^default",
+        "{workspaceRoot}/eslint.config.mjs",
+        "{projectRoot}/eslint.config.mjs",
+        {
+          "externalDependencies": [
+            "eslint"
+          ]
+        }
+      ],
       "options": {
-        "lintFilePatterns": [
-          "apps/label-printer-desktop/main/**/*.{ts,tsx}",
-          "apps/label-printer-desktop/renderer/**/*.{ts,tsx}",
-          "apps/label-printer-desktop/shared/**/*.{ts,tsx}",
-          "apps/label-printer-desktop/src/**/*.{ts,tsx}"
-        ]
+        "cwd": "apps/label-printer-desktop",
+        "command": "eslint --no-error-on-unmatched-pattern main/**/*.{ts,tsx} renderer/**/*.{ts,tsx} shared/**/*.{ts,tsx} src/**/*.{ts,tsx}"
       }
     },
     "typecheck:tsgo": {

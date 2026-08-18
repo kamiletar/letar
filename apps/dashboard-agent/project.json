@@ -77,9 +77,6 @@
         "cwd": "."
       }
     },
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    },
     "test": {
       "options": {
         "config": "vitest.config.ts"
