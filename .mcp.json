@@ -71,6 +71,16 @@
         "libs/studio-time-mcp/src/cli.ts"
       ]
     },
+    "studio-mcp": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "bunx",
+        "tsx",
+        "libs/studio-mcp/src/cli.ts"
+      ]
+    },
     "umami-mcp": {
       "type": "stdio",
       "command": "cmd",
