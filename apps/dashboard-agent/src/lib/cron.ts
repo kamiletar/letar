@@ -267,6 +267,18 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's2',
   },
   {
+    id: 'aboi-activation-reminder',
+    name: 'Activation Reminder (aboi)',
+    app: 'aboi',
+    endpoint: '/api/cron/activation-reminder',
+    // Должно прийти раньше посылки, пока ожидание на пике (lib/activation-reminder.ts) —
+    // часовой прогон, как у abandoned-cart, не суточный.
+    schedule: '0 * * * *',
+    description: 'Письмо «как активировать постер» сразу после отгрузки (§R.2 PLAN_MARKETING.md)',
+    enabled: true,
+    server: 's2',
+  },
+  {
     id: 'email-canary-check',
     name: 'Email Canary Check',
     app: 'dashboard-agent',
