@@ -256,6 +256,17 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's2',
   },
   {
+    id: 'aboi-review-request',
+    name: 'Review Request (aboi)',
+    app: 'aboi',
+    endpoint: '/api/cron/review-request',
+    // Порог — 3 дня после deliveredAt (lib/review-request.ts), суточный прогон достаточен.
+    schedule: '0 9 * * *',
+    description: 'Письмо с просьбой оставить отзыв через 3 дня после доставки (§R.1 PLAN_MARKETING.md)',
+    enabled: true,
+    server: 's2',
+  },
+  {
     id: 'email-canary-check',
     name: 'Email Canary Check',
     app: 'dashboard-agent',
