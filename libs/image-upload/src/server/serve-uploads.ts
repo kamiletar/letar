@@ -57,6 +57,14 @@ export function resolveUploadPath(root: string, segments: readonly string[]): Re
     return { ok: false, reason: 'invalid' }
   }
 
+  // Обратный слеш и буква диска (`C:\Windows\win.ini`) — Windows-абсолютный путь только
+  // для path.win32; на проде (Linux, path.posix) `path.resolve` ниже не распознаёт его как
+  // абсолютный и просто конкатенирует как один сегмент — traversal-проверка через
+  // path.relative() его не ловит. Отсекаем сами, не полагаясь на ОС рантайма.
+  if (segments.some((segment) => segment.includes('\\'))) {
+    return { ok: false, reason: 'traversal' }
+  }
+
   const rootAbs = path.resolve(root)
   // path.resolve, а не join: если сегмент окажется абсолютным путём
   // (`/etc/passwd`, `C:\Windows`), resolve прыгнет туда — и проверка ниже это поймает.
