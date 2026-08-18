@@ -12,6 +12,7 @@ export default defineConfig({
     globals: true,
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['node_modules', 'dist', '.next', 'e2e'],
+    passWithNoTests: true,
     coverage: {
       provider: 'v8',
       reportsDirectory: '../../coverage/apps/animatrona-tracker',
