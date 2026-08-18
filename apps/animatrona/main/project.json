@@ -70,10 +70,22 @@
       }
     },
     "lint": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "^default",
+        "{workspaceRoot}/eslint.config.mjs",
+        "{projectRoot}/eslint.config.mjs",
+        {
+          "externalDependencies": [
+            "eslint"
+          ]
+        }
+      ],
       "options": {
-        "args": [
-          "**/*.ts"
-        ]
+        "cwd": "apps/animatrona/main",
+        "command": "eslint --no-error-on-unmatched-pattern **/*.ts"
       }
     },
     "typecheck": {
