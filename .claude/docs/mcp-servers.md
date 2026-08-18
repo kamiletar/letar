@@ -4,23 +4,25 @@
 
 ## Доступные MCP серверы
 
-| MCP Сервер                  | Пакет                                               | Назначение                                                                                                                                                                                                                   |
-| --------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **nx-mcp**                  | `nx mcp`                                            | Операции с Nx воркспейсом, проекты, таргеты, документация                                                                                                                                                                    |
-| **next-devtools**           | `next-devtools-mcp`                                 | Документация Next.js 16, рантайм dev сервера, ошибки                                                                                                                                                                         |
-| **chakra-ui**               | `@chakra-ui/react-mcp`                              | Компоненты Chakra UI v3, props, примеры, темизация                                                                                                                                                                           |
-| **context7**                | `@upstash/context7-mcp`                             | Документация любых библиотек (React, TanStack, etc.)                                                                                                                                                                         |
-| **form-mcp**                | `@letar/form-mcp` (local) / `@letar/form-mcp` (npm) | 40+ field-компонентов, паттерны форм, @form.\* директивы                                                                                                                                                                     |
-| **deploy-mcp**              | `@letar/deploy-mcp` (local)                         | Деплой через dashboard-agent (SSH-туннель): deploy_app, deploy_status, git_status, agent_health                                                                                                                              |
-| **postgres-driving-school** | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД driving-school (read-only)                                                                                                                                                                                  |
-| **postgres-kami**           | `@modelcontextprotocol/server-postgres`             | SQL запросы к dev-БД kami (read-only)                                                                                                                                                                                        |
-| **postgres-kami-prod**      | `@modelcontextprotocol/server-postgres`             | Прод-БД kami через SSH-туннель, read-only юзер                                                                                                                                                                               |
-| **postgres-grandslamcup**   | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД grandslamcup (read-only)                                                                                                                                                                                    |
-| **postgres-studio**         | `@modelcontextprotocol/server-postgres`             | SQL запросы к dev-БД studio (read-only)                                                                                                                                                                                      |
-| **postgres-studio-prod**    | `@modelcontextprotocol/server-postgres`             | Прод-БД studio через SSH-туннель, read-only юзер                                                                                                                                                                             |
-| **studio-time-mcp**         | `libs/studio-time-mcp` (local)                      | Тайм-трекер studio: `time_start`/`time_switch`/`time_stop`/`time_pause`/`time_status`/`time_note`/`time_log`. Когда стартовать/останавливать — см. [time-tracking.md](/.claude/rules/time-tracking.md)                       |
-| **synth-mcp**               | `apps/synth/src/mcp` (local)                        | Демонстрация синтезатора агентом-ментором для владельца: `load_patch`/`play_demo`/`send_midi_sequence`/`generate_chord_pattern`/`highlight_param`/`focus_section`/`dim_all`. Контекст роли — см. `.claude/commands/synth.md` |
-| **umami-mcp**               | `libs/umami-mcp` (local)                            | Self-hosted аналитика Umami через REST API (без ручного логина в панель): `umami_list_websites`/`umami_find_website`/`umami_get_website_stats`/`umami_create_website`                                                        |
+| MCP Сервер                   | Пакет                                               | Назначение                                                                                                                                                                                                                   |
+| ---------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **nx-mcp**                   | `nx mcp`                                            | Операции с Nx воркспейсом, проекты, таргеты, документация                                                                                                                                                                    |
+| **next-devtools**            | `next-devtools-mcp`                                 | Документация Next.js 16, рантайм dev сервера, ошибки                                                                                                                                                                         |
+| **chakra-ui**                | `@chakra-ui/react-mcp`                              | Компоненты Chakra UI v3, props, примеры, темизация                                                                                                                                                                           |
+| **context7**                 | `@upstash/context7-mcp`                             | Документация любых библиотек (React, TanStack, etc.)                                                                                                                                                                         |
+| **form-mcp**                 | `@letar/form-mcp` (local) / `@letar/form-mcp` (npm) | 40+ field-компонентов, паттерны форм, @form.\* директивы                                                                                                                                                                     |
+| **deploy-mcp**               | `@letar/deploy-mcp` (local)                         | Деплой через dashboard-agent (SSH-туннель): deploy_app, deploy_status, git_status, agent_health                                                                                                                              |
+| **postgres-driving-school**  | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД driving-school (read-only)                                                                                                                                                                                  |
+| **postgres-kami**            | `@modelcontextprotocol/server-postgres`             | SQL запросы к dev-БД kami (read-only)                                                                                                                                                                                        |
+| **postgres-kami-prod**       | `@modelcontextprotocol/server-postgres`             | Прод-БД kami через SSH-туннель, read-only юзер                                                                                                                                                                               |
+| **postgres-grandslamcup**    | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД grandslamcup (read-only)                                                                                                                                                                                    |
+| **postgres-studio**          | `@modelcontextprotocol/server-postgres`             | SQL запросы к dev-БД studio (read-only)                                                                                                                                                                                      |
+| **postgres-studio-prod**     | `@modelcontextprotocol/server-postgres`             | Прод-БД studio через SSH-туннель, read-only юзер                                                                                                                                                                             |
+| **postgres-domwellbes**      | `@modelcontextprotocol/server-postgres`             | SQL запросы к dev-БД domwellbes (read-only)                                                                                                                                                                                  |
+| **postgres-domwellbes-prod** | `@modelcontextprotocol/server-postgres`             | Прод-БД domwellbes через SSH-туннель, read-only юзер                                                                                                                                                                         |
+| **studio-time-mcp**          | `libs/studio-time-mcp` (local)                      | Тайм-трекер studio: `time_start`/`time_switch`/`time_stop`/`time_pause`/`time_status`/`time_note`/`time_log`. Когда стартовать/останавливать — см. [time-tracking.md](/.claude/rules/time-tracking.md)                       |
+| **synth-mcp**                | `apps/synth/src/mcp` (local)                        | Демонстрация синтезатора агентом-ментором для владельца: `load_patch`/`play_demo`/`send_midi_sequence`/`generate_chord_pattern`/`highlight_param`/`focus_section`/`dim_all`. Контекст роли — см. `.claude/commands/synth.md` |
+| **umami-mcp**                | `libs/umami-mcp` (local)                            | Self-hosted аналитика Umami через REST API (без ручного логина в панель): `umami_list_websites`/`umami_find_website`/`umami_get_website_stats`/`umami_create_website`                                                        |
 
 ## Воркфлоу работы с Context7
 
@@ -336,15 +338,17 @@ docker compose pull && docker compose up -d
 
 ### Доступные БД
 
-| MCP сервер                 | БД             | Порт                   | Read-only юзер |
-| -------------------------- | -------------- | ---------------------- | -------------- |
-| `postgres-driving-school`  | driving_school | 5432 (dev)             | —              |
-| `postgres-kami`            | lena_kami      | 5437 (dev)             | —              |
-| `postgres-kami-prod`       | lena_kami      | туннель 5455 → s2:5437 | `kami_ro`      |
-| `postgres-kami-prod-write` | lena_kami      | туннель 5455 → s2:5437 | нет (полный)   |
-| `postgres-grandslamcup`    | grandslamcup   | 5453 (dev)             | —              |
-| `postgres-studio`          | studio_dev     | 5446 (dev)             | —              |
-| `postgres-studio-prod`     | studio         | туннель 5456 → s2:5455 | `studio_ro`    |
+| MCP сервер                 | БД             | Порт                              | Read-only юзер |
+| -------------------------- | -------------- | --------------------------------- | -------------- |
+| `postgres-driving-school`  | driving_school | 5432 (dev)                        | —              |
+| `postgres-kami`            | lena_kami      | 5437 (dev)                        | —              |
+| `postgres-kami-prod`       | lena_kami      | туннель 5455 → s2:5437            | `kami_ro`      |
+| `postgres-kami-prod-write` | lena_kami      | туннель 5455 → s2:5437            | нет (полный)   |
+| `postgres-grandslamcup`    | grandslamcup   | 5453 (dev)                        | —              |
+| `postgres-studio`          | studio_dev     | 5446 (dev)                        | —              |
+| `postgres-studio-prod`     | studio         | туннель 5456 → s2:5455            | `studio_ro`    |
+| `postgres-domwellbes`      | domwellbes     | 5444 (dev)                        | —              |
+| `postgres-domwellbes-prod` | domwellbes     | туннель 5457 → 185.28.85.195:5456 | —              |
 
 Остальные БД (mandala, archetest, time, animatrona-tracker, dashboard, form-develop) можно добавить в `.mcp.json` по аналогии — см. скилл `mcp-postgres-setup`.
 

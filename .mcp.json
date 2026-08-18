@@ -180,6 +180,16 @@
         "root@185.28.85.195",
         "5456"
       ]
+    },
+    "postgres-domwellbes": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        ".claude/mcp/pg-wrapper.mjs",
+        "apps/domwellbes/.env.local",
+        "--pro",
+        "restricted"
+      ]
     }
   }
 }
