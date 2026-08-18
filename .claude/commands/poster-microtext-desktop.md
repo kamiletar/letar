@@ -8,8 +8,10 @@ description: Воркфлоу разработки Electron-приложения
 
 ## Инициализация
 
-1. Прочитай `.claude/rules/electron.md` для общих правил Electron-приложений
-2. Прочитай `apps/poster-microtext-desktop/PLAN.md` для текущего состояния задач
+1. Зарегистрируйся в Agent Mail и стартуй таймер — см. `.claude/rules/app-workflow.md`
+   (agent_name `poster-microtext-desktop-dev`)
+2. Прочитай `.claude/rules/electron.md` для общих правил Electron-приложений
+3. Прочитай `apps/poster-microtext-desktop/PLAN.md` для текущего состояния задач
 
 ## Действия
 
@@ -34,10 +36,11 @@ description: Воркфлоу разработки Electron-приложения
 
 ## После завершения задачи
 
-1. Обнови `PLAN.md` — отметь задачу как выполненную
-2. Обнови `README.md`, если менялся интерфейс/параметры
-3. Обнови `package.json` — увеличь версию (semver)
-4. Коммить и пушить **внутри submodule** (`cd apps/poster-microtext-desktop`), затем
+Общий чеклист — `.claude/rules/app-workflow.md` (обнови PLAN.md/CHANGELOG.md/версию,
+формат/лайнт/тайпчек, коммит). Специфика этого приложения:
+
+1. Обнови `README.md`, если менялся интерфейс/параметры
+2. Коммить и пушить **внутри submodule** (`cd apps/poster-microtext-desktop`), затем
    в `letar` — bump SHA (`git add apps/poster-microtext-desktop && git commit`)
 
 ## Деплой
