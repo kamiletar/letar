@@ -3,76 +3,98 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/forms/src",
   "projectType": "library",
-  "tags": ["scope:shared", "type:ui", "owner:letar"],
+  "tags": [
+    "scope:shared",
+    "type:ui",
+    "owner:letar"
+  ],
   "targets": {
     "oxlint": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.oxlintrc.json"
+      ],
+      "metadata": {
+        "description": "Fast lint with oxlint",
+        "technologies": [
+          "oxlint"
+        ]
+      },
       "options": {
         "command": "bunx oxlint src --config ../../.oxlintrc.json",
         "cwd": "libs/forms"
-      },
-      "cache": true,
-      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
-      "metadata": {
-        "description": "Fast lint with oxlint",
-        "technologies": ["oxlint"]
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "dependsOn": ["oxlint"],
-      "options": {
-        "lintFilePatterns": ["libs/forms/**/*.{ts,tsx}"]
-      },
+      "dependsOn": [
+        "oxlint"
+      ],
       "metadata": {
         "description": "Run ESLint on form-components library",
-        "technologies": ["eslint"]
+        "technologies": [
+          "eslint"
+        ]
+      },
+      "options": {
+        "lintFilePatterns": [
+          "libs/forms/**/*.{ts,tsx}"
+        ]
       }
     },
     "lint:fix": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "eslint . --fix",
-        "cwd": "libs/forms"
-      },
       "cache": false,
       "metadata": {
         "description": "Run ESLint with auto-fix",
-        "technologies": ["eslint"]
+        "technologies": [
+          "eslint"
+        ]
+      },
+      "options": {
+        "command": "eslint . --fix",
+        "cwd": "libs/forms"
       }
     },
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "dprint fmt",
-        "cwd": "libs/forms"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "libs/forms"
       }
     },
     "format:check": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/dprint.json"
+      ],
+      "metadata": {
+        "description": "Check file formatting with dprint",
+        "technologies": [
+          "dprint"
+        ]
+      },
       "options": {
         "command": "dprint check",
         "cwd": "libs/forms"
-      },
-      "cache": true,
-      "inputs": ["default", "{workspaceRoot}/dprint.json"],
-      "metadata": {
-        "description": "Check file formatting with dprint",
-        "technologies": ["dprint"]
       }
     },
     "typecheck": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
-        "cwd": "libs/forms"
-      },
-      "dependsOn": ["^typecheck"],
+      "dependsOn": [
+        "^typecheck"
+      ],
       "cache": true,
       "inputs": [
         "default",
@@ -88,16 +110,20 @@
       ],
       "metadata": {
         "description": "Type-check library and generate declarations",
-        "technologies": ["typescript"]
+        "technologies": [
+          "typescript"
+        ]
+      },
+      "options": {
+        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/forms"
       }
     },
     "typecheck:tsgo": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "tsgo --build tsconfig.lib.json --emitDeclarationOnly",
-        "cwd": "libs/forms"
-      },
-      "dependsOn": ["^typecheck:tsgo"],
+      "dependsOn": [
+        "^typecheck:tsgo"
+      ],
       "cache": true,
       "inputs": [
         "default",
@@ -113,29 +139,53 @@
       ],
       "metadata": {
         "description": "Type-check library and generate declarations with tsgo (38x faster)",
-        "technologies": ["typescript", "tsgo"]
+        "technologies": [
+          "typescript",
+          "tsgo"
+        ]
+      },
+      "options": {
+        "command": "tsgo --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/forms"
       }
     },
     "validate": {
       "executor": "nx:noop",
-      "dependsOn": ["lint", "format:check", "typecheck"],
+      "dependsOn": [
+        "lint",
+        "format:check",
+        "typecheck"
+      ],
       "metadata": {
         "description": "Run all validation checks"
       }
     },
     "test": {
-      "executor": "@nx/vitest:test",
-      "outputs": ["{workspaceRoot}/coverage/libs/forms"],
-      "options": {
-        "config": "libs/forms/vitest.config.ts"
-      },
       "metadata": {
-        "description": "Run unit tests",
-        "technologies": ["vitest"]
+        "description": "Run unit tests"
+      },
+      "options": {
+        "config": "vitest.config.ts"
       }
     },
     "build:npm": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{projectRoot}/tsup.config.ts",
+        "{projectRoot}/package.publish.json",
+        "{projectRoot}/scripts/write-publish-package-json.mjs"
+      ],
+      "outputs": [
+        "{projectRoot}/dist"
+      ],
+      "metadata": {
+        "description": "Сборка @letar/forms для публикации на npm",
+        "technologies": [
+          "tsup"
+        ]
+      },
       "options": {
         "commands": [
           "tsup",
@@ -147,57 +197,58 @@
         ],
         "cwd": "libs/forms",
         "parallel": false
-      },
-      "cache": true,
-      "inputs": [
-        "default",
-        "{projectRoot}/tsup.config.ts",
-        "{projectRoot}/package.publish.json",
-        "{projectRoot}/scripts/write-publish-package-json.mjs"
-      ],
-      "outputs": ["{projectRoot}/dist"],
-      "metadata": {
-        "description": "Сборка @letar/forms для публикации на npm",
-        "technologies": ["tsup"]
       }
     },
     "bench": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "vitest bench --config vitest.config.ts --run",
-        "cwd": "libs/forms"
-      },
       "cache": false,
       "metadata": {
         "description": "Бенчмарки производительности (ре-рендеры)",
-        "technologies": ["vitest"]
+        "technologies": [
+          "vitest"
+        ]
+      },
+      "options": {
+        "command": "vitest bench --config vitest.config.ts --run",
+        "cwd": "libs/forms"
       }
     },
     "size": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "build:npm"
+      ],
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/dist/**/*.js",
+        "{projectRoot}/.size-limit.json"
+      ],
+      "metadata": {
+        "description": "Проверка размера bundle",
+        "technologies": [
+          "size-limit"
+        ]
+      },
       "options": {
         "command": "bun size-limit --config .size-limit.json",
         "cwd": "libs/forms"
-      },
-      "dependsOn": ["build:npm"],
-      "cache": true,
-      "inputs": ["{projectRoot}/dist/**/*.js", "{projectRoot}/.size-limit.json"],
-      "metadata": {
-        "description": "Проверка размера bundle",
-        "technologies": ["size-limit"]
       }
     },
     "publish:npm": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "npm publish --access public",
-        "cwd": "libs/forms/dist"
-      },
-      "dependsOn": ["build:npm"],
+      "dependsOn": [
+        "build:npm"
+      ],
       "cache": false,
       "metadata": {
         "description": "Публикация @letar/forms на npmjs.com",
-        "technologies": ["npm"]
+        "technologies": [
+          "npm"
+        ]
+      },
+      "options": {
+        "command": "npm publish --access public",
+        "cwd": "libs/forms/dist"
       }
     }
   }

@@ -1,66 +1,106 @@
 {
   "name": "auth-hub",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "implicitDependencies": ["@letar/chakra-provider", "@letar/analytics"],
+  "implicitDependencies": [
+    "@letar/chakra-provider",
+    "@letar/analytics",
+    "@letar/ui",
+    "@letar/consent",
+    "@letar/glitchtip",
+    "@letar/chakra-provider",
+    "@letar/analytics"
+  ],
   "sourceRoot": "apps/auth-hub/src",
   "projectType": "application",
-  "tags": ["type:app", "scope:auth-hub", "owner:letar"],
+  "tags": [
+    "type:app",
+    "scope:auth-hub",
+    "owner:letar"
+  ],
   "targets": {
     "db:generate": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "prisma generate",
-        "cwd": "apps/auth-hub"
-      },
       "cache": true,
       "inputs": [
         "{projectRoot}/src/generated/schema.prisma",
         "{projectRoot}/schema.zmodel",
         "{projectRoot}/prisma.config.ts"
       ],
-      "outputs": ["{projectRoot}/src/generated/prisma"],
+      "outputs": [
+        "{projectRoot}/src/generated/prisma"
+      ],
       "metadata": {
         "description": "Generate Prisma Client from schema",
-        "technologies": ["prisma"]
+        "technologies": [
+          "prisma"
+        ]
+      },
+      "options": {
+        "command": "prisma generate",
+        "cwd": "apps/auth-hub"
       }
     },
     "db:push": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "db:generate"
+      ],
+      "metadata": {
+        "description": "Push Prisma schema changes to database (development)",
+        "technologies": [
+          "prisma"
+        ]
+      },
       "options": {
         "command": "prisma db push",
         "cwd": "apps/auth-hub"
-      },
-      "dependsOn": ["db:generate"],
-      "metadata": {
-        "description": "Push Prisma schema changes to database (development)",
-        "technologies": ["prisma"]
       }
     },
     "db:migrate": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "db:generate"
+      ],
+      "metadata": {
+        "description": "Create and apply database migration",
+        "technologies": [
+          "prisma"
+        ]
+      },
       "options": {
         "command": "cross-env CI= VERCEL= GITHUB_ACTIONS= GITLAB= NETLIFY= HEROKU= prisma migrate dev",
         "cwd": "apps/auth-hub"
-      },
-      "dependsOn": ["db:generate"],
-      "metadata": {
-        "description": "Create and apply database migration",
-        "technologies": ["prisma"]
       }
     },
     "db:studio": {
       "executor": "nx:run-commands",
+      "metadata": {
+        "description": "Open Prisma Studio database GUI",
+        "technologies": [
+          "prisma"
+        ]
+      },
       "options": {
         "command": "prisma studio",
         "cwd": "apps/auth-hub"
-      },
-      "metadata": {
-        "description": "Open Prisma Studio database GUI",
-        "technologies": ["prisma"]
       }
     },
     "zenstack:generate": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/schema.zmodel"
+      ],
+      "outputs": [
+        "{projectRoot}/src/generated"
+      ],
+      "metadata": {
+        "description": "Generate Prisma schema from ZenStack",
+        "technologies": [
+          "zenstack",
+          "prisma"
+        ]
+      },
       "options": {
         "commands": [
           "zenstack generate",
@@ -70,33 +110,24 @@
         ],
         "cwd": "apps/auth-hub",
         "parallel": false
-      },
-      "cache": true,
-      "inputs": ["{projectRoot}/schema.zmodel"],
-      "outputs": ["{projectRoot}/src/generated"],
-      "metadata": {
-        "description": "Generate Prisma schema from ZenStack",
-        "technologies": ["zenstack", "prisma"]
       }
     },
     "test": {
-      "dependsOn": ["zenstack:generate"],
-      "executor": "@nx/vitest:test",
-      "options": {
-        "config": "apps/auth-hub/vitest.config.ts"
-      },
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "metadata": {
-        "description": "Run unit tests with Vitest",
-        "technologies": ["vitest"]
+        "description": "Run unit tests with Vitest"
+      },
+      "options": {
+        "config": "vitest.config.ts"
       }
     },
     "typecheck": {
-      "dependsOn": ["zenstack:generate"],
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "executor": "nx:run-commands",
-      "options": {
-        "command": "tsc --noEmit",
-        "cwd": "apps/auth-hub"
-      },
       "cache": true,
       "inputs": [
         "default",
@@ -106,16 +137,20 @@
       ],
       "metadata": {
         "description": "Type-check TypeScript files",
-        "technologies": ["typescript"]
+        "technologies": [
+          "typescript"
+        ]
+      },
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "apps/auth-hub"
       }
     },
     "typecheck:tsgo": {
-      "dependsOn": ["zenstack:generate"],
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "executor": "nx:run-commands",
-      "options": {
-        "command": "tsgo --noEmit",
-        "cwd": "apps/auth-hub"
-      },
       "cache": true,
       "inputs": [
         "default",
@@ -125,82 +160,109 @@
       ],
       "metadata": {
         "description": "Type-check TypeScript files with tsgo (38x faster)",
-        "technologies": ["typescript", "tsgo"]
+        "technologies": [
+          "typescript",
+          "tsgo"
+        ]
+      },
+      "options": {
+        "command": "tsgo --noEmit",
+        "cwd": "apps/auth-hub"
       }
     },
     "oxlint": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.oxlintrc.json"
+      ],
+      "metadata": {
+        "description": "Fast lint with oxlint (50-100x faster than ESLint)",
+        "technologies": [
+          "oxlint"
+        ]
+      },
       "options": {
         "command": "bunx oxlint src --config ../../.oxlintrc.json",
         "cwd": "apps/auth-hub"
-      },
-      "cache": true,
-      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
-      "metadata": {
-        "description": "Fast lint with oxlint (50-100x faster than ESLint)",
-        "technologies": ["oxlint"]
       }
     },
     "lint": {
-      "dependsOn": ["oxlint"]
+      "dependsOn": [
+        "oxlint"
+      ]
     },
     "lint:fix": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "eslint . --fix",
-        "cwd": "apps/auth-hub"
-      },
       "cache": false,
       "metadata": {
         "description": "Run ESLint with auto-fix",
-        "technologies": ["eslint"]
+        "technologies": [
+          "eslint"
+        ]
+      },
+      "options": {
+        "command": "eslint . --fix",
+        "cwd": "apps/auth-hub"
       }
     },
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "bunx dprint fmt \"**/*.{ts,tsx,js,jsx,json,md}\"",
-        "cwd": "apps/auth-hub"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint (~30x faster than Prettier)",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "bunx dprint fmt \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "apps/auth-hub"
       }
     },
     "db:seed": {
       "executor": "nx:run-commands",
+      "metadata": {
+        "description": "Seed OIDC clients into oauthApplication table",
+        "technologies": [
+          "prisma"
+        ]
+      },
       "options": {
         "command": "bun run prisma/seed.ts",
         "cwd": "apps/auth-hub"
-      },
-      "metadata": {
-        "description": "Seed OIDC clients into oauthApplication table",
-        "technologies": ["prisma"]
       }
     },
     "script:encrypt-secrets": {
       "executor": "nx:run-commands",
+      "metadata": {
+        "description": "Encrypt OauthApplication.clientSecret at-rest (Этап 8). DRY RUN по умолчанию, добавь -- --execute для реального запуска.",
+        "technologies": [
+          "crypto"
+        ]
+      },
       "options": {
         "command": "bun run scripts/encrypt-client-secrets.ts",
         "cwd": "apps/auth-hub"
-      },
-      "metadata": {
-        "description": "Encrypt OauthApplication.clientSecret at-rest (Этап 8). DRY RUN по умолчанию, добавь -- --execute для реального запуска.",
-        "technologies": ["crypto"]
       }
     },
     "format:check": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/dprint.json"
+      ],
+      "metadata": {
+        "description": "Check file formatting with dprint",
+        "technologies": [
+          "dprint"
+        ]
+      },
       "options": {
         "command": "bunx dprint check \"**/*.{ts,tsx,js,jsx,json,md}\"",
         "cwd": "apps/auth-hub"
-      },
-      "cache": true,
-      "inputs": ["default", "{workspaceRoot}/dprint.json"],
-      "metadata": {
-        "description": "Check file formatting with dprint",
-        "technologies": ["dprint"]
       }
     }
   }

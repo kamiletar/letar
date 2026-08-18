@@ -1,9 +1,17 @@
 {
   "name": "label-printer-desktop",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "implicitDependencies": [
+    "@letar/query-provider",
+    "@letar/electron-storage"
+  ],
   "sourceRoot": "apps/label-printer-desktop",
   "projectType": "application",
-  "tags": ["type:app", "scope:label-printer", "owner:letar"],
+  "tags": [
+    "type:app",
+    "scope:label-printer",
+    "owner:letar"
+  ],
   "targets": {
     "dev": {
       "command": "node scripts/dev.js",
@@ -13,15 +21,24 @@
     },
     "build": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "options": {
-        "commands": ["cd renderer && next build", "npx webpack --config main/webpack.config.js"],
+        "commands": [
+          "cd renderer && next build",
+          "npx webpack --config main/webpack.config.js"
+        ],
         "cwd": "apps/label-printer-desktop",
         "parallel": false
-      },
-      "dependsOn": ["zenstack:generate"]
+      }
     },
     "build:win": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "zenstack:generate",
+        "db:template"
+      ],
       "options": {
         "commands": [
           "cd renderer && next build",
@@ -32,11 +49,14 @@
         ],
         "cwd": "apps/label-printer-desktop",
         "parallel": false
-      },
-      "dependsOn": ["zenstack:generate", "db:template"]
+      }
     },
     "build:linux": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "zenstack:generate",
+        "db:template"
+      ],
       "options": {
         "commands": [
           "cd renderer && next build",
@@ -47,8 +67,7 @@
         ],
         "cwd": "apps/label-printer-desktop",
         "parallel": false
-      },
-      "dependsOn": ["zenstack:generate", "db:template"]
+      }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
@@ -62,23 +81,36 @@
       }
     },
     "typecheck:tsgo": {
-      "dependsOn": ["zenstack:generate"],
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "command": "tsgo --project apps/label-printer-desktop/tsconfig.json --noEmit"
     },
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "dprint fmt **/*.{ts,tsx,json}",
-        "cwd": "apps/label-printer-desktop"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "dprint fmt **/*.{ts,tsx,json}",
+        "cwd": "apps/label-printer-desktop"
       }
     },
     "zenstack:generate": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "^build",
+        {
+          "projects": [
+            "@letar/zenstack-form-plugin"
+          ],
+          "target": "build"
+        }
+      ],
       "options": {
         "commands": [
           "zenstack generate",
@@ -87,56 +119,60 @@
         ],
         "cwd": "apps/label-printer-desktop",
         "parallel": false
-      },
-      "dependsOn": [
-        "^build",
-        {
-          "projects": ["@letar/zenstack-form-plugin"],
-          "target": "build"
-        }
-      ]
+      }
     },
     "db:template": {
       "command": "bun run scripts/db-template-safe.ts",
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "options": {
         "cwd": "apps/label-printer-desktop"
-      },
-      "dependsOn": ["zenstack:generate"]
+      }
     },
     "db:push": {
       "command": "prisma db push",
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "options": {
         "cwd": "apps/label-printer-desktop"
-      },
-      "dependsOn": ["zenstack:generate"]
+      }
     },
     "db:migrate": {
       "command": "prisma migrate dev",
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "options": {
         "cwd": "apps/label-printer-desktop"
-      },
-      "dependsOn": ["zenstack:generate"]
+      }
     },
     "db:studio": {
       "command": "prisma studio",
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "options": {
         "cwd": "apps/label-printer-desktop"
-      },
-      "dependsOn": ["zenstack:generate"]
+      }
     },
     "db:seed": {
       "command": "ts-node prisma/seed.ts",
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "options": {
         "cwd": "apps/label-printer-desktop"
-      },
-      "dependsOn": ["zenstack:generate"]
+      }
     },
     "test": {
-      "dependsOn": ["zenstack:generate"],
-      "executor": "@nx/vitest:test",
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "options": {
-        "config": "apps/label-printer-desktop/vitest.config.ts",
-        "reportsDirectory": "../../coverage/apps/label-printer-desktop"
+        "config": "vitest.config.ts",
+        "coverage.reportsDirectory": "../../coverage/apps/label-printer-desktop"
       }
     }
   }

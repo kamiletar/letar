@@ -6,163 +6,235 @@
     "@letar/analytics",
     "@letar/consent",
     "animatrona-ui",
+    "@letar/redis-client",
+    "@letar/glitchtip",
+    "@letar/chakra-provider",
+    "@letar/analytics",
+    "@letar/consent",
+    "animatrona-ui",
     "@letar/redis-client"
   ],
   "sourceRoot": "apps/animatrona-tracker/src",
   "projectType": "application",
-  "tags": ["type:app", "scope:animatrona-tracker", "owner:letar"],
+  "tags": [
+    "type:app",
+    "scope:animatrona-tracker",
+    "owner:letar"
+  ],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "^build"
+      ],
+      "cache": false,
+      "outputs": [
+        "{workspaceRoot}/apps/animatrona-tracker/.next"
+      ],
+      "metadata": {
+        "description": "Build production bundle (без Turbopack из-за бага с гидратацией Emotion, см. .claude/docs/nextjs16-turbopack-default-emotion-hydration.md)",
+        "technologies": [
+          "next"
+        ]
+      },
       "options": {
         "command": "next build --webpack",
         "cwd": "apps/animatrona-tracker"
-      },
-      "dependsOn": ["^build"],
-      "cache": false,
-      "outputs": ["{workspaceRoot}/apps/animatrona-tracker/.next"],
-      "metadata": {
-        "description": "Build production bundle (без Turbopack из-за бага с гидратацией Emotion, см. .claude/docs/nextjs16-turbopack-default-emotion-hydration.md)",
-        "technologies": ["next"]
       }
     },
     "dev": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "next dev --webpack",
-        "cwd": "apps/animatrona-tracker"
-      },
       "cache": false,
       "metadata": {
         "description": "Start development server (без Turbopack из-за бага с гидратацией Emotion, см. .claude/docs/nextjs16-turbopack-default-emotion-hydration.md)",
-        "technologies": ["next"]
+        "technologies": [
+          "next"
+        ]
+      },
+      "options": {
+        "command": "next dev --webpack",
+        "cwd": "apps/animatrona-tracker"
       }
     },
     "start": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "next start",
-        "cwd": "apps/animatrona-tracker"
-      },
-      "dependsOn": ["build"],
+      "dependsOn": [
+        "build"
+      ],
       "cache": false,
       "metadata": {
         "description": "Start production server",
-        "technologies": ["next"]
+        "technologies": [
+          "next"
+        ]
+      },
+      "options": {
+        "command": "next start",
+        "cwd": "apps/animatrona-tracker"
       }
     },
     "db:generate": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "prisma generate",
-        "cwd": "apps/animatrona-tracker"
-      },
       "cache": true,
       "inputs": [
         "{projectRoot}/src/generated/schema.prisma",
         "{projectRoot}/schema.zmodel",
         "{projectRoot}/prisma.config.ts"
       ],
-      "outputs": ["{projectRoot}/src/generated/prisma"],
+      "outputs": [
+        "{projectRoot}/src/generated/prisma"
+      ],
       "metadata": {
         "description": "Generate Prisma Client from schema",
-        "technologies": ["prisma"]
+        "technologies": [
+          "prisma"
+        ]
+      },
+      "options": {
+        "command": "prisma generate",
+        "cwd": "apps/animatrona-tracker"
       }
     },
     "db:push": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "db:generate"
+      ],
+      "metadata": {
+        "description": "Push Prisma schema changes to database (development)",
+        "technologies": [
+          "prisma"
+        ]
+      },
       "options": {
         "command": "prisma db push",
         "cwd": "apps/animatrona-tracker"
-      },
-      "dependsOn": ["db:generate"],
-      "metadata": {
-        "description": "Push Prisma schema changes to database (development)",
-        "technologies": ["prisma"]
       }
     },
     "db:push:data-loss": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "db:generate"
+      ],
+      "metadata": {
+        "description": "Push Prisma schema changes to database (development)",
+        "technologies": [
+          "prisma"
+        ]
+      },
       "options": {
         "command": "prisma db push --accept-data-loss --force-reset",
         "cwd": "apps/animatrona-tracker"
-      },
-      "dependsOn": ["db:generate"],
-      "metadata": {
-        "description": "Push Prisma schema changes to database (development)",
-        "technologies": ["prisma"]
       }
     },
     "db:migrate": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "db:generate"
+      ],
+      "metadata": {
+        "description": "Create and apply database migration",
+        "technologies": [
+          "prisma"
+        ]
+      },
       "options": {
         "command": "cross-env CI= VERCEL= GITHUB_ACTIONS= GITLAB= NETLIFY= HEROKU= prisma migrate dev",
         "cwd": "apps/animatrona-tracker"
-      },
-      "dependsOn": ["db:generate"],
-      "metadata": {
-        "description": "Create and apply database migration",
-        "technologies": ["prisma"]
       }
     },
     "db:migrate:deploy": {
       "executor": "nx:run-commands",
+      "metadata": {
+        "description": "Apply pending migrations (production)",
+        "technologies": [
+          "prisma"
+        ]
+      },
       "options": {
         "command": "prisma migrate deploy",
         "cwd": "apps/animatrona-tracker"
-      },
-      "metadata": {
-        "description": "Apply pending migrations (production)",
-        "technologies": ["prisma"]
       }
     },
     "db:studio": {
       "executor": "nx:run-commands",
+      "metadata": {
+        "description": "Open Prisma Studio database GUI",
+        "technologies": [
+          "prisma"
+        ]
+      },
       "options": {
         "command": "prisma studio",
         "cwd": "apps/animatrona-tracker"
-      },
-      "metadata": {
-        "description": "Open Prisma Studio database GUI",
-        "technologies": ["prisma"]
       }
     },
     "db:seed": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "db:generate"
+      ],
+      "metadata": {
+        "description": "Seed database with test data",
+        "technologies": [
+          "prisma"
+        ]
+      },
       "options": {
         "command": "prisma db seed",
         "cwd": "apps/animatrona-tracker"
-      },
-      "dependsOn": ["db:generate"],
-      "metadata": {
-        "description": "Seed database with test data",
-        "technologies": ["prisma"]
       }
     },
     "db:reset": {
       "executor": "nx:run-commands",
+      "metadata": {
+        "description": "Reset database and apply all migrations",
+        "technologies": [
+          "prisma"
+        ]
+      },
       "options": {
         "command": "prisma migrate reset",
         "cwd": "apps/animatrona-tracker"
-      },
-      "metadata": {
-        "description": "Reset database and apply all migrations",
-        "technologies": ["prisma"]
       }
     },
     "db:reset:data-loss": {
       "executor": "nx:run-commands",
+      "metadata": {
+        "description": "Reset database and apply all migrations",
+        "technologies": [
+          "prisma"
+        ]
+      },
       "options": {
         "command": "prisma migrate reset --force",
         "cwd": "apps/animatrona-tracker"
-      },
-      "metadata": {
-        "description": "Reset database and apply all migrations",
-        "technologies": ["prisma"]
       }
     },
     "zenstack:generate": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        {
+          "projects": [
+            "@letar/zenstack-form-plugin"
+          ],
+          "target": "build"
+        }
+      ],
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/schema.zmodel"
+      ],
+      "outputs": [
+        "{projectRoot}/src/generated"
+      ],
+      "metadata": {
+        "description": "Generate Prisma schema from ZenStack",
+        "technologies": [
+          "zenstack",
+          "prisma"
+        ]
+      },
       "options": {
         "commands": [
           "zenstack generate",
@@ -171,92 +243,95 @@
         ],
         "cwd": "apps/animatrona-tracker",
         "parallel": false
-      },
-      "dependsOn": [
-        {
-          "projects": ["@letar/zenstack-form-plugin"],
-          "target": "build"
-        }
-      ],
-      "cache": true,
-      "inputs": ["{projectRoot}/schema.zmodel"],
-      "outputs": ["{projectRoot}/src/generated"],
-      "metadata": {
-        "description": "Generate Prisma schema from ZenStack",
-        "technologies": ["zenstack", "prisma"]
       }
     },
     "zenstack:init": {
       "executor": "nx:run-commands",
+      "metadata": {
+        "description": "Initialize ZenStack in project",
+        "technologies": [
+          "zenstack"
+        ]
+      },
       "options": {
         "command": "zenstack init",
         "cwd": "apps/animatrona-tracker"
-      },
-      "metadata": {
-        "description": "Initialize ZenStack in project",
-        "technologies": ["zenstack"]
       }
     },
     "oxlint": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.oxlintrc.json"
+      ],
+      "metadata": {
+        "description": "Fast lint with oxlint (50-100x faster than ESLint)",
+        "technologies": [
+          "oxlint"
+        ]
+      },
       "options": {
         "command": "bunx oxlint src --config ../../.oxlintrc.json",
         "cwd": "apps/animatrona-tracker"
-      },
-      "cache": true,
-      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
-      "metadata": {
-        "description": "Fast lint with oxlint (50-100x faster than ESLint)",
-        "technologies": ["oxlint"]
       }
     },
     "lint": {
-      "dependsOn": ["oxlint"]
+      "dependsOn": [
+        "oxlint"
+      ]
     },
     "lint:fix": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "eslint . --fix",
-        "cwd": "apps/animatrona-tracker"
-      },
       "cache": false,
       "metadata": {
         "description": "Run ESLint with auto-fix",
-        "technologies": ["eslint"]
+        "technologies": [
+          "eslint"
+        ]
+      },
+      "options": {
+        "command": "eslint . --fix",
+        "cwd": "apps/animatrona-tracker"
       }
     },
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "bunx dprint fmt \"**/*.{ts,tsx,js,jsx,json,md}\"",
-        "cwd": "apps/animatrona-tracker"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint (~30x faster than Prettier)",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "bunx dprint fmt \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "apps/animatrona-tracker"
       }
     },
     "format:check": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/dprint.json"
+      ],
+      "metadata": {
+        "description": "Check file formatting with dprint",
+        "technologies": [
+          "dprint"
+        ]
+      },
       "options": {
         "command": "bunx dprint check \"**/*.{ts,tsx,js,jsx,json,md}\"",
         "cwd": "apps/animatrona-tracker"
-      },
-      "cache": true,
-      "inputs": ["default", "{workspaceRoot}/dprint.json"],
-      "metadata": {
-        "description": "Check file formatting with dprint",
-        "technologies": ["dprint"]
       }
     },
     "typecheck": {
-      "dependsOn": ["zenstack:generate"],
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "executor": "nx:run-commands",
-      "options": {
-        "command": "tsc --noEmit",
-        "cwd": "apps/animatrona-tracker"
-      },
       "cache": true,
       "inputs": [
         "default",
@@ -266,16 +341,20 @@
       ],
       "metadata": {
         "description": "Type-check TypeScript files",
-        "technologies": ["typescript"]
+        "technologies": [
+          "typescript"
+        ]
+      },
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "apps/animatrona-tracker"
       }
     },
     "typecheck:tsgo": {
-      "dependsOn": ["zenstack:generate"],
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "executor": "nx:run-commands",
-      "options": {
-        "command": "tsgo --noEmit",
-        "cwd": "apps/animatrona-tracker"
-      },
       "cache": true,
       "inputs": [
         "default",
@@ -285,20 +364,32 @@
       ],
       "metadata": {
         "description": "Type-check TypeScript files with tsgo (38x faster)",
-        "technologies": ["typescript", "tsgo"]
+        "technologies": [
+          "typescript",
+          "tsgo"
+        ]
+      },
+      "options": {
+        "command": "tsgo --noEmit",
+        "cwd": "apps/animatrona-tracker"
       }
     },
     "test": {
-      "dependsOn": ["zenstack:generate"],
-      "executor": "@nx/vitest:test",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "options": {
-        "config": "apps/animatrona-tracker/vitest.config.ts"
+        "config": "vitest.config.ts"
       }
     },
     "validate": {
       "executor": "nx:noop",
-      "dependsOn": ["lint", "format:check", "typecheck", "test"],
+      "dependsOn": [
+        "lint",
+        "format:check",
+        "typecheck",
+        "test"
+      ],
       "metadata": {
         "description": "Run all validation checks"
       }

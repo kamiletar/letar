@@ -3,45 +3,58 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/image-upload/src",
   "projectType": "library",
-  "tags": ["scope:shared", "type:ui", "owner:letar"],
+  "tags": [
+    "scope:shared",
+    "type:ui",
+    "owner:letar"
+  ],
   "targets": {
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "dprint fmt",
-        "cwd": "libs/image-upload"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "libs/image-upload"
       }
     },
     "oxlint": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.oxlintrc.json"
+      ],
+      "metadata": {
+        "description": "Fast lint with oxlint",
+        "technologies": [
+          "oxlint"
+        ]
+      },
       "options": {
         "command": "bunx oxlint src --config ../../.oxlintrc.json",
         "cwd": "libs/image-upload"
-      },
-      "cache": true,
-      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
-      "metadata": {
-        "description": "Fast lint with oxlint",
-        "technologies": ["oxlint"]
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "dependsOn": ["oxlint"],
-      "outputs": ["{options.outputFile}"]
+      "dependsOn": [
+        "oxlint"
+      ],
+      "outputs": [
+        "{options.outputFile}"
+      ]
     },
     "typecheck": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
-        "cwd": "libs/image-upload"
-      },
-      "dependsOn": ["^typecheck"],
+      "dependsOn": [
+        "^typecheck"
+      ],
       "cache": true,
       "inputs": [
         "default",
@@ -57,16 +70,20 @@
       ],
       "metadata": {
         "description": "Type-check library and generate declarations",
-        "technologies": ["typescript"]
+        "technologies": [
+          "typescript"
+        ]
+      },
+      "options": {
+        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/image-upload"
       }
     },
     "typecheck:tsgo": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "tsgo --build tsconfig.lib.json --emitDeclarationOnly",
-        "cwd": "libs/image-upload"
-      },
-      "dependsOn": ["^typecheck:tsgo"],
+      "dependsOn": [
+        "^typecheck:tsgo"
+      ],
       "cache": true,
       "inputs": [
         "default",
@@ -82,14 +99,23 @@
       ],
       "metadata": {
         "description": "Type-check library with tsgo (faster)",
-        "technologies": ["typescript", "tsgo"]
+        "technologies": [
+          "typescript",
+          "tsgo"
+        ]
+      },
+      "options": {
+        "command": "tsgo --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/image-upload"
       }
     },
     "test": {
-      "executor": "@nx/vitest:test",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}",
+        "{projectRoot}/test-output/vitest/coverage"
+      ],
       "options": {
-        "config": "libs/image-upload/vitest.config.mts"
+        "config": "vitest.config.mts"
       }
     }
   }

@@ -3,27 +3,31 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/github-releases/src",
   "projectType": "library",
-  "tags": ["scope:shared", "type:util", "owner:letar"],
+  "tags": [
+    "scope:shared",
+    "type:util",
+    "owner:letar"
+  ],
   "targets": {
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "dprint fmt",
-        "cwd": "libs/github-releases"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "libs/github-releases"
       }
     },
     "typecheck": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
-        "cwd": "libs/github-releases"
-      },
-      "dependsOn": ["^typecheck"],
+      "dependsOn": [
+        "^typecheck"
+      ],
       "cache": true,
       "inputs": [
         "default",
@@ -39,16 +43,20 @@
       ],
       "metadata": {
         "description": "Type-check library and generate declarations",
-        "technologies": ["typescript"]
+        "technologies": [
+          "typescript"
+        ]
+      },
+      "options": {
+        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/github-releases"
       }
     },
     "typecheck:tsgo": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "tsgo --build tsconfig.lib.json --emitDeclarationOnly",
-        "cwd": "libs/github-releases"
-      },
-      "dependsOn": ["^typecheck:tsgo"],
+      "dependsOn": [
+        "^typecheck:tsgo"
+      ],
       "cache": true,
       "inputs": [
         "default",
@@ -64,32 +72,44 @@
       ],
       "metadata": {
         "description": "Type-check library with tsgo (faster)",
-        "technologies": ["typescript", "tsgo"]
+        "technologies": [
+          "typescript",
+          "tsgo"
+        ]
+      },
+      "options": {
+        "command": "tsgo --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/github-releases"
       }
     },
     "test": {
-      "executor": "@nx/vitest:test",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "config": "libs/github-releases/vitest.config.ts"
+        "config": "vitest.config.ts"
       }
     },
     "oxlint": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.oxlintrc.json"
+      ],
+      "metadata": {
+        "description": "Fast lint with oxlint",
+        "technologies": [
+          "oxlint"
+        ]
+      },
       "options": {
         "command": "bunx oxlint src --config ../../.oxlintrc.json",
         "cwd": "libs/github-releases"
-      },
-      "cache": true,
-      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
-      "metadata": {
-        "description": "Fast lint with oxlint",
-        "technologies": ["oxlint"]
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "dependsOn": ["oxlint"]
+      "dependsOn": [
+        "oxlint"
+      ]
     }
   }
 }

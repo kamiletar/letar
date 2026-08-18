@@ -3,50 +3,59 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/yandex-metrika/src",
   "projectType": "library",
-  "tags": ["scope:shared", "type:util", "owner:letar"],
+  "tags": [
+    "scope:shared",
+    "type:util",
+    "owner:letar"
+  ],
   "targets": {
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "dprint fmt",
-        "cwd": "libs/yandex-metrika"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "libs/yandex-metrika"
       }
     },
     "oxlint": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.oxlintrc.json"
+      ],
+      "metadata": {
+        "description": "Fast lint with oxlint",
+        "technologies": [
+          "oxlint"
+        ]
+      },
       "options": {
         "command": "bunx oxlint src --config ../../.oxlintrc.json",
         "cwd": "libs/yandex-metrika"
-      },
-      "cache": true,
-      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
-      "metadata": {
-        "description": "Fast lint with oxlint",
-        "technologies": ["oxlint"]
       }
     },
     "lint": {
-      "dependsOn": ["oxlint"]
+      "dependsOn": [
+        "oxlint"
+      ]
     },
     "test": {
-      "executor": "@nx/vitest:test",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "config": "libs/yandex-metrika/vitest.config.ts"
+        "config": "vitest.config.ts"
       }
     },
     "typecheck": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
-        "cwd": "libs/yandex-metrika"
-      },
-      "dependsOn": ["^typecheck"],
+      "dependsOn": [
+        "^typecheck"
+      ],
       "cache": true,
       "inputs": [
         "default",
@@ -62,7 +71,13 @@
       ],
       "metadata": {
         "description": "Type-check library and generate declarations",
-        "technologies": ["typescript"]
+        "technologies": [
+          "typescript"
+        ]
+      },
+      "options": {
+        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/yandex-metrika"
       }
     }
   }

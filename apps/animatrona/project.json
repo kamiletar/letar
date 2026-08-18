@@ -1,10 +1,19 @@
 {
   "name": "animatrona",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "implicitDependencies": [
+    "@letar/query-provider",
+    "@letar/electron-storage",
+    "@letar/hooks",
+    "zenstack-form-plugin"
+  ],
   "sourceRoot": "apps/animatrona",
   "projectType": "application",
-  "tags": ["type:app", "scope:animatrona", "owner:letar"],
-  "implicitDependencies": ["zenstack-form-plugin"],
+  "tags": [
+    "type:app",
+    "scope:animatrona",
+    "owner:letar"
+  ],
   "targets": {
     "dev": {
       "command": "nextron",
@@ -14,16 +23,19 @@
     },
     "db:template": {
       "executor": "nx:run-commands",
+      "metadata": {
+        "description": "Обновляет resources/template.db через prisma db push (используется в build/release таргетами и e2e-тестами)"
+      },
       "options": {
         "command": "npx tsx scripts/db-template-safe.ts",
         "cwd": "apps/animatrona"
-      },
-      "metadata": {
-        "description": "Обновляет resources/template.db через prisma db push (используется в build/release таргетами и e2e-тестами)"
       }
     },
     "build": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "db:template"
+      ],
       "options": {
         "commands": [
           "npx tsx scripts/update-splash-version.ts",
@@ -37,8 +49,7 @@
         "env": {
           "NODE_OPTIONS": "--max-old-space-size=8192"
         }
-      },
-      "dependsOn": ["db:template"]
+      }
     },
     "download-ffmpeg": {
       "executor": "nx:run-commands",
@@ -77,6 +88,9 @@
     },
     "release:win": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "db:template"
+      ],
       "options": {
         "commands": [
           "npx tsx scripts/update-splash-version.ts",
@@ -94,11 +108,13 @@
         "env": {
           "NODE_OPTIONS": "--max-old-space-size=8192"
         }
-      },
-      "dependsOn": ["db:template"]
+      }
     },
     "build:linux": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "db:template"
+      ],
       "options": {
         "commands": [
           "npx tsx scripts/update-splash-version.ts",
@@ -115,11 +131,13 @@
         "env": {
           "NODE_OPTIONS": "--max-old-space-size=8192"
         }
-      },
-      "dependsOn": ["db:template"]
+      }
     },
     "release:linux": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "db:template"
+      ],
       "options": {
         "commands": [
           "npx tsx scripts/update-splash-version.ts",
@@ -136,11 +154,13 @@
         "env": {
           "NODE_OPTIONS": "--max-old-space-size=8192"
         }
-      },
-      "dependsOn": ["db:template"]
+      }
     },
     "build:mac": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "db:template"
+      ],
       "options": {
         "commands": [
           "npx tsx scripts/update-splash-version.ts",
@@ -155,11 +175,13 @@
         "env": {
           "NODE_OPTIONS": "--max-old-space-size=8192"
         }
-      },
-      "dependsOn": ["db:template"]
+      }
     },
     "release:mac": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "db:template"
+      ],
       "options": {
         "commands": [
           "npx tsx scripts/update-splash-version.ts",
@@ -174,11 +196,16 @@
         "env": {
           "NODE_OPTIONS": "--max-old-space-size=8192"
         }
-      },
-      "dependsOn": ["db:template"]
+      }
     },
     "release:win-linux": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "db:template"
+      ],
+      "metadata": {
+        "description": "Release для Windows и Linux (можно запускать с Windows)"
+      },
       "options": {
         "commands": [
           "npx tsx scripts/update-splash-version.ts",
@@ -196,18 +223,14 @@
         "env": {
           "NODE_OPTIONS": "--max-old-space-size=8192"
         }
-      },
-      "dependsOn": ["db:template"],
-      "metadata": {
-        "description": "Release для Windows и Linux (можно запускать с Windows)"
       }
     },
     "test": {
-      "executor": "@nx/vitest:test",
-      "dependsOn": ["zenstack:generate"],
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "options": {
-        "config": "apps/animatrona/vitest.config.ts"
+        "config": "vitest.config.ts"
       }
     },
     "lint": {
@@ -222,22 +245,35 @@
     },
     "typecheck:tsgo": {
       "command": "tsgo --project apps/animatrona/tsconfig.json --noEmit",
-      "dependsOn": ["zenstack:generate"]
+      "dependsOn": [
+        "zenstack:generate"
+      ]
     },
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "dprint fmt {main,renderer,shared,preload}/**/*.{ts,tsx,json} *.{ts,json}",
-        "cwd": "apps/animatrona"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "dprint fmt {main,renderer,shared,preload}/**/*.{ts,tsx,json} *.{ts,json}",
+        "cwd": "apps/animatrona"
       }
     },
     "zenstack:generate": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "^build",
+        {
+          "projects": [
+            "@letar/zenstack-form-plugin"
+          ],
+          "target": "build"
+        }
+      ],
       "options": {
         "commands": [
           "zenstack generate --schema schema.zmodel",
@@ -246,131 +282,155 @@
         ],
         "cwd": "apps/animatrona",
         "parallel": false
-      },
-      "dependsOn": [
-        "^build",
-        {
-          "projects": ["@letar/zenstack-form-plugin"],
-          "target": "build"
-        }
-      ]
+      }
     },
     "db:push": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "zenstack:generate"
+      ],
+      "cache": false,
       "options": {
         "command": "prisma db push",
         "cwd": "apps/animatrona"
-      },
-      "dependsOn": ["zenstack:generate"],
-      "cache": false
+      }
     },
     "db:push:data-loss": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "prisma db push --accept-data-loss --force-reset",
-        "cwd": "apps/animatrona"
-      },
-      "dependsOn": ["zenstack:generate"],
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "cache": false,
       "metadata": {
         "description": "Сбросить dev БД и применить схему (потеря данных!)",
-        "technologies": ["prisma"]
+        "technologies": [
+          "prisma"
+        ]
+      },
+      "options": {
+        "command": "prisma db push --accept-data-loss --force-reset",
+        "cwd": "apps/animatrona"
       }
     },
     "db:reset": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "prisma migrate reset",
-        "cwd": "apps/animatrona"
-      },
-      "dependsOn": ["zenstack:generate"],
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "cache": false,
       "metadata": {
         "description": "Сбросить БД и применить все миграции",
-        "technologies": ["prisma"]
+        "technologies": [
+          "prisma"
+        ]
+      },
+      "options": {
+        "command": "prisma migrate reset",
+        "cwd": "apps/animatrona"
       }
     },
     "db:reset:data-loss": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "prisma migrate reset --force",
-        "cwd": "apps/animatrona"
-      },
-      "dependsOn": ["zenstack:generate"],
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "cache": false,
       "metadata": {
         "description": "Сбросить БД без подтверждения (потеря данных!)",
-        "technologies": ["prisma"]
+        "technologies": [
+          "prisma"
+        ]
+      },
+      "options": {
+        "command": "prisma migrate reset --force",
+        "cwd": "apps/animatrona"
       }
     },
     "db:studio": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "options": {
         "command": "prisma studio",
         "cwd": "apps/animatrona"
-      },
-      "dependsOn": ["zenstack:generate"]
+      }
     },
     "db:seed": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "options": {
         "command": "ts-node prisma/seed.ts",
         "cwd": "apps/animatrona"
-      },
-      "dependsOn": ["zenstack:generate"]
+      }
     },
     "db:migrate": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "zenstack:generate"
+      ],
+      "cache": false,
+      "metadata": {
+        "description": "Создать миграцию",
+        "technologies": [
+          "prisma",
+          "electron"
+        ]
+      },
       "options": {
         "command": "cross-env CI= VERCEL= GITHUB_ACTIONS= GITLAB= NETLIFY= HEROKU= prisma migrate dev {args}",
         "forwardAllArgs": true,
         "cwd": "apps/animatrona"
-      },
-      "dependsOn": ["zenstack:generate"],
-      "cache": false,
-      "metadata": {
-        "description": "Создать миграцию",
-        "technologies": ["prisma", "electron"]
       }
     },
     "db:migrate:deploy": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "prisma migrate deploy",
-        "cwd": "apps/animatrona"
-      },
       "cache": false,
       "metadata": {
         "description": "Apply pending migrations (production)",
-        "technologies": ["prisma"]
+        "technologies": [
+          "prisma"
+        ]
+      },
+      "options": {
+        "command": "prisma migrate deploy",
+        "cwd": "apps/animatrona"
       }
     },
     "release": {
       "command": "scripts/release.bat",
       "metadata": {
         "description": "Создать тег из текущей версии package.json и запушить для запуска GitHub Actions. ВАЖНО: версию нужно обновить вручную перед запуском!",
-        "technologies": ["git", "github-actions"]
+        "technologies": [
+          "git",
+          "github-actions"
+        ]
       }
     },
     "build:web-player": {
       "executor": "nx:run-commands",
+      "metadata": {
+        "description": "Собрать standalone web player для IPFS экспорта",
+        "technologies": [
+          "esbuild",
+          "ipfs"
+        ]
+      },
       "options": {
         "command": "node web-player/build.mjs --prod",
         "cwd": "apps/animatrona"
-      },
-      "metadata": {
-        "description": "Собрать standalone web player для IPFS экспорта",
-        "technologies": ["esbuild", "ipfs"]
       }
     },
     "build:web-player:dev": {
       "executor": "nx:run-commands",
+      "metadata": {
+        "description": "Собрать web player (development mode с sourcemaps)"
+      },
       "options": {
         "command": "node web-player/build.mjs",
         "cwd": "apps/animatrona"
-      },
-      "metadata": {
-        "description": "Собрать web player (development mode с sourcemaps)"
       }
     }
   }

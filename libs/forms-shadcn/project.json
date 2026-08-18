@@ -3,15 +3,17 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/forms-shadcn/src",
   "projectType": "library",
-  "tags": ["scope:shared", "type:ui", "owner:letar"],
+  "tags": [
+    "scope:shared",
+    "type:ui",
+    "owner:letar"
+  ],
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
-        "cwd": "libs/forms-shadcn"
-      },
-      "dependsOn": ["^typecheck"],
+      "dependsOn": [
+        "^typecheck"
+      ],
       "cache": true,
       "inputs": [
         "default",
@@ -27,16 +29,20 @@
       ],
       "metadata": {
         "description": "Type-check library and generate declarations",
-        "technologies": ["typescript"]
+        "technologies": [
+          "typescript"
+        ]
+      },
+      "options": {
+        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/forms-shadcn"
       }
     },
     "typecheck:tsgo": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "tsgo --build tsconfig.lib.json --emitDeclarationOnly",
-        "cwd": "libs/forms-shadcn"
-      },
-      "dependsOn": ["^typecheck:tsgo"],
+      "dependsOn": [
+        "^typecheck:tsgo"
+      ],
       "cache": true,
       "inputs": [
         "default",
@@ -52,60 +58,95 @@
       ],
       "metadata": {
         "description": "Type-check library with tsgo (faster)",
-        "technologies": ["typescript", "tsgo"]
+        "technologies": [
+          "typescript",
+          "tsgo"
+        ]
+      },
+      "options": {
+        "command": "tsgo --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/forms-shadcn"
       }
     },
     "test": {
-      "executor": "@nx/vitest:test",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "config": "libs/forms-shadcn/vitest.config.ts"
+        "config": "vitest.config.ts"
       }
     },
     "oxlint": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.oxlintrc.json"
+      ],
+      "metadata": {
+        "description": "Fast lint with oxlint",
+        "technologies": [
+          "oxlint"
+        ]
+      },
       "options": {
         "command": "bunx oxlint src --config ../../.oxlintrc.json",
         "cwd": "libs/forms-shadcn"
-      },
-      "cache": true,
-      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
-      "metadata": {
-        "description": "Fast lint with oxlint",
-        "technologies": ["oxlint"]
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "dependsOn": ["oxlint"]
+      "dependsOn": [
+        "oxlint"
+      ]
     },
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "bunx dprint fmt \"**/*.{ts,tsx,js,jsx,json,md}\"",
-        "cwd": "libs/forms-shadcn"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint (~30x faster than Prettier)",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "bunx dprint fmt \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "cwd": "libs/forms-shadcn"
       }
     },
     "format:check": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/dprint.json"
+      ],
+      "metadata": {
+        "description": "Check file formatting with dprint",
+        "technologies": [
+          "dprint"
+        ]
+      },
       "options": {
         "command": "bunx dprint check \"**/*.{ts,tsx,js,jsx,json,md}\"",
         "cwd": "libs/forms-shadcn"
-      },
-      "cache": true,
-      "inputs": ["default", "{workspaceRoot}/dprint.json"],
-      "metadata": {
-        "description": "Check file formatting with dprint",
-        "technologies": ["dprint"]
       }
     },
     "build:npm": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{projectRoot}/tsup.config.ts",
+        "{projectRoot}/package.publish.json",
+        "{projectRoot}/scripts/write-publish-package-json.mjs"
+      ],
+      "outputs": [
+        "{projectRoot}/dist"
+      ],
+      "metadata": {
+        "description": "Сборка @letar/forms-shadcn для публикации на npm",
+        "technologies": [
+          "tsup"
+        ]
+      },
       "options": {
         "commands": [
           "tsup",
@@ -116,31 +157,23 @@
         ],
         "cwd": "libs/forms-shadcn",
         "parallel": false
-      },
-      "cache": true,
-      "inputs": [
-        "default",
-        "{projectRoot}/tsup.config.ts",
-        "{projectRoot}/package.publish.json",
-        "{projectRoot}/scripts/write-publish-package-json.mjs"
-      ],
-      "outputs": ["{projectRoot}/dist"],
-      "metadata": {
-        "description": "Сборка @letar/forms-shadcn для публикации на npm",
-        "technologies": ["tsup"]
       }
     },
     "publish:npm": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "npm publish --access public",
-        "cwd": "libs/forms-shadcn/dist"
-      },
-      "dependsOn": ["build:npm"],
+      "dependsOn": [
+        "build:npm"
+      ],
       "cache": false,
       "metadata": {
         "description": "Публикация @letar/forms-shadcn на npmjs.com",
-        "technologies": ["npm"]
+        "technologies": [
+          "npm"
+        ]
+      },
+      "options": {
+        "command": "npm publish --access public",
+        "cwd": "libs/forms-shadcn/dist"
       }
     }
   }

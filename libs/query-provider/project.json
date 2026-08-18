@@ -3,34 +3,40 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/query-provider/src",
   "projectType": "library",
-  "tags": ["scope:shared", "type:data-access", "owner:letar"],
+  "tags": [
+    "scope:shared",
+    "type:data-access",
+    "owner:letar"
+  ],
   "targets": {
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "dprint fmt",
-        "cwd": "libs/query-provider"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "libs/query-provider"
       }
     },
     "test": {
-      "executor": "@nx/vitest:test",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}",
+        "{projectRoot}/test-output/vitest/coverage"
+      ],
       "options": {
-        "config": "libs/query-provider/vitest.config.mts"
+        "config": "vitest.config.mts"
       }
     },
     "typecheck": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
-        "cwd": "libs/query-provider"
-      },
-      "dependsOn": ["^typecheck"],
+      "dependsOn": [
+        "^typecheck"
+      ],
       "cache": true,
       "inputs": [
         "default",
@@ -43,21 +49,32 @@
         "{projectRoot}/dist/**/*.d.ts",
         "{projectRoot}/dist/**/*.d.ts.map",
         "{projectRoot}/dist/tsconfig.lib.tsbuildinfo"
-      ]
+      ],
+      "options": {
+        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/query-provider"
+      }
     },
     "oxlint": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.oxlintrc.json"
+      ],
       "options": {
         "command": "bunx oxlint src --config ../../.oxlintrc.json",
         "cwd": "libs/query-provider"
-      },
-      "cache": true,
-      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"]
+      }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "dependsOn": ["oxlint"],
-      "outputs": ["{options.outputFile}"]
+      "dependsOn": [
+        "oxlint"
+      ],
+      "outputs": [
+        "{options.outputFile}"
+      ]
     }
   }
 }

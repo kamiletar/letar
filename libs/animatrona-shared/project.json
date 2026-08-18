@@ -3,24 +3,32 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/animatrona-shared/src",
   "projectType": "library",
-  "tags": ["scope:shared", "type:native-module", "owner:letar"],
+  "tags": [
+    "scope:shared",
+    "type:native-module",
+    "owner:letar"
+  ],
   "targets": {
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "dprint fmt",
-        "cwd": "libs/animatrona-shared"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "libs/animatrona-shared"
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": ["libs/animatrona-shared/**/*.{ts,tsx}"]
+        "lintFilePatterns": [
+          "libs/animatrona-shared/**/*.{ts,tsx}"
+        ]
       }
     },
     "typecheck": {
@@ -30,10 +38,8 @@
       }
     },
     "test": {
-      "executor": "@nx/vitest:test",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "config": "libs/animatrona-shared/vitest.config.ts"
+        "config": "vitest.config.ts"
       }
     }
   }

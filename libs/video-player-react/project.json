@@ -3,15 +3,17 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/video-player-react/src",
   "projectType": "library",
-  "tags": ["scope:shared", "type:lib", "owner:letar"],
+  "tags": [
+    "scope:shared",
+    "type:lib",
+    "owner:letar"
+  ],
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
-        "cwd": "libs/video-player-react"
-      },
-      "dependsOn": ["^typecheck"],
+      "dependsOn": [
+        "^typecheck"
+      ],
       "cache": true,
       "inputs": [
         "default",
@@ -27,16 +29,20 @@
       ],
       "metadata": {
         "description": "Type-check library and generate declarations",
-        "technologies": ["typescript"]
+        "technologies": [
+          "typescript"
+        ]
+      },
+      "options": {
+        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/video-player-react"
       }
     },
     "typecheck:tsgo": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "tsgo --project tsconfig.lib.json --noEmit",
-        "cwd": "libs/video-player-react"
-      },
-      "dependsOn": ["^typecheck:tsgo"],
+      "dependsOn": [
+        "^typecheck:tsgo"
+      ],
       "cache": true,
       "inputs": [
         "default",
@@ -47,47 +53,62 @@
       ],
       "metadata": {
         "description": "Fast type-check with tsgo",
-        "technologies": ["typescript"]
+        "technologies": [
+          "typescript"
+        ]
+      },
+      "options": {
+        "command": "tsgo --project tsconfig.lib.json --noEmit",
+        "cwd": "libs/video-player-react"
       }
     },
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "dprint fmt",
-        "cwd": "libs/video-player-react"
-      },
       "cache": false,
       "metadata": {
         "description": "Format source files with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "libs/video-player-react"
       }
     },
     "oxlint": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.oxlintrc.json"
+      ],
+      "metadata": {
+        "description": "Fast lint with oxlint",
+        "technologies": [
+          "oxlint"
+        ]
+      },
       "options": {
         "command": "bunx oxlint src --config ../../.oxlintrc.json",
         "cwd": "libs/video-player-react"
-      },
-      "cache": true,
-      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
-      "metadata": {
-        "description": "Fast lint with oxlint",
-        "technologies": ["oxlint"]
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "dependsOn": ["oxlint"],
-      "outputs": ["{options.outputFile}"]
+      "dependsOn": [
+        "oxlint"
+      ],
+      "outputs": [
+        "{options.outputFile}"
+      ]
     },
     "test": {
-      "executor": "@nx/vitest:test",
-      "options": {
-        "config": "libs/video-player-react/vitest.config.ts"
-      },
       "metadata": {
-        "description": "Run unit tests with Vitest",
-        "technologies": ["vitest"]
+        "description": "Run unit tests with Vitest"
+      },
+      "options": {
+        "config": "vitest.config.ts"
       }
     }
   }

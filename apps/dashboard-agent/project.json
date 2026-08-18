@@ -3,36 +3,53 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/dashboard-agent/src",
   "projectType": "application",
-  "tags": ["type:app", "scope:infra", "owner:letar"],
-  "implicitDependencies": ["@letar/email", "@letar/glitchtip", "@letar/redis-client"],
+  "tags": [
+    "type:app",
+    "scope:infra",
+    "owner:letar"
+  ],
+  "implicitDependencies": [
+    "@letar/email",
+    "@letar/glitchtip",
+    "@letar/redis-client"
+  ],
   "targets": {
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "dprint fmt",
-        "cwd": "apps/dashboard-agent"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "apps/dashboard-agent"
       }
     },
     "build": {
       "executor": "@nx/esbuild:esbuild",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/apps/dashboard-agent",
         "main": "apps/dashboard-agent/src/index.ts",
         "tsConfig": "apps/dashboard-agent/tsconfig.json",
-        "format": ["cjs"],
+        "format": [
+          "cjs"
+        ],
         "bundle": true,
         "platform": "node",
         "target": "node20",
         "minify": false,
         "sourcemap": true,
         "esbuildOptions": {
-          "external": ["systeminformation", "dockerode"]
+          "external": [
+            "systeminformation",
+            "dockerode"
+          ]
         }
       }
     },
@@ -45,11 +62,13 @@
     },
     "start": {
       "executor": "nx:run-commands",
+      "dependsOn": [
+        "build"
+      ],
       "options": {
         "command": "node dist/apps/dashboard-agent/index.js",
         "cwd": "."
-      },
-      "dependsOn": ["build"]
+      }
     },
     "dev": {
       "executor": "nx:run-commands",
@@ -62,10 +81,8 @@
       "executor": "@nx/eslint:lint"
     },
     "test": {
-      "executor": "@nx/vitest:test",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "config": "apps/dashboard-agent/vitest.config.ts"
+        "config": "vitest.config.ts"
       }
     },
     "typecheck": {

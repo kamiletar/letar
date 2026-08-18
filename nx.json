@@ -2,7 +2,10 @@
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "cacheDirectory": ".nx/cache",
   "namedInputs": {
-    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "default": [
+      "{projectRoot}/**/*",
+      "sharedGlobals"
+    ],
     "production": [
       "default",
       "!{projectRoot}/.eslintrc.json",
@@ -40,7 +43,9 @@
     },
     {
       "plugin": "@nx/next/plugin",
-      "exclude": ["apps/form-docs/**"],
+      "exclude": [
+        "apps/form-docs/**"
+      ],
       "options": {
         "startTargetName": "start",
         "buildTargetName": "build",
@@ -52,7 +57,9 @@
     },
     {
       "plugin": "@nx/eslint/plugin",
-      "exclude": ["eslint.config.mjs"],
+      "exclude": [
+        "eslint.config.mjs"
+      ],
       "options": {
         "targetName": "lint"
       }
@@ -86,16 +93,105 @@
         "ciTargetName": "test-ci",
         "testMode": "watch"
       }
+    },
+    {
+      "plugin": "@nx/vitest",
+      "options": {
+        "testTargetName": "test",
+        "testMode": "watch"
+      },
+      "include": [
+        "apps/aboi/**/*",
+        "apps/aira-web/**/*",
+        "apps/animatrona/**/*",
+        "apps/animatrona-tracker/**/*",
+        "apps/aprel8008/**/*",
+        "apps/archetest/**/*",
+        "apps/auth-hub/**/*",
+        "apps/dashboard-agent/**/*",
+        "apps/driving-school/**/*",
+        "apps/dsperevod/**/*",
+        "apps/form-develop-app-shadcn/**/*",
+        "apps/grandslamcup/**/*",
+        "apps/kami/**/*",
+        "apps/label-printer-desktop/**/*",
+        "apps/mandala/**/*",
+        "apps/poster-microtext-desktop/**/*",
+        "apps/pravda/**/*",
+        "apps/studio/**/*",
+        "apps/svoichuzhie/**/*",
+        "apps/synth/**/*",
+        "apps/time/**/*",
+        "libs/admin-ui/**/*",
+        "libs/analytics/**/*",
+        "libs/animatrona-franchise-graph/**/*",
+        "libs/animatrona-shared/**/*",
+        "libs/animatrona-ui/**/*",
+        "libs/animatrona-utils/**/*",
+        "libs/api-server/**/*",
+        "libs/auth/**/*",
+        "libs/chakra-provider/**/*",
+        "libs/consent/**/*",
+        "libs/contract-generator/**/*",
+        "libs/demo-protection/**/*",
+        "libs/deploy-engine/**/*",
+        "libs/deploy-mcp/**/*",
+        "libs/e2e-testing/**/*",
+        "libs/electron-storage/**/*",
+        "libs/email/**/*",
+        "libs/form-mcp/**/*",
+        "libs/format-utils/**/*",
+        "libs/forms/**/*",
+        "libs/forms-angular/**/*",
+        "libs/forms-core/**/*",
+        "libs/forms-react/**/*",
+        "libs/forms-shadcn/**/*",
+        "libs/forms-vue/**/*",
+        "libs/forms-vue-shadcn/**/*",
+        "libs/generators/**/*",
+        "libs/github-releases/**/*",
+        "libs/glitchtip/**/*",
+        "libs/glitchtip-mcp/**/*",
+        "libs/hooks/**/*",
+        "libs/image-upload/**/*",
+        "libs/infra-config/**/*",
+        "libs/jobs/**/*",
+        "libs/label-printer-core/**/*",
+        "libs/mcp-server-kit/**/*",
+        "libs/media-client/**/*",
+        "libs/number-words/**/*",
+        "libs/pin-auth/**/*",
+        "libs/query-provider/**/*",
+        "libs/redis-client/**/*",
+        "libs/seo/**/*",
+        "libs/studio-time-mcp/**/*",
+        "libs/tailwind-utils/**/*",
+        "libs/ui/**/*",
+        "libs/umami-mcp/**/*",
+        "libs/validation-utils/**/*",
+        "libs/video-player-core/**/*",
+        "libs/video-player-react/**/*",
+        "libs/yandex-metrika/**/*",
+        "libs/zenstack-form-plugin/**/*",
+        "libs/zenstack-fragments/**/*"
+      ]
     }
   ],
   "targetDefaults": {
     "test": {
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
     },
     "@nx/esbuild:esbuild": {
       "cache": true,
-      "dependsOn": ["^build"],
-      "inputs": ["production", "^production"]
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ]
     },
     "oxlint": {
       "executor": "nx:run-commands",
@@ -104,7 +200,10 @@
         "cwd": "{workspaceRoot}"
       },
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"]
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.oxlintrc.json"
+      ]
     },
     "format": {
       "executor": "nx:run-commands",
@@ -115,7 +214,9 @@
       "cache": false,
       "metadata": {
         "description": "Format files with dprint (~30x faster than Prettier)",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
       }
     },
     "format:check": {
@@ -125,10 +226,15 @@
         "cwd": "{workspaceRoot}"
       },
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/dprint.json"],
+      "inputs": [
+        "default",
+        "{workspaceRoot}/dprint.json"
+      ],
       "metadata": {
         "description": "Check formatting with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
       }
     }
   },
@@ -147,7 +253,9 @@
   },
   "sync": {
     "applyChanges": true,
-    "disabledTaskSyncGenerators": ["@nx/js:typescript-sync"]
+    "disabledTaskSyncGenerators": [
+      "@nx/js:typescript-sync"
+    ]
   },
   "parallel": 3,
   "daemon": {

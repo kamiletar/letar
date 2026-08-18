@@ -3,62 +3,79 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/form-mcp/src",
   "projectType": "library",
-  "tags": ["scope:shared", "type:tool", "owner:letar"],
+  "tags": [
+    "scope:shared",
+    "type:tool",
+    "owner:letar"
+  ],
   "targets": {
     "serve": {
       "executor": "nx:run-commands",
+      "metadata": {
+        "description": "Run form MCP server via stdio",
+        "technologies": [
+          "mcp"
+        ]
+      },
       "options": {
         "command": "bunx tsx src/cli.ts",
         "cwd": "libs/form-mcp"
-      },
-      "metadata": {
-        "description": "Run form MCP server via stdio",
-        "technologies": ["mcp"]
       }
     },
     "oxlint": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.oxlintrc.json"
+      ],
+      "metadata": {
+        "description": "Fast lint with oxlint",
+        "technologies": [
+          "oxlint"
+        ]
+      },
       "options": {
         "command": "bunx oxlint src --config ../../.oxlintrc.json",
         "cwd": "libs/form-mcp"
-      },
-      "cache": true,
-      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
-      "metadata": {
-        "description": "Fast lint with oxlint",
-        "technologies": ["oxlint"]
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "dependsOn": ["oxlint"],
-      "options": {
-        "lintFilePatterns": ["libs/form-mcp/**/*.{ts,tsx}"]
-      },
+      "dependsOn": [
+        "oxlint"
+      ],
       "metadata": {
         "description": "Run ESLint on form-mcp library",
-        "technologies": ["eslint"]
+        "technologies": [
+          "eslint"
+        ]
+      },
+      "options": {
+        "lintFilePatterns": [
+          "libs/form-mcp/**/*.{ts,tsx}"
+        ]
       }
     },
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "dprint fmt",
-        "cwd": "libs/form-mcp"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "libs/form-mcp"
       }
     },
     "typecheck": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
-        "cwd": "libs/form-mcp"
-      },
-      "dependsOn": ["^typecheck"],
+      "dependsOn": [
+        "^typecheck"
+      ],
       "cache": true,
       "inputs": [
         "default",
@@ -74,16 +91,20 @@
       ],
       "metadata": {
         "description": "Type-check library and generate declarations",
-        "technologies": ["typescript"]
+        "technologies": [
+          "typescript"
+        ]
+      },
+      "options": {
+        "command": "tsc --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/form-mcp"
       }
     },
     "typecheck:tsgo": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "tsgo --build tsconfig.lib.json --emitDeclarationOnly",
-        "cwd": "libs/form-mcp"
-      },
-      "dependsOn": ["^typecheck:tsgo"],
+      "dependsOn": [
+        "^typecheck:tsgo"
+      ],
       "cache": true,
       "inputs": [
         "default",
@@ -99,18 +120,40 @@
       ],
       "metadata": {
         "description": "Type-check library with tsgo (faster)",
-        "technologies": ["typescript", "tsgo"]
+        "technologies": [
+          "typescript",
+          "tsgo"
+        ]
+      },
+      "options": {
+        "command": "tsgo --build tsconfig.lib.json --emitDeclarationOnly",
+        "cwd": "libs/form-mcp"
       }
     },
     "test": {
-      "executor": "@nx/vitest:test",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "config": "libs/form-mcp/vitest.config.ts"
+        "config": "vitest.config.ts"
       }
     },
     "build:npm": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{projectRoot}/tsup.config.ts",
+        "{projectRoot}/package.publish.json",
+        "{projectRoot}/scripts/write-publish-package-json.mjs",
+        "{workspaceRoot}/libs/forms/docs/**/*.md"
+      ],
+      "outputs": [
+        "{projectRoot}/dist"
+      ],
+      "metadata": {
+        "description": "Build npm package with bundled docs",
+        "technologies": [
+          "tsup"
+        ]
+      },
       "options": {
         "commands": [
           "bunx tsup",
@@ -122,32 +165,23 @@
         ],
         "cwd": "libs/form-mcp",
         "parallel": false
-      },
-      "cache": true,
-      "inputs": [
-        "default",
-        "{projectRoot}/tsup.config.ts",
-        "{projectRoot}/package.publish.json",
-        "{projectRoot}/scripts/write-publish-package-json.mjs",
-        "{workspaceRoot}/libs/forms/docs/**/*.md"
-      ],
-      "outputs": ["{projectRoot}/dist"],
-      "metadata": {
-        "description": "Build npm package with bundled docs",
-        "technologies": ["tsup"]
       }
     },
     "publish:npm": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "npm publish --access public",
-        "cwd": "libs/form-mcp/dist"
-      },
-      "dependsOn": ["build:npm"],
+      "dependsOn": [
+        "build:npm"
+      ],
       "cache": false,
       "metadata": {
         "description": "Publish to npm as @letar/form-mcp",
-        "technologies": ["npm"]
+        "technologies": [
+          "npm"
+        ]
+      },
+      "options": {
+        "command": "npm publish --access public",
+        "cwd": "libs/form-mcp/dist"
       }
     }
   }

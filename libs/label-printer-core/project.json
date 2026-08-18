@@ -3,48 +3,62 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/label-printer-core/src",
   "projectType": "library",
-  "tags": ["scope:label-printer", "type:core", "owner:letar"],
+  "tags": [
+    "scope:label-printer",
+    "type:core",
+    "owner:letar"
+  ],
   "targets": {
     "oxlint": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.oxlintrc.json"
+      ],
+      "metadata": {
+        "description": "Fast lint with oxlint (50-100x faster than ESLint)",
+        "technologies": [
+          "oxlint"
+        ]
+      },
       "options": {
         "command": "bunx oxlint src --config ../../.oxlintrc.json",
         "cwd": "libs/label-printer-core"
-      },
-      "cache": true,
-      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
-      "metadata": {
-        "description": "Fast lint with oxlint (50-100x faster than ESLint)",
-        "technologies": ["oxlint"]
       }
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "dependsOn": ["oxlint"],
+      "dependsOn": [
+        "oxlint"
+      ],
       "options": {
-        "lintFilePatterns": ["libs/label-printer-core/**/*.ts"]
+        "lintFilePatterns": [
+          "libs/label-printer-core/**/*.ts"
+        ]
       }
     },
     "format": {
       "executor": "nx:run-commands",
-      "options": {
-        "command": "dprint fmt",
-        "cwd": "libs/label-printer-core"
-      },
       "cache": false,
       "metadata": {
         "description": "Format files with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "libs/label-printer-core"
       }
     },
     "typecheck:tsgo": {
       "command": "tsgo --project libs/label-printer-core/tsconfig.lib.json --noEmit"
     },
     "test": {
-      "executor": "@nx/vitest:test",
       "options": {
-        "config": "libs/label-printer-core/vitest.config.ts",
-        "reportsDirectory": "../../coverage/libs/label-printer-core"
+        "config": "vitest.config.ts",
+        "coverage.reportsDirectory": "../../coverage/libs/label-printer-core"
       }
     }
   }
