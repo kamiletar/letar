@@ -32,6 +32,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
+    # `zenstack:generate` (зависимость `test` у приложений с БД) вызывает `prisma generate`,
+    # которому достаточно синтаксически валидного DATABASE_URL — реального коннекта к БД он
+    # не делает. Без переменной падает с PrismaConfigEnvError и тянет за собой зависимый `test`.
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+
     steps:
       - name: Checkout (без приватных submodule — см. шапку файла)
         uses: actions/checkout@v4
@@ -81,6 +87,12 @@ jobs:
         if: always() && steps.install.outcome == 'success'
         run: bunx nx affected -t typecheck:tsgo --parallel=3
 
+      # --parallel=2 (не 3, как у lint/typecheck) и ограничение воркеров vitest внутри каждого
+      # проекта — иначе 3 nx-таски × собственный пул воркеров vitest на каждую одновременно
+      # съедают память ubuntu-latest раннера, и процесс убивает OOM (exit code 130, а не
+      # осмысленная ошибка теста — см. разбор run 32084469164). `--poolOptions.threads.*`
+      # не подошёл: у CLI vitest 4 нет такого флага (`CACError: Unknown option`), пул по
+      # умолчанию к тому же `forks`, не `threads` — верный флаг именно `--maxWorkers`.
       - name: Unit tests
         if: always() && steps.install.outcome == 'success'
-        run: bunx nx affected -t test --parallel=3
+        run: bunx nx affected -t test --parallel=2 -- --maxWorkers=2
