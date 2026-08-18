@@ -23,6 +23,9 @@
 агентами: почему правила git такие строгие ·
 [git-pathspec-commit-ignored-deletion](/.claude/docs/git-pathspec-commit-ignored-deletion.md) ⚠️
 `git commit -- <path>` молча теряет `git rm --cached`, если путь уже в `.gitignore` ·
+[nx-convert-to-inferred-scope-regression](/.claude/docs/nx-convert-to-inferred-scope-regression.md)
+⚠️ `nx g @nx/*:convert-to-inferred` тихо меняет реальный охват таргета у проектов с кастомными
+настройками — диффать до/после, не доверять «отработал без ошибок» ·
 [bun-lockfile-private-submodules](/.claude/docs/bun-lockfile-private-submodules.md) ⚠️
 `--frozen-lockfile` падает везде, где submodule не выкачаны; чистка `bun.lock` не держится
 
