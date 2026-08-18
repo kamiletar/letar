@@ -50,6 +50,8 @@ approval, kebab-case в `to`, обнулённая база
 [tristate-cascade-boolean-pattern](/.claude/docs/tristate-cascade-boolean-pattern.md) nullable
 boolean с явным «наследовать» через строковый энум + NativeSelect ·
 [ui-components](/.claude/docs/ui-components.md) · [images](/.claude/docs/images.md) ·
+[sharp-raw-composite-alpha-pitfall](/.claude/docs/sharp-raw-composite-alpha-pitfall.md) ⚠️
+`composite()` над raw-буферами тихо добавляет alpha-канал даже при `create({channels:3})` ·
 [gallery-pattern](/.claude/docs/gallery-pattern.md) Dropzone + SortablePhotoGrid ·
 [period-navigation-pattern](/.claude/docs/period-navigation-pattern.md) навигация по периоду без JS ·
 [data-flag-driving-ui](/.claude/docs/data-flag-driving-ui.md) ⚠️ `isDemo`/`isDraft` попал в условие
