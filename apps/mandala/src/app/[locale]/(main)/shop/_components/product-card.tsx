@@ -44,7 +44,9 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
           borderRadius="lg"
           overflow="hidden"
           bg="bg.panel"
-          transition="all 0.3s ease"
+          transitionProperty="transform, box-shadow"
+          transitionDuration="0.3s"
+          transitionTimingFunction="ease"
           _hover={{
             transform: 'translateY(-4px)',
             boxShadow: '0 0 20px rgba(202, 158, 103, 0.4)',

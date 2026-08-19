@@ -63,7 +63,8 @@ export function MobileMenu() {
                         borderRadius="md"
                         bg={isActive ? 'bg.hover' : 'transparent'}
                         _hover={{ bg: 'bg.hover' }}
-                        transition="all 0.2s"
+                        transitionProperty="background-color"
+                        transitionDuration="0.2s"
                       >
                         <Text
                           fontSize="lg"

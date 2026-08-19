@@ -93,7 +93,8 @@ export default async function AdminDashboardPage() {
               bg={{ _light: 'blackAlpha.50', _dark: 'whiteAlpha.50' }}
               borderColor="border.subtle"
               _hover={{ bg: 'bg.hover', transform: 'translateY(-2px)' }}
-              transition="all 0.2s"
+              transitionProperty="background-color, transform"
+              transitionDuration="0.2s"
             >
               <Card.Body>
                 <Stack direction="row" justify="space-between" align="flex-start">

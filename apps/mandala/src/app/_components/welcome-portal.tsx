@@ -146,7 +146,8 @@ export function WelcomePortal({ mandalas }: WelcomePortalProps) {
                   transform: 'scale(1.05)',
                   boxShadow: '0 0 30px rgba(202, 158, 103, 0.4)',
                 }}
-                transition="all 0.3s"
+                transitionProperty="transform, box-shadow"
+                transitionDuration="0.3s"
               >
                 <LuHeart />
                 {t('startMeditation')}

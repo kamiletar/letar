@@ -97,7 +97,8 @@ export function QuickPresets({ currentPreset, onSelectPreset, visible = true }: 
                       _hover={{
                         transform: 'scale(1.1)',
                       }}
-                      transition="all 0.2s"
+                      transitionProperty="transform"
+                      transitionDuration="0.2s"
                     >
                       <Icon />
                     </IconButton>

@@ -88,7 +88,8 @@ export function Navigation({ variant = 'full', hideOnScroll = false }: Navigatio
                         fontSize="md"
                         fontWeight={isActive ? 'bold' : 'normal'}
                         color={isActive ? 'fg.brand' : 'fg'}
-                        transition="all 0.2s"
+                        transitionProperty="color, transform"
+                        transitionDuration="0.2s"
                         _hover={{
                           color: 'fg.brand',
                           transform: 'translateY(-2px)',

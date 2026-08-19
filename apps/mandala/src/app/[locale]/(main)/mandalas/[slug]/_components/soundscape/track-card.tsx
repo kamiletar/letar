@@ -27,7 +27,8 @@ export const TrackCard = memo(function TrackCard({ name, isSelected, onClick, is
         p={3}
         border="1px solid"
         borderColor={isSelected ? 'purple.400' : 'whiteAlpha.200'}
-        transition="all 0.2s"
+        transitionProperty="background-color, border-color"
+        transitionDuration="0.2s"
         _hover={{ bg: isSelected ? 'purple.600' : 'whiteAlpha.200' }}
       >
         <HStack justify="space-between">

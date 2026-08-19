@@ -232,7 +232,8 @@ export function ProductImagesUpload({
         borderColor={isDragging ? 'purple.500' : uploadError ? 'red.500' : 'border.subtle'}
         borderRadius="lg"
         bg={isDragging ? 'purple.950' : 'bg.muted'}
-        transition="all 0.2s"
+        transitionProperty="border-color, background-color, opacity"
+        transitionDuration="0.2s"
         {...dragHandlers}
         cursor={disabled ? 'not-allowed' : 'pointer'}
         opacity={disabled ? 0.5 : 1}

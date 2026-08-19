@@ -164,7 +164,8 @@ export function MandalaCarousel({ mandalas, currentIndex, onSelect, visible, onC
                 boxShadow="0 10px 40px rgba(0, 0, 0, 0.5)"
                 border="2px solid"
                 borderColor="whiteAlpha.200"
-                transition="all 0.2s"
+                transitionProperty="border-color, box-shadow"
+                transitionDuration="0.2s"
               >
                 <Image
                   src={mandalas[prevIndex].imageUrl}
@@ -233,7 +234,8 @@ export function MandalaCarousel({ mandalas, currentIndex, onSelect, visible, onC
                 boxShadow="0 10px 40px rgba(0, 0, 0, 0.5)"
                 border="2px solid"
                 borderColor="whiteAlpha.200"
-                transition="all 0.2s"
+                transitionProperty="border-color, box-shadow"
+                transitionDuration="0.2s"
               >
                 <Image
                   src={mandalas[nextIndex].imageUrl}

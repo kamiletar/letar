@@ -180,7 +180,8 @@ export function CustomAudioManager({
                 p={6}
                 textAlign="center"
                 bg={isDragging ? 'purple.900/20' : 'transparent'}
-                transition="all 0.2s"
+                transitionProperty="border-color, background-color"
+                transitionDuration="0.2s"
                 cursor="pointer"
                 onClick={() => fileInputRef.current?.click()}
                 onDragOver={handleDragOver}
