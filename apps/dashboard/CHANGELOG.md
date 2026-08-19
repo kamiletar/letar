@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.24.4] — 2026-08-19
+
+### Fixed: dev-сервер мог отдавать 500 из-за `@tanstack/devtools-ui@0.7.0`
+
+Webpack-алиас `@tanstack/devtools-ui: false` расширен с `if (!dev)` на `if (isServer || !dev)` —
+серверная половина графа сборки резолвит `solid-js/web` без экспорта `use`, который эта версия
+devtools-ui импортирует через `@letar/query-provider`. Разбор — PLAN.md §51.
+
 ## [1.24.3] — 2026-08-19
 
 ### Refactor: SSE-хуки на общем `useEventSource` (`@letar/hooks`)

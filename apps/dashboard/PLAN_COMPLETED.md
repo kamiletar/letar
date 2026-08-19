@@ -2,6 +2,14 @@
 
 Детальное описание всех реализованных фич.
 
+## Webpack-фикс `@tanstack/devtools-ui@0.7.0` — server-половина графа (2026-08-19)
+
+Тот же баг, что уронил dev-сервер `driving-school` (500, `Attempted import error: 'use' is not
+exported from 'solid-js/web'` через `@letar/query-provider`) — dashboard в зоне риска той же
+причины (webpack в dev). Добавлен `webpack: (config, { dev, isServer }) => { if (isServer ||
+!dev) { config.resolve.alias['@tanstack/devtools-ui'] = false } ... }`. Полный разбор — PLAN.md
+§51 и `apps/driving-school/PLAN_COMPLETED.md`.
+
 ## Подключение к GlitchTip (2026-08-11)
 
 Через новый генератор `nx g @letar/generators:glitchtip-integrate dashboard` (PLAN-INFRA.md §70
