@@ -1,6 +1,7 @@
 'use client'
 
 import { Box, Card, HStack, Icon, Text } from '@chakra-ui/react'
+import NextLink from 'next/link'
 import type { IconType } from 'react-icons'
 import { LuTrendingUp } from 'react-icons/lu'
 
@@ -8,9 +9,9 @@ type ColorPalette = 'red' | 'green' | 'yellow' | 'blue' | 'orange' | 'purple' | 
 
 export interface StatCardProps {
   /**
-   * Иконка для отображения (react-icons IconType)
+   * Иконка для отображения (react-icons IconType). Без иконки — простая плитка label/value
    */
-  icon: IconType
+  icon?: IconType
   /**
    * Подпись под значением
    */
@@ -37,6 +38,10 @@ export interface StatCardProps {
    * По умолчанию: toLocaleString('ru-RU') для чисел
    */
   formatValue?: (value: number | string) => string
+  /**
+   * Ссылка — при наличии карточка кликабельна и ведёт по указанному пути
+   */
+  href?: string
 }
 
 /**
@@ -70,6 +75,12 @@ function defaultFormatValue(value: number | string): string {
  *   value={567}
  *   colorPalette="green"
  * />
+ *
+ * // Без иконки — простая плитка label/value
+ * <StatCard label="Активных" value={12} />
+ *
+ * // Кликабельная карточка-ссылка
+ * <StatCard label="Клиентов" value={42} href="/owner/clients" />
  * ```
  */
 export function StatCard({
@@ -80,36 +91,57 @@ export function StatCard({
   colorPalette = 'blue',
   subtextIcon = LuTrendingUp,
   formatValue = defaultFormatValue,
+  href,
 }: StatCardProps) {
+  const content = (
+    <HStack gap={4}>
+      {icon && (
+        <Box
+          p={3}
+          borderRadius="lg"
+          bg={`${colorPalette}.100`}
+          color={`${colorPalette}.600`}
+          _dark={{ bg: `${colorPalette}.900`, color: `${colorPalette}.200` }}
+        >
+          <Icon as={icon} boxSize={6} />
+        </Box>
+      )}
+      <Box>
+        <Text fontSize="2xl" fontWeight="bold">
+          {formatValue(value)}
+        </Text>
+        <Text fontSize="sm" color="fg.muted">
+          {label}
+        </Text>
+        {subtext && (
+          <HStack fontSize="xs" color="fg.muted">
+            <Icon as={subtextIcon} boxSize={3} />
+            <span>{subtext}</span>
+          </HStack>
+        )}
+      </Box>
+    </HStack>
+  )
+
+  if (href) {
+    return (
+      <Card.Root
+        asChild
+        display="block"
+        transitionProperty="border-color, background-color"
+        transitionDuration="fast"
+        _hover={{ borderColor: 'border.emphasized', bg: 'bg.emphasized' }}
+      >
+        <NextLink href={href}>
+          <Card.Body>{content}</Card.Body>
+        </NextLink>
+      </Card.Root>
+    )
+  }
+
   return (
     <Card.Root>
-      <Card.Body>
-        <HStack gap={4}>
-          <Box
-            p={3}
-            borderRadius="lg"
-            bg={`${colorPalette}.100`}
-            color={`${colorPalette}.600`}
-            _dark={{ bg: `${colorPalette}.900`, color: `${colorPalette}.200` }}
-          >
-            <Icon as={icon} boxSize={6} />
-          </Box>
-          <Box>
-            <Text fontSize="2xl" fontWeight="bold">
-              {formatValue(value)}
-            </Text>
-            <Text fontSize="sm" color="fg.muted">
-              {label}
-            </Text>
-            {subtext && (
-              <HStack fontSize="xs" color="fg.muted">
-                <Icon as={subtextIcon} boxSize={3} />
-                <span>{subtext}</span>
-              </HStack>
-            )}
-          </Box>
-        </HStack>
-      </Card.Body>
+      <Card.Body>{content}</Card.Body>
     </Card.Root>
   )
 }

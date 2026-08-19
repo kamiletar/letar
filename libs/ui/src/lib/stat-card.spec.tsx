@@ -43,6 +43,26 @@ describe('StatCard', () => {
     )
     expect(screen.getByText('5000 ₽')).toBeInTheDocument()
   })
+
+  it('рендерится без icon как плитка label/value', () => {
+    const { container } = renderWithProvider(<StatCard label="Активных" value={12} />)
+    expect(screen.getByText('Активных')).toBeInTheDocument()
+    expect(screen.getByText('12')).toBeInTheDocument()
+    expect(container.querySelector('svg')).not.toBeInTheDocument()
+  })
+
+  it('рендерит ссылку, если передан href', () => {
+    renderWithProvider(<StatCard label="Клиентов" value={42} href="/owner/clients" />)
+    const link = screen.getByRole('link')
+    expect(link).toHaveAttribute('href', '/owner/clients')
+    expect(link).toHaveTextContent('42')
+    expect(link).toHaveTextContent('Клиентов')
+  })
+
+  it('не рендерит ссылку без href', () => {
+    renderWithProvider(<StatCard label="Клиентов" value={42} />)
+    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+  })
 })
 
 describe('RoleStat', () => {
