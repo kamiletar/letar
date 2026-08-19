@@ -46,9 +46,6 @@ approval, kebab-case в `to`, обнулённая база
 [tree-model-parent-select](/.claude/docs/tree-model-parent-select.md) self-referencing `parentId`
 
 **Формы, UI, компоненты:** [forms](/.claude/docs/forms.md) ⭐ ·
-[interactive-press-feedback](/.claude/docs/interactive-press-feedback.md) ⚠️ `_active` со сжатием
-на 1% — состояние формально есть, глазу его нет; глубина берётся от `_active` кнопки того же
-масштаба в теме приложения; там же — резолв стиля через `system.css()` вместо браузера ·
 [react-duplicate-responsive-dom](/.claude/docs/react-duplicate-responsive-dom.md) ⚠️ два JSX-блока
 на `display={{ base:/md: }}` с одинаковым интерактивным контентом — дубль в DOM, не адаптивность ·
 [form-analytics-goals](/.claude/docs/form-analytics-goals.md) цели формы в Метрике/Umami через
@@ -116,6 +113,9 @@ scope — Invariant вместо обновления кеша ·
 [chakra-hover-condition-already-media-gated](/.claude/docs/chakra-hover-condition-already-media-gated.md)
 ⚠️ `_hover` в Chakra v3 уже завёрнут в `@media (hover: hover)` — своя обёртка лишняя и даёт
 28 ошибок TS2322 в строках, к которым не прикасался ·
+[interactive-press-feedback](/.claude/docs/interactive-press-feedback.md) ⚠️ `_active` со сжатием
+на 1% — состояние формально есть, глазу его нет; глубина берётся от `_active` кнопки того же
+масштаба в теме приложения; там же — резолв стиля через `system.css()` вместо браузера ·
 [chakra-layer-style-property-allowlist](/.claude/docs/chakra-layer-style-property-allowlist.md)
 ⚠️ `LayerStyleProperty` — закрытый список: `touchAction`, `transitionDuration` и прочее вне его
 роняют весь `value` в ветку реестра токенов, TS2322 на каждой строке блока при исправном рантайме ·
