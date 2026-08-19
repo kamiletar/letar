@@ -127,6 +127,10 @@ scope — Invariant вместо обновления кеша ·
 `Pressable` из `@letar/ui` даёт `overflow: hidden` под ripple — обрезает focus ring обёрнутой
 кнопки, если их прямоугольники совпадают; `getComputedStyle` на кнопке врёт, свойство применено,
 но не отрисовано ·
+[theme-hardcode-gate-coverage](/.claude/docs/theme-hardcode-gate-coverage.md) гейт сырых
+цветов/теней/transition (`theme:check` в domwellbes) — только у одного приложения из ~30, рано
+тиражировать через generator, слепые зоны и структурные отличия (нет `src/theme/` у части
+приложений) сначала нужно закрыть на втором реальном потребителе ·
 [chakra-semantic-token-contract](/.claude/docs/chakra-semantic-token-contract.md) ⚠️ стоковые
 рецепты Chakra читают `bg.panel`/`fg.error`/`border.control`/`l1..l3`/`colorPalette.*` напрямую —
 не переопределил в своих `semanticTokens` → холодные цвета мимо палитры и провал WCAG AA; 14 из
