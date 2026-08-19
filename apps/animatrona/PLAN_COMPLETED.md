@@ -2,7 +2,37 @@
 
 Детальное описание всех реализованных фич.
 
-> **Архив обновлён:** 2026-08-09
+> **Архив обновлён:** 2026-08-19
+
+---
+
+## Фикс ложных `no-restricted-syntax` (NODE_ENV) во вложенном main/eslint.config.mjs (2026-08-19)
+
+`nx lint animatrona` падал на 6 ошибках `no-restricted-syntax` в `main/main.ts`,
+`main/services/database.ts`, `main/services/next-server.ts`, `main/services/window-manager.ts`,
+`main/utils/db.ts`, `main/utils/logger.ts` — хотя весь код уже использует легитимный allow-list
+паттерн `app.isPackaged || process.env.NODE_ENV === 'production'` (только `logger.ts:188` — голая
+проверка без `app.isPackaged`, но это тоже покрыто allow-list по пути файла, не по паттерну кода).
+
+Причина — та же, что нашли в `label-printer-desktop` в этой же сессии:
+`apps/animatrona/main/eslint.config.mjs` — вложенный конфиг (спредит корневой `baseConfig`).
+ESLint резолвит его `files`-паттерны относительно каталога `main/`, а не корня репо, поэтому
+корневой allow-list `files: ['main/**/*.ts', 'apps/*/main/**/*.ts']` не матчится — путь приходит
+уже без сегмента `main/` (`background.ts`, не `main/background.ts`).
+
+Фикс — override третьим элементом массива в `apps/animatrona/main/eslint.config.mjs`:
+
+```js
+{
+  files: ['**/*.ts'],
+  rules: { 'no-restricted-syntax': 'off' },
+}
+```
+
+Безопасно — файл управляет только поддеревом `main/`. `nx lint animatrona` → 0 ошибок (39
+предэкзистентных warnings — `react-hooks/exhaustive-deps`, `no-console` — не в рамках задачи).
+`nx typecheck:tsgo animatrona` — зелёный, не затронут. Разбор класса бага —
+`.claude/docs/node-env-not-production-signal.md` § Случай 5.
 
 ---
 

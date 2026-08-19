@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [0.55.19] - 2026-08-19
+
+### Fixed
+
+- **`nx lint animatrona` был красным на 6 ложных срабатываниях `no-restricted-syntax`** —
+  корневой allow-list для `NODE_ENV === 'production'` в `main/**/*.ts` не дотягивался, потому что
+  `apps/animatrona/main/eslint.config.mjs` — вложенный конфиг, и ESLint резолвит его `files`
+  относительно каталога `main/` (без сегмента `main/` в пути), а не от корня репо. Тот же класс
+  бага, что чинили в `label-printer-desktop` в этой же сессии. Фикс — локальный override третьим
+  элементом в `main/eslint.config.mjs`. Подробности —
+  `.claude/docs/node-env-not-production-signal.md` § Случай 5.
+
 ## [0.55.18] - 2026-08-09
 
 ### Changed
