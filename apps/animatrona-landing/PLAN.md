@@ -9,6 +9,8 @@
 
 ### Запланировано
 
+- [ ] Аудит `_active: scale()` в теме на `pressScale` (`@letar/ui`) — задача описана в
+      [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md)
 - [ ] Страница с документацией (подроуты)
 - [ ] Блог с обновлениями
 - [ ] Интеграция аналитики (Yandex Metrika / Plausible)
