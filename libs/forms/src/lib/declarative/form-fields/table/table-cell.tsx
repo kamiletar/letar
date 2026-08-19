@@ -1,7 +1,7 @@
 'use client'
 
 import { Input, NativeSelect, Table } from '@chakra-ui/react'
-import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react'
+import { type KeyboardEvent, type MutableRefObject, useCallback, useEffect, useRef, useState } from 'react'
 import { useDeclarativeForm } from '../../form-context'
 import { formatFieldErrors, hasFieldErrors } from '../base/field-utils'
 import { useTableEditorContext } from './table-editor-context'
@@ -25,7 +25,8 @@ interface TableCellProps {
  */
 export function TableCell({ rowIndex, colIndex, column, rowData }: TableCellProps) {
   const { form } = useDeclarativeForm()
-  const { navigation, setEditingCell, setFocusedCell, fullPath, disabled, readOnly } = useTableEditorContext()
+  const { navigation, setEditingCell, setFocusedCell, commitEditingCellRef, fullPath, disabled, readOnly } =
+    useTableEditorContext()
   const inputRef = useRef<HTMLInputElement | HTMLSelectElement>(null)
   const cellRef = useRef<HTMLTableCellElement>(null)
 
@@ -89,6 +90,7 @@ export function TableCell({ rowIndex, colIndex, column, rowData }: TableCellProp
                 setEditingCell(null)
               }}
               onChange={(newValue) => field.handleChange(newValue)}
+              commitEditingCellRef={commitEditingCellRef}
               rowIndex={rowIndex}
               colIndex={colIndex}
             />
@@ -130,6 +132,7 @@ function EditingCell({
   errors,
   onBlur,
   onChange,
+  commitEditingCellRef,
   rowIndex,
   colIndex,
   ref,
@@ -141,6 +144,7 @@ function EditingCell({
   errors: any
   onBlur: (value: unknown) => void
   onChange: (value: unknown) => void
+  commitEditingCellRef: MutableRefObject<(() => void) | null>
   rowIndex: number
   colIndex: number
   ref: React.RefObject<HTMLInputElement | HTMLSelectElement | null>
@@ -158,6 +162,23 @@ function EditingCell({
       }
     }
   }, [ref])
+
+  // Регистрируем коммит текущего значения — навигация (Tab/Enter/стрелки) вызывает его перед
+  // размонтированием этого инпута, вместо того чтобы полагаться на недостижимый нативный blur.
+  useEffect(() => {
+    commitEditingCellRef.current = () => {
+      if (column.fieldType === 'number' || (column.fieldType !== 'enum' && column.fieldType !== 'boolean')) {
+        const coerced = column.fieldType === 'number' ? Number(localValue) || 0 : localValue
+        onBlur(coerced)
+      } else {
+        // enum/boolean коммитят значение уже на onChange — здесь только выходим из режима правки
+        onBlur(value)
+      }
+    }
+    return () => {
+      commitEditingCellRef.current = null
+    }
+  }, [commitEditingCellRef, column.fieldType, localValue, value, onBlur])
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {

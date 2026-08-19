@@ -1,6 +1,6 @@
 'use client'
 
-import { type KeyboardEvent, useCallback, useRef } from 'react'
+import { type KeyboardEvent, type MutableRefObject, useCallback, useRef } from 'react'
 import type { CellCoord, ResolvedColumn } from './table-types'
 
 interface UseTableNavigationOptions {
@@ -18,6 +18,13 @@ interface UseTableNavigationOptions {
   canAdd: boolean
   /** ReadOnly */
   readOnly: boolean
+  /**
+   * Ref на функцию коммита значения активной ячейки (регистрируется EditingCell).
+   * Вызывается перед сменой ячейки на Tab/Enter/стрелках — иначе `setEditingCell(null)`
+   * размонтирует `<Input>` без нативного `blur`, и введённое значение теряется молча.
+   * На Escape НЕ вызывается — это намеренная отмена редактирования, не коммит.
+   */
+  commitEditingCellRef: MutableRefObject<(() => void) | null>
 }
 
 /**
@@ -41,6 +48,7 @@ export function useTableNavigation({
   addRow,
   canAdd,
   readOnly,
+  commitEditingCellRef,
 }: UseTableNavigationOptions) {
   const containerRef = useRef<HTMLDivElement>(null)
   const editableIndices = getEditableColIndices(columns)
@@ -131,17 +139,20 @@ export function useTableNavigation({
       switch (e.key) {
         case 'Tab':
           e.preventDefault()
-          setEditingCell(null) // выход из текущей ячейки
+          commitEditingCellRef.current?.() // сохранить введённое перед выходом из ячейки
+          setEditingCell(null)
           requestAnimationFrame(() => moveToNext(row, col, e.shiftKey))
           break
 
         case 'Enter':
           e.preventDefault()
+          commitEditingCellRef.current?.()
           setEditingCell(null)
           requestAnimationFrame(() => moveToNext(row, col, false))
           break
 
         case 'Escape':
+          // Намеренно БЕЗ коммита — Escape отменяет редактирование, не сохраняет его
           e.preventDefault()
           setEditingCell(null)
           requestAnimationFrame(() => focusCell(row, col))
@@ -150,6 +161,7 @@ export function useTableNavigation({
         case 'ArrowUp':
           if (row > 0) {
             e.preventDefault()
+            commitEditingCellRef.current?.()
             setEditingCell(null)
             setEditingCell({ row: row - 1, col })
             requestAnimationFrame(() => focusCell(row - 1, col))
@@ -159,6 +171,7 @@ export function useTableNavigation({
         case 'ArrowDown':
           if (row < rowCount - 1) {
             e.preventDefault()
+            commitEditingCellRef.current?.()
             setEditingCell(null)
             setEditingCell({ row: row + 1, col })
             requestAnimationFrame(() => focusCell(row + 1, col))
@@ -166,7 +179,7 @@ export function useTableNavigation({
           break
       }
     },
-    [editingCell, setEditingCell, moveToNext, focusCell, rowCount],
+    [editingCell, setEditingCell, moveToNext, focusCell, rowCount, commitEditingCellRef],
   )
 
   return { containerRef, handleKeyDown, focusCell }

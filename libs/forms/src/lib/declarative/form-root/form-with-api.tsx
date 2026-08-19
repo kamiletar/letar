@@ -15,6 +15,7 @@ import { FormLoadingState } from './form-loading-state'
 import { buildValidators } from './form-validators'
 import { useFieldChangeListeners } from './use-field-change-listeners'
 import { useFormFeatures } from './use-form-features'
+import { usePostSubmitResetGuard } from './use-post-submit-reset-guard'
 
 /**
  * Props for FormWithApi component
@@ -125,7 +126,7 @@ export function FormWithApi<TData extends object>({
   const form = useAppForm({
     defaultValues,
     validators: buildValidators(schema, validateOn),
-    onSubmit: async ({ value, formApi: tanstackFormApi }) => {
+    onSubmit: async ({ value }) => {
       // Honeypot — блокировка ботов
       if (isBot()) {
         return
@@ -157,7 +158,7 @@ export function FormWithApi<TData extends object>({
         }
 
         // Reset form with current values to clear dirty state
-        tanstackFormApi.reset(dataToSubmit)
+        commitPostSubmitReset(dataToSubmit)
       } catch (error) {
         // Call onError middleware
         if (middleware?.onError) {
@@ -167,6 +168,10 @@ export function FormWithApi<TData extends object>({
       }
     },
   })
+
+  // Защита от отката поля к устаревшему initialValue после post-submit reset() —
+  // см. use-post-submit-reset-guard.ts
+  const { commitPostSubmitReset } = usePostSubmitResetGuard<TData>(form, defaultValues)
 
   // Подписка на изменения полей (onFieldChange)
   useFieldChangeListeners(form, onFieldChange)

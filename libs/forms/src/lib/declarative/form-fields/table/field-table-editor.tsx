@@ -1,7 +1,7 @@
 'use client'
 
 import { Box, Field, Table, Text } from '@chakra-ui/react'
-import { type ReactElement, useCallback, useState } from 'react'
+import { type ReactElement, useCallback, useRef, useState } from 'react'
 import { useFormGroup } from '../../../form-group'
 import { useDeclarativeForm } from '../../form-context'
 import { SortableWrapper } from '../../form-group/form-group-list-sortable'
@@ -94,6 +94,9 @@ export function FieldTableEditor({
     setNavigation((prev) => ({ ...prev, focusedCell: cell }))
   }, [])
 
+  // Коммит активной ячейки перед клавиатурной навигацией — см. commitEditingCellRef в table-types.ts
+  const commitEditingCellRef = useRef<(() => void) | null>(null)
+
   const toggleRowSelection = useCallback((index: number) => {
     setSelectedRows((prev) => {
       const next = new Set(prev)
@@ -122,6 +125,7 @@ export function FieldTableEditor({
     addRow: () => addRowRef.current(),
     canAdd: canAddRef.current,
     readOnly,
+    commitEditingCellRef,
   })
 
   return (
@@ -188,6 +192,7 @@ export function FieldTableEditor({
           navigation,
           setEditingCell,
           setFocusedCell,
+          commitEditingCellRef,
           selectedRows,
           toggleRowSelection,
           toggleSelectAll,

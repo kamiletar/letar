@@ -52,7 +52,14 @@ export const FieldDate = createField<DateFieldProps, string | Date>({
         <Input
           type="date"
           value={stringValue}
-          onChange={(e) => field.handleChange((e.target as HTMLInputElement).value)}
+          onChange={(e) => {
+            const raw = (e.target as HTMLInputElement).value
+            // Коммитим Date, а не строку из DOM: FieldDate автоселектится resolveFieldType
+            // только для схем с zodType === 'date' (z.date()/z.coerce.date()) — рантайм-значение
+            // обязано совпадать с выведенным TS-типом поля, иначе values.field.toISOString()
+            // падает в рантайме, а typecheck этого не ловит (расхождение из-за coerce).
+            field.handleChange(raw ? new Date(raw) : undefined)
+          }}
           onBlur={field.handleBlur}
           placeholder={resolved.placeholder}
           min={min}

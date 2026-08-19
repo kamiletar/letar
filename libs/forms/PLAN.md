@@ -778,8 +778,9 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
 - **Предлагаемый фикс:** либо `FieldDate` приводит значение к `Date` при коммите, когда схема
   поля — coerce-дата (тип и рантайм синхронизированы), либо документация/типизация компонента
   явно фиксируют, что значение всегда `string`.
-- **Статус:** делегировано `forms-dev` 2026-08-19 (тред `forms-bug-field-date-runtime-string`),
-  `domwellbes-relay` уведомлён — ждём реализацию.
+- **Статус:** ✅ исправлено 2026-08-19 (v2.6.0). `onChange` теперь коммитит `new Date(raw)`
+  (или `undefined` при пустом значении) вместо сырой строки из `<input type=date>` — рантайм
+  синхронизирован с выведенным TS-типом (`Date`). Уведомление `domwellbes-relay` отправлено.
 
 ### [2026-08-19] Баг: пост-сабмит reset(dataToSubmit) перетирает поле stale initialValue (от domwellbes)
 
@@ -799,15 +800,22 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
   входящего `initialValue`, пока форма не была повторно touched, либо не трогать
   `options.defaultValues` при сбросе dirty-состояния, либо явно задокументировать контракт
   «`initialValue` должен отражать реально отправленные данные» в `libs/forms/README.md`.
-- **Статус:** делегировано `forms-dev` 2026-08-19 (тред message id 358, topic
-  `form-feature-request`), `domwellbes-relay` уведомлён — ждём реализацию.
+- **Статус:** ✅ исправлено 2026-08-19 (v2.6.0). Добавлен `usePostSubmitResetGuard`
+  (`libs/forms/src/lib/declarative/form-root/use-post-submit-reset-guard.ts`), подключён в
+  `FormSimple`/`FormWithApi` — запоминает отправленное значение и восстанавливает его, если
+  следующий рендер откатил `state.values` к чужому `initialValue` (ровно один раз, без
+  ремонта формы). Регресс-тест — `post-submit-reset-stale-initialvalue.spec.tsx`. Уведомление
+  `domwellbes-relay` отправлено.
 
 ### [2026-08-18] Баг: TableEditor теряет введённое значение при Tab/Enter/Escape/стрелках (от aboi)
 
 - **Запросил:** aboi-dev
 - **Приоритет:** high
-- **Статус:** делегировано `forms-dev` 2026-08-19 (тред `forms-bug-tableeditor-keyboard-commit`),
-  `aboi-dev` уведомлён — ждём реализацию.
+- **Статус:** ✅ исправлено 2026-08-19 (v2.6.0). Добавлен `commitEditingCellRef` в
+  `TableEditorContextValue` — `EditingCell` регистрирует функцию коммита текущего значения,
+  `use-table-navigation.ts` вызывает её перед сменой ячейки на Tab/Enter/стрелках (`Escape`
+  намеренно без коммита — это отмена, не сохранение, симметрично `field-data-grid.tsx`).
+  Регресс-тесты — `table-keyboard-commit.spec.tsx`. Уведомление `aboi-dev` отправлено.
 
 **Что нашёл:** `Form.Field.TableEditor` коммитит значение редактируемой ячейки только через
 нативный DOM `blur` (`libs/forms/src/lib/declarative/form-fields/table/table-cell.tsx`,

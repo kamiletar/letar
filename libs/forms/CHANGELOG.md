@@ -4,6 +4,34 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.6.0] - 2026-08-19
+
+### Fixed
+
+- **`Form.Field.TableEditor` — клавиатурная навигация (Tab/Enter/стрелки) теряла введённое
+  значение.** Коммит ячейки был завязан только на нативный DOM `blur`
+  (`EditingCell.onBlur` → `field.handleChange`), а `use-table-navigation.ts` выходил из ячейки
+  через `setEditingCell(null)` напрямую — `<Input>` размонтировался без `blur`. Добавлен
+  `commitEditingCellRef` в `TableEditorContextValue`: `EditingCell` регистрирует функцию коммита,
+  навигация вызывает её перед сменой ячейки на Tab/Enter/стрелках. `Escape` намеренно НЕ коммитит —
+  это отмена редактирования, а не сохранение (симметрично `field-data-grid.tsx`). Регресс-тесты —
+  `table-keyboard-commit.spec.tsx`.
+- **`Form.Field.Date` отдавал `string` в `onSubmit`, даже когда схема поля — `z.coerce.date()`.**
+  `FieldDate` автоселектится `resolveFieldType()` только для схем с `zodType === 'date'`
+  (`z.date()`/`z.coerce.date()`), но коммитил сырую строку из `<input type=date>` без обратного
+  приведения к `Date` — выведенный TS-тип поля (`Date`) расходился с рантайм-значением
+  (`string`), `values.field.toISOString()` падал в рантайме, `typecheck:tsgo` этого не ловил.
+  Теперь `onChange` коммитит `new Date(raw)` (или `undefined` при пустом значении). Разбор —
+  [letar-forms-field-date-runtime-string.md](/.claude/docs/letar-forms-field-date-runtime-string.md).
+- **Post-submit `formApi.reset(dataToSubmit)` мог откатить поле к устаревшему `initialValue`.**
+  `reset()` снимает `state.isTouched`; на следующем рендере TanStack Form (`useForm`'s layout
+  effect → `FormApi.update()`) синхронизирует `state.values` с ЛЮБЫМ `defaultValues`, который
+  родитель передал в `useAppForm`, если форма не touched — если `initialValue` вычисляется как
+  статический дефолт, а не «то, что реально было отправлено», пользователь визуально терял только
+  что сделанный выбор. Добавлен `usePostSubmitResetGuard` (`FormSimple`/`FormWithApi`) — запоминает
+  отправленное значение и восстанавливает его один раз, если следующий рендер разошёлся. Разбор —
+  [letar-forms-post-submit-reset-stale-initialvalue.md](/.claude/docs/letar-forms-post-submit-reset-stale-initialvalue.md).
+
 ## [2.5.3] - 2026-08-19
 
 ### Fixed

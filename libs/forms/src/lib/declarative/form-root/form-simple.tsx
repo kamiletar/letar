@@ -13,6 +13,7 @@ import type { DeclarativeFormContextValue, FormMiddleware, OnFieldChangeMap, Val
 import { buildValidators } from './form-validators'
 import { useFieldChangeListeners } from './use-field-change-listeners'
 import { useFormFeatures } from './use-form-features'
+import { usePostSubmitResetGuard } from './use-post-submit-reset-guard'
 
 /**
  * Props for FormSimple component
@@ -113,7 +114,7 @@ export function FormSimple<TData extends object>({
   const form = useAppForm({
     defaultValues: initialValue,
     validators: buildValidators(schema, validateOn),
-    onSubmit: async ({ value, formApi }) => {
+    onSubmit: async ({ value }) => {
       // Honeypot — блокировка ботов
       if (isBot()) {
         return
@@ -145,7 +146,7 @@ export function FormSimple<TData extends object>({
         }
 
         // Reset form with current values to clear dirty state
-        formApi.reset(dataToSubmit)
+        commitPostSubmitReset(dataToSubmit)
       } catch (error) {
         // Call onError middleware
         if (middleware?.onError) {
@@ -155,6 +156,10 @@ export function FormSimple<TData extends object>({
       }
     },
   })
+
+  // Защита от отката поля к устаревшему initialValue после post-submit reset() —
+  // см. use-post-submit-reset-guard.ts
+  const { commitPostSubmitReset } = usePostSubmitResetGuard<TData>(form, initialValue)
 
   // Подписка на изменения полей (onFieldChange)
   useFieldChangeListeners(form, onFieldChange)

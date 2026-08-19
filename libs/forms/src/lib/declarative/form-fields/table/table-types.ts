@@ -1,6 +1,6 @@
 'use client'
 
-import type { ReactNode } from 'react'
+import type { MutableRefObject, ReactNode } from 'react'
 
 /**
  * Чистые типы (без React/Chakra) вынесены в @letar/forms-core (Фаза 7.1, Этап 3в) —
@@ -89,6 +89,13 @@ export interface TableEditorContextValue {
   setEditingCell: (cell: CellCoord | null) => void
   /** Установить фокусированную ячейку */
   setFocusedCell: (cell: CellCoord | null) => void
+  /**
+   * Ref на функцию коммита значения активной редактируемой ячейки. Регистрируется самой
+   * ячейкой (EditingCell) на время редактирования — навигация (Tab/Enter/стрелки) вызывает её
+   * перед сменой ячейки, потому что размонтирует `<Input>` напрямую через `setEditingCell(null)`,
+   * минуя нативный `blur`, на котором обычно держится коммит.
+   */
+  commitEditingCellRef: MutableRefObject<(() => void) | null>
   /** Выбранные строки (indices) */
   selectedRows: Set<number>
   /** Toggle выбора строки */

@@ -78,10 +78,11 @@ const initialValue = useMemo(
 
 ## Статус
 
-Не исправлено ни в domwellbes (некритично, см. PLAN_LOGISTICS.md), ни в
-`libs/forms`. Кандидат для делегации `forms-dev`/координатору форм
-(`QuietRidge`) через `.claude/rules/form-delegation.md`: `reset(dataToSubmit)`
-после сабмита не должен полагаться на то, что следующий проход рендера даст
-`initialValue`, совпадающий с уже отправленными данными — это неявный
-контракт, нигде не описанный в `libs/forms/README.md` или
-[forms.md](/.claude/docs/forms.md).
+✅ Исправлено в `@letar/forms` 2.6.0 (2026-08-19) —
+`usePostSubmitResetGuard` (`libs/forms/src/lib/declarative/form-root/use-post-submit-reset-guard.ts`)
+запоминает значение, переданное в `reset(dataToSubmit)`, и на следующем рендере, если TanStack
+Form успел откатить `state.values` к чужому `initialValue`, восстанавливает именно отправленные
+данные — ровно один раз, без ремонта компонента. Обходной путь в domwellbes (мемоизация
+`initialValue` с учётом `pendingSubmit`) больше не обязателен, но остаётся более надёжной практикой
+для новых форм — сам фикс лечит симптом на уровне библиотеки, а не корневую причину (per-render
+sync `defaultValues` в `@tanstack/react-form`, вне контроля `@letar/forms`).
