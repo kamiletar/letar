@@ -6,6 +6,14 @@ export { useThrottle } from './lib/utility/use-throttle'
 
 // === Browser Hooks ===
 export {
+  type EventSourceReconnectOptions,
+  type EventSourceReconnectStrategy,
+  type EventSourceStatus,
+  useEventSource,
+  type UseEventSourceOptions,
+  type UseEventSourceResult,
+} from './lib/browser/use-event-source'
+export {
   useInfiniteScrollSentinel,
   type UseInfiniteScrollSentinelOptions,
 } from './lib/browser/use-infinite-scroll-sentinel'

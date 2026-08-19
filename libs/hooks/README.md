@@ -23,13 +23,14 @@ import { useDebounce, useOnlineStatus, usePendingMutations } from '@letar/hooks'
 
 ### Browser Hooks
 
-| Хук                               | Описание                                                                               |
-| --------------------------------- | -------------------------------------------------------------------------------------- |
-| `useOnlineStatus()`               | Статус подключения к интернету (boolean)                                               |
-| `useScrollDirection(threshold?)`  | Направление скролла ('up' \| 'down' \| null)                                           |
-| `useMediaQuery(query)`            | Отслеживание CSS media query                                                           |
-| `useWindowSize()`                 | Размеры окна { width, height }                                                         |
-| `useInfiniteScrollSentinel(opts)` | Infinite scroll через sentinel-элемент + IntersectionObserver, возвращает callback-ref |
+| Хук                               | Описание                                                                                              |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `useOnlineStatus()`               | Статус подключения к интернету (boolean)                                                              |
+| `useScrollDirection(threshold?)`  | Направление скролла ('up' \| 'down' \| null)                                                          |
+| `useMediaQuery(query)`            | Отслеживание CSS media query                                                                          |
+| `useWindowSize()`                 | Размеры окна { width, height }                                                                        |
+| `useInfiniteScrollSentinel(opts)` | Infinite scroll через sentinel-элемент + IntersectionObserver, возвращает callback-ref                |
+| `useEventSource(opts)`            | Единое управление `EventSource` (SSE): backoff-переподключение, `visibilitychange`, кастомные события |
 
 ### TanStack Query Hooks
 
@@ -129,6 +130,32 @@ function SyncIndicator() {
   return <Badge>Синхронизация ({pendingCount})</Badge>
 }
 ```
+
+### SSE-поток (Server-Sent Events)
+
+```tsx
+import { useEventSource } from '@letar/hooks'
+
+function LiveMetrics() {
+  const [metrics, setMetrics] = useState<Metrics | null>(null)
+
+  const { status } = useEventSource({
+    url: '/api/metrics/stream',
+    events: {
+      metrics: (event) => setMetrics(JSON.parse(event.data)),
+    },
+    reconnect: { strategy: 'exponential', baseDelayMs: 1000, maxDelayMs: 30000, jitter: true },
+  })
+
+  return <Badge colorPalette={status === 'connected' ? 'green' : 'gray'}>{status}</Badge>
+}
+```
+
+По умолчанию `reconnectOnVisible: true` — при возврате фоновой вкладки в фокус соединение
+пересоздаётся принудительно (Chrome Memory Saver замораживает `EventSource` фоновых вкладок и не
+всегда переподключает его сам). `reconnect: 'native'` (по умолчанию) не трогает соединение при
+ошибке — переподключение отдаётся браузеру; `'none'` — закрывает без ретраев; объект — closes и
+переподключается по стратегии `'constant' | 'linear' | 'exponential'`.
 
 ### Responsive UI
 
