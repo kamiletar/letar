@@ -15,7 +15,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
       p={5}
       bg="bg.card"
       backdropFilter="blur(10px)"
-      transition="all 0.2s"
+      transitionProperty="border-color, transform, box-shadow"
+      transitionDuration="0.2s"
       _hover={project.url
         ? {
           borderColor: 'brand.500',
