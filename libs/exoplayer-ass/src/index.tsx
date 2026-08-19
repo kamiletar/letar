@@ -19,6 +19,9 @@ import type { NativeAssViewProps } from './types'
 
 export type { NativeAssViewProps } from './types'
 
+/** RN 0.87 типизирует getViewManagerConfig как Object — Commands есть только в рантайме */
+type ViewManagerConfig = { Commands: Record<string, number> }
+
 /** Проверка поддержки платформы */
 const IS_ANDROID = Platform.OS === 'android'
 
@@ -71,7 +74,7 @@ export function NativeAssView({
     // Загружаем ASS контент при изменении
     UIManager.dispatchViewManagerCommand(
       nodeHandle,
-      UIManager.getViewManagerConfig('AssSubtitleView').Commands.loadContent,
+      (UIManager.getViewManagerConfig('AssSubtitleView') as ViewManagerConfig).Commands.loadContent,
       [assContent],
     )
   }, [assContent])
@@ -89,7 +92,7 @@ export function NativeAssView({
 
     UIManager.dispatchViewManagerCommand(
       nodeHandle,
-      UIManager.getViewManagerConfig('AssSubtitleView').Commands.setFrameSize,
+      (UIManager.getViewManagerConfig('AssSubtitleView') as ViewManagerConfig).Commands.setFrameSize,
       [videoWidth, videoHeight],
     )
   }, [videoWidth, videoHeight])
