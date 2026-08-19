@@ -749,6 +749,23 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
 
 ## Backlog (запросы от агентов)
 
+### [2026-08-19] Баг: Field.Date отдаёт string в onSubmit даже при z.coerce.date() (от domwellbes)
+
+- **Запросил:** domwellbes-relay
+- **Приоритет:** high
+- **Описание:** `FieldDate` (`libs/forms/src/lib/declarative/form-fields/datetime/field-date.tsx`)
+  хранит и отдаёт значение поля как строку (`YYYY-MM-DD`) независимо от объявленной Zod-схемы —
+  `field.handleChange` кладёт в state `e.target.value` без приведения к `Date`. Если схема поля —
+  `z.coerce.date()`, TS-тип поля выводится как `Date` (`z.infer`), а фактическое рантайм-значение
+  остаётся строкой — `values.someDate.toISOString()` падает в рантайме, `typecheck:tsgo` не ловит
+  расхождение. Разбор — [letar-forms-field-date-runtime-string.md](/.claude/docs/letar-forms-field-date-runtime-string.md).
+  Workaround-пример — `apps/domwellbes/src/app/(admin)/admin/logistics/carriers/[id]/_components/create-carrier-tariff-form.tsx`.
+- **Предлагаемый фикс:** либо `FieldDate` приводит значение к `Date` при коммите, когда схема
+  поля — coerce-дата (тип и рантайм синхронизированы), либо документация/типизация компонента
+  явно фиксируют, что значение всегда `string`.
+- **Статус:** отправлено `QuietRidge` через agent-mail (тред `form-feature-request`, сообщение
+  «[form-components] Field.Date отдаёт string в onSubmit вместо Date при z.coerce.date()»).
+
 ### [2026-08-18] Баг: TableEditor теряет введённое значение при Tab/Enter/Escape/стрелках (от aboi)
 
 - **Запросил:** aboi-dev
