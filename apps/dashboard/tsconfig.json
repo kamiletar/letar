@@ -37,6 +37,9 @@
       ],
       "@letar/glitchtip/server": [
         "../../libs/glitchtip/src/server/index.ts"
+      ],
+      "@letar/hooks": [
+        "../../libs/hooks/src/index.ts"
       ]
     }
   },

@@ -1,6 +1,6 @@
 {
   "name": "@letar/dashboard",
-  "version": "1.24.2",
+  "version": "1.24.3",
   "private": true,
   "nx": {
     "name": "dashboard",
@@ -12,7 +12,8 @@
       "@letar/query-provider",
       "@letar/analytics",
       "@letar/api-server",
-      "@letar/glitchtip"
+      "@letar/glitchtip",
+      "@letar/hooks"
     ]
   },
   "dependencies": {
@@ -21,6 +22,7 @@
     "@letar/analytics": "workspace:*",
     "@letar/chakra-provider": "workspace:*",
     "@letar/infra-config": "workspace:*",
-    "@letar/glitchtip": "workspace:*"
+    "@letar/glitchtip": "workspace:*",
+    "@letar/hooks": "workspace:*"
   }
 }

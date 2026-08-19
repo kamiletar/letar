@@ -1,6 +1,7 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEventSource } from '@letar/hooks'
+import { useEffect, useRef, useState } from 'react'
 
 /** Информация о CPU */
 interface CPUData {
@@ -79,15 +80,6 @@ interface UseUnifiedStreamOptions {
   onError?: (error: string) => void
 }
 
-// Экспоненциальный backoff для переподключения
-const getReconnectDelay = (attempt: number) => {
-  const baseDelay = 1000 // 1 секунда
-  const maxDelay = 30000 // 30 секунд
-  const delay = Math.min(baseDelay * Math.pow(2, attempt), maxDelay)
-  // Добавляем jitter ±20%
-  return delay * (0.8 + Math.random() * 0.4)
-}
-
 /**
  * Хук для подключения к единому SSE потоку метрик
  * Объединяет metrics и containers в одно соединение
@@ -100,170 +92,78 @@ export function useUnifiedStream({
   maxReconnectAttempts = 5,
   onError,
 }: UseUnifiedStreamOptions = {}) {
-  const [state, setState] = useState<UnifiedStreamState>({
-    metrics: null,
-    containers: null,
-    isConnected: false,
-    error: null,
-    reconnectAttempts: 0,
-  })
+  const [metrics, setMetrics] = useState<MetricsData | null>(null)
+  const [containers, setContainers] = useState<ContainersData | null>(null)
+  const [reconnectAttempts, setReconnectAttempts] = useState(0)
+  const attemptsRef = useRef(0)
 
-  const eventSourceRef = useRef<EventSource | null>(null)
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const mountedRef = useRef(true)
+  const url = serverId ? `/api/stream/unified?serverId=${encodeURIComponent(serverId)}` : '/api/stream/unified'
 
-  const connect = useCallback(() => {
-    if (!enabled || !mountedRef.current) {
-      return
-    }
-
-    // Закрываем существующее соединение
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close()
-      eventSourceRef.current = null
-    }
-
-    try {
-      // Формируем URL с serverId
-      const url = serverId ? `/api/stream/unified?serverId=${encodeURIComponent(serverId)}` : '/api/stream/unified'
-
-      const eventSource = new EventSource(url)
-      eventSourceRef.current = eventSource
-
-      eventSource.addEventListener('open', () => {
-        if (!mountedRef.current) {
-          return
-        }
-        // eslint-disable-next-line no-console -- Логирование SSE соединения для отладки
-        console.log('[Unified Stream] Connected')
-        setState((prev) => ({
-          ...prev,
-          isConnected: true,
-          error: null,
-          reconnectAttempts: 0,
-        }))
-      })
-
-      // Обработка метрик
-      eventSource.addEventListener('metrics', (event: MessageEvent) => {
-        if (!mountedRef.current) {
-          return
-        }
+  const { status, reconnect: reconnectStream, disconnect } = useEventSource({
+    url,
+    enabled,
+    reconnect: {
+      strategy: 'exponential',
+      baseDelayMs: 1000,
+      maxDelayMs: 30000,
+      maxAttempts: maxReconnectAttempts,
+      jitter: true,
+    },
+    events: {
+      metrics: (event) => {
         try {
-          const data = JSON.parse(event.data) as MetricsData
-          setState((prev) => ({ ...prev, metrics: data }))
+          setMetrics(JSON.parse(event.data) as MetricsData)
         } catch (err) {
           console.error('[Unified Stream] Error parsing metrics:', err)
         }
-      })
-
-      // Обработка контейнеров
-      eventSource.addEventListener('containers', (event: MessageEvent) => {
-        if (!mountedRef.current) {
-          return
-        }
+      },
+      containers: (event) => {
         try {
-          const data = JSON.parse(event.data) as ContainersData
-          setState((prev) => ({ ...prev, containers: data }))
+          setContainers(JSON.parse(event.data) as ContainersData)
         } catch (err) {
           console.error('[Unified Stream] Error parsing containers:', err)
         }
-      })
+      },
+    },
+  })
 
-      // Обработка ошибок
-      eventSource.addEventListener('error', () => {
-        if (!mountedRef.current) {
-          return
-        }
-
-        eventSource.close()
-        eventSourceRef.current = null
-
-        setState((prev) => {
-          const newAttempts = prev.reconnectAttempts + 1
-          const shouldReconnect = newAttempts <= maxReconnectAttempts
-
-          if (!shouldReconnect) {
-            const errorMsg = 'Max reconnection attempts reached'
-            onError?.(errorMsg)
-            return {
-              ...prev,
-              isConnected: false,
-              error: errorMsg,
-              reconnectAttempts: newAttempts,
-            }
-          }
-
-          // Планируем переподключение с exponential backoff
-          const delay = getReconnectDelay(newAttempts)
-          // eslint-disable-next-line no-console -- Логирование переподключения
-          console.log(`[Unified Stream] Reconnecting in ${Math.round(delay)}ms (attempt ${newAttempts})`)
-
-          reconnectTimeoutRef.current = setTimeout(() => {
-            if (mountedRef.current) {
-              connect()
-            }
-          }, delay)
-
-          return {
-            ...prev,
-            isConnected: false,
-            error: 'Connection lost, reconnecting...',
-            reconnectAttempts: newAttempts,
-          }
-        })
-      })
-    } catch (err) {
-      console.error('[Unified Stream] Failed to create EventSource:', err)
-      setState((prev) => ({
-        ...prev,
-        isConnected: false,
-        error: 'Failed to connect',
-      }))
-    }
-  }, [enabled, serverId, maxReconnectAttempts, onError])
-
-  // Подключение при монтировании
+  // Отслеживаем число попыток и репортим финальную неудачу — сам useEventSource
+  // ретраит молча, наружу нужен и счётчик, и колбэк onError только при исчерпании попыток
   useEffect(() => {
-    mountedRef.current = true
-
-    if (enabled) {
-      connect()
+    if (status === 'connected') {
+      attemptsRef.current = 0
+      setReconnectAttempts(0)
+      return
     }
-
-    return () => {
-      mountedRef.current = false
-
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current)
-        reconnectTimeoutRef.current = null
-      }
-
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close()
-        eventSourceRef.current = null
-      }
+    if (status === 'error') {
+      attemptsRef.current += 1
+      setReconnectAttempts(attemptsRef.current)
+      return
     }
-  }, [connect, enabled])
-
-  // Ручное переподключение
-  const reconnect = useCallback(() => {
-    setState((prev) => ({ ...prev, reconnectAttempts: 0 }))
-    connect()
-  }, [connect])
-
-  // Отключение
-  const disconnect = useCallback(() => {
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current)
-      reconnectTimeoutRef.current = null
+    if (status === 'disconnected' && attemptsRef.current >= maxReconnectAttempts) {
+      onError?.('Max reconnection attempts reached')
     }
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close()
-      eventSourceRef.current = null
-    }
-    setState((prev) => ({ ...prev, isConnected: false }))
-  }, [])
+  }, [status, maxReconnectAttempts, onError])
+
+  const error = status === 'error'
+    ? 'Connection lost, reconnecting...'
+    : status === 'disconnected' && attemptsRef.current >= maxReconnectAttempts
+    ? 'Max reconnection attempts reached'
+    : null
+
+  const reconnect = () => {
+    attemptsRef.current = 0
+    setReconnectAttempts(0)
+    reconnectStream()
+  }
+
+  const state: UnifiedStreamState = {
+    metrics,
+    containers,
+    isConnected: status === 'connected',
+    error,
+    reconnectAttempts,
+  }
 
   return {
     ...state,

@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.24.3] — 2026-08-19
+
+### Refactor: SSE-хуки на общем `useEventSource` (`@letar/hooks`)
+
+`useSSE`, `useUnifiedStream` и страница `/apps/[app]/logs` переведены с ручных
+`new EventSource(...)` на общий `useEventSource` — дедупликация переподключения с backoff
+(константный/экспоненциальный по месту использования), добавлено пересоздание соединения на
+`visibilitychange`. API `useSSE`/`useUnifiedStream` не изменился, поведение сохранено.
+
 ## [1.24.1] — 2026-08-11
 
 ### Feature: dev-session bypass для preview-верификации

@@ -2,6 +2,7 @@
 
 import { Header } from '@/app/_components/layout/Header'
 import { Badge, Box, Button, Card, Heading, HStack, Input, Text, VStack } from '@chakra-ui/react'
+import { useEventSource } from '@letar/hooks'
 import { use, useEffect, useRef, useState } from 'react'
 import { LuDownload } from 'react-icons/lu'
 
@@ -24,7 +25,6 @@ export default function AppLogsPage({ params: paramsPromise }: { params: Promise
   const [streamType, setStreamType] = useState<'all' | 'stdout' | 'stderr'>('all')
 
   const logsEndRef = useRef<HTMLDivElement>(null)
-  const eventSourceRef = useRef<EventSource | null>(null)
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -34,36 +34,30 @@ export default function AppLogsPage({ params: paramsPromise }: { params: Promise
   }, [logs, autoScroll])
 
   // Connect to SSE stream
-  useEffect(() => {
-    const eventSource = new EventSource(`/api/apps/${appName}/logs?tail=100`)
-    eventSourceRef.current = eventSource
+  useEventSource({
+    url: `/api/apps/${appName}/logs?tail=100`,
+    reconnect: 'none',
+    events: {
+      message: (event) => {
+        try {
+          const data = JSON.parse(event.data) as LogEntry
+          setLogs((prev) => [...prev, data])
 
-    eventSource.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data) as LogEntry
-        setLogs((prev) => [...prev, data])
-
-        if (data.type === 'connected') {
-          setIsConnected(true)
-        } else if (data.type === 'end' || data.type === 'error') {
-          setIsConnected(false)
+          if (data.type === 'connected') {
+            setIsConnected(true)
+          } else if (data.type === 'end' || data.type === 'error') {
+            setIsConnected(false)
+          }
+        } catch (error) {
+          console.error('Failed to parse log entry:', error)
         }
-      } catch (error) {
-        console.error('Failed to parse log entry:', error)
-      }
-    }
-
-    eventSource.onerror = (error) => {
+      },
+    },
+    onError: (error) => {
       console.error('EventSource error:', error)
       setIsConnected(false)
-      eventSource.close()
-    }
-
-    return () => {
-      eventSource.close()
-      setIsConnected(false)
-    }
-  }, [appName])
+    },
+  })
 
   const handleClearLogs = () => {
     setLogs([])
