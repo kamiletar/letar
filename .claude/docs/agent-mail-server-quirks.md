@@ -9,6 +9,101 @@
 
 ---
 
+## Разбор по исходникам сервера (2026-08-20) — root cause вместо догадок
+
+Ниже — то, что раньше было помечено «не выяснено»/«похоже, не доказано», проверено чтением
+исходников внутри контейнера (`docker exec mcp_agent_mail-agent-mail-1 ...`, файлы
+`/app/src/mcp_agent_mail/{app,config,utils}.py`) и апстрим-репозитория
+[Dicklesworthstone/mcp_agent_mail](https://github.com/Dicklesworthstone/mcp_agent_mail).
+
+### ✅ `<app>-dev` — легальный, официально поддерживаемый паттерн, переименовывать не нужно
+
+Сервер знает **два** формата имени агента, не один:
+
+1. **adjective+noun** (`BlueLake`) — auto-generated, случайный.
+2. **explicit identity** (`utils.validate_explicit_agent_id`) — «stable, human-chosen identities
+   like `cc-0`, `alpha-one`, or `worker_42` — useful for swarm workflows where agents are
+   relaunched onto the same identity» (дословно из докстринга). Требование одно: хотя бы один
+   разделитель `-`/`_`/`.` в имени — иначе строка уходит по ветке adjective+noun и там не пройдёт.
+
+`<app>-dev` содержит `-` → это explicit identity **по дизайну**, а не обход валидации. Путь
+регистрации (`_get_or_create_agent` в `app.py`) проверяет `validate_explicit_agent_id` **первым
+делом**, до какой-либо adjective+noun проверки — вот почему `register_agent`/`macro_start_session`
+с `<app>-dev` всегда молча срабатывали, это не везение.
+
+### ⛔ Баг найден и локализован: `send_message(to:)` не проверяет explicit identity вообще
+
+`send_message` на каждого получателя в `to` напрямую вызывает `_detect_agent_name_mistake()`
+(`app.py:7118`) — эта функция **не содержит вызова `validate_explicit_agent_id`**, в отличие от
+`_get_or_create_agent`. Она матчит имя против списка эвристик, и одна из них —
+`_looks_like_descriptive_name`: любое имя, оканчивающееся на `agent|bot|assistant|helper|manager|
+coordinator|developer|engineer|migrator|refactorer|fixer|harmonizer|integrator|optimizer|
+analyzer|worker` — считается «descriptive role name» и отклоняется с текстом про
+«WhiteMountain/BrownCreek».
+
+**Отсюда следует то, чего не было в старой версии этого файла: баг триггерится не любым
+kebab-case именем, а конкретно суффиксом-словом.** `forms-coordinator` ловит его (оканчивается на
+`coordinator`), гипотетический `deploy-agent` тоже поймал бы (`agent`). А `aboi-dev`,
+`studio-dev`, `svoichuzhie-dev` — **не ловят**, потому что `-dev` не входит в список суффиксов и
+не проверяется `_looks_like_unix_username` (та проверка требует `str.isalnum()`, а дефис его
+рвёт). Практический вывод: переименование `<app>-dev` → adjective+noun **не требуется и не было
+нужно** — только координаторские имена, буквально оканчивающиеся на одно из слов списка выше.
+`QuietRidge`/`BlackCove` остаются правильным решением для координаторских ролей, но не потому что
+kebab-case вообще запрещён, а потому что конкретно эти суффиксы попадают под фильтр.
+
+Баг — асимметрия конкретно в `send_message`: `register_agent`, `request_contact`,
+`reply_message` этот путь не проверяют вовсе, отсюда и наблюдение «то же имя в `to` не проходит, а
+в `request_contact`/`reply_message` — проходит».
+
+### ✅ Причина потери БД 2026-08-10 — найдена и это расхождение с апстримом, не баг сервера
+
+Официальный `docker-compose.yml` апстрима держит БД в **Postgres с именованным volume**
+(`pgdata:/var/lib/postgresql/data`, `DATABASE_URL=postgres+asyncpg://...`). Наш self-hosted
+деплой (`infra/agent-mail/setup.sh`) этот compose-файл не использует — контейнер поднят на
+дефолтном `DATABASE_URL=sqlite+aiosqlite:///./storage.sqlite3` (относительный путь). Проверено
+прямо в контейнере: `/app/storage.sqlite3` лежит в писчем слое (`WorkingDir=/app`), а
+примонтирован volume только `/data` (`STORAGE_ROOT=/data/mailbox` — человекочитаемый
+git-архив сообщений, не БД). Любой `docker rm`/пересоздание контейнера стирает
+`storage.sqlite3` вместе со всеми `registration_token`.
+
+**Фикс применён 2026-08-20.** Контейнер `mcp_agent_mail-agent-mail-1` пересоздан с
+`DATABASE_URL=sqlite+aiosqlite:////data/storage.sqlite3` (файл теперь внутри volume
+`mcp_agent_mail_agent_mail_data`, а не в писчем слое). Перенос сделан консистентным снапшотом
+(`sqlite3.connect(...).execute("VACUUM INTO '/data/storage.sqlite3'")` изнутри контейнера, без
+остановки БД под нагрузкой), затем `docker stop` + `docker run` с тем же именем/сетью/портом/
+volume + новым `DATABASE_URL`. Все 78 агентов, 387 сообщений, 429 резерваций, 44 контакта —
+подтверждены в стартовом stats-баннере нового контейнера, все существующие `registration_token`
+из памяти `agent_fixed_names_tokens.md` остаются рабочими (БД не менялась, только путь файла).
+**Теперь `docker rm`/пересоздание контейнера больше не стирает БД** — она в volume, как и
+`/data/mailbox`. Официальный путь апстрима (Postgres+volume, см. `docker-compose.yml` в
+[Dicklesworthstone/mcp_agent_mail](https://github.com/Dicklesworthstone/mcp_agent_mail)) остаётся
+более robust под конкурентную запись, если когда-нибудь понадобится — но текущий фикс полностью
+закрывает причину инцидента 2026-08-10 при заметно меньшей сложности.
+
+⚠️ **Если `infra/agent-mail/setup.sh` когда-нибудь будет использован для пересоздания
+контейнера с нуля (переустановка, миграция на новый сервер) — не запускать `docker run` без
+`-e DATABASE_URL=sqlite+aiosqlite:////data/storage.sqlite3`.** Дефолт из образа снова уйдёт в
+писчий слой без предупреждения. `setup.sh` сам контейнер не поднимает (только клонирует
+`mcp_agent_mail`, см. `scripts/start-agent-mail.sh` внутри) — актуальную команду `docker run` с
+этим флагом стоит зафиксировать там же, если сервер когда-то пересоздаётся не вручную.
+
+### ✅ «Identity ретирится сама между сессиями» — подтверждено, это встроенный idle-reaper
+
+`config.py`: `auto_retire_stale_agents_enabled` (default `true`), sweep каждые
+`AUTO_RETIRE_STALE_AGENTS_INTERVAL_SECONDS=3600` (час), порог —
+`AUTO_RETIRE_STALE_AGENTS_THRESHOLD_SECONDS=86400` (**24 часа** простоя). Комментарий в
+исходнике объясняет зачем: без этого «после ~30+ мёртвых агентов `send_message`-broadcast
+начинает биться в contact-approval стену, потому что каждый новый агент требует апрува от всех
+мёртвых». Это не баг и не связано с форматом имени — обычный сервисный демон. `unretire_agent` на
+старте сессии — штатный шаг для любого приложения, если между сессиями прошло больше суток, а не
+recovery-процедура на крайний случай.
+
+Если 24-часовой порог даёт слишком много `unretire_agent`-трения (например, работа над
+приложением идёт раз в несколько дней) — поднимается через
+`AUTO_RETIRE_STALE_AGENTS_THRESHOLD_SECONDS` в окружении контейнера, без пересборки образа.
+
+---
+
 ## Почему нельзя оставлять серверу генерировать имя
 
 Если вызвать `macro_start_session` без `agent_name`, agent-mail сгенерирует случайное
