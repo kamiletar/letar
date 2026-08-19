@@ -61,7 +61,9 @@ function RelationCard({ relation, librarySlug }: { relation: AnimeManifestRelati
       border="1px"
       borderColor="border.subtle"
       cursor="pointer"
-      transition="all 0.15s ease-out"
+      transitionProperty="border-color, box-shadow"
+      transitionDuration="0.15s"
+      transitionTimingFunction="ease-out"
       _hover={{ borderColor: 'purple.500', shadow: 'md' }}
     >
       {/* Постер */}

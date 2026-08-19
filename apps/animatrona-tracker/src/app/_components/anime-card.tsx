@@ -68,7 +68,8 @@ export function AnimeCard({ anime, progress, franchiseCount }: AnimeCardProps) {
         overflow="hidden"
         borderWidth="1px"
         bg="bg.panel"
-        transition="all 0.2s"
+        transitionProperty="box-shadow, border-color"
+        transitionDuration="0.2s"
         _hover={{ shadow: 'lg', borderColor: isFranchise ? 'purple.500' : 'brand.500' }}
       >
         {/* Постер */}

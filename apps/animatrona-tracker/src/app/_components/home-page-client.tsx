@@ -293,7 +293,8 @@ function LatestAnimeCard({ anime, progress }: { anime: LatestAnimeItem; progress
         overflow="hidden"
         borderWidth="1px"
         bg="bg.panel"
-        transition="all 0.2s"
+        transitionProperty="box-shadow, border-color"
+        transitionDuration="0.2s"
         _hover={{ shadow: 'lg', borderColor: 'brand.500' }}
       >
         <Box position="relative" aspectRatio="2/3" bg="bg.muted">

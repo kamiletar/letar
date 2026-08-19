@@ -130,7 +130,8 @@ export function LibraryClient({ items: initialItems }: LibraryClientProps) {
                     borderWidth="1px"
                     borderRadius="xl"
                     overflow="hidden"
-                    transition="all 0.2s"
+                    transitionProperty="box-shadow, transform"
+                    transitionDuration="0.2s"
                     _hover={{ shadow: 'lg', transform: 'translateY(-2px)' }}
                   >
                     {/* Постер */}

@@ -332,7 +332,8 @@ export function PublicProfileClient({
                         borderRadius="lg"
                         borderWidth="1px"
                         overflow="hidden"
-                        transition="all 0.2s"
+                        transitionProperty="transform, box-shadow"
+                        transitionDuration="0.2s"
                         _hover={{ transform: 'translateY(-2px)', shadow: 'md' }}
                       >
                         <Image

@@ -79,7 +79,8 @@ export function ContinueWatchingSection() {
             overflow="hidden"
             bg="bg.muted"
             _hover={{ transform: 'scale(1.02)', shadow: 'lg' }}
-            transition="all 0.2s"
+            transitionProperty="transform, box-shadow"
+            transitionDuration="0.2s"
           >
             {/* Постер с overlay */}
             <Box position="relative">
