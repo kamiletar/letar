@@ -1,8 +1,7 @@
-export const dynamic = 'force-dynamic'
-
 import { JsonLd, localBusinessSchema } from '@/app/_components/json-ld'
 import { Box, Container, Heading, Link, Text, VStack } from '@chakra-ui/react'
 import type { Metadata } from 'next'
+import { setRequestLocale } from 'next-intl/server'
 import { LuMail, LuMessageCircle } from 'react-icons/lu'
 import { ContactForm } from './_components/contact-form'
 
@@ -18,7 +17,14 @@ export const metadata: Metadata = {
   },
 }
 
-export default function ContactsPage() {
+type Props = {
+  params: Promise<{ locale: string }>
+}
+
+export default async function ContactsPage({ params }: Props) {
+  const { locale } = await params
+  setRequestLocale(locale)
+
   return (
     <>
       <JsonLd data={localBusinessSchema} />

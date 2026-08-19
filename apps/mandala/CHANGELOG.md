@@ -4,6 +4,13 @@
 
 ## [Unreleased]
 
+## [0.40.11] - 2026-08-19
+
+### Fixed: `/contacts` не генерировался статически
+
+Убран лишний `export const dynamic = 'force-dynamic'` (страница не читает ни БД, ни сессию),
+добавлен `setRequestLocale(locale)` — маршрут перешёл `ƒ Dynamic` → `● SSG` в `next build`.
+
 ## [0.40.10] - 2026-08-19
 
 ### Fixed: dev-сервер мог отдавать 500 из-за `@tanstack/devtools-ui@0.7.0`

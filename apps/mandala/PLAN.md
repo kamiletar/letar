@@ -114,6 +114,22 @@
 > **Полная история выполненных фаз, закрытых багов и рефакторинга — в
 > [PLAN_COMPLETED.md](./PLAN_COMPLETED.md).**
 
+## ✅ setRequestLocale/SSG — точечный фикс `contacts` (2026-08-19)
+
+В сессии по apps/studio нашли класс бага: `[locale]/layout.tsx` с `generateStaticParams`, но без
+`setRequestLocale(locale)` в конкретных `page.tsx` — next-intl не может определить локаль на
+этапе сборки, страница остаётся `ƒ` вместо `●`/`○` в выводе `next build`. Проверка `mandala`:
+почти все страницы уже в порядке (`[slug]`, `about-elfafeya`, `about-mandalas`, `cart`,
+`checkout`, `checkout/success`, `offline`, `privacy` — все `●`). Найден один настоящий кандидат:
+`(main)/contacts/page.tsx` держал `export const dynamic = 'force-dynamic'` без всякой причины —
+ни БД, ни сессии в самой странице (форма обратной связи — server action, вызывается с клиента).
+Убрал флаг, добавил `setRequestLocale(locale)` — маркер сборки сменился `ƒ → ●`.
+
+Остальные `ƒ`-страницы динамические заслуженно: `/[locale]` (главная, `force-dynamic` из-за
+списка мандал из БД — правило `.claude/rules/nextjs-apps.md`), `mandalas`, `mandalas/[slug]`,
+`shop`, `shop/[slug]` (то же правило + `headers()` через auth), `sign-in`/`sign-up`
+(`searchParams` — сам по себе Dynamic API), `admin/*` (сессия).
+
 ## Техдолг: подключить theme:check
 
 Гейт сырых цветов/теней/transition в UI-коде (`nx g @letar/generators:theme-check-integrate
