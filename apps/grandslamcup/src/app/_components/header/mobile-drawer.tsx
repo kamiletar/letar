@@ -73,7 +73,8 @@ export function MobileDrawer({ navItems, cityPrefix, user, showAdmin, isCoach, i
                                   color={isActive ? 'brand.solid' : 'fg'}
                                   fontWeight={isActive ? 'semibold' : 'normal'}
                                   _hover={{ bg: isActive ? 'brand.subtle' : 'bg.subtle' }}
-                                  transition="all 0.15s"
+                                  transitionProperty="background-color, color, border-left-color"
+                                  transitionDuration="0.15s"
                                   borderLeftWidth="3px"
                                   borderLeftColor={isActive ? 'brand.solid' : 'transparent'}
                                 >

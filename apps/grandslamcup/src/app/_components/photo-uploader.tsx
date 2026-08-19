@@ -108,7 +108,8 @@ export function PhotoUploader({ matchId }: PhotoUploaderProps) {
         textAlign="center"
         cursor="pointer"
         bg={dragOver ? 'brand.subtle' : 'transparent'}
-        transition="all 0.15s"
+        transitionProperty="border-color, background-color"
+        transitionDuration="0.15s"
         onClick={() => fileInputRef.current?.click()}
         onDragOver={(e) => {
           e.preventDefault()

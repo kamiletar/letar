@@ -68,7 +68,8 @@ export function SwissBracketMobile({ data, citySlug }: SwissBracketMobileProps) 
               colorPalette={hasLive ? 'red' : allFinished ? 'green' : 'gray'}
               borderWidth="1px"
               borderColor={isActive ? 'colorPalette.muted' : 'transparent'}
-              transition="all 0.2s"
+              transitionProperty="background-color, color, border-color"
+              transitionDuration="0.2s"
               onClick={() => setActiveRoundIdx(idx)}
               whiteSpace="nowrap"
             >

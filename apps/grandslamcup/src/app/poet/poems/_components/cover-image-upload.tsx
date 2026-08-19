@@ -120,7 +120,8 @@ export function CoverImageUpload({ value, onChange, poemId }: CoverImageUploadPr
         cursor={uploading ? 'wait' : 'pointer'}
         bg={dragOver ? 'teal.50' : undefined}
         _dark={{ borderColor: dragOver ? 'teal.400' : 'gray.600', bg: dragOver ? 'teal.900/20' : undefined }}
-        transition="all 0.2s"
+        transitionProperty="border-color, background-color"
+        transitionDuration="0.2s"
         onClick={() => !uploading && inputRef.current?.click()}
         onDragOver={(e) => {
           e.preventDefault()

@@ -151,7 +151,8 @@ function TeamCard({
       bg={selected ? 'green.subtle' : 'bg.panel'}
       cursor={disabled ? 'default' : 'pointer'}
       onClick={disabled ? undefined : onClick}
-      transition="all 0.5s"
+      transitionProperty="border-color, background-color, transform"
+      transitionDuration="0.5s"
       transform={animating ? 'rotate(5deg)' : 'none'}
       textAlign="center"
       minH="120px"

@@ -88,7 +88,8 @@ export function AdminSidebar() {
                 color={isActive ? 'brand.fg' : 'fg.muted'}
                 fontWeight={isActive ? 'semibold' : 'normal'}
                 _hover={{ bg: isActive ? 'brand.subtle' : 'bg.subtle' }}
-                transition="all 0.15s"
+                transitionProperty="background-color, color"
+                transitionDuration="0.15s"
               >
                 <Icon as={item.icon} boxSize={5} />
                 <Text fontSize="sm">{item.label}</Text>

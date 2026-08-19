@@ -110,7 +110,8 @@ export function AlbumCoverUpload({ value, onChange, albumId }: AlbumCoverUploadP
         p={6}
         cursor={uploading ? 'wait' : 'pointer'}
         _dark={{ borderColor: dragOver ? 'teal.400' : 'gray.600' }}
-        transition="all 0.2s"
+        transitionProperty="border-color"
+        transitionDuration="0.2s"
         onClick={() => !uploading && inputRef.current?.click()}
         onDragOver={(e) => {
           e.preventDefault()

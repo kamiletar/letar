@@ -118,7 +118,8 @@ export function StepVictoryPoem({ match }: StepVictoryPoemProps) {
               bg={selected ? 'yellow.subtle' : 'bg.panel'}
               cursor="pointer"
               onClick={() => setSelectedId(player.id)}
-              transition="all 0.2s"
+              transitionProperty="border-color, background-color"
+              transitionDuration="0.2s"
               _hover={{ borderColor: 'yellow.muted' }}
             >
               <Flex justify="space-between" align="center">

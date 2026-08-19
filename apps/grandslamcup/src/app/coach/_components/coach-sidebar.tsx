@@ -62,7 +62,8 @@ export function CoachSidebar() {
                 color={isActive ? 'teal.fg' : 'fg.muted'}
                 fontWeight={isActive ? 'semibold' : 'normal'}
                 _hover={{ bg: isActive ? 'teal.subtle' : 'bg.subtle' }}
-                transition="all 0.15s"
+                transitionProperty="background-color, color"
+                transitionDuration="0.15s"
               >
                 <IconComponent size={18} />
                 <Text fontSize="sm">{item.label}</Text>

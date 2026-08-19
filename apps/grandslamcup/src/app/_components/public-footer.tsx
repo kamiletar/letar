@@ -143,7 +143,8 @@ export function PublicFooter({ cityTelegramMap }: PublicFooterProps) {
                           fontSize="sm"
                           color="gray.300"
                           _hover={{ bg: 'gray.700', color: 'white' }}
-                          transition="all 0.15s"
+                          transitionProperty="background-color, color"
+                          transitionDuration="0.15s"
                         >
                           <LuSend size={14} />
                           Telegram
@@ -163,7 +164,8 @@ export function PublicFooter({ cityTelegramMap }: PublicFooterProps) {
                         fontSize="sm"
                         color="gray.300"
                         _hover={{ bg: 'gray.700', color: 'brand.400' }}
-                        transition="all 0.15s"
+                        transitionProperty="background-color, color"
+                        transitionDuration="0.15s"
                       >
                         <LuHeart size={14} />
                         Поддержать

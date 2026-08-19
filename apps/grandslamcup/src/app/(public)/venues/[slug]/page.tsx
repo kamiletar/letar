@@ -142,7 +142,8 @@ export default async function VenueDetailPage({ params }: { params: Params }) {
                   justify="space-between"
                   align="center"
                   _hover={{ borderColor: 'border.emphasized' }}
-                  transition="all 0.15s"
+                  transitionProperty="border-color"
+                  transitionDuration="0.15s"
                 >
                   <Flex gap={2} align="center">
                     <Text fontWeight="medium">{match.homeTeam.team.name}</Text>

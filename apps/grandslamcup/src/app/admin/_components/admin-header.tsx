@@ -57,7 +57,8 @@ export function AdminHeader({ userName }: AdminHeaderProps) {
                                       color={isActive ? 'brand.fg' : 'fg'}
                                       fontWeight={isActive ? 'semibold' : 'normal'}
                                       _hover={{ bg: isActive ? 'brand.subtle' : 'bg.subtle' }}
-                                      transition="all 0.15s"
+                                      transitionProperty="background-color, color"
+                                      transitionDuration="0.15s"
                                     >
                                       <IconComponent size={20} />
                                       <Text fontSize="md">{item.label}</Text>

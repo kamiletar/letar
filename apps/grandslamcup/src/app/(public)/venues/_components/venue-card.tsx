@@ -19,7 +19,8 @@ export function VenueCard({ slug, name, cityName, address, teamNames }: VenueCar
         borderWidth="1px"
         borderColor="border.muted"
         _hover={{ borderColor: 'border.emphasized', shadow: 'sm' }}
-        transition="all 0.15s"
+        transitionProperty="border-color, box-shadow"
+        transitionDuration="0.15s"
         h="full"
       >
         <Heading size="md" mb={2}>

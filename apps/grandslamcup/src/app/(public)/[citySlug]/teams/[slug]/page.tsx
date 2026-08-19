@@ -358,7 +358,8 @@ export default async function TeamPage({ params }: { params: Params }) {
                       borderColor="border"
                       bg="bg.panel"
                       _hover={{ shadow: 'md', borderColor: 'brand.solid' }}
-                      transition="all 0.2s"
+                      transitionProperty="box-shadow, border-color"
+                      transitionDuration="0.2s"
                     >
                       <Box w={10} h={10} borderRadius="lg" overflow="hidden" flexShrink={0} position="relative">
                         {pts.player.photo
@@ -403,7 +404,9 @@ export default async function TeamPage({ params }: { params: Params }) {
                   bg="bg.panel"
                   overflow="hidden"
                   _hover={{ shadow: 'md', borderColor: 'border.emphasized', transform: 'translateY(-2px)' }}
-                  transition="all 0.2s ease"
+                  transitionProperty="box-shadow, border-color, transform"
+                  transitionDuration="0.2s"
+                  transitionTimingFunction="ease"
                 >
                   {/* Фото */}
                   <Box position="relative" w="full" pt="100%" bg="bg.subtle">

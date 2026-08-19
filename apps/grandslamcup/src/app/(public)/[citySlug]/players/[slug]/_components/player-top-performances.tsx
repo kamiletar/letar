@@ -37,7 +37,8 @@ export function PlayerTopPerformances({ perfs, citySlug }: PlayerTopPerformances
               justify="space-between"
               align="center"
               _hover={{ shadow: 'md', borderColor: 'border.emphasized', transform: 'translateY(-1px)' }}
-              transition="all 0.2s"
+              transitionProperty="box-shadow, border-color, transform"
+              transitionDuration="0.2s"
             >
               <HStack gap={3}>
                 <Text fontSize="lg">{MEDALS[i]}</Text>

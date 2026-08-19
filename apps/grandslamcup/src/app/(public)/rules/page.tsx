@@ -44,7 +44,8 @@ export default function RulesIndexPage() {
             <Card.Root
               w="320px"
               _hover={{ shadow: 'lg', borderColor: 'brand.fg' }}
-              transition="all 0.2s"
+              transitionProperty="box-shadow, border-color"
+              transitionDuration="0.2s"
               cursor="pointer"
             >
               <Card.Body>

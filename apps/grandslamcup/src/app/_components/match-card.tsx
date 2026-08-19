@@ -75,7 +75,9 @@ export function MatchCard({
           borderColor: isLive ? 'brand.solid' : 'border.emphasized',
           transform: 'translateY(-2px)',
         }}
-        transition="all 0.2s ease"
+        transitionProperty="box-shadow, border-color, transform"
+        transitionDuration="0.2s"
+        transitionTimingFunction="ease"
         className={isLive ? 'glow-pulse' : undefined}
       >
         {/* LIVE: градиентная полоска сверху */}

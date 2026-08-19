@@ -34,7 +34,8 @@ export function SeasonSelector({ seasons, currentId, basePath }: SeasonSelectorP
             bg={s.id === currentId ? 'brand.solid' : 'bg.subtle'}
             color={s.id === currentId ? 'brand.contrast' : 'fg'}
             _hover={{ opacity: 0.8 }}
-            transition="all 0.15s"
+            transitionProperty="background-color, color, opacity"
+            transitionDuration="0.15s"
           >
             {s.name}
           </Box>

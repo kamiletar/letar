@@ -198,7 +198,8 @@ export function ScorerVoteInput({ matchId, performanceId, dimension, judges, onS
                     fontWeight="bold"
                     cursor={isJudgeLoading ? 'wait' : 'pointer'}
                     userSelect="none"
-                    transition="all 0.15s"
+                    transitionProperty="border-color, background-color, opacity"
+                    transitionDuration="0.15s"
                     borderColor={isSelected ? `${accent}.solid` : 'border.muted'}
                     bg={isSelected ? `${accent}.solid` : 'bg.subtle'}
                     color={isSelected ? 'white' : 'fg'}

@@ -87,7 +87,8 @@ export async function NewsContent({ citySlug, cityId, cityName }: NewsContentPro
                 <Card.Root
                   h="100%"
                   _hover={{ shadow: 'lg', borderColor: 'brand.fg' }}
-                  transition="all 0.2s"
+                  transitionProperty="box-shadow, border-color"
+                  transitionDuration="0.2s"
                   cursor="pointer"
                   overflow="hidden"
                 >

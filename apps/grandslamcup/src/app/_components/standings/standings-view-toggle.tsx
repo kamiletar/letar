@@ -73,7 +73,8 @@ function ToggleButton({
       fontSize="sm"
       fontWeight={active ? 'medium' : 'normal'}
       _hover={active ? {} : { bg: 'bg.subtle' }}
-      transition="all 0.15s"
+      transitionProperty="background-color, color"
+      transitionDuration="0.15s"
       onClick={onClick}
     >
       {icon}

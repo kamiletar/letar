@@ -147,7 +147,9 @@ export default async function CitySelectorPage() {
                   textAlign="center"
                   position="relative"
                   overflow="hidden"
-                  transition="all 0.3s ease"
+                  transitionProperty="background-color, border-color, transform, box-shadow"
+                  transitionDuration="0.3s"
+                  transitionTimingFunction="ease"
                   cursor="pointer"
                   _hover={{
                     bg: 'whiteAlpha.100',

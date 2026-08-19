@@ -163,7 +163,9 @@ export default async function PlayersPage({ searchParams }: { searchParams: Sear
                       borderColor: 'border.emphasized',
                       transform: 'translateY(-2px)',
                     }}
-                    transition="all 0.2s ease"
+                    transitionProperty="box-shadow, border-color, transform"
+                    transitionDuration="0.2s"
+                    transitionTimingFunction="ease"
                     h="full"
                   >
                     {/* Фото или плейсхолдер */}

@@ -62,7 +62,8 @@ export default async function PoetPoemsPage() {
                 borderWidth="1px"
                 borderColor="border"
                 _hover={{ shadow: 'sm', borderColor: 'border.emphasized' }}
-                transition="all 0.15s"
+                transitionProperty="box-shadow, border-color"
+                transitionDuration="0.15s"
               >
                 <Flex justify="space-between" align="start" gap={4}>
                   <VStack gap={1} align="start" flex={1} minW={0}>

@@ -101,7 +101,8 @@ function SectionTabs({
           bg={idx === activeIdx ? 'bg.panel' : 'transparent'}
           color={idx === activeIdx ? `${colorMap[section.type]}.fg` : 'fg.muted'}
           shadow={idx === activeIdx ? 'xs' : undefined}
-          transition="all 0.2s"
+          transitionProperty="background-color, color"
+          transitionDuration="0.2s"
           onClick={() => onChange(idx)}
           _hover={{ bg: idx === activeIdx ? 'bg.panel' : 'bg.muted' }}
         >
@@ -144,7 +145,8 @@ function RoundTabs({
             colorPalette={hasLive ? 'red' : allFinished ? 'green' : 'gray'}
             borderWidth="1px"
             borderColor={isActive ? 'colorPalette.muted' : 'transparent'}
-            transition="all 0.2s"
+            transitionProperty="background-color, color, border-color"
+            transitionDuration="0.2s"
             onClick={() => onChange(idx)}
             whiteSpace="nowrap"
           >

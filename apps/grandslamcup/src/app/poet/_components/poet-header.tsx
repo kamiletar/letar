@@ -62,7 +62,8 @@ export function PoetHeader({ playerName, publicProfileHref }: PoetHeaderProps) {
                                       color={isActive ? 'teal.fg' : 'fg'}
                                       fontWeight={isActive ? 'semibold' : 'normal'}
                                       _hover={{ bg: isActive ? 'teal.subtle' : 'bg.subtle' }}
-                                      transition="all 0.15s"
+                                      transitionProperty="background-color, color"
+                                      transitionDuration="0.15s"
                                     >
                                       <IconComponent size={20} />
                                       <Text fontSize="md">{item.label}</Text>

@@ -28,7 +28,9 @@ export function VenueCard({ slug, name, cityName: _cityName, address, photo, tea
         borderColor="border"
         overflow="hidden"
         _hover={{ borderColor: 'border.emphasized', shadow: 'lg', transform: 'translateY(-2px)' }}
-        transition="all 0.2s ease"
+        transitionProperty="border-color, box-shadow, transform"
+        transitionDuration="0.2s"
+        transitionTimingFunction="ease"
         h="full"
       >
         {/* Фото или плейсхолдер */}

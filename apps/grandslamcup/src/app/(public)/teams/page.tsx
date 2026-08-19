@@ -61,7 +61,9 @@ export default async function TeamsPage() {
                   borderColor: 'border.emphasized',
                   transform: 'translateY(-2px)',
                 }}
-                transition="all 0.2s ease"
+                transitionProperty="box-shadow, border-color, transform"
+                transitionDuration="0.2s"
+                transitionTimingFunction="ease"
                 h="full"
                 position="relative"
                 overflow="hidden"

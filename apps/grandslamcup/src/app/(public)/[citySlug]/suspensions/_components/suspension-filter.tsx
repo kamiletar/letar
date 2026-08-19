@@ -27,7 +27,8 @@ export function SuspensionFilter({ activeOnly, citySlug }: SuspensionFilterProps
           bg={!activeOnly ? 'brand.subtle' : 'transparent'}
           color={!activeOnly ? 'brand.solid' : 'fg.muted'}
           _hover={{ bg: !activeOnly ? 'brand.subtle' : 'bg.subtle' }}
-          transition="all 0.15s"
+          transitionProperty="background-color, color"
+          transitionDuration="0.15s"
           cursor="pointer"
         >
           <Text>Все</Text>
@@ -43,7 +44,8 @@ export function SuspensionFilter({ activeOnly, citySlug }: SuspensionFilterProps
           bg={activeOnly ? 'red.subtle' : 'transparent'}
           color={activeOnly ? 'red.solid' : 'fg.muted'}
           _hover={{ bg: activeOnly ? 'red.subtle' : 'bg.subtle' }}
-          transition="all 0.15s"
+          transitionProperty="background-color, color"
+          transitionDuration="0.15s"
           cursor="pointer"
         >
           <Text>Только активные</Text>

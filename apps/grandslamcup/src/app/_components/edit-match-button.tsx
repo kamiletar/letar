@@ -174,7 +174,8 @@ export function EditMatchButton({ matchId, posterUrl, canEdit }: EditMatchButton
                         p={8}
                         cursor="pointer"
                         _hover={{ borderColor: 'brand.solid', bg: 'bg.subtle' }}
-                        transition="all 0.2s"
+                        transitionProperty="border-color, background-color"
+                        transitionDuration="0.2s"
                         onClick={() => fileRef.current?.click()}
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={handleDrop}

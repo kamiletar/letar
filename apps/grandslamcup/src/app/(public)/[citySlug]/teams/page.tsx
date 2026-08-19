@@ -121,7 +121,9 @@ export default async function TeamsPage({ params, searchParams }: { params: Para
                     opacity: 1,
                     filter: 'none',
                   }}
-                  transition="all 0.2s ease"
+                  transitionProperty="box-shadow, border-color, transform, opacity, filter"
+                  transitionDuration="0.2s"
+                  transitionTimingFunction="ease"
                   h="full"
                   position="relative"
                   overflow="hidden"

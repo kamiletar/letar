@@ -134,7 +134,8 @@ export function DesktopNav({ navItems, cityPrefix }: DesktopNavProps) {
                 fontWeight={isActive ? 'semibold' : 'normal'}
                 color={isActive ? 'brand.solid' : 'fg.muted'}
                 _hover={{ color: isActive ? 'brand.solid' : 'fg', bg: 'bg.subtle' }}
-                transition="all 0.15s"
+                transitionProperty="color, background-color"
+                transitionDuration="0.15s"
                 position="relative"
                 whiteSpace="nowrap"
               >
@@ -160,7 +161,8 @@ export function DesktopNav({ navItems, cityPrefix }: DesktopNavProps) {
               fontWeight="normal"
               color="fg.muted"
               _hover={{ color: 'fg', bg: 'bg.subtle' }}
-              transition="all 0.15s"
+              transitionProperty="color, background-color"
+              transitionDuration="0.15s"
               display="flex"
               alignItems="center"
               gap={1}

@@ -34,7 +34,8 @@ export function SwissMatchCard({ match, citySlug }: SwissMatchCardProps) {
       borderColor={isLive ? 'red.emphasized' : 'border.emphasized'}
       _hover={matchId ? { borderColor: { base: 'gray.400', _dark: 'border.inverted' }, shadow: 'sm' } : undefined}
       cursor={matchId ? 'pointer' : 'default'}
-      transition="all 0.15s"
+      transitionProperty="border-color, box-shadow"
+      transitionDuration="0.15s"
     >
       {/* Домашняя команда */}
       <Text

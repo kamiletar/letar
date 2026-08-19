@@ -33,7 +33,8 @@ export function PlayerPoemsList({ poems, citySlug, playerSlug }: PlayerPoemsList
               borderColor="border"
               align="center"
               _hover={{ shadow: 'sm', borderColor: 'border.emphasized', transform: 'translateY(-1px)' }}
-              transition="all 0.2s"
+              transitionProperty="box-shadow, border-color, transform"
+              transitionDuration="0.2s"
             >
               <HStack gap={2}>
                 <LuPenLine size={16} />

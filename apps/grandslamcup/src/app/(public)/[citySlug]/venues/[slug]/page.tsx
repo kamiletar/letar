@@ -184,7 +184,8 @@ export default async function VenueDetailPage({ params }: { params: Params }) {
                     borderColor="border"
                     bg="bg.panel"
                     _hover={{ borderColor: 'brand.solid', shadow: 'sm' }}
-                    transition="all 0.15s"
+                    transitionProperty="border-color, box-shadow"
+                    transitionDuration="0.15s"
                   >
                     <LuUsers size={16} />
                     <Text fontWeight="medium" fontSize="sm">
