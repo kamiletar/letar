@@ -6,6 +6,14 @@
 
 ## [Unreleased]
 
+## [0.7.4] - 2026-08-19
+
+### Fixed
+
+- Миграция типов под react-native 0.87 API (без апдейта версии — код готов, версия ждёт унификации `react` по монорепо): публичные `CodegenTypes`/`codegenNativeCommands` вместо глубоких путей `Libraries/*` в `libs/exoplayer-ass`/`libs/exoplayer-sync`, явная типизация `UIManager.getViewManagerConfig(...).Commands`, `NativeEventEmitter.addListener` под новую сигнатуру в `usePictureInPicture.ts`/`useRemoteControl.ts`
+- `StatusBar`: убраны `backgroundColor`/`translucent` — пропали из API RN 0.87 (Android теперь всегда edge-to-edge)
+- `SeekBar`: реф `Animated.View` сужен до локального интерфейса с `measureInWindow` вместо `View`-типа, расходящегося между версиями reanimated/react-native
+
 ## [0.7.3] - 2026-05-29
 
 ### Fixed
