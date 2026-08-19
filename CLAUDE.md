@@ -106,7 +106,11 @@ Server→Client — property-access ломается, `undefined` ·
 scope — Invariant вместо обновления кеша ·
 [nextjs-favicon-icon-tsx-both-needed](/.claude/docs/nextjs-favicon-icon-tsx-both-needed.md) ⚠️
 `icon.tsx` не заменяет `favicon.ico` — боты/краулеры бьют в корень мимо `<head>`; вместе они дают
-два тега `link[rel~="icon"]`, подмена href первого найденного молча не работает
+два тега `link[rel~="icon"]`, подмена href первого найденного молча не работает ·
+[nextjs-react19-hoistable-link-mutation-pitfall](/.claude/docs/nextjs-react19-hoistable-link-mutation-pitfall.md)
+⚠️ мутация/удаление React-управляемого `<link>`/`<meta>` (hoistable-ресурс Next float API)
+нестабильна — чужой ре-рендер где угодно в дереве молча вставляет дубль поверх; не воспроизводится
+на dev, только на прод-сборке
 
 **Chakra v3 — ловушки:** [chakra-multi-system-ssr-barrel-trap](/.claude/docs/chakra-multi-system-ssr-barrel-trap.md) ⚠️
 импорт шрифта/константы из барреля с `createSystem()` в Server Component исполняет весь модуль и
