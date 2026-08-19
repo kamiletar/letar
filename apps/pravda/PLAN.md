@@ -12,6 +12,11 @@
 
 ## Backlog
 
+### 🟡 Тема
+
+- [ ] Аудит `_active: scale()` в `src/theme/recipes/*.ts` на `pressScale` (`@letar/ui`) — задача
+      описана в [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md)
+
 ### 🔴 Приоритетные баги — staging e2e (найдено BlackCove, §18.7 Тираж M1, 2026-07-22)
 
 **Раунд 2026-08-12 (214/240 passed, 18 failed, 5 flaky) — частично закрыто:**
