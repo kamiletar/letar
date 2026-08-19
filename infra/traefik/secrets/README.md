@@ -1,6 +1,6 @@
 # infra/traefik/secrets/
 
-Конвейер `.enc` для infra-сервисов — [PLAN-INFRA.md §18.8.1](/PLAN-INFRA.md). Отдельно от
+Конвейер `.enc` для infra-сервисов — [PLAN-INFRA-1.md §18.8.1](/PLAN-INFRA-1.md). Отдельно от
 `.env.docker.enc` (`apps/*`): здесь секрет — файл целиком, а не `KEY=value`, поэтому расшифровка
 кладёт его по пути из `deploy.conf`, а не в переменные окружения.
 

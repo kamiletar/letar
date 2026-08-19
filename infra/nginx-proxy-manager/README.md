@@ -2,7 +2,7 @@
 
 Конфигурация обратного прокси для всех приложений монорепозитория.
 
-> ⚠️ **Замена NPM на Traefik — [PLAN-INFRA.md §48](/PLAN-INFRA.md).** На **s3 уже выполнено**
+> ⚠️ **Замена NPM на Traefik — [PLAN-INFRA-2.md §48](/PLAN-INFRA-2.md).** На **s3 уже выполнено**
 > (2026-08-08): NPM там **выведен из эксплуатации полностью**, контейнера не существует, весь
 > трафик 80/443 держит Traefik (labels в `docker-compose.staging.yml` каждого приложения, см.
 > [infra/traefik/README.md](/infra/traefik/README.md#как-подключить-приложение)). Таблица ниже и
@@ -55,28 +55,28 @@ proxy host сюда его тоже нужно дописать вручную, 
 > [public-repo-hygiene.md](/.claude/rules/public-repo-hygiene.md)), полная таблица всех 26 —
 > в приватных доках, `.claude/private/INFRA-PROXY-HOSTS.md`.
 
-| conf | Домен                         | Forward Host             | Port | SSL | Примечания                                                                            |
-| ---- | ----------------------------- | ------------------------ | ---- | --- | ------------------------------------------------------------------------------------- |
-| 1    | npm.s2.letar.best             | localhost                | 81   | LE  | Админка NPM s2                                                                        |
-| 7    | dash.letar.best               | dashboard-app            | 3002 | LE  | SSE config                                                                            |
-| 11   | gateway.letar.best            | animatrona-gateway       | 8080 | LE  | ⛔ мёртвый: бэкенда нет с июня 2026, имя ведёт на s3. Под снос, [§57](/PLAN-INFRA.md) |
-| 12   | auth.letar.best               | auth-hub-app             | 3010 | LE  | Ключница (OIDC)                                                                       |
-| 13   | archetest.letar.best          | archetest-app            | 3012 | LE  | —                                                                                     |
-| 14   | time.letar.best               | time-app                 | 3013 | LE  | —                                                                                     |
-| 15   | forms.letar.best              | form-docs-app            | 3020 | LE  | Docs @letar/forms                                                                     |
-| 16   | forms-example.letar.best      | form-example-app         | 3022 | LE  | Примеры @letar/forms                                                                  |
-| 18   | grandslamcup.letar.best       | grandslamcup-app         | 3016 | LE  | —                                                                                     |
-| 19   | aira.letar.best               | aira-web-app             | 3017 | LE  | —                                                                                     |
-| 20   | gsc-test.letar.best           | grandslamcup-staging-app | 3018 | LE  | Staging grandslamcup                                                                  |
-| 21   | mandala.letar.best            | mandala-app              | 3004 | LE  | PWA: sw.js без кэша                                                                   |
-| 22   | kami.letar.best               | kami-app                 | 3005 | LE  | CMS                                                                                   |
-| 23   | pravda.letar.best             | pravda-app               | 3007 | LE  | —                                                                                     |
-| 24   | animatrona.letar.best         | animatrona-landing-app   | 3008 | LE  | Landing page                                                                          |
-| 25   | animatrona-tracker.letar.best | animatrona-tracker-app   | 3010 | LE  | Аниме трекер                                                                          |
-| 26   | kamikeythe.letar.best         | kami-key-the-landing-app | 3011 | LE  | —                                                                                     |
-| 27   | letar.best                    | letar-landing-app        | 3015 | LE  | Корневой домен                                                                        |
-| 28   | stats.letar.best              | umami-app                | 3000 | LE  | Аналитика Umami                                                                       |
-| 33   | studio.letar.best             | studio-app               | 3024 | LE  | —                                                                                     |
+| conf | Домен                         | Forward Host             | Port | SSL | Примечания                                                                              |
+| ---- | ----------------------------- | ------------------------ | ---- | --- | --------------------------------------------------------------------------------------- |
+| 1    | npm.s2.letar.best             | localhost                | 81   | LE  | Админка NPM s2                                                                          |
+| 7    | dash.letar.best               | dashboard-app            | 3002 | LE  | SSE config                                                                              |
+| 11   | gateway.letar.best            | animatrona-gateway       | 8080 | LE  | ⛔ мёртвый: бэкенда нет с июня 2026, имя ведёт на s3. Под снос, [§57](/PLAN-INFRA-3.md) |
+| 12   | auth.letar.best               | auth-hub-app             | 3010 | LE  | Ключница (OIDC)                                                                         |
+| 13   | archetest.letar.best          | archetest-app            | 3012 | LE  | —                                                                                       |
+| 14   | time.letar.best               | time-app                 | 3013 | LE  | —                                                                                       |
+| 15   | forms.letar.best              | form-docs-app            | 3020 | LE  | Docs @letar/forms                                                                       |
+| 16   | forms-example.letar.best      | form-example-app         | 3022 | LE  | Примеры @letar/forms                                                                    |
+| 18   | grandslamcup.letar.best       | grandslamcup-app         | 3016 | LE  | —                                                                                       |
+| 19   | aira.letar.best               | aira-web-app             | 3017 | LE  | —                                                                                       |
+| 20   | gsc-test.letar.best           | grandslamcup-staging-app | 3018 | LE  | Staging grandslamcup                                                                    |
+| 21   | mandala.letar.best            | mandala-app              | 3004 | LE  | PWA: sw.js без кэша                                                                     |
+| 22   | kami.letar.best               | kami-app                 | 3005 | LE  | CMS                                                                                     |
+| 23   | pravda.letar.best             | pravda-app               | 3007 | LE  | —                                                                                       |
+| 24   | animatrona.letar.best         | animatrona-landing-app   | 3008 | LE  | Landing page                                                                            |
+| 25   | animatrona-tracker.letar.best | animatrona-tracker-app   | 3010 | LE  | Аниме трекер                                                                            |
+| 26   | kamikeythe.letar.best         | kami-key-the-landing-app | 3011 | LE  | —                                                                                       |
+| 27   | letar.best                    | letar-landing-app        | 3015 | LE  | Корневой домен                                                                          |
+| 28   | stats.letar.best              | umami-app                | 3000 | LE  | Аналитика Umami                                                                         |
+| 33   | studio.letar.best             | studio-app               | 3024 | LE  | —                                                                                       |
 
 Пропуски в нумерации `conf` (2–6, 8, 10, 17, 29–32, 34) — это либо удалённые когда-то хосты,
 либо приложения на коммерческих доменах, вынесенные в приватные доки.
@@ -242,7 +242,7 @@ proxy_read_timeout 86400s;
 
 Этот блок описывал кеш на s2 (порог по размеру `≤ 5MB`), который был снесён вместе с
 `animatrona-gateway` ещё в июне 2026 — сама эта дока и была той «несуществующей схемой», из-за
-которой заведён [PLAN-INFRA.md §57](/PLAN-INFRA.md). Актуальное решение: фильтр по Content-Type
+которой заведён [PLAN-INFRA-3.md §57](/PLAN-INFRA-3.md). Актуальное решение: фильтр по Content-Type
 (не по размеру), видео/аудио не кешируются вообще, прокси едет на **mail-сервер**, не на NPM —
 конфиг и чеклист деплоя в [infra/gateway-cache/](/infra/gateway-cache/README.md). Блок ниже
 оставлен зачёркнутым для истории до момента, пока `gateway-cache` не заменит его в проде.

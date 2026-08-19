@@ -359,7 +359,7 @@ age-ключ; подробнее — [secret-manager](/.claude/docs/secret-manag
 **Postgres MCP Pro:** dev-базы `studio` и `driving-school` подключены флагом `--pro` у
 `.claude/mcp/pg-wrapper.mjs` — вместо одного `query` доступны EXPLAIN, health-checks и подбор
 индексов (9 инструментов). Подбор индексов пока не работает: нужны расширения `pg_stat_statements`
-и `hypopg`, см. [PLAN-INFRA §71](/PLAN-INFRA.md).
+и `hypopg`, см. [PLAN-INFRA-4 §71](/PLAN-INFRA-4.md).
 
 ⚠️ **`nx-mcp` запускается с `--minimal false`.** По умолчанию флаг `--minimal` у сервера равен
 `true`, и он прячет ровно те инструменты, ради которых его ставят: `nx_workspace`,
