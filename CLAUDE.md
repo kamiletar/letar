@@ -27,7 +27,11 @@
 ⚠️ `nx g @nx/*:convert-to-inferred` тихо меняет реальный охват таргета у проектов с кастомными
 настройками — диффать до/после, не доверять «отработал без ошибок» ·
 [bun-lockfile-private-submodules](/.claude/docs/bun-lockfile-private-submodules.md) ⚠️
-`--frozen-lockfile` падает везде, где submodule не выкачаны; чистка `bun.lock` не держится
+`--frozen-lockfile` падает везде, где submodule не выкачаны; чистка `bun.lock` не держится ·
+[bun-install-stale-isolated-cache](/.claude/docs/bun-install-stale-isolated-cache.md) ⚠️
+несколько версий пакета в `node_modules/.bun` после снятия пина — не признак незавершённого
+резолва, обычный `bun install` не прунит устаревшие isolated-копии; сверять по `bun.lock`,
+чинить — `bun install --force`
 
 **MCP-серверы:** [mcp-servers](/.claude/docs/mcp-servers.md) состав и назначение ·
 [mcp-server-pattern](/.claude/docs/mcp-server-pattern.md) тонкий локальный сервер по stdio ·
