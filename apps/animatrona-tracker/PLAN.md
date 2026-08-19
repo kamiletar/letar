@@ -4,6 +4,10 @@
 
 ## Черновик (новые идеи)
 
+- [ ] **Аудит `_active: scale()` в теме на `pressScale`** (`@letar/ui`) — задача описана в
+      [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md). Значения раскиданы
+      по `src/app/_components/ui/provider.tsx` (не в `src/theme`, как у большинства приложений).
+
 - [ ] **Покадровая перемотка на паузе** — при паузе кнопки/горячие клавиши +/- 5 кадров. Shaka Player: `video.currentTime += frameDuration` или seek по кадрам через `requestVideoFrameCallback`
 
 ## Фаза N: Шеринг, тайм-коды, настройка дорожек и комментарии с привязкой ко времени (план, без реализации)
