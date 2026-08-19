@@ -770,10 +770,10 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
 
 - **Запросил:** aboi-dev
 - **Приоритет:** high
-- **Статус:** ожидание (agent-mail недоступен — координатор `QuietRidge` в статусе `retired`,
-  `send_message` отклонён с "Agent 'QuietRidge' is retired and no longer accepts new messages",
-  `unretire_agent` требует чужой `registration_token`, которого у aboi-dev нет — запись сюда
-  вместо письма, по шагу 3 `.claude/rules/form-delegation.md`)
+- **Статус:** отправлено `QuietRidge` через agent-mail 2026-08-19 (тред `form-feature-request`,
+  сообщение «[form-components] TableEditor теряет введённое значение при
+  Tab/Enter/Escape/стрелках») — `QuietRidge` и `aboi-dev` восстановлены из `retired` через
+  `unretire_agent` своими же токенами, письмо доставлено
 
 **Что нашёл:** `Form.Field.TableEditor` коммитит значение редактируемой ячейки только через
 нативный DOM `blur` (`libs/forms/src/lib/declarative/form-fields/table/table-cell.tsx`,
