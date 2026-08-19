@@ -20,7 +20,7 @@ import { TVNextEpisodeOverlay } from '@/components/tv/TVNextEpisodeOverlay'
 import { TVPlayerControls } from '@/components/tv/TVPlayerControls'
 import { audioTracksToItems, subtitleTracksToItems, TVTrackSelector } from '@/components/tv/TVTrackSelector'
 import type { TVStackParamList } from '@/navigation/TVNavigator'
-import type { TVPressableState } from '@/types/react-native'
+import { focusableStyle } from '@/utils/tvStyles'
 import {
   type AnimeDetails,
   type AudioTrack,
@@ -314,7 +314,7 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
         <Text style={styles.errorText}>{error || 'Эпизод не найден'}</Text>
         <View style={styles.errorButtons}>
           <Pressable
-            style={({ focused }: TVPressableState) => [styles.retryButton, focused && styles.retryButtonFocused]}
+            style={focusableStyle([styles.retryButton], styles.retryButtonFocused)}
             onPress={() => navigation.goBack()}
             hasTVPreferredFocus
           >
@@ -335,7 +335,7 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
         <Text style={styles.errorText}>Видео недоступно</Text>
         <View style={styles.errorButtons}>
           <Pressable
-            style={({ focused }: TVPressableState) => [styles.retryButton, focused && styles.retryButtonFocused]}
+            style={focusableStyle([styles.retryButton], styles.retryButtonFocused)}
             onPress={() => navigation.goBack()}
             hasTVPreferredFocus
           >
@@ -401,9 +401,7 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
                   {/* Аудио */}
                   {episode.audioTracks.length > 1 && (
                     <Pressable
-                      style={(
-                        { focused }: TVPressableState,
-                      ) => [styles.settingsButton, focused && styles.settingsButtonFocused]}
+                      style={focusableStyle([styles.settingsButton], styles.settingsButtonFocused)}
                       onPress={() => setShowAudioSelector(true)}
                     >
                       <Text style={styles.settingsButtonText}>🔊 Аудио</Text>
@@ -413,9 +411,7 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
                   {/* Субтитры */}
                   {episode.subtitleTracks.length > 0 && (
                     <Pressable
-                      style={(
-                        { focused }: TVPressableState,
-                      ) => [styles.settingsButton, focused && styles.settingsButtonFocused]}
+                      style={focusableStyle([styles.settingsButton], styles.settingsButtonFocused)}
                       onPress={() => setShowSubtitleSelector(true)}
                     >
                       <Text style={styles.settingsButtonText}>💬 Субтитры</Text>
@@ -450,7 +446,7 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
             <Text style={styles.resumeText}>Вы остановились на {formatDuration(watchProgress.savedPosition || 0)}</Text>
             <View style={styles.resumeButtons}>
               <Pressable
-                style={({ focused }: TVPressableState) => [styles.resumeButton, focused && styles.resumeButtonFocused]}
+                style={focusableStyle([styles.resumeButton], styles.resumeButtonFocused)}
                 onPress={() => {
                   const pos = watchProgress.resumeFromSaved()
                   handleSeek(pos)
@@ -460,11 +456,7 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
                 <Text style={styles.resumeButtonText}>Продолжить</Text>
               </Pressable>
               <Pressable
-                style={({ focused }: TVPressableState) => [
-                  styles.resumeButton,
-                  styles.resumeButtonSecondary,
-                  focused && styles.resumeButtonFocused,
-                ]}
+                style={focusableStyle([styles.resumeButton, styles.resumeButtonSecondary], styles.resumeButtonFocused)}
                 onPress={watchProgress.startFromBeginning}
               >
                 <Text style={styles.resumeButtonText}>Сначала</Text>

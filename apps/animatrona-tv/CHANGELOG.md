@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1] - 2026-08-20
+
+### Changed
+
+- Убрано дублирование `({ focused }: TVPressableState) => [...]` в ~20 местах 9 файлов — вынесен
+  helper `focusableStyle(base, focusedStyle, after?)` в `src/utils/tvStyles.ts`
+
 ## [0.5.0] - 2026-08-20
 
 ### Changed

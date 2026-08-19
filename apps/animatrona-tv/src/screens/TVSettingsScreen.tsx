@@ -22,7 +22,7 @@ import {
 
 import type { TVStackParamList } from '@/navigation/TVNavigator'
 import { useConnectionStore } from '@/store/connection'
-import type { TVPressableState } from '@/types/react-native'
+import { focusableStyle } from '@/utils/tvStyles'
 
 type Props = NativeStackScreenProps<TVStackParamList, 'Settings'>
 
@@ -139,9 +139,7 @@ export function TVSettingsScreen({ navigation }: Props): React.JSX.Element {
                 {error && <Text style={styles.errorText}>{error}</Text>}
                 <View style={styles.editButtons}>
                   <Pressable
-                    style={(
-                      { focused }: TVPressableState,
-                    ) => [styles.button, styles.buttonPrimary, focused && styles.buttonFocused]}
+                    style={focusableStyle([styles.button, styles.buttonPrimary], styles.buttonFocused)}
                     onPress={handleSaveUrl}
                     disabled={isSaving}
                     hasTVPreferredFocus
@@ -149,9 +147,7 @@ export function TVSettingsScreen({ navigation }: Props): React.JSX.Element {
                     <Text style={styles.buttonText}>{isSaving ? 'Сохранение...' : 'Сохранить'}</Text>
                   </Pressable>
                   <Pressable
-                    style={(
-                      { focused }: TVPressableState,
-                    ) => [styles.button, styles.buttonSecondary, focused && styles.buttonFocused]}
+                    style={focusableStyle([styles.button, styles.buttonSecondary], styles.buttonFocused)}
                     onPress={handleCancelEdit}
                     disabled={isSaving}
                   >
@@ -167,9 +163,7 @@ export function TVSettingsScreen({ navigation }: Props): React.JSX.Element {
                   <Text style={styles.settingValue}>{connection?.serverUrl || 'Не подключен'}</Text>
                 </View>
                 <Pressable
-                  style={(
-                    { focused }: TVPressableState,
-                  ) => [styles.button, styles.buttonSecondary, focused && styles.buttonFocused]}
+                  style={focusableStyle([styles.button, styles.buttonSecondary], styles.buttonFocused)}
                   onPress={handleEditUrl}
                   hasTVPreferredFocus
                 >
@@ -186,9 +180,7 @@ export function TVSettingsScreen({ navigation }: Props): React.JSX.Element {
                 <Text style={styles.settingValue}>Активно</Text>
               </View>
               <Pressable
-                style={(
-                  { focused }: TVPressableState,
-                ) => [styles.button, styles.buttonDanger, focused && styles.buttonFocused]}
+                style={focusableStyle([styles.button, styles.buttonDanger], styles.buttonFocused)}
                 onPress={handleDisconnect}
               >
                 <Text style={styles.buttonText}>Отключить</Text>
@@ -227,9 +219,7 @@ export function TVSettingsScreen({ navigation }: Props): React.JSX.Element {
         {/* Кнопка назад */}
         {!isEditing && (
           <Pressable
-            style={(
-              { focused }: TVPressableState,
-            ) => [styles.button, styles.backButton, focused && styles.buttonFocused]}
+            style={focusableStyle([styles.button, styles.backButton], styles.buttonFocused)}
             onPress={() => navigation.goBack()}
           >
             <Text style={styles.buttonText}>← Назад</Text>

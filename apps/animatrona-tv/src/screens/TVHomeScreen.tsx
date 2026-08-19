@@ -17,7 +17,7 @@ import { TVRow } from '@/components/tv/TVRow'
 import { SkeletonRow } from '@/components/tv/TVSkeleton'
 import type { TVStackParamList } from '@/navigation/TVNavigator'
 import { useConnectionStore } from '@/store/connection'
-import type { TVPressableState } from '@/types/react-native'
+import { focusableStyle } from '@/utils/tvStyles'
 import type { AnimeListItem, LastWatched } from '@letar/animatrona-shared'
 
 type Props = NativeStackScreenProps<TVStackParamList, 'Home'>
@@ -115,18 +115,14 @@ export function TVHomeScreen({ navigation }: Props): React.JSX.Element {
         <Text style={styles.errorText}>{error}</Text>
         <View style={styles.errorButtons}>
           <Pressable
-            style={({ focused }: TVPressableState) => [styles.retryButton, focused && styles.retryButtonFocused]}
+            style={focusableStyle([styles.retryButton], styles.retryButtonFocused)}
             onPress={loadData}
             hasTVPreferredFocus
           >
             <Text style={styles.retryButtonText}>Повторить</Text>
           </Pressable>
           <Pressable
-            style={({ focused }: TVPressableState) => [
-              styles.retryButton,
-              styles.retryButtonSecondary,
-              focused && styles.retryButtonFocused,
-            ]}
+            style={focusableStyle([styles.retryButton, styles.retryButtonSecondary], styles.retryButtonFocused)}
             onPress={handleDisconnect}
           >
             <Text style={styles.retryButtonText}>Отключиться</Text>
@@ -149,7 +145,7 @@ export function TVHomeScreen({ navigation }: Props): React.JSX.Element {
           <Text style={styles.subtitle}>{library.length} аниме</Text>
         </View>
         <Pressable
-          style={({ focused }: TVPressableState) => [styles.settingsButton, focused && styles.settingsButtonFocused]}
+          style={focusableStyle([styles.settingsButton], styles.settingsButtonFocused)}
           onPress={handleSettings}
         >
           <Text style={styles.settingsButtonText}>⚙ Настройки</Text>

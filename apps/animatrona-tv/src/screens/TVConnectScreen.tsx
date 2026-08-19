@@ -11,7 +11,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, type TextInp
 
 import type { TVStackParamList } from '@/navigation/TVNavigator'
 import { useConnectionStore } from '@/store/connection'
-import type { TVPressableState } from '@/types/react-native'
+import { focusableStyle } from '@/utils/tvStyles'
 import { normalizeServerUrl } from '@letar/animatrona-shared'
 
 type Props = NativeStackScreenProps<TVStackParamList, 'Connect'>
@@ -85,9 +85,7 @@ export function TVConnectScreen({ navigation }: Props): React.JSX.Element {
 
       {/* Кнопка подключения */}
       <Pressable
-        style={(
-          { focused }: TVPressableState,
-        ) => [styles.button, focused && styles.buttonFocused, isLoading && styles.buttonDisabled]}
+        style={focusableStyle([styles.button], styles.buttonFocused, [isLoading && styles.buttonDisabled])}
         onPress={handleConnect}
         disabled={isLoading}
       >

@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { useTVFocusAnimation } from '@/hooks/useTVFocusAnimation'
-import type { TVPressableState } from '@/types/react-native'
+import { focusableStyle } from '@/utils/tvStyles'
 
 interface TVNextEpisodeOverlayProps {
   /** Номер следующего эпизода */
@@ -111,7 +111,7 @@ export function TVNextEpisodeOverlay({
           </Animated.View>
 
           <Pressable
-            style={({ focused }: TVPressableState) => [styles.cancelButton, focused && styles.cancelButtonFocused]}
+            style={focusableStyle([styles.cancelButton], styles.cancelButtonFocused)}
             onPress={handleCancel}
           >
             <Text style={styles.cancelButtonText}>Отмена</Text>

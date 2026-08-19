@@ -11,7 +11,7 @@ import { ActivityIndicator, Animated, FlatList, Image, Pressable, StyleSheet, Te
 import { getAnimeDetails, getPosterUrl } from '@/api/client'
 import { useTVFocusAnimation } from '@/hooks/useTVFocusAnimation'
 import type { TVStackParamList } from '@/navigation/TVNavigator'
-import type { TVPressableState } from '@/types/react-native'
+import { focusableStyle } from '@/utils/tvStyles'
 import type { AnimeDetails, Episode } from '@letar/animatrona-shared'
 
 type Props = NativeStackScreenProps<TVStackParamList, 'Anime'>
@@ -71,18 +71,14 @@ export function TVAnimeScreen({ navigation, route }: Props): React.JSX.Element {
         <Text style={styles.errorText}>{error || 'Аниме не найдено'}</Text>
         <View style={styles.errorButtons}>
           <Pressable
-            style={({ focused }: TVPressableState) => [styles.retryButton, focused && styles.retryButtonFocused]}
+            style={focusableStyle([styles.retryButton], styles.retryButtonFocused)}
             onPress={loadData}
             hasTVPreferredFocus
           >
             <Text style={styles.retryButtonText}>Повторить</Text>
           </Pressable>
           <Pressable
-            style={({ focused }: TVPressableState) => [
-              styles.retryButton,
-              styles.retryButtonSecondary,
-              focused && styles.retryButtonFocused,
-            ]}
+            style={focusableStyle([styles.retryButton, styles.retryButtonSecondary], styles.retryButtonFocused)}
             onPress={() => navigation.goBack()}
           >
             <Text style={styles.retryButtonText}>Назад</Text>
