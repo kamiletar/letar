@@ -31,7 +31,8 @@ export default function TemplatesDemoPage() {
                 cursor="pointer"
                 onClick={() => setSelectedTemplate(t.name)}
                 _hover={{ borderColor: 'blue.400' }}
-                transition="all 0.15s"
+                transitionProperty="border-color"
+                transitionDuration="0.15s"
               >
                 <Text fontSize="sm" fontWeight="medium">
                   {t.title}
