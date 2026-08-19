@@ -68,7 +68,8 @@ export default function HomePage() {
                 variant="outline"
                 borderColor="brand.200"
                 _hover={{ borderColor: 'brand.solid', shadow: 'md' }}
-                transition="all 0.2s"
+                transitionProperty="border-color, box-shadow"
+                transitionDuration="0.2s"
               >
                 <Card.Body gap={2}>
                   <Stack direction="row" align="center" gap={2}>
@@ -94,7 +95,12 @@ export default function HomePage() {
         {examples.map((ex) => (
           <Link key={ex.href} asChild _hover={{ textDecoration: 'none' }}>
             <NextLink href={ex.href}>
-              <Card.Root variant="outline" _hover={{ borderColor: 'brand.solid', shadow: 'sm' }} transition="all 0.2s">
+              <Card.Root
+                variant="outline"
+                _hover={{ borderColor: 'brand.solid', shadow: 'sm' }}
+                transitionProperty="border-color, box-shadow"
+                transitionDuration="0.2s"
+              >
                 <Card.Body gap={1} py={3}>
                   <Card.Title fontSize="sm">{ex.title}</Card.Title>
                   <Card.Description fontSize="xs">{ex.desc}</Card.Description>
