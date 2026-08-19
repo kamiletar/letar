@@ -29,7 +29,11 @@ const timeConfig = defineConfig({
     },
   },
   globalCss: {
-    ...pressableConfig.globalCss,
+    // Точечно, а не `...pressableConfig.globalCss` целиком: там `_active: scale(0.93)`,
+    // который перемножился бы с собственным `_active` кнопки (если он появится в рецепте),
+    // и `_motionReduce`, который здесь не нужен без второй анимации кнопки. touchAction —
+    // единственное, что действительно нужно `[data-pressable]` в time (см. domwellbes).
+    '[data-pressable]': { touchAction: 'manipulation' },
   },
 })
 

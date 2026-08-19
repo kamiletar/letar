@@ -8,6 +8,8 @@ import { LuBell, LuSettings } from 'react-icons/lu'
 import { Link } from '@/i18n/navigation'
 import { signInWithLetarAuth, useSession } from '@/lib/auth-client'
 
+import { PressableCta } from './pressable-cta'
+
 /**
  * Кнопка подписки на уведомления о юбилеях
  */
@@ -42,9 +44,23 @@ export function SubscribeButton() {
             <Text fontSize="xs" fontWeight="100" color="fg.muted" mb={2}>
               {t('explanation')}
             </Text>
-            <Button size="xs" variant="outline" fontWeight="200" mb={2} onClick={() => signInWithLetarAuth()}>
-              {t('signIn')}
-            </Button>
+            {
+              /* Главный CTA блока — реальный вход, а не переключатель пояснения выше.
+                `colorPalette="brand"` + `variant="solid"` вместо `outline`: без тёмной заливки
+                ripple `PressableCta` (белый полупрозрачный) не виден. */
+            }
+            <PressableCta>
+              <Button
+                size="xs"
+                colorPalette="brand"
+                variant="solid"
+                fontWeight="200"
+                mb={2}
+                onClick={() => signInWithLetarAuth()}
+              >
+                {t('signIn')}
+              </Button>
+            </PressableCta>
           </Box>
         )}
       </VStack>

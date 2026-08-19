@@ -11,6 +11,7 @@ import {
   getSubscription,
   updateSubscription,
 } from '@/app/_actions/subscription.action'
+import { PressableCta } from '@/app/_components/pressable-cta'
 import { useRouter } from '@/i18n/navigation'
 import { useSession } from '@/lib/auth-client'
 
@@ -135,10 +136,16 @@ export default function ProfilePage() {
               </VStack>
 
               <HStack w="full" gap={3}>
-                <Button flex={1} variant="outline" fontWeight="200" onClick={handleSave}>
-                  {saved ? <LuCheck /> : <LuSave />}
-                  {saved ? t('saved') : t('save')}
-                </Button>
+                {
+                  /* Главный CTA формы настроек — заливка вместо outline нужна для видимого
+                    ripple PressableCta (он захардкожен белым полупрозрачным). */
+                }
+                <PressableCta flex={1}>
+                  <Button w="full" colorPalette="brand" variant="solid" fontWeight="200" onClick={handleSave}>
+                    {saved ? <LuCheck /> : <LuSave />}
+                    {saved ? t('saved') : t('save')}
+                  </Button>
+                </PressableCta>
                 <Button flex={1} variant="ghost" fontWeight="100" colorPalette="red" onClick={handleUnsubscribe}>
                   {t('unsubscribe')}
                 </Button>
@@ -150,9 +157,12 @@ export default function ProfilePage() {
               <Text fontWeight="100" color="fg.muted" textAlign="center">
                 {t('noSubscription')}
               </Text>
-              <Button variant="outline" fontWeight="200" onClick={handleCreate}>
-                {t('createSubscription')}
-              </Button>
+              {/* Единственный CTA пустого состояния — заводит подписку. */}
+              <PressableCta>
+                <Button colorPalette="brand" variant="solid" fontWeight="200" onClick={handleCreate}>
+                  {t('createSubscription')}
+                </Button>
+              </PressableCta>
             </VStack>
           )}
       </VStack>
