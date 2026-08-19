@@ -115,7 +115,11 @@ scope — Invariant вместо обновления кеша ·
 [nextjs-react19-hoistable-link-mutation-pitfall](/.claude/docs/nextjs-react19-hoistable-link-mutation-pitfall.md)
 ⚠️ мутация/удаление React-управляемого `<link>`/`<meta>` (hoistable-ресурс Next float API)
 нестабильна — чужой ре-рендер где угодно в дереве молча вставляет дубль поверх; не воспроизводится
-на dev, только на прод-сборке
+на dev, только на прод-сборке ·
+[nextjs-intl-setrequestlocale-ssg](/.claude/docs/nextjs-intl-setrequestlocale-ssg.md) ⚠️
+`setRequestLocale` только в корневом `[locale]/layout.tsx` не хватает для SSG — нужен в каждом
+`page.tsx`; но сначала проверь, не форсит ли динамику Dynamic API выше по дереву (found: studio,
+mandala — реальный фикс; aboi, kami, time, archetest — ложная тревога, динамика легитимна)
 
 **Chakra v3 — ловушки:** [chakra-multi-system-ssr-barrel-trap](/.claude/docs/chakra-multi-system-ssr-barrel-trap.md) ⚠️
 импорт шрифта/константы из барреля с `createSystem()` в Server Component исполняет весь модуль и
