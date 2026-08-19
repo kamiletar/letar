@@ -18,7 +18,7 @@
 
 import { spawn } from 'child_process'
 import { existsSync } from 'fs'
-import { chmod, mkdir, readdir, stat, unlink } from 'fs/promises'
+import { chmod, chown, mkdir, readdir, stat, unlink } from 'fs/promises'
 import path from 'path'
 
 /** Один источник для архива. `label`/`hint` идут в текст ошибки, если файла нет. */
@@ -129,9 +129,16 @@ export async function createTarBackup(options: TarBackupOptions): Promise<TarBac
   }
 
   try {
-    // Архив содержит секреты — читать его должен только владелец.
-    // tar создаёт файл по umask, то есть по умолчанию читаемым для всех.
-    await chmod(filepath, 0o600)
+    // Архив содержит секреты — читать его может владелец (root, процесс агента) и группа
+    // каталога `backups/`. Без группы: контейнер пишет файл как root:root/600, а Resilio Sync
+    // на хосте работает под непривилегированным `deploy` — не root и не в группе `root`, поэтому
+    // физически не может прочитать файл и молча не доставляет его в оффсайт-копии (обнаружено
+    // 2026-08-19: `nginx_auto_*`/`acme-dns_auto_*` никогда не уезжали за пределы сервера).
+    // Группу берём с самого каталога бэкапов, а не хардкодим gid — на хосте это `deploy:deploy`,
+    // но так фикс не завязан на конкретное числовое значение.
+    const dirStats = await stat(backupsDir)
+    await chmod(filepath, 0o640)
+    await chown(filepath, -1, dirStats.gid)
     const stats = await stat(filepath)
     console.warn(`[TarBackup:${prefix}] Успешно создан бэкап: ${filename} (${stats.size} bytes)`)
     await rotateTarBackups(prefix, backupsDir, maxAutoBackups)

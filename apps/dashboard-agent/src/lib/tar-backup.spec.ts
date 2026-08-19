@@ -132,21 +132,30 @@ describe('createTarBackup', () => {
   // 0o666 независимо от того, что мы просили. Утверждение осмысленно ровно на той платформе, где
   // работает агент (Linux), там же оно и проверяется в CI. Ослаблять утверждение до «как получится»
   // нельзя: права на файле с секретами — то, ради чего этот вызов и существует.
-  it.skipIf(process.platform === 'win32')('выставляет права 600 на созданный архив', async () => {
-    const source = await makeSource('a.json')
+  //
+  // 640, не 600: группа каталога `backups/` тоже должна читать файл — иначе Resilio Sync,
+  // работающий на хосте под непривилегированным `deploy`, не может забрать архив в оффсайт-копию
+  // (найдено 2026-08-19 — nginx/acme-dns бэкапы годами не покидали сервер молча).
+  it.skipIf(process.platform === 'win32')(
+    'выставляет права 640 и группу каталога бэкапов на созданный архив',
+    async () => {
+      const source = await makeSource('a.json')
 
-    const { archive } = fakeArchiver()
-    const result = await createTarBackup({
-      prefix: 'traefik',
-      type: 'manual',
-      sources: [{ label: 'a', path: source }],
-      backupsDir,
-      archive,
-    })
+      const { archive } = fakeArchiver()
+      const result = await createTarBackup({
+        prefix: 'traefik',
+        type: 'manual',
+        sources: [{ label: 'a', path: source }],
+        backupsDir,
+        archive,
+      })
 
-    const stats = await stat(path.join(backupsDir, result.file!))
-    expect(stats.mode & 0o777).toBe(0o600)
-  })
+      const dirStats = await stat(backupsDir)
+      const fileStats = await stat(path.join(backupsDir, result.file!))
+      expect(fileStats.mode & 0o777).toBe(0o640)
+      expect(fileStats.gid).toBe(dirStats.gid)
+    },
+  )
 
   it('ротация удаляет лишние auto-бэкапы и не трогает manual', async () => {
     await mkdir(backupsDir, { recursive: true })
