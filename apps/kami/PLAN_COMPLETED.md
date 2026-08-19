@@ -1,5 +1,15 @@
 # Выполненные задачи — Kami
 
+## Проверка setRequestLocale/SSG (2026-08-19)
+
+Аудит по классу бага, найденному в apps/studio. Полный аудит всех ~45 страниц `[locale]/`:
+временно добавлен `setRequestLocale` в 5 кандидатов, но `next build` показал, что маркер не
+изменился ни для одной страницы, включая уже имевшие `setRequestLocale`. Найден настоящий root
+cause: корневой `[locale]/layout.tsx` безусловно вызывает `getSession()` → `headers()`
+(Dynamic API Next.js) для шапки/`UserProvider` на каждой странице сайта — SSG невозможен, пока
+это не изменится. Правки отменены (не оставлять `setRequestLocale` без эффекта), находка с
+вариантами решения задокументирована в PLAN.md.
+
 ## GlitchTip + первичный staging + фикс Keystatic на NODE_ENV (2026-08-12)
 
 Подключение к GlitchTip (`nx g @letar/generators:glitchtip-integrate kami`, PLAN-INFRA.md §70) —
