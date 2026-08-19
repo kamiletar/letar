@@ -15,20 +15,15 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, BackHandler, Pressable, StyleSheet, Text, View } from 'react-native'
 
-import { getAnimeDetails, getAudioCidUrl, getEpisodeVideoUrl, getSubtitleUrlFromCid, saveProgress } from '@/api/client'
+import { getAudioCidUrl, getEpisodeVideoUrl, getSubtitleUrlFromCid, saveProgress } from '@/api/client'
+import { ResumeOverlay } from '@/components/tv/ResumeOverlay'
 import { TVNextEpisodeOverlay } from '@/components/tv/TVNextEpisodeOverlay'
 import { TVPlayerControls } from '@/components/tv/TVPlayerControls'
 import { audioTracksToItems, subtitleTracksToItems, TVTrackSelector } from '@/components/tv/TVTrackSelector'
+import { usePlayerEpisode } from '@/hooks/usePlayerEpisode'
 import type { TVStackParamList } from '@/navigation/TVNavigator'
 import { focusableStyle } from '@/utils/tvStyles'
-import {
-  type AnimeDetails,
-  type AudioTrack,
-  type Episode,
-  formatDuration,
-  type SubtitleTrack,
-  useWatchProgress,
-} from '@letar/animatrona-shared'
+import { useWatchProgress } from '@letar/animatrona-shared'
 
 type Props = NativeStackScreenProps<TVStackParamList, 'Player'>
 
@@ -43,11 +38,18 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
   const playerRef = useRef<SyncVideoPlayerRef>(null)
   const hideControlsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // State
-  const [anime, setAnime] = useState<AnimeDetails | null>(null)
-  const [episode, setEpisode] = useState<Episode | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  // Данные аниме/эпизода + дефолтные аудио/субтитр дорожки
+  const {
+    anime,
+    episode,
+    isLoading,
+    error,
+    setError,
+    selectedAudio,
+    setSelectedAudio,
+    selectedSubtitle,
+    setSelectedSubtitle,
+  } = usePlayerEpisode(animeId, episodeId)
 
   // Player state
   const [isPlaying, setIsPlaying] = useState(false)
@@ -55,10 +57,6 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [showControls, setShowControls] = useState(true)
-
-  // Audio & Subtitles
-  const [selectedAudio, setSelectedAudio] = useState<AudioTrack | null>(null)
-  const [selectedSubtitle, setSelectedSubtitle] = useState<SubtitleTrack | null>(null)
 
   // Track selector modals
   const [showAudioSelector, setShowAudioSelector] = useState(false)
@@ -92,39 +90,6 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
   }, [selectedSubtitle])
 
   const assContent = useAssContent(selectedSubtitle && isAssFormat(selectedSubtitle.format) ? subtitleUrl : null)
-
-  /** Загрузка данных */
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const animeData = await getAnimeDetails(animeId)
-        setAnime(animeData)
-
-        const ep = animeData.episodes.find((e) => e.id === episodeId)
-        if (!ep) {
-          throw new Error('Эпизод не найден')
-        }
-        setEpisode(ep)
-
-        // Выбираем дефолтную аудиодорожку
-        const defaultAudio = ep.audioTracks.find((t) => t.isDefault) || ep.audioTracks[0]
-        if (defaultAudio) {
-          setSelectedAudio(defaultAudio)
-        }
-
-        // Выбираем дефолтные субтитры
-        const defaultSub = ep.subtitleTracks.find((t) => t.isDefault)
-        if (defaultSub) {
-          setSelectedSubtitle(defaultSub)
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Ошибка загрузки')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    loadData()
-  }, [animeId, episodeId])
 
   /** Показать контролы и сбросить таймер скрытия */
   const showControlsTemporarily = useCallback(() => {
@@ -440,30 +405,14 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
 
       {/* Resume Overlay */}
       {watchProgress.showResumePrompt && (
-        <View style={styles.resumeOverlay}>
-          <View style={styles.resumeDialog}>
-            <Text style={styles.resumeTitle}>Продолжить просмотр?</Text>
-            <Text style={styles.resumeText}>Вы остановились на {formatDuration(watchProgress.savedPosition || 0)}</Text>
-            <View style={styles.resumeButtons}>
-              <Pressable
-                style={focusableStyle([styles.resumeButton], styles.resumeButtonFocused)}
-                onPress={() => {
-                  const pos = watchProgress.resumeFromSaved()
-                  handleSeek(pos)
-                }}
-                hasTVPreferredFocus
-              >
-                <Text style={styles.resumeButtonText}>Продолжить</Text>
-              </Pressable>
-              <Pressable
-                style={focusableStyle([styles.resumeButton, styles.resumeButtonSecondary], styles.resumeButtonFocused)}
-                onPress={watchProgress.startFromBeginning}
-              >
-                <Text style={styles.resumeButtonText}>Сначала</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
+        <ResumeOverlay
+          savedPosition={watchProgress.savedPosition || 0}
+          onResume={() => {
+            const pos = watchProgress.resumeFromSaved()
+            handleSeek(pos)
+          }}
+          onStartFromBeginning={watchProgress.startFromBeginning}
+        />
       )}
 
       {/* Audio Selector */}
@@ -596,57 +545,6 @@ const styles = StyleSheet.create({
   },
   settingsButtonText: {
     fontSize: 18,
-    color: '#fff',
-  },
-
-  // Resume overlay
-  resumeOverlay: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  resumeDialog: {
-    backgroundColor: '#1a1a1a',
-    borderRadius: 24,
-    padding: 32,
-    alignItems: 'center',
-  },
-  resumeTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 8,
-  },
-  resumeText: {
-    fontSize: 18,
-    color: '#aaa',
-    marginBottom: 24,
-  },
-  resumeButtons: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  resumeButton: {
-    backgroundColor: '#7c3aed',
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 12,
-    borderWidth: 4,
-    borderColor: 'transparent',
-  },
-  resumeButtonSecondary: {
-    backgroundColor: '#333',
-  },
-  resumeButtonFocused: {
-    borderColor: '#fff',
-    backgroundColor: '#8b5cf6',
-    transform: [{ scale: 1.1 }],
-    elevation: 8,
-  },
-  resumeButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
     color: '#fff',
   },
 })
