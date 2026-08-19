@@ -88,6 +88,9 @@ ECONNREFUSED/ERR_DLOPEN_FAILED при зелёном билде ·
 [chakra-strict-tokens-global-typegen](/.claude/docs/chakra-strict-tokens-global-typegen.md) ⚠️
 `strictTokens` пишет типы в `node_modules/@chakra-ui/react` — не per-app флаг, ломает typecheck
 всех приложений монорепо ·
+[chakra-hover-condition-already-media-gated](/.claude/docs/chakra-hover-condition-already-media-gated.md)
+⚠️ `_hover` в Chakra v3 уже завёрнут в `@media (hover: hover)` — своя обёртка лишняя и даёт
+28 ошибок TS2322 в строках, к которым не прикасался ·
 [turbopack-private-submodule-root](/.claude/docs/turbopack-private-submodule-root.md) «Could not find
 the Next.js package» ·
 [nextjs-rsc-aspectratio-children-only](/.claude/docs/nextjs-rsc-aspectratio-children-only.md) ⚠️
@@ -138,7 +141,10 @@ pre-commit-хука не видел `.exe`-shim на Windows ·
 
 **Деплой и инфраструктура:** [deployment](/.claude/docs/deployment.md) ·
 [verification-pitfalls](/.claude/docs/verification-pitfalls.md) ⭐ проверки, которые врут в
-успокаивающую сторону · [docker-bind-mount-pitfalls](/.claude/docs/docker-bind-mount-pitfalls.md) ⚠️
+успокаивающую сторону ·
+[verification-pitfalls § getComputedStyle при скрытой панели](/.claude/docs/verification-pitfalls.md#тот-же-класс-но-не-про-сервер-getcomputedstyle-врёт-при-скрытой-панели-браузера)
+⚠️ анимируемое свойство читается как тождественная матрица — выглядит как «эффект не работает» ·
+[docker-bind-mount-pitfalls](/.claude/docs/docker-bind-mount-pitfalls.md) ⚠️
 `compose up -d` не перечитывает смонтированный конфиг ·
 [docker-bare-bun-workspace-deps](/.claude/docs/docker-bare-bun-workspace-deps.md) ·
 [dotenvx-stdout-migration-pollution](/.claude/docs/dotenvx-stdout-migration-pollution.md) P3018 ·
