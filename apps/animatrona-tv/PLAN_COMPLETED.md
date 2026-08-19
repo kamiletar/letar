@@ -2,6 +2,26 @@
 
 Детальное описание всех реализованных фич Animatrona TV.
 
+## Версия 0.5.1
+
+### Рефакторинг: helper для focused-стиля Pressable
+
+После миграции на RN 0.87 (версия 0.5.0) паттерн `({ focused }: TVPressableState) => [...]`
+повторялся почти дословно в ~20 местах 9 файлов (`TVNextEpisodeOverlay`, `TVPlayerControls`,
+`TVTrackSelector`, `TVAnimeScreen`, `TVConnectScreen`, `TVHomeScreen`, `TVPlayerScreen`,
+`TVSettingsScreen`).
+
+- Добавлен `focusableStyle(base, focusedStyle, after?)` — `src/utils/tvStyles.ts`. Возвращает
+  готовый style-callback для `Pressable`; `after` — опциональный параметр для случаев, где
+  порядок стилей важен (например `TVConnectScreen`, где `disabled`-стиль должен применяться
+  строго после focused-стиля)
+- Типизация через `ViewStyle`, а не через generic, унаследованный от типа конкретного
+  `styles.X` — базовый и focused-стиль обычно имеют непересекающийся набор полей
+  (`borderColor`/`transform` только у focused), структурная проверка по generic давала TS2345
+- `TVPressableState` теперь импортируется только внутри самого helper'а, а не в каждом
+  экране/компоненте
+- `nx typecheck:tsgo` зелёный
+
 ## Версия 0.5.0
 
 ### Синхронизация react-native до 0.87.0
