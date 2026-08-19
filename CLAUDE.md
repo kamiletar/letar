@@ -238,7 +238,10 @@ pre-commit-хука не видел `.exe`-shim на Windows ·
 `null` под `file://` блокирует Worker и WASM ·
 [electron-net-fetch-tun-vpn](/.claude/docs/electron-net-fetch-tun-vpn.md) ⚠️ `net.fetch` падает под
 TUN-VPN; DNS-проверки с рабочей машины врут ·
-[electron-sqlite](/.claude/docs/electron-sqlite.md)
+[electron-sqlite](/.claude/docs/electron-sqlite.md) ·
+[react-native-087-breaking-changes](/.claude/docs/react-native-087-breaking-changes.md) ⚠️ миграция
+RN 0.85→0.87: пути codegen-типов, `PressableStateCallbackType` interface→type ломает declaration
+merging без ошибки компиляции, и другие TS-грабли
 
 **Медиа, почта, звук:** [media-server](/.claude/docs/media-server.md) · [email](/.claude/docs/email.md) ·
 [transactional-email-cron-pattern](/.claude/docs/transactional-email-cron-pattern.md) паттерн
