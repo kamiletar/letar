@@ -170,6 +170,13 @@ Better Auth, cookie-баннер и т.д.), которую не всем нов
 [`.claude/docs/theme-hardcode-gate-coverage.md`](/.claude/docs/theme-hardcode-gate-coverage.md) —
 там же обоснование, почему выносить не раньше второго реального потребителя).
 
+Сама проверка (обход файлов, regex-правила, allowlist-логика) живёт в
+[`libs/theme-check`](/libs/theme-check/README.md) (`@letar/theme-check`) — сгенерированный скрипт
+всего лишь тонкая обёртка, передающая `ignoredDirectories`/`allowedMatches`/`guidance` конкретного
+приложения. Генератор также сам дописывает `@letar/theme-check` в `dependencies`/
+`nx.implicitDependencies` приложения и (если это потребовалось) прогоняет `bun install` перед
+первым `theme:check` — иначе `node` не найдёт пакет.
+
 ```bash
 nx g @letar/generators:theme-check-integrate <app>
 # с нестандартным каталогом исходников:

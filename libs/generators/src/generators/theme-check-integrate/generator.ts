@@ -42,27 +42,27 @@ function findExistingDirNames(tree: Tree, root: string, candidates: string[], ma
 function buildScriptContent(sourceDirName: string, ignoredDirs: string[], hasThemeDir: boolean): string {
   const ignoredDirsLiteral = JSON.stringify(ignoredDirs)
   const themePrefixComment = hasThemeDir
-    ? `const themePrefix = '${sourceDirName}/theme/'`
+    ? `themePrefix: '${sourceDirName}/theme/',`
     : `// Приложение не имеет ${sourceDirName}/theme/ на момент подключения гейта — ни один файл не\n`
-      + `// освобождён от общих правил. Если позже заведёте отдельный каталог темы, впишите его сюда\n`
-      + `// вручную (см. apps/domwellbes/scripts/check-theme-hardcodes.mjs как образец).\n`
-      + `const themePrefix = '${sourceDirName}/theme/'`
+      + `  // освобождён от общих правил. Если позже заведёте отдельный каталог темы, впишите его сюда\n`
+      + `  // вручную (см. apps/domwellbes/scripts/check-theme-hardcodes.mjs как образец).\n`
+      + `  themePrefix: '${sourceDirName}/theme/',`
 
-  return `import { readdir, readFile } from 'node:fs/promises'
-import { extname, join, relative, resolve, sep } from 'node:path'
+  return `import { resolve } from 'node:path'
+import { runThemeCheckCli } from '@letar/theme-check'
+
+// Сгенерировано \`nx g @letar/generators:theme-check-integrate\`. Общая логика правил (HEX/rgb/hsl,
+// сырая тень, transition/transitionDuration, scale() вне шкалы темы) — в @letar/theme-check, см.
+// её README за полным списком опций и .claude/docs/theme-hardcode-gate-coverage.md за историей.
 
 const projectRoot = resolve(import.meta.dirname, '..')
-const sourceRoot = join(projectRoot, '${sourceDirName}')
-const allowedExtensions = new Set(['.ts', '.tsx'])
-// Сгенерировано \`nx g @letar/generators:theme-check-integrate\` — список подобран автодетектом
-// каталогов на момент подключения. Если позже заведёте новый каталог того же назначения (ещё один
-// PDF-рендер, ещё один generated), впишите имя сюда вручную — повторный запуск генератора не
-// перезаписывает существующий скрипт (см. apps/domwellbes/scripts/check-theme-hardcodes.mjs как
-// эталон обоснований).
-const ignoredDirectories = new Set(${ignoredDirsLiteral})
-${themePrefixComment}
 
-// Значения, которые НЕ являются нарушением, но совпадают с regex ниже — заполняется вручную по
+// Список подобран автодетектом каталогов на момент подключения. Если позже заведёте новый каталог
+// того же назначения (ещё один PDF-рендер, ещё один generated), впишите имя сюда вручную —
+// повторный запуск генератора не перезаписывает существующий скрипт.
+const ignoredDirectories = new Set(${ignoredDirsLiteral})
+
+// Значения, которые НЕ являются нарушением, но совпадают с regex гейта — заполняется вручную по
 // мере первых прогонов. Три задокументированных класса легитимных исключений (образцы — уже
 // подключённые apps/domwellbes, apps/studio, apps/aboi):
 //   1. Metadata Next.js (themeColor/background_color) — literal вне доступа к CSS-переменным темы.
@@ -77,112 +77,52 @@ const allowedMatches = new Map([
   // ['${sourceDirName}/app/layout.tsx', new Set(['#XXXXXX'])],
 ])
 
-const forbiddenPatterns = [
-  { label: 'сырой HEX-цвет', regex: /#[\\da-f]{3,8}\\b/giu },
-  { label: 'сырой rgb()/rgba()-цвет', regex: /\\brgba?\\([^\\n)]+\\)/giu },
-  { label: 'сырой hsl()/hsla()-цвет', regex: /\\bhsla?\\([^\\n)]+\\)/giu },
-  {
-    label: 'сырая тень',
-    regex: /(?:boxShadow|shadow)\\s*(?:=|:)\\s*["'](?:0\\s|[^"'\\n]*(?:rgba?|hsla?)\\()/giu,
-  },
-  {
-    label: 'сырая длительность transition',
-    regex: /transition\\s*(?:=|:)\\s*["'][^"'{}\\n]*\\b\\d+(?:ms|s)\\b[^"'\\n]*["']/giu,
-  },
-  {
-    label: 'сырая transitionDuration',
-    regex: /transitionDuration\\s*(?:=|:)\\s*["']\\d+(?:ms|s)["']/giu,
-  },
-  {
-    // Глубина нажатия — общая шкала темы, а не число «в тон соседям».
-    // Проверяется и внутри ${sourceDirName}/theme: именно там расходятся recipes и layer styles.
-    label: 'сырая глубина нажатия scale()',
-    regex: /transform\\s*(?:=|:)\\s*["'\`][^"'\`\\n]*\\bscale\\(\\s*\\d*\\.?\\d+\\s*\\)/giu,
-    includeTheme: true,
-  },
-]
-
-async function collectFiles(directory) {
-  const entries = await readdir(directory, { withFileTypes: true })
-  const files = []
-
-  for (const entry of entries) {
-    if (entry.isDirectory() && ignoredDirectories.has(entry.name)) {
-      continue
-    }
-
-    const absolutePath = join(directory, entry.name)
-    if (entry.isDirectory()) {
-      files.push(...(await collectFiles(absolutePath)))
-      continue
-    }
-
-    if (entry.isFile() && allowedExtensions.has(extname(entry.name))) {
-      files.push(absolutePath)
-    }
-  }
-
-  return files
-}
-
-function toProjectPath(absolutePath) {
-  return relative(projectRoot, absolutePath).split(sep).join('/')
-}
-
-function lineNumberAt(content, index) {
-  return content.slice(0, index).split('\\n').length
-}
-
-const violations = []
-
-for (const absolutePath of await collectFiles(sourceRoot)) {
-  const projectPath = toProjectPath(absolutePath)
-  const allowedForFile = allowedMatches.get(projectPath) ?? new Set()
-  const content = await readFile(absolutePath, 'utf8')
-
-  const isThemeFile = projectPath.startsWith(themePrefix)
-
-  for (const { label, regex, includeTheme } of forbiddenPatterns) {
-    if (isThemeFile && includeTheme !== true) {
-      continue
-    }
-
-    for (const match of content.matchAll(regex)) {
-      if (allowedForFile.has(match[0])) {
-        continue
-      }
-
-      violations.push({
-        file: projectPath,
-        line: lineNumberAt(content, match.index ?? 0),
-        label,
-        value: match[0],
-      })
-    }
-  }
-}
-
-if (violations.length > 0) {
-  console.error('Найдены новые или ещё не мигрированные hardcoded UI-значения:')
-  for (const violation of violations) {
-    console.error(
-      \`- \${violation.file}:\${violation.line} — \${violation.label}: \${violation.value}\`,
-    )
-  }
-  console.error(
-    'Перенесите повторяемое значение в semantic token/layerStyle, \`transition="all N s"\` — в явный '
-      + 'transitionProperty + токен transitionDuration. Значение вне доступа к теме (metadata, '
-      + 'satori, рендер без провайдеров) — в узкий allowlist только с пояснением.',
-  )
-  process.exitCode = 1
-} else {
-  console.log('Hardcoded UI-цвета, тени и длительности переходов не найдены.')
-}
+await runThemeCheckCli({
+  projectRoot,
+  sourceDirName: '${sourceDirName}',
+  ignoredDirectories,
+  ${themePrefixComment}
+  allowedMatches,
+})
 `
 }
 
-function runChecksCallback(app: string): GeneratorCallback {
+function ensureThemeCheckLibDependency(tree: Tree, appDir: string): boolean {
+  const packageJsonPath = joinPathFragments(appDir, 'package.json')
+  if (!tree.exists(packageJsonPath)) {
+    return false
+  }
+
+  const packageJson = readJson(tree, packageJsonPath)
+  const alreadyWired = packageJson.dependencies?.['@letar/theme-check'] !== undefined
+  if (alreadyWired) {
+    return false
+  }
+
+  updateJson(tree, packageJsonPath, (json) => {
+    json.nx = json.nx ?? {}
+    json.nx.implicitDependencies = json.nx.implicitDependencies ?? []
+    if (!json.nx.implicitDependencies.includes('@letar/theme-check')) {
+      json.nx.implicitDependencies.push('@letar/theme-check')
+    }
+
+    json.dependencies = json.dependencies ?? {}
+    json.dependencies['@letar/theme-check'] = 'workspace:*'
+
+    return json
+  })
+  return true
+}
+
+function runChecksCallback(app: string, needsInstall: boolean): GeneratorCallback {
   return () => {
+    if (needsInstall) {
+      // node не понимает paths/customConditions — резолвит bare-специфер @letar/theme-check только
+      // через симлинк в node_modules, который создаёт bun install (см. libs/theme-check/README.md).
+      logger.info('Прогоняю bun install, чтобы появился node_modules/@letar/theme-check...')
+      execFileSync('bun', ['install'], { stdio: 'inherit', shell: true })
+    }
+
     logger.info(
       `Прогоняю nx theme:check для ${app} (первый прогон обычно находит настоящие нарушения — это ожидаемо)...`,
     )
@@ -292,6 +232,11 @@ export default async function themeCheckIntegrateGenerator(
     )
   }
 
+  const needsInstall = ensureThemeCheckLibDependency(tree, appDir)
+  if (needsInstall) {
+    logger.info(`✅ apps/${app}/package.json: добавлена зависимость @letar/theme-check.`)
+  }
+
   logger.info(
     `\n📋 Первый прогон обычно находит реальные нарушения — это ожидаемо (было так у domwellbes/studio/aboi). `
       + `Для каждой находки: настоящий баг (сырой цвет мимо Chakra-пропа, magic-number \`transition="all N s"\`) — `
@@ -302,5 +247,5 @@ export default async function themeCheckIntegrateGenerator(
   if (options.skipChecks) {
     return
   }
-  return runChecksCallback(app)
+  return runChecksCallback(app, needsInstall)
 }

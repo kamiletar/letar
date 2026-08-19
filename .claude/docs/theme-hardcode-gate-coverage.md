@@ -201,6 +201,35 @@ generator по интерфейсу, наброшенному выше, но э�
 прогоном: у каждого свой набор legit-исключений, которые не автоматизировать, только прочитать
 находки и решить руками (как показал прецедент с настоящим багом в aboi).
 
+## Обновление 2026-08-19 (позже в тот же день) — три копии сведены к общему модулю
+
+Три независимые копии `scripts/check-theme-hardcodes.mjs` (aboi, studio, domwellbes) несли
+дословно идентичный список `forbiddenPatterns` и уже успели разойтись по составу
+(`ignoredDirectories`, `allowedMatches`) — риск рассинхрона правил при следующей правке любой
+копии был ровно тот же класс проблемы, что в этот же день решался для шкалы `pressScale`.
+
+**Решение:** общая логика (обход `src/**/*.ts(x)`, семь regex-правил, allowlist/themePrefix)
+вынесена в [`libs/theme-check`](/libs/theme-check/README.md) (`@letar/theme-check`), три
+`apps/*/scripts/check-theme-hardcodes.mjs` переписаны в тонкие обёртки — только
+`ignoredDirectories`/`allowedMatches`/текст-подсказка (`guidance`) конкретного приложения, вызов
+`runThemeCheckCli(...)`. Генератор `theme-check-integrate` тоже переведён на этот модуль — новый
+сгенерированный скрипт для четвёртого+ потребителя теперь такая же тонкая обёртка, а не копия
+всего списка правил; заодно генератор сам дописывает `@letar/theme-check` в
+`dependencies`/`nx.implicitDependencies` приложения и прогоняет `bun install` перед первым
+`theme:check`.
+
+**Почему `@letar/theme-check` — единственная plain-JS (не TypeScript) библиотека монорепо на
+2026-08-19:** `theme:check` запускается напрямую через `node scripts/check-theme-hardcodes.mjs`
+(`nx:run-commands`), без бандлера и без `tsc`/`tsgo` — а механизм резолва `@letar/*` через
+`paths`/`customConditions` работает только внутри TS-инструментов (компилятор, бандлер). Голому
+`node` нужен исполняемый JS-файл сразу, без шага компиляции, — bare-специфер `@letar/theme-check`
+резолвится обычным Node-механизмом через симлинк `node_modules/@letar/theme-check`, который
+создаёт `bun install`. Подробнее — README библиотеки, раздел «Почему plain JS».
+
+Проверено: `nx theme:check` всех трёх приложений даёт тот же результат (чисто), что и до
+рефакторинга; `nx typecheck:tsgo`/`lint` всех трёх, `nx test @letar/theme-check` (6 тестов) и
+`nx test @letar/generators` (113 тестов, включая новые на wiring `package.json`) — зелёные.
+
 ## Что НЕ сделано в этой сессии (аудит 2026-08-19, до обновления)
 
 Изначальный отчёт был чисто исследовательским — код не менялся. С тех пор код менялся дважды

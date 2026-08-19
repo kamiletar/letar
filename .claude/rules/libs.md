@@ -239,6 +239,7 @@ found` при запуске `nx test <lib>`, все тесты красные �
 | @letar/form-mcp           | MCP сервер для форм (npm: @letar/form-mcp)                                                                                                                               |
 | @letar/generators         | Локальные Nx-генераторы (`nx g @letar/generators:e2e-suite <app>`, `new-lib <name>`, `new-app <name>`)                                                                   |
 | @letar/zenstack-fragments | Общие ZenStack zmodel-миксины (Better Auth Account/Session/Verification) — подключаются через `import` пути в `schema.zmodel`, НЕ через TS-алиасы/`implicitDependencies` |
+| @letar/theme-check        | Гейт сырых UI-цветов/теней/transition (`theme:check`) — единственная plain-JS (не TS) библиотека, см. её README за причиной                                              |
 
 ## Несколько точек входа (`./server`, `./client`)
 

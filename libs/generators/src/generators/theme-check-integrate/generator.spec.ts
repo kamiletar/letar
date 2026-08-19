@@ -48,8 +48,8 @@ describe('theme-check-integrate generator', () => {
 
     expect(tree.exists('apps/dashboard/scripts/check-theme-hardcodes.mjs')).toBe(true)
     const content = tree.read('apps/dashboard/scripts/check-theme-hardcodes.mjs', 'utf-8') ?? ''
-    expect(content).toContain('forbiddenPatterns')
-    expect(content).toContain('сырой HEX-цвет')
+    expect(content).toContain(`import { runThemeCheckCli } from '@letar/theme-check'`)
+    expect(content).toContain('runThemeCheckCli({')
   })
 
   it('добавляет таргет theme:check и подключает его в dependsOn у lint', async () => {
@@ -99,7 +99,7 @@ describe('theme-check-integrate generator', () => {
     await themeCheckIntegrateGenerator(tree, { app: 'studio', skipChecks: true })
 
     const content = tree.read('apps/studio/scripts/check-theme-hardcodes.mjs', 'utf-8') ?? ''
-    expect(content).toContain(`new Set(["generated","pdf"])`)
+    expect(content).toContain(`const ignoredDirectories = new Set(["generated","pdf"])`)
   })
 
   it('не включает pdf/assets в ignoredDirectories, если таких каталогов нет', async () => {
@@ -108,7 +108,7 @@ describe('theme-check-integrate generator', () => {
     await themeCheckIntegrateGenerator(tree, { app: 'dashboard', skipChecks: true })
 
     const content = tree.read('apps/dashboard/scripts/check-theme-hardcodes.mjs', 'utf-8') ?? ''
-    expect(content).toContain(`new Set(["generated"])`)
+    expect(content).toContain(`const ignoredDirectories = new Set(["generated"])`)
   })
 
   it('предупреждает и не проверяет src/theme, если каталога темы нет', async () => {
@@ -117,7 +117,7 @@ describe('theme-check-integrate generator', () => {
     await themeCheckIntegrateGenerator(tree, { app: 'dashboard', skipChecks: true })
 
     const content = tree.read('apps/dashboard/scripts/check-theme-hardcodes.mjs', 'utf-8') ?? ''
-    expect(content).toContain(`const themePrefix = 'src/theme/'`)
+    expect(content).toContain(`themePrefix: 'src/theme/',`)
   })
 
   it('не падает, если у приложения нет таргета lint — просто предупреждает', async () => {
@@ -138,7 +138,7 @@ describe('theme-check-integrate generator', () => {
     const project = JSON.parse(tree.read('apps/custom/project.json', 'utf-8') ?? '{}')
     expect(project.targets['theme:check']).toBeDefined()
     const content = tree.read('apps/custom/scripts/check-theme-hardcodes.mjs', 'utf-8') ?? ''
-    expect(content).toContain(`join(projectRoot, 'app-src')`)
+    expect(content).toContain(`sourceDirName: 'app-src',`)
   })
 
   it('возвращает GeneratorCallback, если skipChecks не передан', async () => {
@@ -147,5 +147,32 @@ describe('theme-check-integrate generator', () => {
     const callback = await themeCheckIntegrateGenerator(tree, { app: 'dashboard' })
 
     expect(typeof callback).toBe('function')
+  })
+
+  it('добавляет @letar/theme-check в dependencies и nx.implicitDependencies приложения', async () => {
+    seedApp(tree, 'dashboard')
+    tree.write(
+      'apps/dashboard/package.json',
+      JSON.stringify({ name: '@letar/dashboard', nx: { implicitDependencies: [] } }),
+    )
+
+    await themeCheckIntegrateGenerator(tree, { app: 'dashboard', skipChecks: true })
+
+    const packageJson = JSON.parse(tree.read('apps/dashboard/package.json', 'utf-8') ?? '{}')
+    expect(packageJson.dependencies['@letar/theme-check']).toBe('workspace:*')
+    expect(packageJson.nx.implicitDependencies).toContain('@letar/theme-check')
+  })
+
+  it('не трогает package.json повторно, если @letar/theme-check уже подключён', async () => {
+    seedApp(tree, 'dashboard')
+    tree.write(
+      'apps/dashboard/package.json',
+      JSON.stringify({ name: '@letar/dashboard', dependencies: { '@letar/theme-check': 'workspace:*' } }),
+    )
+
+    await themeCheckIntegrateGenerator(tree, { app: 'dashboard', skipChecks: true })
+
+    const packageJson = JSON.parse(tree.read('apps/dashboard/package.json', 'utf-8') ?? '{}')
+    expect(Object.keys(packageJson.dependencies)).toEqual(['@letar/theme-check'])
   })
 })
