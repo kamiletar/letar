@@ -126,7 +126,11 @@ scope — Invariant вместо обновления кеша ·
 [pressable-overflow-clips-focus-ring](/.claude/docs/pressable-overflow-clips-focus-ring.md) ⚠️
 `Pressable` из `@letar/ui` даёт `overflow: hidden` под ripple — обрезает focus ring обёрнутой
 кнопки, если их прямоугольники совпадают; `getComputedStyle` на кнопке врёт, свойство применено,
-но не отрисовано
+но не отрисовано ·
+[chakra-semantic-token-contract](/.claude/docs/chakra-semantic-token-contract.md) ⚠️ стоковые
+рецепты Chakra читают `bg.panel`/`fg.error`/`border.control`/`l1..l3`/`colorPalette.*` напрямую —
+не переопределил в своих `semanticTokens` → холодные цвета мимо палитры и провал WCAG AA; 14 из
+15 приложений с темой пробел не закрыли
 
 **Библиотеки и публикация:** [lib-entry-points](/.claude/docs/lib-entry-points.md) подпути
 `./server`/`./client`, границы, ESLint-ловушки ·
@@ -134,7 +138,10 @@ scope — Invariant вместо обновления кеша ·
 в `devDependencies` · [vitest-alias-prefix-matching](/.claude/docs/vitest-alias-prefix-matching.md)
 alias матчится по префиксу ·
 [vitest-unlinked-workspace-lib-imports](/.claude/docs/vitest-unlinked-workspace-lib-imports.md) ⚠️
-`@letar/*`-либа только в `implicitDependencies` (без bun-симлинка) не резолвится под vitest
+`@letar/*`-либа только в `implicitDependencies` (без bun-симлинка) не резолвится под vitest ·
+[zod-computed-key-index-access-pitfall](/.claude/docs/zod-computed-key-index-access-pitfall.md) ⚠️
+`z.object({...Object.fromEntries(arr.map(...))})` — динамический ключ ловит TS7053 не всегда,
+зависит от формы callback'а, а не от структуры массива ключей
 
 **Тесты и форматирование:** [e2e-testing](/.claude/docs/e2e-testing.md) ·
 [unit-testing](/.claude/docs/unit-testing.md) ⚠️ обязательный `tsconfig.spec.json` ·
