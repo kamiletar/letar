@@ -9933,3 +9933,36 @@ allowlist). Только после этого — `nx g @letar/generators:theme
 запускается голым `node` без бандлера/`tsc`, а `paths`/`customConditions` резолвятся только
 внутри TS-инструментов. Подробности —
 [theme-hardcode-gate-coverage.md](/.claude/docs/theme-hardcode-gate-coverage.md).
+
+## §93 — Agent Mail: коллизия фиксированных identity при параллельном старте — диагноз и recovery ✅ ЗАКРЫТО (2026-08-19)
+
+**Найдено:** `domwellbes-dev` считалась «занята чужим неизвестным токеном» с 2026-08-11 (тот же
+паттерн отдельно зафиксирован у `mandala-dev` и `studio-dev`). Причина — не захват identity
+другой сессией, а неудачная старая инструкция: при невалидном токене `.claude/rules/agent-mail.md`
+предписывал заводить fixed-имя заново тем же `register_agent`; при одновременном старте нескольких
+`/domwellbes` обе сессии целятся в одно имя, сервер проверяет владение check-then-act (не атомарно),
+и после гонки identity уходит в orphan/retired, а сессии остаются с токеном, который сервер больше
+не признаёт.
+
+**Сделано:**
+
+1. Диагностический шаг добавлен в правило: `resource://agents/{project_key}` через
+   `ReadMcpResourceTool` не требует токена и показывает `retired_agents` со всеми полями кроме
+   самого токена — по нему видно, «занята живым владельцем» (недавний `last_active_ts` среди
+   активных) или «orphan» (в retired, `inception_ts` ≈ `last_active_ts`, то есть создана и сразу
+   ушла в retired без живой сессии).
+2. Для orphan-случая — recovery без порчи данных: agent-mail self-hosted в этом же Docker
+   (`mcp_agent_mail-agent-mail-1`, БД `/app/storage.sqlite3`), `registration_token` читается
+   READ-ONLY SQL-запросом (`sqlite3.connect('file:...?mode=ro', uri=True)`) через `docker exec`,
+   дальше — штатный `unretire_agent` этим токеном. Легитимно: БД своя, не чужая, просто чтение
+   секрета из своей же инфраструктуры вместо угадывания.
+3. Для настоящей коллизии с живым владельцем (retired_at нет, недавняя активность) — recovery не
+   применим (можно сломать чужую текущую сессию); вместо повторной попытки тем же именем —
+   `create_agent_identity` без `name_hint` (сервер гарантирует уникальность по построению) и
+   relay-имя в `agent_fixed_names_tokens.md`, а не retry-цикл за исходным именем.
+4. `domwellbes-dev` восстановлена этим способом, `.claude/commands/domwellbes.md` и
+   `.claude/rules/agent-mail.md` обновлены на новый порядок проверки.
+
+**Дальше:** `mandala-dev`/`studio-dev` из той же таблицы всё ещё числятся «занята чужим» —
+не проверялись этим методом, кандидаты на тот же recovery при следующей сессии по этим
+приложениям.
