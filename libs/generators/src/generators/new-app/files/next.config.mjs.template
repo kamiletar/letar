@@ -4,6 +4,19 @@ import { composePlugins, withNx } from '@nx/next'
 const nextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
   nx: {},
+
+  // Если это приложение подключит @letar/query-provider И в его project.json стоит
+  // `next dev --webpack` (не Turbopack по умолчанию) — раскомментируй блок ниже.
+  // @tanstack/devtools-ui@0.7.0+ (транзитивная зависимость @tanstack/react-devtools через
+  // @letar/query-provider) импортирует именованный `use` из solid-js/web, которого нет в
+  // серверной сборке пакета под webpack. Разбор и список уже исправленных приложений —
+  // PLAN.md §51 (корень репозитория), apps/driving-school/next.config.js — образец.
+  // webpack: (config, { dev, isServer }) => {
+  //   if (isServer || !dev) {
+  //     config.resolve.alias['@tanstack/devtools-ui'] = false
+  //   }
+  //   return config
+  // },
 }
 
 const withMDX = createMDX({
