@@ -90,6 +90,50 @@ console.log(`${cjkCovered.length} из ${0x9fff - 0x4e00 + 1}`)
 `npm install opentype.js` (перебор всех кодпоинтов медленнее, чем прямой обход `cmap`, но не
 требует ручного разбора subtable format 4/12).
 
+## Node без Python: fontkit + subset-font (предпочтительно для этого монорепо)
+
+Разделы выше — только **верификация** покрытия. Для монорепо на Bun/Node-стеке (без Python как
+зависимости) есть полный путь, включающий и чтение `cmap`, и сам **субсеттинг** — урезание
+исходного шрифта до реально используемых кодпоинтов текста приложения:
+
+- **Чтение `cmap`** — `fontkit` (`npm install fontkit`). В отличие от `opentype.js`, читает
+  `woff2` напрямую (не только `ttf`/`otf`), поэтому не нужен отдельный шаг деконвертации перед
+  проверкой релизных файлов, которые обычно уже в `woff2`.
+- **Субсеттинг** — `subset-font` (`npm install subset-font`), обёртка над WASM-сборкой
+  `harfbuzz`/`hb-subset`. На вход — буфер шрифта и строка нужного текста, на выход — новый файл
+  в целевом формате с оставленными только использованными глифами.
+
+```javascript
+import * as fontkit from 'fontkit'
+import { readFile, writeFile } from 'node:fs/promises'
+import subsetFont from 'subset-font'
+
+async function loadCmap(fontPath) {
+  const buffer = await readFile(fontPath)
+  const font = fontkit.create(buffer)
+  return new Set(font.characterSet) // Set<кодпоинт>, woff2 читается без конвертации
+}
+
+const cmap = await loadCmap('ArkPixel-12px-ja.woff2')
+const cjk = new Set(Array.from({ length: 0x9fff - 0x4e00 + 1 }, (_, i) => 0x4e00 + i))
+console.log([...cmap].filter((cp) => cjk.has(cp)).length, 'из', cjk.size)
+
+// Субсеттинг под фактический текст приложения
+const sourceBuffer = await readFile('ArkPixel-12px-ja.woff2')
+const subsetBuffer = await subsetFont(sourceBuffer, targetText, { targetFormat: 'woff2' })
+await writeFile('ArkPixel12Subset.woff2', subsetBuffer)
+```
+
+Этот путь — предпочтительный в монорепо `letar`: не тянет Python как чужеродную зависимость и
+даёт не только проверку, но и сам файл шрифта готовым к деплою. `opentype.js`/Python остаются
+альтернативой вне Node-экосистемы или когда нужен только разбор `cmap` без субсеттинга.
+
+**Рабочий пример конца в конец** (сборка cmap-проверки И субсеттинга в одном скрипте, с падением
+при непокрытом кодпоинте вместо тихого пустого квадрата) —
+[apps/studio/scripts/subset-ja-font.mjs](/apps/studio/scripts/subset-ja-font.mjs), обёрнутый в
+кэшируемый Nx-таргет `subset-ja-font` (`apps/studio/project.json`) с `inputs`/`outputs` по
+источнику шрифта, фолбэк-шрифту, тексту и самому скрипту.
+
 ## Итог
 
 Если сайт-источник шрифта не даёт списка кодпоинтов явно — не доверяй словам «поддерживает X»,
