@@ -122,7 +122,11 @@ scope — Invariant вместо обновления кеша ·
 [chakra-recipe-variant-property-override](/.claude/docs/chakra-recipe-variant-property-override.md)
 ⚠️ в своём `defineRecipe`/`defineSlotRecipe` порядок ключей в JS не совпадает с порядком CSS-
 каскада — `textStyle` тихо перебивает соседний `fontSize`, вариантный `_hover` наследуется мимо
-`base._hover`
+`base._hover` ·
+[pressable-overflow-clips-focus-ring](/.claude/docs/pressable-overflow-clips-focus-ring.md) ⚠️
+`Pressable` из `@letar/ui` даёт `overflow: hidden` под ripple — обрезает focus ring обёрнутой
+кнопки, если их прямоугольники совпадают; `getComputedStyle` на кнопке врёт, свойство применено,
+но не отрисовано
 
 **Библиотеки и публикация:** [lib-entry-points](/.claude/docs/lib-entry-points.md) подпути
 `./server`/`./client`, границы, ESLint-ловушки ·
