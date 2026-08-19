@@ -55,6 +55,21 @@ const nextConfig = {
       },
     ]
   },
+
+  // @tanstack/devtools-ui@0.7.0+ (транзитивная зависимость @tanstack/react-devtools через
+  // @letar/query-provider) импортирует именованный `use` из solid-js/web. webpack (dev идёт через
+  // `next dev --webpack`) резолвит условие экспорта `node` для СЕРВЕРНОЙ половины графа сборки, а
+  // под этим условием solid-js/web (dist/server.js) `use` вообще не экспортирует — падает
+  // "Attempted import error: 'use' is not exported from solid-js/web", даже когда devtools
+  // подключены через next/dynamic({ ssr: false }) (модуль всё равно резолвится в граф). Алиас на
+  // false нужен для server-половины всегда, для client — только в production. Разбор —
+  // apps/driving-school/next.config.js.
+  webpack: (config, { dev, isServer }) => {
+    if (isServer || !dev) {
+      config.resolve.alias['@tanstack/devtools-ui'] = false
+    }
+    return config
+  },
 }
 
 const plugins = [withNx]

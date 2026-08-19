@@ -26,14 +26,16 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // @tanstack/devtools-ui (транзитивная зависимость @tanstack/react-devtools через
-  // @letar/query-provider) тянет solid-js. webpack не может статически определить именованный
-  // экспорт `use` при CJS/ESM интеропе solid-js/web — падает сборка даже когда devtools
-  // подключены через next/dynamic({ ssr: false }) и рантайм-флагом выключены в production
-  // (next/dynamic не убирает модуль из графа компиляции webpack). Алиас на false в production
-  // полностью убирает пакет из графа. См. тот же фикс в apps/driving-school/next.config.js.
-  webpack: (config, { dev }) => {
-    if (!dev) {
+  // @tanstack/devtools-ui@0.7.0+ (транзитивная зависимость @tanstack/react-devtools через
+  // @letar/query-provider) импортирует именованный `use` из solid-js/web. webpack резолвит
+  // условие экспорта `node` для СЕРВЕРНОЙ половины графа сборки, а под этим условием
+  // solid-js/web (dist/server.js) `use` вообще не экспортирует — падает "Attempted import error:
+  // 'use' is not exported from solid-js/web", причём в dev-сборке тоже, не только в проде
+  // (next/dynamic({ ssr: false }) не убирает модуль из графа компиляции webpack ни для client,
+  // ни для server половины). Алиас на false нужен для server-половины всегда, для client — только
+  // в production. См. подробный разбор в apps/driving-school/next.config.js.
+  webpack: (config, { dev, isServer }) => {
+    if (isServer || !dev) {
       config.resolve.alias['@tanstack/devtools-ui'] = false
     }
     return config
