@@ -1,5 +1,13 @@
 # Выполненные задачи — Animatrona Tracker
 
+## Webpack-фикс `@tanstack/devtools-ui@0.7.0` — server-половина графа (2026-08-19)
+
+Тот же баг, что уронил dev-сервер `driving-school` (500, `Attempted import error: 'use' is not
+exported from 'solid-js/web'` через `@letar/query-provider`) — не имел вообще никакой защиты
+(другие приложения хотя бы держали алиас для prod). Добавлен `webpack: (config, { dev, isServer
+}) => { if (isServer || !dev) { config.resolve.alias['@tanstack/devtools-ui'] = false } ... }`.
+Полный разбор — PLAN.md §51 и `apps/driving-school/PLAN_COMPLETED.md`.
+
 ## Гидратационный мисматч `autoSkipEnabled`/`trackMode` (v0.11.4, 2026-08-13)
 
 Найдено попутным аудитом при исследовании best practices для form-docs P7. Оба поля читали

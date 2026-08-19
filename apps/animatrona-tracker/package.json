@@ -1,6 +1,6 @@
 {
   "name": "@letar/animatrona-tracker",
-  "version": "0.11.4",
+  "version": "0.11.5",
   "private": true,
   "nx": {
     "name": "animatrona-tracker",
