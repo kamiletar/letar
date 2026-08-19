@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEventSource } from '@letar/hooks'
+import { useState } from 'react'
 
 export interface UseVerificationStreamConfig {
   /**
@@ -52,33 +53,24 @@ export function useVerificationStream(config: UseVerificationStreamConfig): UseV
   // Предпочитаем непубличный streamToken; email — legacy-fallback (§13.1)
   const streamKey = streamToken ?? email
 
-  useEffect(() => {
-    if (!streamKey) {
-      return
-    }
-
-    const eventSource = new EventSource(`${streamUrl}/${encodeURIComponent(streamKey)}`)
-
-    eventSource.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data)
-        if (data.verified) {
-          eventSource.close()
-          setVerifiedInOtherTab(true)
-          onVerified?.()
+  const { disconnect } = useEventSource({
+    url: streamKey ? `${streamUrl}/${encodeURIComponent(streamKey)}` : null,
+    reconnect: 'none',
+    events: {
+      message: (event) => {
+        try {
+          const data = JSON.parse(event.data)
+          if (data.verified) {
+            disconnect()
+            setVerifiedInOtherTab(true)
+            onVerified?.()
+          }
+        } catch {
+          // Игнорируем ошибки парсинга
         }
-      } catch {
-        // Игнорируем ошибки парсинга
-      }
-    }
-
-    eventSource.onerror = () => {
-      // SSE ошибка — не критично, пользователь может использовать PIN
-      eventSource.close()
-    }
-
-    return () => eventSource.close()
-  }, [streamKey, streamUrl, onVerified])
+      },
+    },
+  })
 
   return { verifiedInOtherTab }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@letar/pin-auth",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "main": "./src/index.ts",
@@ -47,5 +47,7 @@
       "optional": true
     }
   },
-  "dependencies": {}
+  "dependencies": {
+    "@letar/hooks": "workspace:*"
+  }
 }

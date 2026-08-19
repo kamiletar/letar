@@ -7,6 +7,14 @@
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-08-19
+
+### Refactor: `useVerificationStream` на общем `useEventSource`
+
+`useVerificationStream` переведён с ручного `new EventSource(...)` на `useEventSource` из
+`@letar/hooks` — устраняет дублирование логики переподключения, поведение не изменилось
+(`reconnect: 'none'`, закрытие соединения при получении `verified`).
+
 ## [0.2.0] - 2026-05-30
 
 ### Security hardening (Этап 1 auth-унификации)
