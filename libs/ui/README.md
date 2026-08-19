@@ -165,6 +165,24 @@ import { Pressable, PressableButton } from '@letar/ui'
 </Pressable>
 ```
 
+### PressableCta — CTA-паттерн с продублированным focus ring
+
+`Pressable` обрезает focus ring обёрнутой кнопки своим `overflow: hidden` (разбор —
+[pressable-overflow-clips-focus-ring](/.claude/docs/pressable-overflow-clips-focus-ring.md)).
+`PressableCta` — готовый фикс: `Pressable` + `display="inline-flex"` + продублированный
+`:has(:focus-visible)`-outline. `borderRadius` обязателен без дефолта (должен совпадать с
+радиусом кнопки внутри), `focusRingColorToken` опционален (дефолт `'focus.ring'`).
+
+```tsx
+import { PressableCta } from '@letar/ui'
+
+<PressableCta borderRadius="full" focusRingColorToken="focus.ring">
+  <Button asChild colorPalette="brand" borderRadius="full">
+    <NextLink href="/houses/">Посмотреть проекты</NextLink>
+  </Button>
+</PressableCta>
+```
+
 ### pressScale — шкала глубины нажатия
 
 Лестница `transform`-значений для `_active` в темах приложений: `2xs`…`2xl`, от `scale(0.94)`
