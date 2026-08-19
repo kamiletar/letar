@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.38.6] — 2026-08-19
+
+### Refactor: `useMatchSSE` на общем `useEventSource`
+
+`useMatchSSE` переведён с ручного `new EventSource(...)` на общий `useEventSource`
+(`@letar/hooks`) — дедупликация SSE-подключений по монорепо. Линейный backoff (3с × попытка,
+до 30с, максимум 10 попыток) и набор именованных событий матча сохранены без изменений.
+
 ## [3.38.5] — 2026-08-14
 
 ### Removed

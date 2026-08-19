@@ -10,7 +10,8 @@
 
 import type { MatchEventType } from '@/lib/sse/match-sse-manager'
 import type { ConnectedJudge, CurrentPerformance, TimerState, VotingPhase } from '@/lib/sse/match-state'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEventSource } from '@letar/hooks'
+import { useCallback, useMemo, useRef, useState } from 'react'
 
 // === Типы ===
 
@@ -64,134 +65,76 @@ export interface UseMatchSSEReturn {
   reconnect: () => void
 }
 
+const MATCH_EVENT_TYPES: MatchEventType[] = [
+  'judge:connected',
+  'judge:disconnected',
+  'vote:received',
+  'vote:complete',
+  'phase:changed',
+  'player:sent',
+  'score:calculated',
+  'match:started',
+  'match:finished',
+  'timer:started',
+  'timer:stopped',
+  'timer:reset',
+  'voting:cancelled',
+  'card:issued',
+  'audience:voted',
+  'coach:signal',
+  'vote:timeout',
+  'lineup:updated',
+  'coin:flipped',
+  'victory-poem:set',
+  'ping',
+]
+
 // === Хук ===
 
 export function useMatchSSE({ matchId, role, token, onEvent, enabled = true }: UseMatchSSEOptions): UseMatchSSEReturn {
-  const [status, setStatus] = useState<ConnectionStatus>('disconnected')
   const [matchState, setMatchState] = useState<MatchSSEState | null>(null)
   const [lastEvent, setLastEvent] = useState<MatchSSEEvent | null>(null)
-
-  const eventSourceRef = useRef<EventSource | null>(null)
-  const retriesRef = useRef(0)
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const onEventRef = useRef(onEvent)
   onEventRef.current = onEvent
 
-  const connect = useCallback(() => {
-    if (!enabled || typeof window === 'undefined') {
-      return
-    }
-
-    // Закрываем предыдущее подключение
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close()
-    }
-
-    setStatus('connecting')
-
+  const url = useMemo(() => {
     const params = new URLSearchParams({ role })
     if (token) {
       params.set('token', token)
     }
-    const url = `/api/match/${matchId}/sse?${params.toString()}`
+    return `/api/match/${matchId}/sse?${params.toString()}`
+  }, [matchId, role, token])
 
+  const handleEvent = useCallback((event: MessageEvent) => {
     try {
-      const es = new EventSource(url)
-      eventSourceRef.current = es
+      const data = JSON.parse(event.data) as MatchSSEEvent
+      setLastEvent(data)
 
-      es.onopen = () => {
-        setStatus('connected')
-        retriesRef.current = 0
+      // Обновляем состояние матча из phase:changed
+      if (data.type === 'phase:changed' && data.payload) {
+        setMatchState(data.payload as MatchSSEState)
       }
 
-      // Обработка типизированных событий
-      const eventTypes: MatchEventType[] = [
-        'judge:connected',
-        'judge:disconnected',
-        'vote:received',
-        'vote:complete',
-        'phase:changed',
-        'player:sent',
-        'score:calculated',
-        'match:started',
-        'match:finished',
-        'timer:started',
-        'timer:stopped',
-        'timer:reset',
-        'voting:cancelled',
-        'card:issued',
-        'audience:voted',
-        'coach:signal',
-        'vote:timeout',
-        'lineup:updated',
-        'coin:flipped',
-        'victory-poem:set',
-        'ping',
-      ]
-
-      for (const eventType of eventTypes) {
-        es.addEventListener(eventType, (event: MessageEvent) => {
-          try {
-            const data = JSON.parse(event.data) as MatchSSEEvent
-
-            setLastEvent(data)
-
-            // Обновляем состояние матча из phase:changed
-            if (data.type === 'phase:changed' && data.payload) {
-              setMatchState(data.payload as MatchSSEState)
-            }
-
-            onEventRef.current?.(data)
-          } catch {
-            // Игнорируем невалидные данные
-          }
-        })
-      }
-
-      es.onerror = () => {
-        setStatus('error')
-        es.close()
-
-        // Авто-переподключение (до 10 попыток)
-        if (retriesRef.current < 10) {
-          retriesRef.current++
-          const delay = Math.min(3000 * retriesRef.current, 30000)
-          reconnectTimeoutRef.current = setTimeout(connect, delay)
-        } else {
-          setStatus('disconnected')
-        }
-      }
+      onEventRef.current?.(data)
     } catch {
-      setStatus('error')
+      // Игнорируем невалидные данные
     }
-  }, [matchId, role, token, enabled])
-
-  const disconnect = useCallback(() => {
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current)
-      reconnectTimeoutRef.current = null
-    }
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close()
-      eventSourceRef.current = null
-    }
-    setStatus('disconnected')
   }, [])
 
-  const reconnect = useCallback(() => {
-    retriesRef.current = 0
-    disconnect()
-    connect()
-  }, [connect, disconnect])
-
-  useEffect(() => {
-    if (enabled) {
-      connect()
-    } else {
-      disconnect()
+  const events = useMemo(() => {
+    const map: Record<string, (event: MessageEvent) => void> = {}
+    for (const eventType of MATCH_EVENT_TYPES) {
+      map[eventType] = handleEvent
     }
-    return disconnect
-  }, [enabled, connect, disconnect])
+    return map
+  }, [handleEvent])
+
+  const { status, reconnect } = useEventSource({
+    url,
+    enabled,
+    reconnect: { strategy: 'linear', baseDelayMs: 3000, maxDelayMs: 30000, maxAttempts: 10 },
+    events,
+  })
 
   return { status, matchState, lastEvent, reconnect }
 }
