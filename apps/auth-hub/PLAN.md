@@ -11,6 +11,13 @@
 > re-seed'ом BlackCove 2026-07-30: discovery/get-session/sign-in отвечают 200 (проверено curl).
 > `/api/auth/jwks` → 404 — штатно (HS256, jwt-плагин не подключён), не путать с багом.
 
+## Бэклог — техдолг (2026-08-19, не в работе)
+
+- [ ] Заменить `transition="all 0.15s"` на явный `transitionProperty` (сужает анимацию до реально
+      меняющихся свойств вместо любого изменения пропа при ре-рендере) —
+      `src/app/oauth/consent/_components/account-chooser.tsx`. Паттерн фикса и разбор — в
+      [interactive-press-feedback.md](/.claude/docs/interactive-press-feedback.md)
+
 ## Статус (ранее): v0.6.4 — Этап 8.5: вход по любому linked-email ✅ (Этап 8.5 закрыт целиком)
 
 Детали — [PLAN_COMPLETED.md](./PLAN_COMPLETED.md#версия-064--2026-07-16-этап-85-вход-по-любому-linked-email).
