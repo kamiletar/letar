@@ -32,7 +32,7 @@ description: Воркфлоу разработки TV-плеера Animatrona (R
 **После каждого значимого изменения** уведоми координатора:
 
 ```
-send_message(to: ["GrayMill"], subject: "change: <описание>", topic: "animatrona-change",
+send_message(to: ["animatrona-coordinator-dev"], subject: "change: <описание>", topic: "animatrona-change",
   body_md: "app: animatrona-tv\ntype: <type-change|ui-change>\nfiles: <затронутые файлы>\ndescription: <что изменилось>\nbreaking: true/false")
 ```
 

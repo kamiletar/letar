@@ -1,13 +1,13 @@
 ---
-description: Чеклист подготовки приложения и отправки запроса на деплой координатору BlackCove
+description: Чеклист подготовки приложения и отправки запроса на деплой координатору deploy-agent-dev
 ---
 
 # Deploy - Запрос деплоя приложения
 
-Подготовь приложение к деплою и отправь запрос Deploy Agent (BlackCove).
+Подготовь приложение к деплою и отправь запрос Deploy Agent (deploy-agent-dev).
 
 ⛔ **Деплой самостоятельно ЗАПРЕЩЁН** — ни `deploy-affected.sh`, ни `docker compose`, ни SSH.
-Полная модель координации, шаблон запроса и что делать, если BlackCove молчит 10 минут —
+Полная модель координации, шаблон запроса и что делать, если deploy-agent-dev молчит 10 минут —
 `.claude/rules/deploy-coordination.md`. Этот файл — только контекст для команды `/infra:deploy`.
 
 ## Когда использовать
@@ -31,12 +31,12 @@ description: Чеклист подготовки приложения и отп�
 
 ## Запрос деплоя
 
-Шаблон `send_message` к BlackCove — `.claude/rules/deploy-coordination.md`.
+Шаблон `send_message` к deploy-agent-dev — `.claude/rules/deploy-coordination.md`.
 
 ## После деплоя
 
 - [ ] Приложение доступно, основной функционал работает
-- [ ] Нет ошибок в логах (BlackCove пришлёт их в ответе, если деплой упал)
+- [ ] Нет ошибок в логах (deploy-agent-dev пришлёт их в ответе, если деплой упал)
 - [ ] БД подключена, если применимо
 - [ ] Бекап БД работает (первый деплой с БД):
       `curl -X POST http://localhost:3100/api/database/backup?db=<app>`

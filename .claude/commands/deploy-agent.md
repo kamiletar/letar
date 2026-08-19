@@ -1,5 +1,5 @@
 ---
-description: Инициализация и рабочий цикл BlackCove — приём и выполнение deploy-запросов через Agent Mail
+description: Инициализация и рабочий цикл deploy-agent-dev — приём и выполнение deploy-запросов через Agent Mail
 allowed-tools: Bash, Read, Grep, Glob
 ---
 
@@ -9,7 +9,7 @@ allowed-tools: Bash, Read, Grep, Glob
 
 ## Инициализация
 
-### Шаг 1: Получи токен регистрации BlackCove
+### Шаг 1: Получи токен регистрации deploy-agent-dev
 
 **Токен хранится в памяти** — проверь `C:\Users\Kami\.claude\projects\C--web-letar\memory\agent_blackcove_token.md`.
 
@@ -20,7 +20,7 @@ docker exec mcp_agent_mail-agent-mail-1 python3 -c "
 import sqlite3
 conn = sqlite3.connect('/app/storage.sqlite3')
 cur = conn.cursor()
-cur.execute('SELECT name, registration_token FROM agents WHERE name=\"BlackCove\"')
+cur.execute('SELECT name, registration_token FROM agents WHERE name=\"deploy-agent-dev\"')
 row = cur.fetchone()
 print('token:', row[1])
 "
@@ -34,12 +34,12 @@ macro_start_session(
   program: "claude-code",
   model: "claude-sonnet-5",
   task_description: "Deploy Agent — координатор деплоя всех приложений",
-  agent_name: "BlackCove",
+  agent_name: "deploy-agent-dev",
   registration_token: "<токен из шага 1>"
 )
 ```
 
-> **Имя `BlackCove` — фиксированное.** Все агенты отправляют запросы именно на это имя.
+> **Имя `deploy-agent-dev` — фиксированное.** Все агенты отправляют запросы именно на это имя.
 > **`project_key` = `c-web-letar`** (не `c-web-letar`).
 
 ### Шаг 3: Прочитай правила деплоя
@@ -51,7 +51,7 @@ macro_start_session(
 ```
 send_message(
   project_key: "c-web-letar",
-  sender_name: "BlackCove",
+  sender_name: "deploy-agent-dev",
   sender_token: "<токен>",
   to: [],
   broadcast: true,
@@ -72,7 +72,7 @@ send_message(
    ```
    fetch_inbox(
      project_key: "c-web-letar",
-     agent_name: "BlackCove",
+     agent_name: "deploy-agent-dev",
      registration_token: "<токен>",
      topic: "deploy",
      unread_only: true,
@@ -123,7 +123,7 @@ send_message(
    reply_message(
      project_key: "c-web-letar",
      message_id: <id>,
-     sender_name: "BlackCove",
+     sender_name: "deploy-agent-dev",
      sender_token: "<токен>",
      body_md: "## Результат деплоя: <app>\n\n**Статус:** ✅ Успешно / ❌ Ошибка\n**Коммит:** <commit>\n**Сервер:** s2\n\n<краткий лог>"
    )
@@ -134,7 +134,7 @@ send_message(
    ```
    send_message(
      project_key: "c-web-letar",
-     sender_name: "BlackCove",
+     sender_name: "deploy-agent-dev",
      sender_token: "<токен>",
      to: [],
      broadcast: true,
@@ -203,12 +203,12 @@ Subject: Re: deploy-request: <app-name>
 ```
 send_message(
   project_key: "c-web-letar",
-  sender_name: "BlackCove",
+  sender_name: "deploy-agent-dev",
   sender_token: "<токен>",
   to: [],
   broadcast: true,
   subject: "Deploy Agent остановлен",
-  body_md: "BlackCove завершает работу. Запросы не принимаются до следующего /deploy-agent.",
+  body_md: "deploy-agent-dev завершает работу. Запросы не принимаются до следующего /deploy-agent.",
   topic: "deploy"
 )
 ```

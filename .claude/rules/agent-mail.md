@@ -150,7 +150,7 @@ renew_file_reservations(
 send_message(
   project_key: "c-web-letar",
   sender_name: "<твоё-имя>",
-  to: ["BlackCove"],
+  to: ["deploy-agent-dev"],
   subject: "deploy-request: <app>",
   body_md: "...",
   thread_id: "deploy-<app>",
@@ -198,11 +198,20 @@ release_file_reservations(
 
 ## Фиксированные имена координаторов
 
-| Агент            | Имя          | Роль                           |
-| ---------------- | ------------ | ------------------------------ |
-| Deploy Agent     | `BlackCove`  | Единственный кто деплоит       |
-| Forms Coord      | `QuietRidge` | Владелец libs/forms ecosystem  |
-| Animatrona Coord | `GrayMill`   | Владелец libs/animatrona-types |
+| Агент            | Имя                          | Роль                           |
+| ---------------- | ---------------------------- | ------------------------------ |
+| Deploy Agent     | `deploy-agent-dev`           | Единственный кто деплоит       |
+| Forms Coord      | `forms-coordinator-dev`      | Владелец libs/forms ecosystem  |
+| Animatrona Coord | `animatrona-coordinator-dev` | Владелец libs/animatrona-types |
+
+⚠️ **2026-08-20: переименованы в единую схему `<роль>-dev`** (были `BlackCove`/`QuietRidge`/
+`GrayMill` — adjective+noun, заводились так из-за бага `send_message(to:)`, см.
+[agent-mail-server-quirks](/.claude/docs/agent-mail-server-quirks.md)). Баг триггерится не любым
+kebab-case, а только суффиксом-ролью в конце имени (`coordinator`/`agent`/...) — `<роль>-dev`
+той же ловушки не ловит, `-dev` в списке суффиксов нет. Переименование сделано прямым `UPDATE`
+поля `name` в БД agent-mail (не пересозданием identity) — вся история сообщений/контактов/
+токен сохранены, старые имена в текстах ниже, описывающих прошлые инциденты по датам, оставлены
+как есть (не переписывать историю).
 
 ⚠️ **2026-08-10: БД agent-mail была сброшена целиком** (self-hosted Docker-контейнер держал
 SQLite в писчем слое, не в volume — потерян при пересоздании контейнера во время попытки

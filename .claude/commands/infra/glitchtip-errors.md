@@ -100,7 +100,7 @@ mcp__glitchtip-mcp__glitchtip_get_issue_event({ issueId: "<id из шага 1>" 
 запроса пользователя каждый раз, не должно быть доступно агенту в рамках обычного разбора).
 
 ⛔ Не деплоит фикс — после правки кода дальше обычный `git commit` → `nx lint`/`typecheck:tsgo` →
-деплой-запрос BlackCove ([deploy-coordination.md](/.claude/rules/deploy-coordination.md)), как
+деплой-запрос deploy-agent-dev ([deploy-coordination.md](/.claude/rules/deploy-coordination.md)), как
 для любого изменения.
 
 ## Формат вывода

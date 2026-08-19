@@ -33,7 +33,7 @@ sops apps/<app>/.env.docker.enc
 git add apps/<app>/.env.docker.enc && git commit -m "chore(<app>): обновить секрет"
 ```
 
-Затем — обычный deploy-request к BlackCove (см. [deploy-coordination](/.claude/rules/deploy-coordination.md)).
+Затем — обычный deploy-request к deploy-agent-dev (см. [deploy-coordination](/.claude/rules/deploy-coordination.md)).
 Доставку на сервер делает деплой, отдельного шага не нужно.
 
 **Завести секреты новому приложению:**

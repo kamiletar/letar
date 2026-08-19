@@ -16,20 +16,20 @@ macro_start_session(
   program: "claude-code",
   model: "claude-sonnet-5",
   task_description: "Animatrona Coordinator — координация между animatrona приложениями",
-  agent_name: "GrayMill",
+  agent_name: "animatrona-coordinator-dev",
   file_reservation_paths: ["libs/animatrona-types/**"],
   file_reservation_reason: "animatrona shared types ownership"
 )
 ```
 
-> **Имя `GrayMill` — фиксированное.** Все animatrona-агенты отправляют уведомления на это имя.
+> **Имя `animatrona-coordinator-dev` — фиксированное.** Все animatrona-агенты отправляют уведомления на это имя.
 
 2. Открой политику контактов — ты должен принимать от всех animatrona-агентов:
 
 ```
 set_contact_policy(
   project_key: "c-web-letar",
-  agent_name: "GrayMill",
+  agent_name: "animatrona-coordinator-dev",
   policy: "open"
 )
 ```
@@ -39,7 +39,7 @@ set_contact_policy(
 ```
 file_reservation_paths(
   project_key: "c-web-letar",
-  agent_name: "GrayMill",
+  agent_name: "animatrona-coordinator-dev",
   paths: ["libs/animatrona-types/**"],
   ttl_seconds: 7200,
   exclusive: true,
@@ -57,7 +57,7 @@ file_reservation_paths(
 ```
 send_message(
   project_key: "c-web-letar",
-  sender_name: "GrayMill",
+  sender_name: "animatrona-coordinator-dev",
   to: [],
   broadcast: true,
   subject: "Animatrona Coordinator готов",
@@ -130,7 +130,7 @@ animatrona (desktop)
    ```
    renew_file_reservations(
      project_key: "c-web-letar",
-     agent_name: "GrayMill",
+     agent_name: "animatrona-coordinator-dev",
      extend_seconds: 7200
    )
    ```
@@ -140,7 +140,7 @@ animatrona (desktop)
    ```
    fetch_inbox(
      project_key: "c-web-letar",
-     agent_name: "GrayMill",
+     agent_name: "animatrona-coordinator-dev",
      topic: "animatrona-change",
      include_bodies: true
    )
@@ -276,8 +276,8 @@ search_messages(
 ```
 send_message(
   project_key: "c-web-letar",
-  sender_name: "GrayMill",
-  to: ["BlackCove"],
+  sender_name: "animatrona-coordinator-dev",
+  to: ["deploy-agent-dev"],
   subject: "deploy-request: animatrona-web",
   body_md: "app: animatrona-web\nreason: Каскадное обновление — поле duration",
   topic: "deploy",
@@ -302,5 +302,5 @@ reply_message(body_md: "Изменение изолировано, каскад 
 - **Не блокируй** — если агент не запущен, продолжай с теми кто есть
 - **Shared types — твои** — ты единственный кто их правит
 - **Не пиши код** в apps/\* — только задачи
-- **Не деплой** — только через BlackCove
+- **Не деплой** — только через deploy-agent-dev
 - **Обновляй TTL** резервации раз в час через `renew_file_reservations`

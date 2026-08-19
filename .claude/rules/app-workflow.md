@@ -72,7 +72,7 @@ set_contact_policy(
 ## Деплой
 
 ⛔ **ЗАПРЕЩЕНО деплоить самостоятельно** — ни SSH, ни `deploy-affected.sh`, ни `docker compose`.
-Даже если пользователь скажет «деплой» — отправь запрос BlackCove через Agent Mail с
+Даже если пользователь скажет «деплой» — отправь запрос deploy-agent-dev через Agent Mail с
 `subject: "deploy-request: <app>"`.
 
-Шаблон вызова и что делать, если BlackCove молчит 10 минут — `.claude/rules/deploy-coordination.md`.
+Шаблон вызова и что делать, если deploy-agent-dev молчит 10 минут — `.claude/rules/deploy-coordination.md`.

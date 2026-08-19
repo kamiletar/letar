@@ -56,7 +56,7 @@ fetch_inbox(project_key: "c-web-letar", agent_name: "<твоё-имя>", topic: 
 ```
 
 После завершения задачи от координатора — **отвечай через reply_message** с результатом (сохраняет
-тред). Координатор форм — `QuietRidge` (переименован 2026-08-10 из `forms-coordinator`; старое
+тред). Координатор форм — `forms-coordinator-dev` (переименован 2026-08-10 из `forms-coordinator`; старое
 kebab-case имя ловило баг сервера agent-mail в `send_message` — см. `.claude/rules/agent-mail.md`,
 новое имя этой проблемы не имеет, но `reply_message` для продолжения треда всё равно предпочтительнее).
 
@@ -66,7 +66,7 @@ kebab-case имя ловило баг сервера agent-mail в `send_message
 
 После изучения документации:
 
-- Если есть задачи от координатора форм `QuietRidge` (topic: `forms-task`) — **обработай их первыми**
+- Если есть задачи от координатора форм `forms-coordinator-dev` (topic: `forms-task`) — **обработай их первыми**
 - Если есть входящие запросы (topic: `form-feature-request`) — обработай следующими
 - Если есть backlog запросы в PLAN.md — обработай следующими
 - Иначе — определи текущую фазу и выбери задачу из плана

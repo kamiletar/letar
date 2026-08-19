@@ -1,5 +1,5 @@
 ---
-description: Координатор экосистемы форм QuietRidge — приём запросов, триаж и делегация forms-dev
+description: Координатор экосистемы форм forms-coordinator-dev — приём запросов, триаж и делегация forms-dev
 ---
 
 # Forms Coordinator — Гейткипер экосистемы форм
@@ -15,7 +15,7 @@ macro_start_session(
   human_key: "C:/web/letar",
   program: "claude-code",
   model: "opus-4.6",
-  agent_name: "QuietRidge",
+  agent_name: "forms-coordinator-dev",
   registration_token: "RAN04gzgJ80SIqWl6C59zwyGQbMQlW56sXP4uWgOZrs",
   task_description: "Forms Coordinator — координация экосистемы форм",
   file_reservation_paths: ["libs/forms/**", "libs/zenstack-form-plugin/**", "libs/form-mcp/**"],
@@ -23,26 +23,26 @@ macro_start_session(
 )
 ```
 
-> **Имя `QuietRidge` — фиксированная adjective+noun identity координатора форм** (зарегистрирована
-> 2026-08-10, заменила kebab-case `forms-coordinator` после того, как выяснилось: сервер agent-mail
-> отклоняет kebab-case/описательные имена (заканчивающиеся на `coordinator`/`agent`/`manager` и
-> т.п.) в поле `to` инструмента `send_message` — см. `.claude/rules/agent-mail.md`. Deploy Agent
-> (`BlackCove`) с самого начала обходил эту проблему тем же способом — настоящее adjective+noun имя
-> вместо описательного. **Всегда передавай `registration_token` вместе с `agent_name`** — без
-> токена `macro_start_session`/`register_agent` либо форкнет новую случайную identity, либо
-> откажет с «requires registration_token». Проверяй поле `name` в ответе: должно вернуться
-> `QuietRidge`, без форка.
+> **Имя `forms-coordinator-dev` — фиксированное.** История имени: изначально `forms-coordinator`
+> (kebab-case) → 2026-08-10 переименован в `forms-coordinator-dev` (adjective+noun), когда решили, что сервер
+> agent-mail отклоняет любой kebab-case в поле `to` инструмента `send_message` → 2026-08-20 разобрали
+> исходники сервера и выяснили, что баг триггерится не любым kebab-case, а только именами,
+> **заканчивающимися** на слово-роль (`coordinator`/`agent`/`manager`/...) — `<роль>-dev` этот
+> фильтр не ловит, `-dev` в списке суффиксов нет. Вернулись к kebab-case+`-dev`, единой схеме со
+> всеми `<app>-dev`. Подробности — `.claude/docs/agent-mail-server-quirks.md`. Токен не менялся —
+> переименование сделано прямым `UPDATE` поля `name` в БД, не пересозданием identity.
+> **Всегда передавай `registration_token` вместе с `agent_name`** — без токена
+> `macro_start_session`/`register_agent` либо форкнет новую случайную identity, либо откажет с
+> «requires registration_token». Проверяй поле `name` в ответе: должно вернуться
+> `forms-coordinator-dev`, без форка.
 >
-> ⚠️ **По завершении сессии `/end-session` эту identity ретайрит** (`retire_agent`) — при
-> следующем запуске `macro_start_session` вернёт «Agent 'QuietRidge' is retired and no
-> longer accepts new messages». Сначала вызови `unretire_agent(project_key: "c-web-letar",
-> agent_name: "QuietRidge", registration_token: "RAN04gzgJ80SIqWl6C59zwyGQbMQlW56sXP4uWgOZrs")`,
-> потом `macro_start_session`. Тот же приём нужен и для `forms-dev` при делегации задач — его
-> токен см. `agent_fixed_names_tokens` в памяти.
->
-> ⚠️ **2026-08-10: БД agent-mail сброшена целиком** (см. `agent_fixed_names_tokens` в памяти) —
-> токен `forms-dev` и всех остальных фиксированных identity, скорее всего, тоже устарел. Проверяй
-> ответ `macro_start_session`/`register_agent` на предмет нового токена и обновляй память.
+> ⚠️ **По завершении сессии `/end-session` эту identity НЕ ретайрит** (фиксированные identity
+> исключены из `retire_agent` — см. `.claude/commands/end-session.md`). Если всё же встретишь
+> «is retired and no longer accepts new messages» (сервер сам ретирит по 24ч простоя) — вызови
+> `unretire_agent(project_key: "c-web-letar", agent_name: "forms-coordinator-dev",
+> registration_token: "RAN04gzgJ80SIqWl6C59zwyGQbMQlW56sXP4uWgOZrs")`, потом `macro_start_session`.
+> Тот же приём нужен и для `forms-dev` при делегации задач — его токен см. `agent_fixed_names_tokens`
+> в памяти.
 
 2. Изучи текущее состояние:
    - `libs/forms/README.md` — API и компоненты
@@ -55,7 +55,7 @@ macro_start_session(
 ```
 send_message(
   project_key: "c-web-letar",
-  sender_name: "QuietRidge",
+  sender_name: "forms-coordinator-dev",
   sender_token: "RAN04gzgJ80SIqWl6C59zwyGQbMQlW56sXP4uWgOZrs",
   to: [],
   broadcast: true,
@@ -96,7 +96,7 @@ driving-school (46 Selects), grandslamcup, mandala, premium-rosstil, imot, kami,
    ```
    renew_file_reservations(
      project_key: "c-web-letar",
-     agent_name: "QuietRidge",
+     agent_name: "forms-coordinator-dev",
      extend_seconds: 7200
    )
    ```
@@ -106,7 +106,7 @@ driving-school (46 Selects), grandslamcup, mandala, premium-rosstil, imot, kami,
    ```
    fetch_inbox(
      project_key: "c-web-letar",
-     agent_name: "QuietRidge",
+     agent_name: "forms-coordinator-dev",
      topic: "form-feature-request",
      include_bodies: true
    )
@@ -280,7 +280,7 @@ body_md: "
 Если form-docs или form-example обновлены — запроси деплой:
 ```
 
-send_message(to: ["BlackCove"], subject: "deploy-request: form-docs",
+send_message(to: ["deploy-agent-dev"], subject: "deploy-request: form-docs",
 body_md: "app: form-docs\nreason: Документация нового компонента LocationPicker",
 topic: "deploy", importance: "high", ack_required: true)
 
@@ -327,4 +327,4 @@ send_message(to: ["<consumer-agent>"],
 - **Можешь править** библиотеки напрямую для мелких фиксов (опечатки, экспорты)
 - **Крупные фичи** — через forms-dev агента
 - **form-mcp ВСЕГДА синхронизируй** после изменений в form-components
-- **Деплой** — через BlackCove
+- **Деплой** — через deploy-agent-dev

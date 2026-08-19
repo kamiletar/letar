@@ -8,10 +8,10 @@
 ## ⛔ Прямой деплой ЗАПРЕЩЁН
 
 ⛔ **НИКОГДА** не запускай `deploy-affected.sh`, `docker compose`, SSH-деплой самостоятельно.
-⛔ Даже если пользователь пишет «деплой» — отправь запрос BlackCove, а не деплой сам.
-⛔ Единственное исключение — явное разрешение пользователя после 10 минут молчания BlackCove.
+⛔ Даже если пользователь пишет «деплой» — отправь запрос deploy-agent-dev, а не деплой сам.
+⛔ Единственное исключение — явное разрешение пользователя после 10 минут молчания deploy-agent-dev.
 
-Вместо этого отправь запрос Deploy Agent (BlackCove) через Agent Mail.
+Вместо этого отправь запрос Deploy Agent (deploy-agent-dev) через Agent Mail.
 
 ## Как запросить деплой
 
@@ -19,7 +19,7 @@
 send_message(
   project_key: "c-web-letar",
   sender_name: "<твоё-имя-агента>",
-  to: ["BlackCove"],
+  to: ["deploy-agent-dev"],
   subject: "deploy-request: <app-name>",
   body_md: "app: <app-name>\nreason: <что сделал>\ncommit: <hash>",
   topic: "deploy",
@@ -61,9 +61,9 @@ send_message(
 
 ## Исключение
 
-Если ты сам Deploy Agent (имя агента = `BlackCove`) — ты выполняешь деплой.
+Если ты сам Deploy Agent (имя агента = `deploy-agent-dev`) — ты выполняешь деплой.
 
-### BlackCove: деплой через deploy-mcp (предпочтительно), SSH — резервный канал
+### deploy-agent-dev: деплой через deploy-mcp (предпочтительно), SSH — резервный канал
 
 Основной путь — MCP-инструменты `deploy-mcp` (структурированный статус вместо парсинга stdout):
 

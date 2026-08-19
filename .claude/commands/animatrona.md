@@ -32,7 +32,7 @@ description: Воркфлоу разработки Animatrona — десктоп
 **После каждого значимого изменения** уведоми координатора:
 
 ```
-send_message(to: ["GrayMill"], subject: "change: <описание>", topic: "animatrona-change",
+send_message(to: ["animatrona-coordinator-dev"], subject: "change: <описание>", topic: "animatrona-change",
   body_md: "app: animatrona\ntype: <type-change|api-change|ipfs-change>\nfiles: <затронутые файлы>\ndescription: <что изменилось>\nbreaking: true/false")
 ```
 

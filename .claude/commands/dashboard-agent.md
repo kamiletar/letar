@@ -1,5 +1,5 @@
 ---
-description: Воркфлоу разработки dashboard-agent — регистрация в Agent Mail, задачи, деплой через BlackCove
+description: Воркфлоу разработки dashboard-agent — регистрация в Agent Mail, задачи, деплой через deploy-agent-dev
 ---
 
 # Dashboard Agent - Воркфлоу разработки
@@ -55,10 +55,10 @@ fetch_inbox(
 ## Деплой
 
 ⛔ **ЗАПРЕЩЕНО деплоить самостоятельно** — ни SSH, ни `deploy-affected.sh`, ни `docker compose`.
-Даже если пользователь скажет «деплой» — отправь запрос BlackCove через Agent Mail с
+Даже если пользователь скажет «деплой» — отправь запрос deploy-agent-dev через Agent Mail с
 `subject: "deploy-request: dashboard-agent"`.
 
-Шаблон вызова и что делать, если BlackCove молчит 10 минут — `.claude/rules/deploy-coordination.md`.
+Шаблон вызова и что делать, если deploy-agent-dev молчит 10 минут — `.claude/rules/deploy-coordination.md`.
 
 ## Проект
 

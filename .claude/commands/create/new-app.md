@@ -207,7 +207,7 @@ nx g @letar/generators:e2e-suite <name>
 3. `playwright.config.ts` приложения-e2e обычно уже совместим (читает `BASE_URL` из env,
    `webServer.reuseExistingServer: true`) — правок, как правило, не требует.
 4. **NPM proxy host + DNS** (`<name>-stage.s3.letar.best`, wildcard `*.s3 CNAME s3.letar.best` уже есть) и
-   создание `.env.staging` на s3 с реальными секретами — задача BlackCove, не твоя (см.
+   создание `.env.staging` на s3 с реальными секретами — задача deploy-agent-dev, не твоя (см.
    `.claude/rules/deploy-coordination.md`), отправь `deploy-request` через agent-mail.
 5. Добавление в `E2E_GATED_APPS` — только после зелёного `deploy_app(staging)` → `run_e2e` → `e2e_status`,
    не раньше.
@@ -246,10 +246,10 @@ nx g @letar/generators:e2e-suite <name>
 ## Деплой
 
 ⛔ **ЗАПРЕЩЕНО деплоить самостоятельно** — ни SSH, ни `deploy-affected.sh`, ни `docker compose`.
-Даже если пользователь скажет «деплой» — отправь запрос BlackCove через Agent Mail с
+Даже если пользователь скажет «деплой» — отправь запрос deploy-agent-dev через Agent Mail с
 `subject: "deploy-request: <name>"`.
 
-Шаблон вызова и что делать, если BlackCove молчит 10 минут — `.claude/rules/deploy-coordination.md`.
+Шаблон вызова и что делать, если deploy-agent-dev молчит 10 минут — `.claude/rules/deploy-coordination.md`.
 
 ## Учёт времени
 
