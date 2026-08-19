@@ -126,7 +126,8 @@ export function Sidebar() {
             fontWeight={active ? 'semibold' : 'normal'}
             fontSize="sm"
             _hover={{ bg: active ? 'brand.subtle' : 'bg.subtle', color: 'fg' }}
-            transition="all 0.15s"
+            transitionProperty="background-color, color"
+            transitionDuration="0.15s"
           >
             <Icon boxSize={4} flexShrink={0}>
               <link.icon />
