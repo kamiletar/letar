@@ -15,6 +15,8 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import { type ReactElement, useMemo, useRef, useState } from 'react'
 import { useFormGroup } from '../../../form-group'
 import { useDeclarativeForm } from '../../form-context'
+import type { CellFieldType } from './table-types'
+import { useEditableCellValue } from './use-editable-cell-value'
 import { useTableColumns } from './use-table-columns'
 
 /** Набор фич `@tanstack/react-table` v9 — общий с `@letar/forms-shadcn`/`@letar/forms-angular`, см. `createDataGridTableFeatures`. */
@@ -522,16 +524,15 @@ function EditableCell({
   onCancel,
 }: {
   value: unknown
-  fieldType: string
+  fieldType: CellFieldType
   onSave: (value: unknown) => void
   onCancel: () => void
 }) {
-  const [localValue, setLocalValue] = useState(String(value ?? ''))
+  const { localValue, setLocalValue, coerce } = useEditableCellValue(value, fieldType)
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      const coerced = fieldType === 'number' ? Number(localValue) || 0 : localValue
-      onSave(coerced)
+      onSave(coerce())
     }
     if (e.key === 'Escape') {
       onCancel()
@@ -543,10 +544,7 @@ function EditableCell({
       size="xs"
       value={localValue}
       onChange={(e) => setLocalValue(e.target.value)}
-      onBlur={() => {
-        const coerced = fieldType === 'number' ? Number(localValue) || 0 : localValue
-        onSave(coerced)
-      }}
+      onBlur={() => onSave(coerce())}
       onKeyDown={handleKeyDown}
       type={fieldType === 'number' ? 'number' : 'text'}
       autoFocus

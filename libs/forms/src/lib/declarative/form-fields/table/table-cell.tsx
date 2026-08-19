@@ -1,12 +1,13 @@
 'use client'
 
 import { Input, NativeSelect, Table } from '@chakra-ui/react'
-import { type KeyboardEvent, type MutableRefObject, useCallback, useEffect, useRef, useState } from 'react'
+import { type KeyboardEvent, type MutableRefObject, useCallback, useEffect, useRef } from 'react'
 import { useDeclarativeForm } from '../../form-context'
 import { formatFieldErrors, hasFieldErrors } from '../base/field-utils'
 import { useTableEditorContext } from './table-editor-context'
 import type { ResolvedColumn } from './table-types'
 import { formatCellValue } from './table-utils'
+import { useEditableCellValue } from './use-editable-cell-value'
 
 interface TableCellProps {
   /** Индекс строки */
@@ -150,7 +151,7 @@ function EditingCell({
   ref: React.RefObject<HTMLInputElement | HTMLSelectElement | null>
 }) {
   const { setEditingCell } = useTableEditorContext()
-  const [localValue, setLocalValue] = useState(String(value ?? ''))
+  const { localValue, setLocalValue, coerce } = useEditableCellValue(value, column.fieldType)
 
   // Автофокус при входе в режим редактирования
   useEffect(() => {
@@ -168,8 +169,7 @@ function EditingCell({
   useEffect(() => {
     commitEditingCellRef.current = () => {
       if (column.fieldType === 'number' || (column.fieldType !== 'enum' && column.fieldType !== 'boolean')) {
-        const coerced = column.fieldType === 'number' ? Number(localValue) || 0 : localValue
-        onBlur(coerced)
+        onBlur(coerce())
       } else {
         // enum/boolean коммитят значение уже на onChange — здесь только выходим из режима правки
         onBlur(value)
@@ -178,7 +178,7 @@ function EditingCell({
     return () => {
       commitEditingCellRef.current = null
     }
-  }, [commitEditingCellRef, column.fieldType, localValue, value, onBlur])
+  }, [commitEditingCellRef, column.fieldType, coerce, value, onBlur])
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -247,10 +247,7 @@ function EditingCell({
         type={inputType}
         value={localValue}
         onChange={(e) => setLocalValue(e.target.value)}
-        onBlur={() => {
-          const coerced = column.fieldType === 'number' ? Number(localValue) || 0 : localValue
-          onBlur(coerced)
-        }}
+        onBlur={() => onBlur(coerce())}
         onKeyDown={handleKeyDown}
         textAlign={column.align}
         borderColor={hasError ? 'red.500' : undefined}
