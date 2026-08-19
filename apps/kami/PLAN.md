@@ -138,6 +138,8 @@
 
 ### UX
 
+- ⏳ Аудит `_active: scale()` в теме на `pressScale` (`@letar/ui`) — задача описана в
+  [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md)
 - ✅ Микро-анимации (Framer Motion)
 - ✅ Accessibility audit (SkipLink, ARIA landmarks)
 - ✅ Performance optimization (dynamic imports, React.memo, Prisma select)
