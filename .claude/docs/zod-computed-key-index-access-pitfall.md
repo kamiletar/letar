@@ -83,3 +83,29 @@ IDE (не только для прохождения typecheck), стоит ра
 
 Любой `z.object({ ...явные поля, ...Object.fromEntries(массив.map/flatMap(...)) })` в монорепо,
 где после `z.infer` идёт индексация вычисляемым ключом (`data[\`prefix_${kind}\`]`) — грепать по`Object.fromEntries(`рядом с`z.object(`.
+
+### Аудит 2026-08-19 — весь монорепо, риска не найдено
+
+Полный грep `Object.fromEntries(` по `apps/` (без `.next/standalone`) плюс `nx typecheck:tsgo`
+на domwellbes и driving-school. Помимо уже описанных выше domwellbes-файлов
+(`logistics.action.ts`, `delivery-quote-calculator-form.tsx` — каст сделан;
+`create-carrier-tariff-form.tsx` — тройной `flatMap`, хрупко, но пока держится), проверены:
+
+- `goods-receipt-builder.tsx`, `supplier-payment-builder.tsx`, `attendance-form.tsx`,
+  `exam-results-form.tsx` — `Object.fromEntries(...)` идёт не в спред `z.object`, а прямиком в
+  `useState<Record<string, T>>(...)` с явной generic-аннотацией. Ловушка не применима: индексная
+  сигнатура `Record` заявлена явно разработчиком, не выведена компилятором из спреда.
+- `create-delivery-form.tsx`, `accept-delivery-form.tsx` (domwellbes) — спред `Object.fromEntries`
+  внутри `z.object(...)` **есть** (форма ловушки та же, что и в других формах с `qty_...`), но
+  `handleSubmit` объявляет параметр как `values: Record<string, string | number>` вручную, а не
+  полагается на `z.infer<typeof schema>` — по факту тот же обходной путь, что и явный каст
+  (`surchargeInput`/`rawValues`), просто оформленный как аннотация параметра, а не отдельная
+  переменная.
+- `kanban.action.ts` (driving-school) — результат `Object.fromEntries` сразу приведён через
+  `as Record<KanbanStage, number>`.
+
+Остальные найденные `Object.fromEntries` по монорепо (aboi, animatrona, aprel8008, archetest,
+dashboard-agent, dsperevod, form-docs, grandslamcup, mandala, pravda, studio, svoichuzhie, time,
+form-develop-app) не связаны с `z.object` вообще — обычные объекты/`Record`, ловушка неприменима.
+
+Оба typecheck-прогона (`domwellbes`, `driving-school`) зелёные — правок не потребовалось.
