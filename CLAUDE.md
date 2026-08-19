@@ -60,7 +60,8 @@ boolean с явным «наследовать» через строковый �
 select ·
 [ui-components](/.claude/docs/ui-components.md) · [images](/.claude/docs/images.md) ·
 [font-cmap-coverage-verification](/.claude/docs/font-cmap-coverage-verification.md) описание
-шрифта на сайте лжёт — покрытие символов проверять разбором `cmap` файла ·
+шрифта на сайте лжёт — покрытие символов проверять разбором `cmap` файла; для Node-стека
+монорепо — fontkit+subset-font (чтение cmap из woff2 и сам субсеттинг, не только верификация) ·
 [sharp-raw-composite-alpha-pitfall](/.claude/docs/sharp-raw-composite-alpha-pitfall.md) ⚠️
 `composite()` над raw-буферами тихо добавляет alpha-канал даже при `create({channels:3})` ·
 [gallery-pattern](/.claude/docs/gallery-pattern.md) Dropzone + SortablePhotoGrid ·
@@ -142,7 +143,10 @@ scope — Invariant вместо обновления кеша ·
 [chakra-semantic-token-contract](/.claude/docs/chakra-semantic-token-contract.md) ⚠️ стоковые
 рецепты Chakra читают `bg.panel`/`fg.error`/`border.control`/`l1..l3`/`colorPalette.*` напрямую —
 не переопределил в своих `semanticTokens` → холодные цвета мимо палитры и провал WCAG AA; 14 из
-15 приложений с темой пробел не закрыли
+15 приложений с темой пробел не закрыли ·
+[chakra-overflow-wrap-not-inherited](/.claude/docs/chakra-overflow-wrap-not-inherited.md) ⚠️
+`overflow-wrap`/аналогичное CSS-свойство на предке не наследуется потомком, для которого Chakra
+reset (`preflight`) уже задаёт своё явное значение — фикс только через `'& *'` на предке
 
 **Библиотеки и публикация:** [lib-entry-points](/.claude/docs/lib-entry-points.md) подпути
 `./server`/`./client`, границы, ESLint-ловушки ·
