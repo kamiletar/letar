@@ -2,6 +2,20 @@
 
 Детальное описание всех реализованных фич.
 
+## 2026-08-19 — Фикс dev/prod-БД: `grandslamcup-db` был остановлен, не отсутствовал
+
+Причина «Postgres EACCES»/`AggregateError` при `nx dev`/`nx build` (см. запись ниже про
+`pressScale`) найдена: не отсутствие compose-конфигурации для локальной БД, а просто выключенный
+Docker-контейнер `grandslamcup-db` (postgres:16-alpine, порт `5453:5432`, данные целы в volume) —
+стоял `Exited` около месяца. Фикс — `docker start grandslamcup-db`. Проверено: `pg_isready` →
+`accepting connections`, `nx build grandslamcup` полностью зелёный (113/113 страниц, включая
+`/[citySlug]/donate`, `/[citySlug]/rules`, которые раньше падали на пререндере).
+
+⚠️ Контейнер запущен вручную (`docker start`), не через compose с `restart: unless-stopped` —
+после перезагрузки Windows/Docker Desktop с высокой вероятностью снова окажется `Exited`. Если
+`nx dev grandslamcup` опять начнёт падать на подключении к БД — сначала `docker ps -a --filter
+name=grandslamcup-db`, не искать проблему в коде.
+
 ## 2026-08-19 — Глубина нажатия кнопок/ссылок на общую `pressScale` (`@letar/ui`)
 
 `buttonRecipe`/`linkRecipe` переведены с литеральных `scale(...)` на общую лестницу `pressScale`
