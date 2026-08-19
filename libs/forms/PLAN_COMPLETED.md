@@ -1,5 +1,44 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-08-19 — Три бага из agent-mail backlog (v2.6.0)
+
+Обработаны все три непрочитанных `forms-task`-репорта из inbox `forms-dev` (2 от `QuietRidge` за
+aboi/domwellbes, 1 напрямую от `domwellbes-relay`).
+
+**1. `Form.Field.TableEditor` — клавиатурная навигация теряла значение.** Коммит ячейки был
+завязан только на нативный DOM `blur` (`EditingCell.onBlur`); `use-table-navigation.ts` на
+Tab/Enter/стрелках выходил из режима редактирования через `setEditingCell(null)` напрямую —
+`<Input>` размонтировался без `blur`, введённое значение терялось. Добавлен `commitEditingCellRef`
+в `TableEditorContextValue`: `EditingCell` регистрирует функцию коммита, навигация вызывает её
+перед сменой ячейки. `Escape` намеренно без коммита — отмена, а не сохранение, симметрично
+`field-data-grid.tsx`. Регресс-тест — `table-keyboard-commit.spec.tsx`.
+
+**2. `Form.Field.Date` отдавал `string` в `onSubmit`, даже когда схема — `z.coerce.date()`.**
+`resolveFieldType()` автоселектит `FieldDate` только для `zodType === 'date'`, но компонент
+коммитил сырую строку `e.target.value` — выведенный TS-тип (`Date`) расходился с рантайм-значением
+(`string`), `typecheck:tsgo` этого не ловил. `onChange` теперь коммитит `new Date(raw)` (или
+`undefined` при пустом значении).
+
+**3. Post-submit `formApi.reset(dataToSubmit)` мог откатить поле к устаревшему `initialValue`.**
+`reset()` снимает `state.isTouched`; на следующем рендере `@tanstack/react-form`'s `useForm`
+(layout-эффект без deps → `FormApi.update()`) синхронизирует `state.values` с ЛЮБЫМ
+`defaultValues`, который родитель передал, если форма не touched — если `initialValue` вычисляется
+как статический дефолт, пользователь визуально терял только что сделанный выбор. Добавлен
+`usePostSubmitResetGuard` (`libs/forms/src/lib/declarative/form-root/use-post-submit-reset-guard.ts`),
+подключён в `FormSimple`/`FormWithApi` — запоминает отправленное значение, восстанавливает его один
+раз при расхождении. Корень проблемы (per-render sync в `@tanstack/react-form`) вне контроля
+`@letar/forms` — лечится симптом на границе библиотеки. Регресс-тест —
+`post-submit-reset-stale-initialvalue.spec.tsx`, воспроизводит сценарий с `NativeSelect`.
+
+**Верификация:** для каждого бага regression-тест подтверждён вручную (временно отключал фикс —
+тест падал с воспроизведением исходного симптома). `nx typecheck:tsgo`/`nx lint` зелёные. Полный
+`nx test @letar/forms` — 717–718/719 (1 неродственный флейк на lazy-loaded `FieldRichText` под
+нагрузкой полного прогона, не связан с изменениями).
+
+Ответил всем трём отправителям через `reply_message` (`QuietRidge` x2, `domwellbes-relay`).
+Обновлены doc-разборы `.claude/docs/letar-forms-field-date-runtime-string.md` и
+`.claude/docs/letar-forms-post-submit-reset-stale-initialvalue.md`. Коммит `4aab26d1`.
+
 ## 2026-08-13 — Фаза 9, Этап 5 (часть 2): Signature/Address/City на Vue
 
 Продолжение Этапа 5 (тяжёлые peer-dep поля) для `@letar/forms-vue` (0.7.0→0.8.0, 36→39/61 полей) и
