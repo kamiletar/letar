@@ -1,6 +1,6 @@
 {
   "name": "@letar/synth",
-  "version": "0.22.3",
+  "version": "0.22.4",
   "private": true,
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",

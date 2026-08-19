@@ -1,5 +1,22 @@
 # PLAN_COMPLETED — synth
 
+## 2026-08-19 (применён Pressable к главным CTA)
+
+Тема подключала `pressableConfig` из `@letar/ui` (keyframes + `globalCss` целиком) со скаффолда,
+но ни один компонент им не пользовался (находка в рамках аудита четырёх приложений с той же
+проблемой: aboi, dsperevod, synth, time). Владелец решил применить, а не убрать.
+
+Создан `src/app/_components/pressable-cta.tsx` — synth форсирует тёмную тему
+(`forcedTheme="dark"`), поэтому, в отличие от domwellbes, различие solid/outline не требуется:
+захардкоженный полупрозрачно-белый ripple виден на любой тёмной поверхности приложения.
+`borderRadius="4px"` (реальный радиус кнопок из `button-style.ts`), `outlineColor:
+'accent.DEFAULT'` для focus ring (нет токена `focus.ring`). Обёрнуты 3 CTA: «▶ Запустить звук»
+(`studio-client.tsx`), «▶ прослушать» и «🔗 поделиться» (`gallery-client.tsx`). Engine-переключатели
+(SUB/FM/DRUM), VJ/суфлёр-тогглы, запись/рендер и библиотека патчей не тронуты — это либо
+режимные toggle-кнопки живой сессии, либо органы управления самим синтезатором, не навигационные
+CTA. `globalCss` темы сужен до точечного `'[data-pressable]': { touchAction: 'manipulation' }`.
+Версия `0.22.3` → `0.22.4`.
+
 ## 2026-08-08 (техдолг: latent-баг vitest alias для @letar/seo)
 
 `vitest.config.ts` резолвил `@` через `resolve.alias`, но не имел записи для `@letar/seo` — путь
