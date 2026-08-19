@@ -231,7 +231,9 @@ export function TableOfContents() {
                   h={isActive ? '16px' : '0px'}
                   bg="brand.500"
                   borderRadius="full"
-                  transition="all 0.2s ease"
+                  transitionProperty="height, box-shadow"
+                  transitionDuration="0.2s"
+                  transitionTimingFunction="ease"
                   boxShadow={isActive ? '0 0 8px var(--chakra-colors-brand-500)' : 'none'}
                 />
 
@@ -247,7 +249,9 @@ export function TableOfContents() {
                   color={isActive ? 'brand.600' : 'fg.muted'}
                   fontWeight={isActive ? 'semibold' : 'normal'}
                   borderRadius="sm"
-                  transition="all 0.2s ease"
+                  transitionProperty="color, background-color"
+                  transitionDuration="0.2s"
+                  transitionTimingFunction="ease"
                   _hover={{
                     color: 'brand.600',
                     textDecoration: 'none',

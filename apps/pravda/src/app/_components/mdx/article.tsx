@@ -66,7 +66,9 @@ export function Article({ number, children }: ArticleProps) {
       borderLeftColor="brand.500"
       borderRadius="0 md md 0"
       bg="transparent"
-      transition="all 0.2s ease"
+      transitionProperty="background-color"
+      transitionDuration="0.2s"
+      transitionTimingFunction="ease"
       scrollMarginTop={SCROLL_MARGIN_TOP}
       className="article"
       role="article"
@@ -127,7 +129,9 @@ export function Article({ number, children }: ArticleProps) {
           flexShrink={0}
           opacity={{ base: 1, md: 0 }}
           transform={{ base: 'none', md: 'translateX(8px)' }}
-          transition="all 0.2s ease"
+          transitionProperty="opacity, transform"
+          transitionDuration="0.2s"
+          transitionTimingFunction="ease"
         >
           <BookmarkButton bookmark={bookmark} />
         </Box>

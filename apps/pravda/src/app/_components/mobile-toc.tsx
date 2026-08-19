@@ -130,7 +130,9 @@ export function MobileTOC() {
               shadow="lg"
               _hover={{ bg: 'brand.600', transform: 'scale(1.05)' }}
               _active={{ transform: 'scale(0.95)' }}
-              transition="all 0.2s ease"
+              transitionProperty="background-color, transform"
+              transitionDuration="0.2s"
+              transitionTimingFunction="ease"
             >
               <LuList />
             </IconButton>
@@ -199,7 +201,9 @@ export function MobileTOC() {
                           borderRadius="md"
                           borderLeftWidth={isActive ? '3px' : '0'}
                           borderLeftColor="brand.500"
-                          transition="all 0.2s ease"
+                          transitionProperty="color, background-color, border-left-width"
+                          transitionDuration="0.2s"
+                          transitionTimingFunction="ease"
                           cursor="pointer"
                           _hover={{
                             bg: 'bg.subtle',

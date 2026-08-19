@@ -44,7 +44,8 @@ export default function HomePage() {
               <Card.Root
                 p={6}
                 _hover={{ shadow: 'lg', borderColor: 'brand.500' }}
-                transition="all 0.2s"
+                transitionProperty="box-shadow, border-color"
+                transitionDuration="0.2s"
                 borderWidth="2px"
                 borderColor="transparent"
               >
@@ -67,7 +68,8 @@ export default function HomePage() {
               <Card.Root
                 p={6}
                 _hover={{ shadow: 'lg', borderColor: 'brand.500' }}
-                transition="all 0.2s"
+                transitionProperty="box-shadow, border-color"
+                transitionDuration="0.2s"
                 borderWidth="2px"
                 borderColor="transparent"
               >

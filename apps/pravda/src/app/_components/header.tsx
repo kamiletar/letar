@@ -128,7 +128,9 @@ export function Header() {
               color="fg.muted"
               fontSize="sm"
               cursor="pointer"
-              transition="all 0.2s ease"
+              transitionProperty="border-color, color"
+              transitionDuration="0.2s"
+              transitionTimingFunction="ease"
               _hover={{ borderColor: 'brand.500', color: 'fg.default' }}
               display={{ base: 'none', md: 'flex' }}
             >

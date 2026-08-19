@@ -154,7 +154,9 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                           bg={isSelected ? 'brand.50' : 'transparent'}
                           borderLeftWidth={isSelected ? '3px' : '0'}
                           borderLeftColor="brand.500"
-                          transition="all 0.1s ease"
+                          transitionProperty="background-color, border-left-width"
+                          transitionDuration="0.1s"
+                          transitionTimingFunction="ease"
                           _hover={{ bg: 'bg.subtle', textDecoration: 'none' }}
                           _dark={{
                             bg: isSelected ? 'brand.950' : 'transparent',

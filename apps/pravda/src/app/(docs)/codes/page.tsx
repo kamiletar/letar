@@ -29,7 +29,8 @@ export default function CodesPage() {
               <Card.Root
                 p={4}
                 _hover={{ shadow: 'md', borderColor: 'brand.500' }}
-                transition="all 0.2s"
+                transitionProperty="box-shadow, border-color"
+                transitionDuration="0.2s"
                 borderWidth="1px"
                 borderColor="border"
               >
