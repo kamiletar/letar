@@ -58,6 +58,9 @@ export type {
   SyncVideoPlayerRef,
 } from './types'
 
+/** RN 0.87 типизирует getViewManagerConfig как Object — Commands есть только в рантайме */
+type ViewManagerConfig = { Commands: Record<string, number> }
+
 /** Проверка поддержки платформы */
 const IS_ANDROID = Platform.OS === 'android'
 
@@ -108,7 +111,7 @@ export const SyncVideoPlayer = React.forwardRef<SyncVideoPlayerRef, SyncVideoPla
         return
       }
 
-      const config = UIManager.getViewManagerConfig(VIEW_MANAGER_NAME)
+      const config = UIManager.getViewManagerConfig(VIEW_MANAGER_NAME) as ViewManagerConfig | undefined
       if (!config?.Commands?.[commandName]) {
         console.warn(`[exoplayer-sync] Command ${commandName} not found`)
         return

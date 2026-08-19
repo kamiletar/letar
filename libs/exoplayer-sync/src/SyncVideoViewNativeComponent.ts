@@ -1,8 +1,11 @@
-import type { HostComponent, ViewProps } from 'react-native'
-import type { DirectEventHandler, Double, Int32 } from 'react-native/Libraries/Types/CodegenTypes'
-import codegenNativeCommands from 'react-native/Libraries/Utilities/codegenNativeCommands'
+import type { CodegenTypes, HostComponent, ViewProps } from 'react-native'
+import { codegenNativeCommands } from 'react-native'
 
 const NativeComponentRegistry = require('react-native/Libraries/NativeComponent/NativeComponentRegistry')
+
+type Double = CodegenTypes.Double
+type Int32 = CodegenTypes.Int32
+type DirectEventHandler<T> = CodegenTypes.DirectEventHandler<T>
 
 type OnSyncVideoLoadEvent = Readonly<{
   duration: Double
