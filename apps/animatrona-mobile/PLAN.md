@@ -84,7 +84,7 @@ Storage Access Framework (SAF): пользователь выбирает дер
 
 ## Открытые задачи
 
-- [ ] **Обновить react-native 0.85.0 → 0.86.2** (свой пин в `package.json`, отдельный от
+- [ ] **Обновить react-native 0.85.0 → 0.87.0** (свой пин в `package.json`, отдельный от
       корневого `package.json` монорепо)
 
   Обнаружено при попытке поднять корневой `react-native` до 0.86.2 в рамках общего
@@ -95,17 +95,40 @@ Storage Access Framework (SAF): пользователь выбирает дер
   несовместимы между копиями 0.85.0 и 0.86.2). Корневой пин откатили обратно на 0.85.3,
   чтобы не блокировать остальной апдейт зависимостей.
 
-  **Риск: средний** — сама RN 0.86 официально без breaking changes в JS API, но апдейт
-  версии здесь **инвазивнее обычного**: приложение на TurboModules + Fabric Components
-  (`specs/*.ts`, `libs/exoplayer-sync`, `libs/exoplayer-ass` — нативный Kotlin+JNI), апдейт
-  тянет за собой codegen и, вероятно, пересборку нативных модулей под новый ABI. Обязательно
-  тестировать на реальном устройстве (см. `CLAUDE.md` — GUI/тач-хендлинг не проверить иначе).
+  **2026-08-19: повторная попытка, до 0.87.0, синхронно и в мобильном, и в корне (включая
+  `@react-native/babel-preset|eslint-config|metro-config|typescript-config` и
+  `react-native-gesture-handler` 3.0.1→3.2.1).** Синхронный бамп убрал прежний конфликт
+  дублирующихся номинальных типов между разными версиями — но вскрыл **настоящие breaking
+  changes RN 0.87**, не решаемые версионной синхронизацией:
 
-  Заодно `animatrona-tv` сидит на ещё более старом отдельном пине (`0.84.1`) — та же
-  проблема разъезда версий, но по факту предсуществующая (никто не гонял её `typecheck`
-  вместе с остальным репо, конфликт с корневым 0.85.3 обнаружился только сейчас). Если
-  апдейтить мобильный, стоит заодно свериться и с ним — не только ради типов, но чтобы три
-  версии react-native в одном монорепо (0.84.1/0.85.x/0.86.x) не расходились дальше.
+  - `react-native/Libraries/Types/CodegenTypes` и
+    `react-native/Libraries/Utilities/codegenNativeCommands` — пути codegen-типов переехали
+    в 0.87; оба `libs/exoplayer-ass/src/AssSubtitleViewNativeComponent.ts` и
+    `libs/exoplayer-sync/src/SyncVideoViewNativeComponent.ts` импортируют их напрямую по
+    старому пути (`TS2307`).
+  - `UIManager.getViewManagerConfig(...).Commands` — типизация `.Commands` пропала из
+    возвращаемого типа (`Object`); используется в `libs/exoplayer-ass/src/index.tsx` и
+    `libs/exoplayer-sync/src/index.tsx` для вызова команд `loadContent`/`setFrameSize`/
+    `dispatchViewManagerCommand` (`TS2339`).
+  - `NativeEventEmitter.addListener` в новых тайпингах требует
+    `(...args: readonly Object[]) => unknown` — старые типизированные колбэки в
+    `usePictureInPicture.ts`, `useRemoteControl.ts` (события `onPipAction`, `onKeyEvent` и
+    т.п.) больше не проходят (`TS2345`).
+  - Остаточный `ViewStyle`/`DimensionValue` `TS2719` («two different types with this name
+    exist, but they are unrelated») даже при ОДНОЙ версии `0.87.0` в обоих package.json —
+    похоже на две физические копии пакета в дереве bun из-за разных peer-зависимостей
+    (`react-native-video`/`vision-camera` и т.п.), не выяснено до конца.
+
+  Откачено обратно на 0.85.0/0.85.3 в этой же сессии — typecheck `animatrona-mobile` и
+  `animatrona-tv` оба зелёные на откате. **Следующая попытка = не бамп версии, а миграция**:
+  править codegen-импорты и типизацию команд в обеих `libs/exoplayer-*`, перетипизировать
+  event-колбэки в hooks, только после этого пробовать версию — и обязательно тестировать
+  тач-хендлинг/жесты на реальном устройстве (см. `CLAUDE.md`).
+
+  Заодно `animatrona-tv` сидит на ещё более старом отдельном пине (`0.84.1` в своём
+  `package.json`, но фактически резолвится через корневой `0.85.3`/`react-native-gesture-handler
+  3.0.1`) — та же проблема разъезда версий. Апдейтить его код нельзя из сессии
+  `animatrona-mobile` (правило `CLAUDE.md`) — координировать через GrayMill.
 
 ### Требуют проверки на устройстве
 
