@@ -94,7 +94,10 @@ localStorage/cookie в инициализаторе `useState` — не ошиб
 hydration mismatch на невалидном сегменте локали ·
 [nextjs-compound-component-server-boundary](/.claude/docs/nextjs-compound-component-server-boundary.md)
 ⚠️ compound-экспорт (`Object.assign`) для клиентского компонента не резолвится через границу
-Server→Client — property-access ломается, `undefined`
+Server→Client — property-access ломается, `undefined` ·
+[nextjs-revalidatepath-outside-request-scope](/.claude/docs/nextjs-revalidatepath-outside-request-scope.md)
+⚠️ `revalidatePath` из функции, переиспользуемой в фоновой задаче (`@letar/jobs`) без request
+scope — Invariant вместо обновления кеша
 
 **Библиотеки и публикация:** [lib-entry-points](/.claude/docs/lib-entry-points.md) подпути
 `./server`/`./client`, границы, ESLint-ловушки ·
