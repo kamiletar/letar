@@ -124,8 +124,14 @@ S2_APPS="dashboard dashboard-agent driving-school auth-hub archetest time form-d
 # см. PLAN-INFRA.md §66 п.2). Пусто = разрешить любое explicit --app (как раньше для "unknown").
 S3_APPS=""
 
-# Detect current server by hostname
-CURRENT_HOST=$(hostname -f 2>/dev/null || hostname)
+# Detect current server. Приоритет — явная переменная DEPLOY_SERVER_NAME (для серверов, где
+# hostname -f не совпадает с *.letar.best, например s3 — hostname хостинг-провайдера
+# smartape-vps.com, см. PLAN-INFRA.md §81). hostname -f остаётся фолбэком для остальных.
+if [ -n "$DEPLOY_SERVER_NAME" ]; then
+  CURRENT_HOST="$DEPLOY_SERVER_NAME"
+else
+  CURRENT_HOST=$(hostname -f 2>/dev/null || hostname)
+fi
 case "$CURRENT_HOST" in
   *s1.letar.best*|s1|server1)
     SERVER_APPS="$S1_APPS"
