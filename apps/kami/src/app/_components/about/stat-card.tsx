@@ -47,7 +47,9 @@ export const StatCard = memo(function StatCard({ value, label, icon, index = 0 }
           transform: 'translateY(-4px)',
           boxShadow: 'lg',
         }}
-        transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+        transitionProperty="border-color, transform, box-shadow"
+        transitionDuration="0.3s"
+        transitionTimingFunction="cubic-bezier(0.4, 0, 0.2, 1)"
       >
         {icon && (
           <Box color="fg.500" fontSize="2xl">

@@ -109,7 +109,8 @@ function AboutContent() {
                     fontSize="sm"
                     fontFamily="mono"
                     _hover={{ borderColor: 'fg.500' }}
-                    transition="all 0.2s"
+                    transitionProperty="border-color"
+                    transitionDuration="0.2s"
                   >
                     {tech}
                   </Box>

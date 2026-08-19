@@ -36,7 +36,8 @@ export const CaseCard = memo(function CaseCard({
         transform: 'translateY(-4px)',
         boxShadow: 'xl',
       }}
-      transition="all 0.3s"
+      transitionProperty="border-color, transform, box-shadow"
+      transitionDuration="0.3s"
     >
       {/* Обложка */}
       {coverImage && (

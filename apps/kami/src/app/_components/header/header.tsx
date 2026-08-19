@@ -18,7 +18,9 @@ export const Header = () => {
       backdropFilter="blur(10px)"
       borderBottom="1px solid"
       borderColor={{ base: 'white/15', _dark: 'border.subtle/30' }}
-      transition="all 0.3s ease"
+      transitionProperty="background-color"
+      transitionDuration="0.3s"
+      transitionTimingFunction="ease"
       _hover={{ bg: { base: 'white/40', _dark: 'bg/85' } }}
     >
       {/* Mobile: hamburger + logo + actions */}

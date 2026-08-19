@@ -81,7 +81,8 @@ function NavList({
               _hover={{
                 bg: isActive ? undefined : 'bg.subtle',
               }}
-              transition="all 0.2s"
+              transitionProperty="background-color"
+              transitionDuration="0.2s"
             >
               {item.icon}
               <Text fontSize="sm">{item.label}</Text>

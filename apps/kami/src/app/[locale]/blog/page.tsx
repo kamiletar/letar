@@ -82,7 +82,9 @@ export default async function BlogPage({ params }: Props) {
                           opacity: 1,
                         },
                       }}
-                      transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                      transitionProperty="border-color, transform, box-shadow"
+                      transitionDuration="0.3s"
+                      transitionTimingFunction="cubic-bezier(0.4, 0, 0.2, 1)"
                       h="full"
                       position="relative"
                       overflow="hidden"
@@ -95,7 +97,8 @@ export default async function BlogPage({ params }: Props) {
                         top="50%"
                         transform="translateY(-50%)"
                         opacity={0}
-                        transition="all 0.3s"
+                        transitionProperty="transform, opacity"
+                        transitionDuration="0.3s"
                         color="fg.500"
                         boxSize={5}
                       >

@@ -45,7 +45,9 @@ export const FeatureCard = memo(function FeatureCard({ title, description, icon,
           borderColor: 'fg.500',
           boxShadow: GLOW.cardShadow,
         }}
-        transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+        transitionProperty="border-color, box-shadow"
+        transitionDuration="0.3s"
+        transitionTimingFunction="cubic-bezier(0.4, 0, 0.2, 1)"
       >
         <Box p={3} borderRadius="md" bg={{ base: 'fg.50', _dark: 'fg.900' }} color="fg.500">
           {icon}

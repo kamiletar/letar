@@ -116,7 +116,8 @@ export default async function SkillsPage({ params }: Props) {
                       transform: 'translateY(-2px)',
                       boxShadow: 'md',
                     }}
-                    transition="all 0.2s"
+                    transitionProperty="border-color, transform, box-shadow"
+                    transitionDuration="0.2s"
                     position="relative"
                   >
                     {skill.featured && (

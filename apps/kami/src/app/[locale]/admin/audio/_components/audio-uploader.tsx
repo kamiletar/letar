@@ -155,7 +155,8 @@ export function AudioUploader() {
         bg={isDragging ? { base: 'fg.50', _dark: 'fg.950/30' } : 'transparent'}
         textAlign="center"
         cursor="pointer"
-        transition="all 0.2s"
+        transitionProperty="border-color, background-color"
+        transitionDuration="0.2s"
         _hover={{ borderColor: 'fg', bg: 'bg.subtle' }}
       >
         <VStack gap={2}>

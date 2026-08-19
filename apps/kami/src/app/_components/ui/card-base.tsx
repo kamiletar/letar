@@ -38,7 +38,8 @@ export const CardBase = memo(
             boxShadow: 'lg',
           }
           : { borderColor: hoverColor }}
-        transition="all 0.3s"
+        transitionProperty="border-color, transform, box-shadow"
+        transitionDuration="0.3s"
         {...props}
       >
         {children}

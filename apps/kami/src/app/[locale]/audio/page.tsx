@@ -64,7 +64,8 @@ export default async function AudioListPage({ params }: PageProps) {
                 <Link key={audio.id} href={`/${locale}/audio/${audio.slug}`}>
                   <Card.Root
                     _hover={{ shadow: 'md', borderColor: 'purple.200' }}
-                    transition="all 0.2s"
+                    transitionProperty="box-shadow, border-color"
+                    transitionDuration="0.2s"
                     cursor="pointer"
                   >
                     <Card.Body py={3} px={4}>

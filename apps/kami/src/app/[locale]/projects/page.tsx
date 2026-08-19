@@ -96,7 +96,8 @@ export default async function ProjectsPage({ params }: Props) {
                   transform: 'translateY(-4px)',
                   boxShadow: 'xl',
                 }}
-                transition="all 0.3s"
+                transitionProperty="border-color, transform, box-shadow"
+                transitionDuration="0.3s"
                 position="relative"
               >
                 {/* Featured бейдж */}

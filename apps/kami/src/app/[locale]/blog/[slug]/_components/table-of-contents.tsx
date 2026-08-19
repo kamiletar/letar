@@ -103,7 +103,8 @@ export function TableOfContents({ items, locale }: Props) {
                 color: 'purple.600',
                 bg: { base: 'gray.50', _dark: 'gray.800' },
               }}
-              transition="all 0.15s"
+              transitionProperty="color, border-color, background-color"
+              transitionDuration="0.15s"
               textDecoration="none"
               onClick={(e) => {
                 e.preventDefault()

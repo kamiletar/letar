@@ -74,7 +74,8 @@ export const FaqSection = memo(function FaqSection() {
                   _hover={{
                     bg: { base: 'gray.50', _dark: 'gray.800' },
                   }}
-                  transition="all 0.2s"
+                  transitionProperty="background-color"
+                  transitionDuration="0.2s"
                 >
                   <Text fontWeight="medium" flex="1" textAlign="left">
                     {item.question}

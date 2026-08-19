@@ -36,7 +36,8 @@ export const TestimonialCard = memo(function TestimonialCard({
         transform: 'translateY(-4px)',
         boxShadow: 'lg',
       }}
-      transition="all 0.3s"
+      transitionProperty="border-color, transform, box-shadow"
+      transitionDuration="0.3s"
     >
       <VStack align="stretch" gap={4}>
         {/* Рейтинг */}

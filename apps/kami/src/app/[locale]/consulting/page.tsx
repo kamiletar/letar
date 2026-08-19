@@ -72,7 +72,8 @@ export default function ConsultingPage() {
                     transform: 'translateY(-4px)',
                     boxShadow: 'xl',
                   }}
-                  transition="all 0.3s"
+                  transitionProperty="border-color, transform, box-shadow"
+                  transitionDuration="0.3s"
                 >
                   <HStack justify="space-between" align="start">
                     <VStack align="start" gap={1}>
