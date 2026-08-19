@@ -4,6 +4,8 @@
 
 ### Планируется
 
+- [ ] Аудит `_active: scale()` в теме на `pressScale` (`@letar/ui`) — задача описана в
+      [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md)
 - [ ] Дизайн и контент лендинга
 - [ ] Адаптивная верстка
 - [ ] SEO оптимизация
