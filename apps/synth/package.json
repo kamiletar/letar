@@ -1,9 +1,10 @@
 {
   "name": "@letar/synth",
-  "version": "0.22.2",
+  "version": "0.22.3",
   "private": true,
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.30.0"
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@letar/hooks": "workspace:*"
   },
   "nx": {
     "name": "synth",
@@ -11,7 +12,8 @@
       "@letar/chakra-provider",
       "@letar/analytics",
       "@letar/ui",
-      "@letar/seo"
+      "@letar/seo",
+      "@letar/hooks"
     ]
   }
 }

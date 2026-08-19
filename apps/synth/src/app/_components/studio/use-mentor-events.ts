@@ -3,6 +3,7 @@
 import type { FocusSection, MentorStateReport, MidiSequenceNote } from '@/lib/mentor/schema'
 import { MentorEventSchema } from '@/lib/mentor/schema'
 import type { Patch } from '@/lib/patch/schema'
+import { useEventSource } from '@letar/hooks'
 import { useEffect, useRef, useState } from 'react'
 
 export interface MentorHighlight {
@@ -32,51 +33,53 @@ export function useMentorEvents({ onLoadPatch, onMidiSequence }: UseMentorEvents
   const onMidiSequenceRef = useRef(onMidiSequence)
   onMidiSequenceRef.current = onMidiSequence
 
+  useEventSource({
+    url: '/api/mentor/events/',
+    events: {
+      message: (raw) => {
+        let parsed: unknown
+        try {
+          parsed = JSON.parse(raw.data)
+        } catch {
+          return
+        }
+        const result = MentorEventSchema.safeParse(parsed)
+        if (!result.success) {
+          return
+        }
+        const event = result.data
+
+        switch (event.kind) {
+          case 'highlight_param':
+            if (highlightTimeoutRef.current) {
+              clearTimeout(highlightTimeoutRef.current)
+            }
+            setHighlight({ name: event.name, message: event.message })
+            highlightTimeoutRef.current = setTimeout(() => setHighlight(null), HIGHLIGHT_TIMEOUT_MS)
+            break
+          case 'dim_all':
+            if (highlightTimeoutRef.current) {
+              clearTimeout(highlightTimeoutRef.current)
+            }
+            setHighlight(null)
+            setFocusSection(null)
+            break
+          case 'focus_section':
+            setFocusSection(event.section)
+            break
+          case 'load_patch':
+            onLoadPatchRef.current(event.patch)
+            break
+          case 'midi_sequence':
+            onMidiSequenceRef.current(event.notes)
+            break
+        }
+      },
+    },
+  })
+
   useEffect(() => {
-    const source = new EventSource('/api/mentor/events/')
-
-    source.onmessage = (raw) => {
-      let parsed: unknown
-      try {
-        parsed = JSON.parse(raw.data)
-      } catch {
-        return
-      }
-      const result = MentorEventSchema.safeParse(parsed)
-      if (!result.success) {
-        return
-      }
-      const event = result.data
-
-      switch (event.kind) {
-        case 'highlight_param':
-          if (highlightTimeoutRef.current) {
-            clearTimeout(highlightTimeoutRef.current)
-          }
-          setHighlight({ name: event.name, message: event.message })
-          highlightTimeoutRef.current = setTimeout(() => setHighlight(null), HIGHLIGHT_TIMEOUT_MS)
-          break
-        case 'dim_all':
-          if (highlightTimeoutRef.current) {
-            clearTimeout(highlightTimeoutRef.current)
-          }
-          setHighlight(null)
-          setFocusSection(null)
-          break
-        case 'focus_section':
-          setFocusSection(event.section)
-          break
-        case 'load_patch':
-          onLoadPatchRef.current(event.patch)
-          break
-        case 'midi_sequence':
-          onMidiSequenceRef.current(event.notes)
-          break
-      }
-    }
-
     return () => {
-      source.close()
       if (highlightTimeoutRef.current) {
         clearTimeout(highlightTimeoutRef.current)
       }
