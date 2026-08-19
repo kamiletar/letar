@@ -111,7 +111,7 @@ export function NativeAssView({
       videoWidth={videoWidth}
       videoHeight={videoHeight}
       fontDir={fontDir}
-      style={StyleSheet.flatten([styles.container, style])}
+      style={StyleSheet.flatten([styles.container, style]) ?? undefined}
       pointerEvents={pointerEvents}
     />
   )

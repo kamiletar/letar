@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { useTVFocusAnimation } from '@/hooks/useTVFocusAnimation'
+import type { TVPressableState } from '@/types/react-native'
 
 interface TVNextEpisodeOverlayProps {
   /** Номер следующего эпизода */
@@ -110,7 +111,7 @@ export function TVNextEpisodeOverlay({
           </Animated.View>
 
           <Pressable
-            style={({ focused }) => [styles.cancelButton, focused && styles.cancelButtonFocused]}
+            style={({ focused }: TVPressableState) => [styles.cancelButton, focused && styles.cancelButtonFocused]}
             onPress={handleCancel}
           >
             <Text style={styles.cancelButtonText}>Отмена</Text>
@@ -123,7 +124,7 @@ export function TVNextEpisodeOverlay({
 
 const styles = StyleSheet.create({
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(0, 0, 0, 0.85)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -177,7 +178,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   buttonFocusBorder: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     borderRadius: 12,
     borderWidth: 4,
     borderColor: '#fff',

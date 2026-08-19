@@ -1,6 +1,6 @@
 {
   "name": "@letar/animatrona-tv",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -10,9 +10,9 @@
   },
   "dependencies": {
     "@letar/animatrona-shared": "*",
-    "react-native": "0.84.1",
-    "@react-native/codegen": "0.84.1",
-    "@react-native/gradle-plugin": "0.84.1"
+    "react-native": "0.87.0",
+    "@react-native/codegen": "0.87.0",
+    "@react-native/gradle-plugin": "0.87.0"
   },
   "engines": {
     "node": ">=22.11"

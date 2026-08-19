@@ -17,6 +17,7 @@ import { TVRow } from '@/components/tv/TVRow'
 import { SkeletonRow } from '@/components/tv/TVSkeleton'
 import type { TVStackParamList } from '@/navigation/TVNavigator'
 import { useConnectionStore } from '@/store/connection'
+import type { TVPressableState } from '@/types/react-native'
 import type { AnimeListItem, LastWatched } from '@letar/animatrona-shared'
 
 type Props = NativeStackScreenProps<TVStackParamList, 'Home'>
@@ -114,14 +115,14 @@ export function TVHomeScreen({ navigation }: Props): React.JSX.Element {
         <Text style={styles.errorText}>{error}</Text>
         <View style={styles.errorButtons}>
           <Pressable
-            style={({ focused }) => [styles.retryButton, focused && styles.retryButtonFocused]}
+            style={({ focused }: TVPressableState) => [styles.retryButton, focused && styles.retryButtonFocused]}
             onPress={loadData}
             hasTVPreferredFocus
           >
             <Text style={styles.retryButtonText}>Повторить</Text>
           </Pressable>
           <Pressable
-            style={({ focused }) => [
+            style={({ focused }: TVPressableState) => [
               styles.retryButton,
               styles.retryButtonSecondary,
               focused && styles.retryButtonFocused,
@@ -148,7 +149,7 @@ export function TVHomeScreen({ navigation }: Props): React.JSX.Element {
           <Text style={styles.subtitle}>{library.length} аниме</Text>
         </View>
         <Pressable
-          style={({ focused }) => [styles.settingsButton, focused && styles.settingsButtonFocused]}
+          style={({ focused }: TVPressableState) => [styles.settingsButton, focused && styles.settingsButtonFocused]}
           onPress={handleSettings}
         >
           <Text style={styles.settingsButtonText}>⚙ Настройки</Text>

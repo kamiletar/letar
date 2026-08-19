@@ -9,10 +9,20 @@
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { BackHandler, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import {
+  BackHandler,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  type TextInputInstance,
+  View,
+} from 'react-native'
 
 import type { TVStackParamList } from '@/navigation/TVNavigator'
 import { useConnectionStore } from '@/store/connection'
+import type { TVPressableState } from '@/types/react-native'
 
 type Props = NativeStackScreenProps<TVStackParamList, 'Settings'>
 
@@ -28,7 +38,7 @@ export function TVSettingsScreen({ navigation }: Props): React.JSX.Element {
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const inputRef = useRef<TextInput>(null)
+  const inputRef = useRef<TextInputInstance>(null)
 
   // Обработка кнопки Back
   useEffect(() => {
@@ -129,7 +139,9 @@ export function TVSettingsScreen({ navigation }: Props): React.JSX.Element {
                 {error && <Text style={styles.errorText}>{error}</Text>}
                 <View style={styles.editButtons}>
                   <Pressable
-                    style={({ focused }) => [styles.button, styles.buttonPrimary, focused && styles.buttonFocused]}
+                    style={(
+                      { focused }: TVPressableState,
+                    ) => [styles.button, styles.buttonPrimary, focused && styles.buttonFocused]}
                     onPress={handleSaveUrl}
                     disabled={isSaving}
                     hasTVPreferredFocus
@@ -137,7 +149,9 @@ export function TVSettingsScreen({ navigation }: Props): React.JSX.Element {
                     <Text style={styles.buttonText}>{isSaving ? 'Сохранение...' : 'Сохранить'}</Text>
                   </Pressable>
                   <Pressable
-                    style={({ focused }) => [styles.button, styles.buttonSecondary, focused && styles.buttonFocused]}
+                    style={(
+                      { focused }: TVPressableState,
+                    ) => [styles.button, styles.buttonSecondary, focused && styles.buttonFocused]}
                     onPress={handleCancelEdit}
                     disabled={isSaving}
                   >
@@ -153,7 +167,9 @@ export function TVSettingsScreen({ navigation }: Props): React.JSX.Element {
                   <Text style={styles.settingValue}>{connection?.serverUrl || 'Не подключен'}</Text>
                 </View>
                 <Pressable
-                  style={({ focused }) => [styles.button, styles.buttonSecondary, focused && styles.buttonFocused]}
+                  style={(
+                    { focused }: TVPressableState,
+                  ) => [styles.button, styles.buttonSecondary, focused && styles.buttonFocused]}
                   onPress={handleEditUrl}
                   hasTVPreferredFocus
                 >
@@ -170,7 +186,9 @@ export function TVSettingsScreen({ navigation }: Props): React.JSX.Element {
                 <Text style={styles.settingValue}>Активно</Text>
               </View>
               <Pressable
-                style={({ focused }) => [styles.button, styles.buttonDanger, focused && styles.buttonFocused]}
+                style={(
+                  { focused }: TVPressableState,
+                ) => [styles.button, styles.buttonDanger, focused && styles.buttonFocused]}
                 onPress={handleDisconnect}
               >
                 <Text style={styles.buttonText}>Отключить</Text>
@@ -209,7 +227,9 @@ export function TVSettingsScreen({ navigation }: Props): React.JSX.Element {
         {/* Кнопка назад */}
         {!isEditing && (
           <Pressable
-            style={({ focused }) => [styles.button, styles.backButton, focused && styles.buttonFocused]}
+            style={(
+              { focused }: TVPressableState,
+            ) => [styles.button, styles.backButton, focused && styles.buttonFocused]}
             onPress={() => navigation.goBack()}
           >
             <Text style={styles.buttonText}>← Назад</Text>

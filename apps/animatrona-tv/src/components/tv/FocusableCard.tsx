@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   focusBorder: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     borderRadius: 12,
     borderWidth: 4,
     borderColor: '#7c3aed',

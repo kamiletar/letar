@@ -7,10 +7,11 @@
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import React, { useCallback, useRef, useState } from 'react'
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, type TextInputInstance, View } from 'react-native'
 
 import type { TVStackParamList } from '@/navigation/TVNavigator'
 import { useConnectionStore } from '@/store/connection'
+import type { TVPressableState } from '@/types/react-native'
 import { normalizeServerUrl } from '@letar/animatrona-shared'
 
 type Props = NativeStackScreenProps<TVStackParamList, 'Connect'>
@@ -22,7 +23,7 @@ export function TVConnectScreen({ navigation }: Props): React.JSX.Element {
   const [serverUrl, setServerUrl] = useState(connection?.serverUrl?.replace(/^https?:\/\//, '') || '')
   const [isConnecting, setIsConnecting] = useState(false)
   const [inputFocused, setInputFocused] = useState(false)
-  const inputRef = useRef<TextInput>(null)
+  const inputRef = useRef<TextInputInstance>(null)
 
   /** Попытка подключения */
   const handleConnect = useCallback(async () => {
@@ -84,7 +85,9 @@ export function TVConnectScreen({ navigation }: Props): React.JSX.Element {
 
       {/* Кнопка подключения */}
       <Pressable
-        style={({ focused }) => [styles.button, focused && styles.buttonFocused, isLoading && styles.buttonDisabled]}
+        style={(
+          { focused }: TVPressableState,
+        ) => [styles.button, focused && styles.buttonFocused, isLoading && styles.buttonDisabled]}
         onPress={handleConnect}
         disabled={isLoading}
       >

@@ -7,6 +7,8 @@
 import React from 'react'
 import { FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 
+import type { TVPressableState } from '@/types/react-native'
+
 import type { AudioTrack, SubtitleTrack } from '@letar/animatrona-shared'
 
 /** Общий тип для дорожки */
@@ -54,7 +56,7 @@ export function TVTrackSelector({
             style={styles.list}
             renderItem={({ item, index }) => (
               <Pressable
-                style={({ focused }) => [
+                style={({ focused }: TVPressableState) => [
                   styles.trackItem,
                   item.isSelected && styles.trackItemSelected,
                   focused && styles.trackItemFocused,
@@ -69,18 +71,20 @@ export function TVTrackSelector({
             ListFooterComponent={showDisableOption
               ? (
                 <Pressable
-                  style={({ focused }) => [styles.trackItem, styles.disableItem, focused && styles.trackItemFocused]}
+                  style={(
+                    { focused }: TVPressableState,
+                  ) => [styles.trackItem, styles.disableItem, focused && styles.trackItemFocused]}
                   onPress={() => onSelect(null)}
                 >
                   <Text style={styles.trackLabel}>Выключить</Text>
                 </Pressable>
               )
-              : null}
+              : undefined}
           />
 
           {/* Кнопка закрытия */}
           <Pressable
-            style={({ focused }) => [styles.closeButton, focused && styles.closeButtonFocused]}
+            style={({ focused }: TVPressableState) => [styles.closeButton, focused && styles.closeButtonFocused]}
             onPress={onClose}
           >
             <Text style={styles.closeButtonText}>Закрыть</Text>

@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.5.0] - 2026-08-20
+
+### Changed
+
+- Убран локальный пин `react` (19.2.3) — версии зависимостей только в корне монорепо
+- Обновление React Native 0.84.1 → 0.87.0 вслед за корневым пином и `animatrona-mobile`
+- Миграция кода под breaking changes RN 0.87: `StyleSheet.absoluteFillObject` → `absoluteFill`,
+  `TextInput` ref-тип → `TextInputInstance`, `PressableStateCallbackType` (0.87 — `type`, не
+  `interface`) перестал расширяться через declaration merging — заменено на локальный union-тип
+  `TVPressableState` с явной аннотацией параметра
+- `libs/exoplayer-ass`/`libs/exoplayer-sync`: `@types/react` `^18.3.18` → `^19.2.18` (унификация с
+  корнем), `StyleSheet.flatten(...)` может вернуть `null` в типах RN 0.87 — добавлен `?? undefined`
+
 ## [0.4.0] - 2026-03-02
 
 ### Changed

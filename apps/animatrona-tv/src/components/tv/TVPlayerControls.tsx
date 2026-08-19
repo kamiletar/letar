@@ -7,6 +7,8 @@
 import React from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 
+import type { TVPressableState } from '@/types/react-native'
+
 import { formatDuration } from '@letar/animatrona-shared'
 
 interface TVPlayerControlsProps {
@@ -52,7 +54,7 @@ export function TVPlayerControls({
         <View style={styles.buttonsRow}>
           {/* -10 секунд */}
           <Pressable
-            style={({ focused }) => [styles.controlButton, focused && styles.controlButtonFocused]}
+            style={({ focused }: TVPressableState) => [styles.controlButton, focused && styles.controlButtonFocused]}
             onPress={() => onSeek(currentTime - 10)}
           >
             <Text style={styles.controlButtonText}>-10</Text>
@@ -60,7 +62,7 @@ export function TVPlayerControls({
 
           {/* Play/Pause */}
           <Pressable
-            style={({ focused }) => [styles.playButton, focused && styles.playButtonFocused]}
+            style={({ focused }: TVPressableState) => [styles.playButton, focused && styles.playButtonFocused]}
             onPress={onPlayPause}
             hasTVPreferredFocus
           >
@@ -69,7 +71,7 @@ export function TVPlayerControls({
 
           {/* +10 секунд */}
           <Pressable
-            style={({ focused }) => [styles.controlButton, focused && styles.controlButtonFocused]}
+            style={({ focused }: TVPressableState) => [styles.controlButton, focused && styles.controlButtonFocused]}
             onPress={() => onSeek(currentTime + 10)}
           >
             <Text style={styles.controlButtonText}>+10</Text>

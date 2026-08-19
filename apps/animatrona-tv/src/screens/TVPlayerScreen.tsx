@@ -20,6 +20,7 @@ import { TVNextEpisodeOverlay } from '@/components/tv/TVNextEpisodeOverlay'
 import { TVPlayerControls } from '@/components/tv/TVPlayerControls'
 import { audioTracksToItems, subtitleTracksToItems, TVTrackSelector } from '@/components/tv/TVTrackSelector'
 import type { TVStackParamList } from '@/navigation/TVNavigator'
+import type { TVPressableState } from '@/types/react-native'
 import {
   type AnimeDetails,
   type AudioTrack,
@@ -313,7 +314,7 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
         <Text style={styles.errorText}>{error || 'Эпизод не найден'}</Text>
         <View style={styles.errorButtons}>
           <Pressable
-            style={({ focused }) => [styles.retryButton, focused && styles.retryButtonFocused]}
+            style={({ focused }: TVPressableState) => [styles.retryButton, focused && styles.retryButtonFocused]}
             onPress={() => navigation.goBack()}
             hasTVPreferredFocus
           >
@@ -334,7 +335,7 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
         <Text style={styles.errorText}>Видео недоступно</Text>
         <View style={styles.errorButtons}>
           <Pressable
-            style={({ focused }) => [styles.retryButton, focused && styles.retryButtonFocused]}
+            style={({ focused }: TVPressableState) => [styles.retryButton, focused && styles.retryButtonFocused]}
             onPress={() => navigation.goBack()}
             hasTVPreferredFocus
           >
@@ -368,7 +369,7 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
         <NativeAssView
           assContent={assContent}
           currentTimeMs={currentTime * 1000}
-          style={StyleSheet.flatten(StyleSheet.absoluteFill)}
+          style={StyleSheet.absoluteFill}
           pointerEvents="none"
         />
       )}
@@ -400,7 +401,9 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
                   {/* Аудио */}
                   {episode.audioTracks.length > 1 && (
                     <Pressable
-                      style={({ focused }) => [styles.settingsButton, focused && styles.settingsButtonFocused]}
+                      style={(
+                        { focused }: TVPressableState,
+                      ) => [styles.settingsButton, focused && styles.settingsButtonFocused]}
                       onPress={() => setShowAudioSelector(true)}
                     >
                       <Text style={styles.settingsButtonText}>🔊 Аудио</Text>
@@ -410,7 +413,9 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
                   {/* Субтитры */}
                   {episode.subtitleTracks.length > 0 && (
                     <Pressable
-                      style={({ focused }) => [styles.settingsButton, focused && styles.settingsButtonFocused]}
+                      style={(
+                        { focused }: TVPressableState,
+                      ) => [styles.settingsButton, focused && styles.settingsButtonFocused]}
                       onPress={() => setShowSubtitleSelector(true)}
                     >
                       <Text style={styles.settingsButtonText}>💬 Субтитры</Text>
@@ -445,7 +450,7 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
             <Text style={styles.resumeText}>Вы остановились на {formatDuration(watchProgress.savedPosition || 0)}</Text>
             <View style={styles.resumeButtons}>
               <Pressable
-                style={({ focused }) => [styles.resumeButton, focused && styles.resumeButtonFocused]}
+                style={({ focused }: TVPressableState) => [styles.resumeButton, focused && styles.resumeButtonFocused]}
                 onPress={() => {
                   const pos = watchProgress.resumeFromSaved()
                   handleSeek(pos)
@@ -455,7 +460,7 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
                 <Text style={styles.resumeButtonText}>Продолжить</Text>
               </Pressable>
               <Pressable
-                style={({ focused }) => [
+                style={({ focused }: TVPressableState) => [
                   styles.resumeButton,
                   styles.resumeButtonSecondary,
                   focused && styles.resumeButtonFocused,
@@ -544,7 +549,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     justifyContent: 'space-between',
   },
   topGradient: {
@@ -604,7 +609,7 @@ const styles = StyleSheet.create({
 
   // Resume overlay
   resumeOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
     alignItems: 'center',
     justifyContent: 'center',

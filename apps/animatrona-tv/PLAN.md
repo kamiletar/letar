@@ -196,4 +196,17 @@ nx clean animatrona-tv
 
 ---
 
-**Обновлено:** 2026-02-06
+## Миграция RN 0.87 (2026-08-20)
+
+Каскадная задача от координатора Animatrona (GrayMill, thread `cascade-rn-087-migration`):
+`animatrona-mobile-dev` подняла общие либы `libs/exoplayer-ass`/`libs/exoplayer-sync` под
+React Native 0.87, затем корневой пин — `animatrona-tv` синхронизирована следом.
+
+- Убран локальный пин `react` (был `19.2.3`, отдельно от корневого `^19.2.8`)
+- `react-native`/`@react-native/codegen`/`@react-native/gradle-plugin`: `0.84.1` → `0.87.0`
+- Код мигрирован под breaking changes 0.87 (детали — CHANGELOG.md), typecheck зелёный
+- ⚠️ Тест на реальном Android TV устройстве **не пройден** — среда сессии без подключённого TV.
+  Обязательно проверить перед следующим релизом: D-pad фокус, тач на TextInput-полях,
+  воспроизведение видео+аудио, субтитры.
+
+**Обновлено:** 2026-08-20
