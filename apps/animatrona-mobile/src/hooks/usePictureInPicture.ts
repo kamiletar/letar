@@ -99,12 +99,14 @@ export function usePictureInPicture(options: UsePictureInPictureOptions = {}): U
 
     const pipModeSubscription = pipEmitter.addListener(
       'onPictureInPictureModeChanged',
-      (event: { isInPipMode: boolean }) => {
+      (...args: readonly Object[]) => {
+        const event = args[0] as { isInPipMode: boolean }
         updatePipState(event.isInPipMode)
       },
     )
 
-    const pipActionSubscription = pipEmitter.addListener('onPipAction', (event: { action: PipAction }) => {
+    const pipActionSubscription = pipEmitter.addListener('onPipAction', (...args: readonly Object[]) => {
+      const event = args[0] as { action: PipAction }
       onPipActionRef.current?.(event.action)
     })
 

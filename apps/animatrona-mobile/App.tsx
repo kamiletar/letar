@@ -25,7 +25,8 @@ export default function App() {
     <GestureHandlerRootView style={styles.container}>
       <TamaguiProvider>
         <SafeAreaProvider>
-          <StatusBar barStyle="light-content" backgroundColor="#000" translucent />
+          {/* RN 0.87: Android теперь всегда edge-to-edge — backgroundColor/translucent убраны из API */}
+          <StatusBar barStyle="light-content" />
           <View style={styles.container}>
             {/* TODO: Отладить NetInfo в release сборках */}
             {/* <OfflineIndicator /> */}

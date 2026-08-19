@@ -85,7 +85,9 @@ export function useRemoteControl(handlers: RemoteControlHandlers, options: UseRe
       return
     }
 
-    const subscription = keyEventEmitter.addListener('onKeyEvent', (event: KeyEvent) => {
+    const subscription = keyEventEmitter.addListener('onKeyEvent', (...args: readonly Object[]) => {
+      const event = args[0] as KeyEvent
+
       // Обрабатываем только ACTION_DOWN
       if (event.action !== 0) {
         return

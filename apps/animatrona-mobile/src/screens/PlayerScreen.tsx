@@ -759,7 +759,7 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
                 videoHeight={videoHeight}
                 fontDir={downloadedFontDirPath}
                 fontScale={subtitleFontScale}
-                style={StyleSheet.flatten(StyleSheet.absoluteFill)}
+                style={StyleSheet.absoluteFill}
                 pointerEvents="none"
               />
             )}
@@ -770,7 +770,7 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
                 srtContent={srtContent}
                 currentTimeMs={Math.round(currentTime * 1000)}
                 fontSize={18 * subtitleFontScale}
-                style={StyleSheet.flatten(StyleSheet.absoluteFill)}
+                style={StyleSheet.absoluteFill}
                 pointerEvents="none"
               />
             )}

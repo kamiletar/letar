@@ -41,7 +41,9 @@ export function SeekBar({ currentTime, duration, onSeek }: SeekBarProps) {
   const thumbScale = useSharedValue(1)
   // После seek сохраняем целевую позицию, чтобы не прыгать назад пока плеер не обновит currentTime
   const seekTargetRatio = useSharedValue(-1) // -1 = не активен
-  const barRef = useRef<View>(null)
+  // Узкий интерфейс вместо ComponentRef<typeof Animated.View> — тип рефа Animated.View
+  // расходится между версиями react-native/reanimated, а нужен только measureInWindow
+  const barRef = useRef<{ measureInWindow: (callback: (x: number, y: number) => void) => void }>(null)
   const barXRef = useRef(0)
 
   const seekTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -145,7 +147,7 @@ export function SeekBar({ currentTime, duration, onSeek }: SeekBarProps) {
       <Text style={styles.timeText}>{formatTime(currentTime)}</Text>
       <GestureDetector gesture={pan}>
         <Animated.View
-          ref={barRef}
+          ref={barRef as never}
           style={styles.hitArea}
           onLayout={(e) => {
             barWidth.value = e.nativeEvent.layout.width
