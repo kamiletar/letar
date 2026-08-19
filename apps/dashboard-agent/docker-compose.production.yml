@@ -62,8 +62,14 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       # Git репозиторий
       - ${WORKSPACE_PATH:-/home/deploy/letar}:/home/deploy/letar
-      # SSH ключи для git remote операций
-      - ~/.ssh:/root/.ssh:ro
+      # SSH ключи для git remote операций.
+      # ⚠️ Явный абсолютный путь, НЕ `~/.ssh` — деплой self-deploy идёт через nsenter в хост
+      # (deploy-affected.sh:30 сам это отмечает: "HOME may not be set"), и без HOME docker
+      # compose не раскрывает тильду, а трактует её как буквальный сегмент пути. Итог —
+      # docker compose создаёт каталог `apps/dashboard-agent/~/.ssh/` вместо примонтирования
+      # реального `/home/deploy/.ssh`. Найдено аудитом бэкапов 2026-08-19, WORKSPACE_PATH
+      # выше подтверждает, что домашний каталог deploy-пользователя — `/home/deploy`.
+      - /home/deploy/.ssh:/root/.ssh:ro
       # Файл аккаунтов lego для acme-dns — лежит ВНЕ workspace, поэтому отдельной строкой.
       # Нужен бэкапу acme-dns (lib/acme-dns-backup.ts, PLAN-INFRA.md §48): восстановить этот
       # файл нельзя, а без него встанет продление всех сертификатов зоны.
