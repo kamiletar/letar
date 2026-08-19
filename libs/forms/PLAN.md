@@ -781,6 +781,27 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
 - **Статус:** делегировано `forms-dev` 2026-08-19 (тред `forms-bug-field-date-runtime-string`),
   `domwellbes-relay` уведомлён — ждём реализацию.
 
+### [2026-08-19] Баг: пост-сабмит reset(dataToSubmit) перетирает поле stale initialValue (от domwellbes)
+
+- **Запросил:** domwellbes-relay
+- **Приоритет:** normal
+- **Описание:** `FormSimple`/`FormWithApi` после успешного `onSubmit` вызывает
+  `formApi.reset(dataToSubmit)` (`libs/forms/src/lib/declarative/form-root/form-simple.tsx:148`,
+  `form-with-api.tsx:160`), что снимает `state.isTouched`. Guard в `FormApi.update()`
+  (`@tanstack/form-core`) пропускает перезапись `state.values` новым `defaultValues` только при
+  `!isTouched` — сразу после `reset()` он снят. Если следующий ре-рендер родителя пересчитывает
+  проп `initialValue` как статический дефолт (не как то, что реально было отправлено), форма
+  перетирает поле обратно к дефолту. Бьёт по любому полю, не только по конкретному типу. Разбор —
+  [letar-forms-post-submit-reset-stale-initialvalue.md](/.claude/docs/letar-forms-post-submit-reset-stale-initialvalue.md).
+  Найдено на `warehouseId` в `apps/domwellbes/.../create-delivery-form.tsx` (некритичный
+  косметический баг, `PLAN_LOGISTICS.md` §6 L4.5).
+- **Предлагаемый фикс:** после `reset(dataToSubmit)` игнорировать одно следующее расхождение
+  входящего `initialValue`, пока форма не была повторно touched, либо не трогать
+  `options.defaultValues` при сбросе dirty-состояния, либо явно задокументировать контракт
+  «`initialValue` должен отражать реально отправленные данные» в `libs/forms/README.md`.
+- **Статус:** делегировано `forms-dev` 2026-08-19 (тред message id 358, topic
+  `form-feature-request`), `domwellbes-relay` уведомлён — ждём реализацию.
+
 ### [2026-08-18] Баг: TableEditor теряет введённое значение при Tab/Enter/Escape/стрелках (от aboi)
 
 - **Запросил:** aboi-dev
