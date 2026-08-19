@@ -215,6 +215,27 @@ Resilio Sync синхронизирует uploads и бэкапы на лока�
 Всё описанное ниже относится к s2; упоминания s1 в таблице оставлены как история, актуальными
 их не считать.
 
+⚠️ **`pinner2` (третий пир, отдельная машина) удалён.** Раздел раньше описывал репликацию в три
+точки — сервер, Windows, `pinner2`. Сейчас offsite-копия ровно одна: `C:\BackupSync\letar\s2` на
+Windows владельца (папка переименована из `lena` в `letar` — таблица ниже это отражает). Второй
+offsite-получатель не заведён — трек на восстановление см.
+[PLAN-INFRA.md §90](/PLAN-INFRA.md).
+`s3` не подходит на замену «как есть»: там `resilio-sync` не установлен вовсе, а «пиннер», который
+там есть, — это `infra/animatrona-pinner3` (IPFS/Kubo для контента Animatrona), не Resilio и не
+имеет отношения к бэкапам этого раздела. Спутать легко из-за совпадения слова «пиннер» в двух
+разных системах.
+
+⚠️ **Известный баг, найденный и починенный 2026-08-19:** изменение `.sync/IgnoreList` на
+уже проиндексированной шаре **не** ретроактивно применяется — Resilio раздаёт пирам файлы,
+попавшие в индекс до правки списка, независимо от того, что там написано сейчас. `.git` (836 МБ)
+и `.nx` годами утекали в оффсайт-копию, несмотря на то что оба давно значились в `IgnoreList`.
+Починка — не редактирование конфига, а сброс локального состояния шары на сервере: остановить
+`resilio-sync`, удалить `/var/lib/resilio-sync/<hash>.*` (hash = папка в логе вида `FC[XXXX:...]`,
+сопоставляется с полным hash через `systemctl stop` → `shared_folders: []` → рестарт → смотреть,
+какой `FC[...]` продолжает получать fs-события) и перезапустить с тем же секретом в конфиге —
+это форсирует полный re-index против актуального `IgnoreList`. Секрет менять не нужно, пиры
+переподключаются сами.
+
 **Порты, которые он занимает на хосте** (важно для firewall — это не Docker, `DOCKER-USER` его
 не касается):
 
@@ -236,12 +257,14 @@ Resilio Sync синхронизирует uploads и бэкапы на лока�
 
 ### Синхронизируемые папки
 
-| Сервер | Папка на сервере     | Папка на Windows        | Папка на pinner2        | Ключ (RO)                                |
-| ------ | -------------------- | ----------------------- | ----------------------- | ---------------------------------------- |
-| s1     | `/home/deploy/letar` | `C:\BackupSync\lena\s1` | `/home/backups/lena/s1` | см. `.claude/OPS_JOURNAL.local.md §14.4` |
-| s2     | `/home/deploy/letar` | `C:\BackupSync\lena\s2` | `/home/backups/lena/s2` | см. `.claude/OPS_JOURNAL.local.md §14.4` |
+| Сервер | Папка на сервере     | Папка на Windows         | Ключ (RO)                                |
+| ------ | -------------------- | ------------------------ | ---------------------------------------- |
+| s1     | `/home/deploy/letar` | `C:\BackupSync\letar\s1` | см. `.claude/OPS_JOURNAL.local.md §14.4` |
+| s2     | `/home/deploy/letar` | `C:\BackupSync\letar\s2` | см. `.claude/OPS_JOURNAL.local.md §14.4` |
 
-> R/W ключи хранятся в `/etc/resilio-sync/config.json` на каждом сервере.
+> R/W ключи хранятся в `/etc/resilio-sync/config.json` на каждом сервере. Столбец «Папка на
+> pinner2» убран вместе с самим `pinner2` (см. предупреждение выше) — сейчас у каждой шары ровно
+> один RO-получатель, Windows.
 
 ### Исключения из синхронизации (`.sync/IgnoreList`)
 
@@ -326,7 +349,7 @@ EOF
 1. Установить [Resilio Sync для Windows](https://www.resilio.com/sync/download/)
 2. **Add folder** → **Enter a key or link**
 3. Ввести Read-only ключ: см. `.claude/OPS_JOURNAL.local.md §14.4`
-4. Выбрать папку: `C:\BackupSync\lena\s1`
+4. Выбрать папку: `C:\BackupSync\letar\s1` (или `\s2` — под нужный сервер)
 5. Тип папки: **Read only** (автоматически — RO-ключ)
 
 ### Управление сервисом
@@ -418,8 +441,8 @@ ssh root@mail.letar.best "tail -20 /var/log/maddy-backup.log"
 ### Цепочка хранения
 
 ```
-mail.letar.best          s2.letar.best                    Windows / pinner2
-/root/backups/maddy/ ──rsync──▶ /home/deploy/letar/backups/maddy/ ──Resilio──▶ C:\BackupSync\lena\s2\backups\maddy\
+mail.letar.best          s2.letar.best                    Windows
+/root/backups/maddy/ ──rsync──▶ /home/deploy/letar/backups/maddy/ ──Resilio──▶ C:\BackupSync\letar\s2\backups\maddy\
 ```
 
 SSH-ключ для rsync: `root@mail` → `deploy@s2` (`/root/.ssh/id_ed25519`, добавлен в `~deploy/.ssh/authorized_keys` на s2).
