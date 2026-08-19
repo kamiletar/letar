@@ -54,6 +54,10 @@ approval, kebab-case в `to`, обнулённая база
 boolean с явным «наследовать» через строковый энум + NativeSelect ·
 [letar-forms-field-date-runtime-string](/.claude/docs/letar-forms-field-date-runtime-string.md) ⚠️
 `Field.Date` отдаёт string в onSubmit даже при `z.coerce.date()` — typecheck не ловит ·
+[letar-forms-post-submit-reset-stale-initialvalue](/.claude/docs/letar-forms-post-submit-reset-stale-initialvalue.md)
+⚠️ пост-сабмит `reset(dataToSubmit)` снимает `isTouched` — следующий рендер со статическим
+`initialValue` (не «что реально отправлено») перетирает поле, бьёт по любому полю, не только
+select ·
 [ui-components](/.claude/docs/ui-components.md) · [images](/.claude/docs/images.md) ·
 [font-cmap-coverage-verification](/.claude/docs/font-cmap-coverage-verification.md) описание
 шрифта на сайте лжёт — покрытие символов проверять разбором `cmap` файла ·

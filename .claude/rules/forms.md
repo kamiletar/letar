@@ -56,6 +56,13 @@ export const MyAppForm = createForm({
 
 ### Использование
 
+⚠️ **`initialValue` должен отражать актуально отправленные данные, не статический дефолт.**
+После успешного `onSubmit` форма делает `reset(dataToSubmit)`, снимая `isTouched` — следующий
+ре-рендер родителя с `initialValue`, не совпадающим по значению с тем, что реально было
+отправлено (например «первый элемент списка» вместо выбора пользователя), перетирает поле
+обратно. Бьёт по любому полю, не только select. Разбор —
+[letar-forms-post-submit-reset-stale-initialvalue](/.claude/docs/letar-forms-post-submit-reset-stale-initialvalue.md).
+
 ```tsx
 import { MyAppForm } from '@/my-app-form'
 <MyAppForm initialValue={defaults} onSubmit={handleSubmit}>
