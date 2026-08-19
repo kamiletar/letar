@@ -5,6 +5,9 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "generators": "./generators.json",
+  "dependencies": {
+    "sharp": "^0.35.3"
+  },
   "exports": {
     ".": {
       "types": "./src/index.ts",

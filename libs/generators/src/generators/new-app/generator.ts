@@ -1,8 +1,19 @@
 import { formatFiles, generateFiles, joinPathFragments, logger, type Tree } from '@nx/devkit'
+import { buildFaviconIco, iconTsxSource } from '../../utils/favicon'
 import { toCamelCase, toDisplayName } from '../../utils/naming'
 import { resolveNextFreePort } from '../../utils/ports'
 import { assertTargetIsFree, templatesDirFor } from '../../utils/tree'
 import type { NewAppGeneratorSchema } from './schema'
+
+/**
+ * Нейтральная монограмма по умолчанию — первая буква имени на тёмном сером фоне.
+ *
+ * У свежесгенерированного приложения ещё нет фирменной палитры (тема появляется позже, в теме
+ * приложения), поэтому фавикон намеренно нейтральный — как для приложений без бренда,
+ * см. `.claude/docs/*` про фавиконки (задача 2026-08-19). Заменить на фирменные цвета можно
+ * в любой момент, перегенерировав `favicon.ico`/`icon.tsx` вручную.
+ */
+const DEFAULT_FAVICON = { background: '#2D3748', foreground: '#FFFFFF' }
 
 const templatesDir = templatesDirFor(import.meta.url)
 
@@ -46,6 +57,10 @@ export default async function newAppGenerator(tree: Tree, options: NewAppGenerat
   if (withDb) {
     generateFiles(tree, dbTemplatesDir, appDir, { name, displayName })
   }
+
+  const faviconOptions = { ...DEFAULT_FAVICON, letter: name.charAt(0) }
+  tree.write(joinPathFragments(appDir, 'src/app/favicon.ico'), await buildFaviconIco(faviconOptions))
+  tree.write(joinPathFragments(appDir, 'src/app/icon.tsx'), iconTsxSource(faviconOptions))
 
   await formatFiles(tree)
 
