@@ -213,6 +213,41 @@ export async function addHouseImageAction(houseId: string, url: string) {
 Образец — `apps/domwellbes` (`house-image.action.ts`, `material-image.action.ts`,
 `portfolio-image.action.ts`).
 
+### Tree
+
+| Компонент      | Описание                                                                     |
+| -------------- | ---------------------------------------------------------------------------- |
+| `SortableTree` | Древовидный CRUD-список с drag&drop-сортировкой и перевложением (`@dnd-kit`) |
+
+Для дерева с `parentId`/`order` (категории каталога, дерево работ) — не для плоских списков, для
+них `GenericAdminTable`. Перетаскивание меняет позицию узла и, если он оказался среди детей
+другого родителя, переносит его туда — но всегда СИБЛИНГОМ соседнего узла, никогда не «внутрь»
+него (горизонтальная проекция глубины намеренно не реализована, см.
+`apps/domwellbes/PLAN_SHOP_CATALOG.md`, волна C). Сделать узел явно ребёнком конкретной
+категории — через встроенный список «Переместить в» в каждой строке; та же альтернатива (плюс
+кнопки «▲/▼») работает без мыши.
+
+```tsx
+import { SortableTree } from '@letar/admin-ui'
+
+<SortableTree
+  items={categories} // { id, parentId, order, ...свои поля }
+  getOptionLabel={(c) => c.name}
+  renderLabel={(c) => <Text>{c.name}</Text>}
+  renderMeta={(c) => <Badge>{c.isPublished ? 'Опубликована' : 'Черновик'}</Badge>}
+  renderActions={(c) => <Link href={`/admin/categories/${c.id}/`}>Редактировать</Link>}
+  onMove={(nodeId, newParentId, orderedSiblingIds) => moveCategoryAction(nodeId, newParentId, orderedSiblingIds)}
+  maxDepth={3}
+/>
+```
+
+`onMove` — единственная точка мутации: получает id перенесённого узла, id нового родителя и
+полный порядок детей нового родителя (включая сам узел). Инварианты дерева (запрет цикла,
+ограничение глубины с учётом высоты переносимого поддерева) — общая `validateTreeMove` из этого
+же пакета, framework-free (`buildFlattenedTree`, `getDescendantIds`, `getSubtreeHeight`,
+`computeMoveResult` — все экспортированы отдельно для переиспользования на сервере, где
+`onMove` обязан перепроверить те же инварианты, а не доверять клиенту).
+
 ### Form Fields
 
 | Компонент   | Описание                                |

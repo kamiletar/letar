@@ -46,5 +46,24 @@ export { useInlineCrudList, type UseInlineCrudListOptions, useSelection } from '
 // Jobs (крон-задачи, PLAN-INFRA §75)
 export { JobsTable, type JobsTableProps, type JobStatusItem } from './jobs'
 
+// Tree components (древовидные CRUD-списки с drag&drop-перевложением)
+export {
+  buildFlattenedTree,
+  computeMoveResult,
+  type FlattenedTreeNode,
+  getChildDepth,
+  getDepth,
+  getDescendantIds,
+  getSubtreeHeight,
+  type OrderedTreeItem,
+  SortableTree,
+  type SortableTreeMoveResult,
+  type SortableTreeProps,
+  type TreeItemLike,
+  type TreeMoveErrorCode,
+  type TreeMoveResult,
+  validateTreeMove,
+} from './tree'
+
 // Utils
 export { slugify } from './utils'
