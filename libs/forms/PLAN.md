@@ -749,6 +749,21 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
 
 ## Backlog (запросы от агентов)
 
+### [2026-08-19] UX: NumberInput не очищал ведущий 0 при фокусе — исправлено
+
+- **Запросил:** владелец монорепо (Kami), обнаружено вручную в форме тарифа перевозчика
+  domwellbes (`create-carrier-tariff-form.tsx`, поле «Минимальный заказ»).
+- **Приоритет:** medium
+- **Описание:** `FieldNumber` и `FieldNumberInput` (`libs/forms/src/lib/declarative/form-fields/number/field-number.tsx`,
+  `field-number-input.tsx`) рендерят пустое числовое поле как `"0"`. При попытке ввести новое
+  значение без ручного выделения (Ctrl+A/triple-click) получалась конкатенация вроде `"01500"` —
+  стандартное, но неудобное поведение нативного `<input type=number>`. Готового пропа в zag.js
+  NumberInput (Chakra UI v3) для авто-очистки/select-on-focus нет — проверено через `get_component_props`.
+- **Фикс:** `onFocus={(e) => e.currentTarget.select()}` на `NumberInput.Input` в обоих компонентах
+  (select-on-focus — минимально спорный паттерн, не ломает `clampValueOnBlur`/`spinOnPress`).
+  Тесты на новое поведение добавлены в `field-number.spec.tsx` и `field-number-input.spec.tsx`.
+- **Статус:** ✅ исправлено напрямую (тривиальный локальный фикс, без делегации).
+
 ### [2026-08-19] Баг: Field.Date отдаёт string в onSubmit даже при z.coerce.date() (от domwellbes)
 
 - **Запросил:** domwellbes-relay
@@ -763,17 +778,15 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
 - **Предлагаемый фикс:** либо `FieldDate` приводит значение к `Date` при коммите, когда схема
   поля — coerce-дата (тип и рантайм синхронизированы), либо документация/типизация компонента
   явно фиксируют, что значение всегда `string`.
-- **Статус:** отправлено `QuietRidge` через agent-mail (тред `form-feature-request`, сообщение
-  «[form-components] Field.Date отдаёт string в onSubmit вместо Date при z.coerce.date()»).
+- **Статус:** делегировано `forms-dev` 2026-08-19 (тред `forms-bug-field-date-runtime-string`),
+  `domwellbes-relay` уведомлён — ждём реализацию.
 
 ### [2026-08-18] Баг: TableEditor теряет введённое значение при Tab/Enter/Escape/стрелках (от aboi)
 
 - **Запросил:** aboi-dev
 - **Приоритет:** high
-- **Статус:** отправлено `QuietRidge` через agent-mail 2026-08-19 (тред `form-feature-request`,
-  сообщение «[form-components] TableEditor теряет введённое значение при
-  Tab/Enter/Escape/стрелках») — `QuietRidge` и `aboi-dev` восстановлены из `retired` через
-  `unretire_agent` своими же токенами, письмо доставлено
+- **Статус:** делегировано `forms-dev` 2026-08-19 (тред `forms-bug-tableeditor-keyboard-commit`),
+  `aboi-dev` уведомлён — ждём реализацию.
 
 **Что нашёл:** `Form.Field.TableEditor` коммитит значение редактируемой ячейки только через
 нативный DOM `blur` (`libs/forms/src/lib/declarative/form-fields/table/table-cell.tsx`,
