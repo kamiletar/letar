@@ -1,5 +1,36 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-08-19 — Дедуп коэрсии значения ячейки таблицы + аудит DataGrid (v2.6.1)
+
+Аудит по следам фикса `TableEditor` из v2.6.0: проверить, воспроизводится ли тот же баг
+(размонтирование `<Input>` без нативного `blur` при клавиатурной навигации теряет введённое
+значение) в `field-data-grid.tsx` (`EditableCell`), и оценить дедуп общей коэрсии значения.
+
+**Вывод по багу:** сейчас не воспроизводится. `DataGrid` не имеет внешней клавиатурной навигации
+между ячейками — аналога `use-table-navigation.ts` у него нет, `editingCell` меняется только
+изнутри самого `EditableCell` (через `onSave`/`onCancel`), поэтому коммит всегда успевает
+отработать (нативный `blur` или явный `Enter`) до того, как компонент размонтируют. Риск —
+отложенный: если позже добавят клавиатурную навигацию между ячейками (аналог `TableEditor`),
+нужно будет применить тот же паттерн `commitEditingCellRef` (`TableEditorContextValue`,
+`table-types.ts`), а не полагаться на `blur`. Не стал заводить этот ref в `DataGrid` заранее —
+сейчас его некому вызывать, это был бы мёртвый код.
+
+**Дедуп:** `column.fieldType === 'number' ? Number(localValue) || 0 : localValue` дублировался
+в трёх местах `table-cell.tsx` (`EditingCell`) и двух местах `field-data-grid.tsx`
+(`EditableCell`). Вынесен в общий хук
+`libs/forms/src/lib/declarative/form-fields/table/use-editable-cell-value.ts`
+(`useEditableCellValue`) — `localValue`-стейт + `coerce()` по `fieldType`, используется обоими
+компонентами. Не стал переиспользовать `coerceValue` из `@letar/forms-core/table` — та функция
+заточена под вставку из буфера обмена (полный `ResolvedColumn`, trim/запятые/enum-строки) и
+используется в 5 фреймворк-адаптерах (`forms`, `forms-shadcn`, `forms-angular`, `forms-vue`,
+`forms-vue-shadcn`) — менять её сигнатуру ради этой задачи было бы избыточно широким изменением.
+
+**Верификация:** `table-keyboard-commit.spec.tsx` и `field-data-grid.spec.tsx` изолированно —
+зелёные. Полный `nx test @letar/forms` — 1 неродственный флейк на `field-rich-text.spec.tsx`
+(Suspense/skeleton таймаут под нагрузкой полного прогона), не связан с изменением, подтверждено
+изолированным перезапуском. `typecheck:tsgo`/`lint` — чисто. Версия `@letar/forms` 2.6.0 → 2.6.1,
+публичный контракт не менялся. Коммит `efa10da7`.
+
 ## 2026-08-19 — Три бага из agent-mail backlog (v2.6.0)
 
 Обработаны все три непрочитанных `forms-task`-репорта из inbox `forms-dev` (2 от `QuietRidge` за

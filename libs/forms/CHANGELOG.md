@@ -4,6 +4,21 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.6.1] - 2026-08-19
+
+### Changed
+
+- **Дедуп коэрсии значения ячейки таблицы (`Number(localValue) || 0`).** Логика дублировалась в
+  трёх местах `table-cell.tsx` (`TableEditor`) и двух местах `field-data-grid.tsx` (`DataGrid`).
+  Вынесена в `useEditableCellValue` (`libs/forms/src/lib/declarative/form-fields/table/use-editable-cell-value.ts`)
+  — общий `localValue`-стейт + `coerce()` по `fieldType`, используется обоими компонентами.
+  Публичный контракт не менялся.
+- **Аудит `field-data-grid.tsx` (`EditableCell`) на баг из v2.6.0** (клавиатурная навигация теряла
+  значение при размонтировании инпута без `blur`, см. запись ниже про `TableEditor`) — сейчас не
+  воспроизводится: `DataGrid` не имеет внешней клавиатурной навигации между ячейками, коммит идёт
+  только изнутри инпута (`blur`/`Enter`). Если такая навигация появится — использовать тот же
+  паттерн `commitEditingCellRef` (`TableEditorContextValue`), что уже есть в `TableEditor`.
+
 ## [2.6.0] - 2026-08-19
 
 ### Fixed

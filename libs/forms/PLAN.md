@@ -4,6 +4,27 @@
 
 ---
 
+## ✅ [2026-08-19] Дедуп коэрсии значения ячейки таблицы `TableEditor`/`DataGrid` — закрыто
+
+Задача на аудит (не из backlog): проверить `field-data-grid.tsx` (`EditableCell`) на устойчивость
+к тому же классу бага, что чинили в `TableEditor` в v2.6.0 (клавиатурная навигация теряла значение
+из-за размонтирования `<Input>` без нативного `blur`), и оценить дедуп общей логики.
+
+- **Вывод по багу:** сейчас не воспроизводится — `DataGrid` не имеет внешней клавиатурной
+  навигации между ячейками (нет аналога `use-table-navigation.ts`), коммит идёт только изнутри
+  инпута. Если такую навигацию добавят — использовать `commitEditingCellRef`
+  (`TableEditorContextValue`), уже существующий паттерн из `table-cell.tsx`. Не заводил ref
+  заранее в `DataGrid` — сейчас его некому вызывать, был бы мёртвый код.
+- **Дедуп:** `Number(localValue) || 0` дублировался в трёх местах `table-cell.tsx` и двух местах
+  `field-data-grid.tsx`. Вынесен в `useEditableCellValue`
+  (`libs/forms/src/lib/declarative/form-fields/table/use-editable-cell-value.ts`).
+- Версия: `@letar/forms` 2.6.0 → 2.6.1. Публичный контракт не менялся.
+- Проверено: `nx test @letar/forms` (изолированно по затронутым спекам — зелёные; полный прогон
+  имеет 1 неродственный флейк на `field-rich-text.spec.tsx` под нагрузкой, не связан с этим
+  изменением), `typecheck:tsgo`, `lint` — зелёные.
+
+---
+
 ## ✅ [2026-08-17] Дублирующиеся версии `@tiptap/core` в forms-vue/forms-vue-shadcn — закрыто
 
 Побочная находка предыдущей сессии: `typecheck:tsgo forms-vue` падал на 17 ошибок в
