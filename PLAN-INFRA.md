@@ -10003,3 +10003,44 @@ SQLite чинит следствие, но не объясняет, почему
 `retired_at` с точностью до микросекунды — похоже на периодическую server-side чистку, не только
 на наши явные вызовы), и тогда `unretire_agent` на старте остаётся штатным шагом навсегда, а не
 только переходным периодом.
+
+## §94 — Agent Mail: root cause по исходникам сервера, DB-персистентность и нормализация имён координаторов ✅ ЗАКРЫТО (2026-08-20)
+
+Подтвердил гипотезу из §93 про server-side idle-reaper и закрыл два системных источника трения,
+читая исходники контейнера `mcp_agent_mail-agent-mail-1` (`/app/src/mcp_agent_mail/*.py`) вместо
+догадок по внешнему поведению.
+
+**1. `send_message(to:)` отвергает не любой kebab-case, а только суффикс-роль.** Сервер официально
+поддерживает kebab-case как «explicit identity» (`validate_explicit_agent_id` — имя с разделителем
+`-`/`_`/`.`, honoured первым делом в `register_agent`). Баг — только в `send_message`: отдельная
+эвристика `_looks_like_descriptive_name` отклоняет имена, **оканчивающиеся** на слово из списка
+(`coordinator`/`agent`/`manager`/`developer`/`worker`/...). `<app>-dev` никогда не попадал под
+этот список (`-dev` не в нём) — переименование координаторов в adjective+noun (`BlackCove`,
+`QuietRidge`, `GrayMill`) в §76/ранее было избыточной перестраховкой, реальная причина уже.
+
+**2. Причина сброса БД 10.08 (см. также [[project_agent_mail_db_loss_incident]] в памяти) —
+расхождение с апстримом, не баг сервера.** Официальный `docker-compose.yml`
+[Dicklesworthstone/mcp_agent_mail](https://github.com/Dicklesworthstone/mcp_agent_mail) держит БД
+в Postgres+volume; наш self-hosted деплой (`infra/agent-mail/setup.sh`) использовал дефолтный
+`DATABASE_URL=sqlite+aiosqlite:///./storage.sqlite3`, резолвящийся в писчий слой контейнера (не
+в примонтированный `/data`) — любой `docker rm` стирал всё.
+
+**Фикс:** консистентный снапшот БД (`sqlite3 ... VACUUM INTO '/data/storage.sqlite3'` изнутри
+контейнера), пересоздание контейнера с `DATABASE_URL=sqlite+aiosqlite:////data/storage.sqlite3`.
+Все 78 агентов/387 сообщений/429 резерваций подтверждены целыми в стартовом stats-баннере, все
+`registration_token` рабочие (БД не менялась, только путь файла). `docker rm`/пересоздание
+контейнера больше не стирает состояние.
+
+**Следствие — нормализация имён:** координаторы переименованы обратно в единую схему `<роль>-dev`
+прямым `UPDATE agents.name` в БД (история сообщений/контактов/токены не тронуты): `BlackCove` →
+`deploy-agent-dev`, `QuietRidge` → `forms-coordinator-dev`, `GrayMill` →
+`animatrona-coordinator-dev`, `root-weaver` → `repo-dev`, `domwellbes-relay` → `domwellbes-dev`
+(освободил имя от retired-дубля, переименованного в `domwellbes-dev-orphan-20260810`). Обновлены
+`.claude/rules/{agent-mail,deploy-coordination,app-workflow,env-files,form-delegation}.md` и 15
+файлов `.claude/commands/*` — исторические упоминания старых имён в PLAN_COMPLETED/CHANGELOG не
+трогали (летопись). Полный разбор с точными строками исходника —
+[agent-mail-server-quirks.md](/.claude/docs/agent-mail-server-quirks.md).
+
+**Побочная находка, не трогал:** живая, но ни разу не использованная identity `domwellbes-relay`
+(id 79, создана 2026-08-19 22:08) — не моя, не конфликтует по имени с `domwellbes-dev`, кандидат
+на `retire_agent` после уточнения у владельца сессии.
