@@ -17,6 +17,7 @@ import { ActivityIndicator, BackHandler, Pressable, StyleSheet, Text, View } fro
 
 import { getAudioCidUrl, getEpisodeVideoUrl, getSubtitleUrlFromCid, saveProgress } from '@/api/client'
 import { ResumeOverlay } from '@/components/tv/ResumeOverlay'
+import { TVErrorScreen } from '@/components/tv/TVErrorScreen'
 import { TVNextEpisodeOverlay } from '@/components/tv/TVNextEpisodeOverlay'
 import { TVPlayerControls } from '@/components/tv/TVPlayerControls'
 import { audioTracksToItems, subtitleTracksToItems, TVTrackSelector } from '@/components/tv/TVTrackSelector'
@@ -274,20 +275,7 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
 
   // Ошибка
   if (error || !episode) {
-    return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>{error || 'Эпизод не найден'}</Text>
-        <View style={styles.errorButtons}>
-          <Pressable
-            style={focusableStyle([styles.retryButton], styles.retryButtonFocused)}
-            onPress={() => navigation.goBack()}
-            hasTVPreferredFocus
-          >
-            <Text style={styles.retryButtonText}>Назад</Text>
-          </Pressable>
-        </View>
-      </View>
-    )
+    return <TVErrorScreen message={error || 'Эпизод не найден'} onSecondary={() => navigation.goBack()} />
   }
 
   // URLs
@@ -295,20 +283,7 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
   const audioUrl = selectedAudio?.audioCid ? getAudioCidUrl(selectedAudio.audioCid) : undefined
 
   if (!videoUrl) {
-    return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>Видео недоступно</Text>
-        <View style={styles.errorButtons}>
-          <Pressable
-            style={focusableStyle([styles.retryButton], styles.retryButtonFocused)}
-            onPress={() => navigation.goBack()}
-            hasTVPreferredFocus
-          >
-            <Text style={styles.retryButtonText}>Назад</Text>
-          </Pressable>
-        </View>
-      </View>
-    )
+    return <TVErrorScreen message="Видео недоступно" onSecondary={() => navigation.goBack()} />
   }
 
   // Определяем, показывать ли ASS субтитры
@@ -457,34 +432,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  errorText: {
-    fontSize: 18,
-    color: '#ef4444',
-  },
-  errorButtons: {
-    flexDirection: 'row',
-    gap: 16,
-    marginTop: 24,
-  },
-  retryButton: {
-    backgroundColor: '#7c3aed',
-    paddingHorizontal: 32,
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 4,
-    borderColor: 'transparent',
-  },
-  retryButtonFocused: {
-    borderColor: '#fff',
-    backgroundColor: '#8b5cf6',
-    transform: [{ scale: 1.08 }],
-    elevation: 8,
-  },
-  retryButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#fff',
   },
   player: {
     flex: 1,

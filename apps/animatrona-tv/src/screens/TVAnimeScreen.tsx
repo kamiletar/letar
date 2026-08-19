@@ -9,9 +9,9 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, Animated, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { getAnimeDetails, getPosterUrl } from '@/api/client'
+import { TVErrorScreen } from '@/components/tv/TVErrorScreen'
 import { useTVFocusAnimation } from '@/hooks/useTVFocusAnimation'
 import type { TVStackParamList } from '@/navigation/TVNavigator'
-import { focusableStyle } from '@/utils/tvStyles'
 import type { AnimeDetails, Episode } from '@letar/animatrona-shared'
 
 type Props = NativeStackScreenProps<TVStackParamList, 'Anime'>
@@ -67,24 +67,12 @@ export function TVAnimeScreen({ navigation, route }: Props): React.JSX.Element {
   // Ошибка или нет данных
   if (error || !anime) {
     return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>{error || 'Аниме не найдено'}</Text>
-        <View style={styles.errorButtons}>
-          <Pressable
-            style={focusableStyle([styles.retryButton], styles.retryButtonFocused)}
-            onPress={loadData}
-            hasTVPreferredFocus
-          >
-            <Text style={styles.retryButtonText}>Повторить</Text>
-          </Pressable>
-          <Pressable
-            style={focusableStyle([styles.retryButton, styles.retryButtonSecondary], styles.retryButtonFocused)}
-            onPress={() => navigation.goBack()}
-          >
-            <Text style={styles.retryButtonText}>Назад</Text>
-          </Pressable>
-        </View>
-      </View>
+      <TVErrorScreen
+        message={error || 'Аниме не найдено'}
+        backgroundColor="#0a0a0a"
+        onRetry={loadData}
+        onSecondary={() => navigation.goBack()}
+      />
     )
   }
 
@@ -229,38 +217,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  errorButtons: {
-    flexDirection: 'row',
-    gap: 16,
-    marginTop: 24,
-  },
-  retryButton: {
-    backgroundColor: '#7c3aed',
-    paddingHorizontal: 32,
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 4,
-    borderColor: 'transparent',
-  },
-  retryButtonSecondary: {
-    backgroundColor: '#333',
-  },
-  retryButtonFocused: {
-    borderColor: '#fff',
-    backgroundColor: '#8b5cf6',
-    transform: [{ scale: 1.08 }],
-    elevation: 8,
-  },
-  retryButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  errorText: {
-    fontSize: 18,
-    color: '#ef4444',
-  },
-
   // Информация
   infoSection: {
     width: 400,

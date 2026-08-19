@@ -2,6 +2,28 @@
 
 Детальное описание всех реализованных фич Animatrona TV.
 
+## Версия 0.5.3
+
+### Рефакторинг: TVErrorScreen — общий компонент экрана ошибки
+
+Паттерн «экран ошибки» (`View` с `centerContainer` + `Text` ошибки + одна-две кнопки через
+`focusableStyle`, обычно с `hasTVPreferredFocus`) почти дословно повторялся в 4 местах:
+`TVPlayerScreen.tsx` («Эпизод не найден» и «Видео недоступно» — идентичны, отличается только
+текст), `TVHomeScreen.tsx` (заголовок «Ошибка» + кнопки «Повторить»/«Отключиться») и
+`TVAnimeScreen.tsx` (кнопки «Повторить»/«Назад»). Стили `retryButton`/`retryButtonFocused`/
+`retryButtonText`/`errorButtons` были идентичны во всех 4 местах.
+
+- Добавлен `src/components/tv/TVErrorScreen.tsx` — по образцу `TVNextEpisodeOverlay.tsx`
+  (самодостаточный компонент со своими стилями). Пропсы: `message`, необязательный `title`
+  (показывает вторую, приглушённую цветом строку текста — только у `TVHomeScreen`),
+  `backgroundColor` (экраны используют разный фон: `#000` у плеера, `#0a0a0a` у остальных),
+  `onRetry`/`retryLabel` (кнопка с фокусом, если передан), `onSecondary`/`secondaryLabel`
+  (вторая кнопка — «Назад» либо «Отключиться»; забирает фокус, если `onRetry` не передан)
+- Заменены все 4 вхождения, из каждого экрана убраны теперь неиспользуемые стили
+  (`errorText`/`errorButtons`/`retryButton`/`retryButtonFocused`/`retryButtonText`,
+  у `TVHomeScreen` дополнительно `errorTitle` и неиспользуемый `centerContainer`)
+- `nx typecheck:tsgo` зелёный (lint-таргета у приложения нет)
+
 ## Версия 0.5.2
 
 ### Рефакторинг: декомпозиция TVPlayerScreen

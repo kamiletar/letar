@@ -215,4 +215,10 @@ React Native 0.87, затем корневой пин — `animatrona-tv` син
 helper `focusableStyle(base, focusedStyle, after?)` — `src/utils/tvStyles.ts`. `TVPressableState`
 теперь импортируется только внутри самого helper'а, а не в каждом экране/компоненте.
 
+### Рефакторинг экрана ошибки (2026-08-20)
+
+Дублировавшийся паттерн «экран ошибки» (4 места в `TVPlayerScreen`/`TVHomeScreen`/
+`TVAnimeScreen`) вынесен в `components/tv/TVErrorScreen.tsx`. Подробности — PLAN_COMPLETED.md
+версия 0.5.3.
+
 **Обновлено:** 2026-08-20

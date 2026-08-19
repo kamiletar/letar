@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.3] - 2026-08-20
+
+### Changed
+
+- Дублирующийся паттерн «экран ошибки» (центрированное сообщение + кнопка(и) повтора/назад)
+  из 4 мест (`TVPlayerScreen.tsx` ×2, `TVHomeScreen.tsx`, `TVAnimeScreen.tsx`) вынесен в
+  `components/tv/TVErrorScreen.tsx`
+
 ## [0.5.2] - 2026-08-20
 
 ### Changed

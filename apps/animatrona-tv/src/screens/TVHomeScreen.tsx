@@ -12,6 +12,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { getLastWatched, getLibrary, getPosterUrl } from '@/api/client'
+import { TVErrorScreen } from '@/components/tv/TVErrorScreen'
 import { TVHeroBanner } from '@/components/tv/TVHeroBanner'
 import { TVRow } from '@/components/tv/TVRow'
 import { SkeletonRow } from '@/components/tv/TVSkeleton'
@@ -110,25 +111,14 @@ export function TVHomeScreen({ navigation }: Props): React.JSX.Element {
   // Ошибка
   if (error) {
     return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorTitle}>Ошибка</Text>
-        <Text style={styles.errorText}>{error}</Text>
-        <View style={styles.errorButtons}>
-          <Pressable
-            style={focusableStyle([styles.retryButton], styles.retryButtonFocused)}
-            onPress={loadData}
-            hasTVPreferredFocus
-          >
-            <Text style={styles.retryButtonText}>Повторить</Text>
-          </Pressable>
-          <Pressable
-            style={focusableStyle([styles.retryButton, styles.retryButtonSecondary], styles.retryButtonFocused)}
-            onPress={handleDisconnect}
-          >
-            <Text style={styles.retryButtonText}>Отключиться</Text>
-          </Pressable>
-        </View>
-      </View>
+      <TVErrorScreen
+        title="Ошибка"
+        message={error}
+        backgroundColor="#0a0a0a"
+        onRetry={loadData}
+        onSecondary={handleDisconnect}
+        secondaryLabel="Отключиться"
+      />
     )
   }
 
@@ -223,12 +213,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0a0a0a',
   },
-  centerContainer: {
-    flex: 1,
-    backgroundColor: '#0a0a0a',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -271,43 +255,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-  },
-  errorTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#ef4444',
-    marginBottom: 8,
-  },
-  errorText: {
-    fontSize: 18,
-    color: '#888',
-  },
-  errorButtons: {
-    flexDirection: 'row',
-    gap: 16,
-    marginTop: 24,
-  },
-  retryButton: {
-    backgroundColor: '#7c3aed',
-    paddingHorizontal: 32,
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 4,
-    borderColor: 'transparent',
-  },
-  retryButtonSecondary: {
-    backgroundColor: '#333',
-  },
-  retryButtonFocused: {
-    borderColor: '#fff',
-    backgroundColor: '#8b5cf6',
-    transform: [{ scale: 1.08 }],
-    elevation: 8,
-  },
-  retryButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#fff',
   },
   bottomSpacer: {
     height: 48,
