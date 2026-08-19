@@ -6,7 +6,7 @@
  * - git reset --hard (потеря изменений)
  * - git reset HEAD (сброс staging)
  * - git push --force (перезапись истории)
- * - git checkout -- . (откат всех файлов)
+ * - git checkout/git restore с pathspec "." — любой ref, не только голая форма (откат всех файлов)
  * - git stash (скрытие чужих изменений)
  * - rm -rf / или rm -rf * (опасное удаление)
  * - bare ssh (Git Bash SSH плодит зомби ssh-agent.exe → No buffer space available)
@@ -79,11 +79,6 @@ process.stdin.on('end', () => {
       {
         pattern: /git\s+push\s+-f\b/i,
         message: 'git push -f заблокирован! Это перезапишет историю на remote.',
-      },
-      {
-        pattern: /git\s+checkout\s+--\s+\./i,
-        message:
-          'git checkout -- . заблокирован! Это откатит ВСЕ изменения в репозитории. Используй git checkout -- <file> для конкретного файла.',
       },
       {
         pattern: /git\s+stash(?!\s+pop|\s+apply|\s+list|\s+show)/i,
@@ -172,6 +167,48 @@ process.stdin.on('end', () => {
     // SSH команды через Windows SSH (.exe) на удалённых серверах — пропускаем проверку git
     // На серверах только деплой-ключ (read-only), нет других агентов
     const isRemoteSSH = /ssh\.exe\s+/.test(command)
+
+    // --- `git checkout`/`git restore` с pathspec `.` — перезапись рабочего дерева целиком ---
+    // Инцидент 2026-08-19 (.claude/docs/git-multi-agent-incidents.md): `git checkout <sha> -- .`
+    // стёр чужую незакоммиченную работу. Прежнее правило матчило только голую форму без ref
+    // (`git checkout -- .`) — форма с указанием любого ref (коммит/ветка/HEAD) под неё не
+    // попадала, хотя опасность та же: границу задаёт pathspec `.`, а не ref. Тот же класс риска
+    // у `git restore` — по умолчанию (без --staged) он тоже пишет в рабочее дерево.
+    // Не блокируем: `git checkout -- <file>`, `git checkout <ref> -- <file>`,
+    // `git restore <file>`, `git restore --staged .` (--staged без --worktree не трогает
+    // рабочее дерево, только индекс — тот же риск-класс, что у `git reset HEAD`, уже блокирован
+    // отдельным правилом выше).
+    if (!isRemoteSSH) {
+      for (const m of command.matchAll(/git\s+(?:checkout|restore)\b[^\n;&|]*/gi)) {
+        const invocation = m[0]
+        const isRestore = /^git\s+restore\b/i.test(invocation)
+        let pathspecPart
+        if (isRestore) {
+          const touchesWorktree = !/--staged\b/i.test(invocation) || /--worktree\b/i.test(invocation)
+          if (!touchesWorktree) { continue }
+          pathspecPart = invocation
+            .replace(/^git\s+restore\b/i, '')
+            .replace(/--source[=\s]+\S+/i, '')
+            .replace(/--worktree\b/i, '')
+            .replace(/--staged\b/i, '')
+            .trim()
+        } else {
+          const dashIdx = invocation.indexOf('--')
+          if (dashIdx === -1) { continue // `git checkout <branch>` без pathspec — просто переключение веток
+           }
+          pathspecPart = invocation.slice(dashIdx + 2).trim()
+        }
+        if (pathspecPart === '.') {
+          console.error(
+            `\n⛔ BLOCKED: \`${invocation.trim()}\` заблокирован! Pathspec "." — это весь каталог,\n`
+              + 'команда молча перезапишет рабочее дерево целиком, включая чужие незакоммиченные\n'
+              + 'файлы (инцидент 2026-08-19 — see .claude/docs/git-multi-agent-incidents.md).\n'
+              + 'Перечисли конкретные файлы: git checkout <ref> -- <file> / git restore <file>.\n',
+          )
+          process.exit(2)
+        }
+      }
+    }
 
     // Проверяем на заблокированные паттерны (только локальные команды)
     if (!isRemoteSSH) {
