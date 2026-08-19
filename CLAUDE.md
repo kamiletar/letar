@@ -163,6 +163,8 @@ alias матчится по префиксу ·
 pre-commit-хука не видел `.exe`-shim на Windows ·
 [dprint-eslint-curly-conflict](/.claude/docs/dprint-eslint-curly-conflict.md) `--fix` и `fmt`
 откатывают друг друга ·
+[dprint-typescript-nested-aschild-comment-instability](/.claude/docs/dprint-typescript-nested-aschild-comment-instability.md)
+⚠️ `Formatting not stable` — комментарий перед JSX на третьем уровне вложенных `Box asChild` ·
 [dprint-markdown-table-reformat](/.claude/docs/dprint-markdown-table-reformat.md) ⚠️ dprint
 пересчитывает ширину столбцов при каждом прогоне — `Edit` по соседней строке таблицы падает на
 «верном» тексте ·
