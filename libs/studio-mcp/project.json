@@ -67,10 +67,8 @@
       }
     },
     "test": {
-      "executor": "@nx/vitest:test",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "config": "libs/studio-mcp/vitest.config.ts"
+        "config": "vitest.config.ts"
       }
     },
     "oxlint": {
