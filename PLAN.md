@@ -3082,10 +3082,22 @@ exported from 'solid-js/web'` через цепочку `@tanstack/react-devtool
 `driving-school`/`mandala` (чистая компиляция, `GET / 200`), прод-сборка `driving-school`
 (exit 0, 103/103 страниц).
 
-- [ ] ⚠️ Открытый вопрос: `dsperevod`, `svoichuzhie`, `form-develop-app` — тоже потребители
-      `@letar/query-provider`, их dev использует Turbopack (вне риска), но прод-сборка
-      (`next build`, webpack-based) не проверялась. Нужно прогнать `nx build` на всех трёх и
-      применить тот же фикс, если он там тоже актуален.
+- [x] ✅ Открытый вопрос закрыт (2026-08-19): `dsperevod`, `svoichuzhie`, `form-develop-app` —
+      тоже потребители `@letar/query-provider`, но их прод-сборка (`nx build`) безопасна без
+      изменений. Причина не «повезло не воспроизвести», а структурная: у всех трёх `build`-таргет
+      — голый `next build` без флага `--webpack`, а Next.js 16 по умолчанию собирает прод-бандл
+      через Turbopack (подтверждено маркером `▲ Next.js 16.3.1 (Turbopack)` в логе каждой из трёх
+      сборок) — путь резолва через webpack-условие `node`, который и ломает `solid-js/web`, в этих
+      сборках не задействуется вообще. `--webpack` явно стоит только у 2 приложений из 5
+      затронутых потребителей (`driving-school`, `mandala`) — из-за отдельного бага с гидратацией
+      Emotion под Turbopack, см. `nextjs16-turbopack-default-emotion-hydration.md`. `svoichuzhie`
+      собралась зелёным (`nx build`, exit 0). `dsperevod` и `form-develop-app` упали на
+      несвязанных с этим багом ошибках (EACCES при обращении к БД на этапе сбора данных страниц у
+      dsperevod; runtime-ошибка `useFormContext` вне `formComponent` на демо-странице
+      `/controlled-state-demo` у form-develop-app) — в обоих случаях лог подтверждает, что клиентский
+      бандл скомпилирован Turbopack успешно (`✓ Compiled successfully`) до появления этих
+      несвязанных ошибок, то есть до участка кода, где вообще мог бы сработать баг с
+      `solid-js/web`.
 
 **Продолжение (2026-08-19):** ✅ шаблон генератора `nx g @letar/generators:new-app` —
 `libs/generators/src/generators/new-app/files/next.config.mjs.template` — не содержал
