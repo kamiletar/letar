@@ -150,7 +150,10 @@ scope — Invariant вместо обновления кеша ·
 15 приложений с темой пробел не закрыли ·
 [chakra-overflow-wrap-not-inherited](/.claude/docs/chakra-overflow-wrap-not-inherited.md) ⚠️
 `overflow-wrap`/аналогичное CSS-свойство на предке не наследуется потомком, для которого Chakra
-reset (`preflight`) уже задаёт своё явное значение — фикс только через `'& *'` на предке
+reset (`preflight`) уже задаёт своё явное значение — фикс только через `'& *'` на предке ·
+[chakra-heading-defaults-to-h2](/.claude/docs/chakra-heading-defaults-to-h2.md) ⚠️ `Heading` —
+`withContext("h2")`, без `asChild`+`<h1>` страница может не иметь ни одного настоящего `<h1>`;
+ни lint, ни typecheck, ни глаз на скриншоте это не покажет
 
 **Библиотеки и публикация:** [lib-entry-points](/.claude/docs/lib-entry-points.md) подпути
 `./server`/`./client`, границы, ESLint-ловушки ·
