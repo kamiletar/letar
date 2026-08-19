@@ -2,6 +2,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.1] - 2026-08-19
+
+### Fixed
+
+- **`nx lint form-docs` был красным (6 ошибок) из-за неверного пути в `ignores`.** Сгенерённые
+  Fumadocs-файлы (`.source/browser.ts`, `dynamic.ts`, `server.ts` — `@ts-nocheck`, пустые `{}`
+  типы) уже были исключены блоком `ignores` в `eslint.config.mjs`, но пути в нём (`apps/form-docs/.source/**`)
+  предполагали, что таргет `lint` переключает cwd на корень workspace. На деле таргет —
+  `nx:run-commands` с `cwd: "apps/form-docs"` (не плагин `@nx/eslint:lint`), поэтому пути в
+  `ignores` резолвятся относительно самого конфига — префикс `apps/form-docs/` не совпадал ни с
+  чем. Исправлено на `.source/**`/`.next/**` без префикса.
+
 ## [0.6.0] - 2026-08-14
 
 ### Fixed

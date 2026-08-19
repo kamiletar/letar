@@ -6,9 +6,9 @@ export default [
     // `.source/` — вывод Fumadocs (`fumadocs-mdx`). Файлы перезаписываются на каждом
     // `next dev`/`next build` и лежат в `.gitignore`, поэтому чинить в них `@ts-nocheck`
     // и `{}`-типы бессмысленно — правки исчезнут при следующей генерации.
-    // Пути от корня workspace: `@nx/eslint:lint` переключает cwd на workspace root
-    // перед запуском ESLint, поэтому `ignores`-паттерны резолвятся относительно него,
-    // а не относительно этого файла — короткий `.source/**` совпадения не даёт.
-    ignores: ['apps/form-docs/.source/**', 'apps/form-docs/.next/**', '**/out-tsc'],
+    // Таргет `lint` — `nx:run-commands` с `cwd: "apps/form-docs"` (не `@nx/eslint:lint`,
+    // который переключает cwd на workspace root), поэтому `ignores`-паттерны резолвятся
+    // относительно этого файла — префикс `apps/form-docs/` совпадения не даёт.
+    ignores: ['.source/**', '.next/**', '**/out-tsc'],
   },
 ]

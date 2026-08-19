@@ -1,5 +1,18 @@
 # Выполненные задачи — form-docs
 
+## Сессия 2026-08-19 — фикс `ignores` в `eslint.config.mjs` (неверный путь к `.source/`)
+
+`nx lint form-docs` был красным: 6 ошибок (`@ts-nocheck`, пустые `{}`-типы) в сгенерённых
+Fumadocs-файлах `.source/browser.ts`, `dynamic.ts`, `server.ts`. Блок `ignores` для них уже
+существовал, но пути в нём (`apps/form-docs/.source/**`) были неверны — комментарий ошибочно
+утверждал, что таргет `lint` переключает cwd на корень workspace (поведение `@nx/eslint:lint`).
+Реальный таргет — `nx:run-commands` с `cwd: "apps/form-docs"` (см. `project.json`), поэтому пути
+в `ignores` резолвятся относительно самого файла конфига — короткие `.source/**`/`.next/**` без
+префикса. Обнаружено 2026-08-19 попутно в другой сессии (фикс `eslint-plugin-react-hooks`).
+
+`nx lint form-docs` → `nx run-many -t format --projects=form-docs` → `nx typecheck:tsgo
+form-docs` — все зелёные.
+
 ## Сессия 2026-08-13 (2) — P7 Этап 1: механизм переключателей Framework × Skin
 
 Полный разбор решений и обоснований — `PLAN.md` раздел P7. Кратко:
