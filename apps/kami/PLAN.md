@@ -513,60 +513,96 @@
 
 ## Обновления
 
-| Дата       | Изменение                                                                                         |
-| ---------- | ------------------------------------------------------------------------------------------------- |
-| 2025-12-08 | Создан план, настроен i18n                                                                        |
-| 2025-12-08 | Chakra UI v3, Header/Footer, Matrix-эффект, Hero, E2E тесты                                       |
-| 2025-12-08 | Страница "О себе" с компонентами StatCard и FeatureCard                                           |
-| 2025-12-08 | База данных: Prisma + ZenStack, модели, сиды, страница навыков                                    |
-| 2025-12-08 | Страница проектов, SEO (meta, OG, sitemap, robots)                                                |
-| 2025-12-08 | Блог: Keystatic + Markdoc, список статей, страница статьи                                         |
-| 2025-12-23 | Добавлена Фаза 5: Консалтинг                                                                      |
-| 2025-12-23 | Страница CV/Резюме, страница "Который час?" (UNIX эпоха)                                          |
-| 2025-12-23 | RSS-фид для блога, JSON-LD разметка, Auth.js v5 с GitHub OAuth                                    |
-| 2025-12-23 | Полная авторизация с БД: OAuth (GitHub, Google, Yandex), email/password                           |
-| 2025-12-23 | Telegram OAuth, email верификация (Nodemailer), страница verify-email                             |
-| 2025-12-27 | Docker-конфигурация: Dockerfile.production, docker-compose.production.yml                         |
-| 2025-12-27 | Magic Link: вход по ссылке без пароля                                                             |
-| 2025-12-27 | Форма "Позвать на работу": 7-шаговый wizard с Form.Steps, email-уведомления                       |
-| 2025-12-27 | PWA: Serwist, manifest.ts, Service Worker, офлайн-страница, Web Share Target                      |
-| 2025-12-27 | UX: Framer Motion анимации (Hero, StatCard, FeatureCard, motion компоненты)                       |
-| 2025-12-27 | Accessibility: SkipLink, ARIA landmarks (banner, navigation, contentinfo)                         |
-| 2025-12-27 | Performance: dynamic import Hero, React.memo карточки, Prisma select                              |
-| 2025-12-27 | Consulting: страница услуг, модели ConsultingService/Request, форма заявки                        |
-| 2025-12-27 | Consulting: email-уведомления о новых заявках (HTML-шаблон, MailHog для dev)                      |
-| 2025-12-27 | Google Calendar API: интеграция SlotPicker с реальными слотами                                    |
-| 2025-12-27 | Yandex Metrica: компонент аналитики с NEXT_PUBLIC_YM_COUNTER_ID                                   |
-| 2025-12-27 | Админ-панель: dashboard, requests, testimonials, cases, slots, learning                           |
-| 2025-12-27 | Комментарии в блоге: BlogComment модель с вложенными ответами                                     |
-| 2025-12-27 | Списки изученного: LearningItem модель, публичная /learning страница                              |
-| 2025-12-27 | AI-чатбот: Claude + Vercel AI SDK v6, плавающий виджет ChatWidget                                 |
-| 2025-12-31 | Добавлена Фаза 7: Кросс-постинг в соцсети (Telegram, VK, X, FB, IG и др.)                         |
-| 2025-12-31 | Запланирована миграция на Better Auth (Auth.js в maintenance mode)                                |
-| 2026-01-01 | ✅ Миграция на Better Auth: схема БД, auth.ts, actions, client, удалены старые verify pages       |
-| 2026-01-01 | ✅ Замена Serwist на ручной SW: sw.template.js, update-sw-version.mjs (совместимость с Turbopack) |
-| 2026-01-03 | ✅ Рефакторинг: KamiForm (createForm + extraSelects), унификация форм на KamiForm                 |
-| 2026-01-03 | ✅ Рефакторинг: консолидация labels (kami-form/labels.ts), устранение дублирования в admin        |
-| 2026-01-03 | ✅ Рефакторинг: UI токены (bg.panel, bg.subtle, border.subtle, fg.muted вместо hardcoded RGB)     |
-| 2026-01-03 | ✅ Аудит i18n: toaster, CONTACT, RSS Feed, форматирование дат — всё уже корректно                 |
-| 2026-01-03 | ✅ Better Auth organizations: команды, участники, приглашения                                     |
-| 2026-01-03 | ✅ Team Surveys: опросы для оценки кандидата командой работодателя                                |
-| 2026-01-03 | ✅ Rate limiting: database storage, strict rules, IP headers, client error handling               |
-| 2026-01-03 | ✅ Forms audit: zenstack-form-plugin, i18n labels, SelectSurveyQuestionType, generated labels     |
-| 2026-02-01 | ✅ Admin Learning CRUD: /admin/learning/new, /admin/learning/[id] (создание/редактирование)       |
-| 2026-02-01 | ✅ Admin Skills CRUD: /admin/skills (навыки), /admin/skills/categories (категории навыков)        |
-| 2026-02-01 | ✅ Skill startYear: поле года начала практики, автоматический расчёт опыта                        |
-| 2026-03-20 | ✅ Quiz v2: 3 новые шкалы (BAR/PAG/DPR), 290 вопросов, 13 осей на радаре                          |
-| 2026-03-20 | ✅ Quiz: формула TZ v2, BAR-фильтр, кризисный блок, дисклеймер                                    |
-| 2026-03-20 | ✅ Quiz: светлые стороны, взаимодействия типов (45 пар), модификаторы                             |
-| 2026-03-20 | ✅ Quiz: пропуск вопросов (QuizSkippedQuestion), исключение повторов                              |
-| 2026-03-20 | ✅ Quiz: все переводы RU→EN (1649 текстов + 1450 вопросов), деплой на прод                        |
-| 2026-03-21 | ✅ Quiz: стратифицированное перемешивание, убрано досрочное завершение порции                     |
-| 2026-03-21 | ✅ Фаза 7 Этап 1: кросс-постинг Telegram + VK (модели, сервисы, actions, admin UI, PublishButton) |
-| 2026-03-21 | ✅ Фаза 7: Facebook кросс-постинг, прокси tg-proxy/fb-proxy на mail.letar.best с SSL              |
-| 2026-06-16 | Запланирована Фаза 10: раздел "Ссылки" — сохранение через Android Share Target, категории, метки  |
-| 2026-06-16 | Фаза 10 расширена: загрузка остальных категорий файлов через Share, раздел "Видео" — детали позже |
-| 2026-08-12 | ✅ GlitchTip (§70) + staging окружение впервые заведено (§18.7 M2), Keystatic NODE_ENV-баг        |
+| Дата       | Изменение                                                                                            |
+| ---------- | ---------------------------------------------------------------------------------------------------- |
+| 2025-12-08 | Создан план, настроен i18n                                                                           |
+| 2025-12-08 | Chakra UI v3, Header/Footer, Matrix-эффект, Hero, E2E тесты                                          |
+| 2025-12-08 | Страница "О себе" с компонентами StatCard и FeatureCard                                              |
+| 2025-12-08 | База данных: Prisma + ZenStack, модели, сиды, страница навыков                                       |
+| 2025-12-08 | Страница проектов, SEO (meta, OG, sitemap, robots)                                                   |
+| 2025-12-08 | Блог: Keystatic + Markdoc, список статей, страница статьи                                            |
+| 2025-12-23 | Добавлена Фаза 5: Консалтинг                                                                         |
+| 2025-12-23 | Страница CV/Резюме, страница "Который час?" (UNIX эпоха)                                             |
+| 2025-12-23 | RSS-фид для блога, JSON-LD разметка, Auth.js v5 с GitHub OAuth                                       |
+| 2025-12-23 | Полная авторизация с БД: OAuth (GitHub, Google, Yandex), email/password                              |
+| 2025-12-23 | Telegram OAuth, email верификация (Nodemailer), страница verify-email                                |
+| 2025-12-27 | Docker-конфигурация: Dockerfile.production, docker-compose.production.yml                            |
+| 2025-12-27 | Magic Link: вход по ссылке без пароля                                                                |
+| 2025-12-27 | Форма "Позвать на работу": 7-шаговый wizard с Form.Steps, email-уведомления                          |
+| 2025-12-27 | PWA: Serwist, manifest.ts, Service Worker, офлайн-страница, Web Share Target                         |
+| 2025-12-27 | UX: Framer Motion анимации (Hero, StatCard, FeatureCard, motion компоненты)                          |
+| 2025-12-27 | Accessibility: SkipLink, ARIA landmarks (banner, navigation, contentinfo)                            |
+| 2025-12-27 | Performance: dynamic import Hero, React.memo карточки, Prisma select                                 |
+| 2025-12-27 | Consulting: страница услуг, модели ConsultingService/Request, форма заявки                           |
+| 2025-12-27 | Consulting: email-уведомления о новых заявках (HTML-шаблон, MailHog для dev)                         |
+| 2025-12-27 | Google Calendar API: интеграция SlotPicker с реальными слотами                                       |
+| 2025-12-27 | Yandex Metrica: компонент аналитики с NEXT_PUBLIC_YM_COUNTER_ID                                      |
+| 2025-12-27 | Админ-панель: dashboard, requests, testimonials, cases, slots, learning                              |
+| 2025-12-27 | Комментарии в блоге: BlogComment модель с вложенными ответами                                        |
+| 2025-12-27 | Списки изученного: LearningItem модель, публичная /learning страница                                 |
+| 2025-12-27 | AI-чатбот: Claude + Vercel AI SDK v6, плавающий виджет ChatWidget                                    |
+| 2025-12-31 | Добавлена Фаза 7: Кросс-постинг в соцсети (Telegram, VK, X, FB, IG и др.)                            |
+| 2025-12-31 | Запланирована миграция на Better Auth (Auth.js в maintenance mode)                                   |
+| 2026-01-01 | ✅ Миграция на Better Auth: схема БД, auth.ts, actions, client, удалены старые verify pages          |
+| 2026-01-01 | ✅ Замена Serwist на ручной SW: sw.template.js, update-sw-version.mjs (совместимость с Turbopack)    |
+| 2026-01-03 | ✅ Рефакторинг: KamiForm (createForm + extraSelects), унификация форм на KamiForm                    |
+| 2026-01-03 | ✅ Рефакторинг: консолидация labels (kami-form/labels.ts), устранение дублирования в admin           |
+| 2026-01-03 | ✅ Рефакторинг: UI токены (bg.panel, bg.subtle, border.subtle, fg.muted вместо hardcoded RGB)        |
+| 2026-01-03 | ✅ Аудит i18n: toaster, CONTACT, RSS Feed, форматирование дат — всё уже корректно                    |
+| 2026-01-03 | ✅ Better Auth organizations: команды, участники, приглашения                                        |
+| 2026-01-03 | ✅ Team Surveys: опросы для оценки кандидата командой работодателя                                   |
+| 2026-01-03 | ✅ Rate limiting: database storage, strict rules, IP headers, client error handling                  |
+| 2026-01-03 | ✅ Forms audit: zenstack-form-plugin, i18n labels, SelectSurveyQuestionType, generated labels        |
+| 2026-02-01 | ✅ Admin Learning CRUD: /admin/learning/new, /admin/learning/[id] (создание/редактирование)          |
+| 2026-02-01 | ✅ Admin Skills CRUD: /admin/skills (навыки), /admin/skills/categories (категории навыков)           |
+| 2026-02-01 | ✅ Skill startYear: поле года начала практики, автоматический расчёт опыта                           |
+| 2026-03-20 | ✅ Quiz v2: 3 новые шкалы (BAR/PAG/DPR), 290 вопросов, 13 осей на радаре                             |
+| 2026-03-20 | ✅ Quiz: формула TZ v2, BAR-фильтр, кризисный блок, дисклеймер                                       |
+| 2026-03-20 | ✅ Quiz: светлые стороны, взаимодействия типов (45 пар), модификаторы                                |
+| 2026-03-20 | ✅ Quiz: пропуск вопросов (QuizSkippedQuestion), исключение повторов                                 |
+| 2026-03-20 | ✅ Quiz: все переводы RU→EN (1649 текстов + 1450 вопросов), деплой на прод                           |
+| 2026-03-21 | ✅ Quiz: стратифицированное перемешивание, убрано досрочное завершение порции                        |
+| 2026-03-21 | ✅ Фаза 7 Этап 1: кросс-постинг Telegram + VK (модели, сервисы, actions, admin UI, PublishButton)    |
+| 2026-03-21 | ✅ Фаза 7: Facebook кросс-постинг, прокси tg-proxy/fb-proxy на mail.letar.best с SSL                 |
+| 2026-06-16 | Запланирована Фаза 10: раздел "Ссылки" — сохранение через Android Share Target, категории, метки     |
+| 2026-06-16 | Фаза 10 расширена: загрузка остальных категорий файлов через Share, раздел "Видео" — детали позже    |
+| 2026-08-12 | ✅ GlitchTip (§70) + staging окружение впервые заведено (§18.7 M2), Keystatic NODE_ENV-баг           |
+| 2026-08-19 | 🔍 Аудит setRequestLocale/SSG: найден root cause, почему все страницы `ƒ Dynamic` (см. техдолг ниже) |
+
+## Техдолг: setRequestLocale не даёт SSG — root layout вызывает getSession() безусловно
+
+По аналогии со studio/aira-web проверялась гипотеза «страницам не хватает `setRequestLocale`
+в `page.tsx`, из-за чего `next build` печатает `ƒ` вместо `●`/`○`». Гипотеза не подтвердилась.
+
+`nx build kami` показывает `ƒ Dynamic` **для всех** роутов `[locale]/*`, включая те, что уже
+вызывали `setRequestLocale` до этой сессии (`about`, `cv`, `page` (главная), `blog`,
+`blog/[slug]`, `learning`, `skills`, `projects`, `privacy`, `terms`, `data-deletion`). Добавление
+`setRequestLocale` в ещё пять кандидатов (`hire`, `offline`, `403`, `(auth)/sign-up`,
+`auth/signin`) и разбор `consulting/page.tsx` на серверную обёртку + клиентский компонент маркер
+не изменили — правки отменены (`git checkout`), в коде ничего не осталось.
+
+**Причина:** `src/app/[locale]/layout.tsx` (корневой layout, общий для всего дерева) вызывает
+`getSession()` безусловно — `Promise.all([getMessages(), getSession(), isAdmin()])` — чтобы
+собрать `UserContextValue` для `UserProvider`/шапки на каждой странице. `getSession()` из
+`@letar/auth/server` (`createSessionHelpers`) внутри делает `await headers()`
+(`libs/auth/src/server/session.ts:36`) — это Dynamic API Next.js, которое форсирует динамический
+рендеринг для всего маршрута, где вызывается, включая общего предка. Раз вызов в корневом
+layout — весь `[locale]`-поддерево не может стать SSG независимо от `setRequestLocale` в
+конкретной `page.tsx`.
+
+Это тот же класс причины, что нашли в aboi (`requireAdmin()` на layout), но на уровень выше:
+не гейт конкретного раздела, а общий header/user-context на **всём** сайте.
+
+**Что нужно, чтобы вернуться к SSG хотя бы для части страниц** (не сделано в этой сессии —
+архитектурное изменение вне объёма задачи «добавить setRequestLocale»):
+
+- Либо вынести получение сессии для шапки в клиентский компонент (fetch на клиенте /
+  `authClient.useSession()`), либо
+- Partial Prerendering (Next.js PPR, экспериментальная фича) — статический shell + динамический
+  slot для user-context, либо
+- Явно смириться с тем, что весь сайт рендерится динамически (SSR каждый запрос) — тогда
+  `setRequestLocale` всё равно стоит добавлять по мере правок каждой страницы ради корректной
+  работы `getTranslations`/`getLocale` без предупреждений next-intl в dev, но не ради SSG-маркера.
 
 ## Техдолг: подключить theme:check
 
