@@ -58,7 +58,12 @@ export const FieldNumber = createField<NumberFieldProps, number | undefined>({
             <NumberInput.IncrementTrigger />
             <NumberInput.DecrementTrigger />
           </NumberInput.Control>
-          <NumberInput.Input placeholder={resolved.placeholder} data-field-name={fullPath} inputMode="decimal" />
+          <NumberInput.Input
+            placeholder={resolved.placeholder}
+            data-field-name={fullPath}
+            inputMode="decimal"
+            onFocus={(e) => e.currentTarget.select()}
+          />
         </NumberInput.Root>
       </FieldWrapper>
     )

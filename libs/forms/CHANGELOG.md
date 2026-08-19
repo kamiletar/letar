@@ -4,6 +4,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.5.3] - 2026-08-19
+
+### Fixed
+
+- **`Form.Field.Number`/`Form.Field.NumberInput` — select-on-focus вместо конкатенации с ведущим
+  `0`.** Пустое числовое поле показывало `"0"`, и ввод без ручного выделения (Ctrl+A/triple-click)
+  давал `"01500"` вместо `"1500"` — стандартное поведение нативного `<input type=number>`. Готового
+  пропа в zag.js NumberInput под это нет. Добавлен `onFocus={(e) => e.currentTarget.select()}` на
+  `NumberInput.Input` в обоих компонентах (`field-number.tsx`, `field-number-input.tsx`).
+
 ## [2.5.2] - 2026-08-17
 
 ### Changed

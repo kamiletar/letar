@@ -1,5 +1,6 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -58,6 +59,25 @@ describe('FieldNumberInput', () => {
 
       const buttons = screen.getAllByRole('button')
       expect(buttons.length).toBeGreaterThanOrEqual(2)
+    })
+  })
+
+  describe('focus behavior', () => {
+    it('выделяет содержимое поля при фокусе (select-on-focus)', async () => {
+      const user = userEvent.setup()
+      render(
+        <TestWrapper>
+          <Form initialValue={{ qty: 0 }} onSubmit={vi.fn()}>
+            <Form.Field.NumberInput name="qty" />
+          </Form>
+        </TestWrapper>,
+      )
+
+      const input = screen.getByRole('spinbutton') as HTMLInputElement
+      await user.click(input)
+
+      expect(input.selectionStart).toBe(0)
+      expect(input.selectionEnd).toBe(input.value.length)
     })
   })
 
