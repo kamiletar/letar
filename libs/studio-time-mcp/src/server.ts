@@ -62,14 +62,21 @@ export function createStudioTimeMcpServer(): McpServer {
         .describe(
           'Идентификатор сессии, открывшей таймер — используется Stop-хуком, чтобы не блокировать чужую сессию по этому таймеру. По умолчанию берётся из CLAUDE_CODE_SESSION_ID, передавать вручную обычно не нужно',
         ),
+      stage: z
+        .string()
+        .optional()
+        .describe(
+          'Название этапа проекта — резолвится среди открытых этапов проекта или заводится новый. '
+            + 'Запись времени привяжется к нему. Закрыть этап — time_stage_close',
+        ),
     },
-    async ({ app, description, kind, idempotencyKey, sessionRef }) => {
+    async ({ app, description, kind, idempotencyKey, sessionRef, stage }) => {
       const key = idempotencyKey ?? randomUUID()
       try {
         const res = await studioTimeRequest({
           method: 'POST',
           path: '/api/mcp/time/start',
-          body: { app, description, kind, idempotencyKey: key, sessionRef: sessionRef ?? defaultSessionRef() },
+          body: { app, description, kind, idempotencyKey: key, sessionRef: sessionRef ?? defaultSessionRef(), stage },
         })
         if (!res.ok) {
           return errorText(`❌ time_start(${app}): ${pretty(res.json)}`)
@@ -97,14 +104,15 @@ export function createStudioTimeMcpServer(): McpServer {
       kind: TIME_KIND.optional().describe('Тип активности: WORK (по умолчанию) / MEETING / TRAVEL / ADMIN'),
       idempotencyKey: z.string().optional().describe('Ключ идемпотентности — см. time_start'),
       sessionRef: z.string().optional().describe('Идентификатор сессии — см. time_start'),
+      stage: z.string().optional().describe('Название этапа проекта — см. time_start'),
     },
-    async ({ app, description, kind, idempotencyKey, sessionRef }) => {
+    async ({ app, description, kind, idempotencyKey, sessionRef, stage }) => {
       const key = idempotencyKey ?? randomUUID()
       try {
         const res = await studioTimeRequest({
           method: 'POST',
           path: '/api/mcp/time/switch',
-          body: { app, description, kind, idempotencyKey: key, sessionRef: sessionRef ?? defaultSessionRef() },
+          body: { app, description, kind, idempotencyKey: key, sessionRef: sessionRef ?? defaultSessionRef(), stage },
         })
         if (!res.ok) {
           return errorText(`❌ time_switch(${app}): ${pretty(res.json)}`)
@@ -319,6 +327,58 @@ export function createStudioTimeMcpServer(): McpServer {
         )
       } catch (err) {
         return errorText(`❌ time_log(${app}): ${err instanceof Error ? err.message : String(err)}`)
+      }
+    },
+  )
+
+  // ─── time_stage_close ────────────────────────────────────────────────────────
+  server.tool(
+    'time_stage_close',
+    [
+      'Закрывает этап проекта (ProjectStage.isDone = true) по названию — этап должен быть',
+      'открытым (заведён через параметр stage у time_start/time_switch либо вручную в studio).',
+      'Не трогает активный таймер: закрытие этапа и остановка записи времени по нему независимы.',
+    ].join('\n'),
+    {
+      app: z.string().min(1).describe('repoSlug приложения'),
+      stage: z.string().min(1).max(300).describe('Название открытого этапа — должно совпадать с тем, что при создании'),
+    },
+    async ({ app, stage }) => {
+      try {
+        const res = await studioTimeRequest({
+          method: 'POST',
+          path: '/api/mcp/time/stage/close',
+          body: { app, stage },
+        })
+        if (!res.ok) {
+          return errorText(`❌ time_stage_close(${app}, ${stage}): ${pretty(res.json)}`)
+        }
+        return text(`✅ Этап закрыт: **${stage}** (${app}).\n\n${pretty(res.json.data)}`)
+      } catch (err) {
+        return errorText(`❌ time_stage_close(${app}, ${stage}): ${err instanceof Error ? err.message : String(err)}`)
+      }
+    },
+  )
+
+  // ─── time_fix_internal_billable ─────────────────────────────────────────────
+  server.tool(
+    'time_fix_internal_billable',
+    [
+      'Административная правка: помечает небиллируемыми (INTERNAL) все ещё не выставленные в',
+      'счёт записи времени по некоммерческим проектам (Project.isCommercial = false) — у таких',
+      'проектов нет клиента, платить некому. Не трогает записи, уже вошедшие в выставленный счёт.',
+      'Идемпотентен: повторный вызов, когда чинить нечего, вернёт нулевой результат.',
+    ].join('\n'),
+    {},
+    async () => {
+      try {
+        const res = await studioTimeRequest({ method: 'POST', path: '/api/mcp/time/fix-internal-billable' })
+        if (!res.ok) {
+          return errorText(`❌ time_fix_internal_billable: ${pretty(res.json)}`)
+        }
+        return text(`🔧 Правка billable-статуса выполнена.\n\n${pretty(res.json.data)}`)
+      } catch (err) {
+        return errorText(`❌ time_fix_internal_billable: ${err instanceof Error ? err.message : String(err)}`)
       }
     },
   )
