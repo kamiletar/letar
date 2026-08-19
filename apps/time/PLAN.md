@@ -315,6 +315,20 @@ libs/number-words/
 - [x] **Добавлен в `E2E_GATED_APPS`** (`libs/infra-config/src/index.ts`, коммит `6af28c70`,
       BlackCove, с разрешения владельца).
 
+## ✅ Проверка setRequestLocale/SSG (2026-08-19)
+
+В сессии по apps/studio нашли класс бага: `[locale]/layout.tsx` с `generateStaticParams`, но без
+`setRequestLocale(locale)` в конкретных `page.tsx` — next-intl не может определить локаль на
+этапе сборки, страница остаётся `ƒ` вместо `●`/`○` в выводе `next build`. Проверка `time` по
+этому паттерну: `nx build time` уже показывает `●` для всех 40 локалей на всех пяти маршрутах
+(`/[locale]`, `/privacy`, `/profile`, `/sign-in`, `/unsubscribe`) — правка не нужна. Причина:
+`/[locale]` — единственная страница с бизнес-логикой на клиенте (`'use client'`, текущий unix-час
+через `setInterval`), сама страница и `privacy` — server components, но next-intl уже
+статически резолвит их через корневой `setRequestLocale` в layout; остальные три страницы
+(`profile`, `sign-in`, `unsubscribe`) тоже `'use client'`-компоненты — им `setRequestLocale`
+физически недоступен (server-only функция), но это не мешает статике: сама оболочка страницы
+рендерится статически, динамика — только в клиентском рантайме после гидратации.
+
 ## Техдолг: подключить theme:check
 
 Гейт сырых цветов/теней/transition в UI-коде (`nx g @letar/generators:theme-check-integrate
