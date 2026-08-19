@@ -1,13 +1,15 @@
 import { defineRecipe } from '@chakra-ui/react'
+import { pressScale } from '@letar/ui'
 
 /**
- * Button recipe с тактильной обратной связью через :active стили
+ * Button recipe с тактильной обратной связью через :active стили.
+ * Глубина нажатия — общая шкала @letar/ui (`pressScale`), шаг по размеру кнопки.
  */
 export const buttonRecipe = defineRecipe({
   base: {
     transition: 'all 0.15s ease-out',
     _active: {
-      transform: 'scale(0.95)',
+      transform: pressScale.md,
     },
     _disabled: {
       _active: {
@@ -17,11 +19,11 @@ export const buttonRecipe = defineRecipe({
   },
   variants: {
     size: {
-      xs: { _active: { transform: 'scale(0.9)' } },
-      sm: { _active: { transform: 'scale(0.9)' } },
-      md: { _active: { transform: 'scale(0.95)' } },
-      lg: { _active: { transform: 'scale(0.97)' } },
-      xl: { _active: { transform: 'scale(0.98)' } },
+      xs: { _active: { transform: pressScale.xs } },
+      sm: { _active: { transform: pressScale.sm } },
+      md: { _active: { transform: pressScale.md } },
+      lg: { _active: { transform: pressScale.lg } },
+      xl: { _active: { transform: pressScale.xl } },
     },
     variant: {
       solid: {

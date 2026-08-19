@@ -212,7 +212,12 @@ export const tagRecipe = defineSlotRecipe({
 })
 
 /**
- * IconButton recipe
+ * IconButton recipe.
+ *
+ * Глубина нажатия НЕ переведена на общую `pressScale` (@letar/ui) намеренно: иконка —
+ * визуально мелкая поверхность, для неё нужно проседание заметнее, чем даёт общая шкала
+ * (0.8…0.92 против 0.94…0.98 у pressScale в том же диапазоне размеров). Осознанное
+ * расхождение, не забытая миграция.
  */
 export const iconButtonRecipe = defineRecipe({
   base: {

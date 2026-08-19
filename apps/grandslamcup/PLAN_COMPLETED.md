@@ -2,6 +2,14 @@
 
 Детальное описание всех реализованных фич.
 
+## 2026-08-19 — Webpack-фикс `@tanstack/devtools-ui@0.7.0` — server-половина графа
+
+Тот же баг, что уронил dev-сервер `driving-school` (500, `Attempted import error: 'use' is not
+exported from 'solid-js/web'` через `@letar/query-provider`) — grandslamcup в зоне риска той же
+причины (webpack в dev). Существующий `config.resolve.alias['@tanstack/devtools-ui'] = false`
+работал только в prod (`if (!dev)`); расширен на `if (isServer || !dev)`. Полный разбор —
+PLAN.md §51 и `apps/driving-school/PLAN_COMPLETED.md`.
+
 ## v3.38.5 — 2026-08-14 (удалён мёртвый локальный `UserMenu`)
 
 Аудит по всему монорепо на предмет дублей меню аккаунта (`domwellbes`, `driving-school`,

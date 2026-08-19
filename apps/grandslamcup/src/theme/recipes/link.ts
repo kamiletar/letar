@@ -1,13 +1,15 @@
 import { defineRecipe } from '@chakra-ui/react'
+import { pressScale } from '@letar/ui'
 
 /**
- * Link recipe с тактильной обратной связью
+ * Link recipe с тактильной обратной связью.
+ * Глубина нажатия — общая шкала @letar/ui (`pressScale`), шаг `sm`: ссылка мельче кнопки.
  */
 export const linkRecipe = defineRecipe({
   base: {
     transition: 'all 0.1s ease-out',
     _active: {
-      transform: 'scale(0.9)',
+      transform: pressScale.sm,
     },
   },
   variants: {
