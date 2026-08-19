@@ -2718,12 +2718,18 @@ providerId: 'letar-auth', callbackURL })` с ручным `try/catch` и `switch
 `callbackURL` (`searchParams.get('callbackURL') || '/'`) — детали в `apps/studio/PLAN.md` и
 `PLAN_COMPLETED.md`.
 
-**Тот же паттерн (`signInWithLetarAuth()` без аргумента на собственной странице `/sign-in`)
-найден ещё в трёх приложениях и НЕ исправлен:**
+**✅ Тот же паттерн (`signInWithLetarAuth()` без аргумента на собственной странице `/sign-in`)
+найден ещё в трёх приложениях и исправлен тем же способом (2026-08-19):**
 
-- `apps/archetest/src/app/(auth)/sign-in/page.tsx`
-- `apps/aprel8008/src/app/sign-in/page.tsx`
-- `apps/time/src/app/[locale]/sign-in/page.tsx`
+- `apps/archetest/src/app/(auth)/sign-in/page.tsx` — `v0.27.5`
+- `apps/aprel8008/src/app/sign-in/page.tsx` — `v0.12.25` (submodule)
+- `apps/time/src/app/[locale]/sign-in/page.tsx` — `v0.5.3`
+
+Во всех трёх — тот же явный `callbackURL` (`searchParams.get('callbackURL') || '/'`), и та же
+попутная поправка: добавление `useSearchParams()` требует границы `<Suspense>` вокруг компонента,
+иначе `next build` валит статический пререндер `/sign-in` (`missing-suspense-with-csr-bailout`) —
+наступили на это в `studio` первыми, в остальных трёх завели `Suspense` сразу. `nx build`
+перепроверен зелёным для всех четырёх приложений.
 
 `dashboard`, `kami`, `animatrona-tracker`, `grandslamcup` не затронуты — там `signInWithLetarAuth`
 вызывается только из инлайн-кнопок на произвольных страницах, не с выделенной auto-redirect
