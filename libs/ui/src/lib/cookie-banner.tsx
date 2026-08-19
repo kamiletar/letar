@@ -28,6 +28,12 @@ export interface CookieBannerProps {
   analyticsLabel?: string
   /** Подпись категории маркетинга */
   marketingLabel?: string
+  /**
+   * `zIndex` баннера — по умолчанию 1000, выше практически любого оверлея приложения. Публичной
+   * части studio (REDESIGN_PLAN.md §1/§7) нужно значение ниже слоёв трубки (300–303): иначе баннер
+   * рендерится поверх развёртки/гало и выпадает из «изображения на экране» целиком.
+   */
+  zIndex?: number | string
 }
 
 export function CookieBanner({
@@ -37,6 +43,7 @@ export function CookieBanner({
   consentApiUrl = '/api/consent',
   analyticsLabel = 'Аналитика (Я.Метрика)',
   marketingLabel = 'Маркетинг (ретаргетинг)',
+  zIndex = 1000,
 }: CookieBannerProps) {
   const config = createConsentConfig(appKey, policyVersion)
   const [shown, setShown] = useState(false)
@@ -128,7 +135,7 @@ export function CookieBanner({
       bg="bg.panel"
       borderTopWidth="1px"
       borderColor="border"
-      zIndex={1000}
+      zIndex={zIndex}
       shadow="lg"
     >
       <Container maxW="6xl" py={4}>
