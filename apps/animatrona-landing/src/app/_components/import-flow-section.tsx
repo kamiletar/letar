@@ -66,7 +66,9 @@ function StepIndicator({ index, isActive, onClick }: { index: number; isActive: 
       h={3}
       borderRadius="full"
       bg={isActive ? 'brand.500' : 'gray.700'}
-      transition="all 0.3s ease"
+      transitionProperty="width, background-color"
+      transitionDuration="0.3s"
+      transitionTimingFunction="ease"
       cursor="pointer"
       onClick={onClick}
       aria-label={`Шаг ${index + 1}`}

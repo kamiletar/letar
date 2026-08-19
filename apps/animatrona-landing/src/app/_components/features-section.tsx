@@ -94,7 +94,9 @@ function FeatureCard({ feature }: FeatureCardProps) {
         className="glass"
         borderRadius="xl"
         overflow="hidden"
-        transition="all 0.3s ease"
+        transitionProperty="box-shadow"
+        transitionDuration="0.3s"
+        transitionTimingFunction="ease"
         position="relative"
         h="full"
         borderWidth={feature.isMain ? '2px' : '1px'}

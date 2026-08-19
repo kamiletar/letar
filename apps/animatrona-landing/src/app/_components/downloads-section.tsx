@@ -174,7 +174,9 @@ function MacOSCard({ release, isCurrentPlatform, detectedArch }: MacOSCardProps)
       className="glass"
       borderRadius="xl"
       overflow="hidden"
-      transition="all 0.3s ease"
+      transitionProperty="border-color, box-shadow, transform"
+      transitionDuration="0.3s"
+      transitionTimingFunction="ease"
       position="relative"
       borderWidth={isCurrentPlatform ? '2px' : '1px'}
       borderColor={isCurrentPlatform ? 'brand.500' : 'gray.800'}
@@ -268,7 +270,9 @@ function PlatformCard({ platform, release, isCurrentPlatform }: PlatformCardProp
       className="glass"
       borderRadius="xl"
       overflow="hidden"
-      transition="all 0.3s ease"
+      transitionProperty="border-color, box-shadow, transform"
+      transitionDuration="0.3s"
+      transitionTimingFunction="ease"
       position="relative"
       borderWidth={isCurrentPlatform ? '2px' : '1px'}
       borderColor={isCurrentPlatform ? 'brand.500' : 'gray.800'}

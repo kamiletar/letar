@@ -46,7 +46,8 @@ export function DocsSidebar() {
               bg={isActive ? 'brand.500/20' : 'transparent'}
               borderLeft="3px solid"
               borderColor={isActive ? 'brand.500' : 'transparent'}
-              transition="all 0.2s"
+              transitionProperty="color, background-color, border-color"
+              transitionDuration="0.2s"
               _hover={{
                 color: 'white',
                 bg: 'gray.800',

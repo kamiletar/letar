@@ -95,7 +95,9 @@ export function Navbar() {
       backdropFilter={scrolled ? 'blur(12px)' : 'none'}
       borderBottom={scrolled ? '1px solid' : 'none'}
       borderColor="gray.800"
-      transition="all 0.3s ease"
+      transitionProperty="background-color, backdrop-filter, border-bottom-width"
+      transitionDuration="0.3s"
+      transitionTimingFunction="ease"
     >
       <Container maxW="container.xl" py={4}>
         <Flex justify="space-between" align="center">
@@ -208,7 +210,8 @@ export function Navbar() {
                             bg={activeSection === item.href ? 'brand.500/10' : 'transparent'}
                             borderLeft={activeSection === item.href ? '3px solid' : '3px solid transparent'}
                             borderColor={activeSection === item.href ? 'brand.500' : 'transparent'}
-                            transition="all 0.2s"
+                            transitionProperty="color, background-color, border-color"
+                            transitionDuration="0.2s"
                             _hover={{
                               color: 'white',
                               bg: 'gray.800',

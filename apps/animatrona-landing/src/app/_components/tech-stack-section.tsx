@@ -94,7 +94,9 @@ function TechCard({ tech }: TechCardProps) {
         gap={3}
         borderWidth="1px"
         borderColor="gray.800"
-        transition="all 0.3s ease"
+        transitionProperty="border-color, box-shadow"
+        transitionDuration="0.3s"
+        transitionTimingFunction="ease"
         _hover={{
           borderColor: 'gray.700',
           boxShadow: `0 0 30px ${tech.color}20`,

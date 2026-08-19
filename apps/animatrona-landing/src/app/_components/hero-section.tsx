@@ -327,7 +327,8 @@ export function HeroSection({ release }: HeroSectionProps) {
                     size={{ base: 'lg', md: 'xl' }}
                     colorPalette="purple"
                     className="glow"
-                    transition="all 0.2s"
+                    transitionProperty="transform, box-shadow"
+                    transitionDuration="0.2s"
                     _hover={{
                       transform: 'translateY(-2px)',
                       boxShadow: '0 0 40px rgba(139, 61, 255, 0.5)',
@@ -345,7 +346,8 @@ export function HeroSection({ release }: HeroSectionProps) {
                     size={{ base: 'lg', md: 'xl' }}
                     colorPalette="purple"
                     className="glow"
-                    transition="all 0.2s"
+                    transitionProperty="transform, box-shadow"
+                    transitionDuration="0.2s"
                     _hover={{
                       transform: 'translateY(-2px)',
                       boxShadow: '0 0 40px rgba(139, 61, 255, 0.5)',
