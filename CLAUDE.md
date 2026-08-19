@@ -82,6 +82,9 @@ ECONNREFUSED/ERR_DLOPEN_FAILED при зелёном билде ·
 [nextjs-ssr-browser-only-libs](/.claude/docs/nextjs-ssr-browser-only-libs.md) `self is not defined` ·
 [nextjs16-turbopack-default-emotion-hydration](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md)
 ⚠️ Turbopack по умолчанию + Chakra `<Global>` → hydration mismatch, флаки в e2e ·
+[chakra-multi-system-ssr-barrel-trap](/.claude/docs/chakra-multi-system-ssr-barrel-trap.md) ⚠️
+импорт шрифта/константы из барреля с `createSystem()` в Server Component исполняет весь модуль и
+роняет SSR (`accordionAnatomy.extendWith is not a function`) ·
 [chakra-strict-tokens-global-typegen](/.claude/docs/chakra-strict-tokens-global-typegen.md) ⚠️
 `strictTokens` пишет типы в `node_modules/@chakra-ui/react` — не per-app флаг, ломает typecheck
 всех приложений монорепо ·
