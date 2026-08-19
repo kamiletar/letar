@@ -339,6 +339,13 @@ export default [
     // (голый `main/**`), часть — от корня репо через явный `lintFilePatterns` в project.json
     // (`apps/*/main/**`, см. `apps/animatrona/project.json`). Нужны оба, иначе allow-list
     // работает не для всех приложений сразу — см. комментарий у следующего блока.
+    // ⚠️ Есть и третий basePath, который ни один из этих двух паттернов не покрывает и который
+    // сюда третьим вариантом не добавить (см. ниже): если у `apps/<app>/main/` есть СВОЙ
+    // вложенный `eslint.config.mjs` (label-printer-desktop, animatrona), ESLint резолвит `files`
+    // относительно него самого — путь уже без сегмента `main/` (`background.ts`, не
+    // `main/background.ts`). Голый `**/*.ts` здесь выключил бы правило для всего репо — фикс
+    // для таких приложений живёт локально, в самом вложенном `main/eslint.config.mjs`, третьим
+    // элементом после `...baseConfig`. Разбор — node-env-not-production-signal.md § Случай 5.
     files: ['main/**/*.ts', 'apps/*/main/**/*.ts'],
     rules: {
       'no-restricted-syntax': 'off',
