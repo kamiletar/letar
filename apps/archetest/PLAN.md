@@ -783,6 +783,16 @@ CAT/IRT. ✅ Подтверждено Kami: разделение ASD → ASD + D
 
 ---
 
+## ✅ Проверка setRequestLocale/SSG (2026-08-19)
+
+В сессии по apps/studio нашли класс бага: `[locale]/layout.tsx` с `generateStaticParams`, но без
+`setRequestLocale(locale)` в конкретных `page.tsx` — next-intl не может определить локаль на
+этапе сборки, страница остаётся `ƒ` вместо `●`/`○` в выводе `next build`. Проверка `archetest`:
+все страницы, которым это нужно, уже вызывают `setRequestLocale` явно (`page.tsx` в `/`,
+`/express`, `/privacy`, `/for-professionals`, всё под `/dev/*` — все `●`). `/[locale]` и
+`/express` остаются `ƒ` заслуженно — обе вызывают `getSession()` (читает cookies), их и не нужно
+делать статическими. Правка не нужна нигде.
+
 ## Технический долг / инфра (2026-06)
 
 - [ ] ⚠️ **Staging индексируется наравне с продом — нужен явный гейт по домену**
