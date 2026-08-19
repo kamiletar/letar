@@ -2,6 +2,46 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 0.7.4
+
+### Миграция типов под react-native 0.87 API (без апдейта версии)
+
+Задача от координатора Animatrona (GrayMill, thread `cascade-rn-087-migration`) — подготовить
+код к будущему апдейту `react-native`, не поднимая саму версию (см. `PLAN.md` § «Открытые
+задачи» за полным разбором находок).
+
+- `libs/exoplayer-ass`/`libs/exoplayer-sync`: глубокие импорты `Libraries/Types/CodegenTypes` и
+  `Libraries/Utilities/codegenNativeCommands` заменены на публичные `CodegenTypes`/
+  `codegenNativeCommands` из корня `'react-native'` — доступны и в 0.85, и в 0.87 (коммиты
+  `69e4a723`, `c868c822`). `UIManager.getViewManagerConfig(...).Commands` явно приведён к
+  `{ Commands: Record<string, number> }` — в 0.87 эта типизация пропала из `Object`.
+- `usePictureInPicture.ts`/`useRemoteControl.ts`: `NativeEventEmitter.addListener`
+  перетипизирован под сигнатуру 0.87 `(...args: readonly Object[]) => unknown`, приведение
+  события внутри колбэка (коммит `e4264c23`).
+- Заодно найдены и починены 2 доп. breaking change 0.87, не входившие в исходную задачу:
+  `StatusBar` потерял `backgroundColor`/`translucent` (Android теперь всегда edge-to-edge);
+  реф `Animated.View` в `SeekBar.tsx` больше не даёт типизированный `measureInWindow` через
+  `View` — заменён на узкий локальный интерфейс + `as never` (паттерн уже использовался в
+  `exoplayer-sync/index.tsx`).
+- Устаревшая devDependency `@types/react-native@^0.73.0` в обеих либах убрана — конфликтовала
+  с bundled-типами RN 0.87 (собственные типы есть с 0.71+, community-пакет больше не нужен).
+- Найден и задокументирован отдельный блокер апдейта версии: 4 разные версии `react`
+  одновременно в дереве монорепо (корень `^19.2.8` vs `animatrona-mobile`/`animatrona-tv`
+  `19.2.3`, плюс транзитивные peer у RN-экосистемы) — репо-широкая унификация вне скоупа
+  одного приложения, передана координатору.
+
+Все правки обратно совместимы с текущей 0.85 — `animatrona-mobile`, `exoplayer-ass`,
+`exoplayer-sync`, `animatrona-tv` все зелёные на typecheck.
+
+**2026-08-19/20: блокер версии `react` снят.** Владелец решил через GrayMill (сообщение #383) —
+версии shared-зависимостей только в корневом `package.json`. Убран `"react": "19.2.3"` из
+`package.json` (`animatrona-tv` синхронно, отдельной сессией, коммит `7e95b5ae`). 4 копии в
+`node_modules/.bun` после обычного `bun install` оказались непрочищенным кешем изолированных
+установок, а не реальным разъездом версий — `bun.lock` уже резолвил единственную `react@19.2.8`.
+`bun install --force` схлопнул кеш до одной копии, typecheck обоих приложений зелёный.
+
+---
+
 ## Версия 0.2.1
 
 ### Resume Overlay и UX улучшения
