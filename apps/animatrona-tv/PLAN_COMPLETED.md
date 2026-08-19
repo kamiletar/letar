@@ -2,6 +2,37 @@
 
 Детальное описание всех реализованных фич Animatrona TV.
 
+## Версия 0.5.0
+
+### Синхронизация react-native до 0.87.0
+
+Каскадная задача координатора Animatrona (GrayMill, thread `cascade-rn-087-migration`):
+`animatrona-mobile-dev` подняла общие либы `libs/exoplayer-ass`/`libs/exoplayer-sync` и корневой
+пин `react-native` до `0.87.0`, `animatrona-tv` синхронизирована следом.
+
+- Убран локальный пин `react` (`19.2.3`) из `package.json` — версии только в корне монорепо
+  (решение владельца после находки дубля версий react в дереве зависимостей)
+- `react-native`/`@react-native/codegen`/`@react-native/gradle-plugin`: `0.84.1` → `0.87.0`
+- Мигрирован собственный код под breaking changes 0.87:
+  - `StyleSheet.absoluteFillObject` → `StyleSheet.absoluteFill` (6 мест)
+  - `TextInput` ref-тип `TextInput` → именованный `TextInputInstance`
+  - `FlatList.ListFooterComponent`: `null` → `undefined` (RN 0.87 не принимает `null`)
+  - `PressableStateCallbackType` в 0.87 стал `type` (был `interface`) — старая аугментация через
+    declaration merging (`declare module 'react-native' { interface PressableStateCallbackType
+    {...} }`) молча перестала работать. Заменена на локальный union-тип `TVPressableState =
+    PressableStateCallbackType & { focused?: boolean }` (`focused` — опционально, иначе колбэк
+    несовместим с сигнатурой `Pressable.style` контравариантно) с явной аннотацией параметра в
+    каждом месте использования (`src/types/react-native.d.ts`)
+- Заодно найден и исправлен блокирующий дубль в общих либах (не только для tv — общий для
+  `animatrona-mobile`): `libs/exoplayer-ass`/`libs/exoplayer-sync` держали `@types/react: ^18.3.18`
+  отдельно от корневого `^19.2.18`, что давало изолированную копию типов `react-native` в дереве
+  bun и ошибку `TS2719` на `style`-пропе. Унифицировано до `^19.2.18`. Отдельно —
+  `StyleSheet.flatten(...)` в типах RN 0.87 допускает возврат `null`, добавлен `?? undefined`
+- `nx typecheck:tsgo` зелёный на `animatrona-tv` и `animatrona-mobile` (оба перепроверены)
+
+⚠️ Тест на реальном Android TV устройстве не пройден — нет подключённого устройства в среде
+сессии. Открытый пункт в `PLAN.md` перед следующим релизом.
+
 ## Версия 0.4.0
 
 ### Phase 6: Polish
