@@ -331,7 +331,7 @@
     },
     "apps/aboi": {
       "name": "@letar/aboi",
-      "version": "0.62.0",
+      "version": "0.67.0",
       "dependencies": {
         "leaflet": "^1.9.4",
         "react-leaflet": "^5.0.0",
@@ -415,7 +415,7 @@
     },
     "apps/aprel8008": {
       "name": "@letar/aprel8008",
-      "version": "0.12.24",
+      "version": "0.12.26",
     },
     "apps/aprel8008-e2e": {
       "name": "@letar/aprel8008-e2e",
@@ -423,7 +423,7 @@
     },
     "apps/archetest": {
       "name": "@letar/archetest",
-      "version": "0.27.4",
+      "version": "0.27.5",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
       },
@@ -457,6 +457,7 @@
         "@letar/chakra-provider": "workspace:*",
         "@letar/forms": "workspace:*",
         "@letar/glitchtip": "workspace:*",
+        "@letar/hooks": "workspace:*",
         "@letar/infra-config": "workspace:*",
         "@letar/ui": "workspace:*",
       },
@@ -482,7 +483,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.74.0",
+      "version": "0.79.0",
       "dependencies": {
         "tus-js-client": "^4.3.1",
       },
@@ -494,6 +495,9 @@
     "apps/driving-school": {
       "name": "driving-school",
       "version": "0.238.11",
+      "dependencies": {
+        "@letar/hooks": "workspace:*",
+      },
     },
     "apps/driving-school-e2e": {
       "name": "driving-school-e2e",
@@ -630,7 +634,7 @@
     },
     "apps/poster-microtext-desktop": {
       "name": "@letar/poster-microtext-desktop",
-      "version": "0.13.0",
+      "version": "0.17.0",
       "dependencies": {
         "detect-libc": "^2.1.2",
         "font-list": "^2.1.0",
@@ -657,7 +661,7 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.32.4",
+      "version": "0.35.3",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -701,12 +705,13 @@
       "name": "@letar/synth",
       "version": "0.22.2",
       "dependencies": {
+        "@letar/hooks": "workspace:*",
         "@modelcontextprotocol/sdk": "^1.30.0",
       },
     },
     "apps/time": {
       "name": "@letar/time",
-      "version": "0.5.2",
+      "version": "0.5.4",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
       },
@@ -923,7 +928,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.5.2",
+      "version": "2.5.3",
       "dependencies": {
         "@tanstack/react-table": "^9.1.2",
         "@tanstack/react-virtual": "^3.13.23",
@@ -1168,6 +1173,9 @@
     "libs/pin-auth": {
       "name": "@letar/pin-auth",
       "version": "0.2.0",
+      "dependencies": {
+        "@letar/hooks": "workspace:*",
+      },
       "peerDependencies": {
         "@chakra-ui/react": ">=3.0.0",
         "react": ">=18.0.0",
