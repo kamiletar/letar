@@ -95,9 +95,18 @@ Storage Access Framework (SAF): пользователь выбирает дер
       схлопнул до одной копии `react@19.2.8`. Typecheck `animatrona-mobile`/`animatrona-tv`
       зелёный.
 
-- [ ] **Обновить react-native 0.85.0 → 0.87.0** (свой пин в `package.json`, отдельный от
-      корневого `package.json` монорепо) — код уже мигрирован под 0.87 API (см. ниже и
-      `PLAN_COMPLETED.md` § 0.7.4), блокер версии `react` выше снят, можно возвращаться к бампу.
+- [x] **Обновить react-native 0.85.0 → 0.87.0 в коде — сделано 2026-08-20.** И корневой
+      `package.json` (`react-native`, `@react-native/babel-preset|eslint-config|metro-config|
+      typescript-config` — все `0.87.0`, `react-native-gesture-handler` `3.0.1`→`3.2.1`), и
+      `apps/animatrona-mobile/package.json` (`react-native`/`@react-native/codegen`/
+      `@react-native/gradle-plugin` `0.87.0`) подняты синхронно, зелёный свет от координатора
+      GrayMill (сообщение #387, thread `cascade-rn-087-migration`). Typecheck `animatrona-mobile`
+      зелёный.
+- [ ] ⚠️ **Открытый вопрос: тест на реальном устройстве не пройден.** В сессии, где сделан бамп,
+      не было подключённого Android-устройства (`adb devices` — пусто). Обязательно перед
+      релизом проверить тач-хендлинг/жесты, PiP, remote-control на реальном железе (см.
+      `CLAUDE.md` — известная категория регрессий именно на этой миграции). Не мержить/не
+      деплоить без этой проверки.
 
   Обнаружено при попытке поднять корневой `react-native` до 0.86.2 в рамках общего
   deps-update (2026-07-30): корень и `animatrona-mobile` держат **разные** версии

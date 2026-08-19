@@ -2,6 +2,27 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 0.7.5
+
+### Бамп react-native 0.85.0 → 0.87.0
+
+Зелёный свет от координатора GrayMill (сообщение #387, thread `cascade-rn-087-migration`) после
+снятия блокера версии `react` (§ Версия 0.7.4 ниже). Синхронно подняты корневой `package.json`
+(`react-native`, `@react-native/babel-preset|eslint-config|metro-config|typescript-config` —
+`0.87.0`, `react-native-gesture-handler` `3.0.1`→`3.2.1`) и `apps/animatrona-mobile/package.json`
+(`react-native`/`@react-native/codegen`/`@react-native/gradle-plugin` — `0.87.0`). Код был уже
+мигрирован под 0.87 API заранее (§ Версия 0.7.4), поэтому typecheck `animatrona-mobile` прошёл
+сразу же зелёным.
+
+`animatrona-tv` (typecheck) упал на `TS2719` в `libs/exoplayer-ass`/`libs/exoplayer-sync` — эти
+общие либы теперь резолвят типы `react-native@0.87.0`, а `animatrona-tv` всё ещё сидит на
+`0.84.1`. Ожидаемо, зафиксировано координатором заранее — `animatrona-tv-dev` должна синхронно
+поднять свой пин.
+
+⚠️ **Тест на реальном устройстве не пройден** — в сессии, где сделан бамп, не было подключённого
+Android-устройства (`adb devices` вернул пустой список). Тач-хендлинг/жесты/PiP/remote-control
+обязательно проверить перед релизом (см. `CLAUDE.md`) — см. открытый вопрос в `PLAN.md`.
+
 ## Версия 0.7.4
 
 ### Миграция типов под react-native 0.87 API (без апдейта версии)
