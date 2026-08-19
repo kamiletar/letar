@@ -115,7 +115,14 @@ scope — Invariant вместо обновления кеша ·
 всех приложений монорепо ·
 [chakra-hover-condition-already-media-gated](/.claude/docs/chakra-hover-condition-already-media-gated.md)
 ⚠️ `_hover` в Chakra v3 уже завёрнут в `@media (hover: hover)` — своя обёртка лишняя и даёт
-28 ошибок TS2322 в строках, к которым не прикасался
+28 ошибок TS2322 в строках, к которым не прикасался ·
+[chakra-layer-style-property-allowlist](/.claude/docs/chakra-layer-style-property-allowlist.md)
+⚠️ `LayerStyleProperty` — закрытый список: `touchAction`, `transitionDuration` и прочее вне его
+роняют весь `value` в ветку реестра токенов, TS2322 на каждой строке блока при исправном рантайме ·
+[chakra-recipe-variant-property-override](/.claude/docs/chakra-recipe-variant-property-override.md)
+⚠️ в своём `defineRecipe`/`defineSlotRecipe` порядок ключей в JS не совпадает с порядком CSS-
+каскада — `textStyle` тихо перебивает соседний `fontSize`, вариантный `_hover` наследуется мимо
+`base._hover`
 
 **Библиотеки и публикация:** [lib-entry-points](/.claude/docs/lib-entry-points.md) подпути
 `./server`/`./client`, границы, ESLint-ловушки ·
