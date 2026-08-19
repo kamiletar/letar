@@ -2,6 +2,13 @@
 
 ## Текущая версия: 1.2.3
 
+## Черновик (новые идеи)
+
+- [ ] **⚠️ Локальный пин `electron: 43.3.0` расходится с корневым `^43.4.0`** (аудит
+      2026-08-20) — привести к корневой версии. `bun.lock` подтверждает физический дубль
+      резолвленной версии в дереве (та же ситуация в `animatrona`, `label-printer-desktop`,
+      `poster-microtext-desktop`).
+
 Системная утилита для ввода типографских символов через AltGr (ремейк TypeItEasy).
 Electron + React + Chakra UI v3 (main process: koffi Win32, renderer: Vite SPA).
 
