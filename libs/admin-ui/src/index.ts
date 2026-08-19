@@ -14,6 +14,8 @@ export { AdminBreadcrumbs, AdminNav, AdminSidebar, MobileAdminDrawer } from './l
 
 // Table components
 export {
+  type AssessmentHistoryRow,
+  AssessmentHistoryTable,
   BulkActionsBar,
   commonBulkActions,
   DataTable,

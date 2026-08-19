@@ -29,14 +29,15 @@ bun add @tanstack/react-table
 
 ### Table
 
-| Компонент             | Описание                                                   |
-| --------------------- | ---------------------------------------------------------- |
-| `GenericAdminTable`   | Универсальная таблица с DnD-порядком и bulk actions        |
-| `DataTable`           | Таблица на `@tanstack/react-table` с серверной сортировкой |
-| `InlineEditableTable` | Инлайн-CRUD таблица (форма редактирования прямо в строке)  |
-| `BulkActionsBar`      | Панель массовых действий                                   |
-| `TableSkeleton`       | Skeleton при загрузке                                      |
-| `commonBulkActions`   | Предустановленные действия (publish, delete)               |
+| Компонент                | Описание                                                   |
+| ------------------------ | ---------------------------------------------------------- |
+| `GenericAdminTable`      | Универсальная таблица с DnD-порядком и bulk actions        |
+| `DataTable`              | Таблица на `@tanstack/react-table` с серверной сортировкой |
+| `InlineEditableTable`    | Инлайн-CRUD таблица (форма редактирования прямо в строке)  |
+| `AssessmentHistoryTable` | Бейдж-статус + история неизменяемых снапшотов проверки     |
+| `BulkActionsBar`         | Панель массовых действий                                   |
+| `TableSkeleton`          | Skeleton при загрузке                                      |
+| `commonBulkActions`      | Предустановленные действия (publish, delete)               |
 
 #### `DataTable`
 
@@ -107,6 +108,42 @@ const list = useInlineCrudList({
 привести `Decimal` к `number`), внутри колбэка можно собрать нужную форму вручную. Образец — 8
 секций `apps/domwellbes/src/app/(admin)/admin/` (`house-extras-section.tsx` — простой случай,
 `house-items-section.tsx` — с маппингом ответа).
+
+#### `AssessmentHistoryTable`
+
+Карточка «бейдж-статус + таблица истории неизменяемых снапшотов» — паттерн для скрининг-проверок
+сделки (влезает ли дом на участок, подходит ли под программу финансирования и т.п.), где каждый
+прогон копится в истории, а не перезаписывает предыдущий результат. Извлечён из `domwellbes`
+(`PlotFitScreeningPanel`, `FinancingEligibilityPanel`) — оба компонента были структурно
+идентичны, различались только подписью колонки, словарём статус→палитра и формой действия снизу.
+
+```tsx
+import { type AssessmentHistoryRow, AssessmentHistoryTable } from '@letar/admin-ui'
+
+const RESULT_LABEL: Record<string, string> = { FIT: 'Влезает', NO_FIT: 'Не влезает' }
+const RESULT_PALETTE: Record<string, string> = { FIT: 'success', NO_FIT: 'error' }
+
+const rows: AssessmentHistoryRow[] = assessments.map((a) => ({
+  id: a.id,
+  createdAt: a.createdAt,
+  status: a.result,
+  statusLabel: RESULT_LABEL[a.result] ?? a.result,
+  extraColumnValue: a.houseVersionLabel,
+  reasons: a.reasons,
+}))
+
+<AssessmentHistoryTable
+  title="Проверка «влезет ли дом на участок»"
+  extraColumnLabel="Дом"
+  statusPalette={RESULT_PALETTE}
+  rows={rows}
+  warnings={!hasPlot && <Text fontSize="sm" color="fg.muted">Сначала заполните участок</Text>}
+  actions={canAssess && <Button onClick={handleAssess}>Проверить участок</Button>}
+/>
+```
+
+Форма действия под таблицей — произвольный `actions` (кнопка, `@letar/forms`-форма и т.п.),
+видимость решает вызывающий код, компонент её не обуславливает.
 
 ### Filters
 
