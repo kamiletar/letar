@@ -39,6 +39,9 @@ approval, kebab-case в `to`, обнулённая база
 [seed-scripts](/.claude/docs/seed-scripts.md) идемпотентный `prisma/seed.ts` ·
 [zenstack-decimal-optional-fields](/.claude/docs/zenstack-decimal-optional-fields.md) optional
 `Decimal` не принимает `number` ·
+[zenstack-typed-interface-json-snapshot](/.claude/docs/zenstack-typed-interface-json-snapshot.md)
+именованный `interface` без index signature не проходит в `Json`-поле, фикс —
+`JSON.parse(JSON.stringify(...))` ·
 [zenstack-public-write-read-back](/.claude/docs/zenstack-public-write-read-back.md) публичный
 `@@allow('create')` не даёт прочитать запись назад ·
 [zenstack-generated-prisma-client](/.claude/docs/zenstack-generated-prisma-client.md) лишний
