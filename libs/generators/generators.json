@@ -26,6 +26,11 @@
       "factory": "./src/generators/glitchtip-integrate/generator",
       "schema": "./src/generators/glitchtip-integrate/schema.json",
       "description": "Подключает apps/<app> к @letar/glitchtip: instrumentation-файлы, tsconfig paths, implicitDependencies, .env.docker/docker-compose через ${VAR} (см. libs/glitchtip/README.md)"
+    },
+    "theme-check-integrate": {
+      "factory": "./src/generators/theme-check-integrate/generator",
+      "schema": "./src/generators/theme-check-integrate/schema.json",
+      "description": "Подключает apps/<app> к гейту сырых UI-цветов/теней/transition-длительностей (theme:check), по образцу apps/domwellbes/studio/aboi (см. .claude/docs/theme-hardcode-gate-coverage.md)"
     }
   }
 }

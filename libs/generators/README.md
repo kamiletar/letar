@@ -162,6 +162,45 @@ Better Auth, cookie-баннер и т.д.), которую не всем нов
 `output: 'standalone'`, e2e-gate, MCP postgres, ПДн-чеклист (если приложение собирает персональные
 данные — см. `.claude/docs/personal-data.md`).
 
+### `theme-check-integrate`
+
+Подключает `apps/<app>` к гейту сырых UI-цветов/теней/transition-длительностей (`theme:check`) —
+скрипт, доказавший пользу в `apps/domwellbes` и вручную перенесённый на `apps/studio`/`apps/aboi`
+(три конфигурации набраны до выноса в generator, см.
+[`.claude/docs/theme-hardcode-gate-coverage.md`](/.claude/docs/theme-hardcode-gate-coverage.md) —
+там же обоснование, почему выносить не раньше второго реального потребителя).
+
+```bash
+nx g @letar/generators:theme-check-integrate <app>
+# с нестандартным каталогом исходников:
+nx g @letar/generators:theme-check-integrate <app> --sourceDir=app-src
+```
+
+Генерирует `apps/<app>/scripts/check-theme-hardcodes.mjs` (regex-проверка HEX/rgb/hsl-цветов,
+теней, `transition`/`transitionDuration` с сырой длительностью, `scale()` в `transform` вне
+шкалы темы) и таргет `theme:check` в `project.json`, подключённый в `dependsOn` у `lint`.
+
+- **`ignoredDirectories` подбирается автоматически по факту**: `generated` — всегда, `pdf`/`assets`
+  — только если такой каталог реально существует в `src/` приложения (найдено scan'ом дерева, не
+  предполагается вслепую).
+- **`themePrefix`** — `<sourceDir>/theme/`, даже если такого каталога ещё нет (с предупреждением:
+  без него ни один файл не освобождён от общих правил — так и было у `studio`/`aboi` до первого
+  прогона).
+- **`allowedMatches` генерируется пустым**, с комментарием-памяткой про три задокументированных
+  класса легитимных исключений (metadata Next.js, satori/`next/og`, рендер без Chakra-провайдеров,
+  одноразовый декоративный эффект) — заполняется руками по итогам первого прогона, генератор
+  сознательно не пытается угадать allowlist за человека.
+
+**Генератор не перезаписывает существующий `scripts/check-theme-hardcodes.mjs`** — если он уже
+есть (в том числе с ручным allowlist), файл пропускается с предупреждением; повторный запуск
+идемпотентен и на таргете `theme:check` (не дублирует `dependsOn` у `lint`).
+
+⚠️ **Первый прогон почти всегда находит реальные нарушения** — это не баг генератора. Каждая
+находка — либо настоящий баг (сырой цвет мимо Chakra-пропа, `transition="all N s"` вместо явного
+`transitionProperty`, см. фикс в `aboi`/`grandslamcup`), либо легитимное исключение, которое
+дописывается в `allowedMatches` с пояснением. Без `--skipChecks` генератор сам прогоняет
+`nx run <app>:theme:check` после генерации и печатает инструкцию по обоим случаям.
+
 ## Рассмотренные и отклонённые генераторы
 
 ### `new-crud-admin` — отклонён (2026-08-05), пересмотрен и отклонён повторно (2026-08-11)

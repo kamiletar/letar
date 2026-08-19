@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "ThemeCheckIntegrate",
+  "title": "Theme Check Integrate Generator",
+  "type": "object",
+  "properties": {
+    "app": {
+      "type": "string",
+      "description": "Имя приложения в apps/, куда подключается гейт сырых UI-цветов/теней/transition",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "Какое приложение (apps/<app>) подключить к theme:check?"
+    },
+    "sourceDir": {
+      "type": "string",
+      "description": "Каталог с исходниками приложения относительно apps/<app> (по умолчанию 'src')",
+      "default": "src"
+    },
+    "skipChecks": {
+      "type": "boolean",
+      "description": "Не прогонять nx theme:check после генерации файлов (например, при недоступном nx в CI-окружении генератора)",
+      "default": false
+    }
+  },
+  "required": ["app"]
+}
