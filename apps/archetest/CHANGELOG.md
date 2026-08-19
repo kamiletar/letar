@@ -5,6 +5,15 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.27.5] - 2026-08-19
+
+### Fixed
+
+- Бесконечный редирект на `/sign-in` после успешного входа через Ключницу. `signInWithLetarAuth()`
+  вызывался без явного `callbackURL` — дефолт берёт текущий URL страницы, а на `/sign-in` это
+  всегда сама `/sign-in`. Тот же баг, что был найден и исправлен в `studio` (см. корневой
+  `PLAN.md` §41 addendum). `callbackURL` теперь передаётся явно.
+
 ## [0.27.4] - 2026-08-13
 
 ### Fixed
