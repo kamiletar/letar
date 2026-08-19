@@ -270,6 +270,12 @@ offsite-получатель не заведён — трек на восста�
 
 Стратегия: синхронизируются только **uploads** всех приложений и папка **backups**. Всё остальное восстанавливается из git (`git pull` + `bun install` + генерация). Секреты хранятся отдельно (см. §Локальные credentials ниже).
 
+⚠️ **Список — deny-list, не allow-list.** Bare-имя (без ведущего `/`) матчится на **любой**
+глубине каталога — `src` вычёркивает `src` и в корне приложения, и внутри submodule. Список ниже
+актуализирован 2026-08-19 (найдена и закрыта утечка git-tracked файлов из корня репо и корней
+приложений — `bun.lock`, `nx.json`, `package.json`, `tsconfig*.json`, `docker-compose*.yml` и т.п.
+уезжали в оффсайт-копии, хотя полностью восстановимы из git).
+
 ```
 # Build artifacts
 node_modules
@@ -288,10 +294,48 @@ public
 libs
 scripts
 .github
+.claude
 
 # Nginx (configs backed up via nginx_auto_*.tar.gz)
 infra/nginx-proxy-manager/data
 infra/nginx-proxy-manager/letsencrypt
+
+# Git-tracked манифесты и конфиги — восстанавливаются из репо, синхронизировать нечего
+package.json
+package-lock.json
+bun.lock
+nx.json
+tsconfig.json
+tsconfig.base.json
+tsconfig.next-app.json
+dprint.json
+eslint.config.mjs
+.editorconfig
+.gitignore
+.gitmodules
+.lsp.json
+.mcp.json
+.nxignore
+.oxlintrc.json
+.sops.yaml
+.env.docker.enc
+.env.docker.example
+.env.staging.enc
+.env.staging.example
+.env.example
+.prettierignore
+.swcrc
+deploy-affected.sh
+deploy-wrapper.sh
+docker-compose.yml
+docker-compose.production.yml
+docker-compose.s3.yml
+docker-compose.staging.yml
+Dockerfile.production
+vitest.workspace.ts
+*.md
+LICENSE
+cron-jobs.example.json
 
 # Secrets — НЕ должны синхронизироваться через Resilio
 # Хранить в KeePassXC / OPS_JOURNAL.local.md (см. §Локальные credentials)
@@ -304,6 +348,33 @@ infra/nginx-proxy-manager/letsencrypt
 ```
 
 > **Важно:** `*.sql.gz`, `*.tar.gz` и `uploads/` НЕ исключаются — бэкапы БД, NPM, Maddy и загруженные пользователями файлы синхронизируются на все точки хранения.
+
+> ⚠️ **Известные пробелы (2026-08-19), не закрыты паттернами выше:** приложения с
+> нестандартной раскладкой каталогов не попадают под правило `src`/`libs`/`scripts` — например
+> Electron-приложения с `main/`/`shared/` вместо `src/` (`animatrona`, `poster-microtext-desktop`),
+> сгенерированные `*.d.ts` в корне приложения (`next-env.d.ts`, `index.d.ts`), `*.mdx`-контент
+> (`apps/form-docs/content/**`) и целиком e2e-приложения (`apps/domwellbes-e2e` и подобные — не
+> покрыты, потому что это отдельные `apps/*`, а не подпапка внутри уже исключённого приложения).
+> Точечно расширять список по мере обнаружения новых случаев, не пытаться угадать все заранее.
+
+### ⛔ Смена `dir` под тем же RW-секретом — НЕБЕЗОПАСНО (найдено 2026-08-19)
+
+При попытке перейти от deny-list к настоящему allow-list (синк только заранее собранной папки с
+`uploads/`+`backups/`) естественная идея — переключить `dir` в `config.json` на новый, меньший
+каталог, оставив тот же RW-секрет. **Это не сработало и рисковало необратимо**: Resilio считает
+identity шары привязанной к секрету, а не к каталогу. Когда локальный каталог оказывается меньше
+того, что видят другие пиры под тем же секретом (например, Windows RO-зеркало, где старые файлы
+ещё лежат), Resilio трактует уменьшение не как «так и задумано», а как потерю данных — и начинает
+**затягивать «пропавшие» файлы обратно с пиров**. На проде это означало риск того, что весь
+изгнанный git-мусор (гигабайты `.git`/`node_modules`/старых артефактов) начнёт заново скачиваться
+на сервер с Windows-машины.
+
+Поймано и остановлено (`systemctl stop resilio-sync`) до того, как реально что-то докачалось;
+конфиг возвращён на исходный `dir`. **Правило на будущее:** менять состав синхронизируемого под
+существующим секретом — только через `IgnoreList` (deny-list, применяется через переиндексацию,
+см. ниже), никогда через смену `dir`. Настоящий allow-list для этой пары серверов потребовал бы
+**нового секрета** (полный ресинк с нуля, RO-ключ на Windows тоже поменяется) — не делать этого
+без явного решения владельца, так как это одноразовая необратимая операция ре-провижининга.
 
 ### Применение IgnoreList на серверах
 
