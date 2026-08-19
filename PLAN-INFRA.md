@@ -9923,3 +9923,13 @@ allowlist). Только после этого — `nx g @letar/generators:theme
 
 **Дальше:** подключение к оставшимся ~27 приложениям — по одному, по запросу, не пакетным
 прогоном (каждое требует ручной разбор allowlist).
+
+**Обновление (2026-08-19, позже в тот же день):** сами три копии скрипта (`aboi`/`studio`/
+`domwellbes`) сведены к общему модулю [`libs/theme-check`](/libs/theme-check/README.md)
+(`@letar/theme-check`) — они несли дословно идентичный список regex-правил и уже успели
+разойтись по `ignoredDirectories`/`allowedMatches`. Три `apps/*/scripts/check-theme-hardcodes.mjs`
+и сам генератор `theme-check-integrate` переведены на тонкие обёртки над этим модулем.
+`@letar/theme-check` — единственная в монорепо plain-JS (не TypeScript) библиотека: скрипт
+запускается голым `node` без бандлера/`tsc`, а `paths`/`customConditions` резолвятся только
+внутри TS-инструментов. Подробности —
+[theme-hardcode-gate-coverage.md](/.claude/docs/theme-hardcode-gate-coverage.md).
