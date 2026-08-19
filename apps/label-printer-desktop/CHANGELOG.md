@@ -4,6 +4,16 @@
 
 ## [Unreleased]
 
+## [0.5.8] - 2026-08-19
+
+### Fixed
+
+- `nx lint` падал 3 ошибками `no-restricted-syntax` на `NODE_ENV === 'production'` в
+  `main/background.ts` и `main/services/database.ts` — код уже использовал легитимный
+  `app.isPackaged`-паттерн, ошибка была в резолве allow-list'а из-за вложенного
+  `main/eslint.config.mjs`. Фикс — локальный override в этом файле, подробности в
+  `.claude/docs/node-env-not-production-signal.md` § Случай 5.
+
 ## [0.5.7] - 2026-08-17
 
 ### Fixed

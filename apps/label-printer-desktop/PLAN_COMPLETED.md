@@ -2,6 +2,32 @@
 
 Детальное описание всех реализованных фич Label Printer Desktop.
 
+## `nx lint` красный из-за вложенного `main/eslint.config.mjs` (2026-08-19)
+
+Обнаружено попутно в другой сессии (фикс `eslint-plugin-react-hooks` в корневом
+`eslint.config.mjs`): `nx lint label-printer-desktop` падал 3 ошибками
+`no-restricted-syntax` на `main/background.ts:48,59` и `main/services/database.ts:23` — паттерн
+`app.isPackaged || process.env.NODE_ENV === 'production'`.
+
+Код был корректен — это легитимный fallback для Electron main-процесса, для которого в
+корневом `eslint.config.mjs` уже заведён allow-list. Проблема была в резолве: у
+`apps/label-printer-desktop/main/` есть свой `eslint.config.mjs` (спредит корневой
+`baseConfig` + свои `ignores`), и ESLint находит именно его как ближайший конфиг для
+`main/*.ts`. `basePath` для сопоставления всех `files`-паттернов при этом становится
+`apps/label-printer-desktop/main/`, а не каталог приложения — оба варианта allow-list'а
+(`main/**/*.ts`, `apps/*/main/**/*.ts`) ищут сегмент `main/`, которого относительно этого
+`basePath` уже нет.
+
+Фикс — локальный override третьим элементом в `apps/label-printer-desktop/main/eslint.config.mjs`
+(`{ files: ['**/*.ts'], rules: { 'no-restricted-syntax': 'off' } }`), безопасный, потому что
+этот файл управляет только поддеревом `main/`. В корневой allow-list третий вариант пути
+добавить нельзя — тот массив переиспользуется на всех `basePath` разом, голый `**/*.ts` там
+выключил бы правило для всего репозитория. Разбор — `.claude/docs/node-env-not-production-signal.md`
+§ Случай 5.
+
+⚠️ Тот же вложенный `main/eslint.config.mjs` есть у `apps/animatrona/main/` — латентно тот же
+баг, не проверялось и не чинилось (вне scope этой сессии, отправлено отдельной задачей).
+
 ## Prisma 7 datasource url + недостающий Prisma Client (2026-08-17)
 
 `nx db:push` падал с P1012 («The datasource property `url` is no longer supported in schema
