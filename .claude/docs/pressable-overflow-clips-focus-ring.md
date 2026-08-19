@@ -36,29 +36,34 @@ const clipped = same && getComputedStyle(w).overflow === 'hidden'
 ## Фикс: продублировать ring на самой обёртке
 
 Собственный outline элемента **не** режется его же `overflow` — режутся только потомки. Поэтому
-ring переносится на обёртку теми же значениями, что у кнопки, и визуально остаётся неотличимым:
+ring переносится на обёртку теми же значениями, что у кнопки, и визуально остаётся неотличимым.
+
+**2026-08-19: фикс вынесен в готовый компонент `PressableCta` (`@letar/ui`)** — пять приложений
+(domwellbes, aboi, dsperevod, synth, time) держали этот `css`-блок дословно скопированным,
+отличаясь только `borderRadius` и цветом ring. Теперь это `libs/ui/src/lib/pressable.tsx`,
+приложение задаёт только два пропа:
 
 ```tsx
-<Pressable
-  display="inline-flex"
-  borderRadius="full"
-  css={{
-    '&:has(:focus-visible)': {
-      outline: '2px solid',
-      outlineColor: 'focus.ring',
-      outlineOffset: '2px',
-    },
-  }}
->
+import { PressableCta } from '@letar/ui'
+
+<PressableCta borderRadius="full" focusRingColorToken="focus.ring">
   <Button asChild colorPalette="brand" borderRadius="full">
     <NextLink href="/somewhere">Действие</NextLink>
   </Button>
-</Pressable>
+</PressableCta>
 ```
 
+`borderRadius` обязателен без дефолта — обёртка должна повторять форму кнопки, иначе ring/ripple
+обведёт другую форму, а угадать общее значение для всех приложений нельзя (свой рецепт кнопки
+есть не у каждого). `focusRingColorToken` опционален, дефолт — `'focus.ring'`.
+
+Новое приложение, наступающее на эту же проблему — не копировать блок `css` руками, а
+использовать `PressableCta`. Голый `Pressable` с ручным `css`-блоком остаётся вариантом только
+там, где нужен не CTA-паттерн, а что-то нестандартное (второй набор пропов, отличный от двух
+выше).
+
 `:has(:focus-visible)`, а **не** `_focusWithin`: `focus-within` срабатывает и на клик мышью, из-за
-чего ring вылезал бы при каждом нажатии. `borderRadius` обёртки обязан совпадать с кнопочным,
-иначе ring обведёт другую форму.
+чего ring вылезал бы при каждом нажатии.
 
 Не «чинить» это снятием `overflow: hidden` у обёртки — тогда круг ripple выйдет за края кнопки.
 
