@@ -6,6 +6,11 @@
 
 - [ ] Аудит `_active: scale()` в теме на `pressScale` (`@letar/ui`) — задача описана в
       [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md)
+- [ ] Заменить `transition="all ..."` на явный `transitionProperty` (сужает анимацию до реально
+      меняющихся свойств вместо любого изменения пропа при ре-рендере) — найдено 7 мест в
+      `src/app/_components/downloads-section.tsx`, `faq-section.tsx`, `features-section.tsx`,
+      `hero-section.tsx` (×2), `navbar.tsx` (×2). Паттерн фикса и разбор — в
+      [interactive-press-feedback.md](/.claude/docs/interactive-press-feedback.md)
 - [ ] Дизайн и контент лендинга
 - [ ] Адаптивная верстка
 - [ ] SEO оптимизация
