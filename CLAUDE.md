@@ -52,6 +52,8 @@ approval, kebab-case в `to`, обнулённая база
 `useFormAnalytics`, consent-aware бесплатно ·
 [tristate-cascade-boolean-pattern](/.claude/docs/tristate-cascade-boolean-pattern.md) nullable
 boolean с явным «наследовать» через строковый энум + NativeSelect ·
+[letar-forms-field-date-runtime-string](/.claude/docs/letar-forms-field-date-runtime-string.md) ⚠️
+`Field.Date` отдаёт string в onSubmit даже при `z.coerce.date()` — typecheck не ловит ·
 [ui-components](/.claude/docs/ui-components.md) · [images](/.claude/docs/images.md) ·
 [sharp-raw-composite-alpha-pitfall](/.claude/docs/sharp-raw-composite-alpha-pitfall.md) ⚠️
 `composite()` над raw-буферами тихо добавляет alpha-канал даже при `create({channels:3})` ·
@@ -98,7 +100,9 @@ Server→Client — property-access ломается, `undefined`
 `./server`/`./client`, границы, ESLint-ловушки ·
 [npm-publish-from-monorepo](/.claude/docs/npm-publish-from-monorepo.md) внутренние `@letar/*` — только
 в `devDependencies` · [vitest-alias-prefix-matching](/.claude/docs/vitest-alias-prefix-matching.md)
-alias матчится по префиксу
+alias матчится по префиксу ·
+[vitest-unlinked-workspace-lib-imports](/.claude/docs/vitest-unlinked-workspace-lib-imports.md) ⚠️
+`@letar/*`-либа только в `implicitDependencies` (без bun-симлинка) не резолвится под vitest
 
 **Тесты и форматирование:** [e2e-testing](/.claude/docs/e2e-testing.md) ·
 [unit-testing](/.claude/docs/unit-testing.md) ⚠️ обязательный `tsconfig.spec.json` ·
