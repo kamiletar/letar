@@ -1,5 +1,26 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-08-19 — DataGrid: редактирование enum/boolean-колонок (v2.7.0)
+
+`EditableCell` в `field-data-grid.tsx` рендерил `<Input type="text"|"number">` для любого
+`fieldType`, включая `enum`/`boolean` — не было ветвления, которое уже есть в соседнем
+`EditingCell` (`TableEditor`, `table-cell.tsx`).
+
+**Реализация:** перенесено ветвление из `table-cell.tsx` почти без изменений — `NativeSelect.Root`
+для enum (список опций из `column.enumValues`), нативный `<input type="checkbox">` для boolean,
+коммит на `onChange`. Единственное отличие от исходного `EditingCell` — `DataGrid` до этой задачи
+получал в `EditableCell` только `value`/`fieldType`, не весь `ResolvedColumn`, поэтому добавлен
+отдельный проп `enumValues?: string[]`, прокинутый из `resolved?.enumValues` в родительском
+`FieldDataGrid` (тот же `resolvedCols.find(...)`, что уже резолвит `fieldType`). `table-cell.tsx`
+не менялся.
+
+**Тесты:** добавлен кейс в `field-data-grid.spec.tsx` — схема с `z.enum`/`z.boolean` полями
+массива, клик по enum-ячейке рендерит `<select>` (`role="combobox"`), клик по boolean-ячейке —
+чекбокс, оба коммитят значение сразу.
+
+**Верификация:** `nx test @letar/forms -- field-data-grid.spec.tsx` — 9/9 зелёных.
+`nx typecheck:tsgo @letar/forms` и `nx lint @letar/forms` — без ошибок.
+
 ## 2026-08-19 — Дедуп коэрсии значения ячейки таблицы + аудит DataGrid (v2.6.1)
 
 Аудит по следам фикса `TableEditor` из v2.6.0: проверить, воспроизводится ли тот же баг

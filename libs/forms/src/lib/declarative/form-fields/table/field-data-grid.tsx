@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Button, Checkbox, Field, HStack, Input, Table, Text } from '@chakra-ui/react'
+import { Box, Button, Checkbox, Field, HStack, Input, NativeSelect, Table, Text } from '@chakra-ui/react'
 import { createDataGridTableFeatures } from '@letar/forms-core/table'
 import { useField } from '@tanstack/react-form'
 import {
@@ -175,6 +175,7 @@ export function FieldDataGrid({
               <EditableCell
                 value={value}
                 fieldType={resolved?.fieldType ?? 'string'}
+                enumValues={resolved?.enumValues}
                 onSave={(newValue) => {
                   // Обновляем в форме
                   const fieldPath = `${fullPath}[${rowIndex}].${colDef.name}`
@@ -520,11 +521,13 @@ export function FieldDataGrid({
 function EditableCell({
   value,
   fieldType,
+  enumValues,
   onSave,
   onCancel,
 }: {
   value: unknown
   fieldType: CellFieldType
+  enumValues?: string[]
   onSave: (value: unknown) => void
   onCancel: () => void
 }) {
@@ -537,6 +540,48 @@ function EditableCell({
     if (e.key === 'Escape') {
       onCancel()
     }
+  }
+
+  // Enum → NativeSelect, коммит сразу на change (как в TableEditor)
+  if (fieldType === 'enum' && enumValues) {
+    return (
+      <NativeSelect.Root size="xs">
+        <NativeSelect.Field
+          value={String(value ?? '')}
+          onChange={(e) => onSave(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              onCancel()
+            }
+          }}
+          autoFocus
+        >
+          <option value="">—</option>
+          {enumValues.map((v) => (
+            <option key={v} value={v}>
+              {v}
+            </option>
+          ))}
+        </NativeSelect.Field>
+      </NativeSelect.Root>
+    )
+  }
+
+  // Boolean → чекбокс, коммит сразу на change
+  if (fieldType === 'boolean') {
+    return (
+      <input
+        type="checkbox"
+        checked={!!value}
+        onChange={(e) => onSave(e.target.checked)}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            onCancel()
+          }
+        }}
+        autoFocus
+      />
+    )
   }
 
   return (

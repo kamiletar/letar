@@ -4,6 +4,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.7.0] - 2026-08-19
+
+### Added
+
+- **`Form.Field.DataGrid` — редактирование enum/boolean-колонок.** `EditableCell` рендерил
+  текстовый/числовой `<Input>` для любого `fieldType`, включая `enum` и `boolean` — значение
+  можно было ввести только строкой, без выбора из допустимых вариантов и без чекбокса.
+  Добавлено ветвление по образцу `EditingCell` из `TableEditor` (`table-cell.tsx`):
+  `NativeSelect.Root`/`NativeSelect.Field` для `enum` (список берётся из `enumValues` резолвленной
+  колонки, проброшен как новый проп `EditableCell.enumValues`), нативный `<input
+  type="checkbox">` для `boolean`. Оба варианта коммитят значение сразу на `onChange`, как и в
+  `TableEditor` — не ждут `blur`.
+
 ## [2.6.1] - 2026-08-19
 
 ### Changed

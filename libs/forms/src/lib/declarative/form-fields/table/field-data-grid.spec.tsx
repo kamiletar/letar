@@ -2,6 +2,7 @@ import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
+import { z } from 'zod/v4'
 import { Form } from '../../'
 
 const TestWrapper = ({ children }: { children: ReactNode }) => (
@@ -192,5 +193,51 @@ describe('Form.Field.DataGrid', () => {
     await waitFor(() => expect(screen.getByText('Сотрудники')).toBeInTheDocument())
     // manualPagination: virtualized — счётчик записей без "Страница X из Y"
     expect(screen.getByText(/3 записей/)).toBeInTheDocument()
+  })
+
+  it('enum-колонка редактируется через select, boolean — через чекбокс', async () => {
+    const EmployeeSchema = z.object({
+      employees: z.array(z.object({
+        name: z.string(),
+        status: z.enum(['active', 'vacation']),
+        remote: z.boolean(),
+      })),
+    })
+    const staff = [
+      { name: 'Иван', status: 'active' as const, remote: false },
+      { name: 'Мария', status: 'vacation' as const, remote: true },
+    ]
+
+    render(
+      <TestWrapper>
+        <Form schema={EmployeeSchema} initialValue={{ employees: staff }} onSubmit={vi.fn()}>
+          <Form.Field.DataGrid
+            name="employees"
+            label="Сотрудники"
+            columns={[
+              { name: 'name', label: 'Имя' },
+              { name: 'status', label: 'Статус', editable: true },
+              { name: 'remote', label: 'Удалённо', editable: true },
+            ]}
+          />
+        </Form>
+      </TestWrapper>,
+    )
+
+    await waitFor(() => expect(screen.getByText('Иван')).toBeInTheDocument())
+
+    // Открываем ячейку статуса первой строки — рендерится native select
+    fireEvent.click(screen.getByText('active'))
+    const select = await screen.findByRole('combobox')
+    expect(select).toBeInTheDocument()
+    fireEvent.change(select, { target: { value: 'vacation' } })
+    await waitFor(() => expect(screen.getAllByText('vacation')).not.toHaveLength(0))
+
+    // Открываем ячейку boolean — рендерится чекбокс
+    fireEvent.click(screen.getByText('false'))
+    const checkbox = await screen.findByRole('checkbox')
+    expect(checkbox).toBeInTheDocument()
+    fireEvent.click(checkbox)
+    await waitFor(() => expect(screen.getAllByText('true')).not.toHaveLength(0))
   })
 })
