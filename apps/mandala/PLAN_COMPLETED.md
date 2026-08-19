@@ -11,6 +11,16 @@
 
 ---
 
+## Сессия 2026-08-19 — setRequestLocale/SSG: точечный фикс `/contacts`
+
+Аудит по классу бага, найденному в apps/studio (`[locale]/layout.tsx` с `generateStaticParams`
+без `setRequestLocale` в конкретных `page.tsx`). Почти все страницы mandala уже были в порядке.
+Найден один настоящий кандидат: `(main)/contacts/page.tsx` держал `export const dynamic =
+'force-dynamic'` без всякой причины (ни БД, ни сессии в самой странице — форма обратной связи
+работает через server action с клиента). Убран флаг, добавлен `setRequestLocale(locale)` —
+маркер сборки сменился `ƒ → ●`. `nx run-many -t format/lint/typecheck:tsgo --projects=mandala` —
+зелёные (2 pre-existing warning в `use-event-listener.ts`, не мои). v0.40.10 → v0.40.11.
+
 ## Сессия 2026-08-19 — Webpack-фикс `@tanstack/devtools-ui@0.7.0` — server-половина графа
 
 Тот же баг, что уронил dev-сервер `driving-school` (500, `Attempted import error: 'use' is not
