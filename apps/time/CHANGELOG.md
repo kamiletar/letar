@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.4 (2026-08-19)
+
+### Исправлено
+
+- Деплой падал в crash-loop: `Cannot find module '.../@swc/helpers/esm/_interop_require_default.js'`
+  (`MODULE_NOT_FOUND`). Трейсер `standalone`-сборки (`@vercel/nft`) не докопировал `@swc/helpers`
+  в `.next/standalone` при первом полном ребилде — тот же класс бага, что чинили в `aboi`
+  (`nextjs-standalone-tracing.md`). `outputFileTracingIncludes` в `next.config.js` с сужённым
+  глобом `node_modules/@swc/helpers/**/*` внутри bun-директории пакета.
+
 ## 0.5.3 (2026-08-19)
 
 ### Исправлено

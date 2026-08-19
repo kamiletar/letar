@@ -8,6 +8,15 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
  */
 const nextConfig = {
   output: 'standalone',
+  // @swc/helpers — трейсер (@vercel/nft) не докопировал пакет в .next/standalone при первом
+  // полном ребилде (MODULE_NOT_FOUND на _interop_require_default.js, деплой 2026-08-19). Тот же
+  // класс бага, что у aboi (nextjs-standalone-tracing.md). Глоб сужен до
+  // node_modules/@swc/helpers/**/* внутри bun-директории пакета — широкий @swc+helpers*/**/*
+  // матчит и вложенный node_modules/tslib (симлинк), Turbopack падает на нём при чтении
+  // директории как файла.
+  outputFileTracingIncludes: {
+    '/**/*': ['../../node_modules/.bun/@swc+helpers*/node_modules/@swc/helpers/**/*'],
+  },
   nx: {},
   turbopack: {},
   // Typecheck отдельно через nx typecheck:tsgo — Next.js не понимает TS project references
