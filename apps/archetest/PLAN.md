@@ -826,3 +826,11 @@ CAT/IRT. ✅ Подтверждено Kami: разделение ASD → ASD + D
       захардкожено в тесте как исключение. Влияет на `actual_max` этих шкал —
       небольшая систематическая ошибка нормализации. Разобрать вместе с ревьюером,
       раз он всё равно будет смотреть банк.
+
+## Техдолг: подключить theme:check
+
+Гейт сырых цветов/теней/transition в UI-коде (`nx g @letar/generators:theme-check-integrate
+archetest`, генератор `libs/generators`, обёртка над `@letar/theme-check`) пока не подключён. Уже
+подключено: domwellbes, studio, aboi. Подключать по одному, не пакетно — allowlist легитимных
+исключений собирается руками при первом прогоне. Разбор —
+`.claude/docs/theme-hardcode-gate-coverage.md` в родительском монорепо `letar`.

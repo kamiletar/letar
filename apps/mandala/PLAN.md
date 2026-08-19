@@ -114,6 +114,14 @@
 > **Полная история выполненных фаз, закрытых багов и рефакторинга — в
 > [PLAN_COMPLETED.md](./PLAN_COMPLETED.md).**
 
+## Техдолг: подключить theme:check
+
+Гейт сырых цветов/теней/transition в UI-коде (`nx g @letar/generators:theme-check-integrate
+mandala`, генератор `libs/generators`, обёртка над `@letar/theme-check`) пока не подключён. Уже
+подключено: domwellbes, studio, aboi. Подключать по одному, не пакетно — allowlist легитимных
+исключений собирается руками при первом прогоне. Разбор —
+`.claude/docs/theme-hardcode-gate-coverage.md`.
+
 ---
 
 **Последнее обновление:** 2026-08-09

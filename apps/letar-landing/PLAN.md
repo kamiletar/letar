@@ -14,3 +14,11 @@
       карточки (внешние ссылки vs проекты без URL), footer, robots.txt/sitemap.xml, 404 на несуществующий
       маршрут, отсутствие ошибок в консоли, проверка внутренних ссылок, переход по внешней ссылке в новой
       вкладке. Приложение без БД/auth/форм — сьют не участвует в `E2E_GATED_APPS` (не в скоупе задачи).
+
+### Техдолг: подключить theme:check
+
+Гейт сырых цветов/теней/transition в UI-коде (`nx g @letar/generators:theme-check-integrate
+letar-landing`, генератор `libs/generators`, обёртка над `@letar/theme-check`) пока не
+подключён. Уже подключено: domwellbes, studio, aboi. Подключать по одному, не пакетно —
+allowlist легитимных исключений собирается руками при первом прогоне. Разбор —
+`.claude/docs/theme-hardcode-gate-coverage.md`.

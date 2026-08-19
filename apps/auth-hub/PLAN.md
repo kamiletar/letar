@@ -140,3 +140,11 @@
 ### Не планируется (собственная авторизация)
 
 - driving-school, imot, premium-rosstil — standalone Better Auth, миграция на OIDC не нужна
+
+## Техдолг: подключить theme:check
+
+Гейт сырых цветов/теней/transition в UI-коде (`nx g @letar/generators:theme-check-integrate
+auth-hub`, генератор `libs/generators`, обёртка над `@letar/theme-check`) пока не подключён. Уже
+подключено: domwellbes, studio, aboi. Подключать по одному, не пакетно — allowlist легитимных
+исключений собирается руками при первом прогоне. Разбор —
+`.claude/docs/theme-hardcode-gate-coverage.md`.

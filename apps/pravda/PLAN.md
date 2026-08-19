@@ -52,6 +52,15 @@
 - [x] SEO оптимизация (robots, sitemap, meta, OG, JSON-LD)
 - [x] Перекрёстные ссылки (CrossRef компонент)
 
+## Техдолг: подключить theme:check
+
+Гейт сырых цветов/теней/transition в UI-коде (`nx g @letar/generators:theme-check-integrate
+pravda`, генератор `libs/generators`, обёртка над `@letar/theme-check`) пока не подключён —
+только тестово прогнан и откачен 2026-08-19 (нашёл реальные `scale()` в `src/theme/recipes/*`,
+подтвердил работоспособность на четвёртом приложении). Уже подключено насовсем: domwellbes,
+studio, aboi. Подключать по одному, не пакетно — allowlist легитимных исключений собирается
+руками при первом прогоне. Разбор — `.claude/docs/theme-hardcode-gate-coverage.md`.
+
 ---
 
 **Последнее обновление:** 2026-08-09

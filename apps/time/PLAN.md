@@ -314,3 +314,11 @@ libs/number-words/
       `nx run time-e2e:e2e` напрямую, без `nx run time:dev` — фикс реально работает.
 - [x] **Добавлен в `E2E_GATED_APPS`** (`libs/infra-config/src/index.ts`, коммит `6af28c70`,
       BlackCove, с разрешения владельца).
+
+## Техдолг: подключить theme:check
+
+Гейт сырых цветов/теней/transition в UI-коде (`nx g @letar/generators:theme-check-integrate
+time`, генератор `libs/generators`, обёртка над `@letar/theme-check`) пока не подключён. Уже
+подключено: domwellbes, studio, aboi. Подключать по одному, не пакетно — allowlist легитимных
+исключений собирается руками при первом прогоне. Разбор —
+`.claude/docs/theme-hardcode-gate-coverage.md`.

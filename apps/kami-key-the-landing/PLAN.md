@@ -21,3 +21,11 @@
       навигация, CTA "Скачать для Windows", секции "Возможности"/"Скачать", FAQ-аккордеон, футер,
       health-check, 404 на несуществующем маршруте. Нужен для тиража staging-e2e-гейта (PLAN.md
       §18.7 корневого репо).
+
+## Техдолг: подключить theme:check
+
+Гейт сырых цветов/теней/transition в UI-коде (`nx g @letar/generators:theme-check-integrate
+kami-key-the-landing`, генератор `libs/generators`, обёртка над `@letar/theme-check`) пока не
+подключён. Уже подключено: domwellbes, studio, aboi. Подключать по одному, не пакетно —
+allowlist легитимных исключений собирается руками при первом прогоне. Разбор —
+`.claude/docs/theme-hardcode-gate-coverage.md`.

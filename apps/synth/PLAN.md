@@ -521,3 +521,11 @@ SysEx), просить владельца открыть `localhost:3022` **в �
 
 ✅ **Выбор голоса из 32-голосого bulk-банка `.syx` в UI** — сделано 2026-07-29 (см. CHANGELOG
 0.21.0): импорт bulk-файла показывает список всех имён пресетов, клик применяет выбранный.
+
+## Техдолг: подключить theme:check
+
+Гейт сырых цветов/теней/transition в UI-коде (`nx g @letar/generators:theme-check-integrate
+synth`, генератор `libs/generators`, обёртка над `@letar/theme-check`) пока не подключён. Уже
+подключено: domwellbes, studio, aboi. Подключать по одному, не пакетно — allowlist легитимных
+исключений собирается руками при первом прогоне. Разбор —
+`.claude/docs/theme-hardcode-gate-coverage.md`.

@@ -3329,4 +3329,12 @@ model SwissPair {
 | 8 | ~~Роль «Продюсер команды» — какие права?~~ ✅ Роль не существует в КБС, удалить                         | Решён         |
 | 9 | Есть ли страницы московских команд на Tilda? Или только СПб?                                            | Организатор   |
 
+## Техдолг: подключить theme:check
+
+Гейт сырых цветов/теней/transition в UI-коде (`nx g @letar/generators:theme-check-integrate
+grandslamcup`, генератор `libs/generators`, обёртка над `@letar/theme-check`) пока не подключён.
+Уже подключено: domwellbes, studio, aboi. Подключать по одному, не пакетно — allowlist
+легитимных исключений собирается руками при первом прогоне. Разбор —
+`.claude/docs/theme-hardcode-gate-coverage.md`.
+
 ---
