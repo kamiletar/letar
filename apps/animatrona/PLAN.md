@@ -4,6 +4,9 @@
 
 ## Черновик (новые идеи)
 
+- [ ] **Аудит `_active: scale()` в теме renderer'а на `pressScale`** (`@letar/ui`) — задача
+      описана в [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md).
+
 - [ ] **AniList как источник английского описания (`descriptionEn`) в AnimeInfo/directoryCid**
       (план от 2026-08-08) — идея: раз в раздаче уже бывают английские аудиодорожки и субтитры,
       логично класть в `directoryCid` и английское описание — манифест должен быть
