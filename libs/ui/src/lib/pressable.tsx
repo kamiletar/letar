@@ -96,6 +96,67 @@ export function Pressable({ children, onPointerDown: externalOnPointerDown, ...p
   )
 }
 
+export interface PressableCtaProps extends PressableProps {
+  /**
+   * Радиус обёртки — обязан совпадать с реальным радиусом кнопки внутри, иначе `overflow: hidden`
+   * обрежет её либо квадратными, либо слишком скруглёнными углами относительно самой кнопки.
+   * Дефолта нет намеренно: значение зависит от рецепта кнопки конкретного приложения.
+   */
+  borderRadius: BoxProps['borderRadius']
+  /** Токен цвета focus ring — должен совпадать с тем, что использует сама кнопка. */
+  focusRingColorToken?: string
+}
+
+/**
+ * Обёртка основной CTA-кнопки: добавляет position-aware ripple от точки клика мышью.
+ *
+ * Ripple — отдельный канал обратной связи: он показывает, ГДЕ нажали, тогда как `scale`
+ * у кнопки показывает только САМ факт нажатия. Глубину обёртка не трогает — за неё отвечает
+ * рецепт кнопки приложения.
+ *
+ * Применять только к кнопкам с тёмной заливкой (`colorPalette="brand"` или аналог): ripple
+ * захардкожен белым полупрозрачным, на светлых поверхностях (`variant="inverted"`, `outline`)
+ * он не виден. И только там, где кнопка доступна на десктопе — на тач-устройствах
+ * `useRipple` не срабатывает вовсе.
+ *
+ * `Pressable` отсекает ripple по своим границам (`overflow: hidden`), а focus ring Chakra
+ * рисуется СНАРУЖИ кнопки (`outline-offset: 2px`) — и обрезался бы целиком, потому что
+ * обёртка совпадает с кнопкой по прямоугольнику. Собственный outline элемента его же
+ * `overflow` не режет, поэтому ring дублируется на обёртке — теми же 2px/2px и тем же цветом,
+ * что у кнопки, так что визуально он неотличим от необёрнутой. `:has(:focus-visible)`, а не
+ * `_focusWithin` — иначе ring вылезал бы и на клик мышью.
+ *
+ * @example
+ * ```tsx
+ * <PressableCta borderRadius="full">
+ *   <Button asChild colorPalette="brand" borderRadius="full">
+ *     <NextLink href="/houses/">Посмотреть проекты</NextLink>
+ *   </Button>
+ * </PressableCta>
+ * ```
+ */
+export function PressableCta(
+  { children, borderRadius, focusRingColorToken = 'focus.ring', css, ...props }: PressableCtaProps,
+) {
+  return (
+    <Pressable
+      display="inline-flex"
+      borderRadius={borderRadius}
+      css={{
+        '&:has(:focus-visible)': {
+          outline: '2px solid',
+          outlineColor: focusRingColorToken,
+          outlineOffset: '2px',
+        },
+        ...css,
+      }}
+      {...props}
+    >
+      {children}
+    </Pressable>
+  )
+}
+
 /**
  * Конфиг для мержа в defineConfig() приложения.
  * Подключает кейфрейм ripple-expand и глобальные стили для [data-pressable].

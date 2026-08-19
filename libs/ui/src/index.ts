@@ -71,7 +71,15 @@ export { CopyToClipboardButton, type CopyToClipboardButtonProps } from './lib/co
 export { AppEmptyState, type AppEmptyStateProps } from './lib/empty-state'
 export { FaqAccordion, type FaqAccordionProps, type FaqItem } from './lib/faq-accordion'
 export { type PressDepth, pressScale } from './lib/press-scale'
-export { Pressable, pressableConfig, type PressableProps, RippleEl, useRipple } from './lib/pressable'
+export {
+  Pressable,
+  pressableConfig,
+  PressableCta,
+  type PressableCtaProps,
+  type PressableProps,
+  RippleEl,
+  useRipple,
+} from './lib/pressable'
 export { PressableButton, type PressableButtonProps } from './lib/pressable-button'
 export { PriorityNav, type PriorityNavItem, type PriorityNavProps } from './lib/priority-nav'
 export { StatusBadge, type StatusConfig } from './lib/status-badge'
