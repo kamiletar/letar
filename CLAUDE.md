@@ -149,7 +149,10 @@ alias матчится по префиксу ·
 `@letar/*`-либа только в `implicitDependencies` (без bun-симлинка) не резолвится под vitest ·
 [zod-computed-key-index-access-pitfall](/.claude/docs/zod-computed-key-index-access-pitfall.md) ⚠️
 `z.object({...Object.fromEntries(arr.map(...))})` — динамический ключ ловит TS7053 не всегда,
-зависит от формы callback'а, а не от структуры массива ключей
+зависит от формы callback'а, а не от структуры массива ключей ·
+[eslint-flat-react-typescript-missing-react-hooks-plugin](/.claude/docs/eslint-flat-react-typescript-missing-react-hooks-plugin.md)
+⚠️ `nx.configs['flat/react-typescript']` не регистрирует `eslint-plugin-react-hooks` — правило
+`exhaustive-deps`/`rules-of-hooks` не проверялось ни в одном из ~22 приложений с этим паттерном
 
 **Тесты и форматирование:** [e2e-testing](/.claude/docs/e2e-testing.md) ·
 [unit-testing](/.claude/docs/unit-testing.md) ⚠️ обязательный `tsconfig.spec.json` ·

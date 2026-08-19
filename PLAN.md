@@ -3116,3 +3116,32 @@ query-provider и явный `--webpack` — требуют отдельного
 isServer})`, которую Next вызывает сам — обёртка сэкономила бы 3-4 строки ценой ещё одной
 кросс-репо зависимости и лишнего импорта в каждом `next.config.*`. Для 5 текущих потребителей
 это не оправдано; если список вырастет за 8-10 приложений — пересмотреть.
+
+## §52 — `eslint-plugin-react-hooks` не был зарегистрирован ни в одном из ~22 приложений (2026-08-19) 🆕
+
+В `apps/studio` при чтении кода обнаружено: `eslint-disable-next-line react-hooks/exhaustive-deps`
+сам был ошибкой ESLint («Definition for rule was not found»). Причина — `nx.configs['flat/react-typescript']`
+(`@nx/eslint-plugin`), который приложения спредят перед корневым `baseConfig` (паттерн
+`...nx.configs['flat/react-typescript'], ...baseConfig`), не регистрирует `eslint-plugin-react-hooks`
+вообще — там только `default-case`, `@typescript-eslint/*`. Правило `exhaustive-deps` не
+проверялось нигде в репозитории, кроме `apps/animatrona`, который чинил это точечно у себя ещё
+раньше.
+
+Проверено: 22 из ~30 приложений используют этот паттерн. Список большой — фикс централизован в
+корневом [eslint.config.mjs](/eslint.config.mjs) одним блоком (по образцу animatrona) вместо
+точечной правки каждого `apps/<app>/eslint.config.mjs`.
+
+После включения правила `nx lint` прогнан по всем 22 приложениям — большинство или зелёные, или
+получили только новые `warning` (`exhaustive-deps`, не ломает сборку). Реальную ошибку
+(`rules-of-hooks`, severity `error`) правило нашло только в `driving-school`: 10 комбобоксов
+(`src/driving-school-form/comboboxes/*.tsx`) вызывают хук внутри `useQuery`-пропа
+`FieldCombobox` — безопасный render-prop паттерн, уже помеченный `oxlint-disable-next-line` с тем
+же обоснованием (oxlint эту проверку видел, ESLint — нет). Добавлена парная
+`eslint-disable-next-line`, `nx lint driving-school` снова зелёный.
+
+Остальные `error`, всплывшие в studio (hardcoded HEX в `icon.tsx`, ловит `theme:check`,
+не ESLint), form-docs (`@ts-nocheck`/`{}`-тип в сгенерённых `.source/*` файлах Fumadocs) и
+label-printer-desktop (старый `NODE_ENV === 'production'`, §см. `node-env-not-production-signal.md`)
+— не связаны с этим фиксом, существовали до него, не трогались.
+
+Задокументировано: [eslint-flat-react-typescript-missing-react-hooks-plugin.md](/.claude/docs/eslint-flat-react-typescript-missing-react-hooks-plugin.md).
