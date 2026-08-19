@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@letar/animatrona-shared": "*",
-    "react": "19.2.3",
     "react-native": "0.84.1",
     "@react-native/codegen": "0.84.1",
     "@react-native/gradle-plugin": "0.84.1"
