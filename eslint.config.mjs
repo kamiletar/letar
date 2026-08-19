@@ -1,9 +1,29 @@
 import nx from '@nx/eslint-plugin'
+import reactHooksPlugin from 'eslint-plugin-react-hooks'
 
 export default [
   ...nx.configs['flat/base'],
   ...nx.configs['flat/typescript'],
   ...nx.configs['flat/javascript'],
+  // `nx.configs['flat/react-typescript']`, который приложения спредят перед этим конфигом
+  // (см. apps/studio/eslint.config.mjs и другие — паттерн `...nx.configs['flat/react-typescript'],
+  // ...baseConfig`), не регистрирует плагин `eslint-plugin-react-hooks`. Без этого блока
+  // `react-hooks/exhaustive-deps` не резолвится нигде в репозитории: существующие
+  // `eslint-disable-next-line react-hooks/exhaustive-deps` сами становятся ошибками
+  // «Definition for rule was not found». Найдено в apps/studio (2026-08-19), но баг общий
+  // для всех ~22 приложений с этим паттерном — фикс здесь закрывает их разом, не по одному.
+  // Подключаем только две классические проверки — пресет `recommended` в v7 тянет ещё
+  // ~14 правил React Compiler, это отдельная задача.
+  {
+    files: ['**/*.ts', '**/*.tsx'],
+    plugins: {
+      'react-hooks': reactHooksPlugin,
+    },
+    rules: {
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+    },
+  },
   {
     ignores: [
       '**/dist',
