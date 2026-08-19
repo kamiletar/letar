@@ -164,6 +164,7 @@
         "libs/query-provider/**/*",
         "libs/redis-client/**/*",
         "libs/seo/**/*",
+        "libs/studio-mcp/**/*",
         "libs/studio-time-mcp/**/*",
         "libs/tailwind-utils/**/*",
         "libs/ui/**/*",
