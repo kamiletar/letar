@@ -3041,3 +3041,26 @@ cron и SSH-ключ для rsync на s2. Проверка «через ~2 не
 - [ ] Починить/обойти детекцию `SERVER_NAME` на s3 (`hostname -f` не матчится с ожидаемым
       паттерном).
 - [ ] До фикса: редеплой s3-инстанции `dashboard-agent` — только вручную по SSH.
+
+## §51 — `@tanstack/devtools-ui@0.7.0`: webpack ломал серверную половину графа у потребителей `@letar/query-provider` (2026-08-19) 🆕
+
+`nx dev driving-school` отдавал 500 на любой странице: `Attempted import error: 'use' is not
+exported from 'solid-js/web'` через цепочку `@tanstack/react-devtools` →
+`libs/query-provider/src/lib/devtools-panel.tsx`. Причина — `@tanstack/devtools-ui@0.7.0+`
+(бампнута в `faf83a47`, 2026-08-14) импортирует именованный `use` из `solid-js/web`, а webpack
+резолвит серверную половину графа сборки через условие экспорта `node`, под которым
+`solid-js/web` (`dist/server.js`) `use` не экспортирует. `next/dynamic({ ssr: false })` от этого
+не защищает — модуль резолвится в граф компиляции для обеих половин независимо от того, где он
+реально выполняется.
+
+Фикс — расширен существующий паттерн `config.resolve.alias['@tanstack/devtools-ui'] = false`:
+`if (!dev)` → `if (isServer || !dev)`. Применено во всех пяти приложениях-потребителях
+`@letar/query-provider`, использующих webpack (не Turbopack) в dev: `driving-school`,
+`dashboard`, `animatrona-tracker`, `grandslamcup`, `mandala`. Проверено: dev-сервер
+`driving-school`/`mandala` (чистая компиляция, `GET / 200`), прод-сборка `driving-school`
+(exit 0, 103/103 страниц).
+
+- [ ] ⚠️ Открытый вопрос: `dsperevod`, `svoichuzhie`, `form-develop-app` — тоже потребители
+      `@letar/query-provider`, их dev использует Turbopack (вне риска), но прод-сборка
+      (`next build`, webpack-based) не проверялась. Нужно прогнать `nx build` на всех трёх и
+      применить тот же фикс, если он там тоже актуален.
