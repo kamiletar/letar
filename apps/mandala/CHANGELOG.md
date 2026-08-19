@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+## [0.40.10] - 2026-08-19
+
+### Fixed: dev-сервер мог отдавать 500 из-за `@tanstack/devtools-ui@0.7.0`
+
+Webpack-алиас `@tanstack/devtools-ui: false` расширен с `if (!dev)` на `if (isServer || !dev)` —
+серверная половина графа сборки резолвит `solid-js/web` без экспорта `use`, который эта версия
+devtools-ui импортирует через `@letar/query-provider`. Разбор — PLAN.md §51.
+
 ## [0.40.9] - 2026-08-14
 
 ### Changed

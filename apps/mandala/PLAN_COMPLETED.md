@@ -11,6 +11,16 @@
 
 ---
 
+## Сессия 2026-08-19 — Webpack-фикс `@tanstack/devtools-ui@0.7.0` — server-половина графа
+
+Тот же баг, что уронил dev-сервер `driving-school` (500, `Attempted import error: 'use' is not
+exported from 'solid-js/web'` через `@letar/query-provider`) — mandala в зоне риска той же
+причины (webpack в dev). Существующий `config.resolve.alias['@tanstack/devtools-ui'] = false`
+работал только в prod (`if (!dev)`); расширен на `if (isServer || !dev)`. Проверено запуском
+dev-сервера — компиляция чистая (отдельно найденный там 500 — из-за недоступной локальной БД,
+не связан с этим багом). Полный разбор — PLAN.md §51 и
+`apps/driving-school/PLAN_COMPLETED.md`.
+
 ## Сессия 2026-08-14 — почему `auth-button.tsx` не переведён на общий `UserMenu` (`@letar/ui`)
 
 Аудит по всему монорепо нашёл 4 приложения с независимыми копиями меню аккаунта (`domwellbes`,
