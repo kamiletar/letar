@@ -1,5 +1,13 @@
 # Time — Выполненные задачи
 
+## Проверка setRequestLocale/SSG (2026-08-19)
+
+Аудит по классу бага, найденному в apps/studio. `nx build time` уже показывает `●` для всех 40
+локалей на всех пяти маршрутах — изменений не потребовалось. Разбор в PLAN.md: `/[locale]` и
+`privacy` — server components под корневым `setRequestLocale`; `profile`/`sign-in`/`unsubscribe`
+— `'use client'`-страницы, которым setRequestLocale физически недоступен, но статике это не
+мешает.
+
 ## Применён Pressable к главным CTA (2026-08-19, v0.5.5)
 
 Тема подключала `pressableConfig` из `@letar/ui` (keyframes + `globalCss` целиком) со скаффолда,
