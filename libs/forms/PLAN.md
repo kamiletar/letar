@@ -4,6 +4,20 @@
 
 ---
 
+## ✅ [2026-08-19] DataGrid — редактирование enum/boolean-колонок — закрыто
+
+Задача не из backlog: `EditableCell` в `field-data-grid.tsx` рендерил текстовый/числовой `<Input>`
+для любого `fieldType`, включая `enum`/`boolean` — не было ветвления, которое уже есть в соседнем
+`EditingCell` (`TableEditor`, `table-cell.tsx`).
+
+- **Реализация:** перенесено ветвление из `table-cell.tsx` — `NativeSelect.Root` для enum
+  (`enumValues` проброшен новым пропом `EditableCell.enumValues`, источник — `resolved?.enumValues`
+  в `FieldDataGrid`), нативный `<input type="checkbox">` для boolean, коммит на `onChange`.
+  `table-cell.tsx` не менялся.
+- Версия: `@letar/forms` 2.6.1 → 2.7.0.
+- Проверено: `nx test @letar/forms -- field-data-grid.spec.tsx` (9/9), `typecheck:tsgo`, `lint` —
+  зелёные.
+
 ## ✅ [2026-08-19] Дедуп коэрсии значения ячейки таблицы `TableEditor`/`DataGrid` — закрыто
 
 Задача на аудит (не из backlog): проверить `field-data-grid.tsx` (`EditableCell`) на устойчивость
