@@ -165,6 +165,37 @@ import { Pressable, PressableButton } from '@letar/ui'
 </Pressable>
 ```
 
+### pressScale — шкала глубины нажатия
+
+Лестница `transform`-значений для `_active` в темах приложений: `2xs`…`2xl`, от `scale(0.94)`
+до `scale(0.99)`. Принцип — чем крупнее интерактивная поверхность, тем мельче относительное
+проседание, чтобы абсолютный сдвиг края читался одинаково у мелкой кнопки и у карточки.
+Шаг `md` — значение по умолчанию для поверхности без собственного размера.
+
+Это обычная константа, а не токен темы: категории для `transform` в `TokenCategory` Chakra v3
+нет, а занять чужую (`sizes`/`opacity`) — сломать контракт темы. Значения хранятся готовыми
+строками под `as const` намеренно — функция, возвращающая `string`, ломает `defineLayerStyles`
+(TS2322 на каждом свойстве объекта). Оба обоснования подробно — в JSDoc `src/lib/press-scale.ts`.
+
+```ts
+import { pressScale } from '@letar/ui'
+
+// recipes/button.ts
+size: {
+  sm: { _active: { transform: pressScale.sm } },
+  md: { _active: { transform: pressScale.md } },
+}
+
+// recipes/link.ts — комбинируется с другими трансформами
+_active: { transform: `translateY(1px) ${pressScale.xl}` }
+```
+
+⚠️ `pressableConfig.globalCss` задаёт `[data-pressable]` свой `_active: scale(0.93)` — это НЕ шаг
+этой шкалы и намеренно с ней не сведён. Обёртка `Pressable` может стоять поверх кнопки, у которой
+уже есть глубина, и два трансформа перемножились бы на разных кривых. Приложению, где глубина
+живёт в recipes, разливать `pressableConfig.globalCss` не нужно — хватает `touchAction` и
+кейфреймов (образец — `apps/domwellbes/src/theme/index.ts`).
+
 ### CookieBanner / CookieSettingsButton
 
 Баннер cookie-согласий (152-ФЗ) с тремя категориями (необходимые/аналитика/маркетинг),
