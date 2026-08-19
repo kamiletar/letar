@@ -16,13 +16,17 @@
 # явное подтверждение через переменную окружения:
 #   GIT_ALLOW_MULTI_SCOPE_COMMIT=1 git commit ...
 #
+# Флаг не отключает саму проверку scope — он лишь превращает блокировку в предупреждение:
+# при multi-scope хук печатает список затронутых scope с числом файлов в каждом (не блокируя
+# коммит), чтобы тот, кто снял барьер флагом, увидел явную сводку вместо тихого прохода.
+# Прецедент, из-за которого это добавлено — .claude/docs/git-multi-agent-incidents.md
+# «Дополнение 2026-08-19», «Побочное наблюдение 2»: флаг стоял «на всякий случай» у легитимного
+# multi-scope коммита (bump submodule) и заодно забрал два чужих файла, случайно оказавшихся
+# застейдженными в общем индексе после гонки за HEAD в параллельной сессии.
+#
 # Установка: scripts/hooks/install.sh (ставит связку с pre-commit-sops.sh)
 
 set -euo pipefail
-
-if [[ "${GIT_ALLOW_MULTI_SCOPE_COMMIT:-0}" == "1" ]]; then
-  exit 0
-fi
 
 mapfile -t FILES < <(git diff --cached --name-only --diff-filter=ACMRTUXB)
 
@@ -77,8 +81,19 @@ for f in "${FILES[@]}"; do
       scope="$f"
       ;;
   esac
-  SCOPES["$scope"]=1
+  SCOPES["$scope"]=$(( ${SCOPES["$scope"]:-0} + 1 ))
 done
+
+if [[ "${GIT_ALLOW_MULTI_SCOPE_COMMIT:-0}" == "1" ]]; then
+  if [[ ${#SCOPES[@]} -gt 1 ]]; then
+    echo "⚠️  ФЛАГ GIT_ALLOW_MULTI_SCOPE_COMMIT снят — коммитятся файлы из ${#SCOPES[@]} scope, это осознанно?" >&2
+    for s in "${!SCOPES[@]}"; do
+      echo "  - $s (${SCOPES[$s]} файл(ов))" >&2
+    done
+    echo "" >&2
+  fi
+  exit 0
+fi
 
 if [[ ${#SCOPES[@]} -gt 1 ]]; then
   echo "⛔ pre-commit заблокирован: застейджены файлы из ${#SCOPES[@]} разных scope:" >&2
