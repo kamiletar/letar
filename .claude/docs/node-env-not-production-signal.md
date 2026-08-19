@@ -50,6 +50,35 @@ GitHub через `isProd = NODE_ENV === 'production'`. Поскольку `next
 локальный). Почищено вместе с ревизией ниже: условие — `Boolean(process.env.GITHUB_PAT)`, как и
 в соседнем `keystatic.config.ts`.
 
+## Случай 5: `label-printer-desktop` — allow-list не срабатывал из-за вложенного `eslint.config.mjs` (2026-08-19)
+
+`nx lint label-printer-desktop` падал двумя ошибками на `main/background.ts` и
+`main/services/database.ts`, хотя оба места уже используют легитимный паттерн
+`app.isPackaged || NODE_ENV === 'production'` — тот самый, для которого в корневом
+`eslint.config.mjs` заведён allow-list (`files: ['main/**/*.ts', 'apps/*/main/**/*.ts']`,
+см. «Ревизия ESLint-правила» ниже).
+
+**Причина — не в коде, а в резолве `files`-паттернов.** `apps/label-printer-desktop/main/`
+содержит СВОЙ `eslint.config.mjs` (спредит корневой `baseConfig` + свои `ignores`). Когда
+ESLint линтует `main/background.ts`, он находит именно этот вложенный файл как ближайший
+конфиг — и `basePath` для сопоставления всех `files`-паттернов в унаследованном массиве
+становится `apps/label-printer-desktop/main/`, а не каталог приложения и не корень репо.
+Оба паттерна allow-list'а требуют сегмент `main/` в начале пути — а относительно этого
+`basePath` пути уже без него (`background.ts`, `services/database.ts`). Тот же вложенный
+`eslint.config.mjs` есть и у `apps/animatrona/main/` — латентно тот же баг, не проверялось
+на момент фикса.
+
+**Почему нельзя просто добавить третий вариант пути в корневой allow-list:** массив
+конфигов из корневого `eslint.config.mjs` переиспользуется на ВСЕХ `basePath` сразу (корень
+репо, каждый `apps/<app>/`, и вот такие вложенные `apps/<app>/main/`). Голый `**/*.ts` в этом
+массиве выключил бы `no-restricted-syntax` вообще для всего репозитория — а не только для
+main-процесса конкретного приложения.
+
+**Фикс:** локальный override прямо в вложенном `main/eslint.config.mjs`, третьим элементом
+после `...baseConfig` и `ignores` — `{ files: ['**/*.ts'], rules: { 'no-restricted-syntax':
+'off' } }`. Безопасно, потому что этот файл управляет исключительно поддеревом `main/` —
+никакой другой контекст его не переиспользует, риска over-match нет.
+
 ## Ревизия ESLint-правила (2026-08-12)
 
 Точечные фиксы трижды не удерживались — правило возвращалось в новом месте быстрее, чем успевали
