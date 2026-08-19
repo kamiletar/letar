@@ -55,13 +55,18 @@ boolean с явным «наследовать» через строковый �
 [letar-forms-field-date-runtime-string](/.claude/docs/letar-forms-field-date-runtime-string.md) ⚠️
 `Field.Date` отдаёт string в onSubmit даже при `z.coerce.date()` — typecheck не ловит ·
 [ui-components](/.claude/docs/ui-components.md) · [images](/.claude/docs/images.md) ·
+[font-cmap-coverage-verification](/.claude/docs/font-cmap-coverage-verification.md) описание
+шрифта на сайте лжёт — покрытие символов проверять разбором `cmap` файла ·
 [sharp-raw-composite-alpha-pitfall](/.claude/docs/sharp-raw-composite-alpha-pitfall.md) ⚠️
 `composite()` над raw-буферами тихо добавляет alpha-канал даже при `create({channels:3})` ·
 [gallery-pattern](/.claude/docs/gallery-pattern.md) Dropzone + SortablePhotoGrid ·
 [period-navigation-pattern](/.claude/docs/period-navigation-pattern.md) навигация по периоду без JS ·
 [data-flag-driving-ui](/.claude/docs/data-flag-driving-ui.md) ⚠️ `isDemo`/`isDraft` попал в условие
 рендера — контент демо-записи не виден никогда ·
-[faceted-catalog-pitfalls](/.claude/docs/faceted-catalog-pitfalls.md) фасетные фильтры каталога
+[faceted-catalog-pitfalls](/.claude/docs/faceted-catalog-pitfalls.md) фасетные фильтры каталога ·
+[raf-vs-timers-background-tab](/.claude/docs/raf-vs-timers-background-tab.md) ⚠️ `rAF` замирает в
+фоновой вкладке, `setTimeout`/`setInterval` там душится до раза в секунду/минуту — выбор не
+взаимозаменяем
 
 **Данные и состояние:** [data-fetching](/.claude/docs/data-fetching.md) ·
 [pwa-offline](/.claude/docs/pwa-offline.md) ·
@@ -97,7 +102,10 @@ hydration mismatch на невалидном сегменте локали ·
 Server→Client — property-access ломается, `undefined` ·
 [nextjs-revalidatepath-outside-request-scope](/.claude/docs/nextjs-revalidatepath-outside-request-scope.md)
 ⚠️ `revalidatePath` из функции, переиспользуемой в фоновой задаче (`@letar/jobs`) без request
-scope — Invariant вместо обновления кеша
+scope — Invariant вместо обновления кеша ·
+[nextjs-favicon-icon-tsx-both-needed](/.claude/docs/nextjs-favicon-icon-tsx-both-needed.md) ⚠️
+`icon.tsx` не заменяет `favicon.ico` — боты/краулеры бьют в корень мимо `<head>`; вместе они дают
+два тега `link[rel~="icon"]`, подмена href первого найденного молча не работает
 
 **Библиотеки и публикация:** [lib-entry-points](/.claude/docs/lib-entry-points.md) подпути
 `./server`/`./client`, границы, ESLint-ловушки ·
