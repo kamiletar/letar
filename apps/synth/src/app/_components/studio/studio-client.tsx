@@ -15,6 +15,7 @@ import { downloadPatchSyx, readSyxFile } from '@/lib/patch/syx-file'
 import { Box, Button, Link, Text } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { PressableCta } from '../pressable-cta'
 import { VjOverlay } from '../vj/vj-overlay'
 import { DrumPads } from './drum-pads'
 import { DrumkitColumn } from './drumkit-column'
@@ -563,18 +564,20 @@ export function StudioClient() {
           )}
 
           {!started && (
-            <Button
-              size="sm"
-              variant="outline"
-              borderColor="accent.DEFAULT"
-              color="accent.emphasized"
-              _hover={{ bg: 'accent.muted' }}
-              onClick={handleStart}
-              letterSpacing="0.1em"
-              fontSize="xs"
-            >
-              ▶ Запустить звук
-            </Button>
+            <PressableCta>
+              <Button
+                size="sm"
+                variant="outline"
+                borderColor="accent.DEFAULT"
+                color="accent.emphasized"
+                _hover={{ bg: 'accent.muted' }}
+                onClick={handleStart}
+                letterSpacing="0.1em"
+                fontSize="xs"
+              >
+                ▶ Запустить звук
+              </Button>
+            </PressableCta>
           )}
 
           {started && (

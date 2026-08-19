@@ -6,6 +6,7 @@ import { Box, Container, Heading, Link, Text, VStack } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import type React from 'react'
 import { useCallback, useEffect, useState } from 'react'
+import { PressableCta } from '../pressable-cta'
 
 interface GalleryClientProps {
   patches: Patch[]
@@ -109,12 +110,16 @@ export function GalleryClient({ patches }: GalleryClientProps) {
                 )}
 
                 <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
-                  <button style={btnStyle} disabled={renderingId === patch.id} onClick={() => handlePlay(patch)}>
-                    {renderingId === patch.id ? '… рендер' : audioUrls[patch.id] ? '✓ готово' : '▶ прослушать'}
-                  </button>
-                  <button style={btnStyle} onClick={() => handleShare(patch.id)}>
-                    {copiedId === patch.id ? '✓ ссылка скопирована' : '🔗 поделиться'}
-                  </button>
+                  <PressableCta>
+                    <button style={btnStyle} disabled={renderingId === patch.id} onClick={() => handlePlay(patch)}>
+                      {renderingId === patch.id ? '… рендер' : audioUrls[patch.id] ? '✓ готово' : '▶ прослушать'}
+                    </button>
+                  </PressableCta>
+                  <PressableCta>
+                    <button style={btnStyle} onClick={() => handleShare(patch.id)}>
+                      {copiedId === patch.id ? '✓ ссылка скопирована' : '🔗 поделиться'}
+                    </button>
+                  </PressableCta>
                 </Box>
 
                 {audioUrls[patch.id] && (

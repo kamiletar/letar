@@ -20,7 +20,13 @@ const synthConfig = defineConfig({
     },
   },
   globalCss: {
-    ...pressableConfig.globalCss,
+    // Намеренно НЕ разливаем `pressableConfig.globalCss` целиком: его `_active: scale(0.93)`
+    // перемножился бы с собственным `_active` кнопок synth (см. `PressableCta` в
+    // `app/_components/pressable-cta.tsx`). Оставляем только то, что реально нужно —
+    // снятие 300ms задержки клика на тач-устройствах.
+    '[data-pressable]': {
+      touchAction: 'manipulation',
+    },
     'html, body': {
       bg: 'bg.DEFAULT',
       color: 'fg.DEFAULT',
