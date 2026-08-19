@@ -46,6 +46,9 @@ approval, kebab-case в `to`, обнулённая база
 [tree-model-parent-select](/.claude/docs/tree-model-parent-select.md) self-referencing `parentId`
 
 **Формы, UI, компоненты:** [forms](/.claude/docs/forms.md) ⭐ ·
+[interactive-press-feedback](/.claude/docs/interactive-press-feedback.md) ⚠️ `_active` со сжатием
+на 1% — состояние формально есть, глазу его нет; глубина берётся от `_active` кнопки того же
+масштаба в теме приложения; там же — резолв стиля через `system.css()` вместо браузера ·
 [react-duplicate-responsive-dom](/.claude/docs/react-duplicate-responsive-dom.md) ⚠️ два JSX-блока
 на `display={{ base:/md: }}` с одинаковым интерактивным контентом — дубль в DOM, не адаптивность ·
 [form-analytics-goals](/.claude/docs/form-analytics-goals.md) цели формы в Метрике/Umami через
