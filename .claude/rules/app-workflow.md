@@ -23,6 +23,24 @@ macro_start_session(
 )
 ```
 
+⚠️ **Если `macro_start_session`/`register_agent` вернёт ошибку про retired — это норма, не авария.**
+Fixed-identity никогда не ретирится нашими же командами на завершении сессии (см.
+`.claude/commands/end-session.md`), но сервер сам ретирит агентов по простою между сессиями (по
+наблюдениям — в пределах суток). Правильная реакция — обычный `unretire_agent` с тем же токеном
+из памяти, без паники и без попытки завести identity заново другим путём:
+
+```
+unretire_agent(
+  project_key: "c-web-letar",
+  agent_name: "<app>-dev",
+  registration_token: "<тот же токен>"
+)
+```
+
+Только если и `unretire_agent` с известным токеном отказал («Invalid registration_token» —
+не «retired», а именно неверный токен) — тогда действительно проблема, разбор и recovery через
+`resource://agents/{project_key}` — `.claude/rules/agent-mail.md`.
+
 Сразу следом выставь себе `contact_policy: "open"` — иначе первое сообщение от любого нового
 агента виснет заявкой `Contact request from <app>-dev`, требующей ручного `respond_contact`:
 
