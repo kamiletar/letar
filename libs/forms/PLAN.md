@@ -813,6 +813,20 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
 
 ## Backlog (запросы от агентов)
 
+### [2026-08-20] Баг: Form.Field.TableEditor застревает в нераскрытом Suspense-boundary (от form-example)
+
+- **Запросил:** repo-dev
+- **Приоритет:** high
+- **Описание:** на `apps/form-example/src/app/examples/table-editor/page.tsx` весь контент
+  `Form.Field.TableEditor` (с `selectable`) остаётся в неразвёрнутом React-стриминг-плейсхолдере —
+  реальная разметка сидит в осиротевшем `<div hidden id="S:0">` в конце `<body>`, а на месте поля
+  в форме стоит нераскрытый `<template id="B:0">`. Все чекбоксы имеют нулевой bounding rect и
+  `offsetParent: null`, при этом вычисленные CSS-стили корректны и в консоли нет ни одной ошибки.
+  Причина 5 падающих e2e-тестов в `table-editor.spec.ts` (§18.7 M2, паттерн Б). Полный разбор,
+  что проверено и исключено (нет `next/dynamic`/`ssr:false`/PPR, не дубль responsive-DOM) — в
+  теле сообщения agent-mail, thread `form-example-table-editor-suspense-bug`.
+- **Статус:** ожидание.
+
 ### [2026-08-19] UX: NumberInput не очищал ведущий 0 при фокусе — исправлено
 
 - **Запросил:** владелец монорепо (Kami), обнаружено вручную в форме тарифа перевозчика
