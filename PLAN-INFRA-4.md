@@ -2419,3 +2419,47 @@ SQLite чинит следствие, но не объясняет, почему
 **Побочная находка, не трогал:** живая, но ни разу не использованная identity `domwellbes-relay`
 (id 79, создана 2026-08-19 22:08) — не моя, не конфликтует по имени с `domwellbes-dev`, кандидат
 на `retire_agent` после уточнения у владельца сессии.
+
+## §95 — TZ=Europe/Moscow во всех production-контейнерах ✅ ЗАКРЫТО (2026-08-20)
+
+**Контекст:** в ходе живой отладки push-уведомлений studio (см. `apps/studio/PLAN_COMPLETED.md`,
+сессия 2026-08-20) всплыла React hydration error #418 — `Intl.DateTimeFormat('ru-RU')` без явного
+`timeZone` берёт локальный часовой пояс среды выполнения; сервер (Docker-контейнер) и браузер
+клиента расходятся. Точечный код-фикс (явный `timeZone: 'Europe/Moscow'` в
+`tochka-connect-form.tsx`) — корневое решение и его достаточно везде, где формат даты явный.
+
+Владелец предложил закрыть класс проблемы на уровне окружения: выставить TZ контейнера в
+московское время, раз вся аудитория и сам владелец — MSK. Согласовано как «ремень и подтяжки»
+поверх явного `timeZone` в коде, не вместо него.
+
+**Решение:** не трогать TZ хоста s2 (общий на ~20+ прод-приложений разных агентов, вне мандата
+studio-dev), только уровень **контейнера** — через `Dockerfile.production`, обычным деплой-циклом.
+Alpine (musl) не содержит `/usr/share/zoneinfo` по умолчанию — `ENV TZ=` без `apk add tzdata`
+молча не работает:
+
+```dockerfile
+RUN apk add --no-cache tzdata
+ENV TZ=Europe/Moscow
+```
+
+**Масштаб:** по явному запросу владельца — на все 22 production-приложения монорепо (не только
+studio). 16 apps `node:24-alpine` — единый паттерн, вставлено скриптом (anchor
+`ENV NEXT_TELEMETRY_DISABLED=1`). Два исключения обработаны вручную:
+`apps/dashboard-agent/Dockerfile.production` (multi-stage — правка в стадии `production`),
+`apps/pravda/Dockerfile.production` (база `nginx:alpine`, не Node). `apps/form-example/Dockerfile`
+(без `.production`) сознательно не тронут — `deploy-affected.sh` собирает только
+`Dockerfile.production`.
+
+**Коммиты:** 16 публичных apps одним коммитом (`GIT_ALLOW_MULTI_SCOPE_COMMIT=1`, `6a00a447`); 6
+приватных submodule (`aboi`, `driving-school`, `dsperevod`, `svoichuzhie`, `aprel8008`,
+`domwellbes`) — каждый отдельным коммитом в своём репозитории; `studio` — отдельно
+(`680388d`, замечен незакоммиченным при `git status --porcelain -- apps/` в процессе). Бамп SHA
+всех submodule в letar — один коммит (`GIT_ALLOW_MULTI_SCOPE_COMMIT=1`, `e23d8884`). Всё запушено
+(`6a0e873e`, `origin/main`).
+
+**Раскатка — намеренно частичная.** По решению владельца («давай канарейку, а остальные однажды
+будут задеплоены по факту») массовый редеплой 22 приложений разом не форсировался — блэст-радиус
+одновременного передеплоя такого числа прод-контейнеров не оправдан ради TZ. Задеплоен только
+`studio` как канарейка через deploy-agent-dev (`apk add tzdata` прошёл чисто, контейнер здоров).
+Остальные 21 приложение получат `TZ=Europe/Moscow` на следующем обычном деплое каждого —
+Dockerfile уже в `main`, отдельного трекинга/чек-листа для этого не заводится.
