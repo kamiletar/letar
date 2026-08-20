@@ -825,7 +825,18 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
   Причина 5 падающих e2e-тестов в `table-editor.spec.ts` (§18.7 M2, паттерн Б). Полный разбор,
   что проверено и исключено (нет `next/dynamic`/`ssr:false`/PPR, не дубль responsive-DOM) — в
   теле сообщения agent-mail, thread `form-example-table-editor-suspense-bug`.
-- **Статус:** в работе → forms-dev (делегировано 2026-08-20, тред `form-example-table-editor-suspense-bug`).
+- **Статус:** ✅ исправлено 2026-08-20 (v2.7.1). Причина — не специфична `TableEditor`:
+  `createLazyComponent` (общая инфраструктура ленивой загрузки, использует и `DataGrid`, и
+  `RichText`, и `extraSelects`/`extraComboboxes`/`extraListboxes` из `createForm`) монтировал
+  `<Suspense>` сразу, в том числе на сервере. React стримит содержимое такого boundary в скрытый
+  `<div hidden id="S:N">`, а раскрытие делает через `$RC`/`$RB`/`$RV` reveal-script, батчащий swap
+  через `requestAnimationFrame` — в скрытой/фоновой вкладке (типично для headless e2e) rAF не
+  тикает, boundary виснет навсегда. Подтверждено эмпирически: `document.visibilityState` в
+  тестовой вкладке был `hidden`, ручной `requestAnimationFrame` не срабатывал за 2с. Воспроизвёл и
+  на `Form.Field.DataGrid` — тот же паттерн, та же причина.
+  Фикс — `LazyWrapper` монтирует `<Suspense>` только после клиентского маунта (гейт `mounted`),
+  сервер отдаёт только `Skeleton`. Разбор — `.claude/docs/letar-forms-lazy-component-ssr-stuck-suspense.md`.
+  Регресс-тест — `lazy-component.spec.tsx`. Уведомление `forms-coordinator-dev` отправлено.
 
 ### [2026-08-19] UX: NumberInput не очищал ведущий 0 при фокусе — исправлено
 

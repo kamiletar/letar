@@ -4,6 +4,32 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.7.1] - 2026-08-20
+
+### Fixed
+
+- **Баг: `Form.Field.TableEditor`/`DataGrid` (и любое другое ленивое поле — `RichText`,
+  `extraSelects`/`extraComboboxes`/`extraListboxes` из `createForm`) могли навсегда застрять в
+  нераскрытом SSR-стриминг Suspense-boundary.** `createLazyComponent` монтировал `<Suspense>`
+  вокруг `React.lazy()`-компонента сразу, в том числе на сервере — React отдавал реальную разметку
+  в осиротевший скрытый `<div hidden id="S:N">` в конце `<body>`, а на месте поля оставлял
+  нераскрытый `<template id="B:N">`. Раскрытие такого boundary React делает встроенным
+  `$RC`/`$RB`/`$RV` reveal-script, который батчит swap через `requestAnimationFrame` — если rAF не
+  тикает (свёрнутая/фоновая/скрытая вкладка, типичное состояние headless-браузера в e2e), boundary
+  виснет навсегда: DOM формально валиден, computed CSS корректен, ошибок в консоли нет, но
+  элементы имеют нулевой `getBoundingClientRect()`/`offsetParent: null`.
+- **Фикс:** `LazyWrapper` теперь монтирует `<Suspense>` только после клиентского маунта (гейт
+  `mounted` через `useState`+`useEffect`) — на сервере рендерится только `Skeleton`-заглушка без
+  какого-либо Suspense-boundary. Ленивый импорт запускается и раскрывается целиком на клиенте
+  обычным React-коммитом, не через HTML-патчинг SSR-стрима — зависимость от `requestAnimationFrame`
+  исчезает полностью.
+- Регресс-тест — `lazy-component.spec.tsx`: SSR-рендер (`renderToString`) не содержит содержимого
+  ленивого компонента и не создаёт Suspense-плейсхолдер; клиентский рендер раскрывает содержимое
+  после маунта.
+- Найдено на `apps/form-example/src/app/examples/table-editor/page.tsx` (5 падающих e2e,
+  `table-editor.spec.ts`, §18.7 M2 паттерн Б). Делегировано через agent-mail, тред
+  `form-example-table-editor-suspense-bug`.
+
 ## [2.7.0] - 2026-08-19
 
 ### Added
