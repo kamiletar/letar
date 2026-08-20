@@ -842,8 +842,13 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
   `@letar/forms`) — `field-data-grid.tsx` и `field-rich-text.tsx`. Исправлено тем же способом
   (mounted-гейт перед `<Suspense>`), регресс-тесты через `renderToString` добавлены в
   `field-data-grid.spec.tsx`/`field-rich-text.spec.tsx`. Версия `@letar/forms-shadcn` 0.33.3.
-  Общий хелпер между `@letar/forms` и `@letar/forms-shadcn` не выносился — дублирование
-  ограничено двумя короткими компонентами.
+  **Дедуп закрыт (2026-08-20):** общая логика (mounted-гейт + `<Suspense>`) вынесена в
+  `createLazyComponent` (`@letar/forms-react`, новый подпуть `lib/lazy/`, `fallback` передаётся
+  снаружи как `ReactNode` — слой не знает UI-библиотек). `@letar/forms` (Chakra) теперь тонкая
+  обёртка с `Skeleton`-fallback (2.7.1 → 2.7.2), `FieldDataGrid`/`FieldRichText` в
+  `@letar/forms-shadcn` вызывают тот же хелпер напрямую со своим div-fallback (0.33.3 → 0.33.4).
+  `@letar/forms-react` 0.3.0 → 0.3.1. `typecheck:tsgo`/`lint`/`test` зелёные на всех трёх
+  пакетах (722 теста).
 
 ### [2026-08-19] UX: NumberInput не очищал ведущий 0 при фокусе — исправлено
 

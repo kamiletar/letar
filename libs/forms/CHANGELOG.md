@@ -4,6 +4,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.7.2] - 2026-08-20
+
+### Changed
+
+- **`createLazyComponent` — общая логика вынесена в `@letar/forms-react`.** Устранено
+  дублирование с `@letar/forms-shadcn` (`FieldDataGrid`/`FieldRichText`), где та же логика
+  (mounted-гейт + Suspense) была скопирована руками. Здесь оставлен только Chakra `Skeleton`
+  fallback, обёртка вокруг `createLazyComponent` из `@letar/forms-react`. Публичный API не
+  изменился.
+
 ## [2.7.1] - 2026-08-20
 
 ### Fixed

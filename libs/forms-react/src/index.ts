@@ -31,6 +31,9 @@ export type {
 } from './lib/field/create-field-primitives'
 export type { ResolvedFieldProps } from './lib/field/resolved-field-props'
 
+// Ленивый компонент со встроенным Suspense + клиентским mounted-гейтом (SSR rAF-фикс)
+export { createLazyComponent, type LazyComponentImport } from './lib/lazy/create-lazy-component'
+
 // Хуки и утилиты поля
 export { resolveAutoComplete } from './lib/field/autocomplete-map'
 export { useDeclarativeField } from './lib/field/base-field'

@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.33.4] - 2026-08-20
+
+### Changed
+
+- **`FieldDataGrid`/`FieldRichText` — дублированная логика mounted-гейта заменена общим
+  `createLazyComponent` из `@letar/forms-react`.** До этого коммита оба поля вручную повторяли
+  тот же mounted-гейт + Suspense, что и `createLazyComponent` в `@letar/forms` (Chakra-скин) —
+  теперь оба скина используют одну реализацию. Поведение не изменилось.
+
 ## [0.33.3] - 2026-08-20
 
 ### Fixed
