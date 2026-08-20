@@ -1,3 +1,4 @@
+import { buildIntlMatcher } from '@letar/i18n-proxy'
 import createIntlMiddleware from 'next-intl/middleware'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
@@ -38,10 +39,7 @@ export async function proxy(request: NextRequest) {
 export default proxy
 
 export const config = {
-  // Исключаем из обработки:
-  // - /api (API routes)
-  // - /_next, /_vercel (системные)
-  // - Файлы со точкой (favicon.ico, robots.txt и т.д.)
-  // - /admin (админ-панель без i18n)
-  matcher: '/((?!api|_next|_vercel|admin|.*\\..*).*)',
+  matcher: buildIntlMatcher({
+    excludePrefixes: ['api', '_next', '_vercel', 'admin'],
+  }),
 }

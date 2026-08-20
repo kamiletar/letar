@@ -131,6 +131,9 @@
       "@letar/glitchtip": [
         "../../libs/glitchtip/src/index.ts"
       ],
+      "@letar/i18n-proxy": [
+        "../../libs/i18n-proxy/src/index.ts"
+      ],
       "@letar/glitchtip/client": [
         "../../libs/glitchtip/src/client/index.ts"
       ],
