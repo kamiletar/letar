@@ -837,6 +837,13 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
   Фикс — `LazyWrapper` монтирует `<Suspense>` только после клиентского маунта (гейт `mounted`),
   сервер отдаёт только `Skeleton`. Разбор — `.claude/docs/letar-forms-lazy-component-ssr-stuck-suspense.md`.
   Регресс-тест — `lazy-component.spec.tsx`. Уведомление `forms-coordinator-dev` отправлено.
+  **Дополнение 2026-08-20:** тот же паттерн, БЕЗ mounted-гейта, независимо реализован в
+  `libs/forms-shadcn` (сестринский пакет, не переиспользует `createLazyComponent` из
+  `@letar/forms`) — `field-data-grid.tsx` и `field-rich-text.tsx`. Исправлено тем же способом
+  (mounted-гейт перед `<Suspense>`), регресс-тесты через `renderToString` добавлены в
+  `field-data-grid.spec.tsx`/`field-rich-text.spec.tsx`. Версия `@letar/forms-shadcn` 0.33.3.
+  Общий хелпер между `@letar/forms` и `@letar/forms-shadcn` не выносился — дублирование
+  ограничено двумя короткими компонентами.
 
 ### [2026-08-19] UX: NumberInput не очищал ведущий 0 при фокусе — исправлено
 
