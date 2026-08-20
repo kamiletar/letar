@@ -1,5 +1,13 @@
 # Выполненные задачи — Kami
 
+## Аудит дублей по монорепо: локальный useReducedMotion → @letar/hooks (2026-08-20)
+
+`src/app/_hooks/use-reduced-motion.ts` дублировал `useMediaQuery(breakpoints.prefersReducedMotion)`
+из `@letar/hooks` один в один (реактивный хук с подпиской на `change`). Удалён, единственный
+потребитель `matrix-rain.tsx` переключён на общий хук. `@letar/hooks` добавлен в
+`tsconfig.json` `paths` и `package.json` `implicitDependencies` — раньше в kami не использовался.
+v0.33.4.
+
 ## Проверка setRequestLocale/SSG (2026-08-19)
 
 Аудит по классу бага, найденному в apps/studio. Полный аудит всех ~45 страниц `[locale]/`:
