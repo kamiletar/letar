@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+## [0.7.6] - 2026-08-20
+
+### Fixed
+
+- **Провал первого передеплоя после 0.7.5:** `MODULE_NOT_FOUND` на `@swc/helpers` в standalone
+  output, контейнер в crash-loop (прод не пострадал — zero-downtime rollout откатился сам).
+  Известный класс бага трейсинга Next.js (`.claude/docs/nextjs-standalone-tracing.md`), уже
+  чинили в aboi/time тем же паттерном. Добавлен сужённый глоб
+  `../../node_modules/.bun/@swc+helpers*/node_modules/@swc/helpers/**/*` в
+  `outputFileTracingIncludes` (`next.config.ts`).
+
 ## [0.7.5] - 2026-08-20
 
 ### Fixed
