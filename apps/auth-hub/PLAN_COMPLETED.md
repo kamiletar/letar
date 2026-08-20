@@ -2,6 +2,46 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## 0.7.5 → 0.7.6: прод-инцидент — ложная «Неизвестная ошибка» при re-auth под другим аккаунтом (2026-08-20)
+
+Пользователь сообщил о реальной ошибке входа на auth.letar.best для клиента studio-prod
+(«Ошибка входа: Неизвестная ошибка»). Разбор по логам контейнера + Redis прод-БД:
+
+- **Root cause:** плагин `oidc-provider` в better-auth вешает глобальный `after`-хук
+  (`matcher: () => true`), срабатывающий после ЛЮБОГО эндпоинта. При `prompt=login`
+  (принудительный повторный вход — сценарий «Войти под другим аккаунтом» из account chooser,
+  v0.3.0) хук находит cookie `oidc_login_prompt` + только что установленную сессионную cookie
+  и сам пытается довершить OIDC-flow, вызывая внутренний `authorize(ctx)`. Тот требует
+  `ctx.request` (сырой `Request`), которого нет при вызове `auth.api.signInEmail()` как обычной
+  функции из Server Action (`login.action.ts`) — `authorize()` бросает OAuth2-форму ошибки
+  (`{error: 'invalid_request', error_description: 'request not found'}`, а не привычную
+  `{code, message}`) уже ПОСЛЕ того как сессия успешно создана.
+  `login.action.ts` не распознавал эту форму → падал в дефолт «Неизвестная ошибка», хотя
+  пользователь фактически вошёл.
+- **Подтверждение:** прочитан прод-контейнер `auth-hub-app-16` (`docker logs`) — точная сигнатура
+  ошибки с меткой времени `12:00:32.370Z`. Сверено с Redis (`letar-redis`, БД secondaryStorage
+  сессий better-auth): сессия `aKFpkKOMHcJrS8NDPDgpAV81lfoNgMTu` для `kami@letar.best` имеет
+  `createdAt: 2026-08-20T12:00:32.175Z` — совпадает день-в-день с моментом «ошибки». Это доказало,
+  что сессия реально создавалась, баг — ложноотрицательный UI-результат, не отказ входа.
+- **Фикс (0.7.5):** `login.action.ts` — сигнатурная проверка `apiBody.error === 'invalid_request'
+  && apiBody.error_description === 'request not found'` теперь трактуется как успех; редирект на
+  `redirectTo` (для OIDC-входа это абсолютный URL на `/api/auth/oauth2/authorize`, см.
+  `use-post-sign-in-callback.ts`) штатно завершает flow полноценным HTTP-переходом, где
+  `ctx.request` уже присутствует.
+- **Побочный инцидент деплоя (0.7.6):** первый передеплой 0.7.5 упал в crash-loop —
+  `MODULE_NOT_FOUND` на `@swc/helpers` в standalone-сборке (известный класс бага трейсинга
+  Next.js, `.claude/docs/nextjs-standalone-tracing.md`, уже чинили в aboi/time тем же паттерном).
+  Прод не пострадал — zero-downtime rollout откатился сам, старый контейнер остался healthy.
+  Фикс — сужённый глоб `../../node_modules/.bun/@swc+helpers*/node_modules/@swc/helpers/**/*` в
+  `outputFileTracingIncludes` (`next.config.ts`), точная копия рабочего паттерна из `aboi`.
+  Деплой-агент дополнительно вручную снёс осиротевший crash-looping контейнер `auth-hub-app-17`
+  от первой неудачной попытки (rollout ожидает ровно 1 старый контейнер, нашёл 2).
+- **Проверка:** `nx typecheck:tsgo auth-hub` и `nx lint auth-hub` зелёные на обоих коммитах.
+  Живая проверка через account chooser в браузере не проводилась — фикс верифицирован по
+  прод-логам/Redis, не через UI-тест; стоит перепроверить вживую при следующей сессии над
+  account chooser.
+- Коммиты: `7df17215` (0.7.5, login.action.ts), `a267bbb6` (0.7.6, next.config.ts).
+
 ## 0.7.3 → 0.7.4: убраны references на libs из tsconfig.json — хрупкий TS6305 редирект (2026-08-07)
 
 `references` на `libs/consent`, `libs/email`, `libs/auth`, `libs/chakra-provider`,
