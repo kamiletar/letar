@@ -1,5 +1,42 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-08-20 — createLazyComponent: зависший SSR Suspense-boundary (v2.7.1)
+
+Делегировано координатором `forms-coordinator-dev` (тред `form-example-table-editor-suspense-bug`,
+исходный репорт — `apps/form-example`, 5 падающих e2e в `table-editor.spec.ts`, §18.7 M2 паттерн Б).
+
+**Root cause:** не специфично `TableEditor` — общая инфраструктура `createLazyComponent`
+(`libs/forms/src/lib/declarative/lazy-component.tsx`), используется также `DataGrid`, `RichText` и
+`extraSelects`/`extraComboboxes`/`extraListboxes` из `createForm`. `LazyWrapper` монтировал
+`<Suspense>` вокруг `React.lazy()`-компонента сразу, в том числе на сервере. React стримит
+содержимое такого boundary в осиротевший `<div hidden id="S:N">` в конце `<body>`, а раскрытие
+делает встроенный `$RC`/`$RB`/`$RV` reveal-script, который батчит DOM-swap через
+`requestAnimationFrame` (условие `2===$RB.length` истинно уже после первого вызова, `push` кладёт
+сразу два элемента — так что это касается любого одиночного boundary, не только нескольких сразу).
+Если rAF не тикает (скрытая/фоновая вкладка — воспроизведено и в реальном headless Playwright, не
+только в тестовом Browser pane инструменте), boundary виснет навсегда: DOM формально валиден,
+computed CSS корректен, в консоли нет ни одной ошибки, но `getBoundingClientRect()=0`,
+`offsetParent: null`.
+
+**Фикс:** `LazyWrapper` монтирует `<Suspense>` только после клиентского маунта (гейт `mounted`
+через `useState`+`useEffect`) — сервер отдаёт только `Skeleton`-заглушку, без Suspense-boundary
+вообще. Ленивый импорт запускается и раскрывается целиком на клиенте обычным React-коммитом,
+не через HTML-патчинг SSR-стрима — зависимость от `requestAnimationFrame` исчезает полностью.
+Framework-agnostic (без `next/dynamic` — `@letar/forms` не имеет `next` в зависимостях).
+
+**Тесты:** новый `lazy-component.spec.tsx` — SSR (`renderToString`) не содержит содержимого
+ленивого компонента и не создаёт Suspense-placeholder (только `Skeleton`); клиентский рендер
+раскрывает содержимое после маунта.
+
+**Верификация:** `nx test @letar/forms` (lazy-component/field-rich-text/field-data-grid — зелёные),
+`typecheck:tsgo`, `lint` — без ошибок. Реальные падавшие e2e —
+`bunx playwright test --project=chromium apps/form-example-e2e/src/table-editor.spec.ts` (обходной
+путь через ручной dev-сервер, `nx e2e` зависает на `dependsOn: dev`, см. `.claude/docs/e2e-testing.md`)
+— все 3 теста файла зелёные. Визуально в Browser pane при `document.visibilityState: hidden`
+подтверждено исчезновение `S:0`/`B:0` и появление реального `getBoundingClientRect()` у чекбоксов.
+
+**Разбор:** `.claude/docs/letar-forms-lazy-component-ssr-stuck-suspense.md`.
+
 ## 2026-08-19 — DataGrid: редактирование enum/boolean-колонок (v2.7.0)
 
 `EditableCell` в `field-data-grid.tsx` рендерил `<Input type="text"|"number">` для любого
