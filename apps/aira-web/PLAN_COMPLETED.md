@@ -2,6 +2,12 @@
 
 ## Выполненные задачи
 
+- [x] Аудит matcher proxy.ts — баг studio не подтвердился (2026-08-21). Проверка класса бага из
+      apps/studio (matcher не исключал metadata-роуты без расширения в URL). В aira-web
+      `opengraph-image.tsx` живёт внутри `src/app/[locale]/` — это уже locale-scoped роут, не
+      глобальный, matcher его не должен трогать отдельно. `src/app/manifest.ts` отдаёт
+      `/manifest.webmanifest` — точка в URL есть, dot-wildcard-исключение ловит штатно.
+      `icon`/`apple-icon`/`twitter-image` в приложении нет. Изменений не потребовалось.
 - [x] GlitchTip (staging + production) + первый `.env.staging.enc` (не существовал вообще) +
       healthcheck в прод-compose — последний пробел из 24 приложений монорепо (2026-08-12,
       PLAN-INFRA.md §70)
