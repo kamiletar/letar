@@ -11,6 +11,13 @@
 
 ---
 
+## Аудит matcher proxy.ts — баг studio не подтвердился (2026-08-21)
+
+Проверка класса бага из apps/studio. В mandala единственный metadata-роут без своей
+`[locale]`-вложенности — `src/app/manifest.ts`, но он отдаёт `/manifest.webmanifest`: точка в URL
+есть, dot-wildcard-исключение `.*\\..*` matcher'а её ловит штатно. `icon`/`apple-icon`/
+`opengraph-image`/`twitter-image` в приложении нет. Изменений не потребовалось.
+
 ## Сессия 2026-08-19 — setRequestLocale/SSG: точечный фикс `/contacts`
 
 Аудит по классу бага, найденному в apps/studio (`[locale]/layout.tsx` с `generateStaticParams`
