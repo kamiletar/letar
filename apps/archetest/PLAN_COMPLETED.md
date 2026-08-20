@@ -6,6 +6,18 @@
 
 ---
 
+## Фикс matcher proxy.ts — apple-icon без точки в URL (2026-08-21)
+
+Продолжение аудита next-intl matcher, найденного в apps/studio (публичное исключение `public/`
+никогда не матчилось + metadata-роуты без расширения). Проверены все 7 приложений с next-intl в
+proxy.ts: только archetest воспроизвёл баг. `src/app/apple-icon.tsx` лежит вне `[locale]`, отдаёт
+`/apple-icon` без точки в пути — dot-wildcard-исключение `.*\\..*` его не ловит, next-intl
+middleware переписывал в `/ru/apple-icon` (`x-middleware-rewrite`, подтверждено локальным
+`fetch(..., {redirect: 'manual'})`), которого не существует → 404. Фикс — добавлено явное
+исключение `apple-icon` в matcher (по образцу studio). Проверено: `/apple-icon` → 200 без
+`x-middleware-rewrite`, обычная locale-роутизация (`/` → rewrite `/ru`) не сломана.
+`time`/`mandala`/`kami`/`aira-web`/`aboi` — баг не подтвердился (см. их PLAN_COMPLETED.md).
+
 ## Аудит дублей по монорепо: `prefersReducedMotion` из `@letar/hooks` (2026-08-20)
 
 `globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches` в `useAnimatedScores`
