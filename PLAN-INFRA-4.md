@@ -2463,3 +2463,46 @@ studio). 16 apps `node:24-alpine` — единый паттерн, вставл�
 `studio` как канарейка через deploy-agent-dev (`apk add tzdata` прошёл чисто, контейнер здоров).
 Остальные 21 приложение получат `TZ=Europe/Moscow` на следующем обычном деплое каждого —
 Dockerfile уже в `main`, отдельного трекинга/чек-листа для этого не заводится.
+
+## §96 — `libs/i18n-proxy`: общий matcher next-intl, исправлены ложноотрицательные аудиты metadata-роутов ✅ ЗАКРЫТО (2026-08-21)
+
+**Контекст:** apps/studio ранее вручную вывел паттерн matcher'а для next-intl `proxy.ts`,
+учитывающий metadata-роуты Next.js (`icon`/`apple-icon`/`opengraph-image`/`twitter-image`) — они
+отдаются на URL **без расширения** независимо от расширения файла-источника
+(`.svg`/`.png`/`.tsx`), поэтому обычное правило "путь с точкой — статика" (`.*\..*`) их не ловит и
+next-intl middleware даёт на них 404. Более ранний ручной аудит того же класса бага по остальным 6
+приложениям (сессия 2026-08-20/21, коммиты «баг не подтвердился») дал **ложноотрицательный**
+результат для kami, time и aboi — эвристика «у файла есть расширение, значит уже отфильтровано»
+неверна именно для этих Next.js-конвенций.
+
+**Решение:** новая `libs/i18n-proxy` (`@letar/i18n-proxy`):
+
+- `buildIntlMatcher({ excludePrefixes, metadataRoutes })` — строит `matcher` по паттерну studio,
+  `metadataRoutes` перечисляется явно (не угадывается автоматически).
+- `findUndeclaredMetadataRoutes(appDir, declaredRoutes)` — Node-only (`fs`) проверка для
+  unit-теста приложения (не для `proxy.ts`: он в Edge Runtime, где `fs` недоступен) — сканирует
+  `src/app/` на реальные `icon`/`apple-icon`/`opengraph-image`/`twitter-image`-файлы вне
+  `[locale]` и сверяет с объявленным списком.
+
+Растиражировано на все 7 приложений с next-intl в `proxy.ts`: studio, archetest, time, mandala,
+kami, aira-web, aboi — каждое получило `src/proxy.spec.ts`, ловящий рассинхрон тестом, а не
+ручным аудитом. Заодно найдены и исправлены реальные пропуски, пропущенные прошлым ручным
+аудитом: `icon.svg` в kami и time, `icon.png`+`apple-icon.png` в aboi, второй `icon.svg` в
+archetest (первый фикс там перечислял только `apple-icon`). Соответствующие `PLAN_COMPLETED.md`
+каждого приложения помечают ошибочные записи аудита явной пометкой «ОШИБОЧНО».
+
+Паттерн задокументирован —
+[nextjs-intl-matcher-metadata-routes.md](/.claude/docs/nextjs-intl-matcher-metadata-routes.md).
+
+**Коммиты:** `libs/i18n-proxy` — один коммит; каждое приложение — отдельный коммит
+(`refactor(<app>)`); studio/aboi (submodule) — коммит внутри submodule + бамп SHA в letar;
+version bump — отдельным коммитом на приложение; doc-исправления PLAN_COMPLETED — отдельным
+коммитом на приложение; общий doc + индекс `CLAUDE.md` — один коммит
+(`GIT_ALLOW_MULTI_SCOPE_COMMIT=1`, задевает `.claude/` и корневой `CLAUDE.md` одной осознанной
+правкой); `bun.lock` — отдельный catch-up коммит (новая либа + отставшие версии других
+приложений от параллельных сессий).
+
+typecheck/lint/test прогнаны на `libs/i18n-proxy` и всех 7 приложений — зелёные, кроме
+`studio:test` на `src/app/api/webhooks/tochka/route.test.ts`, что относится к несвязанному,
+уже закоммиченному изменению другого агента по идемпотентности вебхука Точки (см.
+`apps/studio/PLAN_COMPLETED.md`), не к этой миграции.
