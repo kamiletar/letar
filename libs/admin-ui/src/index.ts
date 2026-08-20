@@ -21,6 +21,8 @@ export {
   DataTable,
   type DataTableFeatures,
   type DataTableProps,
+  type DeadLetterReviewColumn,
+  DeadLetterReviewTable,
   GenericAdminTable,
   type GenericAdminTableProps,
   InlineEditableTable,
