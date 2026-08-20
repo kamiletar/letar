@@ -4,6 +4,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.33.3] - 2026-08-20
+
+### Fixed
+
+- **`FieldDataGrid`/`FieldRichText` — зависший серверный Suspense-boundary.** Оба компонента
+  монтировали `<Suspense>` вокруг ленивого `lazy()`-импорта сразу, в том числе на сервере — тот
+  же баг, что был исправлен в `createLazyComponent` (`@letar/forms`, v2.7.1, см.
+  `.claude/docs/letar-forms-lazy-component-ssr-stuck-suspense.md`). Раскрытие серверного
+  Suspense-boundary React делает через reveal-script, батчащий DOM-swap через
+  `requestAnimationFrame` — в скрытой/фоновой вкладке (типично для headless e2e) rAF не тикает,
+  и boundary виснет навсегда без ошибок в консоли. Фикс — тот же mounted-гейт: `<Suspense>`
+  монтируется только после клиентского маунта, сервер отдаёт только fallback-заглушку.
+
 ## [0.33.2] - 2026-08-17
 
 ### Changed

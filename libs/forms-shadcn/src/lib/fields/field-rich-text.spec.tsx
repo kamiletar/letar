@@ -1,9 +1,25 @@
 import { TestForm } from '@letar/forms-react/testing'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { renderToString } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { FieldRichText } from './field-rich-text'
 
 describe('FieldRichText (shadcn)', () => {
+  // Регресс-тест: см. комментарий в field-rich-text.tsx — до фикса Suspense монтировался сразу,
+  // сервер отдавал настоящий SSR-стриминг boundary, чьё раскрытие зависит от requestAnimationFrame
+  // и виснет навсегда в скрытой/фоновой вкладке. Разбор:
+  // .claude/docs/letar-forms-lazy-component-ssr-stuck-suspense.md
+  it('не создаёт Suspense-boundary на сервере — SSR отдаёт только fallback', () => {
+    const html = renderToString(
+      <TestForm defaultValues={{ content: '' }}>
+        <FieldRichText name="content" label="Содержимое" />
+      </TestForm>,
+    )
+
+    expect(html).not.toContain('contenteditable')
+    expect(html).toContain('animate-pulse')
+  })
+
   it('рендерит contenteditable-редактор Tiptap', async () => {
     render(
       <TestForm defaultValues={{ content: '' }}>

@@ -1,5 +1,6 @@
 import { TestForm } from '@letar/forms-react/testing'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { renderToString } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 import { FieldDataGrid } from './field-data-grid'
 
@@ -10,6 +11,21 @@ const employees = [
 ]
 
 describe('FieldDataGrid (shadcn)', () => {
+  // Регресс-тест: см. комментарий в field-data-grid.tsx — до фикса Suspense монтировался сразу,
+  // сервер отдавал настоящий SSR-стриминг boundary, чьё раскрытие зависит от requestAnimationFrame
+  // и виснет навсегда в скрытой/фоновой вкладке. Разбор:
+  // .claude/docs/letar-forms-lazy-component-ssr-stuck-suspense.md
+  it('не создаёт Suspense-boundary на сервере — SSR отдаёт только fallback', () => {
+    const html = renderToString(
+      <TestForm defaultValues={{ employees }}>
+        <FieldDataGrid name="employees" label="Сотрудники" columns={[{ name: 'name' }]} />
+      </TestForm>,
+    )
+
+    expect(html).not.toContain('Иван')
+    expect(html).toContain('animate-pulse')
+  })
+
   it('рендерит строки и заголовки колонок', async () => {
     render(
       <TestForm defaultValues={{ employees }}>

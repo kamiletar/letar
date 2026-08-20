@@ -1,6 +1,6 @@
 {
   "name": "@letar/forms-shadcn",
-  "version": "0.33.2",
+  "version": "0.33.3",
   "description": "shadcn/ui-скин @letar/forms — реализация UIKit-контракта на Radix + cva + tailwind-merge",
   "type": "module",
   "main": "./src/index.ts",
