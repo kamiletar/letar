@@ -1,6 +1,16 @@
 # Выполненные задачи — Kami
 
-## Аудит matcher proxy.ts — баг studio не подтвердился (2026-08-21)
+## Matcher next-intl через @letar/i18n-proxy — исправлен пропущенный icon.svg (2026-08-21)
+
+**Уточнение предыдущей записи ниже: аудит от 2026-08-21 был ошибочным.** `src/app/icon.svg`
+физически существует (с 2026-05-15) — в аудите его не заметили. Next.js metadata route convention
+отдаёт `icon.*` (любое расширение файла-источника, включая `.svg`) на URL `/icon` БЕЗ расширения
+(кэш-бастинг через query), поэтому dot-wildcard `.*\\..*` его не ловит — тот же класс бага, что и
+в studio, просто не был обнаружен предыдущим аудитом. Обнаружено `findUndeclaredMetadataRoutes` из
+новой `@letar/i18n-proxy` (`libs/i18n-proxy`) при переносе matcher'а на `buildIntlMatcher()`.
+Добавлен `src/proxy.spec.ts`, ловит такой рассинхрон впредь без ручного аудита.
+
+## Аудит matcher proxy.ts — баг studio не подтвердился (2026-08-21, ОШИБОЧНО — см. запись выше)
 
 Проверка класса бага из apps/studio. В kami единственный metadata-роут без своей
 `[locale]`-вложенности — `src/app/manifest.ts`, но он отдаёт `/manifest.webmanifest`: точка в URL
