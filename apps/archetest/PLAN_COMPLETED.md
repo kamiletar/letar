@@ -6,6 +6,20 @@
 
 ---
 
+## Matcher next-intl через @letar/i18n-proxy — исправлен ещё один пропущенный icon.svg (2026-08-21)
+
+Паттерн из записи ниже вынесен в общую `libs/i18n-proxy` (`@letar/i18n-proxy`,
+`buildIntlMatcher()`/`findUndeclaredMetadataRoutes()`) — используется всеми 7 приложениями с
+next-intl. При переносе archetest на хелпер `findUndeclaredMetadataRoutes` нашла **второй**
+пропущенный роут в самом archetest: `src/app/icon.svg` тоже отдаётся на `/icon` без расширения
+(тот же класс бага, что apple-icon.tsx ниже) — предыдущий фикс перечислял только `apple-icon`,
+`icon` остался незамеченным. Добавлен в matcher и в `proxy.spec.ts`.
+
+**Уточнение по остальным приложениям:** «`time`/`mandala`/`kami`/`aira-web`/`aboo` — баг не
+подтвердился» ниже — верно только для `mandala`/`aira-web`. Повторный аудит через
+`findUndeclaredMetadataRoutes` нашёл и исправил тот же пропущенный `icon.svg` в `time`/`kami` и
+пропущенные `icon.png`/`apple-icon.png` в `aboi` — см. их `PLAN_COMPLETED.md`.
+
 ## Фикс matcher proxy.ts — apple-icon без точки в URL (2026-08-21)
 
 Продолжение аудита next-intl matcher, найденного в apps/studio (публичное исключение `public/`
