@@ -7,6 +7,14 @@
 
 ## [Unreleased]
 
+## [0.33.4] - 2026-08-20
+
+### Changed
+
+- **`useReducedMotion`** (`src/app/_hooks/use-reduced-motion.ts`) удалён — дублировал
+  `useMediaQuery(breakpoints.prefersReducedMotion)` из `@letar/hooks` (обнаружено при аудите
+  дублей по монорепо). Единственный потребитель, `matrix-rain.tsx`, переключён на общий хук.
+
 ## [0.33.3] - 2026-08-13
 
 ### Fixed
