@@ -254,6 +254,9 @@ cron-рассылок: найти кандидатов → отправить �
 [offlineaudiocontext-suspend-render-race](/.claude/docs/offlineaudiocontext-suspend-render-race.md)
 
 **Продукт и контент:** [ecommerce-cart-orders](/.claude/docs/ecommerce-cart-orders.md) ·
+[payment-webhook-idempotency-pattern](/.claude/docs/payment-webhook-idempotency-pattern.md)
+уникальный ID события + select-then-create + guard по терминальному статусу; расхождение aboi
+(только status-guard, без таблицы событий) — не образец для переноса ·
 [animatrona-db-manifest-dual-source](/.claude/docs/animatrona-db-manifest-dual-source.md) ⚠️ CID в БД
 побеждает свежий CID из манифеста ·
 [paginated-web-source-reading](/.claude/docs/paginated-web-source-reading.md) чтение источника на
