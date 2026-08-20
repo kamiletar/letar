@@ -623,6 +623,27 @@ file-reservations на будущие пакеты Фазы 7 (`forms-core` + с
 - TanStack Form DevTools интеграция
 - createForm() фабрика с extraSelects/Comboboxes/Fields
 
+### Дедуп createLazyComponent между @letar/forms и @letar/forms-shadcn (2026-08-20)
+
+SSR Suspense/rAF-баг (см. запись «Баг: `Form.Field.TableEditor`/`DataGrid`…» выше и в
+`PLAN.md` Backlog) был найден и исправлен дважды независимо — в `@letar/forms` (Chakra) как
+`createLazyComponent`, и вручную скопирован в `@letar/forms-shadcn`
+(`FieldDataGrid`/`FieldRichText`) без переиспользования, потому что `forms-shadcn` — сестринский
+пакет, не тянущий `@letar/forms`.
+
+Общая логика (mounted-гейт + `<Suspense>`) вынесена в новый подпуть
+`@letar/forms-react/lib/lazy/create-lazy-component.tsx` — `fallback` передаётся снаружи как
+`ReactNode` (не хардкодится), поскольку этот слой не знает ни одной UI-библиотеки.
+
+- `@letar/forms` — тонкая обёртка вокруг общего хелпера с Chakra `Skeleton` fallback (2.7.1 →
+  2.7.2, публичный API не менялся).
+- `@letar/forms-shadcn` — `FieldDataGrid`/`FieldRichText` вызывают общий хелпер напрямую со
+  своим div-fallback (0.33.3 → 0.33.4).
+- `@letar/forms-react` — новый экспорт `createLazyComponent` (0.3.0 → 0.3.1), первый
+  `CHANGELOG.md`.
+- Проверено: `typecheck:tsgo`/`lint`/`test` зелёные на всех трёх пакетах (722 теста, 99 файлов).
+- Коммит `7661a4d5` (multi-scope: три библиотеки одной осознанной правкой).
+
 ### Фикс типа Form.Field.Signature (2026-08-04)
 
 `form-compound-types.ts`: тип поля `Signature` был вручную выписанным литералом,
