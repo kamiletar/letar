@@ -23,6 +23,11 @@ COPY --chown=nextjs:nodejs apps/kami/.next/standalone ./
 COPY --chown=nextjs:nodejs apps/kami/.next/static ./apps/kami/.next/static
 COPY --chown=nextjs:nodejs apps/kami/public ./apps/kami/public
 COPY --chown=nextjs:nodejs apps/kami/messages ./apps/kami/messages
+# Keystatic local reader (storage: 'local', используется когда KEYSTATIC_GITHUB_CLIENT_ID не
+# задан — так staging сознательно настроен) читает файлы контента по process.cwd() в рантайме
+# через fs, а не через статические импорты — трейсер standalone-сборки эти файлы не видит и не
+# копирует сам (см. .claude/docs/nextjs-standalone-tracing.md).
+COPY --chown=nextjs:nodejs apps/kami/src/content ./apps/kami/src/content
 
 USER nextjs
 
