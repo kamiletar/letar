@@ -6,6 +6,13 @@
 
 ---
 
+## Аудит дублей по монорепо: `prefersReducedMotion` из `@letar/hooks` (2026-08-20)
+
+`globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches` в `useAnimatedScores`
+(`hexagram-chart.tsx`) заменён на `prefersReducedMotion()` из `@letar/hooks` — тот же вызов
+внутри того же `useEffect`, менялся только источник чтения matchMedia. `@letar/hooks` добавлен
+в `implicitDependencies`. v0.27.6.
+
 ## Проверка setRequestLocale/SSG (2026-08-19)
 
 Аудит по классу бага, найденному в apps/studio. В archetest все страницы, которым нужен
