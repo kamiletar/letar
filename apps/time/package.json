@@ -12,10 +12,12 @@
       "@letar/number-words",
       "@letar/consent",
       "@letar/seo",
-      "@letar/glitchtip"
+      "@letar/glitchtip",
+      "@letar/i18n-proxy"
     ]
   },
   "dependencies": {
-    "@letar/glitchtip": "workspace:*"
+    "@letar/glitchtip": "workspace:*",
+    "@letar/i18n-proxy": "workspace:*"
   }
 }

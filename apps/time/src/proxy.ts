@@ -1,3 +1,4 @@
+import { buildIntlMatcher } from '@letar/i18n-proxy'
 import createIntlMiddleware from 'next-intl/middleware'
 import type { NextRequest } from 'next/server'
 
@@ -15,5 +16,9 @@ export function proxy(request: NextRequest) {
 export default proxy
 
 export const config = {
-  matcher: '/((?!api|_next|_vercel|.*\\..*).*)',
+  matcher: buildIntlMatcher({
+    excludePrefixes: ['api', '_next', '_vercel'],
+    // icon.svg — metadata-роут Next.js, отдаётся на /icon без расширения (см. libs/i18n-proxy)
+    metadataRoutes: ['icon'],
+  }),
 }
