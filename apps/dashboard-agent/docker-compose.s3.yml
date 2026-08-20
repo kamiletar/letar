@@ -54,6 +54,11 @@ services:
       PORT: 3100
       HOST: 0.0.0.0
       SERVER_NAME: s3.letar.best
+      # §81: nsenter-спавн deploy.ts/e2e.ts наследует env контейнера, не shell хоста —
+      # .bashrc на s3 никогда не сорсится в этой цепочке. Здесь (git-файл, не секрет)
+      # переменная переживает любой передеплой, в отличие от правки .env.docker,
+      # которую deploy-affected.sh перезатирает расшифровкой .env.docker.enc.
+      DEPLOY_SERVER_NAME: s3
       WORKSPACE_PATH: /home/deploy/letar
       # Отдельный токен s3: AGENT_TOKEN_S3 живёт в общем .env.docker(.enc), сюда
       # мапится как AGENT_TOKEN (переопределяет значение из env_file). Единый источник
