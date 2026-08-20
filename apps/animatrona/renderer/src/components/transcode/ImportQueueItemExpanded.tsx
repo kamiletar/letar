@@ -31,8 +31,8 @@ import { keyframes } from '@emotion/react'
 import { memo, useEffect, useMemo, useState } from 'react'
 import { LuCircleAlert, LuClock, LuCopy, LuHourglass, LuRefreshCw, LuTarget, LuX, LuZap } from 'react-icons/lu'
 
-import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { formatBytes } from '@/lib/format-utils'
+import { breakpoints, useMediaQuery } from '@letar/hooks'
 import type { ImportQueueEntry } from '../../../../shared/types/import-queue'
 import { ActiveWorkersPanel } from './ActiveWorkersPanel'
 import { VmafProgressCard } from './VmafProgressCard'
@@ -131,7 +131,7 @@ export const ImportQueueItemExpanded = memo(
     // Вычисляем elapsed и ETA для всего сериала
     const elapsedMs = getElapsedMs(item.startedAt)
     const eta = calculateEta(elapsedMs, item.progress)
-    const prefersReducedMotion = usePrefersReducedMotion()
+    const prefersReducedMotion = useMediaQuery(breakpoints.prefersReducedMotion)
 
     // Glow effect стили для активной карточки
     // При reduced motion — отключаем пульсацию, но оставляем glow

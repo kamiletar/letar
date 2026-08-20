@@ -20,8 +20,8 @@ import { keyframes } from '@emotion/react'
 import { memo, useMemo } from 'react'
 import { LuCpu, LuMonitor, LuZap } from 'react-icons/lu'
 
-import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { formatDurationMs, formatSpeed } from '@/lib/format-utils'
+import { breakpoints, useMediaQuery } from '@letar/hooks'
 
 /** Пульсирующая анимация для активной карточки */
 const pulseAnimation = keyframes`
@@ -55,7 +55,7 @@ export const GpuWorkerCard = memo(
   function GpuWorkerCard({ worker, index }: GpuWorkerCardProps) {
     const { fileName, progress, fps, fpsHistory, speed, bitrate, cq, vmafScore, useCpuFallback, elapsedMs } = worker
     const eta = calculateEta(elapsedMs, progress)
-    const prefersReducedMotion = usePrefersReducedMotion()
+    const prefersReducedMotion = useMediaQuery(breakpoints.prefersReducedMotion)
 
     // Glow effect стили для активной карточки
     // При reduced motion — отключаем пульсацию, но оставляем glow
