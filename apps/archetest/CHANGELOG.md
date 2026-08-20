@@ -5,6 +5,14 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.27.6] - 2026-08-20
+
+### Changed
+
+- **`useAnimatedScores`** (`hexagram-chart.tsx`) — `globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches`
+  заменено на `prefersReducedMotion()` из `@letar/hooks` (аудит дублей по монорепо). Вызов
+  остался внутри того же `useEffect`, менялся только источник чтения matchMedia.
+
 ## [0.27.5] - 2026-08-19
 
 ### Fixed
