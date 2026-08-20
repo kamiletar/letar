@@ -5,6 +5,7 @@ export { usePrevious } from './lib/utility/use-previous'
 export { useThrottle } from './lib/utility/use-throttle'
 
 // === Browser Hooks ===
+export { prefersReducedMotion } from './lib/browser/prefers-reduced-motion'
 export {
   type EventSourceReconnectOptions,
   type EventSourceReconnectStrategy,
