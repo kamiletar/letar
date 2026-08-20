@@ -1476,6 +1476,15 @@ onlyMultiLine`) против `.prettierrc` (`trailingComma: es5` + `prettier-plu
 
 ## Открытые задачи
 
+- [ ] ⚠️ **Открытый вопрос: заводить ли `@letar/*` зависимости в `mobile-ui`?** При аудите дублей
+      `prefers-reduced-motion` (2026-08-20) нашлись ещё два инлайн-вхождения в
+      `mobile-ui/src/App.tsx` (реактивный `useReducedMotion`) и `mobile-ui/src/components/ExpandableText.tsx`
+      (пер-рендерное чтение) — не тронуты. `mobile-ui` сейчас изолированный Vite-пакет без единой
+      `@letar/*` зависимости (`package.json` содержит только `@chakra-ui/react`/`react`/`react-router-dom`),
+      предположительно намеренно — под мобильный бандл. Если это архитектурное решение подтверждено —
+      вопрос закрыт как есть. Если нет — стоит подключить `@letar/hooks` и унифицировать так же, как
+      в `renderer`.
+
 - [ ] **Обновить Electron 42.8.0 → 43.2.0** (root `package.json`, animatrona своей версии не
       пинит — использует корневую)
 

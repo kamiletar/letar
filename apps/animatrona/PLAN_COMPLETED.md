@@ -6,6 +6,15 @@
 
 ---
 
+## Аудит дублей по монорепо: renderer/usePrefersReducedMotion → @letar/hooks (2026-08-20)
+
+`renderer/src/hooks/usePrefersReducedMotion.ts` дублировал
+`useMediaQuery(breakpoints.prefersReducedMotion)` из `@letar/hooks` (уже implicit dependency
+animatrona, просто не был использован для этого хука). Удалён, оба потребителя
+(`ImportQueueItemExpanded.tsx`, `GpuWorkerCard.tsx`) переключены на общий хук. `mobile-ui` (свой
+изолированный Vite-пакет без единой `@letar/*` зависимости) намеренно не тронут — см. открытый
+вопрос ниже. v0.55.20.
+
 ## Фикс ложных `no-restricted-syntax` (NODE_ENV) во вложенном main/eslint.config.mjs (2026-08-19)
 
 `nx lint animatrona` падал на 6 ошибках `no-restricted-syntax` в `main/main.ts`,
