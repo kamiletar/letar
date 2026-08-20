@@ -1,6 +1,7 @@
 'use client'
 
-import { Code, Heading, Stack, Text } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Code, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { useState } from 'react'
 
@@ -19,7 +20,7 @@ export default function AsyncValidationExamplePage() {
   return (
     <Stack gap={8} maxW="lg">
       <Stack gap={2}>
-        <Heading size="xl">Async Validation</Heading>
+        <PageH1 size="xl">Async Validation</PageH1>
         <Text color="fg.muted">
           Server-side validation with debounce and caching. Try &quot;taken@example.com&quot; to see the error.
         </Text>

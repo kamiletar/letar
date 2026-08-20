@@ -1,6 +1,7 @@
 'use client'
 
-import { Code, Heading, Stack, Text } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Code, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { useState } from 'react'
 
@@ -17,7 +18,7 @@ export default function DataGridExamplePage() {
   return (
     <Stack gap={8} maxW="4xl">
       <Stack gap={2}>
-        <Heading size="xl">Data Grid</Heading>
+        <PageH1 size="xl">Data Grid</PageH1>
         <Text color="fg.muted">
           Editable data grid with sorting, filtering, pagination, and inline editing. Powered by TanStack Table.
         </Text>

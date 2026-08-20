@@ -1,12 +1,13 @@
 'use client'
 
-import { Code, Heading, Stack, Text } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Code, Stack, Text } from '@chakra-ui/react'
 
 export default function CaptchaExamplePage() {
   return (
     <Stack gap={8} maxW="lg">
       <Stack gap={2}>
-        <Heading size="xl">CAPTCHA</Heading>
+        <PageH1 size="xl">CAPTCHA</PageH1>
         <Text color="fg.muted">
           Protect forms with Cloudflare Turnstile, Google reCAPTCHA, hCaptcha, or Yandex SmartCaptcha. Requires a real
           siteKey from the provider.

@@ -1,6 +1,7 @@
 'use client'
 
-import { Code, Heading, Stack, Text } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Code, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { z } from 'zod/v4'
 
@@ -63,7 +64,7 @@ export default function ConstraintsPage() {
   return (
     <Stack gap={6}>
       <div>
-        <Heading size="lg">Advanced Validation</Heading>
+        <PageH1 size="lg">Advanced Validation</PageH1>
         <Text color="fg.muted">
           Complex Zod constraints: regex, min/max, custom messages, <Code>Form.Errors</Code> summary.
         </Text>

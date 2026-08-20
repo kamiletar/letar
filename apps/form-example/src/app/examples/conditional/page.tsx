@@ -1,6 +1,7 @@
 'use client'
 
-import { Heading, Stack, Text } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { z } from 'zod/v4'
 
@@ -37,7 +38,7 @@ export default function ConditionalPage() {
   return (
     <Stack gap={6}>
       <div>
-        <Heading size="lg">Conditional Fields</Heading>
+        <PageH1 size="lg">Conditional Fields</PageH1>
         <Text color="fg.muted">
           Use Form.When to show/hide fields based on other values. Try switching Account Type and toggling Newsletter.
         </Text>

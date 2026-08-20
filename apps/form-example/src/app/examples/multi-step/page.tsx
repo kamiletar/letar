@@ -1,6 +1,7 @@
 'use client'
 
-import { Heading, Stack, Text } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { z } from 'zod/v4'
 
@@ -39,7 +40,7 @@ export default function MultiStepPage() {
   return (
     <Stack gap={6}>
       <div>
-        <Heading size="lg">Multi-Step Form</Heading>
+        <PageH1 size="lg">Multi-Step Form</PageH1>
         <Text color="fg.muted">Wizard-style form with step navigation and per-step validation.</Text>
       </div>
 

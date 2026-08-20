@@ -1,5 +1,6 @@
 'use client'
 
+import { PageH1 } from '@/components/page-h1'
 import { Box, Heading, HStack, Text, VStack } from '@chakra-ui/react'
 import { FormSkeleton } from '@letar/forms'
 import { z } from 'zod/v4'
@@ -16,7 +17,7 @@ export default function SkeletonExamplePage() {
   return (
     <VStack gap={8} align="stretch" maxW="800px" mx="auto" py={8}>
       <Box>
-        <Heading size="lg">Form Skeleton</Heading>
+        <PageH1 size="lg">Form Skeleton</PageH1>
         <Text color="fg.muted" mt={2}>
           Loading state пока загружаются данные формы.
         </Text>

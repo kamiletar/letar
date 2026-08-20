@@ -1,5 +1,6 @@
 'use client'
 
+import { PageH1 } from '@/components/page-h1'
 import { Code, Heading, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { useState } from 'react'
@@ -10,7 +11,7 @@ export default function DocumentsExamplePage() {
   return (
     <Stack gap={8} maxW="2xl">
       <Stack gap={2}>
-        <Heading size="xl">Russian Documents</Heading>
+        <PageH1 size="xl">Russian Documents</PageH1>
         <Text color="fg.muted">
           Company registration form with INN, KPP, OGRN, bank details, SNILS. All fields have input masks and checksum
           validation.

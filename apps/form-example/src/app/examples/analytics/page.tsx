@@ -1,6 +1,7 @@
 'use client'
 
-import { Box, Heading, Stack, Text, VStack } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Box, Stack, Text, VStack } from '@chakra-ui/react'
 import { AnalyticsPanel, Form, useFormAnalytics } from '@letar/forms'
 import { z } from 'zod/v4'
 
@@ -30,7 +31,7 @@ export default function AnalyticsExamplePage() {
   return (
     <VStack gap={8} align="stretch" maxW="600px" mx="auto" py={8}>
       <Box>
-        <Heading size="lg">Form Analytics</Heading>
+        <PageH1 size="lg">Form Analytics</PageH1>
         <Text color="fg.muted" mt={2}>
           Заполните форму и наблюдайте за аналитикой в панели справа внизу.
         </Text>

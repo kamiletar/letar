@@ -1,6 +1,7 @@
 'use client'
 
-import { Box, Code, Heading, HStack, Text, VStack } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Box, Code, HStack, Text, VStack } from '@chakra-ui/react'
 import { mapServerErrors } from '@letar/forms'
 import { useState } from 'react'
 
@@ -21,7 +22,7 @@ export default function ServerErrorsExamplePage() {
   return (
     <VStack gap={8} align="stretch" maxW="600px" mx="auto" py={8}>
       <Box>
-        <Heading size="lg">Server Error Mapping</Heading>
+        <PageH1 size="lg">Server Error Mapping</PageH1>
         <Text color="fg.muted" mt={2}>
           mapServerErrors() автоматически определяет формат и маппит на поля формы.
         </Text>

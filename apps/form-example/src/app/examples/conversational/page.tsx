@@ -1,6 +1,7 @@
 'use client'
 
-import { Code, Heading, Stack, Text, VStack } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Code, Stack, Text, VStack } from '@chakra-ui/react'
 import { ConversationalMode, Form } from '@letar/forms'
 import { useState } from 'react'
 
@@ -10,7 +11,7 @@ export default function ConversationalExamplePage() {
   return (
     <Stack gap={8} maxW="lg">
       <Stack gap={2}>
-        <Heading size="xl">Conversational Mode</Heading>
+        <PageH1 size="xl">Conversational Mode</PageH1>
         <Text color="fg.muted">Typeform-style one-question-at-a-time experience.</Text>
       </Stack>
 

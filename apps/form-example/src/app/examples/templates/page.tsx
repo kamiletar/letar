@@ -1,6 +1,7 @@
 'use client'
 
-import { Code, Heading, Stack, Text } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Code, Stack, Text } from '@chakra-ui/react'
 import { Form, templates } from '@letar/forms'
 import { useState } from 'react'
 
@@ -10,7 +11,7 @@ export default function TemplatesExamplePage() {
   return (
     <Stack gap={8} maxW="lg">
       <Stack gap={2}>
-        <Heading size="xl">Form Templates</Heading>
+        <PageH1 size="xl">Form Templates</PageH1>
         <Text color="fg.muted">Ready-made form templates. This example uses the Contact Form template.</Text>
       </Stack>
 

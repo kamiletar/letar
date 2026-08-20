@@ -1,5 +1,6 @@
 'use client'
 
+import { PageH1 } from '@/components/page-h1'
 import { Card, Heading, Separator, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { z } from 'zod/v4'
@@ -81,7 +82,7 @@ export default function RecipesPage() {
   return (
     <Stack gap={8}>
       <div>
-        <Heading size="lg">Form Recipes</Heading>
+        <PageH1 size="lg">Form Recipes</PageH1>
         <Text color="fg.muted">Ready-to-use form patterns for common use cases.</Text>
       </div>
 

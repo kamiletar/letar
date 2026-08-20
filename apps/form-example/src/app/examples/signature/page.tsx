@@ -1,5 +1,6 @@
 'use client'
 
+import { PageH1 } from '@/components/page-h1'
 import { Heading, Image, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { useState } from 'react'
@@ -25,7 +26,7 @@ export default function SignatureExamplePage() {
   return (
     <Stack gap={8} maxW="2xl">
       <Stack gap={2}>
-        <Heading size="xl">Signature Field</Heading>
+        <PageH1 size="xl">Signature Field</PageH1>
         <Text color="fg.muted">Consent form with digital signature. Draw or type your name.</Text>
       </Stack>
 

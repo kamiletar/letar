@@ -1,6 +1,7 @@
 'use client'
 
-import { Code, Heading, Stack, Text } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Code, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { useState } from 'react'
 import { z } from 'zod/v4'
@@ -28,7 +29,7 @@ export default function SecurityExamplePage() {
   return (
     <Stack gap={8} maxW="2xl">
       <Stack gap={2}>
-        <Heading size="xl">Security Patterns</Heading>
+        <PageH1 size="xl">Security Patterns</PageH1>
         <Text color="fg.muted">
           Form with honeypot bot protection, rate limiting (3 submits/min), and secure file upload with MIME
           verification.

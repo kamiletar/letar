@@ -1,6 +1,7 @@
 'use client'
 
-import { Heading, Stack, Text } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { z } from 'zod/v4'
 
@@ -37,7 +38,7 @@ export default function ValidationPage() {
   return (
     <Stack gap={6}>
       <div>
-        <Heading size="lg">Validation</Heading>
+        <PageH1 size="lg">Validation</PageH1>
         <Text color="fg.muted">Zod schema validation with custom error messages and Form.Errors display.</Text>
       </div>
 

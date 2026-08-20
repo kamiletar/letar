@@ -1,6 +1,7 @@
 'use client'
 
-import { Box, Code, Heading, Stack, Text } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Box, Code, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { useState } from 'react'
 
@@ -10,9 +11,9 @@ export default function CalculatedExamplePage() {
   return (
     <Stack gap={8}>
       <Box>
-        <Heading size="xl" mb={2}>
+        <PageH1 size="xl" mb={2}>
           Calculated Fields
-        </Heading>
+        </PageH1>
         <Text color="fg.muted">
           Declarative computed fields that auto-update when dependencies change. Replaces manual Form.Watch +
           setFieldValue for simple formulas.

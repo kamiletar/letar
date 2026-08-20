@@ -1,6 +1,7 @@
 'use client'
 
-import { Badge, Code, Heading, HStack, Stack, Text } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Badge, Code, HStack, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { useEffect, useState } from 'react'
 import { z } from 'zod/v4'
@@ -40,7 +41,7 @@ export default function OfflinePage() {
   return (
     <Stack gap={6}>
       <div>
-        <Heading size="lg">Offline-First Forms</Heading>
+        <PageH1 size="lg">Offline-First Forms</PageH1>
         <Text color="fg.muted">
           Forms that work without internet. Data is saved to IndexedDB and synced when connection is restored. Uses{' '}
           <Code>@letar/forms/offline</Code>.

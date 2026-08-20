@@ -1,5 +1,6 @@
 'use client'
 
+import { PageH1 } from '@/components/page-h1'
 import { Box, Heading, Stack, Text, VStack } from '@chakra-ui/react'
 import { FormComparison } from '@letar/forms'
 import { z } from 'zod/v4'
@@ -18,7 +19,7 @@ export default function ComparisonExamplePage() {
   return (
     <VStack gap={8} align="stretch" maxW="600px" mx="auto" py={8}>
       <Box>
-        <Heading size="lg">Сравнение данных</Heading>
+        <PageH1 size="lg">Сравнение данных</PageH1>
         <Text color="fg.muted" mt={2}>
           FormComparison показывает diff: что изменилось между двумя версиями данных.
         </Text>

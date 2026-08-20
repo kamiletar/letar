@@ -5,6 +5,7 @@
  * Статья: https://forms.letar.best/docs/guides/groups
  */
 
+import { PageH1 } from '@/components/page-h1'
 import { Card, Heading, Separator, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { z } from 'zod/v4'
@@ -63,7 +64,7 @@ export default function GroupsPage() {
   return (
     <Stack gap={8}>
       <div>
-        <Heading size="lg">Groups &amp; Arrays</Heading>
+        <PageH1 size="lg">Groups &amp; Arrays</PageH1>
         <Text color="fg.muted">
           Nested objects, dynamic arrays with Add/Remove, sortable drag&amp;drop, and nested arrays.
         </Text>

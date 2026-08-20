@@ -1,6 +1,7 @@
 'use client'
 
-import { Button, Heading, HStack, Stack, Text } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Button, HStack, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { useState } from 'react'
 import { z } from 'zod/v4'
@@ -38,7 +39,7 @@ export default function I18nPage() {
   return (
     <Stack gap={6}>
       <div>
-        <Heading size="lg">i18n — Multi-Language Forms</Heading>
+        <PageH1 size="lg">i18n — Multi-Language Forms</PageH1>
         <Text color="fg.muted">
           Switch language to see form labels change. ZenStack plugin generates i18nKey in .meta() for each field, which
           maps to translation files.

@@ -1,5 +1,6 @@
 'use client'
 
+import { PageH1 } from '@/components/page-h1'
 import { Box, Code, Heading, HStack, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { useState } from 'react'
@@ -48,9 +49,9 @@ export default function UtilityExamplePage() {
   return (
     <Stack gap={8}>
       <Box>
-        <Heading size="xl" mb={2}>
+        <PageH1 size="xl" mb={2}>
           Utility Components
-        </Heading>
+        </PageH1>
         <Text color="fg.muted">
           InfoBlock for contextual messages, Divider for visual separation, Hidden for invisible data.
         </Text>

@@ -1,5 +1,6 @@
 'use client'
 
+import { PageH1 } from '@/components/page-h1'
 import { Box, Heading, Text, VStack } from '@chakra-ui/react'
 import { FormReadOnlyView } from '@letar/forms'
 import { z } from 'zod/v4'
@@ -24,7 +25,7 @@ export default function ReadOnlyExamplePage() {
   return (
     <VStack gap={8} align="stretch" maxW="600px" mx="auto" py={8}>
       <Box>
-        <Heading size="lg">Read-Only View</Heading>
+        <PageH1 size="lg">Read-Only View</PageH1>
         <Text color="fg.muted" mt={2}>
           FormReadOnlyView отображает данные как текст. Labels из Zod .meta().
         </Text>

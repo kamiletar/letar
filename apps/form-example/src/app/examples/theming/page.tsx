@@ -1,16 +1,7 @@
 'use client'
 
-import {
-  Box,
-  ChakraProvider,
-  Code,
-  createSystem,
-  defaultConfig,
-  defineConfig,
-  Heading,
-  Stack,
-  Text,
-} from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Box, ChakraProvider, Code, createSystem, defaultConfig, defineConfig, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { z } from 'zod/v4'
 
@@ -65,7 +56,7 @@ export default function ThemingPage() {
   return (
     <Stack gap={6}>
       <div>
-        <Heading size="lg">Custom Theming</Heading>
+        <PageH1 size="lg">Custom Theming</PageH1>
         <Text color="fg.muted">
           Forms adapt to your Chakra UI theme. This example uses a purple color palette via{' '}
           <Code>createSystem(defineConfig(...))</Code>.

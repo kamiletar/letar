@@ -1,5 +1,6 @@
 'use client'
 
+import { PageH1 } from '@/components/page-h1'
 import { Box, Code, Heading, Link, Stack, Text, VStack } from '@chakra-ui/react'
 import { Form, useUrlPrefill } from '@letar/forms'
 import NextLink from 'next/link'
@@ -46,7 +47,7 @@ export default function UrlPrefillExamplePage() {
   return (
     <VStack gap={8} align="stretch" maxW="600px" mx="auto" py={8}>
       <Box>
-        <Heading size="lg">URL Prefill</Heading>
+        <PageH1 size="lg">URL Prefill</PageH1>
         <Text color="fg.muted" mt={2}>
           Автозаполнение полей формы из URL-параметров. Whitelist обязателен для безопасности.
         </Text>

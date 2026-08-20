@@ -1,14 +1,15 @@
 'use client'
 
+import { PageH1 } from '@/components/page-h1'
 import { ProductCreateFormSchema } from '@/generated/form-schemas'
-import { Code, Heading, Stack, Text } from '@chakra-ui/react'
+import { Code, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 
 export default function ZenstackPage() {
   return (
     <Stack gap={6}>
       <div>
-        <Heading size="lg">ZenStack Plugin</Heading>
+        <PageH1 size="lg">ZenStack Plugin</PageH1>
         <Text color="fg.muted">
           Schemas generated from <Code>schema.zmodel</Code> with{' '}
           <Code>@letar/zenstack-form-plugin</Code>. The form below is built entirely from generated code.

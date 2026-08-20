@@ -1,5 +1,6 @@
 'use client'
 
+import { PageH1 } from '@/components/page-h1'
 import { Heading, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { z } from 'zod/v4'
@@ -77,7 +78,7 @@ export default function AutofillPage() {
   return (
     <Stack gap={8}>
       <div>
-        <Heading size="lg">Smart Autofill</Heading>
+        <PageH1 size="lg">Smart Autofill</PageH1>
         <Text color="fg.muted">
           Fields automatically get HTML autocomplete attributes based on their names. Inspect the inputs in DevTools to
           verify. Try Chrome autofill!

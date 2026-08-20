@@ -1,6 +1,7 @@
 'use client'
 
-import { Badge, Button, Code, Heading, HStack, Stack, Text } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Badge, Button, Code, HStack, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { useCallback, useEffect, useState } from 'react'
 import { z } from 'zod/v4'
@@ -51,7 +52,7 @@ export default function PersistencePage() {
   return (
     <Stack gap={6}>
       <div>
-        <Heading size="lg">Form Persistence</Heading>
+        <PageH1 size="lg">Form Persistence</PageH1>
         <Text color="fg.muted">
           Form data is saved to <Code>localStorage</Code>{' '}
           on submit. Click "Save Draft" to persist, then refresh the page — your data is restored!

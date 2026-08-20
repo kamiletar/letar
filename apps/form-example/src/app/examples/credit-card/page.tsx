@@ -1,6 +1,7 @@
 'use client'
 
-import { Code, Heading, Stack, Text } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Code, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { useState } from 'react'
 
@@ -10,7 +11,7 @@ export default function CreditCardExamplePage() {
   return (
     <Stack gap={8} maxW="lg">
       <Stack gap={2}>
-        <Heading size="xl">Credit Card</Heading>
+        <PageH1 size="xl">Credit Card</PageH1>
         <Text color="fg.muted">
           Card number with brand detection (Visa, MasterCard, Mir, etc.), expiry date, and CVC input.
         </Text>

@@ -1,6 +1,7 @@
 'use client'
 
-import { Box, Heading, Stack, Text, VStack } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Box, Stack, Text, VStack } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { z } from 'zod/v4'
 
@@ -15,7 +16,7 @@ export default function DebugValuesExamplePage() {
   return (
     <VStack gap={8} align="stretch" maxW="600px" mx="auto" py={8}>
       <Box>
-        <Heading size="lg">Debug Values</Heading>
+        <PageH1 size="lg">Debug Values</PageH1>
         <Text color="fg.muted" mt={2}>
           JSON-инспектор значений формы в реальном времени. Скрыт в production.
         </Text>

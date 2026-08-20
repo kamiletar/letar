@@ -1,6 +1,7 @@
 'use client'
 
-import { Code, Heading, Stack, Text } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Code, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { useState } from 'react'
 
@@ -10,7 +11,7 @@ export default function SurveyFieldsExamplePage() {
   return (
     <Stack gap={8} maxW="3xl">
       <Stack gap={2}>
-        <Heading size="xl">Survey Fields</Heading>
+        <PageH1 size="xl">Survey Fields</PageH1>
         <Text color="fg.muted">ImageChoice, Likert, and YesNo for building surveys and questionnaires.</Text>
       </Stack>
 

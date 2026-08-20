@@ -1,6 +1,7 @@
 'use client'
 
-import { Code, Heading, Stack, Text } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Code, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { z } from 'zod/v4'
 
@@ -34,7 +35,7 @@ export default function AutoFieldsPage() {
   return (
     <Stack gap={6}>
       <div>
-        <Heading size="lg">Auto Fields</Heading>
+        <PageH1 size="lg">Auto Fields</PageH1>
         <Text color="fg.muted">
           <Code>Form.FromSchema</Code>{' '}
           generates the entire form from a Zod schema — one line of code, zero manual field definitions.

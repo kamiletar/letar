@@ -1,6 +1,7 @@
 'use client'
 
-import { Box, Heading, Text, VStack } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Box, Text, VStack } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { z } from 'zod/v4'
 
@@ -21,7 +22,7 @@ export default function UndoRedoExamplePage() {
   return (
     <VStack gap={8} align="stretch" maxW="600px" mx="auto" py={8}>
       <Box>
-        <Heading size="lg">Undo / Redo</Heading>
+        <PageH1 size="lg">Undo / Redo</PageH1>
         <Text color="fg.muted" mt={2}>
           Ctrl+Z / Ctrl+Y для отмены и повтора изменений в форме. useFormHistory подписывается на form.store и
           записывает снапшоты с debounce.

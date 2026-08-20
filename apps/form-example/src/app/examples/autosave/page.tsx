@@ -1,12 +1,13 @@
 'use client'
 
-import { Code, Heading, Stack, Text } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Code, Stack, Text } from '@chakra-ui/react'
 
 export default function AutosaveExamplePage() {
   return (
     <Stack gap={8} maxW="lg">
       <Stack gap={2}>
-        <Heading size="xl">Autosave to Server</Heading>
+        <PageH1 size="xl">Autosave to Server</PageH1>
         <Text color="fg.muted">Automatic server-side saving with debounce, offline fallback, and draft recovery.</Text>
       </Stack>
 

@@ -1,6 +1,7 @@
 'use client'
 
-import { Heading, Stack, Text } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { z } from 'zod/v4'
 
@@ -27,7 +28,7 @@ export default function BasicPage() {
   return (
     <Stack gap={6}>
       <div>
-        <Heading size="lg">Basic Form</Heading>
+        <PageH1 size="lg">Basic Form</PageH1>
         <Text color="fg.muted">The simplest example — String, Select, Checkbox fields.</Text>
       </div>
 

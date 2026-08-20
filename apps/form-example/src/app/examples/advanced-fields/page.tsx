@@ -1,5 +1,6 @@
 'use client'
 
+import { PageH1 } from '@/components/page-h1'
 import { Heading, Separator, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { z } from 'zod/v4'
@@ -48,7 +49,7 @@ export default function AdvancedFieldsPage() {
   return (
     <Stack gap={6}>
       <div>
-        <Heading size="lg">Advanced Fields</Heading>
+        <PageH1 size="lg">Advanced Fields</PageH1>
         <Text color="fg.muted">Extended configurations for Rating, Slider, Tags, and FileUpload.</Text>
       </div>
 

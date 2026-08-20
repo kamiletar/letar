@@ -1,6 +1,7 @@
 'use client'
 
-import { Code, Heading, Stack, Text } from '@chakra-ui/react'
+import { PageH1 } from '@/components/page-h1'
+import { Code, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { useState } from 'react'
 
@@ -10,7 +11,7 @@ export default function TableEditorExamplePage() {
   return (
     <Stack gap={8} maxW="4xl">
       <Stack gap={2}>
-        <Heading size="xl">Table Editor</Heading>
+        <PageH1 size="xl">Table Editor</PageH1>
         <Text color="fg.muted">
           Inline editable table for array fields. Click cells to edit, Tab/Enter to navigate. Supports computed columns,
           footer aggregates, and paste from Excel.

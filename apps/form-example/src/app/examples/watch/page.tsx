@@ -1,5 +1,6 @@
 'use client'
 
+import { PageH1 } from '@/components/page-h1'
 import { Code, Heading, Stack, Text, VStack } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { useState } from 'react'
@@ -106,7 +107,7 @@ export default function WatchPage() {
   return (
     <Stack gap={8}>
       <div>
-        <Heading size="lg">Form.Watch & onFieldChange</Heading>
+        <PageH1 size="lg">Form.Watch & onFieldChange</PageH1>
         <Text color="fg.muted">
           React to field changes with side effects — auto-generate slugs, sync dependent fields, recalculate totals.
         </Text>

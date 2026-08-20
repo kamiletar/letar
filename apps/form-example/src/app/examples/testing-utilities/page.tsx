@@ -1,12 +1,13 @@
 'use client'
 
+import { PageH1 } from '@/components/page-h1'
 import { Box, Code, Heading, Stack, Text, VStack } from '@chakra-ui/react'
 
 export default function TestingUtilitiesExamplePage() {
   return (
     <VStack gap={8} align="stretch" maxW="800px" mx="auto" py={8}>
       <Box>
-        <Heading size="lg">Testing Utilities</Heading>
+        <PageH1 size="lg">Testing Utilities</PageH1>
         <Text color="fg.muted" mt={2}>
           Хелперы для тестирования форм с Vitest и @testing-library/react.
         </Text>

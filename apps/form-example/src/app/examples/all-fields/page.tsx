@@ -6,6 +6,7 @@
  * Статья: https://forms.letar.best/docs/guides/all-fields
  */
 
+import { PageH1 } from '@/components/page-h1'
 import { Heading, Separator, Stack, Text } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
 import { z } from 'zod/v4'
@@ -179,7 +180,7 @@ export default function AllFieldsPage() {
   return (
     <Stack gap={6}>
       <div>
-        <Heading size="lg">All Field Types</Heading>
+        <PageH1 size="lg">All Field Types</PageH1>
         <Text color="fg.muted">Every field type available in @letar/forms — 40 components organized by category.</Text>
       </div>
 
