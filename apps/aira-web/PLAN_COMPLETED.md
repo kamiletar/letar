@@ -2,6 +2,11 @@
 
 ## Выполненные задачи
 
+- [x] Matcher next-intl перенесён на `@letar/i18n-proxy` (2026-08-21) — `buildIntlMatcher()` из
+      общей `libs/i18n-proxy`, та же логика (api/_next/_vercel исключены), без изменения
+      поведения. Аудит ниже подтверждён верным, добавлен `proxy.spec.ts`
+      (`findUndeclaredMetadataRoutes`) — ловит появление нового metadata-роута тестом, а не
+      ручным аудитом.
 - [x] Аудит matcher proxy.ts — баг studio не подтвердился (2026-08-21). Проверка класса бага из
       apps/studio (matcher не исключал metadata-роуты без расширения в URL). В aira-web
       `opengraph-image.tsx` живёт внутри `src/app/[locale]/` — это уже locale-scoped роут, не
