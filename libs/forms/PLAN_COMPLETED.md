@@ -1,5 +1,33 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-08-20 — Аудит forms-vue/forms-vue-shadcn/forms-angular на тот же класс бага
+
+Follow-up к фиксу `createLazyComponent` ниже: проверено, наступает ли тот же класс проблемы
+(«сервер отдаёт плейсхолдер, раскрытие которого зависит от клиентского таймера, не гарантированного
+в скрытой/фоновой вкладке») в двух других фреймворковых слоях библиотеки.
+
+**Вывод: риска нет ни у одного.**
+
+- `forms-vue`/`forms-vue-shadcn` — единственная точка ленивой загрузки (`FieldDataGrid`,
+  `FieldRichText` в обеих) идёт через общий `createLazyField`
+  (`libs/forms-vue/src/lib/core/create-lazy-field.ts`, `defineAsyncComponent` **без** `<Suspense>`).
+  Без `<Suspense>` Vue SSR-рендерер дожидается async-загрузку как часть обычного
+  promise-based рендера — не эмитит плейсхолдер и не полагается на отдельный клиентский
+  reveal-скрипт вовсе. Итоговый HTML уже содержит резолвленную разметку.
+- `forms-angular` — `FieldRichTextComponent` грузит реализацию через `import()` +
+  `ViewContainerRef.createComponent()` в `ngAfterViewInit` (`FieldDataGridComponent` ленивой
+  загрузки не использует вовсе, осознанно — см. комментарий в файле). Angular SSR не имеет
+  аналога React-стриминга с плейсхолдер+reveal-скриптом: `renderApplication` дожидается
+  `ApplicationRef` stability (все pending-микрозадачи, включая `ngAfterViewInit`) до сериализации
+  HTML целиком, а не эмитит частичный HTML с последующим клиентским патчингом по таймеру кадра.
+
+Паттерн специфичен именно реализации React 19 out-of-order streaming SSR (`$RC`/`$RB`/`$RV` +
+rAF-батчинг) — ни один из двух других фреймворков его не реализует для async-компонентов вне
+`<Suspense>` (Vue) / вне `@defer`-блоков (Angular, не используется здесь).
+
+**Разбор:** дополнение в
+`.claude/docs/letar-forms-lazy-component-ssr-stuck-suspense.md` (раздел «Проверено 2026-08-20»).
+
 ## 2026-08-20 — createLazyComponent: зависший SSR Suspense-boundary (v2.7.1)
 
 Делегировано координатором `forms-coordinator-dev` (тред `form-example-table-editor-suspense-bug`,
