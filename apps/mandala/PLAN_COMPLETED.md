@@ -11,6 +11,14 @@
 
 ---
 
+## Matcher next-intl перенесён на @letar/i18n-proxy (2026-08-21)
+
+`proxy.ts` переведён на `buildIntlMatcher()` из общей `libs/i18n-proxy` — та же логика (api/
+_next/_vercel/admin исключены), без изменения поведения. Аудит ниже подтверждён верным (в
+mandala действительно нет своих metadata-роутов вне `[locale]`), но добавлен `proxy.spec.ts`
+(`findUndeclaredMetadataRoutes`), чтобы появление такого файла ловилось тестом, а не ручным
+аудитом в следующий раз.
+
 ## Аудит matcher proxy.ts — баг studio не подтвердился (2026-08-21)
 
 Проверка класса бага из apps/studio. В mandala единственный metadata-роут без своей
