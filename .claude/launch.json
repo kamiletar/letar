@@ -142,6 +142,13 @@
       "runtimeExecutable": "nx",
       "runtimeArgs": ["run", "form-docs:start"],
       "port": 3020
+    },
+    {
+      "name": "form-example",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "form-example"],
+      "port": 3027,
+      "autoPort": true
     }
   ]
 }
