@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.2] - 2026-08-20
+
+### Fixed
+
+- Все 42 examples-страницы получили настоящий `<h1>` — Chakra `Heading` рендерит `<h2>` по
+  умолчанию, ни одна страница не имела `<h1>` в DOM. Root cause 5 упавших e2e-спеков (§18.7 M2:
+  `basic`/`conditional`/`groups`/`multi-step`/`validation`, все проверяют
+  `getByRole('heading', {level: 1})`). Добавлен общий `PageH1` (`asChild` + нативный `<h1>`).
+
 ## [0.1.1] - 2026-04-04
 
 ### Improved
