@@ -4,6 +4,23 @@
 
 ## [Unreleased]
 
+## [0.7.5] - 2026-08-20
+
+### Fixed
+
+- **«Ошибка входа: Неизвестная ошибка» при повторном входе под другим аккаунтом (account
+  chooser, `prompt=login`):** плагин `oidc-provider` в `better-auth` вешает глобальный
+  `after`-хук, который при `prompt=login` пытается сам довершить OIDC-flow внутренним вызовом
+  `authorize(ctx)`. Тот требует `ctx.request` (сырой `Request`), которого нет при вызове
+  `auth.api.signInEmail()` как обычной функции из Server Action — хук падает с OAuth2-формой
+  ошибки (`{error, error_description}`, не `{code, message}`) уже ПОСЛЕ успешного создания
+  сессии. `login.action.ts` не распознавал эту форму и показывал «Неизвестная ошибка», хотя
+  пользователь уже вошёл. Подтверждено логами прод-инцидента: `createdAt` новой сессии в Redis
+  совпадает по времени с ошибкой. Теперь этот конкретный сигнатурный случай (`error ===
+  'invalid_request'` && `error_description === 'request not found'`) считается успехом —
+  редирект на `redirectTo` (для OIDC-входа это абсолютный URL на `/api/auth/oauth2/authorize`)
+  завершает flow штатным HTTP-переходом.
+
 ## [0.7.3] - 2026-07-30
 
 ### Fixed

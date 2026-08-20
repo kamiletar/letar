@@ -58,6 +58,24 @@ export async function loginUser(data: LoginInput): Promise<LoginResult> {
 
     console.error('[auth-hub] signIn error full:', { message, apiCode, error })
 
+    // Плагин oidc-provider вешает глобальный after-хук (matcher всегда true),
+    // который срабатывает ПОСЛЕ любого эндпоинта, включая sign-in. При prompt=login
+    // (принудительный повторный вход — «Войти под другим аккаунтом» в account chooser,
+    // см. use-post-sign-in-callback.ts) хук находит cookie oidc_login_prompt +
+    // только что установленную сессионную cookie и сам пытается довершить OIDC-flow,
+    // вызывая внутренний authorize(ctx). Тот требует ctx.request (сырой Request),
+    // а auth.api.signInEmail() из Server Action вызывается как обычная функция —
+    // ctx.request не передаётся, authorize() бросает эту OAuth2-форму ошибки (не
+    // {code,message}, а {error,error_description}) УЖЕ ПОСЛЕ того как сессия создана.
+    // Подтверждено логами прод-инцидента 2026-08-20: createdAt новой сессии в Redis
+    // совпадает с меткой времени этой ошибки день-в-день. Пользователь фактически
+    // вошёл — просто автозавершение OIDC редиректа не удалось. redirectTo для OIDC-
+    // входа — абсолютный URL на /api/auth/oauth2/authorize (usePostSignInCallback),
+    // обычный HTTP-переход туда завершит flow штатно, там ctx.request есть.
+    if (apiBody?.error === 'invalid_request' && apiBody?.error_description === 'request not found') {
+      return { success: true, redirectTo }
+    }
+
     // Если email не верифицирован
     if (apiCode === 'EMAIL_NOT_VERIFIED') {
       // verifyEmailSent → форма покажет кнопку «Отправить письмо повторно» (Этап 2 PLAN.md)
