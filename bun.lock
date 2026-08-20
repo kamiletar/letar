@@ -331,8 +331,9 @@
     },
     "apps/aboi": {
       "name": "@letar/aboi",
-      "version": "0.67.4",
+      "version": "0.67.5",
       "dependencies": {
+        "@letar/i18n-proxy": "workspace:*",
         "@letar/theme-check": "workspace:*",
         "leaflet": "^1.9.4",
         "react-leaflet": "^5.0.0",
@@ -350,6 +351,7 @@
       "version": "0.3.1",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
+        "@letar/i18n-proxy": "workspace:*",
       },
     },
     "apps/aira-web-e2e": {
@@ -358,7 +360,7 @@
     },
     "apps/animatrona": {
       "name": "@letar/animatrona",
-      "version": "0.55.19",
+      "version": "0.55.20",
       "dependencies": {
         "cheerio": "^1.2.0",
       },
@@ -404,7 +406,7 @@
     },
     "apps/animatrona-tv": {
       "name": "@letar/animatrona-tv",
-      "version": "0.4.0",
+      "version": "0.5.3",
       "dependencies": {
         "@letar/animatrona-shared": "*",
         "@react-native/codegen": "0.87.0",
@@ -422,9 +424,10 @@
     },
     "apps/archetest": {
       "name": "@letar/archetest",
-      "version": "0.27.5",
+      "version": "0.27.6",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
+        "@letar/i18n-proxy": "workspace:*",
       },
     },
     "apps/archetest-e2e": {
@@ -433,7 +436,7 @@
     },
     "apps/auth-hub": {
       "name": "auth-hub",
-      "version": "0.7.4",
+      "version": "0.7.6",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
         "@simplewebauthn/browser": "^13.3.0",
@@ -482,7 +485,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.106.0",
+      "version": "0.121.0",
       "dependencies": {
         "@letar/theme-check": "workspace:*",
         "tus-js-client": "^4.3.1",
@@ -549,7 +552,7 @@
     },
     "apps/form-example": {
       "name": "form-example",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
       },
@@ -571,9 +574,10 @@
     },
     "apps/kami": {
       "name": "kami",
-      "version": "0.33.3",
+      "version": "0.33.4",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
+        "@letar/i18n-proxy": "workspace:*",
         "shiki": "^4.1.0",
       },
     },
@@ -626,6 +630,7 @@
       "version": "0.40.11",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
+        "@letar/i18n-proxy": "workspace:*",
       },
     },
     "apps/mandala-e2e": {
@@ -661,11 +666,12 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.48.1",
+      "version": "0.48.9",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/hooks": "workspace:*",
+        "@letar/i18n-proxy": "workspace:*",
         "@letar/jobs": "workspace:*",
         "@letar/theme-check": "workspace:*",
         "@react-pdf/renderer": "^4.5.1",
@@ -686,7 +692,7 @@
     },
     "apps/svoichuzhie": {
       "name": "@letar/svoichuzhie",
-      "version": "0.10.28",
+      "version": "0.10.29",
       "dependencies": {
         "qrcode": "^1.5.4",
         "tus-js-client": "^4.3.1",
@@ -717,6 +723,7 @@
       "version": "0.5.5",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
+        "@letar/i18n-proxy": "workspace:*",
       },
     },
     "apps/time-e2e": {
@@ -725,7 +732,7 @@
     },
     "libs/admin-ui": {
       "name": "@letar/admin-ui",
-      "version": "0.9.0",
+      "version": "0.10.0",
       "devDependencies": {
         "@tanstack/react-table": "^9.1.2",
       },
@@ -929,7 +936,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.7.0",
+      "version": "2.7.2",
       "dependencies": {
         "@tanstack/react-table": "^9.1.2",
         "@tanstack/react-virtual": "^3.13.23",
@@ -987,7 +994,7 @@
     },
     "libs/forms-react": {
       "name": "@letar/forms-react",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },
@@ -999,7 +1006,7 @@
     },
     "libs/forms-shadcn": {
       "name": "@letar/forms-shadcn",
-      "version": "0.33.2",
+      "version": "0.33.4",
       "devDependencies": {
         "@letar/forms-core": "workspace:*",
         "@letar/forms-react": "workspace:*",
@@ -1126,6 +1133,10 @@
       "optionalPeers": [
         "@tanstack/react-query",
       ],
+    },
+    "libs/i18n-proxy": {
+      "name": "@letar/i18n-proxy",
+      "version": "0.1.0",
     },
     "libs/image-upload": {
       "name": "@letar/image-upload",
@@ -2316,6 +2327,8 @@
     "@letar/grandslamcup-e2e": ["@letar/grandslamcup-e2e@workspace:apps/grandslamcup-e2e"],
 
     "@letar/hooks": ["@letar/hooks@workspace:libs/hooks"],
+
+    "@letar/i18n-proxy": ["@letar/i18n-proxy@workspace:libs/i18n-proxy"],
 
     "@letar/image-upload": ["@letar/image-upload@workspace:libs/image-upload"],
 
