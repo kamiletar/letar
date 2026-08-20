@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+## [0.55.20] - 2026-08-20
+
+### Changed
+
+- **`usePrefersReducedMotion`** (`renderer/src/hooks/usePrefersReducedMotion.ts`) удалён —
+  дублировал `useMediaQuery(breakpoints.prefersReducedMotion)` из `@letar/hooks` (обнаружено
+  при аудите дублей по монорепо). Оба потребителя (`ImportQueueItemExpanded.tsx`,
+  `GpuWorkerCard.tsx`) переключены на общий хук. `mobile-ui` (отдельный Vite-пакет без
+  зависимостей на `@letar/*` по архитектуре) не тронут — там свой похожий, но не идентичный
+  инлайн-код.
+
 ## [0.55.19] - 2026-08-19
 
 ### Fixed
