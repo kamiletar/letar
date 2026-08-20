@@ -1,3 +1,4 @@
+import { buildIntlMatcher } from '@letar/i18n-proxy'
 import createIntlMiddleware from 'next-intl/middleware'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
@@ -31,9 +32,9 @@ export async function proxy(request: NextRequest) {
 export default proxy
 
 export const config = {
-  // Исключаем из обработки:
-  // - /api (кроме auth которую обрабатываем), /trpc, /_next, /_vercel
-  // - Файлы со точкой (favicon.ico, robots.txt и т.д.)
-  // - /keystatic (админ-панель CMS)
-  matcher: '/((?!trpc|_next|_vercel|keystatic|.*\\..*).*)',
+  matcher: buildIntlMatcher({
+    excludePrefixes: ['trpc', '_next', '_vercel', 'keystatic'],
+    // icon.svg — metadata-роут Next.js, отдаётся на /icon без расширения (см. libs/i18n-proxy)
+    metadataRoutes: ['icon'],
+  }),
 }
