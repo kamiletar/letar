@@ -1,8 +1,8 @@
 'use client'
 
 import { Box } from '@chakra-ui/react'
+import { breakpoints, useMediaQuery } from '@letar/hooks'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useReducedMotion } from '../_hooks/use-reduced-motion'
 
 interface MatrixRainProps {
   /** Цвет символов (по умолчанию Matrix green) */
@@ -84,7 +84,7 @@ export function MatrixRain({
   /** Позиция внутри текста рецепта для каждого столбца */
   const columnCharIdxRef = useRef<number[]>([])
   const [isVisible, setIsVisible] = useState(true)
-  const prefersReducedMotion = useReducedMotion()
+  const prefersReducedMotion = useMediaQuery(breakpoints.prefersReducedMotion)
 
   // Инициализация капель — каждому столбцу назначается случайный рецепт
   const initDrops = useCallback((columns: number) => {

@@ -9,7 +9,8 @@
       "@letar/analytics",
       "@letar/consent",
       "@letar/image-upload",
-      "@letar/glitchtip"
+      "@letar/glitchtip",
+      "@letar/hooks"
     ]
   },
   "prisma": {
