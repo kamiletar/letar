@@ -825,7 +825,7 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
   Причина 5 падающих e2e-тестов в `table-editor.spec.ts` (§18.7 M2, паттерн Б). Полный разбор,
   что проверено и исключено (нет `next/dynamic`/`ssr:false`/PPR, не дубль responsive-DOM) — в
   теле сообщения agent-mail, thread `form-example-table-editor-suspense-bug`.
-- **Статус:** ожидание.
+- **Статус:** в работе → forms-dev (делегировано 2026-08-20, тред `form-example-table-editor-suspense-bug`).
 
 ### [2026-08-19] UX: NumberInput не очищал ведущий 0 при фокусе — исправлено
 
