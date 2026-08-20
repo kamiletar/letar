@@ -1837,7 +1837,7 @@ staging-сборок — см. [deployment.md](/.claude/docs/deployment.md) § �
 Стоит явно решить (не в этой записи — при реализации), нужен ли резервный путь на случай
 недоступности s3.
 
-## §81 — `deploy-affected.sh` определяет `SERVER_NAME` через `hostname -f` — не матчит реальный hostname s3 🆕 (2026-08-15)
+## §81 — `deploy-affected.sh` определяет `SERVER_NAME` через `hostname -f` — не матчит реальный hostname s3 ✅ ЗАКРЫТО (2026-08-20)
 
 Найдено BlackCove попутно, при прогоне e2e для §18.7 M2 (`form-example`, `kami`): контейнер
 `dashboard-agent` на s3 поднимался на дефолтном порту `3100` (из `docker-compose.production.yml`)
@@ -1876,13 +1876,24 @@ smartape-vps.com).
 
 ### DoD
 
-- [ ] Решить, где хранить `DEPLOY_SERVER_NAME` — `.env.docker` сервера или отдельный конфиг вне
+- [x] Решить, где хранить `DEPLOY_SERVER_NAME` — `.env.docker` сервера или отдельный конфиг вне
       репозитория (тот же класс вопроса, что §60 — инфра-конфиг вне git)
-- [ ] Добавить чтение переменной в `deploy-affected.sh` до вызова `hostname -f`
-- [ ] Проверить живым деплоем `dashboard-agent` на s3 — порт `13103`, туннель `deploy-mcp`
+- [x] Добавить чтение переменной в `deploy-affected.sh` до вызова `hostname -f`
+- [x] Проверить живым деплоем `dashboard-agent` на s3 — порт `13103`, туннель `deploy-mcp`
       поднимается штатно, без ручного `--force-recreate`
 - [ ] Проверить, что явная переменная не сломала резолвинг на s1/s2 (там `hostname -f` пока
-      совпадает с паттерном штатно)
+      совпадает с паттерном штатно) — не проверено в этой сессии, вне явного скоупа
+
+### Итог (сессия 2026-08-20, `repo-dev`)
+
+Чтение `DEPLOY_SERVER_NAME` в `deploy-affected.sh` уже было реализовано ранее (строки 127-151) —
+не хватало только самой переменной в окружении контейнера `dashboard-agent` на s3.
+`.env.docker`/`.bashrc` для неё не годятся — оба перезатираются при каждом деплое (первый —
+расшифровкой `.env.docker.enc`, второй вообще не сорсится в цепочке `nsenter`). Решение —
+`DEPLOY_SERVER_NAME: s3` прямо в `environment:` блоке `apps/dashboard-agent/docker-compose.s3.yml`
+(коммит `02d74d99`) — git-файл, переживает любой передеплой. Подтверждено живым передеплоем
+`deploy-agent-dev`: `docker exec dashboard-agent env` → переменная присутствует, порт `13103` не
+изменился, override подключился без `--force-recreate`.
 
 ---
 
