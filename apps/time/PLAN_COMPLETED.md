@@ -1,5 +1,12 @@
 # Time — Выполненные задачи
 
+## Аудит matcher proxy.ts — баг studio не подтвердился (2026-08-21)
+
+Проверка класса бага из apps/studio (matcher не исключал metadata-роуты без расширения в URL,
+next-intl middleware перезаписывал их в несуществующий локализованный путь). В `time` нет ни
+одного своего metadata-роута (`icon`/`apple-icon`/`opengraph-image`/`twitter-image`/`manifest`) —
+`src/app/` их не содержит. Изменений не потребовалось.
+
 ## Проверка setRequestLocale/SSG (2026-08-19)
 
 Аудит по классу бага, найденному в apps/studio. `nx build time` уже показывает `●` для всех 40
