@@ -1,5 +1,9 @@
 FROM nginx:alpine
 
+# Alpine (musl) не содержит zoneinfo по умолчанию — без tzdata TZ ниже молча не сработает
+RUN apk add --no-cache tzdata
+ENV TZ=Europe/Moscow
+
 # Копируем статический экспорт Next.js
 COPY apps/pravda/out /usr/share/nginx/html
 

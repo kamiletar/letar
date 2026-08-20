@@ -8,6 +8,10 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Alpine (musl) не содержит zoneinfo по умолчанию - без tzdata TZ ниже молча не сработает
+RUN apk add --no-cache tzdata
+ENV TZ=Europe/Moscow
+
 # Install Docker CLI for container management
 # Dashboard needs docker CLI to communicate with Docker daemon via socket
 # openssh-client needed for git operations with SSH remotes

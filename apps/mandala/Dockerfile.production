@@ -7,6 +7,10 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+
+# Alpine (musl) не содержит zoneinfo по умолчанию - без tzdata TZ ниже молча не сработает
+RUN apk add --no-cache tzdata
+ENV TZ=Europe/Moscow
 # Ограничение памяти Node.js (по умолчанию ~50% хоста = ~1GB на 2GB RAM)
 ENV NODE_OPTIONS="--max-old-space-size=512"
 

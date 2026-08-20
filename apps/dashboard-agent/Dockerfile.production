@@ -53,8 +53,10 @@ RUN bun build ./apps/dashboard-agent/src/index.ts --outdir=./apps/dashboard-agen
 # =============================================================================
 FROM base AS production
 
-# Устанавливаем git, ssh и docker-cli для git операций и бэкапов БД
-RUN apk add --no-cache git openssh-client docker-cli
+# Устанавливаем git, ssh, docker-cli и tzdata (Alpine/musl не содержит zoneinfo по умолчанию —
+# без tzdata TZ ниже молча не сработает)
+RUN apk add --no-cache git openssh-client docker-cli tzdata
+ENV TZ=Europe/Moscow
 
 # Создаём пользователя для безопасности
 RUN addgroup -g 1001 -S agent && \

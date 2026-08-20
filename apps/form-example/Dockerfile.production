@@ -7,6 +7,10 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Alpine (musl) не содержит zoneinfo по умолчанию - без tzdata TZ ниже молча не сработает
+RUN apk add --no-cache tzdata
+ENV TZ=Europe/Moscow
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
