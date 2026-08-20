@@ -198,3 +198,34 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
 Коммит фикса: `apps/form-example/src/lib/db.ts` (`bd498ed`). Если у приложения несколько
 версий `pg` в `bun.lock` (`grep -A1 '"pg"' bun.lock` или смотри `node_modules/.bun/pg@*`) и
 используется `@prisma/adapter-pg` — превентивно применяй тот же паттерн.
+
+## ⚠️ Не только `node_modules` — файловый контент приложения тоже не трейсится
+
+Трейсер видит только статически анализируемые `require()`/`import`. Каталог с данными,
+который приложение читает в рантайме через `fs`/`glob` по строковому пути (не через импорт),
+трейсер не находит и не копирует — как бы близко он ни лежал к коду.
+
+Прецедент — `kami` (2026-08-20…21): Keystatic-ридер локального режима
+(`createReader(process.cwd(), keystaticConfig)`, включается когда GitHub-креды не заданы —
+так staging настроен намеренно, см. `docker-compose.staging.yml`) читает markdown-контент
+из `src/content/posts/*` по пути из конфига, а не импортом. `Dockerfile.production` копировал
+`.next/standalone`, `.next/static`, `public`, `messages` — но не `src/content`. На staging
+(и везде, где GitHub-storage креды не заданы) каталог в контейнере физически отсутствовал →
+`reader.collections.posts.all()` возвращал пустой массив → e2e падал на 138 из 150 тестов, все
+с симптомом «контента блога нет» (`toBeVisible` таймаут на заголовке статьи, `getByText(/2025/)`
+не найден и т.п.) — не регрессия конкретного теста, а полностью пустая коллекция.
+
+**Диагностика:** отличить от бага кода/сидинга можно по паттерну падений — если ломается **вся**
+коллекция целиком (а не один тест), а сам markdown-контент в репозитории корректен (проверено
+чтением файла), первым делом проверять не БД/сид, а физическое наличие каталога в контейнере:
+`docker exec <container> ls apps/<app>/src/content/posts/`.
+
+**Фикс** — не `outputFileTracingIncludes` (он про `node_modules`-пакеты), а прямой `COPY` в
+`Dockerfile.production`, тем же способом, что уже используется для `public`/`messages`:
+
+```dockerfile
+COPY --chown=nextjs:nodejs apps/kami/src/content ./apps/kami/src/content
+```
+
+Если у приложения есть похожий локальный file-based reader (Keystatic, любой другой FS-контент,
+читаемый динамически) — тот же паттерн проверить превентивно.
