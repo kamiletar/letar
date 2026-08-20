@@ -1,3 +1,4 @@
+import { buildIntlMatcher } from '@letar/i18n-proxy'
 import createIntlMiddleware from 'next-intl/middleware'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
@@ -24,7 +25,10 @@ export async function proxy(request: NextRequest) {
 export default proxy
 
 export const config = {
-  // Пропускаем API, статику, Next.js внутренние пути и metadata-роуты без расширения в URL
-  // (apple-icon.tsx отдаёт /apple-icon без точки — dot-wildcard его не ловит, см. apps/studio)
-  matcher: ['/((?!api|_next|_vercel|apple-icon|.*\\..*).*)', '/'],
+  matcher: buildIntlMatcher({
+    excludePrefixes: ['api', '_next', '_vercel'],
+    // icon.svg отдаётся на /icon без расширения — тот же класс бага, что и apple-icon,
+    // но раньше не был замечен (см. libs/i18n-proxy — findUndeclaredMetadataRoutes его ловит)
+    metadataRoutes: ['icon', 'apple-icon'],
+  }),
 }

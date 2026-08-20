@@ -17,6 +17,9 @@
       "@letar/hooks": [
         "../../libs/hooks/src/index.ts"
       ],
+      "@letar/i18n-proxy": [
+        "../../libs/i18n-proxy/src/index.ts"
+      ],
       "@letar/analytics": [
         "../../libs/analytics/src/index.ts"
       ],
