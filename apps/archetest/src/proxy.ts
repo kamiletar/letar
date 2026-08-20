@@ -24,6 +24,7 @@ export async function proxy(request: NextRequest) {
 export default proxy
 
 export const config = {
-  // Пропускаем API, статику и Next.js внутренние пути
-  matcher: '/((?!api|_next|_vercel|.*\\..*).*)',
+  // Пропускаем API, статику, Next.js внутренние пути и metadata-роуты без расширения в URL
+  // (apple-icon.tsx отдаёт /apple-icon без точки — dot-wildcard его не ловит, см. apps/studio)
+  matcher: ['/((?!api|_next|_vercel|apple-icon|.*\\..*).*)', '/'],
 }
