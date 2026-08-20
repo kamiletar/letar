@@ -10,7 +10,8 @@
       "@letar/analytics",
       "@letar/auth",
       "@letar/consent",
-      "@letar/glitchtip"
+      "@letar/glitchtip",
+      "@letar/hooks"
     ]
   },
   "dependencies": {

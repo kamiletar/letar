@@ -4,6 +4,8 @@ import { Badge, Box, Heading, HStack, Text, useToken, VStack } from '@chakra-ui/
 import { useLocale } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 
+import { prefersReducedMotion } from '@letar/hooks'
+
 import {
   getPersonalityType,
   getScaleName,
@@ -42,7 +44,7 @@ function useAnimatedScores(
   const targetKey = HEXAGRAM_SCALE_CODES.map((c) => target[c] ?? 0).join(',')
 
   useEffect(() => {
-    if (globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+    if (prefersReducedMotion()) {
       currentRef.current = { ...target }
       setAnimated({ ...target })
       return
