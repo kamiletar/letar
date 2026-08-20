@@ -129,7 +129,12 @@ scope — Invariant вместо обновления кеша ·
 [nextjs-intl-setrequestlocale-ssg](/.claude/docs/nextjs-intl-setrequestlocale-ssg.md) ⚠️
 `setRequestLocale` только в корневом `[locale]/layout.tsx` не хватает для SSG — нужен в каждом
 `page.tsx`; но сначала проверь, не форсит ли динамику Dynamic API выше по дереву (found: studio,
-mandala — реальный фикс; aboi, kami, time, archetest — ложная тревога, динамика легитимна)
+mandala — реальный фикс; aboi, kami, time, archetest — ложная тревога, динамика легитимна) ·
+[nextjs-intl-matcher-metadata-routes](/.claude/docs/nextjs-intl-matcher-metadata-routes.md) ⚠️
+next-intl matcher не ловит `icon`/`apple-icon`/`opengraph-image`/`twitter-image` — эти роуты
+отдаются без расширения в URL независимо от расширения файла-источника (`.svg`/`.png`/`.tsx`
+одинаково), нужно явное перечисление через `@letar/i18n-proxy`; ручной аудит по «есть расширение
+у файла — уже отфильтровано» дважды дал ложноотрицательный результат (kami, time, aboi)
 
 **Chakra v3 — ловушки:** [chakra-multi-system-ssr-barrel-trap](/.claude/docs/chakra-multi-system-ssr-barrel-trap.md) ⚠️
 импорт шрифта/константы из барреля с `createSystem()` в Server Component исполняет весь модуль и
