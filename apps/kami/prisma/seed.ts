@@ -4,11 +4,24 @@ import { Pool } from 'pg'
 import { SkillLevel } from '../src/generated/prisma'
 import { schema } from '../src/generated/schema'
 
+// См. src/lib/db.ts — тот же разбор DATABASE_URL вручную вместо connectionString: пароль
+// (openssl rand -base64 32) может содержать `/`, что ломает `new URL()` внутри pg-connection-string.
+function parsePostgresUrl(url: string) {
+  const match = url.match(/^postgres(?:ql)?:\/\/([^:]+):([\s\S]+)@([^@/:]+):(\d+)\/([^?]+)/)
+  if (!match) {
+    throw new Error('DATABASE_URL: не удалось распарсить (ожидается postgresql://user:password@host:port/db)')
+  }
+  const [, user, password, host, port, database] = match
+  return { user: decodeURIComponent(user), password: decodeURIComponent(password), host, port: Number(port), database }
+}
+
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL не задан')
+}
+
 const prisma = new ZenStackClient(schema, {
   dialect: new PostgresDialect({
-    pool: new Pool({
-      connectionString: process.env.DATABASE_URL,
-    }),
+    pool: new Pool(parsePostgresUrl(process.env.DATABASE_URL)),
   }) as never,
 })
 
@@ -532,11 +545,15 @@ async function main() {
   console.log('  - 10 projects')
 }
 
+// ⚠️ НЕ звать здесь безусловный process.exit(0) в .finally() — он перебивает process.exit(1) из
+// .catch() (event loop живёт, пока открыт pg.Pool, .finally() успевает отработать после catch) и
+// маскирует ЛЮБУЮ ошибку сида как успех. Ровно так seed молча писал 0 строк при "Seed completed"
+// на staging (agent-mail e2e-gate-status-form-example-kami, 2026-08-21) — та же connectionString-
+// ошибка, что чинили в src/lib/db.ts, просто проглатывалась. `process.exitCode` только помечает
+// код выхода, не завершает процесс — Node выходит сам после `$disconnect()`.
 main()
   .catch((e) => {
     console.error(e)
-    process.exit(1)
+    process.exitCode = 1
   })
-  .finally(() => {
-    process.exit(0)
-  })
+  .finally(() => prisma.$disconnect())
