@@ -109,6 +109,55 @@ async function main() {
 
 **Эталон:** `apps/archetest/prisma/seed-questions.ts`.
 
+## 5. ⚠️ `.finally(() => process.exit(0))` маскирует ошибку сида
+
+**Симптом:** деплой-лог показывает «Seed completed» / код выхода 0, хотя сид упал с исключением
+и ничего не записал в БД.
+
+**Причина:** типичный `main().catch().finally()` из документации Prisma —
+
+```typescript
+main()
+  .catch((e) => {
+    console.error(e)
+    process.exit(1)
+  })
+  .finally(() => process.exit(0))
+```
+
+Пока открыт `pg.Pool`/ORM-клиент, event loop жив. `.finally()` выполняется **после** `.catch()`
+отдельным тиком промис-цепочки, и безусловный `process.exit(0)` в нём перебивает
+`process.exit(1)`, выставленный в `.catch()`. Код выхода всегда 0, ошибка видна только в
+`console.error`, который никто не читает построчно в деплой-логе.
+
+Найден и исправлен независимо в трёх приложениях одной сессией (kami, domwellbes, studio,
+2026-08-21) — совпадение не случайно, паттерн копируется из скрипта в скрипт вместе с остальной
+конвенцией этого файла.
+
+**Фикс:** `process.exitCode = 1` вместо `process.exit(1)` — помечает код выхода, не завершает
+процесс принудительно; Node выходит с этим кодом сам, после `disconnect()` в `.finally()`.
+
+**Общий helper — `@letar/seed-utils`.** Паттерн вынесен в `runSeed(main, disconnect)`
+([libs/seed-utils](/libs/seed-utils/README.md)), чтобы не копировать вручную:
+
+```typescript
+import { runSeed } from '@letar/seed-utils'
+
+async function main() {
+  // ...сидирование
+}
+
+void runSeed(main, () => db.$disconnect())
+```
+
+Мигрированы на helper: kami, studio. `domwellbes` остаётся на ручном эквивалентном
+`process.exitCode`-паттерне (не тронут из-за активной файловой резервации на момент миграции,
+не блокер). `aboi`, `animatrona`, `dsperevod`, `grandslamcup`, `auth-hub` вызывают
+`process.exit(1)` прямо внутри `.catch()` без безусловного `exit(0)` в `.finally()` — этого
+конкретного бага там нет (`process.exit()` завершает процесс синхронно, до маскировки в
+`.finally()` дело не доходит), миграция на `runSeed` не проактивна, но желательна при следующей
+правке этих файлов ради единообразия и гарантированного `disconnect()`.
+
 ## Примеры в репозитории
 
 | Приложение     | Файл                                      | Стратегия                                                                                   |
