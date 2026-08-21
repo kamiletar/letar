@@ -27,16 +27,31 @@ try {
 Частые коды Postgres `SQLSTATE` при мутациях: `23505` unique_violation, `23503`
 foreign_key_violation, `23502` not_null_violation, `23514` check_violation.
 
-## Не путать с classic Prisma Client кодами
+## Определить, какой клиент использует приложение
 
-Приложения на **classic** `@prisma/client` (не ZenStack v3 ORM) в этом же монорепо (пример —
-`apps/svoichuzhie/src/app/_actions/admin-product.action.ts`, `apps/driving-school/src/lib/errors.ts`)
-действительно ловят `error.code === 'P2002'` — тот паттерн для них верен, это два разных клиента
-с разным форматом ошибок. Определить, какой клиент использует приложение — по факту импорта
-`getEnhancedPrisma`/`@zenstackhq/orm` (v3 ORM) против `PrismaClient` из `@prisma/client`
-напрямую.
+По факту импорта в `lib/db.ts`: `getEnhancedPrisma`/`ZenStackClient` из `@zenstackhq/orm` (v3
+ORM, коды — `dbErrorCode`/`reason`) против `PrismaClient` из `@prisma/client` напрямую
+(classic, коды — `P2002` и т.п.). Импорт формы `import { prisma } from '@/lib/db'` сам по себе
+ничего не говорит — решает реализация внутри `db.ts`.
+
+Ошибка ORM также несёт поле `error.reason` (`ORMErrorReason`): `'not-found'` — запись не найдена
+(аналог Prisma `P2025`, без SQLSTATE), `'rejected-by-policy'` — отказ политикой доступа (аналог
+`P2004`), `'db-query-error'` — ошибка драйвера, тогда смотреть `dbErrorCode`.
+
+## Аудит 2026-08-21 — все проверенные приложения оказались на ZenStack v3 ORM
 
 Разбор найден на `apps/domwellbes` при фиксе гонки дедупа
 (`restock-subscription.action.ts`, `PLAN_COMPLETED.md` запись 2026-08-21) — код `catch`,
 скопированный по аналогии с `svoichuzhie` (`.code === 'P2002'`), в domwellbes никогда не
 срабатывал: `dbErrorCode` там `23505`, а `.code` на обёрнутом `ORMError` не установлен.
+
+Последующий аудит того же дня (grep по `code === 'P2002'`) нашёл ещё 4 места с тем же
+паттерном — `apps/svoichuzhie/src/app/_actions/admin-product.action.ts`,
+`apps/mandala/src/lib/actions/error-helpers.ts`,
+`apps/animatrona-tracker/src/app/api/anime/route.ts`, `apps/driving-school/src/lib/errors.ts`.
+**Все четыре, вопреки первоначальному предположению по аналогии со svoichuzhie/driving-school
+как «classic Prisma» (см. версию этой заметки до 2026-08-21), оказались на ZenStack v3 ORM** —
+проверено по `lib/db.ts` каждого приложения (`ZenStackClient`/`@zenstackhq/orm` присутствует
+везде). Все четыре исправлены на `dbErrorCode`/`reason`. Не доверять прошлому выводу «этот
+паттерн верен для X» без повторной проверки `lib/db.ts` — вывод мог устареть или быть ошибочным
+изначально.
