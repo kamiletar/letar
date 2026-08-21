@@ -1,4 +1,3 @@
-import { buildIntlMatcher } from '@letar/i18n-proxy'
 import createIntlMiddleware from 'next-intl/middleware'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
@@ -31,10 +30,13 @@ export async function proxy(request: NextRequest) {
 
 export default proxy
 
+// ⚠️ matcher — литерал, не вызов buildIntlMatcher(). Next.js статически парсит `config.matcher`
+// через AST (без исполнения модуля) для построения routes-manifest — `CallExpression` он не
+// умеет разворачивать: "Unsupported node type "CallExpression" at "config.matcher"", билд падает
+// на "Invalid segment configuration export detected" (см. .claude/docs/nextjs-standalone-tracing.md
+// или сообщение в agent-mail e2e-gate-status-form-example-kami от 2026-08-21).
+// Значение сгенерировано buildIntlMatcher({ excludePrefixes: ['trpc', '_next', '_vercel', 'keystatic'],
+// metadataRoutes: ['icon'] }) — дрейф литерала от опций ловит proxy.spec.ts.
 export const config = {
-  matcher: buildIntlMatcher({
-    excludePrefixes: ['trpc', '_next', '_vercel', 'keystatic'],
-    // icon.svg — metadata-роут Next.js, отдаётся на /icon без расширения (см. libs/i18n-proxy)
-    metadataRoutes: ['icon'],
-  }),
+  matcher: ['/((?!trpc|_next|_vercel|keystatic|icon|.*\\..*).*)', '/'],
 }
