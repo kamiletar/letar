@@ -2523,6 +2523,22 @@ disconnect)` — инкапсулирует безопасный вариант 
 
 Паттерн задокументирован — [seed-scripts.md § 5](/.claude/docs/seed-scripts.md).
 
+**Дополнение 2026-08-21 (та же сессия, вторая волна): `aboi`, `animatrona`, `dsperevod`,
+`grandslamcup`, `auth-hub` всё же мигрированы** — не из-за бага (его там не было, см. выше), а
+ради унификации паттерна во всех seed-скриптах монорепо. `auth-hub` потребовал дополнительной
+правки: `Pool`/`ZenStackClient` создавались внутри `seed()`, из-за чего `disconnect` было
+нечем передать в `runSeed()` — вынесены на уровень модуля, `seed()` переименована в `main()`.
+Остальные четыре — механическая замена хвоста `main().catch().finally()`.
+
+`domwellbes` по-прежнему не мигрирован: `apps/domwellbes/prisma/**` под активной эксклюзивной
+резервацией (`GreenBarn`/`domwellbes-dev`, agent-mail) на момент этой сессии — не тронут,
+чтобы не столкнуться с параллельной сессией.
+
+Коммиты: `aboi` (submodule `6f51567` + bump `4cceda6d` вместе с dsperevod), `dsperevod`
+(submodule `7c3239c`), `animatrona` (`9d6a4d3c`), `grandslamcup` (`471016fe`), `auth-hub`
+(`06a6492f`), `bun.lock` (`ac02a668`). typecheck:tsgo/lint — зелёные на всех пяти (только
+предсуществующие warnings, не связанные с этой правкой).
+
 **Коммиты:** `libs/seed-utils` — один коммит; kami (`refactor` + отдельный `chore` version
 bump/changelog) — два коммита; studio (submodule): `refactor` + `chore` version bump, оба внутри
 submodule, затем бамп SHA в letar; `bun.lock` — отдельный catch-up коммит (новая либа + отставшие
