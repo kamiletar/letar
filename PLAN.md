@@ -2533,3 +2533,26 @@ label-printer-desktop (старый `NODE_ENV === 'production'`, §см. `node-e
 — не связаны с этим фиксом, существовали до него, не трогались.
 
 Задокументировано: [eslint-flat-react-typescript-missing-react-hooks-plugin.md](/.claude/docs/eslint-flat-react-typescript-missing-react-hooks-plugin.md).
+
+## §53 — `withImapDeadline`: жёсткий дедлайн вокруг `ImapFlow` вынесен из двух приложений (2026-08-22) 🆕
+
+`dashboard-agent` (email-canary) и `domwellbes` (RFQ email-поллинг, приватный submodule)
+независимо реализовали почти одинаковый приём защиты от зависшего `ImapFlow`: слушатель
+`'error'` (иначе необработанный event роняет процесс) недостаточен сам по себе — если ошибка
+сокета приходит ВМЕСТО reject-а уже начатого `await`, тот `await` может повиснуть навсегда;
+единственная гарантия — внешний `Promise.race` с жёстким таймаутом и безусловный
+`client.close()` после гонки. Разбор ловушки —
+[imapflow-error-listener-hang-pitfall.md](/.claude/docs/imapflow-error-listener-hang-pitfall.md).
+
+### Что сделано
+
+- Общая механика (слушатель `'error'` + `Promise.race` с дедлайном + `client.close()`) вынесена
+  в `@letar/email` (`withImapDeadline`, v0.5.0) — специфика каждого вызывающего места (форма
+  IMAP-операции, что считается результатом по таймауту) осталась в вызывающем коде.
+- Оба места переведены на helper без изменения поведения: `waitForCanaryMessage`
+  (`dashboard-agent` 0.15.12) и `pollRfqEmailReplies` (`domwellbes` 0.139.0, приватный
+  submodule).
+- Doc-файл ловушки обновлён — пример теперь показывает вызов helper-а вместо ручного
+  `Promise.race` в каждом месте.
+
+Третьего места с прямым использованием `ImapFlow` в монорепо на 2026-08-22 нет.
