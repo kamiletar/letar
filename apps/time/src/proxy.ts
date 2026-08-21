@@ -1,4 +1,3 @@
-import { buildIntlMatcher } from '@letar/i18n-proxy'
 import createIntlMiddleware from 'next-intl/middleware'
 import type { NextRequest } from 'next/server'
 
@@ -15,10 +14,13 @@ export function proxy(request: NextRequest) {
 
 export default proxy
 
+// ⚠️ matcher — литерал, не вызов buildIntlMatcher(). Next.js статически парсит `config.matcher`
+// через AST (без исполнения модуля) для построения routes-manifest — `CallExpression` он не
+// умеет разворачивать: "Next.js can't recognize the exported `config` field in route", билд
+// падает на "matcher needs to be a static string or array of static strings" (см.
+// .claude/docs/nextjs-standalone-tracing.md и коммит 6655f165 — тот же фикс в apps/kami).
+// Значение сгенерировано buildIntlMatcher({ excludePrefixes: ['api', '_next', '_vercel'],
+// metadataRoutes: ['icon'] }) — дрейф литерала от опций ловит proxy.spec.ts.
 export const config = {
-  matcher: buildIntlMatcher({
-    excludePrefixes: ['api', '_next', '_vercel'],
-    // icon.svg — metadata-роут Next.js, отдаётся на /icon без расширения (см. libs/i18n-proxy)
-    metadataRoutes: ['icon'],
-  }),
+  matcher: ['/((?!api|_next|_vercel|icon|.*\\..*).*)', '/'],
 }
