@@ -420,6 +420,58 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     enabled: true,
     server: 's2',
   },
+  {
+    id: 'domwellbes-deliver-crm-reminders',
+    name: 'CRM Reminder Delivery (domwellbes)',
+    app: 'domwellbes',
+    endpoint: '/api/cron/deliver-crm-reminders',
+    schedule: '*/5 * * * *',
+    description: 'Клейм и доставка due-напоминаний менеджеров в постоянный in-app inbox (ROADMAP_M7.md, задача №41)',
+    enabled: true,
+    server: 's2',
+  },
+  {
+    id: 'domwellbes-poll-rfq-email-replies',
+    name: 'RFQ Email Reply Poll (domwellbes)',
+    app: 'domwellbes',
+    endpoint: '/api/cron/poll-rfq-email-replies',
+    schedule: '*/5 * * * *',
+    description:
+      'IMAP-поллинг технического ящика rfq@domwellbes.ru — приём ответов перевозчиков на запросы цены (PLAN_LOGISTICS_L9_L11.md §12.4)',
+    enabled: true,
+    server: 's2',
+  },
+  {
+    id: 'domwellbes-expire-rfqs',
+    name: 'RFQ Expiry (domwellbes)',
+    app: 'domwellbes',
+    endpoint: '/api/cron/expire-rfqs',
+    schedule: '0 * * * *',
+    description: 'Автозакрытие просроченных запросов ставок перевозчикам (PLAN_LOGISTICS_L9_L11.md §12.8, волна L10)',
+    enabled: true,
+    server: 's2',
+  },
+  {
+    id: 'domwellbes-release-unpaid-orders',
+    name: 'Unpaid Order Reservation Release (domwellbes)',
+    app: 'domwellbes',
+    endpoint: '/api/cron/release-unpaid-orders',
+    schedule: '0 * * * *',
+    description: 'Снятие резерва склада с неоплаченных розничных заказов по таймауту (PLAN_SHOP_RETAIL.md §3.7, R3)',
+    enabled: true,
+    server: 's2',
+  },
+  {
+    id: 'domwellbes-cleanup-personal-data',
+    name: 'Personal Data Retention Cleanup (domwellbes)',
+    app: 'domwellbes',
+    endpoint: '/api/cron/cleanup-personal-data',
+    schedule: '0 3 * * *',
+    description:
+      'Удаление персональных данных по истечении сроков хранения (152-ФЗ, ROADMAP.md М3) — тот же паттерн, что driving-school:cleanup-api-logs',
+    enabled: true,
+    server: 's2',
+  },
 ]
 
 /**

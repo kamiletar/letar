@@ -55,7 +55,7 @@ const APP_REGISTRY: Record<string, AppRegistryEntry> = {
   aprel8008: { server: 's2' },
   'kami-key-the-landing': { server: 's2' },
   'letar-landing': { server: 's2' },
-  domwellbes: { server: 's2' },
+  domwellbes: { server: 's2', port: 3025, host: process.env.DOMWELLBES_HOST ?? 'domwellbes-app' },
 }
 
 /** Полный маппинг приложений на серверы (производное от `APP_REGISTRY`). */
