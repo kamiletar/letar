@@ -419,7 +419,7 @@ mcp__postgres_kami__query({
 поверх уже существующего API агента, через SSH-туннель. Полная документация:
 [libs/deploy-mcp/README.md](/libs/deploy-mcp/README.md).
 
-**Локально:** `libs/deploy-mcp/` | В первую очередь для **BlackCove** (deploy agent).
+**Локально:** `libs/deploy-mcp/` | В первую очередь для **deploy-agent-dev** (deploy agent).
 
 ### Tools
 
@@ -446,7 +446,7 @@ mcp__postgres_kami__query({
 ### Ограничения
 
 - Модель доверия процедурная (см. [deploy-coordination](/.claude/rules/deploy-coordination.md)) —
-  деплоит только BlackCove по конвенции, технического ограничения по вызывающему нет.
+  деплоит только deploy-agent-dev по конвенции, технического ограничения по вызывающему нет.
 - Полный список инструментов, воркфлоу и e2e-gate — [libs/deploy-mcp/README.md](/libs/deploy-mcp/README.md).
 
 ## Umami MCP (@letar/umami-mcp)

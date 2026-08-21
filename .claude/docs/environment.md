@@ -307,7 +307,7 @@ nx test infra-config
 ⚠️ **Правка seed Ключницы не действует сама по себе.** Локальные приложения ходят в **прод**-
 Ключницу (`OIDC_DISCOVERY_URL=https://auth.letar.best/...`), поэтому `localhost`-адрес должен
 лежать в боевой БД: после изменения `seed.ts` нужен re-seed прод-инстанса `auth-hub`
-(`deploy_app` с `seed: true` — задача BlackCove, см.
+(`deploy_app` с `seed: true` — задача deploy-agent-dev, см.
 [deploy-coordination](/.claude/rules/deploy-coordination.md)).
 
 ## Переменные окружения

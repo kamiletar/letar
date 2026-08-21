@@ -139,7 +139,7 @@ git add apps/<app>/.env.docker.enc
 sops apps/<app>/.env.docker.enc     # открывает расшифрованный файл в $EDITOR
 git add apps/<app>/.env.docker.enc
 git commit -m "chore(<app>): обновить секрет X"
-# дальше — обычный deploy-request к BlackCove
+# дальше — обычный deploy-request к deploy-agent-dev
 ```
 
 ⚠️ **Симптом, который сбивает с толку:** если посмотреть на сервере плейнтекстовый `.env.docker`

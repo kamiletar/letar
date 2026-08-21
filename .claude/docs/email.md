@@ -209,7 +209,7 @@ sops apps/<app>/.env.docker.enc     # правишь SMTP_FROM_EMAIL / SMTP_PASS
 git add apps/<app>/.env.docker.enc && git commit -m "chore(<app>): обновить SMTP"
 ```
 
-Затем — deploy-request к BlackCove. Подробности: [secret-manager.md](/.claude/docs/secret-manager.md).
+Затем — deploy-request к deploy-agent-dev. Подробности: [secret-manager.md](/.claude/docs/secret-manager.md).
 
 ## Troubleshooting
 
