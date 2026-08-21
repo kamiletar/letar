@@ -1,6 +1,6 @@
 {
   "name": "@letar/animatrona",
-  "version": "0.55.20",
+  "version": "0.55.21",
   "private": true,
   "description": "Desktop application for anime transcoding and viewing with IPFS support",
   "author": "Kami Letar",
@@ -10,7 +10,8 @@
     "implicitDependencies": [
       "@letar/query-provider",
       "@letar/electron-storage",
-      "@letar/hooks"
+      "@letar/hooks",
+      "@letar/seed-utils"
     ]
   },
   "scripts": {
@@ -18,7 +19,8 @@
     "postinstall:dev": "npx --no @electron/rebuild -f -w classic-level -v 43.3.0 && node -e \"process.platform==='win32'&&require('child_process').execFileSync('node', ['../../node_modules/ntsuspend/install.cjs'],{stdio:'inherit',cwd:__dirname})\""
   },
   "dependencies": {
-    "cheerio": "^1.2.0"
+    "cheerio": "^1.2.0",
+    "@letar/seed-utils": "workspace:*"
   },
   "devDependencies": {
     "electron": "43.3.0"

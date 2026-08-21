@@ -1,3 +1,4 @@
+import { runSeed } from '@letar/seed-utils'
 import { PrismaClient } from '../src/generated/prisma/index.js'
 
 const prisma = new PrismaClient()
@@ -121,11 +122,4 @@ async function main() {
   )
 }
 
-main()
-  .catch((e) => {
-    console.error(e)
-    process.exit(1)
-  })
-  .finally(async () => {
-    await prisma.$disconnect()
-  })
+void runSeed(main, () => prisma.$disconnect())
