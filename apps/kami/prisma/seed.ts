@@ -1,20 +1,10 @@
+import { parsePostgresUrl } from '@letar/pg-url'
 import { runSeed } from '@letar/seed-utils'
 import { ZenStackClient } from '@zenstackhq/orm'
 import { PostgresDialect } from 'kysely'
 import { Pool } from 'pg'
 import { SkillLevel } from '../src/generated/prisma'
 import { schema } from '../src/generated/schema'
-
-// См. src/lib/db.ts — тот же разбор DATABASE_URL вручную вместо connectionString: пароль
-// (openssl rand -base64 32) может содержать `/`, что ломает `new URL()` внутри pg-connection-string.
-function parsePostgresUrl(url: string) {
-  const match = url.match(/^postgres(?:ql)?:\/\/([^:]+):([\s\S]+)@([^@/:]+):(\d+)\/([^?]+)/)
-  if (!match) {
-    throw new Error('DATABASE_URL: не удалось распарсить (ожидается postgresql://user:password@host:port/db)')
-  }
-  const [, user, password, host, port, database] = match
-  return { user: decodeURIComponent(user), password: decodeURIComponent(password), host, port: Number(port), database }
-}
 
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL не задан')

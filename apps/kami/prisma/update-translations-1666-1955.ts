@@ -6,6 +6,7 @@
  *   cd apps/kami && bun run prisma/update-translations-1666-1955.ts
  */
 
+import { parsePostgresUrl } from '@letar/pg-url'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { Pool } from 'pg'
@@ -127,18 +128,6 @@ function parseTranslationFile(filePath: string): ParsedQuestion[] {
 }
 
 // --- Обновление БД ---
-
-// ⚠️ Пароль в DATABASE_URL генерируется через `openssl rand -base64 32` (см. security.md) —
-// алфавит base64 содержит `/` и `+`. Необработанный `/` перед `@` ломает разбор строки через
-// `new URL()` внутри pg-connection-string. Разбираем строку вручную и передаём поля отдельно.
-function parsePostgresUrl(url: string) {
-  const match = url.match(/^postgres(?:ql)?:\/\/([^:]+):([\s\S]+)@([^@/:]+):(\d+)\/([^?]+)/)
-  if (!match) {
-    throw new Error('DATABASE_URL: не удалось распарсить (ожидается postgresql://user:password@host:port/db)')
-  }
-  const [, user, password, host, port, database] = match
-  return { user: decodeURIComponent(user), password: decodeURIComponent(password), host, port: Number(port), database }
-}
 
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL не задан')
