@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.7 (2026-08-21)
+
+### Fixed
+
+- `config.matcher` в `proxy.ts` заменён с вызова `buildIntlMatcher()` на литерал массива — Next.js
+  статически парсит `config.matcher` через AST на build-time без исполнения модуля, вызов функции
+  ломал `next build`.
+
 ## 0.5.5 (2026-08-19)
 
 ### Изменено

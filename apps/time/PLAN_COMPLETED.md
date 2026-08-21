@@ -1,5 +1,18 @@
 # Time — Выполненные задачи
 
+## Фикс: config.matcher в proxy.ts обязан быть литералом, не вызовом buildIntlMatcher() (2026-08-21)
+
+Репо-широкий баг, найденный в apps/kami при передеплое staging для §18.7 M2: Next.js 16
+статически парсит `export const config.matcher` через AST на build-time без исполнения модуля —
+`CallExpression` (`buildIntlMatcher({...})`) не поддерживается, `next build` падал с "matcher
+needs to be a static string or array of static strings", хотя typecheck/lint проходили чисто.
+Тот же паттерн после миграции на `@letar/i18n-proxy` (см. запись ниже) попал и в `time`.
+`matcher` инлайнен как литерал массива, вычисленный из фактических опций
+(`excludePrefixes: ['api', '_next', '_vercel']`, `metadataRoutes: ['icon']`); `proxy.spec.ts`
+дополнен regression-тестом, сверяющим литерал с `buildIntlMatcher(опции)` через текстовый разбор
+файла (импорт proxy.ts в vitest недоступен — тянет next-intl/middleware → next/server).
+Подтверждено `nx build time` до/после фикса. commit `de173784`.
+
 ## Matcher next-intl через @letar/i18n-proxy — исправлен пропущенный icon.svg (2026-08-21)
 
 **Уточнение предыдущей записи ниже: аудит от 2026-08-21 был ошибочным.** `src/app/icon.svg`
