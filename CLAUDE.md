@@ -57,6 +57,11 @@ approval, kebab-case в `to`, обнулённая база
 ⚠️ self-only read-политика `User` (`auth().id == this.id`) молча режет список сотрудников до одной
 записи в любом staff-lookup под enhanced-клиентом — фикс сырым `prisma`; `studio` отмечен как
 кандидат на перепроверку при появлении non-owner staff-роли ·
+[zenstack-required-relation-nested-select-null](/.claude/docs/zenstack-required-relation-nested-select-null.md)
+⚠️ обязательная relation через nested `select` под более узкой policy связанной модели тихо
+резолвится в `null` вместо ошибки — краш на `.id` только на конкретных данных (черновик рядом с
+опубликованной записью), плюс `take` считает по родителю и съедает слоты лимита на отфильтрованных
+null-строках ·
 [tree-model-parent-select](/.claude/docs/tree-model-parent-select.md) self-referencing `parentId`
 
 **Формы, UI, компоненты:** [forms](/.claude/docs/forms.md) ⭐ ·
