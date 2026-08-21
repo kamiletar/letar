@@ -15,7 +15,23 @@ import { Pool } from 'pg'
 import { transliterate } from '../../src/lib/transliterate'
 import { extractCrossTables, extractSchedule, extractSeason1Results, extractTeams, extractVenues } from './extract'
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+// ⚠️ Пароль в DATABASE_URL генерируется через `openssl rand -base64 32` (см. security.md) —
+// алфавит base64 содержит `/` и `+`. Необработанный `/` перед `@` ломает разбор строки через
+// `new URL()` внутри pg-connection-string. Разбираем строку вручную и передаём поля отдельно.
+function parsePostgresUrl(url: string) {
+  const match = url.match(/^postgres(?:ql)?:\/\/([^:]+):([\s\S]+)@([^@/:]+):(\d+)\/([^?]+)/)
+  if (!match) {
+    throw new Error('DATABASE_URL: не удалось распарсить (ожидается postgresql://user:password@host:port/db)')
+  }
+  const [, user, password, host, port, database] = match
+  return { user: decodeURIComponent(user), password: decodeURIComponent(password), host, port: Number(port), database }
+}
+
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL не задан')
+}
+
+const pool = new Pool(parsePostgresUrl(process.env.DATABASE_URL))
 
 function cuid(): string {
   return `cm${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`
