@@ -2554,3 +2554,52 @@ regression-тест в `proxy.spec.ts` каждого приложения св�
 `5799efff`, time `de173784`, archetest `349dc5a5`, studio (submodule `8922962` + bump `50d1d667`),
 aboi (submodule `d97de234` + bump `7a1a810e`). Push submodule (studio, aboi) и корневого letar —
 ожидает подтверждения пользователя.
+
+## §98 — DATABASE_URL со спецсимволом пароля ломал `pg.Pool`/`new URL()` во всех приложениях ✅ ЗАКРЫТО (2026-08-21)
+
+**Контекст:** найдено предыдущей сессией в kami и domwellbes — пароль в `DATABASE_URL`
+генерируется через `openssl rand -base64 32` (см. `security.md`), алфавит base64 содержит `/` и
+`+`. `new Pool({ connectionString })` разбирает строку через `new URL()` внутри
+`pg-connection-string`; необработанный `/` перед `@` встречается раньше конца userinfo, и парсер
+решает, что username/password закончились, пытаясь разобрать остаток как host:port —
+детерминированная ошибка `Invalid URL` на каждый запрос к БД. На staging приложения, где ошибка
+БД проглатывается (auth/rate-limit), баг молчаливо ломает функциональность без единой записи в
+логе; там, где try/catch нет — 500 на каждой странице.
+
+**Решение:** ручной regex-парсинг `postgresql://user:password@host:port/db` вместо передачи
+`connectionString` в `Pool`/`Client`/`PrismaPg`, с `decodeURIComponent` на user/password. Функция
+`parsePostgresUrl()` продублирована инлайн в каждом файле (не вынесена в общую либу — код
+тривиален, 12 строк, а `libs/` добавил бы связность ради не той экономии).
+
+**Охват:** все 15 приложений с собственной БД — основной клиент (`src/lib/db.ts`): auth-hub,
+form-develop-app, form-example (особый случай — `@prisma/adapter-pg`, `PrismaPg` принимает тот же
+объект полей вместо `connectionString`, без создания `Pool`-инстанса напрямую, что сохраняет
+существующий обход проблемы хостинга с несколькими версиями `pg`), time, mandala, grandslamcup,
+dashboard, archetest, animatrona-tracker (публичный репо, прямые коммиты) + aboi, driving-school,
+dsperevod, studio, svoichuzhie, aprel8008 (submodule — коммит внутри + bump SHA в letar). Плюс
+второстепенные одноразовые скрипты с тем же паттерном: `apps/kami/prisma/update-*.ts` (2 шт.),
+`apps/archetest/prisma/seed-questions.ts`, `apps/grandslamcup/scripts/{add-friendly-matches,
+migrate/seed,migrate/seed-v2,migrate/extract-social-links}.ts`, `apps/studio/prisma/seed.ts`,
+`apps/aprel8008/scripts/seed-photos.ts`, `apps/dsperevod/prisma/seed.ts`,
+`apps/svoichuzhie/scripts/seed.ts`, `apps/domwellbes/scripts/check-db-indexes.mjs`.
+
+**Проверка реального риска:** пароли всех 9 приложений публичного репо с `.env.docker` сверены
+построчно (`DB_PASSWORD`/`DATABASE_URL`) — только у `archetest` пароль реально содержит спецсимвол
+(`+`), но `+` не ломает `new URL()`-парсинг userinfo (это не query-string контекст, `+` не
+декодируется в пробел) и не запускал баг на практике; `/` — единственный ломающий символ — ни у
+одного из проверенных паролей на момент аудита не встретился. Фикс всюду превентивный: следующая
+ротация пароля через `openssl rand -base64 32` может дать `/` в любой момент.
+
+**Не тронуто, вне скоупа:** `libs/jobs/src/lib/scheduler.ts` передаёт `connectionString` в
+сторонний `PgBoss` (не голый `pg.Pool`) — используется `apps/studio/src/jobs/scheduler.ts`.
+Требует отдельного исследования, ломается ли `pg-boss` тем же способом, и отдельного фикса на
+уровне библиотеки (не мехнического инлайна) — если пароль studio когда-либо получит `/`, это
+всплывёт там.
+
+**Коммиты:** по одному `fix()` на каждое приложение (основной клиент), отдельные `fix()` на
+скрипты, отдельные `chore: bump <app> submodule` на каждый submodule (studio дважды — script-фикс
+шёл вторым коммитом после db.ts). Push — ожидает подтверждения пользователя.
+
+typecheck прогнан на всех 15 приложений — зелёный, кроме `domwellbes` (`materials/availability.ts`,
+`materials/item/[sku]/page.tsx`) — ошибка в чужом незакоммиченном WIP другого агента, не связана с
+этой правкой.
