@@ -13,11 +13,13 @@
       "@letar/consent",
       "@letar/seo",
       "@letar/glitchtip",
-      "@letar/i18n-proxy"
+      "@letar/i18n-proxy",
+      "@letar/pg-url"
     ]
   },
   "dependencies": {
     "@letar/glitchtip": "workspace:*",
-    "@letar/i18n-proxy": "workspace:*"
+    "@letar/i18n-proxy": "workspace:*",
+    "@letar/pg-url": "workspace:*"
   }
 }
