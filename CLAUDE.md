@@ -142,7 +142,12 @@ mandala — реальный фикс; aboi, kami, time, archetest — ложн�
 next-intl matcher не ловит `icon`/`apple-icon`/`opengraph-image`/`twitter-image` — эти роуты
 отдаются без расширения в URL независимо от расширения файла-источника (`.svg`/`.png`/`.tsx`
 одинаково), нужно явное перечисление через `@letar/i18n-proxy`; ручной аудит по «есть расширение
-у файла — уже отфильтровано» дважды дал ложноотрицательный результат (kami, time, aboi)
+у файла — уже отфильтровано» дважды дал ложноотрицательный результат (kami, time, aboi) ·
+[vitest-server-action-request-scope-apis](/.claude/docs/vitest-server-action-request-scope-apis.md)
+⚠️ server action, вызванный напрямую под vitest (минуя HTTP) — `headers()`/`revalidatePath()` вне
+request-scope бросают, мокать оба модуля; `redirect()` безопасен сам по себе, но 12 приложений
+глобально мокают `next/navigation` без него в `vitest.setup.tsx` — нужен `importOriginal` или
+проверка `.digest` подстрокой
 
 **Chakra v3 — ловушки:** [chakra-multi-system-ssr-barrel-trap](/.claude/docs/chakra-multi-system-ssr-barrel-trap.md) ⚠️
 импорт шрифта/константы из барреля с `createSystem()` в Server Component исполняет весь модуль и
