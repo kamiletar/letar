@@ -1,5 +1,16 @@
 # Выполненные задачи: Mandala
 
+## Фикс: `handleUniqueConstraintError` ловил Prisma-код P2002, никогда не срабатывал (2026-08-21)
+
+Аудит по мотивам находки в `domwellbes` (`restock-subscription.action.ts`, см.
+`.claude/docs/zenstack-v3-orm-error-codes.md`): приложение на ZenStack v3 ORM (`ZenStackClient`
+в `src/lib/db.ts`), не classic `@prisma/client`. `handleUniqueConstraintError`
+(`src/lib/actions/error-helpers.ts`) проверял `.code === 'P2002'` — обёрнутая ошибка драйвера
+такого поля не несёт, дубль по уникальному полю падал как generic-ошибка вместо адресного
+сообщения с полем. Исправлено на `dbErrorCode === '23505'`. Юнит-тест
+(`__tests__/error-helpers.spec.ts`) обновлён под новый формат ошибки, добавлен явный кейс
+«старый P2002-формат больше не матчится». `typecheck:tsgo`/`lint` зелёные.
+
 ## Фикс: config.matcher в proxy.ts обязан быть литералом, не вызовом buildIntlMatcher() (2026-08-21)
 
 Репо-широкий баг из apps/kami (§18.7 M2): Next.js 16 статически парсит `config.matcher` через AST

@@ -7,6 +7,12 @@
 
 **📚 Документация:** [README.md](./README.md)
 
+> **⚠️ Открытый вопрос (2026-08-21):** `handleUniqueConstraintError` (`src/lib/actions/error-helpers.ts`)
+> исправлен на `dbErrorCode === '23505'` (был `code === 'P2002'`, никогда не срабатывал — ZenStack
+> v3 ORM, не classic Prisma). Юнит-тест обновлён, но интеграционного теста на реальную гонку
+> дубля через параллельные вызовы create-экшена нет — см. образец в
+> `apps/domwellbes/src/app/materials/_actions/restock-subscription.action.spec.ts`.
+
 ---
 
 ## 📋 Содержание

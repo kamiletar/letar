@@ -5,10 +5,10 @@
 import { handleUniqueConstraintError } from '../error-helpers'
 
 describe('handleUniqueConstraintError', () => {
-  it('должен вернуть ошибку для Prisma P2002 кода', () => {
-    const prismaError = { code: 'P2002', meta: { target: ['slug'] } }
+  it('должен вернуть ошибку для ZenStack v3 ORM кода unique_violation (dbErrorCode 23505)', () => {
+    const ormError = { reason: 'db-query-error', dbErrorCode: '23505', dbErrorMessage: 'duplicate key value' }
 
-    const result = handleUniqueConstraintError(prismaError, 'slug', 'Slug уже существует')
+    const result = handleUniqueConstraintError(ormError, 'slug', 'Slug уже существует')
 
     expect(result).toEqual({
       success: false,
@@ -17,10 +17,18 @@ describe('handleUniqueConstraintError', () => {
     })
   })
 
-  it('должен вернуть null для других Prisma ошибок', () => {
-    const otherError = { code: 'P2025', message: 'Record not found' }
+  it('должен вернуть null для других кодов ORM ошибок', () => {
+    const otherError = { reason: 'not-found', dbErrorCode: undefined }
 
     const result = handleUniqueConstraintError(otherError, 'slug', 'Slug уже существует')
+
+    expect(result).toBeNull()
+  })
+
+  it('должен вернуть null для старого Prisma-кода P2002 (не ZenStack v3 формат)', () => {
+    const prismaError = { code: 'P2002', meta: { target: ['slug'] } }
+
+    const result = handleUniqueConstraintError(prismaError, 'slug', 'Slug уже существует')
 
     expect(result).toBeNull()
   })
