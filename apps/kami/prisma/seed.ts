@@ -1,3 +1,4 @@
+import { runSeed } from '@letar/seed-utils'
 import { ZenStackClient } from '@zenstackhq/orm'
 import { PostgresDialect } from 'kysely'
 import { Pool } from 'pg'
@@ -545,15 +546,4 @@ async function main() {
   console.log('  - 10 projects')
 }
 
-// ⚠️ НЕ звать здесь безусловный process.exit(0) в .finally() — он перебивает process.exit(1) из
-// .catch() (event loop живёт, пока открыт pg.Pool, .finally() успевает отработать после catch) и
-// маскирует ЛЮБУЮ ошибку сида как успех. Ровно так seed молча писал 0 строк при "Seed completed"
-// на staging (agent-mail e2e-gate-status-form-example-kami, 2026-08-21) — та же connectionString-
-// ошибка, что чинили в src/lib/db.ts, просто проглатывалась. `process.exitCode` только помечает
-// код выхода, не завершает процесс — Node выходит сам после `$disconnect()`.
-main()
-  .catch((e) => {
-    console.error(e)
-    process.exitCode = 1
-  })
-  .finally(() => prisma.$disconnect())
+void runSeed(main, () => prisma.$disconnect())

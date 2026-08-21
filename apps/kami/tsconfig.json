@@ -127,6 +127,9 @@
       ],
       "@letar/hooks": [
         "../../libs/hooks/src/index.ts"
+      ],
+      "@letar/seed-utils": [
+        "../../libs/seed-utils/src/index.ts"
       ]
     }
   },

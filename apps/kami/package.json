@@ -11,7 +11,8 @@
       "@letar/image-upload",
       "@letar/glitchtip",
       "@letar/hooks",
-      "@letar/i18n-proxy"
+      "@letar/i18n-proxy",
+      "@letar/seed-utils"
     ]
   },
   "prisma": {
@@ -20,6 +21,7 @@
   "dependencies": {
     "shiki": "^4.1.0",
     "@letar/glitchtip": "workspace:*",
-    "@letar/i18n-proxy": "workspace:*"
+    "@letar/i18n-proxy": "workspace:*",
+    "@letar/seed-utils": "workspace:*"
   }
 }
