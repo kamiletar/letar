@@ -271,6 +271,9 @@ merging без ошибки компиляции, и другие TS-грабл�
 [transactional-email-cron-pattern](/.claude/docs/transactional-email-cron-pattern.md) паттерн
 cron-рассылок: найти кандидатов → отправить → пометить дедуп-поле; транзакционное письмо vs
 маркетинг с консент-гейтом ·
+[imapflow-error-listener-hang-pitfall](/.claude/docs/imapflow-error-listener-hang-pitfall.md) ⚠️
+слушателя `'error'` у `ImapFlow` достаточно, чтобы не уронить процесс, но не достаточно, чтобы
+гарантировать возврат из зависшего `await` — нужен внешний `Promise.race` с жёстким дедлайном ·
 [web-push](/.claude/docs/web-push.md) ·
 [offlineaudiocontext-suspend-render-race](/.claude/docs/offlineaudiocontext-suspend-render-race.md)
 
