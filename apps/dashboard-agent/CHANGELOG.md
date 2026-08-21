@@ -11,6 +11,17 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.15.16] — 2026-08-22
+
+### Fixed
+
+- Ещё две зависимости держали собственный пин, расходящийся с корневым `package.json`: `pg`
+  `^8.14.0`→`^8.23.0`, `@fastify/cors` `^11.0.0`→`^11.3.0`. Тот же класс проблемы, что чинили
+  для `imapflow`/`dockerode`/`fastify`/`node-cron`/`cron-parser`/`systeminformation` в
+  `0.15.14`/`0.15.15`. `typecheck` и полный прогон `test` (111 тестов, 15 файлов) зелёные после
+  апгрейда — используемый в коде API `pg.Client` (`lib/database.ts`) и регистрация
+  `@fastify/cors` (`src/index.ts`) не изменились.
+
 ## [0.15.15] — 2026-08-22
 
 ### Fixed
