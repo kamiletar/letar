@@ -5,6 +5,14 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.27.8] - 2026-08-21
+
+### Fixed
+
+- `config.matcher` в `proxy.ts` заменён с вызова `buildIntlMatcher()` на литерал массива — Next.js
+  статически парсит `config.matcher` через AST на build-time без исполнения модуля, вызов функции
+  ломал `next build`.
+
 ## [0.27.6] - 2026-08-20
 
 ### Changed

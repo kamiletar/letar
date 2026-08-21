@@ -6,6 +6,15 @@
 
 ---
 
+## Фикс: config.matcher в proxy.ts обязан быть литералом, не вызовом buildIntlMatcher() (2026-08-21)
+
+Репо-широкий баг из apps/kami (§18.7 M2): Next.js 16 статически парсит `config.matcher` через AST
+на build-time без исполнения модуля — `CallExpression` не поддерживается, `next build` падал с
+`Invalid segment configuration export detected`, хотя typecheck/lint проходили чисто. Matcher
+инлайнен литералом `['/((?!api|_next|_vercel|icon|apple-icon|.*\\..*).*)', '/']`, `proxy.spec.ts`
+дополнен regression-тестом (текстовый разбор файла, сверка с `buildIntlMatcher(опции)`). commit
+`349dc5a5`.
+
 ## Matcher next-intl через @letar/i18n-proxy — исправлен ещё один пропущенный icon.svg (2026-08-21)
 
 Паттерн из записи ниже вынесен в общую `libs/i18n-proxy` (`@letar/i18n-proxy`,
