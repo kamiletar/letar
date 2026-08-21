@@ -1,5 +1,17 @@
 # Выполненные задачи — Animatrona Tracker
 
+## Тест на гонку публикации `POST /api/anime` (2026-08-21)
+
+Закрывает открытый вопрос из предыдущей записи ниже: фикс каталога ошибок ZenStack v3 ORM
+не имел теста, реально воспроизводящего конфликт уникальности. Добавлен
+[route.spec.ts](/apps/animatrona-tracker/src/app/api/anime/route.spec.ts) — два параллельных
+`POST` с одинаковым `directoryCid` бьются об реальный unique-констрейнт в dev-БД; проверяет
+201+409 (не 500) и что в БД остаётся ровно одна запись. Понадобилось замокать `@/lib/ipfs` и
+`@/lib/redis` — оба реэкспортируют workspace-пакеты (`@letar/animatrona-utils`,
+`@letar/redis-client`), не забандленные в `node_modules` (резолвятся только через Next.js
+`customConditions`, vitest их не видит без алиаса/мока). `nx test`/`typecheck:tsgo`/`lint`
+зелёные. Commit `34227ec6`.
+
 ## Фикс: обработка ошибок `POST /api/anime` ловила Prisma-коды P2002/P2004 вместо ZenStack v3 (2026-08-21)
 
 Аудит по мотивам находки в `domwellbes` (см. `.claude/docs/zenstack-v3-orm-error-codes.md`):

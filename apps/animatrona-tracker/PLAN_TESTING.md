@@ -5,7 +5,7 @@
 | Тип         | Количество | Статус      |
 | ----------- | ---------- | ----------- |
 | Unit        | 0          | Планируется |
-| Integration | 0          | Планируется |
+| Integration | 1          | В процессе  |
 | E2E         | 10         | ✅ Готово   |
 
 ## Запуск тестов
@@ -34,7 +34,8 @@ nx typecheck:tsgo animatrona-tracker
 
 ### Фаза 2: Integration тесты
 
-- [ ] API публикации аниме
+- [x] API публикации аниме — гонка `POST /api/anime` по `directoryCid` (2026-08-21),
+      [route.spec.ts](/apps/animatrona-tracker/src/app/api/anime/route.spec.ts)
 - [ ] API получения списка
 - [ ] Access control policies
 
