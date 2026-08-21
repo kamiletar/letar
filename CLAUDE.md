@@ -281,6 +281,10 @@ cron-рассылок: найти кандидатов → отправить �
 [external-provider-fake-pattern](/.claude/docs/external-provider-fake-pattern.md) интерфейс +
 fake-реализация для внешнего сервиса, поставщик которого ещё не выбран (10 контуров domwellbes) —
 деградация vs пропуск по настройке, грабля вечно-успешного fake ·
+[scraper-source-health-detector-pattern](/.claude/docs/scraper-source-health-detector-pattern.md)
+детектор тихой поломки scraping/sync-источника (пусто-после-непустого, падение доли извлечённых
+значений, замороженные значения) — эскалация DEGRADED→DISABLED через два подряд подозрительных
+прогона ·
 [animatrona-db-manifest-dual-source](/.claude/docs/animatrona-db-manifest-dual-source.md) ⚠️ CID в БД
 побеждает свежий CID из манифеста ·
 [paginated-web-source-reading](/.claude/docs/paginated-web-source-reading.md) чтение источника на
