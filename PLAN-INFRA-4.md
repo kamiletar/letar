@@ -2502,6 +2502,36 @@ version bump — отдельным коммитом на приложение; 
 правкой); `bun.lock` — отдельный catch-up коммит (новая либа + отставшие версии других
 приложений от параллельных сессий).
 
+## §97 — `libs/seed-utils`: общий `runSeed()` вместо ручного `main().catch().finally()` в seed-скриптах ✅ ЗАКРЫТО (2026-08-21)
+
+**Контекст:** типичный `main().catch().finally(() => process.exit(0))` из документации Prisma
+маскирует ошибку сида: пока открыт `pg.Pool`/ORM-клиент, event loop жив, `.finally()` выполняется
+**после** `.catch()` отдельным тиком промис-цепочки, и безусловный `process.exit(0)` перебивает
+`process.exit(1)`, выставленный в `.catch()`. Деплой-лог показывает «Seed completed»/код выхода 0,
+хотя сид упал и ничего не записал. Найден и исправлен независимо в трёх приложениях одной сессией
+(kami, domwellbes, studio) до того, как был осознан как системный паттерн, а не разовая ошибка.
+
+**Решение:** новая `libs/seed-utils` (`@letar/seed-utils`), одна функция `runSeed(main,
+disconnect)` — инкапсулирует безопасный вариант (`process.exitCode = 1` вместо `process.exit()`,
+`disconnect()` вызывается всегда через `.finally()`). Мигрированы kami и studio. domwellbes
+оставлен на ручном эквивалентном `process.exitCode`-паттерне — не тронут из-за активной
+эксклюзивной файловой резервации `domwellbes-dev` на `apps/domwellbes/**` на момент миграции, не
+блокер (уведомление отправлено через agent-mail). `aboi`, `animatrona`, `dsperevod`,
+`grandslamcup`, `auth-hub` вызывают `process.exit(1)` прямо внутри `.catch()` без безусловного
+`exit(0)` в `.finally()` — этого конкретного бага там нет (`process.exit()` завершает процесс
+синхронно, до маскировки в `.finally()` дело не доходит), проактивно не мигрированы.
+
+Паттерн задокументирован — [seed-scripts.md § 5](/.claude/docs/seed-scripts.md).
+
+**Коммиты:** `libs/seed-utils` — один коммит; kami (`refactor` + отдельный `chore` version
+bump/changelog) — два коммита; studio (submodule): `refactor` + `chore` version bump, оба внутри
+submodule, затем бамп SHA в letar; `bun.lock` — отдельный catch-up коммит (новая либа + отставшие
+версии других приложений от параллельных сессий); doc — отдельный коммит.
+
+typecheck/lint/test прогнаны на `libs/seed-utils`, `kami`, `studio` — зелёные (только
+предсуществующие warnings в обоих приложениях, не связанные с этой правкой). Push — ожидает
+подтверждения пользователя.
+
 typecheck/lint/test прогнаны на `libs/i18n-proxy` и всех 7 приложений — зелёные, кроме
 `studio:test` на `src/app/api/webhooks/tochka/route.test.ts`, что относится к несвязанному,
 уже закоммиченному изменению другого агента по идемпотентности вебхука Точки (см.
