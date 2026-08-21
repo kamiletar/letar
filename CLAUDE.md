@@ -50,6 +50,9 @@ approval, kebab-case в `to`, обнулённая база
 `@@allow('create')` не даёт прочитать запись назад ·
 [zenstack-generated-prisma-client](/.claude/docs/zenstack-generated-prisma-client.md) лишний
 `generator client` — не признак дрейфа схемы ·
+[zenstack-v3-orm-error-codes](/.claude/docs/zenstack-v3-orm-error-codes.md) ⚠️ `error.dbErrorCode`
+(сырой `SQLSTATE`, `23505`), не Prisma-код `P2002` — classic `@prisma/client` в других
+приложениях монорепо ловит иначе, не путать ·
 [zenstack-self-only-user-policy-staff-picker](/.claude/docs/zenstack-self-only-user-policy-staff-picker.md)
 ⚠️ self-only read-политика `User` (`auth().id == this.id`) молча режет список сотрудников до одной
 записи в любом staff-lookup под enhanced-клиентом — фикс сырым `prisma`; `studio` отмечен как
