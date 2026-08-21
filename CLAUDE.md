@@ -265,6 +265,9 @@ cron-рассылок: найти кандидатов → отправить �
 [payment-webhook-idempotency-pattern](/.claude/docs/payment-webhook-idempotency-pattern.md)
 уникальный ID события + select-then-create + guard по терминальному статусу; расхождение aboi
 (только status-guard, без таблицы событий) — не образец для переноса ·
+[external-provider-fake-pattern](/.claude/docs/external-provider-fake-pattern.md) интерфейс +
+fake-реализация для внешнего сервиса, поставщик которого ещё не выбран (10 контуров domwellbes) —
+деградация vs пропуск по настройке, грабля вечно-успешного fake ·
 [animatrona-db-manifest-dual-source](/.claude/docs/animatrona-db-manifest-dual-source.md) ⚠️ CID в БД
 побеждает свежий CID из манифеста ·
 [paginated-web-source-reading](/.claude/docs/paginated-web-source-reading.md) чтение источника на
