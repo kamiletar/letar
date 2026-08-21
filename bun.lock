@@ -331,7 +331,7 @@
     },
     "apps/aboi": {
       "name": "@letar/aboi",
-      "version": "0.67.5",
+      "version": "0.67.7",
       "dependencies": {
         "@letar/i18n-proxy": "workspace:*",
         "@letar/theme-check": "workspace:*",
@@ -348,7 +348,7 @@
     },
     "apps/aira-web": {
       "name": "@letar/aira-web",
-      "version": "0.3.1",
+      "version": "0.3.3",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
@@ -424,7 +424,7 @@
     },
     "apps/archetest": {
       "name": "@letar/archetest",
-      "version": "0.27.6",
+      "version": "0.27.8",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
@@ -485,7 +485,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.121.0",
+      "version": "0.130.2",
       "dependencies": {
         "@letar/theme-check": "workspace:*",
         "tus-js-client": "^4.3.1",
@@ -574,10 +574,11 @@
     },
     "apps/kami": {
       "name": "kami",
-      "version": "0.33.4",
+      "version": "0.33.5",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
+        "@letar/seed-utils": "workspace:*",
         "shiki": "^4.1.0",
       },
     },
@@ -627,7 +628,7 @@
     },
     "apps/mandala": {
       "name": "@letar/mandala",
-      "version": "0.40.11",
+      "version": "0.40.13",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
@@ -666,13 +667,14 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.48.9",
+      "version": "0.49.1",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/hooks": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
         "@letar/jobs": "workspace:*",
+        "@letar/seed-utils": "workspace:*",
         "@letar/theme-check": "workspace:*",
         "@react-pdf/renderer": "^4.5.1",
         "@serwist/next": "^9.5.12",
@@ -720,7 +722,7 @@
     },
     "apps/time": {
       "name": "@letar/time",
-      "version": "0.5.5",
+      "version": "0.5.7",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
@@ -936,7 +938,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.7.2",
+      "version": "2.7.3",
       "dependencies": {
         "@tanstack/react-table": "^9.1.2",
         "@tanstack/react-virtual": "^3.13.23",
@@ -987,7 +989,7 @@
     },
     "libs/forms-core": {
       "name": "@letar/forms-core",
-      "version": "0.9.0",
+      "version": "0.9.1",
       "dependencies": {
         "@tanstack/table-core": "^9.1.2",
       },
@@ -1218,6 +1220,10 @@
       "dependencies": {
         "ioredis": "^5.11.1",
       },
+    },
+    "libs/seed-utils": {
+      "name": "@letar/seed-utils",
+      "version": "0.1.0",
     },
     "libs/seo": {
       "name": "@letar/seo",
@@ -2363,6 +2369,8 @@
     "@letar/query-provider": ["@letar/query-provider@workspace:libs/query-provider"],
 
     "@letar/redis-client": ["@letar/redis-client@workspace:libs/redis-client"],
+
+    "@letar/seed-utils": ["@letar/seed-utils@workspace:libs/seed-utils"],
 
     "@letar/seo": ["@letar/seo@workspace:libs/seo"],
 
