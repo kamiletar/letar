@@ -181,6 +181,9 @@ reset (`preflight`) уже задаёт своё явное значение —
 alias матчится по префиксу ·
 [vitest-unlinked-workspace-lib-imports](/.claude/docs/vitest-unlinked-workspace-lib-imports.md) ⚠️
 `@letar/*`-либа только в `implicitDependencies` (без bun-симлинка) не резолвится под vitest ·
+[vitest-shared-singleton-row-race](/.claude/docs/vitest-shared-singleton-row-race.md) ⚠️ общая
+singleton-строка настроек (`ShopSettings` и аналоги) — редкий флак под полным прогоном из-за
+файлового параллелизма vitest на общей dev-БД, не внутри одного файла ·
 [zod-computed-key-index-access-pitfall](/.claude/docs/zod-computed-key-index-access-pitfall.md) ⚠️
 `z.object({...Object.fromEntries(arr.map(...))})` — динамический ключ ловит TS7053 не всегда,
 зависит от формы callback'а, а не от структуры массива ключей ·
