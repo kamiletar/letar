@@ -2631,4 +2631,51 @@ database, schema }` вместо `{ connectionString, schema }`. Публичн�
 Пароль studio (`DB_PASSWORD` в `.env.docker`) на момент проверки — hex-алфавит без `/`/`+`
 (собирается в `DATABASE_URL` через интерполяцию в `docker-compose.production.yml`, не хранится
 отдельной строкой), баг не воспроизводился на практике — фикс превентивный, как и остальной §98.
+
+## §99 — `libs/pg-url`: инлайн-копия `parsePostgresUrl()` из §98 сведена в общую библиотеку ✅ ЗАКРЫТО (2026-08-21)
+
+**Контекст:** §98 сознательно оставил `parsePostgresUrl()` инлайн в каждом файле («код
+тривиален, `libs/` добавил бы связность ради не той экономии») — но охват вырос до 32 файлов
+(основной клиент + одноразовые скрипты), и дословный дубль с одним и тем же комментарием стал
+поддерживаться отдельно в каждом месте. Найдено при миграции `seed.ts` на `@letar/seed-utils`
+(§97) как обнаруженный побочный техдолг, вне объёма той сессии.
+
+**Решение:** `nx g @letar/generators:new-lib pg-url` → `@letar/pg-url` с единственным экспортом
+`parsePostgresUrl(url): ParsedPostgresUrl`, поведение сохранено 1:1 (тот же regex,
+`decodeURIComponent`, тот же текст ошибки). Добавлен unit-тест на пароль со спецсимволами
+base64 (`/`, `+`) — ровно тот случай, ради которого функция существует.
+
+**Охват замены — 29 из 32 файлов, найденных `grep -rl 'function parsePostgresUrl'`:**
+
+- Основной клиент (`src/lib/db.ts`): kami, dashboard, mandala, time, form-example,
+  form-develop-app, auth-hub, archetest, animatrona-tracker, grandslamcup (публичный репо) +
+  aboi, driving-school, dsperevod, studio, svoichuzhie, aprel8008 (submodule).
+- Одноразовые скрипты: `apps/kami/prisma/{seed,update-scoring-bar-pag-dpr,
+  update-translations-1666-1955}.ts`, `apps/archetest/prisma/seed-questions.ts`,
+  `apps/grandslamcup/scripts/{add-friendly-matches,migrate/seed,migrate/seed-v2,
+  migrate/extract-social-links}.ts`, `apps/studio/prisma/seed.ts`,
+  `apps/aprel8008/scripts/seed-photos.ts`, `apps/dsperevod/prisma/seed.ts`,
+  `apps/svoichuzhie/scripts/seed.ts`.
+- `libs/jobs/src/lib/scheduler.ts` (закрыт в §98-дополнении 2026-08-21) — тоже переведён на
+  общую функцию; текст сообщения об ошибке при невалидной строке теперь всегда «DATABASE_URL: …»
+  (было «connectionString: …» специально для этого файла) — косметическое расхождение,
+  поведение парсинга не изменилось.
+
+**Пропущено намеренно — `apps/domwellbes/**` (3 файла: `src/lib/db.ts`, `prisma/seed/db.ts`,
+`scripts/check-db-indexes.mjs`).** На момент правки путь был под активной file reservation
+другого агента (`domwellbes-dev`, `apps/domwellbes/**`, см. `.claude/rules/agent-mail.md`) —
+пропущено по правилу «занято — не трогать». Остаётся техдолгом: `grep -rl 'function
+parsePostgresUrl'` на 2026-08-21 всё ещё находит эти 3 файла плюс саму `libs/pg-url/src/lib/
+feature.ts` (реализация, не дубль).
+
+**Подключение:** `@letar/pg-url` добавлен в `nx.implicitDependencies` + `dependencies:
+"workspace:*"` каждого потребителя (16 `package.json`), один `bun install` в корне слинковал все
+разом. `typecheck:tsgo` и `lint` прогнаны на всех 17 проектов (16 приложений + `libs/jobs`) —
+зелёные, 0 ошибок (только предсуществующие warning'и `react-hooks/exhaustive-deps`/`no-console`,
+не связанные с этой правкой).
+
+**Коммиты:** отдельный `feat(pg-url)` на саму библиотеку, отдельный `refactor(<app>)` на каждое
+публичное приложение и `libs/jobs`, отдельный `refactor` внутри каждого submodule + один общий
+`chore: bump submodule SHA` в letar на все шесть разом, плюс отдельный `chore: bun.lock`. Push —
+ожидает подтверждения пользователя.
 `nx typecheck:tsgo jobs` и `nx typecheck:tsgo studio --skip-nx-cache` — зелёные.
