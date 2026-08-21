@@ -2603,3 +2603,16 @@ migrate/seed,migrate/seed-v2,migrate/extract-social-links}.ts`, `apps/studio/pri
 typecheck прогнан на всех 15 приложений — зелёный, кроме `domwellbes` (`materials/availability.ts`,
 `materials/item/[sku]/page.tsx`) — ошибка в чужом незакоммиченном WIP другого агента, не связана с
 этой правкой.
+
+**Дополнение (2026-08-21): `libs/jobs/src/lib/scheduler.ts` закрыт.** Баг подтверждён — `pg-boss`
+(`node_modules/.bun/pg-boss@12.27.0/.../dist/db.js`) в `open()` делает `new pg.Pool(this.config)`
+тем же голым `pg`, что и везде; `attorney.js` просто прокидывает `connectionString` в этот config
+без собственного парсинга. Фикс — `parsePostgresUrl()` (та же regex-функция, что в `db.ts`
+приложений) внутри `createJobScheduler()`, `PgBoss` теперь получает `{ user, password, host, port,
+database, schema }` вместо `{ connectionString, schema }`. Публичный API `JobSchedulerOptions`
+(`connectionString: string`) не менялся — парсинг внутренний.
+
+Пароль studio (`DB_PASSWORD` в `.env.docker`) на момент проверки — hex-алфавит без `/`/`+`
+(собирается в `DATABASE_URL` через интерполяцию в `docker-compose.production.yml`, не хранится
+отдельной строкой), баг не воспроизводился на практике — фикс превентивный, как и остальной §98.
+`nx typecheck:tsgo jobs` и `nx typecheck:tsgo studio --skip-nx-cache` — зелёные.
