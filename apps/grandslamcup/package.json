@@ -15,11 +15,13 @@
       "@letar/hooks",
       "@letar/consent",
       "@letar/glitchtip",
-      "@letar/seed-utils"
+      "@letar/seed-utils",
+      "@letar/pg-url"
     ]
   },
   "dependencies": {
     "@letar/glitchtip": "workspace:*",
-    "@letar/seed-utils": "workspace:*"
+    "@letar/seed-utils": "workspace:*",
+    "@letar/pg-url": "workspace:*"
   }
 }
