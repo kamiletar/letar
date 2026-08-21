@@ -9,7 +9,8 @@
       "@letar/ui",
       "@letar/consent",
       "@letar/glitchtip",
-      "@letar/seed-utils"
+      "@letar/seed-utils",
+      "@letar/pg-url"
     ]
   },
   "dependencies": {
@@ -17,7 +18,8 @@
     "@simplewebauthn/server": "^13.3.1",
     "geoip-lite": "^2.0.2",
     "@letar/glitchtip": "workspace:*",
-    "@letar/seed-utils": "workspace:*"
+    "@letar/seed-utils": "workspace:*",
+    "@letar/pg-url": "workspace:*"
   },
   "devDependencies": {
     "@types/geoip-lite": "^1.4.4"
