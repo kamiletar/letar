@@ -331,9 +331,10 @@
     },
     "apps/aboi": {
       "name": "@letar/aboi",
-      "version": "0.67.7",
+      "version": "0.67.8",
       "dependencies": {
         "@letar/i18n-proxy": "workspace:*",
+        "@letar/pg-url": "workspace:*",
         "@letar/seed-utils": "workspace:*",
         "@letar/theme-check": "workspace:*",
         "leaflet": "^1.9.4",
@@ -361,7 +362,7 @@
     },
     "apps/animatrona": {
       "name": "@letar/animatrona",
-      "version": "0.55.20",
+      "version": "0.55.21",
       "dependencies": {
         "@letar/seed-utils": "workspace:*",
         "cheerio": "^1.2.0",
@@ -400,6 +401,7 @@
       "version": "0.11.5",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
+        "@letar/pg-url": "workspace:*",
       },
     },
     "apps/animatrona-tracker-e2e": {
@@ -419,6 +421,9 @@
     "apps/aprel8008": {
       "name": "@letar/aprel8008",
       "version": "0.12.27",
+      "dependencies": {
+        "@letar/pg-url": "workspace:*",
+      },
     },
     "apps/aprel8008-e2e": {
       "name": "@letar/aprel8008-e2e",
@@ -430,6 +435,7 @@
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
+        "@letar/pg-url": "workspace:*",
       },
     },
     "apps/archetest-e2e": {
@@ -438,9 +444,10 @@
     },
     "apps/auth-hub": {
       "name": "auth-hub",
-      "version": "0.7.6",
+      "version": "0.7.7",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
+        "@letar/pg-url": "workspace:*",
         "@letar/seed-utils": "workspace:*",
         "@simplewebauthn/browser": "^13.3.0",
         "@simplewebauthn/server": "^13.3.1",
@@ -464,6 +471,7 @@
         "@letar/glitchtip": "workspace:*",
         "@letar/hooks": "workspace:*",
         "@letar/infra-config": "workspace:*",
+        "@letar/pg-url": "workspace:*",
         "@letar/ui": "workspace:*",
       },
     },
@@ -488,7 +496,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.130.2",
+      "version": "0.131.0",
       "dependencies": {
         "@letar/theme-check": "workspace:*",
         "tus-js-client": "^4.3.1",
@@ -503,6 +511,7 @@
       "version": "0.240.2",
       "dependencies": {
         "@letar/hooks": "workspace:*",
+        "@letar/pg-url": "workspace:*",
       },
     },
     "apps/driving-school-e2e": {
@@ -514,10 +523,11 @@
     },
     "apps/dsperevod": {
       "name": "@letar/dsperevod",
-      "version": "0.6.7",
+      "version": "0.6.8",
       "dependencies": {
         "@better-auth/utils": "^0.4.2",
         "@chakra-ui/react": "*",
+        "@letar/pg-url": "workspace:*",
         "@letar/seed-utils": "workspace:*",
         "better-auth": "^1.6.11",
         "next-mdx-remote": "^6.0.0",
@@ -534,6 +544,9 @@
     "apps/form-develop-app": {
       "name": "form-develop-app",
       "version": "0.1.1",
+      "dependencies": {
+        "@letar/pg-url": "workspace:*",
+      },
     },
     "apps/form-develop-app-e2e": {
       "name": "form-develop-app-e2e",
@@ -559,6 +572,7 @@
       "version": "0.1.2",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
+        "@letar/pg-url": "workspace:*",
       },
     },
     "apps/form-example-e2e": {
@@ -567,9 +581,10 @@
     },
     "apps/grandslamcup": {
       "name": "@letar/grandslamcup",
-      "version": "3.38.7",
+      "version": "3.38.8",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
+        "@letar/pg-url": "workspace:*",
         "@letar/seed-utils": "workspace:*",
       },
     },
@@ -583,6 +598,7 @@
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
+        "@letar/pg-url": "workspace:*",
         "@letar/seed-utils": "workspace:*",
         "shiki": "^4.1.0",
       },
@@ -637,6 +653,7 @@
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
+        "@letar/pg-url": "workspace:*",
       },
     },
     "apps/mandala-e2e": {
@@ -679,6 +696,7 @@
         "@letar/hooks": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
         "@letar/jobs": "workspace:*",
+        "@letar/pg-url": "workspace:*",
         "@letar/seed-utils": "workspace:*",
         "@letar/theme-check": "workspace:*",
         "@react-pdf/renderer": "^4.5.1",
@@ -701,6 +719,7 @@
       "name": "@letar/svoichuzhie",
       "version": "0.10.29",
       "dependencies": {
+        "@letar/pg-url": "workspace:*",
         "qrcode": "^1.5.4",
         "tus-js-client": "^4.3.1",
         "typograf": "^7.7.0",
@@ -731,6 +750,7 @@
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
+        "@letar/pg-url": "workspace:*",
       },
     },
     "apps/time-e2e": {
@@ -1161,6 +1181,7 @@
       "name": "@letar/jobs",
       "version": "0.2.0",
       "dependencies": {
+        "@letar/pg-url": "workspace:*",
         "cron-parser": "^5.7.0",
         "pg-boss": "^12.27.0",
       },
@@ -1188,6 +1209,10 @@
       "dependencies": {
         "to-words": "^5.3.0",
       },
+    },
+    "libs/pg-url": {
+      "name": "@letar/pg-url",
+      "version": "0.1.0",
     },
     "libs/pin-auth": {
       "name": "@letar/pin-auth",
@@ -2364,6 +2389,8 @@
     "@letar/media-client": ["@letar/media-client@workspace:libs/media-client"],
 
     "@letar/number-words": ["@letar/number-words@workspace:libs/number-words"],
+
+    "@letar/pg-url": ["@letar/pg-url@workspace:libs/pg-url"],
 
     "@letar/pin-auth": ["@letar/pin-auth@workspace:libs/pin-auth"],
 
