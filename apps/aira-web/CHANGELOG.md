@@ -1,5 +1,13 @@
 # Changelog — aira-web
 
+## [0.3.3] — 2026-08-21
+
+### Fixed
+
+- `config.matcher` в `proxy.ts` заменён с вызова `buildIntlMatcher()` на литерал массива — Next.js
+  статически парсит `config.matcher` через AST на build-time без исполнения модуля, вызов функции
+  ломал `next build`.
+
 ## [0.3.1] — 2026-07-30
 
 ### Изменено

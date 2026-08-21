@@ -2,6 +2,13 @@
 
 ## Выполненные задачи
 
+- [x] Фикс: `config.matcher` в `proxy.ts` обязан быть литералом, не вызовом `buildIntlMatcher()`
+      (2026-08-21). Репо-широкий баг из apps/kami (§18.7 M2): Next.js 16 статически парсит
+      `config.matcher` через AST на build-time без исполнения модуля, `CallExpression` не
+      поддерживается — `next build` падал, хотя typecheck/lint проходили чисто. Matcher инлайнен
+      литералом `['/((?!api|_next|_vercel|.*\\..*).*)', '/']`, `proxy.spec.ts` дополнен
+      regression-тестом (текстовый разбор файла, сверка с `buildIntlMatcher(опции)`). commit
+      `b8210b38`.
 - [x] Matcher next-intl перенесён на `@letar/i18n-proxy` (2026-08-21) — `buildIntlMatcher()` из
       общей `libs/i18n-proxy`, та же логика (api/_next/_vercel исключены), без изменения
       поведения. Аудит ниже подтверждён верным, добавлен `proxy.spec.ts`
