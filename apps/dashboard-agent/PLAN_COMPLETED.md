@@ -2,6 +2,25 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 0.15.12 → 0.15.13 — аудит и починка пробелов регистрации cron-эндпоинтов (2026-08-22)
+
+После инцидента domwellbes (задача №68 — 5 cron-эндпоинтов месяцами не вызывались из-за
+отсутствующего `CRON_SECRET` + отсутствия в `DEFAULT_CRON_JOBS`) прошли чек-листом
+(`.claude/docs/cron-endpoint-registration-checklist.md`) все cron-роуты монорепо.
+
+Нашли и починили три пробела: `time-notifications`, `svoichuzhie-cleanup`,
+`driving-school-reminders` — у всех трёх `CRON_SECRET` был на месте и `.env.docker` смонтирован
+в `docker-compose.production.yml` агента, но id задачи не было в `DEFAULT_CRON_JOBS`, поэтому
+агент их никогда не вызывал. У `time` и `svoichuzhie` пробел был двойной: оба приложения
+отсутствовали в `APP_REGISTRY` (`server-config.ts`) — даже после регистрации задачи
+`getAppUrl()` бросал бы «неизвестное приложение». Порт/host добавлены и в канон
+`@letar/infra-config`, синхронизацию подтверждают `server-config.guard.spec.ts`/
+`app-registry.guard.spec.ts`. Остальные 16 cron-эндпоинтов монорепо прошли аудит без замечаний.
+
+Расписания: `time-notifications` — `* * * * *` (эндпоинт сам требует минутной гранулярности
+для `5min`-подписки на вехи), `svoichuzhie-cleanup` — `0 * * * *` (порог зависания заказа —
+2 часа), `driving-school-reminders` — `0 * * * *`.
+
 ## Версия 0.15.6 → 0.15.7 — GlitchTip: первая не-Next.js интеграция тиража §70 (2026-08-12)
 
 Первое приложение монорепо на Fastify, подключённое к GlitchTip — генератор
