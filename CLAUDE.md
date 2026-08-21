@@ -242,7 +242,10 @@ pre-commit-хука не видел `.exe`-shim на Windows ·
 [firewall](/.claude/docs/firewall.md) ⚠️ `ufw` не фильтрует порты Docker ·
 [backup-architecture](/.claude/docs/backup-architecture.md) ·
 [secret-manager](/.claude/docs/secret-manager.md) SOPS + age ·
-[redis-security](/.claude/docs/redis-security.md)
+[redis-security](/.claude/docs/redis-security.md) ·
+[cron-endpoint-registration-checklist](/.claude/docs/cron-endpoint-registration-checklist.md) ⚠️
+новый `/api/cron/*` требует три правки не в scope пишущего приложения (`CRON_SECRET`,
+`dashboard-agent/cron.ts`, порт/host в `infra-config`) — иначе тихий 401 или ненайденный маршрут
 
 **Прокси (`infra/`):** [nginx-proxy-manager](/infra/nginx-proxy-manager/README.md) действующий ·
 [acme-dns](/infra/acme-dns/README.md) ⭐ wildcard-TLS без API регистратора ·
