@@ -13,7 +13,8 @@
       "@letar/analytics",
       "@letar/api-server",
       "@letar/glitchtip",
-      "@letar/hooks"
+      "@letar/hooks",
+      "@letar/pg-url"
     ]
   },
   "dependencies": {
@@ -23,6 +24,7 @@
     "@letar/chakra-provider": "workspace:*",
     "@letar/infra-config": "workspace:*",
     "@letar/glitchtip": "workspace:*",
-    "@letar/hooks": "workspace:*"
+    "@letar/hooks": "workspace:*",
+    "@letar/pg-url": "workspace:*"
   }
 }
