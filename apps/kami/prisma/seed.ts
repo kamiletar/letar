@@ -10,9 +10,16 @@ if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL не задан')
 }
 
+const dbConfig = parsePostgresUrl(process.env.DATABASE_URL)
+// ⚠️ Диагностика host/port/database (без пароля) — deploy-agent-dev сообщил, что сид отчитывается
+// об успехе (exit 0), но целевая БД остаётся пустой и в её логах нет ни одного запроса за время
+// выполнения сида (agent-mail e2e-gate-status-form-example-kami, 2026-08-21). Строка временная,
+// убрать после подтверждения, что сид реально попадает в нужную БД.
+console.log(`[seed] DATABASE_URL → ${dbConfig.user}@${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`)
+
 const prisma = new ZenStackClient(schema, {
   dialect: new PostgresDialect({
-    pool: new Pool(parsePostgresUrl(process.env.DATABASE_URL)),
+    pool: new Pool(dbConfig),
   }) as never,
 })
 
@@ -530,10 +537,8 @@ async function main() {
     ],
   })
 
-  console.log('Database seeded successfully!')
-  console.log('  - 4 skill categories')
-  console.log('  - 28 skills')
-  console.log('  - 10 projects')
+  const projectCount = await prisma.project.count()
+  console.log(`[seed] Database seeded successfully! projects in DB now: ${projectCount}`)
 }
 
 void runSeed(main, () => prisma.$disconnect())
