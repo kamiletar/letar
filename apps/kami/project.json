@@ -89,7 +89,7 @@
     "db:seed": {
       "executor": "nx:run-commands",
       "dependsOn": [
-        "db:generate"
+        "zenstack:generate"
       ],
       "metadata": {
         "description": "Seed database with initial data",
@@ -98,7 +98,7 @@
         ]
       },
       "options": {
-        "command": "prisma generate && prisma db seed",
+        "command": "prisma db seed",
         "cwd": "apps/kami"
       }
     },
