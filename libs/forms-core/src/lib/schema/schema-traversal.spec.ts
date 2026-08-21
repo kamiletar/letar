@@ -84,6 +84,16 @@ describe('traverseSchema', () => {
     expect(fields.find((f) => f.name === 'withDefault')?.required).toBe(false)
   })
 
+  it("определяет .optional().or(z.literal('')) как необязательное (email/url паттерн)", () => {
+    const schema = z.object({
+      customerEmail: z.email().optional().or(z.literal('')),
+    })
+
+    const fields = traverseSchema(schema)
+
+    expect(fields.find((f) => f.name === 'customerEmail')?.required).toBe(false)
+  })
+
   it('обходит вложенные объекты', () => {
     const schema = z.object({
       name: z.string(),

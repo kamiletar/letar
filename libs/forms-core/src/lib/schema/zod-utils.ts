@@ -84,6 +84,25 @@ export function unwrapSchemaWithRequired(schema: any): UnwrapResult {
     }
   }
 
+  // Паттерн `z.email().optional().or(z.literal(''))`: `.or()` оборачивает ZodOptional
+  // в ZodUnion, поэтому верхний уровень становится 'union', а не 'optional'. Считаем
+  // union optional, только если ровно одна ветка сама optional/nullable, а все остальные —
+  // литералы (обычно '' или undefined) — это единственный случай, когда пустое значение
+  // гарантированно валидно независимо от того, какая ветка его примет.
+  if (type === 'union') {
+    const options = schema._zod.def.options
+    if (Array.isArray(options) && options.length > 0) {
+      const unwrappedOptions = options.map((option: unknown) => unwrapSchemaWithRequired(option))
+      const optionalIndex = unwrappedOptions.findIndex((option) => !option.required)
+      const restAreLiterals = unwrappedOptions.every(
+        (_option, index) => index === optionalIndex || getZodType(options[index]) === 'literal',
+      )
+      if (optionalIndex !== -1 && restAreLiterals) {
+        return { schema: unwrappedOptions[optionalIndex].schema, required: false }
+      }
+    }
+  }
+
   return { schema, required: true }
 }
 
@@ -99,7 +118,14 @@ export function getZodType(schema: any): string | undefined {
  */
 export function isOptionalSchema(schema: any): boolean {
   const type = getZodType(schema)
-  return type === 'optional' || type === 'nullable'
+  if (type === 'optional' || type === 'nullable') {
+    return true
+  }
+  // Тот же паттерн union+literal, что в unwrapSchemaWithRequired — см. комментарий там
+  if (type === 'union') {
+    return !unwrapSchemaWithRequired(schema).required
+  }
+  return false
 }
 
 /**

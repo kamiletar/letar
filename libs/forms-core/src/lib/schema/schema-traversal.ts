@@ -1,7 +1,7 @@
 import type { ZodConstraints } from './schema-constraints'
 import { getZodConstraints } from './schema-constraints'
 import type { FieldUIMeta } from './types/meta-types'
-import { unwrapSchema } from './zod-utils'
+import { unwrapSchema, unwrapSchemaWithRequired } from './zod-utils'
 
 /**
  * Schema field information for form auto-generation
@@ -41,20 +41,7 @@ function getZodType(schema: any): string {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isRequired(schema: any): boolean {
-  if (!schema?._zod?.def) {
-    return true
-  }
-
-  const type = schema._zod.def.type
-  if (type === 'optional' || type === 'nullable') {
-    return false
-  }
-  if (type === 'default') {
-    // default always has a value, considered not required for UI
-    return false
-  }
-
-  return true
+  return unwrapSchemaWithRequired(schema).required
 }
 
 /**
