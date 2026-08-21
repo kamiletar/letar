@@ -211,6 +211,40 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     enabled: true,
   },
   {
+    id: 'time-notifications',
+    name: 'Milestone Notifications (time)',
+    app: 'time',
+    endpoint: '/api/cron/notifications',
+    // Собственный комментарий эндпоинта: «Вызывается cron-задачей каждую минуту» — уведомления
+    // о вехах (month/week/day/hour/5min) требуют минутной гранулярности для '5min'-подписки.
+    schedule: '* * * * *',
+    description: 'Отправка уведомлений о приближении вех обратного отсчёта подписчикам',
+    enabled: true,
+    server: 's2',
+  },
+  {
+    id: 'svoichuzhie-cleanup',
+    name: 'Stale Order Cleanup (svoichuzhie)',
+    app: 'svoichuzhie',
+    endpoint: '/api/cron/cleanup',
+    // Порог зависания — 2 часа (route.ts: STALE_HOURS), часовой прогон достаточен.
+    schedule: '0 * * * *',
+    description: 'Отмена PENDING заказов мерча старше 2 часов и восстановление стока',
+    enabled: true,
+    server: 's2',
+  },
+  {
+    id: 'driving-school-reminders',
+    name: 'Reminders (driving-school)',
+    app: 'driving-school',
+    endpoint: '/api/cron/reminders',
+    description:
+      'Правила напоминаний: истекающие документы, просроченные платежи, неактивные ученики, предстоящий экзамен, занятие завтра',
+    schedule: '0 * * * *',
+    enabled: true,
+    server: 's2',
+  },
+  {
     id: 'dsperevod-email-health-check',
     name: 'Email Health Check (dsperevod)',
     app: 'dsperevod',

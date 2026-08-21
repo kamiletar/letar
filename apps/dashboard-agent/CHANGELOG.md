@@ -11,6 +11,22 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.15.13] — 2026-08-22
+
+### Fixed
+
+- **Три cron-эндпоинта (`time`, `svoichuzhie`, `driving-school`) никогда не вызывались агентом**,
+  хотя `CRON_SECRET` был на месте и `.env.docker` смонтирован — их id просто не было в
+  `DEFAULT_CRON_JOBS`. У `time`/`svoichuzhie` пробел был двойной: ни того, ни другого приложения
+  не было в `APP_REGISTRY` (`server-config.ts`) — `getAppUrl()` не смог бы их вызвать даже после
+  регистрации задачи. Добавлены `time-notifications` (`* * * * *`, каждую минуту — уведомления о
+  вехах чувствительны к `5min`-подписке), `svoichuzhie-cleanup` (`0 * * * *`, порог зависания
+  заказа — 2 часа) и `driving-school-reminders` (`0 * * * *`). Порт/host `time`/`svoichuzhie`
+  добавлены и в канон `@letar/infra-config`, синхронизацию подтверждают
+  `server-config.guard.spec.ts`/`app-registry.guard.spec.ts`. Найдено аудитом чек-листа
+  `.claude/docs/cron-endpoint-registration-checklist.md` (заведён после того же класса бага в
+  domwellbes, задача №68).
+
 ## [0.15.12] — 2026-08-22
 
 ### Refactor
