@@ -2679,3 +2679,21 @@ feature.ts` (реализация, не дубль).
 `chore: bump submodule SHA` в letar на все шесть разом, плюс отдельный `chore: bun.lock`. Push —
 ожидает подтверждения пользователя.
 `nx typecheck:tsgo jobs` и `nx typecheck:tsgo studio --skip-nx-cache` — зелёные.
+
+**Дополнение 2026-08-21 — `apps/domwellbes/**` домигрирован, техдолг закрыт.** Резервация
+`domwellbes-dev` к моменту повторного захода снята, конфликта по файлам не было (другой агент
+правил `restock-subscription.action.ts`, не пересекается с `db.ts`/`seed/db.ts`/
+`check-db-indexes.mjs`). Все 3 файла переведены на `import { parsePostgresUrl } from
+'@letar/pg-url'`, дубль-функции и комментарии про base64-пароль удалены. `grep -rl 'function
+parsePostgresUrl'` по репозиторию теперь находит только `libs/pg-url/src/lib/feature.ts`
+(реализацию) — техдолга не осталось.
+
+⚠️ **`scripts/check-db-indexes.mjs` запускался голым `node` (таргет `db:verify-indexes`) — этого
+недостаточно для TS-библиотеки.** `@letar/pg-url` — TS-пакет (`main`/`exports` указывают на
+`./src/index.ts` без расширения в реэкспортах), а `node <script>.mjs` без флагов не резолвит
+бесрасширительный TS-импорт (`ERR_MODULE_NOT_FOUND` на `./lib/feature`), даже на Node 25 с
+нативным type-stripping. Таргет переключён на `bun scripts/check-db-indexes.mjs` — bun
+резолвит TS-либы из коробки, тот же приём, что уже используют `bun run prisma/seed.ts`/`bun run
+scripts/*.ts` в других приложениях. Проверено прогоном скрипта против dev-БД (`✓ Все 2
+expression-индекса на месте`). Если у другого приложения найдётся `.mjs`-скрипт, запускаемый
+`node` и импортирующий TS-библиотеку из `libs/` — тот же фикс.
