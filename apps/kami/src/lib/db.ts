@@ -8,14 +8,34 @@ import { Pool } from 'pg'
 // Re-export commonly used types
 export type * from '@/generated/prisma'
 
+// ⚠️ Пароль в DATABASE_URL генерируется через `openssl rand -base64 32` (см. security.md) —
+// алфавит base64 содержит `/` и `+`. Необработанный `/` перед `@` ломает разбор строки через
+// `new URL()` внутри pg-connection-string (WHATWG URL встречает `/` до `@`, решает, что userinfo
+// закончился, и пытается распарсить "user:пароль-до-слэша" как host:port → "Invalid URL",
+// `base: 'postgres://base'`). Ошибка детерминированная на каждый запрос — на staging kami
+// молчаливо ломала auth/rate-limit (там ошибка проглатывается) и валила 500 на страницах,
+// которые не оборачивают DB-запрос в try/catch (agent-mail e2e-gate-status-form-example-kami,
+// 2026-08-21). Разбираем строку вручную и передаём поля отдельно — так `pg` не парсит
+// connectionString через URL вообще.
+function parsePostgresUrl(url: string) {
+  const match = url.match(/^postgres(?:ql)?:\/\/([^:]+):([\s\S]+)@([^@/:]+):(\d+)\/([^?]+)/)
+  if (!match) {
+    throw new Error('DATABASE_URL: не удалось распарсить (ожидается postgresql://user:password@host:port/db)')
+  }
+  const [, user, password, host, port, database] = match
+  return { user: decodeURIComponent(user), password: decodeURIComponent(password), host, port: Number(port), database }
+}
+
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL не задан')
+}
+
 /**
  * ZenStack v3 ORM Client для PostgreSQL
  */
 const orm = new ZenStackClient(schema, {
   dialect: new PostgresDialect({
-    pool: new Pool({
-      connectionString: process.env.DATABASE_URL,
-    }),
+    pool: new Pool(parsePostgresUrl(process.env.DATABASE_URL)),
   }) as never,
 })
 
