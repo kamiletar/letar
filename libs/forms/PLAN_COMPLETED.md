@@ -1,5 +1,38 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-08-21 — Фикс required-резолва `.optional().or(z.literal(''))` (v2.7.3 / forms-core v0.9.1)
+
+Репорт: `apps/domwellbes/checkout` — поле `customerEmail` рендерилось с `*` (обязательное), хотя
+схема `z.email().optional().or(z.literal(''))` допускает пустую строку.
+
+**Root cause:** `.or()` оборачивает `ZodOptional` в `ZodUnion` — верхний уровень схемы становится
+`'union'`, а не `'optional'`. И `isOptionalSchema`, и `unwrapSchemaWithRequired`
+(`libs/forms-core/src/lib/schema/zod-utils.ts`) проверяли только буквальные типы
+`'optional'`/`'nullable'` на верхнем уровне, поэтому весь union считался обязательным. Тот же
+паттерн (опциональный email/сайт) используется в `apps/driving-school/onboarding`
+(`schoolEmail`, `schoolWebsite`) — там тоже было ложное `required: true`.
+
+**Фикс:** union теперь считается optional, если ровно одна ветка сама optional/nullable, а все
+остальные ветки — литералы (`z.literal(...)`) — единственный случай, когда пустое значение
+гарантированно валидно независимо от того, какая ветка его примет. `z.enum(...)` не задет — в
+Zod v4 это отдельный `_zod.def.type === 'enum'`, не `'union'`.
+
+Заодно найдена и устранена вторая, независимая copy-paste реализация той же логики required в
+`schema-traversal.ts` (используется генерацией авто-полей для Vue/Angular/shadcn-скинов форм,
+`libs/forms-vue/forms-angular/forms-shadcn`) — та же бы дала тот же баг при auto-generated формах.
+Переведена на общий `unwrapSchemaWithRequired` вместо повторной реализации.
+
+**Тесты:** новый `libs/forms-core/src/lib/schema/zod-utils.spec.ts` (паттерн `customerEmail`,
+`.nullable().or(...)`, обычный union без optional-ветки, неоднозначный union из двух optional —
+консервативно остаётся required, `z.enum` не задет) + кейс в `schema-traversal.spec.ts`.
+`nx test forms-core` 479/479, `nx test forms` 720/722 (2 непричастных Tiptap rich-text флейка).
+
+**Не проверено вживую в браузере:** dev-БД `domwellbes` не имеет строки `ShopSettings`, поэтому
+`retailStorefrontEnabled` выключен и «в корзину» на карточках материалов не рендерится — `/checkout`
+недостижим в этом окружении без сидирования настроек магазина (вне рамок этого фикса). Схема
+`customerEmail` покрыта юнит-тестом напрямую через ту же цепочку `getFieldMeta` →
+`unwrapSchemaWithRequired`, которую использует `ChakraFormField`/`base-field.tsx` в реальном рантайме.
+
 ## 2026-08-20 — Аудит forms-vue/forms-vue-shadcn/forms-angular на тот же класс бага
 
 Follow-up к фиксу `createLazyComponent` ниже: проверено, наступает ли тот же класс проблемы

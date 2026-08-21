@@ -4,6 +4,25 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.7.3] - 2026-08-21
+
+### Fixed
+
+- **Баг (`@letar/forms-core`): `isOptionalSchema`/`unwrapSchemaWithRequired` не видели паттерн
+  `z.email().optional().or(z.literal(''))`.** `.or()` оборачивает `ZodOptional` в `ZodUnion`,
+  поэтому верхний уровень схемы становится `'union'`, а не `'optional'` — резолвер считал поле
+  обязательным, хотя пустая строка проходит валидацию. Паттерн распространён для опциональных
+  email/url-полей (найден в `apps/domwellbes/checkout`, `apps/driving-school/onboarding`).
+  Union теперь считается optional, если ровно одна ветка сама optional/nullable, а все
+  остальные — литералы (единственный случай, когда пустое значение гарантированно валидно
+  независимо от выбранной ветки). `z.enum(...)` не задет — отдельный zod-type `'enum'`, не
+  `'union'`.
+- Дублирующая copy-paste реализация required-резолвера в `schema-traversal.ts`
+  (используется генерацией авто-полей для Vue/Angular/shadcn-скинов) переведена на общую
+  `unwrapSchemaWithRequired` вместо повтора той же логики.
+- Тесты: `libs/forms-core/src/lib/schema/zod-utils.spec.ts` (новый),
+  `schema-traversal.spec.ts` (кейс на тот же паттерн).
+
 ## [2.7.2] - 2026-08-20
 
 ### Changed
