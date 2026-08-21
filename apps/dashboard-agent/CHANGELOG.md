@@ -11,6 +11,16 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.15.12] — 2026-08-22
+
+### Refactor
+
+- **`waitForCanaryMessage` (email-canary) переведена на общий helper `withImapDeadline`
+  (`@letar/email`).** Тот же приём (слушатель `'error'` + `Promise.race` с жёстким дедлайном +
+  безусловный `client.close()`) независимо появился в `domwellbes` (RFQ email-поллинг) —
+  вынесено в библиотеку, поведение не меняется. См.
+  `.claude/docs/imapflow-error-listener-hang-pitfall.md`.
+
 ## [0.15.11] — 2026-08-19
 
 ### Fixed

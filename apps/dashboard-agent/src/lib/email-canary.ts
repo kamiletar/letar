@@ -17,7 +17,7 @@
  * (§62 PLAN-INFRA.md).
  */
 
-import { createEmailProvider } from '@letar/email'
+import { createEmailProvider, withImapDeadline } from '@letar/email'
 import { ImapFlow } from 'imapflow'
 import { shouldRepeatAlert } from './alert-policy'
 import { postDashboardAlert } from './dashboard-alert'
@@ -219,14 +219,9 @@ function failedWait(error: string): WaitResult {
  * Ждёт появления письма с токеном в теме во входящих указанного IMAP-ящика.
  * По найденному письму — помечает `\Seen`, чтобы не находить его повторно в следующих прогонах.
  *
- * КРИТИЧНО (инцидент 2026-07-21, см. PLAN.md): ImapFlow на socket-таймауте/обрыве соединения
- * эмитит `'error'` асинхронно — не обязательно как reject уже начатого вызова, а иногда вместо
- * него. Если `'error'` не имеет слушателя, необработанный event на EventEmitter роняет ВЕСЬ
- * процесс dashboard-agent. Но одного слушателя недостаточно: если ошибка происходит ВМЕСТО
- * reject-а уже начатого `await` (например `connect()`/`fetch()`), тот `await` может повиснуть
- * навсегда — слушатель её перехватит, но текущая операция никогда не завершится сама. Поэтому
- * вся функция обёрнута внешним дедлайном (`Promise.race`) — независимо от того, что происходит
- * внутри ImapFlow, вызывающий код гарантированно получает ответ за конечное время.
+ * Обёрнута `withImapDeadline` (`@letar/email`) — см.
+ * `.claude/docs/imapflow-error-listener-hang-pitfall.md` за тем, почему одного слушателя
+ * `'error'` недостаточно и почему нужен внешний жёсткий дедлайн.
  */
 async function waitForCanaryMessage(opts: {
   host: string
@@ -246,30 +241,19 @@ async function waitForCanaryMessage(opts: {
     logger: false,
   })
 
-  let clientError: Error | null = null
-  client.on('error', (error: unknown) => {
-    clientError = error instanceof Error ? error : new Error(String(error))
-  })
-
   const hardDeadlineMs = POLL_TIMEOUT_MS + 15_000
 
-  const result = await Promise.race([
-    waitForCanaryMessageInner(client, opts.token, opts.purge, () => clientError),
-    new Promise<WaitResult>((resolve) => {
-      setTimeout(() => {
-        resolve(failedWait(
-          (clientError as Error | null)?.message
-            ?? `IMAP-операция не завершилась за ${hardDeadlineMs}мс (зависший сокет)`,
-        ))
-      }, hardDeadlineMs)
-    }),
-  ])
-
-  // Гасим соединение жёстко (без LOGOUT) — если гонка выиграна таймаутом, штатный logout() в
-  // waitForCanaryMessageInner мог не выполниться (или тоже зависнуть на мёртвом сокете).
-  client.close()
-
-  return result
+  return withImapDeadline(
+    client,
+    (getClientError) => waitForCanaryMessageInner(client, opts.token, opts.purge, getClientError),
+    {
+      timeoutMs: hardDeadlineMs,
+      onTimeout: (clientError) =>
+        failedWait(
+          clientError?.message ?? `IMAP-операция не завершилась за ${hardDeadlineMs}мс (зависший сокет)`,
+        ),
+    },
+  )
 }
 
 interface FoundMessage {
