@@ -21,6 +21,14 @@ type Props = {
   params: Promise<{ locale: string }>
 }
 
+// Публичная страница со списком из БД, редактируемым через /admin/projects — без force-dynamic
+// Next.js кеширует рендер (Full Route Cache) до первого запроса и не видит более поздний сид/правку
+// админкой без явного revalidatePath на именно этот locale-путь (см. nextjs-apps.md, тот же класс
+// бага что у aboi/catalog и domwellbes/houses). Наблюдалось на staging: /projects (ru) после сида
+// показывал свежие карточки, /en/projects — «Content coming soon» с той же таблицей и тем же
+// запросом (agent-mail e2e-gate-status-form-example-kami, 2026-08-21).
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'projects' })
