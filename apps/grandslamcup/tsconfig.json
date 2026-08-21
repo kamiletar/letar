@@ -112,6 +112,9 @@
       ],
       "@letar/glitchtip/server": [
         "../../libs/glitchtip/src/server/index.ts"
+      ],
+      "@letar/seed-utils": [
+        "../../libs/seed-utils/src/index.ts"
       ]
     }
   },

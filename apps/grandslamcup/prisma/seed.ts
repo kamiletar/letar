@@ -6,6 +6,7 @@
  * Идемпотентен — при повторном запуске не дублирует данные.
  */
 
+import { runSeed } from '@letar/seed-utils'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '../src/generated/prisma/client'
 
@@ -68,9 +69,4 @@ async function main() {
   console.log(`   Автор: ${admin.name ?? admin.id}`)
 }
 
-main()
-  .catch((e) => {
-    console.error('Seed failed:', e)
-    process.exit(1)
-  })
-  .finally(() => prisma.$disconnect())
+void runSeed(main, () => prisma.$disconnect())
