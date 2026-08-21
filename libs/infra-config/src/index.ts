@@ -182,6 +182,7 @@ export const APP_PORTS: Record<string, number> = {
   dsperevod: 3019,
   aboi: 3018,
   studio: 3024,
+  domwellbes: 3025,
   'dashboard-agent': 3100,
 }
 
@@ -217,6 +218,7 @@ export const APP_HOSTS: Record<string, string> = {
   dsperevod: 'dsperevod-app',
   aboi: 'aboi-app',
   studio: 'studio-app',
+  domwellbes: 'domwellbes-app',
   'dashboard-agent': 'dashboard-agent',
 }
 
