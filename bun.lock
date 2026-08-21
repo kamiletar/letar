@@ -334,6 +334,7 @@
       "version": "0.67.7",
       "dependencies": {
         "@letar/i18n-proxy": "workspace:*",
+        "@letar/seed-utils": "workspace:*",
         "@letar/theme-check": "workspace:*",
         "leaflet": "^1.9.4",
         "react-leaflet": "^5.0.0",
@@ -362,6 +363,7 @@
       "name": "@letar/animatrona",
       "version": "0.55.20",
       "dependencies": {
+        "@letar/seed-utils": "workspace:*",
         "cheerio": "^1.2.0",
       },
       "devDependencies": {
@@ -439,6 +441,7 @@
       "version": "0.7.6",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
+        "@letar/seed-utils": "workspace:*",
         "@simplewebauthn/browser": "^13.3.0",
         "@simplewebauthn/server": "^13.3.1",
         "geoip-lite": "^2.0.2",
@@ -515,6 +518,7 @@
       "dependencies": {
         "@better-auth/utils": "^0.4.2",
         "@chakra-ui/react": "*",
+        "@letar/seed-utils": "workspace:*",
         "better-auth": "^1.6.11",
         "next-mdx-remote": "^6.0.0",
         "nodemailer": "^8.0.7",
@@ -566,6 +570,7 @@
       "version": "3.38.7",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
+        "@letar/seed-utils": "workspace:*",
       },
     },
     "apps/grandslamcup-e2e": {
@@ -574,7 +579,7 @@
     },
     "apps/kami": {
       "name": "kami",
-      "version": "0.33.5",
+      "version": "0.33.6",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
@@ -667,7 +672,7 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.49.1",
+      "version": "0.49.2",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/glitchtip": "workspace:*",
