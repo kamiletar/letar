@@ -1,4 +1,3 @@
-import { buildIntlMatcher } from '@letar/i18n-proxy'
 import createIntlMiddleware from 'next-intl/middleware'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
@@ -24,11 +23,13 @@ export async function proxy(request: NextRequest) {
 
 export default proxy
 
+// ⚠️ matcher — литерал, не вызов buildIntlMatcher(). Next.js статически парсит `config.matcher`
+// через AST (без исполнения модуля) для построения routes-manifest — `CallExpression` он не
+// умеет разворачивать: "Unsupported node type "CallExpression" at "config.matcher"", билд падает
+// на "Invalid segment configuration export detected" (см. .claude/docs/nextjs-standalone-tracing.md
+// или commit 6655f165, тот же фикс в apps/kami/src/proxy.ts).
+// Значение сгенерировано buildIntlMatcher({ excludePrefixes: ['api', '_next', '_vercel'],
+// metadataRoutes: ['icon', 'apple-icon'] }) — дрейф литерала от опций ловит proxy.spec.ts.
 export const config = {
-  matcher: buildIntlMatcher({
-    excludePrefixes: ['api', '_next', '_vercel'],
-    // icon.svg отдаётся на /icon без расширения — тот же класс бага, что и apple-icon,
-    // но раньше не был замечен (см. libs/i18n-proxy — findUndeclaredMetadataRoutes его ловит)
-    metadataRoutes: ['icon', 'apple-icon'],
-  }),
+  matcher: ['/((?!api|_next|_vercel|icon|apple-icon|.*\\..*).*)', '/'],
 }
