@@ -45,6 +45,9 @@ export type {
 // === Провайдер ===
 export { createEmailProvider, getConfigFromEnv, isMailhogEnabled, resetTransporter, verifyConnection } from './provider'
 
+// === IMAP: жёсткий дедлайн вокруг ImapFlow ===
+export { withImapDeadline } from './imap-deadline'
+
 // === Репорт провалов отправки (централизованный лог + опциональный алертер) ===
 export {
   type EmailFailureAlerter,
