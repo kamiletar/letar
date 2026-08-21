@@ -10,10 +10,12 @@
       "@letar/consent",
       "animatrona-ui",
       "@letar/redis-client",
-      "@letar/glitchtip"
+      "@letar/glitchtip",
+      "@letar/pg-url"
     ]
   },
   "dependencies": {
-    "@letar/glitchtip": "workspace:*"
+    "@letar/glitchtip": "workspace:*",
+    "@letar/pg-url": "workspace:*"
   }
 }
