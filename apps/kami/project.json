@@ -98,7 +98,7 @@
         ]
       },
       "options": {
-        "command": "prisma db seed",
+        "command": "prisma generate && prisma db seed",
         "cwd": "apps/kami"
       }
     },
