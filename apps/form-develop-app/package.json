@@ -10,8 +10,11 @@
       "@letar/chakra-provider",
       "@letar/forms",
       "@letar/format-utils",
-      "@letar/query-provider"
+      "@letar/query-provider",
+      "@letar/pg-url"
     ]
   },
-  "dependencies": {}
+  "dependencies": {
+    "@letar/pg-url": "workspace:*"
+  }
 }
