@@ -2506,3 +2506,21 @@ typecheck/lint/test прогнаны на `libs/i18n-proxy` и всех 7 при
 `studio:test` на `src/app/api/webhooks/tochka/route.test.ts`, что относится к несвязанному,
 уже закоммиченному изменению другого агента по идемпотентности вебхука Точки (см.
 `apps/studio/PLAN_COMPLETED.md`), не к этой миграции.
+
+**Дополнение 2026-08-21 (тот же день, вторая волна):** сама миграция на `buildIntlMatcher()`
+занесла в 6 из 7 приложений (все, кроме kami — там баг нашли и почти сразу же исправили) второй,
+независимый баг: `config.matcher: buildIntlMatcher({...})` — вызов функции (`CallExpression`) в
+исполняемом при билде `export const config`. Next.js статически парсит `config.matcher` через AST
+**без исполнения модуля** (для routes-manifest на build-time) и не умеет разворачивать
+`CallExpression` — `next build` падал с "Invalid segment configuration export detected" /
+"Unsupported node type CallExpression at config.matcher" / "matcher needs to be a static string or
+array of static strings" (формулировка отличается по версии Next.js/Turbopack), при этом
+typecheck и lint проходили чисто — ловит только реальная сборка. Найдено при передеплое staging
+для §18.7 M2 в apps/kami, фикс распространён на остальные 6 параллельными агентами: matcher
+инлайнится литералом массива (вычисленным вручную из тех же опций `buildIntlMatcher`), а
+regression-тест в `proxy.spec.ts` каждого приложения сверяет литерал с `buildIntlMatcher(опции)`
+через текстовый regex-разбор файла (импорт самого `proxy.ts` в vitest невозможен — тянет
+`next-intl/middleware` → `next/server`). Коммиты: kami `6655f165`, aira-web `b8210b38`, mandala
+`5799efff`, time `de173784`, archetest `349dc5a5`, studio (submodule `8922962` + bump `50d1d667`),
+aboi (submodule `d97de234` + bump `7a1a810e`). Push submodule (studio, aboi) и корневого letar —
+ожидает подтверждения пользователя.
