@@ -7,6 +7,14 @@
 
 ## [Unreleased]
 
+## [0.33.6] - 2026-08-21
+
+### Changed
+
+- **`prisma/seed.ts`** — переведён на `@letar/seed-utils` (`runSeed`): общий helper вместо
+  ручного `main().catch().finally()`, чтобы не повторять баг маскировки кода выхода (см.
+  `.claude/docs/seed-scripts.md`).
+
 ## [0.33.4] - 2026-08-20
 
 ### Changed
