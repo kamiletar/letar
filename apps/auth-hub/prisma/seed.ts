@@ -16,6 +16,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 config({ path: join(__dirname, '../.env.local') })
 config({ path: join(__dirname, '../.env') })
 
+import { runSeed } from '@letar/seed-utils'
 import { ZenStackClient } from '@zenstackhq/orm'
 import { PostgresDialect } from 'kysely'
 import { Pool } from 'pg'
@@ -171,19 +172,17 @@ const clients = [
   },
 ]
 
-async function seed() {
-  // Необходимо DATABASE_URL
-  const databaseUrl = process.env.DATABASE_URL
-  if (!databaseUrl) {
-    throw new Error('[seed] DATABASE_URL не задан')
-  }
+if (!process.env.DATABASE_URL) {
+  throw new Error('[seed] DATABASE_URL не задан')
+}
 
-  const pool = new Pool({ connectionString: databaseUrl })
-  // Raw ORM без PolicyPlugin — обходит @@deny('all', true) на OauthApplication
-  const orm = new ZenStackClient(schema, {
-    dialect: new PostgresDialect({ pool }) as never,
-  })
+const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+// Raw ORM без PolicyPlugin — обходит @@deny('all', true) на OauthApplication
+const orm = new ZenStackClient(schema, {
+  dialect: new PostgresDialect({ pool }) as never,
+})
 
+async function main() {
   console.log('[seed] Seeding OIDC clients...')
 
   for (const client of clients) {
@@ -196,10 +195,6 @@ async function seed() {
   }
 
   console.log(`[seed] Done: ${clients.length} clients seeded.`)
-  await pool.end()
 }
 
-seed().catch((e) => {
-  console.error('[seed] Error:', e)
-  process.exit(1)
-})
+void runSeed(main, () => pool.end())

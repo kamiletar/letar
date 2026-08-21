@@ -1,6 +1,6 @@
 {
   "name": "auth-hub",
-  "version": "0.7.6",
+  "version": "0.7.7",
   "private": true,
   "nx": {
     "implicitDependencies": [
@@ -8,14 +8,16 @@
       "@letar/analytics",
       "@letar/ui",
       "@letar/consent",
-      "@letar/glitchtip"
+      "@letar/glitchtip",
+      "@letar/seed-utils"
     ]
   },
   "dependencies": {
     "@simplewebauthn/browser": "^13.3.0",
     "@simplewebauthn/server": "^13.3.1",
     "geoip-lite": "^2.0.2",
-    "@letar/glitchtip": "workspace:*"
+    "@letar/glitchtip": "workspace:*",
+    "@letar/seed-utils": "workspace:*"
   },
   "devDependencies": {
     "@types/geoip-lite": "^1.4.4"
