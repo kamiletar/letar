@@ -278,20 +278,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `Не удалось загрузить данные из IPFS: ${error.message}` }, { status: 502 })
     }
 
-    // Prisma/ZenStack ошибки с кодом
-    const prismaError = error as { code?: string; meta?: Record<string, unknown>; message?: string }
+    // ZenStack v3 ORM оборачивает ошибку в ORMError с полем `reason`
+    // ('rejected-by-policy' — отказ в доступе, 'db-query-error' + dbErrorCode — ошибка драйвера БД).
+    // Это не Prisma-коды P2004/P2002 — см. .claude/docs/zenstack-v3-orm-error-codes.md
+    const ormError = error as { reason?: string; dbErrorCode?: string; message?: string }
 
     // ZenStack: отказ в доступе
-    if (prismaError.code === 'P2004' || prismaError.message?.includes('denied')) {
+    if (ormError.reason === 'rejected-by-policy' || ormError.message?.includes('denied')) {
       return NextResponse.json(
         { error: 'Нет прав для обновления этого аниме. Возможно, оно загружено другим пользователем.' },
         { status: 403 },
       )
     }
 
-    // Prisma: unique constraint violation
-    if (prismaError.code === 'P2002') {
-      return NextResponse.json({ error: `Конфликт уникальности: ${JSON.stringify(prismaError.meta)}` }, { status: 409 })
+    // ZenStack v3: unique constraint violation (Postgres SQLSTATE 23505)
+    if (ormError.reason === 'db-query-error' && ormError.dbErrorCode === '23505') {
+      return NextResponse.json({ error: `Конфликт уникальности: ${ormError.message}` }, { status: 409 })
     }
 
     return NextResponse.json({ error: 'Внутренняя ошибка сервера' }, { status: 500 })

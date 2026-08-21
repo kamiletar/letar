@@ -1,5 +1,15 @@
 # Выполненные задачи — Animatrona Tracker
 
+## Фикс: обработка ошибок `POST /api/anime` ловила Prisma-коды P2002/P2004 вместо ZenStack v3 (2026-08-21)
+
+Аудит по мотивам находки в `domwellbes` (см. `.claude/docs/zenstack-v3-orm-error-codes.md`):
+`route.ts` использует `getEnhancedPrisma`/`prisma` из ZenStack v3 ORM, но в `catch` проверял
+`prismaError.code === 'P2004'` (отказ политики) и `=== 'P2002'` (unique-конфликт) — оба поля на
+обёрнутом `ORMError` не установлены, обе ветки никогда не срабатывали, конфликт публикации
+всегда падал как общая ошибка 500. Исправлено на `error.reason === 'rejected-by-policy'` и
+`error.reason === 'db-query-error' && error.dbErrorCode === '23505'`. `typecheck:tsgo`/`lint`
+зелёные (только пред-существующие warning'и `react-hooks/exhaustive-deps` в несвязанных файлах).
+
 ## Webpack-фикс `@tanstack/devtools-ui@0.7.0` — server-половина графа (2026-08-19)
 
 Тот же баг, что уронил dev-сервер `driving-school` (500, `Attempted import error: 'use' is not

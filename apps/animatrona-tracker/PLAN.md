@@ -4,6 +4,13 @@
 
 ## Черновик (новые идеи)
 
+- [ ] ⚠️ **Открытый вопрос (2026-08-21):** `POST /api/anime` в `route.ts` исправлен с
+      `prismaError.code === 'P2002'/'P2004'` (никогда не срабатывали — ZenStack v3 ORM, коды
+      `error.reason`/`error.dbErrorCode`, не Prisma P-коды) на `reason === 'db-query-error' &&
+      dbErrorCode === '23505'` / `reason === 'rejected-by-policy'`. Нет теста, реально
+      воспроизводящего конфликт уникальности через параллельные POST — см. образец в
+      `apps/domwellbes/src/app/materials/_actions/restock-subscription.action.spec.ts`.
+
 - [ ] **Аудит `_active: scale()` в теме на `pressScale`** (`@letar/ui`) — задача описана в
       [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md). Значения раскиданы
       по `src/app/_components/ui/provider.tsx` (не в `src/theme`, как у большинства приложений).
