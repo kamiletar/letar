@@ -1,5 +1,16 @@
 # Выполненные задачи: Mandala
 
+## Фикс: config.matcher в proxy.ts обязан быть литералом, не вызовом buildIntlMatcher() (2026-08-21)
+
+Репо-широкий баг из apps/kami (§18.7 M2): Next.js 16 статически парсит `config.matcher` через AST
+на build-time без исполнения модуля — `CallExpression` не поддерживается, `next build` падал с
+`Unsupported node type "CallExpression" at "config.matcher"`, хотя typecheck/lint проходили чисто.
+Matcher инлайнен литералом `['/((?!api|_next|_vercel|admin|.*\\..*).*)', '/']`, вычисленным из
+фактических опций (`excludePrefixes: ['api', '_next', '_vercel', 'admin']`); `proxy.spec.ts`
+дополнен regression-тестом (текстовый разбор файла, сверка с `buildIntlMatcher(опции)`). Билд
+после фикса падает на отдельной несвязанной проблеме (EACCES к БД при генерации `/sitemap.xml`
+локально — БД недоступна в среде проверки, вне scope). commit `5799efff`.
+
 > **📖 Начни с главного README:** [README.md](./README.md) — обзор проекта, быстрый старт
 >
 > **Версия:** 0.16.0 | **Обновлено:** 2025-12-14
