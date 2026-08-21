@@ -5,7 +5,8 @@
   "types": "./src/index.ts",
   "dependencies": {
     "cron-parser": "^5.7.0",
-    "pg-boss": "^12.27.0"
+    "pg-boss": "^12.27.0",
+    "@letar/pg-url": "workspace:*"
   },
   "exports": {
     ".": {
