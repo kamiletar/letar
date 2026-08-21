@@ -398,7 +398,7 @@
     },
     "apps/animatrona-tracker": {
       "name": "@letar/animatrona-tracker",
-      "version": "0.11.6",
+      "version": "0.11.8",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
         "@letar/pg-url": "workspace:*",
@@ -496,10 +496,11 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.131.1",
+      "version": "0.136.0",
       "dependencies": {
         "@letar/pg-url": "workspace:*",
         "@letar/theme-check": "workspace:*",
+        "imapflow": "^1.7.1",
         "tus-js-client": "^4.3.1",
       },
     },
@@ -509,7 +510,7 @@
     },
     "apps/driving-school": {
       "name": "driving-school",
-      "version": "0.240.3",
+      "version": "0.240.5",
       "dependencies": {
         "@letar/hooks": "workspace:*",
         "@letar/pg-url": "workspace:*",
@@ -650,7 +651,7 @@
     },
     "apps/mandala": {
       "name": "@letar/mandala",
-      "version": "0.40.14",
+      "version": "0.40.15",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
@@ -718,7 +719,7 @@
     },
     "apps/svoichuzhie": {
       "name": "@letar/svoichuzhie",
-      "version": "0.10.30",
+      "version": "0.10.33",
       "dependencies": {
         "@letar/pg-url": "workspace:*",
         "qrcode": "^1.5.4",
