@@ -189,7 +189,7 @@ export default async function ProjectsPage({ params }: Props) {
           <VStack gap={4} pt={8} textAlign="center">
             <Pressable display="inline-flex" borderRadius="md">
               <Button asChild size="lg" colorPalette="fg">
-                <Link href="/hire">{tNav('hire')}</Link>
+                <Link href="/hire/">{tNav('hire')}</Link>
               </Button>
             </Pressable>
           </VStack>
