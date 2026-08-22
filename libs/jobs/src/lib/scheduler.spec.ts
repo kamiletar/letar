@@ -43,7 +43,7 @@ describe('createJobScheduler', () => {
 
   it('start(): создаёт очередь, ставит расписание и регистрирует воркер для включённой задачи', async () => {
     const scheduler = createJobScheduler({
-      connectionString: 'postgres://test',
+      connectionString: 'postgres://test:test@localhost:5432/test',
       jobs: [job()],
       overrides: [],
     })
@@ -61,7 +61,7 @@ describe('createJobScheduler', () => {
 
   it('start(): выключенная задача снимается с расписания вместо schedule()', async () => {
     const scheduler = createJobScheduler({
-      connectionString: 'postgres://test',
+      connectionString: 'postgres://test:test@localhost:5432/test',
       jobs: [job({ enabled: false })],
       overrides: [],
     })
@@ -77,7 +77,7 @@ describe('createJobScheduler', () => {
   it('start(): оверрайд расписания из БД побеждает значение из кода', async () => {
     const overrides: JobOverrideRecord[] = [{ jobId: 'demo-job', schedule: '0 7 * * *', enabled: null }]
     const scheduler = createJobScheduler({
-      connectionString: 'postgres://test',
+      connectionString: 'postgres://test:test@localhost:5432/test',
       jobs: [job()],
       overrides,
     })
@@ -91,7 +91,7 @@ describe('createJobScheduler', () => {
 
   it('runNow(): ставит задачу в очередь немедленно через boss.send()', async () => {
     const scheduler = createJobScheduler({
-      connectionString: 'postgres://test',
+      connectionString: 'postgres://test:test@localhost:5432/test',
       jobs: [job()],
       overrides: [],
     })
@@ -105,7 +105,7 @@ describe('createJobScheduler', () => {
 
   it('runNow(): падает с понятной ошибкой для id вне реестра', async () => {
     const scheduler = createJobScheduler({
-      connectionString: 'postgres://test',
+      connectionString: 'postgres://test:test@localhost:5432/test',
       jobs: [job()],
       overrides: [],
     })
@@ -117,7 +117,7 @@ describe('createJobScheduler', () => {
 
   it('stop(): без предварительного start() ничего не делает (idempotent no-op)', async () => {
     const scheduler = createJobScheduler({
-      connectionString: 'postgres://test',
+      connectionString: 'postgres://test:test@localhost:5432/test',
       jobs: [job()],
       overrides: [],
     })
@@ -129,7 +129,7 @@ describe('createJobScheduler', () => {
 
   it('stop(): после start() вызывает graceful boss.stop()', async () => {
     const scheduler = createJobScheduler({
-      connectionString: 'postgres://test',
+      connectionString: 'postgres://test:test@localhost:5432/test',
       jobs: [job()],
       overrides: [],
     })
@@ -142,7 +142,7 @@ describe('createJobScheduler', () => {
 
   it('getStatuses(): без прогонов в БД — lastRunAt/lastRunState пусты, nextRunAt посчитан', async () => {
     const scheduler = createJobScheduler({
-      connectionString: 'postgres://test',
+      connectionString: 'postgres://test:test@localhost:5432/test',
       jobs: [job()],
       overrides: [],
     })
@@ -159,7 +159,7 @@ describe('createJobScheduler', () => {
 
   it('getStatuses(): выключенная задача не получает nextRunAt', async () => {
     const scheduler = createJobScheduler({
-      connectionString: 'postgres://test',
+      connectionString: 'postgres://test:test@localhost:5432/test',
       jobs: [job({ enabled: false })],
       overrides: [],
     })
@@ -181,7 +181,7 @@ describe('createJobScheduler', () => {
     })
 
     const scheduler = createJobScheduler({
-      connectionString: 'postgres://test',
+      connectionString: 'postgres://test:test@localhost:5432/test',
       jobs: [job()],
       overrides: [],
     })
@@ -204,7 +204,7 @@ describe('createJobScheduler', () => {
     })
 
     const scheduler = createJobScheduler({
-      connectionString: 'postgres://test',
+      connectionString: 'postgres://test:test@localhost:5432/test',
       jobs: [job()],
       overrides: [],
     })
@@ -219,7 +219,7 @@ describe('createJobScheduler', () => {
 
   it('несколько задач в реестре обрабатываются независимо', async () => {
     const scheduler = createJobScheduler({
-      connectionString: 'postgres://test',
+      connectionString: 'postgres://test:test@localhost:5432/test',
       jobs: [job({ id: 'job-a' }), job({ id: 'job-b', enabled: false })],
       overrides: [],
     })
@@ -234,7 +234,7 @@ describe('createJobScheduler', () => {
 
   it('autoSchedule=false: очередь и воркер регистрируются, но schedule()/unschedule() не вызываются', async () => {
     const scheduler = createJobScheduler({
-      connectionString: 'postgres://test',
+      connectionString: 'postgres://test:test@localhost:5432/test',
       jobs: [job(), job({ id: 'job-disabled', enabled: false })],
       overrides: [],
       autoSchedule: false,
@@ -250,7 +250,7 @@ describe('createJobScheduler', () => {
 
   it('autoSchedule=false: runNow() всё равно работает — ручной запуск не зависит от автотика', async () => {
     const scheduler = createJobScheduler({
-      connectionString: 'postgres://test',
+      connectionString: 'postgres://test:test@localhost:5432/test',
       jobs: [job()],
       overrides: [],
       autoSchedule: false,
@@ -264,7 +264,7 @@ describe('createJobScheduler', () => {
 
   it('autoSchedule=false: getStatuses() не обещает следующий запуск — тикать нечему', async () => {
     const scheduler = createJobScheduler({
-      connectionString: 'postgres://test',
+      connectionString: 'postgres://test:test@localhost:5432/test',
       jobs: [job()],
       overrides: [],
       autoSchedule: false,
@@ -282,7 +282,7 @@ describe('createJobScheduler', () => {
 
   it('setOverride(): применяет новое расписание сразу, без рестарта процесса', async () => {
     const scheduler = createJobScheduler({
-      connectionString: 'postgres://test',
+      connectionString: 'postgres://test:test@localhost:5432/test',
       jobs: [job()],
       overrides: [],
     })
@@ -302,7 +302,7 @@ describe('createJobScheduler', () => {
 
   it('setOverride(): enabled=false снимает задачу с расписания сразу', async () => {
     const scheduler = createJobScheduler({
-      connectionString: 'postgres://test',
+      connectionString: 'postgres://test:test@localhost:5432/test',
       jobs: [job()],
       overrides: [],
     })
@@ -318,7 +318,7 @@ describe('createJobScheduler', () => {
 
   it('setOverride(): до start() не трогает pg-boss, но обновляет эффективное состояние', async () => {
     const scheduler = createJobScheduler({
-      connectionString: 'postgres://test',
+      connectionString: 'postgres://test:test@localhost:5432/test',
       jobs: [job()],
       overrides: [],
     })
@@ -330,7 +330,7 @@ describe('createJobScheduler', () => {
 
   it('setOverride(): падает с понятной ошибкой для id вне реестра', async () => {
     const scheduler = createJobScheduler({
-      connectionString: 'postgres://test',
+      connectionString: 'postgres://test:test@localhost:5432/test',
       jobs: [job()],
       overrides: [],
     })
