@@ -136,6 +136,13 @@ export function Hero() {
                   <Link href="/about/">{t('cta.about')}</Link>
                 </Button>
               </Pressable>
+
+              {/* Основной CTA */}
+              <Pressable borderRadius="md" display="inline-flex">
+                <Button asChild size="lg" colorPalette="fg">
+                  <Link href="/hire/">{t('cta.hire')}</Link>
+                </Button>
+              </Pressable>
             </HStack>
           </motion.div>
         </motion.div>

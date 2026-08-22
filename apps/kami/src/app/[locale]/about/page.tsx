@@ -121,7 +121,7 @@ function AboutContent() {
           {/* CTA */}
           <HStack justify="center">
             <Button asChild size="lg" colorPalette="fg">
-              <Link href="/skills">{t('cta')}</Link>
+              <Link href="/skills/">{t('cta')}</Link>
             </Button>
           </HStack>
         </VStack>

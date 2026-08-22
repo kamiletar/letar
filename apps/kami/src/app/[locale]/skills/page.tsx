@@ -63,6 +63,7 @@ export default async function SkillsPage({ params }: Props) {
   })
 
   const t = await getTranslations('skills')
+  const tNav = await getTranslations('nav')
   const currentLocale = await getLocale()
   const l = createLocalizer(currentLocale)
 
@@ -160,7 +161,10 @@ export default async function SkillsPage({ params }: Props) {
           {/* CTA */}
           <HStack justify="center" gap={4}>
             <Button asChild variant="outline" size="lg" borderColor="fg.500" color="fg.500">
-              <Link href="/projects">{l('Смотреть проекты', 'View Projects')}</Link>
+              <Link href="/projects/">{l('Смотреть проекты', 'View Projects')}</Link>
+            </Button>
+            <Button asChild size="lg" colorPalette="fg">
+              <Link href="/hire/">{tNav('hire')}</Link>
             </Button>
           </HStack>
         </VStack>
