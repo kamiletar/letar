@@ -1,3 +1,4 @@
+import { Link } from '@/i18n/navigation'
 import { prisma } from '@/lib/prisma'
 import {
   Badge,
@@ -66,6 +67,7 @@ export default async function ProjectsPage({ params }: Props) {
   })
 
   const t = await getTranslations('projects')
+  const tNav = await getTranslations('nav')
   const currentLocale = await getLocale()
 
   return (
@@ -182,6 +184,15 @@ export default async function ProjectsPage({ params }: Props) {
               </Box>
             ))}
           </SimpleGrid>
+
+          {/* CTA — предложение позвать на работу после просмотра портфолио */}
+          <VStack gap={4} pt={8} textAlign="center">
+            <Pressable display="inline-flex" borderRadius="md">
+              <Button asChild size="lg" colorPalette="fg">
+                <Link href="/hire">{tNav('hire')}</Link>
+              </Button>
+            </Pressable>
+          </VStack>
         </VStack>
       </Container>
     </Box>
