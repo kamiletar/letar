@@ -813,6 +813,100 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
 
 ## Backlog (запросы от агентов)
 
+### [2026-08-23] `EditIntentValue<T>` — явная замена значения без передачи старого
+
+- **Запросил:** владелец монорепо (Kami), исходный контракт:
+  `{ isEdited: boolean; value: ValueType }`; первый consumer — OAuth/OIDC/API keys в
+  [`apps/driving-school/PLAN_AUTH.md`](../../apps/driving-school/PLAN_AUTH.md).
+- **Приоритет:** high — общий класс edit-форм, где сохранённое значение нельзя или не нужно
+  возвращать клиенту.
+- **Проблема:** API key/Client Secret нельзя читать повторно, а визуальную маску вроде
+  `********7Kp2` нельзя отправлять как новое значение. TanStack `isDirty` здесь недостаточен:
+  это техническое состояние формы, а серверу нужен явный intent «оставить» либо «заменить».
+
+**Целевой framework-free контракт:**
+
+```typescript
+export type EditIntentValue<T> =
+  | { isEdited: false; value: null }
+  | { isEdited: true; value: T }
+```
+
+`value` присутствует в обеих ветках и стабильно сериализуется в JSON/Server Action. `null` при
+`isEdited: false` означает «не изменять»; маска, прежний plaintext и encrypted blob в form state
+не попадают. Это discriminated union: `true` без валидного `value` и `false` с непустым `value`
+должны отклоняться схемой.
+
+```tsx
+const ApiKeyEditSchema = z.object({
+  apiKey: editIntentValueSchema(z.string().min(20)),
+}).strip()
+
+<Form.Field.EditIntent
+  name="apiKey"
+  displayValue="************P9x4"
+  editLabel="Заменить ключ"
+  cancelLabel="Оставить текущий"
+  sensitive
+>
+  <Form.Field.Password name="apiKey.value" autoComplete="new-password" />
+</Form.Field.EditIntent>
+```
+
+Рабочие имена до API review: `EditIntentValue<T>`, `editIntentValueSchema()` и
+`Form.Field.EditIntent`. Не называть компонент `Editable`: `Form.Field.Editable` уже означает
+inline-редактирование текста. Если `ReplaceValue` окажется яснее, переименовать согласованно до
+первого релиза, не публиковать два синонимичных API.
+
+**Поведение:**
+
+- edit mode стартует как `{ isEdited: false, value: null }` и показывает только безопасный
+  `displayValue`/статус «настроено»;
+- «Заменить» атомарно выставляет `isEdited: true`, создаёт `value` из `emptyValue` и переводит
+  фокус в дочернее поле;
+- «Отмена» очищает ввод, удаляет его из DOM и возвращает `{ isEdited: false, value: null }`;
+- create mode стартует с `{ isEdited: true, value: emptyValue }`;
+- `isEdited` — пользовательский intent, а не производная от `isDirty`: старый secret намеренно
+  неизвестен клиенту и сравнить значения нельзя;
+- после успешного submit/reset поле получает новый безопасный hint и возвращается в read mode;
+- server action обновляет значение только при `isEdited: true`, повторно валидирует `T` и
+  выполняет replace-only операцию; при `false` значение не меняется;
+- server fixture отдельно отклоняет UI-маски (`********…`) как новое значение: клиентская схема
+  не является security boundary;
+- server error нового значения привязывается к `${name}.value`, ошибка intent — к `${name}`.
+
+**Безопасность:**
+
+- `sensitive` по умолчанию `true`; opt-out допустим только для несекретного составного значения;
+- sensitive `value` автоматически исключается из persistence/localStorage, URL sync, offline
+  queue, form history, analytics, devtools/`DebugValues`, comparison и recovery drafts;
+- значение не попадает в label/helper/error/toast/log, data/aria attributes или RSC props;
+  `displayValue` — отдельный безопасный prop и никогда не копируется в `value`;
+- сохранённый secret нельзя reveal/copy: компонент управляет только вводом нового значения;
+- cancel, submit и unmount очищают внутренний sensitive state.
+
+**Архитектура и паритет:**
+
+- `@letar/forms-core`: тип, Zod v4 helper с `.strip()` в обеих object-ветках и чистые helpers;
+- `@letar/forms-react`: headless intent/focus contract без Chakra/shadcn imports;
+- `@letar/forms` и `@letar/forms-shadcn`: одинаковый value contract, разные skins;
+- Angular/Vue adapters используют тот же core payload; UI-порт входит в parity-матрицы;
+- `FromSchema`/`AutoFields` распознают meta `fieldType: 'editIntent'` только с явно заданным
+  inner field — по произвольному object union секретность не угадывать.
+
+**Definition of Done:**
+
+- [ ] schema tests: обе валидные ветки, `false + value`, `true + null`, невалидное `T`, strip
+      неизвестных ключей и JSON round-trip;
+- [ ] UI tests: view → edit → cancel, create mode, focus, disabled/loading, reset после success,
+      nested server error, keyboard и screen reader names;
+- [ ] security tests: mask не становится value, mask-as-input отклоняется, sensitive value не
+      появляется в persistence/history/analytics/debug/offline/URL snapshots;
+- [ ] generic tests: `string` API key и object `ValueType`, чтобы контракт не зашился под строки;
+- [ ] единая contract suite для Chakra/shadcn и framework adapters;
+- [ ] README, `docs/fields.md`, form-docs, form-mcp, CHANGELOG и версии обновлены вместе с
+      реализацией.
+
 ### [2026-08-20] Баг: Form.Field.TableEditor застревает в нераскрытом Suspense-boundary (от form-example)
 
 - **Запросил:** repo-dev
@@ -4055,4 +4149,5 @@ DOM-поведении минимален. Юнит/компонентные т�
 
 ---
 
-**Последнее обновление:** 2026-07-08 (v1.4.0) — Фаза 7: Clean Architecture (core dependency-free по DIP) + Vue-пруф-адаптер (7.8) как верификация границы, не полный порт
+**Последнее обновление:** 2026-08-23 — добавлен backlog `EditIntentValue<T>` /
+`Form.Field.EditIntent` для replace-only значений и безопасного ввода API-ключей.
