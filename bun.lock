@@ -496,7 +496,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.141.0",
+      "version": "0.142.0",
       "dependencies": {
         "@letar/pg-url": "workspace:*",
         "@letar/theme-check": "workspace:*",
