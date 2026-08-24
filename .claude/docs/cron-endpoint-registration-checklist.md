@@ -46,3 +46,23 @@ dashboard-agent вовсе, и находка остаётся открытым 
       https://<домен>/api/cron/<endpoint>` возвращает `{success: true, ...}`, не 401/404
 
 Найдено и закрыто для domwellbes — `apps/domwellbes/PLAN_COMPLETED.md`, задача №68 (2026-08-22).
+
+## ⚠️ Отдельный класс: заголовок авторизации не совпадает с тем, что реально шлёт агент
+
+Чек-лист выше не ловит эту ошибку — все три места настроены верно, `verifyCronSecret()` даже не
+написан. Эндпоинт сверяет собственноручно написанную проверку `Authorization: Bearer $CRON_SECRET`
+(и иногда метод `GET`), а `dashboard-agent` (`executeJob` в `cron.ts`) реально шлёт `POST` с
+заголовком `X-Cron-Secret`. Итог тот же — тихий 401 на каждом прогоне, без алерта до первой
+ручной проверки, потому что `CRON_FAILED`-алерт создаётся, но в потоке уведомлений легко
+потеряться среди других.
+
+Найдено в `apps/time/src/app/api/cron/notifications/route.ts` (2026-08-24, валилось с 22.08 —
+задача `* * * * *`, за 2 суток тысячи 401) — фикс: заменить bespoke-проверку на
+`verifyCronSecret()` из `@letar/api-server`. При аудите по тому же паттерну (`authHeader ===
+Bearer ${cronSecret}`) найдены ещё два вероятных случая, не проверенных живьём на момент записи:
+`apps/driving-school/src/app/api/cron/reminders/route.ts` и
+`apps/svoichuzhie/src/app/api/cron/cleanup/route.ts` (второй ещё и на `GET` вместо `POST`).
+
+**Профилактика:** писать новый `/api/cron/*`-эндпоинт всегда через `verifyCronSecret()` из
+`@letar/api-server`, никогда через собственную проверку заголовка — общий хелпер уже
+захардкожен на реальный контракт `executeJob` (`X-Cron-Secret`, не `Authorization`).
