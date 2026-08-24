@@ -9,13 +9,12 @@
  *
  * Требует: DATABASE_URL, AUTH_ENCRYPTION_KEY в .env.local / .env
  */
-import { config } from 'dotenv'
+import { loadEnvCascade } from '@letar/env-load'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-config({ path: join(__dirname, '../.env.local'), quiet: true })
-config({ path: join(__dirname, '../.env'), quiet: true })
+loadEnvCascade(join(__dirname, '..'))
 
 import { encryptSecret, isEncrypted } from '@letar/auth/server'
 import { ZenStackClient } from '@zenstackhq/orm'
