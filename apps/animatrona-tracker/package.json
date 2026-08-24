@@ -11,11 +11,13 @@
       "animatrona-ui",
       "@letar/redis-client",
       "@letar/glitchtip",
-      "@letar/pg-url"
+      "@letar/pg-url",
+      "@letar/env-load"
     ]
   },
   "dependencies": {
     "@letar/glitchtip": "workspace:*",
-    "@letar/pg-url": "workspace:*"
+    "@letar/pg-url": "workspace:*",
+    "@letar/env-load": "workspace:*"
   }
 }
