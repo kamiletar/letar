@@ -1,5 +1,31 @@
 # Выполненные задачи — Animatrona Tracker
 
+## Разбиение `schema.zmodel` на 7 доменных файлов (2026-08-25)
+
+`schema.zmodel` (1128 строк) разбит через ZModel `import` на `schema/enums.zmodel` (общие
+`ContentStatus`/`UserRole`), `auth.zmodel` (User/ApiKey/Account/Session/Verification),
+`content.zmodel` (Content/ConsentLog/Rating/Report/ReportStatus), `anime.zmodel`
+(Anime/AnimeRelation/AnimeEpisode/AnimeComment/ModerationLog), `distribution.zmodel`
+(DistributionStats/DistributionStatus/Distribution), `pinning.zmodel` (PinServer\*/PinJob\*/
+CidHistory), `library.zmodel` (WatchStatus/UserLibraryItem/UserWatchProgress). Корневой
+`schema.zmodel` — только 7 `import` + `datasource`/`generator`/`plugin`.
+
+Граф импортов циклический (auth ↔ content ↔ anime ↔ distribution ↔ pinning ↔ library) — по
+образцу уже протестированной на grandslamcup декомпозиции
+([zenstack-multifile-schema-circular-imports.md](/.claude/docs/zenstack-multifile-schema-circular-imports.md)).
+Сначала прогнано в изолированном git worktree (субагентом) — `zenstack generate` дал идентичный
+оригиналу вывод. По ходу теста найдена и задокументирована новая ловушка: импорты ZModel не
+транзитивны — файл, ссылающийся на голое значение enum (`auth().role == ADMIN`), должен
+импортировать файл с этим enum напрямую, а не полагаться на импорт через промежуточный файл.
+
+После применения к реальному файлу: `nx zenstack:generate` — 8 enum/21 model, сгенерированные
+файлы не изменились (`git diff` по `src/generated/` пуст); `nx typecheck:tsgo` — зелёный;
+`nx db:push` — «database is already in sync» (drift отсутствует). `nx lint` падал на отсутствующем
+бинарнике `eslint` в `node_modules/.bin` — не связано с этой правкой (oxlint fast-fail прошёл
+чисто), похоже на побочный эффект параллельной работы другого агента с зависимостями.
+
+Два коммита: `b2133763` (сам сплит) и `da5ff0ea` (doc-находка). Не запушено.
+
 ## Тест на гонку публикации `POST /api/anime` (2026-08-21)
 
 Закрывает открытый вопрос из предыдущей записи ниже: фикс каталога ошибок ZenStack v3 ORM
