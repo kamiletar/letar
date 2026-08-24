@@ -13,7 +13,8 @@
       "@letar/hooks",
       "@letar/i18n-proxy",
       "@letar/seed-utils",
-      "@letar/pg-url"
+      "@letar/pg-url",
+      "@letar/env-load"
     ]
   },
   "prisma": {
@@ -24,6 +25,7 @@
     "@letar/glitchtip": "workspace:*",
     "@letar/i18n-proxy": "workspace:*",
     "@letar/seed-utils": "workspace:*",
-    "@letar/pg-url": "workspace:*"
+    "@letar/pg-url": "workspace:*",
+    "@letar/env-load": "workspace:*"
   }
 }
