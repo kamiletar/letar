@@ -119,19 +119,30 @@ test.describe('07 — Blog: галереи и admin-редактор (7.4/8.9)',
     await page.goto('/admin/articles')
     await expect(page).not.toHaveURL(/\/login/)
 
-    const editLink = page.locator('a[href*="/admin/articles/"]').first()
+    // ⚠️ Не `a[href*="/admin/articles/"]` — под эту подстроку попадает и «+ Добавить»
+    // (/admin/articles/new), которая идёт в DOM раньше любой ссылки «Ред.»
+    const editLink = page.getByRole('link', { name: 'Ред.' }).first()
     if (!(await editLink.count())) {
       test.skip()
       return
     }
 
+    const editHref = await editLink.getAttribute('href')
     await editLink.click()
+    // networkidle не гарантирует, что успела произойти именно эта клиентская навигация —
+    // в dev-режиме клик иногда теряется из-за нестабильного порядка className при Fast Refresh
+    // (.claude/docs/nextjs16-turbopack-default-emotion-hydration.md), поэтому ждём смены URL явно
+    if (editHref) {
+      await page.waitForURL((url) => url.pathname === editHref, { timeout: 10_000 })
+    }
     await page.waitForLoadState('networkidle')
 
-    // Форма редактирования загружается
-    await expect(page.locator('form')).toBeVisible()
+    // Форма редактирования загружается. Скоуп на <main> — глобальный Footer (RootLayout)
+    // рендерится на каждой странице, включая /admin/*, и содержит свою форму подписки
+    const mainForm = page.locator('main form')
+    await expect(mainForm).toBeVisible()
     // Есть кнопка сохранения
-    const saveBtn = page.locator('button[type="submit"]')
+    const saveBtn = mainForm.locator('button[type="submit"]')
     await expect(saveBtn.first()).toBeVisible()
   })
 })
