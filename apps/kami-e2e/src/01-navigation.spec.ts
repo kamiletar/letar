@@ -40,10 +40,12 @@ test.describe('Навигация и главная страница', () => {
     test('2.1 — header отображается на главной', async ({ page }) => {
       await page.goto('/')
 
-      // Логотип дублируется в мобильном и десктопном Flex-блоках (скрыты через display
-      // по брейкпоинту) — .first() по DOM-порядку берёт мобильный (скрытый на desktop-вьюпорте
-      // Playwright), нужен именно видимый экземпляр
-      await expect(page.getByRole('link', { name: /Kami/i }).and(page.locator(':visible'))).toBeVisible()
+      // Accessible name ссылки — явный aria-label="Главная страница" (перебивает текст "Kami"
+      // внутри); ссылка также дублируется в мобильном и десктопном Flex-блоках, нужен видимый
+      // экземпляр
+      await expect(
+        page.getByRole('link', { name: /Главная страница/i }).and(page.locator(':visible')),
+      ).toBeVisible()
     })
 
     test('2.2 — навигация в header работает (desktop)', async ({ page }) => {

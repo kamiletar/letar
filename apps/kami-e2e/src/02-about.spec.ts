@@ -14,8 +14,10 @@ test.describe('Страница "О себе"', () => {
   })
 
   test('1.3 — отображаются статистики', async ({ page }) => {
-    // Проверяем статистику
-    await expect(page.getByText(/7\+/)).toBeVisible()
+    // Проверяем статистику. Стаж считается динамически (текущий год − 2002) в about/page.tsx —
+    // хардкод здесь неизбежно разъедется через год, поэтому считаем так же
+    const experienceYears = new Date().getFullYear() - 2002
+    await expect(page.getByText(new RegExp(`${experienceYears}\\+`))).toBeVisible()
     await expect(page.getByText(/30\+/)).toBeVisible()
     await expect(page.getByText(/50\+/)).toBeVisible()
 
@@ -39,8 +41,8 @@ test.describe('Страница "О себе"', () => {
     // exact: та же карточка "Архитектура" содержит "React" как подстроку описания — без exact
     // резолвится и в чип стека, и в текст карточки
     await expect(page.getByText('React', { exact: true })).toBeVisible()
-    await expect(page.getByText('Next.js')).toBeVisible()
-    await expect(page.getByText('TypeScript')).toBeVisible()
+    await expect(page.getByText('Next.js', { exact: true })).toBeVisible()
+    await expect(page.getByText('TypeScript', { exact: true })).toBeVisible()
   })
 
   test('1.6 — CTA кнопка ведёт на страницу навыков', async ({ page }) => {
