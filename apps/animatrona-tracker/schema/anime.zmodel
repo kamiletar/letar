@@ -1,0 +1,306 @@
+import "./enums"
+import "./auth"
+import "./distribution"
+import "./pinning"
+import "./library"
+
+// ============================================================================
+// ANIME — Аниме из Animatrona
+// ============================================================================
+
+/// Аниме, опубликованное из Animatrona desktop клиента
+model Anime {
+  id            String        @id @default(cuid())
+
+  /// @form.title("Название")
+  title         String
+
+  /// @form.title("Оригинальное название")
+  titleOriginal String?
+
+  /// @form.title("Описание")
+  /// @form.fieldType("richText")
+  description   String?       @db.Text
+
+  /// @form.title("URL обложки")
+  coverUrl      String?
+
+  /// CID корневой IPFS-директории аниме (уникальный идентификатор)
+  directoryCid  String?       @unique
+
+  /// Количество блоков IPFS в директории (от desktop, для отображения прогресса пиннинга)
+  directoryBlocks   Int?
+  /// Размер директории в байтах (от desktop)
+  directorySize     BigInt?
+
+  /// Shikimori ID для дедупликации (НЕ unique — PENDING + PUBLISHED сосуществуют)
+  shikimoriId       Int?
+
+  /// MyAnimeList ID (из externalIds манифеста)
+  malId             Int?
+
+  /// AniList ID (из externalIds манифеста)
+  anilistId         Int?
+
+  /// Ключ франшизы — rootShikimoriId из FranchiseGraphDocument (для группировки)
+  franchiseKey      String?
+
+  /// Аниме, которое эта запись замещает (self-relation)
+  /// @form.exclude
+  replacesAnime     Anime?        @relation("AnimeReplacement", fields: [replacesAnimeId], references: [id])
+  /// @form.exclude
+  replacesAnimeId   String?
+  /// Записи-кандидаты на замену этого аниме
+  /// @form.exclude
+  replacedBy        Anime[]       @relation("AnimeReplacement")
+
+  /// @form.title("Год выпуска")
+  year          Int?
+
+  /// @form.title("Студия")
+  studio        String?
+
+  /// @form.title("Жанры")
+  genres        String[]
+
+  /// Возрастной рейтинг Shikimori (g, pg, pg_13, r, r_plus, rx)
+  ageRating     String?
+
+  /// Режиссёр (из Shikimori/MAL)
+  director      String?
+
+  /// Тип озвучки (массив: "SUB", "DUB_RU", "DUB_EN" и т.д.)
+  voiceActing   String[]
+
+  /// Эпизоды аниме
+  /// @form.exclude
+  episodes      AnimeEpisode[]
+
+  /// Раздачи этого аниме
+  /// @form.exclude
+  distributions Distribution[]
+
+  /// Пин-сервер, на котором запинено это аниме (шардирование)
+  /// @form.exclude
+  pinnedOn      PinServer?    @relation("pinnedAnime", fields: [pinnedOnId], references: [id])
+  /// @form.exclude
+  pinnedOnId    String?
+
+  /// Задания на пиннинг
+  /// @form.exclude
+  pinJobs       PinJob[]
+
+  /// История замен CID (для очистки старых пинов)
+  /// @form.exclude
+  cidHistory    CidHistory[]
+
+  /// Записи библиотек пользователей
+  /// @form.exclude
+  libraryItems  UserLibraryItem[]
+
+  /// Комментарии к аниме
+  /// @form.exclude
+  comments      AnimeComment[]
+
+  /// Связи с другими аниме (сиквелы, приквелы и т.д.)
+  /// @form.exclude
+  sourceRelations AnimeRelation[] @relation("SourceRelations")
+  /// Аниме, ссылающиеся на это как на цель
+  /// @form.exclude
+  targetRelations AnimeRelation[] @relation("TargetRelations")
+
+  /// Логи модерации
+  /// @form.exclude
+  moderationLogs ModerationLog[]
+
+  /// Кто загрузил аниме
+  /// @form.exclude
+  uploadedBy    User          @relation(fields: [uploadedById], references: [id])
+  /// @form.exclude
+  uploadedById  String
+
+  /// Статус модерации
+  /// @form.title("Статус")
+  status        ContentStatus @default(PENDING)
+
+  /// Количество уникальных зрителей (денормализовано для быстрой сортировки)
+  viewCount     Int           @default(0)
+
+  /// Сколько раз добавлено в библиотеку (денормализовано)
+  libraryCount  Int           @default(0)
+
+  /// Средний рейтинг от пользователей (0-10, null = нет оценок)
+  avgRating     Float?
+
+  /// @form.exclude
+  createdAt     DateTime      @default(now())
+  /// @form.exclude
+  updatedAt     DateTime      @updatedAt
+
+  @@index([title])
+  @@index([status])
+  @@index([uploadedById])
+  @@index([createdAt])
+  @@index([shikimoriId])
+  @@index([viewCount])
+  @@index([avgRating])
+  @@index([studio])
+  @@index([director])
+  @@index([year])
+
+  // Все могут читать опубликованное аниме
+  @@allow('read', status == PUBLISHED)
+  // Автор видит своё аниме в любом статусе
+  @@allow('read', auth() == uploadedBy)
+  // Модератор/админ видит всё
+  @@allow('read', auth().role == MODERATOR || auth().role == ADMIN)
+  // Авторизованный пользователь может создать
+  @@allow('create', auth() != null)
+  // Автор может обновлять своё аниме
+  @@allow('update', auth() == uploadedBy)
+  // Модератор/админ может менять статус и удалять
+  @@allow('update,delete', auth().role == MODERATOR || auth().role == ADMIN)
+}
+
+/// Связь между аниме (сиквел, приквел, спин-офф и т.д.)
+model AnimeRelation {
+  id                String  @id @default(cuid())
+
+  /// Исходное аниме
+  anime             Anime   @relation("SourceRelations", fields: [animeId], references: [id], onDelete: Cascade)
+  animeId           String
+
+  /// Shikimori ID целевого аниме (всегда заполнен)
+  targetShikimoriId Int
+
+  /// Целевое аниме в нашей БД (null если ещё не опубликовано)
+  targetAnime       Anime?  @relation("TargetRelations", fields: [targetAnimeId], references: [id], onDelete: SetNull)
+  targetAnimeId     String?
+
+  /// Тип связи: SEQUEL, PREQUEL, SIDE_STORY, PARENT_STORY, SUMMARY, FULL_STORY, SPIN_OFF, ADAPTATION, OTHER
+  relationKind      String
+
+  @@index([animeId])
+  @@index([targetShikimoriId])
+  @@unique([animeId, targetShikimoriId, relationKind])
+
+  // Все могут читать связи
+  @@allow('read', true)
+  // Только система (через unenhanced prisma) создаёт связи
+  @@allow('create,update,delete', auth().role == ADMIN || auth().role == MODERATOR)
+}
+
+/// Эпизод аниме
+model AnimeEpisode {
+  id          String   @id @default(cuid())
+
+  /// Номер эпизода
+  /// @form.title("Номер")
+  number      Int
+
+  /// Название эпизода
+  /// @form.title("Название")
+  title       String?
+
+  /// Длительность в секундах
+  /// @form.title("Длительность (сек)")
+  duration    Int?
+
+  /// CID видеофайла в IPFS
+  /// @form.title("Video CID")
+  videoCid    String
+
+  /// Связь с аниме
+  /// @form.exclude
+  anime       Anime    @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  /// @form.exclude
+  animeId     String
+
+  /// @form.exclude
+  createdAt   DateTime @default(now())
+
+  // Уникальность: один номер эпизода на аниме
+  @@unique([animeId, number])
+  @@index([animeId])
+
+  // Права доступа наследуются от аниме
+  @@allow('all', check(anime))
+}
+
+// ============================================================================
+// ANIME COMMENT — Комментарии к аниме
+// ============================================================================
+
+/// Комментарий к аниме (с поддержкой ответов на 1 уровень вложенности)
+model AnimeComment {
+  id        String   @id @default(cuid())
+
+  /// Текст комментария
+  text      String   @db.Text
+
+  /// Аниме, к которому относится комментарий
+  anime     Anime    @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId   String
+
+  /// Автор комментария
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String
+
+  /// Родительский комментарий (для ответов)
+  parent    AnimeComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  parentId  String?
+
+  /// Ответы на этот комментарий
+  replies   AnimeComment[] @relation("CommentReplies")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([animeId, createdAt])
+  @@index([parentId])
+
+  // Все читают комментарии к опубликованным аниме
+  @@allow('read', check(anime))
+  // Авторизованные создают
+  @@allow('create', auth() != null)
+  // Автор редактирует/удаляет свои
+  @@allow('update,delete', auth() == author)
+  // Модератор/админ удаляет любые
+  @@allow('delete', auth().role == MODERATOR || auth().role == ADMIN)
+}
+
+// ============================================================================
+// MODERATION LOG — Аудит-лог модерации
+// ============================================================================
+
+/// Запись аудит-лога модерации (кто, когда, что сделал)
+model ModerationLog {
+  id          String   @id @default(cuid())
+
+  /// Действие модерации: approve | reject | approve_replacement
+  action      String
+
+  /// Аниме, над которым выполнено действие
+  anime       Anime    @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId     String
+
+  /// Название аниме на момент действия (сохраняем для истории)
+  animeTitle  String
+
+  /// Модератор, выполнивший действие
+  moderator   User     @relation(fields: [moderatorId], references: [id])
+  moderatorId String
+
+  /// JSON с доп. данными (replacedAnimeId, previousStatus, newStatus, pinStarted)
+  details     String?  @db.Text
+
+  createdAt   DateTime @default(now())
+
+  @@index([animeId])
+  @@index([moderatorId])
+  @@index([createdAt])
+
+  // Только модераторы/админы видят и создают логи
+  @@allow('read', auth().role == MODERATOR || auth().role == ADMIN)
+  @@allow('create', auth().role == MODERATOR || auth().role == ADMIN)
+}

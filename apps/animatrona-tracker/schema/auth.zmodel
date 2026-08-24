@@ -1,0 +1,165 @@
+import "./enums"
+import "./content"
+import "./anime"
+import "./distribution"
+import "./pinning"
+import "./library"
+
+// ============================================================================
+// USER — Пользователи
+// ============================================================================
+
+model User {
+  id            String    @id @default(cuid())
+
+  /// @form.title("Email")
+  /// @form.fieldType("email")
+  email         String?   @unique
+
+  /// @form.title("Имя")
+  name          String?
+
+  /// @form.title("Аватар")
+  /// Стандартное имя Better Auth для аватара
+  image         String?
+
+  /// @form.title("Роль")
+  role          UserRole  @default(USER)
+
+  // Better Auth fields
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  accounts      Account[]
+  sessions      Session[]
+  contents      Content[]
+  ratings       Rating[]
+  reports       Report[]
+  anime         Anime[]       // Загруженные аниме
+  apiKeys       ApiKey[]      // API ключи для Animatrona
+  distributions Distribution[] // Раздачи пользователя
+  distributionStats DistributionStats? // Статистика раздач
+  pinJobs       PinJob[]      // Созданные задания на пиннинг
+  libraryItems  UserLibraryItem[] // Библиотека пользователя (Cloud Library)
+  comments      AnimeComment[]   // Комментарии пользователя
+  moderationLogs ModerationLog[] // Логи модерации
+
+  // Настройки пользователя
+  /// @form.title("Кастомный IPFS Gateway")
+  /// @form.placeholder("https://...")
+  customGateway String?
+
+  /// Предпочитаемый режим дорожек: 'RUSSIAN_DUB' | 'ORIGINAL_SUB'
+  preferredTrackMode String? @default("RUSSIAN_DUB")
+
+  /// Композитный рейтинг загрузчика (пересчитывается при recalc-stats)
+  uploaderScore Int @default(0)
+
+  /// Ранг загрузчика: Новичок, Загрузчик, Опытный, Мастер, Легенда
+  uploaderRank String? @default("Новичок")
+
+  /// Дата рождения (для возрастной фильтрации каталога)
+  birthDate DateTime?
+
+  @@allow('read', true)
+  @@allow('update', auth() == this)
+  @@allow('all', auth().role == ADMIN)
+}
+
+// ============================================================================
+// API KEY — Ключи для API доступа из Animatrona
+// ============================================================================
+
+/// API ключ для публикации из Animatrona
+model ApiKey {
+  id          String    @id @default(cuid())
+
+  /// @form.title("Название")
+  /// @form.placeholder("Мой ключ для Animatrona")
+  name        String
+
+  /// SHA256 хэш ключа (сам ключ не хранится)
+  /// @form.exclude
+  key         String    @unique
+
+  /// Последнее использование
+  /// @form.exclude
+  lastUsedAt  DateTime?
+
+  /// Владелец ключа
+  /// @form.exclude
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// @form.exclude
+  userId      String
+
+  /// @form.exclude
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+
+  // Пользователь видит и управляет только своими ключами
+  @@allow('all', auth() == user)
+}
+
+// ============================================================================
+// BETTER AUTH MODELS
+// ============================================================================
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  providerId            String
+  accountId             String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+  @@allow('read', auth() == user)
+  @@allow('all', true) // Better Auth adapter needs full access
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@allow('read', auth() == user)
+  @@allow('all', true) // Better Auth adapter needs full access
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  type       String   @default("EMAIL_VERIFICATION")
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@deny('all', true)
+}

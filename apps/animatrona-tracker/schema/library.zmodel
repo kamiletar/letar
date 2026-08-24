@@ -1,0 +1,102 @@
+import "./enums"
+import "./auth"
+import "./anime"
+
+// ============================================================================
+// USER LIBRARY — Библиотека пользователя (Cloud Library)
+// ============================================================================
+
+/// Статус просмотра аниме (синхронизируется с Desktop)
+enum WatchStatus {
+  /// Не начато
+  NOT_STARTED
+  /// Смотрю
+  WATCHING
+  /// Просмотрено
+  COMPLETED
+  /// Отложено
+  ON_HOLD
+  /// Брошено
+  DROPPED
+  /// Запланировано
+  PLANNED
+}
+
+/// Аниме в библиотеке пользователя (синхронизируется между Desktop и Tracker)
+model UserLibraryItem {
+  id            String      @id @default(cuid())
+
+  /// Пользователь-владелец
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+
+  /// Аниме из каталога
+  anime         Anime       @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId       String
+
+  /// Статус просмотра
+  watchStatus   WatchStatus @default(NOT_STARTED)
+
+  /// Оценка пользователя (0-10)
+  userRating    Int?
+
+  /// Контент запиннен локально на Desktop (false = только на удалённых пирах)
+  pinnedLocally Boolean     @default(false)
+
+  /// Когда добавлено в библиотеку
+  addedAt       DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  /// Предпочитаемый trackMode для этого аниме: 'RUSSIAN_DUB' | 'ORIGINAL_SUB'
+  trackMode     String?
+
+  /// Прогресс просмотра по эпизодам
+  watchProgress UserWatchProgress[]
+
+  // Один пользователь — одна запись на аниме
+  @@unique([userId, animeId])
+  @@index([userId])
+  @@index([animeId])
+
+  // Пользователь видит и управляет только своей библиотекой
+  @@allow('read', auth() == user)
+  @@allow('create,update,delete', auth() == user)
+  // Админ видит всё
+  @@allow('read', auth().role == ADMIN)
+}
+
+/// Прогресс просмотра эпизода (синхронизируется между Desktop и Tracker)
+model UserWatchProgress {
+  id              String          @id @default(cuid())
+
+  /// Запись библиотеки
+  libraryItem     UserLibraryItem @relation(fields: [libraryItemId], references: [id], onDelete: Cascade)
+  libraryItemId   String
+
+  /// Номер эпизода
+  episodeNumber   Int
+
+  /// Текущая позиция воспроизведения (секунды)
+  currentTime     Float           @default(0)
+
+  /// Общая длительность эпизода (секунды)
+  duration        Float           @default(0)
+
+  /// Индекс выбранной аудиодорожки
+  audioTrackIndex Int             @default(0)
+
+  /// Индекс выбранных субтитров (-1 = выключены)
+  subtitleTrackIndex Int          @default(-1)
+
+  /// Эпизод полностью просмотрен
+  completed       Boolean         @default(false)
+
+  updatedAt       DateTime        @updatedAt
+
+  // Один прогресс на эпизод в записи библиотеки
+  @@unique([libraryItemId, episodeNumber])
+  @@index([libraryItemId])
+
+  // Доступ наследуется от libraryItem
+  @@allow('all', check(libraryItem))
+}

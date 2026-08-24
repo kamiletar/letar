@@ -1,0 +1,190 @@
+import "./enums"
+import "./auth"
+import "./anime"
+
+// ============================================================================
+// PIN SERVER — Серверы для пиннинга контента
+// ============================================================================
+
+/// Статус пин-сервера
+enum PinServerStatus {
+  /// Доступен для пиннинга
+  ONLINE
+  /// Недоступен
+  OFFLINE
+  /// На обслуживании
+  MAINTENANCE
+}
+
+/// Роль сервера в IPFS инфраструктуре
+enum PinServerRole {
+  /// Kubo-пиннер, хранит контент (имеет pin-queue API)
+  PINNER
+  /// Relay-сервер для NAT traversal и hole punching
+  RELAY
+  /// Gateway — раздаёт контент конечным пользователям
+  GATEWAY
+}
+
+/// Сервер для пиннинга IPFS контента
+model PinServer {
+  id          String          @id @default(cuid())
+
+  /// Название сервера
+  name        String
+
+  /// Роль сервера в IPFS инфраструктуре (PINNER/RELAY/GATEWAY)
+  role        PinServerRole   @default(PINNER)
+
+  /// Multiaddr'а swarm слоя для bootstrap/peering клиентов
+  /// Пример: ["/ip4/193.37.68.73/tcp/43001/p2p/12D3KooW..."]
+  swarmAddrs  String[]        @default([])
+
+  /// URL API пиннинга (например http://193.37.68.73:41080)
+  apiUrl      String          @unique
+
+  /// Peer ID сервера
+  peerId      String?
+
+  /// Bearer-токен для авторизации Kubo API (API.Authorizations)
+  /// ⛔ Никогда не читается через enhanced-клиент: строку целиком разрешает читать любому
+  /// `@@allow('read', status == ONLINE)` ниже (клиентам нужны peerId/swarmAddrs для bootstrap),
+  /// и без этого запрета секрет уезжал бы вместе с ними. Серверный код берёт его сырым
+  /// `prisma`. PLAN-INFRA.md §61.
+  authSecret  String?   @deny('read', true)
+
+  /// URL pin-queue сервиса (если есть). Используется вместо прямого Kubo API.
+  pinQueueUrl String?
+
+  /// Bearer-токен для pin-queue сервиса
+  /// ⛔ См. комментарий у authSecret — тот же запрет и по той же причине.
+  pinQueueSecret String? @deny('read', true)
+
+  /// Статус сервера
+  status      PinServerStatus @default(ONLINE)
+
+  /// Максимальный объём хранилища (байт, 0 = без лимита)
+  capacityBytes BigInt        @default(0)
+
+  /// Текущий занятый объём (байт)
+  usedBytes     BigInt        @default(0)
+
+  /// Аниме, закреплённые за этим сервером (шардирование)
+  pinnedAnime Anime[]       @relation("pinnedAnime")
+
+  /// Задания на этом сервере
+  pinJobs     PinJob[]
+
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([status])
+
+  // Все могут видеть онлайн серверы
+  @@allow('read', status == ONLINE)
+  // Модератор/админ видит все
+  @@allow('read', auth().role == MODERATOR || auth().role == ADMIN)
+  // Только админ управляет серверами
+  @@allow('create,update,delete', auth().role == ADMIN)
+}
+
+// ============================================================================
+// PIN JOB — Задания на пиннинг
+// ============================================================================
+
+/// Статус задания на пиннинг
+enum PinJobStatus {
+  /// Ожидает выполнения
+  QUEUED
+  /// Пиннинг в процессе
+  PINNING
+  /// Успешно запиннен
+  PINNED
+  /// Ошибка при пиннинге
+  FAILED
+  /// Откреплён
+  UNPINNED
+}
+
+/// Задание на пиннинг CID на определённом сервере
+model PinJob {
+  id          String       @id @default(cuid())
+
+  /// CID для пиннинга
+  cid         String
+
+  /// Сервер для пиннинга
+  server      PinServer    @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  serverId    String
+
+  /// Статус задания
+  status      PinJobStatus @default(QUEUED)
+
+  /// Размер запиненного контента (байт)
+  size        BigInt       @default(0)
+
+  /// Количество загруженных блоков IPFS (из pin-queue progress stream)
+  progressBlocks  Int      @default(0)
+
+  /// Сообщение об ошибке (если FAILED)
+  error       String?
+
+  /// Связь с аниме (опционально)
+  anime       Anime?       @relation(fields: [animeId], references: [id], onDelete: SetNull)
+  animeId     String?
+
+  /// Кто создал задание
+  createdBy   User         @relation(fields: [createdById], references: [id])
+  createdById String
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@unique([cid, serverId])
+  @@index([cid])
+  @@index([serverId])
+  @@index([status])
+  @@index([animeId])
+
+  // Модератор/админ видит задания
+  @@allow('read', auth().role == MODERATOR || auth().role == ADMIN)
+  // Модератор/админ может создавать задания
+  @@allow('create', auth().role == MODERATOR || auth().role == ADMIN)
+  // Только админ может обновлять/удалять
+  @@allow('update,delete', auth().role == ADMIN)
+}
+
+// ============================================================================
+// CID HISTORY — История замен directoryCid (для очистки старых пинов)
+// ============================================================================
+
+/// Запись замены directoryCid аниме. Используется для автоматической
+/// очистки устаревших пинов через 30 дней после замены.
+model CidHistory {
+  id          String    @id @default(cuid())
+
+  /// Аниме, чей CID был заменён
+  animeId     String
+  anime       Anime     @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  /// Старый CID (который нужно распинить)
+  oldCid      String
+  /// Новый CID (который заменил старый)
+  newCid      String
+
+  /// Когда произошла замена
+  replacedAt  DateTime  @default(now())
+  /// Пин удалён с серверов
+  cleanedUp   Boolean   @default(false)
+  /// Когда был очищен
+  cleanedUpAt DateTime?
+
+  @@index([cleanedUp, replacedAt])
+  @@index([animeId])
+
+  // Создание через API (любой аутентифицированный — при обновлении directoryCid)
+  @@allow('create', auth() != null)
+  // Чтение и управление — только админ
+  @@allow('read', auth().role == ADMIN)
+  @@allow('update,delete', auth().role == ADMIN)
+}

@@ -1,0 +1,111 @@
+import "./enums"
+import "./auth"
+import "./anime"
+
+// ============================================================================
+// DISTRIBUTION STATS — Статистика раздач пользователя
+// ============================================================================
+
+/// Агрегированная статистика раздач пользователя (обновляется Desktop клиентом)
+model DistributionStats {
+  id                    String   @id @default(cuid())
+
+  /// Пользователь-владелец
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                String   @unique
+
+  /// Всего байт загружено (upload)
+  totalBytesUploaded    BigInt   @default(0)
+
+  /// Всего байт скачано (download)
+  totalBytesDownloaded  BigInt   @default(0)
+
+  /// Общее время раздачи в мс
+  totalSeedingTimeMs    BigInt   @default(0)
+
+  /// Общее количество уникальных Bitswap-пиров, которым отдали данные
+  totalPeersHelped      Int      @default(0)
+
+  /// Общее время работы Desktop в мс (uptime)
+  totalUptimeMs         BigInt   @default(0)
+
+  /// Текущее количество активных раздач
+  activeDistributions   Int      @default(0)
+
+  /// Последний отчёт от Desktop
+  lastReportedAt        DateTime @default(now())
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([userId])
+
+  // Статистика видна всем авторизованным (для лидерборда)
+  @@allow('read', auth() != null)
+  // Создание/обновление через API (auth() != null для API ключа)
+  @@allow('create,update', auth() != null)
+}
+
+// ============================================================================
+// DISTRIBUTION — Раздачи (кто сидирует контент)
+// ============================================================================
+
+/// Статус раздачи
+enum DistributionStatus {
+  /// Активно раздаётся
+  ACTIVE
+  /// Приостановлена
+  PAUSED
+  /// Остановлена (пир отключился)
+  OFFLINE
+}
+
+/// Раздача — запись о том, что пир сидирует определённый контент
+model Distribution {
+  id          String             @id @default(cuid())
+
+  /// CID раздаваемого контента в IPFS
+  cid         String
+
+  /// Peer ID раздающего узла
+  peerId      String
+
+  /// Статус раздачи
+  status      DistributionStatus @default(ACTIVE)
+
+  /// Размер контента в байтах
+  size        BigInt             @default(0)
+
+  /// Последний heartbeat от пира
+  lastSeenAt  DateTime           @default(now())
+
+  /// Связь с аниме (опционально)
+  anime       Anime?             @relation(fields: [animeId], references: [id], onDelete: SetNull)
+  animeId     String?
+
+  /// Кто зарегистрировал раздачу
+  user        User               @relation(fields: [userId], references: [id])
+  userId      String
+
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@unique([cid, peerId])
+  @@index([cid])
+  @@index([userId])
+  @@index([status])
+  @@index([animeId])
+
+  // Все видят активные раздачи
+  @@allow('read', status == ACTIVE)
+  // Автор видит свои раздачи
+  @@allow('read', auth() == user)
+  // Модератор/админ видит все
+  @@allow('read', auth().role == MODERATOR || auth().role == ADMIN)
+  // Авторизованный может создать раздачу
+  @@allow('create', auth() != null)
+  // Автор может обновить/удалить свою раздачу
+  @@allow('update,delete', auth() == user)
+  // Модератор/админ может управлять всеми
+  @@allow('update,delete', auth().role == MODERATOR || auth().role == ADMIN)
+}

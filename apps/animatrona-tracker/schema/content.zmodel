@@ -1,0 +1,210 @@
+import "./enums"
+import "./auth"
+
+/// Статус жалобы на контент
+enum ReportStatus {
+  /// Новая жалоба, ожидает рассмотрения
+  PENDING
+  /// Рассмотрена модератором
+  REVIEWED
+  /// Решена (контент удалён/исправлен или жалоба отклонена)
+  RESOLVED
+}
+
+// ============================================================================
+// CONTENT — Основная модель раздачи
+// ============================================================================
+
+model Content {
+  id          String        @id @default(cuid())
+
+  // Метаданные
+  /// @form.title("Название")
+  /// @form.placeholder("Введите название...")
+  title       String
+
+  /// @form.title("Описание")
+  /// @form.fieldType("richText")
+  description String?
+
+  /// @form.title("Категория")
+  /// @form.fieldType("select")
+  /// @form.options([{"value": "anime", "label": "Аниме"}, {"value": "movie", "label": "Фильм"}, {"value": "series", "label": "Сериал"}, {"value": "other", "label": "Другое"}])
+  category    String        @default("other")
+
+  /// @form.title("Теги")
+  /// @form.fieldType("tags")
+  tags        String[]
+
+  /// @form.title("Год выпуска")
+  year        Int?
+
+  // IPFS данные
+  /// @form.title("IPFS CID")
+  /// @form.placeholder("Qm...")
+  ipfsCid     String        @unique
+
+  /// @form.title("CID постера")
+  /// @form.placeholder("Qm...")
+  posterCid   String?
+
+  /// @form.title("Размер (байты)")
+  size        BigInt        @default(0)
+
+  /// @form.title("Длительность (секунды)")
+  duration    Int?
+
+  /// @form.title("Качество")
+  /// @form.fieldType("select")
+  /// @form.options([{"value": "480p", "label": "480p"}, {"value": "720p", "label": "720p"}, {"value": "1080p", "label": "1080p"}, {"value": "4K", "label": "4K"}])
+  quality     String?
+
+  // Автор
+  /// @form.exclude
+  userId      String?
+  /// @form.exclude
+  user        User?         @relation(fields: [userId], references: [id])
+
+  // Статистика
+  /// @form.exclude
+  views       Int           @default(0)
+
+  // Средний рейтинг (кэшированный)
+  /// @form.exclude
+  avgRating   Float?
+
+  // Модерация
+  /// @form.title("Статус")
+  status      ContentStatus @default(PENDING)
+
+  /// @form.exclude
+  createdAt   DateTime      @default(now())
+  /// @form.exclude
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  /// @form.exclude
+  ratings     Rating[]
+  /// @form.exclude
+  reports     Report[]
+
+  // FTS индекс
+  @@index([title])
+  @@index([category])
+  @@index([status])
+  @@index([createdAt])
+
+  // Access policies:
+  // Все могут читать опубликованный контент
+  @@allow('read', status == PUBLISHED)
+  // Автор видит свой контент в любом статусе
+  @@allow('read', auth() == user)
+  // Модератор/админ видит весь контент
+  @@allow('read', auth().role == MODERATOR || auth().role == ADMIN)
+  // Авторизованный пользователь может создать контент
+  @@allow('create', auth() != null)
+  // Автор может редактировать свой контент
+  @@allow('update', auth() == user)
+  // Модератор/админ может менять статус и удалять
+  @@allow('update,delete', auth().role == MODERATOR || auth().role == ADMIN)
+}
+
+// ============================================================================
+// CONSENT LOG — Журнал согласий на обработку cookie (152-ФЗ)
+// ============================================================================
+
+model ConsentLog {
+  id     String  @id @default(cuid())
+  userId String?
+
+  /// Хэш IP (sha256, без соли — для дедупликации, не для деанонимизации)
+  ipHash    String
+  userAgent String?
+
+  acceptedAnalytics  Boolean @default(false)
+  acceptedMarketing  Boolean @default(false)
+  acceptedFunctional Boolean @default(true)
+
+  /// Версия текста политики, на которую дано согласие
+  consentVersion String
+
+  consentedAt DateTime @default(now())
+
+  @@allow('create', true)
+  @@allow('read', auth().role == ADMIN)
+  @@index([userId])
+  @@index([consentedAt])
+}
+
+// ============================================================================
+// RATING — Оценки контента
+// ============================================================================
+
+model Rating {
+  id        String   @id @default(cuid())
+
+  /// @form.title("Оценка")
+  /// @form.props({ min: 1, max: 10 })
+  score     Int
+
+  /// @form.exclude
+  contentId String
+  /// @form.exclude
+  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  /// @form.exclude
+  userId    String
+  /// @form.exclude
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// @form.exclude
+  createdAt DateTime @default(now())
+
+  // Один пользователь — одна оценка на контент
+  @@unique([contentId, userId])
+  @@index([contentId])
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() == user)
+}
+
+// ============================================================================
+// REPORT — Жалобы на контент
+// ============================================================================
+
+model Report {
+  id        String       @id @default(cuid())
+
+  /// @form.title("Причина")
+  /// @form.fieldType("select")
+  /// @form.options([{"value": "copyright", "label": "Нарушение авторских прав"}, {"value": "spam", "label": "Спам"}, {"value": "inappropriate", "label": "Неприемлемый контент"}, {"value": "other", "label": "Другое"}])
+  reason    String
+
+  /// @form.title("Подробности")
+  /// @form.fieldType("textarea")
+  details   String?
+
+  /// @form.exclude
+  contentId String
+  /// @form.exclude
+  content   Content      @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  /// @form.exclude
+  userId    String
+  /// @form.exclude
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// @form.title("Статус")
+  status    ReportStatus @default(PENDING)
+
+  /// @form.exclude
+  createdAt DateTime     @default(now())
+
+  @@index([contentId])
+  @@index([status])
+
+  // Авторизованный пользователь может создать жалобу
+  @@allow('create', auth() != null)
+  // Модератор/админ может читать и обновлять жалобы
+  @@allow('read,update', auth().role == MODERATOR || auth().role == ADMIN)
+}
