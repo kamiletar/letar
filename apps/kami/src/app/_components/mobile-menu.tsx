@@ -61,7 +61,8 @@ export function MobileMenu() {
                   return (
                     <AppLink
                       key={item.href}
-                      href={item.href}
+                      // trailingSlash:true не проходит через клиентскую навигацию next/link
+                      href={`${item.href}/`}
                       variant="ghost"
                       justifyContent="flex-start"
                       size="lg"

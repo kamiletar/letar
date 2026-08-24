@@ -28,7 +28,9 @@ export function NavLinks() {
         return (
           <AppLink
             key={item.href}
-            href={item.href}
+            // trailingSlash:true в next.config.js не проходит через клиентскую навигацию next/link —
+            // без явного слэша клик уводит на /about вместо /about/
+            href={`${item.href}/`}
             variant="ghost"
             size="sm"
             minH="44px"

@@ -1,9 +1,9 @@
 'use client'
 
-import { Link } from '@/i18n/navigation'
 import { type Locale, routing } from '@/i18n/routing'
 import { Button, Menu, Portal } from '@chakra-ui/react'
 import { useLocale, useTranslations } from 'next-intl'
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LuGlobe } from 'react-icons/lu'
 
@@ -24,10 +24,16 @@ export function LanguageSwitcher() {
 
   // Убираем текущую локаль из пути
   const rawPathname = pathname.replace(`/${locale}`, '') || '/'
-  // next.config.js: trailingSlash: true — Link конструирует href вручную и не проходит через
-  // серверную нормализацию, поэтому слэш нужно добавлять самим (иначе переключатель уводит на
-  // /en без слэша на корне)
+  // next.config.js: trailingSlash: true — но next-intl's <Link> сам не проходит через серверную
+  // нормализацию, а его внутренний prefixPathname() ЯВНО обрезает слэш при префиксации корня
+  // ("/" + "/en" → "/en", не "/en/") — наш собственный trailing-slash здесь бесполезен, баг живёт
+  // внутри next-intl. Поэтому строим href вручную и рендерим plain next/link, минуя эту логику.
+  // localeCookie next-intl тут не нужен: routing.ts уже отключил localeDetection, cookie ни на
+  // что не влияет.
   const pathnameWithoutLocale = rawPathname.endsWith('/') ? rawPathname : `${rawPathname}/`
+  const hrefFor = (
+    loc: Locale,
+  ) => (loc === routing.defaultLocale ? pathnameWithoutLocale : `/${loc}${pathnameWithoutLocale}`)
 
   return (
     <Menu.Root>
@@ -42,7 +48,7 @@ export function LanguageSwitcher() {
           <Menu.Content>
             {routing.locales.map((loc) => (
               <Menu.Item key={loc} value={loc} asChild>
-                <Link href={pathnameWithoutLocale} locale={loc}>
+                <Link href={hrefFor(loc)}>
                   {localeFlags[loc]} {localeNames[loc]}
                 </Link>
               </Menu.Item>

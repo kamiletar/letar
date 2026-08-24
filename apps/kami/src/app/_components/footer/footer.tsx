@@ -64,7 +64,8 @@ export function Footer() {
               {t('navigation')}
             </Text>
             {navLinks.map((link) => (
-              <Link key={link.href} href={link.href}>
+              // trailingSlash:true не проходит через клиентскую навигацию next/link
+              <Link key={link.href} href={`${link.href}/`}>
                 <Text fontSize="sm" color="fg.muted" _hover={{ color: 'fg.500' }} transition="color 0.2s">
                   {tNav(link.labelKey)}
                 </Text>
