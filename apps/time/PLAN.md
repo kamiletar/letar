@@ -66,8 +66,11 @@
 - [x] Настроить NPM для time.letar.best на s2 (live, `DOMAIN=time.letar.best`)
 - [x] Создать Umami website ID (`NEXT_PUBLIC_UMAMI_WEBSITE_ID` в `.env.docker` заполнен)
 - [x] Деплой на s2 (в `S2_APPS` в `deploy-affected.sh`, rollout-пилот пройден — см. запись выше)
-- [ ] Настроить crontab на s2 — актуальный статус не подтверждён (проверить `CRON_SECRET` в
-      `.env.docker` присутствует, но сам crontab-job на сервере не верифицирован в этой сессии)
+- [x] Планирование делает не системный crontab, а `dashboard-agent` (`DEFAULT_CRON_JOBS`,
+      job `time-notifications`, `* * * * *`). Задача реально вызывалась каждую минуту с 22.08.2026,
+      но валилась 401 — `/api/cron/notifications` проверял заголовок `Authorization: Bearer`
+      вместо `X-Cron-Secret`, которым её вызывает `executeJob`. Исправлено на `verifyCronSecret()`
+      (2026-08-24, v0.5.9)
 - [ ] Добавить List-Unsubscribe заголовок в email
 
 ---
