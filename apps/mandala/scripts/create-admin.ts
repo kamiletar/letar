@@ -1,7 +1,7 @@
+import { loadEnvCascade } from '@letar/env-load'
 import bcrypt from 'bcryptjs'
-import { config } from 'dotenv'
 import { PrismaClient } from '../src/generated/prisma'
-config({ path: '.env.local', quiet: true })
+loadEnvCascade(undefined, ['.env.local'])
 
 const prisma = new PrismaClient()
 
