@@ -16,12 +16,14 @@
       "@letar/consent",
       "@letar/glitchtip",
       "@letar/seed-utils",
-      "@letar/pg-url"
+      "@letar/pg-url",
+      "@letar/env-load"
     ]
   },
   "dependencies": {
     "@letar/glitchtip": "workspace:*",
     "@letar/seed-utils": "workspace:*",
-    "@letar/pg-url": "workspace:*"
+    "@letar/pg-url": "workspace:*",
+    "@letar/env-load": "workspace:*"
   }
 }
