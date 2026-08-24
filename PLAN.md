@@ -2556,3 +2556,35 @@ label-printer-desktop (старый `NODE_ENV === 'production'`, §см. `node-e
   `Promise.race` в каждом месте.
 
 Третьего места с прямым использованием `ImapFlow` в монорепо на 2026-08-22 нет.
+
+## §54 — `dotenv@17` спамит stdout промо-tip'ами в `prisma.config.ts` всех приложений (2026-08-25) 🆕
+
+Пакет `dotenv` (тот же автор, что и `dotenvx`/новый `vestauth` — motdotla) начиная с v17 сам
+печатает рекламную строку в **stdout** при каждом вызове `config()` без опций (известный upstream-
+issue [`motdotla/dotenv#903`](https://github.com/motdotla/dotenv/issues/903) — «Advertisements or
+whatever for dotenvx should go to stderr not stdout»). У нас в корневом `package.json` закреплён
+`dotenv: ^17.4.2`, и практически все `apps/<app>/prisma.config.ts` дважды вызывают
+`config({ path: ... })` (`.env.local`, `.env`/`.env.docker`) без `quiet` — отсюда «спам» в
+терминале при любой `prisma`/`nx db:*`-команде.
+
+### Что сделано
+
+Официальный флаг `quiet: true` проставлен в оба вызова `config()` во всех найденных
+`prisma.config.ts` — 16 приложений: `animatrona-tracker`, `time`, `driving-school`, `kami`,
+`archetest`, `aboi`, `aprel8008`, `domwellbes`, `grandslamcup`, `form-develop-app`, `svoichuzhie`,
+`mandala`, `dashboard`, `studio`, `dsperevod`, `auth-hub`. Каждое приложение закоммичено отдельно
+(scope-guard); 7 из них — приватные submodule, там сначала коммит внутри submodule, затем bump
+указателя в root letar. Push не делался — не запрошен пользователем в рамках сессии.
+
+### Не сделано / за скобками
+
+- Тот же паттерн (`import ... from 'dotenv'` без `quiet`) остался в `playwright.config.ts`,
+  `prisma/seed.ts`, разовых `scripts/*.ts` — минимум ещё ~29 файлов
+  (`apps/*/scripts/**`, `apps/*-e2e/**`, см. вывод grep в транскрипте сессии 2026-08-25). Не
+  трогал — это не то место, откуда конкретно жаловался пользователь («спамит команду prisma»), и
+  правка e2e/seed-скриптов — отдельная механическая задача, которую стоит сделать заведомо, а не
+  походя.
+- Обсуждался (и отклонён для внедрения) `vestauth` — крипто-подпись HTTP-запросов агентов
+  (RFC 9421) от того же автора: неактуально для наших MCP-серверов (все локальные
+  stdio/self-hosted, не публичный HTTP API для сторонних агентов), плюс у автора уже есть
+  прецедент недобросовестного встраивания рекламы в stdout прод-инструментов (этот самый §54).
