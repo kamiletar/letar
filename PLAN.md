@@ -2576,15 +2576,35 @@ whatever for dotenvx should go to stderr not stdout»). У нас в корне�
 (scope-guard); 7 из них — приватные submodule, там сначала коммит внутри submodule, затем bump
 указателя в root letar. Push не делался — не запрошен пользователем в рамках сессии.
 
-### Не сделано / за скобками
+### Продолжение (2026-08-25, отдельная сессия) — оставшиеся ~29 файлов закрыты
 
-- Тот же паттерн (`import ... from 'dotenv'` без `quiet`) остался в `playwright.config.ts`,
-  `prisma/seed.ts`, разовых `scripts/*.ts` — минимум ещё ~29 файлов
-  (`apps/*/scripts/**`, `apps/*-e2e/**`, см. вывод grep в транскрипте сессии 2026-08-25). Не
-  трогал — это не то место, откуда конкретно жаловался пользователь («спамит команду prisma»), и
-  правка e2e/seed-скриптов — отдельная механическая задача, которую стоит сделать заведомо, а не
-  походя.
-- Обсуждался (и отклонён для внедрения) `vestauth` — крипто-подпись HTTP-запросов агентов
-  (RFC 9421) от того же автора: неактуально для наших MCP-серверов (все локальные
-  stdio/self-hosted, не публичный HTTP API для сторонних агентов), плюс у автора уже есть
-  прецедент недобросовестного встраивания рекламы в stdout прод-инструментов (этот самый §54).
+Тот же паттерн вычищен из всех оставшихся мест: `prisma/seed.ts` (auth-hub, studio, domwellbes/
+prisma/seed/load-env.ts), разовых `scripts/*.ts`/`.mjs` (domwellbes/check-db-indexes.mjs,
+grandslamcup — 5 файлов включая migrate/, aboi/anonymize-staging-db.ts, mandala/create-admin.ts,
+svoichuzhie/scripts/seed.ts, auth-hub/scripts/encrypt-client-secrets.ts) и `db.helpers.ts` в
+e2e-хелперах (driving-school-e2e, auth-hub-e2e, svoichuzhie-e2e). Каждое приложение/submodule —
+отдельный коммит, submodule — сначала внутри, потом bump в root letar. Push не делался.
+
+Проверено, что в `apps/*-e2e/playwright.config.ts` `dotenv.config()` встречается только в
+закомментированной строке-подсказке (`// require('dotenv').config();`) — не активный код,
+трогать не нужно.
+
+⚠️ **Инцидент по пути:** после первого раунда правок 5 файлов в публичном репо (grandslamcup,
+auth-hub, auth-hub-e2e, mandala, svoichuzhie-e2e) откатились к состоянию без `quiet: true`, пока
+сессия ждала фоновый `nx run-many -t format` — похоже, параллельный агент выполнил
+git-операцию поверх незакоммиченных изменений (класс инцидентов — см.
+[git-multi-agent-incidents](/.claude/docs/git-multi-agent-incidents.md)). Правки переделаны и
+закоммичены сразу без задержки на форматирование.
+
+Отдельно всплыл преэкзистентный дефект: `apps/driving-school-e2e/src/helpers/db.helpers.ts` не
+проходил pre-commit dprint-проверку (однострочный `if` без фигурных скобок, не связано с
+`dotenv`) — поправлено попутно через `dprint fmt` (бинарь напрямую,
+`node_modules/.bin/dprint.exe`, т.к. `npx dprint` падал на конфликте npm-override `kysely` внутри
+submodule).
+
+### Отклонённые направления
+
+- `vestauth` — крипто-подпись HTTP-запросов агентов (RFC 9421) от того же автора: неактуально для
+  наших MCP-серверов (все локальные stdio/self-hosted, не публичный HTTP API для сторонних
+  агентов), плюс у автора уже есть прецедент недобросовестного встраивания рекламы в stdout
+  прод-инструментов (этот самый §54).
