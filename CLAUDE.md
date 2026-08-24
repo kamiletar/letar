@@ -288,6 +288,9 @@ cron-рассылок: найти кандидатов → отправить �
 [payment-webhook-idempotency-pattern](/.claude/docs/payment-webhook-idempotency-pattern.md)
 уникальный ID события + select-then-create + guard по терминальному статусу; расхождение aboi
 (только status-guard, без таблицы событий) — не образец для переноса ·
+[idempotency-key-terminal-transition-pattern](/.claude/docs/idempotency-key-terminal-transition-pattern.md)
+unique `idempotencyKey` (`proposal-terminal:<id>`, `contract-issued:<id>`) + try/catch на append-only
+event-sourced переходе — не путать с select-then-create для внешних вебхук-событий выше ·
 [external-provider-fake-pattern](/.claude/docs/external-provider-fake-pattern.md) интерфейс +
 fake-реализация для внешнего сервиса, поставщик которого ещё не выбран (10 контуров domwellbes) —
 деградация vs пропуск по настройке, грабля вечно-успешного fake ·
