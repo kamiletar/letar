@@ -420,7 +420,7 @@
     },
     "apps/aprel8008": {
       "name": "@letar/aprel8008",
-      "version": "0.12.28",
+      "version": "0.12.29",
       "dependencies": {
         "@letar/pg-url": "workspace:*",
       },
@@ -477,7 +477,7 @@
     },
     "apps/dashboard-agent": {
       "name": "dashboard-agent",
-      "version": "0.15.15",
+      "version": "0.15.16",
       "dependencies": {
         "@fastify/cors": "^11.3.0",
         "@fastify/rate-limit": "^10",
@@ -496,7 +496,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.143.0",
+      "version": "0.144.0",
       "dependencies": {
         "@letar/pg-url": "workspace:*",
         "@letar/theme-check": "workspace:*",
@@ -750,6 +750,7 @@
       "name": "@letar/time",
       "version": "0.5.8",
       "dependencies": {
+        "@letar/api-server": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
         "@letar/pg-url": "workspace:*",

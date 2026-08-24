@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.9 (2026-08-24)
+
+### Fixed
+
+- `POST /api/cron/notifications` проверял заголовок `Authorization: Bearer` вместо стандартного
+  `X-Cron-Secret`, которым `dashboard-agent` реально авторизует cron-вызовы (`executeJob` в
+  `apps/dashboard-agent/src/lib/cron.ts`) — задача валилась 401 каждую минуту с 22.08.2026.
+  Заменено на `verifyCronSecret()` из `@letar/api-server`, как в остальных приложениях
+  (`driving-school:cleanup-api-logs` — образец).
+
 ## 0.5.7 (2026-08-21)
 
 ### Fixed

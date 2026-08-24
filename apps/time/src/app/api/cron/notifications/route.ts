@@ -1,3 +1,4 @@
+import { verifyCronSecret } from '@letar/api-server'
 import { sendGenericEmail } from '@letar/email'
 import { NextResponse } from 'next/server'
 
@@ -65,10 +66,7 @@ const LOCALE_BCP47: Record<string, string> = {
  * Проверяет, какие уведомления нужно отправить, и отправляет их.
  */
 export async function POST(request: Request) {
-  // Проверка авторизации cron
-  const authHeader = request.headers.get('authorization')
-  const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+  if (!verifyCronSecret(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

@@ -1,6 +1,6 @@
 {
   "name": "@letar/time",
-  "version": "0.5.8",
+  "version": "0.5.9",
   "private": true,
   "nx": {
     "name": "time",
@@ -14,12 +14,14 @@
       "@letar/seo",
       "@letar/glitchtip",
       "@letar/i18n-proxy",
-      "@letar/pg-url"
+      "@letar/pg-url",
+      "@letar/api-server"
     ]
   },
   "dependencies": {
     "@letar/glitchtip": "workspace:*",
     "@letar/i18n-proxy": "workspace:*",
-    "@letar/pg-url": "workspace:*"
+    "@letar/pg-url": "workspace:*",
+    "@letar/api-server": "workspace:*"
   }
 }
