@@ -2,9 +2,38 @@
 
 Детальное описание всех реализованных фич.
 
-> **Архив обновлён:** 2026-08-19
+> **Архив обновлён:** 2026-08-25
 
 ---
+
+## Разбиение schema.zmodel на 9 доменных файлов (2026-08-25)
+
+`schema.zmodel` разросся до 2024 строк (17 enum + 39 моделей) — редактирование одной модели
+требовало скроллить сотни несвязанных строк. Разбит на `schema/models/{common,anime,media,
+import,watch,settings,federation,social,shikimori}.zmodel` по домену модели (common — File/
+PinStatus, anime — Franchise/Anime/Genre/Season/Episode и т.д., media — AudioTrack/
+SubtitleTrack/EncodingProfile, federation — Subscription/Tracker/FederatedContent, social —
+геймификация/друзья, shikimori — кэш внешних метаданных). Корневой `schema.zmodel` теперь —
+только 9 `import`-строк + `datasource`/`generator`/`plugin`.
+
+Модели интенсивно ссылаются друг на друга через границы доменов (`Anime` → `File`, `Episode` →
+`AudioTrack`/`Settings`, и т.д.) — импорта только в корне оказалось недостаточно: `zenstack
+generate` падал с `Could not resolve reference to TypeDeclaration`. Рабочий паттерн — **каждый
+доменный файл импортирует все остальные 8** (циклические cross-file импорты между `.zmodel`
+подтверждённо рабочие, см.
+[zenstack-multifile-schema-circular-imports.md](/.claude/docs/zenstack-multifile-schema-circular-imports.md)).
+
+**Проверено в изолированном `git worktree`** (без риска для общего чекаута, см.
+[git.md § Работа рядом с другими агентами](/.claude/rules/git.md)) — прогнан `zenstack generate`
+до и после разбиения напрямую через бинарник (`node_modules/.bin/zenstack`, минуя `nx`),
+сравнены `schema.prisma` и `form-schemas/index.ts`: набор моделей/enum'ов идентичен, различался
+только порядок объявлений (следствие порядка merge файлов, не потеря данных). После применения к
+реальному репо — `prisma db push` на dev-БД: «database is already in sync», `tsgo` — 0 ошибок.
+
+⚠️ Nx daemon/project-graph в момент сессии был нестабилен (падал на чужом орфан-worktree
+`driving-school-wt-split-a41c` от параллельной сессии, затем на таймауте спавна плагин-воркеров)
+— `zenstack:generate`/`db:push`/`typecheck:tsgo` прогнаны напрямую через бинарники в обход `nx`,
+не через сам таргет. Дубль worktree исчез сам к следующей проверке (владелец убрал).
 
 ## Аудит дублей по монорепо: renderer/usePrefersReducedMotion → @letar/hooks (2026-08-20)
 

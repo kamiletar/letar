@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+## [0.55.22] - 2026-08-25
+
+### Changed
+
+- **`schema.zmodel`** разбит на 9 доменных файлов в `schema/models/` (common, anime, media,
+  import, watch, settings, federation, social, shikimori) — было 2024 строки в одном файле.
+  Циклические cross-file импорты между доменами (каждый файл импортирует остальные 8) —
+  подтверждённо рабочий паттерн ZenStack 3.x. Проверено в изолированном `git worktree`:
+  сгенерированные `schema.prisma`/`form-schemas` идентичны до и после (только порядок объявлений
+  отличается), `prisma db push` на dev-БД — без изменений.
+
 ## [0.55.20] - 2026-08-20
 
 ### Changed
