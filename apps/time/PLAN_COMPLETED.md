@@ -1,5 +1,19 @@
 # Time — Выполненные задачи
 
+## Фикс: cron-эндпоинт notifications проверял не тот заголовок авторизации (2026-08-24)
+
+`POST /api/cron/notifications` (задача `time-notifications` в `dashboard-agent`, `* * * * *`)
+проверял `Authorization: Bearer $CRON_SECRET`, а `dashboard-agent` (`executeJob` в
+`apps/dashboard-agent/src/lib/cron.ts`) реально авторизует cron-вызовы заголовком
+`X-Cron-Secret` — расхождение молча появилось после того, как агент перешёл на
+per-приложение `CRON_SECRET` (PLAN-INFRA.md §52), а `time` не обновили. Задача валилась 401
+каждую минуту с 22.08.2026 (алерты `CRON_FAILED` в dashboard — обнаружено по непрочитанным
+алертам на дашборде). Заменено на `verifyCronSecret()` из `@letar/api-server` (образец —
+`driving-school:cleanup-api-logs`), `@letar/api-server` добавлен в `implicitDependencies`/
+`dependencies` `apps/time/package.json`. Версия 0.5.9. Задеплоено (`deploy-agent-dev`,
+commit `6ec3773b`), подтверждено живьём: два прогона `time-notifications` подряд сразу после
+rollout вернули `statusCode: 200`. commit фикса `ec7dcdd4`, docs `286619b1`.
+
 ## Фикс: config.matcher в proxy.ts обязан быть литералом, не вызовом buildIntlMatcher() (2026-08-21)
 
 Репо-широкий баг, найденный в apps/kami при передеплое staging для §18.7 M2: Next.js 16
