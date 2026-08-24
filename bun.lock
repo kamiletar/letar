@@ -463,6 +463,9 @@
     "apps/auth-hub-e2e": {
       "name": "@letar/auth-hub-e2e",
       "version": "0.0.1",
+      "dependencies": {
+        "@letar/env-load": "workspace:*",
+      },
     },
     "apps/dashboard": {
       "name": "@letar/dashboard",
@@ -743,8 +746,8 @@
     "apps/svoichuzhie-e2e": {
       "name": "svoichuzhie-e2e",
       "version": "0.0.1",
-      "devDependencies": {
-        "dotenv": "^17.2.3",
+      "dependencies": {
+        "@letar/env-load": "workspace:*",
       },
     },
     "apps/synth": {

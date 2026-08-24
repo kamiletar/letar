@@ -8,12 +8,11 @@
  * хеширование, воспроизводить его вручную здесь избыточно и хрупко. Здесь нужна только вставка
  * `UserEmail` (self-service linked-email flow не имеет публичного API без письма-подтверждения).
  */
-import { config } from 'dotenv'
+import { loadEnvCascade } from '@letar/env-load'
 import { resolve } from 'path'
 
 const projectDir = resolve(__dirname, '../../../auth-hub')
-config({ path: resolve(projectDir, '.env.local'), quiet: true })
-config({ path: resolve(projectDir, '.env'), quiet: true })
+loadEnvCascade(projectDir)
 
 /**
  * Структурный тип вместо импорта полного generated-клиента auth-hub — импорт .ts из

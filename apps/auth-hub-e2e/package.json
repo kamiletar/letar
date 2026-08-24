@@ -4,7 +4,11 @@
   "private": true,
   "nx": {
     "implicitDependencies": [
-      "auth-hub"
+      "auth-hub",
+      "@letar/env-load"
     ]
+  },
+  "dependencies": {
+    "@letar/env-load": "workspace:*"
   }
 }

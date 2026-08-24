@@ -3,9 +3,12 @@
   "compilerOptions": {
     "allowJs": true,
     "outDir": "out-tsc/playwright",
+    "rootDir": "../..",
     "sourceMap": false,
     "ignoreDeprecations": "6.0",
-    "rootDir": "."
+    "paths": {
+      "@letar/env-load": ["../../libs/env-load/src/index.ts"]
+    }
   },
   "include": [
     "**/*.ts",
@@ -15,7 +18,15 @@
     "src/**/*.spec.js",
     "src/**/*.test.ts",
     "src/**/*.test.js",
-    "src/**/*.d.ts"
+    "src/**/*.d.ts",
+    "../../libs/env-load/src/**/*.ts"
   ],
-  "exclude": ["out-tsc", "test-output", "eslint.config.js", "eslint.config.mjs", "eslint.config.cjs"]
+  "exclude": [
+    "out-tsc",
+    "test-output",
+    "eslint.config.js",
+    "eslint.config.mjs",
+    "eslint.config.cjs",
+    "../../libs/env-load/src/**/*.spec.ts"
+  ]
 }
