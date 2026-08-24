@@ -28,13 +28,17 @@ test.describe('Страница "О себе"', () => {
   test('1.4 — отображаются карточки "Чем занимаюсь"', async ({ page }) => {
     await expect(page.getByText(/Чем занимаюсь/i)).toBeVisible()
     await expect(page.getByText(/Архитектура/i)).toBeVisible()
-    await expect(page.getByText(/Разработка/i)).toBeVisible()
+    // exact: карточка "Архитектура" содержит подстроку "разработка" в описании ("Fullstack
+    // разработка на React..."), широкий /i-regex ловит оба вхождения — strict-mode violation
+    await expect(page.getByText('Разработка', { exact: true })).toBeVisible()
     await expect(page.getByText(/Менторинг/i)).toBeVisible()
   })
 
   test('1.5 — отображается технологический стек', async ({ page }) => {
     await expect(page.getByText(/Основной стек/i)).toBeVisible()
-    await expect(page.getByText('React')).toBeVisible()
+    // exact: та же карточка "Архитектура" содержит "React" как подстроку описания — без exact
+    // резолвится и в чип стека, и в текст карточки
+    await expect(page.getByText('React', { exact: true })).toBeVisible()
     await expect(page.getByText('Next.js')).toBeVisible()
     await expect(page.getByText('TypeScript')).toBeVisible()
   })

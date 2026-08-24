@@ -18,7 +18,8 @@ test.describe('Страница навыков', () => {
 
   test('1.3 — отображаются навыки в категориях', async ({ page }) => {
     // Проверяем ключевые технологии
-    await expect(page.getByText('React')).toBeVisible()
+    // exact: без него "React" резолвится ещё и в чип "React Native" (подстрока)
+    await expect(page.getByText('React', { exact: true })).toBeVisible()
     await expect(page.getByText('Next.js')).toBeVisible()
     await expect(page.getByText('TypeScript')).toBeVisible()
     await expect(page.getByText('Node.js')).toBeVisible()
@@ -40,7 +41,8 @@ test.describe('Skills page (English)', () => {
   test('2.1 — English version loads correctly', async ({ page }) => {
     await page.goto('/en/skills/')
 
-    await expect(page.getByRole('heading', { name: /Skills/i })).toBeVisible()
+    // exact: без него резолвится и в h1 "Skills", и в h2 "Soft Skills"
+    await expect(page.getByRole('heading', { name: 'Skills', exact: true })).toBeVisible()
   })
 
   test('2.2 — English categories are visible', async ({ page }) => {
