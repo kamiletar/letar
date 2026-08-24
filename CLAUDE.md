@@ -67,6 +67,10 @@ null-строках ·
 состояние связи, а не то, на что FK переставляется в том же `update()` — обход immutability
 опубликованной/терминальной записи; защита только field-level `@deny('update', true)` на самом FK ·
 [tree-model-parent-select](/.claude/docs/tree-model-parent-select.md) self-referencing `parentId` ·
+[zenstack-append-only-terminal-event-pattern](/.claude/docs/zenstack-append-only-terminal-event-pattern.md)
+append-only лог событий без статусного поля — терминальность через общий unique `idempotencyKey`
+(TOCTOU-safe на `INSERT`, не на предварительном `SELECT`); ловушка — не защищает нетерминальные
+события того же лога, для них отдельный check-then-act ·
 [zenstack-multifile-schema-circular-imports](/.claude/docs/zenstack-multifile-schema-circular-imports.md)
 декомпозиция `schema.zmodel` на файлы — циклические импорты между ними подтверждённо рабочие,
 единственная ловушка — `import` до `datasource`/`generator`/`plugin`
