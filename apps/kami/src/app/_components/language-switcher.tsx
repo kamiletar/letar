@@ -23,7 +23,11 @@ export function LanguageSwitcher() {
   const pathname = usePathname()
 
   // Убираем текущую локаль из пути
-  const pathnameWithoutLocale = pathname.replace(`/${locale}`, '') || '/'
+  const rawPathname = pathname.replace(`/${locale}`, '') || '/'
+  // next.config.js: trailingSlash: true — Link конструирует href вручную и не проходит через
+  // серверную нормализацию, поэтому слэш нужно добавлять самим (иначе переключатель уводит на
+  // /en без слэша на корне)
+  const pathnameWithoutLocale = rawPathname.endsWith('/') ? rawPathname : `${rawPathname}/`
 
   return (
     <Menu.Root>
