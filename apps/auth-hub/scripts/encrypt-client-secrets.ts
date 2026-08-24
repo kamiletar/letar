@@ -14,8 +14,8 @@ import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-config({ path: join(__dirname, '../.env.local') })
-config({ path: join(__dirname, '../.env') })
+config({ path: join(__dirname, '../.env.local'), quiet: true })
+config({ path: join(__dirname, '../.env'), quiet: true })
 
 import { encryptSecret, isEncrypted } from '@letar/auth/server'
 import { ZenStackClient } from '@zenstackhq/orm'

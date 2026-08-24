@@ -13,8 +13,8 @@ import { fileURLToPath } from 'url'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
 // Загружаем .env.local, затем .env — как Next.js
-config({ path: join(__dirname, '../.env.local') })
-config({ path: join(__dirname, '../.env') })
+config({ path: join(__dirname, '../.env.local'), quiet: true })
+config({ path: join(__dirname, '../.env'), quiet: true })
 
 import { runSeed } from '@letar/seed-utils'
 import { ZenStackClient } from '@zenstackhq/orm'
