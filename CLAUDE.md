@@ -62,6 +62,10 @@ approval, kebab-case в `to`, обнулённая база
 резолвится в `null` вместо ошибки — краш на `.id` только на конкретных данных (черновик рядом с
 опубликованной записью), плюс `take` считает по родителю и съедает слоты лимита на отфильтрованных
 null-строках ·
+[zenstack-relation-traversal-fk-repoint-bypass](/.claude/docs/zenstack-relation-traversal-fk-repoint-bypass.md)
+⚠️ relation-traversal в `@@allow`/`@@deny` (`parent.status == DRAFT` и т.п.) проверяет текущее
+состояние связи, а не то, на что FK переставляется в том же `update()` — обход immutability
+опубликованной/терминальной записи; защита только field-level `@deny('update', true)` на самом FK ·
 [tree-model-parent-select](/.claude/docs/tree-model-parent-select.md) self-referencing `parentId`
 
 **Формы, UI, компоненты:** [forms](/.claude/docs/forms.md) ⭐ ·
