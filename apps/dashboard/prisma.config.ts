@@ -1,9 +1,7 @@
-import { config } from 'dotenv'
+import { loadEnvCascade } from '@letar/env-load'
 import { defineConfig, env } from 'prisma/config'
 
-// Загружаем .env.local, затем .env.docker
-config({ path: '.env.local', quiet: true })
-config({ path: '.env.docker', quiet: true })
+loadEnvCascade(undefined, ['.env.local', '.env.docker'])
 
 export default defineConfig({
   schema: 'src/generated/schema.prisma',

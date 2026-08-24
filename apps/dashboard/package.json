@@ -14,7 +14,8 @@
       "@letar/api-server",
       "@letar/glitchtip",
       "@letar/hooks",
-      "@letar/pg-url"
+      "@letar/pg-url",
+      "@letar/env-load"
     ]
   },
   "dependencies": {
@@ -25,6 +26,7 @@
     "@letar/infra-config": "workspace:*",
     "@letar/glitchtip": "workspace:*",
     "@letar/hooks": "workspace:*",
-    "@letar/pg-url": "workspace:*"
+    "@letar/pg-url": "workspace:*",
+    "@letar/env-load": "workspace:*"
   }
 }

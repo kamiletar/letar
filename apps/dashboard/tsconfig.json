@@ -8,6 +8,9 @@
       "@/*": [
         "./src/*"
       ],
+      "@letar/env-load": [
+        "../../libs/env-load/src/index.ts"
+      ],
       "@letar/auth": [
         "../../libs/auth/src/index.ts"
       ],
