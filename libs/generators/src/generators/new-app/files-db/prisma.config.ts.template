@@ -1,9 +1,7 @@
-import { config } from 'dotenv'
+import { loadEnvCascade } from '@letar/env-load'
 import { defineConfig } from 'prisma/config'
 
-// Загружаем .env.local, затем .env (как Next.js)
-config({ path: '.env.local' })
-config({ path: '.env' })
+loadEnvCascade()
 
 export default defineConfig({
   schema: 'src/generated/schema.prisma',

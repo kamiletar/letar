@@ -5,7 +5,8 @@
       "@/*": ["./src/*"],
       "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
       "@letar/ui": ["../../libs/ui/src/index.ts"],
-      "@letar/analytics": ["../../libs/analytics/src/index.ts"]
+      "@letar/analytics": ["../../libs/analytics/src/index.ts"],
+      "@letar/env-load": ["../../libs/env-load/src/index.ts"]
     }
   },
   "references": [
@@ -17,6 +18,9 @@
     },
     {
       "path": "../../libs/chakra-provider"
+    },
+    {
+      "path": "../../libs/env-load"
     }
   ]
 }
