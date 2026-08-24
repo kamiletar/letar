@@ -10,7 +10,7 @@ test.describe('Страница "О себе"', () => {
   })
 
   test('1.2 — отображается intro текст', async ({ page }) => {
-    await expect(page.getByText(/Фронтенд-архитектор с фокусом на качество/i)).toBeVisible()
+    await expect(page.getByText(/Архитектор ПО с фокусом на качество/i)).toBeVisible()
   })
 
   test('1.3 — отображаются статистики', async ({ page }) => {
@@ -51,7 +51,7 @@ test.describe('Страница About (English)', () => {
     await page.goto('/en/about/')
 
     await expect(page.getByRole('heading', { name: /About Me/i })).toBeVisible()
-    await expect(page.getByText(/Frontend Architect focused on quality/i)).toBeVisible()
+    await expect(page.getByText(/Software Architect focused on quality/i)).toBeVisible()
   })
 
   test('2.2 — English stats are visible', async ({ page }) => {

@@ -8,7 +8,7 @@ test.describe('Навигация и главная страница', () => {
       // Проверяем Hero секцию
       await expect(page.getByRole('heading', { name: /Ками/i })).toBeVisible()
       await expect(page.getByText(/Привет, я/i)).toBeVisible()
-      await expect(page.getByText(/Фронтенд-архитектор/i)).toBeVisible()
+      await expect(page.getByText(/Архитектор/i)).toBeVisible()
     })
 
     test('1.2 — отображаются CTA кнопки', async ({ page }) => {
@@ -40,24 +40,28 @@ test.describe('Навигация и главная страница', () => {
     test('2.1 — header отображается на главной', async ({ page }) => {
       await page.goto('/')
 
-      // Проверяем логотип/название
-      await expect(page.getByRole('link', { name: /Kami/i }).first()).toBeVisible()
+      // Логотип дублируется в мобильном и десктопном Flex-блоках (скрыты через display
+      // по брейкпоинту) — .first() по DOM-порядку берёт мобильный (скрытый на desktop-вьюпорте
+      // Playwright), нужен именно видимый экземпляр
+      await expect(page.getByRole('link', { name: /Kami/i }).and(page.locator(':visible'))).toBeVisible()
     })
 
     test('2.2 — навигация в header работает (desktop)', async ({ page }) => {
       await page.goto('/')
 
-      // Проверяем основные ссылки навигации (на десктопе они должны быть видны)
-      await expect(page.getByRole('link', { name: /Обо мне/i })).toBeVisible()
-      await expect(page.getByRole('link', { name: /Навыки/i })).toBeVisible()
-      await expect(page.getByRole('link', { name: /Проекты/i })).toBeVisible()
-      await expect(page.getByRole('link', { name: /Блог/i })).toBeVisible()
+      // Ссылки навигации дублируются в footer — скоупим к header, иначе strict-mode violation
+      const headerNav = page.getByRole('navigation', { name: /Основная навигация/i })
+      await expect(headerNav.getByRole('link', { name: /Обо мне/i })).toBeVisible()
+      await expect(headerNav.getByRole('link', { name: /Навыки/i })).toBeVisible()
+      await expect(headerNav.getByRole('link', { name: /Проекты/i })).toBeVisible()
+      await expect(headerNav.getByRole('link', { name: /Блог/i })).toBeVisible()
     })
 
     test('2.3 — клик по навигации ведёт на правильную страницу', async ({ page }) => {
       await page.goto('/')
 
-      await page.getByRole('link', { name: /Обо мне/i }).click()
+      const headerNav = page.getByRole('navigation', { name: /Основная навигация/i })
+      await headerNav.getByRole('link', { name: /Обо мне/i }).click()
 
       await expect(page).toHaveURL(/\/about\//)
     })
@@ -114,7 +118,8 @@ test.describe('Переключатель темы', () => {
   test('5.1 — кнопка переключения темы присутствует', async ({ page }) => {
     await page.goto('/')
 
-    // Ищем кнопку переключения темы
-    await expect(page.getByRole('button', { name: /тема|theme/i })).toBeVisible()
+    // aria-label — "Переключить тему" (винительный падеж, не "тема"); кнопка также дублируется
+    // в мобильном и десктопном Flex-блоках, поэтому скоуп на видимый экземпляр
+    await expect(page.getByRole('button', { name: /тему|theme/i }).and(page.locator(':visible'))).toBeVisible()
   })
 })
