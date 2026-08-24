@@ -9,8 +9,8 @@ import { config } from 'dotenv'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-config({ path: join(import.meta.dirname, '../../.env.local') })
-config({ path: join(import.meta.dirname, '../../.env') })
+config({ path: join(import.meta.dirname, '../../.env.local'), quiet: true })
+config({ path: join(import.meta.dirname, '../../.env'), quiet: true })
 
 import { parsePostgresUrl } from '@letar/pg-url'
 import { Pool } from 'pg'

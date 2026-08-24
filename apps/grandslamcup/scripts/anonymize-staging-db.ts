@@ -29,9 +29,9 @@ import { config } from 'dotenv'
 import { join } from 'node:path'
 import { Pool } from 'pg'
 
-config({ path: join(import.meta.dirname, '../.env.staging') })
-config({ path: join(import.meta.dirname, '../.env.local') })
-config({ path: join(import.meta.dirname, '../.env') })
+config({ path: join(import.meta.dirname, '../.env.staging'), quiet: true })
+config({ path: join(import.meta.dirname, '../.env.local'), quiet: true })
+config({ path: join(import.meta.dirname, '../.env'), quiet: true })
 
 const DATABASE_URL = process.env.DATABASE_URL
 

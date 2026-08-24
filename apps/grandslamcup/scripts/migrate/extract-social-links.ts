@@ -20,8 +20,8 @@ import { join } from 'node:path'
 import * as path from 'path'
 import { Pool } from 'pg'
 
-config({ path: join(import.meta.dirname, '../../.env.local') })
-config({ path: join(import.meta.dirname, '../../.env') })
+config({ path: join(import.meta.dirname, '../../.env.local'), quiet: true })
+config({ path: join(import.meta.dirname, '../../.env'), quiet: true })
 
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL не задан')
