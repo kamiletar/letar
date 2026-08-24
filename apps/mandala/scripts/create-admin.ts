@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs'
 import { config } from 'dotenv'
 import { PrismaClient } from '../src/generated/prisma'
-config({ path: '.env.local' })
+config({ path: '.env.local', quiet: true })
 
 const prisma = new PrismaClient()
 
