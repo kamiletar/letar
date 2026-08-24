@@ -12,8 +12,8 @@ import { config } from 'dotenv'
 import { resolve } from 'path'
 
 const projectDir = resolve(__dirname, '../../../auth-hub')
-config({ path: resolve(projectDir, '.env.local') })
-config({ path: resolve(projectDir, '.env') })
+config({ path: resolve(projectDir, '.env.local'), quiet: true })
+config({ path: resolve(projectDir, '.env'), quiet: true })
 
 /**
  * Структурный тип вместо импорта полного generated-клиента auth-hub — импорт .ts из
