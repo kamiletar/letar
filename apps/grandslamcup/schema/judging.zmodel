@@ -1,0 +1,126 @@
+import "./matches"
+
+// ========================================
+// Enum'ы
+// ========================================
+
+/// Измерение оценки (текст или подача)
+enum VoteDimension {
+  /// Оценка текста
+  TEXT
+  /// Оценка подачи
+  DELIVERY
+}
+
+/// Цвет судьи (для визуальной идентификации на матче)
+enum JudgeColor {
+  RED
+  BLUE
+  GREEN
+  YELLOW
+  PURPLE
+}
+
+/// Статус судьи в матче
+enum JudgeStatus {
+  /// Активный судья (одно из 5 мест)
+  ACTIVE
+  /// Отведён тренером
+  RECUSED
+  /// В очереди ожидания
+  QUEUED
+}
+
+// ========================================
+// Live Scoring — судейские сессии и голоса
+// ========================================
+
+/// Сессия судьи в матче (5 судей на тайм, новый состав на 2-й тайм)
+model JudgeSession {
+  id          String   @id @default(cuid())
+  /// Матч
+  matchId     String
+  /// Тайм (1 или 2)
+  half        Int
+  /// Имя судьи (вводит при регистрации через QR)
+  name        String
+  /// Токен для cookie-авторизации (без логина)
+  token       String   @unique @default(cuid())
+  /// Порядковый номер судьи (1-5, назначается при активации)
+  judgeNumber Int
+  /// Цвет судьи для визуальной идентификации
+  color       JudgeColor?
+  /// Статус: активный, отведён или в очереди
+  status      JudgeStatus @default(ACTIVE)
+  /// Позиция в очереди (null = активный/отведённый судья)
+  queuePosition Int?
+  /// Cookie fingerprint для обнаружения повторных судей
+  fingerprint String?
+  createdAt   DateTime @default(now())
+
+  match Match       @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  votes JudgeVote[]
+
+  /// Один судья на один номер в тайме
+  @@unique([matchId, half, judgeNumber])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([matchId])
+  @@index([token])
+}
+
+/// Голос одного судьи за одно выступление по одному измерению
+model JudgeVote {
+  id             String        @id @default(cuid())
+  /// Сессия судьи
+  judgeSessionId String
+  /// Выступление
+  performanceId  String
+  /// Измерение (текст или подача)
+  dimension      VoteDimension
+  /// Оценка (1-5)
+  score          Int
+  createdAt      DateTime      @default(now())
+
+  judgeSession JudgeSession      @relation(fields: [judgeSessionId], references: [id], onDelete: Cascade)
+  performance  PlayerPerformance @relation(fields: [performanceId], references: [id], onDelete: Cascade)
+
+  /// Запрет повторного голосования (один судья = одна оценка за выступление/измерение)
+  @@unique([judgeSessionId, performanceId, dimension])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([performanceId])
+  @@index([judgeSessionId])
+}
+
+// ========================================
+// Зрительское голосование (народное жюри)
+// ========================================
+
+/// Голос зрителя — параллельное голосование, не влияет на результат
+model AudienceVote {
+  id            String   @id @default(cuid())
+  /// Матч
+  matchId       String
+  /// Выступление
+  performanceId String
+  /// Анонимный токен зрителя (cookie)
+  sessionToken  String
+  /// Имя зрителя (опционально)
+  name          String?
+  /// Оценка за текст (1-5)
+  textScore     Int
+  /// Оценка за подачу (1-5)
+  deliveryScore Int
+  createdAt     DateTime @default(now())
+
+  match       Match             @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  performance PlayerPerformance @relation(fields: [performanceId], references: [id], onDelete: Cascade)
+
+  /// Один голос на перформанс от зрителя
+  @@unique([performanceId, sessionToken])
+  @@allow('read', true)
+  @@allow('create', true)
+  @@index([matchId])
+  @@index([performanceId])
+}

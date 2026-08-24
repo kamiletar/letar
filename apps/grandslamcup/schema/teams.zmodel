@@ -1,0 +1,289 @@
+import "./geo"
+import "./users"
+import "./matches"
+import "./competition"
+import "./content"
+
+// ========================================
+// Enum'ы
+// ========================================
+
+/// Роль игрока в команде
+enum PlayerRole {
+  /// Поэт
+  PLAYER
+  /// Тренер
+  COACH
+  /// Заместитель тренера
+  ASSISTANT_COACH
+}
+
+/// Статус заявки на состав/трансфер
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// Тип заявки
+enum RosterAppType {
+  /// Новый игрок (ранее не играл)
+  NEW_PLAYER
+  /// Трансфер (переход из другой команды)
+  TRANSFER
+}
+
+// ========================================
+// Участники
+// ========================================
+
+/// Команда
+model Team {
+  id            String   @id @default(cuid())
+  /// Название команды
+  /// @form.title("Название")
+  /// @form.placeholder("Чумные поэты")
+  name          String
+  /// URL-slug
+  /// @form.title("Slug (URL)")
+  /// @form.placeholder("chumnye-poety")
+  slug          String   @unique
+  /// Город
+  /// @form.title("Город")
+  /// @form.fieldType("select")
+  cityId        String
+  /// Логотип
+  /// @form.exclude
+  logo          String?
+  /// Описание команды
+  /// @form.title("Описание")
+  /// @form.fieldType("textarea")
+  description   String?
+  /// Домашний стадион
+  /// @form.title("Домашний стадион")
+  /// @form.fieldType("select")
+  homeVenueId   String?
+  /// @deprecated Используй socialLinks
+  /// @form.title("Telegram")
+  /// @form.placeholder("https://t.me/team")
+  telegramLink  String?
+  /// Социальные ссылки JSON
+  /// @form.exclude
+  socialLinks   Json?
+  /// История переименований (напр. "Болт" → "Вином")
+  /// @form.exclude
+  previousNames String[]
+  /// @form.exclude
+  createdAt     DateTime @default(now())
+  /// @form.exclude
+  updatedAt     DateTime @updatedAt
+
+  city        City         @relation(fields: [cityId], references: [id])
+  homeVenue   Venue?       @relation(fields: [homeVenueId], references: [id])
+  teamSeasons TeamSeason[]
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([cityId])
+}
+
+/// Поэт / игрок
+model Player {
+  id           String   @id @default(cuid())
+  /// Имя поэта
+  name         String
+  /// URL-slug
+  slug         String   @unique
+  /// Город
+  cityId       String?
+  /// Фото
+  photo        String?
+  /// Биография
+  bio          String?
+  /// @deprecated Используй socialLinks
+  telegramLink String?
+  /// @deprecated Используй socialLinks
+  vkLink       String?
+  /// Социальные ссылки [{platform: "telegram"|"vk"|"youtube"|"instagram"|"website"|"twitter"|"tiktok", url: "..."}]
+  socialLinks  Json?
+  /// Уточнение для однофамильцев (напр. "НЕНАХОД НОГИ", "Москва"). Показывается в скобках рядом с именем
+  disambiguation String?
+  /// Бейджи (например "Оргкомитет", "Создатель КБС")
+  badges       String[]
+  /// Привязка к аккаунту пользователя (опционально)
+  userId          String?  @unique
+  /// Заявка на привязку профиля (ожидает подтверждения тренером/организатором/админом)
+  pendingUserId   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  city               City?               @relation(fields: [cityId], references: [id])
+  user               User?               @relation(fields: [userId], references: [id])
+  playerTeamSeasons  PlayerTeamSeason[]
+  transfers          Transfer[]
+  matchLineups       MatchLineup[]
+  performances       PlayerPerformance[]
+  playerRatings      PlayerRating[]
+  rosterApplications RosterApplication[]
+  suspensions        PlayerSuspension[]
+  poems              Poem[]
+  albums             Album[]
+  victoryPoemMatches Match[]            @relation("VictoryPoem")
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([cityId])
+}
+
+/// Участие команды в сезоне + лиге
+model TeamSeason {
+  id       String @id @default(cuid())
+  /// Команда
+  teamId   String
+  /// Сезон
+  seasonId String
+  /// Лига
+  leagueId String
+
+  /// Дисквалифицирована (5 жёлтых карточек за сезон)
+  disqualified Boolean @default(false)
+
+  team              Team               @relation(fields: [teamId], references: [id])
+  season            Season             @relation(fields: [seasonId], references: [id])
+  league            League             @relation(fields: [leagueId], references: [id])
+  playerTeamSeasons PlayerTeamSeason[]
+  homeMatches       Match[]            @relation("HomeTeam")
+  awayMatches       Match[]            @relation("AwayTeam")
+  lineups           MatchLineup[]
+  performances      PlayerPerformance[]
+  standings         Standings?
+  transfersFrom     Transfer[]         @relation("TransferFrom")
+  transfersTo       Transfer[]         @relation("TransferTo")
+  cards             Card[]
+  applicationsFrom  RosterApplication[] @relation("AppFrom")
+  applicationsTo    RosterApplication[] @relation("AppTo")
+  bracketSlots      BracketSlot[]
+  friendlyRequestsFrom FriendlyMatchRequest[] @relation("FriendlyFrom")
+  friendlyRequestsTo   FriendlyMatchRequest[] @relation("FriendlyTo")
+
+  @@unique([teamId, seasonId])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([teamId])
+  @@index([seasonId])
+  @@index([leagueId])
+}
+
+/// Принадлежность игрока к команде в сезоне
+model PlayerTeamSeason {
+  id           String     @id @default(cuid())
+  /// Игрок
+  playerId     String
+  /// Команда в сезоне
+  teamSeasonId String
+  /// Роль в команде
+  role         PlayerRole @default(PLAYER)
+  /// Играющий (участвует в матчах как поэт). Для PLAYER всегда true, для тренеров — зависит от заявки
+  isPlaying    Boolean    @default(true)
+  /// Дата вступления
+  joinedAt     DateTime   @default(now())
+  /// Дата ухода (null = активный)
+  leftAt       DateTime?
+
+  player     Player     @relation(fields: [playerId], references: [id])
+  teamSeason TeamSeason @relation(fields: [teamSeasonId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, teamSeasonId])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([playerId])
+  @@index([teamSeasonId])
+}
+
+/// Трансфер игрока между командами
+model Transfer {
+  id               String   @id @default(cuid())
+  /// Игрок
+  playerId         String
+  /// Откуда
+  fromTeamSeasonId String
+  /// Куда
+  toTeamSeasonId   String
+  /// Дата трансфера
+  date             DateTime
+  /// Комментарий
+  note             String?
+  createdAt        DateTime @default(now())
+
+  player         Player     @relation(fields: [playerId], references: [id])
+  fromTeamSeason TeamSeason @relation("TransferFrom", fields: [fromTeamSeasonId], references: [id])
+  toTeamSeason   TeamSeason @relation("TransferTo", fields: [toTeamSeasonId], references: [id])
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([playerId])
+}
+
+// ========================================
+// Заявки на состав и трансферы
+// ========================================
+
+/// Заявка на добавление игрока или трансфер
+model RosterApplication {
+  id              String            @id @default(cuid())
+  /// Тип заявки
+  type            RosterAppType
+  /// Статус рассмотрения
+  status          ApplicationStatus @default(PENDING)
+
+  // === Данные нового игрока (type=NEW_PLAYER) ===
+  /// Имя нового игрока
+  playerName      String?
+  /// Город нового игрока
+  playerCity      String?
+  /// Telegram нового игрока
+  playerTelegram  String?
+  /// VK нового игрока
+  playerVk        String?
+  /// Био нового игрока
+  playerBio       String?
+
+  // === Данные трансфера (type=TRANSFER) ===
+  /// Существующий игрок (для трансфера)
+  playerId         String?
+  /// Откуда (для трансфера)
+  fromTeamSeasonId String?
+
+  // === Общие поля ===
+  /// Команда в сезоне, куда подаётся заявка
+  toTeamSeasonId  String
+  /// Роль в команде
+  role            PlayerRole        @default(PLAYER)
+  /// Комментарий от тренера
+  coachNote       String?
+  /// Комментарий модератора
+  moderatorNote   String?
+  /// Кто подал заявку
+  submittedById   String
+  /// Кто рассмотрел
+  reviewedById    String?
+  /// Когда рассмотрена
+  reviewedAt      DateTime?
+
+  /// @form.exclude
+  createdAt       DateTime          @default(now())
+  /// @form.exclude
+  updatedAt       DateTime          @updatedAt
+
+  player         Player?     @relation(fields: [playerId], references: [id])
+  fromTeamSeason TeamSeason? @relation("AppFrom", fields: [fromTeamSeasonId], references: [id])
+  toTeamSeason   TeamSeason  @relation("AppTo", fields: [toTeamSeasonId], references: [id])
+  submittedBy    User        @relation("AppSubmitter", fields: [submittedById], references: [id])
+  reviewedBy     User?       @relation("AppReviewer", fields: [reviewedById], references: [id])
+
+  @@allow('read', auth() != null)
+  @@allow('create', auth() != null)
+  @@allow('update', auth() != null && 'ADMIN' in auth().roles)
+  @@index([toTeamSeasonId])
+  @@index([status])
+}

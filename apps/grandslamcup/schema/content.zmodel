@@ -1,0 +1,218 @@
+import "./matches"
+import "./users"
+import "./geo"
+import "./teams"
+
+// ========================================
+// Enum'ы
+// ========================================
+
+/// Категория изображения
+enum ImageCategory {
+  MATCH
+  TEAM
+  PLAYER
+  VENUE
+  OTHER
+}
+
+// ========================================
+// Новости и контент
+// ========================================
+
+/// Новость / обзор матча
+model NewsPost {
+  id          String    @id @default(cuid())
+  /// Заголовок
+  /// @form.title("Заголовок")
+  title       String
+  /// URL-slug
+  /// @form.title("Slug (URL)")
+  slug        String    @unique
+  /// Контент (Markdown)
+  /// @form.title("Контент")
+  /// @form.fieldType("textarea")
+  content     String
+  /// Краткое описание
+  /// @form.title("Описание")
+  excerpt     String?
+  /// Обложка (URL)
+  /// @form.title("Обложка")
+  coverImage  String?
+  /// Связанный матч
+  /// @form.title("Матч")
+  /// @form.fieldType("select")
+  matchId     String?
+  /// Опубликован
+  /// @form.title("Опубликован")
+  published   Boolean   @default(false)
+  /// Дата публикации
+  publishedAt DateTime?
+  /// Автор
+  /// @form.exclude
+  authorId    String
+  /// @form.exclude
+  createdAt   DateTime  @default(now())
+  /// @form.exclude
+  updatedAt   DateTime  @updatedAt
+
+  /// Город
+  /// @form.title("Город")
+  /// @form.fieldType("select")
+  cityId     String?
+
+  match  Match? @relation(fields: [matchId], references: [id])
+  author User   @relation("NewsAuthor", fields: [authorId], references: [id])
+  city   City?  @relation(fields: [cityId], references: [id])
+
+  @@allow('read', published == true || (auth() != null && 'ADMIN' in auth().roles))
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([published, publishedAt])
+  @@index([cityId])
+}
+
+/// Ссылка на донат (внешний сервис)
+model DonateLink {
+  id        String   @id @default(cuid())
+  /// Название
+  /// @form.title("Название")
+  /// @form.placeholder("Boosty, Перевод на карту...")
+  name      String
+  /// URL
+  /// @form.title("Ссылка")
+  url       String
+  /// Описание
+  /// @form.title("Описание")
+  description String?
+  /// Порядок отображения
+  /// @form.title("Порядок")
+  order     Int      @default(0)
+  /// Активна
+  /// @form.title("Активна")
+  active    Boolean  @default(true)
+  /// Город
+  /// @form.title("Город")
+  /// @form.fieldType("select")
+  cityId    String?
+  /// @form.exclude
+  createdAt DateTime @default(now())
+
+  city City? @relation(fields: [cityId], references: [id])
+
+  @@allow('read', active == true || (auth() != null && 'ADMIN' in auth().roles))
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([cityId])
+}
+
+// ========================================
+// Медиа
+// ========================================
+
+/// Фотография матча
+model MatchPhoto {
+  id           String   @id @default(cuid())
+  /// Матч
+  matchId      String
+  /// Имя файла
+  filename     String
+  /// Путь к файлу (относительно uploads/)
+  path         String   @unique
+  /// MIME-тип
+  mimeType     String
+  /// Размер файла в байтах
+  size         Int
+  /// Ширина в пикселях
+  width        Int?
+  /// Высота в пикселях
+  height       Int?
+  /// Подпись к фото
+  caption      String?
+  /// Порядок отображения
+  order        Int      @default(0)
+  /// Кто загрузил
+  uploadedById String
+  createdAt    DateTime @default(now())
+
+  match      Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  uploadedBy User  @relation("MatchPhotoUploader", fields: [uploadedById], references: [id])
+
+  @@allow('read', true)
+  @@allow('create', auth() != null)
+  @@allow('update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([matchId])
+}
+
+/// Стихотворение поэта
+model Poem {
+  id         String   @id @default(cuid())
+  /// Название стихотворения
+  title      String
+  /// URL-friendly slug
+  slug       String   @unique
+  /// Текст стиха с сохранением переносов строк
+  text       String
+  /// URL обложки (опционально)
+  coverImage String?
+  /// Опубликовано (видно всем) или черновик
+  published  Boolean  @default(false)
+  /// Автор-поэт
+  playerId   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  player     Player      @relation(fields: [playerId], references: [id])
+  albumPoems AlbumPoem[]
+
+  /// Публичные стихи видны всем, черновики — только автору
+  @@allow('read', published || (auth() != null && player.userId == auth().id))
+  @@allow('create,update,delete', auth() != null && player.userId == auth().id)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([playerId])
+}
+
+// ========================================
+// Альбомы стихов
+// ========================================
+
+/// Альбом стихотворений поэта
+model Album {
+  id          String      @id @default(cuid())
+  /// Название альбома
+  title       String
+  /// URL-slug
+  slug        String      @unique
+  /// Путь к обложке (через /api/files/)
+  coverImage  String?
+  /// null = черновик, дата = опубликован
+  publishedAt DateTime?
+  /// Автор-поэт
+  playerId    String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  player     Player      @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  albumPoems AlbumPoem[]
+
+  @@index([playerId])
+  @@index([playerId, publishedAt])
+  @@allow('read', publishedAt != null || (auth() != null && player.userId == auth().id))
+  @@allow('create,update,delete', auth() != null && player.userId == auth().id)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+}
+
+/// Стихотворение в альбоме (pivot)
+model AlbumPoem {
+  id        String @id @default(cuid())
+  albumId   String
+  poemId    String
+  sortOrder Int    @default(0)
+
+  album Album @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  poem  Poem  @relation(fields: [poemId], references: [id], onDelete: Cascade)
+
+  @@unique([albumId, poemId])
+  @@index([albumId, sortOrder])
+  @@allow('read', album.publishedAt != null || (auth() != null && album.player.userId == auth().id))
+  @@allow('create,update,delete', auth() != null && album.player.userId == auth().id)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+}

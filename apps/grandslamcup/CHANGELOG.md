@@ -2,6 +2,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.39.0] — 2026-08-25
+
+### Refactor: `schema.zmodel` разбит на 8 доменных файлов
+
+`schema.zmodel` (1613 строк) декомпозирован на `schema/users.zmodel`, `schema/geo.zmodel`,
+`schema/competition.zmodel`, `schema/teams.zmodel`, `schema/matches.zmodel`,
+`schema/judging.zmodel`, `schema/content.zmodel`, `schema/social.zmodel` — циклические
+cross-file импорты между ними (см.
+`.claude/docs/zenstack-multifile-schema-circular-imports.md`). Корневой `schema.zmodel`
+теперь только импортирует доменные файлы и держит `datasource`/`generator`/`plugin`-блоки.
+`zenstack generate` не изменил ни одного сгенерированного файла (`src/generated/`,
+`prisma/`) — декомпозиция чисто структурная, поведение не менялось.
+
 ## [3.38.7] — 2026-08-19
 
 ### Refactor: глубина нажатия кнопок и ссылок на общую `pressScale` (`@letar/ui`)

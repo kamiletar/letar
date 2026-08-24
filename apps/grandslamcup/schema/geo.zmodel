@@ -1,0 +1,126 @@
+import "./competition"
+import "./teams"
+import "./content"
+import "./matches"
+import "./users"
+
+// ========================================
+// Справочники
+// ========================================
+
+/// Город (СПб, Москва, ...)
+model City {
+  id        String   @id @default(cuid())
+  /// Название города
+  /// @form.title("Название")
+  /// @form.placeholder("Санкт-Петербург")
+  name      String   @unique
+  /// URL-slug
+  /// @form.title("Slug (URL)")
+  /// @form.placeholder("spb")
+  slug      String   @unique
+  /// @deprecated Используй socialLinks
+  /// @form.title("Telegram")
+  /// @form.placeholder("https://t.me/grandslamcup")
+  telegramLink String?
+  /// ID Telegram-канала города (напр. @kbs_spb или -100...)
+  /// @form.title("Telegram Chat ID")
+  /// @form.placeholder("@kbs_spb или -1001234567890")
+  telegramChatId String?
+  /// Социальные ссылки JSON
+  /// @form.exclude
+  socialLinks  Json?
+  /// Использовать терминологию «домашняя/гостевая» (для городов с домашними площадками)
+  /// @form.title("Домашние стадионы")
+  useHomeAway Boolean @default(false)
+  /// @form.exclude
+  createdAt DateTime @default(now())
+  /// @form.exclude
+  updatedAt DateTime @updatedAt
+
+  venues     Venue[]
+  seasons    Season[]
+  teams      Team[]
+  players    Player[]
+  organizers CityOrganizer[]
+  newsPosts  NewsPost[]
+  donateLinks DonateLink[]
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+}
+
+/// Привязка организатора к городу (один пользователь может быть организатором нескольких городов)
+model CityOrganizer {
+  id        String   @id @default(cuid())
+  userId    String
+  cityId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  city City @relation(fields: [cityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, cityId])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([userId])
+  @@index([cityId])
+}
+
+/// Площадка (бар, клуб, библиотека — домашний стадион команды)
+model Venue {
+  id            String   @id @default(cuid())
+  /// Название площадки
+  /// @form.title("Название")
+  /// @form.placeholder("Бар Глагол")
+  name          String
+  /// URL-slug
+  /// @form.title("Slug (URL)")
+  /// @form.placeholder("glagol")
+  slug          String   @unique
+  /// Город
+  /// @form.title("Город")
+  /// @form.fieldType("select")
+  cityId        String
+  /// Адрес
+  /// @form.title("Адрес")
+  /// @form.placeholder("Невский пр., 1")
+  address       String?
+  /// Широта (для карты)
+  /// @form.exclude
+  latitude      Float?
+  /// Долгота (для карты)
+  /// @form.exclude
+  longitude     Float?
+  /// Фото площадки
+  /// @form.exclude
+  photo         String?
+  /// Описание
+  /// @form.title("Описание")
+  /// @form.fieldType("textarea")
+  description   String?
+  /// @deprecated Используй socialLinks
+  /// @form.title("Telegram")
+  /// @form.placeholder("https://t.me/glagol")
+  telegramLink  String?
+  /// @deprecated Используй socialLinks
+  /// @form.title("Сайт")
+  /// @form.placeholder("https://glagol.bar")
+  websiteUrl    String?
+  /// Социальные ссылки JSON
+  /// @form.exclude
+  socialLinks   Json?
+  /// @form.exclude
+  createdAt     DateTime @default(now())
+  /// @form.exclude
+  updatedAt     DateTime @updatedAt
+
+  city    City    @relation(fields: [cityId], references: [id])
+  teams   Team[]
+  matches Match[]
+  friendlyMatchRequests FriendlyMatchRequest[]
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([cityId])
+}

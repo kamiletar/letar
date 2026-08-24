@@ -1,0 +1,311 @@
+import "./competition"
+import "./teams"
+import "./geo"
+import "./users"
+import "./judging"
+import "./content"
+import "./social"
+
+// ========================================
+// Enum'ы
+// ========================================
+
+/// Тип матча
+enum MatchType {
+  /// Регулярный матч чемпионата
+  REGULAR
+  /// Товарищеский матч
+  FRIENDLY
+}
+
+/// Статус матча
+enum MatchStatus {
+  /// Запланирован
+  SCHEDULED
+  /// Идёт (живой скоринг)
+  LIVE
+  /// Завершён
+  FINISHED
+  /// Отложен
+  POSTPONED
+  /// Отменён
+  CANCELLED
+}
+
+/// Статус игрока в заявке на матч
+enum LineupStatus {
+  /// Стартовый состав 1-й тайм
+  STARTER_HALF1
+  /// Стартовый состав 2-й тайм
+  STARTER_HALF2
+  /// Замена
+  SUBSTITUTE
+  /// Не использован
+  UNUSED
+}
+
+/// Тип карточки (нарушение)
+enum CardType {
+  YELLOW
+  RED
+}
+
+/// Причина карточки
+enum CardReason {
+  /// Превышение 3 минут
+  OVERTIME
+  /// Пение (запрещено)
+  SINGING
+  /// Запрещённый перфоманс (костюмы, реквизит, взаимодействие с залом)
+  PERFORMANCE
+  /// Несогласованный дисс
+  UNSANCTIONED_DISS
+  /// Оскорбление
+  INSULT
+  /// Физическая агрессия
+  AGGRESSION
+  /// Другое нарушение
+  OTHER
+}
+
+/// Кто начинает 1-й тайм (жеребьёвка)
+enum HalfStartTeam {
+  HOME
+  AWAY
+}
+
+/// Статус заявки на товарищеский матч
+enum FriendlyRequestStatus {
+  /// Вызов отправлен, ждёт ответа соперника
+  CHALLENGE_SENT
+  /// Соперник принял, ждёт одобрения админа
+  ACCEPTED
+  /// Соперник отклонил вызов
+  DECLINED
+  /// Админ одобрил, матч создан
+  APPROVED
+  /// Админ отклонил
+  REJECTED
+}
+
+// ========================================
+// Матчи и результаты
+// ========================================
+
+/// Матч
+model Match {
+  id                 String         @id @default(cuid())
+  /// Тип матча (регулярный / товарищеский)
+  matchType          MatchType      @default(REGULAR)
+  /// Тур (обязателен для регулярных, null для товарищеских)
+  tourId             String?
+  /// Лига (обязательна для регулярных, null для товарищеских)
+  leagueId           String?
+  /// Сезон (прямая привязка для товарищеских матчей)
+  seasonId           String?
+  /// Домашняя команда
+  homeTeamId         String
+  /// Гостевая команда
+  awayTeamId         String
+  /// Площадка
+  venueId            String?
+  /// Дата и время матча
+  scheduledAt        DateTime?
+  /// Статус матча
+  status             MatchStatus    @default(SCHEDULED)
+  /// Суммарные баллы домашней команды
+  homeScore          Float          @default(0)
+  /// Суммарные баллы гостевой команды
+  awayScore          Float          @default(0)
+  /// Турнирные очки домашней команды (1 / 0.5 / 0)
+  homePoints         Float?
+  /// Турнирные очки гостевой команды (1 / 0.5 / 0)
+  awayPoints         Float?
+  /// Кто начинает 1-й тайм (жеребьёвка)
+  firstHalfStartTeam HalfStartTeam?
+  /// Токен доступа для скорера (по ссылке, без регистрации)
+  scorerToken        String         @unique @default(cuid())
+  /// Пользователь-счетовод (опционально, для отображения в афише)
+  scorerUserId       String?
+  /// Токен доступа для ведущего (по ссылке, без регистрации)
+  presenterToken     String         @unique @default(cuid())
+  /// Пользователь-ведущий (опционально, для отображения в афише)
+  presenterUserId    String?
+  /// Токен доступа для тренера домашней команды
+  homeCoachToken     String         @unique @default(cuid())
+  /// Токен доступа для тренера гостевой команды
+  awayCoachToken     String         @unique @default(cuid())
+  /// Тай-брейк (11-я пара при ничьей, Москва)
+  hasTiebreak        Boolean        @default(false)
+  /// URL постера/афиши матча
+  /// @form.title("Постер")
+  posterUrl          String?
+  /// Поэт, который читал победное стихотворение после завершения матча (только для регулярных матчей)
+  /// @form.exclude
+  victoryPoemPlayerId String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  tour          Tour?               @relation(fields: [tourId], references: [id])
+  league        League?             @relation(fields: [leagueId], references: [id])
+  season        Season?             @relation("FriendlyMatches", fields: [seasonId], references: [id])
+  homeTeam      TeamSeason          @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeam      TeamSeason          @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  venue         Venue?              @relation(fields: [venueId], references: [id])
+  scorerUser    User?               @relation("MatchScorer", fields: [scorerUserId], references: [id])
+  presenterUser User?               @relation("MatchPresenter", fields: [presenterUserId], references: [id])
+  victoryPoemPlayer Player?         @relation("VictoryPoem", fields: [victoryPoemPlayerId], references: [id])
+  lineups       MatchLineup[]
+  performances  PlayerPerformance[]
+  judgeSessions JudgeSession[]
+  audienceVotes AudienceVote[]
+  photos        MatchPhoto[]
+  bracketSlot   BracketSlot?
+  newsPosts     NewsPost[]
+  friendlyMatchRequests FriendlyMatchRequest[]
+  telegramMessages TelegramMessage[]
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([tourId])
+  @@index([leagueId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([seasonId])
+  @@index([matchType])
+}
+
+/// Заявка игрока на матч
+model MatchLineup {
+  id           String       @id @default(cuid())
+  /// Матч
+  matchId      String
+  /// Команда в сезоне
+  teamSeasonId String
+  /// Игрок
+  playerId     String
+  /// Статус в заявке
+  status       LineupStatus @default(UNUSED)
+  /// Порядок выхода (заполняется по ходу матча)
+  order        Int?
+
+  match      Match      @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  teamSeason TeamSeason @relation(fields: [teamSeasonId], references: [id])
+  player     Player     @relation(fields: [playerId], references: [id])
+
+  @@unique([matchId, teamSeasonId, playerId])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([matchId])
+  @@index([teamSeasonId])
+}
+
+/// Выступление поэта в раунде матча
+model PlayerPerformance {
+  id               String   @id @default(cuid())
+  /// Матч
+  matchId          String
+  /// Игрок
+  playerId         String
+  /// Команда в сезоне
+  teamSeasonId     String
+  /// Тайм (1 или 2)
+  half             Int
+  /// Номер раунда в тайме (1-5)
+  roundNumber      Int
+  /// Оценки жюри за текст (5 оценок, шкала 1-5)
+  textScores       Int[]
+  /// Оценки жюри за подачу (5 оценок, шкала 1-5)
+  deliveryScores   Int[]
+  /// Текст после отброса макс/мин (сумма 3 средних)
+  textAdjusted     Int?
+  /// Подача после отброса макс/мин (сумма 3 средних)
+  deliveryAdjusted Int?
+  /// Итого (textAdjusted + deliveryAdjusted), макс 30
+  totalScore       Int?
+  /// Время выступления в секундах
+  durationSec      Int?
+  createdAt        DateTime @default(now())
+
+  match      Match       @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player     Player      @relation(fields: [playerId], references: [id])
+  teamSeason TeamSeason  @relation(fields: [teamSeasonId], references: [id])
+  cards         Card[]
+  judgeVotes    JudgeVote[]
+  audienceVotes AudienceVote[]
+
+  @@unique([matchId, half, roundNumber, teamSeasonId])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([matchId])
+  @@index([playerId])
+}
+
+/// Карточка (нарушение). 5 жёлтых карточек у команды за сезон = дисквалификация.
+model Card {
+  id            String     @id @default(cuid())
+  /// Выступление, на котором получена карточка
+  performanceId String
+  /// Команда, получившая карточку (для подсчёта накопления за сезон)
+  teamSeasonId  String
+  /// Тип карточки
+  type          CardType
+  /// Причина
+  reason        CardReason
+  /// Комментарий
+  note          String?
+  createdAt     DateTime   @default(now())
+
+  performance PlayerPerformance @relation(fields: [performanceId], references: [id], onDelete: Cascade)
+  teamSeason  TeamSeason        @relation(fields: [teamSeasonId], references: [id])
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([performanceId])
+}
+
+// ========================================
+// Заявки на товарищеский матч
+// ========================================
+
+/// Заявка на товарищеский матч от тренера
+model FriendlyMatchRequest {
+  id              String   @id @default(cuid())
+  /// Команда-инициатор
+  fromTeamSeasonId String
+  /// Желаемый соперник
+  toTeamSeasonId   String
+  /// Предпочитаемая площадка
+  venueId          String?
+  /// Желаемая дата
+  preferredDate    DateTime?
+  /// Комментарий тренера
+  note             String?
+  /// Статус заявки
+  status           FriendlyRequestStatus @default(CHALLENGE_SENT)
+  /// Кто подал (тренер-инициатор)
+  submittedById    String
+  /// Тренер-соперник, который ответил на вызов
+  respondedById    String?
+  /// Когда соперник ответил
+  respondedAt      DateTime?
+  /// Причина отказа от соперника (необязательно)
+  declineReason    String?
+  /// Результат: созданный матч (после одобрения админом)
+  matchId          String?
+  createdAt        DateTime @default(now())
+
+  fromTeamSeason TeamSeason @relation("FriendlyFrom", fields: [fromTeamSeasonId], references: [id])
+  toTeamSeason   TeamSeason @relation("FriendlyTo", fields: [toTeamSeasonId], references: [id])
+  venue          Venue?     @relation(fields: [venueId], references: [id])
+  submittedBy    User       @relation("FriendlySubmitter", fields: [submittedById], references: [id])
+  respondedBy    User?      @relation("FriendlyResponder", fields: [respondedById], references: [id])
+  match          Match?     @relation(fields: [matchId], references: [id])
+
+  @@allow('read', auth() != null)
+  @@allow('create', auth() != null)
+  @@allow('update', auth() != null)
+  @@index([fromTeamSeasonId])
+  @@index([toTeamSeasonId])
+  @@index([status])
+}

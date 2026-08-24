@@ -1,0 +1,69 @@
+import "./matches"
+
+// ========================================
+// Настройки интеграций
+// ========================================
+
+/// Глобальные настройки Telegram-бота (singleton, id="default")
+model TelegramConfig {
+  id        String   @id @default("default")
+  /// Токен бота из @BotFather
+  botToken  String?
+  /// Включён ли бот
+  enabled   Boolean  @default(false)
+  /// Автоанонс при заполнении составов обеих команд
+  autoAnnouncement Boolean @default(false)
+  /// Автоитог тайма при завершении тайма
+  autoHalfTime     Boolean @default(false)
+  /// Авторезультат при завершении матча
+  autoResult       Boolean @default(false)
+  /// @form.exclude
+  createdAt DateTime @default(now())
+  /// @form.exclude
+  updatedAt DateTime @updatedAt
+
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+}
+
+/// Отправленные Telegram-сообщения (для трекинга реакций)
+model TelegramMessage {
+  id        String   @id @default(cuid())
+  /// ID матча (для связи с матчем, опционально)
+  matchId   String?
+  /// ID тура (для связи с туром, опционально)
+  tourId    String?
+  /// Telegram message_id (числовой)
+  messageId Int
+  /// Telegram chat_id
+  chatId    String
+  /// Тип сообщения: announcement, result, halfTime, schedule, tourSummary, voting
+  type      String
+  /// Время отправки
+  sentAt    DateTime @default(now())
+
+  match     Match?   @relation(fields: [matchId], references: [id], onDelete: SetNull)
+  reactions TelegramReaction[]
+
+  @@allow('read', auth() != null && 'ADMIN' in auth().roles)
+  @@allow('create,update,delete', true)
+  @@index([matchId])
+  @@index([chatId, messageId])
+}
+
+/// Реакции на Telegram-сообщения (агрегированные)
+model TelegramReaction {
+  id                 String   @id @default(cuid())
+  /// Ссылка на сообщение
+  telegramMessageId  String
+  /// Эмодзи реакции
+  emoji              String
+  /// Количество
+  count              Int      @default(0)
+  updatedAt          DateTime @updatedAt
+
+  telegramMessage TelegramMessage @relation(fields: [telegramMessageId], references: [id], onDelete: Cascade)
+
+  @@unique([telegramMessageId, emoji])
+  @@allow('read', auth() != null && 'ADMIN' in auth().roles)
+  @@allow('create,update,delete', true)
+}

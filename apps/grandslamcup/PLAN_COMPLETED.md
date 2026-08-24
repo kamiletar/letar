@@ -2,7 +2,20 @@
 
 Детальное описание всех реализованных фич.
 
-## 2026-08-19 — Фикс dev/prod-БД: `grandslamcup-db` был остановлен, не отсутствовал
+## 2026-08-25 — `schema.zmodel` разбит на 8 доменных файлов
+
+`schema.zmodel` (1613 строк) декомпозирован на `schema/{users,geo,competition,teams,matches,
+judging,content,social}.zmodel` с циклическими cross-file импортами между ними — методика уже
+была протестирована в одноразовом worktree 2026-08-24 (см.
+`.claude/docs/zenstack-multifile-schema-circular-imports.md`), это применение к реальному файлу.
+Корневой `schema.zmodel` теперь только импортирует 8 доменных файлов и держит
+`datasource`/`generator`/`plugin`-блоки (импорты обязаны идти раньше них).
+
+Единственная реальная сложность — двусторонние зависимости `users.zmodel` ↔ `geo.zmodel`
+(`User.organizedCities: CityOrganizer[]` и `CityOrganizer.user: User`): оба файла импортируют
+друг друга, `zenstack generate` (3.9.2) отработал без ошибок. `nx zenstack:generate` не изменил
+ни одного файла в `src/generated/`/`prisma/` — декомпозиция чисто структурная. `nx db:push` —
+база уже синхронна (drift отсутствует), `nx typecheck:tsgo`/`nx lint` зелёные.
 
 Причина «Postgres EACCES»/`AggregateError` при `nx dev`/`nx build` (см. запись ниже про
 `pressScale`) найдена: не отсутствие compose-конфигурации для локальной БД, а просто выключенный

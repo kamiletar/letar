@@ -1,0 +1,168 @@
+import "./teams"
+import "./matches"
+import "./content"
+import "./geo"
+
+// ========================================
+// Enum'ы
+// ========================================
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+// ========================================
+// Пользователь (синхронизируется с ключницей)
+// ========================================
+
+model User {
+  id              String     @id @default(cuid())
+  /// Имя пользователя
+  name            String?
+  /// Email пользователя
+  email           String     @unique
+  /// URL аватара
+  image           String?
+  /// Email подтверждён
+  emailVerified   Boolean    @default(false)
+  /// Роли пользователя
+  roles           UserRole[] @default([USER])
+  /// ID в ключнице (для связи)
+  externalId      String?    @unique
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  /// Better Auth связи
+  accounts        Account[]
+  sessions        Session[]
+
+  /// Привязка к профилю поэта (опционально)
+  player          Player?
+  /// Города, в которых пользователь является организатором
+  organizedCities CityOrganizer[]
+  /// Поданные заявки на состав/трансфер
+  submittedApplications RosterApplication[] @relation("AppSubmitter")
+  /// Рассмотренные заявки
+  reviewedApplications  RosterApplication[] @relation("AppReviewer")
+  /// Загруженные фото матчей
+  uploadedPhotos        MatchPhoto[]        @relation("MatchPhotoUploader")
+  /// Написанные новости
+  newsPosts             NewsPost[]          @relation("NewsAuthor")
+  /// Матчи где пользователь — счетовод
+  scoredMatches         Match[]             @relation("MatchScorer")
+  /// Матчи где пользователь — ведущий
+  presentedMatches      Match[]             @relation("MatchPresenter")
+  /// Заявки на товарищеские матчи (поданные)
+  friendlySubmitted     FriendlyMatchRequest[] @relation("FriendlySubmitter")
+  /// Заявки на товарищеские матчи (ответы)
+  friendlyResponded     FriendlyMatchRequest[] @relation("FriendlyResponder")
+  /// Push-подписки для уведомлений
+  pushSubscriptions     PushSubscription[]
+  /// Telegram chatId для личных сообщений (привязывается через /start)
+  telegramChatId        String?   @unique
+  /// 152-ФЗ — логи cookie-согласий
+  consentLogs           ConsentLog[]
+
+  @@allow('read', auth() == this)
+  @@allow('update', auth() == this)
+  @@allow('read,update,delete', auth() != null && 'ADMIN' in auth().roles)
+}
+
+// Better Auth — аккаунты OAuth
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@deny('all', true)
+  @@index([userId])
+}
+
+// Better Auth — сессии
+model Session {
+  id          String   @id @default(cuid())
+  userId      String
+  token       String   @unique
+  expiresAt   DateTime
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@deny('all', true)
+  @@index([userId])
+  @@index([token])
+}
+
+// Better Auth — верификация
+model Verification {
+  id          String   @id @default(cuid())
+  identifier  String
+  value       String
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@deny('all', true)
+  @@index([identifier])
+}
+
+// ========================================
+// Настройки интеграций
+// ========================================
+
+/// Подписка на push-уведомления (web-push)
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, endpoint])
+  @@allow('create,read,delete', auth() == user)
+  @@allow('read', auth() != null && 'ADMIN' in auth().roles)
+}
+
+// ============================================================================
+// 152-ФЗ — Логирование cookie-согласий
+// ============================================================================
+model ConsentLog {
+  id                 String   @id @default(cuid())
+  userId             String?
+  ipHash             String   // SHA-256(IP) — не хранится сырой IP
+  userAgent          String?
+  acceptedAnalytics  Boolean
+  acceptedMarketing  Boolean
+  acceptedFunctional Boolean  @default(true)
+  consentVersion     String
+  consentedAt        DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@allow('create', true)
+  @@allow('read', auth() != null && 'ADMIN' in auth().roles)
+  @@index([userId])
+  @@index([consentedAt])
+  @@map("consentLog")
+}

@@ -1,0 +1,329 @@
+import "./geo"
+import "./teams"
+import "./matches"
+
+// ========================================
+// Enum'ы
+// ========================================
+
+/// Статус сезона
+enum SeasonStatus {
+  /// Предстоящий
+  UPCOMING
+  /// Активный
+  ACTIVE
+  /// Завершённый
+  FINISHED
+}
+
+/// Формат турнира
+enum TournamentFormat {
+  /// Каждый с каждым (СПб)
+  ROUND_ROBIN
+  /// Швейцарская система (Москва)
+  SWISS
+}
+
+/// Тип этапа турнира
+enum StageType {
+  /// Групповой этап (round-robin или швейцарка)
+  GROUP
+  /// Верхняя сетка плей-офф (Winners Bracket)
+  PLAYOFF_UPPER
+  /// Нижняя сетка плей-офф (Losers Bracket)
+  PLAYOFF_LOWER
+  /// Гранд-финал
+  GRAND_FINAL
+}
+
+// ========================================
+// Турнирная структура
+// ========================================
+
+/// Сезон (2024-2025 СПб, 2025 Москва, ...)
+model Season {
+  id        String       @id @default(cuid())
+  /// Название сезона
+  /// @form.title("Название")
+  /// @form.placeholder("Сезон 2025-2026 СПб")
+  name      String
+  /// URL-slug
+  /// @form.title("Slug (URL)")
+  /// @form.placeholder("2025-2026-spb")
+  slug      String       @unique
+  /// Город
+  /// @form.title("Город")
+  /// @form.fieldType("select")
+  cityId    String
+  /// Дата начала
+  /// @form.title("Дата начала")
+  startDate DateTime?
+  /// Дата окончания
+  /// @form.title("Дата окончания")
+  endDate   DateTime?
+  /// Статус сезона
+  /// @form.title("Статус")
+  status    SeasonStatus @default(UPCOMING)
+  /// Трансферное окно открыто
+  /// @form.title("Трансферное окно")
+  transferWindowOpen Boolean @default(false)
+  /// Формат турнира
+  /// @form.title("Формат")
+  format             TournamentFormat @default(ROUND_ROBIN)
+  /// Макс замен во 2-м тайме
+  /// @form.title("Макс замен во 2-м тайме")
+  maxSubstitutions   Int              @default(2)
+  /// Ничья разрешена (false = тай-брейк 11-я пара)
+  /// @form.title("Ничья разрешена")
+  drawAllowed        Boolean          @default(true)
+  /// Домашние стадионы (false = площадку назначает оргкомитет)
+  /// @form.title("Домашние стадионы")
+  homeVenuesEnabled  Boolean          @default(true)
+  /// Показывать счёт по ходу матча (false = только в конце)
+  /// @form.title("Промежуточный счёт")
+  showLiveScore      Boolean          @default(true)
+  /// @form.exclude
+  createdAt DateTime     @default(now())
+  /// @form.exclude
+  updatedAt DateTime     @updatedAt
+
+  city              City              @relation(fields: [cityId], references: [id])
+  leagues           League[]
+  rounds            Round[]
+  stages            Stage[]
+  teamSeasons       TeamSeason[]
+  playerRatings     PlayerRating[]
+  bracketSlots      BracketSlot[]
+  playerSuspensions PlayerSuspension[]
+  friendlyMatches   Match[]            @relation("FriendlyMatches")
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([cityId])
+  @@index([status])
+}
+
+/// Лига в рамках сезона (Высшая, Первая)
+model League {
+  id       String @id @default(cuid())
+  /// Название лиги
+  name     String
+  /// Сезон
+  seasonId String
+  /// Порядок отображения
+  order    Int
+
+  season      Season       @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  teamSeasons TeamSeason[]
+  matches     Match[]
+
+  @@unique([seasonId, name])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([seasonId])
+}
+
+/// Круг (Первый круг, Второй круг — между ними трансферное окно)
+model Round {
+  id        String    @id @default(cuid())
+  /// Название круга
+  name      String
+  /// Сезон
+  seasonId  String
+  /// Номер круга в сезоне
+  number    Int
+  /// Этап турнира (для плей-офф)
+  stageId   String?
+  /// Дата начала
+  startDate DateTime?
+  /// Дата окончания
+  endDate   DateTime?
+
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  stage  Stage? @relation(fields: [stageId], references: [id])
+  tours  Tour[]
+
+  @@unique([seasonId, number])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([seasonId])
+  @@index([stageId])
+}
+
+/// Тур внутри круга (1 тур, 2 тур, ...)
+model Tour {
+  id      String @id @default(cuid())
+  /// Круг
+  roundId String
+  /// Номер тура в круге
+  number  Int
+
+  round   Round   @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  matches Match[]
+
+  @@unique([roundId, number])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([roundId])
+}
+
+// ========================================
+// Кэшированные данные (пересчитываются)
+// ========================================
+
+/// Турнирная таблица
+model Standings {
+  id           String @id @default(cuid())
+  /// Команда в сезоне
+  teamSeasonId String @unique
+  /// Позиция в таблице
+  position     Int
+  /// Матчей сыграно
+  played       Int    @default(0)
+  /// Побед
+  won          Int    @default(0)
+  /// Ничьих
+  drawn        Int    @default(0)
+  /// Поражений
+  lost         Int    @default(0)
+  /// Турнирные очки (1 за победу, 0.5 за ничью)
+  points       Float  @default(0)
+  /// Забитые баллы (сумма баллов команды)
+  scored       Float  @default(0)
+  /// Пропущенные баллы (сумма баллов соперников)
+  conceded     Float  @default(0)
+  /// Разница баллов
+  difference   Float  @default(0)
+
+  teamSeason TeamSeason @relation(fields: [teamSeasonId], references: [id], onDelete: Cascade)
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+}
+
+/// Личный зачёт поэта за сезон
+model PlayerRating {
+  id            String @id @default(cuid())
+  /// Поэт
+  playerId      String
+  /// Сезон
+  seasonId      String
+  /// Матчей сыграно
+  matchesPlayed Int    @default(0)
+  /// Суммарный балл за сезон
+  totalScore    Int    @default(0)
+  /// Средний балл за выступление
+  avgScore      Float  @default(0)
+  /// Лучший балл за выступление
+  bestScore     Int    @default(0)
+
+  player Player @relation(fields: [playerId], references: [id])
+  season Season @relation(fields: [seasonId], references: [id])
+
+  @@unique([playerId, seasonId])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([playerId])
+  @@index([seasonId])
+}
+
+// ========================================
+// Этапы турнира и плей-офф сетка
+// ========================================
+
+/// Этап турнира (групповой, верхняя/нижняя сетка, гранд-финал)
+model Stage {
+  id       String    @id @default(cuid())
+  /// Сезон
+  seasonId String
+  /// Название этапа
+  name     String
+  /// Тип этапа
+  type     StageType
+  /// Порядок отображения
+  order    Int
+
+  season       Season        @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  rounds       Round[]
+  bracketSlots BracketSlot[]
+
+  @@unique([seasonId, order])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([seasonId])
+}
+
+/// Слот в турнирной сетке (плей-офф)
+model BracketSlot {
+  id           String  @id @default(cuid())
+  /// Сезон
+  seasonId     String
+  /// Этап
+  stageId      String
+  /// Номер раунда в сетке (WB R1=1, WB R2=2, LB R1=1...)
+  roundNumber  Int
+  /// Номер слота внутри раунда (1-8)
+  slotNumber   Int
+  /// Название слота (WB R1 #1, LB SF, Grand Final...)
+  label        String?
+
+  /// Команда (заполняется при определении)
+  teamSeasonId  String?
+  /// Матч (создаётся когда обе команды определены)
+  matchId       String?  @unique
+  /// Источник 1 — победитель другого слота
+  sourceSlot1Id String?
+  /// Источник 2 — победитель другого слота
+  sourceSlot2Id String?
+  /// Проигравший идёт сюда (для drop из верхней в нижнюю)
+  loserGoesToId String?
+
+  season       Season       @relation(fields: [seasonId], references: [id])
+  stage        Stage        @relation(fields: [stageId], references: [id])
+  teamSeason   TeamSeason?  @relation(fields: [teamSeasonId], references: [id])
+  match        Match?       @relation(fields: [matchId], references: [id])
+  sourceSlot1  BracketSlot? @relation("Source1", fields: [sourceSlot1Id], references: [id])
+  sourceSlot2  BracketSlot? @relation("Source2", fields: [sourceSlot2Id], references: [id])
+  loserGoesTo  BracketSlot? @relation("LoserDrop", fields: [loserGoesToId], references: [id])
+
+  feedsTo1      BracketSlot[] @relation("Source1")
+  feedsTo2      BracketSlot[] @relation("Source2")
+  receivesLoser BracketSlot[] @relation("LoserDrop")
+
+  @@unique([seasonId, stageId, roundNumber, slotNumber])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([seasonId])
+  @@index([stageId])
+}
+
+// ========================================
+// Отстранения игроков
+// ========================================
+
+/// Отстранение игрока (за красную карточку, накопление жёлтых или плагиат)
+model PlayerSuspension {
+  id               String   @id @default(cuid())
+  /// Игрок
+  playerId         String
+  /// Сезон
+  seasonId         String
+  /// Причина: RED_CARD, YELLOW_ACCUMULATION, DOUBLE_YELLOW, PLAGIARISM
+  reason           String
+  /// Количество матчей пропуска (оставшееся). 0 для сезонных дисквалификаций
+  matchesLeft      Int      @default(1)
+  /// Дисквалификация до конца сезона (плагиат и др.)
+  untilEndOfSeason Boolean  @default(false)
+  /// Активно ли отстранение
+  active           Boolean  @default(true)
+  /// Начало отстранения
+  startedAt        DateTime @default(now())
+
+  player Player @relation(fields: [playerId], references: [id])
+  season Season @relation(fields: [seasonId], references: [id])
+
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+  @@index([playerId, seasonId])
+  @@index([active])
+}
