@@ -10,13 +10,15 @@
       "@letar/consent",
       "@letar/glitchtip",
       "@letar/seed-utils",
-      "@letar/pg-url"
+      "@letar/pg-url",
+      "@letar/env-load"
     ]
   },
   "dependencies": {
     "@simplewebauthn/browser": "^13.3.0",
     "@simplewebauthn/server": "^13.3.1",
     "geoip-lite": "^2.0.2",
+    "@letar/env-load": "workspace:*",
     "@letar/glitchtip": "workspace:*",
     "@letar/seed-utils": "workspace:*",
     "@letar/pg-url": "workspace:*"
