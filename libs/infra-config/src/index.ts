@@ -114,7 +114,16 @@ export function getServerForApp(app: string): InfraServer {
  * приложения из этого списка не блокируются жёстче, чем не входящие в него — единственный
  * fail-closed механизм сейчас — `HARD_GATED_APPS` ниже.
  */
-export const E2E_GATED_APPS: string[] = ['grandslamcup', 'time', 'aboi', 'aira-web', 'aprel8008', 'domwellbes', 'kami']
+export const E2E_GATED_APPS: string[] = [
+  'grandslamcup',
+  'time',
+  'aboi',
+  'aira-web',
+  'aprel8008',
+  'domwellbes',
+  'kami',
+  'form-example',
+]
 
 /**
  * Приложения с ЖЁСТКИМ (fail-closed) pre-deploy e2e-гейтом (PLAN-INFRA.md §18.7,
