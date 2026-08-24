@@ -2,13 +2,12 @@
  * Скрипт для добавления товарищеских матчей
  * Запуск: bun apps/grandslamcup/scripts/add-friendly-matches.ts
  */
+import { loadEnvCascade } from '@letar/env-load'
 import { parsePostgresUrl } from '@letar/pg-url'
-import { config } from 'dotenv'
 import { join } from 'node:path'
 import { Pool } from 'pg'
 
-config({ path: join(import.meta.dirname, '../.env.local'), quiet: true })
-config({ path: join(import.meta.dirname, '../.env'), quiet: true })
+loadEnvCascade(join(import.meta.dirname, '..'))
 
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL не задан')

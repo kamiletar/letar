@@ -25,13 +25,11 @@
  *
  * Запуск: bun apps/grandslamcup/scripts/anonymize-staging-db.ts
  */
-import { config } from 'dotenv'
+import { loadEnvCascade } from '@letar/env-load'
 import { join } from 'node:path'
 import { Pool } from 'pg'
 
-config({ path: join(import.meta.dirname, '../.env.staging'), quiet: true })
-config({ path: join(import.meta.dirname, '../.env.local'), quiet: true })
-config({ path: join(import.meta.dirname, '../.env'), quiet: true })
+loadEnvCascade(join(import.meta.dirname, '..'), ['.env.staging', '.env.local', '.env'])
 
 const DATABASE_URL = process.env.DATABASE_URL
 
