@@ -331,7 +331,7 @@
     },
     "apps/aboi": {
       "name": "@letar/aboi",
-      "version": "0.67.9",
+      "version": "0.68.0",
       "dependencies": {
         "@letar/i18n-proxy": "workspace:*",
         "@letar/pg-url": "workspace:*",
@@ -362,7 +362,7 @@
     },
     "apps/animatrona": {
       "name": "@letar/animatrona",
-      "version": "0.55.21",
+      "version": "0.55.22",
       "dependencies": {
         "@letar/seed-utils": "workspace:*",
         "cheerio": "^1.2.0",
@@ -496,7 +496,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.144.0",
+      "version": "0.147.1",
       "dependencies": {
         "@letar/pg-url": "workspace:*",
         "@letar/theme-check": "workspace:*",
@@ -510,7 +510,7 @@
     },
     "apps/driving-school": {
       "name": "driving-school",
-      "version": "0.240.5",
+      "version": "0.240.6",
       "dependencies": {
         "@letar/hooks": "workspace:*",
         "@letar/pg-url": "workspace:*",
@@ -583,7 +583,7 @@
     },
     "apps/grandslamcup": {
       "name": "@letar/grandslamcup",
-      "version": "3.38.9",
+      "version": "3.39.0",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
         "@letar/pg-url": "workspace:*",
@@ -596,7 +596,7 @@
     },
     "apps/kami": {
       "name": "kami",
-      "version": "0.33.7",
+      "version": "0.33.8",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
@@ -719,8 +719,9 @@
     },
     "apps/svoichuzhie": {
       "name": "@letar/svoichuzhie",
-      "version": "0.10.33",
+      "version": "0.10.36",
       "dependencies": {
+        "@letar/api-server": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "qrcode": "^1.5.4",
         "tus-js-client": "^4.3.1",
@@ -748,9 +749,10 @@
     },
     "apps/time": {
       "name": "@letar/time",
-      "version": "0.5.8",
+      "version": "0.5.9",
       "dependencies": {
         "@letar/api-server": "workspace:*",
+        "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
         "@letar/pg-url": "workspace:*",
@@ -929,6 +931,10 @@
       "devDependencies": {
         "@types/nodemailer": "^6.4.17",
       },
+    },
+    "libs/env-load": {
+      "name": "@letar/env-load",
+      "version": "0.1.0",
     },
     "libs/exoplayer-ass": {
       "name": "@letar/exoplayer-ass",
@@ -2327,6 +2333,8 @@
     "@letar/electron-storage": ["@letar/electron-storage@workspace:libs/electron-storage"],
 
     "@letar/email": ["@letar/email@workspace:libs/email"],
+
+    "@letar/env-load": ["@letar/env-load@workspace:libs/env-load"],
 
     "@letar/exoplayer-ass": ["@letar/exoplayer-ass@workspace:libs/exoplayer-ass"],
 

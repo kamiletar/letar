@@ -11,6 +11,9 @@
       "@letar/chakra-provider": [
         "../../libs/chakra-provider/src/index.ts"
       ],
+      "@letar/env-load": [
+        "../../libs/env-load/src/index.ts"
+      ],
       "@letar/ui": [
         "../../libs/ui/src/index.ts"
       ],
