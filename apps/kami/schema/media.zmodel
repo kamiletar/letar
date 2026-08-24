@@ -1,0 +1,85 @@
+import "./auth"
+
+// ========================================
+// Изображения
+// ========================================
+
+// Категория изображения
+enum ImageCategory {
+  /// Блог
+  BLOG
+  /// Контент (кейсы, проекты)
+  CONTENT
+  /// Аватар
+  AVATAR
+  /// Прочее
+  OTHER
+}
+
+// Загруженное изображение
+model Image {
+  id           String        @id @default(cuid())
+  filename     String                    // Оригинальное имя файла
+  path         String        @unique     // Путь к файлу в uploads/
+  mimeType     String                    // MIME тип (image/png, image/jpeg)
+  size         Int                       // Размер в байтах
+  width        Int?                      // Ширина в пикселях
+  height       Int?                      // Высота в пикселях
+  blurDataURL  String?                   // Base64 blur placeholder для Next.js Image
+  category     ImageCategory @default(OTHER)
+
+  uploadedById String?
+  uploadedBy   User?         @relation("uploadedImages", fields: [uploadedById], references: [id], onDelete: SetNull)
+  uploadedAt   DateTime      @default(now())
+
+  @@index([category])
+  @@index([path])
+  @@allow('read', true)
+  @@allow('create,delete', auth() != null && 'ADMIN' in auth().roles)
+}
+
+// ========================================
+// Аудиофайлы
+// ========================================
+
+// Загруженный аудиофайл
+model AudioFile {
+  id           String   @id @default(cuid())
+  title        String                    // Название трека
+  slug         String   @unique          // ЧПУ slug (из title)
+  filename     String                    // Имя файла на диске
+  path         String   @unique          // Путь в uploads/audio/
+  mimeType     String                    // audio/mpeg
+  size         Int                       // Размер в байтах
+  duration     Int?                      // Длительность в секундах
+  artist       String?                   // Исполнитель (из ID3)
+  album        String?                   // Альбом (из ID3)
+  coverPath    String?                   // Путь к обложке в uploads/audio/covers/
+  bitrate      Int?                      // Битрейт в kbps
+
+  uploadedById String?
+  uploadedBy   User?    @relation("uploadedAudio", fields: [uploadedById], references: [id], onDelete: SetNull)
+  uploadedAt   DateTime @default(now())
+
+  @@index([path])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+}
+
+model UploadedFile {
+  id           String   @id @default(cuid())
+  filename     String                    // Оригинальное имя файла
+  storedName   String                    // Имя на диске (уникальное)
+  path         String   @unique          // Путь в uploads/files/
+  mimeType     String                    // MIME-тип файла
+  size         Int                       // Размер в байтах
+  description  String?                   // Описание (опционально)
+
+  uploadedById String?
+  uploadedBy   User?    @relation("uploadedFiles", fields: [uploadedById], references: [id], onDelete: SetNull)
+  uploadedAt   DateTime @default(now())
+
+  @@index([path])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+}

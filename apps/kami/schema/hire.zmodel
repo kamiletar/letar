@@ -1,0 +1,60 @@
+import "./organization"
+import "./survey"
+
+// Заявка на работу (Hire Me форма)
+model HireRequest {
+  id              String   @id @default(cuid())
+
+  // Шаг 1: О компании
+  companyName     String
+  companyWebsite  String?
+  companySize     String?  // startup, small, medium, large, enterprise
+  industry        String?
+
+  // Шаг 2: Команда
+  teamSize        String?
+  teamStructure   String?
+  remoteFriendly  Boolean  @default(true)
+
+  // Шаг 3: Стек
+  techStack       String[] @default([])
+  projectType     String?  // web, mobile, desktop, other
+
+  // Шаг 4: Условия
+  employmentType  String?  // full-time, part-time, contract, freelance
+  location        String?
+  timezone        String?
+
+  // Шаг 5: Компенсация
+  salaryRange     String?
+  benefits        String?
+
+  // Шаг 6: Процесс найма
+  hiringProcess   String?
+  startDate       String?
+
+  // Шаг 7: Контакты
+  contactName     String
+  contactEmail    String
+  contactTelegram String?
+  message         String?
+
+  // Мета
+  status          String   @default("new") // new, reviewed, replied, closed
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Связь с организацией (для командных опросов)
+  organizationId  String?
+  organization    Organization? @relation(fields: [organizationId], references: [id])
+
+  // Опросы команды
+  surveys         TeamSurvey[]
+
+  // Только создание разрешено всем, чтение владельцу организации
+  @@allow('create', true)
+  @@allow('read', organization.members?[userId == auth().id])
+  @@allow('update', organization.members?[userId == auth().id && role == 'owner'])
+
+  @@index([organizationId])
+}

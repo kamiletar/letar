@@ -1,0 +1,70 @@
+import "./auth"
+import "./hire"
+import "./survey"
+
+// ========================================
+// Better Auth Organization модели
+// ========================================
+
+// Организация (компания работодателя)
+model Organization {
+  id          String   @id @default(cuid())
+  name        String   // Название организации
+  slug        String   @unique // URL-friendly идентификатор
+  logo        String?  // URL логотипа
+  metadata    String?  // JSON метаданные
+  createdAt   DateTime @default(now())
+
+  // Связи
+  members     Member[]
+  invitations Invitation[]
+  hireRequests HireRequest[]
+  surveys     TeamSurvey[]
+
+  // Чтение для членов организации, управление только owner/admin
+  @@allow('read', members?[userId == auth().id])
+  @@allow('create', auth() != null)
+  @@allow('update,delete', members?[userId == auth().id && role == 'owner'])
+}
+
+// Член организации
+model Member {
+  id              String   @id @default(cuid())
+  userId          String
+  organizationId  String
+  role            String   @default("member") // owner, admin, member
+  createdAt       DateTime @default(now())
+
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Ответы на опросы
+  surveyResponses TeamSurveyResponse[]
+
+  // Запретить прямой доступ через enhanced client (управление через Better Auth)
+  @@deny('all', true)
+
+  @@unique([userId, organizationId])
+  @@index([userId])
+  @@index([organizationId])
+}
+
+// Приглашение в организацию
+model Invitation {
+  id              String   @id @default(cuid())
+  email           String   // Email приглашённого
+  role            String   @default("member") // Роль при принятии
+  status          String   @default("pending") // pending, accepted, rejected, cancelled
+  expiresAt       DateTime
+  inviterId       String   // Кто пригласил
+  organizationId  String
+  createdAt       DateTime @default(now())
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Запретить прямой доступ через enhanced client (управление через Better Auth)
+  @@deny('all', true)
+
+  @@index([email])
+  @@index([organizationId])
+}

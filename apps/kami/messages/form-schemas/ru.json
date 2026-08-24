@@ -7,18 +7,21 @@
       "label": "Администратор"
     }
   },
-  "SkillLevel": {
-    "BEGINNER": {
-      "label": "Начинающий"
+  "SurveyQuestionType": {
+    "TEXT": {
+      "label": "Свободный текст"
     },
-    "INTERMEDIATE": {
-      "label": "Средний"
+    "SINGLE_CHOICE": {
+      "label": "Один вариант из списка"
     },
-    "ADVANCED": {
-      "label": "Продвинутый"
+    "MULTI_CHOICE": {
+      "label": "Несколько вариантов"
     },
-    "EXPERT": {
-      "label": "Эксперт"
+    "RATING": {
+      "label": "Оценка 1-5 или 1-10"
+    },
+    "SCALE": {
+      "label": "Шкала (не согласен - согласен)"
     }
   },
   "ImageCategory": {
@@ -33,6 +36,20 @@
     },
     "OTHER": {
       "label": "Прочее"
+    }
+  },
+  "SkillLevel": {
+    "BEGINNER": {
+      "label": "Начинающий"
+    },
+    "INTERMEDIATE": {
+      "label": "Средний"
+    },
+    "ADVANCED": {
+      "label": "Продвинутый"
+    },
+    "EXPERT": {
+      "label": "Эксперт"
     }
   },
   "LearningItemType": {
@@ -70,23 +87,6 @@
     },
     "ABANDONED": {
       "label": "Заброшено"
-    }
-  },
-  "SurveyQuestionType": {
-    "TEXT": {
-      "label": "Свободный текст"
-    },
-    "SINGLE_CHOICE": {
-      "label": "Один вариант из списка"
-    },
-    "MULTI_CHOICE": {
-      "label": "Несколько вариантов"
-    },
-    "RATING": {
-      "label": "Оценка 1-5 или 1-10"
-    },
-    "SCALE": {
-      "label": "Шкала (не согласен - согласен)"
     }
   },
   "SocialPlatformType": {

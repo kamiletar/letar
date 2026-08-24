@@ -7,18 +7,21 @@
       "label": "Administrator"
     }
   },
-  "SkillLevel": {
-    "BEGINNER": {
-      "label": "Beginner"
+  "SurveyQuestionType": {
+    "TEXT": {
+      "label": "Free text"
     },
-    "INTERMEDIATE": {
-      "label": "Intermediate"
+    "SINGLE_CHOICE": {
+      "label": "Single choice"
     },
-    "ADVANCED": {
-      "label": "Advanced"
+    "MULTI_CHOICE": {
+      "label": "Multiple choice"
     },
-    "EXPERT": {
-      "label": "Expert"
+    "RATING": {
+      "label": "Rating (1-5 or 1-10)"
+    },
+    "SCALE": {
+      "label": "Scale (disagree - agree)"
     }
   },
   "ImageCategory": {
@@ -33,6 +36,20 @@
     },
     "OTHER": {
       "label": ""
+    }
+  },
+  "SkillLevel": {
+    "BEGINNER": {
+      "label": "Beginner"
+    },
+    "INTERMEDIATE": {
+      "label": "Intermediate"
+    },
+    "ADVANCED": {
+      "label": "Advanced"
+    },
+    "EXPERT": {
+      "label": "Expert"
     }
   },
   "LearningItemType": {
@@ -70,23 +87,6 @@
     },
     "ABANDONED": {
       "label": "Abandoned"
-    }
-  },
-  "SurveyQuestionType": {
-    "TEXT": {
-      "label": "Free text"
-    },
-    "SINGLE_CHOICE": {
-      "label": "Single choice"
-    },
-    "MULTI_CHOICE": {
-      "label": "Multiple choice"
-    },
-    "RATING": {
-      "label": "Rating (1-5 or 1-10)"
-    },
-    "SCALE": {
-      "label": "Scale (disagree - agree)"
     }
   },
   "SocialPlatformType": {

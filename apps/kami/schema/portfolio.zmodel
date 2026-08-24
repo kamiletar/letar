@@ -1,0 +1,84 @@
+// ========================================
+// Портфолио модели
+// ========================================
+
+// Уровень навыка
+enum SkillLevel {
+  /// Начинающий
+  BEGINNER
+  /// Средний
+  INTERMEDIATE
+  /// Продвинутый
+  ADVANCED
+  /// Эксперт
+  EXPERT
+}
+
+// Категория навыков
+model SkillCategory {
+  id          String   @id @default(cuid())
+  name        String   // Название на русском (для отображения)
+  nameEn      String   // Название на английском
+  slug        String   @unique // URL-friendly идентификатор
+  icon        String?  // Название иконки из lucide-react
+  order       Int      @default(0) // Порядок сортировки
+
+  skills      Skill[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Публичный доступ на чтение
+  @@allow('read', true)
+}
+
+// Навык
+model Skill {
+  id          String       @id @default(cuid())
+  name        String       // Название технологии
+  slug        String       @unique // URL-friendly идентификатор
+  level       SkillLevel   @default(INTERMEDIATE)
+  years       Float?       // Годы опыта (ручной ввод, игнорируется если указан startYear)
+  startYear   Int?         // Год начала практики (для автоматического расчёта опыта)
+  icon        String?      // Название иконки или URL логотипа
+  description String?      // Краткое описание (опционально)
+  url         String?      // Ссылка на документацию
+  order       Int          @default(0) // Порядок сортировки
+  featured    Boolean      @default(false) // Выделенный навык
+
+  category    SkillCategory @relation(fields: [categoryId], references: [id])
+  categoryId  String
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Публичный доступ на чтение
+  @@allow('read', true)
+
+  @@index([categoryId])
+}
+
+// Проект в портфолио
+model Project {
+  id          String   @id @default(cuid())
+  title       String   // Название проекта
+  titleEn     String   // Название на английском
+  slug        String   @unique
+  description String   // Описание на русском
+  descriptionEn String // Описание на английском
+  image       String?  // URL превью изображения
+  demoUrl     String?  // Ссылка на демо
+  codeUrl     String?  // Ссылка на код (GitHub)
+  caseUrl     String?  // Ссылка на кейс
+  featured    Boolean  @default(false)
+  order       Int      @default(0)
+
+  // Технологии (JSON массив строк)
+  technologies String[] @default([])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Публичный доступ на чтение
+  @@allow('read', true)
+}

@@ -1,0 +1,77 @@
+// ========================================
+// Обучение и контент
+// ========================================
+
+// Тип элемента для списков изученного
+enum LearningItemType {
+  /// Книга
+  BOOK
+  /// Курс
+  COURSE
+  /// Статья
+  ARTICLE
+  /// Видео
+  VIDEO
+  /// Подкаст
+  PODCAST
+  /// Конференция
+  CONFERENCE
+  /// Другое
+  OTHER
+}
+
+// Статус изучения
+enum LearningStatus {
+  /// Хочу изучить
+  WANT_TO_LEARN
+  /// Изучаю
+  IN_PROGRESS
+  /// Изучено
+  COMPLETED
+  /// Заброшено
+  ABANDONED
+}
+
+// Элемент списка изученного/прочитанного
+model LearningItem {
+  id          String   @id @default(cuid())
+
+  // Основная информация
+  title       String             // Название книги/курса
+  titleEn     String?            // Английское название
+  author      String?            // Автор/создатель
+  url         String?            // Ссылка на ресурс
+  coverImage  String?            // Обложка
+
+  // Классификация
+  type        LearningItemType   @default(BOOK)
+  category    String?            // Категория (programming, design, business, etc.)
+  tags        String[]           // Теги
+
+  // Прогресс
+  status      LearningStatus     @default(WANT_TO_LEARN)
+  rating      Int?               // Оценка 1-5
+  notes       String?            // Заметки/краткое резюме
+  notesEn     String?            // Английские заметки
+
+  // Даты
+  startedAt   DateTime?          // Когда начал
+  completedAt DateTime?          // Когда закончил
+  year        Int?               // Год издания/публикации
+
+  // Публикация
+  isPublished Boolean  @default(false)
+  isFeatured  Boolean  @default(false)
+  order       Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Публичное чтение опубликованных, управление только админ
+  @@allow('read', isPublished == true)
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+
+  @@index([type])
+  @@index([status])
+  @@index([category])
+}

@@ -1,0 +1,250 @@
+// Консалтинговая услуга
+model ConsultingService {
+  id            String   @id @default(cuid())
+
+  // Основное
+  title         String
+  titleEn       String
+  description   String
+  descriptionEn String
+  slug          String   @unique
+
+  // Детали
+  icon          String?  // Название иконки (lucide)
+  price         String?  // Отображаемая цена ("от $100/час")
+  priceType     String   @default("hourly") // hourly, project, retainer
+
+  // Порядок и статус
+  order         Int      @default(0)
+  isActive      Boolean  @default(true)
+
+  // Связи
+  requests      ConsultingRequest[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Публичный доступ на чтение
+  @@allow('read', true)
+}
+
+// Заявка на консультацию
+model ConsultingRequest {
+  id            String   @id @default(cuid())
+
+  // Услуга
+  serviceId     String?
+  service       ConsultingService? @relation(fields: [serviceId], references: [id])
+
+  // Контактные данные
+  name          String
+  email         String
+  telegram      String?
+  company       String?
+
+  // Детали запроса
+  serviceType   String?  // architecture, code-review, audit, mentoring
+  projectType   String?  // web, mobile, desktop, other
+  description   String   // Описание задачи
+  budget        String?  // Примерный бюджет
+  timeline      String?  // Желаемые сроки
+
+  // Доступность
+  preferredTime String?  // Предпочтительное время для созвона
+  timezone      String?
+
+  // Мета
+  status        String   @default("new") // new, contacted, scheduled, completed, cancelled
+  notes         String?  // Внутренние заметки
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Сессии
+  sessions      ConsultingSession[]
+
+  // Забронированные слоты
+  bookedSlots   BookedSlot[]
+
+  // Только создание разрешено всем
+  @@allow('create', true)
+}
+
+// Проведённая консультационная сессия
+model ConsultingSession {
+  id            String   @id @default(cuid())
+
+  // Связь с заявкой
+  requestId     String
+  request       ConsultingRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  // Время сессии
+  scheduledAt   DateTime           // Запланированное время
+  duration      Int      @default(60) // Продолжительность в минутах
+  completedAt   DateTime?          // Фактическое время завершения
+
+  // Детали
+  type          String   @default("call") // call, code-review, mentoring, audit
+  meetingUrl    String?  // Ссылка на созвон (Zoom, Google Meet)
+  calendarEventId String? // ID события в Google Calendar
+
+  // Результаты
+  summary       String?  // Краткое резюме сессии
+  notes         String?  // Подробные заметки
+  followUp      String?  // Следующие шаги
+
+  // Оплата
+  price         Int?     // Цена в копейках/центах
+  currency      String   @default("USD")
+  isPaid        Boolean  @default(false)
+  paidAt        DateTime?
+
+  // Статус
+  status        String   @default("scheduled") // scheduled, completed, cancelled, no-show
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Только админ может управлять сессиями
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+}
+
+// Отзыв клиента
+model Testimonial {
+  id          String   @id @default(cuid())
+
+  // Автор
+  authorName  String             // Имя клиента
+  authorRole  String?            // Должность (CEO, CTO, Lead Developer)
+  authorCompany String?          // Компания
+  authorAvatar String?           // URL аватара
+  authorUrl   String?            // Ссылка на LinkedIn/сайт
+
+  // Контент
+  content     String             // Текст отзыва
+  contentEn   String?            // Английская версия
+  rating      Int      @default(5) // 1-5 звёзд
+
+  // Связь с услугой
+  serviceType String?            // architecture, code-review, audit, mentoring
+
+  // Публикация
+  isPublished Boolean  @default(false)
+  isFeatured  Boolean  @default(false) // Показывать на главной
+  order       Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Публичное чтение, админ управляет
+  @@allow('read', isPublished == true)
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+}
+
+// Кейс консалтингового проекта
+model ConsultingCase {
+  id          String   @id @default(cuid())
+
+  // Основное
+  title       String             // Название кейса
+  titleEn     String?            // Английская версия
+  slug        String   @unique   // URL slug
+  excerpt     String             // Краткое описание
+  excerptEn   String?
+
+  // Контент
+  challenge   String             // Проблема/задача
+  challengeEn String?
+  solution    String             // Решение
+  solutionEn  String?
+  results     String             // Результаты
+  resultsEn   String?
+
+  // Медиа
+  coverImage  String?            // Обложка
+  images      String[]           // Галерея скриншотов
+
+  // Мета
+  clientName  String?            // Имя клиента (если разрешено)
+  clientLogo  String?            // Логотип клиента
+  industry    String?            // Индустрия (fintech, e-commerce, etc.)
+  serviceType String?            // Тип услуги
+  techStack   String[]           // Технологии
+  duration    String?            // Длительность проекта
+  year        Int?               // Год проекта
+
+  // Публикация
+  isPublished Boolean  @default(false)
+  isFeatured  Boolean  @default(false)
+  order       Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Публичное чтение, админ управляет
+  @@allow('read', isPublished == true)
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+}
+
+// Расписание доступности для бронирования
+model AvailabilityRule {
+  id          String   @id @default(cuid())
+
+  // День недели (0=Вс, 1=Пн, ... 6=Сб) или null для разовых правил
+  dayOfWeek   Int?
+
+  // Время работы (в минутах от полуночи)
+  startTime   Int      // Например: 540 = 9:00
+  endTime     Int      // Например: 1080 = 18:00
+
+  // Продолжительность слота (в минутах)
+  slotDuration Int     @default(60)
+
+  // Перерыв между слотами (в минутах)
+  breakDuration Int    @default(15)
+
+  // Timezone
+  timezone    String   @default("Europe/Moscow")
+
+  // Активность
+  isActive    Boolean  @default(true)
+
+  // Применяется с/до (для сезонных правил)
+  validFrom   DateTime?
+  validUntil  DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Только админ может управлять
+  @@allow('read', true)
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+}
+
+// Забронированный слот или блокировка
+model BookedSlot {
+  id          String   @id @default(cuid())
+
+  // Время слота
+  startAt     DateTime
+  endAt       DateTime
+
+  // Тип: booked (занято клиентом), blocked (заблокировано вручную)
+  type        String   @default("booked")
+
+  // Связь с заявкой (если booked)
+  requestId   String?
+  request     ConsultingRequest? @relation(fields: [requestId], references: [id])
+
+  // Google Calendar Event ID
+  calendarEventId String?
+
+  // Заметки (для блокировки)
+  note        String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Чтение для проверки доступности, управление только админ
+  @@allow('read', true)
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+}

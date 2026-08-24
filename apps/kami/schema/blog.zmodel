@@ -1,0 +1,41 @@
+import "./auth"
+
+// Комментарий к статье блога
+model BlogComment {
+  id          String   @id @default(cuid())
+
+  // Связь со статьёй (slug из Keystatic)
+  postSlug    String
+
+  // Автор (опционально для гостевых комментариев)
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Гостевой автор (если не авторизован)
+  guestName   String?
+  guestEmail  String?
+
+  // Контент
+  content     String
+
+  // Ответ на другой комментарий (для вложенности)
+  parentId    String?
+  parent      BlogComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     BlogComment[] @relation("CommentReplies")
+
+  // Модерация
+  isApproved  Boolean  @default(false)
+  isSpam      Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Публичное чтение одобренных, создание авторизованным, управление админ
+  @@allow('read', isApproved == true && isSpam == false)
+  @@allow('create', auth() != null)
+  @@allow('update,delete', auth() != null && userId == auth().id)
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+
+  @@index([postSlug])
+  @@index([userId])
+}

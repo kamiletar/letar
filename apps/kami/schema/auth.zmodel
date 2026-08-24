@@ -1,0 +1,139 @@
+import "./organization"
+import "./blog"
+import "./media"
+import "./consent"
+
+// ========================================
+// Better Auth модели
+// ========================================
+
+// Роль пользователя
+enum UserRole {
+  /// Пользователь
+  USER
+  /// Администратор
+  ADMIN
+}
+
+// Пользователь (Better Auth core schema)
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  name            String
+  image           String?
+  emailVerified   Boolean   @default(false)
+  roles           UserRole[] @default([USER])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Better Auth связи
+  accounts        Account[]
+  sessions        Session[]
+
+  // Организации (Better Auth organization plugin)
+  members         Member[]
+
+  // Комментарии в блоге
+  blogComments    BlogComment[]
+
+  // Загруженные изображения
+  uploadedImages  Image[] @relation("uploadedImages")
+
+  // Загруженные аудиофайлы
+  uploadedAudio   AudioFile[] @relation("uploadedAudio")
+
+  // Загруженные произвольные файлы
+  uploadedFiles   UploadedFile[] @relation("uploadedFiles")
+
+  // Логи согласий на обработку cookie/ПДн (152-ФЗ)
+  consentLogs     ConsentLog[]
+
+  // Доступ на чтение для всех, создание/обновление только для себя
+  @@allow('read', true)
+  @@allow('create', true)
+  @@allow('update', auth() == this)
+
+  // Индекс для email lookup
+  @@index([email])
+}
+
+// Аккаунты OAuth/credentials (Better Auth core schema)
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String    // ID от провайдера или равен userId для credentials
+  providerId            String    // Идентификатор провайдера (github, google, yandex, credential)
+
+  // OAuth токены
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+
+  // Пароль для email/password аутентификации
+  password              String?
+
+  createdAt             DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+
+  // Запретить доступ через enhanced client (только Better Auth через Prisma напрямую)
+  @@deny('all', true)
+
+  @@index([userId])
+}
+
+// Сессии (Better Auth core schema)
+model Session {
+  id          String   @id @default(cuid())
+  userId      String
+  token       String   @unique
+  expiresAt   DateTime
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Запретить доступ через enhanced client (только Better Auth через Prisma напрямую)
+  @@deny('all', true)
+
+  @@index([userId])
+  @@index([token])
+}
+
+// Верификация (Better Auth core schema)
+model Verification {
+  id          String   @id @default(cuid())
+  identifier  String   // Email или другой идентификатор
+  value       String   // Токен верификации
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Запретить доступ через enhanced client (только Better Auth через Prisma напрямую)
+  @@deny('all', true)
+
+  @@index([identifier])
+}
+
+// Rate Limiting (Better Auth, используется в production для защиты от brute-force)
+model RateLimit {
+  id          String   @id @default(cuid())
+  key         String   @unique // IP:path или другой уникальный ключ
+  count       Int      // Количество запросов в текущем окне
+  lastRequest BigInt   // Timestamp последнего запроса (Unix ms)
+
+  // Запретить доступ через enhanced client (только Better Auth через Prisma напрямую)
+  @@deny('all', true)
+
+  @@index([key])
+
+  @@map("rateLimit")
+}

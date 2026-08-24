@@ -1,0 +1,71 @@
+// ========================================
+// Кросс-постинг в соцсети
+// ========================================
+
+// Тип социальной платформы
+enum SocialPlatformType {
+  /// Telegram Bot API (через прокси)
+  TELEGRAM
+  /// ВКонтакте API
+  VK
+  /// LinkedIn Share API (через прокси)
+  LINKEDIN
+  /// X/Twitter API v2
+  TWITTER
+  /// Facebook Graph API
+  FACEBOOK
+  /// Instagram Graph API
+  INSTAGRAM
+  /// Bluesky AT Protocol
+  BLUESKY
+  /// Mastodon ActivityPub
+  MASTODON
+}
+
+// Статус кросс-поста
+enum CrossPostStatus {
+  /// Ожидает публикации
+  PENDING
+  /// Успешно опубликован
+  PUBLISHED
+  /// Ошибка при публикации
+  FAILED
+}
+
+// Настройки социальной платформы (токены, ID каналов)
+model SocialPlatform {
+  id         String              @id @default(cuid())
+  type       SocialPlatformType  @unique
+  /// Отображаемое название ("Telegram", "ВКонтакте")
+  name       String
+  /// Включена ли платформа для публикации
+  enabled    Boolean             @default(false)
+  /// JSON конфигурация (токены, chat_id, group_id и т.д.)
+  config     Json                @default("{}")
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  crossPosts CrossPost[]
+
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+}
+
+// Лог публикации поста в соцсеть
+model CrossPost {
+  id          String            @id @default(cuid())
+  /// Slug блог-поста из Keystatic
+  postSlug    String
+  platform    SocialPlatform    @relation(fields: [platformId], references: [id])
+  platformId  String
+  status      CrossPostStatus   @default(PENDING)
+  /// ID поста в соцсети
+  externalId  String?
+  /// URL поста в соцсети
+  externalUrl String?
+  /// Текст ошибки если FAILED
+  error       String?
+  publishedAt DateTime?
+  createdAt   DateTime          @default(now())
+
+  @@unique([postSlug, platformId])
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+}

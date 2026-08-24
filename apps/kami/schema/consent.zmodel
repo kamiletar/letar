@@ -1,0 +1,29 @@
+import "./auth"
+
+// ========================================
+// Согласия на обработку cookie/ПДн (152-ФЗ)
+// ========================================
+
+// Журнал согласий на обработку cookie (аналитика/маркетинг/функциональные)
+model ConsentLog {
+  id     String  @id @default(cuid())
+  userId String?
+
+  /// Хэш IP (sha256, без соли — для дедупликации, не для деанонимизации)
+  ipHash    String
+  userAgent String?
+
+  acceptedAnalytics  Boolean @default(false)
+  acceptedMarketing  Boolean @default(false)
+  acceptedFunctional Boolean @default(true)
+
+  /// Версия текста политики, на которую дано согласие
+  consentVersion String
+
+  consentedAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@allow('create', true)
+  @@allow('read', auth() != null && 'ADMIN' in auth().roles)
+}

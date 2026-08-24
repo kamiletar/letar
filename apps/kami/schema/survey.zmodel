@@ -1,0 +1,148 @@
+import "./organization"
+import "./hire"
+
+// ========================================
+// Командные опросы (Team Surveys)
+// ========================================
+
+// Тип вопроса опроса
+enum SurveyQuestionType {
+  /// Свободный текст
+  TEXT
+  /// Один вариант из списка
+  SINGLE_CHOICE
+  /// Несколько вариантов
+  MULTI_CHOICE
+  /// Оценка 1-5 или 1-10
+  RATING
+  /// Шкала (не согласен - согласен)
+  SCALE
+}
+
+// Опрос для команды
+model TeamSurvey {
+  id              String   @id @default(cuid())
+  title           String   // Название опроса
+  titleEn         String?  // Английское название
+  description     String?  // Описание опроса
+  descriptionEn   String?
+
+  // Связь с организацией и заявкой
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  hireRequestId   String?
+  hireRequest     HireRequest? @relation(fields: [hireRequestId], references: [id])
+
+  // Статус
+  status          String   @default("draft") // draft, active, closed
+  isAnonymous     Boolean  @default(false)   // Анонимные ответы?
+
+  // Даты
+  startsAt        DateTime?  // Когда открывается
+  endsAt          DateTime?  // Когда закрывается
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Связи
+  questions       TeamSurveyQuestion[]
+  responses       TeamSurveyResponse[]
+
+  // Члены организации могут читать, owner/admin управляет
+  @@allow('read', organization.members?[userId == auth().id])
+  @@allow('create,update,delete', organization.members?[userId == auth().id && (role == 'owner' || role == 'admin')])
+
+  @@index([organizationId])
+  @@index([hireRequestId])
+}
+
+// Вопрос опроса
+model TeamSurveyQuestion {
+  id              String   @id @default(cuid())
+  surveyId        String
+  survey          TeamSurvey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  // Контент вопроса
+  question        String   // Текст вопроса
+  questionEn      String?  // Английская версия
+  type            SurveyQuestionType @default(TEXT)
+
+  // Для вопросов с вариантами ответов (JSON массив)
+  options         String?  // ["Вариант 1", "Вариант 2", ...]
+
+  // Настройки
+  isRequired      Boolean  @default(true)
+  order           Int      @default(0)
+
+  // Для RATING/SCALE типов
+  minValue        Int?     // Минимальное значение (1)
+  maxValue        Int?     // Максимальное значение (5 или 10)
+  minLabel        String?  // Подпись минимального ("Не важно")
+  maxLabel        String?  // Подпись максимального ("Очень важно")
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Связи
+  answers         TeamSurveyAnswer[]
+
+  // Доступ через опрос
+  @@allow('read', survey.organization.members?[userId == auth().id])
+  @@allow('create,update,delete', survey.organization.members?[userId == auth().id && (role == 'owner' || role == 'admin')])
+
+  @@index([surveyId])
+}
+
+// Ответ участника на опрос (группирует все ответы одного человека)
+model TeamSurveyResponse {
+  id              String   @id @default(cuid())
+  surveyId        String
+  survey          TeamSurvey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  // Кто ответил
+  memberId        String
+  member          Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  // Статус
+  status          String   @default("in_progress") // in_progress, completed
+  completedAt     DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Ответы на вопросы
+  answers         TeamSurveyAnswer[]
+
+  // Участник может создавать и редактировать свой ответ
+  @@allow('read', survey.organization.members?[userId == auth().id])
+  @@allow('create', survey.organization.members?[userId == auth().id])
+  @@allow('update', member.userId == auth().id)
+
+  @@unique([surveyId, memberId])
+  @@index([surveyId])
+  @@index([memberId])
+}
+
+// Ответ на конкретный вопрос
+model TeamSurveyAnswer {
+  id              String   @id @default(cuid())
+  responseId      String
+  response        TeamSurveyResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  questionId      String
+  question        TeamSurveyQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  // Значение ответа
+  textValue       String?  // Для TEXT
+  choiceValue     String?  // Для SINGLE_CHOICE (JSON для MULTI_CHOICE)
+  ratingValue     Int?     // Для RATING/SCALE
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Доступ через response
+  @@allow('read', response.survey.organization.members?[userId == auth().id])
+  @@allow('create,update', response.member.userId == auth().id)
+
+  @@unique([responseId, questionId])
+  @@index([responseId])
+  @@index([questionId])
+}
