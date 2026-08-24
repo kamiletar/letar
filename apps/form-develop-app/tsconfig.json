@@ -4,6 +4,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
+      "@letar/env-load": ["../../libs/env-load/src/index.ts"],
       "@letar/forms": ["../../libs/forms/src/index.ts"],
       "@letar/forms/analytics": ["../../libs/forms/src/lib/analytics/index.ts"],
       "@letar/forms/i18n": ["../../libs/forms/src/lib/i18n/index.ts"],

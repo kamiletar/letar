@@ -11,10 +11,12 @@
       "@letar/forms",
       "@letar/format-utils",
       "@letar/query-provider",
-      "@letar/pg-url"
+      "@letar/pg-url",
+      "@letar/env-load"
     ]
   },
   "dependencies": {
-    "@letar/pg-url": "workspace:*"
+    "@letar/pg-url": "workspace:*",
+    "@letar/env-load": "workspace:*"
   }
 }
