@@ -4,7 +4,8 @@
   "private": true,
   "nx": {
     "implicitDependencies": [
-      "@letar/e2e-testing"
+      "@letar/e2e-testing",
+      "@letar/env-load"
     ],
     "tags": [
       "type:e2e",
@@ -12,7 +13,7 @@
       "owner:letar"
     ]
   },
-  "devDependencies": {
-    "dotenv": "^17.2.3"
+  "dependencies": {
+    "@letar/env-load": "workspace:*"
   }
 }

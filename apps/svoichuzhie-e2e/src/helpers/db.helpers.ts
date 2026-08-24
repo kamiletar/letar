@@ -3,7 +3,7 @@
  *
  * Создаёт тестовых пользователей напрямую в БД через Prisma CJS wrapper.
  */
-import { config } from 'dotenv'
+import { loadEnvCascade } from '@letar/env-load'
 import { randomBytes, scryptSync } from 'node:crypto'
 import { resolve } from 'path'
 
@@ -23,8 +23,7 @@ async function hashPasswordBetterAuth(password: string): Promise<string> {
 }
 
 const projectDir = resolve(__dirname, '../../../svoichuzhie')
-config({ path: resolve(projectDir, '.env.local'), quiet: true })
-config({ path: resolve(projectDir, '.env'), quiet: true })
+loadEnvCascade(projectDir)
 
 type AnyPrisma = { user: Record<string, unknown>; account: Record<string, unknown> }
 
