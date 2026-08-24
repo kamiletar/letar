@@ -81,6 +81,21 @@ enforced immutability через relation-traversal и не защищает с�
   (`apps/domwellbes/schema.zmodel`) проверены и **не подпадают** — их write-policy вообще не
   проверяет состояние parent'а (`isCurrent`/`isPublished` участвует только в read-policy),
   значит обходить нечего: staff-редактирование этих моделей не заявлено как immutable.
+- **`domwellbes`** — `EstimateLimitedCost.estimateId` / `EstimateSection.estimateId` /
+  `EstimateItem.estimateId` (`@@deny('create,update,delete', estimate.status != DRAFT)` без
+  field-level деня на `estimateId`), закрыто тем же приёмом при сквозном аудите монорепо
+  2026-08-24.
+
+## Аудит по всем приложениям монорепо (2026-08-24)
+
+Проверены все приложения с `schema.zmodel` (aboi, animatrona, animatrona-tracker, aprel8008,
+archetest, auth-hub, dashboard, domwellbes, driving-school, dsperevod, form-develop-app,
+form-example, grandslamcup, kami, label-printer-desktop, mandala, studio, svoichuzhie, time) —
+грепом write-policy (`@@allow`/`@@deny` на `create`/`update`/`delete`) на relation-traversal до
+поля состояния (`.status`, `.isCurrent`, `.isPublished`, `.isDone`, `.isActive` и аналоги).
+Паттерн найден только в `domwellbes` (три находки выше, все закрыты). Во всех остальных
+приложениях такие условия либо отсутствуют вовсе, либо встречаются только в `@@allow('read', ...)`
+— паттерн специфичен для write-policy, read не даёт способа переставить FK.
 
 ## Как проверять при ревью новой versioned-модели
 
