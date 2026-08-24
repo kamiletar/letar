@@ -66,7 +66,10 @@ null-строках ·
 ⚠️ relation-traversal в `@@allow`/`@@deny` (`parent.status == DRAFT` и т.п.) проверяет текущее
 состояние связи, а не то, на что FK переставляется в том же `update()` — обход immutability
 опубликованной/терминальной записи; защита только field-level `@deny('update', true)` на самом FK ·
-[tree-model-parent-select](/.claude/docs/tree-model-parent-select.md) self-referencing `parentId`
+[tree-model-parent-select](/.claude/docs/tree-model-parent-select.md) self-referencing `parentId` ·
+[zenstack-multifile-schema-circular-imports](/.claude/docs/zenstack-multifile-schema-circular-imports.md)
+декомпозиция `schema.zmodel` на файлы — циклические импорты между ними подтверждённо рабочие,
+единственная ловушка — `import` до `datasource`/`generator`/`plugin`
 
 **Формы, UI, компоненты:** [forms](/.claude/docs/forms.md) ⭐ ·
 [react-duplicate-responsive-dom](/.claude/docs/react-duplicate-responsive-dom.md) ⚠️ два JSX-блока

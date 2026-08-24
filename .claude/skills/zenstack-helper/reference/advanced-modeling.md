@@ -124,7 +124,19 @@ const stats = await db.userStats.findMany()
 
 ## Multi-file — разделение схемы
 
-Для больших проектов разбивай схему на файлы:
+Для больших проектов (ориентир — от ~1000 строк, когда редактирование одной
+модели требует скроллить сотни несвязанных строк) разбивай схему на файлы.
+
+⚠️ **`import` в корневом `schema.zmodel` обязан идти раньше** `datasource`/
+`generator`/`plugin` — иначе парсер падает с `Expecting token of type 'EOF'
+but found 'import'`. В примере ниже порядок уже верный.
+
+**Циклические импорты между файлами моделей — подтверждённо рабочие**
+(протестировано 2026-08-24 на реальной схеме из 59 моделей с плотным графом
+взаимных ссылок, ZenStack 3.9.2 — см.
+[zenstack-multifile-schema-circular-imports](/.claude/docs/zenstack-multifile-schema-circular-imports.md)).
+Раньше был баг [zenstackhq/zenstack#1257](https://github.com/zenstackhq/zenstack/issues/1257)
+(`auth()` не резолвился при взаимном импорте), закрыт в v2.0.0 — наш пин 3.5 уже выше фикса.
 
 ```
 apps/my-app/
