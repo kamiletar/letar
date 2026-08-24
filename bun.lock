@@ -333,6 +333,7 @@
       "name": "@letar/aboi",
       "version": "0.68.0",
       "dependencies": {
+        "@letar/env-load": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "@letar/seed-utils": "workspace:*",
@@ -423,6 +424,7 @@
       "name": "@letar/aprel8008",
       "version": "0.12.29",
       "dependencies": {
+        "@letar/env-load": "workspace:*",
         "@letar/pg-url": "workspace:*",
       },
     },
@@ -503,7 +505,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.148.0",
+      "version": "0.149.0",
       "dependencies": {
         "@letar/pg-url": "workspace:*",
         "@letar/theme-check": "workspace:*",
@@ -519,6 +521,7 @@
       "name": "driving-school",
       "version": "0.240.6",
       "dependencies": {
+        "@letar/env-load": "workspace:*",
         "@letar/hooks": "workspace:*",
         "@letar/pg-url": "workspace:*",
       },
@@ -526,8 +529,8 @@
     "apps/driving-school-e2e": {
       "name": "driving-school-e2e",
       "version": "0.0.1",
-      "devDependencies": {
-        "dotenv": "^17.2.3",
+      "dependencies": {
+        "@letar/env-load": "workspace:*",
       },
     },
     "apps/dsperevod": {
@@ -536,6 +539,7 @@
       "dependencies": {
         "@better-auth/utils": "^0.4.2",
         "@chakra-ui/react": "*",
+        "@letar/env-load": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "@letar/seed-utils": "workspace:*",
         "better-auth": "^1.6.11",
@@ -705,6 +709,7 @@
       "version": "0.49.3",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
+        "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/hooks": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
@@ -733,6 +738,7 @@
       "version": "0.10.36",
       "dependencies": {
         "@letar/api-server": "workspace:*",
+        "@letar/env-load": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "qrcode": "^1.5.4",
         "tus-js-client": "^4.3.1",
