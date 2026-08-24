@@ -8,6 +8,9 @@
       "@letar/consent": [
         "../../libs/consent/src/index.ts"
       ],
+      "@letar/env-load": [
+        "../../libs/env-load/src/index.ts"
+      ],
       "@letar/chakra-provider": [
         "../../libs/chakra-provider/src/index.ts"
       ],
