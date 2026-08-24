@@ -1289,8 +1289,19 @@ production)` — теперь технически возможен (staging-к�
 `8dad8376-4fda-496f-b8d7-7064ba8fad2a`, exitCode 0, коммит `3546414c`. `.env.staging.enc`
 расшифровался штатно, блокера не было. `deploy_app(archetest, production)` теперь не должен
 отказывать по причине «ещё ни разу не прогонялся» — сам прод-деплой archetest этой сессией не
-запрашивался. Остальные 4 (`dsperevod`, `svoichuzhie`, `aboi`, `aprel8008`) — тем же чек-листом,
-живой прогон ещё не запрошен.
+запрашивался. **Остальные 4 подтверждены 2026-08-25:** `svoichuzhie`, `aboi`, `aprel8008` —
+живой staging+e2e зелёный (aprel8008: 3 expected/0 unexpected/0 flaky; svoichuzhie/aboi уже были
+зелёные на текущем коммите, повторный прогон не требовался). `dsperevod` — обнаружен и закрыт
+отдельный баг: staging был в crash-loop (`MODULE_NOT_FOUND: @swc/helpers` — тот же класс, что у
+aboi/time, см. nextjs-standalone-tracing.md), фикс — `outputFileTracingIncludes` в
+`next.config.mjs` (коммит submodule `7149bad`, bump SHA в letar `3bb22b2e`). После фикса staging
+здоровый, но e2e даёт один устойчивый non-flaky фейл — `email-verification.spec.ts` на webkit:
+`POST /api/auth/sign-up/email` не покидает клиент (30с таймаут без единого запроса ни в логах
+app-контейнера, ни в Traefik — сетевой артефакт webkit, не регрессия приложения/сервера).
+Диагностика — deploy-agent-dev, тред `hard-gate-remaining-4`. Закрыто `test.skip(browserName ===
+'webkit', ...)` с задокументированной причиной (коммит `0c29c617`); chromium/firefox зелёные.
+Hard-gate по всем 5 приложениям (archetest, dsperevod, svoichuzhie, aboi, aprel8008) на этом
+можно считать живым и подтверждённым.
 
 > **Батч M1 (статус на 2026-07-21) и находки, требующие отдельного трека** (dashboard-agent
 > устарел на s3, `run_e2e` не выставляет `CI=1`, `db:seed` не резолвит алиас, `@letar/format-utils`
