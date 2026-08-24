@@ -95,8 +95,8 @@ test.describe('Переключатель языка', () => {
     // Проверяем, что URL содержит /en/
     await expect(page).toHaveURL(/\/en\//)
 
-    // Проверяем, что текст изменился на английский
-    await expect(page.getByText(/Hello, I'm/i)).toBeVisible()
+    // Проверяем, что текст изменился на английский (реальный текст — "Hi, I'm", не "Hello, I'm")
+    await expect(page.getByText(/Hi, I'm/i)).toBeVisible()
   })
 
   test('4.2 — переключение обратно на русский', async ({ page }) => {

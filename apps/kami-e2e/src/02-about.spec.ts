@@ -14,17 +14,20 @@ test.describe('Страница "О себе"', () => {
   })
 
   test('1.3 — отображаются статистики', async ({ page }) => {
-    // Проверяем статистику. Стаж считается динамически (текущий год − 2002) в about/page.tsx —
-    // хардкод здесь неизбежно разъедется через год, поэтому считаем так же
-    const experienceYears = new Date().getFullYear() - 2002
-    await expect(page.getByText(new RegExp(`${experienceYears}\\+`))).toBeVisible()
-    await expect(page.getByText(/30\+/)).toBeVisible()
-    await expect(page.getByText(/50\+/)).toBeVisible()
-
-    // Проверяем подписи
+    // Проверяем подписи — они статичны, не требуют скролла/анимации
     await expect(page.getByText(/лет опыта/i)).toBeVisible()
     await expect(page.getByText(/проектов/i)).toBeVisible()
     await expect(page.getByText(/технологий/i)).toBeVisible()
+
+    // Числа — AnimatedCounter (framer-motion useInView + spring): анимация стартует только когда
+    // карточка реально попадает в viewport, а goto() не скроллит; без scrollIntoViewIfNeeded()
+    // число остаётся "0+" и тест таймаутится (воспроизводилось на webkit). Стаж считается
+    // динамически (текущий год − 2002) в about/page.tsx — хардкод разъедется через год
+    const experienceYears = new Date().getFullYear() - 2002
+    await page.getByText(/лет опыта/i).scrollIntoViewIfNeeded()
+    await expect(page.getByText(new RegExp(`${experienceYears}\\+`))).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText(/30\+/)).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText(/50\+/)).toBeVisible({ timeout: 10000 })
   })
 
   test('1.4 — отображаются карточки "Чем занимаюсь"', async ({ page }) => {
