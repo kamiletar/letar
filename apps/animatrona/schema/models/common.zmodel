@@ -1,0 +1,112 @@
+// Общие модели: файлы, статус пинирования IPFS
+
+import "./anime"
+import "./media"
+import "./import"
+import "./watch"
+import "./settings"
+import "./federation"
+import "./social"
+import "./shikimori"
+
+enum FileCategory {
+  /// Постер аниме
+  POSTER
+  /// Скриншот эпизода
+  SCREENSHOT
+  /// Превью эпизода
+  THUMBNAIL
+  /// Шрифт субтитров
+  FONT
+}
+
+/// Статус пинирования CID на удалённых серверах
+enum RemotePinStatus {
+  /// Только в локальном Kubo — ещё не отправлено на удалённые пинеры
+  LOCAL_ONLY
+  /// Отправлено в очередь пинирования (pin-queue)
+  PIN_QUEUED
+  /// Подтверждено на ≥1 удалённом пинере
+  PINNED_REMOTE
+  /// Ошибка пинирования (будет повторена)
+  FAILED
+}
+
+/// Статус пинирования отдельного CID на удалённых серверах.
+///
+/// Используется для безопасного GC локального Kubo:
+/// - LOCAL_ONLY / PIN_QUEUED → обязательно держать рекурсивный пин (блоки только у нас)
+/// - PINNED_REMOTE           → можно снять локальный пин (контент доступен с пинеров)
+///
+/// Создаётся при добавлении контента в IPFS, обновляется при подтверждении от pin-queue.
+model PinStatus {
+  id         String           @id @default(cuid())
+
+  /// CID контента в IPFS (уникальный ключ)
+  cid        String           @unique
+
+  /// Текущий статус пинирования на удалённых серверах
+  status     RemotePinStatus  @default(LOCAL_ONLY)
+
+  /// Когда отправлено в pin-queue
+  queuedAt   DateTime?
+
+  /// Когда подтверждено на удалённом сервере
+  pinnedAt   DateTime?
+
+  /// Сообщение последней ошибки
+  errorMsg   String?
+
+  /// Количество неудачных попыток
+  retryCount Int              @default(0)
+
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  @@allow('all', true)
+  @@index([status])
+  @@index([createdAt])
+}
+
+/// Файл (изображения, шрифты и т.д.)
+model File {
+  id           String       @id @default(cuid())
+
+  /// Имя файла
+  filename     String
+
+  /// MIME-тип (image/jpeg, image/webp, font/ttf)
+  mimeType     String
+
+  /// Размер в байтах
+  size         Int
+
+  /// Ширина в пикселях (для изображений)
+  width        Int?
+
+  /// Высота в пикселях (для изображений)
+  height       Int?
+
+  /// Base64 blur placeholder для next/image
+  blurDataURL  String?
+
+  /// Категория файла
+  category     FileCategory
+
+  /// Источник (например, "shikimori")
+  source       String?
+
+  /// CID файла в IPFS — основной идентификатор
+  cid          String?      @unique
+
+  uploadedAt   DateTime     @default(now())
+
+  // Обратные связи
+  animePoster  Anime[]
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+
+  @@index([category])
+  @@index([uploadedAt])
+}

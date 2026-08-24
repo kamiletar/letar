@@ -1,0 +1,84 @@
+// Кэш внешних метаданных Shikimori: студии, персоны, персонажи
+
+import "./common"
+import "./anime"
+import "./media"
+import "./import"
+import "./watch"
+import "./settings"
+import "./federation"
+import "./social"
+
+model ShikimoriStudio {
+  id              String      @id @default(cuid())
+
+  /// Shikimori ID студии (уникальный)
+  shikimoriId     Int         @unique
+
+  /// Название студии
+  name            String
+
+  /// URL логотипа с Shikimori
+  imageUrl        String?
+
+  /// CID логотипа в IPFS (null = ещё не загружен)
+  imageCid        String?
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@allow('all', true)
+  @@index([name])
+}
+
+model ShikimoriPerson {
+  id              String      @id @default(cuid())
+
+  /// Shikimori ID персоны (уникальный)
+  shikimoriId     Int         @unique
+
+  /// Имя (латиницей)
+  name            String
+
+  /// Имя на русском
+  nameRu          String?
+
+  /// URL изображения с Shikimori
+  imageUrl        String?
+
+  /// CID изображения в IPFS (null = ещё не загружен)
+  imageCid        String?
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@allow('all', true)
+  @@index([name])
+  @@index([nameRu])
+}
+
+model ShikimoriCharacter {
+  id              String      @id @default(cuid())
+
+  /// Shikimori ID персонажа (уникальный)
+  shikimoriId     Int         @unique
+
+  /// Имя (латиницей)
+  name            String
+
+  /// Имя на русском
+  nameRu          String?
+
+  /// URL изображения с Shikimori
+  imageUrl        String?
+
+  /// CID изображения в IPFS (null = ещё не загружен)
+  imageCid        String?
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@allow('all', true)
+  @@index([name])
+  @@index([nameRu])
+}

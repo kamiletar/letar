@@ -1,0 +1,167 @@
+// Импорт: очередь импорта, ошибки, торрент-загрузки
+
+import "./common"
+import "./anime"
+import "./media"
+import "./watch"
+import "./settings"
+import "./federation"
+import "./social"
+import "./shikimori"
+
+/// Ошибка при импорте дорожки
+model ImportError {
+  id              String    @id @default(cuid())
+
+  /// Привязка к эпизоду
+  episode         Episode   @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  episodeId       String
+
+  /// Тип дорожки: audio | subtitle
+  trackType       String
+  /// Индекс потока в контейнере
+  streamIndex     Int
+  /// Язык дорожки
+  language        String?
+  /// Название / dubGroup
+  title           String?
+
+  /// Текст ошибки
+  error           String
+  /// Стадия: transcode | upload | create
+  stage           String
+
+  /// Путь к исходному файлу (для повтора)
+  sourcePath      String?
+
+  /// Исправлено (дорожка успешно добавлена позже)
+  resolved        Boolean   @default(false)
+
+  createdAt       DateTime  @default(now())
+
+  @@allow('all', true)
+  @@index([episodeId])
+  @@index([resolved])
+}
+
+/// Статус элемента очереди импорта
+enum ImportQueueItemStatus {
+  /// Ожидает в очереди
+  PENDING
+  /// Подбор оптимального CQ через VMAF
+  VMAF
+  /// Подготовка (создание аниме, demux)
+  PREPARING
+  /// Транскодирование
+  TRANSCODING
+  /// Постобработка (скриншоты, манифесты)
+  POSTPROCESS
+  /// Завершён успешно
+  COMPLETED
+  /// Ошибка
+  ERROR
+  /// Отменён пользователем
+  CANCELLED
+}
+
+/// Элемент очереди импорта
+/// Хранит настройки из wizard'а для последовательной обработки
+model ImportQueueItem {
+  id              String                @id @default(cuid())
+
+  /// Статус обработки
+  status          ImportQueueItemStatus @default(PENDING)
+
+  /// Приоритет (меньше = раньше)
+  priority        Int                   @default(0)
+
+  /// Время добавления в очередь
+  addedAt         DateTime              @default(now())
+
+  /// Время начала обработки
+  startedAt       DateTime?
+
+  /// Время завершения
+  completedAt     DateTime?
+
+  /// JSON с полными данными ImportQueueEntry (folderPath, selectedAnime, files, etc.)
+  dataJson        String
+
+  /// Сообщение об ошибке (если status = ERROR)
+  error           String?
+
+  /// Прогресс обработки (0-100)
+  progress        Int                   @default(0)
+
+  /// Текущий обрабатываемый файл
+  currentFileName String?
+
+  /// ID созданного аниме в БД (для отката при ошибке)
+  createdAnimeId  String?
+
+  /// Путь к папке аниме в библиотеке (для отката)
+  createdAnimeFolder String?
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+
+  @@index([status])
+  @@index([priority])
+  @@index([addedAt])
+}
+
+/// Скачанный торрент — метаданные для persist между сессиями
+model TorrentDownload {
+  id            String   @id @default(cuid())
+
+  /// InfoHash торрента (уникальный идентификатор)
+  infoHash      String   @unique
+
+  /// Magnet URI для восстановления после перезапуска
+  magnetURI     String
+
+  /// Название торрента
+  name          String?
+
+  /// Папка скачивания
+  downloadPath  String
+
+  /// Статус торрента: adding, downloading, seeding, paused, done, error
+  status        String   @default("adding")
+
+  /// Статус импорта: none, queued, imported
+  importStatus  String   @default("none")
+
+  /// Целевой ratio для авто-остановки сидирования
+  targetRatio   Float    @default(2.0)
+
+  /// Shikimori ID для кнопки «В очередь»
+  shikimoriId   Int?
+
+  /// Название аниме (из Shikimori)
+  animeName     String?
+
+  /// URL раздачи на Rutracker
+  rutrackerUrl  String?
+
+  /// CID сырых байт .torrent файла раздачи в IPFS (заполняется после получения метаданных)
+  torrentFileCid String?
+
+  /// Раздача содержит несколько отдельных аниме (набор/bundle)
+  isBundle      Boolean  @default(false)
+
+  /// JSON массив аниме в наборе: [{shikimoriId, animeName}]
+  bundleAnimesJson String?
+
+  /// Сообщение об ошибке
+  error         String?
+
+  /// Битфилд для fast resume (Base64, пропуск полной верификации)
+  bitfield      String?
+
+  /// Mtime файлов для мгновенного старта без хэширования (JSON массив)
+  fileModtimes  String?
+
+  addedAt       DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

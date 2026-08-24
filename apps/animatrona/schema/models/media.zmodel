@@ -1,0 +1,332 @@
+// Медиа: аудио/субтитры/шрифты, профили транскодирования
+
+import "./common"
+import "./anime"
+import "./import"
+import "./watch"
+import "./settings"
+import "./federation"
+import "./social"
+import "./shikimori"
+
+enum VideoCodec {
+  /// AV1 (рекомендуется)
+  AV1
+  /// HEVC/H.265
+  HEVC
+  /// H.264
+  H264
+  /// Исходный кодек
+  COPY
+}
+
+/// Предпочтения выбора дорожек при просмотре
+enum TrackPreference {
+  /// Русская озвучка + субтитры надписей
+  RUSSIAN_DUB
+  /// Оригинальная дорожка + полные субтитры
+  ORIGINAL_SUB
+  /// Автовыбор по доступности (русская если есть, иначе оригинал)
+  AUTO
+}
+
+enum RateControl {
+  /// Variable Bitrate с CQ target (рекомендуется)
+  VBR
+  /// Constant QP (лучшее качество)
+  CONSTQP
+  /// Constant Quality
+  CQ
+}
+
+enum Tune {
+  /// Без tune
+  NONE
+  /// High Quality (рекомендуется для VBR)
+  HQ
+  /// Ultra High Quality (для Blackwell+)
+  UHQ
+  /// Ultra Low Latency
+  ULL
+  /// Low Latency
+  LL
+}
+
+enum Multipass {
+  /// Отключено
+  DISABLED
+  /// Quarter resolution (быстрее)
+  QRES
+  /// Full resolution (медленнее, лучше качество)
+  FULLRES
+}
+
+enum BRefMode {
+  /// Отключено
+  DISABLED
+  /// Каждый кадр
+  EACH
+  /// Средний кадр
+  MIDDLE
+}
+
+/// Аудиодорожка эпизода
+model AudioTrack {
+  id              String      @id @default(cuid())
+
+  episode         Episode     @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  episodeId       String
+
+  /// Индекс дорожки в контейнере
+  streamIndex     Int
+
+  /// @form.title("Язык")
+  /// @form.placeholder("ru, en, ja")
+  language        String      @default("und")
+
+  /// @form.title("Название")
+  /// @form.placeholder("Например: Japanese 5.1")
+  title           String?
+
+  /// Название группы озвучки (имя папки-дублёра)
+  /// Отображается в меню плеера как "Русский (FuegoAlma & Eladiel)"
+  dubGroup        String?
+
+  /// Кодек (aac, opus, flac, etc.)
+  codec           String
+
+  /// Каналы (2.0, 5.1, 7.1)
+  channels        String
+
+  /// Битрейт (bps)
+  bitrate         Int?
+
+  /// Дорожка по умолчанию
+  isDefault       Boolean     @default(false)
+
+  /// CID транскодированного аудио в IPFS
+  transcodedCid   String?
+  /// Размер аудиодорожки в IPFS (байты)
+  ipfsSize        Int?
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+
+  @@index([episodeId])
+}
+
+/// Субтитры эпизода
+model SubtitleTrack {
+  id              String      @id @default(cuid())
+
+  episode         Episode     @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  episodeId       String
+
+  /// Индекс дорожки в контейнере (-1 для внешних файлов)
+  streamIndex     Int         @default(-1)
+
+  /// @form.title("Язык")
+  language        String      @default("und")
+
+  /// @form.title("Название")
+  title           String?
+
+  /// Название группы субтитров (имя папки-сабберов)
+  /// Отображается в меню плеера как "Русский (AniDUB)"
+  dubGroup        String?
+
+  /// Тип субтитров: full (полные), signs (надписи), songs (песни)
+  subtitleType    String      @default("full")
+
+  /// Формат (ass, srt, vtt)
+  format          String
+
+  /// CID файла субтитров в IPFS
+  fileCid         String?
+  /// Размер субтитров в IPFS (байты)
+  ipfsSize        Int?
+
+  /// Дорожка по умолчанию
+  isDefault       Boolean     @default(false)
+
+  /// Шрифты для ASS субтитров
+  fonts           SubtitleFont[]
+
+  createdAt       DateTime    @default(now())
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+
+  @@index([episodeId])
+}
+
+/// Шрифт для ASS субтитров
+model SubtitleFont {
+  id              String        @id @default(cuid())
+
+  subtitleTrack   SubtitleTrack @relation(fields: [subtitleTrackId], references: [id], onDelete: Cascade)
+  subtitleTrackId String
+
+  /// Имя шрифта (как в ASS файле)
+  fontName        String
+
+  /// Расширение файла шрифта (ttf, otf, woff2 и т.д.)
+  fileExt         String        @default("ttf")
+
+  /// CID файла шрифта в IPFS
+  fileCid         String?
+  /// Размер шрифта в IPFS (байты)
+  ipfsSize        Int?
+
+  createdAt       DateTime      @default(now())
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+
+  @@index([subtitleTrackId])
+}
+
+/// Профиль кодирования
+model EncodingProfile {
+  id              String       @id @default(cuid())
+
+  /// @form.title("Название")
+  /// @form.placeholder("Например: Blackwell UHQ")
+  name            String
+
+  /// Встроенный или пользовательский
+  isBuiltIn       Boolean      @default(false)
+
+  /// @form.title("Профиль по умолчанию")
+  /// @form.fieldType("switch")
+  isDefault       Boolean      @default(false)
+
+  // === Видео ===
+
+  /// @form.title("Видеокодек")
+  /// @form.fieldType("radioCard")
+  codec           VideoCodec   @default(AV1)
+
+  /// @form.title("Использовать GPU")
+  /// @form.fieldType("switch")
+  useGpu          Boolean      @default(true)
+
+  // === Rate Control ===
+
+  /// @form.title("Rate Control")
+  /// @form.fieldType("radioCard")
+  rateControl     RateControl  @default(VBR)
+
+  /// @form.title("Качество (CQ/CRF)")
+  /// @form.fieldType("slider")
+  /// @form.props({ min: 15, max: 40, showValue: true })
+  /// @form.description("Меньше = лучше качество, больше размер")
+  cq              Int          @default(28)
+
+  /// @form.title("Макс. битрейт (Mbps)")
+  /// @form.fieldType("numberInput")
+  /// @form.props({ min: 1, max: 100 })
+  /// @form.description("Для VBR режима")
+  maxBitrate      Int?
+
+  // === Качество ===
+
+  /// @form.title("Пресет скорости")
+  /// @form.fieldType("select")
+  /// @form.props({ options: ["p1", "p2", "p3", "p4", "p5", "p6", "p7"] })
+  preset          String       @default("p5")
+
+  /// @form.title("Tune")
+  /// @form.fieldType("radioCard")
+  tune            Tune         @default(HQ)
+
+  /// @form.title("Multipass")
+  /// @form.fieldType("radioCard")
+  multipass       Multipass    @default(DISABLED)
+
+  // === Adaptive Quantization ===
+
+  /// @form.title("Spatial AQ")
+  /// @form.fieldType("switch")
+  /// @form.description("Улучшает качество плоских областей")
+  spatialAq       Boolean      @default(true)
+
+  /// @form.title("Temporal AQ")
+  /// @form.fieldType("switch")
+  /// @form.description("Адаптирует качество для движущихся сцен")
+  temporalAq      Boolean      @default(true)
+
+  /// @form.title("AQ Strength")
+  /// @form.fieldType("slider")
+  /// @form.props({ min: 1, max: 15, showValue: true })
+  aqStrength      Int          @default(8)
+
+  // === Lookahead ===
+
+  /// @form.title("Lookahead Frames")
+  /// @form.fieldType("slider")
+  /// @form.props({ min: 0, max: 250, showValue: true })
+  /// @form.description("Количество кадров для анализа (0 = авто)")
+  lookahead       Int?
+
+  /// @form.title("Lookahead Level")
+  /// @form.fieldType("slider")
+  /// @form.props({ min: 0, max: 3, showValue: true })
+  lookaheadLevel  Int?
+
+  // === Keyframes ===
+
+  /// @form.title("GOP Size")
+  /// @form.fieldType("numberInput")
+  /// @form.props({ min: 1, max: 600 })
+  /// @form.description("Расстояние между ключевыми кадрами")
+  gopSize         Int          @default(240)
+
+  /// @form.title("B-Ref Mode")
+  /// @form.fieldType("radioCard")
+  bRefMode        BRefMode     @default(DISABLED)
+
+  // === 10-bit ===
+
+  /// @form.title("Принудительно 10-bit")
+  /// @form.fieldType("switch")
+  /// @form.description("Выводить 10-bit даже для 8-bit источника")
+  force10Bit      Boolean      @default(false)
+
+  // === Blackwell-специфичные ===
+
+  /// @form.title("Temporal Filter")
+  /// @form.fieldType("switch")
+  /// @form.description("Blackwell+ только: +4-5% качества при движении")
+  temporalFilter  Boolean      @default(false)
+
+  // === CPU Fallback ===
+
+  /// @form.title("Предпочитать CPU")
+  /// @form.fieldType("switch")
+  /// @form.description("Принудительно использовать libsvtav1 вместо NVENC")
+  preferCpu       Boolean      @default(false)
+
+  // === Фильтры ===
+
+  /// @form.title("Deband фильтр")
+  /// @form.fieldType("switch")
+  /// @form.description("Убирает banding в градиентах (может вызывать краши на тяжёлых файлах)")
+  deband          Boolean      @default(true)
+
+  // Обратные связи
+  settings        Settings[]
+  episodes        Episode[]
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+
+  @@index([isBuiltIn])
+  @@index([isDefault])
+}

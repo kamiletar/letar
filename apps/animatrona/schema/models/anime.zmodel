@@ -1,0 +1,521 @@
+// Каталог аниме: франшизы, тайтлы, жанры, темы, связи, сезоны, эпизоды
+
+import "./common"
+import "./media"
+import "./import"
+import "./watch"
+import "./settings"
+import "./federation"
+import "./social"
+import "./shikimori"
+
+enum AnimeStatus {
+  /// Выходит
+  ONGOING
+  /// Завершён
+  COMPLETED
+  /// Анонсирован
+  ANNOUNCED
+}
+
+enum SeasonType {
+  /// ТВ-сериал
+  TV
+  /// OVA
+  OVA
+  /// ONA
+  ONA
+  /// Фильм
+  MOVIE
+  /// Спешл
+  SPECIAL
+}
+
+enum RelationKind {
+  /// Продолжение
+  SEQUEL
+  /// Предыстория
+  PREQUEL
+  /// Побочная история
+  SIDE_STORY
+  /// Родительская история
+  PARENT_STORY
+  /// Краткое содержание
+  SUMMARY
+  /// Полная версия
+  FULL_STORY
+  /// Спин-офф
+  SPIN_OFF
+  /// Адаптация
+  ADAPTATION
+  /// Общие персонажи
+  CHARACTER
+  /// Альтернативная версия
+  ALTERNATIVE_VERSION
+  /// Альтернативный сеттинг
+  ALTERNATIVE_SETTING
+  /// Другое
+  OTHER
+}
+
+/// Франшиза — группа связанных аниме
+/// Определяется через REST API /api/animes/{id}/franchise
+/// Все аниме в одном графе = одна франшиза
+model Franchise {
+  id                    String    @id @default(cuid())
+
+  /// Название франшизы (от root аниме)
+  name                  String
+
+  /// Минимальный shikimoriId из графа — стабильный ключ франшизы
+  rootShikimoriId       Int?      @unique
+
+  /// CID FranchiseGraphDocument в IPFS
+  graphCid              String?
+
+  /// Когда граф был обновлён (для автообновления раз в неделю)
+  graphUpdatedAt        DateTime?
+
+  animes                Anime[]
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+
+  @@index([rootShikimoriId])
+}
+
+/// Аниме-тайтл
+model Anime {
+  id              String      @id @default(cuid())
+
+  /// @form.title("Название")
+  /// @form.placeholder("Например: Стальной алхимик")
+  /// Русское название (приоритет) или английское если русского нет
+  name            String
+
+  /// @form.title("Оригинальное название")
+  /// @form.placeholder("Например: 鋼の錬金術師")
+  /// Японское название (из Shikimori japanese)
+  originalName    String?
+
+  /// @form.exclude
+  /// Английское название (из Shikimori english)
+  nameEn          String?
+
+  /// @form.exclude
+  /// Альтернативные названия (JSON массив строк с Shikimori)
+  /// Например: ["Человек-бензопила", "История Резе", "Gekijouban Chainsaw Man"]
+  synonyms        String?
+
+  /// @form.title("Год выпуска")
+  /// @form.fieldType("numberInput")
+  /// @form.props({ min: 1900, max: 2100 })
+  year            Int?
+
+  /// @form.title("Статус")
+  /// @form.fieldType("radioCard")
+  status          AnimeStatus @default(ONGOING)
+
+  /// @form.title("Количество серий")
+  /// @form.fieldType("numberInput")
+  /// @form.props({ min: 0 })
+  episodeCount    Int         @default(0)
+
+  /// @form.exclude
+  /// Постер аниме (связь с File)
+  posterId        String?
+  poster          File?       @relation(fields: [posterId], references: [id], onDelete: SetNull)
+
+  /// @form.exclude
+  /// CID постера в IPFS
+  posterCid       String?
+
+  /// @form.title("Рейтинг")
+  /// @form.fieldType("slider")
+  /// @form.props({ min: 0, max: 10, step: 0.1, showValue: true })
+  rating          Float?
+
+  /// @form.title("Путь к папке")
+  /// @form.description("Путь к папке с файлами аниме")
+  folderPath      String?
+
+  /// @form.exclude
+  /// Источник — BDRemux/Bluray Remux (lossless качество)
+  isBdRemux       Boolean     @default(false)
+
+  /// @form.exclude
+  /// CID каноничного AnimeInfo в IPFS (неизменяемые метаданные аниме)
+  animeInfoCid    String?
+
+  /// @form.exclude
+  /// CID корневой IPFS-директории аниме (один рекурсивный pin = весь контент)
+  directoryCid    String?
+  /// Количество IPFS блоков в directoryCid
+  directoryBlocks Int?
+  /// Размер directoryCid в байтах
+  directorySize   Int?
+
+  /// @form.exclude
+  /// Состояние контента после последней проверки/регенерации:
+  /// 'complete' = всё на месте, 'degraded' = потеряны только косметические CID или шрифты,
+  /// 'broken' = потеряны video/audio (нет смысла раздавать).
+  contentHealth     String?
+  /// @form.exclude
+  /// JSON-массив missingCids — описание потерянных CID для UI-отчёта
+  missingCidsJson   String?
+  /// @form.exclude
+  /// JSON-массив missingFonts — потерянные шрифты которые пользователь восстанавливает руками
+  missingFontsJson  String?
+  /// @form.exclude
+  /// Когда последний раз проверяли health (буду перерегенерировать)
+  lastHealthCheckAt DateTime?
+
+  /// @form.exclude
+  /// Возрастной рейтинг из Shikimori (g, pg, pg_13, r, r_plus, rx)
+  ageRating       String?
+
+  /// @form.exclude
+  /// Контент запиннен локально в Kubo (false = только на удалённых пирах, Cloud Library)
+  pinnedLocally   Boolean     @default(true)
+
+  /// @form.exclude
+  /// Требует перезаливки — контент раздавался через утраченный pinner-сервер (миграция
+  /// backfill проставила true всей библиотеке на момент перехода на новую схему раздачи).
+  /// Снимается вручную после успешного реимпорта/republish.
+  needsReupload   Boolean     @default(false)
+
+  /// @form.exclude
+  /// Дата публикации на трекер (null = никогда не публиковалось)
+  trackerPublishedAt DateTime?
+
+  /// @form.exclude
+  /// directoryCid на момент последней публикации (для сравнения с текущим)
+  trackerPublishedCid String?
+
+  /// @form.exclude
+  /// ID на Shikimori для синхронизации метаданных
+  shikimoriId     Int?        @unique
+
+  /// @form.exclude
+  /// URL раздачи на Rutracker (сохраняется при импорте)
+  rutrackerUrl    String?
+
+  /// @form.exclude
+  /// CID сырых байт .torrent файла раздачи в IPFS (source/source.torrent в directoryCid)
+  sourceTorrentCid String?
+
+  /// @form.exclude
+  /// Франшиза к которой принадлежит аниме
+  franchiseId     String?
+  franchise       Franchise?  @relation(fields: [franchiseId], references: [id], onDelete: SetNull)
+
+  // Связи
+  seasons         Season[]
+  episodes        Episode[]
+  genres          GenreOnAnime[]
+  themes          ThemeOnAnime[]
+  watchProgress   WatchProgress[]
+
+  /// Связи с другими аниме (это аниме как источник)
+  sourceRelations AnimeRelation[] @relation("SourceRelations")
+  /// Связи с другими аниме (это аниме как цель)
+  targetRelations AnimeRelation[] @relation("TargetRelations")
+
+  // Расширенные метаданные теперь в AnimeManifest (IPFS)
+  // Удалено в v0.28.0: studios, staff, characters, externalLinks, fandubbers, fansubbers, videos
+  // Данные доступны через manifestCid → IPFS cat → AnimeManifest JSON
+
+  /// Федеративный контент (импортирован из других трекеров) — v0.24.0
+  federatedContent FederatedContent[]
+
+  /// @form.exclude
+  /// Последняя выбранная аудиодорожка (dubGroup) — сохраняется между эпизодами
+  lastSelectedAudioDubGroup   String?
+
+  /// @form.exclude
+  /// Язык последней выбранной аудиодорожки — fallback если dubGroup не найден
+  lastSelectedAudioLanguage   String?
+
+  /// @form.exclude
+  /// Последняя выбранная дорожка субтитров (dubGroup) — сохраняется между эпизодами
+  lastSelectedSubtitleDubGroup String?
+
+  /// @form.exclude
+  /// Язык последних выбранных субтитров — fallback если dubGroup не найден
+  lastSelectedSubtitleLanguage String?
+
+  /// @form.exclude
+  /// Когда последний раз проверяли связи с другими аниме (для UX: null = не проверяли, дата = проверяли)
+  relationsCheckedAt DateTime?
+
+  // === Статус просмотра (v0.9.0) ===
+
+  /// @form.title("Статус просмотра")
+  /// @form.fieldType("radioCard")
+  watchStatus         WatchStatus @default(NOT_STARTED)
+
+  /// @form.exclude
+  /// Дата завершения просмотра
+  watchedAt           DateTime?
+
+  /// @form.title("Оценка")
+  /// @form.fieldType("slider")
+  /// @form.props({ min: 0, max: 10, step: 1, showValue: true })
+  userRating          Int?
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+
+  @@index([name])
+  @@index([year])
+  @@index([status])
+  @@index([shikimoriId])
+  @@index([franchiseId])
+  @@index([watchStatus])
+}
+
+/// Жанр
+model Genre {
+  id              String      @id @default(cuid())
+
+  /// @form.title("Название")
+  name            String      @unique
+
+  /// @form.title("Slug")
+  slug            String      @unique
+
+  /// ID на Shikimori (для синхронизации)
+  shikimoriId     Int?        @unique
+
+  animes          GenreOnAnime[]
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+}
+
+/// Связь жанров и аниме (many-to-many)
+model GenreOnAnime {
+  anime           Anime       @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId         String
+
+  genre           Genre       @relation(fields: [genreId], references: [id], onDelete: Cascade)
+  genreId         String
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+
+  @@id([animeId, genreId])
+}
+
+/// Тема аниме (Жестокость, Городское фэнтези, Школа и т.д.)
+model Theme {
+  id              String      @id @default(cuid())
+
+  /// @form.title("Название")
+  name            String      @unique
+
+  /// Название на русском (из Shikimori)
+  nameRu          String?
+
+  /// ID на Shikimori (для синхронизации)
+  shikimoriId     Int?        @unique
+
+  animes          ThemeOnAnime[]
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+
+  @@index([name])
+}
+
+model ThemeOnAnime {
+  anime           Anime       @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId         String
+
+  theme           Theme       @relation(fields: [themeId], references: [id], onDelete: Cascade)
+  themeId         String
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+
+  @@id([animeId, themeId])
+}
+
+/// Связь между двумя аниме (сиквел, приквел, спин-офф и т.д.)
+model AnimeRelation {
+  id                  String       @id @default(cuid())
+
+  /// Исходное аниме (от которого идёт связь)
+  sourceAnimeId       String
+  sourceAnime         Anime        @relation("SourceRelations", fields: [sourceAnimeId], references: [id], onDelete: Cascade)
+
+  /// ID связанного аниме на Shikimori (может быть не загружено в библиотеку)
+  targetShikimoriId   Int
+
+  /// ID связанного аниме в библиотеке (заполняется когда аниме загружено)
+  targetAnimeId       String?
+  targetAnime         Anime?       @relation("TargetRelations", fields: [targetAnimeId], references: [id], onDelete: SetNull)
+
+  /// Тип связи
+  relationKind        RelationKind
+
+  createdAt           DateTime     @default(now())
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+
+  @@unique([sourceAnimeId, targetShikimoriId])
+  @@index([sourceAnimeId])
+  @@index([targetAnimeId])
+  @@index([targetShikimoriId])
+}
+
+/// Сезон аниме (TV, OVA, Movie и т.д.)
+model Season {
+  id              String      @id @default(cuid())
+
+  anime           Anime       @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId         String
+
+  /// @form.title("Номер сезона")
+  /// @form.fieldType("numberInput")
+  /// @form.props({ min: 1 })
+  number          Int         @default(1)
+
+  /// @form.title("Название")
+  /// @form.placeholder("Например: 2nd Season")
+  name            String?
+
+  /// @form.title("Тип")
+  /// @form.fieldType("radioCard")
+  type            SeasonType  @default(TV)
+
+  /// @form.title("Год выпуска")
+  /// @form.fieldType("numberInput")
+  year            Int?
+
+  /// @form.title("Количество эпизодов")
+  /// @form.fieldType("numberInput")
+  episodeCount    Int         @default(0)
+
+  /// @form.title("Путь к папке")
+  folderPath      String?
+
+  episodes        Episode[]
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+
+  @@unique([animeId, number])
+  @@index([animeId])
+}
+
+/// Эпизод (серия)
+model Episode {
+  id              String      @id @default(cuid())
+
+  anime           Anime       @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId         String
+
+  season          Season?     @relation(fields: [seasonId], references: [id], onDelete: SetNull)
+  seasonId        String?
+
+  /// @form.title("Номер серии")
+  /// @form.fieldType("numberInput")
+  /// @form.props({ min: 0 })
+  number          Int
+
+  /// @form.title("Название")
+  name            String?
+
+  /// @form.title("Длительность (мс)")
+  /// @form.fieldType("numberInput")
+  durationMs      Int?
+
+  /// @form.exclude
+  /// Путь к папке эпизода (для сохранения прогресса в _user/)
+  folderPath      String?
+
+  // Метаданные видео (только те, что нужны для фильтрации)
+  /// @form.exclude
+  videoWidth      Int?
+  /// @form.exclude
+  videoHeight     Int?
+  /// @form.exclude
+  /// Битность цвета видео (8, 10, 12)
+  videoBitDepth   Int?
+
+  // Связи с дорожками
+  audioTracks     AudioTrack[]
+  subtitleTracks  SubtitleTrack[]
+  importErrors    ImportError[]
+
+  watchProgress   WatchProgress[]
+
+  // === Настройки кодирования (v0.9.0) ===
+
+  /// @form.exclude
+  /// ID использованного профиля кодирования
+  encodingProfileId     String?
+  encodingProfile       EncodingProfile? @relation(fields: [encodingProfileId], references: [id], onDelete: SetNull)
+
+  // === IPFS Storage ===
+
+  /// @form.exclude
+  /// CID транскодированного видео в IPFS
+  transcodedCid         String?
+  /// Размер видео в IPFS (байты)
+  ipfsSize              Int?
+
+  /// @form.exclude
+  /// CID манифеста эпизода в IPFS
+  manifestCid           String?
+
+  /// @form.exclude
+  /// JSON массив CID thumbnail'ов в IPFS
+  thumbnailCids         String?
+
+  /// @form.exclude
+  /// JSON массив CID скриншотов в IPFS
+  screenshotCids        String?
+
+  /// @form.exclude
+  /// CID seek-bar спрайта в IPFS (sprite.webp). Дублируется из ThumbnailsDocument
+  /// чтобы переживать recovery — после регенерации обновляется тут, а ThumbnailsDocument
+  /// строится заново из этих полей при необходимости.
+  spriteCid             String?
+  /// @form.exclude
+  /// CID seek-bar VTT-файла в IPFS (sprite.vtt). См. spriteCid.
+  vttCid                String?
+
+  /// @form.exclude
+  /// CID ChaptersDocument в IPFS (главы — OP/ED markers).
+  /// Дублируется из EpisodeManifest.chaptersCid чтобы переживать recovery
+  /// (detectIntros восстанавливает по video.webm, новый CID сохраняется тут).
+  chaptersCid           String?
+
+  /// @form.exclude
+  /// CID metadata.json в IPFS (результат ffprobe)
+  metadataCid           String?
+
+  // sourceMetadataJson удалён в v0.29.0 — данные в EpisodeManifest (IPFS)
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+
+  @@unique([animeId, number])
+  @@index([animeId])
+  @@index([seasonId])
+}

@@ -1,0 +1,121 @@
+// Просмотр: прогресс, статус, очередь синхронизации
+
+import "./common"
+import "./anime"
+import "./media"
+import "./import"
+import "./settings"
+import "./federation"
+import "./social"
+import "./shikimori"
+
+/// Статус просмотра аниме (как на Shikimori)
+enum WatchStatus {
+  /// Не начато
+  NOT_STARTED
+  /// Смотрю
+  WATCHING
+  /// Просмотрено
+  COMPLETED
+  /// Отложено
+  ON_HOLD
+  /// Брошено
+  DROPPED
+  /// Запланировано
+  PLANNED
+}
+
+/// Прогресс просмотра
+model WatchProgress {
+  id              String      @id @default(cuid())
+
+  anime           Anime       @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId         String
+
+  episode         Episode     @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  episodeId       String
+
+  /// @form.title("Текущее время (сек)")
+  currentTime     Float       @default(0)
+
+  /// @form.title("Просмотрено полностью")
+  /// @form.fieldType("switch")
+  completed       Boolean     @default(false)
+
+  /// ID выбранной аудиодорожки
+  selectedAudioTrackId    String?
+
+  /// ID выбранных субтитров (null = выключены)
+  selectedSubtitleTrackId String?
+
+  /// Громкость (0-1)
+  volume          Float       @default(1)
+
+  lastWatchedAt   DateTime    @default(now())
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+
+  @@unique([animeId, episodeId])
+  @@index([animeId])
+  @@index([lastWatchedAt])
+}
+
+/// Прогресс просмотра из каталога (без FK на Anime/Episode)
+model DiscoverWatchProgress {
+  id                      String   @id @default(cuid())
+
+  /// Shikimori ID аниме (стабильный ключ)
+  shikimoriId             Int
+  /// Номер эпизода
+  episodeNumber           Int
+
+  /// Текущее время (сек)
+  currentTime             Float    @default(0)
+  /// Длительность (сек)
+  duration                Float    @default(0)
+  /// Просмотрено полностью
+  completed               Boolean  @default(false)
+
+  /// ID аудиодорожки из манифеста
+  selectedAudioTrackId    String?
+  /// ID субтитров из манифеста
+  selectedSubtitleTrackId String?
+
+  /// Название аниме (для отображения в истории)
+  animeName               String   @default("")
+  /// CID постера (для отображения)
+  posterCid               String?
+  /// ID аниме на трекере (для навигации)
+  trackerAnimeId          String?
+  /// CID директории на IPFS (для резолва эпизода)
+  directoryCid            String?
+
+  lastWatchedAt           DateTime @default(now())
+
+  @@allow('all', true)
+  @@unique([shikimoriId, episodeNumber])
+  @@index([lastWatchedAt])
+}
+
+/// Очередь синхронизации с трекером (offline queue)
+model SyncQueueItem {
+  id        String   @id @default(cuid())
+
+  /// Тип операции: 'watchProgress' | 'librarySync' | 'profileSync'
+  type      String
+
+  /// JSON с данными для отправки
+  payload   String
+
+  createdAt DateTime @default(now())
+
+  /// Количество попыток отправки
+  retries   Int      @default(0)
+
+  /// Последняя ошибка
+  lastError String?
+
+  @@allow('all', true)
+  @@index([createdAt])
+}

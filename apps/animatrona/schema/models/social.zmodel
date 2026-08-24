@@ -1,0 +1,339 @@
+// Соцфункции и геймификация: статистика, репутация, достижения, друзья
+
+import "./common"
+import "./anime"
+import "./media"
+import "./import"
+import "./watch"
+import "./settings"
+import "./federation"
+import "./shikimori"
+
+/// Ранги пользователя (для репутации)
+enum UserRank {
+  /// 0-19 очков — новичок
+  NEWCOMER
+  /// 20-39 очков — контрибьютор
+  CONTRIBUTOR
+  /// 40-59 очков — постоянный участник
+  REGULAR
+  /// 60-79 очков — ветеран
+  VETERAN
+  /// 80-100 очков — легенда
+  LEGEND
+}
+
+/// Тип транзакции бонусных очков
+enum BonusTransactionType {
+  /// Заработок за раздачу
+  EARNING
+  /// Награда за достижение
+  ACHIEVEMENT
+  /// Трата очков
+  SPENDING
+  /// Бонус (промо, ивенты)
+  BONUS
+  /// Корректировка (админ)
+  ADJUSTMENT
+}
+
+/// Уровень достижения
+enum AchievementTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+/// Статистика пользователя (singleton)
+model UserStats {
+  id                    String   @id @default("default")
+
+  /// Всего байт загружено (upload)
+  bytesUploaded         BigInt   @default(0)
+
+  /// Всего байт скачано (download)
+  bytesDownloaded       BigInt   @default(0)
+
+  /// Общее время раздачи в мс
+  totalSeedingTimeMs    BigInt   @default(0)
+
+  /// Время текущей сессии раздачи в мс
+  currentSessionMs      BigInt   @default(0)
+
+  /// Количество уникального контента (CID), который раздаётся
+  uniqueContentSeeded   Int      @default(0)
+
+  /// Общее количество пиров, которым помогли
+  peersHelped           Int      @default(0)
+
+  /// Дата первой раздачи
+  firstSeedAt           DateTime?
+
+  /// Дата последней активности
+  lastActiveAt          DateTime @default(now())
+
+  /// Дневная статистика
+  dailyStats            DailyStats[]
+
+  updatedAt             DateTime @updatedAt
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+}
+
+/// Дневная статистика
+model DailyStats {
+  id                String    @id @default(cuid())
+
+  /// Связь с UserStats
+  userStatsId       String    @default("default")
+  userStats         UserStats @relation(fields: [userStatsId], references: [id], onDelete: Cascade)
+
+  /// Дата в формате YYYY-MM-DD
+  date              String
+
+  /// Байты загружено (upload)
+  bytesUploaded     BigInt    @default(0)
+
+  /// Байты скачано (download)
+  bytesDownloaded   BigInt    @default(0)
+
+  /// Время раздачи в мс
+  seedingTimeMs     BigInt    @default(0)
+
+  /// Количество уникальных пиров, которым помогли
+  peersHelped       Int       @default(0)
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+
+  @@unique([userStatsId, date])
+  @@index([date])
+}
+
+/// Репутация пользователя (singleton)
+model UserReputation {
+  id                    String   @id @default("default")
+
+  /// Общий score (0-100)
+  score                 Int      @default(0)
+
+  /// Текущий ранг
+  rank                  UserRank @default(NEWCOMER)
+
+  // === Компоненты score ===
+
+  /// Score за соотношение upload/download (0-30)
+  ratioScore            Int      @default(0)
+
+  /// Score за время раздачи (0-25)
+  seedingTimeScore      Int      @default(0)
+
+  /// Score за количество уникального контента (0-20)
+  uniqueContentScore    Int      @default(0)
+
+  /// Score за помощь пирам (0-15)
+  helpedPeersScore      Int      @default(0)
+
+  /// Score за время в сообществе (0-10)
+  longevityScore        Int      @default(0)
+
+  updatedAt             DateTime @updatedAt
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+}
+
+/// Разблокированное достижение пользователя
+model UserAchievement {
+  id              String          @id @default(cuid())
+
+  /// ID достижения (из enum AchievementId)
+  achievementId   String
+
+  /// Дата получения
+  unlockedAt      DateTime        @default(now())
+
+  /// Было ли показано уведомление
+  notified        Boolean         @default(false)
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+
+  @@unique([achievementId])
+  @@index([unlockedAt])
+}
+
+/// Прогресс достижения
+model AchievementProgress {
+  id              String   @id @default(cuid())
+
+  /// ID достижения
+  achievementId   String   @unique
+
+  /// Прогресс (0-100)
+  progress        Int      @default(0)
+
+  updatedAt       DateTime @updatedAt
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+}
+
+/// Бонусные очки пользователя (singleton)
+model UserBonusPoints {
+  id              String              @id @default("default")
+
+  /// Текущий баланс
+  balance         Int                 @default(0)
+
+  /// Всего заработано
+  totalEarned     Int                 @default(0)
+
+  /// Всего потрачено
+  totalSpent      Int                 @default(0)
+
+  /// История транзакций
+  transactions    BonusTransaction[]
+
+  updatedAt       DateTime            @updatedAt
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+}
+
+/// Транзакция бонусных очков
+model BonusTransaction {
+  id              String               @id @default(cuid())
+
+  /// Связь с UserBonusPoints
+  bonusPointsId   String               @default("default")
+  bonusPoints     UserBonusPoints      @relation(fields: [bonusPointsId], references: [id], onDelete: Cascade)
+
+  /// Тип транзакции
+  type            BonusTransactionType
+
+  /// Сумма (положительная для начисления, отрицательная для траты)
+  amount          Int
+
+  /// Баланс после транзакции
+  balanceAfter    Int
+
+  /// Описание
+  description     String
+
+  /// Метаданные в JSON (achievementId, contentCid, itemId, multipliers)
+  metadataJson    String?
+
+  createdAt       DateTime             @default(now())
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+
+  @@index([type])
+  @@index([createdAt])
+}
+
+/// Профиль пользователя для P2P синхронизации (singleton)
+/// Заменяет OrbitDB UserProfileDB — хранится в SQLite, публикуется через IPNS
+model LocalUserProfile {
+  id              String      @id @default("default")
+
+  /// PeerId ноды (из Kubo или Helia)
+  peerId          String
+
+  /// Friend Code (XXXX-XXXX) для добавления в друзья
+  friendCode      String      @unique
+
+  /// Отображаемое имя
+  displayName     String      @default("Анонимус")
+
+  /// URL аватара (data URL, IPFS CID или внешний URL)
+  avatarUrl       String?
+
+  /// Цвет аватара (для генерации дефолтного)
+  avatarColor     String?
+
+  /// Статус (пользовательский текст)
+  status          String?
+
+  /// IPNS ключ для публикации профиля (CID последней публикации)
+  ipnsPublishedCid String?
+
+  /// Время последней IPNS публикации
+  ipnsPublishedAt DateTime?
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+}
+
+/// Друг в P2P сети
+/// Хранит информацию о принятых друзьях для PresenceSync
+model Friend {
+  /// PeerId друга (уникальный идентификатор)
+  peerId          String      @id
+
+  /// Friend Code друга
+  friendCode      String
+
+  /// Отображаемое имя
+  displayName     String
+
+  /// URL аватара
+  avatarUrl       String?
+
+  /// Онлайн-статус
+  isOnline        Boolean     @default(false)
+
+  /// JSON-encoded WatchingInfo (что смотрит)
+  watchingJson    String?
+
+  /// Последний раз видели онлайн
+  lastSeenAt      DateTime?
+
+  /// Когда стали друзьями
+  friendsSince    DateTime    @default(now())
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@allow('all', true)
+  @@index([isOnline])
+}
+
+/// Запрос в друзья (входящий/исходящий)
+model FriendRequest {
+  id              String      @id @default(cuid())
+
+  /// PeerId отправителя
+  fromPeerId      String
+
+  /// Friend Code отправителя
+  fromFriendCode  String
+
+  /// Имя отправителя
+  fromDisplayName String
+
+  /// PeerId получателя
+  toPeerId        String
+
+  /// Статус: pending, accepted, rejected, blocked
+  status          String      @default("pending")
+
+  /// Время отправки
+  sentAt          DateTime    @default(now())
+
+  /// Время ответа
+  respondedAt     DateTime?
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@allow('all', true)
+  @@index([fromPeerId, toPeerId, status])
+  @@index([toPeerId, status])
+}

@@ -1,0 +1,159 @@
+// Настройки приложения
+
+import "./common"
+import "./anime"
+import "./media"
+import "./import"
+import "./watch"
+import "./federation"
+import "./social"
+import "./shikimori"
+
+/// Настройки приложения (singleton)
+model Settings {
+  id              String      @id @default("default")
+
+  // === Транскодирование ===
+
+  /// @form.title("Использовать GPU")
+  /// @form.fieldType("switch")
+  /// @form.description("Использовать NVIDIA NVENC для транскодирования")
+  useGpu          Boolean     @default(true)
+
+  /// @form.title("Видеокодек")
+  /// @form.fieldType("radioCard")
+  videoCodec      VideoCodec  @default(AV1)
+
+  /// @form.title("Качество видео (CQ/CRF)")
+  /// @form.fieldType("slider")
+  /// @form.props({ min: 0, max: 51, showValue: true })
+  /// @form.description("Меньше = лучше качество, больше размер")
+  videoQuality    Int         @default(24)
+
+  /// @form.title("Пресет скорости")
+  /// @form.fieldType("select")
+  /// @form.props({ options: ["p1", "p2", "p3", "p4", "p5", "p6", "p7"] })
+  videoPreset     String      @default("p5")
+
+  /// @form.title("Битрейт аудио (kbps)")
+  /// @form.fieldType("slider")
+  /// @form.props({ min: 64, max: 512, step: 32, showValue: true })
+  audioBitrate    Int         @default(192)
+
+  // === Библиотека ===
+
+  /// @form.title("Папка библиотеки")
+  /// @form.description("Путь к папке с медиафайлами")
+  libraryPath     String?
+
+  /// @form.title("Папка для транскодирования")
+  /// @form.description("Куда сохранять перекодированные файлы")
+  outputPath      String?
+
+  /// @form.title("Папка экспорта по умолчанию")
+  /// @form.description("Куда сохранять MKV файлы при экспорте")
+  exportPath      String?
+
+  /// @form.title("Макс. размер IPFS хранилища (ГБ)")
+  /// @form.fieldType("slider")
+  /// @form.props({ min: 10, max: 4000, step: 10, showValue: true })
+  /// @form.description("Ограничение места для локального IPFS кеша")
+  ipfsStorageMaxGb  Int  @default(500)
+
+  // === Системный трей ===
+
+  /// @form.title("Сворачивать в трей")
+  /// @form.fieldType("switch")
+  /// @form.description("Приложение продолжит работать в фоне")
+  minimizeToTray    Boolean     @default(true)
+
+  /// @form.title("Закрытие окна в трей")
+  /// @form.fieldType("switch")
+  /// @form.description("При нажатии на крестик сворачивать в трей вместо закрытия")
+  closeToTray       Boolean     @default(true)
+
+  /// @form.title("Показывать уведомление при сворачивании")
+  /// @form.fieldType("switch")
+  /// @form.description("Показывать уведомление при первом сворачивании в трей")
+  showTrayNotification Boolean  @default(true)
+
+  // === Интерфейс ===
+
+  /// @form.title("Тёмная тема")
+  /// @form.fieldType("switch")
+  darkMode        Boolean     @default(true)
+
+  /// @form.title("Язык интерфейса")
+  /// @form.fieldType("select")
+  /// @form.props({ options: ["ru", "en", "ja"] })
+  language        String      @default("ru")
+
+  // === Плеер ===
+
+  /// @form.title("Автопропуск опенинга")
+  /// @form.fieldType("switch")
+  skipOpening     Boolean     @default(false)
+
+  /// @form.title("Автопропуск эндинга")
+  /// @form.fieldType("switch")
+  skipEnding      Boolean     @default(false)
+
+  /// @form.title("Автовоспроизведение")
+  /// @form.fieldType("switch")
+  autoplay        Boolean     @default(true)
+
+  /// @form.title("Предпочтение дорожек")
+  /// @form.fieldType("radioCard")
+  /// @form.description("Какие дорожки выбирать автоматически при первом просмотре")
+  trackPreference TrackPreference @default(AUTO)
+
+  /// @form.exclude
+  /// Профиль кодирования по умолчанию
+  defaultProfileId String?
+  defaultProfile  EncodingProfile? @relation(fields: [defaultProfileId], references: [id], onDelete: SetNull)
+
+  // === Мобильный доступ ===
+
+  /// @form.title("Мобильный доступ")
+  /// @form.fieldType("switch")
+  /// @form.description("Доступ к библиотеке с мобильных устройств в локальной сети")
+  mobileAccessEnabled Boolean   @default(false)
+
+  /// @form.title("Порт мобильного сервера")
+  /// @form.fieldType("numberInput")
+  /// @form.props({ min: 1024, max: 65535 })
+  /// @form.description("HTTP порт для мобильного доступа")
+  mobileServerPort    Int       @default(4000)
+
+  // === Торрент-клиент ===
+
+  /// @form.title("Бэкенд торрент-клиента")
+  /// @form.fieldType("radioCard")
+  /// @form.props({ options: [{"value":"webtorrent","label":"WebTorrent (встроенный)"},{"value":"qbittorrent","label":"qBittorrent (рекомендуется)"}] })
+  /// @form.description("WebTorrent качает в RAM → OOM на больших раздачах. qBittorrent работает отдельным процессом и качает на диск.")
+  torrentBackend      String      @default("webtorrent")
+
+  /// @form.title("URL qBittorrent Web UI")
+  /// @form.placeholder("http://localhost:8080")
+  /// @form.description("Адрес Web UI qBittorrent (Tools → Options → Web UI)")
+  qbittorrentUrl      String?
+
+  /// @form.title("Логин qBittorrent")
+  /// @form.placeholder("admin")
+  qbittorrentUsername String?
+
+  /// @form.title("Пароль qBittorrent")
+  /// @form.fieldType("password")
+  qbittorrentPassword String?
+
+  // === Миграции данных ===
+
+  /// @form.exclude
+  /// Флаг: главы мигрированы из SQLite в IPFS
+  chaptersMigrated  Boolean     @default(false)
+
+  updatedAt       DateTime    @updatedAt
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+}

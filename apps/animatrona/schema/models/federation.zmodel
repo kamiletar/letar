@@ -1,0 +1,221 @@
+// P2P/федерация: подписки, трекеры, раздачи, настройки федерации
+
+import "./common"
+import "./anime"
+import "./media"
+import "./import"
+import "./watch"
+import "./settings"
+import "./social"
+import "./shikimori"
+
+/// Подписка на библиотеку другого пользователя (P2P Sharing)
+model Subscription {
+  id            String   @id @default(cuid())
+
+  /// IPNS имя (PeerId) владельца библиотеки
+  ipnsName      String   @unique
+
+  /// Имя для отображения (задаётся пользователем)
+  displayName   String
+
+  /// Последний известный CID библиотеки
+  lastKnownCid  String?
+
+  /// Когда последний раз проверяли обновления
+  lastCheckedAt DateTime?
+
+  /// Автоматически пиннить контент из этой подписки
+  autoPin       Boolean  @default(false)
+
+  /// Лимит автопининга в байтах (0 = без лимита)
+  autoPinLimit  Int      @default(0)
+
+  /// Дата создания подписки
+  createdAt     DateTime @default(now())
+
+  /// Дата обновления
+  updatedAt     DateTime @updatedAt
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+
+  @@index([ipnsName])
+  @@index([lastCheckedAt])
+}
+
+/// Уровень доверия к трекеру
+enum TrustLevel {
+  /// Заблокирован — никакие операции не разрешены
+  BLOCKED
+  /// Не доверенный — по умолчанию
+  UNTRUSTED
+  /// Известный — проверен пользователем
+  KNOWN
+  /// Доверенный — автоматический импорт
+  TRUSTED
+  /// Верифицированный — полное доверие
+  VERIFIED
+}
+
+/// Удалённый трекер в федеративной сети
+model Tracker {
+  id                  String        @id @default(cuid())
+
+  /// URL трекера (уникальный идентификатор)
+  url                 String        @unique
+
+  /// Название трекера
+  name                String
+
+  /// Описание трекера
+  description         String?
+
+  /// Тема контента (anime, drama, movie и т.д.)
+  theme               String        @default("anime")
+
+  /// Основной язык контента
+  language            String        @default("ru")
+
+  /// PEM-кодированный публичный ключ для верификации подписей
+  publicKeyPem        String?
+
+  // === Trust System ===
+
+  /// Уровень доверия
+  trustLevel          TrustLevel    @default(UNTRUSTED)
+
+  /// Процент uptime (0-100)
+  uptimePercent       Float         @default(0)
+
+  /// Среднее время ответа в мс
+  avgResponseTimeMs   Int           @default(0)
+
+  /// Качество контента (0-1)
+  contentQuality      Float         @default(0)
+
+  /// Количество успешных синхронизаций
+  successfulSyncs     Int           @default(0)
+
+  /// Количество неудачных синхронизаций
+  failedSyncs         Int           @default(0)
+
+  // === Stats ===
+
+  /// Количество синхронизированного контента
+  contentSynced       Int           @default(0)
+
+  /// Последняя успешная синхронизация
+  lastSyncAt          DateTime?
+
+  /// Последняя проверка доступности
+  lastCheckedAt       DateTime?
+
+  // === Связи ===
+
+  /// Импортированный контент
+  importedContent     FederatedContent[]
+
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+
+  @@index([trustLevel])
+  @@index([lastSyncAt])
+  @@index([lastCheckedAt])
+}
+
+/// Федеративный контент — импортированный из другого трекера
+model FederatedContent {
+  id                  String        @id @default(cuid())
+
+  /// Трекер-источник
+  trackerId           String
+  tracker             Tracker       @relation(fields: [trackerId], references: [id], onDelete: Cascade)
+
+  /// ID контента на удалённом трекере
+  remoteId            String
+
+  /// Связь с локальным аниме (если было импортировано)
+  animeId             String?
+  anime               Anime?        @relation(fields: [animeId], references: [id], onDelete: SetNull)
+
+  /// JSON данные VideoSeriesObject
+  contentJson         String
+
+  // === Внешние ID для дедупликации ===
+
+  /// MyAnimeList ID
+  malId               Int?
+
+  /// AniList ID
+  anilistId           Int?
+
+  /// Shikimori ID
+  shikimoriId         Int?
+
+  /// AniDB ID
+  anidbId             Int?
+
+  /// Когда был получен контент
+  receivedAt          DateTime      @default(now())
+
+  /// Когда был обновлён
+  updatedAt           DateTime      @updatedAt
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+
+  /// Уникальность по трекеру и remoteId
+  @@unique([trackerId, remoteId])
+
+  @@index([trackerId])
+  @@index([animeId])
+  @@index([malId])
+  @@index([anilistId])
+  @@index([shikimoriId])
+}
+
+/// Настройки федерации (singleton)
+model FederationSettings {
+  id                      String      @id @default("default")
+
+  /// Федерация включена
+  enabled                 Boolean     @default(false)
+
+  /// Название этого трекера в сети
+  trackerName             String      @default("My Animatrona")
+
+  /// Описание этого трекера
+  trackerDescription      String?
+
+  /// Тема контента (anime, drama, movie)
+  theme                   String      @default("anime")
+
+  /// Основной язык контента
+  language                String      @default("ru")
+
+  /// Автоматическая синхронизация с доверенными трекерами
+  autoSync                Boolean     @default(true)
+
+  /// Интервал автосинхронизации в минутах
+  syncIntervalMinutes     Int         @default(60)
+
+  /// Минимальный trust level для автоимпорта (1=UNTRUSTED, 2=KNOWN, 3=TRUSTED, 4=VERIFIED)
+  minTrustForAutoImport   Int         @default(3)
+
+  // === Криптография ===
+
+  /// Приватный ключ RSA-2048 (PEM, зашифрован)
+  privateKeyPem           String?
+
+  /// Публичный ключ RSA-2048 (PEM)
+  publicKeyPem            String?
+
+  updatedAt               DateTime    @updatedAt
+
+  // Политики доступа (desktop приложение без аутентификации)
+  @@allow('all', true)
+}
