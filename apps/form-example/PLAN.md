@@ -45,4 +45,10 @@ Example-приложение @letar/forms: демо + стартовый шаб�
 ## P3 — Качество кода
 
 - [ ] Единообразие кода — .meta({ui}), compound components, комментарии
-- [ ] E2E тесты — Basic, Validation, Multi-Step, Products CRUD, Conditional
+- [x] E2E тесты — Basic, Validation, Multi-Step, Products CRUD, Conditional
+
+## Журнал сессий
+
+| Дата       | Событие                                                                      |
+| ---------- | ---------------------------------------------------------------------------- |
+| 2026-08-24 | ✅ §18.7 M2 e2e-гейт закрыт — staging e2e 48/48, добавлен в `E2E_GATED_APPS` |
