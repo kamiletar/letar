@@ -2608,3 +2608,59 @@ submodule).
   наших MCP-серверов (все локальные stdio/self-hosted, не публичный HTTP API для сторонних
   агентов), плюс у автора уже есть прецедент недобросовестного встраивания рекламы в stdout
   прод-инструментов (этот самый §54).
+
+## §55 — `@letar/env-load`: вынесен паттерн каскадной загрузки `.env` из ~40 файлов (2026-08-25) 🆕
+
+Ручная правка `quiet: true` в §54 показала, что копия `config({path:'.env.local'})` +
+`config({path:'.env'})` разошлась по ~40 файлам монорепо (`prisma.config.ts` во всех
+приложениях, `prisma/seed.ts`, разовые `scripts/*`, e2e `db.helpers.ts`) — каждое будущее
+изменение паттерна означает повторный обход всех копий.
+
+### Что сделано
+
+Заведена `libs/env-load` (`nx g @letar/generators:new-lib env-load`) с единственной функцией
+`loadEnvCascade(baseDir?, files?)` — каскадная загрузка через `dotenv`, `quiet: true` внутри,
+по умолчанию `.env.local → .env`, кастомный список файлов для нетиповых случаев (`dashboard`:
+`.env.local → .env.docker`; `grandslamcup`/`aboi` staging-скрипты: `.env.staging → .env.local →
+.env`). 3 unit-теста (приоритет local над base, докладка недостающих ключей, кастомный список).
+
+Мигрированы все найденные потребители, каждое приложение/submodule — отдельный коммит
+(scope-guard): `time`, `auth-hub`, `dashboard`, `mandala`, `form-develop-app`, `grandslamcup`,
+`archetest`, `kami`, `animatrona-tracker` (прямые apps) · `driving-school`, `dsperevod`, `studio`,
+`svoichuzhie`, `aprel8008`, `aboi` (submodule, коммит внутри + bump в root) · `auth-hub-e2e`,
+`svoichuzhie-e2e`, `driving-school-e2e` (e2e `db.helpers.ts`) · разовые `scripts/*`
+(`mandala/create-admin.ts`, `auth-hub/encrypt-client-secrets.ts`,
+`grandslamcup/add-friendly-matches.ts`+`anonymize-staging-db.ts`, `svoichuzhie/scripts/seed.ts`,
+`studio/prisma/seed.ts`, `aboi/scripts/anonymize-staging-db.ts`). Push не делался.
+
+Генератор `nx g @letar/generators:new-app` обновлён — новые приложения сразу получают
+`@letar/env-load` в `prisma.config.ts`/`tsconfig.json`/`package.json`, паттерн не должен
+воспроизводиться в будущих приложениях.
+
+⚠️ **`prisma.config.ts` требует библиотеку в настоящих `dependencies`, не только
+`implicitDependencies`.** Prisma CLI грузит конфиг собственным загрузчиком через обычный
+`require`/`import` по `node_modules`, а не через `tsconfig.json`/`paths` (`customConditions` не
+действует — см. `.claude/rules/libs.md`). Без явной `dependencies`-записи + `bun install`
+падает `Cannot find module '@letar/env-load'`, даже когда `paths` и `implicitDependencies`
+верны. Проверено практическим прогоном на `time` до тиражирования на остальные — задокументировано
+в `libs/env-load/README.md`.
+
+⚠️ **e2e-приложения без `typecheck:tsgo`-таргета не защищены от `TS6059`/`TS6307`.** Три из них
+(`auth-hub-e2e`, `driving-school-e2e`) не имели `references`/`include`-glob на новую библиотеку
+и валились на «File is not under rootDir»/«not listed within the file list» при ручном
+`tsc --noEmit` — тот же класс, что описан в
+[libs.md § Тот же фикс на приложениях, наследующих outDir/include](/.claude/rules/libs.md).
+Фикс — добавить `../../libs/env-load/src/**/*.ts` в `include` + исключить его `*.spec.ts` в
+`exclude`; `auth-hub-e2e` дополнительно потребовал явный `rootDir: "../.."` (был жёстко задан
+`rootDir: "."`, наследуемый `outDir` без `rootDir` не проходит smoke-test у e2e-приложений так же
+надёжно, как у обычных Next.js-приложений на общем пресете).
+
+### Не мигрировано
+
+`domwellbes` (`prisma.config.ts`, `scripts/check-db-indexes.mjs`,
+`prisma/seed/load-env.ts`) — на момент миграции submodule был в активной работе параллельной
+сессии (незакоммиченные правки в `PLAN_OPERATIONS.md`, `ROADMAP_M10.md`,
+`docs/ARCHITECTURE.md`, `contract.action.ts`, и уже частично начатая правка самого
+`check-db-indexes.mjs` под §54). Трогать чужой рабочий чекаут submodule небезопасно
+(`.claude/rules/git.md`) — оставлено на будущую сессию по `domwellbes` или на владельца текущей
+WIP-сессии.
