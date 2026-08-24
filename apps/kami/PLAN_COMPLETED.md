@@ -1,5 +1,27 @@
 # Выполненные задачи — Kami
 
+## Рефакторинг: schema.zmodel разбит на файлы по доменам (2026-08-24)
+
+1083-строчный `schema.zmodel` разбит на 11 доменных файлов в `apps/kami/schema/` через ZModel
+import: `auth` (Better Auth core: User/Account/Session/Verification/RateLimit), `organization`
+(Organization/Member/Invitation), `portfolio` (SkillCategory/Skill/Project), `hire`
+(HireRequest), `consulting` (ConsultingService/Request/Session/Testimonial/Case/AvailabilityRule/
+BookedSlot), `blog` (BlogComment), `media` (Image/AudioFile/UploadedFile), `learning`
+(LearningItem), `survey` (Team Surveys), `social` (кросс-постинг), `consent` (ConsentLog,
+152-ФЗ). Корневой `schema.zmodel` — только `import` + `datasource`/`generator`/`plugin`.
+
+Циклические cross-file импорты (auth ↔ organization ↔ hire ↔ survey, auth ↔ blog/media/consent)
+подтверждены рабочими — см. `.claude/docs/zenstack-multifile-schema-circular-imports.md`.
+Проверено в изолированном git worktree ДО правки реального файла: сгенерированный
+`schema.prisma`/`schema.ts`/`form-schemas` идентичен исходному побайтово по содержимому моделей
+(отличался только порядок объявлений — следствие порядка merge файлов). После переноса в реальный
+репозиторий: `zenstack generate` → `prisma generate` → `prisma db push` (без изменений, БД уже в
+синхроне) → `typecheck:tsgo` — чисто → `oxlint` — чисто → `dprint format` — без изменений.
+
+Nx project graph во время работы был временно сломан гонкой параллельного агента
+(`animatrona-tracker-dev` делал такой же split в это же время) — обошли прямым вызовом бинарников
+(`zenstack`/`prisma`/`tsgo`/`oxlint`) в обход `nx`, не трогая чужую работу.
+
 ## Matcher next-intl через @letar/i18n-proxy — исправлен пропущенный icon.svg (2026-08-21)
 
 **Уточнение предыдущей записи ниже: аудит от 2026-08-21 был ошибочным.** `src/app/icon.svg`
