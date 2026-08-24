@@ -23,8 +23,8 @@ async function hashPasswordBetterAuth(password: string): Promise<string> {
 }
 
 const projectDir = resolve(__dirname, '../../../svoichuzhie')
-config({ path: resolve(projectDir, '.env.local') })
-config({ path: resolve(projectDir, '.env') })
+config({ path: resolve(projectDir, '.env.local'), quiet: true })
+config({ path: resolve(projectDir, '.env'), quiet: true })
 
 type AnyPrisma = { user: Record<string, unknown>; account: Record<string, unknown> }
 
