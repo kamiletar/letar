@@ -52,23 +52,23 @@ try {
 проверкой «терминального события ещё нет» и записью нового события не остаётся окна, в которое
 может проскочить конкурент, потому что сама проверка — это попытка записи, а не чтение.
 
-### Три подтверждённых применения (2026-08-24)
+### Четыре подтверждённых применения (обновлено 2026-08-25)
 
-| Родитель | Слот | Взаимоисключающие исходы |
-| --- | --- | --- |
-| `DeliveryRfq` (через отдельное поле `status`, не этот приём — см. предостережение выше) | — | — |
-| `CommercialProposal` | `proposal-terminal:<proposalId>` | ACCEPTED / REJECTED (и зарезервировано под CANCELLED) — [proposal-lifecycle.ts](/apps/domwellbes/src/lib/sales/proposal-lifecycle.ts) |
-| `ContractRevision` (переход в ISSUED) | `contract-issued:<revisionId>` | только один ISSUED — [contract.tsx:234](/apps/domwellbes/src/lib/sales/contract.tsx) |
-| `ContractRevision` (переход из ISSUED) | `contract-signed:<revisionId>` / `contract-cancelled:<revisionId>` | SIGNED vs CANCELLED — **отдельные** ключи, а не общий слот, потому что до вставки уже есть предварительная проверка по `events.some(...)` (см. ниже) |
+| Родитель                                                                                | Слот                             | Взаимоисключающие исходы                                                                                                                                  |
+| --------------------------------------------------------------------------------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DeliveryRfq` (через отдельное поле `status`, не этот приём — см. предостережение выше) | —                                | —                                                                                                                                                         |
+| `CommercialProposal`                                                                    | `proposal-terminal:<proposalId>` | ACCEPTED / REJECTED (и зарезервировано под CANCELLED) — [proposal-lifecycle.ts](/apps/domwellbes/src/lib/sales/proposal-lifecycle.ts)                     |
+| `ContractRevision` (переход в ISSUED)                                                   | `contract-issued:<revisionId>`   | только один ISSUED — [contract.tsx:234](/apps/domwellbes/src/lib/sales/contract.tsx)                                                                      |
+| `ContractRevision` (переход из ISSUED)                                                  | `contract-terminal:<revisionId>` | SIGNED vs CANCELLED — общий слот, `attachExternallySignedContract`/`cancelContractRevision` в [contract.tsx](/apps/domwellbes/src/lib/sales/contract.tsx) |
 
-Обрати внимание: `attachExternallySignedContract`/`cancelContractRevision` в contract.tsx НЕ
-используют общий ключ на двоих (`contract-terminal:<revisionId>`) — у каждого свой собственный
-идемпотентный ключ. Защита от гонки SIGNED-vs-CANCELLED там обеспечена комбинацией
-предварительной проверки `events.some(kind === 'SIGNED' || kind === 'CANCELLED')` и уникальности
-`revisionId` в связи `events` — если нужна гонка честно закрыть только на уровне БД (без
-предварительного чтения), это стоит унифицировать на общий слот `contract-terminal:<revisionId>`
-отдельной задачей; на 2026-08-24 обе функции полагаются на предварительный `SELECT`, что уже не
-чисто TOCTOU-safe (см. ловушку ниже).
+`attachExternallySignedContract`/`cancelContractRevision` унифицированы на общий ключ
+`contract-terminal:<revisionId>` 2026-08-25 (изначально, на 2026-08-24, у каждого был свой ключ —
+`contract-signed:<revisionId>`/`contract-cancelled:<revisionId>` — и защита от гонки держалась
+только на предварительной проверке `events.some(kind === 'SIGNED' || kind === 'CANCELLED')`, что
+оставляло TOCTOU-окно между `SELECT` и `INSERT`). Предварительная проверка осталась как быстрый
+путь к business-исходу (`NOT_ISSUED`/`ALREADY_TERMINAL` без похода до constraint'а), но саму
+гонку теперь закрывает unique-constraint на `idempotencyKey` — см. тест «гонка SIGNED vs
+CANCELLED» в [contract.spec.ts](/apps/domwellbes/src/lib/sales/contract.spec.ts).
 
 ## Ловушка: это НЕ защита для нетерминальных событий в том же логе
 
@@ -77,7 +77,7 @@ try {
 (обычно с `randomUUID()` в составе) — они не участвуют в терминальном слоте и могут создаваться
 сколько угодно раз:
 
-```typescript
+```
 idempotencyKey: `proposal-sent:${proposalId}:${randomUUID()}`   // SENT — повтор разрешён
 idempotencyKey: `proposal-viewed:${proposalId}:${randomUUID()}` // VIEWED — повтор разрешён
 ```
@@ -95,8 +95,8 @@ async function assertProposalNotTerminal(proposalId: string) {
     where: { id: proposalId },
     select: { events: { select: { kind: true } } },
   })
-  if (!proposal) return { ok: false, error: 'PROPOSAL_NOT_FOUND' }
-  if (hasTerminalEvent(proposal.events)) return { ok: false, error: 'PROPOSAL_TERMINAL_CONFLICT' }
+  if (!proposal) { return { ok: false, error: 'PROPOSAL_NOT_FOUND' } }
+  if (hasTerminalEvent(proposal.events)) { return { ok: false, error: 'PROPOSAL_TERMINAL_CONFLICT' } }
   return { ok: true }
 }
 ```
