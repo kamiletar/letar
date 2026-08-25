@@ -1,5 +1,34 @@
 # PLAN_COMPLETED — aira-web
 
+## GlitchTip AIRA-WEB-1: `ContextError` при переключении языка (2026-08-25)
+
+GlitchTip issue 604: `ContextError: useContext returned 'undefined'... forgot to wrap component
+within <ChakraProvider />`, впервые 2026-08-18, ~9 срабатываний/неделю. Breadcrumb последнего
+события — soft-навигация `to: "/ru", from: "/ru"`, то есть клик по `locale-switcher.tsx` (даже на
+уже активной локали вызывает `router.replace`).
+
+Root cause — тот же класс бага, что уже найден и закрыт на `auth-hub`/`mandala`/`dashboard`/
+`driving-school`/`animatrona-tracker` (разбор —
+[nextjs16-turbopack-default-emotion-hydration.md](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md)):
+`project.json` не переопределял `dev`/`build`, оба таргета наследовались от `@nx/next` плагина
+как голый `next dev`/`next build` → Turbopack по умолчанию (Next.js 16). Комбинация Chakra v3
+`ChakraProvider` (рендерит emotion `<Global>`) + `next-themes` `ColorModeProvider` под Turbopack
+триггерит hydration mismatch на клиентской навигации, React отбрасывает и заново монтирует
+поддерево `<body>` — в момент этой пересборки хуки Chakra в свежесмонтированных компонентах могут
+не увидеть провайдер.
+
+Фикс — тот же паттерн: частичный override `options.command` для `build`/`dev` в `project.json`
+(`next build --webpack` / `next dev --webpack`), без дублирования `cache`/`inputs`/`outputs` —
+проверено `nx show project aira-web --json` до/после, смержилось только поле `command`.
+
+**Проверка:** живая репродукция через Browser pane (`nx dev aira-web` под webpack) — клик по
+переключателю языка на уже активной локали, переключение en→ru→en несколько раз подряд, включая
+быстрые повторные клики — ни разу `ContextError`/hydration-краш, только известное безвредное
+предупреждение `next-themes` про `<script>`-тег (см. тот же doc-файл). `nx build aira-web`
+проходит с явным `(webpack)` в выводе. Добавлен регрессионный e2e-тест
+`apps/aira-web-e2e/src/locale-switcher.spec.ts` — клик на текущей локали и переключение en↔ru не
+дают `pageerror` в консоли.
+
 ## Touch target для текстовых ссылок — WCAG 2.5.5 (2026-08-25)
 
 Аудит по всему монорепо нашёл 2 ссылки без достаточной высоты клика на мобильном:

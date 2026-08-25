@@ -16,6 +16,16 @@
     "owner:letar"
   ],
   "targets": {
+    "build": {
+      "options": {
+        "command": "next build --webpack"
+      }
+    },
+    "dev": {
+      "options": {
+        "command": "next dev --webpack"
+      }
+    },
     "typecheck": {
       "executor": "nx:run-commands",
       "cache": true,

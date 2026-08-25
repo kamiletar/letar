@@ -1,5 +1,18 @@
 # Changelog — aira-web
 
+## [0.3.7] — 2026-08-25
+
+### Fixed
+
+- GlitchTip AIRA-WEB-1: `ContextError: useContext returned 'undefined'` при клике на переключатель
+  языка (в т.ч. на уже активной локали). Причина — `next dev`/`next build` без `--webpack`
+  наследовались от `@nx/next` как Turbopack по умолчанию (Next.js 16), что в сочетании с Chakra v3
+  `ChakraProvider` + `next-themes` `ColorModeProvider` даёт hydration mismatch при клиентской
+  навигации и краш свежепримонтированного поддерева. Тот же класс бага уже закрыт на
+  auth-hub/mandala/dashboard/driving-school/animatrona-tracker — фикс тем же паттерном:
+  `next build --webpack` / `next dev --webpack` в `project.json`. Добавлен регрессионный e2e-тест
+  `locale-switcher.spec.ts`.
+
 ## [0.3.6] — 2026-08-25
 
 ### Changed
