@@ -3021,11 +3021,12 @@ Playwright. Функции-фикстуры (`page`, `adminPage`, `guestPage`) �
 `useRef` — 0 совпадений в коде, только упоминание в комментарии). Правило отключено точечно в
 `eslint.config.mjs` каждого из двух приложений.
 
-⚠️ **Тот же паттерн (`page: async ({ page }, use) => ...`) есть и в `driving-school-e2e`**
-(`src/fixtures/base-test.ts`), но он не попал в `nx affected` этого прогона и не проверен — латентная
-бомба, сработает при следующем изменении, затрагивающем этот проект. Правило там не отключено;
-чинить по факту следующего падения либо превентивно — на усмотрение следующей сессии по
-`driving-school`.
+Тот же паттерн (`page: async ({ page }, use) => ...`) есть и в `driving-school-e2e`
+(`src/fixtures/base-test.ts`) — не попал в `nx affected` этого прогона CI, но `nx run
+driving-school-e2e:lint` отдельно подтвердил ту же ошибку. Закрыто той же точечной правкой
+(`'react-hooks/rules-of-hooks': 'off'` в `eslint.config.mjs`); реальных React-хуков в приложении
+нет (тот же грепп, 0 совпадений). Коммит внутри submodule `driving-school-e2e` + bump SHA в letar
+(`b1863af2`).
 
 **Typecheck** (`form-docs`) — `tsgo --noEmit` падал на `Cannot find module '@/.source/server'`.
 `.source/` — генерируемый Fumadocs каталог (в `.gitignore`), возникает как побочный эффект
