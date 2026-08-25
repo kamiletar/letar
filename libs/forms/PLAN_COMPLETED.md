@@ -1,5 +1,35 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-08-25 — Фикс eager JSX на верхнем уровне модуля: `nx db:seed` падал `React is not defined`
+
+Репорт: `nx db:seed domwellbes` падал `ReferenceError: React is not defined` при импорте
+`@letar/forms` с RichText-полем в схеме — до всякого рендера, прямо на этапе импорта.
+
+**Root cause:** несколько мест в библиотеке создавали JSX-элемент на верхнем уровне модуля (при
+вызове функции в момент импорта, не в `render`): `createLazyComponentBase(importFn, <Skeleton
+.../>)` в `lazy-component.tsx`, `TOOLBAR_CONFIG` со значениями `icon: <LuBold />` в
+`toolbar-config.tsx`, `createDocumentField({ icon: <LuFileText /> })` в 9 документных полях.
+Next.js всегда собирает JSX через automatic runtime независимо от `tsconfig` — под приложением
+незаметно. `tsx` (запускает `prisma/seed.ts`) резолвит JSX-трансформ по `tsconfig` вызывающего
+приложения; Next.js-пресет держит `"jsx": "preserve"` (Next сам делает трансформ), а esbuild в
+этом случае транспилирует JSX в classic `React.createElement(...)` — без `import React` падает
+сразу при импорте. `TOOLBAR_CONFIG`/иконки реэкспортируются как значения из барреля
+`form-fields/index.ts`, поэтому исполняются при обычном статическом импорте `@letar/forms`.
+
+**Фикс:** `createLazyComponent` (`@letar/forms-react` v0.3.2, Chakra-обёртка `@letar/forms`
+v2.7.4, оба места в `@letar/forms-shadcn` v0.33.5) принимает `fallback` как фабрику
+(`() => ReactNode`), не готовый элемент. `ToolbarButtonConfig.icon`/`DocumentFieldConfig.icon` —
+теперь `ComponentType`, инстанцируется в `render`.
+
+**Проверено:** `nx db:seed domwellbes` — полный успешный прогон. `nx db:seed mandala` — прошёл
+весь импорт `@letar/forms`, упал дальше на несвязанной ошибке БД (`EACCES` на `user.upsert`, не
+относится к этому багу). `nx typecheck:tsgo`/`nx lint` на `forms`/`forms-react`/`forms-shadcn`/
+`forms-core` зелёные. `nx test forms` — 2 спека (`field-rich-text.spec.tsx`,
+`table-keyboard-commit.spec.tsx`) падают в полном параллельном прогоне, но проходят в изоляции —
+предсуществующая флейкинесть прогона, не регрессия от этого фикса.
+
+Разбор — [letar-forms-lazy-component-eager-jsx-seed-crash.md](/.claude/docs/letar-forms-lazy-component-eager-jsx-seed-crash.md).
+
 ## 2026-08-21 — Фикс required-резолва `.optional().or(z.literal(''))` (v2.7.3 / forms-core v0.9.1)
 
 Репорт: `apps/domwellbes/checkout` — поле `customerEmail` рендерилось с `*` (обязательное), хотя
