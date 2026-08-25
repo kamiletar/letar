@@ -9,7 +9,7 @@ import StarterKit from '@tiptap/starter-kit'
 import type { ReactElement } from 'react'
 import { useEffect, useMemo } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
-import { DEFAULT_TOOLBAR_BUTTONS, TOOLBAR_CONFIG, type ToolbarButton } from './rich-text-toolbar-config'
+import { DEFAULT_TOOLBAR_BUTTONS, ICON_SIZE, TOOLBAR_CONFIG, type ToolbarButton } from './rich-text-toolbar-config'
 import type { RichTextFieldProps } from './types'
 
 /** Безопасный парсинг JSON — не роняет редактор на битом значении из БД */
@@ -124,7 +124,7 @@ function RichTextEditor({
                   isActive && 'bg-secondary text-secondary-foreground',
                 )}
               >
-                {config.icon}
+                <config.icon size={ICON_SIZE} />
               </button>
             )
           })}

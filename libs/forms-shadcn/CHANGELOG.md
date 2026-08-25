@@ -4,6 +4,26 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.33.6] - 2026-08-25
+
+### Fixed
+
+- **`DocumentFieldConfig.icon`/`ToolbarButtonConfig.icon` — тот же баг eager top-level JSX, что
+  уже был закрыт в `@letar/forms` (v2.7.4, тот же день), не был портирован в shadcn-скин.**
+  `document-field-base.tsx` (`FieldBankAccount`, `FieldCorrAccount`, `FieldBIK`, `FieldINN`,
+  `FieldKPP`, `FieldOGRN`, `FieldPassport`, `FieldSNILS`) и `rich-text-toolbar-config.tsx`
+  (`TOOLBAR_CONFIG`) создавали иконку (`icon: <Landmark />` и т.п.) на верхнем уровне модуля —
+  под `tsx`/esbuild (`nx db:seed`) падало `ReferenceError: React is not defined`. Найдено
+  автоматическим гейтом `eager-jsx-check` (см. ниже) при первом же прогоне. `icon` теперь
+  `ComponentType` (ссылка на компонент), инстанцирование — в `render`.
+
+### Added
+
+- **Таргет `eager-jsx-check`, подключён к `lint`.** Regex-гейт против регресса бага из раздела
+  выше — `@letar/eager-jsx-check` (новая plain-JS библиотека монорепо, по образцу
+  `@letar/theme-check`). Разбор бага —
+  `.claude/docs/letar-forms-lazy-component-eager-jsx-seed-crash.md`.
+
 ## [0.33.5] - 2026-08-25
 
 ### Fixed

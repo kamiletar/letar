@@ -16,7 +16,7 @@ export const FieldINN = createDocumentField({
   formatMode: 'off',
   maxLength: 12,
   placeholder: '7707083893',
-  icon: <FileText />,
+  icon: FileText,
   validate: (value) => {
     const digits = value.replace(/\D/g, '')
     if (!digits) {

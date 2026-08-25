@@ -91,9 +91,21 @@
         "cwd": "libs/forms-react"
       }
     },
+    "eager-jsx-check": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "metadata": {
+        "description": "Reject JSX created at module top level (breaks tsx/esbuild consumers like nx db:seed)"
+      },
+      "options": {
+        "command": "node scripts/check-eager-jsx.mjs",
+        "cwd": "libs/forms-react"
+      }
+    },
     "lint": {
       "dependsOn": [
-        "oxlint"
+        "oxlint",
+        "eager-jsx-check"
       ]
     },
     "format": {

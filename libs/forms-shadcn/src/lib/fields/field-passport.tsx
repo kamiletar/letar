@@ -8,7 +8,7 @@ export const FieldPassport = createDocumentField({
   displayName: 'FieldPassport',
   mask: '99 99 999999',
   placeholder: '45 06 123456',
-  icon: <BookOpen />,
+  icon: BookOpen,
   validate: (value) => {
     const digits = value.replace(/\D/g, '')
     if (!digits) {

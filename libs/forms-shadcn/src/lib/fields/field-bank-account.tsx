@@ -8,7 +8,7 @@ export const FieldBankAccount = createDocumentField({
   displayName: 'FieldBankAccount',
   mask: '99999999999999999999',
   placeholder: '40702810038000000001',
-  icon: <Landmark />,
+  icon: Landmark,
   validate: (value) => {
     const digits = value.replace(/\D/g, '')
     if (!digits) {
@@ -26,7 +26,7 @@ export const FieldCorrAccount = createDocumentField({
   displayName: 'FieldCorrAccount',
   mask: '99999999999999999999',
   placeholder: '30101810400000000225',
-  icon: <Landmark />,
+  icon: Landmark,
   validate: (value) => {
     const digits = value.replace(/\D/g, '')
     if (!digits) {

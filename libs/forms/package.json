@@ -1,8 +1,13 @@
 {
   "name": "@letar/forms",
-  "version": "2.7.4",
+  "version": "2.7.5",
   "description": "Reusable form components library with TanStack Form and Chakra UI integration",
   "type": "module",
+  "nx": {
+    "implicitDependencies": [
+      "@letar/eager-jsx-check"
+    ]
+  },
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
@@ -71,6 +76,7 @@
     "@tanstack/react-virtual": "^3.13.23"
   },
   "devDependencies": {
+    "@letar/eager-jsx-check": "workspace:*",
     "@letar/forms-core": "workspace:*",
     "@letar/forms-react": "workspace:*"
   }

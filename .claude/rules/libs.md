@@ -220,26 +220,27 @@ found` при запуске `nx test <lib>`, все тесты красные �
 
 ## Существующие библиотеки
 
-| Библиотека                | Описание                                                                                                                                                                 |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| @letar/forms              | Формы, Chakra-скин (TanStack Form)                                                                                                                                       |
-| @letar/forms-core         | Формы — framework-free ядро (Фаза 7.1): Zod-мета-движок, UIKit-контракт, форматтеры                                                                                      |
-| @letar/forms-react        | Формы — React-композиционный слой (Фаза 7.3): `createField`, `FormGroup`, хуки поля                                                                                      |
-| @letar/forms-shadcn       | Формы — shadcn/Radix-скин (Фаза 7.3), 47/56 полей                                                                                                                        |
-| @letar/forms-vue          | Формы — headless Vue-слой поверх `@tanstack/vue-form`, полный паритет с React (Фаза 9 закрыта 2026-08-13), 61/61 полей                                                   |
-| @letar/forms-vue-shadcn   | Формы — Reka UI/Vue-скин, полный паритет с React (Фаза 9 закрыта 2026-08-13), 61/61 полей                                                                                |
-| @letar/forms-angular      | Формы — headless Angular-слой поверх нативных `@angular/forms`, полный паритет с React/Vue (Фаза 11 закрыта 2026-08-14), 61/61 полей                                     |
-| @letar/chakra-provider    | Chakra UI провайдер                                                                                                                                                      |
-| @letar/yandex-metrika     | Яндекс Метрика                                                                                                                                                           |
-| @letar/format-utils       | Форматирование дат, телефонов                                                                                                                                            |
-| @letar/tailwind-utils     | `cn()` (clsx+twMerge) и общие Tailwind-классы примитивов — общий код `forms-shadcn`/`forms-vue-shadcn`                                                                   |
-| @letar/ui                 | Shared UI компоненты                                                                                                                                                     |
-| @letar/validation-utils   | Zod схемы валидации                                                                                                                                                      |
-| @letar/email              | Email отправка через Maddy                                                                                                                                               |
-| @letar/form-mcp           | MCP сервер для форм (npm: @letar/form-mcp)                                                                                                                               |
-| @letar/generators         | Локальные Nx-генераторы (`nx g @letar/generators:e2e-suite <app>`, `new-lib <name>`, `new-app <name>`)                                                                   |
-| @letar/zenstack-fragments | Общие ZenStack zmodel-миксины (Better Auth Account/Session/Verification) — подключаются через `import` пути в `schema.zmodel`, НЕ через TS-алиасы/`implicitDependencies` |
-| @letar/theme-check        | Гейт сырых UI-цветов/теней/transition (`theme:check`) — единственная plain-JS (не TS) библиотека, см. её README за причиной                                              |
+| Библиотека                | Описание                                                                                                                                                                  |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| @letar/forms              | Формы, Chakra-скин (TanStack Form)                                                                                                                                        |
+| @letar/forms-core         | Формы — framework-free ядро (Фаза 7.1): Zod-мета-движок, UIKit-контракт, форматтеры                                                                                       |
+| @letar/forms-react        | Формы — React-композиционный слой (Фаза 7.3): `createField`, `FormGroup`, хуки поля                                                                                       |
+| @letar/forms-shadcn       | Формы — shadcn/Radix-скин (Фаза 7.3), 47/56 полей                                                                                                                         |
+| @letar/forms-vue          | Формы — headless Vue-слой поверх `@tanstack/vue-form`, полный паритет с React (Фаза 9 закрыта 2026-08-13), 61/61 полей                                                    |
+| @letar/forms-vue-shadcn   | Формы — Reka UI/Vue-скин, полный паритет с React (Фаза 9 закрыта 2026-08-13), 61/61 полей                                                                                 |
+| @letar/forms-angular      | Формы — headless Angular-слой поверх нативных `@angular/forms`, полный паритет с React/Vue (Фаза 11 закрыта 2026-08-14), 61/61 полей                                      |
+| @letar/chakra-provider    | Chakra UI провайдер                                                                                                                                                       |
+| @letar/yandex-metrika     | Яндекс Метрика                                                                                                                                                            |
+| @letar/format-utils       | Форматирование дат, телефонов                                                                                                                                             |
+| @letar/tailwind-utils     | `cn()` (clsx+twMerge) и общие Tailwind-классы примитивов — общий код `forms-shadcn`/`forms-vue-shadcn`                                                                    |
+| @letar/ui                 | Shared UI компоненты                                                                                                                                                      |
+| @letar/validation-utils   | Zod схемы валидации                                                                                                                                                       |
+| @letar/email              | Email отправка через Maddy                                                                                                                                                |
+| @letar/form-mcp           | MCP сервер для форм (npm: @letar/form-mcp)                                                                                                                                |
+| @letar/generators         | Локальные Nx-генераторы (`nx g @letar/generators:e2e-suite <app>`, `new-lib <name>`, `new-app <name>`)                                                                    |
+| @letar/zenstack-fragments | Общие ZenStack zmodel-миксины (Better Auth Account/Session/Verification) — подключаются через `import` пути в `schema.zmodel`, НЕ через TS-алиасы/`implicitDependencies`  |
+| @letar/theme-check        | Гейт сырых UI-цветов/теней/transition (`theme:check`) — plain-JS (не TS) библиотека, см. её README за причиной                                                            |
+| @letar/eager-jsx-check    | Гейт eager top-level JSX (`eager-jsx-check`, ловит регресс `ReferenceError: React is not defined` под tsx/esbuild) — plain-JS, подключён к forms/forms-react/forms-shadcn |
 
 ## Несколько точек входа (`./server`, `./client`)
 

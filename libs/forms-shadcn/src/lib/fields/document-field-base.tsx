@@ -3,7 +3,7 @@
 import { useMaskField } from '@letar/forms-react'
 import { cn, NATIVE_INPUT_CLASS } from '@letar/tailwind-utils'
 import { useStore } from '@tanstack/react-form'
-import type { ReactElement, ReactNode } from 'react'
+import type { ComponentType, ReactElement } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
 import type { BaseFieldProps } from './types'
 
@@ -29,8 +29,14 @@ export interface DocumentFieldConfig {
   maxLength?: number
   /** Placeholder с примером */
   placeholder: string
-  /** Иконка слева */
-  icon: ReactNode
+  /**
+   * Иконка слева — ссылка на компонент, не готовый JSX-элемент. `createDocumentField(...)`
+   * вызывается на верхнем уровне модуля каждого документного поля; `icon: <LuX />` создавал бы
+   * элемент сразу при импорте, до всякого рендера — падает `ReferenceError: React is not defined`
+   * под tsx/esbuild (`nx db:seed`). См. тот же фикс в Chakra-версии (`document-field-base.tsx`)
+   * и `rich-text-toolbar-config.tsx`.
+   */
+  icon: ComponentType
   /** Функция валидации значения (возвращает сообщение об ошибке или undefined) */
   validate?: (value: string) => string | undefined
 }
@@ -82,7 +88,7 @@ export function createDocumentField(config: DocumentFieldConfig) {
               aria-hidden="true"
               className="text-muted-foreground pointer-events-none absolute inset-y-0 left-2.5 flex items-center [&_svg]:size-4"
             >
-              {config.icon}
+              <config.icon />
             </span>
             <input
               {...fieldState.inputProps}

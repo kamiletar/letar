@@ -1,8 +1,13 @@
 {
   "name": "@letar/forms-react",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "UI-library-free React composition layer for @letar/forms — createField/createForm/context bound to a UIKit contract",
   "type": "module",
+  "nx": {
+    "implicitDependencies": [
+      "@letar/eager-jsx-check"
+    ]
+  },
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
@@ -27,5 +32,8 @@
   },
   "dependencies": {
     "@letar/forms-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@letar/eager-jsx-check": "workspace:*"
   }
 }

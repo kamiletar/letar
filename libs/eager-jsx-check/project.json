@@ -1,0 +1,55 @@
+{
+  "name": "@letar/eager-jsx-check",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/eager-jsx-check/src",
+  "projectType": "library",
+  "tags": [
+    "scope:shared",
+    "type:util",
+    "owner:letar"
+  ],
+  "targets": {
+    "format": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint",
+        "technologies": [
+          "dprint"
+        ]
+      },
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "libs/eager-jsx-check"
+      }
+    },
+    "test": {
+      "options": {
+        "config": "vitest.config.mjs"
+      }
+    },
+    "oxlint": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.oxlintrc.json"
+      ],
+      "metadata": {
+        "description": "Fast lint with oxlint",
+        "technologies": [
+          "oxlint"
+        ]
+      },
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "libs/eager-jsx-check"
+      }
+    },
+    "lint": {
+      "dependsOn": [
+        "oxlint"
+      ]
+    }
+  }
+}

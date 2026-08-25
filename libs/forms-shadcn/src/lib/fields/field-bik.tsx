@@ -9,7 +9,7 @@ export const FieldBIK = createDocumentField({
   displayName: 'FieldBIK',
   mask: '999999999',
   placeholder: '044525225',
-  icon: <Landmark />,
+  icon: Landmark,
   validate: (value) => {
     const digits = value.replace(/\D/g, '')
     if (!digits) {

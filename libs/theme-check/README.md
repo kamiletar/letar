@@ -10,6 +10,9 @@
 
 ## Почему plain JS (`.mjs`), а не TypeScript как остальные библиотеки монорепо
 
+⚠️ 2026-08-25: появился второй потребитель того же паттерна —
+[`@letar/eager-jsx-check`](/libs/eager-jsx-check/README.md). Причина ниже — общая для обеих.
+
 Скрипт `apps/<app>/scripts/check-theme-hardcodes.mjs` запускается таргетом `theme:check` напрямую
 через `node scripts/check-theme-hardcodes.mjs` (`nx:run-commands`) — без бандлера, без `tsc`/`tsgo`,
 без Next.js. Механизм резолва `@letar/*`-библиотек через `paths` в `tsconfig.json` и условие

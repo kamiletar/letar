@@ -57,13 +57,35 @@ Next.js (он делает трансформ сам), но esbuild не пон�
 `function`/`render`/JSX-callback), значение которого реэкспортируется как значение (не
 `export type`) из барреля публичного API библиотеки.
 
+### Автоматизировано (2026-08-25) — `nx lint`, не ручной grep
+
+Ручной прогон грепов ниже (оставлены для истории и fallback-диагностики) заменён таргетом
+`eager-jsx-check`, подключённым к `lint` всех трёх библиотек — регресс ловится при каждом
+`nx lint forms|forms-react|forms-shadcn`, не требует, чтобы кто-то вспомнил прогнать grep перед
+релизом. Общая логика — новая plain-JS библиотека
+[`@letar/eager-jsx-check`](/libs/eager-jsx-check/README.md), по образцу
+[`@letar/theme-check`](/libs/theme-check/README.md). Три правила (JSX как значение свойства
+объекта, top-level `const`-инициализатор, top-level аргумент вызова функции) + исключения
+(JSDoc-комментарии, тернарники в т.ч. многострочные, `render:`/стрелочные функции-значения,
+generic-типы вида `Array<Foo>`/`<TValue = unknown>`) — см. README библиотеки и её тесты
+(`src/index.test.mjs`).
+
+**Первый же прогон нашёл реальный, ещё не исправленный экземпляр этого бага** —
+`libs/forms-shadcn/src/lib/fields/document-field-base.tsx` и `rich-text-toolbar-config.tsx` не
+были переведены на `ComponentType` вместе с Chakra-версией (`@letar/forms` v2.7.4) и
+`@letar/forms-react` (v0.3.2): `DocumentFieldConfig.icon`/`ToolbarButtonConfig.icon` оставались
+`ReactNode`, 8 консьюмеров создавали иконку eagerly. Исправлено в `@letar/forms-shadcn` v0.33.6.
+
+Ручные команды (fallback, если гейт почему-то недоступен):
+
 ```bash
 grep -rnE ':\s*<[A-Z][A-Za-z0-9]*\s*/?>' --include="*.tsx" libs/forms/src libs/forms-react/src libs/forms-shadcn/src | grep -vE 'render:|=>'
 grep -rnE '^(export )?const [A-Za-z_]+ = <[A-Z]' --include="*.tsx" libs/forms/src libs/forms-react/src libs/forms-shadcn/src
 ```
 
-Оба грепа при последнем прогоне (2026-08-25) дали только безопасные срабатывания (комментарии,
-JSX внутри тернарников/render-callback'ов).
+⚠️ Эти два грепа сами по себе шумные (ложные срабатывания на JSDoc-комментарии и тернарники) —
+именно поэтому автоматизированный гейт выше не их прямая обёртка, а переработанная версия с
+дополнительными исключениями, проверенными тестами.
 
 ## Проверено
 

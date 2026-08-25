@@ -505,7 +505,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.149.0",
+      "version": "0.150.1",
       "dependencies": {
         "@letar/pg-url": "workspace:*",
         "@letar/theme-check": "workspace:*",
@@ -933,6 +933,10 @@
       "name": "@letar/e2e-testing",
       "version": "0.1.2",
     },
+    "libs/eager-jsx-check": {
+      "name": "@letar/eager-jsx-check",
+      "version": "0.1.0",
+    },
     "libs/electron-storage": {
       "name": "@letar/electron-storage",
       "version": "0.1.0",
@@ -990,12 +994,13 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.7.3",
+      "version": "2.7.5",
       "dependencies": {
         "@tanstack/react-table": "^9.1.2",
         "@tanstack/react-virtual": "^3.13.23",
       },
       "devDependencies": {
+        "@letar/eager-jsx-check": "workspace:*",
         "@letar/forms-core": "workspace:*",
         "@letar/forms-react": "workspace:*",
       },
@@ -1048,9 +1053,12 @@
     },
     "libs/forms-react": {
       "name": "@letar/forms-react",
-      "version": "0.3.1",
+      "version": "0.3.3",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
+      },
+      "devDependencies": {
+        "@letar/eager-jsx-check": "workspace:*",
       },
       "peerDependencies": {
         "@tanstack/react-form": "^1.0.0",
@@ -1060,8 +1068,9 @@
     },
     "libs/forms-shadcn": {
       "name": "@letar/forms-shadcn",
-      "version": "0.33.4",
+      "version": "0.33.6",
       "devDependencies": {
+        "@letar/eager-jsx-check": "workspace:*",
         "@letar/forms-core": "workspace:*",
         "@letar/forms-react": "workspace:*",
         "@letar/tailwind-utils": "workspace:*",
@@ -2346,6 +2355,8 @@
     "@letar/dsperevod-e2e": ["@letar/dsperevod-e2e@workspace:apps/dsperevod-e2e"],
 
     "@letar/e2e-testing": ["@letar/e2e-testing@workspace:libs/e2e-testing"],
+
+    "@letar/eager-jsx-check": ["@letar/eager-jsx-check@workspace:libs/eager-jsx-check"],
 
     "@letar/electron-storage": ["@letar/electron-storage@workspace:libs/electron-storage"],
 

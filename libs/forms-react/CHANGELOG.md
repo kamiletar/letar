@@ -4,6 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.3.3] - 2026-08-25
+
+### Added
+
+- **Таргет `eager-jsx-check`, подключён к `lint`.** Regex-гейт против регресса бага из v0.3.2
+  ниже (`fallback` как готовый JSX-элемент на верхнем уровне модуля) — новая plain-JS библиотека
+  `@letar/eager-jsx-check`, по образцу `@letar/theme-check`. Прогон на этой библиотеке чистый.
+
 ## [0.3.2] - 2026-08-25
 
 ### Changed
