@@ -3,8 +3,9 @@
 import { loginUser } from '@/app/[locale]/(auth)/_actions/login.action'
 import { LoginSchema } from '@/app/[locale]/(auth)/_schemas/login.schema'
 import { Link as LocalizedLink, useRouter } from '@/i18n/navigation'
-import { Box, Link, Text, VStack } from '@chakra-ui/react'
+import { Box, Text, VStack } from '@chakra-ui/react'
 import { Form } from '@letar/forms'
+import { TouchLink } from '@letar/ui'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
@@ -75,9 +76,9 @@ export function LoginForm({ callbackUrl = '/' }: LoginFormProps) {
         </Form.Button.Submit>
 
         <Text fontSize="sm" color="fg.muted" textAlign="center">
-          <Link asChild colorPalette="fg" fontWeight="medium" minH="2.75rem" alignItems="center">
-            <LocalizedLink href="/forgot-password">{t('forgotPassword')}</LocalizedLink>
-          </Link>
+          <TouchLink href="/forgot-password" linkComponent={LocalizedLink} colorPalette="fg" fontWeight="medium">
+            {t('forgotPassword')}
+          </TouchLink>
         </Text>
       </VStack>
     </Form>

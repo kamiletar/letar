@@ -3,7 +3,8 @@
 import { type CartItem as CartItemType, useCart } from '@/app/_components/cart'
 import { EmptyState } from '@/app/_components/empty-state'
 import { Link as LocalizedLink } from '@/i18n/navigation'
-import { Box, Button, Card, Flex, IconButton, Link, NumberInput, Stack, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Card, Flex, IconButton, NumberInput, Stack, Text, VStack } from '@chakra-ui/react'
+import { TouchLink } from '@letar/ui'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { memo, useCallback } from 'react'
@@ -67,13 +68,11 @@ const CartItemCard = memo(function CartItemCard({
 
           {/* Информация о товаре */}
           <Box flex={1}>
-            <Link asChild minH="2.75rem" alignItems="center">
-              <LocalizedLink href={`/shop/${item.productSlug}`}>
-                <Text fontWeight="bold" color="fg" _hover={{ color: 'fg.brand' }}>
-                  {item.name}
-                </Text>
-              </LocalizedLink>
-            </Link>
+            <TouchLink href={`/shop/${item.productSlug}`} linkComponent={LocalizedLink}>
+              <Text fontWeight="bold" color="fg" _hover={{ color: 'fg.brand' }}>
+                {item.name}
+              </Text>
+            </TouchLink>
             <Text color="fg" fontSize="lg" fontWeight="bold" mt={1}>
               {item.price} {priceUnit}
             </Text>

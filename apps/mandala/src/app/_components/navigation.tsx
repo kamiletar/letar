@@ -3,6 +3,7 @@
 import { Link as LocalizedLink, usePathname } from '@/i18n/navigation'
 import { Box, Container, Flex, Link, Text } from '@chakra-ui/react'
 import { useScrollDirection } from '@letar/hooks'
+import { TouchLink } from '@letar/ui'
 import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import { AuthButton } from './auth-button'
@@ -66,13 +67,11 @@ export function Navigation({ variant = 'full', hideOnScroll = false }: Navigatio
       <Container maxW="container.xl">
         <Flex justify="space-between" align="center" py={4}>
           {/* Логотип */}
-          <Link asChild minH="2.75rem" alignItems="center">
-            <LocalizedLink href="/">
-              <Text fontSize="2xl" fontWeight="bold" color="fg">
-                Elfafeya Art
-              </Text>
-            </LocalizedLink>
-          </Link>
+          <TouchLink href="/" linkComponent={LocalizedLink}>
+            <Text fontSize="2xl" fontWeight="bold" color="fg">
+              Elfafeya Art
+            </Text>
+          </TouchLink>
 
           {/* Полный вариант — все пункты меню (скрыто до lg, т.к. много пунктов) */}
           {variant === 'full' && (

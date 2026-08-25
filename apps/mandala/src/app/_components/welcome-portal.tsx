@@ -1,7 +1,8 @@
 'use client'
 
 import { Link as LocalizedLink } from '@/i18n/navigation'
-import { Box, Button, Heading, HStack, Link, Text } from '@chakra-ui/react'
+import { Box, Button, Heading, HStack, Text } from '@chakra-ui/react'
+import { TouchLink } from '@letar/ui'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import { LuHeart, LuSparkles } from 'react-icons/lu'
@@ -163,44 +164,38 @@ export function WelcomePortal({ mandalas }: WelcomePortalProps) {
               }}
             >
               <HStack gap={4} justify="center" flexWrap="wrap">
-                <Link
-                  asChild
+                <TouchLink
+                  href="/mandalas"
+                  linkComponent={LocalizedLink}
                   color="whiteAlpha.600"
                   fontSize="sm"
-                  minH="2.75rem"
-                  alignItems="center"
                   _hover={{ color: 'white' }}
+                  onClick={handleClose}
                 >
-                  <LocalizedLink href="/mandalas" onClick={handleClose}>
-                    {t('gallery')}
-                  </LocalizedLink>
-                </Link>
+                  {t('gallery')}
+                </TouchLink>
                 <Text color="whiteAlpha.300">•</Text>
-                <Link
-                  asChild
+                <TouchLink
+                  href="/about-elfafeya"
+                  linkComponent={LocalizedLink}
                   color="whiteAlpha.600"
                   fontSize="sm"
-                  minH="2.75rem"
-                  alignItems="center"
                   _hover={{ color: 'white' }}
+                  onClick={handleClose}
                 >
-                  <LocalizedLink href="/about-elfafeya" onClick={handleClose}>
-                    {t('aboutArtist')}
-                  </LocalizedLink>
-                </Link>
+                  {t('aboutArtist')}
+                </TouchLink>
                 <Text color="whiteAlpha.300">•</Text>
-                <Link
-                  asChild
+                <TouchLink
+                  href="/about-mandalas"
+                  linkComponent={LocalizedLink}
                   color="whiteAlpha.600"
                   fontSize="sm"
-                  minH="2.75rem"
-                  alignItems="center"
                   _hover={{ color: 'white' }}
+                  onClick={handleClose}
                 >
-                  <LocalizedLink href="/about-mandalas" onClick={handleClose}>
-                    {t('aboutMandalas')}
-                  </LocalizedLink>
-                </Link>
+                  {t('aboutMandalas')}
+                </TouchLink>
               </HStack>
             </MotionBox>
 

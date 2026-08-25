@@ -4,6 +4,16 @@
 
 ## [Unreleased]
 
+## [0.40.17] - 2026-08-25
+
+### Changed
+
+- `TouchLink` из `@letar/ui` теперь принимает опциональный проп `linkComponent` (по умолчанию
+  `next/link`) — можно передать locale-aware `Link` из `@/i18n/navigation`. Точечные фиксы из
+  v0.40.16 (`minH="2.75rem" alignItems="center"` руками на `Link asChild` в `welcome-portal.tsx`,
+  `navigation.tsx`, `cart-items.tsx`, `login-form.tsx`) заменены на
+  `<TouchLink href={...} linkComponent={Link}>` — убрано дублирование логики между приложениями.
+
 ## [0.40.16] - 2026-08-25
 
 ### Fixed
