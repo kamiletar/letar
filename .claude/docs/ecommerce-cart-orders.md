@@ -218,11 +218,23 @@ export function useShippingCalculation({ packageItems, onShippingCostChange, ...
    `requireAuth()` — хелпер, который явно редиректит анонима на `/sign-in` (`if (!user ||
    user.isAnonymous) redirect('/sign-in')`, см. `apps/aboi/src/lib/auth-utils.ts:63-69`). Гость не
    мог пользоваться избранным вообще, хотя UI-компонент на это рассчитывал. У корзины для той же
-   задачи уже был правильный паттерн — `getOrCreateSessionUserId()` (там же, `:92-107`): если
-   сессии нет вовсе, вызывает `auth.api.signInAnonymous()` и заводит гостевую сессию; если сессия
-   уже есть (гость или реальный юзер) — просто возвращает её `userId`. Это тот геттер, который
-   нужен per-user данным, доступным гостю; `requireAuth()` — для данных, которые гостю недоступны
-   принципиально (например `/profile`).
+   задачи уже был правильный паттерн — `getOrCreateSessionUserId()`: если сессии нет вовсе,
+   вызывает `auth.api.signInAnonymous()` и заводит гостевую сессию; если сессия уже есть (гость или
+   реальный юзер) — просто возвращает её `userId`. Это тот геттер, который нужен per-user данным,
+   доступным гостю; `requireAuth()` — для данных, которые гостю недоступны принципиально (например
+   `/profile`).
+
+   **2026-08-25:** тот же 12-строчный `getOrCreateSessionUserId()` независимо появился и в
+   `apps/domwellbes` (гостевая корзина розницы, `PLAN_SHOP_RETAIL.md` R2) — дословный дубль с
+   идентичным телом и текстом ошибки. Вынесен в `@letar/auth/server` как
+   `createGetOrCreateSessionUserId(auth)` (`libs/auth/src/server/anonymous-session.ts`) — фабрика
+   принимает уже сконструированный `auth`-инстанс приложения, поэтому не конфликтует с
+   документированной ловушкой типов anonymous-плагина (`auth.api.signInAnonymous` теряет
+   tuple-тип, если `plugins` собран не литеральным массивом прямо в `betterAuth()` — см. комментарии
+   в `apps/aboi/src/lib/auth.ts` и `apps/domwellbes/src/lib/auth.ts`): каждое приложение
+   по-прежнему строит свой `auth` сам, в общую фабрику передаётся только готовый объект. Оба
+   приложения теперь — `export const getOrCreateSessionUserId = createGetOrCreateSessionUserId(auth)`.
+   Заводишь такой же геттер в третьем приложении — импортируй отсюда, не копируй тело заново.
 2. **Merge-функция не знала о новой модели.** `mergeAnonymousAccount` (`apps/aboi/src/lib/merge-anonymous.ts`)
    переносила `Address`/`ConsentLog`/`Order`/`Cart`, но не была расширена под `Wishlist`, когда та
    модель появилась. Даже если бы пункт 1 не существовал, накопленное гостем избранное молча
