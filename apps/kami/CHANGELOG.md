@@ -7,6 +7,14 @@
 
 ## [Unreleased]
 
+## [0.33.12] — 2026-08-25
+
+### Fixed
+
+- `OptimizedImage` (`next/image` с `priority`) переведён на `preload`+`fetchPriority="high"` — в
+  Next.js 16 `priority` больше не выставляет `fetchpriority="high"` сам по себе. Разбор —
+  `apps/domwellbes/PLAN_PUBLIC_MOBILE.md` §12.24.
+
 ## [0.33.10] — 2026-08-25
 
 ### Fixed
