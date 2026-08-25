@@ -109,6 +109,21 @@ rules:
       - pattern-not: <NextImage ... preload={...} ... />
       - pattern-not: <NextImage ... fetchPriority={...} ... />
 
+  - id: letar-chakra-as-prop-forbidden
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: >-
+      Проп as="..."/as={Component} на Chakra-компоненте запрещён — используй ТОЛЬКО
+      asChild + нативный HTML-элемент внутри. См. .claude/rules/components.md,
+      apps/aboi/src/app/[locale]/_components/home/scale.tsx как образец.
+    patterns:
+      - pattern-either:
+          - pattern: <$COMPONENT ... as="$TAG" ... />
+          - pattern: <$COMPONENT ... as={$TAG} ... />
+      - metavariable-regex:
+          metavariable: $COMPONENT
+          regex: ^[A-Z]
+
   - id: letar-dev-session-vars-in-prod-env
     languages: [generic]
     paths:
