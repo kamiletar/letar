@@ -6,6 +6,7 @@
 import { Resvg } from '@resvg/resvg-js'
 import { readFileSync, writeFileSync } from 'fs'
 import { dirname, join } from 'path'
+import pngToIco from 'png-to-ico'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -47,9 +48,12 @@ async function generateIcons() {
   writeFileSync(join(resourcesDir, 'icon.png'), mainPng)
   console.log('  ✓ icon.png (256x256)')
 
+  const icoSizes = [16, 32, 48, 256]
+  const icoBuffer = await pngToIco(icoSizes.map((size) => join(resourcesDir, `icon-${size}.png`)))
+  writeFileSync(join(resourcesDir, 'icon.ico'), icoBuffer)
+  console.log('  ✓ icon.ico')
+
   console.log('\n✅ Иконки сгенерированы!')
-  console.log('\nДля Windows .ico используйте онлайн конвертер или:')
-  console.log('  npx png-to-ico resources/icon-256.png > resources/icon.ico')
 }
 
 generateIcons().catch(console.error)

@@ -40,7 +40,8 @@ async function generateIcons() {
 
     // Генерация .ico для Windows (требует png-to-ico)
     try {
-      const pngToIco = require('png-to-ico')
+      // png-to-ico — чистый ESM-пакет, require() отдаёт namespace-объект, не саму функцию
+      const pngToIco = require('png-to-ico').default
 
       // Используем несколько размеров для .ico
       const icoSizes = [16, 32, 48, 256]
@@ -51,7 +52,7 @@ async function generateIcons() {
       fs.writeFileSync(icoPath, icoBuffer)
       console.log('  Создан: icon.ico')
     } catch (e) {
-      console.log('  Пропущен icon.ico (установите png-to-ico: npm install png-to-ico)')
+      console.log('  Пропущен icon.ico:', e.message)
     }
 
     console.log('\nГотово! Для macOS .icns используйте iconutil или онлайн конвертер.')

@@ -4,6 +4,20 @@
 
 ## [Unreleased]
 
+## [0.55.25] - 2026-08-25
+
+### Fixed
+
+- `scripts/generate-icons.js`: `png-to-ico@3.0.2` — чистый ESM-пакет, `require('png-to-ico')` в
+  CommonJS-скрипте отдавал namespace-объект (`{ default: fn }`), а не саму функцию — вызов падал
+  `TypeError`, но `catch` глушил ошибку фиксированным текстом «установите png-to-ico» вместо
+  реальной причины. `icon.ico` не генерировался молча. Фикс — `require('png-to-ico').default`.
+
+### Changed
+
+- Убрана неиспользуемая зависимость `to-ico` из корневого `package.json`/`bun.lock` — устранена
+  уязвимая транзитивная цепочка `request`→`form-data@2.3.3` (CVE-2025-7783).
+
 ## [0.55.24] - 2026-08-25
 
 ### Changed
