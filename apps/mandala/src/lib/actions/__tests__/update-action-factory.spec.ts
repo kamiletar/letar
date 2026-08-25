@@ -123,7 +123,7 @@ describe('createUpdateAction', () => {
     })
   })
 
-  it('должен обработать ошибку уникальности P2002', async () => {
+  it('должен обработать ошибку уникальности ZenStack v3 ORM (dbErrorCode 23505)', async () => {
     const action = createUpdateAction({
       model: 'mandala',
       schema: testSchema,
@@ -133,7 +133,7 @@ describe('createUpdateAction', () => {
       uniqueErrorMessage: 'Мандала с таким slug уже существует',
     })
 
-    mockDb.mandala.update.mockRejectedValue({ code: 'P2002' })
+    mockDb.mandala.update.mockRejectedValue({ dbErrorCode: '23505' })
 
     const result = await action('mandala-123', { name: 'Мандала', slug: 'existing-slug' })
 
@@ -154,7 +154,7 @@ describe('createUpdateAction', () => {
       uniqueField: 'slug',
     })
 
-    mockDb.mandala.update.mockRejectedValue({ code: 'P2002' })
+    mockDb.mandala.update.mockRejectedValue({ dbErrorCode: '23505' })
 
     const result = await action('mandala-123', { name: 'Мандала', slug: 'existing-slug' })
 

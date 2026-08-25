@@ -66,16 +66,16 @@ describe('handleUniqueConstraintError', () => {
   })
 
   it('должен работать с разными полями', () => {
-    const prismaError = { code: 'P2002' }
+    const ormError = { reason: 'db-query-error', dbErrorCode: '23505' }
 
-    const emailResult = handleUniqueConstraintError(prismaError, 'email', 'Email уже занят')
+    const emailResult = handleUniqueConstraintError(ormError, 'email', 'Email уже занят')
     expect(emailResult).toEqual({
       success: false,
       error: 'Email уже занят',
       field: 'email',
     })
 
-    const skuResult = handleUniqueConstraintError(prismaError, 'sku', 'SKU уже существует')
+    const skuResult = handleUniqueConstraintError(ormError, 'sku', 'SKU уже существует')
     expect(skuResult).toEqual({
       success: false,
       error: 'SKU уже существует',
