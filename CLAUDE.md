@@ -316,7 +316,11 @@ TUN-VPN; DNS-проверки с рабочей машины врут ·
 [electron-sqlite](/.claude/docs/electron-sqlite.md) ·
 [react-native-087-breaking-changes](/.claude/docs/react-native-087-breaking-changes.md) ⚠️ миграция
 RN 0.85→0.87: пути codegen-типов, `PressableStateCallbackType` interface→type ломает declaration
-merging без ошибки компиляции, и другие TS-грабли
+merging без ошибки компиляции, и другие TS-грабли ·
+[android-agp9-windows-toolchain-pitfalls](/.claude/docs/android-agp9-windows-toolchain-pitfalls.md)
+⚠️ AGP 9.0+ built-in Kotlin конфликтует с явным `org.jetbrains.kotlin.android` (обход —
+`android.builtInKotlin=false`) · Windows `ninja.exe` из NDK не читает `LongPathsEnabled`, лимит
+260 символов игнорирует системную настройку, обход — `subst` на короткую букву диска
 
 **Медиа, почта, звук:** [media-server](/.claude/docs/media-server.md) · [email](/.claude/docs/email.md) ·
 [transactional-email-cron-pattern](/.claude/docs/transactional-email-cron-pattern.md) паттерн
