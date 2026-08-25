@@ -247,7 +247,12 @@ function buildHubProviderAuth<TProfile extends HubProviderAuthProfile>(profile: 
     ...(profile.databaseHooks && { databaseHooks: profile.databaseHooks }),
 
     user: profile.user,
-    session: buildSessionConfig(profile.session),
+    // oauthProvider требует явный storeSessionInDatabase при secondaryStorage — иначе
+    // BetterAuthError на каждом запросе (see @better-auth/oauth-provider authorize.ts).
+    session: buildSessionConfig({
+      ...(profile.secondaryStorage && { storeSessionInDatabase: true }),
+      ...profile.session,
+    }),
 
     rateLimit: {
       enabled: true,
