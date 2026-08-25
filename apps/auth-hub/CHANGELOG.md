@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [0.7.10] - 2026-08-25
+
+### Fixed
+
+- Кнопка «Отправить ссылку для входа» (и остальной интерактив `/sign-in`, `/oauth/consent`)
+  переставала реагировать на клики у части пользователей — в консоли `Minified React error #418`
+  (`args[]=HTML`, hydration mismatch на корне дерева). `build`/`dev` не имели явного таргета в
+  `project.json` → бандлер по умолчанию (Turbopack, Next.js 16) сталкивался с известным
+  несовпадением SSR/CSR у `ColorModeProvider`/Emotion `Global`. Добавлен `--webpack` override
+  по образцу `mandala`/`studio`/`dashboard`/`driving-school`. Разбор —
+  [.claude/docs/nextjs16-turbopack-default-emotion-hydration.md](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md).
+
 ## [0.7.9] - 2026-08-25
 
 ### Fixed

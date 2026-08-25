@@ -18,6 +18,16 @@
     "owner:letar"
   ],
   "targets": {
+    "build": {
+      "options": {
+        "command": "next build --webpack"
+      }
+    },
+    "dev": {
+      "options": {
+        "command": "next dev --webpack"
+      }
+    },
     "db:generate": {
       "executor": "nx:run-commands",
       "cache": true,
