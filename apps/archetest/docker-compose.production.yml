@@ -46,6 +46,17 @@ services:
     stop_grace_period: 30s
     labels:
       letar.rollout: 'true'
+      # §48 M3 шаг 5, пачка 2 — регистрация Traefik docker-provider роутера. Только регистрация,
+      # трафик НЕ переключён (NPM продолжает форвардить напрямую на archetest-app:3012), см.
+      # PLAN-INFRA-2.md §48 M3.
+      traefik.enable: 'true'
+      traefik.docker.network: 'kami-network'
+      traefik.http.routers.archetest.rule: 'Host(`archetest.letar.best`)'
+      traefik.http.routers.archetest.entrypoints: 'websecure'
+      traefik.http.routers.archetest.tls.certresolver: 'dns'
+      traefik.http.routers.archetest.tls.domains[0].main: 'letar.best'
+      traefik.http.routers.archetest.tls.domains[0].sans[0]: '*.letar.best'
+      traefik.http.services.archetest.loadbalancer.server.port: '3012'
     networks:
       kami-network:
         aliases:

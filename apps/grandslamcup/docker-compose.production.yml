@@ -48,6 +48,17 @@ services:
     stop_grace_period: 30s
     labels:
       letar.rollout: 'true'
+      # §48 M3 шаг 5, пачка 2 — регистрация Traefik docker-provider роутера. Только регистрация,
+      # трафик НЕ переключён (NPM продолжает форвардить напрямую на grandslamcup-app:3016), см.
+      # PLAN-INFRA-2.md §48 M3.
+      traefik.enable: 'true'
+      traefik.docker.network: 'kami-network'
+      traefik.http.routers.grandslamcup.rule: 'Host(`grandslamcup.letar.best`)'
+      traefik.http.routers.grandslamcup.entrypoints: 'websecure'
+      traefik.http.routers.grandslamcup.tls.certresolver: 'dns'
+      traefik.http.routers.grandslamcup.tls.domains[0].main: 'letar.best'
+      traefik.http.routers.grandslamcup.tls.domains[0].sans[0]: '*.letar.best'
+      traefik.http.services.grandslamcup.loadbalancer.server.port: '3016'
     networks:
       kami-network:
         aliases:
