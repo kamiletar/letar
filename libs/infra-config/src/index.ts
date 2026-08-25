@@ -126,6 +126,7 @@ export const E2E_GATED_APPS: string[] = [
   'svoichuzhie',
   'dsperevod',
   'archetest',
+  'auth-hub',
 ]
 
 /**
