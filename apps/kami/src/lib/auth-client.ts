@@ -1,19 +1,22 @@
 'use client'
 
 import type { UserRole } from '@/generated/prisma'
-import { createSignInWithLetarAuth, createTypedUseSession } from '@letar/auth/client'
-import { genericOAuthClient, organizationClient } from 'better-auth/client/plugins'
-import { createAuthClient } from 'better-auth/react'
+import { createAuthClientWithOAuth, createSignInWithLetarAuth, createTypedUseSession } from '@letar/auth/client'
+import { organizationClient } from 'better-auth/client/plugins'
 
 /**
  * Better Auth клиент для Kami
  *
  * Авторизация — ТОЛЬКО через Ключницу (auth.letar.best).
  * Для входа используй signInWithLetarAuth().
+ *
+ * Better Auth 1.7+ убрал genericOAuthClient() — вход через провайдер `letar-auth`
+ * теперь идёт через signIn.social(), обёрнутый createAuthClientWithOAuth() в
+ * совместимый signIn.oauth2() (см. .claude/docs/better-auth-1.7-oidc-provider-removed.md).
  */
-export const authClient = createAuthClient({
+export const authClient = createAuthClientWithOAuth({
   baseURL: process.env.NEXT_PUBLIC_APP_URL,
-  plugins: [genericOAuthClient(), organizationClient()],
+  plugins: [organizationClient()],
   fetchOptions: {
     onError: async (context) => {
       const { response } = context

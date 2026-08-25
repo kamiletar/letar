@@ -19,9 +19,7 @@ export const auth = createAuth({
     discoveryUrl: process.env.OIDC_DISCOVERY_URL,
   },
 
-  ...(process.env.REDIS_URL && {
-    secondaryStorage: createRedisStorage(process.env.REDIS_URL),
-  }),
+  secondaryStorage: process.env.REDIS_URL ? createRedisStorage(process.env.REDIS_URL) : undefined,
 
   rateLimit: {
     storage: process.env.REDIS_URL

@@ -12,19 +12,28 @@
 
 ## Баги / технический долг
 
-- [ ] ⚠️ **Приложение полностью не запускается (500 на всех страницах, включая `/`)** —
-      `next dev` падает при компиляции `src/lib/auth-client.ts:5` (`Export genericOAuthClient
-  doesn't exist in target module 'better-auth/client/plugins'`) и `nx typecheck:tsgo` даёт ещё
-      2 ошибки в `src/lib/auth.ts` (`mode: 'hub-client'` не подходит под `HubProviderAuthProfile`,
-      `storage` в `rateLimit` не существует в текущей сигнатуре `createAuth`). Обнаружено
-      2026-08-25 при попытке живой проверки фикса `slot-picker.tsx` — не связано с самим фиксом,
-      чисто побочная находка. Судя по `.claude/docs/better-auth-1.7-oidc-provider-removed.md`,
-      причина — `bun update` поднял `better-auth` до 1.7 в рамках `^1.6.x`, `oidcProvider`/
-      `genericOAuthClient` убраны из ядра. Требует: обновить `apps/kami/src/lib/auth-client.ts` на
-      замену `genericOAuthClient` (`@better-auth/oauth-provider` + `jwt()`-плагин либо
-      `signIn.social`, см. доку), и разобраться с сигнатурой `createAuth` в `auth.ts` — возможно,
-      `libs/auth` уже мигрировал на новый контракт `HubProviderAuthProfile`, а `kami` остался на
-      старом. Не решал сам — не входило в задачу сессии, вне её объёма.
+- [x] ⚠️ **Приложение полностью не запускается (500 на всех страницах, включая `/`)** — исправлено
+      2026-08-25. Три независимые причины:
+      1. `src/lib/auth-client.ts` — `genericOAuthClient()` убран из better-auth 1.7 (см.
+      `.claude/docs/better-auth-1.7-oidc-provider-removed.md`). Переведено на
+      `createAuthClientWithOAuth()` из `@letar/auth/client` (тот же паттерн, что уже
+      использовали hub-client-приложения) — `signIn.oauth2()` остаётся тонким алиасом над
+      `signIn.social()`.
+      2. `src/lib/auth.ts` — `mode: 'hub-client'`/`rateLimit.storage` ошибочно резолвились в
+      оверлоад `HubProviderAuthProfile`. Настоящая причина — **не** рассинхрон контракта
+      `createAuth`, а известная особенность TS: объектный литерал со спредом условного
+      выражения (`...(process.env.REDIS_URL && {...})`) внутри аргумента оверлоаднутой дженерик-
+      функции ломает резолюцию оверлоада целиком, и TS репортит ошибки от последнего
+      (не подошедшего) варианта вместо реального. Фикс — заменить спред на прямое
+      `secondaryStorage: process.env.REDIS_URL ? createRedisStorage(...) : undefined`.
+      3. `@better-auth/core@1.7.1` сделал `getAndDelete`/`increment` в `SecondaryStorage`
+      обязательными (были опциональными в 1.6.x) — `createRedisStorage` в `libs/auth` их не
+      реализовывал, что и было второй причиной провала того же оверлоада. Добавлены оба метода
+      через `GETDEL`/`INCR`+`EXPIRE`.
+      Заодно `createAuthClientWithOAuth()` в `libs/auth` сделан дженериком по `Option` (сохраняет
+      типы плагинов вроде `organizationClient()` в возвращаемом клиенте) и получил проброс
+      `fetchOptions`. Проверено: `nx typecheck:tsgo kami`, `nx lint kami`, `nx test @letar/auth` —
+      зелёные; `/` и `/ru/consulting` открываются в браузере без 500 и без ошибок в консоли.
 
 ---
 
