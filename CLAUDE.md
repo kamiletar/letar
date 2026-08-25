@@ -142,6 +142,9 @@ Server→Client — property-access ломается, `undefined` ·
 [nextjs-revalidatepath-outside-request-scope](/.claude/docs/nextjs-revalidatepath-outside-request-scope.md)
 ⚠️ `revalidatePath` из функции, переиспользуемой в фоновой задаче (`@letar/jobs`) без request
 scope — Invariant вместо обновления кеша ·
+[nextjs-client-page-metadata-wrapper](/.claude/docs/nextjs-client-page-metadata-wrapper.md)
+`'use client'`-страница + `export const metadata` несовместимы на одном файле — разбить на
+server-обёртку `page.tsx` + `page.client.tsx` ·
 [nextjs-favicon-icon-tsx-both-needed](/.claude/docs/nextjs-favicon-icon-tsx-both-needed.md) ⚠️
 `icon.tsx` не заменяет `favicon.ico` — боты/краулеры бьют в корень мимо `<head>`; вместе они дают
 два тега `link[rel~="icon"]`, подмена href первого найденного молча не работает ·
