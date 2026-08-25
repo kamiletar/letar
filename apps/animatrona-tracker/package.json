@@ -8,7 +8,7 @@
       "@letar/chakra-provider",
       "@letar/analytics",
       "@letar/consent",
-      "animatrona-ui",
+      "@letar/animatrona-ui",
       "@letar/redis-client",
       "@letar/glitchtip",
       "@letar/pg-url",
