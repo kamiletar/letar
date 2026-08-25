@@ -102,11 +102,15 @@ export interface HubClientAuthProfile extends AuthProfileBase {
   }
 }
 
-/** Конфигурация встроенного OIDC провайдера (только для hub-provider) */
+/**
+ * Конфигурация встроенного OAuth 2.1/OIDC провайдера (только для hub-provider).
+ * Better Auth 1.7+ убрал `requirePKCE` — PKCE (S256) обязателен для authorization_code
+ * по спеке OAuth 2.1 без возможности отключить, поле удалено вместе с миграцией на
+ * @better-auth/oauth-provider (см. CHANGELOG).
+ */
 export interface OidcProviderConfig {
   loginPage?: string
   consentPage?: string
-  requirePKCE?: boolean
   allowDynamicClientRegistration?: boolean
   accessTokenExpiresIn?: number
   refreshTokenExpiresIn?: number

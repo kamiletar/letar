@@ -1,6 +1,6 @@
 {
   "name": "@letar/auth",
-  "version": "0.11.4",
+  "version": "0.12.0",
   "private": true,
   "type": "module",
   "main": "./src/index.ts",
@@ -27,7 +27,8 @@
     "name": "auth"
   },
   "peerDependencies": {
-    "better-auth": ">=1.0.0",
+    "@better-auth/oauth-provider": ">=1.7.0",
+    "better-auth": ">=1.7.0",
     "next": ">=15.0.0",
     "react": ">=19.0.0"
   },

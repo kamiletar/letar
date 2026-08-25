@@ -1,6 +1,5 @@
 'use client'
 
-import { genericOAuthClient } from 'better-auth/client/plugins'
 import { createAuthClient as createBetterAuthClient } from 'better-auth/react'
 
 /**
@@ -46,35 +45,55 @@ export interface AuthClientWithOAuthOptions {
   plugins?: unknown[]
 }
 
-// Типизированный клиент с genericOAuth плагином
-type GenericOAuthPlugin = ReturnType<typeof genericOAuthClient>
-type BetterAuthClientWithOAuth = ReturnType<
-  typeof createBetterAuthClient<{
-    plugins: [GenericOAuthPlugin]
-  }>
->
+type BaseAuthClient = ReturnType<typeof createBetterAuthClient>
+
+/** Параметры входа через генерик-OAuth провайдера (Yandex, Ключница, Shikimori и т.д.) */
+export interface OAuth2SignInParams {
+  providerId: string
+  callbackURL?: string
+  errorCallbackURL?: string
+  newUserCallbackURL?: string
+}
+
+// Типизированный клиент с oauth2-совместимой сигнатурой поверх signIn.social
+type BetterAuthClientWithOAuth = BaseAuthClient & {
+  signIn: BaseAuthClient['signIn'] & {
+    oauth2: (params: OAuth2SignInParams) => ReturnType<BaseAuthClient['signIn']['social']>
+  }
+}
 
 /**
- * Создаёт клиент Better Auth с поддержкой genericOAuth
+ * Создаёт клиент Better Auth с поддержкой генерик-OAuth провайдеров (кастомные провайдеры,
+ * зарегистрированные через серверный `genericOAuth()` — Yandex, Ключница/`letar-auth` и т.д.)
  *
- * Используй эту функцию для приложений с кастомными OAuth провайдерами (Yandex и др.)
+ * Better Auth 1.7+ убрал отдельный `genericOAuthClient()`/`signIn.oauth2` — такие провайдеры
+ * теперь используют тот же `signIn.social()`, что и встроенные (см. доки `generic-oauth`).
+ * `signIn.oauth2()` оставлен здесь тонким алиасом над `signIn.social()`, чтобы не переписывать
+ * вызовы во всех потребителях (`createSignInWithLetarAuth` и прямые вызовы в приложениях).
  *
  * @example
  * ```typescript
  * export const authClient = createAuthClientWithOAuth()
  *
- * // signIn.oauth2 доступен для кастомных провайдеров
  * authClient.signIn.oauth2({ providerId: 'yandex' })
  * ```
  */
 export function createAuthClientWithOAuth(options: AuthClientWithOAuthOptions = {}): BetterAuthClientWithOAuth {
   const { baseURL, plugins = [] } = options
 
-  return createBetterAuthClient({
+  const client = createBetterAuthClient({
     baseURL: resolveClientBaseURL(baseURL),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    plugins: [genericOAuthClient(), ...plugins] as any,
-  }) as BetterAuthClientWithOAuth
+    plugins: plugins as any,
+  })
+
+  return {
+    ...client,
+    signIn: {
+      ...client.signIn,
+      oauth2: ({ providerId, ...rest }: OAuth2SignInParams) => client.signIn.social({ provider: providerId, ...rest }),
+    },
+  } as BetterAuthClientWithOAuth
 }
 
 /**

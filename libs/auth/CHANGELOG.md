@@ -7,6 +7,33 @@
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-08-25
+
+### Changed
+
+- **Миграция на Better Auth 1.7: `oidcProvider`/`genericOAuthClient` убраны из ядра пакета.**
+  Обычный `bun update` в пределах существовавшего `^1.6.x` диапазона поднял `better-auth` до
+  `1.7.1` через `bun.lock` (caret на 1.x.x это допускает) и сломал сборку каждого приложения,
+  импортирующего `@letar/auth/server` — `better-auth/plugins/oidc-provider` перестал существовать.
+  - **Сервер** (`create-auth/index.ts`, hub-provider режим): `oidcProviderPlugin` из ядра заменён
+    на `oauthProvider` из нового пакета `@better-auth/oauth-provider`, добавлен обязательный для
+    него `jwt()`-плагин. `OidcProviderConfig.requirePKCE` удалён — PKCE теперь всегда обязателен
+    (OAuth 2.1), опция отключить исчезла из самого better-auth.
+  - **Клиент** (`create-auth-client.ts`): `genericOAuthClient()` убран без замены в апстриме —
+    провайдеры генерик-OAuth (Yandex, Ключница/`letar-auth`, Shikimori) теперь входят через
+    `signIn.social({ provider })`. `createAuthClientWithOAuth()` сохраняет прежний публичный API
+    (`signIn.oauth2({ providerId, ... })`) как тонкий алиас над `signIn.social`, чтобы не
+    переписывать вызовы во всех потребителях (`createSignInWithLetarAuth` и 2 прямых вызова в
+    `animatrona-tracker`).
+  - Новая зависимость `@better-auth/oauth-provider` — в корневом `package.json` и в
+    `peerDependencies` этой библиотеки.
+  - Разбор класса проблемы —
+    [better-auth-1.7-oidc-provider-removed.md](/.claude/docs/better-auth-1.7-oidc-provider-removed.md).
+  - ⚠️ Реальный OIDC-флоу через новый `oauthProvider` (login → consent → токен → discovery) на
+    auth-hub/Ключнице не прогнан живьём в этой сессии — только typecheck/lint/test библиотеки и
+    живой рендер одного приложения-потребителя (aboi, standalone-режим, `oauthProvider` не
+    затронут). Проверить живым входом через Ключницу перед следующим деплоем auth-hub.
+
 ## [0.11.3] - 2026-07-28
 
 ### Changed

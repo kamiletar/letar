@@ -1,7 +1,7 @@
+import { oauthProvider as oauthProviderPlugin } from '@better-auth/oauth-provider'
 import { betterAuth } from 'better-auth'
 import { nextCookies } from 'better-auth/next-js'
-import { genericOAuth } from 'better-auth/plugins'
-import { oidcProvider as oidcProviderPlugin } from 'better-auth/plugins/oidc-provider'
+import { genericOAuth, jwt } from 'better-auth/plugins'
 
 import type { AuthProfile, HubClientAuthProfile, HubProviderAuthProfile, StandaloneAuthProfile } from './types'
 
@@ -288,10 +288,12 @@ function buildHubProviderAuth<TProfile extends HubProviderAuthProfile>(profile: 
     advanced: ADVANCED_IP_CONFIG,
 
     plugins: [
-      oidcProviderPlugin({
+      // jwt() обязателен для oauthProvider — JWKS/подпись id_token идут через него (Better Auth 1.7+,
+      // старый oidcProvider() из ядра убран, замена — @better-auth/oauth-provider, см. CHANGELOG).
+      jwt(),
+      oauthProviderPlugin({
         loginPage: oidcConfig?.loginPage ?? '/sign-in',
         consentPage: oidcConfig?.consentPage ?? '/oauth/consent',
-        requirePKCE: oidcConfig?.requirePKCE ?? true,
         allowDynamicClientRegistration: oidcConfig?.allowDynamicClientRegistration ?? false,
         accessTokenExpiresIn: oidcConfig?.accessTokenExpiresIn ?? 3600,
         refreshTokenExpiresIn: oidcConfig?.refreshTokenExpiresIn ?? 604800,
@@ -301,7 +303,7 @@ function buildHubProviderAuth<TProfile extends HubProviderAuthProfile>(profile: 
       // nextCookies() — ВСЕГДА последним (требование Better Auth)
       nextCookies(),
     ],
-    // oidcProvider использует Zod внутри → тип непортабелен для .d.ts. Приводим к standalone-типу.
+    // oauthProvider использует Zod внутри → тип непортабелен для .d.ts. Приводим к standalone-типу.
   }) as unknown as ReturnType<typeof buildStandaloneAuth<TProfile>>
 }
 

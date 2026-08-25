@@ -10,9 +10,10 @@ vi.mock('better-auth/next-js', () => ({
 }))
 vi.mock('better-auth/plugins', () => ({
   genericOAuth: vi.fn((cfg: object) => ({ id: 'genericOAuth', ...cfg })),
+  jwt: vi.fn(() => ({ id: 'jwt' })),
 }))
-vi.mock('better-auth/plugins/oidc-provider', () => ({
-  oidcProvider: vi.fn((cfg: object) => ({ id: 'oidcProvider', ...cfg })),
+vi.mock('@better-auth/oauth-provider', () => ({
+  oauthProvider: vi.fn((cfg: object) => ({ id: 'oauthProvider', ...cfg })),
 }))
 
 const makeEmailCallbacks = () => ({
@@ -216,8 +217,8 @@ describe('createAuth', () => {
   })
 
   describe('hub-provider режим', () => {
-    it('возвращает инстанс betterAuth с oidcProvider плагином', async () => {
-      const { oidcProvider } = vi.mocked(await import('better-auth/plugins/oidc-provider'))
+    it('возвращает инстанс betterAuth с oauthProvider плагином', async () => {
+      const { oauthProvider } = vi.mocked(await import('@better-auth/oauth-provider'))
       vi.clearAllMocks()
       const auth = createAuth({
         mode: 'hub-provider',
@@ -226,11 +227,11 @@ describe('createAuth', () => {
         email: makeEmailCallbacks(),
       })
       expect(auth).toBeDefined()
-      expect(oidcProvider).toHaveBeenCalledOnce()
+      expect(oauthProvider).toHaveBeenCalledOnce()
     })
 
-    it('использует дефолтные значения OIDC провайдера', async () => {
-      const { oidcProvider } = vi.mocked(await import('better-auth/plugins/oidc-provider'))
+    it('использует дефолтные значения OAuth-провайдера', async () => {
+      const { oauthProvider } = vi.mocked(await import('@better-auth/oauth-provider'))
       vi.clearAllMocks()
       createAuth({
         mode: 'hub-provider',
@@ -238,15 +239,14 @@ describe('createAuth', () => {
         baseURL: 'http://localhost:3014',
         email: makeEmailCallbacks(),
       })
-      const callArg = oidcProvider.mock.calls[0]?.[0] as Record<string, unknown>
+      const callArg = oauthProvider.mock.calls[0]?.[0] as Record<string, unknown>
       expect(callArg.loginPage).toBe('/sign-in')
       expect(callArg.consentPage).toBe('/oauth/consent')
-      expect(callArg.requirePKCE).toBe(true)
       expect(callArg.allowDynamicClientRegistration).toBe(false)
     })
 
-    it('принимает кастомные настройки oidcProvider', async () => {
-      const { oidcProvider } = vi.mocked(await import('better-auth/plugins/oidc-provider'))
+    it('принимает кастомные настройки oauthProvider', async () => {
+      const { oauthProvider } = vi.mocked(await import('@better-auth/oauth-provider'))
       vi.clearAllMocks()
       createAuth({
         mode: 'hub-provider',
@@ -256,13 +256,11 @@ describe('createAuth', () => {
         oidcProvider: {
           loginPage: '/auth/login',
           accessTokenExpiresIn: 7200,
-          requirePKCE: false,
         },
       })
-      const callArg = oidcProvider.mock.calls[0]?.[0] as Record<string, unknown>
+      const callArg = oauthProvider.mock.calls[0]?.[0] as Record<string, unknown>
       expect(callArg.loginPage).toBe('/auth/login')
       expect(callArg.accessTokenExpiresIn).toBe(7200)
-      expect(callArg.requirePKCE).toBe(false)
     })
 
     it('включает emailAndPassword с requireEmailVerification зависящим от NODE_ENV', () => {
