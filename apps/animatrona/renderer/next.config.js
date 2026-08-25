@@ -106,7 +106,7 @@ const nextConfig = {
     ],
   },
 
-  // Turbopack конфигурация
+  // Turbopack конфигурация (используется только если dev/build запущены без --webpack)
   turbopack: {
     // Указываем на корень где находится package.json и node_modules/
     // Это standaloneRoot (один уровень выше renderer/)
@@ -120,6 +120,57 @@ const nextConfig = {
       'node-fetch': './src/lib/fetch-shim.ts',
       '@letar/animatrona-ui': '../../../libs/animatrona-ui/src/index.ts',
     },
+  },
+
+  // Webpack-эквивалент turbopack.resolveAlias — dev/build запускаются с --webpack
+  // (см. nextjs16-turbopack-default-emotion-hydration.md, Chakra <Global> + Turbopack default = hydration mismatch)
+  webpack: (config, { dev, isServer }) => {
+    config.resolve.alias['cross-fetch'] = path.resolve(__dirname, 'src/lib/fetch-shim.ts')
+    config.resolve.alias['node-fetch'] = path.resolve(__dirname, 'src/lib/fetch-shim.ts')
+    config.resolve.alias['@letar/animatrona-ui'] = path.resolve(
+      __dirname,
+      '../../../libs/animatrona-ui/src/index.ts',
+    )
+    // @tanstack/devtools-ui@0.7.0+ (транзитивная зависимость @tanstack/react-devtools через
+    // @letar/query-provider) импортирует именованный `use` из solid-js/web. webpack резолвит
+    // условие экспорта `node` для СЕРВЕРНОЙ половины графа сборки, а под этим условием
+    // solid-js/web (dist/server.js) `use` не экспортирует — падает "Attempted import error:
+    // 'use' is not exported from solid-js/web". next/dynamic({ ssr: false }) не убирает модуль
+    // из графа компиляции webpack ни для client, ни для server половины (PLAN.md §51,
+    // driving-school/mandala/dashboard/animatrona-tracker/grandslamcup — тот же паттерн).
+    if (isServer || !dev) {
+      config.resolve.alias['@tanstack/devtools-ui'] = false
+    }
+    // libsql (native N-API биндинг, единственный пакет в serverExternalPackages выше) сам
+    // резолвит свои опциональные @libsql/*-платформенные пакеты через require.context
+    // (sync ^\.\/.*$) — это relative require внутри самого libsql, обычный
+    // serverExternalPackages/транзитивный webpack-external его не ловит (матчится по
+    // спецификатору require(), а не по факту прохождения через транспилируемый @libsql/client).
+    // Итог — webpack пытается заглянуть внутрь libsql/index.js и падает на .node/.d.ts/README.
+    // Форсируем externals для 'libsql' явно, до дефолтной логики Next — тогда require('libsql')
+    // остаётся require() в собранном бандле и резолвится реальным Node в standalone-выводе.
+    if (isServer) {
+      // Bare `commonjs libsql` не резолвится в рантайме: bun isolated-инсталл не хостит libsql
+      // в корневом node_modules (только в изолированном сторе .bun рядом с @libsql/client,
+      // который его требует) — резолвим абсолютный путь тем же алгоритмом, что использует сам
+      // @libsql/client, и подставляем его как request внешнего require().
+      const libsqlAbsolutePath = require.resolve('libsql', {
+        paths: [path.dirname(require.resolve('@libsql/client'))],
+      })
+      const nextExternals = Array.isArray(config.externals)
+        ? config.externals
+        : config.externals
+        ? [config.externals]
+        : []
+      config.externals = [
+        ({ request }, callback) => {
+          if (request === 'libsql') { return callback(null, `commonjs ${libsqlAbsolutePath}`) }
+          callback()
+        },
+        ...nextExternals,
+      ]
+    }
+    return config
   },
 }
 

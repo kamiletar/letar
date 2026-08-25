@@ -1595,21 +1595,18 @@ title}`), а не из мс IPFS-манифеста (`ManifestChapter`) — ну
         затрагивает обычный скролл/навигацию — исправление отложено (перевод на `execFile`
         каскадно меняет сигнатуры 4 вызывающих мест в критичном для транскода коде, нужно решение
         пользователя, не факт что стоит риска ради редкого пути).
-  - [ ] Проверить размер JS бандла Next.js — `@next/bundle-analyzer` **не работает с Turbopack**
-        (дефолтный билдер этого приложения). **Найден и подтверждён root cause (v0.55.14):**
-        `ANALYZE=true nx build animatrona -- --webpack` теперь корректно пробрасывает флаг в
-        `next build` (в отличие от попытки v0.55.10) и резолвит `@letar/hooks` через настоящий Nx
-        таргет — но сама webpack-сборка падает ДО генерации отчёта анализатора. Причина —
-        `@libsql/client`/`@libsql/hrana-client` принудительно в `transpilePackages`
-        (`next.config.js`, обязательно для Turbopack — иначе битые ESM-зависимости), а внутри этих
-        пакетов есть platform-detection с динамическим `require`, который webpack превращает в
-        require-context (сканирует ВСЮ директорию пакета как модули) — попадают `README.md`,
-        `LICENSE`, `.d.ts` без соответствующих loader'ов → `Module parse failed`. Turbopack эту
-        директорию не сканирует целиком, поэтому в проде (Turbopack-билд) всё собирается нормально.
-        **Тупик без отдельной работы**: нужен либо webpack-специфичный `IgnorePlugin`/`ContextReplacementPlugin`
-        для `@libsql/*` (условно, только когда билдер = webpack), либо смириться и не иметь анализа
-        бандла для этого конкретного набора зависимостей. `next experimental-analyze` (альтернатива
-        из v0.55.10) не проверялась — не нашёл такой команды в CLI `next` в этой версии.
+  - [x] ✅ Root cause закрыт (v0.55.27, 2026-08-25) — заодно с переводом `renderer` на webpack
+        для фикса Turbopack+Emotion hydration-риска (PLAN.md §36 корневого репо). Тупик решён не
+        `IgnorePlugin`/`ContextReplacementPlugin` (webpack не даёт им отличить платформенный
+        `require` внутри `libsql` от остального содержимого пакета так же избирательно, как
+        нужно), а явным `config.externals` для `'libsql'` — резолвится абсолютным путём
+        (`require.resolve('libsql', { paths: [path.dirname(require.resolve('@libsql/client'))]
+        })`), т.к. bare-спецификатор не резолвится в bun isolated-инсталле. `libsql` теперь не
+        попадает в webpack-граф вообще — `require.context`-проблема просто не возникает. `next
+        build --webpack` теперь дефолтный билдер `renderer` (не только для `ANALYZE=true`), так
+        что вопрос «нужен ли анализ бандла для этого набора зависимостей» снят — можно просто
+        `ANALYZE=true nx build animatrona-renderer`. Детали фикса —
+        `apps/animatrona/PLAN_COMPLETED.md` § «Turbopack+Emotion hydration-риск renderer».
 
   **Метрики успеха:** открытие каталога <100ms, скролл 60fps без jank, переход между страницами <200ms
 

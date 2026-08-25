@@ -4,6 +4,26 @@
 
 ## [Unreleased]
 
+## [0.55.27] - 2026-08-25
+
+### Fixed
+
+- Turbopack+Emotion hydration-риск (PLAN.md §36, `nextjs16-turbopack-default-emotion-hydration.md`):
+  `renderer` переведён на webpack (`--webpack` в `dev`/`build`, включая все 8 таргетов
+  Electron-сборки `apps/animatrona/project.json` и e2e `webServer`). `next.config.js` дополнен
+  `webpack()`-хуком, эквивалентным существующему `turbopack.resolveAlias`
+  (`cross-fetch`/`node-fetch`/`@letar/animatrona-ui`).
+- Попутно вскрыты и исправлены два независимых бага, не связанных с Emotion, но блокировавших
+  сам переход на webpack: `libsql` (native N-API биндинг) резолвил свои опциональные
+  `@libsql/*`-платформенные пакеты через `require.context`, который под webpack падал на
+  README/LICENSE/`.node`-файлах — исправлено явным `config.externals` на абсолютный путь.
+  `snowball-stemmers` (`src/lib/stemmer.ts`) резолвился в `undefined` через default-импорт —
+  пакет собран без `exports.default`, только именованные экспорты; исправлено на
+  `import { newStemmer } from 'snowball-stemmers'`.
+- `@tanstack/devtools-ui@0.7.0+` под webpack (тот же паттерн, что в `driving-school`/`mandala`/
+  `dashboard`/`animatrona-tracker`/`grandslamcup`, PLAN.md §51) — `config.resolve.alias =
+  false` при `isServer || !dev`.
+
 ## [0.55.26] - 2026-08-25
 
 ### Changed

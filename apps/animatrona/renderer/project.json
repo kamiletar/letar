@@ -16,19 +16,19 @@
         "{projectRoot}/out"
       ],
       "options": {
-        "command": "next build",
+        "command": "next build --webpack",
         "cwd": "apps/animatrona/renderer"
       },
       "configurations": {
         "production": {
-          "command": "next build"
+          "command": "next build --webpack"
         }
       }
     },
     "dev": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "next dev -p 3007",
+        "command": "next dev -p 3007 --webpack",
         "cwd": "apps/animatrona/renderer"
       }
     },

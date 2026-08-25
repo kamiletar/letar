@@ -4,6 +4,60 @@
 
 > **Архив обновлён:** 2026-08-25
 
+## Turbopack+Emotion hydration-риск renderer: переход на webpack (2026-08-25)
+
+PLAN.md §36: `renderer` держит ту же связку `ChakraProvider` + `next-themes`'ный
+`ColorModeProvider` (прямой потомок), что вызывала подтверждённые hydration-баги (потерянные
+клики, `ContextError`) в mandala/aira-web/auth-hub/dashboard/driving-school/animatrona-tracker
+и трёх лендингах. Риск для animatrona оценён как выше среднего — полноценное multi-route SPA
+(`library`/`watch`/`discover`/`settings`/`party`), soft-навигация происходит постоянно.
+
+Фикс не был тривиальным `--webpack` в двух командах (как у лендингов): `next.config.js` держал
+непустой `turbopack.resolveAlias` (замена `node-fetch`/`cross-fetch` на fetch-шим, алиас
+`@letar/animatrona-ui`) без автоматического webpack-эквивалента. Написан `webpack()`-хук с тем
+же поведением через `config.resolve.alias` + `path.resolve(__dirname, ...)`. `--webpack`
+добавлен в `dev`/`build` `renderer/project.json`, и отдельно — во все 8 таргетов
+`apps/animatrona/project.json` (реальная Electron-сборка `electron-builder` запускает
+`cd renderer && next build` напрямую, минуя nx-таргет renderer), и в e2e `webServer`
+(`apps/animatrona-e2e/playwright.config.ts`).
+
+Переход на webpack вскрыл два независимых, не связанных с Emotion бага, оба исправлены в том
+же `next.config.js`/коде:
+
+- **`libsql`** (native N-API биндинг): резолвит опциональные `@libsql/*`-платформенные пакеты
+  через `require.context` (relative require внутри самого пакета) — Turbopack не-JS файлы
+  (README/LICENSE/`.node`) внутри контекста молча игнорировал, webpack падал на парсинге.
+  Обычный `serverExternalPackages` не спасает (матчится по спецификатору `require()`, а не по
+  факту прохождения через транспилируемый `@libsql/client`). Фикс — явный `config.externals`
+  для `'libsql'`, причём не bare-спецификатором (bun isolated-инсталл не хостит `libsql` в
+  корневом `node_modules`), а абсолютным путём: `require.resolve('libsql', { paths:
+  [path.dirname(require.resolve('@libsql/client'))] })`.
+- **`snowball-stemmers`** (`src/lib/stemmer.ts`, русский стеммер для поиска): `import
+  snowballFactory from 'snowball-stemmers'` резолвился в `undefined` под webpack — пакет собран
+  Babel в CJS с `__esModule: true`, но без `exports.default` (только именованные
+  `newStemmer`/`algorithms`), и Turbopack при этой комбинации фолбэчился на весь module object,
+  а webpack — строго на `undefined`. Настоящий бандлер-агностичный фикс (не воркэраунд-алиас,
+  правка source) — `import { newStemmer } from 'snowball-stemmers'`; `.d.ts` переписан на
+  именованные экспорты.
+
+Отдельно применён уже установленный паттерн — `@tanstack/devtools-ui@0.7.0+` под webpack
+(PLAN.md §51, тот же баг что в `driving-school`/`mandala`/`dashboard`/`animatrona-tracker`/
+`grandslamcup`): `config.resolve.alias['@tanstack/devtools-ui'] = false` при `isServer || !dev`.
+
+Проверено: `nx build animatrona-renderer` зелёный (22/22 страниц), `nx dev
+animatrona-renderer` — dev-сервер отдаёт полный рендер библиотеки без hydration-ошибок в
+консоли (проверено через Browser pane).
+
+**Остаточный пробел, задокументирован, не закрыт в этой сессии:** `nx dev animatrona`
+(интерактивный запуск Electron-оболочки через `nextron` CLI) хардкодит `next dev -p <port>
+<rendererSrcDir>` без опции передать `--webpack` (`nextron@10.3.0`, команда `dev` не имеет
+флага-passthrough). Это дев-only путь — то, что паковается пользователю, идёт через
+`apps/animatrona:build`, уже переведённый на `--webpack`. GUI-уровень самого Electron-окна не
+проверяем в сендбоксе Claude Code в принципе (`.claude/rules/electron.md`).
+
+Детали — [nextjs16-turbopack-default-emotion-hydration.md](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md)
+§ «Electron-рендерер `animatrona`».
+
 ## Вынос generate-icons в общую библиотеку @letar/icon-generator (2026-08-25)
 
 Точечный фикс `require('png-to-ico').default` ниже устранял симптом, но не причину: три

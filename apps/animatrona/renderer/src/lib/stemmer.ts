@@ -9,10 +9,10 @@
  * Английские и другие слова остаются без изменений.
  */
 
-import snowballFactory from 'snowball-stemmers'
+import { newStemmer } from 'snowball-stemmers'
 
 // Инициализируем русский стеммер
-const russianStemmer = snowballFactory.newStemmer('russian')
+const russianStemmer = newStemmer('russian')
 
 // Регулярка для определения кириллических символов
 const CYRILLIC_CHAR_REGEX = /[а-яёА-ЯЁ]/

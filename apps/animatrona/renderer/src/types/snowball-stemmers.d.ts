@@ -8,14 +8,10 @@ declare module 'snowball-stemmers' {
     stem(word: string): string
   }
 
-  export interface SnowballFactory {
-    /**
-     * Создаёт стеммер для указанного языка
-     * @param language - Код языка (russian, english, german, etc.)
-     */
-    newStemmer(language: string): Stemmer
-  }
-
-  const factory: SnowballFactory
-  export default factory
+  /**
+   * Создаёт стеммер для указанного языка
+   * @param language - Код языка (russian, english, german, etc.)
+   */
+  export function newStemmer(language: string): Stemmer
+  export function algorithms(): string[]
 }
