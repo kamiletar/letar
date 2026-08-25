@@ -9,14 +9,24 @@
     "qs": "^6.15.2",
     "picomatch": "^2.3.2",
     "serialize-javascript": "^7.0.5",
-    "kysely": "0.29.3"
+    "kysely": "0.29.3",
+    "protobufjs": "^7.5.9",
+    "seroval": "~1.5.3",
+    "shell-quote": "^1.10.0",
+    "websocket-driver": "^0.7.5",
+    "@xhmikosr/decompress": "^11.1.4"
   },
   "overrides": {
     "minimist": "^1.2.8",
     "qs": "^6.15.2",
     "picomatch": "^2.3.2",
     "serialize-javascript": "^7.0.5",
-    "kysely": "0.29.3"
+    "kysely": "0.29.3",
+    "protobufjs": "^7.5.9",
+    "seroval": "~1.5.3",
+    "shell-quote": "^1.10.0",
+    "websocket-driver": "^0.7.5",
+    "@xhmikosr/decompress": "^11.1.4"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.42",
@@ -184,11 +194,11 @@
     "react-markdown": "^10.1.0",
     "react-native": "0.87.0",
     "react-native-blob-util": "^0.24.10",
-    "react-native-gesture-handler": "3.2.1",
+    "react-native-gesture-handler": "3.3.0-nightly-20260824-5de6d2358",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-orientation-locker": "^1.7.0",
     "react-native-safe-area-context": "~5.8.1",
-    "react-native-screens": "~4.25.2",
+    "react-native-screens": "~4.27.0",
     "react-native-svg": "^15.15.5",
     "react-native-video": "^6.19.2",
     "react-native-vision-camera": "^5.2.3",
