@@ -238,7 +238,11 @@ singleton-строка настроек (`ShopSettings` и аналоги) — �
 зависит от формы callback'а, а не от структуры массива ключей ·
 [eslint-flat-react-typescript-missing-react-hooks-plugin](/.claude/docs/eslint-flat-react-typescript-missing-react-hooks-plugin.md)
 ⚠️ `nx.configs['flat/react-typescript']` не регистрирует `eslint-plugin-react-hooks` — правило
-`exhaustive-deps`/`rules-of-hooks` не проверялось ни в одном из ~22 приложений с этим паттерном
+`exhaustive-deps`/`rules-of-hooks` не проверялось ни в одном из ~22 приложений с этим паттерном ·
+[dotenv-agent-targeted-tip-and-skill-files](/.claude/docs/dotenv-agent-targeted-tip-and-skill-files.md)
+⚠️ пакет `dotenv` печатает в stdout случайную "tip"-строку, одна из которых ведёт на сторонний
+домен и адресована ИИ-агентам ("auth for agents"), плюс кладёт свои `SKILL.md` в пакет —
+легитимный мейнтейнер, не supply-chain compromise, действие не требуется
 
 **Тесты и форматирование:** [e2e-testing](/.claude/docs/e2e-testing.md) ·
 [playwright-testmatch-absolute-path-regex-anchor](/.claude/docs/playwright-testmatch-absolute-path-regex-anchor.md)
