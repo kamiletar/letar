@@ -2,6 +2,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.3] - 2026-08-26
+
+### Fixed
+
+- `nx build` падал на пререндере `/controlled-state-demo` и `/filters-state-demo`: пять API
+  `@letar/forms` (`Form.Subscribe`, `Form.UrlSync`, `useActiveFiltersCount`,
+  `useTypedFormContext`, `useTypedFormSubscribe`) читали TanStack-контекст, который декларативный
+  `<Form>` не устанавливает — баг библиотеки (`@letar/forms` 2.7.6), не демо-страниц.
+  `controlled-state-demo` дополнительно переведён на паттерн `useDeclarativeForm() +
+  form.Subscribe` (тот же, что уже использовался в `FormDebugValues`).
+
 ## Unreleased (2026-08-10)
 
 - `advanced-demo`: `initialData.addressSimple` заполнено непустым значением (было `''`) — этот

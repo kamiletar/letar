@@ -2,6 +2,17 @@
 
 Детальное описание всех реализованных фич.
 
+## `nx build` падал на пререндере — баг библиотеки `@letar/forms`, не демо-страниц (2026-08-26)
+
+`/controlled-state-demo` и `/filters-state-demo` роняли `next build`: `` `formContext` only
+works when within a `formComponent` passed to `createFormHook` ``. Причина — вне этого
+приложения: пять API `@letar/forms` (`Form.Subscribe`, `Form.UrlSync`,
+`useActiveFiltersCount`, `useTypedFormContext`, `useTypedFormSubscribe`) читали TanStack-контекст
+`useFormContext()`, который декларативный `<Form>` не устанавливает. Фикс в `@letar/forms`
+2.7.6 — детали в `libs/forms/PLAN_COMPLETED.md`. Здесь дополнительно поправлен
+`controlled-state-demo/page.tsx`: `useTypedFormSubscribe` заменён на `useDeclarativeForm() +
+form.Subscribe` (паттерн из `FormDebugValues`). `nx build` — 50/50 страниц, зелёный.
+
 ## Прод-сборка проверена на баг devtools-ui/solid-js — безопасна без изменений (2026-08-19)
 
 Открытый вопрос из корневого `PLAN.md` §51 (`@tanstack/devtools-ui@0.7.0+` ломает webpack-резолв
