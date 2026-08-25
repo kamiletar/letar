@@ -1950,13 +1950,20 @@ Emotion», но сама команда была `"next dev"` без флага 
       каждого. `typecheck:tsgo`/`lint`/`build` зелёные. Детали —
       [nextjs16-turbopack-default-emotion-hydration.md](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md)
       § «Лендинги».
-- [ ] ⚠️ Открытый вопрос: Electron-рендерер `animatrona` — риск подтверждён (2026-08-25) и,
-      вероятно, выше среднего (полноценное multi-route SPA с той же связкой провайдеров), но
-      `--webpack` **не применён**: `next.config.js` держит кастомный `turbopack.resolveAlias`
-      (замена `node-fetch`/`cross-fetch`, алиас `@letar/animatrona-ui`) без автоматического
-      webpack-эквивалента — наспех добавленный флаг рискует сломать сборку. Нужна отдельная
-      сессия: написать `webpack()`-хук, эквивалентный `resolveAlias`, и прогнать полный
-      `nx build`/`nx dev` Electron-оболочки. Детали —
+- [x] ✅ Electron-рендерер `animatrona` закрыт (2026-08-25): написан `webpack()`-хук,
+      эквивалентный `turbopack.resolveAlias` (`cross-fetch`/`node-fetch`/`@letar/animatrona-ui`
+      через `config.resolve.alias` + `path.resolve(__dirname, ...)`), `--webpack` добавлен в
+      `dev`/`build` `apps/animatrona/renderer/project.json` и во все 8 таргетов
+      `apps/animatrona/project.json` (реальная сборка Electron-пакета: `cd renderer && next
+      build --webpack`), плюс `apps/animatrona-e2e/playwright.config.ts` (webServer). Переход
+      на webpack вскрыл два независимых предсуществовавших бага, тоже исправленных: `libsql`
+      require.context падал на не-JS файлах (externals на резолвленный абсолютный путь), и
+      `snowball-stemmers` default-импорт резолвился в `undefined` (переход на именованный
+      импорт — настоящий бандлер-агностичный фикс, не алиас). `nx build`/`nx dev
+      animatrona-renderer` зелёные, dev-сервер отдаёт полный рендер без hydration-ошибок.
+      **Остаточный пробел:** `nx dev animatrona` (интерактивная Electron-оболочка через
+      nextron CLI) хардкодит `next dev` без опции передать `--webpack` — дев-only путь, не то,
+      что паковается пользователю. Детали —
       [nextjs16-turbopack-default-emotion-hydration.md](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md)
       § «Electron-рендерер `animatrona`».
 - Побочная находка при аудите `animatrona-tracker` (не hydration): `<CookieBanner>` рендерился
