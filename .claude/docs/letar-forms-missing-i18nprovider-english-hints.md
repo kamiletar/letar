@@ -54,32 +54,34 @@ function FormI18n({ children }: { children: ReactNode }) {
 }
 ```
 
-## Найдено и исправлено
-
-- **domwellbes** (2026-08-25, commit `3da69ba` в submodule) — `LeadRequestForm` на главной
-  показывала английские подсказки; фикс — `FormI18nProvider locale="ru"` в
-  `apps/domwellbes/src/app/_components/providers.tsx`.
-
-## Уже было подключено (без бага)
-
-`driving-school`, `archetest`, `mandala` (через `form-i18n-wrapper.tsx`), `form-develop-app`,
-`dashboard`, `animatrona-tracker` — во всех есть `FormI18nProvider` где-то в дереве провайдеров.
-
-## Статус аудита остальных приложений со своим `createForm()`
+## Найдено и исправлено (2026-08-25)
 
 Полный список приложений со своим form-инстансом (грепом `from '@letar/forms'` по
 `**/*-form.tsx`): `studio`, `aboi`, `driving-school`, `auth-hub`, `archetest`, `svoichuzhie`,
 `dsperevod`, `mandala`, `kami`, `grandslamcup`, `animatrona` (renderer),
 `form-develop-app`, `domwellbes`.
 
-На 2026-08-25 подтверждено грепом (`FormI18nProvider` не встречается вообще ни в одном файле
-приложения) — обёртки нет: `studio`, `aboi`, `auth-hub`, `svoichuzhie`, `dsperevod`, `kami`,
-`grandslamcup`, `animatrona` (renderer). Визуальная проверка в браузере (шаг, подтверждающий, что
-баг реально проявляется, а не просто отсутствует обёртка без последствий) и фикс каждого — в
-процессе, по одному приложению за коммит (см. `.claude/rules/git.md` про 1 scope = 1 коммит).
+Уже было подключено на момент аудита (без бага) — `driving-school`, `archetest`, `mandala`
+(через `form-i18n-wrapper.tsx`), `form-develop-app`, `dashboard`, `animatrona-tracker`.
 
-`studio` и `aboi` используют `next-intl` — для них обёртка должна получать локаль через
-`useLocale()`, не хардкодить `"ru"`. Остальные (`auth-hub`, `svoichuzhie`, `dsperevod`, `kami`,
-`grandslamcup`) — `next-intl` не найден, `<html lang="ru">` захардкожен — обёртка с
-`locale="ru"` без параметризации. `animatrona` (renderer) — Electron, не Next.js, использовать
-паттерн из `i18n-multilingual` skill для проверки текущего фреймворка локализации перед фиксом.
+Остальные восемь были без обёртки — исправлены по одному коммиту на приложение (плюс отдельный
+коммит бампа submodule-указателя там, где приложение — приватный submodule):
+
+| Приложение              | next-intl                               | Где подключено                                                                                                                                                                                            |
+| ----------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `domwellbes`            | нет                                     | `providers.tsx`, `locale="ru"` (первая находка, commit `3da69ba` в submodule)                                                                                                                             |
+| `studio`                | да (ru/en/ja)                           | два дерева провайдеров: `providers.tsx` (бэк-офис, `locale="ru"`, не под next-intl) + новый `(public)/_components/form-i18n-wrapper.tsx` внутри `NextIntlClientProvider` (публичная часть, `useLocale()`) |
+| `aboi`                  | да                                      | `providers.tsx`, уже был внутри `NextIntlClientProvider` — `useLocale()`                                                                                                                                  |
+| `auth-hub`              | нет                                     | корневой `layout.tsx` (Server Component), `locale="ru"`                                                                                                                                                   |
+| `svoichuzhie`           | нет                                     | `providers.tsx`, `locale="ru"`                                                                                                                                                                            |
+| `dsperevod`             | нет                                     | `providers.tsx`, `locale="ru"`                                                                                                                                                                            |
+| `kami`                  | да                                      | новый `_components/form-i18n-wrapper.tsx` внутри `NextIntlClientProvider` (`ThemeProvider` смонтирован снаружи, `useLocale()` там недоступен) — `useLocale()`                                             |
+| `grandslamcup`          | нет                                     | `providers.tsx`, `locale="ru"`                                                                                                                                                                            |
+| `animatrona` (renderer) | нет (Electron, i18next не используется) | `renderer/src/components/ui/provider.tsx`, `locale="ru"`                                                                                                                                                  |
+
+**Правило выбора обёртки:** приложение на `next-intl` — `useLocale()`, без хардкода (форма
+должна следовать текущей локали интерфейса). Приложение без `next-intl` (обычно
+`<html lang="ru">` захардкожен) — прямой `locale="ru"`. Если у приложения несколько независимых
+деревьев провайдеров (как у `studio` — бэк-офис отдельно от публичной части), в каждое дерево
+нужна своя обёртка, и правило для неё определяется тем, есть ли в конкретном дереве
+`NextIntlClientProvider`-предок, а не приложением в целом.
