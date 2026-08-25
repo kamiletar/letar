@@ -2736,17 +2736,23 @@ eslint-config-next и т.д.) — `typecheck:tsgo` чист по всем зад
 [letar-forms-lazy-component-ssr-stuck-suspense](/.claude/docs/letar-forms-lazy-component-ssr-stuck-suspense.md)
 (rAF не тикает в фоновой вкладке под headless-прогоном).
 
-**`ioredis` 5→6 — исследован, НЕ применён намеренно.** Функционально безопасен: весь код в
-репо (`libs/redis-client`, `libs/auth/src/server/redis-storage.ts`, `infra/media-server`,
+**`ioredis` 5→6 — исследован в этой сессии, применён отдельной сессией 2026-08-25 (коммит
+`e0265e6f`).** Функционально безопасен: весь код в репо (`libs/redis-client`,
+`libs/auth/src/server/redis-storage.ts`, `infra/media-server`,
 `apps/driving-school/.../socket/route.ts`) использует только `get`/`set`/`setex`/`del` — эти
 команды не зависят от смены протокола RESP2→RESP3 по умолчанию в v6 (реальная разница
 всплывает на `.call()`/`HGETALL`/`CONFIG`/Streams, которых в репо нет). Node 24 удовлетворяет
 требованию v6 (Node 20+). `@socket.io/redis-adapter` не объявляет peer-зависимость на `ioredis`
-— конфликта версий не будет. **Отложено по причине совпадения зоны, не риска:**
-`redis-storage.ts` — файл в эпицентре одновременного рефакторинга `libs/auth` у auth-hub-dev
-(session storage Better Auth), апдейт также требует правки отдельного пина `libs/redis-client/
-package.json` (`^5.11.1`, иначе в дереве останутся два major ioredis). Кандидат на отдельную
-сессию после того, как их миграция осядет.
+— конфликта версий не было. Пин обновлён синхронно в двух местах (корневой `package.json` +
+`libs/redis-client/package.json`, был раздельный `^5.11.1`). Перед стартом проверено через
+Agent Mail (`file_reservation_paths` на `apps/auth-hub/**`/`libs/auth/**`) — auth-hub-dev
+всё ещё держал эксклюзивную резервацию (миграция `better-auth` 1.7 в процессе), отправлено
+уведомление, апдейт затронул только `package.json`/`libs/redis-client` — не пересёкся физически.
+`bun install` + `nx test @letar/redis-client` (7/7 зелёные) прошли чисто.
+`nx typecheck:tsgo --projects=driving-school,auth-hub,kami,svoichuzhie` дал 3 ошибки — все про
+API `better-auth` (`mode`, `genericOAuthClient`, тип VK-провайдера), ни одна не про
+ioredis/redis — предсуществующие из той же параллельной миграции auth-hub-dev, не регрессия
+этого апдейта.
 
 **`better-auth` 1.6.29→1.7.1 — координация, не мой апдейт.** Первым делом версия была
 случайно откачена обратно на 1.6.29 (ошибочная реакция на breaking typecheck без проверки
