@@ -106,11 +106,16 @@ typecheck» — этого достаточно, чтобы гонка треб�
 
 Таргет `theme:typegen` на 2026-08-25 есть только у трёх приложений: `aboi`, `domwellbes`,
 `driving-school`. `domwellbes` уже имел `dependsOn` до этого разбора (первоисточник паттерна).
-`aboi` донастроен в рамках этой сессии. **`driving-school` фикс всё ещё не получил** — его
-`typecheck`/`typecheck:tsgo` не зависят от `theme:typegen`, тот же класс гонки там открыт; кроме
-того у него самого `theme:typegen` в этой сессии падал с `npm error EOVERRIDE` (команда через
-`npx`, конфликт `kysely` override — отдельная, не связанная с гонкой проблема окружения, чинить
-отдельно).
+`aboi` и `driving-school` донастроены в рамках этой сессии — оба теперь имеют
+`dependsOn: ["theme:typegen"]` на `typecheck`/`typecheck:tsgo` и `theme:typegen: cache: false`.
+
+У `driving-school` дополнительно была отдельная, не связанная с гонкой проблема: `theme:typegen`
+падал с `npm error EOVERRIDE` — команда была `npx @chakra-ui/cli typegen ...`, `npx` запускает
+резолвер npm, который конфликтует между корневым `overrides.kysely` (`0.29.3`) и прямой
+зависимостью `kysely@0.29.5` в корневом `package.json` (тянется Better Auth-плагинами). Фикс —
+команда переведена на прямой вызов бинарника
+(`node ../../node_modules/@chakra-ui/cli/bin/index.js typegen ...`, по образцу `domwellbes`),
+минуя npm-резолвер целиком.
 
 Любое новое приложение с собственным `theme/recipes`/`theme/slotRecipes` и таргетом
 `theme:typegen` — заводить `dependsOn: ["theme:typegen"]` на `typecheck`/`typecheck:tsgo` и
