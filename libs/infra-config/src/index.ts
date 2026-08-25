@@ -127,6 +127,7 @@ export const E2E_GATED_APPS: string[] = [
   'dsperevod',
   'archetest',
   'auth-hub',
+  'driving-school',
 ]
 
 /**
