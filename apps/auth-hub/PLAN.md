@@ -1,5 +1,28 @@
 # План разработки auth-hub
 
+## v0.7.11 — формы sign-in переведены на @letar/forms (2026-08-25)
+
+- [x] **`login-form.tsx` и `magic-link-form.tsx` нарушали правило репозитория** (запрет
+      нативного `<form>` + ручного `FormData`/`useState` вместо `@letar/forms`, см.
+      `.claude/rules/forms.md`). Инстанс `AuthHubForm` (`src/auth-hub-form/`) уже существовал
+      и уже использовался в `add-email-form.tsx` — образец переиспользован без изменений.
+      **login-form:** `AuthHubForm.Field.String` (email, `autoComplete="username webauthn"`
+      для passkey-дропдауна) + `AuthHubForm.Field.Password` (встроенный toggle видимости —
+      убрал ручной `IconButton`/`showPassword`). Валидация через существующую `LoginSchema`,
+      ручной `FormData`+`safeParse` в `onSubmit` убран — форма валидирует сама. Состояния
+      `error`/`info`/`pendingEmail` и вызов `loginUser` — без изменений, `usePasskeyConditionalAuth`
+      не тронут. Убран ручной `loading`-стейт — `AuthHubForm.Button.Submit` сам показывает
+      спиннер по `isSubmitting`.
+      **magic-link-form:** новая локальная Zod-схема `MagicLinkSchema` (одно поле `email`),
+      `sendMagicLinkAction` вызывается из `onSubmit`. Состояния `idle`/`sent`/`error` сохранены
+      (`loading` больше не нужен — спиннер кнопки автоматический).
+      `nx typecheck:tsgo auth-hub`/`nx lint auth-hub` — зелёные (2 предсуществующие ошибки
+      typecheck в `src/lib/auth.ts`/`libs/auth` — VK OAuth-провайдер, не связаны с этой правкой).
+      Визуальная проверка через Browser pane заблокирована: `/sign-in` в SSR падает на
+      `genericOAuthClient is not a function` — предсуществующий баг несовместимости версии
+      `better-auth` в `libs/auth/src/client/create-auth-client.ts` (не в scope задачи, уже
+      незакоммиченные правки другого агента в этом файле).
+
 ## v0.7.10 — фикс кнопки magic-link: hydration mismatch убивал интерактивность (2026-08-25)
 
 - [x] **Кнопка «Отправить ссылку для входа» на `/sign-in` не реагировала на клик у части

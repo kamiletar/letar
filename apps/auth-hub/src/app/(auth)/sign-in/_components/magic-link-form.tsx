@@ -1,12 +1,18 @@
 'use client'
 
 import { sendMagicLinkAction } from '@/app/(auth)/_actions/send-magic-link.action'
-import { Button, Field, Input, Stack, Text } from '@chakra-ui/react'
+import { AuthHubForm } from '@/auth-hub-form'
+import { Button, Stack, Text } from '@chakra-ui/react'
 import { useState } from 'react'
 import { LuMail } from 'react-icons/lu'
+import { z } from 'zod/v4'
 import { usePostSignInCallback } from '../../_hooks/use-post-sign-in-callback'
 
-type FormState = 'idle' | 'loading' | 'sent' | 'error'
+const MagicLinkSchema = z.object({ email: z.email('Некорректный email') }).strip()
+
+type MagicLinkData = z.infer<typeof MagicLinkSchema>
+
+type FormState = 'idle' | 'sent' | 'error'
 
 /**
  * Форма входа по Magic Link
@@ -19,16 +25,11 @@ export function MagicLinkForm() {
   const [state, setState] = useState<FormState>('idle')
   const [email, setEmail] = useState('')
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    if (!email) {
-      return
-    }
-
-    setState('loading')
-    const result = await sendMagicLinkAction(email, callbackUrl)
+  async function handleSubmit(data: MagicLinkData) {
+    const result = await sendMagicLinkAction(data.email, callbackUrl)
 
     if (result.success) {
+      setEmail(data.email)
       setState('sent')
     } else {
       setState('error')
@@ -51,24 +52,21 @@ export function MagicLinkForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <AuthHubForm schema={MagicLinkSchema} initialValue={{ email: '' }} onSubmit={handleSubmit}>
       <Stack gap={4}>
-        <Field.Root>
-          <Field.Label>Email</Field.Label>
-          <Input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            required
-          />
-        </Field.Root>
+        <AuthHubForm.Field.String name="email" label="Email" placeholder="you@example.com" />
 
-        <Button type="submit" variant="outline" loading={state === 'loading'} w="full">
+        {state === 'error' && (
+          <Text color="fg.error" fontSize="sm">
+            Не удалось отправить ссылку. Попробуйте ещё раз.
+          </Text>
+        )}
+
+        <AuthHubForm.Button.Submit variant="outline" width="full">
           <LuMail />
           Отправить ссылку для входа
-        </Button>
+        </AuthHubForm.Button.Submit>
       </Stack>
-    </form>
+    </AuthHubForm>
   )
 }

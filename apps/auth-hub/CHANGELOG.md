@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+## [0.7.11] - 2026-08-25
+
+### Changed
+
+- `login-form.tsx` и `magic-link-form.tsx` переведены с нативного `<form>` + ручного
+  `FormData`/`useState` на `@letar/forms` (`AuthHubForm`) — соответствие правилу
+  `.claude/rules/forms.md`. Поведение форм не изменилось.
+
 ## [0.7.10] - 2026-08-25
 
 ### Fixed

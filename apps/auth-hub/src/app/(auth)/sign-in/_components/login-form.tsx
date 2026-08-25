@@ -2,12 +2,12 @@
 
 import { loginUser } from '@/app/(auth)/_actions/login.action'
 import { type LoginData, LoginSchema } from '@/app/(auth)/_schemas/login.schema'
+import { AuthHubForm } from '@/auth-hub-form'
 import { authClient } from '@/lib/auth-client'
-import { Button, Field, Group, IconButton, Input, InputAddon, Stack, Text } from '@chakra-ui/react'
+import { Stack, Text } from '@chakra-ui/react'
 import { ResendVerificationButton } from '@letar/auth/client'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { LuEye, LuEyeOff } from 'react-icons/lu'
 import { usePostSignInCallback } from '../../_hooks/use-post-sign-in-callback'
 import { usePasskeyConditionalAuth } from '../_hooks/use-passkey-conditional-auth'
 
@@ -23,35 +23,18 @@ export function LoginForm() {
 
   const [error, setError] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
   // Email, для которого нужна повторная отправка письма верификации (Этап 2 PLAN.md)
   const [pendingEmail, setPendingEmail] = useState<string | null>(null)
 
   // Запускаем Conditional UI — passkeys появляются в дропдауне поля email
   usePasskeyConditionalAuth(callbackUrl)
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
+  async function handleSubmit(data: LoginData) {
     setError(null)
     setInfo(null)
     setPendingEmail(null)
-    setLoading(true)
 
-    const formData = new FormData(e.currentTarget)
-    const data: LoginData = {
-      email: formData.get('email') as string,
-      password: formData.get('password') as string,
-    }
-
-    const parsed = LoginSchema.safeParse(data)
-    if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Ошибка валидации')
-      setLoading(false)
-      return
-    }
-
-    const result = await loginUser({ ...parsed.data, callbackUrl })
+    const result = await loginUser({ ...data, callbackUrl })
 
     if (result.success) {
       router.push(result.redirectTo || '/')
@@ -59,46 +42,28 @@ export function LoginForm() {
     } else if (result.verifyEmailSent) {
       // Аккаунт создан/не верифицирован — показываем info + кнопку resend
       setInfo(result.error ?? 'Письмо подтверждения отправлено')
-      setPendingEmail(parsed.data.email)
-      setLoading(false)
+      setPendingEmail(data.email)
     } else {
       setError(result.error ?? 'Ошибка входа')
-      setLoading(false)
     }
   }
 
   return (
-    <form method="post" onSubmit={handleSubmit}>
+    <AuthHubForm schema={LoginSchema} initialValue={{ email: '', password: '' }} onSubmit={handleSubmit}>
       <Stack gap={4}>
-        <Field.Root>
-          <Field.Label>Email</Field.Label>
-          <Input name="email" type="email" autoComplete="username webauthn" placeholder="you@example.com" required />
-        </Field.Root>
+        <AuthHubForm.Field.String
+          name="email"
+          label="Email"
+          autoComplete="username webauthn"
+          placeholder="you@example.com"
+        />
 
-        <Field.Root>
-          <Field.Label>Пароль</Field.Label>
-          <Group attached w="full">
-            <Input
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="current-password"
-              placeholder="••••••••"
-              required
-              flex={1}
-            />
-            <InputAddon p={0}>
-              <IconButton
-                aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowPassword(!showPassword)}
-                tabIndex={-1}
-              >
-                {showPassword ? <LuEyeOff /> : <LuEye />}
-              </IconButton>
-            </InputAddon>
-          </Group>
-        </Field.Root>
+        <AuthHubForm.Field.Password
+          name="password"
+          label="Пароль"
+          autoComplete="current-password"
+          placeholder="••••••••"
+        />
 
         {error && (
           <Text color="fg.error" fontSize="sm">
@@ -125,14 +90,14 @@ export function LoginForm() {
           />
         )}
 
-        <Button type="submit" colorPalette="brand" loading={loading} w="full">
+        <AuthHubForm.Button.Submit colorPalette="brand" width="full">
           Войти
-        </Button>
+        </AuthHubForm.Button.Submit>
 
         <Text fontSize="xs" color="fg.subtle" textAlign="center">
           Если аккаунта с таким email ещё нет — он будет создан автоматически
         </Text>
       </Stack>
-    </form>
+    </AuthHubForm>
   )
 }
