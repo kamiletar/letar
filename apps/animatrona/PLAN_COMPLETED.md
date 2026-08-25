@@ -4,23 +4,27 @@
 
 > **Архив обновлён:** 2026-08-25
 
-## Обновление Electron 43.3.0 → 43.4.1 (2026-08-25)
+## Обновление Electron 43.3.0 → 44.0.0 (2026-08-25)
 
 Локальный пин `electron` расходился с корневым `package.json` (`^43.4.1`) — `bun.lock` держал
-физический дубль версии (`electron@43.4.0`/`43.3.0` резолвились параллельно рядом с корневым).
-Приведён к точной версии `43.4.1` в `devDependencies` (electron-builder требует точную версию,
-не диапазон). Заодно обновлена захардкоженная версия в `postinstall`/`postinstall:dev`
-(`@electron/rebuild -v 43.3.0` → `43.4.1` для native-модуля `classic-level`) — иначе rebuild
-пересобрал бы модуль под версию electron, которая фактически не установится.
+физический дубль версии (`electron@43.4.1`/`43.3.0` резолвились параллельно рядом с корневым).
+Первым шагом приведён к точной версии `43.4.1` (совпадала с корневой на тот момент). По просьбе
+владельца сразу следом поднят до **мажорной** `44.0.0` (актуальный стабильный релиз на 2026-08-25)
+— решение бампнуть заодно и корневой `package.json`, и все четыре Electron-приложения монорепо
+разом, а не только animatrona. electron-builder требует точную версию в `devDependencies`, не
+диапазон — заодно обновлена захардкоженная версия в `postinstall`/`postinstall:dev`
+(`@electron/rebuild -v` для native-модуля `classic-level`).
 
-После `bun install` дубль в `bun.lock` исчез (`@letar/animatrona/electron` больше не резолвится
-отдельно — animatrona делит `electron@43.4.1` с корнем). `@electron/rebuild -v 43.4.1` прошёл
-(`No native modules found` — `classic-level` не тянет нативный биндинг под текущую
-конфигурацию, шаг успешен и без пересборки). `nx typecheck:tsgo animatrona` и `nx lint animatrona`
-зелёные (в lint только 8 давних `react-hooks/exhaustive-deps` warning, не связанных с апдейтом).
+После `bun install` дубль в `bun.lock` исчез — все четыре приложения делят один
+`electron@44.0.0` с корнем. `@electron/rebuild -v 44.0.0` прошёл (`No native modules found` —
+`classic-level` не тянет нативный биндинг под текущую конфигурацию, шаг успешен и без
+пересборки). `nx typecheck:tsgo` и `nx lint` зелёные на всех четырёх приложениях
+(`animatrona`, `label-printer-desktop`, `poster-microtext-desktop`, `kami-key-the`) — warning'и
+в lint все давние и не связаны с апдейтом.
 
-`label-printer-desktop`, `poster-microtext-desktop`, `kami-key-the` остались на `43.3.0` —
-вне охвата этой задачи (не значились в PLAN.md animatrona).
+⚠️ Мажорный бамп electron (43→44) не проверен живым запуском — сборка (`nx build`) и ручной
+смоук каждого приложения на реальном GUI не входили в объём этой задачи (сендбокс Claude Code не
+поднимает Chromium даже headless). Проверять на первом реальном запуске каждого приложения.
 
 ## Фикс: FormI18nProvider отсутствовал — подсказки валидации на английском (2026-08-25)
 

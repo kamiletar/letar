@@ -8,7 +8,7 @@
 
 ### Changed
 
-- Electron `43.3.0` → `43.4.1` — приведён к версии из корневого `package.json`, устранён
+- Electron `43.3.0` → `44.0.0` — приведён к версии из корневого `package.json`, устранён
   физический дубль в `bun.lock`. Обновлена захардкоженная версия в `postinstall`/
   `postinstall:dev` (`@electron/rebuild -v`).
 
