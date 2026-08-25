@@ -63,6 +63,7 @@ export { QuantityStepper, type QuantityStepperProps } from './lib/quantity-stepp
 
 // Отзывы и рейтинги
 export { RatingDisplay, type RatingDisplayProps } from './lib/rating-display'
+export { RatingDistribution, type RatingDistributionProps } from './lib/rating-distribution'
 export { RatingStars, type RatingStarsProps } from './lib/rating-stars'
 export { type ReviewAuthor, ReviewCard, type ReviewCardProps, type ReviewData } from './lib/review-card'
 export { RoleStat, type RoleStatProps, StatCard, type StatCardProps } from './lib/stat-card'

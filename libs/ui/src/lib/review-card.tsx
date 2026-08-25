@@ -1,10 +1,10 @@
 'use client'
 
-import { Avatar, Badge, Box, Button, Card, HStack, Text, Textarea, VStack } from '@chakra-ui/react'
+import { Avatar, Badge, Box, Button, Card, HStack, Image, Text, Textarea, VStack } from '@chakra-ui/react'
 import { formatDistanceToNow, type Locale } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { useState, useTransition } from 'react'
-import { LuFlag, LuMessageSquare, LuSend, LuX } from 'react-icons/lu'
+import { LuBadgeCheck, LuFlag, LuMessageSquare, LuSend, LuX } from 'react-icons/lu'
 
 import { RatingStars } from './rating-stars'
 
@@ -33,6 +33,16 @@ export interface ReviewData {
   response?: string | null
   respondedAt?: Date | null
   createdAt: Date
+  /**
+   * Фото покупателя к отзыву (не путать с публичной галереей товара)
+   */
+  image?: { url: string; alt?: string | null } | null
+  /**
+   * Отзыв оставлен покупателем с подтверждённым заказом — показывает бейдж
+   * «Подтверждённая покупка». По умолчанию не показывается: значение решает
+   * вызывающая сторона (там, где гарантия покупки реально проверена).
+   */
+  verifiedPurchase?: boolean
 }
 
 export interface ReviewCardProps {
@@ -144,7 +154,15 @@ export function ReviewCard({
                 <Avatar.Fallback>{review.author.name?.charAt(0) || '?'}</Avatar.Fallback>
               </Avatar.Root>
               <Box>
-                <Text fontWeight="medium">{review.author.name || 'Без имени'}</Text>
+                <HStack gap={1.5}>
+                  <Text fontWeight="medium">{review.author.name || 'Без имени'}</Text>
+                  {review.verifiedPurchase && (
+                    <Badge colorPalette="green" variant="subtle" size="sm" display="flex" alignItems="center" gap={1}>
+                      <LuBadgeCheck size={12} />
+                      Подтверждённая покупка
+                    </Badge>
+                  )}
+                </HStack>
                 <Text fontSize="sm" color="fg.muted">
                   {timeAgo}
                 </Text>
@@ -155,6 +173,18 @@ export function ReviewCard({
 
           {/* Текст отзыва */}
           {review.text && <Text color="fg">{review.text}</Text>}
+
+          {/* Фото покупателя */}
+          {review.image && (
+            <Image
+              src={review.image.url}
+              alt={review.image.alt ?? 'Фото покупателя к отзыву'}
+              borderRadius="md"
+              maxH="48"
+              w="auto"
+              objectFit="cover"
+            />
+          )}
 
           {/* Статус (если скрыт) */}
           {review.status === hiddenStatus && (
