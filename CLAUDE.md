@@ -112,7 +112,11 @@ select ·
 [faceted-catalog-pitfalls](/.claude/docs/faceted-catalog-pitfalls.md) фасетные фильтры каталога ·
 [raf-vs-timers-background-tab](/.claude/docs/raf-vs-timers-background-tab.md) ⚠️ `rAF` замирает в
 фоновой вкладке, `setTimeout`/`setInterval` там душится до раза в секунду/минуту — выбор не
-взаимозаменяем
+взаимозаменяем ·
+[react-use-transition-initial-pending-race](/.claude/docs/react-use-transition-initial-pending-race.md)
+⚠️ `useTransition().isPending` синхронно `false` до первого тика эффекта — окно между монтированием
+и стартом `startTransition` внутри `useEffect`, где `data===null` и `isPending===false`
+одновременно; ловится только там, где эффект (не клик) триггерит `startTransition`
 
 **Данные и состояние:** [data-fetching](/.claude/docs/data-fetching.md) ·
 [pwa-offline](/.claude/docs/pwa-offline.md) ·
