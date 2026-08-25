@@ -48,7 +48,14 @@ export async function Footer() {
               >
                 {t('releases')}
               </Link>
-              <Link asChild fontSize="sm" color="fg.muted" _hover={{ color: 'fg' }}>
+              <Link
+                asChild
+                fontSize="sm"
+                color="fg.muted"
+                _hover={{ color: 'fg' }}
+                minH="2.75rem"
+                alignItems="center"
+              >
                 <IntlLink href="/privacy">Privacy</IntlLink>
               </Link>
               <CookieSettingsButton appKey="aira-web" />

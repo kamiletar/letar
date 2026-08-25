@@ -1,5 +1,15 @@
 # Changelog — aira-web
 
+## [0.3.5] — 2026-08-25
+
+### Fixed
+
+- Touch target (WCAG 2.5.5): ссылка «← Aira» на `/privacy` и ссылка «Privacy» в футере были
+  ниже 44px по высоте. `TouchLink` из `@letar/ui` заменить нельзя — он жёстко использует
+  `next/link`, а aira-web роутит через locale-aware `Link` из `@/i18n/navigation`
+  (`createNavigation` next-intl). Решение по образцу mandala/archetest: `minH="2.75rem"
+  alignItems="center"` прямо на `<Link asChild>` (Chakra Link), без импорта TouchLink.
+
 ## [0.3.4] — 2026-08-25
 
 ### Fixed

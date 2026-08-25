@@ -23,7 +23,14 @@ export default function PrivacyPage() {
       <main>
         <Container maxW="3xl" py={{ base: 24, md: 32 }}>
           <VStack gap={6} align="stretch">
-            <Link asChild fontSize="sm" color="fg.muted" _hover={{ color: 'fg' }}>
+            <Link
+              asChild
+              fontSize="sm"
+              color="fg.muted"
+              _hover={{ color: 'fg' }}
+              minH="2.75rem"
+              alignItems="center"
+            >
               <IntlLink href="/">&larr; Aira</IntlLink>
             </Link>
 
