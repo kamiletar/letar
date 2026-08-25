@@ -1,5 +1,13 @@
 # Выполненные задачи: Mandala
 
+## Фикс: `next/image` `priority` не выставлял `fetchpriority="high"` (Next.js 16 API) (2026-08-25)
+
+Монорепо-широкий аудит по мотивам находки в domwellbes (`PLAN_PUBLIC_MOBILE.md` §12.24) —
+Next.js 16 развёл `priority` на независимые `preload`/`fetchPriority`, старый проп больше не
+ставит `fetchpriority="high"` сам по себе. `product-slider-swiper.tsx` (слайдер фото товара) —
+единственное прямое использование `next/image` с `priority` в приложении — переведён на
+`preload`+`fetchPriority`. `typecheck:tsgo`/`lint`/`format` зелёные.
+
 ## Touch target для текстовых ссылок — WCAG 2.5.5 (2026-08-25)
 
 4 короткие ссылки без достаточной высоты клика (`welcome-portal.tsx` ×3, `navigation.tsx`
