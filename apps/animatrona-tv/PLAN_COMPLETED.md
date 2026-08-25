@@ -2,6 +2,48 @@
 
 Детальное описание всех реализованных фич Animatrona TV.
 
+## Версия 0.6.0
+
+### Фикс: Android toolchain под RN 0.87 (перенос из animatrona-mobile)
+
+`animatrona-mobile-dev` при попытке собрать и запустить приложение на реальном устройстве под
+RN 0.87 нашла класс несовместимостей Android toolchain, которые не ловятся typecheck'ом. У
+`animatrona-tv` на момент проверки был тот же `gradle-wrapper.properties` на Gradle 8.13 и общие
+с mobile либы `libs/exoplayer-ass`/`libs/exoplayer-sync` — фиксы применены и здесь:
+
+- `gradle-wrapper.properties`: Gradle 8.13 → 9.4.1 — AGP, который требует RN 0.87, минимум 9.4.1
+- `android/build.gradle`: `com.android.tools.build:gradle` 8.7.3 → 9.2.1, `kotlinVersion`
+  2.1.20 → 2.2.0
+- `android/gradle.properties`: добавлены `android.builtInKotlin=false` и `android.newDsl=false`.
+  Без флагов сборка падает на «Cannot add extension with name 'kotlin'» — AGP 9.0+ включает
+  built-in Kotlin support, который конфликтует с явным плагином `org.jetbrains.kotlin.android`,
+  применённым в `:app` и в `exoplayer-ass`/`exoplayer-sync`. Флаг официальный, временный —
+  уберут в AGP 10, тогда придётся снимать `org.jetbrains.kotlin.android` со всех трёх модулей
+- `metro.config.js`: старый `resolveRequest` для singleton-пакетов (`react`, `react-native`)
+  резолвил через `require.resolve(moduleName, { paths: [projectRoot] })` — под RN 0.87 падает
+  (`ERR_PACKAGE_PATH_NOT_EXPORTED`) на глубоких внутренних импортах вида
+  `react-native/src/private/featureflags/ReactNativeFeatureFlags`, которых нет в `exports`
+  пакета. Перенесён фикс из `animatrona-mobile`: вместо строгого Node-резолва подменяется
+  `originModulePath` на несуществующий якорный путь `node_modules/.singleton-anchor.js` —
+  файл реально не нужен, важна только директория, дальше резолв идёт через собственный
+  (нестрогий) резолвер Metro. Список перехватываемых пакетов расширен под фактические
+  зависимости tv: `react-native-safe-area-context`, `react-native-gesture-handler`,
+  `react-native-screens`, `react-native-svg`, `react-native-video`,
+  `@react-native-async-storage/async-storage` (все резолвятся из корневого `node_modules` через
+  hoisting — своих версий в `apps/animatrona-tv/node_modules` нет).
+  `react-native-reanimated` не используется в tv и не добавлен
+- `react-native-gesture-handler`: локального пина в `apps/animatrona-tv/package.json` не было,
+  корневой уже на nightly `3.3.0-nightly-20260824-5de6d2358` — синхронизация не потребовалась
+- `android/local.properties` создан локально (`sdk.dir=C:\Android\Sdk`, в `.gitignore`)
+- Debug APK собран успешно: `npx react-native bundle` (predev bundle, без warning блокирующий) +
+  `./gradlew assembleDebug` — BUILD SUCCESSFUL за 4 мин 9 сек, 187 задач (122 выполнено, 65 из
+  кеша). Сборка шла через `subst X: C:\web\letar` — без короткого пути `ninja` падает на
+  `Filename longer than 260 characters`
+- ⚠️ Установка и запуск на реальном Android TV устройстве не проверены — к сессии было
+  подключено только `TECNO LI6` (обычный Android-телефон). Проверить перед следующим релизом:
+  D-pad фокус, воспроизведение видео+аудио, субтитры — как и по нерешённому пункту из версии
+  0.5.0 миграции RN 0.87
+
 ## Версия 0.5.3
 
 ### Рефакторинг: TVErrorScreen — общий компонент экрана ошибки

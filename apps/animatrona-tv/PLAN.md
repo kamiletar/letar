@@ -209,6 +209,36 @@ React Native 0.87, затем корневой пин — `animatrona-tv` син
   Обязательно проверить перед следующим релизом: D-pad фокус, тач на TextInput-полях,
   воспроизведение видео+аудио, субтитры.
 
+### Android toolchain под RN 0.87 (2026-08-25)
+
+`animatrona-mobile-dev` на реальном устройстве обнаружила класс несовместимостей Android
+toolchain под RN 0.87 (детали и первопричины — CHANGELOG animatrona-mobile v0.7.6). Перенесено
+в `animatrona-tv`, у которой на момент проверки был тот же `gradle-wrapper.properties` на
+Gradle 8.13 и общие с mobile либы `libs/exoplayer-ass`/`libs/exoplayer-sync`:
+
+- `gradle-wrapper.properties`: Gradle 8.13 → 9.4.1 (AGP из RN 0.87 требует минимум 9.4.1)
+- `android/build.gradle`: AGP 8.7.3 → 9.2.1, Kotlin 2.1.20 → 2.2.0
+- `android/gradle.properties`: добавлены `android.builtInKotlin=false` и `android.newDsl=false` —
+  обход конфликта «Cannot add extension with name 'kotlin'» между built-in Kotlin support AGP
+  9.0+ и явным плагином `org.jetbrains.kotlin.android`, который применяют `:app` и
+  `exoplayer-ass`/`exoplayer-sync`
+- `metro.config.js`: старый `resolveRequest` резолвил singleton-пакеты (`react`, `react-native`)
+  через `require.resolve(moduleName, { paths: [projectRoot] })` — под RN 0.87 падает на глубоких
+  внутренних импортах (`react-native/src/private/featureflags/...`), которых нет в `exports`
+  пакета. Перенесён фикс из mobile: подмена `originModulePath` на несуществующий якорный файл
+  `node_modules/.singleton-anchor.js`, чтобы Metro резолвил через свой нестрогий резолвер;
+  список перехватываемых пакетов расширен до фактически используемых в tv
+  (`react-native-safe-area-context`, `react-native-gesture-handler`, `react-native-screens`,
+  `react-native-svg`, `react-native-video`, `@react-native-async-storage/async-storage`) —
+  `react-native-reanimated` не используется в tv, в список не добавлен
+- `react-native-gesture-handler` в tv резолвится из корневого `node_modules` (hoisting), локального
+  пина не было — трогать не потребовалось
+- `android/local.properties` создан локально (`sdk.dir=C:\Android\Sdk`, гитигнорен)
+- Debug APK собран успешно (`./gradlew assembleDebug`, 4 мин, 187 задач) — Windows-путь собирался
+  через `subst X: C:\web\letar` (без него `ninja` падает на `Filename longer than 260 characters`)
+- ⚠️ Установка на устройство не проверена — к сессии было подключено только `TECNO LI6` (обычный
+  телефон, не Android TV/эмулятор). Проверить на реальном Android TV перед следующим релизом.
+
 ### Рефакторинг фокус-стилей (2026-08-20)
 
 Дублировавшийся паттерн `({ focused }: TVPressableState) => [...]` (~20 мест, 9 файлов) вынесен в

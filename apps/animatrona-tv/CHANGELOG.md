@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.6.0] - 2026-08-25
+
+### Fixed
+
+- Android toolchain под RN 0.87 (перенесено из `animatrona-mobile` после теста на реальном
+  устройстве): `gradle-wrapper.properties` Gradle 8.13 → 9.4.1, `android/build.gradle` AGP
+  8.7.3 → 9.2.1 / Kotlin 2.1.20 → 2.2.0, `android/gradle.properties` —
+  `android.builtInKotlin=false` + `android.newDsl=false` (обход конфликта AGP 9.0+ built-in
+  Kotlin support с явным плагином `org.jetbrains.kotlin.android` в `:app`/`exoplayer-ass`/
+  `exoplayer-sync`)
+- `metro.config.js`: `resolveRequest` для singleton-пакетов (`react`, `react-native` и др.)
+  падал под RN 0.87 на глубоких внутренних импортах через строгий `require.resolve` —
+  заменён на резолв через якорный `originModulePath` (перенесено из `animatrona-mobile`),
+  список пакетов расширен до фактически используемых в tv
+
 ## [0.5.3] - 2026-08-20
 
 ### Changed

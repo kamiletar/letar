@@ -1,6 +1,6 @@
 {
   "name": "@letar/animatrona-tv",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "private": true,
   "main": "index.js",
   "scripts": {
