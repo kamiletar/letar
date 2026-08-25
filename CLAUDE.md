@@ -125,7 +125,10 @@ select ·
 **Данные и состояние:** [data-fetching](/.claude/docs/data-fetching.md) ·
 [pwa-offline](/.claude/docs/pwa-offline.md) ·
 [react-effect-stable-ref-pitfall](/.claude/docs/react-effect-stable-ref-pitfall.md) эффект с deps на
-ref/DOM не перезапускается
+ref/DOM не перезапускается ·
+[route-announcer-persistent-layout-required](/.claude/docs/route-announcer-persistent-layout-required.md)
+⚠️ `RouteAnnouncer` молча не объявляет ни одной навигации, если подключён не в persistent
+`layout.tsx`, а в per-page-компонент
 
 **Next.js — ловушки:** [nextjs-standalone-tracing](/.claude/docs/nextjs-standalone-tracing.md)
 ECONNREFUSED/ERR_DLOPEN_FAILED при зелёном билде ·
