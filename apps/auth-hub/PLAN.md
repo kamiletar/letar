@@ -1,5 +1,27 @@
 # План разработки auth-hub
 
+## v0.7.10 — фикс кнопки magic-link: hydration mismatch убивал интерактивность (2026-08-25)
+
+- [x] **Кнопка «Отправить ссылку для входа» на `/sign-in` не реагировала на клик у части
+      пользователей.** Репродукция через Browser pane на свежей вкладке (не кеш): в консоли
+      `Minified React error #418` (`args[]=HTML`) сразу при загрузке, клик по кнопке после этого
+      не порождал вообще никакого сетевого запроса. `project.json` не имел явных `build`/`dev`
+      таргетов → Nx-инференс `@nx/next` выбирал Turbopack по умолчанию — известная комбинация
+      Turbopack + Emotion `Global` + `next-themes` script в `ColorModeProvider`
+      ([nextjs16-turbopack-default-emotion-hydration.md](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md)),
+      ранее пофикшена в `mandala`/`studio`/`dashboard`/`driving-school`, но не в `auth-hub`.
+      **Фикс:** `--webpack` override для `build`/`dev` в `project.json` (коммит `bf690f5d`).
+      GlitchTip подтвердил тот же мисматч и на `/oauth/consent` у реального пользователя (не
+      только на `/sign-in`) — баг не ограничивался одной страницей.
+      **Побочная находка (не код-фикс, отдельно зафиксирована для видимости):** в том же разборе
+      GlitchTip (issue `AUTH-HUB-3`, «Failed to find Server Action») найден payload,
+      похожий на массовое интернет-сканирование известной уязвимости десериализации Next.js
+      Server Actions (recon-скрипт, читающий `.env`/SSH-ключи/облачные credentials через
+      `eval()`). Next.js отбраковал запрос на этапе поиска экшна по невалидному
+      `$ACTION_REF_0` — до десериализации payload'а, эксплуатация не подтверждена. Требует
+      мониторинга, не блокирует этот фикс.
+      **Требует деплоя через `deploy-agent-dev`** — задача пока не задеплоена.
+
 ## §18.7 M4: первый живой прогон staging e2e — закрыто (2026-08-25)
 
 - [x] **Первый деплой + полный e2e-прогон auth-hub на staging.** Деплой ✅ (коммит `82ebb75e`,
