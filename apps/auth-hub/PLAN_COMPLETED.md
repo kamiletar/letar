@@ -2,6 +2,23 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## §18.7 M4: первый живой staging e2e — закрыт (2026-08-25)
+
+Первый деплой auth-hub на staging и первый живой прогон e2e-сьюта (`01-public`, `02-admin`,
+`03-oidc-authorize`, `04-linked-email-login`) через `deploy-agent-dev`.
+
+Деплой прошёл штатно (коммит `82ebb75e`). E2E дал 2 неожиданных фейла — не по причине, о которой
+предупреждали заранее (`requireEmailVerification`), а раньше: `04-linked-email-login.spec.ts`
+бил `fetch()` из Node-процесса Playwright прямо в `/api/auth/sign-up/email` без браузерного
+контекста → нет заголовка `Origin` → better-auth отвечает `403 MISSING_OR_NULL_ORIGIN`.
+
+Корень глубже одного теста: докстринг файла с v0.6.4 заявлял «не запускается в staging-раннере»,
+но проверки не было — `playwright.config.ts` держит единственный project (`chromium`) без
+dev/staging split, в отличие от `driving-school-e2e`. Фикс — `test.skip(!isLocalDev, ...)` в
+начале describe-блока (коммит `7a8afe62`). Повторный прогон — полностью зелёный:
+`expected: 10, skipped: 2, unexpected: 0`. `auth-hub` добавлен в `E2E_GATED_APPS`
+(`libs/infra-config/src/index.ts`). Детали — `PLAN-INFRA-1.md` §18.7.
+
 ## 0.7.11: формы sign-in переведены на @letar/forms (2026-08-25)
 
 `login-form.tsx` и `magic-link-form.tsx` были написаны на нативном `<form>` + ручном
