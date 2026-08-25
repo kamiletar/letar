@@ -30,6 +30,23 @@ services:
     stop_grace_period: 30s
     labels:
       letar.rollout: 'true'
+      # §48 M3 шаг 5 — первый живой тест docker-провайдера Traefik на s2 (все прошлые роутеры
+      # шли через file-провайдер, dynamic/s2/*.yml). Регистрация роутера НЕ переключает трафик —
+      # NPM продолжает форвардить напрямую на animatrona-landing-app:3008, пока проксирование не
+      # переключат отдельным действием (тот же механизм, что для aira.letar.best — см.
+      # PLAN-INFRA-2.md §48 M3 шаг 3). Лейблы висят на сервисе, а не на конкретном контейнере —
+      # обе реплики rollout-профиля (scale=2) получают тот же router-лейбл автоматически, Traefik
+      # балансирует между ними сам, без сигнала reload (см. rollout.ts RolloutOptions.proxyKind).
+      traefik.enable: 'true'
+      traefik.docker.network: 'kami-network'
+      traefik.http.routers.animatrona-landing.rule: 'Host(`animatrona.letar.best`)'
+      traefik.http.routers.animatrona-landing.entrypoints: 'websecure'
+      # certResolver+domains явно — bare `tls: true` на s2 не подхватывает wildcard
+      # (infra/traefik/dynamic/s2/dashboard.yml, тот же урок, что и на s3 2026-08-07).
+      traefik.http.routers.animatrona-landing.tls.certresolver: 'dns'
+      traefik.http.routers.animatrona-landing.tls.domains[0].main: 'letar.best'
+      traefik.http.routers.animatrona-landing.tls.domains[0].sans[0]: '*.letar.best'
+      traefik.http.services.animatrona-landing.loadbalancer.server.port: '3008'
     networks:
       kami-network:
         aliases:
