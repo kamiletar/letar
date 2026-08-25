@@ -1,5 +1,11 @@
 # Выполненные задачи: Mandala
 
+## Фикс: та же грабля ещё в трёх файлах (2026-08-25)
+
+Свежий полный грепп по монорепо (не список из прошлой сессии) нашёл три пропущенных прямых
+`next/image` с `priority`: `mandala-carousel.tsx`, `product-slider.tsx`,
+`admin/mandalas/[id]/page.tsx`. Тот же фикс.
+
 ## Фикс: `next/image` `priority` не выставлял `fetchpriority="high"` (Next.js 16 API) (2026-08-25)
 
 Монорепо-широкий аудит по мотивам находки в domwellbes (`PLAN_PUBLIC_MOBILE.md` §12.24) —

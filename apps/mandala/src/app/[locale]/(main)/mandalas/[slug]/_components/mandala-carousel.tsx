@@ -209,7 +209,8 @@ export function MandalaCarousel({ mandalas, currentIndex, onSelect, visible, onC
                   width={350}
                   height={350}
                   style={{ objectFit: 'cover', width: '100%', height: '100%' }}
-                  priority
+                  preload
+                  fetchPriority="high"
                 />
               </Box>
               <Text textAlign="center" color="white" fontSize={{ base: 'md', md: 'lg' }} fontWeight="semibold" mt={4}>

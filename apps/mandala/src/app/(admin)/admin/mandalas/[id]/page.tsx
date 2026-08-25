@@ -64,7 +64,8 @@ export default async function MandalaDetailsPage({ params }: { params: Promise<{
               fill
               sizes="(max-width: 1024px) 100vw, 400px"
               style={{ objectFit: 'cover' }}
-              priority
+              preload
+              fetchPriority="high"
             />
           </Box>
           {centerImageUrl && (

@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+## [0.40.19] - 2026-08-25
+
+### Fixed
+
+- Ещё три LCP-изображения с тем же багом (прошлый прогон закрыл только `product-slider-swiper.tsx`
+  по заранее подготовленному списку) — карусель мандалы (`mandala-carousel.tsx`), нешвайперный
+  слайдер товара (`product-slider.tsx`) и обложка в админке (`admin/mandalas/[id]/page.tsx`).
+  `priority` → `preload`+`fetchPriority="high"`.
+
 ## [0.40.18] - 2026-08-25
 
 ### Fixed
