@@ -1,0 +1,35 @@
+# §48 M3 шаг 3 — один нерискованный letar.best-домен без rollout-label, первый живой прод-
+# домен на Traefik, но без совмещения с zero-downtime rollout (проверяем один новый механизм
+# за раз). По аналогии с `time` на s3 (M1b).
+#
+# aira.letar.best (aira-web) выбран как кандидат: НЕ в списке `letar.rollout: 'true'`
+# (apps/aira-web/docker-compose.production.yml — статичный container_name, без scale=2), низкий
+# трафик (лендинг релизов Aira), не завязан на длинные сессии/платежи.
+#
+# ⚠️ `tls: {}` в расчёте на наследование entryPoints.websecure.http.tls.domains НЕ работает —
+# проверено вживую на s3 2026-08-07 (см. dynamic/dashboard.yml). certResolver+domains — явно
+# в каждом роутере, даже для доменов внутри зоны letar.best.
+#
+# Это ШАГ 3 — DNS всё ещё указывает на NPM, роутер существует, трафик не переключён. Реальное
+# переключение (смена A-записи или порта NPM/Traefik) — отдельное действие после того, как
+# постоит день-два и подтвердится curl/TLS напрямую на 8443.
+
+http:
+  routers:
+    pilot-aira:
+      rule: 'Host(`aira.letar.best`)'
+      entryPoints:
+        - websecure
+      service: aira-web-app
+      tls:
+        certResolver: dns
+        domains:
+          - main: 'letar.best'
+            sans:
+              - '*.letar.best'
+
+  services:
+    aira-web-app:
+      loadBalancer:
+        servers:
+          - url: 'http://aira-web-app:3017'
