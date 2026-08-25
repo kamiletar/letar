@@ -1468,6 +1468,23 @@ onlyMultiLine`) против `.prettierrc` (`trailingComma: es5` + `prettier-plu
 
 ## Открытые задачи
 
+- [ ] ⚠️ **Открытый вопрос: `nx dev animatrona` (интерактивный Electron dev через nextron)
+      по-прежнему запускает renderer через Turbopack, не webpack.** Закрыт основной риск
+      Turbopack+Emotion hydration (2026-08-25, см. PLAN_COMPLETED.md) — `--webpack` добавлен в
+      standalone `nx dev/build animatrona-renderer` и во все 8 таргетов реальной
+      Electron-сборки `apps/animatrona:build`. Но `nextron@10.3.0` CLI (`nextron.config.js`)
+      хардкодит `next dev -p <port> <rendererSrcDir>` без опции передать `--webpack` —
+      проверено по исходнику пакета, команда `dev` поддерживает только
+      `--renderer-port`/`--startup-delay`/`--electron-options`/`--run-only`. Next.js CLI тоже не
+      читает бандлер из env (только CLI-флаг, проверено по `next-dev.js`). Не блокирует —
+      дев-only путь, не то, что паковается пользователю — но означает, что живая разработка
+      через `nx dev animatrona` теоретически может поймать тот же класс гидратационных багов.
+      Решение не найдено в рамках сессии: либо патчить/форкать nextron, либо смириться и
+      документировать как известное ограничение дев-режима. GUI-уровень самого Electron-окна
+      не проверяем в сендбоксе Claude Code в принципе (`.claude/rules/electron.md`), так что
+      даже если добавить `--webpack`, подтвердить фикс живым прогоном можно только руками
+      пользователя.
+
 - [ ] ⚠️ **Открытый вопрос: заводить ли `@letar/*` зависимости в `mobile-ui`?** При аудите дублей
       `prefers-reduced-motion` (2026-08-20) нашлись ещё два инлайн-вхождения в
       `mobile-ui/src/App.tsx` (реактивный `useReducedMotion`) и `mobile-ui/src/components/ExpandableText.tsx`
