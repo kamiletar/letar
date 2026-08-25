@@ -2,6 +2,21 @@
 
 Детальное описание реализованных функций.
 
+## Фикс hydration mismatch — `<div>` внутри `<p>` в FeaturesSection (2026-08-25)
+
+Найдено при визуальной проверке CookieBanner на mobile viewport (не связано с самим CookieBanner).
+`features-section.tsx` — точка-маркер под деталями фичи была `<Box w={1} h={1} borderRadius="full"
+.../>` (рендерится `<div>`) внутри `<Text>` (рендерится `<p>`) — консоль давала "In HTML, %s
+cannot be a descendant of `<p>`" → hydration failed. Проверены соседние секции (hero, faq,
+downloads, docs, import-flow, changelog) на тот же паттерн (`w={1} h={1} borderRadius="full"
+bg="brand.400"`) — грепом по всему `_components/` нашёлся только этот один случай, changelog его
+не содержит вопреки первоначальному предположению из репорта.
+
+Фикс — `Box asChild` с вложенным `<span />` вместо голого `Box` (проект запрещает проп `as=`,
+см. `.claude/rules/components.md`). Проверено: после reload в браузере ни один `<p>` на странице
+не содержит `<div>`-потомка (`document.querySelectorAll('p')` + `.querySelector('div')` — пусто),
+консоль чистая. `nx lint`/`nx typecheck:tsgo`/`nx format` — зелёные.
+
 ## `--webpack` в dev/build — превентивный фикс Turbopack+Emotion hydration (2026-08-25)
 
 Часть аудита `.claude/docs/nextjs16-turbopack-default-emotion-hydration.md` (раздел «Аудит по
