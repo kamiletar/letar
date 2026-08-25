@@ -36,10 +36,24 @@ API (`schema`/`initialValue`/`onSubmit` на корневом компонент
 
 **Проверка:** `nx typecheck:tsgo auth-hub`/`nx lint auth-hub` — зелёные (2 typecheck-ошибки —
 предсуществующие, в `src/lib/auth.ts`/`libs/auth`, VK OAuth-провайдер, не в scope правки).
-Полноценная визуальная проверка через Browser pane не удалась: `/sign-in` падает на SSR
-(`genericOAuthClient is not a function`) — предсуществующий баг несовместимости версии
-`better-auth` в `libs/auth/src/client/create-auth-client.ts`, там уже лежат чужие
-незакоммиченные правки другого агента (не в scope этой сессии, `apps/auth-hub` не задет).
+
+Первая попытка визуальной проверки упёрлась в SSR-краш `genericOAuthClient is not a function`
+(предсуществующий баг несовместимости версии `better-auth` в
+`libs/auth/src/client/create-auth-client.ts`) — на тот момент там лежали чужие незакоммиченные
+правки другого агента, не в scope этой сессии. Тот баг оказался закрыт (аккуратно
+переписанный `signIn.oauth2` как тонкий алиас над `signIn.social()`, без `genericOAuthClient()`).
+
+**После фикса вскрылась вторая, более глубокая проблема, не связанная ни с формами, ни с
+`better-auth`:** `/sign-in` рендерится на сервере без ошибок, но весь контент страницы
+(`AuthOAuthButtons`/`LoginForm`/`MagicLinkForm`) остаётся в DOM внутри `<div hidden id="S:0/1/2">`
+— React 19 Suspense-плейсхолдеры для стриминга никогда не раскрываются
+(`offsetParent` всех `<input>` — `null`, HMR подключён, ошибок в консоли нет). Видны только шапка
+и cookie-consent баннер. **Проверено A/B-тестом:** временный откат `login-form.tsx`/
+`magic-link-form.tsx` на дореформенную версию (коммит `29aaabdf`, сырой `<form>`) дал тот же
+результат — баг не связан с миграцией форм на `@letar/forms` из этой сессии. `/sign-up` (тоже
+под `<Suspense>`, но с одной границей вместо трёх) рендерится нормально. Root cause не найден
+до конца, занесён как открытый вопрос в `PLAN.md` — вероятный подозреваемый: три параллельных
+`<Suspense>` без fallback вокруг независимых client-компонентов в `sign-in/page.tsx`.
 
 ## 0.7.10: hydration mismatch убивал кнопку magic-link (2026-08-25)
 
