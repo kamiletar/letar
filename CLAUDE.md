@@ -95,6 +95,10 @@ boolean с явным «наследовать» через строковый �
 ⚠️ пост-сабмит `reset(dataToSubmit)` снимает `isTouched` — следующий рендер со статическим
 `initialValue` (не «что реально отправлено») перетирает поле, бьёт по любому полю, не только
 select ·
+[letar-forms-missing-i18nprovider-english-hints](/.claude/docs/letar-forms-missing-i18nprovider-english-hints.md)
+⚠️ без `<FormI18nProvider locale="ru">` в дереве провайдеров подсказки валидации
+(`z.string().min/max`) молча остаются на английском, хотя RU-локализация в библиотеке уже
+реализована — ни typecheck, ни рендер без ошибок этого не покажут ·
 [ui-components](/.claude/docs/ui-components.md) · [images](/.claude/docs/images.md) ·
 [font-cmap-coverage-verification](/.claude/docs/font-cmap-coverage-verification.md) описание
 шрифта на сайте лжёт — покрытие символов проверять разбором `cmap` файла; для Node-стека
