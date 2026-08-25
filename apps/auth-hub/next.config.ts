@@ -15,6 +15,13 @@ const nextConfig: NextConfig = {
   // geoip-lite содержит бинарные .dat файлы — не бандлить, оставить как runtime require
   serverExternalPackages: ['geoip-lite'],
 
+  // Без transpilePackages Next.js webpack ограничивает свой ts/js loader каталогом самого
+  // приложения (shouldIncludeExternalDirs в next/dist/build/webpack-config.js) и молча
+  // отказывается парсить внешний .ts из монорепо-библиотеки — «Module parse failed: Unexpected
+  // token» на `export interface`. Сборка через --webpack (build/dev targets в project.json)
+  // этого не получает бесплатно, в отличие от Turbopack. Тот же фикс — form-docs/next.config.mjs.
+  transpilePackages: ['@letar/glitchtip'],
+
   // Явно включаем geoip-lite в трассировку standalone output (включая .dat файлы).
   // @swc/helpers — трейсер (@vercel/nft) не докопировал пакет в .next/standalone при первом
   // полном передеплое после долгого простоя контейнера (инцидент aboi/time 2026-08-18…19,
