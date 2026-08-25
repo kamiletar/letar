@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+## [0.55.26] - 2026-08-25
+
+### Changed
+
+- `scripts/generate-icons.js` переведён на общую библиотеку `@letar/icon-generator` — прежний
+  фикс `require('png-to-ico').default` был точечной заплаткой на симптом, теперь используется
+  единая (протестированная) реализация вместе с `label-printer-desktop` и
+  `poster-microtext-desktop`.
+
 ## [0.55.25] - 2026-08-25
 
 ### Fixed

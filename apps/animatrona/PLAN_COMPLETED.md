@@ -4,6 +4,21 @@
 
 > **Архив обновлён:** 2026-08-25
 
+## Вынос generate-icons в общую библиотеку @letar/icon-generator (2026-08-25)
+
+Точечный фикс `require('png-to-ico').default` ниже устранял симптом, но не причину: три
+Electron-приложения (`animatrona`, `label-printer-desktop`, `poster-microtext-desktop`) держали
+независимые копии одного и того же скрипта генерации PNG+ICO из SVG, разошедшиеся по движку
+рендера (`sharp` / `@resvg/resvg-js`) и по формату модуля (CJS/ESM) — отсюда и класс багов вроде
+этого. Вынесено в `libs/icon-generator` (`@letar/icon-generator`) — plain-JS ESM-библиотека по
+паттерну `@letar/theme-check` (запускается голым `node` без бандлера, резолв через
+`nx.implicitDependencies` + `dependencies: "workspace:*"` в `package.json` приложения). Движок
+унифицирован на `sharp` (уже был у 2 из 3 приложений и в шаблоне генератора
+`electron-app`). `scripts/generate-icons.js` теперь — тонкая обёртка с
+`await import('@letar/icon-generator')` (CommonJS-файл не может делать top-level `import`, но
+динамический `import()` внутри `async function` работает). Прогнан на всех трёх приложениях,
+иконки визуально сверены, `nx test/lint/typecheck:tsgo` зелёные.
+
 ## Миграция generate-icons.js: to-ico → png-to-ico, фикс молчаливо неработающего icon.ico (2026-08-25)
 
 Задача пришла как «перевести три Electron-приложения с `to-ico` на `png-to-ico`» — по факту
