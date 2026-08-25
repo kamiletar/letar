@@ -37,8 +37,13 @@ test.describe('Документы', () => {
     const toc = page.locator('nav[aria-label="Содержание документа"]')
     await expect(toc).toBeVisible({ timeout: 10000 })
 
-    // Проверяем что есть ссылки
+    // Проверяем что есть ссылки. `count()` не ждёт — headings собираются в клиентском useEffect
+    // ПОСЛЕ гидратации (SSR намеренно рендерит nav пустым, чтобы не словить hydration mismatch,
+    // см. apps/pravda/src/app/_components/toc.tsx), а `toBeVisible(nav)` выше проходит мгновенно,
+    // т.к. сам `<nav>` есть в разметке сразу. Ждём появления первой ссылки (авто-retry локатора),
+    // и только потом читаем count — иначе тест гоняется наперегонки с гидратацией.
     const tocLinks = toc.locator('a')
+    await expect(tocLinks.first()).toBeVisible({ timeout: 10000 })
     const count = await tocLinks.count()
     expect(count).toBeGreaterThan(0)
   })

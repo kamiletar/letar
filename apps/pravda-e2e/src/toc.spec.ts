@@ -35,15 +35,18 @@ test.describe('Table of Contents (TOC)', () => {
     const toc = page.locator('nav[aria-label="Содержание документа"]')
 
     // TOC — клиентский компонент: заголовки собираются из DOM после гидратации, а не приходят
-    // в исходном SSR-HTML. `locator.count()` не ждёт — снимает DOM-снимок сразу и гонится с
-    // React-гидратацией, которая на момент `domcontentloaded` может ещё не начаться (скрипт
-    // Next.js исполняется как deferred module). Дожидаемся видимости самого nav (auto-retry
-    // локатор Playwright) — тот же сигнал готовности, что уже используется в тесте выше
-    // ("TOC отображается на десктопе"), и только потом читаем количество ссылок.
+    // в исходном SSR-HTML (`<nav>` рендерится пустым и на сервере, и при первом клиентском
+    // рендере — намеренно, чтобы не словить hydration mismatch, см.
+    // apps/pravda/src/app/_components/toc.tsx). Поэтому `toBeVisible(nav)` — НЕ сигнал
+    // готовности: сам `<nav>` есть в разметке сразу и виден мгновенно, а ссылки внутри него
+    // появляются позже, отдельным клиентским эффектом. `locator.count()` не ждёт — снимает
+    // DOM-снимок сразу и гонится с гидратацией. Дожидаемся видимости ПЕРВОЙ ссылки (auto-retry
+    // локатор Playwright), и только потом читаем количество.
     await expect(toc).toBeVisible()
 
     // Должны быть ссылки на разделы
     const tocLinks = toc.locator('a[href^="#"]')
+    await expect(tocLinks.first()).toBeVisible({ timeout: 10000 })
     const count = await tocLinks.count()
     expect(count).toBeGreaterThan(0)
   })
@@ -104,8 +107,10 @@ test.describe('Table of Contents (TOC)', () => {
 
     const toc = page.locator('nav[aria-label="Содержание документа"]')
 
-    // Находим пункт в середине списка
+    // Находим пункт в середине списка. Ждём первую ссылку — та же гонка с гидратацией, что и
+    // в тесте "TOC содержит пункты из документа" выше.
     const tocLinks = toc.locator('a[href^="#"]')
+    await expect(tocLinks.first()).toBeVisible({ timeout: 10000 })
     const count = await tocLinks.count()
     const middleIndex = Math.floor(count / 2)
     const middleLink = tocLinks.nth(middleIndex)
@@ -141,8 +146,9 @@ test.describe('Table of Contents (TOC)', () => {
 
     const toc = page.locator('nav[aria-label="Содержание документа"]')
 
-    // Находим последний пункт TOC (внизу списка)
+    // Находим последний пункт TOC (внизу списка). Ждём первую ссылку — та же гонка с гидратацией.
     const tocLinks = toc.locator('a[href^="#"]')
+    await expect(tocLinks.first()).toBeVisible({ timeout: 10000 })
     const count = await tocLinks.count()
 
     // Пропускаем тест если мало пунктов
