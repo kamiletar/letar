@@ -85,3 +85,17 @@ function FormI18n({ children }: { children: ReactNode }) {
 деревьев провайдеров (как у `studio` — бэк-офис отдельно от публичной части), в каждое дерево
 нужна своя обёртка, и правило для неё определяется тем, есть ли в конкретном дереве
 `NextIntlClientProvider`-предок, а не приложением в целом.
+
+## Root cause в генераторах — закрыт (2026-08-25)
+
+Причина, по которой баг регулярно возвращался: шаблоны `Providers`-компонента у
+`nx g @letar/generators:new-app` и `nx g @letar/generators:electron-app` не включали
+`FormI18nProvider` вовсе — каждое новое приложение стартовало уже с этим пробелом.
+
+Исправлено в обоих шаблонах — `<FormI18nProvider locale="ru">` обёрнут вокруг `children`,
+`forms` добавлен в `implicitDependencies` их `package.json.template`
+([libs/generators/src/generators/new-app/files/src/app/_components/providers.tsx.template](/libs/generators/src/generators/new-app/files/src/app/_components/providers.tsx.template),
+[libs/generators/src/generators/electron-app/files/renderer/app/_components/providers.tsx.template](/libs/generators/src/generators/electron-app/files/renderer/app/_components/providers.tsx.template)).
+Ни у одного из двух генераторов нет next-intl-варианта — там всегда хардкод `"ru"`, как у
+приложений без next-intl в таблице выше. Приложение, добавляющее next-intl после генерации,
+переключает обёртку на `useLocale()` вручную, тем же способом, что и `aboi`/`kami` в таблице.
