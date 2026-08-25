@@ -1164,7 +1164,14 @@ RESTART_EOF
     # Откат = убрать/закомментировать label, старый force-recreate путь работает без изменений.
     echo -e "${YELLOW}🔀 ${app}: label letar.rollout=true — zero-downtime rollout (libs/deploy-engine)${NC}"
     GIT_SHORT_SHA_ROLLOUT=$(git -C "$WORKSPACE_ROOT" rev-parse --short HEAD)
-    if (cd "$WORKSPACE_ROOT" && bun run libs/deploy-engine/src/cli.ts rollout --app "$app" --deploy-tag "$GIT_SHORT_SHA_ROLLOUT"); then
+    # §48 M3: opt-in на Traefik как прокси-провайдер через второй label, тем же паттерном что
+    # letar.rollout выше — без label PROXY_KIND_ARGS пустой, cli.ts берёт дефолт 'npm', поведение
+    # остальных rollout-приложений не меняется.
+    PROXY_KIND_ARGS=()
+    if grep -vE '^[[:space:]]*#' "$COMPOSE_FILE" 2> /dev/null | grep -qE "letar\.proxy-kind:[[:space:]]*['\"]?traefik['\"]?"; then
+      PROXY_KIND_ARGS=(--proxy-kind traefik)
+    fi
+    if (cd "$WORKSPACE_ROOT" && bun run libs/deploy-engine/src/cli.ts rollout --app "$app" --deploy-tag "$GIT_SHORT_SHA_ROLLOUT" "${PROXY_KIND_ARGS[@]}"); then
       echo -e "${GREEN}✅ Rollout completed for ${app}!${NC}"
       DEPLOY_SUCCEEDED=true
     else
