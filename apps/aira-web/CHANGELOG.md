@@ -1,5 +1,14 @@
 # Changelog — aira-web
 
+## [0.3.4] — 2026-08-25
+
+### Fixed
+
+- `CookieBanner` в `[locale]/layout.tsx` рендерился сиблингом после `</Providers>`, а не
+  потомком — Chakra-компоненты внутри баннера падали `ContextError` вне дерева
+  `RootChakraProvider`, как только эффект выставлял `shown = true`. Перенесён внутрь
+  `<Providers>`/`<NextIntlClientProvider>`.
+
 ## [0.3.3] — 2026-08-21
 
 ### Fixed

@@ -120,16 +120,16 @@ export default async function LocaleLayout({ children, params }: Props) {
           <NextIntlClientProvider messages={messages}>
             <SkipToContent />
             {children}
+            <CookieBanner
+              appKey="aira-web"
+              consentApiUrl={null}
+              privacyUrl={`${localePath(locale) === '/' ? '' : localePath(locale)}/privacy`}
+            />
           </NextIntlClientProvider>
         </Providers>
         <AnalyticsGate appKey="aira-web">
           <UmamiScript />
         </AnalyticsGate>
-        <CookieBanner
-          appKey="aira-web"
-          consentApiUrl={null}
-          privacyUrl={`${localePath(locale) === '/' ? '' : localePath(locale)}/privacy`}
-        />
       </body>
     </html>
   )

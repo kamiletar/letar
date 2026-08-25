@@ -2,6 +2,16 @@
 
 ## Выполненные задачи
 
+- [x] Фикс: `CookieBanner` рендерился вне `ChakraProvider` (2026-08-25). Тот же класс бага, что
+      только что найден и исправлен в `apps/time` (commit `b5b138cd`) — `[locale]/layout.tsx`
+      рендерил `<CookieBanner appKey="aira-web" />` сиблингом после закрывающего `</Providers>`,
+      а не его потомком. Пока `shown === false` (до первого эффекта, читающего `localStorage`)
+      баннер рендерит `null` и ошибка не видна; как только эффект выставляет `shown = true`,
+      падают реальные Chakra-компоненты (`Box`/`Checkbox`/`Button`/...) вне дерева
+      `RootChakraProvider` — `ContextError: useContext returned undefined`. Образец правильного
+      вложения — `apps/driving-school/src/app/layout.tsx`. Фикс — перенос `<CookieBanner>`
+      внутрь `<Providers>`/`<NextIntlClientProvider>`. Версия 0.3.4. Подтверждено живьём через
+      Browser pane (`nx dev aira-web`, консоль без `ContextError`, баннер рендерится).
 - [x] Фикс: `config.matcher` в `proxy.ts` обязан быть литералом, не вызовом `buildIntlMatcher()`
       (2026-08-21). Репо-широкий баг из apps/kami (§18.7 M2): Next.js 16 статически парсит
       `config.matcher` через AST на build-time без исполнения модуля, `CallExpression` не
