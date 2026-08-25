@@ -310,7 +310,7 @@
     "electron-builder": "^26.15.3",
     "electron-playwright-helpers": "^2.3.1",
     "esbuild": "^0.28.2",
-    "eslint": "10.6.0",
+    "eslint": "^10.9.1",
     "eslint-config-next": "^16.3.3",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "2.32.0",
