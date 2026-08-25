@@ -1,16 +1,8 @@
 # Animatrona — План развития
 
-## Текущая версия: 0.55.22
+## Текущая версия: 0.55.24
 
 ## Черновик (новые идеи)
-
-- [ ] **⚠️ Локальный пин `electron: 43.3.0` расходится с корневым `^43.4.0`** (аудит
-      2026-08-20) — привести к корневой версии. `bun.lock` подтверждает физический дубль:
-      резолвится и `electron@43.4.0` (корень), и `electron@43.3.0` (этот пакет, вместе с
-      `kami-key-the`, `label-printer-desktop`, `poster-microtext-desktop`). Версия `43.3.0`
-      также захардкожена в `postinstall`/`postinstall:dev` (`@electron/rebuild -v 43.3.0`
-      для native-модуля `classic-level`) — при бампе обновить и её, иначе rebuild
-      пересоберёт модуль под версию electron, которая фактически не установится.
 
 - [ ] **Аудит `_active: scale()` в теме renderer'а на `pressScale`** (`@letar/ui`) — задача
       описана в [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md).

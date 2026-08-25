@@ -4,6 +4,24 @@
 
 > **Архив обновлён:** 2026-08-25
 
+## Обновление Electron 43.3.0 → 43.4.1 (2026-08-25)
+
+Локальный пин `electron` расходился с корневым `package.json` (`^43.4.1`) — `bun.lock` держал
+физический дубль версии (`electron@43.4.0`/`43.3.0` резолвились параллельно рядом с корневым).
+Приведён к точной версии `43.4.1` в `devDependencies` (electron-builder требует точную версию,
+не диапазон). Заодно обновлена захардкоженная версия в `postinstall`/`postinstall:dev`
+(`@electron/rebuild -v 43.3.0` → `43.4.1` для native-модуля `classic-level`) — иначе rebuild
+пересобрал бы модуль под версию electron, которая фактически не установится.
+
+После `bun install` дубль в `bun.lock` исчез (`@letar/animatrona/electron` больше не резолвится
+отдельно — animatrona делит `electron@43.4.1` с корнем). `@electron/rebuild -v 43.4.1` прошёл
+(`No native modules found` — `classic-level` не тянет нативный биндинг под текущую
+конфигурацию, шаг успешен и без пересборки). `nx typecheck:tsgo animatrona` и `nx lint animatrona`
+зелёные (в lint только 8 давних `react-hooks/exhaustive-deps` warning, не связанных с апдейтом).
+
+`label-printer-desktop`, `poster-microtext-desktop`, `kami-key-the` остались на `43.3.0` —
+вне охвата этой задачи (не значились в PLAN.md animatrona).
+
 ## Фикс: FormI18nProvider отсутствовал — подсказки валидации на английском (2026-08-25)
 
 Тот же класс бага, что нашли и починили в `domwellbes`: `@letar/forms` переводит constraint

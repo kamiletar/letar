@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+## [0.55.24] - 2026-08-25
+
+### Changed
+
+- Electron `43.3.0` → `43.4.1` — приведён к версии из корневого `package.json`, устранён
+  физический дубль в `bun.lock`. Обновлена захардкоженная версия в `postinstall`/
+  `postinstall:dev` (`@electron/rebuild -v`).
+
 ## [0.55.23] - 2026-08-25
 
 ### Fixed
