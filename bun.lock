@@ -331,7 +331,7 @@
     },
     "apps/aboi": {
       "name": "@letar/aboi",
-      "version": "0.68.0",
+      "version": "0.69.0",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
@@ -507,6 +507,7 @@
       "name": "@letar/domwellbes",
       "version": "0.150.1",
       "dependencies": {
+        "@letar/env-load": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "@letar/theme-check": "workspace:*",
         "imapflow": "^1.7.1",
