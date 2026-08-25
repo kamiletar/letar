@@ -1,5 +1,17 @@
 # Выполненные задачи — Animatrona Tracker
 
+## Проверка ложного `react-hooks/rules-of-hooks` в e2e-фикстурах — не применимо (2026-08-25)
+
+По образцу `PLAN-INFRA-4.md §109` (ложное срабатывание eslint-plugin-react-hooks на `use` в
+Playwright `test.extend({ page: async ({ page }, use) => ... })`, уже пофикшено в
+grandslamcup-e2e/mandala-e2e/driving-school-e2e) — проверено `apps/animatrona-tracker-e2e/src/fixtures/base-test.ts`.
+
+Паттерн отсутствует: файл — заготовка с пустым `test.extend({})`, без параметра `use` вообще.
+`nx run animatrona-tracker-e2e:lint` зелёный (1 не связанный warning про `console` в
+`global-setup.ts`). Отключать `react-hooks/rules-of-hooks` в `eslint.config.mjs` не стал —
+триггера для бага нет, отключение было бы неоправданным. Актуально пересмотреть, если в
+`base-test.ts` появится реальная fixture с `use`.
+
 ## Разбиение `schema.zmodel` на 7 доменных файлов (2026-08-25)
 
 `schema.zmodel` (1128 строк) разбит через ZModel `import` на `schema/enums.zmodel` (общие
