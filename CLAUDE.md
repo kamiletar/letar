@@ -31,7 +31,11 @@
 [bun-install-stale-isolated-cache](/.claude/docs/bun-install-stale-isolated-cache.md) ⚠️
 несколько версий пакета в `node_modules/.bun` после снятия пина — не признак незавершённого
 резолва, обычный `bun install` не прунит устаревшие isolated-копии; сверять по `bun.lock`,
-чинить — `bun install --force`
+чинить — `bun install --force` ·
+[root-pin-peer-drift](/.claude/docs/root-pin-peer-drift.md) ⚠️ точный пин в корневом
+`package.json` — тихая мина: override/resolution перебивает его молча или caret-соседи уезжают
+вперёд без него; `bun install` не печатает peer-warnings ни в каком режиме, проверка —
+`bun scripts/check-peer-deps.mjs`
 
 **MCP-серверы:** [mcp-servers](/.claude/docs/mcp-servers.md) состав и назначение ·
 [mcp-server-pattern](/.claude/docs/mcp-server-pattern.md) тонкий локальный сервер по stdio ·

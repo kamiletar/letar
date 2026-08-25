@@ -1,6 +1,6 @@
 ---
 description: Систематическое обновление зависимостей монорепо через bun с проверкой безопасности и сборки
-allowed-tools: Bash(bun outdated:*), Bash(bun update:*), Bash(bun add:*), Bash(bun audit:*), Bash(bun install:*), Bash(nx run-many:*)
+allowed-tools: Bash(bun outdated:*), Bash(bun update:*), Bash(bun add:*), Bash(bun audit:*), Bash(bun install:*), Bash(bun scripts/check-peer-deps.mjs:*), Bash(nx run-many:*)
 ---
 
 # Deps Update - Обновление зависимостей
@@ -64,6 +64,9 @@ bun add <package>@latest
 # Пересобрать
 bun install
 
+# Проверить peer-зависимости между корневыми пакетами
+bun scripts/check-peer-deps.mjs
+
 # Проверить типы
 nx run-many -t typecheck:tsgo
 
@@ -74,9 +77,22 @@ nx run-many -t test
 nx run-many -t build
 ```
 
+⚠️ **Шаг «проверить peer-зависимости» не заменяет чтение вывода `bun install`
+глазами.** `bun` (проверено на 1.3.14, включая `--verbose` и `--force`) не
+печатает предупреждений о несовпадении `peerDependencies` вообще — ни в каком
+режиме. `bun scripts/check-peer-deps.mjs` — единственный способ это увидеть,
+он читает `bun.lock` и сверяет через `Bun.semver`. Скрипт всегда завершается
+кодом 0 (это отчёт для человека, не gate) и в выводе всегда есть несколько
+строк известного фонового шума (например eslint 10.x против старых
+eslint-plugin-\*) — смотри не на список целиком, а на то, не появилась ли
+**новая** строка после этого прогона `bun update`/`bun add`. Подробности
+класса ошибки и почему это отдельный шаг —
+[root-pin-peer-drift.md](/.claude/docs/root-pin-peer-drift.md).
+
 ## Чеклист
 
 - [ ] `bun audit` без критичных уязвимостей
+- [ ] `bun scripts/check-peer-deps.mjs` — нет новых строк по сравнению с прошлым прогоном
 - [ ] Все тесты проходят
 - [ ] Сборка успешна
 - [ ] Приложения запускаются
@@ -86,17 +102,23 @@ nx run-many -t build
 
 ### Зафиксированные версии
 
-```json
-// package.json — не обновлять без проверки
-"overrides": {
-  "@tanstack/query-core": "5.90.12",
-  "@tanstack/react-query": "5.90.12"
-}
-```
+`overrides`/`resolutions` в корневом `package.json` держат несколько
+транзитивных пакетов на конкретных диапазонах ради security-патчей
+(`minimist`, `qs`, `picomatch`, `serialize-javascript`, `protobufjs`,
+`seroval`, `shell-quote`, `websocket-driver`, `@xhmikosr/decompress` —
+актуальный список смотри в самом файле, не здесь, чтобы не рассинхронизироваться).
+
+⚠️ **Точный пин (без `^`/`~`) в `dependencies`/`devDependencies` — отдельная
+категория риска, не про security.** `kysely` и `@tanstack/react-query` были
+точно запинены весной 2026 и оставались так до 2026-08-25 — оба пина снят,
+прецеденты разобраны в
+[root-pin-peer-drift.md](/.claude/docs/root-pin-peer-drift.md). Если заводишь
+новый точный пин — фиксируй в PLAN-INFRA-\*.md **причину и дату**, иначе через
+несколько месяцев никто не сможет отличить осознанное решение от
+унаследованного стиля.
 
 ### Проблемные пакеты
 
-- `@auth/core` — зафиксирован в resolutions
 - `chalk` — v5 ESM only, используем v4
 
 ## После обновления
