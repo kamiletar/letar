@@ -1,6 +1,7 @@
 import { Footer } from '@/app/_components/footer'
 import { Link as IntlLink } from '@/i18n/navigation'
-import { Box, Container, Heading, Link, Text, VStack } from '@chakra-ui/react'
+import { Box, Container, Heading, Text, VStack } from '@chakra-ui/react'
+import { TouchLink } from '@letar/ui'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -23,16 +24,9 @@ export default function PrivacyPage() {
       <main>
         <Container maxW="3xl" py={{ base: 24, md: 32 }}>
           <VStack gap={6} align="stretch">
-            <Link
-              asChild
-              fontSize="sm"
-              color="fg.muted"
-              _hover={{ color: 'fg' }}
-              minH="2.75rem"
-              alignItems="center"
-            >
-              <IntlLink href="/">&larr; Aira</IntlLink>
-            </Link>
+            <TouchLink href="/" linkComponent={IntlLink} fontSize="sm" color="fg.muted" _hover={{ color: 'fg' }}>
+              &larr; Aira
+            </TouchLink>
 
             <Heading size="xl">Политика конфиденциальности</Heading>
             <Text color="fg.muted" fontSize="sm">

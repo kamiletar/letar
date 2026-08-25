@@ -1,5 +1,15 @@
 # Changelog — aira-web
 
+## [0.3.6] — 2026-08-25
+
+### Changed
+
+- `TouchLink` из `@letar/ui` теперь принимает опциональный проп `linkComponent` (по умолчанию
+  `next/link`) — можно передать locale-aware `Link` из `@/i18n/navigation`. Точечные фиксы из
+  v0.3.5 (`minH="2.75rem" alignItems="center"` руками на `<Link asChild>` в `privacy/page.tsx` и
+  `footer.tsx`) заменены на `<TouchLink href={...} linkComponent={Link}>` — убрано дублирование
+  логики между приложениями.
+
 ## [0.3.5] — 2026-08-25
 
 ### Fixed

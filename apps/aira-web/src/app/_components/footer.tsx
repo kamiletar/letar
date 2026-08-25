@@ -1,6 +1,6 @@
 import { Link as IntlLink } from '@/i18n/navigation'
 import { Box, Container, Flex, HStack, Link, Text } from '@chakra-ui/react'
-import { CookieSettingsButton } from '@letar/ui'
+import { CookieSettingsButton, TouchLink } from '@letar/ui'
 import { getTranslations } from 'next-intl/server'
 
 /**
@@ -48,16 +48,15 @@ export async function Footer() {
               >
                 {t('releases')}
               </Link>
-              <Link
-                asChild
+              <TouchLink
+                href="/privacy"
+                linkComponent={IntlLink}
                 fontSize="sm"
                 color="fg.muted"
                 _hover={{ color: 'fg' }}
-                minH="2.75rem"
-                alignItems="center"
               >
-                <IntlLink href="/privacy">Privacy</IntlLink>
-              </Link>
+                Privacy
+              </TouchLink>
               <CookieSettingsButton appKey="aira-web" />
             </HStack>
           </Flex>
