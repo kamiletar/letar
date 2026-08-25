@@ -75,14 +75,32 @@ export interface RedisStorageClient {
   set(key: string, value: string): Promise<unknown>
   setex(key: string, ttl: number, value: string): Promise<unknown>
   del(key: string): Promise<unknown>
+  /** Atomic GETDEL — Redis 6.2+ */
+  getdel(key: string): Promise<string | null>
+  incr(key: string): Promise<number>
+  expire(key: string, ttl: number): Promise<unknown>
 }
 
-/** @internal Принимает уже созданный клиент — используется `createRedisStorage` и тестами напрямую. */
+/**
+ * @internal Принимает уже созданный клиент — используется `createRedisStorage` и тестами напрямую.
+ *
+ * `getAndDelete`/`increment` — обязательные поля `SecondaryStorage` начиная с `@better-auth/core`
+ * 1.7.1 (были опциональными в 1.6.x): `getAndDelete` используется для атомарного consume
+ * одноразовых токенов, `increment` — для secondary-storage-backed rate-limit.
+ */
 export function createRedisStorageFromClient(redis: RedisStorageClient, options: CreateRedisStorageOptions = {}) {
   const { timeoutMs = DEFAULT_TIMEOUT_MS } = options
 
   return {
     get: async (key: string) => withRedisTimeout(redis.get(key), timeoutMs, null, `get(${key})`),
+    getAndDelete: async (key: string) => withRedisTimeout(redis.getdel(key), timeoutMs, null, `getAndDelete(${key})`),
+    increment: async (key: string, ttl: number) => {
+      const value = await withRedisTimeout(redis.incr(key), timeoutMs, 1, `increment(${key})`)
+      if (value === 1) {
+        await withRedisTimeout(redis.expire(key, ttl).then(() => undefined), timeoutMs, undefined, `expire(${key})`)
+      }
+      return value
+    },
     set: async (key: string, value: string, ttl?: number) => {
       const write = ttl ? redis.setex(key, ttl, value) : redis.set(key, value)
       await withRedisTimeout(write.then(() => undefined), timeoutMs, undefined, `set(${key})`)

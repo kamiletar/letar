@@ -63,7 +63,7 @@ export function getLetarAuthErrorMessage(status?: number): string {
  * ```
  */
 export function createSignInWithLetarAuth(
-  authClient: AuthClientWithOAuth,
+  authClient: Pick<AuthClientWithOAuth, 'signIn'>,
   options: CreateSignInWithLetarAuthOptions = {},
 ) {
   const { providerId = 'letar-auth', defaultCallbackURL, onError } = options

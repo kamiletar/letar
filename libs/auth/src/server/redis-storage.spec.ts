@@ -7,6 +7,9 @@ function fakeClient(overrides: Partial<RedisStorageClient> = {}): RedisStorageCl
     set: vi.fn().mockResolvedValue('OK'),
     setex: vi.fn().mockResolvedValue('OK'),
     del: vi.fn().mockResolvedValue(1),
+    getdel: vi.fn().mockResolvedValue(null),
+    incr: vi.fn().mockResolvedValue(1),
+    expire: vi.fn().mockResolvedValue(1),
     ...overrides,
   }
 }

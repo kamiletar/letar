@@ -25,6 +25,9 @@ function resolveClientBaseURL(explicit?: string): string | undefined {
   return typeof window !== 'undefined' ? window.location.origin : undefined
 }
 
+/** Опции createBetterAuthClient (better-auth 1.7+, @better-auth/core BetterAuthClientOptions) */
+type BetterAuthClientOptions = NonNullable<Parameters<typeof createBetterAuthClient>[0]>
+
 /**
  * Опции для создания auth клиента
  */
@@ -36,16 +39,17 @@ export interface AuthClientOptions {
 }
 
 /**
- * Опции для создания auth клиента с genericOAuth
+ * Опции для создания auth клиента с genericOAuth — те же опции, что принимает `createAuthClient`
+ * из `better-auth/react` (включая `plugins` с точными типами приложения, например
+ * `organizationClient()`). `Option` выводится TS напрямую из переданного объекта (он же передан
+ * параметром функции ниже) — благодаря этому возвращаемый клиент сохраняет типы, специфичные для
+ * подключённых плагинов (`authClient.organization.*`). `baseURL` внутри уже опционален в
+ * `BetterAuthClientOptions`, отдельный тип для него не нужен — переопределяем значение через
+ * {@link resolveClientBaseURL} внутри функции, не в типе.
  */
-export interface AuthClientWithOAuthOptions {
-  /** URL сервера авторизации (по умолчанию — см. {@link resolveClientBaseURL}) */
-  baseURL?: string
-  /** Дополнительные плагины Better Auth */
-  plugins?: unknown[]
-}
+export type AuthClientWithOAuthOptions<Option extends BetterAuthClientOptions = BetterAuthClientOptions> = Option
 
-type BaseAuthClient = ReturnType<typeof createBetterAuthClient>
+type BaseAuthClient<Option extends BetterAuthClientOptions> = ReturnType<typeof createBetterAuthClient<Option>>
 
 /** Параметры входа через генерик-OAuth провайдера (Yandex, Ключница, Shikimori и т.д.) */
 export interface OAuth2SignInParams {
@@ -55,10 +59,22 @@ export interface OAuth2SignInParams {
   newUserCallbackURL?: string
 }
 
+// `BaseAuthClient<Option>['signIn']` не индексируется напрямую, пока Option остаётся дженериком
+// (TS2536/TS2344 — известное ограничение TS на индексируемый доступ поверх условных/мэппед типов
+// внешней библиотеки). Обходим через structural extends+infer — та же информация, без прямого
+// индекса по литералу.
+type SignInOf<Option extends BetterAuthClientOptions> = BaseAuthClient<Option> extends { signIn: infer S } ? S
+  : never
+type SocialSignInOf<Option extends BetterAuthClientOptions> = SignInOf<Option> extends { social: infer F } ? F
+  : never
+
 // Типизированный клиент с oauth2-совместимой сигнатурой поверх signIn.social
-type BetterAuthClientWithOAuth = BaseAuthClient & {
-  signIn: BaseAuthClient['signIn'] & {
-    oauth2: (params: OAuth2SignInParams) => ReturnType<BaseAuthClient['signIn']['social']>
+type BetterAuthClientWithOAuth<Option extends BetterAuthClientOptions> = BaseAuthClient<Option> & {
+  signIn: SignInOf<Option> & {
+    oauth2: (
+      params: OAuth2SignInParams,
+    ) => SocialSignInOf<Option> extends (...args: never[]) => unknown ? ReturnType<SocialSignInOf<Option>>
+      : Promise<unknown>
   }
 }
 
@@ -78,22 +94,42 @@ type BetterAuthClientWithOAuth = BaseAuthClient & {
  * authClient.signIn.oauth2({ providerId: 'yandex' })
  * ```
  */
-export function createAuthClientWithOAuth(options: AuthClientWithOAuthOptions = {}): BetterAuthClientWithOAuth {
-  const { baseURL, plugins = [] } = options
+export function createAuthClientWithOAuth<Option extends BetterAuthClientOptions = BetterAuthClientOptions>(
+  options: Option = {} as Option,
+): BetterAuthClientWithOAuth<Option> {
+  const { baseURL, ...rest } = options
 
   const client = createBetterAuthClient({
+    ...rest,
     baseURL: resolveClientBaseURL(baseURL),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    plugins: plugins as any,
-  })
+  } as Option)
 
-  return {
-    ...client,
-    signIn: {
-      ...client.signIn,
-      oauth2: ({ providerId, ...rest }: OAuth2SignInParams) => client.signIn.social({ provider: providerId, ...rest }),
+  // Better Auth реализует клиент через Proxy над пустой function() {} без ownKeys-трапа —
+  // {...client} копирует ноль собственных ключей, любой обычный spread молча теряет useSession/
+  // signOut/signIn.social и т.д. Оборачиваем настоящим Proxy, форвардящим через Reflect.get,
+  // и подмешиваем oauth2 только на уровне вложенного signIn.
+  // Внутри плагинга типизируем как `any` — TS не может статически индексировать `['signIn']`
+  // на клиенте, дженерик по `Option` (TS2536/TS2344 при попытке); публичный тип сохраняется
+  // через явный каст результата ниже.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const untypedClient = client as any
+  return new Proxy(untypedClient, {
+    get(target, prop, receiver) {
+      if (prop === 'signIn') {
+        const signIn = Reflect.get(target, prop, receiver)
+        return new Proxy(signIn, {
+          get(signInTarget, signInProp, signInReceiver) {
+            if (signInProp === 'oauth2') {
+              return ({ providerId, ...rest2 }: OAuth2SignInParams) =>
+                untypedClient.signIn.social({ provider: providerId, ...rest2 })
+            }
+            return Reflect.get(signInTarget, signInProp, signInReceiver)
+          },
+        })
+      }
+      return Reflect.get(target, prop, receiver)
     },
-  } as BetterAuthClientWithOAuth
+  }) as BetterAuthClientWithOAuth<Option>
 }
 
 /**
@@ -115,7 +151,8 @@ export function createAuthClient(options: AuthClientOptions = {}): ReturnType<ty
 }
 
 /** Тип auth клиента с genericOAuth (для Yandex и др.) */
-export type AuthClientWithOAuth = BetterAuthClientWithOAuth
+export type AuthClientWithOAuth<Option extends BetterAuthClientOptions = BetterAuthClientOptions> =
+  BetterAuthClientWithOAuth<Option>
 
 /** Тип базового auth клиента */
 export type AuthClient = ReturnType<typeof createAuthClient>
