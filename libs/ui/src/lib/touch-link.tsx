@@ -4,6 +4,12 @@ import NextLink from 'next/link'
 export interface TouchLinkProps extends Omit<LinkProps, 'asChild'> {
   href: string
   children: React.ReactNode
+  /**
+   * Компонент ссылки для рендера внутри `asChild` — по умолчанию `next/link`.
+   * Передавай локализованный `Link` из `@/i18n/navigation` (next-intl) в
+   * приложениях, где навигация должна сохранять префикс локали.
+   */
+  linkComponent?: React.ComponentType<{ href: string; children: React.ReactNode }>
 }
 
 /**
@@ -18,11 +24,27 @@ export interface TouchLinkProps extends Omit<LinkProps, 'asChild'> {
  *   Все проекты
  * </TouchLink>
  * ```
+ *
+ * @example С локализованной навигацией (next-intl)
+ * ```tsx
+ * import { Link } from '@/i18n/navigation'
+ *
+ * <TouchLink href="/cart" linkComponent={Link} color="fg.muted">
+ *   Корзина
+ * </TouchLink>
+ * ```
  */
-export function TouchLink({ href, children, minH = '2.75rem', alignItems = 'center', ...props }: TouchLinkProps) {
+export function TouchLink({
+  href,
+  children,
+  linkComponent: LinkComponent = NextLink,
+  minH = '2.75rem',
+  alignItems = 'center',
+  ...props
+}: TouchLinkProps) {
   return (
     <Link asChild minH={minH} alignItems={alignItems} {...props}>
-      <NextLink href={href}>{children}</NextLink>
+      <LinkComponent href={href}>{children}</LinkComponent>
     </Link>
   )
 }

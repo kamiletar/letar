@@ -388,6 +388,19 @@ import { TouchLink } from '@letar/ui'
 </TouchLink>
 ```
 
+По умолчанию рендерит `next/link`. В приложениях с локализованной навигацией (next-intl
+`createNavigation`, например `aira-web`/`mandala`/`archetest`) слепая замена на `next/link`
+сломала бы префикс локали в URL — передавай проп `linkComponent` с локализованным `Link`:
+
+```tsx
+import { TouchLink } from '@letar/ui'
+import { Link } from '@/i18n/navigation'
+
+<TouchLink href="/cart" linkComponent={Link} color="fg.muted">
+  Корзина
+</TouchLink>
+```
+
 ### AdminEditOverlay
 
 Иконка-карандаш поверх карточки, ведущая в раздел редактирования (например `/admin/[slug]`).
