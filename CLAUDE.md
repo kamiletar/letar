@@ -210,7 +210,10 @@ reset (`preflight`) уже задаёт своё явное значение —
 ни lint, ни typecheck, ни глаз на скриншоте это не покажет ·
 [chakra-aschild-multiple-children-silent-drop](/.claude/docs/chakra-aschild-multiple-children-silent-drop.md)
 ⚠️ `asChild` с двумя и более детьми — `.find(isValidElement)` молча берёт только первого, второй
-пропадает без единой ошибки в typecheck/lint/консоли; ловится только живым кликом в браузере
+пропадает без единой ошибки в typecheck/lint/консоли; ловится только живым кликом в браузере ·
+[header-drawer-dedup-audit](/.claude/docs/header-drawer-dedup-audit.md) 7 реализаций Header+Drawer
+между приложениями — общий `libs/ui`-примитив не заводить (разные оси расходятся по-настоящему),
+но 3 файла ролевых шапок внутри grandslamcup — реальный дубль, кандидат на локальное извлечение
 
 **Библиотеки и публикация:** [lib-entry-points](/.claude/docs/lib-entry-points.md) подпути
 `./server`/`./client`, границы, ESLint-ловушки ·
