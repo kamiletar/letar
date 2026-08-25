@@ -2,6 +2,12 @@
 
 Детальное описание всех реализованных фич.
 
+## Фикс: fetchPriority вместо устаревшего priority на обложке площадки (2026-08-25)
+
+Свежий полный грепп по монорепо нашёл прямой `next/image` с `priority` на `venues/[slug]` — тот
+же класс бага, что нашли и починили в domwellbes: Next.js 16 разделил `priority` на
+`preload`/`fetchPriority`, старый проп молча не выставляет `fetchpriority="high"`.
+
 ## Touch target для текстовых ссылок в футере — WCAG 2.5.5 (2026-08-25)
 
 `tournamentLinks`/`generalLinks` в `public-footer.tsx` (голый `next/link` + вложенный `Text`, без

@@ -84,7 +84,8 @@ export default async function VenueDetailPage({ params }: { params: Params }) {
                 fill
                 sizes="100vw"
                 style={{ objectFit: 'cover' }}
-                priority
+                preload
+                fetchPriority="high"
               />
             )
             : (

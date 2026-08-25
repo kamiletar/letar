@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.39.4] — 2026-08-25
+
+### Fixed
+
+- Обложка площадки на `[citySlug]/venues/[slug]` (`next/image` с `priority`) заменена на
+  `preload`+`fetchPriority="high"` — в Next.js 16 `priority` больше не выставляет
+  `fetchpriority="high"` сам по себе. Root cause и канонический фикс — сессия domwellbes
+  2026-08-25.
+
 ## [3.39.3] — 2026-08-25
 
 ### Fixed: touch target для текстовых ссылок в футере (WCAG 2.5.5)
