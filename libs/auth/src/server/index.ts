@@ -29,6 +29,7 @@
  */
 
 // Session helpers
+export { type AnonymousAuthInstance, createGetOrCreateSessionUserId } from './anonymous-session'
 export { createAuthChecks } from './checks'
 export { AuthError, createAuthGuards, type GuardOptions } from './guards'
 export { type AuthInstance, createSessionHelpers } from './session'
