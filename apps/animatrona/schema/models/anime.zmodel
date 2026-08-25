@@ -196,6 +196,12 @@ model Anime {
   trackerPublishedCid String?
 
   /// @form.exclude
+  /// ID аниме на трекере (кэш маппинга directoryCid → id, заполняется при регистрации
+  /// раздачи в DistributionService — для быстрого lookup при push прогресса без похода
+  /// за всем каталогом трекера)
+  trackerAnimeId  String?
+
+  /// @form.exclude
   /// ID на Shikimori для синхронизации метаданных
   shikimoriId     Int?        @unique
 

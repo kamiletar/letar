@@ -4,6 +4,21 @@
 
 ## [Unreleased]
 
+## [0.55.28] - 2026-08-26
+
+### Fixed
+
+- `nx run animatrona-main:build` падал на 73 TS-ошибках в `tracker-sync.ts`: обращения к
+  `Anime.trackerAnimeId`/`Anime.manifestCid`, которых нет в `schema.zmodel` (`typecheck:tsgo`
+  был зелёным из-за устаревшего закешированного сгенерированного Prisma-клиента, `build`
+  регенерирует клиент по актуальной схеме и ловит расхождение). `trackerAnimeId` — реальный
+  пробел: добавлен в `Anime` (кэш id аниме на трекере для быстрого lookup при push прогресса),
+  заполняется в `DistributionService.registerAllDistributions()`, где уже резолвился, но
+  никуда не сохранялся. `manifestCid` на `Anime` — устаревшее legacy-поле, приложение мигрировало
+  на `directoryCid` как основной идентификатор (v0.53+); все обращения к нему в
+  `tracker-sync.ts` (select, фильтры, fallback-поиск в `applyServerItems`) удалены, на
+  wire-протоколе с трекером (`TrackerSyncItem`/`TrackerServerItem`) поле осталось как было.
+
 ## [0.55.27] - 2026-08-25
 
 ### Fixed

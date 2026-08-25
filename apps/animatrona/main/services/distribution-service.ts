@@ -131,6 +131,15 @@ export class DistributionService {
 
         const trackerAnimeId = trackerAnimeMap.get(anime.directoryCid)
 
+        if (trackerAnimeId) {
+          await prisma.anime.update({
+            where: { id: anime.id },
+            data: { trackerAnimeId },
+          }).catch((err) => {
+            log.warn('Не удалось сохранить trackerAnimeId', { animeId: anime.id, error: String(err) })
+          })
+        }
+
         const result = await registerDistribution(config, {
           cid: anime.directoryCid,
           peerId,

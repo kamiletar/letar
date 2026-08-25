@@ -179,7 +179,6 @@ class TrackerSyncService {
       where: { id: animeId },
       select: {
         directoryCid: true,
-        manifestCid: true,
         shikimoriId: true,
         watchStatus: true,
         userRating: true,
@@ -188,14 +187,13 @@ class TrackerSyncService {
       },
     })
 
-    if (!anime || (!anime.directoryCid && !anime.manifestCid)) {
+    if (!anime || !anime.directoryCid) {
       return
     }
 
     const items = [
       {
-        directoryCid: anime.directoryCid ?? '',
-        manifestCid: anime.manifestCid ?? undefined,
+        directoryCid: anime.directoryCid,
         shikimoriId: anime.shikimoriId ?? undefined,
         watchStatus: anime.watchStatus,
         userRating: anime.userRating,
@@ -339,9 +337,8 @@ class TrackerSyncService {
 
     // 2. Собрать локальную библиотеку
     const animes = await prisma.anime.findMany({
-      where: { OR: [{ directoryCid: { not: null } }, { manifestCid: { not: null } }] },
+      where: { directoryCid: { not: null } },
       select: {
-        manifestCid: true,
         directoryCid: true,
         shikimoriId: true,
         watchStatus: true,
@@ -359,12 +356,10 @@ class TrackerSyncService {
       },
     })
 
-    // TODO: удалить manifestCid из mapping после миграции всех клиентов на directoryCid
     const items = animes
-      .filter((a) => a.directoryCid || a.manifestCid)
+      .filter((a) => a.directoryCid)
       .map((a) => ({
         directoryCid: a.directoryCid ?? '',
-        manifestCid: a.manifestCid ?? undefined,
         shikimoriId: a.shikimoriId ?? undefined,
         watchStatus: a.watchStatus,
         userRating: a.userRating,
@@ -417,7 +412,7 @@ class TrackerSyncService {
   private async applyServerItems(serverItems: TrackerServerItem[]): Promise<void> {
     for (const item of serverItems) {
       try {
-        // Каскадный поиск: directoryCid → manifestCid → shikimoriId (fallback при смене CID)
+        // Каскадный поиск: directoryCid → shikimoriId (fallback при смене CID)
         let localAnime = item.directoryCid
           ? await prisma.anime.findFirst({
             where: { directoryCid: item.directoryCid },
@@ -432,21 +427,6 @@ class TrackerSyncService {
             },
           })
           : null
-        // TODO: удалить fallback по manifestCid после миграции всех клиентов на directoryCid
-        if (!localAnime) {
-          localAnime = await prisma.anime.findFirst({
-            where: { manifestCid: item.manifestCid },
-            select: {
-              id: true,
-              updatedAt: true,
-              shikimoriId: true,
-              name: true,
-              posterCid: true,
-              directoryCid: true,
-              pinnedLocally: true,
-            },
-          })
-        }
         // Fallback по shikimoriId — нужен когда directoryCid обновился на трекере
         if (!localAnime && item.shikimoriId) {
           localAnime = await prisma.anime.findFirst({

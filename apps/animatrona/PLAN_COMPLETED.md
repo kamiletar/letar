@@ -2,7 +2,42 @@
 
 Детальное описание всех реализованных фич.
 
-> **Архив обновлён:** 2026-08-25
+> **Архив обновлён:** 2026-08-26
+
+## Фикс `animatrona-main:build`: расхождение схемы и `tracker-sync.ts` (2026-08-26)
+
+`nx run animatrona-main:build` падал на 73 TS-ошибках — код обращался к
+`Anime.trackerAnimeId`/`Anime.manifestCid`, которых нет в `schema.zmodel`.
+`nx run animatrona-main:typecheck:tsgo` при этом был зелёным — таргет использует закешированный
+сгенерированный Prisma-клиент, а `build` зависит от `animatrona:db:template`, который
+регенерирует клиент по актуальной схеме и сразу ловит расхождение. Разбор двух полей —
+разные причины:
+
+- **`trackerAnimeId`** — реальный пробел, не опечатка. Комментарии в `tracker.handlers.ts` и
+  логика `resolveAndPushWatchProgress()`/`pushWatchProgressImmediate()` в `tracker-sync.ts`
+  явно рассчитывали на кэш-поле «id аниме на трекере» у `Anime` (для lookup без похода за
+  всем каталогом трекера при push прогресса), но поля в схеме не было и заполнять его было
+  некому. Добавлено `trackerAnimeId String?` в `schema/models/anime.zmodel`. Подключено
+  заполнение: `DistributionService.registerAllDistributions()` уже резолвит
+  `directoryCid → trackerAnimeId` через `buildTrackerAnimeMap()`, но раньше не сохранял
+  результат обратно в БД — добавлен `prisma.anime.update({ trackerAnimeId })` в этом месте.
+  Без этого поле оставалось бы вечно `null`, а push прогресса — тихим no-op.
+- **`manifestCid`** — устаревший код, не пробел. Поле раньше было у `Anime`, но приложение
+  мигрировало на `directoryCid` как основной идентификатор (v0.53+, см. запись
+  «`directoryCid` как primary идентификатор для sync» выше по файлу). `tracker-sync.ts` держал
+  legacy-fallback с явными TODO-комментариями «удалить после миграции клиентов на
+  directoryCid» — миграция уже случилась, код не почистили. Удалены все обращения к
+  локальному `Anime.manifestCid`: select в `doPushLibraryItem`/`doFullSync`, `OR`-фильтр по
+  нему в выборке библиотеки, fallback-поиск `prisma.anime.findFirst({ where: { manifestCid }
+  })` в `applyServerItems`. На wire-протоколе с трекером (`TrackerSyncItem`/`TrackerServerItem`
+  в `shared/types/tracker.ts`) поле осталось нетронутым — оно deprecated-опциональное для
+  входящих/исходящих данных API, не для локального хранения.
+
+Проверено: `nx zenstack:generate animatrona` → `nx db:push animatrona` →
+`nx run animatrona-main:build` проходит чисто (остаются только 70 предсуществующих
+`TS18046`-ошибок в `tracker-client.ts` — `response.json()` возвращает `unknown`, файл не
+трогался, не связан со схемой `Anime`, вне скоупа этой задачи). `nx lint animatrona` — чисто
+(только старые warnings по React hooks, не по этой правке).
 
 ## Turbopack+Emotion hydration-риск renderer: переход на webpack (2026-08-25)
 
