@@ -2,6 +2,20 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.39.1] — 2026-08-25
+
+### Refactor: `RoleHeader` — общий хедер кабинетов admin/coach/poet
+
+По итогам аудита дублирования (`.claude/docs/header-drawer-dedup-audit.md`) три почти
+идентичных файла (`admin-header.tsx`, `coach-header.tsx`, `poet-header.tsx` — одинаковая
+разметка Box→Container→Flex, одинаковый мобильный `Drawer.Root` с `Drawer.Context`
+render-prop) сведены к общему `RoleHeader` (`app/_components/header/role-header.tsx`).
+Различия между ролями — `colorPalette` (`brand`/`teal`), заголовки, `navItems`, `rootHref`
+и `rightContent` — вынесены в пропы. Исходные три файла стали тонкими обёртками.
+Живая проверка (dev-сессия admin@grandslamcup.ru): гамбургер открывает Drawer с верным
+заголовком и списком пунктов, активный пункт подсвечен `brand.subtle`/`brand.fg`, клик по
+пункту закрывает Drawer и переходит по ссылке.
+
 ## [3.39.0] — 2026-08-25
 
 ### Refactor: `schema.zmodel` разбит на 8 доменных файлов
