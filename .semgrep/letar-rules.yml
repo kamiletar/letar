@@ -80,6 +80,35 @@ rules:
               ...
               if (!$TARGET.startsWith($ROOT)) { ... }
 
+  - id: letar-nextjs-image-priority-deprecated
+    languages: [typescript, javascript]
+    severity: WARNING
+    message: >-
+      Next.js 16 разделил проп `priority` у next/image на независимые `preload` и
+      `fetchPriority` — устаревший `priority` больше не проставляет браузеру
+      `fetchpriority="high"` на LCP-изображении, а typecheck это не ловит. Передавай
+      `preload` и `fetchPriority="high"` явно вместо `priority`. Готовая обёртка —
+      CoverImage из @letar/ui. См. apps/domwellbes/PLAN_PUBLIC_MOBILE.md §12.24.
+    patterns:
+      - pattern-either:
+          - pattern-inside: |
+              import Image from 'next/image'
+              ...
+          - pattern-inside: |
+              import NextImage from 'next/image'
+              ...
+      - pattern-either:
+          - pattern: <Image ... priority ... />
+          - pattern: <Image ... priority={...} ... />
+          - pattern: <NextImage ... priority ... />
+          - pattern: <NextImage ... priority={...} ... />
+      - pattern-not: <Image ... preload ... />
+      - pattern-not: <Image ... preload={...} ... />
+      - pattern-not: <Image ... fetchPriority={...} ... />
+      - pattern-not: <NextImage ... preload ... />
+      - pattern-not: <NextImage ... preload={...} ... />
+      - pattern-not: <NextImage ... fetchPriority={...} ... />
+
   - id: letar-dev-session-vars-in-prod-env
     languages: [generic]
     paths:
