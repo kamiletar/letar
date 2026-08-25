@@ -1,5 +1,14 @@
 # Выполненные задачи: Mandala
 
+## Touch target для текстовых ссылок — WCAG 2.5.5 (2026-08-25)
+
+4 короткие ссылки без достаточной высоты клика (`welcome-portal.tsx` ×3, `navigation.tsx`
+логотип, `cart-items.tsx` название товара, `login-form.tsx` «Забыли пароль?») получили
+`minH="2.75rem" alignItems="center"` прямо на `Link asChild`. `TouchLink` (`@letar/ui`) не
+применялся — mandala роутит через locale-aware `Link` из `@/i18n/navigation` (next-intl),
+несовместимый с жёстким `next/link` внутри `TouchLink`. Не тронуты: карточки (вся площадь уже
+кликабельна), `IconButton`, инлайновые ссылки внутри текста.
+
 ## Фикс: `handleUniqueConstraintError` ловил Prisma-код P2002, никогда не срабатывал (2026-08-21)
 
 Аудит по мотивам находки в `domwellbes` (`restock-subscription.action.ts`, см.
