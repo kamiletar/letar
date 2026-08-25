@@ -1,0 +1,42 @@
+{
+  "name": "@letar/icon-generator",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/icon-generator/src",
+  "projectType": "library",
+  "tags": ["scope:shared", "type:util", "owner:letar"],
+  "targets": {
+    "format": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
+      },
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "libs/icon-generator"
+      }
+    },
+    "test": {
+      "options": {
+        "config": "vitest.config.mjs"
+      }
+    },
+    "oxlint": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
+      "metadata": {
+        "description": "Fast lint with oxlint",
+        "technologies": ["oxlint"]
+      },
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "libs/icon-generator"
+      }
+    },
+    "lint": {
+      "dependsOn": ["oxlint"]
+    }
+  }
+}

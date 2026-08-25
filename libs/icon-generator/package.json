@@ -1,0 +1,10 @@
+{
+  "name": "@letar/icon-generator",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.mjs",
+  "exports": {
+    ".": "./src/index.mjs",
+    "./package.json": "./package.json"
+  }
+}
