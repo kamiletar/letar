@@ -307,7 +307,7 @@
     "dotenv-cli": "^11.0.0",
     "dprint": "^0.56.1",
     "electron-builder": "^26.15.3",
-    "electron-playwright-helpers": "^2.3.1",
+    "electron-playwright-helpers": "^3.1.2",
     "esbuild": "^0.28.2",
     "eslint": "^10.9.1",
     "eslint-config-next": "^16.3.3",
