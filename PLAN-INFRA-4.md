@@ -3044,3 +3044,47 @@ scope одним CI-прогоном (`mandala`, `mandala-e2e`, `grandslamcup-e2
 случай, когда падение в одном workflow вскрывает независимые проблемы в разных приложениях сразу.
 Закоммичено 4 отдельными scoped-коммитами (`0de45a54`, `ecbcb483`, `13775adc`, `17a666dd`).
 Severity — `WARNING` (перф-деградация, не уязвимость), коммит не блокирует.
+
+## §110 — `/infra:deps-update` (2026-08-26): обновление в рамках диапазонов, `bun install --force` понадобился
+
+Плановое обновление зависимостей (`bun update`, без `--latest`): Next.js 16.3.2→16.3.3, Prisma
+7.9.1→7.10.0 (клиент+адаптеры), `@xyflow/react`, `puppeteer`, `systeminformation` — все в пределах
+существующих `^`-диапазонов. Коммит `982b3f17` (`package.json` + `bun.lock`, осознанный
+multi-scope — оба файла одна логическая правка).
+
+**`bun install --force` понадобился отдельным шагом** — после обычного `bun update` typecheck
+`@letar/forms-vue`/`studio` спотыкался о дублирующуюся изолированную копию `@tiptap/core`
+(3.30.1 vs 3.30.3) и пропавший symlink `node_modules/@letar/query-provider`. Оба симптома —
+проявление [bun-install-stale-isolated-cache.md](/.claude/docs/bun-install-stale-isolated-cache.md):
+обычный `bun install` не прунит устаревшие `.bun`-копии после снятия/смены версий. После
+`--force` + повторного `bun install` оба симптома исчезли без правок кода.
+
+**`nx run-many -t build` дал 6 падений — ни одно не вызвано этим обновлением** (проверено через
+`git diff -- bun.lock` на затронутые пакеты — версии не менялись):
+
+- `auth-hub`, `dsperevod`, `mandala` — нет `AUTH_ENCRYPTION_KEY`/доступа к локальной БД
+  (EACCES) при SSG на dev-машине без секретов — ожидаемо для этого окружения, не баг.
+- `studio` — pre-existing peer-конфликт `solid-js`↔`@tanstack/react-devtools@0.10.12`
+  (`'use' is not exported from 'solid-js/web'`), версии в `bun.lock` не тронуты этим апдейтом.
+- `form-develop-app` — pre-existing баг демо-страницы `/controlled-state-demo`
+  (`formContext` вызван вне `formComponent` из `createFormHook`).
+- `animatrona-main` — pre-existing дрейф Prisma-схемы: `services/tracker-sync.ts` обращается к
+  полям `Anime.trackerAnimeId`/`Anime.manifestCid`, которых нет в `apps/animatrona/schema.zmodel`.
+  `typecheck:tsgo` зелёный (использует закешированный сгенерированный клиент), падает только
+  `build` — там таргет зависит от `animatrona:db:template`, который регенерирует клиент по
+  актуальной схеме и вскрывает расхождение.
+
+Также найден **pre-existing** false-positive `react-hooks/rules-of-hooks` в
+`@letar/forms-vue`/`forms-vue-shadcn` (74 срабатывания на Vue-composables `use*` внутри `setup()`,
+детектируемых как React-хуки) — тот же класс проблемы, что и §109 (`use(page)` в Playwright
+фикстурах), но в другом приложении и без предшествующей точечной правки `eslint.config.mjs`.
+
+**Заведены фоновые чипы (не в scope самого deps-update, отдельные сессии):**
+`studio` peer-конфликт, `form-develop-app` демо-баг, `animatrona-main` дрейф схемы,
+`forms-vue` rules-of-hooks false-positive — все запущены пользователем отдельными сессиями,
+статус смотри в их собственных `PLAN_COMPLETED.md`/коммитах на момент чтения.
+
+`bun audit` — 158 уязвимостей, все транзитивные в dev-тулинге (`webpack-dev-server`, `ws`,
+`immutable` внутри `sass-embedded`, `fast-uri`, `node-tar` внутри `electron-builder`) — не
+устраняются точечным `bun update`, требуют апстрим-фиксов в `@nx/webpack`/`electron-builder`.
+Не блокирующие (dev-only транзитивные зависимости, не идут в прод-бандл).
