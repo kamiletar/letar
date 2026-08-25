@@ -39,7 +39,34 @@ if [[ ! -d "$SERVICE_DIR" ]]; then
   exit 1
 fi
 
+# Определение сервера — тот же приоритет, что в deploy-affected.sh (DEPLOY_SERVER_NAME для
+# серверов, где hostname -f не совпадает с *.letar.best, иначе hostname -f как фолбэк).
+if [[ -n "${DEPLOY_SERVER_NAME:-}" ]]; then
+  CURRENT_HOST="$DEPLOY_SERVER_NAME"
+else
+  CURRENT_HOST=$(hostname -f 2>/dev/null || hostname)
+fi
+case "$CURRENT_HOST" in
+  *s1.letar.best* | s1 | server1) SERVER_NAME="s1" ;;
+  *s2.letar.best* | s2 | server2) SERVER_NAME="s2" ;;
+  *s3.letar.best* | s3 | server3) SERVER_NAME="s3" ;;
+  *) SERVER_NAME="unknown" ;;
+esac
+
+# Server-specific override — полная замена, не merge (тот же паттерн, что
+# docker-compose.<SERVER_NAME>.yml у apps в deploy-affected.sh). Без override — прежнее
+# поведение (docker-compose.yml / secrets/deploy.conf), s3 этот код не задевает вовсе.
+COMPOSE_FILE="docker-compose.yml"
+if [[ -f "$SERVICE_DIR/docker-compose.${SERVER_NAME}.yml" ]]; then
+  COMPOSE_FILE="docker-compose.${SERVER_NAME}.yml"
+  echo "[deploy-infra] серверный override: $COMPOSE_FILE (сервер $SERVER_NAME)"
+fi
+
 MANIFEST="$SERVICE_DIR/secrets/deploy.conf"
+if [[ -f "$SERVICE_DIR/secrets/deploy.${SERVER_NAME}.conf" ]]; then
+  MANIFEST="$SERVICE_DIR/secrets/deploy.${SERVER_NAME}.conf"
+  echo "[deploy-infra] серверный манифест секретов: deploy.${SERVER_NAME}.conf"
+fi
 
 if [[ -f "$MANIFEST" ]]; then
   if ! command -v sops &>/dev/null; then
@@ -74,7 +101,7 @@ else
   echo "[deploy-infra] $SERVICE без secrets/deploy.conf — пропускаю расшифровку"
 fi
 
-echo "[deploy-infra] docker compose up -d ($SERVICE)"
-(cd "$SERVICE_DIR" && docker compose up -d)
+echo "[deploy-infra] docker compose -f $COMPOSE_FILE up -d ($SERVICE)"
+(cd "$SERVICE_DIR" && docker compose -f "$COMPOSE_FILE" up -d)
 
 echo "[deploy-infra] Готово: $SERVICE"
