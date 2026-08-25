@@ -78,7 +78,7 @@ export default defineConfig({
     ? {}
     : {
       webServer: {
-        command: 'cd apps/animatrona/renderer && next dev -p 3007',
+        command: 'cd apps/animatrona/renderer && next dev -p 3007 --webpack',
         url: baseURL,
         reuseExistingServer: true,
         cwd: workspaceRoot,
