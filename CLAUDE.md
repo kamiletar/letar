@@ -207,7 +207,10 @@ request-scope бросают, мокать оба модуля; `redirect()` б�
 reset (`preflight`) уже задаёт своё явное значение — фикс только через `'& *'` на предке ·
 [chakra-heading-defaults-to-h2](/.claude/docs/chakra-heading-defaults-to-h2.md) ⚠️ `Heading` —
 `withContext("h2")`, без `asChild`+`<h1>` страница может не иметь ни одного настоящего `<h1>`;
-ни lint, ни typecheck, ни глаз на скриншоте это не покажет
+ни lint, ни typecheck, ни глаз на скриншоте это не покажет ·
+[chakra-aschild-multiple-children-silent-drop](/.claude/docs/chakra-aschild-multiple-children-silent-drop.md)
+⚠️ `asChild` с двумя и более детьми — `.find(isValidElement)` молча берёт только первого, второй
+пропадает без единой ошибки в typecheck/lint/консоли; ловится только живым кликом в браузере
 
 **Библиотеки и публикация:** [lib-entry-points](/.claude/docs/lib-entry-points.md) подпути
 `./server`/`./client`, границы, ESLint-ловушки ·
