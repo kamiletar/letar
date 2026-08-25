@@ -47,6 +47,9 @@ services:
       traefik.http.routers.animatrona-landing.tls.domains[0].main: 'letar.best'
       traefik.http.routers.animatrona-landing.tls.domains[0].sans[0]: '*.letar.best'
       traefik.http.services.animatrona-landing.loadbalancer.server.port: '3008'
+      # §48 M3 шаг 5 — включает --proxy-kind traefik в deploy-affected.sh (коммит 7281a7ae):
+      # nginx-reload-шаги rollout.ts станут no-op вместо docker exec к NPM.
+      letar.proxy-kind: 'traefik'
     networks:
       kami-network:
         aliases:
