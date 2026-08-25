@@ -8,7 +8,7 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "next build",
+        "command": "next build --webpack",
         "cwd": "apps/animatrona-landing"
       },
       "dependsOn": ["^build"],
@@ -22,7 +22,7 @@
     "dev": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "next dev -p 3008",
+        "command": "next dev -p 3008 --webpack",
         "cwd": "apps/animatrona-landing"
       },
       "cache": false,

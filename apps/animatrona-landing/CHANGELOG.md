@@ -2,6 +2,14 @@
 
 Все изменения в проекте animatrona-landing документируются в этом файле.
 
+## [0.4.2] - 2026-08-25
+
+### Fixed
+
+- `--webpack` в `dev`/`build` — превентивный фикс hydration-бага Turbopack+Emotion (Chakra
+  `ChakraProvider` + `next-themes` `ThemeProvider`), см.
+  `.claude/docs/nextjs16-turbopack-default-emotion-hydration.md`
+
 ## [0.4.1] - 2026-08-25
 
 ### Fixed

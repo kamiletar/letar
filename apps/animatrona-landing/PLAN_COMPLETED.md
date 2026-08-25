@@ -2,6 +2,16 @@
 
 Детальное описание реализованных функций.
 
+## `--webpack` в dev/build — превентивный фикс Turbopack+Emotion hydration (2026-08-25)
+
+Часть аудита `.claude/docs/nextjs16-turbopack-default-emotion-hydration.md` (раздел «Аудит по
+всему монорепо»). Приложение сочетает Chakra v3 `ChakraProvider` и `next-themes`'ный
+`ThemeProvider` как прямого потомка (`_components/ui/provider.tsx`), `dev`/`build` в
+`project.json` были голым `next dev -p 3008`/`next build` без флага бандлера — Turbopack по
+умолчанию. Фикс — `--webpack` добавлен к обеим командам (эталон — `apps/mandala`). Живая
+репродукция гонки клика не проводилась (превентивный фикс по структурному совпадению, как и на
+`aira-web`/`auth-hub`) — `nx typecheck:tsgo`/`nx lint`/`nx build` зелёные.
+
 ## Touch target для текстовых ссылок — WCAG 2.5.5 (2026-08-25)
 
 Ссылка «Конфиденциальность» в футере переведена на `TouchLink` (`@letar/ui`). Остальные ссылки
