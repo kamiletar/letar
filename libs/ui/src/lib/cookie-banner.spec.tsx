@@ -64,8 +64,13 @@ describe('CookieBanner', () => {
     expect(link).toHaveAttribute('href', '/custom-privacy')
   })
 
-  it('чекбокс «Необходимые» всегда включён и заблокирован', () => {
+  it('чекбоксы скрыты по умолчанию — видны только после «Настроить»', async () => {
+    const user = userEvent.setup()
     renderWithProvider(<CookieBanner appKey="test-app" />)
+    expect(screen.queryByRole('checkbox', { name: /Необходимые/ })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Настроить' }))
+
     const necessaryCheckbox = screen.getByRole('checkbox', { name: /Необходимые/ })
     expect(necessaryCheckbox).toBeChecked()
     expect(necessaryCheckbox).toBeDisabled()
@@ -100,6 +105,7 @@ describe('CookieBanner', () => {
       <CookieBanner appKey="test-app" policyVersion="v1" analyticsLabel="Аналитика" marketingLabel="Маркетинг" />,
     )
 
+    await user.click(screen.getByRole('button', { name: 'Настроить' }))
     await user.click(screen.getByRole('checkbox', { name: 'Аналитика' }))
     await user.click(screen.getByRole('button', { name: 'Сохранить выбор' }))
 

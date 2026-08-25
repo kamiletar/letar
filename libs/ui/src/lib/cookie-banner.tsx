@@ -46,7 +46,19 @@ export function CookieBanner({
   zIndex = 1000,
 }: CookieBannerProps) {
   const config = createConsentConfig(appKey, policyVersion)
-  const [shown, setShown] = useState(false)
+  // ⚠️ По умолчанию `true`, не `false` — рендерится сразу на сервере вместе с остальным
+  // контентом страницы. Раньше стартовал с `false` и переключался в `true` только внутри
+  // useEffect: на content-light страницах (формы входа/регистрации) баннер оставался
+  // единственным крупным элементом, появлявшимся ПОСЛЕ гидратации — Lighthouse брал его
+  // текст как LCP-элемент, раздувая LCP до времени полной гидратации (7.2–8.4с вместо
+  // времени первой отрисовки). Эффект ниже по-прежнему прячет баннер (`setShown(false)`),
+  // если найдено валидное согласие под текущей версией политики — для вернувшихся
+  // пользователей возможна короткая вспышка баннера на время гидратации, это дешевле
+  // регрессии LCP. Баннер `position: fixed`, поэтому скрытие не даёт CLS.
+  const [shown, setShown] = useState(true)
+  // Гранулярные чекбоксы скрыты, пока пользователь явно не нажмёт «Настроить» — по умолчанию
+  // баннер занимает одну строку текста + строку кнопок, а не три ряда с чекбоксами.
+  const [expanded, setExpanded] = useState(false)
   const [analytics, setAnalytics] = useState(false)
   const [marketing, setMarketing] = useState(false)
   // Публикует свою высоту в CSS-переменную, пока видим — StickyActionBar (тот же bottom:0)
@@ -56,16 +68,14 @@ export function CookieBanner({
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(config.storageKey)
-      if (!raw) {
-        setShown(true)
-        return
-      }
-      const parsed = JSON.parse(raw) as CookieConsentState
-      if (parsed.version !== policyVersion) {
-        setShown(true)
+      if (raw) {
+        const parsed = JSON.parse(raw) as CookieConsentState
+        if (parsed.version === policyVersion) {
+          setShown(false)
+        }
       }
     } catch {
-      setShown(true)
+      // некорректный JSON в localStorage — считаем, что согласия нет, баннер остаётся видимым
     }
 
     function handleOpen() {
@@ -80,6 +90,7 @@ export function CookieBanner({
         }
       }
       setShown(true)
+      setExpanded(true)
     }
 
     window.addEventListener(config.openSettingsEvent, handleOpen)
@@ -138,64 +149,74 @@ export function CookieBanner({
       zIndex={zIndex}
       shadow="lg"
     >
-      <Container maxW="6xl" py={4}>
-        <Stack gap={4}>
-          <Text fontSize="sm" color="fg.muted">
+      <Container maxW="6xl" py={2}>
+        <Stack gap={2}>
+          <Text fontSize="xs" color="fg.muted">
             Мы используем cookie. Необходимые — всегда активны.{' '}
             <Box asChild color="brand.solid" _hover={{ textDecoration: 'underline' }} display="inline">
               <Link href={privacyUrl}>Подробнее в политике ПДн</Link>
             </Box>
           </Text>
 
-          <HStack gap={6} wrap="wrap">
-            <Checkbox.Root checked disabled colorPalette="brand" size="sm">
-              <Checkbox.HiddenInput />
-              <Checkbox.Control />
-              <Checkbox.Label>
-                <Text as="span" fontSize="sm">
-                  Необходимые{' '}
-                  <Text as="span" fontSize="xs" color="fg.subtle">
-                    (сессия)
+          {expanded && (
+            <HStack gap={3} wrap="wrap">
+              <Checkbox.Root checked disabled colorPalette="brand" size="sm">
+                <Checkbox.HiddenInput />
+                <Checkbox.Control />
+                <Checkbox.Label>
+                  <Text as="span" fontSize="xs">
+                    Необходимые{' '}
+                    <Text as="span" fontSize="xs" color="fg.subtle">
+                      (сессия)
+                    </Text>
                   </Text>
-                </Text>
-              </Checkbox.Label>
-            </Checkbox.Root>
+                </Checkbox.Label>
+              </Checkbox.Root>
 
-            <Checkbox.Root
-              checked={analytics}
-              onCheckedChange={(e) => setAnalytics(!!e.checked)}
-              colorPalette="brand"
-              size="sm"
-            >
-              <Checkbox.HiddenInput />
-              <Checkbox.Control />
-              <Checkbox.Label>
-                <Text as="span" fontSize="sm">
-                  {analyticsLabel}
-                </Text>
-              </Checkbox.Label>
-            </Checkbox.Root>
+              <Checkbox.Root
+                checked={analytics}
+                onCheckedChange={(e) => setAnalytics(!!e.checked)}
+                colorPalette="brand"
+                size="sm"
+              >
+                <Checkbox.HiddenInput />
+                <Checkbox.Control />
+                <Checkbox.Label>
+                  <Text as="span" fontSize="xs">
+                    {analyticsLabel}
+                  </Text>
+                </Checkbox.Label>
+              </Checkbox.Root>
 
-            <Checkbox.Root
-              checked={marketing}
-              onCheckedChange={(e) => setMarketing(!!e.checked)}
-              colorPalette="brand"
-              size="sm"
-            >
-              <Checkbox.HiddenInput />
-              <Checkbox.Control />
-              <Checkbox.Label>
-                <Text as="span" fontSize="sm">
-                  {marketingLabel}
-                </Text>
-              </Checkbox.Label>
-            </Checkbox.Root>
-          </HStack>
+              <Checkbox.Root
+                checked={marketing}
+                onCheckedChange={(e) => setMarketing(!!e.checked)}
+                colorPalette="brand"
+                size="sm"
+              >
+                <Checkbox.HiddenInput />
+                <Checkbox.Control />
+                <Checkbox.Label>
+                  <Text as="span" fontSize="xs">
+                    {marketingLabel}
+                  </Text>
+                </Checkbox.Label>
+              </Checkbox.Root>
+            </HStack>
+          )}
 
           <HStack gap={2} justify="flex-end">
-            <Button size="sm" variant="ghost" onClick={handleSaveCustom}>
-              Сохранить выбор
-            </Button>
+            {expanded
+              ? (
+                <Button size="sm" variant="ghost" onClick={handleSaveCustom}>
+                  Сохранить выбор
+                </Button>
+              )
+              : (
+                <Button size="sm" variant="ghost" onClick={() => setExpanded(true)}>
+                  Настроить
+                </Button>
+              )}
             <Button size="sm" colorPalette="brand" onClick={handleAcceptAll}>
               Принять все
             </Button>
