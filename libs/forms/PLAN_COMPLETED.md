@@ -1,5 +1,26 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-08-26 — Фикс расколотого React-контекста в декларативном `<Form>` (2.7.6)
+
+Найдено при чинке `form-develop-app` (`nx build` падал на `/controlled-state-demo`,
+затем на `/filters-state-demo`): `Form.Subscribe`, `Form.UrlSync`, `useActiveFiltersCount`,
+`useTypedFormContext`, `useTypedFormSubscribe` читали TanStack `useFormContext()`
+(`createFormHookContexts()` из `libs/forms/src/lib/context.tsx`) — этот контекст
+устанавливается только компонентом `form.AppForm`, который декларативный `<Form>`
+(`FormSimple`/`FormWithApi`) не рендерит. Он прокидывает форму через свой собственный
+`DeclarativeFormContext` (`useDeclarativeForm()`, `@letar/forms-react`). Итог — падение при
+первом же рендере внутри любого `<Form>`, а на SSG — фейл пререндера страницы целиком.
+
+Рабочий паттерн уже существовал рядом (`FormDebugValues` — `useDeclarativeForm()` + `form.
+Subscribe`), просто не был применён в пяти местах. Фикс — все пятеро переведены на него.
+Коммиты `207e25b7` (libs/forms), `4c333998` (form-develop-app, `controlled-state-demo`).
+
+Проверено: `typecheck:tsgo`/`lint`/`nx build form-develop-app` (50/50 страниц) зелёные.
+`nx test forms` — 3 теста в 2 файлах падают (`table-selection.spec.tsx` и смежный) — это
+пре-существующий, не связанный с этой правкой баг зависшего SSR Suspense/rAF у ленивых
+`TableEditor`/`DataGrid` (см. `project_forms_lazy_component_ssr_stuck_suspense` в памяти),
+не регрессия от этой сессии.
+
 ## 2026-08-26 — Проверка `forms-angular` на уязвимость react-hooks/rules-of-hooks — override не нужен
 
 После фикса `forms-vue`/`forms-vue-shadcn` (см. запись в `PLAN.md` того же дня) проверена

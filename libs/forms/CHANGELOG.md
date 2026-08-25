@@ -4,6 +4,21 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.7.6] - 2026-08-26
+
+### Fixed
+
+- **`Form.Subscribe`, `Form.UrlSync`, `useActiveFiltersCount`, `useTypedFormContext`,
+  `useTypedFormSubscribe` падали при первом рендере внутри декларативного `<Form>`.** Все пятеро
+  читали `useFormContext()` из `createFormHookContexts()` (TanStack) — этот контекст
+  устанавливает только `form.AppForm`, а декларативный `<Form>` (`FormSimple`/`FormWithApi`) его
+  не рендерит: он прокидывает форму через собственный `DeclarativeFormContext`
+  (`useDeclarativeForm()`). Ошибка: `` `formContext` only works when within a `formComponent`
+  passed to `createFormHook` ``. На SSG-страницах (`form-develop-app`) это валило
+  `next build` целиком. Найдено на `/filters-state-demo` и `/controlled-state-demo`
+  (`form-develop-app`) — обе страницы используют затронутые API официально задокументированным
+  способом. Фикс — все пятеро переведены на `useDeclarativeForm()`.
+
 ## [2.7.5] - 2026-08-25
 
 ### Added
