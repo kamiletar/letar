@@ -2800,3 +2800,20 @@ ioredis/redis — предсуществующие из той же паралл
 
 **Коммит:** `12b9fbcb` (`.claude/docs/electron-version-drift.md`, `scripts/check-electron-drift.sh`,
 `CLAUDE.md` — один осознанный multi-scope коммит, `GIT_ALLOW_MULTI_SCOPE_COMMIT=1`).
+
+## §102 — `implicitDependencies` без префикса `@letar/` в 3 приложениях ✅ ЗАКРЫТО (2026-08-25)
+
+**Контекст:** `aira-web`, `domwellbes`, `studio` держали в `nx.implicitDependencies` часть
+имён библиотек без scope (`"chakra-provider"`, `"ui"`, `"analytics"`, `"github-releases"`,
+`"auth"`, `"forms"`, `"format-utils"`, `"consent"`, `"demo-protection"`, `"email"`) — реальные
+имена проектов Nx для всех них со scope, `@letar/chakra-provider` и т.д. (сверено
+`nx show projects`). Из-за этого граф зависимостей Nx не видел рёбра к этим библиотекам — ломает
+affected-детекцию, порядок сборки и инвалидацию кэша.
+
+**Сделано:** во всех трёх `package.json` бракованные имена заменены на `@letar/*`-эквиваленты.
+`nx typecheck:tsgo --projects=aira-web,domwellbes,studio` зелёный, `nx graph` подтвердил
+появление рёбер к `@letar/chakra-provider`/`@letar/ui`/`@letar/analytics` и остальным.
+
+**Коммиты:** `2600dde7` (aira-web, letar) · submodule domwellbes `391db4f` + bump `ea96d274` ·
+submodule studio `b7bf6b5` + bump `74812bdb`. Не запушено — ждёт одобрения пользователя
+([git.md § push](/.claude/rules/git.md)).
