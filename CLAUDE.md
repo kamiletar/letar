@@ -202,6 +202,10 @@ request-scope бросают, мокать оба модуля; `redirect()` б�
 рецепты Chakra читают `bg.panel`/`fg.error`/`border.control`/`l1..l3`/`colorPalette.*` напрямую —
 не переопределил в своих `semanticTokens` → холодные цвета мимо палитры и провал WCAG AA; 14 из
 15 приложений с темой пробел не закрыли ·
+[chakra-typegen-shared-node-modules-race](/.claude/docs/chakra-typegen-shared-node-modules-race.md)
+⚠️ `theme:typegen` пишет в общий физический файл `node_modules/@chakra-ui/react` — параллельный
+`theme:typegen` другого приложения молча откатывает кастомные recipe-варианты, `typecheck:tsgo`
+падает на незатронутых файлах; фикс — `nx theme:typegen <app> --skip-nx-cache` перед коммитом ·
 [chakra-overflow-wrap-not-inherited](/.claude/docs/chakra-overflow-wrap-not-inherited.md) ⚠️
 `overflow-wrap`/аналогичное CSS-свойство на предке не наследуется потомком, для которого Chakra
 reset (`preflight`) уже задаёт своё явное значение — фикс только через `'& *'` на предке ·
