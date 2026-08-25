@@ -3009,4 +3009,37 @@ aprel8008, svoichuzhie, mandala, animatrona-landing, grandslamcup). Список
 (`0b9544b~1`, до фикса) — ловит корректно; `libs/ui/src/lib/cover-image.tsx` — не ловит. Полный
 прогон `apps/**` + `libs/**` после добавления правила — 0 срабатываний (класс бага уже полностью
 зачищен на 2026-08-25 предыдущими ручными проходами), 0 ложноположительных, 0 ошибок парсинга.
+
+## §109 — `main CI` #32892784230 упал на всех трёх шагах — три несвязанные причины ✅ ЗАКРЫТО (2026-08-26)
+
+**Lint** (`grandslamcup-e2e`, `mandala-e2e`) — `react-hooks/rules-of-hooks` ловил вызов `use(page)`
+внутри Playwright-фикстур `test.extend({ page: async ({ page }, use) => { ...; await use(page) } })`
+как React Hook (по совпадению имени с React 19 `use()`), хотя это параметр `use` из фикстуры
+Playwright. Функции-фикстуры (`page`, `adminPage`, `guestPage`) не компоненты и не хуки — ESLint не
+различает эти два `use` по источнику импорта, только по имени идентификатора. Реальных React-хуков
+в обоих e2e-приложениях нет (проверено греппом на `useState`/`useEffect`/`useMemo`/`useCallback`/
+`useRef` — 0 совпадений в коде, только упоминание в комментарии). Правило отключено точечно в
+`eslint.config.mjs` каждого из двух приложений.
+
+⚠️ **Тот же паттерн (`page: async ({ page }, use) => ...`) есть и в `driving-school-e2e`**
+(`src/fixtures/base-test.ts`), но он не попал в `nx affected` этого прогона и не проверен — латентная
+бомба, сработает при следующем изменении, затрагивающем этот проект. Правило там не отключено;
+чинить по факту следующего падения либо превентивно — на усмотрение следующей сессии по
+`driving-school`.
+
+**Typecheck** (`form-docs`) — `tsgo --noEmit` падал на `Cannot find module '@/.source/server'`.
+`.source/` — генерируемый Fumadocs каталог (в `.gitignore`), возникает как побочный эффект
+`next dev`/`next build`, но CI гоняет `typecheck:tsgo` отдельно от `build`. Добавлен таргет
+`fumadocs-mdx` в `apps/form-docs/project.json` (команда `fumadocs-mdx` из одноимённого пакета),
+`typecheck:tsgo` теперь на него `dependsOn`.
+
+**Unit-тесты** (`mandala`) — три спека мокали устаревший Prisma-код `{ code: 'P2002' }`, хотя
+`handleUniqueConstraintError` был переключён на `error.dbErrorCode === '23505'` (ZenStack v3 ORM)
+ещё коммитом `941a9331` (2026-08-21) — обновление тестов тогда закрыло не все места. Подробности и
+список файлов — `apps/mandala/PLAN_COMPLETED.md` (сессия 2026-08-26).
+
+**Почему в этом файле, а не только в `apps/mandala/PLAN_COMPLETED.md`:** правки задели 4 разных
+scope одним CI-прогоном (`mandala`, `mandala-e2e`, `grandslamcup-e2e`, `form-docs`) — типичный
+случай, когда падение в одном workflow вскрывает независимые проблемы в разных приложениях сразу.
+Закоммичено 4 отдельными scoped-коммитами (`0de45a54`, `ecbcb483`, `13775adc`, `17a666dd`).
 Severity — `WARNING` (перф-деградация, не уязвимость), коммит не блокирует.
