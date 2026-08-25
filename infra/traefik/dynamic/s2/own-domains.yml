@@ -1,0 +1,103 @@
+# Собственные домены коммерческих приложений (вне зоны letar.best) — PLAN-INFRA-2.md §48 M3,
+# шаг 2. Резолвер `http` (HTTP-01) — не покрыты wildcard `*.letar.best` (решение владельца,
+# wildcard делаем только для своей зоны).
+#
+# ⚠️ Список и адреса сняты СО СЛЕПКА сервера (docker-agent-dev, 2026-08-25), не из документации
+# — тот же урок, что уже трижды срабатывал на s3 (§48 M2). Все ssl_forced=1,
+# allow_websocket_upgrade=1, block_exploits=1 в NPM — WebSocket Traefik проксирует без
+# настройки, `block_exploits` (эвристический фильтр эксплойтов nginx) прямого аналога в
+# Traefik нет — сознательно не переносим, отдельного риска для этих доменов это не создаёт
+# (все приложения уже проходят через свой application-level auth/validation).
+#
+# ⚠️ Адрес — network alias (`<app>-app`), НЕ пронумерованный контейнер (`<app>-app-12`).
+# Пронумерованное имя — артефакт zero-downtime rollout (rollout.ts), меняется на каждом
+# передеплое; alias — то, чем сейчас пользуется сам NPM, и то, что переживёт следующий деплой.
+#
+# Это ШАГ 2 плана — приложения НЕ переведены на label-based роутинг (это шаг 5, отдельно и
+# только для тех, у кого `letar.rollout: true`). Здесь file-провайдер со статическим адресом,
+# без правок в docker-compose самих приложений (все submodule) — трафик пока НЕ переключён,
+# роутеры существуют, но DNS всё ещё указывает на NPM.
+
+http:
+  routers:
+    driving-school-own-domain:
+      # направа.рф — punycode-форма обязательна, Traefik/Go rule-парсер IDN не раскрывает.
+      rule: 'Host(`xn--80aaah6cnh.xn--p1ai`)'
+      entryPoints:
+        - websecure
+      service: driving-school-app
+      tls:
+        certResolver: http
+      # ⚠️ В NPM Advanced-конфиге есть мёртвое правило `/socket.io/` → driving-school-app:3004 —
+      # проверено живьём (ss -tlnp внутри контейнера): 3004 никто не слушает. Не переносим.
+
+    aboi-own-domain:
+      rule: 'Host(`neyroaboi.ru`) || Host(`www.neyroaboi.ru`)'
+      entryPoints:
+        - websecure
+      service: aboi-app
+      tls:
+        certResolver: http
+
+    dsperevod-own-domain:
+      rule: 'Host(`dsperevod.ru`) || Host(`www.dsperevod.ru`)'
+      entryPoints:
+        - websecure
+      service: dsperevod-app
+      tls:
+        certResolver: http
+
+    svoichuzhie-own-domain:
+      rule: 'Host(`svoichuzhie.ru`)'
+      entryPoints:
+        - websecure
+      service: svoichuzhie-app
+      tls:
+        certResolver: http
+
+    aprel8008-own-domain:
+      rule: 'Host(`aprel8008.ru`)'
+      entryPoints:
+        - websecure
+      service: aprel8008-app
+      tls:
+        certResolver: http
+
+    domwellbes-own-domain:
+      rule: 'Host(`domwellbes.ru`) || Host(`www.domwellbes.ru`)'
+      entryPoints:
+        - websecure
+      service: domwellbes-app
+      tls:
+        certResolver: http
+
+  services:
+    driving-school-app:
+      loadBalancer:
+        servers:
+          - url: 'http://driving-school-app:3003'
+
+    aboi-app:
+      loadBalancer:
+        servers:
+          - url: 'http://aboi-app:3018'
+
+    dsperevod-app:
+      loadBalancer:
+        servers:
+          - url: 'http://dsperevod-app:3019'
+
+    svoichuzhie-app:
+      loadBalancer:
+        servers:
+          - url: 'http://svoichuzhie-app:3021'
+
+    aprel8008-app:
+      loadBalancer:
+        servers:
+          - url: 'http://aprel8008-app:3023'
+
+    domwellbes-app:
+      loadBalancer:
+        servers:
+          - url: 'http://domwellbes-app:3025'
