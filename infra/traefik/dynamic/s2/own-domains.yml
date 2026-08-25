@@ -1,6 +1,20 @@
 # Собственные домены коммерческих приложений (вне зоны letar.best) — PLAN-INFRA-2.md §48 M3,
-# шаг 2. Резолвер `http` (HTTP-01) — не покрыты wildcard `*.letar.best` (решение владельца,
-# wildcard делаем только для своей зоны).
+# шаг 2. Резолвер `dns` (DNS-01 через acme-dns), не `http` — HTTP-01 (порт 80) конфликтует с
+# собственным webroot-продлением NPM для тех же доменов (`include letsencrypt-acme-challenge.conf`
+# на каждом host-файле): либо дубль location не пройдёт `nginx -t`, либо блок NPM матчится первым
+# и продление через Traefik никогда не сработает. Решение владельца 2026-08-25 — DNS-01, чтобы
+# порт 80/NPM вообще не трогать, по образцу персональных acme-dns аккаунтов media/ipfs/gateway на
+# s3 (см. infra/traefik/README.md). Резолвер `http` остаётся в traefik.s2.yml как резервный на
+# случай, если DNS-01 окажется непригоден для какого-то из доменов — этими роутерами не используется.
+#
+# ⚠️ Первый запуск с этим резолвером УСТАНОВИТ, но не активирует сертификат: lego не найдёт
+# существующий acme-dns аккаунт для домена вне зоны letar.best, автоматически зарегистрирует
+# новый через API acme-dns и допишет его в /home/deploy/lego/acme-dns-accounts.json — но выпуск
+# сертификата всё равно упадёт, пока владелец вручную не добавит CNAME
+# `_acme-challenge.<домен> → <fulldomain из аккаунта>.acme.letar.best` у регистратора ЭТОГО
+# домена. Это ожидаемо, не баг. CNAME-записи нужно снять из логов Traefik/acme-dns после
+# первого запуска и передать владельцу — до этого сертификаты не выпустятся, но роутер и
+# location никак не мешают уже работающему NPM (DNS всё ещё указывает на NPM, трафик не идёт).
 #
 # ⚠️ Список и адреса сняты СО СЛЕПКА сервера (docker-agent-dev, 2026-08-25), не из документации
 # — тот же урок, что уже трижды срабатывал на s3 (§48 M2). Все ssl_forced=1,
@@ -27,7 +41,7 @@ http:
         - websecure
       service: driving-school-app
       tls:
-        certResolver: http
+        certResolver: dns
       # ⚠️ В NPM Advanced-конфиге есть мёртвое правило `/socket.io/` → driving-school-app:3004 —
       # проверено живьём (ss -tlnp внутри контейнера): 3004 никто не слушает. Не переносим.
 
@@ -37,7 +51,7 @@ http:
         - websecure
       service: aboi-app
       tls:
-        certResolver: http
+        certResolver: dns
 
     dsperevod-own-domain:
       rule: 'Host(`dsperevod.ru`) || Host(`www.dsperevod.ru`)'
@@ -45,7 +59,7 @@ http:
         - websecure
       service: dsperevod-app
       tls:
-        certResolver: http
+        certResolver: dns
 
     svoichuzhie-own-domain:
       rule: 'Host(`svoichuzhie.ru`)'
@@ -53,7 +67,7 @@ http:
         - websecure
       service: svoichuzhie-app
       tls:
-        certResolver: http
+        certResolver: dns
 
     aprel8008-own-domain:
       rule: 'Host(`aprel8008.ru`)'
@@ -61,7 +75,7 @@ http:
         - websecure
       service: aprel8008-app
       tls:
-        certResolver: http
+        certResolver: dns
 
     domwellbes-own-domain:
       rule: 'Host(`domwellbes.ru`) || Host(`www.domwellbes.ru`)'
@@ -69,7 +83,7 @@ http:
         - websecure
       service: domwellbes-app
       tls:
-        certResolver: http
+        certResolver: dns
 
   services:
     driving-school-app:
