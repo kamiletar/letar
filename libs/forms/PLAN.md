@@ -813,6 +813,22 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
 
 ## Backlog (запросы от агентов)
 
+### [2026-08-25] `Field.Checkbox` — кликабельная область ~20px вместо 44×44
+
+- **Запросил:** `domwellbes-dev`, найдено полным touch-target sweep публичных страниц (MU1,
+  задача №73 `PLAN_INDEX.md`).
+- **Приоритет:** normal — не блокирует текущую работу, но общий класс дефекта (все приложения,
+  использующие `Form.Field.Checkbox`).
+- **Проблема:** `chakraUIKit.Checkbox` (`libs/forms/src/lib/declarative/form-fields/base/uikit-chakra.tsx:124-140`)
+  рендерит `Checkbox.Root` без `minH` — `getBoundingClientRect()` живого поля даёт `{height: 20}`
+  вместо продуктового минимума 44×44 CSS px (WCAG 2.5.5, стандарт domwellbes §4.2
+  `PLAN_PUBLIC_MOBILE.md`). Подробности и полная переписка — сообщение `domwellbes-dev` →
+  `forms-coordinator-dev` в agent-mail, `topic: form-feature-request`.
+- **Предлагаемый фикс:** `minH="touchTarget"` (`2.75rem`, тот же токен, что уже использует
+  `libs/ui/src/lib/touch-link.tsx`) + `alignItems="center"` на `Checkbox.Root`. Стоит проверить
+  тот же паттерн у любых других `Checkbox.Root`/`Radio.Root` в адаптере без явного `minH`.
+- **Статус:** ожидание.
+
 ### [2026-08-23] `EditIntentValue<T>` — явная замена значения без передачи старого
 
 - **Запросил:** владелец монорепо (Kami), исходный контракт:
