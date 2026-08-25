@@ -1,6 +1,5 @@
 import { Box, Container, Flex, HStack, Link, SimpleGrid, Text, VStack } from '@chakra-ui/react'
-import { BuildVersion, CookieSettingsButton, StudioCredit } from '@letar/ui'
-import NextLink from 'next/link'
+import { BuildVersion, CookieSettingsButton, StudioCredit, TouchLink } from '@letar/ui'
 import type { ReactNode } from 'react'
 import { LuFileText, LuGavel, LuScroll, LuShield } from 'react-icons/lu'
 
@@ -56,16 +55,28 @@ export function Footer() {
 
               {/* Первые 2 элемента */}
               {section.items.slice(0, 2).map((item) => (
-                <Link key={item.href} asChild fontSize="sm" color="fg.muted" _hover={{ color: 'brand.600' }}>
-                  <NextLink href={item.href}>{item.title}</NextLink>
-                </Link>
+                <TouchLink
+                  key={item.href}
+                  href={item.href}
+                  fontSize="sm"
+                  color="fg.muted"
+                  _hover={{ color: 'brand.600' }}
+                >
+                  {item.title}
+                </TouchLink>
               ))}
 
               {/* Ссылка "Все ..." если есть */}
               {CATEGORY_ALL_LINKS[section.title] && (
-                <Link asChild fontSize="sm" color="brand.600" fontWeight="medium" _hover={{ color: 'brand.700' }}>
-                  <NextLink href={CATEGORY_ALL_LINKS[section.title]}>Все {section.title.toLowerCase()}</NextLink>
-                </Link>
+                <TouchLink
+                  href={CATEGORY_ALL_LINKS[section.title]}
+                  fontSize="sm"
+                  color="brand.600"
+                  fontWeight="medium"
+                  _hover={{ color: 'brand.700' }}
+                >
+                  Все {section.title.toLowerCase()}
+                </TouchLink>
               )}
             </VStack>
           ))}
@@ -108,9 +119,9 @@ export function Footer() {
             <Text display={{ base: 'none', sm: 'block' }} aria-hidden="true">
               |
             </Text>
-            <Link asChild color="brand.500" _hover={{ textDecoration: 'underline' }}>
-              <NextLink href="/privacy">Конфиденциальность</NextLink>
-            </Link>
+            <TouchLink href="/privacy" color="brand.500" _hover={{ textDecoration: 'underline' }}>
+              Конфиденциальность
+            </TouchLink>
             <Text display={{ base: 'none', sm: 'block' }} aria-hidden="true">
               |
             </Text>

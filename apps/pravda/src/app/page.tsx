@@ -1,4 +1,5 @@
 import { Badge, Box, Card, Container, Flex, Heading, HStack, Link, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { TouchLink } from '@letar/ui'
 import Image from 'next/image'
 import NextLink from 'next/link'
 import { LuBookOpen, LuFileText, LuGavel, LuScroll, LuShield } from 'react-icons/lu'
@@ -104,13 +105,19 @@ export default function HomePage() {
               </HStack>
               <VStack align="start" gap={1}>
                 {navData[1].items.slice(0, 5).map((item) => (
-                  <Link asChild key={item.href} fontSize="sm" color="fg.muted" _hover={{ color: 'brand.600' }}>
-                    <NextLink href={item.href}>{item.title}</NextLink>
-                  </Link>
+                  <TouchLink
+                    key={item.href}
+                    href={item.href}
+                    fontSize="sm"
+                    color="fg.muted"
+                    _hover={{ color: 'brand.600' }}
+                  >
+                    {item.title}
+                  </TouchLink>
                 ))}
-                <Link asChild fontSize="sm" color="brand.600" fontWeight="medium">
-                  <NextLink href="/codes">Все кодексы →</NextLink>
-                </Link>
+                <TouchLink href="/codes" fontSize="sm" color="brand.600" fontWeight="medium">
+                  Все кодексы →
+                </TouchLink>
               </VStack>
             </VStack>
 
@@ -125,13 +132,19 @@ export default function HomePage() {
               </HStack>
               <VStack align="start" gap={1}>
                 {navData[2].items.slice(0, 5).map((item) => (
-                  <Link asChild key={item.href} fontSize="sm" color="fg.muted" _hover={{ color: 'brand.600' }}>
-                    <NextLink href={item.href}>{item.title}</NextLink>
-                  </Link>
+                  <TouchLink
+                    key={item.href}
+                    href={item.href}
+                    fontSize="sm"
+                    color="fg.muted"
+                    _hover={{ color: 'brand.600' }}
+                  >
+                    {item.title}
+                  </TouchLink>
                 ))}
-                <Link asChild fontSize="sm" color="brand.600" fontWeight="medium">
-                  <NextLink href="/statutes">Все уставы →</NextLink>
-                </Link>
+                <TouchLink href="/statutes" fontSize="sm" color="brand.600" fontWeight="medium">
+                  Все уставы →
+                </TouchLink>
               </VStack>
             </VStack>
 
@@ -146,13 +159,19 @@ export default function HomePage() {
               </HStack>
               <VStack align="start" gap={1}>
                 {navData[3].items.map((item) => (
-                  <Link asChild key={item.href} fontSize="sm" color="fg.muted" _hover={{ color: 'brand.600' }}>
-                    <NextLink href={item.href}>{item.title}</NextLink>
-                  </Link>
+                  <TouchLink
+                    key={item.href}
+                    href={item.href}
+                    fontSize="sm"
+                    color="fg.muted"
+                    _hover={{ color: 'brand.600' }}
+                  >
+                    {item.title}
+                  </TouchLink>
                 ))}
-                <Link asChild fontSize="sm" color="brand.600" fontWeight="medium">
-                  <NextLink href="/regulations">Все регламенты →</NextLink>
-                </Link>
+                <TouchLink href="/regulations" fontSize="sm" color="brand.600" fontWeight="medium">
+                  Все регламенты →
+                </TouchLink>
               </VStack>
             </VStack>
           </SimpleGrid>

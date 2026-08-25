@@ -1,7 +1,6 @@
 'use client'
 
-import { Link, Text } from '@chakra-ui/react'
-import NextLink from 'next/link'
+import { TouchLink } from '@letar/ui'
 
 interface HomeLinkProps {
   /** Колбэк при клике (для закрытия мобильного меню) */
@@ -14,12 +13,16 @@ interface HomeLinkProps {
  */
 export function HomeLink({ onClick }: HomeLinkProps) {
   return (
-    <Link asChild mb={6} display="block" onClick={onClick}>
-      <NextLink href="/">
-        <Text fontSize="sm" color="fg.muted" _hover={{ color: 'brand.600' }}>
-          ← На главную
-        </Text>
-      </NextLink>
-    </Link>
+    <TouchLink
+      href="/"
+      mb={6}
+      display="flex"
+      fontSize="sm"
+      color="fg.muted"
+      _hover={{ color: 'brand.600' }}
+      onClick={onClick}
+    >
+      ← На главную
+    </TouchLink>
   )
 }

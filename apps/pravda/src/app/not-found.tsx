@@ -1,4 +1,5 @@
-import { Box, Button, Container, Flex, Heading, Link, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Container, Flex, Heading, Text, VStack } from '@chakra-ui/react'
+import { TouchLink } from '@letar/ui'
 import NextLink from 'next/link'
 import { LuArrowLeft, LuHouse, LuSearch } from 'react-icons/lu'
 
@@ -81,12 +82,17 @@ export default function NotFound() {
           </Flex>
 
           {/* Ссылка назад */}
-          <Link asChild color="fg.muted" fontSize="sm" _hover={{ color: 'brand.600' }}>
-            <NextLink href="javascript:history.back()">
-              <LuArrowLeft />
-              Вернуться назад
-            </NextLink>
-          </Link>
+          <TouchLink
+            href="javascript:history.back()"
+            color="fg.muted"
+            fontSize="sm"
+            display="inline-flex"
+            gap={1}
+            _hover={{ color: 'brand.600' }}
+          >
+            <LuArrowLeft />
+            Вернуться назад
+          </TouchLink>
         </VStack>
       </Container>
 

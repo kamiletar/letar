@@ -15,6 +15,7 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
+import { TouchLink } from '@letar/ui'
 import NextLink from 'next/link'
 import { LuBookmark, LuExternalLink, LuTrash2 } from 'react-icons/lu'
 
@@ -140,9 +141,9 @@ export default function BookmarksPage() {
           {/* Ссылка на главную */}
           {bookmarks.length > 0 && (
             <Box textAlign="center" pt={4}>
-              <Link asChild color="brand.500">
-                <NextLink href="/">← Вернуться к документам</NextLink>
-              </Link>
+              <TouchLink href="/" color="brand.500" display="inline-flex">
+                ← Вернуться к документам
+              </TouchLink>
             </Box>
           )}
         </VStack>
