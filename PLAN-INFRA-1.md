@@ -1303,6 +1303,17 @@ app-контейнера, ни в Traefik — сетевой артефакт we
 Hard-gate по всем 5 приложениям (archetest, dsperevod, svoichuzhie, aboi, aprel8008) на этом
 можно считать живым и подтверждённым.
 
+**✅ M4, первая половина (`auth-hub`) — закрыто 2026-08-25.** Первый живой деплой+e2e на staging:
+деплой ✅ (коммит `82ebb75e`), e2e ❌ — `04-linked-email-login.spec.ts` (0/2) падал не на
+ожидаемой `requireEmailVerification`-логике, а раньше: `beforeAll` бил `fetch()` из Node-процесса
+Playwright без браузерного `Origin` → better-auth `403 MISSING_OR_NULL_ORIGIN`. Заодно вскрылось,
+что файл никогда не был реально огорожен от staging-прогона (докстринг это обещал с v0.6.4,
+проверки в коде не было — `playwright.config.ts` держит один project без dev/staging split, в
+отличие от эталона `driving-school-e2e`). Фикс — `test.skip(!isLocalDev, ...)` (коммит `7a8afe62`).
+Повторный прогон — полностью зелёный: `expected: 10, skipped: 2, unexpected: 0`, exitCode 0.
+`auth-hub` добавлен в `E2E_GATED_APPS`. Детали — `apps/auth-hub/PLAN.md` §18.7 M4.
+Осталась вторая половина батча — `driving-school`.
+
 > **Батч M1 (статус на 2026-07-21) и находки, требующие отдельного трека** (dashboard-agent
 > устарел на s3, `run_e2e` не выставляет `CI=1`, `db:seed` не резолвит алиас, `@letar/format-utils`
 > сломан) — детали в `.claude/private/PLAN-JOURNAL.md` §18.7 (см. пометку выше).
