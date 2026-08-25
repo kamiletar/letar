@@ -2627,8 +2627,8 @@ submodule).
 Мигрированы все найденные потребители, каждое приложение/submodule — отдельный коммит
 (scope-guard): `time`, `auth-hub`, `dashboard`, `mandala`, `form-develop-app`, `grandslamcup`,
 `archetest`, `kami`, `animatrona-tracker` (прямые apps) · `driving-school`, `dsperevod`, `studio`,
-`svoichuzhie`, `aprel8008`, `aboi` (submodule, коммит внутри + bump в root) · `auth-hub-e2e`,
-`svoichuzhie-e2e`, `driving-school-e2e` (e2e `db.helpers.ts`) · разовые `scripts/*`
+`svoichuzhie`, `aprel8008`, `aboi`, `domwellbes` (submodule, коммит внутри + bump в root) ·
+`auth-hub-e2e`, `svoichuzhie-e2e`, `driving-school-e2e` (e2e `db.helpers.ts`) · разовые `scripts/*`
 (`mandala/create-admin.ts`, `auth-hub/encrypt-client-secrets.ts`,
 `grandslamcup/add-friendly-matches.ts`+`anonymize-staging-db.ts`, `svoichuzhie/scripts/seed.ts`,
 `studio/prisma/seed.ts`, `aboi/scripts/anonymize-staging-db.ts`). Push не делался.
@@ -2655,16 +2655,12 @@ submodule).
 `rootDir: "."`, наследуемый `outDir` без `rootDir` не проходит smoke-test у e2e-приложений так же
 надёжно, как у обычных Next.js-приложений на общем пресете).
 
-### Не мигрировано
+### `domwellbes` домигрирован (2026-08-25)
 
-`domwellbes` (`prisma.config.ts`, `scripts/check-db-indexes.mjs`,
-`prisma/seed/load-env.ts`) — на момент миграции submodule был в активной работе параллельной
-сессии (незакоммиченные правки в `PLAN_OPERATIONS.md`, `ROADMAP_M10.md`,
-`docs/ARCHITECTURE.md`, `contract.action.ts`, и уже частично начатая правка самого
-`check-db-indexes.mjs` под §54). Трогать чужой рабочий чекаут submodule небезопасно
-(`.claude/rules/git.md`) — оставлено на будущую сессию по `domwellbes` или на владельца текущей
-WIP-сессии.
-
-- [ ] ⚠️ Открытый вопрос: домигрировать `domwellbes` на `@letar/env-load` (те же 3 файла), когда
-      его текущая WIP-сессия завершится и закоммитит/освободит рабочее дерево. Паттерн и
-      команды — этот же §55, разделы выше.
+На момент первого прохода submodule был в активной работе параллельной сессии (незакоммиченные
+правки в `PLAN_OPERATIONS.md`, `ROADMAP_M10.md`, `docs/ARCHITECTURE.md`, `contract.action.ts`, и
+уже частично начатая правка самого `check-db-indexes.mjs` под §54) — трогать чужой рабочий чекаут
+было небезопасно (`.claude/rules/git.md`), миграция отложена. После того как параллельная сессия
+закоммитила свою работу, дерево очистилось и `prisma.config.ts`, `scripts/check-db-indexes.mjs`,
+`prisma/seed/load-env.ts` переведены на `@letar/env-load` тем же паттерном, что и остальные
+приложения (коммит внутри submodule + bump SHA + `bun.lock` в root).
