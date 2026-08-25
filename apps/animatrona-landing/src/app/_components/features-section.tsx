@@ -154,7 +154,9 @@ function FeatureCard({ feature }: FeatureCardProps) {
             <VStack align="start" gap={1} w="full">
               {feature.details.map((detail) => (
                 <Text key={detail} fontSize="sm" color="gray.500" display="flex" alignItems="center" gap={2}>
-                  <Box w={1} h={1} borderRadius="full" bg={feature.isMain ? 'brand.400' : 'brand.500'} />
+                  <Box asChild w={1} h={1} borderRadius="full" bg={feature.isMain ? 'brand.400' : 'brand.500'}>
+                    <span />
+                  </Box>
                   {detail}
                 </Text>
               ))}
