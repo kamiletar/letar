@@ -1,5 +1,13 @@
 # Выполненные задачи — Kami
 
+## Фикс: `OptimizedImage` `priority` не выставлял `fetchpriority="high"` (Next.js 16 API) (2026-08-25)
+
+Монорепо-широкий аудит по мотивам находки в domwellbes (`PLAN_PUBLIC_MOBILE.md` §12.24) —
+Next.js 16 развёл `priority` на независимые `preload`/`fetchPriority`, старый проп больше не
+ставит `fetchpriority="high"` сам по себе. `optimized-image.tsx` — общий обёрточный компонент
+над `next/image` — переведён на `preload`+`fetchPriority`. `typecheck:tsgo`/`lint`/`format`
+зелёные.
+
 ## Фикс: гонка useTransition.isPending на первом кадре SlotPicker (2026-08-25)
 
 Аудит по всему монорепо на паттерн из `domwellbes` §12.10 (`useTransition().isPending`
