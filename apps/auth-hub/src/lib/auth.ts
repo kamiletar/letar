@@ -71,44 +71,6 @@ export const auth = createAuth({
         clientSecret: process.env.AUTH_FACEBOOK_SECRET,
       },
     }),
-
-    // VK (ВКонтакте)
-    ...(process.env.AUTH_VK_ID
-      && process.env.AUTH_VK_SECRET && {
-      vk: {
-        clientId: process.env.AUTH_VK_ID,
-        clientSecret: process.env.AUTH_VK_SECRET,
-        getUserInfo: async (tokens) => {
-          const accessToken = tokens.accessToken
-          if (!accessToken) {
-            throw new Error('VK: no access token')
-          }
-          const userId = (tokens.raw as { user_id?: number })?.user_id
-          const response = await fetch(
-            `https://api.vk.com/method/users.get?user_ids=${userId}&fields=photo_200,screen_name&access_token=${accessToken}&v=5.131`,
-          )
-          const data = await response.json()
-          const user = data.response?.[0]
-
-          if (!user) {
-            throw new Error('VK user not found')
-          }
-
-          const email = (tokens.raw as { email?: string })?.email
-
-          return {
-            user: {
-              id: String(user.id),
-              name: `${user.first_name} ${user.last_name}`.trim() || user.screen_name,
-              email: email || `${user.id}@vk.com`,
-              image: user.photo_200,
-              emailVerified: !!email,
-            },
-            data: user,
-          }
-        },
-      },
-    }),
   },
 
   // Дополнительные плагины поверх стандартных hub-provider
@@ -132,37 +94,82 @@ export const auth = createAuth({
       disableSignUp: false,
     }),
 
-    // Yandex через genericOAuth
+    // Yandex + VK через genericOAuth
     genericOAuth({
-      config: process.env.AUTH_YANDEX_ID && process.env.AUTH_YANDEX_SECRET
-        ? [
-          {
-            providerId: 'yandex',
-            clientId: process.env.AUTH_YANDEX_ID,
-            clientSecret: process.env.AUTH_YANDEX_SECRET,
-            authorizationUrl: 'https://oauth.yandex.ru/authorize',
-            tokenUrl: 'https://oauth.yandex.ru/token',
-            scopes: ['login:email', 'login:info', 'login:avatar'],
-            getUserInfo: async (tokens) => {
-              const response = await fetch('https://login.yandex.ru/info', {
-                headers: {
-                  Authorization: `OAuth ${tokens.accessToken}`,
-                },
-              })
-              const data = await response.json()
-              return {
-                id: data.id,
-                name: data.display_name || data.real_name || data.login,
-                email: data.default_email,
-                image: data.default_avatar_id
-                  ? `https://avatars.yandex.net/get-yapic/${data.default_avatar_id}/islands-200`
-                  : undefined,
-                emailVerified: true,
-              }
+      config: [
+        ...(process.env.AUTH_YANDEX_ID && process.env.AUTH_YANDEX_SECRET
+          ? [
+            {
+              providerId: 'yandex',
+              clientId: process.env.AUTH_YANDEX_ID,
+              clientSecret: process.env.AUTH_YANDEX_SECRET,
+              authorizationUrl: 'https://oauth.yandex.ru/authorize',
+              tokenUrl: 'https://oauth.yandex.ru/token',
+              scopes: ['login:email', 'login:info', 'login:avatar'],
+              getUserInfo: async (tokens: { accessToken?: string }) => {
+                const response = await fetch('https://login.yandex.ru/info', {
+                  headers: {
+                    Authorization: `OAuth ${tokens.accessToken}`,
+                  },
+                })
+                const data = await response.json()
+                return {
+                  id: data.id,
+                  name: data.display_name || data.real_name || data.login,
+                  email: data.default_email,
+                  image: data.default_avatar_id
+                    ? `https://avatars.yandex.net/get-yapic/${data.default_avatar_id}/islands-200`
+                    : undefined,
+                  emailVerified: true,
+                }
+              },
             },
-          },
-        ]
-        : [],
+          ]
+          : []),
+
+        // VK (ВКонтакте): better-auth 1.7 зарезервировал ключ `vk` в `socialProviders` под
+        // собственный OAuth 2.1/PKCE-провайдер (VK ID), несовместимый со старым VK API 5.131-
+        // флоу (users.get с clientSecret) — тот же фикс, что уже сделан в driving-school.
+        ...(process.env.AUTH_VK_ID && process.env.AUTH_VK_SECRET
+          ? [
+            {
+              providerId: 'vk',
+              clientId: process.env.AUTH_VK_ID,
+              clientSecret: process.env.AUTH_VK_SECRET,
+              authorizationUrl: 'https://oauth.vk.com/authorize',
+              tokenUrl: 'https://oauth.vk.com/access_token',
+              getUserInfo: async (tokens: { accessToken?: string; raw?: Record<string, unknown> }) => {
+                const accessToken = tokens.accessToken
+                if (!accessToken) {
+                  throw new Error('VK: no access token')
+                }
+                const userId = (tokens.raw as { user_id?: number })?.user_id
+                const response = await fetch(
+                  `https://api.vk.com/method/users.get?user_ids=${userId}&fields=photo_200,screen_name&access_token=${accessToken}&v=5.131`,
+                )
+                const data = await response.json()
+                const user = data.response?.[0] as
+                  | { id: number; first_name?: string; last_name?: string; screen_name?: string; photo_200?: string }
+                  | undefined
+
+                if (!user) {
+                  throw new Error('VK user not found')
+                }
+
+                const email = (tokens.raw as { email?: string })?.email
+
+                return {
+                  id: String(user.id),
+                  name: `${user.first_name} ${user.last_name}`.trim() || user.screen_name,
+                  email: email || `${user.id}@vk.com`,
+                  image: user.photo_200,
+                  emailVerified: !!email,
+                }
+              },
+            },
+          ]
+          : []),
+      ],
     }),
 
     // Passkeys / WebAuthn (Этап 6.5 PLAN.md)

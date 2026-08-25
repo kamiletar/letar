@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+## [0.7.13] - 2026-08-25
+
+### Fixed
+
+- `nx typecheck:tsgo auth-hub` был красным: better-auth 1.7 зарезервировал ключ `vk` в
+  `socialProviders` под собственный OAuth 2.1/PKCE-провайдер, несовместимый со старым кастомным
+  VK-провайдером (VK API 5.131). Перенёс VK из `socialProviders` в `genericOAuth` — тот же фикс,
+  что уже применён в driving-school.
+
 ## [0.7.12] - 2026-08-25
 
 ### Fixed

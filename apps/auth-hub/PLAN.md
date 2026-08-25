@@ -1,5 +1,25 @@
 # План разработки auth-hub
 
+## v0.7.13 — фикс typecheck: VK-провайдер перенесён в genericOAuth (2026-08-25)
+
+- [x] **`nx typecheck:tsgo auth-hub` был красным** — better-auth 1.7 зарезервировал ключ `vk` в
+      `socialProviders` под собственный OAuth 2.1/PKCE-провайдер (VK ID, тип `VkOption`/
+      `VkProfile` из `@better-auth/core`), несовместимый со старым кастомным VK-провайдером
+      (VK API 5.131, `clientSecret` + ручной `users.get`). Тот же баг уже чинили в
+      `driving-school` (см. `apps/driving-school/PLAN_COMPLETED.md`) — здесь применён тот же
+      фикс: VK-провайдер перенесён из `socialProviders.vk` в `genericOAuth({config: [...]})`
+      рядом с Yandex (`src/lib/auth.ts`). Логика `getUserInfo` (VK API 5.131 users.get) не
+      менялась, только точка регистрации. Вторая ошибка typecheck, ранее числившаяся отдельной
+      (`TS2322` в `libs/auth/src/server/create-auth/index.ts`, `buildHubProviderAuth.plugins`),
+      оказалась следствием этой же VK-несовместимости, не отдельным багом — `libs/auth` не
+      правился, после фикса auth-hub чист сам по себе.
+      Прогон: `nx run-many -t format --projects=auth-hub` → `nx lint auth-hub` →
+      `nx typecheck:tsgo auth-hub` — все зелёные. Дополнительно прогнан `tsgo --noEmit` на
+      остальных 8 потребителей `createAuth` (`driving-school`, `kami`, `domwellbes`, `time`,
+      `aprel8008`, `dsperevod`, `svoichuzhie`, `aboi`) — `libs/auth` не менялся, поэтому фикс их
+      не затрагивает; единственные красные ошибки в `domwellbes` (Chakra Card/Link/Button
+      recipe-варианты) — предсуществующие, не про auth, не трогал.
+
 - [x] ✅ **«Открытый вопрос» `/sign-in` не раскрывается из React-стриминга — закрыт как ложная
       тревога, не баг приложения (2026-08-25).** Причина — известная ловушка инструментов
       автоматизации (Browser pane / фоновая вкладка `claude-in-chrome`): вкладка, которую браузер
