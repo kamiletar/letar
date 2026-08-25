@@ -39,7 +39,9 @@ const context = await browser.newContext({ viewport: { width: 1280, height: 2200
 const page = await context.newPage()
 
 // Программная авторизация — секрет не покидает этот процесс, не набирается через UI
-await page.goto(`${BASE_URL}/api/auth/dev-session?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`)
+await page.goto(
+  `${BASE_URL}/api/auth/dev-session?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`,
+)
 
 await page.goto(`${BASE_URL}${targetPath}`, { waitUntil: 'networkidle' })
 await page.waitForTimeout(500) // дать догрузиться lazy-контенту/шрифтам
