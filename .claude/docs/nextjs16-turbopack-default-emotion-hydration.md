@@ -123,14 +123,17 @@ React component» — оно остаётся и под webpack (это отде
 Проверены приложения, сочетающие `ChakraProvider` (Chakra v3) и `next-themes`'ный
 `ColorModeProvider` как прямой потомок — той же связке, что вызвала баг в `mandala`:
 
-| Приложение           | Было (dev/build)                                  | Бандлер до фикса | Статус                                                  |
-| -------------------- | ------------------------------------------------- | ---------------- | ------------------------------------------------------- |
-| `mandala`            | явные, `next dev`/`next build`                    | Turbopack        | ✅ исправлено ранее (эталон)                            |
-| `animatrona-tracker` | `build` явный, `dev` инферился                    | Turbopack        | ✅ исправлено — `--webpack` в обоих                     |
-| `dashboard`          | оба инферились (частичный `build`)                | Turbopack        | ✅ исправлено — частичный override `options.command`    |
-| `driving-school`     | оба инферились (submodule)                        | Turbopack        | ✅ исправлено — частичный override, коммит `4d0ccaf`    |
-| `auth-hub`           | оба инферились (`project.json` без `build`/`dev`) | Turbopack        | ✅ исправлено 2026-08-25 — частичный override, см. ниже |
-| `aira-web`           | оба инферились (`project.json` без `build`/`dev`) | Turbopack        | ✅ исправлено 2026-08-25 — частичный override, см. ниже |
+| Приложение             | Было (dev/build)                                  | Бандлер до фикса | Статус                                                        |
+| ---------------------- | ------------------------------------------------- | ---------------- | ------------------------------------------------------------- |
+| `mandala`              | явные, `next dev`/`next build`                    | Turbopack        | ✅ исправлено ранее (эталон)                                  |
+| `animatrona-tracker`   | `build` явный, `dev` инферился                    | Turbopack        | ✅ исправлено — `--webpack` в обоих                           |
+| `dashboard`            | оба инферились (частичный `build`)                | Turbopack        | ✅ исправлено — частичный override `options.command`          |
+| `driving-school`       | оба инферились (submodule)                        | Turbopack        | ✅ исправлено — частичный override, коммит `4d0ccaf`          |
+| `auth-hub`             | оба инферились (`project.json` без `build`/`dev`) | Turbopack        | ✅ исправлено 2026-08-25 — частичный override, см. ниже       |
+| `aira-web`             | оба инферились (`project.json` без `build`/`dev`) | Turbopack        | ✅ исправлено 2026-08-25 — частичный override, см. ниже       |
+| `letar-landing`        | явные, `next dev -p 3015`/`next build`            | Turbopack        | ✅ исправлено 2026-08-25 — `--webpack` добавлен в обе команды |
+| `kami-key-the-landing` | явные, `next dev -p 3011`/`next build`            | Turbopack        | ✅ исправлено 2026-08-25 — `--webpack` добавлен в обе команды |
+| `animatrona-landing`   | явные, `next dev -p 3008`/`next build`            | Turbopack        | ✅ исправлено 2026-08-25 — `--webpack` добавлен в обе команды |
 
 Для всех трёх подтверждён Turbopack в логе dev-сервера до фикса
 (`▲ Next.js 16.3.0 (Turbopack)`) и webpack после (`▲ Next.js 16.3.0 (webpack)`), а также
@@ -149,11 +152,10 @@ Chakra UI, без дожидания живой репродукции гонк�
 сохранённого cookie-согласия (баннер скрыт до первого рендера, поэтому не ловилось в
 e2e/ручной проверке с уже принятым согласием). См. `apps/animatrona-tracker/PLAN_COMPLETED.md`.
 
-Не проверялись целенаправленно приложения-лендинги (`letar-landing`, `kami-key-the-landing`,
-`animatrona-landing`) и Electron-рендерер `animatrona` — у них другой профиль риска (лендинги
-почти без интерактивности сразу после навигации; Electron-рендерер собирается отдельно от
-`next dev`/`next build` через `bun x next dev`, не через Nx-инферированные таргеты) — чинить
-по факту обнаружения, если всплывёт.
+Ранее (до 2026-08-25) в этом разделе значилось, что лендинги (`letar-landing`,
+`kami-key-the-landing`, `animatrona-landing`) и Electron-рендерер `animatrona` не проверялись
+целенаправленно — «другой профиль риска». Проверка проведена, результаты — в таблице выше и в
+разделе «Electron-рендерер `animatrona`» ниже.
 
 ## Найдено на `auth-hub` (2026-08-25): реальный отказ интерактивности, не только консольный шум
 
@@ -329,3 +331,73 @@ type="button">` на сервере и `<div data-scope="menu" data-part="trigge
 разумное число попыток — как и в исходном аудите 2026-08-04, это не опровергает риск, просто не
 поймано. Если всплывёт флаки именно с падением клика сразу после навигации (не общий шум в
 консоли) — сначала проверить это, `--webpack` в `apps/svoichuzhie/project.json` пока не применён.
+
+## Лендинги (`letar-landing`, `kami-key-the-landing`, `animatrona-landing`): паттерн подтверждён, фикс применён (2026-08-25)
+
+Все три используют одну и ту же связку в `_components/ui/provider.tsx` — Chakra v3
+`ChakraProvider` обёрнут в `next-themes`'ный `ThemeProvider` (`attribute="class"
+defaultTheme="dark" forcedTheme="dark"`), т.е. то же структурное совпадение, что и во всех
+записях таблицы выше. `dev`/`build` в `project.json` были явными (не инферились через
+`@nx/next`), но без `--webpack` — голый `next dev -p <порт>`/`next build`, Turbopack по
+умолчанию. `package.json` каждого приложения без блока `scripts` — переопределения бандлера на
+этом уровне не было.
+
+Живая репродукция гонки клика не проводилась — фикс превентивный, по структурному совпадению, тем
+же способом, что и на `aira-web`/`auth-hub`/остальных из таблицы. `--webpack` добавлен к обеим
+командам во всех трёх `project.json`. Проверено: `nx typecheck:tsgo`/`nx lint` зелёные,
+`nx build` проходит и подтверждает бандлер webpack в выводе (`✓ Compiled successfully`, без
+маркера `(Turbopack)`).
+
+Ремарка про «лендинги почти без интерактивности» из более раннего диагноза не отменяет риск:
+у всех трёх есть навигация между несколькими route (`/`, `/privacy`, а у `animatrona-landing`
+ещё и `/docs/*` с саб-роутами) через обычные Next.js ссылки — именно клиентская soft-навигация
+между такими маршрутами и есть триггер гонки в задокументированных случаях (`aira-web`,
+`mandala`), не обязательно насыщенный интерактив на самой странице.
+
+## Electron-рендерер `animatrona`: риск актуален и, возможно, выше среднего, но `--webpack` не применён — нужна отдельная работа
+
+`apps/animatrona/renderer` — **не** `bun x next dev` в обход Nx, как предполагалось в более
+раннем диагнозе: у приложения есть обычный `project.json` с явными `dev`/`build`
+(`next dev -p 3007` / `next build`, без `--webpack`), таргеты гоняются через `nx dev/build
+animatrona-renderer` как у любого другого приложения монорепо.
+
+**Структурное совпадение подтверждено, риск, вероятно, выше, чем у лендингов:**
+`src/components/ui/provider.tsx` — `ChakraProvider` с `ColorModeProvider` (обёртка над
+`next-themes`'ным `ThemeProvider`, `src/components/ui/color-mode.tsx`) как прямым потомком.
+В отличие от лендингов, это полноценное multi-route SPA (`library`, `watch`, `discover`,
+`settings`, `party` и др. — 40+ файлов с `next/link`/`useRouter`/`router.push`, см.
+`AppShell`/`Sidebar`), т.е. клиентская soft-навигация происходит постоянно в обычном
+пользовательском потоке, а не изредка как на лендинге.
+
+**Почему `--webpack` не применён в этой сессии — не пропуск, а осознанное решение.**
+`next.config.js` приложения держит непустой блок `turbopack: {...}` с двумя вещами, у которых
+нет автоматического webpack-эквивалента:
+
+```js
+turbopack: {
+  root: standaloneRoot,
+  resolveAlias: {
+    'cross-fetch': './src/lib/fetch-shim.ts',
+    'node-fetch': './src/lib/fetch-shim.ts',
+    '@letar/animatrona-ui': '../../../libs/animatrona-ui/src/index.ts',
+  },
+},
+```
+
+`resolveAlias` — специфичный API Turbopack (см. комментарий в файле: «Заменяем
+node-fetch/cross-fetch на встроенный fetch — это убирает цепочку ESM полифиллов»). Простое
+добавление `--webpack` без переноса этой замены в эквивалентный `webpack()`-хук с высокой
+вероятностью возвращает сломанную цепочку `node-fetch → fetch-blob` ESM-полифиллов, о которой
+предупреждает сам комментарий в конфиге — то есть попытка воспроизвести фикс по аналогии с
+лендингами рискует не превентивно устранить один баг, а внести новый, гарантированно
+воспроизводимый (не гипотетическую гонку, а поломку сборки/рантайма). `output: 'standalone'`
+(HTTP-сервер, не статический экспорт и не `file://`) дополнительно означает, что это не тот же
+класс риска, что у остальных Electron-приложений монорепо (`label-printer-desktop`,
+`poster-microtext-desktop`) — там `output: 'export'` и `file://`/`app://`, soft-навигации в
+том же смысле нет вообще.
+
+**Статус: риск открыт, фикс требует отдельной сессии** — написать `webpack()`-эквивалент для
+`resolveAlias` (переопределение `cross-fetch`/`node-fetch` через `config.resolve.alias`,
+`@letar/animatrona-ui` — аналогично) и полный `nx build`/`nx dev` прогон Electron-оболочки
+(не только `next build`) перед тем как считать фикс безопасным. Не чинить наспех в рамках
+аудита, где основная цель — landing-приложения.
