@@ -4,6 +4,19 @@
 
 ## [Unreleased]
 
+## [0.40.16] - 2026-08-25
+
+### Fixed
+
+- Touch target для коротких текстовых ссылок (WCAG 2.5.5) — добавлен `minH="2.75rem"
+  alignItems="center"` на `Link asChild` в `welcome-portal.tsx` (3 ссылки), `navigation.tsx`
+  (логотип), `cart-items.tsx` (название товара в корзине) и `login-form.tsx` (ссылка «Забыли
+  пароль?»). Компонент `TouchLink` из `@letar/ui` не подошёл напрямую — он жёстко использует
+  `next/link`, а mandala везде роутит через locale-aware `Link` из `@/i18n/navigation`
+  (`next-intl`), замена сломала бы префиксацию локали в URL. Инлайновые ссылки внутри
+  предложений (`about-elfafeya` — jungLink, `register-form.tsx` — signIn) не тронуты — на них
+  распространяется явное исключение WCAG 2.5.5 для ссылок внутри блока текста.
+
 ## [0.40.13] - 2026-08-21
 
 ### Fixed

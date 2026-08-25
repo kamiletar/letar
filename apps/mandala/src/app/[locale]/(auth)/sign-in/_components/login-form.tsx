@@ -75,7 +75,7 @@ export function LoginForm({ callbackUrl = '/' }: LoginFormProps) {
         </Form.Button.Submit>
 
         <Text fontSize="sm" color="fg.muted" textAlign="center">
-          <Link asChild colorPalette="fg" fontWeight="medium">
+          <Link asChild colorPalette="fg" fontWeight="medium" minH="2.75rem" alignItems="center">
             <LocalizedLink href="/forgot-password">{t('forgotPassword')}</LocalizedLink>
           </Link>
         </Text>

@@ -67,7 +67,7 @@ const CartItemCard = memo(function CartItemCard({
 
           {/* Информация о товаре */}
           <Box flex={1}>
-            <Link asChild>
+            <Link asChild minH="2.75rem" alignItems="center">
               <LocalizedLink href={`/shop/${item.productSlug}`}>
                 <Text fontWeight="bold" color="fg" _hover={{ color: 'fg.brand' }}>
                   {item.name}

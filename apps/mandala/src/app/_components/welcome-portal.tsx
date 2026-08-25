@@ -163,19 +163,40 @@ export function WelcomePortal({ mandalas }: WelcomePortalProps) {
               }}
             >
               <HStack gap={4} justify="center" flexWrap="wrap">
-                <Link asChild color="whiteAlpha.600" fontSize="sm" _hover={{ color: 'white' }}>
+                <Link
+                  asChild
+                  color="whiteAlpha.600"
+                  fontSize="sm"
+                  minH="2.75rem"
+                  alignItems="center"
+                  _hover={{ color: 'white' }}
+                >
                   <LocalizedLink href="/mandalas" onClick={handleClose}>
                     {t('gallery')}
                   </LocalizedLink>
                 </Link>
                 <Text color="whiteAlpha.300">•</Text>
-                <Link asChild color="whiteAlpha.600" fontSize="sm" _hover={{ color: 'white' }}>
+                <Link
+                  asChild
+                  color="whiteAlpha.600"
+                  fontSize="sm"
+                  minH="2.75rem"
+                  alignItems="center"
+                  _hover={{ color: 'white' }}
+                >
                   <LocalizedLink href="/about-elfafeya" onClick={handleClose}>
                     {t('aboutArtist')}
                   </LocalizedLink>
                 </Link>
                 <Text color="whiteAlpha.300">•</Text>
-                <Link asChild color="whiteAlpha.600" fontSize="sm" _hover={{ color: 'white' }}>
+                <Link
+                  asChild
+                  color="whiteAlpha.600"
+                  fontSize="sm"
+                  minH="2.75rem"
+                  alignItems="center"
+                  _hover={{ color: 'white' }}
+                >
                   <LocalizedLink href="/about-mandalas" onClick={handleClose}>
                     {t('aboutMandalas')}
                   </LocalizedLink>

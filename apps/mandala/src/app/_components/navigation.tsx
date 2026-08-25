@@ -66,7 +66,7 @@ export function Navigation({ variant = 'full', hideOnScroll = false }: Navigatio
       <Container maxW="container.xl">
         <Flex justify="space-between" align="center" py={4}>
           {/* Логотип */}
-          <Link asChild>
+          <Link asChild minH="2.75rem" alignItems="center">
             <LocalizedLink href="/">
               <Text fontSize="2xl" fontWeight="bold" color="fg">
                 Elfafeya Art
