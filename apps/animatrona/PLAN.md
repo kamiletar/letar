@@ -1468,6 +1468,26 @@ onlyMultiLine`) против `.prettierrc` (`trailingComma: es5` + `prettier-plu
 
 ## Открытые задачи
 
+- [ ] ⚠️ **Открытый вопрос: `animatrona-main:build`/`animatrona:build` нестабилен — 38
+      TS-ошибок в 12 файлах, воспроизводится через раз.** После фикса `tracker-client.ts`
+      (2026-08-26, см. PLAN_COMPLETED.md) прогнан трижды подряд одной и той же командой
+      `nx run animatrona-main:build --skip-nx-cache` без изменений в коде между запусками: один
+      раз прошёл чисто, два раза дал одинаковые 38 ошибок в `rutracker-parser.ts`,
+      `shikimori/client.ts`, `qbittorrent-service.ts`, `kubo-service.ts`, `kubo-health.ts`,
+      `kubo-stats.ts`, `unified-ipfs-service.ts`, `library-migration.ts`,
+      `export-queue-service.ts`, `mobile-server/{server,routes/media}.ts`,
+      `rutracker-download-orchestrator.ts`, `peer-id-manager.ts`, `pin-manager.ts`. Большинство —
+      `TS2835`/`TS1479`/`TS1541` про `moduleResolution: node16/nodenext` (относительные импорты
+      без `.js`-расширения, CJS↔ESM границы) — эта настройка есть только у tsc-конфига таргета
+      `build`, `typecheck:tsgo` её не ловит (там всегда чисто). Есть и несколько настоящих
+      type-mismatch: `library-migration.ts` (`Dirent<string>` vs `Dirent<NonSharedBuffer>`),
+      `rutracker-download-orchestrator.ts` (обращения к несуществующим полям),
+      `qbittorrent-service.ts:393` (`Object is possibly 'null'`). Не решено в рамках сессии
+      (файлы вне скоупа задачи) — нужно отдельно: (1) разобраться, откуда нестабильность
+      0-vs-38 ошибок на идентичной команде — похоже на гонку в кеше/генерируемых файлах внутри
+      `animatrona:build`; (2) закрыть сами 12 файлов под `node16`-резолюцию и реальные
+      type-ошибки.
+
 - [ ] ⚠️ **Открытый вопрос: `nx dev animatrona` (интерактивный Electron dev через nextron)
       по-прежнему запускает renderer через Turbopack, не webpack.** Закрыт основной риск
       Turbopack+Emotion hydration (2026-08-25, см. PLAN_COMPLETED.md) — `--webpack` добавлен в

@@ -4,6 +4,44 @@
 
 > **Архив обновлён:** 2026-08-26
 
+## Типизация `response.json()` в `tracker-client.ts` (2026-08-26)
+
+Продолжение предыдущей записи («Фикс `animatrona-main:build`»): после фикса схемы `Anime`
+build дошёл до 70 предсуществующих `TS18046`/`TS2322`-ошибок в
+[tracker-client.ts](/apps/animatrona/main/services/tracker-client.ts) — каждая функция
+(`fetchTrackerCatalog`, `syncLibraryToTracker`, `fetchWatchProgressSince`, `fetchProfile`,
+`updateProfile`, `addToLibraryViaTracker` и т.д.) делала `await response.json()` без типа и
+либо читала поле результата как `unknown`, либо возвращала его напрямую как типизированный
+интерфейс.
+
+Добавлен generic-хелпер `readJson<T>(response): Promise<T>` и типизированное
+`TrackerErrorPayload = { error?: string }` для веток ошибок. Каждый вызов `response.json()`
+заменён на `readJson<КонкретныйТип>(response)` — используются уже существующие интерфейсы из
+[tracker.ts](/apps/animatrona/shared/types/tracker.ts) (`TrackerSyncResult`,
+`TrackerAddToLibraryResult`, `TrackerCatalogResult` и т.п.) либо инлайн-тип обёртки
+(`{ data?: T }`, `{ items?: T[] }`) там, где сервер отдаёт не готовый интерфейс целиком, а
+поле внутри объекта.
+
+Проверено: `nx typecheck:tsgo animatrona` — 0 ошибок (все 70 исчезли), `nx lint animatrona` —
+0 errors (39 pre-existing warnings в других файлах не задеты). `tracker-client.ts` не
+встречается ни в одном прогоне `nx run animatrona-main:build`.
+
+⚠️ **Побочная находка, не в скоупе этой задачи:** `animatrona-main:build`/`nx run
+animatrona:build` при этом всё ещё нестабилен — из трёх прогонов один прошёл чисто, два дали
+одни и те же **38 TS-ошибок в 12 других файлах** (`rutracker-parser.ts`, `shikimori/client.ts`,
+`qbittorrent-service.ts`, `kubo-service.ts`, `kubo-health.ts`, `kubo-stats.ts`,
+`unified-ipfs-service.ts`, `library-migration.ts`, `export-queue-service.ts`,
+`mobile-server/{server,routes/media}.ts`, `rutracker-download-orchestrator.ts`,
+`peer-id-manager.ts`, `pin-manager.ts`). Ошибки двух родов: (1) большинство — `TS2835`/`TS1479`/
+`TS1541`, все про `moduleResolution: node16/nodenext` (относительные импорты без `.js`,
+CJS↔ESM), таргет `main:build` собирается tsc с этой настройкой, а `typecheck:tsgo` — нет,
+поэтому там чисто; (2) несколько настоящих type-mismatch (`library-migration.ts` — `Dirent<string>`
+vs `Dirent<NonSharedBuffer>`, `rutracker-download-orchestrator.ts` — обращения к
+несуществующим полям, `qbittorrent-service.ts:393` — `Object is possibly 'null'`). Плюс сама
+нестабильность прогона (0 vs 38 ошибок на идентичной команде без изменений в коде между
+запусками) — отдельная проблема, похоже на гонку в кеше/генерируемых файлах внутри таргета
+`animatrona:build`. Задача занесена в `PLAN.md` как открытый вопрос.
+
 ## Фикс `animatrona-main:build`: расхождение схемы и `tracker-sync.ts` (2026-08-26)
 
 `nx run animatrona-main:build` падал на 73 TS-ошибках — код обращался к

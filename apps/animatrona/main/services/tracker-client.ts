@@ -21,6 +21,14 @@ import { createModuleLogger } from '../utils/logger'
 
 const log = createModuleLogger('TrackerClient')
 
+/** Тело ответа трекера при ошибке */
+type TrackerErrorPayload = { error?: string }
+
+/** Типизированный разбор JSON-ответа fetch */
+async function readJson<T>(response: Response): Promise<T> {
+  return (await response.json()) as T
+}
+
 /** Конфигурация подключения к tracker */
 export interface TrackerConfig {
   /** URL трекера (например, https://animatrona-tracker.letar.best) */
@@ -89,7 +97,7 @@ export async function publishToTracker(config: TrackerConfig, directoryCid: stri
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: response.statusText }))
+      const errorData = await readJson<TrackerErrorPayload>(response).catch(() => ({ error: response.statusText }))
       const errorMessage = typeof errorData.error === 'string' ? errorData.error : JSON.stringify(errorData.error)
 
       log.error('Ошибка публикации', {
@@ -103,7 +111,15 @@ export async function publishToTracker(config: TrackerConfig, directoryCid: stri
       }
     }
 
-    const result = await response.json()
+    const result = await readJson<{
+      anime?: {
+        id?: string
+        status?: string
+        episodeCount?: number
+        isReplacement?: boolean
+        replacesAnimeId?: string
+      }
+    }>(response)
 
     log.info('Успешная публикация', {
       animeId: result.anime?.id,
@@ -222,12 +238,12 @@ export async function registerDistribution(
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: response.statusText }))
+      const errorData = await readJson<TrackerErrorPayload>(response).catch(() => ({ error: response.statusText }))
       return { success: false, error: `${response.status}: ${errorData.error || response.statusText}` }
     }
 
-    const result = await response.json()
-    return { success: true, distribution: result.data as TrackerDistribution }
+    const result = await readJson<{ data?: TrackerDistribution }>(response)
+    return { success: true, distribution: result.data }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     log.error('Ошибка регистрации раздачи', { error: message })
@@ -256,12 +272,12 @@ export async function updateDistribution(
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: response.statusText }))
+      const errorData = await readJson<TrackerErrorPayload>(response).catch(() => ({ error: response.statusText }))
       return { success: false, error: `${response.status}: ${errorData.error || response.statusText}` }
     }
 
-    const result = await response.json()
-    return { success: true, distribution: result.data as TrackerDistribution }
+    const result = await readJson<{ data?: TrackerDistribution }>(response)
+    return { success: true, distribution: result.data }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     log.error('Ошибка обновления раздачи', { error: message })
@@ -290,7 +306,7 @@ export async function reportStats(
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: response.statusText }))
+      const errorData = await readJson<TrackerErrorPayload>(response).catch(() => ({ error: response.statusText }))
       return { success: false, error: `${response.status}: ${errorData.error || response.statusText}` }
     }
 
@@ -339,7 +355,11 @@ export async function fetchTrackerCatalog(
       return { success: false, error: `${response.status}: ${response.statusText}` }
     }
 
-    const result = await response.json()
+    const result = await readJson<{
+      data?: TrackerCatalogResult['data']
+      pagination?: { total?: number }
+      total?: number
+    }>(response)
     log.info('Каталог загружен', { count: result.data?.length ?? 0, total: result.pagination?.total ?? 0 })
     return {
       success: true,
@@ -374,7 +394,7 @@ export async function fetchTrackerAnimeDetail(
       return { success: false, error: `${response.status}: ${response.statusText}` }
     }
 
-    const result = await response.json()
+    const result = await readJson<{ data?: TrackerAnimeDetailResult['data'] }>(response)
     return { success: true, data: result.data }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
@@ -399,7 +419,7 @@ export async function fetchLibraryFromTracker(
       return { success: false, error: `${response.status}: ${response.statusText}` }
     }
 
-    const result = await response.json()
+    const result = await readJson<{ data?: TrackerLibraryItem[] }>(response)
     return { success: true, data: result.data ?? [] }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
@@ -430,11 +450,11 @@ export async function syncLibraryToTracker(
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: response.statusText }))
+      const errorData = await readJson<TrackerErrorPayload>(response).catch(() => ({ error: response.statusText }))
       return { success: false, error: `${response.status}: ${errorData.error || response.statusText}` }
     }
 
-    return await response.json()
+    return await readJson<TrackerSyncResult>(response)
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     log.error('Ошибка синхронизации библиотеки', { error: message })
@@ -471,7 +491,7 @@ export async function pushWatchProgress(
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: response.statusText }))
+      const errorData = await readJson<TrackerErrorPayload>(response).catch(() => ({ error: response.statusText }))
       return { success: false, error: `${response.status}: ${errorData.error || response.statusText}` }
     }
 
@@ -505,7 +525,7 @@ export async function fetchWatchProgressSince(
       return { success: false, error: `${response.status}: ${response.statusText}` }
     }
 
-    const result = await response.json()
+    const result = await readJson<{ items?: TrackerWatchProgressItem[] }>(response)
     return { success: true, items: result.items ?? [] }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
@@ -534,7 +554,7 @@ export async function fetchProfile(
       return { success: false, error: `${response.status}: ${response.statusText}` }
     }
 
-    const result = await response.json()
+    const result = await readJson<{ data?: TrackerUserProfile }>(response)
     return { success: true, data: result.data }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
@@ -561,11 +581,11 @@ export async function updateProfile(
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: response.statusText }))
+      const errorData = await readJson<TrackerErrorPayload>(response).catch(() => ({ error: response.statusText }))
       return { success: false, error: `${response.status}: ${errorData.error || response.statusText}` }
     }
 
-    const result = await response.json()
+    const result = await readJson<{ data?: TrackerUserProfile }>(response)
     return { success: true, data: result.data }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
@@ -592,11 +612,11 @@ export async function addToLibraryViaTracker(
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: response.statusText }))
+      const errorData = await readJson<TrackerErrorPayload>(response).catch(() => ({ error: response.statusText }))
       return { success: false, error: `${response.status}: ${errorData.error || response.statusText}` }
     }
 
-    return await response.json()
+    return await readJson<TrackerAddToLibraryResult>(response)
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     log.error('Ошибка добавления в библиотеку', { error: message })

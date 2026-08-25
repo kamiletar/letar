@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+## [0.55.29] - 2026-08-26
+
+### Fixed
+
+- `tracker-client.ts`: 70 предсуществующих TS-ошибок (`TS18046`/`TS2322`) — все функции читали
+  `response.json()` как `unknown` либо возвращали его напрямую как типизированный интерфейс.
+  Добавлен generic-хелпер `readJson<T>(response)` и `TrackerErrorPayload` для веток ошибок,
+  каждый вызов типизирован конкретным интерфейсом из `shared/types/tracker.ts`.
+  `typecheck:tsgo`/`lint` — чисто. Побочная находка вне скоупа — открытый вопрос про
+  нестабильные 38 TS-ошибок в 12 других файлах на `nx run animatrona-main:build`, см. PLAN.md.
+
 ## [0.55.28] - 2026-08-26
 
 ### Fixed
