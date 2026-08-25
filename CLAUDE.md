@@ -270,7 +270,10 @@ pre-commit-хука не видел `.exe`-shim на Windows ·
 [tochka-acquiring-site-requirements](/.claude/docs/tochka-acquiring-site-requirements.md)
 
 **Auth, профиль, админка:** [auth](/.claude/docs/auth.md) · [admin](/.claude/docs/admin.md) ·
-[user-profile](/.claude/docs/user-profile.md)
+[user-profile](/.claude/docs/user-profile.md) ·
+[one-time-reveal-fragment-token-pattern](/.claude/docs/one-time-reveal-fragment-token-pattern.md)
+одноразово-раскрываемая публичная ссылка (счета, договоры, приглашения): fragment-токен → POST →
+scoped cookie, без утечки токена в лог/`Referer`
 
 **Электрон и десктоп:** [electron-app-protocol](/.claude/docs/electron-app-protocol.md) ⚠️ origin
 `null` под `file://` блокирует Worker и WASM ·
