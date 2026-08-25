@@ -28,8 +28,16 @@ export interface RolloutOptions {
   envFile?: string
   /** Тег образа — прокидывается через `DEPLOY_TAG` (compose: `image: <app>:${DEPLOY_TAG:-latest}`). */
   deployTag?: string
-  /** Имя контейнера NPM для `nginx -s reload` (канон — `nginx-proxy-manager`, см. infra/nginx-proxy-manager). */
-  npmContainerName: string
+  /** Какой реверс-прокси стоит перед приложением (по умолчанию `npm`, §48 M3 шаг 4).
+   *  `npm` — нужен явный `nginx -s reload`, чтобы подхватить оба контейнера по алиасу.
+   *  `traefik` — docker-провайдер сам следит за событиями контейнеров (`watch`), новый контейнер
+   *  с тем же service-лейблом появляется в балансировке сразу после healthy, старый пропадает
+   *  сразу после `docker rm` — сигнал не нужен и не существует (у Traefik нет команды reload). */
+  proxyKind?: 'npm' | 'traefik'
+  /** Имя контейнера NPM для `nginx -s reload` (канон — `nginx-proxy-manager`, см.
+   *  infra/nginx-proxy-manager). Обязателен при `proxyKind: 'npm'` (по умолчанию), игнорируется
+   *  при `proxyKind: 'traefik'`. */
+  npmContainerName?: string
   /** Сколько ждать healthy у нового контейнера, мс (по умолчанию 5 минут). */
   healthTimeoutMs?: number
   /** Интервал опроса healthcheck, мс (по умолчанию 3с). */
@@ -300,15 +308,35 @@ export async function runRollout(
     return { app, ok: false, steps }
   }
 
-  const reload1 = await executor.runCommand('docker', ['exec', options.npmContainerName, 'nginx', '-s', 'reload'])
-  push({
-    id: 'nginx-reload-1',
-    description: 'nginx reload (резолвит alias на оба контейнера)',
-    ok: reload1.exitCode === 0,
-    detail: reload1.exitCode === 0 ? undefined : reload1.stderr.trim(),
-  })
-  if (reload1.exitCode !== 0) {
-    return { app, ok: false, steps }
+  const proxyKind = options.proxyKind ?? 'npm'
+
+  if (proxyKind === 'traefik') {
+    push({
+      id: 'nginx-reload-1',
+      description:
+        'Traefik docker-провайдер уже добавил новый контейнер в балансировку (watch по событиям, сигнал не нужен)',
+      ok: true,
+    })
+  } else {
+    if (!options.npmContainerName) {
+      push({
+        id: 'nginx-reload-1',
+        description: 'nginx reload (резолвит alias на оба контейнера)',
+        ok: false,
+        detail: 'npmContainerName обязателен при proxyKind: "npm"',
+      })
+      return { app, ok: false, steps }
+    }
+    const reload1 = await executor.runCommand('docker', ['exec', options.npmContainerName, 'nginx', '-s', 'reload'])
+    push({
+      id: 'nginx-reload-1',
+      description: 'nginx reload (резолвит alias на оба контейнера)',
+      ok: reload1.exitCode === 0,
+      detail: reload1.exitCode === 0 ? undefined : reload1.stderr.trim(),
+    })
+    if (reload1.exitCode !== 0) {
+      return { app, ok: false, steps }
+    }
   }
 
   const stopOld = await executor.runCommand('docker', ['stop', oldContainer])
@@ -333,13 +361,28 @@ export async function runRollout(
     return { app, ok: false, steps }
   }
 
-  const reload2 = await executor.runCommand('docker', ['exec', options.npmContainerName, 'nginx', '-s', 'reload'])
-  push({
-    id: 'nginx-reload-2',
-    description: 'повторный nginx reload (убирает старый IP из upstream)',
-    ok: reload2.exitCode === 0,
-    detail: reload2.exitCode === 0 ? undefined : reload2.stderr.trim(),
-  })
+  if (proxyKind === 'traefik') {
+    push({
+      id: 'nginx-reload-2',
+      description: 'Traefik уже убрал старый контейнер из балансировки (событие docker rm поймано провайдером)',
+      ok: true,
+    })
+  } else {
+    // npmContainerName уже провалидирован веткой nginx-reload-1 выше при proxyKind: 'npm'.
+    const reload2 = await executor.runCommand('docker', [
+      'exec',
+      options.npmContainerName as string,
+      'nginx',
+      '-s',
+      'reload',
+    ])
+    push({
+      id: 'nginx-reload-2',
+      description: 'повторный nginx reload (убирает старый IP из upstream)',
+      ok: reload2.exitCode === 0,
+      detail: reload2.exitCode === 0 ? undefined : reload2.stderr.trim(),
+    })
+  }
 
   return { app, ok: steps.every((s) => s.ok), steps }
 }

@@ -397,6 +397,59 @@ services:
     expect(calls.some((c) => c.args[0] === 'inspect' || c.args[0] === 'exec' || c.args[0] === 'stop')).toBe(false)
   })
 
+  it('proxyKind: traefik пропускает nginx-reload как no-op, без docker exec к прокси', async () => {
+    // §48 M3 шаг 4: Traefik docker-провайдер сам подхватывает/убирает контейнеры по событиям —
+    // нет команды-аналога `nginx -s reload`, шаги остаются в RolloutResult.steps[] для видимости
+    // прогресса, но ok:true без реального docker exec.
+    const { executor, calls } = memoryExecutor({
+      composeText: READY_COMPOSE,
+      commandResults: [
+        sequentialPsResults('time-app-1\n', 'time-app-1\ntime-app-2\n'),
+        { match: (a) => a[0] === 'inspect', result: { stdout: 'healthy\n', stderr: '', exitCode: 0 } },
+      ],
+    })
+
+    const result = await runRollout(executor, 'time', { proxyKind: 'traefik' }, noopSleep)
+
+    expect(result.ok).toBe(true)
+    expect(result.steps.map((s) => s.id)).toEqual([
+      'doctor',
+      'resolve-old-container',
+      'scale-up',
+      'resolve-new-container',
+      'wait-healthy',
+      'smoke-test',
+      'nginx-reload-1',
+      'stop-old',
+      'rm-old',
+      'nginx-reload-2',
+    ])
+    expect(result.steps.every((s) => s.ok)).toBe(true)
+    // ни одного docker exec с nginx — Traefik не получает явного сигнала
+    expect(calls.some((c) => c.args[0] === 'exec' && c.args.includes('nginx'))).toBe(false)
+    // старый контейнер всё равно останавливается и удаляется
+    expect(calls.find((c) => c.args[0] === 'stop')?.args).toContain('time-app-1')
+    expect(calls.find((c) => c.args[0] === 'rm')?.args).toContain('time-app-1')
+  })
+
+  it('proxyKind: npm без npmContainerName падает на nginx-reload-1 с понятной ошибкой', async () => {
+    const { executor, calls } = memoryExecutor({
+      composeText: READY_COMPOSE,
+      commandResults: [
+        sequentialPsResults('time-app-1\n', 'time-app-1\ntime-app-2\n'),
+        { match: (a) => a[0] === 'inspect', result: { stdout: 'healthy\n', stderr: '', exitCode: 0 } },
+      ],
+    })
+
+    const result = await runRollout(executor, 'time', {}, noopSleep)
+
+    expect(result.ok).toBe(false)
+    expect(result.steps.at(-1)).toEqual(
+      expect.objectContaining({ id: 'nginx-reload-1', ok: false, detail: expect.stringContaining('npmContainerName') }),
+    )
+    expect(calls.some((c) => c.args[0] === 'stop')).toBe(false)
+  })
+
   it('падает на resolve-old-container, если найдено 0 или >1 контейнеров сервиса app', async () => {
     const { executor, calls } = memoryExecutor({
       composeText: READY_COMPOSE,

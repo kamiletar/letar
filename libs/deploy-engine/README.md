@@ -37,12 +37,20 @@ branching в `deploy-affected.sh` по opt-in label (пока dead code — ни
   контейнер (**не** конвенция `<project>-app-2` — нумерация Compose не детерминирована: после
   нескольких rollout-циклов старый контейнер может быть `-app-3`, тогда новый станет `-app-4`) →
   poll `docker inspect --format '{{.State.Health.Status}}'` нового контейнера до `healthy` →
-  `docker exec <npmContainerName> nginx -s reload` (резолвит alias на оба IP) → `docker
-stop`+`docker rm` старого → повторный reload. Останавливается на первом неуспешном шаге
-  (`RolloutResult.steps[]`, каждый шаг — `{ id, ok, detail? }`): `doctor` →
-  `resolve-old-container` → `scale-up` → `resolve-new-container` → `wait-healthy` → `smoke-test` →
-  `nginx-reload-1` → `stop-old` → `rm-old` → `nginx-reload-2`. Пока НЕ пишет deploy-manifest
-  (свяжется в сессии H вместе с `rollback`).
+  reload-сигнал прокси (см. `proxyKind` ниже) → `docker stop`+`docker rm` старого → повторный
+  reload-сигнал. Останавливается на первом неуспешном шаге (`RolloutResult.steps[]`, каждый шаг —
+  `{ id, ok, detail? }`): `doctor` → `resolve-old-container` → `scale-up` →
+  `resolve-new-container` → `wait-healthy` → `smoke-test` → `nginx-reload-1` → `stop-old` →
+  `rm-old` → `nginx-reload-2`. Пока НЕ пишет deploy-manifest (свяжется в сессии H вместе с
+  `rollback`).
+- **`proxyKind`** (§48 M3 шаг 4, по умолчанию `'npm'`): `npm` — `docker exec <npmContainerName>
+  nginx -s reload` дважды (резолвит alias на оба IP, затем убирает старый). `traefik` — reload-шаги
+  становятся no-op (`ok: true`, без `docker exec`): Traefik docker-провайдер сам следит за
+  событиями контейнеров (`watch`), подхватывает новый контейнер с тем же service-лейблом сразу
+  после healthy и убирает старый сразу после `docker rm` — явного сигнала аналога `nginx -s
+  reload` у Traefik не существует. Шаги сохраняют те же id (`nginx-reload-1`/`nginx-reload-2`) —
+  переименовывать под `proxyKind: 'traefik'` не стали, чтобы не плодить два набора id в одном и
+  том же `RolloutResult.steps[]`.
 
 ## CLI
 
@@ -57,10 +65,11 @@ nx run @letar/deploy-engine:cli -- doctor --app grandslamcup
 ```
 
 `doctor`/`rollout` выходят с кодом `0` при успехе, `1` при провале (диагностика — per-check/
-per-step ✅/❌/⚠️ с деталями). `status` печатает JSON. `rollout` принимает `--npm-container`
-(по умолчанию `nginx-proxy-manager` — канонический `container_name` из
-`infra/nginx-proxy-manager/docker-compose.yml`), `--project-name` (по умолчанию = `--app`),
-`--env-file` (по умолчанию `.env.docker`).
+per-step ✅/❌/⚠️ с деталями). `status` печатает JSON. `rollout` принимает `--proxy-kind npm|traefik`
+(по умолчанию `npm`, см. «Ограничения» выше), `--npm-container` (по умолчанию
+`nginx-proxy-manager` — канонический `container_name` из
+`infra/nginx-proxy-manager/docker-compose.yml`, игнорируется при `--proxy-kind traefik`),
+`--project-name` (по умолчанию = `--app`), `--env-file` (по умолчанию `.env.docker`).
 
 Корень репозитория — `process.cwd()` по умолчанию, переопределяется `DEPLOY_ENGINE_REPO_ROOT`
 (тот же паттерн, что `DEPLOY_MCP_REPO_ROOT` в `libs/deploy-mcp`) — на случай запуска не из корня

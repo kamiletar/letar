@@ -63,25 +63,28 @@ async function main(): Promise<void> {
     }
     case 'rollout': {
       const usage =
-        'Использование: deploy-engine rollout --app <имя> [--deploy-tag <sha>] [--npm-container <имя>] [--project-name <имя>] [--env-file <файл>]'
+        'Использование: deploy-engine rollout --app <имя> [--deploy-tag <sha>] [--proxy-kind npm|traefik] [--npm-container <имя>] [--project-name <имя>] [--env-file <файл>]'
       const app = requireApp(rest, usage)
       const { values } = parseArgs({
         args: rest,
         options: {
           app: { type: 'string' },
           'deploy-tag': { type: 'string' },
+          'proxy-kind': { type: 'string' },
           'npm-container': { type: 'string' },
           'project-name': { type: 'string' },
           'env-file': { type: 'string' },
         },
       })
-      console.log(`## rollout ${app}\n`)
+      const proxyKind = values['proxy-kind'] === 'traefik' ? 'traefik' : 'npm'
+      console.log(`## rollout ${app} (proxy: ${proxyKind})\n`)
       const result = await runRollout(
         executor,
         app,
         {
           deployTag: values['deploy-tag'],
-          npmContainerName: values['npm-container'] ?? DEFAULT_NPM_CONTAINER,
+          proxyKind,
+          npmContainerName: proxyKind === 'npm' ? (values['npm-container'] ?? DEFAULT_NPM_CONTAINER) : undefined,
           projectName: values['project-name'],
           envFile: values['env-file'],
         },
