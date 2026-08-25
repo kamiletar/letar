@@ -272,6 +272,7 @@ function RichTextEditor({
 
             const config = TOOLBAR_CONFIG[button]
             const isActive = config.isActive?.(editor) ?? false
+            const Icon = config.icon
 
             return (
               <IconButton
@@ -283,7 +284,7 @@ function RichTextEditor({
                 onClick={() => config.action(editor)}
                 disabled={disabled}
               >
-                {config.icon}
+                <Icon />
               </IconButton>
             )
           })}

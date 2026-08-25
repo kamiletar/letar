@@ -22,7 +22,7 @@ export function createLazyComponent<T extends AnyComponent>(
   importFn: LazyImportFn<T>,
   fallbackHeight = '40px',
 ): ComponentType<ComponentProps<T>> {
-  return createLazyComponentBase(importFn, <Skeleton height={fallbackHeight} borderRadius="md" />)
+  return createLazyComponentBase(importFn, () => <Skeleton height={fallbackHeight} borderRadius="md" />)
 }
 
 /**

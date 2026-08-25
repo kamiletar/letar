@@ -87,6 +87,10 @@ boolean с явным «наследовать» через строковый �
 [letar-forms-lazy-component-ssr-stuck-suspense](/.claude/docs/letar-forms-lazy-component-ssr-stuck-suspense.md)
 ⚠️ `createLazyComponent` (TableEditor/DataGrid/RichText/extraSelects) вешал серверный Suspense —
 раскрытие зависит от `requestAnimationFrame`, в скрытой/фоновой вкладке (headless e2e) не тикает ·
+[letar-forms-lazy-component-eager-jsx-seed-crash](/.claude/docs/letar-forms-lazy-component-eager-jsx-seed-crash.md)
+⚠️ JSX-элемент/иконка, созданные на верхнем уровне модуля (не в `render`), падают
+`ReferenceError: React is not defined` под `tsx` (`nx db:seed`) — Next.js собирает JSX
+автоматическим runtime независимо от `tsconfig`, `tsx`/esbuild под `"jsx": "preserve"` — нет ·
 [letar-forms-post-submit-reset-stale-initialvalue](/.claude/docs/letar-forms-post-submit-reset-stale-initialvalue.md)
 ⚠️ пост-сабмит `reset(dataToSubmit)` снимает `isTouched` — следующий рендер со статическим
 `initialValue` (не «что реально отправлено») перетирает поле, бьёт по любому полю, не только

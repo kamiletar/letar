@@ -9,7 +9,7 @@ export const FieldOGRN = createDocumentField({
   displayName: 'FieldOGRN',
   mask: '9999999999999',
   placeholder: '1027700132195',
-  icon: <LuFileText />,
+  icon: LuFileText,
   validate: (value) => {
     const digits = value.replace(/\D/g, '')
     if (!digits) {

@@ -26,10 +26,21 @@ type LazyImportFn<T> = () => Promise<{ default: T } | T>
  *
  * `fallback` передаётся снаружи (не хардкодится) — этот слой не знает ни одной UI-библиотеки,
  * скины (`@letar/forms` на Chakra, `@letar/forms-shadcn` на Radix/tailwind) рисуют его сами.
+ *
+ * ⚠️ `fallback` — фабрика (`() => ReactNode`), не готовый элемент. Готовый JSX-элемент,
+ * созданный на верхнем уровне модуля (в момент вызова `createLazyComponent(...)`, а не в
+ * рендере), исполняется сразу при импорте модуля — в том числе вне Next.js/React-рантайма,
+ * например при импорте формы из `prisma/seed.ts` под `tsx`. Next.js собирает JSX в automatic
+ * runtime независимо от `tsconfig`, а `tsx`/esbuild под `"jsx": "preserve"` (пресет
+ * `tsconfig.next-app.json` для самого Next.js) транспилирует JSX в classic
+ * `React.createElement(...)` — модуль без `import React` падает `ReferenceError: React is not
+ * defined` при обычном импорте, до всякого рендера. Фабрика делает то же самое, что и раньше,
+ * но только внутри `LazyWrapper` на клиенте — там, где React-рантайм уже гарантированно есть.
+ * Разбор — `.claude/docs/letar-forms-lazy-component-eager-jsx-seed-crash.md`.
  */
 export function createLazyComponent<T extends AnyComponent>(
   importFn: LazyImportFn<T>,
-  fallback: ReactNode,
+  fallback: () => ReactNode,
 ): ComponentType<ComponentProps<T>> {
   const LazyComponent = lazy(async () => {
     const module = await importFn()
@@ -50,11 +61,11 @@ export function createLazyComponent<T extends AnyComponent>(
     }, [])
 
     if (!mounted) {
-      return fallback
+      return fallback()
     }
 
     return (
-      <Suspense fallback={fallback}>
+      <Suspense fallback={fallback()}>
         <LazyComponent {...props} />
       </Suspense>
     )

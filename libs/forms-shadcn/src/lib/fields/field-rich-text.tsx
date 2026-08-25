@@ -4,7 +4,7 @@ import { createLazyComponent } from '@letar/forms-react'
 import type { ComponentType } from 'react'
 import type { RichTextFieldProps } from './types'
 
-const fallback = <div className="border-input bg-muted/30 h-[150px] animate-pulse rounded-md border" />
+const fallback = () => <div className="border-input bg-muted/30 h-[150px] animate-pulse rounded-md border" />
 
 /**
  * Form.Field.RichText — shadcn-скин. WYSIWYG-редактор на Tiptap с тулбаром.

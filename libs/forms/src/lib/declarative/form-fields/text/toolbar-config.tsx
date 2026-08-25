@@ -1,7 +1,7 @@
 'use client'
 
 import type { useEditor } from '@tiptap/react'
-import type { ReactNode } from 'react'
+import type { ComponentType } from 'react'
 import {
   LuBold,
   LuCode,
@@ -62,9 +62,15 @@ export const DEFAULT_TOOLBAR_BUTTONS: ToolbarButton[] = [
 
 /**
  * Конфигурация кнопки toolbar
+ *
+ * ⚠️ `icon` — ссылка на компонент, не готовый JSX-элемент (`<LuBold />` создавался бы сразу при
+ * загрузке модуля, до всякого рендера — падает `ReferenceError: React is not defined` при импорте
+ * под `tsx`/esbuild, см. комментарий в `create-lazy-component.tsx`). `TOOLBAR_CONFIG` реэкспортится
+ * как значение из `form-fields/index.ts`, а не только через ленивый `import()`, поэтому модуль
+ * исполняется при обычном статическом импорте `@letar/forms` (в т.ч. из `prisma/seed.ts`).
  */
 export interface ToolbarButtonConfig {
-  icon: ReactNode
+  icon: ComponentType
   label: string
   action: (editor: ReturnType<typeof useEditor>) => void
   isActive?: (editor: ReturnType<typeof useEditor>) => boolean
@@ -75,73 +81,73 @@ export interface ToolbarButtonConfig {
  */
 export const TOOLBAR_CONFIG: Record<ToolbarButton, ToolbarButtonConfig> = {
   bold: {
-    icon: <LuBold />,
+    icon: LuBold,
     label: 'Bold',
     action: (editor) => editor?.chain().focus().toggleBold().run(),
     isActive: (editor) => editor?.isActive('bold') ?? false,
   },
   italic: {
-    icon: <LuItalic />,
+    icon: LuItalic,
     label: 'Italic',
     action: (editor) => editor?.chain().focus().toggleItalic().run(),
     isActive: (editor) => editor?.isActive('italic') ?? false,
   },
   underline: {
-    icon: <LuUnderline />,
+    icon: LuUnderline,
     label: 'Подчёркнутый',
     action: (editor) => editor?.chain().focus().toggleUnderline().run(),
     isActive: (editor) => editor?.isActive('underline') ?? false,
   },
   strike: {
-    icon: <LuStrikethrough />,
+    icon: LuStrikethrough,
     label: 'Strikethrough',
     action: (editor) => editor?.chain().focus().toggleStrike().run(),
     isActive: (editor) => editor?.isActive('strike') ?? false,
   },
   code: {
-    icon: <LuCode />,
+    icon: LuCode,
     label: 'Код',
     action: (editor) => editor?.chain().focus().toggleCode().run(),
     isActive: (editor) => editor?.isActive('code') ?? false,
   },
   heading1: {
-    icon: <LuHeading1 />,
+    icon: LuHeading1,
     label: 'Заголовок 1',
     action: (editor) => editor?.chain().focus().toggleHeading({ level: 1 }).run(),
     isActive: (editor) => editor?.isActive('heading', { level: 1 }) ?? false,
   },
   heading2: {
-    icon: <LuHeading2 />,
+    icon: LuHeading2,
     label: 'Заголовок 2',
     action: (editor) => editor?.chain().focus().toggleHeading({ level: 2 }).run(),
     isActive: (editor) => editor?.isActive('heading', { level: 2 }) ?? false,
   },
   heading3: {
-    icon: <LuHeading3 />,
+    icon: LuHeading3,
     label: 'Заголовок 3',
     action: (editor) => editor?.chain().focus().toggleHeading({ level: 3 }).run(),
     isActive: (editor) => editor?.isActive('heading', { level: 3 }) ?? false,
   },
   bulletList: {
-    icon: <LuList />,
+    icon: LuList,
     label: 'Bullet list',
     action: (editor) => editor?.chain().focus().toggleBulletList().run(),
     isActive: (editor) => editor?.isActive('bulletList') ?? false,
   },
   orderedList: {
-    icon: <LuListOrdered />,
+    icon: LuListOrdered,
     label: 'Ordered list',
     action: (editor) => editor?.chain().focus().toggleOrderedList().run(),
     isActive: (editor) => editor?.isActive('orderedList') ?? false,
   },
   blockquote: {
-    icon: <LuQuote />,
+    icon: LuQuote,
     label: 'Quote',
     action: (editor) => editor?.chain().focus().toggleBlockquote().run(),
     isActive: (editor) => editor?.isActive('blockquote') ?? false,
   },
   link: {
-    icon: <LuLink />,
+    icon: LuLink,
     label: 'Ссылка',
     action: (editor) => {
       if (editor?.isActive('link')) {
@@ -156,18 +162,18 @@ export const TOOLBAR_CONFIG: Record<ToolbarButton, ToolbarButtonConfig> = {
     isActive: (editor) => editor?.isActive('link') ?? false,
   },
   undo: {
-    icon: <LuUndo />,
+    icon: LuUndo,
     label: 'Undo',
     action: (editor) => editor?.chain().focus().undo().run(),
   },
   redo: {
-    icon: <LuRedo />,
+    icon: LuRedo,
     label: 'Redo',
     action: (editor) => editor?.chain().focus().redo().run(),
   },
   // Кнопка image processesся отдельно через ImagePopover (аналогично link)
   image: {
-    icon: <LuImage />,
+    icon: LuImage,
     label: 'Insert image',
     action: () => {
       // Action handled via ImagePopover

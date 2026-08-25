@@ -9,7 +9,7 @@ export const FieldSNILS = createDocumentField({
   displayName: 'FieldSNILS',
   mask: '999-999-999 99',
   placeholder: '123-456-789 00',
-  icon: <LuShield />,
+  icon: LuShield,
   validate: (value) => {
     const digits = value.replace(/\D/g, '')
     if (!digits) {

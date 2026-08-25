@@ -9,7 +9,7 @@ export const FieldForeignPassport = createDocumentField({
   displayName: 'FieldForeignPassport',
   mask: '99 9999999',
   placeholder: '75 0123456',
-  icon: <LuPlane />,
+  icon: LuPlane,
   validate: (value) => {
     const digits = value.replace(/\D/g, '')
     if (!digits) {

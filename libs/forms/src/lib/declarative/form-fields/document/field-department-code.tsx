@@ -9,7 +9,7 @@ export const FieldDepartmentCode = createDocumentField({
   displayName: 'FieldDepartmentCode',
   mask: '999-999',
   placeholder: '770-001',
-  icon: <LuBadge />,
+  icon: LuBadge,
   validate: (value) => {
     const digits = value.replace(/\D/g, '')
     if (!digits) {

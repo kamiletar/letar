@@ -9,7 +9,7 @@ export const FieldKPP = createDocumentField({
   displayName: 'FieldKPP',
   mask: '*********', // 9 символов (цифры или буквы)
   placeholder: '770701001',
-  icon: <LuFileText />,
+  icon: LuFileText,
   validate: (value) => {
     const clean = value.replace(/[\s-]/g, '').toUpperCase()
     if (!clean) {

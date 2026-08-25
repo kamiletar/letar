@@ -4,7 +4,7 @@ import { createLazyComponent } from '@letar/forms-react'
 import type { ComponentType } from 'react'
 import type { DataGridFieldProps } from './field-data-grid-types'
 
-const fallback = <div className="border-input bg-muted/30 h-[200px] animate-pulse rounded-md border" />
+const fallback = () => <div className="border-input bg-muted/30 h-[200px] animate-pulse rounded-md border" />
 
 /**
  * Form.Field.DataGrid — shadcn-скин. Большая таблица на TanStack Table: сортировка,

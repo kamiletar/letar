@@ -4,6 +4,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.33.5] - 2026-08-25
+
+### Fixed
+
+- **`FieldDataGrid`/`FieldRichText` — `fallback` объявлялся как готовый JSX-элемент на верхнем
+  уровне модуля** (`const fallback = <div .../>`), что исполняется сразу при импорте, до всякого
+  рендера. Под `tsx` (Node-скрипты вне Next.js) это падало `ReferenceError: React is not defined`
+  — тот же баг, что и в `@letar/forms-react` `createLazyComponent` (v0.3.2). Теперь `fallback` —
+  фабрика (`() => <div .../>`), соответствует новой сигнатуре `createLazyComponent`. Разбор —
+  [letar-forms-lazy-component-eager-jsx-seed-crash.md](/.claude/docs/letar-forms-lazy-component-eager-jsx-seed-crash.md).
+
 ## [0.33.4] - 2026-08-20
 
 ### Changed

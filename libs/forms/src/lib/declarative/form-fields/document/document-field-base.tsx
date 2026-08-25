@@ -3,7 +3,7 @@
 import { Field, Icon, Input, InputGroup } from '@chakra-ui/react'
 import { useMaskField } from '@letar/forms-react'
 import { useStore } from '@tanstack/react-form'
-import type { ReactElement, ReactNode } from 'react'
+import type { ComponentType, ReactElement } from 'react'
 import type { FieldTooltipMeta } from '../../types'
 import { createField, FieldError, FieldLabel } from '../base'
 
@@ -43,8 +43,14 @@ export interface DocumentFieldConfig {
   maxLength?: number
   /** Placeholder с примером */
   placeholder: string
-  /** Иконка слева */
-  icon: ReactNode
+  /**
+   * Иконка слева — ссылка на компонент, не готовый JSX-элемент. `createDocumentField(...)`
+   * вызывается на верхнем уровне модуля каждого документного поля; `icon: <LuX />` создавал бы
+   * элемент сразу при импорте, до всякого рендера — падает `ReferenceError: React is not defined`
+   * при обычном статическом импорте `@letar/forms` вне Next.js/React-рантайма (например, из
+   * `prisma/seed.ts` под `tsx`). См. тот же фикс в `toolbar-config.tsx`.
+   */
+  icon: ComponentType
   /** Функция валидации значения (возвращает сообщение об ошибке или undefined) */
   validate?: (value: string) => string | undefined
 }
@@ -93,7 +99,13 @@ export function createDocumentField(config: DocumentFieldConfig) {
         <Field.Root invalid={showError} required={resolved.required} disabled={resolved.disabled}>
           <FieldLabel label={resolved.label} tooltip={resolved.tooltip} required={resolved.required} />
 
-          <InputGroup startElement={<Icon color="fg.muted">{config.icon}</Icon>}>
+          <InputGroup
+            startElement={
+              <Icon color="fg.muted">
+                <config.icon />
+              </Icon>
+            }
+          >
             <Input
               {...fieldState.inputProps}
               onFocus={fieldState.onFocus}

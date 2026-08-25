@@ -4,6 +4,27 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.7.4] - 2026-08-25
+
+### Fixed
+
+- **Баг: `nx db:seed <app>` падал `ReferenceError: React is not defined` в любом приложении,
+  чей `schema.zmodel`/`seed.ts` транзитивно импортирует `@letar/forms` с RichText-полем.**
+  Несколько модулей библиотеки создавали JSX-элемент (иконку) прямо на верхнем уровне модуля —
+  `<Skeleton .../>` в `lazy-component.tsx` (аргумент `createLazyComponent`), `<LuBold />` и
+  аналоги в `toolbar-config.tsx` (`TOOLBAR_CONFIG`), `<LuFileText />` и аналоги в документных
+  полях (`createDocumentField({ icon: <LuX /> })`). Next.js всегда собирает JSX через automatic
+  runtime независимо от `tsconfig`, поэтому в приложении это не проявлялось. `tsx` (используется
+  `prisma/seed.ts`) резолвит JSX-трансформ по `tsconfig` вызывающего приложения — а Next.js
+  пресет (`tsconfig.next-app.json`) держит `"jsx": "preserve"` (Next сам решает трансформ, tsx
+  так не умеет), и esbuild в этом случае транспилирует JSX в classic
+  `React.createElement(...)` — без `import React` в модуле это падает ещё на этапе импорта, до
+  всякого рендера. Фикс — не создавать JSX-элемент eagerly: `createLazyComponent` (`@letar/forms-react`
+  и Chakra-обёртка `@letar/forms`) принимает `fallback` как фабрику (`() => ReactNode`), а иконки
+  в `ToolbarButtonConfig`/`DocumentFieldConfig` — как ссылку на компонент (`ComponentType`),
+  инстанцируемую в `render`. Разбор —
+  [letar-forms-lazy-component-eager-jsx-seed-crash.md](/.claude/docs/letar-forms-lazy-component-eager-jsx-seed-crash.md).
+
 ## [2.7.3] - 2026-08-21
 
 ### Fixed
