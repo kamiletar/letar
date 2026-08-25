@@ -1,5 +1,13 @@
 # Pravda - Выполненные задачи
 
+## Touch target для текстовых ссылок — WCAG 2.5.5 (2026-08-25)
+
+Короткие текстовые ссылки в `footer.tsx`, `sidebar/home-link.tsx`, `bookmarks/page.tsx`,
+`not-found.tsx`, `page.tsx` переведены на `TouchLink` (`@letar/ui`). Не тронуты: инлайновые
+перекрёстные ссылки внутри MDX-параграфов (`mdx/cross-ref.tsx`, исключение WCAG 2.5.5 «inline»),
+`Breadcrumb.Link` (другая анатомия Chakra, `TouchLink` не подходит), карточки-ссылки (площадь уже
+достаточна), ссылка на MIT-лицензию (`target="_blank"`).
+
 ## tsconfig.json — убраны `references` на `libs/*`, добавлен явный `rootDir` (2026-08-07)
 
 Убраны 4 ссылки (`chakra-provider`, `ui`, `hooks`, `analytics`) из `references` — тот же хрупкий
