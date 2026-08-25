@@ -6,7 +6,11 @@ export default [
   ...baseConfig,
   {
     files: ['**/*.ts', '**/*.js'],
-    // Override or add rules here
-    rules: {},
+    rules: {
+      // Playwright-фикстуры вызывают `use(page)` — это параметр use() из test.extend(),
+      // не React-хук. eslint-plugin-react-hooks не различает их по имени и ложно
+      // срабатывает на функциях-фикстурах (page/adminPage), не являющихся компонентами.
+      'react-hooks/rules-of-hooks': 'off',
+    },
   },
 ]
