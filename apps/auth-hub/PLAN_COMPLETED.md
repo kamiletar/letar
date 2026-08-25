@@ -2,6 +2,45 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## 0.7.11: формы sign-in переведены на @letar/forms (2026-08-25)
+
+`login-form.tsx` и `magic-link-form.tsx` были написаны на нативном `<form>` + ручном
+`FormData`/`useState` — прямое нарушение `.claude/rules/forms.md` («NEVER используй нативный
+`<form>` + `useActionState`/ручной state вместо `@letar/forms` — даже для «простых» форм»).
+
+Инстанс `AuthHubForm` (`src/auth-hub-form/`) уже существовал и уже использовался в
+`app/profile/emails/_components/add-email-form.tsx` — этот файл послужил готовым образцом
+API (`schema`/`initialValue`/`onSubmit` на корневом компоненте, `Form.Field.*`,
+`Form.Button.Submit`). Проверка `form-mcp` → `list_fields` подтвердила, что `String` и
+`Password` уже есть в библиотеке — делегация через `forms-coordinator-dev` не потребовалась.
+
+**login-form.tsx:**
+
+- `AuthHubForm.Field.String name="email"` (`autoComplete="username webauthn"` для passkey-
+  дропдауна, `usePasskeyConditionalAuth` не тронут) + `AuthHubForm.Field.Password` — встроенный
+  toggle видимости пароля заменил ручной `IconButton`/`showPassword`/`Group`/`InputAddon`.
+- Валидация теперь целиком на существующей `LoginSchema` — ручной `FormData`+`safeParse` в
+  `onSubmit` убран, форма валидирует и типизирует данные сама.
+- Состояния `error`/`info`/`pendingEmail` и вызов `loginUser` — без изменений поведения.
+  `ResendVerificationButton` остался как был.
+- Ручной `loading`-стейт убран: `AuthHubForm.Button.Submit` сам показывает спиннер по
+  `isSubmitting` формы.
+
+**magic-link-form.tsx:**
+
+- Новая локальная схема `MagicLinkSchema` (`z.object({ email: z.email(...) }).strip()`) —
+  у формы раньше вообще не было валидации, кроме `required` на native input.
+- `sendMagicLinkAction(email, callbackUrl)` вызывается из `onSubmit` формы, как раньше.
+- Состояния `idle`/`sent`/`error` сохранены; `loading` убран по той же причине, что и в
+  login-form (спиннер кнопки автоматический).
+
+**Проверка:** `nx typecheck:tsgo auth-hub`/`nx lint auth-hub` — зелёные (2 typecheck-ошибки —
+предсуществующие, в `src/lib/auth.ts`/`libs/auth`, VK OAuth-провайдер, не в scope правки).
+Полноценная визуальная проверка через Browser pane не удалась: `/sign-in` падает на SSR
+(`genericOAuthClient is not a function`) — предсуществующий баг несовместимости версии
+`better-auth` в `libs/auth/src/client/create-auth-client.ts`, там уже лежат чужие
+незакоммиченные правки другого агента (не в scope этой сессии, `apps/auth-hub` не задет).
+
 ## 0.7.10: hydration mismatch убивал кнопку magic-link (2026-08-25)
 
 Пользователь сообщил, что кнопка «Отправить ссылку для входа» на проде (`auth.letar.best/sign-in`)
