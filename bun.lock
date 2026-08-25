@@ -121,7 +121,7 @@
         "fumadocs-mdx": "^15.3.1",
         "fumadocs-ui": "^16.15.1",
         "fuse.js": "^7.5.0",
-        "googleapis": "176.0.0",
+        "googleapis": "^176.0.0",
         "grammy": "^1.45.1",
         "handlebars": "^4.7.9",
         "html-to-image": "^1.11.13",
