@@ -1,5 +1,23 @@
 # План разработки auth-hub
 
+## §18.7 M4: первый живой прогон staging e2e — закрыто (2026-08-25)
+
+- [x] **Первый деплой + полный e2e-прогон auth-hub на staging.** Деплой ✅ (коммит `82ebb75e`,
+      контейнер healthy за 9с). E2E: `01-public`/`02-admin`/`03-oidc-authorize` — 10/10 ✅.
+      `04-linked-email-login.spec.ts` — 0/2 ❌, но не по ожидаемой причине
+      (`requireEmailVerification`). Упало раньше, в `beforeAll`: прямой `fetch()` из Node-процесса
+      Playwright (без браузерного контекста) в `/api/auth/sign-up/email` не несёт заголовка
+      `Origin` → better-auth отвечает `403 MISSING_OR_NULL_ORIGIN`. Плюс отдельная находка —
+      `afterAll`-cleanup падал на `Cannot find module '@letar/e2e-testing/prisma-cjs-wrapper'`
+      (не диагностировано глубже, не актуально после фикса ниже).
+      **Корень:** докстринг файла с самого начала (Этап 8.5, v0.6.4) заявлял «не запускается в
+      staging-раннере», но фактической проверки в коде не было — `playwright.config.ts` держит
+      единственный project (`chromium`) без dev/staging-разделения, в отличие от эталонного
+      паттерна `driving-school-e2e` (`testIgnore: /^staging\//` + отдельный `staging/`-каталог).
+      **Фикс:** `test.skip(!isLocalDev, ...)` в начале describe-блока — коммит после этой записи.
+      Требует dev-БД (`NODE_ENV=development`, `requireEmailVerification=false`), на staging/prod
+      сборке не работает — теперь пропускается явно, а не падает.
+
 ## Текущий статус: v0.7.6 — задеплоено, фикс «Неизвестная ошибка» при re-auth под другим аккаунтом (2026-08-20)
 
 > **2026-08-20:** прод-инцидент — вход под другим аккаунтом (account chooser, `prompt=login`)
