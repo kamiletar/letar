@@ -115,15 +115,30 @@ import { ExternalLink } from '@letar/ui'
 
 ### CoverImage
 
-Клиентская граница `AspectRatio` + `Image`/иконка-фолбэк для карточек товаров/объектов, у
+Клиентская граница `AspectRatio` + `next/image`/иконка-фолбэк для карточек товаров/объектов, у
 которых обложка может отсутствовать (`imageUrl: null` → рендерится `icon`, не сломанная
 картинка). Уже объявляет `'use client'` — Server Component-родитель может рендерить её
 напрямую без собственной обёртки (`AspectRatio`/`Image` в Chakra v3 клиентские, при пересечении
 Server→Client границы `Children.only` внутри `AspectRatio` иначе падает).
 
+Картинка рендерится через `next/image` с `fill` (обёртка уже задаёт пропорции через `ratio`) —
+**обязательно передавай `sizes`** под фактическую вёрстку места вызова (доля вьюпорта на каждом
+брейкпоинте), иначе оптимизатор ориентируется на дефолт (ширину вьюпорта) и отдаёт файл крупнее,
+чем нужно. Для единственного настоящего LCP-кандидата страницы (hero детальной страницы, первая
+карточка листинга) передавай `priority` вместо `loading="eager"` — `priority` дополнительно
+ставит `fetchpriority="high"` и добавляет `<link rel="preload">`, не использовать на нескольких
+изображениях сразу.
+
 ```tsx
 import { CoverImage } from '@letar/ui'
-<CoverImage imageUrl={house.coverUrl} alt={house.title} icon={<LuHome />} ratio={4 / 3} />
+<CoverImage
+  imageUrl={house.coverUrl}
+  alt={house.title}
+  icon={<LuHome />}
+  ratio={4 / 3}
+  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+  priority // только для настоящего LCP-элемента страницы
+/>
 ```
 
 ### DeleteAccountZone
