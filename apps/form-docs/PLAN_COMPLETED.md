@@ -1,5 +1,18 @@
 # Выполненные задачи — form-docs
 
+## Сессия 2026-08-26 — фикс CI: typecheck падал на негенерируемом `.source/`
+
+`main CI` #32892784230: `tsgo --noEmit` падал с `TS2307: Cannot find module '@/.source/server'`.
+`.source/` — сгенерированный Fumadocs каталог (`browser.ts`/`dynamic.ts`/`server.ts`), в
+`.gitignore` (корневой `.gitignore:88`), обычно появляется как побочный эффект `next dev`/
+`next build`. CI гонял `typecheck:tsgo` без предварительного `build`/`dev` — модуль просто не
+существовал на диске.
+
+Добавлен таргет `fumadocs-mdx` в `project.json` (команда `fumadocs-mdx` — CLI пакета
+`fumadocs-mdx`, генерирует `.source/` за ~15мс), `typecheck:tsgo` теперь `dependsOn` него.
+Проверено: `rm -rf .source && nx run form-docs:typecheck:tsgo` — таргет генерирует `.source/` и
+проходит зелёным.
+
 ## Сессия 2026-08-19 — фикс `ignores` в `eslint.config.mjs` (неверный путь к `.source/`)
 
 `nx lint form-docs` был красным: 6 ошибок (`@ts-nocheck`, пустые `{}`-типы) в сгенерённых
