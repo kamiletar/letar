@@ -142,7 +142,7 @@
     "idb-keyval": "^6.3.0",
     "imapflow": "^1.7.6",
     "import-in-the-middle": "^3.3.3",
-    "ioredis": "^5.11.1",
+    "ioredis": "^6.0.0",
     "jimp": "^1.6.1",
     "jose": "^6.2.10",
     "js-base64": "^3.9.3",
