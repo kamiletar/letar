@@ -312,7 +312,10 @@ pre-commit-хука не видел `.exe`-shim на Windows ·
 scoped cookie, без утечки токена в лог/`Referer` ·
 [better-auth-1.7-oidc-provider-removed](/.claude/docs/better-auth-1.7-oidc-provider-removed.md) ⚠️
 `bun update` в пределах `^1.6.x` поднимает better-auth до 1.7 — `oidcProvider`/`genericOAuthClient`
-убраны из ядра, замена — `@better-auth/oauth-provider` + `jwt()`-плагин, клиент — `signIn.social`
+убраны из ядра, замена — `@better-auth/oauth-provider` + `jwt()`-плагин, клиент — `signIn.social` ·
+[better-auth-1.7-account-issuer-field](/.claude/docs/better-auth-1.7-account-issuer-field.md) ⚠️
+тот же релиз тихо требует поле `issuer` в модели `Account` — 500 на sign-up/reset-password, если
+общий фрагмент `AccountFields` его не объявляет
 
 **Электрон и десктоп:** [electron-app-protocol](/.claude/docs/electron-app-protocol.md) ⚠️ origin
 `null` под `file://` блокирует Worker и WASM ·
