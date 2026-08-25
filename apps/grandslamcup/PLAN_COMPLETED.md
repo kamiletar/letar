@@ -2,6 +2,15 @@
 
 Детальное описание всех реализованных фич.
 
+## 2026-08-25 — FormI18nProvider отсутствовал — подсказки валидации на английском
+
+Тот же класс бага, что нашли и починили в `domwellbes`: `@letar/forms` переводит constraint
+hints (`z.string().min/max`) на русский только внутри `FormI18nProvider` — без обёртки локаль по
+умолчанию `'en'`. Добавлен `FormI18nProvider locale="ru"` в
+`src/app/_components/providers.tsx`. Разбор класса бага —
+[.claude/docs/letar-forms-missing-i18nprovider-english-hints.md](/.claude/docs/letar-forms-missing-i18nprovider-english-hints.md).
+`nx typecheck:tsgo grandslamcup` зелёный.
+
 ## 2026-08-25 — `RoleHeader`: общий хедер кабинетов admin/coach/poet
 
 По итогам аудита дублирования (`.claude/docs/header-drawer-dedup-audit.md`) три файла —
