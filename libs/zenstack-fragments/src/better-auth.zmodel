@@ -48,6 +48,9 @@ type AccountFields {
   /// Хеш пароля для email/password аутентификации
   password              String?
 
+  /// Better Auth 1.7+ — провайдер, выдавший accountId (защита от provider impersonation)
+  issuer                String?
+
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 }
