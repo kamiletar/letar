@@ -1,5 +1,25 @@
 # Выполненные задачи: Mandala
 
+## Фикс CI: unit-тесты мокали устаревший Prisma-код P2002 (2026-08-26)
+
+`main CI` #32892784230 падал на трёх спеках (`create-action-factory.spec.ts`,
+`update-action-factory.spec.ts`, `error-helpers.spec.ts`) — ожидали адресное сообщение об ошибке
+уникальности («Мандала с таким slug уже существует»), получали generic fallback или `null`.
+
+Причина: коммит `941a9331` (2026-08-21) переключил `handleUniqueConstraintError` на
+`error.dbErrorCode === '23505'` (формат ZenStack v3 ORM, см.
+`.claude/docs/zenstack-v3-orm-error-codes.md`), но обновил только часть тестов в
+`error-helpers.spec.ts` — `create-`/`update-action-factory.spec.ts` продолжали мокать старый
+Prisma-формат `{ code: 'P2002' }`, который функция больше не ловит. Плюс один тест внутри самого
+`error-helpers.spec.ts` («должен работать с разными полями») остался на старом моке.
+
+Обновлены все моки на `{ dbErrorCode: '23505' }` (+ `reason: 'db-query-error'` там, где было в
+оригинале). `nx test mandala` — 253 passed. Заодно в этой же сессии почищены два несвязанных
+падения того же CI-прогона: `react-hooks/rules-of-hooks` ложно срабатывал на Playwright-фикстурах
+`grandslamcup-e2e`/`mandala-e2e` (правило отключено в их `eslint.config.mjs`) и `form-docs`
+падал на typecheck из-за негенерируемого `.source/` (добавлен таргет `fumadocs-mdx`) — подробности
+в `PLAN-INFRA-4.md` §109, т.к. это кросс-приложенческая инфра-находка.
+
 ## Фикс: та же грабля ещё в трёх файлах (2026-08-25)
 
 Свежий полный грепп по монорепо (не список из прошлой сессии) нашёл три пропущенных прямых
