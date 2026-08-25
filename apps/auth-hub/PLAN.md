@@ -14,9 +14,13 @@
       staging-раннере», но фактической проверки в коде не было — `playwright.config.ts` держит
       единственный project (`chromium`) без dev/staging-разделения, в отличие от эталонного
       паттерна `driving-school-e2e` (`testIgnore: /^staging\//` + отдельный `staging/`-каталог).
-      **Фикс:** `test.skip(!isLocalDev, ...)` в начале describe-блока — коммит после этой записи.
+      **Фикс:** `test.skip(!isLocalDev, ...)` в начале describe-блока (коммит `7a8afe62`).
       Требует dev-БД (`NODE_ENV=development`, `requireEmailVerification=false`), на staging/prod
       сборке не работает — теперь пропускается явно, а не падает.
+      **Повторный прогон 2026-08-25 — полностью зелёный:** `expected: 10, skipped: 2, unexpected: 0`,
+      exitCode 0. `auth-hub` добавлен в `E2E_GATED_APPS` (`libs/infra-config/src/index.ts`).
+      DoD §18.7 M4 для auth-hub выполнен, warn-only минимум неделю перед тем, как рассчитывать на
+      гейт как на реальную защиту. Остаётся `driving-school` — второе и последнее приложение M4.
 
 ## Текущий статус: v0.7.6 — задеплоено, фикс «Неизвестная ошибка» при re-auth под другим аккаунтом (2026-08-20)
 
