@@ -109,7 +109,7 @@
     "@zenstackhq/plugin-policy": "^3.9.2",
     "@zenstackhq/schema": "^3.9.2",
     "@zenstackhq/server": "^3.9.2",
-    "@zxing/library": "0.23.0",
+    "@zxing/library": "^0.23.0",
     "ai": "^7.0.79",
     "async-mutex": "^0.5.0",
     "bcryptjs": "^3.0.3",
