@@ -213,6 +213,9 @@ apps/animatrona-tv/android/build/
 apps/animatrona-tv/android/.gradle/
 apps/animatrona-tv/android/local.properties
 apps/animatrona-tv/android/app/.cxx/
+apps/animatrona-tv/android/app/src/main/assets/
+apps/animatrona-tv/android/app/src/main/res/drawable-*/
+apps/animatrona-tv/android/app/src/main/res/raw/
 apps/animatrona-tv/screen-*.png
 /playwright/.auth/school-data.json
 .nx/polygraph
