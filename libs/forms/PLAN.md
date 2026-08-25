@@ -4,6 +4,33 @@
 
 ---
 
+## ✅ [2026-08-26] `react-hooks/rules-of-hooks` ложно валил `forms-vue`/`forms-vue-shadcn` — закрыто
+
+`nx run @letar/forms-vue:lint` (и `forms-vue-shadcn`) падал 74 ошибками `react-hooks/rules-of-hooks`
+на Vue composables (`useAppFormContext`, `useFormGroup`, `useMaskField` и т.п.), вызываемых внутри
+Vue `setup()` — статический анализ принимал их за React Hook по конвенции имени `use*`.
+
+- **Причина:** централизованный фикс от 2026-08-19 (регистрация `eslint-plugin-react-hooks` в
+  корневом `eslint.config.mjs`, см.
+  [eslint-flat-react-typescript-missing-react-hooks-plugin.md](/.claude/docs/eslint-flat-react-typescript-missing-react-hooks-plugin.md))
+  зарегистрировал правило для **всех** `**/*.ts`/`**/*.tsx` монорепо без ограничения по проекту —
+  раньше плагин вообще не резолвился, поэтому ложные срабатывания на этих двух Vue-либах не были
+  видны никому. Существующий `.oxlintrc.json`-override в обеих либах не спасал: он настраивает
+  только `oxlint`, а `nx lint` для проектов с `eslint.config.mjs` дополнительно гоняет отдельную
+  ESLint-команду поверх `dependsOn: [oxlint]`.
+- **Фикс:** override в `libs/forms-vue/eslint.config.mjs` и `libs/forms-vue-shadcn/eslint.config.mjs`
+  (после `...baseConfig` — поздний объект в flat config перекрывает правило для совпадающих
+  файлов), отключающий `react-hooks/rules-of-hooks`/`exhaustive-deps` только для этих двух
+  проектов. Остальной монорепо и корневой `eslint.config.mjs` не тронуты.
+- Версии/CHANGELOG обеих либ не менялись — правка только конфигурации линтера, публичный код и
+  API не затронуты.
+- Проверено: `nx run @letar/forms-vue:lint --skip-nx-cache` и
+  `nx run @letar/forms-vue-shadcn:lint --skip-nx-cache` — зелёные (`git status` подтверждает, что
+  изменены только два `eslint.config.mjs`).
+- `libs/forms-angular` использует тот же паттерн (`export default [...baseConfig]`, без override)
+  и потенциально подвержена тому же классу бага, но сейчас в нём нет функций `use*` — открытая
+  находка, не задача (см. ниже).
+
 ## ✅ [2026-08-19] DataGrid — редактирование enum/boolean-колонок — закрыто
 
 Задача не из backlog: `EditableCell` в `field-data-grid.tsx` рендерил текстовый/числовой `<Input>`
