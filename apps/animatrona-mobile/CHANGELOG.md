@@ -6,6 +6,41 @@
 
 ## [Unreleased]
 
+## [0.7.6] - 2026-08-25
+
+### Fixed
+
+- Тест `react-native` 0.87.0 на реальном устройстве пройден (Redmi Note 8 Pro) — приложение
+  запускается, тач-хендлинг и переключение вкладок работают, JS-ошибок нет. По пути вскрылись и
+  исправлены реальные несовместимости, которые типами/typecheck не ловились:
+  - `metro.config.js`: кастомный `resolveRequest` для singleton-пакетов резолвил deep imports
+    через `require.resolve` (строгий Node `exports`) — react-native 0.87 не экспортирует
+    `./src/private/featureflags/ReactNativeFeatureFlags`. Заменено на подмену
+    `context.originModulePath` + `context.resolveRequest` (нестрогий резолвер Metro)
+  - Gradle 8.13 → 9.4.1 — AGP из RN 0.87 требует минимум 9.4.1 (и `animatrona-mobile`, и
+    `animatrona-tv` были на 8.13)
+  - AGP 8.7.3 → 9.2.1, Kotlin Gradle Plugin → 2.2.0 — AGP 9.0+ несёт встроенную поддержку Kotlin,
+    конфликтующую с явным `org.jetbrains.kotlin.android` (`Cannot add extension with name
+    'kotlin'`); временный официальный обход — `android.builtInKotlin=false` +
+    `android.newDsl=false` в `gradle.properties` (уберут в AGP 10, тогда — полная миграция на
+    built-in Kotlin во всех трёх модулях: `:app`, `exoplayer-ass`, `exoplayer-sync`)
+  - `libs/exoplayer-ass`, `libs/exoplayer-sync`: `kotlinOptions { jvmTarget }` → `compilerOptions`
+    DSL — старый API помечен `DeprecationLevel.ERROR` в связке AGP 9.2.1/Kotlin 2.2.0
+  - `react-native-worklets` 0.8.1 → 0.12.1, `react-native-reanimated` 4.3.0 → 4.6.0,
+    `react-native-screens` 4.25.2 → 4.27.0 — все три декларировали несовместимость с RN 0.87
+    (assert/ошибка компиляции)
+  - `react-native-gesture-handler`: стабильный 3.2.1 использует внутренний Android API
+    (`ReactViewGroup.getZIndexMappedChildIndex`), удалённый в RN 0.87 — фикса в stable нет,
+    временно на nightly `3.3.0-nightly-20260824-5de6d2358`; откатить на stable, когда выйдет
+    релиз с поддержкой 0.87
+  - Убран локальный пин `react-native-gesture-handler: ^2.31.0` из `package.json` приложения —
+    перекрывал корневую версию через bun workspace resolution (тот же класс проблемы, что уже
+    чинили для `react`), а `bun install` без `--force` не чистит устаревшие изолированные копии
+    в `node_modules/.bun`
+  - Windows: сборка `:app` падает на `ninja: Filename longer than 260 characters` — старый
+    `ninja.exe` из NDK-тулчейна не поддерживает длинные пути даже при системном
+    `LongPathsEnabled=1`. Обход — `subst X: C:\web\letar` и сборка из `X:\apps\animatrona-mobile\android`
+
 ## [0.7.5] - 2026-08-20
 
 ### Changed

@@ -102,11 +102,17 @@ Storage Access Framework (SAF): пользователь выбирает дер
       `@react-native/gradle-plugin` `0.87.0`) подняты синхронно, зелёный свет от координатора
       GrayMill (сообщение #387, thread `cascade-rn-087-migration`). Typecheck `animatrona-mobile`
       зелёный.
-- [ ] ⚠️ **Открытый вопрос: тест на реальном устройстве не пройден.** В сессии, где сделан бамп,
-      не было подключённого Android-устройства (`adb devices` — пусто). Обязательно перед
-      релизом проверить тач-хендлинг/жесты, PiP, remote-control на реальном железе (см.
-      `CLAUDE.md` — известная категория регрессий именно на этой миграции). Не мержить/не
-      деплоить без этой проверки.
+- [x] **Тест на реальном устройстве — пройден 2026-08-25** (Redmi Note 8 Pro). Приложение
+      собирается и запускается на RN 0.87.0, тач-хендлинг и переключение вкладок (Desktop/Tracker)
+      работают, JS runtime ошибок нет. По пути вскрыт и исправлен целый класс несовместимостей RN
+      0.87 в самой Android-сборке, которые не ловились typecheck'ом (Gradle/AGP/Kotlin toolchain,
+      несовместимые версии `react-native-worklets`/`reanimated`/`screens`/`gesture-handler`,
+      Windows path-length лимит ninja). Детали и обходные пути —
+      [CHANGELOG.md v0.7.6](CHANGELOG.md). ⚠️ `react-native-gesture-handler` временно на nightly
+      (`3.3.0-nightly-20260824-5de6d2358`) — stable 3.2.1 не поддерживает RN 0.87 (удалённый
+      внутренний API `getZIndexMappedChildIndex`); откатить на stable, когда выйдет релиз с
+      поддержкой 0.87. PiP/remote-control не проверены в этой сессии (нет подключённого
+      Desktop/Tracker-сервера для реального видео) — довести отдельно.
 
   Обнаружено при попытке поднять корневой `react-native` до 0.86.2 в рамках общего
   deps-update (2026-07-30): корень и `animatrona-mobile` держат **разные** версии

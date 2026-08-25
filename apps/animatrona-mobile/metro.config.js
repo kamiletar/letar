@@ -38,7 +38,7 @@ const config = {
     resolveRequest: (context, moduleName, platform) => {
       // Для singleton пакетов и их deep imports всегда используем версию из app
       // ВАЖНО: в bun monorepo нативные модули могут дублироваться через .bun/ cache,
-      // что приводит к "Tried to register two views with the same name"
+      // что приводит к "Tried to register two views с одинаковым именем"
       if (
         moduleName === 'react'
         || moduleName === 'react-native'
@@ -59,10 +59,16 @@ const config = {
         || moduleName === '@react-native-async-storage/async-storage'
         || moduleName.startsWith('@react-native-async-storage/async-storage/')
       ) {
-        return {
-          filePath: require.resolve(moduleName, { paths: [projectRoot] }),
-          type: 'sourceFile',
-        }
+        // ВАЖНО: не резолвить через `require.resolve` (Node) — он строго проверяет
+        // "exports" в package.json и падает на глубоких внутренних импортах react-native
+        // (напр. `react-native/src/private/featureflags/...`), которых нет в exports-карте
+        // пакета в 0.87. Вместо этого подменяем originModulePath на файл внутри node_modules
+        // приложения — так Metro сам находит singleton-копию своим (нестрогим) резолвером.
+        return context.resolveRequest(
+          { ...context, originModulePath: path.join(projectRoot, 'node_modules', '.singleton-anchor.js') },
+          moduleName,
+          platform,
+        )
       }
       // Остальные модули резолвим стандартно
       return context.resolveRequest(context, moduleName, platform)
