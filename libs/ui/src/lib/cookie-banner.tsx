@@ -178,6 +178,8 @@ export function CookieBanner({
                 onCheckedChange={(e) => setAnalytics(!!e.checked)}
                 colorPalette="brand"
                 size="sm"
+                minH="2.75rem"
+                alignItems="center"
               >
                 <Checkbox.HiddenInput />
                 <Checkbox.Control />
@@ -193,6 +195,8 @@ export function CookieBanner({
                 onCheckedChange={(e) => setMarketing(!!e.checked)}
                 colorPalette="brand"
                 size="sm"
+                minH="2.75rem"
+                alignItems="center"
               >
                 <Checkbox.HiddenInput />
                 <Checkbox.Control />
@@ -208,16 +212,16 @@ export function CookieBanner({
           <HStack gap={2} justify="flex-end">
             {expanded
               ? (
-                <Button size="sm" variant="ghost" onClick={handleSaveCustom}>
+                <Button size="sm" variant="ghost" minH="2.75rem" onClick={handleSaveCustom}>
                   Сохранить выбор
                 </Button>
               )
               : (
-                <Button size="sm" variant="ghost" onClick={() => setExpanded(true)}>
+                <Button size="sm" variant="ghost" minH="2.75rem" onClick={() => setExpanded(true)}>
                   Настроить
                 </Button>
               )}
-            <Button size="sm" colorPalette="brand" onClick={handleAcceptAll}>
+            <Button size="sm" colorPalette="brand" minH="2.75rem" onClick={handleAcceptAll}>
               Принять все
             </Button>
           </HStack>

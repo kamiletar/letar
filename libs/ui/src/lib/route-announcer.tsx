@@ -22,13 +22,17 @@ import { useEffect, useRef, useState } from 'react'
 export function RouteAnnouncer() {
   const pathname = usePathname()
   const [message, setMessage] = useState('')
-  const isFirstRender = useRef(true)
+  const previousPathname = useRef(pathname)
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false
+    // Сравнение с сохранённым путём (не булев флаг «первый рендер») — идемпотентно под
+    // React Strict Mode, который в dev вызывает эффект дважды (setup → cleanup → setup):
+    // булев флаг переключался первым вызовом и терял смысл ко второму, отчего баннер
+    // объявлял title уже на самом первом монтировании.
+    if (previousPathname.current === pathname) {
       return
     }
+    previousPathname.current = pathname
     const timer = setTimeout(() => setMessage(document.title), 100)
     return () => clearTimeout(timer)
   }, [pathname])
