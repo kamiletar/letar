@@ -2951,3 +2951,12 @@ Action ID после редеплоя), не разовую случайност
       репозитории `png-to-ico` — закрывает последний непропатченный critical-путь (`form-data@2.3.3`)
       и убирает дублирование (два инструмента для одной задачи). Закрыто 2026-08-25, подробности —
       выше.
+- [x] Дедуп трёх копий `generate-icons.*` доведён до конца отдельной сессией 2026-08-25: логика
+      вынесена в `libs/icon-generator` (`@letar/icon-generator`, plain-JS ESM по паттерну
+      `@letar/theme-check` — запускается голым `node` без бандлера). Заодно найден и устранён ещё
+      один класс расхождения: `label-printer-desktop` импортировал `@resvg/resvg-js`, которого не
+      было ни в одном `package.json`, ни в `bun.lock` — первый реальный запуск скрипта упал бы
+      `Cannot find module`. Все три приложения и шаблон генератора `electron-app` переведены на
+      единый движок (`sharp`). Иконки перегенерированы и визуально сверены, `nx test/lint/
+      typecheck:tsgo` зелёные. Детали — `apps/animatrona/PLAN_COMPLETED.md`,
+      `apps/label-printer-desktop/PLAN_COMPLETED.md`, `apps/poster-microtext-desktop/PLAN_COMPLETED.md`.
