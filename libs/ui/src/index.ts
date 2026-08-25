@@ -83,6 +83,7 @@ export {
 } from './lib/pressable'
 export { PressableButton, type PressableButtonProps } from './lib/pressable-button'
 export { PriorityNav, type PriorityNavItem, type PriorityNavProps } from './lib/priority-nav'
+export { RouteAnnouncer } from './lib/route-announcer'
 export { StatusBadge, type StatusConfig } from './lib/status-badge'
 export { StickyActionBar, type StickyActionBarProps } from './lib/sticky-action-bar'
 export { Tooltip, type TooltipProps } from './lib/tooltip'
