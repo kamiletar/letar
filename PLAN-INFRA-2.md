@@ -2982,4 +2982,42 @@ M2), проверить фактическую историю инциденто
 - **§18.7** — блокирует M3, но именно он же даёт основную выгоду от M1/M2.
 - **§18.8** — секреты Dynadot едут тем же конвейером `.enc`.
 
+### Шаг 5 — ход выполнения (2026-08-25)
+
+**Пачка 1** (`--proxy-kind traefik` wiring): `letar.proxy-kind: traefik` label в compose
+(симметрично `letar.rollout`), проброшен в `deploy-affected.sh` (коммит `7281a7ae`) →
+`libs/deploy-engine` CLI (`--proxy-kind`, дефолт `npm`) → `rollout.ts`. Живой прогон на
+`animatrona-landing` (коммит `3368f1c9`) подтвердил: `(proxy: traefik)` в логе rollout, оба
+`nginx-reload-*` шага стали no-op (Traefik docker-provider сам ловит события `docker add/rm`,
+без единого `docker exec` к NPM), трафик не прерывался (`curl` держал 200 всё время).
+
+**Пачка 2** (регистрация роутеров + cutover): 5 приложений, коммит `dfe79954`.
+
+- ✅ **form-docs**, **form-example**, **letar-landing** — роутеры зарегистрированы, пилот-
+  верифицированы на `:8443`, cutover на NPM выполнен (`forward_host: traefik`, `:443`, `https`),
+  проверены живым `curl` + сертификатом. Готовы, откат не понадобился.
+- ⏸️ **archetest** — деплой заблокирован собственным hard e2e-gate (3/21 тестов падают:
+  express/kiosk/mood-check-in/safety-net.spec.ts), не связано с Traefik-лейблами. Отложено
+  отдельно от остального шага 5.
+- ❌→✅ **grandslamcup** (не входил в пачку напрямую, но блокировал через `libs/auth`) — билд
+  падал на `@letar/auth:typecheck` (`tsc --build`, не `tsgo` — см. разбор ниже). Версии пакетов,
+  `.tsbuildinfo`/`dist/` — все гипотезы отвергнуты; помог только полный `rm -rf node_modules &&
+  bun install --frozen-lockfile` на сервере (по прямому одобрению владельца). Новая грань
+  задокументирована в
+  [bun-install-stale-isolated-cache.md](/.claude/docs/bun-install-stale-isolated-cache.md).
+  После фикса — build чистый, rollout ✅, пилот 200.
+- ❌→✅ **auth-hub** — после фикса `node_modules` build прошёл, но всплыл отдельный рантайм-баг:
+  `BetterAuthError: OAuth Provider requires session.storeSessionInDatabase: true when using
+  secondaryStorage` (побочка миграции на `@better-auth/oauth-provider`, коммит `a8efcc72`, в
+  сочетании с более ранним `secondaryStorage`/Redis, коммит `73fb87b7`). Zero-downtime rollout
+  защитил прод: старый `auth-hub-app-17` держал трафик, битый `-18` не подхватил cutover, деплой
+  корректно упал с exit 1. Фикс — `libs/auth/src/server/create-auth/index.ts`,
+  `buildHubProviderAuth`: `storeSessionInDatabase: true` условно при активном `secondaryStorage`
+  (коммит `0735564f`). Typecheck + 42/42 теста зелёные, передеплой — ✅ успешно, 9 OIDC-клиентов
+  пересижены, пилот `HTTP 307` (живой редирект).
+
+Со стороны deploy-agent-dev шаг 5 в этой пачке считается закрытым. Остаются: archetest
+(заблокирован e2e), kami-key-the-landing (отдельная docker-сеть, не входит ни в одну пачку),
+и остальные `letar.rollout: true` приложения — следующими пачками.
+
 ---
