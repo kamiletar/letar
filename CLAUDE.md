@@ -304,6 +304,9 @@ scoped cookie, без утечки токена в лог/`Referer` ·
 
 **Электрон и десктоп:** [electron-app-protocol](/.claude/docs/electron-app-protocol.md) ⚠️ origin
 `null` под `file://` блокирует Worker и WASM ·
+[electron-version-drift](/.claude/docs/electron-version-drift.md) точная версия electron в
+каждом приложении расходится с диапазоном корневого `package.json` без единой ошибки сборки —
+проверка `scripts/check-electron-drift.sh` ·
 [electron-net-fetch-tun-vpn](/.claude/docs/electron-net-fetch-tun-vpn.md) ⚠️ `net.fetch` падает под
 TUN-VPN; DNS-проверки с рабочей машины врут ·
 [electron-sqlite](/.claude/docs/electron-sqlite.md) ·
