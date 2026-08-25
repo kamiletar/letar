@@ -2,6 +2,29 @@
 
 Детальное описание всех реализованных фич.
 
+## 2026-08-25 — `RoleHeader`: общий хедер кабинетов admin/coach/poet
+
+По итогам аудита дублирования (`.claude/docs/header-drawer-dedup-audit.md`) три файла —
+`admin/_components/admin-header.tsx`, `coach/_components/coach-header.tsx`,
+`poet/_components/poet-header.tsx` — были практически идентичны: разметка
+`Box → Container → Flex`, мобильный `Drawer.Root placement="start"` с `Drawer.Context`
+render-prop для закрытия по клику на пункт, одинаковая active-подсветка. Различия — только
+данные: `colorPalette` (`brand` у admin, `teal` у coach/poet), заголовки, источник `navItems`,
+правая часть хедера (имя/команда/поэт + опциональная ссылка на публичный профиль).
+
+Вынесен общий `app/_components/header/role-header.tsx` (в уже существовавшую папку
+`_components/header/`, рядом с `PublicHeader`) с пропами `title`/`shortTitle` (у admin —
+два breakpoint-варианта заголовка, у coach/poet — один), `drawerTitle`, `colorPalette`,
+`navItems`, `rootHref`, `rightContent`. Три исходных файла стали тонкими обёртками.
+
+`nx run-many -t format/lint/typecheck:tsgo --projects=grandslamcup` — зелёные (лint-warnings
+дочерние, не связаны с изменением). Живая проверка через dev-сессию `admin@grandslamcup.ru`:
+гамбургер открывает Drawer с верным заголовком и списком пунктов, активный пункт подсвечен
+`brand.subtle`/`brand.fg`, клик по пункту закрывает Drawer и переходит по ссылке (Browser pane
+была скрыта — проверка через DOM/`javascript_tool`, не скриншот). Coach/poet живым кликом не
+проверены — в dev-БД нет пользователей с этими ролями; проверены только typecheck'ом
+(идентичная форма `NavItem` во всех трёх сайдбарах).
+
 ## 2026-08-25 — `schema.zmodel` разбит на 8 доменных файлов
 
 `schema.zmodel` (1613 строк) декомпозирован на `schema/{users,geo,competition,teams,matches,
