@@ -7,12 +7,7 @@
     "@letar/consent",
     "@letar/animatrona-ui",
     "@letar/redis-client",
-    "@letar/glitchtip",
-    "@letar/chakra-provider",
-    "@letar/analytics",
-    "@letar/consent",
-    "@letar/animatrona-ui",
-    "@letar/redis-client"
+    "@letar/glitchtip"
   ],
   "sourceRoot": "apps/animatrona-tracker/src",
   "projectType": "application",
