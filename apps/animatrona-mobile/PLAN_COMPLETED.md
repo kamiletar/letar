@@ -2,6 +2,55 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 0.7.6
+
+### react-native 0.87.0 — тест на реальном устройстве пройден (2026-08-25)
+
+Закрыт открытый вопрос из v0.7.5. Устройство — Redmi Note 8 Pro. Приложение собралось,
+установилось, запустилось без JS-ошибок; тач-хендлинг и переключение вкладок Desktop/Tracker на
+экране подключения проверены вживую (`adb shell input tap` + скриншоты). PiP/remote-control не
+проверялись — нет подключённого Desktop/Tracker-сервера для реального видеопотока в этой сессии.
+
+По пути вскрыт и исправлен целый класс несовместимостей RN 0.87 в самой Android-сборке — ни одна
+из них не ловилась typecheck'ом, все проявлялись только на реальной сборке/устройстве:
+
+- **`metro.config.js`**: кастомный `resolveRequest` для singleton-пакетов (react/react-native и
+  т.п.) резолвил через `require.resolve(moduleName, {paths})` — Node-резолвер строго проверяет
+  `exports` в `package.json`, а react-native 0.87 не экспортирует
+  `./src/private/featureflags/ReactNativeFeatureFlags`, используемый транзитивно. Фикс — подмена
+  `context.originModulePath` на файл внутри `node_modules` приложения и делегирование
+  `context.resolveRequest` (собственный, нестрогий резолвер Metro).
+- **Gradle 8.13 → 9.4.1** — AGP, который тянет RN 0.87, требует минимум 9.4.1. Задета и
+  `animatrona-tv` (тот же Gradle wrapper), не только `animatrona-mobile`.
+- **AGP 8.7.3 → 9.2.1, Kotlin Gradle Plugin → 2.2.0.** AGP 9.0+ несёт встроенную поддержку Kotlin
+  и конфликтует с явным плагином `org.jetbrains.kotlin.android` (`Cannot add extension with name
+  'kotlin', as there is an extension already registered with that name`). Официальный временный
+  обход — `android.builtInKotlin=false` + `android.newDsl=false` в `gradle.properties` (уберут в
+  AGP 10 — тогда потребуется полная миграция на встроенный Kotlin во всех трёх Android-модулях:
+  `:app`, `exoplayer-ass`, `exoplayer-sync`).
+- **`libs/exoplayer-ass`, `libs/exoplayer-sync`**: `kotlinOptions { jvmTarget = "17" }` заменён на
+  `kotlin { compilerOptions { jvmTarget.set(JvmTarget.JVM_17) } }` — старый API помечен
+  `DeprecationLevel.ERROR` в связке AGP 9.2.1/Kotlin 2.2.0 и валит сборку `.gradle.kts`-скрипта
+  целиком (не просто warning).
+- **`react-native-worklets` 0.8.1→0.12.1, `react-native-reanimated` 4.3.0→4.6.0,
+  `react-native-screens` 4.25.2→4.27.0** — все три декларировали явную несовместимость с RN 0.87
+  (worklets/reanimated — через `assertMinimalReactNativeVersionTask`, screens — ошибкой
+  компиляции Kotlin в собственном коде библиотеки).
+- **`react-native-gesture-handler`**: стабильный 3.2.1 использует внутренний Android API
+  `ReactViewGroup.getZIndexMappedChildIndex`, удалённый в RN 0.87 (`Unresolved reference`).
+  Исправления есть только в nightly-канале — поставлен `3.3.0-nightly-20260824-5de6d2358`
+  (временно, до релиза stable с поддержкой 0.87).
+- Убран локальный пин `react-native-gesture-handler: ^2.31.0` из
+  `apps/animatrona-mobile/package.json` — перекрывал корневую (уже обновлённую) версию через bun
+  workspace resolution, тот же класс проблемы, что уже чинили для `react`
+  ([feedback_root_only_dependency_versions] в памяти). Дополнительно потребовался
+  `bun install --force` — обычный `bun install` не чистит устаревшие изолированные копии пакета в
+  `node_modules/.bun`, символическая ссылка продолжала указывать на старую версию.
+- **Windows**: `:app:buildCMakeDebug[armeabi-v7a]` падал на `ninja: Filename longer than 260
+  characters` — старый `ninja.exe` из NDK-тулчейна (bundled с cmake 3.22.1) не поддерживает
+  длинные пути даже при системном `LongPathsEnabled=1` (нет манифеста `longPathAware`). Обход —
+  `subst X: C:\web\letar` и сборка из `X:\apps\animatrona-mobile\android` вместо `C:\web\letar\...`.
+
 ## Версия 0.7.5
 
 ### Бамп react-native 0.85.0 → 0.87.0
