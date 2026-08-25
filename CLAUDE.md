@@ -294,7 +294,10 @@ pre-commit-хука не видел `.exe`-shim на Windows ·
 [user-profile](/.claude/docs/user-profile.md) ·
 [one-time-reveal-fragment-token-pattern](/.claude/docs/one-time-reveal-fragment-token-pattern.md)
 одноразово-раскрываемая публичная ссылка (счета, договоры, приглашения): fragment-токен → POST →
-scoped cookie, без утечки токена в лог/`Referer`
+scoped cookie, без утечки токена в лог/`Referer` ·
+[better-auth-1.7-oidc-provider-removed](/.claude/docs/better-auth-1.7-oidc-provider-removed.md) ⚠️
+`bun update` в пределах `^1.6.x` поднимает better-auth до 1.7 — `oidcProvider`/`genericOAuthClient`
+убраны из ядра, замена — `@better-auth/oauth-provider` + `jwt()`-плагин, клиент — `signIn.social`
 
 **Электрон и десктоп:** [electron-app-protocol](/.claude/docs/electron-app-protocol.md) ⚠️ origin
 `null` под `file://` блокирует Worker и WASM ·
