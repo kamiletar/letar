@@ -373,6 +373,21 @@ const { sentinelRef, reachedEnd } = useScrollGate({ enabled: !consentGiven })
 </>
 ```
 
+### TouchLink
+
+Текстовая ссылка с высотой не ниже 44px (WCAG 2.5.5 touch target). Обёртка над Chakra
+`Link` + `next/link`, минимальная высота задана литералом `2.75rem`, а не через
+тему-специфичный токен — работает одинаково в любом приложении независимо от того, есть
+ли у него свой токен `touchTarget`. Выделена из шести повторов одного и того же блока
+(`Link asChild minH="touchTarget" alignItems="center"`) в domwellbes.
+
+```tsx
+import { TouchLink } from '@letar/ui'
+<TouchLink href="/houses/" color="fg.muted" _hover={{ color: 'fg' }}>
+  Все проекты
+</TouchLink>
+```
+
 ### AdminEditOverlay
 
 Иконка-карандаш поверх карточки, ведущая в раздел редактирования (например `/admin/[slug]`).

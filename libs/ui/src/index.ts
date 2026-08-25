@@ -35,6 +35,7 @@ export {
   useHeaderMobile,
 } from './lib/header'
 export { MobileAuthSection, type MobileAuthSectionProps } from './lib/mobile-auth-section'
+export { TouchLink, type TouchLinkProps } from './lib/touch-link'
 export { UserMenu, type UserMenuItemConfig, type UserMenuProps, type UserMenuSession } from './lib/user-menu'
 
 // Медиа
