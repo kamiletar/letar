@@ -23,6 +23,42 @@
       нефункциональна». Никакого изменения кода не потребовалось — `page.tsx`/`login-form.tsx`/
       `magic-link-form.tsx`/`oauth-buttons.tsx` и остальные компоненты `/sign-in` корректны как есть.
 
+## v0.7.12 — живая проверка OIDC-флоу better-auth 1.7: два бага найдены и исправлены (2026-08-25)
+
+- [x] **`createAuthClientWithOAuth` (`libs/auth/src/client/create-auth-client.ts`) терял почти
+      весь клиент.** `{...client}` над Proxy-клиентом better-auth (пустой `ownKeys`-трап) молча
+      терял `useSession`/`signOut`/`signIn.social`, оставляя только явно прописанный
+      `signIn.oauth2`. Ломало ЛЮБОЙ hub-client, вызывающий `useSession()` —
+      `TypeError: useSession is not a function` при первом рендере. Исправлено на настоящий
+      `Proxy` с `Reflect.get` (коммит `6c9a009d`, вместе с сопутствующей типизацией
+      `Option`-дженерика от параллельной сессии — итог сверен `nx run-many -t
+      lint,typecheck:tsgo,test --projects=auth,auth-hub`, полностью зелёный).
+- [x] **`apps/auth-hub/prisma/seed.ts` — `redirectUrls` всех 9 клиентов указывали
+      несуществующий путь `/api/auth/oauth2/callback/<id>`.** Реальный колбэк
+      generic-oauth-плагина — `/api/auth/callback/<id>` (`getOAuthCallbackPath`); сегмент
+      `oauth2/` есть только у провайдерских эндпоинтов самой Ключницы. Исправлены все 9
+      клиентов, пересеяно (коммит `b421da79`). Без фикса `oauthProvider()` отклонял бы
+      `redirect_uri` любого hub-client в проде.
+      Подробности обоих багов — [better-auth-1.7-oidc-provider-removed.md](/.claude/docs/better-auth-1.7-oidc-provider-removed.md#живая-проверка-2026-08-25--два-реальных-бага-найдены-и-исправлены).
+- [x] **Подтверждено живьём:** discovery-документ (`/.well-known/openid-configuration`) отдаёт
+      корректные OAuth 2.1 endpoints с JWT/EdDSA-подписью — связка `oauthProvider()`+`jwt()`
+      реально поднимается и работает.
+- [ ] ⚠️ **Открытый вопрос: полный клик-через (login → consent → редирект с токеном в
+      hub-client) так и не подтверждён живьём.** Заблокировано перегрузкой машины — параллельные
+      сессии держали 228→265 node-процессов, dev-серверы `auth-hub`/`archetest`/`time` падали
+      через секунды после старта на каждой из нескольких попыток за две сессии подряд. Повторить
+      на менее нагруженной машине (или в окно с меньшим числом параллельных агентов):
+      `nx dev auth-hub` + `nx dev archetest` (или `time` — есть отдельный незакрытый
+      `ContextError`/ChakraProvider баг в `apps/time`, не связан с этой миграцией, найден
+      случайно и не чинился, см. ниже).
+- [ ] ⚠️ **Открытый вопрос: `ContextError` в `apps/time` Toolbar (не связан с OIDC-миграцией).**
+      При тестировании OIDC на `time` после фикса `useSession` вскрылась отдельная ошибка —
+      `useContext returned undefined... forgot to wrap in ChakraProvider` в
+      `apps/time/src/app/_components/toolbar.tsx`. `providers.tsx`/`[locale]/layout.tsx`
+      структурно оборачивают `Toolbar` в `ChakraProviders` — беглый просмотр причину не выявил.
+      Не исследовано глубже (не в скоупе OIDC-задачи), маскировалось багом `useSession` до этой
+      сессии.
+
 ## v0.7.11 — формы sign-in переведены на @letar/forms (2026-08-25)
 
 - [x] **`login-form.tsx` и `magic-link-form.tsx` нарушали правило репозитория** (запрет

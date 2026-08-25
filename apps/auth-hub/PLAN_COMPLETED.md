@@ -2,6 +2,65 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## Живая проверка OIDC-флоу better-auth 1.7 — два бага найдены и исправлены (2026-08-25)
+
+Задача сессии: прогнать живьём полный OIDC-цикл через auth-hub (login → consent → токен →
+hub-client получает сессию) после того, как предыдущая сессия смигрировала `libs/auth` с
+`oidcProvider` (better-auth 1.6, убран в 1.7) на `@better-auth/oauth-provider` + обязательный
+`jwt()`-плагин, но проверила это только build/типами/юнит-тестами, не живым кликом.
+
+**Найдены и исправлены два самостоятельных бага**, ни один не специфичен именно переходу на
+1.7 — оба существовали раньше, просто живьём их никто не гонял:
+
+1. **`createAuthClientWithOAuth` (`libs/auth/src/client/create-auth-client.ts`) терял почти весь
+   клиент.** Собирал обёртку через `{...client, signIn: {...client.signIn, oauth2: ...}}`.
+   Better Auth строит клиент через `Proxy` над пустой `function(){}` без `ownKeys`-трапа —
+   spread копирует собственные enumerable-ключи цели, а у голого `Proxy` без `ownKeys` их ноль.
+   Итог: возвращаемый объект реально содержал только явно прописанный `signIn.oauth2` —
+   `useSession`, `signOut`, `signIn.social` были `undefined`. Ломало ЛЮБОЙ hub-client,
+   вызывающий `useSession()` (все, кто рендерит статус входа в toolbar/header) —
+   `TypeError: useSession is not a function` при первом рендере. Воспроизведено живьём на `time`.
+   **Фикс:** обёрнуто в настоящий `Proxy` с `get(target, prop) { return Reflect.get(target,
+   prop) }`, `oauth2` подмешивается только на уровне вложенного `signIn`-прокси. Верифицировано
+   юнит-тестами (`nx run auth:test` — 42/42). Пока фикс проверялся, параллельная сессия
+   независимо переписывала этот же файл (добавляла generic `Option`-параметр для сохранения
+   типов плагинов вроде `organizationClient()`) — оба изменения совместимы, итоговый файл
+   (коммит `6c9a009d`) держит и Proxy-логику, и типизацию через `SignInOf<Option>`/
+   `SocialSignInOf<Option>` (conditional-infer вместо прямого `BaseAuthClient<Option>['signIn']`
+   — TS2536/TS2344 при попытке индексировать генерик напрямую). Пересверено после слияния:
+   `nx run-many -t lint,typecheck:tsgo,test --projects=auth,auth-hub` — полностью зелёный
+   (единственная оставшаяся ошибка typecheck в `auth-hub/src/lib/auth.ts:47` — предсуществующий
+   VK-провайдер type mismatch, не связан с этой правкой).
+2. **Все 9 клиентов в `apps/auth-hub/prisma/seed.ts` были заведены с несуществующим
+   `redirectUrls`.** Путь `/api/auth/oauth2/callback/<providerId>` никогда не существовал —
+   реальный колбэк generic-oauth-плагина (сторона hub-client) — `/api/auth/callback/<providerId>`,
+   без сегмента `oauth2` (`getOAuthCallbackPath`, `node_modules/better-auth/dist/oauth2/utils.mjs`;
+   `oauth2/` есть только у провайдерских эндпоинтов самой Ключницы —
+   `/api/auth/oauth2/authorize`, `/api/auth/oauth2/token`). С неверным `redirectUrls`
+   `oauthProvider()` отклонил бы `redirect_uri` каждого hub-client в проде
+   (`invalid_redirect_uri`) — миграция была бы незаметно сломана до первого реального входа
+   пользователя. **Исправлены все 9 клиентов** (archetest-prod, time-prod, grandslamcup-prod,
+   kami-prod, animatrona-tracker-prod, dashboard-prod, studio-prod, domwellbes-prod,
+   aprel8008-prod), добавлены недостающие localhost-колбэки для archetest/time, пересеяно
+   `nx run auth-hub:db:seed` (коммит `b421da79`).
+
+**Подтверждено живьём:** discovery-документ auth-hub (`/api/auth/.well-known/openid-configuration`)
+отдаёт корректные OAuth 2.1 endpoints с JWT/EdDSA-подписью — связка `oauthProvider()`+`jwt()`
+реально поднимается и работает.
+
+**НЕ подтверждено живьём (за две сессии подряд):** полный клик-через (login → consent → редирект
+с токеном обратно в hub-client). Причина — не код, а перегрузка машины: параллельные Claude Code
+сессии держали 228→265 node-процессов одновременно, dev-серверы `auth-hub`/`archetest`/`time`
+падали в пределах секунд после старта на каждой из нескольких попыток. `Get-NetTCPConnection`
+использовался вместо `preview_list`, чтобы надёжно отличить реально живой сервер от устаревшего
+статуса «running». См. открытый вопрос в PLAN.md.
+
+**Побочная находка (не чинилась, вне скоупа):** в `apps/time` при тестировании после фикса
+`useSession` вскрылся отдельный `ContextError: forgot to wrap in ChakraProvider` в
+`_components/toolbar.tsx`, ранее маскировавшийся крашем `useSession`. Структурно `Toolbar`
+обёрнут в `ChakraProviders` — беглый просмотр причину не выявил, задокументировано как открытый
+вопрос.
+
 ## `/sign-in` «зависший React-стриминг» — диагностирован как false positive инструмента, не баг (2026-08-25)
 
 Предыдущая сессия (v0.7.11) зафиксировала в PLAN.md «открытый вопрос»: `/sign-in` рендерится на

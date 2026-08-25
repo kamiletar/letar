@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [0.7.12] - 2026-08-25
+
+### Fixed
+
+- `redirectUrls` всех 9 OIDC-клиентов в `prisma/seed.ts` указывали несуществующий путь
+  `/api/auth/oauth2/callback/<id>` вместо реального `/api/auth/callback/<id>` — `oauthProvider()`
+  отклонял бы `redirect_uri` любого hub-client в проде. Найдено живой проверкой OIDC-флоу
+  (better-auth 1.7 миграция), исправлено для всех клиентов.
+- `createAuthClientWithOAuth` (`libs/auth`) терял `useSession`/`signOut`/`signIn.social` из-за
+  spread над Proxy-клиентом better-auth без `ownKeys`-трапа — ломало любой hub-client, вызывающий
+  `useSession()`. Исправлено в `libs/auth`.
+
 ## [0.7.11] - 2026-08-25
 
 ### Changed
