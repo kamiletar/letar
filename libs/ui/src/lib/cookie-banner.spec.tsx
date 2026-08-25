@@ -121,14 +121,30 @@ describe('CookieBanner', () => {
     expect(fetch).not.toHaveBeenCalled()
   })
 
+  it('принял согласие → тут же открыл настройки cookie без перезагрузки страницы', async () => {
+    // Раньше не работало: useEffect регистрировал слушатель openSettingsEvent только в ветке,
+    // куда попадал через ранний `return` из чтения localStorage — при пустом localStorage при
+    // монтировании (обычный первый визит) return срабатывал раньше addEventListener, и открыть
+    // настройки сразу после «Принять все» без перезагрузки было нельзя. SSR-фикс LCP (cookie-
+    // banner.tsx) убрал этот ранний return как часть переписывания эффекта — сценарий заработал
+    // попутно, без отдельной задачи. Регрессионный тест на закрытую находку.
+    const user = userEvent.setup()
+    const { openSettingsEvent } = createConsentConfig('test-app', 'v1')
+
+    renderWithProvider(<CookieBanner appKey="test-app" policyVersion="v1" />)
+    await user.click(screen.getByRole('button', { name: 'Принять все' }))
+    expect(screen.queryByText(/Мы используем cookie/)).not.toBeInTheDocument()
+
+    await act(async () => {
+      window.dispatchEvent(new Event(openSettingsEvent))
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText(/Мы используем cookie/)).toBeInTheDocument()
+    })
+  })
+
   it('открывается заново по событию openSettingsEvent, если согласие уже было сохранено при монтировании', async () => {
-    // ⚠️ Обработчик openSettingsEvent регистрируется в CookieBanner только внутри ветки
-    // useEffect, где localStorage.getItem(storageKey) уже что-то вернул при монтировании —
-    // при пустом localStorage эффект делает ранний `return` до window.addEventListener.
-    // Поэтому сценарий «принял согласие → тут же открыл настройки cookie без перезагрузки
-    // страницы» в текущей реализации не работает (см. итоговый отчёт задачи — возможный баг).
-    // Здесь проверяем случай, где это действительно работает: согласие уже было в localStorage
-    // на момент монтирования (типичная повторная загрузка страницы).
     const { storageKey, openSettingsEvent } = createConsentConfig('test-app', 'v1')
     window.localStorage.setItem(
       storageKey,
