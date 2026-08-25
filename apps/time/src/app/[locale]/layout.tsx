@@ -73,9 +73,9 @@ export default async function LocaleLayout({ children, params }: Props) {
             <Toolbar />
             {children}
           </NextIntlClientProvider>
+          <CookieBanner appKey="time" />
         </ChakraProviders>
         <UmamiScript />
-        <CookieBanner appKey="time" />
       </body>
     </html>
   )

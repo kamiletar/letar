@@ -1,5 +1,25 @@
 # Time — Выполненные задачи
 
+## Фикс: CookieBanner рендерился вне ChakraProvider (2026-08-25)
+
+Обнаружено в сессии живой проверки OIDC-флоу auth-hub — после починки отдельного бага в
+`useSession` рендер `Toolbar` перестал падать раньше и вскрыл независимую проблему: любой
+Chakra-компонент на странице падал `ContextError: useContext returned undefined... forgot to
+wrap component within <ChakraProvider />`, воспроизводилось даже с пустым `<Box />` вместо
+контента страницы — то есть баг был не в `Toolbar`/содержимом, а структурный.
+
+Причина — `[locale]/layout.tsx` рендерил `<CookieBanner appKey="time" />` **сиблингом** после
+закрывающего `</ChakraProviders>`, а не его потомком. Баннер использует `Box`/`Checkbox`/
+`Button`/... из `@chakra-ui/react` напрямую; пока `shown === false` (до первого эффекта) баннер
+рендерит `null` и ошибка не проявляется, а как только эффект читает пустой `localStorage` и
+выставляет `shown = true` — падают уже реальные Chakra-компоненты вне дерева провайдера, и
+ошибка валит всё приложение (`Fast Refresh: unrecoverable error`).
+
+Образец правильного вложения — `driving-school/src/app/layout.tsx` (`CookieBanner` внутри
+`<Provider>`). Фикс — перенос `<CookieBanner>` внутрь `<ChakraProviders>`. Версия 0.5.10.
+Подтверждено живьём через Browser pane (`nx dev time`, консоль без `ContextError`, страница и
+баннер рендерятся полностью).
+
 ## Фикс: cron-эндпоинт notifications проверял не тот заголовок авторизации (2026-08-24)
 
 `POST /api/cron/notifications` (задача `time-notifications` в `dashboard-agent`, `* * * * *`)

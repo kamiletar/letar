@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.5.10 (2026-08-25)
+
+### Fixed
+
+- `<CookieBanner appKey="time" />` в `[locale]/layout.tsx` рендерился **вне** `<ChakraProviders>`
+  (сиблингом после закрывающего тега, не потомком) — как только баннер показывался (эффект читал
+  пустой `localStorage` и выставлял `shown=true`), любой Chakra-компонент внутри него (`Box`,
+  `Checkbox`, `Button`, ...) падал `ContextError: useContext returned undefined... forgot to wrap
+  component within <ChakraProvider />` и валил всё приложение (`Fast Refresh: unrecoverable
+  error`). Баг не зависел от `Toolbar`/содержимого страницы — воспроизводился с пустым `<Box />`.
+  Образец правильного вложения — `driving-school/src/app/layout.tsx`. Фикс — перенос
+  `<CookieBanner>` внутрь `<ChakraProviders>` (после `<NextIntlClientProvider>`).
+
 ## 0.5.9 (2026-08-24)
 
 ### Fixed
