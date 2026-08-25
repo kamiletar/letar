@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useFormContext } from '../context'
 import { useFormStoreSubscribe } from '../utils'
+import { useDeclarativeForm } from './form-context'
 
 /**
  * Returns the number of form fields that differ from their default values.
@@ -28,7 +28,7 @@ import { useFormStoreSubscribe } from '../utils'
  * ```
  */
 export function useActiveFiltersCount<TData extends object>(defaults: TData): number {
-  const form = useFormContext()
+  const { form } = useDeclarativeForm()
 
   const [count, setCount] = useState(() =>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

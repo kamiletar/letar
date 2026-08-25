@@ -1,7 +1,7 @@
 'use client'
 
 import { type ReactNode, useEffect, useRef, useState } from 'react'
-import { useFormContext } from '../context'
+import { useDeclarativeForm } from './form-context'
 
 export interface FormSubscribeProps {
   /** Render function receiving current form values and state */
@@ -51,7 +51,7 @@ export interface FormSubscribeProps {
  * ```
  */
 export function FormSubscribe({ children, debounce: delay }: FormSubscribeProps): ReactNode {
-  const form = useFormContext()
+  const { form } = useDeclarativeForm()
 
   if (!delay) {
     return (
@@ -81,7 +81,7 @@ interface DebouncedProps {
 }
 
 function FormSubscribeDebounced({ delay, children }: DebouncedProps): ReactNode {
-  const form = useFormContext()
+  const { form } = useDeclarativeForm()
 
   const [snapshot, setSnapshot] = useState<{
     values: Record<string, unknown>

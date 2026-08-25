@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { useFormContext } from '../context'
+import { useDeclarativeForm } from './form-context'
 import { generatePrefillUrl } from './use-url-prefill'
 
 /**
@@ -140,7 +140,7 @@ export function FormUrlSync<TData extends object>({
   replace = true,
   router,
 }: FormUrlSyncProps<TData>): null {
-  const form = useFormContext()
+  const { form } = useDeclarativeForm()
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {

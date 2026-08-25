@@ -2,6 +2,7 @@
 
 import { createFormHookContexts } from '@tanstack/react-form'
 import { type ReactNode, useMemo } from 'react'
+import { useDeclarativeForm } from './declarative/form-context'
 
 /**
  * Form hook contexts for the application
@@ -32,11 +33,14 @@ import { type ReactNode, useMemo } from 'react'
 export const { fieldContext, formContext, useFieldContext, useFormContext } = createFormHookContexts()
 
 /**
- * Typed wrapper around useFormContext.
+ * Typed wrapper around the declarative form instance (useDeclarativeForm().form).
  *
- * Solves the typing problem: standard useFormContext() does not accept a type argument,
+ * Solves the typing problem: the raw form API does not accept a type argument,
  * so accessing typed values requires a workaround `as unknown as T`.
  * This hook does it automatically.
+ *
+ * Must be used inside a declarative `<Form>` — not inside `form.AppForm`/`form.AppField`
+ * (those get their own typed form/field via `useAppForm`).
  *
  * @example
  * ```tsx
@@ -60,7 +64,7 @@ export const { fieldContext, formContext, useFieldContext, useFormContext } = cr
  * ```
  */
 export function useTypedFormContext<TFormData extends object>() {
-  const rawForm = useFormContext()
+  const { form: rawForm } = useDeclarativeForm()
 
   return useMemo(
     () => ({
@@ -115,6 +119,9 @@ interface TypedFormSubscribeProps<TFormData extends object, TSelected> {
 /**
  * Typed Subscribe component for convenient form value subscriptions.
  *
+ * Must be used inside a declarative `<Form>` (relies on `useDeclarativeForm()`), not inside
+ * `form.AppForm`/`form.AppField`.
+ *
  * @example
  * ```tsx
  * function LivePreview() {
@@ -129,7 +136,7 @@ interface TypedFormSubscribeProps<TFormData extends object, TSelected> {
  * ```
  */
 export function useTypedFormSubscribe<TFormData extends object>() {
-  const form = useFormContext()
+  const { form } = useDeclarativeForm()
 
   const TypedSubscribe = useMemo(() => {
     return function TypedFormSubscribe<TSelected,>({
