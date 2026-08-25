@@ -1,5 +1,5 @@
 {
-  "name": "label-printer-core",
+  "name": "@letar/label-printer-core",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/label-printer-core/src",
   "projectType": "library",

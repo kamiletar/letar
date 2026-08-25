@@ -1,5 +1,5 @@
 {
-  "name": "contract-generator",
+  "name": "@letar/contract-generator",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/contract-generator/src",
   "projectType": "library",

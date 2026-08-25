@@ -1,5 +1,5 @@
 {
-  "name": "exoplayer-ass",
+  "name": "@letar/exoplayer-ass",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/exoplayer-ass/src",
   "projectType": "library",

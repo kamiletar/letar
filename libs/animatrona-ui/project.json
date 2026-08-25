@@ -1,5 +1,5 @@
 {
-  "name": "animatrona-ui",
+  "name": "@letar/animatrona-ui",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/animatrona-ui/src",
   "projectType": "library",

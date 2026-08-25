@@ -19,7 +19,6 @@
     "./package.json": "./package.json"
   },
   "nx": {
-    "name": "cdek",
     "tags": [
       "scope:shared",
       "type:lib",

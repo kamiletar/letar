@@ -1,5 +1,5 @@
 {
-  "name": "animatrona-types",
+  "name": "@letar/animatrona-types",
   "tags": ["scope:shared", "type:lib", "owner:letar"],
   "targets": {
     "format": {

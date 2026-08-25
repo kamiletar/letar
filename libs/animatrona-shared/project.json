@@ -1,5 +1,5 @@
 {
-  "name": "animatrona-shared",
+  "name": "@letar/animatrona-shared",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/animatrona-shared/src",
   "projectType": "library",

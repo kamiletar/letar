@@ -1,5 +1,5 @@
 {
-  "name": "animatrona-franchise-graph",
+  "name": "@letar/animatrona-franchise-graph",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/animatrona-franchise-graph/src",
   "projectType": "library",
