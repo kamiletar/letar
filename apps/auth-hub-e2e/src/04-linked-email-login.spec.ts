@@ -21,6 +21,7 @@ import { expect, test } from './fixtures/base-test'
 import { deleteUserEmail, disconnectDb, ensureVerifiedLinkedEmail, findUserByEmail } from './helpers/db.helpers'
 
 const BASE_URL = process.env['BASE_URL'] || 'http://localhost:3014'
+const isLocalDev = BASE_URL.includes('localhost')
 
 const runId = Date.now()
 const PRIMARY_EMAIL = `e2e-linked-primary-${runId}@auth.letar.best`
@@ -29,6 +30,16 @@ const LINKED_EMAIL = `e2e-linked-secondary-${runId}@auth.letar.best`
 
 test.describe('Вход по linked-email → сессия primary-аккаунта', () => {
   test.use({ storageState: undefined })
+
+  // Докстринг файла обещал это с самого начала, но проверки не было — 2026-08-25 первый живой
+  // прогон на staging упал не на requireEmailVerification (как ожидалось), а раньше: прямой
+  // fetch() из Node-процесса Playwright (без браузерного контекста) в /api/auth/sign-up/email
+  // не несёт заголовка Origin, better-auth отвечает 403 MISSING_OR_NULL_ORIGIN. Правильный фикс —
+  // не подделывать Origin, а действительно не гонять этот сьют вне dev, как и было написано.
+  test.skip(
+    !isLocalDev,
+    'Требует dev-БД auth-hub с requireEmailVerification=false (NODE_ENV=development) — не работает на staging/production сборке',
+  )
 
   test.beforeAll(async () => {
     const signUpRes = await fetch(`${BASE_URL}/api/auth/sign-up/email`, {
