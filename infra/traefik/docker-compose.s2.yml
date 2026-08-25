@@ -35,19 +35,18 @@ services:
       - ./dynamic/s2:/etc/traefik/dynamic:ro
       - ./auth:/etc/traefik/auth:ro # basicAuth дашборда, общий с s3 (не в git)
       - ./acme-s2:/acme # ⚠️ ОТДЕЛЬНАЯ от s3 директория (./acme) — свои приватные ключи, не в git
-      # ⛔ КРИТИЧНО: БЕЗ участия deploy-infra.sh. Файл на s2 УЖЕ существует —
+      # ⛔ КРИТИЧНО: read-only и БЕЗ участия deploy-infra.sh. Файл на s2 УЖЕ существует —
       # полный набор ключей зоны letar.best, заведён в M1a. Это НЕ та копия, что лежит в
       # infra/traefik/secrets/acme-dns-accounts.json.enc (там только урезанный ключ
       # s3.letar.best, вырезанный из этого же файла для другого сервера — см. README).
       # secrets/deploy.s2.conf НАРОЧНО не содержит эту строку — не добавлять её туда.
       #
-      # ⏳ ВРЕМЕННО :rw (2026-08-25, §48 M3 шаг 2) — lego должен дописать в этот файл 6 новых
-      # persoanl-аккаунтов под собственные домены (own-domains.yml). Открывается СИНХРОННО с
-      # disable_registration=false в infra/acme-dns/config/config.cfg — оба флага возвращать
-      # обратно вместе, сразу после регистрации всех 6, не по отдельности. Перед открытием
-      # окна — обязательный ручной бэкап файла с меткой времени (тот же файл уже один раз
-      # восстанавливался из бэкапа сегодня же, см. PLAN-INFRA-2.md §48 M3 шаг 1).
-      - /home/deploy/lego:/acme-data:rw
+      # 2026-08-25, §48 M3 шаг 2: было временно `:rw` на ~15 минут для регистрации 9 acme-dns
+      # аккаунтов под 6 собственных доменов (apex+www отдельно) — синхронно с
+      # disable_registration=false в infra/acme-dns/config/config.cfg. Оба окна закрыты,
+      # регистрация подтверждена, вернулось на `:ro`. Не открывать снова без такой же явной
+      # синхронной пары действий (см. PLAN-INFRA-2.md §48 M3 шаг 2).
+      - /home/deploy/lego:/acme-data:ro
     networks:
       - kami-network
 
