@@ -21,15 +21,17 @@ interface SlotPickerProps {
 export const SlotPicker = memo(function SlotPicker({ value, onChange, daysAhead = 14 }: SlotPickerProps) {
   const t = useTranslations('consulting')
   const locale = useLocale()
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const [groupedSlots, setGroupedSlots] = useState<Record<string, SlotOption[]>>({})
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false)
 
   // Загружаем слоты при монтировании или изменении параметров
   useEffect(() => {
     startTransition(async () => {
       const slots = await getGroupedSlotsAction(daysAhead, locale)
       setGroupedSlots(slots)
+      setHasLoadedOnce(true)
 
       // Выбираем первый день по умолчанию
       const dates = Object.keys(slots)
@@ -75,7 +77,7 @@ export const SlotPicker = memo(function SlotPicker({ value, onChange, daysAhead 
     })
   }, [value, locale])
 
-  if (isPending && !hasSlots) {
+  if (!hasLoadedOnce) {
     return (
       <VStack py={8} gap={4}>
         <Spinner size="lg" color="purple.500" />
