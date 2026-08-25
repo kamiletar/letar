@@ -1,0 +1,85 @@
+# Traefik — статическая конфигурация для s2 (PLAN-INFRA-2.md §48 M3)
+#
+# Читается один раз при старте, правка требует ПЕРЕЗАПУСКА контейнера (не `up -d`) — та же
+# грабля, что на s3, см. infra/traefik/README.md. Динамическая часть — ./dynamic/s2/.
+
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+log:
+  level: INFO
+
+accessLog: {}
+
+api:
+  dashboard: true
+  # ⛔ insecure: true — карта всей внутренней сети наружу. Дашборд отдаётся роутером из
+  # dynamic/s2/dashboard.yml с basicAuth поверх TLS.
+  insecure: false
+
+entryPoints:
+  web:
+    address: ':80'
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+
+  websecure:
+    address: ':443'
+    transport:
+      respondingTimeouts:
+        # Тот же дедлайн, что на s3 (см. traefik.yml) — сохраняем поведение NPM
+        # (`proxy_read_timeout`), а не вводим новое.
+        readTimeout: '7200s'
+    http3: {}
+    http:
+      # Сжатие (gzip/brotli/zstd) — на весь прокси одним middleware, а не per-host, как было
+      # у части хостов NPM на s2 (найдено 2026-08-19 при разборе studio, §12.1 apps/studio/PLAN.md:
+      # HTML жался, JS/CSS — нет). Применяется ко всем роутерам на этом entrypoint автоматически.
+      middlewares:
+        - 'compress@file'
+      tls:
+        certResolver: dns
+        domains:
+          - main: 'letar.best'
+            sans:
+              - '*.letar.best'
+
+providers:
+  docker:
+    endpoint: 'unix:///var/run/docker.sock'
+    exposedByDefault: false
+    # kami-network — та же сеть, где уже сидят все app-контейнеры s2 (NPM форвардит туда же).
+    # Не заводим отдельную traefik-network: миграция приложений на шаге 5 M3 не требует смены
+    # сети, только добавления label'ов.
+    network: kami-network
+
+  file:
+    directory: '/etc/traefik/dynamic'
+    watch: true
+
+certificatesResolvers:
+  # Основной резолвер: DNS-01 через acme-dns на этом же хосте (s2), доступ по имени контейнера.
+  # Ключ зоны letar.best уже существует в /home/deploy/lego/acme-dns-accounts.json (M1a) —
+  # ничего заводить не нужно.
+  dns:
+    acme:
+      email: 'kami@letar.best'
+      storage: '/acme/acme.json'
+      dnsChallenge:
+        provider: 'acme-dns'
+        resolvers:
+          - '1.1.1.1:53'
+          - '8.8.8.8:53'
+
+  # Резервный резолвер под собственные домены приложений вне зоны letar.best (HTTP-01).
+  # Не используется ни одним роутером на шаге 1 — понадобится на шаге 2 плана M3.
+  http:
+    acme:
+      email: 'kami@letar.best'
+      storage: '/acme/acme-http.json'
+      httpChallenge:
+        entryPoint: web

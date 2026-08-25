@@ -189,13 +189,16 @@ infra/acme-dns/data/
 
 # Traefik — секреты и выпущенные сертификаты (per-server, не в git)
 infra/traefik/acme/
+infra/traefik/acme-s2/
 infra/traefik/auth/
 
 # §18.8.1 PLAN-INFRA.md — плейнтекст секретов infra/*/secrets/: коммитится только
-# зашифрованный *.enc и манифест deploy.conf (см. scripts/deploy-infra.sh)
+# зашифрованный *.enc и манифесты deploy*.conf (см. scripts/deploy-infra.sh — deploy.conf по
+# умолчанию, deploy.<SERVER_NAME>.conf — server-specific override, например deploy.s2.conf)
 infra/*/secrets/*
 !infra/*/secrets/*.enc
 !infra/*/secrets/deploy.conf
+!infra/*/secrets/deploy.*.conf
 !infra/*/secrets/README.md
 apps/animatrona/dist*/
 

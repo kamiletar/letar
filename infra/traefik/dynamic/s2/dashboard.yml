@@ -1,0 +1,28 @@
+# Дашборд Traefik на s2 — read-only (см. infra/traefik/dynamic/dashboard.yml для s3, тот же
+# паттерн). Заводить хост через него нельзя — маршруты только label'ами/file-провайдером.
+#
+# ⚠️ `domains` обязателен и это единственный заказчик wildcard-сертификата летар.best на s2.
+# Пустой `tls: {}` в расчёте на наследование entryPoints.websecure.http.tls.domains НЕ
+# работает (проверено вживую на s3 2026-08-07, см. dynamic/dashboard.yml).
+
+http:
+  routers:
+    dashboard:
+      rule: 'Host(`traefik.letar.best`)'
+      entryPoints:
+        - websecure
+      service: 'api@internal'
+      middlewares:
+        - dashboard-auth
+      tls:
+        certResolver: dns
+        domains:
+          - main: 'letar.best'
+            sans:
+              - '*.letar.best'
+
+  middlewares:
+    dashboard-auth:
+      basicAuth:
+        usersFile: '/etc/traefik/auth/dashboard-users'
+        removeHeader: true

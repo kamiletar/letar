@@ -1,0 +1,49 @@
+# Traefik — прокси для s2 (пилот, PLAN-INFRA-2.md §48 M3, шаг 1: поднять, не переключая трафик)
+#
+# ⚠️ Пилотная фаза: NPM на s2 продолжает держать 80/443, это путь отката. Traefik слушает
+#    8090/8443 (по аналогии с пилотом s3) — порты ПРЕДПОЛОЖИТЕЛЬНО свободны, ПРОВЕРИТЬ на
+#    сервере перед первым запуском (на s2 сервисов больше, чем было на s3 в пилоте):
+#      ss -tlnp | grep -E ':(8090|8443)\b'
+#      docker ps --format '{{.Names}}\t{{.Ports}}' | grep -E '8090|8443'
+#
+# ⚠️ Сеть — kami-network, НЕ traefik-network. На s2 в kami-network уже сидят и acme-dns, и
+#    все app-контейнеры (NPM форвардит туда же по имени контейнера — см.
+#    infra/nginx-proxy-manager/README.md). Traefik на s2 достаёт acme-dns напрямую по имени
+#    контейнера (http://acme-dns:80), без proxy host + Access List через NPM, которые
+#    потребовались на s3 (там acme-dns на ДРУГОМ сервере). Тем же путём в перспективе дешевле
+#    и миграция приложений на шаге 5 плана M3: им не нужно менять сеть, только добавить label'ы.
+#
+# Запуск: scripts/deploy-infra.sh traefik  (сервер определяется автоматически, см. скрипт)
+# Дашборд: https://traefik.letar.best:8443 (basicAuth, см. README)
+
+services:
+  traefik:
+    image: 'traefik:v3.6.25' # версия зафиксирована как на s3 — не latest, не туториальная
+    container_name: traefik
+    restart: unless-stopped
+    ports:
+      - '8090:80'
+      - '8443:443/tcp'
+      - '8443:443/udp'
+    environment:
+      # acme-dns на этом же хосте — прямой доступ по имени контейнера в kami-network.
+      ACME_DNS_API_BASE: 'http://acme-dns:80'
+      ACME_DNS_STORAGE_PATH: '/acme-data/acme-dns-accounts.json'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.s2.yml:/etc/traefik/traefik.yml:ro
+      - ./dynamic/s2:/etc/traefik/dynamic:ro
+      - ./auth:/etc/traefik/auth:ro # basicAuth дашборда, общий с s3 (не в git)
+      - ./acme-s2:/acme # ⚠️ ОТДЕЛЬНАЯ от s3 директория (./acme) — свои приватные ключи, не в git
+      # ⛔ КРИТИЧНО: read-only и БЕЗ участия deploy-infra.sh. Файл на s2 УЖЕ существует —
+      # полный набор ключей зоны letar.best, заведён в M1a. Это НЕ та копия, что лежит в
+      # infra/traefik/secrets/acme-dns-accounts.json.enc (там только урезанный ключ
+      # s3.letar.best, вырезанный из этого же файла для другого сервера — см. README).
+      # secrets/deploy.s2.conf НАРОЧНО не содержит эту строку — не добавлять её туда.
+      - /home/deploy/lego:/acme-data:ro
+    networks:
+      - kami-network
+
+networks:
+  kami-network:
+    external: true

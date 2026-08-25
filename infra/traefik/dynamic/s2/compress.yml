@@ -1,0 +1,8 @@
+# Сжатие статики (gzip/brotli/zstd) — PLAN-INFRA-2.md §48 M3, пункт 3 чек-листа.
+# Подключается глобально на entrypoint websecure (traefik.s2.yml), а не per-router —
+# закрывает разом категорию багов, где у части хостов NPM на s2 сжатие не было включено.
+
+http:
+  middlewares:
+    compress:
+      compress: {}
