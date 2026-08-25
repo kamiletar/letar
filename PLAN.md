@@ -916,12 +916,32 @@ resolve --applied` (не `--rolled-back`, как планировалось из
 > Скиллы: `better-auth` (resend, rateLimit, OIDC, динамика провайдеров), `email-maddy` (`SMTP_FROM_EMAIL`),
 > `chakra-theming`, `i18n-multilingual`, `zenstack-helper` (access policies), `deployment-assistant` (секреты).
 
-- [ ] ⚠️ **Открытый вопрос (2026-08-25):** миграция `libs/auth` на `@better-auth/oauth-provider`
-      (better-auth 1.7, см. [better-auth-1.7-oidc-provider-removed](/.claude/docs/better-auth-1.7-oidc-provider-removed.md))
-      закрыла сборку/типы/юнит-тесты, но реальный OIDC-флоу end-to-end (login → consent → токен →
-      discovery) через `oauthProvider()`+новый обязательный `jwt()`-плагин на auth-hub/Ключнице
-      **не прогнан живьём**. Нужно подтвердить живым входом через Ключницу (auth-hub) или один
-      hub-client (`time`/`archetest`) до следующего прод-деплоя auth-hub.
+- [x] ⚠️ **Открытый вопрос (2026-08-25, частично закрыт):** миграция `libs/auth` на
+      `@better-auth/oauth-provider` (better-auth 1.7, см.
+      [better-auth-1.7-oidc-provider-removed](/.claude/docs/better-auth-1.7-oidc-provider-removed.md))
+      прогнана живьём локально. **Найдено и исправлено два реальных бага**, оба не специфичны
+      самой миграции на 1.7, но были впервые вскрыты именно живым прогоном (юнит-тесты их не
+      ловили):
+      1. `createAuthClientWithOAuth` (`libs/auth/src/client/create-auth-client.ts`) — `{...client}`
+      над Proxy-клиентом better-auth (пустой `ownKeys`-трап) молча терял `useSession`,
+      `signOut`, `signIn.social` целиком, оставляя только явно прописанный `signIn.oauth2`.
+      Ломало ЛЮБОЙ hub-client, использующий `useSession`/`signOut` (не только новые). Исправлено
+      на настоящий `Proxy` с `Reflect.get`.
+      2. `apps/auth-hub/prisma/seed.ts` — `redirectUrls` всех 9 клиентов указывали несуществующий
+      путь `/api/auth/oauth2/callback/<id>`; реальный колбэк generic-oauth-плагина —
+      `/api/auth/callback/<id>` (`getOAuthCallbackPath`, `node_modules/better-auth/dist/oauth2/utils.mjs`).
+      С неправильным `redirectUrls` `oauthProvider()` отклонил бы `redirect_uri` любого
+      hub-client в проде. **Исправлены все 9 клиентов** (archetest-prod, time-prod,
+      grandslamcup-prod, kami-prod, animatrona-tracker-prod, dashboard-prod, studio-prod,
+      domwellbes-prod, aprel8008-prod), пересеяно `nx run auth-hub:db:seed`.
+      **Подтверждено живьём:** discovery-документ `auth-hub` (`/.well-known/openid-configuration`)
+      отдаёт корректные OAuth 2.1 endpoints с JWT/EdDSA-подписью — новая связка
+      `oauthProvider()`+`jwt()` действительно поднимается и работает.
+      **НЕ подтверждено живьём:** полный клик-через (login → consent → редирект с токеном
+      обратно в hub-client) — среда (эта же машина) была перегружена параллельными сессиями
+      (счётчик node-процессов рос 228→252 за время попытки), dev-серверы падали через секунды
+      после старта быстрее, чем успевал пройти полный цикл клика. Требуется повторить клик-через
+      на менее нагруженной машине.
 
 ---
 
@@ -2861,3 +2881,57 @@ Action ID после редеплоя), не разовую случайност
 - Прогон существующих staging-сьютов целиком против прода (мутирующие тесты).
 - `ALLOW_DEV_SESSION`-бэкдор на проде в любом виде.
 - Cron поверх `@prod-smoke` (отдельный вопрос, не решается в этой итерации).
+
+## §57 — Аудит critical-уязвимостей зависимостей по итогам `deps-scan.ts` (2026-08-25) 🆕
+
+Скан `bun scripts/deps-scan.ts` (первый за 14 дней) дал riskScore 100/100, 7 critical. `bun audit`
+в этой сессии недоступен (`UNKNOWN_CERTIFICATE_VERIFICATION_ERROR` при обращении к registry) —
+разбирались вручную через WebSearch по каждому пакету + грепом `bun.lock` на реальную
+достижимость (кто тянет пакет, прод это или dev-тулинг).
+
+### Что сделано
+
+Из 7 critical пять оказались реально уязвимы на резолвленных версиях, два уже пропатчены текущей
+резолюцией (`form-data` → 4.0.5/4.0.6, безопасны; `tar` → 7.5.13, все известные CVE фиксились
+≤7.5.7). Зафиксировал патч-версии через `resolutions`/`overrides` в корневом `package.json`:
+
+| Пакет                  | Было → стало    | CVE/advisory                              | Куда тянется                                             |
+| ---------------------- | --------------- | ----------------------------------------- | -------------------------------------------------------- |
+| `protobufjs`           | 7.5.4 → 7.6.5   | CVE-2026-41242 (RCE, GHSA-xq3m-2v4x-88gg) | `dockerode` → `dashboard-agent` (прод)                   |
+| `seroval`              | 1.5.1 → 1.5.6   | CVE-2026-23736/23737                      | `@tanstack/devtools` (dev-only)                          |
+| `shell-quote`          | 1.8.3 → 1.10.0  | CVE-2026-9277 (CVSS 9.2)                  | `launch-editor`/`react-devtools-core` (dev-only)         |
+| `websocket-driver`     | 0.7.4 → 0.7.5   | CVE-2026-54466                            | `sockjs`/`faye-websocket` (dev-only, webpack-dev-server) |
+| `@xhmikosr/decompress` | 11.1.1 → 11.1.4 | CVE-2026-53486 (zip-slip)                 | `@swc/cli` (сборочный тул)                               |
+
+`bun install` прогнан, `dashboard`/`dashboard-agent` (единственные с прямой прод-зависимостью в
+цепочке — `dashboard-agent` через `dockerode`) прошли `typecheck:tsgo`/`lint`/`typecheck` чисто.
+
+### Принятый риск (не форсил override)
+
+`form-data@2.3.3` тянется через устаревший `request` (`resize-img` → `to-ico`, скрипты генерации
+иконок трёх Electron-приложений — `poster-microtext-desktop`, `label-printer-desktop`,
+`animatrona`). Диапазон `request` — `~2.3.2`, патч на `form-data` требует `>=2.5.4`, вне
+диапазона. Форсировать не стал: код не делает multipart-запросов с внешним вводом (только читает
+локальные PNG для конвертации в `.ico`), эксплуатируемость нулевая. Во всех трёх приложениях уже
+есть современная замена в корневых зависимостях — `png-to-ico@3.0.2` — но `generate-icons.*`
+скрипты на неё не переведены, `to-ico` просто не вычищен.
+
+### ⚠️ Гонка с параллельным агентом при коммите
+
+Мои правки `package.json`+`bun.lock` были подхвачены чужим `git add`/`commit` параллельной
+сессии, работавшей над `animatrona-mobile`, и уехали в commit
+`a660e06f chore(deps): react-native-gesture-handler nightly, react-native-screens 4.27.0` —
+содержимое корректно (уже протипчекано), но commit message не отражает security-фикс. Данные не
+потеряны, коммит не запушен. Ещё один пример класса гонки из
+[git-multi-agent-incidents.md](/.claude/docs/git-multi-agent-incidents.md) — отдельно туда не
+заносил, паттерн уже описан там (staged-файлы одной сессии в чужом коммите).
+
+### Открытые вопросы
+
+- [ ] ⚠️ Открытый вопрос: `bun audit` в этом окружении падает с `UNKNOWN_CERTIFICATE_VERIFICATION_ERROR`
+      при обращении к npm registry — не проверено, разовая сетевая проблема или постоянная (прокси/TUN
+      VPN перехватывает TLS). Если постоянная — `deps-scan.ts` и ручные аудиты вроде этого будут
+      повторяться каждый раз через WebSearch вместо штатного инструмента.
+- [ ] Перевести `generate-icons.*` в трёх Electron-приложениях с `to-ico` на уже используемый в
+      репозитории `png-to-ico` — закрывает последний непропатченный critical-путь (`form-data@2.3.3`)
+      и убирает дублирование (два инструмента для одной задачи).
