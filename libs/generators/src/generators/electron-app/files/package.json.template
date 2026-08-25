@@ -7,7 +7,10 @@
   "main": "app/background.js",
   "nx": {
     "name": "<%= name %>",
-    "implicitDependencies": ["forms"]
+    "implicitDependencies": ["forms", "@letar/icon-generator"]
+  },
+  "dependencies": {
+    "@letar/icon-generator": "workspace:*"
   },
   "devDependencies": {
     "electron": "<%= electronVersion %>",
