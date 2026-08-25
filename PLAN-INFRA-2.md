@@ -11,7 +11,7 @@
 | [PLAN-INFRA-1.md](/PLAN-INFRA-1.md) | §15–§25      | сервер s3, deploy MCP, e2e-гейт, форматтер worktree, `libs/ui` |
 | **эта часть (PLAN-INFRA-2.md)**     | §26–§48      | SEO, npm-публикация, деплой, redis-инцидент, Traefik           |
 | [PLAN-INFRA-3.md](/PLAN-INFRA-3.md) | §49–§61      | firewall, hard e2e-gate, cron-задачи, security-инциденты       |
-| [PLAN-INFRA-4.md](/PLAN-INFRA-4.md) | §62–§94      | канарейка, GlitchTip, CI-гейт, Agent Mail                      |
+| [PLAN-INFRA-4.md](/PLAN-INFRA-4.md) | §62–§105     | канарейка, GlitchTip, CI-гейт, Agent Mail                      |
 
 ---
 
