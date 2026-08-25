@@ -7,7 +7,7 @@
  */
 
 import { Box, Container, Flex, HStack, Image, SimpleGrid, Text, VStack } from '@chakra-ui/react'
-import { BuildVersion, Pressable, StudioCredit } from '@letar/ui'
+import { BuildVersion, Pressable, StudioCredit, TouchLink } from '@letar/ui'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LuHeart, LuSend } from 'react-icons/lu'
@@ -100,11 +100,16 @@ export function PublicFooter({ cityTelegramMap }: PublicFooterProps) {
                     Турнир
                   </Text>
                   {tournamentLinks.map((link) => (
-                    <Link key={link.href} href={link.href}>
-                      <Text fontSize="sm" color="gray.400" _hover={{ color: 'white' }} transition="color 0.15s">
-                        {link.label}
-                      </Text>
-                    </Link>
+                    <TouchLink
+                      key={link.href}
+                      href={link.href}
+                      fontSize="sm"
+                      color="gray.400"
+                      _hover={{ color: 'white' }}
+                      transition="color 0.15s"
+                    >
+                      {link.label}
+                    </TouchLink>
                   ))}
                 </VStack>
                 <VStack align="flex-start" gap={2}>
@@ -118,11 +123,16 @@ export function PublicFooter({ cityTelegramMap }: PublicFooterProps) {
                     Ещё
                   </Text>
                   {generalLinks.map((link) => (
-                    <Link key={link.href} href={link.href}>
-                      <Text fontSize="sm" color="gray.400" _hover={{ color: 'white' }} transition="color 0.15s">
-                        {link.label}
-                      </Text>
-                    </Link>
+                    <TouchLink
+                      key={link.href}
+                      href={link.href}
+                      fontSize="sm"
+                      color="gray.400"
+                      _hover={{ color: 'white' }}
+                      transition="color 0.15s"
+                    >
+                      {link.label}
+                    </TouchLink>
                   ))}
                 </VStack>
               </SimpleGrid>
