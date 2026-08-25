@@ -149,6 +149,12 @@
       "runtimeArgs": ["dev", "form-example"],
       "port": 3027,
       "autoPort": true
+    },
+    {
+      "name": "time",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "time"],
+      "port": 3013
     }
   ]
 }

@@ -94,14 +94,36 @@ return {
 **Зависимость:** добавлена `"@better-auth/oauth-provider": "^1.7.1"` в корневой `package.json`
 (рядом с уже существующим `better-auth`).
 
-## Что не проверялось живьём
+## Живая проверка (2026-08-25) — два реальных бага найдены и исправлены
 
-Миграция закрывает **сборку/типы/юнит-тесты** (`nx typecheck`/`lint`/`test auth` — зелёные) и
-живой рендер приложений-потребителей (aboi проверен: dev-сервер поднимается, страницы рендерятся
-без ошибок в консоли). Реальный OIDC-флоу через `oauthProvider()` end-to-end (login → consent →
-токен → discovery на клиенте) на auth-hub/Ключнице **не был прогнан живьём** в рамках этой сессии
-— новая механика JWT-токенов и `jwt()`-плагина теоретически совместима с существующими
-hub-client-приложениями (они читают discovery-документ и токен как обычный OIDC-клиент,
-`genericOAuth()` не завязан на внутренний формат токена провайдера), но это стоит подтвердить
-живым входом через Ключницу на auth-hub или одном hub-client-приложении (например `time`/
-`archetest`) до следующего продакшен-деплоя auth-hub.
+Discovery-документ auth-hub (`/api/auth/.well-known/openid-configuration`) подтверждён живьём:
+корректные OAuth 2.1 endpoints, JWT/EdDSA id_token — связка `oauthProvider()`+`jwt()` реально
+поднимается и работает. Но попытка прогнать полный клик-через (login → consent → редирект с
+кодом обратно в hub-client) вскрыла два самостоятельных бага, ни один не специфичен именно
+переходу на 1.7 — оба существовали и раньше, просто их некому было живьём прогнать:
+
+1. **`createAuthClientWithOAuth` терял почти весь клиент.** `libs/auth/src/client/create-auth-client.ts`
+   собирал обёртку через `{...client, signIn: {...client.signIn, oauth2: ...}}`. Better Auth
+   строит клиент через `Proxy` над пустой `function(){}` без `ownKeys`-трапа — spread-оператор
+   копирует собственные enumerable-ключи цели, а у голого `Proxy` без `ownKeys` их ноль. Итог:
+   возвращаемый объект реально содержал только явно прописанный `signIn.oauth2` — `useSession`,
+   `signOut`, `signIn.social`, всё остальное было `undefined`. Ломало любой hub-client,
+   вызывающий `useSession()` (все, кто рендерит статус входа в toolbar/header) —
+   `TypeError: useSession is not a function` при первом же рендере. Фикс: обернуть в настоящий
+   `Proxy` с `get(target, prop) { return Reflect.get(target, prop) }`, подмешивая `oauth2` только
+   на уровне вложенного `signIn`-прокси.
+2. **Все 9 клиентов в `apps/auth-hub/prisma/seed.ts` были заведены с несуществующим
+   `redirectUrls`.** Путь `/api/auth/oauth2/callback/<providerId>` никогда не существовал —
+   реальный колбэк generic-oauth-плагина (сторона hub-client, куда Ключница редиректит после
+   логина) — `/api/auth/callback/<providerId>`, без сегмента `oauth2` (см.
+   `getOAuthCallbackPath` в `node_modules/better-auth/dist/oauth2/utils.mjs`: `/callback/${id}`
+   без `oauth2/`; сегмент `oauth2/` есть только в **провайдерских** эндпоинтах auth-hub —
+   `/api/auth/oauth2/authorize`, `/api/auth/oauth2/token` и т.д., это другая сторона протокола).
+   С неверным `redirectUrls` `oauthProvider()` отклонил бы `redirect_uri` каждого hub-client
+   в проде (`invalid_redirect_uri`) — миграция была бы незаметно сломана до первого реального
+   входа пользователя. Исправлено для всех 9 клиентов.
+
+**Не подтверждено живьём:** полный клик-через до экрана consent и обратно — заблокировано
+перегрузкой машины (параллельные сессии подняли счётчик node-процессов до 250+, dev-серверы
+падали через секунды после старта). Нужно повторить на менее нагруженной машине, когда получится
+удержать оба dev-сервера (auth-hub + один hub-client) живыми достаточно долго для клика.
