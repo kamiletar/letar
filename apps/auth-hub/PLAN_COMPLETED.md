@@ -2,6 +2,37 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## Фикс typecheck: VK-провайдер перенесён в genericOAuth (2026-08-25)
+
+Задача сессии: `nx typecheck:tsgo auth-hub` был красным по двум пунктам, оба зафиксированы
+предыдущей сессией как открытые (см. запись выше про VK type mismatch на `auth.ts:47`).
+
+**Оказалось одной проблемой, не двумя.** better-auth 1.7 зарезервировал ключ `vk` в
+`socialProviders` под собственный OAuth 2.1/PKCE-провайдер (VK ID, тип `VkOption`/`VkProfile` из
+`@better-auth/core`), несовместимый со старым кастомным VK-провайдером (VK API 5.131,
+`clientSecret` + ручной `users.get`). Второй пункт, ранее описанный отдельно (`TS2322` в
+`libs/auth/src/server/create-auth/index.ts`, `buildHubProviderAuth.plugins`), не подтвердился —
+это была одна и та же ошибка, отражавшаяся в отчёте typecheck как два разных места. После фикса
+VK `tsgo --noEmit` для auth-hub чист без единой правки в `libs/auth`.
+
+**Фикс:** тот же, что уже применён в driving-school (`apps/driving-school/src/lib/auth.ts`) —
+VK-провайдер перенесён из `socialProviders.vk` в `genericOAuth({config: [...]})` рядом с Yandex.
+Логика `getUserInfo` (VK API 5.131 `users.get`) не менялась, только точка регистрации.
+
+**Проверка:** `dprint fmt` → `nx lint auth-hub` → `nx typecheck:tsgo auth-hub` — зелёные.
+Дополнительно `tsgo --noEmit` прогнан на остальных 8 потребителей `createAuth` (driving-school,
+kami, domwellbes, time, aprel8008, dsperevod, svoichuzhie, aboi), т.к. фикс изначально
+подозревался как затрагивающий `libs/auth` — на деле `libs/auth` не трогался, ошибки в
+`domwellbes` (Chakra Card/Button recipe-варианты) предсуществующие и не про auth.
+
+Коммит `ce8da48b` (auth-hub — не submodule, часть публичного репо, отдельного bump SHA не
+требуется).
+
+⚠️ Замечено попутно, не относится к этой задаче: деплой auth-hub от 2026-08-25 (см.
+agent-mail, deploy-agent-dev, thread 575) заблокирован дрейфом `bun.lock` в
+`apps/animatrona-mobile` (react-native-reanimated/worklets версии не совпадают) — не auth-hub
+код, вне scope этой сессии.
+
 ## Живая проверка OIDC-флоу better-auth 1.7 — два бага найдены и исправлены (2026-08-25)
 
 Задача сессии: прогнать живьём полный OIDC-цикл через auth-hub (login → consent → токен →
