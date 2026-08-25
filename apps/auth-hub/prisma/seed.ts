@@ -139,6 +139,10 @@ const clients = [
       // должен лежать в боевой БД. Сверяется guard-тестом @letar/infra-config.
       'http://localhost:3024/api/auth/callback/letar-auth',
       'http://localhost:3024/sign-in',
+      // Staging на s3 — тот же клиент, отдельного staging-инстанса Ключницы нет, только
+      // дополнительный redirect URI (образец — time-prod/aprel8008-prod выше).
+      'https://studio-stage.s3.letar.best/api/auth/callback/letar-auth',
+      'https://studio-stage.s3.letar.best/sign-in',
     ].join(','),
   },
   {
