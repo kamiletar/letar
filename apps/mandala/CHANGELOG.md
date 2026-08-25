@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+## [0.40.18] - 2026-08-25
+
+### Fixed
+
+- Слайдер фото товара (`next/image` с `priority`) переведён на `preload`+`fetchPriority="high"` —
+  в Next.js 16 `priority` больше не выставляет `fetchpriority="high"` сам по себе. Разбор —
+  `apps/domwellbes/PLAN_PUBLIC_MOBILE.md` §12.24.
+
 ## [0.40.17] - 2026-08-25
 
 ### Changed

@@ -60,7 +60,8 @@ export function ProductSliderSwiper({ images, productName }: ProductSliderSwiper
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
                 style={{ objectFit: 'cover' }}
-                priority={index === 0}
+                preload={index === 0}
+                fetchPriority={index === 0 ? 'high' : undefined}
                 loading={index === 0 ? 'eager' : 'lazy'}
               />
             </Box>
