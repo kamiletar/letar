@@ -7,7 +7,7 @@
   "main": "app/background.js",
   "nx": {
     "name": "<%= name %>",
-    "implicitDependencies": ["forms", "@letar/icon-generator"]
+    "implicitDependencies": ["@letar/forms", "@letar/icon-generator"]
   },
   "dependencies": {
     "@letar/icon-generator": "workspace:*"
