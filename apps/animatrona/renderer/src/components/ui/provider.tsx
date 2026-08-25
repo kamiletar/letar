@@ -3,6 +3,7 @@
 import { SearchProvider } from '@/app/_providers/SearchProvider'
 import { system } from '@/theme'
 import { ChakraProvider } from '@chakra-ui/react'
+import { FormI18nProvider } from '@letar/forms'
 import { QueryProvider } from '@letar/query-provider'
 
 import { ColorModeProvider } from './color-mode'
@@ -25,7 +26,9 @@ export function Provider({ children }: { children: React.ReactNode }) {
     <QueryProvider preset="standard">
       <ChakraProvider value={system}>
         <ColorModeProvider>
-          <SearchProvider>{children}</SearchProvider>
+          <FormI18nProvider locale="ru">
+            <SearchProvider>{children}</SearchProvider>
+          </FormI18nProvider>
         </ColorModeProvider>
       </ChakraProvider>
     </QueryProvider>

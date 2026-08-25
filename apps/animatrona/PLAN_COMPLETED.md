@@ -4,6 +4,15 @@
 
 > **Архив обновлён:** 2026-08-25
 
+## Фикс: FormI18nProvider отсутствовал — подсказки валидации на английском (2026-08-25)
+
+Тот же класс бага, что нашли и починили в `domwellbes`: `@letar/forms` переводит constraint
+hints (`z.string().min/max`) на русский только внутри `FormI18nProvider` — без обёртки локаль по
+умолчанию `'en'`. Renderer не использует i18next (приложение русскоязычное), поэтому обёртка —
+`FormI18nProvider locale="ru"` в `renderer/src/components/ui/provider.tsx`. Разбор класса бага —
+[.claude/docs/letar-forms-missing-i18nprovider-english-hints.md](/.claude/docs/letar-forms-missing-i18nprovider-english-hints.md).
+`nx typecheck:tsgo animatrona-renderer` зелёный.
+
 ---
 
 ## Разбиение schema.zmodel на 9 доменных файлов (2026-08-25)
