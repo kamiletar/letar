@@ -7,6 +7,16 @@
 
 ## [Unreleased]
 
+## [0.33.9] — 2026-08-25
+
+### Fixed
+
+- Подсказки валидации форм (`z.string().min/max`) показывались на английском —
+  `FormI18nProvider` из `@letar/forms` не был подключён. Новый `FormI18nWrapper`
+  (`src/app/_components/form-i18n-wrapper.tsx`) внутри `NextIntlClientProvider` — локаль через
+  `useLocale()`, следует текущей локали интерфейса. Разбор класса бага —
+  [.claude/docs/letar-forms-missing-i18nprovider-english-hints.md](/.claude/docs/letar-forms-missing-i18nprovider-english-hints.md).
+
 ## [0.33.6] - 2026-08-21
 
 ### Changed

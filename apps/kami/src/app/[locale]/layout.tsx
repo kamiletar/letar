@@ -2,6 +2,7 @@ import { MainMatrix } from '@/app/[locale]/main-matrix'
 import { ChatWidgetLazy } from '@/app/_components/chat/chat-widget-lazy'
 import { CookieConsent } from '@/app/_components/cookie-consent'
 import { Footer } from '@/app/_components/footer/footer'
+import { FormI18nWrapper } from '@/app/_components/form-i18n-wrapper'
 import { Header } from '@/app/_components/header/header'
 import { JsonLd } from '@/app/_components/json-ld'
 import { SkipLink } from '@/app/_components/skip-link'
@@ -141,26 +142,28 @@ export default async function LocaleLayout({ children, params }: Props) {
             }}
           >
             <NextIntlClientProvider messages={messages}>
-              <UserProvider value={userContext}>
-                <SkipLink />
-                <HeaderScrollPadding cssVar="--kami-header-h" />
-                <Flex direction="column" minH="100vh">
-                  <Header />
-                  <Box as="main" id="main-content" flex="1" tabIndex={-1} outline="none">
-                    {/* Matrix Rain Background */}
-                    <MainMatrix />
-                    {children}
-                  </Box>
-                  <Footer />
-                </Flex>
-                <Toaster />
-                {process.env.ANTHROPIC_API_KEY && <ChatWidgetLazy />}
-                <CookieConsent />
-                <AnalyticsGate appKey="kami">
-                  <YandexMetrika YM_COUNTER_ID={Number(process.env.NEXT_PUBLIC_YM_COUNTER_ID) || 0} />
-                  <UmamiScript />
-                </AnalyticsGate>
-              </UserProvider>
+              <FormI18nWrapper>
+                <UserProvider value={userContext}>
+                  <SkipLink />
+                  <HeaderScrollPadding cssVar="--kami-header-h" />
+                  <Flex direction="column" minH="100vh">
+                    <Header />
+                    <Box as="main" id="main-content" flex="1" tabIndex={-1} outline="none">
+                      {/* Matrix Rain Background */}
+                      <MainMatrix />
+                      {children}
+                    </Box>
+                    <Footer />
+                  </Flex>
+                  <Toaster />
+                  {process.env.ANTHROPIC_API_KEY && <ChatWidgetLazy />}
+                  <CookieConsent />
+                  <AnalyticsGate appKey="kami">
+                    <YandexMetrika YM_COUNTER_ID={Number(process.env.NEXT_PUBLIC_YM_COUNTER_ID) || 0} />
+                    <UmamiScript />
+                  </AnalyticsGate>
+                </UserProvider>
+              </FormI18nWrapper>
             </NextIntlClientProvider>
           </ThemeProvider>
         </ColorModeProvider>

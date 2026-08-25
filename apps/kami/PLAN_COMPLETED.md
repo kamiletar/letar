@@ -1,5 +1,16 @@
 # Выполненные задачи — Kami
 
+## Фикс: FormI18nProvider отсутствовал — подсказки валидации на английском (2026-08-25)
+
+Тот же класс бага, что нашли и починили в `domwellbes`: `@letar/forms` переводит constraint
+hints (`z.string().min/max`) на русский только внутри `FormI18nProvider` — без обёртки локаль по
+умолчанию `'en'`. `ThemeProvider` смонтирован снаружи `NextIntlClientProvider` (см.
+`[locale]/layout.tsx`) — значит `useLocale()` там недоступен, поэтому обёртка не в нём. Новый
+клиентский `FormI18nWrapper` (`src/app/_components/form-i18n-wrapper.tsx`) добавлен внутри
+`NextIntlClientProvider`, локаль через `useLocale()`, без хардкода. Разбор класса бага —
+[.claude/docs/letar-forms-missing-i18nprovider-english-hints.md](/.claude/docs/letar-forms-missing-i18nprovider-english-hints.md).
+`nx typecheck:tsgo kami` и `nx lint kami` зелёные.
+
 ## Рефакторинг: schema.zmodel разбит на файлы по доменам (2026-08-24)
 
 1083-строчный `schema.zmodel` разбит на 11 доменных файлов в `apps/kami/schema/` через ZModel
