@@ -2931,6 +2931,20 @@ M2), проверить фактическую историю инциденто
    правка `deploy-affected.sh` (парсинг + прокидывание флага в вызов `deploy-engine rollout`), не
    сделана этим коммитом.
 
+   ✅ **Wiring реализован и обкатан живым прод-деплоем (2026-08-25).** `deploy-affected.sh`
+   (коммит `7281a7ae`) детектирует `letar.proxy-kind: traefik` тем же grep-паттерном, что и
+   `letar.rollout` — без label поведение всех остальных rollout-приложений не меняется (флаг не
+   передаётся, дефолт `npm`). Label добавлен `animatrona-landing` (коммит `3368f1c9`), следующий
+   обычный `deploy_app` дал:
+   ```
+   ## rollout animatrona-landing (proxy: traefik)
+   ✅ [nginx-reload-1] Traefik docker-провайдер уже добавил новый контейнер в балансировку
+   ✅ [nginx-reload-2] Traefik уже убрал старый контейнер из балансировки
+   ```
+   Ни одного `docker exec` к NPM за весь rollout, `curl https://animatrona.letar.best/` — 200 без
+   перерыва во время и после. Настоящая `traefik`-ветка (no-op reload) тем самым обкатана живым
+   прогоном — пункт выше («обкатка сделана неявно») закрыт по-настоящему.
+
 5. **Пачками перевести оставшиеся 20 приложений с `letar.rollout: 'true'`** (сверено
    2026-08-25: `aboi`, `animatrona-landing`, `animatrona-tracker`, `aprel8008`, `archetest`,
    `auth-hub`, `domwellbes`, `driving-school`, `dsperevod`, `form-docs`, `form-example`,
