@@ -1,5 +1,14 @@
 # PLAN_COMPLETED — aira-web
 
+## Touch target для текстовых ссылок — WCAG 2.5.5 (2026-08-25)
+
+Аудит по всему монорепо нашёл 2 ссылки без достаточной высоты клика на мобильном:
+`[locale]/privacy/page.tsx` («← Aira») и `_components/footer.tsx` («Privacy»). Обе идут через
+locale-aware `Link` из `@/i18n/navigation` (next-intl) — общий компонент `TouchLink` (`@letar/ui`)
+для них не подходит (жёстко берёт `next/link`, сломал бы префикс локали). Фикс — `minH="2.75rem"
+alignItems="center"` прямо на существующем `Link asChild`, без замены компонента. Внешние ссылки
+(github/spec/releases, `target="_blank"`) не тронуты.
+
 ## Выполненные задачи
 
 - [x] Фикс: `CookieBanner` рендерился вне `ChakraProvider` (2026-08-25). Тот же класс бага, что
