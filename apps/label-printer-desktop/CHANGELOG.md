@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+## [0.5.11] - 2026-08-25
+
+### Changed
+
+- `scripts/generate-icons.mjs` переведён с `@resvg/resvg-js` (не был установлен как зависимость —
+  скрипт падал бы `Cannot find module` при первом реальном запуске) на общую библиотеку
+  `@letar/icon-generator` (движок `sharp`, как у остальных Electron-приложений монорепо).
+
 ## [0.5.10] - 2026-08-25
 
 ### Fixed

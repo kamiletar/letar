@@ -2,6 +2,16 @@
 
 Детальное описание всех реализованных фич Label Printer Desktop.
 
+## Вынос generate-icons в общую библиотеку @letar/icon-generator (2026-08-25)
+
+При выносе трёх копий скрипта генерации иконок в общую библиотеку (`libs/icon-generator`,
+`.claude/docs` — см. `animatrona/PLAN_COMPLETED.md` за полным разбором) обнаружено, что
+`@resvg/resvg-js`, который использовал прежний `scripts/generate-icons.mjs`, вообще не был
+установлен как зависимость (нет ни в `package.json`, ни в `bun.lock`) — первый же реальный
+запуск после сборки упал бы `Cannot find module`. Переведён на `@letar/icon-generator` (движок
+`sharp`, единый со всеми Electron-приложениями монорепо). Прогнан локально, `icon.ico` и PNG
+сверены визуально.
+
 ## Миграция generate-icons.mjs: to-ico → png-to-ico, дописана генерация icon.ico (2026-08-25)
 
 Задача пришла как «перевести три Electron-приложения с `to-ico` на `png-to-ico`». Здесь скрипт
