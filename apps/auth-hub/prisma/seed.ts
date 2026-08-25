@@ -41,9 +41,10 @@ const clients = [
     disabled: false,
     skipConsent: false,
     redirectUrls: [
-      'https://archetest.letar.best/api/auth/oauth2/callback/letar-auth',
+      'https://archetest.letar.best/api/auth/callback/letar-auth',
       'https://archetest.letar.best/sign-in',
       'http://localhost:3012/sign-in',
+      'http://localhost:3012/api/auth/callback/letar-auth',
     ].join(','),
   },
   {
@@ -54,13 +55,14 @@ const clients = [
     disabled: false,
     skipConsent: false,
     redirectUrls: [
-      'https://time.letar.best/api/auth/oauth2/callback/letar-auth',
+      'https://time.letar.best/api/auth/callback/letar-auth',
       'https://time.letar.best/',
       'http://localhost:3013/',
+      'http://localhost:3013/api/auth/callback/letar-auth',
       // Staging (PLAN.md §18.7 Тираж M) — тот же клиент, отдельного staging-инстанса Ключницы
       // нет, только дополнительный redirect URI. Один лейбл (time-stage), под wildcard
       // `*.s3 CNAME s3.letar.best`.
-      'https://time-stage.s3.letar.best/api/auth/oauth2/callback/letar-auth',
+      'https://time-stage.s3.letar.best/api/auth/callback/letar-auth',
       'https://time-stage.s3.letar.best/',
     ].join(','),
   },
@@ -72,13 +74,13 @@ const clients = [
     disabled: false,
     skipConsent: false,
     redirectUrls: [
-      'https://grandslamcup.letar.best/api/auth/oauth2/callback/letar-auth',
+      'https://grandslamcup.letar.best/api/auth/callback/letar-auth',
       'https://grandslamcup.letar.best/sign-in',
       'http://localhost:3016/sign-in',
       // Staging на s3 (PLAN.md §18 Сессия D) — реальный HTTPS-домен, максимально близко к проду.
       // Один лейбл (grandslamcup-stage), не два (grandslamcup.stage) — попадает под существующий
       // DNS-wildcard `*.s3 CNAME s3.letar.best`, новая DNS-запись не нужна.
-      'https://grandslamcup-stage.s3.letar.best/api/auth/oauth2/callback/letar-auth',
+      'https://grandslamcup-stage.s3.letar.best/api/auth/callback/letar-auth',
       'https://grandslamcup-stage.s3.letar.best/sign-in',
     ].join(','),
   },
@@ -90,7 +92,7 @@ const clients = [
     disabled: false,
     skipConsent: false,
     redirectUrls: [
-      'https://kami.letar.best/api/auth/oauth2/callback/letar-auth',
+      'https://kami.letar.best/api/auth/callback/letar-auth',
       'https://kami.letar.best/sign-in',
       'http://localhost:3005/sign-in',
     ].join(','),
@@ -103,7 +105,7 @@ const clients = [
     disabled: false,
     skipConsent: false,
     redirectUrls: [
-      'https://animatrona-tracker.letar.best/api/auth/oauth2/callback/letar-auth',
+      'https://animatrona-tracker.letar.best/api/auth/callback/letar-auth',
       'https://animatrona-tracker.letar.best/sign-in',
       'http://localhost:3010/sign-in',
     ].join(','),
@@ -116,7 +118,7 @@ const clients = [
     disabled: false,
     skipConsent: false,
     redirectUrls: [
-      'https://dash.letar.best/api/auth/oauth2/callback/letar-auth',
+      'https://dash.letar.best/api/auth/callback/letar-auth',
       'https://dash.letar.best/auth/signin',
     ].join(','),
   },
@@ -130,12 +132,12 @@ const clients = [
     // После миграции — единожды покажется consent-экран, затем consent сохраняется в oauthConsent.
     skipConsent: false,
     redirectUrls: [
-      'https://studio.letar.best/api/auth/oauth2/callback/letar-auth',
+      'https://studio.letar.best/api/auth/callback/letar-auth',
       'https://studio.letar.best/sign-in',
       // Локальный dev-порт студии — 3024 (3020 занял form-docs). Расхождение с этим
       // значением ломает локальный вход: студия ходит в ПРОД-Ключницу, поэтому localhost-адрес
       // должен лежать в боевой БД. Сверяется guard-тестом @letar/infra-config.
-      'http://localhost:3024/api/auth/oauth2/callback/letar-auth',
+      'http://localhost:3024/api/auth/callback/letar-auth',
       'http://localhost:3024/sign-in',
     ].join(','),
   },
@@ -147,7 +149,7 @@ const clients = [
     disabled: false,
     skipConsent: false,
     redirectUrls: [
-      'https://domwellbes.ru/api/auth/oauth2/callback/letar-auth',
+      'https://domwellbes.ru/api/auth/callback/letar-auth',
       'https://domwellbes.ru/sign-in',
     ].join(','),
   },
@@ -159,14 +161,14 @@ const clients = [
     disabled: false,
     skipConsent: false,
     redirectUrls: [
-      'https://aprel8008.ru/api/auth/oauth2/callback/letar-auth',
+      'https://aprel8008.ru/api/auth/callback/letar-auth',
       'https://aprel8008.ru/sign-in',
-      'http://localhost:3023/api/auth/oauth2/callback/letar-auth',
+      'http://localhost:3023/api/auth/callback/letar-auth',
       'http://localhost:3023/sign-in',
       // Staging (PLAN.md §18.7 Тираж M1) — тот же клиент, отдельного staging-инстанса Ключницы
       // нет, только дополнительный redirect URI. Один лейбл (aprel8008-stage), под wildcard
       // `*.s3 CNAME s3.letar.best`.
-      'https://aprel8008-stage.s3.letar.best/api/auth/oauth2/callback/letar-auth',
+      'https://aprel8008-stage.s3.letar.best/api/auth/callback/letar-auth',
       'https://aprel8008-stage.s3.letar.best/sign-in',
     ].join(','),
   },
