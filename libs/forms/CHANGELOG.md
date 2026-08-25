@@ -4,6 +4,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.7.7] - 2026-08-26
+
+### Added
+
+- **Regression-тесты на пять API из фикса 2.7.6** (`Form.Subscribe`, `Form.UrlSync`,
+  `useActiveFiltersCount`, `useTypedFormContext`, `useTypedFormSubscribe`) — каждый рендерится
+  внутри настоящего декларативного `<Form>` (не мок-контекст) и проверяет реакцию на изменение
+  поля. Раньше ни один тест не рендерил эти API внутри `<Form>`, поэтому баг ловился только на
+  SSG-пререндере `form-develop-app`, не на CI/unit-тестах.
+
 ## [2.7.6] - 2026-08-26
 
 ### Fixed

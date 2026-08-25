@@ -4204,4 +4204,5 @@ DOM-поведении минимален. Юнит/компонентные т�
 ---
 
 **Последнее обновление:** 2026-08-26 — фикс расколотого React-контекста в `Form.Subscribe`/
-`Form.UrlSync`/`useActiveFiltersCount`/typed-хуках (2.7.6), детали в `PLAN_COMPLETED.md`.
+`Form.UrlSync`/`useActiveFiltersCount`/typed-хуках (2.7.6) + regression-тесты на все пять API
+внутри настоящего декларативного `<Form>`, детали в `PLAN_COMPLETED.md`.

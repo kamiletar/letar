@@ -1,5 +1,28 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-08-26 — Regression-тесты на пять API, падавших внутри декларативного `<Form>`
+
+Продолжение предыдущей записи (фикс 2.7.6 ниже): у `Form.Subscribe`, `Form.UrlSync`,
+`useActiveFiltersCount`, `useTypedFormContext`, `useTypedFormSubscribe` не было ни одного теста,
+рендерящего их внутри настоящего `<Form>` — грепом по `libs/forms/src/**/*.spec.tsx` было ноль
+совпадений, поэтому баг не ловился на CI/unit-тестах, только на SSG-пререндере
+`form-develop-app`. Добавлены 4 файла, 17 тестов, каждый рендерит API внутри реального
+`<Form initialValue=... onSubmit=...>` (не мок-контекст) и проверяет реакцию на изменение поля
+через `userEvent`:
+
+- `libs/forms/src/lib/declarative/form-subscribe.spec.tsx` — `Form.Subscribe` (в т.ч. debounce)
+- `libs/forms/src/lib/declarative/use-form-url-sync.spec.tsx` — `Form.UrlSync` + `useFormUrlSync`
+- `libs/forms/src/lib/declarative/use-active-filters-count.spec.tsx` — `useActiveFiltersCount`
+- `libs/forms/src/lib/context.spec.tsx` (новый файл) — `useTypedFormContext`,
+  `useTypedFormSubscribe`
+
+Коммит `bd6686d2`. Проверено: `typecheck:tsgo`/`lint` зелёные, все 4 новых файла — 17/17 тестов
+(`nx test forms -- <4 файла>`). Полный `nx test forms` в моменте падал на ~32 посторонних файлах
+с ошибками резолва модулей (`@ark-ui/react`/`@zag-js`/EPERM в `node_modules/.bun`) — шире
+задокументированных 2 пре-существующих сбоев `table-selection.spec.tsx`; файлы физически на
+диске целы, похоже на конфликт файловых блокировок с параллельно работавшими агентами в
+`.claude/worktrees/agent-*` (не регрессия от этой сессии, не чинилось).
+
 ## 2026-08-26 — Фикс расколотого React-контекста в декларативном `<Form>` (2.7.6)
 
 Найдено при чинке `form-develop-app` (`nx build` падал на `/controlled-state-demo`,
