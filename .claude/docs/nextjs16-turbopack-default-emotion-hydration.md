@@ -130,6 +130,7 @@ React component» — оно остаётся и под webpack (это отде
 | `dashboard`          | оба инферились (частичный `build`)                | Turbopack        | ✅ исправлено — частичный override `options.command`    |
 | `driving-school`     | оба инферились (submodule)                        | Turbopack        | ✅ исправлено — частичный override, коммит `4d0ccaf`    |
 | `auth-hub`           | оба инферились (`project.json` без `build`/`dev`) | Turbopack        | ✅ исправлено 2026-08-25 — частичный override, см. ниже |
+| `aira-web`           | оба инферились (`project.json` без `build`/`dev`) | Turbopack        | ✅ исправлено 2026-08-25 — частичный override, см. ниже |
 
 Для всех трёх подтверждён Turbopack в логе dev-сервера до фикса
 (`▲ Next.js 16.3.0 (Turbopack)`) и webpack после (`▲ Next.js 16.3.0 (webpack)`), а также
@@ -184,6 +185,27 @@ GlitchTip и после фикса (`mandala` issue `AUTH-HUB`-аналог `MAN
 Частота на `mandala`/`studio` заметно ниже, чем была на `auth-hub` до фикса — не поднимать это в
 приоритет без нового подтверждённого падения интерактивности (как на `auth-hub`), просто иметь в
 виду при следующей находке этого сигнатурного текста в GlitchTip.
+
+## Найдено на `aira-web` (2026-08-25): `ContextError` при клиентской навигации locale-switcher
+
+GlitchTip AIRA-WEB-1 (issue 604): `ContextError: useContext returned 'undefined'. Seems you forgot
+to wrap component within <ChakraProvider />`, впервые 2026-08-18, ~9 событий/неделю. Breadcrumb —
+soft-навигация `to: "/ru", from: "/ru"` (клик по переключателю языка, в т.ч. на уже активной
+локали — `router.replace` из next-intl `navigation` всё равно триггерит клиентский переход).
+
+Ни один прямой стектрейс с сорсмапами получен не был (прод-бандл минифицирован), диагноз поставлен
+по структурному совпадению с уже закрытыми случаями: `project.json` не переопределял `build`/`dev`
+→ голый инференс `@nx/next` → Turbopack; Chakra v3 `ChakraProvider` + `next-themes`
+`ColorModeProvider` в дереве провайдеров (`apps/aira-web/src/app/_components/providers.tsx`).
+Живая репродукция через Browser pane **до** фикса не запускалась (сразу применён фикс по
+структурному совпадению, как и на `auth-hub`/остальных из таблицы) — **после** фикса многократные
+клики по переключателю (включая повтор текущей локали и быстрое переключение en↔ru) ошибок не
+дали, что косвенно подтверждает диагноз, но не является строгим доказательством причины (см.
+предупреждение раздела «Найдено на `auth-hub`» — флаг `--webpack` не гарантированно устраняет
+весь класс симптома целиком).
+
+Фикс — тот же частичный override, добавлен в `apps/aira-web/project.json`. Регрессионный тест —
+`apps/aira-web-e2e/src/locale-switcher.spec.ts`.
 
 ## Второй, отдельный источник того же симптома: разный порядок CSS-свойств в Emotion-классе (2026-08-12)
 
