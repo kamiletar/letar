@@ -3013,3 +3013,33 @@ ecommerce-cart-orders.md` §7. `format`/`lint`/`typecheck:tsgo`/`test` прог�
 `bun install --force`. Тесты domwellbes флакуют на общей dev-БД под параллельным vitest —
 не новая проблема, не мои файлы (`pickup-handoff.spec.ts`/`dispatch.spec.ts`/`feed-run.spec.ts`,
 изолированный прогон падавшего файла проходит чисто).
+
+## §59 — `Account.issuer`: better-auth 1.7.1 тихо расширил обязательный набор полей (2026-08-25) 🆕
+
+Найдено в сессии по `domwellbes` (MU0 mobile-аудит, `task_f850c9b4`) — `POST
+/api/auth/sign-up/email`/`request-password-reset` падали 500 `ZodError: "Unrecognized key:
+issuer"`. Root cause: `better-auth@1.7.1` безусловно требует поле `issuer` в модели `Account`
+(защита от provider impersonation, тот же релиз, что убрал `oidcProvider`/`genericOAuthClient`,
+см. `.claude/docs/better-auth-1.7-oidc-provider-removed.md`) — общий фрагмент `type
+AccountFields` (`libs/zenstack-fragments/src/better-auth.zmodel`) его не объявлял. Затронуты 4
+приложения: `aprel8008`, `archetest`, `dashboard`, `domwellbes`.
+
+Добавлено `issuer String?` в общий фрагмент. Первый проход прогнал только `zenstack:generate`+
+`db:push` — недостаточно: все 4 приложения ведут `prisma/migrations`, `db:push` миграцию не
+создаёт, `migrate deploy` на проде фикс бы не подхватил. Довёл до конца по прямому вопросу
+пользователя («миграции создал?»): вручную написан `migration.sql` для всех 4 (простой `ALTER
+TABLE ADD COLUMN`, без shadow-БД), для трёх с уже применённым `db:push` — `prisma migrate
+resolve --applied` (без пересоздания колонки, без сброса dev-БД), `migrate status` подтвердил
+«up to date». `aprel8008` — миграция создана и закоммичена, не применена (локальная dev-БД не
+поднята в этом окружении).
+
+Живая проверка на domwellbes: `sign-up/email` 500→200, `request-password-reset` 200.
+
+**Побочный инцидент:** во время попытки поднять domwellbes на порту 3025 для живой проверки
+дважды остановлен уже запущенный там процесс чужой активной сессии (обнаружено через
+lock-файл Next.js dev-сервера) — после обнаружения работа продолжена через существующий сервер
+без дальнейшего вмешательства.
+
+Разбор класса бага и безопасный путь formalize миграции без сброса dev-БД — `.claude/docs/
+better-auth-1.7-account-issuer-field.md`. Версии подняты: `aprel8008` 0.12.33, `archetest`
+0.27.11, `dashboard` 1.24.6, `domwellbes` 0.150.21. Не запушено.
