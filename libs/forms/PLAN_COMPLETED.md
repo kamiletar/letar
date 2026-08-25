@@ -30,6 +30,24 @@ v2.7.4, оба места в `@letar/forms-shadcn` v0.33.5) принимает `
 
 Разбор — [letar-forms-lazy-component-eager-jsx-seed-crash.md](/.claude/docs/letar-forms-lazy-component-eager-jsx-seed-crash.md).
 
+## 2026-08-25 — Автоматизация регресс-гейта против eager JSX (`@letar/eager-jsx-check`)
+
+Ручной grep, оставленный предыдущей сессией как единственная защита от регрессии бага выше,
+заменён таргетом `eager-jsx-check`, подключённым к `lint`. Новая plain-JS библиотека
+[`@letar/eager-jsx-check`](/libs/eager-jsx-check/README.md) (по образцу `@letar/theme-check`) —
+три regex-правила (JSX как значение свойства объекта, top-level `const`-инициализатор, top-level
+аргумент вызова) с исключениями под JSDoc, тернарники и generic-типы, 14 unit-тестов. Подключена
+к `forms`, `forms-react`, `forms-shadcn` — регресс теперь ловится каждым `nx lint`.
+
+**Первый же прогон нашёл реальный, ещё не исправленный экземпляр этого бага**:
+`forms-shadcn`'s `document-field-base.tsx` и `rich-text-toolbar-config.tsx` не были переведены на
+`ComponentType` вместе с Chakra-версией — 8 полей + `TOOLBAR_CONFIG` создавали иконку eagerly.
+Исправлено (`forms-shadcn` v0.33.6).
+
+**`forms-vue`/`forms-vue-shadcn`/`forms-angular` — сознательно не подключены**: в них нет ни
+одного `.tsx`-файла (Vue — SFC `.vue` + `.ts`, Angular — только `.ts`), баг специфичен именно
+JSX-трансформу — подключение было бы шумом без пользы. Обоснование зафиксировано в README гейта.
+
 ## 2026-08-21 — Фикс required-резолва `.optional().or(z.literal(''))` (v2.7.3 / forms-core v0.9.1)
 
 Репорт: `apps/domwellbes/checkout` — поле `customerEmail` рендерилось с `*` (обязательное), хотя
