@@ -2817,3 +2817,50 @@ affected-детекцию, порядок сборки и инвалидацию
 **Коммиты:** `2600dde7` (aira-web, letar) · submodule domwellbes `391db4f` + bump `ea96d274` ·
 submodule studio `b7bf6b5` + bump `74812bdb`. Не запушено — ждёт одобрения пользователя
 ([git.md § push](/.claude/rules/git.md)).
+
+## §103 — Nx project name без scope у 10 библиотек ✅ ЗАКРЫТО (2026-08-25)
+
+**Контекст:** побочная находка §102 — та же болезнь (граф Nx не видит ребро зависимости из-за
+несовпадения имени), но с другой стороны: у 10 библиотек сам **Nx project name**
+(`project.json` «name» / `package.json` → `nx.name`) был без scope, хотя `package.json.name`
+уже `@letar/<lib>` — единственные 10 исключений из конвенции `libs.md` («name совпадает с
+package.json.name»): `animatrona-franchise-graph`, `animatrona-shared`, `animatrona-types`,
+`animatrona-ui`, `animatrona-utils`, `contract-generator`, `exoplayer-ass`, `exoplayer-sync`,
+`label-printer-core` (все — собственный `project.json`) и `cdek` (переопределение прямо в
+`package.json` → `nx.name`, без отдельного `project.json`).
+
+**Сделано:**
+
+- В 9 `project.json` `"name"` заменено на `"@letar/<lib>"`; в `libs/cdek/package.json` удалён
+  ключ `nx.name` — Nx взял имя из top-level `package.json.name` (уже `@letar/cdek`).
+- Три потребителя со ссылками на старые бэйр-имена в `nx.implicitDependencies`:
+  `apps/animatrona-tracker/package.json` (`"animatrona-ui"` → `"@letar/animatrona-ui"`, плюс
+  тот же дубль в `apps/animatrona-tracker/project.json`, у которого свой параллельный
+  `implicitDependencies` с задвоенным списком — фикс применён в обоих местах), приватные
+  submodule `aboi` и `svoichuzhie` (`"cdek"` → `"@letar/cdek"`). Грепом по репозиторию (`scripts/`,
+  `.claude/docs/`, `*.md`) других упоминаний бэйр-имён в контексте `nx run`/`implicitDependencies`/
+  `dependsOn` не найдено.
+- `nx show projects` подтвердил: новые `@letar/animatrona-*`, `@letar/contract-generator`,
+  `@letar/exoplayer-*`, `@letar/label-printer-core`, `@letar/cdek` в списке, старые бэйр-имена
+  исчезли. `nx graph` (JSON) подтвердил рёбра `animatrona-tracker`/`aboi`/`svoichuzhie` теперь
+  ведут на scoped-имена.
+- `nx typecheck:tsgo animatrona-tracker` — 5 ошибок, все в `libs/auth/src/server/create-auth/index.ts`
+  (несовместимость типов `BetterAuthPlugin`, не связано с этой правкой, добавлено параллельной
+  сессией не в рамках §103). `nx typecheck:tsgo svoichuzhie` — зелёный. `aboi` не прогонялся —
+  submodule был занят активной параллельной сессией (`aboi-dev`, эксклюзивная резервация
+  `apps/aboi/**`), typecheck внутри чужой активной работы решено не запускать.
+
+**Открытый вопрос пользователю:** переименование Nx project name (в отличие от §102, где менялись
+только ссылки в `implicitDependencies`) более инвазивно — потенциально задевает кеш Nx Cloud и
+любые внешние строки вида `nx run <старое-имя>:...`/`nx affected --projects=<старое-имя>`, если
+такие существуют вне репозитория (CI-конфиги на других серверах, внешние скрипты). Внутри
+репозитория и в отслеживаемых submodule таких ссылок не найдено, но `nx affected` на полном
+diff не прогонялся — эффект на весь Nx Cloud кеш не проверен.
+
+**Коммиты:** letar — `9965bd3d` (10 библиотек, один осознанный multi-scope коммит,
+`GIT_ALLOW_MULTI_SCOPE_COMMIT=1`) + `10baa25f` (animatrona-tracker) + `076d4b4e` (bump svoichuzhie
+submodule). submodule svoichuzhie — `1b19607`. submodule aboi — правка `cdek` → `@letar/cdek`
+попала в уже готовившийся коммит параллельной сессии `aboi-dev`
+(`a713830b4120bb1d91df3d59fa43bc1de3a97e1f`, «редизайн каталога — Фаза 3 старт»), bump SHA в
+letar — `af2ea917`, тоже её коммит. Ничего не запушено — ждёт одобрения пользователя
+([git.md § push](/.claude/rules/git.md)).
