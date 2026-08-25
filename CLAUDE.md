@@ -237,6 +237,9 @@ singleton-строка настроек (`ShopSettings` и аналоги) — �
 `exhaustive-deps`/`rules-of-hooks` не проверялось ни в одном из ~22 приложений с этим паттерном
 
 **Тесты и форматирование:** [e2e-testing](/.claude/docs/e2e-testing.md) ·
+[playwright-testmatch-absolute-path-regex-anchor](/.claude/docs/playwright-testmatch-absolute-path-regex-anchor.md)
+⚠️ якорный `RegExp` (`^`) в `testMatch`/`testIgnore` матчится против абсолютного пути файла, не
+относительно `testDir` — никогда не совпадает, чинится glob-строкой ·
 [unit-testing](/.claude/docs/unit-testing.md) ⚠️ обязательный `tsconfig.spec.json` ·
 [dprint-worktree-submodule-scope](/.claude/docs/dprint-worktree-submodule-scope.md) ⚠️ dprint не видит
 границ worktree/submodule ·
