@@ -137,6 +137,9 @@ ECONNREFUSED/ERR_DLOPEN_FAILED при зелёном билде ·
 «Only plain objects can be passed to Client Components» ·
 [nextjs-static-export-rsc-paths](/.claude/docs/nextjs-static-export-rsc-paths.md) ·
 [nextjs-ssr-browser-only-libs](/.claude/docs/nextjs-ssr-browser-only-libs.md) `self is not defined` ·
+[nextjs-dynamic-ssr-false-still-server-compiled](/.claude/docs/nextjs-dynamic-ssr-false-still-server-compiled.md)
+⚠️ `dynamic(ssr:false)` не исключает модуль из server-резолва импортов (RSC client reference) —
+несовпадение `"node"`/`"browser"` exports транзитивной зависимости всё равно валит билд ·
 [nextjs16-turbopack-default-emotion-hydration](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md)
 ⚠️ Turbopack по умолчанию + Chakra `<Global>` → hydration mismatch, флаки в e2e ·
 [turbopack-private-submodule-root](/.claude/docs/turbopack-private-submodule-root.md) «Could not find

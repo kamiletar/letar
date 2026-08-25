@@ -3109,3 +3109,39 @@ Bash, а не через Browser tool — секрет читает сам ск�
 `createDevSessionRoute` из `@letar/auth/server`, не только `aboi`. ⚠️ Git Bash на Windows
 переинтерпретирует ведущий `/` в аргументе как путь к файлу (MSYS-конвертация) — нужен
 `MSYS_NO_PATHCONV=1` перед вызовом, задокументировано там же.
+
+## §112 — `nx run studio:build` падал на `solid-js/web`: пин `@tanstack/react-devtools` на `0.10.5` ✅ ЗАКРЫТО (2026-08-26)
+
+После недавнего планового обновления зависимостей (§100/§110) `nx run studio:build` начал падать
+на webpack-этапе: `Attempted import error: 'use' is not exported from 'solid-js/web'`, трейс —
+через `libs/query-provider/src/lib/devtools-panel.tsx`. `bun install` печатал предупреждение
+`incorrect peer dependency "@tanstack/react-devtools@>=1.0.0"` — но это оказалось красной
+селёдкой: `@tanstack/react-devtools` пока не выпустил `1.x` вообще (это завышенный
+peer-диапазон в `libs/query-provider/package.json` на будущее), а несовпадение версии
+`solid-js` тут ни при чём — установленная `1.9.12` удовлетворяет диапазону `>=1.9.7`, который
+требует `@tanstack/devtools-ui`.
+
+Настоящая причина — баг апстрима, а не версийный конфликт: `@tanstack/devtools-ui@0.7.1`
+(последняя опубликованная на 2026-08-26, тянется через `@tanstack/react-devtools@0.10.12` →
+`@tanstack/devtools@0.14.2`) в `theme.js` статически импортирует `use`/`insert`/`template` из
+`solid-js/web`. `libs/query-provider` уже дважды защищался от бандлинга devtools в прод
+(`next/dynamic(..., { ssr: false })` и в `persist-provider.tsx`, и в `query-provider.tsx`) — но
+это не помогает: App Router обязан построить RSC client-reference для `'use client'`-модуля
+даже с `ssr:false`, а для этого server-компилятор webpack резолвит граф импортов с условием
+экспорта `"node"`. У `solid-js/web` `"node"`-условие ведёт на `web/dist/server.js` (SSR-рендер
+в строку), который не экспортирует `use` вовсе — даже не заглушкой (`notSup`), в отличие от
+большинства остальных DOM-функций там же. Новый класс бага, не описанный в существовавшем
+`nextjs-ssr-browser-only-libs.md` (тот — про рантайм-краш `self is not defined`, этот — про
+падение на этапе резолва импортов при билде). Задокументирован отдельно —
+[nextjs-dynamic-ssr-false-still-server-compiled.md](/.claude/docs/nextjs-dynamic-ssr-false-still-server-compiled.md).
+
+**Фикс:** точный пин `"@tanstack/react-devtools": "0.10.5"` в корневом `package.json` (был
+`^0.10.12`) — тянет `@tanstack/devtools@0.12.2` → `@tanstack/devtools-ui@0.5.2`, чей `theme.js`
+импортирует только `createComponent`. Побочный эффект: `@tanstack/react-form-devtools` уже
+использовал `devtools-ui@0.5.2` — теперь обе `devtools`-зависимости сходятся на одной версии,
+исчезла и вторая копия в изолированном `.bun`-кеше, и peer-warning. Проверено:
+`nx run studio:build --skip-nx-cache`, `typecheck`/`typecheck:tsgo`/`lint` на
+`@letar/query-provider` и `studio` — коммит `175ec47f`.
+
+⚠️ Снимать пин можно только когда апстрим поправит `"node"`-экспорт `devtools-ui`/`solid-js/web`
+— проверка описана в самом doc-файле.
