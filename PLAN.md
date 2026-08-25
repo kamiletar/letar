@@ -2960,3 +2960,29 @@ Action ID после редеплоя), не разовую случайност
       единый движок (`sharp`). Иконки перегенерированы и визуально сверены, `nx test/lint/
       typecheck:tsgo` зелёные. Детали — `apps/animatrona/PLAN_COMPLETED.md`,
       `apps/label-printer-desktop/PLAN_COMPLETED.md`, `apps/poster-microtext-desktop/PLAN_COMPLETED.md`.
+
+## §58 — `getOrCreateSessionUserId`: гостевая anonymous-сессия вынесена из двух приложений (2026-08-25) 🆕
+
+Целевой аудит (наводка из сессии `aboi` R3.7 — там аноним-гостевая корзина/избранное только что
+чинились) сравнил `apps/aboi/src/lib/auth-utils.ts` и `apps/domwellbes/src/lib/retail-session.ts`:
+обе реализации `getOrCreateSessionUserId()` (получить `userId` реального юзера или завести гостя
+через Better Auth `signInAnonymous`, если сессии нет) совпадали дословно — тело и текст ошибки
+1:1. domwellbes сам честно писал в комментарии «тот же приём, что apps/aboi».
+
+Вынесено в `@letar/auth/server` — `createGetOrCreateSessionUserId(auth)`
+(`libs/auth/src/server/anonymous-session.ts`, экспорт из `libs/auth/src/server/index.ts`). Фабрика
+принимает уже сконструированный `auth`-инстанс приложения (структурная типизация по минимальному
+интерфейсу, тот же паттерн, что у `createSessionHelpers`/`createAuthGuards`) — не конфликтует с
+задокументированной ловушкой типов anonymous-плагина (`auth.api.signInAnonymous` теряет
+tuple-тип, если `plugins` не передан литеральным массивом прямо в `betterAuth()`, см. комментарии
+в `apps/aboi/src/lib/auth.ts` и `apps/domwellbes/src/lib/auth.ts`): каждое приложение по-прежнему
+строит свой `auth` само, в фабрику передаётся только готовый объект. Оба приложения теперь —
+однострочный `export const getOrCreateSessionUserId = createGetOrCreateSessionUserId(auth)`.
+
+Разбор задним числом (для будущих сессий, чтобы не искать заново) — `.claude/docs/
+ecommerce-cart-orders.md` §7. `format`/`lint`/`typecheck:tsgo`/`test` прогнаны на `@letar/auth`,
+`aboi`, `domwellbes` — зелёные. По пути поймал не связанную с задачей проблему графа Nx
+(устаревший isolated bun-кеш, `libs.md` → `bun-install-stale-isolated-cache.md`), почин
+`bun install --force`. Тесты domwellbes флакуют на общей dev-БД под параллельным vitest —
+не новая проблема, не мои файлы (`pickup-handoff.spec.ts`/`dispatch.spec.ts`/`feed-run.spec.ts`,
+изолированный прогон падавшего файла проходит чисто).
