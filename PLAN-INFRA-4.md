@@ -2896,3 +2896,29 @@ override перебивал её, так что реально резолвил�
 ложноотрицательный результат чистой установки. Подтверждено окончательно только повторным
 полным сносом и переустановом уже в основном чекауте `C:\web\letar` — с явного одобрения
 пользователя, т.к. общий `node_modules` используют другие активные сессии.
+
+## §105 — снят точный пин `@tanstack/react-query` ✅ ЗАКРЫТО (2026-08-25)
+
+Второй пин, помеченный в §72 как «осознанный, не трогать» рядом с `kysely`. Проверка истории
+git не нашла коммита с объяснением причины — похоже на унаследованный стиль, а не решение под
+конкретный инцидент.
+
+**Механизм отличается от kysely:** ни один пакет в дереве не тянет `@tanstack/react-query` как
+свою `dependencies`-запись — везде только широкие `peerDependencies` (`>=5.0.0`/`^5.0.0`):
+`@tanstack/react-query-devtools`, `@tanstack/react-query-persist-client`,
+`@zenstackhq/tanstack-query`, `libs/hooks`, `libs/query-provider`. Физически раздвоиться в дереве
+пакет с такой схемой резолва не может — риска дублирования копий (как у kysely) структурно нет,
+подтверждения полным сносом `node_modules` не требуется.
+
+**Была живая нестыковка:** коммит `3d552de7` (апдейт electron) заодно поднял
+`@tanstack/react-query-devtools`/`persist-client` до `^5.102.3` (caret сам подтянул), а сам
+`react-query` остался жёстко на `5.101.4` — их peer-требование `^5.102.3` уже не satisfied
+установленной версией.
+
+**Сделано:** `dependencies.react-query` — `^5.102.3` (был `bun update @tanstack/react-query`,
+подтянул сам). Заодно продедуплицировался вложенный `@tanstack/query-core` у
+`query-persist-client-core` — раньше в `bun.lock` была отдельная запись
+`@tanstack/query-persist-client-core/@tanstack/query-core@5.102.3` рядом с корневым
+`@tanstack/query-core@5.101.4`, теперь обе ссылки сходятся в одну. Проверено:
+`nx typecheck:tsgo` на driving-school/studio/mandala/animatrona-tracker (обычный `bun install`,
+без сноса — по указанной выше причине это не требовалось) — зелёный.
