@@ -1,8 +1,13 @@
 # React Native 0.85→0.87 — breaking changes при миграции
 
 ⚠️ Найдено в сессиях `animatrona-mobile-dev` и `animatrona-tv-dev` (agent-mail тред
-`cascade-rn-087-migration`, 2026-08-19) при миграции двух приложений подряд. Не привязано к
-Animatrona — общая ловушка для любого будущего React Native приложения монорепо.
+`cascade-rn-087-migration`, 2026-08-19 и 2026-08-25) при миграции двух приложений подряд. Не
+привязано к Animatrona — общая ловушка для любого будущего React Native приложения монорепо.
+
+⚠️ Пункты 1-11 — компилируемые breaking changes самого RN. Пункты 12-13 ниже — **не ловятся
+typecheck'ом вообще**, всплывают только на реальной сборке/запуске (`react-native bundle`,
+`gradlew assembleDebug`) — обнаружены `animatrona-mobile-dev` при тесте на реальном устройстве
+2026-08-25, перенесены в `animatrona-tv` в тот же день.
 
 ## 1. Codegen-типы переехали в публичный корень пакета
 
@@ -120,3 +125,71 @@ type MyPressableState = PressableStateCallbackType & { hovered: boolean }
 ```typescript
 const flatStyle = StyleSheet.flatten([styleA, styleB]) ?? undefined
 ```
+
+## 12. Android toolchain: RN 0.87 требует Gradle 9.4.1+ / AGP 9.2.1+ / Kotlin 2.2.0+
+
+⚠️ Не ловится typecheck'ом — только реальной сборкой (`gradlew assembleDebug`). Симптом на
+старом toolchain (Gradle 8.13, AGP 8.7.3, Kotlin 2.1.20) — сборка падает на несовместимости
+AGP/Kotlin plugin API уже на этапе конфигурации.
+
+Правки трёх файлов в `android/`:
+
+```properties
+# gradle/wrapper/gradle-wrapper.properties
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.4.1-bin.zip
+```
+
+```groovy
+// android/build.gradle
+kotlinVersion = "2.2.0"
+// ...
+classpath("com.android.tools.build:gradle:9.2.1")
+```
+
+```properties
+# android/gradle.properties — обход AGP 9.0+ built-in Kotlin support
+# конфликтует с явным org.jetbrains.kotlin.android плагином (нужен библиотекам вроде
+# exoplayer-ass/exoplayer-sync) — ошибка "Cannot add extension with name 'kotlin'"
+android.builtInKotlin=false
+android.newDsl=false
+```
+
+`android.builtInKotlin`/`android.newDsl` — официальный, но временный откат-флаг AGP; уберут в
+AGP 10. К тому моменту нужно будет снять явный `org.jetbrains.kotlin.android` со всех модулей,
+которые его применяют, и перейти на built-in Kotlin support.
+
+## 13. `metro.config.js`: строгий `require.resolve` для singleton-пакетов падает на deep imports
+
+Паттерн «форсировать одну копию `react`/`react-native` (и других native-модулей) через
+`resolveRequest`, чтобы bun-монорепо не плодило дубликаты» — рабочий на RN < 0.87, но версия с
+`require.resolve(moduleName, { paths: [projectRoot] })` под 0.87 падает:
+
+```
+Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: Package subpath
+'./src/private/featureflags/ReactNativeFeatureFlags' is not defined by "exports" in
+.../node_modules/react-native/package.json
+```
+
+Причина — `require.resolve` строго проверяет карту `exports` пакета, а RN 0.87 не экспортирует
+все свои внутренние пути, на которые ссылаются транзитивные зависимости. Фикс — не резолвить
+через Node напрямую, а подменить `originModulePath` контекста на путь внутри `node_modules`
+приложения (файл может не существовать физически — важна только директория) и передать резолв
+дальше штатному `context.resolveRequest`, который резолвит нестрого:
+
+```javascript
+resolveRequest: ;
+;((context, moduleName, platform) => {
+  if (moduleName === 'react' || moduleName === 'react-native' /* и другие singleton-пакеты */) {
+    return context.resolveRequest(
+      { ...context, originModulePath: path.join(projectRoot, 'node_modules', '.singleton-anchor.js') },
+      moduleName,
+      platform,
+    )
+  }
+  return context.resolveRequest(context, moduleName, platform)
+})
+```
+
+Список перехватываемых пакетов — под фактические зависимости конкретного приложения
+(`react-native-gesture-handler`, `-screens`, `-svg`, `-video`, `-safe-area-context`,
+`@react-native-async-storage/async-storage` и т.п.), не общий шаблон один на всех.
