@@ -31,6 +31,19 @@ services:
       PORT: 3100
       HOST: 0.0.0.0
       SERVER_NAME: s2.letar.best
+      # §48 M3: nsenter-спавн deploy.ts/deploy-infra.sh (routes/deploy.ts, host-exec.ts)
+      # наследует env КОНТЕЙНЕРА, не хоста — namespace хоста (nsenter -u) даёт UTS, но
+      # `hostname -f` на s2 падает (`Name or service not known`), а `hostname` отдаёт
+      # случайное VPS-имя провайдера (`byzantium-alexandrine19179`), не матчащееся ни под
+      # один паттерн server-детекта. Тот же класс сюрприза, что уже был на s3
+      # (`smartape-vps.com`, см. DEPLOY_SERVER_NAME в docker-compose.s3.yml) — там фикс уже
+      # стоял, здесь пробел молчал, пока не появился первый потребитель server-specific
+      # override на s2 (scripts/deploy-infra.sh, docker-compose.s2.yml Traefik). Инцидент
+      # 2026-08-25: без этой переменной deploy-infra.sh молча падал в фолбэк «сервер не
+      # определён» → выбирал общий secrets/deploy.conf → расшифровал s3-копию
+      # acme-dns-accounts.json.enc поверх боевого файла зоны letar.best на s2 (восстановлен
+      # из бэкапа, деплой не дошёл до подъёма контейнера — см. PLAN-INFRA-2.md §48 M3).
+      DEPLOY_SERVER_NAME: s2
       WORKSPACE_PATH: /home/deploy/letar
       # Персистентность deploy-истории между рестартами контейнера (см. lib/redis.ts,
       # routes/deploy.ts). Опционально — без Redis деплой продолжает работать в
