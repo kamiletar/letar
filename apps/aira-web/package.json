@@ -5,10 +5,10 @@
   "nx": {
     "name": "aira-web",
     "implicitDependencies": [
-      "chakra-provider",
-      "ui",
-      "analytics",
-      "github-releases",
+      "@letar/chakra-provider",
+      "@letar/ui",
+      "@letar/analytics",
+      "@letar/github-releases",
       "@letar/glitchtip",
       "@letar/i18n-proxy"
     ]
