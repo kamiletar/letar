@@ -2,6 +2,47 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## 0.7.10: hydration mismatch убивал кнопку magic-link (2026-08-25)
+
+Пользователь сообщил, что кнопка «Отправить ссылку для входа» на проде (`auth.letar.best/sign-in`)
+не реагирует на клик. Репродукция через Browser pane на свежей вкладке подтвердила: при загрузке
+страницы в консоли `Minified React error #418` (`args[]=HTML`) — hydration mismatch на корне
+дерева. После этого клик по кнопке не порождал вообще никакого сетевого запроса (проверено
+`read_network_requests` — пусто и до, и после клика), т.е. кнопка не «глючила визуально», а была
+полностью мертва до перезагрузки страницы.
+
+**Root cause:** `apps/auth-hub/project.json` не имел явных таргетов `build`/`dev` — Nx-инференс
+`@nx/next` выбирал бандлер по умолчанию (Turbopack в Next.js 16). Уже задокументированная в
+репозитории комбинация Turbopack + Emotion `Global` (Chakra UI v3) + `next-themes`-скрипт в
+`ColorModeProvider` даёт настоящий hydration mismatch —
+[nextjs16-turbopack-default-emotion-hydration.md](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md).
+Аудит 2026-08-04 закрыл этот баг в `mandala`/`animatrona-tracker`/`dashboard`/`driving-school`, но
+`auth-hub` в тот аудит не попал (приложение появилось позже).
+
+GlitchTip (`glitchtip-mcp`) подтвердил: тот же мисматч бил и по `/oauth/consent` у реального
+пользователя на обычном Chrome — баг не ограничивался одной страницей входа.
+
+**Фикс:** частичный override `build`/`dev` → `next build/dev --webpack` в `project.json`, по
+образцу уже исправленных приложений (только `options.command`, `cache`/`inputs`/`outputs`
+остаются от инференса — проверено `nx show project auth-hub --json`).
+
+**Побочная находка (не потребовала код-фикса):** при разборе смежной GlitchTip-issue («Failed to
+find Server Action») обнаружен payload, похожий на массовое сканирование известного класса
+уязвимостей десериализации Next.js Server Actions — recon-скрипт пытается прочитать
+`.env`/SSH-ключи/облачные credentials через `eval()`. Next.js отбраковал запрос на этапе поиска
+экшна по невалидному `$ACTION_REF_0`, до десериализации payload'а — эксплуатация не подтверждена.
+
+**Дополнено:** обновлён общий doc-файл ([коммит 966a001c](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md))
+— добавлен `auth-hub` в таблицу аудита + зафиксирован открытый вопрос: `mandala`/`studio` уже на
+`--webpack`, но продолжают изредка получать тот же `args[]=HTML` в проде — возможно, отдельный,
+пока не выделенный источник (браузерные расширения/боты, мутирующие `<html>` до гидратации).
+
+`nx lint auth-hub` — зелёный. `nx typecheck:tsgo auth-hub` — 3 предсуществующие ошибки в
+`src/lib/auth.ts`/`libs/auth`, не связаны с этим изменением.
+
+Деплой не выполнен — пользователь попросил не пушить в этой сессии; deploy-request отправлен
+`deploy-agent-dev` с пометкой, что коммиты локальные.
+
 ## 0.7.9: FormI18nProvider отсутствовал — подсказки валидации на английском (2026-08-25)
 
 Тот же класс бага, что нашли и починили в `domwellbes`: `@letar/forms` переводит constraint
