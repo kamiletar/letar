@@ -7,6 +7,15 @@
 
 ## [Unreleased]
 
+## [0.33.10] — 2026-08-25
+
+### Fixed
+
+- `SlotPicker` (виджет выбора времени консультации) на первом кадре показывал «Нет доступных
+  слотов» вместо загрузки — `useTransition().isPending` синхронно `false` до первого тика
+  эффекта, вызывающего `startTransition`. Фикс — отдельный флаг `hasLoadedOnce`. Разбор
+  паттерна — [.claude/docs/react-use-transition-initial-pending-race.md](/.claude/docs/react-use-transition-initial-pending-race.md).
+
 ## [0.33.9] — 2026-08-25
 
 ### Fixed

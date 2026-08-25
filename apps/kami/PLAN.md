@@ -10,6 +10,24 @@
 
 ---
 
+## Баги / технический долг
+
+- [ ] ⚠️ **Приложение полностью не запускается (500 на всех страницах, включая `/`)** —
+      `next dev` падает при компиляции `src/lib/auth-client.ts:5` (`Export genericOAuthClient
+  doesn't exist in target module 'better-auth/client/plugins'`) и `nx typecheck:tsgo` даёт ещё
+      2 ошибки в `src/lib/auth.ts` (`mode: 'hub-client'` не подходит под `HubProviderAuthProfile`,
+      `storage` в `rateLimit` не существует в текущей сигнатуре `createAuth`). Обнаружено
+      2026-08-25 при попытке живой проверки фикса `slot-picker.tsx` — не связано с самим фиксом,
+      чисто побочная находка. Судя по `.claude/docs/better-auth-1.7-oidc-provider-removed.md`,
+      причина — `bun update` поднял `better-auth` до 1.7 в рамках `^1.6.x`, `oidcProvider`/
+      `genericOAuthClient` убраны из ядра. Требует: обновить `apps/kami/src/lib/auth-client.ts` на
+      замену `genericOAuthClient` (`@better-auth/oauth-provider` + `jwt()`-плагин либо
+      `signIn.social`, см. доку), и разобраться с сигнатурой `createAuth` в `auth.ts` — возможно,
+      `libs/auth` уже мигрировал на новый контракт `HubProviderAuthProfile`, а `kami` остался на
+      старом. Не решал сам — не входило в задачу сессии, вне её объёма.
+
+---
+
 ## Фаза 1: Фундамент (MVP)
 
 ### Инфраструктура

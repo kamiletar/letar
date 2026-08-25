@@ -1,5 +1,19 @@
 # Выполненные задачи — Kami
 
+## Фикс: гонка useTransition.isPending на первом кадре SlotPicker (2026-08-25)
+
+Аудит по всему монорепо на паттерн из `domwellbes` §12.10 (`useTransition().isPending`
+синхронно `false` до первого тика `useEffect`, вызывающего `startTransition` — окно, где данные
+ещё не загружены, но `isPending` тоже `false`) нашёл второй случай:
+`apps/kami/src/app/[locale]/consulting/_components/slot-picker.tsx` — виджет выбора времени
+консультации на публичной форме записи. Условие `isPending && !hasSlots` на первом кадре ложно
+проваливалось в ветку «Нет доступных слотов. Свяжитесь напрямую» вместо спиннера загрузки.
+
+Фикс — отдельный флаг `hasLoadedOnce`, не завязанный на `isPending`. `nx typecheck:tsgo kami` и
+`nx lint kami` — без новых ошибок (есть 2 предсуществующие ошибки в `auth-client.ts`/`auth.ts`,
+не связаны с этой правкой — см. задачу ниже). Разбор паттерна и обеих находок —
+[.claude/docs/react-use-transition-initial-pending-race.md](/.claude/docs/react-use-transition-initial-pending-race.md).
+
 ## Фикс: FormI18nProvider отсутствовал — подсказки валидации на английском (2026-08-25)
 
 Тот же класс бага, что нашли и починили в `domwellbes`: `@letar/forms` переводит constraint
