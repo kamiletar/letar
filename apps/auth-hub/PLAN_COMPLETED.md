@@ -2,6 +2,16 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## 0.7.9: FormI18nProvider отсутствовал — подсказки валидации на английском (2026-08-25)
+
+Тот же класс бага, что нашли и починили в `domwellbes`: `@letar/forms` переводит constraint
+hints (`z.string().min/max`) на русский только внутри `FormI18nProvider` — без обёртки локаль по
+умолчанию `'en'`. `src/app/layout.tsx` — корневой Server Component, `FormI18nProvider
+locale="ru"` добавлен прямо туда вокруг `{children}` (auth-hub не под next-intl). Разбор класса
+бага —
+[.claude/docs/letar-forms-missing-i18nprovider-english-hints.md](/.claude/docs/letar-forms-missing-i18nprovider-english-hints.md).
+`nx typecheck:tsgo auth-hub` и `nx lint auth-hub` зелёные.
+
 ## 0.7.5 → 0.7.6: прод-инцидент — ложная «Неизвестная ошибка» при re-auth под другим аккаунтом (2026-08-20)
 
 Пользователь сообщил о реальной ошибке входа на auth.letar.best для клиента studio-prod
