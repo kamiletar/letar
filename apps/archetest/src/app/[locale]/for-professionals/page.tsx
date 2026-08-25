@@ -1,5 +1,6 @@
 import { Link } from '@/i18n/navigation'
 import { Box, Container, Heading, Link as ChakraLink, Table, Text, VStack } from '@chakra-ui/react'
+import { TouchLink } from '@letar/ui'
 import type { Metadata } from 'next'
 import { useTranslations } from 'next-intl'
 import { setRequestLocale } from 'next-intl/server'
@@ -425,9 +426,15 @@ function ForProfessionalsView({ locale }: { locale: string }) {
 
         {/* Ссылка на главную */}
         <Box w="100%" textAlign="center" pt={4}>
-          <ChakraLink href={`/${locale}`} color="blue.500" fontWeight="bold">
+          <TouchLink
+            href={`/${locale}`}
+            color="blue.500"
+            fontWeight="bold"
+            display="inline-flex"
+            justifyContent="center"
+          >
             ← {t('title')}
-          </ChakraLink>
+          </TouchLink>
         </Box>
       </VStack>
     </Container>
