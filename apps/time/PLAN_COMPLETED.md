@@ -1,5 +1,18 @@
 # Time — Выполненные задачи
 
+## Деплой фикса 401 у cron time-notifications (2026-08-25)
+
+Код-фикс (`ec7dcdd4`, замена самописной проверки `Authorization: Bearer` на `verifyCronSecret()`
+из `@letar/api-server`) был закоммичен и запушен ранее (2026-08-24), но контейнер `time` на s2 не
+пересобирался — cron `/api/cron/notifications` продолжал получать 401 каждую минуту.
+
+Отправлен `deploy-request: time` агенту `deploy-agent-dev` через Agent Mail. Деплой прошёл
+успешно: коммит `a3f02048e` (включает `ec7dcdd4`), zero-downtime rollout, smoke-test зелёный.
+По пути deploy-agent-dev нашёл и починил не связанный с `time` инфраструктурный блокер —
+SSH deploy-ключ на s2 не имел доступа к submodule `letar-private-docs`, из-за чего
+`deploy-affected.sh` падал ещё до сборки любого приложения на s2 (не только `time`); фикс
+задокументирован deploy-agent-dev отдельно, здесь не дублируется.
+
 ## Фикс: CookieBanner рендерился вне ChakraProvider (2026-08-25)
 
 Обнаружено в сессии живой проверки OIDC-флоу auth-hub — после починки отдельного бага в

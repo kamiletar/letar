@@ -70,7 +70,8 @@
       job `time-notifications`, `* * * * *`). Задача реально вызывалась каждую минуту с 22.08.2026,
       но валилась 401 — `/api/cron/notifications` проверял заголовок `Authorization: Bearer`
       вместо `X-Cron-Secret`, которым её вызывает `executeJob`. Исправлено на `verifyCronSecret()`
-      (2026-08-24, v0.5.9)
+      (2026-08-24, v0.5.9). Задеплоено на s2 2026-08-25 (коммит `a3f02048e`, zero-downtime rollout,
+      smoke-test прошёл) — 401 на cron прекратились
 - [ ] Добавить List-Unsubscribe заголовок в email
 
 ---
