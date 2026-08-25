@@ -1945,9 +1945,20 @@ Emotion», но сама команда была `"next dev"` без флага 
       сессии терял скомпонованный кадр (`reference_browser_pane_hidden_raf`), фикс применён
       превентивно по структурному совпадению + официальному предупреждению Chakra UI, без
       подтверждения гонки на месте. Не блокирует — тот же паттерн уже проверен в `mandala`.
-- [ ] Не проверялись целенаправленно: лендинги (`letar-landing`, `kami-key-the-landing`,
-      `animatrona-landing`) и Electron-рендерер `animatrona` — другой профиль риска, чинить по
-      факту обнаружения.
+- [x] Лендинги (`letar-landing`, `kami-key-the-landing`, `animatrona-landing`) проверены
+      (2026-08-25) — паттерн подтвердился у всех трёх, `--webpack` добавлен в `dev`/`build`
+      каждого. `typecheck:tsgo`/`lint`/`build` зелёные. Детали —
+      [nextjs16-turbopack-default-emotion-hydration.md](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md)
+      § «Лендинги».
+- [ ] ⚠️ Открытый вопрос: Electron-рендерер `animatrona` — риск подтверждён (2026-08-25) и,
+      вероятно, выше среднего (полноценное multi-route SPA с той же связкой провайдеров), но
+      `--webpack` **не применён**: `next.config.js` держит кастомный `turbopack.resolveAlias`
+      (замена `node-fetch`/`cross-fetch`, алиас `@letar/animatrona-ui`) без автоматического
+      webpack-эквивалента — наспех добавленный флаг рискует сломать сборку. Нужна отдельная
+      сессия: написать `webpack()`-хук, эквивалентный `resolveAlias`, и прогнать полный
+      `nx build`/`nx dev` Electron-оболочки. Детали —
+      [nextjs16-turbopack-default-emotion-hydration.md](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md)
+      § «Electron-рендерер `animatrona`».
 - Побочная находка при аудите `animatrona-tracker` (не hydration): `<CookieBanner>` рендерился
   вне `<ChakraProvider>`, падал на первом визите без cookie-согласия — уже исправлено
   пользователем параллельно, см. `apps/animatrona-tracker/PLAN_COMPLETED.md`.
