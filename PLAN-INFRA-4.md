@@ -2697,3 +2697,77 @@ parsePostgresUrl'` по репозиторию теперь находит то�
 scripts/*.ts` в других приложениях. Проверено прогоном скрипта против dev-БД (`✓ Все 2
 expression-индекса на месте`). Если у другого приложения найдётся `.mjs`-скрипт, запускаемый
 `node` и импортирующий TS-библиотеку из `libs/` — тот же фикс.
+
+## §100 — Плановое обновление зависимостей монорепо (2026-08-25)
+
+**Контекст:** `/infra:deps-update` — регулярный проход по `bun outdated`/`bun audit` корневого
+`package.json`. Рабочее дерево общее с несколькими параллельными сессиями (auth-hub-dev мигрировал
+`better-auth` на новый `oauthProvider`-плагин, отдельная сессия одновременно бампала `electron`
+43→44) — часть работы этой сессии свелась к координации через Agent Mail, а не к правкам кода.
+
+**Применено (patch/minor в рамках существующего `^`-диапазона, ~45 пакетов):** next, zenstack
+(orm/plugin-policy/schema/server/cli/language/sdk/tanstack-query), tiptap (extension-image/link/
+placeholder/underline, pm, react, starter-kit), ai-sdk (anthropic/react), ai, jose, fastify,
+fumadocs (core/mdx/ui), imapflow, koffi, lucide-react(-native), music-metadata, dompurify,
+bwip-js, systeminformation, react-dropzone, react-native-vision-camera, shaka-player,
+@tanstack/react-virtual, @react-navigation/_, @react-pdf/renderer, @keystatic/_, @libp2p/* и
+служебные dev-пакеты (@swc/core, @vitejs/plugin-react, vitest, vite, baseline-browser-mapping,
+eslint-config-next и т.д.) — `typecheck:tsgo` чист по всем задетым проектам.
+
+**Точечно проверены и применены отдельно (см. ниже) — `to-words` 5→6 (major, изолирован в
+`libs/number-words`, 63/63 теста зелёные), `uuid` 14.0.1→14.0.2, `googleapis` 173→176
+(единственный потребитель `apps/kami`, чисто), `@tiptap/vue-3` 3.30.1→3.30.3 (выровнен с
+остальным семейством tiptap, 85/85 тестов `@letar/forms-vue` зелёные).
+
+**`framer-motion` 12→13 — исследован и применён.** Единственный breaking change в v13 (removal
+`@emotion/is-prop-valid` как опциональной зависимости) касается только компонентов, обёрнутых
+`motion()`/`motion.create()` поверх **строкового DOM-тега** или styled-обёртки поверх такого
+тега — фильтрацию пропсов для кастомных React-компонентов (в т.ч. Chakra `Box`/`VStack`/
+`Card.Root`) framer-motion не делает вообще, это уже зона ответственности самого компонента.
+Аудит всех 45 файлов с `framer-motion` в репо: 33 места — `motion.create(<ChakraComponent>)`
+(не задеты в принципе), остальные — `motion.div`/`motion.span` строго через типизированный
+`HTMLMotionProps<'div'>` без спреда произвольных пропсов (TS и так не пропустит невалидный
+атрибут). `typecheck:tsgo` по всем потребителям (`kami`, `mandala`, `animatrona-landing`,
+`driving-school`, `@letar/forms`, `@letar/video-player-react`) — чисто (два красных failure в
+`kami`/`driving-school` не про framer-motion, это параллельная миграция `libs/auth`, см. ниже).
+Тесты `@letar/forms-vue`/`@letar/number-words` зелёные; 5 упавших тестов `@letar/forms`
+(`table-selection.spec.tsx`, `field-rich-text.spec.tsx`) — не про framer-motion (в тех модулях
+он не импортируется), это задокументированный
+[letar-forms-lazy-component-ssr-stuck-suspense](/.claude/docs/letar-forms-lazy-component-ssr-stuck-suspense.md)
+(rAF не тикает в фоновой вкладке под headless-прогоном).
+
+**`ioredis` 5→6 — исследован, НЕ применён намеренно.** Функционально безопасен: весь код в
+репо (`libs/redis-client`, `libs/auth/src/server/redis-storage.ts`, `infra/media-server`,
+`apps/driving-school/.../socket/route.ts`) использует только `get`/`set`/`setex`/`del` — эти
+команды не зависят от смены протокола RESP2→RESP3 по умолчанию в v6 (реальная разница
+всплывает на `.call()`/`HGETALL`/`CONFIG`/Streams, которых в репо нет). Node 24 удовлетворяет
+требованию v6 (Node 20+). `@socket.io/redis-adapter` не объявляет peer-зависимость на `ioredis`
+— конфликта версий не будет. **Отложено по причине совпадения зоны, не риска:**
+`redis-storage.ts` — файл в эпицентре одновременного рефакторинга `libs/auth` у auth-hub-dev
+(session storage Better Auth), апдейт также требует правки отдельного пина `libs/redis-client/
+package.json` (`^5.11.1`, иначе в дереве останутся два major ioredis). Кандидат на отдельную
+сессию после того, как их миграция осядет.
+
+**`better-auth` 1.6.29→1.7.1 — координация, не мой апдейт.** Первым делом версия была
+случайно откачена обратно на 1.6.29 (ошибочная реакция на breaking typecheck без проверки
+контекста), затем возвращена на 1.7.1 после того, как выяснилось: параллельная сессия
+(`auth-hub-dev`) уже целенаправленно мигрирует `libs/auth` на новый `oauthProvider`-плагин
+1.7.1 (JWT вместо opaque-токенов, `@better-auth/oauth-provider` как отдельная зависимость) — не
+регрессия, а осознанный апгрейд с реальной работой по адаптации `libs/auth` под новый API.
+Координация — через Agent Mail (`c-web-letar`, тред `deps-update: better-auth 1.6.29→1.7.1
+ломает libs/auth`).
+
+**Не тронуты сознательно (major, требуют отдельного прохода с полным build/e2e):** `electron`
+43→44 (сделан отдельной параллельной сессией в этом же окне), `better-sqlite3` 12→13 и `kubo`
+0.42→0.43 (`apps/animatrona` — под активной сессией), `@babel/runtime` 7→8, `typescript` 6→7
+(эффект на весь монорепо). `kysely` 0.29.3 и `@tanstack/react-query` 5.101.4 — осознанные
+точные пины в корневом `package.json` (см. `CLAUDE.md`), не трогать.
+
+**`bun audit`:** 184 уязвимости (7 critical/76 high/86 moderate/15 low) — все транзитивные, из
+глубоких dev-зависимостей (`nx`→webpack-dev-server, `react-native`, `electron-builder`,
+`dockerode`). Не лечатся точечным `bun update` — требуют major-апгрейда самого `nx`/
+`react-native`/`electron-builder`, вне объёма этой сессии.
+
+**Коммит:** `package.json`/`bun.lock` уже попали в общий коммит `3d552de7` (electron-бамп
+параллельной сессии на том же общем чекауте) — отдельного коммита от этой сессии не
+потребовалось.
