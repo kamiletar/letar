@@ -155,6 +155,24 @@
       "runtimeExecutable": "nx",
       "runtimeArgs": ["dev", "time"],
       "port": 3013
+    },
+    {
+      "name": "letar-landing",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "letar-landing"],
+      "port": 3015
+    },
+    {
+      "name": "kami-key-the-landing",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "kami-key-the-landing"],
+      "port": 3011
+    },
+    {
+      "name": "animatrona-landing",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["dev", "animatrona-landing"],
+      "port": 3008
     }
   ]
 }
