@@ -26,10 +26,13 @@ export interface CoverImageProps {
    */
   sizes?: string
   /**
-   * Для единственного hero-изображения над сгибом (LCP-кандидат детальной страницы) — `loading`
-   * тут недостаточно: `priority` у `next/image` дополнительно ставит `fetchpriority="high"` и
-   * добавляет `<link rel="preload">`, из-за чего браузер начинает грузить файл раньше в общей
-   * очереди сети. Не использовать на нескольких изображениях сразу (только один настоящий LCP).
+   * Для единственного hero-изображения над сгибом (LCP-кандидат детальной страницы). С Next.js 16
+   * проп `priority` у `next/image` устарел и ставит ТОЛЬКО `<link rel="preload">` —
+   * `fetchpriority="high"` он больше не выставляет (были раздельные пропы `preload`/`fetchPriority`
+   * с самого 16.0.0, `get-img-props.js`: `preload: preload || priority`, `fetchPriority` — отдельный
+   * проп без вывода из `priority`). Поэтому здесь передаются `preload` + `fetchPriority="high"`
+   * явно, вместо устаревшего `priority`. Не использовать на нескольких изображениях сразу (только
+   * один настоящий LCP).
    */
   priority?: boolean
 }
@@ -66,7 +69,8 @@ export function CoverImage({
             fill
             sizes={sizes}
             loading={priority ? undefined : loading}
-            priority={priority}
+            preload={priority}
+            fetchPriority={priority ? 'high' : undefined}
             style={{ objectFit }}
           />
         )
