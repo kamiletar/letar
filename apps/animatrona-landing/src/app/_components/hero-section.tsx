@@ -442,7 +442,8 @@ export function HeroSection({ release }: HeroSectionProps) {
                     alt="Animatrona - Библиотека аниме"
                     fill
                     style={{ objectFit: 'cover' }}
-                    priority
+                    preload
+                    fetchPriority="high"
                     onError={() => setImageError(true)}
                   />
                 )}

@@ -2,6 +2,15 @@
 
 Все изменения в проекте animatrona-landing документируются в этом файле.
 
+## [0.4.4] - 2026-08-25
+
+### Fixed
+
+- Hero-скриншот библиотеки (`_components/hero-section.tsx`) — `next/image` с `priority` заменён
+  на `preload`+`fetchPriority="high"`: в Next.js 16 `priority` больше не выставляет
+  `fetchpriority="high"` браузеру, LCP-изображение молча теряло приоритет загрузки. Root cause и
+  канонический фикс — сессия domwellbes 2026-08-25.
+
 ## [0.4.3] - 2026-08-25
 
 ### Fixed

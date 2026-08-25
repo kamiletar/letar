@@ -2,6 +2,12 @@
 
 Детальное описание реализованных функций.
 
+## Фикс: fetchPriority вместо устаревшего priority на hero-скриншоте (2026-08-25)
+
+Свежий полный грепп по монорепо нашёл прямой `next/image` с `priority` в `hero-section.tsx` —
+Next.js 16 разделил `priority` на `preload`/`fetchPriority`, старый проп больше не выставляет
+`fetchpriority="high"`. Root cause — сессия domwellbes 2026-08-25.
+
 ## Фикс hydration mismatch — `<div>` внутри `<p>` в FeaturesSection (2026-08-25)
 
 Найдено при визуальной проверке CookieBanner на mobile viewport (не связано с самим CookieBanner).
