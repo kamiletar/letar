@@ -22,6 +22,17 @@ services:
     stop_grace_period: 30s
     labels:
       letar.rollout: 'true'
+      # §48 M3 шаг 5, пачка 3 — регистрация Traefik docker-provider роутера. Только регистрация,
+      # трафик НЕ переключён (NPM продолжает форвардить напрямую на pravda-app:3007), см.
+      # PLAN-INFRA-2.md §48 M3.
+      traefik.enable: 'true'
+      traefik.docker.network: 'kami-network'
+      traefik.http.routers.pravda.rule: 'Host(`pravda.letar.best`)'
+      traefik.http.routers.pravda.entrypoints: 'websecure'
+      traefik.http.routers.pravda.tls.certresolver: 'dns'
+      traefik.http.routers.pravda.tls.domains[0].main: 'letar.best'
+      traefik.http.routers.pravda.tls.domains[0].sans[0]: '*.letar.best'
+      traefik.http.services.pravda.loadbalancer.server.port: '3007'
     networks:
       kami-network:
         aliases:

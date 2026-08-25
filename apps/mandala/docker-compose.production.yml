@@ -90,6 +90,17 @@ services:
     stop_grace_period: 30s
     labels:
       letar.rollout: 'true'
+      # §48 M3 шаг 5, пачка 3 — регистрация Traefik docker-provider роутера. Только регистрация,
+      # трафик НЕ переключён (NPM продолжает форвардить напрямую на mandala-app:3004), см.
+      # PLAN-INFRA-2.md §48 M3.
+      traefik.enable: 'true'
+      traefik.docker.network: 'kami-network'
+      traefik.http.routers.mandala.rule: 'Host(`mandala.letar.best`)'
+      traefik.http.routers.mandala.entrypoints: 'websecure'
+      traefik.http.routers.mandala.tls.certresolver: 'dns'
+      traefik.http.routers.mandala.tls.domains[0].main: 'letar.best'
+      traefik.http.routers.mandala.tls.domains[0].sans[0]: '*.letar.best'
+      traefik.http.services.mandala.loadbalancer.server.port: '3004'
     networks:
       kami-network:
         aliases:

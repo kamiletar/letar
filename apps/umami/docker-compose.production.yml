@@ -47,6 +47,17 @@ services:
     stop_grace_period: 30s
     labels:
       letar.rollout: 'true'
+      # §48 M3 шаг 5, пачка 3 — регистрация Traefik docker-provider роутера. Только регистрация,
+      # трафик НЕ переключён (NPM продолжает форвардить напрямую на umami-app:3000), см.
+      # PLAN-INFRA-2.md §48 M3. Домен stats.letar.best (не umami.letar.best).
+      traefik.enable: 'true'
+      traefik.docker.network: 'kami-network'
+      traefik.http.routers.umami.rule: 'Host(`stats.letar.best`)'
+      traefik.http.routers.umami.entrypoints: 'websecure'
+      traefik.http.routers.umami.tls.certresolver: 'dns'
+      traefik.http.routers.umami.tls.domains[0].main: 'letar.best'
+      traefik.http.routers.umami.tls.domains[0].sans[0]: '*.letar.best'
+      traefik.http.services.umami.loadbalancer.server.port: '3000'
     networks:
       kami-network:
         aliases:

@@ -99,6 +99,17 @@ services:
     stop_grace_period: 30s
     labels:
       letar.rollout: 'true'
+      # §48 M3 шаг 5, пачка 3 — регистрация Traefik docker-provider роутера. Только регистрация,
+      # трафик НЕ переключён (NPM продолжает форвардить напрямую на kami-app:3005), см.
+      # PLAN-INFRA-2.md §48 M3.
+      traefik.enable: 'true'
+      traefik.docker.network: 'kami-network'
+      traefik.http.routers.kami.rule: 'Host(`kami.letar.best`)'
+      traefik.http.routers.kami.entrypoints: 'websecure'
+      traefik.http.routers.kami.tls.certresolver: 'dns'
+      traefik.http.routers.kami.tls.domains[0].main: 'letar.best'
+      traefik.http.routers.kami.tls.domains[0].sans[0]: '*.letar.best'
+      traefik.http.services.kami.loadbalancer.server.port: '3005'
     networks:
       kami-network:
         aliases:
