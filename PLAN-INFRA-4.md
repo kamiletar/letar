@@ -3169,3 +3169,74 @@ peer-диапазон в `libs/query-provider/package.json` на будущее)
 `nx run animatrona:db:template` (использует IPFS-функциональность приложения, но через
 `kubo-rpc-client`/скачанный бинарник, не через npm-пакет `kubo`) — все зелёные. Коммит
 `2b222568` (`package.json` + `bun.lock`, multi-scope — оба файла одной логической правки).
+
+## §114 — продолжение `/infra:deps-update` (2026-08-26): eslint/better-sqlite3/dprint/electron-playwright-helpers применены, oxlint и jsdom откачены
+
+Разбор оставшихся пакетов из `bun outdated` по одному, с чтением changelog каждого:
+
+- **`eslint` 10.6.0→10.9.1`** — точный пин снят на`^10.9.1`(по решению пользователя: не было
+  причины держать exact, только унаследованный стиль).`nx run-many -t lint` — зелёный.
+- **`better-sqlite3` 12→13.0.3`** — major, verified end-to-end: нативный биндинг грузится,`db:template`-скрипт (использует его напрямую, только dev-инструмент, не идёт в собранный
+  Electron-дистрибутив) отрабатывает, миграции применяются. v13 несёт Windows-прибилды
+  (`prebuilds/win32-x64.node`), rebuild не требуется.
+  - Побочная находка при верификации: `MODULE_NOT_FOUND` на `better-sqlite3` был вызван не
+    версией пакета, а битым `bunx`-temp-кешем для `node-gyp@latest`
+    (воспроизводится идентично на несвязанном `cpu-features`) — фикс
+    `rm -rf "$LOCALAPPDATA/Temp/bunx-"*` + переустановка. В `bun-install-stale-isolated-cache.md`
+    не описан — это отдельный, новый класс порчи кеша (`bunx`, не `.bun`-isolated-store), стоит
+    задокументировать отдельно, если проявится ещё раз.
+- **`electron-playwright-helpers` 2.3.1→3.1.2`** — major, changelog: только требование более
+  новой версии Node (уже выполнено в репо). Единственный потребитель —`apps/animatrona-e2e/helpers/electron.helpers.ts`(`parseElectronApp`,`stubAllDialogs`,`stubDialog`) — typecheck зелёный.
+- **`dprint` 0.5x→0.56.1`** — применён другим агентом параллельно (случайно попал в чужой
+  коммит`2b222568`из-за гонки за`package.json`, см.`.claude/rules/git.md`про риск общего
+  чекаута). Верификация доделана постфактум:`dprint check`нашёл 1 файл
+  ([.claude/scripts/dev-session-screenshot.mjs](/.claude/scripts/dev-session-screenshot.mjs)),
+  переформатирован и закоммичен отдельно (`47e5a162`).
+- **`oxlint` 1.73.0→1.80.0`— ОТКАЧЕН.** Новая версия принесла ~28 новых находок нового
+  React-correctness правила (`react/refs`,`react/set-state-in-effect`,`react/use-memo` —
+  часть роллаута "React Compiler Support"). Находки реальные, не баг апдейта, но правка 28
+  файлов в чужом коде вне scope deps-update, тем более с другими агентами на связи — отложено
+  на отдельную сессию.
+- **`jsdom` 29.1.1→30.0.1`— ОТКАЧЕН, найдена настоящая регрессия.** Под jsdom 30 тест`apps/studio/src/app/api/webhooks/tochka/route.test.ts`стабильно (не флаки) валился 11/14 —`Request.text()`вёл себя иначе внутри jsdom-окружения vitest, обработчик уходил в catch и
+  возвращал`{ok: false}`. Откачен на`^29.1.1`.
+  - ⚠️ **Уточнение при повторной проверке (в этой же сессии, после компакции):** после отката
+    jsdom тот же тест **продолжил падать** — то есть первичный диагноз (регрессия именно в
+    `Request.text()` под jsdom 30) оказался неверным. Реальная причина, вскрытая через
+    `console.error` в catch-блоке: `prisma.$transaction is not a function` — мок `@/lib/db` в
+    тесте не объявляет `$transaction`, а `route.ts` его вызывает (см. JSDoc-комментарий в файле
+    про идемпотентность через транзакцию). Это **pre-existing баг теста/кода на `main`**, не
+    связан ни с одной версией jsdom и не вызван этим сессионным апдейтом. Заведён отдельный чип.
+- **`@babel/*`** — сознательно не трогается: `apps/animatrona-mobile/babel.config.js` держит
+  `@react-native/babel-preset`, который пинует `@babel/core: ^7.25.2` — RN-экосистема не готова
+  к Babel 8.
+- **`typescript`, `@types/node`, `@prisma/*`** — по прямому решению пользователя вне scope этой
+  сессии (typescript 6→7 уже в отдельном плане репо).
+- **`react-native-safe-area-context`** — не начато, требует нативной пересборки APK и проверки
+  на устройстве (см. конвенции `apps/animatrona-mobile/CLAUDE.md`), не вписывается в объём этой
+  сессии текстового апдейта.
+
+**Фоновый прогон `nx run-many -t test` (task `bzifeqdpl`, ещё под jsdom 30) показал 6 упавших
+целей — при поштучной перепроверке в изоляции (jsdom уже на 29.1.1) выяснилось, что ни одна не
+вызвана этим апдейтом:**
+
+- `@letar/forms`, `@letar/forms-shadcn`, `@letar/forms-vue-shadcn` — флаки от параллельного
+  прогона (ресурсная конкуренция при `run-many`); Nx сам пометил `@letar/forms:test` как
+  `Flaky task`. В изоляции — зелёные (739/739 и 234/234 тестов соответственно).
+- `studio` — см. находку про `prisma.$transaction` выше, pre-existing, не jsdom.
+- `@letar/studio-mcp` — у либы физически нет тестовых файлов (`src/**/*.{test,spec}.ts` пуст),
+  поэтому `vitest` завершается кодом 1 на "No test files found" (у большинства других
+  pass-through-проектов та же ситуация даёт код 0 — разница в конфиге, не разбиралась).
+  Pre-existing пробел покрытия, не регрессия.
+- `domwellbes` — недетерминированные падения (разный набор упавших тестов на двух
+  последовательных изолированных прогонах: 9 из 9 файлов vs 3 из 3, разные конкретные тесты).
+  Классический паттерн гонки за общей dev-БД под параллельной работой других агентов
+  ([vitest-shared-singleton-row-race.md](/.claude/docs/vitest-shared-singleton-row-race.md)),
+  не связано с deps-update.
+
+**Итог по `package.json`/`bun.lock` этой части сессии:** после отката jsdom дифф обоих файлов
+относительно HEAD пуст по моим правкам — коммитить нечего (jsdom вернулся к исходному
+`^29.1.1`). На момент проверки в рабочем дереве уже стоял чужой незакоммиченный дифф
+(`@libp2p/interface` добавлен другим агентом) — не трогать, не моё.
+
+**Заведены фоновые чипы:** studio `prisma.$transaction` мок-баг в тесте вебхука Точки,
+`@letar/studio-mcp` отсутствие тестов (низкий приоритет — просто пробел, не баг).
