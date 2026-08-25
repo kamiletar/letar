@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.24.6] — 2026-08-25
+
+### Fixed
+
+- `Account.issuer` — добавлено в общий ZenStack-фрагмент `AccountFields`
+  (`libs/zenstack-fragments`), better-auth 1.7.1 требует это поле при создании/обновлении
+  `Account` (регистрация, сброс пароля). `db:push` прогнан, live sign-up не проверялся в этой
+  сессии. См. [better-auth-1.7-account-issuer-field](/.claude/docs/better-auth-1.7-account-issuer-field.md).
+
 ## [1.24.4] — 2026-08-19
 
 ### Fixed: dev-сервер мог отдавать 500 из-за `@tanstack/devtools-ui@0.7.0`
