@@ -873,6 +873,13 @@ resolve --applied` (не `--rolled-back`, как планировалось из
 > Скиллы: `better-auth` (resend, rateLimit, OIDC, динамика провайдеров), `email-maddy` (`SMTP_FROM_EMAIL`),
 > `chakra-theming`, `i18n-multilingual`, `zenstack-helper` (access policies), `deployment-assistant` (секреты).
 
+- [ ] ⚠️ **Открытый вопрос (2026-08-25):** миграция `libs/auth` на `@better-auth/oauth-provider`
+      (better-auth 1.7, см. [better-auth-1.7-oidc-provider-removed](/.claude/docs/better-auth-1.7-oidc-provider-removed.md))
+      закрыла сборку/типы/юнит-тесты, но реальный OIDC-флоу end-to-end (login → consent → токен →
+      discovery) через `oauthProvider()`+новый обязательный `jwt()`-плагин на auth-hub/Ключнице
+      **не прогнан живьём**. Нужно подтвердить живым входом через Ключницу (auth-hub) или один
+      hub-client (`time`/`archetest`) до следующего прод-деплоя auth-hub.
+
 ---
 
 ## 13. Предложения архитектора (поверхностный анализ — нужны уточнения)
