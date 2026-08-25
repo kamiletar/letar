@@ -331,7 +331,7 @@
     },
     "apps/aboi": {
       "name": "@letar/aboi",
-      "version": "0.73.0",
+      "version": "0.74.2",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
@@ -351,7 +351,7 @@
     },
     "apps/aira-web": {
       "name": "@letar/aira-web",
-      "version": "0.3.3",
+      "version": "0.3.4",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
@@ -363,8 +363,9 @@
     },
     "apps/animatrona": {
       "name": "@letar/animatrona",
-      "version": "0.55.24",
+      "version": "0.55.25",
       "dependencies": {
+        "@letar/icon-generator": "workspace:*",
         "@letar/seed-utils": "workspace:*",
         "cheerio": "^1.2.0",
       },
@@ -411,7 +412,7 @@
     },
     "apps/animatrona-tv": {
       "name": "@letar/animatrona-tv",
-      "version": "0.5.3",
+      "version": "0.6.0",
       "dependencies": {
         "@letar/animatrona-shared": "*",
         "@react-native/codegen": "0.87.0",
@@ -447,7 +448,7 @@
     },
     "apps/auth-hub": {
       "name": "auth-hub",
-      "version": "0.7.11",
+      "version": "0.7.12",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -504,7 +505,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.150.6",
+      "version": "0.150.9",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/pg-url": "workspace:*",
@@ -643,8 +644,9 @@
     },
     "apps/label-printer-desktop": {
       "name": "@letar/label-printer-desktop",
-      "version": "0.5.9",
+      "version": "0.5.10",
       "dependencies": {
+        "@letar/icon-generator": "workspace:*",
         "canvas": "^3.1.0",
         "pdfjs-dist": "^4.10.38",
       },
@@ -679,8 +681,9 @@
     },
     "apps/poster-microtext-desktop": {
       "name": "@letar/poster-microtext-desktop",
-      "version": "0.17.1",
+      "version": "0.17.2",
       "dependencies": {
+        "@letar/icon-generator": "workspace:*",
         "detect-libc": "^2.1.2",
         "font-list": "^2.1.0",
         "qrcode": "^1.5.4",
@@ -766,7 +769,7 @@
     },
     "apps/time": {
       "name": "@letar/time",
-      "version": "0.5.9",
+      "version": "0.5.10",
       "dependencies": {
         "@letar/api-server": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -1202,6 +1205,10 @@
       "name": "@letar/i18n-proxy",
       "version": "0.1.0",
     },
+    "libs/icon-generator": {
+      "name": "@letar/icon-generator",
+      "version": "0.1.0",
+    },
     "libs/image-upload": {
       "name": "@letar/image-upload",
       "version": "0.1.2",
@@ -1328,7 +1335,7 @@
     },
     "libs/ui": {
       "name": "@letar/ui",
-      "version": "0.16.0",
+      "version": "0.17.0",
       "peerDependencies": {
         "@chakra-ui/react": ">=3.0.0",
         "react": ">=18.0.0",
@@ -2411,6 +2418,8 @@
     "@letar/hooks": ["@letar/hooks@workspace:libs/hooks"],
 
     "@letar/i18n-proxy": ["@letar/i18n-proxy@workspace:libs/i18n-proxy"],
+
+    "@letar/icon-generator": ["@letar/icon-generator@workspace:libs/icon-generator"],
 
     "@letar/image-upload": ["@letar/image-upload@workspace:libs/image-upload"],
 
