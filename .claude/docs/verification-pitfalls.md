@@ -278,3 +278,6 @@ curl -sI -H "Accept-Encoding: br, gzip" https://<host>/_next/static/chunks/<фа
   почему hover-стили не надо оборачивать в свой медиазапрос и как эмулировать состояния атрибутами
 - [electron-net-fetch-tun-vpn.md](/.claude/docs/electron-net-fetch-tun-vpn.md) — под TUN-VPN врут
   любые DNS-проверки с рабочей машины
+- [dev-session-screenshot-bypass.md](/.claude/docs/dev-session-screenshot-bypass.md) — соседний
+  класс, но про инструмент, а не про проверку: Browser tool отказывается авторизоваться за
+  admin-гейтом, обход — Playwright-скрипт через Bash

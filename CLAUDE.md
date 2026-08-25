@@ -277,6 +277,9 @@ pre-commit-хука не видел `.exe`-shim на Windows ·
 **Деплой и инфраструктура:** [deployment](/.claude/docs/deployment.md) ·
 [verification-pitfalls](/.claude/docs/verification-pitfalls.md) ⭐ проверки, которые врут в
 успокаивающую сторону ·
+[dev-session-screenshot-bypass](/.claude/docs/dev-session-screenshot-bypass.md) ⚠️ живая проверка
+страницы за admin-гейтом, когда Browser tool отказывается передать `DEV_SESSION_TOKEN` —
+Playwright-скрипт через Bash вместо navigate/UI-логина ·
 [verification-pitfalls § getComputedStyle при скрытой панели](/.claude/docs/verification-pitfalls.md#тот-же-класс-но-не-про-сервер-getcomputedstyle-врёт-при-скрытой-панели-браузера)
 ⚠️ анимируемое свойство читается как тождественная матрица — выглядит как «эффект не работает» ·
 [verification-pitfalls § заголовки HTML не говорят про статику](/.claude/docs/verification-pitfalls.md#тот-же-класс-но-не-про-отдельный-запрос-заголовки-html-ответа-не-говорят-ничего-про-статику)
