@@ -1,7 +1,7 @@
 'use client'
 
 import { Badge, Box, Card, Grid, Heading, HStack, SimpleGrid, Text, VStack } from '@chakra-ui/react'
-import { Form, useTypedFormSubscribe } from '@letar/forms'
+import { Form, useDeclarativeForm } from '@letar/forms'
 import { z } from 'zod/v4'
 
 /**
@@ -84,14 +84,16 @@ const demoCards = [
 
 /**
  * Компонент превью, который реагирует на изменения настроек.
- * Использует useTypedFormSubscribe для типизированной подписки на значения формы.
+ * Использует useDeclarativeForm + form.Subscribe — паттерн, работающий внутри декларативного
+ * <Form>: он не оборачивает children в `form.AppForm`, поэтому TanStack-хуки useFieldContext/
+ * useFormContext (createFormHookContexts) здесь недоступны — только React-контекст самой формы.
  */
 function LivePreview() {
-  const { TypedSubscribe } = useTypedFormSubscribe<DisplaySettings>()
+  const { form } = useDeclarativeForm()
 
   return (
-    <TypedSubscribe selector={(values) => values}>
-      {(settings) => (
+    <form.Subscribe selector={(state: { values: unknown }) => state.values as DisplaySettings}>
+      {(settings: DisplaySettings) => (
         <Box
           p={4}
           bg="gray.50"
@@ -131,7 +133,7 @@ function LivePreview() {
           </SimpleGrid>
         </Box>
       )}
-    </TypedSubscribe>
+    </form.Subscribe>
   )
 }
 
@@ -140,11 +142,11 @@ function LivePreview() {
  * Показывает, как читать state формы в реальном времени.
  */
 function CurrentValues() {
-  const { TypedSubscribe } = useTypedFormSubscribe<DisplaySettings>()
+  const { form } = useDeclarativeForm()
 
   return (
-    <TypedSubscribe selector={(values) => values}>
-      {(settings) => (
+    <form.Subscribe selector={(state: { values: unknown }) => state.values as DisplaySettings}>
+      {(settings: DisplaySettings) => (
         <Box p={4} bg="blue.50" borderRadius="md" _dark={{ bg: 'blue.900' }} data-testid="current-values">
           <Text fontWeight="bold" mb={2}>
             Текущие значения:
@@ -159,7 +161,7 @@ function CurrentValues() {
           </HStack>
         </Box>
       )}
-    </TypedSubscribe>
+    </form.Subscribe>
   )
 }
 
@@ -321,19 +323,18 @@ export default function ControlledStateDemoPage() {
   <LivePreview />
 </Form>
 
-// Компонент с типизированной подпиской на значения
+// Компонент, подписанный на значения формы
 function LivePreview() {
-  const { TypedSubscribe } = useTypedFormSubscribe<Settings>()
+  const { form } = useDeclarativeForm()
 
   return (
-    <TypedSubscribe selector={(values) => values}>
-      {(settings) => (
-        // settings автоматически типизирован как Settings
+    <form.Subscribe selector={(state) => state.values}>
+      {(settings: Settings) => (
         <div style={{ fontSize: settings.fontSize }}>
           {/* Контент с динамическими стилями */}
         </div>
       )}
-    </TypedSubscribe>
+    </form.Subscribe>
   )
 }`}
           </Box>
