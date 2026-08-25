@@ -6,7 +6,8 @@
   "author": "Kami Letar",
   "main": "app/background.js",
   "nx": {
-    "name": "<%= name %>"
+    "name": "<%= name %>",
+    "implicitDependencies": ["forms"]
   },
   "devDependencies": {
     "electron": "<%= electronVersion %>",

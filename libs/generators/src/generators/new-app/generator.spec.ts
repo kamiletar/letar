@@ -115,7 +115,13 @@ describe('new-app generator', () => {
 
     const pkg = JSON.parse(tree.read('apps/my-app/package.json', 'utf-8') ?? '{}')
     expect(pkg.name).toBe('@letar/my-app')
-    expect(pkg.nx.implicitDependencies).toEqual(['chakra-provider', 'ui', 'analytics'])
+    expect(pkg.nx.implicitDependencies).toEqual([
+      'chakra-provider',
+      'ui',
+      'analytics',
+      'forms',
+      '@letar/env-load',
+    ])
   })
 
   it('--private кладёт .gitignore — корневой на submodule не действует', async () => {
