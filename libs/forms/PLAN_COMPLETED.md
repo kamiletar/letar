@@ -1,5 +1,14 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-08-26 — Проверка `forms-angular` на уязвимость react-hooks/rules-of-hooks — override не нужен
+
+После фикса `forms-vue`/`forms-vue-shadcn` (см. запись в `PLAN.md` того же дня) проверена
+третья headless-либа с идентичным незащищённым паттерном `eslint.config.mjs`
+(`export default [...baseConfig]`, без override). Грепом по `libs/forms-angular/src` не найдено
+ни одной функции `use*` — Angular-конвенция для переиспользуемой логики использует DI-сервисы
+(`*.service.ts`, `inject()`), а не composables по имени `use*`, как в React/Vue. Превентивный
+override решено не добавлять — вывод и обоснование зафиксированы в `PLAN.md`, коммит `ee09c9c3`.
+
 ## 2026-08-25 — Фикс eager JSX на верхнем уровне модуля: `nx db:seed` падал `React is not defined`
 
 Репорт: `nx db:seed domwellbes` падал `ReferenceError: React is not defined` при импорте
