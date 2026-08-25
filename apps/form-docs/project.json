@@ -70,9 +70,33 @@
         "command": "eslint --no-error-on-unmatched-pattern **/*.{ts,tsx}"
       }
     },
+    "fumadocs-mdx": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/content/**/*",
+        "{projectRoot}/source.config.ts"
+      ],
+      "outputs": [
+        "{projectRoot}/.source"
+      ],
+      "metadata": {
+        "description": "Генерирует .source/ (Fumadocs) — нужен typecheck'у, next dev/build генерируют его сами",
+        "technologies": [
+          "fumadocs-mdx"
+        ]
+      },
+      "options": {
+        "command": "fumadocs-mdx",
+        "cwd": "apps/form-docs"
+      }
+    },
     "typecheck:tsgo": {
       "executor": "nx:run-commands",
       "cache": true,
+      "dependsOn": [
+        "fumadocs-mdx"
+      ],
       "inputs": [
         "default",
         "^production",
