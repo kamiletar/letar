@@ -123,17 +123,18 @@ React component» — оно остаётся и под webpack (это отде
 Проверены приложения, сочетающие `ChakraProvider` (Chakra v3) и `next-themes`'ный
 `ColorModeProvider` как прямой потомок — той же связке, что вызвала баг в `mandala`:
 
-| Приложение             | Было (dev/build)                                  | Бандлер до фикса | Статус                                                        |
-| ---------------------- | ------------------------------------------------- | ---------------- | ------------------------------------------------------------- |
-| `mandala`              | явные, `next dev`/`next build`                    | Turbopack        | ✅ исправлено ранее (эталон)                                  |
-| `animatrona-tracker`   | `build` явный, `dev` инферился                    | Turbopack        | ✅ исправлено — `--webpack` в обоих                           |
-| `dashboard`            | оба инферились (частичный `build`)                | Turbopack        | ✅ исправлено — частичный override `options.command`          |
-| `driving-school`       | оба инферились (submodule)                        | Turbopack        | ✅ исправлено — частичный override, коммит `4d0ccaf`          |
-| `auth-hub`             | оба инферились (`project.json` без `build`/`dev`) | Turbopack        | ✅ исправлено 2026-08-25 — частичный override, см. ниже       |
-| `aira-web`             | оба инферились (`project.json` без `build`/`dev`) | Turbopack        | ✅ исправлено 2026-08-25 — частичный override, см. ниже       |
-| `letar-landing`        | явные, `next dev -p 3015`/`next build`            | Turbopack        | ✅ исправлено 2026-08-25 — `--webpack` добавлен в обе команды |
-| `kami-key-the-landing` | явные, `next dev -p 3011`/`next build`            | Turbopack        | ✅ исправлено 2026-08-25 — `--webpack` добавлен в обе команды |
-| `animatrona-landing`   | явные, `next dev -p 3008`/`next build`            | Turbopack        | ✅ исправлено 2026-08-25 — `--webpack` добавлен в обе команды |
+| Приложение              | Было (dev/build)                                  | Бандлер до фикса | Статус                                                                                                                                      |
+| ----------------------- | ------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mandala`               | явные, `next dev`/`next build`                    | Turbopack        | ✅ исправлено ранее (эталон)                                                                                                                |
+| `animatrona-tracker`    | `build` явный, `dev` инферился                    | Turbopack        | ✅ исправлено — `--webpack` в обоих                                                                                                         |
+| `dashboard`             | оба инферились (частичный `build`)                | Turbopack        | ✅ исправлено — частичный override `options.command`                                                                                        |
+| `driving-school`        | оба инферились (submodule)                        | Turbopack        | ✅ исправлено — частичный override, коммит `4d0ccaf`                                                                                        |
+| `auth-hub`              | оба инферились (`project.json` без `build`/`dev`) | Turbopack        | ✅ исправлено 2026-08-25 — частичный override, см. ниже                                                                                     |
+| `aira-web`              | оба инферились (`project.json` без `build`/`dev`) | Turbopack        | ✅ исправлено 2026-08-25 — частичный override, см. ниже                                                                                     |
+| `letar-landing`         | явные, `next dev -p 3015`/`next build`            | Turbopack        | ✅ исправлено 2026-08-25 — `--webpack` добавлен в обе команды                                                                               |
+| `kami-key-the-landing`  | явные, `next dev -p 3011`/`next build`            | Turbopack        | ✅ исправлено 2026-08-25 — `--webpack` добавлен в обе команды                                                                               |
+| `animatrona-landing`    | явные, `next dev -p 3008`/`next build`            | Turbopack        | ✅ исправлено 2026-08-25 — `--webpack` добавлен в обе команды                                                                               |
+| `animatrona` (renderer) | явные, `next dev -p 3007`/`next build`            | Turbopack        | ✅ исправлено 2026-08-25 — `--webpack` + `webpack()`-эквивалент `resolveAlias`, см. ниже; `nx dev animatrona` (nextron) — остаточный пробел |
 
 Для всех трёх подтверждён Turbopack в логе dev-сервера до фикса
 (`▲ Next.js 16.3.0 (Turbopack)`) и webpack после (`▲ Next.js 16.3.0 (webpack)`), а также
@@ -354,50 +355,65 @@ defaultTheme="dark" forcedTheme="dark"`), т.е. то же структурно�
 между такими маршрутами и есть триггер гонки в задокументированных случаях (`aira-web`,
 `mandala`), не обязательно насыщенный интерактив на самой странице.
 
-## Electron-рендерер `animatrona`: риск актуален и, возможно, выше среднего, но `--webpack` не применён — нужна отдельная работа
+## Electron-рендерер `animatrona`: `--webpack` применён (2026-08-25), но с оговоркой про nextron dev
 
-`apps/animatrona/renderer` — **не** `bun x next dev` в обход Nx, как предполагалось в более
-раннем диагнозе: у приложения есть обычный `project.json` с явными `dev`/`build`
-(`next dev -p 3007` / `next build`, без `--webpack`), таргеты гоняются через `nx dev/build
-animatrona-renderer` как у любого другого приложения монорепо.
+`apps/animatrona/renderer` — обычный `project.json` с явными `dev`/`build`, гоняется через
+`nx dev/build animatrona-renderer` как любое приложение монорепо. `src/components/ui/provider.tsx`
+держит тот же структурный паттерн (`ChakraProvider` + `ColorModeProvider` как прямой потомок),
+и это полноценное multi-route SPA (`library`, `watch`, `discover`, `settings`, `party` — 40+
+файлов с `next/link`/`useRouter`), т.е. риск гидратации выше, чем у лендингов с редкой
+навигацией.
 
-**Структурное совпадение подтверждено, риск, вероятно, выше, чем у лендингов:**
-`src/components/ui/provider.tsx` — `ChakraProvider` с `ColorModeProvider` (обёртка над
-`next-themes`'ным `ThemeProvider`, `src/components/ui/color-mode.tsx`) как прямым потомком.
-В отличие от лендингов, это полноценное multi-route SPA (`library`, `watch`, `discover`,
-`settings`, `party` и др. — 40+ файлов с `next/link`/`useRouter`/`router.push`, см.
-`AppShell`/`Sidebar`), т.е. клиентская soft-навигация происходит постоянно в обычном
-пользовательском потоке, а не изредка как на лендинге.
+**Фикс — `webpack()`-хук, эквивалентный `turbopack.resolveAlias`** (`next.config.js`,
+`config.resolve.alias['cross-fetch']`/`['node-fetch']`/`['@letar/animatrona-ui']` через
+`path.resolve(__dirname, ...)`), плюс `--webpack` в `dev`/`build` `apps/animatrona/renderer/
+project.json`. Простой переход на webpack вскрыл два независимых, не связанных с Emotion
+предсуществовавших бага — оба тоже исправлены в том же `next.config.js`:
 
-**Почему `--webpack` не применён в этой сессии — не пропуск, а осознанное решение.**
-`next.config.js` приложения держит непустой блок `turbopack: {...}` с двумя вещами, у которых
-нет автоматического webpack-эквивалента:
+1. **`libsql` require.context падает на не-JS файлах.** `libsql` (native N-API биндинг) сам
+   резолвит опциональные `@libsql/*`-платформенные пакеты через `require.context`
+   (`sync ^\.\/.*$`) — relative require внутри самого пакета, обычный
+   `serverExternalPackages`/PL транзитивный external его не ловит (матчится по спецификатору
+   `require()`, а не по факту прохождения через транспилируемый `@libsql/client`). Turbopack
+   такие не-JS файлы (`README`, `LICENSE`, `.node`, `.d.ts`) внутри контекста молча
+   игнорировал, webpack — пытается их парсить и падает. Фикс — явный `config.externals` для
+   `'libsql'` **до** дефолтной логики Next, причём не bare-спецификатором (`commonjs libsql`
+   не резолвится в рантайме: bun isolated-инсталл не хостит `libsql` в корневом
+   `node_modules`, только в `.bun`-сторе рядом с `@libsql/client`), а абсолютным путём,
+   разрешённым тем же алгоритмом, что использует сам `@libsql/client`:
+   `require.resolve('libsql', { paths: [path.dirname(require.resolve('@libsql/client'))] })`.
+2. **`@tanstack/devtools-ui@0.7.0+` под webpack** — тот же баг, что в PLAN.md §51
+   (`driving-school`/`mandala`/`dashboard`/`animatrona-tracker`/`grandslamcup`): именованный
+   `use` не экспортируется из серверной половины `solid-js/web`. Тот же established-паттерн —
+   `config.resolve.alias['@tanstack/devtools-ui'] = false` при `isServer || !dev`.
+3. **Отдельно, не блокирующий фикс, но всплывший при переходе на webpack: `snowball-stemmers`
+   default-импорт.** `import snowballFactory from 'snowball-stemmers'` (`src/lib/stemmer.ts`)
+   резолвился в `undefined` под webpack — пакет собран Babel в CJS с `__esModule: true`, но
+   без `exports.default` (только именованные `newStemmer`/`algorithms`), и Turbopack, в
+   отличие от webpack, при `__esModule: true` без `default` фолбэчился на весь module object,
+   а не на `undefined`. Настоящий бандлер-агностичный фикс (не алиас, правка source) —
+   `import { newStemmer } from 'snowball-stemmers'` вместо default-импорта; `.d.ts`
+   (`src/types/snowball-stemmers.d.ts`) переписан на именованные экспорты.
 
-```js
-turbopack: {
-  root: standaloneRoot,
-  resolveAlias: {
-    'cross-fetch': './src/lib/fetch-shim.ts',
-    'node-fetch': './src/lib/fetch-shim.ts',
-    '@letar/animatrona-ui': '../../../libs/animatrona-ui/src/index.ts',
-  },
-},
-```
+`apps/animatrona:build` (реальная сборка Electron-пакета через `electron-builder`,
+`project.json` в корне `apps/animatrona`) отдельно запускает `cd renderer && next build` в
+8 таргетах по платформам/архитектурам — тоже переведены на `--webpack`, иначе фикс не
+затрагивал бы то, что реально паковается пользователю.
 
-`resolveAlias` — специфичный API Turbopack (см. комментарий в файле: «Заменяем
-node-fetch/cross-fetch на встроенный fetch — это убирает цепочку ESM полифиллов»). Простое
-добавление `--webpack` без переноса этой замены в эквивалентный `webpack()`-хук с высокой
-вероятностью возвращает сломанную цепочку `node-fetch → fetch-blob` ESM-полифиллов, о которой
-предупреждает сам комментарий в конфиге — то есть попытка воспроизвести фикс по аналогии с
-лендингами рискует не превентивно устранить один баг, а внести новый, гарантированно
-воспроизводимый (не гипотетическую гонку, а поломку сборки/рантайма). `output: 'standalone'`
-(HTTP-сервер, не статический экспорт и не `file://`) дополнительно означает, что это не тот же
-класс риска, что у остальных Electron-приложений монорепо (`label-printer-desktop`,
-`poster-microtext-desktop`) — там `output: 'export'` и `file://`/`app://`, soft-навигации в
-том же смысле нет вообще.
+**Прод-сборка (`nx build animatrona-renderer`) и standalone dev-сервер (`nx dev
+animatrona-renderer`) проверены** — билд зелёный (22/22 страниц), dev-сервер отдаёт полный
+рендер без hydration-ошибок в консоли браузера (проверено через Browser pane).
 
-**Статус: риск открыт, фикс требует отдельной сессии** — написать `webpack()`-эквивалент для
-`resolveAlias` (переопределение `cross-fetch`/`node-fetch` через `config.resolve.alias`,
-`@letar/animatrona-ui` — аналогично) и полный `nx build`/`nx dev` прогон Electron-оболочки
-(не только `next build`) перед тем как считать фикс безопасным. Не чинить наспех в рамках
-аудита, где основная цель — landing-приложения.
+**Известный остаточный пробел — не автоматически закрывается этим фиксом:** `nx dev
+animatrona` (интерактивный запуск Electron-оболочки для разработки) идёт через `nextron` CLI
+(`nextron.config.js`), который хардкодит `next dev -p <port> <rendererSrcDir>` без какой-либо
+опции передать `--webpack` (проверено по исходнику `nextron@10.3.0`, команда `dev` поддерживает
+только `--renderer-port`/`--startup-delay`/`--electron-options`/`--run-only`). Это дев-only
+путь — не то, что паковается и уходит к пользователю (тот идёт через
+`apps/animatrona:build`, уже переведён на `--webpack`), но означает, что разработка вживую
+через `nx dev animatrona` по-прежнему видит Turbopack и теоретически может поймать тот же
+класс гидратационных багов. Закрыть до конца — либо патчить/форкать nextron, либо найти способ
+подсунуть его CLI-вызову флаг (env-переменной Next.js CLI не читает — проверено по исходнику
+`next-dev.js`, бандлер выбирается только через CLI-опции). GUI-уровень самого Electron-окна
+(поднимается ли реально `nx dev animatrona`) в сендбоксе Claude Code не проверяем в принципе —
+см. `.claude/rules/electron.md` § «Грабли».
