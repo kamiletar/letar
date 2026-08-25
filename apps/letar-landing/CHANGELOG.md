@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-08-25
+
+### Fixed
+
+- `--webpack` в `dev`/`build` — превентивный фикс hydration-бага Turbopack+Emotion (Chakra
+  `ChakraProvider` + `next-themes` `ThemeProvider`), см.
+  `.claude/docs/nextjs16-turbopack-default-emotion-hydration.md`
+
 ## [0.3.1] - 2026-08-25
 
 ### Fixed

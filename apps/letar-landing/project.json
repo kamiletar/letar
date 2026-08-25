@@ -8,7 +8,7 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "next build",
+        "command": "next build --webpack",
         "cwd": "apps/letar-landing"
       },
       "dependsOn": ["^build"],
@@ -22,7 +22,7 @@
     "dev": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "next dev -p 3015",
+        "command": "next dev -p 3015 --webpack",
         "cwd": "apps/letar-landing"
       },
       "cache": false,
