@@ -1,4 +1,4 @@
-# PLAN-INFRA-4 — §62–§94
+# PLAN-INFRA-4 — §62–§113
 
 > Часть журнала `PLAN-INFRA.md` (журнал инфраструктурных треков монорепо letar, вне auth-плана).
 > Файл разрезан на части 2026-08-20 — исходный файл превысил 10000 строк, см.
@@ -3150,3 +3150,22 @@ peer-диапазон в `libs/query-provider/package.json` на будущее)
 `libs/query-provider/package.json` (упомянут выше как красная селёдка при диагностике) исправлен
 отдельно на `">=0.10.0"` — коммит `170da8cf`. Не влияет на сам баг/пин выше, только убирает
 ложный peer-warning при `bun install`, который сбивал с толку при первой диагностике.
+
+## §113 — удалён неиспользуемый npm-пакет `kubo` ✅ ЗАКРЫТО (2026-08-26)
+
+Продолжение §107 (тогда `kubo` только сняли с точного пина на диапазон `^0.43.0` как
+пакет-лист). При аудите обновления зависимостей (`/infra:deps-update`) выяснилось, что сам
+пакет фактически не используется вовсе: реальный IPFS-демон в `apps/animatrona` работает через
+отдельно скачанный бинарник (`apps/animatrona/scripts/download-kubo.ts:31`, версия
+захардкожена там же, `KUBO_VERSION`, независимо от npm), а не через
+`node_modules/.bin/ipfs` из npm-пакета `kubo`. Грепп по `from 'kubo'`/`require('kubo')` и по
+прямому вызову бинарника (`spawn('ipfs'`, `exec('ipfs`) не нашёл ни одного места во всём репо.
+`kubo-rpc-client` (RPC-клиент, отдельный пакет) — используется активно
+(`apps/animatrona/main/services/{kubo,ipfs,sync}/*`), не тронут.
+
+**Сделано:** удалена строка `"kubo": "^0.43.0"` из корневого `package.json`. `bun install` —
+пакет убран (`1 package removed`), `bun scripts/check-peer-deps.mjs` не показал новых строк.
+Проверено: `nx run animatrona:typecheck:tsgo`, `nx run animatrona-main:typecheck:tsgo`,
+`nx run animatrona:db:template` (использует IPFS-функциональность приложения, но через
+`kubo-rpc-client`/скачанный бинарник, не через npm-пакет `kubo`) — все зелёные. Коммит
+`2b222568` (`package.json` + `bun.lock`, multi-scope — оба файла одной логической правки).
