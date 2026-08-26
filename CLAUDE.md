@@ -232,6 +232,9 @@ reset (`preflight`) уже задаёт своё явное значение —
 [chakra-aschild-multiple-children-silent-drop](/.claude/docs/chakra-aschild-multiple-children-silent-drop.md)
 ⚠️ `asChild` с двумя и более детьми — `.find(isValidElement)` молча берёт только первого, второй
 пропадает без единой ошибки в typecheck/lint/консоли; ловится только живым кликом в браузере ·
+[chakra-icon-as-prop-cleanup-pattern](/.claude/docs/chakra-icon-as-prop-cleanup-pattern.md)
+рецепт чистки семгреп-запрета `as=` (`Icon as=`, `Link as=`) — три сессии независимо изобрели
+один и тот же паттерн ·
 [header-drawer-dedup-audit](/.claude/docs/header-drawer-dedup-audit.md) 7 реализаций Header+Drawer
 между приложениями — общий `libs/ui`-примитив не заводить (разные оси расходятся по-настоящему),
 но 3 файла ролевых шапок внутри grandslamcup — реальный дубль, кандидат на локальное извлечение
