@@ -312,5 +312,10 @@ app/
       стабильно) — другой баг, чем прогресс-бар/активный пункт; RSC-навигация Firefox/WebKit не
       меняет URL; Command Palette Escape (webkit) — флейк без стабильного репро. Детали и статус —
       `PLAN.md` §Backlog
+- [x] **`OfflineConsentBanner` перекрывал `CookieBanner`** (2026-08-26) — оба `position: fixed;
+      bottom: 0` без координации между собой физически накладывались друг на друга снизу экрана.
+      Фикс — `bottom` баннера через CSS-переменную `--letar-cookie-banner-height`, публикуемую
+      `CookieBanner` (тот же паттерн, что уже применён к `StickyActionBar` из `@letar/ui`, см.
+      `.claude/docs/ui-components.md` § «Координация bottom-anchored компонентов»).
 
-**Последнее обновление:** 2026-08-12
+**Последнее обновление:** 2026-08-26
