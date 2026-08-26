@@ -12,7 +12,7 @@
  * - type='anime' — сиквел/продолжение (фиолетовая тема)
  */
 
-import { Box, Button, HStack, Icon, Image, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, HStack, Image, Text, VStack } from '@chakra-ui/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { LuPlay, LuTv, LuX } from 'react-icons/lu'
@@ -120,6 +120,8 @@ export function UpNextOverlay({
     }
   }, [next?.type])
 
+  const ButtonIcon = contentStyles.buttonIcon
+
   // Форматируем подзаголовок
   const formattedSubtitle = next?.type === 'episode'
     ? `Эпизод ${next.subtitle || ''}`
@@ -156,7 +158,7 @@ export function UpNextOverlay({
                 ? <Image src={next.posterUrl} alt={next.title} w="full" h="full" objectFit="cover" opacity={0.7} />
                 : (
                   <Box w="full" h="full" bg="whiteAlpha.100" display="flex" alignItems="center" justifyContent="center">
-                    <Icon as={LuPlay} boxSize={10} color="whiteAlpha.500" />
+                    <LuPlay size={40} color="var(--chakra-colors-white-alpha-500)" />
                   </Box>
                 )}
 
@@ -172,7 +174,7 @@ export function UpNextOverlay({
                 minW="auto"
                 p={1}
               >
-                <Icon as={LuX} boxSize={4} />
+                <LuX size={16} />
               </Button>
 
               {/* Бейдж типа контента */}
@@ -200,7 +202,7 @@ export function UpNextOverlay({
               {/* Кнопка с countdown */}
               <HStack gap={2} mt={1}>
                 <Button flex={1} colorPalette={contentStyles.buttonColorPalette} size="sm" onClick={onPlayNow}>
-                  <Icon as={contentStyles.buttonIcon} mr={1} />
+                  <ButtonIcon size={16} style={{ marginRight: 4 }} />
                   {contentStyles.buttonText}
                 </Button>
                 {autoPlayEnabled && countdown > 0 && (

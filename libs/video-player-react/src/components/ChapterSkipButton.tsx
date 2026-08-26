@@ -7,7 +7,7 @@
  * в пропускаемый сегмент (OP, ED, RECAP, PREVIEW)
  */
 
-import { Box, Button, Icon } from '@chakra-ui/react'
+import { Box, Button } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { LuSkipForward } from 'react-icons/lu'
 
@@ -68,7 +68,7 @@ export function ChapterSkipButton({ chapters, currentTime, onSeek }: ChapterSkip
         animation="fadeIn 0.3s ease-out"
         boxShadow="0 4px 12px rgba(0, 0, 0, 0.4)"
       >
-        <Icon as={LuSkipForward} mr={2} />
+        <LuSkipForward size={16} style={{ marginRight: 8 }} />
         {activeSkipChapter.type ? SKIP_LABELS[activeSkipChapter.type] : 'Пропустить'}
       </Button>
     </Box>

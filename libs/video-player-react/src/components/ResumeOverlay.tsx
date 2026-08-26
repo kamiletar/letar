@@ -7,7 +7,7 @@
  * Автоматически выбирает "Продолжить" через 5 секунд.
  */
 
-import { Box, Button, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, HStack, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { LuPlay, LuRotateCcw } from 'react-icons/lu'
 
@@ -112,7 +112,7 @@ export function ResumeOverlay({ savedTime, onResume, onStartOver, isOpen }: Resu
         <HStack gap={4} width="100%">
           {/* Кнопка "Сначала" */}
           <Button flex={1} variant="outline" colorPalette="gray" size="lg" onClick={handleStartOver} px={6}>
-            <Icon as={LuRotateCcw} mr={2} />
+            <LuRotateCcw size={16} style={{ marginRight: 8 }} />
             Сначала
           </Button>
 
@@ -137,7 +137,7 @@ export function ResumeOverlay({ savedTime, onResume, onStartOver, isOpen }: Resu
               opacity={0.3}
               transition="width 1s linear"
             />
-            <Icon as={LuPlay} mr={2} zIndex={1} />
+            <LuPlay size={16} style={{ marginRight: 8, zIndex: 1, position: 'relative' }} />
             <Text zIndex={1}>Продолжить ({countdown})</Text>
           </Button>
         </HStack>

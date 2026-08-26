@@ -7,7 +7,7 @@
  * т.к. Menu.Positioner ломается в fullscreen-контейнере плеера.
  */
 
-import { Box, HStack, Icon, IconButton, Text } from '@chakra-ui/react'
+import { Box, HStack, IconButton, Text } from '@chakra-ui/react'
 import { useCallback, useState } from 'react'
 import { LuGauge } from 'react-icons/lu'
 
@@ -50,7 +50,7 @@ export function SpeedSelector({ speed, onSpeedChange }: SpeedSelectorProps) {
           onClick={toggle}
         >
           <HStack gap={1}>
-            <Icon as={LuGauge} color="player.control" />
+            <LuGauge size={20} color="var(--chakra-colors-player-control)" />
             {speed !== 1 && (
               <Text fontSize="xs" color="player.control" fontWeight="bold">
                 {speed}x

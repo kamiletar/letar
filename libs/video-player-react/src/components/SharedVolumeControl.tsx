@@ -4,7 +4,7 @@
  * SharedVolumeControl — контроль громкости (кнопка mute + слайдер)
  */
 
-import { HStack, Icon, IconButton, Slider } from '@chakra-ui/react'
+import { HStack, IconButton, Slider } from '@chakra-ui/react'
 import { LuVolume2, LuVolumeX } from 'react-icons/lu'
 
 import { Tooltip } from './Tooltip'
@@ -34,7 +34,9 @@ export function SharedVolumeControl({ volume, isMuted, onVolumeChange, onToggleM
           size="sm"
           onClick={onToggleMute}
         >
-          <Icon as={isMuted ? LuVolumeX : LuVolume2} color="player.control" />
+          {isMuted
+            ? <LuVolumeX size={20} color="var(--chakra-colors-player-control)" />
+            : <LuVolume2 size={20} color="var(--chakra-colors-player-control)" />}
         </IconButton>
       </Tooltip>
 

@@ -17,7 +17,7 @@
  * - extraControlsSlot — PiP, Video Info и др.
  */
 
-import { Box, HStack, Icon, IconButton, Text } from '@chakra-ui/react'
+import { Box, HStack, IconButton, Text } from '@chakra-ui/react'
 import { memo, type ReactNode } from 'react'
 import { LuMaximize, LuMinimize, LuPause, LuPlay, LuSkipBack, LuSkipForward } from 'react-icons/lu'
 
@@ -147,7 +147,7 @@ export const SharedPlayerControls = memo(function SharedPlayerControls({
               size="sm"
               onClick={() => onSkipTime(-SKIP_TIME)}
             >
-              <Icon as={LuSkipBack} color="player.control" />
+              <LuSkipBack size={20} color="var(--chakra-colors-player-control)" />
             </IconButton>
           </Tooltip>
 
@@ -159,7 +159,9 @@ export const SharedPlayerControls = memo(function SharedPlayerControls({
               size="md"
               onClick={onTogglePlay}
             >
-              <Icon as={isPlaying ? LuPause : LuPlay} color="player.control" boxSize={6} />
+              {isPlaying
+                ? <LuPause size={24} color="var(--chakra-colors-player-control)" />
+                : <LuPlay size={24} color="var(--chakra-colors-player-control)" />}
             </IconButton>
           </Tooltip>
 
@@ -171,7 +173,7 @@ export const SharedPlayerControls = memo(function SharedPlayerControls({
               size="sm"
               onClick={() => onSkipTime(SKIP_TIME)}
             >
-              <Icon as={LuSkipForward} color="player.control" />
+              <LuSkipForward size={20} color="var(--chakra-colors-player-control)" />
             </IconButton>
           </Tooltip>
 
@@ -209,7 +211,9 @@ export const SharedPlayerControls = memo(function SharedPlayerControls({
               size="sm"
               onClick={onToggleFullscreen}
             >
-              <Icon as={isFullscreen ? LuMinimize : LuMaximize} color="player.control" />
+              {isFullscreen
+                ? <LuMinimize size={20} color="var(--chakra-colors-player-control)" />
+                : <LuMaximize size={20} color="var(--chakra-colors-player-control)" />}
             </IconButton>
           </Tooltip>
         </HStack>
