@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Button, CloseButton, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, CloseButton, HStack, Text, VStack } from '@chakra-ui/react'
 import { useOfflineConsent } from '@letar/hooks'
 import { useEffect, useState } from 'react'
 import { LuDownload, LuWifiOff } from 'react-icons/lu'
@@ -64,7 +64,7 @@ export function OfflineConsentBanner() {
       <VStack gap={3} align="stretch" maxW="container.md" mx="auto">
         <HStack justify="space-between" align="start">
           <HStack gap={3} align="start">
-            <Icon as={LuDownload} boxSize={5} color="brand.500" mt={0.5} />
+            <LuDownload size={20} color="var(--chakra-colors-brand-500)" style={{ marginTop: 2 }} />
             <VStack align="start" gap={0.5}>
               <Text fontWeight="semibold" fontSize="sm">
                 Включить оффлайн-доступ?
@@ -79,7 +79,7 @@ export function OfflineConsentBanner() {
 
         <HStack gap={2} color="fg.muted" fontSize="xs" flexWrap="wrap">
           <HStack gap={1}>
-            <Icon as={LuWifiOff} boxSize={3} />
+            <LuWifiOff size={12} />
             <Text>Работает без сети</Text>
           </HStack>
           <Text>•</Text>

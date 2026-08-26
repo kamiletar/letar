@@ -9,7 +9,7 @@ import { AdminActionsMenu } from '@/app/admin/_components/admin-actions-menu'
 import { AdminCard, AdminCardRow } from '@/app/admin/_components/admin-card'
 import { AdminResponsiveList } from '@/app/admin/_components/admin-responsive-list'
 import { DeleteDialog } from '@/app/admin/_components/delete-dialog'
-import { Badge, Box, Button, Flex, Heading, Icon, Input, NativeSelect, Table, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Flex, Heading, Input, NativeSelect, Table, Text, VStack } from '@chakra-ui/react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
@@ -74,7 +74,7 @@ export function TeamsClient({ teams, cities, searchQuery, cityFilter, defaultCit
         <Heading size="lg">Команды ({teams.length})</Heading>
         <Link href="/admin/teams/new">
           <Button colorPalette="brand" size="sm">
-            <Icon as={LuPlus} mr={1} /> Добавить команду
+            <LuPlus size={16} style={{ marginRight: 4 }} /> Добавить команду
           </Button>
         </Link>
       </Flex>

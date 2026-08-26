@@ -12,7 +12,6 @@ import {
   Circle,
   Flex,
   Heading,
-  Icon,
   Input,
   Spinner,
   Table,
@@ -90,14 +89,10 @@ export function UsersClient() {
             pl={10}
             size="sm"
           />
-          <Icon
-            as={LuSearch}
-            position="absolute"
-            left={3}
-            top="50%"
-            transform="translateY(-50%)"
-            color="fg.muted"
-            boxSize={4}
+          <LuSearch
+            size={16}
+            color="var(--chakra-colors-fg-muted)"
+            style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }}
           />
         </Box>
       </Flex>
@@ -226,7 +221,7 @@ export function UsersClient() {
                       <Table.Cell>
                         <Link href={`/admin/users/${user.id}`}>
                           <Button variant="ghost" size="sm" minW="44px" minH="44px" aria-label="Подробнее">
-                            <Icon as={LuPencil} />
+                            <LuPencil size={16} />
                           </Button>
                         </Link>
                       </Table.Cell>

@@ -19,7 +19,6 @@ import {
   Flex,
   Heading,
   HStack,
-  Icon,
   Input,
   NativeSelect,
   Table,
@@ -128,7 +127,7 @@ export function UserDetailClient({ user, allCities }: UserDetailClientProps) {
       <Flex align="center" gap={3}>
         <Link href="/admin/users">
           <Button variant="ghost" size="sm" minW="44px" minH="44px">
-            <Icon as={LuArrowLeft} />
+            <LuArrowLeft size={16} />
           </Button>
         </Link>
         <Heading size="lg">Пользователь</Heading>
@@ -154,7 +153,7 @@ export function UserDetailClient({ user, allCities }: UserDetailClientProps) {
             {user.player && (
               <Link href={`/admin/players/${user.player.id}`}>
                 <Flex align="center" gap={1} color="brand.fg" fontSize="sm">
-                  <Icon as={LuUserRound} boxSize={4} />
+                  <LuUserRound size={16} />
                   <Text>Поэт: {user.player.name}</Text>
                 </Flex>
               </Link>
@@ -186,7 +185,9 @@ export function UserDetailClient({ user, allCities }: UserDetailClientProps) {
             onClick={handleToggleAdmin}
             loading={togglingAdmin}
           >
-            <Icon as={isAdmin ? LuShieldOff : LuShield} mr={1} />
+            {isAdmin
+              ? <LuShieldOff size={16} style={{ marginRight: 4 }} />
+              : <LuShield size={16} style={{ marginRight: 4 }} />}
             {isAdmin ? 'Снять админа' : 'Сделать админом'}
           </Button>
         </Flex>
@@ -227,7 +228,7 @@ export function UserDetailClient({ user, allCities }: UserDetailClientProps) {
                             aria-label="Снять организатора"
                             onClick={() => setRemoveTarget(oc)}
                           >
-                            <Icon as={LuTrash2} />
+                            <LuTrash2 size={16} />
                           </Button>
                         </Table.Cell>
                       </Table.Row>
@@ -263,7 +264,7 @@ export function UserDetailClient({ user, allCities }: UserDetailClientProps) {
               loading={addingCity}
               disabled={!selectedCityId}
             >
-              <Icon as={LuPlus} mr={1} />
+              <LuPlus size={16} style={{ marginRight: 4 }} />
               Добавить
             </Button>
           </Flex>
@@ -388,7 +389,7 @@ function PlayerLinkBlock({ userId, player }: { userId: string; player: { id: str
               </Link>
             </HStack>
             <Button size="sm" variant="outline" colorPalette="red" onClick={handleUnlink} loading={unlinking}>
-              <Icon as={LuUnlink} />
+              <LuUnlink size={16} />
               Отвязать
             </Button>
           </Flex>
@@ -437,7 +438,7 @@ function PlayerLinkBlock({ userId, player }: { userId: string; player: { id: str
                             onClick={() => handleLink(p.id)}
                             loading={linking}
                           >
-                            <Icon as={LuLink} />
+                            <LuLink size={16} />
                             Привязать
                           </Button>
                         </Table.Cell>

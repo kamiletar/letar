@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Flex, Icon, Text, VStack } from '@chakra-ui/react'
+import { Box, Flex, Text, VStack } from '@chakra-ui/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -75,6 +75,7 @@ export function AdminSidebar() {
       <VStack gap={1} align="stretch">
         {navItems.map((item) => {
           const isActive = item.href === '/admin' ? pathname === '/admin' : pathname.startsWith(item.href)
+          const IconComponent = item.icon
 
           return (
             <Link key={item.href} href={item.href}>
@@ -91,7 +92,7 @@ export function AdminSidebar() {
                 transitionProperty="background-color, color"
                 transitionDuration="0.15s"
               >
-                <Icon as={item.icon} boxSize={5} />
+                <IconComponent size={20} />
                 <Text fontSize="sm">{item.label}</Text>
               </Flex>
             </Link>

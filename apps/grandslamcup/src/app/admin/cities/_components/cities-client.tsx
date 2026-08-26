@@ -5,7 +5,7 @@ import { AdminActionsMenu } from '@/app/admin/_components/admin-actions-menu'
 import { AdminCard, AdminCardRow } from '@/app/admin/_components/admin-card'
 import { AdminResponsiveList } from '@/app/admin/_components/admin-responsive-list'
 import { DeleteDialog } from '@/app/admin/_components/delete-dialog'
-import { Badge, Box, Button, Center, Flex, Heading, Icon, Spinner, Table, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Center, Flex, Heading, Spinner, Table, Text, VStack } from '@chakra-ui/react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -67,7 +67,7 @@ export function CitiesClient() {
         <Heading size="lg">Города ({cities.length})</Heading>
         <Link href="/admin/cities/new">
           <Button colorPalette="brand" size="sm">
-            <Icon as={LuPlus} mr={1} /> Добавить город
+            <LuPlus size={16} style={{ marginRight: 4 }} /> Добавить город
           </Button>
         </Link>
       </Flex>
