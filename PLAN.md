@@ -3178,3 +3178,14 @@ typecheck+lint+построчным ревью диффов. Повторный 
 `components/{command-palette,shortcuts,social,update}/*` и разрозненные точки внутри уже
 почищенных директорий) — тот же класс `Box/Text/Heading as="..."` вне скоупа задачи, что и в
 animatrona-landing/animatrona-tracker выше; severity НЕ поднята.
+
+**Инфраструктура (2026-08-26): хелпер `chakraColorVar` в `@letar/ui`.** Ручную конвертацию
+Chakra-токена в CSS custom property (`"fg.muted"` → `"var(--chakra-colors-fg-muted)"`), которую
+предыдущие сессии выше выполняли построчно вручную, вынесли в чистую функцию
+`chakraColorVar(token)` — [libs/ui/src/lib/chakra-color-var.ts](/libs/ui/src/lib/chakra-color-var.ts),
+экспорт через `@letar/ui`. Покрывает многосоставные (`border.control`), camelCase-сегменты
+(`whiteAlpha.500` → `white-alpha-500`) и однословные токены без точки (`l1`). Тест на 11 реальных
+токенах из уже изменённых файлов — [chakra-color-var.spec.ts](/libs/ui/src/lib/chakra-color-var.spec.ts).
+`typecheck:tsgo`+`test` зелёные (270/270), коммит `a8630cf3`. ⚠️ **Уже свершённые замены НЕ
+переписаны на хелпер** — это отдельная более крупная задача, вне скоупа; следующим сессиям чистки
+`apps/*` использовать `chakraColorVar()` вместо инлайн `var(--chakra-colors-...)`.
