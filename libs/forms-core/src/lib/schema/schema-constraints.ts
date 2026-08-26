@@ -103,11 +103,20 @@ export function getZodConstraints(schema: any, path: string): ZodConstraints {
   const checks = def.checks || []
 
   switch (type) {
-    case 'string':
+    case 'string': {
+      const stringConstraints = extractStringConstraints(checks)
+      // Топ-уровневые фабрики (z.email(), z.url(), z.uuid()...) кладут format прямо
+      // в def верхнего уровня, а не в def.checks[] — в отличие от `z.string().email()`,
+      // где тот же формат приходит через цепочку checks. Без этой ветки inputType
+      // молча теряется именно для идиоматичного `z.email()`.
+      if (!stringConstraints.inputType && def.check === 'string_format') {
+        stringConstraintHandlers.string_format(stringConstraints, def)
+      }
       return {
         schemaType: 'string',
-        string: extractStringConstraints(checks),
+        string: stringConstraints,
       }
+    }
 
     case 'number':
       return {

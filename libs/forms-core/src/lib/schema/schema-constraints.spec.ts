@@ -77,6 +77,17 @@ describe('getZodConstraints', () => {
 
       expect(result.string?.pattern).toBe('^\\+7\\d{10}$')
     })
+
+    it("detects email input type from z.email().optional().or(z.literal('')) — паттерн опционального email", () => {
+      const schema = z.object({
+        customerEmail: z.email().optional().or(z.literal('')),
+      })
+
+      const result = getZodConstraints(schema, 'customerEmail')
+
+      expect(result.schemaType).toBe('string')
+      expect(result.string?.inputType).toBe('email')
+    })
   })
 
   describe('number constraints', () => {

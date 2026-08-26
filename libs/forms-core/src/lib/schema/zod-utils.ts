@@ -44,6 +44,22 @@ export function unwrapSchema(schema: any): any {
     }
   }
 
+  // Тот же паттерн `.optional().or(z.literal(''))`/`.nullable().or(z.literal(''))`,
+  // что в unwrapSchemaWithRequired — `.or()` оборачивает optional/nullable в union,
+  // и без этой ветки inputType/checks базовой схемы (email, url, regex...) теряются.
+  if (type === 'union') {
+    const options = schema._zod.def.options
+    if (Array.isArray(options) && options.length > 0) {
+      const optionalIndex = options.findIndex((option: any) => isOptionalSchema(option))
+      const restAreLiterals = options.every(
+        (option: any, index: number) => index === optionalIndex || getZodType(option) === 'literal',
+      )
+      if (optionalIndex !== -1 && restAreLiterals) {
+        return unwrapSchema(options[optionalIndex])
+      }
+    }
+  }
+
   return schema
 }
 
