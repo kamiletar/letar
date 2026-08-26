@@ -4,7 +4,7 @@
  * Шаг результатов пакетной публикации
  */
 
-import { Badge, Box, Button, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, HStack, Text, VStack } from '@chakra-ui/react'
 import { LuCheck, LuRefreshCw, LuX } from 'react-icons/lu'
 
 import type { BatchResult } from './use-batch-publish'
@@ -64,12 +64,12 @@ export function ResultStep({ result, onClose, onRetry }: ResultStepProps) {
                 {item.result.success
                   ? (
                     <Badge size="sm" colorPalette="green" variant="subtle">
-                      <Icon as={LuCheck} boxSize={3} />
+                      <LuCheck size={12} />
                     </Badge>
                   )
                   : (
                     <Badge size="sm" colorPalette="red" variant="subtle">
-                      <Icon as={LuX} boxSize={3} />
+                      <LuX size={12} />
                     </Badge>
                   )}
                 <Text fontSize="sm" flex={1} truncate>
@@ -89,8 +89,8 @@ export function ResultStep({ result, onClose, onRetry }: ResultStepProps) {
       {/* Кнопки */}
       <HStack gap={2} justify="flex-end">
         {hasErrors && (
-          <Button variant="outline" onClick={onRetry} size="sm">
-            <Icon as={LuRefreshCw} mr={2} />
+          <Button variant="outline" onClick={onRetry} size="sm" gap={2}>
+            <LuRefreshCw />
             Попробовать снова
           </Button>
         )}

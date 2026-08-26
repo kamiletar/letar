@@ -9,7 +9,7 @@
  * 3. ResultStep — итоги
  */
 
-import { CloseButton, Dialog, HStack, Icon, Portal, Text } from '@chakra-ui/react'
+import { CloseButton, Dialog, HStack, Portal, Text } from '@chakra-ui/react'
 import { LuGlobe } from 'react-icons/lu'
 
 import { ProgressStep } from './ProgressStep'
@@ -63,7 +63,7 @@ export function BatchPublishDialog({ open, onOpenChange, animes, onPublished }: 
             <Dialog.Header>
               <Dialog.Title>
                 <HStack>
-                  <Icon as={LuGlobe} color="blue.500" />
+                  <LuGlobe color="var(--chakra-colors-blue-500)" />
                   <Text>{titles[batch.step]}</Text>
                 </HStack>
               </Dialog.Title>

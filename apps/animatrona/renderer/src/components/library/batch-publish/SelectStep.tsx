@@ -4,7 +4,7 @@
  * Шаг выбора аниме для пакетной публикации
  */
 
-import { Badge, Box, Button, Checkbox, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Checkbox, HStack, Text, VStack } from '@chakra-ui/react'
 import { LuCheck, LuFilter, LuGlobe, LuListChecks, LuRefreshCw } from 'react-icons/lu'
 
 import type { WatchStatus } from '@/generated/prisma'
@@ -51,7 +51,7 @@ export function SelectStep({
     <VStack gap={4} align="stretch">
       {/* Фильтр по статусу */}
       <HStack gap={1} flexWrap="wrap">
-        <Icon as={LuFilter} color="fg.muted" boxSize={4} />
+        <LuFilter color="var(--chakra-colors-fg-muted)" size={16} />
         {STATUS_FILTERS.map((f) => (
           <Button
             key={f.value}
@@ -66,8 +66,8 @@ export function SelectStep({
 
       {/* Кнопки массового выбора */}
       <HStack gap={2}>
-        <Button size="xs" variant="ghost" onClick={allSelected ? onDeselectAll : onSelectAll}>
-          <Icon as={LuListChecks} mr={1} />
+        <Button size="xs" variant="ghost" gap={1} onClick={allSelected ? onDeselectAll : onSelectAll}>
+          <LuListChecks />
           {allSelected ? 'Снять всё' : 'Выбрать все'}
         </Button>
         <Button size="xs" variant="ghost" onClick={onSelectUnpublished}>
@@ -97,6 +97,7 @@ export function SelectStep({
                 const isPublished = !!anime.trackerPublishedAt
                 const needsUpdate = isPublished && anime.trackerPublishedCid !== anime.directoryCid
                 const statusConfig = WATCH_STATUS_CONFIG[anime.watchStatus as WatchStatus]
+                const PublishStatusIcon = needsUpdate ? LuRefreshCw : LuCheck
 
                 return (
                   <HStack
@@ -129,8 +130,8 @@ export function SelectStep({
                     </VStack>
 
                     {isPublished && (
-                      <Badge size="sm" colorPalette={needsUpdate ? 'orange' : 'green'} variant="subtle">
-                        <Icon as={needsUpdate ? LuRefreshCw : LuCheck} boxSize={3} mr={1} />
+                      <Badge size="sm" colorPalette={needsUpdate ? 'orange' : 'green'} variant="subtle" gap={1}>
+                        <PublishStatusIcon size={12} />
                         {needsUpdate ? 'Обновить' : 'Опубликовано'}
                       </Badge>
                     )}
@@ -142,8 +143,8 @@ export function SelectStep({
       </Box>
 
       {/* Кнопка старта */}
-      <Button colorPalette="blue" onClick={onStart} disabled={selectedCount === 0} size="md">
-        <Icon as={LuGlobe} mr={2} />
+      <Button colorPalette="blue" onClick={onStart} disabled={selectedCount === 0} size="md" gap={2}>
+        <LuGlobe />
         Опубликовать ({selectedCount})
       </Button>
     </VStack>
