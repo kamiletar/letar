@@ -1,6 +1,7 @@
 'use server'
 
 import { requireAdmin } from '@/lib/auth'
+import { hashOauthClientSecret } from '@/lib/oauth-client-secret'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
@@ -82,7 +83,9 @@ export async function createClientAction(
     data: {
       name: parsed.data.name,
       clientId: parsed.data.clientId,
-      clientSecret: secret,
+      // @better-auth/oauth-provider хранит clientSecret хешированным (см. oauth-client-secret.ts) —
+      // plaintext возвращаем админу один раз в ответе action, в БД пишем только хеш.
+      clientSecret: await hashOauthClientSecret(secret),
       redirectUrls: redirectUris.join(','),
       redirectUris,
       type: parsed.data.type,
@@ -150,7 +153,7 @@ export async function rotateSecretAction(clientId: string): Promise<{ secret: st
   const secret = generateSecret()
   await prisma.oauthApplication.update({
     where: { clientId },
-    data: { clientSecret: secret },
+    data: { clientSecret: await hashOauthClientSecret(secret) },
   })
 
   revalidatePath(`/admin/clients/${clientId}`)

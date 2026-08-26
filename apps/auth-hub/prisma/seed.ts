@@ -22,6 +22,7 @@ import { PostgresDialect } from 'kysely'
 import { Pool } from 'pg'
 // Используем относительный путь — tsconfig.paths недоступен вне src/
 import { schema } from '../src/generated/schema.js'
+import { hashOauthClientSecret } from '../src/lib/oauth-client-secret.js'
 
 function requireSecret(name: string): string {
   const value = process.env[name]
@@ -199,10 +200,14 @@ async function main() {
   console.log('[seed] Seeding OIDC clients...')
 
   for (const client of clientsWithRedirectUris) {
+    // @better-auth/oauth-provider хранит clientSecret хешированным (storeClientSecret по
+    // умолчанию "hashed" при включённом jwt()-плагине) — plaintext из env хешируем перед записью,
+    // см. oauth-client-secret.ts.
+    const data = { ...client, clientSecret: await hashOauthClientSecret(client.clientSecret) }
     const result = await orm.oauthApplication.upsert({
       where: { clientId: client.clientId },
-      update: client,
-      create: client,
+      update: data,
+      create: data,
     })
     console.log(`  ✓ ${result.clientId} (${result.name})`)
   }
