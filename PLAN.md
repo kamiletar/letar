@@ -3320,3 +3320,25 @@ aboi,auth-hub` — зелёные.
 
 Не проверено на других order/booking-потоках монорепо (`driving-school` — запись на занятие) —
 см. открытый пункт в самом doc-файле «Куда смотреть при добавлении нового order/booking-чекаута».
+
+## §64 — `OfflineConsentBanner` (`@letar/ui`) вынесен из пяти приложений (2026-08-26)
+
+Баннер согласия на PWA-оффлайн-режим был реализован независимо в studio, grandslamcup, mandala,
+pravda и archetest — почти дословный дубль (UI, анимация, координация с `CookieBanner` через
+`--letar-cookie-banner-height`, см. `.claude/docs/ui-components.md` § «Координация
+bottom-anchored компонентов»), с тремя точками расхождения: наличие next-intl (mandala,
+archetest — да; остальные — хардкод текста), `colorPalette` (archetest — `purple`, остальные —
+`brand`) и studio-специфичный проп `requireVisitedBackoffice` (гейт по факту захода в кабинет).
+
+Вынесено в `libs/ui/src/lib/offline-consent-banner.tsx` — текст/фичи/`colorPalette`/`isEligible`
+пропами, без завязки на конкретный i18n-стек (компонент не знает про next-intl, вызывающий код
+передаёт уже переведённые строки). grandslamcup и pravda перешли на прямой импорт из
+`@letar/ui` (их локальные копии были без специфики). studio, mandala, archetest оставили тонкие
+обёртки: studio — прокидывает `requireVisitedBackoffice`/`hasVisitedBackoffice` через
+`isEligible`, mandala/archetest — маппят `useTranslations('offlineBanner')` в пропы, archetest
+дополнительно задаёт `colorPalette="purple"`. Документация — `libs/ui/README.md` §
+«OfflineConsentBanner».
+
+`nx typecheck:tsgo`/`lint` зелёные на всех шести затронутых проектах (`@letar/ui`, studio,
+grandslamcup, mandala, pravda, archetest). Шесть коммитов (либа + докс, studio submodule +
+bump SHA, по одному на grandslamcup/mandala/pravda/archetest), не запушено.
