@@ -3078,7 +3078,7 @@ per-page-компонента, а не в `layout.tsx`), подвержено т
 Версии: `@letar/ui` 0.19.2, `domwellbes` 0.150.24. Детали —
 `apps/domwellbes/PLAN_PUBLIC_MOBILE.md` §12.31. Не запушено.
 
-## §61 — `letar-chakra-as-prop-forbidden`: severity понижена ERROR→WARNING, ~1434 существующих нарушения в libs/* (2026-08-26) 🆕
+## §61 — `letar-chakra-as-prop-forbidden`: severity понижена ERROR→WARNING, ~1434 существующих нарушения в libs/* (2026-08-26)
 
 Semgrep-правило `letar-chakra-as-prop-forbidden` (заведено в сессии по aboi, §26 записи выше в
 `apps/aboi/PLAN.md`) при исходной `severity: ERROR` блокировало pre-commit-хук
@@ -3097,6 +3097,19 @@ SharedPlayerControls, SharedVolumeControl, SpeedSelector, UpNextOverlay) и `lib
 осталось активным (видно в выводе, не блокирует), запрет из `components.md` не отменён — просто
 не гейтит коммиты в уже нарушающие файлы до чистки.
 
-**Задача:** поэтапно почистить `libs/video-player-react` и `libs/ui` (иконки → `<FaX size={16}
-/>` напрямую, без `Icon as={}` — см. пример в `components.md`), затем вернуть `severity: ERROR`.
-Не в скоупе этой сессии — правку никто не начинал.
+**Прогресс (2026-08-26, доп.):** `libs/video-player-react` и `libs/ui` полностью почищены — 14
+вхождений `<Icon as={...}>` заменены на прямой рендер иконки (`<LuX size={16} />`), с
+сопоставлением `boxSize`→`size` (×4px) и `color="токен"`→`color="var(--chakra-colors-<kebab-
+token>)"` (иконка сама наследует `currentColor` там, где цвет уже задан на обёртке — см.
+`stat-card.tsx`). Динамические `as={icon}`/`as={contentStyles.buttonIcon}` — через локальную
+capitalized-переменную (`const IconComponent = icon`), иначе JSX трактует lowercase-переменную
+как DOM-тег. `typecheck:tsgo`+`lint` (oxlint только по изменённым файлам — обе либы засорены
+посторонними untracked `*.d.ts` от предыдущей сборки, `no-useless-empty-export`, не относится к
+этой правке) — зелёные, headless-либы без своего dev-сервера, визуальной проверки не требуют.
+Повторный прогон semgrep: **0 срабатываний в `libs/*`**, все оставшиеся 1406 — в `apps/*`
+(больше всего в `animatrona`/`animatrona-tracker`/`animatrona-landing`).
+
+**Severity НЕ поднята** — задачей явно запрещено поднимать, пока `apps/*` не очищен целиком.
+`apps/*` вне скоупа этой правки (~1406 срабатываний, по всей видимости общий паттерн `<Icon
+as={LuX}>` растиражирован в `animatrona`/`animatrona-tracker`/`animatrona-landing`) — отдельная
+задача.
