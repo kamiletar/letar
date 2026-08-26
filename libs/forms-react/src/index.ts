@@ -48,6 +48,8 @@ export type {
   UseAsyncSearchResult,
 } from './lib/field/use-async-search'
 export { useDebounce } from './lib/field/use-debounce'
+export { useEditIntentField } from './lib/field/use-edit-intent-field'
+export type { UseEditIntentFieldOptions, UseEditIntentFieldResult } from './lib/field/use-edit-intent-field'
 export type {
   MaskFieldFormatMode,
   MaskFieldMask,

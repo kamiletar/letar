@@ -4,6 +4,21 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.4.0] - 2026-08-26
+
+### Added
+
+- **`useEditIntentField`** — headless view/edit/focus-контракт для `Form.Field.EditIntent`
+  (единая реализация для Chakra-скина `@letar/forms` и `@letar/forms-shadcn`, скины отличаются
+  только вёрсткой). Подписывается на значение поля реактивно через `useStore(form.store, ...)`,
+  пишет через `form.setFieldValue(fullPath, ...)`. Предназначен для вызова из `useFieldState`
+  (`createFieldPrimitives`), а не напрямую внутри render-prop `<form.Field>` — тот вызывается
+  TanStack Form из собственного `useMemo`, где хуки недопустимы
+  (`Do not call Hooks inside useEffect(...), useMemo(...)`). `startEdit`/`cancelEdit` атомарны
+  (пишут `isEdited` и `value` одним вызовом), фокус переводится эффектом после реального
+  перехода режима, не синхронно в обработчике клика. Тип `EditIntentValue<T>` и схема
+  `editIntentValueSchema()` — в `@letar/forms-core/edit-intent` (0.9.3 → 0.10.0).
+
 ## [0.3.3] - 2026-08-25
 
 ### Added
