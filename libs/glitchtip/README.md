@@ -68,6 +68,25 @@ fastify.addHook('onError', async (_request, _reply, error) => {
 и запись в `package.json`/`project.json` (`dependencies`/`implicitDependencies`) добавляются
 руками, `bun install` после — обязателен (создаёт symlink в `node_modules/@letar/`).
 
+### `./client` — `captureException(err)`
+
+Для React error boundaries (Next.js `error.tsx`/`global-error.tsx`) — они перехватывают ошибку до
+`window.onerror`, поэтому глобальные обработчики `@sentry/browser`, включённые `initClient()`, её
+не видят без явного вызова:
+
+```tsx
+'use client'
+import { captureException } from '@letar/glitchtip/client'
+import { useEffect } from 'react'
+
+export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  useEffect(() => {
+    captureException(error)
+  }, [error])
+  // ...
+}
+```
+
 ### `./client` — `initClient({ dsn, environment })`
 
 Вызывать из `instrumentation-client.ts` на верхнем уровне модуля (не в функции — см. доку Next.js

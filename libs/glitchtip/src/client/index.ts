@@ -18,4 +18,14 @@ export function initClient({ dsn, environment }: InitClientOptions): void {
   })
 }
 
+/**
+ * Для React error boundaries (Next.js `error.tsx`) — они перехватывают ошибку до того, как та
+ * дойдёт до `window.onerror`, поэтому глобальные обработчики `@sentry/browser` её не видят без
+ * явного вызова. Тот же принцип, что у серверного `captureException` — вызывать из тела
+ * компонента-границы после `initClient()`.
+ */
+export function captureException(err: unknown): void {
+  Sentry.captureException(err)
+}
+
 export { scrubPii }
