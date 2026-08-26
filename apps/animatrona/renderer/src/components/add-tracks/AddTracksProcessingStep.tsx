@@ -4,7 +4,7 @@
  * Шаг 4: Обработка — прогресс добавления дорожек
  */
 
-import { Badge, Box, Button, HStack, Icon, Progress, Slider, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, HStack, Progress, Slider, Text, VStack } from '@chakra-ui/react'
 import { LuCaptions, LuCheck, LuCircleAlert, LuLoader, LuMusic, LuX } from 'react-icons/lu'
 
 import type { AddTracksProgress, AddTracksStage, FileProgress } from '@/lib/add-tracks'
@@ -103,7 +103,11 @@ function FileProgressItem({ file }: { file: FileProgress }) {
   return (
     <Box p={2} borderWidth="1px" borderColor={`${color}.700`} borderRadius="md" bg={`${color}.900/20`}>
       <HStack gap={2} mb={1}>
-        <Icon as={IconComponent} boxSize={4} color={`${color}.400`} className={isActive ? 'animate-spin' : ''} />
+        <IconComponent
+          size={16}
+          color={`var(--chakra-colors-${color}-400)`}
+          className={isActive ? 'animate-spin' : ''}
+        />
         <Text fontSize="xs" color="fg.muted" flex={1} lineClamp={1}>
           {file.fileName}
         </Text>
@@ -181,10 +185,9 @@ export function AddTracksProcessingStep({
       {/* Статус */}
       <Box textAlign="center">
         <VStack gap={3}>
-          <Icon
-            as={stageInfo.icon}
-            boxSize={12}
-            color={stageInfo.color}
+          <stageInfo.icon
+            size={48}
+            color={`var(--chakra-colors-${stageInfo.color.replace(/\./g, '-')})`}
             className={isProcessing ? 'animate-spin' : ''}
           />
           <Text fontSize="lg" fontWeight="medium" color={stageInfo.color}>
@@ -280,7 +283,7 @@ export function AddTracksProcessingStep({
           <HStack gap={8} justify="center">
             <VStack gap={1}>
               <HStack gap={2}>
-                <Icon as={LuMusic} color="accent.fg" boxSize={6} />
+                <LuMusic color="var(--chakra-colors-accent-fg)" size={24} />
                 <Text fontSize="2xl" fontWeight="bold" color="fg">
                   {progress.addedAudioTracks}
                 </Text>
@@ -292,7 +295,7 @@ export function AddTracksProcessingStep({
 
             <VStack gap={1}>
               <HStack gap={2}>
-                <Icon as={LuCaptions} color="success.fg" boxSize={6} />
+                <LuCaptions color="var(--chakra-colors-success-fg)" size={24} />
                 <Text fontSize="2xl" fontWeight="bold" color="fg">
                   {progress.addedSubtitleTracks}
                 </Text>

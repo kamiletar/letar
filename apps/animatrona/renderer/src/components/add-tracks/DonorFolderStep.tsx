@@ -4,7 +4,7 @@
  * Шаг 1: Выбор папки-донора
  */
 
-import { Box, Button, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, HStack, Text, VStack } from '@chakra-ui/react'
 import { useCallback } from 'react'
 import { LuCaptions, LuFile, LuFolder, LuFolderOpen, LuLoader, LuMusic, LuVideo } from 'react-icons/lu'
 
@@ -27,13 +27,13 @@ interface DonorFolderStepProps {
 function FileTypeIcon({ type }: { type: DonorFile['type'] }) {
   switch (type) {
     case 'video':
-      return <Icon as={LuVideo} color="primary.fg" boxSize={4} />
+      return <LuVideo color="var(--chakra-colors-primary-fg)" size={16} />
     case 'audio':
-      return <Icon as={LuMusic} color="accent.fg" boxSize={4} />
+      return <LuMusic color="var(--chakra-colors-accent-fg)" size={16} />
     case 'subtitle':
-      return <Icon as={LuCaptions} color="success.fg" boxSize={4} />
+      return <LuCaptions color="var(--chakra-colors-success-fg)" size={16} />
     default:
-      return <Icon as={LuFile} color="fg.muted" boxSize={4} />
+      return <LuFile color="var(--chakra-colors-fg-muted)" size={16} />
   }
 }
 
@@ -73,7 +73,9 @@ export function DonorFolderStep({ donorPath, donorFiles, isScanning, onFolderSel
           disabled={isScanning}
         >
           <VStack gap={2}>
-            <Icon as={isScanning ? LuLoader : LuFolderOpen} boxSize={8} className={isScanning ? 'animate-spin' : ''} />
+            {isScanning
+              ? <LuLoader size={32} className="animate-spin" />
+              : <LuFolderOpen size={32} />}
             <Text>{isScanning ? 'Сканирование...' : 'Выбрать папку-донор'}</Text>
           </VStack>
         </Button>
@@ -85,7 +87,7 @@ export function DonorFolderStep({ donorPath, donorFiles, isScanning, onFolderSel
           <VStack gap={3} align="stretch">
             {/* Путь */}
             <HStack gap={2}>
-              <Icon as={LuFolder} color="primary.fg" />
+              <LuFolder color="var(--chakra-colors-primary-fg)" />
               <Text fontSize="sm" color="fg.muted" truncate flex={1}>
                 {donorPath}
               </Text>
@@ -96,7 +98,7 @@ export function DonorFolderStep({ donorPath, donorFiles, isScanning, onFolderSel
               <HStack gap={6} justify="center">
                 <VStack gap={1}>
                   <HStack gap={1}>
-                    <Icon as={LuVideo} color="primary.fg" boxSize={5} />
+                    <LuVideo color="var(--chakra-colors-primary-fg)" size={20} />
                     <Text fontSize="lg" fontWeight="bold" color="fg">
                       {videoCount}
                     </Text>
@@ -109,7 +111,7 @@ export function DonorFolderStep({ donorPath, donorFiles, isScanning, onFolderSel
                 {audioCount > 0 && (
                   <VStack gap={1}>
                     <HStack gap={1}>
-                      <Icon as={LuMusic} color="accent.fg" boxSize={5} />
+                      <LuMusic color="var(--chakra-colors-accent-fg)" size={20} />
                       <Text fontSize="lg" fontWeight="bold" color="fg">
                         {audioCount}
                       </Text>
@@ -123,7 +125,7 @@ export function DonorFolderStep({ donorPath, donorFiles, isScanning, onFolderSel
                 {subtitleCount > 0 && (
                   <VStack gap={1}>
                     <HStack gap={1}>
-                      <Icon as={LuCaptions} color="success.fg" boxSize={5} />
+                      <LuCaptions color="var(--chakra-colors-success-fg)" size={20} />
                       <Text fontSize="lg" fontWeight="bold" color="fg">
                         {subtitleCount}
                       </Text>

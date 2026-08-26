@@ -4,7 +4,7 @@
  * Шаг 2: Сопоставление файлов донора с эпизодами библиотеки
  */
 
-import { Badge, Box, HStack, Icon, NativeSelect, Table, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, HStack, NativeSelect, Table, Text, VStack } from '@chakra-ui/react'
 import { LuArrowRight, LuCheck, LuTriangleAlert } from 'react-icons/lu'
 
 import type { EpisodeMatch, LibraryEpisode } from '@/lib/add-tracks'
@@ -25,22 +25,22 @@ function MatchStatusBadge({ confidence }: { confidence: EpisodeMatch['confidence
   switch (confidence) {
     case 'auto':
       return (
-        <Badge colorPalette="green" variant="subtle" size="sm">
-          <Icon as={LuCheck} boxSize={3} mr={1} />
+        <Badge colorPalette="green" variant="subtle" size="sm" gap={1}>
+          <LuCheck size={12} />
           Авто
         </Badge>
       )
     case 'manual':
       return (
-        <Badge colorPalette="blue" variant="subtle" size="sm">
-          <Icon as={LuCheck} boxSize={3} mr={1} />
+        <Badge colorPalette="blue" variant="subtle" size="sm" gap={1}>
+          <LuCheck size={12} />
           Вручную
         </Badge>
       )
     case 'unmatched':
       return (
-        <Badge colorPalette="orange" variant="subtle" size="sm">
-          <Icon as={LuTriangleAlert} boxSize={3} mr={1} />
+        <Badge colorPalette="orange" variant="subtle" size="sm" gap={1}>
+          <LuTriangleAlert size={12} />
           Не сопоставлено
         </Badge>
       )
@@ -111,7 +111,7 @@ export function FileMatchingStep({ matches, libraryEpisodes, onMatchChange }: Fi
 
                 {/* Стрелка */}
                 <Table.Cell textAlign="center">
-                  <Icon as={LuArrowRight} color="fg.subtle" />
+                  <LuArrowRight color="var(--chakra-colors-fg-subtle)" />
                 </Table.Cell>
 
                 {/* Эпизод библиотеки */}

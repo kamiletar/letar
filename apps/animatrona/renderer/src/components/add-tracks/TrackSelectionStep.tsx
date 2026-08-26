@@ -5,7 +5,7 @@
  * Оптимизирован для производительности с 500+ дорожками
  */
 
-import { Accordion, Badge, Box, Button, Checkbox, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Accordion, Badge, Box, Button, Checkbox, HStack, Text, VStack } from '@chakra-ui/react'
 import { memo, useCallback, useMemo } from 'react'
 import { LuCaptions, LuCheck, LuMusic, LuType } from 'react-icons/lu'
 
@@ -128,7 +128,7 @@ const AudioTrackCard = memo(function AudioTrackCard({
         </Checkbox.Control>
       </Checkbox.Root>
 
-      <Icon as={LuMusic} color="accent.fg" boxSize={5} />
+      <LuMusic color="var(--chakra-colors-accent-fg)" size={20} />
 
       <VStack align="start" gap={0} flex={1}>
         <HStack gap={2}>
@@ -203,7 +203,7 @@ const SubtitleTrackCard = memo(function SubtitleTrackCard({
         </Checkbox.Control>
       </Checkbox.Root>
 
-      <Icon as={LuCaptions} color="success.fg" boxSize={5} />
+      <LuCaptions color="var(--chakra-colors-success-fg)" size={20} />
 
       <VStack align="start" gap={0} flex={1}>
         <HStack gap={2}>
@@ -222,7 +222,7 @@ const SubtitleTrackCard = memo(function SubtitleTrackCard({
           </Text>
           {hasFonts && (
             <HStack gap={1}>
-              <Icon as={LuType} boxSize={3} color="fg.subtle" />
+              <LuType color="var(--chakra-colors-fg-subtle)" size={12} />
               <Text fontSize="xs" color="fg.subtle">
                 {(track.matchedFonts ?? []).length} шрифт{(track.matchedFonts ?? []).length > 1 ? 'а' : ''}
               </Text>
@@ -321,12 +321,12 @@ export function TrackSelectionStep({
       {/* Кнопки быстрого выбора */}
       <HStack justify="space-between" px={2} flexWrap="wrap" gap={2}>
         <HStack gap={2} flexWrap="wrap">
-          <Button size="sm" variant="outline" onClick={() => onSelectAllOfType('audio')}>
-            <Icon as={LuMusic} mr={1} />
+          <Button size="sm" variant="outline" onClick={() => onSelectAllOfType('audio')} gap={1}>
+            <LuMusic />
             Все аудио
           </Button>
-          <Button size="sm" variant="outline" onClick={() => onSelectAllOfType('subtitle')}>
-            <Icon as={LuCaptions} mr={1} />
+          <Button size="sm" variant="outline" onClick={() => onSelectAllOfType('subtitle')} gap={1}>
+            <LuCaptions />
             Все субтитры
           </Button>
           {onSelectByLanguage && (
@@ -386,13 +386,13 @@ export function TrackSelectionStep({
                   <Text fontWeight="medium">Эпизод {targetEp.number}</Text>
                   <HStack gap={4}>
                     <HStack gap={1}>
-                      <Icon as={LuMusic} color="accent.fg" boxSize={4} />
+                      <LuMusic color="var(--chakra-colors-accent-fg)" size={16} />
                       <Text fontSize="sm" color="fg.muted">
                         {totalAudioCount}
                       </Text>
                     </HStack>
                     <HStack gap={1}>
-                      <Icon as={LuCaptions} color="success.fg" boxSize={4} />
+                      <LuCaptions color="var(--chakra-colors-success-fg)" size={16} />
                       <Text fontSize="sm" color="fg.muted">
                         {subtitleTracks.length}
                       </Text>

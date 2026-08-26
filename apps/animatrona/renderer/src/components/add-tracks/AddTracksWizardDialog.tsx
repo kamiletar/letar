@@ -4,7 +4,7 @@
  * Диалог добавления дорожек из папки-донора
  */
 
-import { Button, Dialog, HStack, Icon, Portal, Text, VStack } from '@chakra-ui/react'
+import { Button, Dialog, HStack, Portal, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useEffect } from 'react'
 import { LuArrowLeft, LuArrowRight, LuCheck, LuMusic, LuX } from 'react-icons/lu'
 
@@ -208,7 +208,7 @@ export function AddTracksWizardDialog({
           <Dialog.Content bg="bg.subtle" borderColor="border">
             <Dialog.Header borderBottomWidth="1px" borderColor="border">
               <HStack gap={2}>
-                <Icon as={LuMusic} color="primary.fg" />
+                <LuMusic color="var(--chakra-colors-primary-fg)" />
                 <Dialog.Title>Добавить дорожки</Dialog.Title>
               </HStack>
               <Dialog.CloseTrigger asChild>
@@ -296,8 +296,9 @@ export function AddTracksWizardDialog({
                   onClick={handleBack}
                   disabled={currentStep === 0 || isProcessing || isDone}
                   visibility={currentStep > 0 && currentStep < 3 ? 'visible' : 'hidden'}
+                  gap={1}
                 >
-                  <Icon as={LuArrowLeft} mr={1} />
+                  <LuArrowLeft />
                   Назад
                 </Button>
 
@@ -312,26 +313,26 @@ export function AddTracksWizardDialog({
 
                   {/* Готово */}
                   {(isDone || isError) && (
-                    <Button colorPalette="purple" onClick={handleClose}>
-                      <Icon as={LuCheck} mr={1} />
+                    <Button colorPalette="purple" onClick={handleClose} gap={1}>
+                      <LuCheck />
                       Готово
                     </Button>
                   )}
 
                   {/* Далее */}
                   {(state.stage === 'matching' || state.stage === 'calibration' || state.stage === 'selection') && (
-                    <Button colorPalette="purple" onClick={handleNext} disabled={!canProceed()}>
+                    <Button colorPalette="purple" onClick={handleNext} disabled={!canProceed()} gap={1}>
                       {state.stage === 'selection'
                         ? (
                           <>
                             Добавить дорожки
-                            <Icon as={LuArrowRight} ml={1} />
+                            <LuArrowRight />
                           </>
                         )
                         : (
                           <>
                             Далее
-                            <Icon as={LuArrowRight} ml={1} />
+                            <LuArrowRight />
                           </>
                         )}
                     </Button>
