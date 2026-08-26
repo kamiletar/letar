@@ -1,7 +1,7 @@
 'use client'
 
 import { UpdateBadge } from '@/components/update'
-import { Box, Flex, HStack, Icon, Kbd, Text } from '@chakra-ui/react'
+import { Box, Flex, HStack, Kbd, Text } from '@chakra-ui/react'
 import { LuSearch } from 'react-icons/lu'
 
 interface HeaderProps {
@@ -73,7 +73,7 @@ export function Header({ title, onOpenSearch }: HeaderProps) {
           _active={{ bg: 'state.active', transform: 'scale(0.98)' }}
           transition="all 0.1s ease-out"
         >
-          <Icon as={LuSearch} color="fg.subtle" boxSize={4} />
+          <LuSearch color="var(--chakra-colors-fg-subtle)" size={16} />
           <Text fontSize="sm" color="fg.subtle">
             Поиск
           </Text>

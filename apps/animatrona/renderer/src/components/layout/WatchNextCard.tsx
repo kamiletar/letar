@@ -7,7 +7,7 @@
  * Отображается под ContinueWatchingCard
  */
 
-import { Box, HStack, Icon, Image, Text, VStack } from '@chakra-ui/react'
+import { Box, HStack, Image, Text, VStack } from '@chakra-ui/react'
 import { usePolledData } from '@letar/hooks'
 import { memo } from 'react'
 import { LuArrowRight } from 'react-icons/lu'
@@ -68,7 +68,7 @@ export const WatchNextCard = memo(function WatchNextCard() {
       <VStack gap={2} align="stretch">
         {/* Заголовок */}
         <HStack gap={2}>
-          <Icon as={LuArrowRight} boxSize={4} color="purple.400" />
+          <LuArrowRight size={16} color="var(--chakra-colors-purple-400)" />
           <Text fontSize="xs" fontWeight="semibold" color="purple.300">
             Смотреть далее
           </Text>

@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Flex, HStack, Icon, Text } from '@chakra-ui/react'
+import { Box, Flex, HStack, Text } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { LuMinus, LuSquare, LuX } from 'react-icons/lu'
 
@@ -178,15 +178,15 @@ export function TitleBar() {
       {!isMac && (
         <HStack gap={0}>
           <WindowButton onClick={handleMinimize} label="Свернуть">
-            <Icon as={LuMinus} boxSize={4} />
+            <LuMinus size={16} />
           </WindowButton>
 
           <WindowButton onClick={handleMaximize} label={isMaximized ? 'Восстановить' : 'Развернуть'}>
-            {isMaximized ? <RestoreIcon /> : <Icon as={LuSquare} boxSize={3.5} />}
+            {isMaximized ? <RestoreIcon /> : <LuSquare size={14} />}
           </WindowButton>
 
           <WindowButton onClick={handleClose} label="Закрыть" isClose>
-            <Icon as={LuX} boxSize={4} />
+            <LuX size={16} />
           </WindowButton>
         </HStack>
       )}

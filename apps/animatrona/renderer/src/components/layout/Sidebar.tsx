@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Box, HStack, Text, VStack } from '@chakra-ui/react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -159,6 +159,7 @@ export function Sidebar() {
       <VStack gap={1} align="stretch" px={2} mb={4}>
         {navItems.map((item) => {
           const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href))
+          const NavIcon = item.icon
 
           return (
             <Box
@@ -179,7 +180,7 @@ export function Sidebar() {
               transition="all 0.1s ease-out"
               textAlign="left"
             >
-              <Icon as={item.icon} boxSize={5} />
+              <NavIcon size={20} />
               <Text fontSize="sm" fontWeight="medium">
                 {item.label}
               </Text>
@@ -216,7 +217,10 @@ export function Sidebar() {
           w="calc(100% - 16px)"
         >
           <HStack gap={2} justify="center">
-            <Icon as={LuCoffee} boxSize={4} color={powerSave?.isBlocking ? 'yellow.400' : 'fg.subtle'} />
+            <LuCoffee
+              size={16}
+              color={powerSave?.isBlocking ? 'var(--chakra-colors-yellow-400)' : 'var(--chakra-colors-fg-subtle)'}
+            />
             <Text fontSize="xs" color={powerSave?.isBlocking ? 'yellow.300' : 'fg.subtle'}>
               {powerSave?.isBlocking ? 'Не спать' : 'Сон разрешён'}
             </Text>
@@ -227,7 +231,7 @@ export function Sidebar() {
         <Box p={3} mx={2} borderRadius="md" bg="bg.muted" border="1px" borderColor="border">
           {/* Размер IPFS хранилища */}
           <HStack gap={2} mb={2}>
-            <Icon as={LuDatabase} boxSize={3.5} color="fg.subtle" />
+            <LuDatabase size={14} color="var(--chakra-colors-fg-subtle)" />
             <Text fontSize="xs" color="fg.subtle">
               IPFS:
             </Text>

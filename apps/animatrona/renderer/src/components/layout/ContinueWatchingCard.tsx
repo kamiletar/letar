@@ -6,7 +6,7 @@
  * Скрывается на странице /watch (во время просмотра бесмыслен)
  */
 
-import { Box, Flex, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Box, Flex, HStack, Text, VStack } from '@chakra-ui/react'
 import { usePolledData } from '@letar/hooks'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
@@ -82,7 +82,7 @@ export const ContinueWatchingCard = memo(function ContinueWatchingCard() {
       <VStack gap={2} align="stretch">
         {/* Заголовок */}
         <HStack gap={2}>
-          <Icon as={LuPlay} boxSize={4} color="primary.solid" />
+          <LuPlay size={16} color="var(--chakra-colors-primary-solid)" />
           <Text fontSize="xs" fontWeight="semibold" color="fg.muted">
             Продолжить
           </Text>
