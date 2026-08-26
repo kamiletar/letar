@@ -40,6 +40,9 @@
 **MCP-серверы:** [mcp-servers](/.claude/docs/mcp-servers.md) состав и назначение ·
 [mcp-server-pattern](/.claude/docs/mcp-server-pattern.md) тонкий локальный сервер по stdio ·
 [mcp-sse-bridge](/.claude/docs/mcp-sse-bridge.md) мост stdio-процесс ↔ открытая страница ·
+[mcp-tool-handler-testing-pattern](/.claude/docs/mcp-tool-handler-testing-pattern.md) тест
+инструментов через настоящий `Client` + `InMemoryTransport`, не рефлексию по приватным полям
+`McpServer` — невалидные аргументы дают `isError: true`, не `throw` ·
 [agent-mail-server-quirks](/.claude/docs/agent-mail-server-quirks.md) баги координации: contact
 approval, kebab-case в `to`, обнулённая база
 
