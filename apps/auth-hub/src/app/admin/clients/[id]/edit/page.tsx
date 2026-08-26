@@ -42,6 +42,8 @@ export default async function EditClientPage({ params }: Props) {
         defaultValues={{
           name: client.name ?? '',
           redirectUrls: client.redirectUrls,
+          postLogoutRedirectUris: client.postLogoutRedirectUris ?? [],
+          enableEndSession: client.enableEndSession ?? true,
           type: (client.type as 'web' | 'native' | 'spa') ?? 'web',
           skipConsent: client.skipConsent ?? false,
           disabled: client.disabled ?? false,

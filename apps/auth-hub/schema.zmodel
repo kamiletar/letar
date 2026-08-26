@@ -201,6 +201,14 @@ model OauthApplication {
   type                  String   @default("web")
   disabled              Boolean  @default(false)
   skipConsent           Boolean  @default(false)
+  // RP-Initiated Logout (@better-auth/oauth-provider 1.7+, src/schema.ts::oauthClient) — без
+  // enableEndSession=true плагин безусловно отдаёт 401 "The client is not allowed to initiate
+  // logout" на /oauth2/end-session для ЛЮБОГО клиента (поле без дефолта в схеме плагина).
+  enableEndSession                 Boolean  @default(false)
+  postLogoutRedirectUris           String[] @default([]) // Белый список — без фолбэка на redirectUris,
+                                                            // getRegisteredLogoutRedirect сверяет только этот массив.
+  backchannelLogoutUri             String?
+  backchannelLogoutSessionRequired Boolean?
   userId                String?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt

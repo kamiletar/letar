@@ -9,6 +9,8 @@ interface ClientFormValues {
   name: string
   clientId?: string
   redirectUrls: string
+  postLogoutRedirectUris?: string[]
+  enableEndSession?: boolean
   type: 'web' | 'native' | 'spa'
   skipConsent: boolean
   disabled?: boolean
@@ -40,6 +42,9 @@ export function ClientForm({ mode, defaultValues, lockedClientId, onSubmit, succ
     // Checkbox не попадает в FormData если не отмечен — явно выставляем false
     if (!formData.has('skipConsent')) {
       formData.set('skipConsent', 'false')
+    }
+    if (!formData.has('enableEndSession')) {
+      formData.set('enableEndSession', 'false')
     }
     if (mode === 'edit' && !formData.has('disabled')) {
       formData.set('disabled', 'false')
@@ -115,6 +120,34 @@ export function ClientForm({ mode, defaultValues, lockedClientId, onSubmit, succ
               />
               <Field.HelperText>По одному URL на строку.</Field.HelperText>
               {error?.fields?.redirectUrls && <Field.ErrorText>{error.fields.redirectUrls[0]}</Field.ErrorText>}
+            </Field.Root>
+
+            <Field.Root>
+              <Field.Label>Post-logout redirect URLs</Field.Label>
+              <Textarea
+                name="postLogoutRedirectUris"
+                placeholder={'https://app.example.com/sign-in'}
+                rows={2}
+                defaultValue={defaultValues?.postLogoutRedirectUris?.join('\n')}
+                fontFamily="mono"
+                fontSize="sm"
+              />
+              <Field.HelperText>
+                Куда вернуть пользователя после «Выход». По одному URL на строку — отдельный список от Redirect URLs
+                выше, туда автоматически не попадает.
+              </Field.HelperText>
+            </Field.Root>
+
+            <Field.Root>
+              <Checkbox.Root
+                name="enableEndSession"
+                value="true"
+                defaultChecked={defaultValues?.enableEndSession ?? true}
+              >
+                <Checkbox.HiddenInput />
+                <Checkbox.Control />
+                <Checkbox.Label>Разрешить клиенту инициировать выход (RP-Initiated Logout)</Checkbox.Label>
+              </Checkbox.Root>
             </Field.Root>
 
             <Field.Root>

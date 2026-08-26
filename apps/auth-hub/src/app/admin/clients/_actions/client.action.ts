@@ -16,6 +16,11 @@ const ClientSchema = z
       .min(1, 'Client ID обязателен')
       .regex(/^[a-z0-9-]+$/, 'Только строчные буквы, цифры и дефис'),
     redirectUrls: z.string().min(1, 'Укажите хотя бы один redirect URL'),
+    // RP-Initiated Logout (@better-auth/oauth-provider 1.7+) — отдельный от redirectUris белый
+    // список, фолбэка на него плагин не делает. Необязательное поле: клиент может не поддерживать
+    // logout вовсе.
+    postLogoutRedirectUris: z.string().optional(),
+    enableEndSession: z.boolean().default(true),
     type: z.enum(['web', 'native', 'spa']).default('web'),
     skipConsent: z.boolean().default(false),
   })
@@ -25,6 +30,8 @@ const UpdateClientSchema = z
   .object({
     name: z.string().min(1, 'Название обязательно').max(100),
     redirectUrls: z.string().min(1, 'Укажите хотя бы один redirect URL'),
+    postLogoutRedirectUris: z.string().optional(),
+    enableEndSession: z.boolean().default(true),
     type: z.enum(['web', 'native', 'spa']).default('web'),
     skipConsent: z.boolean().default(false),
     disabled: z.boolean().default(false),
@@ -57,6 +64,8 @@ export async function createClientAction(
     name: formData.get('name') as string,
     clientId: formData.get('clientId') as string,
     redirectUrls: formData.get('redirectUrls') as string,
+    postLogoutRedirectUris: (formData.get('postLogoutRedirectUris') as string) || undefined,
+    enableEndSession: formData.get('enableEndSession') !== 'false',
     type: (formData.get('type') as string) || 'web',
     skipConsent: formData.get('skipConsent') === 'true',
   }
@@ -88,6 +97,10 @@ export async function createClientAction(
       clientSecret: await hashOauthClientSecret(secret),
       redirectUrls: redirectUris.join(','),
       redirectUris,
+      postLogoutRedirectUris: parsed.data.postLogoutRedirectUris
+        ? parseRedirectUrlList(parsed.data.postLogoutRedirectUris)
+        : [],
+      enableEndSession: parsed.data.enableEndSession,
       type: parsed.data.type,
       skipConsent: parsed.data.skipConsent,
       disabled: false,
@@ -108,6 +121,8 @@ export async function updateClientAction(
   const raw = {
     name: formData.get('name') as string,
     redirectUrls: formData.get('redirectUrls') as string,
+    postLogoutRedirectUris: (formData.get('postLogoutRedirectUris') as string) || undefined,
+    enableEndSession: formData.get('enableEndSession') !== 'false',
     type: (formData.get('type') as string) || 'web',
     skipConsent: formData.get('skipConsent') === 'true',
     disabled: formData.get('disabled') === 'true',
@@ -128,6 +143,10 @@ export async function updateClientAction(
       name: parsed.data.name,
       redirectUrls: redirectUris.join(','),
       redirectUris,
+      postLogoutRedirectUris: parsed.data.postLogoutRedirectUris
+        ? parseRedirectUrlList(parsed.data.postLogoutRedirectUris)
+        : [],
+      enableEndSession: parsed.data.enableEndSession,
       type: parsed.data.type,
       skipConsent: parsed.data.skipConsent,
       disabled: parsed.data.disabled,
