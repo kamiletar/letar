@@ -7,7 +7,7 @@
  * Используется на странице каталога (discover), где данные БД недоступны.
  */
 
-import { Badge, Box, Card, Heading, HStack, Icon, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Card, Heading, HStack, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { LuCaptions, LuHeadphones } from 'react-icons/lu'
 
 import type { TracksSummary } from '@/lib/hooks/use-anime-ipfs-data'
@@ -60,7 +60,7 @@ export function DiscoverTracksView({ tracksSummary }: DiscoverTracksViewProps) {
           <Card.Body>
             <VStack gap={3} align="stretch">
               <HStack>
-                <Icon as={LuHeadphones} color="fg.muted" />
+                <LuHeadphones color="var(--chakra-colors-fg-muted)" />
                 <Heading size="sm">Аудиодорожки</Heading>
                 <Badge colorPalette="blue" variant="subtle">
                   {audioTracks.length}
@@ -106,7 +106,7 @@ export function DiscoverTracksView({ tracksSummary }: DiscoverTracksViewProps) {
           <Card.Body>
             <VStack gap={3} align="stretch">
               <HStack>
-                <Icon as={LuCaptions} color="fg.muted" />
+                <LuCaptions color="var(--chakra-colors-fg-muted)" />
                 <Heading size="sm">Субтитры</Heading>
                 <Badge colorPalette="green" variant="subtle">
                   {subtitleTracks.length}

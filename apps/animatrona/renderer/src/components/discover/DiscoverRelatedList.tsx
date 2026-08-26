@@ -7,7 +7,7 @@
  * Используется на странице каталога (discover), где данные БД недоступны.
  */
 
-import { Badge, Box, Card, Heading, HStack, Icon, Image, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Card, Heading, HStack, Image, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { LuLink2 } from 'react-icons/lu'
 
 import { getGatewayBaseUrl } from '@/lib/media-url'
@@ -87,7 +87,7 @@ export function DiscoverRelatedList({ relations }: DiscoverRelatedListProps) {
       <Card.Body>
         <VStack gap={4} align="stretch">
           <HStack>
-            <Icon as={LuLink2} color="fg.muted" />
+            <LuLink2 color="var(--chakra-colors-fg-muted)" />
             <Heading size="md">Связанные аниме</Heading>
             <Badge colorPalette="gray" variant="subtle">
               {relations.length}
@@ -121,7 +121,7 @@ export function DiscoverRelatedList({ relations }: DiscoverRelatedListProps) {
                       ? <Image src={posterUrl} alt={rel.targetName ?? 'Постер'} objectFit="cover" w="100%" h="100%" />
                       : (
                         <Box w="100%" h="100%" display="flex" alignItems="center" justifyContent="center">
-                          <Icon as={LuLink2} boxSize={8} color="fg.subtle" />
+                          <LuLink2 size={32} color="var(--chakra-colors-fg-subtle)" />
                         </Box>
                       )}
 
