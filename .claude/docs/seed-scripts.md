@@ -219,6 +219,55 @@ if (existingItemCount === 0) {
   родителя — родитель может существовать сколько угодно раз, дочерний вызов всё равно
   отрабатывает на каждом прогоне.
 
+## 7. Сид, резервирующий физический остаток — сверять свободный остаток перед резервом, не полагаться на исходный `RECEIPT`
+
+**Симптом:** сид, который сначала проводит приход (`postStockDocument RECEIPT`), а потом резервирует
+часть его под демо-заказ (движок с `reserveStock`/`OverReservationError` — доставка, бронирование
+партии и т.п.), падает на резерве с ошибкой нехватки остатка **не на первом прогоне**, а спустя
+время, на уже засеянной dev-БД.
+
+**Причина:** приход в сид-скрипте идемпотентен по `idempotencyKey` — при повторном прогоне не
+проводится заново. Но физический остаток между прогонами сида не заморожен: dev-БД общая, и
+ручное тестирование бизнес-логики (сотрудник отгрузил демо-доставку через UI, оформил тестовый
+заказ) списывает часть остатка обычным `SHIPMENT`-документом — легитимно, в обход сида. К моменту
+следующего `nx db:seed` реального свободного остатка (`quantity - reserved`) может не хватать на
+то количество, которое сид планировал зарезервировать при исходном проектировании фикстур.
+
+**Найдено:** `domwellbes`, `prisma/seed/deliveries.ts` — `DELIVERY_PLANS` резервировал под доставку
+40 единиц `ARM-A500-12`, засеянных приходом на 50; между прогонами кто-то отгрузил реальную
+доставку на 40 тех же единиц через UI, оставив свободными только 20 — `createDelivery` падал на
+`DeliveryStateError`/`OverReservationError`, обрывая весь пайплайн `seed.ts` (2026-08-26).
+
+**Фикс:** перед резервом читать текущий `quantity - reserved` для нужной пары
+склад/материал и, если он меньше требуемого, доводить остаток компенсирующим `RECEIPT` на
+недостающее количество — с собственным `idempotencyKey` (например
+`seed-delivery-topup-<planKey>`), чтобы не задваивался при повторных прогонах:
+
+```typescript
+const stockItem = await db.stockItem.findFirst({
+  where: { warehouseId, materialId, ownership: 'OUR' },
+  select: { quantity: true, reserved: true, avgCostKopecks: true },
+})
+const free = Number(stockItem?.quantity ?? 0) - Number(stockItem?.reserved ?? 0)
+const shortfall = qtyNeeded - free
+if (shortfall > 0) {
+  const idempotencyKey = `seed-<feature>-topup-<planKey>`
+  const existing = await db.stockDocument.findUnique({ where: { idempotencyKey }, select: { id: true } })
+  if (!existing) {
+    await postStockDocument({
+      type: 'RECEIPT',
+      idempotencyKey,
+      lines: [{ warehouseId, materialId, quantity: shortfall, unitCostKopecks: stockItem?.avgCostKopecks ?? 0 }],
+      /* ... */
+    })
+  }
+}
+```
+
+Общий класс с §6: и там, и здесь сид перестаёт быть однократным «первый прогон закладывает
+фундамент, дальше только упсерты» и становится самовосстанавливающимся относительно любого
+состояния, в которое живая эксплуатация могла увести dev-БД между прогонами.
+
 ## Примеры в репозитории
 
 | Приложение     | Файл                                      | Стратегия                                                                                   |
