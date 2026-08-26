@@ -1,5 +1,4 @@
-import { Client } from '@modelcontextprotocol/sdk/client/index.js'
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js'
+import { connectedClient as connectMcp, expectValidationError, textOf } from '@letar/mcp-test-kit'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
@@ -15,25 +14,8 @@ import { createFormMcpServer } from './index.js'
  */
 const docsPath = join(fileURLToPath(new URL('.', import.meta.url)), '..', '..', 'forms', 'docs')
 
-/** Поднимает сервер и подключённого к нему клиента через связанный in-memory транспорт. */
-async function connectedClient() {
-  const server = createFormMcpServer({ docsPath })
-  const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair()
-  const client = new Client({ name: 'test-client', version: '0.0.0' })
-  await Promise.all([client.connect(clientTransport), server.connect(serverTransport)])
-  return { client, server }
-}
-
-function textOf(result: unknown) {
-  const content = (result as { content: Array<{ type: string; text?: string }> }).content
-  return content.map((c) => c.text).join('\n')
-}
-
-/** Невалидные аргументы — MCP-клиент оборачивает protocol-ошибку в isError-результат, не throw. */
-async function expectValidationError(client: Client, name: string, args: Record<string, unknown>) {
-  const result = await client.callTool({ name, arguments: args })
-  expect(result.isError).toBe(true)
-  expect(textOf(result)).toContain('Input validation error')
+function connectedClient() {
+  return connectMcp(() => createFormMcpServer({ docsPath }))
 }
 
 describe('createFormMcpServer', () => {
