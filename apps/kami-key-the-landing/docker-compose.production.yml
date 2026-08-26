@@ -29,8 +29,24 @@ services:
     stop_grace_period: 30s
     labels:
       letar.rollout: 'true'
+      # §48 M3 шаг 5, пачка 5 (последняя) — регистрация Traefik docker-provider роутера. Только
+      # регистрация, трафик НЕ переключён (NPM продолжает форвардить напрямую на
+      # kami-key-the-landing-app:3011), см. PLAN-INFRA-2.md §48 M3. Контейнер добавлен также в
+      # kami-network — Traefik сидит только там, старая сеть nginx-proxy-manager_default
+      # сохранена, чтобы NPM продолжал резолвить как раньше.
+      traefik.enable: 'true'
+      traefik.docker.network: 'kami-network'
+      traefik.http.routers.kami-key-the-landing.rule: 'Host(`kamikeythe.letar.best`)'
+      traefik.http.routers.kami-key-the-landing.entrypoints: 'websecure'
+      traefik.http.routers.kami-key-the-landing.tls.certresolver: 'dns'
+      traefik.http.routers.kami-key-the-landing.tls.domains[0].main: 'letar.best'
+      traefik.http.routers.kami-key-the-landing.tls.domains[0].sans[0]: '*.letar.best'
+      traefik.http.services.kami-key-the-landing.loadbalancer.server.port: '3011'
     networks:
       nginx-proxy-manager_default:
+        aliases:
+          - kami-key-the-landing-app
+      kami-network:
         aliases:
           - kami-key-the-landing-app
     logging:
@@ -41,4 +57,6 @@ services:
 
 networks:
   nginx-proxy-manager_default:
+    external: true
+  kami-network:
     external: true
