@@ -7,7 +7,7 @@
  * VMAF подбор CQ теперь выполняется в очереди импорта, не здесь.
  */
 
-import { Badge, Box, Button, HStack, Icon, Progress, Tabs, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, HStack, Progress, Tabs, Text, VStack } from '@chakra-ui/react'
 import { useEffect, useRef } from 'react'
 import { LuAudioLines, LuCheck, LuRefreshCw, LuSettings2, LuX } from 'react-icons/lu'
 
@@ -72,8 +72,9 @@ export function PreviewStep({ files, folderPath, sourceYear, onAnalysisComplete,
             variant="ghost"
             onClick={analysis.startAnalysis}
             disabled={analysis.selectedFiles.length === 0}
+            gap={2}
           >
-            <Icon as={LuRefreshCw} mr={2} />
+            <LuRefreshCw />
             Перезапустить
           </Button>
         )}
@@ -111,12 +112,12 @@ export function PreviewStep({ files, folderPath, sourceYear, onAnalysisComplete,
       {!analysis.isAnalyzing && analysis.analyzedCount > 0 && (
         <Tabs.Root defaultValue="tracks" variant="line" colorPalette="purple">
           <Tabs.List>
-            <Tabs.Trigger value="tracks">
-              <Icon as={LuAudioLines} boxSize={4} />
+            <Tabs.Trigger value="tracks" gap={2}>
+              <LuAudioLines size={16} />
               Дорожки
             </Tabs.Trigger>
-            <Tabs.Trigger value="encoding">
-              <Icon as={LuSettings2} boxSize={4} />
+            <Tabs.Trigger value="encoding" gap={2}>
+              <LuSettings2 size={16} />
               Кодирование
             </Tabs.Trigger>
           </Tabs.List>

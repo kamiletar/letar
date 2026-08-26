@@ -12,7 +12,7 @@
  * - Пользователь может продолжать пользоваться приложением пока идёт импорт
  */
 
-import { Button, CloseButton, Dialog, HStack, Icon, Portal } from '@chakra-ui/react'
+import { Button, CloseButton, Dialog, HStack, Portal } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { LuArrowLeft, LuArrowRight, LuExternalLink, LuListPlus } from 'react-icons/lu'
@@ -757,8 +757,8 @@ export function ImportWizardDialog({
                 {/* Левая часть: Назад + ссылка на источник */}
                 <HStack gap={3}>
                   {currentStep > 1 && (
-                    <Button variant="ghost" onClick={goBack}>
-                      <Icon as={LuArrowLeft} mr={2} />
+                    <Button variant="ghost" onClick={goBack} gap={2}>
+                      <LuArrowLeft />
                       Назад
                     </Button>
                   )}
@@ -770,8 +770,9 @@ export function ImportWizardDialog({
                         color="fg.muted"
                         onClick={() => window.electronAPI?.app.openExternal(sourceUrl)}
                         title={sourceUrl}
+                        gap={1}
                       >
-                        <Icon as={LuExternalLink} mr={1} />
+                        <LuExternalLink />
                         Rutracker
                       </Button>
                     )
@@ -786,8 +787,9 @@ export function ImportWizardDialog({
                               `https://rutracker.org/forum/tracker.php?nm=${encodeURIComponent(parsedInfo.animeName)}`,
                             )}
                           title="Поиск на Rutracker"
+                          gap={1}
                         >
-                          <Icon as={LuExternalLink} mr={1} />
+                          <LuExternalLink />
                           Rutracker
                         </Button>
                       )
@@ -803,16 +805,16 @@ export function ImportWizardDialog({
 
                   {/* Далее (все шаги кроме последнего) */}
                   {getLogicalStep(currentStep) !== 'settings' && (
-                    <Button colorPalette="purple" onClick={goNext} disabled={!canGoNext()}>
+                    <Button colorPalette="purple" onClick={goNext} disabled={!canGoNext()} gap={2}>
                       Далее
-                      <Icon as={LuArrowRight} ml={2} />
+                      <LuArrowRight />
                     </Button>
                   )}
 
                   {/* В очередь (последний шаг) */}
                   {getLogicalStep(currentStep) === 'settings' && (
-                    <Button colorPalette="purple" onClick={addToQueue} disabled={!canGoNext()}>
-                      <Icon as={LuListPlus} mr={2} />В очередь (
+                    <Button colorPalette="purple" onClick={addToQueue} disabled={!canGoNext()} gap={2}>
+                      <LuListPlus />В очередь (
                       {fileAnalyses.filter((a) =>
                         a.mediaInfo !== null
                       ).length})

@@ -11,7 +11,6 @@ import {
   Button,
   Checkbox,
   HStack,
-  Icon,
   NativeSelect,
   Spinner,
   Table,
@@ -303,8 +302,14 @@ export function FileScanStep({
           )}
           {/* Кнопка автонумерации — не показываем для одиночного файла */}
           {!isFileMode && files.length > 0 && (
-            <Button size="sm" variant="outline" onClick={handleAutoNumber} title="Присвоить номера 1, 2, 3...">
-              <Icon as={LuHash} mr={1} />
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleAutoNumber}
+              title="Присвоить номера 1, 2, 3..."
+              gap={1}
+            >
+              <LuHash />
               Автонумерация
             </Button>
           )}
@@ -338,7 +343,7 @@ export function FileScanStep({
           {/* Кнопка обновить — не показываем для одиночного файла */}
           {!isFileMode && (
             <Button size="sm" variant="outline" onClick={scanFolder} disabled={isScanning}>
-              {isScanning ? <Spinner size="xs" /> : <Icon as={LuRefreshCw} />}
+              {isScanning ? <Spinner size="xs" /> : <LuRefreshCw />}
             </Button>
           )}
         </HStack>
@@ -425,14 +430,13 @@ export function FileScanStep({
                   </Table.Cell>
                   <Table.Cell>
                     <HStack gap={2}>
-                      <Icon
-                        as={LuFileVideo}
+                      <LuFileVideo
                         color={file.episodeType === 'movie'
-                          ? 'blue.400'
+                          ? 'var(--chakra-colors-blue-400)'
                           : file.episodeType === 'ova'
-                          ? 'orange.400'
-                          : 'purple.400'}
-                        flexShrink={0}
+                          ? 'var(--chakra-colors-orange-400)'
+                          : 'var(--chakra-colors-purple-400)'}
+                        style={{ flexShrink: 0 }}
                       />
                       <Text truncate maxW="350px" title={file.name}>
                         {file.name}
@@ -476,7 +480,7 @@ export function FileScanStep({
       {/* Пусто */}
       {!isScanning && files.length === 0 && (
         <Box textAlign="center" py={8}>
-          <Icon as={LuFileVideo} boxSize={10} color="fg.subtle" mb={3} />
+          <LuFileVideo size={40} color="var(--chakra-colors-fg-subtle)" style={{ marginBottom: '12px' }} />
           <Text color="fg.subtle">Видеофайлы не найдены</Text>
           <Text fontSize="sm" color="fg.subtle">
             Убедитесь, что папка содержит файлы MKV, MP4 или AVI

@@ -7,7 +7,7 @@
  * с помощью DualVideoPlayer (overlay режим).
  */
 
-import { Box, Button, createListCollection, HStack, Icon, Select, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, createListCollection, HStack, Select, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useMemo, useState } from 'react'
 import { LuInfo, LuPlay, LuRotateCcw } from 'react-icons/lu'
 
@@ -106,7 +106,7 @@ export function SyncCalibrationStep({
     return (
       <VStack gap={6} align="stretch" py={4}>
         <Box p={6} bg="bg.subtle" borderRadius="lg" textAlign="center">
-          <Icon as={LuInfo} boxSize={10} color="fg.subtle" mb={3} />
+          <LuInfo size={40} color="var(--chakra-colors-fg-subtle)" style={{ marginBottom: '12px' }} />
           <Text color="fg.muted">Не найдено совпадающих эпизодов между оригиналом и донором.</Text>
           <Text fontSize="sm" color="fg.subtle" mt={2}>
             Убедитесь, что папка донора содержит файлы с теми же номерами эпизодов.
@@ -160,12 +160,12 @@ export function SyncCalibrationStep({
         </HStack>
 
         <HStack gap={2}>
-          <Button size="sm" variant="outline" onClick={handleReset} disabled={syncOffset === 0}>
-            <Icon as={LuRotateCcw} mr={1} />
+          <Button size="sm" variant="outline" onClick={handleReset} disabled={syncOffset === 0} gap={1}>
+            <LuRotateCcw />
             Сбросить
           </Button>
-          <Button size="sm" colorPalette="purple" onClick={() => setShowPlayer(!showPlayer)}>
-            <Icon as={LuPlay} mr={1} />
+          <Button size="sm" colorPalette="purple" onClick={() => setShowPlayer(!showPlayer)} gap={1}>
+            <LuPlay />
             {showPlayer ? 'Скрыть плеер' : 'Открыть плеер'}
           </Button>
         </HStack>

@@ -4,7 +4,7 @@
  * Шаг 1: Выбор папки с эпизодами или файла (для фильма)
  */
 
-import { Box, Button, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, HStack, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useState } from 'react'
 import { LuFile, LuFileVideo, LuFolder, LuFolderOpen, LuLoader } from 'react-icons/lu'
 
@@ -113,7 +113,9 @@ export function FolderSelectStep({
           disabled={isScanning}
         >
           <VStack gap={2}>
-            <Icon as={isScanning ? LuLoader : LuFolderOpen} boxSize={8} className={isScanning ? 'animate-spin' : ''} />
+            {isScanning
+              ? <LuLoader size={32} className="animate-spin" />
+              : <LuFolderOpen size={32} />}
             <Text>{isScanning ? 'Сканирование...' : 'Выбрать папку'}</Text>
             <Text fontSize="xs" color="fg.subtle">
               Сериал
@@ -122,7 +124,7 @@ export function FolderSelectStep({
         </Button>
         <Button size="lg" colorPalette="blue" onClick={handleSelectFile} h="auto" py={6} px={8} disabled={isScanning}>
           <VStack gap={2}>
-            <Icon as={LuFileVideo} boxSize={8} />
+            <LuFileVideo size={32} />
             <Text>Выбрать файл</Text>
             <Text fontSize="xs" color="fg.subtle">
               Фильм
@@ -137,7 +139,9 @@ export function FolderSelectStep({
           <VStack gap={3} align="stretch">
             {/* Путь */}
             <HStack gap={2}>
-              <Icon as={isFileMode ? LuFile : LuFolder} color={isFileMode ? 'blue.400' : 'purple.400'} />
+              {isFileMode
+                ? <LuFile color="var(--chakra-colors-blue-400)" />
+                : <LuFolder color="var(--chakra-colors-purple-400)" />}
               <Text fontSize="sm" color="fg.muted" truncate flex={1}>
                 {isFileMode ? singleFilePath : folderPath}
               </Text>

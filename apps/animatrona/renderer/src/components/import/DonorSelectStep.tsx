@@ -7,7 +7,7 @@
  * Видеоряд донора может быть рассинхронизирован с оригиналом.
  */
 
-import { Badge, Box, Button, Checkbox, HStack, Icon, Spinner, Table, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Checkbox, HStack, Spinner, Table, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useState } from 'react'
 import { LuCheck, LuFileVideo, LuFolder, LuFolderOpen, LuX } from 'react-icons/lu'
 
@@ -208,7 +208,7 @@ export function DonorSelectStep({
                   disabled={isScanning}
                 >
                   <VStack gap={2}>
-                    <Icon as={isScanning ? Spinner : LuFolderOpen} boxSize={8} />
+                    {isScanning ? <Spinner size="lg" /> : <LuFolderOpen size={32} />}
                     <Text>{isScanning ? 'Сканирование...' : 'Выбрать папку донора'}</Text>
                   </VStack>
                 </Button>
@@ -220,13 +220,13 @@ export function DonorSelectStep({
                   {/* Путь и кнопка удаления */}
                   <HStack justify="space-between">
                     <HStack gap={2} flex={1} minW={0}>
-                      <Icon as={LuFolder} color="purple.400" flexShrink={0} />
+                      <LuFolder color="var(--chakra-colors-purple-400)" style={{ flexShrink: 0 }} />
                       <Text fontSize="sm" color="fg.muted" truncate>
                         {donorPath}
                       </Text>
                     </HStack>
                     <Button size="xs" variant="ghost" colorPalette="red" onClick={handleClearDonor}>
-                      <Icon as={LuX} />
+                      <LuX />
                     </Button>
                   </HStack>
 
@@ -257,7 +257,7 @@ export function DonorSelectStep({
                         <HStack gap={2}>
                           {matchInfo.matched > 0 && (
                             <HStack gap={1} color="green.400">
-                              <Icon as={LuCheck} boxSize={4} />
+                              <LuCheck size={16} />
                               <Text fontSize="sm" fontWeight="medium">
                                 {matchInfo.matched} найдено
                               </Text>
@@ -265,7 +265,7 @@ export function DonorSelectStep({
                           )}
                           {matchInfo.unmatched > 0 && (
                             <HStack gap={1} color="orange.400">
-                              <Icon as={LuX} boxSize={4} />
+                              <LuX size={16} />
                               <Text fontSize="sm" fontWeight="medium">
                                 {matchInfo.unmatched} не найдено
                               </Text>
@@ -312,7 +312,7 @@ export function DonorSelectStep({
                         </Table.Cell>
                         <Table.Cell>
                           <HStack gap={2}>
-                            <Icon as={LuFileVideo} color="purple.400" flexShrink={0} />
+                            <LuFileVideo color="var(--chakra-colors-purple-400)" style={{ flexShrink: 0 }} />
                             <Text truncate maxW="300px" title={file.name}>
                               {file.name}
                             </Text>
@@ -322,8 +322,8 @@ export function DonorSelectStep({
                           {file.episodeNumber !== null
                             && (hasMatch
                               ? (
-                                <Badge colorPalette="green" variant="subtle">
-                                  <Icon as={LuCheck} mr={1} />
+                                <Badge colorPalette="green" variant="subtle" gap={1}>
+                                  <LuCheck />
                                   Найден
                                 </Badge>
                               )

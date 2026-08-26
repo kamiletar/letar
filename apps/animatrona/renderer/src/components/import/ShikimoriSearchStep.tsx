@@ -4,7 +4,7 @@
  * Шаг 2: Поиск аниме в Shikimori
  */
 
-import { Box, Button, HStack, Icon, Input, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, HStack, Input, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { LuSearch, LuX } from 'react-icons/lu'
 
@@ -158,11 +158,11 @@ export function ShikimoriSearchStep({
         />
         {query && (
           <Button variant="ghost" size="sm" onClick={handleClear}>
-            <Icon as={LuX} />
+            <LuX />
           </Button>
         )}
         <Button colorPalette="purple" onClick={handleSearch} disabled={query.trim().length < 2 || isLoading}>
-          {isLoading ? <Spinner size="sm" /> : <Icon as={LuSearch} />}
+          {isLoading ? <Spinner size="sm" /> : <LuSearch />}
         </Button>
       </HStack>
 
@@ -217,7 +217,7 @@ export function ShikimoriSearchStep({
       {/* Начальное состояние */}
       {!data && !isLoading && !isLoadingDetails && !error && !selectedAnime && (
         <Box textAlign="center" py={8}>
-          <Icon as={LuSearch} boxSize={10} color="fg.subtle" mb={3} />
+          <LuSearch size={40} color="var(--chakra-colors-fg-subtle)" style={{ marginBottom: '12px' }} />
           <Text color="fg.subtle">Введите название аниме для поиска в базе Shikimori</Text>
         </Box>
       )}

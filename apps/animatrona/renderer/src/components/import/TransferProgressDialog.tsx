@@ -6,7 +6,7 @@
  * поэтому старый прогресс из папочного режима можно очистить
  */
 
-import { Button, CloseButton, Dialog, HStack, Icon, Portal, Text, VStack } from '@chakra-ui/react'
+import { Button, CloseButton, Dialog, HStack, Portal, Text, VStack } from '@chakra-ui/react'
 import { useEffect, useMemo } from 'react'
 import { LuCheck, LuClock, LuTrash2 } from 'react-icons/lu'
 
@@ -152,7 +152,7 @@ export function TransferProgressDialog({ open, onOpenChange, folderPath }: Trans
             <Dialog.Body py={4}>
               <VStack gap={4} align="stretch">
                 <HStack gap={3}>
-                  <Icon as={LuClock} color="blue.400" boxSize={5} />
+                  <LuClock color="var(--chakra-colors-blue-400)" size={20} />
                   <VStack align="start" gap={0}>
                     <Text fontWeight="medium">Найден сохранённый прогресс</Text>
                     <Text fontSize="sm" color="fg.muted">
@@ -171,12 +171,12 @@ export function TransferProgressDialog({ open, onOpenChange, folderPath }: Trans
 
             <Dialog.Footer borderTopWidth="1px" borderColor="border.subtle">
               <HStack gap={2} justify="flex-end" w="full">
-                <Button variant="ghost" onClick={handleKeep}>
-                  <Icon as={LuCheck} mr={2} />
+                <Button variant="ghost" onClick={handleKeep} gap={2}>
+                  <LuCheck />
                   Оставить
                 </Button>
-                <Button colorPalette="red" variant="outline" onClick={handleClear}>
-                  <Icon as={LuTrash2} mr={2} />
+                <Button colorPalette="red" variant="outline" onClick={handleClear} gap={2}>
+                  <LuTrash2 />
                   Очистить
                 </Button>
               </HStack>
