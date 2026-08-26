@@ -365,7 +365,7 @@
     },
     "apps/animatrona": {
       "name": "@letar/animatrona",
-      "version": "0.55.29",
+      "version": "0.55.30",
       "dependencies": {
         "@letar/icon-generator": "workspace:*",
         "@letar/seed-utils": "workspace:*",
@@ -377,7 +377,7 @@
     },
     "apps/animatrona-landing": {
       "name": "@letar/animatrona-landing",
-      "version": "0.4.4",
+      "version": "0.4.5",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
       },
@@ -1056,7 +1056,7 @@
     },
     "libs/forms-core": {
       "name": "@letar/forms-core",
-      "version": "0.9.1",
+      "version": "0.9.2",
       "dependencies": {
         "@tanstack/table-core": "^9.1.2",
       },
