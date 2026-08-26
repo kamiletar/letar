@@ -39,13 +39,12 @@ function generateSecret(): string {
   return randomBytes(32).toString('hex')
 }
 
-/** Нормализует список redirect URLs — по одному на строку → comma-separated */
-function parseRedirectUrls(raw: string): string {
+/** Нормализует список redirect URLs — по одному на строку → массив */
+function parseRedirectUrlList(raw: string): string[] {
   return raw
     .split(/[\n,]/)
     .map((u) => u.trim())
     .filter(Boolean)
-    .join(',')
 }
 
 export async function createClientAction(
@@ -77,13 +76,15 @@ export async function createClientAction(
   }
 
   const secret = generateSecret()
+  const redirectUris = parseRedirectUrlList(parsed.data.redirectUrls)
 
   const client = await prisma.oauthApplication.create({
     data: {
       name: parsed.data.name,
       clientId: parsed.data.clientId,
       clientSecret: secret,
-      redirectUrls: parseRedirectUrls(parsed.data.redirectUrls),
+      redirectUrls: redirectUris.join(','),
+      redirectUris,
       type: parsed.data.type,
       skipConsent: parsed.data.skipConsent,
       disabled: false,
@@ -116,11 +117,14 @@ export async function updateClientAction(
     }
   }
 
+  const redirectUris = parseRedirectUrlList(parsed.data.redirectUrls)
+
   await prisma.oauthApplication.update({
     where: { clientId },
     data: {
       name: parsed.data.name,
-      redirectUrls: parseRedirectUrls(parsed.data.redirectUrls),
+      redirectUrls: redirectUris.join(','),
+      redirectUris,
       type: parsed.data.type,
       skipConsent: parsed.data.skipConsent,
       disabled: parsed.data.disabled,

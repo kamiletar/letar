@@ -178,6 +178,13 @@ const clients = [
   },
 ]
 
+// @better-auth/oauth-provider (1.7+) читает redirectUris (string[]), не redirectUrls (CSV) —
+// выводим из уже собранного CSV-поля, не дублируя список URL в каждом клиенте.
+const clientsWithRedirectUris = clients.map((client) => ({
+  ...client,
+  redirectUris: client.redirectUrls.split(','),
+}))
+
 if (!process.env.DATABASE_URL) {
   throw new Error('[seed] DATABASE_URL не задан')
 }
@@ -191,7 +198,7 @@ const orm = new ZenStackClient(schema, {
 async function main() {
   console.log('[seed] Seeding OIDC clients...')
 
-  for (const client of clients) {
+  for (const client of clientsWithRedirectUris) {
     const result = await orm.oauthApplication.upsert({
       where: { clientId: client.clientId },
       update: client,

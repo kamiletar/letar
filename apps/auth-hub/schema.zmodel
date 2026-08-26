@@ -180,7 +180,10 @@ model OauthApplication {
   name                  String
   icon                  String?
   metadata              String?
-  redirectUrls          String   // CSV-строка redirect URI (через запятую) — better-auth OIDC делает res.redirectUrls.split(",")
+  redirectUrls          String   // CSV-строка redirect URI (через запятую) — устаревшее поле старого oidcProvider,
+                                   // держим для admin UI/seed.ts; источник истины теперь redirectUris ниже
+  redirectUris          String[] @default([]) // Требуется @better-auth/oauth-provider (1.7+) — schema.oauthClient.fields.redirectUris,
+                                                // required:true, string[]. Синхронизируется с redirectUrls на каждой записи.
   type                  String   @default("web")
   disabled              Boolean  @default(false)
   skipConsent           Boolean  @default(false)
