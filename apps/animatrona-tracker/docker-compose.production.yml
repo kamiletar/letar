@@ -91,6 +91,17 @@ services:
     stop_grace_period: 30s
     labels:
       letar.rollout: 'true'
+      # §48 M3 шаг 5, пачка 4 — регистрация Traefik docker-provider роутера. Только регистрация,
+      # трафик НЕ переключён (NPM продолжает форвардить напрямую на animatrona-tracker-app:3010),
+      # см. PLAN-INFRA-2.md §48 M3.
+      traefik.enable: 'true'
+      traefik.docker.network: 'kami-network'
+      traefik.http.routers.animatrona-tracker.rule: 'Host(`animatrona-tracker.letar.best`)'
+      traefik.http.routers.animatrona-tracker.entrypoints: 'websecure'
+      traefik.http.routers.animatrona-tracker.tls.certresolver: 'dns'
+      traefik.http.routers.animatrona-tracker.tls.domains[0].main: 'letar.best'
+      traefik.http.routers.animatrona-tracker.tls.domains[0].sans[0]: '*.letar.best'
+      traefik.http.services.animatrona-tracker.loadbalancer.server.port: '3010'
     networks:
       kami-network:
         aliases:
