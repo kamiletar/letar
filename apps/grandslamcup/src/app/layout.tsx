@@ -1,7 +1,6 @@
-import { CookieBanner, TopLoader } from '@letar/ui'
+import { CookieBanner, OfflineConsentBanner, TopLoader } from '@letar/ui'
 import type { Metadata } from 'next'
 
-import { OfflineConsentBanner } from './_components/offline-consent-banner'
 import { Providers } from './_components/providers'
 import { ServiceWorkerRegistration } from './_components/service-worker-registration'
 import { AppToaster } from './_components/ui/toaster'
@@ -52,7 +51,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
           <AppToaster />
           <ServiceWorkerRegistration />
-          <OfflineConsentBanner />
+          <OfflineConsentBanner
+            consentKey="grandslamcup-offline-consent"
+            title="Включить оффлайн-доступ?"
+            description="Приложение сохранит расписание, таблицы и профили для просмотра без интернета"
+            features={['Работает без сети', 'Займёт немного места в хранилище браузера']}
+            enableLabel="Включить оффлайн"
+          />
         </Providers>
         <UmamiScriptConsent />
       </body>
