@@ -303,6 +303,14 @@ function buildHubProviderAuth<TProfile extends HubProviderAuthProfile>(profile: 
         accessTokenExpiresIn: oidcConfig?.accessTokenExpiresIn ?? 3600,
         refreshTokenExpiresIn: oidcConfig?.refreshTokenExpiresIn ?? 604800,
         scopes: oidcConfig?.scopes ?? ['openid', 'profile', 'email', 'offline_access'],
+        // По умолчанию плагин ищет модель "oauthClient" — у нас таблица "oauthApplication"
+        // (унаследована от старого oidcProvider()). Без этой строки — BetterAuthError "Model
+        // oauthClient does not exist" на каждом /oauth2/authorize (найдено 2026-08-26, прод-инцидент
+        // после миграции a8efcc72 на @better-auth/oauth-provider — миграция плагина не сопровождалась
+        // миграцией схемы БД).
+        schema: {
+          oauthClient: { modelName: 'oauthApplication' },
+        },
       }),
       ...(profile.plugins ?? []),
       // nextCookies() — ВСЕГДА последним (требование Better Auth)
