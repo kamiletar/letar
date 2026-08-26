@@ -52,6 +52,7 @@ export { AnalyticsGate, type AnalyticsGateProps } from './lib/analytics-gate'
 export { type ConsentConfig, type CookieConsentState, createConsentConfig, readConsentState } from './lib/consent-types'
 export { CookieBanner, type CookieBannerProps } from './lib/cookie-banner'
 export { CookieSettingsButton, type CookieSettingsButtonProps } from './lib/cookie-settings-button'
+export { OfflineConsentBanner, type OfflineConsentBannerProps } from './lib/offline-consent-banner'
 export { useAnalyticsConsent } from './lib/use-analytics-consent'
 
 // Формы
