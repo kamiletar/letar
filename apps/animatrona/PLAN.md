@@ -4,6 +4,28 @@
 
 ## Черновик (новые идеи)
 
+## Техдолг: `as=` на Chakra-компонентах — Box/Text/Heading (не Icon)
+
+`<Icon as={IconComponent}>` уже почищен полностью (см. PLAN_COMPLETED.md, 2026-08-26, 475
+вхождений в 114 файлах `renderer/src/components/**`). Semgrep (`letar-chakra-as-prop-forbidden`,
+`.semgrep/letar-rules.yml`, WARNING) всё ещё даёт **284** срабатывания в приложении на другой
+форме того же паттерна: `Box as="span"`, `Text as="span"`, и т.п. — в `mobile-ui/**`,
+`renderer/src/app/**` (discover, history, import-cid, library, player, reputation, settings,
+subscriptions, watch, test-encoding — почти весь роутинг), и разрозненно в `components/
+{command-palette,shortcuts,social,update}/*` плюс несколько точек внутри уже почищенных
+директорий (`layout/Header.tsx`, `layout/Sidebar.tsx`, `layout/TitleBar.tsx`,
+`library/AnimeFilters/*`, `library/AnimeMetadataSection.tsx`, `library/EmptyLibraryState.tsx`,
+`library/anime-detail/AnimeHero.tsx`, `player/ChapterEditor.tsx`, `quick-search/QuickSearch.tsx`
+— `Box as={cmd.icon}`, `setup/SetupWizardOverlay.tsx`, `transcode/{CompactQueueItem,
+EditQueueItemDialog,GpuWorkerCard}.tsx`). Разбор на `asChild` + нативный тег — отдельная,
+существенно более крупная задача (`mobile-ui` — не Chakra v3 web-стек, там `as=` может иметь
+другую природу — проверить перед переносом того же рецепта). Не блокирует pre-commit (WARNING),
+но входит в общую цель §61 корневого `PLAN.md` (полная чистка `apps/*` перед возвратом правила к
+ERROR).
+
+- [ ] Почистить оставшиеся 284 `as=` (Box/Text/Heading и др.) на Chakra-компонентах в
+      `apps/animatrona` (renderer + mobile-ui)
+
 - [ ] **Аудит `_active: scale()` в теме renderer'а на `pressScale`** (`@letar/ui`) — задача
       описана в [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md).
 

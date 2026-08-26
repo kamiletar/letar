@@ -4,6 +4,58 @@
 
 > **Архив обновлён:** 2026-08-26
 
+## Чистка `<Icon as={IconComponent}>` — semgrep `letar-chakra-as-prop-forbidden` (2026-08-26)
+
+Часть кросс-приложенческой инициативы §61 корневого `PLAN.md` (после `libs/video-player-react`,
+`libs/ui`, `animatrona-landing`, `animatrona-tracker`). Все 475 вхождений
+`<Icon as={IconComponent}>` в 114 файлах `renderer/src/components/**` заменены на прямой рендер
+react-icons-компонента — работа разбита на 5 параллельных фоновых агентов по директориям
+(`transcode/*`, `library/*` верхний уровень, `library/{anime-detail,AnimeFilters,batch-publish,
+reencode,export}/*`, `import*/add-tracks/restore-tracks`, `player/layout/discover/misc`), один
+из них (`transcode/*`) сам дополнительно разбился на 4 подгруппы.
+
+Тот же рецепт, что и в трёх предыдущих сессиях (см.
+[chakra-icon-as-prop-cleanup-pattern.md](/.claude/docs/chakra-icon-as-prop-cleanup-pattern.md)):
+`boxSize={N}` → `size={N×4}`, статичный `color="токен"` → `color="var(--chakra-colors-<kebab-
+token>)"` (иконка сама наследует `currentColor`, где цвет уже задан на обёртке — проп просто
+убран), динамический `as={cond ? A : B}`/`as={var}` → локальная capitalized-переменная перед JSX
+(`const IconComponent = var`), spacing-пропы (`mr=`/`ml=`) без гарантированного `gap`-родителя →
+`style={{ marginRight: 'Npx' }}`.
+
+Один довесок вне исходного грепа — невалидный `animation=` проп на голом react-icons компоненте в
+`VmafProgressCard.tsx` (react-icons не принимает `animation` как атрибут так, как принимал
+обёрнутый `Icon`) — перенесён в `style={{ animation: ... }}`.
+
+Проверено: `nx typecheck:tsgo animatrona` и `nx lint animatrona` — зелёные на каждую группу и на
+финальный прогон (0 ошибок, только 56 pre-existing warnings). Electron-приложение — визуальная
+проверка через dev-сервер не проводилась (не веб-страница, `preview_start` не применим к
+Electron-окну), ограничились typecheck+lint+построчным ревью диффов.
+
+⚠️ Приложение НЕ очищено от `as=` полностью — остаются 284 срабатывания другой формы того же
+паттерна (`Box as="span"`, `Text as="span"` и т.п.), см. открытую задачу в `PLAN.md`. Severity
+правила не поднималась (осталась WARNING).
+
+## Фикс `animation`-пропа у react-icons в renderer (2026-08-26)
+
+`nx typecheck:tsgo animatrona` падал тремя `TS2322` — `IconBaseProps` из `react-icons` не имеет
+пропа `animation`, а он передавался напрямую в `<LuRefreshCw animation={...} />` (и аналогично
+`LuChevronUp`/`StageIcon`) для CSS-анимации спиннера при загрузке. Фикс — перенос `animation` в
+`style={{ ...остальное, animation }}`: [AnimeMetadataSection.tsx:400](/apps/animatrona/renderer/src/components/library/AnimeMetadataSection.tsx),
+[EditAnimeDialog.tsx:69](/apps/animatrona/renderer/src/components/library/EditAnimeDialog.tsx),
+[VmafProgressCard.tsx:122](/apps/animatrona/renderer/src/components/transcode/VmafProgressCard.tsx).
+
+Восьмая ошибка, изначально описанная в задаче (`<Icon as={X}>` без импорта `Icon` в
+`EncodingInfoDialog.tsx`), на момент фикса уже отсутствовала — файл использует прямой рендер
+иконок без `Icon`/`as=`; похоже, устранена параллельной сессией до начала этой работы.
+
+Проверено: `nx typecheck:tsgo animatrona` — 0 ошибок, `nx lint animatrona` — 0 errors
+(56 pre-existing warnings не в скоупе). Изменения **не закоммичены** — в момент правки в тех же
+двух файлах (`AnimeMetadataSection.tsx`, `EditAnimeDialog.tsx`) шла параллельная сессия
+(`animatrona-dev`, активна с 2026-08-24T20:42 согласно cross-session памяти), выполняющая
+bulk-миграцию `<Icon as={X}>` → прямой рендер иконки — те же файлы правились одновременно двумя
+сессиями. Коммитить пришлось бы чужую незавершённую работу вместе со своей, поэтому изменения
+оставлены в рабочем дереве для владельца/параллельной сессии.
+
 ## Типизация `response.json()` в `tracker-client.ts` (2026-08-26)
 
 Продолжение предыдущей записи («Фикс `animatrona-main:build`»): после фикса схемы `Anime`
