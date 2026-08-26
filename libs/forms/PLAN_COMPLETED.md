@@ -1,5 +1,37 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-08-26 — `EditIntentValue<T>` / `Form.Field.EditIntent` — частично закрыто (backlog [2026-08-23])
+
+Запрос от владельца монорепо (high, напрямую): компонент для полей API-key/Client Secret,
+значение которых сервер не может/не должен возвращать клиенту.
+
+**Реализовано (4 отдельных коммита по scope):**
+
+- `@letar/forms-core` 0.9.3→0.10.0 — `EditIntentValue<T>` discriminated union
+  (`{isEdited:false;value:null}|{isEdited:true;value:T}`), `editIntentValueSchema()`,
+  `emptyEditIntentValue()`/`startEditIntentValue()`; новый тип `'editIntent'` в
+  `FieldComponentType`; subpath-экспорт `./edit-intent`.
+- `@letar/forms-react` 0.3.3→0.4.0 — `useEditIntentField` — headless view/edit/focus-контракт,
+  общий для обоих скинов. Подписка на значение через `useStore(form.store, selector)`, запись —
+  `form.setFieldValue`. **Важно:** вызывается из `useFieldState` (`createFieldPrimitives`), ДО
+  монтирования `<form.Field>` — TanStack Form вызывает render-prop children из собственного
+  `useMemo`, где хуки недопустимы (`Do not call Hooks inside useEffect/useMemo`). Первая версия
+  реализации звала хук прямо в render-prop и падала на этом.
+- `@letar/forms` 2.7.8→2.8.0 — `Form.Field.EditIntent` (Chakra), опциональная поддержка
+  `'editIntent'` в схемном движке (`FromSchema`/`AutoFields`) — требует явных
+  `fieldProps.innerField`/`displayValue`, без автодетекта по форме union-схемы (сознательно,
+  чтобы не угадывать security-чувствительные поля).
+- `@letar/forms-shadcn` 0.33.6→0.34.0 — зеркало Chakra-компонента, та же headless-логика.
+
+Проверка: `nx run-many -t typecheck:tsgo test --projects=@letar/forms-core,@letar/forms-react,@letar/forms,@letar/forms-shadcn --skip-nx-cache` — 747/747 тестов, зелёный typecheck/lint.
+
+**Явно НЕ закрыто** (см. обновлённый Definition of Done в `PLAN.md` §[2026-08-23]):
+Vue/Angular-паритет (`forms-vue`, `forms-vue-shadcn`, `forms-angular`), единый contract-suite между
+скинами, `README.md`/`apps/form-docs`/`apps/form-example`/`apps/form-develop-app` демо, `form-mcp`
+описание поля, и главное — реальная security-инфраструктура: `sensitive` пока только
+документирует намерение, но не исключает значение из persistence/URL-sync/analytics/debug/offline
+автоматически.
+
 ## 2026-08-26 — Фикс: email inputType терялся для `z.email().optional().or(literal(''))`
 
 Найдено при аудите чекаута мобильного `domwellbes` (MU4, `PLAN_PUBLIC_MOBILE.md` §12.41):
