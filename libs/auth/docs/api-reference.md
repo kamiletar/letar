@@ -137,21 +137,22 @@ export const logoutAction = createLogoutAction(auth)
 // OIDC выход (hub-client — выходит и из Ключницы)
 export const logoutAction = createLogoutAction(auth, {
   oidcLogout: {
-    endSessionUrl: `${process.env.BETTER_AUTH_OIDC_ISSUER}/api/auth/oauth2/endsession`,
+    issuer: process.env.BETTER_AUTH_OIDC_ISSUER!,
     clientId: process.env.OIDC_CLIENT_ID!,
     postLogoutRedirectUri: `${process.env.BETTER_AUTH_URL}/sign-in`,
   },
 })
 ```
 
-| Опция                              | Тип                   | Описание                                          |
-| ---------------------------------- | --------------------- | ------------------------------------------------- |
-| `redirectTo`                       | `string`              | URL после выхода (дефолт `/`)                     |
-| `oidcLogout.endSessionUrl`         | `string`              | `{OIDC_ISSUER}/api/auth/oauth2/endsession`        |
-| `oidcLogout.clientId`              | `string`              | OIDC client_id приложения                         |
-| `oidcLogout.postLogoutRedirectUri` | `string`              | URL возврата (должен быть в redirectUrls клиента) |
-| `onBeforeLogout`                   | `() => Promise<void>` | Колбэк до signOut                                 |
-| `onAfterLogout`                    | `() => Promise<void>` | Колбэк после signOut, до редиректа                |
+| Опция                              | Тип                   | Описание                                                                                        |
+| ---------------------------------- | --------------------- | ----------------------------------------------------------------------------------------------- |
+| `redirectTo`                       | `string`              | URL после выхода (дефолт `/`)                                                                   |
+| `oidcLogout.issuer`                | `string`              | Base URL Ключницы — `end_session_endpoint` выводится автоматически                              |
+| `oidcLogout.endSessionUrl`         | `string`              | @deprecated — готовый URL, обходит авто-вывод из `issuer`                                       |
+| `oidcLogout.clientId`              | `string`              | OIDC client_id приложения                                                                       |
+| `oidcLogout.postLogoutRedirectUri` | `string`              | URL возврата — должен быть в `postLogoutRedirectUris` клиента на Ключнице (НЕ в `redirectUrls`) |
+| `onBeforeLogout`                   | `() => Promise<void>` | Колбэк до signOut                                                                               |
+| `onAfterLogout`                    | `() => Promise<void>` | Колбэк после signOut, до редиректа                                                              |
 
 > **Важно для hub-client:** без `oidcLogout` пользователь выйдет из локальной сессии, но останется
 > залогинен в Ключнице → при следующем входе тихий ре-логин без формы. Всегда используй `oidcLogout`.

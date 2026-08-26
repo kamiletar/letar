@@ -3,20 +3,35 @@ import { redirect } from 'next/navigation'
 import type { AuthInstance } from '../session'
 
 /**
+ * Путь end_session_endpoint у @better-auth/oauth-provider (1.7+, src/logout.ts,
+ * createOAuthEndpoint("/oauth2/end-session", ...)) — С дефисом. Восемь приложений на 2026-08-27
+ * годами звали `/oauth2/endsession` (без дефиса) — такого роута нет, 404 до проверки клиента
+ * даже не доходило.
+ */
+export const OIDC_END_SESSION_PATH = '/oauth2/end-session'
+
+/**
  * Опции OIDC logout (RP-Initiated Logout).
  * Используется клиентскими приложениями, подключёнными к Ключнице через OIDC.
  */
 export interface OidcLogoutOptions {
   /**
-   * URL end_session_endpoint Ключницы.
-   * Обычно: `${BETTER_AUTH_OIDC_ISSUER}/api/auth/oauth2/endsession`
+   * Base URL Ключницы (issuer), например `process.env.BETTER_AUTH_OIDC_ISSUER`.
+   * end_session_endpoint выводится из него автоматически: `${issuer}/api/auth${OIDC_END_SESSION_PATH}`.
+   * Взаимоисключимо с `endSessionUrl`.
    */
-  endSessionUrl: string
+  issuer?: string
+  /**
+   * @deprecated Задавай `issuer` вместо готового URL — раньше приложения собирали путь вручную
+   * и расходились с плагином (`endsession` вместо `end-session`). Если задан — используется как есть.
+   */
+  endSessionUrl?: string
   /** OIDC client_id этого приложения (из env OIDC_CLIENT_ID) */
   clientId: string
   /**
    * URL для возврата от Ключницы после выхода.
-   * Должен быть зарегистрирован в redirectUrls клиента на Ключнице.
+   * Должен быть зарегистрирован в `postLogoutRedirectUris` клиента на Ключнице
+   * (НЕ в `redirectUrls`/`redirectUris` — те применяются только к authorization-callback).
    * Обычно: `${BETTER_AUTH_URL}/sign-in`
    */
   postLogoutRedirectUri: string
@@ -64,7 +79,7 @@ export interface LogoutActionOptions {
  * // OIDC выход (приложения с Ключницей через OIDC)
  * export const logoutAction = createLogoutAction(auth, {
  *   oidcLogout: {
- *     endSessionUrl: `${process.env.BETTER_AUTH_OIDC_ISSUER}/api/auth/oauth2/endsession`,
+ *     issuer: process.env.BETTER_AUTH_OIDC_ISSUER!,
  *     clientId: process.env.OIDC_CLIENT_ID!,
  *     postLogoutRedirectUri: `${process.env.BETTER_AUTH_URL}/sign-in`,
  *   },
@@ -94,12 +109,13 @@ export function createLogoutAction(auth: AuthInstance, options: LogoutActionOpti
     // OIDC logout: редиректим на end_session_endpoint Ключницы
     // Ключница очистит OIDC сессию и токены, затем вернёт на postLogoutRedirectUri
     if (oidcLogout) {
-      const { endSessionUrl, clientId, postLogoutRedirectUri } = oidcLogout
+      const { issuer, endSessionUrl, clientId, postLogoutRedirectUri } = oidcLogout
+      const resolvedEndSessionUrl = endSessionUrl ?? `${issuer}/api/auth${OIDC_END_SESSION_PATH}`
       const params = new URLSearchParams({
         client_id: clientId,
         post_logout_redirect_uri: postLogoutRedirectUri,
       })
-      redirect(`${endSessionUrl}?${params.toString()}`)
+      redirect(`${resolvedEndSessionUrl}?${params.toString()}`)
     }
 
     redirect(redirectTo)
