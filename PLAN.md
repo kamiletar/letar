@@ -3158,3 +3158,23 @@ _hover={{...}}>` вокруг `<a>`, иконка наследует цвет ч
 нет. Повторный прогон semgrep: **0 срабатываний `Icon as=`** в `animatrona-tracker`; 28 оставшихся
 находок — тот же класс `Heading as="h1"`/`Box as="button"` вне скоупа задачи, что и в
 animatrona-landing выше.
+
+**Прогресс (2026-08-26, animatrona основное приложение):** все 475 вхождений `<Icon as={IconComponent}>`
+в 114 файлах `apps/animatrona/renderer/src/components/**` заменены на прямой рендер иконки —
+параллельно 5 фоновыми агентами по директориям (`transcode/*` — 44 после внутреннего дозаполнения
+одним агентом, `library/*` верхний уровень — 43, `library/{anime-detail,AnimeFilters,batch-publish,
+reencode,export}/*` — 78, `import*/add-tracks/restore-tracks` — 5 групп ~113, `player/layout/
+discover/misc` — 4 группы ~75). Тот же паттерн замены, что и в трёх предыдущих сессиях
+(`boxSize`→`size` ×4px, статичный `color="токен"`→`var(--chakra-colors-<kebab-token>)`, динамический
+`as={cond ? A : B}`/`as={var}` → локальная capitalized-переменная перед JSX, spacing-пропы без
+гарантированного `gap` родителя → `style={{ marginRight: 'Npx' }}`). Один довесок вне исходного
+грепа — невалидный `animation=` проп на голом react-icons компоненте в `VmafProgressCard.tsx`
+(react-icons не принимает `animation` как HTML/SVG-атрибут так, как принимал обёрнутый `Icon`) —
+перенесён в `style={{ animation: ... }}`. `typecheck:tsgo` и `lint` зелёные на каждую группу и на
+финальный прогон. Electron-приложение — визуальная проверка через dev-сервер не проводилась (не
+веб-страница, `preview_start` не применим для Electron-окна), ограничились
+typecheck+lint+построчным ревью диффов. Повторный прогон semgrep: **0 срабатываний `Icon as=`** в
+`apps/animatrona/renderer`; 284 оставшихся находки в приложении (включая `mobile-ui`, `app/**`,
+`components/{command-palette,shortcuts,social,update}/*` и разрозненные точки внутри уже
+почищенных директорий) — тот же класс `Box/Text/Heading as="..."` вне скоупа задачи, что и в
+animatrona-landing/animatrona-tracker выше; severity НЕ поднята.
