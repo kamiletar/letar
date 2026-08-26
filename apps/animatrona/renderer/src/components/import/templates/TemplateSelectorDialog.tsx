@@ -7,7 +7,7 @@
  * его настройки к текущему импорту.
  */
 
-import { Badge, Box, Button, Dialog, HStack, Icon, IconButton, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Dialog, HStack, IconButton, Spinner, Text, VStack } from '@chakra-ui/react'
 import { LuBookmark, LuCpu, LuMonitor, LuTarget, LuTrash2, LuX } from 'react-icons/lu'
 import type { ImportTemplate } from '../../../../../shared/types/import-template'
 
@@ -79,7 +79,7 @@ function TemplateCard({
       <VStack align="stretch" gap={2}>
         <HStack justify="space-between">
           <HStack gap={2}>
-            <Icon as={LuBookmark} color="purple.400" boxSize={4} />
+            <LuBookmark color="var(--chakra-colors-purple-400)" size={16} />
             <Text fontWeight="medium" fontSize="sm">
               {template.name}
             </Text>
@@ -110,7 +110,7 @@ function TemplateCard({
           {template.vmafSettings.enabled
             ? (
               <HStack gap={1}>
-                <Icon as={LuTarget} color="yellow.400" boxSize={3} />
+                <LuTarget color="var(--chakra-colors-yellow-400)" size={12} />
                 <Text fontSize="xs" color="fg.subtle">
                   VMAF {template.vmafSettings.targetVmaf}
                 </Text>
@@ -124,13 +124,13 @@ function TemplateCard({
 
           {/* Параллельность */}
           <HStack gap={1}>
-            <Icon as={LuMonitor} color="purple.400" boxSize={3} />
+            <LuMonitor color="var(--chakra-colors-purple-400)" size={12} />
             <Text fontSize="xs" color="fg.subtle">
               {template.videoMaxConcurrent} видео
             </Text>
           </HStack>
           <HStack gap={1}>
-            <Icon as={LuCpu} color="green.400" boxSize={3} />
+            <LuCpu color="var(--chakra-colors-green-400)" size={12} />
             <Text fontSize="xs" color="fg.subtle">
               {template.audioMaxConcurrent} аудио
             </Text>
@@ -187,7 +187,7 @@ export function TemplateSelectorDialog({ open, onClose, onSelect }: TemplateSele
               : templates.length === 0
               ? (
                 <VStack py={8} gap={2}>
-                  <Icon as={LuBookmark} boxSize={12} color="fg.muted" />
+                  <LuBookmark size={48} color="var(--chakra-colors-fg-muted)" />
                   <Text color="fg.subtle">Нет сохранённых шаблонов</Text>
                   <Text fontSize="sm" color="fg.muted">
                     Создайте шаблон, чтобы быстро применять настройки

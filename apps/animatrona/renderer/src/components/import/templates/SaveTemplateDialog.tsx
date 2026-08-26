@@ -7,7 +7,7 @@
  * новый шаблон для последующего использования.
  */
 
-import { Badge, Box, Button, Dialog, Field, HStack, Icon, IconButton, Input, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Dialog, Field, HStack, IconButton, Input, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useState } from 'react'
 import { LuBookmarkPlus, LuCpu, LuMonitor, LuSave, LuTarget, LuX } from 'react-icons/lu'
 import type { ImportTemplateCreateData } from '../../../../../shared/types/import-template'
@@ -96,7 +96,7 @@ export function SaveTemplateDialog({ open, onClose, currentSettings, onSaved }: 
           <Dialog.Header borderBottomWidth="1px" borderColor="border.subtle">
             <HStack justify="space-between" w="full">
               <HStack gap={2}>
-                <Icon as={LuBookmarkPlus} color="purple.400" boxSize={5} />
+                <LuBookmarkPlus color="var(--chakra-colors-purple-400)" size={20} />
                 <Dialog.Title fontSize="lg">Сохранить шаблон</Dialog.Title>
               </HStack>
               <Dialog.CloseTrigger asChild>
@@ -145,7 +145,12 @@ export function SaveTemplateDialog({ open, onClose, currentSettings, onSaved }: 
 
                   {/* VMAF */}
                   <HStack gap={2}>
-                    <Icon as={LuTarget} color={currentSettings.vmafEnabled ? 'yellow.400' : 'fg.muted'} boxSize={4} />
+                    <LuTarget
+                      color={currentSettings.vmafEnabled
+                        ? 'var(--chakra-colors-yellow-400)'
+                        : 'var(--chakra-colors-fg-muted)'}
+                      size={16}
+                    />
                     <Text fontSize="xs" color="fg.subtle">
                       {currentSettings.vmafEnabled
                         ? `VMAF подбор: ${currentSettings.targetVmaf}`
@@ -156,13 +161,13 @@ export function SaveTemplateDialog({ open, onClose, currentSettings, onSaved }: 
                   {/* Параллельность */}
                   <HStack gap={4}>
                     <HStack gap={1}>
-                      <Icon as={LuMonitor} color="purple.400" boxSize={4} />
+                      <LuMonitor color="var(--chakra-colors-purple-400)" size={16} />
                       <Text fontSize="xs" color="fg.subtle">
                         {currentSettings.videoMaxConcurrent} видео
                       </Text>
                     </HStack>
                     <HStack gap={1}>
-                      <Icon as={LuCpu} color="green.400" boxSize={4} />
+                      <LuCpu color="var(--chakra-colors-green-400)" size={16} />
                       <Text fontSize="xs" color="fg.subtle">
                         {currentSettings.audioMaxConcurrent} аудио
                       </Text>
