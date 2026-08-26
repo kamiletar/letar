@@ -5,7 +5,7 @@
  * если есть неразрешённые ImportError записи
  */
 
-import { Badge, Box, Button, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, HStack, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useEffect, useState } from 'react'
 import { LuCaptions, LuCheck, LuMusic, LuTriangleAlert, LuX } from 'react-icons/lu'
 
@@ -83,7 +83,7 @@ export function ImportErrorsSection({ animeId }: ImportErrorsSectionProps) {
         {/* Заголовок */}
         <HStack justify="space-between">
           <HStack gap={2}>
-            <Icon as={LuTriangleAlert} color="warning.fg" boxSize={5} />
+            <LuTriangleAlert color="var(--chakra-colors-warning-fg)" size={20} />
             <Text fontWeight="medium" fontSize="sm" color="warning.fg">
               Ошибки импорта дорожек
             </Text>
@@ -98,59 +98,63 @@ export function ImportErrorsSection({ animeId }: ImportErrorsSectionProps) {
 
         {/* Список ошибок */}
         <VStack gap={2} align="stretch" maxH="200px" overflowY="auto">
-          {errors.map((error) => (
-            <HStack
-              key={error.id}
-              gap={2}
-              p={2}
-              bg="bg.subtle"
-              borderRadius="md"
-              borderWidth="1px"
-              borderColor="border"
-            >
-              {/* Иконка типа дорожки */}
-              <Icon
-                as={error.trackType === 'audio' ? LuMusic : LuCaptions}
-                color={error.trackType === 'audio' ? 'accent.fg' : 'success.fg'}
-                boxSize={4}
-                flexShrink={0}
-              />
+          {errors.map((error) => {
+            const TrackIcon = error.trackType === 'audio' ? LuMusic : LuCaptions
+            const trackIconColor = error.trackType === 'audio'
+              ? 'var(--chakra-colors-accent-fg)'
+              : 'var(--chakra-colors-success-fg)'
+            const isResolving = resolvingIds.has(error.id)
+            const DismissIcon = isResolving ? LuCheck : LuX
 
-              {/* Информация */}
-              <VStack gap={0} align="start" flex={1} minW={0}>
-                <HStack gap={2}>
-                  <Badge size="sm" colorPalette="purple" variant="subtle">
-                    EP {error.episode.number}
-                  </Badge>
-                  {error.language && (
-                    <Badge size="sm" variant="outline">
-                      {error.language}
-                    </Badge>
-                  )}
-                  {error.title && (
-                    <Text fontSize="xs" color="fg.muted" lineClamp={1}>
-                      {error.title}
-                    </Text>
-                  )}
-                </HStack>
-                <Text fontSize="xs" color="fg.error" lineClamp={1}>
-                  {error.stage}: {error.error}
-                </Text>
-              </VStack>
-
-              {/* Кнопка dismiss */}
-              <Button
-                size="xs"
-                variant="ghost"
-                colorPalette="green"
-                onClick={() => handleResolve(error.id)}
-                disabled={resolvingIds.has(error.id)}
-                flexShrink={0}
+            return (
+              <HStack
+                key={error.id}
+                gap={2}
+                p={2}
+                bg="bg.subtle"
+                borderRadius="md"
+                borderWidth="1px"
+                borderColor="border"
               >
-                <Icon as={resolvingIds.has(error.id) ? LuCheck : LuX} />
-              </Button>
-            </HStack>
-          ))}
+                {/* Иконка типа дорожки */}
+                <TrackIcon color={trackIconColor} size={16} style={{ flexShrink: 0 }} />
+
+                {/* Информация */}
+                <VStack gap={0} align="start" flex={1} minW={0}>
+                  <HStack gap={2}>
+                    <Badge size="sm" colorPalette="purple" variant="subtle">
+                      EP {error.episode.number}
+                    </Badge>
+                    {error.language && (
+                      <Badge size="sm" variant="outline">
+                        {error.language}
+                      </Badge>
+                    )}
+                    {error.title && (
+                      <Text fontSize="xs" color="fg.muted" lineClamp={1}>
+                        {error.title}
+                      </Text>
+                    )}
+                  </HStack>
+                  <Text fontSize="xs" color="fg.error" lineClamp={1}>
+                    {error.stage}: {error.error}
+                  </Text>
+                </VStack>
+
+                {/* Кнопка dismiss */}
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  colorPalette="green"
+                  onClick={() => handleResolve(error.id)}
+                  disabled={isResolving}
+                  flexShrink={0}
+                >
+                  <DismissIcon />
+                </Button>
+              </HStack>
+            )
+          })}
         </VStack>
 
         {/* Подсказка */}

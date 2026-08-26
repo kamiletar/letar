@@ -6,7 +6,7 @@
  * Grid карточек эпизодов с прогрессом просмотра
  */
 
-import { Box, Button, Card, Heading, HStack, Icon, SimpleGrid, Text } from '@chakra-ui/react'
+import { Box, Button, Card, Heading, HStack, SimpleGrid, Text } from '@chakra-ui/react'
 import { LuFileText } from 'react-icons/lu'
 
 import { EpisodeCard } from '@/components/library/EpisodeCard'
@@ -53,8 +53,8 @@ export function EpisodesTab({ episodes, watchProgress, onEditNames }: EpisodesTa
         <Heading size="md" color="fg.subtle">
           {episodes.length} {episodes.length === 1 ? 'эпизод' : episodes.length < 5 ? 'эпизода' : 'эпизодов'}
         </Heading>
-        <Button variant="ghost" size="sm" onClick={onEditNames}>
-          <Icon as={LuFileText} mr={2} />
+        <Button variant="ghost" size="sm" gap={2} onClick={onEditNames}>
+          <LuFileText />
           Редактировать названия
         </Button>
       </HStack>

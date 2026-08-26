@@ -6,7 +6,7 @@
  * Заменяет вертикальный список кнопок на компактное меню
  */
 
-import { Icon, IconButton, Menu, Portal } from '@chakra-ui/react'
+import { IconButton, Menu, Portal } from '@chakra-ui/react'
 import {
   LuAudioLines,
   LuCloudUpload,
@@ -124,7 +124,7 @@ export function ActionMenu({
     <Menu.Root>
       <Menu.Trigger asChild>
         <IconButton variant="outline" size={{ base: 'md', md: 'lg' }} aria-label="Действия">
-          <Icon as={LuEllipsisVertical} />
+          <LuEllipsisVertical />
         </IconButton>
       </Menu.Trigger>
       <Portal>
@@ -139,20 +139,22 @@ export function ActionMenu({
             )}
 
             <Menu.Item value="edit" onClick={onEdit}>
-              <Icon as={LuPencil} />
+              <LuPencil />
               Редактировать
             </Menu.Item>
 
             {hasShikimoriId && onRefreshMetadata && (
               <Menu.Item value="refresh-metadata" onClick={onRefreshMetadata} disabled={isRefreshingMetadata}>
-                <Icon as={LuRefreshCw} animation={isRefreshingMetadata ? 'spin 1s linear infinite' : undefined} />
+                <LuRefreshCw
+                  style={isRefreshingMetadata ? { animation: 'spin 1s linear infinite' } : undefined}
+                />
                 {isRefreshingMetadata ? 'Обновление...' : 'Обновить метаданные'}
               </Menu.Item>
             )}
 
             {onAddEpisodes && (
               <Menu.Item value="add-episodes" onClick={onAddEpisodes}>
-                <Icon as={LuFilePlus} />
+                <LuFilePlus />
                 Добавить эпизоды
               </Menu.Item>
             )}
@@ -160,25 +162,27 @@ export function ActionMenu({
             {hasEpisodes && (
               <>
                 <Menu.Item value="export" onClick={onExport}>
-                  <Icon as={LuDownload} />
+                  <LuDownload />
                   Экспорт
                 </Menu.Item>
 
                 <Menu.Item value="add-tracks" onClick={onAddTracks}>
-                  <Icon as={LuMusic} />
+                  <LuMusic />
                   Добавить дорожки
                 </Menu.Item>
 
                 {hasBrokenTracks && onRestoreTracks && (
                   <Menu.Item value="restore-tracks" onClick={onRestoreTracks}>
-                    <Icon as={LuWrench} />
+                    <LuWrench />
                     Восстановить дорожки
                   </Menu.Item>
                 )}
 
                 {episodeCount >= 2 && onDetectIntros && (
                   <Menu.Item value="detect-intros" onClick={onDetectIntros} disabled={isDetectingIntros}>
-                    <Icon as={LuAudioLines} animation={isDetectingIntros ? 'spin 1s linear infinite' : undefined} />
+                    <LuAudioLines
+                      style={isDetectingIntros ? { animation: 'spin 1s linear infinite' } : undefined}
+                    />
                     {isDetectingIntros ? 'Определение OP/ED...' : 'Определить OP/ED'}
                   </Menu.Item>
                 )}
@@ -187,14 +191,16 @@ export function ActionMenu({
 
             {hasEpisodes && onReencodeAudio && (
               <Menu.Item value="reencode-audio" onClick={onReencodeAudio}>
-                <Icon as={LuAudioLines} />
+                <LuAudioLines />
                 Пережать аудио
               </Menu.Item>
             )}
 
             {hasDirectoryCid && onPublishToTracker && (
               <Menu.Item value="publish-tracker" onClick={onPublishToTracker} disabled={isPublishingToTracker}>
-                <Icon as={LuGlobe} animation={isPublishingToTracker ? 'spin 1s linear infinite' : undefined} />
+                <LuGlobe
+                  style={isPublishingToTracker ? { animation: 'spin 1s linear infinite' } : undefined}
+                />
                 {isPublishingToTracker ? 'Публикация...' : 'Опубликовать на трекер'}
               </Menu.Item>
             )}
@@ -206,7 +212,7 @@ export function ActionMenu({
                   void navigator.clipboard.writeText(directoryCid)
                 }}
               >
-                <Icon as={LuCopy} />
+                <LuCopy />
                 Скопировать Directory CID
               </Menu.Item>
             )}
@@ -215,7 +221,7 @@ export function ActionMenu({
               <>
                 <Menu.Separator />
                 <Menu.Item value="open-source" onClick={() => window.electronAPI?.app?.openExternal(sourceUrl)}>
-                  <Icon as={LuExternalLink} />
+                  <LuExternalLink />
                   Источник (Rutracker)
                 </Menu.Item>
               </>
@@ -224,21 +230,23 @@ export function ActionMenu({
             {/* Управление хранилищем */}
             {pinnedLocally && onUnpin && (
               <Menu.Item value="unpin" onClick={onUnpin} disabled={isUnpinning}>
-                <Icon as={LuCloudUpload} animation={isUnpinning ? 'spin 1s linear infinite' : undefined} />
+                <LuCloudUpload style={isUnpinning ? { animation: 'spin 1s linear infinite' } : undefined} />
                 {isUnpinning ? 'Откреплениe...' : 'Отпинить с диска'}
               </Menu.Item>
             )}
 
             {pinnedLocally === false && onRepin && (
               <Menu.Item value="repin" onClick={onRepin} disabled={isRepinning}>
-                <Icon as={LuHardDrive} animation={isRepinning ? 'spin 1s linear infinite' : undefined} />
+                <LuHardDrive style={isRepinning ? { animation: 'spin 1s linear infinite' } : undefined} />
                 {isRepinning ? 'Закреплениe...' : 'Запинить на диск'}
               </Menu.Item>
             )}
 
             {hasDirectoryCid && onSyncEpisodes && (
               <Menu.Item value="sync-episodes" onClick={onSyncEpisodes} disabled={isSyncingEpisodes}>
-                <Icon as={LuRefreshCw} animation={isSyncingEpisodes ? 'spin 1s linear infinite' : undefined} />
+                <LuRefreshCw
+                  style={isSyncingEpisodes ? { animation: 'spin 1s linear infinite' } : undefined}
+                />
                 {isSyncingEpisodes ? 'Загрузка серий...' : 'Загрузить новые серии'}
               </Menu.Item>
             )}
@@ -246,7 +254,7 @@ export function ActionMenu({
             <Menu.Separator />
 
             <Menu.Item value="delete" color="fg.error" onClick={onDelete}>
-              <Icon as={LuTrash2} />
+              <LuTrash2 />
               Удалить
             </Menu.Item>
           </Menu.Content>

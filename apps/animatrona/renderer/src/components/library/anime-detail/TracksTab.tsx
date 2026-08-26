@@ -17,7 +17,6 @@ import {
   Dialog,
   Heading,
   HStack,
-  Icon,
   IconButton,
   Input,
   Select,
@@ -335,7 +334,7 @@ export function TracksTab({ audioTracks, subtitleTracks }: TracksTabProps) {
       {audioGroups.length > 0 && (
         <Box>
           <HStack gap={2} mb={3}>
-            <Icon as={LuAudioLines} color="green.400" boxSize={5} />
+            <LuAudioLines color="var(--chakra-colors-green-400)" size={20} />
             <Heading size="md">Аудиодорожки</Heading>
             <Badge colorPalette="green" variant="subtle">
               {audioGroups.length}
@@ -375,7 +374,7 @@ export function TracksTab({ audioTracks, subtitleTracks }: TracksTabProps) {
       {subtitleGroups.length > 0 && (
         <Box>
           <HStack gap={2} mb={3}>
-            <Icon as={LuCaptions} color="yellow.400" boxSize={5} />
+            <LuCaptions color="var(--chakra-colors-yellow-400)" size={20} />
             <Heading size="md">Субтитры</Heading>
             <Badge colorPalette="yellow" variant="subtle">
               {subtitleGroups.length}
@@ -581,8 +580,8 @@ function TrackGroupRow({
         </HStack>
 
         <HStack gap={1}>
-          <Button variant="ghost" size="sm" onClick={onStartEdit}>
-            <Icon as={LuPencil} mr={2} />
+          <Button variant="ghost" size="sm" gap={2} onClick={onStartEdit}>
+            <LuPencil />
             Изменить
           </Button>
           <IconButton aria-label="Удалить группу" variant="ghost" size="sm" colorPalette="red" onClick={onDelete}>

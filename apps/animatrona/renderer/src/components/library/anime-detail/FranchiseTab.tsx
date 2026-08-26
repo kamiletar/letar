@@ -5,7 +5,7 @@
  * Отображает интерактивный граф связей франшизы
  */
 
-import { Box, Button, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useEffect, useState } from 'react'
 import { LuFilm, LuRefreshCw } from 'react-icons/lu'
 
@@ -149,7 +149,7 @@ export function FranchiseTab({
   if (noFranchise) {
     return (
       <VStack p={6} gap={4}>
-        <Icon as={LuFilm} boxSize={10} color="fg.muted" />
+        <LuFilm size={40} color="var(--chakra-colors-fg-muted)" />
         <Text color="fg.muted" textAlign="center">
           Это аниме не является частью франшизы
         </Text>

@@ -19,7 +19,7 @@ import type {
 } from '@/generated/prisma'
 import { formatBytes } from '@/lib/format-utils'
 import { toMediaUrl } from '@/lib/media-url'
-import { Badge, Box, Button, HStack, Icon, Portal, Text, Tooltip, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, HStack, Portal, Text, Tooltip, VStack } from '@chakra-ui/react'
 import { AnimeHeroBase } from '@letar/animatrona-ui'
 import { getAnimeStatusConfig } from '@letar/animatrona-utils'
 import { type ReactNode, useMemo } from 'react'
@@ -167,6 +167,7 @@ export function AnimeHero({
   const router = useRouter()
   const statusInfo = getAnimeStatusConfig(status)
   const watchStatusInfo = watchStatus ? watchStatusLabels[watchStatus] : null
+  const WatchStatusIcon = watchStatusInfo?.icon
   const posterUrl = posterUrlProp ?? (posterPath ? toMediaUrl(posterPath) : null)
 
   // Вычисляем общий прогресс (% просмотренных эпизодов)
@@ -210,14 +211,14 @@ export function AnimeHero({
           )}
           {rating && (
             <Badge colorPalette="yellow" display="flex" alignItems="center" gap={1}>
-              <Icon as={LuStar} boxSize={3} />
+              <LuStar size={12} />
               {rating.toFixed(1)}
             </Badge>
           )}
           {/* Статус просмотра (не показываем NOT_STARTED) */}
-          {watchStatusInfo && watchStatus !== 'NOT_STARTED' && (
+          {watchStatusInfo && watchStatus !== 'NOT_STARTED' && WatchStatusIcon && (
             <Badge colorPalette={watchStatusInfo.color} display="flex" alignItems="center" gap={1}>
-              <Icon as={watchStatusInfo.icon} boxSize={3} />
+              <WatchStatusIcon size={12} />
               {watchStatusInfo.label}
               {watchStatus === 'COMPLETED' && watchedAt && (
                 <Text as="span" fontWeight="normal" opacity={0.8}>
@@ -288,13 +289,13 @@ export function AnimeHero({
                     onClick={() =>
                       router.push(`/watch/${playTarget.episodeId}${playTarget.isContinue ? '?autoResume=true' : ''}`)}
                   >
-                    <Icon as={LuPlay} />
+                    <LuPlay />
                     {playTarget.label}
                   </Button>
                 )
                 : (
                   <Button colorPalette="purple" size={{ base: 'md', md: 'lg' }} disabled>
-                    <Icon as={LuPlay} />
+                    <LuPlay />
                     Нет эпизодов
                   </Button>
                 )}
