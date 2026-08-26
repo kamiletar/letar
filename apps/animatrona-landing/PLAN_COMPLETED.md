@@ -22,10 +22,28 @@ semgrep-паттерн ловит **любой** Chakra-компонент с `a
 страница и `/docs/quick-start`, `/docs/troubleshooting` открыты в браузере — без ошибок в
 консоли, иконки и переходы по сайдбару рендерятся корректно.
 
-⚠️ Приложение НЕ очищено от `as=` полностью — остаются 49 срабатываний другой формы того же
-паттерна (`Box as="section"`, `Heading as="h1"/"h2"/"h3"`, `Text as="span"`), см. открытую задачу
-в `PLAN.md`. Severity правила не поднималась (осталась WARNING) — это разрешено только после
-полной чистки `apps/*` по всему монорепо.
+## Чистка `Box/Heading/Text as=` (HTML-теги) — приложение полностью очищено (2026-08-26)
+
+Продолжение сессии выше. Оставшиеся 49 срабатываний (`Box as="section"/"nav"/"footer"/"button"`,
+`Heading as="h1"/"h2"/"h3"`, `Text as="span"`) в 16 файлах (11 из исходного списка + `footer.tsx`,
+`app-showcase-section.tsx`, `import-flow-section.tsx`, `docs/encoding-profiles/page.tsx`,
+`docs/keyboard-shortcuts/page.tsx`) заменены на `asChild` + нативный HTML-тег внутри:
+`<Heading asChild size="xl"><h1>...</h1></Heading>`, `<Box asChild id="section"><section>
+...</section></Box>`. Уровень заголовка (`h1`/`h2`/`h3`) сохранён 1:1 по семантике исходного
+`as=` — не понижен и не потерян ни в одном случае.
+
+Единственный нетривиальный случай — кликабельная точка-индикатор карусели импорта
+(`import-flow-section.tsx`, `StepIndicator`): было `Box as="button"` с `onClick`/`aria-label`
+прямо на Box, стало `Box asChild` со стилями + вложенный `<button type="button" onClick=.../>`
+с HTML-атрибутами.
+
+Проверено: `nx typecheck:tsgo`/`nx lint` зелёные, dev-сервер поднят, все страницы (главная +
+`/docs/quick-start`, `/docs/encoding-profiles`, `/docs/keyboard-shortcuts`,
+`/docs/troubleshooting`) открыты в браузере живьём — без ошибок в консоли, разметка не изменилась
+визуально. Финальный `uvx semgrep scan --config .semgrep/letar-rules.yml apps/animatrona-landing`:
+**0 срабатываний** `letar-chakra-as-prop-forbidden` во всём приложении (коммит `19f055a5`).
+Severity правила в `.semgrep/letar-rules.yml` не поднималась — решение общее для всего монорепо,
+принимается только после чистки всех `apps/*` (см. §61 корневого `PLAN.md`).
 
 ## Фикс: fetchPriority вместо устаревшего priority на hero-скриншоте (2026-08-25)
 
