@@ -55,20 +55,37 @@ E-commerce/booking чекаут-формы обычно защищены от д
    страница "оплата не прошла" с кнопкой повторной оплаты (если платёж ещё требуется — безопасно
    переинициировать, не создавая новый заказ).
 
+## Клиентская часть — общая либа `@letar/idempotency-key`
+
+Клиентская половина паттерна (генерация `crypto.randomUUID()` + чтение/запись `sessionStorage`
+по ключу, защищённое поведение при недоступном `sessionStorage`) вынесена в
+`libs/idempotency-key` (`getOrCreateIdempotencyKey(storageKey)`/`clearIdempotencyKey(storageKey)`)
+после того, как один и тот же код обнаружился независимо реализованным в трёх приложениях
+(2026-08-26). Каждое приложение задаёт свой `storageKey`, специфичный сценарию:
+
+- `apps/aboi/src/app/[locale]/(shop)/checkout/_lib/checkout-draft.ts` —
+  `'aboi:checkout-idempotency-key'`, тонкая обёртка `getOrCreateCheckoutIdempotencyKey()`/
+  `clearCheckoutIdempotencyKey()` (там же живёт черновик контактов/адреса R6.7a, у обоих
+  одинаковый жизненный цикл — `sessionStorage`, очистка на success-странице).
+- `apps/domwellbes/src/app/checkout/_lib/checkout-draft.ts` — та же схема, свой
+  `storageKey`.
+- `apps/svoichuzhie` — прямой импорт `@letar/idempotency-key` в местах использования
+  (`buy-ticket-form.tsx` с `storageKey` на `eventSlug`, `merch/checkout/_components/checkout-form.tsx`)
+  без промежуточной обёртки — `storageKey` вычисляется прямо в вызывающем коде.
+
+Серверная половина (fast-path `findUnique` + `try{$transaction}catch`, уникальная колонка) —
+не обобщена, у каждого приложения своя модель и своя транзакция.
+
 ## Реализация в монорепо
 
 `apps/aboi/src/lib/checkout.ts` (`placeOrderAction`) + `Order.idempotencyKey` в
-`apps/aboi/models/orders.zmodel` (R6.12, PLAN.md §11.11, 2026-08-26). Ключ генерируется в
-`checkout-form.tsx` через `getOrCreateCheckoutIdempotencyKey()`
-(`apps/aboi/src/app/[locale]/(shop)/checkout/_lib/checkout-draft.ts`) — там же живёт черновик
-контактов/адреса (R6.7a), у обоих одинаковый жизненный цикл (`sessionStorage`, очистка на
-success-странице).
+`apps/aboi/models/orders.zmodel` (R6.12, PLAN.md §11.11, 2026-08-26).
 
 ## Куда смотреть при добавлении нового order/booking-чекаута
 
 Любой server action, который **одной транзакцией** и создаёт сущность из корзины/формы, и
 опустошает/переводит в терминальный статус источник (корзину, слот бронирования) — кандидат на
 ту же гонку double-submit. На момент написания не проверено на других e-commerce/booking-потоках
-монорепо (`driving-school` — запись на занятие, `domwellbes` — заявки, `svoichuzhie` — билеты) —
-не факт, что там тот же пробел (могут быть закрыты иначе, например уникальным слотом времени),
-но стоит явно свериться при следующей работе с их checkout/booking-кодом.
+монорепо (`driving-school` — запись на занятие) — не факт, что там тот же пробел (могут быть
+закрыты иначе, например уникальным слотом времени), но стоит явно свериться при следующей работе
+с их checkout/booking-кодом.

@@ -232,6 +232,7 @@ found` при запуске `nx test <lib>`, все тесты красные �
 | @letar/chakra-provider    | Chakra UI провайдер                                                                                                                                                       |
 | @letar/yandex-metrika     | Яндекс Метрика                                                                                                                                                            |
 | @letar/format-utils       | Форматирование дат, телефонов                                                                                                                                             |
+| @letar/idempotency-key    | Клиентский idempotency-key одной попытки чекаута (`sessionStorage` + `crypto.randomUUID()`), см. `.claude/docs/client-idempotency-key-order-creation.md`                  |
 | @letar/tailwind-utils     | `cn()` (clsx+twMerge) и общие Tailwind-классы примитивов — общий код `forms-shadcn`/`forms-vue-shadcn`                                                                    |
 | @letar/ui                 | Shared UI компоненты                                                                                                                                                      |
 | @letar/validation-utils   | Zod схемы валидации                                                                                                                                                       |
