@@ -109,6 +109,11 @@ select ·
 ⚠️ без `<FormI18nProvider locale="ru">` в дереве провайдеров подсказки валидации
 (`z.string().min/max`) молча остаются на английском, хотя RU-локализация в библиотеке уже
 реализована — ни typecheck, ни рендер без ошибок этого не покажут ·
+[letar-forms-select-nullable-meta-options-lost](/.claude/docs/letar-forms-select-nullable-meta-options-lost.md)
+⚠️ `Field.Select` без явного `options` на поле, обёрнутом в `.nullable().optional()` (стандартный
+вывод `@letar/zenstack-form-plugin` для nullable enum) — резолвер не разворачивает
+`ZodNullable`/`ZodOptional` перед поиском `.meta()`, дропдаун рендерится пустым, хотя значение
+хранится и сабмитится корректно ·
 [ui-components](/.claude/docs/ui-components.md) · [images](/.claude/docs/images.md) ·
 [font-cmap-coverage-verification](/.claude/docs/font-cmap-coverage-verification.md) описание
 шрифта на сайте лжёт — покрытие символов проверять разбором `cmap` файла; для Node-стека
