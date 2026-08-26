@@ -6,20 +6,7 @@
  * Flow: folder → matching → probing → comparison → processing (main process) → done
  */
 
-import {
-  Badge,
-  Box,
-  Button,
-  Dialog,
-  HStack,
-  Icon,
-  Portal,
-  Progress,
-  Slider,
-  Spinner,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import { Badge, Box, Button, Dialog, HStack, Portal, Progress, Slider, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useEffect, useState } from 'react'
 import { LuCaptions, LuCheck, LuCircleAlert, LuLoader, LuMusic, LuWrench, LuX } from 'react-icons/lu'
 
@@ -206,7 +193,7 @@ export function RestoreTracksDialog({
           <Dialog.Content bg="bg.subtle" borderColor="border">
             <Dialog.Header borderBottomWidth="1px" borderColor="border">
               <HStack gap={2}>
-                <Icon as={LuWrench} color="primary.fg" />
+                <LuWrench color="var(--chakra-colors-primary-fg)" />
                 <Dialog.Title>Восстановить дорожки</Dialog.Title>
               </HStack>
               <Dialog.CloseTrigger asChild>
@@ -280,7 +267,7 @@ export function RestoreTracksDialog({
                 <VStack gap={6} py={4}>
                   <Box textAlign="center">
                     <VStack gap={3}>
-                      <Icon as={LuCheck} boxSize={12} color="status.success" />
+                      <LuCheck size={48} color="var(--chakra-colors-status-success)" />
                       <Text fontSize="lg" fontWeight="medium" color="status.success">
                         Восстановление завершено!
                       </Text>
@@ -311,11 +298,12 @@ export function RestoreTracksDialog({
                     variant={isDone ? 'solid' : 'outline'}
                     colorPalette={isDone ? 'purple' : undefined}
                     onClick={handleClose}
+                    gap={1}
                   >
                     {isDone
                       ? (
                         <>
-                          <Icon as={LuCheck} mr={1} />
+                          <LuCheck />
                           Готово
                         </>
                       )
@@ -402,7 +390,7 @@ function RestoreProcessingView({
       {/* Статус */}
       <Box textAlign="center">
         <VStack gap={3}>
-          <Icon as={LuLoader} boxSize={12} color="primary.fg" className="animate-spin" />
+          <LuLoader size={48} color="var(--chakra-colors-primary-fg)" className="animate-spin" />
           <Text fontSize="lg" fontWeight="medium" color="primary.fg">
             Обработка...
           </Text>
@@ -457,7 +445,7 @@ function RestoreProcessingView({
         <HStack gap={8} justify="center">
           <VStack gap={1}>
             <HStack gap={2}>
-              <Icon as={LuMusic} color="accent.fg" boxSize={6} />
+              <LuMusic color="var(--chakra-colors-accent-fg)" size={24} />
               <Text fontSize="2xl" fontWeight="bold" color="fg">
                 {progress.addedAudioTracks}
               </Text>
@@ -468,7 +456,7 @@ function RestoreProcessingView({
           </VStack>
           <VStack gap={1}>
             <HStack gap={2}>
-              <Icon as={LuCaptions} color="success.fg" boxSize={6} />
+              <LuCaptions color="var(--chakra-colors-success-fg)" size={24} />
               <Text fontSize="2xl" fontWeight="bold" color="fg">
                 {progress.addedSubtitleTracks}
               </Text>
@@ -509,12 +497,29 @@ function TaskItem({ task }: { task: RestoreTaskDetail }) {
   return (
     <Box p={2} borderWidth="1px" borderColor={`${color}.700`} borderRadius="md" bg={`${color}.900/20`}>
       <HStack gap={2} mb={isActive ? 1 : 0}>
-        <Icon
-          as={isError ? LuCircleAlert : isActive ? LuLoader : LuCheck}
-          boxSize={4}
-          color={`${color}.400`}
-          className={isActive ? 'animate-spin' : ''}
-        />
+        {isError
+          ? (
+            <LuCircleAlert
+              size={16}
+              color={`var(--chakra-colors-${color}-400)`}
+              className={isActive ? 'animate-spin' : ''}
+            />
+          )
+          : isActive
+          ? (
+            <LuLoader
+              size={16}
+              color={`var(--chakra-colors-${color}-400)`}
+              className={isActive ? 'animate-spin' : ''}
+            />
+          )
+          : (
+            <LuCheck
+              size={16}
+              color={`var(--chakra-colors-${color}-400)`}
+              className={isActive ? 'animate-spin' : ''}
+            />
+          )}
         <Text fontSize="xs" color="fg.muted" flex={1} lineClamp={1}>
           {task.fileName}
         </Text>

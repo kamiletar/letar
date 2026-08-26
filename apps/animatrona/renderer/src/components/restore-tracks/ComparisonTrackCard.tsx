@@ -7,7 +7,7 @@
  * Без checkbox/click — чисто информационная.
  */
 
-import { Badge, HStack, Icon, Text } from '@chakra-ui/react'
+import { Badge, HStack, Text } from '@chakra-ui/react'
 import { LuCaptions, LuCheck, LuMusic, LuTriangleAlert, LuType } from 'react-icons/lu'
 
 import type { TrackInfo } from '@/lib/add-tracks'
@@ -78,15 +78,14 @@ export function DonorTrackCard({ track, type, isMissing }: DonorTrackCardProps) 
   return (
     <HStack gap={2} py={1} px={2} borderRadius="sm" bg={isMissing ? 'orange.subtle' : 'green.subtle'} fontSize="xs">
       {/* Статус */}
-      <Icon
-        as={isMissing ? LuTriangleAlert : LuCheck}
-        color={isMissing ? 'orange.fg' : 'green.fg'}
-        boxSize={3.5}
-        flexShrink={0}
-      />
+      {isMissing
+        ? <LuTriangleAlert color="var(--chakra-colors-orange-fg)" size={14} style={{ flexShrink: 0 }} />
+        : <LuCheck color="var(--chakra-colors-green-fg)" size={14} style={{ flexShrink: 0 }} />}
 
       {/* Иконка типа */}
-      <Icon as={type === 'audio' ? LuMusic : LuCaptions} color="fg.subtle" boxSize={3.5} flexShrink={0} />
+      {type === 'audio'
+        ? <LuMusic color="var(--chakra-colors-fg-subtle)" size={14} style={{ flexShrink: 0 }} />
+        : <LuCaptions color="var(--chakra-colors-fg-subtle)" size={14} style={{ flexShrink: 0 }} />}
 
       {/* Язык и название */}
       <Text color="fg" fontWeight="medium" flexShrink={0}>
@@ -115,8 +114,8 @@ export function DonorTrackCard({ track, type, isMissing }: DonorTrackCardProps) 
         </Badge>
       )}
       {type === 'subtitle' && track.matchedFonts && track.matchedFonts.length > 0 && (
-        <Badge size="sm" variant="subtle" colorPalette="blue" flexShrink={0}>
-          <Icon as={LuType} boxSize={3} mr={0.5} />
+        <Badge size="sm" variant="subtle" colorPalette="blue" flexShrink={0} gap={0.5}>
+          <LuType size={12} />
           {track.matchedFonts.length}
         </Badge>
       )}

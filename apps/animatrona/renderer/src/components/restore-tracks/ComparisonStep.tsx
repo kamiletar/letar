@@ -7,7 +7,7 @@
  * Каждая дорожка показывает статус: ✅ уже есть / ⚠️ будет восстановлена.
  */
 
-import { Accordion, Badge, Box, HStack, Icon, Separator, Text, VStack } from '@chakra-ui/react'
+import { Accordion, Badge, Box, HStack, Separator, Text, VStack } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import { LuBookOpen, LuCaptions, LuCheck, LuFileAudio, LuMusic, LuTriangleAlert, LuType } from 'react-icons/lu'
 
@@ -36,10 +36,15 @@ function StatRow({
   missingCount: number
 }) {
   const isOk = missingCount === 0
+  const IconComponent = icon
 
   return (
     <HStack gap={3} py={1.5}>
-      <Icon as={icon} color={isOk ? 'green.500' : 'orange.500'} boxSize={5} flexShrink={0} />
+      <IconComponent
+        color={isOk ? 'var(--chakra-colors-green-500)' : 'var(--chakra-colors-orange-500)'}
+        size={20}
+        style={{ flexShrink: 0 }}
+      />
       <Text fontSize="sm" flex={1}>
         {label}
       </Text>
@@ -52,8 +57,8 @@ function StatRow({
         </Badge>
         {isOk
           ? (
-            <Badge colorPalette="green" size="sm">
-              <Icon as={LuCheck} boxSize={3} mr={0.5} />
+            <Badge colorPalette="green" size="sm" gap={0.5}>
+              <LuCheck size={12} />
               OK
             </Badge>
           )
@@ -77,10 +82,12 @@ function TrackSection({
   icon: React.ElementType
   children: React.ReactNode
 }) {
+  const IconComponent = icon
+
   return (
     <VStack align="stretch" gap={1.5}>
       <HStack gap={1.5}>
-        <Icon as={icon} boxSize={4} color="fg.subtle" />
+        <IconComponent size={16} color="var(--chakra-colors-fg-subtle)" />
         <Text fontSize="xs" fontWeight="semibold" color="fg.subtle">
           {label}
         </Text>
@@ -153,8 +160,8 @@ function EpisodeAccordionItem({ episode }: { episode: EpisodeComparison }) {
           </Badge>
           {isOk
             ? (
-              <Badge colorPalette="green" size="sm">
-                <Icon as={LuCheck} boxSize={3} mr={0.5} />
+              <Badge colorPalette="green" size="sm" gap={0.5}>
+                <LuCheck size={12} />
                 OK
               </Badge>
             )
@@ -263,12 +270,21 @@ function EpisodeAccordionItem({ episode }: { episode: EpisodeComparison }) {
                             const isMissing = episode.missing.fonts.includes(fontName)
                             return (
                               <HStack key={fontName} gap={2}>
-                                <Icon
-                                  as={isMissing ? LuTriangleAlert : LuCheck}
-                                  color={isMissing ? 'orange.500' : 'green.500'}
-                                  boxSize={3}
-                                  flexShrink={0}
-                                />
+                                {isMissing
+                                  ? (
+                                    <LuTriangleAlert
+                                      color="var(--chakra-colors-orange-500)"
+                                      size={12}
+                                      style={{ flexShrink: 0 }}
+                                    />
+                                  )
+                                  : (
+                                    <LuCheck
+                                      color="var(--chakra-colors-green-500)"
+                                      size={12}
+                                      style={{ flexShrink: 0 }}
+                                    />
+                                  )}
                                 <Text fontSize="xs" color={isMissing ? 'fg' : 'fg.muted'}>
                                   {fontName}
                                 </Text>
@@ -318,7 +334,7 @@ export function ComparisonStep({ comparison }: ComparisonStepProps) {
           {allOk
             ? (
               <>
-                <Icon as={LuCheck} boxSize={12} color="green.500" />
+                <LuCheck size={48} color="var(--chakra-colors-green-500)" />
                 <Text fontSize="lg" fontWeight="medium" color="green.500">
                   Все дорожки на месте
                 </Text>

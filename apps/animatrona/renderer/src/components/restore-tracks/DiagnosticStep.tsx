@@ -5,7 +5,7 @@
  * Выявляет эпизоды без аудио и битые записи (без transcodedCid)
  */
 
-import { Badge, Box, Button, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useState } from 'react'
 import { LuCaptions, LuMusic, LuTrash2, LuTriangleAlert } from 'react-icons/lu'
 
@@ -55,7 +55,7 @@ export function DiagnosticStep({ episodes, importErrors, onCleanAndContinue }: D
       {/* Заголовок */}
       <Box textAlign="center">
         <VStack gap={2}>
-          <Icon as={LuTriangleAlert} boxSize={12} color="warning.fg" />
+          <LuTriangleAlert size={48} color="var(--chakra-colors-warning-fg)" />
           <Text fontSize="lg" fontWeight="medium">
             Диагностика дорожек
           </Text>
@@ -71,7 +71,7 @@ export function DiagnosticStep({ episodes, importErrors, onCleanAndContinue }: D
           {/* Эпизоды без аудио */}
           {episodesWithoutAudio.length > 0 && (
             <HStack gap={3}>
-              <Icon as={LuMusic} color="error.fg" boxSize={5} />
+              <LuMusic color="var(--chakra-colors-error-fg)" size={20} />
               <Text fontSize="sm" flex={1}>
                 Эпизодов без аудиодорожек
               </Text>
@@ -84,7 +84,7 @@ export function DiagnosticStep({ episodes, importErrors, onCleanAndContinue }: D
           {/* Эпизоды без субтитров */}
           {episodesWithoutSubs.length > 0 && (
             <HStack gap={3}>
-              <Icon as={LuCaptions} color="warning.fg" boxSize={5} />
+              <LuCaptions color="var(--chakra-colors-warning-fg)" size={20} />
               <Text fontSize="sm" flex={1}>
                 Эпизодов без субтитров
               </Text>
@@ -97,7 +97,7 @@ export function DiagnosticStep({ episodes, importErrors, onCleanAndContinue }: D
           {/* Битые записи */}
           {brokenTracks.length > 0 && (
             <HStack gap={3}>
-              <Icon as={LuTrash2} color="warning.fg" boxSize={5} />
+              <LuTrash2 color="var(--chakra-colors-warning-fg)" size={20} />
               <Text fontSize="sm" flex={1}>
                 Битых записей (без CID)
               </Text>
@@ -110,7 +110,7 @@ export function DiagnosticStep({ episodes, importErrors, onCleanAndContinue }: D
           {/* Ошибки импорта */}
           {importErrors.length > 0 && (
             <HStack gap={3}>
-              <Icon as={LuTriangleAlert} color="warning.fg" boxSize={5} />
+              <LuTriangleAlert color="var(--chakra-colors-warning-fg)" size={20} />
               <Text fontSize="sm" flex={1}>
                 Ошибок импорта
               </Text>
