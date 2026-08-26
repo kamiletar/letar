@@ -1,10 +1,10 @@
 'use client'
 
 import { ColorModeProvider, RootChakraProvider } from '@letar/chakra-provider'
+import { OfflineConsentBanner } from '@letar/ui'
 import type { PropsWithChildren } from 'react'
 
 import { system } from '@/theme'
-import { OfflineConsentBanner } from './offline-consent-banner'
 import { ServiceWorkerRegistration } from './service-worker-registration'
 import { TopLoader } from './top-loader'
 
@@ -25,7 +25,13 @@ export function Providers({ children }: PropsWithChildren) {
         {children}
         {/* PWA компоненты */}
         <ServiceWorkerRegistration />
-        <OfflineConsentBanner />
+        <OfflineConsentBanner
+          consentKey="pravda-offline-consent"
+          title="Читайте законы без интернета"
+          description="Сохраните все документы для оффлайн доступа (~5 MB)"
+          features={['Работает без интернета', '22 документа', 'Полнотекстовый поиск']}
+          enableLabel="Включить оффлайн"
+        />
       </RootChakraProvider>
     </ColorModeProvider>
   )
