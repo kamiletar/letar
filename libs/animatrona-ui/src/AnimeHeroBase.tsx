@@ -11,7 +11,7 @@
  * - Слоты для бейджей, метаданных, CTA
  */
 
-import { Box, Flex, Heading, Icon, Image, Text, VStack } from '@chakra-ui/react'
+import { Box, Flex, Heading, Image, Text, VStack } from '@chakra-ui/react'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { LuPlay } from 'react-icons/lu'
@@ -133,7 +133,7 @@ export function AnimeHeroBase({
                 alignItems="center"
                 justifyContent="center"
               >
-                <Icon as={LuPlay} boxSize={12} color="fg.subtle" />
+                <LuPlay size={48} color="var(--chakra-colors-fg-subtle)" />
               </Box>
             )}
 

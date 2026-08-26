@@ -11,7 +11,7 @@
  * - Слоты для кастомных оверлеев и действий
  */
 
-import { Box, Card, HStack, Icon, Text } from '@chakra-ui/react'
+import { Box, Card, HStack, Text } from '@chakra-ui/react'
 import { formatDurationMinutes } from '@letar/animatrona-utils'
 import type { ReactNode } from 'react'
 import { LuPlay } from 'react-icons/lu'
@@ -84,7 +84,7 @@ export function EpisodeCardBase({
         justifyContent="center"
         overflow="hidden"
       >
-        {thumbnailSlot ?? <Icon as={LuPlay} boxSize={8} color="fg.subtle" />}
+        {thumbnailSlot ?? <LuPlay size={32} color="var(--chakra-colors-fg-subtle)" />}
 
         {/* Кастомный оверлей */}
         {overlaySlot}
