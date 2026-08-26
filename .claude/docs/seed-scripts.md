@@ -158,6 +158,61 @@ void runSeed(main, () => db.$disconnect())
 `.finally()` дело не доходит), миграция на `runSeed` не проактивна, но желательна при следующей
 правке этих файлов ради единообразия и гарантированного `disconnect()`.
 
+## 6. ⚠️ Дочерние `create()` внутри creator-замыкания `upsertIdByNaturalKey` не самовосстанавливаются
+
+**Симптом:** родительская запись существует и выглядит корректно (`findFirst` по natural key её
+находит), но связанные дочерние строки (позиции заказа, контакты клиента, этапы кейса и т.п.)
+пусты или частично утеряны — и остаются такими после любого числа повторных `nx db:seed`.
+
+**Причина:** типичный вызов `upsertIdByNaturalKey(finder, creator)` кладёт создание дочерних
+записей внутрь `creator`-замыкания:
+
+```typescript
+const id = await upsertIdByNaturalKey(
+  () => db.salesOrder.findFirst({ where: { note: def.key /* ... */ }, select: { id: true } }),
+  async () => {
+    const order = await db.salesOrder.create({ data: {/* ... */} })
+    for (const line of def.lines) {
+      await db.salesOrderItem.create({ data: { orderId: order.id /* ... */ } }) // ⚠️
+    }
+    return order
+  },
+)
+```
+
+Если `finder` находит существующую запись, `creator` не вызывается вообще — а вместе с ним
+пропускается и цикл создания дочерних строк. Любая частичная порча (ручное вмешательство, баг в
+чужом cleanup-скрипте, ошибка миграции) переживает сколько угодно повторных прогонов сида: раз
+родитель уже существует, дочерние записи никогда не будут досозданы.
+
+**Найдено:** `domwellbes`, `prisma/seed/sales-orders.ts` — все 4 демо-заказа стояли с 0
+`SalesOrderItem` (сама причина утраты не установлена), пока сид не был исправлен (2026-08-26).
+
+**Фикс:** создание дочерних записей — отдельным шагом **после** `upsertIdByNaturalKey`
+родителя, с собственной проверкой идемпотентности по количеству (а не по существованию
+родителя):
+
+```typescript
+const id = await upsertIdByNaturalKey(finder, creator) // creator больше не трогает items
+
+const existingItemCount = await db.salesOrderItem.count({ where: { orderId: id } })
+if (existingItemCount === 0) {
+  for (const line of def.lines) {
+    await db.salesOrderItem.create({ data: { orderId: id /* ... */ } })
+  }
+}
+```
+
+Работает и для нового родителя (только что созданного, `existingItemCount === 0`), и для
+существовавшего-но-осиротевшего — не создаёт дублей там, где дочерние записи уже есть.
+
+**Не единичный случай.** Тот же вложенный паттерн (create ребёнка внутри creator-замыкания
+родителя) встречается и в других seed-файлах domwellbes — `clients.ts` (`ClientContact`),
+`construction-cases.ts` (`ConstructionCaseStage`), `counterparties.ts` (`CounterpartyLocation`),
+`logistics.ts` (`CarrierTariff`/`TariffComponent`), `works.ts` (нормы). Каждый — кандидат на ту же
+уязвимость, но не аудирован и не исправлен превентивно (см. связанный чип, заведённый вместе с
+этой записью) — фикс применён только там, где баг проявился и был подтверждён живой проверкой.
+
 ## Примеры в репозитории
 
 | Приложение     | Файл                                      | Стратегия                                                                                   |
