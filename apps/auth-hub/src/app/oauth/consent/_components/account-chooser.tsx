@@ -27,13 +27,20 @@ interface AccountChooserProps {
 export function AccountChooser({ user, oidcParams }: AccountChooserProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const consentCode = searchParams.get('consent_code')
   const clientId = searchParams.get('client_id')
   const scope = searchParams.get('scope')
+  // @better-auth/oauth-provider (1.7+) больше не использует consent_code — consent-эндпоинт
+  // (src/consent.ts::consentEndpoint) читает подписанную query ИСКЛЮЧИТЕЛЬНО из ctx.body.oauth_query
+  // (before-хук матчится на ctx.body?.oauth_query, верифицирует sig и кладёт в oAuthState).
+  // Без него — "missing oauth query"/invalid_request, т.к. oAuthState.get() пуст (найдено 2026-08-26,
+  // шестой слой инцидента a8efcc72). URL страницы consent — уже сама подписанная query (response_type,
+  // redirect_uri, ..., exp, ba_iat, sig), поэтому просто сериализуем searchParams как есть.
+  const oauthQuery = searchParams.toString()
 
   const [pending, setPending] = useState<'continue' | 'switch' | 'cancel' | null>(null)
 
-  // POST на consent endpoint — Better Auth вернёт redirectURI с кодом или ошибкой
+  // POST на consent endpoint — при fetch-запросе (handleRedirect в oauth-provider) Better Auth
+  // возвращает JSON { redirect: true, url } — НЕ redirectURI и НЕ настоящий HTTP-редирект.
   const submitConsent = useCallback(
     async (accept: boolean) => {
       const res = await fetch('/api/auth/oauth2/consent', {
@@ -41,21 +48,17 @@ export function AccountChooser({ user, oidcParams }: AccountChooserProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           accept,
-          consent_code: consentCode,
-          client_id: clientId,
           scope,
+          oauth_query: oauthQuery,
         }),
-        redirect: 'follow',
       })
 
       const data = await res.json().catch(() => null)
-      if (data?.redirectURI) {
-        window.location.href = data.redirectURI
-      } else if (res.redirected) {
-        window.location.href = res.url
+      if (data?.url) {
+        window.location.href = data.url
       }
     },
-    [consentCode, clientId, scope],
+    [scope, oauthQuery],
   )
 
   const handleContinue = useCallback(async () => {
