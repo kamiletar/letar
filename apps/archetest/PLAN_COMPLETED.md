@@ -2199,3 +2199,7 @@ production-деплоем, не только теоретически реали
   Фикс — `bottom` баннера через CSS-переменную `--letar-cookie-banner-height`, публикуемую
   `CookieBanner` (тот же паттерн, что уже применён к `StickyActionBar` из `@letar/ui`, см.
   `.claude/docs/ui-components.md` § «Координация bottom-anchored компонентов»).
+- **`OfflineConsentBanner` вынесен в `@letar/ui`** (2026-08-26) — дубль из пяти приложений
+  заменён на общий компонент; `apps/archetest/.../offline-consent-banner.tsx` теперь тонкая
+  обёртка, маппит `useTranslations('offlineBanner')` в пропы `@letar/ui` и задаёт
+  `colorPalette="purple"`. Детали — `PLAN.md` §64 в корне репо.
