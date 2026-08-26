@@ -6,7 +6,6 @@ import {
   createListCollection,
   Drawer,
   HStack,
-  Icon,
   Input,
   Portal,
   Select,
@@ -203,7 +202,7 @@ export function MobileFilterDrawer({
             <Drawer.Header borderBottomWidth={1}>
               <HStack justify="space-between" w="full">
                 <HStack>
-                  <Icon as={LuFilter} />
+                  <LuFilter />
                   <Drawer.Title>Фильтры</Drawer.Title>
                   {activeCount > 0 && (
                     <Text fontSize="sm" color="fg.subtle">
@@ -213,7 +212,7 @@ export function MobileFilterDrawer({
                 </HStack>
                 <Drawer.CloseTrigger asChild>
                   <Button variant="ghost" size="sm">
-                    <Icon as={LuX} />
+                    <LuX />
                   </Button>
                 </Drawer.CloseTrigger>
               </HStack>
@@ -292,7 +291,7 @@ export function MobileFilterDrawer({
                         colorPalette={watchStatus === item.value ? 'purple' : 'gray'}
                         onClick={() => onWatchStatusChange(item.value)}
                       >
-                        {item.icon && <Icon as={item.icon} />}
+                        {item.icon && <item.icon />}
                         {item.label}
                       </Button>
                     ))}

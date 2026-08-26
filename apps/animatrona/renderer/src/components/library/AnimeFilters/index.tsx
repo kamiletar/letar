@@ -7,7 +7,6 @@ import {
   Collapsible,
   createListCollection,
   HStack,
-  Icon,
   Input,
   Select,
   Text,
@@ -386,6 +385,7 @@ export function AnimeFilters({
   ])
 
   const hasAdvancedFilters = studio || fandubber || director || episodesMin || episodesMax
+  const ExpandIcon = isExpanded ? LuChevronUp : LuChevronDown
 
   return (
     <>
@@ -404,13 +404,9 @@ export function AnimeFilters({
                   border="none"
                   _placeholder={{ color: 'fg.muted' }}
                 />
-                <Icon
-                  as={LuSearch}
-                  position="absolute"
-                  left={3}
-                  top="50%"
-                  transform="translateY(-50%)"
-                  color="fg.subtle"
+                <LuSearch
+                  style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
+                  color="var(--chakra-colors-fg-subtle)"
                 />
               </Box>
 
@@ -419,12 +415,13 @@ export function AnimeFilters({
                 <Button
                   variant="outline"
                   size="sm"
+                  gap={1}
                   onClick={() => setIsMobileFilterOpen(true)}
                   colorPalette={activeFilters.length > 0 ? 'purple' : undefined}
                   minH="44px"
                   minW="44px"
                 >
-                  <Icon as={LuSlidersHorizontal} mr={1} />
+                  <LuSlidersHorizontal />
                   Фильтры
                   {activeFilters.length > 0 && ` (${activeFilters.length})`}
                 </Button>
@@ -465,7 +462,7 @@ export function AnimeFilters({
             <Box hideBelow="md">
               <HStack gap={3} wrap="wrap">
                 <HStack gap={2}>
-                  <Icon as={LuFilter} color="fg.subtle" />
+                  <LuFilter color="var(--chakra-colors-fg-subtle)" />
                   <Text fontSize="sm" color="fg.subtle">
                     Фильтры:
                   </Text>
@@ -566,7 +563,7 @@ export function AnimeFilters({
                       colorPalette={watchStatus === item.value ? 'purple' : 'gray'}
                       onClick={() => onWatchStatusChange(item.value)}
                     >
-                      {item.icon && <Icon as={item.icon} />}
+                      {item.icon && <item.icon />}
                       {item.label}
                       {item.value && counts?.watchStatus?.[item.value] !== undefined && (
                         <Text as="span" fontSize="2xs" opacity={0.7}>
@@ -639,10 +636,11 @@ export function AnimeFilters({
                 <Button
                   variant="ghost"
                   size="sm"
+                  gap={1}
                   onClick={() => setIsExpanded(!isExpanded)}
                   colorPalette={hasAdvancedFilters ? 'purple' : undefined}
                 >
-                  <Icon as={isExpanded ? LuChevronUp : LuChevronDown} mr={1} />
+                  <ExpandIcon />
                   Ещё
                   {hasAdvancedFilters && ' •'}
                 </Button>

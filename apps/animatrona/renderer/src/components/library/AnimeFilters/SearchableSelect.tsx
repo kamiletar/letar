@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Button, HStack, Icon, Input, Popover, Portal, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, HStack, Input, Popover, Portal, Text, VStack } from '@chakra-ui/react'
 import { useMemo, useState } from 'react'
 import { LuCheck, LuChevronDown, LuSearch } from 'react-icons/lu'
 
@@ -96,7 +96,7 @@ export function SearchableSelect({
                 •
               </Box>
             )}
-            <Icon as={LuChevronDown} boxSize={4} color="fg.subtle" />
+            <LuChevronDown size={16} color="var(--chakra-colors-fg-subtle)" />
           </HStack>
         </Button>
       </Popover.Trigger>
@@ -124,14 +124,10 @@ export function SearchableSelect({
                     pl={8}
                     autoFocus
                   />
-                  <Icon
-                    as={LuSearch}
-                    position="absolute"
-                    left={2.5}
-                    top="50%"
-                    transform="translateY(-50%)"
-                    color="fg.subtle"
-                    boxSize={4}
+                  <LuSearch
+                    style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }}
+                    color="var(--chakra-colors-fg-subtle)"
+                    size={16}
                   />
                 </Box>
               </Box>
@@ -181,7 +177,7 @@ export function SearchableSelect({
                         onClick={() => handleSelect(item.value)}
                       >
                         <Text truncate>{item.label}</Text>
-                        {item.value === value && <Icon as={LuCheck} boxSize={4} color="purple.500" />}
+                        {item.value === value && <LuCheck size={16} color="var(--chakra-colors-purple-500)" />}
                       </Button>
                     ))
                   )}

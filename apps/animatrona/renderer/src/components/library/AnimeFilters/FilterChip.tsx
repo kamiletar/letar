@@ -1,6 +1,6 @@
 'use client'
 
-import { Icon, Tag } from '@chakra-ui/react'
+import { Tag } from '@chakra-ui/react'
 import { LuX } from 'react-icons/lu'
 
 export interface FilterChipProps {
@@ -44,7 +44,7 @@ export function FilterChip({ label, category, onClear, colorPalette = 'purple' }
           borderRadius="full"
           p={0.5}
         >
-          <Icon as={LuX} boxSize={3} />
+          <LuX size={12} />
         </Tag.CloseTrigger>
       </Tag.EndElement>
     </Tag.Root>

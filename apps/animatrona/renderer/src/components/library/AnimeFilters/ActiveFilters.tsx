@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, HStack, Icon, Text } from '@chakra-ui/react'
+import { Button, HStack, Text } from '@chakra-ui/react'
 import { LuX } from 'react-icons/lu'
 
 import { FilterChip } from './FilterChip'
@@ -57,12 +57,13 @@ export function ActiveFilters({ filters, onClearAll }: ActiveFiltersProps) {
       <Button
         variant="ghost"
         size="xs"
+        gap={1}
         onClick={onClearAll}
         color="fg.subtle"
         _hover={{ color: 'fg', bg: 'state.hover' }}
         flexShrink={0}
       >
-        <Icon as={LuX} mr={1} />
+        <LuX />
         Сбросить все
       </Button>
     </HStack>

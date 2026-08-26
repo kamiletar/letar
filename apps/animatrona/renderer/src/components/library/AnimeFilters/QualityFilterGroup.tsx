@@ -1,17 +1,6 @@
 'use client'
 
-import {
-  Box,
-  Button,
-  createListCollection,
-  HStack,
-  Icon,
-  Popover,
-  Portal,
-  Select,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import { Box, Button, createListCollection, HStack, Popover, Portal, Select, Text, VStack } from '@chakra-ui/react'
 import { LuChevronDown, LuMonitor } from 'react-icons/lu'
 
 export interface QualityFilterGroupProps {
@@ -97,18 +86,19 @@ export function QualityFilterGroup({
         <Button
           variant={hasActiveFilters ? 'subtle' : 'outline'}
           size="sm"
+          gap={1}
           colorPalette={hasActiveFilters ? 'purple' : undefined}
           borderColor={hasActiveFilters ? 'purple.500' : 'border'}
           minH="44px"
         >
-          <Icon as={LuMonitor} mr={1} />
+          <LuMonitor />
           {getButtonLabel()}
           {hasActiveFilters && (
             <Box as="span" color="purple.500" ml={1}>
               •
             </Box>
           )}
-          <Icon as={LuChevronDown} ml={1} />
+          <LuChevronDown />
         </Button>
       </Popover.Trigger>
 
@@ -121,7 +111,7 @@ export function QualityFilterGroup({
 
             <Popover.Header fontWeight="semibold" borderBottomWidth={1} pb={2}>
               <HStack>
-                <Icon as={LuMonitor} />
+                <LuMonitor />
                 <Text>Качество видео</Text>
               </HStack>
             </Popover.Header>
