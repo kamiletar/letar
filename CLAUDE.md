@@ -390,6 +390,10 @@ event-sourced переходе — не путать с select-then-create дл�
 [client-idempotency-key-order-creation](/.claude/docs/client-idempotency-key-order-creation.md)
 третий вариант — сущность ещё не существует, ключ не детерминирован (client-generated uuid в
 sessionStorage), fast-path findUnique + try/catch на настоящую гонку двойного клика/back/reload ·
+[pessimistic-row-lock-capacity-race-pattern](/.claude/docs/pessimistic-row-lock-capacity-race-pattern.md)
+четвёртый вариант — не дубль запроса одного актора, а гонка РАЗНЫХ акторов за последние единицы
+общего ограниченного ресурса (capacity/quota); idempotencyKey её не видит — нужен
+`SELECT ... FOR UPDATE` внутри той же транзакции, что и проверка вместимости ·
 [external-provider-fake-pattern](/.claude/docs/external-provider-fake-pattern.md) интерфейс +
 fake-реализация для внешнего сервиса, поставщик которого ещё не выбран (10 контуров domwellbes) —
 деградация vs пропуск по настройке, грабля вечно-успешного fake ·
