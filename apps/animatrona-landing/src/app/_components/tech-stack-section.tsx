@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Container, Heading, HStack, Icon, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { Box, Container, Heading, HStack, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
 import type { IconType } from 'react-icons'
 import { LuClapperboard } from 'react-icons/lu'
@@ -85,6 +85,7 @@ interface TechCardProps {
 }
 
 function TechCard({ tech }: TechCardProps) {
+  const TechIcon = tech.icon
   return (
     <MotionBox variants={itemVariants} whileHover={{ scale: 1.05, y: -4 }} transition={{ duration: 0.2 }}>
       <VStack
@@ -102,7 +103,7 @@ function TechCard({ tech }: TechCardProps) {
           boxShadow: `0 0 30px ${tech.color}20`,
         }}
       >
-        <Icon as={tech.icon} boxSize={10} color={tech.color} />
+        <TechIcon size={40} color={tech.color} />
         <VStack gap={0}>
           <Text fontWeight="semibold" color="white">
             {tech.name}

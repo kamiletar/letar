@@ -2,20 +2,7 @@
 
 import { formatFileSize } from '@/lib/github'
 import type { MacArch, ParsedRelease, Platform, ReleaseAsset } from '@/types/release'
-import {
-  Badge,
-  Box,
-  Button,
-  Card,
-  Container,
-  Heading,
-  HStack,
-  Icon,
-  Link,
-  SimpleGrid,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import { Badge, Box, Button, Card, Container, Heading, HStack, Link, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { FaApple, FaLinux, FaWindows } from 'react-icons/fa6'
 import { LuCheck, LuDownload } from 'react-icons/lu'
@@ -137,7 +124,7 @@ function DownloadButton({
   if (!asset) {
     return (
       <Button colorPalette="purple" size="lg" w="full" disabled opacity={0.5} cursor="not-allowed">
-        <Icon as={LuDownload} />
+        <LuDownload />
         {label}
       </Button>
     )
@@ -146,7 +133,7 @@ function DownloadButton({
   return (
     <Button asChild colorPalette="purple" size="lg" w="full" variant={isPrimary ? 'solid' : 'outline'}>
       <Link href={asset.browser_download_url} target="_blank" rel="noopener noreferrer">
-        <Icon as={LuDownload} />
+        <LuDownload />
         {label}
       </Link>
     </Button>
@@ -164,6 +151,7 @@ interface MacOSCardProps {
  */
 function MacOSCard({ release, isCurrentPlatform, detectedArch }: MacOSCardProps) {
   const info = PLATFORM_INFO.macos
+  const PlatformIcon = info.icon
   const macAssets = release?.assets.macos
 
   // Определяем рекомендуемую архитектуру
@@ -206,7 +194,7 @@ function MacOSCard({ release, isCurrentPlatform, detectedArch }: MacOSCardProps)
         <VStack gap={4} align="stretch">
           {/* Заголовок платформы */}
           <HStack justify="center" gap={3}>
-            <Icon as={info.icon} boxSize={6} color={info.color} />
+            <PlatformIcon size={24} color={info.color} />
             <Heading as="h3" size="lg">
               {info.name}
             </Heading>
@@ -247,7 +235,7 @@ function MacOSCard({ release, isCurrentPlatform, detectedArch }: MacOSCardProps)
           <VStack gap={1} align="start" pt={2}>
             {info.requirements.map((req) => (
               <HStack key={req} gap={2}>
-                <Icon as={LuCheck} color="green.400" boxSize={3} />
+                <LuCheck color="var(--chakra-colors-green-400)" size={12} />
                 <Text fontSize="xs" color="gray.500">
                   {req}
                 </Text>
@@ -262,6 +250,7 @@ function MacOSCard({ release, isCurrentPlatform, detectedArch }: MacOSCardProps)
 
 function PlatformCard({ platform, release, isCurrentPlatform }: PlatformCardProps) {
   const info = PLATFORM_INFO[platform]
+  const PlatformIcon = info.icon
   // Для Windows и Linux — обычный ассет
   const asset = platform === 'macos' ? null : (release?.assets[platform] as ReleaseAsset | null)
 
@@ -302,7 +291,7 @@ function PlatformCard({ platform, release, isCurrentPlatform }: PlatformCardProp
         <VStack gap={4} align="stretch">
           {/* Заголовок платформы */}
           <HStack justify="center" gap={3}>
-            <Icon as={info.icon} boxSize={6} color={info.color} />
+            <PlatformIcon size={24} color={info.color} />
             <Heading as="h3" size="lg">
               {info.name}
             </Heading>
@@ -322,7 +311,7 @@ function PlatformCard({ platform, release, isCurrentPlatform }: PlatformCardProp
           <VStack gap={1} align="start" pt={2}>
             {info.requirements.map((req) => (
               <HStack key={req} gap={2}>
-                <Icon as={LuCheck} color="green.400" boxSize={3} />
+                <LuCheck color="var(--chakra-colors-green-400)" size={12} />
                 <Text fontSize="xs" color="gray.500">
                   {req}
                 </Text>

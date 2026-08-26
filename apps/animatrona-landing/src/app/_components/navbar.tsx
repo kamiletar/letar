@@ -7,7 +7,6 @@ import {
   Drawer,
   Flex,
   HStack,
-  Icon,
   IconButton,
   Link,
   Portal,
@@ -171,7 +170,7 @@ export function Navbar() {
                   display={{ base: 'flex', md: 'none' }}
                   _hover={{ color: 'white', bg: 'gray.800' }}
                 >
-                  <Icon as={LuMenu} boxSize={5} />
+                  <LuMenu size={20} />
                 </IconButton>
               </Drawer.Trigger>
 

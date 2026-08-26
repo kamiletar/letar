@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Card, Container, Heading, Icon, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { Box, Card, Container, Heading, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
 import type { IconType } from 'react-icons'
 import { LuCpu, LuFilm, LuFolderTree, LuGauge, LuMonitorPlay, LuSmartphone } from 'react-icons/lu'
@@ -88,6 +88,7 @@ interface FeatureCardProps {
 }
 
 function FeatureCard({ feature }: FeatureCardProps) {
+  const FeatureIcon = feature.icon
   return (
     <MotionBox variants={cardVariants} whileHover={{ y: -8, transition: { duration: 0.2 } }}>
       <Card.Root
@@ -132,7 +133,7 @@ function FeatureCard({ feature }: FeatureCardProps) {
               whileHover={{ scale: 1.1, rotate: 5 }}
               transition={{ duration: 0.2 }}
             >
-              <Icon as={feature.icon} boxSize={6} />
+              <FeatureIcon size={24} />
             </MotionBox>
 
             {/* Заголовок и описание */}

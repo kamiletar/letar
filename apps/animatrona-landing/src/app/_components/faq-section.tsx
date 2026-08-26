@@ -1,6 +1,6 @@
 'use client'
 
-import { Accordion, Box, Container, Heading, Icon, Span, Text, VStack } from '@chakra-ui/react'
+import { Accordion, Box, Container, Heading, Span, Text, VStack } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
 import { LuCircleHelp } from 'react-icons/lu'
 
@@ -98,7 +98,7 @@ export function FaqSection() {
                   }}
                 >
                   <Accordion.ItemTrigger px={5} py={4} _hover={{ bg: 'gray.900/50' }}>
-                    <Icon as={LuCircleHelp} color="brand.400" boxSize={5} mr={3} />
+                    <LuCircleHelp color="var(--chakra-colors-brand-400)" size={20} style={{ marginRight: '12px' }} />
                     <Span flex="1" fontWeight="medium" color="white" textAlign="left">
                       {item.question}
                     </Span>

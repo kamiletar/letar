@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Card, Heading, HStack, Icon, Link, Text, VStack } from '@chakra-ui/react'
+import { Box, Card, Heading, HStack, Link, Text, VStack } from '@chakra-ui/react'
 import { LuDownload, LuExternalLink, LuFolderOpen, LuPlay, LuSearch } from 'react-icons/lu'
 
 const STEPS = [
@@ -60,32 +60,35 @@ export default function QuickStartPage() {
 
       {/* Шаги */}
       <VStack align="stretch" gap={6}>
-        {STEPS.map((step) => (
-          <Card.Root key={step.title} className="glass" borderRadius="xl">
-            <Card.Body p={6}>
-              <HStack align="start" gap={4}>
-                <Box p={3} borderRadius="lg" bg="brand.500/20" color="brand.400" flexShrink={0}>
-                  <Icon as={step.icon} boxSize={6} />
-                </Box>
-                <Box flex={1}>
-                  <Heading as="h2" size="md" mb={2}>
-                    {step.title}
-                  </Heading>
-                  <Text color="gray.300" mb={3}>
-                    {step.description}
-                  </Text>
-                  <VStack align="start" gap={1}>
-                    {step.details.map((detail) => (
-                      <Text key={detail} fontSize="sm" color="gray.500">
-                        • {detail}
-                      </Text>
-                    ))}
-                  </VStack>
-                </Box>
-              </HStack>
-            </Card.Body>
-          </Card.Root>
-        ))}
+        {STEPS.map((step) => {
+          const StepIcon = step.icon
+          return (
+            <Card.Root key={step.title} className="glass" borderRadius="xl">
+              <Card.Body p={6}>
+                <HStack align="start" gap={4}>
+                  <Box p={3} borderRadius="lg" bg="brand.500/20" color="brand.400" flexShrink={0}>
+                    <StepIcon size={24} />
+                  </Box>
+                  <Box flex={1}>
+                    <Heading as="h2" size="md" mb={2}>
+                      {step.title}
+                    </Heading>
+                    <Text color="gray.300" mb={3}>
+                      {step.description}
+                    </Text>
+                    <VStack align="start" gap={1}>
+                      {step.details.map((detail) => (
+                        <Text key={detail} fontSize="sm" color="gray.500">
+                          • {detail}
+                        </Text>
+                      ))}
+                    </VStack>
+                  </Box>
+                </HStack>
+              </Card.Body>
+            </Card.Root>
+          )
+        })}
       </VStack>
 
       {/* Полезные ссылки */}
@@ -106,7 +109,7 @@ export default function QuickStartPage() {
               gap={1}
               _hover={{ color: 'brand.300' }}
             >
-              <Icon as={LuExternalLink} />
+              <LuExternalLink />
               Страница релизов
             </Link>
             <Link
@@ -120,7 +123,7 @@ export default function QuickStartPage() {
               gap={1}
               _hover={{ color: 'brand.300' }}
             >
-              <Icon as={LuExternalLink} />
+              <LuExternalLink />
               Shikimori
             </Link>
           </HStack>

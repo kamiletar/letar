@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Card, Heading, Icon, Link, Text, VStack } from '@chakra-ui/react'
+import { Box, Card, Heading, Link, Text, VStack } from '@chakra-ui/react'
 import { LuCpu, LuDatabase, LuExternalLink, LuFileVideo, LuMonitor, LuTriangleAlert } from 'react-icons/lu'
 
 interface Problem {
@@ -75,51 +75,54 @@ export default function TroubleshootingPage() {
 
       {/* Проблемы */}
       <VStack align="stretch" gap={6}>
-        {PROBLEMS.map((problem) => (
-          <Card.Root key={problem.title} className="glass" borderRadius="xl">
-            <Card.Body p={6}>
-              <VStack align="stretch" gap={4}>
-                {/* Заголовок */}
-                <Box display="flex" alignItems="center" gap={3}>
-                  <Box p={2} borderRadius="lg" bg="red.500/20" color="red.400">
-                    <Icon as={problem.icon} boxSize={5} />
+        {PROBLEMS.map((problem) => {
+          const ProblemIcon = problem.icon
+          return (
+            <Card.Root key={problem.title} className="glass" borderRadius="xl">
+              <Card.Body p={6}>
+                <VStack align="stretch" gap={4}>
+                  {/* Заголовок */}
+                  <Box display="flex" alignItems="center" gap={3}>
+                    <Box p={2} borderRadius="lg" bg="red.500/20" color="red.400">
+                      <ProblemIcon size={20} />
+                    </Box>
+                    <Heading as="h2" size="md">
+                      {problem.title}
+                    </Heading>
                   </Box>
-                  <Heading as="h2" size="md">
-                    {problem.title}
-                  </Heading>
-                </Box>
 
-                {/* Симптомы */}
-                <Box>
-                  <Text fontSize="sm" fontWeight="bold" color="gray.500" mb={2}>
-                    Симптомы:
-                  </Text>
-                  <VStack align="start" gap={1}>
-                    {problem.symptoms.map((symptom) => (
-                      <Text key={symptom} fontSize="sm" color="gray.400">
-                        • {symptom}
-                      </Text>
-                    ))}
-                  </VStack>
-                </Box>
+                  {/* Симптомы */}
+                  <Box>
+                    <Text fontSize="sm" fontWeight="bold" color="gray.500" mb={2}>
+                      Симптомы:
+                    </Text>
+                    <VStack align="start" gap={1}>
+                      {problem.symptoms.map((symptom) => (
+                        <Text key={symptom} fontSize="sm" color="gray.400">
+                          • {symptom}
+                        </Text>
+                      ))}
+                    </VStack>
+                  </Box>
 
-                {/* Решения */}
-                <Box>
-                  <Text fontSize="sm" fontWeight="bold" color="green.400" mb={2}>
-                    Решения:
-                  </Text>
-                  <VStack align="start" gap={2}>
-                    {problem.solutions.map((solution, index) => (
-                      <Text key={solution} fontSize="sm" color="gray.300">
-                        {index + 1}. {solution}
-                      </Text>
-                    ))}
-                  </VStack>
-                </Box>
-              </VStack>
-            </Card.Body>
-          </Card.Root>
-        ))}
+                  {/* Решения */}
+                  <Box>
+                    <Text fontSize="sm" fontWeight="bold" color="green.400" mb={2}>
+                      Решения:
+                    </Text>
+                    <VStack align="start" gap={2}>
+                      {problem.solutions.map((solution, index) => (
+                        <Text key={solution} fontSize="sm" color="gray.300">
+                          {index + 1}. {solution}
+                        </Text>
+                      ))}
+                    </VStack>
+                  </Box>
+                </VStack>
+              </Card.Body>
+            </Card.Root>
+          )
+        })}
       </VStack>
 
       {/* Дополнительная помощь */}
@@ -127,7 +130,7 @@ export default function TroubleshootingPage() {
         <Card.Body p={6}>
           <Box display="flex" alignItems="center" gap={3} mb={4}>
             <Box p={2} borderRadius="lg" bg="brand.500/20" color="brand.400">
-              <Icon as={LuTriangleAlert} boxSize={5} />
+              <LuTriangleAlert size={20} />
             </Box>
             <Heading as="h2" size="md">
               Не нашли решение?
@@ -148,7 +151,7 @@ export default function TroubleshootingPage() {
             gap={1}
             _hover={{ color: 'brand.300' }}
           >
-            <Icon as={LuExternalLink} />
+            <LuExternalLink />
             Создать Issue на GitHub
           </Link>
         </Card.Body>

@@ -1,7 +1,7 @@
 'use client'
 
 import type { ParsedRelease, ReleaseChange } from '@/types/release'
-import { Badge, Box, Card, Container, Heading, HStack, Icon, Link, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Card, Container, Heading, HStack, Link, Text, VStack } from '@chakra-ui/react'
 import { LuArrowRight, LuSparkles, LuWrench, LuZap } from 'react-icons/lu'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -79,20 +79,22 @@ export function ChangelogSection({ releases }: ChangelogSectionProps) {
                     {/* Список изменений */}
                     {release.changes.length > 0 && (
                       <VStack align="start" gap={2}>
-                        {release.changes.slice(0, 5).map((change) => (
-                          <HStack key={`${release.version}-${change.text.slice(0, 30)}`} gap={2} align="start">
-                            <Icon
-                              as={getChangeIcon(change.type)}
-                              color={getChangeColor(change.type)}
-                              boxSize={4}
-                              mt={0.5}
-                              flexShrink={0}
-                            />
-                            <Text fontSize="sm" color="gray.300">
-                              {change.text}
-                            </Text>
-                          </HStack>
-                        ))}
+                        {release.changes.slice(0, 5).map((change) => {
+                          const ChangeIcon = getChangeIcon(change.type)
+                          return (
+                            <HStack key={`${release.version}-${change.text.slice(0, 30)}`} gap={2} align="start">
+                              <Box mt={0.5} flexShrink={0}>
+                                <ChangeIcon
+                                  size={16}
+                                  color={`var(--chakra-colors-${getChangeColor(change.type).replace('.', '-')})`}
+                                />
+                              </Box>
+                              <Text fontSize="sm" color="gray.300">
+                                {change.text}
+                              </Text>
+                            </HStack>
+                          )
+                        })}
                         {release.changes.length > 5 && (
                           <Text fontSize="xs" color="gray.500">
                             ... и ещё {release.changes.length - 5} изменений
@@ -149,7 +151,7 @@ export function ChangelogSection({ releases }: ChangelogSectionProps) {
             _hover={{ color: 'brand.300' }}
           >
             Все релизы на GitHub
-            <Icon as={LuArrowRight} />
+            <LuArrowRight />
           </Link>
         </VStack>
       </Container>

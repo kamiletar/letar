@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Icon, Link, Text, VStack } from '@chakra-ui/react'
+import { Box, Link, Text, VStack } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { IconType } from 'react-icons'
@@ -30,11 +30,11 @@ export function DocsSidebar() {
         </Text>
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href
+          const NavIcon = item.icon
           return (
             <Link
               key={item.href}
-              as={NextLink}
-              href={item.href}
+              asChild
               display="flex"
               alignItems="center"
               gap={3}
@@ -54,8 +54,10 @@ export function DocsSidebar() {
                 textDecoration: 'none',
               }}
             >
-              <Icon as={item.icon} boxSize={4} />
-              {item.label}
+              <NextLink href={item.href}>
+                <NavIcon size={16} />
+                {item.label}
+              </NextLink>
             </Link>
           )
         })}
@@ -63,8 +65,8 @@ export function DocsSidebar() {
 
       {/* Ссылка на главную */}
       <Box mt={8} pt={4} borderTop="1px solid" borderColor="gray.800">
-        <Link as={NextLink} href="/" fontSize="sm" color="gray.500" px={3} _hover={{ color: 'brand.400' }}>
-          ← Вернуться на главную
+        <Link asChild fontSize="sm" color="gray.500" px={3} _hover={{ color: 'brand.400' }}>
+          <NextLink href="/">← Вернуться на главную</NextLink>
         </Link>
       </Box>
     </Box>

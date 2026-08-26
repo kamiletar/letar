@@ -1,20 +1,7 @@
 'use client'
 
 import type { MacArch, ParsedRelease, Platform } from '@/types/release'
-import {
-  Badge,
-  Box,
-  Button,
-  Container,
-  Heading,
-  HStack,
-  Icon,
-  Link,
-  SimpleGrid,
-  Stack,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import { Badge, Box, Button, Container, Heading, HStack, Link, SimpleGrid, Stack, Text, VStack } from '@chakra-ui/react'
 import { motion, useInView } from 'framer-motion'
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
@@ -172,7 +159,7 @@ function TypingText({ phrases }: { phrases: string[] }) {
 function ScreenshotPlaceholder() {
   return (
     <VStack gap={4} justify="center" align="center" h="full">
-      <Icon as={LuMonitor} boxSize={16} color="gray.700" />
+      <LuMonitor size={64} color="var(--chakra-colors-gray-700)" />
       <Text color="gray.600" fontSize="lg">
         Скриншот приложения
       </Text>
@@ -199,6 +186,7 @@ export function HeroSection({ release }: HeroSectionProps) {
   }, [])
 
   const platformInfo = getPlatformInfo(platform)
+  const PlatformIcon = platformInfo.icon
 
   // Получаем URL для скачивания (для macOS выбираем подходящую архитектуру)
   const downloadUrl = (() => {
@@ -335,7 +323,7 @@ export function HeroSection({ release }: HeroSectionProps) {
                     }}
                   >
                     <Link href={downloadUrl} target="_blank" rel="noopener noreferrer">
-                      <Icon as={platformInfo.icon} />
+                      <PlatformIcon />
                       Скачать для {platformInfo.name}
                     </Link>
                   </Button>
@@ -354,7 +342,7 @@ export function HeroSection({ release }: HeroSectionProps) {
                     }}
                   >
                     <Link href="#downloads">
-                      <Icon as={LuDownload} />
+                      <LuDownload />
                       Скачать
                     </Link>
                   </Button>
@@ -373,7 +361,7 @@ export function HeroSection({ release }: HeroSectionProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <Icon as={LuExternalLink} />
+                  <LuExternalLink />
                   GitHub
                 </Link>
               </Button>
@@ -383,7 +371,7 @@ export function HeroSection({ release }: HeroSectionProps) {
             <SimpleGrid columns={3} gap={8} pt={4}>
               <VStack gap={0}>
                 <HStack gap={1}>
-                  <Icon as={LuZap} color="brand.400" />
+                  <LuZap color="var(--chakra-colors-brand-400)" />
                   <AnimatedCounter value={2} suffix="x" />
                 </HStack>
                 <Text fontSize="sm" color="gray.500">
@@ -392,7 +380,7 @@ export function HeroSection({ release }: HeroSectionProps) {
               </VStack>
               <VStack gap={0}>
                 <HStack gap={1}>
-                  <Icon as={LuSparkles} color="brand.400" />
+                  <LuSparkles color="var(--chakra-colors-brand-400)" />
                   <AnimatedCounter value={95} suffix="+" />
                 </HStack>
                 <Text fontSize="sm" color="gray.500">
@@ -401,7 +389,7 @@ export function HeroSection({ release }: HeroSectionProps) {
               </VStack>
               <VStack gap={0}>
                 <HStack gap={1}>
-                  <Icon as={LuMonitor} color="brand.400" />
+                  <LuMonitor color="var(--chakra-colors-brand-400)" />
                   <AnimatedCounter value={3} />
                 </HStack>
                 <Text fontSize="sm" color="gray.500">
