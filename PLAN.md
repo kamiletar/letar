@@ -3113,3 +3113,23 @@ capitalized-переменную (`const IconComponent = icon`), иначе JSX 
 `apps/*` вне скоупа этой правки (~1406 срабатываний, по всей видимости общий паттерн `<Icon
 as={LuX}>` растиражирован в `animatrona`/`animatrona-tracker`/`animatrona-landing`) — отдельная
 задача.
+
+**Прогресс (2026-08-26, animatrona-landing):** все 27 вхождений `<Icon as={IconComponent}>` в 11
+файлах `apps/animatrona-landing/src/app/**` заменены на прямой рендер иконки — тот же паттерн, что
+и в `libs/video-player-react`/`libs/ui` (`boxSize`→`size` ×4px, статичный `color="токен"`→
+`var(--chakra-colors-<kebab-token>)`, динамический `as={var.icon}` → локальная capitalized-
+переменная перед использованием). Заодно поймано и почищено 2 инстанса `Link as={NextLink}` в
+`docs-sidebar.tsx` — тот же семгреп-паттерн ловит **любой** Chakra-компонент с `as=`, не только
+`Icon`, так что попутные совпадения в файлах, которые правишь по другой причине, стоит чинить
+сразу, а не откладывать. `typecheck:tsgo` + `lint` (oxlint+eslint) зелёные, dev-сервер поднят,
+главная страница и `/docs/quick-start`, `/docs/troubleshooting` проверены живьём — без ошибок в
+консоли, иконки и ссылки рендерятся.
+
+⚠️ **`animatrona-landing` НЕ очищен полностью** — повторный прогон semgrep даёt **49** оставшихся
+срабатываний в этом приложении, ни одного `Icon as=` среди них: это `Box as="section"`,
+`Heading as="h1"/"h2"/"h3"`, `Text as="span"`, `Box as="nav"/"footer"/"button"` — тот же
+запрещённый паттерн, но с HTML-тегом вместо компонента, и часть — в файлах вне исходного списка
+задачи (`footer.tsx`, `app-showcase-section.tsx`, `import-flow-section.tsx`,
+`docs/encoding-profiles/page.tsx`, `docs/keyboard-shortcuts/page.tsx`). Разбор на
+`asChild`+нативный тег — отдельная, более крупная задача (семантические `Heading as="h1"` требуют
+осторожности, чтобы не потерять уровень заголовка); не путать с уже закрытым Icon-паттерном выше.
