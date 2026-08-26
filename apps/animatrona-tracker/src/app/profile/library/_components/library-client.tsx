@@ -2,7 +2,7 @@
 
 import { toaster } from '@/app/_components/ui/toaster'
 import { resolveImageUrl } from '@/lib/ipfs'
-import { Badge, Box, Button, Container, Grid, Heading, HStack, Icon, Image, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Container, Grid, Heading, HStack, Image, Text, VStack } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -72,7 +72,7 @@ export function LibraryClient({ items: initialItems }: LibraryClientProps) {
         {/* Заголовок */}
         <HStack justify="space-between">
           <Heading size="xl">
-            <Icon as={LuBookOpen} mr={3} />
+            <LuBookOpen style={{ marginRight: '12px' }} />
             Моя библиотека
           </Heading>
           <Text color="fg.muted">{initialItems.length} аниме</Text>
@@ -123,6 +123,7 @@ export function LibraryClient({ items: initialItems }: LibraryClientProps) {
                 const status = WATCH_STATUS_MAP[item.watchStatus] || WATCH_STATUS_MAP.NOT_STARTED
                 const completedEpisodes = item.watchProgress.filter((p) => p.completed).length
                 const totalEpisodes = item.anime._count.episodes
+                const PinStatusIcon = item.pinnedLocally ? LuHardDrive : LuCloud
 
                 return (
                   <Box
@@ -152,7 +153,7 @@ export function LibraryClient({ items: initialItems }: LibraryClientProps) {
                           colorPalette={item.pinnedLocally ? 'green' : 'blue'}
                           size="sm"
                         >
-                          <Icon as={item.pinnedLocally ? LuHardDrive : LuCloud} mr={1} />
+                          <PinStatusIcon style={{ marginRight: '4px' }} />
                           {item.pinnedLocally ? 'Локально' : 'Облако'}
                         </Badge>
                       </NextLink>
@@ -170,7 +171,7 @@ export function LibraryClient({ items: initialItems }: LibraryClientProps) {
                         </Badge>
                         {item.userRating !== null && item.userRating !== undefined && (
                           <HStack gap={1}>
-                            <Icon as={LuStar} color="yellow.400" boxSize={3} />
+                            <LuStar size={12} style={{ color: 'var(--chakra-colors-yellow-400)' }} />
                             <Text fontSize="xs">{item.userRating}</Text>
                           </HStack>
                         )}
@@ -185,7 +186,7 @@ export function LibraryClient({ items: initialItems }: LibraryClientProps) {
 
                       {/* Кнопка удаления */}
                       <Button size="xs" variant="ghost" colorPalette="red" onClick={() => handleRemove(item.id)}>
-                        <Icon as={LuTrash2} mr={1} />
+                        <LuTrash2 style={{ marginRight: '4px' }} />
                         Удалить
                       </Button>
                     </VStack>

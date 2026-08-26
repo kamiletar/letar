@@ -11,7 +11,6 @@ import {
   Dialog,
   Heading,
   HStack,
-  Icon,
   IconButton,
   Portal,
   Table,
@@ -77,7 +76,7 @@ export function ApiKeysClient({ keys }: ApiKeysClientProps) {
       {/* Заголовок */}
       <Container maxW="container.lg" pt={6}>
         <Heading size="lg">
-          <Icon as={LuKey} mr={2} />
+          <LuKey style={{ marginRight: '8px' }} />
           API Ключи
         </Heading>
       </Container>
@@ -98,7 +97,7 @@ export function ApiKeysClient({ keys }: ApiKeysClientProps) {
           {/* Форма создания */}
           <Box bg="bg.panel" p={6} borderRadius="xl" borderWidth="1px">
             <Heading size="sm" mb={4}>
-              <Icon as={LuPlus} mr={2} />
+              <LuPlus style={{ marginRight: '8px' }} />
               Создать новый ключ
             </Heading>
 
@@ -146,14 +145,14 @@ export function ApiKeysClient({ keys }: ApiKeysClientProps) {
                       </Text>
                       <Clipboard.Trigger asChild>
                         <IconButton size="sm" variant="ghost" aria-label="Копировать">
-                          <Icon as={LuCopy} />
+                          <LuCopy />
                         </IconButton>
                       </Clipboard.Trigger>
                     </HStack>
                   </Clipboard.Root>
                   <HStack mt={2} gap={2}>
                     <Button size="sm" variant="outline" onClick={() => setShowQR(true)}>
-                      <Icon as={LuQrCode} mr={1} />
+                      <LuQrCode style={{ marginRight: '4px' }} />
                       QR для мобильного
                     </Button>
                     <Button size="sm" variant="ghost" onClick={() => setCreatedKey(null)}>
@@ -184,7 +183,10 @@ export function ApiKeysClient({ keys }: ApiKeysClientProps) {
             {keys.length === 0
               ? (
                 <Box textAlign="center" py={12}>
-                  <Icon as={LuKey} boxSize={10} color="fg.muted" mb={4} />
+                  <LuKey
+                    size={40}
+                    style={{ color: 'var(--chakra-colors-fg-muted)', marginBottom: '16px' }}
+                  />
                   <Text color="fg.muted">У вас пока нет API ключей</Text>
                 </Box>
               )
@@ -203,7 +205,7 @@ export function ApiKeysClient({ keys }: ApiKeysClientProps) {
                       <Table.Row key={key.id}>
                         <Table.Cell>
                           <HStack gap={2}>
-                            <Icon as={LuKey} color="fg.muted" />
+                            <LuKey style={{ color: 'var(--chakra-colors-fg-muted)' }} />
                             <Text fontWeight="medium">{key.name}</Text>
                           </HStack>
                         </Table.Cell>
@@ -235,7 +237,7 @@ export function ApiKeysClient({ keys }: ApiKeysClientProps) {
                             disabled={isPending}
                             onClick={() => setDeleteTarget({ id: key.id, name: key.name })}
                           >
-                            <Icon as={LuTrash2} />
+                            <LuTrash2 />
                           </IconButton>
                         </Table.Cell>
                       </Table.Row>

@@ -1,21 +1,7 @@
 'use client'
 
 import { formatFileSize, formatSeedingTime, resolveImageUrl } from '@/lib/ipfs'
-import {
-  Badge,
-  Box,
-  Button,
-  Container,
-  Flex,
-  Grid,
-  Heading,
-  HStack,
-  Icon,
-  Image,
-  Stat,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import { Badge, Box, Button, Container, Flex, Grid, Heading, HStack, Image, Stat, Text, VStack } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { LuArrowLeft, LuBookOpen, LuCalendar, LuClock, LuFilm, LuTrophy, LuUpload, LuUsers } from 'react-icons/lu'
 
@@ -89,7 +75,7 @@ export function PublicProfileClient({
             <HStack gap={4}>
               <Button asChild variant="ghost" size="sm">
                 <NextLink href="/anime">
-                  <Icon as={LuArrowLeft} mr={2} />
+                  <LuArrowLeft style={{ marginRight: '8px' }} />
                   Каталог
                 </NextLink>
               </Button>
@@ -146,13 +132,13 @@ export function PublicProfileClient({
                       alignItems="center"
                       gap={1}
                     >
-                      <Icon as={LuTrophy} boxSize={3} />
+                      <LuTrophy size={12} />
                       {user.uploaderRank}
                     </Badge>
                   )}
                 </HStack>
                 <HStack color="fg.muted" fontSize="sm" gap={2}>
-                  <Icon as={LuCalendar} />
+                  <LuCalendar />
                   <Text>
                     На трекере с {new Date(user.createdAt).toLocaleDateString('ru', { year: 'numeric', month: 'long' })}
                   </Text>
@@ -166,7 +152,7 @@ export function PublicProfileClient({
             <Stat.Root>
               <Stat.Label>
                 <HStack gap={1}>
-                  <Icon as={LuFilm} boxSize={3} />
+                  <LuFilm size={12} />
                   <Text>Опубликовано</Text>
                 </HStack>
               </Stat.Label>
@@ -178,7 +164,7 @@ export function PublicProfileClient({
                 <Stat.Root>
                   <Stat.Label>
                     <HStack gap={1}>
-                      <Icon as={LuUpload} boxSize={3} />
+                      <LuUpload size={12} />
                       <Text>Отдано</Text>
                     </HStack>
                   </Stat.Label>
@@ -188,7 +174,7 @@ export function PublicProfileClient({
                 <Stat.Root>
                   <Stat.Label>
                     <HStack gap={1}>
-                      <Icon as={LuClock} boxSize={3} />
+                      <LuClock size={12} />
                       <Text>Время раздачи</Text>
                     </HStack>
                   </Stat.Label>
@@ -198,7 +184,7 @@ export function PublicProfileClient({
                 <Stat.Root>
                   <Stat.Label>
                     <HStack gap={1}>
-                      <Icon as={LuUsers} boxSize={3} />
+                      <LuUsers size={12} />
                       <Text>Помог пирам</Text>
                     </HStack>
                   </Stat.Label>
@@ -212,7 +198,7 @@ export function PublicProfileClient({
                 <Stat.Root>
                   <Stat.Label>
                     <HStack gap={1}>
-                      <Icon as={LuBookOpen} boxSize={3} />
+                      <LuBookOpen size={12} />
                       <Text>В библиотеке</Text>
                     </HStack>
                   </Stat.Label>
@@ -236,7 +222,7 @@ export function PublicProfileClient({
           {user.uploaderScore > 0 && (
             <Box bg="bg.panel" p={6} borderRadius="xl" borderWidth="1px">
               <HStack mb={4}>
-                <Icon as={LuTrophy} />
+                <LuTrophy />
                 <Heading size="sm">Рейтинг загрузчика</Heading>
               </HStack>
               <Flex gap={6} align="center" direction={{ base: 'column', sm: 'row' }}>
@@ -281,7 +267,7 @@ export function PublicProfileClient({
           {distributionStats && (activityStats.libraryCount > 0 || activityStats.completedAnimeCount > 0) && (
             <Box bg="bg.panel" p={6} borderRadius="xl" borderWidth="1px">
               <HStack mb={4}>
-                <Icon as={LuBookOpen} />
+                <LuBookOpen />
                 <Heading size="sm">Активность просмотра</Heading>
               </HStack>
               <Grid templateColumns="repeat(3, 1fr)" gap={4}>
@@ -304,14 +290,17 @@ export function PublicProfileClient({
           {/* Опубликованные аниме */}
           <Box>
             <Heading size="lg" mb={4}>
-              <Icon as={LuFilm} mr={2} />
+              <LuFilm style={{ marginRight: '8px' }} />
               Опубликованные аниме
             </Heading>
 
             {publishedAnime.length === 0
               ? (
                 <Box textAlign="center" py={12} bg="bg.panel" borderRadius="xl" borderWidth="1px">
-                  <Icon as={LuFilm} boxSize={10} color="fg.muted" mb={3} />
+                  <LuFilm
+                    size={40}
+                    style={{ color: 'var(--chakra-colors-fg-muted)', marginBottom: '12px' }}
+                  />
                   <Text color="fg.muted">Пока нет опубликованных аниме</Text>
                 </Box>
               )

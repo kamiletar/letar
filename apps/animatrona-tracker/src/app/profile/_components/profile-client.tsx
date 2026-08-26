@@ -10,7 +10,6 @@ import {
   Grid,
   Heading,
   HStack,
-  Icon,
   Input,
   Stat,
   Tabs,
@@ -245,15 +244,15 @@ export function ProfileClient({
                 css={{ '&::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none' }}
               >
                 <Tabs.Trigger value="anime" whiteSpace="nowrap">
-                  <Icon as={LuFilm} mr={1} />
+                  <LuFilm style={{ marginRight: '4px' }} />
                   Мои аниме ({stats.totalAnime})
                 </Tabs.Trigger>
                 <Tabs.Trigger value="stats" whiteSpace="nowrap">
-                  <Icon as={LuHardDrive} mr={1} />
+                  <LuHardDrive style={{ marginRight: '4px' }} />
                   Статистика
                 </Tabs.Trigger>
                 <Tabs.Trigger value="settings" whiteSpace="nowrap">
-                  <Icon as={LuSettings} mr={1} />
+                  <LuSettings style={{ marginRight: '4px' }} />
                   Настройки
                 </Tabs.Trigger>
               </Tabs.List>
@@ -263,7 +262,7 @@ export function ProfileClient({
                 <VStack align="stretch" gap={4}>
                   {/* Поиск */}
                   <Flex gap={2} align="center" maxW="400px">
-                    <Icon as={LuSearch} color="fg.muted" />
+                    <LuSearch style={{ color: 'var(--chakra-colors-fg-muted)' }} />
                     <Input
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
@@ -283,7 +282,10 @@ export function ProfileClient({
                   {animeList.length === 0
                     ? (
                       <Box textAlign="center" py={16} bg="bg.panel" borderRadius="xl">
-                        <Icon as={LuFilm} boxSize={12} color="fg.muted" mb={4} />
+                        <LuFilm
+                          size={48}
+                          style={{ color: 'var(--chakra-colors-fg-muted)', marginBottom: '16px' }}
+                        />
                         <Heading size="lg" mb={2}>
                           {initialQuery ? 'Ничего не найдено' : 'У вас пока нет аниме на трекере'}
                         </Heading>
@@ -325,7 +327,7 @@ export function ProfileClient({
                               disabled={page <= 1}
                               onClick={() => updateParams({ page: String(page - 1), tab: initialTab })}
                             >
-                              <Icon as={LuChevronLeft} />
+                              <LuChevronLeft />
                             </Button>
                             <HStack gap={1}>
                               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -358,7 +360,7 @@ export function ProfileClient({
                               disabled={page >= totalPages}
                               onClick={() => updateParams({ page: String(page + 1), tab: initialTab })}
                             >
-                              <Icon as={LuChevronRight} />
+                              <LuChevronRight />
                             </Button>
                           </Flex>
                         )}
@@ -374,14 +376,14 @@ export function ProfileClient({
                   {distributionStats && (
                     <Box bg="bg.panel" p={6} borderRadius="xl" borderWidth="1px">
                       <HStack mb={4}>
-                        <Icon as={LuHardDrive} />
+                        <LuHardDrive />
                         <Heading size="sm">Раздачи</Heading>
                       </HStack>
                       <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }} gap={4}>
                         <Stat.Root>
                           <Stat.Label>
                             <HStack gap={1}>
-                              <Icon as={LuUpload} boxSize={3} />
+                              <LuUpload size={12} />
                               <Text>Отдано</Text>
                             </HStack>
                           </Stat.Label>
@@ -390,7 +392,7 @@ export function ProfileClient({
                         <Stat.Root>
                           <Stat.Label>
                             <HStack gap={1}>
-                              <Icon as={LuDownload} boxSize={3} />
+                              <LuDownload size={12} />
                               <Text>Загружено</Text>
                             </HStack>
                           </Stat.Label>
@@ -405,7 +407,7 @@ export function ProfileClient({
                         <Stat.Root>
                           <Stat.Label>
                             <HStack gap={1}>
-                              <Icon as={LuClock} boxSize={3} />
+                              <LuClock size={12} />
                               <Text>Время раздачи</Text>
                             </HStack>
                           </Stat.Label>
@@ -414,7 +416,7 @@ export function ProfileClient({
                         <Stat.Root>
                           <Stat.Label>
                             <HStack gap={1}>
-                              <Icon as={LuClock} boxSize={3} />
+                              <LuClock size={12} />
                               <Text>Аптайм</Text>
                             </HStack>
                           </Stat.Label>
@@ -423,7 +425,7 @@ export function ProfileClient({
                         <Stat.Root>
                           <Stat.Label>
                             <HStack gap={1}>
-                              <Icon as={LuUsers} boxSize={3} />
+                              <LuUsers size={12} />
                               <Text>Помог пирам</Text>
                             </HStack>
                           </Stat.Label>
@@ -436,7 +438,7 @@ export function ProfileClient({
                   {/* Активность */}
                   <Box bg="bg.panel" p={6} borderRadius="xl" borderWidth="1px">
                     <HStack mb={4}>
-                      <Icon as={LuBookOpen} />
+                      <LuBookOpen />
                       <Heading size="sm">Активность</Heading>
                     </HStack>
                     <Grid templateColumns={{ base: '1fr', sm: 'repeat(3, 1fr)' }} gap={4}>
@@ -458,7 +460,7 @@ export function ProfileClient({
                   {/* Библиотека — ссылка */}
                   <Button asChild variant="outline" size="lg" w="fit-content">
                     <NextLink href="/profile/library">
-                      <Icon as={LuBookOpen} mr={2} />
+                      <LuBookOpen style={{ marginRight: '8px' }} />
                       Открыть библиотеку
                     </NextLink>
                   </Button>
@@ -471,7 +473,7 @@ export function ProfileClient({
                   {/* Настройки плеера */}
                   <Box bg="bg.panel" p={6} borderRadius="xl" borderWidth="1px">
                     <HStack mb={4}>
-                      <Icon as={LuLanguages} />
+                      <LuLanguages />
                       <Heading size="sm">Настройки плеера</Heading>
                     </HStack>
                     <Text fontSize="sm" color="fg.muted" mb={3}>
@@ -505,7 +507,7 @@ export function ProfileClient({
                   {/* API Ключи */}
                   <Box bg="bg.panel" p={6} borderRadius="xl" borderWidth="1px">
                     <HStack mb={4}>
-                      <Icon as={LuKey} />
+                      <LuKey />
                       <Heading size="sm">API Ключи</Heading>
                     </HStack>
                     <Text fontSize="sm" color="fg.muted" mb={4}>
@@ -513,7 +515,7 @@ export function ProfileClient({
                     </Text>
                     <Button asChild size="sm" variant="outline">
                       <NextLink href="/profile/api-keys">
-                        <Icon as={LuKey} mr={2} />
+                        <LuKey style={{ marginRight: '8px' }} />
                         Управление ключами
                       </NextLink>
                     </Button>
@@ -568,20 +570,20 @@ function LinkedAccountsSection({ linkedAccounts }: { linkedAccounts: LinkedAccou
   return (
     <Box bg="bg.panel" p={6} borderRadius="xl" borderWidth="1px">
       <HStack mb={4}>
-        <Icon as={LuLink} />
+        <LuLink />
         <Heading size="sm">Привязанные аккаунты</Heading>
       </HStack>
 
       <Box>
         <HStack justify="space-between" mb={2}>
           <HStack gap={2}>
-            <Icon as={LuBookOpen} color="green.500" />
+            <LuBookOpen style={{ color: 'var(--chakra-colors-green-500)' }} />
             <Text fontWeight="medium">Shikimori</Text>
           </HStack>
           {hasShikimori
             ? (
               <Badge colorPalette="green" display="flex" alignItems="center" gap={1}>
-                <Icon as={LuCheck} boxSize={3} />
+                <LuCheck size={12} />
                 Привязан
               </Badge>
             )
@@ -592,7 +594,7 @@ function LinkedAccountsSection({ linkedAccounts }: { linkedAccounts: LinkedAccou
           ? (
             <VStack align="stretch" gap={2}>
               <Button size="sm" variant="outline" onClick={handleSync} loading={syncing}>
-                <Icon as={LuRefreshCw} mr={2} />
+                <LuRefreshCw style={{ marginRight: '8px' }} />
                 Синхронизировать список
               </Button>
               {syncResult && (
@@ -604,7 +606,7 @@ function LinkedAccountsSection({ linkedAccounts }: { linkedAccounts: LinkedAccou
           )
           : (
             <Button size="sm" variant="outline" onClick={handleLinkShikimori}>
-              <Icon as={LuLink} mr={2} />
+              <LuLink style={{ marginRight: '8px' }} />
               Привязать Shikimori
             </Button>
           )}
