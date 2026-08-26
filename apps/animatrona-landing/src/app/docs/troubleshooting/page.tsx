@@ -65,8 +65,8 @@ export default function TroubleshootingPage() {
   return (
     <VStack align="stretch" gap={8}>
       <Box>
-        <Heading as="h1" size="xl" mb={4}>
-          Решение проблем
+        <Heading asChild size="xl" mb={4}>
+          <h1>Решение проблем</h1>
         </Heading>
         <Text color="gray.400" fontSize="lg">
           Типичные проблемы и способы их устранения
@@ -86,8 +86,8 @@ export default function TroubleshootingPage() {
                     <Box p={2} borderRadius="lg" bg="red.500/20" color="red.400">
                       <ProblemIcon size={20} />
                     </Box>
-                    <Heading as="h2" size="md">
-                      {problem.title}
+                    <Heading asChild size="md">
+                      <h2>{problem.title}</h2>
                     </Heading>
                   </Box>
 
@@ -132,8 +132,8 @@ export default function TroubleshootingPage() {
             <Box p={2} borderRadius="lg" bg="brand.500/20" color="brand.400">
               <LuTriangleAlert size={20} />
             </Box>
-            <Heading as="h2" size="md">
-              Не нашли решение?
+            <Heading asChild size="md">
+              <h2>Не нашли решение?</h2>
             </Heading>
           </Box>
           <Text color="gray.300" mb={4}>

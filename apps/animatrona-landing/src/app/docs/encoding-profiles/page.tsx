@@ -46,8 +46,8 @@ export default function EncodingProfilesPage() {
   return (
     <VStack align="stretch" gap={8}>
       <Box>
-        <Heading as="h1" size="xl" mb={4}>
-          Профили кодирования
+        <Heading asChild size="xl" mb={4}>
+          <h1>Профили кодирования</h1>
         </Heading>
         <Text color="gray.400" fontSize="lg">
           Готовые настройки для разных сценариев использования
@@ -57,8 +57,8 @@ export default function EncodingProfilesPage() {
       {/* Что такое профили */}
       <Card.Root className="glass" borderRadius="xl">
         <Card.Body p={6}>
-          <Heading as="h2" size="md" mb={4}>
-            Что такое профили кодирования?
+          <Heading asChild size="md" mb={4}>
+            <h2>Что такое профили кодирования?</h2>
           </Heading>
           <Text color="gray.300" lineHeight="tall">
             Профили кодирования — это предустановленные наборы настроек для конвертации видео. Каждый профиль
@@ -75,8 +75,8 @@ export default function EncodingProfilesPage() {
       {/* Встроенные профили */}
       <Card.Root className="glass" borderRadius="xl">
         <Card.Body p={6}>
-          <Heading as="h2" size="md" mb={4}>
-            Встроенные профили
+          <Heading asChild size="md" mb={4}>
+            <h2>Встроенные профили</h2>
           </Heading>
           <Table.Root variant="outline" borderRadius="lg" overflow="hidden">
             <Table.Header>
@@ -123,8 +123,8 @@ export default function EncodingProfilesPage() {
           <Card.Root key={profile.name} className="glass" borderRadius="xl">
             <Card.Body p={6}>
               <HStack justify="space-between" mb={2}>
-                <Heading as="h3" size="sm">
-                  {profile.name}
+                <Heading asChild size="sm">
+                  <h3>{profile.name}</h3>
                 </Heading>
                 <Badge
                   colorPalette={profile.name === 'Quality' ? 'purple' : profile.name === 'Balanced' ? 'blue' : 'green'}
@@ -143,8 +143,8 @@ export default function EncodingProfilesPage() {
       {/* VMAF */}
       <Card.Root className="glass" borderRadius="xl">
         <Card.Body p={6}>
-          <Heading as="h2" size="md" mb={4}>
-            VMAF оптимизация
+          <Heading asChild size="md" mb={4}>
+            <h2>VMAF оптимизация</h2>
           </Heading>
           <Text color="gray.300" lineHeight="tall">
             VMAF (Video Multi-method Assessment Fusion) — это метрика качества видео, разработанная Netflix. Animatrona

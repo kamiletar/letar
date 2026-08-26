@@ -119,51 +119,53 @@ function TechCard({ tech }: TechCardProps) {
 
 export function TechStackSection() {
   return (
-    <Box as="section" id="tech" py={{ base: 12, md: 16 }} bg="gray.900/30">
-      <Container maxW="container.xl">
-        <VStack gap={10}>
-          {/* Заголовок */}
-          <MotionVStack
-            gap={2}
-            textAlign="center"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <Heading as="h2" size={{ base: 'xl', md: '2xl' }}>
-              Технологии
-            </Heading>
-            <Text color="gray.500" fontSize="md">
-              Современный стек для надёжной работы
-            </Text>
-          </MotionVStack>
+    <Box asChild id="tech" py={{ base: 12, md: 16 }} bg="gray.900/30">
+      <section>
+        <Container maxW="container.xl">
+          <VStack gap={10}>
+            {/* Заголовок */}
+            <MotionVStack
+              gap={2}
+              textAlign="center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <Heading asChild size={{ base: 'xl', md: '2xl' }}>
+                <h2>Технологии</h2>
+              </Heading>
+              <Text color="gray.500" fontSize="md">
+                Современный стек для надёжной работы
+              </Text>
+            </MotionVStack>
 
-          {/* Иконки технологий */}
-          <MotionSimpleGrid
-            columns={{ base: 2, sm: 3, md: 6 }}
-            gap={4}
-            w="full"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-50px' }}
-          >
-            {TECH_STACK.map((tech) => <TechCard key={tech.name} tech={tech} />)}
-          </MotionSimpleGrid>
+            {/* Иконки технологий */}
+            <MotionSimpleGrid
+              columns={{ base: 2, sm: 3, md: 6 }}
+              gap={4}
+              w="full"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-50px' }}
+            >
+              {TECH_STACK.map((tech) => <TechCard key={tech.name} tech={tech} />)}
+            </MotionSimpleGrid>
 
-          {/* Дополнительные технологии */}
-          <HStack gap={4} flexWrap="wrap" justify="center" color="gray.600" fontSize="sm">
-            <Text>+ Next.js</Text>
-            <Text>•</Text>
-            <Text>+ Zustand</Text>
-            <Text>•</Text>
-            <Text>+ Shaka Player</Text>
-            <Text>•</Text>
-            <Text>+ SubtitlesOctopus</Text>
-          </HStack>
-        </VStack>
-      </Container>
+            {/* Дополнительные технологии */}
+            <HStack gap={4} flexWrap="wrap" justify="center" color="gray.600" fontSize="sm">
+              <Text>+ Next.js</Text>
+              <Text>•</Text>
+              <Text>+ Zustand</Text>
+              <Text>•</Text>
+              <Text>+ Shaka Player</Text>
+              <Text>•</Text>
+              <Text>+ SubtitlesOctopus</Text>
+            </HStack>
+          </VStack>
+        </Container>
+      </section>
     </Box>
   )
 }

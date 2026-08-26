@@ -45,116 +45,118 @@ export function ChangelogSection({ releases }: ChangelogSectionProps) {
   }
 
   return (
-    <Box as="section" id="changelog" py={{ base: 16, md: 24 }} bg="gray.900/50">
-      <Container maxW="container.lg">
-        <VStack gap={12}>
-          {/* Заголовок */}
-          <VStack gap={4} textAlign="center">
-            <Heading as="h2" size={{ base: '2xl', md: '3xl' }}>
-              История изменений
-            </Heading>
-            <Text color="gray.400" fontSize="lg">
-              Последние обновления и улучшения
-            </Text>
-          </VStack>
+    <Box asChild id="changelog" py={{ base: 16, md: 24 }} bg="gray.900/50">
+      <section>
+        <Container maxW="container.lg">
+          <VStack gap={12}>
+            {/* Заголовок */}
+            <VStack gap={4} textAlign="center">
+              <Heading asChild size={{ base: '2xl', md: '3xl' }}>
+                <h2>История изменений</h2>
+              </Heading>
+              <Text color="gray.400" fontSize="lg">
+                Последние обновления и улучшения
+              </Text>
+            </VStack>
 
-          {/* Список релизов */}
-          <VStack gap={4} w="full">
-            {displayReleases.map((release) => (
-              <Card.Root key={release.version} className="glass" borderRadius="xl" w="full">
-                <Card.Body p={6}>
-                  <VStack align="stretch" gap={4}>
-                    {/* Заголовок релиза */}
-                    <HStack justify="space-between" wrap="wrap" gap={2}>
-                      <HStack gap={3}>
-                        <Badge colorPalette="purple" px={3} py={1} borderRadius="full" fontSize="sm">
-                          v{release.version}
-                        </Badge>
-                        <Text color="gray.500" fontSize="sm">
-                          {release.date}
-                        </Text>
-                      </HStack>
-                    </HStack>
-
-                    {/* Список изменений */}
-                    {release.changes.length > 0 && (
-                      <VStack align="start" gap={2}>
-                        {release.changes.slice(0, 5).map((change) => {
-                          const ChangeIcon = getChangeIcon(change.type)
-                          return (
-                            <HStack key={`${release.version}-${change.text.slice(0, 30)}`} gap={2} align="start">
-                              <Box mt={0.5} flexShrink={0}>
-                                <ChangeIcon
-                                  size={16}
-                                  color={`var(--chakra-colors-${getChangeColor(change.type).replace('.', '-')})`}
-                                />
-                              </Box>
-                              <Text fontSize="sm" color="gray.300">
-                                {change.text}
-                              </Text>
-                            </HStack>
-                          )
-                        })}
-                        {release.changes.length > 5 && (
-                          <Text fontSize="xs" color="gray.500">
-                            ... и ещё {release.changes.length - 5} изменений
+            {/* Список релизов */}
+            <VStack gap={4} w="full">
+              {displayReleases.map((release) => (
+                <Card.Root key={release.version} className="glass" borderRadius="xl" w="full">
+                  <Card.Body p={6}>
+                    <VStack align="stretch" gap={4}>
+                      {/* Заголовок релиза */}
+                      <HStack justify="space-between" wrap="wrap" gap={2}>
+                        <HStack gap={3}>
+                          <Badge colorPalette="purple" px={3} py={1} borderRadius="full" fontSize="sm">
+                            v{release.version}
+                          </Badge>
+                          <Text color="gray.500" fontSize="sm">
+                            {release.date}
                           </Text>
-                        )}
-                      </VStack>
-                    )}
+                        </HStack>
+                      </HStack>
 
-                    {/* Если нет структурированных изменений — рендерим rawBody */}
-                    {release.changes.length === 0 && release.rawBody && (
-                      <Box
-                        className="changelog-markdown"
-                        fontSize="sm"
-                        color="gray.300"
-                        css={{
-                          '& p': { marginBottom: '0.5em' },
-                          '& ul, & ol': { marginLeft: '1.5em', marginBottom: '0.5em' },
-                          '& li': { marginBottom: '0.25em' },
-                          '& a': { color: 'var(--chakra-colors-brand-400)', textDecoration: 'underline' },
-                          '& code': {
-                            background: 'rgba(255,255,255,0.1)',
-                            padding: '0.1em 0.3em',
-                            borderRadius: '3px',
-                          },
-                          '& h1, & h2, & h3': { fontWeight: 'bold', marginTop: '0.5em', marginBottom: '0.25em' },
-                        }}
-                      >
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{release.rawBody}</ReactMarkdown>
-                      </Box>
-                    )}
+                      {/* Список изменений */}
+                      {release.changes.length > 0 && (
+                        <VStack align="start" gap={2}>
+                          {release.changes.slice(0, 5).map((change) => {
+                            const ChangeIcon = getChangeIcon(change.type)
+                            return (
+                              <HStack key={`${release.version}-${change.text.slice(0, 30)}`} gap={2} align="start">
+                                <Box mt={0.5} flexShrink={0}>
+                                  <ChangeIcon
+                                    size={16}
+                                    color={`var(--chakra-colors-${getChangeColor(change.type).replace('.', '-')})`}
+                                  />
+                                </Box>
+                                <Text fontSize="sm" color="gray.300">
+                                  {change.text}
+                                </Text>
+                              </HStack>
+                            )
+                          })}
+                          {release.changes.length > 5 && (
+                            <Text fontSize="xs" color="gray.500">
+                              ... и ещё {release.changes.length - 5} изменений
+                            </Text>
+                          )}
+                        </VStack>
+                      )}
 
-                    {/* Если вообще нет данных */}
-                    {release.changes.length === 0 && !release.rawBody && (
-                      <Text fontSize="sm" color="gray.500">
-                        Подробности на GitHub
-                      </Text>
-                    )}
-                  </VStack>
-                </Card.Body>
-              </Card.Root>
-            ))}
+                      {/* Если нет структурированных изменений — рендерим rawBody */}
+                      {release.changes.length === 0 && release.rawBody && (
+                        <Box
+                          className="changelog-markdown"
+                          fontSize="sm"
+                          color="gray.300"
+                          css={{
+                            '& p': { marginBottom: '0.5em' },
+                            '& ul, & ol': { marginLeft: '1.5em', marginBottom: '0.5em' },
+                            '& li': { marginBottom: '0.25em' },
+                            '& a': { color: 'var(--chakra-colors-brand-400)', textDecoration: 'underline' },
+                            '& code': {
+                              background: 'rgba(255,255,255,0.1)',
+                              padding: '0.1em 0.3em',
+                              borderRadius: '3px',
+                            },
+                            '& h1, & h2, & h3': { fontWeight: 'bold', marginTop: '0.5em', marginBottom: '0.25em' },
+                          }}
+                        >
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{release.rawBody}</ReactMarkdown>
+                        </Box>
+                      )}
+
+                      {/* Если вообще нет данных */}
+                      {release.changes.length === 0 && !release.rawBody && (
+                        <Text fontSize="sm" color="gray.500">
+                          Подробности на GitHub
+                        </Text>
+                      )}
+                    </VStack>
+                  </Card.Body>
+                </Card.Root>
+              ))}
+            </VStack>
+
+            {/* Ссылка на все релизы */}
+            <Link
+              href="https://github.com/kamiletar/letar/releases"
+              target="_blank"
+              rel="noopener noreferrer"
+              color="brand.400"
+              fontSize="sm"
+              display="flex"
+              alignItems="center"
+              gap={1}
+              _hover={{ color: 'brand.300' }}
+            >
+              Все релизы на GitHub
+              <LuArrowRight />
+            </Link>
           </VStack>
-
-          {/* Ссылка на все релизы */}
-          <Link
-            href="https://github.com/kamiletar/letar/releases"
-            target="_blank"
-            rel="noopener noreferrer"
-            color="brand.400"
-            fontSize="sm"
-            display="flex"
-            alignItems="center"
-            gap={1}
-            _hover={{ color: 'brand.300' }}
-          >
-            Все релизы на GitHub
-            <LuArrowRight />
-          </Link>
-        </VStack>
-      </Container>
+        </Container>
+      </section>
     </Box>
   )
 }

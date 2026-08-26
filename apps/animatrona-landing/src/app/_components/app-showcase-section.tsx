@@ -113,32 +113,34 @@ function ShowcaseCard({ item, index }: { item: ShowcaseItem; index: number }) {
 
 export function AppShowcaseSection() {
   return (
-    <Box as="section" id="showcase" py={{ base: 16, md: 24 }} bg="gray.900/30">
-      <Container maxW="container.xl">
-        <VStack gap={{ base: 8, md: 12 }}>
-          {/* Заголовок */}
-          <MotionVStack
-            gap={4}
-            textAlign="center"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <Heading as="h2" size={{ base: '2xl', md: '3xl' }}>
-              Приложение в деле
-            </Heading>
-            <Text color="gray.400" fontSize="lg" maxW="2xl">
-              Современный интерфейс для комфортной работы с аниме-коллекцией
-            </Text>
-          </MotionVStack>
+    <Box asChild id="showcase" py={{ base: 16, md: 24 }} bg="gray.900/30">
+      <section>
+        <Container maxW="container.xl">
+          <VStack gap={{ base: 8, md: 12 }}>
+            {/* Заголовок */}
+            <MotionVStack
+              gap={4}
+              textAlign="center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <Heading asChild size={{ base: '2xl', md: '3xl' }}>
+                <h2>Приложение в деле</h2>
+              </Heading>
+              <Text color="gray.400" fontSize="lg" maxW="2xl">
+                Современный интерфейс для комфортной работы с аниме-коллекцией
+              </Text>
+            </MotionVStack>
 
-          {/* Bento Grid */}
-          <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }} gap={6} w="full">
-            {SHOWCASE_ITEMS.map((item, index) => <ShowcaseCard key={item.title} item={item} index={index} />)}
-          </Grid>
-        </VStack>
-      </Container>
+            {/* Bento Grid */}
+            <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }} gap={6} w="full">
+              {SHOWCASE_ITEMS.map((item, index) => <ShowcaseCard key={item.title} item={item} index={index} />)}
+            </Grid>
+          </VStack>
+        </Container>
+      </section>
     </Box>
   )
 }

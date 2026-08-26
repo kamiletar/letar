@@ -84,8 +84,8 @@ export default function KeyboardShortcutsPage() {
   return (
     <VStack align="stretch" gap={8}>
       <Box>
-        <Heading as="h1" size="xl" mb={4}>
-          Горячие клавиши
+        <Heading asChild size="xl" mb={4}>
+          <h1>Горячие клавиши</h1>
         </Heading>
         <Text color="gray.400" fontSize="lg">
           Быстрые клавиши для эффективной работы с приложением
@@ -95,8 +95,8 @@ export default function KeyboardShortcutsPage() {
       {/* Воспроизведение */}
       <Card.Root className="glass" borderRadius="xl">
         <Card.Body p={6}>
-          <Heading as="h2" size="md" mb={4}>
-            Управление воспроизведением
+          <Heading asChild size="md" mb={4}>
+            <h2>Управление воспроизведением</h2>
           </Heading>
           <ShortcutTable shortcuts={PLAYBACK_SHORTCUTS} />
         </Card.Body>
@@ -105,8 +105,8 @@ export default function KeyboardShortcutsPage() {
       {/* Навигация */}
       <Card.Root className="glass" borderRadius="xl">
         <Card.Body p={6}>
-          <Heading as="h2" size="md" mb={4}>
-            Навигация
+          <Heading asChild size="md" mb={4}>
+            <h2>Навигация</h2>
           </Heading>
           <ShortcutTable shortcuts={NAVIGATION_SHORTCUTS} />
         </Card.Body>
@@ -115,8 +115,8 @@ export default function KeyboardShortcutsPage() {
       {/* Кодирование */}
       <Card.Root className="glass" borderRadius="xl">
         <Card.Body p={6}>
-          <Heading as="h2" size="md" mb={4}>
-            Кодирование
+          <Heading asChild size="md" mb={4}>
+            <h2>Кодирование</h2>
           </Heading>
           <ShortcutTable shortcuts={ENCODING_SHORTCUTS} />
         </Card.Body>

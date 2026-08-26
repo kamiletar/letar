@@ -138,13 +138,15 @@ function FeatureCard({ feature }: FeatureCardProps) {
 
             {/* Заголовок и описание */}
             <VStack align="start" gap={1}>
-              <Heading as="h3" size="md" color="white">
-                {feature.title}
-                {feature.isMain && (
-                  <Text as="span" ml={2} fontSize="xs" color="brand.400" fontWeight="normal">
-                    ★ Главное
-                  </Text>
-                )}
+              <Heading asChild size="md" color="white">
+                <h3>
+                  {feature.title}
+                  {feature.isMain && (
+                    <Text asChild ml={2} fontSize="xs" color="brand.400" fontWeight="normal">
+                      <span>★ Главное</span>
+                    </Text>
+                  )}
+                </h3>
               </Heading>
               <Text color="gray.400" fontSize="sm">
                 {feature.description}
@@ -171,40 +173,42 @@ function FeatureCard({ feature }: FeatureCardProps) {
 
 export function FeaturesSection() {
   return (
-    <Box as="section" id="features" py={{ base: 16, md: 24 }}>
-      <Container maxW="container.xl">
-        <VStack gap={12}>
-          {/* Заголовок */}
-          <MotionVStack
-            gap={4}
-            textAlign="center"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <Heading as="h2" size={{ base: '2xl', md: '3xl' }}>
-              Возможности
-            </Heading>
-            <Text color="gray.400" fontSize="lg" maxW="2xl">
-              Всё необходимое для управления аниме-коллекцией в одном приложении
-            </Text>
-          </MotionVStack>
+    <Box asChild id="features" py={{ base: 16, md: 24 }}>
+      <section>
+        <Container maxW="container.xl">
+          <VStack gap={12}>
+            {/* Заголовок */}
+            <MotionVStack
+              gap={4}
+              textAlign="center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <Heading asChild size={{ base: '2xl', md: '3xl' }}>
+                <h2>Возможности</h2>
+              </Heading>
+              <Text color="gray.400" fontSize="lg" maxW="2xl">
+                Всё необходимое для управления аниме-коллекцией в одном приложении
+              </Text>
+            </MotionVStack>
 
-          {/* Карточки с stagger анимацией */}
-          <MotionSimpleGrid
-            columns={{ base: 1, md: 2, lg: 3 }}
-            gap={6}
-            w="full"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-100px' }}
-          >
-            {FEATURES.map((feature) => <FeatureCard key={feature.title} feature={feature} />)}
-          </MotionSimpleGrid>
-        </VStack>
-      </Container>
+            {/* Карточки с stagger анимацией */}
+            <MotionSimpleGrid
+              columns={{ base: 1, md: 2, lg: 3 }}
+              gap={6}
+              w="full"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-100px' }}
+            >
+              {FEATURES.map((feature) => <FeatureCard key={feature.title} feature={feature} />)}
+            </MotionSimpleGrid>
+          </VStack>
+        </Container>
+      </section>
     </Box>
   )
 }

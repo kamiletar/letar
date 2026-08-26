@@ -100,9 +100,11 @@ function AnimatedCounter({ value, suffix = '', duration = 2 }: { value: number; 
   }, [isInView, value, duration])
 
   return (
-    <Box as="span" ref={ref} fontSize="2xl" fontWeight="bold" color="white">
-      {count}
-      {suffix}
+    <Box asChild ref={ref} fontSize="2xl" fontWeight="bold" color="white">
+      <span>
+        {count}
+        {suffix}
+      </span>
     </Box>
   )
 }
@@ -144,11 +146,13 @@ function TypingText({ phrases }: { phrases: string[] }) {
   }, [displayText, isDeleting, currentPhrase, phrases])
 
   return (
-    <Text as="span" color="brand.400">
-      {displayText}
-      <Text as="span" animation="blink 1s step-end infinite" color="brand.400">
-        |
-      </Text>
+    <Text asChild color="brand.400">
+      <span>
+        {displayText}
+        <Text asChild animation="blink 1s step-end infinite" color="brand.400">
+          <span>|</span>
+        </Text>
+      </span>
     </Text>
   )
 }
@@ -205,293 +209,304 @@ export function HeroSection({ release }: HeroSectionProps) {
   })()
 
   return (
-    <Box as="section" pt={{ base: 24, md: 32 }} pb={{ base: 16, md: 24 }} position="relative" overflow="hidden">
-      {/* Aurora gradient background */}
-      <Box position="absolute" inset={0} overflow="hidden" pointerEvents="none">
-        {/* Primary gradient blob */}
-        <MotionBox
-          position="absolute"
-          top="-30%"
-          left="20%"
-          width="60%"
-          height="60%"
-          bgGradient="radial-gradient(circle at center, rgba(139, 61, 255, 0.25) 0%, transparent 70%)"
-          filter="blur(60px)"
-          animate={{
-            x: [0, 50, 0],
-            y: [0, -30, 0],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        />
-        {/* Secondary gradient blob */}
-        <MotionBox
-          position="absolute"
-          top="10%"
-          right="10%"
-          width="40%"
-          height="40%"
-          bgGradient="radial-gradient(circle at center, rgba(88, 28, 135, 0.2) 0%, transparent 70%)"
-          filter="blur(80px)"
-          animate={{
-            x: [0, -40, 0],
-            y: [0, 40, 0],
-            scale: [1, 0.9, 1],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        />
-        {/* Accent gradient blob */}
-        <MotionBox
-          position="absolute"
-          bottom="0%"
-          left="40%"
-          width="50%"
-          height="50%"
-          bgGradient="radial-gradient(circle at center, rgba(192, 132, 252, 0.15) 0%, transparent 70%)"
-          filter="blur(100px)"
-          animate={{
-            x: [0, 30, 0],
-            y: [0, -20, 0],
-          }}
-          transition={{
-            duration: 12,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        />
-      </Box>
-
-      <Container maxW="container.xl" position="relative">
-        <Stack direction={{ base: 'column', lg: 'row' }} gap={{ base: 12, lg: 16 }} align="center">
-          {/* Текстовый контент */}
-          <MotionVStack
-            flex={1}
-            align={{ base: 'center', lg: 'start' }}
-            gap={6}
-            textAlign={{ base: 'center', lg: 'left' }}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            {/* Бейдж версии */}
-            <Badge colorPalette="purple" px={3} py={1} borderRadius="full" fontSize="sm">
-              v{version} — Новый релиз
-            </Badge>
-
-            {/* Заголовок */}
-            <Heading as="h1" size={{ base: '3xl', md: '4xl', lg: '5xl' }} fontWeight="bold" lineHeight="1.1">
-              <Text as="span" className="gradient-text">
-                Animatrona
-              </Text>
-              <br />
-              <Text as="span" color="gray.100">
-                <TypingText
-                  phrases={['Умная библиотека аниме', 'GPU-транскодирование', 'Импорт из Shikimori', 'Автоподбор VMAF']}
-                />
-              </Text>
-            </Heading>
-
-            {/* Описание */}
-            <Text fontSize={{ base: 'lg', md: 'xl' }} color="gray.400" maxW="xl">
-              Desktop приложение для управления аниме-коллекцией с GPU-ускоренным транскодированием, автоподбором
-              качества VMAF и импортом метаданных с Shikimori.
-            </Text>
-
-            {/* Кнопки */}
-            <HStack gap={4} pt={2} flexWrap="wrap" justify={{ base: 'center', lg: 'start' }}>
-              {/* Smart Download Button */}
-              {downloadUrl
-                ? (
-                  <Button
-                    asChild
-                    size={{ base: 'lg', md: 'xl' }}
-                    colorPalette="purple"
-                    className="glow"
-                    transitionProperty="transform, box-shadow"
-                    transitionDuration="0.2s"
-                    _hover={{
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 0 40px rgba(139, 61, 255, 0.5)',
-                    }}
-                  >
-                    <Link href={downloadUrl} target="_blank" rel="noopener noreferrer">
-                      <PlatformIcon />
-                      Скачать для {platformInfo.name}
-                    </Link>
-                  </Button>
-                )
-                : (
-                  <Button
-                    asChild
-                    size={{ base: 'lg', md: 'xl' }}
-                    colorPalette="purple"
-                    className="glow"
-                    transitionProperty="transform, box-shadow"
-                    transitionDuration="0.2s"
-                    _hover={{
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 0 40px rgba(139, 61, 255, 0.5)',
-                    }}
-                  >
-                    <Link href="#downloads">
-                      <LuDownload />
-                      Скачать
-                    </Link>
-                  </Button>
-                )}
-
-              <Button
-                asChild
-                size={{ base: 'lg', md: 'xl' }}
-                variant="outline"
-                borderColor="gray.700"
-                color="gray.300"
-                _hover={{ borderColor: 'gray.600', bg: 'gray.900' }}
-              >
-                <Link
-                  href="https://github.com/kamiletar/letar/tree/main/apps/animatrona"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <LuExternalLink />
-                  GitHub
-                </Link>
-              </Button>
-            </HStack>
-
-            {/* Статистика с анимированными счётчиками */}
-            <SimpleGrid columns={3} gap={8} pt={4}>
-              <VStack gap={0}>
-                <HStack gap={1}>
-                  <LuZap color="var(--chakra-colors-brand-400)" />
-                  <AnimatedCounter value={2} suffix="x" />
-                </HStack>
-                <Text fontSize="sm" color="gray.500">
-                  Dual NVENC
-                </Text>
-              </VStack>
-              <VStack gap={0}>
-                <HStack gap={1}>
-                  <LuSparkles color="var(--chakra-colors-brand-400)" />
-                  <AnimatedCounter value={95} suffix="+" />
-                </HStack>
-                <Text fontSize="sm" color="gray.500">
-                  VMAF качество
-                </Text>
-              </VStack>
-              <VStack gap={0}>
-                <HStack gap={1}>
-                  <LuMonitor color="var(--chakra-colors-brand-400)" />
-                  <AnimatedCounter value={3} />
-                </HStack>
-                <Text fontSize="sm" color="gray.500">
-                  Платформы
-                </Text>
-              </VStack>
-            </SimpleGrid>
-          </MotionVStack>
-
-          {/* Превью приложения */}
+    <Box asChild pt={{ base: 24, md: 32 }} pb={{ base: 16, md: 24 }} position="relative" overflow="hidden">
+      <section>
+        {/* Aurora gradient background */}
+        <Box position="absolute" inset={0} overflow="hidden" pointerEvents="none">
+          {/* Primary gradient blob */}
           <MotionBox
-            flex={1}
-            maxW={{ base: 'full', lg: '600px' }}
-            position="relative"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            <Box
-              className="glass"
-              borderRadius="2xl"
-              overflow="hidden"
-              boxShadow="0 0 60px rgba(139, 61, 255, 0.2)"
-              animation="float 6s ease-in-out infinite"
+            position="absolute"
+            top="-30%"
+            left="20%"
+            width="60%"
+            height="60%"
+            bgGradient="radial-gradient(circle at center, rgba(139, 61, 255, 0.25) 0%, transparent 70%)"
+            filter="blur(60px)"
+            animate={{
+              x: [0, 50, 0],
+              y: [0, -30, 0],
+              scale: [1, 1.1, 1],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          />
+          {/* Secondary gradient blob */}
+          <MotionBox
+            position="absolute"
+            top="10%"
+            right="10%"
+            width="40%"
+            height="40%"
+            bgGradient="radial-gradient(circle at center, rgba(88, 28, 135, 0.2) 0%, transparent 70%)"
+            filter="blur(80px)"
+            animate={{
+              x: [0, -40, 0],
+              y: [0, 40, 0],
+              scale: [1, 0.9, 1],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          />
+          {/* Accent gradient blob */}
+          <MotionBox
+            position="absolute"
+            bottom="0%"
+            left="40%"
+            width="50%"
+            height="50%"
+            bgGradient="radial-gradient(circle at center, rgba(192, 132, 252, 0.15) 0%, transparent 70%)"
+            filter="blur(100px)"
+            animate={{
+              x: [0, 30, 0],
+              y: [0, -20, 0],
+            }}
+            transition={{
+              duration: 12,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          />
+        </Box>
+
+        <Container maxW="container.xl" position="relative">
+          <Stack direction={{ base: 'column', lg: 'row' }} gap={{ base: 12, lg: 16 }} align="center">
+            {/* Текстовый контент */}
+            <MotionVStack
+              flex={1}
+              align={{ base: 'center', lg: 'start' }}
+              gap={6}
+              textAlign={{ base: 'center', lg: 'left' }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
             >
-              {/* Скриншот или placeholder */}
-              <Box
-                bg="gray.900"
-                aspectRatio={16 / 10}
-                position="relative"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                {imageError ? <ScreenshotPlaceholder /> : (
-                  <Image
-                    src="/screenshots/library.png"
-                    alt="Animatrona - Библиотека аниме"
-                    fill
-                    style={{ objectFit: 'cover' }}
-                    preload
-                    fetchPriority="high"
-                    onError={() => setImageError(true)}
-                  />
-                )}
-              </Box>
-            </Box>
+              {/* Бейдж версии */}
+              <Badge colorPalette="purple" px={3} py={1} borderRadius="full" fontSize="sm">
+                v{version} — Новый релиз
+              </Badge>
 
-            {/* Декоративные элементы */}
-            <Box
-              position="absolute"
-              top={-4}
-              right={-4}
-              width={24}
-              height={24}
-              bgGradient="radial-gradient(circle, rgba(139, 61, 255, 0.3), transparent)"
-              borderRadius="full"
-              filter="blur(20px)"
-              pointerEvents="none"
-            />
-            <Box
-              position="absolute"
-              bottom={-6}
-              left={-6}
-              width={32}
-              height={32}
-              bgGradient="radial-gradient(circle, rgba(88, 28, 135, 0.3), transparent)"
-              borderRadius="full"
-              filter="blur(30px)"
-              pointerEvents="none"
-            />
+              {/* Заголовок */}
+              <Heading asChild size={{ base: '3xl', md: '4xl', lg: '5xl' }} fontWeight="bold" lineHeight="1.1">
+                <h1>
+                  <Text asChild className="gradient-text">
+                    <span>Animatrona</span>
+                  </Text>
+                  <br />
+                  <Text asChild color="gray.100">
+                    <span>
+                      <TypingText
+                        phrases={[
+                          'Умная библиотека аниме',
+                          'GPU-транскодирование',
+                          'Импорт из Shikimori',
+                          'Автоподбор VMAF',
+                        ]}
+                      />
+                    </span>
+                  </Text>
+                </h1>
+              </Heading>
 
-            {/* Маскот — floating справа-снизу */}
+              {/* Описание */}
+              <Text fontSize={{ base: 'lg', md: 'xl' }} color="gray.400" maxW="xl">
+                Desktop приложение для управления аниме-коллекцией с GPU-ускоренным транскодированием, автоподбором
+                качества VMAF и импортом метаданных с Shikimori.
+              </Text>
+
+              {/* Кнопки */}
+              <HStack gap={4} pt={2} flexWrap="wrap" justify={{ base: 'center', lg: 'start' }}>
+                {/* Smart Download Button */}
+                {downloadUrl
+                  ? (
+                    <Button
+                      asChild
+                      size={{ base: 'lg', md: 'xl' }}
+                      colorPalette="purple"
+                      className="glow"
+                      transitionProperty="transform, box-shadow"
+                      transitionDuration="0.2s"
+                      _hover={{
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 0 40px rgba(139, 61, 255, 0.5)',
+                      }}
+                    >
+                      <Link href={downloadUrl} target="_blank" rel="noopener noreferrer">
+                        <PlatformIcon />
+                        Скачать для {platformInfo.name}
+                      </Link>
+                    </Button>
+                  )
+                  : (
+                    <Button
+                      asChild
+                      size={{ base: 'lg', md: 'xl' }}
+                      colorPalette="purple"
+                      className="glow"
+                      transitionProperty="transform, box-shadow"
+                      transitionDuration="0.2s"
+                      _hover={{
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 0 40px rgba(139, 61, 255, 0.5)',
+                      }}
+                    >
+                      <Link href="#downloads">
+                        <LuDownload />
+                        Скачать
+                      </Link>
+                    </Button>
+                  )}
+
+                <Button
+                  asChild
+                  size={{ base: 'lg', md: 'xl' }}
+                  variant="outline"
+                  borderColor="gray.700"
+                  color="gray.300"
+                  _hover={{ borderColor: 'gray.600', bg: 'gray.900' }}
+                >
+                  <Link
+                    href="https://github.com/kamiletar/letar/tree/main/apps/animatrona"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <LuExternalLink />
+                    GitHub
+                  </Link>
+                </Button>
+              </HStack>
+
+              {/* Статистика с анимированными счётчиками */}
+              <SimpleGrid columns={3} gap={8} pt={4}>
+                <VStack gap={0}>
+                  <HStack gap={1}>
+                    <LuZap color="var(--chakra-colors-brand-400)" />
+                    <AnimatedCounter value={2} suffix="x" />
+                  </HStack>
+                  <Text fontSize="sm" color="gray.500">
+                    Dual NVENC
+                  </Text>
+                </VStack>
+                <VStack gap={0}>
+                  <HStack gap={1}>
+                    <LuSparkles color="var(--chakra-colors-brand-400)" />
+                    <AnimatedCounter value={95} suffix="+" />
+                  </HStack>
+                  <Text fontSize="sm" color="gray.500">
+                    VMAF качество
+                  </Text>
+                </VStack>
+                <VStack gap={0}>
+                  <HStack gap={1}>
+                    <LuMonitor color="var(--chakra-colors-brand-400)" />
+                    <AnimatedCounter value={3} />
+                  </HStack>
+                  <Text fontSize="sm" color="gray.500">
+                    Платформы
+                  </Text>
+                </VStack>
+              </SimpleGrid>
+            </MotionVStack>
+
+            {/* Превью приложения */}
             <MotionBox
-              position="absolute"
-              bottom={{ md: -6, lg: -10 }}
-              right={{ md: -6, lg: -10, xl: -14 }}
-              display={{ base: 'none', md: 'block' }}
-              animate={{ y: [0, -8, 0] }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: 'easeInOut',
-              }}
-              zIndex={10}
+              flex={1}
+              maxW={{ base: 'full', lg: '600px' }}
+              position="relative"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <Image
-                src="/mascot.png"
-                alt="Animatrona Mascot"
-                width={140}
-                height={140}
-                style={{
-                  filter: 'drop-shadow(0 0 25px rgba(139, 61, 255, 0.5))',
-                  width: 'auto',
-                  height: 'auto',
-                }}
-                sizes="(max-width: 1024px) 120px, (max-width: 1280px) 140px, 180px"
+              <Box
+                className="glass"
+                borderRadius="2xl"
+                overflow="hidden"
+                boxShadow="0 0 60px rgba(139, 61, 255, 0.2)"
+                animation="float 6s ease-in-out infinite"
+              >
+                {/* Скриншот или placeholder */}
+                <Box
+                  bg="gray.900"
+                  aspectRatio={16 / 10}
+                  position="relative"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  {imageError ? <ScreenshotPlaceholder /> : (
+                    <Image
+                      src="/screenshots/library.png"
+                      alt="Animatrona - Библиотека аниме"
+                      fill
+                      style={{ objectFit: 'cover' }}
+                      preload
+                      fetchPriority="high"
+                      onError={() => setImageError(true)}
+                    />
+                  )}
+                </Box>
+              </Box>
+
+              {/* Декоративные элементы */}
+              <Box
+                position="absolute"
+                top={-4}
+                right={-4}
+                width={24}
+                height={24}
+                bgGradient="radial-gradient(circle, rgba(139, 61, 255, 0.3), transparent)"
+                borderRadius="full"
+                filter="blur(20px)"
+                pointerEvents="none"
               />
+              <Box
+                position="absolute"
+                bottom={-6}
+                left={-6}
+                width={32}
+                height={32}
+                bgGradient="radial-gradient(circle, rgba(88, 28, 135, 0.3), transparent)"
+                borderRadius="full"
+                filter="blur(30px)"
+                pointerEvents="none"
+              />
+
+              {/* Маскот — floating справа-снизу */}
+              <MotionBox
+                position="absolute"
+                bottom={{ md: -6, lg: -10 }}
+                right={{ md: -6, lg: -10, xl: -14 }}
+                display={{ base: 'none', md: 'block' }}
+                animate={{ y: [0, -8, 0] }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+                zIndex={10}
+              >
+                <Image
+                  src="/mascot.png"
+                  alt="Animatrona Mascot"
+                  width={140}
+                  height={140}
+                  style={{
+                    filter: 'drop-shadow(0 0 25px rgba(139, 61, 255, 0.5))',
+                    width: 'auto',
+                    height: 'auto',
+                  }}
+                  sizes="(max-width: 1024px) 120px, (max-width: 1280px) 140px, 180px"
+                />
+              </MotionBox>
             </MotionBox>
-          </MotionBox>
-        </Stack>
-      </Container>
+          </Stack>
+        </Container>
+      </section>
     </Box>
   )
 }

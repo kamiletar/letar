@@ -50,8 +50,8 @@ export default function QuickStartPage() {
   return (
     <VStack align="stretch" gap={8}>
       <Box>
-        <Heading as="h1" size="xl" mb={4}>
-          Быстрый старт
+        <Heading asChild size="xl" mb={4}>
+          <h1>Быстрый старт</h1>
         </Heading>
         <Text color="gray.400" fontSize="lg">
           Начните использовать Animatrona за 4 простых шага
@@ -70,8 +70,8 @@ export default function QuickStartPage() {
                     <StepIcon size={24} />
                   </Box>
                   <Box flex={1}>
-                    <Heading as="h2" size="md" mb={2}>
-                      {step.title}
+                    <Heading asChild size="md" mb={2}>
+                      <h2>{step.title}</h2>
                     </Heading>
                     <Text color="gray.300" mb={3}>
                       {step.description}
@@ -94,8 +94,8 @@ export default function QuickStartPage() {
       {/* Полезные ссылки */}
       <Card.Root className="glass" borderRadius="xl">
         <Card.Body p={6}>
-          <Heading as="h3" size="md" mb={4}>
-            Полезные ссылки
+          <Heading asChild size="md" mb={4}>
+            <h3>Полезные ссылки</h3>
           </Heading>
           <HStack gap={4} wrap="wrap">
             <Link

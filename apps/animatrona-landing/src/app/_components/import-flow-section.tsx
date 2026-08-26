@@ -61,7 +61,7 @@ const MotionVStack = motion.create(VStack)
 function StepIndicator({ index, isActive, onClick }: { index: number; isActive: boolean; onClick: () => void }) {
   return (
     <Box
-      as="button"
+      asChild
       w={isActive ? 8 : 3}
       h={3}
       borderRadius="full"
@@ -70,10 +70,10 @@ function StepIndicator({ index, isActive, onClick }: { index: number; isActive: 
       transitionDuration="0.3s"
       transitionTimingFunction="ease"
       cursor="pointer"
-      onClick={onClick}
-      aria-label={`Шаг ${index + 1}`}
       _hover={{ bg: isActive ? 'brand.400' : 'gray.600' }}
-    />
+    >
+      <button type="button" onClick={onClick} aria-label={`Шаг ${index + 1}`} />
+    </Box>
   )
 }
 
@@ -106,127 +106,129 @@ export function ImportFlowSection() {
   const step = IMPORT_STEPS[currentStep]
 
   return (
-    <Box as="section" id="import-flow" py={{ base: 16, md: 24 }}>
-      <Container maxW="container.xl">
-        <VStack gap={{ base: 8, md: 12 }}>
-          {/* Заголовок */}
-          <MotionVStack
-            gap={4}
-            textAlign="center"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <Heading as="h2" size={{ base: '2xl', md: '3xl' }}>
-              Импорт за 6 шагов
-            </Heading>
-            <Text color="gray.400" fontSize="lg" maxW="2xl">
-              Добавьте аниме в библиотеку с автоматическим поиском метаданных и настройкой транскодирования
-            </Text>
-          </MotionVStack>
-
-          {/* Индикаторы */}
-          <HStack gap={2}>
-            {IMPORT_STEPS.map((_, index) => (
-              <StepIndicator
-                key={index}
-                index={index}
-                isActive={index === currentStep}
-                onClick={() => goToStep(index)}
-              />
-            ))}
-          </HStack>
-
-          {/* Скриншот */}
-          <MotionBox
-            className="glass"
-            borderRadius="2xl"
-            overflow="hidden"
-            w="full"
-            maxW="900px"
-            boxShadow="0 0 60px rgba(139, 61, 255, 0.15)"
-            onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <Box position="relative" aspectRatio={16 / 10} bg="gray.900">
-              <AnimatePresence mode="wait">
-                <MotionBox
-                  key={currentStep}
-                  position="absolute"
-                  inset={0}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {imageErrors[currentStep]
-                    ? (
-                      <VStack h="full" justify="center" color="gray.600">
-                        <Text>Изображение недоступно</Text>
-                      </VStack>
-                    )
-                    : (
-                      <Image
-                        src={step.image}
-                        alt={step.title}
-                        fill
-                        style={{ objectFit: 'cover' }}
-                        onError={() => handleImageError(currentStep)}
-                        sizes="(max-width: 768px) 100vw, 900px"
-                      />
-                    )}
-                </MotionBox>
-              </AnimatePresence>
-
-              {/* Номер шага */}
-              <Box
-                position="absolute"
-                top={4}
-                left={4}
-                bg="brand.500"
-                color="white"
-                px={3}
-                py={1}
-                borderRadius="full"
-                fontSize="sm"
-                fontWeight="bold"
-              >
-                {currentStep + 1} / {IMPORT_STEPS.length}
-              </Box>
-            </Box>
-          </MotionBox>
-
-          {/* Название и описание шага */}
-          <AnimatePresence mode="wait">
+    <Box asChild id="import-flow" py={{ base: 16, md: 24 }}>
+      <section>
+        <Container maxW="container.xl">
+          <VStack gap={{ base: 8, md: 12 }}>
+            {/* Заголовок */}
             <MotionVStack
-              key={currentStep}
-              gap={2}
+              gap={4}
               textAlign="center"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
             >
-              <Heading as="h3" size="lg" color="white">
-                {step.title}
+              <Heading asChild size={{ base: '2xl', md: '3xl' }}>
+                <h2>Импорт за 6 шагов</h2>
               </Heading>
-              <Text color="gray.400" fontSize="md" maxW="lg">
-                {step.description}
+              <Text color="gray.400" fontSize="lg" maxW="2xl">
+                Добавьте аниме в библиотеку с автоматическим поиском метаданных и настройкой транскодирования
               </Text>
             </MotionVStack>
-          </AnimatePresence>
 
-          {/* Подсказка */}
-          <Text color="gray.600" fontSize="sm">
-            {isPaused ? 'Автопереключение приостановлено' : 'Наведите для паузы • Кликните на точку для перехода'}
-          </Text>
-        </VStack>
-      </Container>
+            {/* Индикаторы */}
+            <HStack gap={2}>
+              {IMPORT_STEPS.map((_, index) => (
+                <StepIndicator
+                  key={index}
+                  index={index}
+                  isActive={index === currentStep}
+                  onClick={() => goToStep(index)}
+                />
+              ))}
+            </HStack>
+
+            {/* Скриншот */}
+            <MotionBox
+              className="glass"
+              borderRadius="2xl"
+              overflow="hidden"
+              w="full"
+              maxW="900px"
+              boxShadow="0 0 60px rgba(139, 61, 255, 0.15)"
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <Box position="relative" aspectRatio={16 / 10} bg="gray.900">
+                <AnimatePresence mode="wait">
+                  <MotionBox
+                    key={currentStep}
+                    position="absolute"
+                    inset={0}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {imageErrors[currentStep]
+                      ? (
+                        <VStack h="full" justify="center" color="gray.600">
+                          <Text>Изображение недоступно</Text>
+                        </VStack>
+                      )
+                      : (
+                        <Image
+                          src={step.image}
+                          alt={step.title}
+                          fill
+                          style={{ objectFit: 'cover' }}
+                          onError={() => handleImageError(currentStep)}
+                          sizes="(max-width: 768px) 100vw, 900px"
+                        />
+                      )}
+                  </MotionBox>
+                </AnimatePresence>
+
+                {/* Номер шага */}
+                <Box
+                  position="absolute"
+                  top={4}
+                  left={4}
+                  bg="brand.500"
+                  color="white"
+                  px={3}
+                  py={1}
+                  borderRadius="full"
+                  fontSize="sm"
+                  fontWeight="bold"
+                >
+                  {currentStep + 1} / {IMPORT_STEPS.length}
+                </Box>
+              </Box>
+            </MotionBox>
+
+            {/* Название и описание шага */}
+            <AnimatePresence mode="wait">
+              <MotionVStack
+                key={currentStep}
+                gap={2}
+                textAlign="center"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Heading asChild size="lg" color="white">
+                  <h3>{step.title}</h3>
+                </Heading>
+                <Text color="gray.400" fontSize="md" maxW="lg">
+                  {step.description}
+                </Text>
+              </MotionVStack>
+            </AnimatePresence>
+
+            {/* Подсказка */}
+            <Text color="gray.600" fontSize="sm">
+              {isPaused ? 'Автопереключение приостановлено' : 'Наведите для паузы • Кликните на точку для перехода'}
+            </Text>
+          </VStack>
+        </Container>
+      </section>
     </Box>
   )
 }

@@ -195,8 +195,8 @@ function MacOSCard({ release, isCurrentPlatform, detectedArch }: MacOSCardProps)
           {/* Заголовок платформы */}
           <HStack justify="center" gap={3}>
             <PlatformIcon size={24} color={info.color} />
-            <Heading as="h3" size="lg">
-              {info.name}
+            <Heading asChild size="lg">
+              <h3>{info.name}</h3>
             </Heading>
           </HStack>
 
@@ -292,8 +292,8 @@ function PlatformCard({ platform, release, isCurrentPlatform }: PlatformCardProp
           {/* Заголовок платформы */}
           <HStack justify="center" gap={3}>
             <PlatformIcon size={24} color={info.color} />
-            <Heading as="h3" size="lg">
-              {info.name}
+            <Heading asChild size="lg">
+              <h3>{info.name}</h3>
             </Heading>
           </HStack>
 
@@ -345,66 +345,68 @@ export function DownloadsSection({ release }: DownloadsSectionProps) {
     : platforms
 
   return (
-    <Box as="section" id="downloads" py={{ base: 16, md: 24 }} bg="gray.900/50">
-      <Container maxW="container.xl">
-        <VStack gap={12}>
-          {/* Заголовок */}
-          <VStack gap={4} textAlign="center">
-            <Heading as="h2" size={{ base: '2xl', md: '3xl' }}>
-              Скачать
-            </Heading>
-            {release && (
-              <HStack gap={2}>
-                <Badge colorPalette="purple" px={3} py={1} borderRadius="full">
-                  v{release.version}
-                </Badge>
-                <Text color="gray.500" fontSize="sm">
-                  {release.date}
-                </Text>
-              </HStack>
-            )}
-          </VStack>
+    <Box asChild id="downloads" py={{ base: 16, md: 24 }} bg="gray.900/50">
+      <section>
+        <Container maxW="container.xl">
+          <VStack gap={12}>
+            {/* Заголовок */}
+            <VStack gap={4} textAlign="center">
+              <Heading asChild size={{ base: '2xl', md: '3xl' }}>
+                <h2>Скачать</h2>
+              </Heading>
+              {release && (
+                <HStack gap={2}>
+                  <Badge colorPalette="purple" px={3} py={1} borderRadius="full">
+                    v{release.version}
+                  </Badge>
+                  <Text color="gray.500" fontSize="sm">
+                    {release.date}
+                  </Text>
+                </HStack>
+              )}
+            </VStack>
 
-          {/* Карточки платформ */}
-          <SimpleGrid columns={{ base: 1, md: 3 }} gap={6} w="full" maxW="4xl">
-            {sortedPlatforms.map((platform) =>
-              platform === 'macos'
-                ? (
-                  <MacOSCard
-                    key={platform}
-                    release={release}
-                    isCurrentPlatform={currentPlatform === 'macos'}
-                    detectedArch={macArch}
-                  />
-                )
-                : (
-                  <PlatformCard
-                    key={platform}
-                    platform={platform}
-                    release={release}
-                    isCurrentPlatform={platform === currentPlatform}
-                  />
-                )
-            )}
-          </SimpleGrid>
+            {/* Карточки платформ */}
+            <SimpleGrid columns={{ base: 1, md: 3 }} gap={6} w="full" maxW="4xl">
+              {sortedPlatforms.map((platform) =>
+                platform === 'macos'
+                  ? (
+                    <MacOSCard
+                      key={platform}
+                      release={release}
+                      isCurrentPlatform={currentPlatform === 'macos'}
+                      detectedArch={macArch}
+                    />
+                  )
+                  : (
+                    <PlatformCard
+                      key={platform}
+                      platform={platform}
+                      release={release}
+                      isCurrentPlatform={platform === currentPlatform}
+                    />
+                  )
+              )}
+            </SimpleGrid>
 
-          {/* Системные требования */}
-          <VStack gap={2} textAlign="center">
-            <Text color="gray.500" fontSize="sm">
-              Рекомендуется: NVIDIA GPU с NVENC для GPU-ускорения (RTX серия)
-            </Text>
-            <Text color="gray.600" fontSize="xs">
-              Без GPU приложение использует CPU кодирование (libsvtav1)
-            </Text>
-            <Text color="gray.600" fontSize="xs" pt={2}>
-              * macOS: Приложение не подписано. При первом запуске откройте{' '}
-              <Text as="span" color="gray.400">
-                Системные настройки → Конфиденциальность → Основные → «Всё равно открыть»
+            {/* Системные требования */}
+            <VStack gap={2} textAlign="center">
+              <Text color="gray.500" fontSize="sm">
+                Рекомендуется: NVIDIA GPU с NVENC для GPU-ускорения (RTX серия)
               </Text>
-            </Text>
+              <Text color="gray.600" fontSize="xs">
+                Без GPU приложение использует CPU кодирование (libsvtav1)
+              </Text>
+              <Text color="gray.600" fontSize="xs" pt={2}>
+                * macOS: Приложение не подписано. При первом запуске откройте{' '}
+                <Text asChild color="gray.400">
+                  <span>Системные настройки → Конфиденциальность → Основные → «Всё равно открыть»</span>
+                </Text>
+              </Text>
+            </VStack>
           </VStack>
-        </VStack>
-      </Container>
+        </Container>
+      </section>
     </Box>
   )
 }

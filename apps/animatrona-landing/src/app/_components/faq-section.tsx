@@ -55,68 +55,70 @@ const MotionVStack = motion.create(VStack)
 
 export function FaqSection() {
   return (
-    <Box as="section" id="faq" py={{ base: 16, md: 24 }}>
-      <Container maxW="container.md">
-        <VStack gap={12}>
-          {/* Заголовок */}
-          <MotionVStack
-            gap={4}
-            textAlign="center"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <Heading as="h2" size={{ base: '2xl', md: '3xl' }}>
-              Часто задаваемые вопросы
-            </Heading>
-            <Text color="gray.400" fontSize="lg">
-              Ответы на популярные вопросы о приложении
-            </Text>
-          </MotionVStack>
+    <Box asChild id="faq" py={{ base: 16, md: 24 }}>
+      <section>
+        <Container maxW="container.md">
+          <VStack gap={12}>
+            {/* Заголовок */}
+            <MotionVStack
+              gap={4}
+              textAlign="center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <Heading asChild size={{ base: '2xl', md: '3xl' }}>
+                <h2>Часто задаваемые вопросы</h2>
+              </Heading>
+              <Text color="gray.400" fontSize="lg">
+                Ответы на популярные вопросы о приложении
+              </Text>
+            </MotionVStack>
 
-          {/* FAQ Accordion */}
-          <MotionBox
-            w="full"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <Accordion.Root collapsible variant="enclosed" spaceY={3}>
-              {FAQ_ITEMS.map((item) => (
-                <Accordion.Item
-                  key={item.value}
-                  value={item.value}
-                  className="glass"
-                  borderRadius="xl"
-                  borderWidth="1px"
-                  borderColor="gray.800"
-                  overflow="hidden"
-                  _open={{
-                    borderColor: 'brand.500/30',
-                  }}
-                >
-                  <Accordion.ItemTrigger px={5} py={4} _hover={{ bg: 'gray.900/50' }}>
-                    <LuCircleHelp color="var(--chakra-colors-brand-400)" size={20} style={{ marginRight: '12px' }} />
-                    <Span flex="1" fontWeight="medium" color="white" textAlign="left">
-                      {item.question}
-                    </Span>
-                    <Accordion.ItemIndicator color="gray.500" />
-                  </Accordion.ItemTrigger>
-                  <Accordion.ItemContent>
-                    <Accordion.ItemBody px={5} pb={5} pt={0}>
-                      <Text color="gray.400" lineHeight="tall">
-                        {item.answer}
-                      </Text>
-                    </Accordion.ItemBody>
-                  </Accordion.ItemContent>
-                </Accordion.Item>
-              ))}
-            </Accordion.Root>
-          </MotionBox>
-        </VStack>
-      </Container>
+            {/* FAQ Accordion */}
+            <MotionBox
+              w="full"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <Accordion.Root collapsible variant="enclosed" spaceY={3}>
+                {FAQ_ITEMS.map((item) => (
+                  <Accordion.Item
+                    key={item.value}
+                    value={item.value}
+                    className="glass"
+                    borderRadius="xl"
+                    borderWidth="1px"
+                    borderColor="gray.800"
+                    overflow="hidden"
+                    _open={{
+                      borderColor: 'brand.500/30',
+                    }}
+                  >
+                    <Accordion.ItemTrigger px={5} py={4} _hover={{ bg: 'gray.900/50' }}>
+                      <LuCircleHelp color="var(--chakra-colors-brand-400)" size={20} style={{ marginRight: '12px' }} />
+                      <Span flex="1" fontWeight="medium" color="white" textAlign="left">
+                        {item.question}
+                      </Span>
+                      <Accordion.ItemIndicator color="gray.500" />
+                    </Accordion.ItemTrigger>
+                    <Accordion.ItemContent>
+                      <Accordion.ItemBody px={5} pb={5} pt={0}>
+                        <Text color="gray.400" lineHeight="tall">
+                          {item.answer}
+                        </Text>
+                      </Accordion.ItemBody>
+                    </Accordion.ItemContent>
+                  </Accordion.Item>
+                ))}
+              </Accordion.Root>
+            </MotionBox>
+          </VStack>
+        </Container>
+      </section>
     </Box>
   )
 }
