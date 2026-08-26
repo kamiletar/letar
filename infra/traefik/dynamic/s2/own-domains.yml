@@ -34,16 +34,15 @@
 
 http:
   routers:
-    driving-school-own-domain:
-      # направа.рф — punycode-форма обязательна, Traefik/Go rule-парсер IDN не раскрывает.
-      rule: 'Host(`xn--80aaah6cnh.xn--p1ai`)'
-      entryPoints:
-        - websecure
-      service: driving-school-app
-      tls:
-        certResolver: dns
-      # ⚠️ В NPM Advanced-конфиге есть мёртвое правило `/socket.io/` → driving-school-app:3004 —
-      # проверено живьём (ss -tlnp внутри контейнера): 3004 никто не слушает. Не переносим.
+    # ⚠️ driving-school-own-domain удалён 2026-08-26 (deploy-agent-dev): docker-provider роутер
+    # `driving-school@docker` (label в apps/driving-school/docker-compose.production.yml, Пачка 4
+    # §48 M3 шаг 5) уже живой на текущем контейнере (traefik.enable=true подтверждён
+    # `docker inspect`) и покрывает ровно тот же единственный домен (направа.рф, без www) —
+    # дублирующий file-роутер с идентичным Host() правилом снят, а не оставлен «на всякий случай»:
+    # Traefik не проверяет конфликт правил на старте (не увидели ни одного WARN/ERROR в логе за
+    # сутки сосуществования обоих роутеров), два роутера с одинаковым rule молча делят трафик по
+    # своему внутреннему приоритету — работало только потому, что оба указывали на один и тот же
+    # backend. Сервис driving-school-app ниже тоже удалён вместе с роутером.
 
     aboi-own-domain:
       rule: 'Host(`neyroaboi.ru`) || Host(`www.neyroaboi.ru`)'
@@ -78,7 +77,11 @@ http:
         certResolver: dns
 
     domwellbes-own-domain:
-      rule: 'Host(`domwellbes.ru`) || Host(`www.domwellbes.ru`)'
+      # ⚠️ Сужено с `Host(domwellbes.ru) || Host(www.domwellbes.ru)` 2026-08-26 (deploy-agent-dev):
+      # apex-часть теперь дублирует живой `domwellbes@docker` (label уже на текущем контейнере,
+      # тот же класс дубля, что у driving-school выше) — оставлен только www, который
+      # docker-provider роутер НЕ покрывает (его Host() — только apex, без www).
+      rule: 'Host(`www.domwellbes.ru`)'
       entryPoints:
         - websecure
       service: domwellbes-app
@@ -86,11 +89,6 @@ http:
         certResolver: dns
 
   services:
-    driving-school-app:
-      loadBalancer:
-        servers:
-          - url: 'http://driving-school-app:3003'
-
     aboi-app:
       loadBalancer:
         servers:
