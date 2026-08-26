@@ -3260,3 +3260,39 @@ glob-паттерн с character class и молча терял файл из о
   `worktree-agent-a594c9092792e0d94`) от убитого animatrona-агента — удалён: все коммиты его
   ветки (включая создание самого кодмода) уже были предками `main`, несохранённые изменения в
   рабочем дереве полностью перекрыты финальной версией из этой сессии.
+
+## §62 — `createAuth()`: двойной `reportEmailFailure` в общей фабрике `@letar/auth` (2026-08-26)
+
+Точечный фикс в `apps/domwellbes/src/lib/auth.ts` (предыдущая сессия) — `sendResetPassword`/
+`sendVerificationEmail` вручную вызывали `reportEmailFailure` после `!result.success`, хотя
+`provider.sendEmail` внутри `@letar/email` (`libs/email/src/provider.ts:183`) уже сам репортит
+провал SMTP-отправки — каждый сбой логировался и (если настроен алертер) алертился дважды.
+
+Тот же паттерн подтверждён и исправлен точечно в `apps/aboi/src/lib/auth.ts` и
+`apps/auth-hub/src/app/profile/emails/_actions/emails.action.ts`. Но корень оказался глубже:
+общая фабрика `libs/auth/src/server/create-auth/index.ts` (оба билдера — `standalone` и
+`hub-provider`) сама содержала идентичный дублирующий вызов `email.reportEmailFailure` внутри
+`sendResetPassword`/`sendVerificationEmail`. Это затрагивает **все** приложения, передающие в
+`createAuth()` настоящий `reportEmailFailure` из `@letar/email` — как минимум `dsperevod` и
+`svoichuzhie` (auth-hub и driving-school используют ту же фабрику, но driving-school передаёт
+собственный no-op-логгер вместо алертера, поэтому там дублировался только `console.error`, не
+Telegram/Umami-алерт).
+
+**Фикс:** убраны оба вызова `email.reportEmailFailure(...)` из `buildStandaloneAuth` и
+`buildHubProviderAuth` в `libs/auth/src/server/create-auth/index.ts` — колбэки теперь просто
+`await email.sendXxxEmail(...)` без перепроверки `result.success`. Один существующий тест
+(`create-auth.spec.ts`, «reportEmailFailure вызывается при ошибке верификации») переписан на
+обратное утверждение — «НЕ вызывается» (репорт уже происходит внутри мока `sendVerificationEmail`,
+которая в реальности была бы `@letar/email`). Поле `reportEmailFailure` в типе конфига оставлено
+(обратная совместимость, приложения продолжают его передавать) — просто больше не используется
+внутри фабрики.
+
+Коммиты: `bee925b1` (`libs/auth`), `91645437` (auth-hub), `1fbb123` в submodule aboi +
+`1bee2695` bump SHA. `nx test/typecheck:tsgo "@letar/auth"` (42/42), `nx typecheck:tsgo/lint
+aboi,auth-hub` — зелёные.
+
+⚠️ Не проверено исчерпывающе: тот же класс бага (`sendGenericEmail`/аналог + ручной
+`reportEmailFailure` на `!success`) вероятно есть и вне better-auth колбэков — найден (но не
+исправлен в этой сессии) в четырёх cron-письмах aboi (`activation-reminder.ts`,
+`review-request.ts`, `birthday-promo.ts`, `abandoned-cart.ts`). Заведена отдельная задача —
+см. `apps/aboi/PLAN_COMPLETED.md` запись этой же сессии.
