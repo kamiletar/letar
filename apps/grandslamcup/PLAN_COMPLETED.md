@@ -1627,3 +1627,6 @@ PLAN_COMPLETED.md` v0.7.4, тред agent-mail `grandslamcup-staging-pilot`.
       `.claude/docs/ui-components.md` § «Координация bottom-anchored компонентов»). Найдено при
       проверке этого же бага в `studio` — идентичный компонент оказался в 4 других приложениях
       (`mandala`, `pravda`, `archetest`), везде тот же фикс.
+- [x] **`OfflineConsentBanner` вынесен в `@letar/ui`** (2026-08-26) — дубль из пяти приложений
+      заменён на общий компонент, локальный `offline-consent-banner.tsx` удалён, используется
+      напрямую из `@letar/ui` в `layout.tsx`. Детали — `PLAN.md` §64 в корне репо.
