@@ -1,7 +1,7 @@
 'use client'
 
 import { formatFileSize } from '@/lib/ipfs'
-import { Badge, Box, Flex, Grid, HStack, Icon, Skeleton, SkeletonText, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Flex, Grid, HStack, Skeleton, SkeletonText, Text, VStack } from '@chakra-ui/react'
 import { useQuery } from '@tanstack/react-query'
 import { LuHardDrive, LuMonitor, LuServer, LuShare2 } from 'react-icons/lu'
 import { EmptyState } from '../common/empty-state'
@@ -60,10 +60,11 @@ function formatTimeSince(isoDate: string): string {
 /** Карточка сида (строка внутри карточки аниме) */
 function SeedRow({ seed }: { seed: Seed }) {
   const isDesktop = seed.type === 'desktop'
+  const SeedTypeIcon = isDesktop ? LuMonitor : LuServer
 
   return (
     <Flex align="center" gap={3} py={1.5} px={2} borderRadius="md" bg={seed.online ? 'bg.subtle' : 'bg.muted'}>
-      <Icon as={isDesktop ? LuMonitor : LuServer} color={isDesktop ? 'purple.500' : 'blue.500'} />
+      <SeedTypeIcon color={isDesktop ? 'var(--chakra-colors-purple-500)' : 'var(--chakra-colors-blue-500)'} />
       <Badge size="xs" colorPalette={isDesktop ? 'purple' : 'blue'} variant="subtle">
         {isDesktop ? 'Desktop' : 'Pin-сервер'}
       </Badge>
@@ -107,7 +108,7 @@ function AnimeSeedCard({ animeSeed }: { animeSeed: AnimeSeed }) {
         <HStack gap={2}>
           {animeSeed.totalSize > 0 && (
             <HStack gap={1} color="fg.muted">
-              <Icon as={LuHardDrive} boxSize={3.5} />
+              <LuHardDrive size={14} />
               <Text fontSize="xs">{formatFileSize(animeSeed.totalSize)}</Text>
             </HStack>
           )}
@@ -121,7 +122,7 @@ function AnimeSeedCard({ animeSeed }: { animeSeed: AnimeSeed }) {
       <HStack gap={3} mb={2}>
         {desktopCount > 0 && (
           <HStack gap={1}>
-            <Icon as={LuMonitor} boxSize={3.5} color="purple.500" />
+            <LuMonitor size={14} color="var(--chakra-colors-purple-500)" />
             <Text fontSize="xs" color="fg.muted">
               {desktopCount} desktop
             </Text>
@@ -129,7 +130,7 @@ function AnimeSeedCard({ animeSeed }: { animeSeed: AnimeSeed }) {
         )}
         {serverCount > 0 && (
           <HStack gap={1}>
-            <Icon as={LuServer} boxSize={3.5} color="blue.500" />
+            <LuServer size={14} color="var(--chakra-colors-blue-500)" />
             <Text fontSize="xs" color="fg.muted">
               {serverCount} {serverCount === 1 ? 'сервер' : 'серверов'}
             </Text>

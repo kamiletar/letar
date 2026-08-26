@@ -1,18 +1,6 @@
 'use client'
 
-import {
-  Badge,
-  Box,
-  Button,
-  Collapsible,
-  Heading,
-  HStack,
-  Icon,
-  Progress,
-  Separator,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import { Badge, Box, Button, Collapsible, Heading, HStack, Progress, Separator, Text, VStack } from '@chakra-ui/react'
 import { useQuery } from '@tanstack/react-query'
 import { useCallback, useState } from 'react'
 import { LuCircleCheck, LuSearch, LuTrash2, LuTriangleAlert } from 'react-icons/lu'
@@ -108,7 +96,7 @@ export function AuditPinsSection({ pinServers }: AuditPinsSectionProps) {
   return (
     <Box mt={6} p={4} borderWidth="1px" borderRadius="lg" bg="bg.panel">
       <HStack gap={2} mb={3}>
-        <Icon as={LuSearch} />
+        <LuSearch />
         <Heading size="sm">Аудит сиротских пинов</Heading>
       </HStack>
 
@@ -129,7 +117,7 @@ export function AuditPinsSection({ pinServers }: AuditPinsSectionProps) {
               loading={launching === server.id}
               onClick={() => handleStartAudit(server.id)}
             >
-              <Icon as={LuTrash2} mr={1} />
+              <LuTrash2 style={{ marginRight: '4px' }} />
               {server.name}
             </Button>
           ))}
@@ -164,7 +152,7 @@ export function AuditPinsSection({ pinServers }: AuditPinsSectionProps) {
       {jobStatus && jobStatus.status === 'done' && (
         <VStack align="stretch" gap={2} mt={3}>
           <HStack gap={2}>
-            <Icon as={LuCircleCheck} color="green.500" />
+            <LuCircleCheck color="var(--chakra-colors-green-500)" />
             <Text fontWeight="medium">Аудит завершён — {jobStatus.serverName}</Text>
           </HStack>
 
@@ -198,7 +186,7 @@ export function AuditPinsSection({ pinServers }: AuditPinsSectionProps) {
             <Collapsible.Root>
               <Collapsible.Trigger asChild>
                 <Button size="xs" variant="ghost" colorPalette="orange">
-                  <Icon as={LuTriangleAlert} mr={1} />
+                  <LuTriangleAlert style={{ marginRight: '4px' }} />
                   {jobStatus.result.manifestErrors.length} ошибок манифестов
                 </Button>
               </Collapsible.Trigger>
@@ -219,7 +207,7 @@ export function AuditPinsSection({ pinServers }: AuditPinsSectionProps) {
             <Collapsible.Root>
               <Collapsible.Trigger asChild>
                 <Button size="xs" variant="ghost" colorPalette="red">
-                  <Icon as={LuTriangleAlert} mr={1} />
+                  <LuTriangleAlert style={{ marginRight: '4px' }} />
                   {jobStatus.result.errors.length} ошибок unpin
                 </Button>
               </Collapsible.Trigger>
@@ -246,7 +234,7 @@ export function AuditPinsSection({ pinServers }: AuditPinsSectionProps) {
       {jobStatus && jobStatus.status === 'error' && (
         <VStack align="stretch" gap={2} mt={3}>
           <HStack gap={2}>
-            <Icon as={LuTriangleAlert} color="red.500" />
+            <LuTriangleAlert color="var(--chakra-colors-red-500)" />
             <Text fontWeight="medium" color="fg.error">
               Ошибка аудита — {jobStatus.serverName}
             </Text>

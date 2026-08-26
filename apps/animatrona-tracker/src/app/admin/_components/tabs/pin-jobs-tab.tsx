@@ -9,7 +9,7 @@
  */
 
 import { toaster } from '@/app/_components/ui/toaster'
-import { Box, Button, Center, HStack, Icon, Skeleton, SkeletonText, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Center, HStack, Skeleton, SkeletonText, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { LuPin, LuRefreshCw, LuShieldAlert, LuTrash2 } from 'react-icons/lu'
@@ -246,7 +246,7 @@ export function PinJobsTab() {
     <>
       <HStack gap={2} mt={4} mb={4}>
         <Button size="sm" variant="outline" onClick={handleSyncStatuses} loading={syncing}>
-          <Icon as={LuRefreshCw} mr={1} />
+          <LuRefreshCw style={{ marginRight: '4px' }} />
           Обновить статусы
         </Button>
         {hasFailed && (
@@ -258,7 +258,7 @@ export function PinJobsTab() {
               onClick={handleRetryAllFailed}
               loading={retryingFailed}
             >
-              <Icon as={LuRefreshCw} mr={1} />
+              <LuRefreshCw style={{ marginRight: '4px' }} />
               Повторить все ошибки
             </Button>
             <Button
@@ -268,14 +268,14 @@ export function PinJobsTab() {
               onClick={handleDeleteAllFailed}
               loading={deletingFailed}
             >
-              <Icon as={LuTrash2} mr={1} />
+              <LuTrash2 style={{ marginRight: '4px' }} />
               Удалить все ошибки
             </Button>
           </>
         )}
         {(cleanupStatus?.pendingCount ?? 0) > 0 && (
           <Button size="sm" variant="outline" colorPalette="orange" onClick={handleCleanupOldPins} loading={cleaningUp}>
-            <Icon as={LuShieldAlert} mr={1} />
+            <LuShieldAlert style={{ marginRight: '4px' }} />
             Очистить старые пины ({cleanupStatus?.pendingCount})
           </Button>
         )}

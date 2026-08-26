@@ -8,20 +8,7 @@
  */
 
 import { formatFileSize } from '@/lib/ipfs'
-import {
-  Badge,
-  Box,
-  Button,
-  Center,
-  Container,
-  Flex,
-  Heading,
-  HStack,
-  Icon,
-  Spinner,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import { Badge, Box, Button, Center, Container, Flex, Heading, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useQuery } from '@tanstack/react-query'
 import NextLink from 'next/link'
 import { LuArrowLeft, LuPin, LuServer } from 'react-icons/lu'
@@ -72,12 +59,12 @@ export function PinnedListClient() {
             <HStack gap={4}>
               <Button asChild variant="ghost" size="sm">
                 <NextLink href="/admin?tab=pinjobs">
-                  <Icon as={LuArrowLeft} mr={2} />
+                  <LuArrowLeft style={{ marginRight: '8px' }} />
                   Админ-панель
                 </NextLink>
               </Button>
               <Heading size="lg">
-                <Icon as={LuPin} mr={2} />
+                <LuPin style={{ marginRight: '8px' }} />
                 Запиненные аниме ({data?.total ?? 0})
               </Heading>
             </HStack>
@@ -107,7 +94,7 @@ export function PinnedListClient() {
           ? (
             <Center py={12}>
               <VStack gap={2}>
-                <Icon as={LuPin} boxSize={12} color="fg.muted" />
+                <LuPin size={48} color="var(--chakra-colors-fg-muted)" />
                 <Text color="fg.muted" fontSize="lg">
                   Нет запиненных аниме
                 </Text>
@@ -155,7 +142,7 @@ export function PinnedListClient() {
 
                   {/* Серверы */}
                   <HStack gap={2} mt={2}>
-                    <Icon as={LuServer} color="fg.muted" boxSize={4} />
+                    <LuServer color="var(--chakra-colors-fg-muted)" size={16} />
                     {item.servers.map((server) => (
                       <Badge key={server.id} colorPalette={server.status === 'ONLINE' ? 'green' : 'gray'} size="sm">
                         {server.name}

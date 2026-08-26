@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, HStack, Icon, VStack } from '@chakra-ui/react'
+import { Button, HStack, VStack } from '@chakra-ui/react'
 import { useState } from 'react'
 import { LuPlus, LuRefreshCw, LuServer } from 'react-icons/lu'
 
@@ -48,12 +48,12 @@ export function PinServersTab({ pinServers, userRole, onRefresh }: PinServersTab
     <>
       <HStack gap={2} mt={4} mb={4}>
         <Button size="sm" variant="outline" onClick={handleHealthCheck} loading={healthChecking}>
-          <Icon as={LuRefreshCw} mr={1} />
+          <LuRefreshCw style={{ marginRight: '4px' }} />
           Проверить статусы
         </Button>
         {userRole === 'ADMIN' && (
           <Button size="sm" colorPalette="green" onClick={() => setAddServerOpen(true)}>
-            <Icon as={LuPlus} mr={1} />
+            <LuPlus style={{ marginRight: '4px' }} />
             Добавить сервер
           </Button>
         )}

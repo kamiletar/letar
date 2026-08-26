@@ -17,7 +17,6 @@ import {
   Flex,
   Heading,
   HStack,
-  Icon,
   Input,
   Spinner,
   Table,
@@ -105,12 +104,12 @@ export function UsersListClient() {
             <HStack gap={4}>
               <Button asChild variant="ghost" size="sm">
                 <NextLink href="/admin">
-                  <Icon as={LuArrowLeft} mr={2} />
+                  <LuArrowLeft style={{ marginRight: '8px' }} />
                   Админ-панель
                 </NextLink>
               </Button>
               <Heading size="lg">
-                <Icon as={LuUsers} mr={2} />
+                <LuUsers style={{ marginRight: '8px' }} />
                 Пользователи ({data?.total ?? 0})
               </Heading>
             </HStack>
@@ -129,7 +128,7 @@ export function UsersListClient() {
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
             <Button variant="outline" onClick={handleSearch}>
-              <Icon as={LuSearch} />
+              <LuSearch />
             </Button>
           </HStack>
 
@@ -155,7 +154,7 @@ export function UsersListClient() {
             ? (
               <Center py={12}>
                 <VStack gap={2}>
-                  <Icon as={LuUsers} boxSize={12} color="fg.muted" />
+                  <LuUsers size={48} color="var(--chakra-colors-fg-muted)" />
                   <Text color="fg.muted" fontSize="lg">
                     {search ? 'Ничего не найдено' : 'Нет пользователей'}
                   </Text>
@@ -230,7 +229,7 @@ export function UsersListClient() {
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page <= 1}
                     >
-                      <Icon as={LuChevronLeft} />
+                      <LuChevronLeft />
                     </Button>
                     <Text fontSize="sm" color="fg.muted">
                       {page} / {data.totalPages}
@@ -241,7 +240,7 @@ export function UsersListClient() {
                       onClick={() => setPage((p) => Math.min(data.totalPages, p + 1))}
                       disabled={page >= data.totalPages}
                     >
-                      <Icon as={LuChevronRight} />
+                      <LuChevronRight />
                     </Button>
                   </HStack>
                 )}

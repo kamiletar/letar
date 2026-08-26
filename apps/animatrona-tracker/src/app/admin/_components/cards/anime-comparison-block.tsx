@@ -625,7 +625,7 @@ function AutoDiff({
             queryClient.refetchQueries({ queryKey: ['deep-diff', current.directoryCid] })
           }}
         >
-          <Icon as={LuRefreshCw} mr={1} />
+          <LuRefreshCw style={{ marginRight: '4px' }} />
           Повторить загрузку манифестов
         </Button>
       )}

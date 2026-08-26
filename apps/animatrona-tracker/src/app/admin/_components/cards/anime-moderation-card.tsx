@@ -2,7 +2,7 @@
 
 import { toaster } from '@/app/_components/ui/toaster'
 import { formatFileSize, resolveImageUrl } from '@/lib/ipfs'
-import { Badge, Box, Button, Flex, Heading, HStack, Icon, Image, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Flex, Heading, HStack, Image, Text, VStack } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -97,14 +97,14 @@ export function AnimeModerationCard({
             <HStack gap={2}>
               {isReplacement && (
                 <Badge colorPalette="orange">
-                  <Icon as={LuArrowRightLeft} mr={1} />
+                  <LuArrowRightLeft style={{ marginRight: '4px' }} />
                   Замена
                 </Badge>
               )}
               <Badge colorPalette="yellow">На модерации</Badge>
               {anime.competingCount !== undefined && anime.competingCount > 0 && (
                 <Badge colorPalette="red" variant="subtle">
-                  <Icon as={LuSwords} mr={1} />
+                  <LuSwords style={{ marginRight: '4px' }} />
                   {anime.competingCount} конкурент
                   {anime.competingCount === 1 ? '' : anime.competingCount < 5 ? 'а' : 'ов'}
                 </Badge>
@@ -122,7 +122,7 @@ export function AnimeModerationCard({
                 </Badge>
               ))}
               <Badge colorPalette="blue">
-                <Icon as={LuFilm} mr={1} />
+                <LuFilm style={{ marginRight: '4px' }} />
                 {anime.episodes.length} эп.
               </Badge>
               {anime.shikimoriId && <Badge colorPalette="teal">Shikimori: {anime.shikimoriId}</Badge>}
@@ -146,7 +146,7 @@ export function AnimeModerationCard({
             )}
 
             <HStack gap={2}>
-              <Icon as={LuUsers} />
+              <LuUsers />
               <NextLink href={`/profile/${anime.uploadedBy.id}`}>
                 <Text fontSize="sm" _hover={{ color: 'brand.500', textDecoration: 'underline' }}>
                   {anime.uploadedBy.name || anime.uploadedBy.email || 'Аноним'}
@@ -240,13 +240,13 @@ function ModerationActions({
         ? (
           <>
             <Button colorPalette="orange" variant="outline" size="sm" onClick={onApproveReplacement}>
-              <Icon as={LuArrowRightLeft} mr={2} />
+              <LuArrowRightLeft style={{ marginRight: '8px' }} />
               Одобрить замену
             </Button>
             {userRole === 'ADMIN' && (
               <Button colorPalette="orange" size="sm" onClick={onApproveReplacementAndPin} disabled={!hasOnlineServers}>
-                <Icon as={LuArrowRightLeft} mr={1} />
-                <Icon as={LuPin} mr={1} />
+                <LuArrowRightLeft style={{ marginRight: '4px' }} />
+                <LuPin style={{ marginRight: '4px' }} />
                 Замена + запинить
               </Button>
             )}
@@ -255,13 +255,13 @@ function ModerationActions({
         : (
           <>
             <Button colorPalette="green" variant="outline" size="sm" onClick={onApprove}>
-              <Icon as={LuCheck} mr={2} />
+              <LuCheck style={{ marginRight: '8px' }} />
               Одобрить
             </Button>
             {userRole === 'ADMIN' && (
               <Button colorPalette="green" size="sm" onClick={onApproveAndPin} disabled={!hasOnlineServers}>
-                <Icon as={LuCheck} mr={1} />
-                <Icon as={LuPin} mr={1} />
+                <LuCheck style={{ marginRight: '4px' }} />
+                <LuPin style={{ marginRight: '4px' }} />
                 Одобрить + запинить
               </Button>
             )}
@@ -269,7 +269,7 @@ function ModerationActions({
         )}
 
       <Button colorPalette="red" variant="outline" size="sm" onClick={onReject}>
-        <Icon as={LuX} mr={2} />
+        <LuX style={{ marginRight: '8px' }} />
         Отклонить
       </Button>
       {userRole === 'ADMIN' && (
@@ -281,7 +281,7 @@ function ModerationActions({
           loading={pinning}
           disabled={!hasOnlineServers}
         >
-          <Icon as={LuPin} mr={2} />
+          <LuPin style={{ marginRight: '8px' }} />
           Запинить
         </Button>
       )}

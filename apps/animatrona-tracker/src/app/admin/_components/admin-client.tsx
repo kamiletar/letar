@@ -1,7 +1,7 @@
 'use client'
 
 import { toaster } from '@/app/_components/ui/toaster'
-import { Box, Button, Container, Flex, Grid, Heading, HStack, Icon, Stat, Tabs, VStack } from '@chakra-ui/react'
+import { Box, Button, Container, Flex, Grid, Heading, HStack, Stat, Tabs, VStack } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useRef, useState } from 'react'
@@ -184,12 +184,12 @@ export function AdminClient({
             <HStack gap={4}>
               <Button asChild variant="ghost" size="sm">
                 <NextLink href="/anime">
-                  <Icon as={LuArrowLeft} mr={2} />
+                  <LuArrowLeft style={{ marginRight: '8px' }} />
                   Каталог
                 </NextLink>
               </Button>
               <Heading size="lg">
-                <Icon as={LuShield} mr={2} />
+                <LuShield style={{ marginRight: '8px' }} />
                 Админ-панель
               </Heading>
             </HStack>
@@ -234,31 +234,31 @@ export function AdminClient({
             <Tabs.List overflowX="auto" css={{ '&::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none' }}>
               <Tabs.Trigger value="moderation" whiteSpace="nowrap">
                 <Box hideBelow="md" display="inline">
-                  <Icon as={LuFilm} mr={1} />
+                  <LuFilm style={{ marginRight: '4px' }} />
                 </Box>
                 Модерация ({stats.pendingAnime})
               </Tabs.Trigger>
               <Tabs.Trigger value="pinservers" whiteSpace="nowrap">
                 <Box hideBelow="md" display="inline">
-                  <Icon as={LuServer} mr={1} />
+                  <LuServer style={{ marginRight: '4px' }} />
                 </Box>
                 Пин-серверы ({pinServers.length})
               </Tabs.Trigger>
               <Tabs.Trigger value="pinjobs" whiteSpace="nowrap">
                 <Box hideBelow="md" display="inline">
-                  <Icon as={LuPin} mr={1} />
+                  <LuPin style={{ marginRight: '4px' }} />
                 </Box>
                 Задания
               </Tabs.Trigger>
               <Tabs.Trigger value="seeds" whiteSpace="nowrap">
                 <Box hideBelow="md" display="inline">
-                  <Icon as={LuShare2} mr={1} />
+                  <LuShare2 style={{ marginRight: '4px' }} />
                 </Box>
                 Раздачи
               </Tabs.Trigger>
               <Tabs.Trigger value="log" whiteSpace="nowrap">
                 <Box hideBelow="md" display="inline">
-                  <Icon as={LuHistory} mr={1} />
+                  <LuHistory style={{ marginRight: '4px' }} />
                 </Box>
                 Лог
               </Tabs.Trigger>

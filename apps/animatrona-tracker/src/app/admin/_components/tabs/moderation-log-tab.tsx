@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Box, Button, HStack, Icon, Spinner, Table, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, HStack, Spinner, Table, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { LuChevronDown, LuHistory } from 'react-icons/lu'
 
@@ -140,7 +140,7 @@ export function ModerationLogTab() {
   if (logs.length === 0) {
     return (
       <VStack py={12}>
-        <Icon as={LuHistory} boxSize={12} color="fg.muted" />
+        <LuHistory size={48} color="var(--chakra-colors-fg-muted)" />
         <Text color="fg.muted" fontSize="lg">
           Логов пока нет
         </Text>
@@ -221,7 +221,7 @@ export function ModerationLogTab() {
           loading={loadingMore}
           alignSelf="center"
         >
-          <Icon as={LuChevronDown} mr={1} />
+          <LuChevronDown style={{ marginRight: '4px' }} />
           Загрузить ещё
         </Button>
       )}

@@ -2,7 +2,7 @@
 
 import { toaster } from '@/app/_components/ui/toaster'
 import { formatFileSize } from '@/lib/ipfs'
-import { Badge, Box, Button, Flex, HStack, Icon, Text } from '@chakra-ui/react'
+import { Badge, Box, Button, Flex, HStack, Text } from '@chakra-ui/react'
 import { useState } from 'react'
 import { LuRefreshCw, LuTrash2 } from 'react-icons/lu'
 import type { PinJob } from '../types'
@@ -174,13 +174,13 @@ export function PinJobCard({ job, onMutate }: PinJobCardProps) {
         )}
         {job.status === 'FAILED' && (
           <Button size="xs" colorPalette="blue" loading={retryLoading} onClick={handleRetry}>
-            <Icon as={LuRefreshCw} mr={1} />
+            <LuRefreshCw style={{ marginRight: '4px' }} />
             Повторить
           </Button>
         )}
         {job.status !== 'PINNED' && (
           <Button size="xs" variant="outline" colorPalette="red" loading={deleteLoading} onClick={handleDelete}>
-            <Icon as={LuTrash2} mr={1} />
+            <LuTrash2 style={{ marginRight: '4px' }} />
             Удалить
           </Button>
         )}

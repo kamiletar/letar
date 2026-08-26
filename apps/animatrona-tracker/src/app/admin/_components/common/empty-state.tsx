@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Heading, Icon, Text } from '@chakra-ui/react'
+import { Box, Heading, Text } from '@chakra-ui/react'
 
 interface EmptyStateProps {
   /** Иконка из react-icons */
@@ -15,7 +15,11 @@ interface EmptyStateProps {
 export function EmptyState({ icon: IconComponent, title, subtitle }: EmptyStateProps) {
   return (
     <Box textAlign="center" py={16} bg="bg.panel" borderRadius="xl">
-      <Icon as={IconComponent} boxSize={12} color="green.500" mb={4} />
+      <IconComponent
+        size={48}
+        color="var(--chakra-colors-green-500)"
+        style={{ marginBottom: '16px' }}
+      />
       <Heading size="lg">{title}</Heading>
       <Text color="fg.muted">{subtitle}</Text>
     </Box>

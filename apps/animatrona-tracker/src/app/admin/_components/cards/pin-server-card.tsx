@@ -2,7 +2,7 @@
 
 import { toaster } from '@/app/_components/ui/toaster'
 import { formatFileSize } from '@/lib/ipfs'
-import { Badge, Box, Button, Flex, Heading, HStack, Icon, IconButton, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Flex, Heading, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { LuCloud, LuCloudOff, LuHardDrive, LuPause, LuPencil, LuPlay, LuTrash2 } from 'react-icons/lu'
@@ -20,6 +20,7 @@ export function PinServerCard({ server }: { server: PinServer }) {
   const StatusIcon = server.status === 'ONLINE' ? LuCloud : LuCloudOff
   const usedPercent = server.capacityBytes > 0 ? Math.round((server.usedBytes / server.capacityBytes) * 100) : 0
   const isMaintenance = server.status === 'MAINTENANCE'
+  const ToggleStatusIcon = isMaintenance ? LuPlay : LuPause
   // Только PINNER может пинить — relay и gateway не имеют pin-заданий
   const isPinner = server.role === 'PINNER'
 
@@ -51,7 +52,7 @@ export function PinServerCard({ server }: { server: PinServer }) {
       <Box bg="bg.panel" p={6} borderRadius="xl" borderWidth="1px">
         <Flex justify="space-between" align="center" mb={3}>
           <HStack gap={3}>
-            <Icon as={StatusIcon} color={`${statusColor}.500`} />
+            <StatusIcon color={`var(--chakra-colors-${statusColor}-500)`} />
             <Heading size="md">{server.name}</Heading>
             <Badge colorPalette={statusColor}>{server.status}</Badge>
             {server.authSecret && <Badge colorPalette="purple">Авторизация</Badge>}
@@ -70,7 +71,7 @@ export function PinServerCard({ server }: { server: PinServer }) {
                 onClick={handleToggleStatus}
                 loading={toggling}
               >
-                <Icon as={isMaintenance ? LuPlay : LuPause} mr={1} />
+                <ToggleStatusIcon style={{ marginRight: '4px' }} />
                 {isMaintenance ? 'Включить' : 'На паузу'}
               </Button>
             )}
@@ -100,7 +101,7 @@ export function PinServerCard({ server }: { server: PinServer }) {
           )}
           {server.capacityBytes > 0 && (
             <HStack gap={2}>
-              <Icon as={LuHardDrive} />
+              <LuHardDrive />
               <Text fontSize="sm">
                 {formatFileSize(server.usedBytes)} / {formatFileSize(server.capacityBytes)} ({usedPercent}%)
               </Text>
