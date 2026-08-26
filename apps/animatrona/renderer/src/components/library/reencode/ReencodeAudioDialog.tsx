@@ -4,7 +4,7 @@
  * Диалог перекодировки аудиодорожек аниме
  */
 
-import { CloseButton, Dialog, HStack, Icon, Portal, Text } from '@chakra-ui/react'
+import { CloseButton, Dialog, HStack, Portal, Text } from '@chakra-ui/react'
 import { LuAudioLines } from 'react-icons/lu'
 
 import { ReencodePreviewStep } from './ReencodePreviewStep'
@@ -40,7 +40,7 @@ export function ReencodeAudioDialog({ open, onOpenChange, animeId, targetBitrate
             <Dialog.Header>
               <Dialog.Title>
                 <HStack>
-                  <Icon as={LuAudioLines} color="purple.400" />
+                  <LuAudioLines color="var(--chakra-colors-purple-400)" />
                   <Text>Перекодировка аудио</Text>
                 </HStack>
               </Dialog.Title>

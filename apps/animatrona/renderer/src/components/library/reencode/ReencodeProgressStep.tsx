@@ -4,7 +4,7 @@
  * Шаг отображения прогресса перекодировки
  */
 
-import { Badge, Box, Button, Dialog, Flex, HStack, Icon, Progress, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Dialog, Flex, HStack, Progress, Spinner, Text, VStack } from '@chakra-ui/react'
 import { LuCheck, LuX } from 'react-icons/lu'
 
 import { formatBytes } from '@/lib/format-utils'
@@ -110,7 +110,7 @@ export function ReencodeProgressStep({ state }: { state: UseReencodeDialogStateR
                     {track.status === 'done' && (
                       <HStack gap={1}>
                         <Badge colorPalette="green">
-                          <Icon as={LuCheck} />
+                          <LuCheck />
                         </Badge>
                         {track.savedBytes != null && track.savedBytes > 0 && (
                           <Text fontSize="xs" color="green.400">
@@ -121,7 +121,7 @@ export function ReencodeProgressStep({ state }: { state: UseReencodeDialogStateR
                     )}
                     {track.status === 'error' && (
                       <Badge colorPalette="red">
-                        <Icon as={LuX} />
+                        <LuX />
                       </Badge>
                     )}
                   </HStack>
@@ -140,8 +140,14 @@ export function ReencodeProgressStep({ state }: { state: UseReencodeDialogStateR
       </Dialog.Body>
 
       <Dialog.Footer>
-        <Button colorPalette="red" variant="outline" disabled={!state.isReencoding} onClick={state.handleCancel}>
-          <Icon as={LuX} mr={2} />
+        <Button
+          colorPalette="red"
+          variant="outline"
+          gap={2}
+          disabled={!state.isReencoding}
+          onClick={state.handleCancel}
+        >
+          <LuX />
           Отменить
         </Button>
       </Dialog.Footer>

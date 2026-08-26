@@ -4,7 +4,7 @@
  * Шаг предпросмотра пакетной перекодировки
  */
 
-import { Badge, Box, Button, Dialog, Flex, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Dialog, Flex, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
 import { LuAudioLines, LuCheck, LuPlay } from 'react-icons/lu'
 
 import { formatBytes } from '@/lib/format-utils'
@@ -44,7 +44,7 @@ export function BatchReencodePreviewStep({ state }: { state: UseBatchReencodeSta
       <>
         <Dialog.Body>
           <VStack gap={4} py={6}>
-            <Icon as={LuCheck} boxSize={10} color="green.400" />
+            <LuCheck size={40} color="var(--chakra-colors-green-400)" />
             <Text fontWeight="medium">Все аудиодорожки уже оптимизированы</Text>
             <Text color="fg.muted" fontSize="sm">
               Перекодировка не требуется
@@ -88,7 +88,7 @@ export function BatchReencodePreviewStep({ state }: { state: UseBatchReencodeSta
               {preview.animes.map((anime) => (
                 <Flex key={anime.id} justify="space-between" align="center" p={2} bg="bg.subtle" borderRadius="md">
                   <HStack gap={2}>
-                    <Icon as={LuAudioLines} color="purple.400" />
+                    <LuAudioLines color="var(--chakra-colors-purple-400)" />
                     <Text fontSize="sm">{anime.name}</Text>
                   </HStack>
                   <HStack gap={2}>
@@ -108,8 +108,8 @@ export function BatchReencodePreviewStep({ state }: { state: UseBatchReencodeSta
         <Button variant="outline" onClick={handleClose}>
           Отмена
         </Button>
-        <Button colorPalette="purple" onClick={handleStart}>
-          <Icon as={LuPlay} mr={2} />
+        <Button colorPalette="purple" gap={2} onClick={handleStart}>
+          <LuPlay />
           Начать перекодировку
         </Button>
       </Dialog.Footer>

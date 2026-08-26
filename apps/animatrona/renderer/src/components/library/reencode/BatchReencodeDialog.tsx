@@ -5,7 +5,7 @@
  * Пережимает аудио во всех аниме, где дорожки ещё не оптимизированы
  */
 
-import { CloseButton, Dialog, HStack, Icon, Portal, Text } from '@chakra-ui/react'
+import { CloseButton, Dialog, HStack, Portal, Text } from '@chakra-ui/react'
 import { LuAudioLines } from 'react-icons/lu'
 
 import { BatchReencodePreviewStep } from './BatchReencodePreviewStep'
@@ -51,7 +51,7 @@ export function BatchReencodeDialog({ open, onOpenChange, onCompleted }: BatchRe
             <Dialog.Header>
               <Dialog.Title>
                 <HStack>
-                  <Icon as={LuAudioLines} color="purple.400" />
+                  <LuAudioLines color="var(--chakra-colors-purple-400)" />
                   <Text>Пакетная перекодировка аудио</Text>
                 </HStack>
               </Dialog.Title>

@@ -4,7 +4,7 @@
  * Шаг результата пакетной перекодировки
  */
 
-import { Box, Button, Dialog, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Dialog, HStack, Text, VStack } from '@chakra-ui/react'
 import { LuCheck, LuX } from 'react-icons/lu'
 
 import { formatBytes } from '@/lib/format-utils'
@@ -18,7 +18,7 @@ export function BatchReencodeResultStep({ state }: { state: UseBatchReencodeStat
       <>
         <Dialog.Body>
           <VStack gap={4} py={6}>
-            <Icon as={LuX} boxSize={10} color="red.400" />
+            <LuX size={40} color="var(--chakra-colors-red-400)" />
             <Text fontWeight="medium" color="red.400">
               Ошибка пакетной перекодировки
             </Text>
@@ -45,7 +45,7 @@ export function BatchReencodeResultStep({ state }: { state: UseBatchReencodeStat
     <>
       <Dialog.Body>
         <VStack gap={4} py={4}>
-          <Icon as={LuCheck} boxSize={10} color="green.400" />
+          <LuCheck size={40} color="var(--chakra-colors-green-400)" />
           <Text fontWeight="medium" fontSize="lg">
             Пакетная перекодировка завершена
           </Text>
