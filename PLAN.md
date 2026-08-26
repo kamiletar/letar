@@ -3133,3 +3133,18 @@ as={LuX}>` растиражирован в `animatrona`/`animatrona-tracker`/`an
 `docs/encoding-profiles/page.tsx`, `docs/keyboard-shortcuts/page.tsx`). Разбор на
 `asChild`+нативный тег — отдельная, более крупная задача (семантические `Heading as="h1"` требуют
 осторожности, чтобы не потерять уровень заголовка); не путать с уже закрытым Icon-паттерном выше.
+
+**Прогресс (2026-08-26, animatrona-tracker):** все 194 вхождения `<Icon as={IconComponent}>` в 33
+файлах `apps/animatrona-tracker/src/app/**` заменены на прямой рендер иконки — параллельно 4
+фоновыми агентами по группам (`profile/*` — 46, `anime/[id]/*` — 46, `admin/*` — 50, главная/
+шапка/авторизация/каталог/лидерборд — 51 с ручным довеском одного `_hover`-случая), тот же паттерн
+замены (`boxSize`→`size` ×4px, статичный `color="токен"`→`var(--chakra-colors-<kebab-token>)`,
+динамический `as={cond ? A : B}`/`as={var}` → локальная capitalized-переменная перед JSX,
+spacing-пропы без гарантированного `gap` родителя → `style={{ marginRight: 'Npx' }}`). Один
+нестандартный случай не покрытый общим правилом — RSS-иконка в `anime-catalog-client.tsx` с
+`_hover` (react-icons такой проп не поддерживает): решено оборачиванием в `<Box asChild
+_hover={{...}}>` вокруг `<a>`, иконка наследует цвет через `currentColor`. `typecheck:tsgo` и
+`lint` зелёные, dev-сервер проверен (каталог, страница входа) — SVG рендерятся, ошибок в консоли
+нет. Повторный прогон semgrep: **0 срабатываний `Icon as=`** в `animatrona-tracker`; 28 оставшихся
+находок — тот же класс `Heading as="h1"`/`Box as="button"` вне скоупа задачи, что и в
+animatrona-landing выше.
