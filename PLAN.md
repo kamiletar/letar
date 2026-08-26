@@ -3134,6 +3134,16 @@ as={LuX}>` растиражирован в `animatrona`/`animatrona-tracker`/`an
 `asChild`+нативный тег — отдельная, более крупная задача (семантические `Heading as="h1"` требуют
 осторожности, чтобы не потерять уровень заголовка); не путать с уже закрытым Icon-паттерном выше.
 
+**Документация (2026-08-26):** рецепт из трёх независимых сессий выше (`libs/video-player-react`,
+`libs/ui`, `animatrona-landing`) оформлен в
+[chakra-icon-as-prop-cleanup-pattern.md](/.claude/docs/chakra-icon-as-prop-cleanup-pattern.md) —
+все пять пунктов (статическая иконка, наследование `currentColor`, динамический `as={obj.icon}`
+через capitalized-переменную, spacing-проп → инлайн `style`, `Link as={NextLink}` → `asChild`) с
+реальными диффами (`80ac608c`, `d50a078c`, `087521ce`). Ссылка добавлена в раздел «Документация»
+корневого `CLAUDE.md`. Оставшиеся ~15 приложений с тем же паттерном (`Icon as=`) и отдельно
+разбор `asChild`+нативный тег для `Box/Heading/Text as=` — не начаты, ждут следующей сессии,
+теперь с готовым рецептом под рукой.
+
 **Прогресс (2026-08-26, animatrona-tracker):** все 194 вхождения `<Icon as={IconComponent}>` в 33
 файлах `apps/animatrona-tracker/src/app/**` заменены на прямой рендер иконки — параллельно 4
 фоновыми агентами по группам (`profile/*` — 46, `anime/[id]/*` — 46, `admin/*` — 50, главная/
