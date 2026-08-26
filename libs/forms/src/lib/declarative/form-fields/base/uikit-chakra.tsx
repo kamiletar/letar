@@ -130,6 +130,10 @@ export const chakraUIKit: ChakraUIKit = {
         size={(size as 'sm' | 'md' | 'lg') ?? 'md'}
         disabled={disabled}
         readOnly={readOnly}
+        // WCAG 2.5.5 — минимум 44×44 CSS px кликабельной области, Checkbox.Root без
+        // этого рендерит ~20px (высота самого квадратика)
+        minH="2.75rem"
+        alignItems="center"
         data-field-name={rest['data-field-name']}
       >
         <Checkbox.HiddenInput onBlur={onBlur} />

@@ -4,6 +4,28 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.7.8] - 2026-08-26
+
+### Fixed
+
+- **`Form.Field.Select` терял `ui.options` для enum-поля, обёрнутого в `.nullable().optional()`**
+  (`@letar/forms-core` 0.9.2 → 0.9.3). Zod v4 хранит `.meta()` в глобальном registry, ключуясь по
+  идентичности объекта схемы — `ZodOptional`/`ZodNullable` создают новую обёртку, и `.meta()` на
+  ней не видит мету, повешенную на внутреннюю enum-схему. Именно так генерирует схему
+  `@letar/zenstack-form-plugin` для nullable enum-полей модели. Значение сохранялось и
+  отправлялось корректно, но `<select>` рендерился без единого `<option>`, дропдаун был пуст.
+  Найдено на `apps/aboi/src/generated/form-schemas/Product.form.ts` (поле `mood`). Фикс —
+  `getFieldMeta` (`schema-meta.ts`) и `traverseSchema`'s `getUIMeta` (`schema-traversal.ts`)
+  теперь пробуют `.meta()` на обёртке, а если пусто — на развёрнутой через
+  `unwrapSchemaWithRequired` внутренней схеме; порядок сохраняет уже работавший случай
+  `z.string().default('x').meta(...)`, где мета на самой обёртке. Регресс-тесты —
+  `schema-meta.spec.ts` (новый файл), `schema-traversal.spec.ts`.
+- **`Form.Field.Checkbox` — кликабельная область ~20px вместо 44×44 (WCAG 2.5.5).**
+  `chakraUIKit.Checkbox` не задавал `minH` на `Checkbox.Root` — реальная кликабельная зона
+  равнялась высоте квадратика чекбокса. Фикс — `minH="2.75rem"` + `alignItems="center"`
+  (тот же токен-значение, что уже использует `libs/ui/src/lib/touch-link.tsx`). Регресс-тест —
+  `field-checkbox.spec.tsx` блок «touch target».
+
 ## [2.7.7] - 2026-08-26
 
 ### Added

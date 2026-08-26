@@ -851,50 +851,52 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
 
 ## Backlog (запросы от агентов)
 
-### [2026-08-26] `Field.Select` — meta `ui.options` теряется через `.nullable().optional()`
+### ✅ [2026-08-26] `Field.Select` — meta `ui.options` теряется через `.nullable().optional()` — закрыто
 
 - **Запросил:** `aboi-dev`, найдено при добавлении nullable enum-поля `Product.mood` (§11.8 R3.4
   `apps/aboi/PLAN.md`). Письмо в agent-mail `forms-coordinator-dev` не доставлено — адресат
   оказался retired на момент отправки, поэтому запись сразу здесь.
-- **Приоритет:** normal — есть обход, но класс дефекта общий (любое nullable/optional enum-поле
-  в любом приложении).
 - **Проблема:** `Form.Field.Select` без явного `options` берёт список из `resolved.options`
   (`libs/forms/src/lib/declarative/form-fields/selection/field-select.tsx`, `useFieldState`:
   `const sourceOptions = componentProps.options ?? resolved.options ?? []`). Если поле в
   сгенерированной схеме обёрнуто в `.nullable().optional()` (стандартный вывод
   `@letar/zenstack-form-plugin` для nullable enum-поля модели), `resolved.options` приходит
-  пустым массивом — сама enum-схема несёт корректный `.meta({ui:{options:[...]}})`, но резолвер
-  поля, похоже, не разворачивает `ZodNullable`/`ZodOptional` при поиске `.meta()` на вложенной
-  схеме.
-- **Симптом:** значение хранится и передаётся корректно (submit/save работает, БД получает
-  верное значение), но `<select aria-hidden>` (native fallback) рендерится без единого
-  `<option>`, `chakra-select__valueText` — пустая строка даже при заданном `field.state.value`,
-  а дропдаун при открытии пуст (переопределить значение через UI тоже нельзя).
+  пустым массивом.
 - **Репро:** `apps/aboi/src/generated/form-schemas/Product.form.ts`:
   `mood: ProductMoodFormSchema.nullable().optional()`, где `ProductMoodFormSchema` (из
   `enums/ProductMood.form.ts`) несёт валидный `.meta({ui:{options:[...]}})`. Рендер —
   `<AboiForm.Field.Select name="mood" label="Настроение" />` без `options` prop.
-- **Обход (применён в aboi):** `options` переданы явно, собраны из экспортированных лейблов
-  enum-схемы (`ProductMoodLabels`) — `apps/aboi/src/app/[locale]/admin/products/_components/product-form.tsx`.
-- **Предлагаемый фикс:** в `useFieldState` разворачивать `ZodNullable`/`ZodOptional` (аналогично
-  тому, как это наверняка уже делается для `resolved.required`/`resolved.disabled`) перед
-  поиском `.meta()` на схеме поля.
+- **Root cause:** Zod v4 хранит `.meta()` в глобальном registry, ключуясь по идентичности
+  объекта схемы (`registry._map.get(schema)`), а не разворачивая обёртки — `ZodOptional`/
+  `ZodNullable` создают новый объект схемы, и `.meta()` на нём не видит мету внутренней
+  enum-схемы. `getSchemaAtPath` (`schema-meta.ts`) до фикса намеренно возвращал схему **до**
+  финального unwrap ради случая `z.string().default('x').meta(...)`, где мета висит на самой
+  обёртке — но это же решение ломало nullable/optional-случай, где мета висит на внутренней
+  схеме.
+- **Статус:** ✅ исправлено 2026-08-26 (`@letar/forms-core` 0.9.2 → 0.9.3). `getFieldMeta`
+  (`schema-meta.ts`) и `getUIMeta` внутри `traverseSchema` (`schema-traversal.ts`, используется
+  `FromSchema`/`AutoFields`) теперь пробуют `.meta()` сначала на схеме как есть, и только если
+  там пусто — на схеме, развёрнутой через `unwrapSchemaWithRequired`. Порядок проверки сохраняет
+  уже работавший `.default().meta()`-случай. Регресс-тесты — новый `schema-meta.spec.ts` (не
+  существовал раньше отдельным файлом для этого хука) + кейс в `schema-traversal.spec.ts`.
+  Обход в aboi (явные `options` через `ProductMoodLabels`) можно снять отдельным заходом aboi-dev,
+  не блокирует закрытие этой записи.
 
-### [2026-08-25] `Field.Checkbox` — кликабельная область ~20px вместо 44×44
+### ✅ [2026-08-25] `Field.Checkbox` — кликабельная область ~20px вместо 44×44 — закрыто
 
 - **Запросил:** `domwellbes-dev`, найдено полным touch-target sweep публичных страниц (MU1,
   задача №73 `PLAN_INDEX.md`).
-- **Приоритет:** normal — не блокирует текущую работу, но общий класс дефекта (все приложения,
-  использующие `Form.Field.Checkbox`).
 - **Проблема:** `chakraUIKit.Checkbox` (`libs/forms/src/lib/declarative/form-fields/base/uikit-chakra.tsx:124-140`)
   рендерит `Checkbox.Root` без `minH` — `getBoundingClientRect()` живого поля даёт `{height: 20}`
   вместо продуктового минимума 44×44 CSS px (WCAG 2.5.5, стандарт domwellbes §4.2
   `PLAN_PUBLIC_MOBILE.md`). Подробности и полная переписка — сообщение `domwellbes-dev` →
   `forms-coordinator-dev` в agent-mail, `topic: form-feature-request`.
-- **Предлагаемый фикс:** `minH="touchTarget"` (`2.75rem`, тот же токен, что уже использует
-  `libs/ui/src/lib/touch-link.tsx`) + `alignItems="center"` на `Checkbox.Root`. Стоит проверить
-  тот же паттерн у любых других `Checkbox.Root`/`Radio.Root` в адаптере без явного `minH`.
-- **Статус:** ожидание.
+- **Статус:** ✅ исправлено 2026-08-26 (v2.7.8). `minH="2.75rem"` + `alignItems="center"` на
+  `Checkbox.Root` (то же значение, что уже использует `libs/ui/src/lib/touch-link.tsx`). Только
+  `Checkbox.Root` затронут — в этом адаптере нет `Radio.Root` того же паттерна (радиогруппа
+  реализована иначе, `field-radio-group.tsx`), проверка «тот же паттерн у Radio.Root» из
+  предложенного фикса неактуальна. Регресс-тест — `field-checkbox.spec.tsx`, блок
+  «touch target (WCAG 2.5.5)».
 
 ### [2026-08-23] `EditIntentValue<T>` — явная замена значения без передачи старого
 
