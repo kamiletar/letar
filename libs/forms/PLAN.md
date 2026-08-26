@@ -851,6 +851,35 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
 
 ## Backlog (запросы от агентов)
 
+### [2026-08-26] `Field.Select` — meta `ui.options` теряется через `.nullable().optional()`
+
+- **Запросил:** `aboi-dev`, найдено при добавлении nullable enum-поля `Product.mood` (§11.8 R3.4
+  `apps/aboi/PLAN.md`). Письмо в agent-mail `forms-coordinator-dev` не доставлено — адресат
+  оказался retired на момент отправки, поэтому запись сразу здесь.
+- **Приоритет:** normal — есть обход, но класс дефекта общий (любое nullable/optional enum-поле
+  в любом приложении).
+- **Проблема:** `Form.Field.Select` без явного `options` берёт список из `resolved.options`
+  (`libs/forms/src/lib/declarative/form-fields/selection/field-select.tsx`, `useFieldState`:
+  `const sourceOptions = componentProps.options ?? resolved.options ?? []`). Если поле в
+  сгенерированной схеме обёрнуто в `.nullable().optional()` (стандартный вывод
+  `@letar/zenstack-form-plugin` для nullable enum-поля модели), `resolved.options` приходит
+  пустым массивом — сама enum-схема несёт корректный `.meta({ui:{options:[...]}})`, но резолвер
+  поля, похоже, не разворачивает `ZodNullable`/`ZodOptional` при поиске `.meta()` на вложенной
+  схеме.
+- **Симптом:** значение хранится и передаётся корректно (submit/save работает, БД получает
+  верное значение), но `<select aria-hidden>` (native fallback) рендерится без единого
+  `<option>`, `chakra-select__valueText` — пустая строка даже при заданном `field.state.value`,
+  а дропдаун при открытии пуст (переопределить значение через UI тоже нельзя).
+- **Репро:** `apps/aboi/src/generated/form-schemas/Product.form.ts`:
+  `mood: ProductMoodFormSchema.nullable().optional()`, где `ProductMoodFormSchema` (из
+  `enums/ProductMood.form.ts`) несёт валидный `.meta({ui:{options:[...]}})`. Рендер —
+  `<AboiForm.Field.Select name="mood" label="Настроение" />` без `options` prop.
+- **Обход (применён в aboi):** `options` переданы явно, собраны из экспортированных лейблов
+  enum-схемы (`ProductMoodLabels`) — `apps/aboi/src/app/[locale]/admin/products/_components/product-form.tsx`.
+- **Предлагаемый фикс:** в `useFieldState` разворачивать `ZodNullable`/`ZodOptional` (аналогично
+  тому, как это наверняка уже делается для `resolved.required`/`resolved.disabled`) перед
+  поиском `.meta()` на схеме поля.
+
 ### [2026-08-25] `Field.Checkbox` — кликабельная область ~20px вместо 44×44
 
 - **Запросил:** `domwellbes-dev`, найдено полным touch-target sweep публичных страниц (MU1,
