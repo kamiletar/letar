@@ -2,6 +2,7 @@
 
 import type { UIKitCorePrimitives, UIKitExtendedPrimitives } from '@letar/forms-core/uikit'
 import type { AnyFieldApi } from '@tanstack/react-form'
+import { useStore } from '@tanstack/react-form'
 import { Component, type ErrorInfo, memo, type ReactElement, type ReactNode } from 'react'
 import { useDeclarativeFormOptional } from '../context/form-context'
 import type { AppFormApi, BaseFieldProps } from '../types'
@@ -289,6 +290,13 @@ export function createFieldPrimitives(uikit: FieldPrimitivesUIKit): FieldPrimiti
         asyncValidate ? { asyncValidate, asyncDebounce, asyncTrigger } : undefined,
       )
 
+      // Реактивная подписка на form.store, не на field.store — попытка сабмита меняет
+      // submissionAttempts формы, а не meta самого поля напрямую.
+      const submissionAttempts = useStore(
+        form.store,
+        (state: { submissionAttempts: number }) => state.submissionAttempts,
+      )
+
       return (
         <FieldErrorBoundary fieldName={fullPath}>
           <form.Field
@@ -299,8 +307,10 @@ export function createFieldPrimitives(uikit: FieldPrimitivesUIKit): FieldPrimiti
             {(field: AnyFieldApi) => {
               const errors = field.state.meta.errors
               const isTouched = field.state.meta.isTouched
-              // Show errors only if field was touched (after blur or programmatic validation)
-              const hasError = isTouched && hasFieldErrors(errors)
+              // Показываем ошибку и без blur/change поля — после попытки сабмита. Иначе поле,
+              // которое пользователь ни разу не трогал (чекбокс согласия, select с дефолтом),
+              // остаётся невалидным молча: submit не проходит, но причина не видна.
+              const hasError = (isTouched || submissionAttempts > 0) && hasFieldErrors(errors)
               const errorMessage = hasError ? formatFieldErrors(errors) : ''
 
               // Async validation в процессе
