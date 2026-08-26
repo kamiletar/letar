@@ -9,8 +9,7 @@
  */
 
 import { createReadStream, promises as fs } from 'fs'
-import type { KuboRPCClient } from 'kubo-rpc-client'
-import { CID } from 'multiformats/cid'
+import type { KuboRPCClient } from 'kubo-rpc-client' with { 'resolution-mode': 'import' }
 import path from 'path'
 
 import type { IpfsAddResult, IpfsStatResult } from '../../../shared/types/ipfs'
@@ -18,6 +17,14 @@ import { createModuleLogger } from '../../utils/logger'
 import { getKuboService } from '../kubo'
 
 const log = createModuleLogger('UnifiedIPFS')
+
+/** Ленивая загрузка CID — 'multiformats/cid' ESM-only, недоступен через require() из CJS */
+type MultiformatsCid = typeof import('multiformats/cid', { with: { 'resolution-mode': 'import' }})
+let cidModulePromise: Promise<MultiformatsCid> | null = null
+function getCidCtor(): Promise<MultiformatsCid['CID']> {
+  cidModulePromise ??= import('multiformats/cid')
+  return cidModulePromise.then((m) => m.CID)
+}
 
 /**
  * Получить Kubo RPC клиент
@@ -188,7 +195,7 @@ export async function hasBlock(cidString: string): Promise<boolean> {
 
     // block.stat возвращает информацию если блок есть
     // Вызывает ошибку если блока нет
-    await client.block.stat(CID.parse(cidString))
+    await client.block.stat((await getCidCtor()).parse(cidString))
     return true
   } catch {
     return false
@@ -252,7 +259,7 @@ export async function probeCidAvailable(cidString: string, timeoutMs = 5_000): P
   const timer = setTimeout(() => controller.abort(), timeoutMs)
 
   try {
-    await client.block.stat(CID.parse(cidString), { signal: controller.signal })
+    await client.block.stat((await getCidCtor()).parse(cidString), { signal: controller.signal })
     return true
   } catch {
     return false

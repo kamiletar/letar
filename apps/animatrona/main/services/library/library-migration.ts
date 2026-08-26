@@ -3,6 +3,7 @@
  */
 
 import { app } from 'electron'
+import type { Dirent } from 'fs'
 import { promises as fs } from 'fs'
 import path from 'path'
 
@@ -24,7 +25,7 @@ export interface MigrationProgress {
 /** Рекурсивно собирает все файлы в директории, исключая указанные подпапки */
 async function collectFiles(dir: string, excludeDirs: string[] = []): Promise<string[]> {
   const result: string[] = []
-  let entries: Awaited<ReturnType<typeof fs.readdir>>
+  let entries: Dirent[]
   try {
     entries = await fs.readdir(dir, { withFileTypes: true })
   } catch {
@@ -52,7 +53,7 @@ async function copyFile(src: string, dest: string): Promise<void> {
 
 /** Удаляет пустые директории рекурсивно снизу вверх */
 async function removeEmptyDirs(dir: string): Promise<void> {
-  let entries: Awaited<ReturnType<typeof fs.readdir>>
+  let entries: string[]
   try {
     entries = await fs.readdir(dir)
   } catch {

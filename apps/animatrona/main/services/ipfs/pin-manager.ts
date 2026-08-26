@@ -10,7 +10,6 @@
 
 import { EventEmitter } from 'events'
 import { promises as fs } from 'fs'
-import { CID } from 'multiformats/cid'
 import path from 'path'
 
 import { createModuleLogger } from '../../utils/logger'
@@ -19,6 +18,14 @@ import { getIpfsDataDir } from './peer-id-manager'
 import { stat } from './unixfs-service'
 
 const log = createModuleLogger('PinManager')
+
+/** Ленивая загрузка CID — 'multiformats/cid' ESM-only, недоступен через require() из CJS */
+type MultiformatsCid = typeof import('multiformats/cid', { with: { 'resolution-mode': 'import' }})
+let cidModulePromise: Promise<MultiformatsCid> | null = null
+function getCidCtor(): Promise<MultiformatsCid['CID']> {
+  cidModulePromise ??= import('multiformats/cid')
+  return cidModulePromise.then((m) => m.CID)
+}
 
 /** Информация о закреплённом контенте */
 export interface PinInfo {
@@ -127,7 +134,7 @@ export class PinManager extends EventEmitter {
 
     if (client) {
       try {
-        const cidObj = CID.parse(cid)
+        const cidObj = (await getCidCtor()).parse(cid)
         await client.pin.add(cidObj)
         log.debug('Контент закреплён в Kubo', { cid })
       } catch (error) {
@@ -164,7 +171,7 @@ export class PinManager extends EventEmitter {
 
     if (client) {
       try {
-        const cidObj = CID.parse(cid)
+        const cidObj = (await getCidCtor()).parse(cid)
         await client.pin.rm(cidObj)
         kuboUnpinned = true
         log.debug('Pin удалён из Kubo', { cid })
@@ -261,7 +268,7 @@ export class PinManager extends EventEmitter {
     if (client) {
       for (const cid of this.pins.keys()) {
         try {
-          const cidObj = CID.parse(cid)
+          const cidObj = (await getCidCtor()).parse(cid)
           await client.pin.rm(cidObj)
         } catch {
           // Игнорируем ошибки — контент может уже быть не запинен

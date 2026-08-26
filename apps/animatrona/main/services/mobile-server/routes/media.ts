@@ -56,7 +56,7 @@ function getMimeType(filePath: string): string {
  */
 async function isPathAllowed(filePath: string): Promise<boolean> {
   // Импортируем динамически чтобы избежать циклических зависимостей
-  const { getDb } = await import('../../database')
+  const { getDb } = await import('../../database.js')
   const db = getDb()
 
   const settings = await db.settings.findUnique({ where: { id: 'default' } })

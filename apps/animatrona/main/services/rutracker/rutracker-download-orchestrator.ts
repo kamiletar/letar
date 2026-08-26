@@ -315,8 +315,12 @@ class RutrackerDownloadOrchestrator {
       status: shikimoriData.status ?? null,
       episodes: shikimoriData.episodes ?? 0,
       episodesAired: shikimoriData.episodesAired ?? 0,
-      airedOn: shikimoriData.airedOn?.date ?? null,
-      score: shikimoriData.score ? parseFloat(shikimoriData.score) : null,
+      airedOn: shikimoriData.airedOn
+        ? [shikimoriData.airedOn.year, shikimoriData.airedOn.month, shikimoriData.airedOn.day]
+          .filter((v) => v != null)
+          .join('-')
+        : null,
+      score: shikimoriData.score ?? null,
       genres: (shikimoriData.genres ?? []).map((g) => ({
         id: String(g.id),
         name: g.name,

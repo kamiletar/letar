@@ -4,7 +4,7 @@
  * Функции для получения и обновления статистики IPFS ноды.
  */
 
-import type { KuboRPCClient } from 'kubo-rpc-client'
+import type { KuboRPCClient } from 'kubo-rpc-client' with { 'resolution-mode': 'import' }
 
 import type { IpfsServiceStatus } from '../../../shared/types/ipfs'
 import { createModuleLogger } from '../../utils/logger'

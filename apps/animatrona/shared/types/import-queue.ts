@@ -78,6 +78,12 @@ export interface ImportQueueSelectedAnime {
   episodes: number | null
   /** Год выхода */
   airedOn: string | null
+  /** Количество вышедших эпизодов (опционально, из расширенных данных Shikimori) */
+  episodesAired?: number
+  /** Рейтинг Shikimori (опционально, из расширенных данных Shikimori) */
+  score?: number | null
+  /** Жанры/темы (опционально, из расширенных данных Shikimori) */
+  genres?: Array<{ id: string; name: string; russian: string; kind: string }>
 }
 
 /**

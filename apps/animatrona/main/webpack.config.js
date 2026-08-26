@@ -18,6 +18,11 @@ module.exports = {
   },
   resolve: {
     extensions: ['.ts', '.js'],
+    // node16/nodenext (tsconfig main/tsconfig.json) требует явный '.js' в относительных
+    // импортах TS-исходников — extensionAlias учит webpack резолвить такой '.js' в '.ts'
+    extensionAlias: {
+      '.js': ['.ts', '.js'],
+    },
     alias: {
       // Заменяем WebRTC на mock — libp2p требует модуль, но мы не используем WebRTC
       '@libp2p/webrtc': libp2pWebrtcMock,

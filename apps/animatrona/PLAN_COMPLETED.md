@@ -4,6 +4,74 @@
 
 > **Архив обновлён:** 2026-08-26
 
+## Стабилизация `animatrona-main:build` — 38 TS-ошибок + флаки (2026-08-26)
+
+Закрыт открытый вопрос из `PLAN.md` (после фикса `tracker-client.ts` в предыдущей сессии).
+`nx run animatrona-main:build --skip-nx-cache` прогнан **3 раза подряд без изменений в коде между
+запусками — все три чисто**, `nx lint animatrona` и `nx typecheck:tsgo animatrona` тоже зелёные.
+
+**38 TS-ошибок в 12 файлах** (полный список — см. предыдущую версию этой записи в git-истории
+`PLAN.md`) закрыты по трём классам:
+
+1. **`TS2835`** (относительный импорт без `.js` под `moduleResolution: node16`) — добавлено
+   `.js`-расширение к динамическим `import(...)` в `export-queue-service.ts`, `kubo-service.ts`,
+   `mobile-server/{server,routes/media}.ts`, `shikimori/client.ts`. Побочный эффект — это сломало
+   **реальную** production-сборку через webpack/`ts-loader` (тот не понимает `.js`-суффикс,
+   указывающий на `.ts`-файл); фикс — `resolve.extensionAlias: { '.js': ['.ts', '.js'] }` в
+   `main/webpack.config.js`.
+2. **`TS1479`/`TS1541`/`TS1542`** (CJS-файл ↔ ESM-only пакет: `@libp2p/crypto/keys`,
+   `@libp2p/peer-id`, `multiformats/cid`, `kubo-rpc-client`) — статические импорты переведены в
+   динамические `import()` внутри уже-`async` функций (`peer-id-manager.ts`) либо в ленивый
+   `cidModulePromise`-геттер (`pin-manager.ts`, `unified-ipfs-service.ts`); `import type` —
+   добавлен `with { 'resolution-mode': 'import' }` (`kubo-health.ts`, `kubo-stats.ts`,
+   `kubo-service.ts`, `unified-ipfs-service.ts`); для `typeof import(...)` в позиции типа —
+   отдельный синтаксис `typeof import('module', { with: { 'resolution-mode': 'import' } })`.
+3. **Настоящие type-ошибки:**
+   - `library-migration.ts` — `Awaited<ReturnType<typeof fs.readdir>>` резолвился не в тот
+     оверлоад (`Dirent<NonSharedBuffer>[]` вместо нужного); явный тип `Dirent[]`/`string[]`.
+   - `torrent-service-interface.ts` — `getShikimoriMeta()` не объявлял `torrentFileCid?: string`,
+     хотя реализация в `qbittorrent-service.ts` его уже возвращала — интерфейс расширен.
+   - `qbittorrent-service.ts:393` — `getTorrentFiles()` не делал `ensureClient()`+`!` как соседний
+     `getTorrentComment()` — приведено к тому же паттерну.
+   - `rutracker-download-orchestrator.ts` — `airedOn: shikimoriData.airedOn?.date` (поля `.date` у
+     `ShikimoriDate` нет, только `{year,month,day}`) и `score: parseFloat(shikimoriData.score)`
+     (уже `number | null`, не строка) — оба переписаны корректно; `ImportQueueSelectedAnime`
+     (`shared/types/import-queue.ts` + `.d.ts`) расширен опциональными `episodesAired`/`score`/
+     `genres`.
+   - `rutracker-parser.ts` — `cheerio.Element` больше не реэкспортируется cheerio 1.2.0, тип
+     импортирован из `domhandler` напрямую.
+   - `peer-sync-service.ts` (**не входил в исходный список 12 файлов** — найден дополнительно) —
+     `KUBO_CONFIG.Peering.Peers.find(p => p.ID === GATEWAY_PEER_ID)` структурно не мог совпасть:
+     `GATEWAY_PEER_ID` намеренно исключён из `Peering` (gateway s2 списан с июня 2026, см.
+     комментарий в `kubo-config.ts`) — мёртвый код удалён целиком, а не просто типизирован.
+   - `TS2307 Cannot find module '@libp2p/interface'` / cheerio→`domhandler` — обе транзитивные
+     зависимости не хостились в root `node_modules` под bun isolated linker; добавлены явно в
+     корневой `package.json` (`@libp2p/interface`, `domhandler`), `bun install`.
+
+**Причина исходной нестабильности (0 vs 38 ошибок на идентичной команде)** — НЕ гонка внутри
+`animatrona:build`, как предполагалось изначально. Один из диагностических прогонов (`build4.log`)
+не дошёл до реальной сборки вообще — лог на 5931 строк целиком состоял из повторяющегося Nx
+"Creating project graph nodes", процесс пришлось убить; `tasklist` в этот момент показал десятки
+параллельных `node.exe`/`bunx.exe` — это общий монорепо с множеством одновременных агентских
+сессий (см. `.claude/rules/agent-mail.md`). Нестабильность — конкуренция за Nx daemon/project
+graph между агентами, не баг в конфигурации `animatrona-main`.
+
+**Отдельно найдено и починено (не входило в исходный отчёт про 38 ошибок):** после того как
+type-check стал чистым, esbuild-бандлинг самого таргета `animatrona-main:build` упал на двух
+конфигурационных проблемах, ранее замаскированных TS-ошибками:
+
+- `main/project.json` → `targets.build.options.main` указывал на несуществующий
+  `apps/animatrona/main/src/index.ts` (папка `src/` содержит только `ffmpeg/`, реальная точка
+  входа — `apps/animatrona/main/main.ts`) — путь исправлен.
+- `main/tsconfig.json` → `paths` не содержал `@letar/electron-storage` (два других `@letar/*`-либы
+  уже были там), хотя `webpack.config.js` резолвит все три через `alias`. Esbuild-executor читает
+  `tsconfig.json` `paths` для бандлинга — добавлена третья запись, по аналогии с двумя
+  существующими.
+
+**Файлы:** 15 файлов под `main/services/**`+`main/ipc/**` (перечислены выше), `shared/types/
+import-queue.{ts,d.ts}`, `main/webpack.config.js`, `main/project.json`, `main/tsconfig.json`,
+корневой `package.json`.
+
 ## Чистка `<Icon as={IconComponent}>` — semgrep `letar-chakra-as-prop-forbidden` (2026-08-26)
 
 Часть кросс-приложенческой инициативы §61 корневого `PLAN.md` (после `libs/video-player-react`,

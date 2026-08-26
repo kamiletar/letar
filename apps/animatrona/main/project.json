@@ -23,7 +23,7 @@
           "cjs"
         ],
         "bundle": true,
-        "main": "apps/animatrona/main/src/index.ts",
+        "main": "apps/animatrona/main/main.ts",
         "additionalEntryPoints": [
           "apps/animatrona/main/preload/index.ts"
         ],

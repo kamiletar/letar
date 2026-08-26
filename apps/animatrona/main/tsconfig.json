@@ -17,7 +17,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "@letar/animatrona-types": ["../../../libs/animatrona-types/src/index.ts"],
-      "@letar/animatrona-utils": ["../../../libs/animatrona-utils/src/index.ts"]
+      "@letar/animatrona-utils": ["../../../libs/animatrona-utils/src/index.ts"],
+      "@letar/electron-storage": ["../../../libs/electron-storage/src/index.ts"]
     },
     "noUncheckedSideEffectImports": false,
     "ignoreDeprecations": "6.0"

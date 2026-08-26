@@ -390,7 +390,8 @@ export class QBittorrentService extends EventEmitter {
 
   /** Получить список файлов торрента через qBittorrent API */
   async getTorrentFiles(infoHash: string) {
-    return this.client.getFiles(infoHash)
+    this.ensureClient()
+    return this.client!.getFiles(infoHash)
   }
 
   /** Получить comment раздачи (часто содержит ссылку на страницу источника у торрентов, добавленных вручную) */

@@ -288,7 +288,7 @@ export class MobileServer extends EventEmitter {
 
     // Импортируем динамически чтобы избежать циклических зависимостей
     const { app } = await import('electron')
-    const { getDb } = await import('../database')
+    const { getDb } = await import('../database.js')
 
     const db = getDb()
     const settings = await db.settings.findUnique({ where: { id: 'default' } })

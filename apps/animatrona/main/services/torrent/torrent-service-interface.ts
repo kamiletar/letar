@@ -67,5 +67,6 @@ export interface TorrentServiceInterface extends EventEmitter {
     rutrackerUrl?: string
     isBundle?: boolean
     bundleAnimesJson?: string
+    torrentFileCid?: string
   } | null
 }

@@ -398,7 +398,7 @@ export async function getAnimeExtended(shikimoriId: number): Promise<ShikimoriAn
   let personRoles: ShikimoriAnimeExtended['personRoles'] = []
   let characterRoles: ShikimoriAnimeExtended['characterRoles'] = []
   try {
-    const { getAnimeRoles } = await import('./anime-api')
+    const { getAnimeRoles } = await import('./anime-api.js')
     const roles = await getAnimeRoles(shikimoriId)
     personRoles = roles.personRoles
     characterRoles = roles.characterRoles

@@ -14,7 +14,7 @@
 
 import type { ChildProcess } from 'child_process'
 import { EventEmitter } from 'events'
-import type { KuboRPCClient } from 'kubo-rpc-client'
+import type { KuboRPCClient } from 'kubo-rpc-client' with { 'resolution-mode': 'import' }
 
 import type { IpfsServiceStatus, P2PDiagnostics } from '../../../shared/types/ipfs'
 import { createModuleLogger } from '../../utils/logger'
@@ -176,10 +176,10 @@ export class KuboService extends EventEmitter {
       // без него desktop bitswap зависает (Recv=0, см. task #229)
       const apiUrl = this.getApiUrl()
       if (apiUrl) {
-        const { getPeerSyncService } = await import('./peer-sync-service')
+        const { getPeerSyncService } = await import('./peer-sync-service.js')
         getPeerSyncService()
           .initialize(apiUrl)
-          .catch((err) => {
+          .catch((err: unknown) => {
             log.warn('PeerSyncService initialize failed', { error: String(err) })
           })
       }
@@ -328,7 +328,7 @@ export class KuboService extends EventEmitter {
 
       // Останавливаем PeerSyncService (periodic refresh + reconnect cycle)
       try {
-        const { getPeerSyncService } = await import('./peer-sync-service')
+        const { getPeerSyncService } = await import('./peer-sync-service.js')
         getPeerSyncService().shutdown()
       } catch (err) {
         log.warn('PeerSyncService shutdown failed', { error: String(err) })

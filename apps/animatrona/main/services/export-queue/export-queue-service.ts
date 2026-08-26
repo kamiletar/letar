@@ -329,7 +329,7 @@ export class ExportQueueService extends EventEmitter {
     }
 
     try {
-      const { ExportManager } = await import('../export-manager')
+      const { ExportManager } = await import('../export-manager.js')
       const exportManager = ExportManager.getInstance()
       exportManager.cancel()
 
@@ -387,7 +387,7 @@ export class ExportQueueService extends EventEmitter {
     this.saveQueue()
 
     try {
-      const { ExportManager } = await import('../export-manager')
+      const { ExportManager } = await import('../export-manager.js')
       const exportManager = ExportManager.getInstance()
 
       // Подписаться на события прогресса
@@ -410,7 +410,7 @@ export class ExportQueueService extends EventEmitter {
         this.completeTask(task.id)
       } else {
         const errorMsg = result.failedEpisodes.length > 0
-          ? `Failed: ${result.failedEpisodes.map((e) => e.error).join(', ')}`
+          ? `Failed: ${result.failedEpisodes.map((e: { error: string }) => e.error).join(', ')}`
           : 'Export failed'
         this.failTask(task.id, errorMsg)
       }
@@ -418,7 +418,7 @@ export class ExportQueueService extends EventEmitter {
       // Отписаться от событий при ошибке
       if (this.currentProgressHandler) {
         try {
-          const { ExportManager } = await import('../export-manager')
+          const { ExportManager } = await import('../export-manager.js')
           ExportManager.getInstance().off('progress', this.currentProgressHandler)
         } catch {
           // Игнорируем ошибку при попытке отписаться

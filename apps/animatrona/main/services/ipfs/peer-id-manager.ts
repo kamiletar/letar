@@ -9,9 +9,7 @@ import { app } from 'electron'
 import { promises as fs } from 'fs'
 import path from 'path'
 
-import { generateKeyPair, privateKeyFromProtobuf, privateKeyToProtobuf, publicKeyToProtobuf } from '@libp2p/crypto/keys'
-import type { PeerId, PrivateKey } from '@libp2p/interface'
-import { peerIdFromPrivateKey } from '@libp2p/peer-id'
+import type { PeerId, PrivateKey } from '@libp2p/interface' with { 'resolution-mode': 'import' }
 import { createModuleLogger } from '../../utils/logger'
 
 const log = createModuleLogger('PeerIdManager')
@@ -58,6 +56,8 @@ export async function loadOrCreatePeerId(): Promise<PeerId> {
     const peerIdFile: PeerIdFile = JSON.parse(data)
 
     // Восстанавливаем PeerId из сохранённого приватного ключа
+    const { privateKeyFromProtobuf } = await import('@libp2p/crypto/keys')
+    const { peerIdFromPrivateKey } = await import('@libp2p/peer-id')
     const privKeyBytes = Buffer.from(peerIdFile.privKey, 'base64')
     const privateKey = privateKeyFromProtobuf(privKeyBytes)
     const peerId = peerIdFromPrivateKey(privateKey)
@@ -68,6 +68,8 @@ export async function loadOrCreatePeerId(): Promise<PeerId> {
     // Файл не существует или повреждён — создаём новый
     log.info('Создаю новый PeerId...')
 
+    const { generateKeyPair } = await import('@libp2p/crypto/keys')
+    const { peerIdFromPrivateKey } = await import('@libp2p/peer-id')
     const privateKey = await generateKeyPair('Ed25519')
     const peerId = peerIdFromPrivateKey(privateKey)
 
@@ -90,6 +92,7 @@ export async function savePeerId(peerId: PeerId, privateKey: PrivateKey): Promis
   await fs.mkdir(ipfsDir, { recursive: true })
 
   // Сериализуем ключи в protobuf формат
+  const { privateKeyToProtobuf, publicKeyToProtobuf } = await import('@libp2p/crypto/keys')
   const privKeyBytes = privateKeyToProtobuf(privateKey)
   const pubKeyBytes = publicKeyToProtobuf(privateKey.publicKey)
 

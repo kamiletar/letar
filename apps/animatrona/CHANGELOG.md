@@ -4,6 +4,20 @@
 
 ## [Unreleased]
 
+## [0.55.31] - 2026-08-26
+
+### Fixed
+
+- `animatrona-main:build` — 38 предсуществующих TS-ошибок в 12 файлах (`node16`-резолюция
+  относительных импортов без `.js`, CJS↔ESM границы `@libp2p/*`/`multiformats`/`kubo-rpc-client`,
+  несколько настоящих type-mismatch) плюс ещё один файл, найденный дополнительно
+  (`peer-sync-service.ts` — удалён мёртвый код на списанный gateway-peer). После чистки
+  type-check вскрылись два конфигурационных бага esbuild-таргета, ранее замаскированных
+  TS-ошибками: несуществующий `main` entry в `main/project.json` и отсутствующий tsconfig
+  path-alias для `@letar/electron-storage`. `nx run animatrona-main:build --skip-nx-cache`
+  прогнан 3 раза подряд чисто, `nx lint animatrona`/`nx typecheck:tsgo animatrona` — зелёные.
+  Подробности — `PLAN_COMPLETED.md`.
+
 ## [0.55.29] - 2026-08-26
 
 ### Fixed

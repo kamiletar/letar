@@ -18,7 +18,7 @@ import path from 'path'
 import { createModuleLogger } from '../../utils/logger'
 import { fetchPinServers } from '../tracker-client'
 import * as kuboApi from './kubo-api-client'
-import { GATEWAY_PEER_ID, KUBO_CONFIG, PINNER3_PEER_ID, PINNER4_PEER_ID, PINNER_PEER_ID } from './kubo-config'
+import { KUBO_CONFIG, PINNER3_PEER_ID, PINNER4_PEER_ID, PINNER_PEER_ID } from './kubo-config'
 import type {
   PeerSyncResult,
   PeerSyncSource,
@@ -468,17 +468,8 @@ class PeerSyncService {
       })
     }
 
-    const gatewayPeering = KUBO_CONFIG.Peering.Peers.find((p) => p.ID === GATEWAY_PEER_ID)
-    if (gatewayPeering) {
-      servers.push({
-        id: 'gateway-hardcoded',
-        name: 'Gateway (s2, hardcoded)',
-        role: 'gateway',
-        peerId: GATEWAY_PEER_ID,
-        multiaddrs: Array.from(gatewayPeering.Addrs).map((addr) => `${addr}/p2p/${GATEWAY_PEER_ID}`),
-        peeringRole: 'peering',
-      })
-    }
+    // Gateway (s2) списан с июня 2026 и не входит в KUBO_CONFIG.Peering — см. комментарий
+    // у GATEWAY_PEER_ID в kubo-config.ts. Хардкод-fallback на него больше не строим.
 
     return {
       version: 1,

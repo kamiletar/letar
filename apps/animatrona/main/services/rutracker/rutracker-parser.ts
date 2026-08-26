@@ -6,6 +6,7 @@
  */
 
 import * as cheerio from 'cheerio'
+import type { Element } from 'domhandler'
 import type {
   RutrackerAudioTrack,
   RutrackerDubGroup,
@@ -219,7 +220,7 @@ function extractBracketGroups(text: string): string[] {
  */
 export function parsePostFields(
   $: cheerio.CheerioAPI,
-  postBody: cheerio.Cheerio<cheerio.Element>,
+  postBody: cheerio.Cheerio<Element>,
 ): Record<string, string> {
   const fields: Record<string, string> = {}
 
@@ -234,7 +235,7 @@ export function parsePostFields(
     let node = el.nextSibling
     while (node) {
       if (node.type === 'tag') {
-        const tagName = (node as cheerio.Element).tagName?.toLowerCase()
+        const tagName = (node as Element).tagName?.toLowerCase()
         // Остановка на <br> или следующем span.post-b
         if (tagName === 'br') {
           break
@@ -267,7 +268,7 @@ export function parsePostFields(
 }
 
 /** Парсит внешние ссылки (Shikimori, MAL, AniDB и т.д.) */
-function parseExternalLinks($: cheerio.CheerioAPI, postBody: cheerio.Cheerio<cheerio.Element>): RutrackerExternalLinks {
+function parseExternalLinks($: cheerio.CheerioAPI, postBody: cheerio.Cheerio<Element>): RutrackerExternalLinks {
   const links: RutrackerExternalLinks = {}
 
   postBody.find('a.postLink, a.p-ext-link, a[href]').each((_i, el) => {
@@ -352,7 +353,7 @@ function parseSingleDubGroup(raw: string, defaultType: 'dub' | 'sub'): Rutracker
 /** Парсит MediaInfo из спойлера */
 export function parseMediaInfo(
   $: cheerio.CheerioAPI,
-  postBody: cheerio.Cheerio<cheerio.Element>,
+  postBody: cheerio.Cheerio<Element>,
 ): RutrackerMediaInfo | undefined {
   // Ищем спойлер с заголовком "MediaInfo" или "Mediainfo"
   let mediaInfoText = ''
@@ -579,7 +580,7 @@ function parseBitrate(value: string): number {
 }
 
 /** Извлекает URL постера */
-function extractPosterUrl($: cheerio.CheerioAPI, postBody: cheerio.Cheerio<cheerio.Element>): string | undefined {
+function extractPosterUrl($: cheerio.CheerioAPI, postBody: cheerio.Cheerio<Element>): string | undefined {
   // Вариант 1: <img class="postImg">
   const img = postBody.find('img.postImg').first()
   if (img.length) {
@@ -609,7 +610,7 @@ function extractSizeText($: cheerio.CheerioAPI): string | undefined {
 }
 
 /** Извлекает список файлов из спойлера */
-function extractFileList($: cheerio.CheerioAPI, postBody: cheerio.Cheerio<cheerio.Element>): string[] | undefined {
+function extractFileList($: cheerio.CheerioAPI, postBody: cheerio.Cheerio<Element>): string[] | undefined {
   let fileListText = ''
 
   postBody.find('div.sp-wrap').each((_i, el) => {
