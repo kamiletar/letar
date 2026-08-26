@@ -1,7 +1,7 @@
 'use client'
 
 import { signInWithLetarAuth } from '@/lib/auth-client'
-import { Box, Button, Container, Heading, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Container, Heading, HStack, Text, VStack } from '@chakra-ui/react'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { LuFilm, LuKeyRound } from 'react-icons/lu'
@@ -16,14 +16,14 @@ function SignInContent() {
         <VStack gap={8}>
           <VStack gap={2}>
             <HStack gap={2}>
-              <Icon as={LuFilm} boxSize={8} color="brand.500" />
+              <LuFilm size={32} color="var(--chakra-colors-brand-500)" />
               <Heading size="xl">Animatrona</Heading>
             </HStack>
             <Text color="fg.muted">Войдите в аккаунт</Text>
           </VStack>
 
           <Button w="100%" colorPalette="brand" onClick={() => signInWithLetarAuth(returnTo)}>
-            <Icon as={LuKeyRound} mr={2} />
+            <LuKeyRound style={{ marginRight: '8px' }} />
             Войти через Ключницу
           </Button>
         </VStack>

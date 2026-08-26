@@ -10,7 +10,6 @@ import {
   Grid,
   Heading,
   HStack,
-  Icon,
   Input,
   Text,
   VStack,
@@ -283,6 +282,10 @@ export function AnimeCatalogClient({
     }
   }, [query])
 
+  // Динамическая иконка «свернуть/развернуть» — react-icons требует Capitalized-компонент, не переменную as=
+  const MoreFiltersIcon = moreFiltersOpen ? LuChevronUp : LuChevronDown
+  const MobileFiltersToggleIcon = mobileFiltersOpen ? LuChevronUp : LuChevronDown
+
   /** Общий контент фильтров (переиспользуется desktop + mobile) */
   const filterContent = (
     <VStack align="stretch" gap={4}>
@@ -421,7 +424,7 @@ export function AnimeCatalogClient({
               colorPalette={initialView !== 'franchise' ? 'brand' : 'gray'}
               onClick={() => updateFilters({ view: '' })}
             >
-              <Icon as={LuGrid3X3} />
+              <LuGrid3X3 />
               Все
             </Button>
             <Button
@@ -430,7 +433,7 @@ export function AnimeCatalogClient({
               colorPalette={initialView === 'franchise' ? 'brand' : 'gray'}
               onClick={() => updateFilters({ view: 'franchise' })}
             >
-              <Icon as={LuLayers} />
+              <LuLayers />
               Франшизы
             </Button>
           </HStack>
@@ -464,7 +467,7 @@ export function AnimeCatalogClient({
               colorPalette="gray"
               onClick={() => updateFilters({ voice: '' })}
             >
-              <Icon as={LuX} />
+              <LuX />
               Сбросить
             </Button>
           )}
@@ -475,7 +478,7 @@ export function AnimeCatalogClient({
       <Collapsible.Root open={moreFiltersOpen} onOpenChange={(d) => setMoreFiltersOpen(d.open)}>
         <Collapsible.Trigger asChild>
           <Button variant="ghost" size="xs" colorPalette="gray">
-            <Icon as={moreFiltersOpen ? LuChevronUp : LuChevronDown} />
+            <MoreFiltersIcon />
             Ещё фильтры
             {(initialStudio || initialDirector || initialEpFrom || initialEpTo) && (
               <Badge ml={1} colorPalette="brand" variant="subtle" borderRadius="full" fontSize="2xs">
@@ -577,19 +580,21 @@ export function AnimeCatalogClient({
               <Breadcrumbs items={[{ label: 'Каталог аниме' }]} />
               <HStack gap={2}>
                 <Heading as="h1" size="lg">
-                  <Icon as={LuPlay} mr={2} />
+                  <LuPlay style={{ marginRight: '8px' }} />
                   Каталог аниме
                 </Heading>
-                <a href="/api/rss/feed.xml" target="_blank" rel="noopener noreferrer" title="RSS фид новых релизов">
-                  <Icon as={LuRss} boxSize={5} color="orange.500" _hover={{ color: 'orange.400' }} />
-                </a>
+                <Box asChild color="orange.500" _hover={{ color: 'orange.400' }} display="inline-flex">
+                  <a href="/api/rss/feed.xml" target="_blank" rel="noopener noreferrer" title="RSS фид новых релизов">
+                    <LuRss size={20} />
+                  </a>
+                </Box>
               </HStack>
             </VStack>
 
             {/* Поиск + Сортировка */}
             <HStack gap={3} flex={1} maxW="600px" justify="flex-end">
               <Flex gap={2} flex={1} maxW="300px" align="center">
-                <Icon as={LuSearch} color="fg.muted" />
+                <LuSearch color="var(--chakra-colors-fg-muted)" />
                 <Input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
@@ -634,7 +639,7 @@ export function AnimeCatalogClient({
             </Text>
             {activeFilterCount > 0 && (
               <Button size="xs" variant="ghost" colorPalette="red" onClick={resetFilters}>
-                <Icon as={LuX} />
+                <LuX />
                 Сбросить фильтры ({activeFilterCount})
               </Button>
             )}
@@ -648,20 +653,20 @@ export function AnimeCatalogClient({
               <Collapsible.Trigger asChild>
                 <Button variant="outline" flex={1}>
                   <HStack>
-                    <Icon as={LuFilter} />
+                    <LuFilter />
                     <Text>Фильтры</Text>
                     {activeFilterCount > 0 && (
                       <Badge colorPalette="brand" borderRadius="full">
                         {activeFilterCount}
                       </Badge>
                     )}
-                    <Icon as={mobileFiltersOpen ? LuChevronUp : LuChevronDown} />
+                    <MobileFiltersToggleIcon />
                   </HStack>
                 </Button>
               </Collapsible.Trigger>
               {activeFilterCount > 0 && (
                 <Button size="sm" variant="ghost" colorPalette="red" onClick={resetFilters}>
-                  <Icon as={LuX} />
+                  <LuX />
                 </Button>
               )}
             </Flex>
@@ -681,7 +686,11 @@ export function AnimeCatalogClient({
         {animeList.length === 0
           ? (
             <Box textAlign="center" py={16}>
-              <Icon as={LuFilm} boxSize={12} color="fg.muted" mb={4} />
+              <LuFilm
+                size={48}
+                color="var(--chakra-colors-fg-muted)"
+                style={{ marginBottom: '16px' }}
+              />
               <Heading size="lg" mb={2}>
                 Ничего не найдено
               </Heading>
@@ -726,7 +735,7 @@ export function AnimeCatalogClient({
                     disabled={page <= 1}
                     onClick={() => updateFilters({ page: String(page - 1) })}
                   >
-                    <Icon as={LuChevronLeft} />
+                    <LuChevronLeft />
                   </Button>
 
                   <HStack gap={1}>
@@ -761,7 +770,7 @@ export function AnimeCatalogClient({
                     disabled={page >= totalPages}
                     onClick={() => updateFilters({ page: String(page + 1) })}
                   >
-                    <Icon as={LuChevronRight} />
+                    <LuChevronRight />
                   </Button>
                 </Flex>
               )}

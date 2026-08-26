@@ -11,7 +11,6 @@ import {
   Flex,
   Heading,
   HStack,
-  Icon,
   IconButton,
   Portal,
   Separator,
@@ -56,7 +55,7 @@ export function Header() {
           <HStack gap={4}>
             <Button asChild variant="ghost" size="sm" p={1}>
               <NextLink href="/">
-                <Icon as={LuFilm} boxSize={5} color="brand.500" />
+                <LuFilm size={20} color="var(--chakra-colors-brand-500)" />
                 <Heading as="span" size="sm" ml={1}>
                   Animatrona
                 </Heading>
@@ -69,7 +68,7 @@ export function Header() {
               </Button>
               <Button asChild variant="ghost" size="sm" {...activeLinkProps('/leaderboard')}>
                 <NextLink href="/leaderboard">
-                  <Icon as={LuTrophy} mr={1} />
+                  <LuTrophy style={{ marginRight: '4px' }} />
                   Лидерборд
                 </NextLink>
               </Button>
@@ -96,7 +95,7 @@ export function Header() {
             display={{ base: 'flex', md: 'none' }}
             onClick={() => setDrawerOpen(true)}
           >
-            <Icon as={LuMenu} boxSize={5} />
+            <LuMenu size={20} />
           </IconButton>
 
           {/* Мобильный Drawer */}
@@ -122,7 +121,7 @@ export function Header() {
                         {...activeLinkProps('/anime')}
                       >
                         <NextLink href="/anime">
-                          <Icon as={LuFilm} mr={2} />
+                          <LuFilm style={{ marginRight: '8px' }} />
                           Аниме
                         </NextLink>
                       </Button>
@@ -136,7 +135,7 @@ export function Header() {
                         {...activeLinkProps('/leaderboard')}
                       >
                         <NextLink href="/leaderboard">
-                          <Icon as={LuTrophy} mr={2} />
+                          <LuTrophy style={{ marginRight: '8px' }} />
                           Лидерборд
                         </NextLink>
                       </Button>
@@ -167,7 +166,7 @@ export function Header() {
         <Box bg="orange.subtle" borderBottomWidth="1px" borderColor="orange.muted" py={2}>
           <Container maxW="7xl">
             <Flex align="center" justify="center" gap={2} fontSize="sm">
-              <Icon as={LuCalendar} color="orange.fg" />
+              <LuCalendar color="var(--chakra-colors-orange-fg)" />
               <Box color="orange.fg">Укажите дату рождения для доступа ко всему каталогу.</Box>
               <Button asChild size="xs" colorPalette="orange" variant="solid">
                 <NextLink href="/complete-profile">Указать</NextLink>

@@ -2,7 +2,7 @@
 
 import { toaster } from '@/app/_components/ui/toaster'
 import { signIn, signUp } from '@/lib/auth-client'
-import { Box, Button, Container, Heading, HStack, Icon, Input, Separator, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Container, Heading, HStack, Input, Separator, Text, VStack } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -69,7 +69,7 @@ export default function SignUpPage() {
           {/* Logo */}
           <VStack gap={2}>
             <HStack gap={2}>
-              <Icon as={LuFilm} boxSize={8} color="brand.500" />
+              <LuFilm size={32} color="var(--chakra-colors-brand-500)" />
               <Heading size="xl">Animatrona</Heading>
             </HStack>
             <Text color="fg.muted">Создайте аккаунт</Text>
@@ -78,19 +78,19 @@ export default function SignUpPage() {
           {/* OAuth Buttons */}
           <VStack gap={3} w="100%">
             <Button w="100%" variant="outline" onClick={() => handleOAuthSignIn('google')}>
-              <Icon as={FaGoogle} mr={2} />
+              <FaGoogle style={{ marginRight: '8px' }} />
               Продолжить с Google
             </Button>
             <Button w="100%" variant="outline" onClick={() => handleOAuthSignIn('yandex')}>
-              <Icon as={FaYandex} mr={2} />
+              <FaYandex style={{ marginRight: '8px' }} />
               Продолжить с Яндекс
             </Button>
             <Button w="100%" variant="outline" onClick={() => handleOAuthSignIn('vk')}>
-              <Icon as={FaVk} mr={2} />
+              <FaVk style={{ marginRight: '8px' }} />
               Продолжить с VK
             </Button>
             <Button w="100%" variant="outline" onClick={() => handleOAuthSignIn('shikimori')}>
-              <Icon as={LuBookOpen} mr={2} />
+              <LuBookOpen style={{ marginRight: '8px' }} />
               Продолжить с Shikimori
             </Button>
           </VStack>
@@ -131,7 +131,7 @@ export default function SignUpPage() {
                 min="1920-01-01"
               />
               <Button type="submit" w="100%" colorPalette="brand" loading={loading}>
-                <Icon as={LuUserPlus} mr={2} />
+                <LuUserPlus style={{ marginRight: '8px' }} />
                 Зарегистрироваться
               </Button>
             </VStack>

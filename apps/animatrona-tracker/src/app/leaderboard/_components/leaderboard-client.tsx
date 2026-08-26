@@ -1,7 +1,7 @@
 'use client'
 
 import { formatFileSize, formatSeedingTime } from '@/lib/ipfs'
-import { Badge, Box, Button, Container, Flex, Heading, HStack, Icon, Table, Tabs, Text } from '@chakra-ui/react'
+import { Badge, Box, Button, Container, Flex, Heading, HStack, Table, Tabs, Text } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { LuArrowLeft, LuBookOpen, LuClock, LuFilm, LuTrophy, LuUpload } from 'react-icons/lu'
 
@@ -91,12 +91,12 @@ export function LeaderboardClient({
             <HStack gap={4}>
               <Button asChild variant="ghost" size="sm">
                 <NextLink href="/anime">
-                  <Icon as={LuArrowLeft} mr={2} />
+                  <LuArrowLeft style={{ marginRight: '8px' }} />
                   Аниме
                 </NextLink>
               </Button>
               <Heading size="lg">
-                <Icon as={LuTrophy} mr={2} />
+                <LuTrophy style={{ marginRight: '8px' }} />
                 Лидерборд
               </Heading>
             </HStack>
@@ -113,13 +113,13 @@ export function LeaderboardClient({
           >
             <Tabs.Trigger value="score" whiteSpace="nowrap">
               <Box hideBelow="md" display="inline">
-                <Icon as={LuTrophy} mr={1} />
+                <LuTrophy style={{ marginRight: '4px' }} />
               </Box>
               Рейтинг
             </Tabs.Trigger>
             <Tabs.Trigger value="uploaded" whiteSpace="nowrap">
               <Box hideBelow="md" display="inline">
-                <Icon as={LuUpload} mr={1} />
+                <LuUpload style={{ marginRight: '4px' }} />
               </Box>
               Отдано
             </Tabs.Trigger>
@@ -128,25 +128,25 @@ export function LeaderboardClient({
             </Tabs.Trigger>
             <Tabs.Trigger value="seeding" whiteSpace="nowrap">
               <Box hideBelow="md" display="inline">
-                <Icon as={LuClock} mr={1} />
+                <LuClock style={{ marginRight: '4px' }} />
               </Box>
               Сидирование
             </Tabs.Trigger>
             <Tabs.Trigger value="uptime" whiteSpace="nowrap">
               <Box hideBelow="md" display="inline">
-                <Icon as={LuClock} mr={1} />
+                <LuClock style={{ marginRight: '4px' }} />
               </Box>
               Аптайм
             </Tabs.Trigger>
             <Tabs.Trigger value="published" whiteSpace="nowrap">
               <Box hideBelow="md" display="inline">
-                <Icon as={LuFilm} mr={1} />
+                <LuFilm style={{ marginRight: '4px' }} />
               </Box>
               Публикации
             </Tabs.Trigger>
             <Tabs.Trigger value="library" whiteSpace="nowrap">
               <Box hideBelow="md" display="inline">
-                <Icon as={LuBookOpen} mr={1} />
+                <LuBookOpen style={{ marginRight: '4px' }} />
               </Box>
               Библиотека
             </Tabs.Trigger>
@@ -295,7 +295,11 @@ function LeaderTable({
   if (items.length === 0) {
     return (
       <Box textAlign="center" py={16} bg="bg.panel" borderRadius="xl" borderWidth="1px">
-        <Icon as={LuTrophy} boxSize={10} color="fg.muted" mb={4} />
+        <LuTrophy
+          size={40}
+          color="var(--chakra-colors-fg-muted)"
+          style={{ marginBottom: '16px' }}
+        />
         <Text color="fg.muted" fontSize="lg">
           Пока нет данных
         </Text>

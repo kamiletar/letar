@@ -2,7 +2,7 @@
 
 import { AGE_RATING_CONFIG } from '@/lib/age-rating'
 import { resolveImageUrl } from '@/lib/ipfs'
-import { Badge, Box, HStack, Icon, Image, Text } from '@chakra-ui/react'
+import { Badge, Box, HStack, Image, Text } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { LuCheck, LuEye, LuLayers, LuStar, LuUser } from 'react-icons/lu'
 
@@ -91,7 +91,7 @@ export function AnimeCard({ anime, progress, franchiseCount }: AnimeCardProps) {
               {progress.watchedEpisodes === totalEpisodes
                 ? (
                   <>
-                    <Icon as={LuCheck} boxSize={3} />
+                    <LuCheck size={12} />
                     Просмотрено
                   </>
                 )
@@ -112,7 +112,7 @@ export function AnimeCard({ anime, progress, franchiseCount }: AnimeCardProps) {
               alignItems="center"
               gap={1}
             >
-              <Icon as={LuLayers} boxSize={3} />
+              <LuLayers size={12} />
               {franchiseCount} тайтлов
             </Badge>
           )}
@@ -168,19 +168,19 @@ export function AnimeCard({ anime, progress, franchiseCount }: AnimeCardProps) {
           <HStack gap={2} fontSize="xs" color="fg.muted" mt={2} flexWrap="wrap">
             {anime.uploadedBy?.name && (
               <HStack gap={1}>
-                <Icon as={LuUser} />
+                <LuUser />
                 <Text>{anime.uploadedBy.name}</Text>
               </HStack>
             )}
             {(anime.viewCount ?? 0) > 0 && (
               <HStack gap={1}>
-                <Icon as={LuEye} />
+                <LuEye />
                 <Text>{anime.viewCount}</Text>
               </HStack>
             )}
             {anime.avgRating !== null && anime.avgRating !== undefined && anime.avgRating > 0 && (
               <HStack gap={1}>
-                <Icon as={LuStar} color="yellow.500" />
+                <LuStar color="var(--chakra-colors-yellow-500)" />
                 <Text>{anime.avgRating.toFixed(1)}</Text>
               </HStack>
             )}

@@ -10,7 +10,6 @@ import {
   Grid,
   Heading,
   HStack,
-  Icon,
   Image,
   Input,
   SimpleGrid,
@@ -89,7 +88,7 @@ export function HomePageClient({ genreCounts, totalCount, latestAnime }: HomePag
           <VStack gap={8} textAlign="center">
             <VStack gap={4}>
               <HStack gap={2}>
-                <Icon as={LuFilm} boxSize={10} />
+                <LuFilm size={40} />
                 <Heading as="h1" size="4xl" fontWeight="bold">
                   Animatrona
                 </Heading>
@@ -113,7 +112,7 @@ export function HomePageClient({ genreCounts, totalCount, latestAnime }: HomePag
                 borderRadius="lg"
               />
               <Button onClick={handleSearch} size="lg" colorPalette="accent" borderRadius="lg">
-                <Icon as={LuSearch} mr={2} />
+                <LuSearch style={{ marginRight: '8px' }} />
                 Найти
               </Button>
             </Flex>
@@ -121,11 +120,11 @@ export function HomePageClient({ genreCounts, totalCount, latestAnime }: HomePag
             {/* Статистика */}
             <HStack gap={6} opacity={0.85} fontSize="sm">
               <HStack gap={1}>
-                <Icon as={LuTv} />
+                <LuTv />
                 <Text fontWeight="medium">{totalCount} аниме</Text>
               </HStack>
               <HStack gap={1}>
-                <Icon as={LuLibrary} />
+                <LuLibrary />
                 <Text fontWeight="medium">{genreCounts.length} жанров</Text>
               </HStack>
             </HStack>
@@ -223,7 +222,7 @@ export function HomePageClient({ genreCounts, totalCount, latestAnime }: HomePag
         <Container maxW="container.xl">
           <Flex justify="space-between" align="center" flexWrap="wrap" gap={4}>
             <HStack gap={2}>
-              <Icon as={LuFilm} />
+              <LuFilm />
               <Text fontWeight="semibold">Animatrona Tracker</Text>
             </HStack>
             <Text color="fg.muted" fontSize="sm">
@@ -316,7 +315,7 @@ function LatestAnimeCard({ anime, progress }: { anime: LatestAnimeItem; progress
               {progress.watchedEpisodes === totalEpisodes
                 ? (
                   <>
-                    <Icon as={LuCheck} boxSize={3} />
+                    <LuCheck size={12} />
                     Просмотрено
                   </>
                 )
