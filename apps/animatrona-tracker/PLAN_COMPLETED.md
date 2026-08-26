@@ -1,5 +1,38 @@
 # Выполненные задачи — Animatrona Tracker
 
+## Чистка запрещённого Chakra `Icon as=` — 194 вхождения в 33 файлах (2026-08-26)
+
+Кросс-приложенческая задача из корневого `PLAN.md` §61 (semgrep-правило
+`letar-chakra-as-prop-forbidden`, `.semgrep/letar-rules.yml`). Все `<Icon as={IconComponent}
+.../>` в `apps/animatrona-tracker/src/app/**` заменены на прямой рендер react-icons
+компонентов — работа распределена на 4 параллельных фоновых агента по группам:
+
+- `profile/*` (4 файла) — 46 замен, коммит `6626eb5a`
+- `anime/[id]/*` (9 файлов) — 46 замен, коммит `e4e2c270`
+- `admin/*` (12 файлов) — 50 замен, коммит `efae5cb3`
+- главная/шапка/авторизация/каталог/лидерборд/pinned (8 файлов) — 51 замена, коммит `5adb7c34`
+
+Правила замены: `boxSize`→`size` (×4px); статичный `color="токен"` без общего родителя по
+цвету → `color="var(--chakra-colors-<kebab-token>)"` (там, где родитель уже задавал тот же цвет —
+проп у иконки просто убран, react-icons использует `currentColor`); динамический
+`as={cond ? A : B}`/`as={переменная}` → локальная capitalized-переменная перед JSX (иначе JSX
+трактует lowercase-переменную как DOM-тег); spacing-пропы (`mr`/`mb` и т.п.) без гарантированного
+`gap` у родителя → `style={{ marginRight: 'Npx' }}` по шкале Chakra spacing.
+
+Один нестандартный случай вне общего правила — RSS-иконка в `anime/_components/
+anime-catalog-client.tsx` использовала `_hover`, которого у react-icons нет: решено
+оборачиванием ссылки в `<Box asChild color="orange.500" _hover={{ color: 'orange.400' }}>`,
+иконка внутри наследует цвет через `currentColor`.
+
+Проверка: `nx typecheck:tsgo animatrona-tracker` и `nx lint animatrona-tracker` — зелёные (только
+предсуществующие `react-hooks/exhaustive-deps` warnings в видеоплеере, не связаны с правкой).
+Dev-сервер поднят, каталог аниме и страница входа проверены через Browser pane (JS-инспекция DOM,
+т.к. композитный скриншот в этой сессии был недоступен) — SVG-иконки рендерятся, ошибок в
+консоли нет. Финальный `semgrep scan --config .semgrep/letar-rules.yml apps/animatrona-tracker` —
+**0 срабатываний на `Icon as=`**; 28 оставшихся находок — другой класс (`Heading as="h1"`,
+`Box as="button"` и т.п.), вне рамок этой задачи, severity правила не поднималась (задачей
+запрещено, пока не почищен весь `apps/*`).
+
 ## Проверка ложного `react-hooks/rules-of-hooks` в e2e-фикстурах — не применимо (2026-08-25)
 
 По образцу `PLAN-INFRA-4.md §109` (ложное срабатывание eslint-plugin-react-hooks на `use` в
