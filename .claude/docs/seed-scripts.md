@@ -206,12 +206,18 @@ if (existingItemCount === 0) {
 Работает и для нового родителя (только что созданного, `existingItemCount === 0`), и для
 существовавшего-но-осиротевшего — не создаёт дублей там, где дочерние записи уже есть.
 
-**Не единичный случай.** Тот же вложенный паттерн (create ребёнка внутри creator-замыкания
-родителя) встречается и в других seed-файлах domwellbes — `clients.ts` (`ClientContact`),
-`construction-cases.ts` (`ConstructionCaseStage`), `counterparties.ts` (`CounterpartyLocation`),
-`logistics.ts` (`CarrierTariff`/`TariffComponent`), `works.ts` (нормы). Каждый — кандидат на ту же
-уязвимость, но не аудирован и не исправлен превентивно (см. связанный чип, заведённый вместе с
-этой записью) — фикс применён только там, где баг проявился и был подтверждён живой проверкой.
+**Аудит остальных seed-файлов domwellbes завершён (2026-08-26).** Тот же вложенный паттерн
+проверен в `clients.ts`, `construction-cases.ts`, `counterparties.ts`, `logistics.ts`, `works.ts`:
+
+- **Были уязвимы и исправлены** тем же паттерном (дочерний count()===0 отдельным шагом) —
+  `clients.ts` (`ClientContact`), `construction-cases.ts` (`ConstructionCaseStage`),
+  `logistics.ts` (`CarrierTariff`/`TariffComponent`/`TariffZoneRate`, оба перевозчика).
+  На момент аудита данные в БД были целы (без осиротевших родителей) — фикс превентивный.
+- **Уже безопасны без изменений** — `counterparties.ts` (`CounterpartyLocation`) и
+  `works.ts` (`WorkMaterialNorm`/`WorkMachineNorm`): в обоих файлах дочерняя запись создаётся
+  отдельным top-level вызовом `upsertIdByNaturalKey`, не вложенным в creator-замыкание
+  родителя — родитель может существовать сколько угодно раз, дочерний вызов всё равно
+  отрабатывает на каждом прогоне.
 
 ## Примеры в репозитории
 
