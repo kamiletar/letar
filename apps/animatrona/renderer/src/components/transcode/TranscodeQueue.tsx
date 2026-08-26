@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Card, HStack, Icon, Progress, Text, VStack } from '@chakra-ui/react'
+import { Box, Card, HStack, Progress, Text, VStack } from '@chakra-ui/react'
 import { memo, useMemo } from 'react'
 import { LuCheck, LuClock, LuFileVideo, LuLoader, LuX } from 'react-icons/lu'
 
@@ -52,7 +52,7 @@ export function TranscodeQueue({ files }: TranscodeQueueProps) {
           <Card.Body>
             <HStack gap={4}>
               <Box p={3} borderRadius="lg" bg="purple.800">
-                <Icon as={LuLoader} boxSize={6} className="animate-spin" />
+                <LuLoader size={24} className="animate-spin" />
               </Box>
               <Box flex={1}>
                 <Text fontWeight="medium">{currentFile.name}</Text>
@@ -103,16 +103,16 @@ export function TranscodeQueue({ files }: TranscodeQueueProps) {
 const StatusIcon = memo(function StatusIcon({ status }: { status: FileItem['status'] }) {
   switch (status) {
     case 'pending':
-      return <Icon as={LuClock} color="fg.subtle" boxSize={5} />
+      return <LuClock color="var(--chakra-colors-fg-subtle)" size={20} />
     case 'analyzing':
     case 'transcoding':
-      return <Icon as={LuLoader} color="purple.400" boxSize={5} className="animate-spin" />
+      return <LuLoader color="var(--chakra-colors-purple-400)" size={20} className="animate-spin" />
     case 'ready':
-      return <Icon as={LuFileVideo} color="blue.400" boxSize={5} />
+      return <LuFileVideo color="var(--chakra-colors-blue-400)" size={20} />
     case 'completed':
-      return <Icon as={LuCheck} color="green.400" boxSize={5} />
+      return <LuCheck color="var(--chakra-colors-green-400)" size={20} />
     case 'error':
-      return <Icon as={LuX} color="red.400" boxSize={5} />
+      return <LuX color="var(--chakra-colors-red-400)" size={20} />
   }
 })
 

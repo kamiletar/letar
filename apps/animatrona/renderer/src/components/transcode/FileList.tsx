@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Box, Button, Card, Checkbox, HStack, Icon, Progress, Table, Text } from '@chakra-ui/react'
+import { Badge, Box, Button, Card, Checkbox, HStack, Progress, Table, Text } from '@chakra-ui/react'
 import { LuCheck, LuFileVideo, LuLoader, LuSquareCheck, LuSquareMinus, LuX } from 'react-icons/lu'
 
 import type { FileItem } from '@/hooks/useTranscode'
@@ -31,8 +31,8 @@ export function FileList({ files, selectedFiles, onToggle, onSelectAll, onDesele
         return <Badge colorPalette="gray">Ожидание</Badge>
       case 'analyzing':
         return (
-          <Badge colorPalette="blue">
-            <Icon as={LuLoader} mr={1} className="animate-spin" />
+          <Badge colorPalette="blue" gap={1}>
+            <LuLoader className="animate-spin" />
             Анализ
           </Badge>
         )
@@ -40,22 +40,22 @@ export function FileList({ files, selectedFiles, onToggle, onSelectAll, onDesele
         return <Badge colorPalette="green">Готов</Badge>
       case 'transcoding':
         return (
-          <Badge colorPalette="purple">
-            <Icon as={LuLoader} mr={1} className="animate-spin" />
+          <Badge colorPalette="purple" gap={1}>
+            <LuLoader className="animate-spin" />
             Кодирование
           </Badge>
         )
       case 'completed':
         return (
-          <Badge colorPalette="green">
-            <Icon as={LuCheck} mr={1} />
+          <Badge colorPalette="green" gap={1}>
+            <LuCheck />
             Готово
           </Badge>
         )
       case 'error':
         return (
-          <Badge colorPalette="red">
-            <Icon as={LuX} mr={1} />
+          <Badge colorPalette="red" gap={1}>
+            <LuX />
             Ошибка
           </Badge>
         )
@@ -72,12 +72,12 @@ export function FileList({ files, selectedFiles, onToggle, onSelectAll, onDesele
               Выбрано: {selectedFiles.length} из {files.length}
             </Text>
             <HStack gap={2}>
-              <Button size="xs" variant="ghost" onClick={onSelectAll} disabled={allSelected}>
-                <Icon as={LuSquareCheck} mr={1} />
+              <Button size="xs" variant="ghost" onClick={onSelectAll} disabled={allSelected} gap={1}>
+                <LuSquareCheck />
                 Выбрать всё
               </Button>
-              <Button size="xs" variant="ghost" onClick={onDeselectAll} disabled={noneSelected}>
-                <Icon as={LuSquareMinus} mr={1} />
+              <Button size="xs" variant="ghost" onClick={onDeselectAll} disabled={noneSelected} gap={1}>
+                <LuSquareMinus />
                 Снять всё
               </Button>
             </HStack>
@@ -115,7 +115,7 @@ export function FileList({ files, selectedFiles, onToggle, onSelectAll, onDesele
                 </Table.Cell>
                 <Table.Cell>
                   <HStack gap={3}>
-                    <Icon as={LuFileVideo} color="purple.400" boxSize={5} />
+                    <LuFileVideo color="var(--chakra-colors-purple-400)" size={20} />
                     <Text fontWeight="medium">{file.name}</Text>
                   </HStack>
                 </Table.Cell>
@@ -149,7 +149,7 @@ export function FileList({ files, selectedFiles, onToggle, onSelectAll, onDesele
                         </Text>
                       </Box>
                     )}
-                    {file.status === 'completed' && <Icon as={LuCheck} color="green.400" boxSize={5} />}
+                    {file.status === 'completed' && <LuCheck color="var(--chakra-colors-green-400)" size={20} />}
                   </Table.Cell>
                 )}
               </Table.Row>

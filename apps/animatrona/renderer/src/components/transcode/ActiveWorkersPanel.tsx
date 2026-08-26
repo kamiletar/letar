@@ -7,7 +7,7 @@
  * + список завершённых видео-файлов с экономией размера.
  */
 
-import { Badge, Box, Card, Grid, HStack, Icon, Text, VStack, Wrap } from '@chakra-ui/react'
+import { Badge, Box, Card, Grid, HStack, Text, VStack, Wrap } from '@chakra-ui/react'
 import { LuCheck, LuCpu, LuFilm, LuMonitor, LuTrendingDown } from 'react-icons/lu'
 
 import type { ImportQueueDetailProgress } from '../../../../shared/types/import-queue'
@@ -69,7 +69,7 @@ export function ActiveWorkersPanel({ progress }: ActiveWorkersPanelProps) {
           <HStack gap={3}>
             {videoTotal > 0 && (
               <HStack gap={1}>
-                <Icon as={LuMonitor} boxSize={3} color="purple.400" />
+                <LuMonitor size={12} color="var(--chakra-colors-purple-400)" />
                 <Badge colorPalette="purple" variant="subtle" size="sm">
                   {videoCompleted}/{videoTotal} видео
                 </Badge>
@@ -77,7 +77,7 @@ export function ActiveWorkersPanel({ progress }: ActiveWorkersPanelProps) {
             )}
             {audioTotal > 0 && (
               <HStack gap={1}>
-                <Icon as={LuCpu} boxSize={3} color="green.400" />
+                <LuCpu size={12} color="var(--chakra-colors-green-400)" />
                 <Badge colorPalette="green" variant="subtle" size="sm">
                   {audioCompleted}/{audioTotal} аудио
                 </Badge>
@@ -93,7 +93,7 @@ export function ActiveWorkersPanel({ progress }: ActiveWorkersPanelProps) {
           {activeVideoWorkers.length > 0 && (
             <Box role="region" aria-label={`GPU воркеры: ${activeVideoWorkers.length} активных`}>
               <HStack gap={1} mb={2}>
-                <Icon as={LuMonitor} boxSize={3} color="purple.400" />
+                <LuMonitor size={12} color="var(--chakra-colors-purple-400)" />
                 <Text fontSize="xs" color="fg.muted">
                   Видео-потоки
                 </Text>
@@ -124,7 +124,7 @@ export function ActiveWorkersPanel({ progress }: ActiveWorkersPanelProps) {
               aria-label={`CPU воркеры: ${activeAudioWorkers.length} активных, ${completedAudioWorkers.length} завершённых`}
             >
               <HStack gap={1} mb={2}>
-                <Icon as={LuCpu} boxSize={3} color="green.400" />
+                <LuCpu size={12} color="var(--chakra-colors-green-400)" />
                 <Text fontSize="xs" color="fg.muted">
                   Аудио-дорожки
                 </Text>
@@ -143,14 +143,14 @@ export function ActiveWorkersPanel({ progress }: ActiveWorkersPanelProps) {
             <Box role="region" aria-label={`Завершённые файлы: ${completedVideoFiles.length}`}>
               <HStack gap={2} mb={2} justify="space-between">
                 <HStack gap={1}>
-                  <Icon as={LuCheck} boxSize={3} color="green.400" />
+                  <LuCheck size={12} color="var(--chakra-colors-green-400)" />
                   <Text fontSize="xs" color="fg.muted">
                     Завершённые файлы ({completedVideoFiles.length})
                   </Text>
                 </HStack>
                 {totalSourceSize > 0 && totalTranscodedSize > 0 && (
                   <HStack gap={1}>
-                    <Icon as={LuTrendingDown} boxSize={3} color="green.400" />
+                    <LuTrendingDown size={12} color="var(--chakra-colors-green-400)" />
                     <Text fontSize="xs" color="green.400" fontWeight="medium">
                       {formatSize(totalSourceSize)} → {formatSize(totalTranscodedSize)} (−{totalSavingPercent}%)
                     </Text>
@@ -175,7 +175,7 @@ export function ActiveWorkersPanel({ progress }: ActiveWorkersPanelProps) {
                       borderColor="border.subtle"
                       role="listitem"
                     >
-                      <Icon as={LuFilm} boxSize={3} color="fg.muted" />
+                      <LuFilm size={12} color="var(--chakra-colors-fg-muted)" />
                       <Text fontSize="xs" flex={1} truncate title={file.fileName}>
                         {file.fileName}
                       </Text>

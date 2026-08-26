@@ -20,7 +20,6 @@ import {
   Dialog,
   Float,
   HStack,
-  Icon,
   Image,
   Portal,
   Progress,
@@ -218,7 +217,7 @@ export const ImportQueueItemExpanded = memo(
                         onClick={() => setShowCancelDialog(true)}
                         aria-label="Отменить кодирование"
                       >
-                        <Icon as={LuX} boxSize={3} />
+                        <LuX size={12} />
                         Отменить
                       </Button>
                     )}
@@ -239,7 +238,7 @@ export const ImportQueueItemExpanded = memo(
                   {/* VMAF результат (после подбора) */}
                   {item.vmafResult && item.status !== 'vmaf' && (
                     <HStack gap={3} p={2} bg="green.900/30" borderRadius="md">
-                      <Icon as={LuTarget} color="green.400" boxSize={4} />
+                      <LuTarget color="var(--chakra-colors-green-400)" size={16} />
                       <Text fontSize="sm" color="green.300">
                         VMAF подобрал: <strong>CQ {item.vmafResult.optimalCq}</strong> (VMAF{' '}
                         {item.vmafResult.vmafScore.toFixed(1)})
@@ -283,7 +282,7 @@ export const ImportQueueItemExpanded = memo(
                   {elapsedMs !== undefined && elapsedMs > 0 && (
                     <HStack justify="center" gap={6} mt={3} fontSize="sm">
                       <HStack gap={2} color="fg.muted">
-                        <Icon as={LuClock} boxSize={4} color="blue.400" />
+                        <LuClock size={16} color="var(--chakra-colors-blue-400)" />
                         <Text>Прошло:</Text>
                         <Text fontWeight="bold" color="blue.300">
                           {formatTime(elapsedMs)}
@@ -291,7 +290,7 @@ export const ImportQueueItemExpanded = memo(
                       </HStack>
                       {eta !== undefined && (
                         <HStack gap={2} color="fg.muted">
-                          <Icon as={LuHourglass} boxSize={4} color="orange.400" />
+                          <LuHourglass size={16} color="var(--chakra-colors-orange-400)" />
                           <Text>Осталось:</Text>
                           <Text fontWeight="bold" color="orange.300">
                             ~{formatTime(eta)}
@@ -319,7 +318,7 @@ export const ImportQueueItemExpanded = memo(
                   )}
                   {item.detailProgress.speed !== undefined && item.detailProgress.speed > 0 && (
                     <HStack gap={1}>
-                      <Icon as={LuZap} color="yellow.400" boxSize={4} />
+                      <LuZap color="var(--chakra-colors-yellow-400)" size={16} />
                       <Text fontWeight="bold" color="yellow.400">
                         {item.detailProgress.speed.toFixed(2)}x
                       </Text>
@@ -336,7 +335,7 @@ export const ImportQueueItemExpanded = memo(
                 <Box p={3} bg="red.900/30" borderRadius="md" borderWidth="1px" borderColor="red.700/50">
                   <HStack justify="space-between" mb={2}>
                     <HStack gap={2}>
-                      <Icon as={LuCircleAlert} color="red.400" boxSize={4} />
+                      <LuCircleAlert color="var(--chakra-colors-red-400)" size={16} />
                       <Text fontWeight="medium" color="red.300">
                         Ошибка
                       </Text>
@@ -350,7 +349,7 @@ export const ImportQueueItemExpanded = memo(
                           navigator.clipboard.writeText(item.error ?? '')}
                         aria-label="Копировать ошибку"
                       >
-                        <Icon as={LuCopy} boxSize={3} />
+                        <LuCopy size={12} />
                         Копировать
                       </Button>
                       {onRetry && (
@@ -360,7 +359,7 @@ export const ImportQueueItemExpanded = memo(
                           onClick={() => onRetry(item.id)}
                           aria-label="Повторить"
                         >
-                          <Icon as={LuRefreshCw} boxSize={3} />
+                          <LuRefreshCw size={12} />
                           Повторить
                         </Button>
                       )}

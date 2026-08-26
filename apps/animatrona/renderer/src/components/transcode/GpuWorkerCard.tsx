@@ -15,7 +15,7 @@
  * - Pulse animation для processing
  */
 
-import { Badge, Box, Float, HStack, Icon, Progress, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Float, HStack, Progress, Text, VStack } from '@chakra-ui/react'
 import { keyframes } from '@emotion/react'
 import { memo, useMemo } from 'react'
 import { LuCpu, LuMonitor, LuZap } from 'react-icons/lu'
@@ -71,6 +71,8 @@ export const GpuWorkerCard = memo(
       [useCpuFallback, progress, prefersReducedMotion],
     )
 
+    const WorkerIcon = useCpuFallback ? LuCpu : LuMonitor
+
     return (
       <Box
         p={3}
@@ -86,10 +88,9 @@ export const GpuWorkerCard = memo(
           {/* Заголовок */}
           <HStack justify="space-between">
             <HStack gap={2}>
-              <Icon
-                as={useCpuFallback ? LuCpu : LuMonitor}
-                color={useCpuFallback ? 'blue.400' : 'purple.400'}
-                boxSize={4}
+              <WorkerIcon
+                color={useCpuFallback ? 'var(--chakra-colors-blue-400)' : 'var(--chakra-colors-purple-400)'}
+                size={16}
               />
               <Text fontSize="sm" fontWeight="medium" color={useCpuFallback ? 'blue.300' : 'purple.300'}>
                 {useCpuFallback ? `CPU #${index + 1}` : `GPU #${index + 1}`}
@@ -145,7 +146,7 @@ export const GpuWorkerCard = memo(
               )}
               {speed !== undefined && speed > 0 && (
                 <HStack gap={1}>
-                  <Icon as={LuZap} color="yellow.400" boxSize={3} />
+                  <LuZap color="var(--chakra-colors-yellow-400)" size={12} />
                   <Text color="yellow.400" fontWeight="medium">
                     {formatSpeed(speed)}
                   </Text>

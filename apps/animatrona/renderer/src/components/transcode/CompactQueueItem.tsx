@@ -7,7 +7,7 @@
  * [🔵 Status] Название (12 эп.) [████░░ 75%] [🔄 🗑️]
  */
 
-import { Badge, Button, HStack, Icon, Progress, Text } from '@chakra-ui/react'
+import { Badge, Button, HStack, Progress, Text } from '@chakra-ui/react'
 import { memo } from 'react'
 import { LuCheck, LuClock, LuLoader, LuPencil, LuPlay, LuRefreshCw, LuTrash2, LuX, LuZap } from 'react-icons/lu'
 
@@ -98,8 +98,8 @@ export const CompactQueueItem = memo(function CompactQueueItem({
       _hover={{ borderColor: isFocused ? 'purple.500' : 'border.emphasized' }}
     >
       {/* Статус */}
-      <Badge colorPalette={statusColors[item.status]} variant="subtle" flexShrink={0}>
-        <Icon as={StatusIcon} boxSize={3} mr={1} />
+      <Badge colorPalette={statusColors[item.status]} variant="subtle" flexShrink={0} gap={1}>
+        <StatusIcon size={12} />
         {statusLabels[item.status]}
       </Badge>
 
@@ -130,7 +130,7 @@ export const CompactQueueItem = memo(function CompactQueueItem({
         {/* Редактировать (pending) */}
         {item.status === 'pending' && onEdit && (
           <Button size="xs" variant="ghost" onClick={onEdit} aria-label="Редактировать">
-            <Icon as={LuPencil} boxSize={3} />
+            <LuPencil size={12} />
           </Button>
         )}
 
@@ -143,14 +143,14 @@ export const CompactQueueItem = memo(function CompactQueueItem({
             onClick={() => onRetry(item.id)}
             aria-label="Повторить"
           >
-            <Icon as={LuRefreshCw} boxSize={3} />
+            <LuRefreshCw size={12} />
           </Button>
         )}
 
         {/* Удалить */}
         {(item.status === 'pending' || isFinished) && (
           <Button size="xs" variant="ghost" colorPalette="red" onClick={onRemove} aria-label="Удалить">
-            <Icon as={LuTrash2} boxSize={3} />
+            <LuTrash2 size={12} />
           </Button>
         )}
       </HStack>

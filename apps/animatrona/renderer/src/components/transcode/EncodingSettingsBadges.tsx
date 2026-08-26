@@ -9,7 +9,7 @@
  * - GPU / CPU потоки
  */
 
-import { Badge, HStack, Icon } from '@chakra-ui/react'
+import { Badge, HStack } from '@chakra-ui/react'
 import { LuCpu, LuMonitor, LuTarget, LuVideo } from 'react-icons/lu'
 
 import type { ImportQueueEntry } from '../../../../shared/types/import-queue'
@@ -29,15 +29,15 @@ export function EncodingSettingsBadges({ item, compact = false }: EncodingSettin
       {/* VMAF / CQ */}
       {vmafResult
         ? (
-          <Badge colorPalette="green" variant="subtle" size="sm">
-            <Icon as={LuTarget} boxSize={3} mr={1} />
+          <Badge colorPalette="green" variant="subtle" size="sm" gap={1}>
+            <LuTarget size={12} />
             CQ {vmafResult.optimalCq} (VMAF {vmafResult.vmafScore.toFixed(0)})
           </Badge>
         )
         : vmafSettings?.enabled
         ? (
-          <Badge colorPalette="yellow" variant="subtle" size="sm">
-            <Icon as={LuTarget} boxSize={3} mr={1} />
+          <Badge colorPalette="yellow" variant="subtle" size="sm" gap={1}>
+            <LuTarget size={12} />
             VMAF {vmafSettings.targetVmaf} → ?
           </Badge>
         )
@@ -51,8 +51,8 @@ export function EncodingSettingsBadges({ item, compact = false }: EncodingSettin
 
       {/* Кодек (в полном режиме) */}
       {!compact && (
-        <Badge colorPalette="purple" variant="subtle" size="sm">
-          <Icon as={LuVideo} boxSize={3} mr={1} />
+        <Badge colorPalette="purple" variant="subtle" size="sm" gap={1}>
+          <LuVideo size={12} />
           AV1
         </Badge>
       )}
@@ -60,12 +60,12 @@ export function EncodingSettingsBadges({ item, compact = false }: EncodingSettin
       {/* Потоки (в полном режиме) */}
       {!compact && (
         <>
-          <Badge colorPalette="purple" variant="outline" size="sm">
-            <Icon as={LuMonitor} boxSize={3} mr={1} />
+          <Badge colorPalette="purple" variant="outline" size="sm" gap={1}>
+            <LuMonitor size={12} />
             {importSettings?.videoMaxConcurrent ?? 2} GPU
           </Badge>
-          <Badge colorPalette="green" variant="outline" size="sm">
-            <Icon as={LuCpu} boxSize={3} mr={1} />
+          <Badge colorPalette="green" variant="outline" size="sm" gap={1}>
+            <LuCpu size={12} />
             {importSettings?.audioMaxConcurrent ?? 4} CPU
           </Badge>
         </>

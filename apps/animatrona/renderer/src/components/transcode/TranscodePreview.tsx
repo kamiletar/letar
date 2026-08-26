@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Box, Button, Card, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Card, HStack, Text, VStack } from '@chakra-ui/react'
 import { LuCircleCheck, LuCopy, LuFileVideo, LuPlay, LuRotateCcw, LuSkipForward, LuX } from 'react-icons/lu'
 
 import { formatBytes } from '@/lib/format-utils'
@@ -51,10 +51,12 @@ function RecommendationBadge({ recommendation }: RecommendationBadgeProps) {
       break
   }
 
+  const IconComponent = icon
+
   return (
     <Badge colorPalette={colorPalette} size="sm">
       <HStack gap={1}>
-        <Icon as={icon} boxSize={3} />
+        <IconComponent size={12} />
         <Text>{text}</Text>
       </HStack>
     </Badge>
@@ -81,7 +83,7 @@ function PreviewItem({ item, onEdit, onRemove }: PreviewItemProps) {
         <HStack gap={4}>
           {/* Иконка */}
           <Box p={2} borderRadius="md" bg="bg.subtle">
-            <Icon as={LuFileVideo} boxSize={5} color="blue.400" />
+            <LuFileVideo size={20} color="var(--chakra-colors-blue-400)" />
           </Box>
 
           {/* Информация */}
@@ -124,7 +126,7 @@ function PreviewItem({ item, onEdit, onRemove }: PreviewItemProps) {
             {settings?.skipTranscode && (
               <Badge colorPalette="gray" size="sm">
                 <HStack gap={1}>
-                  <Icon as={LuCircleCheck} boxSize={3} />
+                  <LuCircleCheck size={12} />
                   <Text>Пропустить транскодирование</Text>
                 </HStack>
               </Badge>

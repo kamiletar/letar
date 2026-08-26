@@ -10,7 +10,7 @@
  * - Текущий этап (extracting/encoding/calculating)
  */
 
-import { Badge, Box, Card, HStack, Icon, Progress, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Card, HStack, Progress, Text, VStack } from '@chakra-ui/react'
 import { LuCheck, LuCpu, LuTarget, LuTrendingDown, LuTrendingUp, LuZap } from 'react-icons/lu'
 
 import { formatBytes } from '@/lib/format-utils'
@@ -68,6 +68,8 @@ export function VmafProgressCard({ item }: VmafProgressCardProps) {
     return null
   }
 
+  const StageIcon = vmafProgress.stage === 'encoding' ? LuZap : LuCpu
+
   const progress = (vmafProgress.currentIteration / vmafProgress.totalIterations) * 100
 
   // Используем массив итераций из прогресса
@@ -79,7 +81,7 @@ export function VmafProgressCard({ item }: VmafProgressCardProps) {
       <Card.Header py={3} px={4}>
         <HStack justify="space-between">
           <HStack gap={2}>
-            <Icon as={LuTarget} color="yellow.400" boxSize={5} />
+            <LuTarget color="var(--chakra-colors-yellow-400)" size={20} />
             <VStack align="start" gap={0}>
               <Text fontWeight="semibold" color="yellow.200">
                 VMAF подбор CQ
@@ -117,10 +119,9 @@ export function VmafProgressCard({ item }: VmafProgressCardProps) {
 
           {/* Текущий этап */}
           <HStack gap={2} p={3} bg="yellow.900/30" borderRadius="md" justify="center">
-            <Icon
-              as={vmafProgress.stage === 'encoding' ? LuZap : LuCpu}
-              color="yellow.400"
-              boxSize={4}
+            <StageIcon
+              color="var(--chakra-colors-yellow-400)"
+              size={16}
               animation={vmafProgress.stage !== 'done' ? 'spin 2s linear infinite' : undefined}
             />
             <Text fontSize="sm" color="yellow.300">
@@ -192,10 +193,10 @@ export function VmafProgressCard({ item }: VmafProgressCardProps) {
                     >
                       <HStack gap={2}>
                         {isOptimal
-                          ? <Icon as={LuCheck} color="green.400" boxSize={4} />
+                          ? <LuCheck color="var(--chakra-colors-green-400)" size={16} />
                           : direction === 'up'
-                          ? <Icon as={LuTrendingUp} color="orange.400" boxSize={4} />
-                          : <Icon as={LuTrendingDown} color="blue.400" boxSize={4} />}
+                          ? <LuTrendingUp color="var(--chakra-colors-orange-400)" size={16} />
+                          : <LuTrendingDown color="var(--chakra-colors-blue-400)" size={16} />}
                         <Text color={isOptimal ? 'green.300' : 'yellow.300'}>CQ {iter.cq}</Text>
                         <Text color="fg.muted">→</Text>
                         <Text fontWeight="medium" color={isOptimal ? 'green.400' : 'yellow.300'}>

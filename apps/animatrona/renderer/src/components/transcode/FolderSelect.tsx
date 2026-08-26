@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Button, Icon, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Text, VStack } from '@chakra-ui/react'
 import { LuFolderOpen, LuUpload } from 'react-icons/lu'
 
 interface FolderSelectProps {
@@ -27,7 +27,7 @@ export function FolderSelect({ onSelect, isLoading }: FolderSelectProps) {
     >
       <VStack gap={4}>
         <Box p={6} borderRadius="full" bg="purple.900">
-          <Icon as={LuFolderOpen} boxSize={16} color="purple.400" />
+          <LuFolderOpen size={64} color="var(--chakra-colors-purple-400)" />
         </Box>
 
         <VStack gap={2}>
@@ -39,8 +39,8 @@ export function FolderSelect({ onSelect, isLoading }: FolderSelectProps) {
           </Text>
         </VStack>
 
-        <Button size="lg" colorPalette="purple" loading={isLoading} loadingText="Сканирование...">
-          <Icon as={LuUpload} mr={2} />
+        <Button size="lg" colorPalette="purple" loading={isLoading} loadingText="Сканирование..." gap={2}>
+          <LuUpload />
           Выбрать папку
         </Button>
       </VStack>

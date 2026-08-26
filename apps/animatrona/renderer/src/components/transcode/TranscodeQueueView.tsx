@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Button, Card, EmptyState, HStack, Icon, Progress, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Card, EmptyState, HStack, Progress, Text, VStack } from '@chakra-ui/react'
 import { LuFolder, LuPause, LuPlay, LuPlus } from 'react-icons/lu'
 
 import { useTranscodeManager } from '@/hooks/useTranscodeManager'
@@ -92,7 +92,7 @@ export function TranscodeQueueView() {
           <EmptyState.Root>
             <EmptyState.Content>
               <EmptyState.Indicator>
-                <Icon as={LuFolder} boxSize={10} color="fg.subtle" />
+                <LuFolder size={40} color="var(--chakra-colors-fg-subtle)" />
               </EmptyState.Indicator>
               <EmptyState.Title>Очередь пуста</EmptyState.Title>
               <EmptyState.Description>Добавьте файлы для транскодирования</EmptyState.Description>

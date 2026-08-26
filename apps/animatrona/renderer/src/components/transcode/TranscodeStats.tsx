@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Card, Grid, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Box, Card, Grid, HStack, Text, VStack } from '@chakra-ui/react'
 import { LuActivity, LuClock, LuGauge, LuHardDrive, LuTimer, LuTrendingDown } from 'react-icons/lu'
 
 import {
@@ -32,10 +32,11 @@ interface StatItemProps {
  * Элемент статистики
  */
 function StatItem({ icon, label, value, color = 'fg.muted' }: StatItemProps) {
+  const IconComponent = icon
   return (
     <HStack gap={3}>
       <Box p={2} borderRadius="md" bg="bg.muted">
-        <Icon as={icon} boxSize={4} color={color} />
+        <IconComponent size={16} color={`var(--chakra-colors-${color.replaceAll('.', '-')})`} />
       </Box>
       <VStack align="start" gap={0}>
         <Text fontSize="xs" color="fg.muted">

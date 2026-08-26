@@ -6,7 +6,7 @@
  * Использует @dnd-kit/sortable для drag & drop в очереди
  */
 
-import { Box, Icon } from '@chakra-ui/react'
+import { Box } from '@chakra-ui/react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useState } from 'react'
@@ -61,7 +61,7 @@ export function SortableQueueItem({ item, onRemove, onUpdate, isFocused, onFocus
         borderRadius="md"
         aria-label={`Перетащить "${animeName}"`}
       >
-        <Icon as={LuGripVertical} boxSize={5} />
+        <LuGripVertical size={20} />
       </Box>
 
       <ImportQueueItem

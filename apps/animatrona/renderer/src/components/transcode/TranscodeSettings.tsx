@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Card, Grid, Heading, HStack, Icon, Slider, Switch, Text, VStack } from '@chakra-ui/react'
+import { Box, Card, Grid, Heading, HStack, Slider, Switch, Text, VStack } from '@chakra-ui/react'
 import { LuCpu, LuGauge, LuSettings, LuZap } from 'react-icons/lu'
 
 import type { VideoTranscodeOptions } from '../../../../shared/types'
@@ -33,7 +33,7 @@ export function TranscodeSettings({ settings, onChange }: TranscodeSettingsProps
       <Card.Root bg="bg.subtle" border="1px" borderColor="border.subtle">
         <Card.Body>
           <HStack mb={4}>
-            <Icon as={LuSettings} color="primary.fg" />
+            <LuSettings color="var(--chakra-colors-primary-fg)" />
             <Heading size="sm">Видеокодек</Heading>
           </HStack>
 
@@ -66,7 +66,7 @@ export function TranscodeSettings({ settings, onChange }: TranscodeSettingsProps
       <Card.Root bg="bg.subtle" border="1px" borderColor="border.subtle">
         <Card.Body>
           <HStack mb={4}>
-            <Icon as={LuGauge} color="primary.fg" />
+            <LuGauge color="var(--chakra-colors-primary-fg)" />
             <Heading size="sm">Качество (CQ: {settings.cq})</Heading>
           </HStack>
 
@@ -101,7 +101,7 @@ export function TranscodeSettings({ settings, onChange }: TranscodeSettingsProps
       <Card.Root bg="bg.subtle" border="1px" borderColor="border.subtle">
         <Card.Body>
           <HStack mb={4}>
-            <Icon as={LuZap} color="primary.fg" />
+            <LuZap color="var(--chakra-colors-primary-fg)" />
             <Heading size="sm">Скорость кодирования</Heading>
           </HStack>
 
@@ -138,7 +138,7 @@ export function TranscodeSettings({ settings, onChange }: TranscodeSettingsProps
         <Card.Body>
           <HStack justify="space-between">
             <HStack gap={3}>
-              <Icon as={LuCpu} color="primary.fg" boxSize={5} />
+              <LuCpu color="var(--chakra-colors-primary-fg)" size={20} />
               <Box>
                 <Text fontWeight="medium">Использовать GPU</Text>
                 <Text fontSize="sm" color="fg.subtle">

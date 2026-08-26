@@ -18,7 +18,6 @@ import {
   Collapsible,
   Dialog,
   HStack,
-  Icon,
   Image,
   Input,
   Portal,
@@ -148,7 +147,7 @@ function WarningDetails({ error }: { error: string }) {
   if (!isMultiline) {
     return (
       <HStack gap={2} mt={1}>
-        <Icon as={LuCircleAlert} color="orange.400" boxSize={3} flexShrink={0} />
+        <LuCircleAlert color="var(--chakra-colors-orange-400)" size={12} style={{ flexShrink: 0 }} />
         <Text fontSize="xs" color="orange.400">
           {error}
         </Text>
@@ -160,16 +159,17 @@ function WarningDetails({ error }: { error: string }) {
     <Collapsible.Root open={open} onOpenChange={({ open: o }) => setOpen(o)}>
       <Collapsible.Trigger asChild>
         <HStack gap={2} mt={1} cursor="pointer" _hover={{ opacity: 0.8 }} role="button" aria-expanded={open}>
-          <Icon as={LuCircleAlert} color="orange.400" boxSize={3} flexShrink={0} />
+          <LuCircleAlert color="var(--chakra-colors-orange-400)" size={12} style={{ flexShrink: 0 }} />
           <Text fontSize="xs" color="orange.400" flex={1}>
             {summary}
           </Text>
-          <Icon
-            as={LuChevronDown}
-            color="orange.400"
-            boxSize={3}
-            transform={open ? 'rotate(180deg)' : undefined}
-            transition="transform 0.2s"
+          <LuChevronDown
+            color="var(--chakra-colors-orange-400)"
+            size={12}
+            style={{
+              transform: open ? 'rotate(180deg)' : undefined,
+              transition: 'transform 0.2s',
+            }}
           />
         </HStack>
       </Collapsible.Trigger>
@@ -375,11 +375,11 @@ export const ImportQueueItem = memo(
                   </Text>
 
                   <HStack gap={2}>
-                    <Badge colorPalette={statusColors[item.status]} variant="subtle">
-                      <Icon as={StatusIcon} boxSize={3} mr={1} />
+                    <Badge colorPalette={statusColors[item.status]} variant="subtle" gap={1}>
+                      <StatusIcon size={12} />
                       {statusLabels[item.status]}
                     </Badge>
-                    {isClickable && <Icon as={LuExternalLink} boxSize={4} color="green.400" />}
+                    {isClickable && <LuExternalLink size={16} color="var(--chakra-colors-green-400)" />}
                   </HStack>
                 </HStack>
 
@@ -400,8 +400,9 @@ export const ImportQueueItem = memo(
                       px={1}
                       minW="auto"
                       h="auto"
+                      gap={1}
                     >
-                      <Icon as={LuExternalLink} boxSize={3} />
+                      <LuExternalLink size={12} />
                       <Text fontSize="xs">Rutracker</Text>
                     </Button>
                   )}
@@ -426,7 +427,7 @@ export const ImportQueueItem = memo(
                     </Progress.Root>
                     <HStack justify="space-between" mt={1}>
                       <HStack gap={2}>
-                        <Icon as={LuTarget} color="yellow.400" boxSize={3} />
+                        <LuTarget color="var(--chakra-colors-yellow-400)" size={12} />
                         <Text fontSize="xs" color="fg.muted">
                           Итерация {item.vmafProgress.currentIteration}/{item.vmafProgress.totalIterations}
                           {item.vmafProgress.currentCq !== undefined && ` • CQ ${item.vmafProgress.currentCq}`}
@@ -452,7 +453,7 @@ export const ImportQueueItem = memo(
                 {/* VMAF результат (после подбора, показываем во время кодирования) */}
                 {item.vmafResult && item.status !== 'vmaf' && !isFinished && (
                   <HStack gap={2} mt={1}>
-                    <Icon as={LuCheck} color="green.400" boxSize={3} />
+                    <LuCheck color="var(--chakra-colors-green-400)" size={12} />
                     <Text fontSize="xs" color="green.400">
                       CQ {item.vmafResult.optimalCq} (VMAF {item.vmafResult.vmafScore.toFixed(1)})
                     </Text>
@@ -501,7 +502,7 @@ export const ImportQueueItem = memo(
                           )}
                           {item.detailProgress.speed !== undefined && item.detailProgress.speed > 0 && (
                             <HStack gap={1}>
-                              <Icon as={LuZap} color="yellow.400" boxSize={3} />
+                              <LuZap color="var(--chakra-colors-yellow-400)" size={12} />
                               <Text fontWeight="medium" color="yellow.400">
                                 {formatSpeed(item.detailProgress.speed)}
                               </Text>
@@ -515,29 +516,34 @@ export const ImportQueueItem = memo(
                         {/* Аудио-дорожки (компактно) */}
                         {item.detailProgress.audioTracks && item.detailProgress.audioTracks.length > 0 && (
                           <HStack gap={2} flexWrap="wrap">
-                            {item.detailProgress.audioTracks.map((track) => (
-                              <HStack
-                                key={track.index}
-                                gap={1}
-                                px={2}
-                                py={0.5}
-                                bg={track.progress >= 100 ? 'green.900/30' : 'purple.900/30'}
-                                borderRadius="sm"
-                                fontSize="xs"
-                              >
-                                <Icon
-                                  as={track.progress >= 100 ? LuCheck : LuMusic}
-                                  color={track.progress >= 100 ? 'green.400' : 'purple.400'}
-                                  boxSize={3}
-                                />
-                                <Text color={track.progress >= 100 ? 'green.400' : 'purple.400'}>{track.name}</Text>
-                                {track.progress < 100 && (
-                                  <Text color="purple.400" fontWeight="medium">
-                                    {track.progress}%
-                                  </Text>
-                                )}
-                              </HStack>
-                            ))}
+                            {item.detailProgress.audioTracks.map((track) => {
+                              const TrackIcon = track.progress >= 100 ? LuCheck : LuMusic
+
+                              return (
+                                <HStack
+                                  key={track.index}
+                                  gap={1}
+                                  px={2}
+                                  py={0.5}
+                                  bg={track.progress >= 100 ? 'green.900/30' : 'purple.900/30'}
+                                  borderRadius="sm"
+                                  fontSize="xs"
+                                >
+                                  <TrackIcon
+                                    color={track.progress >= 100
+                                      ? 'var(--chakra-colors-green-400)'
+                                      : 'var(--chakra-colors-purple-400)'}
+                                    size={12}
+                                  />
+                                  <Text color={track.progress >= 100 ? 'green.400' : 'purple.400'}>{track.name}</Text>
+                                  {track.progress < 100 && (
+                                    <Text color="purple.400" fontWeight="medium">
+                                      {track.progress}%
+                                    </Text>
+                                  )}
+                                </HStack>
+                              )
+                            })}
                           </HStack>
                         )}
                       </VStack>
@@ -575,7 +581,7 @@ export const ImportQueueItem = memo(
                     minW="40px"
                     minH="40px"
                   >
-                    <Icon as={LuPencil} />
+                    <LuPencil />
                   </Button>
                 )}
                 {/* Переделать недостающие (для всех completed) */}
@@ -590,7 +596,7 @@ export const ImportQueueItem = memo(
                     minH="40px"
                     title="Переделать недостающие"
                   >
-                    <Icon as={LuRefreshCw} />
+                    <LuRefreshCw />
                   </Button>
                 )}
                 {/* Пометить неудачным (только для completed) */}
@@ -605,7 +611,7 @@ export const ImportQueueItem = memo(
                     minH="40px"
                     title="Пометить неудачным"
                   >
-                    <Icon as={LuUndo2} />
+                    <LuUndo2 />
                   </Button>
                 )}
                 {/* Повторить (только для error и cancelled) */}
@@ -620,7 +626,7 @@ export const ImportQueueItem = memo(
                     minH="40px"
                     title="Повторить"
                   >
-                    <Icon as={LuRefreshCw} />
+                    <LuRefreshCw />
                   </Button>
                 )}
                 {/* Повторить игнорируя проверку сжатия */}
@@ -635,7 +641,7 @@ export const ImportQueueItem = memo(
                     minH="40px"
                     title="Повторить (игнор. сжатие)"
                   >
-                    <Icon as={LuZap} />
+                    <LuZap />
                   </Button>
                 )}
                 {/* Удалить (только для pending и завершённых) */}
@@ -649,7 +655,7 @@ export const ImportQueueItem = memo(
                     minW="40px"
                     minH="40px"
                   >
-                    <Icon as={LuTrash2} />
+                    <LuTrash2 />
                   </Button>
                 )}
               </VStack>

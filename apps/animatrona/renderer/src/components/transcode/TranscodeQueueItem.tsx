@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Card, HStack, Icon, IconButton, Progress, Text, VStack } from '@chakra-ui/react'
+import { Box, Card, HStack, IconButton, Progress, Text, VStack } from '@chakra-ui/react'
 import {
   LuArrowDown,
   LuArrowUp,
@@ -46,23 +46,23 @@ interface TranscodeQueueItemProps {
 function StatusIcon({ status }: { status: QueueItemStatus }) {
   switch (status) {
     case 'pending':
-      return <Icon as={LuClock} color="fg.subtle" boxSize={5} />
+      return <LuClock color="var(--chakra-colors-fg-subtle)" size={20} />
     case 'analyzing':
-      return <Icon as={LuLoader} color="blue.400" boxSize={5} className="animate-spin" />
+      return <LuLoader color="var(--chakra-colors-blue-400)" size={20} className="animate-spin" />
     case 'ready':
-      return <Icon as={LuFileVideo} color="blue.400" boxSize={5} />
+      return <LuFileVideo color="var(--chakra-colors-blue-400)" size={20} />
     case 'transcoding':
-      return <Icon as={LuLoader} color="purple.400" boxSize={5} className="animate-spin" />
+      return <LuLoader color="var(--chakra-colors-purple-400)" size={20} className="animate-spin" />
     case 'paused':
-      return <Icon as={LuPause} color="yellow.400" boxSize={5} />
+      return <LuPause color="var(--chakra-colors-yellow-400)" size={20} />
     case 'completed':
-      return <Icon as={LuCheck} color="green.400" boxSize={5} />
+      return <LuCheck color="var(--chakra-colors-green-400)" size={20} />
     case 'cancelled':
-      return <Icon as={LuX} color="fg.subtle" boxSize={5} />
+      return <LuX color="var(--chakra-colors-fg-subtle)" size={20} />
     case 'error':
-      return <Icon as={LuCircleAlert} color="red.400" boxSize={5} />
+      return <LuCircleAlert color="var(--chakra-colors-red-400)" size={20} />
     case 'skipped':
-      return <Icon as={LuSkipForward} color="fg.muted" boxSize={5} />
+      return <LuSkipForward color="var(--chakra-colors-fg-muted)" size={20} />
   }
 }
 

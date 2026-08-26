@@ -12,7 +12,7 @@
  * - Уменьшение лимита — не останавливает активные, но не запускает новые пока активных > лимита
  */
 
-import { Badge, Box, HStack, Icon, Slider, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, HStack, Slider, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useEffect, useState } from 'react'
 import { LuCpu, LuMonitor } from 'react-icons/lu'
 
@@ -128,7 +128,7 @@ export function ConcurrencyControls({ compact = false }: ConcurrencyControlsProp
     return (
       <HStack gap={4}>
         <HStack gap={2}>
-          <Icon as={LuMonitor} boxSize={4} color="purple.400" />
+          <LuMonitor size={16} color="var(--chakra-colors-purple-400)" />
           <Text fontSize="sm" color="fg.muted">
             GPU:
           </Text>
@@ -137,7 +137,7 @@ export function ConcurrencyControls({ compact = false }: ConcurrencyControlsProp
           </Badge>
         </HStack>
         <HStack gap={2}>
-          <Icon as={LuCpu} boxSize={4} color="cyan.400" />
+          <LuCpu size={16} color="var(--chakra-colors-cyan-400)" />
           <Text fontSize="sm" color="fg.muted">
             CPU:
           </Text>
@@ -156,7 +156,7 @@ export function ConcurrencyControls({ compact = false }: ConcurrencyControlsProp
         <Box>
           <HStack justify="space-between" mb={2}>
             <HStack gap={2}>
-              <Icon as={LuMonitor} boxSize={4} color="purple.400" />
+              <LuMonitor size={16} color="var(--chakra-colors-purple-400)" />
               <Text fontSize="sm" fontWeight="medium">
                 GPU потоки (видео)
               </Text>
@@ -195,7 +195,7 @@ export function ConcurrencyControls({ compact = false }: ConcurrencyControlsProp
         <Box>
           <HStack justify="space-between" mb={2}>
             <HStack gap={2}>
-              <Icon as={LuCpu} boxSize={4} color="cyan.400" />
+              <LuCpu size={16} color="var(--chakra-colors-cyan-400)" />
               <Text fontSize="sm" fontWeight="medium">
                 CPU потоки (аудио)
               </Text>

@@ -18,7 +18,6 @@ import {
   Card,
   EmptyState,
   HStack,
-  Icon,
   Input,
   Progress,
   Separator,
@@ -396,7 +395,7 @@ export function ImportQueueView({ onAddImport }: ImportQueueViewProps) {
           <EmptyState.Root>
             <EmptyState.Content>
               <EmptyState.Indicator>
-                <Icon as={LuPlus} boxSize={10} color="fg.subtle" />
+                <LuPlus size={40} color="var(--chakra-colors-fg-subtle)" />
               </EmptyState.Indicator>
               <EmptyState.Title>Очередь импорта пуста</EmptyState.Title>
               <EmptyState.Description>Добавьте сериалы через импорт в библиотеке</EmptyState.Description>
@@ -508,15 +507,10 @@ export function ImportQueueView({ onAddImport }: ImportQueueViewProps) {
       {items.length > 3 && (
         <HStack gap={3}>
           <Box position="relative" flex={1}>
-            <Icon
-              as={LuSearch}
-              position="absolute"
-              left={3}
-              top="50%"
-              transform="translateY(-50%)"
-              color="fg.muted"
-              boxSize={4}
-              zIndex={1}
+            <LuSearch
+              style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}
+              color="var(--chakra-colors-fg-muted)"
+              size={16}
             />
             <Input
               placeholder="Поиск по названию..."
@@ -546,7 +540,10 @@ export function ImportQueueView({ onAddImport }: ImportQueueViewProps) {
             aria-label={isCompactView ? 'Развёрнутый вид' : 'Компактный вид'}
             title={isCompactView ? 'Развёрнутый вид' : 'Компактный вид'}
           >
-            <Icon as={isCompactView ? LuRows3 : LuList} boxSize={4} />
+            {(() => {
+              const IconComponent = isCompactView ? LuRows3 : LuList
+              return <IconComponent size={16} />
+            })()}
           </Button>
         </HStack>
       )}
@@ -555,7 +552,7 @@ export function ImportQueueView({ onAddImport }: ImportQueueViewProps) {
       {pendingItems.length > 0 && (
         <Box>
           <HStack mb={2} color="fg.muted" fontSize="sm" pl={isCompactView ? 0 : 8}>
-            <Icon as={LuClock} boxSize={4} />
+            <LuClock size={16} />
             <Text fontWeight="medium">Ожидают ({pendingItems.length})</Text>
           </HStack>
           {isCompactView
@@ -608,7 +605,7 @@ export function ImportQueueView({ onAddImport }: ImportQueueViewProps) {
         <Box>
           <HStack mb={2} justify="space-between">
             <HStack color="fg.muted" fontSize="sm">
-              <Icon as={LuCheck} boxSize={4} />
+              <LuCheck size={16} />
               <Text fontWeight="medium">Завершено ({completedItems.length})</Text>
             </HStack>
             <HStack gap={1}>

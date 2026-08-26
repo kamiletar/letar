@@ -10,7 +10,7 @@
  * Доступно только для элементов со статусом 'pending'
  */
 
-import { Button, Checkbox, Dialog, HStack, Icon, Portal, Slider, Switch, Text, VStack } from '@chakra-ui/react'
+import { Button, Checkbox, Dialog, HStack, Portal, Slider, Switch, Text, VStack } from '@chakra-ui/react'
 import { memo, useCallback, useState } from 'react'
 import { LuCpu, LuPencil, LuTarget } from 'react-icons/lu'
 
@@ -120,7 +120,7 @@ export const EditQueueItemDialog = memo(function EditQueueItemDialog({
         <Dialog.Trigger asChild>
           {trigger ?? (
             <Button size="sm" variant="ghost" aria-label="Редактировать">
-              <Icon as={LuPencil} boxSize={4} />
+              <LuPencil size={16} />
             </Button>
           )}
         </Dialog.Trigger>
@@ -144,7 +144,7 @@ export const EditQueueItemDialog = memo(function EditQueueItemDialog({
                 <VStack gap={3} align="stretch">
                   <HStack justify="space-between">
                     <HStack gap={2}>
-                      <Icon as={LuTarget} boxSize={4} color="yellow.400" />
+                      <LuTarget size={16} color="var(--chakra-colors-yellow-400)" />
                       <Text fontWeight="medium">VMAF подбор CQ</Text>
                     </HStack>
                     <Switch.Root checked={vmafEnabled} onCheckedChange={(e) => setVmafEnabled(e.checked)}>
@@ -189,7 +189,7 @@ export const EditQueueItemDialog = memo(function EditQueueItemDialog({
                 {/* Принудительный CPU */}
                 <HStack justify="space-between">
                   <HStack gap={2}>
-                    <Icon as={LuCpu} boxSize={4} color="blue.400" />
+                    <LuCpu size={16} color="var(--chakra-colors-blue-400)" />
                     <VStack gap={0} align="start">
                       <Text fontWeight="medium">Использовать CPU</Text>
                       <Text fontSize="xs" color="fg.muted">

@@ -6,7 +6,7 @@
  * Компактное отображение прогресса аудио-дорожки
  */
 
-import { Box, HStack, Icon, Progress, Text } from '@chakra-ui/react'
+import { Box, HStack, Progress, Text } from '@chakra-ui/react'
 import { memo } from 'react'
 import { LuCheck, LuMusic } from 'react-icons/lu'
 
@@ -21,6 +21,7 @@ export const CpuWorkerCard = memo(
     const { name, language, progress, status } = worker
     const isCompleted = status === 'completed'
     const displayName = name || language || 'Audio'
+    const WorkerIcon = isCompleted ? LuCheck : LuMusic
 
     return (
       <Box
@@ -33,7 +34,10 @@ export const CpuWorkerCard = memo(
         minW="100px"
       >
         <HStack gap={2}>
-          <Icon as={isCompleted ? LuCheck : LuMusic} color={isCompleted ? 'green.400' : 'green.500'} boxSize={3} />
+          <WorkerIcon
+            size={12}
+            color={isCompleted ? 'var(--chakra-colors-green-400)' : 'var(--chakra-colors-green-500)'}
+          />
           <Text
             fontSize="xs"
             color={isCompleted ? 'green.400' : 'green.300'}
