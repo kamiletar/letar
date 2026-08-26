@@ -1062,6 +1062,15 @@ SaaS-Sentry отпадает отдельно: тело ошибки тащит 
    `form-example` ✅ код+секреты (деплой-запрос отправлен), `animatrona-landing`/
    `kami-key-the-landing`/`letar-landing` ✅ код+секреты (деплой-запрос отправлен),
    `animatrona-tracker`/`kami`/`dashboard-agent` ✅ код готов, DSN передан BlackCove напрямую
+
+   **⚠️ Дополнение 2026-08-26 (domwellbes, MU6):** живой Lighthouse-прогон на production build
+   нашёл, что клиентский `Sentry.init()` из `@letar/glitchtip` с дефолтным набором интеграций
+   даёт TBT-регрессию 1.7–2.2с — `breadcrumbsIntegration`/`browserApiErrorsIntegration`
+   перехватывают console/DOM/history/fetch/XHR/таймеры, это и есть основная синхронная стоимость,
+   не сам факт инициализации SDK. Исправлено в самой библиотеке (`libs/glitchtip/src/client/
+   index.ts`) — явный минимальный список интеграций вместо `getDefaultIntegrations()`; эффект
+   касается всех приложений из тиража выше, не только domwellbes. Замер и разбор —
+   `apps/domwellbes/PLAN_PUBLIC_MOBILE.md §12.52`.
    (деплой-запрос — следующий шаг). Коммерческие/ПДн (`aboi`, `driving-school`, `dsperevod`,
    `svoichuzhie`, `aprel8008`, `domwellbes`) и не-Next.js десктоп/мобильные (Electron/React
    Native — `animatrona`, `label-printer-desktop`, `poster-microtext-desktop`,
