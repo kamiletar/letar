@@ -91,7 +91,7 @@ describe('createAuth', () => {
       expect((cfgWithout.emailAndPassword as { sendResetPassword?: unknown }).sendResetPassword).toBeUndefined()
     })
 
-    it('email коллбэки — reportEmailFailure вызывается при ошибке верификации', async () => {
+    it('email коллбэки — reportEmailFailure НЕ вызывается при ошибке верификации (уже вызван внутри email.sendVerificationEmail)', async () => {
       const email = {
         sendVerificationEmail: vi.fn().mockResolvedValue({ success: false, error: 'SMTP timeout' }),
         reportEmailFailure: vi.fn(),
@@ -105,11 +105,8 @@ describe('createAuth', () => {
       const cfg = (auth as unknown as { _config: Record<string, unknown> })._config
       const ev = cfg.emailVerification as { sendVerificationEmail: (...args: unknown[]) => Promise<void> }
       await ev.sendVerificationEmail({ user: { email: 'test@example.com', name: 'Test' }, url: 'https://x/verify' })
-      expect(email.reportEmailFailure).toHaveBeenCalledWith({
-        type: 'verification',
-        to: 'test@example.com',
-        error: 'SMTP timeout',
-      })
+      // provider.sendEmail (@letar/email) уже репортит провал сам — createAuth не должен дублировать
+      expect(email.reportEmailFailure).not.toHaveBeenCalled()
     })
 
     it('email коллбэки — reportEmailFailure НЕ вызывается при успехе', async () => {

@@ -75,18 +75,13 @@ function buildStandaloneAuth<TProfile extends StandaloneAuthProfile | HubProvide
       ...(profile.password && { password: profile.password }),
       ...(email.sendPasswordResetEmail && {
         sendResetPassword: async ({ user, url }: { user: { email: string; name?: string | null }; url: string }) => {
-          const result = await email.sendPasswordResetEmail!({
+          // email.sendPasswordResetEmail (провайдер @letar/email) уже вызывает reportEmailFailure
+          // сам при провале SMTP — здесь не дублируем.
+          await email.sendPasswordResetEmail!({
             to: user.email,
             userName: user.name ?? undefined,
             resetUrl: url,
           })
-          if (!result.success) {
-            email.reportEmailFailure({
-              type: 'password-reset',
-              to: user.email,
-              error: result.error ?? 'unknown',
-            })
-          }
         },
       }),
     },
@@ -95,18 +90,12 @@ function buildStandaloneAuth<TProfile extends StandaloneAuthProfile | HubProvide
       sendOnSignUp: true,
       autoSignInAfterVerification: true,
       sendVerificationEmail: async ({ user, url }: { user: { email: string; name?: string | null }; url: string }) => {
-        const result = await email.sendVerificationEmail({
+        // email.sendVerificationEmail уже вызывает reportEmailFailure сам при провале SMTP.
+        await email.sendVerificationEmail({
           to: user.email,
           userName: user.name ?? undefined,
           verificationUrl: url,
         })
-        if (!result.success) {
-          email.reportEmailFailure({
-            type: 'verification',
-            to: user.email,
-            error: result.error ?? 'unknown',
-          })
-        }
       },
     },
 
@@ -208,18 +197,13 @@ function buildHubProviderAuth<TProfile extends HubProviderAuthProfile>(profile: 
       ...(profile.password && { password: profile.password }),
       ...(email.sendPasswordResetEmail && {
         sendResetPassword: async ({ user, url }: { user: { email: string; name?: string | null }; url: string }) => {
-          const result = await email.sendPasswordResetEmail!({
+          // email.sendPasswordResetEmail (провайдер @letar/email) уже вызывает reportEmailFailure
+          // сам при провале SMTP — здесь не дублируем.
+          await email.sendPasswordResetEmail!({
             to: user.email,
             userName: user.name ?? undefined,
             resetUrl: url,
           })
-          if (!result.success) {
-            email.reportEmailFailure({
-              type: 'password-reset',
-              to: user.email,
-              error: result.error ?? 'unknown',
-            })
-          }
         },
       }),
     },
@@ -228,18 +212,12 @@ function buildHubProviderAuth<TProfile extends HubProviderAuthProfile>(profile: 
       sendOnSignUp: true,
       autoSignInAfterVerification: true,
       sendVerificationEmail: async ({ user, url }: { user: { email: string; name?: string | null }; url: string }) => {
-        const result = await email.sendVerificationEmail({
+        // email.sendVerificationEmail уже вызывает reportEmailFailure сам при провале SMTP.
+        await email.sendVerificationEmail({
           to: user.email,
           userName: user.name ?? undefined,
           verificationUrl: url,
         })
-        if (!result.success) {
-          email.reportEmailFailure({
-            type: 'verification',
-            to: user.email,
-            error: result.error ?? 'unknown',
-          })
-        }
       },
     },
 
