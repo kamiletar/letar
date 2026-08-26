@@ -387,6 +387,9 @@ cron-рассылок: найти кандидатов → отправить �
 [idempotency-key-terminal-transition-pattern](/.claude/docs/idempotency-key-terminal-transition-pattern.md)
 unique `idempotencyKey` (`proposal-terminal:<id>`, `contract-issued:<id>`) + try/catch на append-only
 event-sourced переходе — не путать с select-then-create для внешних вебхук-событий выше ·
+[client-idempotency-key-order-creation](/.claude/docs/client-idempotency-key-order-creation.md)
+третий вариант — сущность ещё не существует, ключ не детерминирован (client-generated uuid в
+sessionStorage), fast-path findUnique + try/catch на настоящую гонку двойного клика/back/reload ·
 [external-provider-fake-pattern](/.claude/docs/external-provider-fake-pattern.md) интерфейс +
 fake-реализация для внешнего сервиса, поставщик которого ещё не выбран (10 контуров domwellbes) —
 деградация vs пропуск по настройке, грабля вечно-успешного fake ·
