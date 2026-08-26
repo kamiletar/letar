@@ -851,6 +851,24 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
 
 ## Backlog (запросы от агентов)
 
+### ✅ [2026-08-26] Сообщённый баг TS2739 в `field-type-mapper.tsx` при `persistence` — не подтвердился, закрыто
+
+- **Запросил:** `aboi-dev`, сообщил о `tsgo`-ошибке `TS2739` («missing displayValue, emptyValue»
+  для `EditIntentFieldProps`) в `field-type-mapper.tsx:433,440` при добавлении
+  `<Form persistence={{...}}>` в `apps/aboi` `gift-form.tsx`, обошёл через `useFormRef()`+
+  `onFieldChange` вместо `persistence`.
+- **Расследование:** изолированный `nx typecheck:tsgo forms` — чисто; повторный
+  `nx typecheck:tsgo aboi --skip-nx-cache` с реально добавленным `persistence` (несколько
+  вариантов конфига) на той же схеме/форме — `TS2739` ни разу не воспроизвёлся. Код ветки
+  `case 'editIntent'` при ручном разборе типов не содержит несоответствия; `useFormPersistence`/
+  `FormPersistenceConfig` структурно не связаны с этой веткой ни по коду, ни по типам.
+- **Вывод:** вероятно транзиентная нестыковка инкрементального `tsgo --build` — коммит
+  `feat(forms): Form.Field.EditIntent` (`61f2fd38`) и коммит с `gift-form.tsx` в `aboi`
+  разошлись всего на 3 минуты. Задокументировано как корроборирующий случай в
+  [tsgo-stray-declarations.md](../../.claude/docs/tsgo-stray-declarations.md). `aboi-dev`
+  уведомлён через agent-mail, решение — оставлять обходной путь или вернуться к `persistence` —
+  за владельцем aboi.
+
 ### ✅ [2026-08-26] `Field.Select` — meta `ui.options` теряется через `.nullable().optional()` — закрыто
 
 - **Запросил:** `aboi-dev`, найдено при добавлении nullable enum-поля `Product.mood` (§11.8 R3.4
