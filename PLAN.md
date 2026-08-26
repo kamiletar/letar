@@ -3296,3 +3296,27 @@ aboi,auth-hub` — зелёные.
 исправлен в этой сессии) в четырёх cron-письмах aboi (`activation-reminder.ts`,
 `review-request.ts`, `birthday-promo.ts`, `abandoned-cart.ts`). Заведена отдельная задача —
 см. `apps/aboi/PLAN_COMPLETED.md` запись этой же сессии.
+
+## §63 — `@letar/idempotency-key`: клиентский idempotency-key вынесен из трёх приложений (2026-08-26)
+
+`.claude/docs/client-idempotency-key-order-creation.md` описывал паттерн клиентского
+`crypto.randomUUID()` в `sessionStorage` для защиты от double-submit при создании заказа —
+реализован независимо в `aboi` (R6.12, оригинал), `domwellbes` (перенос) и `svoichuzhie`
+(перенос, но уже в общей форме с параметром `storageKey`, а не хардкодом ключа). Контракт всех
+трёх совпадал дословно: генерация ключа, чтение/запись `sessionStorage`, защищённое поведение
+при недоступном `sessionStorage` (приватный режим).
+
+Вынесено в новую shared-либу `libs/idempotency-key` (`getOrCreateIdempotencyKey(storageKey)`/
+`clearIdempotencyKey(storageKey)`). `svoichuzhie` перешёл на прямой импорт (его локальный файл
+был уже тонкой обёрткой без специфики); `aboi`/`domwellbes` оставили тонкие обёртки с
+захардкоженным `storageKey` в своих `checkout-draft.ts`. Серверная половина паттерна
+(`@unique`-колонка + fast-path `findUnique` + `try{$transaction}catch`) не обобщалась — у
+каждого приложения своя модель и своя транзакция.
+
+`nx typecheck:tsgo/lint/test` зелёные на всех четырёх проектах (проверено по отдельности —
+совместный прогон `aboi`+`domwellbes` в одной команде схватил задокументированную гонку
+`chakra-typegen-shared-node-modules-race`, не связанную с этим изменением). Шесть коммитов
+(новая либа, докс, три submodule-коммита + три bump SHA), не запушено.
+
+Не проверено на других order/booking-потоках монорепо (`driving-school` — запись на занятие) —
+см. открытый пункт в самом doc-файле «Куда смотреть при добавлении нового order/booking-чекаута».
