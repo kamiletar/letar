@@ -16,7 +16,6 @@ import {
   createListCollection,
   For,
   HStack,
-  Icon,
   IconButton,
   Input,
   Select,
@@ -67,10 +66,10 @@ export function TrackGroupEditor({ audioGroups, subtitleGroups, onGroupEdit, onA
       <Collapsible.Trigger asChild>
         <Button variant="ghost" size="sm" w="full" justifyContent="space-between" mb={isOpen ? 2 : 0}>
           <HStack gap={2}>
-            <Icon as={LuSettings} boxSize={4} />
+            <LuSettings size={16} />
             <Text>Настроить язык/команду</Text>
           </HStack>
-          <Icon as={isOpen ? LuChevronUp : LuChevronDown} boxSize={4} />
+          {isOpen ? <LuChevronUp size={16} /> : <LuChevronDown size={16} />}
         </Button>
       </Collapsible.Trigger>
 
@@ -80,7 +79,7 @@ export function TrackGroupEditor({ audioGroups, subtitleGroups, onGroupEdit, onA
           {audioGroups.length > 0 && (
             <VStack align="stretch" gap={2}>
               <HStack gap={2}>
-                <Icon as={LuAudioLines} color="green.400" boxSize={4} />
+                <LuAudioLines color="var(--chakra-colors-green-400)" size={16} />
                 <Text fontSize="sm" fontWeight="medium">
                   Аудиодорожки
                 </Text>
@@ -103,7 +102,7 @@ export function TrackGroupEditor({ audioGroups, subtitleGroups, onGroupEdit, onA
           {subtitleGroups.length > 0 && (
             <VStack align="stretch" gap={2}>
               <HStack gap={2}>
-                <Icon as={LuCaptions} color="yellow.400" boxSize={4} />
+                <LuCaptions color="var(--chakra-colors-yellow-400)" size={16} />
                 <Text fontSize="sm" fontWeight="medium">
                   Субтитры
                 </Text>
@@ -319,8 +318,9 @@ function GroupEditRow({ group, isSubtitle, onEdit, onApplyToAll }: GroupEditRowP
             colorPalette="purple"
             onClick={handleApplyToAll}
             title="Применить эти настройки ко всем эпизодам"
+            gap={1}
           >
-            <Icon as={LuCopy} boxSize={3} mr={1} />
+            <LuCopy size={12} />
             Ко всем
           </Button>
         )}

@@ -4,7 +4,7 @@
  * Компонент карточки файла для PreviewStep
  */
 
-import { Badge, Box, Card, Checkbox, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Card, Checkbox, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
 import { LuAudioLines, LuCaptions, LuCheck, LuFileVideo, LuVideo, LuX } from 'react-icons/lu'
 
 import { formatLanguageShort } from '@/constants/dub-groups'
@@ -58,7 +58,7 @@ export function FileCard({
       <Card.Header py={3} px={4}>
         <HStack justify="space-between">
           <HStack gap={3}>
-            <Icon as={LuFileVideo} color="purple.400" boxSize={5} />
+            <LuFileVideo color="var(--chakra-colors-purple-400)" size={20} />
             <VStack align="start" gap={0}>
               <Text fontWeight="medium" lineClamp={1}>
                 {file.name}
@@ -101,7 +101,7 @@ export function FileCard({
             {videoTrack && (
               <HStack p={2} bg="bg.subtle" borderRadius="md" justify="space-between">
                 <HStack gap={2}>
-                  <Icon as={LuVideo} color="blue.400" boxSize={4} />
+                  <LuVideo color="var(--chakra-colors-blue-400)" size={16} />
                   <Text fontSize="sm">Видео</Text>
                 </HStack>
                 <HStack gap={4} fontSize="xs" color="fg.muted">
@@ -129,7 +129,7 @@ export function FileCard({
             {audioRecommendations.length > 0 && (
               <VStack align="stretch" gap={2}>
                 <HStack gap={2}>
-                  <Icon as={LuAudioLines} color="green.400" boxSize={4} />
+                  <LuAudioLines color="var(--chakra-colors-green-400)" size={16} />
                   <Text fontSize="sm" fontWeight="medium">
                     Аудиодорожки ({audioRecommendations.length})
                   </Text>
@@ -234,7 +234,7 @@ export function FileCard({
             {subtitleRecommendations.length > 0 && (
               <VStack align="stretch" gap={2}>
                 <HStack gap={2}>
-                  <Icon as={LuCaptions} color="yellow.400" boxSize={4} />
+                  <LuCaptions color="var(--chakra-colors-yellow-400)" size={16} />
                   <Text fontSize="sm" fontWeight="medium">
                     Субтитры ({subtitleRecommendations.length})
                   </Text>

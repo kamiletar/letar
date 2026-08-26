@@ -18,7 +18,6 @@ import {
   Card,
   Checkbox,
   HStack,
-  Icon,
   NativeSelect,
   Slider,
   Spinner,
@@ -95,7 +94,7 @@ export function EncodingSettingsCard({ settings }: EncodingSettingsCardProps) {
         <Card.Header py={3} px={4}>
           <HStack justify="space-between" w="full">
             <HStack gap={2}>
-              <Icon as={LuSettings2} color="purple.400" boxSize={4} />
+              <LuSettings2 color="var(--chakra-colors-purple-400)" size={16} />
               <Text fontWeight="medium" fontSize="sm">
                 Настройки кодирования
               </Text>
@@ -152,7 +151,10 @@ export function EncodingSettingsCard({ settings }: EncodingSettingsCardProps) {
             {/* Принудительное использование CPU */}
             <HStack justify="space-between" align="center">
               <HStack gap={2}>
-                <Icon as={LuCpu} color={forceCpu ? 'orange.400' : 'fg.subtle'} boxSize={4} />
+                <LuCpu
+                  color={forceCpu ? 'var(--chakra-colors-orange-400)' : 'var(--chakra-colors-fg-subtle)'}
+                  size={16}
+                />
                 <VStack align="start" gap={0}>
                   <Text fontSize="sm">Использовать CPU</Text>
                   <Text fontSize="xs" color="fg.subtle">
@@ -186,7 +188,10 @@ export function EncodingSettingsCard({ settings }: EncodingSettingsCardProps) {
                   <Checkbox.Control />
                   <Checkbox.Label>
                     <HStack gap={2}>
-                      <Icon as={LuTarget} color={vmafEnabled ? 'yellow.400' : 'fg.subtle'} boxSize={4} />
+                      <LuTarget
+                        color={vmafEnabled ? 'var(--chakra-colors-yellow-400)' : 'var(--chakra-colors-fg-subtle)'}
+                        size={16}
+                      />
                       <Text fontWeight="medium">VMAF подбор CQ</Text>
                     </HStack>
                   </Checkbox.Label>
@@ -235,7 +240,10 @@ export function EncodingSettingsCard({ settings }: EncodingSettingsCardProps) {
             {/* Денойз hqdn3d */}
             <HStack justify="space-between" align="center">
               <HStack gap={2}>
-                <Icon as={LuWind} color={denoiseEnabled ? 'teal.400' : 'fg.subtle'} boxSize={4} />
+                <LuWind
+                  color={denoiseEnabled ? 'var(--chakra-colors-teal-400)' : 'var(--chakra-colors-fg-subtle)'}
+                  size={16}
+                />
                 <VStack align="start" gap={0}>
                   <Text fontSize="sm">Денойз</Text>
                   <Text fontSize="xs" color="fg.subtle">
@@ -273,7 +281,10 @@ export function EncodingSettingsCard({ settings }: EncodingSettingsCardProps) {
                   <Checkbox.Control />
                   <Checkbox.Label>
                     <HStack gap={2}>
-                      <Icon as={LuSparkles} color={anime4kEnabled ? 'purple.400' : 'fg.subtle'} boxSize={4} />
+                      <LuSparkles
+                        color={anime4kEnabled ? 'var(--chakra-colors-purple-400)' : 'var(--chakra-colors-fg-subtle)'}
+                        size={16}
+                      />
                       <Text fontWeight="medium">Anime4K апскейл</Text>
                       <Badge size="xs" colorPalette="purple" variant="subtle">
                         GPU
