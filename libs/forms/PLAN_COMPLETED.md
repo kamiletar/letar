@@ -1,5 +1,29 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-08-26 — Фикс: email inputType терялся для `z.email().optional().or(literal(''))`
+
+Найдено при аудите чекаута мобильного `domwellbes` (MU4, `PLAN_PUBLIC_MOBILE.md` §12.41):
+`Field.String` не детектил `type="email"`/`inputMode="email"` для поля вида
+`z.email().optional().or(z.literal(''))` — распространённый паттерн опционального email
+(тот же в `checkout.schema.ts` и `lead-request.schema.ts` домвелбеса), из-за чего оба места
+несли явный workaround-проп `type="email"` вместо auto-detect.
+
+Root cause — два независимых бага в `getZodConstraints` (`libs/forms-core/src/lib/schema/`):
+
+1. `unwrapSchema` (`zod-utils.ts`) не разворачивал `union`, который создаёт `.or(z.literal(''))`
+   — в отличие от соседней `unwrapSchemaWithRequired`, где этот паттерн уже был учтён отдельно.
+2. Даже после разворачивания union до базовой схемы `extractStringConstraints`
+   (`schema-constraints.ts`) не находила формат: топ-уровневые Zod v4-фабрики
+   `z.email()`/`z.url()`/`z.uuid()` кладут `format` прямо в `def` верхнего уровня, а не в
+   `def.checks[]` — в отличие от цепочки `z.string().email()`, где формат приходит через
+   `checks`. Оба бага гасили auto-detect одновременно именно для этого паттерна.
+
+Фикс — оба места. Тест `schema-constraints.spec.ts` на конкретно этот паттерн. Домвелбес не
+трогали: workaround там — уже устоявшийся паттерн приложения (два места одинаково), не разовая
+затычка, и задача явно указывала не менять его, если так. Коммит `bb326f33`
+(`libs/forms-core`, версия 0.9.1 → 0.9.2). Проверено: `nx test forms-core` — 480/480,
+`typecheck:tsgo` — чисто.
+
 ## 2026-08-26 — Regression-тесты на пять API, падавших внутри декларативного `<Form>`
 
 Продолжение предыдущей записи (фикс 2.7.6 ниже): у `Form.Subscribe`, `Form.UrlSync`,
