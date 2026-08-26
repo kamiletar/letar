@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Button, CloseButton, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, CloseButton, HStack, Text, VStack } from '@chakra-ui/react'
 import { useOfflineConsent } from '@letar/hooks'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
@@ -81,7 +81,7 @@ export function OfflineConsentBanner() {
         {/* Заголовок с иконкой и кнопкой закрытия */}
         <HStack justify="space-between" align="start">
           <HStack gap={3} align="start">
-            <Icon as={LuDownload} boxSize={5} color="brand.500" mt={0.5} />
+            <LuDownload size={20} color="var(--chakra-colors-brand-500)" style={{ marginTop: 2 }} />
             <VStack align="start" gap={0.5}>
               <Text fontWeight="semibold" fontSize="sm">
                 {t('title')}
@@ -97,7 +97,7 @@ export function OfflineConsentBanner() {
         {/* Описание преимуществ */}
         <HStack gap={2} color="fg.muted" fontSize="xs" flexWrap="wrap">
           <HStack gap={1}>
-            <Icon as={LuWifiOff} boxSize={3} />
+            <LuWifiOff size={12} />
             <Text>{t('worksOffline')}</Text>
           </HStack>
           <Text>•</Text>

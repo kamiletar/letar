@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Container, Heading, Icon, Text, VStack } from '@chakra-ui/react'
+import { Box, Container, Heading, Text, VStack } from '@chakra-ui/react'
 import { LuWifiOff } from 'react-icons/lu'
 
 /**
@@ -14,7 +14,7 @@ export default function OfflinePage() {
     <Container maxW="container.md" py={20}>
       <VStack gap={6} textAlign="center">
         <Box p={6} borderRadius="full" bg="brand.500/10" color="brand.500">
-          <Icon as={LuWifiOff} boxSize={12} />
+          <LuWifiOff size={48} />
         </Box>
 
         <VStack gap={2}>
