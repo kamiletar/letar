@@ -250,6 +250,28 @@ model OauthConsent {
 }
 
 // ========================================
+// JWT / JWKS — плагин jwt() (обязателен для oauthProvider, JWKS/подпись id_token)
+// ========================================
+
+// Ключевая пара для подписи JWT (id_token) — Better Auth jwt-плагин хранит и ротирует сама,
+// схема полей продиктована самим плагином (better-auth/dist/plugins/jwt/schema.mjs), не менять
+// произвольно. Без этой модели ЛЮБОЙ вызов get-session/oauth2 падает "Model jwks does not exist"
+// (найдено 2026-08-26, четвёртый слой прод-инцидента после миграции a8efcc72 на
+// @better-auth/oauth-provider — миграция плагина не сопровождалась полной миграцией схемы БД).
+model Jwks {
+  id         String    @id @default(cuid())
+  publicKey  String
+  privateKey String
+  createdAt  DateTime  @default(now())
+  expiresAt  DateTime?
+  alg        String?
+  crv        String?
+
+  @@deny('all', true)
+  @@map("jwks")
+}
+
+// ========================================
 // Passkeys / WebAuthn
 // ========================================
 
