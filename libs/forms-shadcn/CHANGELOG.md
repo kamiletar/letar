@@ -4,6 +4,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.34.0] - 2026-08-26
+
+### Added
+
+- **`FieldEditIntent`** — shadcn-скин `Form.Field.EditIntent` (`libs/forms/PLAN.md` backlog
+  `EditIntentValue<T>`). Явная замена значения без передачи старого клиенту (API key/Client
+  Secret и т.п.) — view mode с безопасным `displayValue` и кнопкой «Заменить», edit mode с
+  дочерним полем и кнопкой «Оставить текущее». Value-контракт и view/edit/focus-логика идентичны
+  Chakra-скину — общий headless `useEditIntentField` из `@letar/forms-react` (0.3.3 → 0.4.0),
+  отличается только вёрстка (`shadcnUIKit`/tailwind вместо Chakra-примитивов). Тесты —
+  `field-edit-intent.spec.tsx` (5 тестов).
+
 ## [0.33.6] - 2026-08-25
 
 ### Fixed

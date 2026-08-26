@@ -23,6 +23,34 @@ export interface StringFieldProps extends BaseFieldProps {
 /** Props for Form.Field.Checkbox (shadcn-скин). */
 export type CheckboxFieldProps = Omit<BaseFieldProps, 'placeholder'>
 
+/**
+ * Props for Form.Field.EditIntent (shadcn-скин) — явная замена значения без передачи старого
+ * (API key/Client Secret и т.п., см. `libs/forms/PLAN.md` backlog `EditIntentValue<T>`).
+ * Value-контракт и headless-логика (`useEditIntentField` из `@letar/forms-react`) те же, что у
+ * Chakra-скина — отличается только вёрстка.
+ */
+export interface EditIntentFieldProps<T = unknown> extends Omit<BaseFieldProps, 'placeholder'> {
+  /**
+   * Безопасный индикатор view mode — маска (`************P9x4`) или статус («настроено»).
+   * Никогда не копируется в `value`.
+   */
+  displayValue: ReactNode
+  /** Текст кнопки перехода в edit mode. @default 'Заменить' */
+  editLabel?: string
+  /** Текст кнопки отмены edit mode (возврат к view mode). @default 'Оставить текущее' */
+  cancelLabel?: string
+  /** Значение, с которого стартует дочернее поле при входе в edit mode. */
+  emptyValue: T
+  /**
+   * Помечает содержимое как чувствительное — потребитель обязан вручную исключить путь
+   * `${name}.value` из persistence/URL sync/аналитики: общего автоматического redaction-слоя
+   * на всю форму сегодня нет. @default true
+   */
+  sensitive?: boolean
+  /** Дочернее поле, рендерящееся в edit mode (обычно `FieldPassword name="${name}.value"`). */
+  children: ReactNode
+}
+
 export interface SelectOption {
   label: ReactNode
   value: string | number
