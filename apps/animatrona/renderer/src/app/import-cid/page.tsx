@@ -7,20 +7,7 @@
  * эпизоды напрямую из IPFS без импорта в библиотеку.
  */
 
-import {
-  Badge,
-  Box,
-  Button,
-  Card,
-  Heading,
-  HStack,
-  Icon,
-  IconButton,
-  Input,
-  Spinner,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import { Badge, Box, Button, Card, Heading, HStack, IconButton, Input, Spinner, Text, VStack } from '@chakra-ui/react'
 import type { AnimeManifestEpisode, EpisodesDocument } from '@letar/animatrona-types'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
@@ -348,7 +335,7 @@ export function ImportCidContentEmbedded() {
                         flex={1}
                       />
                       <Button colorPalette="purple" onClick={() => handlePreview()} loading={isLoading}>
-                        <Icon as={LuSearch} mr={2} />
+                        <LuSearch size={16} style={{ marginRight: 8 }} />
                         Найти
                       </Button>
                     </HStack>
@@ -386,7 +373,7 @@ export function ImportCidContentEmbedded() {
                     <HStack flexWrap="wrap" gap={2}>
                       {animeInfo?.year && (
                         <Badge variant="subtle">
-                          <Icon as={LuCalendar} mr={1} />
+                          <LuCalendar size={16} style={{ marginRight: 4 }} />
                           {animeInfo.year}
                         </Badge>
                       )}
@@ -397,7 +384,7 @@ export function ImportCidContentEmbedded() {
                       )}
                       {episodes.length > 0 && (
                         <Badge variant="subtle">
-                          <Icon as={LuFilm} mr={1} />
+                          <LuFilm size={16} style={{ marginRight: 4 }} />
                           {episodes.length} эп.
                         </Badge>
                       )}
@@ -429,7 +416,7 @@ export function ImportCidContentEmbedded() {
                       onClick={() => handleImport(false)}
                       loading={isImporting}
                     >
-                      <Icon as={LuDownload} mr={1} />В библиотеку
+                      <LuDownload size={16} style={{ marginRight: 4 }} />В библиотеку
                     </Button>
                     <Button
                       size="sm"
@@ -438,7 +425,7 @@ export function ImportCidContentEmbedded() {
                       onClick={() => handleImport(true)}
                       loading={isImporting}
                     >
-                      <Icon as={LuPin} mr={1} />В библиотеку + пин
+                      <LuPin size={16} style={{ marginRight: 4 }} />В библиотеку + пин
                     </Button>
                   </VStack>
                 </HStack>

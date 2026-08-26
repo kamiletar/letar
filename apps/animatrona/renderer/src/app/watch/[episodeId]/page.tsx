@@ -7,7 +7,7 @@
  * Поддерживает редактирование глав и автопропуск
  */
 
-import { Box, Button, HStack, Icon, IconButton, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, HStack, IconButton, Spinner, Text, VStack } from '@chakra-ui/react'
 import { use, useCallback, useEffect, useRef, useState } from 'react'
 import { LuArrowLeft, LuLanguages, LuList, LuSkipForward } from 'react-icons/lu'
 
@@ -226,7 +226,7 @@ export default function WatchPage({ params }: WatchPageProps) {
       <Box minH="100vh" bg="bg" color="fg" p={6}>
         <VStack gap={4} align="start">
           <Button variant="ghost" size="sm" onClick={() => router.push('/library')}>
-            <Icon as={LuArrowLeft} mr={2} />
+            <LuArrowLeft size={16} style={{ marginRight: 8 }} />
             Назад в библиотеку
           </Button>
           <Text color="red.400">{error ? 'Ошибка загрузки' : 'Эпизод не найден'}</Text>
@@ -241,7 +241,7 @@ export default function WatchPage({ params }: WatchPageProps) {
       <Box minH="100vh" bg="bg" color="fg" p={6}>
         <VStack gap={4} align="start">
           <Button variant="ghost" size="sm" onClick={() => router.push(`/library/${episode.animeId}`)}>
-            <Icon as={LuArrowLeft} mr={2} />
+            <LuArrowLeft size={16} style={{ marginRight: 8 }} />
             Назад к аниме
           </Button>
           <Text color="yellow.400">Контент недоступен</Text>
@@ -291,7 +291,7 @@ export default function WatchPage({ params }: WatchPageProps) {
                 colorPalette="whiteAlpha"
                 onClick={() => router.push(`/library/${episode.animeId}`)}
               >
-                <Icon as={LuArrowLeft} mr={2} />
+                <LuArrowLeft size={16} style={{ marginRight: 8 }} />
                 {episode.anime.name}
               </Button>
             </HStack>
@@ -330,7 +330,7 @@ export default function WatchPage({ params }: WatchPageProps) {
                     tracks.setSelectedSubtitleTrackId(null)
                   }}
                 >
-                  <Icon as={LuLanguages} />
+                  <LuLanguages size={16} />
                 </IconButton>
               </Tooltip>
               <Tooltip
@@ -351,7 +351,7 @@ export default function WatchPage({ params }: WatchPageProps) {
                   size="sm"
                   onClick={autoSkip.toggleAutoSkip}
                 >
-                  <Icon as={LuSkipForward} />
+                  <LuSkipForward size={16} />
                 </IconButton>
               </Tooltip>
               <Tooltip content="Редактор глав">
@@ -362,7 +362,7 @@ export default function WatchPage({ params }: WatchPageProps) {
                   size="sm"
                   onClick={chapterEditor.toggleChapterEditor}
                 >
-                  <Icon as={LuList} />
+                  <LuList size={16} />
                 </IconButton>
               </Tooltip>
               <TrackSelector

@@ -4,7 +4,7 @@
  * Секция подписок на библиотеки других пользователей
  */
 
-import { Badge, Box, Button, Flex, Heading, HStack, Icon, IconButton, Input, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Flex, Heading, HStack, IconButton, Input, Text, VStack } from '@chakra-ui/react'
 import { useState } from 'react'
 import { LuExternalLink, LuPlus, LuRefreshCw, LuTrash2, LuUsers } from 'react-icons/lu'
 
@@ -47,7 +47,7 @@ export function SubscriptionsSection({
     <Box>
       <HStack mb={4} gap={3} justify="space-between">
         <HStack gap={3}>
-          <Icon as={LuUsers} color="green.400" boxSize={5} />
+          <LuUsers size={20} color="var(--chakra-colors-green-400)" />
           <Heading size="sm">Подписки</Heading>
           <Badge size="sm">{subscriptions.list.length}</Badge>
         </HStack>

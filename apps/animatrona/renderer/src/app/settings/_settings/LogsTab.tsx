@@ -12,7 +12,7 @@
  * - Очистка отображения (не очищает файл)
  */
 
-import { Badge, Box, Button, HStack, Icon, Input, Switch, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, HStack, Input, Switch, Text, VStack } from '@chakra-ui/react'
 import { NativeSelectField, NativeSelectRoot } from '@chakra-ui/react/native-select'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { LuArrowDown, LuFileText, LuRefreshCw, LuTrash } from 'react-icons/lu'
@@ -122,7 +122,7 @@ export function LogsTab() {
     <VStack gap={3} align="stretch" maxW="100%">
       {/* Заголовок и путь к файлу */}
       <HStack gap={2}>
-        <Icon as={LuFileText} color="blue.400" boxSize={5} />
+        <LuFileText size={20} color="var(--chakra-colors-blue-400)" />
         <Text fontWeight={500}>Системные логи</Text>
         {watching && (
           <Badge colorPalette="green" variant="subtle" size="sm">
@@ -154,11 +154,11 @@ export function LogsTab() {
           </NativeSelectField>
         </NativeSelectRoot>
         <Button size="sm" variant="outline" onClick={() => void loadTail()}>
-          <Icon as={LuRefreshCw} />
+          <LuRefreshCw size={16} />
           Обновить
         </Button>
         <Button size="sm" variant="ghost" onClick={() => setLines([])}>
-          <Icon as={LuTrash} />
+          <LuTrash size={16} />
           Очистить
         </Button>
         <HStack gap={2}>
@@ -169,7 +169,7 @@ export function LogsTab() {
             </Switch.Control>
             <Switch.Label>
               <HStack gap={1}>
-                <Icon as={LuArrowDown} boxSize={3} />
+                <LuArrowDown size={12} />
                 <Text fontSize="xs">Авто-скролл</Text>
               </HStack>
             </Switch.Label>

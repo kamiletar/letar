@@ -5,7 +5,7 @@
  * Показывает score, rank, и компоненты репутации
  */
 
-import { Box, Card, Heading, HStack, Icon, Progress, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { Box, Card, Heading, HStack, Progress, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { LuAward, LuClock, LuHardDrive, LuTrendingUp, LuUsers, LuZap } from 'react-icons/lu'
 
 import type { UserReputation } from '../../../../../shared/types/reputation'
@@ -35,14 +35,14 @@ interface ScoreComponentProps {
   color: string
 }
 
-function ScoreComponent({ icon, label, value, maxValue, color }: ScoreComponentProps) {
+function ScoreComponent({ icon: IconComponent, label, value, maxValue, color }: ScoreComponentProps) {
   const percentage = (value / maxValue) * 100
 
   return (
     <VStack align="stretch" gap={1}>
       <HStack justify="space-between">
         <HStack gap={2}>
-          <Icon as={icon} color={color} boxSize={4} />
+          <IconComponent size={16} color={`var(--chakra-colors-${color.replaceAll('.', '-')})`} />
           <Text fontSize="sm" color="fg.subtle">
             {label}
           </Text>
@@ -66,7 +66,7 @@ export function ReputationCard({ reputation, isLoading }: ReputationCardProps) {
       <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
         <Card.Header>
           <HStack gap={3}>
-            <Icon as={LuAward} color="yellow.400" boxSize={5} />
+            <LuAward size={20} color="var(--chakra-colors-yellow-400)" />
             <Heading size="md">Репутация</Heading>
           </HStack>
         </Card.Header>
@@ -82,7 +82,7 @@ export function ReputationCard({ reputation, isLoading }: ReputationCardProps) {
       <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
         <Card.Header>
           <HStack gap={3}>
-            <Icon as={LuAward} color="yellow.400" boxSize={5} />
+            <LuAward size={20} color="var(--chakra-colors-yellow-400)" />
             <Heading size="md">Репутация</Heading>
           </HStack>
         </Card.Header>
@@ -100,7 +100,7 @@ export function ReputationCard({ reputation, isLoading }: ReputationCardProps) {
     <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
       <Card.Header>
         <HStack gap={3}>
-          <Icon as={LuAward} color="yellow.400" boxSize={5} />
+          <LuAward size={20} color="var(--chakra-colors-yellow-400)" />
           <Heading size="md">Репутация</Heading>
         </HStack>
       </Card.Header>

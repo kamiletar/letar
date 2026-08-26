@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Button, Grid, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Grid, Spinner, Text, VStack } from '@chakra-ui/react'
 import { use, useCallback, useEffect, useMemo, useState } from 'react'
 import { LuArrowLeft, LuDownload, LuLibrary, LuPlay, LuRefreshCw, LuUpload } from 'react-icons/lu'
 
@@ -177,7 +177,7 @@ export default function DiscoverDetailPage({ params }: { params: Promise<{ id: s
         <VStack gap={4} py={16}>
           <Text color="red.500">{error || 'Аниме не найдено'}</Text>
           <Button onClick={() => router.push('/discover')} variant="outline">
-            <Icon as={LuArrowLeft} mr={2} />
+            <LuArrowLeft size={16} style={{ marginRight: 8 }} />
             Назад к каталогу
           </Button>
         </VStack>
@@ -194,19 +194,19 @@ export default function DiscoverDetailPage({ params }: { params: Promise<{ id: s
         ? (
           <>
             <Button colorPalette="green" onClick={() => router.push(`/library/${localId}`)}>
-              <Icon as={LuLibrary} />
+              <LuLibrary size={16} />
               Открыть в библиотеке
             </Button>
             {/* Версия на трекере отличается — предложить действие */}
             {syncStatus === 'local-newer' && (
               <Button colorPalette="blue" onClick={handlePublishToTracker} loading={publishing} variant="outline">
-                <Icon as={LuUpload} />
+                <LuUpload size={16} />
                 Опубликовать на трекер
               </Button>
             )}
             {syncStatus === 'tracker-newer' && (
               <Button colorPalette="orange" onClick={handleUpdateFromTracker} loading={importingCid} variant="outline">
-                <Icon as={LuRefreshCw} />
+                <LuRefreshCw size={16} />
                 Обновить из трекера
               </Button>
             )}
@@ -215,14 +215,14 @@ export default function DiscoverDetailPage({ params }: { params: Promise<{ id: s
         : (
           anime.directoryCid && (
             <Button colorPalette="green" onClick={handleImport} loading={importingCid}>
-              <Icon as={LuDownload} />
+              <LuDownload size={16} />
               Импортировать
             </Button>
           )
         )}
       {anime.episodes.length > 0 && (
         <Button colorPalette="purple" onClick={() => handlePlayEpisode(anime.episodes[0])}>
-          <Icon as={LuPlay} />
+          <LuPlay size={16} />
           Смотреть Эп.1
         </Button>
       )}
@@ -237,7 +237,7 @@ export default function DiscoverDetailPage({ params }: { params: Promise<{ id: s
         {/* Навигация */}
         <Box px={6} py={3}>
           <Button variant="ghost" size="sm" onClick={() => router.push('/discover')}>
-            <Icon as={LuArrowLeft} mr={2} />
+            <LuArrowLeft size={16} style={{ marginRight: 8 }} />
             Назад к каталогу
           </Button>
         </Box>

@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Button, Card, Heading, HStack, Icon, VStack } from '@chakra-ui/react'
+import { Box, Button, Card, Heading, HStack, VStack } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
 import { LuArrowLeft, LuCheck, LuCpu, LuGauge, LuSettings, LuZap } from 'react-icons/lu'
 
@@ -54,11 +54,11 @@ export default function NewProfilePage() {
             {/* Шапка с кнопками */}
             <HStack justify="space-between">
               <Button variant="ghost" onClick={() => router.push('/settings')}>
-                <Icon as={LuArrowLeft} mr={2} />
+                <LuArrowLeft size={16} style={{ marginRight: 8 }} />
                 Назад
               </Button>
               <AnimatronaForm.Button.Submit colorPalette="purple" disabled={isCreating}>
-                <Icon as={LuCheck} mr={2} />
+                <LuCheck size={16} style={{ marginRight: 8 }} />
                 {isCreating ? 'Создание...' : 'Создать'}
               </AnimatronaForm.Button.Submit>
             </HStack>
@@ -67,7 +67,7 @@ export default function NewProfilePage() {
             <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
               <Card.Header>
                 <HStack gap={3}>
-                  <Icon as={LuSettings} color="purple.400" boxSize={5} />
+                  <LuSettings size={20} color="var(--chakra-colors-purple-400)" />
                   <Heading size="md">Основные параметры</Heading>
                 </HStack>
               </Card.Header>
@@ -80,7 +80,7 @@ export default function NewProfilePage() {
             <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
               <Card.Header>
                 <HStack gap={3}>
-                  <Icon as={LuGauge} color="purple.400" boxSize={5} />
+                  <LuGauge size={20} color="var(--chakra-colors-purple-400)" />
                   <Heading size="md">Rate Control</Heading>
                 </HStack>
               </Card.Header>
@@ -107,7 +107,7 @@ export default function NewProfilePage() {
             <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
               <Card.Header>
                 <HStack gap={3}>
-                  <Icon as={LuZap} color="purple.400" boxSize={5} />
+                  <LuZap size={20} color="var(--chakra-colors-purple-400)" />
                   <Heading size="md">Скорость/Качество</Heading>
                 </HStack>
               </Card.Header>
@@ -128,7 +128,7 @@ export default function NewProfilePage() {
             <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
               <Card.Header>
                 <HStack gap={3}>
-                  <Icon as={LuCpu} color="purple.400" boxSize={5} />
+                  <LuCpu size={20} color="var(--chakra-colors-purple-400)" />
                   <Heading size="md">Adaptive Quantization</Heading>
                 </HStack>
               </Card.Header>
@@ -155,7 +155,7 @@ export default function NewProfilePage() {
             <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
               <Card.Header>
                 <HStack gap={3}>
-                  <Icon as={LuSettings} color="purple.400" boxSize={5} />
+                  <LuSettings size={20} color="var(--chakra-colors-purple-400)" />
                   <Heading size="md">Продвинутые параметры</Heading>
                 </HStack>
               </Card.Header>

@@ -19,7 +19,7 @@
  * Прогресс сохраняется в localStorage.
  */
 
-import { Box, Button, Drawer, HStack, Icon, IconButton, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Drawer, HStack, IconButton, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { LuArrowLeft, LuDownload, LuLanguages, LuList, LuSkipForward } from 'react-icons/lu'
@@ -480,7 +480,7 @@ function DiscoverWatchContent() {
       <Box h="full" display="flex" alignItems="center" justifyContent="center" flexDir="column" gap={4}>
         <Text color="red.500">Нет видео для воспроизведения</Text>
         <Button onClick={() => router.push('/discover')} variant="outline">
-          <Icon as={LuArrowLeft} mr={2} />
+          <LuArrowLeft size={16} style={{ marginRight: 8 }} />
           Каталог
         </Button>
       </Box>
@@ -525,7 +525,7 @@ function DiscoverWatchContent() {
           headerLeft={
             <HStack gap={2}>
               <Button onClick={handleBack} variant="ghost" size="sm" color="white" _hover={{ bg: 'whiteAlpha.200' }}>
-                <Icon as={LuArrowLeft} mr={1} />
+                <LuArrowLeft size={16} style={{ marginRight: 4 }} />
                 {title || 'Назад'}
               </Button>
             </HStack>
@@ -553,7 +553,7 @@ function DiscoverWatchContent() {
                   size="sm"
                   onClick={toggleTrackMode}
                 >
-                  <Icon as={LuLanguages} />
+                  <LuLanguages size={20} />
                 </IconButton>
               </Tooltip>
               {/* Автопропуск OP/ED */}
@@ -566,7 +566,7 @@ function DiscoverWatchContent() {
                     size="sm"
                     onClick={toggleAutoSkip}
                   >
-                    <Icon as={LuSkipForward} />
+                    <LuSkipForward size={20} />
                   </IconButton>
                 </Tooltip>
               )}
@@ -580,7 +580,7 @@ function DiscoverWatchContent() {
                     size="sm"
                     onClick={() => setShowChapterList((v) => !v)}
                   >
-                    <Icon as={LuList} />
+                    <LuList size={20} />
                   </IconButton>
                 </Tooltip>
               )}
@@ -604,7 +604,7 @@ function DiscoverWatchContent() {
                   color="white"
                   _hover={{ bg: 'whiteAlpha.200' }}
                 >
-                  <Icon as={LuDownload} mr={1} />
+                  <LuDownload size={16} style={{ marginRight: 4 }} />
                   Импорт
                 </Button>
               )}

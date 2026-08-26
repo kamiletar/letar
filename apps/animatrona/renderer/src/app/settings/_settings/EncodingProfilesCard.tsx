@@ -4,7 +4,7 @@
  * Карточка профилей кодирования
  */
 
-import { Badge, Box, Button, Card, Heading, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Card, Heading, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
 import Link from 'next/link'
 import { LuCopy, LuFilm, LuPlay, LuPlus, LuStar } from 'react-icons/lu'
 
@@ -40,19 +40,19 @@ export function EncodingProfilesCard({ profiles, isLoading, onRefetch }: Encodin
       <Card.Header>
         <HStack justify="space-between">
           <HStack gap={3}>
-            <Icon as={LuFilm} color="purple.400" boxSize={5} />
+            <LuFilm size={20} color="var(--chakra-colors-purple-400)" />
             <Heading size="md">Профили кодирования</Heading>
           </HStack>
           <HStack gap={2}>
             <Button asChild size="sm" variant="outline">
               <Link href="/test-encoding">
-                <Icon as={LuPlay} />
+                <LuPlay size={16} />
                 Тестировать
               </Link>
             </Button>
             <Button asChild size="sm" colorPalette="purple">
               <Link href="/settings/profiles/new">
-                <Icon as={LuPlus} />
+                <LuPlus size={16} />
                 Создать
               </Link>
             </Button>
@@ -75,7 +75,7 @@ export function EncodingProfilesCard({ profiles, isLoading, onRefetch }: Encodin
                   <HStack justify="space-between">
                     <Link href={`/settings/profiles/${profile.id}`} style={{ flex: 1 }}>
                       <HStack gap={3} _hover={{ opacity: 0.8 }} cursor="pointer">
-                        {profile.isDefault && <Icon as={LuStar} color="yellow.400" boxSize={4} />}
+                        {profile.isDefault && <LuStar size={16} color="var(--chakra-colors-yellow-400)" />}
                         <Box>
                           <HStack gap={2}>
                             <Text fontWeight="medium">{profile.name}</Text>
@@ -116,7 +116,7 @@ export function EncodingProfilesCard({ profiles, isLoading, onRefetch }: Encodin
                               handleSetDefault(profile)
                             }}
                           >
-                            <Icon as={LuStar} boxSize={4} />
+                            <LuStar size={16} />
                           </Button>
                         </Tooltip>
                       )}
@@ -130,7 +130,7 @@ export function EncodingProfilesCard({ profiles, isLoading, onRefetch }: Encodin
                             handleDuplicate(profile)
                           }}
                         >
-                          <Icon as={LuCopy} boxSize={4} />
+                          <LuCopy size={16} />
                         </Button>
                       </Tooltip>
                     </HStack>

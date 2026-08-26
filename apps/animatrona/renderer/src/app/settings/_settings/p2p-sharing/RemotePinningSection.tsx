@@ -4,20 +4,7 @@
  * Секция Remote Pinning (Pinata)
  */
 
-import {
-  Badge,
-  Box,
-  Button,
-  Flex,
-  Grid,
-  Heading,
-  HStack,
-  Icon,
-  IconButton,
-  Input,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import { Badge, Box, Button, Flex, Grid, Heading, HStack, IconButton, Input, Text, VStack } from '@chakra-ui/react'
 import { useState } from 'react'
 import { LuCheck, LuCloud, LuEye, LuEyeOff, LuRefreshCw, LuX } from 'react-icons/lu'
 
@@ -69,7 +56,7 @@ export function RemotePinningSection({
     <Box>
       <HStack mb={4} gap={3} justify="space-between">
         <HStack gap={3}>
-          <Icon as={LuCloud} color="pink.400" boxSize={5} />
+          <LuCloud size={20} color="var(--chakra-colors-pink-400)" />
           <Heading size="sm">Remote Pinning (Pinata)</Heading>
           <Badge colorPalette={isConfigured ? 'green' : 'gray'} size="sm">
             {isConfigured ? 'Настроено' : 'Не настроено'}
@@ -137,13 +124,13 @@ export function RemotePinningSection({
                       </Button>
                       {jwtValid === true && (
                         <Badge colorPalette="green">
-                          <Icon as={LuCheck} mr={1} />
+                          <LuCheck size={12} style={{ marginRight: 4 }} />
                           Верный
                         </Badge>
                       )}
                       {jwtValid === false && (
                         <Badge colorPalette="red">
-                          <Icon as={LuX} mr={1} />
+                          <LuX size={12} style={{ marginRight: 4 }} />
                           Неверный
                         </Badge>
                       )}

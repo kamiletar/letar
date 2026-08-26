@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Box, Button, Card, Heading, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Card, Heading, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { LuArrowLeft, LuCheck, LuCopy, LuCpu, LuGauge, LuSettings, LuStar, LuTrash2, LuZap } from 'react-icons/lu'
@@ -157,7 +157,7 @@ export default function ProfileEditorPage() {
             {/* Шапка с кнопками */}
             <HStack justify="space-between">
               <Button variant="ghost" onClick={() => router.push('/settings')}>
-                <Icon as={LuArrowLeft} mr={2} />
+                <LuArrowLeft size={16} style={{ marginRight: 8 }} />
                 Назад
               </Button>
               <HStack gap={2}>
@@ -165,11 +165,11 @@ export default function ProfileEditorPage() {
                   ? (
                     <>
                       <Button variant="outline" onClick={handleReset} disabled={isResetting}>
-                        <Icon as={LuSettings} mr={2} />
+                        <LuSettings size={16} style={{ marginRight: 8 }} />
                         {isResetting ? 'Сброс...' : 'Сбросить'}
                       </Button>
                       <Button colorPalette="purple" onClick={handleDuplicate} disabled={isDuplicating}>
-                        <Icon as={LuCopy} mr={2} />
+                        <LuCopy size={16} style={{ marginRight: 8 }} />
                         {isDuplicating ? 'Копирование...' : 'Создать копию'}
                       </Button>
                     </>
@@ -177,11 +177,11 @@ export default function ProfileEditorPage() {
                   : (
                     <>
                       <Button variant="outline" colorPalette="red" onClick={handleDelete} disabled={isDeleting}>
-                        <Icon as={LuTrash2} mr={2} />
+                        <LuTrash2 size={16} style={{ marginRight: 8 }} />
                         Удалить
                       </Button>
                       <AnimatronaForm.Button.Submit colorPalette="purple" disabled={isUpdating}>
-                        <Icon as={LuCheck} mr={2} />
+                        <LuCheck size={16} style={{ marginRight: 8 }} />
                         {isUpdating ? 'Сохранение...' : 'Сохранить'}
                       </AnimatronaForm.Button.Submit>
                     </>
@@ -204,7 +204,7 @@ export default function ProfileEditorPage() {
             <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
               <Card.Header>
                 <HStack gap={3}>
-                  <Icon as={LuSettings} color="purple.400" boxSize={5} />
+                  <LuSettings size={20} color="var(--chakra-colors-purple-400)" />
                   <Heading size="md">Основные параметры</Heading>
                   {profile.isBuiltIn && (
                     <Badge colorPalette="purple" variant="subtle">
@@ -213,7 +213,7 @@ export default function ProfileEditorPage() {
                   )}
                   {profile.isDefault && (
                     <Badge colorPalette="yellow" variant="subtle">
-                      <Icon as={LuStar} mr={1} />
+                      <LuStar size={16} style={{ marginRight: 4 }} />
                       По умолчанию
                     </Badge>
                   )}
@@ -234,7 +234,7 @@ export default function ProfileEditorPage() {
             <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
               <Card.Header>
                 <HStack gap={3}>
-                  <Icon as={LuGauge} color="purple.400" boxSize={5} />
+                  <LuGauge size={20} color="var(--chakra-colors-purple-400)" />
                   <Heading size="md">Rate Control</Heading>
                 </HStack>
               </Card.Header>
@@ -273,7 +273,7 @@ export default function ProfileEditorPage() {
             <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
               <Card.Header>
                 <HStack gap={3}>
-                  <Icon as={LuZap} color="purple.400" boxSize={5} />
+                  <LuZap size={20} color="var(--chakra-colors-purple-400)" />
                   <Heading size="md">Скорость/Качество</Heading>
                 </HStack>
               </Card.Header>
@@ -294,7 +294,7 @@ export default function ProfileEditorPage() {
             <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
               <Card.Header>
                 <HStack gap={3}>
-                  <Icon as={LuCpu} color="purple.400" boxSize={5} />
+                  <LuCpu size={20} color="var(--chakra-colors-purple-400)" />
                   <Heading size="md">Adaptive Quantization</Heading>
                 </HStack>
               </Card.Header>
@@ -330,7 +330,7 @@ export default function ProfileEditorPage() {
             <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
               <Card.Header>
                 <HStack gap={3}>
-                  <Icon as={LuSettings} color="purple.400" boxSize={5} />
+                  <LuSettings size={20} color="var(--chakra-colors-purple-400)" />
                   <Heading size="md">Продвинутые параметры</Heading>
                 </HStack>
               </Card.Header>

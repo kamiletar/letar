@@ -4,7 +4,7 @@
  * Карточка настроек транскодирования
  */
 
-import { Box, Card, Heading, HStack, Icon, Slider, Switch, Text, VStack } from '@chakra-ui/react'
+import { Box, Card, Heading, HStack, Slider, Switch, Text, VStack } from '@chakra-ui/react'
 import { LuCpu, LuSettings, LuZap } from 'react-icons/lu'
 
 import type { Settings } from '@/generated/prisma'
@@ -22,7 +22,7 @@ export function TranscodingSettingsCard({ settings, onSave }: TranscodingSetting
     <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
       <Card.Header>
         <HStack gap={3}>
-          <Icon as={LuSettings} color="purple.400" boxSize={5} />
+          <LuSettings size={20} color="var(--chakra-colors-purple-400)" />
           <Heading size="md">Транскодирование</Heading>
         </HStack>
       </Card.Header>
@@ -31,7 +31,7 @@ export function TranscodingSettingsCard({ settings, onSave }: TranscodingSetting
           {/* GPU */}
           <HStack justify="space-between">
             <HStack gap={3}>
-              <Icon as={LuCpu} color="fg.muted" />
+              <LuCpu size={20} color="var(--chakra-colors-fg-muted)" />
               <Box>
                 <Text fontWeight="medium">Использовать GPU</Text>
                 <Text fontSize="sm" color="fg.subtle">
@@ -52,7 +52,7 @@ export function TranscodingSettingsCard({ settings, onSave }: TranscodingSetting
           <Box>
             <HStack justify="space-between" mb={2}>
               <HStack gap={3}>
-                <Icon as={LuZap} color="fg.muted" />
+                <LuZap size={20} color="var(--chakra-colors-fg-muted)" />
                 <Text fontWeight="medium">Битрейт аудио (kbps)</Text>
               </HStack>
               <Text color="purple.400" fontWeight="bold">

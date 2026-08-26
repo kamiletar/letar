@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Button, Heading, HStack, Icon, Menu, Portal, SegmentGroup, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Heading, HStack, Menu, Portal, SegmentGroup, Spinner, Text, VStack } from '@chakra-ui/react'
 import nextDynamic from 'next/dynamic'
 import { Component, type ErrorInfo, type ReactNode, Suspense, useState } from 'react'
 import {
@@ -80,10 +80,10 @@ class GridErrorBoundary extends Component<GridErrorBoundaryProps, GridErrorBound
       return (
         <Box textAlign="center" py={12} px={4}>
           <VStack gap={4}>
-            <Icon as={LuTriangleAlert} boxSize={10} color="orange.500" />
+            <LuTriangleAlert size={40} color="var(--chakra-colors-orange-500)" />
             <Text color="fg.muted">Ошибка отображения списка аниме</Text>
             <Button size="sm" variant="outline" onClick={() => this.setState({ hasError: false, error: null })}>
-              <Icon as={LuRefreshCw} mr={1} />
+              <LuRefreshCw size={16} style={{ marginRight: 4 }} />
               Попробовать снова
             </Button>
           </VStack>
@@ -244,7 +244,7 @@ function LibraryPageContent() {
               </Box>
               <HStack gap={2}>
                 <Button variant="outline" size="sm" onClick={() => refetch()}>
-                  <Icon as={LuRefreshCw} mr={2} />
+                  <LuRefreshCw size={16} style={{ marginRight: 8 }} />
                   Обновить
                 </Button>
 
@@ -260,7 +260,7 @@ function LibraryPageContent() {
                     }
                   }}
                 >
-                  <Icon as={LuSquareCheck} mr={2} />
+                  <LuSquareCheck size={16} style={{ marginRight: 8 }} />
                   {selectionMode ? `Выбрано ${selectedIds.size}` : 'Выбрать'}
                 </Button>
 
@@ -268,20 +268,20 @@ function LibraryPageContent() {
                 <Menu.Root>
                   <Menu.Trigger asChild>
                     <Button variant="outline" size="sm" disabled={isDeduplicating}>
-                      <Icon as={LuWrench} mr={2} />
+                      <LuWrench size={16} style={{ marginRight: 8 }} />
                       Обслуживание
-                      <Icon as={LuChevronDown} ml={2} />
+                      <LuChevronDown size={16} style={{ marginLeft: 8 }} />
                     </Button>
                   </Menu.Trigger>
                   <Portal>
                     <Menu.Positioner>
                       <Menu.Content minW="240px">
                         <Menu.Item value="batch-reencode" onClick={() => setIsBatchReencodeOpen(true)}>
-                          <Icon as={LuAudioLines} />
+                          <LuAudioLines size={16} />
                           Пережать аудио
                         </Menu.Item>
                         <Menu.Item value="batch-publish" onClick={() => setIsBatchPublishOpen(true)}>
-                          <Icon as={LuGlobe} />
+                          <LuGlobe size={16} />
                           Опубликовать на трекер
                         </Menu.Item>
                         <Menu.Item
@@ -289,7 +289,7 @@ function LibraryPageContent() {
                           onClick={() => void handleDeduplicateTracks()}
                           disabled={isDeduplicating}
                         >
-                          <Icon as={LuCopyX} />
+                          <LuCopyX size={16} />
                           {isDeduplicating ? 'Дедупликация...' : 'Дедуплицировать дорожки'}
                         </Menu.Item>
                       </Menu.Content>
@@ -298,7 +298,7 @@ function LibraryPageContent() {
                 </Menu.Root>
 
                 <Button colorPalette="purple" size="sm" onClick={() => setIsImportOpen(true)}>
-                  <Icon as={LuImport} mr={2} />
+                  <LuImport size={16} style={{ marginRight: 8 }} />
                   Импорт видео
                 </Button>
               </HStack>
@@ -310,7 +310,7 @@ function LibraryPageContent() {
               <SegmentGroup.Item value="individual">
                 <SegmentGroup.ItemText>
                   <HStack gap={1}>
-                    <Icon as={LuGrid2X2} boxSize={4} />
+                    <LuGrid2X2 size={16} />
                     <Text>По отдельности</Text>
                   </HStack>
                 </SegmentGroup.ItemText>
@@ -319,7 +319,7 @@ function LibraryPageContent() {
               <SegmentGroup.Item value="franchise">
                 <SegmentGroup.ItemText>
                   <HStack gap={1}>
-                    <Icon as={LuLayers} boxSize={4} />
+                    <LuLayers size={16} />
                     <Text>По франшизам</Text>
                   </HStack>
                 </SegmentGroup.ItemText>

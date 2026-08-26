@@ -7,7 +7,7 @@
  * Позволяет просматривать аниме из чужой библиотеки и импортировать их.
  */
 
-import { Badge, Box, Button, Grid, Heading, HStack, Icon, Image, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Grid, Heading, HStack, Image, Spinner, Text, VStack } from '@chakra-ui/react'
 import { use, useCallback, useEffect, useState } from 'react'
 import { LuArrowLeft, LuDownload, LuRefreshCw } from 'react-icons/lu'
 
@@ -139,7 +139,7 @@ export default function SubscriptionLibraryPage({ params }: SubscriptionPageProp
         <HStack mb={4} justify="space-between">
           <HStack gap={2}>
             <Button size="sm" variant="ghost" onClick={() => router.push('/settings/p2p-sharing')}>
-              <Icon as={LuArrowLeft} />
+              <LuArrowLeft size={16} />
               Назад
             </Button>
             <Heading size="sm">{displayName}</Heading>
@@ -150,7 +150,7 @@ export default function SubscriptionLibraryPage({ params }: SubscriptionPageProp
             )}
           </HStack>
           <Button size="sm" variant="outline" onClick={() => void handleRefresh()} loading={isRefreshing}>
-            <Icon as={LuRefreshCw} />
+            <LuRefreshCw size={16} />
             Обновить
           </Button>
         </HStack>
@@ -161,7 +161,7 @@ export default function SubscriptionLibraryPage({ params }: SubscriptionPageProp
             <VStack py={8} gap={4}>
               <Text color="fg.subtle">Нет данных — нажмите «Обновить» для загрузки библиотеки через IPNS</Text>
               <Button colorPalette="purple" onClick={() => void handleRefresh()} loading={isRefreshing}>
-                <Icon as={LuRefreshCw} />
+                <LuRefreshCw size={16} />
                 Обновить
               </Button>
             </VStack>
@@ -239,7 +239,7 @@ function PublishedAnimeCard({ anime, onImport, isImporting }: PublishedAnimeCard
             onClick={() => void onImport(anime.directoryCid!)}
             loading={isImporting}
           >
-            <Icon as={LuDownload} />
+            <LuDownload size={16} />
             Импортировать
           </Button>
         )}

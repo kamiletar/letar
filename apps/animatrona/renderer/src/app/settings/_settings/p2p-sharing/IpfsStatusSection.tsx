@@ -4,19 +4,7 @@
  * Секция статуса IPFS ноды с трекингом скорости и диагностикой
  */
 
-import {
-  Badge,
-  Box,
-  Button,
-  Collapsible,
-  Grid,
-  Heading,
-  HStack,
-  Icon,
-  IconButton,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import { Badge, Box, Button, Collapsible, Grid, Heading, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   LuArrowDown,
@@ -154,7 +142,7 @@ export function IpfsStatusSection({ ipfs, onStart, onStop }: IpfsStatusSectionPr
   return (
     <Box>
       <HStack mb={4} gap={3}>
-        <Icon as={LuGlobe} color="purple.400" boxSize={5} />
+        <LuGlobe size={20} color="var(--chakra-colors-purple-400)" />
         <Heading size="sm">IPFS Нода</Heading>
         <Badge colorPalette={isRunning ? 'green' : 'gray'} size="sm">
           {isRunning ? 'Запущена' : 'Остановлена'}
@@ -174,7 +162,7 @@ export function IpfsStatusSection({ ipfs, onStart, onStop }: IpfsStatusSectionPr
                   {/* Пиры */}
                   <Box p={3} bg="bg.subtle" borderRadius="md">
                     <HStack gap={2} mb={1}>
-                      <Icon as={LuUsers} color={`${peerColor}.400`} boxSize={3.5} />
+                      <LuUsers size={14} color={`var(--chakra-colors-${peerColor}-400)`} />
                       <Text fontSize="xs" color="fg.subtle">
                         Пиры
                       </Text>
@@ -194,7 +182,10 @@ export function IpfsStatusSection({ ipfs, onStart, onStop }: IpfsStatusSectionPr
                   {/* NAT статус */}
                   <Box p={3} bg="bg.subtle" borderRadius="md">
                     <HStack gap={2} mb={1}>
-                      <Icon as={LuShield} color={`${getNatStatusColor(ipfs.status.natStatus)}.400`} boxSize={3.5} />
+                      <LuShield
+                        size={14}
+                        color={`var(--chakra-colors-${getNatStatusColor(ipfs.status.natStatus)}-400)`}
+                      />
                       <Text fontSize="xs" color="fg.subtle">
                         NAT
                       </Text>
@@ -207,7 +198,7 @@ export function IpfsStatusSection({ ipfs, onStart, onStop }: IpfsStatusSectionPr
                   {/* Blockstore */}
                   <Box p={3} bg="bg.subtle" borderRadius="md">
                     <HStack gap={2} mb={1}>
-                      <Icon as={LuDatabase} color="blue.400" boxSize={3.5} />
+                      <LuDatabase size={14} color="var(--chakra-colors-blue-400)" />
                       <Text fontSize="xs" color="fg.subtle">
                         Хранилище
                       </Text>
@@ -223,7 +214,7 @@ export function IpfsStatusSection({ ipfs, onStart, onStop }: IpfsStatusSectionPr
                   {/* Входящий */}
                   <Box p={3} bg="bg.subtle" borderRadius="md">
                     <HStack gap={2} mb={1}>
-                      <Icon as={LuArrowDown} color="green.400" boxSize={3.5} />
+                      <LuArrowDown size={14} color="var(--chakra-colors-green-400)" />
                       <Text fontSize="xs" color="fg.subtle">
                         Входящий
                       </Text>
@@ -241,7 +232,7 @@ export function IpfsStatusSection({ ipfs, onStart, onStop }: IpfsStatusSectionPr
                   {/* Исходящий */}
                   <Box p={3} bg="bg.subtle" borderRadius="md">
                     <HStack gap={2} mb={1}>
-                      <Icon as={LuArrowUp} color="orange.400" boxSize={3.5} />
+                      <LuArrowUp size={14} color="var(--chakra-colors-orange-400)" />
                       <Text fontSize="xs" color="fg.subtle">
                         Исходящий
                       </Text>
@@ -261,9 +252,11 @@ export function IpfsStatusSection({ ipfs, onStart, onStop }: IpfsStatusSectionPr
                 <Collapsible.Root open={showDiagnostics} onOpenChange={(e) => setShowDiagnostics(e.open)}>
                   <Collapsible.Trigger asChild>
                     <Button size="xs" variant="ghost" w="full">
-                      <Icon as={LuInfo} mr={2} />
+                      <LuInfo size={16} style={{ marginRight: 8 }} />
                       Диагностика P2P
-                      <Icon as={showDiagnostics ? LuChevronUp : LuChevronDown} ml="auto" />
+                      {showDiagnostics
+                        ? <LuChevronUp size={16} style={{ marginLeft: 'auto' }} />
+                        : <LuChevronDown size={16} style={{ marginLeft: 'auto' }} />}
                     </Button>
                   </Collapsible.Trigger>
                   <Collapsible.Content>
@@ -391,7 +384,7 @@ export function IpfsStatusSection({ ipfs, onStart, onStop }: IpfsStatusSectionPr
                     }}
                     aria-label="Копировать PeerId"
                   >
-                    <Icon as={LuCopy} />
+                    <LuCopy size={20} />
                   </IconButton>
                 </HStack>
                 <Text fontFamily="mono" fontSize="xs" color="fg.muted" wordBreak="break-all">
@@ -406,18 +399,18 @@ export function IpfsStatusSection({ ipfs, onStart, onStop }: IpfsStatusSectionPr
                 ? (
                   <>
                     <Button size="sm" variant="outline" colorPalette="red" onClick={onStop} loading={ipfs.isLoading}>
-                      <Icon as={LuPause} mr={2} />
+                      <LuPause size={16} style={{ marginRight: 8 }} />
                       Остановить
                     </Button>
                     <Button size="sm" variant="outline" onClick={runGc} loading={isRunningGc}>
-                      <Icon as={LuTrash2} mr={2} />
+                      <LuTrash2 size={16} style={{ marginRight: 8 }} />
                       Очистить хранилище
                     </Button>
                   </>
                 )
                 : (
                   <Button size="sm" colorPalette="purple" onClick={onStart} loading={ipfs.isLoading}>
-                    <Icon as={LuPlay} mr={2} />
+                    <LuPlay size={16} style={{ marginRight: 8 }} />
                     Запустить
                   </Button>
                 )}

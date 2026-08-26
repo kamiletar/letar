@@ -5,7 +5,7 @@
  * Показывает историю из библиотеки и историю папок
  */
 
-import { Badge, Box, Button, Card, Heading, HStack, Icon, Spinner, Tabs, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Card, Heading, HStack, Spinner, Tabs, Text, VStack } from '@chakra-ui/react'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import Link from 'next/link'
@@ -163,7 +163,7 @@ export default function HistoryPage() {
       <HStack px={6} py={2}>
         <Link href="/">
           <Button variant="ghost" size="sm">
-            <Icon as={LuArrowLeft} mr={2} />
+            <LuArrowLeft size={16} style={{ marginRight: 8 }} />
             На главную
           </Button>
         </Link>
@@ -174,7 +174,7 @@ export default function HistoryPage() {
         <Tabs.Root defaultValue="library" variant="enclosed">
           <Tabs.List mb={4}>
             <Tabs.Trigger value="library">
-              <Icon as={LuLibrary} mr={2} />
+              <LuLibrary size={16} style={{ marginRight: 8 }} />
               Библиотека
               {libraryHistory && libraryHistory.total > 0 && (
                 <Badge ml={2} colorPalette="purple">
@@ -183,7 +183,7 @@ export default function HistoryPage() {
               )}
             </Tabs.Trigger>
             <Tabs.Trigger value="folders">
-              <Icon as={LuFolderOpen} mr={2} />
+              <LuFolderOpen size={16} style={{ marginRight: 8 }} />
               Папки
               {folderHistory.length > 0 && (
                 <Badge ml={2} colorPalette="blue">
@@ -192,7 +192,7 @@ export default function HistoryPage() {
               )}
             </Tabs.Trigger>
             <Tabs.Trigger value="watched">
-              <Icon as={LuEye} mr={2} />
+              <LuEye size={16} style={{ marginRight: 8 }} />
               Смотрел
               {watchedAnime && watchedAnime.total > 0 && (
                 <Badge ml={2} colorPalette="green">
@@ -260,7 +260,7 @@ export default function HistoryPage() {
                                   ? <Badge colorPalette="green">Просмотрено</Badge>
                                   : <Badge colorPalette="blue">{Math.round(progressPercent)}%</Badge>}
                                 <Button size="sm" colorPalette="purple">
-                                  <Icon as={LuPlay} mr={1} />
+                                  <LuPlay size={16} style={{ marginRight: 4 }} />
                                   Продолжить
                                 </Button>
                               </VStack>
@@ -301,7 +301,7 @@ export default function HistoryPage() {
               )
               : (
                 <VStack py={12} gap={4}>
-                  <Icon as={LuLibrary} boxSize={16} color="fg.subtle" />
+                  <LuLibrary size={64} color="var(--chakra-colors-fg-subtle)" />
                   <Heading size="md" color="fg.muted">
                     История пуста
                   </Heading>
@@ -331,7 +331,7 @@ export default function HistoryPage() {
                         <HStack gap={4}>
                           {/* Иконка */}
                           <Box p={3} borderRadius="md" bg="bg.muted">
-                            <Icon as={LuFolderOpen} boxSize={6} color="primary.solid" />
+                            <LuFolderOpen size={24} color="var(--chakra-colors-primary-solid)" />
                           </Box>
 
                           {/* Информация */}
@@ -360,7 +360,7 @@ export default function HistoryPage() {
                           <HStack gap={2}>
                             <Link href={`/player?folder=${encodeURIComponent(entry.folderPath)}`}>
                               <Button size="sm" colorPalette="purple">
-                                <Icon as={LuPlay} mr={1} />
+                                <LuPlay size={16} style={{ marginRight: 4 }} />
                                 Открыть
                               </Button>
                             </Link>
@@ -370,7 +370,7 @@ export default function HistoryPage() {
                               colorPalette="red"
                               onClick={() => handleRemoveFolder(entry.folderPath)}
                             >
-                              <Icon as={LuTrash2} />
+                              <LuTrash2 size={16} />
                             </Button>
                           </HStack>
                         </HStack>
@@ -381,7 +381,7 @@ export default function HistoryPage() {
               )
               : (
                 <VStack py={12} gap={4}>
-                  <Icon as={LuFolderOpen} boxSize={16} color="fg.subtle" />
+                  <LuFolderOpen size={64} color="var(--chakra-colors-fg-subtle)" />
                   <Heading size="md" color="fg.muted">
                     История пуста
                   </Heading>
@@ -472,7 +472,7 @@ export default function HistoryPage() {
                               </Badge>
                               <Badge colorPalette="purple">{item.overallProgress}%</Badge>
                               <Button size="sm" colorPalette="green">
-                                <Icon as={LuPlay} mr={1} />
+                                <LuPlay size={16} style={{ marginRight: 4 }} />
                                 Продолжить
                               </Button>
                             </VStack>
@@ -512,7 +512,7 @@ export default function HistoryPage() {
               )
               : (
                 <VStack py={12} gap={4}>
-                  <Icon as={LuEye} boxSize={16} color="fg.subtle" />
+                  <LuEye size={64} color="var(--chakra-colors-fg-subtle)" />
                   <Heading size="md" color="fg.muted">
                     Список пуст
                   </Heading>

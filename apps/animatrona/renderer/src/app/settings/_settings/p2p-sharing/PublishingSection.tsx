@@ -11,7 +11,6 @@ import {
   Flex,
   Heading,
   HStack,
-  Icon,
   Input,
   Progress,
   Switch as ChakraSwitch,
@@ -365,7 +364,7 @@ export function PublishingSection({
   return (
     <Box>
       <HStack mb={4} gap={3}>
-        <Icon as={LuCloudUpload} color="blue.400" boxSize={5} />
+        <LuCloudUpload size={20} color="var(--chakra-colors-blue-400)" />
         <Heading size="sm">Публикация библиотеки</Heading>
         {publisher.animeCount > 0 && (
           <Badge colorPalette="blue" size="sm">
@@ -487,7 +486,7 @@ export function PublishingSection({
               loading={publisher.isPublishing}
               disabled={!publisher.config?.enabled}
             >
-              <Icon as={LuCloudUpload} mr={2} />
+              <LuCloudUpload size={20} style={{ marginRight: 8 }} />
               Опубликовать сейчас
             </Button>
           </VStack>
@@ -512,7 +511,7 @@ export function PublishingSection({
                       loading={isRegenerating}
                       loadingText="Регенерация..."
                     >
-                      <Icon as={LuRefreshCw} mr={2} />
+                      <LuRefreshCw size={20} style={{ marginRight: 8 }} />
                       Продолжить ({regenCheckpoint.pending} осталось)
                     </Button>
                     {isRegenerating
@@ -538,7 +537,7 @@ export function PublishingSection({
                     loading={isRegenerating}
                     loadingText="Регенерация..."
                   >
-                    <Icon as={LuRefreshCw} mr={2} />
+                    <LuRefreshCw size={20} style={{ marginRight: 8 }} />
                     Регенерировать манифесты
                   </Button>
                   {isRegenerating && (
@@ -623,7 +622,11 @@ export function PublishingSection({
           {diskFullError && !isRegenerating && (
             <Box p={3} bg="red.subtle" borderRadius="md">
               <HStack gap={2}>
-                <Icon as={LuTriangleAlert} color="red.fg" flexShrink={0} />
+                <LuTriangleAlert
+                  size={16}
+                  color="var(--chakra-colors-red-fg)"
+                  style={{ flexShrink: 0 }}
+                />
                 <Text fontSize="sm" fontWeight={500} color="red.fg">
                   Нет места на диске — регенерация остановлена. Освободите место и возобновите с чекпоинта.
                 </Text>

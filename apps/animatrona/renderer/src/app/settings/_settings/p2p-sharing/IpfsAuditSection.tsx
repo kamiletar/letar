@@ -5,7 +5,7 @@
  * Находит осиротевшие pins и позволяет их удалить
  */
 
-import { Badge, Box, Button, Collapsible, Grid, Heading, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Collapsible, Grid, Heading, HStack, Text, VStack } from '@chakra-ui/react'
 import { useState } from 'react'
 import { LuChevronDown, LuChevronUp, LuPin, LuSearch, LuTrash2, LuWrench } from 'react-icons/lu'
 
@@ -57,7 +57,7 @@ export function IpfsAuditSection() {
     <Box>
       <HStack mb={4} gap={3} justify="space-between">
         <HStack gap={3}>
-          <Icon as={LuSearch} color="orange.400" boxSize={5} />
+          <LuSearch size={20} color="var(--chakra-colors-orange-400)" />
           <Heading size="sm">Аудит хранилища</Heading>
           {result && (
             <Badge colorPalette={result.orphanedPins.length > 0 ? 'orange' : 'green'} size="sm">
@@ -230,7 +230,7 @@ export function IpfsAuditSection() {
               <Button size="xs" variant="ghost" width="full">
                 <HStack gap={1}>
                   <Text>{showDetails ? 'Скрыть детали' : 'Показать детали'}</Text>
-                  <Icon as={showDetails ? LuChevronUp : LuChevronDown} />
+                  {showDetails ? <LuChevronUp size={16} /> : <LuChevronDown size={16} />}
                 </HStack>
               </Button>
             </Collapsible.Trigger>

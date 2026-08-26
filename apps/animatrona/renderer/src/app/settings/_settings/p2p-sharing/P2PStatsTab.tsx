@@ -5,7 +5,7 @@
  * дневной историей трафика и суммарными метриками.
  */
 
-import { Box, Grid, Heading, HStack, Icon, SegmentGroup, Text, VStack } from '@chakra-ui/react'
+import { Box, Grid, Heading, HStack, SegmentGroup, Text, VStack } from '@chakra-ui/react'
 import { useMemo, useState } from 'react'
 import { LuArrowDown, LuArrowUp, LuClock, LuDatabase, LuHash, LuShield, LuUsers } from 'react-icons/lu'
 import {
@@ -162,9 +162,14 @@ function StatCard({
   value: string
   subtitle?: string
 }) {
+  const StatIcon = icon
   return (
     <Box p={4} bg="bg.subtle" borderRadius="lg" textAlign="center">
-      <Icon as={icon} color={`${color}.400`} boxSize={5} mb={2} />
+      <StatIcon
+        size={20}
+        color={`var(--chakra-colors-${color}-400)`}
+        style={{ marginBottom: 8, display: 'inline-block' }}
+      />
       <Text fontSize="xs" color="fg.subtle" mb={1}>
         {label}
       </Text>
@@ -436,7 +441,7 @@ export function P2PStatsTab() {
             {/* Пиры */}
             <Box p={3} bg="bg.subtle" borderRadius="md" textAlign="center">
               <HStack gap={1} justify="center" mb={1}>
-                <Icon as={LuUsers} color={`${peerColor}.400`} boxSize={3.5} />
+                <LuUsers size={14} color={`var(--chakra-colors-${peerColor}-400)`} />
                 <Text fontSize="xs" color="fg.subtle">
                   Пиры
                 </Text>
@@ -449,7 +454,7 @@ export function P2PStatsTab() {
             {/* NAT */}
             <Box p={3} bg="bg.subtle" borderRadius="md" textAlign="center">
               <HStack gap={1} justify="center" mb={1}>
-                <Icon as={LuShield} color={`${getNatStatusColor(ipfsStatus.natStatus)}.400`} boxSize={3.5} />
+                <LuShield size={14} color={`var(--chakra-colors-${getNatStatusColor(ipfsStatus.natStatus)}-400)`} />
                 <Text fontSize="xs" color="fg.subtle">
                   NAT
                 </Text>
@@ -462,7 +467,7 @@ export function P2PStatsTab() {
             {/* Хранилище */}
             <Box p={3} bg="bg.subtle" borderRadius="md" textAlign="center">
               <HStack gap={1} justify="center" mb={1}>
-                <Icon as={LuDatabase} color="blue.400" boxSize={3.5} />
+                <LuDatabase size={14} color="var(--chakra-colors-blue-400)" />
                 <Text fontSize="xs" color="fg.subtle">
                   Хранилище
                 </Text>
@@ -475,7 +480,7 @@ export function P2PStatsTab() {
             {/* Входящий */}
             <Box p={3} bg="bg.subtle" borderRadius="md" textAlign="center">
               <HStack gap={1} justify="center" mb={1}>
-                <Icon as={LuArrowDown} color="green.400" boxSize={3.5} />
+                <LuArrowDown size={14} color="var(--chakra-colors-green-400)" />
                 <Text fontSize="xs" color="fg.subtle">
                   Входящий
                 </Text>
@@ -493,7 +498,7 @@ export function P2PStatsTab() {
             {/* Исходящий */}
             <Box p={3} bg="bg.subtle" borderRadius="md" textAlign="center">
               <HStack gap={1} justify="center" mb={1}>
-                <Icon as={LuArrowUp} color="orange.400" boxSize={3.5} />
+                <LuArrowUp size={14} color="var(--chakra-colors-orange-400)" />
                 <Text fontSize="xs" color="fg.subtle">
                   Исходящий
                 </Text>

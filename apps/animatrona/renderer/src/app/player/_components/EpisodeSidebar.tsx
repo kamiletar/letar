@@ -2,19 +2,7 @@
  * Сайдбар со списком эпизодов для папочного режима плеера
  */
 
-import {
-  Badge,
-  Box,
-  Button,
-  Collapsible,
-  Flex,
-  HStack,
-  Icon,
-  IconButton,
-  Progress,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import { Badge, Box, Button, Collapsible, Flex, HStack, IconButton, Progress, Text, VStack } from '@chakra-ui/react'
 import { memo, useMemo } from 'react'
 import {
   LuChevronDown,
@@ -196,7 +184,7 @@ const EpisodeItem = memo(function EpisodeItem({
         {/* Индикатор воспроизведения */}
         <Box w={5} h={5} flexShrink={0} mt={0.5}>
           {isActive
-            ? <Icon as={LuPlay} color="brand.400" boxSize={5} />
+            ? <LuPlay size={20} color="var(--chakra-colors-brand-400)" />
             : (
               <Text fontSize="sm" color="fg.subtle" fontWeight="medium" textAlign="center">
                 {episode.episodeNumber ?? index + 1}
@@ -280,7 +268,7 @@ const BonusItem = memo(function BonusItem({
       cursor="pointer"
     >
       <HStack gap={2}>
-        <Icon as={ItemIcon} color={isActive ? 'orange.400' : 'fg.subtle'} boxSize={4} />
+        <ItemIcon size={16} color={isActive ? 'var(--chakra-colors-orange-400)' : 'var(--chakra-colors-fg-subtle)'} />
         <Text fontSize="sm" fontWeight={isActive ? 'semibold' : 'normal'} color={isActive ? 'fg' : 'fg'} truncate>
           {truncateName(bonus.name, 30)}
         </Text>
@@ -330,18 +318,18 @@ export const EpisodeSidebar = memo(function EpisodeSidebar({
     >
       {/* Заголовок */}
       <Flex px={3} py={2} borderBottom="1px" borderColor="border.subtle" align="center" gap={2}>
-        <Icon as={LuFolder} color="brand.400" boxSize={5} />
+        <LuFolder size={20} color="var(--chakra-colors-brand-400)" />
         <Text fontSize="sm" fontWeight="semibold" color="fg" flex={1} truncate title={folderName ?? 'Папка'}>
           {folderName ?? 'Папка'}
         </Text>
         {onImportToLibrary && (
           <Button size="xs" variant="outline" colorPalette="blue" onClick={onImportToLibrary}>
-            <Icon as={LuLibrary} mr={1} />
+            <LuLibrary size={16} style={{ marginRight: 4 }} />
             Импорт
           </Button>
         )}
         <IconButton aria-label="Закрыть список" size="xs" variant="ghost" onClick={onClose}>
-          <Icon as={LuX} />
+          <LuX size={16} />
         </IconButton>
       </Flex>
 
@@ -367,7 +355,7 @@ export const EpisodeSidebar = memo(function EpisodeSidebar({
         {episodes.length > 0 && (
           <Box mb={2}>
             <HStack px={3} py={1} color="fg.muted">
-              <Icon as={LuTv} boxSize={4} />
+              <LuTv size={16} />
               <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase">
                 Эпизоды ({episodes.length})
               </Text>
@@ -405,12 +393,14 @@ export const EpisodeSidebar = memo(function EpisodeSidebar({
                 _hover={{ color: 'fg' }}
                 cursor="pointer"
               >
-                <Icon as={LuStar} boxSize={4} />
+                <LuStar size={16} />
                 <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" flex={1} textAlign="left">
                   Бонусы ({bonusVideos.length})
                 </Text>
                 <Collapsible.Context>
-                  {({ open }) => <Icon as={open ? LuChevronDown : LuChevronRight} boxSize={4} />}
+                  {({ open }) => {
+                    open ? <LuChevronDown size={16} /> : <LuChevronRight size={16} />
+                  }}
                 </Collapsible.Context>
               </Box>
             </Collapsible.Trigger>
@@ -434,7 +424,7 @@ export const EpisodeSidebar = memo(function EpisodeSidebar({
         {/* Пустое состояние */}
         {episodes.length === 0 && bonusVideos.length === 0 && (
           <VStack py={8} px={4} color="fg.subtle">
-            <Icon as={LuFolder} boxSize={8} />
+            <LuFolder size={32} />
             <Text fontSize="sm" textAlign="center">
               Видеофайлы не найдены
             </Text>

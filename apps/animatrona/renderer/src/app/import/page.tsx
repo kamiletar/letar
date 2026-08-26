@@ -8,7 +8,7 @@
  * Кнопка "Импорт видео" — дубль с библиотеки для быстрого доступа
  */
 
-import { Box, Button, Icon, Spinner, Tabs } from '@chakra-ui/react'
+import { Box, Button, Spinner, Tabs } from '@chakra-ui/react'
 import nextDynamic from 'next/dynamic'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useState } from 'react'
@@ -52,9 +52,7 @@ function ImportTabsContent() {
       <Tabs.List>
         {TABS.map(({ value, label, icon: TabIcon }) => (
           <Tabs.Trigger key={value} value={value}>
-            <Icon fontSize="sm">
-              <TabIcon />
-            </Icon>
+            <TabIcon size={14} />
             {label}
           </Tabs.Trigger>
         ))}
@@ -101,7 +99,7 @@ export default function ImportPage() {
         {/* Кнопка "Импорт видео" — дубль с библиотеки */}
         <Box display="flex" justifyContent="flex-end" mb={2}>
           <Button colorPalette="purple" size="sm" onClick={() => setIsImportOpen(true)}>
-            <Icon as={LuImport} mr={2} />
+            <LuImport size={16} style={{ marginRight: 8 }} />
             Импорт видео
           </Button>
         </Box>

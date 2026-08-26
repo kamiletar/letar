@@ -4,7 +4,7 @@
  * Карточка настроек темы
  */
 
-import { Box, Card, ClientOnly, Heading, HStack, Icon, RadioGroup, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { Box, Card, ClientOnly, Heading, HStack, RadioGroup, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { LuMonitor, LuMoon, LuPalette, LuSun } from 'react-icons/lu'
 
 import { type ThemeMode, useColorMode } from '@/components/ui/color-mode'
@@ -29,7 +29,7 @@ export function ThemeSettingsCard() {
     <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
       <Card.Header>
         <HStack gap={3}>
-          <Icon as={LuPalette} color="purple.400" boxSize={5} />
+          <LuPalette size={20} color="var(--chakra-colors-purple-400)" />
           <Heading size="md">Внешний вид</Heading>
         </HStack>
       </Card.Header>
@@ -49,23 +49,26 @@ export function ThemeSettingsCard() {
                 colorPalette="purple"
               >
                 <VStack align="stretch" gap={2}>
-                  {THEME_OPTIONS.map((option) => (
-                    <RadioGroup.Item key={option.value} value={option.value}>
-                      <RadioGroup.ItemHiddenInput />
-                      <RadioGroup.ItemIndicator />
-                      <RadioGroup.ItemText>
-                        <HStack gap={2}>
-                          <Icon as={option.icon} color="fg.muted" />
-                          <Box>
-                            <Text fontWeight="medium">{option.label}</Text>
-                            <Text fontSize="xs" color="fg.subtle">
-                              {option.description}
-                            </Text>
-                          </Box>
-                        </HStack>
-                      </RadioGroup.ItemText>
-                    </RadioGroup.Item>
-                  ))}
+                  {THEME_OPTIONS.map((option) => {
+                    const OptionIcon = option.icon
+                    return (
+                      <RadioGroup.Item key={option.value} value={option.value}>
+                        <RadioGroup.ItemHiddenInput />
+                        <RadioGroup.ItemIndicator />
+                        <RadioGroup.ItemText>
+                          <HStack gap={2}>
+                            <OptionIcon size={16} color="var(--chakra-colors-fg-muted)" />
+                            <Box>
+                              <Text fontWeight="medium">{option.label}</Text>
+                              <Text fontSize="xs" color="fg.subtle">
+                                {option.description}
+                              </Text>
+                            </Box>
+                          </HStack>
+                        </RadioGroup.ItemText>
+                      </RadioGroup.Item>
+                    )
+                  })}
                 </VStack>
               </RadioGroup.Root>
             </ClientOnly>

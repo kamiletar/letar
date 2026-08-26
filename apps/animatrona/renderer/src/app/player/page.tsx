@@ -5,7 +5,7 @@
  * Поддерживает режим одиночного файла и папочный режим (сериалы)
  */
 
-import { Box, Button, Card, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Card, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
 import dynamic from 'next/dynamic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { LuArrowLeft, LuFile, LuFolderOpen, LuPlay } from 'react-icons/lu'
@@ -255,14 +255,14 @@ export default function PlayerPage() {
       {/* Навигация */}
       <HStack px={6} py={2} gap={2} flexShrink={0}>
         <Button variant="ghost" size="sm" onClick={() => router.push('/')}>
-          <Icon as={LuArrowLeft} mr={2} />
+          <LuArrowLeft size={20} style={{ marginRight: 8 }} />
           На главную
         </Button>
 
         {/* Кнопка показа сайдбара (если свёрнут) */}
         {isFolderMode && sidebarCollapsed && (
           <Button variant="ghost" size="sm" onClick={handleToggleSidebar}>
-            <Icon as={LuFolderOpen} mr={2} />
+            <LuFolderOpen size={20} style={{ marginRight: 8 }} />
             Эпизоды ({folderPlayer.totalEpisodes})
           </Button>
         )}
@@ -334,7 +334,7 @@ export default function PlayerPage() {
                 <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle" maxW="md" w="full">
                   <Card.Body p={8}>
                     <VStack gap={6}>
-                      <Icon as={LuPlay} boxSize={16} color="purple.400" />
+                      <LuPlay size={64} color="var(--chakra-colors-purple-400)" />
 
                       <VStack gap={2} textAlign="center">
                         <Text fontSize="xl" fontWeight="bold">
@@ -346,11 +346,11 @@ export default function PlayerPage() {
                       {/* Кнопки выбора */}
                       <HStack gap={3} w="full">
                         <Button colorPalette="purple" size="lg" flex={1} onClick={handleSelectFolder}>
-                          <Icon as={LuFolderOpen} mr={2} />
+                          <LuFolderOpen size={24} style={{ marginRight: 8 }} />
                           Выбрать папку
                         </Button>
                         <Button variant="outline" colorPalette="gray" size="lg" flex={1} onClick={handleSelectFile}>
-                          <Icon as={LuFile} mr={2} />
+                          <LuFile size={24} style={{ marginRight: 8 }} />
                           Выбрать файл
                         </Button>
                       </HStack>

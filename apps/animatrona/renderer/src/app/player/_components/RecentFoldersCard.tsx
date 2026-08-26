@@ -5,7 +5,7 @@
  * Показывается в режиме выбора файла, когда нет активного видео
  */
 
-import { Box, Card, HStack, Icon, IconButton, Text, VStack } from '@chakra-ui/react'
+import { Box, Card, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { memo, useCallback } from 'react'
@@ -81,7 +81,7 @@ const FolderItem = memo(function FolderItem({
       </Box>
 
       <IconButton aria-label="Удалить из истории" size="xs" variant="ghost" colorPalette="gray" onClick={handleRemove}>
-        <Icon as={LuTrash2} />
+        <LuTrash2 size={14} />
       </IconButton>
     </HStack>
   )
@@ -105,7 +105,7 @@ export const RecentFoldersCard = memo(function RecentFoldersCard({
     <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle" maxW="md" w="full">
       <Card.Body>
         <HStack mb={3} gap={2}>
-          <Icon as={LuFolderOpen} boxSize={5} color="primary.solid" />
+          <LuFolderOpen size={20} color="var(--chakra-colors-primary-solid)" />
           <Text fontWeight="medium">Недавние папки</Text>
         </HStack>
 

@@ -8,7 +8,6 @@ import {
   Checkbox,
   Heading,
   HStack,
-  Icon,
   Input,
   Progress,
   Spinner,
@@ -326,7 +325,9 @@ export function TestEncodingContent() {
                 alignItems="center"
                 justifyContent="center"
               >
-                {step > s ? <Icon as={LuCheck} color="white" /> : <Text fontWeight="bold">{s}</Text>}
+                {step > s
+                  ? <LuCheck size={20} color="var(--chakra-colors-white)" />
+                  : <Text fontWeight="bold">{s}</Text>}
               </Box>
               <Text fontSize="sm" color={step >= s ? 'fg' : 'fg.subtle'}>
                 {s === 1 && 'Файл'}
@@ -343,7 +344,7 @@ export function TestEncodingContent() {
           <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
             <Card.Header>
               <HStack gap={3}>
-                <Icon as={LuFile} color="purple.400" boxSize={5} />
+                <LuFile size={20} color="var(--chakra-colors-purple-400)" />
                 <Heading size="md">Выберите исходный файл</Heading>
               </HStack>
             </Card.Header>
@@ -354,7 +355,9 @@ export function TestEncodingContent() {
                     {fileInfo?.path || 'Файл не выбран'}
                   </Box>
                   <Button onClick={handleSelectFile} disabled={isProbing}>
-                    {isProbing ? <Spinner size="sm" mr={2} /> : <Icon as={LuFolderOpen} mr={2} />}
+                    {isProbing
+                      ? <Spinner size="sm" mr={2} />
+                      : <LuFolderOpen size={16} style={{ marginRight: 8 }} />}
                     Выбрать
                   </Button>
                 </HStack>
@@ -420,7 +423,7 @@ export function TestEncodingContent() {
           <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
             <Card.Header>
               <HStack gap={3}>
-                <Icon as={LuFilm} color="purple.400" boxSize={5} />
+                <LuFilm size={20} color="var(--chakra-colors-purple-400)" />
                 <Heading size="md">Выберите профили для сравнения (2-4)</Heading>
               </HStack>
             </Card.Header>
@@ -444,7 +447,7 @@ export function TestEncodingContent() {
                       <Checkbox.Control />
                     </Checkbox.Root>
                     <HStack gap={3} flex={1}>
-                      {profile.isDefault && <Icon as={LuStar} color="yellow.400" boxSize={4} />}
+                      {profile.isDefault && <LuStar size={16} color="var(--chakra-colors-yellow-400)" />}
                       <Box>
                         <HStack gap={2}>
                           <Text fontWeight="medium">{profile.name}</Text>
@@ -480,7 +483,7 @@ export function TestEncodingContent() {
                 {/* Настройка параллельного кодирования */}
                 <Box p={4} bg="bg.subtle" borderRadius="md" mt={4}>
                   <HStack gap={3} mb={3}>
-                    <Icon as={LuZap} color="yellow.400" boxSize={5} />
+                    <LuZap size={20} color="var(--chakra-colors-yellow-400)" />
                     <Text fontWeight="medium">Параллельное кодирование</Text>
                   </HStack>
                   <HStack gap={4}>
@@ -516,12 +519,12 @@ export function TestEncodingContent() {
             <Card.Header>
               <HStack gap={3} justify="space-between" w="full">
                 <HStack gap={3}>
-                  <Icon as={LuPlay} color="purple.400" boxSize={5} />
+                  <LuPlay size={20} color="var(--chakra-colors-purple-400)" />
                   <Heading size="md">Кодирование сэмплов</Heading>
                 </HStack>
                 {parallelEncoding === 2 && (
                   <Badge colorPalette="yellow" variant="subtle">
-                    <Icon as={LuZap} mr={1} />
+                    <LuZap size={16} style={{ marginRight: 4 }} />
                     Dual Encoders
                   </Badge>
                 )}
@@ -639,7 +642,7 @@ export function TestEncodingContent() {
           <VStack gap={4} align="stretch">
             <HStack justify="space-between">
               <Button variant="ghost" onClick={() => setStep(3)}>
-                <Icon as={LuArrowLeft} mr={2} />
+                <LuArrowLeft size={16} style={{ marginRight: 8 }} />
                 Назад к результатам
               </Button>
             </HStack>
@@ -661,14 +664,14 @@ export function TestEncodingContent() {
               onClick={() => (step === 1 ? router.push('/settings') : setStep(step - 1))}
               disabled={isEncoding}
             >
-              <Icon as={LuArrowLeft} mr={2} />
+              <LuArrowLeft size={16} style={{ marginRight: 8 }} />
               {step === 1 ? 'К настройкам' : 'Назад'}
             </Button>
 
             {step === 2
               ? (
                 <Button colorPalette="purple" onClick={startEncoding} disabled={!canProceed() || isEncoding}>
-                  <Icon as={LuPlay} mr={2} />
+                  <LuPlay size={16} style={{ marginRight: 8 }} />
                   Начать кодирование
                 </Button>
               )
@@ -676,7 +679,7 @@ export function TestEncodingContent() {
               ? (
                 <Button colorPalette="purple" onClick={() => setStep(step + 1)} disabled={!canProceed()}>
                   Далее
-                  <Icon as={LuArrowRight} ml={2} />
+                  <LuArrowRight size={16} style={{ marginLeft: 8 }} />
                 </Button>
               )
               : null}

@@ -4,7 +4,7 @@
  * Карточка настроек обновлений
  */
 
-import { Badge, Box, Button, Card, Heading, HStack, Icon, Progress, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Card, Heading, HStack, Progress, Spinner, Text, VStack } from '@chakra-ui/react'
 import { LuDownload, LuPlay, LuRefreshCw } from 'react-icons/lu'
 
 import type { UpdateStatus } from './types'
@@ -31,7 +31,7 @@ export function UpdateSettingsCard({
     <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
       <Card.Header>
         <HStack gap={3}>
-          <Icon as={LuDownload} color="purple.400" boxSize={5} />
+          <LuDownload size={20} color="var(--chakra-colors-purple-400)" />
           <Heading size="md">Обновления</Heading>
         </HStack>
       </Card.Header>
@@ -65,7 +65,7 @@ export function UpdateSettingsCard({
                   </Text>
                 </VStack>
                 <Button colorPalette="green" size="sm" onClick={onDownloadUpdate}>
-                  <Icon as={LuDownload} />
+                  <LuDownload size={16} />
                   Скачать
                 </Button>
               </HStack>
@@ -110,7 +110,7 @@ export function UpdateSettingsCard({
                   </Text>
                 </VStack>
                 <Button colorPalette="purple" size="sm" onClick={onInstallUpdate}>
-                  <Icon as={LuPlay} />
+                  <LuPlay size={16} />
                   Установить
                 </Button>
               </HStack>
@@ -136,7 +136,7 @@ export function UpdateSettingsCard({
             || updateStatus.status === 'not-available'
             || updateStatus.status === 'error') && (
             <Button variant="outline" size="sm" onClick={onCheckUpdates} alignSelf="flex-start">
-              <Icon as={LuRefreshCw} />
+              <LuRefreshCw size={16} />
               Проверить обновления
             </Button>
           )}

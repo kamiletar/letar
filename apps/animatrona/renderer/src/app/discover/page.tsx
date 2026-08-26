@@ -8,7 +8,6 @@ import {
   Grid,
   Heading,
   HStack,
-  Icon,
   Image,
   Input,
   Spinner,
@@ -115,11 +114,11 @@ export default function DiscoverPage() {
         {/* Заголовок */}
         <HStack justify="space-between">
           <Heading size="xl">
-            <Icon as={LuGlobe} mr={3} />
+            <LuGlobe size={24} style={{ marginRight: 12 }} />
             Каталог трекера
           </Heading>
           <Badge colorPalette="blue" size="lg">
-            <Icon as={LuCloud} mr={1} />
+            <LuCloud size={16} style={{ marginRight: 4 }} />
             {total} аниме
           </Badge>
         </HStack>
@@ -136,7 +135,11 @@ export default function DiscoverPage() {
               }}
               pl={10}
             />
-            <Icon as={LuSearch} position="absolute" left={3} top="50%" transform="translateY(-50%)" color="fg.muted" />
+            <LuSearch
+              size={16}
+              color="var(--chakra-colors-fg-muted)"
+              style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }}
+            />
           </Box>
           <Button onClick={loadCatalog} variant="outline">
             Обновить
@@ -189,6 +192,7 @@ export default function DiscoverPage() {
                   || (anime.shikimoriId && localAnimeMap.get(`shiki:${anime.shikimoriId}`))
                   || null
                 const isLocal = !!localId
+                const StatusIcon = isLocal ? LuLibrary : LuCloud
 
                 return (
                   <Box
@@ -226,7 +230,7 @@ export default function DiscoverPage() {
                       </Box>
                       {/* Бейдж статуса */}
                       <Badge position="absolute" top={2} right={2} colorPalette={isLocal ? 'green' : 'blue'} size="sm">
-                        <Icon as={isLocal ? LuLibrary : LuCloud} mr={1} />
+                        <StatusIcon size={16} style={{ marginRight: 4 }} />
                         {isLocal ? 'В библиотеке' : 'Удалённо'}
                       </Badge>
                     </Box>
@@ -268,7 +272,7 @@ export default function DiscoverPage() {
                               router.push(`/library/${localId}`)
                             }}
                           >
-                            <Icon as={LuLibrary} mr={1} />
+                            <LuLibrary size={16} style={{ marginRight: 4 }} />
                             Открыть в библиотеке
                           </Button>
                         )
@@ -284,7 +288,7 @@ export default function DiscoverPage() {
                               }}
                               loading={addingId === anime.id}
                             >
-                              <Icon as={LuPlus} mr={1} />В библиотеку
+                              <LuPlus size={16} style={{ marginRight: 4 }} />В библиотеку
                             </Button>
                             {anime.directoryCid && (
                               <>
@@ -299,7 +303,7 @@ export default function DiscoverPage() {
                                   loading={importingId === anime.id}
                                   title="Импортировать и закрепить локально"
                                 >
-                                  <Icon as={LuDownload} />
+                                  <LuDownload size={16} />
                                 </Button>
                                 <Button
                                   size="xs"
@@ -312,7 +316,7 @@ export default function DiscoverPage() {
                                   loading={importingId === anime.id}
                                   title="Добавить в облако (без скачивания)"
                                 >
-                                  <Icon as={LuCloud} />
+                                  <LuCloud size={16} />
                                 </Button>
                               </>
                             )}

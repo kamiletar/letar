@@ -5,7 +5,7 @@
  * Показывает разблокированные и заблокированные достижения
  */
 
-import { Badge, Box, Card, Heading, HStack, Icon, Progress, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Card, Heading, HStack, Progress, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { LuLock, LuTrophy } from 'react-icons/lu'
 
 import type { AchievementWithProgress } from '../../../../../shared/types/achievements'
@@ -67,7 +67,7 @@ function AchievementItem({ achievement }: AchievementItemProps) {
               )}
             </VStack>
           </HStack>
-          {!isUnlocked && <Icon as={LuLock} color="fg.subtle" boxSize={4} />}
+          {!isUnlocked && <LuLock size={16} color="var(--chakra-colors-fg-subtle)" />}
         </HStack>
 
         <Text fontSize="xs" color="fg.subtle">
@@ -108,7 +108,7 @@ export function AchievementsCard({ achievements, isLoading }: AchievementsCardPr
       <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
         <Card.Header>
           <HStack gap={3}>
-            <Icon as={LuTrophy} color="orange.400" boxSize={5} />
+            <LuTrophy size={20} color="var(--chakra-colors-orange-400)" />
             <Heading size="md">Достижения</Heading>
           </HStack>
         </Card.Header>
@@ -141,7 +141,7 @@ export function AchievementsCard({ achievements, isLoading }: AchievementsCardPr
       <Card.Header>
         <HStack gap={3} justify="space-between">
           <HStack gap={3}>
-            <Icon as={LuTrophy} color="orange.400" boxSize={5} />
+            <LuTrophy size={20} color="var(--chakra-colors-orange-400)" />
             <Heading size="md">Достижения</Heading>
           </HStack>
           <Badge colorPalette="orange" size="md">

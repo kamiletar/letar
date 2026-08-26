@@ -4,7 +4,7 @@
  * Карточка настроек плеера
  */
 
-import { Box, Card, Heading, HStack, Icon, RadioGroup, Switch, Text, VStack } from '@chakra-ui/react'
+import { Box, Card, Heading, HStack, RadioGroup, Switch, Text, VStack } from '@chakra-ui/react'
 import { LuZap } from 'react-icons/lu'
 
 import type { Settings } from '@/generated/prisma'
@@ -22,7 +22,7 @@ export function PlayerSettingsCard({ settings, onSave }: PlayerSettingsCardProps
     <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
       <Card.Header>
         <HStack gap={3}>
-          <Icon as={LuZap} color="purple.400" boxSize={5} />
+          <LuZap size={20} color="var(--chakra-colors-purple-400)" />
           <Heading size="md">Плеер</Heading>
         </HStack>
       </Card.Header>

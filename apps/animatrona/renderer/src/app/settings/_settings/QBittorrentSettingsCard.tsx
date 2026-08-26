@@ -8,20 +8,7 @@
  * URL/логин/пароль для подключения.
  */
 
-import {
-  Badge,
-  Box,
-  Button,
-  Card,
-  Collapsible,
-  Field,
-  Heading,
-  HStack,
-  Icon,
-  Input,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import { Badge, Box, Button, Card, Collapsible, Field, Heading, HStack, Input, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useEffect, useState } from 'react'
 import { LuCheck, LuExternalLink, LuGauge, LuInfo, LuX } from 'react-icons/lu'
 
@@ -146,9 +133,7 @@ export function QBittorrentSettingsCard() {
       <Card.Header>
         <Heading size="md">
           <HStack>
-            <Icon>
-              <LuGauge />
-            </Icon>
+            <LuGauge size={16} />
             <Text>Подключение к qBittorrent</Text>
           </HStack>
         </Heading>
@@ -200,7 +185,7 @@ export function QBittorrentSettingsCard() {
             {testResult.status === 'success' && (
               <Badge colorPalette="green">
                 <HStack gap={1}>
-                  <Icon as={LuCheck} boxSize={3} />
+                  <LuCheck size={12} />
                   <Text>Подключено {testResult.version && `(v${testResult.version})`}</Text>
                 </HStack>
               </Badge>
@@ -209,7 +194,7 @@ export function QBittorrentSettingsCard() {
             {testResult.status === 'error' && (
               <Badge colorPalette="red">
                 <HStack gap={1}>
-                  <Icon as={LuX} boxSize={3} />
+                  <LuX size={12} />
                   <Text>Ошибка</Text>
                 </HStack>
               </Badge>
@@ -226,7 +211,7 @@ export function QBittorrentSettingsCard() {
           <Collapsible.Root open={showInstructions} onOpenChange={(e) => setShowInstructions(e.open)}>
             <Collapsible.Trigger asChild>
               <Button size="sm" variant="ghost" justifyContent="flex-start">
-                <Icon as={LuInfo} mr={2} />
+                <LuInfo size={16} style={{ marginRight: 8 }} />
                 Как настроить qBittorrent?
               </Button>
             </Collapsible.Trigger>
@@ -242,7 +227,7 @@ export function QBittorrentSettingsCard() {
                       colorPalette="blue"
                       onClick={() => window.electronAPI?.app?.openExternal('https://www.qbittorrent.org/')}
                     >
-                      qbittorrent.org <Icon as={LuExternalLink} ml={1} boxSize={3} />
+                      qbittorrent.org <LuExternalLink size={12} style={{ marginLeft: 4 }} />
                     </Button>
                   </HStack>
                   <Text>

@@ -4,7 +4,7 @@
  * Карточка настроек библиотеки (папки)
  */
 
-import { Box, Button, Card, Heading, HStack, Icon, Separator, Slider, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Card, Heading, HStack, Separator, Slider, Text, VStack } from '@chakra-ui/react'
 import { useState } from 'react'
 import { LuDatabase, LuFolderOpen, LuTrash2, LuTruck } from 'react-icons/lu'
 
@@ -83,7 +83,7 @@ export function LibrarySettingsCard({ settings, defaultPaths, onSave }: LibraryS
     <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
       <Card.Header>
         <HStack gap={3}>
-          <Icon as={LuFolderOpen} color="purple.400" boxSize={5} />
+          <LuFolderOpen size={20} color="var(--chakra-colors-purple-400)" />
           <Heading size="md">Библиотека</Heading>
         </HStack>
       </Card.Header>
@@ -142,7 +142,7 @@ export function LibrarySettingsCard({ settings, defaultPaths, onSave }: LibraryS
           {/* IPFS хранилище */}
           <Box>
             <HStack gap={3} mb={3}>
-              <Icon as={LuDatabase} color="cyan.400" boxSize={4} />
+              <LuDatabase size={16} color="var(--chakra-colors-cyan-400)" />
               <Text fontSize="sm" fontWeight="medium">
                 IPFS хранилище
               </Text>
@@ -195,7 +195,7 @@ export function LibrarySettingsCard({ settings, defaultPaths, onSave }: LibraryS
               </Box>
 
               <Button variant="outline" size="sm" alignSelf="start" onClick={() => setMigrationOpen(true)}>
-                <Icon as={LuTruck} />
+                <LuTruck size={16} />
                 Перенести библиотеку...
               </Button>
             </VStack>
@@ -212,7 +212,7 @@ export function LibrarySettingsCard({ settings, defaultPaths, onSave }: LibraryS
           {/* Очистка библиотеки */}
           <Box>
             <HStack gap={3} mb={2}>
-              <Icon as={LuTrash2} color="red.400" boxSize={4} />
+              <LuTrash2 size={16} color="var(--chakra-colors-red-400)" />
               <Text fontSize="sm" fontWeight="medium" color="red.400">
                 Опасная зона
               </Text>

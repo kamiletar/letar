@@ -10,7 +10,7 @@
  * - Автообновление подписок
  */
 
-import { Card, Heading, HStack, Icon, Separator, Text, VStack } from '@chakra-ui/react'
+import { Card, Heading, HStack, Separator, Text, VStack } from '@chakra-ui/react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { LuSettings } from 'react-icons/lu'
@@ -68,7 +68,7 @@ export function P2PSharingCard() {
     <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
       <Card.Header>
         <HStack gap={3}>
-          <Icon as={LuSettings} color="purple.400" boxSize={5} />
+          <LuSettings size={20} color="var(--chakra-colors-purple-400)" />
           <Heading size="md">P2P Sharing</Heading>
         </HStack>
         <Text fontSize="sm" color="fg.subtle" mt={1}>

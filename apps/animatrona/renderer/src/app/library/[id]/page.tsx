@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Button, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useQueryClient } from '@tanstack/react-query'
 import nextDynamic from 'next/dynamic'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -533,7 +533,7 @@ export default function AnimePage({ params }: AnimePageProps) {
         <Box p={6}>
           <Text color="fg.subtle">Аниме не найдено</Text>
           <Button mt={4} variant="outline" onClick={() => router.push('/library')}>
-            <Icon as={LuArrowLeft} mr={2} />
+            <LuArrowLeft size={16} style={{ marginRight: 8 }} />
             Вернуться в библиотеку
           </Button>
         </Box>
@@ -549,7 +549,7 @@ export default function AnimePage({ params }: AnimePageProps) {
         {/* Навигация */}
         <HStack px={6} py={3} justify="space-between">
           <Button variant="ghost" size="sm" onClick={() => router.push('/library')}>
-            <Icon as={LuArrowLeft} mr={2} />
+            <LuArrowLeft size={16} style={{ marginRight: 8 }} />
             Назад к библиотеке
           </Button>
           {anime.rutrackerUrl && (
@@ -559,7 +559,7 @@ export default function AnimePage({ params }: AnimePageProps) {
               colorPalette="blue"
               onClick={() => anime.rutrackerUrl && window.electronAPI?.app.openExternal(anime.rutrackerUrl)}
             >
-              <Icon as={LuExternalLink} mr={1} />
+              <LuExternalLink size={16} style={{ marginRight: 4 }} />
               Rutracker
             </Button>
           )}

@@ -18,7 +18,6 @@ import {
   Flex,
   Heading,
   HStack,
-  Icon,
   Input,
   Switch as ChakraSwitch,
   Text,
@@ -183,7 +182,7 @@ export function TrackerPublishingCard() {
     <Card.Root>
       <Card.Header>
         <HStack gap={3}>
-          <Icon as={LuGlobe} color="brand.500" boxSize={5} />
+          <LuGlobe size={20} color="var(--chakra-colors-brand-500)" />
           <Heading size="md">Публикация на Tracker</Heading>
           {config.enabled && (
             <Badge colorPalette="green" size="sm">
@@ -205,7 +204,7 @@ export function TrackerPublishingCard() {
                 rel="noopener noreferrer"
               >
                 странице профиля
-                <Icon as={LuExternalLink} ml={1} boxSize={3} />
+                <LuExternalLink size={12} style={{ marginLeft: 4 }} />
               </a>
             </Button>
           </Text>
@@ -226,7 +225,7 @@ export function TrackerPublishingCard() {
           {/* API ключ */}
           <Box>
             <HStack mb={2}>
-              <Icon as={LuKey} boxSize={4} color="fg.muted" />
+              <LuKey size={16} color="var(--chakra-colors-fg-muted)" />
               <Text fontSize="sm" fontWeight="medium">
                 API ключ
               </Text>
@@ -249,7 +248,7 @@ export function TrackerPublishingCard() {
               Сохранить
             </Button>
             <Button size="sm" variant="outline" onClick={handleTestConnection} loading={isTesting} disabled={!canTest}>
-              <Icon as={LuRefreshCw} mr={2} />
+              <LuRefreshCw size={20} style={{ marginRight: 8 }} />
               Проверить подключение
             </Button>
           </HStack>
@@ -260,7 +259,7 @@ export function TrackerPublishingCard() {
               <Alert.Indicator />
               <Alert.Content>
                 <HStack>
-                  <Icon as={connectionStatus.success ? LuCheck : LuX} />
+                  {connectionStatus.success ? <LuCheck size={16} /> : <LuX size={16} />}
                   <Text fontSize="sm">
                     {connectionStatus.message}
                     {connectionStatus.trackerName && ` (${connectionStatus.trackerName})`}
@@ -300,7 +299,7 @@ export function TrackerPublishingCard() {
           {config.apiKey && (
             <Box pt={4} borderTopWidth="1px">
               <HStack gap={2} mb={3}>
-                <Icon as={LuCloud} color="blue.500" boxSize={4} />
+                <LuCloud size={16} color="var(--chakra-colors-blue-500)" />
                 <Text fontSize="sm" fontWeight="medium">
                   Облачная библиотека
                 </Text>
@@ -326,7 +325,7 @@ export function TrackerPublishingCard() {
                     }
                   }}
                 >
-                  <Icon as={LuUpload} mr={1} />
+                  <LuUpload size={20} style={{ marginRight: 4 }} />
                   Синхронизировать
                 </Button>
                 <Button
@@ -357,7 +356,7 @@ export function TrackerPublishingCard() {
                     }
                   }}
                 >
-                  <Icon as={LuDownload} mr={1} />
+                  <LuDownload size={16} style={{ marginRight: 4 }} />
                   Восстановить библиотеку
                 </Button>
               </HStack>

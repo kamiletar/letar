@@ -7,7 +7,7 @@
  * в локальной сети. Показывает QR-код для быстрого подключения.
  */
 
-import { Box, Card, Heading, HStack, Icon, Image, Spinner, Switch, Text, VStack } from '@chakra-ui/react'
+import { Box, Card, Heading, HStack, Image, Spinner, Switch, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useEffect, useState } from 'react'
 import { LuRefreshCw, LuSmartphone, LuWifi } from 'react-icons/lu'
 
@@ -109,7 +109,7 @@ export function MobileAccessCard() {
       <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
         <Card.Header>
           <HStack gap={3}>
-            <Icon as={LuSmartphone} color="purple.400" boxSize={5} />
+            <LuSmartphone size={20} color="var(--chakra-colors-purple-400)" />
             <Heading size="md">Мобильный доступ</Heading>
           </HStack>
         </Card.Header>
@@ -127,7 +127,7 @@ export function MobileAccessCard() {
     <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
       <Card.Header>
         <HStack gap={3}>
-          <Icon as={LuSmartphone} color="purple.400" boxSize={5} />
+          <LuSmartphone size={20} color="var(--chakra-colors-purple-400)" />
           <Heading size="md">Мобильный доступ</Heading>
         </HStack>
       </Card.Header>
@@ -158,7 +158,7 @@ export function MobileAccessCard() {
               <Box bg="bg.subtle" borderRadius="lg" p={4}>
                 <VStack gap={3} align="stretch">
                   <HStack gap={2}>
-                    <Icon as={LuWifi} color="green.400" />
+                    <LuWifi size={16} color="var(--chakra-colors-green-400)" />
                     <Text fontWeight="medium" color="green.400">
                       Сервер запущен
                     </Text>
@@ -187,7 +187,7 @@ export function MobileAccessCard() {
                       onClick={handleRefreshIp}
                       _hover={{ color: 'fg' }}
                     >
-                      <Icon as={LuRefreshCw} boxSize={3} />
+                      <LuRefreshCw size={12} />
                       Обновить IP
                     </Box>
                   </HStack>

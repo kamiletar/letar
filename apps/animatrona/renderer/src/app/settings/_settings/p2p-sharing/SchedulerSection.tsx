@@ -11,7 +11,6 @@ import {
   Flex,
   Heading,
   HStack,
-  Icon,
   Input,
   Switch as ChakraSwitch,
   Text,
@@ -50,7 +49,7 @@ export function SchedulerSection({
   return (
     <Box>
       <HStack mb={4} gap={3}>
-        <Icon as={LuRss} color="orange.400" boxSize={5} />
+        <LuRss size={20} color="var(--chakra-colors-orange-400)" />
         <Heading size="sm">Автообновление</Heading>
         <Badge colorPalette={config?.enabled ? 'green' : 'gray'} size="sm">
           {config?.enabled ? 'Активно' : 'Отключено'}
@@ -155,18 +154,18 @@ export function SchedulerSection({
               {isRunning
                 ? (
                   <Button size="sm" variant="outline" colorPalette="orange" onClick={onStop}>
-                    <Icon as={LuPause} mr={2} />
+                    <LuPause size={16} style={{ marginRight: 8 }} />
                     Приостановить
                   </Button>
                 )
                 : (
                   <Button size="sm" colorPalette="orange" onClick={onStart} disabled={!config?.enabled}>
-                    <Icon as={LuPlay} mr={2} />
+                    <LuPlay size={16} style={{ marginRight: 8 }} />
                     Запустить
                   </Button>
                 )}
               <Button size="sm" variant="outline" onClick={onCheckNow}>
-                <Icon as={LuRefreshCw} mr={2} />
+                <LuRefreshCw size={16} style={{ marginRight: 8 }} />
                 Проверить сейчас
               </Button>
             </HStack>

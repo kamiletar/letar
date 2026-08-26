@@ -7,7 +7,7 @@
  * sync и reconnect cycle. Кнопки «Force sync now» и «Force reconnect».
  */
 
-import { Badge, Box, Button, Heading, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Heading, HStack, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useEffect, useState } from 'react'
 import { LuCircleCheck, LuRefreshCw, LuServer, LuWaypoints } from 'react-icons/lu'
 
@@ -167,7 +167,7 @@ export function PeerSyncSection() {
     <Box>
       <HStack mb={4} gap={3} justify="space-between">
         <HStack gap={3}>
-          <Icon as={LuWaypoints} color="teal.400" boxSize={5} />
+          <LuWaypoints size={20} color="var(--chakra-colors-teal-400)" />
           <Heading size="sm">Синхронизация pin-серверов</Heading>
           {status && <SourceBadge source={status.source} />}
         </HStack>
@@ -179,7 +179,7 @@ export function PeerSyncSection() {
             loading={isSyncing}
             loadingText="Sync..."
           >
-            <Icon as={LuRefreshCw} mr={1} />
+            <LuRefreshCw size={16} style={{ marginRight: 4 }} />
             Force sync
           </Button>
           <Button
@@ -189,7 +189,7 @@ export function PeerSyncSection() {
             loading={isReconnecting}
             loadingText="Reconnect..."
           >
-            <Icon as={LuCircleCheck} mr={1} />
+            <LuCircleCheck size={16} style={{ marginRight: 4 }} />
             Reconnect
           </Button>
         </HStack>
@@ -243,7 +243,7 @@ export function PeerSyncSection() {
               <Box key={peer.id} p={3} borderWidth="1px" borderRadius="md" bg="bg.subtle">
                 <HStack justify="space-between" mb={1}>
                   <HStack gap={2}>
-                    <Icon as={LuServer} boxSize={4} color="fg.muted" />
+                    <LuServer size={16} color="var(--chakra-colors-fg-muted)" />
                     <Text fontWeight="semibold" fontSize="sm">
                       {peer.name}
                     </Text>

@@ -19,7 +19,6 @@ import {
   Grid,
   Heading,
   HStack,
-  Icon,
   IconButton,
   Input,
   Separator,
@@ -118,7 +117,7 @@ function SettingsSection({
   return (
     <Box>
       <HStack mb={4} gap={3}>
-        <Icon as={LuSettings} color="purple.400" boxSize={5} />
+        <LuSettings size={20} color="var(--chakra-colors-purple-400)" />
         <Heading size="sm">Настройки</Heading>
       </HStack>
 
@@ -178,11 +177,11 @@ function SettingsSection({
                   ? (
                     <>
                       <Badge colorPalette="green">
-                        <Icon as={LuCheck} mr={1} />
+                        <LuCheck size={16} style={{ marginRight: 4 }} />
                         Ключи настроены
                       </Badge>
                       <Button size="sm" variant="outline" onClick={onGenerateKeys} loading={isGeneratingKeys}>
-                        <Icon as={LuRefreshCw} mr={2} />
+                        <LuRefreshCw size={16} style={{ marginRight: 8 }} />
                         Перегенерировать
                       </Button>
                     </>
@@ -190,11 +189,11 @@ function SettingsSection({
                   : (
                     <>
                       <Badge colorPalette="yellow">
-                        <Icon as={LuKey} mr={1} />
+                        <LuKey size={16} style={{ marginRight: 4 }} />
                         Ключи не настроены
                       </Badge>
                       <Button size="sm" colorPalette="purple" onClick={onGenerateKeys} loading={isGeneratingKeys}>
-                        <Icon as={LuKey} mr={2} />
+                        <LuKey size={16} style={{ marginRight: 8 }} />
                         Сгенерировать
                       </Button>
                     </>
@@ -287,7 +286,7 @@ function DiscoverySection({
   return (
     <Box>
       <HStack mb={4} gap={3}>
-        <Icon as={LuSearch} color="blue.400" boxSize={5} />
+        <LuSearch size={20} color="var(--chakra-colors-blue-400)" />
         <Heading size="sm">Добавить трекер</Heading>
       </HStack>
 
@@ -300,7 +299,7 @@ function DiscoverySection({
             placeholder="https://tracker.example.com"
           />
           <Button size="sm" colorPalette="blue" onClick={handleDiscover} loading={discovery.isLoading}>
-            <Icon as={LuSearch} mr={2} />
+            <LuSearch size={16} style={{ marginRight: 8 }} />
             Найти
           </Button>
         </HStack>
@@ -323,13 +322,13 @@ function DiscoverySection({
               {discovery.result.alreadyAdded
                 ? (
                   <Badge colorPalette="gray">
-                    <Icon as={LuCheck} mr={1} />
+                    <LuCheck size={16} style={{ marginRight: 4 }} />
                     Уже добавлен
                   </Badge>
                 )
                 : (
                   <Button size="xs" colorPalette="green" onClick={handleAdd}>
-                    <Icon as={LuPlus} mr={1} />
+                    <LuPlus size={16} style={{ marginRight: 4 }} />
                     Добавить
                   </Button>
                 )}
@@ -380,7 +379,7 @@ function TrackersSection({
     <Box>
       <HStack mb={4} gap={3} justify="space-between">
         <HStack gap={3}>
-          <Icon as={LuGlobe} color="green.400" boxSize={5} />
+          <LuGlobe size={20} color="var(--chakra-colors-green-400)" />
           <Heading size="sm">Трекеры</Heading>
           <Badge size="sm">{trackers.list.length}</Badge>
         </HStack>
@@ -391,7 +390,7 @@ function TrackersSection({
             onClick={() => void onSyncAll()}
             loading={sync.isSyncing}
           >
-            <Icon as={LuRotateCw} mr={1} />
+            <LuRotateCw size={16} style={{ marginRight: 4 }} />
             Синхронизировать все
           </Button>
         )}
@@ -413,6 +412,7 @@ function TrackersSection({
           <VStack align="stretch" gap={3}>
             {trackers.list.map((tracker) => {
               const trustInfo = getTrustInfo(tracker.trustLevel)
+              const TrustIcon = trustInfo.icon
               const isSyncing = sync.isSyncing && sync.syncingTrackerId === tracker.id
               const isBlocked = tracker.trustLevel === 0
 
@@ -423,7 +423,7 @@ function TrackersSection({
                       <HStack>
                         <Text fontWeight="medium">{tracker.name}</Text>
                         <Badge colorPalette={trustInfo.color} size="xs">
-                          <Icon as={trustInfo.icon} mr={1} />
+                          <TrustIcon size={16} style={{ marginRight: 4 }} />
                           {trustInfo.name}
                         </Badge>
                       </HStack>
@@ -540,7 +540,7 @@ function TrackersSection({
                               colorPalette="red"
                               onClick={() => void onBlock(tracker.id)}
                             >
-                              <Icon as={LuBan} mr={1} />
+                              <LuBan size={16} style={{ marginRight: 4 }} />
                               Блок
                             </Button>
                           </>
@@ -567,7 +567,7 @@ function SyncResultsSection({ sync }: { sync: ReturnType<typeof useFederation>['
   return (
     <Box>
       <HStack mb={4} gap={3}>
-        <Icon as={LuRotateCw} color="cyan.400" boxSize={5} />
+        <LuRotateCw size={20} color="var(--chakra-colors-cyan-400)" />
         <Heading size="sm">Последние синхронизации</Heading>
       </HStack>
 
@@ -596,7 +596,7 @@ function SyncResultsSection({ sync }: { sync: ReturnType<typeof useFederation>['
                 )}
                 {result.errors.length > 0 && (
                   <Badge colorPalette="red" size="xs">
-                    <Icon as={LuX} mr={1} />
+                    <LuX size={16} style={{ marginRight: 4 }} />
                     {result.errors.length}
                   </Badge>
                 )}
@@ -642,7 +642,7 @@ export function FederationCard() {
     <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
       <Card.Header>
         <HStack gap={3}>
-          <Icon as={LuLink} color="purple.400" boxSize={5} />
+          <LuLink size={20} color="var(--chakra-colors-purple-400)" />
           <Heading size="md">Федерация трекеров</Heading>
           <Badge colorPalette={federationEnabled ? 'green' : 'gray'} size="sm">
             {federationEnabled ? 'Активна' : 'Отключена'}

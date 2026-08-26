@@ -5,7 +5,7 @@
  * Показывает трафик, время раздачи, количество контента
  */
 
-import { Box, Card, Heading, HStack, Icon, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { Box, Card, Heading, HStack, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { LuActivity, LuClock, LuDownload, LuHardDrive, LuUpload, LuUsers } from 'react-icons/lu'
 
 import { formatBytes } from '@/lib/format-utils'
@@ -52,11 +52,11 @@ interface StatItemProps {
   color: string
 }
 
-function StatItem({ icon, label, value, color }: StatItemProps) {
+function StatItem({ icon: IconComponent, label, value, color }: StatItemProps) {
   return (
     <VStack align="stretch" gap={1}>
       <HStack gap={2}>
-        <Icon as={icon} color={color} boxSize={4} />
+        <IconComponent size={16} color={`var(--chakra-colors-${color.replaceAll('.', '-')})`} />
         <Text fontSize="sm" color="fg.subtle">
           {label}
         </Text>
@@ -74,7 +74,7 @@ export function StatsCard({ stats, isLoading }: StatsCardProps) {
       <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
         <Card.Header>
           <HStack gap={3}>
-            <Icon as={LuActivity} color="blue.400" boxSize={5} />
+            <LuActivity size={20} color="var(--chakra-colors-blue-400)" />
             <Heading size="md">Статистика</Heading>
           </HStack>
         </Card.Header>
@@ -90,7 +90,7 @@ export function StatsCard({ stats, isLoading }: StatsCardProps) {
       <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
         <Card.Header>
           <HStack gap={3}>
-            <Icon as={LuActivity} color="blue.400" boxSize={5} />
+            <LuActivity size={20} color="var(--chakra-colors-blue-400)" />
             <Heading size="md">Статистика</Heading>
           </HStack>
         </Card.Header>
@@ -107,7 +107,7 @@ export function StatsCard({ stats, isLoading }: StatsCardProps) {
     <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
       <Card.Header>
         <HStack gap={3}>
-          <Icon as={LuActivity} color="blue.400" boxSize={5} />
+          <LuActivity size={20} color="var(--chakra-colors-blue-400)" />
           <Heading size="md">Статистика</Heading>
         </HStack>
       </Card.Header>

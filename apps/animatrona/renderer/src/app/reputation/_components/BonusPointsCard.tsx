@@ -5,7 +5,7 @@
  * Показывает баланс и историю транзакций
  */
 
-import { Badge, Box, Card, Heading, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Card, Heading, HStack, Text, VStack } from '@chakra-ui/react'
 import { LuArrowDown, LuArrowUp, LuCoins, LuGift, LuSettings, LuTrophy } from 'react-icons/lu'
 
 import type { BonusPoints, BonusTransaction } from '../../../../../shared/types/bonus-points'
@@ -47,6 +47,7 @@ interface TransactionItemProps {
 function TransactionItem({ transaction }: TransactionItemProps) {
   const config = TRANSACTION_CONFIG[transaction.type] || TRANSACTION_CONFIG.adjustment
   const isPositive = transaction.amount > 0
+  const ConfigIcon = config.icon
 
   return (
     <HStack
@@ -57,7 +58,7 @@ function TransactionItem({ transaction }: TransactionItemProps) {
       _last={{ borderBottom: 'none' }}
     >
       <HStack gap={3}>
-        <Icon as={config.icon} color={config.color} boxSize={4} />
+        <ConfigIcon size={16} color={`var(--chakra-colors-${config.color.replaceAll('.', '-')})`} />
         <VStack align="start" gap={0}>
           <Text fontSize="sm" fontWeight="medium">
             {transaction.description}
@@ -86,7 +87,7 @@ export function BonusPointsCard({ bonusPoints, transactions, isLoading }: BonusP
       <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
         <Card.Header>
           <HStack gap={3}>
-            <Icon as={LuCoins} color="yellow.400" boxSize={5} />
+            <LuCoins size={20} color="var(--chakra-colors-yellow-400)" />
             <Heading size="md">Бонусные очки</Heading>
           </HStack>
         </Card.Header>
@@ -102,7 +103,7 @@ export function BonusPointsCard({ bonusPoints, transactions, isLoading }: BonusP
       <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
         <Card.Header>
           <HStack gap={3}>
-            <Icon as={LuCoins} color="yellow.400" boxSize={5} />
+            <LuCoins size={20} color="var(--chakra-colors-yellow-400)" />
             <Heading size="md">Бонусные очки</Heading>
           </HStack>
         </Card.Header>
@@ -117,7 +118,7 @@ export function BonusPointsCard({ bonusPoints, transactions, isLoading }: BonusP
     <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
       <Card.Header>
         <HStack gap={3}>
-          <Icon as={LuCoins} color="yellow.400" boxSize={5} />
+          <LuCoins size={20} color="var(--chakra-colors-yellow-400)" />
           <Heading size="md">Бонусные очки</Heading>
         </HStack>
       </Card.Header>
