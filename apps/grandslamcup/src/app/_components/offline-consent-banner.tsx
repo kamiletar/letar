@@ -44,7 +44,11 @@ export function OfflineConsentBanner() {
   return (
     <Box
       position="fixed"
-      bottom={0}
+      // Приподнимается над CookieBanner, когда он показан — без координации оба bottom:0
+      // компонента физически накладываются друг на друга. Тот же паттерн, что у
+      // StickyActionBar — .claude/docs/ui-components.md § «Координация bottom-anchored
+      // компонентов».
+      bottom="var(--letar-cookie-banner-height, 0px)"
       left={0}
       right={0}
       bg="bg.panel"
