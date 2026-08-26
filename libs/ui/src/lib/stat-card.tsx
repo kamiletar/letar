@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Card, HStack, Icon, Text } from '@chakra-ui/react'
+import { Box, Card, HStack, Text } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import type { IconType } from 'react-icons'
 import { LuTrendingUp } from 'react-icons/lu'
@@ -93,9 +93,11 @@ export function StatCard({
   formatValue = defaultFormatValue,
   href,
 }: StatCardProps) {
+  const IconComponent = icon
+  const SubtextIcon = subtextIcon
   const content = (
     <HStack gap={4}>
-      {icon && (
+      {IconComponent && (
         <Box
           p={3}
           borderRadius="lg"
@@ -103,7 +105,7 @@ export function StatCard({
           color={`${colorPalette}.600`}
           _dark={{ bg: `${colorPalette}.900`, color: `${colorPalette}.200` }}
         >
-          <Icon as={icon} boxSize={6} />
+          <IconComponent size={24} />
         </Box>
       )}
       <Box>
@@ -115,7 +117,7 @@ export function StatCard({
         </Text>
         {subtext && (
           <HStack fontSize="xs" color="fg.muted">
-            <Icon as={subtextIcon} boxSize={3} />
+            <SubtextIcon size={12} />
             <span>{subtext}</span>
           </HStack>
         )}
