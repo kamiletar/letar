@@ -1620,3 +1620,10 @@ PLAN_COMPLETED.md` v0.7.4, тред agent-mail `grandslamcup-staging-pilot`.
 
 - [x] **OIDC `offline_access` scope** — добавлен в `src/lib/auth.ts` → refresh_token теперь сохраняется в `account` (2026-06-26)
 - [x] **MobileAuthSection** — самодельная auth-секция в `mobile-drawer.tsx` заменена на `MobileAuthSection` из `@letar/ui` (2026-06-26)
+- [x] **`OfflineConsentBanner` перекрывал `CookieBanner`** (2026-08-26) — оба `position: fixed;
+      bottom: 0` без координации между собой физически накладывались друг на друга снизу экрана.
+      Фикс — `bottom` баннера через CSS-переменную `--letar-cookie-banner-height`, публикуемую
+      `CookieBanner` (тот же паттерн, что уже применён к `StickyActionBar` из `@letar/ui`, см.
+      `.claude/docs/ui-components.md` § «Координация bottom-anchored компонентов»). Найдено при
+      проверке этого же бага в `studio` — идентичный компонент оказался в 4 других приложениях
+      (`mandala`, `pravda`, `archetest`), везде тот же фикс.
