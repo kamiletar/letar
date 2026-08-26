@@ -52,9 +52,10 @@ model User {
   passkeys        Passkey[]
 
   // OIDC Provider связи
-  oauthApplications OauthApplication[]
-  oauthAccessTokens OauthAccessToken[]
-  oauthConsents     OauthConsent[]
+  oauthApplications  OauthApplication[]
+  oauthAccessTokens  OauthAccessToken[]
+  oauthConsents      OauthConsent[]
+  oauthRefreshTokens OauthRefreshToken[]
 
   // Профили в проектах
   projectProfiles ProjectProfile[]
@@ -116,6 +117,12 @@ model Session {
   updatedAt   DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Обратные связи от @better-auth/oauth-provider (jwt/oauthProvider плагины ссылаются
+  // на session.id из oauthAccessToken/oauthRefreshToken, onDelete: set null на их стороне —
+  // Prisma требует объявленную обратную связь на этой модели, даже read/write в неё сюда не идёт)
+  oauthAccessTokens  OauthAccessToken[]
+  oauthRefreshTokens OauthRefreshToken[]
 
   @@deny('all', true)
   @@index([userId])
@@ -195,8 +202,9 @@ model OauthApplication {
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
-  user          User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessTokens  OauthAccessToken[]
+  refreshTokens OauthRefreshToken[]
   consents      OauthConsent[]
 
   // Только админы через UI, Better Auth управляет напрямую
@@ -206,41 +214,99 @@ model OauthApplication {
   @@map("oauthApplication")
 }
 
-// Выданные токены
+// Выданные access-токены. Поля продиктованы @better-auth/oauth-provider (1.7+,
+// node_modules/@better-auth/oauth-provider/dist/authorize-*.mjs, src/schema.ts::oauthAccessToken) —
+// плагин обращается к ним напрямую по имени, не через маппинг schema{} (в отличие от oauthClient/
+// oauthApplication). Старая схема (accessToken/refreshToken/scopes:String? одной записью) — из
+// прежнего oidcProvider() ядра, миграция a8efcc72 её не тронула → NOT NULL/unknown-field 500 на
+// КАЖДОМ обмене code→token (найдено 2026-08-26, седьмой слой прод-инцидента). Refresh-токены теперь
+// отдельная модель OauthRefreshToken (offline_access scope, дефолтный в oauthProviderPlugin).
 model OauthAccessToken {
-  id                    String   @id @default(cuid())
-  accessToken           String   @unique
-  refreshToken          String?  @unique
-  accessTokenExpiresAt  DateTime
-  refreshTokenExpiresAt DateTime?
-  clientId              String
-  userId                String?
-  scopes                String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id                      String    @id @default(cuid())
+  token                   String    @unique
+  clientId                String
+  sessionId               String?
+  userId                  String?
+  referenceId             String?
+  authorizationCodeId     String?
+  resources               String[]  @default([])
+  requestedUserInfoClaims String[]  @default([])
+  refreshId               String?
+  expiresAt               DateTime
+  createdAt               DateTime  @default(now())
+  revoked                 DateTime?
+  confirmation            Json?
+  scopes                  String[]  @default([])
 
-  client OauthApplication @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
-  user   User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client       OauthApplication   @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+  user         User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session      Session?           @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  refreshToken OauthRefreshToken? @relation(fields: [refreshId], references: [id], onDelete: SetNull)
 
   @@deny('all', true)
   @@index([clientId])
   @@index([userId])
+  @@index([sessionId])
+  @@index([authorizationCodeId])
 
   @@map("oauthAccessToken")
 }
 
-// Согласия пользователей
+// Refresh-токены (offline_access) — отдельная модель плагина (src/schema.ts::oauthRefreshToken),
+// без маппинга в schema{}, без аналога в старой схеме вовсе (седьмой слой того же инцидента —
+// без этой модели каждый обмен code→token с offline_access падал ДО того, как код доходил до
+// выдачи access-токена).
+model OauthRefreshToken {
+  id                      String    @id @default(cuid())
+  token                   String    @unique
+  clientId                String
+  sessionId               String?
+  userId                  String
+  referenceId             String?
+  authorizationCodeId     String?
+  resources               String[]  @default([])
+  requestedUserInfoClaims String[]  @default([])
+  expiresAt               DateTime
+  createdAt               DateTime  @default(now())
+  revoked                 DateTime?
+  rotatedAt               DateTime?
+  rotationReplayResponse  String?
+  rotationReplayExpiresAt DateTime?
+  authTime                DateTime?
+  confirmation            Json?
+  scopes                  String[]  @default([])
+
+  client       OauthApplication   @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session      Session?           @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  accessTokens OauthAccessToken[]
+
+  @@deny('all', true)
+  @@index([clientId])
+  @@index([userId])
+  @@index([sessionId])
+  @@index([authorizationCodeId])
+
+  @@map("oauthRefreshToken")
+}
+
+// Согласия пользователей. Поля — тот же источник и та же причина правки, что у OauthAccessToken
+// выше (src/schema.ts::oauthConsent): плагин пишет scopes КАК string[] (не CSV-строку) и никогда
+// не заполняет consentGiven — старое обязательное поле без дефолта гарантированно давало
+// NOT NULL на первом же ctx.context.adapter.create() внутри consentEndpoint.
 model OauthConsent {
-  id            String   @id @default(cuid())
-  clientId      String
-  userId        String
-  scopes        String?
-  consentGiven  Boolean
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                      String   @id @default(cuid())
+  clientId                String
+  userId                  String?
+  referenceId             String?
+  resources               String[] @default([])
+  requestedUserInfoClaims String[] @default([])
+  scopes                  String[] @default([])
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
 
   client OauthApplication @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
-  user   User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@deny('all', true)
   @@index([clientId])
