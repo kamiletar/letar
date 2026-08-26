@@ -2,6 +2,31 @@
 
 Детальное описание реализованных функций.
 
+## Чистка `<Icon as={IconComponent}>` — semgrep `letar-chakra-as-prop-forbidden` (2026-08-26)
+
+Часть кросс-приложенческой инициативы §61 корневого `PLAN.md` (после `libs/video-player-react`
+и `libs/ui`). Все 27 вхождений `<Icon as={IconComponent}>` в 11 файлах
+`apps/animatrona-landing/src/app/**` заменены на прямой рендер react-icons-компонента:
+`boxSize={N}` → `size={N×4}`, статичный `color="токен"` → `color="var(--chakra-colors-<kebab-
+token>)"` (там, где иконка уже наследует цвет от обёртки — проп просто убран), динамический
+`as={obj.icon}` → локальная capitalized-переменная перед JSX (`const PlatformIcon = info.icon`,
+иначе JSX трактует lowercase-переменную как DOM-тег). Самые крупные файлы — `hero-section.tsx`
+(7), `downloads-section.tsx` (6).
+
+Попутно найдены и почищены 2 инстанса `Link as={NextLink}` в `docs-sidebar.tsx` — тот же
+semgrep-паттерн ловит **любой** Chakra-компонент с `as=`, не только `Icon`. Фикс — `Link asChild`
+
+- `<NextLink href={...}>` внутри.
+
+Проверено: `nx typecheck:tsgo`/`nx lint` (oxlint+eslint) зелёные, dev-сервер поднят, главная
+страница и `/docs/quick-start`, `/docs/troubleshooting` открыты в браузере — без ошибок в
+консоли, иконки и переходы по сайдбару рендерятся корректно.
+
+⚠️ Приложение НЕ очищено от `as=` полностью — остаются 49 срабатываний другой формы того же
+паттерна (`Box as="section"`, `Heading as="h1"/"h2"/"h3"`, `Text as="span"`), см. открытую задачу
+в `PLAN.md`. Severity правила не поднималась (осталась WARNING) — это разрешено только после
+полной чистки `apps/*` по всему монорепо.
+
 ## Фикс: fetchPriority вместо устаревшего priority на hero-скриншоте (2026-08-25)
 
 Свежий полный грепп по монорепо нашёл прямой `next/image` с `priority` в `hero-section.tsx` —
