@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Button, HStack, Icon, IconButton, Slider, Text } from '@chakra-ui/react'
+import { Box, Button, HStack, IconButton, Slider, Text } from '@chakra-ui/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   LuArrowLeftRight,
@@ -363,7 +363,7 @@ export function ComparePlayer({ videoA, videoB, labelA, labelB, onClose: _onClos
             alignItems="center"
             justifyContent="center"
           >
-            <Icon as={LuArrowLeftRight} color="player.control" boxSize={4} />
+            <LuArrowLeftRight color="var(--chakra-colors-player-control)" size={16} />
           </Box>
         </Box>
       </Box>
@@ -395,7 +395,7 @@ export function ComparePlayer({ videoA, videoB, labelA, labelB, onClose: _onClos
           <HStack gap={2}>
             {/* Play/Pause */}
             <IconButton aria-label={isPlaying ? 'Pause' : 'Play'} onClick={togglePlay} variant="ghost" size="sm">
-              <Icon as={isPlaying ? LuPause : LuPlay} />
+              {isPlaying ? <LuPause /> : <LuPlay />}
             </IconButton>
 
             {/* Время */}
@@ -411,7 +411,7 @@ export function ComparePlayer({ videoA, videoB, labelA, labelB, onClose: _onClos
               size="sm"
               title="Shift+← для покадрового шага"
             >
-              <Icon as={LuChevronLeft} />
+              <LuChevronLeft />
             </IconButton>
             <IconButton
               aria-label="Step forward"
@@ -420,20 +420,20 @@ export function ComparePlayer({ videoA, videoB, labelA, labelB, onClose: _onClos
               size="sm"
               title="Shift+→ для покадрового шага"
             >
-              <Icon as={LuChevronRight} />
+              <LuChevronRight />
             </IconButton>
           </HStack>
 
           <HStack gap={2}>
             {/* Swap */}
             <Button variant="ghost" size="sm" onClick={swapVideos} title="Поменять аудио (S)">
-              <Icon as={LuArrowLeftRight} mr={1} />
+              <LuArrowLeftRight style={{ marginRight: '4px' }} />
               <Text fontSize="xs">Аудио: {audioSource}</Text>
             </Button>
 
             {/* Volume */}
             <IconButton aria-label={isMuted ? 'Unmute' : 'Mute'} onClick={toggleMute} variant="ghost" size="sm">
-              <Icon as={isMuted ? LuVolumeX : LuVolume2} />
+              {isMuted ? <LuVolumeX /> : <LuVolume2 />}
             </IconButton>
 
             {/* Fullscreen */}
@@ -443,7 +443,7 @@ export function ComparePlayer({ videoA, videoB, labelA, labelB, onClose: _onClos
               variant="ghost"
               size="sm"
             >
-              <Icon as={isFullscreen ? LuMinimize : LuMaximize} />
+              {isFullscreen ? <LuMinimize /> : <LuMaximize />}
             </IconButton>
           </HStack>
         </HStack>

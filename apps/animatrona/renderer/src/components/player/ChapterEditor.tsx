@@ -10,20 +10,7 @@
  * - Переименовывать главы
  */
 
-import {
-  Badge,
-  Box,
-  Button,
-  Card,
-  Checkbox,
-  Heading,
-  HStack,
-  Icon,
-  IconButton,
-  Input,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import { Badge, Box, Button, Card, Checkbox, Heading, HStack, IconButton, Input, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   LuCheck,
@@ -206,7 +193,7 @@ function ChapterRow({
                         variant="ghost"
                         onClick={handleSetStartFromCurrent}
                       >
-                        <Icon as={LuPlay} />
+                        <LuPlay />
                       </IconButton>
                     </Tooltip>
                   </HStack>
@@ -230,7 +217,7 @@ function ChapterRow({
                         variant="ghost"
                         onClick={handleSetEndFromCurrent}
                       >
-                        <Icon as={LuPause} />
+                        <LuPause />
                       </IconButton>
                     </Tooltip>
                   </HStack>
@@ -238,11 +225,11 @@ function ChapterRow({
               </HStack>
               <HStack gap={2} justify="flex-end">
                 <Button size="xs" variant="ghost" onClick={handleCancel}>
-                  <Icon as={LuX} mr={1} />
+                  <LuX style={{ marginRight: '4px' }} />
                   Отмена
                 </Button>
                 <Button size="xs" colorPalette="green" onClick={handleSave}>
-                  <Icon as={LuCheck} mr={1} />
+                  <LuCheck style={{ marginRight: '4px' }} />
                   Сохранить
                 </Button>
               </HStack>
@@ -275,12 +262,12 @@ function ChapterRow({
               <HStack gap={0}>
                 <Tooltip content="Редактировать">
                   <IconButton aria-label="Редактировать" size="xs" variant="ghost" onClick={() => setIsEditing(true)}>
-                    <Icon as={LuPencil} boxSize={3} />
+                    <LuPencil size={12} />
                   </IconButton>
                 </Tooltip>
                 <Tooltip content="Удалить">
                   <IconButton aria-label="Удалить" size="xs" variant="ghost" colorPalette="red" onClick={onDelete}>
-                    <Icon as={LuTrash2} boxSize={3} />
+                    <LuTrash2 size={12} />
                   </IconButton>
                 </Tooltip>
               </HStack>
@@ -523,7 +510,7 @@ export function ChapterEditor({
       <HStack px={4} py={3} borderBottom="1px" borderColor="border.subtle" justify="space-between">
         <Heading size="sm">Редактор глав</Heading>
         <IconButton aria-label="Закрыть" size="sm" variant="ghost" onClick={onClose}>
-          <Icon as={LuX} />
+          <LuX />
         </IconButton>
       </HStack>
 
@@ -545,7 +532,7 @@ export function ChapterEditor({
                 R
               </Button>
               <Button size="xs" colorPalette="red" variant="ghost" onClick={cancelMarking}>
-                <Icon as={LuX} />
+                <LuX />
               </Button>
             </HStack>
           </HStack>
@@ -643,7 +630,7 @@ export function ChapterEditor({
               disabled={selectedEpisodes.size === 0 || isCopying}
               loading={isCopying}
             >
-              <Icon as={LuCopy} mr={1} />
+              <LuCopy style={{ marginRight: '4px' }} />
               Скопировать ({selectedEpisodes.size})
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setIsCopyMode(false)}>
@@ -658,25 +645,25 @@ export function ChapterEditor({
         <Box px={4} py={3} borderTop="1px" borderColor="border.subtle">
           <HStack gap={2} wrap="wrap">
             <Button size="xs" colorPalette="purple" onClick={() => addChapter('OP')}>
-              <Icon as={LuPlus} mr={1} />
+              <LuPlus style={{ marginRight: '4px' }} />
               OP
             </Button>
             <Button size="xs" colorPalette="blue" onClick={() => addChapter('ED')}>
-              <Icon as={LuPlus} mr={1} />
+              <LuPlus style={{ marginRight: '4px' }} />
               ED
             </Button>
             <Button size="xs" colorPalette="yellow" onClick={() => addChapter('RECAP')}>
-              <Icon as={LuPlus} mr={1} />
+              <LuPlus style={{ marginRight: '4px' }} />
               Ретро
             </Button>
             <Button size="xs" colorPalette="orange" onClick={() => addChapter('PREVIEW')}>
-              <Icon as={LuPlus} mr={1} />
+              <LuPlus style={{ marginRight: '4px' }} />
               Превью
             </Button>
             {canCopy && (
               <Tooltip content="Скопировать OP/ED на другие эпизоды">
                 <Button size="xs" colorPalette="cyan" variant="outline" onClick={() => setIsCopyMode(true)}>
-                  <Icon as={LuCopy} mr={1} />
+                  <LuCopy style={{ marginRight: '4px' }} />
                   Копировать
                 </Button>
               </Tooltip>
@@ -684,7 +671,7 @@ export function ChapterEditor({
             {hasOpEd && onGenerateRecapPreview && (
               <Tooltip content="Авто-создание RECAP (перед OP) и PREVIEW (после ED) для всех эпизодов">
                 <Button size="xs" colorPalette="teal" variant="outline" onClick={handleGenerate} loading={isGenerating}>
-                  <Icon as={LuWand} mr={1} />
+                  <LuWand style={{ marginRight: '4px' }} />
                   RECAP/PREVIEW
                 </Button>
               </Tooltip>

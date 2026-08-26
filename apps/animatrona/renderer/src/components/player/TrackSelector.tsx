@@ -8,7 +8,7 @@
  * - Субтитры (или отключить)
  */
 
-import { Badge, Box, Button, HStack, Icon, IconButton, Menu, Portal, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, HStack, IconButton, Menu, Portal, Text, VStack } from '@chakra-ui/react'
 import { type RefObject } from 'react'
 import { LuCaptions, LuCheck, LuLanguages, LuPencil, LuTrash2, LuVolume2 } from 'react-icons/lu'
 
@@ -190,7 +190,7 @@ export function TrackSelector({
         <Menu.Root>
           <Menu.Trigger asChild>
             <Button variant="ghost" colorPalette="whiteAlpha" size="sm" title="Аудиодорожка">
-              <Icon as={LuVolume2} color="player.control" />
+              <LuVolume2 color="var(--chakra-colors-player-control)" />
             </Button>
           </Menu.Trigger>
           <Portal container={effectiveContainerRef ?? undefined}>
@@ -198,7 +198,7 @@ export function TrackSelector({
               <Menu.Content bg="bg.panel" borderColor="border.subtle">
                 <Box px={3} py={2} borderBottom="1px" borderColor="border.subtle">
                   <HStack gap={2}>
-                    <Icon as={LuLanguages} color="fg.muted" />
+                    <LuLanguages color="var(--chakra-colors-fg-muted)" />
                     <Text fontSize="sm" fontWeight="medium" color="fg.muted">
                       Аудиодорожка
                     </Text>
@@ -263,7 +263,7 @@ export function TrackSelector({
                                 onEditAudioTrack(track.id)
                               }}
                             >
-                              <Icon as={LuPencil} boxSize={3} />
+                              <LuPencil size={12} />
                             </IconButton>
                           )}
                           {onDeleteAudioTrack && (
@@ -278,10 +278,10 @@ export function TrackSelector({
                                 onDeleteAudioTrack(track.id)
                               }}
                             >
-                              <Icon as={LuTrash2} boxSize={3} />
+                              <LuTrash2 size={12} />
                             </IconButton>
                           )}
-                          {isSelected && <Icon as={LuCheck} />}
+                          {isSelected && <LuCheck />}
                         </HStack>
                       </HStack>
                     </Menu.Item>
@@ -298,7 +298,11 @@ export function TrackSelector({
         <Menu.Root>
           <Menu.Trigger asChild>
             <Button variant="ghost" colorPalette="whiteAlpha" size="sm" title="Субтитры">
-              <Icon as={LuCaptions} color={selectedSubtitleTrack !== null ? 'purple.400' : 'player.control'} />
+              <LuCaptions
+                color={selectedSubtitleTrack !== null
+                  ? 'var(--chakra-colors-purple-400)'
+                  : 'var(--chakra-colors-player-control)'}
+              />
             </Button>
           </Menu.Trigger>
           <Portal container={effectiveContainerRef ?? undefined}>
@@ -306,7 +310,7 @@ export function TrackSelector({
               <Menu.Content bg="bg.panel" borderColor="border.subtle">
                 <Box px={3} py={2} borderBottom="1px" borderColor="border.subtle">
                   <HStack gap={2}>
-                    <Icon as={LuCaptions} color="fg.muted" />
+                    <LuCaptions color="var(--chakra-colors-fg-muted)" />
                     <Text fontSize="sm" fontWeight="medium" color="fg.muted">
                       Субтитры
                     </Text>
@@ -331,7 +335,7 @@ export function TrackSelector({
                     <Text fontSize="sm" color={selectedSubtitleTrack === null ? 'white' : undefined}>
                       Выключены
                     </Text>
-                    {selectedSubtitleTrack === null && <Icon as={LuCheck} color="white" />}
+                    {selectedSubtitleTrack === null && <LuCheck color="white" />}
                   </HStack>
                 </Menu.Item>
                 {subtitleTracks.map((track) => {
@@ -381,7 +385,7 @@ export function TrackSelector({
                                 onEditSubtitleTrack(track.id)
                               }}
                             >
-                              <Icon as={LuPencil} boxSize={3} />
+                              <LuPencil size={12} />
                             </IconButton>
                           )}
                           {onDeleteSubtitleTrack && (
@@ -396,10 +400,10 @@ export function TrackSelector({
                                 onDeleteSubtitleTrack(track.id)
                               }}
                             >
-                              <Icon as={LuTrash2} boxSize={3} />
+                              <LuTrash2 size={12} />
                             </IconButton>
                           )}
-                          {isSelected && <Icon as={LuCheck} />}
+                          {isSelected && <LuCheck />}
                         </HStack>
                       </HStack>
                     </Menu.Item>

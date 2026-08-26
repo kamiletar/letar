@@ -13,7 +13,7 @@
  */
 
 import { formatBitrate, formatDuration, formatFileSize } from '@/lib/format-utils'
-import { Box, Grid, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Box, Grid, HStack, Text, VStack } from '@chakra-ui/react'
 import { memo } from 'react'
 import {
   LuAudioLines,
@@ -79,10 +79,10 @@ function getFileName(path?: string): string {
 }
 
 /** Строка информации */
-function InfoRow({ icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
+function InfoRow({ icon: IconComponent, label, value }: { icon: React.ElementType; label: string; value: string }) {
   return (
     <HStack gap={2}>
-      <Icon as={icon} color="fg.subtle" boxSize={4} />
+      <IconComponent color="var(--chakra-colors-fg-subtle)" size={16} />
       <Text color="fg.muted" fontSize="sm" minW="80px">
         {label}:
       </Text>

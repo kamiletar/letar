@@ -7,7 +7,7 @@
  * Предлагает сиквел или возврат в библиотеку
  */
 
-import { Box, Button, Heading, HStack, Icon, Image, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Heading, HStack, Image, Spinner, Text, VStack } from '@chakra-ui/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { LuArrowLeft, LuArrowRight, LuDownload, LuPartyPopper, LuPlay, LuStar } from 'react-icons/lu'
@@ -148,7 +148,7 @@ export function CompletionOverlay({
                   alignItems="center"
                   justifyContent="center"
                 >
-                  <Icon as={LuPartyPopper} boxSize={8} color="player.control" />
+                  <LuPartyPopper size={32} color="var(--chakra-colors-player-control)" />
                 </Box>
                 <Heading size="xl" color="player.control">
                   Аниме завершено!
@@ -177,7 +177,7 @@ export function CompletionOverlay({
                   <Box bg="whiteAlpha.100" borderRadius="xl" p={6} border="1px" borderColor="whiteAlpha.200">
                     <VStack gap={4} align="stretch">
                       <HStack gap={2}>
-                        <Icon as={LuArrowRight} color="purple.400" />
+                        <LuArrowRight color="var(--chakra-colors-purple-400)" />
                         <Text color="whiteAlpha.800" fontWeight="medium">
                           Что смотреть дальше
                         </Text>
@@ -232,13 +232,13 @@ export function CompletionOverlay({
                       {suggestion.isInLibrary && suggestion.firstEpisodeId
                         ? (
                           <Button colorPalette="purple" size="lg" onClick={handleWatchSequel}>
-                            <Icon as={LuPlay} mr={2} />
+                            <LuPlay style={{ marginRight: '8px' }} />
                             Смотреть {suggestion.relationLabel.toLowerCase()}
                           </Button>
                         )
                         : (
                           <Button colorPalette="purple" variant="outline" size="lg" onClick={handleAddToLibrary}>
-                            <Icon as={LuDownload} mr={2} />
+                            <LuDownload style={{ marginRight: '8px' }} />
                             Добавить в библиотеку
                           </Button>
                         )}
@@ -254,11 +254,11 @@ export function CompletionOverlay({
               {/* Дополнительные действия */}
               <HStack gap={4} justify="center">
                 <Button variant="ghost" colorPalette="whiteAlpha" onClick={handleBack}>
-                  <Icon as={LuArrowLeft} mr={2} />
+                  <LuArrowLeft style={{ marginRight: '8px' }} />
                   {backLabel}
                 </Button>
                 <Button variant="ghost" colorPalette="whiteAlpha">
-                  <Icon as={LuStar} mr={2} />
+                  <LuStar style={{ marginRight: '8px' }} />
                   Оценить
                 </Button>
               </HStack>

@@ -13,7 +13,7 @@
  * Рефакторинг v2: логика вынесена в хуки, UI — в подкомпоненты
  */
 
-import { Box, Icon, IconButton } from '@chakra-ui/react'
+import { Box, IconButton } from '@chakra-ui/react'
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { LuChevronLeft, LuChevronRight, LuPictureInPicture } from 'react-icons/lu'
 
@@ -501,7 +501,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
             disabled={!hasPrevEpisode}
             onClick={onPrevEpisode}
           >
-            <Icon as={LuChevronLeft} color="player.control" />
+            <LuChevronLeft color="var(--chakra-colors-player-control)" />
           </IconButton>
         </Tooltip>
         <Tooltip content={nextEpisodeTooltip || 'Следующий эпизод'}>
@@ -513,7 +513,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
             disabled={!hasNextEpisode}
             onClick={onNextEpisode}
           >
-            <Icon as={LuChevronRight} color="player.control" />
+            <LuChevronRight color="var(--chakra-colors-player-control)" />
           </IconButton>
         </Tooltip>
       </>
@@ -531,7 +531,9 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
           size="sm"
           onClick={togglePiP}
         >
-          <Icon as={LuPictureInPicture} color={isPiP ? 'primary.fg' : 'player.control'} />
+          <LuPictureInPicture
+            color={isPiP ? 'var(--chakra-colors-primary-fg)' : 'var(--chakra-colors-player-control)'}
+          />
         </IconButton>
       </Tooltip>
     ),

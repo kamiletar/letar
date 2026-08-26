@@ -15,7 +15,7 @@
  * - Home: Сбросить смещение к 0
  */
 
-import { Box, HStack, Icon, IconButton, Slider, Text, VStack } from '@chakra-ui/react'
+import { Box, HStack, IconButton, Slider, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   LuChevronLeft,
@@ -429,7 +429,7 @@ export function DualVideoPlayer({
           <HStack gap={2}>
             {/* Play/Pause */}
             <IconButton aria-label={isPlaying ? 'Pause' : 'Play'} onClick={togglePlay} variant="ghost" size="sm">
-              <Icon as={isPlaying ? LuPause : LuPlay} />
+              {isPlaying ? <LuPause /> : <LuPlay />}
             </IconButton>
 
             {/* Время */}
@@ -445,7 +445,7 @@ export function DualVideoPlayer({
               size="sm"
               title=", — кадр назад"
             >
-              <Icon as={LuChevronLeft} />
+              <LuChevronLeft />
             </IconButton>
             <IconButton
               aria-label="Step forward"
@@ -454,7 +454,7 @@ export function DualVideoPlayer({
               size="sm"
               title=". — кадр вперёд"
             >
-              <Icon as={LuChevronRight} />
+              <LuChevronRight />
             </IconButton>
           </HStack>
 
@@ -490,7 +490,7 @@ export function DualVideoPlayer({
               size="sm"
               title="D — показать/скрыть донор"
             >
-              <Icon as={showDonor ? LuEye : LuEyeOff} />
+              {showDonor ? <LuEye /> : <LuEyeOff />}
             </IconButton>
 
             {/* Сбросить смещение */}
@@ -501,7 +501,7 @@ export function DualVideoPlayer({
               size="sm"
               title="Home — сбросить смещение"
             >
-              <Icon as={LuRotateCcw} />
+              <LuRotateCcw />
             </IconButton>
 
             {/* Volume */}
@@ -512,7 +512,7 @@ export function DualVideoPlayer({
               size="sm"
               title="M — звук"
             >
-              <Icon as={isMuted ? LuVolumeX : LuVolume2} />
+              {isMuted ? <LuVolumeX /> : <LuVolume2 />}
             </IconButton>
 
             {/* Fullscreen */}
@@ -523,7 +523,7 @@ export function DualVideoPlayer({
               size="sm"
               title="F — полноэкранный режим"
             >
-              <Icon as={isFullscreen ? LuMinimize : LuMaximize} />
+              {isFullscreen ? <LuMinimize /> : <LuMaximize />}
             </IconButton>
           </HStack>
         </HStack>

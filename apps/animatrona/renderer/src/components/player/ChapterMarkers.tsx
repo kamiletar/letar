@@ -8,7 +8,7 @@
  * - Кнопку "Пропустить опенинг/эндинг" при приближении к этим сегментам
  */
 
-import { Box, Button, Icon } from '@chakra-ui/react'
+import { Box, Button } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { LuSkipForward } from 'react-icons/lu'
 
@@ -110,7 +110,7 @@ export function ChapterMarkers({
         animation="fadeIn 0.3s ease-out"
         boxShadow="0 4px 12px rgba(0, 0, 0, 0.4)"
       >
-        <Icon as={LuSkipForward} mr={2} />
+        <LuSkipForward style={{ marginRight: '8px' }} />
         {activeSkipChapter.type ? SKIP_LABELS[activeSkipChapter.type] : 'Пропустить'}
       </Button>
     </Box>
