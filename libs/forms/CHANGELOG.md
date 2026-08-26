@@ -4,6 +4,36 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.8.0] - 2026-08-26
+
+### Added
+
+- **`Form.Field.EditIntent`** — явная замена значения без передачи старого клиенту (API key/
+  Client Secret и т.п.). View mode показывает только безопасный `displayValue` (маска вида
+  `************P9x4`) и кнопку «Заменить»; клик атомарно переводит поле в edit mode
+  (`{isEdited: true, value: emptyValue}`) и монтирует дочернее поле с переводом фокуса в него.
+  «Отмена» атомарно возвращает `{isEdited: false, value: null}`, дочерний ввод размонтируется.
+  `isEdited` — пользовательский intent, а не производная от `isDirty`: старый secret намеренно
+  неизвестен клиенту, сравнивать значения не с чем. Value-контракт `EditIntentValue<T>` и
+  `editIntentValueSchema()` — новый подпуть `@letar/forms-core/edit-intent`
+  (`@letar/forms-core` 0.9.3 → 0.10.0). Headless view/edit/focus-логика — новый
+  `useEditIntentField` в `@letar/forms-react` (0.3.3 → 0.4.0), подписывается на значение
+  реактивно через `useStore(form.store, ...)` внутри `useFieldState` — вызов хука напрямую в
+  render-prop `<form.Field>` невозможен (TanStack Form зовёт `children` из собственного
+  `useMemo`, хуки там запрещены). Тот же паттерн и хук использует `@letar/forms-shadcn`
+  (0.33.6 → 0.34.0) — скины отличаются только вёрсткой. `FromSchema`/`AutoFields` распознают
+  meta `fieldType: 'editIntent'` только с явно заданными `fieldProps.innerField`
+  (`'Password'` | `'String'`) и `fieldProps.displayValue` — без обоих полей предупреждение в
+  dev-консоли и `Form.Field.String`-фоллбек, автоугадывание типа по union-схеме намеренно не
+  реализовано (составное значение секрета не должно определяться эвристикой).
+  ⚠️ **Security-контур неполный**: `sensitive` (по умолчанию `true`) — только маркер на проп,
+  общего автоматического redaction-слоя (persistence/URL sync/analytics/DebugValues/offline
+  queue) в библиотеке сегодня нет ни для одного поля — потребитель обязан вручную исключать
+  `${name}.value` из `useFormPersistence({ excludeFields })`/`Form.UrlSync`/аналитики. Запрошено
+  владельцем монорепо (Kami) напрямую, backlog `libs/forms/PLAN.md` [2026-08-23]. Тесты — схема
+  (`edit-intent-value.spec.ts`), headless-хук (`use-edit-intent-field.spec.tsx` в forms-react),
+  UI (Chakra `field-edit-intent.spec.tsx` 7 тестов, shadcn `field-edit-intent.spec.tsx` 5 тестов).
+
 ## [2.7.8] - 2026-08-26
 
 ### Fixed

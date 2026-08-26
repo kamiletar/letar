@@ -43,6 +43,7 @@ import { FieldTags } from './form-fields/selection/field-tags'
 
 import { FieldAddress } from './form-fields/specialized/field-address'
 import { FieldColorPicker } from './form-fields/specialized/field-color-picker'
+import { FieldEditIntent } from './form-fields/specialized/field-edit-intent'
 import { FieldFileUpload } from './form-fields/specialized/field-file-upload'
 import { FieldOTPInput } from './form-fields/specialized/field-otp-input'
 import { FieldPhone } from './form-fields/specialized/field-phone'
@@ -420,6 +421,41 @@ export function renderFieldByType(type: FieldComponentType, props: FieldRenderPr
     }
     case 'maskedInput':
       return <FieldMaskedInput key={name} {...baseProps} {...fieldProps} />
+
+    case 'editIntent': {
+      // PLAN.md намеренно требует явный inner field в meta — по произвольному object union
+      // угадывать секретность нельзя (в отличие от select/enum-полей выше). Без innerField/
+      // displayValue/emptyValue это не "рискованный автовыбор", а неполная конфигурация —
+      // предупреждаем и падаем в string, не пытаясь спредом обмануть обязательные пропсы.
+      const { innerField, displayValue, emptyValue, ...editIntentProps } = fieldProps as {
+        innerField?: 'Password' | 'String'
+        displayValue?: ReactNode
+        emptyValue?: unknown
+      } & Record<string, unknown>
+
+      if (innerField && displayValue !== undefined) {
+        const InnerField = innerField === 'Password' ? FieldPassword : FieldString
+        return (
+          <FieldEditIntent
+            key={name}
+            {...baseProps}
+            {...editIntentProps}
+            displayValue={displayValue}
+            emptyValue={emptyValue ?? ''}
+          >
+            <InnerField
+              name={`${name}.value`}
+              {...(innerField === 'Password' ? { autoComplete: 'new-password' } : {})}
+            />
+          </FieldEditIntent>
+        )
+      }
+
+      console.warn(
+        `Form.Field.EditIntent "${name}" requires fieldProps.innerField ('Password' | 'String') and fieldProps.displayValue — falling back to string`,
+      )
+      return <FieldString key={name} {...baseProps} {...editIntentProps} />
+    }
 
     default:
       // Fallback to string

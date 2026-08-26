@@ -1,6 +1,7 @@
 // Auto field
 export { type AutoFieldConfig, type AutoFieldProps, camelCaseToLabel, FieldAuto } from './auto'
 // Base utilities from base/
+export type { EditIntentFieldProps } from '../types'
 export {
   createField,
   FieldError,
@@ -71,6 +72,7 @@ export { FieldYesNo, type YesNoFieldProps } from './selection/field-yes-no'
 export { FieldAddress } from './specialized/field-address'
 export { FieldCity } from './specialized/field-city'
 export { type ColorPickerFieldProps, FieldColorPicker } from './specialized/field-color-picker'
+export { FieldEditIntent } from './specialized/field-edit-intent'
 export { FieldFileUpload, type FileUploadFieldProps } from './specialized/field-file-upload'
 export { FieldOTPInput } from './specialized/field-otp-input'
 export { FieldPhone } from './specialized/field-phone'

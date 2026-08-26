@@ -898,7 +898,7 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
   предложенного фикса неактуальна. Регресс-тест — `field-checkbox.spec.tsx`, блок
   «touch target (WCAG 2.5.5)».
 
-### [2026-08-23] `EditIntentValue<T>` — явная замена значения без передачи старого
+### 🟡 [2026-08-23] `EditIntentValue<T>` — явная замена значения без передачи старого — частично закрыто
 
 - **Запросил:** владелец монорепо (Kami), исходный контракт:
   `{ isEdited: boolean; value: ValueType }`; первый consumer — OAuth/OIDC/API keys в
@@ -981,16 +981,36 @@ inline-редактирование текста. Если `ReplaceValue` ока
 
 **Definition of Done:**
 
-- [ ] schema tests: обе валидные ветки, `false + value`, `true + null`, невалидное `T`, strip
-      неизвестных ключей и JSON round-trip;
-- [ ] UI tests: view → edit → cancel, create mode, focus, disabled/loading, reset после success,
-      nested server error, keyboard и screen reader names;
-- [ ] security tests: mask не становится value, mask-as-input отклоняется, sensitive value не
-      появляется в persistence/history/analytics/debug/offline/URL snapshots;
-- [ ] generic tests: `string` API key и object `ValueType`, чтобы контракт не зашился под строки;
-- [ ] единая contract suite для Chakra/shadcn и framework adapters;
-- [ ] README, `docs/fields.md`, form-docs, form-mcp, CHANGELOG и версии обновлены вместе с
-      реализацией.
+- [x] schema tests: обе валидные ветки, `false + value`, `true + null`, невалидное `T`, strip
+      неизвестных ключей и JSON round-trip — `edit-intent-value.spec.ts` (`@letar/forms-core`);
+- [x] UI tests (базовый набор): view → edit → cancel, create mode, focus — Chakra
+      `field-edit-intent.spec.tsx` (7 тестов) и shadcn `field-edit-intent.spec.tsx` (5 тестов).
+      **Не сделано:** disabled/loading state, reset после success, nested server error
+      (`${name}.value` ошибка сервера), keyboard/screen-reader-names — отдельная задача;
+- [ ] security tests и сама security-инфраструктура — **не реализовано**. `sensitive` (default
+      `true`) сегодня — только маркер на пропе, не подключён ни к чему: в библиотеке вообще нет
+      общего redaction-слоя (`useFormPersistence`/`Form.UrlSync`/`FormDebugValues`/analytics
+      adapters/offline queue не умеют исключать поля по мете, только вручную через
+      `excludeFields`). До этой задачи такой инфраструктуры не было ни у одного поля —
+      строить её нужно отдельно, не только для `EditIntent`. Mask-as-input rejection —
+      ответственность server fixture (уже задокументирована в «Поведении» выше), не клиента;
+- [x] generic tests: `string` API key и object `ValueType` — оба покрыты в
+      `edit-intent-value.spec.ts` (`editIntentValueSchema(z.object({...}).strip())`);
+- [x] `@letar/forms-core/edit-intent` (тип + `editIntentValueSchema`/`emptyEditIntentValue`/
+      `startEditIntentValue`, 0.9.3 → 0.10.0), `@letar/forms-react` `useEditIntentField`
+      (headless view/edit/focus-контракт, 0.3.3 → 0.4.0), `Form.Field.EditIntent` в
+      `@letar/forms` (Chakra, 2.7.8 → 2.8.0) и `@letar/forms-shadcn` (0.33.6 → 0.34.0) — одна
+      headless-логика, разная вёрстка. `FromSchema`/`AutoFields` — `fieldType: 'editIntent'`
+      только с явным `fieldProps.innerField`/`displayValue` (без автоугадывания, как и
+      требовалось);
+  - [ ] **Не сделано:** отдельная unified contract suite поверх обоих скинов (сейчас — два
+        независимых набора тестов с одинаковыми сценариями, не общий helper);
+  - [ ] **Не сделано:** `forms-vue`/`forms-vue-shadcn`/`forms-angular` parity;
+- [x] `docs/fields.md` (таблица + детальный раздел), `CHANGELOG.md` и версии всех четырёх
+      пакетов обновлены вместе с реализацией.
+  - [ ] **Не сделано:** `README.md` библиотеки, `form-docs`/`form-example` (демо-страницы),
+        `form-mcp` — детальный H2-раздел для `get_field_props`/`get_field_example` (таблица в
+        `docs/fields.md` уже даёт `list_fields`/базовый `get_field_props` без `details`).
 
 ### [2026-08-20] Баг: Form.Field.TableEditor застревает в нераскрытом Suspense-boundary (от form-example)
 

@@ -2,6 +2,7 @@
 
 import type { PhoneCountry } from '@letar/forms-core/phone'
 import type { BaseFieldProps } from '@letar/forms-react'
+import type { ReactNode } from 'react'
 
 /**
  * `BaseFieldProps` переехал в `@letar/forms-react` (Фаза 7.3): он одинаков для любого скина —
@@ -73,6 +74,36 @@ export interface PasswordStrengthFieldProps extends BaseFieldProps {
   showRequirements?: boolean
   /** Default visibility */
   defaultVisible?: boolean
+}
+
+/**
+ * Props for the EditIntent field — explicit replace-value-without-returning-old-one
+ * (API key/Client Secret и т.п., см. `libs/forms/PLAN.md` backlog `EditIntentValue<T>`).
+ */
+export interface EditIntentFieldProps<T = unknown> extends Omit<BaseFieldProps, 'placeholder'> {
+  /**
+   * Безопасный индикатор view mode — маска (`************P9x4`) или статус («настроено»).
+   * Никогда не копируется в `value`, отдельный проп именно для этого.
+   */
+  displayValue: ReactNode
+  /** Текст кнопки перехода в edit mode. @default 'Заменить' */
+  editLabel?: string
+  /** Текст кнопки отмены edit mode (возврат к view mode). @default 'Оставить текущее' */
+  cancelLabel?: string
+  /**
+   * Значение, с которого стартует дочернее поле при входе в edit mode
+   * (например `''` для строкового API-ключа).
+   */
+  emptyValue: T
+  /**
+   * Помечает содержимое как чувствительное — потребитель обязан вручную исключить путь
+   * `${name}.value` из `useFormPersistence({ excludeFields })`/`Form.UrlSync`/аналитики: общего
+   * автоматического redaction-слоя на всю форму сегодня нет (см. `libs/forms/PLAN.md`,
+   * секция «Безопасность» записи `EditIntentValue<T>`). @default true
+   */
+  sensitive?: boolean
+  /** Дочернее поле, рендерящееся в edit mode (обычно `Form.Field.Password name="${name}.value"`). */
+  children: ReactNode
 }
 
 // ============================================================================

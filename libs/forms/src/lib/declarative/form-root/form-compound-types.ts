@@ -13,6 +13,7 @@ import type {
   ComboboxFieldProps,
   DateRangeFieldProps,
   EditableFieldProps,
+  EditIntentFieldProps,
   FileUploadFieldProps,
   HiddenFieldProps,
   ImageChoiceFieldProps,
@@ -110,6 +111,7 @@ export interface FormFieldComponents {
     showRequirements?: boolean
   }) => ReactElement
   Editable: (props: EditableFieldProps) => ReactElement
+  EditIntent: <T = unknown>(props: EditIntentFieldProps<T>) => ReactElement
   RichText: (props: RichTextFieldProps) => ReactElement
   MaskedInput: (props: { name?: string; label?: string; mask: string; placeholder?: string }) => ReactElement
 

@@ -33,6 +33,7 @@ export type {
   DateFieldProps,
   DateTimePickerFieldProps,
   DurationFieldProps,
+  EditIntentFieldProps,
   MaskedInputFieldProps,
   NumberFieldProps,
   NumberInputFieldProps,

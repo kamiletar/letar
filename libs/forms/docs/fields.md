@@ -62,19 +62,20 @@
 
 ## Специализированные
 
-| Компонент                | Описание                               |
-| ------------------------ | -------------------------------------- |
-| `Form.Field.Auto`        | Автоопределение типа из Zod схемы      |
-| `Form.Field.PinInput`    | Ввод PIN/OTP кода                      |
-| `Form.Field.OTPInput`    | OTP код с таймером resend              |
-| `Form.Field.ColorPicker` | Выбор цвета                            |
-| `Form.Field.FileUpload`  | Загрузка файлов                        |
-| `Form.Field.Phone`       | Телефон с маской                       |
-| `Form.Field.MaskedInput` | Универсальная маска                    |
-| `Form.Field.Address`     | Адрес с автодополнением (DaData)       |
-| `Form.Field.City`        | Город с автодополнением (DaData)       |
-| `Form.Field.Signature`   | Цифровая подпись (canvas draw + typed) |
-| `Form.Field.CreditCard`  | Данные банковской карты                |
+| Компонент                | Описание                                                     |
+| ------------------------ | ------------------------------------------------------------ |
+| `Form.Field.Auto`        | Автоопределение типа из Zod схемы                            |
+| `Form.Field.PinInput`    | Ввод PIN/OTP кода                                            |
+| `Form.Field.OTPInput`    | OTP код с таймером resend                                    |
+| `Form.Field.ColorPicker` | Выбор цвета                                                  |
+| `Form.Field.FileUpload`  | Загрузка файлов                                              |
+| `Form.Field.Phone`       | Телефон с маской                                             |
+| `Form.Field.MaskedInput` | Универсальная маска                                          |
+| `Form.Field.Address`     | Адрес с автодополнением (DaData)                             |
+| `Form.Field.City`        | Город с автодополнением (DaData)                             |
+| `Form.Field.Signature`   | Цифровая подпись (canvas draw + typed)                       |
+| `Form.Field.CreditCard`  | Данные банковской карты                                      |
+| `Form.Field.EditIntent`  | Замена значения без передачи старого (API key/Client Secret) |
 
 ## Опросные поля
 
@@ -440,6 +441,42 @@ import { zRu } from '@letar/forms/validators/ru'
 ```
 
 **Props:** `compute` (обязательно), `deps` (зависимости), `format` (форматирование), `hidden` (без рендера).
+
+---
+
+## Form.Field.EditIntent — Замена значения без передачи старого (v2.8.0+)
+
+Для секретов, которые сервер не может (или не должен) вернуть клиенту повторно — API-ключ,
+Client Secret и т.п. View mode показывает только безопасный `displayValue` (маска вида
+`************P9x4`) и кнопку «Заменить». Клик атомарно переводит поле в edit mode и монтирует
+дочернее поле; «Отмена» атомарно возвращает view mode, дочерний ввод размонтируется вместе со
+своим значением.
+
+```tsx
+const ApiKeyEditSchema = z.object({
+  apiKey: editIntentValueSchema(z.string().min(20)),
+}).strip()
+
+<Form.Field.EditIntent name="apiKey" displayValue="************P9x4" emptyValue="">
+  <Form.Field.Password name="apiKey.value" autoComplete="new-password" />
+</Form.Field.EditIntent>
+```
+
+Значение в форме — `EditIntentValue<T>` из `@letar/forms-core/edit-intent`:
+`{ isEdited: false; value: null } | { isEdited: true; value: T }`. `isEdited` — пользовательский
+intent, а не производная от `isDirty`: старый secret намеренно неизвестен клиенту, сравнивать
+значения не с чем. Server action обновляет значение только при `isEdited: true`.
+
+**Props:** `displayValue` (обязательно), `emptyValue` (обязательно — старт дочернего поля),
+`editLabel` (по умолчанию «Заменить»), `cancelLabel` (по умолчанию «Оставить текущее»),
+`sensitive` (по умолчанию `true` — потребитель обязан вручную исключить `${name}.value` из
+`useFormPersistence({ excludeFields })`/`Form.UrlSync`/аналитики, общего автоматического
+redaction-слоя на всю форму пока нет), `children` (обязательно — дочернее поле для edit mode).
+
+**FromSchema/AutoFields:** через meta `fieldType: 'editIntent'` с обязательным
+`fieldProps.innerField` (`'Password'` | `'String'`) и `fieldProps.displayValue` — без обоих полей
+рендерится предупреждение в dev-консоли и `Form.Field.String`-фоллбек, автоугадывание типа
+намеренно не поддерживается (составное значение секрета не должно определяться эвристикой).
 
 ---
 
