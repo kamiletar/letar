@@ -55,7 +55,19 @@ function getUIMeta(schema: any): FieldUIMeta | undefined {
 
   try {
     const meta = schema.meta()
-    return meta?.ui as FieldUIMeta | undefined
+    if (meta?.ui) {
+      return meta.ui as FieldUIMeta
+    }
+
+    // Zod v4 registry ключуется по идентичности объекта — обёртка optional/nullable
+    // не видит мету внутренней схемы (см. schema-meta.ts getFieldMeta)
+    const unwrapped = unwrapSchemaWithRequired(schema).schema
+    if (unwrapped && unwrapped !== schema && typeof unwrapped.meta === 'function') {
+      const innerMeta = unwrapped.meta()
+      return innerMeta?.ui as FieldUIMeta | undefined
+    }
+
+    return undefined
   } catch {
     return undefined
   }

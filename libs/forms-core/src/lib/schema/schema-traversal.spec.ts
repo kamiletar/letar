@@ -68,6 +68,31 @@ describe('traverseSchema', () => {
     expect(fields[0].ui?.fieldType).toBe('richText')
   })
 
+  it('извлекает ui.options из enum-схемы, обёрнутой в .nullable().optional()', () => {
+    // Типичный вывод @letar/zenstack-form-plugin для nullable enum-поля модели —
+    // мета висит на самой enum-схеме, а поле оборачивается в nullable().optional()
+    const moodSchema = z.enum(['happy', 'sad']).meta({
+      ui: {
+        options: [
+          { value: 'happy', label: 'Радость' },
+          { value: 'sad', label: 'Грусть' },
+        ],
+      },
+    })
+
+    const schema = z.object({
+      mood: moodSchema.nullable().optional(),
+    })
+
+    const fields = traverseSchema(schema)
+
+    expect(fields[0].required).toBe(false)
+    expect(fields[0].ui?.options).toEqual([
+      { value: 'happy', label: 'Радость' },
+      { value: 'sad', label: 'Грусть' },
+    ])
+  })
+
   it('определяет optional поля как необязательные', () => {
     const schema = z.object({
       required: z.string(),

@@ -38,10 +38,23 @@ export function getFieldMeta(schema: any, path: string): FieldSchemaInfo {
     return { required: false }
   }
 
-  // Zod v4: meta is stored in globalRegistry, accessed via .meta() method
+  // Zod v4: meta is stored in globalRegistry, keyed by schema object identity —
+  // ZodOptional/ZodNullable — отдельный объект, .meta() на обёртке не видит мету,
+  // повешенную на внутреннюю схему (типичный случай — enum-схема из
+  // @letar/zenstack-form-plugin, обёрнутая в .nullable().optional())
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fieldSchema = result.schema as any
-  const meta = typeof fieldSchema?.meta === 'function' ? fieldSchema.meta() : undefined
+  let meta = typeof fieldSchema?.meta === 'function' ? fieldSchema.meta() : undefined
+
+  if (!meta?.ui) {
+    const unwrapped = unwrapSchemaWithRequired(fieldSchema).schema
+    if (unwrapped && unwrapped !== fieldSchema && typeof unwrapped.meta === 'function') {
+      const innerMeta = unwrapped.meta()
+      if (innerMeta?.ui) {
+        meta = innerMeta
+      }
+    }
+  }
 
   return {
     ui: meta?.ui as FieldUIMeta | undefined,
