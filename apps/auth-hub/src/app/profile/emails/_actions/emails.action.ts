@@ -2,7 +2,7 @@
 
 import { auth, requireAuth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { reportEmailFailure, sendVerificationEmail } from '@letar/email'
+import { sendVerificationEmail } from '@letar/email'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { randomBytes } from 'node:crypto'
@@ -55,9 +55,9 @@ export async function requestAddEmail(input: unknown) {
   const verificationUrl = `${
     process.env.BETTER_AUTH_URL ?? 'http://localhost:3014'
   }/profile/emails/verify?token=${token}`
+  // provider.sendEmail уже вызывает reportEmailFailure при провале SMTP — здесь не дублируем.
   const result = await sendVerificationEmail({ to: email, userName: session.user.name ?? undefined, verificationUrl })
   if (!result.success) {
-    reportEmailFailure({ type: 'verification', to: email, error: result.error ?? 'unknown' })
     return { error: 'Не удалось отправить письмо подтверждения' }
   }
 
