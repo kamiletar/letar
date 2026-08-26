@@ -1910,5 +1910,9 @@ staging подтверждён.
       `CookieBanner` (тот же паттерн, что уже применён к `StickyActionBar` из `@letar/ui`, см.
       `.claude/docs/ui-components.md` § «Координация bottom-anchored компонентов»). Проверено
       живьём в браузере — `bottom` баннера резолвится ровно в высоту `CookieBanner`.
+- [x] **`OfflineConsentBanner` вынесен в `@letar/ui`** (2026-08-26) — дубль из пяти приложений
+      заменён на общий компонент; `apps/mandala/.../offline-consent-banner.tsx` теперь тонкая
+      обёртка, маппит `useTranslations('offlineBanner')` в пропы `@letar/ui`. Детали — `PLAN.md`
+      §64 в корне репо.
 
 **Последнее обновление:** 2026-08-26
