@@ -4,6 +4,23 @@
 
 > **Архив обновлён:** 2026-08-26
 
+## Чистка `Icon as=` в `renderer/src/app/**` — codemod + ручная доработка (2026-08-26, доп.)
+
+42 файла, 17 из них с оставшимся `Icon as=` доведены вручную (codemod `chakra-icon-as-cleanup.mjs`
+дал 0 автоконверсий — все 56 узлов без `boxSize=`, что не редкость — codemod сознательно не
+угадывает размер). Типовые случаи: инлайн-иконка перед текстом кнопки → `size={16}` по контексту,
+`mr`/`ml` → `style={{ marginRight/marginLeft }}`, тернарник `as={cond ? A : B}` → JSX-тернарник с
+двумя иконками, локальная переменная через capitalized alias (`const IconComponent = ...`).
+Отдельный паттерн — три карточки статистики в `reputation/_components/`
+(`StatsCard`/`ReputationCard`/`BonusPointsCard`) с пропом `icon: React.ElementType` — фикс
+`{ icon: IconComponent }` в деструктуризации + `color` через
+`` `var(--chakra-colors-${color.replaceAll('.', '-')})` `` вместо буквального токена.
+
+Работа была изначально делегирована фоновому агенту, убитому лимитом сессии API — один файл
+(`TrackerPublishingCard.tsx`) остался в буквально неконсистентном состоянии (импорт `Icon` убран,
+использование — нет, `TS2304`), починен первым же делом. Коммит `3d927090`.
+`typecheck:tsgo`+`lint` зелёные. Подробности рецепта — `.claude/docs/chakra-icon-as-prop-cleanup-pattern.md`.
+
 ## Стабилизация `animatrona-main:build` — 38 TS-ошибок + флаки (2026-08-26)
 
 Закрыт открытый вопрос из `PLAN.md` (после фикса `tracker-client.ts` в предыдущей сессии).
