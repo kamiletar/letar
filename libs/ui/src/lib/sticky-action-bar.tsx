@@ -67,7 +67,15 @@ export const StickyActionBar = forwardRef<HTMLDivElement, StickyActionBarProps>(
       // из баннера). Переменная публикуется самим CookieBanner, 0px если он скрыт/не подключён.
       bottom="var(--letar-cookie-banner-height, 0px)"
       insetInline="0"
-      zIndex="docked"
+      // ⚠️ Одного bottom-отступа недостаточно: он спасает только когда панель уже в «застрявшем»
+      // (stuck) sticky-состоянии. На короткой странице (archetest quiz-intro — интро без скролла)
+      // панель может ещё не «застрять» и стоять в обычном потоке прямо у нижнего края страницы —
+      // ровно там же, где всегда сидит fixed-баннер. Тогда решает только zIndex, а "docked" (10)
+      // на порядки ниже CookieBanner по умолчанию (1000) — баннер перехватывает клики по CTA.
+      // Регресс найден 2026-08-27: 3 e2e archetest (firefox/webkit — там расчёт высоты интро от
+      // шрифта чуть отличается от chromium) падали на перехвате клика по «Начать экспресс»
+      // чужим chakra-stack. "sticky" (1100) гарантированно выше дефолтного zIndex CookieBanner.
+      zIndex="sticky"
       w="100%"
       bg="bg"
       borderTopWidth="1px"
