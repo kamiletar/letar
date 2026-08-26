@@ -3240,3 +3240,13 @@ peer-диапазон в `libs/query-provider/package.json` на будущее)
 
 **Заведены фоновые чипы:** studio `prisma.$transaction` мок-баг в тесте вебхука Точки,
 `@letar/studio-mcp` отсутствие тестов (низкий приоритет — просто пробел, не баг).
+
+**Дополнение 2026-08-26: пробел `@letar/studio-mcp` закрыт.** Добавлены `money.spec.ts`,
+`config.spec.ts`, `client.spec.ts`, `server.spec.ts` (42 теста). `server.spec.ts` инструменты
+проверены не рефлексией по внутренним полям SDK, а настоящим MCP `Client` +
+`InMemoryTransport` из `@modelcontextprotocol/sdk` — покрыты успешные вызовы всех 15
+инструментов, ошибки валидации Zod (SDK на невалидных аргументах возвращает `isError: true` с
+текстом `Input validation error`, а не бросает исключение — не intuitивно, стоит учитывать при
+написании тестов для других `*-mcp` библиотек с тем же паттерном) и ошибки внешнего API
+(`ok: false` от `studioAdminRequest`). `nx test/typecheck:tsgo/lint @letar/studio-mcp` — зелёные,
+коммит `0c92f3e6`.
