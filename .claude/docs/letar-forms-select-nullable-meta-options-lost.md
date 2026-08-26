@@ -1,5 +1,9 @@
 # Field.Select теряет meta ui.options через .nullable().optional()
 
+> ✅ **Исправлено 2026-08-26** (`@letar/forms-core` 0.9.2 → 0.9.3, `@letar/forms` 2.7.8) —
+> см. раздел «Статус» ниже. Документ оставлен как разбор класса бага (Zod v4 registry
+> keyed by identity), может повториться в другом месте той же природы.
+
 ## Симптом
 
 `Form.Field.Select` без явного prop `options` рендерится пустым: `<select aria-hidden>` (native
@@ -23,7 +27,7 @@ mood: ProductMoodFormSchema.nullable().optional()
 где `ProductMoodFormSchema` (из `enums/ProductMood.form.ts`) несёт валидный
 `.meta({ ui: { options: [...] } })`.
 
-## Причина
+## Причина (root cause)
 
 `Form.Field.Select` без явного `options` берёт список из `resolved.options`
 ([field-select.tsx:70](/libs/forms/src/lib/declarative/form-fields/selection/field-select.tsx#L70)):
@@ -33,11 +37,14 @@ mood: ProductMoodFormSchema.nullable().optional()
 const sourceOptions = componentProps.options ?? resolved.options ?? []
 ```
 
-Сама enum-схема несёт корректный `.meta({ui:{options:[...]}})`, но резолвер поля (то, что строит
-`resolved`) не разворачивает `ZodNullable`/`ZodOptional` при поиске `.meta()` на вложенной схеме
-— поэтому для `.nullable().optional()`-обёртки `resolved.options` приходит пустым массивом.
+Сама enum-схема несёт корректный `.meta({ui:{options:[...]}})`. Настоящая причина — не в
+`field-select.tsx`, а в резолвере меты (`@letar/forms-core`, `schema-meta.ts`/`schema-traversal.ts`):
+Zod v4 хранит `.meta()` в глобальном registry, ключуясь по **идентичности объекта** схемы
+(`registry._map.get(schema)`), а не разворачивая обёртки. `ZodOptional`/`ZodNullable` — новый
+объект схемы поверх внутренней enum-схемы, и `.meta()` на этой обёртке не видит мету, повешенную
+на внутреннюю схему до `.nullable()`/`.optional()`.
 
-## Обходной путь
+## Обходной путь (больше не нужен после фикса, оставлен для истории)
 
 Передать `options` явно, собрав их из экспортированных лейблов enum-схемы:
 
@@ -49,16 +56,21 @@ const sourceOptions = componentProps.options ?? resolved.options ?? []
 />
 ```
 
-Образец применения — `apps/aboi/src/app/[locale]/admin/products/_components/product-form.tsx`.
+Применялся в `apps/aboi/src/app/[locale]/admin/products/_components/product-form.tsx` — можно
+снять отдельным заходом aboi-dev, теперь `options` резолвятся из meta автоматически.
 
-## Предполагаемый фикс (для библиотеки, не применён)
+## Фикс
 
-В `useFieldState` разворачивать `ZodNullable`/`ZodOptional` (аналогично тому, как это, судя по
-всему, уже делается для `resolved.required`/`resolved.disabled`) перед поиском `.meta()` на схеме
-поля.
+`getFieldMeta` (`libs/forms-core/src/lib/schema/schema-meta.ts`) и `getUIMeta` внутри
+`traverseSchema` (`libs/forms-core/src/lib/schema/schema-traversal.ts`, используется
+`FromSchema`/`AutoFields`) теперь пробуют `.meta()` сначала на схеме как есть, и только если там
+пусто — на схеме, развёрнутой через `unwrapSchemaWithRequired`. Порядок проверки (сначала
+как есть) намеренно сохраняет уже работавший случай `z.string().default('x').meta(...)`, где мета
+висит на самой обёртке `.default()`, а не на внутренней схеме — если бы разворачивали всегда,
+этот случай сломался бы в обратную сторону.
 
 ## Статус
 
-Открытый backlog-пункт `@letar/forms` — `libs/forms/PLAN.md`, раздел «Backlog (запросы от
-агентов)», запись [2026-08-26]. Класс дефекта общий: любое nullable/optional enum-поле в любом
-приложении с `Form.Field.Select` без явного `options`.
+✅ Закрыто 2026-08-26 (`@letar/forms-core` 0.9.2 → 0.9.3, `@letar/forms` 2.7.8) — подробности в
+`libs/forms/CHANGELOG.md` и `libs/forms/PLAN.md` (Backlog, запись [2026-08-26], помечена
+закрытой). Регресс-тесты — `schema-meta.spec.ts` (новый файл), кейс в `schema-traversal.spec.ts`.
