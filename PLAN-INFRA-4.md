@@ -3250,3 +3250,18 @@ peer-диапазон в `libs/query-provider/package.json` на будущее)
 написании тестов для других `*-mcp` библиотек с тем же паттерном) и ошибки внешнего API
 (`ok: false` от `studioAdminRequest`). `nx test/typecheck:tsgo/lint @letar/studio-mcp` — зелёные,
 коммит `0c92f3e6`.
+
+**Дополнение 2026-08-26 (сессия 2): тот же пробел закрыт у 4 соседних `*-mcp` библиотек.**
+Паттерн из предыдущего дополнения задокументирован отдельно —
+[mcp-tool-handler-testing-pattern.md](/.claude/docs/mcp-tool-handler-testing-pattern.md) — и
+применён к `glitchtip-mcp`, `umami-mcp`, `form-mcp` (новые `server.spec.ts`, HTTP-клиент мокался
+через `vi.mock('./client.js', ...)` + `vi.hoisted`, кроме `form-mcp` — там нет внешнего HTTP-слоя,
+используются реальные локальные доки `libs/forms/docs`) и `studio-time-mcp` (дополнен уже
+существующий `server.spec.ts`, ранее покрывавший только вспомогательную `defaultSessionRef`, не
+реальные вызовы инструментов). У `glitchtip-mcp` и `umami-mcp` HTTP-обёртка не возвращает
+`{ok:false}`, а бросает `Error` при неуспехе — мокалось через `mockRejectedValue`, тоже даёт
+`isError:true`, тот же итоговый контракт, что и `{ok:false}` у `studio-mcp`/`studio-time-mcp`.
+`nx test/typecheck:tsgo/lint` — зелёные у всех четырёх. Отдельные коммиты по scope:
+`5cf3f5c` (glitchtip-mcp, 17/17), `fb27283e` (umami-mcp, 22/22), `925506b` (studio-time-mcp,
++19 тестов), `1d916f7` (form-mcp, 59/59). Пробел тестирования MCP tool-хендлеров закрыт по всем
+известным на 2026-08-26 `*-mcp` библиотекам монорепо.
