@@ -6,7 +6,7 @@
  * При выборе COMPLETED показывает слайдер оценки
  */
 
-import { Box, HStack, Icon, Slider, Text, VStack } from '@chakra-ui/react'
+import { Box, HStack, Slider, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useState } from 'react'
 import { LuCalendar, LuCheck, LuClock, LuPause, LuPlay, LuX } from 'react-icons/lu'
 
@@ -135,7 +135,7 @@ export function WatchStatusSelector({
                 }
               }}
             >
-              <Icon as={config.icon} boxSize={iconSize} />
+              <config.icon size={iconSize * 4} />
               <Text fontSize={fontSize} fontWeight="medium">
                 {config.label}
               </Text>
@@ -202,7 +202,7 @@ export function WatchStatusBadge({ status, size = 'sm' }: { status: WatchStatus;
       color={config.color}
       title={config.label}
     >
-      <Icon as={config.icon} boxSize={iconSize} />
+      <config.icon size={iconSize * 4} />
     </Box>
   )
 }

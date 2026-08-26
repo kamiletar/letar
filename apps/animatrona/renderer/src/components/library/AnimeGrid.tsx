@@ -1,6 +1,6 @@
 'use client'
 
-import { AspectRatio, Box, Checkbox, Grid, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
+import { AspectRatio, Box, Checkbox, Grid, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useInfiniteScrollSentinel } from '@letar/hooks'
 import { memo } from 'react'
 import { LuFilm } from 'react-icons/lu'
@@ -112,7 +112,7 @@ export const AnimeGrid = memo(function AnimeGrid({
     return (
       <Box textAlign="center" py={16} px={4} borderRadius="xl" border="2px dashed" borderColor="border.subtle">
         <VStack gap={4}>
-          <Icon as={LuFilm} boxSize={16} color="fg.subtle" />
+          <LuFilm size={64} color="var(--chakra-colors-fg-subtle)" />
           <Box>
             <Text fontSize="xl" fontWeight="semibold" color="fg.muted">
               Аниме не найдено

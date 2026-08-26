@@ -5,7 +5,7 @@
  * v0.9.0 — добавлена кнопка информации о кодировании
  */
 
-import { Badge, Box, Card, HStack, Icon, IconButton, Image, Text } from '@chakra-ui/react'
+import { Badge, Box, Card, HStack, IconButton, Image, Text } from '@chakra-ui/react'
 import { LightboxViewer } from '@letar/ui'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { LuCheck, LuClock, LuExpand, LuInfo, LuPlay } from 'react-icons/lu'
@@ -211,7 +211,7 @@ export const EpisodeCard = memo(function EpisodeCard({
             )
             : (
               <Box w="full" h="full" bg="bg.subtle" display="flex" alignItems="center" justifyContent="center">
-                <Icon as={LuPlay} boxSize={10} color="fg.subtle" />
+                <LuPlay size={40} color="var(--chakra-colors-fg-subtle)" />
               </Box>
             )}
 
@@ -237,7 +237,7 @@ export const EpisodeCard = memo(function EpisodeCard({
                 borderRadius="full"
                 onClick={handlePlayClick}
               >
-                <Icon as={LuPlay} boxSize={6} />
+                <LuPlay size={24} />
               </IconButton>
 
               {/* Кнопка Развернуть (лайтбокс) — только если есть скриншоты */}
@@ -250,7 +250,7 @@ export const EpisodeCard = memo(function EpisodeCard({
                   borderRadius="full"
                   onClick={handleScreenshotClick}
                 >
-                  <Icon as={LuExpand} boxSize={4} />
+                  <LuExpand size={16} />
                 </IconButton>
               )}
 
@@ -264,7 +264,7 @@ export const EpisodeCard = memo(function EpisodeCard({
                   borderRadius="full"
                   onClick={handleEncodingInfoClick}
                 >
-                  <Icon as={LuInfo} boxSize={4} />
+                  <LuInfo size={16} />
                 </IconButton>
               )}
             </Box>
@@ -297,7 +297,7 @@ export const EpisodeCard = memo(function EpisodeCard({
               alignItems="center"
               gap={1}
             >
-              <Icon as={statusBadge.icon} boxSize={3} />
+              <statusBadge.icon size={12} />
               {statusBadge.label}
             </Badge>
           )}

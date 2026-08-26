@@ -6,7 +6,7 @@
  * v0.6.35
  */
 
-import { Box, Button, CloseButton, Dialog, HStack, Icon, Text, Textarea, VStack } from '@chakra-ui/react'
+import { Box, Button, CloseButton, Dialog, HStack, Text, Textarea, VStack } from '@chakra-ui/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { LuCheck, LuSave, LuX } from 'react-icons/lu'
 
@@ -107,6 +107,8 @@ export function EpisodeNameEditor({ open, onOpenChange, episodes, animeId, onSav
     }
   }, [parsedNames, updateEpisode, onOpenChange, onSaved])
 
+  const SaveIcon = changedCount > 0 ? LuSave : LuCheck
+
   return (
     <Dialog.Root open={open} onOpenChange={(details) => onOpenChange(details.open)} size="lg">
       <Dialog.Backdrop />
@@ -169,11 +171,11 @@ export function EpisodeNameEditor({ open, onOpenChange, episodes, animeId, onSav
           <Dialog.Footer>
             <HStack gap={2}>
               <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={isSaving}>
-                <Icon as={LuX} mr={2} />
+                <LuX style={{ marginRight: '8px' }} />
                 Отмена
               </Button>
               <Button colorPalette="purple" onClick={handleSave} disabled={changedCount === 0} loading={isSaving}>
-                <Icon as={changedCount > 0 ? LuSave : LuCheck} mr={2} />
+                <SaveIcon style={{ marginRight: '8px' }} />
                 {changedCount > 0 ? 'Сохранить' : 'Без изменений'}
               </Button>
             </HStack>

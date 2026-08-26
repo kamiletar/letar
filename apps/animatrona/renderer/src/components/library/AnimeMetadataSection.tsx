@@ -9,7 +9,6 @@ import {
   Grid,
   Heading,
   HStack,
-  Icon,
   Image,
   Skeleton,
   Text,
@@ -113,7 +112,7 @@ function StudioCard({ studio }: { studio: ShikimoriStudio }) {
                 decoding="async"
               />
             )
-            : <Icon as={LuBuilding2} boxSize={6} color="fg.muted" />}
+            : <LuBuilding2 size={24} color="var(--chakra-colors-fg-muted)" />}
           <Text fontWeight="medium" fontSize="sm">
             {studio.name}
           </Text>
@@ -151,7 +150,7 @@ function StaffCard({ person }: { person: ShikimoriPersonRole }) {
                 alignItems="center"
                 justifyContent="center"
               >
-                <Icon as={LuUser} boxSize={5} color="fg.subtle" />
+                <LuUser size={20} color="var(--chakra-colors-fg-subtle)" />
               </Box>
             )}
           <VStack align="start" gap={0}>
@@ -196,7 +195,7 @@ function CharacterCard({ role }: { role: ShikimoriCharacterRole }) {
                 alignItems="center"
                 justifyContent="center"
               >
-                <Icon as={LuUsers} boxSize={5} color="fg.subtle" />
+                <LuUsers size={20} color="var(--chakra-colors-fg-subtle)" />
               </Box>
             )}
           <VStack align="start" gap={0}>
@@ -379,6 +378,8 @@ export function AnimeMetadataSection({ animeId, shikimoriId }: AnimeMetadataSect
     return null
   }
 
+  const ExpandIcon = isExpanded ? LuChevronUp : LuChevronDown
+
   return (
     <Card.Root bg="bg.panel" border="1px" borderColor="border.subtle">
       <Card.Body>
@@ -389,14 +390,19 @@ export function AnimeMetadataSection({ animeId, shikimoriId }: AnimeMetadataSect
               <Heading size="md">Метаданные Shikimori</Heading>
               <a href={`https://shikimori.one/animes/${shikimoriId}`} target="_blank" rel="noopener noreferrer">
                 <Badge colorPalette="purple" variant="subtle" cursor="pointer" _hover={{ bg: 'purple.900' }}>
-                  <Icon as={LuExternalLink} mr={1} />
+                  <LuExternalLink style={{ marginRight: '4px' }} />
                   Открыть на Shikimori
                 </Badge>
               </a>
             </HStack>
             <HStack gap={2}>
               <Button size="xs" variant="ghost" onClick={fetchMetadata} disabled={isLoading}>
-                <Icon as={LuRefreshCw} animation={isLoading ? 'spin 1s linear infinite' : undefined} mr={1} />
+                <LuRefreshCw
+                  style={{
+                    marginRight: '4px',
+                    animation: isLoading ? 'spin 1s linear infinite' : undefined,
+                  }}
+                />
                 Обновить
               </Button>
               <Button
@@ -406,7 +412,7 @@ export function AnimeMetadataSection({ animeId, shikimoriId }: AnimeMetadataSect
                 onClick={handleSaveToDb}
                 disabled={isSaving || saveStatus === 'saved'}
               >
-                <Icon as={LuDatabase} mr={1} />
+                <LuDatabase style={{ marginRight: '4px' }} />
                 {saveStatus === 'saved' ? 'Сохранено' : isSaving ? 'Сохранение...' : 'Обновить манифест'}
               </Button>
             </HStack>
@@ -419,7 +425,7 @@ export function AnimeMetadataSection({ animeId, shikimoriId }: AnimeMetadataSect
               {hasStudios && (
                 <Box>
                   <HStack mb={2}>
-                    <Icon as={LuBuilding2} color="fg.muted" boxSize={4} />
+                    <LuBuilding2 color="var(--chakra-colors-fg-muted)" size={16} />
                     <Heading size="sm">Студия</Heading>
                   </HStack>
                   <Wrap gap={2}>
@@ -432,7 +438,7 @@ export function AnimeMetadataSection({ animeId, shikimoriId }: AnimeMetadataSect
               {directors.length > 0 && (
                 <Box>
                   <HStack mb={2}>
-                    <Icon as={LuTv} color="fg.muted" boxSize={4} />
+                    <LuTv color="var(--chakra-colors-fg-muted)" size={16} />
                     <Heading size="sm">Режиссёр</Heading>
                   </HStack>
                   <Wrap gap={2}>
@@ -458,10 +464,10 @@ export function AnimeMetadataSection({ animeId, shikimoriId }: AnimeMetadataSect
                   _hover={{ color: 'fg.muted' }}
                 >
                   <HStack>
-                    <Icon as={LuUsers} color="fg.muted" />
+                    <LuUsers color="var(--chakra-colors-fg-muted)" />
                     <Heading size="sm">Персонажи ({mainCharacters.length + supportingCharacters.length})</Heading>
                   </HStack>
-                  <Icon as={isExpanded ? LuChevronUp : LuChevronDown} />
+                  <ExpandIcon />
                 </Box>
               </Collapsible.Trigger>
               <Collapsible.Content>
@@ -501,7 +507,7 @@ export function AnimeMetadataSection({ animeId, shikimoriId }: AnimeMetadataSect
               {hasFandubbers && (
                 <Box>
                   <HStack mb={3}>
-                    <Icon as={LuMic} color="fg.muted" />
+                    <LuMic color="var(--chakra-colors-fg-muted)" />
                     <Heading size="sm">Озвучка</Heading>
                   </HStack>
                   <Wrap gap={2}>
@@ -514,7 +520,7 @@ export function AnimeMetadataSection({ animeId, shikimoriId }: AnimeMetadataSect
                           colorPalette={hasLocal ? 'green' : 'gray'}
                           variant={hasLocal ? 'solid' : 'outline'}
                         >
-                          {hasLocal && <Icon as={LuCheck} mr={1} />}
+                          {hasLocal && <LuCheck style={{ marginRight: '4px' }} />}
                           {fandubber}
                         </Badge>
                       )
@@ -522,7 +528,7 @@ export function AnimeMetadataSection({ animeId, shikimoriId }: AnimeMetadataSect
                     {/* Локальные озвучки без совпадений в Shikimori */}
                     {unmatchedLocalGroups.map((group) => (
                       <Badge key={group} colorPalette="purple" variant="subtle">
-                        <Icon as={LuHardDrive} mr={1} />
+                        <LuHardDrive style={{ marginRight: '4px' }} />
                         {group}
                       </Badge>
                     ))}
@@ -534,7 +540,7 @@ export function AnimeMetadataSection({ animeId, shikimoriId }: AnimeMetadataSect
               {hasFansubbers && (
                 <Box>
                   <HStack mb={3}>
-                    <Icon as={LuCaptions} color="fg.muted" />
+                    <LuCaptions color="var(--chakra-colors-fg-muted)" />
                     <Heading size="sm">Субтитры</Heading>
                   </HStack>
                   <Wrap gap={2}>
@@ -553,7 +559,7 @@ export function AnimeMetadataSection({ animeId, shikimoriId }: AnimeMetadataSect
           {hasExternalLinks && (
             <Box>
               <HStack mb={3}>
-                <Icon as={LuExternalLink} color="fg.muted" />
+                <LuExternalLink color="var(--chakra-colors-fg-muted)" />
                 <Heading size="sm">Ссылки</Heading>
               </HStack>
               <Wrap gap={2}>

@@ -8,7 +8,7 @@
  * При drop вызывает колбэк с путём к папке.
  */
 
-import { Box, Icon, Text, VStack } from '@chakra-ui/react'
+import { Box, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useState } from 'react'
 import { LuFolderOpen } from 'react-icons/lu'
 
@@ -123,7 +123,7 @@ export function DropZone({ onFolderDrop, children }: DropZoneProps) {
           pointerEvents="none"
         >
           <VStack gap={4} p={12} borderRadius="2xl" border="3px dashed" borderColor="purple.400" bg="bg.panel">
-            <Icon as={LuFolderOpen} boxSize={16} color="purple.400" />
+            <LuFolderOpen size={64} color="var(--chakra-colors-purple-400)" />
             <Text fontSize="2xl" fontWeight="bold" color="fg">
               Отпустите для импорта
             </Text>

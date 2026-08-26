@@ -8,7 +8,7 @@
  * - AnimeCard (сетка библиотеки)
  */
 
-import { Icon, Menu, Portal } from '@chakra-ui/react'
+import { Menu, Portal } from '@chakra-ui/react'
 import { LuCheck, LuChevronRight } from 'react-icons/lu'
 
 import type { WatchStatus } from '@/generated/prisma'
@@ -32,9 +32,9 @@ export function WatchStatusSubmenu({ watchStatus, onWatchStatusChange }: WatchSt
   return (
     <Menu.Root positioning={{ placement: 'right-start', gutter: 2 }}>
       <Menu.TriggerItem>
-        <Icon as={currentStatus.icon} color={currentStatus.color} />
+        <currentStatus.icon color={`var(--chakra-colors-${currentStatus.color.replace('.', '-')})`} />
         {currentStatus.label}
-        <Icon as={LuChevronRight} ml="auto" />
+        <LuChevronRight style={{ marginLeft: 'auto' }} />
       </Menu.TriggerItem>
       <Portal>
         <Menu.Positioner>
@@ -50,9 +50,9 @@ export function WatchStatusSubmenu({ watchStatus, onWatchStatusChange }: WatchSt
                   fontWeight={isActive ? 'semibold' : 'normal'}
                   color={isActive ? config.color : undefined}
                 >
-                  <Icon as={config.icon} color={config.color} />
+                  <config.icon color={`var(--chakra-colors-${config.color.replace('.', '-')})`} />
                   {config.label}
-                  {isActive && <Icon as={LuCheck} ml="auto" />}
+                  {isActive && <LuCheck style={{ marginLeft: 'auto' }} />}
                 </Menu.Item>
               )
             })}

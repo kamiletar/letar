@@ -8,7 +8,6 @@ import {
   CloseButton,
   Dialog,
   HStack,
-  Icon,
   Portal,
   Spinner,
   Table,
@@ -188,7 +187,7 @@ export function ScanFolderDialog({
                 {/* Выбор папки */}
                 <HStack gap={4}>
                   <Button variant="outline" onClick={handleSelectFolder} disabled={isScanning}>
-                    <Icon as={LuFolderOpen} mr={2} />
+                    <LuFolderOpen style={{ marginRight: '8px' }} />
                     Выбрать папку
                   </Button>
                   {folderPath && (
@@ -202,7 +201,7 @@ export function ScanFolderDialog({
                         onClick={() => folderPath && scan(folderPath)}
                         disabled={isScanning}
                       >
-                        <Icon as={LuRefreshCw} />
+                        <LuRefreshCw />
                       </Button>
                     </>
                   )}
@@ -277,7 +276,7 @@ export function ScanFolderDialog({
                                 </Table.Cell>
                                 <Table.Cell>
                                   <HStack gap={2}>
-                                    <Icon as={LuFileVideo} color="purple.400" />
+                                    <LuFileVideo color="var(--chakra-colors-purple-400)" />
                                     <Text truncate maxW="400px" title={file.name}>
                                       {file.name}
                                     </Text>
@@ -302,7 +301,7 @@ export function ScanFolderDialog({
 
                 {!folderPath && !isScanning && (
                   <Box textAlign="center" py={8}>
-                    <Icon as={LuFolderOpen} boxSize={12} color="fg.subtle" mb={4} />
+                    <LuFolderOpen size={48} color="var(--chakra-colors-fg-subtle)" style={{ marginBottom: '16px' }} />
                     <Text color="fg.subtle">Выберите папку с эпизодами для сканирования</Text>
                   </Box>
                 )}
@@ -328,7 +327,7 @@ export function ScanFolderDialog({
                       )
                       : (
                         <>
-                          <Icon as={LuImport} mr={2} />
+                          <LuImport style={{ marginRight: '8px' }} />
                           Импортировать ({selectedCount})
                         </>
                       )}

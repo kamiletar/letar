@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, HStack, Icon, Text } from '@chakra-ui/react'
+import { Button, HStack, Text } from '@chakra-ui/react'
 import { LuLink, LuRefreshCw } from 'react-icons/lu'
 
 import { useSyncRelations } from '../../lib/franchise'
@@ -38,7 +38,7 @@ export function SyncRelationsButton({ animeId, shikimoriId, compact = false, onS
     return (
       <Tooltip content="Необходим ID Shikimori для поиска связей">
         <Button size="sm" variant="ghost" disabled>
-          <Icon as={LuLink} />
+          <LuLink />
           {!compact && <Text>Нет ID</Text>}
         </Button>
       </Tooltip>
@@ -55,7 +55,7 @@ export function SyncRelationsButton({ animeId, shikimoriId, compact = false, onS
           loading={isSyncing}
           colorPalette={error ? 'red' : undefined}
         >
-          <Icon as={LuRefreshCw} />
+          <LuRefreshCw />
         </Button>
       </Tooltip>
     )
@@ -64,7 +64,7 @@ export function SyncRelationsButton({ animeId, shikimoriId, compact = false, onS
   return (
     <HStack gap={2}>
       <Button size="sm" variant="outline" onClick={handleSync} loading={isSyncing}>
-        <Icon as={LuLink} />
+        <LuLink />
         <Text>Найти связи</Text>
       </Button>
       {error && (

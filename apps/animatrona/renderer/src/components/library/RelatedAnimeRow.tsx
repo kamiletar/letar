@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Box, HStack, Icon, Image, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, HStack, Image, Text, VStack } from '@chakra-ui/react'
 import { LuCheck, LuDownload, LuFilm, LuPlay, LuTv } from 'react-icons/lu'
 
 import { useRouter } from 'next/navigation'
@@ -113,7 +113,7 @@ export function RelatedAnimeRow({
           )
           : (
             <Box w="full" h="full" display="flex" alignItems="center" justifyContent="center">
-              <Icon as={KindIcon} boxSize={4} color="fg.subtle" />
+              <KindIcon size={16} color="var(--chakra-colors-fg-subtle)" />
             </Box>
           )}
       </Box>
@@ -142,12 +142,10 @@ export function RelatedAnimeRow({
 
       {/* Статус / Действие */}
       <Box flexShrink={0}>
-        {isLoaded ? <Icon as={LuCheck} boxSize={5} color="green.400" /> : (
-          <Icon
-            as={LuDownload}
-            boxSize={5}
-            color="fg.subtle"
-            _hover={{ color: 'purple.400' }}
+        {isLoaded ? <LuCheck size={20} color="var(--chakra-colors-green-400)" /> : (
+          <LuDownload
+            size={20}
+            color="var(--chakra-colors-fg-subtle)"
             cursor="pointer"
             onClick={(e) => {
               e.preventDefault()

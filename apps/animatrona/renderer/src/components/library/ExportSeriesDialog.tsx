@@ -1,6 +1,6 @@
 'use client'
 
-import { CloseButton, Dialog, HStack, Icon, Portal, Text } from '@chakra-ui/react'
+import { CloseButton, Dialog, HStack, Portal, Text } from '@chakra-ui/react'
 import { LuDownload } from 'react-icons/lu'
 
 import { ExportConfigStep, ExportProgressStep, ExportResultStep, type ExportSeriesDialogProps } from './export'
@@ -30,7 +30,7 @@ export function ExportSeriesDialog({ open, onOpenChange, anime, defaultExportPat
             <Dialog.Header>
               <Dialog.Title>
                 <HStack>
-                  <Icon as={LuDownload} color="purple.400" />
+                  <LuDownload color="var(--chakra-colors-purple-400)" />
                   <Text>Экспорт сериала</Text>
                 </HStack>
               </Dialog.Title>

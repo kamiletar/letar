@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Button, HStack, Icon, Menu, Portal, Spinner, Text } from '@chakra-ui/react'
+import { Box, Button, HStack, Menu, Portal, Spinner, Text } from '@chakra-ui/react'
 import { LuCheck, LuChevronDown, LuPin, LuSquareCheck, LuX } from 'react-icons/lu'
 
 import type { WatchStatus } from '@/generated/prisma'
@@ -56,11 +56,11 @@ export function BatchActionsBar({
             Выбрано: {selectedCount}
           </Text>
           <Button size="xs" variant="ghost" onClick={onSelectAll} disabled={isBatchUpdating}>
-            <Icon as={LuSquareCheck} />
+            <LuSquareCheck />
             Все ({totalCount})
           </Button>
           <Button size="xs" variant="ghost" onClick={onClearSelection} disabled={isBatchUpdating}>
-            <Icon as={LuX} />
+            <LuX />
             Отмена
           </Button>
         </HStack>
@@ -71,9 +71,9 @@ export function BatchActionsBar({
             <Menu.Root>
               <Menu.Trigger asChild>
                 <Button size="sm" variant="outline" colorPalette="purple" disabled={isBatchUpdating}>
-                  {isBatchUpdating ? <Spinner size="xs" /> : <Icon as={LuCheck} />}
+                  {isBatchUpdating ? <Spinner size="xs" /> : <LuCheck />}
                   Статус просмотра
-                  <Icon as={LuChevronDown} />
+                  <LuChevronDown />
                 </Button>
               </Menu.Trigger>
               <Portal>
@@ -83,7 +83,7 @@ export function BatchActionsBar({
                       const cfg = WATCH_STATUS_CONFIG[status]
                       return (
                         <Menu.Item key={status} value={status} onClick={() => onBatchWatchStatus(status)}>
-                          <Icon as={cfg.icon} color={cfg.color} />
+                          <cfg.icon color={`var(--chakra-colors-${cfg.color.replace('.', '-')})`} />
                           {cfg.label}
                         </Menu.Item>
                       )
@@ -95,7 +95,7 @@ export function BatchActionsBar({
 
             {/* Распин */}
             <Button size="sm" variant="outline" colorPalette="orange" onClick={onBatchUnpin} disabled={isBatchUpdating}>
-              {isBatchUpdating ? <Spinner size="xs" /> : <Icon as={LuPin} />}
+              {isBatchUpdating ? <Spinner size="xs" /> : <LuPin />}
               Открепить
             </Button>
           </>

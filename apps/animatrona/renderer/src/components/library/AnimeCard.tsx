@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Box, Card, HStack, Icon, IconButton, Menu, Portal, Text, Tooltip, VStack } from '@chakra-ui/react'
+import { Badge, Box, Card, HStack, IconButton, Menu, Portal, Text, Tooltip, VStack } from '@chakra-ui/react'
 import NextImage from 'next/image'
 import NextLink from 'next/link'
 import { memo, type MouseEvent, useCallback } from 'react'
@@ -149,7 +149,7 @@ export const AnimeCard = memo(function AnimeCard({
             )
             : (
               <Box w="full" h="full" bg="bg.muted" display="flex" alignItems="center" justifyContent="center">
-                <Icon as={LuPlay} boxSize={12} color="fg.subtle" />
+                <LuPlay size={48} color="var(--chakra-colors-fg-subtle)" />
               </Box>
             )}
 
@@ -196,7 +196,7 @@ export const AnimeCard = memo(function AnimeCard({
                       _hover={{ bg: 'state.hover' }}
                     >
                       <HStack gap={2}>
-                        <Icon as={LuPlay} color="status.success" />
+                        <LuPlay color="var(--chakra-colors-status-success)" />
                         <Text>Продолжить просмотр</Text>
                       </HStack>
                     </Menu.Item>
@@ -207,7 +207,7 @@ export const AnimeCard = memo(function AnimeCard({
                       _hover={{ bg: 'state.hover' }}
                     >
                       <HStack gap={2}>
-                        <Icon as={LuUpload} color="status.info" />
+                        <LuUpload color="var(--chakra-colors-status-info)" />
                         <Text>Экспорт</Text>
                       </HStack>
                     </Menu.Item>
@@ -218,7 +218,7 @@ export const AnimeCard = memo(function AnimeCard({
                       _hover={{ bg: 'state.hover' }}
                     >
                       <HStack gap={2}>
-                        <Icon as={LuRefreshCw} color="primary.fg" />
+                        <LuRefreshCw color="var(--chakra-colors-primary-fg)" />
                         <Text>Обновить метаданные</Text>
                       </HStack>
                     </Menu.Item>
@@ -230,7 +230,7 @@ export const AnimeCard = memo(function AnimeCard({
                       _hover={{ bg: 'error.subtle' }}
                     >
                       <HStack gap={2}>
-                        <Icon as={LuTrash2} color="error.fg" />
+                        <LuTrash2 color="var(--chakra-colors-error-fg)" />
                         <Text color="error.fg">Удалить</Text>
                       </HStack>
                     </Menu.Item>
@@ -251,7 +251,7 @@ export const AnimeCard = memo(function AnimeCard({
               alignItems="center"
               gap={1}
             >
-              <Icon as={LuStar} boxSize={3} />
+              <LuStar size={12} />
               {rating.toFixed(1)}
             </Badge>
           )}
@@ -275,7 +275,7 @@ export const AnimeCard = memo(function AnimeCard({
                   gap={1}
                   cursor="default"
                 >
-                  <Icon as={LuTriangleAlert} boxSize={3} />
+                  <LuTriangleAlert size={12} />
                   Перезалить
                 </Badge>
               </Tooltip.Trigger>
@@ -298,7 +298,7 @@ export const AnimeCard = memo(function AnimeCard({
               alignItems="center"
               gap={1}
             >
-              <Icon as={LuCloud} boxSize={3} />
+              <LuCloud size={12} />
               Облако
             </Badge>
           )}

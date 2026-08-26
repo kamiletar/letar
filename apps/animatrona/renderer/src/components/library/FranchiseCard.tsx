@@ -1,19 +1,6 @@
 'use client'
 
-import {
-  Badge,
-  Box,
-  Card,
-  CloseButton,
-  Dialog,
-  Grid,
-  HStack,
-  Icon,
-  IconButton,
-  Menu,
-  Portal,
-  Text,
-} from '@chakra-ui/react'
+import { Badge, Box, Card, CloseButton, Dialog, Grid, HStack, IconButton, Menu, Portal, Text } from '@chakra-ui/react'
 import NextImage from 'next/image'
 import NextLink from 'next/link'
 import { type MouseEvent, useCallback, useState } from 'react'
@@ -101,7 +88,7 @@ function FranchiseModalCard({
         ? <NextImage src={anime.posterUrl} alt={anime.title} fill sizes="140px" style={{ objectFit: 'cover' }} />
         : (
           <Box w="full" h="full" bg="bg.muted" display="flex" alignItems="center" justifyContent="center">
-            <Icon as={KindIcon} boxSize={8} color="fg.subtle" />
+            <KindIcon size={32} color="var(--chakra-colors-fg-subtle)" />
           </Box>
         )}
 
@@ -230,7 +217,7 @@ export function FranchiseCard({
               )
               : (
                 <Box w="full" h="full" bg="bg.muted" display="flex" alignItems="center" justifyContent="center">
-                  <Icon as={MainKindIcon} boxSize={12} color="fg.subtle" />
+                  <MainKindIcon size={48} color="var(--chakra-colors-fg-subtle)" />
                 </Box>
               )}
           </Box>
@@ -284,7 +271,7 @@ export function FranchiseCard({
                       _hover={{ bg: 'state.hover' }}
                     >
                       <HStack gap={2}>
-                        <Icon as={LuPlay} color="status.success" />
+                        <LuPlay color="var(--chakra-colors-status-success)" />
                         <Text>Продолжить просмотр</Text>
                       </HStack>
                     </Menu.Item>
@@ -295,7 +282,7 @@ export function FranchiseCard({
                       _hover={{ bg: 'state.hover' }}
                     >
                       <HStack gap={2}>
-                        <Icon as={LuUpload} color="status.info" />
+                        <LuUpload color="var(--chakra-colors-status-info)" />
                         <Text>Экспорт</Text>
                       </HStack>
                     </Menu.Item>
@@ -306,7 +293,7 @@ export function FranchiseCard({
                       _hover={{ bg: 'state.hover' }}
                     >
                       <HStack gap={2}>
-                        <Icon as={LuRefreshCw} color="primary.fg" />
+                        <LuRefreshCw color="var(--chakra-colors-primary-fg)" />
                         <Text>Обновить метаданные</Text>
                       </HStack>
                     </Menu.Item>
@@ -318,7 +305,7 @@ export function FranchiseCard({
                       _hover={{ bg: 'error.subtle' }}
                     >
                       <HStack gap={2}>
-                        <Icon as={LuTrash2} color="error.fg" />
+                        <LuTrash2 color="var(--chakra-colors-error-fg)" />
                         <Text color="error.fg">Удалить</Text>
                       </HStack>
                     </Menu.Item>

@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Box, Button, Heading, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Heading, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import { LuLink, LuRefreshCw } from 'react-icons/lu'
 
@@ -122,7 +122,7 @@ export function RelatedAnimeList({ animeId, shikimoriId, relationsCheckedAt, onD
         <Box py={4}>
           <VStack align="start" gap={3}>
             <Heading size="md" display="flex" alignItems="center" gap={2}>
-              <Icon as={LuLink} />
+              <LuLink />
               Связанные аниме
             </Heading>
             <Text color="fg.muted" fontSize="sm">
@@ -147,7 +147,7 @@ export function RelatedAnimeList({ animeId, shikimoriId, relationsCheckedAt, onD
       <Box py={4}>
         <VStack align="start" gap={3}>
           <Heading size="md" display="flex" alignItems="center" gap={2}>
-            <Icon as={LuLink} />
+            <LuLink />
             Связанные аниме
           </Heading>
           <Text color="fg.muted" fontSize="sm">
@@ -177,7 +177,7 @@ export function RelatedAnimeList({ animeId, shikimoriId, relationsCheckedAt, onD
         {/* Заголовок с статистикой */}
         <HStack justify="space-between" align="center">
           <Heading size="md" display="flex" alignItems="center" gap={2}>
-            <Icon as={LuLink} />
+            <LuLink />
             Связанные аниме
             <Badge colorPalette={loadedCount === totalCount ? 'green' : 'gray'} variant="subtle">
               {loadedCount}/{totalCount}

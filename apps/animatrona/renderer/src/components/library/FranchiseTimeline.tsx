@@ -7,7 +7,7 @@
  * Отображает статус просмотра для каждого элемента
  */
 
-import { Badge, Box, Heading, HStack, Icon, Image, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Heading, HStack, Image, Text, VStack } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { LuCheck, LuChevronRight, LuCircle, LuPlay } from 'react-icons/lu'
 
@@ -97,14 +97,15 @@ export function FranchiseTimeline({ animeId }: FranchiseTimelineProps) {
               {index < items.length - 1 && (
                 <Box display="flex" alignItems="center" px={2}>
                   <Box w="40px" h="2px" bg="border" position="relative">
-                    <Icon
-                      as={LuChevronRight}
-                      position="absolute"
-                      right="-6px"
-                      top="50%"
-                      transform="translateY(-50%)"
-                      color="fg.subtle"
-                      boxSize={4}
+                    <LuChevronRight
+                      style={{
+                        position: 'absolute',
+                        right: '-6px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                      }}
+                      color="var(--chakra-colors-fg-subtle)"
+                      size={16}
                     />
                   </Box>
                 </Box>
@@ -117,15 +118,15 @@ export function FranchiseTimeline({ animeId }: FranchiseTimelineProps) {
       {/* Легенда */}
       <HStack gap={4} mt={2} color="fg.subtle" fontSize="xs">
         <HStack gap={1}>
-          <Icon as={LuCheck} color="green.500" />
+          <LuCheck color="var(--chakra-colors-green-500)" />
           <Text>Просмотрено</Text>
         </HStack>
         <HStack gap={1}>
-          <Icon as={LuPlay} color="purple.500" />
+          <LuPlay color="var(--chakra-colors-purple-500)" />
           <Text>Смотрите сейчас</Text>
         </HStack>
         <HStack gap={1}>
-          <Icon as={LuCircle} color="fg.subtle" />
+          <LuCircle color="var(--chakra-colors-fg-subtle)" />
           <Text>Не начато</Text>
         </HStack>
       </HStack>
@@ -185,7 +186,7 @@ function TimelineItem({ item }: { item: TimelineAnime }) {
         alignItems="center"
         justifyContent="center"
       >
-        <Icon as={status.icon} color={status.color} boxSize={3.5} />
+        <status.icon color={`var(--chakra-colors-${status.color.replace('.', '-')})`} size={14} />
       </Box>
 
       {/* Постер */}

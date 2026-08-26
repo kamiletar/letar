@@ -4,7 +4,7 @@
  * Диалог редактирования аниме
  */
 
-import { Button, CloseButton, Dialog, HStack, Icon, Portal, Text, VStack } from '@chakra-ui/react'
+import { Button, CloseButton, Dialog, HStack, Portal, Text, VStack } from '@chakra-ui/react'
 import { Form, useDeclarativeForm } from '@letar/forms'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -66,7 +66,7 @@ function ShikimoriRefreshButton({ shikimoriId }: { shikimoriId: number | null })
   return (
     <>
       <Button size="xs" variant="ghost" colorPalette="purple" onClick={handleRefresh} disabled={isLoading}>
-        <Icon as={LuRefreshCw} animation={isLoading ? 'spin 1s linear infinite' : undefined} />
+        <LuRefreshCw style={{ animation: isLoading ? 'spin 1s linear infinite' : undefined }} />
         Обновить с Shikimori
       </Button>
       {error && (

@@ -18,7 +18,6 @@ import {
   Dialog,
   Heading,
   HStack,
-  Icon,
   Image,
   Portal,
   SimpleGrid,
@@ -90,7 +89,7 @@ function VideoCard({ video, onPlay }: { video: AnimeManifestVideo; onPlay: () =>
             ? <Image src={thumbnailUrl} alt={video.name || 'Video'} objectFit="cover" loading="lazy" decoding="async" />
             : (
               <Box bg="bg.subtle" display="flex" alignItems="center" justifyContent="center">
-                <Icon as={LuFilm} boxSize={12} color="fg.subtle" />
+                <LuFilm size={48} color="var(--chakra-colors-fg-subtle)" />
               </Box>
             )}
 
@@ -106,7 +105,7 @@ function VideoCard({ video, onPlay }: { video: AnimeManifestVideo; onPlay: () =>
             transition="opacity 0.2s"
             _groupHover={{ opacity: 1 }}
           >
-            <Icon as={LuPlay} boxSize={12} color="white" />
+            <LuPlay size={48} color="white" />
           </Box>
 
           {/* Бейдж типа */}
@@ -161,13 +160,13 @@ function VideoPlayerDialog({
                   {/* Ссылка на YouTube */}
                   <a href={video.url} target="_blank" rel="noopener noreferrer">
                     <Button size="sm" variant="ghost">
-                      <Icon as={LuExternalLink} mr={1} />
+                      <LuExternalLink style={{ marginRight: '4px' }} />
                       YouTube
                     </Button>
                   </a>
                   <Dialog.CloseTrigger asChild>
                     <Button size="sm" variant="ghost">
-                      <Icon as={LuX} />
+                      <LuX />
                     </Button>
                   </Dialog.CloseTrigger>
                 </HStack>
@@ -189,11 +188,11 @@ function VideoPlayerDialog({
                 )
                 : (
                   <VStack py={12} gap={4}>
-                    <Icon as={LuFilm} boxSize={16} color="fg.subtle" />
+                    <LuFilm size={64} color="var(--chakra-colors-fg-subtle)" />
                     <Text color="fg.muted">Видео недоступно для embed</Text>
                     <a href={video.url} target="_blank" rel="noopener noreferrer">
                       <Button colorPalette="purple">
-                        <Icon as={LuExternalLink} mr={2} />
+                        <LuExternalLink style={{ marginRight: '8px' }} />
                         Открыть в браузере
                       </Button>
                     </a>
@@ -230,7 +229,7 @@ export function VideoSection({ videos }: VideoSectionProps) {
         <Card.Body>
           <VStack gap={6} align="stretch">
             <HStack>
-              <Icon as={LuFilm} color="fg.muted" />
+              <LuFilm color="var(--chakra-colors-fg-muted)" />
               <Heading size="md">Видео</Heading>
               <Badge colorPalette="gray" variant="subtle">
                 {videos.length}

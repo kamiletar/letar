@@ -14,7 +14,6 @@ import {
   DataList,
   Dialog,
   HStack,
-  Icon,
   Portal,
   Spinner,
   Text,
@@ -89,15 +88,17 @@ function EncodingSection({
   title,
   children,
 }: {
-  icon: React.ComponentType
+  icon: React.ComponentType<{ size?: number; color?: string }>
   color: string
   title: string
   children: React.ReactNode
 }) {
+  const SectionIcon = icon
+
   return (
     <Box>
       <HStack mb={2}>
-        <Icon as={icon} color={color} boxSize={4} />
+        <SectionIcon color={`var(--chakra-colors-${color.replace('.', '-')})`} size={16} />
         <Text fontWeight="semibold" fontSize="sm">
           {title}
         </Text>
@@ -223,7 +224,7 @@ export function EncodingInfoDialog({
               <Dialog.Header>
                 <Dialog.Title>
                   <HStack>
-                    <Icon as={LuSettings2} color="purple.400" />
+                    <LuSettings2 color="var(--chakra-colors-purple-400)" />
                     <Text>Настройки кодирования</Text>
                   </HStack>
                 </Dialog.Title>
@@ -409,7 +410,7 @@ export function EncodingInfoDialog({
                               <DataList.Item>
                                 <DataList.ItemLabel color="fg.muted">
                                   <HStack gap={1}>
-                                    <Icon as={LuTarget} boxSize={3} />
+                                    <LuTarget size={12} />
                                     <Text>VMAF</Text>
                                   </HStack>
                                 </DataList.ItemLabel>
@@ -434,7 +435,7 @@ export function EncodingInfoDialog({
                               <DataList.Item>
                                 <DataList.ItemLabel color="fg.muted">
                                   <HStack gap={1}>
-                                    <Icon as={LuClock} boxSize={3} />
+                                    <LuClock size={12} />
                                     <Text>Время кодирования</Text>
                                   </HStack>
                                 </DataList.ItemLabel>
@@ -450,7 +451,7 @@ export function EncodingInfoDialog({
                               <DataList.Item>
                                 <DataList.ItemLabel color="fg.muted">
                                   <HStack gap={1}>
-                                    <Icon as={LuLayers} boxSize={3} />
+                                    <LuLayers size={12} />
                                     <Text>GPU потоки</Text>
                                   </HStack>
                                 </DataList.ItemLabel>
@@ -539,13 +540,13 @@ export function EncodingInfoDialog({
                         <Box>
                           <HStack mb={2} justify="space-between">
                             <HStack>
-                              <Icon as={LuTerminal} color="orange.400" boxSize={4} />
+                              <LuTerminal color="var(--chakra-colors-orange-400)" size={16} />
                               <Text fontWeight="semibold" fontSize="sm">
                                 FFmpeg команда
                               </Text>
                             </HStack>
                             <Button size="xs" variant="ghost" onClick={handleCopyCommand}>
-                              <Icon as={LuClipboard} boxSize={3} mr={1} />
+                              <LuClipboard size={12} style={{ marginRight: '4px' }} />
                               Копировать
                             </Button>
                           </HStack>
@@ -587,7 +588,7 @@ export function EncodingInfoDialog({
                               <DataList.Item>
                                 <DataList.ItemLabel color="fg.muted">
                                   <HStack gap={1}>
-                                    <Icon as={LuPercent} boxSize={3} />
+                                    <LuPercent size={12} />
                                     <Text>Экономия</Text>
                                   </HStack>
                                 </DataList.ItemLabel>
@@ -617,7 +618,7 @@ export function EncodingInfoDialog({
                 {metadataCid
                   ? (
                     <Button variant="outline" size="sm" onClick={handleShowMediaInfo}>
-                      <Icon as={LuFileVideo} mr={1} />
+                      <LuFileVideo style={{ marginRight: '4px' }} />
                       Медиаинфо исходника
                     </Button>
                   )
@@ -638,7 +639,7 @@ export function EncodingInfoDialog({
               <Dialog.Header>
                 <Dialog.Title>
                   <HStack>
-                    <Icon as={LuFileVideo} color="teal.400" />
+                    <LuFileVideo color="var(--chakra-colors-teal-400)" />
                     <Text>Медиаинфо исходника — Эпизод {episodeNumber}</Text>
                   </HStack>
                 </Dialog.Title>
@@ -690,7 +691,7 @@ export function EncodingInfoDialog({
                   }}
                   disabled={!mediaInfo}
                 >
-                  <Icon as={LuClipboard} mr={1} />
+                  <LuClipboard style={{ marginRight: '4px' }} />
                   Копировать
                 </Button>
                 <Button onClick={() => setMediaInfoOpen(false)}>Закрыть</Button>

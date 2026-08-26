@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Button, CloseButton, Dialog, HStack, Icon, Portal, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, CloseButton, Dialog, HStack, Portal, Text, VStack } from '@chakra-ui/react'
 import { LuTrash2, LuTriangleAlert } from 'react-icons/lu'
 
 import { toaster } from '@/components/ui/toaster'
@@ -56,7 +56,7 @@ export function DeleteAnimeDialog({ open, onOpenChange, anime, onDeleted }: Dele
             <Dialog.Header>
               <Dialog.Title>
                 <HStack>
-                  <Icon as={LuTriangleAlert} color="red.500" />
+                  <LuTriangleAlert color="var(--chakra-colors-red-500)" />
                   <Text>Удалить аниме?</Text>
                 </HStack>
               </Dialog.Title>
@@ -87,7 +87,7 @@ export function DeleteAnimeDialog({ open, onOpenChange, anime, onDeleted }: Dele
                   Отмена
                 </Button>
                 <Button colorPalette="red" onClick={handleDelete} disabled={isDeleting} loading={isDeleting}>
-                  <Icon as={LuTrash2} mr={2} />
+                  <LuTrash2 style={{ marginRight: '8px' }} />
                   Удалить
                 </Button>
               </HStack>
