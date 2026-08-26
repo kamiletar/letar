@@ -7,7 +7,7 @@
  * Используется для регенерации манифестов и аудита хранилища.
  */
 
-import { Box, HStack, Icon, Progress, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Box, HStack, Progress, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useEffect, useRef } from 'react'
 import { LuCheck, LuX } from 'react-icons/lu'
 
@@ -70,8 +70,8 @@ export function ProgressLog({ entries, progress, isRunning, maxH = '300px' }: Pr
             <HStack key={i} gap={2} fontSize="xs">
               {/* Иконка статуса */}
               {entry.status === 'processing' && <Spinner size="xs" />}
-              {entry.status === 'ok' && <Icon as={LuCheck} color="green.500" boxSize={3} />}
-              {entry.status === 'error' && <Icon as={LuX} color="red.500" boxSize={3} />}
+              {entry.status === 'ok' && <LuCheck color="var(--chakra-colors-green-500)" size={12} />}
+              {entry.status === 'error' && <LuX color="var(--chakra-colors-red-500)" size={12} />}
 
               {/* Текст */}
               <Text color={entry.status === 'error' ? 'fg.error' : 'fg'} lineClamp={1} flex={1}>

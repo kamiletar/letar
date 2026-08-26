@@ -4,19 +4,7 @@
  * ExportQueuePanel — сворачиваемая панель очереди экспорта
  */
 
-import {
-  Box,
-  Button,
-  Collapsible,
-  Flex,
-  HStack,
-  Icon,
-  IconButton,
-  Progress,
-  Stack,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import { Box, Button, Collapsible, Flex, HStack, IconButton, Progress, Stack, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useState } from 'react'
 import {
   LuCheck,
@@ -60,15 +48,15 @@ const STATUS_TEXT: Record<ExportTaskStatus, string> = {
 function StatusIcon({ status }: { status: ExportTaskStatus }) {
   switch (status) {
     case 'completed':
-      return <Icon as={LuCheck} color="green.500" />
+      return <LuCheck color="var(--chakra-colors-green-500)" />
     case 'failed':
-      return <Icon as={LuX} color="red.500" />
+      return <LuX color="var(--chakra-colors-red-500)" />
     case 'fetching':
-      return <Icon as={LuDownload} color="blue.500" />
+      return <LuDownload color="var(--chakra-colors-blue-500)" />
     case 'encoding':
-      return <Icon as={LuRefreshCw} color="purple.500" className="animate-spin" />
+      return <LuRefreshCw color="var(--chakra-colors-purple-500)" className="animate-spin" />
     case 'paused':
-      return <Icon as={LuPause} color="yellow.500" />
+      return <LuPause color="var(--chakra-colors-yellow-500)" />
     default:
       return null
   }
@@ -204,7 +192,7 @@ export function ExportQueuePanel() {
         _hover={{ bg: 'bg.subtle' }}
       >
         <HStack>
-          <Icon as={LuDownload} />
+          <LuDownload />
           <Text fontWeight="medium">Очередь экспорта</Text>
           {activeCount > 0 && (
             <Box px={2} py={0.5} borderRadius="full" bg="blue.500" color="white" fontSize="xs">
@@ -232,7 +220,7 @@ export function ExportQueuePanel() {
               Очистить ({completedCount})
             </Button>
           )}
-          <Icon as={isExpanded ? LuChevronDown : LuChevronUp} />
+          {isExpanded ? <LuChevronDown /> : <LuChevronUp />}
         </HStack>
       </Flex>
 

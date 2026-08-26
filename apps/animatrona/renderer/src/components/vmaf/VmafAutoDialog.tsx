@@ -16,7 +16,6 @@ import {
   Dialog,
   Flex,
   HStack,
-  Icon,
   Portal,
   Progress,
   Slider,
@@ -252,7 +251,7 @@ export function VmafAutoDialog({
           {/* Описание */}
           <Box p={4} bg="callout.brand.bg" borderRadius="md" borderWidth="1px" borderColor="callout.brand.border">
             <HStack gap={3}>
-              <Icon as={LuTarget} color="callout.brand.fg" boxSize={5} />
+              <LuTarget color="var(--chakra-colors-callout-brand-fg)" size={20} />
               <Box>
                 <Text fontWeight="bold">Автоподбор качества</Text>
                 <Text color="fg.muted" fontSize="sm">
@@ -275,7 +274,7 @@ export function VmafAutoDialog({
                 </Text>
               </Box>
               <Button variant="outline" onClick={handleSelectFile}>
-                <Icon as={LuFolderOpen} mr={2} />
+                <LuFolderOpen style={{ marginRight: '8px' }} />
                 Обзор
               </Button>
             </HStack>
@@ -333,7 +332,7 @@ export function VmafAutoDialog({
           {/* Примерное время */}
           <Box p={3} bg="callout.info.bg" borderRadius="md" borderWidth="1px" borderColor="callout.info.border">
             <HStack>
-              <Icon as={LuZap} color="callout.info.fg" />
+              <LuZap color="var(--chakra-colors-callout-info-fg)" />
               <Text color="callout.info.fg" fontSize="sm">
                 Ожидаемое время: 2-5 минут (GPU) или 5-15 минут (CPU fallback)
               </Text>
@@ -348,7 +347,7 @@ export function VmafAutoDialog({
             Отмена
           </Button>
           <Button colorPalette="purple" onClick={handleStartSearch} disabled={!videoPath}>
-            <Icon as={LuPlay} mr={2} />
+            <LuPlay style={{ marginRight: '8px' }} />
             Начать поиск
           </Button>
         </HStack>
@@ -398,7 +397,10 @@ export function VmafAutoDialog({
             {/* Текущий этап */}
             <Box p={4} bg="bg.muted" borderRadius="md">
               <HStack gap={3}>
-                <Icon as={LuGauge} color="primary.fg" animation="spin 2s linear infinite" />
+                <LuGauge
+                  color="var(--chakra-colors-primary-fg)"
+                  style={{ animation: 'spin 2s linear infinite' }}
+                />
                 <Box>
                   <Text fontWeight="medium">{stageLabels[progress?.stage || 'extracting']}</Text>
                   {progress?.currentCq && (
@@ -440,8 +442,8 @@ export function VmafAutoDialog({
                           {formatFileSize(iter.size)}
                         </Text>
                         {iter.vmaf >= targetVmaf
-                          ? <Icon as={LuCheck} color="status.success" />
-                          : <Icon as={LuX} color="status.error" />}
+                          ? <LuCheck color="var(--chakra-colors-status-success)" />
+                          : <LuX color="var(--chakra-colors-status-error)" />}
                       </HStack>
                     </Flex>
                   ))}
@@ -483,7 +485,11 @@ export function VmafAutoDialog({
               borderColor="callout.success.border"
               textAlign="center"
             >
-              <Icon as={LuCheck} boxSize={8} color="status.success" mb={2} />
+              <LuCheck
+                size={32}
+                color="var(--chakra-colors-status-success)"
+                style={{ marginBottom: '8px' }}
+              />
               <Text fontWeight="bold" fontSize="lg">
                 Оптимальный CQ найден!
               </Text>
@@ -499,7 +505,7 @@ export function VmafAutoDialog({
                 borderColor="callout.warning.border"
               >
                 <HStack gap={2}>
-                  <Icon as={LuTriangleAlert} color="status.warning" boxSize={5} />
+                  <LuTriangleAlert color="var(--chakra-colors-status-warning)" size={20} />
                   <Text fontSize="sm" color="callout.warning.fg">
                     Целевой VMAF {targetVmaf} недостижим для этого контента. Выбран лучший результат:{' '}
                     {result.vmafScore.toFixed(1)}
@@ -568,7 +574,7 @@ export function VmafAutoDialog({
                 borderColor="callout.warning.border"
               >
                 <HStack gap={2}>
-                  <Icon as={LuCpu} color="status.warning" boxSize={5} />
+                  <LuCpu color="var(--chakra-colors-status-warning)" size={20} />
                   <Box>
                     <Text fontWeight="medium" color="callout.warning.fg">
                       Переключение на CPU кодирование
@@ -647,7 +653,7 @@ export function VmafAutoDialog({
             <Dialog.Header borderBottomWidth="1px" borderColor="border.subtle">
               <Dialog.Title>
                 <HStack>
-                  <Icon as={LuFileVideo} color="primary.fg" />
+                  <LuFileVideo color="var(--chakra-colors-primary-fg)" />
                   <Text>VMAF автоподбор качества</Text>
                 </HStack>
               </Dialog.Title>

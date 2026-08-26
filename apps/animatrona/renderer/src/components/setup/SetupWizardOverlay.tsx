@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Button, Heading, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Heading, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { LuCircleCheck, LuFolder, LuHardDrive } from 'react-icons/lu'
 
@@ -70,7 +70,7 @@ export function SetupWizardOverlay() {
       <VStack gap={8} maxW="520px" w="full" px={6}>
         {/* Логотип / иконка */}
         <VStack gap={3}>
-          <Icon as={LuHardDrive} boxSize={12} color="purple.400" />
+          <LuHardDrive size={48} color="var(--chakra-colors-purple-400)" />
           <Heading size="xl" textAlign="center">
             Добро пожаловать в Animatrona
           </Heading>
@@ -93,7 +93,7 @@ export function SetupWizardOverlay() {
                   </Text>
                 </Box>
                 <Button variant="outline" onClick={handleSelectFolder}>
-                  <Icon as={LuFolder} />
+                  <LuFolder />
                   Выбрать
                 </Button>
               </HStack>
@@ -102,7 +102,7 @@ export function SetupWizardOverlay() {
             {/* Свободное место */}
             {freeSpace !== null && (
               <HStack w="full" p={3} bg="bg.subtle" borderRadius="md" gap={2}>
-                <Icon as={LuHardDrive} color="fg.muted" />
+                <LuHardDrive color="var(--chakra-colors-fg-muted)" />
                 <Text fontSize="sm" color="fg.muted">
                   Свободно на диске: <strong>{formatBytes(freeSpace)}</strong>
                 </Text>
@@ -132,13 +132,13 @@ export function SetupWizardOverlay() {
           <VStack gap={4} w="full">
             <VStack gap={3} w="full" p={4} bg="bg.subtle" borderRadius="lg" align="start">
               <HStack gap={2}>
-                <Icon as={LuCircleCheck} color="green.400" />
+                <LuCircleCheck color="var(--chakra-colors-green-400)" />
                 <Text fontSize="sm">
                   <strong>Библиотека:</strong> {libraryPath}
                 </Text>
               </HStack>
               <HStack gap={2}>
-                <Icon as={LuCircleCheck} color="green.400" />
+                <LuCircleCheck color="var(--chakra-colors-green-400)" />
                 <Text fontSize="sm">
                   <strong>IPFS хранилище:</strong> {libraryPath}/ipfs
                 </Text>

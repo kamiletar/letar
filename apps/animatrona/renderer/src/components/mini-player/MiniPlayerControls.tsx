@@ -10,7 +10,7 @@
  * - Close (закрыть mini-player)
  */
 
-import { Box, HStack, Icon, IconButton, Slider, Text } from '@chakra-ui/react'
+import { Box, HStack, IconButton, Slider, Text } from '@chakra-ui/react'
 import { memo } from 'react'
 import { LuExpand, LuPause, LuPictureInPicture, LuPlay, LuX } from 'react-icons/lu'
 
@@ -90,7 +90,7 @@ export const MiniPlayerControls = memo(function MiniPlayerControls({
               onExpand()
             }}
           >
-            <Icon as={LuExpand} />
+            <LuExpand />
           </IconButton>
         </Tooltip>
         <Tooltip content="Картинка в картинке">
@@ -104,7 +104,7 @@ export const MiniPlayerControls = memo(function MiniPlayerControls({
               onTogglePiP()
             }}
           >
-            <Icon as={LuPictureInPicture} />
+            <LuPictureInPicture />
           </IconButton>
         </Tooltip>
         <Tooltip content="Закрыть">
@@ -118,7 +118,7 @@ export const MiniPlayerControls = memo(function MiniPlayerControls({
               onClose()
             }}
           >
-            <Icon as={LuX} />
+            <LuX />
           </IconButton>
         </Tooltip>
       </HStack>
@@ -135,7 +135,7 @@ export const MiniPlayerControls = memo(function MiniPlayerControls({
             onTogglePlay()
           }}
         >
-          <Icon as={isPlaying ? LuPause : LuPlay} boxSize={6} />
+          {isPlaying ? <LuPause size={24} /> : <LuPlay size={24} />}
         </IconButton>
       </HStack>
 

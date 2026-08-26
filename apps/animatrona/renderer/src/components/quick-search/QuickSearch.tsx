@@ -10,7 +10,7 @@
  * v0.28.9: Миграция с FTS5 на Fuse.js
  */
 
-import { Box, Dialog, Flex, HStack, Icon, Image, Input, Kbd, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Box, Dialog, Flex, HStack, Image, Input, Kbd, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { LuCommand, LuFilm, LuSearch } from 'react-icons/lu'
@@ -202,7 +202,9 @@ export function QuickSearch({ open, onOpenChange, onShowShortcuts, onImport }: Q
         >
           {/* Поле поиска */}
           <Flex px={4} py={3} borderBottomWidth={1} borderColor="border.subtle" align="center" gap={3}>
-            {isSearching ? <Spinner size="sm" color="primary.fg" /> : <Icon as={LuSearch} color="fg.subtle" />}
+            {isSearching
+              ? <Spinner size="sm" color="primary.fg" />
+              : <LuSearch color="var(--chakra-colors-fg-subtle)" />}
             <Input
               ref={inputRef}
               data-testid="search-input"
@@ -314,7 +316,7 @@ export function QuickSearch({ open, onOpenChange, onShowShortcuts, onImport }: Q
               <Box>
                 {/* Заголовок категории */}
                 <HStack px={4} py={1} gap={2}>
-                  <Icon as={LuFilm} color="fg.subtle" boxSize={3} />
+                  <LuFilm color="var(--chakra-colors-fg-subtle)" size={12} />
                   <Text
                     fontSize="xs"
                     fontWeight="semibold"
@@ -361,7 +363,7 @@ export function QuickSearch({ open, onOpenChange, onShowShortcuts, onImport }: Q
                             )
                             : (
                               <Flex w="full" h="full" align="center" justify="center">
-                                <Icon as={LuFilm} color="fg.subtle" boxSize={4} />
+                                <LuFilm color="var(--chakra-colors-fg-subtle)" size={16} />
                               </Flex>
                             )}
                         </Box>
@@ -394,7 +396,7 @@ export function QuickSearch({ open, onOpenChange, onShowShortcuts, onImport }: Q
             {/* Placeholder для короткого запроса */}
             {displayMode === 'search' && query.length > 0 && query.length < 2 && !isSearching && (
               <Flex py={8} justify="center" align="center" color="fg.subtle" direction="column" gap={2}>
-                <Icon as={LuSearch} boxSize={6} />
+                <LuSearch size={24} />
                 <Text fontSize="sm">Введите минимум 2 символа</Text>
               </Flex>
             )}
@@ -417,7 +419,7 @@ export function QuickSearch({ open, onOpenChange, onShowShortcuts, onImport }: Q
               </HStack>
             </HStack>
             <HStack gap={1} color="fg.muted">
-              <Icon as={LuCommand} boxSize={3} />
+              <LuCommand size={12} />
               <Text fontSize="xs">{displayMode === 'commands' ? 'Command Palette' : 'Quick Search'}</Text>
             </HStack>
           </Flex>

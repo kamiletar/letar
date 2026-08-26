@@ -6,7 +6,7 @@
  * Должна использоваться внутри AnimatronaForm для доступа к контексту формы.
  */
 
-import { Button, Icon } from '@chakra-ui/react'
+import { Button } from '@chakra-ui/react'
 import { useState } from 'react'
 import { LuTarget } from 'react-icons/lu'
 
@@ -76,7 +76,7 @@ export function VmafCqButton({ disabled, size = 'sm' }: VmafCqButtonProps) {
         onClick={() => setDialogOpen(true)}
         disabled={disabled}
       >
-        <Icon as={LuTarget} mr={1} />
+        <LuTarget style={{ marginRight: '4px' }} />
         Авто VMAF
       </Button>
 

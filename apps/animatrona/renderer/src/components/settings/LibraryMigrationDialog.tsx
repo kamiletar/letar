@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Button, CloseButton, Dialog, HStack, Icon, Progress, RadioGroup, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, CloseButton, Dialog, HStack, Progress, RadioGroup, Text, VStack } from '@chakra-ui/react'
 import { useEffect, useRef, useState } from 'react'
 import { LuFolder, LuHardDrive } from 'react-icons/lu'
 
@@ -154,13 +154,13 @@ export function LibraryMigrationDialog({ open, onOpenChange, currentLibraryPath 
                     </Text>
                   </Box>
                   <Button variant="outline" onClick={handleSelectFolder} disabled={isMigrating}>
-                    <Icon as={LuFolder} />
+                    <LuFolder />
                     Выбрать
                   </Button>
                 </HStack>
                 {freeSpace !== null && (
                   <HStack mt={2} gap={1}>
-                    <Icon as={LuHardDrive} color="fg.muted" boxSize={3.5} />
+                    <LuHardDrive color="var(--chakra-colors-fg-muted)" size={14} />
                     <Text fontSize="xs" color="fg.muted">
                       Свободно: {formatBytes(freeSpace)}
                     </Text>
