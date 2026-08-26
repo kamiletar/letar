@@ -28,11 +28,11 @@ if (!app || !port || !targetPath || !outPath) {
 
 const BASE_URL = `http://localhost:${port}`
 const envLocal = readFileSync(`apps/${app}/.env.local`, 'utf8')
-const tokenMatch = envLocal.match(/^DEV_SESSION_TOKEN="(.+)"$/m)
+const tokenMatch = envLocal.match(/^DEV_SESSION_TOKEN=(?:"([^"]+)"|(\S+))$/m)
 if (!tokenMatch) {
   throw new Error(`DEV_SESSION_TOKEN не найден в apps/${app}/.env.local — см. .claude/docs/verification-pitfalls.md`)
 }
-const token = tokenMatch[1]
+const token = tokenMatch[1] ?? tokenMatch[2]
 
 const browser = await chromium.launch()
 const context = await browser.newContext({ viewport: { width: 1280, height: 2200 } })
