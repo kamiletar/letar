@@ -7,7 +7,7 @@
  * Маппит tracker-специфичные данные → общие props.
  */
 
-import { Badge, HStack, Icon, Text } from '@chakra-ui/react'
+import { Badge, HStack, Text } from '@chakra-ui/react'
 import { AnimeHeroBase } from '@letar/animatrona-ui'
 import { formatBytes, formatDurationMinutes, getAnimeStatusConfig } from '@letar/animatrona-utils'
 import { LuBookOpen, LuEye, LuShare2, LuStar } from 'react-icons/lu'
@@ -86,7 +86,7 @@ export function AnimeHero({
           )}
           {rating !== null && rating !== undefined && rating > 0 && (
             <Badge colorPalette="yellow" display="flex" alignItems="center" gap={1}>
-              <Icon as={LuStar} boxSize={3} />
+              <LuStar size={12} />
               {rating.toFixed(1)}
             </Badge>
           )}
@@ -120,7 +120,7 @@ export function AnimeHero({
             <>
               <Text>&bull;</Text>
               <HStack gap={1}>
-                <Icon as={LuEye} boxSize={3.5} />
+                <LuEye size={14} />
                 <Text>{viewCount}</Text>
               </HStack>
             </>
@@ -129,7 +129,7 @@ export function AnimeHero({
             <>
               <Text>&bull;</Text>
               <HStack gap={1}>
-                <Icon as={LuBookOpen} boxSize={3.5} />
+                <LuBookOpen size={14} />
                 <Text>{libraryCount}</Text>
               </HStack>
             </>
@@ -138,7 +138,7 @@ export function AnimeHero({
             <>
               <Text>&bull;</Text>
               <HStack gap={1}>
-                <Icon as={LuStar} boxSize={3.5} color="yellow.500" />
+                <LuStar size={14} color="var(--chakra-colors-yellow-500)" />
                 <Text>{avgRating.toFixed(1)}</Text>
               </HStack>
             </>
@@ -148,7 +148,7 @@ export function AnimeHero({
             <>
               <Text>&bull;</Text>
               <HStack gap={1}>
-                <Icon as={LuShare2} boxSize={3.5} color="green.500" />
+                <LuShare2 size={14} color="var(--chakra-colors-green-500)" />
                 <Text>
                   {onlineSeedCount} {onlineSeedCount === 1 ? 'сид' : onlineSeedCount < 5 ? 'сида' : 'сидов'}
                 </Text>

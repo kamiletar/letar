@@ -8,7 +8,7 @@
  */
 
 import { toaster } from '@/app/_components/ui/toaster'
-import { Box, Button, Icon, Skeleton, Text, Textarea, VStack } from '@chakra-ui/react'
+import { Box, Button, Skeleton, Text, Textarea, VStack } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { LuLogIn, LuMessageCircle, LuSend } from 'react-icons/lu'
@@ -124,7 +124,7 @@ export function CommentsSection({ animeId, isAuthenticated, currentUserId, curre
                 loading={submitting}
                 disabled={!newComment.trim()}
               >
-                <Icon as={LuSend} />
+                <LuSend />
                 Отправить
               </Button>
             </Box>
@@ -133,12 +133,12 @@ export function CommentsSection({ animeId, isAuthenticated, currentUserId, curre
         : (
           <Box p={4} bg="bg.subtle" borderRadius="lg" textAlign="center">
             <Text color="fg.muted" mb={3}>
-              <Icon as={LuMessageCircle} mr={2} verticalAlign="middle" />
+              <LuMessageCircle style={{ marginRight: '8px', verticalAlign: 'middle' }} />
               Войдите, чтобы оставить комментарий
             </Text>
             <Button asChild size="sm" colorPalette="brand" variant="outline">
               <NextLink href="/sign-in">
-                <Icon as={LuLogIn} />
+                <LuLogIn />
                 Войти
               </NextLink>
             </Button>
@@ -160,7 +160,11 @@ export function CommentsSection({ animeId, isAuthenticated, currentUserId, curre
         : comments.length === 0
         ? (
           <Box textAlign="center" py={8}>
-            <Icon as={LuMessageCircle} boxSize={8} color="fg.muted" mb={3} />
+            <LuMessageCircle
+              size={32}
+              color="var(--chakra-colors-fg-muted)"
+              style={{ marginBottom: '12px' }}
+            />
             <Text color="fg.muted">Комментариев пока нет. Будьте первым!</Text>
           </Box>
         )

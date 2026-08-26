@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Box, Grid, Heading, HStack, Icon, Table, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Grid, Heading, HStack, Table, Text, VStack } from '@chakra-ui/react'
 import { LuDatabase, LuServer, LuUser, LuWifi } from 'react-icons/lu'
 
 interface PinServerInfo {
@@ -71,7 +71,7 @@ export function AdminSection({ pinnedOn, viewers, viewCount }: AdminSectionProps
               <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }} gap={4}>
                 <VStack align="start" gap={1}>
                   <HStack color="fg.muted" fontSize="xs">
-                    <Icon as={LuServer} />
+                    <LuServer />
                     <Text>Сервер</Text>
                   </HStack>
                   <HStack>
@@ -87,7 +87,7 @@ export function AdminSection({ pinnedOn, viewers, viewCount }: AdminSectionProps
 
                 <VStack align="start" gap={1}>
                   <HStack color="fg.muted" fontSize="xs">
-                    <Icon as={LuWifi} />
+                    <LuWifi />
                     <Text>API URL</Text>
                   </HStack>
                   <Text fontSize="sm" fontFamily="mono" wordBreak="break-all">
@@ -102,7 +102,7 @@ export function AdminSection({ pinnedOn, viewers, viewCount }: AdminSectionProps
 
                 <VStack align="start" gap={1}>
                   <HStack color="fg.muted" fontSize="xs">
-                    <Icon as={LuDatabase} />
+                    <LuDatabase />
                     <Text>Хранилище</Text>
                   </HStack>
                   <Text fontSize="sm">
@@ -165,7 +165,7 @@ export function AdminSection({ pinnedOn, viewers, viewCount }: AdminSectionProps
                       <Table.Row key={v.userId}>
                         <Table.Cell>
                           <HStack gap={2}>
-                            <Icon as={LuUser} color="fg.muted" />
+                            <LuUser color="var(--chakra-colors-fg-muted)" />
                             <Text>{v.userName ?? 'Аноним'}</Text>
                           </HStack>
                         </Table.Cell>

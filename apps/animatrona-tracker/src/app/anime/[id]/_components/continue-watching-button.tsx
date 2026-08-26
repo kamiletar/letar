@@ -8,7 +8,7 @@
  * После реализации WatchProgress — читать из сервера.
  */
 
-import { Button, Icon } from '@chakra-ui/react'
+import { Button } from '@chakra-ui/react'
 import Link from 'next/link'
 import { LuPlay } from 'react-icons/lu'
 
@@ -77,7 +77,7 @@ export function ContinueWatchingButton({ animeSlug, episodes, watchProgress }: C
   if (!target) {
     return (
       <Button colorPalette="purple" size={{ base: 'md', md: 'lg' }} disabled>
-        <Icon as={LuPlay} />
+        <LuPlay />
         Нет эпизодов
       </Button>
     )
@@ -86,7 +86,7 @@ export function ContinueWatchingButton({ animeSlug, episodes, watchProgress }: C
   return (
     <Link href={`/watch/${animeSlug}/${target.episodeNumber}`}>
       <Button colorPalette="purple" size={{ base: 'md', md: 'lg' }}>
-        <Icon as={LuPlay} />
+        <LuPlay />
         {target.label}
       </Button>
     </Link>

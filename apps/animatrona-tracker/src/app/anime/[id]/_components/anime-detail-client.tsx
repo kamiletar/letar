@@ -2,20 +2,7 @@
 
 import { toaster } from '@/app/_components/ui/toaster'
 import { resolveImageUrl } from '@/lib/ipfs'
-import {
-  Badge,
-  Box,
-  Button,
-  Container,
-  Grid,
-  Heading,
-  HStack,
-  Icon,
-  Image,
-  Table,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import { Badge, Box, Button, Container, Grid, Heading, HStack, Image, Table, Text, VStack } from '@chakra-ui/react'
 import dynamic from 'next/dynamic'
 import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -160,6 +147,8 @@ export function AnimeDetailClient({
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
+  const LibraryButtonIcon = inLibrary ? LuCheck : LuBookOpen
+
   return (
     <Box minH="100vh" bg="bg">
       {/* Header */}
@@ -168,7 +157,7 @@ export function AnimeDetailClient({
           <HStack gap={4}>
             <Button asChild variant="ghost" size="sm">
               <NextLink href="/anime">
-                <Icon as={LuArrowLeft} mr={2} />
+                <LuArrowLeft style={{ marginRight: '8px' }} />
                 Каталог
               </NextLink>
             </Button>
@@ -189,7 +178,7 @@ export function AnimeDetailClient({
               {/* Открыть в Animatrona (deep link, не внутренняя навигация) */}
               <Button asChild colorPalette="brand" size="lg">
                 <a href={animatronaUrl}>
-                  <Icon as={LuPlay} mr={2} />
+                  <LuPlay style={{ marginRight: '8px' }} />
                   Открыть в Animatrona
                 </a>
               </Button>
@@ -203,14 +192,14 @@ export function AnimeDetailClient({
                   loading={addingToLibrary}
                   disabled={inLibrary}
                 >
-                  <Icon as={inLibrary ? LuCheck : LuBookOpen} mr={2} />
+                  <LibraryButtonIcon style={{ marginRight: '8px' }} />
                   {inLibrary ? 'В библиотеке' : 'В библиотеку'}
                 </Button>
               )}
 
               {/* Показать QR */}
               <Button variant="outline" onClick={() => setShowQR(!showQR)}>
-                <Icon as={LuQrCode} mr={2} />
+                <LuQrCode style={{ marginRight: '8px' }} />
                 {showQR ? 'Скрыть QR' : 'Показать QR для импорта'}
               </Button>
 
@@ -224,7 +213,7 @@ export function AnimeDetailClient({
               {/* Кнопка пиннинга (только для ADMIN) */}
               {isAdmin && anime.status === 'PUBLISHED' && (
                 <Button colorPalette="blue" variant="outline" onClick={handlePin} loading={pinning}>
-                  <Icon as={LuPin} mr={2} />
+                  <LuPin style={{ marginRight: '8px' }} />
                   Запинить на сервер
                 </Button>
               )}
@@ -239,7 +228,7 @@ export function AnimeDetailClient({
                     {anime.directoryCid}
                   </Text>
                   <Button size="xs" variant="ghost" onClick={handleCopyManifestCid}>
-                    <Icon as={LuCopy} />
+                    <LuCopy />
                     {copied && (
                       <Text ml={1} fontSize="xs">
                         Скопировано
@@ -269,22 +258,22 @@ export function AnimeDetailClient({
             <HStack gap={4} flexWrap="wrap">
               {anime.year && (
                 <HStack color="fg.muted">
-                  <Icon as={LuCalendar} />
+                  <LuCalendar />
                   <Text>{anime.year}</Text>
                 </HStack>
               )}
               {anime.studio && (
                 <HStack color="fg.muted">
-                  <Icon as={LuClapperboard} />
+                  <LuClapperboard />
                   <Text>{anime.studio}</Text>
                 </HStack>
               )}
               <HStack color="fg.muted">
-                <Icon as={LuFilm} />
+                <LuFilm />
                 <Text>{anime.episodes.length} эпизодов</Text>
               </HStack>
               <HStack color="fg.muted">
-                <Icon as={LuUser} />
+                <LuUser />
                 <Text>Загрузил: {anime.uploadedBy.name || 'Аноним'}</Text>
               </HStack>
             </HStack>
@@ -344,7 +333,7 @@ export function AnimeDetailClient({
             {/* Инструкция по импорту */}
             <Box p={4} bg="bg.subtle" borderRadius="lg">
               <Heading as="h3" size="sm" mb={2}>
-                <Icon as={LuMonitor} mr={2} />
+                <LuMonitor style={{ marginRight: '8px' }} />
                 Как смотреть
               </Heading>
               <VStack align="stretch" gap={2} fontSize="sm" color="fg.muted">
@@ -355,7 +344,7 @@ export function AnimeDetailClient({
               <Button asChild variant="ghost" colorPalette="brand" mt={3} size="sm">
                 <a href="https://animatrona.letar.best" target="_blank" rel="noopener noreferrer">
                   Скачать Animatrona
-                  <Icon as={LuExternalLink} ml={1} />
+                  <LuExternalLink style={{ marginLeft: '4px' }} />
                 </a>
               </Button>
             </Box>

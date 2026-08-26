@@ -8,7 +8,7 @@
  */
 
 import { getIpfsUrl } from '@/lib/ipfs'
-import { Box, CloseButton, DataList, Dialog, HStack, Icon, Portal, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Box, CloseButton, DataList, Dialog, HStack, Portal, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useEffect, useState } from 'react'
 import { LuCpu, LuInfo, LuMonitor, LuVideo } from 'react-icons/lu'
 
@@ -92,7 +92,7 @@ export function EncodingInfoDialog({ open, onOpenChange, episodeNumber, director
           <Dialog.Content>
             <Dialog.Header>
               <HStack gap={2}>
-                <Icon as={LuInfo} />
+                <LuInfo />
                 <Dialog.Title>Эпизод {episodeNumber} — Кодирование</Dialog.Title>
               </HStack>
               <Dialog.CloseTrigger asChild>
@@ -121,7 +121,7 @@ export function EncodingInfoDialog({ open, onOpenChange, episodeNumber, director
                     <DataList.Item>
                       <DataList.ItemLabel>
                         <HStack gap={1}>
-                          <Icon as={LuVideo} boxSize={3} />
+                          <LuVideo size={12} />
                           <Text>Кодек</Text>
                         </HStack>
                       </DataList.ItemLabel>
@@ -136,7 +136,7 @@ export function EncodingInfoDialog({ open, onOpenChange, episodeNumber, director
                     <DataList.Item>
                       <DataList.ItemLabel>
                         <HStack gap={1}>
-                          <Icon as={LuMonitor} boxSize={3} />
+                          <LuMonitor size={12} />
                           <Text>Разрешение</Text>
                         </HStack>
                       </DataList.ItemLabel>
@@ -172,7 +172,7 @@ export function EncodingInfoDialog({ open, onOpenChange, episodeNumber, director
                     <DataList.Item>
                       <DataList.ItemLabel>
                         <HStack gap={1}>
-                          <Icon as={LuCpu} boxSize={3} />
+                          <LuCpu size={12} />
                           <Text>Encoder</Text>
                         </HStack>
                       </DataList.ItemLabel>

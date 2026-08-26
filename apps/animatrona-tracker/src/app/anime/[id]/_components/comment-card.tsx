@@ -1,7 +1,7 @@
 'use client'
 
 import { toaster } from '@/app/_components/ui/toaster'
-import { Avatar, Button, HStack, Icon, Text, Textarea, VStack } from '@chakra-ui/react'
+import { Avatar, Button, HStack, Text, Textarea, VStack } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { LuCornerDownRight, LuPencil, LuReply, LuTrash2, LuX } from 'react-icons/lu'
@@ -71,6 +71,8 @@ export function CommentCard({
   const [isReplying, setIsReplying] = useState(false)
   const [replyText, setReplyText] = useState('')
   const [loading, setLoading] = useState(false)
+
+  const ReplyToggleIcon = isReplying ? LuX : LuReply
 
   const isOwner = currentUserId === comment.authorId
   const canDelete = isOwner || currentUserRole === 'ADMIN' || currentUserRole === 'MODERATOR'
@@ -152,7 +154,12 @@ export function CommentCard({
   return (
     <VStack align="stretch" gap={0}>
       <HStack align="start" gap={3} pl={isReply ? 8 : 0}>
-        {isReply && <Icon as={LuCornerDownRight} color="fg.muted" mt={1} flexShrink={0} />}
+        {isReply && (
+          <LuCornerDownRight
+            color="var(--chakra-colors-fg-muted)"
+            style={{ marginTop: '4px', flexShrink: 0 }}
+          />
+        )}
         <Avatar.Root size="sm" flexShrink={0}>
           {comment.author.image && <Avatar.Image src={comment.author.image} />}
           <Avatar.Fallback>{(comment.author.name || '?')[0]}</Avatar.Fallback>
@@ -219,21 +226,21 @@ export function CommentCard({
                   color="fg.muted"
                   onClick={() => setIsReplying(!isReplying)}
                 >
-                  <Icon as={isReplying ? LuX : LuReply} />
+                  <ReplyToggleIcon />
                   {isReplying ? 'Отмена' : 'Ответить'}
                 </Button>
               )}
               {/* Редактировать (только автор) */}
               {isOwner && (
                 <Button size="xs" variant="ghost" color="fg.muted" onClick={() => setIsEditing(true)}>
-                  <Icon as={LuPencil} />
+                  <LuPencil />
                   Изменить
                 </Button>
               )}
               {/* Удалить (автор / модератор / админ) */}
               {canDelete && (
                 <Button size="xs" variant="ghost" color="fg.muted" onClick={handleDelete} loading={loading}>
-                  <Icon as={LuTrash2} />
+                  <LuTrash2 />
                   Удалить
                 </Button>
               )}

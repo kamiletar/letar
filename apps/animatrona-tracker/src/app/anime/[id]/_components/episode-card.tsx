@@ -11,7 +11,7 @@
  */
 
 import { getIpfsUrl } from '@/lib/ipfs'
-import { Box, HStack, Icon, IconButton, Image } from '@chakra-ui/react'
+import { Box, HStack, IconButton, Image } from '@chakra-ui/react'
 import { EpisodeCardBase } from '@letar/animatrona-ui'
 import { LightboxViewer } from '@letar/ui'
 import Link from 'next/link'
@@ -139,7 +139,7 @@ export const EpisodeCard = memo(function EpisodeCard({
               alignItems="center"
               justifyContent="center"
             >
-              <Icon as={LuLock} boxSize={8} color="white" />
+              <LuLock size={32} color="white" />
             </Box>
           )
           : !isLocked && isHovering && thumbnailUrl
@@ -156,7 +156,7 @@ export const EpisodeCard = memo(function EpisodeCard({
               {/* Кнопка Play */}
               <IconButton aria-label="Смотреть" size="lg" colorPalette="purple" borderRadius="full" asChild>
                 <Link href={href}>
-                  <Icon as={LuPlay} boxSize={6} />
+                  <LuPlay size={24} />
                 </Link>
               </IconButton>
 
@@ -170,7 +170,7 @@ export const EpisodeCard = memo(function EpisodeCard({
                   borderRadius="full"
                   onClick={handleScreenshotClick}
                 >
-                  <Icon as={LuExpand} boxSize={4} />
+                  <LuExpand size={16} />
                 </IconButton>
               )}
 
@@ -184,7 +184,7 @@ export const EpisodeCard = memo(function EpisodeCard({
                   borderRadius="full"
                   onClick={handleInfoClick}
                 >
-                  <Icon as={LuInfo} boxSize={4} />
+                  <LuInfo size={16} />
                 </IconButton>
               )}
             </Box>
