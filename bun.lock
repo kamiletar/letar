@@ -24,6 +24,7 @@
         "@keystatic/core": "^0.6.8",
         "@keystatic/next": "^5.0.5",
         "@libp2p/crypto": "^5.1.23",
+        "@libp2p/interface": "^3.3.0",
         "@libp2p/peer-id": "^6.0.15",
         "@libsql/client": "^0.17.4",
         "@libsql/core": "^0.17.4",
@@ -109,6 +110,7 @@
         "date-fns": "^4.4.0",
         "decimal.js": "^10.6.0",
         "dockerode": "^5.0.1",
+        "domhandler": "^5.0.3",
         "dompurify": "^3.4.14",
         "electron": "^44.0.0",
         "electron-updater": "^6.8.9",
@@ -330,7 +332,7 @@
     },
     "apps/aboi": {
       "name": "@letar/aboi",
-      "version": "0.76.9",
+      "version": "0.76.13",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
@@ -504,7 +506,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.150.31",
+      "version": "0.150.35",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/pg-url": "workspace:*",
@@ -515,7 +517,7 @@
     },
     "apps/domwellbes-e2e": {
       "name": "@letar/domwellbes-e2e",
-      "version": "0.0.8",
+      "version": "0.0.9",
     },
     "apps/driving-school": {
       "name": "driving-school",
@@ -708,7 +710,7 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.50.1",
+      "version": "0.50.2",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -991,6 +993,9 @@
         "@modelcontextprotocol/sdk": "1.29.0",
         "zod": "4.3.6",
       },
+      "devDependencies": {
+        "@letar/mcp-test-kit": "workspace:*",
+      },
     },
     "libs/format-utils": {
       "name": "@letar/format-utils",
@@ -1189,6 +1194,9 @@
         "@modelcontextprotocol/sdk": "1.29.0",
         "zod": "4.3.6",
       },
+      "devDependencies": {
+        "@letar/mcp-test-kit": "workspace:*",
+      },
     },
     "libs/hooks": {
       "name": "@letar/hooks",
@@ -1242,6 +1250,16 @@
     "libs/mcp-server-kit": {
       "name": "@letar/mcp-server-kit",
       "version": "0.1.0",
+    },
+    "libs/mcp-test-kit": {
+      "name": "@letar/mcp-test-kit",
+      "version": "0.1.0",
+      "dependencies": {
+        "@modelcontextprotocol/sdk": "1.29.0",
+      },
+      "devDependencies": {
+        "zod": "4.3.6",
+      },
     },
     "libs/media-client": {
       "name": "@letar/media-client",
@@ -1311,6 +1329,9 @@
         "@modelcontextprotocol/sdk": "1.29.0",
         "zod": "4.3.6",
       },
+      "devDependencies": {
+        "@letar/mcp-test-kit": "workspace:*",
+      },
     },
     "libs/studio-time-mcp": {
       "name": "@letar/studio-time-mcp",
@@ -1319,6 +1340,9 @@
         "@letar/mcp-server-kit": "workspace:*",
         "@modelcontextprotocol/sdk": "1.29.0",
         "zod": "4.3.6",
+      },
+      "devDependencies": {
+        "@letar/mcp-test-kit": "workspace:*",
       },
     },
     "libs/tailwind-utils": {
@@ -1351,6 +1375,9 @@
         "@letar/mcp-server-kit": "workspace:*",
         "@modelcontextprotocol/sdk": "1.29.0",
         "zod": "4.3.6",
+      },
+      "devDependencies": {
+        "@letar/mcp-test-kit": "workspace:*",
       },
     },
     "libs/validation-utils": {
@@ -2440,6 +2467,8 @@
     "@letar/mandala": ["@letar/mandala@workspace:apps/mandala"],
 
     "@letar/mcp-server-kit": ["@letar/mcp-server-kit@workspace:libs/mcp-server-kit"],
+
+    "@letar/mcp-test-kit": ["@letar/mcp-test-kit@workspace:libs/mcp-test-kit"],
 
     "@letar/media-client": ["@letar/media-client@workspace:libs/media-client"],
 
@@ -8660,6 +8689,8 @@
     "@letar/glitchtip-mcp/zod": ["zod@4.3.6", "", {}, "sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg=="],
 
     "@letar/label-printer-desktop/pdfjs-dist": ["pdfjs-dist@4.10.38", "", { "optionalDependencies": { "@napi-rs/canvas": "^0.1.65" } }, "sha512-/Y3fcFrXEAsMjJXeL9J8+ZG9U01LbuWaYypvDW2ycW1jL269L3js3DVBjDJ0Up9Np1uqDXsDrRihHANhZOlwdQ=="],
+
+    "@letar/mcp-test-kit/zod": ["zod@4.3.6", "", {}, "sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg=="],
 
     "@letar/number-words/to-words": ["to-words@5.7.0", "", { "bin": { "to-words": "dist/cjs/cli.js" } }, "sha512-D6Scrd19yCs/GZC70U/5ClQwcn9heojeFyvghQIXgqHK8YVGrbByjEshvLm9aHqzsCRxBAW0VTFm4tR+UQl9EQ=="],
 

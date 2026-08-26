@@ -11,40 +11,42 @@
 in-memory транспортом. Это гоняет колбэк ровно так, как его вызывает настоящий MCP-клиент —
 включая Zod-валидацию входных аргументов и сериализацию результата.
 
-```typescript
-import { Client } from '@modelcontextprotocol/sdk/client/index.js'
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js'
+### Хелперы — `@letar/mcp-test-kit`, не копипаста
 
-async function connectedClient() {
-  const server = createYourMcpServer()
-  const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair()
-  const client = new Client({ name: 'test-client', version: '0.0.0' })
-  await Promise.all([client.connect(clientTransport), server.connect(serverTransport)])
-  return { client, server }
+Три вспомогательные функции (`connectedClient`, `textOf`, `expectValidationError`) появились
+дословно одинаковыми в пяти `server.spec.ts` (`studio-mcp`, `glitchtip-mcp`, `umami-mcp`,
+`studio-time-mcp`, `form-mcp`) — вынесены в `@letar/mcp-test-kit` (2026-08-26). Подключение —
+`devDependencies` (`workspace:*`) + `bun install`, не прод-зависимость.
+
+```typescript
+import { connectedClient, expectValidationError, textOf } from '@letar/mcp-test-kit'
+
+import { createYourMcpServer } from './server.js'
+
+function connect() {
+  return connectedClient(createYourMcpServer)
 }
 
-const { client } = await connectedClient()
+const { client } = await connect()
 const result = await client.callTool({ name: 'tool_name', arguments: { id: 'x' } })
 ```
 
-Эталон — [libs/studio-mcp/src/server.spec.ts](/libs/studio-mcp/src/server.spec.ts): внешний
-HTTP-вызов (`studioAdminRequest`) мокается через `vi.mock`, а сам инструмент вызывается через
-`client.callTool` — проверяются и happy path, и ошибки валидации, и ошибки внешнего API.
+`connectedClient` принимает фабрику сервера параметром — не завязана на конкретную сигнатуру
+`create*McpServer`. У `form-mcp` фабрика принимает аргумент (`{ docsPath }`), поэтому вызов
+оборачивается в замыкание: `() => createFormMcpServer({ docsPath })`.
+
+Эталон использования — [libs/studio-mcp/src/server.spec.ts](/libs/studio-mcp/src/server.spec.ts):
+внешний HTTP-вызов (`studioAdminRequest`) мокается через `vi.mock`, а сам инструмент вызывается
+через `client.callTool` — проверяются и happy path, и ошибки валидации, и ошибки внешнего API.
+Реализация хелперов и их собственные тесты — [libs/mcp-test-kit](/libs/mcp-test-kit/README.md).
 
 ## ⚠️ Невалидные аргументы — `isError: true`, не `throw`
 
 Интуитивно ожидаешь, что вызов инструмента с аргументами, не проходящими его Zod-схему, бросит
 исключение. На деле MCP `Client` оборачивает protocol-ошибку валидации в обычный
 `CallToolResult` с `isError: true` и текстом вида `Input validation error: ...` — `await
-client.callTool(...)` не бросает, а возвращает объект.
-
-```typescript
-async function expectValidationError(client: Client, name: string, args: Record<string, unknown>) {
-  const result = await client.callTool({ name, arguments: args })
-  expect(result.isError).toBe(true)
-  expect(textOf(result)).toContain('Input validation error')
-}
-```
+client.callTool(...)` не бросает, а возвращает объект. `expectValidationError` из
+`@letar/mcp-test-kit` инкапсулирует эту проверку.
 
 Та же форма (`isError: true` в `CallToolResult`) используется инструментами и для доменных
 ошибок (404, конфликт, ошибка внешнего API) — отличить «невалидные аргументы» от «валидные
