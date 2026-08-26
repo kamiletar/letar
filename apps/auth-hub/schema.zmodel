@@ -184,6 +184,10 @@ model OauthApplication {
                                    // держим для admin UI/seed.ts; источник истины теперь redirectUris ниже
   redirectUris          String[] @default([]) // Требуется @better-auth/oauth-provider (1.7+) — schema.oauthClient.fields.redirectUris,
                                                 // required:true, string[]. Синхронизируется с redirectUrls на каждой записи.
+  tokenEndpointAuthMethod String @default("client_secret_post") // Без значения плагин дефолтит в client_secret_basic
+                                                                  // (opts default), а наш @letar/auth client шлёт client_secret_post —
+                                                                  // "client registered for client_secret_basic cannot use
+                                                                  // client_secret_post" на КАЖДОМ обмене code→token (найдено 2026-08-26).
   type                  String   @default("web")
   disabled              Boolean  @default(false)
   skipConsent           Boolean  @default(false)
