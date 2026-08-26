@@ -122,7 +122,7 @@ export function VmafProgressCard({ item }: VmafProgressCardProps) {
             <StageIcon
               color="var(--chakra-colors-yellow-400)"
               size={16}
-              animation={vmafProgress.stage !== 'done' ? 'spin 2s linear infinite' : undefined}
+              style={{ animation: vmafProgress.stage !== 'done' ? 'spin 2s linear infinite' : undefined }}
             />
             <Text fontSize="sm" color="yellow.300">
               {vmafProgress.stage === 'extracting' && 'Извлечение сэмплов из видео...'}
