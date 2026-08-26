@@ -12,7 +12,7 @@
  */
 
 import { Project, Node, SyntaxKind } from 'ts-morph'
-import { globSync } from 'node:fs'
+import { existsSync, globSync } from 'node:fs'
 import path from 'node:path'
 
 const patterns = process.argv.slice(2)
@@ -27,7 +27,10 @@ if (patterns.length === 0) {
 // position: relative), поэтому не трогаем узел целиком.
 const PASSTHROUGH_ATTR_RE = /^(className|title|onClick|onMouseEnter|onMouseLeave|onFocus|onBlur|tabIndex|role|id|fill|stroke|strokeWidth|data-|aria-)/
 
-const files = [...new Set(patterns.flatMap((p) => globSync(p, { cwd: process.cwd() })))]
+// Пути вроде apps/mandala/src/app/[locale]/(main)/offline/page.tsx — легальные каталоги Next.js,
+// но [...]/(...) — glob-метасимволы. Существующий на диске путь берём буквально, не через glob,
+// иначе он молча не находится (globSync трактует скобки как паттерн, не как часть имени).
+const files = [...new Set(patterns.flatMap((p) => existsSync(p) ? [p] : globSync(p, { cwd: process.cwd() })))]
   .map((p) => path.resolve(process.cwd(), p))
 
 if (files.length === 0) {
@@ -116,7 +119,7 @@ function processFile(sourceFile) {
     const opening = Node.isJsxSelfClosingElement(node) ? node : node.getOpeningElement()
     const attrs = opening.getAttributes()
 
-    const known = { as: null, boxSize: null, color: null, mr: null, ml: null }
+    const known = { as: null, boxSize: null, color: null, mr: null, ml: null, mt: null, mb: null }
     const passthroughTexts = []
     let unsupported = null
 
@@ -181,26 +184,23 @@ function processFile(sourceFile) {
       colorAttrText = ` color="var(--chakra-colors-${tokenToKebab(tokenText)})"`
     }
 
-    // mr/ml → инлайн style (react-icons SVG не понимает Chakra spacing-пропы)
+    // mr/ml/mt/mb → инлайн style (react-icons SVG не понимает Chakra spacing-пропы)
+    const MARGIN_PROP_TO_CSS = { mr: 'marginRight', ml: 'marginLeft', mt: 'marginTop', mb: 'marginBottom' }
     let styleAttrText = ''
-    if (known.mr || known.ml) {
+    if (known.mr || known.ml || known.mt || known.mb) {
       const styleParts = []
-      if (known.mr) {
-        const num = extractNumericLiteralText(known.mr.getInitializer())
+      let marginBail = false
+      for (const [propName, cssName] of Object.entries(MARGIN_PROP_TO_CSS)) {
+        if (!known[propName]) continue
+        const num = extractNumericLiteralText(known[propName].getInitializer())
         if (num === null) {
-          warn('mr= не числовой литерал — не однозначно')
-          continue
+          warn(`${propName}= не числовой литерал — не однозначно`)
+          marginBail = true
+          break
         }
-        styleParts.push(`marginRight: ${Number(num) * 4}`)
+        styleParts.push(`${cssName}: ${Number(num) * 4}`)
       }
-      if (known.ml) {
-        const num = extractNumericLiteralText(known.ml.getInitializer())
-        if (num === null) {
-          warn('ml= не числовой литерал — не однозначно')
-          continue
-        }
-        styleParts.push(`marginLeft: ${Number(num) * 4}`)
-      }
+      if (marginBail) continue
       styleAttrText = ` style={{ ${styleParts.join(', ')} }}`
     }
 
