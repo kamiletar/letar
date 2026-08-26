@@ -248,6 +248,28 @@ import { CookieBanner, CookieSettingsButton } from '@letar/ui'
 одновременно (`position: fixed/sticky; bottom: 0`), `StickyActionBar` сам приподнимается над
 баннером, координация уже встроена.
 
+### OfflineConsentBanner
+
+Баннер запроса согласия на PWA-оффлайн-режим (регистрация Service Worker) — появляется через
+`delayMs` после гидратации, приподнимается над `CookieBanner` через ту же CSS-переменную высоты.
+Текст и список фич — пропами, компонент не завязан на конкретный i18n-стек: приложение с
+next-intl передаёт уже переведённые строки из `useTranslations()`.
+
+```tsx
+import { OfflineConsentBanner } from '@letar/ui'
+<OfflineConsentBanner
+  consentKey="my-app-offline-consent"
+  title="Включить оффлайн-режим?"
+  description="Страницы и данные будут доступны без интернета"
+  features={['Работает без сети', 'Экономит трафик']}
+/>
+```
+
+`isEligible?: () => boolean` — доп. условие показа сверх согласия (например «пользователь уже
+заходил в личный кабинет»), вычисляется на клиенте после монтирования. `colorPalette` меняет
+цвет иконки/кнопки принятия (по умолчанию `'brand'`). Вынесен из пяти почти одинаковых копий в
+studio/grandslamcup/mandala/pravda/archetest (2026-08-26).
+
 ### createConsentConfig / readConsentState
 
 Не React-компоненты — утилиты для namespace cookie-согласий, которыми пользуются
