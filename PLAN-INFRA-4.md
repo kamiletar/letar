@@ -3265,3 +3265,19 @@ peer-диапазон в `libs/query-provider/package.json` на будущее)
 `5cf3f5c` (glitchtip-mcp, 17/17), `fb27283e` (umami-mcp, 22/22), `925506b` (studio-time-mcp,
 +19 тестов), `1d916f7` (form-mcp, 59/59). Пробел тестирования MCP tool-хендлеров закрыт по всем
 известным на 2026-08-26 `*-mcp` библиотекам монорепо.
+
+**Дополнение 2026-08-26 (сессия 3): три хелпера дедуплицированы в `@letar/mcp-test-kit`.**
+`connectedClient`/`textOf`/`expectValidationError` были дословно скопированы во всех пяти
+`server.spec.ts` из сессий 1–2 (`studio-mcp`, `glitchtip-mcp`, `umami-mcp`, `studio-time-mcp`,
+`form-mcp`) — 5 повторов по правилу shared-first уже кандидат на вынос. Создана
+[libs/mcp-test-kit](/libs/mcp-test-kit/README.md) (`nx g @letar/generators:new-lib`,
+подключается через `devDependencies` `workspace:*`, не прод-зависимость — библиотека только
+для тестов). `connectedClient` принимает фабрику сервера параметром вместо жёсткой привязки к
+`create*McpServer` — у `form-mcp` фабрика с аргументом (`{ docsPath }`), оборачивается в
+`() => createFormMcpServer({ docsPath })`. Все пять потребителей переведены на импорт из
+`@letar/mcp-test-kit`, локальные копии удалены. `nx typecheck:tsgo/lint/test` — зелёные на
+новой либе и всех пяти потребителях. [mcp-tool-handler-testing-pattern.md](/.claude/docs/mcp-tool-handler-testing-pattern.md)
+обновлён — эталон теперь ссылается на общую библиотеку, а не на копипасту в `studio-mcp`.
+Отдельные коммиты по scope: `2395bb06` (mcp-test-kit, новая либа), `27c3b2af` (studio-mcp),
+`f6c41c9e` (glitchtip-mcp), `fe6bc781` (umami-mcp), `66d0c575` (studio-time-mcp), `323e913b`
+(form-mcp).
