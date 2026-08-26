@@ -2194,3 +2194,8 @@ production-деплоем, не только теоретически реали
   сохраняется в `account`.
 - **MobileAuthSection** — самодельная auth-секция в `mobile-drawer.tsx` заменена на
   `MobileAuthSection` из `@letar/ui`.
+- **`OfflineConsentBanner` перекрывал `CookieBanner`** (2026-08-26) — оба `position: fixed;
+  bottom: 0` без координации между собой физически накладывались друг на друга снизу экрана.
+  Фикс — `bottom` баннера через CSS-переменную `--letar-cookie-banner-height`, публикуемую
+  `CookieBanner` (тот же паттерн, что уже применён к `StickyActionBar` из `@letar/ui`, см.
+  `.claude/docs/ui-components.md` § «Координация bottom-anchored компонентов»).
