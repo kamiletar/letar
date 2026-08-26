@@ -173,12 +173,14 @@ async function main() {
     },
     update: {
       password: hashedPassword,
+      issuer: 'local:credential',
     },
     create: {
       userId: admin.id,
       providerId: 'credential',
       accountId: admin.email,
       password: hashedPassword, // Better Auth хранит пароль в Account, не в User
+      issuer: 'local:credential',
     },
   })
 

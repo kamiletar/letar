@@ -72,6 +72,8 @@ model Account {
   scope                 String?
   idToken               String?
   password              String?   // Хеш пароля для credential auth
+  /// Better Auth 1.7+ — провайдер, выдавший accountId (защита от provider impersonation)
+  issuer                String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
