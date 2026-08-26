@@ -1,3 +1,6 @@
+// Токены и цвета
+export { chakraColorVar } from './lib/chakra-color-var'
+
 // Оверлеи
 export { AdminEditOverlay, type AdminEditOverlayProps } from './lib/admin-edit-overlay'
 export {
