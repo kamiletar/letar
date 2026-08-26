@@ -13,7 +13,7 @@ import { createLogoutAction } from '@letar/auth/server'
  */
 export const logoutAction = createLogoutAction(auth, {
   oidcLogout: {
-    endSessionUrl: `${process.env.BETTER_AUTH_OIDC_ISSUER}/api/auth/oauth2/endsession`,
+    issuer: process.env.BETTER_AUTH_OIDC_ISSUER!,
     clientId: process.env.OIDC_CLIENT_ID!,
     postLogoutRedirectUri: `${process.env.BETTER_AUTH_URL}/sign-in`,
   },
