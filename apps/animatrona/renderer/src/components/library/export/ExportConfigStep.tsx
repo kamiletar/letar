@@ -4,7 +4,7 @@
  * Шаг конфигурации экспорта сериала
  */
 
-import { Badge, Box, Button, Checkbox, Dialog, Flex, HStack, Icon, Tabs, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Checkbox, Dialog, Flex, HStack, Tabs, Text, VStack } from '@chakra-ui/react'
 import { closestCenter, DndContext } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { LuCircleAlert, LuDownload, LuFolderOpen, LuGlobe, LuPlay, LuShare } from 'react-icons/lu'
@@ -28,6 +28,8 @@ export interface ExportConfigStepProps {
  * Компонент шага конфигурации экспорта
  */
 export function ExportConfigStep({ state, anime, onClose }: ExportConfigStepProps) {
+  const ExportActionIcon = state.exportType === 'mkv' ? LuPlay : LuShare
+
   return (
     <>
       <Dialog.Body>
@@ -39,12 +41,12 @@ export function ExportConfigStep({ state, anime, onClose }: ExportConfigStepProp
             variant="enclosed"
           >
             <Tabs.List>
-              <Tabs.Trigger value="mkv">
-                <Icon as={LuDownload} mr={2} />
+              <Tabs.Trigger value="mkv" gap={2}>
+                <LuDownload />
                 MKV
               </Tabs.Trigger>
-              <Tabs.Trigger value="web">
-                <Icon as={LuGlobe} mr={2} />
+              <Tabs.Trigger value="web" gap={2}>
+                <LuGlobe />
                 Web Player
               </Tabs.Trigger>
             </Tabs.List>
@@ -64,7 +66,7 @@ export function ExportConfigStep({ state, anime, onClose }: ExportConfigStepProp
           {state.readyEpisodes < anime.episodes.length && (
             <Box p={3} bg="yellow.subtle" borderRadius="md">
               <HStack>
-                <Icon as={LuCircleAlert} color="yellow.fg" />
+                <LuCircleAlert color="var(--chakra-colors-yellow-fg)" />
                 <Text color="yellow.fg" fontSize="sm">
                   Некоторые эпизоды не имеют готовых дорожек и будут пропущены
                 </Text>
@@ -289,8 +291,8 @@ export function ExportConfigStep({ state, anime, onClose }: ExportConfigStepProp
                     {state.outputDir || 'Выберите папку...'}
                   </Text>
                 </Box>
-                <Button variant="outline" onClick={state.handleSelectFolder}>
-                  <Icon as={LuFolderOpen} mr={2} />
+                <Button variant="outline" gap={2} onClick={state.handleSelectFolder}>
+                  <LuFolderOpen />
                   Обзор
                 </Button>
               </HStack>
@@ -373,7 +375,7 @@ export function ExportConfigStep({ state, anime, onClose }: ExportConfigStepProp
           {state.exportType === 'web' && (
             <Box p={3} bg="purple.subtle" borderRadius="md">
               <HStack align="start" gap={2}>
-                <Icon as={LuGlobe} color="purple.fg" mt={1} />
+                <LuGlobe color="var(--chakra-colors-purple-fg)" style={{ marginTop: '4px' }} />
                 <VStack align="start" gap={1}>
                   <Text fontWeight="medium" color="purple.fg" fontSize="sm">
                     Web Player
@@ -395,9 +397,10 @@ export function ExportConfigStep({ state, anime, onClose }: ExportConfigStepProp
           </Button>
           <Button
             colorPalette="purple"
+            gap={2}
             onClick={state.exportType === 'mkv' ? state.handleStartExport : state.handleStartWebExport}
           >
-            <Icon as={state.exportType === 'mkv' ? LuPlay : LuShare} mr={2} />
+            <ExportActionIcon />
             {state.exportType === 'mkv' ? 'Экспортировать MKV' : 'Опубликовать в IPFS'}
           </Button>
         </HStack>

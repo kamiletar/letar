@@ -4,7 +4,7 @@
  * Шаг отображения прогресса экспорта
  */
 
-import { Badge, Box, Button, Dialog, Flex, HStack, Icon, Progress, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Dialog, Flex, HStack, Progress, Text, VStack } from '@chakra-ui/react'
 import { LuCheck, LuX } from 'react-icons/lu'
 
 import type { useExportDialogState } from './use-export-dialog-state'
@@ -81,12 +81,12 @@ export function ExportProgressStep({ state }: ExportProgressStepProps) {
                     {ep.status === 'processing' && <Badge colorPalette="purple">{Math.round(ep.percent)}%</Badge>}
                     {ep.status === 'completed' && (
                       <Badge colorPalette="green">
-                        <Icon as={LuCheck} />
+                        <LuCheck />
                       </Badge>
                     )}
                     {ep.status === 'error' && (
                       <Badge colorPalette="red">
-                        <Icon as={LuX} />
+                        <LuX />
                       </Badge>
                     )}
                     {ep.status === 'skipped' && <Badge colorPalette="yellow">Пропущен</Badge>}
@@ -99,8 +99,14 @@ export function ExportProgressStep({ state }: ExportProgressStepProps) {
       </Dialog.Body>
 
       <Dialog.Footer>
-        <Button colorPalette="red" variant="outline" onClick={state.handleCancel} disabled={!state.isExporting}>
-          <Icon as={LuX} mr={2} />
+        <Button
+          colorPalette="red"
+          variant="outline"
+          gap={2}
+          onClick={state.handleCancel}
+          disabled={!state.isExporting}
+        >
+          <LuX />
           Отменить
         </Button>
       </Dialog.Footer>

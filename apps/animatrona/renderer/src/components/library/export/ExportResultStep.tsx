@@ -4,7 +4,7 @@
  * Шаг отображения результата экспорта
  */
 
-import { Box, Button, Dialog, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Dialog, HStack, Text, VStack } from '@chakra-ui/react'
 import { LuCheck, LuCopy, LuExternalLink, LuX } from 'react-icons/lu'
 
 import { toaster } from '@/components/ui/toaster'
@@ -43,7 +43,7 @@ export function ExportResultStep({ state, onClose }: ExportResultStepProps) {
           <VStack gap={4} align="stretch">
             {/* Успех */}
             <Box p={4} bg="green.subtle" borderRadius="md" textAlign="center">
-              <Icon as={LuCheck} boxSize={8} color="green.fg" mb={2} />
+              <LuCheck size={32} color="var(--chakra-colors-green-fg)" style={{ marginBottom: '8px' }} />
               <Text fontWeight="bold" fontSize="lg" color="green.fg">
                 Опубликовано в IPFS!
               </Text>
@@ -68,7 +68,7 @@ export function ExportResultStep({ state, onClose }: ExportResultStepProps) {
                   variant="outline"
                   onClick={() => copyToClipboard(state.publishResult!.rootCid, 'CID')}
                 >
-                  <Icon as={LuCopy} />
+                  <LuCopy />
                 </Button>
               </HStack>
             </Box>
@@ -89,7 +89,7 @@ export function ExportResultStep({ state, onClose }: ExportResultStepProps) {
                   variant="outline"
                   onClick={() => copyToClipboard(state.publishResult!.gatewayUrl, 'URL')}
                 >
-                  <Icon as={LuCopy} />
+                  <LuCopy />
                 </Button>
               </HStack>
             </Box>
@@ -110,7 +110,7 @@ export function ExportResultStep({ state, onClose }: ExportResultStepProps) {
                   variant="outline"
                   onClick={() => copyToClipboard(state.publishResult!.publicGatewayUrl, 'URL')}
                 >
-                  <Icon as={LuCopy} />
+                  <LuCopy />
                 </Button>
               </HStack>
               <Text fontSize="xs" color="fg.muted" mt={1}>
@@ -124,12 +124,13 @@ export function ExportResultStep({ state, onClose }: ExportResultStepProps) {
           <HStack gap={2}>
             <Button
               variant="outline"
+              gap={2}
               onClick={() => {
                 // Открыть в браузере
                 window.open(state.publishResult!.gatewayUrl, '_blank')
               }}
             >
-              <Icon as={LuExternalLink} mr={2} />
+              <LuExternalLink />
               Открыть
             </Button>
             <Button colorPalette="purple" onClick={onClose}>
@@ -150,7 +151,7 @@ export function ExportResultStep({ state, onClose }: ExportResultStepProps) {
             ? (
               <>
                 <Box p={4} bg="green.subtle" borderRadius="md" textAlign="center">
-                  <Icon as={LuCheck} boxSize={8} color="green.fg" mb={2} />
+                  <LuCheck size={32} color="var(--chakra-colors-green-fg)" style={{ marginBottom: '8px' }} />
                   <Text fontWeight="bold" fontSize="lg" color="green.fg">
                     Экспорт завершён!
                   </Text>
@@ -194,7 +195,7 @@ export function ExportResultStep({ state, onClose }: ExportResultStepProps) {
             )
             : (
               <Box p={4} bg="red.subtle" borderRadius="md" textAlign="center">
-                <Icon as={LuX} boxSize={8} color="red.fg" mb={2} />
+                <LuX size={32} color="var(--chakra-colors-red-fg)" style={{ marginBottom: '8px' }} />
                 <Text fontWeight="bold" fontSize="lg" color="red.fg">
                   Экспорт не удался
                 </Text>

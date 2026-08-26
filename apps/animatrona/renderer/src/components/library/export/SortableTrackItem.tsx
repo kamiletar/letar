@@ -4,7 +4,7 @@
  * Sortable item для drag-and-drop дорожек
  */
 
-import { Badge, Box, Button, Flex, HStack, Icon, Text } from '@chakra-ui/react'
+import { Badge, Box, Button, Flex, HStack, Text } from '@chakra-ui/react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { LuGripVertical, LuStar } from 'react-icons/lu'
@@ -54,7 +54,7 @@ export function SortableTrackItem({
     >
       {/* Drag handle */}
       <Box {...attributes} {...listeners} cursor="grab" color="fg.subtle" _hover={{ color: 'fg.muted' }}>
-        <Icon as={LuGripVertical} />
+        <LuGripVertical />
       </Box>
 
       {/* Track info */}
@@ -87,7 +87,7 @@ export function SortableTrackItem({
           onClick={onSetDefault}
           title={isDefault ? 'Дорожка по умолчанию' : 'Сделать дорожкой по умолчанию'}
         >
-          <Icon as={LuStar} />
+          <LuStar />
         </Button>
       )}
     </Flex>
