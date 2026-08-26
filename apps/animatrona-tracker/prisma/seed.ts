@@ -53,12 +53,14 @@ async function main() {
     },
     update: {
       password: hashedPassword,
+      issuer: 'local:credential',
     },
     create: {
       userId: user.id,
       providerId: 'credential',
       accountId: user.id,
       password: hashedPassword,
+      issuer: 'local:credential',
     },
   })
   console.log(`🔑 Credential account created`)

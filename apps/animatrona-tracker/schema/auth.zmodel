@@ -119,6 +119,8 @@ model Account {
   scope                 String?
   idToken               String?
   password              String?
+  /// Better Auth 1.7+ — провайдер, выдавший accountId (защита от provider impersonation)
+  issuer                String?
 
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
