@@ -86,12 +86,18 @@ export function createRoleGuards<TSession, TUser extends { id: string; roles: TR
     return hasRole('ADMIN' as TRole)
   }
 
-  /** Требует авторизации, иначе редирект на `signInUrl` */
-  async function requireAuth(): Promise<{ session: TSession; user: TUser }> {
+  /**
+   * Требует авторизации, иначе редирект на `signInUrl`.
+   *
+   * @param callbackUrl - путь, куда вернуть пользователя после входа (`?callbackUrl=`). Без него
+   * `signInUrl` использует свой дефолт — актуально для приложений, где страница входа общая для
+   * админки и публичного кабинета покупателя (домены с разными дефолтами после входа).
+   */
+  async function requireAuth(callbackUrl?: string): Promise<{ session: TSession; user: TUser }> {
     const { redirect } = await import('next/navigation')
     const session = await getSession()
     if (!session) {
-      redirect(signInUrl)
+      redirect(callbackUrl ? `${signInUrl}?callbackUrl=${encodeURIComponent(callbackUrl)}` : signInUrl)
     }
     const nonNullSession = session as TSession
     return { session: nonNullSession, user: getUserFromSession(nonNullSession) }
