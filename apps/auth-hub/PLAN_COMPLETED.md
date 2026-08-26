@@ -2,6 +2,25 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## Фикс: двойной reportEmailFailure (2026-08-26)
+
+Задача сессии: проверить и починить по образцу domwellbes два места, где ручной
+`reportEmailFailure` дублировал репорт, уже сделанный внутри `@letar/email` (`provider.ts`
+логирует и алертит провал SMTP сам). В `profile/emails/_actions/emails.action.ts`
+(`addEmail`-подобное действие с `sendVerificationEmail`) убран лишний вызов после
+`!result.success`, ветка `return { error: ... }` оставлена без изменений.
+
+Также найден и исправлен на уровне общей фабрики `@letar/auth`
+(`libs/auth/src/server/create-auth/index.ts`) тот же паттерн — оба билдера (standalone,
+hub-provider) сами вызывали `email.reportEmailFailure` после `!result.success`. Это чинит
+баг разом для всех приложений, передающих туда настоящий `reportEmailFailure` из
+`@letar/email` (dsperevod, svoichuzhie), без правок в их коде. auth-hub's `src/lib/auth.ts`
+использует ту же фабрику — тоже перестал дублировать после фикса библиотеки.
+
+`nx typecheck:tsgo/lint/format auth-hub` и `nx test/typecheck:tsgo "@letar/auth"` — зелёные
+(42/42 теста, один тест `create-auth.spec.ts` переписан под новое поведение — не дублировать).
+Коммиты: `91645437` (auth-hub), `bee925b1` (`@letar/auth`).
+
 ## Фикс typecheck: VK-провайдер перенесён в genericOAuth (2026-08-25)
 
 Задача сессии: `nx typecheck:tsgo auth-hub` был красным по двум пунктам, оба зафиксированы
