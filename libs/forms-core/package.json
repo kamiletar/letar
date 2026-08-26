@@ -1,6 +1,6 @@
 {
   "name": "@letar/forms-core",
-  "version": "0.9.3",
+  "version": "0.10.0",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
@@ -66,6 +66,12 @@
       "types": "./src/lib/credit-card/index.ts",
       "import": "./src/lib/credit-card/index.ts",
       "default": "./src/lib/credit-card/index.ts"
+    },
+    "./edit-intent": {
+      "@letar/source": "./src/lib/edit-intent/index.ts",
+      "types": "./src/lib/edit-intent/index.ts",
+      "import": "./src/lib/edit-intent/index.ts",
+      "default": "./src/lib/edit-intent/index.ts"
     },
     "./phone": {
       "@letar/source": "./src/lib/phone/index.ts",

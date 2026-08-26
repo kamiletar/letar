@@ -70,6 +70,8 @@ export type FieldComponentType =
   | 'yesNo'
   // Табличный редактор
   | 'tableEditor'
+  // Явная замена значения без передачи старого (API key/Client Secret)
+  | 'editIntent'
 
 /**
  * Option for select/enum fields with i18n support
