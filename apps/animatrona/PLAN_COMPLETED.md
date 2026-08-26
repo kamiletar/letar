@@ -66,7 +66,9 @@ type-check стал чистым, esbuild-бандлинг самого тарг
 - `main/tsconfig.json` → `paths` не содержал `@letar/electron-storage` (два других `@letar/*`-либы
   уже были там), хотя `webpack.config.js` резолвит все три через `alias`. Esbuild-executor читает
   `tsconfig.json` `paths` для бандлинга — добавлена третья запись, по аналогии с двумя
-  существующими.
+  существующими. Общая причина класса — два независимых механизма резолва алиасов в `main/`, оба
+  нужно обновлять при новом `@letar/*`-импорте: разбор и чеклист —
+  [animatrona-dual-build-alias-drift.md](/.claude/docs/animatrona-dual-build-alias-drift.md).
 
 **Файлы:** 15 файлов под `main/services/**`+`main/ipc/**` (перечислены выше), `shared/types/
 import-queue.{ts,d.ts}`, `main/webpack.config.js`, `main/project.json`, `main/tsconfig.json`,

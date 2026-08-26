@@ -76,4 +76,5 @@ nx db:template animatrona        # Обновить template.db
 - См. `apps/animatrona/PLAN.md` для roadmap
 - См. `.claude/docs/electron-sqlite.md` — архитектура миграций
 - См. [animatrona-db-manifest-dual-source.md](/.claude/docs/animatrona-db-manifest-dual-source.md) — поля `Episode.spriteCid`/`vttCid`/`chaptersCid`, дублированные в БД и в IPFS-манифесте: билдер directoryCid читает с приоритетом БД, а retranscode не обновляет колонки, из-за чего в directoryCid может уехать устаревший CID
+- См. [animatrona-dual-build-alias-drift.md](/.claude/docs/animatrona-dual-build-alias-drift.md) — `apps/animatrona/main/` собирается webpack (`animatrona:build`) и esbuild (`animatrona-main:build`) независимо, каждый со своим списком `@letar/*`-алиасов (`webpack.config.js` `resolve.alias` vs `tsconfig.json` `paths`) — новый `@letar/*`-импорт в `main/` требует правки обоих файлов
 - → Skill: `pwa-offline` для offline паттернов (будущее)

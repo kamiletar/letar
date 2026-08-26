@@ -337,6 +337,11 @@ scoped cookie, без утечки токена в лог/`Referer` ·
 
 **Электрон и десктоп:** [electron-app-protocol](/.claude/docs/electron-app-protocol.md) ⚠️ origin
 `null` под `file://` блокирует Worker и WASM ·
+[animatrona-dual-build-alias-drift](/.claude/docs/animatrona-dual-build-alias-drift.md) ⚠️
+`apps/animatrona/main/` собирается webpack (`animatrona:build`) и esbuild
+(`animatrona-main:build`) независимо, каждый со своим списком `@letar/*`-алиасов
+(`webpack.config.js` `resolve.alias` vs `tsconfig.json` `paths`) — новый `@letar/*`-импорт
+требует правки обоих файлов, иначе одна из двух сборок молча/непредсказуемо ломается ·
 [electron-version-drift](/.claude/docs/electron-version-drift.md) точная версия electron в
 каждом приложении расходится с диапазоном корневого `package.json` без единой ошибки сборки —
 проверка `scripts/check-electron-drift.sh` ·
