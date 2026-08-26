@@ -67,6 +67,7 @@ docker compose logs -f web   # ждать "Application startup complete"
 | `animatrona-tracker`   | `animatrona-tracker`   | только production — не на SOPS-пайплайне (`.env.docker` только plaintext на сервере), DSN передан BlackCove для ручного добавления, не задеплоено                                                                   |
 | `kami`                 | `kami`                 | только production — не на SOPS-пайплайне, DSN передан BlackCove для ручного добавления, не задеплоено                                                                                                               |
 | `dashboard-agent`      | `dashboard-agent`      | production, Fastify (не Next.js) — серверная интеграция через `@letar/glitchtip/server`, новый `captureException()` в библиотеке; не на SOPS-пайплайне, DSN передан BlackCove для ручного добавления, не задеплоено |
+| `domwellbes`           | `domwellbes`           | staging + production — приватный submodule с ПДн, подключён с явным `--allowPrivate` (MU6, PLAN_PUBLIC_MOBILE.md), DSN в `.env.docker.enc`/`.env.staging.enc` (2026-08-26), не задеплоено                           |
 
 DSN приложения выдаёт `ProjectKey` при создании проекта в организации — не секрет (тот же принцип,
 что у настоящего Sentry: ключ предназначен для клиентского бандла), но с 2026-08-11 хранится в
