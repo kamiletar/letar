@@ -26,6 +26,9 @@
 [nx-convert-to-inferred-scope-regression](/.claude/docs/nx-convert-to-inferred-scope-regression.md)
 ⚠️ `nx g @nx/*:convert-to-inferred` тихо меняет реальный охват таргета у проектов с кастомными
 настройками — диффать до/после, не доверять «отработал без ошибок» ·
+[tsgo-stray-declarations](/.claude/docs/tsgo-stray-declarations.md) ⚠️ `typecheck:tsgo` иногда
+эмитит `.d.ts`/`.d.ts.map` рядом с исходником вместо `outDir` — не воспроизведено детерминированно
+на чистом дереве, гигиена (`.d.ts.map` в `.gitignore`) и cleanup-команда ·
 [bun-lockfile-private-submodules](/.claude/docs/bun-lockfile-private-submodules.md) ⚠️
 `--frozen-lockfile` падает везде, где submodule не выкачаны; чистка `bun.lock` не держится ·
 [bun-install-stale-isolated-cache](/.claude/docs/bun-install-stale-isolated-cache.md) ⚠️

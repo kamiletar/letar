@@ -8,6 +8,12 @@ out-tsc
 *.tsbuildinfo
 output/
 
+# tsgo (typescript-go, typecheck:tsgo таргеты) иногда эмитит .d.ts.map рядом с исходником
+# вместо outDir библиотеки/приложения — см. .claude/docs/tsgo-stray-declarations.md.
+# Только .map: у .d.ts бывают легитимные рукописные файлы в src/ (css.d.ts и т.п.),
+# .d.ts.map руками никто не пишет — безопасно игнорировать везде.
+**/src/**/*.d.ts.map
+
 # dependencies
 node_modules
 
