@@ -338,7 +338,12 @@ scoped cookie, без утечки токена в лог/`Referer` ·
 убраны из ядра, замена — `@better-auth/oauth-provider` + `jwt()`-плагин, клиент — `signIn.social` ·
 [better-auth-1.7-account-issuer-field](/.claude/docs/better-auth-1.7-account-issuer-field.md) ⚠️
 тот же релиз тихо требует поле `issuer` в модели `Account` — 500 на sign-up/reset-password, если
-общий фрагмент `AccountFields` его не объявляет
+общий фрагмент `AccountFields` его не объявляет ·
+[better-auth-oauth-provider-schema-drift](/.claude/docs/better-auth-oauth-provider-schema-drift.md)
+⚠️ `@better-auth/oauth-provider` держит свою полную схему БД (`dist/*.mjs` `src/schema.ts`),
+только `oauthClient` замаппен на `oauthApplication` — `oauthConsent`/`oauthAccessToken` ищутся
+по буквальному имени модели, несовпадение полей после миграции `a8efcc72` дало 7-слойный
+прод-инцидент SSO (2026-08-26)
 
 **Электрон и десктоп:** [electron-app-protocol](/.claude/docs/electron-app-protocol.md) ⚠️ origin
 `null` под `file://` блокирует Worker и WASM ·
