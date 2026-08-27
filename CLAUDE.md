@@ -138,7 +138,11 @@ select ·
 [react-use-transition-initial-pending-race](/.claude/docs/react-use-transition-initial-pending-race.md)
 ⚠️ `useTransition().isPending` синхронно `false` до первого тика эффекта — окно между монтированием
 и стартом `startTransition` внутри `useEffect`, где `data===null` и `isPending===false`
-одновременно; ловится только там, где эффект (не клик) триггерит `startTransition`
+одновременно; ловится только там, где эффект (не клик) триггерит `startTransition` ·
+[sticky-actionbar-cookiebanner-zindex-race](/.claude/docs/sticky-actionbar-cookiebanner-zindex-race.md)
+⚠️ на короткой странице без скролла `StickyActionBar` (position:sticky) может ещё не «застрять» и
+стоять в потоке у нижнего края — там же, где `position:fixed` CookieBanner с выше zIndex,
+перехватывает клик по CTA; firefox/webkit чувствительнее chromium к font-metrics разнице
 
 **Данные и состояние:** [data-fetching](/.claude/docs/data-fetching.md) ·
 [pwa-offline](/.claude/docs/pwa-offline.md) ·
