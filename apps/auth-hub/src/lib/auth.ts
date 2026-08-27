@@ -71,6 +71,61 @@ export const auth = createAuth({
         clientSecret: process.env.AUTH_FACEBOOK_SECRET,
       },
     }),
+
+    // VK (ВКонтакте): нативный провайдер Better Auth 1.7 — VK ID (OAuth 2.1, id.vk.ru),
+    // обязательный PKCE. Старые Standalone-приложения VK (oauth.vk.com/vk.ru, API 5.131)
+    // принудительно перенесены VK в сервис VK ID — legacy-эндпоинт для уже мигрировавших
+    // приложений отвечает `{"error":"invalid_request","error_description":"Security Error"}`
+    // независимо от PKCE. getUserInfo переопределён, чтобы сохранить синтетический email
+    // `<id>@vk.com` для пользователей, не выдавших scope email (как было в старом флоу).
+    ...(process.env.AUTH_VK_ID && process.env.AUTH_VK_SECRET && {
+      vk: {
+        clientId: process.env.AUTH_VK_ID,
+        clientSecret: process.env.AUTH_VK_SECRET,
+        getUserInfo: async (tokens: { accessToken?: string }) => {
+          if (!tokens.accessToken) {
+            return null
+          }
+          const response = await fetch('https://id.vk.com/oauth2/user_info', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+              access_token: tokens.accessToken,
+              client_id: process.env.AUTH_VK_ID!,
+            }).toString(),
+          })
+          const data = await response.json()
+          const profile = data?.user as
+            | { user_id: string; first_name?: string; last_name?: string; email?: string; avatar?: string }
+            | undefined
+
+          if (!profile) {
+            return null
+          }
+
+          return {
+            user: {
+              name: `${profile.first_name ?? ''} ${profile.last_name ?? ''}`.trim() || undefined,
+              email: profile.email || `${profile.user_id}@vk.com`,
+              image: profile.avatar,
+              emailVerified: !!profile.email,
+            },
+            // `VkProfile` требует first_name/last_name/birthday непустыми строками — id.vk.com
+            // их не всегда отдаёт, дефолтим на пустую строку, сам аккаунт мапится по email выше.
+            data: {
+              user: {
+                user_id: profile.user_id,
+                first_name: profile.first_name ?? '',
+                last_name: profile.last_name ?? '',
+                email: profile.email,
+                avatar: profile.avatar,
+                birthday: '',
+              },
+            },
+          }
+        },
+      },
+    }),
   },
 
   // Дополнительные плагины поверх стандартных hub-provider
@@ -94,7 +149,7 @@ export const auth = createAuth({
       disableSignUp: false,
     }),
 
-    // Yandex + VK через genericOAuth
+    // Yandex через genericOAuth (VK переехал в socialProviders.vk — нативный VK ID, см. выше)
     genericOAuth({
       config: [
         ...(process.env.AUTH_YANDEX_ID && process.env.AUTH_YANDEX_SECRET
@@ -121,53 +176,6 @@ export const auth = createAuth({
                     ? `https://avatars.yandex.net/get-yapic/${data.default_avatar_id}/islands-200`
                     : undefined,
                   emailVerified: true,
-                }
-              },
-            },
-          ]
-          : []),
-
-        // VK (ВКонтакте): better-auth 1.7 зарезервировал ключ `vk` в `socialProviders` под
-        // собственный OAuth 2.1/PKCE-провайдер (VK ID), несовместимый со старым VK API 5.131-
-        // флоу (users.get с clientSecret) — тот же фикс, что уже сделан в driving-school.
-        ...(process.env.AUTH_VK_ID && process.env.AUTH_VK_SECRET
-          ? [
-            {
-              providerId: 'vk',
-              clientId: process.env.AUTH_VK_ID,
-              clientSecret: process.env.AUTH_VK_SECRET,
-              authorizationUrl: 'https://oauth.vk.com/authorize',
-              tokenUrl: 'https://oauth.vk.com/access_token',
-              // Better Auth genericOAuth включает PKCE (code_challenge) по умолчанию — старый
-              // VK OAuth API 5.131 его не поддерживает и отвечает `Code challenge method is
-              // unsupported` уже на экране авторизации, до всякого callback.
-              pkce: false,
-              getUserInfo: async (tokens: { accessToken?: string; raw?: Record<string, unknown> }) => {
-                const accessToken = tokens.accessToken
-                if (!accessToken) {
-                  throw new Error('VK: no access token')
-                }
-                const userId = (tokens.raw as { user_id?: number })?.user_id
-                const response = await fetch(
-                  `https://api.vk.com/method/users.get?user_ids=${userId}&fields=photo_200,screen_name&access_token=${accessToken}&v=5.131`,
-                )
-                const data = await response.json()
-                const user = data.response?.[0] as
-                  | { id: number; first_name?: string; last_name?: string; screen_name?: string; photo_200?: string }
-                  | undefined
-
-                if (!user) {
-                  throw new Error('VK user not found')
-                }
-
-                const email = (tokens.raw as { email?: string })?.email
-
-                return {
-                  id: String(user.id),
-                  name: `${user.first_name} ${user.last_name}`.trim() || user.screen_name,
-                  email: email || `${user.id}@vk.com`,
-                  image: user.photo_200,
-                  emailVerified: !!email,
                 }
               },
             },
