@@ -5,6 +5,7 @@
  * ZenStack-политики здесь не нужны, тест сам управляет доступом через UI-логин.
  */
 import { loadEnvCascade } from '@letar/env-load'
+import { execFileSync } from 'node:child_process'
 import { randomBytes, scryptSync } from 'node:crypto'
 import { resolve } from 'path'
 
@@ -25,6 +26,42 @@ async function hashPasswordBetterAuth(password: string): Promise<string> {
 
 const projectDir = resolve(__dirname, '../../../dsperevod')
 loadEnvCascade(projectDir)
+
+/**
+ * На s3-стейджинге у apps/dsperevod нет .env.local (только .env с PORT) — DATABASE_URL
+ * остаётся пустым, а хост-порт БД динамический (docker перекидывает при конфликте). Раннер
+ * e2e (dashboard-agent) прокидывает только BASE_URL/DEV_SESSION_TOKEN, не DATABASE_URL
+ * (apps/dashboard-agent/src/routes/e2e.ts). Playwright исполняется на ХОСТЕ (nsenter -t 1),
+ * не внутри docker-сети — обращение по внутреннему hostname `dsperevod-staging-db` оттуда не
+ * резолвится, нужен host-порт.
+ *
+ * Фолбэк: если DATABASE_URL пуст, читаем реальный DATABASE_URL (с настоящим паролем) прямо
+ * из работающего app-контейнера и переписываем в нём внутренний host:port на
+ * `localhost:<текущий host-порт из docker port>`. Пароль никогда не хардкодится в тесте.
+ * Только для staging — на локальной разработке .env.local всегда есть, до сюда не доходит.
+ */
+function resolveStagingDatabaseUrl(): string {
+  const containerApp = 'dsperevod-staging-app'
+  const containerDb = 'dsperevod-staging-db'
+
+  const rawEnv = execFileSync('docker', ['exec', containerApp, 'printenv', 'DATABASE_URL'], { encoding: 'utf8' })
+    .trim()
+  if (!rawEnv) {
+    throw new Error(`DATABASE_URL пуст внутри контейнера ${containerApp}`)
+  }
+
+  const portOutput = execFileSync('docker', ['port', containerDb, '5432'], { encoding: 'utf8' }).trim()
+  const hostPort = portOutput.split(':').pop()
+  if (!hostPort) {
+    throw new Error(`Не удалось распарсить host-порт из "docker port ${containerDb} 5432": "${portOutput}"`)
+  }
+
+  return rawEnv.replace(`${containerDb}:5432`, `localhost:${hostPort}`)
+}
+
+if (!process.env['DATABASE_URL']) {
+  process.env['DATABASE_URL'] = resolveStagingDatabaseUrl()
+}
 
 type AnyPrisma = {
   user: Record<string, unknown>
