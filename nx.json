@@ -2,10 +2,7 @@
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "cacheDirectory": ".nx/cache",
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
       "!{projectRoot}/.eslintrc.json",
@@ -43,9 +40,7 @@
     },
     {
       "plugin": "@nx/next/plugin",
-      "exclude": [
-        "apps/form-docs/**"
-      ],
+      "exclude": ["apps/form-docs/**"],
       "options": {
         "startTargetName": "start",
         "buildTargetName": "build",
@@ -57,9 +52,7 @@
     },
     {
       "plugin": "@nx/eslint/plugin",
-      "exclude": [
-        "eslint.config.mjs"
-      ],
+      "exclude": ["eslint.config.mjs"],
       "options": {
         "targetName": "lint"
       }
@@ -180,19 +173,12 @@
   ],
   "targetDefaults": {
     "test": {
-      "dependsOn": [
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     },
     "@nx/esbuild:esbuild": {
       "cache": true,
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "production",
-        "^production"
-      ]
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
     },
     "oxlint": {
       "executor": "nx:run-commands",
@@ -201,10 +187,7 @@
         "cwd": "{workspaceRoot}"
       },
       "cache": true,
-      "inputs": [
-        "default",
-        "{workspaceRoot}/.oxlintrc.json"
-      ]
+      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"]
     },
     "format": {
       "executor": "nx:run-commands",
@@ -215,9 +198,7 @@
       "cache": false,
       "metadata": {
         "description": "Format files with dprint (~30x faster than Prettier)",
-        "technologies": [
-          "dprint"
-        ]
+        "technologies": ["dprint"]
       }
     },
     "format:check": {
@@ -227,15 +208,10 @@
         "cwd": "{workspaceRoot}"
       },
       "cache": true,
-      "inputs": [
-        "default",
-        "{workspaceRoot}/dprint.json"
-      ],
+      "inputs": ["default", "{workspaceRoot}/dprint.json"],
       "metadata": {
         "description": "Check formatting with dprint",
-        "technologies": [
-          "dprint"
-        ]
+        "technologies": ["dprint"]
       }
     }
   },
@@ -254,9 +230,7 @@
   },
   "sync": {
     "applyChanges": true,
-    "disabledTaskSyncGenerators": [
-      "@nx/js:typescript-sync"
-    ]
+    "disabledTaskSyncGenerators": ["@nx/js:typescript-sync"]
   },
   "parallel": 3,
   "daemon": {
