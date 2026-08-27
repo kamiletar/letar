@@ -570,6 +570,51 @@ ON CONFLICT (name, \"serverId\") DO UPDATE SET domain = EXCLUDED.domain;
 
 Не забудь обновить таблицу в [nginx-proxy-manager/README.md](/infra/nginx-proxy-manager/README.md).
 
+### 3. GlitchTip (трекинг ошибок)
+
+Подключи новое приложение сразу, не откладывай до первого прод-инцидента — фикс
+`AuditLog.metadata` в dsperevod (2026-08-27) обнаружился только по скриншоту пользователя именно
+потому, что приложение не было подключено и ошибка нигде не всплыла раньше живых жалоб.
+
+```bash
+nx g @letar/generators:glitchtip-integrate <app>              # публичное приложение
+nx g @letar/generators:glitchtip-integrate <app> --allowPrivate --skipChecks  # приватный submodule
+```
+
+Генератор создаёт `instrumentation.ts`/`instrumentation-client.ts`, добавляет зависимость и
+`nx.implicitDependencies` в `package.json`, `tsconfig.json`-пути, плейсхолдеры переменных в
+`.env.docker`/`.env.staging` (+ `.example`) и `docker-compose.*.yml`. DSN — из GlitchTip UI
+(Settings → Client Keys) или batched Django-shell на s3, см. [infra/glitchtip/README.md](/infra/glitchtip/README.md).
+После заполнения DSN перешифруй `.env.docker.enc`/`.env.staging.enc` через sops
+([secret-manager.md](/.claude/docs/secret-manager.md)) и допиши строку в таблицу
+«Подключённые приложения» там же.
+
+⚠️ Если у приложения уже есть свой `instrumentation.ts` (кастомная логика, как в aboi с
+регистрацией CDEK-вебхука) — генератор его не трогает и только предупреждает, GlitchTip-вызов
+(`initServer`/`onRequestError` из `@letar/glitchtip/server`) нужно дописать вручную рядом с
+существующим кодом, не заменяя его.
+
+⚠️ **Известный ложноположительный `@nx/enforce-module-boundaries`:** eslint иногда ругается
+`Static imports of lazy-loaded libraries are forbidden` на статический импорт
+`@letar/glitchtip/client` в `instrumentation-client.ts`, считая его конфликтующим с динамическим
+`await import('@letar/glitchtip/server')` в `instrumentation.ts` — то же самое workspace-lib
+`@letar/glitchtip`, разные подпути (client/server), баг детектирования Nx-демона, не реальная
+проблема границ. Подтверждено воспроизведением на 3 из 7 приложений одной сессии (aprel8008,
+driving-school, svoichuzhie — но НЕ dashboard/domwellbes/dsperevod с идентичным кодом),
+нестабильность не объяснена причиной, только фиксом. Обход — `eslint-disable-next-line` прямо
+над импортом в `instrumentation-client.ts`:
+
+```ts
+// Известная ложная блокировка Nx-демона на static(/client)+dynamic(/server) паре подпутей
+// @letar/glitchtip, см. PLAN-INFRA-4.md §70.
+// eslint-disable-next-line @nx/enforce-module-boundaries
+import { initClient } from '@letar/glitchtip/client'
+```
+
+Не пытайся «починить» это перестройкой project-графа (`nx reset` может упереться в `EPERM`, если
+в репо параллельно работает другой агент) — воспроизводится нестабильно и независимо от кэша,
+проще сразу поставить disable-комментарий по образцу выше.
+
 ---
 
 ## Заметки по Dashboard
