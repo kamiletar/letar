@@ -56,6 +56,9 @@ approval, kebab-case в `to`, обнулённая база
 [zenstack-typed-interface-json-snapshot](/.claude/docs/zenstack-typed-interface-json-snapshot.md)
 именованный `interface` без index signature не проходит в `Json`-поле, фикс —
 `JSON.parse(JSON.stringify(...))` ·
+[zenstack-nullable-json-field-null-sentinel](/.claude/docs/zenstack-nullable-json-field-null-sentinel.md)
+⚠️ nullable `Json`-поле не принимает JS `null` — `invalid_union`-ошибка Zod указывает на
+посторонние поля, фикс — `JsonNull` из `@zenstackhq/orm` ·
 [zenstack-public-write-read-back](/.claude/docs/zenstack-public-write-read-back.md) публичный
 `@@allow('create')` не даёт прочитать запись назад ·
 [zenstack-generated-prisma-client](/.claude/docs/zenstack-generated-prisma-client.md) лишний
