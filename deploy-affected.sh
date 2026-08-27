@@ -159,7 +159,14 @@ ORIGINAL_ARGS=("$@")
 SPECIFIC_APP=""
 SKIP_GIT=false
 DRY_RUN=false
-SKIP_NX_CACHE=true  # По умолчанию выключен Nx кэш (избегаем ошибок "File exists")
+# Nx-кэш включён по умолчанию. Раньше здесь стояло true с пометкой «избегаем ошибок
+# "File exists"» — та ошибка была следствием файлов с владельцем root в .nx/, и её закрыл
+# re-exec под пользователя deploy (см. верх скрипта). Цена выключенного кэша измерена
+# 2026-08-28: шаг «Rebuilding libs/*/dist declarations» — это typecheck ВСЕХ 67 библиотек
+# монорепо, и без кэша он занимает ~15 минут на каждом деплое любого приложения (замер: 5 либ
+# = 2м06с на s3). С кэшем неизменные либы дают cache hit за секунды, а изменённая
+# пересчитывается вместе с зависимыми. Вернуть прежнее поведение: --skip-cache.
+SKIP_NX_CACHE=false
 CLEAN_INSTALL=false
 STAGING=false  # Деплой на staging окружение (docker-compose.staging.yml + .env.staging)
 RUN_SEED=false  # Запустить nx db:seed после деплоя
@@ -372,11 +379,16 @@ if [ "$SKIP_GIT" = false ]; then
   echo -e "${GREEN}✅ Submodules updated${NC}"
   echo ""
 
-  # Reset Nx daemon after git pull to avoid stale project graph cache
-  echo -e "${YELLOW}🔄 Resetting Nx daemon cache...${NC}"
+  # Сбрасываем ТОЛЬКО project graph (.nx/workspace-data) — после git pull + submodule update
+  # он может быть устаревшим. Кэш вычислений (.nx/cache) здесь больше не трогаем: он хранит
+  # результаты typecheck 67 библиотек, ради которых и включён SKIP_NX_CACHE=false, а его
+  # удаление сводило бы кэширование на нет. Пересборка графа стоит ~17с холодно (замер s3,
+  # 2026-08-28) — заметно дешевле, чем повторный typecheck всех либ.
+  # Полный сброс — флагом --clean.
+  echo -e "${YELLOW}🔄 Resetting Nx project graph...${NC}"
   npx nx daemon --stop 2>/dev/null || true
-  rm -rf .nx/cache .nx/workspace-data 2>/dev/null || true
-  echo -e "${GREEN}✅ Nx cache cleared${NC}"
+  rm -rf .nx/workspace-data 2>/dev/null || true
+  echo -e "${GREEN}✅ Nx project graph cleared${NC}"
   echo ""
 fi
 
@@ -928,9 +940,19 @@ for app in $AFFECTED_APPS; do
     fi
   fi
 
-  # Clear Next.js and Babel caches before build to prevent stale cache issues
+  # Чистим ВЫХОДНЫЕ артефакты предыдущей сборки, но не весь .next.
+  # В .next/turbopack лежит persistent filesystem cache Turbopack — в Next 16
+  # (experimental.turbopackFileSystemCacheForBuild) он включён по умолчанию. Прежний
+  # `rm -rf "$APP_DIR/.next"` сносил его вместе со всем остальным, из-за чего КАЖДАЯ сборка
+  # была холодной: dsperevod показывал "Compiled successfully in 14.4min" на приложении из
+  # 109 tsx и 63 роутов. Полная чистка по-прежнему доступна флагом --clean.
   echo -e "${YELLOW}🧹 Clearing build caches for ${app}...${NC}"
-  rm -rf "$APP_DIR/.next" 2>/dev/null || true
+  if [ "$CLEAN_INSTALL" = true ]; then
+    rm -rf "$APP_DIR/.next" 2>/dev/null || true
+  else
+    rm -rf "$APP_DIR/.next/standalone" "$APP_DIR/.next/static" "$APP_DIR/.next/server" 2>/dev/null || true
+    rm -rf "$APP_DIR/.next/build" "$APP_DIR/.next/types" 2>/dev/null || true
+  fi
   rm -rf "$APP_DIR/out" 2>/dev/null || true
   rm -rf "node_modules/.cache" 2>/dev/null || true
 
