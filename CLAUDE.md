@@ -268,6 +268,10 @@ alias матчится по префиксу ·
 [vitest-shared-singleton-row-race](/.claude/docs/vitest-shared-singleton-row-race.md) ⚠️ общая
 singleton-строка настроек (`ShopSettings` и аналоги) — редкий флак под полным прогоном из-за
 файлового параллелизма vitest на общей dev-БД, не внутри одного файла ·
+[vitest-serializable-transaction-cross-file-flake](/.claude/docs/vitest-serializable-transaction-cross-file-flake.md)
+⚠️ соседний, но другой класс — Postgres SSI абортирует `40001` даже без пересечения данных между
+файлами, чем больше spec-файлов с `Serializable`-транзакциями параллельно, тем чаще; не гонка за
+строку, фикс не нужен, `--fileParallelism=false` детерминированно зелёный ·
 [hardcoded-unique-lookup-key-test-race](/.claude/docs/hardcoded-unique-lookup-key-test-race.md) ⚠️
 функция ищет запись по захардкоженному значению `@unique`-поля (ключ шаблона, `slug`, `code`) —
 параллельные spec-файлы вынуждены делить один ряд БД; фикс — сделать значение опциональным
