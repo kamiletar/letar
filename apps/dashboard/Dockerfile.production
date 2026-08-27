@@ -2,14 +2,19 @@
 # Используется когда сборка выполнена на сервере с nx build affected
 # Build context: workspace root (C:\web\letar)
 
+FROM node:24-slim AS tz
+
 FROM node:24-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Alpine (musl) не содержит zoneinfo по умолчанию - без tzdata TZ ниже молча не сработает
-RUN apk add --no-cache tzdata
+# zoneinfo копируем из Debian-образа, а не ставим `apk add tzdata`: Alpine (musl) не
+# содержит zoneinfo, а apk был единственным сетевым запросом в этом Dockerfile и падал
+# с "TLS: unspecified error" каждый раз, когда ночной docker-prune сносил кеш слоя.
+# Разбор — .claude/docs/docker-prune-cold-layer-network-flake.md
+COPY --from=tz /usr/share/zoneinfo /usr/share/zoneinfo
 ENV TZ=Europe/Moscow
 
 # Install Docker CLI for container management
