@@ -196,7 +196,7 @@ export function CookieBanner({
                 onCheckedChange={(e) => setAnalytics(!!e.checked)}
                 colorPalette="brand"
                 size="sm"
-                minH="2.75rem"
+                minH={{ base: '2.75rem', md: 'auto' }}
                 alignItems="center"
               >
                 <Checkbox.HiddenInput />
@@ -213,7 +213,7 @@ export function CookieBanner({
                 onCheckedChange={(e) => setMarketing(!!e.checked)}
                 colorPalette="brand"
                 size="sm"
-                minH="2.75rem"
+                minH={{ base: '2.75rem', md: 'auto' }}
                 alignItems="center"
               >
                 <Checkbox.HiddenInput />
