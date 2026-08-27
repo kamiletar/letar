@@ -1,5 +1,6 @@
 'use client'
 
+import { authClient } from '@/lib/auth-client'
 import type { AccountBase } from '@letar/auth'
 import { ConnectedAccountsList } from '@letar/auth/client'
 import { unlinkAccount } from '../_actions/unlink-account'
@@ -23,6 +24,7 @@ export function ConnectedAccountsWrapper({ accounts, hasPassword, userEmail }: P
       linkCallbackUrl="/profile/connected-accounts"
       changePasswordUrl="/profile/change-password"
       onUnlink={unlinkAccount}
+      linkSocial={authClient.linkSocial}
     />
   )
 }

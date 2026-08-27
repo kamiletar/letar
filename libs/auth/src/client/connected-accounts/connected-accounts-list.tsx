@@ -1,7 +1,6 @@
 'use client'
 
 import { Alert, Badge, Box, Button, HStack, Icon, Text, VStack } from '@chakra-ui/react'
-import { useRouter } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { FaEnvelope } from 'react-icons/fa'
@@ -42,6 +41,14 @@ export interface ConnectedAccountsListProps {
   changePasswordUrl?: string
   /** Обработчик отвязки аккаунта */
   onUnlink: (providerId: string) => Promise<UnlinkAccountResult>
+  /**
+   * `authClient.linkSocial` — привязка OAuth-провайдера к текущей сессии.
+   * Better Auth регистрирует и нативные провайдеры, и провайдеры `genericOAuth` (Yandex, VK)
+   * на одном core-эндпоинте `/link-social`, поэтому один и тот же вызов подходит всем провайдерам
+   * из списка `providers`. НЕ строить URL `/api/auth/signin/{provider}` вручную — такого роута
+   * в Better Auth нет, это соглашение NextAuth.
+   */
+  linkSocial: (params: { provider: string; callbackURL?: string }) => Promise<{ error?: { message?: string } | null }>
   /** Кастомный виджет для Telegram (TelegramLinkButton) */
   telegramWidget?: ReactNode
   /** Кастомные иконки провайдеров (переопределяют дефолтные) */
@@ -74,10 +81,10 @@ export function ConnectedAccountsList({
   linkCallbackUrl = '/settings/connected-accounts',
   changePasswordUrl = '/settings/change-password',
   onUnlink,
+  linkSocial,
   telegramWidget,
   providerIcons,
 }: ConnectedAccountsListProps) {
-  const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState<string>('')
 
@@ -95,8 +102,12 @@ export function ConnectedAccountsList({
     setError('')
 
     try {
-      // Better Auth: редирект на OAuth провайдер
-      router.push(`/api/auth/signin/${providerId}?callbackURL=${encodeURIComponent(linkCallbackUrl)}`)
+      // Better Auth: /link-social сам редиректит браузер на OAuth провайдера
+      const { error } = await linkSocial({ provider: providerId, callbackURL: linkCallbackUrl })
+      if (error) {
+        setError(error.message || 'Не удалось связать аккаунт')
+        setLoading(null)
+      }
     } catch (err) {
       console.error('[ConnectedAccountsList] Link error:', err)
       setError('Не удалось связать аккаунт')
