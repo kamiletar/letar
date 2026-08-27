@@ -55,3 +55,16 @@ ORM, коды — `dbErrorCode`/`reason`) против `PrismaClient` из `@pri
 везде). Все четыре исправлены на `dbErrorCode`/`reason`. Не доверять прошлому выводу «этот
 паттерн верен для X» без повторной проверки `lib/db.ts` — вывод мог устареть или быть ошибочным
 изначально.
+
+## `P2034` (serialization failure) — тот же паттерн, другой SQLSTATE
+
+Найдено 2026-08-27 в `createProjectActivityDependencyAction`
+(`apps/domwellbes/src/app/(admin)/admin/_actions/project-schedule.action.ts`) — транзакция на
+raw `prisma` с `isolationLevel: Serializable` (защита от параллельного создания цикла в двух
+рёбрах зависимости) ловила конфликт сериализации через `error.code === 'P2034'`. Тот же root
+cause, что unique-violation выше: под ZenStack v3 ORM это никогда не срабатывает — сырой
+Postgres `SQLSTATE` для serialization_failure — `40001`, а не Prisma `P2034`. Фикс — тот же
+`error.dbErrorCode === '40001'`. Вывод: `Serializable`-транзакции на raw `prisma` в этом
+монорепо (см. `payment-webhook-idempotency-pattern.md`,
+`idempotency-key-terminal-transition-pattern.md` — оба паттерна нередко оборачивают retry именно
+в `Serializable`) — ещё один кандидат на этот же баг, проверять `dbErrorCode`, а не `.code`.
