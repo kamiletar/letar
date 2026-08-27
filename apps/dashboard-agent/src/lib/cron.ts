@@ -422,6 +422,31 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's2',
   },
   {
+    id: 'next-cache-cleanup-s2',
+    name: 'Next.js Build Cache Cleanup (s2)',
+    app: 'dashboard-agent',
+    endpoint: '/api/cron/next-cache-cleanup',
+    schedule: '30 4 * * *',
+    description: 'Удаляет `apps/<app>/.next/cache` в чекауте репозитория для приложений, не пересобиравшихся '
+      + '≥2 дня (NEXT_CACHE_CLEANUP_DAYS, по BUILD_ID/mtime `.next`) — Next.js документирует этот каталог как '
+      + 'безопасный к удалению в любой момент, следующий `next build` пересоберёт его с нуля. Отдельно от '
+      + '`docker-prune` (тот чистит Docker build cache, это — host-чекаут): замер s2 2026-08-28 показал ~34GB '
+      + 'суммарно по всем приложениям, часть не трогалась месяцами (выведенные из эксплуатации приложения).',
+    enabled: true,
+    server: 's2',
+  },
+  {
+    id: 'next-cache-cleanup-s3',
+    name: 'Next.js Build Cache Cleanup (s3)',
+    app: 'dashboard-agent',
+    endpoint: '/api/cron/next-cache-cleanup',
+    schedule: '30 4 * * *',
+    description: 'То же самое, что next-cache-cleanup-s2, но для staging-чекаута на s3 — deploy-affected.sh '
+      + '--staging тоже пересобирает `.next` при каждом staging-деплое.',
+    enabled: true,
+    server: 's3',
+  },
+  {
     id: 'staging-idle-shutdown',
     name: 'Staging Idle Shutdown (s3)',
     app: 'dashboard-agent',

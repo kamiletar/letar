@@ -40,6 +40,7 @@ import { healthRoutes } from './routes/health'
 import { healthCheckRoutes } from './routes/health-check'
 import { logScanRoutes } from './routes/log-scan'
 import { metricsRoutes } from './routes/metrics'
+import { nextCacheCleanupRoutes } from './routes/next-cache-cleanup'
 import { nginxRoutes } from './routes/nginx'
 import { stagingIdleShutdownRoutes } from './routes/staging-idle-shutdown'
 import { systemRoutes } from './routes/system'
@@ -130,6 +131,7 @@ async function main(): Promise<void> {
   await fastify.register(healthCheckRoutes)
   await fastify.register(logScanRoutes)
   await fastify.register(dockerPruneRoutes)
+  await fastify.register(nextCacheCleanupRoutes)
   await fastify.register(stagingIdleShutdownRoutes)
   await fastify.register(metricsRoutes)
 
