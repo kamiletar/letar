@@ -1,0 +1,47 @@
+services:
+  clamav:
+    image: clamav/clamav:1.4
+    container_name: letar-clamav
+    restart: always
+    environment:
+      # Нужен только clamd для сканирования потоком — почтовый milter и freshclam-only режим
+      # выключены, иначе контейнер поднимает лишние процессы под ту же память
+      CLAMAV_NO_MILTERD: 'true'
+      CLAMAV_NO_FRESHCLAMD: 'false'
+    volumes:
+      # Базы сигнатур переживают пересоздание контейнера. Без этого том каждый рестарт
+      # тянет ~250 МБ с зеркала freshclam — и первые минуты после старта сканера фактически нет
+      - clamav_signatures:/var/lib/clamav
+    # ⚠️ Порт 3310 НЕ публикуется на хост намеренно — тот же приём, что у letar-redis
+    # (см. .claude/docs/redis-security.md). clamd не имеет никакой аутентификации: любой,
+    # кто дотянулся до порта, сканирует и читает ответы. Потребители ходят только внутри
+    # kami-network по имени контейнера.
+    networks:
+      - kami-network
+    # clamd держит распакованные базы сигнатур в памяти — это ~1.2 ГБ RSS в покое.
+    # Лимит с запасом на пик сканирования, но жёсткий: без него OOM-killer выбирает жертву
+    # сам и может унести приложение вместо сканера
+    mem_limit: 2g
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+    healthcheck:
+      # clamdcheck.sh идёт в самом образе — спрашивает clamd через сокет, а не просто
+      # проверяет живость процесса: процесс может быть жив, пока базы ещё грузятся
+      test: ['CMD', 'clamdcheck.sh']
+      interval: 30s
+      timeout: 10s
+      # Холодный старт с загрузкой баз занимает до пары минут — без start_period
+      # контейнер успеет несколько раз посчитаться нездоровым и уйти в рестарт-петлю
+      start_period: 180s
+      retries: 3
+
+volumes:
+  clamav_signatures:
+    driver: local
+
+networks:
+  kami-network:
+    external: true
