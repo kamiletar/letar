@@ -1,5 +1,11 @@
 {
   "name": "@letar/dsperevod-e2e",
   "version": "0.0.1",
-  "private": true
+  "private": true,
+  "nx": {
+    "implicitDependencies": ["@letar/env-load"]
+  },
+  "dependencies": {
+    "@letar/env-load": "workspace:*"
+  }
 }
