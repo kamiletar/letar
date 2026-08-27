@@ -69,6 +69,10 @@ docker compose logs -f web   # ждать "Application startup complete"
 | `dashboard-agent`      | `dashboard-agent`      | production, Fastify (не Next.js) — серверная интеграция через `@letar/glitchtip/server`, новый `captureException()` в библиотеке; не на SOPS-пайплайне, DSN передан BlackCove для ручного добавления, не задеплоено                              |
 | `domwellbes`           | `domwellbes`           | staging + production — приватный submodule с ПДн, подключён с явным `--allowPrivate` (MU6, PLAN_PUBLIC_MOBILE.md), DSN в `.env.docker.enc`/`.env.staging.enc` (2026-08-26), не задеплоено                                                        |
 | `dsperevod`            | `dsperevod`            | staging + production — приватный submodule (бюро переводов, 152-ФЗ), подключён с явным `--allowPrivate` после разбора прод-инцидента (500 на любом audit-логе), DSN в `.env.docker.enc`/`.env.staging.enc` (2026-08-27), деплой-запрос отправлен |
+| `aboi`                 | `aboi`                 | staging + production — приватный submodule, подключён с `--allowPrivate` (2026-08-27), DSN в `.env.docker.enc`/`.env.staging.enc`; `instrumentation.ts` дописан вручную поверх существующей регистрации CDEK-вебхука, не задеплоено              |
+| `aprel8008`            | `aprel8008`            | staging + production — приватный submodule, подключён с `--allowPrivate` (2026-08-27), DSN в `.env.docker.enc`/`.env.staging.enc`, не задеплоено                                                                                                 |
+| `driving-school`       | `driving-school`       | staging + production — приватный submodule, подключён с `--allowPrivate` (2026-08-27), DSN в `.env.docker.enc`/`.env.staging.enc`, не задеплоено                                                                                                 |
+| `svoichuzhie`          | `svoichuzhie`          | staging + production — приватный submodule, подключён с `--allowPrivate` (2026-08-27), DSN в `.env.docker.enc`/`.env.staging.enc`, не задеплоено                                                                                                 |
 
 DSN приложения выдаёт `ProjectKey` при создании проекта в организации — не секрет (тот же принцип,
 что у настоящего Sentry: ключ предназначен для клиентского бандла), но с 2026-08-11 хранится в
@@ -87,6 +91,12 @@ Org slug (для API, отличается от отображаемого им�
 slug читаются из `infra/glitchtip/.env.local` (не в git); токен создаётся только через
 GlitchTip UI (Settings → Auth Tokens, права `project:read` + `event:read`) — API намеренно не
 даёт токену создавать другие токены. Подробности — [glitchtip-mcp/README.md](/libs/glitchtip-mcp/README.md).
+
+## Пропущенные приложения
+
+`form-develop-app`, `form-develop-app-shadcn`, `synth` — dev-песочницы без
+`docker-compose`/`.env.docker` и без production-деплоя вообще (аудит 2026-08-27). Подключать
+GlitchTip им физически некуда — оставлены как есть, до появления реального деплоя.
 
 ## Что не сделано (см. PLAN-INFRA.md §70)
 
