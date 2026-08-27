@@ -151,12 +151,30 @@ export function CookieBanner({
     >
       <Container maxW="6xl" py={2}>
         <Stack gap={2}>
-          <Text fontSize="xs" color="fg.muted">
-            Мы используем cookie. Необходимые — всегда активны.{' '}
-            <Box asChild color="brand.solid" _hover={{ textDecoration: 'underline' }} display="inline">
-              <Link href={privacyUrl}>Подробнее в политике ПДн</Link>
-            </Box>
-          </Text>
+          <Stack direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ md: 'center' }} gap={2}>
+            <Text fontSize="xs" color="fg.muted">
+              Мы используем cookie. Необходимые — всегда активны.{' '}
+              <Box asChild color="brand.solid" _hover={{ textDecoration: 'underline' }} display="inline">
+                <Link href={privacyUrl}>Подробнее в политике ПДн</Link>
+              </Box>
+            </Text>
+
+            {!expanded && (
+              <HStack gap={2} flexShrink={0}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  minH={{ base: '2.75rem', md: 'auto' }}
+                  onClick={() => setExpanded(true)}
+                >
+                  Настроить
+                </Button>
+                <Button size="sm" colorPalette="brand" minH={{ base: '2.75rem', md: 'auto' }} onClick={handleAcceptAll}>
+                  Принять все
+                </Button>
+              </HStack>
+            )}
+          </Stack>
 
           {expanded && (
             <HStack gap={3} wrap="wrap">
@@ -209,22 +227,16 @@ export function CookieBanner({
             </HStack>
           )}
 
-          <HStack gap={2} justify="flex-end">
-            {expanded
-              ? (
-                <Button size="sm" variant="ghost" minH="2.75rem" onClick={handleSaveCustom}>
-                  Сохранить выбор
-                </Button>
-              )
-              : (
-                <Button size="sm" variant="ghost" minH="2.75rem" onClick={() => setExpanded(true)}>
-                  Настроить
-                </Button>
-              )}
-            <Button size="sm" colorPalette="brand" minH="2.75rem" onClick={handleAcceptAll}>
-              Принять все
-            </Button>
-          </HStack>
+          {expanded && (
+            <HStack gap={2} justify="flex-end">
+              <Button size="sm" variant="ghost" minH={{ base: '2.75rem', md: 'auto' }} onClick={handleSaveCustom}>
+                Сохранить выбор
+              </Button>
+              <Button size="sm" colorPalette="brand" minH={{ base: '2.75rem', md: 'auto' }} onClick={handleAcceptAll}>
+                Принять все
+              </Button>
+            </HStack>
+          )}
         </Stack>
       </Container>
     </Box>
