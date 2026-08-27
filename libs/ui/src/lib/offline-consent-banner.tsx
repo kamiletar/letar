@@ -110,7 +110,13 @@ export function OfflineConsentBanner({
               </Text>
             </VStack>
           </HStack>
-          <CloseButton size="sm" onClick={handleDecline} aria-label={closeLabel} />
+          <CloseButton
+            size="sm"
+            minH={{ base: '2.75rem', md: 'auto' }}
+            minW={{ base: '2.75rem', md: 'auto' }}
+            onClick={handleDecline}
+            aria-label={closeLabel}
+          />
         </HStack>
 
         <HStack gap={2} color="fg.muted" fontSize="xs" flexWrap="wrap">
@@ -134,10 +140,10 @@ export function OfflineConsentBanner({
         </HStack>
 
         <HStack gap={3} justify="flex-end">
-          <Button variant="ghost" size="sm" onClick={handleDecline}>
+          <Button variant="ghost" size="sm" minH={{ base: '2.75rem', md: 'auto' }} onClick={handleDecline}>
             {notNowLabel}
           </Button>
-          <Button colorPalette={colorPalette} size="sm" onClick={handleAccept}>
+          <Button colorPalette={colorPalette} size="sm" minH={{ base: '2.75rem', md: 'auto' }} onClick={handleAccept}>
             {enableLabel}
           </Button>
         </HStack>
