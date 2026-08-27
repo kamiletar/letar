@@ -237,6 +237,35 @@ telnet mail.letar.best 587
 ssh root@mail.letar.best "docker exec -it maddy maddy creds password noreply@letar.best"
 ```
 
+### ⚠️ IDN/кириллический домен отправителя — `authorize_sender` сравнивает Unicode-форму, не punycode
+
+**Симптомы:** приложение шлёт письма как `noreply@<кириллический-домен>` через общего
+SMTP-пользователя `noreply@letar.best`, все письма отклоняются с `553 5.7.0 Unauthorized use of
+sender address` (видно в `docker logs maddy` как `"check":"check.authorize_sender"`), хотя домен
+уже есть в `$(local_domains)` конфига и DKIM-ключ существует.
+
+**Причина:** доступ проверяет `check.authorize_sender` через таблицу `user_to_email` —
+`/opt/maddy/data/sender_map.txt` (`ключ = SASL-логин, значение = список разрешённых адресов
+отправителя через запятую`, см. [reference/authorize_sender](https://maddy.email/reference/checks/authorize_sender/)).
+Домен из письма Maddy [внутренне нормализует в Unicode](https://maddy.email/internals/unicode/),
+а не оставляет в ACE/punycode-форме (`xn--...`) — если строка в `sender_map.txt` записана как
+punycode, сравнение с уже раскодированным Unicode-доменом не совпадает, и правило срабатывает как
+для чужого адреса.
+
+**Фикс:** прописывать в `sender_map.txt` домен в Unicode-форме (кириллицей), не punycode:
+
+```
+noreply@letar.best: noreply@letar.best, noreply@<кириллический-домен-без-punycode>
+```
+
+**Перезапуск не нужен** — `table.file` (в т.ч. `sender_map.txt`) перечитывается автоматически
+каждые ~15 секунд при изменении mtime файла, невалидный синтаксис просто не применяется
+([reference/table/file](https://maddy.email/reference/table/file/)). Перед правкой сделай копию:
+`cp sender_map.txt sender_map.txt.bak-$(date +%Y%m%d%H%M%S)`.
+
+Проверить формат значения в таблице: кроме точного адреса допустим просто домен (тогда разрешён
+любой ящик на нём) или `*` (любой адрес) — см. ту же страницу reference.
+
 ## Полезные ссылки
 
 - **Библиотека:** `libs/email/README.md`
