@@ -261,6 +261,10 @@ alias матчится по префиксу ·
 [vitest-shared-singleton-row-race](/.claude/docs/vitest-shared-singleton-row-race.md) ⚠️ общая
 singleton-строка настроек (`ShopSettings` и аналоги) — редкий флак под полным прогоном из-за
 файлового параллелизма vitest на общей dev-БД, не внутри одного файла ·
+[hardcoded-unique-lookup-key-test-race](/.claude/docs/hardcoded-unique-lookup-key-test-race.md) ⚠️
+функция ищет запись по захардкоженному значению `@unique`-поля (ключ шаблона, `slug`, `code`) —
+параллельные spec-файлы вынуждены делить один ряд БД; фикс — сделать значение опциональным
+параметром с дефолтом на production-константу ·
 [zod-computed-key-index-access-pitfall](/.claude/docs/zod-computed-key-index-access-pitfall.md) ⚠️
 `z.object({...Object.fromEntries(arr.map(...))})` — динамический ключ ловит TS7053 не всегда,
 зависит от формы callback'а, а не от структуры массива ключей ·
