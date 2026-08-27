@@ -83,7 +83,11 @@ append-only лог событий без статусного поля — те�
 события того же лога, для них отдельный check-then-act ·
 [zenstack-multifile-schema-circular-imports](/.claude/docs/zenstack-multifile-schema-circular-imports.md)
 декомпозиция `schema.zmodel` на файлы — циклические импорты между ними подтверждённо рабочие,
-единственная ловушка — `import` до `datasource`/`generator`/`plugin`
+единственная ловушка — `import` до `datasource`/`generator`/`plugin` ·
+[zenstack-field-level-allow-does-not-narrow](/.claude/docs/zenstack-field-level-allow-does-not-narrow.md)
+⚠️ field-level `@allow` только добавляет разрешение поверх модельной `@@allow`, не сужает —
+сужение только через field-level `@deny`; найдено трижды подряд (`User.roles` privilege
+escalation, `Payment.settlementId`, `DeliveryDiscrepancy`)
 
 **Формы, UI, компоненты:** [forms](/.claude/docs/forms.md) ⭐ ·
 [react-duplicate-responsive-dom](/.claude/docs/react-duplicate-responsive-dom.md) ⚠️ два JSX-блока
