@@ -208,6 +208,11 @@ export const auth = createAuth({
     accountLinking: {
       enabled: true,
       trustedProviders: ['google', 'github', 'facebook', 'vk', 'yandex'],
+      // Явная привязка через linkSocial() на /profile/connected-accounts — email провайдера
+      // (или синтетический `<id>@vk.com` для VK-пользователей без email-scope) не обязан
+      // совпадать с email текущей сессии. Без этого флага Better Auth молча роняет привязку
+      // с EMAIL_DOES_NOT_MATCH и редиректит на errorURL без явного сообщения об ошибке.
+      allowDifferentEmails: true,
     },
   },
 

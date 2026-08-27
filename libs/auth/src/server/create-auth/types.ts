@@ -36,6 +36,20 @@ export interface AuthPages {
   resetPassword?: string
 }
 
+/**
+ * Привязка аккаунтов по email от доверенных провайдеров.
+ *
+ * `allowDifferentEmails` — без него explicit-линковка (authClient.linkSocial()) молча падает
+ * с EMAIL_DOES_NOT_MATCH, если провайдер вернул email, отличный от email текущей сессии (или
+ * вовсе не вернул email и код подставил синтетический, как VK без scope email). См. проверку
+ * в better-auth/dist/api/routes/callback.mjs: `userInfo.email !== link.email && !allowDifferentEmails`.
+ */
+export interface AccountLinkingConfig {
+  enabled?: boolean
+  trustedProviders?: string[]
+  allowDifferentEmails?: boolean
+}
+
 interface AuthProfileBase {
   baseURL: string
   trustedOrigins?: string[]
@@ -80,6 +94,10 @@ export interface StandaloneAuthProfile extends AuthProfileBase {
   databaseHooks?: BetterAuthOptions['databaseHooks']
   /** Переопределение алгоритма хеширования паролей (например bcrypt вместо scrypt) */
   password?: NonNullable<NonNullable<BetterAuthOptions['emailAndPassword']>['password']>
+  /** Привязка аккаунтов по email от доверенных провайдеров */
+  account?: {
+    accountLinking?: AccountLinkingConfig
+  }
 }
 
 /** hub-client — OIDC клиент Ключницы, без локального email/password */
@@ -95,10 +113,7 @@ export interface HubClientAuthProfile extends AuthProfileBase {
   }
   /** Привязка аккаунтов по email от доверенных провайдеров */
   account?: {
-    accountLinking?: {
-      enabled?: boolean
-      trustedProviders?: string[]
-    }
+    accountLinking?: AccountLinkingConfig
   }
 }
 
@@ -132,10 +147,7 @@ export interface HubProviderAuthProfile extends AuthProfileBase {
   oidcProvider?: OidcProviderConfig
   /** Привязка аккаунтов по email от доверенных провайдеров */
   account?: {
-    accountLinking?: {
-      enabled?: boolean
-      trustedProviders?: string[]
-    }
+    accountLinking?: AccountLinkingConfig
   }
 }
 

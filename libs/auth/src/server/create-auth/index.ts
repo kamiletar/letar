@@ -123,6 +123,7 @@ function buildStandaloneAuth<TProfile extends StandaloneAuthProfile | HubProvide
     plugins: [...(profile.plugins ?? []), nextCookies()],
     pages: profile.pages,
     advanced: ADVANCED_IP_CONFIG,
+    ...(profile.account && { account: profile.account }),
   })
 }
 
