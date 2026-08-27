@@ -323,6 +323,14 @@ Playwright-скрипт через Bash вместо navigate/UI-логина ·
 [docker-bind-mount-pitfalls](/.claude/docs/docker-bind-mount-pitfalls.md) ⚠️
 `compose up -d` не перечитывает смонтированный конфиг ·
 [docker-bare-bun-workspace-deps](/.claude/docs/docker-bare-bun-workspace-deps.md) ·
+[docker-prune-cold-layer-network-flake](/.claude/docs/docker-prune-cold-layer-network-flake.md)
+⚠️ ночной `pruneBuilder()` без фильтра сносит build cache целиком (`ACTIVE 0` при 76GB) —
+первый деплой каждого приложения после 04:00 идёт в сеть и ловит `TLS: unspecified error` на
+`apk add`; чинится `COPY --from` вместо установки пакета, а не настройками buildkit ·
+[deploy-affected-cache-invalidation](/.claude/docs/deploy-affected-cache-invalidation.md)
+⚠️ деплой был холодным по трём независимым причинам (typecheck 67 либ без кэша, `rm -rf .next`
+поверх persistent cache Turbopack, `rm -rf .nx/cache` после каждого git pull); предупреждения
+`vitest.config.ts` в логе — шум на 17 секунд, а не признак пересчёта графа ·
 [dotenvx-stdout-migration-pollution](/.claude/docs/dotenvx-stdout-migration-pollution.md) P3018 ·
 [external-services-blocked-from-s2](/.claude/docs/external-services-blocked-from-s2.md) ·
 [dashboard-agent-alert-debounce-patterns](/.claude/docs/dashboard-agent-alert-debounce-patterns.md) ·
