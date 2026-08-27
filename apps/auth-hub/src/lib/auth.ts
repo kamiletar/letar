@@ -138,6 +138,10 @@ export const auth = createAuth({
               clientSecret: process.env.AUTH_VK_SECRET,
               authorizationUrl: 'https://oauth.vk.com/authorize',
               tokenUrl: 'https://oauth.vk.com/access_token',
+              // Better Auth genericOAuth включает PKCE (code_challenge) по умолчанию — старый
+              // VK OAuth API 5.131 его не поддерживает и отвечает `Code challenge method is
+              // unsupported` уже на экране авторизации, до всякого callback.
+              pkce: false,
               getUserInfo: async (tokens: { accessToken?: string; raw?: Record<string, unknown> }) => {
                 const accessToken = tokens.accessToken
                 if (!accessToken) {
