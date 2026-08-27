@@ -83,6 +83,11 @@ export default [
               sourceTag: 'type:mobile',
               onlyDependOnLibsWithTags: ['scope:shared'],
             },
+            // E2E-проекты могут зависеть от shared библиотек (env-load, e2e-testing и т.п.)
+            {
+              sourceTag: 'type:e2e',
+              onlyDependOnLibsWithTags: ['scope:shared'],
+            },
             // Label-printer scope может зависеть от своих и shared
             {
               sourceTag: 'scope:label-printer',
