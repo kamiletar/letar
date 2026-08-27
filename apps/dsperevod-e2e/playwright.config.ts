@@ -23,11 +23,14 @@ export default defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
   },
-  /* Run your local dev server before starting the tests */
+  /* Run your local dev server before starting the tests (staging-раннер передаёт BASE_URL —
+   * реальный staging-контейнер уже поднят, reuseExistingServer:true пропускает spawn команды).
+   * Health-check на голый baseURL, не на подпуть — так у остальных HARD_GATED-приложений
+   * (svoichuzhie-e2e, driving-school-e2e), путь `/sign-up` вносил лишний хоп (редирект/TLS),
+   * из-за которого проверка reuse иногда не срабатывала на staging. */
   webServer: {
     command: 'bun nx run dsperevod:dev',
-    // /sign-up — client-только страница без SSR-запросов к БД, гарантированно 200
-    url: `${baseURL}/sign-up`,
+    url: baseURL,
     reuseExistingServer: true,
     cwd: workspaceRoot,
     timeout: 120_000,
