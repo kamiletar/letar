@@ -11,6 +11,15 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.15.18] — 2026-08-28
+
+### Added
+
+- Новая cron-задача `staging-idle-shutdown` (s3, ежечасно): гасит staging-контейнеры (app+db),
+  не пересоздававшиеся ≥24ч (`docker stop`, не `rm` — volume остаётся). Закрывает основной вклад в
+  занятую память s3 (до 16 постоянных staging-инстансов, ~6.5Gi RSS без пользы), см.
+  `.claude/docs/s3-staging-host-memory-pressure.md`
+
 ## [0.15.17] — 2026-08-25
 
 ### Changed

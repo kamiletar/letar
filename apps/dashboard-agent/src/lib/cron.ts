@@ -422,6 +422,20 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's2',
   },
   {
+    id: 'staging-idle-shutdown',
+    name: 'Staging Idle Shutdown (s3)',
+    app: 'dashboard-agent',
+    endpoint: '/api/cron/staging-idle-shutdown',
+    schedule: '20 * * * *',
+    description: 'Гасит staging-контейнеры (app+db), не пересоздававшиеся ≥24ч (STAGING_IDLE_SHUTDOWN_HOURS) — деплой '
+      + 'пересоздаёт только `app`, возраст его контейнера ≈ время последнего использования (деплой всегда идёт '
+      + 'перед e2e). `docker stop`, не `rm` — volume остаётся, следующий деплой просто стартует контейнер заново. '
+      + 'До 16 постоянных staging-инстансов на s3 держали ~6.5Gi RSS месяцами без пользы — см. '
+      + '.claude/docs/s3-staging-host-memory-pressure.md',
+    enabled: true,
+    server: 's3',
+  },
+  {
     id: 'log-scan',
     name: 'Log Scan (сканирование логов контейнеров на ошибки)',
     app: 'dashboard-agent',
