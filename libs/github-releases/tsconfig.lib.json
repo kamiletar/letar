@@ -5,6 +5,9 @@
     "types": ["node"],
     "rootDir": "src",
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
+    "paths": {
+      "@letar/format-utils": ["../format-utils/src/index.ts"]
+    },
     "ignoreDeprecations": "6.0"
   },
   "exclude": [
@@ -17,5 +20,10 @@
     "eslint.config.cjs",
     "eslint.config.mjs"
   ],
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "references": [
+    {
+      "path": "../format-utils/tsconfig.lib.json"
+    }
+  ]
 }

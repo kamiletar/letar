@@ -34,7 +34,7 @@ import { fetchLatestRelease, fetchReleases, formatFileSize } from '@letar/github
 
 ### `formatFileSize(bytes: number): string`
 
-`"512 B"` / `"2.0 KB"` / `"5.0 MB"`.
+Реэкспорт `@letar/format-utils` — `"512 B"` / `"2.0 KB"` / `"5.0 MB"`.
 
 ### Типы
 

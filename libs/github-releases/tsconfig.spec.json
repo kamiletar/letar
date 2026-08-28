@@ -3,7 +3,15 @@
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
     "types": ["vitest/globals", "node"],
-    "rootDir": "."
+    "rootDir": ".",
+    "paths": {
+      "@letar/format-utils": ["../format-utils/src/index.ts"]
+    }
   },
-  "include": ["vitest.config.ts", "src/**/*.ts", "src/**/*.d.ts"]
+  "include": ["vitest.config.ts", "src/**/*.ts", "src/**/*.d.ts"],
+  "references": [
+    {
+      "path": "../format-utils/tsconfig.lib.json"
+    }
+  ]
 }
