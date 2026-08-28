@@ -1,5 +1,31 @@
 # Выполненные задачи — Kami
 
+## Рефакторинг: `/api/audio/upload` и `/api/arbitrary-upload` на `@letar/upload-validation` (2026-08-28)
+
+Аудит безопасности нашёл дублирование инлайн-логики валидации/сохранения загружаемых файлов
+между `driving-school`, `grandslamcup`, `aprel8008`, `svoichuzhie` и `kami` — все реализовывали
+байт-в-байт похожую, но не идентичную проверку MIME/размера и сборку безопасного имени файла.
+Первые два уже были выделены в `@letar/upload-validation` в этой же сессии; `kami` переведён
+третьим.
+
+`/api/audio/upload` — заменена ручная MIME-проверка (`ALLOWED_AUDIO_TYPES.has(file.type)`),
+генерация имени и запись на диск на `extractAndValidateFile`/`generateFilename`/`saveFileToDisk`;
+ID3-парсинг, извлечение обложки и создание записи `AudioFile` в БД остались собственной логикой
+роута — библиотека этот слой не покрывает. `DELETE` переведён на `deleteFileFromDisk`.
+
+`/api/arbitrary-upload` — тот же перевод; MIME-ограничения не было и раньше (`allowedTypes` не
+передаётся), сохранена только проверка размера.
+
+Замечено при переводе: `generateFilename` (в отличие от прежнего инлайн-кода) всегда добавляет
+расширение (`.bin`, если у исходного имени файла точки нет) — минорное, не влияющее на
+раздачу файла изменение (URL строится из сохранённого `path`, не угадывается по расширению).
+
+`aboi` (`/api/images`, `/api/desktop/publish`) намеренно не тронуты — используют
+`@letar/image-upload/server` (sharp-обработка, `resolveUploadPath` с защитой от path traversal),
+это отдельная, более продвинутая схема, аналогичная `domwellbes`.
+
+`typecheck:tsgo`/`lint`/`format` зелёные.
+
 ## Фикс: `OptimizedImage` `priority` не выставлял `fetchpriority="high"` (Next.js 16 API) (2026-08-25)
 
 Монорепо-широкий аудит по мотивам находки в domwellbes (`PLAN_PUBLIC_MOBILE.md` §12.24) —

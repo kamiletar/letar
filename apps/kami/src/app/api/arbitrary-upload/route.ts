@@ -1,10 +1,8 @@
 import { getSession } from '@/lib/auth'
 import { prisma } from '@/lib/db'
-import { existsSync } from 'fs'
-import { mkdir, unlink, writeFile } from 'fs/promises'
+import { deleteFileFromDisk, extractAndValidateFile, generateFilename, saveFileToDisk } from '@letar/upload-validation'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { join } from 'path'
 
 /** Максимальный размер файла — 500MB */
 const MAX_SIZE = 500 * 1024 * 1024
@@ -19,33 +17,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Недостаточно прав' }, { status: 403 })
     }
 
-    const formData = await request.formData()
-    const file = formData.get('file') as File
+    const { file, formData, error } = await extractAndValidateFile(request, 'file', { maxSize: MAX_SIZE })
+    if (error) {
+      return error
+    }
     const description = (formData.get('description') as string | null)?.trim() || null
 
-    if (!file) {
-      return NextResponse.json({ error: 'Файл не предоставлен' }, { status: 400 })
-    }
-
-    if (file.size > MAX_SIZE) {
-      return NextResponse.json(
-        { error: `Максимальный размер — 500MB (файл: ${(file.size / 1024 / 1024).toFixed(1)} MB)` },
-        { status: 400 },
-      )
-    }
-
-    const timestamp = Date.now()
-    const randomString = Math.random().toString(36).substring(2, 15)
-    const extension = file.name.includes('.') ? file.name.split('.').pop()?.toLowerCase() : ''
-    const storedName = extension ? `${timestamp}-${randomString}.${extension}` : `${timestamp}-${randomString}`
-
-    const uploadsDir = join(process.cwd(), 'uploads', 'files')
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true })
-    }
-
-    const bytes = await file.arrayBuffer()
-    await writeFile(join(uploadsDir, storedName), Buffer.from(bytes))
+    const storedName = generateFilename(file.name)
+    await saveFileToDisk(file, 'files', storedName)
 
     const path = `files/${storedName}`
 
@@ -96,10 +75,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Файл не найден' }, { status: 404 })
     }
 
-    const filepath = join(process.cwd(), 'uploads', record.path)
-    if (existsSync(filepath)) {
-      await unlink(filepath)
-    }
+    await deleteFileFromDisk(record.path)
 
     await prisma.uploadedFile.delete({ where: { id } })
 

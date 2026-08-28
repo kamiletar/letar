@@ -1,6 +1,6 @@
 {
   "name": "kami",
-  "version": "0.33.12",
+  "version": "0.33.13",
   "private": true,
   "nx": {
     "implicitDependencies": [
@@ -14,7 +14,8 @@
       "@letar/i18n-proxy",
       "@letar/seed-utils",
       "@letar/pg-url",
-      "@letar/env-load"
+      "@letar/env-load",
+      "@letar/upload-validation"
     ]
   },
   "prisma": {

@@ -1,15 +1,16 @@
 import { getSession } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { uniqueSlug } from '@/lib/utils/slugify'
+import { deleteFileFromDisk, extractAndValidateFile, generateFilename, saveFileToDisk } from '@letar/upload-validation'
 import { existsSync } from 'fs'
-import { mkdir, unlink, writeFile } from 'fs/promises'
+import { mkdir } from 'fs/promises'
 import { parseBuffer } from 'music-metadata'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { join } from 'path'
 
 /** Допустимые MIME-типы для аудио */
-const ALLOWED_AUDIO_TYPES = new Set(['audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/wav', 'audio/mp4', 'audio/m4a'])
+const ALLOWED_AUDIO_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/wav', 'audio/mp4', 'audio/m4a']
 
 /** Максимальный размер файла — 100MB */
 const MAX_SIZE = 100 * 1024 * 1024
@@ -30,9 +31,13 @@ async function saveCover(picture: { data: Uint8Array; format: string }): Promise
 
     const ext = picture.format.includes('png') ? 'png' : 'jpg'
     const filename = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`
-    await writeFile(join(coversDir, filename), Buffer.from(picture.data))
+    const { path } = await saveFileToDisk(
+      new File([Buffer.from(picture.data)], filename),
+      'audio/covers',
+      filename,
+    )
 
-    return `audio/covers/${filename}`
+    return path
   } catch (error) {
     console.error('[Audio Upload] Ошибка сохранения обложки:', error)
     return null
@@ -49,42 +54,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Недостаточно прав' }, { status: 403 })
     }
 
-    const formData = await request.formData()
-    const file = formData.get('file') as File
+    const { file, formData, error } = await extractAndValidateFile(request, 'file', {
+      maxSize: MAX_SIZE,
+      allowedTypes: ALLOWED_AUDIO_TYPES,
+    })
+    if (error) {
+      return error
+    }
     const customTitle = formData.get('title') as string | null
 
-    if (!file) {
-      return NextResponse.json({ error: 'Файл не предоставлен' }, { status: 400 })
-    }
-
-    // Валидация MIME-типа
-    if (!ALLOWED_AUDIO_TYPES.has(file.type)) {
-      return NextResponse.json({ error: `Допустимы только аудиофайлы (получен: ${file.type})` }, { status: 400 })
-    }
-
-    // Валидация размера
-    if (file.size > MAX_SIZE) {
-      return NextResponse.json(
-        { error: `Максимальный размер — 100MB (файл: ${(file.size / 1024 / 1024).toFixed(1)} MB)` },
-        { status: 400 },
-      )
-    }
-
-    // Генерация уникального имени файла
-    const timestamp = Date.now()
-    const randomString = Math.random().toString(36).substring(2, 15)
-    const extension = file.name.split('.').pop()?.toLowerCase() || 'mp3'
-    const filename = `${timestamp}-${randomString}.${extension}`
-
-    // Сохраняем на диск
-    const uploadsDir = join(process.cwd(), 'uploads', 'audio')
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true })
-    }
-
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-    await writeFile(join(uploadsDir, filename), buffer)
+    // Генерация уникального имени файла и сохранение на диск
+    const filename = generateFilename(file.name)
+    const { buffer } = await saveFileToDisk(file, 'audio', filename)
 
     // Парсим ID3 метаданные
     let artist: string | undefined
@@ -170,17 +151,11 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Удаляем файл с диска
-    const filepath = join(process.cwd(), 'uploads', audioFile.path)
-    if (existsSync(filepath)) {
-      await unlink(filepath)
-    }
+    await deleteFileFromDisk(audioFile.path)
 
     // Удаляем обложку если есть
     if (audioFile.coverPath) {
-      const coverFilepath = join(process.cwd(), 'uploads', audioFile.coverPath)
-      if (existsSync(coverFilepath)) {
-        await unlink(coverFilepath)
-      }
+      await deleteFileFromDisk(audioFile.coverPath)
     }
 
     // Удаляем запись из БД

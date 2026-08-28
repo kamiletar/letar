@@ -133,6 +133,9 @@
       ],
       "@letar/seed-utils": [
         "../../libs/seed-utils/src/index.ts"
+      ],
+      "@letar/upload-validation": [
+        "../../libs/upload-validation/src/index.ts"
       ]
     }
   },
