@@ -4,6 +4,28 @@
 
 ## [Unreleased]
 
+## [0.40.21] - 2026-08-28
+
+### Fixed
+
+- Вход и регистрация по email+паролю падали с 500 без тела и без единой записи в GlitchTip/логах
+  контейнера — две независимые причины, обе на каждом запросе к `/api/auth/*`:
+  - `lib/auth.ts` передавал в `prismaAdapter()` ZenStack ORM-клиент (`prisma` из `db.ts`,
+    Kysely под капотом), а better-auth требует нативный `PrismaClient`. Заведён отдельный
+    `lib/prisma.ts` с ленивым (через `Proxy`) `PrismaClient` на `@prisma/adapter-pg` —
+    паттерн один в один с `apps/dashboard/src/lib/prisma.ts`. ZenStack-клиент (`prisma`/
+    `getEnhancedPrisma`) остаётся для всего остального прикладного кода без изменений.
+  - `genericOAuth` для Yandex использовал `discoveryUrl`; discovery-документ Yandex не
+    отдаёт `issuer`, и better-auth (текущая версия) кидает `Unhandled Rejection` при
+    инициализации плагина — падает **весь** `/api/auth/*`-хендлер, а не только Yandex-вход.
+    Как раз поэтому ошибка не коррелировала по времени с конкретным упавшим запросом при
+    попытке провизининга канареечного аккаунта. Заменено на явные `authorizationUrl`/
+    `tokenUrl`/`getUserInfo` без `discoveryUrl` — тот же паттерн, что уже в
+    `auth-hub`/`driving-school`. Подтверждено в GlitchTip (issue `MANDALA-H`,
+    `errors.s3.letar.best/mandala/issues/773`, впервые поймано 2026-08-28T12:48).
+  - Проверено локально (временный dev-контейнер Postgres + `nx db:push`): `POST
+    /api/auth/sign-up/email` и `POST /api/auth/sign-in/email` теперь возвращают 200 вместо 500.
+
 ## [0.40.20] - 2026-08-28
 
 ### Changed

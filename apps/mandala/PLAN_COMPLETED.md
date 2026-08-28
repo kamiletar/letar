@@ -1,5 +1,38 @@
 # Выполненные задачи: Mandala
 
+## Фикс: вход/регистрация по email+паролю падали с 500 (2026-08-28)
+
+Найдено при провизининге канареечного аккаунта для login-canary-check (корневой `PLAN.md` §71
+п.3.3): `POST /api/auth/sign-up/email` стабильно возвращал 500 с пустым телом, без единой
+совпадающей по времени записи в GlitchTip или логах контейнера.
+
+Две независимые причины, обе валят **весь** `/api/auth/*`-хендлер на каждом запросе:
+
+1. `lib/auth.ts` передавал в `prismaAdapter()` ZenStack ORM-клиент (`prisma` из `db.ts` —
+   Kysely под капотом), а better-auth требует нативный `PrismaClient` для своего adapter'а.
+   Заведён `lib/prisma.ts` — отдельный `PrismaClient` на `@prisma/adapter-pg`, ленивая
+   инициализация через `Proxy` (иначе Turbopack исполняет top-level код при сборке). Паттерн
+   один в один с `apps/dashboard/src/lib/prisma.ts` — там уже был докстринг про эту
+   несовместимость. ZenStack-клиент (`prisma`/`getEnhancedPrisma` из `db.ts`) остался для всего
+   остального прикладного кода без изменений.
+2. `genericOAuth` для Yandex использовал `discoveryUrl`. Discovery-документ Yandex не отдаёт
+   `issuer` — better-auth (текущая версия) на этом кидает `Unhandled Rejection` при
+   инициализации плагина, а не структурированную ошибку внутри обработки конкретного запроса.
+   Именно поэтому ошибка не коррелировала по времени с упавшим сайн-апом при первичном
+   расследовании — она ловится глобальным `unhandledRejection`, не request-scoped обработчиком
+   Next.js. Подтверждено отдельной записью в GlitchTip (issue `MANDALA-H`, впервые поймано
+   2026-08-28T12:48, до этого фикса не привязывалась к конкретным упавшим запросам). Заменено на
+   явные `authorizationUrl`/`tokenUrl`/`getUserInfo` без `discoveryUrl` — тот же паттерн, что уже
+   в `auth-hub`/`driving-school` (оба явно избегают `discoveryUrl` для Yandex).
+
+Проверено локально: временный dev-контейнер Postgres (штатного `docker-compose` для локальной БД
+у mandala нет) + `nx db:push`, затем прямые запросы к `POST /api/auth/sign-up/email` и `POST
+/api/auth/sign-in/email` — оба вернули 200 вместо 500 после фикса, до фикса воспроизводили баг
+1-в-1 (проверено на неизменённом `main` тем же способом). `nx typecheck:tsgo`/`nx lint` зелёные;
+`nx build` падает по несвязанной причине — локальный EACCES при подключении к БД во время
+статической генерации `sitemap.xml`/precache-manifest, воспроизводится и на чистом `main` без
+этого фикса, не блокирует.
+
 ## `formatFileSize` переведена на `@letar/format-utils` (2026-08-28)
 
 `custom-audio-manager.tsx` держал локальную RU-копию, байт-в-байт идентичную дублю в

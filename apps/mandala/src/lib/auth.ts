@@ -17,6 +17,7 @@ import { nextCookies } from 'better-auth/next-js'
 import { genericOAuth } from 'better-auth/plugins'
 import { cache } from 'react'
 import { prisma } from './db'
+import { prismaAuth } from './prisma'
 import type { SessionWithRole, UserWithRole } from './types/auth.types'
 
 export const auth = betterAuth({
@@ -24,7 +25,7 @@ export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: process.env.BETTER_AUTH_URL,
 
-  database: prismaAdapter(prisma, {
+  database: prismaAdapter(prismaAuth, {
     provider: 'postgresql',
   }),
 
@@ -49,18 +50,42 @@ export const auth = betterAuth({
   // Плагины
   plugins: [
     nextCookies(),
-    // genericOAuth для Yandex
-    genericOAuth({
-      config: [
-        {
-          providerId: 'yandex',
-          clientId: process.env.AUTH_YANDEX_ID || '',
-          clientSecret: process.env.AUTH_YANDEX_SECRET || '',
-          discoveryUrl: 'https://oauth.yandex.ru/.well-known/openid-configuration',
-          scopes: ['login:email', 'login:info', 'login:avatar'],
-        },
-      ],
-    }),
+    // genericOAuth для Yandex — без discoveryUrl: discovery-документ Yandex не
+    // отдаёт issuer, и better-auth падает на этом на каждом /api/auth/*-запросе
+    // (не только yandex-специфичном). Явные endpoints — как в auth-hub/driving-school.
+    ...(process.env.AUTH_YANDEX_ID && process.env.AUTH_YANDEX_SECRET
+      ? [
+        genericOAuth({
+          config: [
+            {
+              providerId: 'yandex',
+              clientId: process.env.AUTH_YANDEX_ID,
+              clientSecret: process.env.AUTH_YANDEX_SECRET,
+              authorizationUrl: 'https://oauth.yandex.ru/authorize',
+              tokenUrl: 'https://oauth.yandex.ru/token',
+              scopes: ['login:email', 'login:info', 'login:avatar'],
+              getUserInfo: async (tokens: { accessToken?: string }) => {
+                const response = await fetch('https://login.yandex.ru/info', {
+                  headers: {
+                    Authorization: `OAuth ${tokens.accessToken}`,
+                  },
+                })
+                const data = await response.json()
+                return {
+                  id: data.id,
+                  name: data.display_name || data.real_name || data.login,
+                  email: data.default_email,
+                  image: data.default_avatar_id
+                    ? `https://avatars.yandex.net/get-yapic/${data.default_avatar_id}/islands-200`
+                    : undefined,
+                  emailVerified: true,
+                }
+              },
+            },
+          ],
+        }),
+      ]
+      : []),
   ],
 
   // Настройки сессии
