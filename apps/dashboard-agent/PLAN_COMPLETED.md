@@ -2,6 +2,22 @@
 
 Детальное описание всех реализованных фич.
 
+## Исправление: errorResponse() реально применён к routes/deploy.ts (2026-08-28, `0.15.26`)
+
+Запись ниже про `0.15.23` (regex-скрипт по 56 местам, включая «`deploy.ts` (20)») оказалась
+неточной: `deploy.ts` фактически не был тронут — 20 литералов
+`{success:false, error, timestamp: new Date().toISOString()}` (ранние return'ы валидации +
+`catch`-блоки шести хендлеров) оставались руками собранными. Обнаружено при точечном ревью
+файла, не по логам regex-прогона `0.15.23` (их не сохранилось).
+
+Заменены все 20 на `errorResponse(<expr>)` из `lib/api-handler.ts`, control flow не менялся.
+Два места потребовали доп. правки: `error: deploy.error` (тип `error?: string` в
+`DeployStatus`) не проходит в `errorResponse<T>(error: string)` — обязательный параметр, тогда
+как исходный литерал молча пропускал `undefined` через опциональность `ApiResponse.error`.
+Фикс — `deploy.error ?? 'Unknown error'` в обоих местах (`/api/deploy/pull` и
+`/api/deploy/restart` catch-блоки). `nx typecheck`/`nx test dashboard-agent` — зелёные без
+правок тестов.
+
 ## Дедуп finishDeploy в routes/deploy.ts (2026-08-28, `0.15.25`)
 
 После декомпозиции (`0.15.24`, см. ниже) в трёх разовых docker-хендлерах (`/api/deploy/pull`,

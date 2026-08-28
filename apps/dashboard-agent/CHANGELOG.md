@@ -11,6 +11,18 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.15.26] — 2026-08-28
+
+### Fixed
+
+- `errorResponse<T>()` (введён в `0.15.23`) фактически не был применён к `routes/deploy.ts` —
+  запись в `CHANGELOG.md`/`PLAN.md` про «`deploy.ts` (20)» отражала намерение, а не код: файл
+  выпал из прошлой правки. Теперь все 20 мест (ранние return'ы валидации + catch-блоки) реально
+  заменены на `errorResponse(...)`. Два места (`error: deploy.error`, тип `string | undefined`)
+  потребовали `?? 'Unknown error'` — `errorResponse<T>` принимает обязательный `string`, литерал
+  раньше пропускал `undefined` благодаря опциональности `ApiResponse.error`. Control flow не
+  менялся.
+
 ## [0.15.25] — 2026-08-28
 
 ### Changed
