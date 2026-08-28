@@ -1,6 +1,6 @@
 ---
 description: Систематическое обновление зависимостей монорепо через bun с проверкой безопасности и сборки
-allowed-tools: Bash(bun outdated:*), Bash(bun update:*), Bash(bun add:*), Bash(bun audit:*), Bash(bun install:*), Bash(bun scripts/check-peer-deps.mjs:*), Bash(nx run-many:*)
+allowed-tools: Bash(bun outdated:*), Bash(bun update:*), Bash(bun add:*), Bash(bun audit:*), Bash(bun install:*), Bash(bun scripts/check-peer-deps.mjs:*), Bash(bun scripts/check-patched-deps.mjs:*), Bash(bun patch:*), Bash(nx run-many:*)
 ---
 
 # Deps Update - Обновление зависимостей
@@ -67,6 +67,9 @@ bun install
 # Проверить peer-зависимости между корневыми пакетами
 bun scripts/check-peer-deps.mjs
 
+# Проверить, что патчи зависимостей всё ещё применяются
+bun scripts/check-patched-deps.mjs
+
 # Проверить типы
 nx run-many -t typecheck:tsgo
 
@@ -89,10 +92,33 @@ eslint-plugin-\*) — смотри не на список целиком, а н�
 класса ошибки и почему это отдельный шаг —
 [root-pin-peer-drift.md](/.claude/docs/root-pin-peer-drift.md).
 
+⚠️ **Шаг «проверить патчи зависимостей» обязателен, если bump задел
+пропатченный пакет.** Ключ `patchedDependencies` в корневом `package.json`
+прибит к **точной** версии (`"@chakra-ui/react@3.36.1"`), а сама зависимость
+стоит по caret-диапазону (`^3.36.1`). Любой bump разводит их — и bun 1.3.14
+в этой ситуации **молчит**: `bun install`/`bun update --latest` завершаются
+кодом 0, ничего не печатают, патч просто не накладывается. Файл
+`patches/*.patch` при этом остаётся на диске, ключ в `package.json` — на
+месте, в git всё выглядит здоровым; единственный след — блок
+`patchedDependencies` тихо пропадает из `bun.lock`, и в диффе lock-файла на
+тысячи строк его никто не заметит. Проверено эмпирически, разбор —
+PLAN-INFRA-4.md §118.
+
+Цена пропуска на сегодняшнем патче `@chakra-ui/react` — рассинхрон гидратации
+во **всех ~30 приложениях сразу**, без единой ошибки сборки, lint или
+typecheck ([chakra-css-memo-prop-order-hydration.md](/.claude/docs/chakra-css-memo-prop-order-hydration.md)).
+
+`bun scripts/check-patched-deps.mjs` завершается кодом **1** при расхождении
+(в отличие от `check-peer-deps.mjs` — это gate, а не отчёт) и сам смотрит в
+свежеустановленную копию пакета: скажет, нужен ли патч дальше (тогда покажет
+команды `bun patch` для пересоздания) или апстрим уже починил — и патч надо
+**удалить**, а не переносить на новую версию.
+
 ## Чеклист
 
 - [ ] `bun audit` без критичных уязвимостей
 - [ ] `bun scripts/check-peer-deps.mjs` — нет новых строк по сравнению с прошлым прогоном
+- [ ] `bun scripts/check-patched-deps.mjs` — зелёный (код 0)
 - [ ] Все тесты проходят
 - [ ] Сборка успешна
 - [ ] Приложения запускаются
@@ -116,6 +142,27 @@ eslint-plugin-\*) — смотри не на список целиком, а н�
 новый точный пин — фиксируй в PLAN-INFRA-\*.md **причину и дату**, иначе через
 несколько месяцев никто не сможет отличить осознанное решение от
 унаследованного стиля.
+
+### Пропатченные пакеты
+
+Актуальный список — в `patchedDependencies` корневого `package.json` (не здесь,
+чтобы не рассинхронизироваться). На 2026-08-28 это `@chakra-ui/react`.
+
+Порядок пересоздания патча под новую версию:
+
+```bash
+bun patch <pkg>@<новая-версия>
+# правишь файл(ы) в node_modules/<pkg>/ — ESM и CJS обычно оба
+bun patch --commit node_modules/<pkg>
+rm patches/<старый>.patch   # bun кладёт новый файл рядом, старый не удаляет
+bun scripts/check-patched-deps.mjs
+```
+
+⚠️ **Заводишь новый патч — добавь запись в `UPSTREAM_MARKERS`**
+(`scripts/check-patched-deps.mjs`): где внутри пакета лежит место, ради
+которого патч заведён, и по какому маркеру видно, что апстрим его ещё не
+починил. Без записи скрипт при следующем bump'е сможет сказать только «версии
+разошлись», но не «патч ещё нужен» / «патч пора удалить».
 
 ### Проблемные пакеты
 
