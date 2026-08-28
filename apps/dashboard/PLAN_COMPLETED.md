@@ -2,6 +2,17 @@
 
 Детальное описание всех реализованных фич.
 
+## Новый AlertType `AUTH_ACCOUNT_ISSUER_NULL` (2026-08-28)
+
+PLAN.md корня §71 п.3.2: защита от NULL-регрессии `Account.issuer` (better-auth 1.7) со стороны
+мониторинга, а не только статическим гейтом схемы. Новый enum-значение в `AlertType`
+(`schema.zmodel`) + миграция `20260828055033_alert_type_auth_account_issuer_null`
+(`ALTER TYPE "AlertType" ADD VALUE 'AUTH_ACCOUNT_ISSUER_NULL'`) — создаётся `dashboard-agent`
+ежедневной cron-проверкой, реализация и разбор области — `apps/dashboard-agent/PLAN_COMPLETED.md`.
+Существующий `CreateAlertSchema` (`app/api/alerts/route.ts`) валидирует `type` через
+`z.enum(Object.values(AlertType))` — новое значение подхватилось без отдельной правки роута.
+1.24.8 → 1.24.9.
+
 ## Сведён внутренний дубль `formatBytes` (2026-08-28)
 
 `SystemOverview.tsx` держал свою копию `formatBytes` (всегда GB, 2 знака после запятой — для
