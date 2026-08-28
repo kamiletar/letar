@@ -838,6 +838,14 @@ for app in $AFFECTED_APPS; do
     ENCODED_PASSWORD=$(printf '%s' "$DB_PASSWORD" | sed 's/=/%3D/g; s/\//%2F/g; s/+/%2B/g')
 
     # Extract DB user, name and port from docker-compose.yml
+    # ⚠️ Аудит 2026-08-28: grep не заякорен на блок services.db (в отличие от DB_CONTAINER
+    # ниже, найденного в §128 хрупким на аналогичный класс ошибки) — но проверка по всем
+    # apps/*/docker-compose*.yml на 2026-08-28 показала, что POSTGRES_USER/POSTGRES_DB
+    # встречаются РОВНО по одному разу в каждом файле (объявляются только в environment
+    # сервиса db). Дублей нет ни в одном приложении, `head -1` ничего не выбирает — риск
+    # неверного матча сейчас отсутствует. Если появится второй Postgres-сервис в одном
+    # compose-файле — переанализировать и заякорить так же, как DB_CONTAINER (awk-фильтр по
+    # top-level ключу `^  db:$`).
     DB_USER=$(grep "POSTGRES_USER:" $COMPOSE_FILE | awk '{print $2}' | head -1)
     DB_NAME=$(grep "POSTGRES_DB:" $COMPOSE_FILE | awk '{print $2}' | head -1)
     DB_PORT=$(grep -A 1 "ports:" $COMPOSE_FILE | grep -o "[0-9]\+:5432" | cut -d: -f1 | head -1)
@@ -1143,6 +1151,8 @@ for app in $AFFECTED_APPS; do
   # Generate DATABASE_URL with proper postgres container name
   if [ -n "$DB_PASSWORD" ]; then
     # Extract DB user and name from docker-compose
+    # ⚠️ См. разбор того же паттерна выше (~строка 841) — аудит 2026-08-28 подтвердил, что
+    # POSTGRES_USER/POSTGRES_DB не дублируются ни в одном apps/*/docker-compose*.yml, риска нет.
     DB_USER=$(grep "POSTGRES_USER:" $COMPOSE_FILE | awk '{print $2}' | head -1)
     DB_NAME=$(grep "POSTGRES_DB:" $COMPOSE_FILE | awk '{print $2}' | head -1)
     # Get postgres container_name — по соглашению монорепо это всегда "${app}-db"
