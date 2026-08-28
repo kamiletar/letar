@@ -33,6 +33,36 @@ export async function POST(request: Request) {
 }
 ```
 
+### `extractAndValidateFiles(request, fieldName, options)`
+
+Вариант для множественной загрузки — извлекает все значения поля через
+`formData.getAll(fieldName)` и валидирует каждое по отдельности. В отличие от
+`extractAndValidateFile`, один невалидный файл **не прерывает** всю операцию: он попадает
+в `failures` с причиной, остальные файлы обрабатываются дальше. Значения поля, которые не
+являются `File` (например пустая строка), тоже уходят в `failures`, а не бросают исключение.
+
+```ts
+import { extractAndValidateFiles } from '@letar/upload-validation'
+
+export async function POST(request: Request) {
+  const { files, failures, error } = await extractAndValidateFiles(request, 'files', {
+    maxSize: 5 * 1024 * 1024,
+    allowedTypes: 'image/',
+  })
+  if (error) { return error }
+
+  if (failures.length) {
+    // failures: { index, name, reason }[] — вызывающий код сам решает,
+    // что делать: залогировать, вернуть частичный успех клиенту и т.д.
+    console.warn('Пропущены файлы:', failures)
+  }
+
+  for (const file of files) {
+    // file: File — только прошедшие валидацию
+  }
+}
+```
+
 ### `validateFile(file, options)`
 
 То же самое, но без чтения `FormData` — когда файл уже извлечён откуда-то ещё.
@@ -80,4 +110,6 @@ nx typecheck:tsgo upload-validation
 ## Потребители
 
 `driving-school`, `grandslamcup` — обе держали байт-в-байт одинаковую реализацию
-(`src/lib/upload/{validate-file,save-file}.ts`) до выноса сюда.
+(`src/lib/upload/{validate-file,save-file}.ts`) до выноса сюда. `aprel8008` — единственный
+загружает несколько файлов одним запросом (`formData.getAll('files')`), отсюда
+`extractAndValidateFiles`.

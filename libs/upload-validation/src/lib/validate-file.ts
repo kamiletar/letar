@@ -17,6 +17,35 @@ export interface FileValidationResult {
 }
 
 /**
+ * Проверяет тип и размер файла, не оборачивая причину в `NextResponse`.
+ *
+ * Общее ядро для `validateFile` (один файл → готовый `NextResponse`) и
+ * `extractAndValidateFiles` (много файлов → список причин пропуска для
+ * вызывающего кода, без множества независимых `NextResponse`).
+ */
+function checkFile(file: File, options: FileValidationOptions): { valid: true } | { valid: false; reason: string } {
+  const { allowedTypes } = options
+  if (allowedTypes) {
+    const isAllowed = Array.isArray(allowedTypes)
+      ? allowedTypes.includes(file.type)
+      : file.type.startsWith(allowedTypes)
+
+    if (!isAllowed) {
+      const expected = Array.isArray(allowedTypes) ? allowedTypes.join(', ') : allowedTypes + '*'
+      return { valid: false, reason: `Недопустимый тип файла: ${file.type}. Ожидается: ${expected}` }
+    }
+  }
+
+  if (file.size > options.maxSize) {
+    const maxMB = (options.maxSize / 1024 / 1024).toFixed(0)
+    const fileMB = (file.size / 1024 / 1024).toFixed(2)
+    return { valid: false, reason: `Размер файла (${fileMB}MB) превышает максимум ${maxMB}MB` }
+  }
+
+  return { valid: true }
+}
+
+/**
  * Валидирует файл из FormData
  *
  * @example
@@ -33,33 +62,9 @@ export function validateFile(file: File | null, options: FileValidationOptions):
     }
   }
 
-  // Проверка типа файла
-  const { allowedTypes } = options
-  if (allowedTypes) {
-    const isAllowed = Array.isArray(allowedTypes)
-      ? allowedTypes.includes(file.type)
-      : file.type.startsWith(allowedTypes)
-
-    if (!isAllowed) {
-      const expected = Array.isArray(allowedTypes) ? allowedTypes.join(', ') : allowedTypes + '*'
-      return {
-        valid: false,
-        error: NextResponse.json(
-          { error: `Недопустимый тип файла: ${file.type}. Ожидается: ${expected}` },
-          { status: 400 },
-        ),
-      }
-    }
-  }
-
-  // Проверка размера файла
-  if (file.size > options.maxSize) {
-    const maxMB = (options.maxSize / 1024 / 1024).toFixed(0)
-    const fileMB = (file.size / 1024 / 1024).toFixed(2)
-    return {
-      valid: false,
-      error: NextResponse.json({ error: `Размер файла (${fileMB}MB) превышает максимум ${maxMB}MB` }, { status: 400 }),
-    }
+  const check = checkFile(file, options)
+  if (!check.valid) {
+    return { valid: false, error: NextResponse.json({ error: check.reason }, { status: 400 }) }
   }
 
   return { valid: true }
@@ -97,6 +102,73 @@ export async function extractAndValidateFile(
 
     // Когда validation прошла, file гарантированно существует
     return { file: file as File, formData }
+  } catch {
+    return {
+      error: NextResponse.json({ error: 'Ошибка при разборе данных формы' }, { status: 400 }),
+    }
+  }
+}
+
+/** Причина, по которой один из файлов в `extractAndValidateFiles` не прошёл валидацию. */
+export interface FileValidationFailure {
+  /** Позиция в списке `formData.getAll(fieldName)` */
+  index: number
+  /** Имя файла (или строковое представление значения, если это не File) */
+  name: string
+  reason: string
+}
+
+/**
+ * Извлекает несколько файлов из FormData (`formData.getAll(fieldName)`) и валидирует
+ * каждый по отдельности.
+ *
+ * В отличие от `extractAndValidateFile`, невалидные файлы не прерывают всю операцию —
+ * они попадают в `failures` с причиной, а обработка продолжается для остальных.
+ * Вызывающий код сам решает, что делать со `failures` (отклонить весь запрос, показать
+ * пользователю частичный успех, залогировать и пропустить).
+ *
+ * @example
+ * ```ts
+ * const { files, failures, error } = await extractAndValidateFiles(request, 'files', {
+ *   maxSize: 5 * 1024 * 1024,
+ *   allowedTypes: 'image/',
+ * })
+ * if (error) return error
+ * if (failures.length) console.warn('Пропущены файлы:', failures)
+ * // files: File[] — только прошедшие валидацию
+ * ```
+ */
+export async function extractAndValidateFiles(
+  request: Request,
+  fieldName: string,
+  options: FileValidationOptions,
+): Promise<
+  | { files: File[]; formData: FormData; failures: FileValidationFailure[]; error?: never }
+  | { files?: never; formData?: never; failures?: never; error: NextResponse }
+> {
+  try {
+    const formData = await request.formData()
+    const entries = formData.getAll(fieldName)
+
+    const files: File[] = []
+    const failures: FileValidationFailure[] = []
+
+    entries.forEach((entry, index) => {
+      if (!(entry instanceof File)) {
+        failures.push({ index, name: String(entry), reason: 'Значение не является файлом' })
+        return
+      }
+
+      const check = checkFile(entry, options)
+      if (!check.valid) {
+        failures.push({ index, name: entry.name, reason: check.reason })
+        return
+      }
+
+      files.push(entry)
+    })
+
+    return { files, formData, failures }
   } catch {
     return {
       error: NextResponse.json({ error: 'Ошибка при разборе данных формы' }, { status: 400 }),

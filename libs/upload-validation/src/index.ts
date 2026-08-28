@@ -19,6 +19,8 @@
 export { deleteFileFromDisk, deleteOldFile, ensureUploadDir, generateFilename, saveFileToDisk } from './lib/save-file'
 export {
   extractAndValidateFile,
+  extractAndValidateFiles,
+  type FileValidationFailure,
   type FileValidationOptions,
   type FileValidationResult,
   validateFile,
