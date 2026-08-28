@@ -50,7 +50,11 @@ projects --with-target` этого не ловит ·
 `package.json` — тихая мина: override/resolution перебивает его молча или caret-соседи уезжают
 вперёд без него; `bun install` не печатает peer-warnings ни в каком режиме, проверка —
 `bun scripts/check-all.mjs --group=deps` (раннер проверок целостности, состав — см. ниже
-§ «Проверки целостности монорепо»)
+§ «Проверки целостности монорепо») ·
+[nested-package-resolution-under-bun-isolated-installs](/.claude/docs/nested-package-resolution-under-bun-isolated-installs.md)
+⚠️ голый `import('@foo/bar')` от скрипта в `scripts/` не резолвит транзитивную зависимость чужого
+пакета под изолированной установкой bun, хотя она есть в `bun.lock` — фикс: `createRequire` от
+уже резолвленного entry-файла пакета-родителя, не от своего местоположения
 
 **MCP-серверы:** [mcp-servers](/.claude/docs/mcp-servers.md) состав и назначение ·
 [mcp-server-pattern](/.claude/docs/mcp-server-pattern.md) тонкий локальный сервер по stdio ·
