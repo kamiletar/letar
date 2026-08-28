@@ -4038,3 +4038,26 @@ namespace (ошибка воспроизводится и вне сборки). 
 терял `docker-compose.s3.yml` при запуске в обход dashboard-agent — дополнение см. в §81 выше).
 
 **Коммит:** `9d3b369e`. **Док:** [deploy-affected-premigrate-dump-wrong-container](/.claude/docs/deploy-affected-premigrate-dump-wrong-container.md).
+
+## §129 — общий базовый Docker-образ для 20 из 22 `Dockerfile.production` (открыто, требует согласования)
+
+tz-блок (zoneinfo из Debian-образа + `ENV TZ`) сократили с 6-строчного комментария до одной строки
+во всех 22 `Dockerfile.production` — сам механизм не тронут, риск нулевой.
+
+Более глубокий шаг не сделан без отдельного согласования: **20 из 22** приложений (все, кроме
+`pravda` на `nginx:alpine` и `dashboard-agent`, который вообще не использует tz-стейдж) имеют
+идентичный runner-стейдж — `FROM node:24-alpine AS runner` → tz-блок → `addgroup --gid 1001
+nodejs` + `adduser --uid 1001 nextjs` → `COPY .next/standalone`. Общий базовый образ
+(`letar-node-runtime:24` = `node:24-alpine` + zoneinfo + `TZ` + пользователи `nodejs`/`nextjs`)
+собрал бы это в одну строку `FROM letar-node-runtime AS runner` в каждом приложении.
+`dashboard` мог бы наследовать базу и добавить свой слой `ARG ALPINE_MIRROR` + `apk add
+docker-cli` поверх.
+
+**Почему не сделано сразу:** меняет `deploy-affected.sh` (нужен шаг сборки и публикации
+базового образа до сборки приложений) — правки Dockerfile проверяются только реальной сборкой
+на сервере, локально негде. Нужен явный шаг: согласовать с владельцем → прогнать через
+`deploy-agent-dev` на staging хотя бы для одного приложения → только потом тиражировать на
+остальные 19-20.
+
+**Коммит (сокращение комментария):** `6b46d78d` (letar) + отдельные коммиты внутри 7 приватных
+submodule (aboi, aprel8008, domwellbes, driving-school, dsperevod, studio, svoichuzhie).
