@@ -1,14 +1,13 @@
 import { createSystem, defaultConfig, defineConfig } from '@chakra-ui/react'
 
 /**
- * Тема для Letar Landing
- * Тёмная тема с teal/cyan акцентом
+ * Тема для Letar Landing.
+ * Графитовая «карта экосистемы» с холодным мятным сигналом.
  */
 const customConfig = defineConfig({
   theme: {
     tokens: {
       colors: {
-        // Фирменный teal
         brand: {
           50: { value: '#e6fffa' },
           100: { value: '#b2f5ea' },
@@ -20,28 +19,30 @@ const customConfig = defineConfig({
           700: { value: '#285e61' },
           800: { value: '#234e52' },
           900: { value: '#1d4044' },
+          a08: { value: 'rgba(101, 230, 210, 0.08)' },
         },
       },
     },
     semanticTokens: {
       colors: {
-        // Фон — всегда тёмный
         bg: {
-          DEFAULT: { value: '{colors.gray.950}' },
-          subtle: { value: '{colors.gray.900}' },
-          muted: { value: '{colors.gray.800}' },
-          card: { value: 'rgba(20, 30, 35, 0.8)' },
+          DEFAULT: { value: '#090d0d' },
+          subtle: { value: '#101817' },
+          muted: { value: '#172220' },
+          card: { value: '#0f1817' },
+          cardHover: { value: '#13201e' },
+          header: { value: 'rgba(9, 13, 13, 0.82)' },
+          footer: { value: '#080b0b' },
         },
-        // Текст — светлый
         fg: {
-          DEFAULT: { value: '{colors.gray.50}' },
-          muted: { value: '{colors.gray.400}' },
-          subtle: { value: '{colors.gray.500}' },
+          DEFAULT: { value: '#f2f8f7' },
+          muted: { value: '#9cafac' },
+          subtle: { value: '#71817f' },
         },
-        // Границы
         border: {
-          DEFAULT: { value: '{colors.gray.800}' },
-          subtle: { value: '{colors.gray.700}' },
+          DEFAULT: { value: '#1d2b29' },
+          subtle: { value: '#172220' },
+          emphasized: { value: '#2c4440' },
         },
         // ColorPalette для brand
         colorPalette: {
@@ -58,8 +59,8 @@ const customConfig = defineConfig({
   },
   globalCss: {
     'html, body': {
-      bg: 'gray.950',
-      color: 'gray.50',
+      bg: 'bg',
+      color: 'fg',
       minHeight: '100dvh',
     },
   },

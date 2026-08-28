@@ -2,6 +2,148 @@ html {
   scroll-behavior: smooth;
 }
 
+body {
+  overflow-x: hidden;
+  font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  background-image:
+    radial-gradient(circle at 12% 10%, rgba(101, 230, 210, 0.06), transparent 28rem),
+    linear-gradient(rgba(101, 230, 210, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(101, 230, 210, 0.025) 1px, transparent 1px);
+  background-size: auto, 64px 64px, 64px 64px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.signal-font {
+  font-family: var(--font-signal), ui-monospace, monospace;
+}
+
+.signal-dot {
+  box-shadow: 0 0 0 0 rgba(101, 230, 210, 0.45);
+  animation: signal-pulse 2.4s ease-out infinite;
+}
+
+.section-kicker {
+  color: #65e6d2;
+  font-size: 0.75rem;
+  letter-spacing: 0.11em;
+}
+
+.header-link {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0 0.875rem;
+}
+
+.hero-section {
+  position: relative;
+}
+
+.hero-section::after {
+  position: absolute;
+  z-index: -1;
+  top: 4rem;
+  right: -14rem;
+  width: 38rem;
+  height: 38rem;
+  border: 1px solid rgba(101, 230, 210, 0.08);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 7rem rgba(101, 230, 210, 0.018),
+    0 0 0 14rem rgba(101, 230, 210, 0.012);
+  content: "";
+  pointer-events: none;
+}
+
+.ecosystem-preview {
+  position: relative;
+  min-height: 31rem;
+}
+
+.preview-window {
+  position: absolute;
+  display: block;
+  width: min(82%, 33rem);
+}
+
+.preview-window-1 {
+  z-index: 2;
+  top: 0;
+  right: 0;
+}
+
+.preview-window-2 {
+  z-index: 1;
+  bottom: 0;
+  left: 0;
+}
+
+.preview-window img,
+.featured-image {
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.preview-window:hover img,
+.featured-card:hover .featured-image {
+  transform: scale(1.035);
+}
+
+.featured-image-shade {
+  background: linear-gradient(180deg, transparent 55%, rgba(4, 7, 7, 0.64));
+}
+
+.featured-index {
+  padding: 0.45rem 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.88);
+  background: rgba(4, 7, 7, 0.55);
+  backdrop-filter: blur(10px);
+}
+
+.featured-arrow {
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.featured-card:hover .featured-arrow {
+  transform: rotate(8deg);
+  background: rgba(101, 230, 210, 0.08);
+}
+
+.category-details > summary {
+  list-style: none;
+}
+
+.category-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.category-chevron {
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.category-details[open] .category-chevron {
+  transform: rotate(180deg);
+  border-color: #2c4440;
+}
+
+.tech-label {
+  color: #839693;
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+}
+
+.tech-label:not(:last-child)::after {
+  margin-left: 0.5rem;
+  color: #2c4440;
+  content: "/";
+}
+
 /* Скроллбар */
 ::-webkit-scrollbar {
   width: 8px;
@@ -19,14 +161,81 @@ html {
 
 /* Выделение текста */
 ::selection {
-  background: rgba(49, 151, 149, 0.4);
+  background: rgba(101, 230, 210, 0.35);
   color: #fff;
 }
 
 /* Градиентный текст */
 .gradient-text {
-  background: linear-gradient(135deg, #38b2ac, #81e6d9, #4fd1c5);
+  background: linear-gradient(105deg, #65e6d2 5%, #b7fff4 50%, #47b8a8 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+@keyframes signal-pulse {
+  70%,
+  100% {
+    box-shadow: 0 0 0 9px rgba(101, 230, 210, 0);
+  }
+}
+
+@media (max-width: 63.99rem) {
+  .ecosystem-preview {
+    min-height: 34rem;
+    max-width: 44rem;
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 40rem) {
+  body {
+    background-size: auto, 40px 40px, 40px 40px;
+  }
+
+  .hero-section::after {
+    display: none;
+  }
+
+  .ecosystem-preview {
+    display: flex;
+    min-height: unset;
+    flex-direction: column;
+    padding-bottom: 0.5rem;
+  }
+
+  .preview-window {
+    position: relative;
+    width: 94%;
+  }
+
+  .preview-window-1 {
+    align-self: flex-start;
+  }
+
+  .preview-window-2 {
+    z-index: 3;
+    margin-top: -2rem;
+    align-self: flex-end;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .signal-dot {
+    animation: none;
+  }
+
+  .preview-window,
+  .preview-window img,
+  .featured-card,
+  .featured-image,
+  .featured-arrow,
+  .project-card,
+  .category-chevron {
+    transition: none !important;
+  }
 }

@@ -2,7 +2,14 @@ import { Provider } from '@/app/_components/ui/provider'
 import { UmamiScript } from '@letar/analytics'
 import { AnalyticsGate, CookieBanner } from '@letar/ui'
 import type { Metadata, Viewport } from 'next'
+import localFont from 'next/font/local'
 import './globals.css'
+
+const signalFont = localFont({
+  src: '../assets/fonts/departure-mono.woff2',
+  variable: '--font-signal',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://letar.best'),
@@ -11,7 +18,7 @@ export const metadata: Metadata = {
     default: 'Letar — Проекты и приложения',
   },
   description:
-    'Экосистема веб-приложений, десктопных и мобильных проектов. E-commerce, образование, медиа, аналитика и инфраструктура.',
+    'Живая экосистема сайтов, приложений и инструментов: продукты Ками, работы Studio Letar, open source и инфраструктура.',
   keywords: ['letar', 'проекты', 'веб-приложения', 'Next.js', 'open source'],
   authors: [{ name: 'Letar' }],
   alternates: {
@@ -24,7 +31,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Letar',
-    description: 'Экосистема проектов и приложений',
+    description: 'Проекты, которые живут и работают',
     url: 'https://letar.best',
     siteName: 'Letar',
     locale: 'ru_RU',
@@ -33,7 +40,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Letar',
-    description: 'Экосистема проектов и приложений',
+    description: 'Проекты, которые живут и работают',
   },
   icons: {
     icon: '/icon.svg',
@@ -45,7 +52,7 @@ const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   name: 'Letar',
-  description: 'Экосистема проектов и приложений',
+  description: 'Живая экосистема сайтов, приложений и инструментов',
   url: 'https://letar.best',
 }
 
@@ -58,9 +65,8 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru" suppressHydrationWarning>
-      <body>
-        {/* JSON-LD для SEO — статические данные, XSS невозможен */}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <body className={signalFont.variable}>
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
         <Provider>
           {children}
           <CookieBanner appKey="letar-landing" consentApiUrl={null} />

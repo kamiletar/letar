@@ -1,3 +1,9 @@
+import animatronaPreview from '@/assets/projects/animatrona.webp'
+import kamiPreview from '@/assets/projects/kami.webp'
+import mandalaPreview from '@/assets/projects/mandala.webp'
+import studioPreview from '@/assets/projects/studio.webp'
+import type { StaticImageData } from 'next/image'
+
 /** Проект в каталоге */
 export interface Project {
   /** Название проекта */
@@ -21,6 +27,61 @@ export interface ProjectCategory {
   /** Свёрнуто по умолчанию */
   defaultCollapsed?: boolean
 }
+
+/** Большое превью одного из ключевых входов или продуктов экосистемы */
+export interface ShowcaseProject {
+  name: string
+  label: string
+  description: string
+  url: string
+  image: StaticImageData
+  imageAlt: string
+  tone: 'terminal' | 'paper' | 'color' | 'violet'
+}
+
+/** Два главных входа в экосистему: услуги студии и личный сайт автора */
+export const ecosystemEntrances: ShowcaseProject[] = [
+  {
+    name: 'Studio Letar',
+    label: 'Разработка',
+    description: 'Сайты, приложения и цифровые продукты — от идеи до продакшена.',
+    url: 'https://studio.letar.best',
+    image: studioPreview,
+    imageAlt: 'Главная страница Studio Letar в эстетике компьютерного терминала',
+    tone: 'terminal',
+  },
+  {
+    name: 'Kami',
+    label: 'Автор',
+    description: 'Личный сайт, блог и профессиональная история архитектора ПО.',
+    url: 'https://kami.letar.best',
+    image: kamiPreview,
+    imageAlt: 'Главная страница личного сайта Kami',
+    tone: 'paper',
+  },
+]
+
+/** Проекты, которые первыми показывают широту экосистемы */
+export const featuredProjects: ShowcaseProject[] = [
+  {
+    name: 'Mandala',
+    label: 'PWA · Искусство',
+    description: 'Медитативная галерея мандал, которая работает и без интернета.',
+    url: 'https://mandala.letar.best',
+    image: mandalaPreview,
+    imageAlt: 'Интерактивная галерея проекта Mandala',
+    tone: 'color',
+  },
+  {
+    name: 'Animatrona',
+    label: 'Desktop · Медиа',
+    description: 'Управление аниме-коллекцией и GPU-транскодирование в одном приложении.',
+    url: 'https://animatrona.letar.best',
+    image: animatronaPreview,
+    imageAlt: 'Лендинг десктопного приложения Animatrona',
+    tone: 'violet',
+  },
+]
 
 /** Все проекты, сгруппированные по категориям */
 export const projectCategories: ProjectCategory[] = [
@@ -141,6 +202,7 @@ export const projectCategories: ProjectCategory[] = [
   },
   {
     title: 'Инфраструктура',
+    defaultCollapsed: true,
     projects: [
       {
         name: 'Dashboard',
@@ -167,6 +229,7 @@ export const projectCategories: ProjectCategory[] = [
   },
   {
     title: 'Библиотеки',
+    defaultCollapsed: true,
     projects: [
       {
         name: '@letar/forms',
@@ -206,3 +269,6 @@ export const projectCategories: ProjectCategory[] = [
     ],
   },
 ]
+
+/** Количество уникальных карточек полного каталога */
+export const projectCount = projectCategories.reduce((total, category) => total + category.projects.length, 0)
