@@ -412,6 +412,21 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's2',
   },
   {
+    id: 'login-canary-check',
+    name: 'Login Canary Check',
+    app: 'dashboard-agent',
+    endpoint: '/api/cron/login-canary-check',
+    // Раз в 30 минут — вход ломается резче, чем NULL накапливается: не суточный, но и не
+    // ежеминутный, чтобы не создавать реальные сессии канареечным аккаунтам слишком часто.
+    schedule: '*/30 * * * *',
+    description: 'Синтетическая проверка входа (PLAN.md §71 п.3.3): POST /api/auth/sign-in/email '
+      + 'канареечными учётными данными на каждое приложение с credential-входом. Ловит любую поломку '
+      + 'входа (не только NULL issuer) — рассинхрон OAuth-клиента, истёкший секрет, сломанный '
+      + 'password-хеш, частичный сид',
+    enabled: true,
+    server: 's2',
+  },
+  {
     id: 'health-check',
     name: 'Health Check (CPU/память/диск/контейнеры/БД)',
     app: 'dashboard-agent',

@@ -18,6 +18,7 @@ export type DashboardAlertType =
   | 'BACKUP_FAILED'
   | 'CRON_FAILED'
   | 'AUTH_ACCOUNT_ISSUER_NULL'
+  | 'AUTH_LOGIN_CANARY_FAILED'
 
 export type DashboardAlertSeverity = 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL'
 

@@ -11,6 +11,29 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.15.27] — 2026-08-28
+
+### Added
+
+- Синтетическая канареечная проверка входа (PLAN.md корня §71 п.3.3) — новая cron-задача
+  `login-canary-check` (каждые 30 минут, `lib/login-canary.ts`): POST `/api/auth/sign-in/email`
+  канареечными учётными данными на каждое из 9 приложений с реальным credential-входом (aboi,
+  domwellbes, mandala, animatrona-tracker, dashboard, auth-hub, driving-school, svoichuzhie,
+  dsperevod — остальные приложения либо только SSO через Ключницу, либо только другие OAuth).
+  Дополняет `account-issuer-check.ts` (ловит один конкретный класс регрессии) — эта проверка
+  ловит любую поломку входа тем же способом, каким её обнаружил бы реальный пользователь: любой
+  ответ, отличный от HTTP 200, — провал. Алерт `AUTH_LOGIN_CANARY_FAILED`, порог 2 неудачи подряд
+  (как у `email-canary.ts`), повтор при каждом удвоении числа неудач через `alert-policy.ts`.
+  Учётные данные — реестр `LOGIN_CANARY_<APP>_EMAIL`/`_PASSWORD` в `apps/dashboard/.env.docker.enc`
+  (читается из уже смонтированного `/secrets/dashboard.env`, новых mount'ов в
+  `docker-compose.production.yml` не потребовалось — все 9 приложений уже были смонтированы для
+  `database.ts`).
+- `POST /api/admin/login-canary-setup` (`lib/login-canary-setup.ts`) — одноразовый провижининг
+  канареечного аккаунта в одном приложении: регистрирует через `/api/auth/sign-up/email` самого
+  приложения (пароль хешируется его собственным алгоритмом, включая bcrypt driving-school), затем
+  напрямую в БД снимает `emailVerified`, чтобы канарейка не получала `EMAIL_NOT_VERIFIED` вместо
+  реальной проверки входа. Идемпотентен — повторный вызов на существующий аккаунт не ошибка.
+
 ## [0.15.26] — 2026-08-28
 
 ### Fixed
