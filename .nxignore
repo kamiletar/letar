@@ -1,5 +1,18 @@
 .claude/worktrees
-**/dist
-**/.next
-**/dist-electron
 infra
+
+# Артефакты сборки. Шаблоны, а не точные имена: временный distDir
+# (`NEXT_DIST_DIR=.next-prodcheck`, `dist-check` и т.п.) — обычная практика,
+# чтобы не затирать `.next` работающего dev-сервера, а перечисление имён
+# отстаёт от следующего агента.
+**/.next*
+**/dist
+**/dist-*
+
+# Страховка, не зависящая от имени каталога: `output: 'standalone'` кладёт
+# внутрь копии `project.json`/`eslint.config.mjs` ВСЕХ проектов монорепо.
+# Nx считает их настоящими проектами — MultipleProjectsWithSameNameError,
+# и падает не одно приложение, а любая `nx`-команда у всех агентов сразу.
+# Разбор — .claude/docs/nx-temp-build-dir-breaks-project-graph.md
+**/standalone/apps
+**/standalone/libs

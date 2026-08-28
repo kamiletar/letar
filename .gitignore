@@ -58,7 +58,11 @@ Thumbs.db
 .env.mcp
 
 # Next.js
-.next
+# Шаблон, а не точное имя: временный distDir (`NEXT_DIST_DIR=.next-prodcheck`
+# и т.п., чтобы не затирать `.next` работающего dev-сервера) иначе висит
+# untracked и ломает граф Nx — см. .nxignore и
+# .claude/docs/nx-temp-build-dir-breaks-project-graph.md
+.next*
 out
 next-env.d.ts
 
