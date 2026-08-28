@@ -1433,6 +1433,9 @@
       "version": "0.1.0",
     },
   },
+  "patchedDependencies": {
+    "@chakra-ui/react@3.36.1": "patches/@chakra-ui%2Freact@3.36.1.patch",
+  },
   "overrides": {
     "@xhmikosr/decompress": "^11.1.4",
     "minimist": "^1.2.8",

@@ -1,0 +1,26 @@
+diff --git a/dist/cjs/utils/memo.cjs b/dist/cjs/utils/memo.cjs
+index 69b42ebaef6b10ac13a9f4538c08eb4f2aa9bd54..930dcecb9876d79ba6a93f2064abc0ee02dea4f5 100644
+--- a/dist/cjs/utils/memo.cjs
++++ b/dist/cjs/utils/memo.cjs
+@@ -16,7 +16,7 @@ function simpleHash(value) {
+     return `a:[${value.map(simpleHash).join(",")}]`;
+   }
+   if (type === "object") {
+-    const keys = Object.keys(value).sort();
++    const keys = Object.keys(value);
+     return `o:{${keys.map((k) => `${k}:${simpleHash(value[k])}`).join(",")}}`;
+   }
+   return String(value);
+diff --git a/dist/esm/utils/memo.js b/dist/esm/utils/memo.js
+index fc514d509407af49ff50b319628308ae2abe525c..1e699120cd842e219e8fc8b96c1a7fc28079546d 100644
+--- a/dist/esm/utils/memo.js
++++ b/dist/esm/utils/memo.js
+@@ -14,7 +14,7 @@ function simpleHash(value) {
+     return `a:[${value.map(simpleHash).join(",")}]`;
+   }
+   if (type === "object") {
+-    const keys = Object.keys(value).sort();
++    const keys = Object.keys(value);
+     return `o:{${keys.map((k) => `${k}:${simpleHash(value[k])}`).join(",")}}`;
+   }
+   return String(value);

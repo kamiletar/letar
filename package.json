@@ -356,5 +356,8 @@
     "apps/*",
     "libs/shared/*",
     "libs/*"
-  ]
+  ],
+  "patchedDependencies": {
+    "@chakra-ui/react@3.36.1": "patches/@chakra-ui%2Freact@3.36.1.patch"
+  }
 }
