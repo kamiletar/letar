@@ -3470,6 +3470,10 @@ distDir копии `project.json`/`eslint.config.mjs` всех проектов 
 [chakra-css-memo-prop-order-hydration](/.claude/docs/chakra-css-memo-prop-order-hydration.md),
 опровергнутые разделы помечены в
 [nextjs16-turbopack-default-emotion-hydration](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md).
+Обобщение вынесено отдельным разделом в свод обманчивых проверок —
+[verification-pitfalls § состояние живёт в процессе](/.claude/docs/verification-pitfalls.md#тот-же-класс-но-не-про-артефакт-состояние-живёт-в-процессе-а-не-в-бандле)
+(признак класса, почему холодный прод даёт ложноотрицательный результат, как прогревать процесс
+перед проверкой).
 
 **Апстрим:** симптом уже приносили ([chakra-ui#10730](https://github.com/chakra-ui/chakra-ui/issues/10730)),
 закрыт мейнтейнером как `not_planned` — причину тогда не нашли. Разбор с причиной, диапазоном
