@@ -3,7 +3,8 @@
  * API для получения статуса и статистики PostgreSQL баз данных
  */
 
-import type { FastifyInstance } from 'fastify'
+import type { FastifyInstance, FastifyRequest } from 'fastify'
+import { apiHandler } from '../lib/api-handler'
 import {
   backupAllDatabases,
   backupDatabase,
@@ -22,22 +23,7 @@ export async function databaseRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * GET /api/database/status — статус всех БД
    */
-  fastify.get('/api/database/status', async (): Promise<ApiResponse<DatabaseStatus[]>> => {
-    try {
-      const data = await getAllDatabaseStatuses()
-      return {
-        success: true,
-        data,
-        timestamp: new Date().toISOString(),
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
-      }
-    }
-  })
+  fastify.get('/api/database/status', apiHandler<DatabaseStatus[]>(() => getAllDatabaseStatuses()))
 
   /**
    * GET /api/database/stats — статистика всех БД
@@ -46,23 +32,9 @@ export async function databaseRoutes(fastify: FastifyInstance): Promise<void> {
    */
   fastify.get<{ Querystring: { db?: string } }>(
     '/api/database/stats',
-    async (request): Promise<ApiResponse<DatabaseStatsResult[]>> => {
-      try {
-        const dbName = request.query.db
-        const data = await getAllDatabaseStats(dbName)
-        return {
-          success: true,
-          data,
-          timestamp: new Date().toISOString(),
-        }
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
-      }
-    },
+    apiHandler<DatabaseStatsResult[], FastifyRequest<{ Querystring: { db?: string } }>>((request) =>
+      getAllDatabaseStats(request.query.db)
+    ),
   )
 
   /**
@@ -127,22 +99,8 @@ export async function databaseRoutes(fastify: FastifyInstance): Promise<void> {
    */
   fastify.get<{ Querystring: { db?: string } }>(
     '/api/database/backups',
-    async (request): Promise<ApiResponse<BackupInfo[]>> => {
-      try {
-        const dbName = request.query.db
-        const backups = await getBackupsList(dbName)
-        return {
-          success: true,
-          data: backups,
-          timestamp: new Date().toISOString(),
-        }
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
-      }
-    },
+    apiHandler<BackupInfo[], FastifyRequest<{ Querystring: { db?: string } }>>((request) =>
+      getBackupsList(request.query.db)
+    ),
   )
 }

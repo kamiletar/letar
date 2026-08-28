@@ -4,9 +4,9 @@
  */
 
 import type { FastifyInstance } from 'fastify'
+import { apiHandler } from '../lib/api-handler'
 import { defineCronRoute } from '../lib/cron-route'
 import { getEmailCanaryState, runEmailCanaryCheck } from '../lib/email-canary'
-import type { ApiResponse } from '../types'
 
 export async function emailCanaryRoutes(fastify: FastifyInstance): Promise<void> {
   /**
@@ -19,20 +19,6 @@ export async function emailCanaryRoutes(fastify: FastifyInstance): Promise<void>
    */
   fastify.get(
     '/api/cron/email-canary-check/status',
-    async (): Promise<ApiResponse<ReturnType<typeof getEmailCanaryState>>> => {
-      try {
-        return {
-          success: true,
-          data: getEmailCanaryState(),
-          timestamp: new Date().toISOString(),
-        }
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
-      }
-    },
+    apiHandler<ReturnType<typeof getEmailCanaryState>>(() => Promise.resolve(getEmailCanaryState())),
   )
 }

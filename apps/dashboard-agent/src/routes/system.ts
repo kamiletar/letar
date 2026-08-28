@@ -3,7 +3,8 @@
  * API для получения системных метрик
  */
 
-import type { FastifyInstance } from 'fastify'
+import type { FastifyInstance, FastifyRequest } from 'fastify'
+import { apiHandler } from '../lib/api-handler'
 import type { HistoryData } from '../lib/history'
 import { getHistory } from '../lib/history'
 import {
@@ -15,151 +16,47 @@ import {
   getSystemUptime,
   getTopProcesses,
 } from '../lib/system'
-import type { ApiResponse } from '../types'
 
 export async function systemRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * GET /api/system/cpu — информация о CPU
    */
-  fastify.get('/api/system/cpu', async (): Promise<ApiResponse<Awaited<ReturnType<typeof getCPUInfo>>>> => {
-    try {
-      const data = await getCPUInfo()
-      return {
-        success: true,
-        data,
-        timestamp: new Date().toISOString(),
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
-      }
-    }
-  })
+  fastify.get('/api/system/cpu', apiHandler(() => getCPUInfo()))
 
   /**
    * GET /api/system/memory — информация о памяти
    */
-  fastify.get('/api/system/memory', async (): Promise<ApiResponse<Awaited<ReturnType<typeof getMemoryInfo>>>> => {
-    try {
-      const data = await getMemoryInfo()
-      return {
-        success: true,
-        data,
-        timestamp: new Date().toISOString(),
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
-      }
-    }
-  })
+  fastify.get('/api/system/memory', apiHandler(() => getMemoryInfo()))
 
   /**
    * GET /api/system/disk — информация о дисках
    */
-  fastify.get('/api/system/disk', async (): Promise<ApiResponse<Awaited<ReturnType<typeof getDiskInfo>>>> => {
-    try {
-      const data = await getDiskInfo()
-      return {
-        success: true,
-        data,
-        timestamp: new Date().toISOString(),
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
-      }
-    }
-  })
+  fastify.get('/api/system/disk', apiHandler(() => getDiskInfo()))
 
   /**
    * GET /api/system/network — информация о сети
    */
-  fastify.get('/api/system/network', async (): Promise<ApiResponse<Awaited<ReturnType<typeof getNetworkInfo>>>> => {
-    try {
-      const data = await getNetworkInfo()
-      return {
-        success: true,
-        data,
-        timestamp: new Date().toISOString(),
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
-      }
-    }
-  })
+  fastify.get('/api/system/network', apiHandler(() => getNetworkInfo()))
 
   /**
    * GET /api/system/uptime — uptime системы
    */
-  fastify.get('/api/system/uptime', async (): Promise<ApiResponse<Awaited<ReturnType<typeof getSystemUptime>>>> => {
-    try {
-      const data = await getSystemUptime()
-      return {
-        success: true,
-        data,
-        timestamp: new Date().toISOString(),
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
-      }
-    }
-  })
+  fastify.get('/api/system/uptime', apiHandler(() => getSystemUptime()))
 
   /**
    * GET /api/system/info — общая информация о системе
    */
-  fastify.get('/api/system/info', async (): Promise<ApiResponse<Awaited<ReturnType<typeof getSystemInfo>>>> => {
-    try {
-      const data = await getSystemInfo()
-      return {
-        success: true,
-        data,
-        timestamp: new Date().toISOString(),
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
-      }
-    }
-  })
+  fastify.get('/api/system/info', apiHandler(() => getSystemInfo()))
 
   /**
    * GET /api/system/processes — топ процессов по памяти
    */
   fastify.get<{ Querystring: { limit?: string } }>(
     '/api/system/processes',
-    async (request): Promise<ApiResponse<Awaited<ReturnType<typeof getTopProcesses>>>> => {
-      try {
-        const limit = request.query.limit ? parseInt(request.query.limit, 10) : 20
-        const data = await getTopProcesses(limit)
-        return {
-          success: true,
-          data,
-          timestamp: new Date().toISOString(),
-        }
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
-      }
-    },
+    apiHandler(async (request: FastifyRequest<{ Querystring: { limit?: string } }>) => {
+      const limit = request.query.limit ? parseInt(request.query.limit, 10) : 20
+      return getTopProcesses(limit)
+    }),
   )
 
   /**
@@ -167,23 +64,10 @@ export async function systemRoutes(fastify: FastifyInstance): Promise<void> {
    */
   fastify.get<{ Querystring: { hours?: string } }>(
     '/api/system/history',
-    async (request): Promise<ApiResponse<HistoryData>> => {
-      try {
-        const hours = request.query.hours ? parseInt(request.query.hours, 10) : 24
-        const data = getHistory(hours)
-        return {
-          success: true,
-          data,
-          timestamp: new Date().toISOString(),
-        }
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
-      }
-    },
+    apiHandler(async (request: FastifyRequest<{ Querystring: { hours?: string } }>): Promise<HistoryData> => {
+      const hours = request.query.hours ? parseInt(request.query.hours, 10) : 24
+      return getHistory(hours)
+    }),
   )
 
   /**
@@ -191,28 +75,9 @@ export async function systemRoutes(fastify: FastifyInstance): Promise<void> {
    */
   fastify.get(
     '/api/system/all',
-    async (): Promise<
-      ApiResponse<{
-        cpu: Awaited<ReturnType<typeof getCPUInfo>>
-        memory: Awaited<ReturnType<typeof getMemoryInfo>>
-        disk: Awaited<ReturnType<typeof getDiskInfo>>
-      }>
-    > => {
-      try {
-        const [cpu, memory, disk] = await Promise.all([getCPUInfo(), getMemoryInfo(), getDiskInfo()])
-
-        return {
-          success: true,
-          data: { cpu, memory, disk },
-          timestamp: new Date().toISOString(),
-        }
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
-      }
-    },
+    apiHandler(async () => {
+      const [cpu, memory, disk] = await Promise.all([getCPUInfo(), getMemoryInfo(), getDiskInfo()])
+      return { cpu, memory, disk }
+    }),
   )
 }

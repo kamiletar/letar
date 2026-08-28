@@ -4,6 +4,7 @@
  */
 
 import type { FastifyInstance } from 'fastify'
+import { apiHandler } from '../lib/api-handler'
 import { backupNginx, getNginxBackupsList, type NginxBackupInfo, type NginxBackupResult } from '../lib/nginx-backup'
 import type { ApiResponse } from '../types'
 
@@ -38,20 +39,5 @@ export async function nginxRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * GET /api/nginx/backups — список бэкапов NPM
    */
-  fastify.get('/api/nginx/backups', async (): Promise<ApiResponse<NginxBackupInfo[]>> => {
-    try {
-      const backups = await getNginxBackupsList()
-      return {
-        success: true,
-        data: backups,
-        timestamp: new Date().toISOString(),
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
-      }
-    }
-  })
+  fastify.get('/api/nginx/backups', apiHandler<NginxBackupInfo[]>(() => getNginxBackupsList()))
 }

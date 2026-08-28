@@ -4,6 +4,7 @@
  */
 
 import type { FastifyInstance } from 'fastify'
+import { apiHandler } from '../lib/api-handler'
 import {
   backupTraefik,
   getTraefikBackupsList,
@@ -43,20 +44,5 @@ export async function traefikRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * GET /api/traefik/backups — список бэкапов Traefik
    */
-  fastify.get('/api/traefik/backups', async (): Promise<ApiResponse<TraefikBackupInfo[]>> => {
-    try {
-      const backups = await getTraefikBackupsList()
-      return {
-        success: true,
-        data: backups,
-        timestamp: new Date().toISOString(),
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
-      }
-    }
-  })
+  fastify.get('/api/traefik/backups', apiHandler<TraefikBackupInfo[]>(() => getTraefikBackupsList()))
 }

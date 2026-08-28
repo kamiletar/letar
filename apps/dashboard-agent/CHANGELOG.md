@@ -11,6 +11,22 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.15.22] — 2026-08-28
+
+### Changed
+
+- Рефакторинг: общий try/catch → `ApiResponse<T>` (обычный успех/исключение, без
+  ранних return'ов и без вычисления `success`/`error` из полей результата) вынесен
+  в `apiHandler<T>(fn)` (`lib/api-handler.ts`) и применён к 27 GET/POST-хендлерам в
+  `system.ts` (9), `docker.ts` (8 из 11), `database.ts` (3 из 4), `git.ts` (2 из 3),
+  `cron.ts` (1 из 6), `traefik.ts`/`acme-dns.ts`/`nginx.ts` (по 1 из 2), `email-canary.ts`
+  (1 из 2). Осознанно НЕ тронуты (задокументировано, не унифицировано ради унификации):
+  ранние return-валидации до вызова бизнес-логики без исключения (`docker.ts`
+  control/images-pull/prune, весь `cron.ts` кроме списка задач), `success`/`error`,
+  вычисляемые из вложенных полей результата, а не из факта исключения (`git.ts` pull,
+  `database.ts` backup, `traefik/acme-dns/nginx.ts` backup), и `deploy.ts` целиком —
+  там try/catch не единственная логика хендлера, обобщение потеряло бы читаемость.
+
 ## [0.15.21] — 2026-08-28
 
 ### Changed

@@ -3,7 +3,8 @@
  * API для управления Docker контейнерами
  */
 
-import type { FastifyInstance } from 'fastify'
+import type { FastifyInstance, FastifyRequest } from 'fastify'
+import { apiHandler } from '../lib/api-handler'
 import {
   controlContainer,
   docker,
@@ -27,69 +28,23 @@ export async function dockerRoutes(fastify: FastifyInstance): Promise<void> {
    */
   fastify.get<{ Querystring: { all?: string } }>(
     '/api/docker/containers',
-    async (request): Promise<ApiResponse<Awaited<ReturnType<typeof getContainers>>>> => {
-      try {
-        const all = request.query.all !== 'false'
-        const data = await getContainers(all)
-        return {
-          success: true,
-          data,
-          timestamp: new Date().toISOString(),
-        }
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
-      }
-    },
+    apiHandler(async (request: FastifyRequest<{ Querystring: { all?: string } }>) => {
+      const all = request.query.all !== 'false'
+      return getContainers(all)
+    }),
   )
 
   /**
    * GET /api/docker/containers/memory — память всех контейнеров
    */
-  fastify.get(
-    '/api/docker/containers/memory',
-    async (): Promise<ApiResponse<Awaited<ReturnType<typeof getAllContainersMemory>>>> => {
-      try {
-        const data = await getAllContainersMemory()
-        return {
-          success: true,
-          data,
-          timestamp: new Date().toISOString(),
-        }
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
-      }
-    },
-  )
+  fastify.get('/api/docker/containers/memory', apiHandler(() => getAllContainersMemory()))
 
   /**
    * GET /api/docker/containers/:id/stats — статистика контейнера
    */
   fastify.get<{ Params: { id: string } }>(
     '/api/docker/containers/:id/stats',
-    async (request): Promise<ApiResponse<Awaited<ReturnType<typeof getContainerStats>>>> => {
-      try {
-        const data = await getContainerStats(request.params.id)
-        return {
-          success: true,
-          data,
-          timestamp: new Date().toISOString(),
-        }
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
-      }
-    },
+    apiHandler((request: FastifyRequest<{ Params: { id: string } }>) => getContainerStats(request.params.id)),
   )
 
   /**
@@ -97,23 +52,10 @@ export async function dockerRoutes(fastify: FastifyInstance): Promise<void> {
    */
   fastify.get<{ Params: { id: string }; Querystring: { tail?: string } }>(
     '/api/docker/containers/:id/logs',
-    async (request): Promise<ApiResponse<Awaited<ReturnType<typeof getContainerLogs>>>> => {
-      try {
-        const tail = request.query.tail ? parseInt(request.query.tail, 10) : 100
-        const data = await getContainerLogs(request.params.id, tail)
-        return {
-          success: true,
-          data,
-          timestamp: new Date().toISOString(),
-        }
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
-      }
-    },
+    apiHandler(async (request: FastifyRequest<{ Params: { id: string }; Querystring: { tail?: string } }>) => {
+      const tail = request.query.tail ? parseInt(request.query.tail, 10) : 100
+      return getContainerLogs(request.params.id, tail)
+    }),
   )
 
   /**
@@ -152,22 +94,7 @@ export async function dockerRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * GET /api/docker/images — список образов
    */
-  fastify.get('/api/docker/images', async (): Promise<ApiResponse<Awaited<ReturnType<typeof getImages>>>> => {
-    try {
-      const data = await getImages()
-      return {
-        success: true,
-        data,
-        timestamp: new Date().toISOString(),
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
-      }
-    }
-  })
+  fastify.get('/api/docker/images', apiHandler(() => getImages()))
 
   /**
    * POST /api/docker/images/pull — pull Docker образа
@@ -225,65 +152,17 @@ export async function dockerRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * GET /api/docker/volumes — список volumes
    */
-  fastify.get('/api/docker/volumes', async (): Promise<ApiResponse<Awaited<ReturnType<typeof getVolumes>>>> => {
-    try {
-      const data = await getVolumes()
-      return {
-        success: true,
-        data,
-        timestamp: new Date().toISOString(),
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
-      }
-    }
-  })
+  fastify.get('/api/docker/volumes', apiHandler(() => getVolumes()))
 
   /**
    * GET /api/docker/networks — список сетей
    */
-  fastify.get('/api/docker/networks', async (): Promise<ApiResponse<Awaited<ReturnType<typeof getNetworks>>>> => {
-    try {
-      const data = await getNetworks()
-      return {
-        success: true,
-        data,
-        timestamp: new Date().toISOString(),
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
-      }
-    }
-  })
+  fastify.get('/api/docker/networks', apiHandler(() => getNetworks()))
 
   /**
    * GET /api/docker/disk-usage — статистика диска Docker
    */
-  fastify.get(
-    '/api/docker/disk-usage',
-    async (): Promise<ApiResponse<Awaited<ReturnType<typeof getDockerDiskUsage>>>> => {
-      try {
-        const data = await getDockerDiskUsage()
-        return {
-          success: true,
-          data,
-          timestamp: new Date().toISOString(),
-        }
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
-      }
-    },
-  )
+  fastify.get('/api/docker/disk-usage', apiHandler(() => getDockerDiskUsage()))
 
   /**
    * POST /api/docker/prune — очистка неиспользуемых ресурсов Docker

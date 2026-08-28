@@ -4,6 +4,7 @@
  */
 
 import type { FastifyInstance } from 'fastify'
+import { apiHandler } from '../lib/api-handler'
 import {
   type CronExecutionLog,
   type CronJob,
@@ -42,30 +43,21 @@ export async function cronRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * GET /api/cron/jobs — список всех задач с статусами
    */
-  fastify.get('/api/cron/jobs', async (): Promise<ApiResponse<JobsResponse>> => {
-    try {
+  fastify.get(
+    '/api/cron/jobs',
+    apiHandler<JobsResponse>(async () => {
       const statuses = getAllJobStatuses()
       const isRunning = isSchedulerRunning()
       const scheduledCount = getScheduledCount()
 
       return {
-        success: true,
-        data: {
-          isRunning,
-          scheduledCount,
-          totalCount: statuses.length,
-          jobs: statuses,
-        },
-        timestamp: new Date().toISOString(),
+        isRunning,
+        scheduledCount,
+        totalCount: statuses.length,
+        jobs: statuses,
       }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
-      }
-    }
-  })
+    }),
+  )
 
   /**
    * POST /api/cron/jobs — start/stop планировщика

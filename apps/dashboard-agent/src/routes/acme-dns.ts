@@ -10,6 +10,7 @@ import {
   backupAcmeDns,
   getAcmeDnsBackupsList,
 } from '../lib/acme-dns-backup'
+import { apiHandler } from '../lib/api-handler'
 import type { ApiResponse } from '../types'
 
 export async function acmeDnsRoutes(fastify: FastifyInstance): Promise<void> {
@@ -43,20 +44,5 @@ export async function acmeDnsRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * GET /api/acme-dns/backups — список бэкапов acme-dns
    */
-  fastify.get('/api/acme-dns/backups', async (): Promise<ApiResponse<AcmeDnsBackupInfo[]>> => {
-    try {
-      const backups = await getAcmeDnsBackupsList()
-      return {
-        success: true,
-        data: backups,
-        timestamp: new Date().toISOString(),
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
-      }
-    }
-  })
+  fastify.get('/api/acme-dns/backups', apiHandler<AcmeDnsBackupInfo[]>(() => getAcmeDnsBackupsList()))
 }
