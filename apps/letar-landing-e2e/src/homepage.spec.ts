@@ -56,7 +56,7 @@ test.describe('Главная страница', () => {
     await expect(infrastructureDetails.getByText('Dashboard', { exact: true })).toBeVisible()
   })
 
-  test('каталог содержит актуальные ссылки на Studio Letar и личный сайт Kami', async ({ page }) => {
+  test('каталог содержит актуальные ссылки на ключевые сайты экосистемы', async ({ page }) => {
     await page.goto('/')
 
     const studioCard = page.locator('#catalog a[href="https://studio.letar.best"]')
@@ -70,6 +70,16 @@ test.describe('Главная страница', () => {
     await expect(kamiCard).toHaveAttribute('target', '_blank')
     await expect(kamiCard).toHaveAttribute('rel', 'noopener noreferrer')
     await expect(kamiCard.getByText('Kami', { exact: true })).toBeVisible()
+
+    const svoichuzhieCard = page.locator('#catalog a[href="https://svoichuzhie.ru"]')
+    await expect(svoichuzhieCard).toBeVisible()
+    await expect(svoichuzhieCard).toHaveAttribute('target', '_blank')
+    await expect(svoichuzhieCard.getByText('Свои Чужие', { exact: true })).toBeVisible()
+
+    const domWellbesCard = page.locator('#catalog a[href="https://domwellbes.ru"]')
+    await expect(domWellbesCard).toBeVisible()
+    await expect(domWellbesCard).toHaveAttribute('target', '_blank')
+    await expect(domWellbesCard.getByText('DomWellbes', { exact: true })).toBeVisible()
 
     await expect(page.getByText('Premium Rosstil', { exact: true })).toHaveCount(0)
     await expect(page.getByText('Integrelle', { exact: true })).toHaveCount(0)
