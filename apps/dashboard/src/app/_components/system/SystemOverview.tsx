@@ -3,6 +3,7 @@
 import { type MetricDataPoint, MetricsChart } from '@/app/_components/charts'
 import { MetricCardSkeleton, SkeletonGrid } from '@/app/_components/ui/skeletons'
 import { useServerContext } from '@/lib/contexts/ServerContext'
+import { formatBytes } from '@/lib/format'
 import { generateInitialHistory, useMetricsHistory } from '@/lib/hooks/useMetricsHistory'
 import { useUnifiedStream } from '@/lib/hooks/useUnifiedStream'
 import { Badge, Box, Card, Grid, HStack, Icon, Stat } from '@chakra-ui/react'
@@ -19,14 +20,6 @@ const CHART_COLORS = {
   cpu: '#CA9E67', // Brand golden
   memory: '#4ADE80', // Green
   disk: '#60A5FA', // Blue
-}
-
-/**
- * Форматирование байтов в человекочитаемый формат
- */
-const formatBytes = (bytes: number) => {
-  const gb = bytes / (1024 * 1024 * 1024)
-  return `${gb.toFixed(2)} GB`
 }
 
 /**
@@ -231,8 +224,8 @@ export const SystemOverview = memo(function SystemOverview() {
           icon={LuMemoryStick}
           label="Память"
           value={realMemoryUsage.toFixed(1)}
-          helpText={`${memory ? formatBytes(memory.total - memory.available) : '0'} / ${
-            memory ? formatBytes(memory.total) : '0'
+          helpText={`${memory ? formatBytes(memory.total - memory.available, 2, 'GB') : '0'} / ${
+            memory ? formatBytes(memory.total, 2, 'GB') : '0'
           }`}
           chartData={chartData.memory}
           chartColor={CHART_COLORS.memory}
@@ -244,8 +237,8 @@ export const SystemOverview = memo(function SystemOverview() {
           icon={LuHardDrive}
           label="Диск"
           value={disk?.[0]?.use?.toFixed(1) || '0'}
-          helpText={`${disk?.[0]?.used ? formatBytes(disk[0].used) : '0'} / ${
-            disk?.[0]?.size ? formatBytes(disk[0].size) : '0'
+          helpText={`${disk?.[0]?.used ? formatBytes(disk[0].used, 2, 'GB') : '0'} / ${
+            disk?.[0]?.size ? formatBytes(disk[0].size, 2, 'GB') : '0'
           }`}
           chartData={chartData.disk}
           chartColor={CHART_COLORS.disk}
