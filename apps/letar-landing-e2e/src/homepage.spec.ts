@@ -1,13 +1,50 @@
 import { expect, test } from '@playwright/test'
 
 test.describe('Главная страница', () => {
-  test('загружается с правильным заголовком и мета-описанием', async ({ page }) => {
+  test('загружается с полным набором SEO-метаданных и структурированных данных', async ({ page }) => {
     await page.goto('/')
 
     await expect(page).toHaveTitle(/Letar/)
 
     const description = page.locator('meta[name="description"]')
     await expect(description).toHaveAttribute('content', /экосистема/i)
+
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://letar.best/')
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /opengraph-image/)
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /^https?:\/\//)
+    await expect(page.locator('meta[property="og:image:width"]')).toHaveAttribute('content', '1200')
+    await expect(page.locator('meta[property="og:image:height"]')).toHaveAttribute('content', '630')
+    await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', /twitter-image/)
+
+    const jsonLd = await page.locator('script[type="application/ld+json"]').allTextContents()
+    const structuredData = jsonLd.join('\n')
+    expect(structuredData).toContain('"@type":"WebSite"')
+    expect(structuredData).toContain('"@type":"Organization"')
+    expect(structuredData).toContain('"@type":"ItemList"')
+    expect(structuredData).toContain('"numberOfItems":25')
+    expect(structuredData).toContain('"name":"DomWellbes"')
+  })
+
+  test('социальные карточки генерируются как PNG-изображения', async ({ page, request }) => {
+    await page.goto('/')
+
+    const ogImageUrl = await page.locator('meta[property="og:image"]').evaluate((element) =>
+      element.getAttribute('content')
+    )
+    const twitterImageUrl = await page
+      .locator('meta[name="twitter:image"]')
+      .evaluate((element) => element.getAttribute('content'))
+
+    expect(ogImageUrl).toBeTruthy()
+    expect(twitterImageUrl).toBeTruthy()
+
+    const ogImageResponse = await request.get(ogImageUrl!)
+    expect(ogImageResponse.ok()).toBeTruthy()
+    expect(ogImageResponse.headers()['content-type']).toContain('image/png')
+
+    const twitterImageResponse = await request.get(twitterImageUrl!)
+    expect(twitterImageResponse.ok()).toBeTruthy()
+    expect(twitterImageResponse.headers()['content-type']).toContain('image/png')
   })
 
   test('отображается hero-секция с позиционированием и навигацией', async ({ page }) => {
@@ -114,7 +151,23 @@ test.describe('Главная страница', () => {
     const sitemapResponse = await request.get('/sitemap.xml')
     expect(sitemapResponse.ok()).toBeTruthy()
     const sitemapBody = await sitemapResponse.text()
-    expect(sitemapBody).toContain('letar.best')
+    expect(sitemapBody).toContain('<loc>https://letar.best</loc>')
+    expect(sitemapBody).toContain('<loc>https://letar.best/privacy/</loc>')
+  })
+
+  test('страница политики имеет собственные metadata, canonical и H1', async ({ page }) => {
+    await page.goto('/privacy/')
+
+    await expect(page).toHaveTitle('Политика конфиденциальности | Letar')
+    await expect(page.getByRole('heading', { level: 1, name: 'Политика конфиденциальности' })).toBeVisible()
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /cookie/i)
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://letar.best/privacy/')
+    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+      'content',
+      'Политика конфиденциальности | Letar',
+    )
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /opengraph-image/)
+    await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', /twitter-image/)
   })
 
   test('несуществующий маршрут отдаёт 404', async ({ page }) => {
