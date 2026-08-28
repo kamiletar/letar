@@ -2,6 +2,47 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## Фикс: привязка VK-аккаунта — четыре наслоённых бага подряд (2026-08-27/28)
+
+Исходная жалоба: клик «ВКонтакте» на `/profile/connected-accounts` давал 404. Диагностика
+вскрыла цепочку из четырёх независимых дефектов, каждый следующий проявлялся только после
+починки предыдущего:
+
+1. **404** — `ConnectedAccountsList` (`libs/auth/src/client/connected-accounts/`) строил
+   несуществующий в Better Auth роут `/api/auth/signin/{provider}` (конвенция NextAuth, не
+   Better Auth). Фикс — `authClient.linkSocial({ provider, callbackURL })`, компонент получил
+   новый обязательный проп `linkSocial`.
+2. **«Code challenge method is unsupported»** — временный фикс `pkce: false` на VK внутри
+   `genericOAuth` (старый Standalone VK API не поддерживал PKCE).
+3. **«Security Error» независимо от PKCE»** — настоящая причина: VK принудительно перевёл
+   Standalone-приложения на сервис VK ID (`id.vk.ru`, OAuth 2.1, обязательный PKCE + `device_id`).
+   Legacy-эндпоинты `oauth.vk.com`/`oauth.vk.ru` для уже мигрировавших приложений отвечают этой
+   ошибкой независимо от настроек. Фикс — переезд на нативный `socialProviders.vk` Better Auth
+   1.7 (полностью убран из `genericOAuth`). Проверено: `id.vk.com`/`id.vk.ru` — один и тот же
+   бэкенд (идентичный ответ на тестовый запрос), `device_id` уже прокидывается насквозь ядром
+   Better Auth (`callback.mjs` → `validateAuthorizationCode`), доп. код не нужен.
+4. **Привязка молча не срабатывала** (VK OAuth проходил успешно, но кнопка оставалась
+   «Подключить») — `better-auth/dist/api/routes/callback.mjs`: explicit-линковка через
+   `linkSocial()` требует совпадения email провайдера с email текущей сессии, если не включён
+   `account.accountLinking.allowDifferentEmails`. VK либо не выдаёт email вовсе, либо выдаёт
+   email самого VK-профиля — не совпадает с `kami@letar.best`. Добавлен
+   `allowDifferentEmails: true` в конфиг auth-hub; по пути расширена сама библиотека
+   `libs/auth` — `StandaloneAuthProfile` (используется driving-school) до этого вообще не
+   прокидывала `account.accountLinking` в Better Auth, добавлен общий тип `AccountLinkingConfig`
+   с полем `allowDifferentEmails`.
+
+**После всех четырёх фиксов проявился пятый эффект — не баг кода, а данные:** реальный VK-аккаунт
+Ками уже был привязан к аккаунту-дублю в БД (`111046174@vk.com`, имя «Ками Летар», создан
+2026-04-06 при более раннем тестировании легаси VK OAuth) — Better Auth корректно отверг попытку
+`account_already_linked_to_different_user`. Разобрано вручную через прямой SQL на проде
+(`Account.userId` дубля перевешен на настоящий `userId` Ками, дубль-`User` + его просроченная
+сессия удалены — других данных на дубле не было). ⚠️ Если у другого реального пользователя
+всплывёт та же ошибка `account_already_linked_to_different_user` — это тот же класс проблемы
+(старый тестовый/дубль-аккаунт с тем же VK ID), решение то же: найти конфликтующую строку
+`Account` по `providerId='vk'` и `accountId`, решить с пользователем, что делать с дублем.
+
+Деплой каждого шага — через `deploy-agent-dev`, подтверждён на проде для всех четырёх коммитов.
+
 ## Фикс: двойной reportEmailFailure (2026-08-26)
 
 Задача сессии: проверить и починить по образцу domwellbes два места, где ручной

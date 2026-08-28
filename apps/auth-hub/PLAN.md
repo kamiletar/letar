@@ -1,5 +1,18 @@
 # План разработки auth-hub
 
+## v0.7.15 — фикс привязки VK-аккаунта: четыре наслоённых бага (2026-08-27/28)
+
+- [x] **VK на `/profile/connected-accounts` не привязывался** — 404 → «Code challenge method
+      unsupported» → «Security Error» (VK принудительно перевёл на VK ID) → молчаливый провал
+      линковки (`EMAIL_DOES_NOT_MATCH` без видимой ошибки) → `account_already_linked_to_different_user`
+      (собственный дубль-аккаунт с апрельского тестирования). Все пять причин разобраны и
+      исправлены, включая ручную DB-правку на проде. Детали — `PLAN_COMPLETED.md`.
+- [x] `authClient.linkSocial()` в `ConnectedAccountsList` вместо несуществующего
+      `/api/auth/signin/{provider}`
+- [x] Переезд VK на нативный `socialProviders.vk` (Better Auth 1.7, VK ID)
+- [x] `account.accountLinking.allowDifferentEmails: true` — явная линковка не требует совпадения
+      email с текущей сессией (затронул и `libs/auth`, см. driving-school)
+
 ## v0.7.13 — фикс typecheck: VK-провайдер перенесён в genericOAuth (2026-08-25)
 
 - [x] **`nx typecheck:tsgo auth-hub` был красным** — better-auth 1.7 зарезервировал ключ `vk` в

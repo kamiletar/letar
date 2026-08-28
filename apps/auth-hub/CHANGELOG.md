@@ -4,6 +4,16 @@
 
 ## [Unreleased]
 
+## [0.7.15] - 2026-08-28
+
+### Fixed
+
+- Привязка VK-аккаунта на `/profile/connected-accounts` не работала целиком — четыре наслоённых
+  бага: несуществующий роут `/api/auth/signin/{provider}` → неподдерживаемый PKCE у legacy VK API
+  → принудительный переезд VK на VK ID (`socialProviders.vk`, нативный провайдер Better Auth 1.7)
+  → молчаливый провал явной линковки (`EMAIL_DOES_NOT_MATCH`), пофикшен через
+  `account.accountLinking.allowDifferentEmails: true`. Подробности — `PLAN_COMPLETED.md`.
+
 ## [0.7.13] - 2026-08-25
 
 ### Fixed
