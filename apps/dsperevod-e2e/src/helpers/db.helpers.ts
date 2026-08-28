@@ -4,6 +4,7 @@
  * Создаёт тестовые данные напрямую в БД через Prisma CJS wrapper (см. prisma-cjs-wrapper.js) —
  * ZenStack-политики здесь не нужны, тест сам управляет доступом через UI-логин.
  */
+import { upsertCredentialAccount } from '@letar/e2e-testing'
 import { loadEnvCascade } from '@letar/env-load'
 import { execFileSync } from 'node:child_process'
 import { randomBytes, scryptSync } from 'node:crypto'
@@ -95,31 +96,13 @@ export async function createTestAdmin(data: { email: string; password: string; n
       data: { name: data.name, emailVerified: true, role: 'ADMIN' },
     })
     userId = existing.id
-    await db.account.upsert({
-      where: { providerId_accountId: { providerId: 'credential', accountId: userId } },
-      update: { password: hashedPassword },
-      create: {
-        userId,
-        providerId: 'credential',
-        accountId: userId,
-        password: hashedPassword,
-        issuer: 'local:credential',
-      },
-    })
+    await upsertCredentialAccount(db, { userId, hashedPassword })
   } else {
     const user = await db.user.create({
       data: { email: data.email, name: data.name, emailVerified: true, role: 'ADMIN' },
     })
     userId = user.id
-    await db.account.create({
-      data: {
-        userId,
-        providerId: 'credential',
-        accountId: userId,
-        password: hashedPassword,
-        issuer: 'local:credential',
-      },
-    })
+    await upsertCredentialAccount(db, { userId, hashedPassword })
   }
 
   return userId

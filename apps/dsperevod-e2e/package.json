@@ -3,9 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "nx": {
-    "implicitDependencies": ["@letar/env-load"]
+    "implicitDependencies": ["@letar/env-load", "@letar/e2e-testing"]
   },
   "dependencies": {
-    "@letar/env-load": "workspace:*"
+    "@letar/env-load": "workspace:*",
+    "@letar/e2e-testing": "workspace:*"
   }
 }
