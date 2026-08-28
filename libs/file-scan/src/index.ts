@@ -1,0 +1,5 @@
+export { ClamAvScanner } from './lib/scanner-clamav'
+export type { ClamAvScannerOptions } from './lib/scanner-clamav'
+export { FakeCleanScanner, FakeFixedResultScanner } from './lib/scanner-fake'
+export { resetFileScannerCache, resolveFileScanner } from './lib/scanner-resolver'
+export type { FileScanner, ScanResult } from './lib/types'
