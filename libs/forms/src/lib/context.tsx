@@ -30,7 +30,20 @@ import { useDeclarativeForm } from './declarative/form-context'
  * }
  * ```
  */
-export const { fieldContext, formContext, useFieldContext, useFormContext } = createFormHookContexts()
+const formHookContexts = createFormHookContexts()
+
+// Разложено на отдельные экспорты намеренно, не пишите обратно одной деструктуризацией
+// (`export const { fieldContext, ... } = createFormHookContexts()`): webpack не видит имена
+// экспортов в деструктурирующем объявлении и считает, что модуль экспортирует только
+// функции ниже. Реэкспорт из `src/index.ts` тогда даёт четыре предупреждения
+// «export 'fieldContext' was not found», а в рантайме значения приезжают undefined.
+// Сборку это не роняет, поэтому ловится только чтением лога. Turbopack разбирает
+// деструктуризацию нормально — расхождение видно лишь на приложениях с `next build --webpack`
+// (на 2026-08-28 такое одно — auth-hub).
+export const fieldContext = formHookContexts.fieldContext
+export const formContext = formHookContexts.formContext
+export const useFieldContext = formHookContexts.useFieldContext
+export const useFormContext = formHookContexts.useFormContext
 
 /**
  * Typed wrapper around the declarative form instance (useDeclarativeForm().form).

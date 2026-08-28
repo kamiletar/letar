@@ -4,6 +4,22 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.8.1] - 2026-08-28
+
+### Fixed
+
+- **Экспорты `fieldContext`/`formContext`/`useFieldContext`/`useFormContext` стали видимы для
+  webpack.** Раньше они объявлялись одной деструктуризацией
+  (`export const { fieldContext, ... } = createFormHookContexts()`), а webpack не разбирает имена
+  экспортов в деструктурирующем объявлении: реэкспорт из `src/index.ts` давал четыре
+  предупреждения `export 'fieldContext' (reexported as 'fieldContext') was not found in
+  './lib/context'`, а в рантайме под webpack все четыре значения приезжали `undefined`.
+  Сборку это не роняло, поэтому дефект был виден только чтением лога — и однажды был ошибочно
+  принят за причину «падения сборки auth-hub» (сборка на самом деле проходила).
+  Turbopack деструктуризацию разбирает нормально, поэтому расхождение проявлялось лишь на
+  приложениях с `next build --webpack` — на 2026-08-28 такое одно, `auth-hub`.
+  Публичный API не изменился: те же четыре имени, те же типы.
+
 ## [2.8.0] - 2026-08-26
 
 ### Added
