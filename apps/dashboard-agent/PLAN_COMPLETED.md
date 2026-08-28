@@ -2,6 +2,32 @@
 
 Детальное описание всех реализованных фич.
 
+## Рефакторинг: общий apiHandler для GET/POST-роутов (2026-08-28, `0.15.22`)
+
+Продолжение задачи ниже (`defineCronRoute`): в 10 файлах `src/routes/` (`system.ts`, `git.ts`,
+`docker.ts`, `database.ts`, `deploy.ts`, `traefik.ts`, `acme-dns.ts`, `nginx.ts`, `cron.ts`,
+`email-canary.ts`) тот же `try/catch → ApiResponse<T>` встречался ещё в ~30 хендлерах, но не
+однородно: часть без аргументов, часть с query/params, часть вычисляет `success`/`error` из
+полей результата (не из факта исключения), часть делает ранний `return {success:false}` до
+вызова бизнес-логики (без throw).
+
+Вынесен только «чистый» случай (один вызов, без ранних return, `success`/`error` строго из
+факта исключения) — `apiHandler<T, Request>(fn)` в `lib/api-handler.ts`. Применён к 27
+хендлерам: `system.ts` (все 9), `docker.ts` (8 из 11 — containers, containers/memory,
+containers/:id/stats, containers/:id/logs, images, volumes, networks, disk-usage),
+`database.ts` (3 из 4 — status, stats, backups), `git.ts` (2 из 3 — status, incoming),
+`cron.ts` (1 из 6 — список задач), `traefik.ts`/`acme-dns.ts`/`nginx.ts` (по 1 из 2 — список
+бэкапов), `email-canary.ts` (1 из 2 — status).
+
+Осознанно НЕ унифицировано: `docker.ts` control/images-pull/prune и почти весь `cron.ts`
+(ранние return без throw — семантически «валидный 200 с success:false», не «исключение»),
+`git.ts` pull / `database.ts` backup / `traefik-acme-dns-nginx.ts` backup (success/error
+вычисляются из вложенных полей результата, а не из факта исключения), `deploy.ts` целиком (там
+try/catch — меньшая часть логики хендлера: side-effects, ring-buffer истории деплоев,
+host-lock). Форсировать эти случаи под общий helper потребовало бы либо терять типобезопасность
+дискриминированного union через duck-typing, либо вводить исключения там, где семантически их
+нет — обе цены выше выигрыша в строках.
+
 ## Рефакторинг: общий helper для cron-роутов (2026-08-28)
 
 8 файлов в `src/routes/` (`docker-prune.ts`, `next-cache-cleanup.ts`,
