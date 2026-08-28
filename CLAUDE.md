@@ -176,6 +176,10 @@ localStorage/cookie в инициализаторе `useState` — не ошиб
 [nextjs-root-notfound-no-root-layout](/.claude/docs/nextjs-root-notfound-no-root-layout.md) ⚠️
 корневой `not-found.tsx` без `app/layout.tsx` сам рендерит `<html>/<body>` — дублирование тега,
 hydration mismatch на невалидном сегменте локали ·
+[nextjs-streaming-soft-404-loading-boundary](/.claude/docs/nextjs-streaming-soft-404-loading-boundary.md)
+⚠️ `notFound()` отдаёт 200 вместо 404, если выше по дереву есть любой `loading.tsx` — один
+корневой `app/loading.tsx` делает soft-404 из всего сайта, точечное удаление у маршрута не
+помогает; воспроизводится и на прод-сборке, смягчено автоматическим `noindex` от Next ·
 [nextjs-compound-component-server-boundary](/.claude/docs/nextjs-compound-component-server-boundary.md)
 ⚠️ compound-экспорт (`Object.assign`) для клиентского компонента не резолвится через границу
 Server→Client — property-access ломается, `undefined` ·
