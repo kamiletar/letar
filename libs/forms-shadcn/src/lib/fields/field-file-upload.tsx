@@ -8,6 +8,8 @@ import { useRef, useState } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
 import type { FileUploadFieldProps } from './types'
 
+// Дубль @letar/format-utils formatFileSize — осознанно: forms-shadcn публикуется в npm отдельно,
+// внутренние @letar/* пакеты допустимы там только в devDependencies (npm-publish-from-monorepo.md)
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) { return `${bytes} B` }
   if (bytes < 1024 * 1024) { return `${(bytes / 1024).toFixed(1)} KB` }
