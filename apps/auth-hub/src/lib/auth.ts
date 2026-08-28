@@ -1,5 +1,5 @@
 import type { UserRole } from '@/generated/prisma'
-import { createAuth, createRedisStorage } from '@letar/auth/server'
+import { createAuth, createRedisStorage, createVkGetUserInfo } from '@letar/auth/server'
 import { reportEmailFailure, sendMagicLinkEmail, sendVerificationEmail } from '@letar/email'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { genericOAuth, magicLink } from 'better-auth/plugins'
@@ -82,48 +82,7 @@ export const auth = createAuth({
       vk: {
         clientId: process.env.AUTH_VK_ID,
         clientSecret: process.env.AUTH_VK_SECRET,
-        getUserInfo: async (tokens: { accessToken?: string }) => {
-          if (!tokens.accessToken) {
-            return null
-          }
-          const response = await fetch('https://id.vk.com/oauth2/user_info', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({
-              access_token: tokens.accessToken,
-              client_id: process.env.AUTH_VK_ID!,
-            }).toString(),
-          })
-          const data = await response.json()
-          const profile = data?.user as
-            | { user_id: string; first_name?: string; last_name?: string; email?: string; avatar?: string }
-            | undefined
-
-          if (!profile) {
-            return null
-          }
-
-          return {
-            user: {
-              name: `${profile.first_name ?? ''} ${profile.last_name ?? ''}`.trim() || undefined,
-              email: profile.email || `${profile.user_id}@vk.com`,
-              image: profile.avatar,
-              emailVerified: !!profile.email,
-            },
-            // `VkProfile` требует first_name/last_name/birthday непустыми строками — id.vk.com
-            // их не всегда отдаёт, дефолтим на пустую строку, сам аккаунт мапится по email выше.
-            data: {
-              user: {
-                user_id: profile.user_id,
-                first_name: profile.first_name ?? '',
-                last_name: profile.last_name ?? '',
-                email: profile.email,
-                avatar: profile.avatar,
-                birthday: '',
-              },
-            },
-          }
-        },
+        getUserInfo: createVkGetUserInfo({ clientId: process.env.AUTH_VK_ID! }),
       },
     }),
   },
