@@ -3611,9 +3611,36 @@ mandala, animatrona-tracker, dashboard, auth-hub, driving-school, svoichuzhie, d
 the database`) — в `schema.zmodel` не было модели `RateLimit`, а `libs/auth` с 2026-06-18
 включает `rateLimit.storage: 'database'` для production standalone-режима без Redis
 (`secondaryStorage` не передан). За 90 дней в GlitchTip до фикса — 0 живых пользователей,
-не P0. Добавлена модель `RateLimit` + миграция, версия `driving-school` 0.240.13. Тот же класс
-риска (standalone-режим без `secondaryStorage` и без модели `RateLimit` в схеме) у других
-приложений не проверялся — вне скоупа этой сессии.
+не P0. Добавлена модель `RateLimit` + миграция, версия `driving-school` 0.240.13.
+
+**Системный аудит того же класса риска по всем `createAuth`/`createAuthAsync`/raw `betterAuth()`
+потребителям (2026-08-28) — закрыт, других пробелов нет:** проверены все 17 приложений с
+собственным `lib/auth.ts` (`betterAuth(`/`createAuth(` найдены грепом по `apps/**/*.ts`).
+Единственная опасная ветка — `rateLimit.storage` резолвится в `'database'` (не `'memory'`/
+`'secondary-storage'`) — срабатывает только когда приложение **явно** передаёт `rateLimit` без
+`secondaryStorage` в production; сам Better Auth по умолчанию (без явного `rateLimit`-конфига)
+никогда не выбирает `'database'` сам (`node_modules/better-auth/dist/context/create-context.mjs`:
+`storage: options.rateLimit?.storage || (options.secondaryStorage ? "secondary-storage" :
+"memory")`). Результат по приложениям:
+
+- **kami, auth-hub, dsperevod, domwellbes** — тоже на этой ветке (либо через `createAuth`, либо
+  через ручную копию `buildStandaloneAuth`-конфига, как domwellbes), но модель `RateLimit`/
+  `rateLimit` в их схемах уже была до этого аудита — не задеты.
+- **svoichuzhie** — на этой ветке, но всегда передаёт `secondaryStorage` (Redis), в `'database'`
+  не уходит; модель в схеме тоже есть.
+- **aboi** — не использует фабрику `createAuth()` вовсе (raw `betterAuth()`, задокументировано
+  прямо в файле), rate-limit хранит in-memory по дизайну однопроцессного деплоя — не задет.
+- **time, aprel8008** — `mode: 'hub-client'`, `rateLimit` в профиль не передают вовсе → Better
+  Auth использует свой дефолт (`memory`) — не задеты.
+- **mandala, dashboard, animatrona-tracker, archetest, grandslamcup, studio** — raw
+  `betterAuth()` с собственным `rateLimit`-блоком, но без явного `storage:` — тоже попадают под
+  дефолт Better Auth (`memory`/`secondary-storage`), никогда не `'database'` — не задеты.
+
+⚠️ **Открытый вопрос (не проверялось в этой сессии):** kami и auth-hub тихо переключаются с
+Redis на `'database'`-хранилище rate-limit, если `REDIS_URL` не задан в проде (условие
+`process.env.REDIS_URL ? 'secondary-storage' : ...`) — модель в схеме есть, поэтому это не
+крашит, но стоит свериться, что `REDIS_URL` реально заполнен в их `.env.docker.enc`, а не
+использовать Postgres как rate-limit store по факту вместо Redis по намерению.
 
 **Часть 4 (доки) — закрыта (2026-08-28):** `better-auth-1.7-account-issuer-field.md` переписан
 (14 приложений вместо 4, обычный sign-in затронут тоже, двухчастный паттерн миграции add-column +
