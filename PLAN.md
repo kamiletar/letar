@@ -3576,7 +3576,18 @@ dist-файлам — скрипт резолвит и **исполняет** р
 `apps/kami/schema/auth.zmodel` дало ожидаемый ❌ с понятным списком (приложение, модель, поле),
 после возврата поля — чисто зелёный прогон, `git diff` пуст.
 
-**Часть 3.2–3.3 (алерт в dashboard, синтетическая проверка входа) — не начаты.**
+**Часть 3.2 (алерт в dashboard) — закрыта (2026-08-28):** новый `AlertType.AUTH_ACCOUNT_ISSUER_NULL`
+в `apps/dashboard/schema.zmodel` + миграция `20260828055033_alert_type_auth_account_issuer_null`.
+Ежедневная cron-задача `account-issuer-null-check` в dashboard-agent (`lib/account-issuer-check.ts`,
+04:00 s2) подключается к БД каждого из 14 приложений с моделью Account и выполняет
+`SELECT count(*) FROM "Account" WHERE issuer IS NULL` — дополняет статический гейт схемы (часть
+3.1, ловит только «поля нет в schema.zmodel») соседним классом отказа: поле есть, но строка
+осталась с `issuer = NULL`. `domwellbes` заодно добавлен в `APP_CONFIG` (`database.ts`) — раньше
+отсутствовал там. Живая проверка: ручной `UPDATE "Account" SET issuer = NULL` на одной строке
+дев-БД dashboard → детекторный SQL-запрос вернул 1 → откат строки вернул 0. Детали —
+`apps/dashboard-agent/CHANGELOG.md` 0.15.20, `apps/dashboard/CHANGELOG.md` 1.24.9.
+
+**Часть 3.3 (синтетическая проверка входа) — не начата.**
 
 **Часть 4 (доки) — закрыта (2026-08-28):** `better-auth-1.7-account-issuer-field.md` переписан
 (14 приложений вместо 4, обычный sign-in затронут тоже, двухчастный паттерн миграции add-column +
