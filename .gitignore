@@ -2,7 +2,13 @@
 
 # compiled output
 dist
-dist-electron
+# Шаблон, а не перечисление имён: временный dist с суффиксом (`dist-electron`,
+# `dist-check` и т.п.) иначе висит untracked и ломает граф Nx — та же болезнь,
+# что у `.next*` ниже, см. .claude/docs/nx-temp-build-dir-breaks-project-graph.md
+# ⚠️ `dist*` (без дефиса) брать НЕЛЬЗЯ: под него попадает настоящий исходник
+# apps/animatrona-tracker/src/app/api/distributions/ — это тихое отравление кэша
+# Nx, а не ошибка сборки. Проверено: под `dist-*` не попадает ни один tracked-файл.
+dist-*
 tmp
 out-tsc
 *.tsbuildinfo
@@ -210,7 +216,10 @@ infra/*/secrets/*
 !infra/*/secrets/deploy.conf
 !infra/*/secrets/deploy.*.conf
 !infra/*/secrets/README.md
-apps/animatrona/dist*/
+# apps/animatrona/dist*/ — убрано: покрывается общими `dist` + `dist-*` выше, а форма
+# `dist*` без дефиса — та самая мина (совпала бы с каталогом `distributions/`, заведи его
+# кто-нибудь в этом приложении). Заскоупленность на одно приложение уменьшала радиус, но
+# не устраняла класс ошибки.
 
 # Android build artifacts
 libs/*/android/build/
