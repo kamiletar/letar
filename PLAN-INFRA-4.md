@@ -4019,3 +4019,22 @@ namespace (ошибка воспроизводится и вне сборки). 
       проблемного файла — расширение `.tsx` (JSX-трансформ), причинная связь не подтверждена.
       Пока не выяснено, правило звучит как «читай лог сборки auth-hub», а не «избегай
       деструктурирующих экспортов».
+
+## §128 — `deploy-affected.sh`: awk pre-migrate дампа резолвил не тот контейнер БД ✅ ЗАКРЫТО (2026-08-28)
+
+Найдено deploy-agent-dev при прод-деплое `svoichuzhie`: pre-migrate дамп ушёл в
+`svoichuzhie-redis` вместо `svoichuzhie-db` — `docker exec ... pg_dump` закономерно упал,
+деплой корректно прервался штатной защитой «миграция без бэкапа запрещена», данные не
+пострадали.
+
+Причина — awk-паттерн `/^[[:space:]]*db:[[:space:]]*$/` матчился на любой отступ, включая
+вложенный `depends_on: \n  db: \n    condition: ...`, который в `docker-compose.production.yml`
+у части приложений (в т.ч. `svoichuzhie`) стоит в файле раньше настоящего `services.db:`. awk
+брал `container_name` из первого совпавшего блока по тексту — не обязательно из нужного сервиса.
+
+**Фикс:** якорь сужен на ровно 2 пробела отступа (top-level ключ сервиса под `services:`), `f`
+сбрасывается на любом другом top-level ключе. Проверено на `svoichuzhie`, `dsperevod`,
+`domwellbes`, `aboi`, `driving-school`. Заодно тем же коммитом закрыт рецидив §81 (s3 self-deploy
+терял `docker-compose.s3.yml` при запуске в обход dashboard-agent — дополнение см. в §81 выше).
+
+**Коммит:** `9d3b369e`. **Док:** [deploy-affected-premigrate-dump-wrong-container](/.claude/docs/deploy-affected-premigrate-dump-wrong-container.md).

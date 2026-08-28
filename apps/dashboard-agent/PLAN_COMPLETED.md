@@ -1550,6 +1550,36 @@ indexType/гранулярности ключа/стратегии персис�
       изменились при минорном апгрейде. Та же оговорка про `Dockerfile.production` (см. запись
       выше) применима и здесь — зависимости остаются в `package.json` приложения.
 
+- [x] **Плановая остановка простаивающих staging-контейнеров на s3 (repo-dev, 2026-08-28,
+      `0.15.17 → 0.15.18`)** — `lib/staging-idle-shutdown.ts` + `routes/staging-idle-shutdown.ts`
+      + cron-задача `staging-idle-shutdown` (`20 * * * *`, только `server: 's3'`). Идея
+      изначально ушла в письмо к отретиренной identity `letar-dev` (deploy-agent-dev не заметил,
+      что адресат мёртв) — подхвачена заново. Порог 24ч простоя выбран владельцем явно (не
+      «сразу после e2e») — нужен запас на ручные заходы на staging-домены для тестов.
+      `docker stop` (не `rm`) на паре `<app>-staging-app`/`<app>-staging-db` — тома остаются,
+      следующий деплой поднимает быстро. Идентификация «свежести» — `Created` таймстамп
+      контейнера `app` (у `docker-affected.sh --staging` пересоздаётся только `app`, `db` —
+      нет, поэтому `db` для этой цели не смотрим).
+- [x] **Плановая чистка `.next/cache` в host-чекауте на s2+s3 (repo-dev, 2026-08-28,
+      `0.15.18 → 0.15.19`)** — `lib/next-cache-cleanup.ts` + `routes/next-cache-cleanup.ts` +
+      две cron-задачи (`next-cache-cleanup-s2`/`-s3`, `30 4 * * *`). Найдено при разборе диска
+      s2 по просьбе владельца (~34GB, не Docker build cache, как предполагалось изначально) —
+      `.next/cache` каждого приложения в `/home/deploy/letar/apps/*` официально safe-to-delete
+      (Next.js docs), порог простоя — 2 дня (владелец). Свежесть определяется по
+      `.next/BUILD_ID` (переписывается каждым `next build`), не по mtime самой директории
+      `.next/cache` (обновляется только на прямое добавление/удаление дочернего элемента, не на
+      вложенную запись). `WORKSPACE_PATH`-монт у dashboard-agent — read-write (в отличие от
+      read-only монта у `dashboard`), поэтому обошлось без `nsenter`, прямой `fs/promises`.
+- [x] **Два бага `deploy-affected.sh`, найденные deploy-agent-dev при прод-инциденте svoichuzhie
+      и self-deploy на s3 (repo-dev, 2026-08-28)** — не версия dashboard-agent, правка корневого
+      скрипта деплоя. (1) awk-резолвер `container_name` для pre-migrate дампа матчился на
+      вложенный `depends_on.db:` раньше настоящего `services.db:` — на `svoichuzhie` увёл дамп
+      в `redis`. Якорь сужен на отступ top-level ключа сервиса. (2) `SERVER_NAME` резолвился в
+      `unknown` при прямом SSH на s3 в обход dashboard-agent-контейнера (там живёт
+      `DEPLOY_SERVER_NAME`) — добавлен hostname-провайдера как fallback. Коммит `9d3b369e`.
+      Разбор — `.claude/docs/deploy-affected-premigrate-dump-wrong-container.md`,
+      `PLAN-INFRA-4.md` §81 (дополнение) и §128.
+
 ---
 
-**Последнее обновление:** 2026-08-22
+**Последнее обновление:** 2026-08-28
