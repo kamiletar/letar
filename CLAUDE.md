@@ -21,8 +21,10 @@
 `apps/<app>/AGENTS.md` ·
 [git-multi-agent-incidents](/.claude/docs/git-multi-agent-incidents.md) разборы гонок между
 агентами: почему правила git такие строгие ·
-[git-pathspec-commit-ignored-deletion](/.claude/docs/git-pathspec-commit-ignored-deletion.md) ⚠️
-`git commit -- <path>` молча теряет `git rm --cached`, если путь уже в `.gitignore` ·
+[git-pathspec-commit-worktree-not-index](/.claude/docs/git-pathspec-commit-worktree-not-index.md)
+⚠️ `git commit -- <pathspec>` берёт рабочее дерево, а не индекс: молча теряет `git rm --cached`
+на игнорируемом пути, забирает чужой WIP из каталога в pathspec и оставляет индекс
+рассинхронизированным (`MM` со staged-удалением того, что уже в `HEAD`) ·
 [nx-convert-to-inferred-scope-regression](/.claude/docs/nx-convert-to-inferred-scope-regression.md)
 ⚠️ `nx g @nx/*:convert-to-inferred` тихо меняет реальный охват таргета у проектов с кастомными
 настройками — диффать до/после, не доверять «отработал без ошибок» ·
@@ -396,7 +398,12 @@ scoped cookie, без утечки токена в лог/`Referer` ·
 ⚠️ `@better-auth/oauth-provider` держит свою полную схему БД (`dist/*.mjs` `src/schema.ts`),
 только `oauthClient` замаппен на `oauthApplication` — `oauthConsent`/`oauthAccessToken` ищутся
 по буквальному имени модели, несовпадение полей после миграции `a8efcc72` дало 7-слойный
-прод-инцидент SSO (2026-08-26)
+прод-инцидент SSO (2026-08-26) ·
+[better-auth-vk-id-migration-and-linksocial-pitfalls](/.claude/docs/better-auth-vk-id-migration-and-linksocial-pitfalls.md)
+⚠️ VK принудительно перевёл Standalone-приложения на VK ID (OAuth 2.1) — legacy
+`oauth.vk.com`/`.ru` отвечает `Security Error` независимо от PKCE, фикс — нативный
+`socialProviders.vk`; отдельно `linkSocial()` тихо не привязывает провайдера без email без
+`allowDifferentEmails`, и `account_already_linked_to_different_user` — не баг, а дубль-аккаунт в БД
 
 **Электрон и десктоп:** [electron-app-protocol](/.claude/docs/electron-app-protocol.md) ⚠️ origin
 `null` под `file://` блокирует Worker и WASM ·

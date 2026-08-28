@@ -1424,7 +1424,7 @@ staging-деплоях этих пяти приложений — если не�
       `aprel8008`/`svoichuzhie` не упоминали `.env.staging` вообще ни в каком виде. Добавлена
       явная строка `.env.staging` во все пять — свой коммит в каждом приватном репозитории, SHA
       подняты в корне. Найдено при уборке грязного дерева на s3 (см. также
-      [git-pathspec-commit-ignored-deletion](/.claude/docs/git-pathspec-commit-ignored-deletion.md),
+      [git-pathspec-commit-worktree-not-index](/.claude/docs/git-pathspec-commit-worktree-not-index.md),
       обнаружено в той же сессии). ⚠️ Это закрывает только риск случайного `git add .` — реальная
       SOPS-шифровка (`.env.staging.enc`) для этих пяти по-прежнему не заведена, см. пункт тиража
       ниже.

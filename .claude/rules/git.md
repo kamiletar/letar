@@ -88,6 +88,14 @@ git add apps/my-app/
 git commit -m "feat(my-app): описание" -- apps/my-app/
 ```
 
+⚠️ **Pathspec защищает от чужих файлов ВНЕ твоих путей, но не от чужих правок ВНУТРИ них.**
+`git commit -- <pathspec>` берёт содержимое рабочего дерева, а не индекса, поэтому каталог в
+pathspec заберёт всё изменённое внутри него — включая чужой WIP — и оставит индекс
+рассинхронизированным (мина для следующего коммита). Перечисляй **файлы**, а не каталоги, и
+после коммита проверяй `git show --stat HEAD`: `git diff --cached` перед коммитом этого не
+поймает по построению. Механизм и лечение —
+[git-pathspec-commit-worktree-not-index](/.claude/docs/git-pathspec-commit-worktree-not-index.md).
+
 ⛔ **Запрещено:** `git reset --hard`, `git reset HEAD`, `git checkout -- .`, `git add .`,
 `git stash` без явной необходимости, `git push --force`. Всё это забирает или уничтожает чужие
 незакоммиченные изменения. Первые четыре блокирует хук `.claude/hooks/validate-bash.js`.
