@@ -1,6 +1,6 @@
 # Dashboard Agent — План развития
 
-## Текущая версия: 0.15.28
+## Текущая версия: 0.15.29
 
 Легковесный агент мониторинга для удалённых серверов.
 
@@ -56,7 +56,18 @@ svoichuzhie, dsperevod. Алерт `AUTH_LOGIN_CANARY_FAILED` при HTTP-отв
 не лечится: `BetterAuthError: Model rateLimit does not exist in the database` — в
 `schema.zmodel` нет модели `rateLimit`, а `createAuth()` в проде без `secondaryStorage`
 требует rate-limit именно в БД (подтверждено GlitchTip, issue `DRIVING-SCHOOL-2`). Заведена
-отдельная задача — реальный прод-баг, не входит в scope этой сессии.
+отдельная задача — реальный прод-баг, не входит в scope этой сессии (уже закрыт: driving-school
+задеплоен с миграцией `20260828182655_add_rate_limit_model`).
+
+**Фикс регистра имени таблицы (2026-08-28, `0.15.29`):** после деплоя `0.15.28` прогон по всем
+9 приложениям дал `signUpOk: true` везде, но `emailVerifiedSet: false` с
+`relation "user" does not exist` — `markEmailVerified()` обращался к `"user"` (нижний регистр),
+реальное имя таблицы (ZenStack/Prisma без `@@map`) — `"User"`. Исправлено. Заодно найден ещё один
+самостоятельный прод-баг — **mandala** передаёт ZenStack ORM-клиент (kysely) напрямую в
+`prismaAdapter()` better-auth вместо нативного `PrismaClient` (задокументированная в
+`apps/dashboard/src/lib/prisma.ts` несовместимость) — email/password вход там, вероятно, сломан
+для реальных пользователей, не только для канарейки. Заведена отдельная задача, не в scope
+этой сессии.
 
 **Проверка `Account.issuer = NULL` (2026-08-28):** дополняет статический гейт схемы
 (`scripts/check-better-auth-schema.mjs`, PLAN.md корня §71 п.3.1) — тот ловит только «поля нет

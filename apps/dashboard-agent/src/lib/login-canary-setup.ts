@@ -79,8 +79,14 @@ async function signUpCanaryAccount(
 }
 
 /**
- * Снимает `emailVerified` (better-auth хранит эту булеву колонку в модели `user`, имя таблицы —
- * `"user"` в кавычках у Postgres, т.к. `user` — зарезервированное слово).
+ * Снимает `emailVerified` (better-auth хранит эту булеву колонку в модели `User`).
+ *
+ * ⚠️ Имя таблицы — `"User"` (с большой буквы), НЕ `"user"`. ZenStack/Prisma без явного
+ * `@@map(...)` использует имя модели как есть для имени таблицы — во всех 9 приложениях модель
+ * объявлена как `model User { ... }` без `@@map`, поэтому физическая таблица тоже `User`.
+ * Найдено на первом реальном прогоне (2026-08-28): `signUpOk: true`, но `emailVerifiedSet: false`
+ * с `relation "user" does not exist` — sign-up шёл через собственный REST API приложения (Prisma
+ * знает верное имя), а этот прямой SQL-запрос — отдельный шаг поверх с ошибкой в регистре.
  */
 async function markEmailVerified(app: string, email: string): Promise<boolean> {
   const config = getDbConfig(app)
@@ -99,7 +105,7 @@ async function markEmailVerified(app: string, email: string): Promise<boolean> {
 
   try {
     await client.connect()
-    await client.query('UPDATE "user" SET "emailVerified" = true WHERE email = $1', [email])
+    await client.query('UPDATE "User" SET "emailVerified" = true WHERE email = $1', [email])
     return true
   } finally {
     await client.end()

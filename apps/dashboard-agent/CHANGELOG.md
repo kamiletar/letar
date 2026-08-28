@@ -11,6 +11,16 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.15.29] — 2026-08-28
+
+### Fixed
+
+- `login-canary-setup`: реальный прогон по всем 9 приложениям после фикса `0.15.28` дал
+  `signUpOk: true` везде, но `emailVerifiedSet: false` с `relation "user" does not exist` — прямой
+  SQL-запрос `markEmailVerified()` обращался к таблице `"user"` (нижний регистр), а фактическое
+  имя таблицы во всех 9 приложениях — `"User"` (ZenStack/Prisma без `@@map(...)` использует имя
+  модели как есть). Исправлено на `"User"`.
+
 ## [0.15.28] — 2026-08-28
 
 ### Fixed
