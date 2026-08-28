@@ -1,6 +1,6 @@
 ---
 description: Систематическое обновление зависимостей монорепо через bun с проверкой безопасности и сборки
-allowed-tools: Bash(bun outdated:*), Bash(bun update:*), Bash(bun add:*), Bash(bun audit:*), Bash(bun install:*), Bash(bun scripts/check-peer-deps.mjs:*), Bash(bun scripts/check-patched-deps.mjs:*), Bash(bun patch:*), Bash(nx run-many:*)
+allowed-tools: Bash(bun outdated:*), Bash(bun update:*), Bash(bun add:*), Bash(bun audit:*), Bash(bun install:*), Bash(bun scripts/check-all.mjs:*), Bash(bun scripts/check-peer-deps.mjs:*), Bash(bun scripts/check-patched-deps.mjs:*), Bash(bun patch:*), Bash(nx run-many:*)
 ---
 
 # Deps Update - Обновление зависимостей
@@ -64,11 +64,8 @@ bun add <package>@latest
 # Пересобрать
 bun install
 
-# Проверить peer-зависимости между корневыми пакетами
-bun scripts/check-peer-deps.mjs
-
-# Проверить, что патчи зависимостей всё ещё применяются
-bun scripts/check-patched-deps.mjs
+# Проверки целостности: патчи зависимостей, peer-диапазоны, дрейф electron
+bun scripts/check-all.mjs --group=deps
 
 # Проверить типы
 nx run-many -t typecheck:tsgo
@@ -79,6 +76,31 @@ nx run-many -t test
 # Проверить сборку
 nx run-many -t build
 ```
+
+С 2026-08-28 эти проверки запускаются **сами** — ручной прогон остался как
+способ увидеть результат раньше и подробнее, а не как единственная точка входа:
+
+- **pre-commit** (`scripts/hooks/pre-commit-deps-integrity.sh`) — `patched-deps`
+  и `peer-deps`, но **только** если в staged-наборе есть `bun.lock` или
+  `package.json`. Обычный коммит по коду не платит ничего (~0.13 с на проверку
+  индекса), коммит с bump'ом — ~0.3 с. Обход для заведомо ломающего
+  промежуточного коммита: `GIT_SKIP_DEPS_INTEGRITY=1 git commit ...`
+- **CI** (шаг `Integrity checks` в `.github/workflows/ci.yml`) — `bun
+  scripts/check-all.mjs --ci`, весь набор кроме того, чему нужны приватные
+  submodule.
+
+⚠️ **Автозапуск не отменяет чтение вывода глазами — по двум причинам.**
+Во-первых, `peer-deps` завершается кодом 0 **всегда**: ни хук, ни CI на нём
+упасть не могут по построению, смотреть на список обязан человек (см. ниже).
+Во-вторых, в CI часть проверок видит не весь репозиторий: приватные submodule
+там намеренно не выкачиваются, поэтому `electron-drift` не проверяет
+`poster-microtext-desktop`, а `lib-subpath-paths` — tsconfig приватных
+приложений. Раннер объявляет это строкой «неполное покрытие» в логе, но зелёный
+CI на этих двух проверках означает «зелено на том, что было видно», а не
+«зелено везде». Полное покрытие даёт только локальный прогон
+`bun scripts/check-all.mjs` с выкаченными submodule.
+
+Реестр проверок и что каждая роняет — `bun scripts/check-all.mjs --list`.
 
 ⚠️ **Шаг «проверить peer-зависимости» не заменяет чтение вывода `bun install`
 глазами.** `bun` (проверено на 1.3.14, включая `--verbose` и `--force`) не
@@ -117,8 +139,9 @@ typecheck ([chakra-css-memo-prop-order-hydration.md](/.claude/docs/chakra-css-me
 ## Чеклист
 
 - [ ] `bun audit` без критичных уязвимостей
-- [ ] `bun scripts/check-peer-deps.mjs` — нет новых строк по сравнению с прошлым прогоном
-- [ ] `bun scripts/check-patched-deps.mjs` — зелёный (код 0)
+- [ ] `bun scripts/check-all.mjs --group=deps` — gate-проверки зелёные (код 0)
+- [ ] в его выводе секция `peer-deps` — нет **новых** строк по сравнению с прошлым
+      прогоном (сама она код возврата не меняет, автозапуск на ней упасть не может)
 - [ ] Все тесты проходят
 - [ ] Сборка успешна
 - [ ] Приложения запускаются
@@ -155,8 +178,12 @@ bun patch <pkg>@<новая-версия>
 # правишь файл(ы) в node_modules/<pkg>/ — ESM и CJS обычно оба
 bun patch --commit node_modules/<pkg>
 rm patches/<старый>.patch   # bun кладёт новый файл рядом, старый не удаляет
-bun scripts/check-patched-deps.mjs
+bun scripts/check-all.mjs --only=patched-deps
 ```
+
+Промежуточные коммиты внутри этой процедуры блокирует pre-commit-хук (он и
+должен — версии в этот момент вправду разошлись). Пропустить его на конкретном
+коммите: `GIT_SKIP_DEPS_INTEGRITY=1 git commit ...`
 
 ⚠️ **Заводишь новый патч — добавь запись в `UPSTREAM_MARKERS`**
 (`scripts/check-patched-deps.mjs`): где внутри пакета лежит место, ради

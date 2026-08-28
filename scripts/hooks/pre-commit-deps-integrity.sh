@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# pre-commit-deps-integrity.sh — проверяет целостность зависимостей, но ТОЛЬКО
+# когда коммит их вправду задевает.
+#
+# Зачем на коммит-пути, а не только в CI: `patchedDependencies` прибит к точной
+# версии пакета, а сама зависимость стоит по caret-диапазону. Любой bump их
+# разводит, и bun 1.3.14 при этом МОЛЧИТ — код 0, ни строки предупреждения,
+# файл патча на диске, ключ в package.json на месте (PLAN-INFRA-4.md §118).
+# Единственный след — блок `patchedDependencies` тихо пропадает из bun.lock, и в
+# диффе lock-файла на тысячи строк его никто не замечает. Цена пропуска —
+# возврат бага гидратации во все ~30 приложений сразу, без единой ошибки сборки,
+# lint или typecheck (.claude/docs/chakra-css-memo-prop-order-hydration.md).
+# CI это тоже ловит, но уже ПОСЛЕ коммита; расхождение возникает ровно в момент
+# bump'а, поэтому дешевле сказать об этом сразу.
+#
+# ⚠️ Почему набор узкий. Это ПЯТЫЙ хук на коммит-пути (scope-guard, semgrep,
+# dprint-check, sops — уже там), и утяжелять его дальше — осознанное решение
+# владельца, а не «раз проверка есть, пусть запускается». Поэтому здесь:
+#   * только две самые быстрые проверки (~0.6 с суммарно);
+#   * и только если в staged-наборе есть bun.lock или package.json.
+# Обычный коммит по коду не платит ничего — хук выходит на первой же проверке.
+# Медленные проверки (electron-drift 4.7 с, lib-subpath-paths 6.8 с) живут в CI
+# и в ручном `bun scripts/check-all.mjs`.
+#
+# Обход для заведомо ломающего коммита (например промежуточный шаг миграции
+# патча на новую версию):
+#   GIT_SKIP_DEPS_INTEGRITY=1 git commit ...
+
+set -uo pipefail
+
+if [[ -n "${GIT_SKIP_DEPS_INTEGRITY:-}" ]]; then
+  echo "ℹ️  проверка целостности зависимостей пропущена (GIT_SKIP_DEPS_INTEGRITY)" >&2
+  exit 0
+fi
+
+# Только staged-файлы: непроиндексированная правка bun.lock в коммит не едет и
+# блокировать его не должна.
+staged="$(git diff --cached --name-only --diff-filter=ACMR)"
+
+if ! grep -qE '(^|/)(bun\.lock|package\.json)$' <<< "$staged"; then
+  exit 0
+fi
+
+# Проверки читают bun.lock и node_modules КОРНЯ монорепо. Внутри submodule
+# (собственный .git, куда install.sh ставит те же хуки) ни того, ни другого нет —
+# зависимости там общие, из корня. Молча «проходить» в этом случае нельзя, но и
+# запускать нечего: выходим с явным объяснением, а не с тихим успехом.
+if [[ -n "$(git rev-parse --show-superproject-working-tree 2>/dev/null)" ]]; then
+  exit 0
+fi
+
+repo_root="$(git rev-parse --show-toplevel)"
+
+if ! command -v bun > /dev/null 2>&1; then
+  echo "⚠️  bun не найден в PATH — проверка целостности зависимостей пропущена." >&2
+  echo "    Прогони вручную перед push: bun scripts/check-all.mjs --group=deps" >&2
+  exit 0
+fi
+
+echo "🔍 в коммите есть bun.lock/package.json — проверяю целостность зависимостей…" >&2
+
+if ! bun "$repo_root/scripts/check-all.mjs" --only=patched-deps,peer-deps; then
+  cat >&2 <<'MSG'
+
+❌ Коммит остановлен: gate-проверка целостности зависимостей не прошла.
+
+Что делать — см. вывод выше и /infra:deps-update § «Пропатченные пакеты»
+(порядок пересоздания патча через `bun patch`).
+
+Если коммит ломает проверку осознанно (промежуточный шаг миграции патча):
+  GIT_SKIP_DEPS_INTEGRITY=1 git commit ...
+MSG
+  exit 1
+fi
+
+exit 0

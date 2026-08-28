@@ -44,7 +44,8 @@
 [root-pin-peer-drift](/.claude/docs/root-pin-peer-drift.md) ⚠️ точный пин в корневом
 `package.json` — тихая мина: override/resolution перебивает его молча или caret-соседи уезжают
 вперёд без него; `bun install` не печатает peer-warnings ни в каком режиме, проверка —
-`bun scripts/check-peer-deps.mjs`
+`bun scripts/check-all.mjs --group=deps` (раннер пяти проверок целостности, см. ниже
+§ «Проверки целостности монорепо»)
 
 **MCP-серверы:** [mcp-servers](/.claude/docs/mcp-servers.md) состав и назначение ·
 [mcp-server-pattern](/.claude/docs/mcp-server-pattern.md) тонкий локальный сервер по stdio ·
@@ -489,12 +490,42 @@ fake-реализация для внешнего сервиса, поставщ
 bash scripts/hooks/install.sh
 ```
 
-Ставит связку из двух хуков: `pre-commit-scope-guard.sh` (блокирует голый `git commit`/`git add -A`,
-затянувший файлы из нескольких несвязанных `apps/*`/`libs/*` — типовая причина, по которой один
-агент коммитит чужую незакоммиченную работу другого; подробнее и обход для легитимных multi-scope
-коммитов — [git.md § Работа рядом с другими агентами](/.claude/rules/git.md)) и `pre-commit-sops.sh`
-(авто-шифрует `.env.docker` → `.env.docker.enc` перед каждым коммитом, если доступен sops +
-age-ключ; подробнее — [secret-manager](/.claude/docs/secret-manager.md)).
+Ставит связку из пяти хуков:
+
+- `pre-commit-scope-guard.sh` — блокирует голый `git commit`/`git add -A`, затянувший файлы из
+  нескольких несвязанных `apps/*`/`libs/*`: типовая причина, по которой один агент коммитит чужую
+  незакоммиченную работу другого. Обход для легитимных multi-scope коммитов —
+  [git.md § Работа рядом с другими агентами](/.claude/rules/git.md).
+- `pre-commit-semgrep.sh` — статический анализ безопасности по staged-файлам.
+- `pre-commit-dprint-check.sh` — блокирует коммит файлов не в стиле dprint (например после
+  случайного Prettier-форматирования голой `nx format`).
+- `pre-commit-deps-integrity.sh` — целостность зависимостей (патчи + peer-диапазоны), запускается
+  **только** если в staged-наборе есть `bun.lock`/`package.json`; обычный коммит по коду не платит
+  ничего. См. раздел «Проверки целостности» ниже.
+- `pre-commit-sops.sh` — авто-шифрует `.env.docker` → `.env.docker.enc`, если доступен sops +
+  age-ключ; подробнее — [secret-manager](/.claude/docs/secret-manager.md).
+
+### Проверки целостности монорепо
+
+Пять проверок в `scripts/check-*` (патчи зависимостей, peer-диапазоны, дрейф electron, subpath-пути
+`@letar/*`, шаблоны `.gitignore` в submodule) собраны под общий раннер:
+
+```bash
+bun scripts/check-all.mjs
+```
+
+`--list` — реестр с уровнями, `--group=deps` — подмножество, `--only=<id>` — точечно, `--ci` —
+режим CI. Уровень **gate** роняет прогон, **warn** (накопленный долг) и **отчёт** — нет; до
+2026-08-28 это различие существовало только в комментариях внутри самих скриптов.
+
+Запускается автоматически в двух точках: pre-commit (узко — см. `pre-commit-deps-integrity.sh`
+выше) и шаг `Integrity checks` в [ci.yml](/.github/workflows/ci.yml).
+
+⚠️ **Зелёный CI на этих проверках ≠ зелено везде.** Приватные submodule в CI намеренно не
+выкачиваются, поэтому `electron-drift` не видит `poster-microtext-desktop`, а `lib-subpath-paths` —
+tsconfig приватных приложений. Раннер печатает «неполное покрытие» вместо того, чтобы молча
+зеленеть на отсутствующих файлах ([verification-pitfalls](/.claude/docs/verification-pitfalls.md)),
+но полное покрытие даёт только локальный прогон.
 
 ⚠️ **Не добавляй submodule пути в `.gitignore`** — Nx уважает gitignore и спрячет проекты из графа.
 

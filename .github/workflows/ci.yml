@@ -103,3 +103,21 @@ jobs:
       - name: Unit tests
         if: always() && steps.install.outcome == 'success'
         run: bunx nx affected -t test --parallel=2 -- --maxWorkers=2
+
+      # Проверки целостности монорепо: патчи зависимостей, peer-диапазоны, дрейф
+      # версий electron. Не про код конкретного проекта, поэтому вне `nx affected` —
+      # они читают корневые package.json/bun.lock/node_modules и стоят ~5 секунд.
+      #
+      # Ключевая из них — patched-deps. `patchedDependencies` прибит к точной версии,
+      # зависимость стоит по caret, и bun 1.3.14 при расхождении молчит (код 0, ни
+      # строки) — патч просто перестаёт накладываться, а баг гидратации возвращается
+      # во все ~30 приложений без единой ошибки сборки (PLAN-INFRA-4.md §118).
+      #
+      # ⚠️ Раннер запускается с `--ci`: в этом режиме он пропускает проверки, которым
+      # нужны приватные submodule (здесь не выкачиваются, см. шапку файла), и ВСЛУХ
+      # объявляет неполное покрытие там, где вход виден лишь частично — иначе
+      # `check-electron-drift` молча зеленела бы, не увидев poster-microtext-desktop.
+      # Проверки уровня `warn` (накопленный долг) прогон не роняют, только печатаются.
+      - name: Integrity checks
+        if: always() && steps.install.outcome == 'success'
+        run: bun scripts/check-all.mjs --ci

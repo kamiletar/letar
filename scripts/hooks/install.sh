@@ -7,6 +7,8 @@
 #   - pre-commit-sops.sh         — авто-шифрование .env.docker/.env.staging → *.enc
 #   - pre-commit-dprint-check.sh — блокирует commit staged-файлов не в стиле dprint (напр.
 #                                   после случайного Prettier-форматирования `nx format`)
+#   - pre-commit-deps-integrity.sh — целостность зависимостей (патчи + peer), запускается
+#                                   ТОЛЬКО если в коммите есть bun.lock/package.json
 #
 # Использование:
 #   bash scripts/hooks/install.sh                                  # из корня letar
@@ -35,8 +37,10 @@ install_into() {
   cp "$SRC_DIR/pre-commit-sops.sh" "$hooks_dir/_pre-commit-sops.sh"
   cp "$SRC_DIR/pre-commit-semgrep.sh" "$hooks_dir/_pre-commit-semgrep.sh"
   cp "$SRC_DIR/pre-commit-dprint-check.sh" "$hooks_dir/_pre-commit-dprint-check.sh"
+  cp "$SRC_DIR/pre-commit-deps-integrity.sh" "$hooks_dir/_pre-commit-deps-integrity.sh"
   chmod +x "$hooks_dir/_pre-commit-scope-guard.sh" "$hooks_dir/_pre-commit-sops.sh" \
-    "$hooks_dir/_pre-commit-semgrep.sh" "$hooks_dir/_pre-commit-dprint-check.sh"
+    "$hooks_dir/_pre-commit-semgrep.sh" "$hooks_dir/_pre-commit-dprint-check.sh" \
+    "$hooks_dir/_pre-commit-deps-integrity.sh"
 
   cat > "$hooks_dir/pre-commit" <<'DISPATCH'
 #!/usr/bin/env bash
@@ -52,13 +56,16 @@ if [[ $status -eq 0 ]]; then
   bash "$DIR/_pre-commit-dprint-check.sh" || status=$?
 fi
 if [[ $status -eq 0 ]]; then
+  bash "$DIR/_pre-commit-deps-integrity.sh" || status=$?
+fi
+if [[ $status -eq 0 ]]; then
   bash "$DIR/_pre-commit-sops.sh" || status=$?
 fi
 exit $status
 DISPATCH
   chmod +x "$hooks_dir/pre-commit"
 
-  echo "✅ $label → $hooks_dir/pre-commit (scope-guard + semgrep + dprint-check + sops)"
+  echo "✅ $label → $hooks_dir/pre-commit (scope-guard + semgrep + dprint-check + deps-integrity + sops)"
 }
 
 if [[ "${1:-}" == "--all-submodules" ]]; then
@@ -86,4 +93,4 @@ if [[ "${1:-}" == "--all-submodules" ]]; then
 fi
 
 GIT_DIR="$(git rev-parse --git-dir)"
-install_into "$GIT_DIR" "pre-commit хуки установлены: scope-guard + sops"
+install_into "$GIT_DIR" "pre-commit хуки установлены"
