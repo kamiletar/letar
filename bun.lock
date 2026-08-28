@@ -333,9 +333,10 @@
     },
     "apps/aboi": {
       "name": "@letar/aboi",
-      "version": "0.76.42",
+      "version": "0.76.43",
       "dependencies": {
         "@letar/env-load": "workspace:*",
+        "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "@letar/seed-utils": "workspace:*",
@@ -401,7 +402,7 @@
     },
     "apps/animatrona-tracker": {
       "name": "@letar/animatrona-tracker",
-      "version": "0.11.8",
+      "version": "0.11.9",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -427,6 +428,7 @@
       "version": "0.12.33",
       "dependencies": {
         "@letar/env-load": "workspace:*",
+        "@letar/glitchtip": "workspace:*",
         "@letar/pg-url": "workspace:*",
       },
     },
@@ -450,7 +452,7 @@
     },
     "apps/auth-hub": {
       "name": "auth-hub",
-      "version": "0.7.14",
+      "version": "0.7.15",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -473,7 +475,7 @@
     },
     "apps/dashboard": {
       "name": "@letar/dashboard",
-      "version": "1.24.6",
+      "version": "1.24.8",
       "dependencies": {
         "@letar/analytics": "workspace:*",
         "@letar/chakra-provider": "workspace:*",
@@ -488,7 +490,7 @@
     },
     "apps/dashboard-agent": {
       "name": "dashboard-agent",
-      "version": "0.15.17",
+      "version": "0.15.20",
       "dependencies": {
         "@fastify/cors": "^11.3.0",
         "@fastify/rate-limit": "^10",
@@ -507,7 +509,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.151.0",
+      "version": "0.162.1",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -527,9 +529,10 @@
     },
     "apps/driving-school": {
       "name": "driving-school",
-      "version": "0.240.9",
+      "version": "0.240.11",
       "dependencies": {
         "@letar/env-load": "workspace:*",
+        "@letar/glitchtip": "workspace:*",
         "@letar/hooks": "workspace:*",
         "@letar/pg-url": "workspace:*",
       },
@@ -543,7 +546,7 @@
     },
     "apps/dsperevod": {
       "name": "@letar/dsperevod",
-      "version": "0.6.12",
+      "version": "0.6.13",
       "dependencies": {
         "@better-auth/utils": "^0.4.2",
         "@chakra-ui/react": "*",
@@ -562,6 +565,7 @@
       "name": "@letar/dsperevod-e2e",
       "version": "0.0.1",
       "dependencies": {
+        "@letar/e2e-testing": "workspace:*",
         "@letar/env-load": "workspace:*",
       },
     },
@@ -606,7 +610,7 @@
     },
     "apps/grandslamcup": {
       "name": "@letar/grandslamcup",
-      "version": "3.39.5",
+      "version": "3.39.6",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -719,7 +723,7 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.50.8",
+      "version": "0.50.10",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -749,10 +753,11 @@
     },
     "apps/svoichuzhie": {
       "name": "@letar/svoichuzhie",
-      "version": "0.10.42",
+      "version": "0.10.43",
       "dependencies": {
         "@letar/api-server": "workspace:*",
         "@letar/env-load": "workspace:*",
+        "@letar/glitchtip": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "qrcode": "^1.5.4",
         "tus-js-client": "^4.3.1",
@@ -869,7 +874,7 @@
     },
     "libs/auth": {
       "name": "@letar/auth",
-      "version": "0.12.2",
+      "version": "0.12.3",
       "dependencies": {
         "@better-auth/utils": "^0.4.2",
         "@letar/pin-auth": "workspace:*",
@@ -995,6 +1000,10 @@
         "react-native": ">=0.73",
       },
     },
+    "libs/file-scan": {
+      "name": "@letar/file-scan",
+      "version": "0.1.0",
+    },
     "libs/form-mcp": {
       "name": "@letar/form-mcp",
       "version": "1.0.3",
@@ -1012,7 +1021,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.8.0",
+      "version": "2.8.1",
       "dependencies": {
         "@tanstack/react-table": "^9.1.2",
         "@tanstack/react-virtual": "^3.13.23",
@@ -1372,7 +1381,7 @@
     },
     "libs/ui": {
       "name": "@letar/ui",
-      "version": "0.19.3",
+      "version": "0.19.4",
       "dependencies": {
         "@letar/hooks": "workspace:*",
       },
@@ -1396,6 +1405,10 @@
       "devDependencies": {
         "@letar/mcp-test-kit": "workspace:*",
       },
+    },
+    "libs/upload-validation": {
+      "name": "@letar/upload-validation",
+      "version": "0.1.0",
     },
     "libs/validation-utils": {
       "name": "@letar/validation-utils",
@@ -2426,6 +2439,8 @@
 
     "@letar/exoplayer-sync": ["@letar/exoplayer-sync@workspace:libs/exoplayer-sync"],
 
+    "@letar/file-scan": ["@letar/file-scan@workspace:libs/file-scan"],
+
     "@letar/form-develop-app-shadcn": ["@letar/form-develop-app-shadcn@workspace:apps/form-develop-app-shadcn"],
 
     "@letar/form-docs-e2e": ["@letar/form-docs-e2e@workspace:apps/form-docs-e2e"],
@@ -2533,6 +2548,8 @@
     "@letar/ui": ["@letar/ui@workspace:libs/ui"],
 
     "@letar/umami-mcp": ["@letar/umami-mcp@workspace:libs/umami-mcp"],
+
+    "@letar/upload-validation": ["@letar/upload-validation@workspace:libs/upload-validation"],
 
     "@letar/validation-utils": ["@letar/validation-utils@workspace:libs/validation-utils"],
 
