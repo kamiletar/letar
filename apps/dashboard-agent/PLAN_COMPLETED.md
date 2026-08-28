@@ -2,6 +2,53 @@
 
 Детальное описание всех реализованных фич.
 
+## Ежедневная проверка `Account.issuer = NULL` (2026-08-28)
+
+PLAN.md корня §71 п.3.2 — защита от повторения better-auth 1.7 issuer-инцидента через
+мониторинг, а не только статический гейт схемы (`scripts/check-better-auth-schema.mjs`, часть
+3.1). Тот гейт ловит только «поля `issuer` нет в `schema.zmodel`» — не ловит соседний случай:
+поле есть, но одна строка `Account` получила `issuer = NULL` (ручной SQL, забытая миграция на
+одном из окружений, баг апстрима). Такая строка ломает `sign-up`/`reset-password` конкретного
+аккаунта 500-й ошибкой, при этом остальной вход продолжает работать — молчаливый частичный
+отказ, который никакая типизация не ловит.
+
+Новый модуль `lib/account-issuer-check.ts` подключается напрямую к Postgres каждого из 14
+приложений с моделью `Account` и выполняет `SELECT count(*) FROM "Account" WHERE issuer IS
+NULL`. Список приложений выяснен не из исходной постановки задачи (та называла 4 — по общему
+фрагменту `AccountFields`), а прогоном `node scripts/check-better-auth-schema.mjs`, который
+находит приложения через реальное использование `prismaAdapter`: **aboi, animatrona-tracker,
+aprel8008, archetest, auth-hub, dashboard, domwellbes, driving-school, dsperevod, grandslamcup,
+kami, mandala, studio, svoichuzhie** — часть держит `issuer` в собственной копии модели, не
+через общий фрагмент, но регрессия того же класса возможна и там. `time` в список не входит — у
+него нет своей модели `Account` (в §71 был затронут только путь logout).
+
+Алертит `AUTH_ACCOUNT_ISSUER_NULL` в dashboard с первой же находки, повтор — тем же паттерном
+удвоения (`shouldRepeatAlert`, `alert-policy.ts`), что у `backup-freshness.ts` (§62): не спамит
+между удвоениями, но и не замолкает навсегда, пока проблема жива. Ошибка подключения к БД
+одного приложения не маскируется как «чисто» — попадает в `error`, не в `nullCount: 0`,
+и не создаёт этот алерт (это отдельный класс отказа — недоступность БД, не отсутствие issuer).
+
+Попутно найден и закрыт пробел: `domwellbes` отсутствовал в `APP_CONFIG` (`lib/database.ts`) —
+`dashboard-agent` не мог подключиться к его БД ни для этой проверки, ни для существующих
+бэкапов. Добавлен по конвенции остальных записей (`containerName: 'domwellbes-db'`, секрет уже
+смонтирован в `docker-compose.production.yml` как `domwellbes.env`).
+
+Новая cron-задача `account-issuer-null-check`, `0 4 * * *` на s2 (после `traefik-backup-s3` и
+перед `health-check` в списке `DEFAULT_CRON_JOBS`). 7 тестов
+(`account-issuer-check.spec.ts`) — чистый прогон, приложение без конфига на этом сервере тихо
+пропускается, алерт с первой находки, ошибка подключения не путается с NULL, повтор при
+удвоении, отсутствие спама между удвоениями, сброс состояния после чистого прогона.
+
+Живая проверка: `UPDATE "Account" SET issuer = NULL` на одной строке локальной dev-БД
+`dashboard` → `SELECT count(*) FROM "Account" WHERE issuer IS NULL` (та же строка, что в
+`countNullIssuers`) вернул `1` → строка возвращена в исходное состояние → повторный запрос
+вернул `0`. Полный прогон через HTTP-эндпоинт на реальном сервере (Docker-сеть, hostname'ы
+контейнеров) в этом окружении недоступен — эта часть осталась непроверенной живьём.
+
+`nx test dashboard-agent` (120 тестов, включая 7 новых), `nx typecheck dashboard-agent`,
+`node scripts/check-better-auth-schema.mjs` (14/14 приложений без расхождений) — зелёные.
+0.15.19 → 0.15.20.
+
 ## Снятие точного пина dockerode (2026-08-25)
 
 Продолжение PLAN-INFRA-4.md §107: в корневом `package.json` `dockerode` уже был переведён с точного
