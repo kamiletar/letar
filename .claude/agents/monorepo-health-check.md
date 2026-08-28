@@ -104,27 +104,25 @@ Client коммитится в git как обычный файл — и рас�
 инцидента — [database.md](/.claude/docs/database.md) (раздел про дрейф `zenstack:generate`).
 
 ```bash
-# Проверка по факту, не по наличию schema.zmodel в самом submodule: генератор одного submodule
-# (apps/driving-school) пишет вывод в другой (libs/driving-school-db) — проверка «есть ли
-# schema.zmodel рядом» такой случай не поймает, проверка «есть ли уже закоммиченные файлы» ловит
-# всегда.
-for m in $(git config --file .gitmodules --get-regexp path | awk '{print $2}'); do
-  n=$(git -C "$m" ls-files src/generated 2>/dev/null | wc -l)
-  if [ "$n" -gt 0 ]; then
-    echo "TRACKED ($n files, надо git rm --cached): $m"
-  fi
-done
-
-# Дополнительно превентивно — submodule со своей schema.zmodel, но ещё без .gitignore-исключения
-# (тревога до того, как в git реально что-то попадёт)
-for m in $(git config --file .gitmodules --get-regexp path | awk '{print $2}'); do
-  if [ -f "$m/schema.zmodel" ] && { [ ! -f "$m/.gitignore" ] || ! grep -q "src/generated" "$m/.gitignore"; }; then
-    echo "MISSING .gitignore exclusion: $m"
-  fi
-done
+bun scripts/check-submodule-gitignore.mjs
 ```
 
-**Признак проблемы:** любая строка `TRACKED` или `MISSING` в выводе.
+Тот же скрипт, что и в §9: обход `.gitmodules` с отсевом невыкаченных и не-JS submodule там уже
+написан, и держать рядом его копию в теле этого документа значит держать непроверяемую логику,
+которая молча протухнет. Скрипт спрашивает у git обе стороны проблемы:
+
+- `src/generated в индексе` — расхождение, которое **уже случилось** (обязательное, ненулевой код
+  возврата);
+- `src/generated/` — submodule со своей `schema.zmodel`, но без исключения: тревога **до** того,
+  как в git что-то попадёт (рекомендательное, код возврата не меняет).
+
+**Признак проблемы:** строка `src/generated в индексе` в таблице расхождений либо
+`src/generated/` в блоке «рекомендуется».
+
+⚠️ **Проверка «уже закоммичено» намеренно идёт по факту (`git ls-files`), а не по наличию
+`schema.zmodel` рядом.** Генератор одного submodule (`apps/driving-school`) пишет вывод в другой
+(`libs/driving-school-db`), у которого своей схемы нет, — проверка «есть ли схема рядом» такой
+случай не поймает. Не упрощай это обратно к проверке схемы.
 
 **Решение:** в `.gitignore` submodule добавить `src/generated/`, затем вычистить уже
 закоммиченное — `git -C <submodule> rm -r --cached src/generated`, коммит **без** pathspec
