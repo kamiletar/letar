@@ -28,17 +28,10 @@ export const projectCategories: ProjectCategory[] = [
     title: 'Веб-приложения',
     projects: [
       {
-        name: 'Premium Rosstil',
-        description: 'Fashion e-commerce платформа',
-        url: 'https://premium.rosstil.ru',
-        emoji: '👗',
-        tech: ['Next.js', 'PostgreSQL', 'ZenStack'],
-      },
-      {
-        name: 'Integrelle',
-        description: 'Платформа для психотерапии',
-        url: 'https://integrelle.com',
-        emoji: '🧠',
+        name: 'Studio Letar',
+        description: 'Веб-студия разработки сайтов, приложений и цифровых продуктов',
+        url: 'https://studio.letar.best',
+        emoji: '💻',
         tech: ['Next.js', 'PostgreSQL', 'ZenStack'],
       },
       {
@@ -50,7 +43,7 @@ export const projectCategories: ProjectCategory[] = [
       },
       {
         name: 'Kami',
-        description: 'Личный сайт архитектора ПО',
+        description: 'Личный сайт и блог архитектора ПО',
         url: 'https://kami.letar.best',
         emoji: '📝',
         tech: ['Next.js', 'PostgreSQL', 'ZenStack'],
