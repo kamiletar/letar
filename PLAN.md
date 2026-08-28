@@ -3606,6 +3606,15 @@ mandala, animatrona-tracker, dashboard, auth-hub, driving-school, svoichuzhie, d
 сессии. Детали — `apps/dashboard-agent/CHANGELOG.md` 0.15.27, `apps/dashboard/CHANGELOG.md`
 1.24.10.
 
+**Провижининг canary для driving-school (2026-08-28) вскрыл отдельный баг — исправлен:**
+`POST /api/auth/sign-up/email` падал 500 (`BetterAuthError: Model rateLimit does not exist in
+the database`) — в `schema.zmodel` не было модели `RateLimit`, а `libs/auth` с 2026-06-18
+включает `rateLimit.storage: 'database'` для production standalone-режима без Redis
+(`secondaryStorage` не передан). За 90 дней в GlitchTip до фикса — 0 живых пользователей,
+не P0. Добавлена модель `RateLimit` + миграция, версия `driving-school` 0.240.13. Тот же класс
+риска (standalone-режим без `secondaryStorage` и без модели `RateLimit` в схеме) у других
+приложений не проверялся — вне скоупа этой сессии.
+
 **Часть 4 (доки) — закрыта (2026-08-28):** `better-auth-1.7-account-issuer-field.md` переписан
 (14 приложений вместо 4, обычный sign-in затронут тоже, двухчастный паттерн миграции add-column +
 backfill, ловушка «коммит миграции ≠ применение на проде»); `better-auth-oauth-provider-schema-drift.md`
