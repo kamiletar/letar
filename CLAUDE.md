@@ -143,6 +143,9 @@ select ·
 [period-navigation-pattern](/.claude/docs/period-navigation-pattern.md) навигация по периоду без JS ·
 [data-flag-driving-ui](/.claude/docs/data-flag-driving-ui.md) ⚠️ `isDemo`/`isDraft` попал в условие
 рендера — контент демо-записи не виден никогда ·
+[content-block-edit-gate-not-wired](/.claude/docs/content-block-edit-gate-not-wired.md) ⚠️ кнопка
+редактирования секции контента рядом с блоком не доказывает, что блок реально читает то, что она
+пишет — проверять грепом по использованию ключей в JSX, не визуальным соседством ·
 [faceted-catalog-pitfalls](/.claude/docs/faceted-catalog-pitfalls.md) фасетные фильтры каталога ·
 [raf-vs-timers-background-tab](/.claude/docs/raf-vs-timers-background-tab.md) ⚠️ `rAF` замирает в
 фоновой вкладке, `setTimeout`/`setInterval` там душится до раза в секунду/минуту — выбор не
