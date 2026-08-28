@@ -3409,3 +3409,27 @@ driving-school submodule + bump SHA, mandala), не запушено.
 `SystemOverview.tsx` — два разных `formatBytes` в одном приложении) свёден отдельной сессией:
 общая функция получила опциональный `forceUnit`, видимый текст не изменился. Детали —
 `apps/dashboard/PLAN_COMPLETED.md`.
+
+## §67 — `@letar/upload-validation`: валидация upload-файлов вынесена из driving-school/grandslamcup (2026-08-28)
+
+Сквозной аудит безопасности нашёл `src/lib/upload/{validate-file,save-file}.ts` байт-в-байт
+идентичными между `driving-school` и `grandslamcup` (комментарий в grandslamcup прямо признавал
+копирование: «Паттерн аналогичен driving-school»). Отдельно `generateFilename` (санитизация
+расширения из multipart-заголовка до `[a-zA-Z0-9]`, защита от path traversal через `../`) чинили
+порознь ещё и в `mandala` — три независимых фикса одного и того же класса дефекта.
+
+Новая библиотека `libs/upload-validation` (заведена генератором `new-lib`) объединяет
+`extractAndValidateFile`/`validateFile`/`generateFilename`/`saveFileToDisk`/`ensureUploadDir`/
+`deleteFileFromDisk`/`deleteOldFile`; регрессионный тест path-traversal (`save-file.spec.ts`,
+положительный контроль на прежней уязвимой реализации) перенесён туда же. Оба приложения
+переведены на неё, локальные копии удалены; `grandslamcup/src/lib/upload/resize-image.ts`
+(sharp-логика этого приложения) не тронут — не часть дубля. `typecheck:tsgo`/`lint`/`test`
+зелёные на обоих приложениях и на библиотеке. Три коммита (submodule driving-school, grandslamcup,
+libs/upload-validation), не запушено.
+
+**Не тронуто (сознательно, отдельная задача заведена как чип):** `aboi`, `aprel8008`,
+`svoichuzhie`, `kami` держат свою инлайн-логику валидации upload-файлов (не через общий модуль,
+разные проверки — по расширению vs MIME, разные лимиты) — не байт-в-байт дубль, миграция требует
+разбора каждого случая отдельно, не входила в scope этой сессии. `domwellbes` НЕ кандидат — там
+уже другая, более продвинутая схема (`@letar/image-upload/server` с sharp-обработкой и
+`resolveUploadPath`).
