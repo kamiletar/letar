@@ -2,6 +2,41 @@
 
 Детальное описание всех реализованных фич.
 
+## 2026-08-28 — Soft-404: проверка citySlug в proxy.ts
+
+Owner выбрал для grandslamcup отдельную стратегию из четырёх обсуждавшихся приложений
+(domwellbes/aboi/animatrona-tracker приняли soft-404 как есть — там `noindex` уже достаточен)
+из-за того, что `[citySlug]` — динамический сегмент прямо в корне `(public)`, перехватывающий
+буквально любой опечатанный URL сайта, а не только «глубокие» notFound()-страницы.
+
+Реализовано:
+
+- [src/proxy.ts](/apps/grandslamcup/src/proxy.ts) — для первого сегмента пути, не входящего в
+  `RESERVED_SEGMENTS` (top-level роуты: `admin`, `api`, `coach`, `match`, `my`, `offline`, `poet`,
+  `privacy`, `profile`, `sign-in`, плюс статические публичные `bracket`, `donate`, `matches`,
+  `news`, `players`, `rules`, `schedule`, `standings`, `teams`, `venues`), проверяется
+  существование города по in-memory кэшу слагов (TTL 5 мин, читает `City` через raw `prisma` —
+  модель публично читаемая, `@@allow('read', true)`). Неизвестный слаг → `NextResponse.rewrite`
+  на `/system-404`.
+- [src/app/system-404/page.tsx](/apps/grandslamcup/src/app/system-404/page.tsx) — технический
+  top-level роут-цель rewrite, намеренно вне `(public)` и без `loading.tsx`/Suspense-границы над
+  собой, поэтому вызванный там `notFound()` отдаёт настоящий HTTP 404 (см. разбор механизма —
+  [.claude/docs/nextjs-streaming-soft-404-loading-boundary.md](/.claude/docs/nextjs-streaming-soft-404-loading-boundary.md)).
+
+Проверено живьём на dev-сервере (`nx dev grandslamcup`, порт 3016):
+`/nope-nope-nope-route` и `/moskva` (несуществующий слаг) → 404; `/msk`, `/spb` (реальные
+слаги из БД) и `/matches`, `/players` (статические роуты) → 200 без изменений.
+
+Осознанно не покрыто: глубокие `notFound()` внутри валидного города (`/msk/matches/no-such-id`)
+остаются soft-404 (200 + `noindex`) — та же категория риска, что owner принял как есть для
+остальных трёх приложений; постраничная валидация ID в proxy означала бы поход в БД на каждый
+просмотр любой страницы, чего документация Next прямо не рекомендует.
+
+`nx lint grandslamcup` — 0 ошибок (11 pre-existing warnings, не по теме). `nx typecheck:tsgo
+grandslamcup` — 14 ошибок, все pre-existing в `api/upload/**` (`@letar/upload-validation` module
+resolution, не связано с этой правкой — обнаружено, что в репозитории параллельно шёл рефакторинг
+upload-логии grandslamcup в `libs/upload-validation/`, не трогал).
+
 ## Фикс: fetchPriority вместо устаревшего priority на обложке площадки (2026-08-25)
 
 Свежий полный грепп по монорепо нашёл прямой `next/image` с `priority` на `venues/[slug]` — тот
