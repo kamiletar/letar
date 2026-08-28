@@ -3587,7 +3587,24 @@ dist-файлам — скрипт резолвит и **исполняет** р
 дев-БД dashboard → детекторный SQL-запрос вернул 1 → откат строки вернул 0. Детали —
 `apps/dashboard-agent/CHANGELOG.md` 0.15.20, `apps/dashboard/CHANGELOG.md` 1.24.9.
 
-**Часть 3.3 (синтетическая проверка входа) — не начата.**
+**Часть 3.3 (синтетическая проверка входа) — код закрыт (2026-08-28), аккаунты не заведены:**
+новая получасовая cron-задача `login-canary-check` в dashboard-agent
+(`lib/login-canary.ts`) шлёт POST `/api/auth/sign-in/email` канареечными учётными данными на
+9 приложений с реальным credential-входом email/password (не все 14 из issuer-фикса — часть
+входит только через OIDC Ключницы, `mode: 'hub-client'`: time, kami, aprel8008; часть только
+через другой OAuth без своего пароля: archetest, grandslamcup, studio): aboi, domwellbes,
+mandala, animatrona-tracker, dashboard, auth-hub, driving-school, svoichuzhie, dsperevod. Новый
+`AlertType.AUTH_LOGIN_CANARY_FAILED` (миграция `20260828124810_add_login_canary_alert_type`),
+тот же паттерн порога/повтора через удвоение, что у `email-canary.ts`/части 3.2 (2 неудачи
+подряд). Учётные данные — реестр `LOGIN_CANARY_<APP>_EMAIL`/`_PASSWORD` в
+`apps/dashboard/.env.docker.enc`; провижининг — одноразовый `POST /api/admin/login-canary-setup`
+(регистрация через `/api/auth/sign-up/email` самого приложения + снятие `emailVerified` в БД).
+Логика проверена 7 unit-тестами (провал sign-in → алерт на 2-й подряд неудаче, повтор на
+удвоении, сброс после чистого прогона) — реальные канареечные аккаунты в 9 production-БД ещё
+не созданы, это отдельный ручной шаг (генерация паролей + вызов setup-эндпоинта на каждое
+приложение + запись в `.env.docker.enc` через sops), намеренно не выполнен автономно из этой
+сессии. Детали — `apps/dashboard-agent/CHANGELOG.md` 0.15.27, `apps/dashboard/CHANGELOG.md`
+1.24.10.
 
 **Часть 4 (доки) — закрыта (2026-08-28):** `better-auth-1.7-account-issuer-field.md` переписан
 (14 приложений вместо 4, обычный sign-in затронут тоже, двухчастный паттерн миграции add-column +
