@@ -3595,3 +3595,18 @@ backfill, ловушка «коммит миграции ≠ применени�
 дополнен разделом про logout-поля `oauthClient` и путь-баг `/oauth2/endsession` vs
 `/oauth2/end-session`; новый `runtime-invariant-missing-from-select.md` обобщает класс бага;
 индекс `CLAUDE.md` синхронизирован. Коммит `96667515`.
+
+## §72 — дедупликация tz-блока в 22 `Dockerfile.production` (2026-08-28)
+
+Сокращён с 6-строчного комментария до одной строки во всех 22 `Dockerfile.production`
+(разбор — `PLAN-INFRA-4.md §129`). Отдельно на `apps/time` проверена и не принята к тиражированию
+альтернатива `node:24-slim` вместо `node:24-alpine` — работает, но образ на 90MB тяжелее
+(`PLAN-INFRA-4.md §130`, детали — `apps/time/PLAN_COMPLETED.md`).
+
+⚠️ **Открытый вопрос:** все коммиты сессии не запушены — 5 в `letar`
+(`6b46d78d`, `e290ad80`, `fdb95596`, `e66fded7`, `f2957a15`) + 7 внутри приватных submodule
+(aboi, aprel8008, domwellbes, driving-school, dsperevod, studio, svoichuzhie — SHA уже
+зафиксирован в `6b46d78d`, но сами коммиты submodule ждут push в свои origin). Push требует
+свежего одобрения пользователя на каждый раз (`.claude/rules/git.md`) — не запрашивался и не
+делался в этой сессии. Порядок push при выполнении — сначала все 7 submodule, потом `letar`
+(см. `.claude/rules/git.md` § «Порядок push нерушим»).
