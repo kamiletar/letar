@@ -45,10 +45,16 @@ const formHookContexts = createFormHookContexts()
 // ⚠️ Механизм НЕ в том, что «webpack вообще не разбирает деструктуризацию»: тот же паттерн
 // в `form-hook.ts` (`export const { useAppForm, withForm } = createFormHook(...)`) и в
 // `declarative/form-fields/base/primitives.ts` предупреждений не даёт, хотя реэкспортируется
-// из `index.ts` точно так же. Отличие этого файла — расширение `.tsx` (JSX-трансформ), но
-// причина не подтверждена, поэтому переписывать те файлы «на всякий случай» не нужно —
-// у них проблемы нет. Turbopack разбирает оба варианта нормально, так что расхождение видно
-// только на приложениях с `next build --webpack` (на 2026-08-28 такое одно — auth-hub).
+// из `index.ts` точно так же. Причина не в расширении `.tsx`, а в том, что этот файл содержит
+// настоящий JSX (компонент `TypedFormSubscribe` ниже) — SWC с automatic JSX runtime вставляет
+// `import { jsx as _jsx } from 'react/jsx-runtime'`, и именно наличие этого импорта в модуле
+// (в любом месте файла, порядок не важен) ломает статический анализ webpack для
+// деструктурирующего `export const { ... } = ...`, но не для обычных `export function`.
+// Подтверждено экспериментально 2026-08-28 — детали и воспроизведение в
+// `.claude/docs/webpack-only-app-silent-export-drift.md`. `form-hook.ts`/`primitives.ts`
+// переписывать «на всякий случай» не нужно — они не содержат JSX, этот импорт у них не
+// появляется. Turbopack разбирает оба варианта нормально, расхождение видно только на
+// приложениях с `next build --webpack` (на 2026-08-28 такое одно — auth-hub).
 export const fieldContext = formHookContexts.fieldContext
 export const formContext = formHookContexts.formContext
 export const useFieldContext = formHookContexts.useFieldContext
