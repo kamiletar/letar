@@ -141,7 +141,10 @@ case "$CURRENT_HOST" in
     SERVER_APPS="$S2_APPS"
     SERVER_NAME="s2"
     ;;
-  *s3.letar.best*|s3|server3)
+  *s3.letar.best*|s3|server3|*smartape-vps.com*)
+    # smartape-vps.com — реальный hostname s3 (см. §81), fallback на случай прямого SSH-запуска
+    # в обход dashboard-agent (там hostname хоста не покрыт DEPLOY_SERVER_NAME из compose-env).
+    # DEPLOY_SERVER_NAME остаётся приоритетным путём — этот паттерн только подстраховка.
     SERVER_APPS="$S3_APPS"
     SERVER_NAME="s3"
     ;;
@@ -913,8 +916,11 @@ for app in $AFFECTED_APPS; do
         if [ "${SKIP_PREMIGRATE_DUMP:-0}" != "1" ]; then
           mkdir -p "$DUMP_DIR"
           DUMP_FILE="${DUMP_DIR}/${app}-$(git -C "$WORKSPACE_ROOT" rev-parse --short HEAD)-$(date +%Y%m%d-%H%M%S).sql.gz"
-          # Имя контейнера БД — из compose (container_name под сервисом db:), fallback на конвенцию <app>-db
-          DB_CONTAINER=$(awk '/^[[:space:]]*db:[[:space:]]*$/{f=1} f && /container_name:/{print $2; exit}' "$COMPOSE_FILE")
+          # Имя контейнера БД — из compose (container_name под сервисом db:), fallback на конвенцию <app>-db.
+          # Якорь на ровно 2 пробела отступа (top-level ключ сервиса под `services:`) — иначе
+          # матчится и вложенный `depends_on: \n  db: \n    condition: ...`, который в файле может
+          # стоять раньше настоящего services.db: (см. .claude/docs/deploy-affected-premigrate-dump-wrong-container.md)
+          DB_CONTAINER=$(awk '/^  [A-Za-z0-9_-]+:[[:space:]]*$/{f=($0 ~ /^  db:[[:space:]]*$/)?1:0} f && /container_name:/{print $2; exit}' "$COMPOSE_FILE")
           DB_CONTAINER="${DB_CONTAINER:-${app}-db}"
           echo -e "${YELLOW}💾 Pre-migrate dump (${DB_CONTAINER}): ${DUMP_FILE}${NC}"
           docker exec "$DB_CONTAINER" pg_dump -U "${DB_USER:-lena_user}" "${DB_NAME}" | gzip > "$DUMP_FILE"
