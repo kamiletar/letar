@@ -33,13 +33,22 @@ import { useDeclarativeForm } from './declarative/form-context'
 const formHookContexts = createFormHookContexts()
 
 // Разложено на отдельные экспорты намеренно, не пишите обратно одной деструктуризацией
-// (`export const { fieldContext, ... } = createFormHookContexts()`): webpack не видит имена
-// экспортов в деструктурирующем объявлении и считает, что модуль экспортирует только
-// функции ниже. Реэкспорт из `src/index.ts` тогда даёт четыре предупреждения
-// «export 'fieldContext' was not found», а в рантайме значения приезжают undefined.
-// Сборку это не роняет, поэтому ловится только чтением лога. Turbopack разбирает
-// деструктуризацию нормально — расхождение видно лишь на приложениях с `next build --webpack`
-// (на 2026-08-28 такое одно — auth-hub).
+// (`export const { fieldContext, ... } = createFormHookContexts()`). В таком виде webpack не
+// видит здесь имена экспортов: реэкспорт из `src/index.ts` даёт четыре предупреждения
+// «export 'fieldContext' (reexported as ...) was not found in './lib/context', possible
+// exports: useTypedFormContext, useTypedFormSubscribe» — то есть модуль для него экспортирует
+// только function-объявления ниже. В рантайме под webpack все четыре значения при этом
+// undefined; сборка не падает, поэтому дефект ловится только чтением лога.
+// Проверено в обе стороны на сборке auth-hub: деструктуризация — 4 предупреждения,
+// отдельные экспорты — ноль.
+//
+// ⚠️ Механизм НЕ в том, что «webpack вообще не разбирает деструктуризацию»: тот же паттерн
+// в `form-hook.ts` (`export const { useAppForm, withForm } = createFormHook(...)`) и в
+// `declarative/form-fields/base/primitives.ts` предупреждений не даёт, хотя реэкспортируется
+// из `index.ts` точно так же. Отличие этого файла — расширение `.tsx` (JSX-трансформ), но
+// причина не подтверждена, поэтому переписывать те файлы «на всякий случай» не нужно —
+// у них проблемы нет. Turbopack разбирает оба варианта нормально, так что расхождение видно
+// только на приложениях с `next build --webpack` (на 2026-08-28 такое одно — auth-hub).
 export const fieldContext = formHookContexts.fieldContext
 export const formContext = formHookContexts.formContext
 export const useFieldContext = formHookContexts.useFieldContext
