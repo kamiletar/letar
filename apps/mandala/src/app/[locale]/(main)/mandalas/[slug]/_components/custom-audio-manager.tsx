@@ -1,6 +1,7 @@
 'use client'
 
 import { Box, Button, CloseButton, Dialog, Flex, HStack, IconButton, Portal, Text, VStack } from '@chakra-ui/react'
+import { formatFileSize } from '@letar/format-utils'
 import { useCallback, useRef, useState } from 'react'
 import { LuMusic, LuTrash2, LuUpload } from 'react-icons/lu'
 import type { CustomAudioTrack } from '../_schemas/viewer-settings.schema'
@@ -20,19 +21,6 @@ interface CustomAudioManagerProps {
   onSelectTrack: (id: string) => void
   /** ID текущего выбранного трека */
   selectedTrackId: string | null
-}
-
-/**
- * Форматирование размера файла
- */
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) {
-    return `${bytes} Б`
-  }
-  if (bytes < 1024 * 1024) {
-    return `${(bytes / 1024).toFixed(1)} КБ`
-  }
-  return `${(bytes / (1024 * 1024)).toFixed(1)} МБ`
 }
 
 /**
@@ -245,7 +233,7 @@ export function CustomAudioManager({
                             {track.name}
                           </Text>
                           <Text color="gray.500" fontSize="xs">
-                            {formatDuration(track.duration)} • {formatFileSize(track.size)}
+                            {formatDuration(track.duration)} • {formatFileSize(track.size, { locale: 'ru' })}
                           </Text>
                         </Box>
                       </HStack>
