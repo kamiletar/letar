@@ -24,6 +24,19 @@
   существующей» и не блокирует создание правильной. См.
   `.claude/docs/better-auth-1.7-account-issuer-field.md`.
 
+## [0.12.2] - 2026-08-27
+
+### Changed
+
+- **`createLogoutAction`: `oidcLogout.issuer` вместо ручного `endSessionUrl`.** Восемь приложений
+  (aprel8008, archetest, animatrona-tracker, dashboard, domwellbes, grandslamcup, kami, time)
+  собирали URL RP-Initiated Logout вручную с опечаткой в пути (`/oauth2/endsession` вместо
+  реально зарегистрированного `@better-auth/oauth-provider` `/oauth2/end-session`). Новый
+  `issuer` выводит `end_session_endpoint` автоматически
+  (`${issuer}/api/auth${OIDC_END_SESSION_PATH}`, константа экспортирована); `endSessionUrl`
+  оставлен как `@deprecated` для обратной совместимости. См.
+  `.claude/docs/better-auth-oauth-provider-schema-drift.md`.
+
 ## [0.12.0] - 2026-08-25
 
 ### Changed
