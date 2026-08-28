@@ -1,17 +1,16 @@
-FROM node:24-slim AS tz
-
-FROM node:24-alpine AS runner
+# node:24-slim, не node:24-alpine — эксперимент, единственное отклонение от паттерна
+# остальных приложений. Debian содержит zoneinfo из коробки, двухстадийный
+# COPY --from=tz не нужен. Цена — образ на ~90MB тяжелее alpine-варианта (замер 2026-08-28).
+# Не тиражировать на другие приложения без отдельного решения — разбор в PLAN-INFRA-4.md §130.
+FROM node:24-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-
-# zoneinfo для Alpine — не `apk add tzdata`, причина: .claude/docs/docker-prune-cold-layer-network-flake.md
-COPY --from=tz /usr/share/zoneinfo /usr/share/zoneinfo
 ENV TZ=Europe/Moscow
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN groupadd --gid 1001 nodejs
+RUN useradd --system --uid 1001 --gid nodejs nextjs
 
 # Копируем standalone build
 COPY --chown=nextjs:nodejs apps/time/.next/standalone ./
