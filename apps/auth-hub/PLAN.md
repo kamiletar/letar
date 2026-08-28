@@ -1,5 +1,13 @@
 # План разработки auth-hub
 
+## v0.7.16 — вынос дубля VK getUserInfo в libs/auth (2026-08-28)
+
+- [x] `createVkGetUserInfo` вынесен в `libs/auth/src/server/vk-user-info.ts`, auth-hub и
+      driving-school переведены на общую фабрику. Детали — `PLAN_COMPLETED.md`.
+- [ ] ⚠️ Открытый вопрос: живой вход через VK не пере-протестирован после рефакторинга (чистый
+      перенос кода, риск низкий, но не проверено руками). Перед следующим деплоем — пройти клик
+      «ВКонтакте» на `/profile/connected-accounts`.
+
 ## v0.7.15 — фикс привязки VK-аккаунта: четыре наслоённых бага (2026-08-27/28)
 
 - [x] **VK на `/profile/connected-accounts` не привязывался** — 404 → «Code challenge method
