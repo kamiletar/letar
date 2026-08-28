@@ -17,6 +17,15 @@ ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=tz /usr/share/zoneinfo /usr/share/zoneinfo
 ENV TZ=Europe/Moscow
 
+# Alpine-пакеты ставим с зеркала, а не с dl-cdn.alpinelinux.org: с s3 (188.127.235.141) до
+# Fastly-адресов dl-cdn нет пути вообще — ни по IPv4 (все 4 адреса), ни по IPv6, ни с хоста,
+# ни из контейнера. При этом GitHub, npm, Docker registry и сами зеркала Alpine с того же
+# хоста доступны, так что дело не в сети сервера и не в BuildKit — недоступен ровно этот CDN.
+# Симптом без зеркала: `WARNING: fetching APKINDEX.tar.gz: TLS: unspecified error` и
+# `no such package`, три сборки подряд, стабильно. Разбор — .claude/docs/alpine-cdn-unreachable-s3.md
+ARG ALPINE_MIRROR=https://mirror.yandex.ru/mirrors/alpine
+RUN sed -i "s|https://dl-cdn.alpinelinux.org/alpine|${ALPINE_MIRROR}|g" /etc/apk/repositories
+
 # Install Docker CLI for container management
 # Dashboard needs docker CLI to communicate with Docker daemon via socket
 # openssh-client needed for git operations with SSH remotes

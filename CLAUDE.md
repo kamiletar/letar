@@ -343,6 +343,10 @@ Playwright-скрипт через Bash вместо navigate/UI-логина ·
 [docker-bind-mount-pitfalls](/.claude/docs/docker-bind-mount-pitfalls.md) ⚠️
 `compose up -d` не перечитывает смонтированный конфиг ·
 [docker-bare-bun-workspace-deps](/.claude/docs/docker-bare-bun-workspace-deps.md) ·
+[alpine-cdn-unreachable-s3](/.claude/docs/alpine-cdn-unreachable-s3.md) ⚠️ с s3 нет пути до
+`dl-cdn.alpinelinux.org` вообще (ни IPv4, ни IPv6, ни с хоста, ни из контейнера) при рабочих
+GitHub/npm/registry — `apk add` в сборке падает, фикс — зеркало; там же ловушка диагностики:
+`nc` на s3 не установлен и даёт ложный FAIL на любом адресе ·
 [docker-prune-cold-layer-network-flake](/.claude/docs/docker-prune-cold-layer-network-flake.md)
 ⚠️ ночной `pruneBuilder()` без фильтра сносит build cache целиком (`ACTIVE 0` при 76GB) —
 первый деплой каждого приложения после 04:00 идёт в сеть и ловит `TLS: unspecified error` на
