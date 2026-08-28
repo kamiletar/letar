@@ -4,8 +4,8 @@
  */
 
 import { prisma } from '@/lib/db'
-import { deleteFileFromDisk, ensureUploadDir, extractAndValidateFile, generateFilename } from '@/lib/upload'
 import { MAX_UPLOAD_SIZE, resizeAvatar } from '@/lib/upload/resize-image'
+import { deleteFileFromDisk, ensureUploadDir, extractAndValidateFile, generateFilename } from '@letar/upload-validation'
 import { writeFile } from 'fs/promises'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'

@@ -104,6 +104,9 @@
       "@letar/image-upload/server": [
         "../../libs/image-upload/src/server/index.ts"
       ],
+      "@letar/upload-validation": [
+        "../../libs/upload-validation/src/index.ts"
+      ],
       "@letar/query-provider": [
         "../../libs/query-provider/src/index.ts"
       ],

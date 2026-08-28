@@ -6,8 +6,8 @@
 
 import { prisma } from '@/lib/db'
 import { getPhotoUrl } from '@/lib/images'
-import { ensureUploadDir } from '@/lib/upload'
 import { MAX_UPLOAD_SIZE, resizeImage } from '@/lib/upload/resize-image'
+import { ensureUploadDir } from '@letar/upload-validation'
 import { writeFile } from 'fs/promises'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'

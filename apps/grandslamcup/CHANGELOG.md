@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.39.6] — 2026-08-28
+
+### Changed
+
+- `src/lib/upload/{validate-file,save-file}.ts` вынесены в общую `@letar/upload-validation` —
+  байт-в-байт дублировали одноимённые файлы в driving-school (`resize-image.ts` остался на
+  месте — своя sharp-логика, не часть дубля). Разбор — `libs/upload-validation/README.md`.
+
 ## [3.39.4] — 2026-08-25
 
 ### Fixed

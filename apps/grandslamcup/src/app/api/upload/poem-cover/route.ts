@@ -6,8 +6,8 @@
 
 import { prisma } from '@/lib/db'
 import { requirePoetAction } from '@/lib/roles'
-import { deleteFileFromDisk, ensureUploadDir, extractAndValidateFile, generateFilename } from '@/lib/upload'
 import { MAX_UPLOAD_SIZE, resizeImage } from '@/lib/upload/resize-image'
+import { deleteFileFromDisk, ensureUploadDir, extractAndValidateFile, generateFilename } from '@letar/upload-validation'
 import { writeFile } from 'fs/promises'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
