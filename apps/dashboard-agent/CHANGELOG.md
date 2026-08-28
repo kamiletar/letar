@@ -11,6 +11,18 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.15.24] — 2026-08-28
+
+### Changed
+
+- Декомпозиция `routes/deploy.ts` (927 строк) — три независимые заботы вынесены в отдельные
+  модули: `lib/deploy-history.ts` (ring-buffer истории деплоев, long-poll `EventEmitter`),
+  `lib/deploy-history-redis.ts` (best-effort персистентность в Redis, `rehydrateFromRedis`),
+  `lib/deploy-process.ts` (жизненный цикл `nsenter`-процесса деплоя, `runDockerCommand`).
+  `routes/deploy.ts` (659 строк) — теперь только регистрация HTTP-роутов и вызовы этих
+  модулей. Логика и поведение не менялись, комментарии-объяснения (например про
+  `withTimeout` вокруг `rehydrateFromRedis`) перенесены вместе с кодом.
+
 ## [0.15.23] — 2026-08-28
 
 ### Changed

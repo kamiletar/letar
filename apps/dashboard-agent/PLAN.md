@@ -1,6 +1,6 @@
 # Dashboard Agent — План развития
 
-## Текущая версия: 0.15.22
+## Текущая версия: 0.15.24
 
 Легковесный агент мониторинга для удалённых серверов.
 
@@ -62,6 +62,13 @@ success/error, вычисляемым из полей результата, ос
 `traefik.ts`/`nginx.ts`/`git.ts`/`acme-dns.ts` по 1) заменены на `errorResponse(error)` из
 `lib/api-handler.ts`. Control flow хендлеров не менялся — только сам литерал. Детали —
 `CHANGELOG.md` 0.15.23.
+
+**Декомпозиция `routes/deploy.ts` (2026-08-28, `0.15.24`):** после двух сессий выше файл
+оставался 927 строк — в нём смешаны заботы, которые не про сами HTTP-роуты: Redis-персистентность
+истории деплоев, ring-buffer + long-poll `EventEmitter`, жизненный цикл `nsenter`-процесса.
+Вынесены в `lib/deploy-history.ts`, `lib/deploy-history-redis.ts`, `lib/deploy-process.ts` —
+`routes/deploy.ts` (659 строк) теперь только регистрация роутов и вызовы этих модулей. Логика
+не менялась. Детали — `CHANGELOG.md` 0.15.24.
 
 Детали закрытых задач (Deploy MCP + staging, email-канарейка, health-check, структурированный
 прогресс деплоя и т.д.) — `PLAN_COMPLETED.md`.

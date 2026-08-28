@@ -5,28 +5,36 @@
  *
  * Деплой приложений (POST /api/deploy/app) — асинхронная long-running операция:
  * возвращает deployId сразу, прогресс опрашивается через GET /api/deploy/status.
- * История последних деплоев хранится в ring-buffer в памяти процесса.
+ * История последних деплоев хранится в ring-buffer в памяти процесса
+ * (lib/deploy-history.ts, персистентность — lib/deploy-history-redis.ts),
+ * жизненный цикл long-running процесса — lib/deploy-process.ts.
  */
 
-import { type ChildProcess, exec, spawn } from 'child_process'
-import { randomUUID } from 'crypto'
-import { EventEmitter } from 'events'
+import { spawn } from 'child_process'
 import type { FastifyInstance } from 'fastify'
-import { promisify } from 'util'
-import { errorResponse } from '../lib/api-handler'
-import { applyPhaseLine, computeStalled, type DeployPhase } from '../lib/deploy-phases'
+import {
+  appendOutput,
+  createDeploy,
+  deployEvents,
+  deployHistory,
+  type DeployStatus,
+  getLatestDeploy,
+  isDeployRunning,
+  rehydrateHistory,
+} from '../lib/deploy-history'
+import { flushPersist } from '../lib/deploy-history-redis'
+import { computeStalled } from '../lib/deploy-phases'
+import {
+  attachDeployProcessHandlers,
+  getCurrentProcess,
+  runDockerCommand,
+  setCurrentProcess,
+} from '../lib/deploy-process'
 import { hostExecArgs } from '../lib/host-exec'
 import { getHostLock, releaseHostLock, tryAcquireHostLock } from '../lib/host-lock'
-import { getRedis } from '../lib/redis'
 import { getCurrentServer } from '../lib/server-config'
 import { withTimeout } from '../lib/with-timeout'
 import type { ApiResponse } from '../types'
-
-const execAsync = promisify(exec)
-
-// Ограничения хранения: сколько деплоев помним и сколько строк лога на деплой
-const MAX_DEPLOY_HISTORY = 20
-const MAX_OUTPUT_LINES = 2000
 
 // Максимум секунд на один long-poll запрос /api/deploy/wait — ограничение сверху
 // (не только договорённость, но и Fastify/nginx-таймауты на туннеле), см. PLAN-INFRA.md §38 Этап 2.
@@ -36,285 +44,6 @@ const DEFAULT_WAIT_SECONDS = 60
 // Сколько хвостовых строк лога отдавать из /api/deploy/wait — в happy-path вызывающий
 // ждёт смены фазы, а не читает лог целиком (см. §38 «Чего делать НЕ надо»).
 const WAIT_LOG_TAIL_LINES = 20
-
-// Статус одного деплоя
-interface DeployStatus {
-  deployId: string
-  running: boolean
-  appName?: string
-  staging?: boolean
-  containerId?: string
-  action?: 'pull' | 'restart' | 'pull-restart' | 'deploy-app' | 'deploy-infra'
-  startTime?: string
-  endTime?: string
-  exitCode?: number | null
-  /** Полный лог (капится MAX_OUTPUT_LINES, при переполнении старые строки вытесняются) */
-  output: string[]
-  /** Сколько строк было вытеснено из начала output из-за переполнения */
-  truncatedLines: number
-  error?: string
-  /** true если запись восстановлена из Redis после рестарта агента во время running=true — реальный
-   * исход деплоя после этого момента неизвестен dashboard-agent'у (см. lib/redis.ts) */
-  interrupted?: boolean
-  /** Структурированный прогресс — распарсен из `::phase:name:start/ok/fail` маркеров
-   * deploy-affected.sh и из уже существующих `[step-id]` строк libs/deploy-engine (rollout.ts)
-   * при zero-downtime rollout. Не заменяет прозу в `output`, а дополняет её (PLAN-INFRA.md §38). */
-  phases: DeployPhase[]
-  /** ISO-время последней строки лога — основа watchdog'а залипания (computeStalled ниже) */
-  lastOutputAt?: string
-}
-
-// Ring-buffer истории деплоев: новые в конец, старые вытесняются. Персистится в Redis
-// (best-effort, см. persistDeploy/persistIndex ниже) — переживает рестарт контейнера.
-const deployHistory: DeployStatus[] = []
-
-// Текущий процесс деплоя (для возможности отмены)
-let currentProcess: ChildProcess | null = null
-
-// =============================================================================
-// Redis-персистентность (best-effort, graceful degradation без Redis — см. lib/redis.ts)
-// =============================================================================
-
-const REDIS_KEY_PREFIX = 'dashboard-agent:deploy:'
-const REDIS_INDEX_KEY = `${REDIS_KEY_PREFIX}index`
-// TTL с запасом сверх разумного времени жизни записи — подстраховка от рассинхрона
-// индекса и элементов, а не основной механизм ограничения размера (для этого MAX_DEPLOY_HISTORY)
-const REDIS_ITEM_TTL_SEC = 7 * 24 * 60 * 60
-
-function redisItemKey(deployId: string): string {
-  return `${REDIS_KEY_PREFIX}item:${deployId}`
-}
-
-/** Немедленный best-effort персист снапшота одного деплоя */
-async function persistDeploy(deploy: DeployStatus): Promise<void> {
-  const r = getRedis()
-  if (!r) {
-    return
-  }
-  try {
-    await r.set(redisItemKey(deploy.deployId), JSON.stringify(deploy), 'EX', REDIS_ITEM_TTL_SEC)
-  } catch {
-    // Не критично — следующий персист (debounce/flush) попробует снова
-  }
-}
-
-/** Перезаписывает индекс порядка deployId целиком (список короткий — до MAX_DEPLOY_HISTORY) */
-async function persistIndex(): Promise<void> {
-  const r = getRedis()
-  if (!r) {
-    return
-  }
-  try {
-    const ids = deployHistory.map((d) => d.deployId)
-    const pipeline = r.pipeline()
-    pipeline.del(REDIS_INDEX_KEY)
-    if (ids.length > 0) {
-      pipeline.rpush(REDIS_INDEX_KEY, ...ids)
-      pipeline.expire(REDIS_INDEX_KEY, REDIS_ITEM_TTL_SEC)
-    }
-    await pipeline.exec()
-  } catch {
-    // Не критично
-  }
-}
-
-// Debounce персиста лога: appendOutput может вызываться построчно на каждый chunk
-// stdout/stderr — пишем в Redis не чаще раза в секунду на деплой, а не на каждую строку
-const PERSIST_DEBOUNCE_MS = 1000
-const pendingPersists = new Map<string, ReturnType<typeof setTimeout>>()
-
-function schedulePersist(deploy: DeployStatus): void {
-  const existing = pendingPersists.get(deploy.deployId)
-  if (existing) {
-    clearTimeout(existing)
-  }
-  pendingPersists.set(
-    deploy.deployId,
-    setTimeout(() => {
-      pendingPersists.delete(deploy.deployId)
-      void persistDeploy(deploy)
-    }, PERSIST_DEBOUNCE_MS),
-  )
-}
-
-/** Немедленный персист в обход debounce — вызывать при завершении/значимых переходах статуса */
-function flushPersist(deploy: DeployStatus): void {
-  const existing = pendingPersists.get(deploy.deployId)
-  if (existing) {
-    clearTimeout(existing)
-    pendingPersists.delete(deploy.deployId)
-  }
-  void persistDeploy(deploy)
-}
-
-/**
- * Восстанавливает deployHistory из Redis при старте процесса. Записи, застигнутые
- * в состоянии running=true (агент перезапустился, пока деплой шёл) помечаются
- * interrupted — реальный исход неизвестен: nsenter-процесс на хосте физически может
- * быть жив (см. host-exec.ts), но dashboard-agent потерял currentProcess и больше не
- * получает от него stdout/exit code напрямую.
- */
-async function rehydrateFromRedis(): Promise<void> {
-  const r = getRedis()
-  if (!r) {
-    return
-  }
-  try {
-    const ids = await r.lrange(REDIS_INDEX_KEY, 0, -1)
-    if (ids.length === 0) {
-      return
-    }
-    const items = await r.mget(...ids.map(redisItemKey))
-    for (const raw of items) {
-      if (!raw) {
-        continue
-      }
-      try {
-        const deploy = JSON.parse(raw) as DeployStatus
-        // Записи, персистированные до §38 (нет phases в Redis) — бэкфилл пустым массивом.
-        deploy.phases = deploy.phases ?? []
-        if (deploy.running) {
-          deploy.running = false
-          deploy.interrupted = true
-          deploy.error = deploy.error
-            ?? 'Dashboard-agent перезапустился во время этого деплоя — итоговый статус неизвестен'
-          deploy.endTime = deploy.endTime ?? new Date().toISOString()
-        }
-        deployHistory.push(deploy)
-      } catch {
-        // Битая запись в Redis — пропускаем
-      }
-    }
-    if (deployHistory.length > 0) {
-      console.warn(`[deploy] Восстановлено ${deployHistory.length} записей истории деплоя из Redis`)
-    }
-  } catch (err) {
-    console.error('[deploy] Не удалось восстановить историю деплоя из Redis:', err)
-  }
-}
-
-/** Создаёт новую запись деплоя и кладёт в историю */
-function createDeploy(partial: Omit<DeployStatus, 'deployId' | 'output' | 'truncatedLines' | 'phases'>): DeployStatus {
-  const deploy: DeployStatus = {
-    deployId: randomUUID(),
-    output: [],
-    truncatedLines: 0,
-    phases: [],
-    lastOutputAt: new Date().toISOString(),
-    ...partial,
-  }
-  deployHistory.push(deploy)
-  if (deployHistory.length > MAX_DEPLOY_HISTORY) {
-    deployHistory.shift()
-  }
-  void persistDeploy(deploy)
-  void persistIndex()
-  return deploy
-}
-
-// =============================================================================
-// Long-poll ожидание прогресса (§38 Этап 2) — деплой один на процесс (isDeployRunning
-// отклоняет параллельные), поэтому один EventEmitter на все deployId с лихвой хватает.
-// =============================================================================
-
-const deployEvents = new EventEmitter()
-deployEvents.setMaxListeners(50)
-
-function emitDeployEvent(deployId: string): void {
-  deployEvents.emit(deployId)
-}
-
-/** Добавляет строку в лог деплоя с вытеснением старых строк при переполнении, обновляет
- * фазы/lastOutputAt и будит все ожидающие deploy_wait для этого deployId. */
-function appendOutput(deploy: DeployStatus, line: string): void {
-  deploy.output.push(line)
-  if (deploy.output.length > MAX_OUTPUT_LINES) {
-    deploy.output.shift()
-    deploy.truncatedLines++
-  }
-  deploy.lastOutputAt = new Date().toISOString()
-  applyPhaseLine(deploy.phases, line)
-  schedulePersist(deploy)
-  emitDeployEvent(deploy.deployId)
-}
-
-/** Текущий активный или последний завершённый деплой */
-function getLatestDeploy(): DeployStatus | undefined {
-  return deployHistory[deployHistory.length - 1]
-}
-
-/** Есть ли сейчас работающий деплой */
-function isDeployRunning(): boolean {
-  return deployHistory.some((d) => d.running)
-}
-
-/** Регистрирует stdout/stderr/close/error обработчики для long-running деплой-процесса
- * (nsenter-спавн на хосте). Общий код для /api/deploy/app и /api/deploy/infra — оба
- * запускают один и тот же жизненный цикл процесса, различается только сама команда. */
-function attachDeployProcessHandlers(deploy: DeployStatus, proc: ChildProcess): void {
-  proc.stdout?.on('data', (data: Buffer) => {
-    const lines = data
-      .toString()
-      .split('\n')
-      .filter((line) => line.trim())
-    for (const line of lines) {
-      appendOutput(deploy, line)
-    }
-  })
-
-  proc.stderr?.on('data', (data: Buffer) => {
-    const lines = data
-      .toString()
-      .split('\n')
-      .filter((line) => line.trim())
-    for (const line of lines) {
-      appendOutput(deploy, `⚠️ ${line}`)
-    }
-  })
-
-  proc.on('close', (code) => {
-    deploy.exitCode = code
-    if (code === 0) {
-      appendOutput(deploy, `✅ Deploy completed successfully`)
-    } else {
-      appendOutput(deploy, `❌ Deploy failed with exit code ${code}`)
-      deploy.error = `Process exited with code ${code}`
-    }
-    deploy.running = false
-    deploy.endTime = new Date().toISOString()
-    currentProcess = null
-    releaseHostLock()
-    flushPersist(deploy)
-    // appendOutput выше уже разбудил ожидающих deploy_wait, но синхронно ДО этой строки —
-    // deploy.running там ещё был true. Будим ещё раз теперь, когда running реально false,
-    // иначе deploy_wait не отпускается раньше таймаута на терминальном статусе.
-    emitDeployEvent(deploy.deployId)
-  })
-
-  proc.on('error', (error) => {
-    appendOutput(deploy, `❌ Process error: ${error.message}`)
-    deploy.error = error.message
-    deploy.running = false
-    deploy.endTime = new Date().toISOString()
-    currentProcess = null
-    releaseHostLock()
-    flushPersist(deploy)
-    emitDeployEvent(deploy.deployId)
-  })
-}
-
-/**
- * Выполняет docker команду
- */
-async function runDockerCommand(command: string): Promise<{ stdout: string; stderr: string }> {
-  try {
-    const { stdout, stderr } = await execAsync(command, { timeout: 120000 })
-    return { stdout, stderr }
-  } catch (error) {
-    const execError = error as { stdout?: string; stderr?: string; message?: string }
-    throw new Error(execError.stderr || execError.message || 'Docker command failed', { cause: error })
-  }
-}
 
 export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
   // ⚠️ Граница по времени обязательна, и вот почему (инцидент 2026-08-08, s3).
@@ -326,12 +55,12 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
   // таймауту (`AVV_ERR_PLUGIN_EXEC_TIMEOUT`), агент уходил в crash loop.
   //
   // Форма отказа тут важнее самого отказа: не «работаем без Redis», как обещает библиотека, а
-  // смерть всего приложения. `try/catch` внутри `rehydrateFromRedis` не помогает — исключения
+  // смерть всего приложения. `try/catch` внутри rehydrateHistory не помогает — исключения
   // не происходит вовсе, происходит зависание.
   //
   // История деплоев — вещь необязательная (это кеш в памяти, восстанавливаемый из Redis), поэтому
   // 3 секунды и продолжаем без неё. Терять её неприятно, не подняться — недопустимо.
-  await withTimeout(rehydrateFromRedis(), {
+  await withTimeout(rehydrateHistory(), {
     ms: 3000,
     fallback: undefined,
     label: 'восстановление истории деплоев из Redis',
@@ -364,7 +93,11 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       const deploy = deployId ? deployHistory.find((d) => d.deployId === deployId) : getLatestDeploy()
 
       if (!deploy) {
-        return errorResponse(deployId ? `Deploy ${deployId} not found in history` : 'No deploys yet')
+        return {
+          success: false,
+          error: deployId ? `Deploy ${deployId} not found in history` : 'No deploys yet',
+          timestamp: new Date().toISOString(),
+        }
       }
 
       // Сквозная нумерация строк: строка N лога = output[N - truncatedLines]
@@ -414,7 +147,11 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       const deploy = deployId ? deployHistory.find((d) => d.deployId === deployId) : getLatestDeploy()
 
       if (!deploy) {
-        return errorResponse(deployId ? `Deploy ${deployId} not found in history` : 'No deploys yet')
+        return {
+          success: false,
+          error: deployId ? `Deploy ${deployId} not found in history` : 'No deploys yet',
+          timestamp: new Date().toISOString(),
+        }
       }
 
       const waitMs = Math.min(
@@ -485,7 +222,11 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       const { image } = request.body
 
       if (!image) {
-        return errorResponse('Image name is required')
+        return {
+          success: false,
+          error: 'Image name is required',
+          timestamp: new Date().toISOString(),
+        }
       }
 
       const deploy = createDeploy({
@@ -518,7 +259,11 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         deploy.error = error instanceof Error ? error.message : 'Unknown error'
         flushPersist(deploy)
 
-        return errorResponse(deploy.error)
+        return {
+          success: false,
+          error: deploy.error,
+          timestamp: new Date().toISOString(),
+        }
       }
     },
   )
@@ -532,7 +277,11 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       const { containerId, pull = false } = request.body
 
       if (!containerId) {
-        return errorResponse('Container ID is required')
+        return {
+          success: false,
+          error: 'Container ID is required',
+          timestamp: new Date().toISOString(),
+        }
       }
 
       const deploy = createDeploy({
@@ -590,7 +339,11 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         deploy.error = error instanceof Error ? error.message : 'Unknown error'
         flushPersist(deploy)
 
-        return errorResponse(deploy.error)
+        return {
+          success: false,
+          error: deploy.error,
+          timestamp: new Date().toISOString(),
+        }
       }
     },
   )
@@ -604,7 +357,11 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       const { composePath, services = [] } = request.body
 
       if (!composePath) {
-        return errorResponse('Compose file path is required')
+        return {
+          success: false,
+          error: 'Compose file path is required',
+          timestamp: new Date().toISOString(),
+        }
       }
 
       const deploy = createDeploy({
@@ -639,7 +396,11 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         deploy.error = error instanceof Error ? error.message : 'Unknown error'
         flushPersist(deploy)
 
-        return errorResponse(deploy.error)
+        return {
+          success: false,
+          error: deploy.error,
+          timestamp: new Date().toISOString(),
+        }
       }
     },
   )
@@ -666,12 +427,20 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       const { appName, staging = false, seed = false } = request.body
 
       if (!appName) {
-        return errorResponse('App name is required')
+        return {
+          success: false,
+          error: 'App name is required',
+          timestamp: new Date().toISOString(),
+        }
       }
 
       // Валидация имени приложения (только буквы, цифры, дефис)
       if (!/^[a-z0-9-]+$/.test(appName)) {
-        return errorResponse('Invalid app name format')
+        return {
+          success: false,
+          error: 'Invalid app name format',
+          timestamp: new Date().toISOString(),
+        }
       }
 
       // Серверный guard: s3 (staging-раннер) принимает только staging-деплои, s2 (прод) —
@@ -680,24 +449,39 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       // клиентской проверки в deploy-mcp).
       const currentServer = getCurrentServer()
       if (currentServer === 's3' && !staging) {
-        return errorResponse('s3 — staging-раннер, принимает только staging-деплои (staging: true)')
+        return {
+          success: false,
+          error: 's3 — staging-раннер, принимает только staging-деплои (staging: true)',
+          timestamp: new Date().toISOString(),
+        }
       }
       if (currentServer === 's2' && staging) {
-        return errorResponse('s2 — production, staging-деплои идут на s3 (staging: true здесь запрещён)')
+        return {
+          success: false,
+          error: 's2 — production, staging-деплои идут на s3 (staging: true здесь запрещён)',
+          timestamp: new Date().toISOString(),
+        }
       }
 
       // Если уже есть запущенный деплой — отклоняем
       if (isDeployRunning()) {
-        return errorResponse('Another deploy is already in progress')
+        return {
+          success: false,
+          error: 'Another deploy is already in progress',
+          timestamp: new Date().toISOString(),
+        }
       }
 
       // Host-level lock (см. lib/host-lock.ts): деплой и e2e спавнят процессы на одном хосте
       // и конкурируют за node_modules/сборку — блокируем и когда занято именно e2e-прогоном.
       if (!tryAcquireHostLock('deploy', appName)) {
         const lock = getHostLock()
-        return errorResponse(
-          `Хост занят другой операцией: ${lock?.kind} (${lock?.label}), с ${lock?.since} — дождитесь завершения перед новым деплоем`,
-        )
+        return {
+          success: false,
+          error:
+            `Хост занят другой операцией: ${lock?.kind} (${lock?.label}), с ${lock?.since} — дождитесь завершения перед новым деплоем`,
+          timestamp: new Date().toISOString(),
+        }
       }
 
       const deploy = createDeploy({
@@ -723,11 +507,12 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       // как при ручном SSH-запуске BlackCove). Переопределяется env-переменной.
       const sopsKeyFile = process.env['SOPS_AGE_KEY_FILE'] || '/home/deploy/.age/letar-key.txt'
 
-      currentProcess = spawn('nsenter', args, {
+      const proc = spawn('nsenter', args, {
         stdio: ['ignore', 'pipe', 'pipe'],
         env: { ...process.env, SOPS_AGE_KEY_FILE: sopsKeyFile },
       })
-      attachDeployProcessHandlers(deploy, currentProcess)
+      setCurrentProcess(proc)
+      attachDeployProcessHandlers(deploy, proc)
 
       // Возвращаем сразу — клиент будет опрашивать статус через /api/deploy/status
       return {
@@ -760,22 +545,37 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       const { service } = request.body
 
       if (!service) {
-        return errorResponse('Service name is required')
+        return {
+          success: false,
+          error: 'Service name is required',
+          timestamp: new Date().toISOString(),
+        }
       }
 
       if (!/^[a-z0-9-]+$/.test(service)) {
-        return errorResponse('Invalid service name format')
+        return {
+          success: false,
+          error: 'Invalid service name format',
+          timestamp: new Date().toISOString(),
+        }
       }
 
       if (isDeployRunning()) {
-        return errorResponse('Another deploy is already in progress')
+        return {
+          success: false,
+          error: 'Another deploy is already in progress',
+          timestamp: new Date().toISOString(),
+        }
       }
 
       if (!tryAcquireHostLock('deploy', service)) {
         const lock = getHostLock()
-        return errorResponse(
-          `Хост занят другой операцией: ${lock?.kind} (${lock?.label}), с ${lock?.since} — дождитесь завершения перед новым деплоем`,
-        )
+        return {
+          success: false,
+          error:
+            `Хост занят другой операцией: ${lock?.kind} (${lock?.label}), с ${lock?.since} — дождитесь завершения перед новым деплоем`,
+          timestamp: new Date().toISOString(),
+        }
       }
 
       const deploy = createDeploy({
@@ -798,11 +598,12 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       // это проверяет и падает с понятной ошибкой, если ключа нет, а секреты есть.
       const sopsKeyFile = process.env['SOPS_AGE_KEY_FILE'] || '/home/deploy/.age/letar-key.txt'
 
-      currentProcess = spawn('nsenter', args, {
+      const proc = spawn('nsenter', args, {
         stdio: ['ignore', 'pipe', 'pipe'],
         env: { ...process.env, SOPS_AGE_KEY_FILE: sopsKeyFile },
       })
-      attachDeployProcessHandlers(deploy, currentProcess)
+      setCurrentProcess(proc)
+      attachDeployProcessHandlers(deploy, proc)
 
       return {
         success: true,
@@ -821,21 +622,26 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
    */
   fastify.post('/api/deploy/cancel', async (): Promise<ApiResponse<{ deployId: string; cancelled: boolean }>> => {
     const running = deployHistory.find((d) => d.running)
+    const proc = getCurrentProcess()
 
-    if (!running || !currentProcess) {
-      return errorResponse('No deploy in progress')
+    if (!running || !proc) {
+      return {
+        success: false,
+        error: 'No deploy in progress',
+        timestamp: new Date().toISOString(),
+      }
     }
 
     try {
-      currentProcess.kill('SIGTERM')
+      proc.kill('SIGTERM')
       appendOutput(running, '🛑 Deploy cancelled by user')
       running.error = 'Cancelled by user'
       running.running = false
       running.endTime = new Date().toISOString()
-      currentProcess = null
+      setCurrentProcess(null)
       releaseHostLock()
       flushPersist(running)
-      emitDeployEvent(running.deployId)
+      deployEvents.emit(running.deployId)
 
       return {
         success: true,
@@ -843,7 +649,11 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         timestamp: new Date().toISOString(),
       }
     } catch (error) {
-      return errorResponse(error instanceof Error ? error.message : 'Failed to cancel')
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to cancel',
+        timestamp: new Date().toISOString(),
+      }
     }
   })
 }
