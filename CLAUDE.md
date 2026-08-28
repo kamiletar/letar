@@ -28,6 +28,11 @@
 [nx-convert-to-inferred-scope-regression](/.claude/docs/nx-convert-to-inferred-scope-regression.md)
 ⚠️ `nx g @nx/*:convert-to-inferred` тихо меняет реальный охват таргета у проектов с кастомными
 настройками — диффать до/после, не доверять «отработал без ошибок» ·
+[nx-target-without-executor-silent-noop](/.claude/docs/nx-target-without-executor-silent-noop.md)
+⚠️ таргет в `project.json` без `executor` (только `options`, добавка к inferred-таргету плагина) —
+если путь проекта выпал из `include` плагина в `nx.json`, Nx молча подставляет `nx:noop`: команда
+завершается за ~21мс с `Successfully ran target`, ноль тестов реально не запущено, `nx show
+projects --with-target` этого не ловит ·
 [nx-temp-build-dir-breaks-project-graph](/.claude/docs/nx-temp-build-dir-breaks-project-graph.md)
 ⚠️ временный distDir внутри `apps/` (`NEXT_DIST_DIR=.next-prodcheck`) роняет граф Nx **у всех**
 параллельных агентов, а ошибка не намекает на чужой каталог; закрыто шаблонами в `.nxignore` —
