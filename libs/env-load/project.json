@@ -56,10 +56,8 @@
       }
     },
     "test": {
-      "executor": "@nx/vitest:test",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "config": "libs/env-load/vitest.config.ts"
+        "config": "vitest.config.ts"
       }
     },
     "oxlint": {
