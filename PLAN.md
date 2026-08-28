@@ -3636,11 +3636,13 @@ the database`) — в `schema.zmodel` не было модели `RateLimit`, а
   `betterAuth()` с собственным `rateLimit`-блоком, но без явного `storage:` — тоже попадают под
   дефолт Better Auth (`memory`/`secondary-storage`), никогда не `'database'` — не задеты.
 
-⚠️ **Открытый вопрос (не проверялось в этой сессии):** kami и auth-hub тихо переключаются с
-Redis на `'database'`-хранилище rate-limit, если `REDIS_URL` не задан в проде (условие
-`process.env.REDIS_URL ? 'secondary-storage' : ...`) — модель в схеме есть, поэтому это не
-крашит, но стоит свериться, что `REDIS_URL` реально заполнен в их `.env.docker.enc`, а не
-использовать Postgres как rate-limit store по факту вместо Redis по намерению.
+✅ **Открытый вопрос закрыт (2026-08-28):** `REDIS_URL` реально заполнен в
+`apps/kami/.env.docker.enc` и `apps/auth-hub/.env.docker.enc`, указывает на общий `letar-redis`;
+переменная прописана и в `environment:` обоих `docker-compose.production.yml` (второе место из
+`.claude/rules/env-files.md`). Проверено на s2 напрямую в запущенных контейнерах
+(`docker exec kami-app-10`/`auth-hub-app-32` — `REDIS_URL` реально есть в env процесса, не только
+в файле), `letar-redis` — `Up 2 weeks (healthy)`. Оба приложения фактически на ветке
+`'secondary-storage'`, database-fallback не используется.
 
 **Часть 4 (доки) — закрыта (2026-08-28):** `better-auth-1.7-account-issuer-field.md` переписан
 (14 приложений вместо 4, обычный sign-in затронут тоже, двухчастный паттерн миграции add-column +
