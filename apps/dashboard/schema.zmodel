@@ -123,6 +123,9 @@ enum AlertType {
   /// В модели Account найдены строки с issuer = NULL — регрессия better-auth 1.7 (см.
   /// .claude/docs/better-auth-1.7-account-issuer-field.md), sign-up/reset-password вернут 500
   AUTH_ACCOUNT_ISSUER_NULL
+  /// Синтетическая канарейка не смогла войти в приложение (POST /api/auth/sign-in/email вернул
+  /// не 200) — PLAN.md §71 п.3.3, ловит любую поломку входа, не только NULL issuer
+  AUTH_LOGIN_CANARY_FAILED
 }
 
 /// Уровни серьёзности алертов

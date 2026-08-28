@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "AlertType" ADD VALUE 'AUTH_LOGIN_CANARY_FAILED';

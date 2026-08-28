@@ -2,6 +2,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.24.10] — 2026-08-28
+
+### Added
+
+- Новый тип алерта `AUTH_LOGIN_CANARY_FAILED` в `AlertType` (миграция
+  `20260828124810_add_login_canary_alert_type`) — создаётся `dashboard-agent`'ской синтетической
+  канареечной проверкой входа каждые 30 минут (`login-canary-check`, PLAN.md корня §71 п.3.3):
+  POST `/api/auth/sign-in/email` канареечными учётными данными на 9 приложений с реальным
+  credential-входом, алерт при HTTP-ответе, отличном от 200, две неудачи подряд. Дополняет
+  `AUTH_ACCOUNT_ISSUER_NULL` (п.3.2) — ловит любую поломку входа, не только NULL issuer.
+
 ## [1.24.9] — 2026-08-28
 
 ### Added
