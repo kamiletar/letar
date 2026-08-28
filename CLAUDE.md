@@ -219,7 +219,12 @@ request-scope бросают, мокать оба модуля; `redirect()` б�
 глобально мокают `next/navigation` без него в `vitest.setup.tsx` — нужен `importOriginal` или
 проверка `.digest` подстрокой
 
-**Chakra v3 — ловушки:** [chakra-multi-system-ssr-barrel-trap](/.claude/docs/chakra-multi-system-ssr-barrel-trap.md) ⚠️
+**Chakra v3 — ловушки:** [chakra-css-memo-prop-order-hydration](/.claude/docs/chakra-css-memo-prop-order-hydration.md)
+⚠️ кеш `css()` считает ключ по отсортированным ключам объекта (регрессия 3.29.0), а результат
+зависит от порядка — один и тот же `<Text>` получает разные классы emotion на сервере и клиенте,
+«attributes didn't match» при визуально одинаковом CSS; не путать с багом Turbopack+Emotion ниже,
+`--webpack` не помогает, чинится патчем зависимости ·
+[chakra-multi-system-ssr-barrel-trap](/.claude/docs/chakra-multi-system-ssr-barrel-trap.md) ⚠️
 импорт шрифта/константы из барреля с `createSystem()` в Server Component исполняет весь модуль и
 роняет SSR (`accordionAnatomy.extendWith is not a function`) ·
 [chakra-strict-tokens-global-typegen](/.claude/docs/chakra-strict-tokens-global-typegen.md) ⚠️
