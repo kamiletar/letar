@@ -44,7 +44,7 @@
 [root-pin-peer-drift](/.claude/docs/root-pin-peer-drift.md) ⚠️ точный пин в корневом
 `package.json` — тихая мина: override/resolution перебивает его молча или caret-соседи уезжают
 вперёд без него; `bun install` не печатает peer-warnings ни в каком режиме, проверка —
-`bun scripts/check-all.mjs --group=deps` (раннер пяти проверок целостности, см. ниже
+`bun scripts/check-all.mjs --group=deps` (раннер проверок целостности, состав — см. ниже
 § «Проверки целостности монорепо»)
 
 **MCP-серверы:** [mcp-servers](/.claude/docs/mcp-servers.md) состав и назначение ·
