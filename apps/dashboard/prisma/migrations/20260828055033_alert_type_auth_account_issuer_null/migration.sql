@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "AlertType" ADD VALUE 'AUTH_ACCOUNT_ISSUER_NULL';

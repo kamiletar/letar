@@ -120,6 +120,9 @@ enum AlertType {
   DEPS_VULNERABLE
   /// Lock-файл давно не обновлялся (§25 PLAN-INFRA.md)
   DEPS_STALE
+  /// В модели Account найдены строки с issuer = NULL — регрессия better-auth 1.7 (см.
+  /// .claude/docs/better-auth-1.7-account-issuer-field.md), sign-up/reset-password вернут 500
+  AUTH_ACCOUNT_ISSUER_NULL
 }
 
 /// Уровни серьёзности алертов

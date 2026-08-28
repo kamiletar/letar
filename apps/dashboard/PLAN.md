@@ -1,7 +1,7 @@
 # План развития Dashboard
 
-> **Версия:** 1.24.1
-> **Последнее обновление:** 2026-08-11
+> **Версия:** 1.24.9
+> **Последнее обновление:** 2026-08-28
 
 ---
 
@@ -37,6 +37,11 @@
   `@letar/auth/server` `createDevSessionRoute` — тот же паттерн, что в `domwellbes`/
   `grandslamcup`). `ALLOW_DEV_SESSION`/`DEV_SESSION_TOKEN` только в `.env.local`,
   **никогда в `.env.docker`** (см. `.claude/rules/env-files.md`)
+- Алерт `AUTH_ACCOUNT_ISSUER_NULL` (PLAN.md корня §71 п.3.2) — новый тип в `AlertType`,
+  создаётся `dashboard-agent` ежедневной cron-проверкой `Account.issuer IS NULL` по 14
+  приложениям с моделью Account (better-auth 1.7 регрессия, не путать со статическим гейтом
+  схемы `check-better-auth-schema.mjs` — этот ловит уже вставленные NULL-строки, тот — только
+  отсутствие поля)
 
 ---
 

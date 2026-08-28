@@ -2,6 +2,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.24.9] — 2026-08-28
+
+### Added
+
+- Новый тип алерта `AUTH_ACCOUNT_ISSUER_NULL` в `AlertType` (миграция
+  `20260828055033_alert_type_auth_account_issuer_null`) — создаётся `dashboard-agent`
+  ежедневной cron-проверкой `Account.issuer IS NULL` по 14 приложениям с моделью Account
+  (регрессия better-auth 1.7, PLAN.md корня §71 п.3.2). Дополняет статический гейт схемы
+  `scripts/check-better-auth-schema.mjs` — тот ловит отсутствие поля, не уже вставленные NULL.
+
 ## [1.24.7] — 2026-08-28
 
 ### Refactor: сведён дубль `formatBytes`
