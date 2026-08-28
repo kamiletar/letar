@@ -17,6 +17,9 @@ const baseURL = process.env['BASE_URL'] || 'http://localhost:3015'
  */
 export default defineConfig({
   ...nxE2EPreset(__filename, { testDir: './src' }),
+  // Первый webpack compile Next.js и генерация image-variants тяжелее обычного рендера.
+  // Ограничиваем fan-out, чтобы параллельные page.goto не упирались в общий 30s timeout.
+  workers: 4,
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,

@@ -16,8 +16,7 @@ test.describe('Внутренняя навигация и консистентн
   })
 
   test('все внутренние ссылки на странице не ведут на 404 (кроме внешних доменов)', async ({ page, request }) => {
-    await page.goto('/')
-    await page.waitForLoadState('domcontentloaded')
+    await page.goto('/', { waitUntil: 'load' })
 
     const hrefs = await page
       .locator('a[href]')
@@ -37,7 +36,7 @@ test.describe('Внутренняя навигация и консистентн
     await page.goto('/')
 
     const pagePromise = context.waitForEvent('page')
-    await page.locator('a[href="https://kami.letar.best"]').first().click()
+    await page.locator('footer a[href="https://kami.letar.best"]').click()
     const newPage = await pagePromise
 
     // Текущая страница осталась на главной
