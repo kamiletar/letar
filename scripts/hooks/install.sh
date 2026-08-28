@@ -9,6 +9,9 @@
 #                                   после случайного Prettier-форматирования `nx format`)
 #   - pre-commit-deps-integrity.sh — целостность зависимостей (патчи + peer), запускается
 #                                   ТОЛЬКО если в коммите есть bun.lock/package.json
+#   - pre-commit-schema-migration-check.sh — блокирует commit schema.zmodel со структурным
+#                                   изменением (новое/изменённое поле, @@unique/@@index/...)
+#                                   без новой папки prisma/migrations/ рядом
 #   - pre-push-submodule-check.sh — блокирует push, если записанный SHA submodule ещё не
 #                                   существует на его origin (иначе падает деплой ВСЕХ
 #                                   приложений: `upload-pack: not our ref`)
@@ -41,9 +44,11 @@ install_into() {
   cp "$SRC_DIR/pre-commit-semgrep.sh" "$hooks_dir/_pre-commit-semgrep.sh"
   cp "$SRC_DIR/pre-commit-dprint-check.sh" "$hooks_dir/_pre-commit-dprint-check.sh"
   cp "$SRC_DIR/pre-commit-deps-integrity.sh" "$hooks_dir/_pre-commit-deps-integrity.sh"
+  cp "$SRC_DIR/pre-commit-schema-migration-check.sh" "$hooks_dir/_pre-commit-schema-migration-check.sh"
+  cp "$SRC_DIR/../check-schema-migration.mjs" "$hooks_dir/_check-schema-migration.mjs"
   chmod +x "$hooks_dir/_pre-commit-scope-guard.sh" "$hooks_dir/_pre-commit-sops.sh" \
     "$hooks_dir/_pre-commit-semgrep.sh" "$hooks_dir/_pre-commit-dprint-check.sh" \
-    "$hooks_dir/_pre-commit-deps-integrity.sh"
+    "$hooks_dir/_pre-commit-deps-integrity.sh" "$hooks_dir/_pre-commit-schema-migration-check.sh"
 
   cat > "$hooks_dir/pre-commit" <<'DISPATCH'
 #!/usr/bin/env bash
@@ -60,6 +65,9 @@ if [[ $status -eq 0 ]]; then
 fi
 if [[ $status -eq 0 ]]; then
   bash "$DIR/_pre-commit-deps-integrity.sh" || status=$?
+fi
+if [[ $status -eq 0 ]]; then
+  bash "$DIR/_pre-commit-schema-migration-check.sh" || status=$?
 fi
 if [[ $status -eq 0 ]]; then
   bash "$DIR/_pre-commit-sops.sh" || status=$?
@@ -84,7 +92,7 @@ exec bash "$DIR/_pre-push-submodule-check.sh" "$@"
 PUSH_DISPATCH
   chmod +x "$hooks_dir/pre-push"
 
-  echo "✅ $label → $hooks_dir/pre-commit (scope-guard + semgrep + dprint-check + deps-integrity + sops)"
+  echo "✅ $label → $hooks_dir/pre-commit (scope-guard + semgrep + dprint-check + deps-integrity + schema-migration-check + sops)"
   echo "   $label → $hooks_dir/pre-push (submodule-check)"
 }
 

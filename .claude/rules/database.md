@@ -10,6 +10,12 @@ paths: apps/**/schema.zmodel, apps/**/prisma/**, apps/**/generated/**
 2. Запусти `nx zenstack:generate <app-name>`
 3. Запусти `nx db:migrate <app-name> -- --name <описание>` — **ВСЕГДА создавай migration file**
 
+⚠️ Забытый шаг 3 не ловится деплоем (`prisma migrate status` сверяет файлы миграций против
+`_prisma_migrations`, а не схему против БД) — только pre-commit хук
+`pre-commit-schema-migration-check.sh` блокирует коммит структурного изменения
+`schema.zmodel` без новой папки `prisma/migrations/`. Подробности —
+[database.md § «Изменил схему...»](/.claude/docs/database.md#-изменил-схему--файл-миграции-обязан-ехать-в-том-же-коммите).
+
 ## ⛔ КРИТИЧНО: Миграции на production
 
 **ЗАПРЕЩЕНО на production:**
