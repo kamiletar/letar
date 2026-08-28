@@ -58,6 +58,10 @@
 - [x] Перенести time на s2 (deploy-affected.sh, pull-env-docker.sh, dashboard seed)
 - [x] Compose-миграция под zero-downtime rollout-профиль (§18.6 Сессия G, healthcheck/alias/
       DEPLOY_TAG/без container_name-ports; `doctor --app time` → 6/7 required ✅)
+- [x] Dockerfile.production — эксперимент `node:24-slim` вместо `node:24-alpine` (2026-08-28,
+      детали в `PLAN_COMPLETED.md`, разбор — `PLAN-INFRA-4.md §130`). Единственное приложение
+      репозитория на slim — сознательное отклонение, не переносить на другие без пересмотра
+      цены (+90MB на образ).
 - [x] Живой пилот rollout: `letar.rollout: 'true'` включён, супервизируемый прод-деплой с
       непрерывным curl-мониторингом пройден чисто (2026-07-12, сессия №68) — см. корневой
       `PLAN.md` §18.6 Сессия G

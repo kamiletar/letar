@@ -1,5 +1,27 @@
 # Time — Выполненные задачи
 
+## Эксперимент: `node:24-slim` вместо `node:24-alpine` в Dockerfile.production (2026-08-28)
+
+Контекст — репозиторная задача по дедупликации tz-блока (двухстадийный `COPY --from=tz`,
+обходящий отсутствие zoneinfo в Alpine/musl), повторявшегося в 22 `Dockerfile.production`.
+Кроме сокращения комментария до одной строки во всех 22 файлах (`PLAN-INFRA-4.md §129`), `time`
+выбран площадкой для проверки более радикальной альтернативы: перейти на `node:24-slim`
+(Debian), где zoneinfo есть из коробки и весь tz-стейдж не нужен вообще.
+
+Проверено локально (Docker Desktop): `nx build time` → `docker build -f
+apps/time/Dockerfile.production .` → `docker run ... node -e
+"Intl.DateTimeFormat().resolvedOptions().timeZone"`. `TZ=Europe/Moscow` подтверждён без установки
+`tzdata`. Заодно проверена и не подтвердилась гипотеза про поломку нативных модулей из-за
+сборки на glibc-хосте и рантайма на musl — на slim и alpine идентичная ошибка `Cannot find
+module 'require-in-the-middle-...'` при старте, это существующий баг instrumentation-хука
+Next.js standalone (`.claude/docs/nextjs-standalone-tracing.md`), не связанный с базовым
+образом.
+
+**Итог:** решение работает, но образ вырос со 324MB (alpine) до 414MB (slim) — приемлемо для
+одного приложения, но неприемлемо как массовая замена при диске s2, уже упиравшемся в 91%.
+Оставлено только в `time` как задокументированное отклонение (комментарий в самом Dockerfile),
+не тиражируется на остальные 21 приложение. Полный разбор — `PLAN-INFRA-4.md §130`.
+
 ## Деплой фикса 401 у cron time-notifications (2026-08-25)
 
 Код-фикс (`ec7dcdd4`, замена самописной проверки `Authorization: Bearer` на `verifyCronSecret()`
