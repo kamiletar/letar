@@ -12,6 +12,7 @@
 
 import {
   type DeployTarget,
+  E2E_GATED_APPS,
   HARD_GATED_APPS,
   type InfraServer,
   resolveDeployServer,
@@ -45,11 +46,13 @@ interface E2eGateResult {
  * читает `.last-e2e-status/<app>.json` на s3 через dashboard-agent и собирает причины
  * (несвежий/проваленный/отсутствующий прогон, коммит не совпадает, инфраструктурная ошибка).
  *
- * Для приложений из `HARD_GATED_APPS` (`@letar/infra-config` — единственный источник истины,
- * список там же и прокомментирован; PLAN-INFRA.md §18.7, инцидент archetest 2026-07-28)
- * любая причина блокирует деплой
- * (`blocked: true`, fail-closed). Для остальных — те же причины остаются предупреждениями, деплой
- * продолжается (`blocked: false`) — старое warn-only поведение Фазы 2 не меняется.
+ * Вызывается только для приложений из `E2E_GATED_APPS` (`@letar/infra-config`) — вызывающий код
+ * (`deploy_app`) пропускает эту функцию целиком для остальных, у них нет staging-e2e инфры и
+ * причины были бы чистым шумом (см. §126 PLAN-INFRA-4.md). Для приложений из `HARD_GATED_APPS`
+ * (подмножество `E2E_GATED_APPS`, инвариант закреплён тестом; PLAN-INFRA.md §18.7, инцидент
+ * archetest 2026-07-28) любая причина блокирует деплой (`blocked: true`, fail-closed). Для
+ * остальных gated-приложений — те же причины остаются предупреждениями, деплой продолжается
+ * (`blocked: false`) — старое warn-only поведение Фазы 2 не меняется.
  *
  * Коммит e2e-прогона может расходиться с `origin/main` (несвязанные посторонние коммиты
  * прилетают в main постоянно — это нормальный режим монорепо, не аномалия) — тогда сверка
@@ -304,10 +307,13 @@ export function createDeployMcpServer(): McpServer {
     async ({ app, target = 'production', seed = false }) => {
       const server = resolveDeployServer(app, target as DeployTarget)
       const staging = target === 'staging'
+      const gated = !staging && E2E_GATED_APPS.includes(app)
       const hardGated = !staging && HARD_GATED_APPS.includes(app)
-      // e2e-gate: только для production. Для HARD_GATED_APPS — fail-closed (блокирует деплой),
-      // для остальных — старое warn-only поведение Фазы 2 (только предупреждает).
-      const gate = staging ? { blocked: false, reasons: [] } : await evaluateE2eGate(app, hardGated)
+      // e2e-gate: только для production и только для приложений из E2E_GATED_APPS — у остальных
+      // нет staging-e2e инфры, проверка была бы чистым шумом (§126 PLAN-INFRA-4.md). Внутри
+      // gated-приложений: HARD_GATED_APPS — fail-closed (блокирует деплой), остальные — старое
+      // warn-only поведение Фазы 2 (только предупреждает).
+      const gate = gated ? await evaluateE2eGate(app, hardGated) : { blocked: false, reasons: [] }
       if (gate.blocked) {
         return errorText(
           [
