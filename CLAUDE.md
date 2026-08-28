@@ -337,6 +337,9 @@ Playwright-скрипт через Bash вместо navigate/UI-логина ·
 ⚠️ анимируемое свойство читается как тождественная матрица — выглядит как «эффект не работает» ·
 [verification-pitfalls § заголовки HTML не говорят про статику](/.claude/docs/verification-pitfalls.md#тот-же-класс-но-не-про-отдельный-запрос-заголовки-html-ответа-не-говорят-ничего-про-статику)
 ⚠️ `content-encoding` HTML-ответа не доказывает сжатие `.js`/`.css` — проверять по типу контента ·
+[verification-pitfalls § состояние живёт в процессе](/.claude/docs/verification-pitfalls.md#тот-же-класс-но-не-про-артефакт-состояние-живёт-в-процессе-а-не-в-бандле)
+⚠️ холодный `next start` не воспроизводит баг, потому что кеш процесса заполняет сама проверяемая
+страница — прогревать другими маршрутами, иначе «на проде не воспроизводится» ложно ·
 [docker-bind-mount-pitfalls](/.claude/docs/docker-bind-mount-pitfalls.md) ⚠️
 `compose up -d` не перечитывает смонтированный конфиг ·
 [docker-bare-bun-workspace-deps](/.claude/docs/docker-bare-bun-workspace-deps.md) ·
