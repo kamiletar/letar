@@ -345,6 +345,10 @@ Playwright-скрипт через Bash вместо navigate/UI-логина ·
 [verification-pitfalls § состояние живёт в процессе](/.claude/docs/verification-pitfalls.md#тот-же-класс-но-не-про-артефакт-состояние-живёт-в-процессе-а-не-в-бандле)
 ⚠️ холодный `next start` не воспроизводит баг, потому что кеш процесса заполняет сама проверяемая
 страница — прогревать другими маршрутами, иначе «на проде не воспроизводится» ложно ·
+[verification-pitfalls § grep по копиям репо](/.claude/docs/verification-pitfalls.md#обратный-случай-рекурсивный-grepgrep-по-рабочему-дереву-врёт-в-тревожную-сторону--копии-репозитория-в-claudeworktrees)
+⚠️ единственный раздел документа с обратным направлением вранья — рекурсивный поиск заходит в
+`.claude/worktrees/` (копии репо фоновых агентов) и кеш Nx, показывая давно исправленные проблемы
+как живые; фикс — `git grep` или явное исключение этих каталогов ·
 [docker-bind-mount-pitfalls](/.claude/docs/docker-bind-mount-pitfalls.md) ⚠️
 `compose up -d` не перечитывает смонтированный конфиг ·
 [docker-bare-bun-workspace-deps](/.claude/docs/docker-bare-bun-workspace-deps.md) ·
