@@ -3442,3 +3442,22 @@ libs/upload-validation), не запушено.
 разбора каждого случая отдельно, не входила в scope этой сессии. `domwellbes` НЕ кандидат — там
 уже другая, более продвинутая схема (`@letar/image-upload/server` с sharp-обработкой и
 `resolveUploadPath`).
+
+## §68 — `createVkGetUserInfo` (`@letar/auth`): VK ID getUserInfo вынесен из auth-hub/driving-school (2026-08-28)
+
+Ещё один дословный дубль, найденный по свежим следам марафона VK OAuth-фиксов (§66 и разбор в
+`apps/auth-hub/PLAN_COMPLETED.md` «четыре наслоённых бага») — `getUserInfo` нативного VK ID
+провайдера (`socialProviders.vk`) в auth-hub и driving-school делал один и тот же POST на
+`id.vk.com/oauth2/user_info`, парсинг профиля и синтетический email `<user_id>@vk.com`.
+
+Вынесен в `libs/auth/src/server/vk-user-info.ts` (`createVkGetUserInfo`), экспортирован из
+`@letar/auth/server`. driving-school-специфичные поля (`birthdate`/`gender`/`phone`, через
+`parseGender`/`parseBirthdate`) передаются опциональным `mapAdditionalUserFields` — сами функции
+парсинга остались в приложении, т.к. переиспользуются им ещё и для Yandex-профиля.
+`nx typecheck:tsgo auth-hub driving-school` и `nx test auth` (42/42) зелёные, поведение не
+изменилось (чистый перенос кода). Четыре коммита (libs/auth, auth-hub код+доки, submodule
+driving-school код+доки, bump submodule); не запушено.
+
+⚠️ **Живой вход через VK не пере-протестирован** — риск низкий (логика байт-в-байт та же), но
+перед следующим деплоем стоит пройти клик «ВКонтакте» на `/profile/connected-accounts` (auth-hub)
+и форму входа driving-school вручную.
