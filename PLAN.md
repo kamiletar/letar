@@ -3358,6 +3358,37 @@ GB/TB, которых не было, поведение для всех уже �
 `document-upload-dialog.tsx` (EN), `driving-school/file-upload.tsx` + `mandala/
 custom-audio-manager.tsx` (RU).
 
+## §66 — `createDevSessionRoute` (`@letar/auth`): credential-аккаунт без `issuer`/верного `accountId` — второй слой того же бага §59 (2026-08-28)
+
+Найдено в сессии по `svoichuzhie`, продолжение §59. Там был закрыт root cause в схеме
+(`Account.issuer` в общем фрагменте) для 4 приложений — но deploy-agent-dev продолжал получать
+падение `10-auth.spec.ts` на staging svoichuzhie: «успешный вход» не редиректит, таймаут.
+
+Причина — не схема, а сама фабрика `createDevSessionRoute` (`libs/auth/src/server/factories/
+create-dev-session-route.ts`), которой staging e2e-раннер логинит тестовые фикстуры для честного
+прогона `/sign-in/email` (не только dev-session cookie bypass, см. её же JSDoc про PLAN.md §18.7
+batch2). Роут создавал credential-`Account` с `accountId=email` вместо `user.id` и без поля
+`issuer` вовсе. Better Auth 1.7+ ищет аккаунт при входе строгим совпадением
+`providerId+issuer+accountId` (`internal-adapter.mjs`, `findAccountByKey`/`findCredentialAccount`)
+— такая запись никогда не находилась. До 1.7 issuer не проверялся, поэтому баг был скрыт до
+самого апгрейда, тем же классом, что и §59, только на уровне рантайм-кода общей библиотеки, а не
+Prisma-схемы приложения.
+
+**Фикс:** `accountId: user.id`, `issuer: 'local:credential'` (буквальное значение
+`createLocalAccountIssuer('credential')` из `@better-auth/core`, захардкожено тем же литералом,
+что и backfill-миграция §59, без новой зависимости в `libs/auth`). Заодно проверка на «уже
+существующий аккаунт» матчится по тем же корректным полям — иначе уже накопившаяся на staging
+битая запись вечно блокировала бы создание правильной даже после фикса.
+
+`@letar/auth@0.12.3` — фиксит потенциально **все** приложения, подключающие
+`createDevSessionRoute` с параметром `password` (не только svoichuzhie): `aboi`, `archetest`,
+`auth-hub`, `dashboard`, `domwellbes`, `driving-school`, `grandslamcup`, `studio`,
+`animatrona-tracker`. Живая проверка проведена только на svoichuzhie (деплой-запрос отправлен
+deploy-agent-dev, результат на момент записи не получен) — если у других приложений тот же
+staging e2e-тест на реальный вход по паролю всё ещё падает после апгрейда до `@letar/auth@0.12.3`
+или выше, причина не в них, искать в другом месте. Разбор — `.claude/docs/
+better-auth-1.7-account-issuer-field.md` (обновить при случае ссылкой на этот раздел).
+
 **Не тронуто (сознательно):** `@letar/animatrona-utils` (уже консолидирована для своей
 экосистемы, своя конвенция округления GB) · `@letar/forms-shadcn/field-file-upload.tsx`
 (публикуемый npm-пакет, runtime-зависимость на внутренний `@letar/*` там недопустима —
