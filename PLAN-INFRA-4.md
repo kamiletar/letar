@@ -1,4 +1,4 @@
-# PLAN-INFRA-4 — §62–§113
+# PLAN-INFRA-4 — §62–§119
 
 > Часть журнала `PLAN-INFRA.md` (журнал инфраструктурных треков монорепо letar, вне auth-плана).
 > Файл разрезан на части 2026-08-20 — исходный файл превысил 10000 строк, см.
@@ -11,7 +11,7 @@
 | [PLAN-INFRA-1.md](/PLAN-INFRA-1.md) | §15–§25      | сервер s3, deploy MCP, e2e-гейт, форматтер worktree, `libs/ui` |
 | [PLAN-INFRA-2.md](/PLAN-INFRA-2.md) | §26–§48      | SEO, npm-публикация, деплой, redis-инцидент, Traefik           |
 | [PLAN-INFRA-3.md](/PLAN-INFRA-3.md) | §49–§61      | firewall, hard e2e-gate, cron-задачи, security-инциденты       |
-| **эта часть (PLAN-INFRA-4.md)**     | §62–§94      | канарейка, GlitchTip, CI-гейт, Agent Mail                      |
+| **эта часть (PLAN-INFRA-4.md)**     | §62–§119     | канарейка, GlitchTip, CI-гейт, Agent Mail                      |
 
 ---
 
