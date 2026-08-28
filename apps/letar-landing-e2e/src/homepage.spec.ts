@@ -26,18 +26,23 @@ test.describe('Главная страница', () => {
     await expect(page.getByRole('heading', { name: 'Библиотеки' })).toBeVisible()
   })
 
-  test('карточки проектов отображаются с ссылками на внешние ресурсы', async ({ page }) => {
+  test('каталог содержит актуальные ссылки на Studio Letar и личный сайт Kami', async ({ page }) => {
     await page.goto('/')
 
-    // Карточка Premium Rosstil ведёт на внешний домен, открывается в новой вкладке
-    const rosstilCard = page.locator('a[href="https://premium.rosstil.ru"]').first()
-    await expect(rosstilCard).toBeVisible()
-    await expect(rosstilCard).toHaveAttribute('target', '_blank')
-    await expect(rosstilCard).toHaveAttribute('rel', 'noopener noreferrer')
+    const studioCard = page.locator('a[href="https://studio.letar.best"]').first()
+    await expect(studioCard).toBeVisible()
+    await expect(studioCard).toHaveAttribute('target', '_blank')
+    await expect(studioCard).toHaveAttribute('rel', 'noopener noreferrer')
+    await expect(studioCard.getByText('Studio Letar')).toBeVisible()
 
-    // Название и описание карточки видны
-    await expect(rosstilCard.getByText('Premium Rosstil')).toBeVisible()
-    await expect(rosstilCard.getByText('Fashion e-commerce платформа')).toBeVisible()
+    const kamiCard = page.locator('a[href="https://kami.letar.best"]').first()
+    await expect(kamiCard).toBeVisible()
+    await expect(kamiCard).toHaveAttribute('target', '_blank')
+    await expect(kamiCard).toHaveAttribute('rel', 'noopener noreferrer')
+    await expect(kamiCard.getByText('Kami', { exact: true })).toBeVisible()
+
+    await expect(page.getByText('Premium Rosstil', { exact: true })).toHaveCount(0)
+    await expect(page.getByText('Integrelle', { exact: true })).toHaveCount(0)
   })
 
   test('проекты без ссылки (десктопные) рендерятся без <a>-обёртки', async ({ page }) => {
