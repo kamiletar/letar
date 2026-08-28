@@ -73,6 +73,10 @@ export {
 } from './crypto'
 export { createSocialProviderLoader } from './social-loader'
 
+// VK ID getUserInfo (Этап VK ID миграции 2026-08-27, вынесено из дословного дубля
+// auth-hub/driving-school)
+export { createVkGetUserInfo, type CreateVkGetUserInfoOptions, type VkOAuth2Profile } from './vk-user-info'
+
 // Connected Accounts
 export {
   createUnlinkAccountAction,
