@@ -6,12 +6,11 @@
 
 import type { FastifyInstance } from 'fastify'
 import {
-  type BackupFreshnessCheckResult,
   runAcmeDnsBackupFreshnessCheck,
   runBackupFreshnessCheck,
   runTraefikBackupFreshnessCheck,
 } from '../lib/backup-freshness'
-import type { ApiResponse } from '../types'
+import { defineCronRoute } from '../lib/cron-route'
 
 export async function backupFreshnessRoutes(fastify: FastifyInstance): Promise<void> {
   /**
@@ -21,72 +20,15 @@ export async function backupFreshnessRoutes(fastify: FastifyInstance): Promise<v
    * (`maddy-backup-freshness-check`), переименование потребовало бы правки конфига на сервере
    * ради косметики.
    */
-  fastify.post(
-    '/api/cron/backup-freshness-check',
-    { schema: { body: { type: 'object', additionalProperties: true } } },
-    async (): Promise<ApiResponse<BackupFreshnessCheckResult>> => {
-      try {
-        const result = await runBackupFreshnessCheck()
-        return {
-          success: true,
-          data: result,
-          timestamp: new Date().toISOString(),
-        }
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
-      }
-    },
-  )
+  defineCronRoute(fastify, '/api/cron/backup-freshness-check', runBackupFreshnessCheck)
 
   /**
    * POST /api/cron/acme-dns-backup-freshness-check — прогон проверки acme-dns
    */
-  fastify.post(
-    '/api/cron/acme-dns-backup-freshness-check',
-    { schema: { body: { type: 'object', additionalProperties: true } } },
-    async (): Promise<ApiResponse<BackupFreshnessCheckResult>> => {
-      try {
-        const result = await runAcmeDnsBackupFreshnessCheck()
-        return {
-          success: true,
-          data: result,
-          timestamp: new Date().toISOString(),
-        }
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
-      }
-    },
-  )
+  defineCronRoute(fastify, '/api/cron/acme-dns-backup-freshness-check', runAcmeDnsBackupFreshnessCheck)
 
   /**
    * POST /api/cron/traefik-backup-freshness-check — прогон проверки секретов Traefik на s3
    */
-  fastify.post(
-    '/api/cron/traefik-backup-freshness-check',
-    { schema: { body: { type: 'object', additionalProperties: true } } },
-    async (): Promise<ApiResponse<BackupFreshnessCheckResult>> => {
-      try {
-        const result = await runTraefikBackupFreshnessCheck()
-        return {
-          success: true,
-          data: result,
-          timestamp: new Date().toISOString(),
-        }
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
-      }
-    },
-  )
+  defineCronRoute(fastify, '/api/cron/traefik-backup-freshness-check', runTraefikBackupFreshnessCheck)
 }

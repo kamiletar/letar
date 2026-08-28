@@ -2,6 +2,25 @@
 
 Детальное описание всех реализованных фич.
 
+## Рефакторинг: общий helper для cron-роутов (2026-08-28)
+
+8 файлов в `src/routes/` (`docker-prune.ts`, `next-cache-cleanup.ts`,
+`staging-idle-shutdown.ts`, `backup-freshness.ts` — три регистрации, `log-scan.ts`,
+`health-check.ts`, `email-canary.ts`, `account-issuer-check.ts`) регистрировали
+`POST /api/cron/<name>` дословно одинаковым телом: схема `{ body: { type: 'object',
+additionalProperties: true } }` без валидации полей, `await runner()`, оборачивание в
+`ApiResponse<T>` через одинаковый `try/catch`. Различался только путь, runner-функция и
+generic-тип результата.
+
+Вынесено в `lib/cron-route.ts` — `defineCronRoute<T>(fastify, path, runner: () =>
+Promise<T>): void`. Все 8 регистраций заменены одной строкой каждая, generic-тип результата
+выводится из сигнатуры `runner` автоматически (`ApiResponse<DockerPruneResult>` и т.п. больше
+не пишутся руками). GET `/api/cron/email-canary-check/status` в `email-canary.ts` не тронут —
+у него нет схемы тела и `data` берётся из синхронного `getEmailCanaryState()`, а не из
+`await runner()`, поведение структурно другое.
+
+Поведение не изменилось: тот же путь, та же схема, тот же формат ответа при успехе/ошибке.
+
 ## Ежедневная проверка `Account.issuer = NULL` (2026-08-28)
 
 PLAN.md корня §71 п.3.2 — защита от повторения better-auth 1.7 issuer-инцидента через

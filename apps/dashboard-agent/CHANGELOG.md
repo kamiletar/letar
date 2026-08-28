@@ -11,6 +11,17 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.15.21] — 2026-08-28
+
+### Changed
+
+- Рефакторинг: 8 идентичных регистраций `POST /api/cron/<name>` (`docker-prune`,
+  `next-cache-cleanup`, `staging-idle-shutdown`, `backup-freshness-check` ×3,
+  `log-scan`, `health-check`, `email-canary-check`, `account-issuer-check`) вынесены
+  в общий `defineCronRoute<T>(fastify, path, runner)` (`lib/cron-route.ts`). Поведение
+  не менялось — та же схема тела, тот же `try/catch` в `ApiResponse<T>`. GET
+  `/api/cron/email-canary-check/status` не тронут — другая форма (sync-геттер, нет схемы тела).
+
 ## [0.15.20] — 2026-08-28
 
 ### Added
