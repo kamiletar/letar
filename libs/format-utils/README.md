@@ -68,6 +68,23 @@ formatExperience(new Date('2020-01-01')) // 5 лет
 calculateYearsFromDate(new Date('1990-05-15')) // 34
 ```
 
+### Размер файла
+
+```typescript
+import { formatFileSize } from '@letar/format-utils'
+
+formatFileSize(1536) // '1.5 KB'
+formatFileSize(0) // '0 B'
+formatFileSize(1536, { locale: 'ru' }) // '1.5 КБ'
+```
+
+⚠️ Не единственная реализация в монорепо — намеренно. `@letar/animatrona-utils` держит свою
+(`formatFileSize`/`formatBytes`/`formatFileSizeRu`) — она уже консолидирована для всей экосистемы
+Animatrona под собственной конвенцией округления GB, трогать не нужно. `@letar/forms-shadcn`
+держит локальную копию в `field-file-upload.tsx` — публикуемый npm-пакет, внутренние `@letar/*`
+там допустимы только в `devDependencies` (`.claude/docs/npm-publish-from-monorepo.md`), поэтому
+runtime-зависимость на `format-utils` ему не подходит.
+
 ## Экспорты
 
 ### Деньги
@@ -85,6 +102,10 @@ calculateYearsFromDate(new Date('1990-05-15')) // 34
 - `formatDuration` — длительность
 - `formatExperience` — опыт в годах
 - `calculateYearsFromDate` — расчёт лет
+
+### Размер файла
+
+- `formatFileSize` — байты в человекочитаемый вид, `{ locale: 'en' | 'ru' }`
 
 ## Команды
 

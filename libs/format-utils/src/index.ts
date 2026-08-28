@@ -23,4 +23,8 @@ export { slugify } from './lib/slugify'
 // Pluralization utilities
 export { pluralizeRu } from './lib/pluralize'
 
+// File size utilities
+export { formatFileSize } from './lib/file-size'
+export type { FormatFileSizeOptions } from './lib/file-size'
+
 // Re-export types if needed in the future
