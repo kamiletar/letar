@@ -3562,8 +3562,21 @@ mandala (2) ✅, dashboard ✅, animatrona-tracker ✅, time (только logou
 подтвердить прод-деплой; после — живая проверка входа/logout по плану (`providerId`/NULL-count
 SQL по каждой БД, реальный логин, кнопка «Выход» со свежей сессией).
 
-**Часть 3 (защита от повторения) — не начата**, вынесена отдельными задачами (см. spawn_task
-ниже): скрипт-гейт по схемам, алерт в dashboard, синтетическая проверка входа.
+**Часть 3.1 (защита от повторения — гейт-скрипт) — закрыта (2026-08-28):**
+`scripts/check-better-auth-schema.mjs` сверяет модели `Account`/`oauthClient` каждого
+приложения с полями, которые реально требует установленный `better-auth`/
+`@better-auth/oauth-provider`. Требуемый набор полей не хардкожен и не парсится регэкспом по
+dist-файлам — скрипт резолвит и **исполняет** реальный код пакетов (`@better-auth/core/db` →
+`getAuthTables({})`, `@better-auth/oauth-provider` → `oauthProvider({}).schema.oauthClient`),
+поэтому переживёт следующий minor-апгрейд без правок. Область — 14 приложений с `prismaAdapter`
+для `Account`, auth-hub (единственный с `@better-auth/oauth-provider`) для `oauthClient`.
+Подключён в общий раннер (`bun scripts/check-all.mjs`, id `better-auth-schema`, severity `gate`,
+группа `auth`) и тем самым в CI (`Integrity checks` в `.github/workflows/ci.yml` уже вызывает
+раннер без изменений). Живая проверка: временное удаление `issuer` из
+`apps/kami/schema/auth.zmodel` дало ожидаемый ❌ с понятным списком (приложение, модель, поле),
+после возврата поля — чисто зелёный прогон, `git diff` пуст.
+
+**Часть 3.2–3.3 (алерт в dashboard, синтетическая проверка входа) — не начаты.**
 
 **Часть 4 (доки) — закрыта (2026-08-28):** `better-auth-1.7-account-issuer-field.md` переписан
 (14 приложений вместо 4, обычный sign-in затронут тоже, двухчастный паттерн миграции add-column +
