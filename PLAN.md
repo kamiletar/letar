@@ -3410,6 +3410,15 @@ driving-school submodule + bump SHA, mandala), не запушено.
 общая функция получила опциональный `forceUnit`, видимый текст не изменился. Детали —
 `apps/dashboard/PLAN_COMPLETED.md`.
 
+**Дополнение 2 (2026-08-28):** тот же класс бага (не `createDevSessionRoute`, а собственный
+`db.helpers.ts` e2e-хелпера) закрыт в `apps/driving-school-e2e/src/helpers/db.helpers.ts` —
+`createTestUser` создавал/апсертил credential-`Account` с `accountId: data.email` и без
+`issuer` (оба места: upsert и plain-create). Приведено к `accountId: user.id` +
+`issuer: 'local:credential'`, устаревшие комментарии «accountId = email для credential auth»
+поправлены. `svoichuzhie-e2e`/`dsperevod-e2e` уже были в правильном виде — использовались как
+образец. `nx lint driving-school-e2e` зелёный (typecheck:tsgo-таргета у e2e-приложения нет).
+Коммит внутри submodule + bump SHA в root letar, не запушено.
+
 ## §67 — `@letar/upload-validation`: валидация upload-файлов вынесена из driving-school/grandslamcup (2026-08-28)
 
 Сквозной аудит безопасности нашёл `src/lib/upload/{validate-file,save-file}.ts` байт-в-байт
