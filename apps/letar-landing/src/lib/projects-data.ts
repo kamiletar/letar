@@ -96,6 +96,20 @@ export const projectCategories: ProjectCategory[] = [
         tech: ['Next.js', 'PostgreSQL', 'ZenStack'],
       },
       {
+        name: 'Свои Чужие',
+        description: 'Официальный сайт группы: концерты, музыка, мерч и фан-клуб',
+        url: 'https://svoichuzhie.ru',
+        emoji: '🎸',
+        tech: ['Next.js', 'PostgreSQL', 'ZenStack'],
+      },
+      {
+        name: 'DomWellbes',
+        description: 'Каталог загородных домов с прозрачной комплектацией и ценой',
+        url: 'https://domwellbes.ru',
+        emoji: '🏡',
+        tech: ['Next.js', 'PostgreSQL', 'ZenStack'],
+      },
+      {
         name: 'Mandala',
         description: 'Галерея мандал и магазин (PWA)',
         url: 'https://mandala.letar.best',
