@@ -21,6 +21,8 @@ export const metadata: Metadata = {
     'Живая экосистема сайтов, приложений и инструментов: продукты Ками, работы Studio Letar, open source и инфраструктура.',
   keywords: ['letar', 'проекты', 'веб-приложения', 'Next.js', 'open source'],
   authors: [{ name: 'Letar' }],
+  creator: 'Kami',
+  publisher: 'Studio Letar',
   alternates: {
     canonical: 'https://letar.best',
   },
@@ -47,13 +49,34 @@ export const metadata: Metadata = {
   },
 }
 
-/** JSON-LD структурированные данные — статический объект, безопасно */
+/** JSON-LD структурированные данные экосистемы — статический объект, безопасно */
 const jsonLd = {
   '@context': 'https://schema.org',
-  '@type': 'WebSite',
-  name: 'Letar',
-  description: 'Живая экосистема сайтов, приложений и инструментов',
-  url: 'https://letar.best',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': 'https://letar.best/#website',
+      name: 'Letar',
+      description: 'Живая экосистема сайтов, приложений и инструментов',
+      url: 'https://letar.best',
+      inLanguage: 'ru',
+      creator: { '@id': 'https://kami.letar.best/#person' },
+      publisher: { '@id': 'https://studio.letar.best/#organization' },
+    },
+    {
+      '@type': 'Person',
+      '@id': 'https://kami.letar.best/#person',
+      name: 'Kami',
+      url: 'https://kami.letar.best',
+      worksFor: { '@id': 'https://studio.letar.best/#organization' },
+    },
+    {
+      '@type': 'Organization',
+      '@id': 'https://studio.letar.best/#organization',
+      name: 'Studio Letar',
+      url: 'https://studio.letar.best',
+    },
+  ],
 }
 
 export const viewport: Viewport = {

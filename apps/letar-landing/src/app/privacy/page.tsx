@@ -4,7 +4,34 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Политика конфиденциальности',
+  description:
+    'Политика конфиденциальности Letar: какие cookie и обезличенную аналитику использует сайт и как управлять согласием.',
+  alternates: {
+    canonical: 'https://letar.best/privacy/',
+  },
   robots: { index: true, follow: true },
+  openGraph: {
+    title: 'Политика конфиденциальности | Letar',
+    description: 'Cookie, обезличенная аналитика и управление согласием на сайте Letar.',
+    url: 'https://letar.best/privacy/',
+    siteName: 'Letar',
+    locale: 'ru_RU',
+    type: 'website',
+    images: [
+      {
+        url: '/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: 'Letar — проекты, сайты, приложения и open source',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Политика конфиденциальности | Letar',
+    description: 'Cookie, обезличенная аналитика и управление согласием на сайте Letar.',
+    images: ['/twitter-image'],
+  },
 }
 
 /**
@@ -20,7 +47,9 @@ export default function PrivacyPage() {
       <main>
         <Container maxW="3xl" py={{ base: 16, md: 24 }}>
           <VStack gap={6} align="stretch">
-            <Heading size="xl">Политика конфиденциальности</Heading>
+            <Heading asChild size="xl">
+              <h1>Политика конфиденциальности</h1>
+            </Heading>
             <Text color="fg.muted" fontSize="sm">
               Действует с 2026 года
             </Text>
