@@ -166,6 +166,10 @@ ECONNREFUSED/ERR_DLOPEN_FAILED при зелёном билде ·
 [nextjs-dynamic-ssr-false-still-server-compiled](/.claude/docs/nextjs-dynamic-ssr-false-still-server-compiled.md)
 ⚠️ `dynamic(ssr:false)` не исключает модуль из server-резолва импортов (RSC client reference) —
 несовпадение `"node"`/`"browser"` exports транзитивной зависимости всё равно валит билд ·
+[webpack-only-app-silent-export-drift](/.claude/docs/webpack-only-app-silent-export-drift.md) ⚠️
+auth-hub — единственное приложение на `next build --webpack`; расхождения с Turbopack тихие
+(предупреждение в логе + `undefined` в рантайме при `exit=0`), и этот лог дважды приняли за
+падение сборки ·
 [nextjs16-turbopack-default-emotion-hydration](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md)
 ⚠️ Turbopack по умолчанию + Chakra `<Global>` → hydration mismatch, флаки в e2e ·
 [turbopack-private-submodule-root](/.claude/docs/turbopack-private-submodule-root.md) «Could not find
