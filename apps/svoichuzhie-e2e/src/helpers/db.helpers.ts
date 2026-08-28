@@ -52,6 +52,11 @@ export async function createTestUser(data: {
 
   let userId: string
 
+  // Better Auth 1.7+ ищет credential-аккаунт строгим совпадением providerId+issuer+accountId,
+  // где accountId — id пользователя (не email) и issuer — 'local:credential' (буквальное значение
+  // createLocalAccountIssuer('credential') из @better-auth/core). Без них /sign-in/email не
+  // находит аккаунт даже при верном пароле. См. .claude/docs/better-auth-1.7-account-issuer-field.md
+  // и тот же фикс в create-dev-session-route.ts (@letar/auth).
   if (existing) {
     await db.user.update({
       where: { email: data.email },
@@ -59,9 +64,15 @@ export async function createTestUser(data: {
     })
     userId = existing.id
     await db.account.upsert({
-      where: { providerId_accountId: { providerId: 'credential', accountId: data.email } },
-      update: { password: hashedPassword },
-      create: { userId, providerId: 'credential', accountId: data.email, password: hashedPassword },
+      where: { providerId_accountId: { providerId: 'credential', accountId: userId } },
+      update: { password: hashedPassword, issuer: 'local:credential' },
+      create: {
+        userId,
+        providerId: 'credential',
+        issuer: 'local:credential',
+        accountId: userId,
+        password: hashedPassword,
+      },
     })
     console.log(`  ✓ Updated user: ${data.email}`)
   } else {
@@ -70,7 +81,13 @@ export async function createTestUser(data: {
     })
     userId = user.id
     await db.account.create({
-      data: { userId, providerId: 'credential', accountId: data.email, password: hashedPassword },
+      data: {
+        userId,
+        providerId: 'credential',
+        issuer: 'local:credential',
+        accountId: userId,
+        password: hashedPassword,
+      },
     })
     console.log(`  ✓ Created user: ${data.email}`)
   }
