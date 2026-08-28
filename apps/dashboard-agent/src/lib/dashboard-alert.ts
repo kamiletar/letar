@@ -17,6 +17,7 @@ export type DashboardAlertType =
   | 'DEPLOY_FAILED'
   | 'BACKUP_FAILED'
   | 'CRON_FAILED'
+  | 'AUTH_ACCOUNT_ISSUER_NULL'
 
 export type DashboardAlertSeverity = 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL'
 

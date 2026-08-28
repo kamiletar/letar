@@ -11,6 +11,21 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.15.20] — 2026-08-28
+
+### Added
+
+- Ежедневная cron-проверка `account-issuer-null-check` (04:00 s2): подключается к БД каждого
+  из 14 приложений с моделью Account (`lib/account-issuer-check.ts`) и выполняет
+  `SELECT count(*) FROM "Account" WHERE issuer IS NULL`. Дополняет статический гейт схемы
+  (`scripts/check-better-auth-schema.mjs`) — тот ловит отсутствие поля `issuer` в
+  `schema.zmodel`, эта проверка ловит соседний класс отказа: поле есть, но одна из строк
+  осталась с `issuer = NULL` (see PLAN.md корня §71 п.3.2). Алерт `AUTH_ACCOUNT_ISSUER_NULL`
+  шлётся в dashboard с первой же находки, повтор — тем же паттерном удвоения, что у
+  `backup-freshness.ts` (§62): не спамит, но и не замолкает навсегда, пока проблема жива.
+- `domwellbes` добавлен в `APP_CONFIG` (`lib/database.ts`) — раньше отсутствовал, из-за чего
+  `dashboard-agent` не мог подключиться к его БД ни для бэкапов, ни для новой проверки.
+
 ## [0.15.19] — 2026-08-28
 
 ### Added

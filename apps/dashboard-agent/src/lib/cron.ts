@@ -400,6 +400,18 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's3',
   },
   {
+    id: 'account-issuer-null-check',
+    name: 'Account.issuer NULL Check',
+    app: 'dashboard-agent',
+    endpoint: '/api/cron/account-issuer-check',
+    schedule: '0 4 * * *',
+    description: 'Ежедневная проверка NULL-регрессии Account.issuer (better-auth 1.7, PLAN.md §71 п.3.2): '
+      + 'алерт AUTH_ACCOUNT_ISSUER_NULL, если в БД любого из приложений с моделью Account найдена '
+      + 'хотя бы одна строка с issuer = NULL — sign-up/reset-password для такого аккаунта вернёт 500',
+    enabled: true,
+    server: 's2',
+  },
+  {
     id: 'health-check',
     name: 'Health Check (CPU/память/диск/контейнеры/БД)',
     app: 'dashboard-agent',

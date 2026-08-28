@@ -157,6 +157,15 @@ const APP_CONFIG = {
       user: 'aprel8008_user',
     },
   },
+  domwellbes: {
+    secretsPath: '/secrets/domwellbes.env',
+    containerName: 'domwellbes-db',
+    defaults: {
+      port: 5432,
+      database: 'domwellbes',
+      user: 'domwellbes',
+    },
+  },
 } as const
 
 type AppName = keyof typeof APP_CONFIG

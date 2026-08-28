@@ -24,6 +24,7 @@ import { authMiddleware } from './lib/auth'
 import { rehydrateExecutionLogsFromRedis, startScheduler } from './lib/cron'
 import { startHistoryCollection } from './lib/history'
 import { ipWhitelistMiddleware } from './lib/ip-whitelist'
+import { accountIssuerCheckRoutes } from './routes/account-issuer-check'
 import { acmeDnsRoutes } from './routes/acme-dns'
 import { appsRoutes } from './routes/apps'
 import { backupFreshnessRoutes } from './routes/backup-freshness'
@@ -128,6 +129,7 @@ async function main(): Promise<void> {
   await fastify.register(envRoutes)
   await fastify.register(emailCanaryRoutes)
   await fastify.register(backupFreshnessRoutes)
+  await fastify.register(accountIssuerCheckRoutes)
   await fastify.register(healthCheckRoutes)
   await fastify.register(logScanRoutes)
   await fastify.register(dockerPruneRoutes)
