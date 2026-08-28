@@ -3342,3 +3342,33 @@ archetest — да; остальные — хардкод текста), `colorP
 `nx typecheck:tsgo`/`lint` зелёные на всех шести затронутых проектах (`@letar/ui`, studio,
 grandslamcup, mandala, pravda, archetest). Шесть коммитов (либа + докс, studio submodule +
 bump SHA, по одному на grandslamcup/mandala/pravda/archetest), не запушено.
+
+## §65 — `@letar/format-utils`: `formatFileSize` вынесена из 13 мест (2026-08-28)
+
+`formatFileSize`/`formatBytes` была продублирована 13 раз по монорепо тремя конкурирующими
+семействами поведения: EN cap-на-MB (4 идентичные копии), RU cap-на-МБ (2 идентичные копии),
+плюс россыпь несовместимых друг с другом вариантов (always-GB, запятая вместо точки, свои
+единицы округления).
+
+Добавлена `formatFileSize(bytes, { locale: 'en' | 'ru' })` в `libs/format-utils` (не в
+`@letar/animatrona-utils` — та привязана именем к одной продуктовой экосистеме). Свела только
+байт-в-байт идентичные дубли, где новая функция — строгое надмножество старой (добавляет
+GB/TB, которых не было, поведение для всех уже отображаемых значений не меняется):
+`libs/github-releases` (реэкспорт), `driving-school/document-card.tsx` +
+`document-upload-dialog.tsx` (EN), `driving-school/file-upload.tsx` + `mandala/
+custom-audio-manager.tsx` (RU).
+
+**Не тронуто (сознательно):** `@letar/animatrona-utils` (уже консолидирована для своей
+экосистемы, своя конвенция округления GB) · `@letar/forms-shadcn/field-file-upload.tsx`
+(публикуемый npm-пакет, runtime-зависимость на внутренний `@letar/*` там недопустима —
+оставлена копия с комментарием-объяснением) · `dashboard/lib/format.ts` +
+`SystemOverview.tsx` (always-GB и decimals-параметр — другая семантика) ·
+`domwellbes/cabinet/projects/[id]/page.tsx` (запятая вместо точки, округление до минимум 1 КБ —
+осознанное форматирование для клиента) · `animatrona-tracker/admin-section.tsx` (только ГБ/МБ,
+своё округление) — унификация этих пяти изменила бы видимый на экране текст, не только код.
+
+`nx run-many -t format/lint/typecheck:tsgo` зелёные на всех пяти затронутых проектах
+(`@letar/format-utils`, `@letar/github-releases`, `@letar/forms-shadcn`, `driving-school`,
+`mandala`). Тесты `format-utils` (новые) и `github-releases` (существующие, теперь проверяют
+реэкспорт) зелёные. Шесть коммитов (либа+тесты, github-releases, forms-shadcn-комментарий,
+driving-school submodule + bump SHA, mandala), не запушено.
