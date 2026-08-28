@@ -76,8 +76,8 @@ deploy_app({ app })                                                      → tar
 
 - **Warn-only** (по умолчанию, для всех приложений вне списка ниже) — только ПРЕДУПРЕЖДАЕТ, не
   блокирует, если данных нет / прогон упал / коммит другой / старше 24ч.
-- **Hard gate** (`HARD_GATED_APPS` в `libs/infra-config/src/index.ts`: `archetest`, `dsperevod`,
-  `svoichuzhie`, `aboi`, `aprel8008`) — **ОТКАЗЫВАЕТ** в том же наборе случаев, fail-closed
+- **Hard gate** (`HARD_GATED_APPS` в `libs/infra-config/src/index.ts` — актуальный состав
+  смотри там, здесь не дублируется) — **ОТКАЗЫВАЕТ** в том же наборе случаев, fail-closed
   (включая ошибку самой проверки статуса — «не могу проверить» тоже блокирует, не пропускает).
   `deploy_app` в этом случае возвращает `isError` до вызова `/api/deploy/app` — деплой на прод
   не запускается вообще, ни на шаг.
@@ -128,8 +128,9 @@ gate на уровне MCP-инструмента `deploy_app`.
 гарантирует «этот коммит прошёл e2e на staging-сборке», а не «этот конкретный production-артефакт
 протестирован» (build once/promote — вне скоупа Фазы 1–2).
 
-**Hard gate для `HARD_GATED_APPS` реализован 2026-07-28** (см. выше) — покрывает archetest,
-dsperevod, svoichuzhie, aboi, aprel8008. Для `grandslamcup` (Фаза 3, `PLAN.md` §18.6) отдельное
+**Hard gate для `HARD_GATED_APPS` реализован 2026-07-28** (см. выше). Состав списка с тех пор
+рос (`studio` — 2026-08-06, `auth-hub` — 2026-08-28); актуальный смотри в
+`libs/infra-config/src/index.ts`. Для `grandslamcup` (Фаза 3, `PLAN.md` §18.6) отдельное
 решение о переводе на hard gate по-прежнему ждёт недели эксплуатации warn-only — эти два трека
 независимы, `grandslamcup` в `HARD_GATED_APPS` не входит.
 

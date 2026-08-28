@@ -78,7 +78,7 @@ export const E2E_GATED_APPS: string[]
  * в деплое приложения из этого списка, если e2e на staging не прошёл/не прогонялся/
  * устарел/не на том коммите.
  */
-export const HARD_GATED_APPS: string[] // archetest, dsperevod, svoichuzhie, aboi, aprel8008, studio
+export const HARD_GATED_APPS: string[] // archetest, dsperevod, svoichuzhie, aboi, aprel8008, studio, auth-hub
 ```
 
 ### Текущий сервер (рантайм внутри контейнера)

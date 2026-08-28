@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   APP_PORTS,
+  E2E_GATED_APPS,
   getAppPort,
   getCurrentServer,
   getServerForApp,
@@ -10,8 +11,24 @@ import {
 } from './index'
 
 describe('HARD_GATED_APPS', () => {
-  it('содержит активные коммерческие приложения (PLAN-INFRA.md §18.7)', () => {
-    expect(HARD_GATED_APPS).toEqual(['archetest', 'dsperevod', 'svoichuzhie', 'aboi', 'aprel8008', 'studio'])
+  it('содержит активные коммерческие приложения + auth-hub (PLAN-INFRA.md §18.7)', () => {
+    expect(HARD_GATED_APPS).toEqual([
+      'archetest',
+      'dsperevod',
+      'svoichuzhie',
+      'aboi',
+      'aprel8008',
+      'studio',
+      'auth-hub',
+    ])
+  })
+
+  it('каждое hard-gated приложение уже под warn-only гейтом (E2E_GATED_APPS)', () => {
+    // Hard gate — ужесточение warn-only, а не альтернатива ему: приложение сначала набирает
+    // историю зелёных прогонов в E2E_GATED_APPS, только потом попадает сюда.
+    for (const app of HARD_GATED_APPS) {
+      expect(E2E_GATED_APPS).toContain(app)
+    }
   })
 
   it('каждое hard-gated приложение известно SERVER_APPS (не опечатка в имени)', () => {

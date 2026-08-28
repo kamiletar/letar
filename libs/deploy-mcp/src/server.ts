@@ -45,8 +45,9 @@ interface E2eGateResult {
  * читает `.last-e2e-status/<app>.json` на s3 через dashboard-agent и собирает причины
  * (несвежий/проваленный/отсутствующий прогон, коммит не совпадает, инфраструктурная ошибка).
  *
- * Для приложений из `HARD_GATED_APPS` (archetest, dsperevod, svoichuzhie, aboi, aprel8008 —
- * PLAN-INFRA.md §18.7, инцидент archetest 2026-07-28) любая причина блокирует деплой
+ * Для приложений из `HARD_GATED_APPS` (`@letar/infra-config` — единственный источник истины,
+ * список там же и прокомментирован; PLAN-INFRA.md §18.7, инцидент archetest 2026-07-28)
+ * любая причина блокирует деплой
  * (`blocked: true`, fail-closed). Для остальных — те же причины остаются предупреждениями, деплой
  * продолжается (`blocked: false`) — старое warn-only поведение Фазы 2 не меняется.
  *
@@ -286,7 +287,7 @@ export function createDeployMcpServer(): McpServer {
       'seed: true → deploy-affected.sh --seed (nx run <app>:db:seed после успешного деплоя).',
       'Возвращает deployId — опрашивай прогресс через deploy_status({ server, deployId, sinceLine }).',
       '⚠️ Изменяет production. Перед деплоем убедись, что коммиты запушены (git_status).',
-      '⛔ Для archetest/dsperevod/svoichuzhie/aboi/aprel8008 (HARD_GATED_APPS) production-деплой',
+      `⛔ Для приложений из HARD_GATED_APPS (${HARD_GATED_APPS.join(', ')}) production-деплой`,
       'ОТКАЗЫВАЕТ без свежего зелёного e2e на staging для текущего коммита — не обходится флагом.',
     ].join('\n'),
     {
