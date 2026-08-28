@@ -40,10 +40,28 @@ git push && ssh s2 'cd /home/deploy/letar && git pull && ./deploy-affected.sh --
 ```bash
 # Создать migration из diff
 bun x prisma migrate diff --from-migrations prisma/migrations --to-schema src/generated/schema.prisma --script > /tmp/mig.sql
-# Положить SQL в новую папку миграции и применить
+# Положить SQL в новую папку миграции
 mkdir -p prisma/migrations/<timestamp>_<name> && cp /tmp/mig.sql prisma/migrations/<timestamp>_<name>/migration.sql
-bun x prisma migrate deploy
+# ⚠️ НЕ `migrate deploy` — таблица уже есть в dev-БД (её создал db:push), `migrate deploy`
+# попытается выполнить CREATE TABLE заново и упадёт на «relation already exists». Нужно
+# ПОМЕТИТЬ миграцию применённой, не выполнять её SQL повторно:
+bun x prisma migrate resolve --applied <timestamp>_<name>
 ```
+
+Дальше эта миграция едет в git как обычная — на проде (где таблицы ещё нет) её накатит штатный
+`migrate deploy` при следующем деплое, и там SQL выполнится по-настоящему.
+
+⚠️ **`src/generated/schema.prisma` обычно в `.gitignore` (генерируемый файл) — его состояние на
+диске НЕ равно последнему коммиту.** Если в рабочем дереве есть **чужие незакоммиченные** правки
+`schema.zmodel` (другой агент работает параллельно, см. `git.md` § «Работа рядом с другими
+агентами») и кто-то уже прогонял `zenstack:generate` поверх них, `--to-schema
+src/generated/schema.prisma` подмешает в diff ещё и их незавершённые модели — миграция получится
+шире, чем нужно, и накатит на прод чужой недоделанный кусок раньше времени. Перед тем как класть
+`.sql` в новую папку — глазами сверить, что в нём только твоя модель (по названиям
+`CREATE TABLE`/`ALTER TABLE` в выводе diff), и вручную вырезать лишнее, если оно туда попало.
+Прецедент — `ProjectMilestoneRmrSnapshot` в `domwellbes` (2026-08-28): diff вернул также
+`ProjectChangeAccessGrant`/`ProjectChangeEmergencyOverride` из чужого незакоммиченного WIP,
+пришлось вручную оставить в SQL только строки нужной таблицы.
 
 ### ⚠️ Prisma 7: флаги и shadow-БД изменились
 
