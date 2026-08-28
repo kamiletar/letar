@@ -18,9 +18,9 @@
 // расслоения libs/forms → libs/forms-core, см. libs/forms/PLAN.md (Этап 1/Этап 3а).
 
 import { readFileSync, writeFileSync } from 'node:fs'
-import { readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { walk } from './lib/fs-walk.mjs'
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(scriptDir, '..')
@@ -54,30 +54,7 @@ if (!packageName || !target) {
 const targetAbs = path.resolve(repoRoot, target)
 
 function findTsconfigs(dir, depth) {
-  const found = []
-  if (depth < 0) { return found }
-  let entries
-  try {
-    entries = readdirSync(dir)
-  } catch {
-    return found
-  }
-  for (const entry of entries) {
-    if (entry === 'node_modules' || entry === '.next' || entry === 'dist' || entry === 'out') { continue }
-    const fullPath = path.join(dir, entry)
-    let stats
-    try {
-      stats = statSync(fullPath)
-    } catch {
-      continue
-    }
-    if (stats.isDirectory()) {
-      found.push(...findTsconfigs(fullPath, depth - 1))
-    } else if (entry === 'tsconfig.json') {
-      found.push(fullPath)
-    }
-  }
-  return found
+  return walk(dir, (entry) => entry === 'tsconfig.json', depth)
 }
 
 const appsDir = path.join(repoRoot, 'apps')

@@ -25,6 +25,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import ts from 'typescript'
+import { walk } from './lib/fs-walk.mjs'
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(scriptDir, '..')
@@ -71,32 +72,7 @@ function collectLibSubpaths() {
 // --- 2. Находим все tsconfig.json потребителей внутри apps/ (включая приватные submodule) ---
 
 function findTsconfigs(dir, depth) {
-  const found = []
-  if (depth < 0) { return found }
-  let entries
-  try {
-    entries = readdirSync(dir)
-  } catch {
-    return found
-  }
-  for (const entry of entries) {
-    if (entry === 'node_modules' || entry === '.next' || entry === 'dist' || entry === 'out' || entry === '.git') {
-      continue
-    }
-    const fullPath = path.join(dir, entry)
-    let stats
-    try {
-      stats = statSync(fullPath)
-    } catch {
-      continue
-    }
-    if (stats.isDirectory()) {
-      found.push(...findTsconfigs(fullPath, depth - 1))
-    } else if (entry === 'tsconfig.json') {
-      found.push(fullPath)
-    }
-  }
-  return found
+  return walk(dir, (entry) => entry === 'tsconfig.json', depth)
 }
 
 // tsconfig.json могут содержать JSONC-комментарии (см. apps/aboi-e2e/tsconfig.json) —

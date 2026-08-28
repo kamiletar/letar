@@ -51,39 +51,11 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { walk } from './lib/fs-walk.mjs'
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(scriptDir, '..')
 const rel = (p) => path.relative(repoRoot, p).split(path.sep).join('/')
-
-const SKIP_DIRS = new Set(['node_modules', '.next', 'dist', 'out', '.git', '.nx'])
-
-function walk(dir, predicate, depth) {
-  const found = []
-  if (depth < 0) { return found }
-  let entries
-  try {
-    entries = readdirSync(dir)
-  } catch {
-    return found
-  }
-  for (const entry of entries) {
-    if (SKIP_DIRS.has(entry)) { continue }
-    const fullPath = path.join(dir, entry)
-    let stats
-    try {
-      stats = statSync(fullPath)
-    } catch {
-      continue
-    }
-    if (stats.isDirectory()) {
-      found.push(...walk(fullPath, predicate, depth - 1))
-    } else if (predicate(entry, fullPath)) {
-      found.push(fullPath)
-    }
-  }
-  return found
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. Требуемые поля — из реального кода установленных пакетов, не из хардкода.
