@@ -18,6 +18,7 @@ import {
   deployEvents,
   deployHistory,
   type DeployStatus,
+  finishDeploy,
   getLatestDeploy,
   isDeployRunning,
   rehydrateHistory,
@@ -240,9 +241,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         const { stdout, stderr } = await runDockerCommand(`docker pull ${image}`)
 
         appendOutput(deploy, stdout || stderr || 'Pull completed')
-        deploy.running = false
-        deploy.endTime = new Date().toISOString()
-        flushPersist(deploy)
+        finishDeploy(deploy)
 
         return {
           success: true,
@@ -254,10 +253,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       } catch (error) {
-        deploy.running = false
-        deploy.endTime = new Date().toISOString()
-        deploy.error = error instanceof Error ? error.message : 'Unknown error'
-        flushPersist(deploy)
+        finishDeploy(deploy, error)
 
         return {
           success: false,
@@ -320,9 +316,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         output.push('Container restarted successfully')
         appendOutput(deploy, 'Container restarted successfully')
 
-        deploy.running = false
-        deploy.endTime = new Date().toISOString()
-        flushPersist(deploy)
+        finishDeploy(deploy)
 
         return {
           success: true,
@@ -334,10 +328,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       } catch (error) {
-        deploy.running = false
-        deploy.endTime = new Date().toISOString()
-        deploy.error = error instanceof Error ? error.message : 'Unknown error'
-        flushPersist(deploy)
+        finishDeploy(deploy, error)
 
         return {
           success: false,
@@ -381,9 +372,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         const output = stdout || stderr || 'Compose up completed'
 
         appendOutput(deploy, output)
-        deploy.running = false
-        deploy.endTime = new Date().toISOString()
-        flushPersist(deploy)
+        finishDeploy(deploy)
 
         return {
           success: true,
@@ -391,10 +380,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       } catch (error) {
-        deploy.running = false
-        deploy.endTime = new Date().toISOString()
-        deploy.error = error instanceof Error ? error.message : 'Unknown error'
-        flushPersist(deploy)
+        finishDeploy(deploy, error)
 
         return {
           success: false,

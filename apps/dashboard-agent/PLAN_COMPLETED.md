@@ -2,6 +2,26 @@
 
 Детальное описание всех реализованных фич.
 
+## Дедуп finishDeploy в routes/deploy.ts (2026-08-28, `0.15.25`)
+
+После декомпозиции (`0.15.24`, см. ниже) в трёх разовых docker-хендлерах (`/api/deploy/pull`,
+`/api/deploy/restart`, `/api/deploy/compose-up`) оставался повторяющийся блок завершения записи
+`DeployStatus` — по 2 копии на хендлер (успех и `catch`), итого 6 повторений:
+
+```ts
+deploy.running = false
+deploy.endTime = new Date().toISOString()
+[deploy.error = ...]
+flushPersist(deploy)
+```
+
+Вынесен в `finishDeploy(deploy, error?)` в `lib/deploy-history.ts`, использует уже
+экспортированный оттуда `flushPersist` из `deploy-history-redis.ts`. Осознанно не тронут
+`attachDeployProcessHandlers` в `lib/deploy-process.ts` — похожий по форме, но не идентичный
+паттерн для long-running `nsenter`-процесса деплоя (`appendOutput` с текстом, `exitCode`,
+`currentProcess = null`, `releaseHostLock()` — отдельная забота, не разовая docker-команда).
+`nx typecheck`/`nx test dashboard-agent` — зелёные без правок тестов.
+
 ## Рефакторинг: декомпозиция routes/deploy.ts (2026-08-28, `0.15.24`)
 
 Файл вырос до 927 строк, смешивая четыре независимые заботы. Разрезан на:

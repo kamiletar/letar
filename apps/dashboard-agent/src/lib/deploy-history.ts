@@ -5,7 +5,7 @@
 
 import { randomUUID } from 'crypto'
 import { EventEmitter } from 'events'
-import { persistDeploy, persistIndex, rehydrateFromRedis, schedulePersist } from './deploy-history-redis'
+import { flushPersist, persistDeploy, persistIndex, rehydrateFromRedis, schedulePersist } from './deploy-history-redis'
 import { applyPhaseLine, type DeployPhase } from './deploy-phases'
 
 // Ограничения хранения: сколько деплоев помним и сколько строк лога на деплой
@@ -91,6 +91,19 @@ deployEvents.setMaxListeners(50)
 
 export function emitDeployEvent(deployId: string): void {
   deployEvents.emit(deployId)
+}
+
+/** Завершает разовую docker-команду (pull/restart/compose-up): останавливает running,
+ * проставляет endTime и, если передан error, сообщение из него — затем персистит.
+ * Не годится для long-running процесса deploy-app/deploy-infra — см. attachDeployProcessHandlers
+ * в lib/deploy-process.ts (там своя забота: appendOutput с текстом, exitCode, releaseHostLock). */
+export function finishDeploy(deploy: DeployStatus, error?: unknown): void {
+  deploy.running = false
+  deploy.endTime = new Date().toISOString()
+  if (error !== undefined) {
+    deploy.error = error instanceof Error ? error.message : 'Unknown error'
+  }
+  flushPersist(deploy)
 }
 
 /** Добавляет строку в лог деплоя с вытеснением старых строк при переполнении, обновляет

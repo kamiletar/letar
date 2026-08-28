@@ -11,6 +11,17 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.15.25] — 2026-08-28
+
+### Changed
+
+- Дедуп завершения разовых docker-команд (`pull`/`restart`/`compose-up`) в `routes/deploy.ts` —
+  повторяющийся блок `running = false` + `endTime` + опциональный `error` + `flushPersist`
+  (6 повторений, по 2 на каждый из трёх хендлеров) вынесен в `finishDeploy()`
+  (`lib/deploy-history.ts`). Не тронут `attachDeployProcessHandlers` в `lib/deploy-process.ts` —
+  похожий, но не идентичный паттерн для long-running `nsenter`-процесса (там ещё
+  `appendOutput` с текстом, `exitCode`, `currentProcess = null`, `releaseHostLock()`).
+
 ## [0.15.24] — 2026-08-28
 
 ### Changed
