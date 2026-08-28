@@ -15,7 +15,9 @@
       "@/*": ["./src/*"],
       "@letar/email": ["../../libs/email/src/index.ts"],
       "@letar/glitchtip/server": ["../../libs/glitchtip/src/server/index.ts"],
-      "@letar/redis-client": ["../../libs/redis-client/src/index.ts"]
+      "@letar/redis-client": ["../../libs/redis-client/src/index.ts"],
+      "@letar/glitchtip": ["../../libs/glitchtip/src/index.ts"],
+      "@letar/glitchtip/client": ["../../libs/glitchtip/src/client/index.ts"]
     },
     "types": ["node"],
     "lib": ["ES2022"],

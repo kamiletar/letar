@@ -41,7 +41,18 @@
       "@letar/chakra-provider": ["../../../libs/chakra-provider/src/index.ts"],
       "@letar/query-provider": ["../../../libs/query-provider/src/index.ts"],
       "@letar/label-printer-core": ["../../../libs/label-printer-core/src/index.ts"],
-      "@letar/label-printer-core/*": ["../../../libs/label-printer-core/src/*"]
+      "@letar/label-printer-core/*": ["../../../libs/label-printer-core/src/*"],
+      "@letar/forms/captcha/server": ["../../../libs/forms/src/server/captcha/verify.ts"],
+      "@letar/forms-core/credit-card": ["../../../libs/forms-core/src/lib/credit-card/index.ts"],
+      "@letar/forms-core/edit-intent": ["../../../libs/forms-core/src/lib/edit-intent/index.ts"],
+      "@letar/forms-core/phone": ["../../../libs/forms-core/src/lib/phone/index.ts"],
+      "@letar/forms-core/mask": ["../../../libs/forms-core/src/lib/mask/index.ts"],
+      "@letar/forms-core/field-widgets": ["../../../libs/forms-core/src/lib/field-widgets/index.ts"],
+      "@letar/forms-core/table": ["../../../libs/forms-core/src/lib/table/index.ts"],
+      "@letar/forms-core/address": ["../../../libs/forms-core/src/lib/address/index.ts"],
+      "@letar/forms-core/i18n": ["../../../libs/forms-core/src/lib/i18n/index.ts"],
+      "@letar/forms-core/uikit": ["../../../libs/forms-core/src/lib/uikit/index.ts"],
+      "@letar/forms-core/testing": ["../../../libs/forms-core/src/lib/testing/index.ts"]
     },
     "noUncheckedSideEffectImports": false,
     "ignoreDeprecations": "6.0"

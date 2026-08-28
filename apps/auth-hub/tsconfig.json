@@ -115,7 +115,13 @@
       ],
       "@letar/seed-utils": [
         "../../libs/seed-utils/src/index.ts"
-      ]
+      ],
+      "@letar/forms/captcha/server": ["../../libs/forms/src/server/captcha/verify.ts"],
+      "@letar/forms-core/edit-intent": ["../../libs/forms-core/src/lib/edit-intent/index.ts"],
+      "@letar/forms-core/mask": ["../../libs/forms-core/src/lib/mask/index.ts"],
+      "@letar/forms-core/field-widgets": ["../../libs/forms-core/src/lib/field-widgets/index.ts"],
+      "@letar/forms-core/testing": ["../../libs/forms-core/src/lib/testing/index.ts"],
+      "@letar/forms-react/testing": ["../../libs/forms-react/src/lib/testing/index.ts"]
     }
   },
   "references": [

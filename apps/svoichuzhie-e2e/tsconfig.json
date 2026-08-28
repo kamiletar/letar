@@ -9,7 +9,8 @@
     "ignoreDeprecations": "6.0",
     "paths": {
       "@letar/e2e-testing": ["../../libs/e2e-testing/src/index.ts"],
-      "@letar/env-load": ["../../libs/env-load/src/index.ts"]
+      "@letar/env-load": ["../../libs/env-load/src/index.ts"],
+      "@letar/e2e-testing/prisma-cjs-wrapper": ["../../libs/e2e-testing/src/lib/prisma-cjs-wrapper.js"]
     }
   },
   "include": [
