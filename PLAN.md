@@ -3444,12 +3444,18 @@ libs/upload-validation), не запушено.
 `request.formData()`+`instanceof File`), сохранение на диск оставлено своим (`public/uploads/`
 с `UPLOAD_DIR`, не `uploads/` от `cwd()`, как жёстко зашито в `saveFileToDisk` библиотеки).
 
-**Не тронуто (отдельная задача заведена как чип):** `aboi` — два роута
-(`api/images`, `api/desktop/publish`) с `instanceof File`-проверкой без явных
-type/size-лимитов в самом роуте (валидация, похоже, внутри `lib/images/upload.ts`
-`createImageRecord`, не проверялось) — требует отдельного разбора, не byte-for-byte дубль.
-`domwellbes` НЕ кандидат — там уже другая, более продвинутая схема
-(`@letar/image-upload/server` с sharp-обработкой и `resolveUploadPath`).
+**Обновление 2026-08-28 (закрыт `aboi`):** оба роута (`api/images`, `api/desktop/publish`)
+переведены на `extractAndValidateFile`/`validateFile`. Type/size-лимиты действительно жили
+глубже — в `lib/images/upload.ts` (`createImageRecord`, 10 МБ, jpeg/png/webp) и
+`lib/print-source.ts` (`savePrintSource`, 200 МБ, +tiff) — не byte-for-byte дубль остальных
+приложений, лимиты у aboi свои и не унифицированы. Константы экспортированы из этих двух
+модулей и переиспользованы в роутах, сами проверки внутри `createImageRecord`/`savePrintSource`
+оставлены (defense-in-depth рядом с fs-записью — тот же принцип, что у path-traversal-защиты
+там же). `api/desktop/publish` читает оба файла (`catalogImage`, `printSource`) из одной
+`formData` — `extractAndValidateFile` там не подходит (второй `request.formData()` бросает),
+использован `validateFile` на уже извлечённых файлах после `instanceof File`. `domwellbes`
+НЕ кандидат — там уже другая, более продвинутая схема (`@letar/image-upload/server` с
+sharp-обработкой и `resolveUploadPath`).
 
 ## §68 — `createVkGetUserInfo` (`@letar/auth`): VK ID getUserInfo вынесен из auth-hub/driving-school (2026-08-28)
 
