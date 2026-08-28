@@ -43,6 +43,19 @@
 
 Деплой каждого шага — через `deploy-agent-dev`, подтверждён на проде для всех четырёх коммитов.
 
+### Follow-up: вынос дубля getUserInfo в libs/auth (2026-08-28)
+
+По итогам марафона выше `getUserInfo` VK ID-провайдера оказался дословно продублирован между
+auth-hub и driving-school (обе версии добавлены в один день миграции на VK ID). Вынесен в
+`createVkGetUserInfo` (`libs/auth/src/server/vk-user-info.ts`) — общий fetch на
+`id.vk.com/oauth2/user_info` + синтетический email `<id>@vk.com`, driving-school-специфичные
+поля (`birthdate`/`gender`/`phone`) передаются через опциональный `mapAdditionalUserFields`,
+т.к. их разбор (`parseGender`/`parseBirthdate`) переиспользуется тем же приложением ещё и для
+Yandex-профиля. `nx typecheck:tsgo auth-hub driving-school` + `nx test auth` (42/42) зелёные.
+Живой вход через VK не пере-тестирован в этой сессии — риск регресса низкий (чистый рефакторинг
+без изменения логики), но перед следующим деплоем стоит пройти клик «ВКонтакте» на
+`/profile/connected-accounts` (auth-hub) и на форме входа driving-school вручную.
+
 ## Фикс: двойной reportEmailFailure (2026-08-26)
 
 Задача сессии: проверить и починить по образцу domwellbes два места, где ручной

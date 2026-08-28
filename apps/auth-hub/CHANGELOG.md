@@ -4,6 +4,13 @@
 
 ## [Unreleased]
 
+## [0.7.16] - 2026-08-28
+
+### Changed
+
+- `getUserInfo` VK ID-провайдера вынесен в общую фабрику `createVkGetUserInfo` (`@letar/auth`) —
+  был дословным дублем с driving-school. Поведение не изменилось.
+
 ## [0.7.15] - 2026-08-28
 
 ### Fixed
