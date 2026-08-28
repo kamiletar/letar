@@ -317,6 +317,42 @@ script_hash() {
   fi
 }
 
+# Диагностика самой частой причины падения `git submodule update`: gitlink указывает на
+# коммит, который так и не запушили в репозиторий submodule. Git сообщает об этом строкой
+# `fatal: remote error: upload-pack: not our ref <sha>` — она не называет ни приложение, ни
+# что делать, а встаёт при этом ВСЯ очередь деплоев, включая приложения, к которым виновный
+# submodule отношения не имеет (за 2026-08-27…28 — минимум пять раз).
+# Барьер на стороне разработчика — scripts/hooks/pre-push-submodule-check.sh.
+diagnose_unpushed_submodules() {
+  echo -e "${YELLOW}🔎 Проверяю, все ли коммиты submodule доступны на их origin...${NC}"
+  local found=0
+  local sha sm_path
+  while IFS=$'\t' read -r sha sm_path; do
+    [ -z "$sha" ] && continue
+    # Неинициализированные submodule `git submodule update` без --init не трогает — они не
+    # могут быть причиной падения, и на серверах их часть отсутствует штатно.
+    git -C "$sm_path" rev-parse --git-dir >/dev/null 2>&1 || continue
+    git -C "$sm_path" cat-file -e "$sha^{commit}" 2>/dev/null && continue
+    git -C "$sm_path" fetch --quiet --no-tags origin 2>/dev/null || true
+    git -C "$sm_path" cat-file -e "$sha^{commit}" 2>/dev/null && continue
+    found=$((found + 1))
+    echo -e "${RED}  • $sm_path → $sha — коммита нет на origin этого submodule${NC}"
+  done < <(git ls-tree -r HEAD | awk '$1 == "160000" { print $3 "\t" substr($0, index($0, "\t") + 1) }')
+
+  if [ "$found" -eq 0 ]; then
+    echo -e "${YELLOW}   Неотправленных коммитов submodule не найдено — причина падения другая${NC}"
+    echo -e "${YELLOW}   (конфликт, права, сеть). Смотри вывод git выше.${NC}"
+    return 0
+  fi
+
+  echo ""
+  echo -e "${RED}❗ Деплой НЕ ПОЙДЁТ, пока эти коммиты не запушены — и не только для${NC}"
+  echo -e "${RED}   перечисленных приложений, а вообще для всех: submodule обновляются до${NC}"
+  echo -e "${RED}   выбора приложения.${NC}"
+  echo -e "${YELLOW}   Чинится на рабочей машине: git -C <путь> push origin main${NC}"
+  echo -e "${YELLOW}   Пересоздавать коммит в letar не нужно — записанный SHA верный.${NC}"
+}
+
 # Step 2: Git pull (unless skipped)
 if [ "$SKIP_GIT" = false ]; then
   echo -e "${YELLOW}📥 Pulling latest changes from git...${NC}"
@@ -375,7 +411,11 @@ if [ "$SKIP_GIT" = false ]; then
   fi
 
   # Обновляем инициализированные submodules до коммитов из родительского репо
-  git submodule update --recursive
+  if ! git submodule update --recursive; then
+    echo -e "${RED}❌ git submodule update failed${NC}"
+    diagnose_unpushed_submodules
+    exit 1
+  fi
   echo -e "${GREEN}✅ Submodules updated${NC}"
   echo ""
 
