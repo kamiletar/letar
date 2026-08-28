@@ -405,13 +405,20 @@ scoped cookie, без утечки токена в лог/`Referer` ·
 `bun update` в пределах `^1.6.x` поднимает better-auth до 1.7 — `oidcProvider`/`genericOAuthClient`
 убраны из ядра, замена — `@better-auth/oauth-provider` + `jwt()`-плагин, клиент — `signIn.social` ·
 [better-auth-1.7-account-issuer-field](/.claude/docs/better-auth-1.7-account-issuer-field.md) ⚠️
-тот же релиз тихо требует поле `issuer` в модели `Account` — 500 на sign-up/reset-password, если
-общий фрагмент `AccountFields` его не объявляет ·
+тот же релиз тихо требует поле `issuer` в модели `Account`, проверка идёт в памяти рантайма
+(`sign-in.mjs`) — затронуты 14 приложений и обычный вход, не только sign-up/reset-password;
+фикс двухчастный (add-column + отдельный backfill), коммит миграции ≠ её применение на проде ·
 [better-auth-oauth-provider-schema-drift](/.claude/docs/better-auth-oauth-provider-schema-drift.md)
 ⚠️ `@better-auth/oauth-provider` держит свою полную схему БД (`dist/*.mjs` `src/schema.ts`),
 только `oauthClient` замаппен на `oauthApplication` — `oauthConsent`/`oauthAccessToken` ищутся
 по буквальному имени модели, несовпадение полей после миграции `a8efcc72` дало 7-слойный
-прод-инцидент SSO (2026-08-26) ·
+прод-инцидент SSO (2026-08-26); тот же `oauthClient` отдельно недосчитался 4 logout-полей
+(`enableEndSession` без дефолта отдавал 401 всем клиентам) плюс путь `/oauth2/endsession` вместо
+`/oauth2/end-session` маскировал первопричину у всех 8 hub-client приложений (2026-08-27) ·
+[runtime-invariant-missing-from-select](/.claude/docs/runtime-invariant-missing-from-select.md)
+⚠️ класс бага: зависимость сравнивает в памяти поле, отсутствующее в схеме/`NULL` у старых строк —
+не исключение, не отличимо в логах от легитимного отказа, typecheck не видит новый рантайм-
+инвариант ·
 [better-auth-vk-id-migration-and-linksocial-pitfalls](/.claude/docs/better-auth-vk-id-migration-and-linksocial-pitfalls.md)
 ⚠️ VK принудительно перевёл Standalone-приложения на VK ID (OAuth 2.1) — legacy
 `oauth.vk.com`/`.ru` отвечает `Security Error` независимо от PKCE, фикс — нативный

@@ -80,6 +80,52 @@ grep -n "const schema = {" -A 400 node_modules/@better-auth/oauth-provider/dist/
 POST-тело — `{accept, scope?, claims?, oauth_query}` (не `{consent_code, client_id, scope}`),
 ответ — `{redirect: true, url}` (не `{redirectURI}`).
 
+## Второй заход: `oauthClient` logout-поля (2026-08-27, §71)
+
+Тот же класс бага, найденный отдельно и позже (аудит-сессия по RP-Initiated Logout, `PLAN.md`
+§71) — на этот раз не в `oauthConsent`/`oauthAccessToken`, а в `oauthClient` (замапленной на нашу
+`OauthApplication`). Схема плагина требует под logout четыре поля, которых в `OauthApplication` не
+было вовсе:
+
+- **`enableEndSession`** (`Boolean`) — гейт для всего RP-Initiated Logout. В схеме плагина у него
+  нет дефолта на уровне БД (дефолт `false` только в коде — `authorizeEndSessionRequest` в
+  `dist/authorize-*.mjs`). Пока колонки не было, `oauthClient.enableEndSession` резолвился в
+  `undefined`, что плагин трактует как falsy — `/oauth2/end-session` отвечал `401 "The client is
+  not allowed to initiate logout"` **для всех клиентов**, не только для тех, кому логаут
+  действительно не разрешён. Backfill для существующих клиентов — явный `true`, иначе после
+  добавления колонки поведение не изменится (тот же паттерн `NULL` vs ожидаемое значение, что и
+  в [[better-auth-1.7-account-issuer-field]]).
+- **`postLogoutRedirectUris`** (`String[]`) — отдельное поле, **нет фолбэка на `redirectUris`**.
+  Функция `getRegisteredLogoutRedirect` в дистрибутиве плагина проверяет запрошенный
+  `post_logout_redirect_uri` строго против этого списка; если поле пустое (в т.ч. когда
+  разработчик рассуждает «redirect URI ведь уже есть в `redirectUris`, зачем дублировать») —
+  логаут с явным `post_logout_redirect_uri` в query всегда отвергается, независимо от
+  `enableEndSession`. Backfill для существующих 9 клиентов выведен из уже заполненного
+  `redirectUris` за вычетом OAuth-callback путей — не гадать вручную по каждому клиенту.
+- **`backchannelLogoutUri`** / **`backchannelLogoutSessionRequired`** — опциональны (для клиентов,
+  реализующих OIDC Back-Channel Logout), в текущей конфигурации ни один hub-client их не
+  использует, но плагин ожидает эти поля в объекте клиента при чтении из БД — их отсутствие в
+  Zod-схеме модели ловится тем же классом ошибки, что и остальные поля этого документа
+  («Unrecognized key»/несовпадение схемы).
+
+### Путь-баг поверх схемного: `/oauth2/endsession` вместо `/oauth2/end-session`
+
+Отдельная, не связанная со схемой причина того же внешнего симптома (RP-Initiated Logout не
+работал), которая маскировала первопричину выше: плагин регистрирует эндпоинт как
+`/oauth2/end-session` (с дефисом), а все восемь hub-client приложений (`aprel8008`, `archetest`,
+`animatrona-tracker`, `dashboard`, `domwellbes`, `grandslamcup`, `kami`, `time`) вызывали
+`/oauth2/endsession` (без дефиса) — опечатка, унаследованная от более раннего этапа интеграции
+(`PLAN_COMPLETED.md` auth-hub упоминает `/oauth2/endsession` как «подтверждённый на проде» путь
+ещё в 2026-06/07, то есть опечатка присутствовала до самого апгрейда на `@better-auth/oauth-provider`
+и раньше просто не проверялась по стро́гому совпадению маршрута). Неверный путь давал `404`,
+который **маскировал** 401 от `enableEndSession` — оба симптома выглядели как «logout не работает»
+на клиентской стороне, но чинились независимо и в любом порядке фикс одного не решал другой.
+
+Фикс — `libs/auth/src/server/factories/create-logout-action.ts` (`@letar/auth` 0.12.1→0.12.2):
+опция `oidcLogout.issuer` вместо ручного `endSessionUrl`, путь выводится автоматически как
+`${issuer}/api/auth/oauth2/end-session` — устраняет саму возможность рассинхрона опечаткой, а не
+только исправляет её текущее вхождение.
+
 ## Практический вывод
 
 При любом мажорном апгрейде `@better-auth/*`-плагина, который меняет модель хранения
