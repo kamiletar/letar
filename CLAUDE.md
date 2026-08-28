@@ -223,7 +223,9 @@ request-scope бросают, мокать оба модуля; `redirect()` б�
 ⚠️ кеш `css()` считает ключ по отсортированным ключам объекта (регрессия 3.29.0), а результат
 зависит от порядка — один и тот же `<Text>` получает разные классы emotion на сервере и клиенте,
 «attributes didn't match» при визуально одинаковом CSS; не путать с багом Turbopack+Emotion ниже,
-`--webpack` не помогает, чинится патчем зависимости ·
+`--webpack` не помогает, чинится патчем зависимости — а сам патч прибит к точной версии, и bun
+при её расхождении молчит (код 0, ни строки), поэтому bump без
+`bun scripts/check-patched-deps.mjs` тихо возвращает баг во все приложения ·
 [chakra-multi-system-ssr-barrel-trap](/.claude/docs/chakra-multi-system-ssr-barrel-trap.md) ⚠️
 импорт шрифта/константы из барреля с `createSystem()` в Server Component исполняет весь модуль и
 роняет SSR (`accordionAnatomy.extendWith is not a function`) ·
