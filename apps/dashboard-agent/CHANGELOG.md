@@ -11,6 +11,20 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.15.28] — 2026-08-28
+
+### Fixed
+
+- `login-canary-check`/`login-canary-setup` (0.15.27) не работали для 4 из 9 приложений:
+  `auth-hub`/`animatrona-tracker` не имели порта/хоста в реестре `server-config.ts`
+  (rollout-профиль без фиксированного контейнера — внутренний порт всегда `3010`, добавлен явно);
+  остальные (`aboi`, `domwellbes`, `dashboard`, `svoichuzhie`, `dsperevod`, `mandala`) получали
+  `403 MISSING_OR_NULL_ORIGIN` или необработанное исключение (mandala — 500 с пустым телом,
+  better-auth без явного `trustedOrigins` крашится на отсутствующем `Origin`, а не отдаёт 403) —
+  оба HTTP-вызова теперь шлют заголовок `Origin` со значением `BETTER_AUTH_URL` приложения,
+  прочитанным из уже смонтированного `/secrets/<app>.env` (`getAppOrigin()` в `app-secrets.ts`) —
+  без хардкода доменов в публичном коде (часть из 9 приложений — приватные submodule).
+
 ## [0.15.27] — 2026-08-28
 
 ### Added

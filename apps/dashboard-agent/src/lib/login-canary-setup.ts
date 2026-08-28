@@ -15,6 +15,7 @@
 
 import { Client } from 'pg'
 import { getAppUrl } from './app-registry'
+import { getAppOrigin } from './app-secrets'
 import { getDbConfig } from './database'
 
 export interface LoginCanarySetupResult {
@@ -41,9 +42,13 @@ async function signUpCanaryAccount(
   password: string,
 ): Promise<{ ok: boolean; status: number | null; alreadyExisted: boolean; error: string | null }> {
   try {
+    const origin = getAppOrigin(app)
     const response = await fetch(getAppUrl(app, '/api/auth/sign-up/email'), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(origin && { Origin: origin }),
+      },
       body: JSON.stringify({ email, password, name: 'Login Canary' }),
     })
 

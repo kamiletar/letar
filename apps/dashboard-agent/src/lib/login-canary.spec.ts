@@ -43,6 +43,7 @@ vi.mock('./app-secrets', () => ({
     }
     return registry
   },
+  getAppOrigin: () => 'http://test.local',
 }))
 
 function fakeFetch(

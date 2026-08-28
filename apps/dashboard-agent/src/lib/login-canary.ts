@@ -25,7 +25,7 @@
 import path from 'node:path'
 import { shouldRepeatAlert } from './alert-policy'
 import { getAppUrl } from './app-registry'
-import { parseEnvFile } from './app-secrets'
+import { getAppOrigin, parseEnvFile } from './app-secrets'
 import { postDashboardAlert } from './dashboard-alert'
 import { loadJsonState, saveJsonState } from './json-state-file'
 
@@ -105,9 +105,13 @@ async function checkApp(app: string): Promise<LoginCanaryAppResult> {
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
 
   try {
+    const origin = getAppOrigin(app)
     const response = await fetch(getAppUrl(app, '/api/auth/sign-in/email'), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(origin && { Origin: origin }),
+      },
       body: JSON.stringify({ email: credentials.email, password: credentials.password }),
       signal: controller.signal,
     })

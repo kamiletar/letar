@@ -41,14 +41,18 @@ const APP_REGISTRY: Record<string, AppRegistryEntry> = {
   dsperevod: { server: 's2', port: 3019, host: process.env.DSPEREVOD_HOST ?? 'dsperevod-app' },
   studio: { server: 's2', port: 3024, host: process.env.STUDIO_HOST ?? 'studio-app' },
   archetest: { server: 's2' },
-  'auth-hub': { server: 's2' },
+  // Rollout-профиль (§18.6): нет фиксированного порта/имени контейнера, внутренний порт
+  // приложения всегда 3010 (см. docker-compose.production.yml traefik.loadbalancer.server.port),
+  // network alias — статический (сохраняет NPM/Traefik forward host независимо от scale).
+  'auth-hub': { server: 's2', port: 3010, host: 'auth-hub-app' },
   time: { server: 's2', port: 3013, host: process.env.TIME_HOST ?? 'time-app' },
   'form-example': { server: 's2' },
   'form-docs': { server: 's2' },
   grandslamcup: { server: 's2' },
   pravda: { server: 's2' },
   'animatrona-landing': { server: 's2' },
-  'animatrona-tracker': { server: 's2' },
+  // Тот же rollout-профиль, что у auth-hub выше — фиксированный внутренний порт 3010.
+  'animatrona-tracker': { server: 's2', port: 3010, host: 'animatrona-tracker-app' },
   umami: { server: 's2' },
   aboi: { server: 's2', port: 3018, host: process.env.ABOI_HOST ?? 'aboi-app' },
   svoichuzhie: { server: 's2', port: 3021, host: process.env.SVOICHUZHIE_HOST ?? 'svoichuzhie-app' },

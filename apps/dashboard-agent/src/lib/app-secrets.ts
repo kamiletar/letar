@@ -95,3 +95,23 @@ export function getAppCronSecret(app: string): string | null {
 
   return secret || null
 }
+
+/**
+ * Публичный `BETTER_AUTH_URL` приложения — из того же смонтированного `.env.docker`.
+ *
+ * Нужен как значение заголовка `Origin` для серверных вызовов better-auth-эндпоинтов
+ * (`login-canary.ts`, `login-canary-setup.ts`): better-auth проверяет `Origin` против
+ * `trustedOrigins` на каждом POST (CSRF-защита) и отклоняет запрос без него —
+ * `MISSING_OR_NULL_ORIGIN`, а на части приложений (без явно заданного `trustedOrigins`,
+ * например mandala) отсутствие заголовка роняет обработчик необработанным исключением
+ * (HTTP 500 с пустым телом) вместо чистого 403.
+ *
+ * ⛔ Намеренно не хардкодится ни в одном приложении: часть из 9 приложений — приватные
+ * submodule (aboi, driving-school, dsperevod), их production-домен — коммерческая тайна,
+ * писать литералом в публичный `dashboard-agent` нельзя (`public-repo-hygiene.md`).
+ */
+export function getAppOrigin(app: string): string | null {
+  const origin = parseEnvFile(path.join(getSecretsDir(), `${app}.env`))['BETTER_AUTH_URL']
+
+  return origin || null
+}

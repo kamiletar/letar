@@ -1,6 +1,6 @@
 # Dashboard Agent — План развития
 
-## Текущая версия: 0.15.27
+## Текущая версия: 0.15.28
 
 Легковесный агент мониторинга для удалённых серверов.
 
@@ -42,6 +42,21 @@ svoichuzhie, dsperevod. Алерт `AUTH_LOGIN_CANARY_FAILED` при HTTP-отв
 на каждое приложение, положить credentials в `.env.docker.enc` через sops), не выполнялся из
 этой сессии — создание учётных записей в 9 живых production-БД требует явной координации,
 не автономного действия агента.
+
+**Фикс провижининга (2026-08-28, `0.15.28`):** первый прогон `/api/admin/login-canary-setup` по
+всем 9 приложениям вскрыл три бага. (1) `auth-hub`/`animatrona-tracker` не имели порта/хоста в
+`server-config.ts` — добавлены (rollout-профиль, внутренний порт фиксирован на `3010`). (2) 6 из
+оставшихся 7 падали на CSRF-проверке better-auth — сервер не слал заголовок `Origin`, часть
+приложений отвечала чистым `403 MISSING_OR_NULL_ORIGIN`, mandala (без явного `trustedOrigins` в
+конфиге) — необработанным исключением, HTTP 500 с пустым телом. Фикс — `getAppOrigin()` в
+`app-secrets.ts` читает `BETTER_AUTH_URL` из уже смонтированного `/secrets/<app>.env` и оба
+вызова (`login-canary.ts` sign-in, `login-canary-setup.ts` sign-up) шлют его как `Origin`; без
+хардкода доменов — 3 из 9 приложений приватные submodule, их домен нельзя писать литералом в
+публичный код (`public-repo-hygiene.md`). (3) `driving-school` падает отдельно и НЕ этим фиксом
+не лечится: `BetterAuthError: Model rateLimit does not exist in the database` — в
+`schema.zmodel` нет модели `rateLimit`, а `createAuth()` в проде без `secondaryStorage`
+требует rate-limit именно в БД (подтверждено GlitchTip, issue `DRIVING-SCHOOL-2`). Заведена
+отдельная задача — реальный прод-баг, не входит в scope этой сессии.
 
 **Проверка `Account.issuer = NULL` (2026-08-28):** дополняет статический гейт схемы
 (`scripts/check-better-auth-schema.mjs`, PLAN.md корня §71 п.3.1) — тот ловит только «поля нет
@@ -148,4 +163,4 @@ nx typecheck dashboard-agent
 
 ---
 
-**Последнее обновление:** 2026-08-22
+**Последнее обновление:** 2026-08-28
