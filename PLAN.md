@@ -3436,12 +3436,20 @@ driving-school submodule + bump SHA, mandala), не запушено.
 зелёные на обоих приложениях и на библиотеке. Три коммита (submodule driving-school, grandslamcup,
 libs/upload-validation), не запушено.
 
-**Не тронуто (сознательно, отдельная задача заведена как чип):** `aboi`, `aprel8008`,
-`svoichuzhie`, `kami` держат свою инлайн-логику валидации upload-файлов (не через общий модуль,
-разные проверки — по расширению vs MIME, разные лимиты) — не байт-в-байт дубль, миграция требует
-разбора каждого случая отдельно, не входила в scope этой сессии. `domwellbes` НЕ кандидат — там
-уже другая, более продвинутая схема (`@letar/image-upload/server` с sharp-обработкой и
-`resolveUploadPath`).
+**Обновление 2026-08-28 (продолжение аудита):** `aprel8008`
+(`api/admin/photos/upload`, `extractAndValidateFiles` — несколько файлов одним запросом) и
+`kami` (`arbitrary-upload`, `audio/upload`) переведены отдельными сессиями. `svoichuzhie`
+(`photo/upload`, `audio/upload`) переведён этой сессией — `validateFile`/`generateFilename`
+сначала (доковано `extractAndValidateFile` для замены ручного
+`request.formData()`+`instanceof File`), сохранение на диск оставлено своим (`public/uploads/`
+с `UPLOAD_DIR`, не `uploads/` от `cwd()`, как жёстко зашито в `saveFileToDisk` библиотеки).
+
+**Не тронуто (отдельная задача заведена как чип):** `aboi` — два роута
+(`api/images`, `api/desktop/publish`) с `instanceof File`-проверкой без явных
+type/size-лимитов в самом роуте (валидация, похоже, внутри `lib/images/upload.ts`
+`createImageRecord`, не проверялось) — требует отдельного разбора, не byte-for-byte дубль.
+`domwellbes` НЕ кандидат — там уже другая, более продвинутая схема
+(`@letar/image-upload/server` с sharp-обработкой и `resolveUploadPath`).
 
 ## §68 — `createVkGetUserInfo` (`@letar/auth`): VK ID getUserInfo вынесен из auth-hub/driving-school (2026-08-28)
 
