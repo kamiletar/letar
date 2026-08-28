@@ -7,6 +7,23 @@
 
 ## [Unreleased]
 
+## [0.12.3] - 2026-08-28
+
+### Fixed
+
+- **`createDevSessionRoute`: credential-аккаунт создавался с полями, которые Better Auth 1.7+ не
+  распознаёт при входе.** `accountId` был равен email вместо `user.id`, поле `issuer` не
+  заполнялось вовсе — `internal-adapter.mjs` (`findAccountByKey`/`findCredentialAccount`) ищет
+  credential-аккаунт строгим совпадением `providerId+issuer+accountId`, где `accountId` — id
+  пользователя, а `issuer` — `'local:credential'` (то же самое, что сам Better Auth пишет при
+  `/sign-up/email`). Раньше это работало только потому, что до 1.7 issuer не проверялся;
+  апгрейд молча сломал реальный вход по email+паролю для e2e-фикстур на staging (не dev-session
+  cookie-обход, а честный `/sign-in/email` — например `10-auth.spec.ts` в svoichuzhie). Заодно
+  проверка на существующий аккаунт теперь матчится по тем же (корректным) полям — старая,
+  созданная до фикса запись с неверным `accountId`/`issuer` больше не считается «уже
+  существующей» и не блокирует создание правильной. См.
+  `.claude/docs/better-auth-1.7-account-issuer-field.md`.
+
 ## [0.12.0] - 2026-08-25
 
 ### Changed

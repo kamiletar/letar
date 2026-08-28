@@ -24,7 +24,7 @@ export interface DevSessionPrismaClient {
    * Better Auth ищет providerId='credential' и не находит ни одной записи Account.
    */
   account?: {
-    findFirst(args: { where: { userId: string; providerId: string } }): Promise<{ id: string } | null>
+    findFirst(args: { where: Record<string, unknown> }): Promise<{ id: string } | null>
     create(args: { data: Record<string, unknown> }): Promise<unknown>
   }
 }
@@ -179,17 +179,36 @@ export function createDevSessionRoute(options: CreateDevSessionRouteOptions) {
     // которым помимо dev-session cookie нужен ещё и рабочий реальный вход по email+паролю
     // (например, тест "успешный вход" в 10-auth.spec.ts). Idempotent — не трогает уже
     // существующую запись повторными вызовами.
+    //
+    // ⚠️ `accountId` и `issuer` обязаны совпадать с тем, что пишет сам Better Auth при
+    // `/sign-up/email` (better-auth/dist/api/routes/sign-up.mjs): `accountId: createdUser.id`
+    // (не email!) и `issuer: createLocalAccountIssuer('credential')`. Better Auth 1.7+ ищет
+    // credential-аккаунт при входе строгим совпадением providerId+issuer+accountId
+    // (internal-adapter.mjs, findAccountByKey/findCredentialAccount) — запись без этих полей
+    // просто не находится, `/sign-in/email` всегда отвечает "неверный email или пароль", даже
+    // с правильным паролем. `'local:credential'` — буквальное значение
+    // `createLocalAccountIssuer('credential')` (`local:${encodeURIComponent('credential')}`,
+    // @better-auth/core/dist/db/schema/account.mjs); захардкожено тем же литералом, что и
+    // backfill-миграция `issuer` (см. .claude/docs/better-auth-1.7-account-issuer-field.md), не
+    // импортировано из @better-auth/core — избегаем новой зависимости в shared-либе ради одной
+    // строки, которая зависит только от стабильного поведения encodeURIComponent на латинице.
+    // ⚠️ Ключ поиска — issuer+accountId, не просто userId+providerId: старые записи, созданные
+    // до этого фикса (accountId=email вместо user.id, issuer=NULL), не должны считаться «уже
+    // существующим корректным аккаунтом» — иначе staging, где такая запись уже накопилась,
+    // остаётся сломанным даже после деплоя фикса. Несовпадающая старая запись просто игнорируется
+    // (осиротевший мусор в БД, не мешает), рядом создаётся новая с правильными полями.
     const password = url.searchParams.get('password')
     if (password && prisma.account) {
       const existingAccount = await prisma.account.findFirst({
-        where: { userId: user.id, providerId: 'credential' },
+        where: { userId: user.id, providerId: 'credential', issuer: 'local:credential', accountId: user.id },
       })
       if (!existingAccount) {
         await prisma.account.create({
           data: {
             userId: user.id,
             providerId: 'credential',
-            accountId: email,
+            issuer: 'local:credential',
+            accountId: user.id,
             password: await hashPassword(password),
           },
         })
