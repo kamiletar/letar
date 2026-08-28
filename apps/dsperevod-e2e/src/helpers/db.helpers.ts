@@ -68,6 +68,7 @@ type AnyPrisma = {
   user: Record<string, unknown>
   account: Record<string, unknown>
   translationRequest: Record<string, unknown>
+  rateLimit: Record<string, unknown>
   $disconnect: () => Promise<void>
 }
 
@@ -127,6 +128,17 @@ export async function createTestTranslationRequest(): Promise<string> {
 export async function deleteTranslationRequest(id: string): Promise<void> {
   const db = (await getPrisma()) as any
   await db.translationRequest.delete({ where: { id } }).catch(() => undefined)
+}
+
+/**
+ * Обнуляет счётчики rate-limit (better-auth, storage: 'database' на staging/prod — без Redis).
+ * Без этого повторные прогоны e2e-сьюта подряд накапливают попытки на общий IP staging-раннера
+ * и упираются в customRules (например /sign-up/email: 3/5мин), давая ложный флейк вместо
+ * реального регресса. Безопасно только для одноразовой staging-среды e2e.
+ */
+export async function resetRateLimits(): Promise<void> {
+  const db = (await getPrisma()) as any
+  await db.rateLimit.deleteMany({})
 }
 
 /** Закрывает соединение с БД. */

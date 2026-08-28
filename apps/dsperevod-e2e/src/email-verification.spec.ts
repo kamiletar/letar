@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 import { SignJWT } from 'jose'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { resetRateLimits } from './helpers/db.helpers'
 
 /**
  * Этап 2 (PLAN.md) — Resend email-верификации, тираж эталона aboi на dsperevod.
@@ -58,6 +59,12 @@ test.describe.serial('email-верификация: resend + verify (Этап 2)
   // Уникальный email на прогон — чтобы регистрация не упиралась в существующего юзера
   const email = `e2e-verify-${Date.now()}@example.com`
   const password = 'Password123!'
+
+  // Иначе повторные прогоны сьюта подряд (тот же staging-IP) упираются в customRules
+  // /sign-up/email: 3 попытки/5мин — не регрессия, а накопленный счётчик прошлых прогонов.
+  test.beforeAll(async () => {
+    await resetRateLimits()
+  })
 
   test('регистрация → тупик EMAIL_NOT_VERIFIED → resend → cooldown', async ({ page, browserName }) => {
     // webkit: POST /api/auth/sign-up/email не покидает клиент — воспроизведено дважды идентично

@@ -1,10 +1,24 @@
-import { expect, test } from '@playwright/test'
+import { expect, type Locator, test } from '@playwright/test'
 import {
   createTestAdmin,
   createTestTranslationRequest,
   deleteTranslationRequest,
   disconnectDb,
 } from './helpers/db.helpers'
+
+/**
+ * WebKit сбрасывает ранее заполненный controlled-инпут при заполнении следующего поля той же
+ * формы (найдено в aboi email-verification.spec.ts, тот же паттерн). Обычный `.fill()` без
+ * повторного подтверждения значения непосредственно перед submit — источник флейка именно на
+ * webkit при логине (email заполнили → пароль заполнили → email оказался пустым → неверный
+ * логин → редирект обратно на /sign-in).
+ */
+async function fillStable(locator: Locator, value: string): Promise<void> {
+  await expect(async () => {
+    await locator.fill(value)
+    await expect(locator).toHaveValue(value)
+  }).toPass({ timeout: 10_000 })
+}
 
 /**
  * Регрессия: logAudit() (src/lib/action-helpers.ts) писал JS `null` в nullable Json-поле
@@ -31,8 +45,13 @@ test.describe.serial('admin: audit-log регрессия (AuditLog.metadata Jso
 
   test('редактирование блока контента и просмотр заявки не падают 500', async ({ page }) => {
     await page.goto('/sign-in')
-    await page.getByPlaceholder('admin@dsperevod.ru').fill(adminEmail)
-    await page.getByPlaceholder('••••••••').fill(adminPassword)
+    const emailInput = page.getByPlaceholder('admin@dsperevod.ru')
+    const passwordInput = page.getByPlaceholder('••••••••')
+    await fillStable(emailInput, adminEmail)
+    await fillStable(passwordInput, adminPassword)
+    // Повторное подтверждение прямо перед submit — WebKit мог сбросить email за время,
+    // пока заполнялся password.
+    await fillStable(emailInput, adminEmail)
     await page.getByRole('button', { name: 'Войти' }).click()
     await expect(page).not.toHaveURL(/\/sign-in/, { timeout: 15000 })
 
