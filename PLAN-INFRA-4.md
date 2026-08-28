@@ -3778,3 +3778,54 @@ submodule.
 `apps/poster-microtext-desktop` — оба без шаблона `.next*/`), не связанных с этой правкой.
 
 **Коммит:** `5fec1168`.
+
+## §123 — неотправленный коммит submodule ронял деплой ВСЕХ приложений: pre-push барьер ✅ ЗАКРЫТО (2026-08-28)
+
+За 2026-08-27…28 инцидент повторился минимум пять раз (сообщения deploy-agent-dev в agent-mail
+822/845/847 + два случая, найденных вручную ночью 28-го — `apps/dsperevod`, `apps/svoichuzhie`
+были записаны в уже запушенный `origin/main` на коммиты, которых не было на их origin). Механизм:
+коммит letar фиксирует submodule как gitlink (SHA); если сам коммит внутри submodule не запушен,
+а bump SHA в letar — запушен, `git submodule update --recursive` в `deploy-affected.sh` падает с
+`fatal: remote error: upload-pack: not our ref <sha>` **до** выбора приложения — встаёт вся
+очередь деплоев, а не только виновное приложение.
+
+Правило «сначала push submodule, потом bump SHA» было записано в `.claude/rules/git.md` и раньше,
+но держалось только на дисциплине: bump обычно делает не та сессия, что коммитила внутрь
+submodule (push submodule требует одобрения владельца отдельно от push letar).
+
+**Фикс — три части:**
+
+- `scripts/check-submodule-push-state.sh` — проверяет, что SHA каждого gitlink'а отправляемого
+  коммита существует на origin своего submodule. Двухступенчато: быстрый локальный
+  `for-each-ref --contains` по всем submodule (1.6 c, без сети), сеть — только для не
+  подтвердившихся, параллельным `git fetch`. Замеры на 14 submodule (Windows): наивный сетевой
+  проход по всем — ~34 c; итоговый — 1.6 c на здоровом дереве, ~11 c при 7 проблемах.
+- `scripts/hooks/pre-push-submodule-check.sh` — pre-push хук, блокирует push letar и печатает
+  готовую команду `git push` для каждого отставшего submodule. Ставится через
+  `scripts/hooks/install.sh` вместе с pre-commit-связкой. Обход —
+  `GIT_ALLOW_UNPUSHED_SUBMODULES=1 git push` (не отключает проверку, превращает блокировку в
+  предупреждение — тот же приём, что у `GIT_ALLOW_MULTI_SCOPE_COMMIT`).
+- `deploy-affected.sh` — `git submodule update --recursive` обёрнут `diagnose_unpushed_submodules()`:
+  при падении называет конкретный submodule и SHA вместо сырого `not our ref` в логе, который
+  deploy-agent-dev раньше приходилось разбирать вручную.
+
+Штатного `git push --recurse-submodules=check` недостаточно: он проверяет только submodule,
+изменённые в отправляемых ревизиях (не ловит уже лежащий в `origin/main` отставший SHA — второй
+из ночных случаев был ровно таким), и сверяется с локальными remote-tracking ветками, которые
+могут быть устаревшими.
+
+Зарегистрировано в `scripts/check-all.mjs` как `submodule-push-state` (`warn`, `ci: no`) — для
+видимости и ручного прогона перед `deploy-request`; настоящий барьер стоит на push, не здесь,
+потому что между «закоммитил bump» и «запушил submodule» краснота — законное промежуточное
+состояние, а не поломка.
+
+**Побочное наблюдение:** первый прогон проверки нашёл 7 submodule с неотправленными коммитами
+одновременно (aprel8008, domwellbes, driving-school + e2e, dsperevod, studio, svoichuzhie) — не
+редкая гонка, а установившееся фоновое состояние репозитория. `origin/main` при этом был чист
+(14 из 14) — деплой на момент проверки не был сломан, но следующий push letar без досылки этих
+submodule положил бы очередь. Разрешение на push самих submodule и letar — за владельцем.
+
+Разбор механизма и полные замеры —
+[git-multi-agent-incidents § Дополнение 2026-08-28 (второе за день)](/.claude/docs/git-multi-agent-incidents.md).
+
+**Коммиты:** `deadf1eb`, `532fe533`, `a4484e64`, `0c6da8d7`.
