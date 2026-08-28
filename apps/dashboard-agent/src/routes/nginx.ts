@@ -4,7 +4,7 @@
  */
 
 import type { FastifyInstance } from 'fastify'
-import { apiHandler } from '../lib/api-handler'
+import { apiHandler, errorResponse } from '../lib/api-handler'
 import { backupNginx, getNginxBackupsList, type NginxBackupInfo, type NginxBackupResult } from '../lib/nginx-backup'
 import type { ApiResponse } from '../types'
 
@@ -27,11 +27,7 @@ export async function nginxRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse(error instanceof Error ? error.message : 'Unknown error')
       }
     },
   )

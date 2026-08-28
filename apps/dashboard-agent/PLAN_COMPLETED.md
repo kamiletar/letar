@@ -2,6 +2,29 @@
 
 Детальное описание всех реализованных фич.
 
+## Рефакторинг: общий errorResponse для early-return/catch литерала (2026-08-28, `0.15.23`)
+
+Компаньон задачи ниже (`apiHandler<T>`): аудит хендлеров, намеренно исключённых из обобщения
+`apiHandler` (ранний `return {success:false}` до вызова бизнес-логики, без throw), показал, что
+литерал ошибки
+
+```ts
+{
+  success: false,
+  error: <expr>,
+  timestamp: new Date().toISOString(),
+}
+```
+
+повторяется 56 раз в тех же 10 файлах `src/routes/`: `deploy.ts` (20), `cron.ts` (10),
+`e2e.ts` (9), `env.ts` (6), `docker.ts` (5), `database.ts` (2), `traefik.ts`/`nginx.ts`/
+`git.ts`/`acme-dns.ts` (по 1). Вынесен `errorResponse<T = never>(error: string): ApiResponse<T>`
+в `lib/api-handler.ts` (та же обвязка, откуда экспортируется `apiHandler`) — все 56 мест
+заменены на `errorResponse(<expr>)` regex-скриптом, control flow хендлеров не тронут (только
+литерал), `success: true`-ветки не затронуты. `T = never` typecheck проходит: `ApiResponse<T>`
+объявляет `data?: T` опциональным, поэтому `ApiResponse<never>` структурно совместим с любым
+`ApiResponse<X>`, когда `data` не указано.
+
 ## Рефакторинг: общий apiHandler для GET/POST-роутов (2026-08-28, `0.15.22`)
 
 Продолжение задачи ниже (`defineCronRoute`): в 10 файлах `src/routes/` (`system.ts`, `git.ts`,

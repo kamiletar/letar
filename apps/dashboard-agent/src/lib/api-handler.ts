@@ -13,6 +13,19 @@
 import type { FastifyRequest } from 'fastify'
 import type { ApiResponse } from '../types'
 
+/**
+ * Общий helper для литерала ошибки `{ success: false, error, timestamp }`,
+ * используемого в ранних return'ах валидации и в catch-блоках хендлеров,
+ * которые не подходят под apiHandler() целиком.
+ */
+export function errorResponse<T = never>(error: string): ApiResponse<T> {
+  return {
+    success: false,
+    error,
+    timestamp: new Date().toISOString(),
+  }
+}
+
 export function apiHandler<T, Request = FastifyRequest>(
   fn: (request: Request) => Promise<T>,
 ): (request: Request) => Promise<ApiResponse<T>> {

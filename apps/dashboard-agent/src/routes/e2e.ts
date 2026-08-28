@@ -20,6 +20,7 @@ import { randomUUID } from 'crypto'
 import type { FastifyInstance } from 'fastify'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import path from 'path'
+import { errorResponse } from '../lib/api-handler'
 import { getCurrentCommit } from '../lib/git'
 import { hostShellArgs } from '../lib/host-exec'
 import { getHostLock, releaseHostLock, tryAcquireHostLock } from '../lib/host-lock'
@@ -216,62 +217,47 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
       const { app, baseUrl, project, grep, workers } = request.body
 
       if (!app) {
-        return { success: false, error: 'App name is required', timestamp: new Date().toISOString() }
+        return errorResponse('App name is required')
       }
       if (!/^[a-z0-9-]+$/.test(app)) {
-        return { success: false, error: 'Invalid app name format', timestamp: new Date().toISOString() }
+        return errorResponse('Invalid app name format')
       }
       if (!baseUrl) {
-        return { success: false, error: 'baseUrl is required', timestamp: new Date().toISOString() }
+        return errorResponse('baseUrl is required')
       }
       // project интерполируется в shell-строку для nsenter (см. ниже) — обязательная валидация,
       // иначе это command injection в root-контекст хоста (nsenter -t 1 выходит из контейнера).
       if (project !== undefined && !/^[a-z0-9-]+$/.test(project)) {
-        return { success: false, error: 'Invalid project format', timestamp: new Date().toISOString() }
+        return errorResponse('Invalid project format')
       }
       // grep тоже интерполируется в shell-строку (внутри одинарных кавычек) — запрещаем символы,
       // которыми можно вырваться из кавычек или инжектировать команду. Кириллица/пробелы/пунктуация
       // (для поиска по названию теста) разрешены, поэтому это deny-, а не allow-лист.
       if (grep !== undefined && (grep.length > 200 || /['"`$;|&<>\\\r\n]/.test(grep))) {
-        return {
-          success: false,
-          error: 'Invalid grep pattern (запрещены кавычки/`$;|&<>\\` и переносы строк, макс. 200 символов)',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse('Invalid grep pattern (запрещены кавычки/`$;|&<>\\` и переносы строк, макс. 200 символов)')
       }
       // workers тоже интерполируется в shell-строку — числовая проверка убирает риск инъекции
       // без regex-эквилибристики. Верхняя граница 16 — щедрый потолок, реальные раннеры s3 меньше.
       if (workers !== undefined && (!Number.isInteger(workers) || workers < 1 || workers > 16)) {
-        return {
-          success: false,
-          error: 'Invalid workers value (целое число от 1 до 16)',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse('Invalid workers value (целое число от 1 до 16)')
       }
 
       // e2e гоняется только на s3 — там PostgreSQL/Redis E2E-инфра и nightly cron (e2e-testing.md)
       if (getCurrentServer() !== 's3') {
-        return {
-          success: false,
-          error: 'E2E запускается только на s3 (staging-раннер), этот сервер — не s3',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse('E2E запускается только на s3 (staging-раннер), этот сервер — не s3')
       }
 
       if (isE2eRunning()) {
-        return { success: false, error: 'Другой e2e-прогон уже выполняется', timestamp: new Date().toISOString() }
+        return errorResponse('Другой e2e-прогон уже выполняется')
       }
 
       // Host-level lock (см. lib/host-lock.ts): деплой и e2e спавнят процессы на одном хосте
       // и конкурируют за node_modules/сборку — блокируем и когда занято именно деплоем.
       if (!tryAcquireHostLock('e2e', app)) {
         const lock = getHostLock()
-        return {
-          success: false,
-          error:
-            `Хост занят другой операцией: ${lock?.kind} (${lock?.label}), с ${lock?.since} — дождитесь завершения перед e2e-прогоном`,
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse(
+          `Хост занят другой операцией: ${lock?.kind} (${lock?.label}), с ${lock?.since} — дождитесь завершения перед e2e-прогоном`,
+        )
       }
 
       const run = createRun({ running: true, app, project, grep, workers, startTime: new Date().toISOString() })

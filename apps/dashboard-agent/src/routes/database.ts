@@ -4,7 +4,7 @@
  */
 
 import type { FastifyInstance, FastifyRequest } from 'fastify'
-import { apiHandler } from '../lib/api-handler'
+import { apiHandler, errorResponse } from '../lib/api-handler'
 import {
   backupAllDatabases,
   backupDatabase,
@@ -58,11 +58,7 @@ export async function databaseRoutes(fastify: FastifyInstance): Promise<void> {
           // Бэкап конкретной БД
           const dbConfig = getDbConfig(db)
           if (!dbConfig) {
-            return {
-              success: false,
-              error: `Database config not found: ${db}`,
-              timestamp: new Date().toISOString(),
-            }
+            return errorResponse(`Database config not found: ${db}`)
           }
           results = [await backupDatabase(dbConfig)]
         } else {
@@ -82,11 +78,7 @@ export async function databaseRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse(error instanceof Error ? error.message : 'Unknown error')
       }
     },
   )

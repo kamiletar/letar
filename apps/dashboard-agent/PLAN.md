@@ -54,6 +54,15 @@ success/error, вычисляемым из полей результата, ос
 читаемость ради спорной экономии строк; `deploy.ts` не тронут вообще (там try/catch — меньшая
 часть логики хендлера). Детали — `CHANGELOG.md` 0.15.22.
 
+**Общий `errorResponse<T>()` для early-return/catch литерала (2026-08-28, `0.15.23`):**
+компаньон `apiHandler<T>()` выше — обобщён оставшийся литерал
+`{success:false, error, timestamp: new Date().toISOString()}` из ранних return'ов валидации
+и catch-блоков, не подошедших под `apiHandler` целиком. 56 мест в тех же 10 файлах `routes/`
+(`deploy.ts` 20, `cron.ts` 10, `e2e.ts` 9, `env.ts` 6, `docker.ts` 5, `database.ts` 2,
+`traefik.ts`/`nginx.ts`/`git.ts`/`acme-dns.ts` по 1) заменены на `errorResponse(error)` из
+`lib/api-handler.ts`. Control flow хендлеров не менялся — только сам литерал. Детали —
+`CHANGELOG.md` 0.15.23.
+
 Детали закрытых задач (Deploy MCP + staging, email-канарейка, health-check, структурированный
 прогресс деплоя и т.д.) — `PLAN_COMPLETED.md`.
 

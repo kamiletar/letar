@@ -6,6 +6,7 @@
 import type { FastifyInstance } from 'fastify'
 import { existsSync, readFileSync, writeFileSync } from 'fs'
 import path from 'path'
+import { errorResponse } from '../lib/api-handler'
 import type { ApiResponse } from '../types'
 
 const WORKSPACE_PATH = process.env.WORKSPACE_PATH || '/home/deploy/letar'
@@ -54,11 +55,7 @@ export async function envRoutes(fastify: FastifyInstance): Promise<void> {
 
       // Валидация имени приложения (защита от path traversal)
       if (!/^[a-z0-9-]+$/.test(app)) {
-        return reply.status(400).send({
-          success: false,
-          error: 'Некорректное имя приложения',
-          timestamp: new Date().toISOString(),
-        })
+        return reply.status(400).send(errorResponse('Некорректное имя приложения'))
       }
 
       const envPath = path.join(WORKSPACE_PATH, 'apps', app, '.env.docker')
@@ -71,11 +68,7 @@ export async function envRoutes(fastify: FastifyInstance): Promise<void> {
           // Проверить что директория приложения существует, создать .env.docker
           const appDir = path.join(WORKSPACE_PATH, 'apps', app)
           if (!existsSync(appDir)) {
-            return reply.status(404).send({
-              success: false,
-              error: `Директория apps/${app} не найдена`,
-              timestamp: new Date().toISOString(),
-            })
+            return reply.status(404).send(errorResponse(`Директория apps/${app} не найдена`))
           }
           content = ''
         }
@@ -83,11 +76,7 @@ export async function envRoutes(fastify: FastifyInstance): Promise<void> {
         // Режим Umami — записать Website ID и Script URL
         if (websiteId) {
           if (!/^[a-f0-9-]+$/.test(websiteId)) {
-            return reply.status(400).send({
-              success: false,
-              error: 'Некорректный websiteId',
-              timestamp: new Date().toISOString(),
-            })
+            return reply.status(400).send(errorResponse('Некорректный websiteId'))
           }
 
           const scriptUrlLine = `NEXT_PUBLIC_UMAMI_SCRIPT_URL=${UMAMI_SCRIPT_URL}`
@@ -106,11 +95,7 @@ export async function envRoutes(fastify: FastifyInstance): Promise<void> {
         } // Режим key/value — записать произвольную переменную
         else if (key && value !== undefined) {
           if (!/^[A-Z_][A-Z0-9_]*$/.test(key)) {
-            return reply.status(400).send({
-              success: false,
-              error: 'Некорректное имя переменной',
-              timestamp: new Date().toISOString(),
-            })
+            return reply.status(400).send(errorResponse('Некорректное имя переменной'))
           }
 
           const line = `${key}=${value}`
@@ -120,11 +105,7 @@ export async function envRoutes(fastify: FastifyInstance): Promise<void> {
             content = content.trimEnd() + '\n' + line + '\n'
           }
         } else {
-          return reply.status(400).send({
-            success: false,
-            error: 'Нужен websiteId или key+value',
-            timestamp: new Date().toISOString(),
-          })
+          return reply.status(400).send(errorResponse('Нужен websiteId или key+value'))
         }
 
         writeFileSync(envPath, content, 'utf-8')
@@ -135,11 +116,7 @@ export async function envRoutes(fastify: FastifyInstance): Promise<void> {
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Неизвестная ошибка'
-        return reply.status(500).send({
-          success: false,
-          error: `Не удалось записать .env.docker: ${message}`,
-          timestamp: new Date().toISOString(),
-        })
+        return reply.status(500).send(errorResponse(`Не удалось записать .env.docker: ${message}`))
       }
     },
   )

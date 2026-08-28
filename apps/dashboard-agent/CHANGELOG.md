@@ -11,6 +11,18 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.15.23] — 2026-08-28
+
+### Changed
+
+- Рефакторинг: общий литерал ошибки `{success: false, error, timestamp: new
+  Date().toISOString()}` (ранние return'ы валидации и catch-блоки, не подошедшие под
+  `apiHandler<T>` целиком) вынесен в `errorResponse<T>(error)` (`lib/api-handler.ts`) —
+  компаньон `apiHandler<T>`. Заменено 56 мест в тех же 10 файлах `routes/`: `deploy.ts` (20),
+  `cron.ts` (10), `e2e.ts` (9), `env.ts` (6), `docker.ts` (5), `database.ts` (2),
+  `traefik.ts`/`nginx.ts`/`git.ts`/`acme-dns.ts` (по 1). Control flow не менялся, только
+  сам литерал.
+
 ## [0.15.22] — 2026-08-28
 
 ### Changed

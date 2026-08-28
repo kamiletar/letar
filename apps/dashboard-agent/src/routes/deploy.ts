@@ -13,6 +13,7 @@ import { randomUUID } from 'crypto'
 import { EventEmitter } from 'events'
 import type { FastifyInstance } from 'fastify'
 import { promisify } from 'util'
+import { errorResponse } from '../lib/api-handler'
 import { applyPhaseLine, computeStalled, type DeployPhase } from '../lib/deploy-phases'
 import { hostExecArgs } from '../lib/host-exec'
 import { getHostLock, releaseHostLock, tryAcquireHostLock } from '../lib/host-lock'
@@ -363,11 +364,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       const deploy = deployId ? deployHistory.find((d) => d.deployId === deployId) : getLatestDeploy()
 
       if (!deploy) {
-        return {
-          success: false,
-          error: deployId ? `Deploy ${deployId} not found in history` : 'No deploys yet',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse(deployId ? `Deploy ${deployId} not found in history` : 'No deploys yet')
       }
 
       // Сквозная нумерация строк: строка N лога = output[N - truncatedLines]
@@ -417,11 +414,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       const deploy = deployId ? deployHistory.find((d) => d.deployId === deployId) : getLatestDeploy()
 
       if (!deploy) {
-        return {
-          success: false,
-          error: deployId ? `Deploy ${deployId} not found in history` : 'No deploys yet',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse(deployId ? `Deploy ${deployId} not found in history` : 'No deploys yet')
       }
 
       const waitMs = Math.min(
@@ -492,11 +485,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       const { image } = request.body
 
       if (!image) {
-        return {
-          success: false,
-          error: 'Image name is required',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse('Image name is required')
       }
 
       const deploy = createDeploy({
@@ -529,11 +518,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         deploy.error = error instanceof Error ? error.message : 'Unknown error'
         flushPersist(deploy)
 
-        return {
-          success: false,
-          error: deploy.error,
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse(deploy.error)
       }
     },
   )
@@ -547,11 +532,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       const { containerId, pull = false } = request.body
 
       if (!containerId) {
-        return {
-          success: false,
-          error: 'Container ID is required',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse('Container ID is required')
       }
 
       const deploy = createDeploy({
@@ -609,11 +590,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         deploy.error = error instanceof Error ? error.message : 'Unknown error'
         flushPersist(deploy)
 
-        return {
-          success: false,
-          error: deploy.error,
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse(deploy.error)
       }
     },
   )
@@ -627,11 +604,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       const { composePath, services = [] } = request.body
 
       if (!composePath) {
-        return {
-          success: false,
-          error: 'Compose file path is required',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse('Compose file path is required')
       }
 
       const deploy = createDeploy({
@@ -666,11 +639,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         deploy.error = error instanceof Error ? error.message : 'Unknown error'
         flushPersist(deploy)
 
-        return {
-          success: false,
-          error: deploy.error,
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse(deploy.error)
       }
     },
   )
@@ -697,20 +666,12 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       const { appName, staging = false, seed = false } = request.body
 
       if (!appName) {
-        return {
-          success: false,
-          error: 'App name is required',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse('App name is required')
       }
 
       // Валидация имени приложения (только буквы, цифры, дефис)
       if (!/^[a-z0-9-]+$/.test(appName)) {
-        return {
-          success: false,
-          error: 'Invalid app name format',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse('Invalid app name format')
       }
 
       // Серверный guard: s3 (staging-раннер) принимает только staging-деплои, s2 (прод) —
@@ -719,39 +680,24 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       // клиентской проверки в deploy-mcp).
       const currentServer = getCurrentServer()
       if (currentServer === 's3' && !staging) {
-        return {
-          success: false,
-          error: 's3 — staging-раннер, принимает только staging-деплои (staging: true)',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse('s3 — staging-раннер, принимает только staging-деплои (staging: true)')
       }
       if (currentServer === 's2' && staging) {
-        return {
-          success: false,
-          error: 's2 — production, staging-деплои идут на s3 (staging: true здесь запрещён)',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse('s2 — production, staging-деплои идут на s3 (staging: true здесь запрещён)')
       }
 
       // Если уже есть запущенный деплой — отклоняем
       if (isDeployRunning()) {
-        return {
-          success: false,
-          error: 'Another deploy is already in progress',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse('Another deploy is already in progress')
       }
 
       // Host-level lock (см. lib/host-lock.ts): деплой и e2e спавнят процессы на одном хосте
       // и конкурируют за node_modules/сборку — блокируем и когда занято именно e2e-прогоном.
       if (!tryAcquireHostLock('deploy', appName)) {
         const lock = getHostLock()
-        return {
-          success: false,
-          error:
-            `Хост занят другой операцией: ${lock?.kind} (${lock?.label}), с ${lock?.since} — дождитесь завершения перед новым деплоем`,
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse(
+          `Хост занят другой операцией: ${lock?.kind} (${lock?.label}), с ${lock?.since} — дождитесь завершения перед новым деплоем`,
+        )
       }
 
       const deploy = createDeploy({
@@ -814,37 +760,22 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
       const { service } = request.body
 
       if (!service) {
-        return {
-          success: false,
-          error: 'Service name is required',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse('Service name is required')
       }
 
       if (!/^[a-z0-9-]+$/.test(service)) {
-        return {
-          success: false,
-          error: 'Invalid service name format',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse('Invalid service name format')
       }
 
       if (isDeployRunning()) {
-        return {
-          success: false,
-          error: 'Another deploy is already in progress',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse('Another deploy is already in progress')
       }
 
       if (!tryAcquireHostLock('deploy', service)) {
         const lock = getHostLock()
-        return {
-          success: false,
-          error:
-            `Хост занят другой операцией: ${lock?.kind} (${lock?.label}), с ${lock?.since} — дождитесь завершения перед новым деплоем`,
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse(
+          `Хост занят другой операцией: ${lock?.kind} (${lock?.label}), с ${lock?.since} — дождитесь завершения перед новым деплоем`,
+        )
       }
 
       const deploy = createDeploy({
@@ -892,11 +823,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
     const running = deployHistory.find((d) => d.running)
 
     if (!running || !currentProcess) {
-      return {
-        success: false,
-        error: 'No deploy in progress',
-        timestamp: new Date().toISOString(),
-      }
+      return errorResponse('No deploy in progress')
     }
 
     try {
@@ -916,11 +843,7 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
         timestamp: new Date().toISOString(),
       }
     } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to cancel',
-        timestamp: new Date().toISOString(),
-      }
+      return errorResponse(error instanceof Error ? error.message : 'Failed to cancel')
     }
   })
 }

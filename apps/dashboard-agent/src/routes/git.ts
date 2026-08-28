@@ -4,7 +4,7 @@
  */
 
 import type { FastifyInstance } from 'fastify'
-import { apiHandler } from '../lib/api-handler'
+import { apiHandler, errorResponse } from '../lib/api-handler'
 import { getGitStatus, getIncomingCommits, gitPull } from '../lib/git'
 import type { ApiResponse } from '../types'
 
@@ -32,11 +32,7 @@ export async function gitRoutes(fastify: FastifyInstance): Promise<void> {
         timestamp: new Date().toISOString(),
       }
     } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString(),
-      }
+      return errorResponse(error instanceof Error ? error.message : 'Unknown error')
     }
   })
 }

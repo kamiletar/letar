@@ -4,7 +4,7 @@
  */
 
 import type { FastifyInstance } from 'fastify'
-import { apiHandler } from '../lib/api-handler'
+import { apiHandler, errorResponse } from '../lib/api-handler'
 import {
   type CronExecutionLog,
   type CronJob,
@@ -92,17 +92,9 @@ export async function cronRoutes(fastify: FastifyInstance): Promise<void> {
           }
         }
 
-        return {
-          success: false,
-          error: 'Invalid action. Use "start" or "stop"',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse('Invalid action. Use "start" or "stop"')
       } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse(error instanceof Error ? error.message : 'Unknown error')
       }
     },
   )
@@ -118,11 +110,7 @@ export async function cronRoutes(fastify: FastifyInstance): Promise<void> {
         const status = getJobStatus(id)
 
         if (!status) {
-          return {
-            success: false,
-            error: 'Job not found',
-            timestamp: new Date().toISOString(),
-          }
+          return errorResponse('Job not found')
         }
 
         return {
@@ -131,11 +119,7 @@ export async function cronRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse(error instanceof Error ? error.message : 'Unknown error')
       }
     },
   )
@@ -165,11 +149,7 @@ export async function cronRoutes(fastify: FastifyInstance): Promise<void> {
         const updatedJob = updateJob(id, updates)
 
         if (!updatedJob) {
-          return {
-            success: false,
-            error: 'Job not found',
-            timestamp: new Date().toISOString(),
-          }
+          return errorResponse('Job not found')
         }
 
         return {
@@ -178,11 +158,7 @@ export async function cronRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse(error instanceof Error ? error.message : 'Unknown error')
       }
     },
   )
@@ -201,11 +177,7 @@ export async function cronRoutes(fastify: FastifyInstance): Promise<void> {
         const job = jobs.find((j) => j.id === id)
 
         if (!job) {
-          return {
-            success: false,
-            error: 'Job not found',
-            timestamp: new Date().toISOString(),
-          }
+          return errorResponse('Job not found')
         }
 
         const result = await executeJob(job)
@@ -216,11 +188,7 @@ export async function cronRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse(error instanceof Error ? error.message : 'Unknown error')
       }
     },
   )
@@ -238,11 +206,7 @@ export async function cronRoutes(fastify: FastifyInstance): Promise<void> {
         const status = getJobStatus(id)
 
         if (!status) {
-          return {
-            success: false,
-            error: 'Job not found',
-            timestamp: new Date().toISOString(),
-          }
+          return errorResponse('Job not found')
         }
 
         const logs = getJobLogs(id, limit)
@@ -257,11 +221,7 @@ export async function cronRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse(error instanceof Error ? error.message : 'Unknown error')
       }
     },
   )

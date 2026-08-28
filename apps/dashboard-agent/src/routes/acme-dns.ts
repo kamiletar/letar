@@ -10,7 +10,7 @@ import {
   backupAcmeDns,
   getAcmeDnsBackupsList,
 } from '../lib/acme-dns-backup'
-import { apiHandler } from '../lib/api-handler'
+import { apiHandler, errorResponse } from '../lib/api-handler'
 import type { ApiResponse } from '../types'
 
 export async function acmeDnsRoutes(fastify: FastifyInstance): Promise<void> {
@@ -32,11 +32,7 @@ export async function acmeDnsRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse(error instanceof Error ? error.message : 'Unknown error')
       }
     },
   )

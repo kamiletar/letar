@@ -4,7 +4,7 @@
  */
 
 import type { FastifyInstance, FastifyRequest } from 'fastify'
-import { apiHandler } from '../lib/api-handler'
+import { apiHandler, errorResponse } from '../lib/api-handler'
 import {
   controlContainer,
   docker,
@@ -67,11 +67,7 @@ export async function dockerRoutes(fastify: FastifyInstance): Promise<void> {
       try {
         const { action } = request.body
         if (!['start', 'stop', 'restart'].includes(action)) {
-          return {
-            success: false,
-            error: 'Invalid action. Must be: start, stop, or restart',
-            timestamp: new Date().toISOString(),
-          }
+          return errorResponse('Invalid action. Must be: start, stop, or restart')
         }
 
         await controlContainer(request.params.id, action)
@@ -82,11 +78,7 @@ export async function dockerRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse(error instanceof Error ? error.message : 'Unknown error')
       }
     },
   )
@@ -106,11 +98,7 @@ export async function dockerRoutes(fastify: FastifyInstance): Promise<void> {
         const { imageName } = request.body
 
         if (!imageName) {
-          return {
-            success: false,
-            error: 'Image name is required',
-            timestamp: new Date().toISOString(),
-          }
+          return errorResponse('Image name is required')
         }
 
         // Используем docker.pull для загрузки образа
@@ -140,11 +128,7 @@ export async function dockerRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse(error instanceof Error ? error.message : 'Unknown error')
       }
     },
   )
@@ -194,11 +178,7 @@ export async function dockerRoutes(fastify: FastifyInstance): Promise<void> {
           timestamp: new Date().toISOString(),
         }
       } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        }
+        return errorResponse(error instanceof Error ? error.message : 'Unknown error')
       }
     },
   )
