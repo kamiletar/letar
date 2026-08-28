@@ -87,6 +87,19 @@ const CHECKS = [
     doc: '.claude/docs/electron-version-drift.md',
   },
   {
+    id: 'better-auth-schema',
+    group: 'auth',
+    title: 'модели Account/oauthClient покрывают обязательные поля better-auth',
+    run: ['node', ['scripts/check-better-auth-schema.mjs']],
+    // gate: расхождение не ловится ни typecheck, ни lint — падает 500-кой в рантайме на
+    // sign-up/reset-password/OAuth-логине без единой строки в логе. См. §71 PLAN.md и
+    // .claude/docs/better-auth-1.7-account-issuer-field.md.
+    severity: 'gate',
+    ci: 'partial',
+    ciNote: 'приватные submodule не выкачаны — их schema.zmodel не проверены',
+    doc: '.claude/docs/better-auth-1.7-account-issuer-field.md',
+  },
+  {
     id: 'lib-subpath-paths',
     group: 'tsconfig',
     title: 'потребители покрывают все subpath-экспорты @letar/*',
