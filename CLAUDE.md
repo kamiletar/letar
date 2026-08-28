@@ -494,7 +494,7 @@ fake-реализация для внешнего сервиса, поставщ
 bash scripts/hooks/install.sh
 ```
 
-Ставит связку из пяти хуков:
+Ставит связку из пяти pre-commit хуков и одного pre-push:
 
 - `pre-commit-scope-guard.sh` — блокирует голый `git commit`/`git add -A`, затянувший файлы из
   нескольких несвязанных `apps/*`/`libs/*`: типовая причина, по которой один агент коммитит чужую
@@ -508,11 +508,18 @@ bash scripts/hooks/install.sh
   ничего. См. раздел «Проверки целостности» ниже.
 - `pre-commit-sops.sh` — авто-шифрует `.env.docker` → `.env.docker.enc`, если доступен sops +
   age-ключ; подробнее — [secret-manager](/.claude/docs/secret-manager.md).
+- `pre-push-submodule-check.sh` — блокирует push letar, если записанный SHA submodule ещё не
+  существует на его origin. Такой push ломает **не приложение-виновника, а весь деплой сразу**
+  (`upload-pack: not our ref` внутри `git submodule update` — до выбора приложения). Обход —
+  `GIT_ALLOW_UNPUSHED_SUBMODULES=1 git push`; проверить руками —
+  `bash scripts/check-submodule-push-state.sh`. Разбор —
+  [git-multi-agent-incidents](/.claude/docs/git-multi-agent-incidents.md).
 
 ### Проверки целостности монорепо
 
-Пять проверок в `scripts/check-*` (патчи зависимостей, peer-диапазоны, дрейф electron, subpath-пути
-`@letar/*`, шаблоны `.gitignore` в submodule) собраны под общий раннер:
+Проверки в `scripts/check-*` (патчи зависимостей, peer-диапазоны, дрейф electron, subpath-пути
+`@letar/*`, шаблоны `.gitignore` в submodule, неотправленные коммиты submodule, брошенные
+worktree) собраны под общий раннер — актуальный состав всегда у `--list`, не по этому списку:
 
 ```bash
 bun scripts/check-all.mjs
