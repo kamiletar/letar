@@ -1254,4 +1254,35 @@ apps/auth-hub/src/app/(auth)/sign-in/_components/magic-link-form.tsx ← про�
 
 ---
 
-**Последнее обновление:** 2026-07-30
+## 2026-08-27 — Better Auth 1.7: `issuer` в Account + RP-Initiated Logout
+
+**Проблема (вход):** апгрейд `better-auth` `^1.6.x → 1.7.1` добавил обязательную проверку
+`Account.issuer` — в памяти, не в SQL. Без колонки/значения аккаунт становился «невидимым» для
+входа без единой строки в логах. Затронуло 14 приложений монорепо, не только auth-hub (сам
+auth-hub тоже был затронут — 32 аккаунта).
+
+**Проблема (logout):** `@better-auth/oauth-provider` 1.7 гейтит RP-Initiated Logout полем
+`oauthClient.enableEndSession`, которого не было в схеме — `undefined` → 401 для всех клиентов.
+Плюс путь `/oauth2/endsession`, который использовали все 8 hub-client приложений, не совпадал с
+реально зарегистрированным `/oauth2/end-session`.
+
+**Решение (auth-hub):**
+
+- `schema.zmodel`, модель `OauthApplication` — 4 новых поля: `enableEndSession`,
+  `postLogoutRedirectUris`, `backchannelLogoutUri`, `backchannelLogoutSessionRequired`.
+- Миграция `20260827010000_oauth_client_logout_fields` — колонки + backfill для 9 существующих
+  клиентов (`enableEndSession=true`, `postLogoutRedirectUris` из уже заполненного `redirectUris`
+  за вычетом callback-путей).
+- Админка (`admin/clients/_actions/client.action.ts`, `_components/client-form.tsx`,
+  `[id]/edit/page.tsx`) — новые поля в форме создания/редактирования клиента.
+- `libs/auth/src/server/factories/create-logout-action.ts` (v0.12.1→0.12.2) — `oidcLogout.issuer`
+  вместо ручного `endSessionUrl`, путь выводится автоматически
+  (`${issuer}/api/auth/oauth2/end-session`); восемь потребителей (`aprel8008`, `archetest`,
+  `animatrona-tracker`, `dashboard`, `domwellbes`, `grandslamcup`, `kami`, `time`) переведены на
+  новый параметр.
+
+Задеплоено в прод 2026-08-27. Полный охват всех 14 приложений, статус деплоя по каждому и
+незакрытые пункты (dsperevod, aboi, svoichuzhie, archetest, aprel8008) — `PLAN.md` §71 (корень
+монорепо, кросс-приложенческая часть).
+
+**Последнее обновление:** 2026-08-27
