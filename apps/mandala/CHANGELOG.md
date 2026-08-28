@@ -4,6 +4,13 @@
 
 ## [Unreleased]
 
+## [0.40.20] - 2026-08-28
+
+### Changed
+
+- `formatFileSize` в `custom-audio-manager.tsx` переведена на общую `@letar/format-utils` —
+  локальная копия была дублем (детали — корневой `PLAN.md` §65)
+
 ## [0.40.19] - 2026-08-25
 
 ### Fixed
