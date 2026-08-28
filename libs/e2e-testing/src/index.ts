@@ -1,3 +1,4 @@
+export { upsertCredentialAccount } from './lib/credential-account'
 export { checkWithHydrationRetry, clickWithHydrationRetry, fillWithHydrationRetry } from './lib/hydration-retry'
 export { devSessionLogin, requireDevSessionToken, storagePaths } from './lib/staging-auth'
 export type { DevSessionLoginOptions } from './lib/staging-auth'

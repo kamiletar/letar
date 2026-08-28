@@ -15,6 +15,21 @@ staging используется отдельный staging-only роут `/api/
 
 ## API
 
+- `upsertCredentialAccount(db, { userId, hashedPassword })` — создаёт/обновляет Better Auth
+  credential-`Account` (providerId `'credential'`, accountId = `userId`, issuer
+  `'local:credential'` — Better Auth 1.7+ ищет аккаунт строгим совпадением всех трёх, см.
+  `.claude/docs/better-auth-1.7-account-issuer-field.md`). `db` — минимальная структурная форма
+  `{ account: { upsert } }`, подходит generated Prisma-клиент любого приложения без явного
+  приведения типа. Хеширование пароля — на вызывающей стороне (bcrypt/scrypt в зависимости от
+  того, чем приложение хеширует пароли при регистрации), функция принимает уже готовый хеш.
+
+  ```ts
+  import { upsertCredentialAccount } from '@letar/e2e-testing'
+
+  const hashedPassword = await hash(data.password, 12) // или Better Auth scrypt-формат
+  await upsertCredentialAccount(db, { userId: user.id, hashedPassword })
+  ```
+
 - `storagePaths(e2eRoot, filename)` — пути для записи `storageState` (config-директория + CWD).
 - `requireDevSessionToken()` — читает `DEV_SESSION_TOKEN` из окружения, бросает понятную ошибку
   вместо непрозрачного 403 при пустом значении.
