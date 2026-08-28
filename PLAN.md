@@ -3372,3 +3372,9 @@ custom-audio-manager.tsx` (RU).
 `mandala`). Тесты `format-utils` (новые) и `github-releases` (существующие, теперь проверяют
 реэкспорт) зелёные. Шесть коммитов (либа+тесты, github-releases, forms-shadcn-комментарий,
 driving-school submodule + bump SHA, mandala), не запушено.
+
+**Дополнение (2026-08-28):** `dashboard` остался несведённым с `@letar/format-utils` (верно,
+не пересматриваю), но его **собственный внутренний** дубль (`lib/format.ts` +
+`SystemOverview.tsx` — два разных `formatBytes` в одном приложении) свёден отдельной сессией:
+общая функция получила опциональный `forceUnit`, видимый текст не изменился. Детали —
+`apps/dashboard/PLAN_COMPLETED.md`.
