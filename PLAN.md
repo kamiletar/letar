@@ -3461,3 +3461,30 @@ driving-school код+доки, bump submodule); не запушено.
 ⚠️ **Живой вход через VK не пере-протестирован** — риск низкий (логика байт-в-байт та же), но
 перед следующим деплоем стоит пройти клик «ВКонтакте» на `/profile/connected-accounts` (auth-hub)
 и форму входа driving-school вручную.
+
+## §69 — `upsertCredentialAccount` (`@letar/e2e-testing`): credential-Account e2e-хелпер вынесен из трёх приложений (2026-08-28)
+
+Третий дословный дубль того же класса, что §66/§68 — независимая правка одного и того же бага
+Better Auth 1.7+ (`accountId = user.id`, не email; `issuer: 'local:credential'`, см.
+`.claude/docs/better-auth-1.7-account-issuer-field.md`) в `db.helpers.ts` трёх e2e-сьютов:
+`driving-school-e2e`, `dsperevod-e2e`, `svoichuzhie-e2e`.
+
+Вынесено в `libs/e2e-testing/src/lib/credential-account.ts` (`upsertCredentialAccount`) —
+структурный тип `{ account: { upsert } }`, принимает уже готовый хеш пароля (хеширование остаётся
+на вызывающей стороне: bcrypt в driving-school-e2e, Better Auth scrypt-формат в dsperevod-e2e/
+svoichuzhie-e2e — разные приложения хешируют по-разному, это не унифицировалось). Заодно упростило
+каждый вызывающий файл: раньше было отдельное ветвление `account.create`/`account.upsert` для
+новых/существующих пользователей, теперь везде один `upsertCredentialAccount` (upsert по
+`providerId_accountId` идемпотентен в обоих случаях).
+
+`dsperevod-e2e` не имел `@letar/e2e-testing` в зависимостях вовсе — добавлен в
+`implicitDependencies`/`dependencies` его `package.json`. `nx lint` зелёный на всех трёх;
+`nx run-many -t typecheck` падает 121 ошибкой, но все — в нетронутых спек-файлах
+(`document`/`window` без DOM lib, преэкзистентно, не по теме сессии).
+
+Четыре коммита: `feat(e2e-testing)` + `refactor(dsperevod-e2e)` + `refactor(svoichuzhie-e2e)` в
+letar, `refactor(driving-school-e2e)` внутри submodule + `chore: bump driving-school-e2e
+submodule` в letar. Не запушено.
+
+⚠️ `auth-hub-e2e` под этот паттерн не проверялся отдельно — grep `providerId: 'credential'` по
+`apps/*/src/helpers/db.helpers.ts` его не нашёл, только три указанных приложения.
