@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install.sh — устанавливает связку pre-commit хуков в текущий git-репозиторий.
+# install.sh — устанавливает связку git-хуков (pre-commit + pre-push) в текущий репозиторий.
 #
 # Ставит:
 #   - pre-commit-scope-guard.sh  — блокирует голый commit, затянувший несвязанные scope
@@ -9,6 +9,9 @@
 #                                   после случайного Prettier-форматирования `nx format`)
 #   - pre-commit-deps-integrity.sh — целостность зависимостей (патчи + peer), запускается
 #                                   ТОЛЬКО если в коммите есть bun.lock/package.json
+#   - pre-push-submodule-check.sh — блокирует push, если записанный SHA submodule ещё не
+#                                   существует на его origin (иначе падает деплой ВСЕХ
+#                                   приложений: `upload-pack: not our ref`)
 #
 # Использование:
 #   bash scripts/hooks/install.sh                                  # из корня letar
@@ -65,7 +68,24 @@ exit $status
 DISPATCH
   chmod +x "$hooks_dir/pre-commit"
 
+  # pre-push. Рядом с хуком кладём и сам чекер: внутри submodule каталога scripts/ нет, а в
+  # корне letar хук всё равно предпочтёт рабочую копию scripts/check-submodule-push-state.sh —
+  # чтобы правки чекера применялись без переустановки хуков.
+  cp "$SRC_DIR/pre-push-submodule-check.sh" "$hooks_dir/_pre-push-submodule-check.sh"
+  cp "$SRC_DIR/../check-submodule-push-state.sh" "$hooks_dir/_check-submodule-push-state.sh"
+  chmod +x "$hooks_dir/_pre-push-submodule-check.sh" "$hooks_dir/_check-submodule-push-state.sh"
+
+  cat > "$hooks_dir/pre-push" <<'PUSH_DISPATCH'
+#!/usr/bin/env bash
+# Сгенерировано scripts/hooks/install.sh — не редактируй руками, правь исходники в scripts/hooks/
+set -uo pipefail
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec bash "$DIR/_pre-push-submodule-check.sh" "$@"
+PUSH_DISPATCH
+  chmod +x "$hooks_dir/pre-push"
+
   echo "✅ $label → $hooks_dir/pre-commit (scope-guard + semgrep + dprint-check + deps-integrity + sops)"
+  echo "   $label → $hooks_dir/pre-push (submodule-check)"
 }
 
 if [[ "${1:-}" == "--all-submodules" ]]; then
@@ -93,4 +113,4 @@ if [[ "${1:-}" == "--all-submodules" ]]; then
 fi
 
 GIT_DIR="$(git rev-parse --git-dir)"
-install_into "$GIT_DIR" "pre-commit хуки установлены"
+install_into "$GIT_DIR" "хуки установлены"

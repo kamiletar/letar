@@ -114,6 +114,22 @@ const CHECKS = [
     doc: '.claude/docs/nx-temp-build-dir-breaks-project-graph.md',
   },
   {
+    id: 'submodule-push-state',
+    group: 'submodule',
+    title: 'SHA каждого submodule существует на его origin',
+    run: ['bash', ['scripts/check-submodule-push-state.sh']],
+    // warn, а не gate: между «закоммитил bump SHA» и «запушил submodule» проверка
+    // красная законно — это нормальное промежуточное состояние работы, а не поломка
+    // (push submodule требует одобрения владельца, см. .claude/rules/git.md). Настоящий
+    // барьер стоит там, где состояние становится опасным, — на push:
+    // scripts/hooks/pre-push-submodule-check.sh. Здесь запись нужна для видимости и
+    // ручного прогона перед deploy-request.
+    severity: 'warn',
+    ci: 'no',
+    ciNote: 'приватные submodule в CI не выкачиваются — проверять нечего',
+    doc: '.claude/docs/git-multi-agent-incidents.md',
+  },
+  {
     id: 'stale-worktrees',
     group: 'git',
     title: 'брошенные worktree фоновых агентов и осиротевшие ветки worktree-agent-*',
