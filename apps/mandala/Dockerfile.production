@@ -10,10 +10,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# zoneinfo копируем из Debian-образа, а не ставим `apk add tzdata`: Alpine (musl) не
-# содержит zoneinfo, а apk был единственным сетевым запросом в этом Dockerfile и падал
-# с "TLS: unspecified error" каждый раз, когда ночной docker-prune сносил кеш слоя.
-# Разбор — .claude/docs/docker-prune-cold-layer-network-flake.md
+# zoneinfo для Alpine — не `apk add tzdata`, причина: .claude/docs/docker-prune-cold-layer-network-flake.md
 COPY --from=tz /usr/share/zoneinfo /usr/share/zoneinfo
 ENV TZ=Europe/Moscow
 # Ограничение памяти Node.js (по умолчанию ~50% хоста = ~1GB на 2GB RAM)
