@@ -4154,3 +4154,23 @@ Traefik: `forwardedHeaders.notAppendXForwardedFor` по умолчанию `fals
   email-verification rate-limiter.
 - `apps/driving-school/src/lib/api-logger.ts` — искажение `ipAddress` в аудит-логе партнёрского
   API, не сам по себе rate-limit bypass.
+
+**Обе локальные копии фикс получили** (aboi — коммит `2379bff`, driving-school — в рабочем дереве
+на момент проверки). **Консолидация в общий хелпер (`libs/api-server`, уже implicit-dependency
+у обоих приложений) рассмотрена и отклонена** — три реализации не тривиально сводимы к одной
+сигнатуре:
+
+- `libs/demo-protection` — `async getClientIp(): Promise<string>`, читает `headers()` из
+  `next/headers` (без параметра), miss → `'unknown'`.
+- `apps/aboi` — `getClientIp(request: Request): string`, синхронная, miss → `'unknown'`.
+- `apps/driving-school` — `getClientIp(request: Request): string | null`, синхронная, есть
+  третий фоллбек `cf-connecting-ip` (Cloudflare — в инфре репозитория нет, только Traefik, но
+  фоллбек defensive, не мёртвый код на 100%), miss → `null` (используется как
+  `Prisma.ApiLog.ipAddress: String?`).
+
+Разное поведение на промахе (`'unknown'` vs `null`) и разный стиль вызова (`headers()` vs
+`request.headers`) — не косметика, а часть контракта каждого места использования. Форсировать
+общую сигнатуру означало бы дописывать нормализацию на стороне вызывающих или менять семантику
+`ipAddress` в БД driving-school ради переиспользования трёх строк парсинга запятой. Оставлено
+раздельно, следуя тому же принципу, что и остальные три пункта выше по документу (аналогичная
+дупликация признана обоснованной там, где расходятся сигнатура и семантика промаха).
