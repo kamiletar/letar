@@ -72,12 +72,13 @@ ls -la "$GITDIR/hooks/pre-commit" scripts/hooks/install.sh
 Установленный `pre-commit` старше, чем `install.sh` в `scripts/hooks/`, — повод перепроверить
 построчно, а не считать хуки актуальными по умолчанию.
 
-**Не только domwellbes.** Тот же греп по всем приложениям с БД на 2026-09-01 нашёл ещё три
-submodule со стухшим набором хуков (schema-migration-check не подключён): `aboi`,
-`driving-school`, `dsperevod`. Остальные (`aprel8008`, `studio`, `svoichuzhie`, `auth-hub`,
-`mandala`, `archetest`) — актуальны. Если работаешь в одном из трёх отставших приложений и
-меняешь `schema.zmodel` — не полагайся на pre-commit хук, глазами проверяй, что миграция создана
-(`nx db:migrate <app>`), пока хуки там не переустановлены.
+**Не только domwellbes была затронута.** Тот же греп по всем приложениям с БД на 2026-09-01 нашёл
+ещё три submodule со стухшим набором хуков (schema-migration-check не подключён): `aboi`,
+`driving-school`, `dsperevod`. В тот же день `bash scripts/hooks/install.sh --all-submodules`
+переустановлен для всех 15 submodule — на 2026-09-01 `schema-migration-check` подключён везде,
+включая эти три. Урок остаётся актуальным: набор хуков — копия на момент установки, не симлинк,
+и после любого нового скрипта в `scripts/hooks/` (не только этого) отставание снова начнёт расти
+для submodule, которые не переустанавливали с момента добавления.
 
 ## Как чинить
 
