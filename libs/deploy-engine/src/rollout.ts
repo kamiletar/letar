@@ -61,6 +61,45 @@ export interface RolloutResult {
 const DEFAULT_HEALTH_TIMEOUT_MS = 5 * 60 * 1000
 const DEFAULT_POLL_INTERVAL_MS = 3000
 const DEFAULT_ENV_FILE = '.env.docker'
+const NPM_CONTAINER_CANDIDATES = ['nginx-proxy-manager', 'npm']
+
+export interface ProxyDetection {
+  proxyKind: 'npm' | 'traefik'
+  npmContainerName?: string
+}
+
+/**
+ * Автоопределение реверс-прокси на хосте по фактически запущенным контейнерам — тем же
+ * паттерном, что уже проверенный fallback в `deploy-affected.sh` (общий `nginx-reload` шаг после
+ * всего batch): пробует контейнеры NPM (`nginx-proxy-manager` на s2, `npm` на s3), иначе
+ * контейнер `traefik`.
+ *
+ * Не полагается на per-app label `letar.proxy-kind` в compose — переход s2/s3 на Traefik
+ * произошёл одномоментно на уровне сервера (§48 M3, снят NPM и с s2 2026-08-08, и с s3
+ * 2026-08-31), а label расставлен только у одного приложения из 20 с `letar.rollout: true`
+ * (`animatrona-landing`). Без автоопределения каждый rollout остальных 19 падает на
+ * `nginx-reload-1` — `docker exec nginx-proxy-manager ...` бьёт в контейнер, которого больше нет,
+ * cleanup-шаги (`stop-old`/`rm-old`) не выполняются, старый контейнер остаётся висеть рядом с
+ * новым (найдено 2026-09-01 на domwellbes и mandala).
+ */
+export async function detectProxyKind(executor: DeployEngineExecutor): Promise<ProxyDetection> {
+  const res = await executor.runCommand('docker', ['ps', '--format', '{{.Names}}'])
+  const names = res.stdout
+    .split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean)
+  for (const candidate of NPM_CONTAINER_CANDIDATES) {
+    if (names.includes(candidate)) {
+      return { proxyKind: 'npm', npmContainerName: candidate }
+    }
+  }
+  if (names.includes('traefik')) {
+    return { proxyKind: 'traefik' }
+  }
+  // Ни NPM, ни Traefik не нашлись живыми — не блокируем rollout, откатываемся на исторический
+  // дефолт (npm/nginx-proxy-manager), как и раньше делал cli.ts без автоопределения.
+  return { proxyKind: 'npm', npmContainerName: 'nginx-proxy-manager' }
+}
 
 /** Директория compose-файла — производная от `composePathForApp` (единый источник конвенции пути). */
 function composeDir(app: string): string {

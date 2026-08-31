@@ -12,7 +12,7 @@ import { parseArgs } from 'node:util'
 import { composePathForApp, type DoctorReport, runDoctor } from './doctor.js'
 import { createNodeExecutor } from './executor.js'
 import { migrateComposeToRollout } from './migrate-compose.js'
-import { type RolloutResult, type RolloutStep, runRollout } from './rollout.js'
+import { detectProxyKind, type RolloutResult, type RolloutStep, runRollout } from './rollout.js'
 import { getStatus } from './status.js'
 
 const DEFAULT_NPM_CONTAINER = 'nginx-proxy-manager'
@@ -76,15 +76,30 @@ async function main(): Promise<void> {
           'env-file': { type: 'string' },
         },
       })
-      const proxyKind = values['proxy-kind'] === 'traefik' ? 'traefik' : 'npm'
-      console.log(`## rollout ${app} (proxy: ${proxyKind})\n`)
+      // `--proxy-kind` явно форсирует выбор (для приложений с label `letar.proxy-kind` в
+      // compose). Без флага — автоопределение по реально запущенным контейнерам на хосте
+      // (см. detectProxyKind), не жёсткий дефолт 'npm': NPM снят и с s2, и с s3 (§48 M3),
+      // жёсткий дефолт ронял nginx-reload-1 на каждом rollout-приложении без выставленного label.
+      let proxyKind: 'npm' | 'traefik'
+      let npmContainerName: string | undefined
+      if (values['proxy-kind'] === 'npm' || values['proxy-kind'] === 'traefik') {
+        proxyKind = values['proxy-kind']
+        npmContainerName = proxyKind === 'npm' ? (values['npm-container'] ?? DEFAULT_NPM_CONTAINER) : undefined
+      } else {
+        const detected = await detectProxyKind(executor)
+        proxyKind = detected.proxyKind
+        npmContainerName = proxyKind === 'npm' ? (values['npm-container'] ?? detected.npmContainerName) : undefined
+      }
+      console.log(
+        `## rollout ${app} (proxy: ${proxyKind}${npmContainerName ? `, container: ${npmContainerName}` : ''})\n`,
+      )
       const result = await runRollout(
         executor,
         app,
         {
           deployTag: values['deploy-tag'],
           proxyKind,
-          npmContainerName: proxyKind === 'npm' ? (values['npm-container'] ?? DEFAULT_NPM_CONTAINER) : undefined,
+          npmContainerName,
           projectName: values['project-name'],
           envFile: values['env-file'],
         },

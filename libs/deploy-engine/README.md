@@ -43,14 +43,28 @@ branching в `deploy-affected.sh` по opt-in label (пока dead code — ни
   `resolve-new-container` → `wait-healthy` → `smoke-test` → `nginx-reload-1` → `stop-old` →
   `rm-old` → `nginx-reload-2`. Пока НЕ пишет deploy-manifest (свяжется в сессии H вместе с
   `rollback`).
-- **`proxyKind`** (§48 M3 шаг 4, по умолчанию `'npm'`): `npm` — `docker exec <npmContainerName>
-  nginx -s reload` дважды (резолвит alias на оба IP, затем убирает старый). `traefik` — reload-шаги
-  становятся no-op (`ok: true`, без `docker exec`): Traefik docker-провайдер сам следит за
-  событиями контейнеров (`watch`), подхватывает новый контейнер с тем же service-лейблом сразу
-  после healthy и убирает старый сразу после `docker rm` — явного сигнала аналога `nginx -s
-  reload` у Traefik не существует. Шаги сохраняют те же id (`nginx-reload-1`/`nginx-reload-2`) —
-  переименовывать под `proxyKind: 'traefik'` не стали, чтобы не плодить два набора id в одном и
-  том же `RolloutResult.steps[]`.
+- **`proxyKind`** (§48 M3 шаг 4): `npm` — `docker exec <npmContainerName> nginx -s reload` дважды
+  (резолвит alias на оба IP, затем убирает старый). `traefik` — reload-шаги становятся no-op
+  (`ok: true`, без `docker exec`): Traefik docker-провайдер сам следит за событиями контейнеров
+  (`watch`), подхватывает новый контейнер с тем же service-лейблом сразу после healthy и убирает
+  старый сразу после `docker rm` — явного сигнала аналога `nginx -s reload` у Traefik не
+  существует. Шаги сохраняют те же id (`nginx-reload-1`/`nginx-reload-2`) — переименовывать под
+  `proxyKind: 'traefik'` не стали, чтобы не плодить два набора id в одном и том же
+  `RolloutResult.steps[]`.
+  - **Библиотечная функция `runRollout` дефолтится на `'npm'`, если `proxyKind` не передан** —
+    это низкоуровневый API, автоопределение живёт на уровень выше (`detectProxyKind`, `cli.ts`).
+  - **CLI (`rollout` subcommand) без `--proxy-kind` автоопределяет прокси** через
+    `detectProxyKind()` — смотрит на реально запущенные контейнеры хоста
+    (`docker ps --format '{{.Names}}'`): `nginx-proxy-manager`/`npm` → `proxyKind: 'npm'`,
+    иначе `traefik` → `proxyKind: 'traefik'`, иначе исторический дефолт
+    `npm`/`nginx-proxy-manager`. Не полагается на per-app label `letar.proxy-kind` в compose —
+    переход s2/s3 на Traefik произошёл одномоментно на уровне сервера (NPM снят и с s2
+    2026-08-08, и с s3 2026-08-31), а label расставлен только у `animatrona-landing` из 20
+    приложений с `letar.rollout: true`. Без автоопределения каждый rollout остальных 19 падал на
+    `nginx-reload-1` (`docker exec nginx-proxy-manager ...` бьёт в контейнер, которого больше
+    нет) — cleanup-шаги (`stop-old`/`rm-old`) не выполнялись, старый контейнер оставался висеть
+    рядом с новым (найдено 2026-09-01 на domwellbes и mandala). `--proxy-kind`/label
+    `letar.proxy-kind` по-прежнему форсируют явный выбор, если он нужен.
 
 ## CLI
 
@@ -66,9 +80,9 @@ nx run @letar/deploy-engine:cli -- doctor --app grandslamcup
 
 `doctor`/`rollout` выходят с кодом `0` при успехе, `1` при провале (диагностика — per-check/
 per-step ✅/❌/⚠️ с деталями). `status` печатает JSON. `rollout` принимает `--proxy-kind npm|traefik`
-(по умолчанию `npm`, см. «Ограничения» выше), `--npm-container` (по умолчанию
-`nginx-proxy-manager` — канонический `container_name` из
-`infra/nginx-proxy-manager/docker-compose.yml`, игнорируется при `--proxy-kind traefik`),
+(без флага — автоопределение по `detectProxyKind()`, см. «Архитектура» выше), `--npm-container`
+(по умолчанию — то, что определил `detectProxyKind()`, либо `nginx-proxy-manager` при явном
+`--proxy-kind npm` без автоопределения; игнорируется при `--proxy-kind traefik`),
 `--project-name` (по умолчанию = `--app`), `--env-file` (по умолчанию `.env.docker`).
 
 Корень репозитория — `process.cwd()` по умолчанию, переопределяется `DEPLOY_ENGINE_REPO_ROOT`

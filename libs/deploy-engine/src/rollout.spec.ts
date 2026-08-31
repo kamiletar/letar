@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { composePathForApp } from './doctor.js'
 import type { CommandResult, DeployEngineExecutor } from './executor.js'
-import { runRollout } from './rollout.js'
+import { detectProxyKind, runRollout } from './rollout.js'
 
 const READY_COMPOSE = `
 services:
@@ -465,5 +465,46 @@ services:
     expect(result.steps.at(-1)?.detail).toContain('найдено 2')
     // scale-up не должен был выполниться — небезопасно катить, не зная какой контейнер старый
     expect(calls.some((c) => c.args.includes('--scale'))).toBe(false)
+  })
+})
+
+describe('detectProxyKind', () => {
+  function psExecutor(namesStdout: string): DeployEngineExecutor {
+    return {
+      async runCommand(command, args) {
+        if (command === 'docker' && args[0] === 'ps') {
+          return { stdout: namesStdout, stderr: '', exitCode: 0 }
+        }
+        return { stdout: '', stderr: '', exitCode: 0 }
+      },
+      async readFile() {
+        return null
+      },
+      async writeFile() {},
+      async fileExists() {
+        return false
+      },
+    }
+  }
+
+  it('находит nginx-proxy-manager (s2) среди запущенных контейнеров', async () => {
+    const result = await detectProxyKind(psExecutor('dashboard-app-1\nnginx-proxy-manager\ntraefik\n'))
+    // NPM в приоритете, если оба контейнера почему-то живы одновременно (переходный момент миграции)
+    expect(result).toEqual({ proxyKind: 'npm', npmContainerName: 'nginx-proxy-manager' })
+  })
+
+  it('находит npm (легаси-имя контейнера на s3) среди запущенных контейнеров', async () => {
+    const result = await detectProxyKind(psExecutor('dashboard-agent\nnpm\n'))
+    expect(result).toEqual({ proxyKind: 'npm', npmContainerName: 'npm' })
+  })
+
+  it('находит traefik, если ни один из NPM-кандидатов не запущен', async () => {
+    const result = await detectProxyKind(psExecutor('dashboard-app-1\ntraefik\n'))
+    expect(result).toEqual({ proxyKind: 'traefik' })
+  })
+
+  it('откатывается на исторический дефолт npm/nginx-proxy-manager, если не найден ни один прокси', async () => {
+    const result = await detectProxyKind(psExecutor('dashboard-app-1\n'))
+    expect(result).toEqual({ proxyKind: 'npm', npmContainerName: 'nginx-proxy-manager' })
   })
 })
