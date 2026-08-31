@@ -91,6 +91,74 @@ bun install --frozen-lockfile
 grandslamcup`. Если приложение на сервере падает, а `typecheck:tsgo` локально зелёный — проверять
 именно `tsc --build`, не полагаться на `tsgo`.
 
+## ⚠️ Другой симптом того же класса: верхнеуровневый симлинк пакета вообще отсутствует
+
+**Симптом (2026-09-01, aboi):** `nx typecheck:tsgo aboi` и `nx theme:typegen aboi --skip-nx-cache`
+падают на шаге `bunx @chakra-ui/cli typegen` (esbuild) с ~183 ошибками вида
+`Could not resolve "@ark-ui/react"` / `"@ark-ui/react/accordion"` и т.д. — все пути резолва внутри
+`@chakra-ui/react/dist/esm/*.js`. При этом `ls node_modules/@ark-ui` даёт «No such file or
+directory», хотя `ls node_modules/.bun | grep ark-ui` показывает физически скачанные изолированные
+копии пакета (в конкретном случае — сразу две версии, `5.37.2` и `5.39.0`). Отличие от основного
+случая этого документа: там на диске несколько **лишних** копий при верном резолве в `bun.lock`,
+здесь — резолв в `bun.lock` тоже верный (одна версия, `5.39.0`, тянется как зависимость
+`@chakra-ui/react@3.37.0`), но верхнеуровневого симлинка на неё в `node_modules/@ark-ui/react` нет
+вообще ни одного — тот самый путь, который резолвит `require`/esbuild.
+
+**Причина в этом случае — не устаревший кеш, а прерванный `bun install`.** В рабочем дереве уже
+лежал незакоммиченный бамп `@chakra-ui/react` (3.36.1 → 3.37.0: новый файл патча, обновлённый
+`patchedDependencies` в корневом `package.json`), то есть кто-то ранее запускал `bun install`,
+но он не дошёл до конца. Повторный `bun install` в этой сессии подтвердил механизм — он дважды
+падал на постинсталл-скрипте `@letar/animatrona` с:
+
+```
+error: EBUSY: resource busy or locked, open '...\node_modules\.bun\ntsuspend@1.0.2\...\win32-x64_lib.node'
+```
+
+затем со второй попытки — `ERR_DLOPEN_FAILED` на том же файле («The process cannot access the file
+because it is being used by another process»). `ntsuspend` — нативный модуль, который тянет
+`@letar/animatrona`; его `.node`-бинарник оказался залочен каким-то процессом на машине (не
+электрон — `Get-Process electron` пуст; вероятно один из множества фоновых `node.exe` от других
+параллельных агентских сессий на этой же машине, держащий устаревший чекаут пакета). Прямая
+проверка через `[System.IO.File]::Open(...)` подтвердила: файл был залочен на момент первых двух
+попыток и свободен на третьей — лок оказался временным, не постоянным.
+
+**Диагностика чужого процесса, если EBUSY повторяется:**
+
+```powershell
+Get-Process node -ErrorAction SilentlyContinue | ForEach-Object {
+  try {
+    $mods = $_.Modules | Where-Object { $_.ModuleName -match 'ntsuspend' }
+    if ($mods) { Write-Output "PID $($_.Id): $($mods.FileName)" }
+  } catch {}
+}
+```
+
+Точечная проверка лока конкретного файла (без падения всего `bun install` ради диагностики):
+
+```powershell
+$path = 'C:\web\letar\node_modules\.bun\ntsuspend@1.0.2\node_modules\ntsuspend\win32-x64_lib.node'
+try { ([System.IO.File]::Open($path,'Open','ReadWrite','None')).Close(); 'NOT LOCKED' }
+catch { "LOCKED: $($_.Exception.Message)" }
+```
+
+**Фикс:** просто повторить `bun install` (без `--force`, без `rm -rf`) — как только сторонний
+процесс отпускает файл, установка проходит целиком и восстанавливает пропавший верхнеуровневый
+симлинк:
+
+```
+bun install
+# → "Checked 3596 installs across 3925 packages (no changes)" — не No changes, а полноценный install,
+#   пропавшие top-level симлинки (в т.ч. @ark-ui/react) восстанавливаются как часть обычного прогона.
+```
+
+Подтверждено зелёным `theme:typegen`/`typecheck:tsgo` не только на `aboi`, но и на `domwellbes` и
+`driving-school` — баг был репо-широким (общий `node_modules` в монорепо), а не специфичным для
+одного приложения, хотя обнаружился через `aboi`.
+
+⚠️ Если EBUSY/`ERR_DLOPEN_FAILED` на постинсталл-скрипте повторяется стабильно (не разово) —
+это не тот же случай: искать конкретный держащий процесс через модульный поиск выше, а не ретраить
+`bun install` бесконечно.
+
 ## Смежное
 
 - [bun-lockfile-private-submodules](/.claude/docs/bun-lockfile-private-submodules.md) — другая
