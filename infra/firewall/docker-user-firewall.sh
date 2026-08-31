@@ -1,11 +1,22 @@
 #!/usr/bin/env bash
-# Default-deny в цепочке DOCKER-USER (IPv4, FORWARD) и, опционально, в INPUT (IPv6).
+# Default-deny в цепочке DOCKER-USER (IPv4, FORWARD) + default-deny в IPv4 INPUT + опционально
+# в IPv6 INPUT.
 #
 # Почему это существует отдельно от ufw — .claude/docs/firewall.md, раздел
 # «Почему ufw бесполезен против Docker-портов». Коротко: Docker публикует порты через DNAT
 # в PREROUTING/FORWARD, куда правила ufw (живущие в INPUT) никогда не попадают. DOCKER-USER —
 # единственное место в FORWARD, которое Docker гарантированно просматривает раньше своих
 # ACCEPT-правил и не перетирает при рестарте демона.
+#
+# ⚠️ 2026-08-31 (PLAN-INFRA-3.md §49, дополнение): DOCKER-USER (FORWARD) один НЕ закрывает всё
+# для IPv4 — раньше считалось, что закрывает. userland-proxy у Docker включён по умолчанию (нет
+# /etc/docker/daemon.json → нет userland-proxy:false) для ОБЕИХ версий IP, не только v6. Для
+# портов без переписывания номера при DNAT (хостовый ≠ контейнерный, например host:5456→ct:5432)
+# это не спасает — реальный внешний трафик подтверждён живой пробой шёл через FORWARD/DOCKER-USER
+# по правилам, но открытые не-allow-list порты (напр. те самые PostgreSQL 5456/5443) всё равно
+# принимали соединения. Поэтому IPv4 INPUT default-deny теперь ОБЯЗАТЕЛЕН симметрично IPv6, не
+# опционален. Живой разбор и урок про то, почему гипотеза не была протестирована раньше —
+# PLAN-INFRA-3.md §49.
 #
 # IPv6 — отдельная история (см. тот же док, раздел «IPv6»): без "ip6tables": true в
 # /etc/docker/daemon.json Docker не создаёт DNAT для v6, порт слушает docker-proxy на самом
@@ -56,6 +67,18 @@ if [ -n "$UDP_PORTS" ]; then
   iptables -A DOCKER-USER -i "$EXT_IFACE" -p udp -m multiport --dports "$UDP_PORTS" -j RETURN
 fi
 iptables -A DOCKER-USER -i "$EXT_IFACE" -j DROP
+
+# --- IPv4: INPUT — обязательный default-deny, симметрично DOCKER-USER (см. предупреждение
+#     2026-08-31 в шапке файла: userland-proxy делает часть портов видимыми в INPUT для v4 тоже) ---
+iptables -F INPUT 2>/dev/null || true
+iptables -A INPUT -i "$EXT_IFACE" -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+iptables -A INPUT -i "$EXT_IFACE" -p icmp -j ACCEPT
+iptables -A INPUT -i "$EXT_IFACE" -p tcp --dport 22 -j ACCEPT
+iptables -A INPUT -i "$EXT_IFACE" -p tcp -m multiport --dports "$TCP_PORTS" -j ACCEPT
+if [ -n "$UDP_PORTS" ]; then
+  iptables -A INPUT -i "$EXT_IFACE" -p udp -m multiport --dports "$UDP_PORTS" -j ACCEPT
+fi
+iptables -A INPUT -i "$EXT_IFACE" -j DROP
 
 # --- IPv6: INPUT — только если явно включено этой конфигурацией ---
 if [ "$ENABLE_IPV6_INPUT" = "1" ]; then
