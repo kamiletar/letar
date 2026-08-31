@@ -89,14 +89,46 @@ export const auth = betterAuth({
 дублировавшую самописную обвязку globalThis-singleton+Proxy заменили на общую фабрику
 `createLazyPrismaAuthClient`, поведенчески без изменений), `dashboard` (образец).
 
-⚠️ **`archetest`, `grandslamcup`, `kami` — запись «уже было ОК» не подтверждается кодом на
-2026-08-31 и требует перепроверки.** Их `auth.ts` передаёт в `prismaAdapter()` `prisma` из
-`./prisma`, который в каждом из трёх приложений — просто `export { prisma } from './db'`, а
-`db.ts` `export const prisma = orm` — это голый `ZenStackClient`, ровно тот же паттерн, что
-вызывал баг в пяти починенных приложениях выше. Не установлено, ошибка ли это в исходном аудите
-или регресс, случившийся после него. Требуется тот же живой прогон (`nx dev <app>` +
-`sign-up`/`sign-in` через `/api/auth/*`), что и для `auth-hub` ниже, прежде чем делать вывод.
-Проверка вынесена отдельной задачей (см. `apps/<app>/PLAN.md` каждого приложения).
+### `archetest`, `grandslamcup`, `kami` — перепроверены живьём (2026-08-31), три разных исхода
+
+Запись «уже было ОК» была неточной для всех трёх: их `auth.ts` передавал в `prismaAdapter()`
+`prisma` из `./prisma`, который в каждом приложении был просто `export { prisma } from './db'`, а
+`db.ts` — `export const prisma = orm`, голый `ZenStackClient`. Тот же паттерн, что вызывал баг в
+пяти починенных приложениях выше. Живой прогон (`nx dev <app>` + `fetch` на `/api/auth/*`) дал
+три разных результата:
+
+- **`archetest` — баг подтверждён и починен.** `POST /api/auth/sign-up/email` и `sign-in/email`
+  стабильно давали пустой `500` без единой строки в логах — точное совпадение с сигнатурой бага.
+  Фикс по образцу выше (`createLazyPrismaAuthClient`), коммит `ff5af4a1`. ⚠️ `archetest` физически
+  **не submodule** — обычная директория основного репозитория `letar`, коммит сделан прямо туда
+  (pathspec ограничен тремя изменёнными файлами), а не как для остальных приложений в этом списке.
+  После фикса — `400 EMAIL_PASSWORD_SIGN_UP_DISABLED`/`EMAIL_PASSWORD_DISABLED` (email/password
+  выключен в конфиге штатно); с временно включённым `emailAndPassword.enabled` (только для
+  верификации, не закоммичено) — `200`, реальный `User` создан, вход прошёл. Заодно почищен
+  побочный дефектный ре-экспорт в `src/app/api/consent/route.ts` (брал тот же сломанный `prisma`
+  из `lib/prisma.ts` — переведён на `getEnhancedPrisma`).
+
+- **`grandslamcup` — баг НЕ подтверждён, код НЕ трогали.** Email/password выключен
+  (`EMAIL_PASSWORD_SIGN_UP_DISABLED`/`EMAIL_PASSWORD_DISABLED`), OIDC не сконфигурирован
+  локально — прямой sign-up/sign-in непроверяем. Вместо этого проверили сам путь через
+  `prismaAdapter(ZenStackClient)` напрямую: сессия создана в обход через `/api/auth/dev-session`
+  (тот эндпоинт читает БД напрямую, не через adapter), затем `GET /api/auth/get-session` → `200`
+  с корректными данными (сверено с БД через `postgres-grandslamcup` MCP — не заглушка), и
+  `POST /api/auth/sign-out` → `200 {"success":true}`. Оба реально идут через `prismaAdapter`, ни
+  разу пустой 500. Причина расхождения с остальными пятью не выяснена — не в скоупе проверки.
+
+- **`kami` — баг НЕ подтверждён, но проверка неполная.** Шесть проверенных эндпоинтов
+  (`sign-up/email` → 400, `sign-in/social` с неизвестным провайдером → 404, `get-session` с
+  поддельным токеном → `200 null`, `sign-out` → 415, `list-accounts` без сессии → 401) — везде
+  структурированный JSON, ни одного пустого 500. Но `kami` использует `mode: 'hub-client'`
+  (`buildHubClientAuth()` в `libs/auth/src/server/create-auth/index.ts`), где `emailAndPassword`
+  вообще не конфигурируется, а OIDC локально не настроен (`.env.local` без
+  `OIDC_CLIENT_ID`/`SECRET`) — путь **создания нового аккаунта** (sign-up email или OAuth-
+  коллбэк с записью user+account), где баг типично проявлялся у остальных пяти, физически
+  недостижим локальным тестом. Код не трогали — нет положительного репро, чинить вслепую
+  рискованно. Если понадобится закрыть вопрос окончательно: настроить
+  `OIDC_CLIENT_ID`/`SECRET` в `.env.local` и прогнать полный OAuth sign-in с живой Ключницей,
+  либо превентивно применить тот же фикс, что в `archetest`.
 
 **✅ Проверено живьём (2026-08-31), баг НЕ подтвердился:** `auth-hub` — `src/lib/prisma.ts` там
 действительно не отдельный нативный `PrismaClient`, а ре-экспорт `prisma`/`rawOrm` из `db.ts`, где
