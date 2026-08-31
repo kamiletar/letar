@@ -1,0 +1,38 @@
+# acme-api.letar.best — служебный маршрут, НЕ приложение. PLAN-INFRA-2.md §48, шаг 6 (снять NPM
+# с s2): Traefik на s3 ходит через этот адрес за ACME DNS-01 challenge к acme-dns, который живёт
+# на s2 (infra/acme-dns/, HTTP API только на loopback 127.0.0.1:8053). До этой правки маршрут
+# держал NPM (proxy host id 35, Access List allow 188.127.235.141 deny all) — обязателен ДО
+# снятия NPM, иначе Traefik на s3 перестанет продлевать сертификаты *.s3.letar.best.
+#
+# tls: true, БЕЗ certResolver — берёт уже выпущенный wildcard *.letar.best из хранилища
+# (заказывает его роутер dashboard/studio через docker-label, см. traefik.s2.yml). Свой
+# certResolver здесь означал бы точечный запрос на "acme-api.letar.best", под который в
+# acme-dns-accounts.json нет ключа — тот же класс ошибки, что описан в README про s3
+# (регистрация нового аккаунта закрыта, 404).
+#
+# acme-dns — контейнер в той же kami-network, доступен по имени, порт 80 (внутренний, не
+# опубликованный 127.0.0.1:8053).
+#
+# ⚠️ IP-фильтр НЕ здесь, пока NPM ещё в цепочке. Живая проверка 2026-08-31: `ipAllowList` с
+# `ipStrategy.depth: 1` (расчёт на X-Forwarded-For от NPM) дал 403 и с s3, и в обход NPM —
+# depth-подход не заработал предсказуемо на первой попытке, разбираться дальше не стали, т.к.
+# NPM всё равно временный. Реальный периметр сейчас — Access List "s3" на самом NPM-хосте
+# (proxy_host id 35, allow 188.127.235.141/deny all) — не трогать, пока не будет отдельно
+# заведён и проверен ipAllowList здесь. TODO при шаге 6 (снять NPM): Traefik станет первым
+# хопом, RemoteAddr = реальный IP клиента — тогда завести простой ipAllowList без ipStrategy
+# и проверить живьём ДО отключения Access List на NPM, не вместо.
+
+http:
+  routers:
+    acme-api:
+      rule: 'Host(`acme-api.letar.best`)'
+      entryPoints:
+        - websecure
+      service: acme-dns
+      tls: true
+
+  services:
+    acme-dns:
+      loadBalancer:
+        servers:
+          - url: 'http://acme-dns:80'
