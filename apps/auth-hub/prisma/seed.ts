@@ -96,6 +96,7 @@ const clients = [
       'https://kami.letar.best/api/auth/callback/letar-auth',
       'https://kami.letar.best/sign-in',
       'http://localhost:3005/sign-in',
+      'http://localhost:3005/api/auth/callback/letar-auth',
     ].join(','),
   },
   {
