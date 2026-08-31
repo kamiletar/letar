@@ -1,5 +1,26 @@
 # Выполненные задачи — form-docs
 
+## Сессия 2026-09-01 — фикс `nx typecheck:tsgo`: сломанный вывод типов fumadocs-core в `loader()`
+
+`[[...slug]]/page.tsx`: `TS2339: Property 'body'/'toc' does not exist on type 'PageData'` —
+воспроизведено во время `/infra:deps-update`, но фикс шире одной сессии обновления зависимостей:
+root cause — не регрессия бампа. `StaticSource<Config>` (`fumadocs-core/source`) несёт `Config`
+только через индексный доступ (`files: VirtualFile<Config>[]` → `Config['pageData']`), и
+`loader()`'s внутренний `GeneratePage<I>`/`GenerateMeta<I>` не может восстановить его через
+`infer` — тихо откатывается к базовым `PageData`/`MetaData`. Подтверждено пошаговыми
+type-пробниками: `docs`/`docs.toFumadocsSource()` (из `.source/server.ts`) типизированы верно,
+разрушение — именно внутри вычисления результата `loader()`. Не зависит от `tsc` vs `tsgo`
+(идентично на обоих), не зависит от версии fumadocs-core/-mdx (воспроизведено и на откаченных
+точь-в-точь пре-бамп версиях), не дубликат установки пакета (`require.resolve` из
+`fumadocs-mdx`/`fumadocs-ui` резолвится в один физический путь).
+
+Фикс — явный `as unknown as LoaderOutput<...>` в `src/lib/source.ts` с типом `docs.docs[number]`/
+`docs.meta[number]` (эти типы достижимы напрямую, без `infer`, минуя сломанную цепочку). Разбор —
+[fumadocs-core-staticsource-config-indexed-access-inference](/.claude/docs/fumadocs-core-staticsource-config-indexed-access-inference.md).
+
+Проверено: `nx typecheck:tsgo form-docs --skip-nx-cache`, `nx lint form-docs`,
+`nx run-many -t format --projects=form-docs` — все зелёные. v0.6.2.
+
 ## Сессия 2026-08-26 — фикс CI: typecheck падал на негенерируемом `.source/`
 
 `main CI` #32892784230: `tsgo --noEmit` падал с `TS2307: Cannot find module '@/.source/server'`.
