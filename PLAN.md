@@ -3587,7 +3587,7 @@ dist-файлам — скрипт резолвит и **исполняет** р
 дев-БД dashboard → детекторный SQL-запрос вернул 1 → откат строки вернул 0. Детали —
 `apps/dashboard-agent/CHANGELOG.md` 0.15.20, `apps/dashboard/CHANGELOG.md` 1.24.9.
 
-**Часть 3.3 (синтетическая проверка входа) — код закрыт (2026-08-28), аккаунты не заведены:**
+**Часть 3.3 (синтетическая проверка входа) — полностью закрыта (2026-08-31):**
 новая получасовая cron-задача `login-canary-check` в dashboard-agent
 (`lib/login-canary.ts`) шлёт POST `/api/auth/sign-in/email` канареечными учётными данными на
 9 приложений с реальным credential-входом email/password (не все 14 из issuer-фикса — часть
@@ -3613,6 +3613,25 @@ the database`) — в `schema.zmodel` не было модели `RateLimit`, а
 (`secondaryStorage` не передан). За 90 дней в GlitchTip до фикса — 0 живых пользователей,
 не P0. Добавлена модель `RateLimit` + миграция, версия `driving-school` 0.240.13.
 
+**Провижининг canary для mandala (2026-08-28/31) вскрыл отдельный баг — исправлен:** `prismaAdapter()`
+better-auth получал ZenStack ORM-клиент (kysely) вместо нативного `PrismaClient`
+(несовместимость, задокументированная в `apps/dashboard/src/lib/prisma.ts`) — 500 для реальных
+пользователей, не только канарейки. Плюс независимая вторая причина: `genericOAuth` для Yandex
+использовал `discoveryUrl`, а Yandex не отдаёт `issuer` в discovery-документе —
+`Unhandled Rejection` на инициализации плагина. Фикс — `lib/prisma.ts` (Proxy +
+`@prisma/adapter-pg`) + явные `authorizationUrl`/`tokenUrl`/`getUserInfo` вместо `discoveryUrl`.
+Позже вынесено в общую фабрику `createLazyPrismaAuthClient` (`@letar/auth`) — тот же код был
+продублирован в dashboard/svoichuzhie/dsperevod/domwellbes. Для `auth-hub` та же миграция явно
+отклонена (слой at-rest шифрования `crypto-orm.ts`, которого голая фабрика не имеет) — детали в
+`.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md`.
+
+**Реальные аккаунты созданы и проверены живьём (2026-08-31):** все 9 приложений провижинены
+через `/api/admin/login-canary-setup`, пароли — в `apps/dashboard/.env.docker.enc`. Живая
+проверка сквозной цепочки: `emailVerified` временно сброшен на `canary-dsperevod@letar.best`,
+2 подряд `login-canary-check` → `403 EMAIL_NOT_VERIFIED` → `alerted: true` → алерт
+`AUTH_LOGIN_CANARY_FAILED` подтверждённо дошёл до Telegram. Флаг возвращён, состояние сброшено.
+Детали — `apps/dashboard-agent/PLAN_COMPLETED.md`.
+
 **Системный аудит того же класса риска по всем `createAuth`/`createAuthAsync`/raw `betterAuth()`
 потребителям (2026-08-28) — закрыт, других пробелов нет:** проверены все 17 приложений с
 собственным `lib/auth.ts` (`betterAuth(`/`createAuth(` найдены грепом по `apps/**/*.ts`).
@@ -3631,7 +3650,8 @@ the database`) — в `schema.zmodel` не было модели `RateLimit`, а
 - **aboi** — не использует фабрику `createAuth()` вовсе (raw `betterAuth()`, задокументировано
   прямо в файле), rate-limit хранит in-memory по дизайну однопроцессного деплоя — не задет.
 - **time, aprel8008** — `mode: 'hub-client'`, `rateLimit` в профиль не передают вовсе → Better
-  Auth использует свой дефолт (`memory`) — не задеты.
+  Auth использует свой дефолт (`memory`) — не задеты. ⚠️ Уточнение 2026-08-31: у `mandala` sign-up/
+  sign-in всё равно падал 500 — по другой, независимой от `rateLimit` причине, см. ниже.
 - **mandala, dashboard, animatrona-tracker, archetest, grandslamcup, studio** — raw
   `betterAuth()` с собственным `rateLimit`-блоком, но без явного `storage:` — тоже попадают под
   дефолт Better Auth (`memory`/`secondary-storage`), никогда не `'database'` — не задеты.
