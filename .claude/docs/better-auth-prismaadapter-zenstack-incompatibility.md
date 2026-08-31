@@ -108,14 +108,23 @@ export const auth = betterAuth({
   побочный дефектный ре-экспорт в `src/app/api/consent/route.ts` (брал тот же сломанный `prisma`
   из `lib/prisma.ts` — переведён на `getEnhancedPrisma`).
 
-- **`grandslamcup` — баг НЕ подтверждён, код НЕ трогали.** Email/password выключен
-  (`EMAIL_PASSWORD_SIGN_UP_DISABLED`/`EMAIL_PASSWORD_DISABLED`), OIDC не сконфигурирован
-  локально — прямой sign-up/sign-in непроверяем. Вместо этого проверили сам путь через
-  `prismaAdapter(ZenStackClient)` напрямую: сессия создана в обход через `/api/auth/dev-session`
-  (тот эндпоинт читает БД напрямую, не через adapter), затем `GET /api/auth/get-session` → `200`
-  с корректными данными (сверено с БД через `postgres-grandslamcup` MCP — не заглушка), и
-  `POST /api/auth/sign-out` → `200 {"success":true}`. Оба реально идут через `prismaAdapter`, ни
-  разу пустой 500. Причина расхождения с остальными пятью не выяснена — не в скоупе проверки.
+- **`grandslamcup` — баг НЕ подтверждён живым тестом, но фикс применён превентивно (2026-08-31).**
+  Email/password выключен (`EMAIL_PASSWORD_SIGN_UP_DISABLED`/`EMAIL_PASSWORD_DISABLED`), OIDC не
+  сконфигурирован локально — прямой sign-up/sign-in непроверяем. Первая проверка прогнала сам путь
+  через `prismaAdapter(ZenStackClient)` напрямую: сессия создана в обход через
+  `/api/auth/dev-session` (тот эндпоинт читает БД напрямую, не через adapter), затем
+  `GET /api/auth/get-session` → `200` с корректными данными (сверено с БД через
+  `postgres-grandslamcup` MCP — не заглушка), и `POST /api/auth/sign-out` → `200
+  {"success":true}`. Оба реально идут через `prismaAdapter`, ни разу пустой 500. Причина
+  расхождения с остальными пятью не выяснена.
+
+  Решение: не полагаться на необъяснённое везение — применён тот же фикс, что в `archetest`
+  (`createLazyPrismaAuthClient`, `src/lib/prisma.ts`). Обоснование: код был байт-в-байт тем же
+  паттерном, что валил пять других приложений; `email/password`/OIDC выключены только в текущем
+  конфиге, а не структурно — включение любого из них в будущем стало бы репро без предупреждения.
+  Фикс дешёвый и уже вынесен в общую фабрику (`@letar/auth/server`), риск регрессии низкий. После
+  фикса `nx typecheck:tsgo`/`nx lint` зелёные, тот же live-тест (dev-session → get-session →
+  sign-out) снова дал `200`/`200`.
 
 - **`kami` — баг НЕ подтверждён, но проверка неполная.** Шесть проверенных эндпоинтов
   (`sign-up/email` → 400, `sign-in/social` с неизвестным провайдером → 404, `get-session` с
