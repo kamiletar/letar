@@ -52,6 +52,21 @@ libs/my-lib/
 в `libs/<name>/package.json` (генератор `new-lib` их проставляет). Поэтому `dashboard` импортирует
 `@letar/forms` и `@letar/chakra-provider`, не имея для них ни одной записи в `paths`.
 
+⚠️ **Оговорка неверна для библиотеки, у которой ни один потребитель никогда не держал её в
+настоящих `dependencies`.** `customConditions` резолвит `exports`, но чтобы дойти до них,
+TS/Node-резолверу сначала физически нужен `node_modules/@letar/<lib>` — под изолированным
+линковщиком bun этот симлинк создаёт **только** `bun install` по записи в `dependencies`
+(`apps/<app>/node_modules/@letar/`, не корневой). `nx.implicitDependencies` — чисто графовое
+ребро Nx, bun о нём не знает. Для давно используемых библиотек (`@letar/forms`,
+`@letar/chakra-provider`) это на практике не всплывает — они почти везде оказались настоящей
+`dependencies` по другой причине. Найдено трижды подряд на `@letar/demo-protection` (aboi,
+domwellbes, form-example, 2026-08-31…09-01) — библиотека новая, во всех потребителях заведена
+только через `implicitDependencies`, `nx typecheck:tsgo` падал `TS2307: Cannot find module`.
+Фикс — добавить пакет в реальные `dependencies` потребителя + `bun install` из корня. Тот же
+механизм резолва, что уже описан для vitest в
+[vitest-unlinked-workspace-lib-imports.md](/.claude/docs/vitest-unlinked-workspace-lib-imports.md)
+— здесь он бьёт не только по vitest, но и по самому `typecheck:tsgo`.
+
 **`paths` и `references` в `tsconfig.json` приложения — вспомогательные, не обязательные.**
 Они безвредны и помогают редактору, но обязательными их считать не надо:
 
