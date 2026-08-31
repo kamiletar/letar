@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+## [0.5.12] - 2026-09-01
+
+### Fixed
+
+- `Table.Root` внутри `Card.Body` без `overflowX="auto"` вызывал горизонтальный скролл всей
+  страницы вместо локального скролла таблицы на узких экранах — добавлен `overflowX="auto"` на
+  `Card.Body` в `renderer/app/products/page.tsx`, `renderer/app/history/page.tsx`,
+  `renderer/app/batch/page.tsx`.
+
 ## [0.5.11] - 2026-08-25
 
 ### Changed

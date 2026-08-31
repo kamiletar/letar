@@ -549,7 +549,7 @@ export default function BatchPage() {
         {/* Таблица кодов */}
         {items.length > 0 && (
           <Card.Root>
-            <Card.Body p={0}>
+            <Card.Body p={0} overflowX="auto">
               <Table.Root>
                 <Table.Header>
                   <Table.Row>

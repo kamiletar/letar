@@ -362,7 +362,7 @@ export default function HistoryPage() {
 
         {/* Таблица */}
         <Card.Root>
-          <Card.Body p={0}>
+          <Card.Body p={0} overflowX="auto">
             {isLoading
               ? (
                 <Box p={8} textAlign="center">

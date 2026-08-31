@@ -2,6 +2,16 @@
 
 Детальное описание всех реализованных фич Label Printer Desktop.
 
+## overflowX на Card.Body вокруг Table.Root (2026-09-01)
+
+Точечный аудит по образцу найденного в `domwellbes` бага (61 место): `<Table.Root>` внутри
+`<Card.Body>` без `overflowX="auto"` даёт горизонтальный скролл всей страницы вместо локального
+скролла таблицы на узких экранах. Найдено и починено 3 реальных места:
+`renderer/app/products/page.tsx` (список товаров), `renderer/app/history/page.tsx` (история),
+`renderer/app/batch/page.tsx` (список кодов маркировки). Четвёртый `Table.Root`
+(`products/page.tsx`, превью импорта CSV/XLSX) — ложное срабатывание: обёрнут не в `Card.Body`, а
+в обычный `Box` с `maxH`+`overflowY="auto"`, вне паттерна.
+
 ## Вынос generate-icons в общую библиотеку @letar/icon-generator (2026-08-25)
 
 При выносе трёх копий скрипта генерации иконок в общую библиотеку (`libs/icon-generator`,
