@@ -171,6 +171,31 @@ import { createRedisStorage } from '@letar/auth/server'
 
 Redis настроен с `lazyConnect: true` — не падает при старте если Redis недоступен.
 
+### `createLazyPrismaAuthClient(PrismaClientCtor, options?)`
+
+Ленивая обёртка нативного `PrismaClient` для `prismaAdapter()` — ZenStack v3 ORM (`db.ts`)
+использует Kysely под капотом и с `prismaAdapter()` несовместим (500 без логов на каждом
+`/api/auth/*`). Вынесено после пятого дословного дубля (`dashboard`, `mandala`, `svoichuzhie`,
+`dsperevod`, `domwellbes`, 2026-08-31) — см. `apps/mandala/PLAN_COMPLETED.md` за полным разбором
+несовместимости.
+
+`PrismaClientCtor` передаётся приложением: кодогенерация ZenStack кладёт класс в
+`@/generated/prisma/client` каждого приложения отдельно, унифицировать тип нельзя — только саму
+Proxy-обёртку с ленивой инициализацией (Turbopack выполняет top-level код модуля при сборке,
+немедленный `new PrismaClientCtor(...)` там падает).
+
+```typescript
+// apps/my-app/src/lib/prisma.ts
+import { PrismaClient } from '@/generated/prisma/client'
+import { createLazyPrismaAuthClient } from '@letar/auth/server'
+
+export const prismaAuth = createLazyPrismaAuthClient(PrismaClient)
+```
+
+| Параметр                   | Тип      | По умолчанию               |
+| -------------------------- | -------- | -------------------------- |
+| `options.connectionString` | `string` | `process.env.DATABASE_URL` |
+
 ## Client
 
 ### `createAuthClient(options?)`

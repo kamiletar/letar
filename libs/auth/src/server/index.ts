@@ -38,6 +38,8 @@ export { type AuthInstance, createSessionHelpers } from './session'
 export {
   createDevSessionRoute,
   type CreateDevSessionRouteOptions,
+  createLazyPrismaAuthClient,
+  type CreateLazyPrismaAuthClientOptions,
   createLogoutAction,
   createRoleGuards,
   type DevSessionPrismaClient,

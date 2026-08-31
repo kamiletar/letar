@@ -1,6 +1,6 @@
 {
   "name": "@letar/auth",
-  "version": "0.12.3",
+  "version": "0.13.0",
   "private": true,
   "type": "module",
   "main": "./src/index.ts",
@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "@better-auth/utils": "^0.4.2",
-    "@letar/pin-auth": "workspace:*"
+    "@letar/pin-auth": "workspace:*",
+    "@prisma/adapter-pg": "^7.10.0"
   }
 }

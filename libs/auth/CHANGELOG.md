@@ -7,6 +7,16 @@
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-08-31
+
+### Added
+
+- **`createLazyPrismaAuthClient(PrismaClientCtor, options?)`** — ленивая `Proxy`-обёртка нативного
+  `PrismaClient` для `prismaAdapter()`. Вынесено после пятого дословного дубля кода в
+  `dashboard`/`mandala`/`svoichuzhie`/`dsperevod`/`domwellbes` — все пять приложений столкнулись с
+  несовместимостью ZenStack v3 ORM-клиента (Kysely под капотом) и better-auth `prismaAdapter()`
+  независимо друг от друга. `@prisma/adapter-pg` добавлен в `dependencies`.
+
 ## [0.12.3] - 2026-08-28
 
 ### Fixed

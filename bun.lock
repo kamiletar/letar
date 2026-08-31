@@ -425,7 +425,7 @@
     },
     "apps/aprel8008": {
       "name": "@letar/aprel8008",
-      "version": "0.12.35",
+      "version": "0.25.0",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -475,7 +475,7 @@
     },
     "apps/dashboard": {
       "name": "@letar/dashboard",
-      "version": "1.24.8",
+      "version": "1.24.10",
       "dependencies": {
         "@letar/analytics": "workspace:*",
         "@letar/chakra-provider": "workspace:*",
@@ -490,7 +490,7 @@
     },
     "apps/dashboard-agent": {
       "name": "dashboard-agent",
-      "version": "0.15.20",
+      "version": "0.15.29",
       "dependencies": {
         "@fastify/cors": "^11.3.0",
         "@fastify/rate-limit": "^10",
@@ -509,7 +509,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.162.4",
+      "version": "0.162.6",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -529,7 +529,7 @@
     },
     "apps/driving-school": {
       "name": "driving-school",
-      "version": "0.240.12",
+      "version": "0.240.13",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -546,7 +546,7 @@
     },
     "apps/dsperevod": {
       "name": "@letar/dsperevod",
-      "version": "0.6.14",
+      "version": "0.6.19",
       "dependencies": {
         "@better-auth/utils": "^0.4.2",
         "@chakra-ui/react": "*",
@@ -670,7 +670,7 @@
     },
     "apps/letar-landing": {
       "name": "@letar/letar-landing",
-      "version": "0.4.0",
+      "version": "0.5.2",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
       },
@@ -681,7 +681,7 @@
     },
     "apps/mandala": {
       "name": "@letar/mandala",
-      "version": "0.40.20",
+      "version": "0.40.21",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -723,7 +723,7 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.50.12",
+      "version": "0.50.13",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -753,7 +753,7 @@
     },
     "apps/svoichuzhie": {
       "name": "@letar/svoichuzhie",
-      "version": "0.10.45",
+      "version": "0.10.48",
       "dependencies": {
         "@letar/api-server": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -785,7 +785,7 @@
     },
     "apps/time": {
       "name": "@letar/time",
-      "version": "0.5.10",
+      "version": "0.5.11",
       "dependencies": {
         "@letar/api-server": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -878,6 +878,7 @@
       "dependencies": {
         "@better-auth/utils": "^0.4.2",
         "@letar/pin-auth": "workspace:*",
+        "@prisma/adapter-pg": "^7.10.0",
       },
       "peerDependencies": {
         "@better-auth/oauth-provider": ">=1.7.0",
