@@ -389,9 +389,10 @@ GitHub/npm/registry — `apk add` в сборке падает, фикс — з�
 новый `/api/cron/*` требует три правки не в scope пишущего приложения (`CRON_SECRET`,
 `dashboard-agent/cron.ts`, порт/host в `infra-config`) — иначе тихий 401 или ненайденный маршрут
 
-**Прокси (`infra/`):** [nginx-proxy-manager](/infra/nginx-proxy-manager/README.md) действующий ·
+**Прокси (`infra/`):** [nginx-proxy-manager](/infra/nginx-proxy-manager/README.md) ⛔ снят
+и с s3 (2026-08-08), и с s2 (2026-08-31) — история, не текущее состояние ·
 [acme-dns](/infra/acme-dns/README.md) ⭐ wildcard-TLS без API регистратора ·
-[traefik](/infra/traefik/README.md) пилот замены NPM на s3
+[traefik](/infra/traefik/README.md) боевой на s2 и s3
 
 **Безопасность и право:** [personal-data](/.claude/docs/personal-data.md) ⭐ 152-ФЗ, РКН, cookie ·
 [upload-path-traversal](/.claude/docs/upload-path-traversal.md) почему `path.join`+`startsWith` не
