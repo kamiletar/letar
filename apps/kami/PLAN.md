@@ -12,14 +12,20 @@
 
 ## Баги / технический долг
 
-- [ ] ⚠️ Открытый вопрос: `src/lib/auth.ts` передаёт в `prismaAdapter()` `prisma` из `./db`
-      (голый `ZenStackClient`) — тот же паттерн, что вызывал пустой 500 без логов на
-      `/api/auth/*` в mandala/domwellbes/svoichuzhie/dsperevod/studio (см.
-      `.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md`). Существующий аудит
-      этого файла ошибочно числил kami как «уже было ОК» — на 2026-08-31 это не подтверждается
-      кодом. Нужна живая проверка (`nx dev`, sign-up/sign-in через `/api/auth/*`) и, если баг
-      подтвердится, миграция на `createLazyPrismaAuthClient` (`@letar/auth/server`) по образцу
-      починенных приложений. Отдельная сессия для проверки уже запущена (чип `task_5ac5b32a`).
+- [ ] ⚠️ Открытый вопрос (проверено частично, 2026-08-31): код передаёт в `prismaAdapter()`
+      голый `ZenStackClient` — тот же паттерн, что чинили в mandala/domwellbes/svoichuzhie/
+      dsperevod/studio (см. `.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md`).
+      Живой прогон шести эндпоинтов (`sign-up/email` → 400, `sign-in/social` неизвестный
+      провайдер → 404, `get-session` с поддельным токеном → `200 null`, `sign-out` → 415,
+      `list-accounts` без сессии → 401) не дал ни одного пустого 500 — но `kami` использует
+      `mode: 'hub-client'`, где `emailAndPassword` вообще не конфигурируется, а OIDC локально не
+      настроен (`.env.local` без `OIDC_CLIENT_ID`/`SECRET`). Путь **создания нового аккаунта**
+      (sign-up email или OAuth-коллбэк с записью user+account) — где баг типично проявлялся у
+      остальных приложений — физически недостижим локальным тестом, остаётся непроверенным. Код
+      не менялся (нет положительного репро). Закрыть вопрос: настроить `OIDC_CLIENT_ID`/`SECRET`
+      в `.env.local` и прогнать полный OAuth sign-in с живой Ключницей, либо превентивно
+      применить фикс `createLazyPrismaAuthClient` по образцу archetest (коммит `ff5af4a1` в
+      корне монорепо).
 
 - [x] ⚠️ **Приложение полностью не запускается (500 на всех страницах, включая `/`)** — исправлено
       2026-08-25. Три независимые причины:
