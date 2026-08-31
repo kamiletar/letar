@@ -384,6 +384,11 @@ GitHub/npm/registry — `apk add` в сборке падает, фикс — з�
 ⚠️ деплой был холодным по трём независимым причинам (typecheck 67 либ без кэша, `rm -rf .next`
 поверх persistent cache Turbopack, `rm -rf .nx/cache` после каждого git pull); предупреждения
 `vitest.config.ts` в логе — шум на 17 секунд, а не признак пересчёта графа ·
+[deploy-engine-rollout-proxy-kind-autodetect](/.claude/docs/deploy-engine-rollout-proxy-kind-autodetect.md)
+⚠️ `libs/deploy-engine` rollout ронял `nginx-reload-1`/`stop-old`/`rm-old` на 19 из 20
+rollout-приложений после перехода s2/s3 на Traefik — per-app label `letar.proxy-kind` не
+поспевал за одномоментной сменой прокси на уровне сервера; фикс — автоопределение
+(`detectProxyKind`) по факту запущенных контейнеров, а не по label ·
 [dotenvx-stdout-migration-pollution](/.claude/docs/dotenvx-stdout-migration-pollution.md) P3018 ·
 [external-services-blocked-from-s2](/.claude/docs/external-services-blocked-from-s2.md) ·
 [dashboard-agent-alert-debounce-patterns](/.claude/docs/dashboard-agent-alert-debounce-patterns.md) ·
