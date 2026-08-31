@@ -3681,3 +3681,38 @@ backfill, ловушка «коммит миграции ≠ применени�
 ✅ **Открытый вопрос закрыт (2026-09-01):** все коммиты запушены — 7 submodule
 (aboi, aprel8008, domwellbes, driving-school, dsperevod, studio, svoichuzhie) первыми, затем
 `letar`, с разрешения пользователя.
+
+## §73 — миграция всех `next.config.*` с deprecated `@nx/next` composePlugins/withNx (2026-09-01)
+
+Повод: `@nx/next` 23.x печатает на каждом билде два deprecation-варнинга (`composePlugins`/
+`withNx` уходят в Nx v24). Переведены все 21 `next.config.*` монорепо (14 публичных приложений +
+7 приватных submodule: aboi, aprel8008, domwellbes, driving-school, dsperevod, studio,
+svoichuzhie) на голый конфиг без обёртки.
+
+**Не тривиальное «просто убрать импорт»:** `withNx` инжектил `transpilePackages` для транзитивных
+workspace-либ через граф зависимостей Nx. Без него webpack (`next build --webpack`, прод-сборка
+почти везде) перестаёт транспилировать TS из `libs/*` — падает на первом же
+`interface`/`export type`. Заявление депрекейшн-варнинга «Next.js транспилирует workspace-либы
+автоматически» здесь не работает: монорепо на изолированной установке bun + алиасы `@letar/*`
+через `paths` в **app-level** `tsconfig.json` (не в корневом), а не через symlink'и в
+`node_modules` — автоматическое определение workspace-пакетов Next.js это не видит. Фикс — явный
+`transpilePackages` в каждом приложении, вычисленный из его собственного `tsconfig.json paths`
+(тот же набор, который `withNx` пытался вычислить через граф Nx, но не находил — читал только
+корневой tsconfig, где `paths` нет). Каждое приложение пересобрано (`nx build`) и подтверждено
+зелёным. Композиция дополнительных плагинов (`next-intl`/MDX/Serwist/bundle-analyzer) переведена
+с `composePlugins(...)` на простую вложенную композицию функций с сохранением порядка.
+Разбор — `.claude/docs/nextjs-nx-composeplugins-migration.md`.
+
+**Попутно найден и исправлен отдельный баг (не следствие этой миграции):** `animatrona-landing` и
+`aira-web` не резолвили `@letar/format-utils` (тянется транзитивно через реэкспорт в
+`@letar/github-releases`) — алиас отсутствовал в `tsconfig.json paths` обоих приложений, поэтому
+webpack не мог найти модуль вообще, не только не транспилировать. Воспроизведено и на исходном
+(до миграции) конфиге через `git show HEAD:...` — баг существовал раньше, миграция его только
+проявила чётче через явный список `transpilePackages`. Тот же класс, что уже чинили в
+aboi/aprel8008 (`SortablePhotoGrid` → `@letar/format-utils`, см. `deploy-coordination.md` п.4).
+Фикс — три места на приложение: `tsconfig.json` (path-алиас), `package.json`
+(`nx.implicitDependencies`), `next.config.*` (`transpilePackages`).
+
+Коммиты: 7 внутри submodule + бамп SHA в letar + один multi-scope коммит на 14 публичных
+приложений и доку + отдельный fix-коммит на format-utils. Не запушено — ждёт решения пользователя
+о push (см. `.claude/rules/git.md`).
