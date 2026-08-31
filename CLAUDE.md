@@ -427,7 +427,12 @@ scoped cookie, без утечки токена в лог/`Referer` ·
 ⚠️ VK принудительно перевёл Standalone-приложения на VK ID (OAuth 2.1) — legacy
 `oauth.vk.com`/`.ru` отвечает `Security Error` независимо от PKCE, фикс — нативный
 `socialProviders.vk`; отдельно `linkSocial()` тихо не привязывает провайдера без email без
-`allowDifferentEmails`, и `account_already_linked_to_different_user` — не баг, а дубль-аккаунт в БД
+`allowDifferentEmails`, и `account_already_linked_to_different_user` — не баг, а дубль-аккаунт в БД ·
+[better-auth-prismaadapter-zenstack-incompatibility](/.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md)
+⚠️ `prismaAdapter()` требует нативный `PrismaClient` — ZenStack ORM-клиент (Kysely под капотом)
+несовместим, любой `/api/auth/*` падает 500 без единой строки в логах; фикс — отдельный
+`lib/prisma.ts`, найдено и починено в 5 приложениях (mandala, domwellbes, svoichuzhie, dsperevod,
+studio)
 
 **Электрон и десктоп:** [electron-app-protocol](/.claude/docs/electron-app-protocol.md) ⚠️ origin
 `null` под `file://` блокирует Worker и WASM ·
