@@ -108,7 +108,7 @@ export default async function OrderDetailPage({ params }: Props) {
             <Card.Header>
               <Heading size="md">Товары</Heading>
             </Card.Header>
-            <Card.Body p={0}>
+            <Card.Body p={0} overflowX="auto">
               <Table.Root>
                 <Table.Header>
                   <Table.Row>

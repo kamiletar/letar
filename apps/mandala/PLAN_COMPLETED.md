@@ -1,5 +1,15 @@
 # Выполненные задачи: Mandala
 
+## Фикс: overflowX на Card.Body вокруг Table.Root (2026-09-01)
+
+Точечный аудит по образцу фикса в domwellbes (61 место, `Card.Body` без `overflowX="auto"`
+вокруг `Table.Root` вызывал скролл всей страницы вместо локального скролла таблицы на узких
+экранах). В mandala всего 3 `Table.Root`; только один — на странице заказа
+(`src/app/(admin)/admin/orders/[id]/page.tsx`, таблица товаров внутри `Card.Body p={0}`) — был
+внутри `Card.Body`. Добавлен `overflowX="auto"`. Два остальных (`orders-table.tsx`,
+`content-pages-table.tsx`) рендерятся напрямую в `Stack`, не в `Card.Body` — паттерн бага к ним
+не применим, правка не нужна.
+
 ## Дубль `lib/prisma.ts` вынесен в `createLazyPrismaAuthClient` (2026-08-31)
 
 Продолжение фикса ниже. Тот же `lib/prisma.ts` дословно скопировали в `dashboard`, `svoichuzhie`,
