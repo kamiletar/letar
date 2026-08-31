@@ -85,8 +85,18 @@ export const auth = betterAuth({
 `auth.ts` передавал в `prismaAdapter()` ZenStack-клиент из `db.ts` вместо отдельного
 `prismaAuth`.
 
-**Уже было ОК** (отдельный `prismaAuth`-клиент с самого начала): `aboi`, `archetest`,
-`grandslamcup`, `kami`, `dashboard` (образец).
+**Уже было ОК** (отдельный `prismaAuth`-клиент с самого начала): `aboi` (2026-08-31 —
+дублировавшую самописную обвязку globalThis-singleton+Proxy заменили на общую фабрику
+`createLazyPrismaAuthClient`, поведенчески без изменений), `dashboard` (образец).
+
+⚠️ **`archetest`, `grandslamcup`, `kami` — запись «уже было ОК» не подтверждается кодом на
+2026-08-31 и требует перепроверки.** Их `auth.ts` передаёт в `prismaAdapter()` `prisma` из
+`./prisma`, который в каждом из трёх приложений — просто `export { prisma } from './db'`, а
+`db.ts` `export const prisma = orm` — это голый `ZenStackClient`, ровно тот же паттерн, что
+вызывал баг в пяти починенных приложениях выше. Не установлено, ошибка ли это в исходном аудите
+или регресс, случившийся после него. Требуется тот же живой прогон (`nx dev <app>` +
+`sign-up`/`sign-in` через `/api/auth/*`), что и для `auth-hub` ниже, прежде чем делать вывод.
+Проверка вынесена отдельной задачей (см. `apps/<app>/PLAN.md` каждого приложения).
 
 **✅ Проверено живьём (2026-08-31), баг НЕ подтвердился:** `auth-hub` — `src/lib/prisma.ts` там
 действительно не отдельный нативный `PrismaClient`, а ре-экспорт `prisma`/`rawOrm` из `db.ts`, где
