@@ -1,5 +1,24 @@
 # Выполненные задачи: Mandala
 
+## Дубль `lib/prisma.ts` вынесен в `createLazyPrismaAuthClient` (2026-08-31)
+
+Продолжение фикса ниже. Тот же `lib/prisma.ts` дословно скопировали в `dashboard`, `svoichuzhie`,
+`dsperevod`, `domwellbes` (и позже независимо в `studio`) — 6 идентичных копий. Вынесено в
+`createLazyPrismaAuthClient(PrismaClientCtor, options?)` —
+[libs/auth/src/server/factories/create-lazy-prisma-auth-client.ts](/libs/auth/src/server/factories/create-lazy-prisma-auth-client.ts),
+экспорт из `@letar/auth/server`. `PrismaClientCtor` передаётся приложением — кодогенерация
+ZenStack кладёт класс в `@/generated/prisma/client` каждого приложения отдельно, унифицировать
+можно только `Proxy`-обвязку с ленивой инициализацией, не тип клиента. `@letar/auth/src/lib/prisma.ts`
+mandala сокращён до одной строки:
+
+```typescript
+export const prismaAuth = createLazyPrismaAuthClient(PrismaClient)
+```
+
+`typecheck:tsgo`/`lint`/`format` зелёные во всех 6 приложениях + `@letar/auth`. API-справка —
+`libs/auth/docs/api-reference.md`. Полная история задачи — в памяти агентов
+`project_prisma_adapter_zenstack_incompatibility_audit`.
+
 ## Фикс: вход/регистрация по email+паролю падали с 500 (2026-08-28)
 
 Найдено при провизининге канареечного аккаунта для login-canary-check (корневой `PLAN.md` §71
