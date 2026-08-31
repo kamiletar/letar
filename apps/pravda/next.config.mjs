@@ -1,5 +1,4 @@
 import createMDX from '@next/mdx'
-import { composePlugins, withNx } from '@nx/next'
 import { fileURLToPath } from 'node:url'
 
 // Serwist отключён — не поддерживает Turbopack (Next.js 16+)
@@ -8,7 +7,7 @@ import { fileURLToPath } from 'node:url'
 const isProduction = process.env.NODE_ENV === 'production'
 
 /**
- * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
+ * @type {import('next').NextConfig}
  */
 const nextConfig = {
   // Статический экспорт только для production build (не для dev)
@@ -24,7 +23,9 @@ const nextConfig = {
   },
   // Добавляем поддержку MDX как страниц
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
-  nx: {},
+  // Workspace-либы вне корня приложения — без withNx (удалён, deprecated) webpack их не
+  // транспилирует сам. См. .claude/docs/nextjs-nx-composeplugins-migration.md
+  transpilePackages: ['@letar/analytics', '@letar/chakra-provider', '@letar/glitchtip', '@letar/hooks', '@letar/ui'],
   // Typecheck отдельно через nx typecheck:tsgo — Next.js не понимает TS project references
   // (см. tsconfig.json "references"), из-за чего собственный тайпчекер next build ложно валит
   // rootDir-проверку на любом path-mapped импорте из libs/ (e.g. @letar/chakra-provider). Тот же
@@ -44,6 +45,4 @@ const withMDX = createMDX({
   },
 })
 
-const plugins = [withNx, withMDX]
-
-export default composePlugins(...plugins)(nextConfig)
+export default withMDX(nextConfig)

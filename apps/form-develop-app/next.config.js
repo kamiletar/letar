@@ -1,7 +1,5 @@
 // @ts-check
 
-const { composePlugins, withNx } = require('@nx/next')
-
 // Bundle analyzer для анализа размера бандла
 // Запуск: ANALYZE=true nx build form-develop-app
 // Требует: bun add -D @next/bundle-analyzer
@@ -15,18 +13,21 @@ try {
 }
 
 /**
- * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
+ * @type {import('next').NextConfig}
  */
 const nextConfig = {
-  // Use this to set Nx-specific options
-  // See: https://nx.dev/recipes/next/next-config-setup
-  nx: {},
+  // Workspace-либы вне корня приложения — без withNx (удалён, deprecated) webpack их не
+  // транспилирует сам. См. .claude/docs/nextjs-nx-composeplugins-migration.md
+  transpilePackages: [
+    '@letar/chakra-provider',
+    '@letar/env-load',
+    '@letar/format-utils',
+    '@letar/forms',
+    '@letar/forms-core',
+    '@letar/forms-react',
+    '@letar/query-provider',
+    '@letar/zenstack-form-plugin',
+  ],
 }
 
-const plugins = [
-  // Add more Next.js plugins to this list if needed.
-  withNx,
-  withBundleAnalyzer,
-]
-
-module.exports = composePlugins(...plugins)(nextConfig)
+module.exports = withBundleAnalyzer(nextConfig)

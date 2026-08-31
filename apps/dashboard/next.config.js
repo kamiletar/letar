@@ -1,16 +1,21 @@
 // @ts-check
 
-const { composePlugins, withNx } = require('@nx/next')
-
 /**
- * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
+ * @type {import('next').NextConfig}
  */
 const nextConfig = {
-  // Use this to set Nx-specific options
-  // See: https://nx.dev/recipes/next/next-config-setup
-  nx: {
-    svgr: false,
-  },
+  // Workspace-либы вне корня приложения — без withNx (удалён, deprecated) webpack их не
+  // транспилирует сам. См. .claude/docs/nextjs-nx-composeplugins-migration.md
+  transpilePackages: [
+    '@letar/analytics',
+    '@letar/api-server',
+    '@letar/auth',
+    '@letar/env-load',
+    '@letar/glitchtip',
+    '@letar/hooks',
+    '@letar/infra-config',
+    '@letar/query-provider',
+  ],
   // Enable standalone output for Docker deployment
   output: 'standalone',
   typescript: {
@@ -40,9 +45,4 @@ const nextConfig = {
   },
 }
 
-const plugins = [
-  // Add more Next.js plugins to this list if needed.
-  withNx,
-]
-
-module.exports = composePlugins(...plugins)(nextConfig)
+module.exports = nextConfig

@@ -1,5 +1,4 @@
 import createMDX from '@next/mdx'
-import { composePlugins, withNx } from '@nx/next'
 import withSerwistInit from '@serwist/next'
 
 const withSerwist = withSerwistInit({
@@ -10,6 +9,7 @@ const withSerwist = withSerwistInit({
   disable: process.env.NODE_ENV === 'development',
 })
 
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
   // sharp грузит libvips-cpp.so через dlopen(), трейсер это не ловит — без явного
@@ -21,7 +21,25 @@ const nextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
   // Пустой turbopack — подавляет ошибку при наличии webpack config от Serwist
   turbopack: {},
-  nx: {},
+  // Workspace-либы вне корня приложения — без withNx (удалён, deprecated) webpack их не
+  // транспилирует сам. См. .claude/docs/nextjs-nx-composeplugins-migration.md
+  transpilePackages: [
+    '@letar/analytics',
+    '@letar/auth',
+    '@letar/chakra-provider',
+    '@letar/consent',
+    '@letar/env-load',
+    '@letar/forms',
+    '@letar/forms-core',
+    '@letar/forms-react',
+    '@letar/glitchtip',
+    '@letar/hooks',
+    '@letar/image-upload',
+    '@letar/query-provider',
+    '@letar/seed-utils',
+    '@letar/ui',
+    '@letar/upload-validation',
+  ],
   // Typecheck отдельно через nx typecheck:tsgo — экономит RAM при билде на серверах
   typescript: {
     ignoreBuildErrors: true,
@@ -49,7 +67,5 @@ const withMDX = createMDX({
   },
 })
 
-// Serwist внутри compose — чтобы MDX loader сохранялся
-const plugins = [withNx, withMDX, withSerwist]
-
-export default composePlugins(...plugins)(nextConfig)
+// Serwist поверх MDX — чтобы MDX loader сохранялся
+export default withSerwist(withMDX(nextConfig))

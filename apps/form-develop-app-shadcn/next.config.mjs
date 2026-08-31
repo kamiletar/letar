@@ -1,9 +1,17 @@
 import createMDX from '@next/mdx'
-import { composePlugins, withNx } from '@nx/next'
 
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
-  nx: {},
+  // Workspace-либы вне корня приложения — без withNx (удалён, deprecated) webpack их не
+  // транспилирует сам. См. .claude/docs/nextjs-nx-composeplugins-migration.md
+  transpilePackages: [
+    '@letar/analytics',
+    '@letar/forms-core',
+    '@letar/forms-react',
+    '@letar/forms-shadcn',
+    '@letar/tailwind-utils',
+  ],
 }
 
 const withMDX = createMDX({
@@ -13,6 +21,4 @@ const withMDX = createMDX({
   },
 })
 
-const plugins = [withNx, withMDX]
-
-export default composePlugins(...plugins)(nextConfig)
+export default withMDX(nextConfig)

@@ -1,14 +1,13 @@
 // @ts-check
 
 const path = require('path')
-const { composePlugins, withNx } = require('@nx/next')
 const createNextIntlPlugin = require('next-intl/plugin')
 
 // next-intl плагин с путём к конфигурации
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
 /**
- * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
+ * @type {import('next').NextConfig}
  */
 const nextConfig = {
   // Standalone output для Docker production сборки
@@ -22,9 +21,28 @@ const nextConfig = {
   outputFileTracingIncludes: {
     '/**/*': ['../../node_modules/@swc/helpers/**/*', '../../node_modules/.bun/@img+sharp-libvips-*/**/*.so*'],
   },
-  nx: {
-    svgr: false,
-  },
+  // Workspace-либы вне корня приложения — без withNx (удалён, deprecated) webpack их не
+  // транспилирует сам. См. .claude/docs/nextjs-nx-composeplugins-migration.md
+  transpilePackages: [
+    '@letar/admin-ui',
+    '@letar/analytics',
+    '@letar/auth',
+    '@letar/chakra-provider',
+    '@letar/consent',
+    '@letar/email',
+    '@letar/env-load',
+    '@letar/format-utils',
+    '@letar/forms',
+    '@letar/forms-core',
+    '@letar/forms-react',
+    '@letar/glitchtip',
+    '@letar/hooks',
+    '@letar/i18n-proxy',
+    '@letar/image-upload',
+    '@letar/pin-auth',
+    '@letar/query-provider',
+    '@letar/ui',
+  ],
   // Оптимизация изображений
   images: {
     formats: ['image/avif', 'image/webp'],
@@ -53,5 +71,4 @@ const nextConfig = {
   },
 }
 
-// Компонуем плагины: Nx + next-intl
-module.exports = composePlugins(withNx, withNextIntl)(nextConfig)
+module.exports = withNextIntl(nextConfig)

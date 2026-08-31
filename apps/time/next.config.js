@@ -1,10 +1,9 @@
-const { composePlugins, withNx } = require('@nx/next')
 const createNextIntlPlugin = require('next-intl/plugin')
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
 /**
- * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
+ * @type {import('next').NextConfig}
  */
 const nextConfig = {
   output: 'standalone',
@@ -17,7 +16,21 @@ const nextConfig = {
   outputFileTracingIncludes: {
     '/**/*': ['../../node_modules/.bun/@swc+helpers*/node_modules/@swc/helpers/**/*'],
   },
-  nx: {},
+  // Workspace-либы вне корня приложения — без withNx (удалён, deprecated) webpack их не
+  // транспилирует сам. См. .claude/docs/nextjs-nx-composeplugins-migration.md
+  transpilePackages: [
+    '@letar/analytics',
+    '@letar/auth',
+    '@letar/chakra-provider',
+    '@letar/consent',
+    '@letar/email',
+    '@letar/env-load',
+    '@letar/glitchtip',
+    '@letar/i18n-proxy',
+    '@letar/number-words',
+    '@letar/seo',
+    '@letar/ui',
+  ],
   turbopack: {},
   // Typecheck отдельно через nx typecheck:tsgo — Next.js не понимает TS project references
   // (см. tsconfig.json "references"), из-за чего собственный тайпчекер next build ложно валит
@@ -28,6 +41,4 @@ const nextConfig = {
   },
 }
 
-const plugins = [withNx, withNextIntl]
-
-module.exports = composePlugins(...plugins)(nextConfig)
+module.exports = withNextIntl(nextConfig)

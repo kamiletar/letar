@@ -171,7 +171,11 @@ ref/DOM не перезапускается ·
 ⚠️ `RouteAnnouncer` молча не объявляет ни одной навигации, если подключён не в persistent
 `layout.tsx`, а в per-page-компонент
 
-**Next.js — ловушки:** [nextjs-standalone-tracing](/.claude/docs/nextjs-standalone-tracing.md)
+**Next.js — ловушки:**
+[nextjs-nx-composeplugins-migration](/.claude/docs/nextjs-nx-composeplugins-migration.md) миграция
+с deprecated `composePlugins`/`withNx` (`@nx/next`) на голый `next.config` + явный
+`transpilePackages` ·
+[nextjs-standalone-tracing](/.claude/docs/nextjs-standalone-tracing.md)
 ECONNREFUSED/ERR_DLOPEN_FAILED при зелёном билде ·
 [nextjs-server-action-redirect-race](/.claude/docs/nextjs-server-action-redirect-race.md) ·
 [nextjs-server-action-decimal-serialization](/.claude/docs/nextjs-server-action-decimal-serialization.md)

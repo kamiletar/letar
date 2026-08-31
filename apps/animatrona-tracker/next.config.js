@@ -1,11 +1,32 @@
 // @ts-check
 
-const { composePlugins, withNx } = require('@nx/next')
-
 /**
- * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
+ * @type {import('next').NextConfig}
  */
 const nextConfig = {
+  // Workspace-либы вне корня приложения — без withNx (удалён, deprecated) webpack их не
+  // транспилирует сам. См. .claude/docs/nextjs-nx-composeplugins-migration.md
+  transpilePackages: [
+    '@letar/analytics',
+    '@letar/animatrona-franchise-graph',
+    '@letar/animatrona-types',
+    '@letar/animatrona-ui',
+    '@letar/animatrona-utils',
+    '@letar/auth',
+    '@letar/chakra-provider',
+    '@letar/consent',
+    '@letar/env-load',
+    '@letar/forms',
+    '@letar/forms-core',
+    '@letar/forms-react',
+    '@letar/glitchtip',
+    '@letar/query-provider',
+    '@letar/redis-client',
+    '@letar/ui',
+    '@letar/validation-utils',
+    '@letar/video-player-core',
+    '@letar/video-player-react',
+  ],
   output: 'standalone',
   trailingSlash: true,
   skipTrailingSlashRedirect: true,
@@ -31,9 +52,6 @@ const nextConfig = {
         hostname: 'cloudflare-ipfs.com',
       },
     ],
-  },
-  nx: {
-    svgr: false,
   },
   typescript: {
     ignoreBuildErrors: true,
@@ -72,6 +90,4 @@ const nextConfig = {
   },
 }
 
-const plugins = [withNx]
-
-module.exports = composePlugins(...plugins)(nextConfig)
+module.exports = nextConfig

@@ -1,6 +1,5 @@
 // @ts-check
 
-import { composePlugins, withNx } from '@nx/next'
 import withSerwistInit from '@serwist/next'
 import createNextIntlPlugin from 'next-intl/plugin'
 
@@ -24,10 +23,25 @@ const withSerwist = withSerwistInit({
   disable: process.env.NODE_ENV === 'development',
 })
 
-/** @type {import('@nx/next/plugins/with-nx').WithNxOptions} */
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
-  nx: {},
+  // Workspace-либы вне корня приложения — без withNx (удалён, deprecated) webpack их не
+  // транспилирует сам. См. .claude/docs/nextjs-nx-composeplugins-migration.md
+  transpilePackages: [
+    '@letar/analytics',
+    '@letar/auth',
+    '@letar/chakra-provider',
+    '@letar/consent',
+    '@letar/env-load',
+    '@letar/forms',
+    '@letar/forms-core',
+    '@letar/forms-react',
+    '@letar/glitchtip',
+    '@letar/hooks',
+    '@letar/i18n-proxy',
+    '@letar/ui',
+  ],
   typescript: {
     ignoreBuildErrors: true,
     tsconfigPath: './tsconfig.json',
@@ -36,6 +50,4 @@ const nextConfig = {
   turbopack: {},
 }
 
-const plugins = [withNx, withNextIntl, withSerwist]
-
-export default composePlugins(...plugins)(nextConfig)
+export default withSerwist(withNextIntl(nextConfig))
