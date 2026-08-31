@@ -129,7 +129,7 @@ export function StepHalfSummary({ match, matchState }: StepHalfSummaryProps) {
 
       {/* Статистика участников тайма */}
       {sortedByScore.length > 0 && (
-        <Box bg="bg.panel" p={4} borderRadius="xl" borderWidth="1px" borderColor="border.muted">
+        <Box bg="bg.panel" p={4} borderRadius="xl" borderWidth="1px" borderColor="border.muted" overflowX="auto">
           <Heading size="sm" mb={3}>
             📊 Статистика участников
           </Heading>

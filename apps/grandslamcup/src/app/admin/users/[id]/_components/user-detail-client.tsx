@@ -416,7 +416,7 @@ function PlayerLinkBlock({ userId, player }: { userId: string; player: { id: str
             </HStack>
 
             {results.length > 0 && (
-              <Box borderWidth="1px" borderColor="border.muted" borderRadius="lg" overflow="hidden">
+              <Box borderWidth="1px" borderColor="border.muted" borderRadius="lg" overflow="hidden" overflowX="auto">
                 <Table.Root size="sm">
                   <Table.Body>
                     {results.map((p) => (

@@ -2,6 +2,34 @@
 
 Детальное описание всех реализованных фич.
 
+## 2026-09-01 — Аудит `overflowX` на обёртках `Table.Root` (v3.39.8)
+
+Точечный аудит по образцу фикса в domwellbes (там — `Card.Body` без `overflowX="auto"` вокруг
+`Table.Root`, вызывавший скролл всей страницы вместо локального скролла таблицы на узких
+экранах). В grandslamcup таблицы оборачивает не Chakra `Card.Body`, а обычный `Box` — но
+проблема та же: часть обёрток не имела горизонтального скролла вовсе, часть имела только
+`overflow="hidden"` (клипает контент вместо скролла).
+
+Найдено и починено 4 места (добавлен `overflowX="auto"`, там где уже был `overflow="hidden"` —
+добавлен рядом, паттерн подтверждён существующим `data-table-wrapper.tsx`):
+
+- `src/app/match/[id]/score/_components/wizard/step-half-summary.tsx` — таблица «Статистика
+  участников» (не было overflow вообще).
+- `src/app/match/[id]/score/_components/wizard/step-final-results.tsx` — 2 таблицы: «По таймам» и
+  «Топ участников матча» (не было overflow вообще).
+- `src/app/admin/telegram/page.tsx` — таблица сообщений бота (был только `overflow="hidden"`).
+- `src/app/admin/users/[id]/_components/user-detail-client.tsx` — таблица поиска непривязанного
+  поэта (был только `overflow="hidden"`).
+
+Остальные ~20 мест с `Table.Root` в приложении уже были обёрнуты `Box overflowX="auto"` —
+проверено грепом по `Table.Root|Card.Body|overflowX` по всему `apps/grandslamcup`. `Card.Body`
+(Chakra compound component) в приложении используется только в некабличных местах
+(`news-content.tsx`, `rules/page.tsx`, `donate/page.tsx`, `[citySlug]/donate/page.tsx`) — рядом с
+`Table.Root` не встречается вообще.
+
+`nx lint grandslamcup` и `nx typecheck:tsgo grandslamcup` — зелёные (только pre-existing warnings,
+не связанные с правкой).
+
 ## 2026-08-28 — Тест на дрейф `RESERVED_SEGMENTS` в `proxy.ts`
 
 `RESERVED_SEGMENTS` (soft-404 фикс из этой же даты, ниже) — литеральный список, синхронизированный

@@ -112,7 +112,14 @@ export default async function AdminTelegramPage() {
             </Box>
           )
           : (
-            <Box bg="bg.panel" borderRadius="lg" borderWidth="1px" borderColor="border.muted" overflow="hidden">
+            <Box
+              bg="bg.panel"
+              borderRadius="lg"
+              borderWidth="1px"
+              borderColor="border.muted"
+              overflow="hidden"
+              overflowX="auto"
+            >
               <Table.Root size="sm">
                 <Table.Header>
                   <Table.Row>

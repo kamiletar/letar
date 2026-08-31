@@ -83,7 +83,7 @@ export function StepFinalResults({ match, onConfirm }: StepFinalResultsProps) {
       </Box>
 
       {/* Сравнение команд: тайм 1 vs тайм 2 */}
-      <Box bg="bg.panel" p={4} borderRadius="xl" borderWidth="1px" borderColor="border.muted">
+      <Box bg="bg.panel" p={4} borderRadius="xl" borderWidth="1px" borderColor="border.muted" overflowX="auto">
         <Heading size="sm" mb={3}>
           📈 По таймам
         </Heading>
@@ -141,7 +141,7 @@ export function StepFinalResults({ match, onConfirm }: StepFinalResultsProps) {
 
       {/* Топ участников матча */}
       {sortedAll.length > 0 && (
-        <Box bg="bg.panel" p={4} borderRadius="xl" borderWidth="1px" borderColor="border.muted">
+        <Box bg="bg.panel" p={4} borderRadius="xl" borderWidth="1px" borderColor="border.muted" overflowX="auto">
           <Heading size="sm" mb={3}>
             🏅 Топ участников матча
           </Heading>

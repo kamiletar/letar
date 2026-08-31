@@ -2,6 +2,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.39.8] — 2026-09-01
+
+### Fixed
+
+- `overflowX="auto"` на обёртке `Table.Root` в четырёх местах, где её не было или где вместо
+  этого стоял только `overflow="hidden"` (клипает контент таблицы вместо горизонтального
+  скролла): `step-half-summary.tsx`, `step-final-results.tsx` (2 таблицы), `admin/telegram/page.tsx`,
+  `admin/users/[id]/_components/user-detail-client.tsx` (таблица поиска поэта). На узких экранах
+  такие таблицы раньше растягивали всю страницу вместо локального скролла — тот же класс бага,
+  что чинили в domwellbes на `Card.Body`/`Table.Root` (grandslamcup таблицы оборачивает `Box`, не
+  Chakra `Card.Body`, но проблема идентична).
+
 ## [3.39.7] — 2026-08-31
 
 ### Fixed
