@@ -101,7 +101,7 @@ export function DepsPackageTable({ packages, isLoading }: { packages: DepPackage
 
   return (
     <Card.Root>
-      <Card.Body p="0">
+      <Card.Body p="0" overflowX="auto">
         <Box p="4" borderBottomWidth="1px">
           <HStack justify="space-between" flexWrap="wrap" gap="3">
             <Tabs.Root value={filter} onValueChange={(d) => setFilter(d.value as Filter)}>

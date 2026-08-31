@@ -363,7 +363,7 @@ export default function CronPage() {
 
         {/* Таблица задач */}
         <Card.Root>
-          <Card.Body p="0">
+          <Card.Body p="0" overflowX="auto">
             <Table.Root size="sm">
               <Table.Header>
                 <Table.Row>

@@ -2,6 +2,30 @@
 
 Детальное описание всех реализованных фич.
 
+## `overflowX="auto"` на `Card.Body` вокруг `Table.Root` (2026-09-01)
+
+Точечный аудит по образцу бага, найденного и починенного в `domwellbes` (61 место): `Table.Root`
+внутри `Card.Body` без `overflowX="auto"` на узких экранах раздвигает `Card.Body` и скроллит
+горизонтально всю страницу вместо локального скролла самой таблицы.
+
+Грепом найдено 11 файлов с `Table.Root`. Из них 4 — настоящий случай (`Card.Body` без обёртки со
+скроллом, прямо оборачивающий `Table.Root`):
+
+- `src/app/_components/deps/DepsPackageTable.tsx`
+- `src/app/database/backups/page.tsx`
+- `src/app/cron/page.tsx`
+- `src/app/_components/analytics/PageViewsCard.tsx`
+
+Фикс — добавлен `overflowX="auto"` на сам `Card.Body`.
+
+`DiskUsage.tsx` и `ProcessList.tsx` уже оборачивали `Table.Root` в собственный
+`Box overflowX="auto"` внутри `Card.Body` — ложное срабатывание, не тронуты. `ImageList.tsx`,
+`AppsTable.tsx`, `docker/volumes/page.tsx`, `docker/networks/page.tsx`,
+`CronHistoryDialog.tsx` используют таблицы не внутри `Card.Body` (голый `Box`/`DialogBody`) —
+вне охвата задачи, паттерн не применим один в один.
+
+1.24.11 → 1.24.12.
+
 ## Новый AlertType `AUTH_ACCOUNT_ISSUER_NULL` (2026-08-28)
 
 PLAN.md корня §71 п.3.2: защита от NULL-регрессии `Account.issuer` (better-auth 1.7) со стороны

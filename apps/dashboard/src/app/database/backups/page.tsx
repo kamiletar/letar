@@ -360,7 +360,7 @@ export default function BackupsPage() {
 
               <Collapsible.Root open={!isCollapsed}>
                 <Collapsible.Content>
-                  <Card.Body pt="0" px="0">
+                  <Card.Body pt="0" px="0" overflowX="auto">
                     <Table.Root size="sm">
                       <Table.Header>
                         <Table.Row>

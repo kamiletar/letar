@@ -19,7 +19,7 @@ export function PageViewsCard({ data }: PageViewsCardProps) {
 
   return (
     <Card.Root mb="6">
-      <Card.Body px="4" py="3">
+      <Card.Body px="4" py="3" overflowX="auto">
         <Heading size="sm" mb="1">
           Просмотры страниц (грубый счётчик)
         </Heading>

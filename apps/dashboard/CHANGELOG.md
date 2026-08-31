@@ -2,6 +2,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.24.12] — 2026-09-01
+
+### Fixed
+
+- `overflowX="auto"` на `Card.Body`, оборачивающем `Table.Root` без своей обёртки со скроллом —
+  4 места (`DepsPackageTable.tsx`, `database/backups/page.tsx`, `cron/page.tsx`,
+  `PageViewsCard.tsx`). Без него узкая таблица на мобильных раздвигала `Card.Body` и скроллила
+  всю страницу горизонтально вместо локального скролла самой таблицы — тот же баг, что был
+  найден и починен в `domwellbes` (61 место). `DiskUsage.tsx`/`ProcessList.tsx` уже оборачивали
+  `Table.Root` в собственный `Box overflowX="auto"` — не тронуты. `ImageList.tsx`, `AppsTable.tsx`,
+  `docker/volumes`, `docker/networks`, `CronHistoryDialog.tsx` — таблицы там не внутри
+  `Card.Body` (голый `Box`/`Dialog`), вне охвата этого фикса.
+
 ## [1.24.11] — 2026-08-31
 
 ### Changed
