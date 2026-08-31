@@ -1,5 +1,32 @@
 # Выполненные задачи — Kami
 
+## Аудит prismaAdapter/ZenStack — закрыт живым прогоном полного OAuth sign-in (2026-08-31)
+
+Ранее (2026-08-31, той же датой, более ранняя сессия) прогон шести эндпоинтов `/api/auth/*` не
+дал пустого 500, но путь **создания нового аккаунта** (OAuth-коллбэк → запись `User`+`Account`) —
+где баг прежде проявлялся у пяти других приложений (mandala/domwellbes/svoichuzhie/dsperevod/
+studio) — оставался непроверенным: `kami` в `mode: 'hub-client'` не конфигурирует
+`emailAndPassword`, а OIDC локально не был настроен.
+
+Эта сессия закрыла разрыв: подняты локальные `auth-hub` (порт 3014) и `kami` (порт 3005),
+в `apps/kami/.env.local` добавлены `OIDC_CLIENT_ID`/`OIDC_CLIENT_SECRET`/`OIDC_DISCOVERY_URL`
+(указывает на локальную Ключницу, не на прод). Обнаружено и исправлено: `kami-prod` в
+`apps/auth-hub/prisma/seed.ts` не имел localhost-redirect URI (паттерн уже есть у archetest/
+time/aprel8008) — добавлен, реседед только локальной БД auth-hub, прод не тронут.
+
+Первый живой прогон дал структурированную ошибку (не пустой 500): `столбец Account.issuer не
+существует` — локальная БД `kami` была не синхронизирована со схемой (поле `issuer` в
+`schema/auth.zmodel` уже было объявлено, см. `better-auth-1.7-account-issuer-field.md`). После
+`nx zenstack:generate kami && nx db:push kami` полный flow (email/password sign-up на Ключнице →
+OAuth callback → `prismaAdapter(ZenStackClient)` пишет `User`+`Account`) прошёл без единой
+ошибки — подтверждено прямым SQL-запросом к `DATABASE_URL` приложения (MCP `postgres-kami`
+оказался нацелен на другую локальную БД, `MCP_LOCAL_URL`/`lena_kami`, не пригоден для этой
+проверки).
+
+Вывод: баг prismaAdapter/ZenStack в `kami` не подтверждён на всём пути, включая создание
+аккаунта. Код `auth.ts`/`prisma.ts` не менялся. Аудит по kami закрыт — детали в
+`.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md`.
+
 ## Рефакторинг: `/api/audio/upload` и `/api/arbitrary-upload` на `@letar/upload-validation` (2026-08-28)
 
 Аудит безопасности нашёл дублирование инлайн-логики валидации/сохранения загружаемых файлов
