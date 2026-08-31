@@ -12,20 +12,13 @@
 
 ## Баги / технический долг
 
-- [ ] ⚠️ Открытый вопрос (проверено частично, 2026-08-31): код передаёт в `prismaAdapter()`
-      голый `ZenStackClient` — тот же паттерн, что чинили в mandala/domwellbes/svoichuzhie/
-      dsperevod/studio (см. `.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md`).
-      Живой прогон шести эндпоинтов (`sign-up/email` → 400, `sign-in/social` неизвестный
-      провайдер → 404, `get-session` с поддельным токеном → `200 null`, `sign-out` → 415,
-      `list-accounts` без сессии → 401) не дал ни одного пустого 500 — но `kami` использует
-      `mode: 'hub-client'`, где `emailAndPassword` вообще не конфигурируется, а OIDC локально не
-      настроен (`.env.local` без `OIDC_CLIENT_ID`/`SECRET`). Путь **создания нового аккаунта**
-      (sign-up email или OAuth-коллбэк с записью user+account) — где баг типично проявлялся у
-      остальных приложений — физически недостижим локальным тестом, остаётся непроверенным. Код
-      не менялся (нет положительного репро). Закрыть вопрос: настроить `OIDC_CLIENT_ID`/`SECRET`
-      в `.env.local` и прогнать полный OAuth sign-in с живой Ключницей, либо превентивно
-      применить фикс `createLazyPrismaAuthClient` по образцу archetest (коммит `ff5af4a1` в
-      корне монорепо).
+- [x] ⚠️ prismaAdapter/ZenStack — закрыто (2026-08-31): полный OAuth sign-in прогнан живьём
+      (локальный `auth-hub` + локальный `kami`, `OIDC_CLIENT_ID`/`SECRET`/`DISCOVERY_URL`
+      добавлены в `.env.local`). Путь создания нового аккаунта (OAuth-коллбэк → `User`+`Account`
+      через `prismaAdapter(ZenStackClient)`) пройден без единого пустого 500 — `User`/`Account`
+      реально созданы, сверено прямым запросом к `DATABASE_URL`. Код `auth.ts`/`prisma.ts` не
+      менялся, фикс не требуется. Подробности —
+      `.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md`.
 
 - [x] ⚠️ **Приложение полностью не запускается (500 на всех страницах, включая `/`)** — исправлено
       2026-08-25. Три независимые причины:
