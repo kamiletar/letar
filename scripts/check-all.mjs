@@ -156,6 +156,22 @@ const CHECKS = [
     doc: '.claude/docs/git-multi-agent-incidents.md',
   },
   {
+    id: 'precommit-hook-staleness',
+    group: 'submodule',
+    title: 'установленные pre-commit хуки submodule против актуального install.sh',
+    run: ['bun', ['scripts/check-precommit-hook-staleness.mjs']],
+    // warn: install.sh копирует скрипты один раз при запуске, не симлинк — новый
+    // скрипт в scripts/hooks/ не появляется в уже установленных копиях сам.
+    // Фикс один и тот же для любой находки (install.sh --all-submodules) и не
+    // требует решения владельца submodule (в отличие от submodule-gitignore) —
+    // но остаётся warn, потому что накопленный долг тут неизбежен между
+    // добавлением нового hook-скрипта и следующим прогоном --all-submodules.
+    severity: 'warn',
+    ci: 'no',
+    ciNote: 'приватные submodule в CI не выкачиваются — проверять нечего',
+    doc: '.claude/docs/precommit-hook-install-staleness.md',
+  },
+  {
     id: 'stale-worktrees',
     group: 'git',
     title: 'брошенные worktree фоновых агентов и осиротевшие ветки worktree-agent-*',
