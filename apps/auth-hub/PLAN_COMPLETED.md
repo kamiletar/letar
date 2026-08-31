@@ -2,6 +2,19 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## Фикс: geo.ts брал первый (подделываемый) хоп x-forwarded-for (2026-09-01)
+
+Найдено попутно при консолидации `getClientIp` в aboi/demo-protection (тот же класс бага).
+`getCountryCode()` (определяет страну для скрытия Google/GitHub/Facebook на `/sign-in` по
+149-ФЗ) брал `x-forwarded-for.split(',')[0]` — первый хоп произвольно задаёт клиент, последний
+дописывает Traefik. Проверено: серверного гейта по стране нет вообще (`socialProviders`/
+`genericOAuth` в `auth.ts` включают провайдеров безусловно) — это чисто UI-косметика, спуфинг
+не открывает ничего сверх прямого запроса к `/api/auth/sign-in/social`, но противоречит цели
+фичи. Переведено на `getClientIp()` из `@letar/demo-protection` (последний хоп); добавлена
+implicit-зависимость в `package.json`. `nx lint,typecheck:tsgo,test auth-hub` — зелёные.
+Коммит `f4369b70`, разбор общего паттерна —
+[.claude/docs/shared-get-client-ip-consolidation.md](/.claude/docs/shared-get-client-ip-consolidation.md).
+
 ## Аудит: prismaAdapter/ZenStack — баг НЕ подтвердился (2026-08-31)
 
 По итогам фикса того же паттерна в пяти других приложениях (mandala, domwellbes, svoichuzhie,

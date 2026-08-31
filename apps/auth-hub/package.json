@@ -1,6 +1,6 @@
 {
   "name": "auth-hub",
-  "version": "0.7.17",
+  "version": "0.7.18",
   "private": true,
   "nx": {
     "implicitDependencies": [
