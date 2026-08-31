@@ -3105,6 +3105,29 @@ M2), проверить фактическую историю инциденто
 (заблокирован e2e), kami-key-the-landing (отдельная docker-сеть, не входит ни в одну пачку),
 и остальные `letar.rollout: true` приложения — следующими пачками.
 
+### ⚠️ Уточнение (2026-08-31): «21/21» не значило «все NPM-хосты s2 переключены»
+
+При подготовке шага 6 (снять NPM с s2) живая сверка (`docker ps`+`ss -tlnp`+дамп таблицы
+`proxy_host` NPM, не чек-лист) нашла два домена, у которых Traefik-лейблы в
+`docker-compose.production.yml` уже стояли и были применены к живым контейнерам, но сам NPM
+proxy host всё ещё форвардил напрямую на `dashboard-app`/`studio-app`, а не на `traefik`:
+`dash.letar.best` (id 7) и `studio.letar.best` (id 33). Переключены тем же приёмом
+(`PUT /api/nginx/proxy-hosts/{id}` → `forward_host: traefik, forward_port: 443, forward_scheme:
+https`), у `dash` при этом сохранён существующий `advanced_config` (`proxy_buffering off` и
+т.д. — нужен для SSE, см. `infra/nginx-proxy-manager/README.md` § Dashboard). Проверено живьём:
+`dash.letar.best` → `307` на `/auth/signin`, `studio.letar.best` → `200`.
+
+Отдельно найден незакрытый пункт, не входящий в список 21 приложения вовсе:
+**`acme-api.letar.best`** (id 35, форвардит на `acme-dns:80`) — служебный маршрут, через который
+Traefik на s3 достаёт ACME DNS-01 challenge к `acme-dns` на s2. Не приложение, поэтому мимо
+списка `letar.rollout`. Перед шагом 6 его нужно перенести на сам Traefik s2 (роутер `tls: true`
+под существующий wildcard `*.letar.best`, без своего `certresolver`, + `IPAllowList` вместо
+текущего Access List NPM) — иначе снятие NPM с s2 сломает продление сертификатов s3.
+
+**Урок:** «X/X приложений с Traefik-роутером» — факт про код (лейблы в compose), не про то, куда
+реально форвардит NPM. Для проверки «домен уже на Traefik» единственный источник — сам сервер
+(`proxy_host.forward_host` в БД NPM или сгенерированный `.conf`), не список приложений с лейблами.
+
 ### §48 M3 — ЗАКРЫТО (2026-08-27)
 
 Все 20 оставшихся приложений переведены пачками (3–6 за проход), router-only регистрация →
