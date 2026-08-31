@@ -7,6 +7,17 @@
 
 ## [Unreleased]
 
+## [0.33.14] — 2026-09-01
+
+### Fixed
+
+- `Card.Body` вокруг `Table.Root` в `admin/users/page.tsx` не имел `overflowX="auto"` — на узких
+  экранах скроллилась вся страница вместо локального горизонтального скролла таблицы. Тот же
+  класс бага, что нашли и починили в domwellbes (61 место), образец фикса —
+  `apps/domwellbes/src/app/(admin)/admin/projects/[id]/_components/schedule-gantt.tsx`. Остальные
+  15 мест с `Table.Root` в `apps/kami` уже оборачивают таблицу в `<Box overflowX="auto">` — ложных
+  срабатываний не найдено.
+
 ## [0.33.13] — 2026-08-28
 
 ### Changed
