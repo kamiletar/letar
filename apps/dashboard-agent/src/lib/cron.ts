@@ -583,6 +583,17 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     enabled: true,
     server: 's2',
   },
+  {
+    id: 'domwellbes-anonymize-archived-clients',
+    name: 'Archived Client Anonymization (domwellbes)',
+    app: 'domwellbes',
+    endpoint: '/api/cron/anonymize-archived-clients',
+    schedule: '0 4 * * *',
+    description:
+      'Автоанонимизация ПДн клиентского логина после 3-летнего grace period с архивации клиента, при отсутствии блокеров (152-ФЗ, ROADMAP_M8.md §M8B.3) — ручной путь — кнопка в /admin/clients/[id]',
+    enabled: true,
+    server: 's2',
+  },
 ]
 
 /**
