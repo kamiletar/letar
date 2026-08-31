@@ -11,6 +11,20 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.15.30] — 2026-08-31
+
+### Added
+
+- Реестр `LOGIN_CANARY_<APP>_EMAIL`/`_PASSWORD` (9 пар) добавлен в `apps/dashboard/.env.docker.enc`.
+- Все 9 канареечных аккаунтов провижинены на проде через `/api/admin/login-canary-setup`
+  (`emailVerifiedSet: true` везде).
+
+### Verified
+
+- Живая проверка сквозной цепочки алерта: временный сброс `emailVerified` на `dsperevod`,
+  2 подряд `login-canary-check` → `alerted: true` → `AUTH_LOGIN_CANARY_FAILED` подтверждённо
+  дошёл до Telegram. PLAN.md §71 п.3.3 закрыт полностью.
+
 ## [0.15.29] — 2026-08-28
 
 ### Fixed
