@@ -795,16 +795,6 @@ CAT/IRT. ✅ Подтверждено Kami: разделение ASD → ASD + D
 
 ## Технический долг / инфра (2026-06)
 
-- [ ] ⚠️ Открытый вопрос: `src/lib/auth.ts` передаёт в `prismaAdapter()` `prisma` из `./db`
-      (голый `ZenStackClient`) — тот же паттерн, что вызывал пустой 500 без логов на
-      `/api/auth/*` в mandala/domwellbes/svoichuzhie/dsperevod/studio (см.
-      `.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md`). Существующий аудит
-      этого файла ошибочно числил archetest как «уже было ОК» — на 2026-08-31 это не
-      подтверждается кодом. Нужна живая проверка (`nx dev`, sign-up/sign-in через
-      `/api/auth/*`) и, если баг подтвердится, миграция на `createLazyPrismaAuthClient`
-      (`@letar/auth/server`) по образцу починенных приложений. Отдельная сессия для проверки
-      уже запущена (чип `task_5ac5b32a`).
-
 - [ ] ⚠️ **Staging индексируется наравне с продом — нужен явный гейт по домену**
       (найдено 2026-07-28 при добавлении `robots.ts`). Файл сейчас отдаёт один и тот же
       `Allow: /` в любом окружении. Правильная проверка — сверка `NEXT_PUBLIC_APP_URL`

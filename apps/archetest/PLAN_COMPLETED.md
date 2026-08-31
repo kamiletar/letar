@@ -1,5 +1,30 @@
 # Выполненные задачи: Archetest
 
+## Фикс prismaAdapter/ZenStack в better-auth (2026-08-31)
+
+Живой прогон (`nx dev archetest` + `fetch` на `/api/auth/sign-up|sign-in/email`) подтвердил баг:
+`prismaAdapter()` получал `prisma` из `lib/prisma.ts`, который был просто ре-экспортом
+ZenStack `orm` из `db.ts` — пустой `500` без единой строки в логах на каждом запросе, тот же
+паттерн, что валил пять других приложений монорепо (mandala/domwellbes/svoichuzhie/dsperevod/
+studio).
+
+Фикс — отдельный нативный `PrismaClient` через `createLazyPrismaAuthClient` (`@letar/auth/server`)
+в `lib/prisma.ts`, `auth.ts` переключён на него. Заодно `src/app/api/consent/route.ts` переведён
+на `getEnhancedPrisma` — брал тот же сломанный ре-экспорт. `db.ts`/`orm` не тронуты, используются
+в других местах приложения без изменений.
+
+Ретест после фикса: `sign-up`/`sign-in` дают структурированный `400 EMAIL_PASSWORD_*_DISABLED`
+(email/password штатно выключен в конфиге) вместо пустого 500; с временно включённым
+`emailAndPassword.enabled` (только для верификации, не закоммичено) — `200`, реальный `User`
+создан и вход прошёл. `nx typecheck:tsgo archetest` и `nx lint archetest` — зелёные.
+
+Коммит `ff5af4a1` (в основном репозитории letar — `archetest` не submodule). Разбор — обновлён
+`.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md` в корне монорепо.
+
+> **Версия:** 0.27.12 | **Обновлено:** 2026-08-31
+
+---
+
 ## Touch target для текстовых ссылок — WCAG 2.5.5 (2026-08-25)
 
 Ссылка «← Назад на главную» (`for-professionals/page.tsx`) переведена на `TouchLink` (`@letar/ui`).

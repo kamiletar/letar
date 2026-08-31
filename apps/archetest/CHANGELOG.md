@@ -5,6 +5,18 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.27.12] - 2026-08-31
+
+### Fixed
+
+- `better-auth` `prismaAdapter()` получал голый ZenStack `orm` вместо нативного `PrismaClient` —
+  `POST /api/auth/sign-up/email`/`sign-in/email` стабильно давали пустой `500` без единой строки
+  в логах. Отдельный `prismaAuth`-клиент через `createLazyPrismaAuthClient` (`@letar/auth/server`)
+  по образцу mandala/domwellbes/svoichuzhie/dsperevod/studio/aboi. Заодно
+  `src/app/api/consent/route.ts` переведён на `getEnhancedPrisma` — брал тот же сломанный
+  ре-экспорт из `lib/prisma.ts`. См.
+  [better-auth-prismaadapter-zenstack-incompatibility](/.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md).
+
 ## [0.27.11] - 2026-08-25
 
 ### Fixed
