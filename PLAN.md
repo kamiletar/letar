@@ -3678,10 +3678,6 @@ backfill, ловушка «коммит миграции ≠ применени�
 альтернатива `node:24-slim` вместо `node:24-alpine` — работает, но образ на 90MB тяжелее
 (`PLAN-INFRA-4.md §130`, детали — `apps/time/PLAN_COMPLETED.md`).
 
-⚠️ **Открытый вопрос:** все коммиты сессии не запушены — 5 в `letar`
-(`6b46d78d`, `e290ad80`, `fdb95596`, `e66fded7`, `f2957a15`) + 7 внутри приватных submodule
-(aboi, aprel8008, domwellbes, driving-school, dsperevod, studio, svoichuzhie — SHA уже
-зафиксирован в `6b46d78d`, но сами коммиты submodule ждут push в свои origin). Push требует
-свежего одобрения пользователя на каждый раз (`.claude/rules/git.md`) — не запрашивался и не
-делался в этой сессии. Порядок push при выполнении — сначала все 7 submodule, потом `letar`
-(см. `.claude/rules/git.md` § «Порядок push нерушим»).
+✅ **Открытый вопрос закрыт (2026-09-01):** все коммиты запушены — 7 submodule
+(aboi, aprel8008, domwellbes, driving-school, dsperevod, studio, svoichuzhie) первыми, затем
+`letar`, с разрешения пользователя.
