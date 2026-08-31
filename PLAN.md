@@ -4,6 +4,47 @@
 
 ### ▶ Следующий старт — точечные UI-баги, найденные тиражом e2e-гейта (mandala/pravda/form-example/kami), либо начать план M3 (перевод s2 на Traefik)
 
+## §75 — аудит транзитивных `@letar/*`-алиасов по всему монорепо (2026-09-01)
+
+Повод: в этой же сессии (§73, миграция `next.config` с `composePlugins`/`withNx`) нашли и
+починили баг в `animatrona-landing`/`aira-web` — `@letar/github-releases` реэкспортирует
+`formatFileSize` из `@letar/format-utils` (`libs/github-releases/src/index.ts`), а алиас
+`@letar/format-utils` отсутствовал в `paths` их `tsconfig.json` → `Module not found` на прод-
+сборке. Тот же класс уже чинили раньше в aboi/aprel8008 (`SortablePhotoGrid` из `@letar/admin-ui`
+реэкспортирует `@letar/format-utils`). Прогнали системный аудит по всем библиотекам и
+приложениям репозитория.
+
+**Метод:** нашли все реэкспорты `export {...}/* from '@letar/...'` во всём `libs/**/*.ts`
+(не только `src/index.ts` — по всем файлам, реэкспорт может быть в barrel-цепочке любой
+глубины), сопоставили с приложениями, у которых в `tsconfig.json` уже есть алиас на
+внешний/родительский пакет, и для каждой пары сверили все три места: `tsconfig.json paths`,
+`package.json` → `nx.implicitDependencies`, `next.config.*` → `transpilePackages`. Цепочки
+глубже одного уровня в репозитории не встретились (пакеты-получатели реэкспорта —
+`format-utils`, `tailwind-utils`, `forms-vue/core`, `video-player-core`, `forms-core`,
+`forms-react` — сами дальше ничего из `@letar/*` не реэкспортируют).
+
+**Найденные цепочки:** `admin-ui`→`format-utils`, `github-releases`→`format-utils` (уже
+починено), `forms-shadcn`→`tailwind-utils`, `forms-vue-shadcn`→`forms-vue`+`tailwind-utils`
+(потребителей нет), `video-player-react`→`video-player-core`, `forms`→`forms-core`+`forms-react`.
+
+**`tsconfig.json`** — у всех приложений-потребителей алиас уже был на месте, ни одно не рисковало
+поймать «Module not found» прямо сейчас.
+
+**Найдено и починено** (везде не хватало только `package.json` → `implicitDependencies`,
+`tsconfig`/`next.config` уже были в порядке): `apps/studio` — не было `@letar/format-utils`
+(остальные потребители `admin-ui` — aboi/aprel8008/domwellbes/mandala — уже имели, submodule-
+коммит + bump SHA в letar); `apps/form-develop-app-shadcn` — не было `@letar/tailwind-utils`.
+Оба билда (`nx build studio`, `nx build form-develop-app-shadcn`) зелёные, `lint`/
+`typecheck:tsgo` без ошибок. Закоммичено локально (2 коммита + bump submodule), не запушено.
+
+⚠️ **Не трогали** `forms-core`/`forms-react` (17 приложений) и `video-player-core`
+(animatrona/animatrona-tracker) — по всему репозиторию ни одно приложение никогда не заносит эти
+транзитивные либы в `package.json`, это устоявшаяся конвенция для «глубоких» leaf-пакетов, а не
+пропуск (в отличие от `format-utils`/`tailwind-utils`, которые в приложениях-аналогах явно
+перечислены). У `animatrona` (Electron/nextron) в `renderer/next.config.js` вообще нет ни одного
+`@letar/*` в `transpilePackages` при рабочем билд-кэше — особенность его сборки, не тот класс
+бага, трогать не стали.
+
 ## §74 — тираж фикса `overflowX` на `Card.Body` вокруг `Table.Root` по всему монорепо (2026-09-01)
 
 Повод: в apps/domwellbes нашли и починили 61 место, где Chakra `<Table.Root>` рендерился внутри
