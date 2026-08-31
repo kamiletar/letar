@@ -2,6 +2,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.39.7] — 2026-08-31
+
+### Fixed
+
+- `src/lib/auth.ts`/`src/lib/prisma.ts` — `prismaAdapter()` теперь получает отдельный нативный
+  `prismaAuth` (`createLazyPrismaAuthClient`), а не голый ZenStack `ZenStackClient` из `db.ts`.
+  Живой тест не воспроизвёл симптом (пустой 500), но код был байт-в-байт тем же паттерном, что
+  валил better-auth в пяти других приложениях монорепо — фикс превентивный, не зависит от
+  невыясненной причины, почему это приложение раньше не падало. Разбор —
+  `.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md`.
+
 ## [3.39.6] — 2026-08-28
 
 ### Changed

@@ -8,15 +8,20 @@
 
 ## Открытые вопросы
 
-- [x] Проверено живьём (2026-08-31): код действительно передаёт в `prismaAdapter()` голый
-      `ZenStackClient` (тот же паттерн, что чинили в mandala/domwellbes/svoichuzhie/dsperevod/
-      studio), но симптом (пустой 500) не воспроизвёлся. Email/password выключен
-      (`EMAIL_PASSWORD_SIGN_UP_DISABLED`), поэтому проверяли сам путь через `prismaAdapter`
-      напрямую: сессия создана в обход через `/api/auth/dev-session`, затем
-      `GET /api/auth/get-session` → `200` с корректными данными (сверено с БД через
-      `postgres-grandslamcup` MCP), `POST /api/auth/sign-out` → `200`. Оба реально идут через
-      `prismaAdapter`, ни разу пустой 500. Причина расхождения с остальными приложениями не
-      выяснена. Код не менялся — фикс не требуется по факту живого поведения. Разбор —
+- [x] Аудит prismaAdapter/ZenStack закрыт превентивным фиксом (2026-08-31). Первая проверка
+      (2026-08-31, живой прогон) подтвердила, что `auth.ts` передавал в `prismaAdapter()` голый
+      `ZenStackClient` из `db.ts` — тот же паттерн, что валил пустой 500 в
+      mandala/domwellbes/svoichuzhie/dsperevod/studio — но симптом не воспроизвёлся: сессия через
+      `/api/auth/dev-session` → `GET /api/auth/get-session` → `200`, `POST /api/auth/sign-out` →
+      `200`. Причина расхождения с остальными приложениями осталась невыясненной.
+
+      Решение — не полагаться на необъяснённое везение: применён тот же фикс, что в `archetest`
+      (`createLazyPrismaAuthClient`, коммит-образец `ff5af4a1`). `src/lib/prisma.ts` теперь
+      держит отдельный нативный `prismaAuth` (не переиспользует `ZenStackClient` из `db.ts`),
+      `auth.ts` передаёт его в `prismaAdapter()`. `nx typecheck:tsgo`/`nx lint` зелёные, живой
+      повтор той же проверки (dev-session → get-session → sign-out) — снова `200`/`200`, теперь
+      гарантированно через настоящий Prisma-клиент, а не через необъяснённое стечение
+      обстоятельств. Разбор класса бага и всех проверенных приложений —
       `.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md` в корне монорепо.
 
 - [x] ⚠️ Soft-404 (2026-08-28, сквозной аудит монорепо, закрыто в этой же сессии): `notFound()`
