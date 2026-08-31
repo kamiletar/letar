@@ -17,6 +17,16 @@ dsperevod, studio — better-auth `prismaAdapter()` получал ZenStack ORM-
 [.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md](/.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md).
 ⚠️ Не убирать/не упрощать эту Proxy-обёртку без повторного живого прогона sign-up/sign-in.
 
+**Доп. 2026-08-31, та же сессия:** попытка довести auth-hub до единообразия с остальными пятью
+(перевод на общую фабрику `createLazyPrismaAuthClient`) отменена после анализа. Фабрика отдаёт
+голый нативный `PrismaClient` без перехвата — а у auth-hub единственного из всех приложений
+шифрование секретов at-rest (`account.accessToken/refreshToken`, `oauthAccessToken.*`,
+`oauthApplication.clientSecret`) живёт только в `wrapWithEncryption()`-прокси, которым сейчас
+обёрнут объект в `prismaAdapter()`. Замена клиента без переноса шифрования на новый слой (Prisma
+Client Extensions) тихо положила бы OAuth-секреты и OIDC-токены в БД в открытом виде — без единой
+ошибки, в отличие от 500-бага. Код не менялся. Полный разбор — в доке выше, раздел
+«Замена на `createLazyPrismaAuthClient` для auth-hub — миграция НЕ безопасна».
+
 ## Фикс: привязка VK-аккаунта — четыре наслоённых бага подряд (2026-08-27/28)
 
 Исходная жалоба: клик «ВКонтакте» на `/profile/connected-accounts` давал 404. Диагностика
