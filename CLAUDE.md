@@ -54,7 +54,11 @@ projects --with-target` этого не ловит ·
 [nested-package-resolution-under-bun-isolated-installs](/.claude/docs/nested-package-resolution-under-bun-isolated-installs.md)
 ⚠️ голый `import('@foo/bar')` от скрипта в `scripts/` не резолвит транзитивную зависимость чужого
 пакета под изолированной установкой bun, хотя она есть в `bun.lock` — фикс: `createRequire` от
-уже резолвленного entry-файла пакета-родителя, не от своего местоположения
+уже резолвленного entry-файла пакета-родителя, не от своего местоположения ·
+[shared-get-client-ip-consolidation](/.claude/docs/shared-get-client-ip-consolidation.md)
+консолидация дубля «последний хоп x-forwarded-for» (aboi + `@letar/demo-protection`) в
+`getClientIpFromHeaders`; третья копия в driving-school (`api-logger.ts`) осознанно оставлена
+отдельной — другой контракт возврата и доп. заголовок `cf-connecting-ip`
 
 **MCP-серверы:** [mcp-servers](/.claude/docs/mcp-servers.md) состав и назначение ·
 [mcp-server-pattern](/.claude/docs/mcp-server-pattern.md) тонкий локальный сервер по stdio ·
