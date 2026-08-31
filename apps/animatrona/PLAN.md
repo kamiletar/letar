@@ -1461,11 +1461,15 @@ Animatrona: библиотека, каталог, импорт, очередь, 
 
 **Найдено попутно в этой же сессии (в исходном списке не было):**
 
-- [ ] 🔴 **`next build` renderer'а падает** на пререндере `/_not-found`:
-      `InvariantError: Expected workStore to be initialized`. Проверено отложением своих правок —
-      **воспроизводится и без них**, то есть источник в другом месте (в рабочей копии на момент
-      сессии были чужие незакоммиченные изменения renderer'а). Пока не починено, нельзя собрать
-      `dist/win-unpacked`, а значит и прогнать electron-e2e на свежем коде
+- [x] **`next build` renderer'а падает** на пререндере `/_not-found`:
+      `InvariantError: Expected workStore to be initialized` — причинно проверено отдельной
+      сессией 2026-09-01: код (`layout.tsx`, оба Route Handler) не содержит вызовов dynamic API
+      вне request-scope, два чистых прогона (`rm -rf .next` + `next build --webpack`) подряд без
+      единой правки кода прошли зелёными. Вывод — транзиентная гонка за `node_modules` с
+      параллельным `bun install` (в `.bun`-сторе одновременно лежали три версии `next`), тот же
+      класс проблемы, что и `Module not found` для `@ark-ui/react/*` в соседнем пункте плана.
+      Разбор — [nextron-renderer-transpile-packages-required.md](/.claude/docs/nextron-renderer-transpile-packages-required.md#дополнение-2026-09-01-транзиентный-invarianterror-на-_not-found--тоже-гонка-за-node_modules).
+      Если падение повторится — сначала переприбить чистым прогоном, не чинить код на веру
 - [ ] 🔴 **Main-процесс не типизируется вообще ничем.**
       `apps/animatrona/main/tsconfig.json` имеет `include: ["src/**/*.ts", "preload/**/*.ts",
 "../shared/**/*.ts"]`, а код лежит в `main/ffmpeg`, `main/services`, `main/ipc`, `main.ts` —

@@ -4,6 +4,27 @@
 
 > **Архив обновлён:** 2026-09-01
 
+## `/_not-found` prerender InvariantError — не баг кода, гонка за node_modules (2026-09-01)
+
+Найденный попутно в сессии §75 (`PLAN.md` §23.3) пункт «`next build` renderer'а падает на
+пререндере `/_not-found`» проверен причинно отдельной сессией. Осмотр `layout.tsx` и обоих Route
+Handler'ов (`api/model/[...path]/route.ts`, `api/image/route.ts`) не выявил вызовов dynamic API
+(`headers()`/`cookies()`) на уровне модуля или вне request-scope. Известная ловушка
+[nextjs-root-notfound-no-root-layout.md](/.claude/docs/nextjs-root-notfound-no-root-layout.md) не
+подошла — корневой `layout.tsx` присутствует.
+
+Два чистых прогона подряд (`rm -rf .next` + `next.exe build --webpack`, без единой правки кода)
+прошли зелёными — `/_not-found` собрался как `○ (Static)`. В момент, когда ошибка проявлялась,
+`node_modules/.bun/` одновременно держал три версии `next` (16.3.2/16.3.3/16.3.4) — след
+параллельной пересборки isolated-стора bun другой сессией. Тот же класс гонки, что уже
+задокументирован для `Module not found '@ark-ui/react/*'` в том же файле — просто с другим
+симптомом (там `Module not found`, здесь рантайм-инвариант Next, вероятно из-за частично
+подменённого `next/dist/server/*` в момент запуска build-воркеров).
+
+`lint`/`typecheck:tsgo` зелёные, код не менялся. Разбор и диагностический критерий (не
+воспроизводится вторым чистым прогоном подряд → гонка, не баг) —
+[nextron-renderer-transpile-packages-required.md § Дополнение 2026-09-01](/.claude/docs/nextron-renderer-transpile-packages-required.md#дополнение-2026-09-01-транзиентный-invarianterror-на-_not-found--тоже-гонка-за-node_modules).
+
 ## Аудит `transpilePackages` в nextron-рендерере — фикс уже был внесён, задокументирован (2026-09-01)
 
 Делегированная проверка от сессии §75 (`PLAN.md` корня): почему `renderer/next.config.js` не
