@@ -1,5 +1,21 @@
 # План разработки auth-hub
 
+## Аудит prismaAdapter/ZenStack (2026-08-31)
+
+- [x] Проверить живьём, повторяет ли auth-hub баг, найденный и починенный в mandala/domwellbes/
+      svoichuzhie/dsperevod/studio (better-auth `prismaAdapter()` + ZenStack ORM-клиент → 500 на
+      каждом `/api/auth/*`). **Не подтвердилось** — sign-up/sign-in/сессия вернули 200 живьём.
+      Правка не вносилась. Детали — `PLAN_COMPLETED.md` и
+      `.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md`.
+- [ ] ⚠️ Открытый вопрос: почему auth-hub не воспроизводит баг, хотя код выглядит так же —
+      не установлено окончательно. Рабочая гипотеза — Proxy-обёртка `wrapWithEncryption` в
+      `db.ts` случайно даёт нужную индирекцию, которой нет у голого `ZenStackClient`/`as never`
+      в починенных приложениях. Не проверено экспериментально (не снимал Proxy, чтобы не
+      трогать прод-путь шифрования). Если когда-нибудь возникнет повод менять `db.ts`/
+      `prisma.ts` — стоит либо подтвердить гипотезу (временно снять обёртку в dev и повторить
+      живой тест), либо просто перевести auth-hub на общий `createLazyPrismaAuthClient`
+      (`@letar/auth`) ради единообразия с остальными пятью приложениями.
+
 ## v0.7.16 — вынос дубля VK getUserInfo в libs/auth (2026-08-28)
 
 - [x] `createVkGetUserInfo` вынесен в `libs/auth/src/server/vk-user-info.ts`, auth-hub и
