@@ -27,20 +27,20 @@ describe('getClientIp', () => {
     await expect(getClientIp()).resolves.toBe('203.0.113.1')
   })
 
-  it('берёт первый IP из цепочки x-forwarded-for (реальный клиент)', async () => {
+  it('берёт ПОСЛЕДНИЙ IP из цепочки x-forwarded-for (дописанный Traefik, не клиентский)', async () => {
     headersMock.mockResolvedValue(
       mockHeaders({ 'x-forwarded-for': '203.0.113.1, 70.41.3.18, 150.172.238.178' }),
     )
     const getClientIp = await importGetClientIp()
 
-    await expect(getClientIp()).resolves.toBe('203.0.113.1')
+    await expect(getClientIp()).resolves.toBe('150.172.238.178')
   })
 
-  it('обрезает пробелы вокруг первого IP в цепочке', async () => {
-    headersMock.mockResolvedValue(mockHeaders({ 'x-forwarded-for': '  203.0.113.1  , 70.41.3.18' }))
+  it('обрезает пробелы вокруг последнего IP в цепочке', async () => {
+    headersMock.mockResolvedValue(mockHeaders({ 'x-forwarded-for': '203.0.113.1  ,  70.41.3.18  ' }))
     const getClientIp = await importGetClientIp()
 
-    await expect(getClientIp()).resolves.toBe('203.0.113.1')
+    await expect(getClientIp()).resolves.toBe('70.41.3.18')
   })
 
   it('падает на x-real-ip, если x-forwarded-for отсутствует', async () => {
