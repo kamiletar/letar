@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import { getClientIpFromHeaders } from './get-client-ip'
 
 const { headersMock } = vi.hoisted(() => ({ headersMock: vi.fn() }))
 
@@ -12,6 +13,27 @@ function mockHeaders(values: Record<string, string>) {
     get: (name: string) => values[name] ?? null,
   }
 }
+
+describe('getClientIpFromHeaders', () => {
+  it('берёт ПОСЛЕДНИЙ IP из цепочки x-forwarded-for', () => {
+    const headers = mockHeaders({ 'x-forwarded-for': '203.0.113.1, 70.41.3.18, 150.172.238.178' })
+    expect(getClientIpFromHeaders(headers)).toBe('150.172.238.178')
+  })
+
+  it('работает с настоящим Web Headers (Route Handler Request)', () => {
+    const headers = new Headers({ 'x-forwarded-for': '203.0.113.1, 70.41.3.18' })
+    expect(getClientIpFromHeaders(headers)).toBe('70.41.3.18')
+  })
+
+  it('падает на x-real-ip, если x-forwarded-for отсутствует', () => {
+    const headers = mockHeaders({ 'x-real-ip': '198.51.100.7' })
+    expect(getClientIpFromHeaders(headers)).toBe('198.51.100.7')
+  })
+
+  it('возвращает "unknown", если оба заголовка отсутствуют', () => {
+    expect(getClientIpFromHeaders(mockHeaders({}))).toBe('unknown')
+  })
+})
 
 // Свежий импорт после каждого vi.mock/резолва — headers() смокан выше модульно
 async function importGetClientIp() {
