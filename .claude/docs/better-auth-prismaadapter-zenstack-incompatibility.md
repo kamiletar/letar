@@ -126,18 +126,31 @@ export const auth = betterAuth({
   фикса `nx typecheck:tsgo`/`nx lint` зелёные, тот же live-тест (dev-session → get-session →
   sign-out) снова дал `200`/`200`.
 
-- **`kami` — баг НЕ подтверждён, но проверка неполная.** Шесть проверенных эндпоинтов
-  (`sign-up/email` → 400, `sign-in/social` с неизвестным провайдером → 404, `get-session` с
-  поддельным токеном → `200 null`, `sign-out` → 415, `list-accounts` без сессии → 401) — везде
-  структурированный JSON, ни одного пустого 500. Но `kami` использует `mode: 'hub-client'`
-  (`buildHubClientAuth()` в `libs/auth/src/server/create-auth/index.ts`), где `emailAndPassword`
-  вообще не конфигурируется, а OIDC локально не настроен (`.env.local` без
-  `OIDC_CLIENT_ID`/`SECRET`) — путь **создания нового аккаунта** (sign-up email или OAuth-
-  коллбэк с записью user+account), где баг типично проявлялся у остальных пяти, физически
-  недостижим локальным тестом. Код не трогали — нет положительного репро, чинить вслепую
-  рискованно. Если понадобится закрыть вопрос окончательно: настроить
-  `OIDC_CLIENT_ID`/`SECRET` в `.env.local` и прогнать полный OAuth sign-in с живой Ключницей,
-  либо превентивно применить тот же фикс, что в `archetest`.
+- **`kami` — баг НЕ подтверждён, покрытие закрыто (2026-08-31, повторная проверка).** Полный OAuth
+  sign-in прогнан живьём: локальный `auth-hub` (`nx dev auth-hub`, порт 3014) + локальный `kami`
+  (`nx dev kami`, порт 3005), в `apps/kami/.env.local` добавлены `OIDC_CLIENT_ID=kami-prod`,
+  `OIDC_CLIENT_SECRET` (значение `OIDC_KAMI_SECRET` из `apps/auth-hub/.env.local`),
+  `OIDC_DISCOVERY_URL=http://localhost:3014/...` (переопределяет дефолтный прод-адрес Ключницы —
+  тест шёл против локального `auth-hub`, не против прода). В `apps/auth-hub/prisma/seed.ts` для
+  `kami-prod` не хватало локального redirect URI (`http://localhost:3005/api/auth/callback/letar-
+  auth`) — по тому же паттерну, что уже есть у `archetest`/`time`/`aprel8008`; добавлен и
+  зафиксирован обычным коммитом, реседед только локальной auth-hub БД (`nx db:seed auth-hub`,
+  прод не затронут).
+
+  Первый прогон (до `nx db:push kami`) дал структурированную ошибку — не пустой 500:
+  `столбец Account.issuer не существует` (`dbErrorCode: '42703'`), с полным стектрейсом в логе
+  `nx dev kami`. Причина — локальная БД `kami` не была синхронизирована с уже актуальной схемой
+  (`schema/auth.zmodel` `Account.issuer` уже присутствовал, см.
+  [better-auth-1.7-account-issuer-field.md](/.claude/docs/better-auth-1.7-account-issuer-field.md)) —
+  не баг prismaAdapter/ZenStack, а обычный дрейф локальной БД. После `nx zenstack:generate kami &&
+  nx db:push kami` повторный прогон полного flow (sign-up нового email через Ключницу → OAuth
+  callback → `prismaAdapter(ZenStackClient)` пишет `User`+`Account`) завершился без единой ошибки:
+  проверено прямым запросом к `DATABASE_URL` приложения (не через `postgres-kami` MCP — тот
+  смотрит на другую локальную БД, `MCP_LOCAL_URL`/`lena_kami`, не связанную с `DATABASE_URL`
+  приложения) — `User` и `Account` (`providerId: 'letar-auth'`, `issuer:
+  'http://localhost:3014/api/auth'`) реально созданы. Это ровно путь **создания нового аккаунта**,
+  где баг типично проявлялся у остальных пяти приложений — пройден живьём, без единого пустого
+  500. Код `apps/kami/src/lib/auth.ts`/`prisma.ts` не трогали — фикс не требуется.
 
 **✅ Проверено живьём (2026-08-31), баг НЕ подтвердился:** `auth-hub` — `src/lib/prisma.ts` там
 действительно не отдельный нативный `PrismaClient`, а ре-экспорт `prisma`/`rawOrm` из `db.ts`, где
