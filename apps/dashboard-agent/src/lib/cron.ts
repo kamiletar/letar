@@ -531,6 +531,17 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's2',
   },
   {
+    id: 'domwellbes-deliver-project-message-notifications',
+    name: 'Project Message Notification Delivery (domwellbes)',
+    app: 'domwellbes',
+    endpoint: '/api/cron/deliver-project-message-notifications',
+    schedule: '*/5 * * * *',
+    description:
+      'Клейм и email-доставка уведомлений клиенту о новых CLIENT_VISIBLE сообщениях чата проекта (ROADMAP_M8.md §M8B.2)',
+    enabled: true,
+    server: 's2',
+  },
+  {
     id: 'domwellbes-poll-rfq-email-replies',
     name: 'RFQ Email Reply Poll (domwellbes)',
     app: 'domwellbes',
