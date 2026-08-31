@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+## [0.40.22] - 2026-08-31
+
+### Changed
+
+- `src/lib/prisma.ts` (ленивый нативный `PrismaClient` для better-auth `prismaAdapter()`)
+  переведён на общую фабрику `createLazyPrismaAuthClient` из `@letar/auth/server` — тот же код
+  дословно дублировался в 5 приложениях (dashboard, mandala, svoichuzhie, dsperevod, domwellbes).
+  Поведение не изменилось.
+
 ## [0.40.21] - 2026-08-28
 
 ### Fixed
