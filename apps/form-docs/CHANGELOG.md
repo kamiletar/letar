@@ -2,6 +2,21 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.2] - 2026-09-01
+
+### Fixed
+
+- **`nx typecheck:tsgo form-docs` был красным** (`Property 'body'/'toc' does not exist on type
+  'PageData'` в `[[...slug]]/page.tsx`). Root cause — не регрессия сегодняшнего апдейта
+  зависимостей: `fumadocs-core`'s `StaticSource<Config>` несёт `Config` только через индексный
+  доступ (`files: VirtualFile<Config>[]` → `Config['pageData']`), и `loader()`'s внутренний
+  `GeneratePage<I>` не может восстановить его через `infer` — откатывается к базовым
+  `PageData`/`MetaData`. Воспроизведено идентично на `tsc` и `tsgo`, на текущей и на откаченной
+  точь-в-точь пре-бамп версии fumadocs — не version-specific и не tsgo-specific. Обход — явный
+  `as unknown as LoaderOutput<...>` в `src/lib/source.ts` с типом `docs.docs[number]` (доступен
+  напрямую, без `infer`). Разбор —
+  [fumadocs-core-staticsource-config-indexed-access-inference](/.claude/docs/fumadocs-core-staticsource-config-indexed-access-inference.md).
+
 ## [0.6.1] - 2026-08-19
 
 ### Fixed
