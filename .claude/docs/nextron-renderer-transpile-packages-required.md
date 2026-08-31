@@ -85,3 +85,34 @@ Next.js приложения монорепо (см. корневой `CLAUDE.md
 Любой новый прямой импорт `@letar/*` в `apps/animatrona/renderer/src/` — сверить с
 `transpilePackages` тем же гейтом (`node scripts/check-transpile-packages.mjs`), не полагаться
 на то, что «раньше как-то собиралось». Кэш `.next` — не доказательство корректности конфигурации.
+
+## Дополнение 2026-09-01: транзиентный `InvariantError` на `/_not-found` — тоже гонка за node_modules
+
+При причинной проверке фикса выше одна сборка (`rm -rf .next` + `next.exe build --webpack`)
+единожды упала на этапе `Generating static pages` с:
+
+```
+Error occurred prerendering page "/_not-found". Read more: https://nextjs.org/docs/messages/prerender-error
+Error [InvariantError]: Invariant: Expected workStore to be initialized. This is a bug in Next.js.
+Export encountered an error on /_not-found/page: /_not-found, exiting the build.
+```
+
+Осмотр кода не дал зацепки: в `layout.tsx` нет вызовов `headers()`/`cookies()` на уровне модуля,
+единственный Route Handler с `force-dynamic` (`api/model/[...path]/route.ts`) грузит всё лениво
+внутри `async`-функций, `api/image/route.ts` не использует dynamic API вообще. Известная ловушка
+[nextjs-root-notfound-no-root-layout](/.claude/docs/nextjs-root-notfound-no-root-layout.md) сюда
+не подходит — `layout.tsx` на месте.
+
+Два последующих чистых прогона (`rm -rf .next` + билд, без изменения кода) прошли зелёными —
+`/_not-found` собрался как `○ (Static)`. В момент первого падения `node_modules/next` уже
+указывал на 16.3.4, но в `node_modules/.bun/` одновременно лежали три версии next
+(16.3.2/16.3.3/16.3.4) — след параллельной пересборки isolated-стора другой сессией. Это тот же
+класс гонки, что описан выше для `@ark-ui/react` (изолированная установка bun на секунды
+физически убирает/подменяет модули во время релинковки), просто с другим симптомом: там —
+`Module not found`, здесь — рантайм-инвариант Next (вероятно, из-за частично
+подменённого/несогласованного `next/dist/server/*` в момент запуска build-воркеров).
+
+**Диагностика:** если `InvariantError: Expected workStore to be initialized` на `/_not-found`
+не воспроизводится вторым чистым прогоном подряд — это гонка за `node_modules`, а не баг кода
+приложения. Не чинить код в ответ на одноразовое падение; перепроверять причинно (`rm -rf .next` +
+билд ещё раз, желательно когда в репозитории не идёт параллельный `bun install`).
