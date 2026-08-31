@@ -2,6 +2,21 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## Аудит: prismaAdapter/ZenStack — баг НЕ подтвердился (2026-08-31)
+
+По итогам фикса того же паттерна в пяти других приложениях (mandala, domwellbes, svoichuzhie,
+dsperevod, studio — better-auth `prismaAdapter()` получал ZenStack ORM-клиент вместо нативного
+`PrismaClient`, любой `/api/auth/*` падал 500 без логов) auth-hub выглядел подозрительно похоже:
+`src/lib/prisma.ts` не заводит отдельный `PrismaClient`, а ре-экспортирует `prisma` из `db.ts`,
+и это тот же `ZenStackClient` (обёрнутый Proxy-шифрованием), что передаётся в `prismaAdapter()`.
+
+Живой прогон (`nx dev auth-hub` + `fetch` на `/api/auth/sign-up/email` и `/api/auth/sign-in/email`
+против dev-Postgres) бага не воспроизвёл: оба запроса вернули `200`, сессия установилась и
+`/` отдал `Профиль`-страницу. Правка не вносилась — код рабочий в текущем виде. Разбор и гипотеза,
+почему тут иначе (Proxy-обёртка `wrapWithEncryption` в `db.ts`), — в
+[.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md](/.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md).
+⚠️ Не убирать/не упрощать эту Proxy-обёртку без повторного живого прогона sign-up/sign-in.
+
 ## Фикс: привязка VK-аккаунта — четыре наслоённых бага подряд (2026-08-27/28)
 
 Исходная жалоба: клик «ВКонтакте» на `/profile/connected-accounts` давал 404. Диагностика
