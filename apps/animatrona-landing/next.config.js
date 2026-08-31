@@ -6,7 +6,13 @@
 const nextConfig = {
   // Workspace-либы вне корня приложения — без withNx (удалён, deprecated) webpack их не
   // транспилирует сам. См. .claude/docs/nextjs-nx-composeplugins-migration.md
-  transpilePackages: ['@letar/analytics', '@letar/github-releases', '@letar/glitchtip', '@letar/ui'],
+  transpilePackages: [
+    '@letar/analytics',
+    '@letar/format-utils',
+    '@letar/github-releases',
+    '@letar/glitchtip',
+    '@letar/ui',
+  ],
   // Standalone output для Docker production сборки
   output: 'standalone',
   // Trailing slash для консистентных URL

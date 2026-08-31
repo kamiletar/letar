@@ -8,6 +8,7 @@
       "@letar/chakra-provider",
       "@letar/ui",
       "@letar/analytics",
+      "@letar/format-utils",
       "@letar/github-releases",
       "@letar/glitchtip",
       "@letar/i18n-proxy"

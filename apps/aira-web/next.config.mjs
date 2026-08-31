@@ -12,6 +12,7 @@ const nextConfig = {
   transpilePackages: [
     '@letar/analytics',
     '@letar/chakra-provider',
+    '@letar/format-utils',
     '@letar/github-releases',
     '@letar/glitchtip',
     '@letar/hooks',

@@ -32,6 +32,9 @@
       "@letar/ui": [
         "../../libs/ui/src/index.ts"
       ],
+      "@letar/format-utils": [
+        "../../libs/format-utils/src/index.ts"
+      ],
       "@letar/github-releases": [
         "../../libs/github-releases/src/index.ts"
       ],

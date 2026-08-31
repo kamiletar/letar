@@ -8,6 +8,7 @@
       "@letar/chakra-provider",
       "@letar/analytics",
       "@letar/ui",
+      "@letar/format-utils",
       "@letar/github-releases",
       "@letar/glitchtip"
     ]
