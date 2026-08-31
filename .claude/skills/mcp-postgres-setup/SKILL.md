@@ -174,12 +174,12 @@ MCP_PROD_RW_URL=postgresql://<prod-user>:<prod-password>@localhost:<tunnel-port>
 
 ## Справочник: текущие MCP серверы
 
-⚠️ **`postgres-kami` — исторически разъехавшаяся конфигурация, не образец для копирования.**
-`MCP_LOCAL_URL` (порт 5437, `lena_kami`) указывает на канонический дев-контейнер `kami-postgres`
-(совпадает с `docker-compose.production.yml`), а `DATABASE_URL` в том же `.env.local` смотрит на
-порт 5432 — контейнер постороннего `premium-rosstil-postgres`, где на этой машине также заведена
-база `kami`. `nx dev kami` реально пишет во вторую, MCP читает первую — они не синхронны.
-Разбор — [verification-pitfalls.md](/.claude/docs/verification-pitfalls.md#тот-же-класс-но-не-про-инструмент-а-про-mcp-сервер-postgres-app-может-смотреть-не-в-ту-бд-что-database_url-приложения).
+✅ **`postgres-kami` — расхождение `MCP_LOCAL_URL`/`DATABASE_URL` закрыто 2026-08-31.** Раньше
+`DATABASE_URL` в `apps/kami/.env.local` указывал на порт 5432 (`premium-rosstil-postgres`) — не
+просто другую базу, а битую строку подключения (роль `postgres` там не существует). Теперь оба
+значения указывают на один и тот же канонический дев-контейнер `kami-postgres` (порт 5437,
+`lena_kami`, совпадает с `docker-compose.production.yml`). Разбор инцидента и его закрытие —
+[verification-pitfalls.md](/.claude/docs/verification-pitfalls.md#тот-же-класс-но-не-про-инструмент-а-про-mcp-сервер-postgres-app-может-смотреть-не-в-ту-бд-что-database_url-приложения).
 Для нового приложения `MCP_LOCAL_URL` имеет смысл только когда он реально смотрит на тот же
 контейнер, что и `DATABASE_URL` — иначе используй вариант по умолчанию из Шага 2/3 выше (без
 третьего аргумента, читает `DATABASE_URL` напрямую), там расхождение структурно невозможно.

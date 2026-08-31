@@ -4101,7 +4101,7 @@ alpine) идентичная ошибка `Cannot find module 'require-in-the-mi
 причину, чтобы не пытались "исправить" обратно. Остальные приложения остаются на
 `node:24-alpine` + двухстадийный tz-трюк (см. §129 про однострочный комментарий там).
 
-## §131 — `postgres-kami` MCP смотрит не в ту БД, что `DATABASE_URL` приложения ✅ ЗАДОКУМЕНТИРОВАНО (2026-08-31)
+## §131 — `postgres-kami` MCP смотрит не в ту БД, что `DATABASE_URL` приложения ✅ ЗАКРЫТО (2026-08-31)
 
 Обнаружено при аудите `apps/kami` (prismaAdapter/ZenStack): запрос через `postgres-kami` MCP к
 `User`/`Account` после живого OAuth-входа вернул пустой результат без единой ошибки. Причина —
@@ -4116,14 +4116,14 @@ alpine) идентичная ошибка `Cannot find module 'require-in-the-mi
 (`postgres-driving-school`, `postgres-grandslamcup`, `postgres-studio`, `postgres-domwellbes`)
 читают ту же `DATABASE_URL`, что и приложение — расхождение у них структурно невозможно.
 
-**Не починено:** непонятно, какая из двух локальных баз сейчас реально держит нужные для
-тестов данные — правка вслепую могла бы просто перекинуть баг в другую сторону. Задокументирован
-новый класс в [verification-pitfalls.md](/.claude/docs/verification-pitfalls.md#тот-же-класс-но-не-про-инструмент-а-про-mcp-сервер-postgres-app-может-смотреть-не-в-ту-бд-что-database_url-приложения)
-
-- предупреждение в [mcp-postgres-setup/SKILL.md](/.claude/skills/mcp-postgres-setup/SKILL.md).
-
-* [ ] ⚠️ Открытый вопрос: свести `postgres-kami` `MCP_LOCAL_URL` и `DATABASE_URL` к одному
-      контейнеру — решить, какая из двух баз (`kami-postgres:5437/lena_kami` или
-      `premium-rosstil-postgres:5432/kami`) канонична для дев-окружения kami, и перенести данные
-      при необходимости. Требует владельца — риск потерять локальные dev-данные при выборе не
-      той стороны.
+**Починено 2026-08-31.** Проверка показала, что выбор не был неоднозначным: в
+`premium-rosstil-postgres` вообще нет ни роли `postgres`, ни базы `kami` (реальный
+`POSTGRES_USER`/`POSTGRES_DB` этого контейнера — `lena_user`/`lena_premium`) — старый
+`DATABASE_URL` был не «указывает на другую базу», а битой строкой подключения. `kami-postgres`
+(порт 5437, `lena_kami`) — единственный рабочий вариант, и он же совпадает с
+`docker-compose.production.yml`. Данных для переноса не было (базы `kami` в
+`premium-rosstil-postgres` не существовало). Фикс — `DATABASE_URL` в `apps/kami/.env.local`
+переписан на то же значение, что и `MCP_LOCAL_URL`; `postgres-kami` MCP и `nx dev kami` теперь
+смотрят в одну и ту же базу. Обновлены
+[verification-pitfalls.md](/.claude/docs/verification-pitfalls.md#тот-же-класс-но-не-про-инструмент-а-про-mcp-сервер-postgres-app-может-смотреть-не-в-ту-бд-что-database_url-приложения)
+и [mcp-postgres-setup/SKILL.md](/.claude/skills/mcp-postgres-setup/SKILL.md) — сняты ⚠️-пометки.
