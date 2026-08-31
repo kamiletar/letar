@@ -1,16 +1,15 @@
+import { getClientIp } from '@letar/demo-protection'
 import geoip from 'geoip-lite'
-import { headers } from 'next/headers'
 
 /**
  * Возвращает двухбуквенный код страны по IP запроса.
- * IP читается из заголовка x-forwarded-for, который выставляет Nginx Proxy Manager.
- * В dev-окружении заголовок отсутствует → возвращает пустую строку.
+ * IP читается из x-forwarded-for/x-real-ip (последний хоп, дописанный Traefik — первый хоп
+ * произвольно подделывается клиентом, см. .claude/docs/shared-get-client-ip-consolidation.md).
+ * В dev-окружении заголовки отсутствуют → geoip.lookup('unknown') вернёт undefined.
  */
 export async function getCountryCode(): Promise<string> {
-  const hdrs = await headers()
-  const forwarded = hdrs.get('x-forwarded-for')
-  const ip = forwarded?.split(',')[0]?.trim() ?? ''
-  return ip ? (geoip.lookup(ip)?.country ?? '') : ''
+  const ip = await getClientIp()
+  return geoip.lookup(ip)?.country ?? ''
 }
 
 /**

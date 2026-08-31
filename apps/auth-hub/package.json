@@ -11,7 +11,8 @@
       "@letar/glitchtip",
       "@letar/seed-utils",
       "@letar/pg-url",
-      "@letar/env-load"
+      "@letar/env-load",
+      "@letar/demo-protection"
     ]
   },
   "dependencies": {
@@ -21,7 +22,8 @@
     "@letar/env-load": "workspace:*",
     "@letar/glitchtip": "workspace:*",
     "@letar/seed-utils": "workspace:*",
-    "@letar/pg-url": "workspace:*"
+    "@letar/pg-url": "workspace:*",
+    "@letar/demo-protection": "workspace:*"
   },
   "devDependencies": {
     "@types/geoip-lite": "^1.4.4"
