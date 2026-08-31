@@ -4127,3 +4127,30 @@ alpine) идентичная ошибка `Cannot find module 'require-in-the-mi
 смотрят в одну и ту же базу. Обновлены
 [verification-pitfalls.md](/.claude/docs/verification-pitfalls.md#тот-же-класс-но-не-про-инструмент-а-про-mcp-сервер-postgres-app-может-смотреть-не-в-ту-бд-что-database_url-приложения)
 и [mcp-postgres-setup/SKILL.md](/.claude/skills/mcp-postgres-setup/SKILL.md) — сняты ⚠️-пометки.
+
+## §132 — `@letar/demo-protection` `getClientIp()` брал первый (клиентский) IP из X-Forwarded-For, не последний ✅ ЗАКРЫТО (2026-09-01)
+
+Найдено security-auditor'ом при ревью M8B.3 на `domwellbes` (вне scope самой задачи M8B.3).
+`libs/demo-protection/src/get-client-ip.ts` брал первый элемент цепочки `x-forwarded-for` как
+«реальный клиент». Неверно для топологии репозитория: Traefik (единственный edge-прокси,
+`infra/traefik/`) не настроен на `forwardedHeaders.trustedIPs` и по умолчанию НЕ вырезает уже
+пришедший заголовок — он дописывает свой `RemoteAddr` последним элементом (подтверждено докой
+Traefik: `forwardedHeaders.notAppendXForwardedFor` по умолчанию `false` = всегда дописывает).
+Первый элемент — произвольная строка, которую клиент сам вписал в заголовок своего запроса.
+
+**Эксплуатируемость:** любой IP-based rate-limit через эту функцию обходился тривиально —
+`X-Forwarded-For: <новое значение>` на каждый запрос давал новый бакет.
+
+**Фикс:** `getClientIp()` теперь берёт последний элемент цепочки (последний хоп — то, что дописал
+сам Traefik). Traefik-конфиг трогать не потребовалось: этот фикс корректен независимо от
+`trustedIPs`. Тесты в `get-client-ip.spec.ts` обновлены — старый тест буквально проверял «берёт
+первый IP», что и было ошибочным допущением. Коммит `e7bba0c4`.
+
+**Не закрыто этим фиксом — тот же паттерн локальными копиями (не через
+`@letar/demo-protection`), заведено отдельными задачами (`spawn_task`) для `aboi-dev` и
+`driving-school-dev`:**
+
+- `apps/aboi/src/app/api/auth/[...all]/route.ts` — реально эксплуатируемый обход
+  email-verification rate-limiter.
+- `apps/driving-school/src/lib/api-logger.ts` — искажение `ipAddress` в аудит-логе партнёрского
+  API, не сам по себе rate-limit bypass.
