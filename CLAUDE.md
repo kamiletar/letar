@@ -312,6 +312,11 @@ as="строка-тега"`) — четыре сессии независимо 
 
 **Библиотеки и публикация:** [lib-entry-points](/.claude/docs/lib-entry-points.md) подпути
 `./server`/`./client`, границы, ESLint-ловушки ·
+[fumadocs-core-staticsource-config-indexed-access-inference](/.claude/docs/fumadocs-core-staticsource-config-indexed-access-inference.md)
+⚠️ `loader()` из `fumadocs-core/source` откатывает `page.data`/`meta.data` до базовых
+`PageData`/`MetaData` — `Config` в `StaticSource<Config>` достижим только через индексный доступ,
+`infer` его не восстанавливает; не версия-специфично, не tsgo-специфично; обход — явный
+`as unknown as LoaderOutput<...>` с типом `docs.docs[number]` ·
 [npm-publish-from-monorepo](/.claude/docs/npm-publish-from-monorepo.md) внутренние `@letar/*` — только
 в `devDependencies` · [vitest-alias-prefix-matching](/.claude/docs/vitest-alias-prefix-matching.md)
 alias матчится по префиксу ·
