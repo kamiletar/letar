@@ -16,7 +16,7 @@ const config = {
   // Без transpilePackages Next.js ограничивает свой ts/js loader `include: [dir]`
   // (см. shouldIncludeExternalDirs в next/dist/build/webpack-config.js) и молча
   // отказывается обрабатывать внешние .ts — «no loaders configured».
-  transpilePackages: ['@letar/glitchtip'],
+  transpilePackages: ['@letar/analytics', '@letar/forms', '@letar/glitchtip', '@letar/seo'],
 }
 
 export default withMDX(config)

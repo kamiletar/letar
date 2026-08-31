@@ -113,6 +113,20 @@ const CHECKS = [
     doc: '.claude/rules/libs.md',
   },
   {
+    id: 'transpile-packages',
+    group: 'tsconfig',
+    title: 'transpilePackages next.config.* покрывает импортируемые @letar/*-алиасы tsconfig',
+    run: ['node', ['scripts/check-transpile-packages.mjs']],
+    // gate: расхождение не ловится ни typecheck, ни lint — падает "Module parse failed:
+    // Unexpected token" на прод-сборке через --webpack без единой строки в логе от tsgo/lint.
+    // На момент регистрации (2026-09-01) долг из 3 приложений (auth-hub, form-docs,
+    // animatrona/renderer) закрыт правкой их next.config.* в том же коммите.
+    severity: 'gate',
+    ci: 'partial',
+    ciNote: 'приватные submodule не выкачаны — их next.config.*/tsconfig не проверены',
+    doc: '.claude/docs/nextjs-nx-composeplugins-migration.md',
+  },
+  {
     id: 'submodule-gitignore',
     group: 'submodule',
     title: 'шаблоны .gitignore во всех submodule',

@@ -20,7 +20,16 @@ const nextConfig: NextConfig = {
   // отказывается парсить внешний .ts из монорепо-библиотеки — «Module parse failed: Unexpected
   // token» на `export interface`. Сборка через --webpack (build/dev targets в project.json)
   // этого не получает бесплатно, в отличие от Turbopack. Тот же фикс — form-docs/next.config.mjs.
-  transpilePackages: ['@letar/glitchtip'],
+  transpilePackages: [
+    '@letar/analytics',
+    '@letar/auth',
+    '@letar/chakra-provider',
+    '@letar/consent',
+    '@letar/email',
+    '@letar/forms',
+    '@letar/glitchtip',
+    '@letar/ui',
+  ],
 
   // Явно включаем geoip-lite в трассировку standalone output (включая .dat файлы).
   // @swc/helpers — трейсер (@vercel/nft) не докопировал пакет в .next/standalone при первом

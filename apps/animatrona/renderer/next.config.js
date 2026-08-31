@@ -51,9 +51,24 @@ const nextConfig = {
   },
 
   // Принудительно бандлим вместо экстернализации — иначе turbopack создаёт внешние модули
-  // с битыми ESM зависимостями (node-fetch → fetch-blob).
-  // Библиотеки @letar/* сюда не входят: они резолвятся в исходники под libs/, вне node_modules.
+  // с битыми ESM зависимостями (node-fetch → fetch-blob). @letar/*-записи ниже добавлены
+  // 2026-09-01 (§73 PLAN.md) — без withNx (снят у остальных 20 приложений в этом же коммите)
+  // webpack (--webpack, см. commit 71bba44d) не транспилирует TS из libs/* сам по себе, см.
+  // .claude/docs/nextjs-nx-composeplugins-migration.md. Их отсутствие до этой правки объяснялось
+  // тем, что withNx тут никогда не подключался (commit 0693e342 снял записи, полагаясь на
+  // резолв через paths/customConditions в исходники libs/, а не на node_modules) — но это не
+  // равнозначно транспиляции: резолв путей и парсинг TS-синтаксиса внутри найденного файла —
+  // разные механизмы, а лишние записи безвредны, если пакет уже резолвится (см. тот же doc).
   transpilePackages: [
+    '@letar/animatrona-types',
+    '@letar/animatrona-ui',
+    '@letar/animatrona-utils',
+    '@letar/forms',
+    '@letar/hooks',
+    '@letar/query-provider',
+    '@letar/ui',
+    '@letar/video-player-core',
+    '@letar/video-player-react',
     '@libsql/client',
     '@libsql/core',
     '@libsql/hrana-client',
