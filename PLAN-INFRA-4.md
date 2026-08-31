@@ -4202,11 +4202,13 @@ scripts/hooks/install.sh --all-submodules` — переустановлено в
 `aboi`/`driving-school`/`dsperevod`. Рабочее дерево коммитом не тронуто (`.git/modules/*/hooks/`
 не версионируется) — закоммичена только правка доки.
 
-**Остаточный риск:** нет автоматической проверки в `bun scripts/check-all.mjs`, которая сверяла
-бы установленный набор хуков с исходниками `scripts/hooks/` и ловила бы этот класс дрейфа без
-ручного грепа — предложено в доке как кандидат (уровень `warn`), не реализовано. Следующий новый
-скрипт в `scripts/hooks/` без немедленного `install.sh --all-submodules` снова начнёт копить то
-же отставание.
+**Остаточный риск закрыт (2026-09-01, отдельная сессия):** `scripts/check-precommit-hook-staleness.mjs`
+добавлен в `bun scripts/check-all.mjs` как `precommit-hook-staleness` (группа `submodule`, уровень
+`warn` — тот же класс накопленного долга, что `submodule-gitignore`/`submodule-push-state` рядом).
+Сравнивает `_pre-commit-*.sh`, реально установленные в `hooks/pre-commit` каждого submodule, с
+актуальным списком из `scripts/hooks/install.sh`. Следующий новый скрипт в `scripts/hooks/` без
+немедленного `install.sh --all-submodules` теперь виден прогону `check-all.mjs`, а не только
+ручному грепу.
 
 ## §134 — корневой `zod` временно точно запинен на `4.4.3` — дедуп с `@modelcontextprotocol/sdk` (2026-09-01)
 
