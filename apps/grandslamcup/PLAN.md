@@ -8,15 +8,16 @@
 
 ## Открытые вопросы
 
-- [ ] ⚠️ Открытый вопрос: `src/lib/auth.ts` передаёт в `prismaAdapter()` `prisma` из `./db`
-      (голый `ZenStackClient`) — тот же паттерн, что вызывал пустой 500 без логов на
-      `/api/auth/*` в mandala/domwellbes/svoichuzhie/dsperevod/studio (см.
-      `.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md`). Существующий аудит
-      этого файла ошибочно числил grandslamcup как «уже было ОК» — на 2026-08-31 это не
-      подтверждается кодом. Нужна живая проверка (`nx dev`, sign-up/sign-in через
-      `/api/auth/*`) и, если баг подтвердится, миграция на `createLazyPrismaAuthClient`
-      (`@letar/auth/server`) по образцу починенных приложений. Отдельная сессия для проверки
-      уже запущена (чип `task_5ac5b32a`).
+- [x] Проверено живьём (2026-08-31): код действительно передаёт в `prismaAdapter()` голый
+      `ZenStackClient` (тот же паттерн, что чинили в mandala/domwellbes/svoichuzhie/dsperevod/
+      studio), но симптом (пустой 500) не воспроизвёлся. Email/password выключен
+      (`EMAIL_PASSWORD_SIGN_UP_DISABLED`), поэтому проверяли сам путь через `prismaAdapter`
+      напрямую: сессия создана в обход через `/api/auth/dev-session`, затем
+      `GET /api/auth/get-session` → `200` с корректными данными (сверено с БД через
+      `postgres-grandslamcup` MCP), `POST /api/auth/sign-out` → `200`. Оба реально идут через
+      `prismaAdapter`, ни разу пустой 500. Причина расхождения с остальными приложениями не
+      выяснена. Код не менялся — фикс не требуется по факту живого поведения. Разбор —
+      `.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md` в корне монорепо.
 
 - [x] ⚠️ Soft-404 (2026-08-28, сквозной аудит монорепо, закрыто в этой же сессии): `notFound()`
       из кода страницы отдавал **HTTP 200** вместо 404 — причина `(public)/loading.tsx`
