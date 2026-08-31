@@ -38,7 +38,7 @@ export default async function UsersPage() {
       </HStack>
 
       <Card.Root>
-        <Card.Body p={0}>
+        <Card.Body p={0} overflowX="auto">
           <Table.Root>
             <Table.Header>
               <Table.Row>
