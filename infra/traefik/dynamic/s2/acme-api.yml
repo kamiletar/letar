@@ -13,14 +13,13 @@
 # acme-dns — контейнер в той же kami-network, доступен по имени, порт 80 (внутренний, не
 # опубликованный 127.0.0.1:8053).
 #
-# ⚠️ IP-фильтр НЕ здесь, пока NPM ещё в цепочке. Живая проверка 2026-08-31: `ipAllowList` с
-# `ipStrategy.depth: 1` (расчёт на X-Forwarded-For от NPM) дал 403 и с s3, и в обход NPM —
-# depth-подход не заработал предсказуемо на первой попытке, разбираться дальше не стали, т.к.
-# NPM всё равно временный. Реальный периметр сейчас — Access List "s3" на самом NPM-хосте
-# (proxy_host id 35, allow 188.127.235.141/deny all) — не трогать, пока не будет отдельно
-# заведён и проверен ipAllowList здесь. TODO при шаге 6 (снять NPM): Traefik станет первым
-# хопом, RemoteAddr = реальный IP клиента — тогда завести простой ipAllowList без ipStrategy
-# и проверить живьём ДО отключения Access List на NPM, не вместо.
+# ✅ IP-фильтр заведён 2026-08-31 при снятии NPM с s2 (§48 шаг 6). До этого NPM был единственной
+# защитой (Access List "s3", proxy_host id 35) — раньше в этом файле стоял `ipAllowList` с
+# `ipStrategy.depth: 1` (расчёт на X-Forwarded-For от NPM), который давал 403 непредсказуемо, и
+# был снят в пользу защиты на стороне NPM. Теперь NPM остановлен, Traefik — первый хоп,
+# RemoteAddr = реальный IP клиента напрямую, поэтому ipStrategy не нужен вовсе — обычный
+# sourceRange по RemoteAddr. Проверено живьём: 200 с s3, без него маршрут был бы открыт всему
+# интернету в окне между остановкой NPM и этой правкой.
 
 http:
   routers:
@@ -29,7 +28,15 @@ http:
       entryPoints:
         - websecure
       service: acme-dns
+      middlewares:
+        - acme-api-allowlist
       tls: true
+
+  middlewares:
+    acme-api-allowlist:
+      ipAllowList:
+        sourceRange:
+          - '188.127.235.141/32' # s3 — единственный легитимный клиент этого маршрута
 
   services:
     acme-dns:
