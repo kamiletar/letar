@@ -38,9 +38,10 @@
 // (.claude/rules/git.md).
 
 import { execFileSync } from 'node:child_process'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { isCheckedOut, readSubmodulePaths } from './lib/submodules.mjs'
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..')
 
@@ -139,12 +140,6 @@ const REQUIREMENTS = [
   },
 ]
 
-/** Пути submodule из .gitmodules — порядок как в файле. */
-function readSubmodulePaths() {
-  const text = readFileSync(join(repoRoot, '.gitmodules'), 'utf8')
-  return [...text.matchAll(/^\s*path\s*=\s*(.+)$/gm)].map((m) => m[1].trim())
-}
-
 /** Игнорируется ли путь внутри репозитория `cwd`. */
 function isIgnored(cwd, probe) {
   try {
@@ -190,12 +185,12 @@ function checkSubmodule(abs) {
 const rows = []
 const skipped = []
 
-for (const path of readSubmodulePaths()) {
+for (const path of readSubmodulePaths(repoRoot)) {
   const abs = join(repoRoot, path)
 
   // Submodule может быть не выкачан — это штатная ситуация на чужой машине
   // (.claude/docs/bun-lockfile-private-submodules.md), не расхождение.
-  if (!existsSync(join(abs, '.git'))) {
+  if (!isCheckedOut(abs)) {
     skipped.push({ path, why: 'не выкачан' })
     continue
   }

@@ -33,14 +33,9 @@ import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { isCheckedOut, readSubmodulePaths } from './lib/submodules.mjs'
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..')
-
-/** Пути submodule из .gitmodules — порядок как в файле. */
-function readSubmodulePaths() {
-  const text = readFileSync(join(repoRoot, '.gitmodules'), 'utf8')
-  return [...text.matchAll(/^\s*path\s*=\s*(.+)$/gm)].map((m) => m[1].trim())
-}
 
 /**
  * Актуальный список `_pre-commit-*.sh`, которые install.sh копирует в hooks_dir
@@ -77,10 +72,10 @@ if (expected.length === 0) {
 const rows = []
 const skipped = []
 
-for (const path of readSubmodulePaths()) {
+for (const path of readSubmodulePaths(repoRoot)) {
   const abs = join(repoRoot, path)
 
-  if (!existsSync(join(abs, '.git'))) {
+  if (!isCheckedOut(abs)) {
     skipped.push({ path, why: 'не выкачан' })
     continue
   }
