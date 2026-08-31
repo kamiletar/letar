@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.4] - 2026-09-01
+
+### Fixed
+
+- `@letar/demo-protection` резолвился только через `nx.implicitDependencies`, не был в
+  `dependencies` — под изолированным линковщиком bun это тихо ронял `typecheck:tsgo` с
+  `TS2307: Cannot find module '@letar/demo-protection'`. Добавлен в `dependencies`.
+
 ## [0.1.2] - 2026-08-20
 
 ### Fixed
