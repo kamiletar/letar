@@ -2,6 +2,57 @@
 
 Детальное описание всех реализованных фич.
 
+## Login-canary — реальные аккаунты во всех 9 production-БД + живая проверка алерта (2026-08-31, `0.15.30`)
+
+Закрыт «открытый вопрос» из `PLAN.md` §71 п.3.3, оставленный сессией `0.15.27`: реальные
+канареечные аккаунты в 9 production-БД не были созданы. В этой сессии — созданы и проверены
+end-to-end.
+
+**Провижининг.** `/api/admin/login-canary-setup` прогнан по всем 9 приложениям
+(aboi, domwellbes, mandala, animatrona-tracker, dashboard, auth-hub, driving-school,
+svoichuzhie, dsperevod) — все дали `emailVerifiedSet: true`. По пути найдены и исправлены три
+самостоятельных прод-бага (не входили в scope изначально, но блокировали провижининг):
+
+- `auth-hub`/`animatrona-tracker` не имели порта/хоста в `server-config.ts` (rollout-профиль,
+  внутренний порт фиксирован на `3010`) — добавлено.
+- 6 из 9 приложений падали на CSRF-проверке better-auth (сервер не слал `Origin`), `mandala` —
+  необработанным исключением (HTTP 500, нет `trustedOrigins`) — фикс: `getAppOrigin()` в
+  `app-secrets.ts` читает `BETTER_AUTH_URL` из уже смонтированного `/secrets/<app>.env`, без
+  хардкода доменов (3 из 9 — приватные submodule).
+- `markEmailVerified()` обращался к таблице `"user"` (нижний регистр) вместо реального имени
+  `"User"` — `signUpOk: true`, но `emailVerifiedSet: false` на первом реальном прогоне.
+
+Отдельно найден и исправлен (не в исходном scope, задеплоено тем же вечером) прод-баг
+`driving-school`: `createAuth()` в проде без `secondaryStorage` требует модель `rateLimit` в
+БД, которой не было в `schema.zmodel` — падал `/api/auth/sign-up/email` для реальных
+пользователей, не только канарейки.
+
+**mandala — отдельный прод-баг.** ZenStack ORM-клиент (kysely) передавался напрямую в
+`prismaAdapter()` better-auth вместо нативного `PrismaClient` (несовместимость,
+задокументированная в `apps/dashboard/src/lib/prisma.ts`) — sign-up/sign-in давали 500 для
+реальных пользователей, не только канарейки. Плюс независимая вторая причина: `genericOAuth`
+для Yandex использовал `discoveryUrl`, а Yandex не отдаёт `issuer` в discovery-документе —
+`Unhandled Rejection` при инициализации плагина. Оба фикса — в `apps/mandala/src/lib/prisma.ts`
+(новый файл, Proxy + `@prisma/adapter-pg`) и `auth.ts` (явные `authorizationUrl`/`tokenUrl`/
+`getUserInfo` вместо `discoveryUrl`). Позже вынесено в общую фабрику `createLazyPrismaAuthClient`
+из `@letar/auth` (тот же код был продублирован в dashboard/svoichuzhie/dsperevod/domwellbes).
+Для `auth-hub` та же миграция явно отклонена — у него есть слой at-rest шифрования
+(`crypto-orm.ts`) поверх клиента, которого голая фабрика не имеет; решение и обоснование — в
+`.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md`.
+
+**Секреты и деплой.** Пароли для всех 9 аккаунтов сгенерированы, реестр
+`LOGIN_CANARY_<APP>_EMAIL`/`_PASSWORD` добавлен в `apps/dashboard/.env.docker.enc` через sops.
+Задеплоены (через `deploy-agent-dev`, координация Agent Mail): `driving-school` (rateLimit),
+`dashboard-agent` (Origin/порты/регистр таблицы), `mandala` (Prisma-адаптер + Yandex OAuth),
+`dashboard` + `dashboard-agent` повторно (реестр секретов).
+
+**Живая проверка алерта.** `emailVerified` временно сброшен в `false` на аккаунте
+`canary-dsperevod@letar.best` (обратимая тестовая мутация, не создание аккаунта/ввод пароля).
+Два подряд ручных вызова `POST /api/cron/login-canary-check` дали `403 EMAIL_NOT_VERIFIED` →
+`consecutiveFailures: 2` → `alerted: true`. Алерт `AUTH_LOGIN_CANARY_FAILED` подтверждённо
+дошёл до Telegram (визуально проверено получателем, не только по коду возврата
+`postDashboardAlert`). Флаг возвращён в `true`, состояние сброшено чистым прогоном.
+
 ## Исправление: errorResponse() реально применён к routes/deploy.ts (2026-08-28, `0.15.26`)
 
 Запись ниже про `0.15.23` (regex-скрипт по 56 местам, включая «`deploy.ts` (20)») оказалась
