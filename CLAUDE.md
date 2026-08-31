@@ -175,6 +175,10 @@ ref/DOM не перезапускается ·
 [nextjs-nx-composeplugins-migration](/.claude/docs/nextjs-nx-composeplugins-migration.md) миграция
 с deprecated `composePlugins`/`withNx` (`@nx/next`) на голый `next.config` + явный
 `transpilePackages` ·
+[nextron-renderer-transpile-packages-required](/.claude/docs/nextron-renderer-transpile-packages-required.md)
+⚠️ `transpilePackages` для `@letar/*` обязателен и в nextron-рендерере (`animatrona`) — резолв
+пути через `tsconfig paths` не равнозначен транспиляции TS-синтаксиса, отсутствие маскировал
+только устаревший `.next/cache` ·
 [nextjs-standalone-tracing](/.claude/docs/nextjs-standalone-tracing.md)
 ECONNREFUSED/ERR_DLOPEN_FAILED при зелёном билде ·
 [nextjs-server-action-redirect-race](/.claude/docs/nextjs-server-action-redirect-race.md) ·
