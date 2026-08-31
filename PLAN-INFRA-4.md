@@ -4210,6 +4210,12 @@ scripts/hooks/install.sh --all-submodules` — переустановлено в
 немедленного `install.sh --all-submodules` теперь виден прогону `check-all.mjs`, а не только
 ручному грепу.
 
+**Дедуп (2026-09-01, отдельная сессия):** `check-submodule-gitignore.mjs` и
+`check-precommit-hook-staleness.mjs` держали одинаковый парсинг `.gitmodules`
+(`readSubmodulePaths()`) и одинаковую проверку «submodule выкачен» — вынесены в
+`scripts/lib/submodules.mjs`. Поведение не менялось, проверено прогоном
+`bun scripts/check-all.mjs --group=submodule`.
+
 ## §134 — корневой `zod` временно точно запинен на `4.4.3` — дедуп с `@modelcontextprotocol/sdk` (2026-09-01)
 
 **Контекст:** плановый `/infra:deps-update`. Обычный `bun update` поднял корневой `zod` в
