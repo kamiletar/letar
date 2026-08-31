@@ -3186,4 +3186,19 @@ NPM → `docker compose -f docker-compose.s2.yml up -d` Traefik → сквозн
 - **NPM остаётся публичным фронтом на s2** (443) сознательно — шаг 6 («снять NPM с s2» целиком)
   отложен на будущее, после стабилизации текущей связки NPM→Traefik.
 
+### Дополнение 2026-09-01 — регрессия в `libs/deploy-engine` после шага 6 (снятие NPM с s2/s3)
+
+После снятия NPM с s2 (2026-08-08) и с s3 (2026-08-31) целиком выяснилось, что
+`libs/deploy-engine` rollout (`letar.rollout: 'true'`, 20 приложений) продолжал по умолчанию
+пытаться `docker exec nginx-proxy-manager nginx -s reload` — контейнера уже не существовало,
+шаг `nginx-reload-1` падал, `stop-old`/`rm-old` не выполнялись. Причина: выбор `proxyKind`
+управлялся per-app label `letar.proxy-kind: 'traefik'` в compose, который был выставлен только
+у `animatrona-landing`, а переход на Traefik произошёл одномоментно на уровне сервера, а не по
+приложению. Обнаружено на живых деплоях `domwellbes` и `mandala` — по два «осиротевших»
+контейнера (`domwellbes-app-35` рядом с `-36`, `mandala-app-9` рядом с `-10`), вычищены вручную
+на s2. Фикс — `detectProxyKind()` в `libs/deploy-engine/src/rollout.ts`: CLI без явного
+`--proxy-kind` автоопределяет прокси по факту запущенных контейнеров хоста, тем же приоритетом,
+что уже проверенный batch-level fallback в `deploy-affected.sh`. Разбор —
+[deploy-engine-rollout-proxy-kind-autodetect](/.claude/docs/deploy-engine-rollout-proxy-kind-autodetect.md).
+
 ---
