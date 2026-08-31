@@ -12,6 +12,15 @@
 
 ## Баги / технический долг
 
+- [ ] ⚠️ Открытый вопрос: `src/lib/auth.ts` передаёт в `prismaAdapter()` `prisma` из `./db`
+      (голый `ZenStackClient`) — тот же паттерн, что вызывал пустой 500 без логов на
+      `/api/auth/*` в mandala/domwellbes/svoichuzhie/dsperevod/studio (см.
+      `.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md`). Существующий аудит
+      этого файла ошибочно числил kami как «уже было ОК» — на 2026-08-31 это не подтверждается
+      кодом. Нужна живая проверка (`nx dev`, sign-up/sign-in через `/api/auth/*`) и, если баг
+      подтвердится, миграция на `createLazyPrismaAuthClient` (`@letar/auth/server`) по образцу
+      починенных приложений. Отдельная сессия для проверки уже запущена (чип `task_5ac5b32a`).
+
 - [x] ⚠️ **Приложение полностью не запускается (500 на всех страницах, включая `/`)** — исправлено
       2026-08-25. Три независимые причины:
       1. `src/lib/auth-client.ts` — `genericOAuthClient()` убран из better-auth 1.7 (см.
