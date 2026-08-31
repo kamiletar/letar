@@ -8,6 +8,16 @@
 
 ## Открытые вопросы
 
+- [ ] ⚠️ Открытый вопрос: `src/lib/auth.ts` передаёт в `prismaAdapter()` `prisma` из `./db`
+      (голый `ZenStackClient`) — тот же паттерн, что вызывал пустой 500 без логов на
+      `/api/auth/*` в mandala/domwellbes/svoichuzhie/dsperevod/studio (см.
+      `.claude/docs/better-auth-prismaadapter-zenstack-incompatibility.md`). Существующий аудит
+      этого файла ошибочно числил grandslamcup как «уже было ОК» — на 2026-08-31 это не
+      подтверждается кодом. Нужна живая проверка (`nx dev`, sign-up/sign-in через
+      `/api/auth/*`) и, если баг подтвердится, миграция на `createLazyPrismaAuthClient`
+      (`@letar/auth/server`) по образцу починенных приложений. Отдельная сессия для проверки
+      уже запущена (чип `task_5ac5b32a`).
+
 - [x] ⚠️ Soft-404 (2026-08-28, сквозной аудит монорепо, закрыто в этой же сессии): `notFound()`
       из кода страницы отдавал **HTTP 200** вместо 404 — причина `(public)/loading.tsx`
       (Suspense-граница) над всем деревом `(public)`. Здесь эффект был шире, чем в остальных
