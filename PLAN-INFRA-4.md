@@ -4100,3 +4100,30 @@ alpine) идентичная ошибка `Cannot find module 'require-in-the-mi
 единственное отклонение от паттерна остальных 21 приложения — комментарий в файле объясняет
 причину, чтобы не пытались "исправить" обратно. Остальные приложения остаются на
 `node:24-alpine` + двухстадийный tz-трюк (см. §129 про однострочный комментарий там).
+
+## §131 — `postgres-kami` MCP смотрит не в ту БД, что `DATABASE_URL` приложения ✅ ЗАДОКУМЕНТИРОВАНО (2026-08-31)
+
+Обнаружено при аудите `apps/kami` (prismaAdapter/ZenStack): запрос через `postgres-kami` MCP к
+`User`/`Account` после живого OAuth-входа вернул пустой результат без единой ошибки. Причина —
+`apps/kami/.env.local` держит `DATABASE_URL` на `localhost:5432/kami` (контейнер постороннего
+`premium-rosstil-postgres`, где на этой машине также заведена база `kami`), а `.mcp.json` для
+`postgres-kami` явно требует `MCP_LOCAL_URL` из того же файла — `localhost:5437/lena_kami`
+(канонический дев-контейнер `kami-postgres`, совпадает с `docker-compose.production.yml`).
+`nx dev kami` реально пишет во вторую, MCP читает первую.
+
+**Масштаб проверен по всему монорепо:** `postgres-kami` — единственный dev-сервер `postgres-*`,
+чья обёртка `pg-wrapper.mjs` вызывается с явным третьим аргументом `MCP_LOCAL_URL`. Остальные
+(`postgres-driving-school`, `postgres-grandslamcup`, `postgres-studio`, `postgres-domwellbes`)
+читают ту же `DATABASE_URL`, что и приложение — расхождение у них структурно невозможно.
+
+**Не починено:** непонятно, какая из двух локальных баз сейчас реально держит нужные для
+тестов данные — правка вслепую могла бы просто перекинуть баг в другую сторону. Задокументирован
+новый класс в [verification-pitfalls.md](/.claude/docs/verification-pitfalls.md#тот-же-класс-но-не-про-инструмент-а-про-mcp-сервер-postgres-app-может-смотреть-не-в-ту-бд-что-database_url-приложения)
+
+- предупреждение в [mcp-postgres-setup/SKILL.md](/.claude/skills/mcp-postgres-setup/SKILL.md).
+
+* [ ] ⚠️ Открытый вопрос: свести `postgres-kami` `MCP_LOCAL_URL` и `DATABASE_URL` к одному
+      контейнеру — решить, какая из двух баз (`kami-postgres:5437/lena_kami` или
+      `premium-rosstil-postgres:5432/kami`) канонична для дев-окружения kami, и перенести данные
+      при необходимости. Требует владельца — риск потерять локальные dev-данные при выборе не
+      той стороны.

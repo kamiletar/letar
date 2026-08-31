@@ -174,9 +174,19 @@ MCP_PROD_RW_URL=postgresql://<prod-user>:<prod-password>@localhost:<tunnel-port>
 
 ## Справочник: текущие MCP серверы
 
+⚠️ **`postgres-kami` — исторически разъехавшаяся конфигурация, не образец для копирования.**
+`MCP_LOCAL_URL` (порт 5437, `lena_kami`) указывает на канонический дев-контейнер `kami-postgres`
+(совпадает с `docker-compose.production.yml`), а `DATABASE_URL` в том же `.env.local` смотрит на
+порт 5432 — контейнер постороннего `premium-rosstil-postgres`, где на этой машине также заведена
+база `kami`. `nx dev kami` реально пишет во вторую, MCP читает первую — они не синхронны.
+Разбор — [verification-pitfalls.md](/.claude/docs/verification-pitfalls.md#тот-же-класс-но-не-про-инструмент-а-про-mcp-сервер-postgres-app-может-смотреть-не-в-ту-бд-что-database_url-приложения).
+Для нового приложения `MCP_LOCAL_URL` имеет смысл только когда он реально смотрит на тот же
+контейнер, что и `DATABASE_URL` — иначе используй вариант по умолчанию из Шага 2/3 выше (без
+третьего аргумента, читает `DATABASE_URL` напрямую), там расхождение структурно невозможно.
+
 | Сервер                     | Env файл                         | Переменная        | Туннель         |
 | -------------------------- | -------------------------------- | ----------------- | --------------- |
-| `postgres-kami`            | `apps/kami/.env.local`           | `MCP_LOCAL_URL`   | нет (порт 5437) |
+| `postgres-kami` ⚠️          | `apps/kami/.env.local`           | `MCP_LOCAL_URL`   | нет (порт 5437) |
 | `postgres-kami-prod`       | `apps/kami/.env.docker`          | `MCP_PROD_RO_URL` | 5455 → s2:5437  |
 | `postgres-kami-prod-write` | `apps/kami/.env.docker`          | `MCP_PROD_RW_URL` | 5455 → s2:5437  |
 | `postgres-driving-school`  | `apps/driving-school/.env.local` | `DATABASE_URL`    | нет (порт 5432) |
