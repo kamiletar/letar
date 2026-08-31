@@ -1,6 +1,8 @@
+import { PrismaClient } from '@/generated/prisma/client'
+import { createLazyPrismaAuthClient } from '@letar/auth/server'
+
 /**
- * Re-export из db.ts для совместимости.
- * Новый код должен импортировать из '@/lib/db'.
+ * Стандартный Prisma Client для Better Auth adapter — используется отдельно от ZenStack ORM
+ * (`db.ts`), т.к. `prismaAdapter()` несовместим с Kysely-клиентом ZenStack v3.
  */
-export type * from './db'
-export { getEnhancedPrisma, prisma } from './db'
+export const prismaAuth = createLazyPrismaAuthClient(PrismaClient)

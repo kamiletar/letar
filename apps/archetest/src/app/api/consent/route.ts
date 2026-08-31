@@ -1,5 +1,5 @@
 import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/db'
 import { createConsentRoute } from '@letar/consent'
 
 export const POST = createConsentRoute({
