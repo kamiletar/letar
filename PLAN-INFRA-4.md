@@ -4174,3 +4174,33 @@ Traefik: `forwardedHeaders.notAppendXForwardedFor` по умолчанию `fals
 `ipAddress` в БД driving-school ради переиспользования трёх строк парсинга запятой. Оставлено
 раздельно, следуя тому же принципу, что и остальные три пункта выше по документу (аналогичная
 дупликация признана обоснованной там, где расходятся сигнатура и семантика промаха).
+
+## §135 — установленные pre-commit хуки не подтягивают новые скрипты сами: schema-migration-check проскочил в domwellbes ⚠️ ЧАСТИЧНО ЗАКРЫТО (2026-09-01)
+
+Продолжение того же класса, что §72/§79/§128-соседи выше: `scripts/hooks/install.sh` копирует
+текущий набор скриптов в `.git/modules/apps/<app>/hooks/` **один раз**, в момент запуска. Не
+симлинк — установленная копия не видит новых скриптов, добавленных в `scripts/hooks/` позже.
+
+**Инцидент:** коммит `3244464` в domwellbes (2026-08-31) добавил в `schema/projects.zmodel`
+модели `ProjectMessageNotification`/`ProjectMessageRead` без файла миграции — прошёл чисто, без
+`--no-verify`/обхода. Причина — установленный в этом submodule pre-commit датирован 2026-08-17,
+а `pre-commit-schema-migration-check.sh` (§4090 выше) подключён в `install.sh` только с
+2026-08-28, на 11 дней позже. На проде таблиц не было, cron `deliver-project-message-notifications`
+падал 500 на каждом запуске — разбор и безопасный фикс без сброса dev-БД (`migrate diff` + `migrate
+resolve --applied`) в `apps/domwellbes/PLAN_COMPLETED.md`.
+
+Тот же греп по установленному `pre-commit` во всех submodule нашёл ещё три с тем же стухшим
+набором (нет schema-migration-check): `aboi`, `driving-school`, `dsperevod`. Актуальны —
+`aprel8008`, `studio`, `svoichuzhie`, `auth-hub`, `mandala`, `archetest`, `domwellbes` (переустановлен
+в рамках этого же дня отдельной сессией — см. ниже).
+
+**Закрыто в этой сессии:** разбор + диагностика документированы —
+[`.claude/docs/precommit-hook-install-staleness.md`](/.claude/docs/precommit-hook-install-staleness.md),
+ссылка в индексе `CLAUDE.md`.
+
+**Не закрыто:** `aboi`/`driving-school`/`dsperevod` всё ещё не переустановлены (`bash
+scripts/hooks/install.sh --all-submodules` не запускался в рамках этой сессии — задача была
+только документация). Также нет автоматической проверки в `bun scripts/check-all.mjs`,
+которая сверяла бы установленный набор хуков с исходниками `scripts/hooks/` и ловила бы этот
+класс дрейфа без ручного грепа — предложено в доке как кандидат, не реализовано.
+
