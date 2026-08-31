@@ -110,7 +110,13 @@ append-only лог событий без статусного поля — те�
 [zenstack-field-level-allow-does-not-narrow](/.claude/docs/zenstack-field-level-allow-does-not-narrow.md)
 ⚠️ field-level `@allow` только добавляет разрешение поверх модельной `@@allow`, не сужает —
 сужение только через field-level `@deny`; найдено трижды подряд (`User.roles` privilege
-escalation, `Payment.settlementId`, `DeliveryDiscrepancy`)
+escalation, `Payment.settlementId`, `DeliveryDiscrepancy`) ·
+[precommit-hook-install-staleness](/.claude/docs/precommit-hook-install-staleness.md) ⚠️
+установленный pre-commit-хук — копия на момент последнего `install.sh`, не симлинк: новый скрипт
+в `scripts/hooks/` (например `schema-migration-check`) не появляется в уже установленных
+submodule сам; коммит без миграции schema.zmodel прошёл в domwellbes чисто, потому что хуки там
+не переустанавливались 11 дней — на 2026-09-01 тот же дрейф ещё у `aboi`/`driving-school`/
+`dsperevod`
 
 **Формы, UI, компоненты:** [forms](/.claude/docs/forms.md) ⭐ ·
 [react-duplicate-responsive-dom](/.claude/docs/react-duplicate-responsive-dom.md) ⚠️ два JSX-блока
