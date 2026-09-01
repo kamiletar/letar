@@ -3,9 +3,7 @@
  *
  * Проверяем путь: магазин → товар → корзина → checkout → успех
  */
-import { expect, test } from '@playwright/test'
-import { seedCookieConsent } from '../fixtures/cookie-consent'
-import { seedOfflineConsent } from '../fixtures/offline-consent'
+import { expect, test } from '../fixtures/guest.fixture'
 
 // Тестовые данные покупателя
 const testCustomer = {
@@ -24,15 +22,6 @@ test.describe('Полный Checkout Flow', () => {
     // 1. Переход в магазин
     await page.goto('/shop')
     await expect(page).toHaveURL(/\/shop/)
-
-    // Гасим bottom-anchored баннеры (cookie + offline) — без этого клик по карточке товара —
-    // гонка с их появлением, см. offline-consent.ts. localStorage.setItem из page.evaluate() НЕ
-    // шлёт 'storage'-событие в том же документе (только другим вкладкам/контекстам) — баннер уже
-    // смонтирован и не перечитает значение сам. reload() обязателен, чтобы баннер прочитал
-    // localStorage заново при монтировании (initial getSnapshot, не подписка на storage-событие).
-    await seedCookieConsent(page)
-    await seedOfflineConsent(page)
-    await page.reload()
 
     // 2. Ждём загрузки товаров
     const productCard = page.locator('a[href^="/shop/"]').first()
@@ -101,15 +90,6 @@ test.describe('Полный Checkout Flow', () => {
   test('checkout с пустыми полями показывает ошибки валидации', async ({ page }) => {
     // Сначала добавляем товар в корзину
     await page.goto('/shop')
-
-    // Гасим bottom-anchored баннеры (cookie + offline) — без этого клик по карточке товара —
-    // гонка с их появлением, см. offline-consent.ts. localStorage.setItem из page.evaluate() НЕ
-    // шлёт 'storage'-событие в том же документе (только другим вкладкам/контекстам) — баннер уже
-    // смонтирован и не перечитает значение сам. reload() обязателен, чтобы баннер прочитал
-    // localStorage заново при монтировании (initial getSnapshot, не подписка на storage-событие).
-    await seedCookieConsent(page)
-    await seedOfflineConsent(page)
-    await page.reload()
 
     const productCard = page.locator('a[href^="/shop/"]').first()
     const hasProducts = await productCard.isVisible({ timeout: 10000 }).catch(() => false)

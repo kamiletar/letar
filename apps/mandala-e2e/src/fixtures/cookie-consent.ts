@@ -39,9 +39,26 @@ export const COOKIE_CONSENT_VALUE = JSON.stringify({
  *
  * Вызывать после первой навигации на baseURL — до неё origin ещё `about:blank`
  * и localStorage недоступен.
+ *
+ * ⚠️ Если баннер на текущей странице уже смонтирован, он согласие не увидит без `page.reload()`
+ * (см. `seedCookieConsentBeforeNavigation` ниже — предпочтительна, если ещё не переходили на
+ * страницу, т.к. `reload()` создаёт отдельную гонку гидратации для клика сразу после).
  */
 export async function seedCookieConsent(page: Page): Promise<void> {
   await page.evaluate(
+    ([key, value]) => {
+      window.localStorage.setItem(key, value)
+    },
+    [COOKIE_CONSENT_STORAGE_KEY, COOKIE_CONSENT_VALUE] as const,
+  )
+}
+
+/**
+ * Проставляет cookie-согласие ДО первой навигации — через `page.addInitScript`, аналогично
+ * `seedOfflineConsentBeforeNavigation` в `offline-consent.ts`. Вызывать ДО `page.goto(...)`.
+ */
+export async function seedCookieConsentBeforeNavigation(page: Page): Promise<void> {
+  await page.addInitScript(
     ([key, value]) => {
       window.localStorage.setItem(key, value)
     },

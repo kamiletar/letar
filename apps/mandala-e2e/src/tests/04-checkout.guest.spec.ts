@@ -3,7 +3,7 @@
  *
  * Проверяем процесс checkout
  */
-import { expect, test } from '@playwright/test'
+import { expect, test } from '../fixtures/guest.fixture'
 
 test.describe('Оформление заказа', () => {
   // Убеждаемся, что нет сохранённой сессии

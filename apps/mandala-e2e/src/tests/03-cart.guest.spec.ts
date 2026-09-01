@@ -3,7 +3,7 @@
  *
  * Проверяем функциональность корзины (localStorage)
  */
-import { expect, test } from '@playwright/test'
+import { expect, test } from '../fixtures/guest.fixture'
 
 test.describe('Корзина', () => {
   // Убеждаемся, что нет сохранённой сессии

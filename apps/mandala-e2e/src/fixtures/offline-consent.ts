@@ -40,9 +40,33 @@ export const OFFLINE_CONSENT_VALUE = JSON.stringify({
  *
  * Вызывать после первой навигации на baseURL — до неё origin ещё `about:blank`
  * и localStorage недоступен.
+ *
+ * ⚠️ Пишет через `page.evaluate()` на уже загруженной странице — если баннер к этому моменту
+ * уже смонтирован, он согласие не увидит (см. `seedOfflineConsentBeforeNavigation` ниже) и
+ * потребует `page.reload()`, который сам по себе создаёт гонку гидратации для клика сразу после
+ * (найдено 2026-09-01, `05-full-checkout.guest.spec.ts`). Предпочитай
+ * `seedOfflineConsentBeforeNavigation`, если ещё не переходили на страницу.
  */
 export async function seedOfflineConsent(page: Page): Promise<void> {
   await page.evaluate(
+    ([key, value]) => {
+      window.localStorage.setItem(key, value)
+    },
+    [OFFLINE_CONSENT_STORAGE_KEY, OFFLINE_CONSENT_VALUE] as const,
+  )
+}
+
+/**
+ * Проставляет отказ от оффлайн-режима ДО первой навигации — через `page.addInitScript`,
+ * которое выполняется перед любым скриптом страницы при каждой следующей загрузке документа в
+ * этом page/context. Баннер с самого первого рендера получает `shouldShowBanner === false` —
+ * не нужен ни `reload()`, ни расчёт тайминга гонки с `delayMs`.
+ *
+ * Вызывать ДО `page.goto(...)` (а не после) — иначе `addInitScript` зарегистрируется, но
+ * текущий уже загруженный документ он не затронет.
+ */
+export async function seedOfflineConsentBeforeNavigation(page: Page): Promise<void> {
+  await page.addInitScript(
     ([key, value]) => {
       window.localStorage.setItem(key, value)
     },
