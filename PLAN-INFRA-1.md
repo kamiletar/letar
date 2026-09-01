@@ -1638,10 +1638,19 @@ staging-деплоях этих пяти приложений — если не�
 4. **Аудит tsconfig на тихие breaking changes TS7** (дефолты `strict: true`, `module: esnext`,
    `noUncheckedSideEffectImports: true`, `rootDir: "./"`, `types: []`) — в `tsconfig.base.json` letar они уже
    явные, риск низкий, но нужно свериться по каждому app-level `tsconfig.json`, если там есть переопределения.
-5. **Учесть ограничение embedded-языков** — Vue/MDX/Astro/Svelte/Angular-темплейты пока не работают с TS7
-   language server (нет стабильного API). Проверить, есть ли такие стеки в летар (MDX встречается в
-   `dsperevod` — `useMDXComponents`, см. `.claude/rules/git.md`) — для них редакторская поддержка TS7 пока
-   недоступна, но CLI-тайпчек (`tsc`/`tsgo`) не затронут.
+5. **Учесть ограничение embedded-языков — НЕ блокер тиража.** Vue/MDX/Astro/Svelte/Angular-темплейты
+   пока не работают с TS7 **language server** (нет стабильного API) — это касается только
+   редакторских подсказок при переходе на нативный LSP-плагин VS Code, **CLI-тайпчек
+   (`tsc`/`tsgo`/`typecheck:tsgo`) этим не затронут** и тиражируется независимо. Проверено
+   (2026-09-01), где такие стеки реально есть в летар:
+   - **MDX** — заметно шире одного `dsperevod` из первой проверки: минимум 10 приложений держат
+     `mdx-components.tsx` (`aira-web`, `archetest`, `domwellbes`, `dsperevod`, `form-docs`,
+     `grandslamcup`, `pravda`, `studio`, `svoichuzhie`, `time`).
+   - **Vue** — только `libs/forms-vue`/`libs/forms-vue-shadcn` (часть OSS-дистрибуции
+     `@letar/forms`, не веб-приложение репозитория).
+   - Astro/Svelte/Angular — не используются нигде в летар, пункт неактуален.
+     Для всех перечисленных приложений CLI-тайпчек и тираж §19 идут как обычно; в список
+     «отложить редакторский переход на нативный LSP» попадают только они.
 6. **Тиражировать по приложениям** — по одному, тем же способом, что и пилот (bunx-изоляция сначала,
    переход на настоящую замену зависимости только после проверки lint-тулинга, п.1).
 7. **Вынести `typecheck`/`typecheck:tsgo` в `targetDefaults` корневого `nx.json`** (делать ПЕРЕД
