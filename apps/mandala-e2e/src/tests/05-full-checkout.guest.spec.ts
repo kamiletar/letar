@@ -25,15 +25,20 @@ test.describe('Полный Checkout Flow', () => {
 
     // 2. Ждём загрузки товаров
     const productCard = page.locator('a[href^="/shop/"]').first()
-    const hasProducts = await productCard.isVisible({ timeout: 10000 }).catch(() => false)
+    const hasProducts = (await productCard.count()) > 0
 
     if (!hasProducts) {
       test.skip(true, 'Нет товаров в магазине')
       return
     }
 
-    // 3. Клик на первый товар
-    await productCard.click()
+    // 3. Переход на страницу товара
+    // page.goto(href) вместо productCard.click() — клик по <Link> может попасть на узкое окно
+    // гидратации: SSR-разметка <a href> видна и кликабельна ДО того, как React успел навесить
+    // client-side обработчик, из-за чего событие клика проглатывается без единой ошибки и без
+    // fallback-навигации браузера. Прямой goto() по атрибуту href не зависит от гидратации.
+    const productHref = await productCard.getAttribute('href')
+    await page.goto(productHref ?? '/shop')
     await page.waitForURL(/\/shop\/.+/)
 
     // 4. Клик "Добавить в корзину"
@@ -92,14 +97,16 @@ test.describe('Полный Checkout Flow', () => {
     await page.goto('/shop')
 
     const productCard = page.locator('a[href^="/shop/"]').first()
-    const hasProducts = await productCard.isVisible({ timeout: 10000 }).catch(() => false)
+    const hasProducts = (await productCard.count()) > 0
 
     if (!hasProducts) {
       test.skip(true, 'Нет товаров в магазине')
       return
     }
 
-    await productCard.click()
+    // page.goto(href) вместо click() — см. комментарий в первом тесте этого файла
+    const productHref = await productCard.getAttribute('href')
+    await page.goto(productHref ?? '/shop')
     await page.waitForURL(/\/shop\/.+/)
 
     const addToCartButton = page.locator('button:has-text("Добавить в корзину")')
