@@ -57,7 +57,15 @@ test.describe('Перекрёстные ссылки (CrossRef)', () => {
     await expect(article).toBeVisible()
   })
 
-  test('Переход по CrossRef ссылке работает', async ({ page }) => {
+  test('Переход по CrossRef ссылке работает', async ({ page, browserName }) => {
+    // firefox/webkit: RSC-навигация не меняет URL — блокировано известным неисправленным багом
+    // Next.js 16.0-16.3 в output:'export' (vercel/next.js#85374, открыт на 2026-08-25). Владелец
+    // решил не чинить (не критичное приложение) — см. решение в apps/pravda/PLAN.md.
+    test.skip(
+      browserName === 'firefox' || browserName === 'webkit',
+      'известный баг апстрима Next.js RSC-навигации, владелец принял решение не чинить',
+    )
+
     await page.goto('/codes/criminal-procedure/')
     await page.waitForLoadState('domcontentloaded')
     await expect(page.locator('h1')).toBeVisible({ timeout: 10000 })

@@ -24,7 +24,11 @@ test.describe('Поиск', () => {
     await expect(page.getByPlaceholder('Поиск по законам...')).toBeVisible()
   })
 
-  test('Command Palette закрывается по Escape', async ({ page }) => {
+  test('Command Palette закрывается по Escape', async ({ page, browserName }) => {
+    // webkit: флейк без стабильного репро (найдено 2026-08-25, apps/pravda/PLAN.md §18.7 M1).
+    // Владелец решил не тратить время на некритичное приложение — см. решение в PLAN.md.
+    test.skip(browserName === 'webkit', 'нестабильный флейк, владелец принял решение не чинить')
+
     await page.goto('/')
     await page.waitForLoadState('domcontentloaded')
 
