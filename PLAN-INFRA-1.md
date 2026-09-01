@@ -1638,7 +1638,48 @@ TODO. Детали — `apps/pravda/PLAN.md`.
 `@typescript/typescript6` = `6.0.2`, bin `tsc6`; `@typescript/native-preview` (текущий пакет монорепо) ещё
 жив на `latest: 7.0.0-dev.20260707.2`, но по анонсу будет свёрнут в пользу `typescript@next`.
 
-### План тиража (не начат, только пилот)
+### ⛔ Решение владельца (2026-09-01): ждём TS7.1 GA, тираж не начинать
+
+Живая попытка применить схему выше (шаг 2 плана) вскрыла новый блокер и подтвердила старый — на
+основании обоих владелец решил не продавливать переход сейчас, а ждать релиза TypeScript 7.1
+(обещанного с полноценным API) и явно зафиксировать это как решение, не как забытый TODO.
+
+**Подтверждено официальным анонсом (fetch_and_index,
+[devblogs.microsoft.com/typescript/announcing-typescript-7-0](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/)):**
+
+- `@typescript/native` в схеме выше — **не отдельный npm-пакет**, а имя-алиас, которое сам
+  разработчик придумывает в `devDependencies` (`"@typescript/native": "npm:typescript@^7.0.2"`).
+  `npm view @typescript/native` закономерно отвечает 404 — это не баг, так и задумано.
+- `@typescript/native-preview` (текущий пакет монорепо, nightly-сборки) официально сворачивается:
+  «nightly builds will soon resume under the standard `typescript` package with the `next` tag».
+  Наш текущий `^7.0.0-dev.20260707.2` уже почти два месяца не обновлялся — фактически заморожен.
+- TS7.1 (обещанный полноценный API) **всё ещё не GA** на 2026-09-01: `npm view typescript
+  dist-tags` → `next: 7.1.0-dev.20260824.1` — dev-канал, не релиз.
+
+**Новый блокер, не описанный в исходном плане — коллизия имён внутри изолированного линкера
+bun.** Официальная npm-alias-схема рассчитана на классический (плоский/npm) `node_modules`, где
+алиас в `devDependencies` действительно управляет тем, что видит `require('typescript')`. Под bun
+это не так: изолированный линкер (`.bun/node_modules/<name>`) резолвит **общий** бакет по имени
+пакета **внутри самого тарболла** (`package.json.name` реального `typescript@7.0.2` — буквально
+`"typescript"`), а не по ключу алиаса в корневом `package.json`. Живой прогон (`bun install` с
+применённой схемой) это подтвердил: `node_modules/.bun/node_modules/typescript` резолвился в
+настоящий `typescript@7.0.2` (без API), а не в алиас `@typescript/typescript6@6.0.2` — из-за
+этого `nx lint` падал **на всём монорепо разом**, потому что `@nx/js` (плагин
+`dependencies-and-lockfile`, используется для графа проектов, вызывается при каждом `nx lint`) сам
+дёргает `require('typescript')` программно (`readConfigFile`, `ModuleKind` и т.п.) — это не только
+`typescript-eslint`, как предполагал п.1 плана, но и сам Nx. Изменение было немедленно отменено
+(`git checkout -- package.json bun.lock` + `bun install --force`), `nx lint` подтверждён зелёным
+после отката — блокировка длилась только во время локальной проверки, в общий `main` ничего не
+попало.
+
+**Решение:** не начинать тираж (п.2 и далее ниже) до выхода TS7.1 GA с рабочим API — тогда
+`typescript-eslint` и `@nx/js` смогут работать напрямую на 7.x, вся схема с двумя алиасами и
+её bun-специфичная ловушка станут не нужны вовсе (upgrade `typescript` одной строкой, без
+костылей). До этого момента: `@typescript/native-preview` остаётся как есть (даёт то же ускорение
+CLI-тайпчека, которое и было целью тиража), пилот `time` (§19, таргет `typecheck:ts7`) — тоже
+как есть, задача переведена в статус ожидания апстрима, не в очередь работ.
+
+### План тиража (не начат, только пилот — ЖДЁТ TS7.1 GA, см. решение владельца выше)
 
 1. **Проверить lint-тулинг на зависимость от API `typescript`** — есть ли в летар ESLint-конфиге
    typescript-eslint (`.oxlintrc.json`/`eslint.config.mjs`), который импортирует `require('typescript')`
