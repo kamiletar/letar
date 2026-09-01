@@ -46,19 +46,25 @@ projects --with-target` этого не ловит ·
 несколько версий пакета в `node_modules/.bun` после снятия пина — не признак незавершённого
 резолва, обычный `bun install` не прунит устаревшие isolated-копии; сверять по `bun.lock`,
 чинить — `bun install --force` ·
-[root-pin-peer-drift](/.claude/docs/root-pin-peer-drift.md) ⚠️ точный пин в корневом
-`package.json` — тихая мина: override/resolution перебивает его молча или caret-соседи уезжают
-вперёд без него; `bun install` не печатает peer-warnings ни в каком режиме, проверка —
-`bun scripts/check-all.mjs --group=deps` (раннер проверок целостности, состав — см. ниже
-§ «Проверки целостности монорепо») ·
-[nested-package-resolution-under-bun-isolated-installs](/.claude/docs/nested-package-resolution-under-bun-isolated-installs.md)
-⚠️ голый `import('@foo/bar')` от скрипта в `scripts/` не резолвит транзитивную зависимость чужого
-пакета под изолированной установкой bun, хотя она есть в `bun.lock` — фикс: `createRequire` от
-уже резолвленного entry-файла пакета-родителя, не от своего местоположения ·
-[shared-get-client-ip-consolidation](/.claude/docs/shared-get-client-ip-consolidation.md)
-консолидация дубля «последний хоп x-forwarded-for» (aboi + `@letar/demo-protection`) в
-`getClientIpFromHeaders`; третья копия в driving-school (`api-logger.ts`) осознанно оставлена
-отдельной — другой контракт возврата и доп. заголовок `cf-connecting-ip`
+[bun-isolated-linker-alias-shared-bucket-collision](/.claude/docs/bun-isolated-linker-alias-shared-bucket-collision.md)
+⚠️ npm-alias-схема двух версий одного пакета (`"typescript": "npm:@typescript/typescript6@^6.0.2"`
+
+- `"@typescript/native": "npm:typescript@^7.0.2"`) не работает под bun isolated linker — оба
+  алиаса резолвятся в один общий bucket по `package.json.name` тарболла, не по ключу-алиасу;
+  уронило `nx lint` на всём монорепо разом ·
+  [root-pin-peer-drift](/.claude/docs/root-pin-peer-drift.md) ⚠️ точный пин в корневом
+  `package.json` — тихая мина: override/resolution перебивает его молча или caret-соседи уезжают
+  вперёд без него; `bun install` не печатает peer-warnings ни в каком режиме, проверка —
+  `bun scripts/check-all.mjs --group=deps` (раннер проверок целостности, состав — см. ниже
+  § «Проверки целостности монорепо») ·
+  [nested-package-resolution-under-bun-isolated-installs](/.claude/docs/nested-package-resolution-under-bun-isolated-installs.md)
+  ⚠️ голый `import('@foo/bar')` от скрипта в `scripts/` не резолвит транзитивную зависимость чужого
+  пакета под изолированной установкой bun, хотя она есть в `bun.lock` — фикс: `createRequire` от
+  уже резолвленного entry-файла пакета-родителя, не от своего местоположения ·
+  [shared-get-client-ip-consolidation](/.claude/docs/shared-get-client-ip-consolidation.md)
+  консолидация дубля «последний хоп x-forwarded-for» (aboi + `@letar/demo-protection`) в
+  `getClientIpFromHeaders`; третья копия в driving-school (`api-logger.ts`) осознанно оставлена
+  отдельной — другой контракт возврата и доп. заголовок `cf-connecting-ip`
 
 **MCP-серверы:** [mcp-servers](/.claude/docs/mcp-servers.md) состав и назначение ·
 [mcp-server-pattern](/.claude/docs/mcp-server-pattern.md) тонкий локальный сервер по stdio ·
