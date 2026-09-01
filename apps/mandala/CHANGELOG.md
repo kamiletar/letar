@@ -4,6 +4,23 @@
 
 ## [Unreleased]
 
+## [0.40.25] - 2026-09-01
+
+### Fixed
+
+- Гонка гидратации при клике по SSR-разметке `<a href>`/`<Link>` в e2e-тестах: клик мог попасть
+  в окно до навешивания React-обработчика, событие проглатывалось без единой ошибки и без
+  fallback-навигации браузера. Настоящая причина оставшихся `unexpected` после Раунда 7 (не
+  `OfflineConsentBanner`, как считалось изначально). Заменено на `page.goto(href)` вместо клика
+  во всех 4 гостевых spec-файлах (`01-public-pages`, `03-cart`, `04-checkout`,
+  `05-full-checkout`). Полный e2e-прогон на staging — **123 passed, 0 failed**. Разбор —
+  [PLAN_COMPLETED.md § Раунд 8](./PLAN_COMPLETED.md#стейджинг-e2e--раунд-8-настоящая-причина-05-full-checkout--не-баннер-а-гонка-гидратации-2026-09-01).
+- `seedOfflineConsent`/`seedCookieConsent` через `page.evaluate()` после навигации не гасили
+  баннеры надёжно (same-document `storage`-событие не срабатывает). Добавлены
+  `seedOfflineConsentBeforeNavigation`/`seedCookieConsentBeforeNavigation` через
+  `page.addInitScript()` и общая фикстура `apps/mandala-e2e/src/fixtures/guest.fixture.ts`,
+  подключённая во всех 4 гостевых spec-файлах.
+
 ## [0.40.24] - 2026-09-01
 
 ### Fixed
