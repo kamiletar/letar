@@ -89,7 +89,11 @@ test.describe('Публичные страницы', () => {
       const hasProducts = (await productCard.count()) > 0
 
       if (hasProducts) {
-        await productCard.click()
+        // page.goto(href) вместо click() — клик по SSR-разметке <a href> может попасть в
+        // окно до навешивания React-обработчика (гонка гидратации): событие проглатывается
+        // без ошибки и без fallback-навигации браузера. См. 05-full-checkout.guest.spec.ts.
+        const productHref = await productCard.getAttribute('href')
+        await page.goto(productHref ?? '/shop')
         await page.waitForURL(/\/shop\/.+/)
         // Проверяем, что загрузилась страница товара
         await expect(page.locator('img').first()).toBeVisible()

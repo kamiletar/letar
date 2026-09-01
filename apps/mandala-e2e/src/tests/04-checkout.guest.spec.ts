@@ -40,7 +40,9 @@ test.describe('Оформление заказа', () => {
         return
       }
 
-      await productCard.click()
+      // page.goto(href) вместо click() — гонка гидратации, см. 05-full-checkout.guest.spec.ts
+      const productHref = await productCard.getAttribute('href')
+      await page.goto(productHref ?? '/shop')
       await page.waitForURL(/\/shop\/.+/)
 
       const addToCartButton = page.getByRole('button', { name: /добавить в корзину|в корзину/i })

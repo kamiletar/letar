@@ -40,7 +40,9 @@ test.describe('Корзина', () => {
       const hasProducts = (await productCard.count()) > 0
 
       if (hasProducts) {
-        await productCard.click()
+        // page.goto(href) вместо click() — гонка гидратации, см. 05-full-checkout.guest.spec.ts
+        const productHref = await productCard.getAttribute('href')
+        await page.goto(productHref ?? '/shop')
         await page.waitForURL(/\/shop\/.+/)
 
         // Ищем кнопку "Добавить в корзину"
