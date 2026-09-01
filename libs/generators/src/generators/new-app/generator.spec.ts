@@ -165,7 +165,7 @@ describe('new-app generator', () => {
     const project = JSON.parse(tree.read('apps/my-app/project.json', 'utf-8') ?? '{}')
     expect(project.sourceRoot).toBe('apps/my-app/src')
     expect(project.projectType).toBe('application')
-    expect(project.targets.test.options.config).toBe('apps/my-app/vitest.config.ts')
+    expect(project.targets.test.options.config).toBe('vitest.config.ts')
   })
 
   it('без --withDb не создаёт ZenStack/Prisma-каркас', async () => {
@@ -199,7 +199,7 @@ describe('new-app generator', () => {
     expect(project.targets['db:migrate'].options.cwd).toBe('apps/my-app')
     // остальные таргеты (typecheck и т.д.) не затираются условным блоком
     expect(project.targets.typecheck).toBeDefined()
-    expect(project.targets.test.options.config).toBe('apps/my-app/vitest.config.ts')
+    expect(project.targets.test.options.config).toBe('vitest.config.ts')
   })
 
   it('--withDb --private добавляет src/generated/ в .gitignore приватного приложения', async () => {

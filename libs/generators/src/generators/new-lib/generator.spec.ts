@@ -45,7 +45,7 @@ describe('new-lib generator', () => {
     const project = JSON.parse(tree.read('libs/my-lib/project.json', 'utf-8') ?? '{}')
     expect(project.sourceRoot).toBe('libs/my-lib/src')
     expect(project.projectType).toBe('library')
-    expect(project.targets.test.options.config).toBe('libs/my-lib/vitest.config.ts')
+    expect(project.targets.test.options.config).toBe('vitest.config.ts')
   })
 
   it('README.md использует переданное описание', async () => {
