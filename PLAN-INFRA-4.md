@@ -4317,3 +4317,43 @@ SDK остался на `4.4.3` (bun не подтягивает транзит�
 ([electron-net-fetch-tun-vpn.md](/.claude/docs/electron-net-fetch-tun-vpn.md) — прецедент был
 именно про VPN, но не единственная причина такого симптома) — сначала проверить `docker ps`/
 `Test-NetConnection` на сам порт, прежде чем подозревать сеть.
+
+## §137 — repo-wide фикс предупреждений `configLoader: 'native'` в `vitest.config.*` (2026-09-01)
+
+**Триггер:** пользователь показал вывод `nx run aprel8008:format`, где vitest предупреждал про
+ESM-синтаксис в `.ts`-файле, воспринимаемом как CommonJS (`vitest.config.ts` без
+`"type": "module"` рядом). Проверка распространилась на весь монорепо.
+
+**Фикс в два прохода:**
+
+1. **8 приватных submodule** (aboi, driving-school, dsperevod, studio, svoichuzhie, aprel8008,
+   poster-microtext-desktop, domwellbes) — оставались единственными, где конфиг всё ещё был
+   `vitest.config.ts` (публичные `apps/*`/`libs/*` уже были на `.mts` из более ранней сессии).
+   Переименование `git mv vitest.config.ts vitest.config.mts` + правка ссылки в `project.json`
+   (`options.config` везде, кроме `domwellbes` — там `nx:run-commands` со строкой
+   `--config vitest.config.ts` внутри `command`) + `tsconfig.spec.json` там, где включает файл
+   по имени.
+2. **Второй, менее очевидный слой:** после перевода на `.mts` часть конфигов (33 файла публичного
+   репо + все 8 submodule) используют `__dirname` в `resolve(__dirname, ...)` — CommonJS-глобал,
+   которого нет в нативном ESM-загрузчике. У большинства запусков (обычный `@nx/vite`-инференс)
+   это молча проглатывалось, но `domwellbes:test` (единственный `nx:run-commands`, гоняющий
+   `node vitest.mjs` напрямую, минуя обычный CLI-бин) сразу показал второе предупреждение того же
+   класса про `__dirname`. Фикс — `__dirname` → `import.meta.dirname` тем же repo-wide sed'ом.
+
+**Верификация:** прогон `nx run-many -t test` по затронутым 8 submodule и части публичных
+проектов (`ui`, `forms`, `chakra-provider`, `cdek`, `image-upload`, `query-provider`) дал только
+два падения, оба подтверждённо не связаны с правкой (воспроизведены в изоляции как прошедшие):
+`domwellbes` — известная гонка serializable-транзакций на общей dev-БД
+([vitest-serializable-transaction-cross-file-flake.md](/.claude/docs/vitest-serializable-transaction-cross-file-flake.md)),
+`@letar/forms` — таймаут `waitFor` в Tiptap rich-text спеке (flaky timing, не про конфиг).
+
+**Коммиты:** публичный репо `2e80cc72` (`__dirname` → `import.meta.dirname`, 26 файлов,
+multi-scope — repo-wide механическая правка); 8 submodule — по одному коммиту на каждый
+(`vitest.config.ts` → `.mts` + `__dirname`-фикс), SHA зафиксированы в letar коммитом `3114d4e9`.
+Не запушено — ждёт отдельного одобрения `git push` ([git.md](/.claude/rules/git.md)).
+
+**Урок:** scope-guard-хук делит корневые файлы submodule (`project.json`/`vitest.config.mts`/
+`tsconfig.spec.json`) на разные scope, потому что для файла без каталога «первый сегмент пути» —
+это имя самого файла. Для одной логической правки, задевающей несколько таких корневых файлов
+одного submodule, `GIT_ALLOW_MULTI_SCOPE_COMMIT=1` — штатный путь, не обход дисциплины (тот же
+случай, что exception `docs-root`, но без готового спецкейса под non-md-файлы).
