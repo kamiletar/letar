@@ -4288,3 +4288,32 @@ SDK остался на `4.4.3` (bun не подтягивает транзит�
 `cde37fe2`), не запушены. Общий урок: `nx run-many -t test` без `--skip-nx-cache` может не
 поймать такой дрейф из кэша — гонять полный прогон время от времени со `--skip-nx-cache`, а не
 полагаться на affected после точечных правок доков/README.
+
+## §136 — два провала `nx run-many -t build` из той же сессии `/infra:deps-update`, оба про локальную dev-среду, не про зависимости (2026-09-01)
+
+**Контекст:** тот же прогон `/infra:deps-update`, но полный `nx run-many -t build`, а не `-t test`
+(§135 выше). Оба падения воспроизводились одинаково в изолированном повторном прогоне и не имеют
+отношения к версиям пакетов.
+
+1. **`auth-hub:build`** — падал на `AUTH_ENCRYPTION_KEY обязателен в production` при сборе page
+   data для `/api/auth/[...all]`. Причина — известный класс из
+   [env-files.md § «NODE_ENV === 'production' — не сигнал прод/не прод»](/.claude/rules/env-files.md):
+   `next build` всегда выставляет `NODE_ENV=production` независимо от реального окружения, а
+   [apps/auth-hub/src/lib/db.ts:34](/apps/auth-hub/src/lib/db.ts) кидает `throw` именно по этой
+   проверке. Это не баг кода — локальная сборка `auth-hub` штатно требует `AUTH_ENCRYPTION_KEY` в
+   `.env.local`, как и любой другой секрет. Фикс — сгенерирован ключ (`openssl rand -hex 32`) и
+   добавлен в `apps/auth-hub/.env.local` (не коммитится, `.gitignore`).
+2. **`mandala:build`** — падал на статической генерации `/api/precache-manifest` и `/sitemap.xml`
+   с `dbErrorCode: 'EACCES'` при подключении к `DATABASE_URL` из `.env.local`
+   (`localhost:5434`). Выглядело как сетевая/firewall-проблема, но root cause проще: у `mandala`,
+   в отличие от `dsperevod`/`studio`/`domwellbes`, никогда не было своего
+   `docker-compose.dev.yml` — порт 5434 просто ничего не слушал (connection refused, не
+   permission-блок). Фикс — заведён [apps/mandala/docker-compose.dev.yml](/apps/mandala/docker-compose.dev.yml)
+   по образцу трёх других приложений (commit `5cdeb4a4`), контейнер поднят, схема на свежую БД
+   накачена через `nx db:push mandala` (без изменений `schema.zmodel` — миграция не нужна).
+
+Оба фикса — только локальная dev-среда конкретной машины, `apps/*` код не менялся. Урок: `EACCES`
+на socket-уровне при подключении к `localhost:<порт>` не обязательно VPN/firewall
+([electron-net-fetch-tun-vpn.md](/.claude/docs/electron-net-fetch-tun-vpn.md) — прецедент был
+именно про VPN, но не единственная причина такого симптома) — сначала проверить `docker ps`/
+`Test-NetConnection` на сам порт, прежде чем подозревать сеть.
