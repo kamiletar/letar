@@ -25,10 +25,14 @@ test.describe('Полный Checkout Flow', () => {
     await page.goto('/shop')
     await expect(page).toHaveURL(/\/shop/)
 
-    // Гасим bottom-anchored баннеры (cookie + offline) — без этого клик по последней карточке
-    // товара — гонка с их появлением, см. offline-consent.ts
+    // Гасим bottom-anchored баннеры (cookie + offline) — без этого клик по карточке товара —
+    // гонка с их появлением, см. offline-consent.ts. localStorage.setItem из page.evaluate() НЕ
+    // шлёт 'storage'-событие в том же документе (только другим вкладкам/контекстам) — баннер уже
+    // смонтирован и не перечитает значение сам. reload() обязателен, чтобы баннер прочитал
+    // localStorage заново при монтировании (initial getSnapshot, не подписка на storage-событие).
     await seedCookieConsent(page)
     await seedOfflineConsent(page)
+    await page.reload()
 
     // 2. Ждём загрузки товаров
     const productCard = page.locator('a[href^="/shop/"]').first()
@@ -98,10 +102,14 @@ test.describe('Полный Checkout Flow', () => {
     // Сначала добавляем товар в корзину
     await page.goto('/shop')
 
-    // Гасим bottom-anchored баннеры (cookie + offline) — без этого клик по последней карточке
-    // товара — гонка с их появлением, см. offline-consent.ts
+    // Гасим bottom-anchored баннеры (cookie + offline) — без этого клик по карточке товара —
+    // гонка с их появлением, см. offline-consent.ts. localStorage.setItem из page.evaluate() НЕ
+    // шлёт 'storage'-событие в том же документе (только другим вкладкам/контекстам) — баннер уже
+    // смонтирован и не перечитает значение сам. reload() обязателен, чтобы баннер прочитал
+    // localStorage заново при монтировании (initial getSnapshot, не подписка на storage-событие).
     await seedCookieConsent(page)
     await seedOfflineConsent(page)
+    await page.reload()
 
     const productCard = page.locator('a[href^="/shop/"]').first()
     const hasProducts = await productCard.isVisible({ timeout: 10000 }).catch(() => false)
