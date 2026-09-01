@@ -9,6 +9,6 @@
     "types": ["vitest/globals", "node"],
     "rootDir": "."
   },
-  "include": ["vitest.config.ts", "main/**/*.ts", "shared/**/*.ts"],
+  "include": ["vitest.config.mts", "main/**/*.ts", "shared/**/*.ts"],
   "exclude": ["out-tsc", "dist", "node_modules", ".next"]
 }

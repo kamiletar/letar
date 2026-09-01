@@ -23,7 +23,7 @@ describe('new-lib generator', () => {
     expect(tree.exists('libs/my-lib/tsconfig.json')).toBe(true)
     expect(tree.exists('libs/my-lib/tsconfig.lib.json')).toBe(true)
     expect(tree.exists('libs/my-lib/tsconfig.spec.json')).toBe(true)
-    expect(tree.exists('libs/my-lib/vitest.config.ts')).toBe(true)
+    expect(tree.exists('libs/my-lib/vitest.config.mts')).toBe(true)
     expect(tree.exists('libs/my-lib/eslint.config.mjs')).toBe(true)
     expect(tree.exists('libs/my-lib/README.md')).toBe(true)
     expect(tree.exists('libs/my-lib/src/index.ts')).toBe(true)
@@ -45,7 +45,7 @@ describe('new-lib generator', () => {
     const project = JSON.parse(tree.read('libs/my-lib/project.json', 'utf-8') ?? '{}')
     expect(project.sourceRoot).toBe('libs/my-lib/src')
     expect(project.projectType).toBe('library')
-    expect(project.targets.test.options.config).toBe('vitest.config.ts')
+    expect(project.targets.test.options.config).toBe('vitest.config.mts')
   })
 
   it('README.md использует переданное описание', async () => {
@@ -89,10 +89,10 @@ describe('new-lib generator', () => {
       expect(tsconfig.include).toEqual(['src/**/*.ts', 'src/**/*.tsx'])
     })
 
-    it('vitest.config.ts переключается на jsdom + @vitejs/plugin-react', async () => {
+    it('vitest.config.mts переключается на jsdom + @vitejs/plugin-react', async () => {
       await newLibGenerator(tree, { name: 'my-react-lib', react: true })
 
-      const vitestConfig = tree.read('libs/my-react-lib/vitest.config.ts', 'utf-8')
+      const vitestConfig = tree.read('libs/my-react-lib/vitest.config.mts', 'utf-8')
       expect(vitestConfig).toContain(`environment: 'jsdom'`)
       expect(vitestConfig).toContain(`import react from '@vitejs/plugin-react'`)
       expect(vitestConfig).toContain(`setupFiles: ['./vitest.setup.ts']`)
@@ -115,7 +115,7 @@ describe('new-lib generator', () => {
     const pkg = JSON.parse(tree.read('libs/my-lib/package.json', 'utf-8') ?? '{}')
     expect(pkg.peerDependencies).toBeUndefined()
 
-    const vitestConfig = tree.read('libs/my-lib/vitest.config.ts', 'utf-8')
+    const vitestConfig = tree.read('libs/my-lib/vitest.config.mts', 'utf-8')
     expect(vitestConfig).toContain(`environment: 'node'`)
   })
 })

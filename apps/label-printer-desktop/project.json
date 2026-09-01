@@ -181,7 +181,7 @@
         "zenstack:generate"
       ],
       "options": {
-        "config": "vitest.config.ts",
+        "config": "vitest.config.mts",
         "coverage.reportsDirectory": "../../coverage/apps/label-printer-desktop"
       }
     }

@@ -74,7 +74,7 @@ describe('new-app generator', () => {
     // next-env.d.ts не генерируем: его создаёт сам Next при первом dev/build, и он под .gitignore
     expect(tree.exists('apps/my-app/next-env.d.ts')).toBe(false)
     expect(tree.exists('apps/my-app/eslint.config.mjs')).toBe(true)
-    expect(tree.exists('apps/my-app/vitest.config.ts')).toBe(true)
+    expect(tree.exists('apps/my-app/vitest.config.mts')).toBe(true)
     expect(tree.exists('apps/my-app/vitest.setup.tsx')).toBe(true)
     expect(tree.exists('apps/my-app/README.md')).toBe(true)
     expect(tree.exists('apps/my-app/PLAN.md')).toBe(true)
@@ -165,7 +165,7 @@ describe('new-app generator', () => {
     const project = JSON.parse(tree.read('apps/my-app/project.json', 'utf-8') ?? '{}')
     expect(project.sourceRoot).toBe('apps/my-app/src')
     expect(project.projectType).toBe('application')
-    expect(project.targets.test.options.config).toBe('vitest.config.ts')
+    expect(project.targets.test.options.config).toBe('vitest.config.mts')
   })
 
   it('без --withDb не создаёт ZenStack/Prisma-каркас', async () => {
@@ -199,7 +199,7 @@ describe('new-app generator', () => {
     expect(project.targets['db:migrate'].options.cwd).toBe('apps/my-app')
     // остальные таргеты (typecheck и т.д.) не затираются условным блоком
     expect(project.targets.typecheck).toBeDefined()
-    expect(project.targets.test.options.config).toBe('vitest.config.ts')
+    expect(project.targets.test.options.config).toBe('vitest.config.mts')
   })
 
   it('--withDb --private добавляет src/generated/ в .gitignore приватного приложения', async () => {

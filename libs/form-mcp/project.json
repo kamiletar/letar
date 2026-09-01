@@ -128,7 +128,7 @@
     },
     "test": {
       "options": {
-        "config": "vitest.config.ts"
+        "config": "vitest.config.mts"
       }
     },
     "build:npm": {

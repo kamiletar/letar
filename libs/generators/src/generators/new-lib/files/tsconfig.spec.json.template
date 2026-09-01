@@ -6,5 +6,5 @@
     "rootDir": "."<% if (react) { %>,
     "jsx": "react-jsx"<% } %>
   },
-  "include": ["vitest.config.ts", "src/**/*.ts", "src/**/*.d.ts"<% if (react) { %>, "src/**/*.tsx", "vitest.setup.ts"<% } %>]
+  "include": ["vitest.config.mts", "src/**/*.ts", "src/**/*.d.ts"<% if (react) { %>, "src/**/*.tsx", "vitest.setup.ts"<% } %>]
 }

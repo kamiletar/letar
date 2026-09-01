@@ -2,7 +2,7 @@
 
 ## Unit-тесты (Vitest)
 
-Настроены (`vitest.config.ts`, `vitest.setup.tsx`), тестов пока нет — добавляй по мере появления
+Настроены (`vitest.config.mts`, `vitest.setup.tsx`), тестов пока нет — добавляй по мере появления
 логики в `src/`.
 
 ## E2E-тесты (Playwright)

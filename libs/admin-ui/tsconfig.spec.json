@@ -9,7 +9,7 @@
       "@letar/format-utils": ["../format-utils/src/index.ts"]
     }
   },
-  "include": ["vitest.config.ts", "vitest.setup.tsx", "src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts"],
+  "include": ["vitest.config.mts", "vitest.setup.tsx", "src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts"],
   "references": [
     {
       "path": "../format-utils/tsconfig.lib.json"

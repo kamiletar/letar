@@ -68,7 +68,7 @@
     },
     "test": {
       "options": {
-        "config": "vitest.config.ts"
+        "config": "vitest.config.mts"
       }
     },
     "oxlint": {

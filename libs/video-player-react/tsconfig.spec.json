@@ -8,7 +8,7 @@
       "@letar/video-player-core": ["../video-player-core/src/index.ts"]
     }
   },
-  "include": ["vitest.config.ts", "vitest.setup.tsx", "src/**/*.ts", "src/**/*.tsx"],
+  "include": ["vitest.config.mts", "vitest.setup.tsx", "src/**/*.ts", "src/**/*.tsx"],
   "references": [
     {
       "path": "../video-player-core/tsconfig.lib.json"

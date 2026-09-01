@@ -10,6 +10,6 @@
   },
   "include": [
     "src/**/*.ts",
-    "vitest.config.ts"
+    "vitest.config.mts"
   ]
 }

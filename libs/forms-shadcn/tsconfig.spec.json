@@ -6,5 +6,5 @@
     "rootDir": ".",
     "jsx": "react-jsx"
   },
-  "include": ["vitest.config.ts", "src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "vitest.setup.ts"]
+  "include": ["vitest.config.mts", "src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "vitest.setup.ts"]
 }

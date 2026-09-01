@@ -56,7 +56,7 @@
     },
     "test": {
       "options": {
-        "config": "vitest.config.ts",
+        "config": "vitest.config.mts",
         "coverage.reportsDirectory": "../../coverage/libs/label-printer-core"
       }
     }

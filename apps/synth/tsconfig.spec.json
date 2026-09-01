@@ -11,7 +11,7 @@
     "rootDir": "."
   },
   "include": [
-    "vitest.config.ts",
+    "vitest.config.mts",
     "src/**/*.test.ts",
     "src/**/*.spec.ts",
     "src/**/*.test.tsx",

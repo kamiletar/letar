@@ -201,7 +201,7 @@
         "description": "Run unit tests with Vitest"
       },
       "options": {
-        "config": "vitest.config.ts"
+        "config": "vitest.config.mts"
       }
     }
   }

@@ -23,7 +23,7 @@
       "@letar/forms-core/uikit": ["../../libs/forms-core/src/lib/uikit/index.ts"]
     }
   },
-  "include": ["vitest.setup.ts", "vitest.config.ts", "src/**/*.ts", "src/**/*.tsx"],
+  "include": ["vitest.setup.ts", "vitest.config.mts", "src/**/*.ts", "src/**/*.tsx"],
   "references": [
     {
       "path": "../forms-core/tsconfig.lib.json"

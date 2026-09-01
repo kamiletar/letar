@@ -167,7 +167,7 @@
     },
     "test": {
       "options": {
-        "config": "vitest.config.ts"
+        "config": "vitest.config.mts"
       },
       "metadata": {
         "description": "Run unit tests with Vitest",
