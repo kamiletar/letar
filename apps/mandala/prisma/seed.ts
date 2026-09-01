@@ -163,12 +163,19 @@ async function main() {
     },
   })
 
-  // Создаём Account запись для credential auth (Better Auth v1 формат)
+  // Создаём Account запись для credential auth.
+  // ⚠️ Better Auth 1.7+ ищет credential-аккаунт при входе строгим совпадением
+  // providerId+issuer+accountId, где accountId == user.id (НЕ email) — см. комментарий в
+  // libs/auth/src/server/factories/create-dev-session-route.ts и
+  // .claude/docs/better-auth-1.7-account-issuer-field.md. Старый ключ upsert (accountId:
+  // admin.email) создавал строку, невидимую для входа, и на каждом повторном запуске seed
+  // молча чинил не ту запись — обнаружено на staging 2026-09-01 (вход админа падал с
+  // «Неверный email или пароль» на свежепосеянной БД).
   await prisma.account.upsert({
     where: {
       providerId_accountId: {
         providerId: 'credential',
-        accountId: admin.email,
+        accountId: admin.id,
       },
     },
     update: {
@@ -178,10 +185,17 @@ async function main() {
     create: {
       userId: admin.id,
       providerId: 'credential',
-      accountId: admin.email,
+      accountId: admin.id,
       password: hashedPassword, // Better Auth хранит пароль в Account, не в User
       issuer: 'local:credential',
     },
+  })
+
+  // Legacy-хвост: если seed уже когда-то создавал строку по старому ключу (accountId=email),
+  // она осталась в БД параллельно с новой и её нужно удалить — иначе оба provider'а credential
+  // формально существуют, а better-auth продолжает видеть только строку с верным accountId.
+  await prisma.account.deleteMany({
+    where: { providerId: 'credential', accountId: admin.email, userId: admin.id },
   })
 
   console.log('✓ Created admin user:', admin.email, '(password: admin123 for E2E tests)')

@@ -4,6 +4,22 @@
 
 ## [Unreleased]
 
+## [0.40.24] - 2026-09-01
+
+### Fixed
+
+- `prisma/seed.ts` создавал credential-`Account` админа с ключом `accountId: admin.email` вместо
+  `admin.id` — Better Auth 1.7+ требует строгое совпадение `accountId === user.id`, из-за чего
+  вход админа на свежепосеянной staging-БД падал с «Неверный email или пароль». Это была главная
+  причина нестабильности e2e-прогона на staging (3 из 5 `unexpected`, все — admin-orders
+  навигация), ошибочно принятой в предыдущей сессии за проблему навигации/окружения. Разбор —
+  [PLAN_COMPLETED.md § Раунд 7](./PLAN_COMPLETED.md#стейджинг-e2e--раунд-7-root-cause-найден-и-починен-2026-09-01).
+- `apps/mandala-e2e/src/tests/05-full-checkout.guest.spec.ts` — гонка клика по карточке товара с
+  `OfflineConsentBanner` (`position: fixed`, появляется через 2с после гидратации и перехватывает
+  pointer-events над статичным контентом внизу страницы). Фикс — новый
+  `apps/mandala-e2e/src/fixtures/offline-consent.ts` (`seedOfflineConsent`), зеркало уже
+  существующего `seedCookieConsent`.
+
 ## [0.40.23] - 2026-09-01
 
 ### Fixed
