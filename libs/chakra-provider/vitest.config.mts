@@ -6,7 +6,7 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   plugins: [react()],
   cacheDir: '../../node_modules/.vitest/chakra-provider',
-  root: __dirname,
+  root: import.meta.dirname,
   test: {
     name: '@letar/chakra-provider',
     environment: 'jsdom',
@@ -24,7 +24,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@letar/chakra-provider': resolve(__dirname, './src'),
+      '@letar/chakra-provider': resolve(import.meta.dirname, './src'),
     },
   },
 })

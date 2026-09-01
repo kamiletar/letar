@@ -10,7 +10,7 @@ export default defineConfig({
     alias: {
       // slugify.ts реэкспортирует slugify из @letar/format-utils — пакет не хоистится
       // в node_modules (workspace без symlink), поэтому Vite не резолвит bare specifier
-      '@letar/format-utils': resolve(__dirname, '../format-utils/src/index.ts'),
+      '@letar/format-utils': resolve(import.meta.dirname, '../format-utils/src/index.ts'),
     },
   },
   test: {

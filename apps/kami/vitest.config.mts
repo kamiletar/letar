@@ -6,7 +6,7 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   plugins: [react()],
   cacheDir: '../../node_modules/.vitest/kami',
-  root: __dirname,
+  root: import.meta.dirname,
   test: {
     name: 'kami',
     environment: 'jsdom',
@@ -23,11 +23,11 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, './src'),
+      '@': resolve(import.meta.dirname, './src'),
       // Подпуть объявляем раньше корня: иначе '@letar/image-upload' совпадёт первым
       // и '/server' приклеится к пути основной точки входа.
-      '@letar/image-upload/server': resolve(__dirname, '../../libs/image-upload/src/server'),
-      '@letar/image-upload': resolve(__dirname, '../../libs/image-upload/src'),
+      '@letar/image-upload/server': resolve(import.meta.dirname, '../../libs/image-upload/src/server'),
+      '@letar/image-upload': resolve(import.meta.dirname, '../../libs/image-upload/src'),
     },
   },
 })

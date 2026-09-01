@@ -22,7 +22,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, './main'),
+      '@': resolve(import.meta.dirname, './main'),
     },
   },
 })

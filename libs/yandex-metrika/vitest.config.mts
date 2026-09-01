@@ -6,7 +6,7 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   plugins: [react()],
   cacheDir: '../../node_modules/.vitest/yandex-metrika',
-  root: __dirname,
+  root: import.meta.dirname,
   test: {
     name: '@letar/yandex-metrika',
     environment: 'jsdom',
@@ -24,7 +24,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@letar/yandex-metrika': resolve(__dirname, './src'),
+      '@letar/yandex-metrika': resolve(import.meta.dirname, './src'),
     },
   },
 })

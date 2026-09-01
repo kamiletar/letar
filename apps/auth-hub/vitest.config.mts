@@ -4,7 +4,7 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   cacheDir: '../../node_modules/.vitest/auth-hub',
-  root: __dirname,
+  root: import.meta.dirname,
   test: {
     name: 'auth-hub',
     environment: 'node',
@@ -21,7 +21,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, './src'),
+      '@': resolve(import.meta.dirname, './src'),
     },
   },
 })

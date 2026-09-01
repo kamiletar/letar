@@ -3,7 +3,7 @@ import { buildFormsCoreAlias } from '@letar/forms-core/testing'
 import { resolve } from 'path'
 import { defineConfig } from 'vitest/config'
 
-const formsCoreAlias = buildFormsCoreAlias(resolve(__dirname, '../forms-core'))
+const formsCoreAlias = buildFormsCoreAlias(resolve(import.meta.dirname, '../forms-core'))
 
 /**
  * Angular не даёт executor'а под Vitest (в отличие от Jest/Karma) — TestBed запускается вручную
@@ -14,7 +14,7 @@ const formsCoreAlias = buildFormsCoreAlias(resolve(__dirname, '../forms-core'))
  */
 export default defineConfig({
   cacheDir: '../../node_modules/.vitest/forms-angular',
-  root: __dirname,
+  root: import.meta.dirname,
   // Vite 8 трансформирует `.ts` через `oxc` по умолчанию (не esbuild) — `esbuild.tsconfigRaw`
   // тихо игнорируется («Both esbuild and oxc options were set»). Angular-декораторы
   // (`@Component`, `@Injectable`, `@Directive`) — legacy TS decorators; на 2026-08-13 не нашли

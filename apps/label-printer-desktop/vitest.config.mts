@@ -6,7 +6,7 @@ export default defineConfig({
   cacheDir: '../../node_modules/.vitest/label-printer-desktop',
   resolve: {
     alias: {
-      '@letar/label-printer-core': resolve(__dirname, '../../libs/label-printer-core/src'),
+      '@letar/label-printer-core': resolve(import.meta.dirname, '../../libs/label-printer-core/src'),
     },
   },
   test: {

@@ -6,7 +6,7 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   plugins: [react()],
   cacheDir: '../../node_modules/.vitest/archetest',
-  root: __dirname,
+  root: import.meta.dirname,
   test: {
     name: 'archetest',
     environment: 'jsdom',
@@ -24,7 +24,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, './src'),
+      '@': resolve(import.meta.dirname, './src'),
     },
   },
 })

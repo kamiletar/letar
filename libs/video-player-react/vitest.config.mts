@@ -24,7 +24,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@letar/video-player-core': resolve(__dirname, '../video-player-core/src/index.ts'),
+      '@letar/video-player-core': resolve(import.meta.dirname, '../video-player-core/src/index.ts'),
     },
   },
 })

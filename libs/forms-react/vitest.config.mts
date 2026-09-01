@@ -4,12 +4,12 @@ import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 import { defineConfig } from 'vitest/config'
 
-const formsCoreAlias = buildFormsCoreAlias(resolve(__dirname, '../forms-core'))
+const formsCoreAlias = buildFormsCoreAlias(resolve(import.meta.dirname, '../forms-core'))
 
 export default defineConfig({
   plugins: [react()],
   cacheDir: '../../node_modules/.vitest/forms-react',
-  root: __dirname,
+  root: import.meta.dirname,
   test: {
     name: '@letar/forms-react',
     environment: 'jsdom',

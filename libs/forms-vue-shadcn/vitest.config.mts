@@ -3,11 +3,11 @@ import { buildFormsCoreAlias } from '@letar/forms-core/testing'
 import { resolve } from 'path'
 import { defineConfig } from 'vitest/config'
 
-const formsCoreAlias = buildFormsCoreAlias(resolve(__dirname, '../forms-core'))
+const formsCoreAlias = buildFormsCoreAlias(resolve(import.meta.dirname, '../forms-core'))
 
 export default defineConfig({
   cacheDir: '../../node_modules/.vitest/forms-vue-shadcn',
-  root: __dirname,
+  root: import.meta.dirname,
   test: {
     name: '@letar/forms-vue-shadcn',
     environment: 'jsdom',
@@ -29,8 +29,8 @@ export default defineConfig({
       // Подпуть перед голым пакетом — rollup-plugin-alias матчит по префиксу (см. предупреждение
       // в forms-core/README.md), иначе '@letar/forms-vue/core' резолвился бы как
       // '@letar/forms-vue' + '/core' в файловой системе, не в './core.ts'.
-      '@letar/forms-vue/core': resolve(__dirname, '../forms-vue/src/core.ts'),
-      '@letar/forms-vue': resolve(__dirname, '../forms-vue/src/index.ts'),
+      '@letar/forms-vue/core': resolve(import.meta.dirname, '../forms-vue/src/core.ts'),
+      '@letar/forms-vue': resolve(import.meta.dirname, '../forms-vue/src/index.ts'),
     },
   },
 })

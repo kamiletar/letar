@@ -4,12 +4,12 @@ import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 import { defineConfig } from 'vitest/config'
 
-const formsCoreAlias = buildFormsCoreAlias(resolve(__dirname, '../forms-core'))
+const formsCoreAlias = buildFormsCoreAlias(resolve(import.meta.dirname, '../forms-core'))
 
 export default defineConfig({
   plugins: [react()],
   cacheDir: '../../node_modules/.vitest/forms',
-  root: __dirname,
+  root: import.meta.dirname,
   test: {
     name: '@letar/forms',
     environment: 'jsdom',
@@ -31,8 +31,8 @@ export default defineConfig({
       // `@letar/forms-react` обязан стоять ДО `@letar/forms`: alias матчится по префиксу,
       // первый подошедший выигрывает — иначе короткий ключ перехватит и композиционный слой
       // отрезолвится внутрь скина. Та же грабля, что и с bare-ключом `forms-core` выше.
-      '@letar/forms-react': resolve(__dirname, '../forms-react/src'),
-      '@letar/forms': resolve(__dirname, './src'),
+      '@letar/forms-react': resolve(import.meta.dirname, '../forms-react/src'),
+      '@letar/forms': resolve(import.meta.dirname, './src'),
     },
   },
 })
