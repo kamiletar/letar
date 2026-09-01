@@ -79,6 +79,18 @@ bash scripts/check-electron-drift.sh
 существует для быстрой ручной сверки (например в рамках `infra:deps-update` skill при апдейте
 electron) — этого достаточно.
 
+## ⚠️ Версия electron может быть захардкожена ещё и в `postinstall`-скрипте
+
+`scripts/check-electron-drift.sh` (и `check-all.mjs --only=electron-drift`) сравнивает только
+`devDependencies.electron` — но у `animatrona` версия дополнительно зашита строкой в её
+собственном `postinstall`/`postinstall:dev` (`package.json`), вызывающих
+`@electron/rebuild -v 44.0.0` для нативного модуля `classic-level`. При апдейте `electron` в
+`devDependencies` (2026-09-01, `/infra:deps-update`, 44.0.0 → 44.1.0) эта строка осталась
+нетронутой — проверка её не видит вообще, дрейф внутри одного файла между полем зависимости и
+командой postinstall. Тот же класс бага, что у [[project_rollout_hardcoded_container_bug]] в
+памяти: версия продублирована текстом там, где скрипт не может её найти. Обнаруживается только
+руками — `grep -n "electron/rebuild.*-v" apps/*/package.json` — и не автоматизировано.
+
 ## Затронутые приложения на 2026-08-25
 
 `animatrona`, `label-printer-desktop`, `kami-key-the`, `poster-microtext-desktop` (приватный
