@@ -4263,3 +4263,28 @@ SDK остался на `4.4.3` (bun не подтягивает транзит�
 можно вернуть на `^4.x`. Проверять при каждом следующем `/infra:deps-update`:
 `grep -n '"@modelcontextprotocol/sdk/zod"' bun.lock` — пустой результат означает, что дедуп уже
 не нужен, и пин можно снимать.
+
+## §135 — три несвязанных с зависимостями провала `nx run-many -t test` (2026-09-01, отдельная сессия)
+
+**Контекст:** тот же полный прогон тестов в рамках `/infra:deps-update` (§134 выше). Три падения
+воспроизводились одинаково независимо от версий зависимостей — чистый дрейф контента/доков/конфига,
+не связанный с бампом.
+
+1. **`@letar/generators:test`** — `new-app`/`new-lib` спеки ожидали `test.options.config` полным
+   путём (`'apps/my-app/vitest.config.ts'`), генератор пишет bare `'vitest.config.ts'` — как и
+   **все** реальные `apps/*`/`libs/*` (сверено грепом). Устарели именно ожидания спека, генератор
+   не трогал. Фикс — [libs/generators/src/generators/new-app/generator.spec.ts](/libs/generators/src/generators/new-app/generator.spec.ts),
+   [.../new-lib/generator.spec.ts](/libs/generators/src/generators/new-lib/generator.spec.ts).
+2. **`@letar/form-mcp:test`** — `doc-field-count.integration.spec.ts` (страж прозы, см. его
+   заголовок) поймал, что `libs/forms/README.md` заявлял 61 поле, `list_fields` реально отдаёт
+   62 — README не обновили при добавлении поля. Фикс — [libs/forms/README.md](/libs/forms/README.md).
+3. **`dashboard-agent:test`** — `app-registry.guard.spec.ts` поймал, что канон
+   `@letar/infra-config` `APP_PORTS`/`APP_HOSTS` не содержал `auth-hub` (порт 3010, host
+   `auth-hub-app`) **и** `animatrona-tracker` (тот же порт 3010, host `animatrona-tracker-app`) —
+   оба уже были в локальной копии `apps/dashboard-agent/src/lib/server-config.ts`, но канон не
+   обновили при их добавлении. Фикс — [libs/infra-config/src/index.ts](/libs/infra-config/src/index.ts).
+
+Все три — независимые точечные правки, закоммичены раздельно (`735f4e4e`, `8d341707`,
+`cde37fe2`), не запушены. Общий урок: `nx run-many -t test` без `--skip-nx-cache` может не
+поймать такой дрейф из кэша — гонять полный прогон время от времени со `--skip-nx-cache`, а не
+полагаться на affected после точечных правок доков/README.
