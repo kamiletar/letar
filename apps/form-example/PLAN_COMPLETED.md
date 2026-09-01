@@ -1,5 +1,15 @@
 # Выполненные задачи — form-example
 
+## fix: `@letar/demo-protection` резолв через bun isolated linker (2026-09-01)
+
+Тот же класс бага, что уже был найден и исправлен в aboi: пакет числился только в
+`nx.implicitDependencies` (`package.json`), но не в `dependencies` — изолированный линковщик bun
+кладёт symlink пакета в `apps/<app>/node_modules/@letar/`, не в корневой `node_modules`, только
+если пакет реально перечислен в `dependencies`. Без него `nx typecheck:tsgo form-example` падал
+с `TS2307: Cannot find module '@letar/demo-protection'`. Фикс — добавить
+`"@letar/demo-protection": "workspace:*"` в `dependencies` + `bun install` из корня. Проверено
+свежим `typecheck:tsgo --skip-nx-cache` — зелёный. `v0.1.4`.
+
 ## Сессия 2026-08-12 — GlitchTip + первый staging + фикс невалидного e2e-прогона
 
 Подключение к GlitchTip (`nx g @letar/generators:glitchtip-integrate form-example`,
