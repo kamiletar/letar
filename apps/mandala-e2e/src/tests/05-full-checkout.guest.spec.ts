@@ -110,6 +110,10 @@ test.describe('Полный Checkout Flow', () => {
     await page.waitForURL(/\/shop\/.+/)
 
     const addToCartButton = page.locator('button:has-text("Добавить в корзину")')
+    // Явное ожидание видимости перед кликом — не формальность: тот же класс гонки гидратации,
+    // что и у навигации на карточку товара выше (см. комментарий в первом тесте этого файла).
+    // Без него клик может попасть на кнопку до навешивания React-обработчика.
+    await expect(addToCartButton).toBeVisible({ timeout: 5000 })
     await addToCartButton.click()
 
     // Ждём подтверждения добавления в корзину
