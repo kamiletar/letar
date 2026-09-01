@@ -226,6 +226,8 @@ export const APP_PORTS: Record<string, number> = {
   studio: 3024,
   domwellbes: 3025,
   'dashboard-agent': 3100,
+  'auth-hub': 3010,
+  'animatrona-tracker': 3010,
 }
 
 /** HTTP-порт приложения из канона, если известен. */
@@ -264,6 +266,8 @@ export const APP_HOSTS: Record<string, string> = {
   studio: 'studio-app',
   domwellbes: 'domwellbes-app',
   'dashboard-agent': 'dashboard-agent',
+  'auth-hub': 'auth-hub-app',
+  'animatrona-tracker': 'animatrona-tracker-app',
 }
 
 /** Docker container name/alias приложения из канона. Fallback — `localhost` (dev-режим). */
