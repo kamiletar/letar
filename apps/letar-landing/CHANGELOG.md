@@ -2,6 +2,13 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.5.3] - 2026-09-02
+
+### Added
+
+- `public/llms.txt` — карта публичных разделов для LLM-агентов (llmstxt.org), см.
+  [.claude/docs/llms-txt-pattern.md](../../.claude/docs/llms-txt-pattern.md).
+
 ## [Unreleased]
 
 ## [0.5.2] - 2026-08-28
