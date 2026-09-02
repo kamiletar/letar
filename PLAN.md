@@ -130,9 +130,14 @@ compress-middleware (gzip+brotli, найдено при разборе `studio` 
   `test.skip`; кластер скролл-ассертов TOC/progress-bar — оставлен красным без диагностики,
   приложение некритичное. `pravda` НЕ добавлена в `E2E_GATED_APPS` — сознательно, не
   временный пробел.
-- `form-example` (h1 не появляется на 4 страницах + чекбоксы `table-editor`) и `kami`
-  (контент блога не находится на staging — похоже на отсутствие seed-данных, не подтверждено
-  до конца) — статус не проверялся в этой сессии, остаются как есть.
+- ✅ **`form-example` — закрыто 2026-08-24** (§18.7 M2, `apps/form-example/CHANGELOG.md`
+  v0.1.2). Ни одна из 42 examples-страниц не имела настоящего `<h1>` (Chakra `Heading`
+  рендерит `<h2>` по умолчанию) — root cause 5 упавших спеков. Добавлен общий `PageH1`
+  (`asChild` + нативный `<h1>`). Staging e2e 48/48, `form-example` в `E2E_GATED_APPS`.
+- ✅ **`kami` — закрыто 2026-08-24** (§18.7 M2, `apps/kami/PLAN_COMPLETED.md`). Первый
+  staging для kami заведён с нуля; OIDC/Keystatic GitHub Storage/Telegram/Yandex Metrica
+  сознательно не настроены на стейдже — `kami-e2e` тестирует только публичные страницы.
+  Staging e2e 150/150, `kami` в `E2E_GATED_APPS`.
 
 ---
 
