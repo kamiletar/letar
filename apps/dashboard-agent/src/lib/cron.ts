@@ -563,6 +563,17 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's2',
   },
   {
+    id: 'domwellbes-expire-project-changes',
+    name: 'Project Change Expiry (domwellbes)',
+    app: 'domwellbes',
+    endpoint: '/api/cron/expire-project-changes',
+    schedule: '0 * * * *',
+    description:
+      'Эскалация просроченных допсоглашений (client не ответил до responseDueAt) — снимает CHANGE_HOLD (ROADMAP_M8.md §M8B.1)',
+    enabled: true,
+    server: 's2',
+  },
+  {
     id: 'domwellbes-release-unpaid-orders',
     name: 'Unpaid Order Reservation Release (domwellbes)',
     app: 'domwellbes',
