@@ -33,6 +33,7 @@ services:
       GLITCHTIP_ENVIRONMENT: ${GLITCHTIP_ENVIRONMENT}
       NEXT_PUBLIC_GLITCHTIP_DSN: ${NEXT_PUBLIC_GLITCHTIP_DSN}
       NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT: ${NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT}
+      NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL}
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@grandslamcup-db:5432/grandslamcup
     volumes:
       - ./uploads:/app/apps/grandslamcup/uploads

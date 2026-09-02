@@ -1,14 +1,17 @@
+import { isProductionDomain } from '@letar/seo'
 import type { MetadataRoute } from 'next'
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://grandslamcup.letar.best'
-const DOMAIN = process.env.DOMAIN ?? ''
+const PRODUCTION_URL = 'https://grandslamcup.letar.best'
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? PRODUCTION_URL
 
-/** Staging-окружение — запрещаем индексацию полностью */
-const isStaging = DOMAIN.includes('test') || DOMAIN.includes('staging')
-
-/** Robots.txt — правила индексации для поисковых роботов */
+/**
+ * Robots.txt — правила индексации для поисковых роботов.
+ * На staging/dev индексация закрыта целиком (§33 PLAN-INFRA.md) — гейт по домену через
+ * `@letar/seo`, не по `DOMAIN.includes('staging')` (реальный staging-домен содержит
+ * подстроку `stage`, не `staging` — старый гейт никогда не срабатывал).
+ */
 export default function robots(): MetadataRoute.Robots {
-  if (isStaging) {
+  if (!isProductionDomain(PRODUCTION_URL)) {
     return {
       rules: [{ userAgent: '*', disallow: '/' }],
     }

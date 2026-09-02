@@ -2,6 +2,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.39.10] - 2026-09-02
+
+### Fixed
+
+- `robots.ts` содержал сломанную самодельную проверку `DOMAIN.includes('test') ||
+  DOMAIN.includes('staging')`, которая не срабатывала на реальном staging-домене
+  (`grandslamcup-stage.s3.letar.best` не содержит ни `test`, ни `staging`) — индексация была
+  открыта. Переведено на `@letar/seo` (`isProductionDomain()`), `NEXT_PUBLIC_BASE_URL` добавлена
+  в compose-файлы и `.env.staging.enc`/`.env.docker.enc` — тот же паттерн, что и в
+  `pravda`/`aira-web` (§33 `PLAN-INFRA-2.md`).
+
 ## [3.39.9] - 2026-09-02
 
 ### Added
