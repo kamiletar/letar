@@ -1,6 +1,6 @@
 {
   "name": "@letar/mandala",
-  "version": "0.40.26",
+  "version": "0.40.27",
   "private": true,
   "nx": {
     "name": "mandala",
@@ -9,6 +9,7 @@
       "@letar/forms",
       "@letar/hooks",
       "@letar/analytics",
+      "@letar/seo",
       "@letar/consent",
       "@letar/format-utils",
       "@letar/image-upload",

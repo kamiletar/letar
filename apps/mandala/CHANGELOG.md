@@ -2,6 +2,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.40.27] - 2026-09-02
+
+### Fixed
+
+- `robots.ts` разрешал индексацию на staging (`mandala-stage.s3.letar.best`) — гейт строился из
+  хардкод-константы без проверки боевого домена. Переведено на `@letar/seo`
+  (`isProductionDomain()`), `NEXT_PUBLIC_BASE_URL` добавлена в `docker-compose.staging.yml` и
+  `.env.staging.enc`/`.env.docker.enc` (в `docker-compose.production.yml` переменная уже была
+  проброшена) — тот же паттерн, что и в `pravda`/`aira-web` (§33 `PLAN-INFRA-2.md`).
+
 ## [0.40.26] - 2026-09-02
 
 ### Added
