@@ -680,7 +680,7 @@ type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAut
   secret-mounts других приложений, backup-скрипты, generated Prisma, doc-комментарии) — Backlog в
   `apps/dashboard-agent/PLAN.md` (см. §0).
 
-### Этап 0.8 — Аудит соответствия 152-ФЗ (комплексная проверка) ⏳ В РАБОТЕ
+### Этап 0.8 — Аудит соответствия 152-ФЗ (комплексная проверка) 🟡 ЧАСТИЧНО (техника выполнена, юр. блокер отдельно)
 
 > **Контекст:** требования 152-ФЗ уже частично выполнены (эталон aboi, cookie-баннер, согласия в формах, чекбоксы ПДн,
 > страница /privacy). Документация — `.claude/docs/personal-data.md`. Этот этап — сквозной аудит **всех приложений**,
