@@ -242,6 +242,12 @@ scope — Invariant вместо обновления кеша ·
 [nextjs-client-page-metadata-wrapper](/.claude/docs/nextjs-client-page-metadata-wrapper.md)
 `'use client'`-страница + `export const metadata` несовместимы на одном файле — разбить на
 server-обёртку `page.tsx` + `page.client.tsx` ·
+[nextjs-metadata-inheritance-canonical-trap](/.claude/docs/nextjs-metadata-inheritance-canonical-trap.md)
+⚠️ страница без своей `metadata` наследует `canonical` **главной** от корневого layout; связка
+«canonical на главную + noindex» опаснее отсутствия обоих, снимается только явным `null`
+(`undefined` наследование не убирает, а `languages: null` не компилируется); `alternates`
+заменяется целиком — своя `canonical` молча теряет унаследованный `hreflang`; в aboi так стояли
+24 маршрута из ~50 (авторизация, админка, личный кабинет) ·
 [nextjs-favicon-icon-tsx-both-needed](/.claude/docs/nextjs-favicon-icon-tsx-both-needed.md) ⚠️
 `icon.tsx` не заменяет `favicon.ico` — боты/краулеры бьют в корень мимо `<head>`; вместе они дают
 два тега `link[rel~="icon"]`, подмена href первого найденного молча не работает ·
