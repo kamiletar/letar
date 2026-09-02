@@ -2,6 +2,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.6] - 2026-09-02
+
+### Fixed
+
+- `robots.ts` уже использовал `@letar/seo` (`isProductionDomain()`) корректно, но
+  `NEXT_PUBLIC_BASE_URL` не была проброшена ни в один из compose-файлов и env — гейт был
+  no-op, staging (`form-example-stage.s3.letar.best`) индексировался наравне с продом. Добавлена
+  переменная в `docker-compose.staging.yml`/`docker-compose.production.yml` и
+  `.env.staging.enc`/`.env.docker.enc` (§33 `PLAN-INFRA-2.md`).
+
 ## [0.1.5] - 2026-09-02
 
 ### Added
