@@ -952,6 +952,64 @@ staged-файле → коммит заблокирован с корректн�
 или подключённый, но без wiring `NEXT_PUBLIC_BASE_URL` в staging env) на остальных приложениях со
 staging-деплоем. `aboi`/`archetest` уже были в порядке на 2026-08-12, но список не полный.
 
+### Дополнение 2026-09-02 — аудит остальных staging-приложений, найдено ещё 10
+
+Полный аудит `robots.ts` всех приложений со staging-деплоем (не только 2 из предыдущего пункта)
+нашёл тот же класс бага у ещё десяти: `archetest`, `aprel8008`, `dsperevod`, `kami`, `mandala`,
+`studio`, `svoichuzhie`, `grandslamcup`, `time`, `form-example`. Три разных подварианта одной
+причины — «гейт не читает то, что реально доезжает до build-time env»:
+
+1. **Гейта в коде не было вовсе** (`archetest`, `aprel8008`, `kami`, `mandala`, `studio`) —
+   `robots.ts` строил правила из хардкод-константы `BASE_URL`/`PRODUCTION_URL` без вызова
+   `isProductionDomain()`.
+2. **Самодельная (сломанная) проверка вместо гейта** (`svoichuzhie`, `grandslamcup`) —
+   `DOMAIN.includes('test') || DOMAIN.includes('staging')` не совпадает ни с одним реальным
+   staging-доменом монорепо (`<app>-stage.s3.letar.best` не содержит подстроки `test` или
+   `staging` целиком отдельным словом — ложное срабатывание отсутствовало полностью).
+3. **Гейт уже был на `@letar/seo` корректно, но `NEXT_PUBLIC_BASE_URL` нигде не была
+   проброшена** (`time`, `form-example`) — код формально правильный, но без переменной в build-time
+   env `getBaseUrl()` всегда падает на `productionUrl`-фоллбэк, то есть гейт — no-op, staging
+   индексируется наравне с продом. Этот подвариант опаснее первых двух: `nx build` без явно
+   выставленной `NEXT_PUBLIC_BASE_URL` для ЛЮБОГО из всех 12 приложений (включая уже
+   «переведённые» на `@letar/seo`) даёт `Allow: /` по умолчанию — подтверждено живой пересборкой
+   `form-example` с полностью пустым окружением (см. ниже).
+
+Отдельно у `dsperevod` вскрылась независимая ошибка: гейт использовал `BASE_URL =
+'https://dsperevod.letar.best'`, а реальный боевой домен по Traefik-лейблу — `dsperevod.ru`
+(letar.best-домен не существует в проде этого приложения). С неверной константой гейт
+сравнивал бы staging/прод неправильно даже при правильном wiring — исправлено на `dsperevod.ru`.
+
+**Починено:** все 10 переведены на `@letar/seo` (`isProductionDomain()`), `NEXT_PUBLIC_BASE_URL`
+проброшена в `docker-compose.staging.yml`/`docker-compose.production.yml` (кроме `mandala`/
+`svoichuzhie`-prod и `dsperevod`-staging, где нужный проброс частично уже существовал) и в
+`.env.staging.enc`/`.env.docker.enc` через `sops`, значения — реальные домены по Traefik-лейблам
+(не по одноимённым переменным `NEXT_PUBLIC_APP_URL`, которые у части приложений расходятся).
+Живая пересборка `form-example` (`nx build --skip-nx-cache`) подтвердила флип `robots.txt`:
+`Disallow: /` с `NEXT_PUBLIC_BASE_URL` от staging, `Allow: /` с prod-значением, и **`Allow: /` по
+умолчанию при полностью пустом окружении** — доказывает пункт 3 выше не гипотетически.
+`typecheck:tsgo`/`lint` зелёные по всем 10 (`nx run-many --projects=<10 приложений>`); `nx build`
+не гонялся по всем — `kami` падает на досессионной проблеме (Better Auth OIDC discovery не может
+достучаться до `auth.letar.best` при локальной сборке без сети, воспроизводится и без правок этой
+сессии — не связано с `NEXT_PUBLIC_BASE_URL`).
+
+⚠️ **sops-грабля, наступили дважды за сессию:** `sops --encrypt --output <path> <input>` матчит
+`.sops.yaml`-`creation_rules` по пути **входного** файла, не выходного — плейсхолдер-имя вида
+`apps/<app>/.env.staging.tmp` не совпадает с regex `\.env\.staging(\.enc)?$` и падает с `error
+loading config: no matching creation rules found` (**неигнорируемая fatal-ошибка**, exit 1, файл
+не создаётся) — 20 первых попыток так и не записали ничего, при этом скрипт-цикл не проверял exit
+code и бодро печатал «OK». Фикс — плейсхолдер должен буквально заканчиваться на `.env.staging`/
+`.env.docker`. Отдельно у части файлов (`kami`/`.env.staging.enc`, `dsperevod`/`.env.docker.enc`,
+`form-example`/`.env.staging.enc`) обнаружился второй, независимый формат хранения — построчный
+dotenv-sops (`KEY=ENC[...]` на каждую переменную) вместо привычного JSON-обёрнутого бинарного
+блоба; бинарный `sops -d`/`sops --encrypt` без `--input-type dotenv --output-type dotenv`
+падает на этих файлах с `Error unmarshalling input json: invalid character ... looking for
+beginning of value` — тоже нужно детектировать формат до операции (`sops -d file >/dev/null
+2>&1` как проверка), не считать все `.enc` в репозитории идентичными по внутреннему формату.
+
+⚠️ **Не проверено**: `nx build` полного прод-режима (не staging) ни для одного из 10 — только
+typecheck/lint и целевой staging-rebuild `form-example`. Live-запрос `curl /robots.txt` к реальному
+staging-серверу тоже не делался — фикс не задеплоен (коммиты локальные, не запушены).
+
 ### Что сделано (2026-08-06)
 
 - [x] `libs/seo` (`@letar/seo`) — `getBaseUrl(productionUrl)`/`isProductionDomain(productionUrl)`,
