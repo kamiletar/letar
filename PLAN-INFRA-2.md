@@ -921,8 +921,36 @@ staged-файле → коммит заблокирован с корректн�
       это дополнительный слой, не замена. `typecheck:tsgo`/`lint` зелёные, commit `86368d69`.
       Остальные публичные приложения из списка §33 (кроме `time`) не проверялись на приватные
       разделы внутри — если появятся, паттерн тот же.
-- [ ] Staging-домены не индексируются — гейт `isProductionDomain()` в коде, но **не проверено
-      живым запросом** `/robots.txt` ни на одном staging-домене в этой сессии
+- [ ] Staging-домены не индексируются — 2/N приложений подтверждены живой пересборкой с staging
+      env (`pravda`, `aira-web`, см. ниже); остальные приложения со staging (`archetest`, `time`,
+      `kami`, `mandala`, `form-example`, `driving-school`, `auth-hub` и т.д.) не аудировались в
+      этой сессии — не факт, что у них такой же пробел, `aboi`/`archetest` уже были подключены
+      раньше
+
+### Дополнение 2026-09-02 — `pravda`/`aira-web` не были переведены на `@letar/seo` вовсе
+
+Оба приложения имели `robots.ts`/`sitemap.ts`/`metadataBase` (проходили Часть B по формальному
+признаку наличия файла), но `BASE_URL` резолвился собственным `src/lib/seo.ts` с локальным именем
+переменной (`NEXT_PUBLIC_APP_URL` у pravda, `NEXT_PUBLIC_SITE_URL` у aira-web) — не той, что читает
+`@letar/seo` (`NEXT_PUBLIC_BASE_URL`), и без вызова `isProductionDomain()` в `robots.ts` вообще.
+Обе переменные физически не были подключены ни в `docker-compose.staging.yml`, ни в `.env.staging` —
+значит на staging-сборке `BASE_URL` всегда падал на боевой URL-фоллбэк, и `robots.txt` staging
+(`pravda-stage.s3.letar.best`, `aira-web-stage.s3.letar.best`) отдавал `Allow: /` наравне с продом.
+Реального инцидента (проиндексированный staging) не подтверждено — не проверялось живым запросом
+к серверу, только локальной пересборкой с тем же `.env.staging`, что видит `deploy-affected.sh`.
+
+**Починено:** оба приложения переведены на `@letar/seo` (`getBaseUrl`/`isProductionDomain`,
+тонкие обёртки с `PRODUCTION_URL`, тот же паттерн, что `aboi`), `robots.ts` гейтуется через
+`isProductionDomain()`. `NEXT_PUBLIC_BASE_URL` заведён в `.env.staging.enc` (staging-домен) и
+`.env.docker.enc` (боевой домен, явное значение вместо неявного фоллбэка) обоих приложений,
+`docker-compose.staging.yml`/`docker-compose.production.yml` читают `${NEXT_PUBLIC_BASE_URL}`.
+Поведение проверено локальной пересборкой (`nx build --skip-nx-cache` с `set -a; source <(sops -d
+.env.staging.enc)`) — `robots.txt` флипается `Allow: /` → `Disallow: /` и обратно. `typecheck:tsgo`/
+`lint`/`build` (оба режима) зелёные. Коммит — pravda/aira-web scope, не запушено.
+
+⚠️ **Не проверено**: тот же аудит (собственный `src/lib/seo.ts`, не подключённый к `@letar/seo` —
+или подключённый, но без wiring `NEXT_PUBLIC_BASE_URL` в staging env) на остальных приложениях со
+staging-деплоем. `aboi`/`archetest` уже были в порядке на 2026-08-12, но список не полный.
 
 ### Что сделано (2026-08-06)
 
