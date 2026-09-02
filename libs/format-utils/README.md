@@ -20,7 +20,7 @@ import { formatDate } from '@letar/format-utils'
 ### Деньги
 
 ```typescript
-import { formatKopecks, formatRubles } from '@letar/format-utils'
+import { formatKopecks, formatRubles, toKopecks } from '@letar/format-utils'
 
 // Сумма в рублях
 formatRubles(150000) // 150 000 ₽
@@ -33,6 +33,9 @@ formatRubles(null, { fallback: 'по запросу' }) // по запросу
 
 // Префикс и суффикс
 formatRubles(1500, { prefix: 'от ', suffix: ' / занятие' }) // от 1 500 ₽ / занятие
+
+// Обратная конвертация — рубли из формы в копейки для БД
+toKopecks(1500) // 150000
 ```
 
 ### Даты

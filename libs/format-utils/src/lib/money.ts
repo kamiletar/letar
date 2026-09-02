@@ -46,3 +46,14 @@ export function formatKopecks(kopecks: number | null | undefined, options: Forma
   }
   return formatRubles(kopecks / 100, options)
 }
+
+/**
+ * Конвертирует сумму в рублях (как её вводит пользователь в форме) в копейки для хранения в БД.
+ *
+ * @example
+ * toKopecks(1500) // 150000
+ * toKopecks(19.99) // 1999
+ */
+export function toKopecks(rubles: number): number {
+  return Math.round(rubles * 100)
+}

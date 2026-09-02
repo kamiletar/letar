@@ -1,5 +1,5 @@
 // globals: true в vitest.config.ts — describe, expect, it доступны глобально
-import { formatKopecks, formatRubles } from './money'
+import { formatKopecks, formatRubles, toKopecks } from './money'
 
 // formatRubles/formatKopecks разделяют тысячи тонким неразрывным пробелом (U+202F)
 const NBSP = ' '
@@ -65,5 +65,23 @@ describe('formatKopecks', () => {
 
   it('добавляет prefix и suffix', () => {
     expect(formatKopecks(100000, { prefix: 'от ' })).toBe(`от 1${NBSP}000 ₽`)
+  })
+})
+
+describe('toKopecks', () => {
+  it('умножает рубли на 100', () => {
+    expect(toKopecks(1500)).toBe(150000)
+  })
+
+  it('округляет дробную часть копейки', () => {
+    expect(toKopecks(19.999)).toBe(2000)
+  })
+
+  it('конвертирует ноль', () => {
+    expect(toKopecks(0)).toBe(0)
+  })
+
+  it('является обратной операцией к делению formatKopecks/100', () => {
+    expect(toKopecks(1500.5)).toBe(150050)
   })
 })

@@ -14,7 +14,7 @@ export {
 } from './lib/date'
 
 // Money utilities
-export { formatKopecks, formatRubles } from './lib/money'
+export { formatKopecks, formatRubles, toKopecks } from './lib/money'
 export type { FormatMoneyOptions } from './lib/money'
 
 // String utilities
