@@ -181,9 +181,9 @@ curl -sSI http://localhost:<порт>/llms.txt | grep -i content-type   # text/p
 `kami-key-the-landing`, `kami`, `archetest`, `dsperevod`, `svoichuzhie`, `aprel8008`, `domwellbes`,
 `studio` (граница публичное/кабинет проверена по коду — какие route group реально не читают
 `auth()`/`cookies()` на сервере, а не по названиям папок; личный кабинет, бэк-офис и API в файл
-не попали), `driving-school` (нет `sitemap.ts`/`robots.ts` — отдельный пробел, зафиксирован
-здесь, не устранён), `synth` (честно отражает пустую пока витрину — `gallery` без опубликованных
-патчей).
+не попали), `driving-school` (пробел `sitemap.ts`/`robots.ts` устранён 2026-09-02 — см.
+`apps/driving-school/CHANGELOG.md`), `synth` (честно отражает пустую пока витрину — `gallery` без
+опубликованных патчей).
 
 **Сознательно НЕ заведён — противоречит решению владельца:** `animatrona-tracker`. Его
 `robots.ts` ставит безусловный `disallow: '/'` — по `PLAN-INFRA-2.md` §33 «каталог/плеер, вся
