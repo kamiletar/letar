@@ -1,0 +1,59 @@
+# @letar/forms Example App
+
+> Витрина библиотеки форм `@letar/forms` (React 19 + TanStack Form + Zod v4 + Chakra UI v3):
+> полноценное Next.js-приложение с PostgreSQL, Server Actions и TanStack Query, показывающее
+> реальное использование библиотеки — не изолированные сниппеты, а работающий код с базой данных.
+
+Каждая страница `/examples/*` — самостоятельный демо одной фичи библиотеки с исходным кодом рядом
+(ссылка на файл в GitHub). Полный и всегда актуальный список всех демо — на главной странице
+(`/`), сгруппированный на «Full-Stack» (CRUD с БД) и «Component Examples» (изолированные фичи).
+Ниже — курируемая выборка по категориям, не полный список.
+
+## Полноценные CRUD-приложения
+
+- [Products](/products/): список товаров с базой (PostgreSQL), создание/редактирование/удаление —
+  полный цикл Server Actions
+- [Contacts](/contacts/): форма обратной связи → Server Action → запись в БД; список отправленных
+  сообщений
+
+## Основы (BASICS)
+
+- [Basic Form](/examples/basic/): минимальная форма — String, Select, Checkbox
+- [All Fields](/examples/all-fields/): витрина всех 56 типов полей библиотеки
+- [Validation](/examples/validation/): валидация через Zod v4 и `Form.Errors`
+- [Constraints](/examples/constraints/): regex-ограничения и кросс-полевая валидация
+
+## Раскладка (LAYOUT)
+
+- [Multi-Step](/examples/multi-step/): пошаговый визард через `Form.Steps`
+- [Conditional](/examples/conditional/): условный рендер полей через `Form.When`
+- [Groups & Arrays](/examples/groups/): вложенные группы и динамические массивы полей
+- [Watch](/examples/watch/): подписка на изменение значения поля
+
+## Генерация форм (GENERATION)
+
+- [Auto Fields](/examples/auto-fields/): автогенерация формы из Zod-схемы (`Form.FromSchema`)
+- [ZenStack](/examples/zenstack/): формы, сгенерированные из `schema.zmodel` через
+  `@letar/zenstack-form-plugin`
+- [Templates](/examples/templates/): готовые шаблоны форм
+- [Conversational](/examples/conversational/): пошаговая форма в форме диалога
+
+## Паттерны (PATTERNS)
+
+- [Offline](/examples/offline/): офлайн-формы с автосинхронизацией при восстановлении сети
+- [Persistence](/examples/persistence/): черновик формы в localStorage
+- [Autosave](/examples/autosave/): автосохранение по мере заполнения
+- [i18n](/examples/i18n/): мультиязычные подсказки валидации
+- [Security](/examples/security/): защита форм (rate limiting, honeypot)
+
+## Продвинутое (ADVANCED)
+
+- [Theming](/examples/theming/): кастомизация формы под тему Chakra UI
+- [Recipes](/examples/recipes/): готовые формы — вход, регистрация и другие частые сценарии
+- [Data Grid](/examples/data-grid/) и [Table Editor](/examples/table-editor/): табличные поля
+- [Signature](/examples/signature/) и [Credit Card](/examples/credit-card/): специализированные
+  поля ввода
+
+## Источник
+
+- [Исходный код на GitHub](https://github.com/kamiletar/letar/tree/main/apps/form-example)
