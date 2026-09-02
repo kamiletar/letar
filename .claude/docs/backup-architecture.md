@@ -257,14 +257,23 @@ offsite-получатель не заведён — трек на восста�
 
 ### Синхронизируемые папки
 
-| Сервер | Папка на сервере     | Папка на Windows         | Ключ (RO)                                |
-| ------ | -------------------- | ------------------------ | ---------------------------------------- |
-| s1     | `/home/deploy/letar` | `C:\BackupSync\letar\s1` | см. `.claude/OPS_JOURNAL.local.md §14.4` |
-| s2     | `/home/deploy/letar` | `C:\BackupSync\letar\s2` | см. `.claude/OPS_JOURNAL.local.md §14.4` |
+| Сервер | Папка на сервере     | Папка на получателе                       | Ключ                                                    |
+| ------ | -------------------- | ----------------------------------------- | ------------------------------------------------------- |
+| s1     | `/home/deploy/letar` | `C:\BackupSync\letar\s1` (Windows)        | RW на s1, см. `.claude/OPS_JOURNAL.local.md §14.4`      |
+| s2     | `/home/deploy/letar` | `C:\BackupSync\letar\s2` (Windows)        | RW на s2, см. `.claude/OPS_JOURNAL.local.md §14.4`      |
+| s2     | `/home/deploy/letar` | `/home/deploy/backup-replica/s2` (s3, RO) | тот же RO-ключ, что у Windows-копии — второй получатель |
 
-> R/W ключи хранятся в `/etc/resilio-sync/config.json` на каждом сервере. Столбец «Папка на
-> pinner2» убран вместе с самим `pinner2` (см. предупреждение выше) — сейчас у каждой шары ровно
-> один RO-получатель, Windows.
+> R/W ключ — в `/etc/resilio-sync/config.json` на s2 (только root). Один и тот же RO-ключ отдан
+> двум независимым получателям (Windows + s3) — это штатный режим Resilio: RO-ключ не даёт право
+> писать обратно, поэтому количество RO-получателей под одним ключом не ограничено и не создаёт
+> риска для источника. **Вторая offsite-точка взамен `pinner2`** ([PLAN-INFRA-4.md §90](/PLAN-INFRA-4.md),
+> закрыто 2026-09-02) — s3, а не отдельная новая машина: сервер уже существует, дешевле в
+> обслуживании, физически отделён от s2 (другой хостер/датацентр — реальная offsite-гарантия).
+>
+> ⚠️ Каталог-получатель на s3 — `/home/deploy/backup-replica/s2/`, **не** `/home/deploy/letar`.
+> У s3 своя, отдельная от s2 живая копия репозитория по этому пути (свой checkout, свои
+> контейнеры) — использовать её же как приёмник чужой RO-копии значило бы смешать два разных
+> дерева под одной Resilio-identity. Отдельный каталог обязателен.
 
 ### Исключения из синхронизации (`.sync/IgnoreList`)
 
@@ -598,6 +607,24 @@ cron traefik-backup-freshness-check (30 */6 * * *)
 Общая механика упаковки у всех tar-бэкапов агента вынесена в `src/lib/tar-backup.ts` (покрыта
 тестами; `acme-dns-backup.ts` и `nginx-backup.ts` пока живут своими копиями — миграция ждёт
 тестов на их текущее поведение).
+
+### Оффсайт-копия (добавлено 2026-09-02, PLAN-INFRA-4.md §90)
+
+⚠️ **До 2026-09-02 этот архив жил только на s3** — не реплицировался никуда, `resilio-sync` на s3
+не был установлен вовсе. Одновременная потеря сервера убила бы единственную копию невосстановимых
+`acme-dns-accounts.json`. Закрыто systemd-таймером, копирующим свежий архив на s2 сразу после того,
+как dashboard-agent его создаёт — дальше он уезжает в Windows тем же путём, что и остальные бэкапы
+s2 (`backups/`/`*.tar.gz` не входят в `IgnoreList`).
+
+```
+systemd timer traefik-backup-rsync.timer (s3, 04:00, после cron 03:45)
+  → /root/traefik-backup-rsync.sh
+  → rsync -az --delete /home/deploy/letar/backups/traefik/ → deploy@s2:/home/deploy/letar/backups/traefik-s3/
+  → дальше подхватывает Resilio Sync (s2 → Windows), как остальные *.tar.gz
+```
+
+SSH-ключ: `root@s3` → `deploy@s2` (`/root/.ssh/id_ed25519_s2`, добавлен в `~deploy/.ssh/authorized_keys`
+на s2 под меткой `s3-to-s2-traefik-backup`) — тот же паттерн, что у Maddy выше.
 
 ---
 
