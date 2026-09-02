@@ -233,7 +233,9 @@ hydration mismatch на невалидном сегменте локали ·
 помогает; воспроизводится и на прод-сборке, смягчено автоматическим `noindex` от Next ·
 [nextjs-compound-component-server-boundary](/.claude/docs/nextjs-compound-component-server-boundary.md)
 ⚠️ compound-экспорт (`Object.assign`) для клиентского компонента не резолвится через границу
-Server→Client — property-access ломается, `undefined` ·
+Server→Client — property-access ломается, `undefined`; тот же класс бьёт по **обычной
+константе** из `'use client'`-модуля (объект с именами событий аналитики резолвился в
+`undefined` в серверном компоненте, событие уходило с пустым именем) ·
 [nextjs-revalidatepath-outside-request-scope](/.claude/docs/nextjs-revalidatepath-outside-request-scope.md)
 ⚠️ `revalidatePath` из функции, переиспользуемой в фоновой задаче (`@letar/jobs`) без request
 scope — Invariant вместо обновления кеша ·
