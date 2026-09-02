@@ -7,6 +7,19 @@
 
 ## [Unreleased]
 
+## [1.9.4] - 2026-09-02
+
+### Fixed
+
+- **`robots.ts` не закрывал индексацию на staging** (PLAN-INFRA.md §33 Часть A) — `BASE_URL`
+  резолвился локальным `NEXT_PUBLIC_APP_URL`, который никогда не был подключён ни в
+  `docker-compose.staging.yml`, ни в `.env.staging` → на боевом URL-фоллбэке индексация всегда
+  разрешалась, в том числе на `pravda-stage.s3.letar.best`. Переведено на `@letar/seo`
+  (`getBaseUrl`/`isProductionDomain`, конвенция `NEXT_PUBLIC_BASE_URL`), `robots.ts` теперь
+  закрывает индексацию целиком вне боевого домена — как у `aboi`. `NEXT_PUBLIC_BASE_URL` заведён
+  в `.env.staging.enc` (`pravda-stage.s3.letar.best`) и `.env.docker.enc`
+  (`pravda.letar.best`, явное значение для консистентности).
+
 ## [1.9.2] - 2026-08-25
 
 ### Fixed

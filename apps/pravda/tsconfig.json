@@ -23,6 +23,9 @@
       "@letar/analytics": [
         "../../libs/analytics/src/index.ts"
       ],
+      "@letar/seo": [
+        "../../libs/seo/src/index.ts"
+      ],
       "@letar/glitchtip": [
         "../../libs/glitchtip/src/index.ts"
       ],

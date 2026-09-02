@@ -3,12 +3,24 @@
  * Единый источник для метаданных, OpenGraph и JSON-LD.
  */
 
+import { getBaseUrl, isProductionDomain as sharedIsProductionDomain } from '@letar/seo'
 import type { Metadata } from 'next'
 
 import { type DocumentInfo, documents } from './documents'
 
+const PRODUCTION_URL = 'https://pravda.letar.best'
+
 /** Базовый URL сайта */
-export const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://pravda.letar.best'
+export const BASE_URL = getBaseUrl(PRODUCTION_URL)
+
+/**
+ * true только на боевом домене. `NODE_ENV` не годится для этой проверки — `next build`
+ * выставляет `production` и на staging-образе тоже (см. .claude/rules/env-files.md).
+ * Единственный общий источник правды для robots.ts.
+ */
+export function isProductionDomain(): boolean {
+  return sharedIsProductionDomain(PRODUCTION_URL)
+}
 
 /** Название сайта */
 export const SITE_NAME = 'Pravda — Свод законов Руси'
