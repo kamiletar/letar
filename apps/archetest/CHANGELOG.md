@@ -5,6 +5,13 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.27.13] - 2026-09-02
+
+### Added
+
+- `public/llms.txt` — карта публичных разделов для LLM-агентов (llmstxt.org), см.
+  [.claude/docs/llms-txt-pattern.md](../../.claude/docs/llms-txt-pattern.md).
+
 ## [0.27.12] - 2026-08-31
 
 ### Fixed
