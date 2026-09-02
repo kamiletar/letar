@@ -1,5 +1,43 @@
 # Выполненные задачи: Archetest
 
+## Разблокирован деплой issuer-backfill: OfflineConsentBanner перехватывал клик у StickyActionBar (2026-09-02)
+
+Прод-алерт `account-issuer-null-check` (dashboard-agent) показал 2 записи `Account.issuer IS
+NULL` на archetest — миграция `20260827030000_backfill_account_issuer` была закоммичена ещё
+25–27.08, но так и не доехала до прода: e2e-гейт архетеста падал на `express.spec.ts` в
+firefox/webkit целую неделю (три отдельных прогона `deploy-agent-dev`, 27.08/28.08/01.09, один
+и тот же паттерн — `subtree intercepts pointer events`).
+
+Первый разбор (2026-08-27, `sticky-actionbar-cookiebanner-zindex-race.md`) диагностировал баг
+как `CookieBanner` (`zIndex: 1000`) поверх `StickyActionBar` (тогда `zIndex: "docked"` = 10) и
+пофиксил `StickyActionBar` на `zIndex: "sticky"` (1100, коммит `33feb329`) — но падение
+повторилось теми же двумя тестами на обоих последующих прогонах уже с этим фиксом. Trace от
+`deploy-agent-dev` (запрошен точечно 2026-09-01) показал: перехватывает не `CookieBanner`, а
+**`OfflineConsentBanner`** (`libs/ui`) — компонент, добавленный уже после исходного фикса,
+`zIndex: "banner"` = 1200 (выше `StickyActionBar`), появляется через `delayMs=2000` на `/express`
+и физически накладывается на чекбокс согласия на короткой intro-странице без скролла.
+
+**Фикс (`libs/ui`, коммиты `30189888` доки + `d3c3c959` код):** `OfflineConsentBanner` теперь
+публикует свою высоту в `--letar-offline-consent-banner-height` (`usePublishedHeight`, тот же
+хук, что у `CookieBanner`), `StickyActionBar` складывает её с `--letar-cookie-banner-height` в
+своём `bottom` — раздвигает компоненты позиционно, а не полагается на приоритет `zIndex`, что и
+устраняет перехват независимо от того, какой компонент чем перекрывается в будущем.
+
+Побочно: `git push` letar был заблокирован pre-push-хуком — `domwellbes` (1→2 коммита за время
+разбора) и `studio` (4 коммита) отставали от своих origin, не связано с этой задачей, но держало
+push letar целиком. Оба submodule запушены отдельно, `check-submodule-push-state.sh` подтвердил
+14/14 синхронно перед push letar.
+
+**Итог:** staging e2e 21/21 (было 17/21), прод-раскатка на s2 успешна, миграция применена — оба
+пользователя с `issuer IS NULL` разблокированы. `nx typecheck:tsgo ui`, `nx lint ui`,
+`nx typecheck:tsgo archetest` — зелёные. Разбор дополнен в
+`.claude/docs/sticky-actionbar-cookiebanner-zindex-race.md` и
+`.claude/docs/ui-components.md` § «Координация bottom-anchored компонентов» (корень монорепо).
+
+> **Версия:** 0.27.13 | **Обновлено:** 2026-09-02
+
+---
+
 ## Фикс prismaAdapter/ZenStack в better-auth (2026-08-31)
 
 Живой прогон (`nx dev archetest` + `fetch` на `/api/auth/sign-up|sign-in/email`) подтвердил баг:

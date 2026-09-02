@@ -5,6 +5,15 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.27.14] - 2026-09-02
+
+### Fixed
+
+- Деплой миграции `Account.issuer` backfill был заблокирован e2e-гейтом неделю — `OfflineConsentBanner`
+  (`libs/ui`, `zIndex: "banner"`) перехватывал клик по чекбоксу согласия на `/express` у
+  `StickyActionBar`. Фикс в `libs/ui` (не в самом archetest) — см.
+  [PLAN_COMPLETED.md](./PLAN_COMPLETED.md).
+
 ## [0.27.13] - 2026-09-02
 
 ### Added
