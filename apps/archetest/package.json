@@ -1,6 +1,6 @@
 {
   "name": "@letar/archetest",
-  "version": "0.27.14",
+  "version": "0.27.15",
   "private": true,
   "nx": {
     "name": "archetest",
@@ -8,6 +8,7 @@
       "@letar/chakra-provider",
       "@letar/ui",
       "@letar/analytics",
+      "@letar/seo",
       "@letar/auth",
       "@letar/consent",
       "@letar/glitchtip",

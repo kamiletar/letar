@@ -1,4 +1,7 @@
+import { isProductionDomain } from '@letar/seo'
 import type { MetadataRoute } from 'next'
+
+const PRODUCTION_URL = 'https://archetest.letar.best'
 
 /**
  * robots.txt. До этого файла не было вовсе — краулеры обходили и приватные разделы.
@@ -7,15 +10,15 @@ import type { MetadataRoute } from 'next'
  * нечего), API и dev-превью. Открыты публичные страницы: главная, экспресс,
  * методология для психологов, политика приватности.
  *
- * ⚠️ Здесь НЕТ разделения «прод/не прод». Гейт по `NODE_ENV` был бы ложным:
- * `next build` выставляет `production` и на staging тоже (см.
- * [env-files](/.claude/rules/env-files.md)). Правильный гейт — сверка домена
- * с явным списком продакшен-доменов; он не сделан, потому что домен задаётся
- * только через `NEXT_PUBLIC_APP_URL` в незакоммиченном окружении.
- * Задача заведена в PLAN.md (техдолг «staging индексируется наравне с продом»).
+ * На staging/dev индексация закрыта целиком (§33 PLAN-INFRA.md) — гейт по `NODE_ENV`
+ * был бы ложным: `next build` выставляет `production` и на staging тоже (см.
+ * [env-files](/.claude/rules/env-files.md)). Правильный гейт — сверка домена с боевым
+ * через `@letar/seo`.
  */
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+  if (!isProductionDomain(PRODUCTION_URL)) {
+    return { rules: { userAgent: '*', disallow: '/' } }
+  }
 
   return {
     rules: {
@@ -23,6 +26,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/cabinet', '/en/cabinet', '/settings', '/en/settings', '/api/', '/dev/', '/en/dev/'],
     },
-    ...(baseUrl ? { sitemap: `${baseUrl}/sitemap.xml` } : {}),
+    sitemap: `${PRODUCTION_URL}/sitemap.xml`,
   }
 }

@@ -43,6 +43,7 @@ services:
       GLITCHTIP_ENVIRONMENT: ${GLITCHTIP_ENVIRONMENT}
       NEXT_PUBLIC_GLITCHTIP_DSN: ${NEXT_PUBLIC_GLITCHTIP_DSN}
       NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT: ${NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT}
+      NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL}
       DATABASE_URL: postgresql://archetest:${POSTGRES_PASSWORD:-postgres}@archetest-staging-db:5432/archetest_staging
       # hub-client: авторизация делегирована Ключнице (auth.letar.best), не своему Better Auth.
       # Текущий e2e-сьют (express/kiosk/mood-check-in/safety-net) не проходит через OIDC-логин —

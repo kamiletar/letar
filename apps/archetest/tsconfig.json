@@ -26,6 +26,9 @@
       "@letar/analytics": [
         "../../libs/analytics/src/index.ts"
       ],
+      "@letar/seo": [
+        "../../libs/seo/src/index.ts"
+      ],
       "@letar/auth": [
         "../../libs/auth/src/index.ts"
       ],
