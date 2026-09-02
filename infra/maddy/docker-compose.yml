@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  maddy:
+    image: foxcpp/maddy:latest
+    container_name: maddy
+    restart: unless-stopped
+    ports:
+      - "25:25"      # SMTP (incoming mail)
+      - "465:465"    # SMTPS (submission)
+      - "587:587"    # Submission (STARTTLS)
+      - "993:993"    # IMAPS (reading mail)
+    volumes:
+      - ./data:/data
+    environment:
+      - MADDY_HOSTNAME=mail.letar.best
+      - MADDY_DOMAIN=letar.best
+    hostname: mail.letar.best

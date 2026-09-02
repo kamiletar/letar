@@ -1,0 +1,21 @@
+# Nginx Proxy Manager — mail сервер (31.56.180.161)
+# Обратный прокси для tg-proxy.letar.best / tg-in.letar.best (обход блокировки api.telegram.org на s1/s2)
+#
+# Запуск: docker compose up -d
+# Первый вход: admin@example.com / changeme (сменить сразу после входа)
+# Админка: http://31.56.180.161:81
+
+services:
+  app:
+    image: 'jc21/nginx-proxy-manager:2.15.1'
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+    environment:
+      TZ: 'Europe/Moscow'
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
