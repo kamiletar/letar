@@ -1119,12 +1119,28 @@ import { ImageMagnifier } from '@letar/ui'
 иначе баг проявится только у вернувшегося пользователя и не воспроизведётся при разработке
 с отключённым кэшем.
 
-## Координация bottom-anchored компонентов (`CookieBanner` + `StickyActionBar`)
+## Координация bottom-anchored компонентов (`CookieBanner` + `OfflineConsentBanner` + `StickyActionBar`)
 
 ⚠️ **Любые два компонента, которые оба анкерятся в низ экрана (`position: fixed`/`sticky`,
 `bottom: 0`) — например будущий mobile bottom-nav рядом с `StickyActionBar` — физически
 накладываются друг на друга без явной координации.** Тот, у кого выше `zIndex`, перехватывает
 pointer-events поверх второго, даже если второй визуально "виден" под ним.
+
+⚠️ **Регресс того же класса (archetest `/express`, 2026-09-01):** `OfflineConsentBanner`
+(`libs/ui`, `position: fixed; bottom: var(--letar-cookie-banner-height, 0px); zIndex: "banner"`
+= 1200) появляется через `delayMs` (по умолчанию 2000мс) поверх `StickyActionBar` (`zIndex:
+"sticky"` = 1100) на той же короткой intro-странице — перехватывал клик по чекбоксу согласия
+в e2e (firefox/webkit), из-за чего деплой archetest был заблокирован гейтом почти неделю.
+Исходный фикс `CookieBanner`↔`StickyActionBar` (см. ниже) не покрывал третий компонент.
+**Фикс:** `OfflineConsentBanner` теперь тоже публикует свою высоту
+(`--letar-offline-consent-banner-height` через `usePublishedHeight`, тот же хук, что и у
+`CookieBanner`), а `StickyActionBar` складывает обе переменные в своём `bottom`:
+`calc(var(--letar-cookie-banner-height, 0px) + var(--letar-offline-consent-banner-height, 0px))`.
+Правило на будущее: **каждый новый bottom-anchored компонент обязан либо публиковать свою
+высоту в отдельную CSS-переменную и быть учтён в `bottom` у `StickyActionBar` (или любого
+другого bottom-anchored CTA-компонента), либо явно проверяться на пересечение с уже
+существующими** — молчаливое добавление третьего/четвёртого компонента с тем же `bottom: 0`
+воспроизводит баг снова.
 
 **Прецедент (archetest, 2026-07-28):** `CookieBanner` (`libs/ui`, `position: fixed; bottom:
 0; zIndex: 1000`) и `StickyActionBar` (`libs/ui`, `position: sticky; bottom: 0; zIndex:
