@@ -1,0 +1,13 @@
+services:
+  ipfs:
+    image: ipfs/kubo:latest
+    container_name: kubo
+    restart: unless-stopped
+    ports:
+      - "4001:4001"        # p2p swarm (публичный)
+      - "127.0.0.1:5001:5001"  # API (только localhost)
+      - "127.0.0.1:8080:8080"  # Gateway (через nginx)
+    volumes:
+      - /data/ipfs:/data/ipfs
+    environment:
+      - IPFS_PROFILE=server
