@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.12 (2026-09-02)
+
+### Fixed
+
+- `robots.ts` уже использовал `@letar/seo` (`isProductionDomain()`) корректно, но
+  `NEXT_PUBLIC_BASE_URL` не была проброшена ни в один из compose-файлов и env — гейт был
+  no-op, staging (`time-stage.s3.letar.best`) индексировался наравне с продом. Добавлена
+  переменная в `docker-compose.staging.yml`/`docker-compose.production.yml` и
+  `.env.staging.enc`/`.env.docker.enc` (§33 `PLAN-INFRA-2.md`).
+
 ## 0.5.10 (2026-08-25)
 
 ### Fixed
