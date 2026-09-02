@@ -2,6 +2,13 @@
 
 Все изменения в проекте animatrona-landing документируются в этом файле.
 
+## [0.4.7] - 2026-09-02
+
+### Added
+
+- `public/llms.txt` — карта публичных разделов для LLM-агентов (llmstxt.org), см.
+  [.claude/docs/llms-txt-pattern.md](../../.claude/docs/llms-txt-pattern.md).
+
 ## [0.4.4] - 2026-08-25
 
 ### Fixed
