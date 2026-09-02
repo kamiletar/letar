@@ -168,3 +168,23 @@ curl -sSI http://localhost:<порт>/llms.txt | grep -i content-type   # text/p
 статически, а не превращает в динамический маршрут: `nx build <app>` и проверить, что маршрут
 попал в prerender-манифест (динамический `llms.txt` без причины — лишний рендер на каждый
 запрос краулера).
+
+## Статус по приложениям (2026-09-02)
+
+Первая волна — приложения с публичным контентом, у которых уже были `sitemap.ts`/`robots.ts`
+(критерий «нужен» выше). Все статикой, все относительными ссылками, кроме случаев, где ссылка
+осознанно ведёт наружу (form-example → GitHub, letar-landing → studio/kami как отдельные домены).
+
+**Заведён `public/llms.txt`:** `aboi` (образец, машинный контракт JSON-LD+window-API),
+`form-docs` (роут — единственный обоснованный случай, абсолютные URL на прод-домен), `form-example`,
+`letar-landing`, `mandala`, `grandslamcup`, `aira-web`, `animatrona-landing`,
+`kami-key-the-landing`, `kami`, `archetest`, `dsperevod`, `svoichuzhie`, `aprel8008`, `domwellbes`.
+
+**Ещё не заведён, но кандидат** (см. разбор приложений в истории задачи — не дублируется здесь):
+`studio` (нужно явно отделить публичный маркетинг от кабинета/биллинга), `driving-school`
+(публичный контент есть, но нет самого `sitemap.ts`/`robots.ts` — сначала закрыть это),
+`synth` (контента для витрины пока мало), `animatrona-tracker` (есть `robots.ts`, нет
+`sitemap.ts`; если заводить — только карта каталога, без модерации/пиннинга).
+
+**Не нужен:** desktop/Electron без веб-контента, внутренние инструменты (`auth-hub`, `dashboard`,
+`dashboard-agent`), dev/test-каркасы, `pravda` (назначение приложения пока не описано).
