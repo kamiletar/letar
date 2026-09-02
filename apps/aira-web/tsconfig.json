@@ -17,6 +17,9 @@
       "@letar/analytics": [
         "../../libs/analytics/src/index.ts"
       ],
+      "@letar/seo": [
+        "../../libs/seo/src/index.ts"
+      ],
       "@letar/format-utils": [
         "../../libs/format-utils/src/index.ts"
       ],

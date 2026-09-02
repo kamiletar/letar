@@ -1,6 +1,6 @@
 {
   "name": "@letar/aira-web",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "private": true,
   "nx": {
     "name": "aira-web",
@@ -8,6 +8,7 @@
       "@letar/chakra-provider",
       "@letar/ui",
       "@letar/analytics",
+      "@letar/seo",
       "@letar/format-utils",
       "@letar/github-releases",
       "@letar/glitchtip",

@@ -1,5 +1,18 @@
 # Changelog — aira-web
 
+## [0.3.9] - 2026-09-02
+
+### Fixed
+
+- **`robots.ts` не закрывал индексацию на staging** (PLAN-INFRA.md §33 Часть A) — `BASE_URL`
+  резолвился локальным `NEXT_PUBLIC_SITE_URL`, который никогда не был подключён ни в
+  `docker-compose.staging.yml`, ни в `.env.staging` → на боевом URL-фоллбэке индексация всегда
+  разрешалась, в том числе на `aira-web-stage.s3.letar.best`. Переведено на `@letar/seo`
+  (`getBaseUrl`/`isProductionDomain`, конвенция `NEXT_PUBLIC_BASE_URL` вместо `NEXT_PUBLIC_SITE_URL`),
+  `robots.ts` теперь закрывает индексацию целиком вне боевого домена — как у `aboi`.
+  `NEXT_PUBLIC_BASE_URL` заведён в `.env.staging.enc` (`aira-web-stage.s3.letar.best`) и
+  переименован в `.env.docker.enc` (было `NEXT_PUBLIC_SITE_URL`).
+
 ## [0.3.8] - 2026-09-02
 
 ### Added
