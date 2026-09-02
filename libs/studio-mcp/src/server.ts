@@ -407,6 +407,23 @@ export function createStudioAdminMcpServer(): McpServer {
   )
 
   server.tool(
+    'studio_invoice_mark_paid',
+    'Регистрирует ручную оплату счёта (банковский перевод/наличные вне вебхука эквайринга) — создаёт Payment и переводит счёт в PAID/PARTIALLY_PAID.',
+    { id: z.string().min(1), amountKopecks: z.number().int().positive().optional() },
+    async ({ id, amountKopecks }) => {
+      const res = await studioAdminRequest({
+        method: 'POST',
+        path: `/api/mcp/admin/invoices/${id}/mark-paid`,
+        body: amountKopecks !== undefined ? { amountKopecks } : {},
+      })
+      if (!res.ok) {
+        return errorText(`❌ studio_invoice_mark_paid(${id}): ${pretty(res.json)}`)
+      }
+      return text(`✅ Оплата зарегистрирована.\n\n${pretty(res.json.data)}`)
+    },
+  )
+
+  server.tool(
     'studio_invoice_cancel',
     'Отменяет неоплаченный счёт (PAID отменить нельзя).',
     { id: z.string().min(1) },

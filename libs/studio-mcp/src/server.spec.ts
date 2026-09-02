@@ -302,6 +302,54 @@ describe('createStudioAdminMcpServer', () => {
     })
   })
 
+  describe('studio_invoice_mark_paid', () => {
+    it('успешный вызов регистрирует оплату', async () => {
+      studioAdminRequestMock.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: { data: { status: 'PAID', sumPaid: 10000 } },
+      })
+
+      const result = await client.callTool({ name: 'studio_invoice_mark_paid', arguments: { id: 'i1' } })
+
+      expect(result.isError).toBeFalsy()
+      expect(textOf(result)).toContain('Оплата зарегистрирована')
+      expect(studioAdminRequestMock).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/api/mcp/admin/invoices/i1/mark-paid',
+        body: {},
+      })
+    })
+
+    it('передаёт amountKopecks частичной оплаты', async () => {
+      studioAdminRequestMock.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: { data: { status: 'PARTIALLY_PAID', sumPaid: 5000 } },
+      })
+
+      await client.callTool({
+        name: 'studio_invoice_mark_paid',
+        arguments: { id: 'i1', amountKopecks: 5000 },
+      })
+
+      expect(studioAdminRequestMock).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/api/mcp/admin/invoices/i1/mark-paid',
+        body: { amountKopecks: 5000 },
+      })
+    })
+
+    it('счёт уже закрыт — ошибка внешнего вызова', async () => {
+      studioAdminRequestMock.mockResolvedValue({ ok: false, status: 400, json: { error: 'Счёт уже закрыт' } })
+
+      const result = await client.callTool({ name: 'studio_invoice_mark_paid', arguments: { id: 'i1' } })
+
+      expect(result.isError).toBe(true)
+      expect(textOf(result)).toContain('Счёт уже закрыт')
+    })
+  })
+
   describe('studio_invoice_cancel', () => {
     it('успешный вызов отменяет счёт', async () => {
       studioAdminRequestMock.mockResolvedValue({ ok: true, status: 200, json: {} })
