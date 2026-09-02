@@ -19,6 +19,10 @@
 [agent-skills-mirror](/.claude/docs/agent-skills-mirror.md) зеркало `.claude/skills/` для Codex ·
 [nextjs16-agent-guide-files](/.claude/docs/nextjs16-agent-guide-files.md) `next dev` сам пишет
 `apps/<app>/AGENTS.md` ·
+[llms-txt-pattern](/.claude/docs/llms-txt-pattern.md) `llms.txt` (llmstxt.org) — кому нужен,
+статика `public/` vs роут (роут только при зависимости от БД/`BASE_URL`), курируемый список
+вместо дубля `sitemap.xml`, машинный контракт (JSON-LD + `window`-API) и ⚠️ юридические запреты
+формулировок действуют в нём так же, как на страницах сайта ·
 [git-multi-agent-incidents](/.claude/docs/git-multi-agent-incidents.md) разборы гонок между
 агентами: почему правила git такие строгие ·
 [git-pathspec-commit-worktree-not-index](/.claude/docs/git-pathspec-commit-worktree-not-index.md)
