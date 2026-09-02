@@ -178,13 +178,15 @@ curl -sSI http://localhost:<порт>/llms.txt | grep -i content-type   # text/p
 **Заведён `public/llms.txt`:** `aboi` (образец, машинный контракт JSON-LD+window-API),
 `form-docs` (роут — единственный обоснованный случай, абсолютные URL на прод-домен), `form-example`,
 `letar-landing`, `mandala`, `grandslamcup`, `aira-web`, `animatrona-landing`,
-`kami-key-the-landing`, `kami`, `archetest`, `dsperevod`, `svoichuzhie`, `aprel8008`, `domwellbes`.
+`kami-key-the-landing`, `kami`, `archetest`, `dsperevod`, `svoichuzhie`, `aprel8008`, `domwellbes`,
+`studio` (граница публичное/кабинет проверена по коду — какие route group реально не читают
+`auth()`/`cookies()` на сервере, а не по названиям папок; личный кабинет, бэк-офис и API в файл
+не попали).
 
 **Ещё не заведён, но кандидат** (см. разбор приложений в истории задачи — не дублируется здесь):
-`studio` (нужно явно отделить публичный маркетинг от кабинета/биллинга), `driving-school`
-(публичный контент есть, но нет самого `sitemap.ts`/`robots.ts` — сначала закрыть это),
-`synth` (контента для витрины пока мало), `animatrona-tracker` (есть `robots.ts`, нет
-`sitemap.ts`; если заводить — только карта каталога, без модерации/пиннинга).
+`driving-school` (публичный контент есть, но нет самого `sitemap.ts`/`robots.ts` — сначала
+закрыть это), `synth` (контента для витрины пока мало), `animatrona-tracker` (есть `robots.ts`,
+нет `sitemap.ts`; если заводить — только карта каталога, без модерации/пиннинга).
 
 **Не нужен:** desktop/Electron без веб-контента, внутренние инструменты (`auth-hub`, `dashboard`,
 `dashboard-agent`), dev/test-каркасы, `pravda` (назначение приложения пока не описано).
