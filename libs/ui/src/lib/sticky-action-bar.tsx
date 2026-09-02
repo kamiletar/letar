@@ -61,11 +61,15 @@ export const StickyActionBar = forwardRef<HTMLDivElement, StickyActionBarProps>(
     <Box
       ref={mergeRefs(ref, innerRef)}
       position="sticky"
-      // Приподнимается над CookieBanner (@letar/ui), если он сейчас показан — оба компонента
-      // bottom:0, без координации баннер (zIndex выше) перекрывает эту CTA по pointer-events
-      // (archetest, 2026-07-28: клики по «Начать экспресс»/«Пропустить» перехватывала ссылка
-      // из баннера). Переменная публикуется самим CookieBanner, 0px если он скрыт/не подключён.
-      bottom="var(--letar-cookie-banner-height, 0px)"
+      // Приподнимается над CookieBanner И OfflineConsentBanner (@letar/ui), если они сейчас
+      // показаны — все три компонента bottom:0, без координации более высокий по zIndex
+      // перекрывает эту CTA по pointer-events (archetest, 2026-07-28: клики по «Начать
+      // экспресс»/«Пропустить» перехватывала ссылка из CookieBanner; регресс на том же
+      // экране 2026-09-01 — перехватывал OfflineConsentBanner, zIndex "banner"=1200 выше
+      // "sticky"=1100). Обе переменные публикуются самими баннерами, 0px если скрыты/не
+      // подключены. OfflineConsentBanner уже сам приподнят над CookieBanner своим bottom —
+      // складывать с cookie-banner-height второй раз не нужно.
+      bottom="calc(var(--letar-cookie-banner-height, 0px) + var(--letar-offline-consent-banner-height, 0px))"
       insetInline="0"
       // ⚠️ Одного bottom-отступа недостаточно: он спасает только когда панель уже в «застрявшем»
       // (stuck) sticky-состоянии. На короткой странице (archetest quiz-intro — интро без скролла)

@@ -4,6 +4,19 @@ import { Box, Button, CloseButton, HStack, Text, VStack } from '@chakra-ui/react
 import { useOfflineConsent } from '@letar/hooks'
 import { Fragment, useEffect, useState } from 'react'
 import { LuDownload, LuWifiOff } from 'react-icons/lu'
+import { usePublishedHeight } from './use-published-height'
+
+/**
+ * CSS-переменная с текущей высотой баннера (0, если скрыт) — читает {@link StickyActionBar},
+ * чтобы приподняться над баннером, а не отдать ему клики по pointer-events. Оба компонента
+ * `position: fixed/sticky; bottom: 0` (у обоих отсчёт от `--letar-cookie-banner-height`) —
+ * без координации баннер (zIndex "banner" = 1200, выше "sticky" = 1100 у StickyActionBar)
+ * перекрывает CTA под собой. Тот же класс бага, что у `CookieBanner`
+ * (`.claude/docs/ui-components.md` § «Координация bottom-anchored компонентов»), найден
+ * повторно на archetest `/express` (2026-09-01): клик по чекбоксу согласия внутри
+ * `StickyActionBar` перехватывался этим баннером, появляющимся через `delayMs` после интро.
+ */
+const OFFLINE_BANNER_HEIGHT_VAR = '--letar-offline-consent-banner-height'
 
 export interface OfflineConsentBannerProps {
   /** Namespace-ключ для {@link useOfflineConsent} (localStorage), например `'studio-offline-consent'` */
@@ -52,6 +65,9 @@ export function OfflineConsentBanner({
   const [isVisible, setIsVisible] = useState(false)
   const [isReady, setIsReady] = useState(false)
   const [eligible, setEligible] = useState(!isEligible)
+  // Публикует свою высоту, пока видим — StickyActionBar приподнимается над баннером вместо
+  // того, чтобы отдавать ему клики по CTA (см. JSDoc переменной выше).
+  const rootRef = usePublishedHeight(OFFLINE_BANNER_HEIGHT_VAR, isVisible)
 
   useEffect(() => {
     if (isEligible) {
@@ -84,6 +100,7 @@ export function OfflineConsentBanner({
 
   return (
     <Box
+      ref={rootRef}
       position="fixed"
       bottom="var(--letar-cookie-banner-height, 0px)"
       left={0}
