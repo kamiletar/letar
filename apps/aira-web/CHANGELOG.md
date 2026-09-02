@@ -1,5 +1,12 @@
 # Changelog — aira-web
 
+## [0.3.8] - 2026-09-02
+
+### Added
+
+- `public/llms.txt` — карта публичных разделов для LLM-агентов (llmstxt.org), см.
+  [.claude/docs/llms-txt-pattern.md](../../.claude/docs/llms-txt-pattern.md).
+
 ## [0.3.7] — 2026-08-25
 
 ### Fixed
