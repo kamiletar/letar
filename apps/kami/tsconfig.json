@@ -32,6 +32,9 @@
       "@letar/analytics": [
         "../../libs/analytics/src/index.ts"
       ],
+      "@letar/seo": [
+        "../../libs/seo/src/index.ts"
+      ],
       "@letar/chakra-provider": [
         "../../libs/chakra-provider/src/index.ts"
       ],

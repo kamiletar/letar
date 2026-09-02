@@ -5,6 +5,16 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 проект придерживается [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.33.16] - 2026-09-02
+
+### Fixed
+
+- `robots.ts` разрешал индексацию на staging (`kami-stage.s3.letar.best`) — гейт строился из
+  хардкод-константы без проверки боевого домена. Переведено на `@letar/seo`
+  (`isProductionDomain()`), `NEXT_PUBLIC_BASE_URL` добавлена в compose-файлы и
+  `.env.staging.enc`/`.env.docker.enc` — тот же паттерн, что и в `pravda`/`aira-web`
+  (§33 `PLAN-INFRA-2.md`).
+
 ## [0.33.15] - 2026-09-02
 
 ### Added

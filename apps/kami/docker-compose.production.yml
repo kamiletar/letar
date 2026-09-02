@@ -64,6 +64,7 @@ services:
 
       # Application
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3005}
+      NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL:-http://localhost:3005}
 
       # Yandex Metrica
       NEXT_PUBLIC_YM_COUNTER_ID: ${NEXT_PUBLIC_YM_COUNTER_ID}
