@@ -33,10 +33,18 @@ const nextConfig = {
 }
 ```
 
-Next резолвит имена из `transpilePackages` через тот же алиас `paths`, даже когда пакета физически
-нет в `node_modules` — проверено сборкой (пусто в `node_modules/@letar/*`, но билд проходит).
 Лишние записи (пакет объявлен в `paths`, но не импортируется) безвредны — Next не резолвит их
 eagerly.
+
+⚠️ **Уточнение 2026-09-03: работает наличие ключа, а не имена в нём.** Формулировка «Next резолвит
+имена из `transpilePackages` через тот же алиас `paths`» (стояла здесь раньше) неверна: webpack
+Next для этого `paths` из tsconfig не читает, резолв идёт через симлинк bun
+`apps/<app>/node_modules/@letar/* -> libs/*`. Вывод раздела — «явный `transpilePackages` нужен» —
+остаётся верным, но причина другая: непустой массив снимает ограничение `include: [dir]`
+(`shouldIncludeExternalDirs`), а конкретные имена в нём для `@letar/*` не участвуют ни в чём.
+Проверено тремя сборками `studio`: список из одного `['@letar/ui']` — зелёный, ключ удалён —
+`Module parse failed`. Разбор —
+[transpile-packages-array-presence-not-content](/.claude/docs/transpile-packages-array-presence-not-content.md).
 
 ## Композиция плагинов без composePlugins
 

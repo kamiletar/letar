@@ -1,0 +1,124 @@
+{
+  "_": [
+    "Реестр НАМЕРЕННЫХ точных пинов версий в корневом package.json.",
+    "",
+    "Зачем файл вообще существует: JSON не допускает комментариев, поэтому строка",
+    "вида \"@tanstack/react-devtools\": \"0.10.5\" в package.json ничем не отличается",
+    "от отставшей версии — и обычный /infra:deps-update снимает её как любую другую.",
+    "Именно так пин из PLAN-INFRA-4.md §112 был снят коммитом 9a65abe7 и падение",
+    "прод-сборки вернулось во все приложения-потребители @letar/query-provider (§142).",
+    "Ни bun install, ни nx lint, ни typecheck:tsgo, ни nx test точных пинов не проверяют.",
+    "",
+    "Проверяет этот файл scripts/check-intentional-pins.mjs (gate в scripts/check-all.mjs,",
+    "группа deps; запускается и pre-commit хуком, когда в коммите есть package.json/bun.lock).",
+    "",
+    "Как заводить запись: см. шапку scripts/check-intentional-pins.mjs.",
+    "Снимать пин можно — но осознанно: удали запись отсюда тем же коммитом и напиши",
+    "в PLAN-INFRA-*, почему причина отпала."
+  ],
+
+  "pins": [
+    {
+      "package": "zod",
+      "version": "4.4.3",
+      "field": "dependencies",
+      "since": "2026-09-01",
+      "commit": "8f267c62",
+      "reason": "Дедуп с @modelcontextprotocol/sdk: SDK тянет свой zod диапазоном \"^3.25 || ^4.0\". Пока корневая версия совпадает с той, на которую резолвится вложенный диапазон, bun держит ОДИН физический пакет. Любой бамп корня разводит их на две копии, и tsgo перестаёт считать ZodTypeAny одним типом — 19 ошибок TS2322 в nx typecheck:tsgo synth. Scoped-override у bun 1.3.14 не работает ни в одной из трёх форм.",
+      "doc": "PLAN-INFRA-4.md §134",
+      "unpinWhen": "grep -n '\"@modelcontextprotocol/sdk/zod\"' bun.lock даёт пусто при поднятом корневом zod — значит SDK сам догнал версию и дедуп больше не нужен. Второй путь: bun научится overrides со scoped-таргетом."
+    },
+    {
+      "package": "react-native-gesture-handler",
+      "version": "3.3.0-nightly-20260824-5de6d2358",
+      "field": "dependencies",
+      "since": "2026-08-25",
+      "commit": "a660e06f",
+      "reason": "Стабильный gesture-handler 3.2.1 использует внутренний Android API ReactViewGroup.getZIndexMappedChildIndex, удалённый в react-native 0.87 — сборка APK падает. Фикса в stable на момент установки не было, поэтому nightly. У nightly-версии диапазона нет по построению.",
+      "doc": "apps/animatrona-mobile/PLAN.md § открытый вопрос про nightly",
+      "unpinWhen": "Вышел stable-релиз gesture-handler с поддержкой RN 0.87. Тогда bun add react-native-gesture-handler@latest в корне + пересборка APK и проверка жестов на устройстве (nightly в проде держать нельзя)."
+    },
+    {
+      "package": "@tamagui/lucide-icons",
+      "version": "2.0.0-rc.26",
+      "field": "dependencies",
+      "since": "2026-05-29",
+      "commit": "80cbd6a7",
+      "reason": "Tamagui v2 на момент установки не имел финального релиза этого пакета. Caret на rc-версию semver трактует иначе, чем на стабильную (^2.0.0-rc.26 не подтягивает соседние rc предсказуемо) — точная версия здесь безопаснее диапазона.",
+      "doc": "PLAN-INFRA-4.md §107 § «Оставлены как есть (намеренные исключения)»",
+      "unpinWhen": "Вышел стабильный 2.x @tamagui/lucide-icons — тогда обычный caret-диапазон."
+    },
+    {
+      "package": "oxlint",
+      "version": "1.73.0",
+      "field": "devDependencies",
+      "since": "2026-08-26",
+      "commit": "a1ffb4ee",
+      "reason": "Бамп 1.73.0 → 1.80.0 откачен: новая версия включает React-correctness правила роллаута «React Compiler Support» (react/refs, react/set-state-in-effect, react/use-memo) и даёт ~28 новых находок в чужом коде. Находки реальные, но правка 28 файлов — отдельная задача, а не побочный эффект deps-update.",
+      "doc": "PLAN-INFRA-4.md §114",
+      "unpinWhen": "Разобраны 28 находок новых React-правил (отдельная сессия). После этого поднимать oxlint обычным порядком и переписать эту запись на новую версию — точную форму сохранить: набор находок линтера должен быть одинаковым у всех агентов и в CI."
+    }
+  ],
+
+  "lockstepGroups": [
+    {
+      "id": "nx",
+      "packages": [
+        "nx",
+        "@nx/devkit",
+        "@nx/esbuild",
+        "@nx/eslint",
+        "@nx/eslint-plugin",
+        "@nx/js",
+        "@nx/next",
+        "@nx/node",
+        "@nx/playwright",
+        "@nx/react",
+        "@nx/vitest",
+        "@nx/workspace"
+      ],
+      "reason": "Плагины Nx версионируются лок-степом с ядром и между собой не совместимы через минорные границы: разъехавшийся @nx/next ломает граф проектов и inferred-таргеты всего монорепо. Версия здесь не заморожена — бампы штатны (23.1.2 → 23.1.3 → 23.2.0), проверка требует лишь, чтобы все двенадцать пакетов стояли на ОДНОЙ точной версии.",
+      "doc": "CLAUDE.md § Технологический стек"
+    },
+    {
+      "id": "react-native",
+      "packages": [
+        "react-native",
+        "@react-native/babel-preset",
+        "@react-native/eslint-config",
+        "@react-native/metro-config",
+        "@react-native/typescript-config"
+      ],
+      "reason": "Лок-степ версионирование — стандартная практика экосистемы React Native: @react-native/* публикуются одной версией с ядром, диапазон здесь даёт нативные сбои сборки APK вместо ошибки резолва. Версия не заморожена (бампы мажоров RN штатны), требуется одинаковая точная у всех пяти.",
+      "doc": "PLAN-INFRA-4.md §107 § «Оставлены как есть (намеренные исключения)»"
+    }
+  ],
+
+  "unexplained": {
+    "_": [
+      "Точные пины, для которых причина НЕ найдена: git-история ведёт в initial commit или",
+      "в общий chore(deps)-коммит без объяснения, в PLAN-INFRA*/docs разбора нет.",
+      "Список нужен, чтобы проверка не шумела на давно унаследованном, но при этом громко",
+      "называла НОВЫЙ точный пин, заведённый без записи в реестре.",
+      "",
+      "Это не индульгенция: любой пакет отсюда можно либо перевести на диапазон обычным",
+      "deps-update, либо — если выяснится причина — перенести в pins с объяснением."
+    ],
+    "packages": {
+      "@tanstack/react-devtools": "Рудимент снятого пина: 0.10.5 стоял по §112, deps update 9a65abe7 поднял до 0.10.12, сохранив точную форму. Сама причина отпала — §142 заменил пин структурным фиксом в libs/query-provider (мёртвая ветка отсекается сравнением с process.env.NODE_ENV на верхнем уровне модуля) плюс сторож devtools-isolation.spec.ts. Кандидат на возврат к caret-диапазону при следующем deps-update.",
+      "typescript": "Точный 6.0.3 с initial commit. Обновление 6 → 7 ведётся отдельным планом репозитория (PLAN-INFRA-1.md § TypeScript 7), из scope deps-update выведено решением владельца. Смежная ловушка — alias-схема двух компиляторов под bun isolated linker (.claude/docs/bun-isolated-linker-alias-shared-bucket-collision.md).",
+      "@eslint/js": "Точная версия с ca0eb7a7 (eslint 10). Причина точной формы не задокументирована.",
+      "eslint-plugin-import": "Точная версия с initial commit, причина не задокументирована.",
+      "eslint-plugin-jsx-a11y": "Точная версия с initial commit, причина не задокументирована.",
+      "eslint-plugin-react": "Точная версия с initial commit, причина не задокументирована.",
+      "eslint-plugin-react-hooks": "Точная версия с initial commit, причина не задокументирована.",
+      "@testing-library/dom": "Точная версия с initial commit, причина не задокументирована.",
+      "@testing-library/react": "Точная версия с initial commit, причина не задокументирована.",
+      "@types/nodemailer": "Точная версия с initial commit, причина не задокументирована.",
+      "@swc-node/register": "Точная версия с initial commit (последний бамп aa3bc619), причина не задокументирована.",
+      "hermes-compiler": "Точная версия с initial commit (последний бамп aa3bc619). Собственная схема версионирования апстрима (250829098.0.17) — caret на ней ведёт себя неочевидно, но явного решения в доках нет.",
+      "jiti": "Точная версия с initial commit, причина не задокументирована.",
+      "satori": "Точная версия с initial commit, причина не задокументирована."
+    }
+  }
+}

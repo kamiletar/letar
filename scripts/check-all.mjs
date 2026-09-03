@@ -73,6 +73,20 @@ const CHECKS = [
     doc: '.claude/docs/root-pin-peer-drift.md',
   },
   {
+    id: 'intentional-pins',
+    group: 'deps',
+    title: 'намеренные точные пины версий против реестра причин',
+    run: ['bun', ['scripts/check-intentional-pins.mjs']],
+    // gate: снятие такого пина не ловится ничем — ни bun install, ни lint, ни
+    // typecheck:tsgo, ни nx test версий не сверяют, а комментарий в JSON
+    // невозможен. Прецедент: пин @tanstack/react-devtools@0.10.5 (§112) снят
+    // обычным `deps update` через неделю, падение прод-сборки вернулось во все
+    // приложения — потребители @letar/query-provider (§142).
+    severity: 'gate',
+    ci: 'full',
+    doc: '.claude/docs/root-pin-peer-drift.md',
+  },
+  {
     id: 'electron-drift',
     group: 'deps',
     title: 'версии electron в приложениях против корневой',

@@ -60,7 +60,10 @@ projects --with-target` этого не ловит ·
   `package.json` — тихая мина: override/resolution перебивает его молча или caret-соседи уезжают
   вперёд без него; `bun install` не печатает peer-warnings ни в каком режиме, проверка —
   `bun scripts/check-all.mjs --group=deps` (раннер проверок целостности, состав — см. ниже
-  § «Проверки целостности монорепо») ·
+  § «Проверки целостности монорепо»); там же ⚠️ обратная сторона: пин, поставленный как фикс
+  бага, JSON объяснить не может — `deps update` снимает его как любую отставшую версию (так
+  вернулось падение прод-сборки, §142), причины намеренных пинов живут в
+  `scripts/intentional-pins.json` и сверяются gate-проверкой `intentional-pins` ·
   [nested-package-resolution-under-bun-isolated-installs](/.claude/docs/nested-package-resolution-under-bun-isolated-installs.md)
   ⚠️ голый `import('@foo/bar')` от скрипта в `scripts/` не резолвит транзитивную зависимость чужого
   пакета под изолированной установкой bun, хотя она есть в `bun.lock` — фикс: `createRequire` от
@@ -213,6 +216,13 @@ ref/DOM не перезапускается ·
 [nextjs-nx-composeplugins-migration](/.claude/docs/nextjs-nx-composeplugins-migration.md) миграция
 с deprecated `composePlugins`/`withNx` (`@nx/next`) на голый `next.config` + явный
 `transpilePackages` ·
+[transpile-packages-array-presence-not-content](/.claude/docs/transpile-packages-array-presence-not-content.md)
+⚠️ ловушка обратного направления: для `@letar/*` работает **наличие** ключа `transpilePackages`
+(снимает `include: [dir]`), а не перечисленные в нём имена — bun линкует либы симлинком на
+`libs/`, реальный путь без `node_modules`, проверка по списку до них не доходит; отсутствие
+записи о конкретном пакете ничего не ломает (доказано зелёной сборкой с `['@letar/ui']`),
+а удаление ключа целиком ломает сразу; красный гейт `check-transpile-packages` = разъехался
+список, а не сломалась прод-сборка ·
 [nextron-renderer-transpile-packages-required](/.claude/docs/nextron-renderer-transpile-packages-required.md)
 ⚠️ `transpilePackages` для `@letar/*` обязателен и в nextron-рендерере (`animatrona`) — резолв
 пути через `tsconfig paths` не равнозначен транспиляции TS-синтаксиса, отсутствие маскировал
@@ -631,9 +641,10 @@ bash scripts/hooks/install.sh
 
 ### Проверки целостности монорепо
 
-Проверки в `scripts/check-*` (патчи зависимостей, peer-диапазоны, дрейф electron, subpath-пути
-`@letar/*`, шаблоны `.gitignore` в submodule, неотправленные коммиты submodule, брошенные
-worktree) собраны под общий раннер — актуальный состав всегда у `--list`, не по этому списку:
+Проверки в `scripts/check-*` (патчи зависимостей, peer-диапазоны, намеренные пины версий,
+дрейф electron, subpath-пути `@letar/*`, шаблоны `.gitignore` в submodule, неотправленные
+коммиты submodule, брошенные worktree) собраны под общий раннер — актуальный состав всегда
+у `--list`, не по этому списку:
 
 ```bash
 bun scripts/check-all.mjs
