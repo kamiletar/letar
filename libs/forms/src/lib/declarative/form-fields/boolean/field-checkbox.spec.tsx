@@ -168,9 +168,9 @@ describe('FieldCheckbox', () => {
       )
 
       const checkboxRoot = screen.getByRole('checkbox').closest('[data-scope="checkbox"]') as HTMLElement
-      // jsdom не резолвит rem→px (нет реального layout), сравниваем как задано в стиле;
-      // 2.75rem = 44px при базовом font-size 16px (WCAG 2.5.5 минимум)
-      expect(getComputedStyle(checkboxRoot).minHeight).toBe('2.75rem')
+      // jsdom 30+ резолвит rem→px в getComputedStyle (при базовом font-size 16px);
+      // 2.75rem = 44px — минимум WCAG 2.5.5
+      expect(getComputedStyle(checkboxRoot).minHeight).toBe('44px')
     })
   })
 
