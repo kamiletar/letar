@@ -333,14 +333,16 @@
     },
     "apps/aboi": {
       "name": "@letar/aboi",
-      "version": "0.83.0",
+      "version": "0.83.2",
       "dependencies": {
+        "@letar/admin-ui": "workspace:*",
         "@letar/api-server": "workspace:*",
         "@letar/auth": "workspace:*",
         "@letar/demo-protection": "workspace:*",
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
+        "@letar/jobs": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "@letar/seed-utils": "workspace:*",
         "@letar/theme-check": "workspace:*",
@@ -442,7 +444,7 @@
     },
     "apps/archetest": {
       "name": "@letar/archetest",
-      "version": "0.27.15",
+      "version": "0.27.17",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -480,7 +482,7 @@
     },
     "apps/dashboard": {
       "name": "@letar/dashboard",
-      "version": "1.26.2",
+      "version": "1.26.4",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/analytics": "workspace:*",
@@ -518,7 +520,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.175.0",
+      "version": "0.178.0",
       "dependencies": {
         "@letar/demo-protection": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -539,11 +541,13 @@
     },
     "apps/driving-school": {
       "name": "driving-school",
-      "version": "0.240.18",
+      "version": "0.240.19",
       "dependencies": {
+        "@letar/admin-ui": "workspace:*",
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/hooks": "workspace:*",
+        "@letar/jobs": "workspace:*",
         "@letar/pg-url": "workspace:*",
       },
     },
@@ -556,12 +560,14 @@
     },
     "apps/dsperevod": {
       "name": "@letar/dsperevod",
-      "version": "0.6.25",
+      "version": "0.6.26",
       "dependencies": {
         "@better-auth/utils": "^0.4.2",
         "@chakra-ui/react": "*",
+        "@letar/admin-ui": "workspace:*",
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
+        "@letar/jobs": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "@letar/seed-utils": "workspace:*",
         "next-mdx-remote": "^6.0.0",
@@ -621,7 +627,7 @@
     },
     "apps/grandslamcup": {
       "name": "@letar/grandslamcup",
-      "version": "3.39.11",
+      "version": "3.39.14",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -692,7 +698,7 @@
     },
     "apps/mandala": {
       "name": "@letar/mandala",
-      "version": "0.40.27",
+      "version": "0.40.28",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -723,7 +729,7 @@
     },
     "apps/pravda": {
       "name": "@letar/pravda",
-      "version": "1.9.4",
+      "version": "1.9.5",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
       },
@@ -734,7 +740,7 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.56.3",
+      "version": "0.56.4",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -764,11 +770,13 @@
     },
     "apps/svoichuzhie": {
       "name": "@letar/svoichuzhie",
-      "version": "0.10.51",
+      "version": "0.10.52",
       "dependencies": {
+        "@letar/admin-ui": "workspace:*",
         "@letar/api-server": "workspace:*",
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
+        "@letar/jobs": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "qrcode": "^1.5.4",
         "tus-js-client": "^4.3.1",
@@ -796,12 +804,13 @@
     },
     "apps/time": {
       "name": "@letar/time",
-      "version": "0.5.12",
+      "version": "0.5.13",
       "dependencies": {
         "@letar/api-server": "workspace:*",
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
+        "@letar/jobs": "workspace:*",
         "@letar/pg-url": "workspace:*",
       },
     },
@@ -1230,7 +1239,7 @@
     },
     "libs/hooks": {
       "name": "@letar/hooks",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "peerDependencies": {
         "@tanstack/react-query": ">=5.0.0",
         "react": ">=18.0.0",
@@ -1265,7 +1274,7 @@
     },
     "libs/jobs": {
       "name": "@letar/jobs",
-      "version": "0.2.1",
+      "version": "0.3.0",
       "dependencies": {
         "@letar/pg-url": "workspace:*",
         "cron-parser": "^5.7.0",
