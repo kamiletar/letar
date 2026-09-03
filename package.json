@@ -6,25 +6,37 @@
   "private": true,
   "resolutions": {
     "minimist": "^1.2.8",
-    "qs": "^6.15.2",
+    "qs": "^6.16.0",
     "picomatch": "^2.3.2",
     "serialize-javascript": "^7.0.5",
     "protobufjs": "^7.5.9",
     "seroval": "~1.5.3",
     "shell-quote": "^1.10.0",
     "websocket-driver": "^0.7.5",
-    "@xhmikosr/decompress": "^11.1.4"
+    "@xhmikosr/decompress": "^11.1.4",
+    "tar": "^7.5.22",
+    "@xmldom/xmldom": "^0.8.15",
+    "app-builder-lib": "^26.15.3",
+    "builder-util-runtime": "^9.7.0",
+    "fast-uri": "^3.1.7",
+    "form-data": "^4.0.6"
   },
   "overrides": {
     "minimist": "^1.2.8",
-    "qs": "^6.15.2",
+    "qs": "^6.16.0",
     "picomatch": "^2.3.2",
     "serialize-javascript": "^7.0.5",
     "protobufjs": "^7.5.9",
     "seroval": "~1.5.3",
     "shell-quote": "^1.10.0",
     "websocket-driver": "^0.7.5",
-    "@xhmikosr/decompress": "^11.1.4"
+    "@xhmikosr/decompress": "^11.1.4",
+    "tar": "^7.5.22",
+    "@xmldom/xmldom": "^0.8.15",
+    "app-builder-lib": "^26.15.3",
+    "builder-util-runtime": "^9.7.0",
+    "fast-uri": "^3.1.7",
+    "form-data": "^4.0.6"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.49",
