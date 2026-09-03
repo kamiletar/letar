@@ -179,6 +179,29 @@ export function createFindUniqueHook<TResult, TInclude = object>(config: FindUni
 // ============================================================
 
 /**
+ * Server action может вернуть `{ success: false, error }` вместо throw (найдено в
+ * delete-actions anime-relation/audio-track/subtitle-track — коммит cfd2e63e). TanStack Query
+ * считает такой результат успехом и вызывает onSuccess/invalidateQueries как обычно — правки
+ * отката не происходит, UI выглядит как «сработало». Оборачиваем каждый `mutationFn` этой
+ * проверкой: узнаём форму `{success:false}` и бросаем Error, тогда мутация уходит в error-статус
+ * до onSuccess. Actions, возвращающие сущность напрямую (без поля `success`), проходят не тронутыми.
+ */
+function throwOnFailureResult<TResult>(result: TResult): TResult {
+  if (
+    typeof result === 'object'
+    && result !== null
+    && 'success' in result
+    && (result as { success: unknown }).success === false
+  ) {
+    const message = 'error' in result && typeof (result as { error: unknown }).error === 'string'
+      ? (result as { error: string }).error
+      : 'Операция завершилась ошибкой'
+    throw new Error(message)
+  }
+  return result
+}
+
+/**
  * Создаёт хук useCreate для сущности
  *
  * @example
@@ -192,7 +215,7 @@ export function createCreateHook<TData, TResult>(config: CreateConfig<TData, TRe
     const queryClient = useQueryClient()
 
     return useMutation({
-      mutationFn: ({ data }: { data: TData }) => config.mutationFn(data),
+      mutationFn: async ({ data }: { data: TData }) => throwOnFailureResult(await config.mutationFn(data)),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: [config.listKey] })
         config.additionalInvalidation?.forEach((key) => {
@@ -218,7 +241,8 @@ export function createUpdateHook<TData, TResult>(config: UpdateConfig<TData, TRe
     const queryClient = useQueryClient()
 
     return useMutation({
-      mutationFn: ({ where, data }: { where: { id: string }; data: TData }) => config.mutationFn(where.id, data),
+      mutationFn: async ({ where, data }: { where: { id: string }; data: TData }) =>
+        throwOnFailureResult(await config.mutationFn(where.id, data)),
       onSuccess: (_result, variables) => {
         queryClient.invalidateQueries({ queryKey: [config.listKey] })
         queryClient.invalidateQueries({ queryKey: [config.singleKey, variables.where.id] })
@@ -247,7 +271,8 @@ export function createDeleteHook<TResult>(config: DeleteConfig<TResult>) {
     const queryClient = useQueryClient()
 
     return useMutation({
-      mutationFn: ({ where }: { where: { id: string } }) => config.mutationFn(where.id),
+      mutationFn: async ({ where }: { where: { id: string } }) =>
+        throwOnFailureResult(await config.mutationFn(where.id)),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: [config.listKey] })
         if (config.predicateInvalidation) {

@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [0.55.34] - 2026-09-03
+
+### Fixed
+
+- `createCreateHook`/`createUpdateHook`/`createDeleteHook` (`hooks-factory.ts`) — общие фабрики
+  мутаций не защищали от того же класса бага, что и фикс delete-actions в 0.55.33: любой будущий
+  server action, возвращающий `{ success: false, error }` вместо throw, подключённый через одну
+  из этих фабрик, снова маскировался бы под успешную мутацию. Добавлен рантайм-guard
+  `throwOnFailureResult` — оборачивает `mutationFn` каждой фабрики, распознаёт форму
+  `{success:false}` и бросает `Error` до `onSuccess`/`invalidateQueries`. Actions, возвращающие
+  сущность напрямую (без поля `success`), проходят не тронутыми — типизация не сужена.
+
 ## [0.55.33] - 2026-09-03
 
 ### Fixed

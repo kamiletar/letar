@@ -4,6 +4,31 @@
 
 > **Архив обновлён:** 2026-09-01
 
+## Фабрики мутаций (`hooks-factory.ts`) защищены от `{ success: false }`-результатов (2026-09-03)
+
+Продолжение фикса ниже (delete-actions animatrona) на уровень общей инфраструктуры. Сам фикс
+делает конкретные action'ы правильными, но `createCreateHook`/`createUpdateHook`/
+`createDeleteHook` ([hooks-factory.ts](renderer/src/lib/hooks-factory.ts)) оставались уязвимы
+по конструкции — их `onSuccess` безусловно вызывал `invalidateQueries` без проверки формы
+результата. Новый action по паттерну `{success:false, error}` (не throw), подключённый через
+любую из трёх фабрик, воспроизвёл бы баг молча — ни typecheck, ни lint такое не ловят.
+
+Добавлен generic runtime-guard `throwOnFailureResult<TResult>` — узкий type guard
+(`typeof result === 'object' && result !== null && 'success' in result && result.success ===
+false`), которым обёрнут `mutationFn` во всех трёх фабриках (`async (...) =>
+throwOnFailureResult(await config.mutationFn(...))`). При совпадении формы бросает `Error` с
+текстом `result.error` (если строка) до того, как `onSuccess`/`invalidateQueries` вообще
+выполнится — мутация уходит в `error`-статус, а не притворяется успешной. Guard размещён в
+обёртке `mutationFn`, а не в теле `onSuccess`: `onSuccess`, бросающий исключение в TanStack
+Query v5, не переводит статус наблюдателя мутации в `error` (баг совпадает с классом, описанным
+в [tanstack-query-client-recreated-per-render.md](/.claude/docs/tanstack-query-client-recreated-per-render.md)
+— мутация обязана бросать в `mutationFn`, не полагаться на throw из колбэков). Actions,
+возвращающие сущность напрямую (Prisma-модель, без поля `success`), проходят через guard не
+тронутыми — сигнатуры `TResult` фабрик не сужены.
+
+`typecheck:tsgo`/`lint animatrona` — зелёные (0 ошибок, только предсуществующие
+`react-hooks/exhaustive-deps`-предупреждения в несвязанных файлах).
+
 ## Delete-actions бросают исключение вместо `{ success: false }` (2026-09-03)
 
 Аудит по всему монорепо на класс бага «`mutationFn` резолвит server action, возвращающий
