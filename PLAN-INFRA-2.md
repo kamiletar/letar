@@ -1006,6 +1006,14 @@ dotenv-sops (`KEY=ENC[...]` на каждую переменную) вместо
 beginning of value` — тоже нужно детектировать формат до операции (`sops -d file >/dev/null
 2>&1` как проверка), не считать все `.enc` в репозитории идентичными по внутреннему формату.
 
+✅ **Закрыто (2026-09-03):** `scripts/sops-env-set.sh <app> <staging|docker> <KEY> <VALUE>` —
+решает обе грабли разом (временный plaintext с именем, буквально заканчивающимся на
+`.env.staging`/`.env.docker`, автоопределение формата пробой decrypt, проверка exit code каждой
+команды sops, верификация обратным decrypt). Проверено вручную на обоих форматах
+(`kami`/staging — dotenv, `aboi`/docker — binary). Разбор —
+[sops-env-encrypt-input-path-matching.md](/.claude/docs/sops-env-encrypt-input-path-matching.md),
+рецепт зафиксирован в [env-files.md](/.claude/rules/env-files.md).
+
 ⚠️ **Не проверено**: `nx build` полного прод-режима (не staging) ни для одного из 10 — только
 typecheck/lint и целевой staging-rebuild `form-example`. Live-запрос `curl /robots.txt` к реальному
 staging-серверу тоже не делался — фикс не задеплоен (коммиты локальные, не запушены).
