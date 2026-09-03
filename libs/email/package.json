@@ -1,6 +1,6 @@
 {
   "name": "@letar/email",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": true,
   "type": "module",
   "main": "./src/index.ts",
@@ -15,10 +15,10 @@
   },
   "dependencies": {
     "imapflow": "^1.7.1",
-    "nodemailer": "^6.9.16",
+    "nodemailer": "^9.1.1",
     "punycode": "^2.3.1"
   },
   "devDependencies": {
-    "@types/nodemailer": "^6.4.17"
+    "@types/nodemailer": "^8.0.1"
   }
 }

@@ -7,6 +7,13 @@
 
 ## [Unreleased]
 
+### Security
+
+- Обновлён `nodemailer` `^6.9.16` → `^9.1.1` (и `@types/nodemailer` до `^8.0.1`, синхронно с
+  корнем) — устраняет 8 уязвимостей (2 high, 5 moderate, 1 low), включая SSRF/произвольное чтение
+  файлов через message-level `raw` option (GHSA-p6gq-j5cr-w38f). API (`createTransport`,
+  `sendMail`, тип `Transporter`) не менялся — правка без изменений в `provider.ts`.
+
 ## [0.5.0] - 2026-08-22
 
 ### Добавлена `withImapDeadline` — общий helper жёсткого дедлайна для `ImapFlow`
