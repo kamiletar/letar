@@ -19,7 +19,12 @@
     "app-builder-lib": "^26.15.3",
     "builder-util-runtime": "^9.7.0",
     "fast-uri": "^3.1.7",
-    "form-data": "^4.0.6"
+    "form-data": "^4.0.6",
+    "engine.io": "^6.6.10",
+    "engine.io-client": "^6.6.6",
+    "socket.io-adapter": "2.5.6",
+    "socket.io-parser": "^4.2.7",
+    "undici": "^7.29.0"
   },
   "overrides": {
     "minimist": "^1.2.8",
@@ -36,7 +41,12 @@
     "app-builder-lib": "^26.15.3",
     "builder-util-runtime": "^9.7.0",
     "fast-uri": "^3.1.7",
-    "form-data": "^4.0.6"
+    "form-data": "^4.0.6",
+    "engine.io": "^6.6.10",
+    "engine.io-client": "^6.6.6",
+    "socket.io-adapter": "2.5.6",
+    "socket.io-parser": "^4.2.7",
+    "undici": "^7.29.0"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.49",
