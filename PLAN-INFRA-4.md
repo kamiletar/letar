@@ -4793,6 +4793,15 @@ const codeCondition = { test: ..., ...(shouldIncludeExternalDirs ? {} : { includ
 через симлинк bun, а не через tsconfig) — вывод того дока «явный `transpilePackages` нужен» верен,
 но по другой причине.
 
+**[ ] ⚠️ Открытый вопрос: оставлять ли гейту `transpile-packages` уровень `gate`.** Его
+обоснование в `scripts/check-all.mjs` («падает `Module parse failed` на прод-сборке через
+`--webpack`») и шапка `scripts/check-transpile-packages.mjs` описывают механизм, которого нет:
+сборка от содержимого списка не зависит. Проверка остаётся осмысленной как соглашение о
+единообразии, но красный CI за расхождение списка — решение владельца, не следствие поломки.
+Отдельно: охват гейта ограничен пулом `paths` app-level `tsconfig.json`, поэтому импорты без
+записи в `paths` (`@letar/query-provider`, `@letar/jobs`, `@letar/pg-url` в studio) он не видит
+в принципе — расширять ли охват, тот же вопрос.
+
 **Попутно:** прогон `check-transpile-packages` в 15:30 показал `dashboard` без `@letar/admin-ui` и
 `@letar/jobs` (гейт `severity: gate`) — к 15:37 закрыто параллельной сессией (`b4b58cba`), повторный
 прогон зелёный, 25 из 28 конфигов проверено.
