@@ -36,9 +36,10 @@ const nextConfig = {
 Лишние записи (пакет объявлен в `paths`, но не импортируется) безвредны — Next не резолвит их
 eagerly.
 
-Ту же миграцию прошёл и `apps/animatrona/renderer` (Electron/nextron) — там явный список
-обязателен по отдельной причине (резолв через `paths` в nextron не равнозначен транспиляции
-TS-синтаксиса), см. [nextron-renderer-transpile-packages-required](/.claude/docs/nextron-renderer-transpile-packages-required.md).
+Ту же миграцию прошёл и `apps/animatrona/renderer` (Electron/nextron) — список там остался, но
+он не обязателен: причинная проверка 2026-09-03 опровергла исходный claim «нужен отдельно по
+другой причине», сборка зелёная и без ключа вовсе, см.
+[nextron-renderer-transpile-packages-required](/.claude/docs/nextron-renderer-transpile-packages-required.md).
 
 ⚠️ **Уточнение 2026-09-03: работает наличие ключа, а не имена в нём.** Формулировка «Next резолвит
 имена из `transpilePackages` через тот же алиас `paths`» (стояла здесь раньше) неверна: webpack

@@ -269,10 +269,12 @@ Nx, а не установка пакета. Линка не появляетс�
 grep -A14 'transpilePackages' apps/*/next.config.* apps/*/*/next.config.* | grep -c '@letar/'
 ```
 
-Обязательна опция отдельно в nextron-рендерере (`animatrona`) — там резолв через `paths` не
-равнозначен транспиляции TS-синтаксиса, см.
+⚠️ До 2026-09-03 здесь стояло, что опция отдельно обязательна в nextron-рендерере (`animatrona`) —
+claim опровергнут: причинная проверка показала зелёную сборку и без ключа вовсе, см.
 [nextron-renderer-transpile-packages-required](/.claude/docs/nextron-renderer-transpile-packages-required.md).
-Пишешь новый `next.config.*` — смотри на соседей своей группы, а не на «у всех снято».
+Существующий список там трогать не нужно (безвреден, подстраховка), но обязательным для сборки
+он не является. Пишешь новый `next.config.*` — смотри на соседей своей группы, а не на «у всех
+снято».
 
 ⚠️ Уточнение к прецеденту из [deploy-coordination.md](/.claude/rules/deploy-coordination.md)
 («typecheck зелёный, прод-билд падает на `Module not found`» при транзитивном реэкспорте одной

@@ -225,9 +225,9 @@ ref/DOM не перезапускается ·
 а удаление ключа целиком ломает сразу; красный гейт `check-transpile-packages` = разъехался
 список, а не сломалась прод-сборка ·
 [nextron-renderer-transpile-packages-required](/.claude/docs/nextron-renderer-transpile-packages-required.md)
-⚠️ `transpilePackages` для `@letar/*` обязателен и в nextron-рендерере (`animatrona`) — резолв
-пути через `tsconfig paths` не равнозначен транспиляции TS-синтаксиса, отсутствие маскировал
-только устаревший `.next/cache` ·
+⚠️ прежний claim «`transpilePackages` для `@letar/*` обязателен и в nextron-рендерере
+(`animatrona`)» опровергнут причинной проверкой 2026-09-03 — сборка зелёная и без ключа вовсе;
+существующий список трогать не нужно (безвреден), но обязательным не является ·
 [nextjs-standalone-tracing](/.claude/docs/nextjs-standalone-tracing.md)
 ECONNREFUSED/ERR_DLOPEN_FAILED при зелёном билде ·
 [nextjs-build-time-oidc-discovery-network-dependency](/.claude/docs/nextjs-build-time-oidc-discovery-network-dependency.md)
