@@ -1851,3 +1851,78 @@ driving-school (реальный read/write round-trip через новый `xl
 задачи в этом репо — сначала проверить `bun.lock`'s `lockfileVersion` после установки
 (должен стать `3`, если синтаксис принят); если остался `1` — записи молча проигнорированы,
 не тратить время на повторные попытки другим синтаксисом того же типа.
+
+## §151 — продолжение `/infra:deps-update`: Vitest 5, `@types/node` 25→24, хвост minor-пакетов, полный typecheck+test монорепо ✅ ЗАКРЫТО (2026-09-04)
+
+**Контекст:** прямое продолжение §150 в рамках той же ревизии `/infra:deps-update`.
+
+**Vitest 4→5 миграция.** Обновлён `vitest`+`@vitest/coverage-v8` до 5.0.0. Единственный breaking
+change, задевший репозиторий — переписан benchmark API (PR vitest-dev/vitest#10113): `bench`
+больше не именованный экспорт `vitest`, а fixture `TestContext` (`test('name', async ({ bench })
+=> { await bench('name', fn).run() })`). Затронуты 3 файла (один найден только через typecheck,
+не тестовым прогоном исходной миграции — методологический пробел):
+`libs/forms/src/lib/analytics/analytics.bench.ts`,
+`libs/forms/src/lib/declarative/render-count.bench.tsx`,
+`libs/forms-core/src/lib/server-errors/map-server-errors.bench.ts`. Все переведены на новый API,
+грепом по всему репо (`import \{[^}]*\bbench\b[^}]*\} from 'vitest'`) подтверждено — других не
+осталось.
+
+**`@types/node` 25.9.5 → 24.13.3.** Типы должны трекать мажор рантайма Node, а не идти впереди
+(Docker-образы приложений — `node:24-alpine`), 25.x был случайным опережением при широком
+`--latest`.
+
+**Обновлены (низкий риск, каждый — usage-grep + чтение changelog перед правкой):**
+`domhandler` 5→6 (только `import type { Element }` в `animatrona`, типобезопасно),
+`googleapis` 176→178 (единственный потребитель — `apps/kami` Calendar API, брейки версии — в
+неиспользуемых сервисах типа `webcontentpublisher`/`homegraph`), `to-words` 6→7 (сигнатура
+`toWords(n, { localeCode })`/`toOrdinal` не изменилась, оба использующих файла в
+`libs/number-words` перепроверены построчно), `@types/bwip-js` 3→4, `jsdom` 29→30 (единственный
+breaking change — минимум Node `^22.22.2 || ^24.15.0 || >=26.0.0`, все Dockerfile на `node:24-alpine`).
+
+**Побочная находка от `@types/bwip-js` 4.0.0:** пакет стал stub-заглушкой (сам `bwip-js`
+теперь несёт свои типы через conditional `exports`), что вскрыло скрытую проблему — репозиторий
+уже год как использует `bwip-js@^4.11.4`, но `moduleResolution: "bundler"` +
+`customConditions: ['@letar/source']` (без `node`) не резолвит корневой `.` экспорт пакета.
+Симптом: `TS2307: Cannot find module 'bwip-js'` в двух файлах `libs/label-printer-core`. Фикс —
+не трогать `customConditions` (репо-широкий blast radius на другие пакеты с conditional exports),
+а импортировать явный неймспейсный subpath пакета: `import bwipjs from 'bwip-js/node'` в
+`barcode.service.ts` и `image-generator.service.ts`. Проверено `typecheck:tsgo` +
+`label-printer-core:test` (76/76, включая реальную генерацию штрихкодов, не только типы).
+
+**Babel (`@babel/core`/`preset-react`/`runtime`/`runtime-corejs3`) НЕ обновлён до мажора 8** —
+`@react-native/babel-preset@0.87.1` (Metro-сборка `animatrona-mobile`/`animatrona-tv`) тянет
+~20 `@babel/plugin-*` пакетов, все запиненные `^7.24.x`/`^7.25.x`. То же решение, что раньше по
+TypeScript 7 — ждём, пока экосистема React Native/Metro догонит мажор.
+
+**`prisma` НЕ обновлён** — `8.0.0` всё ещё release candidate (`rc.12`), релиз-кандидаты в этом
+репо сознательно не берутся.
+
+**Полный прогон после всего `/infra:deps-update` (typecheck + test по всему монорепо, отдельным
+запросом):** `nx run-many -t typecheck:tsgo` — 100% зелёный, 78 проектов. `nx run-many -t test
+--parallel=4` — упало 5 таргетов, разобран каждый изолированным прогоном:
+
+- `@letar/admin-ui`, `@letar/forms-vue-shadcn` — падали только под `--parallel=4` (конкуренция за
+  ресурсы), изолированно 150/150 и 81/81 зелёные. Ложные срабатывания.
+- `@letar/forms` — **реальная находка**: jsdom 30 начал резолвить `rem→px` в
+  `getComputedStyle()` (раньше возвращал значение как задано в стиле нерезолвленным). Тест
+  touch-target WCAG 2.5.5 в `field-checkbox.spec.tsx` сравнивал со старым нерезолвленным
+  значением `'2.75rem'`, комментарий в самом тесте документировал именно это старое ограничение
+  jsdom. Поправлено на `'44px'`, закоммичено (`b3e6f83f`). Единственный файл в репо с этим
+  паттерном (проверено грепом).
+- `aboi` — `src/lib/checkout.test.ts` (`server-only` в клиентском модуле) — тот же баг, что уже
+  подтверждён A/B-экспериментом на Vitest 4 в рамках этой же сессии `/infra:deps-update`
+  (§134/§136 в PLAN-INFRA-6.md), к обновлениям зависимостей отношения не имеет. 181/181 остальных
+  тестов aboi зелёные.
+- `domwellbes` — массовые таймауты и FK-violation в `afterEach` при `--parallel=4` (96 тестов).
+  Изолированный прогон одного проекта — тоже упал (48 тестов), но с `--fileParallelism=false`
+  (214 spec-файлов последовательно против одной реальной dev-БД) упало уже только 8 — подтверждает
+  известный класс `ci-real-postgres-unit-test-isolation`/`vitest-shared-singleton-row-race`
+  (гонка параллельных файлов за общие/singleton строки реальной Postgres), не регрессию от
+  deps-update. Пре-существующая особенность тестовой инфраструктуры domwellbes, вне scope этой
+  сессии — падений с прогонами до сегодняшнего дня не сравнивалось, так как раньше
+  `run-many -t test` по всему монорепо в эту сессию не запускался.
+
+**Итог `/infra:deps-update` этой ревизии:** все патч/minor обновления и хвост из 5
+низкорисковых minor-пакетов применены и провалидированы; единственная реальная регрессия
+(jsdom 30 rem-резолюция) найдена и закрыта; побочный баг типов `bwip-js` найден и закрыт;
+Babel 8 и Prisma 8-rc сознательно отложены с явной причиной каждый.
