@@ -59,13 +59,9 @@ export async function updateAudioTrack(id: string, data: Prisma.AudioTrackUpdate
 /**
  * Удалить аудиодорожку
  */
-export async function deleteAudioTrack(id: string): Promise<{ success: boolean; error?: string }> {
-  try {
-    await prisma.audioTrack.delete({ where: { id } })
-    return { success: true }
-  } catch (error) {
-    return { success: false, error: String(error) }
-  }
+export async function deleteAudioTrack(id: string): Promise<{ success: true }> {
+  await prisma.audioTrack.delete({ where: { id } })
+  return { success: true }
 }
 
 /**

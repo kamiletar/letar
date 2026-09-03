@@ -100,13 +100,9 @@ export async function updateAnimeRelation(id: string, data: Prisma.AnimeRelation
 /**
  * Удалить связь
  */
-export async function deleteAnimeRelation(id: string): Promise<{ success: boolean; error?: string }> {
-  try {
-    await prisma.animeRelation.delete({ where: { id } })
-    return { success: true }
-  } catch (error) {
-    return { success: false, error: String(error) }
-  }
+export async function deleteAnimeRelation(id: string): Promise<{ success: true }> {
+  await prisma.animeRelation.delete({ where: { id } })
+  return { success: true }
 }
 
 /**

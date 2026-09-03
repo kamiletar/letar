@@ -64,13 +64,9 @@ export async function updateSubtitleTrack(id: string, data: Prisma.SubtitleTrack
 /**
  * Удалить субтитры
  */
-export async function deleteSubtitleTrack(id: string): Promise<{ success: boolean; error?: string }> {
-  try {
-    await prisma.subtitleTrack.delete({ where: { id } })
-    return { success: true }
-  } catch (error) {
-    return { success: false, error: String(error) }
-  }
+export async function deleteSubtitleTrack(id: string): Promise<{ success: true }> {
+  await prisma.subtitleTrack.delete({ where: { id } })
+  return { success: true }
 }
 
 /**
