@@ -173,6 +173,15 @@ const CONFIG_PATH = '/home/deploy/letar/cron-jobs.json'
 /**
  * Дефолтные задачи для ВСЕХ серверов
  * Фильтруются по текущему серверу при загрузке
+ *
+ * ⚠️ `schedule` здесь — только НАЧАЛЬНОЕ значение при первом создании задачи (когда её ещё нет
+ * в `cron-jobs.json`). После этого расписание живёт исключительно в UI дашборда
+ * (`PATCH /api/cron/jobs/:id`), правка `schedule` здесь на уже существующую задачу на прод НЕ
+ * доедет — `loadAllCronJobs()` ниже сознательно не сверяет это поле (решение владельца,
+ * 2026-09-03, PLAN-INFRA.md §56: синхронизация создавала риск тихого отката осознанных
+ * прод-правок через UI — см. инцидент с `s2-database-backup` ниже). Меняешь `schedule` тут —
+ * это документация «как было заведено изначально», не команда на прод; реальный сдвиг делай
+ * через UI.
  */
 const DEFAULT_CRON_JOBS: CronJob[] = [
   {
@@ -695,7 +704,10 @@ function loadAllCronJobs(): CronJob[] {
     return DEFAULT_CRON_JOBS
   }
 
-  // Обновляем существующие задачи если их app/endpoint/server/timeoutMs изменились в дефолтах
+  // Обновляем существующие задачи если их app/endpoint/server/timeoutMs изменились в дефолтах.
+  // `schedule`/`enabled`/`description` намеренно НЕ в этом списке — они редактируются через UI
+  // дашборда и код их обратно не перетирает (PLAN-INFRA.md §56, решение владельца 2026-09-03:
+  // расписание — UI-only, DEFAULT_CRON_JOBS задаёт только стартовое значение при первом создании).
   let hasChanges = false
   const updatedJobs = existingJobs.map((existing) => {
     const defaultJob = DEFAULT_CRON_JOBS.find((d) => d.id === existing.id)
