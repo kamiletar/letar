@@ -2,6 +2,19 @@
 
 Детальное описание всех реализованных фич.
 
+## Дедупликация origin-паттерна через @letar/hooks (2026-09-03, v3.39.14)
+
+Продолжение фикса ниже (v3.39.13): тот же паттерн `useState('')`+`useEffect(() =>
+setOrigin(window.location.origin))` в один день нашёлся ещё и в `studio` независимо — вынесен
+в общий хук `useClientOrigin()` (`@letar/hooks` 0.5.0, `libs/hooks/src/lib/browser/use-client-origin.ts`).
+Обе локальные копии в `presenter-select-jury.tsx` и `wizard/step-select-jury.tsx` заменены на
+вызов хука. `studio` хук не использует — там origin вычисляется на сервере через
+`getRequestOrigin()` (`headers()`), это другой, более ранний подход без клиентского мигания.
+
+Репо-широкий грep `window.location.origin` (2026-09-03): остальные 13 вхождений — внутри
+обработчиков событий/`useCallback` (клик, share, copy-link), не в теле рендера, поэтому тот же
+класс бага им не грозит, трогать не нужно.
+
 ## Превентивный фикс паттерна hydration mismatch в QR-приглашении жюри (2026-09-03, v3.39.13)
 
 Паттерн `typeof window !== 'undefined' ? window.location.origin : ''`, вычисляемый прямо в теле
