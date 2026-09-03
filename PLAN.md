@@ -18,7 +18,7 @@
 не начинать: решение владельца (2026-09-01), ждём GA TypeScript 7.1 с рабочим API** (живая попытка
 вскрыла bun-специфичный блокер поверх уже известного риска lint-тулинга — разбор в §19).
 
-## §77 — гейт `cookie-cache-strategy`: защита от повтора cookie-коллизии better-auth (2026-09-03)
+## §80 — гейт `cookie-cache-strategy`: защита от повтора cookie-коллизии better-auth (2026-09-03)
 
 Продолжение фикса из `.claude/docs/better-auth-localhost-cookie-jar-collision.md` (`strategy: 'jwt'`
 убран из `apps/dashboard/src/lib/auth.ts`, там же оставлен предупреждающий комментарий). Комментарий
@@ -35,7 +35,7 @@
 зелёный прогон (16 приложений проверено), `git diff` пуст. `bun scripts/check-all.mjs --ci`
 подтверждён — новая проверка корректно помечена `(покрытие неполное)`.
 
-## §76 — паттерн `llms.txt` задокументирован и раскатан на 18 приложений (2026-09-02)
+## §79 — паттерн `llms.txt` задокументирован и раскатан на 18 приложений (2026-09-02)
 
 Повод: два приложения (`aboi`, `form-docs`) независимо завели `llms.txt` (llmstxt.org) разными
 механизмами (статика/роут), выбор между ними нигде не был зафиксирован.
@@ -67,7 +67,7 @@ submodule (`dsperevod`, `svoichuzhie`, `aprel8008`, `domwellbes`, `studio`, `dri
 Отдельно раздел «Заповеди студии» (`.claude/private/WEBSTUDIO.md`, приватный submodule) пополнен
 заповедью №19 — публичный сайт студии заводит `llms.txt` по умолчанию, не как разовую задачу.
 
-## §75 — аудит транзитивных `@letar/*`-алиасов по всему монорепо (2026-09-01)
+## §78 — аудит транзитивных `@letar/*`-алиасов по всему монорепо (2026-09-01)
 
 Повод: в этой же сессии (§73, миграция `next.config` с `composePlugins`/`withNx`) нашли и
 починили баг в `animatrona-landing`/`aira-web` — `@letar/github-releases` реэкспортирует
@@ -114,7 +114,7 @@ submodule (`dsperevod`, `svoichuzhie`, `aprel8008`, `domwellbes`, `studio`, `dri
 починено в том же коммитном окне (`c302242c`) параллельной сессией. Разбор —
 [nextron-renderer-transpile-packages-required.md](/.claude/docs/nextron-renderer-transpile-packages-required.md).
 
-## §74 — тираж фикса `overflowX` на `Card.Body` вокруг `Table.Root` по всему монорепо (2026-09-01)
+## §77 — тираж фикса `overflowX` на `Card.Body` вокруг `Table.Root` по всему монорепо (2026-09-01)
 
 Повод: в apps/domwellbes нашли и починили 61 место, где Chakra `<Table.Root>` рендерился внутри
 `<Card.Body>` без `overflowX="auto"` — на узких экранах (320px) из-за этого скроллилась вся

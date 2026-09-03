@@ -21,7 +21,7 @@ request scope бесплатно. Проблема начинается, ког�
 **Прецедент (studio, 2026-08-19):** `generateInvoiceFromHours()` в `src/lib/billing.ts`
 вызывается и из owner-экшена (`_actions/invoices.action.ts`, request scope есть), и из
 `src/jobs/biweekly-hourly-invoices.ts` (фоновая задача, scope нет). До перехода задач с
-HTTP-ручек `/api/cron/*` на встроенный планировщик (`PLAN.md` §75, 2026-08-12) request scope
+HTTP-ручек `/api/cron/*` на встроенный планировщик (`PLAN-INFRA-4.md` §75, 2026-08-12) request scope
 был всегда — ручку дёргал HTTP-запрос от `dashboard-agent`. После переезда на `@letar/jobs`
 тот же код стал выполняться без него, и первый же прогон (16.08.26 09:00) уронил задачу.
 
