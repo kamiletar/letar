@@ -67,8 +67,9 @@ test.describe('Вход по linked-email → сессия primary-аккаун�
   test('вход по linked-адресу авторизует под primary-аккаунтом', async ({ page }) => {
     await page.goto('/sign-in', { waitUntil: 'domcontentloaded' })
 
-    await page.locator('input[name="email"]').fill(LINKED_EMAIL)
-    await page.locator('input[name="password"]').fill(PRIMARY_PASSWORD)
+    // @letar/forms не выставляет нативный `name` — локатор через data-field-name (см. 01-public.spec.ts).
+    await page.locator('input[data-field-name="email"][autocomplete="username webauthn"]').fill(LINKED_EMAIL)
+    await page.locator('input[data-field-name="password"]').fill(PRIMARY_PASSWORD)
     await page.getByRole('button', { name: 'Войти' }).click()
 
     // Успешный вход уводит с /sign-in (redirectTo по умолчанию '/', см. login.action.ts)
@@ -82,8 +83,8 @@ test.describe('Вход по linked-email → сессия primary-аккаун�
   test('неверный пароль по linked-адресу — «Неверный пароль», без дубль-регистрации', async ({ page }) => {
     await page.goto('/sign-in', { waitUntil: 'domcontentloaded' })
 
-    await page.locator('input[name="email"]').fill(LINKED_EMAIL)
-    await page.locator('input[name="password"]').fill('definitely-wrong-password')
+    await page.locator('input[data-field-name="email"][autocomplete="username webauthn"]').fill(LINKED_EMAIL)
+    await page.locator('input[data-field-name="password"]').fill('definitely-wrong-password')
     await page.getByRole('button', { name: 'Войти' }).click()
 
     await expect(page.getByText('Неверный пароль')).toBeVisible()

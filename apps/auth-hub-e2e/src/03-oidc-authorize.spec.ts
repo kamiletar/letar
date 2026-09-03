@@ -32,7 +32,8 @@ test.describe('OIDC flow — без сессии', () => {
     const response = await page.goto(`/sign-in?${params.toString()}`, { waitUntil: 'domcontentloaded' })
 
     expect(response?.status()).toBeLessThan(500)
-    await expect(page.locator('input[name="email"]')).toBeVisible()
+    // @letar/forms не выставляет нативный `name` — локатор через data-field-name (см. 01-public.spec.ts).
+    await expect(page.locator('input[data-field-name="email"][autocomplete="username webauthn"]')).toBeVisible()
     await expect(page.getByRole('button', { name: 'Войти' })).toBeVisible()
   })
 

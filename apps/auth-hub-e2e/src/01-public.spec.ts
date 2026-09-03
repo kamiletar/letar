@@ -12,8 +12,12 @@ test.describe('Sign-in', () => {
   test('форма email/password видна', async ({ page }) => {
     await page.goto('/sign-in')
     await expect(page.getByRole('heading', { name: 'Войти' })).toBeVisible()
-    await expect(page.locator('input[name="email"]')).toBeVisible()
-    await expect(page.locator('input[name="password"]')).toBeVisible()
+    // @letar/forms не выставляет нативный HTML `name` (headless TanStack Form state) —
+    // общий для монорепо локатор поля через `data-field-name` (см. domwellbes-e2e).
+    // Уточняем autoComplete: на /sign-in два поля с data-field-name="email" — своё у
+    // LoginForm (autoComplete="username webauthn", ниже) и у MagicLinkForm (autoComplete="email").
+    await expect(page.locator('input[data-field-name="email"][autocomplete="username webauthn"]')).toBeVisible()
+    await expect(page.locator('input[data-field-name="password"]')).toBeVisible()
     await expect(page.getByRole('button', { name: 'Войти' })).toBeVisible()
   })
 
