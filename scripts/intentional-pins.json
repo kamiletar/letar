@@ -105,7 +105,6 @@
       "deps-update, либо — если выяснится причина — перенести в pins с объяснением."
     ],
     "packages": {
-      "@tanstack/react-devtools": "Рудимент снятого пина: 0.10.5 стоял по §112, deps update 9a65abe7 поднял до 0.10.12, сохранив точную форму. Сама причина отпала — §142 заменил пин структурным фиксом в libs/query-provider (мёртвая ветка отсекается сравнением с process.env.NODE_ENV на верхнем уровне модуля) плюс сторож devtools-isolation.spec.ts. Кандидат на возврат к caret-диапазону при следующем deps-update.",
       "typescript": "Точный 6.0.3 с initial commit. Обновление 6 → 7 ведётся отдельным планом репозитория (PLAN-INFRA-1.md § TypeScript 7), из scope deps-update выведено решением владельца. Смежная ловушка — alias-схема двух компиляторов под bun isolated linker (.claude/docs/bun-isolated-linker-alias-shared-bucket-collision.md).",
       "@eslint/js": "Точная версия с ca0eb7a7 (eslint 10). Причина точной формы не задокументирована.",
       "eslint-plugin-import": "Точная версия с initial commit, причина не задокументирована.",
