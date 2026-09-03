@@ -1,4 +1,4 @@
-# PLAN-INFRA-6 — §115–§149
+# PLAN-INFRA-6 — §115–§150
 
 > Продолжение [PLAN-INFRA-5.md](/PLAN-INFRA-5.md) — часть журнала `PLAN-INFRA.md`, отрезанная от
 > неё 2026-09-03 (см. [plan-decomposition-pattern.md](/.claude/docs/plan-decomposition-pattern.md)).
@@ -1764,3 +1764,90 @@ driving-school-e2e, dsperevod, studio-e2e, `.claude/private`, driving-school-db)
 нечего, только локальное состояние машины.
 
 Коммит фикса — `182fb393` (`scripts/hooks/pre-commit-semgrep.sh`).
+
+## §150 — Разбор `bun audit` risk score 100/100: 133 → 109 уязвимостей, scoped overrides не работают в bun 1.3.14
+
+Триггер — `/repo` сообщил про давно не обновлявшийся `bun.lock` и risk score 100/100 из
+последнего `deps-scan.ts`. Разобрано вручную (не автоматической эвристикой скрипта), с
+кросс-сверкой резолвнутых версий из `bun.lock` против диапазонов уязвимостей — `bun audit`
+группирует все резолвнутые версии пакета под одной записью, даже если реально уязвима только
+часть, поэтому список путей от самого `bun audit` завышает картину.
+
+**Побочный фикс, найденный первым:** `POST /api/deps/scan` давал 404 — `scripts/deps-scan.ts`
+был захардкожен на несуществующий `dashboard.letar.best` вместо реального Traefik-домена
+`dash.letar.best` (виден в `docker-compose.production.yml`). Коммит `e21369af`.
+
+**Ключевая находка: scoped/nested bun overrides (синтаксис `parent>child` из документации
+bun.sh) эмпирически не работают в bun 1.3.14 этого репозитория.** Резолвер эти записи молча
+игнорирует — версии не меняются ни после `bun install`, ни после `bun install --force`, а
+`bun.lock` остаётся на `lockfileVersion: 1` (документация подразумевает переход на `3` при их
+наличии). Коммит `071a8c94` убрал 8 таких нерабочих записей (ws/undici/js-yaml/brace-expansion),
+добавленных в предыдущей попытке под вводящим в заблуждение сообщением «fix».
+
+⚠️ **Побочный инцидент во время разбора: гонка с параллельной сессией.** Фоновая задача,
+запущенная этой же сессией через `spawn_task` для фикса `nodemailer` в `apps/dsperevod`,
+оказалась запущена в ТОМ ЖЕ общем `C:\web\letar`, а не в изолированном worktree — конкурентно
+правила корневые `package.json`/`bun.lock` одновременно с этой сессией. Проявилось как «Edit
+тихо откатывается между попытками» — реального бага в тулинге не было, был реальный
+многоагентный конфликт (см. [git-multi-agent-incidents](/.claude/docs/git-multi-agent-incidents.md)).
+Разрулено через `git checkout HEAD -- package.json` + переприменение правки от чистой базы.
+Урок: `spawn_task` не гарантирует изоляцию рабочего каталога сама по себе — для конкурентной
+правки общих файлов (`package.json`, `bun.lock`) нужна явная координация через Agent Mail,
+которую эта сессия не завела (`macro_start_session` не вызывался).
+
+**Пофикшено плоскими (не scoped) overrides — работают, подтверждено `bun.lock`-дедупом:**
+
+- Раунд 1 (`fdbec5e2`): критичный `tar` (GHSA-23hp-3jrh-7fpw, DoS) + `@xmldom/xmldom`,
+  `app-builder-lib`, `builder-util-runtime`, `fast-uri`, `form-data`; `qs` `^6.15.2 → ^6.16.0`
+  (старый диапазон сам был внутри уязвимого окна).
+- `nodemailer` в `libs/email`: `^6.9.16 → ^9.1.1` (GHSA-p6gq-j5cr-w38f, SSRF/чтение файлов через
+  `raw` option) — коммит `abe42f32`, проверено typecheck+тестами.
+- Socket.io-семья + `undici` (`9781a76c`): `engine.io` 6.6.6→6.6.10, `engine.io-client`
+  6.6.4→6.6.6, `socket.io-parser` 4.2.6→4.2.7, `undici` →7.29.0. Реальная экспозиция —
+  driving-school использует socket.io для живого чата (`apps/driving-school/src/lib/socket/*`,
+  production-путь), `undici` актуален для `cheerio`/`jsdom` в animatrona/grandslamcup (парсинг
+  внешнего HTML). Побочный эффект: новые версии `engine.io`/`engine.io-client` сами подняли
+  требование к `ws` до патченного `~8.21.0` — глобальный override на `ws` не понадобился,
+  multi-major потребители (`ws@6.x/7.x` у react-native-cli/metro) не задеты.
+- `xlsx` → CDN SheetJS (`fc72374c`): npm-регистри для `xlsx` заморожен на `0.18.5` с апреля
+  2022 — сам SheetJS ушёл из npm (юридический спор с npm Inc. + требование 2FA для топ-пакетов,
+  [SheetJS/sheetjs#2667](https://github.com/SheetJS/sheetjs/issues/2667)) и называет npm-версию
+  известным багом реестра, а `cdn.sheetjs.com` — единственным авторитетным источником.
+  Рассмотрены `exceljs`/`@e965/xlsx` как альтернативы — обе стагнируют с 2024 без релизов, а
+  `@e965/xlsx` физически не может быть свежее CDN (просто зеркалит его). Переключено на
+  `"xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"` — API идентичен, правок в 9
+  потребителях (driving-school, domwellbes, label-printer-desktop) не потребовалось. ⚠️
+  Остаточный риск: пакет вне npm registry, `bun audit`/Dependabot его больше не видят.
+- `socket.io-adapter` 2.5.6→^2.5.8 (`01832319`): версия, при которой сам требует патченный
+  `ws@~8.21.0`, убирает уязвимый `ws@8.18.3` из production-чата driving-school. Столкнулось с
+  типовой несовместимостью — `2.5.7`/`2.5.8` меняют приватное поле `encoder` класса `Adapter`
+  несовместимо со снимком типов в бандле `@socket.io/redis-adapter@8.3.0` (собран против
+  peer-диапазона `^2.5.4`) — `typecheck:tsgo driving-school` падал на `TS2345`. Починено кастом
+  `as unknown as Parameters<typeof io.adapter>[0]` в `route.ts` с комментарием (submodule-коммит
+  `0bbbb9e`, bump-коммит `08e16eaf`). Рантайм-протокол между версиями не менялся, несовместимость
+  чисто в типах.
+
+**Итог: 133 → 109 уязвимостей** (54→44 high). Проверено на каждом шаге: `typecheck:tsgo` на
+затронутых приложениях (driving-school, domwellbes, label-printer-desktop), 31/31 excel-тестов
+driving-school (реальный read/write round-trip через новый `xlsx`), `bun scripts/check-all.mjs
+--group=deps` зелёный на каждом коммите.
+
+**Остаточный backlog, разобран и сознательно не тронут:**
+
+- `ws@8.20.0` на `@libsql/isomorphic-ws` (SQLite/turso-клиент) — тот же advisory
+  (GHSA-96hv-2xvq-fx4p), но это исходящий WS-клиент к БД, не сервер, принимающий произвольные
+  входящие соединения — практическая экспозиция низкая. Bun-резолвер не дедуплицирует эту версию
+  с корневой даже после `bun install --force` (нестандартный слот `@libsql/isomorphic-ws/ws` в
+  `bun.lock`) — глобальный override на `"ws"` не применён намеренно: сломает несовместимые по
+  мажору потребители (`ws@6.x/7.x` у react-native-cli/metro).
+- Всё остальное (`js-yaml`, `brace-expansion`, `hono`, `mysql2`, `@grpc/grpc-js`, `ip-address`,
+  `nanoid`, `postcss`, `svgo`, `browserslist`, `tmp`, `piscina`, `lodash` через
+  keystatic/prisma, `defu`, `effect`, `deepmerge-ts` и т.п.) — проверено грепом: ни один не
+  импортируется напрямую в `apps/`/`libs/`, чисто транзитивные зависимости build-тулинга (jest,
+  prisma CLI, react-native-community-cli, metro, webpack-tooling, MCP SDK). Глобальный override
+  дал бы риск сломать несвязанное при нулевой пользе для реальной поверхности атаки.
+
+⚠️ **Урок на будущее:** прежде чем пробовать scoped overrides (`parent>child`) для похожей
+задачи в этом репо — сначала проверить `bun.lock`'s `lockfileVersion` после установки
+(должен стать `3`, если синтаксис принят); если остался `1` — записи молча проигнорированы,
+не тратить время на повторные попытки другим синтаксисом того же типа.
