@@ -5007,9 +5007,9 @@ Nx и показывает давно исправленное как живое
 **Не запушено** — как и весь код в этой сессии, `git push` требует отдельного подтверждения
 пользователя (`.claude/rules/git.md`), самого прогона на CI после этой сессии ещё не было.
 
-⚠️ **Открытый вопрос:** тот же паттерн (настоящий Postgres в unit-тесте вместо мока) есть и у
-`svoichuzhie` (`admin-product.action.spec.ts`) — в этом run он просто не был затронут (affected),
-поэтому фикс сюда не тиражирован. Если/когда `svoichuzhie` первым же тестом упадёт так же —
-рецепт уже задокументирован здесь (именованная БД в `services.postgres` + `test.env` override),
-осталось повторить теми же тремя шагами: `CREATE DATABASE svoichuzhie_ci`, `db:push` в шаге
-`Prepare test databases`, `test.env` в его `vitest.config.mts`.
+**Открытый вопрос закрыт тем же днём:** тот же паттерн (настоящий Postgres в unit-тесте вместо
+мока) есть и у `svoichuzhie` (`admin-product.action.spec.ts`) — тиражирован теми же тремя шагами
+(`CREATE DATABASE svoichuzhie_ci`, `db:push` в шаге `Prepare test databases`, `test.env` в его
+`vitest.config.mts`), проверено тем же приёмом (`CI=1` + намеренно неверный shell-уровневый
+`DATABASE_URL`). Коммиты: `fa8305f3` (ci.yml), `b1bfb807` (bump submodule svoichuzhie), внутри
+submodule — `a8d4372`.
