@@ -7,6 +7,16 @@
 
 ## [Unreleased]
 
+## [1.9.5] - 2026-09-03
+
+### Fixed
+
+- `service-worker-registration.tsx` снимал регистрацию только по `registrationRef` с текущей
+  загрузки страницы — воркер прошлой сессии браузера в ref не попадал, и выключение
+  оффлайн-режима не делало ничего до перезагрузки. Компонент заменён на общий
+  `ServiceWorkerRegistration` из `@letar/ui` (снятие по `getRegistrations()`, `unregister()` без
+  `await`, очистка `caches`), эталон — фикс на `studio` 2026-09-03.
+
 ## [1.9.4] - 2026-09-02
 
 ### Fixed
