@@ -9,6 +9,7 @@
 
 import type { MatchSSEState } from '@/app/_hooks/use-match-sse'
 import { Badge, Box, Heading, HStack, Text, VStack } from '@chakra-ui/react'
+import { useEffect, useState } from 'react'
 
 /** Цвета судей */
 const JUDGE_COLORS: Record<string, string> = {
@@ -29,10 +30,14 @@ export function PresenterSelectJury({ match, matchState }: PresenterSelectJuryPr
   const judges = matchState?.judges ?? []
   const connectedCount = judges.length
 
+  // origin известен только клиенту — вычисляем после монтирования, чтобы не расходиться с SSR
+  const [origin, setOrigin] = useState('')
+  useEffect(() => {
+    setOrigin(window.location.origin)
+  }, [])
+
   // URL для QR-кода
-  const inviteUrl = inviteKey
-    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/match/${match.id}/judge?key=${inviteKey}`
-    : null
+  const inviteUrl = inviteKey ? `${origin}/match/${match.id}/judge?key=${inviteKey}` : null
 
   return (
     <VStack gap={6} align="stretch" py={4}>

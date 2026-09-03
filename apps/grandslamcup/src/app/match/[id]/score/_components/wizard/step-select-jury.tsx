@@ -33,6 +33,11 @@ export function StepSelectJury({ match, matchState }: StepSelectJuryProps) {
   const [error, setError] = useState<string | null>(null)
   // inviteKey хранится локально т.к. не передаётся через SSE (секрет)
   const [inviteKey, setInviteKey] = useState<string | null>(null)
+  // origin известен только клиенту — вычисляем после монтирования, чтобы не расходиться с SSR
+  const [origin, setOrigin] = useState('')
+  useEffect(() => {
+    setOrigin(window.location.origin)
+  }, [])
 
   const currentHalf = matchState?.currentHalf ?? 1
   const judges = matchState?.judges ?? []
@@ -78,11 +83,7 @@ export function StepSelectJury({ match, matchState }: StepSelectJuryProps) {
     [match.id],
   )
 
-  const inviteUrl = inviteKey
-    ? `${
-      typeof window !== 'undefined' ? window.location.origin : ''
-    }/match/${match.id}/judge?half=${currentHalf}&invite=${inviteKey}`
-    : null
+  const inviteUrl = inviteKey ? `${origin}/match/${match.id}/judge?half=${currentHalf}&invite=${inviteKey}` : null
 
   const slotsFilled = judges.length
   const allFilled = slotsFilled >= 5

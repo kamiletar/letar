@@ -2,6 +2,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.39.13] - 2026-09-03
+
+### Fixed
+
+- Превентивный фикс паттерна hydration mismatch (найден и исправлен на `studio` в тот же день):
+  `presenter-select-jury.tsx` и `step-select-jury.tsx` вычисляли `inviteUrl` через
+  `typeof window !== 'undefined' ? window.location.origin : ''` прямо в теле рендера клиентского
+  компонента. На практике `inviteKey` (источник `matchState` из SSE) гарантированно `null` на
+  SSR и первом клиентском рендере — реального расхождения текста не было, но паттерн хрупкий:
+  любое будущее изменение, синхронно доставляющее `matchState` до первого рендера, тут же дало
+  бы React error 418. `origin` теперь вычисляется в `useEffect` через `useState`, не в теле
+  компонента.
+
 ## [3.39.12] - 2026-09-03
 
 ### Fixed

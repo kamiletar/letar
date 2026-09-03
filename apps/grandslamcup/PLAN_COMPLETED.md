@@ -2,6 +2,29 @@
 
 Детальное описание всех реализованных фич.
 
+## Превентивный фикс паттерна hydration mismatch в QR-приглашении жюри (2026-09-03, v3.39.13)
+
+Паттерн `typeof window !== 'undefined' ? window.location.origin : ''`, вычисляемый прямо в теле
+render клиентского компонента, — тот же баг, что дал React error 418 на `studio/owner/settings`
+в этой же сессии. Найдено две копии в grandslamcup:
+`match/[id]/presenter/_components/presenter-select-jury.tsx` и
+`match/[id]/score/_components/wizard/step-select-jury.tsx`.
+
+Проверка цепочки рендера: оба компонента получают `matchState` из `useMatchSSE`
+(`src/app/_hooks/use-match-sse.ts`), где он инициализируется `useState<MatchSSEState | null>(null)`
+и обновляется только из обработчика SSE-события `phase:changed` — то есть исключительно после
+монтирования, уже после первой гидратации. Значит `inviteKey` (и в `step-select-jury.tsx` —
+локальный `inviteKey`, тоже `useState(null)`, тоже выставляется только в `useEffect`)
+гарантированно `null` и на SSR, и на первом клиентском рендере: ветка с `window.location.origin`
+на этом шаге не выполняется вовсе, реального расхождения текста между сервером и клиентом не
+было. Риск теоретический — будущее изменение SSE-хука, которое станет доставлять `matchState`
+синхронно ещё до первого рендера, тут же воспроизвело бы 418.
+
+Фикс — тот же, что в studio: `origin` вычисляется в `useEffect` через `useState('')`, не в теле
+компонента, поэтому и SSR, и первый клиентский рендер видят одинаковый (пустой) `origin`.
+Третье совпадение того же паттерна — `jury-panel.tsx:61` — не тронуто: там
+`window.location.origin` внутри `useCallback` обработчика клика, не в теле рендера, риска нет.
+
 ## Фикс: выключение оффлайн-режима не снимало Service Worker (2026-09-03, v3.39.12)
 
 `service-worker-registration.tsx` снимал регистрацию по `getRegistration('/')` с текущей загрузки
