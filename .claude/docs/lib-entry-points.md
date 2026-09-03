@@ -448,5 +448,5 @@ node scripts/add-lib-tsconfig-path.mjs \
 ## Ссылки
 
 - `libs/image-upload/README.md` § «Серверная часть» — сам API `createUploadsRoute`.
-- `PLAN.md` §29, §33 — зачем серверную раздачу вообще вынесли в библиотеку и разбор резолва.
+- `PLAN-JOURNAL-1.md` §29, §33 — зачем серверную раздачу вообще вынесли в библиотеку и разбор резолва.
 - [libs.md](/.claude/rules/libs.md) — общие правила библиотек.

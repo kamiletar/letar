@@ -33,7 +33,7 @@ Code). `.claude/skills/` остаётся единственным источн�
 
 Первая версия зеркала была одноразовым снимком стороннего агента (~31.07.2026, до появления
 скрипта) и разошлась с источником: чистка устаревшего совета `nx sync` (коммит `5cb023ea`,
-корневой `PLAN.md` §29) прошла по `.claude/skills/`, но не по `.agents/skills/` — те же шесть
+корневой `PLAN-JOURNAL-1.md` §29) прошла по `.claude/skills/`, но не по `.agents/skills/` — те же шесть
 вхождений остались в `nx-monorepo/SKILL.md`, `nx-monorepo/reference/{troubleshooting,project-structure,commands}.md`,
 `nextjs-expert/reference/troubleshooting.md`. Совет неверен для этого репо: генератор
 `@nx/js:typescript-sync` отключён в `nx.json`, `nx sync` references не обновит. Игнорирование

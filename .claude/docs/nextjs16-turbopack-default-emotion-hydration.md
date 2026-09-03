@@ -420,7 +420,7 @@ project.json`. Простой переход на webpack вскрыл два н
    `node_modules`, только в `.bun`-сторе рядом с `@libsql/client`), а абсолютным путём,
    разрешённым тем же алгоритмом, что использует сам `@libsql/client`:
    `require.resolve('libsql', { paths: [path.dirname(require.resolve('@libsql/client'))] })`.
-2. **`@tanstack/devtools-ui@0.7.0+` под webpack** — тот же баг, что в PLAN.md §51
+2. **`@tanstack/devtools-ui@0.7.0+` под webpack** — тот же баг, что в PLAN-JOURNAL-1.md §51
    (`driving-school`/`mandala`/`dashboard`/`animatrona-tracker`/`grandslamcup`): именованный
    `use` не экспортируется из серверной половины `solid-js/web`. Тот же established-паттерн —
    `config.resolve.alias['@tanstack/devtools-ui'] = false` при `isServer || !dev`.

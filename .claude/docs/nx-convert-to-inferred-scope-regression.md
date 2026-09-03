@@ -8,7 +8,7 @@ deprecated executor-таргетов на inferred) кодомод отраба�
 кастомные lint-паттерны, нестандартный `cwd`) реальный охват таргета молча меняется.
 
 Найдено дважды подряд, один и тот же класс бага под разными симптомами — разбор:
-[PLAN-INFRA-4.md §86](/PLAN-INFRA-4.md) (vitest), [PLAN-INFRA-4.md §87](/PLAN-INFRA-4.md) (eslint).
+[PLAN-INFRA-5.md §86](/PLAN-INFRA-5.md) (vitest), [PLAN-INFRA-5.md §87](/PLAN-INFRA-5.md) (eslint).
 
 ## Причина
 

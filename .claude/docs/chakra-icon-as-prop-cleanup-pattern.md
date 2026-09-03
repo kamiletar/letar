@@ -1,6 +1,6 @@
 # Чистка Chakra `as=` (`Icon as=`, `Link as=`) — общий рецепт
 
-Semgrep-правило `letar-chakra-as-prop-forbidden` (`.semgrep/letar-rules.yml`, `PLAN.md` §61)
+Semgrep-правило `letar-chakra-as-prop-forbidden` (`.semgrep/letar-rules.yml`, `PLAN-JOURNAL-2.md` §61)
 запрещает проп `as=` на Chakra-компонентах. Три независимые сессии (`libs/video-player-react`,
 `libs/ui`, `apps/animatrona-landing` — коммиты `80ac608c`, `d50a078c`, `087521ce`) вывели один и
 тот же рецепт заново. Ниже — рецепт, чтобы следующая сессия его не переизобретала.
@@ -292,5 +292,5 @@ HTML-атрибуты и обработчики переезжают на нат
 ## Источники
 
 Реальные диффы четырёх сессий — `git show 80ac608c`, `git show d50a078c`, `git show 087521ce`,
-`git show 19f055a5`. Остаток по репозиторию — `PLAN.md` §61 (~1406 срабатываний в `apps/*` на
+`git show 19f055a5`. Остаток по репозиторию — `PLAN-JOURNAL-2.md` §61 (~1406 срабатываний в `apps/*` на
 момент замера).
