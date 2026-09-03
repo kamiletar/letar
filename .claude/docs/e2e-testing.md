@@ -429,6 +429,41 @@ Drawer-теста, условный Tab-блок для skip-link-теста), �
 }
 ```
 
+### ⚠️ Сигнатура «chromium стабилен, firefox/webkit стабильно проигрывают» — это конкуренция за CPU staging-контейнера, не холодная компиляция
+
+`apps/aboi-e2e/playwright.config.ts` (коммит 8b6db65, 2026-09-03) получил `workers: 1` после
+того, как три разных падения на staging (`waitForURL`, `confirmAddToCart`, `leaflet-container`)
+оказались не холодной Turbopack-компиляцией (staging собирается production-билдом `next build`,
+там нет постраничной компиляции по первому запросу), а конкуренцией трёх параллельных browser
+project (chromium/firefox/webkit) за CPU ограниченного staging-контейнера на s3 — chromium
+стабильно проходил, firefox/webkit стабильно проигрывали гонку. Разбор — `apps/aboi/
+PLAN_COMPLETED.md` § «workers: 1 вместо третьего бампа таймаута».
+
+**Аудит 2026-09-03** прошёлся по остальным 12 приложениям без `workers` в конфиге (aira-web,
+animatrona-landing, archetest, domwellbes, dsperevod, form-develop-app, form-docs, form-example,
+kami, kami-key-the-landing, pravda, time) на предмет той же сигнатуры — не нашёл совпадений:
+
+- animatrona-landing, form-develop-app, form-docs, kami-key-the-landing не подключены к staging
+  e2e-гейту вообще (нет в `E2E_GATED_APPS`, `libs/infra-config/src/index.ts`) — конкуренция за
+  CPU staging-контейнера для них неприменима.
+- aira-web, domwellbes, kami, form-example, time гейтятся, но истории firefox/webkit-флейков на
+  staging в их `PLAN.md`/`PLAN_COMPLETED.md` нет вовсе.
+- pravda не гейтится; firefox/webkit-флейки в истории есть (RSC-навигация — апстрим-баг
+  Next.js, Command Palette Escape — принятый некритичный флейк), но один из кластеров явно
+  падает вперемешку по всем трём браузерам, не только firefox/webkit — не та сигнатура; владелец
+  2026-09-01 решил не диагностировать и не чинить.
+- archetest, dsperevod (`HARD_GATED_APPS`) — firefox/webkit-таймауты на staging были, но у обоих
+  найден и исправлен реальный root cause в коде/тестах (гонка гидратации `DisclaimerConsent`,
+  z-index race `StickyActionBar`/`CookieBanner`, сброс controlled email-инпута WebKit,
+  БД-rate-limit между прогонами) — не CPU-конкуренция. У archetest `--workers=1` использовался
+  только как диагностический приём для получения стабильной статистики; финальный прогон
+  (21/21) прошёл в штатном параллельном режиме.
+
+Вывод: `workers: 1` профилактически нигде из этих 12 не добавлен — паттерн не подтверждён.
+Если у нового приложения на `E2E_GATED_APPS`/`HARD_GATED_APPS` появится история «chromium
+зелёный, firefox/webkit стабильно таймаутятся на staging без другой найденной причины» — это
+кандидат на тот же фикс, что и aboi, а не на очередной бамп таймаута.
+
 ## Next.js 16: proxy.ts вместо middleware.ts
 
 ### Важно для driving-school
