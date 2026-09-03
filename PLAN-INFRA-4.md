@@ -1590,7 +1590,15 @@ lockfile-drift-гейт), обязана либо чекаутить submodule, 
       живого прод-прогона (тот же порядок, что у `dashboard`, см. уточнение находки ниже);
       driving-school без `env_file:` в compose — `JOBS_ENABLED` пришлось добавить в
       `environment:` явной строкой, а не полагаться на автопрокидывание
-- [ ] Тираж: `dsperevod`, `aboi`, `time`, `svoichuzhie`
+- [x] Тираж на `dsperevod` (1 задача: `email-health-check`, 2026-09-03) — `env_file:` в compose,
+      явной строки `JOBS_ENABLED` не потребовалось; `JOBS_ENABLED=true` в `.env.docker.enc`;
+      старая `/api/cron/email-health-check` и запись в `dashboard-agent` намеренно не удалены (тот
+      же порядок, что у `dashboard`/`driving-school`); у приложения не было dev-session bypass —
+      заведён (`src/app/api/auth/dev-session/route.ts` + `.env.local`) для живой проверки; живой
+      runNow подтверждён по логам dev-сервера (POST → `runJobNowAction` → задача выполнилась,
+      статус в `/admin/jobs` показал ожидаемую `ECONNREFUSED 127.0.0.1:1025` — MailHog не поднят
+      локально, конвейер работает)
+- [ ] Тираж: `aboi`, `time`, `svoichuzhie`
 - [ ] `dashboard-agent`: режим наблюдателя (опрос `/api/jobs/status` + алерт по «давно не было
       успеха»), снятие монтирования чужих `.env.docker`
 - [ ] Инфра-задачи и бэкап Maddy — на systemd timers, конфиги в `infra/`, доставка через
