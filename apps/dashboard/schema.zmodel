@@ -268,6 +268,21 @@ model AlertSettings {
   @@allow('all', auth() != null)
 }
 
+/// Оверрайд расписания/enabled одной задачи `@letar/jobs` из админки `/jobs` — накладывается
+/// поверх дефолта из кода (`src/jobs/*.ts`), не заменяет его: null-поле означает «оверрайда нет,
+/// брать значение из кода». PLAN-INFRA-4.md §75 — код остаётся источником истины для набора
+/// задач, но правка через UI переживает деплой (тот же принцип, что уже решён для DEFAULT_CRON_JOBS
+/// dashboard-agent в PLAN-INFRA-3.md §56, только здесь оба источника примиряются, а не выбирается один).
+model JobOverride {
+  id        String   @id @default(cuid())
+  jobId     String   @unique
+  schedule  String?
+  enabled   Boolean?
+  updatedAt DateTime @updatedAt
+
+  @@allow('all', auth() != null)
+}
+
 /// Лог выполнения cron задач
 model CronExecutionLog {
   id           String     @id @default(cuid())

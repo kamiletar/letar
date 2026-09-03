@@ -43,6 +43,18 @@
       ],
       "@letar/hooks": [
         "../../libs/hooks/src/index.ts"
+      ],
+      "@letar/admin-ui": [
+        "../../libs/admin-ui/src/index.ts"
+      ],
+      "@letar/admin-ui/server": [
+        "../../libs/admin-ui/src/server/index.ts"
+      ],
+      "@letar/jobs": [
+        "../../libs/jobs/src/index.ts"
+      ],
+      "@letar/format-utils": [
+        "../../libs/format-utils/src/index.ts"
       ]
     }
   },

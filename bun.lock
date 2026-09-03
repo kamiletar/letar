@@ -481,13 +481,16 @@
       "name": "@letar/dashboard",
       "version": "1.25.0",
       "dependencies": {
+        "@letar/admin-ui": "workspace:*",
         "@letar/analytics": "workspace:*",
         "@letar/chakra-provider": "workspace:*",
         "@letar/env-load": "workspace:*",
+        "@letar/format-utils": "workspace:*",
         "@letar/forms": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/hooks": "workspace:*",
         "@letar/infra-config": "workspace:*",
+        "@letar/jobs": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "@letar/ui": "workspace:*",
       },
@@ -701,7 +704,7 @@
     },
     "apps/poster-microtext-desktop": {
       "name": "@letar/poster-microtext-desktop",
-      "version": "0.17.3",
+      "version": "0.17.4",
       "dependencies": {
         "@letar/icon-generator": "workspace:*",
         "detect-libc": "^2.1.2",

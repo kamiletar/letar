@@ -23,6 +23,11 @@ export async function register() {
       dsn: process.env.GLITCHTIP_DSN,
       environment: process.env.GLITCHTIP_ENVIRONMENT ?? 'development',
     })
+
+    // @letar/jobs (PLAN-INFRA-4.md §75) — не требует нативных модулей (pg-boss ходит в БД по
+    // обычному TCP), ограничение выше про dockerode/ssh2 сюда не относится.
+    const { startDashboardJobs } = await import('./jobs/scheduler')
+    await startDashboardJobs()
   }
 }
 

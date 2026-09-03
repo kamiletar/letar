@@ -2,6 +2,30 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.26.0] — 2026-09-03
+
+### Added
+
+- Собственные крон-задачи (`dashboard-heartbeat`, `s2-pageview-count`, `s2-ssl-check`) переехали
+  на `@letar/jobs` (pg-boss) — по образцу пилота `studio` (PLAN-INFRA-4.md §75). Планировщик
+  стартует из `instrumentation.ts`, задачи объявлены в `src/jobs/`, статус — `/api/jobs/status`
+  (для будущего наблюдателя `dashboard-agent`) и новая страница `/jobs` (`requireAdmin()`,
+  таблица `@letar/admin-ui` `JobsTable` — расписание, последний/следующий прогон, «Запустить
+  сейчас», вкл./выкл. без редеплоя).
+- Модель `JobOverride` — правка расписания/включённости через `/jobs` переживает деплой (та же
+  идея, что уже решена для `DEFAULT_CRON_JOBS` `dashboard-agent`, но здесь код и UI-оверрайд
+  примиряются, а не выбирается один источник).
+- `deploy-affected.sh`: блокирующий гейт — прод-деплой приложения с `src/jobs/` останавливается,
+  если `JOBS_ENABLED=true` не задан в расшифрованном `.env.docker` (защита от инцидента studio
+  2026-08-13, где задачи сутки не тикали молча).
+
+### Removed
+
+- `app/api/cron/{heartbeat,pageview-count,ssl-check}/route.ts` — логика переехала в
+  `src/jobs/*.ts`, HTTP-обёртка для `dashboard-agent` больше не нужна (агент перестанет дёргать
+  эти три id отдельным шагом — только после живого прод-прогона через `/jobs`, см. PLAN-INFRA-4.md
+  §75).
+
 ## [1.25.0] — 2026-09-03
 
 ### Added
