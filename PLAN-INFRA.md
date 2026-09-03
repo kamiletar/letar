@@ -34,7 +34,7 @@ CI, координация агентов, документация — всё, 
 | [PLAN-INFRA-1.md](/PLAN-INFRA-1.md) | §15–§25      | сервер s3, deploy MCP, e2e-гейт, форматтер worktree, СДЭК |
 | [PLAN-INFRA-2.md](/PLAN-INFRA-2.md) | §26–§48      | `libs/ui`, SEO, npm-публикация, деплой, redis, Traefik    |
 | [PLAN-INFRA-3.md](/PLAN-INFRA-3.md) | §49–§61      | firewall, hard e2e-gate, cron-задачи, security-инциденты  |
-| [PLAN-INFRA-4.md](/PLAN-INFRA-4.md) | §62–§140     | канарейка, GlitchTip, CI-гейт, Agent Mail                 |
+| [PLAN-INFRA-4.md](/PLAN-INFRA-4.md) | §62–§145     | канарейка, GlitchTip, CI-гейт, Agent Mail                 |
 
 Нужен конкретный `§NN` — ищи диапазон в таблице выше и открывай соответствующий файл. Это
 **единственная** карта диапазонов: в самих частях её копий нет.
