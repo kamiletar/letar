@@ -43,6 +43,16 @@
       `fetchOptions`. Проверено: `nx typecheck:tsgo kami`, `nx lint kami`, `nx test @letar/auth` —
       зелёные; `/` и `/ru/consulting` открываются в браузере без 500 и без ошибок в консоли.
 
+- [x] ⚠️ `nx build kami` иногда падает с потоком `[Better Auth]: Discovery fetch failed for
+      "letar-auth"` — разобрано 2026-09-02, не баг: `genericOAuth`-плагин better-auth делает
+      discovery-fetch синхронно в момент `betterAuth({...})` (внутри `init()`, вызывается при
+      импорте `lib/auth.ts`, не лениво на первый запрос), поэтому `next build` требует сетевой
+      доступности `auth.letar.best` во время сборки. В разобранном прогоне фактический
+      fatal-краш был от другого источника (Keystatic → `api.github.com`, `ECONNRESET`) — не от
+      OIDC. Код не менялся, фикс не требуется — это ограничение better-auth, затрагивающее все
+      hub-client приложения (kami/time/aprel8008/domwellbes). Подробности —
+      `.claude/docs/nextjs-build-time-oidc-discovery-network-dependency.md`.
+
 ---
 
 ## Фаза 1: Фундамент (MVP)

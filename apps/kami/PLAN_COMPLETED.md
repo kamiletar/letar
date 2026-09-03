@@ -1,5 +1,34 @@
 # Выполненные задачи — Kami
 
+## Разбор падения `nx build` на discovery-fetch better-auth (2026-09-02)
+
+Попутно при верификации фикса §33 `PLAN-INFRA-2.md` (индексация staging через `robots.ts`)
+обнаружено: `nx build kami --skip-nx-cache` иногда падает с потоком `[Better Auth]: Discovery
+fetch failed for "letar-auth"`. Проверено на полностью откаченных правках сессии — падает и без
+них, к §33 отношения не имеет.
+
+Разбор источника (`node_modules/.bun/better-auth@.../dist/plugins/generic-oauth/index.mjs` +
+`dist/auth/base.mjs`) показал: `genericOAuth`-плагин делает `fetchDiscovery()` внутри своего
+`init()`, а better-auth вызывает `init()` **синхронно в момент `betterAuth({...})`**
+(`createBetterAuth`: `const authContext = initFn(options)`, без `await`) — то есть при импорте
+`lib/auth.ts`, не лениво на первый реальный auth-запрос. Next.js импортирует этот модуль во время
+`collect page data`, параллельно в нескольких воркерах — отсюда повторяющиеся строки лога.
+
+Реальный `nx build kami --skip-nx-cache` воспроизведён живьём: OIDC-ошибки в этом прогоне не были
+фатальными сами по себе (пойманы внутри `.catch`) — фактический `Build error occurred` пришёл от
+**другого источника**, Keystatic (`createGitHubReader` в `src/lib/keystatic.ts`) не смог
+достучаться до `api.github.com` на странице `/[locale]/blog/[slug]`
+(`ECONNRESET` при TLS-хендшейке). Оба сбоя — симптом одной и той же сетевой нестабильности
+исходящих HTTPS-запросов с этой машины во время сборки, а не два разных бага.
+
+Затронуты все hub-client профили `@letar/auth`, не только kami:
+`grep -rl "hub-client" apps/*/src/lib/auth.ts` → kami, time, aprel8008, domwellbes.
+
+Код не менялся — это архитектурное ограничение better-auth (build требует сетевой доступности
+`auth.letar.best`), не баг `@letar/auth`/kami. Задокументировано —
+`.claude/docs/nextjs-build-time-oidc-discovery-network-dependency.md`, ссылка в корневом
+`CLAUDE.md`.
+
 ## Аудит overflowX на Card.Body вокруг Table.Root (2026-09-01)
 
 По следам фикса в domwellbes (61 место, `Table.Root` внутри `Card.Body` без локального
