@@ -4389,3 +4389,46 @@ multi-scope — repo-wide механическая правка); 8 submodule �
 это имя самого файла. Для одной логической правки, задевающей несколько таких корневых файлов
 одного submodule, `GIT_ALLOW_MULTI_SCOPE_COMMIT=1` — штатный путь, не обход дисциплины (тот же
 случай, что exception `docs-root`, но без готового спецкейса под non-md-файлы).
+
+## §139 — Nx 23.1.3 → 23.2.0: `nx migrate latest`, breaking changes нет (2026-09-03)
+
+**Триггер:** пользователь увидел на GitHub релиз Nx 23.2.0 и попросил проверить, что касается
+репозитория. `CLAUDE.md` на тот момент врал в шапке — «Nx 22.6» — на деле корень уже стоял на
+`23.1.3` (мажорный переход 22→23 был сделан раньше, `§`-запись про это в архиве отдельно не
+заведена, сам факт виден по `git log -- package.json`).
+
+**Разбор changelog** (23.0.0/23.1.0/23.2.0 через GitHub API, не веб-страницу релиза — она отдаёт
+пустой JS-каркас без реального тела релиза) не нашёл в 23.2.0 ни одного пункта с меткой
+`⚠️ Breaking Changes` — только Features/Fixes. Из потенциально релевантного нашему стеку (Windows,
+bun, vitest, oxlint):
+
+- `core: resolve main worktree root without a Windows verbatim prefix` (#36649) и
+  `core: resolve project roots case-insensitively on Windows` (#36835) — фиксы под Windows +
+  практику `git worktree` для изолированных агентов.
+- `vitest: prevent out-of-memory crash during atomized test graph creation` — полезно при полных
+  прогонах vitest по монорепо.
+- `core: accept bun.lock lockfileVersion 2 and 3` — совместимость с текущим форматом `bun.lock`.
+- `linter: hash only lintable files for inferred oxlint tasks` — ускорение `nx lint`.
+- миграция `@nx/vitest: update-23-2-0-use-import-meta-dirname` (`__dirname` →
+  `import.meta.dirname` в `vitest.config.mts`) — уже сделана вручную в [§138](#138—repo-wide-фикс-предупреждений-configloader-native-в-vitestconfig-2026-09-01)
+  двумя днями раньше, поэтому при прогоне миграций отработала как no-op — независимое
+  подтверждение, что тот фикс был в правильном направлении.
+- остальные 6 миграций (SVGR/webpack, module federation packages, pnpm-lockfile-cache-inputs,
+  executor-target-defaults cache) — no-op, паттернов, к которым они применимы (pnpm-воркспейсы,
+  module federation, ручной SVGR в next/webpack-конфиге), в репозитории нет.
+
+**Ход:** `nx migrate latest` → `bun install` (первая попытка упала на `EBUSY` при постинсталле
+`ntsuspend` у `@letar/animatrona` — заблокированный `.node`-файл, `tasklist` не нашёл живого
+`node.exe`/`electron.exe`, повтор прошёл чисто — транзиентная блокировка антивирусом/индексатором,
+не чужой процесс) → `nx migrate --run-migrations` (7/7 migrations, 0 изменений в коде) →
+`migrations.json` удалён.
+
+**Коммиты:** `0ff59c75` (`chore(deps): bump Nx 23.1.3 -> 23.2.0`, `package.json`+`bun.lock`,
+`GIT_ALLOW_MULTI_SCOPE_COMMIT=1` — та же природа, что и precedent-коммит `7ebde228` на 23.1.2→23.1.3,
+только с двумя файлами root-scope сразу), `3d2e9291` (`docs: обновить версию Nx и дату в шапке
+CLAUDE.md`). Не запушено — ждёт отдельного одобрения `git push`.
+
+**peer-deps warning без действия:** pre-commit-хук на коммит `package.json`+`bun.lock` показал 4
+несовпадения (`eslint-plugin-import`/`-jsx-a11y`/`-react`/`@react-native/eslint-config` против
+`eslint@10.9.1`) — старый фоновый шум (ESLint 10 против плагинов, объявивших верхнюю границу до
+9.x), не новая строка после этого апдейта, действия не требует.
