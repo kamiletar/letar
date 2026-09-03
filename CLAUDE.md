@@ -187,6 +187,14 @@ select ·
 перехватывает клик по CTA; firefox/webkit чувствительнее chromium к font-metrics разнице
 
 **Данные и состояние:** [data-fetching](/.claude/docs/data-fetching.md) ·
+[tanstack-query-client-recreated-per-render](/.claude/docs/tanstack-query-client-recreated-per-render.md)
+⚠️ `createQueryClient()` в теле провайдера (было во всех трёх провайдерах
+`@letar/query-provider`) выдаёт новый пустой клиент на каждый ре-рендер, а провайдер стоит в
+layout — его перерисовывает любая мягкая навигация и любой `revalidatePath` из server action;
+снаружи выглядит как «первое действие применилось, следующие молча не доехали до экрана» при
+исправно отработавшем сервере, фикс — `useState(() => …)`, сторож — тест по исходникам
+библиотеки; там же смежная ловушка: `mutationFn` поверх server action, отвечающего
+`{ error }` значением, обязан бросать — иначе откат оптимистичной правки не срабатывает ·
 [pwa-offline](/.claude/docs/pwa-offline.md) ·
 [serwist-turbopack-stale-sw-artifact](/.claude/docs/serwist-turbopack-stale-sw-artifact.md) ⚠️
 `@serwist/next` работает только с webpack, а `public/sw.js` в `.gitignore` — собрал приложение
