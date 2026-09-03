@@ -334,13 +334,17 @@ request-scope бросают, мокать оба модуля; `redirect()` б�
 4 страницы из 12 (до 777px при экране 375px), там же скрипт аудита и почему его нельзя запускать
 через Bash-тул на Windows ·
 [theme-hardcode-gate-coverage](/.claude/docs/theme-hardcode-gate-coverage.md) гейт сырых
-цветов/теней/transition (`theme:check` в domwellbes) — только у одного приложения из ~30, рано
-тиражировать через generator, слепые зоны и структурные отличия (нет `src/theme/` у части
-приложений) сначала нужно закрыть на втором реальном потребителе ·
+цветов/теней/transition (`theme:check`) — на 2026-09-03 у четырёх приложений (`aboi`, `dashboard`,
+`domwellbes`, `studio`), считать `grep -rl '"theme:check"' apps/*/project.json`, не `git grep`
+(три из четырёх — submodule); до 2026-09-03 и док, и эта строка утверждали «только у одного
+приложения из ~30», хотя сам док ниже описывал три; слепые зоны и структурные отличия (нет
+`src/theme/` у части приложений) — почему тиражирование через generator всё ещё не закрыто ·
 [chakra-semantic-token-contract](/.claude/docs/chakra-semantic-token-contract.md) ⚠️ стоковые
 рецепты Chakra читают `bg.panel`/`fg.error`/`border.control`/`l1..l3`/`colorPalette.*` напрямую —
-не переопределил в своих `semanticTokens` → холодные цвета мимо палитры и провал WCAG AA; 14 из
-15 приложений с темой пробел не закрыли ·
+не переопределил в своих `semanticTokens` → холодные цвета мимо палитры и провал WCAG AA; замер
+«14 из 15 приложений с темой пробел не закрыли» — на 2026-08-19, каталог `src/theme` сейчас у 16
+приложений (`ls -d apps/*/src/theme`), кто из них закрыл контракт после того замера — не
+перепроверялось ·
 [chakra-typegen-shared-node-modules-race](/.claude/docs/chakra-typegen-shared-node-modules-race.md)
 ⚠️ `theme:typegen` пишет в общий физический файл `node_modules/@chakra-ui/react` — параллельный
 `theme:typegen` другого приложения молча откатывает кастомные recipe-варианты, `typecheck:tsgo`
@@ -389,7 +393,9 @@ singleton-строка настроек (`ShopSettings` и аналоги) — �
 зависит от формы callback'а, а не от структуры массива ключей ·
 [eslint-flat-react-typescript-missing-react-hooks-plugin](/.claude/docs/eslint-flat-react-typescript-missing-react-hooks-plugin.md)
 ⚠️ `nx.configs['flat/react-typescript']` не регистрирует `eslint-plugin-react-hooks` — правило
-`exhaustive-deps`/`rules-of-hooks` не проверялось ни в одном из ~22 приложений с этим паттерном ·
+`exhaustive-deps`/`rules-of-hooks` не проверялось ни в одном из ~22 приложений с этим паттерном
+(ревизия 2026-08-19); **починено централизованно** — плагин зарегистрирован в корневом
+`eslint.config.mjs`, приложения получают его через `...baseConfig` ·
 [dotenv-agent-targeted-tip-and-skill-files](/.claude/docs/dotenv-agent-targeted-tip-and-skill-files.md)
 ⚠️ пакет `dotenv` печатает в stdout случайную "tip"-строку, одна из которых ведёт на сторонний
 домен и адресована ИИ-агентам ("auth for agents"), плюс кладёт свои `SKILL.md` в пакет —

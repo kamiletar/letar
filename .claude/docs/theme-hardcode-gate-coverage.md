@@ -11,6 +11,18 @@
 Грep по всем `apps/*/project.json` на таргет с именем `theme:check`/`check-theme`/`no-raw-color` —
 **только у domwellbes**. Ни один из ~30 других apps аналогичного гейта не имеет.
 
+⚠️ **Замер выше — на 2026-08-19, и он устарел в тот же месяц.** На 2026-09-03 таргет `theme:check`
+есть у **четырёх** приложений: `aboi`, `dashboard`, `domwellbes`, `studio`. Про `studio` и `aboi`
+написано ниже в этом же файле (раздел про три конфигурации), про `dashboard` — не было нигде, то
+есть файл противоречил сам себе. Считай охват командой, не по тексту:
+
+```bash
+grep -rl '"theme:check"' apps/*/project.json
+```
+
+⚠️ `git grep` для этого не годится — он не заходит в submodule, а `aboi`/`domwellbes`/`studio` —
+именно submodule. Обычный рекурсивный `grep` по рабочему дереву их видит.
+
 ### 2. Что ловит скрипт (полное чтение)
 
 Правила (regex по `.ts`/`.tsx` в `src/`, кроме `assets/generated/pdf`):
@@ -218,13 +230,23 @@ generator по интерфейсу, наброшенному выше, но э�
 `dependencies`/`nx.implicitDependencies` приложения и прогоняет `bun install` перед первым
 `theme:check`.
 
-**Почему `@letar/theme-check` — единственная plain-JS (не TypeScript) библиотека монорепо на
-2026-08-19:** `theme:check` запускается напрямую через `node scripts/check-theme-hardcodes.mjs`
+**Почему `@letar/theme-check` — plain-JS (не TypeScript) библиотека:** `theme:check` запускается
+напрямую через `node scripts/check-theme-hardcodes.mjs`
 (`nx:run-commands`), без бандлера и без `tsc`/`tsgo` — а механизм резолва `@letar/*` через
 `paths`/`customConditions` работает только внутри TS-инструментов (компилятор, бандлер). Голому
 `node` нужен исполняемый JS-файл сразу, без шага компиляции, — bare-специфер `@letar/theme-check`
 резолвится обычным Node-механизмом через симлинк `node_modules/@letar/theme-check`, который
 создаёт `bun install`. Подробнее — README библиотеки, раздел «Почему plain JS».
+
+⚠️ **До 2026-09-03 фраза выше начиналась с «единственная plain-JS библиотека монорепо на
+2026-08-19».** Это перестало быть верным через шесть дней: `libs/eager-jsx-check` и
+`libs/icon-generator` заведены 2026-08-25 по той же схеме (`main: "./src/index.mjs"`, ноль `.ts`
+в `src/`). Приём не уникален для `theme-check` — он общий для любой библиотеки, которую
+запускает голый `node`. Список считать командой:
+
+```bash
+for d in libs/*/; do [ -f "$d/package.json" ] && [ ! -f "$d/tsconfig.json" ] && echo "$d"; done
+```
 
 Проверено: `nx theme:check` всех трёх приложений даёт тот же результат (чисто), что и до
 рефакторинга; `nx typecheck:tsgo`/`lint` всех трёх, `nx test @letar/theme-check` (6 тестов) и
