@@ -344,16 +344,6 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     timeoutMs: 130_000,
   },
   {
-    id: 'dashboard-heartbeat',
-    name: 'Heartbeat (dashboard)',
-    app: 'dashboard',
-    endpoint: '/api/cron/heartbeat',
-    schedule: '0 21 * * *',
-    description: 'Если за 24ч не было ни одного Alert — уведомление в Telegram о живости канала',
-    enabled: true,
-    server: 's2',
-  },
-  {
     id: 'maddy-backup-freshness-check',
     name: 'Maddy Backup Freshness Check',
     app: 'dashboard-agent',
@@ -504,28 +494,6 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     schedule: '*/10 * * * *',
     description:
       'Сканирует хвост логов запущенных контейнеров на строки с ошибками (error/exception/fatal/panic и т.п.), алертит CRON_FAILED по новым находкам с курсором per-контейнер, чтобы не повторять уже виденные строки (Backlog «Улучшения сбора метрик»)',
-    enabled: true,
-    server: 's2',
-  },
-  {
-    id: 's2-pageview-count',
-    name: 'Page View Counter (NPM access logs)',
-    app: 'dashboard',
-    endpoint: '/api/cron/pageview-count',
-    schedule: '*/10 * * * *',
-    description:
-      'Инкрементальный парсинг access-логов Nginx Proxy Manager в грубый счётчик hits/day/domain без ПДн — дополняет Umami там, где cookie-consent gate не пропускает часть трафика (см. lib/pageview-counter.ts в dashboard)',
-    enabled: true,
-    server: 's2',
-  },
-  {
-    id: 's2-ssl-check',
-    name: 'SSL Certificate Expiry Check',
-    app: 'dashboard',
-    endpoint: '/api/cron/ssl-check',
-    schedule: '0 8 * * *',
-    description:
-      'Проверка сроков действия SSL сертификатов в Nginx Proxy Manager, алерт SSL_EXPIRING с Telegram уведомлением при истечении/скором истечении (см. lib/ssl-monitor.ts в dashboard)',
     enabled: true,
     server: 's2',
   },
