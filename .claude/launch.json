@@ -65,6 +65,12 @@
       "port": 3024
     },
     {
+      "name": "studio-prod",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["apps/studio/.next/standalone/apps/studio/server.js"],
+      "port": 3124
+    },
+    {
       "name": "svoichuzhie",
       "runtimeExecutable": "nx",
       "runtimeArgs": ["dev", "svoichuzhie"],
