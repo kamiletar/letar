@@ -117,9 +117,11 @@ jobs:
       # Создаёт БД и накатывает схему для приложений, чьи unit-тесты бьют в настоящий Postgres
       # (см. комментарий у `services.postgres` выше). Имя БД должно совпадать с тем, что задано
       # в `test.env.DATABASE_URL` соответствующего `vitest.config.mts` — здесь это
-      # animatrona_tracker_ci. `prisma db push` идёт со своим DATABASE_URL на шаг (не job-level),
-      # чтобы не задеть остальные проекты. Новое приложение с настоящим (не замоканным) Postgres
-      # в unit-тестах добавляется сюда отдельной строкой + своим `test.env` в vitest.config.mts.
+      # animatrona_tracker_ci и svoichuzhie_ci (отдельная БД — у обоих приложений одноимённые
+      # модели Better Auth User/Account/Session/Verification, общая БД рискует коллизией схем).
+      # `prisma db push` идёт со своим DATABASE_URL на шаг (не job-level), чтобы не задеть
+      # остальные проекты. Новое приложение с настоящим (не замоканным) Postgres в unit-тестах
+      # добавляется сюда отдельной строкой + своим `test.env` в vitest.config.mts.
       - name: Prepare test databases
         if: always() && steps.install.outcome == 'success'
         env:
@@ -128,6 +130,9 @@ jobs:
           psql -h localhost -U ci -d ci -c 'CREATE DATABASE animatrona_tracker_ci'
           bunx nx run animatrona-tracker:zenstack:generate
           DATABASE_URL=postgresql://ci:ci@localhost:5432/animatrona_tracker_ci bunx nx run animatrona-tracker:db:push
+          psql -h localhost -U ci -d ci -c 'CREATE DATABASE svoichuzhie_ci'
+          bunx nx run svoichuzhie:zenstack:generate
+          DATABASE_URL=postgresql://ci:ci@localhost:5432/svoichuzhie_ci bunx nx run svoichuzhie:db:push
 
       # --parallel=2 (не 3, как у lint/typecheck) и ограничение воркеров vitest внутри каждого
       # проекта — иначе 3 nx-таски × собственный пул воркеров vitest на каждую одновременно
