@@ -8,7 +8,9 @@
 ссылаются сюда за механизмом: [lib-entry-points](/.claude/docs/lib-entry-points.md#transpilepackages--не-нужен-для-резолва)
 — опция не нужна конкретно для резолва пути через `paths` (компиляции найденного файла это не
 касается, см. ниже); [nextron-renderer-transpile-packages-required](/.claude/docs/nextron-renderer-transpile-packages-required.md)
-— тот же ключ обязателен и в Electron/nextron-рендерере, по этой же причине; [nextjs-nx-composeplugins-migration](/.claude/docs/nextjs-nx-composeplugins-migration.md)
+— тот же вопрос для Electron/nextron-рендерера (`animatrona`): изначальный claim «обязателен»
+опровергнут 2026-09-03, там даже отсутствие ключа целиком не ломает сборку — сильнее вывода этого
+дока; [nextjs-nx-composeplugins-migration](/.claude/docs/nextjs-nx-composeplugins-migration.md)
 — откуда явные списки вообще взялись (миграция с `withNx`).
 
 ## Короткий ответ

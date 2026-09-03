@@ -4833,6 +4833,33 @@ const codeCondition = { test: ..., ...(shouldIncludeExternalDirs ? {} : { includ
 не видит вовсе — у неё нет записи в `paths` app-level `tsconfig.json`, а охват гейта ограничен
 пулом `paths`.
 
+## §145 — тот же вопрос для nextron-рендерера `animatrona` — прежний claim «обязателен» тоже опровергнут (2026-09-03)
+
+`.claude/docs/nextron-renderer-transpile-packages-required.md` утверждал: `transpilePackages`
+для `@letar/*` в `apps/animatrona/renderer` обязателен, в отличие от обычных приложений, потому
+что резолв через `tsconfig paths`/webpack `resolve.alias` не равнозначен транспиляции синтаксиса.
+
+Причинная проверка теми же тремя прогонами, что и §144 (`rm -rf .next` + `next.exe build
+--webpack`, коммит `c302242c`, конфиг восстановлен побайтово через `git checkout --` + сверка md5
+между прогонами): 15 пакетов как в репозитории — зелёный; `transpilePackages: ['@letar/ui']` —
+зелёный; **ключ убран из `next.config.js` целиком — тоже зелёный.** Третий результат идёт дальше
+вывода §144: там полное отсутствие ключа ломало сборку studio, здесь — нет.
+
+Отладочный `console.log` внутри `getBaseWebpackConfig` (`node_modules/next`, временный патч,
+откачен побайтово после проверки) подтвердил `shouldIncludeExternalDirs = false` и
+`dir = apps/animatrona/renderer` при снятом ключе — то есть по формуле §144 ограничение
+`include: [dir, ...]` должно было действовать, а `libs/*` физически лежит вне `dir`. Тем не менее
+сборка чистая. Причина — `webpack-config.js` заводит несколько module rules с SWC-лоадером;
+часть спреит `...codeCondition` (с ограничением), часть использует только `test:
+codeCondition.test` без ограничения вовсе (строки 1404/1419/1435/1441/1446/1456 в 16.3.4) —
+какое-то из вторых ловит `libs/*`-файлы независимо от `dir`. Почему для studio в этом же месте
+всё-таки падало — не прослежено до конца (не хватило времени на дальнейшее реверс-инжиниринг
+условий выбора module rules по `compilerType`/`isServer`/`appDir`), но на практический вывод это
+не влияет: записи в `transpilePackages` для этого приложения тоже не требуются для зелёной
+сборки. Существующий список менять не нужно — та же логика безвредности и подстраховки, что в
+§144. Подробности и таблица прогонов — в самом доке (переписан целиком, старый claim оставлен
+как история, не удалён).
+
 **Документация:** новый
 [transpile-packages-array-presence-not-content](/.claude/docs/transpile-packages-array-presence-not-content.md),
 ссылка в индексе `CLAUDE.md`; в
