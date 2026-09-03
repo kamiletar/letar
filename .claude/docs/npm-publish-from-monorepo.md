@@ -13,6 +13,8 @@
 grep -l '"build:npm"' libs/*/project.json apps/*/project.json
 ```
 
+<!-- doc-count: {"cmd": "grep -l '\"build:npm\"' libs/*/project.json apps/*/project.json | wc -l", "expect": 4} -->
+
 Отдельно: наличие `build:npm` ≠ пакет опубликован. Что реально уходит на npm, задаёт список тегов
 в [publish-npm.yml](/.github/workflows/publish-npm.yml) (`forms-v*`, `form-mcp-v*`,
 `zenstack-form-plugin-v*`) — `forms-shadcn` там на 2026-09-03 нет, а у `form-mcp` в `package.json`

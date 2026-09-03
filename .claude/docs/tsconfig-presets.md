@@ -42,6 +42,7 @@ tsconfig.base.json          — общие для ВСЕХ проектов (app
   `git grep`: часть приложений живёт в submodule). Существенно не число, а инвариант одинаковой
   глубины: заводишь приложение на пресете глубже/мельче `apps/<app>/` — `rootDir` из пресета для
   него неверен.
+  <!-- doc-count: {"cmd": "grep -rl 'tsconfig.next-app.json' apps/*/tsconfig.json | wc -l", "expect": 21} -->
   Теперь вынесено в сам пресет — см. ниже.
 - **`noUnusedLocals`/`noUnusedParameters`** — у части приложений (`driving-school`,
   `animatrona-tracker`, `mandala`, `form-develop-app`) стояли в `false`. Проверено эмпирически
