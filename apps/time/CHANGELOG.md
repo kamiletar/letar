@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.13 (2026-09-03)
+
+### Added
+
+- Cron-задача `/api/cron/notifications` перенесена на `@letar/jobs` (pg-boss, PLAN-INFRA-4.md
+  §75) — `src/jobs/{notifications,index,scheduler}.ts`, `/api/jobs/status`. У приложения нет
+  роли ADMIN и admin-панели вообще — ручной запуск через UI не заведён, задача работает только
+  на автотике (`JOBS_ENABLED=true`). Модель `JobOverride` (`@@deny('all', true)` — правится
+  только напрямую через `prisma`, не через UI). Старая `/api/cron/notifications` и запись в
+  `dashboard-agent` намеренно не удалены — по правилу §75 снимаются только после подтверждённого
+  живого прогона на проде.
+
 ## 0.5.12 (2026-09-02)
 
 ### Fixed

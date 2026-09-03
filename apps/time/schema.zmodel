@@ -143,3 +143,18 @@ model NotificationLog {
   @@allow('read', auth() == subscription.user)
   @@allow('create', true)
 }
+
+// ========================================
+// Крон-задачи (@letar/jobs, PLAN-INFRA-4.md §75)
+// ========================================
+
+/// Ручное переопределение расписания/включённости крон-задачи. У приложения нет ADMIN-роли —
+/// правится только напрямую через `prisma` (raw client), не через enhanced-клиент/UI.
+model JobOverride {
+  jobId     String   @id
+  schedule  String?
+  enabled   Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+
+  @@deny('all', true)
+}

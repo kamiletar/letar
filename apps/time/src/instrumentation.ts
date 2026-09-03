@@ -7,6 +7,11 @@ export async function register() {
       dsn: process.env.GLITCHTIP_DSN,
       environment: process.env.GLITCHTIP_ENVIRONMENT ?? 'development',
     })
+
+    // @letar/jobs (PLAN-INFRA-4.md §75) — не требует нативных модулей, pg-boss ходит в БД по
+    // обычному TCP.
+    const { startTimeJobs } = await import('./jobs/scheduler')
+    await startTimeJobs()
   }
 }
 
