@@ -18,6 +18,23 @@
 не начинать: решение владельца (2026-09-01), ждём GA TypeScript 7.1 с рабочим API** (живая попытка
 вскрыла bun-специфичный блокер поверх уже известного риска lint-тулинга — разбор в §19).
 
+## §77 — гейт `cookie-cache-strategy`: защита от повтора cookie-коллизии better-auth (2026-09-03)
+
+Продолжение фикса из `.claude/docs/better-auth-localhost-cookie-jar-collision.md` (`strategy: 'jwt'`
+убран из `apps/dashboard/src/lib/auth.ts`, там же оставлен предупреждающий комментарий). Комментарий
+не мешает следующему приложению повторить ту же ошибку — добавлена техническая страховка.
+
+`scripts/check-cookie-cache-strategy.mjs`: грепает все `apps/*/src/lib/auth.ts` (комментарии
+вычищены перед матчингом — иначе сам предупреждающий комментарий в dashboard стал бы ложным
+срабатыванием) на `session.cookieCache.strategy: 'jwt'/'jwe'` и требует, чтобы у такого
+приложения был свой `advanced.cookiePrefix` где-то в `src/lib/*.ts` (образец —
+`apps/studio/src/lib/auth-cookies.ts`). Зарегистрирован в `check-all.mjs` как
+`cookie-cache-strategy` (группа `auth`, severity `gate`, `ci: partial` — приватные submodule не
+выкачаны в CI). Живая проверка: временное добавление `strategy: 'jwt'` обратно в
+`apps/dashboard/src/lib/auth.ts` дало ожидаемый ❌ с понятным сообщением, после отката — чисто
+зелёный прогон (16 приложений проверено), `git diff` пуст. `bun scripts/check-all.mjs --ci`
+подтверждён — новая проверка корректно помечена `(покрытие неполное)`.
+
 ## §76 — паттерн `llms.txt` задокументирован и раскатан на 18 приложений (2026-09-02)
 
 Повод: два приложения (`aboi`, `form-docs`) независимо завели `llms.txt` (llmstxt.org) разными
