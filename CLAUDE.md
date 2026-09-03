@@ -430,6 +430,10 @@ rollout-приложений после перехода s2/s3 на Traefik — 
 [firewall](/.claude/docs/firewall.md) ⚠️ `ufw` не фильтрует порты Docker ·
 [backup-architecture](/.claude/docs/backup-architecture.md) ·
 [secret-manager](/.claude/docs/secret-manager.md) SOPS + age ·
+[sops-env-encrypt-input-path-matching](/.claude/docs/sops-env-encrypt-input-path-matching.md) ⚠️
+`sops --encrypt --output <out> <in>` матчит `.sops.yaml` по пути `<in>`, не `<out>` — временный
+plaintext с произвольным именем не совпадает с creation_rules; плюс dotenv vs бинарный формат
+`.enc` требует разных флагов на decrypt/encrypt — рецепт `scripts/sops-env-set.sh` ·
 [redis-security](/.claude/docs/redis-security.md) ·
 [cron-endpoint-registration-checklist](/.claude/docs/cron-endpoint-registration-checklist.md) ⚠️
 новый `/api/cron/*` требует три правки не в scope пишущего приложения (`CRON_SECRET`,

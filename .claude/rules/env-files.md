@@ -45,6 +45,28 @@
 - Требует `SOPS_AGE_KEY_FILE=$HOME\.age\letar-key.txt` (ключ из KeePassXC)
 - Подробнее: [secret-manager.md](/.claude/docs/secret-manager.md)
 
+### ⚠️ Точечная правка одного ключа скриптом — не голым `sops --encrypt --output <tmp> <tmp>`
+
+`sops apps/<app>/.env.docker.enc` (интерактивно через `$EDITOR`) — штатный путь, граблей не даёт.
+Но если правку одного ключа делает **скрипт** (а не человек в редакторе), он неизбежно создаёт
+свой промежуточный plaintext-файл — и тут есть две грабли, обе найдены на практике при батч-правке
+нескольких приложений подряд (2026-09-02):
+
+1. `sops --encrypt --output <out> <in>` матчит `creation_rules` из `.sops.yaml` по пути **`<in>`**,
+   не `<out>`. Временный файл с произвольным именем (`....tmp`) не совпадает с regex
+   `\.env\.staging(\.enc)?$` / `\.env\.docker(\.enc)?$` → `error loading config: no matching
+   creation rules found`, фатально, `.enc` не перезаписывается — но exit code нужно проверять
+   явно, «команда что-то напечатала» этого не покажет.
+2. Часть `.enc`-файлов в репозитории хранится построчным dotenv-форматом sops
+   (`KEY=ENC[...]` на переменную), часть — JSON-обёрнутым бинарным блобом (формат по умолчанию).
+   Decrypt/encrypt не тем режимом падает с `Error unmarshalling input json: invalid character`.
+
+**Готовое решение — `scripts/sops-env-set.sh <app> <staging|docker> <KEY> <VALUE>`.** Определяет
+формат пробой, шифрует временный файл с именем, буквально заканчивающимся на
+`.env.staging`/`.env.docker` (регэксп `.sops.yaml` не заякорен слева), проверяет exit code каждой
+команды sops и верифицирует результат обратным decrypt. Разбор обеих граблей и почему это не
+частный случай — [sops-env-encrypt-input-path-matching.md](/.claude/docs/sops-env-encrypt-input-path-matching.md).
+
 ### ⛔ `/sync-env` устарел — не используй
 
 Команда и скрипты `scripts/sync-env-docker.sh` / `pull-env-docker.sh` возили `.env.docker` по
