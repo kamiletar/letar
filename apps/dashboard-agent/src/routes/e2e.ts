@@ -311,8 +311,13 @@ export async function e2eRoutes(fastify: FastifyInstance): Promise<void> {
       // с SOPS_AGE_KEY_FILE в deploy-affected.sh) — без --preserve-env BASE_URL/DEV_SESSION_TOKEN
       // не долетают до `bunx nx e2e`, Playwright не видит staging baseUrl и поднимает свой
       // `nx dev` против dev-БД (регрессия, найдена BlackCove на живом прогоне 2026-07-11).
+      // PLAYWRIGHT_JSON_OUTPUT_NAME добавлена в --preserve-env отдельно (PLAN-INFRA-3.md §55,
+      // живая проверка 2026-09-03): без неё та же ловушка стирает путь к JSON-отчёту, чей
+      // единственный смысл — не зависеть от кода возврата nx. readE2eReportStats() молча
+      // откатывался на код возврата, и живые прогоны archetest/aprel8008 подтвердили это —
+      // `⚠️ Отчёт Playwright не найден/не прочитан` при полностью зелёном отчёте в stdout.
       const nxCommand =
-        `if [ "$(id -u)" = "0" ] && id deploy >/dev/null 2>&1; then exec sudo -u deploy -H --preserve-env=BASE_URL,DEV_SESSION_TOKEN -- bash -c '${e2eCommand}'; fi; ${e2eCommand}`
+        `if [ "$(id -u)" = "0" ] && id deploy >/dev/null 2>&1; then exec sudo -u deploy -H --preserve-env=BASE_URL,DEV_SESSION_TOKEN,PLAYWRIGHT_JSON_OUTPUT_NAME -- bash -c '${e2eCommand}'; fi; ${e2eCommand}`
       const args = hostShellArgs(nxCommand)
       appendOutput(run, `📋 Command: nsenter -- bash -c "${nxCommand}"`)
 
