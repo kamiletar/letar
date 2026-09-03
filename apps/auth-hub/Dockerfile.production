@@ -1,17 +1,5 @@
-FROM node:24-slim AS tz
-
-FROM node:24-alpine AS runner
+FROM letar-node-runtime:24 AS runner
 WORKDIR /app
-
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-
-# zoneinfo для Alpine — не `apk add tzdata`, причина: .claude/docs/docker-prune-cold-layer-network-flake.md
-COPY --from=tz /usr/share/zoneinfo /usr/share/zoneinfo
-ENV TZ=Europe/Moscow
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
 
 # Копируем standalone build
 COPY --chown=nextjs:nodejs apps/auth-hub/.next/standalone ./

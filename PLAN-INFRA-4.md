@@ -4083,7 +4083,7 @@ runtime вставляет `import { jsx as _jsx } from 'react/jsx-runtime'`, и
 вхождениями. Если в будущем в одном compose-файле появится второй Postgres-сервис — переанализировать
 и заякорить тем же приёмом, что и `DB_CONTAINER` выше (awk-фильтр по top-level ключу `^  db:$`).
 
-## §129 — общий базовый Docker-образ для 20 из 22 `Dockerfile.production` 🟡 ПИЛОТ (2026-09-03, ждёт staging-прогона)
+## §129 — общий базовый Docker-образ для 20 из 22 `Dockerfile.production` ✅ ЗАКРЫТО (2026-09-03)
 
 tz-блок (zoneinfo из Debian-образа + `ENV TZ`) сократили с 6-строчного комментария до одной строки
 во всех 22 `Dockerfile.production` — сам механизм не тронут, риск нулевой.
@@ -4130,10 +4130,32 @@ submodule (aboi, aprel8008, domwellbes, driving-school, dsperevod, studio, svoic
   деплой на staging через `deploy-agent-dev` (сам деплой не запускаю — см.
   `.claude/rules/deploy-coordination.md`) — это следующий шаг, ждёт deploy-request.
 
-**Дальше:** deploy-request на `mandala` (staging) → если Step 3.5 отработал и контейнер поднялся
-штатно — тиражировать `FROM letar-node-runtime:24 AS runner` на оставшиеся 19 приложений
-(`dashboard` — с доп. слоем `ARG ALPINE_MIRROR` + `apk add docker-cli` поверх, как и
-планировалось).
+**Пилот подтверждён на staging (2026-09-03, deploy-agent-dev):** Step 3.5 собрал базовый образ,
+сборка `mandala` реально взяла его (`FROM docker.io/library/letar-node-runtime:24@sha256:...`),
+контейнер поднялся здоровым, Traefik подхватил сам.
+
+### Тираж на оставшиеся 19 приложений (2026-09-03)
+
+`FROM letar-node-runtime:24 AS runner` применён во всех 19 оставшихся приложениях (17 — точная
+замена 13-строчного блока; `animatrona-tracker` — с сохранением своего `NODE_OPTIONS` после
+`WORKDIR`, как и в `mandala`; `dashboard` — с сохранённым доп. слоем `ARG ALPINE_MIRROR` + `apk
+add docker-cli git openssh-client` поверх базы, `addgroup`/`adduser` для `nodejs`/`nextjs` больше
+не нужны — уже в базовом образе). Итог: **20 из 22** `Dockerfile.production` на общей базе,
+`pravda` (`nginx:alpine`, не Node) и `time` (сознательно на `node:24-slim`, §130) — вне охвата,
+как и планировалось изначально.
+
+**Проверено:** `docker build --check` (BuildKit lint, требует только сам `letar-node-runtime:24`
+локально, не полный build context) — все 20 файлов синтаксически чистые, `Check complete, no
+warnings found.` **Не проверено:** реальный деплой всех 19 — только `mandala` прогнана через
+staging живьём; остальные впервые соберутся у `deploy-affected.sh` при следующем affected-деплое
+каждого приложения (Step 3.5 уже общий, отдельного deploy-request на каждое не требуется — риск
+разово всплыть на первом реальном деплое, а не сейчас).
+
+Коммиты: `apps/*/Dockerfile.production` в letar + отдельные коммиты внутри 7 приватных submodule
+(aboi `586f152`, aprel8008 `7c02299`, domwellbes `8eb2042`, driving-school `ab40248`, dsperevod
+`9d3086c`, studio `7393fce`, svoichuzhie `6b12653`) — каждый коммит внутри submodule scoped
+только на `Dockerfile.production` (`aboi`/`domwellbes`/`studio` на момент правки имели
+незакоммиченный WIP других сессий в других файлах — не тронут).
 
 ## §130 — эксперимент `node:24-slim` вместо `node:24-alpine`: работает, не тиражируем ✅ ЗАКРЫТО (2026-08-28)
 
