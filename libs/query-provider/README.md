@@ -92,6 +92,15 @@ const client = getQueryClient({ preset: 'standard' })
 const persister = createIDBPersister({ key: 'my-app-cache' })
 ```
 
+⚠️ **Пишешь свой провайдер поверх `createQueryClient()` — оберни вызов в `useState(() => …)`.**
+Голый `const client = createQueryClient(config)` в теле компонента отдаёт новый пустой клиент на
+каждый ре-рендер: кеш обнуляется, а уже запущенные мутации продолжают писать
+`setQueryData`/`invalidateQueries` в выброшенный клиент. Провайдер обычно стоит в `layout`, где
+ре-рендер вызывает любая мягкая навигация и любой `revalidatePath` из server action — снаружи
+это выглядит как «первое действие применилось, следующие молча не доехали до экрана». Разбор —
+[tanstack-query-client-recreated-per-render](/.claude/docs/tanstack-query-client-recreated-per-render.md).
+Провайдеры самой библиотеки от рецидива закрыты тестом `src/lib/stable-query-client.spec.ts`.
+
 ## Зависимости
 
 - `@tanstack/react-query` >= 5.0.0

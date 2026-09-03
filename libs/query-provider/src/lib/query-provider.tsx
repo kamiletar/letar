@@ -1,7 +1,7 @@
 'use client'
 
 import { QueryClientProvider } from '@tanstack/react-query'
-import type { ReactNode } from 'react'
+import { type ReactNode, useState } from 'react'
 import { createQueryClient, type QueryClientConfig } from './create-query-client'
 // Панель девтулзов подключается только так — почему `dynamic(ssr:false)` тут не работает,
 // написано в самом модуле
@@ -51,7 +51,16 @@ export interface QueryProviderProps extends QueryClientConfig {
  * ```
  */
 export function QueryProvider({ children, showDevtools, ...config }: QueryProviderProps) {
-  const queryClient = createQueryClient(config)
+  // Клиент создаётся ОДИН раз на монтирование провайдера. Голый `createQueryClient(config)`
+  // в теле компонента выглядит безобидно, но выдаёт НОВЫЙ клиент на каждый ре-рендер — вместе с
+  // ним обнуляется весь кеш и рвётся связь с оптимистичными правками: `setQueryData`/
+  // `invalidateQueries` из уже запущенной мутации попадают в выброшенный клиент, а смонтированные
+  // `useQuery` читают пустой новый. Внешне это выглядит как «первое действие применилось, а
+  // следующие молча не доехали до экрана», хотя сервер отработал все.
+  //
+  // Ре-рендер здесь — не редкость: провайдер стоит в layout, поэтому его перерисовывает любая
+  // мягкая навигация и любой `revalidatePath` из server action.
+  const [queryClient] = useState(() => createQueryClient(config))
 
   const devtoolsEnabled = showDevtools ?? process.env.NODE_ENV === 'development'
 

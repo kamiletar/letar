@@ -1,7 +1,7 @@
 'use client'
 
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
-import type { ReactNode } from 'react'
+import { type ReactNode, useState } from 'react'
 import { createQueryClient, type QueryClientConfig } from './create-query-client'
 // Панель девтулзов подключается только так — почему `dynamic(ssr:false)` тут не работает,
 // написано в самом модуле
@@ -67,13 +67,21 @@ export function PersistQueryProvider({
   showDevtools,
   ...config
 }: PersistQueryProviderProps) {
+  // Клиент создаётся ОДИН раз на монтирование провайдера. Голый `createQueryClient(config)`
+  // в теле компонента выглядит безобидно, но выдаёт НОВЫЙ клиент на каждый ре-рендер — вместе с
+  // ним обнуляется весь кеш и рвётся связь с оптимистичными правками: `setQueryData`/
+  // `invalidateQueries` из уже запущенной мутации попадают в выброшенный клиент, а смонтированные
+  // `useQuery` читают пустой новый. Внешне это выглядит как «первое действие применилось, а
+  // следующие молча не доехали до экрана», хотя сервер отработал все.
+  //
+  // Ре-рендер здесь — не редкость: провайдер стоит в layout, поэтому его перерисовывает любая
+  // мягкая навигация и любой `revalidatePath` из server action.
   // Для PWA по умолчанию используем offline пресет
-  const queryClient = createQueryClient({
-    preset: 'offline',
-    ...config,
-  })
+  const [queryClient] = useState(() => createQueryClient({ preset: 'offline', ...config }))
 
-  const persister = createIDBPersister(persisterOptions)
+  // Персистер тоже держит состояние (открытое соединение с IndexedDB) — пересоздавать его
+  // на каждый ре-рендер незачем.
+  const [persister] = useState(() => createIDBPersister(persisterOptions))
 
   const devtoolsEnabled = showDevtools ?? process.env.NODE_ENV === 'development'
 
