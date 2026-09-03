@@ -304,6 +304,12 @@ request-scope бросают, мокать оба модуля; `redirect()` б�
 `Pressable` из `@letar/ui` даёт `overflow: hidden` под ripple — обрезает focus ring обёрнутой
 кнопки, если их прямоугольники совпадают; `getComputedStyle` на кнопке врёт, свойство применено,
 но не отрисовано ·
+[admin-table-horizontal-overflow](/.claude/docs/admin-table-horizontal-overflow.md) ⚠️
+`Table.Root` без `Table.ScrollArea` раздвигает **весь документ**, а не прокручивается сам —
+на телефоне читается как «поехала вёрстка»; lint/typecheck/тесты зелёные, на десктопе не видно,
+ширина зависит от данных, поэтому «на dev нормально» ничего не доказывает; в studio разъезжались
+4 страницы из 12 (до 777px при экране 375px), там же скрипт аудита и почему его нельзя запускать
+через Bash-тул на Windows ·
 [theme-hardcode-gate-coverage](/.claude/docs/theme-hardcode-gate-coverage.md) гейт сырых
 цветов/теней/transition (`theme:check` в domwellbes) — только у одного приложения из ~30, рано
 тиражировать через generator, слепые зоны и структурные отличия (нет `src/theme/` у части
