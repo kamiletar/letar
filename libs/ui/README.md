@@ -23,7 +23,7 @@ import { TopLoader } from '@letar/ui'
 
 ### ConfirmDialog
 
-Диалог подтверждения действия.
+Диалог подтверждения действия (controlled — состояние `open` снаружи).
 
 ```tsx
 import { ConfirmDialog } from '@letar/ui'
@@ -36,18 +36,58 @@ import { ConfirmDialog } from '@letar/ui'
 />
 ```
 
-### RatingStars / RatingDisplay
+**`TriggerConfirmDialog`** — uncontrolled вариант: сам управляет открытием/закрытием, принимает
+`trigger` (элемент-открывашку), поддерживает async `onConfirm` с автоматическим loading-состоянием.
+
+```tsx
+import { TriggerConfirmDialog } from '@letar/ui'
+<TriggerConfirmDialog
+  trigger={<Button colorPalette="red">Удалить</Button>}
+  title="Удалить контейнер?"
+  description="Это действие нельзя отменить."
+  confirmText="Удалить"
+  colorPalette="red"
+  onConfirm={async () => {
+    await deleteContainer(id)
+  }}
+/>
+```
+
+**`DeleteConfirmDialog` / `StopConfirmDialog`** — готовые обёртки над `TriggerConfirmDialog` для
+двух частых случаев (удаление/остановка ресурса) — только `trigger` + `resourceName`, текст и
+цвет уже подобраны.
+
+```tsx
+import { DeleteConfirmDialog, StopConfirmDialog } from '@letar/ui'
+<DeleteConfirmDialog trigger={<Button>Удалить</Button>} resourceName="контейнер" onConfirm={remove} />
+<StopConfirmDialog trigger={<Button>Стоп</Button>} resourceName="сервис" onConfirm={stop} />
+```
+
+**`useConfirmDialog<T>()`** — хук для controlled-варианта: держит `isOpen` + произвольные `data`
+(например id удаляемой записи), не завязан на конкретный JSX диалога.
+
+```tsx
+import { useConfirmDialog } from '@letar/ui'
+const { isOpen, data, open, close } = useConfirmDialog<{ id: string }>()
+// open({ id: 'lesson-123' }) — открыть с данными
+// в onConfirm: if (data) deleteLesson(data.id); close()
+```
+
+### RatingStars / RatingDisplay / RatingDistribution
 
 Компоненты для отображения рейтинга.
 
 ```tsx
-import { RatingDisplay, RatingStars } from '@letar/ui'
+import { RatingDisplay, RatingDistribution, RatingStars } from '@letar/ui'
 
 // Интерактивные звёзды
 <RatingStars value={rating} onChange={setRating} />
 
 // Только отображение
 <RatingDisplay value={4.5} />
+
+// Распределение оценок 5→1 звёзд горизонтальными барами (карточка отзывов о продукте)
+<RatingDistribution distribution={{ 5: 12, 4: 3, 3: 1 }} />
 ```
 
 ### StatusBadge
@@ -321,6 +361,21 @@ const navItems = [
     <Header.MobileMenu items={navItems} />
   </Header.MobileActions>
 </Header>
+```
+
+### PriorityNav
+
+Priority Plus навигация: видимые пункты + дропдаун «Ещё» с тем, что не влезло в ширину
+контейнера. Замер через `ResizeObserver` — без него длинные пункты переносятся на вторую строку
+вместо ухода в overflow.
+
+```tsx
+import { PriorityNav } from '@letar/ui'
+
+<PriorityNav
+  items={[{ href: '/', label: 'Главная' }, { href: '/about', label: 'Как мы подбираем дом' }]}
+  isActive={(href) => pathname === href}
+/>
 ```
 
 ### UserMenu / MobileAuthSection
@@ -608,6 +663,23 @@ html: {
 }
 ```
 
+### RouteAnnouncer
+
+Объявляет screen reader'у смену маршрута при client-side навигации Next.js App Router — тот не
+даёт встроенного эквивалента (в отличие от старого Pages Router), и без этого пользователь
+TalkBack/VoiceOver не получает сигнала, что страница сменилась. Разместить один раз в корневом
+layout/shell, не на каждой странице.
+
+```tsx
+import { RouteAnnouncer } from '@letar/ui'
+
+// в корневом layout.tsx (persistent layout — см. предупреждение ниже)
+<RouteAnnouncer />
+```
+
+⚠️ **Обязателен persistent `layout.tsx`, не per-page-компонент** — иначе он не объявляет ни одной
+навигации, см. `.claude/docs/route-announcer-persistent-layout-required.md`.
+
 ### CopyToClipboardButton
 
 Тонкая кнопка-обёртка над `useCopyToClipboard`. Вынесена после того, как один и тот же ручной
@@ -622,6 +694,22 @@ driving-school, aboi, mandala, archetest и aprel8008.
 ```tsx
 import { CopyToClipboardButton } from '@letar/ui'
 <CopyToClipboardButton text={() => window.location.href} label="Скопировать ссылку" />
+```
+
+## Утилиты
+
+### chakraColorVar
+
+Переводит Chakra-токен цвета (`"fg.muted"`, `"whiteAlpha.500"`, `"orange.500"`) в CSS custom
+property vanilla-extract рантайма Chakra (`"var(--chakra-colors-fg-muted)"`). Нужна там, где
+`Icon as={X}` заменяется на голый `react-icons`-компонент (запрет пропа `as=` —
+`.claude/rules/components.md`) и цвет приходится передавать не Chakra-токеном, а инлайн CSS.
+
+```tsx
+import { chakraColorVar } from '@letar/ui'
+
+chakraColorVar('fg.muted') // 'var(--chakra-colors-fg-muted)'
+chakraColorVar('whiteAlpha.500') // 'var(--chakra-colors-white-alpha-500)'
 ```
 
 ## Хуки
