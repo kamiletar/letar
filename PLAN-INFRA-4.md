@@ -3193,6 +3193,9 @@ Bash, а не через Browser tool — секрет читает сам ск�
 
 ## §112 — `nx run studio:build` падал на `solid-js/web`: пин `@tanstack/react-devtools` на `0.10.5` ✅ ЗАКРЫТО (2026-08-26)
 
+⚠️ **Пин из этого пункта снят обычным `deps update` через неделю и баг вернулся — см. §142.**
+Пункт оставлен как есть: диагностика в нём верна, неверен только выбор способа фикса.
+
 После недавнего планового обновления зависимостей (§100/§110) `nx run studio:build` начал падать
 на webpack-этапе: `Attempted import error: 'use' is not exported from 'solid-js/web'`, трейс —
 через `libs/query-provider/src/lib/devtools-panel.tsx`. `bun install` печатал предупреждение
@@ -4591,3 +4594,69 @@ CHANGELOG отдельным коммитом, инцидент самоурег
 **Коммиты:** submodule — `5680e6d3` (aboi), `a17dbe26` (aprel8008), `3e6ff57d` (dsperevod),
 `d92401ff` (svoichuzhie), studio закрыт параллельной сессией (`bc41522e`). letar —
 `39cc4d67` (bump 4 submodule). Всё запушено с одобрения пользователя.
+
+## §142 — тот же `solid-js/web` вернулся: пин из §112 снят `deps update`, фикс переделан структурным ✅ ЗАКРЫТО (2026-09-03)
+
+`nx build studio` снова падал на `Attempted import error: 'use' is not exported from
+'solid-js/web'` — буква в букву как в §112, той же цепочкой через `libs/query-provider`.
+
+**Почему вернулось.** `9a65abe7 deps update` (2026-09-02) поднял `@tanstack/react-devtools`
+`0.10.5` → `0.10.12`, сняв пин из `175ec47f`. Ничто не связывало строку `"0.10.5"` в корневом
+`package.json` с причиной, по которой она там стояла: комментарий в JSON невозможен, а
+комментарии в коде библиотеки объясняли `dynamic(ssr:false)`, не пин. Ни `bun install`, ни
+`lint`, ни `typecheck:tsgo`, ни `nx test` пин не проверяют. Ровно класс из
+[root-pin-peer-drift](/.claude/docs/root-pin-peer-drift.md).
+
+**Ложный след (стоит записать отдельно).** Форма ошибки указывает на рассинхрон версий solid-js —
+и это неверно. Экспорта `use` нет **ни в какой версии**: он есть в `web/dist/web.js` (условие
+`browser`) и `dev.js`, и отсутствует в `web/dist/server.js` (условие `node`), который и достаётся
+серверному компилятору. Проверяется до любых сборок:
+
+```bash
+grep -c 'use,' node_modules/.bun/solid-js@*/node_modules/solid-js/web/dist/server.js  # 0
+grep -c 'use,' node_modules/.bun/solid-js@*/node_modules/solid-js/web/dist/web.js     # 1
+```
+
+**Фикс — структурный, пин не возвращали.** `libs/query-provider/src/lib/devtools-panel-lazy.tsx`:
+единственная точка подключения панели, ветка с `import()` отсекается сравнением с литералом
+`process.env.NODE_ENV` **на верхнем уровне модуля** — бандлер не резолвит мёртвое поддерево
+вовсе. Все три провайдера (`query-provider`, `persist-provider`, `zenstack-provider`) импортируют
+панель только оттуда. Переживёт любой будущий bump devtools.
+
+Цена: `showDevtools: true` больше не включает панель в production (её нет в сборке). Проп не
+передаёт ни одно приложение; JSDoc всех трёх провайдеров и README библиотеки исправлены, чтобы не
+обещать невозможного.
+
+**Сторож.** `devtools-isolation.spec.ts` — читает исходники и проверяет форму графа модулей
+(никто, кроме `devtools-panel-lazy.tsx`, не тянет devtools; условие стоит на верхнем уровне).
+Позитивный контроль пройден: регулярки ловят ровно ту форму, что была до фикса. Баг возвращался
+трижды (driving-school 2026-08-14, studio 2026-08-26 и 2026-09-03) именно потому, что выглядит
+починенным на dev при зелёных lint/typecheck/тестах.
+
+**Охват.** Затронуты были все 11 потребителей `@letar/query-provider` — путь отказа общий для
+всех трёх провайдеров.
+
+**Проверено.** `nx build --skip-nx-cache`: `studio` и `dashboard` (webpack), `svoichuzhie`
+(Turbopack) — зелёные, `solid-js`/`devtools-ui` отсутствуют в серверных бандлах всех трёх. По
+библиотеке зелёные `format`/`lint`/`typecheck`/`test` (38) и `check-all --group=deps`.
+
+**Побочная находка.** Док `webpack-only-app-silent-export-drift.md` утверждал, что `auth-hub` —
+единственное приложение на `next build --webpack`. Их **14**, включая studio. Из-за этого
+webpack-специфичный класс бага читался как частный случай Ключницы. Список заменён на команду
+`grep -l 'next build --webpack' apps/*/project.json`.
+
+**Деплой.** studio задеплоен в production (deploy-agent-dev). Первый заход упёрся в hard e2e-gate
+на несвязанном sidebar-тесте (`apps/studio-e2e/src/03-owner.spec.ts:23`) — гейт отработал верно,
+тест починили отдельно, второй заход прошёл целиком.
+
+**Коммиты:** `260ffca1` (фикс + сторож), `c4641ffe` (доки + индекс `CLAUDE.md`). Запушено с
+одобрения пользователя.
+
+⚠️ **Открытый вопрос.** Файлы `libs/query-provider/*.tsx` изменились на диске в середине сессии
+не тем агентом, который вёл задачу (появился готовый `devtools-panel-lazy.tsx`, три провайдера
+переключены на него), при удерживаемой exclusive-резервации на `libs/query-provider/**`. Диф был
+проверен целиком и подтверждён тремя сборками, работа не потеряна — но происхождение правки не
+установлено. Если это вторая параллельная сессия по той же библиотеке, стоит понять, почему она
+не увидела резервацию: `file_reservation_paths` не блокирует физически (сервер сам предупреждает
+`enforcement_off_for_code_paths`), и на такой сценарий нет технического барьера — pre-commit
+scope-guard ловит только multi-scope коммит, а не двух агентов внутри одного `libs/<lib>`.
