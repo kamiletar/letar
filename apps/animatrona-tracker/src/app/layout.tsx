@@ -10,6 +10,7 @@ import type { Metadata } from 'next'
 // oxlint-disable-next-line no-unassigned-import
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://animatrona-tracker.letar.best'),
   title: {
     default: 'Animatrona Tracker',
     template: '%s | Animatrona',

@@ -1018,6 +1018,27 @@ beginning of value` — тоже нужно детектировать форм�
 typecheck/lint и целевой staging-rebuild `form-example`. Live-запрос `curl /robots.txt` к реальному
 staging-серверу тоже не делался — фикс не задеплоен (коммиты локальные, не запушены).
 
+### Дополнение 2026-09-03 — аудит `metadataBase` по всему монорепо, 4 реальных пробела закрыты
+
+Полный аудит: у всех `layout.tsx`/`[locale]/layout.tsx` (27 файлов) проверено наличие
+`metadataBase`. 8 файлов не содержали его; 4 оказались ложным срабатыванием — `archetest` и
+`mandala` держат `metadataBase` в `[locale]/layout.tsx`, а грепом ловился только их пустой
+корневой `layout.tsx`-обёртка; `form-develop-app`/`form-develop-app-shadcn` не имеют
+`Dockerfile.production` вовсе (dev-only песочницы `@letar/forms`, никогда не деплоятся публично)
+— добавлять `metadataBase` для несуществующего домена бессмысленно, не трогал.
+
+**Реальных пробелов — 4, все закрыты:** `animatrona-tracker`, `auth-hub`, `dashboard` (закрытые
+панели, `Disallow: /` уже стоит — но отсутствие `metadataBase` всё равно ломает резолв
+относительных OG/canonical-ссылок при случайном шаринге, а не только при индексации, см. §33
+Часть B выше) и `driving-school` (единственное публичное приложение из четырёх). Домены — по
+Traefik-лейблам `docker-compose.production.yml` (`auth.letar.best`, `dash.letar.best`,
+`animatrona-tracker.letar.best`), driving-school — через уже существующий `getAppUrl()` из
+`@/lib/app-url` (своя реализация, ещё не на `@letar/seo` — вне скоупа этой правки, не трогал).
+`typecheck:tsgo`/`lint`/`format` зелёные по всем четырём. Коммит — не запушен.
+
+Это закрывает DoD-пункт «у каждого приложения... есть `metadataBase`» **по всему монорепо**
+(27/27 `layout.tsx`), не только по исходным 10 из §33 Части B.
+
 ### Что сделано (2026-08-06)
 
 - [x] `libs/seo` (`@letar/seo`) — `getBaseUrl(productionUrl)`/`isProductionDomain(productionUrl)`,

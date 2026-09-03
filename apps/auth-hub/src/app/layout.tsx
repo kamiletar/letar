@@ -11,6 +11,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://auth.letar.best'),
   title: {
     default: 'Letar Auth — Ключница',
     template: '%s | Letar Auth',

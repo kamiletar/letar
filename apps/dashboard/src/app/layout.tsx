@@ -17,6 +17,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://dash.letar.best'),
   title: 'Dashboard - Система управления',
   description: 'Мониторинг и управление продакшен серверами v3',
 }
