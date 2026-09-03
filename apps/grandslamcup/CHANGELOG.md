@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.39.14] - 2026-09-03
+
+### Changed
+
+- `presenter-select-jury.tsx` и `wizard/step-select-jury.tsx`: локальный
+  `useState('')`+`useEffect(() => setOrigin(window.location.origin))` из фикса 3.39.13 заменён
+  на общий `useClientOrigin()` из `@letar/hooks` (0.5.0) — тот же паттерн независимо всплыл в
+  `studio` в тот же день, вынесен в библиотеку.
+
 ## [3.39.13] - 2026-09-03
 
 ### Fixed

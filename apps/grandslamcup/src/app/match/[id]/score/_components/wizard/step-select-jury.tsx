@@ -14,6 +14,7 @@
 import type { MatchSSEState } from '@/app/_hooks/use-match-sse'
 import { JUDGE_COLORS, type JudgeColor } from '@/lib/judge-colors'
 import { Badge, Box, Button, Checkbox, Flex, Heading, HStack, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { useClientOrigin } from '@letar/hooks'
 import { QRCodeSVG } from 'qrcode.react'
 import { useCallback, useEffect, useState } from 'react'
 import { assignManualJudgeAction, createJuryInviteAction, removeManualJudgeAction } from '../../_actions/scorer.action'
@@ -33,11 +34,7 @@ export function StepSelectJury({ match, matchState }: StepSelectJuryProps) {
   const [error, setError] = useState<string | null>(null)
   // inviteKey хранится локально т.к. не передаётся через SSE (секрет)
   const [inviteKey, setInviteKey] = useState<string | null>(null)
-  // origin известен только клиенту — вычисляем после монтирования, чтобы не расходиться с SSR
-  const [origin, setOrigin] = useState('')
-  useEffect(() => {
-    setOrigin(window.location.origin)
-  }, [])
+  const origin = useClientOrigin()
 
   const currentHalf = matchState?.currentHalf ?? 1
   const judges = matchState?.judges ?? []
