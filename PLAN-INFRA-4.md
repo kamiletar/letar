@@ -1,4 +1,4 @@
-# PLAN-INFRA-4 — §62–§122
+# PLAN-INFRA-4 — §62–§140
 
 > Часть журнала `PLAN-INFRA.md` (журнал инфраструктурных треков монорепо letar, вне auth-плана).
 > Файл разрезан на части 2026-08-20 — исходный файл превысил 10000 строк, см.
@@ -4483,3 +4483,48 @@ CLAUDE.md`). Не запушено — ждёт отдельного одобр�
 несовпадения (`eslint-plugin-import`/`-jsx-a11y`/`-react`/`@react-native/eslint-config` против
 `eslint@10.9.1`) — старый фоновый шум (ESLint 10 против плагинов, объявивших верхнюю границу до
 9.x), не новая строка после этого апдейта, действия не требует.
+
+## §140 — CI `main` красный по 4 несвязанным причинам, все починены (2026-09-03)
+
+**Триггер:** пользователь дал ссылку на упавший run
+(`https://github.com/kamiletar/letar/actions/runs/33719696853`) и попросил разобраться. `gh run
+list` показал, что `main` был красным **шестью прогонами подряд** до этого — не разовый сбой.
+
+Разбор `--log-failed` дал четыре независимых причины:
+
+1. **`letar-landing:typecheck:tsgo`** — `TS2307: Cannot find module '@/assets/projects/*.webp'`.
+   `next-env.d.ts` гитигнорится (генерируется `next dev`/`next build`), а CI гоняет
+   `typecheck:tsgo` без запуска `next` — ambient-декларация модулей изображений из
+   `next/image-types/global` никогда не подключалась. Первое публичное приложение с таким
+   импортом (`domwellbes` делает так же, но это приватный submodule, CI его не видит) — гэп был
+   скрыт, пока не появился первый живой кейс. **Фикс:** трекаемый
+   `apps/letar-landing/src/types/images.d.ts` с `/// <reference types="next/image-types/global"
+   />` — попадает в `include` через `**/*.ts` без правки tsconfig.
+2. **`aira-web`/`time`/`animatrona-tracker`: `test`** — `TSCONFIG_ERROR: Failed to load tsconfig
+   '../driving-school-e2e'`. Известный класс из
+   [unit-testing.md](/.claude/docs/unit-testing.md) (vite:oxc резолвит tsconfig per-file и без
+   собственного `tsconfig.spec.json` уходит вверх до корневого `tsconfig.json`, чей `references`
+   указывает на приватный submodule, не выкачанный в CI) — эти три приложения не попали под
+   тираж фикса 2026-07-08. **Фикс:** `tsconfig.spec.json` + `references` по образцу `archetest`
+   для всех трёх.
+3. **Integrity `electron-drift`** — `animatrona`/`kami-key-the`/`label-printer-desktop` держали
+   точный пин `electron@44.1.0`, корень уже `^44.1.1` (более ранний коммит бампнул корень, но не
+   app-level пины — регрессия, не преэкзистентный баг: run от 2026-09-02 19:22 на этом гейте был
+   зелёным). **Фикс:** подтянуть пины + `bun install`.
+4. **Integrity `transpile-packages`** — 6 публичных приложений (`aira-web`, `archetest`,
+   `grandslamcup`, `kami`, `mandala`, `pravda`) импортируют `@letar/seo`, но не перечисляли его в
+   `transpilePackages` next.config — тоже регрессия того же коммита, что и (3) (тот же run
+   2026-09-02 был зелёным на этом гейте). **Фикс:** добавить пакет в массив каждого.
+
+**Коммиты (4, каждый — своя причина, `GIT_ALLOW_MULTI_SCOPE_COMMIT=1` для multi-app):**
+`b0810603` (tsconfig.spec.json ×3), `f888e0ef` (letar-landing images.d.ts), `c83bd275`
+(@letar/seo ×6), `e6c51b77` (electron ×3 + `bun.lock`). Запушено — CI на
+[33722914944](https://github.com/kamiletar/letar/actions/runs/33722914944) зелёный, 1m16s.
+
+**Побочный эффект — обнаружен и расчищен затор в очереди push:** push letar был заблокирован
+`pre-push`-хуком (`apps/domwellbes` записан на SHA, не запушенный на его origin — чужая активная
+сессия M9B.3/M9B.4, коммиты без push). Не стал пушить submodule сам, пока в его рабочем дереве
+были незакоммиченные файлы (`inventory-count.ts`+`.spec.ts`) — дождался, пока владелец сессии
+закоммитил их, и только тогда `git -C apps/domwellbes push origin main` (`58864d4..ae255ee`), не
+трогая новый незакоммиченный файл (`inventory-count-reports.ts`), появившийся к тому моменту.
+`check-submodule-push-state.sh` подтвердил: 14/14 submodule синхронны.
