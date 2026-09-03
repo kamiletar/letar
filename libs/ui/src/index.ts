@@ -53,6 +53,7 @@ export { type ConsentConfig, type CookieConsentState, createConsentConfig, readC
 export { CookieBanner, type CookieBannerProps } from './lib/cookie-banner'
 export { CookieSettingsButton, type CookieSettingsButtonProps } from './lib/cookie-settings-button'
 export { OfflineConsentBanner, type OfflineConsentBannerProps } from './lib/offline-consent-banner'
+export { ServiceWorkerRegistration, type ServiceWorkerRegistrationProps } from './lib/service-worker-registration'
 export { useAnalyticsConsent } from './lib/use-analytics-consent'
 
 // Формы

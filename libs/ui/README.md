@@ -310,6 +310,23 @@ import { OfflineConsentBanner } from '@letar/ui'
 цвет иконки/кнопки принятия (по умолчанию `'brand'`). Вынесен из пяти почти одинаковых копий в
 studio/grandslamcup/mandala/pravda/archetest (2026-08-26).
 
+### ServiceWorkerRegistration
+
+Исполнительная половина того же согласия: регистрирует Service Worker, когда согласие есть, и
+снимает **все** регистрации + чистит `caches`, когда его нет. UI не рендерит, ставится один раз
+в persistent layout рядом с `OfflineConsentBanner` — с тем же `consentKey`.
+
+```tsx
+import { ServiceWorkerRegistration } from '@letar/ui'
+<ServiceWorkerRegistration consentKey="my-app-offline-consent" />
+```
+
+`swUrl` (по умолчанию `'/sw.js'`), `scopes` (по умолчанию `['/']` — несколько, если воркер
+обслуживает только часть маршрутов) и `enabled` пробрасываются в `useOfflineServiceWorker`
+(`@letar/hooks`), где и лежит вся логика вместе с разбором трёх ловушек снятия регистрации.
+Вынесен из копий в grandslamcup/mandala/pravda (2026-09-03) — во всех трёх снятие шло по ref с
+текущей загрузки страницы и поэтому не работало вовсе.
+
 ### createConsentConfig / readConsentState
 
 Не React-компоненты — утилиты для namespace cookie-согласий, которыми пользуются
