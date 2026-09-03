@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `auth-hub-e2e`: локаторы `input[name="email"/"password"]` на `/sign-in` не находили поля после
+  перехода форм на `@letar/forms` (не выставляет нативный `name`, только `data-field-name`) —
+  падало 2 теста из 10 на staging-гейте. Локаторы переведены на `[data-field-name="..."]`
+  (паттерн `domwellbes-e2e`), email на `/sign-in` уточнён через `autocomplete="username webauthn"`
+  (два поля с одинаковым `data-field-name` — LoginForm и MagicLinkForm). См. PLAN.md §18.7.1.
+
 ## [0.7.17] - 2026-09-01
 
 ### Fixed

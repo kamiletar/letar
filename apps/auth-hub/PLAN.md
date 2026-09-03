@@ -197,6 +197,28 @@
       DoD §18.7 M4 для auth-hub выполнен, warn-only минимум неделю перед тем, как рассчитывать на
       гейт как на реальную защиту. Остаётся `driving-school` — второе и последнее приложение M4.
 
+### §18.7.1 Регрессия e2e-локаторов после перехода на `@letar/forms` — закрыто (2026-09-03)
+
+- [x] **Прогон staging e2e на коммите `6e8620b67` уронил 2 теста** (`01-public.spec.ts` «форма
+      email/password видна», `03-oidc-authorize.spec.ts` «/sign-in рендерит форму логина...») —
+      `page.locator('input[name="email"]')` таймаутился, хотя заголовок «Войти» рендерился.
+      **Корень:** зелёный прогон 04:47 (запись выше) прошёл **до** коммита `31f208b0` (06:18 того
+      же дня) — «перевести формы sign-in на @letar/forms». `@letar/forms` не выставляет нативный
+      HTML `name` (headless TanStack Form state), только `data-field-name` — регрессия жила
+      незамеченной 9 дней, потому что после 2026-08-25 полный e2e-прогон auth-hub на staging до
+      2026-09-03 не запускался. `input[name="email"]` для `/sign-up` (обычный Chakra `<Input>`,
+      не мигрировал) продолжал работать — поэтому падали только 2 из 10, а не все тесты с email.
+      **Фикс:** локаторы `01-public.spec.ts`/`03-oidc-authorize.spec.ts`/`04-linked-email-login.spec.ts`
+      переведены на `[data-field-name="..."]` — тот же паттерн, что уже используется в
+      `domwellbes-e2e` для полей `@letar/forms`. На `/sign-in` два поля с `data-field-name="email"`
+      (LoginForm + MagicLinkForm) — уточняется через `autocomplete="username webauthn"`
+      (уникален для LoginForm). Проверено на staging: `input[data-field-name="email"][autocomplete="username webauthn"]`
+      и `input[data-field-name="password"]` резолвятся в ровно один элемент.
+      **Не в скоупе фикса:** тот же прогон вскрыл 2 отдельных провала («OAuth-кнопки видны» —
+      Google не виден, похоже на гео-фильтр RU с текущей сети агента; «`/api/auth/oauth2/authorize`
+      без сессии» — `ERR_CONNECTION_REFUSED`) — не связаны с локаторами `@letar/forms`, не
+      трогались.
+
 ## Текущий статус: v0.7.6 — задеплоено, фикс «Неизвестная ошибка» при re-auth под другим аккаунтом (2026-08-20)
 
 > **2026-08-20:** прод-инцидент — вход под другим аккаунтом (account chooser, `prompt=login`)
