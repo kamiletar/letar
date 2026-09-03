@@ -10,7 +10,8 @@ import * as path from 'node:path'
 
 import { ZenStackClient } from '@zenstackhq/orm'
 import { SqlJsDialect } from 'kysely-wasm'
-import { schema } from '../../schema'
+
+import { schema } from '@/generated/schema'
 
 let initSqlJs: ReturnType<typeof require>
 

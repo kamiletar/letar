@@ -6,7 +6,8 @@
  */
 
 import { useClientQueries } from '@zenstackhq/tanstack-query/react'
-import { schema } from '../../schema'
+
+import { schema } from '@/generated/schema'
 
 // === Product хуки ===
 
