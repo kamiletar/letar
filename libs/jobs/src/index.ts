@@ -1,3 +1,5 @@
+export type { AppJobsModule, AppJobsModuleOptions, AppJobsPrismaClient } from './lib/app-jobs-module'
+export { createAppJobsModule } from './lib/app-jobs-module'
 export { defineJob } from './lib/define-job'
 export { mergeJobsWithOverrides } from './lib/merge-overrides'
 export { createJobScheduler } from './lib/scheduler'
