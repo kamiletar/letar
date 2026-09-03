@@ -320,6 +320,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "fake-indexeddb": "^6.2.5",
+    "fast-check": "^3.23.2",
     "hermes-compiler": "250829098.0.17",
     "jiti": "2.7.0",
     "jsdom": "^29.1.1",
