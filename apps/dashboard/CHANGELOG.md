@@ -2,6 +2,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.26.5] — 2026-09-03
+
+### Fixed
+
+- `src/app/cron/page.tsx`: `schedulerMutation` (start/stop планировщика) не проверял
+  `{ success: false }` от `controlScheduler` — TanStack Query считал мутацию успешной, тост
+  показывал `undefined` как success-сообщение вместо реальной ошибки. Найдено аудитом по
+  всему монорепо на класс бага «`mutationFn` не бросает при `{ error }` от server action».
+  `mutationFn` теперь бросает `Error` при неудаче.
+
 ## [1.26.4] — 2026-09-03
 
 ### Fixed

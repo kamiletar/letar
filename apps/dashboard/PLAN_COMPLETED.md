@@ -2,6 +2,21 @@
 
 Детальное описание всех реализованных фич.
 
+## Фикс `mutationFn` для `controlScheduler` — ложный success-тост при отказе (2026-09-03)
+
+Аудит по всему монорепо на класс бага «`mutationFn` резолвит server action, возвращающий
+`{ error }`/`{ success: false }`, вместо throw — TanStack Query считает мутацию успешной,
+`onError` не срабатывает, откат оптимистичного обновления не происходит» (эталон фикса —
+`apps/studio` time-entries). В `dashboard` нашлось одно совпадение: `schedulerMutation`
+([cron/page.tsx](src/app/cron/page.tsx)) вызывал `controlScheduler` (start/stop
+dashboard-agent-планировщика), который при ошибке возвращает `{ success: false, error }` —
+`mutationFn` это не проверял, `onSuccess` показывал `result.message` (`undefined`) как
+успешный тост вместо ошибки. Соседняя мутация в том же файле (`runMutation`) уже делала
+проверку правильно — расхождение было только в `schedulerMutation`.
+
+Фикс: `mutationFn` теперь бросает `Error` при `!result.success`, `onError` подхватывает и
+показывает реальный текст ошибки. `typecheck:tsgo`/`lint` зелёные. Коммит `b6ab59ef`.
+
 ## Убран `cookieCache.strategy: 'jwt'` — закрыт открытый вопрос studio по cookie-коллизии (2026-09-03, 1.26.4)
 
 Сессия 2026-09-03 в `studio` нашла причину 500 на `/api/auth/get-session` в dev: все dev-серверы
