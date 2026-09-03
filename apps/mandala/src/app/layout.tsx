@@ -3,14 +3,13 @@ import { JsonLd, organizationSchema, websiteSchema } from '@/app/_components/jso
 import { OfflineIndicator } from '@/app/_components/offline-indicator'
 import { OnboardingProvider, OnboardingTooltip } from '@/app/_components/onboarding'
 import { QueryProvider } from '@/app/_components/providers/query-provider'
-import { ServiceWorkerRegistration } from '@/app/_components/service-worker-registration'
 import { SessionProvider } from '@/app/_components/session-provider'
 import { TransitionProvider } from '@/app/_components/transition-context'
 import { Provider } from '@/app/_components/ui/provider'
 import { Toaster } from '@/app/_components/ui/toaster'
 import { YandexMetrika } from '@/app/_components/yandex-metrika'
 import { UmamiScript } from '@letar/analytics'
-import { CookieBanner, TopLoader } from '@letar/ui'
+import { CookieBanner, ServiceWorkerRegistration, TopLoader } from '@letar/ui'
 import type { Viewport } from 'next'
 import type { JSX } from 'react'
 
@@ -56,7 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
                   </OnboardingProvider>
                 </TransitionProvider>
                 <Toaster />
-                <ServiceWorkerRegistration />
+                <ServiceWorkerRegistration consentKey="mandala-offline-consent" />
                 <OfflineIndicator />
                 <YandexMetrika />
                 <UmamiScript />

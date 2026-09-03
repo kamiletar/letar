@@ -2,6 +2,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.40.28] - 2026-09-03
+
+### Fixed
+
+- `service-worker-registration.tsx` снимал регистрацию только по `registrationRef` с текущей
+  загрузки страницы — воркер прошлой сессии браузера в ref не попадал, и выключение
+  оффлайн-режима не делало ничего до перезагрузки. Компонент заменён на общий
+  `ServiceWorkerRegistration` из `@letar/ui` (снятие по `getRegistrations()`, `unregister()` без
+  `await`, очистка `caches`), эталон — фикс на `studio` 2026-09-03.
+
 ## [0.40.27] - 2026-09-02
 
 ### Fixed
