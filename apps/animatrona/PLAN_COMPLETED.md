@@ -4,6 +4,27 @@
 
 > **Архив обновлён:** 2026-09-01
 
+## Delete-actions бросают исключение вместо `{ success: false }` (2026-09-03)
+
+Аудит по всему монорепо на класс бага «`mutationFn` резолвит server action, возвращающий
+`{ error }`/`{ success: false }`, вместо throw — TanStack Query считает мутацию успешной,
+`onError` не срабатывает, откат оптимистичного обновления не происходит» (эталон фикса —
+`apps/studio` time-entries). В `animatrona` три delete-экшена — `deleteAnimeRelation`,
+`deleteAudioTrack`, `deleteSubtitleTrack` — глотали ошибку в try/catch и возвращали
+`{ success: false, error }`, в отличие от соседних create/update в тех же файлах (дают Prisma
+бросить исключение естественно). Они идут через общую фабрику `createDeleteHook`
+([hooks-factory.ts](renderer/src/lib/hooks-factory.ts)), чей `onSuccess` безусловно
+инвалидирует кэш без проверки `success` — при неудачном delete UI вёл себя так, будто запись
+реально удалена.
+
+Фикс — привёл все три экшена к контракту соседей (throw вместо swallow), саму фабрику не
+трогали (она универсальная, разные `mutationFn` возвращают разные формы). На момент фикса
+`useDeleteAnimeRelation` нигде не вызывается (мёртвый экспорт), `useDeleteAudioTrack`/
+`useDeleteSubtitleTrack` используются в `use-track-processing.ts` (rollback-путь при отмене
+добавления дорожек) и `use-player-tracks.ts` (fire-and-forget без UI-фидбэка) — в обоих
+местах поведение строго улучшилось (ошибка теперь видна хотя бы как rejected promise, а не
+маскируется под успех). `typecheck:tsgo`/`lint` зелёные. Коммит `cfd2e63e`.
+
 ## `/_not-found` prerender InvariantError — не баг кода, гонка за node_modules (2026-09-01)
 
 Найденный попутно в сессии §75 (`PLAN.md` §23.3) пункт «`next build` renderer'а падает на

@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+## [0.55.33] - 2026-09-03
+
+### Fixed
+
+- `deleteAnimeRelation`/`deleteAudioTrack`/`deleteSubtitleTrack` (`_actions/*.action.ts`)
+  глотали ошибку в try/catch и возвращали `{ success: false, error }` вместо throw — общая
+  фабрика `createDeleteHook` (`hooks-factory.ts`) не проверяла `success` и безусловно
+  инвалидировала кэш даже при неудачном удалении. Приведены к контракту соседних create/update
+  в тех же файлах (throw). Найдено аудитом по всему монорепо на класс бага «`mutationFn` не
+  бросает при `{ error }` от server action».
+
 ## [0.55.31] - 2026-08-26
 
 ### Fixed
