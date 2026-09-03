@@ -66,8 +66,9 @@
     },
     {
       "name": "studio-prod",
-      "runtimeExecutable": "node",
-      "runtimeArgs": ["apps/studio/.next/standalone/apps/studio/server.js"],
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["x", "next", "start", "-p", "3124"],
+      "cwd": "apps/studio",
       "port": 3124
     },
     {

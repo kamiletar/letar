@@ -185,6 +185,13 @@ select ·
 
 **Данные и состояние:** [data-fetching](/.claude/docs/data-fetching.md) ·
 [pwa-offline](/.claude/docs/pwa-offline.md) ·
+[serwist-turbopack-stale-sw-artifact](/.claude/docs/serwist-turbopack-stale-sw-artifact.md) ⚠️
+`@serwist/next` работает только с webpack, а `public/sw.js` в `.gitignore` — собрал приложение
+Turbopack'ом (голый `next build` вместо `next build --webpack` из `project.json`), и отдаётся
+протухший воркер прошлой сборки: регистрируется, навсегда виснет в `installing`, `unregister()`
+на нём не резолвится; выглядит как сломанный оффлайн-режим приложения. Там же — `register: false`
+у `withSerwistInit`: по умолчанию Serwist сам регистрирует воркер на каждой странице в обход
+консент-гейта ·
 [react-effect-stable-ref-pitfall](/.claude/docs/react-effect-stable-ref-pitfall.md) эффект с deps на
 ref/DOM не перезапускается ·
 [route-announcer-persistent-layout-required](/.claude/docs/route-announcer-persistent-layout-required.md)

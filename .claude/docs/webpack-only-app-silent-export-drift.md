@@ -6,10 +6,10 @@
 в логе плюс `undefined` в рантайме.
 
 ⚠️ **До 2026-09-03 здесь стояло «`auth-hub` — единственное приложение с `next build --webpack`».
-Это давно неверно:** на 2026-09-03 таких приложений 14 (`aira-web`, `animatrona-landing`,
-`animatrona-tracker`, `archetest`, `auth-hub`, `dashboard`, `driving-school`, `form-docs`,
-`grandslamcup`, `kami`, `kami-key-the-landing`, `letar-landing`, `mandala`, `studio`). Список
-устаревает — считать его командой, а не переписывать из этого файла:
+Это давно неверно:** на 2026-09-03 таких приложений 15 (`aira-web`, `animatrona`,
+`animatrona-landing`, `animatrona-tracker`, `archetest`, `auth-hub`, `dashboard`,
+`driving-school`, `form-docs`, `grandslamcup`, `kami`, `kami-key-the-landing`, `letar-landing`,
+`mandala`, `studio`). Список устаревает — считать его командой, а не переписывать из этого файла:
 
 ```bash
 grep -l 'next build --webpack' apps/*/project.json
