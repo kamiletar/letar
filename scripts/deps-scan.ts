@@ -571,7 +571,7 @@ async function main() {
   }
 
   const secret = readCronSecret()
-  const resolvedEndpoint = endpoint ?? process.env.DEPS_DASHBOARD_URL ?? 'https://dashboard.letar.best'
+  const resolvedEndpoint = endpoint ?? process.env.DEPS_DASHBOARD_URL ?? 'https://dash.letar.best'
 
   console.log(chalk.gray(`Отправка на ${resolvedEndpoint}/api/deps/scan...`))
   await postScan(payload, resolvedEndpoint, secret)
