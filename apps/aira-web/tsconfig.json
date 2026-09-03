@@ -39,5 +39,10 @@
         "../../libs/glitchtip/src/server/index.ts"
       ]
     }
-  }
+  },
+  "references": [
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
 }

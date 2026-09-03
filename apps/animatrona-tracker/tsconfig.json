@@ -188,5 +188,10 @@
     "../../libs/**/*.spec.tsx",
     "../../libs/**/*.test.ts",
     "../../libs/**/*.test.tsx"
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.spec.json"
+    }
   ]
 }
