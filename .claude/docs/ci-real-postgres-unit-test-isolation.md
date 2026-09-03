@@ -58,11 +58,14 @@ env = { ...process.env, ...options.env, ...ctx.config.env, ...project.config.env
 
 ## Чек-лист для нового приложения с этим же паттерном
 
-Приложению-кандидату (сейчас в этой ситуации, но ещё не задета в CI — `svoichuzhie`,
-`admin-product.action.spec.ts`) нужны те же три шага: `CREATE DATABASE <app>_ci` в шаге `Prepare
+Новому приложению-кандидату нужны те же три шага: `CREATE DATABASE <app>_ci` в шаге `Prepare
 test databases`, `nx run <app>:db:push` там же, `test.env` в его `vitest.config.mts`. Один шаг
 `ci.yml` расширяется построчно на каждое новое такое приложение — не заводить отдельный сервис
 Postgres на приложение, один сервер вполне держит несколько баз.
+
+Тиражировано на `svoichuzhie` (`admin-product.action.spec.ts`) 2026-09-03 — второе приложение
+после `animatrona-tracker`, отдельная БД (не общая) из-за одноимённых Better Auth моделей
+(`User`/`Account`/`Session`/`Verification`) у обоих.
 
 ## Проверка перед тем, как считать фикс рабочим
 
