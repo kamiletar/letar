@@ -1584,7 +1584,13 @@ lockfile-drift-гейт), обязана либо чекаутить submodule, 
       2026-09-03) — старые `/api/cron/{heartbeat,pageview-count,ssl-check}` удалены, `JOBS_ENABLED=true`
       уже в `.env.docker.enc`; retire из `dashboard-agent` (`RETIRED_JOB_IDS`) — сознательно
       отдельным шагом после живого прод-прогона (см. находку пилота ниже, пункт «порядок миграции»)
-- [ ] Тираж: `driving-school`, `dsperevod`, `aboi`, `time`, `svoichuzhie`
+- [x] Тираж на `driving-school` (2 задачи: `cleanup-api-logs`, `reminders`, 2026-09-03) —
+      `JOBS_ENABLED=true` уже в `.env.docker.enc`; старые `/api/cron/{cleanup-api-logs,reminders}`
+      **намеренно не удалены** и retire из `dashboard-agent` не сделан — отдельным шагом после
+      живого прод-прогона (тот же порядок, что у `dashboard`, см. уточнение находки ниже);
+      driving-school без `env_file:` в compose — `JOBS_ENABLED` пришлось добавить в
+      `environment:` явной строкой, а не полагаться на автопрокидывание
+- [ ] Тираж: `dsperevod`, `aboi`, `time`, `svoichuzhie`
 - [ ] `dashboard-agent`: режим наблюдателя (опрос `/api/jobs/status` + алерт по «давно не было
       успеха»), снятие монтирования чужих `.env.docker`
 - [ ] Инфра-задачи и бэкап Maddy — на systemd timers, конфиги в `infra/`, доставка через
