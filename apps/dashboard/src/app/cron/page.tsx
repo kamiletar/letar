@@ -206,7 +206,13 @@ export default function CronPage() {
 
   // Управление планировщиком
   const schedulerMutation = useMutation({
-    mutationFn: (action: 'start' | 'stop') => controlScheduler(action, serverId),
+    mutationFn: async (action: 'start' | 'stop') => {
+      const result = await controlScheduler(action, serverId)
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to control scheduler')
+      }
+      return result
+    },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['cron-jobs', serverId] })
       toaster.create({
