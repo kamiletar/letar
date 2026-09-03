@@ -2,6 +2,21 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.39.11] - 2026-09-03
+
+### Fixed
+
+- Service Worker регистрировался в обход согласия пользователя. `withSerwistInit` по умолчанию
+  инжектит собственный скрипт, который регистрирует `/sw.js` со scope `/` на **каждой** странице
+  безусловно — то есть `useOfflineConsent` в `src/app/_components/service-worker-registration.tsx`
+  ни на что не влиял, воркер и кеш появлялись до того, как пользователя спросили. Добавлен
+  `register: false` в `next.config.mjs`. Тот же пропуск был закрыт в `archetest` ещё 2026-07-28 и
+  одновременно с этим — в `studio`, где и был пойман замером на прод-сборке.
+- ⚠️ В dev не воспроизводится: `disable: NODE_ENV === 'development'` отключает serwist целиком.
+  Проверять только на прод-сборке и только командой из `project.json` (`next build --webpack`) —
+  голый `next build` в Next 16 это Turbopack, с которым `@serwist/next` не работает вовсе. Разбор
+  — `.claude/docs/serwist-turbopack-stale-sw-artifact.md`.
+
 ## [3.39.10] - 2026-09-02
 
 ### Fixed
