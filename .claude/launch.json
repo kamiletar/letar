@@ -180,6 +180,12 @@
       "runtimeExecutable": "nx",
       "runtimeArgs": ["dev", "animatrona-landing"],
       "port": 3008
+    },
+    {
+      "name": "studio-prodcheck",
+      "runtimeExecutable": "nx",
+      "runtimeArgs": ["start:prodcheck", "studio"],
+      "port": 3125
     }
   ]
 }
