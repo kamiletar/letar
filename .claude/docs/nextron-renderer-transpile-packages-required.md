@@ -11,11 +11,11 @@
 `tsconfig.json paths` (и `webpack.config.js` `resolve.alias` у `main/`, см.
 [animatrona-dual-build-alias-drift](/.claude/docs/animatrona-dual-build-alias-drift.md)) отвечают
 только за то, ГДЕ webpack найдёт файл. Найденный файл всё равно проходит через loader webpack —
-а по умолчанию Next.js исключает из транспиляции `babel-loader`/`swc` всё, что резолвится как
-пакет по спецификатору `@scope/name` (даже если физически лежит вне `node_modules` — как
-`@letar/*` через `paths`). Без явного `transpilePackages` первый же
-`interface`/`export type`/другой TS-only синтаксис внутри такого пакета даёт `Module parse
-failed: Unexpected token`.
+без явного `transpilePackages` первый же `interface`/`export type`/другой TS-only синтаксис
+внутри такого пакета даёт `Module parse failed: Unexpected token`. Точный механизм (что именно
+в конфигурации Next.js это включает и почему играет роль наличие ключа, а не список имён в нём) —
+в [transpile-packages-array-presence-not-content](/.claude/docs/transpile-packages-array-presence-not-content.md),
+здесь — только специфика nextron-рендерера.
 
 ## Почему раньше не проявлялось
 

@@ -4,6 +4,13 @@
 но её отсутствие выглядит как найденный баг». Проверено на `studio`, Next 16.3.4, `next build
 --webpack`, 2026-09-03.
 
+**Это точка входа по теме `transpilePackages` в монорепо.** Смежные доки описывают свой аспект и
+ссылаются сюда за механизмом: [lib-entry-points](/.claude/docs/lib-entry-points.md#transpilepackages--не-нужен-для-резолва)
+— опция не нужна конкретно для резолва пути через `paths` (компиляции найденного файла это не
+касается, см. ниже); [nextron-renderer-transpile-packages-required](/.claude/docs/nextron-renderer-transpile-packages-required.md)
+— тот же ключ обязателен и в Electron/nextron-рендерере, по этой же причине; [nextjs-nx-composeplugins-migration](/.claude/docs/nextjs-nx-composeplugins-migration.md)
+— откуда явные списки вообще взялись (миграция с `withNx`).
+
 ## Короткий ответ
 
 Для `@letar/*`-либ монорепо **перечисление конкретного пакета в `transpilePackages` не влияет
@@ -130,3 +137,24 @@ Import trace for requested module:
 Next их не читает для этого), а через симлинк bun в `apps/<app>/node_modules/@letar/*`. Вывод
 того дока — «явный `transpilePackages` нужен» — верен, но по другой причине: нужен **ключ**,
 чтобы снялось ограничение `include: [dir]`, а не конкретные имена в нём.
+
+## Почему эксперимент 2026-08-05 выглядел ровно наоборот
+
+[lib-entry-points](/.claude/docs/lib-entry-points.md#transpilepackages--не-нужен-для-резолва)
+описывает сплошную проверку 2026-08-05: `@letar/*` убрали из `transpilePackages` **всех**
+приложений монорепо, и сборки остались зелёными. На первый взгляд это противоречит выводу
+выше («убрать ключ целиком — ломает сборку сразу»). Противоречия нет — 2026-08-05 из
+`next.config.*` убирали только статический литерал массива, но обёртка `withNx()` (`@nx/next`,
+снята позже, коммитом `14fb647c`, 2026-09-01) на каждой сборке выполняла:
+
+```js
+nextConfig.transpilePackages ??= []
+```
+
+— то есть сама заводила ключ рантаймом, пусть и пустым (для `@letar/*` он и оставался пустым:
+`readTsConfigPaths()` внутри `@nx/next` читает корневой `tsconfig.base.json`, где `@letar/*`-алиасов
+нет — см. [nextjs-nx-composeplugins-migration](/.claude/docs/nextjs-nx-composeplugins-migration.md)).
+`!![]` — истина, `shouldIncludeExternalDirs` включался независимо от того, что написано в
+файле конфига. Эксперимент 2026-09-03 (этот док) проведён **после** ухода от `withNx`, когда
+ключ больше никто не заводит неявно — поэтому его отсутствие в статическом конфиге стало видимым
+и ломающим. Дата миграции — водораздел между двумя наблюдениями, не ошибка ни в одном из них.

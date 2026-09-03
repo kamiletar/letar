@@ -228,94 +228,58 @@ Nx, а не установка пакета. Линка не появляетс�
 `dependencies` → линк есть), и `nx typecheck:tsgo studio` зелёный. Не бери это за образец — при
 `implicitDependencies` так не будет.
 
-### `transpilePackages` — НЕ нужен
+### `transpilePackages` — не нужен для резолва
 
-Для библиотеки, резолвящейся через `paths`, запись в `transpilePackages` не требуется.
+Общий механизм опции (что и почему делает, включая проверенный на исходниках Next разбор
+`shouldIncludeExternalDirs`/`isResourceInPackages`) разобран в
+[transpile-packages-array-presence-not-content](/.claude/docs/transpile-packages-array-presence-not-content.md) —
+она точка входа по теме, этот раздел про свой узкий аспект: **резолв пути** через `paths`.
+
+Резолв специфера `@letar/foo` в файл под `libs/` делает bun-симлинк
+(`apps/<app>/node_modules/@letar/foo -> libs/foo`) + `paths` в `tsconfig.json` — оба шага не
+имеют отношения к `transpilePackages`. Опция участвует позже, на фазе **компиляции уже
+найденного файла**: снимает вебпаковское «не компилировать то, что лежит в `node_modules`»
+(подробности и код — в доке выше). Поэтому «нужен ли `transpilePackages` для резолва» и «нужен ли
+он вообще» — разные вопросы: на первый ответ всегда «нет», на второй — «да, как ключ, если
+собираешь через `--webpack`» (см. доку выше).
 
 ⚠️ **До 2026-09-03 здесь стояло «Итог массовой проверки 2026-08-05: опция снята во всех
-приложениях монорепо».** Утверждение перестало быть верным 2026-09-01 и на момент правки было
-неверным: `@letar/*` вернулись в `transpilePackages` **25 из 28** `next.config.*` монорепо.
-Снял их коммит `0693e342` (2026-08-05), вернул `14fb647c` (2026-09-01, «убрать deprecated
-`composePlugins`/`withNx`») — миграция с `@nx/next` заменила неявную транспиляцию плагина явным
-списком, см. [nextjs-nx-composeplugins-migration](/.claude/docs/nextjs-nx-composeplugins-migration.md).
-Кто читал этот раздел между этими датами, получал ложную опору: «раз опции нет ни у кого, её
-наличие в конфиге — дрейф» — на самом деле наоборот.
+приложениях монорепо», а формулировка раздела была «НЕ нужен» без уточнения «для резолва».**
+Утверждение перестало быть верным 2026-09-01 и на момент правки было прямо неверным: `@letar/*`
+вернулись в `transpilePackages` **25 из 28** `next.config.*` монорепо. Снял их коммит `0693e342`
+(2026-08-05), вернул `14fb647c` (2026-09-01, «убрать deprecated `composePlugins`/`withNx`») —
+миграция с `@nx/next` заменила неявную транспиляцию плагина явным списком, см.
+[nextjs-nx-composeplugins-migration](/.claude/docs/nextjs-nx-composeplugins-migration.md). Кто
+читал этот раздел между этими датами, получал ложную опору: «раз опции нет ни у кого, её наличие
+в конфиге — дрейф» — на самом деле наоборот.
 
-**Считай факт командой, не по этому тексту:**
+Массовая проверка 2026-08-05 (снять ключ везде, всё собралось) не противоречит более позднему
+выводу «удалить ключ — сломает сборку» — она была сделана **при живом `withNx`**, который сам
+заводил `transpilePackages ??= []` рантаймом независимо от того, что написано в файле конфига;
+после ухода от `withNx` эта подстраховка исчезла. Разбор — в
+[transpile-packages-array-presence-not-content § Почему эксперимент 2026-08-05 выглядел ровно наоборот](/.claude/docs/transpile-packages-array-presence-not-content.md#почему-эксперимент-2026-08-05-выглядел-ровно-наоборот).
+Таблицы с результатами того прохода здесь не воспроизводятся — они больше не показывают
+текущее состояние конфигов ни одного из перечисленных в них приложений (`kami`, `grandslamcup`,
+`aprel8008`, `dsperevod`, `studio`, `animatrona-tracker`, `svoichuzhie` — у всех сейчас есть
+`transpilePackages` с полным списком).
+
+**Считай факт командой, не по историческим числам в доках:**
 
 ```bash
 grep -A14 'transpilePackages' apps/*/next.config.* apps/*/*/next.config.* | grep -c '@letar/'
 ```
 
-Что осталось верным и не зависит от этой истории: для резолва через `paths` опция **не
-обязательна** — рассуждение и доказательства ниже, они воспроизводились и в 2026-08-05, и сейчас.
-Обязательна она отдельно в nextron-рендерере (`animatrona`) — там резолв через `paths` не
+Обязательна опция отдельно в nextron-рендерере (`animatrona`) — там резолв через `paths` не
 равнозначен транспиляции TS-синтаксиса, см.
 [nextron-renderer-transpile-packages-required](/.claude/docs/nextron-renderer-transpile-packages-required.md).
 Пишешь новый `next.config.*` — смотри на соседей своей группы, а не на «у всех снято».
 
-- [apps/kami/next.config.js:36](/apps/kami/next.config.js) перечисляет пять пакетов, и
-  `@letar/image-upload` среди них нет — при том что `src/app/api/files/[...path]/route.ts`
-  импортирует `@letar/image-upload/server`. `nx build kami` доходит до `✓ Compiled successfully`
-  — а это ровно та фаза, где вылез бы `Module not found`. Turbopack в трейсе прямо показывает,
-  что затянул исходник библиотеки:
-
-  ```
-  Import trace:
-    App Route:
-      ./libs/image-upload/src/server/serve-uploads.ts
-      ./apps/kami/src/app/api/files/[...path]/route.ts
-  ```
-
-- [apps/grandslamcup/next.config.mjs](/apps/grandslamcup/next.config.mjs) не имеет
-  `transpilePackages` вовсе, хотя тянет `@letar/forms`, `@letar/ui`, `@letar/auth`,
-  `@letar/chakra-provider` и серверный вход `image-upload`. `nx build grandslamcup` тоже доходит
-  до `✓ Compiled successfully`. То же отсутствие `transpilePackages` — у `aprel8008`,
-  `dsperevod`, `studio`.
-
-Важно, что эти два случая закрывают **оба бандлера**: `kami` собирается Turbopack'ом,
-`grandslamcup` — webpack'ом (`next build --webpack`). Правило «не компилировать `node_modules`»,
-которое снимает `transpilePackages`, — исторически webpack'овое, так что webpack-подтверждение
-здесь весомее.
-
-⚠️ Целиком локально ни тот, ни другой билд не проходит — но оба падают **позже** фазы компиляции
-и по причинам, не связанным с резолвом библиотек: `kami` — на `/api/keystatic/[...params]` без
-`KEYSTATIC_*` (они только в `.env.docker`, а локальный `next build` грузит `.env.local`/`.env`),
-`grandslamcup` — на «Collecting page data» без доступа к БД (`EACCES` при `acquireConnection`).
-Для вопроса про `transpilePackages` это неважно: `Module not found` вылезает на фазе компиляции,
-а она в обоих случаях зелёная.
-
-#### Проверка обратным ходом: `@letar/redis-client` (2026-08-05)
-
-Оба примера выше — наблюдения «записи нет, и всё работает». Прямая проверка с другой стороны
-(запись **была**, убрали — сломается?) сделана на `@letar/redis-client`: у обоих его
-Next.js-потребителей `output: 'standalone'`, оба подключают библиотеку через
-`implicitDependencies` + `paths` и оба держали её в `transpilePackages`.
-
-| Приложение           | Бандлер                          | `nx build` без записи | Что ещё сверено                                                                                                                                           |
-| -------------------- | -------------------------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `animatrona-tracker` | webpack (`next build --webpack`) | зелёный, 3м32с        | код библиотеки — в тех же 19 серверных чанках (список файлов с `REDIS_URL` в `.next/server` совпал с baseline), `.next/standalone/node_modules` идентичен |
-| `svoichuzhie`        | Turbopack (`next build`)         | зелёный, 50.6с        | —                                                                                                                                                         |
-
-Обе сборки доходят не только до `✓ Compiled successfully`, но до конца (prerender + запись
-`.next/standalone`) — в отличие от `kami`/`grandslamcup` выше, где зелёной была только компиляция.
-Записи `@letar/redis-client` в `transpilePackages` обоих приложений оставлены как есть: они
-безвредны, но не обязательны — воспроизводить их в новых приложениях не нужно.
-
-**Причина.** `transpilePackages` снимает дефолтное правило Next.js «не компилировать то, что лежит
-в `node_modules`». Через `paths` специфер резолвится сразу в исходник под `libs/` — файл вне
-`node_modules`, который Next компилирует как обычный файл проекта. Снимать нечего.
-
-То же говорит Nx в деприкейшен-предупреждении, которое печатается при каждом билде:
-
-> `withNx()` from `@nx/next` is deprecated… Next.js transpiles workspace libraries automatically.
-
 ⚠️ Уточнение к прецеденту из [deploy-coordination.md](/.claude/rules/deploy-coordination.md)
 («typecheck зелёный, прод-билд падает на `Module not found`» при транзитивном реэкспорте одной
 `@letar/*`-либы из другой): чинится он добавлением **`paths`** для транзитивной библиотеки, а не
-`transpilePackages`. Показательно, что `aprel8008` имеет `@letar/format-utils` в `paths` и не имеет
-`transpilePackages` вовсе. Сам совет «прогони `nx build <app>` после нового импорта из `libs/`»
-остаётся в силе — меняется только то, что чинить по факту падения.
+`transpilePackages` — это ровно граница «резолв vs компиляция» выше. Сам совет «прогони `nx build
+<app>` после нового импорта из `libs/`» остаётся в силе — меняется только то, что чинить по факту
+падения.
 
 ### `transpilePackages` ≠ `outputFileTracingIncludes`
 
@@ -335,48 +299,26 @@ Next.js-потребителей `output: 'standalone'`, оба подключа
 вообще — на standalone-вывод он не влияет: у `animatrona-tracker` содержимое `.next/standalone`
 от удаления записи не изменилось (проверка выше).
 
-### Сплошная проверка: опция была снята везде (2026-08-05, откачено 2026-09-01)
+### Сплошная проверка 2026-08-05 — историческая, здесь не воспроизводится
 
-Разделы выше доказывали «не нужен» на отдельных примерах. Здесь — сплошной проход: `@letar/*`
-были убраны из **всех** конфигов монорепо, где они были, и каждое приложение собрано.
+Здесь раньше стояли две полные таблицы результатов сплошного прохода (снять `@letar/*` из
+**всех** конфигов монорепо и собрать каждое приложение) — сделанного при живом `withNx`,
+который сам подставлял ключ рантаймом (см. раздел выше «`transpilePackages` — не нужен для
+резолва», и разбор — в
+[transpile-packages-array-presence-not-content § Почему эксперимент 2026-08-05 выглядел ровно наоборот](/.claude/docs/transpile-packages-array-presence-not-content.md#почему-эксперимент-2026-08-05-выглядел-ровно-наоборот)).
+Таблицы с результатами прохода и разбор методологической ловушки того замера («`.next`-кэш даёт
+ложный зелёный при сравнении конфигов») здесь убраны как дублирующие — приложения из них
+(`kami`, `grandslamcup`, `aprel8008`, `dsperevod`, `studio`, `animatrona-tracker`,
+`svoichuzhie` и другие) сейчас все несут `transpilePackages` с полным списком, см. факт-чек
+командой в разделе выше.
 
-⚠️ **Это исторический замер, а не текущее состояние.** Коммит `14fb647c` (2026-09-01) вернул
-`@letar/*` в `transpilePackages` при миграции с `composePlugins`/`withNx`. Ценность таблицы ниже
-— доказательство, что сборка проходит и **без** опции; читать её как «сейчас у всех снято»
-нельзя.
-
-| Группа                  | Приложения                                                                                                                                                                          | Результат                                                                       |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Публичные web (13)      | `aira-web`, `animatrona-landing`, `animatrona-tracker`, `archetest`, `auth-hub`, `dashboard`, `kami`, `kami-key-the-landing`, `letar-landing`, `mandala`, `pravda`, `synth`, `time` | 13/13 `✓ Compiled successfully`, ни одного `Module not found`                   |
-| Приватные submodule (4) | `aboi`, `domwellbes`, `driving-school`, `svoichuzhie`                                                                                                                               | 4/4 скомпилировались; три из них — полностью зелёный билд                       |
-| Electron-renderer (3)   | `animatrona`, `label-printer-desktop`, `poster-microtext-desktop`                                                                                                                   | `animatrona` — полный зелёный билд; двое падают одинаково до и после (см. ниже) |
-
-Покрыты оба бандлера: `animatrona-tracker`, `dashboard`, `driving-school` собираются webpack'ом,
-остальные — Turbopack'ом. Шаблон генератора `electron-app` тоже почищен, чтобы новые десктопные
-приложения не рождались с этой записью (шаблон `new-app` её и не имел).
-
-⚠️ **Что осталось в `transpilePackages` намеренно:** в
-[apps/animatrona/renderer/next.config.js](/apps/animatrona/renderer/next.config.js) — `@libsql/*`
-и `@prisma/adapter-libsql`/`driver-adapter-utils`/`debug`. Это не workspace-библиотеки, а
-настоящие пакеты из `node_modules`, которым нужен принудительный бандлинг вместо экстернализации
-(иначе Turbopack собирает внешние модули с битыми ESM-зависимостями `node-fetch` → `fetch-blob`).
-Правило «`@letar/*` не нужны» на них не распространяется.
-
-**Приложения, чей билд не проходит локально по причинам, не связанным с этой правкой** — для
-каждого сделана сверка «исходный конфиг из `git HEAD` → та же ошибка»:
-
-| Приложение                          | Где падает             | Причина                                                                                                                                     |
-| ----------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `synth`                             | `Running TypeScript`   | `TS6305` на `out-tsc/spec/vitest.config.d.ts` (project references)                                                                          |
-| `auth-hub`, `aboi`                  | `Collecting page data` | роуты Better Auth требуют env, которых нет в локальном `.env.local`                                                                         |
-| `label-printer-desktop/renderer`    | компиляция             | несгенерированные `src/generated/form-schemas` и `../../schema`                                                                             |
-| `poster-microtext-desktop/renderer` | резолв самого `next`   | `turbopack.root` в submodule со своим `.git` — см. [turbopack-private-submodule-root.md](/.claude/docs/turbopack-private-submodule-root.md) |
-
-⚠️ **Методическая ловушка этой проверки: `.next` от предыдущей сборки даёт ложный зелёный.**
-`label-printer-desktop/renderer` в первом прогоне отчитался `✓ Compiled successfully in 1815ms` —
-1.8 секунды на приложение, которое с чистого кэша не компилируется вовсе. Сверять два конфига
-можно только с `rm -rf .next` перед каждым запуском; аномально быстрая сборка — сигнал, что
-сравниваешь кэш, а не код.
+⚠️ Что из той проверки осталось актуальным именно здесь: в
+[apps/animatrona/renderer/next.config.js](/apps/animatrona/renderer/next.config.js)
+`transpilePackages` намеренно содержит не только `@letar/*`, но и `@libsql/*`/
+`@prisma/adapter-libsql`/`driver-adapter-utils`/`debug` — настоящие пакеты из `node_modules`,
+которым нужен принудительный бандлинг вместо экстернализации (иначе Turbopack собирает внешние
+модули с битыми ESM-зависимостями `node-fetch` → `fetch-blob`). Правило «резолв через `paths` не
+требует записи» на них не распространяется — это не workspace-библиотеки.
 
 ## Заводишь библиотеку со второй точкой входа — чек-лист
 
@@ -388,14 +330,10 @@ Next.js-потребителей `output: 'standalone'`, оба подключа
    которого у приложений нет). Если ставишь — на библиотеку целиком, одна на все подпути
    (`{ "path": "../../libs/x" }`), и **руками**: `nx sync` в этом репо отключён.
 5. `nx.implicitDependencies` в `package.json` приложения — для графа Nx.
-6. `transpilePackages` — **сам по себе для резолва не нужен**: библиотеке, резолвящейся через
-   `paths`, он не требуется, в том числе при `output: 'standalone'` (проверка на
-   `@letar/redis-client` выше). Проблемы standalone-вывода лечит `outputFileTracingIncludes`,
-   а не эта опция. ⚠️ До 2026-09-03 пункт читался как «**не добавлять**» — с 2026-09-01 это
-   расходится с репозиторием: после миграции с `composePlugins`/`withNx` (`14fb647c`) явный
-   список `@letar/*` стоит в 25 из 28 `next.config.*`, а nextron-рендерер (`animatrona`) без него
-   вообще не собирается. Смотри на конфиг соседей своей группы; удалять чужую существующую
-   запись «по этому пункту» — нельзя.
+6. `transpilePackages` — для резолва через `paths` не нужен (см. раздел выше); нужен ли он
+   вообще в `next.config.*` твоего приложения — смотри на соседей своей группы и на
+   [transpile-packages-array-presence-not-content](/.claude/docs/transpile-packages-array-presence-not-content.md),
+   не удаляй чужую существующую запись «по этому пункту».
 7. Раздел про серверную часть в README библиотеки — тег `type:*` про неё не расскажет.
 8. Тег не трогаем: он про `.`.
 
