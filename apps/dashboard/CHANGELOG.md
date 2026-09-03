@@ -2,6 +2,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.26.4] — 2026-09-03
+
+### Fixed
+
+- `src/lib/auth.ts`: убран `session.cookieCache.strategy: 'jwt'`. Dashboard был единственным
+  приложением монорепо с этой схемой — все dev-серверы монорепо на `localhost` делят один
+  cookie-jar (cookie не различаются по порту), и JWT в `better-auth.session_data` (значение с
+  точками) ронял `/api/auth/get-session` у любого другого приложения с дефолтной compact-схемой
+  (`Invalid Base64 character: .`). Разбор и почему это не тронуло прод (host-only cookie, разные
+  домены) — `.claude/docs/better-auth-localhost-cookie-jar-collision.md`. Альтернатива
+  (`cookiePrefix` каждому из ~14 приложений) отклонена: несоразмерна dev-only риску и разово
+  разлогинивает пользователей на проде при выкатке.
+
 ## [1.26.3] — 2026-09-03
 
 ### Changed

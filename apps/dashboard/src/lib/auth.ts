@@ -61,12 +61,16 @@ export const auth = betterAuth({
     },
   },
 
-  // Stateless сессии (cookie-based)
+  // Stateless сессии (cookie-based).
+  // ⚠️ НЕ возвращай strategy: 'jwt' — все dev-серверы монорепо на localhost делят один
+  // cookie-jar (cookie не различаются по порту), и только dashboard использовал jwt-схему,
+  // из-за чего better-auth.session_data содержал точки и ронял /api/auth/get-session у любого
+  // другого приложения (default compact-схема decode() без try/catch). Разбор:
+  // .claude/docs/better-auth-localhost-cookie-jar-collision.md
   session: {
     cookieCache: {
       enabled: true,
       maxAge: 7 * 24 * 60 * 60, // 7 дней
-      strategy: 'jwt',
     },
   },
 

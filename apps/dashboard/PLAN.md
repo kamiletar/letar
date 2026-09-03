@@ -1,7 +1,13 @@
 # План развития Dashboard
 
-> **Версия:** 1.26.0
+> **Версия:** 1.26.4
 > **Последнее обновление:** 2026-09-03
+
+**✅ Фикс: `strategy: 'jwt'` убран из `session.cookieCache` (2026-09-03, 1.26.4).** Dashboard был
+единственным приложением монорепо с этой схемой — на общем dev-`localhost` cookie-jar это ронял
+`/api/auth/get-session` у любого другого приложения 500-й `Invalid Base64 character: .`.
+Прод не затронут. Разбор и почему выбран этот вариант, а не `cookiePrefix` на 14 приложений —
+`.claude/docs/better-auth-localhost-cookie-jar-collision.md`, детали в `apps/studio/PLAN.md`.
 
 ---
 
