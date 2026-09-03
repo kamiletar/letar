@@ -246,10 +246,10 @@ discovery ещё на этапе `betterAuth()` — не баг `@letar/auth`, �
 поддеревом; ложный след — «рассинхрон версий solid-js», хотя `use` отсутствует в SSR-сборке
 любой версии ·
 [webpack-only-app-silent-export-drift](/.claude/docs/webpack-only-app-silent-export-drift.md) ⚠️
-14 приложений собираются `next build --webpack`, остальные Turbopack (до 2026-09-03 док утверждал
-«auth-hub — единственное»); расхождения тихие — предупреждение в логе + `undefined` в рантайме
-при `exit=0`, и этот лог дважды приняли за падение сборки; список считать
-`grep -l 'next build --webpack' apps/*/project.json`, не по памяти ·
+15 приложений собираются `next build --webpack`, остальные Turbopack (до 2026-09-03 док утверждал
+«auth-hub — единственное», затем «14» — само число устарело в тот же день); расхождения тихие —
+предупреждение в логе + `undefined` в рантайме при `exit=0`, и этот лог дважды приняли за падение
+сборки; список считать `grep -l 'next build --webpack' apps/*/project.json`, не по памяти ·
 [nextjs16-turbopack-default-emotion-hydration](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md)
 ⚠️ Turbopack по умолчанию + Chakra `<Global>` → hydration mismatch, флаки в e2e ·
 [turbopack-private-submodule-root](/.claude/docs/turbopack-private-submodule-root.md) «Could not find
@@ -451,6 +451,10 @@ Playwright-скрипт через Bash вместо navigate/UI-логина ·
 ⚠️ единственный раздел документа с обратным направлением вранья — рекурсивный поиск заходит в
 `.claude/worktrees/` (копии репо фоновых агентов) и кеш Nx, показывая давно исправленные проблемы
 как живые; фикс — `git grep` или явное исключение этих каталогов ·
+[verification-pitfalls § git grep и приватные submodule](/.claude/docs/verification-pitfalls.md#парный-к-предыдущему-git-grep-врёт-в-успокаивающую-сторону--он-не-заходит-в-приватные-submodule)
+⚠️ зеркало предыдущего пункта — `git grep` не заходит в submodule (gitlink, не каталог) и
+недосчитывает аудиты вида «у скольких приложений есть X»; для покрытия — рекурсивный `grep` с
+исключением `.claude/worktrees`/`.nx`, прецедент — `theme:check` (1 вместо 4) ·
 [docker-bind-mount-pitfalls](/.claude/docs/docker-bind-mount-pitfalls.md) ⚠️
 `compose up -d` не перечитывает смонтированный конфиг ·
 [docker-bare-bun-workspace-deps](/.claude/docs/docker-bare-bun-workspace-deps.md) ·
@@ -505,6 +509,15 @@ plaintext с произвольным именем не совпадает с cr
 [one-time-reveal-fragment-token-pattern](/.claude/docs/one-time-reveal-fragment-token-pattern.md)
 одноразово-раскрываемая публичная ссылка (счета, договоры, приглашения): fragment-токен → POST →
 scoped cookie, без утечки токена в лог/`Referer` ·
+[better-auth-localhost-cookie-jar-collision](/.claude/docs/better-auth-localhost-cookie-jar-collision.md)
+⚠️ cookie не различаются по порту — все dev-серверы монорепо делят один cookie-jar `localhost`;
+`apps/dashboard` (единственное с `cookieCache.strategy: 'jwt'`) кладёт в общий
+`better-auth.session_data` JWT, и любое другое приложение падает 500 на
+`Invalid Base64 character: .` (ветка `compact` в better-auth без try/catch, ветка `jwt` — с ним);
+⚠️ ложный след «1.7 сменила формат cookieCache» опровергнут сверкой с 1.6.0…1.6.29, и ещё —
+падение требует ОБА cookie сразу, поэтому «воспроизвелось в чистом контексте без cookie»
+технически невозможно; прод не затронут (host-only cookie, разные домены), риск вернёт только
+включение `crossSubDomainCookies` ·
 [better-auth-1.7-oidc-provider-removed](/.claude/docs/better-auth-1.7-oidc-provider-removed.md) ⚠️
 `bun update` в пределах `^1.6.x` поднимает better-auth до 1.7 — `oidcProvider`/`genericOAuthClient`
 убраны из ядра, замена — `@better-auth/oauth-provider` + `jwt()`-плагин, клиент — `signIn.social` ·
