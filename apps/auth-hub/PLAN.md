@@ -218,6 +218,19 @@
       Google не виден, похоже на гео-фильтр RU с текущей сети агента; «`/api/auth/oauth2/authorize`
       без сессии» — `ERR_CONNECTION_REFUSED`) — не связаны с локаторами `@letar/forms`, не
       трогались.
+- [x] **Проверены остальные 7 файлов монорепо с `input[name=...]`** (грепом по всем `apps/*-e2e`)
+      на тот же класс регрессии, отдельной сессией. Реально сломано и починено:
+      `apps/mandala-e2e/src/tests/06-contact-form.guest.spec.ts` (форма `/contacts`) и
+      `apps/driving-school-e2e/src/{58-form-validation,66-ui-ux-improvements}.spec.ts` (email на
+      `/sign-in`/`/sign-up` — `emailSchema` обёрнута в `z.preprocess()`, из-за чего даже
+      `type="email"`-фоллбек не спасал; заодно найден несвязанный баг — поле авто в
+      `vehicle-form.tsx` называется `brand`, тест ссылался на `carBrand`). Ложные срабатывания
+      (форма нативная или уже был правильный `data-field-name`-локатор): `svoichuzhie-e2e`
+      (`07-blog.admin.spec.ts` — самописный `AdminInput`, не `@letar/forms`), `aboi-e2e`
+      (`pvz-picker.spec.ts`/`checkout.spec.ts` — нативный radio на ручном React-стейте),
+      `mandala-e2e` (`03-admin-products.admin.spec.ts` — уже был `data-field-name`). Общий паттерн
+      и грабля с `z.preprocess()` задокументированы в
+      [e2e-testing.md § Формы и селекторы полей](/.claude/docs/e2e-testing.md#формы-и-селекторы-полей).
 
 - [ ] ⚠️ **Открытый вопрос: два новых провала e2e на staging, не диагностированы.** Полный
       прогон `nx e2e auth-hub-e2e` (2026-09-03, `--project=chromium`, с сети агента) даёт
