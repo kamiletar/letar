@@ -12,10 +12,17 @@
 # Что проверяет:
 #   - .semgrep/letar-rules.yml — свои правила (SQL-инъекция через $queryRawUnsafe,
 #     dangerouslySetInnerHTML, ALLOW_DEV_SESSION в прод-конфиге). Работают офлайн.
-#   - p/secrets — реестровый набор на захардкоженные ключи. Требует сети; если сети нет,
-#     проверка деградирует до локальных правил, но коммит не блокируется.
+#   - p/secrets — реестровый набор на захардкоженные ключи. Требует сети.
 #
-# ERROR блокирует коммит, WARNING печатается. Обход — SKIP_SEMGREP=1 git commit.
+# ⚠️ Раньше здесь было написано, что при недоступности сети проверка «деградирует до
+# локальных правил». Это неверно и было проверено эмпирически (2026-09-03): если хотя бы
+# один --config не резолвится, semgrep не сканирует НИ ОДНОГО файла вообще (paths.scanned
+# пуст), а не откатывается на локальный конфиг. Отсюда и политика ниже.
+#
+# ERROR блокирует коммит, WARNING печатается. Сам semgrep не отработал (сеть, fatal error,
+# unparseable YAML) — тоже блокирует, а не пропускает молча: анализ безопасности, который
+# не смог ответить, не должен читаться как «проверено и чисто»
+# (.claude/docs/verification-pitfalls.md). Обход в обоих случаях — SKIP_SEMGREP=1 git commit.
 
 set -uo pipefail
 
@@ -64,11 +71,13 @@ PYTHONUTF8=1 timeout 120 uvx semgrep scan "${CONFIGS[@]}" --quiet --json --metri
   "${EXISTING[@]}" >"$OUT" 2>/dev/null
 SCAN_STATUS=$?
 
-if [[ ! -s "$OUT" ]]; then
-  # пустой вывод — сеть, таймаут или сломанный конфиг. Не блокируем: анализ безопасности
-  # не должен превращаться в единственную точку отказа для коммита.
-  echo "⚠️  semgrep не отработал (код $SCAN_STATUS) — коммит пропущен без проверки"
-  exit 0
+if [[ $SCAN_STATUS -ne 0 || ! -s "$OUT" ]]; then
+  # semgrep не смог отработать (сеть, fatal error, сломанный конфиг) — это не «находок
+  # нет», это «мы не знаем». Блокируем явно, а не пропускаем молча — иначе тихий сбой
+  # реестрового конфига (p/secrets) читался бы как «проверено и чисто».
+  echo "⛔ semgrep не отработал (код $SCAN_STATUS) — коммит остановлен"
+  echo "   Обход (осознанный пропуск проверки): SKIP_SEMGREP=1 git commit ..."
+  exit 1
 fi
 
 node -e '
@@ -77,8 +86,18 @@ let data
 try {
   data = JSON.parse(fs.readFileSync(process.argv[1], "utf8"))
 } catch {
-  console.error("⚠️  semgrep вернул неразбираемый вывод — коммит пропущен без проверки")
-  process.exit(0)
+  console.error("⛔ semgrep вернул неразбираемый вывод — коммит остановлен")
+  console.error("   Обход: SKIP_SEMGREP=1 git commit ...")
+  process.exit(1)
+}
+// data.errors — нефатальные ошибки semgrep (например конфиг частично не резолвился, но
+// сканирование остальных файлов прошло, exit=0). Раньше игнорировались полностью — коммит
+// с таким выводом молча читался как «0 находок», хотя часть проверки не выполнилась.
+const scanErrors = data.errors || []
+if (scanErrors.length) {
+  for (const e of scanErrors) {
+    console.error(`⚠️  semgrep: ${e.type || "ошибка"} — ${(e.message || "").trim()}`)
+  }
 }
 const results = data.results || []
 const errors = results.filter((r) => r.extra.severity === "ERROR")
