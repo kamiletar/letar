@@ -89,19 +89,43 @@ await page.getByText('Согласен на обработку ПДн', { exact:
 
 ### @letar/forms (рекомендуемый подход)
 
-TanStack Form использует контролируемые компоненты со стандартными именами полей. Селекторы по атрибуту `name` работают корректно:
+⚠️ **`input[name="..."]` НЕ работает.** `@letar/forms` — headless TanStack Form, поля
+контролируются в памяти и не выставляют нативный HTML-атрибут `name` на DOM-элементе. Вместо
+него компонент рендерит `data-field-name` (см. `libs/forms/src/lib/declarative/form-fields/text/field-string.tsx`).
+Регрессия жила незамеченной 9 дней в auth-hub и была независимо найдена ещё в двух приложениях —
+`PLAN.md` §18.7.1 (auth-hub) — потому что полный e2e-прогон делается не после каждого коммита
+форм, а `input[name=...]` не роняет typecheck/lint, только таймаутит в рантайме теста.
 
 ```typescript
-// ✅ РАБОТАЕТ - стандартные имена полей
+// ❌ НЕ РАБОТАЕТ для полей @letar/forms — DOM не содержит атрибут name
 this.emailInput = page.locator('input[name="email"]')
-this.nameInput = page.locator('input[name="user.name"]') // вложенные поля
 
-// ✅ РАБОТАЕТ - по placeholder (более надёжно)
+// ✅ РАБОТАЕТ — data-field-name как основной локатор
+this.emailInput = page.locator('input[data-field-name="email"]')
+this.nameInput = page.locator('input[data-field-name="user.name"]') // вложенные поля
+
+// ✅ Устойчивее — data-field-name первым, старый вариант вторым (на случай нативных
+// полей вне @letar/forms на той же странице)
+this.emailInput = page.locator('[data-field-name="email"], input[name="email"]')
+
+// ✅ РАБОТАЕТ - по placeholder (более надёжно для самописных, не-@letar/forms полей)
 this.nameInput = page.getByPlaceholder('Введите название')
 
 // ✅ РАБОТАЕТ - по data-testid (самый надёжный)
 this.nameInput = page.locator('[data-testid="product-name-input"]')
 ```
+
+⚠️ **`type="email"`/`type="password"` — ненадёжный фоллбек.** `FieldString` выводит
+`type="email"` из констрейнтов Zod-схемы (`z.string().email()`), но если схема поля обёрнута в
+`z.preprocess()` (как `emailSchema` в `@letar/validation-utils`), вывод типа не срабатывает и
+реальный `type` остаётся `"text"` — локатор `input[type="email"]` тоже не находит элемент.
+`type="password"` для `FieldPassword` задаётся явно и не зависит от схемы — этот фоллбек
+надёжен. Проверять по факту (живой DOM), не полагаться на аналогию между полями.
+
+⚠️ **Несколько полей с одинаковым `data-field-name` на одной странице** (например `LoginForm` +
+`MagicLinkForm` одновременно рендерят поле `email`) — уточняй через соседний атрибут, например
+`autocomplete` (`input[data-field-name="email"][autocomplete="username webauthn"]`), а не
+полагайся на `.first()` вслепую.
 
 ## Next.js Server Actions и redirect
 
