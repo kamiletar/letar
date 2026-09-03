@@ -1,6 +1,6 @@
 {
   "name": "@letar/grandslamcup",
-  "version": "3.39.11",
+  "version": "3.39.12",
   "private": true,
   "nx": {
     "name": "grandslamcup",

@@ -1,8 +1,7 @@
-import { CookieBanner, OfflineConsentBanner, TopLoader } from '@letar/ui'
+import { CookieBanner, OfflineConsentBanner, ServiceWorkerRegistration, TopLoader } from '@letar/ui'
 import type { Metadata } from 'next'
 
 import { Providers } from './_components/providers'
-import { ServiceWorkerRegistration } from './_components/service-worker-registration'
 import { AppToaster } from './_components/ui/toaster'
 import { UmamiScriptConsent } from './_components/umami-script-consent'
 
@@ -50,7 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <CookieBanner appKey="grandslamcup" privacyUrl="/privacy" />
           {children}
           <AppToaster />
-          <ServiceWorkerRegistration />
+          <ServiceWorkerRegistration consentKey="grandslamcup-offline-consent" />
           <OfflineConsentBanner
             consentKey="grandslamcup-offline-consent"
             title="Включить оффлайн-доступ?"
