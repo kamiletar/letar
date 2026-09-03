@@ -65,3 +65,74 @@ libs/query-provider/src/lib/persist-provider.tsx  ← dynamic(..., { ssr: false 
 импортировать в файле, попадающем в server-граф) — пин можно снять и вернуться на `^0.x` диапазон.
 Проверка: `nx run studio:build --skip-nx-cache` (или любое другое приложение с
 `@letar/query-provider` и включённым `showDevtools`) должен пройти без `Attempted import error`.
+
+## ⚠️ Рецидив 2026-09-03: версийный фикс не пережил обычного `deps update`
+
+Пин выше держался ровно неделю. `9a65abe7 deps update` (2026-09-02) поднял
+`@tanstack/react-devtools` `0.10.5` → `0.10.12` в корневом `package.json` — и всё вернулось
+буква в букву: `devtools@0.14.2` → `devtools-ui@0.7.1` → тот же `theme.js`, та же строка
+`Attempted import error: 'use' is not exported from 'solid-js/web'`, та же цепочка через
+`libs/query-provider`.
+
+Это ровно тот класс, что описан в [root-pin-peer-drift](/.claude/docs/root-pin-peer-drift.md):
+точный пин в корневом `package.json` — тихая мина. Ничто не связывает строку `"0.10.5"` с
+причиной, по которой она там стоит: ни `bun install`, ни `nx lint`, ни `typecheck:tsgo`, ни
+`nx test` пин не проверяют, а `deps update` его снимает как любую другую отставшую версию.
+Комментарий в `package.json` невозможен (JSON), а комментарии в коде библиотеки объясняли
+`dynamic(ssr:false)`, а не пин.
+
+### Ложный след при диагностике
+
+Форма ошибки («`use` не экспортируется», пакет ждёт `solid-js@^1.9.9`) выглядит как рассинхрон
+версий solid-js — и это **неверная** гипотеза, на которую легко потратить сессию:
+
+- установлена ровно одна копия, `solid-js@1.9.12`, диапазон `^1.9.9` удовлетворён;
+- `use` **есть** в `web/dist/web.js` (условие `browser`) и в `web/dist/dev.js`
+  (условие `development`), и его **нет** в `web/dist/server.js` (условия `node`/`worker`/`deno`).
+
+То есть недостающего экспорта нет ни в какой версии solid-js — это не дефект версии, а
+осмысленное отсутствие DOM-директивы в SSR-сборке. Поднимать/понижать `solid-js` бессмысленно.
+Проверяется за один вызов, до любых сборок:
+
+```bash
+grep -c 'use,' node_modules/.bun/solid-js@*/node_modules/solid-js/web/dist/server.js  # 0
+grep -c 'use,' node_modules/.bun/solid-js@*/node_modules/solid-js/web/dist/web.js     # 1
+```
+
+### Структурный фикс (заменил пин)
+
+`libs/query-provider/src/lib/devtools-panel-lazy.tsx` — единственная точка, где панель
+подключается; все три провайдера (`query-provider`, `persist-provider`, `zenstack-provider`)
+импортируют её оттуда:
+
+```tsx
+export const DevtoolsPanel = process.env.NODE_ENV === 'production'
+  ? NoDevtools
+  : dynamic(() => import('./devtools-panel').then((m) => m.DevtoolsPanel), { ssr: false })
+```
+
+Работает потому, что Next подставляет `process.env.NODE_ENV` литералом **до** обхода графа
+зависимостей: сравнение сворачивается в константу, ветка с `import()` становится недостижимой, и
+бандлер не резолвит её поддерево вовсе — вместо того чтобы зарезолвить и упасть. Условие обязано
+остаться **на верхнем уровне модуля**: внутри компонента (`devtoolsEnabled && <DevtoolsPanel />`)
+это уже рантайм-проверка, она модуль из графа не убирает — именно так выглядел код до фикса.
+
+Цена — `showDevtools: true` больше не включает панель в production (в сборке её нет). Ни одно
+приложение этот проп не передаёт, поведение по умолчанию не менялось; JSDoc всех трёх провайдеров
+и README библиотеки исправлены, чтобы не обещать невозможного.
+
+Пин `@tanstack/react-devtools` после этого не нужен: даже если апстрим снова принесёт
+DOM-специфичный импорт в server-граф, ветки с devtools в production-сборке просто нет.
+
+### Как проверять
+
+Только прод-сборкой — `nx build <app>`. Ни `nx dev`, ни `lint`, ни `typecheck:tsgo`, ни `nx test`
+этот класс не видят: в dev живёт ровно та ветка, что работала всегда. Позитивный контроль, что
+поддерево действительно выброшено, а не просто не рендерится:
+
+```bash
+grep -rl "solid-js\|devtools-ui" apps/<app>/.next/server --include=*.js   # должно быть пусто
+```
+
+Проверено 2026-09-03 на `studio` и `dashboard` (оба на `next build --webpack`): сборка зелёная,
+`solid-js`/`devtools-ui` в серверном бандле отсутствуют полностью.

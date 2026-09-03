@@ -212,11 +212,16 @@ discovery ещё на этапе `betterAuth()` — не баг `@letar/auth`, �
 [nextjs-ssr-browser-only-libs](/.claude/docs/nextjs-ssr-browser-only-libs.md) `self is not defined` ·
 [nextjs-dynamic-ssr-false-still-server-compiled](/.claude/docs/nextjs-dynamic-ssr-false-still-server-compiled.md)
 ⚠️ `dynamic(ssr:false)` не исключает модуль из server-резолва импортов (RSC client reference) —
-несовпадение `"node"`/`"browser"` exports транзитивной зависимости всё равно валит билд ·
+несовпадение `"node"`/`"browser"` exports транзитивной зависимости всё равно валит билд; лечится
+не пином версии (пин пережил неделю и был снят обычным `deps update`), а сравнением с
+`process.env.NODE_ENV` на верхнем уровне модуля — бандлер выбрасывает мёртвую ветку вместе с
+поддеревом; ложный след — «рассинхрон версий solid-js», хотя `use` отсутствует в SSR-сборке
+любой версии ·
 [webpack-only-app-silent-export-drift](/.claude/docs/webpack-only-app-silent-export-drift.md) ⚠️
-auth-hub — единственное приложение на `next build --webpack`; расхождения с Turbopack тихие
-(предупреждение в логе + `undefined` в рантайме при `exit=0`), и этот лог дважды приняли за
-падение сборки ·
+14 приложений собираются `next build --webpack`, остальные Turbopack (до 2026-09-03 док утверждал
+«auth-hub — единственное»); расхождения тихие — предупреждение в логе + `undefined` в рантайме
+при `exit=0`, и этот лог дважды приняли за падение сборки; список считать
+`grep -l 'next build --webpack' apps/*/project.json`, не по памяти ·
 [nextjs16-turbopack-default-emotion-hydration](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md)
 ⚠️ Turbopack по умолчанию + Chakra `<Global>` → hydration mismatch, флаки в e2e ·
 [turbopack-private-submodule-root](/.claude/docs/turbopack-private-submodule-root.md) «Could not find
