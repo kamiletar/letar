@@ -940,8 +940,10 @@ Telegram alerting — в Этапе 0. Вместе дают картину: % �
   `.env.docker.enc` (2026-08-05, найдено при заведении staging у `domwellbes`)
 - **§19** — TypeScript 7 GA: план тиража, включая **§19.1** (гейт проверки типов в деплое)
 - **§20** — рассинхрон форматтера между worktree/фоновыми сессиями
-- **§25** — еженедельный контроль зависимостей (скан `bun outdated`/`audit` → страница `/deps`
-  в dashboard + баннер в `/repo`); спроектировано 2026-07-28, реализации ещё нет
+- **§25** — ✅ ЗАКРЫТО (2026-09-04) — еженедельный контроль зависимостей: `scripts/deps-scan.ts`
+  → `POST /api/deps/scan` → страница `/deps` в dashboard (`apps/dashboard/src/app/deps/page.tsx`)
+  - `DepsStalenessBanner`; skill `repo` читает `.claude/state/deps-last-scan.json` и показывает
+    баннер по возрасту скана (≤7д норм, 7-14д 🟡, >14д 🔴)
 
 ---
 
