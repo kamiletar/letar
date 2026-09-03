@@ -2,6 +2,31 @@
 
 Детальное описание всех реализованных фич.
 
+## Убран `cookieCache.strategy: 'jwt'` — закрыт открытый вопрос studio по cookie-коллизии (2026-09-03, 1.26.4)
+
+Сессия 2026-09-03 в `studio` нашла причину 500 на `/api/auth/get-session` в dev: все dev-серверы
+монорепо на `localhost` делят один cookie-jar (порт не входит в идентификатор cookie), а
+`dashboard` был единственным приложением монорепо с `session.cookieCache.strategy: 'jwt'` —
+JWT в общем `better-auth.session_data` (значение с точками) ронял `get-session` у любого другого
+приложения на дефолтной compact-схеме (`base64Url.decode()` без try/catch, `Invalid Base64
+character: .`). Studio закрылась своим `advanced.cookiePrefix`; для остальных ~14 приложений
+студийная сессия оставила открытый вопрос — раскатать `cookiePrefix` всем или убрать источник
+точек в одном месте.
+
+Выбран второй вариант: `strategy: 'jwt'` убран из `session.cookieCache` в `src/lib/auth.ts` (та же
+`maxAge: 7 * 24 * 60 * 60`, схема стала дефолтной compact — как везде в монорепо). Обоснование:
+риск чисто dev-окружения (прод не затронут — cookie host-only, разные домены), а `cookiePrefix`
+на 14 приложений разово разлогинивает прод-пользователей при выкатке — несоразмерная цена ради
+dev-only неудобства. `dashboard` был единственным источником `strategy: 'jwt'` в монорепо
+(проверено грепом по всем 16 `apps/*/src/lib/auth.ts`), поэтому фикс в одном файле закрывает риск
+у всех остальных сразу, без 14-кратного объёма работы. Латентность (следующий, кто добавит
+`jwt`/`jwe`-стратегию, вернёт баг) — закрыта явным предупреждающим комментарием в самом
+`auth.ts` со ссылкой на разбор.
+
+Проверено: `format`/`lint`/`typecheck:tsgo` зелёные. Разбор —
+`.claude/docs/better-auth-localhost-cookie-jar-collision.md`, закрытие открытого вопроса —
+`apps/studio/PLAN.md`.
+
 ## `src/jobs/scheduler.ts` на общую фабрику `createAppJobsModule` (2026-09-03)
 
 `scheduler.ts` studio и dashboard были почти дословными копиями друг друга (~75 строк):
