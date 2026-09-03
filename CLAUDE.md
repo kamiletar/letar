@@ -395,6 +395,10 @@ singleton-строка настроек (`ShopSettings` и аналоги) — �
 ⚠️ соседний, но другой класс — Postgres SSI абортирует `40001` даже без пересечения данных между
 файлами, чем больше spec-файлов с `Serializable`-транзакциями параллельно, тем чаще; не гонка за
 строку, фикс не нужен, `--fileParallelism=false` детерминированно зелёный ·
+[ci-real-postgres-unit-test-isolation](/.claude/docs/ci-real-postgres-unit-test-isolation.md)
+unit-тест с настоящими (не замоканными) запросами к БД в CI — `services.postgres` +
+именованная БД на приложение + `vitest.config.mts` `test.env` (спредится последним поверх
+`process.env`, реально перебивает job-level `DATABASE_URL`, в отличие от dotenv-каскада Nx) ·
 [hardcoded-unique-lookup-key-test-race](/.claude/docs/hardcoded-unique-lookup-key-test-race.md) ⚠️
 функция ищет запись по захардкоженному значению `@unique`-поля (ключ шаблона, `slug`, `code`) —
 параллельные spec-файлы вынуждены делить один ряд БД; фикс — сделать значение опциональным
