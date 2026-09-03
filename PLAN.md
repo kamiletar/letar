@@ -3964,3 +3964,21 @@ submodule ([verification-pitfalls.md § git grep и приватные submodule
 реэкспортирует хук из `@letar/ui` (`src/hooks/use-service-worker.ts`) и использует его в
 `service-worker-init.tsx`/`update-banner.tsx` (prefetch страниц, баннер обновления). Хук не
 удаляется.
+
+## §76 — `useClientOrigin` (`@letar/hooks` 0.5.0) — дедупликация SSR-safe `window.location.origin` (2026-09-03)
+
+Тот же класс бага, что и §75, только другой паттерн: hydration mismatch (React error 418) от
+`typeof window !== 'undefined' ? window.location.origin : ''`, вычисляемого прямо в теле render
+клиентского компонента, — сервер рендерит `''`, клиент реальный origin. Найден в один день
+независимо в `studio` (`/owner/settings`) и `grandslamcup` (две копии). Вынесено в
+`useClientOrigin()` (`libs/hooks/src/lib/browser/use-client-origin.ts`) — те же `useState('')`+
+`useEffect`, что уже отработали в обоих приложениях, но в одном месте.
+
+Обе копии в `grandslamcup` (`presenter-select-jury.tsx`, `wizard/step-select-jury.tsx`) переведены
+на хук. `studio` хук не использует — там origin вычисляется на сервере через `getRequestOrigin()`
+(`headers()`), более ранний и более правильный подход без клиентского мигания; см. предупреждающий
+комментарий в `apps/studio/src/lib/request-origin.ts`.
+
+Репо-широкий grep `window.location.origin` по всем `apps/*`: 13 прочих вхождений — все внутри
+обработчиков событий/`useCallback` (клик, share, copy-link), не в теле рендера, тому же классу
+бага не подвержены.
