@@ -19,16 +19,7 @@
     "app-builder-lib": "^26.15.3",
     "builder-util-runtime": "^9.7.0",
     "fast-uri": "^3.1.7",
-    "form-data": "^4.0.6",
-    "minimatch@^10>brace-expansion": "^5.0.9",
-    "engine.io>ws": "^8.21.3",
-    "engine.io-client>ws": "^8.21.3",
-    "socket.io-adapter>ws": "^8.21.3",
-    "@libsql/isomorphic-ws>ws": "^8.21.3",
-    "@electron/get>undici": "^7.29.0",
-    "cheerio>undici": "^7.29.0",
-    "jsdom>undici": "^7.29.0",
-    "@istanbuljs/load-nyc-config>js-yaml": "^3.15.0"
+    "form-data": "^4.0.6"
   },
   "overrides": {
     "minimist": "^1.2.8",
@@ -45,16 +36,7 @@
     "app-builder-lib": "^26.15.3",
     "builder-util-runtime": "^9.7.0",
     "fast-uri": "^3.1.7",
-    "form-data": "^4.0.6",
-    "minimatch@^10>brace-expansion": "^5.0.9",
-    "engine.io>ws": "^8.21.3",
-    "engine.io-client>ws": "^8.21.3",
-    "socket.io-adapter>ws": "^8.21.3",
-    "@libsql/isomorphic-ws>ws": "^8.21.3",
-    "@electron/get>undici": "^7.29.0",
-    "cheerio>undici": "^7.29.0",
-    "jsdom>undici": "^7.29.0",
-    "@istanbuljs/load-nyc-config>js-yaml": "^3.15.0"
+    "form-data": "^4.0.6"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.49",
