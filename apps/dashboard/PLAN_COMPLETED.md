@@ -2,6 +2,14 @@
 
 Детальное описание всех реализованных фич.
 
+## GlitchTip — проект создан и DSN подключён (2026-08-12, отмечено в плане 2026-09-03)
+
+Пункт «В процессе» в `PLAN.md` отстал от факта: GlitchTip-проект `dashboard` (id 2) был создан
+в `errors.s3.letar.best` ещё 2026-08-12, `firstEvent` зафиксирован в тот же день. DSN прописан в
+`docker-compose.production.yml` (`GLITCHTIP_DSN`, `NEXT_PUBLIC_GLITCHTIP_DSN` + `*_ENVIRONMENT`),
+деплой подтверждён в agent-mail (`deploy-log: dashboard+time GlitchTip DSN — деплой OK,
+клиентские ошибки живьём подтверждены`). Действий не требовалось — только актуализация плана.
+
 ## `overflowX="auto"` на `Card.Body` вокруг `Table.Root` (2026-09-01)
 
 Точечный аудит по образцу бага, найденного и починенного в `domwellbes` (61 место): `Table.Root`
