@@ -31,6 +31,8 @@ import { useDebounce, useOnlineStatus, usePendingMutations } from '@letar/hooks'
 | `useWindowSize()`                 | Размеры окна { width, height }                                                                        |
 | `useInfiniteScrollSentinel(opts)` | Infinite scroll через sentinel-элемент + IntersectionObserver, возвращает callback-ref                |
 | `useEventSource(opts)`            | Единое управление `EventSource` (SSE): backoff-переподключение, `visibilitychange`, кастомные события |
+| `useOfflineConsent(storageKey)`   | Согласие на оффлайн-режим в localStorage (парный UI — `OfflineConsentBanner` из `@letar/ui`)          |
+| `useOfflineServiceWorker(opts)`   | Регистрация Service Worker по этому согласию; при отзыве — снятие всех регистраций и очистка кешей    |
 
 ### TanStack Query Hooks
 

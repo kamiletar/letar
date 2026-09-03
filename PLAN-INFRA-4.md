@@ -4737,6 +4737,15 @@ PLAN-INFRA-\*.md» соблюдено было (§112 написан подро�
 (`git apply --cached` ради чужой правки в том же `CLAUDE.md`) вынуждает коммитить без pathspec —
 то есть ровно всем индексом.
 
+**Дополнение 2026-09-03 — рудимент снят.** `@tanstack/react-devtools` переведён обратно на
+`^0.10.12`, запись удалена из `unexplained` в `scripts/intentional-pins.json`. Проверено:
+`bun install` (resolved-версия не изменилась, `0.10.12`), прод-сборки `nx build studio`/
+`nx build dashboard` (webpack) и `nx build svoichuzhie` (Turbopack, публичный потребитель
+`@letar/query-provider`) — все три зелёные; в серверных чанках `.next/server` нет реального
+`solid-js`/`devtools-ui` (только ложное совпадение по имени `.map`-файла); `nx test
+query-provider` — все 41 тест, включая `devtools-isolation.spec.ts`, зелёные; `bun
+scripts/check-all.mjs --group=deps` зелёный.
+
 ## §144 — `transpilePackages`: работает наличие ключа, а не имена в нём — «пробел» в studio оказался не пробелом (2026-09-03)
 
 **Триггер:** `apps/studio/next.config.mjs` импортирует `@letar/query-provider`, но не перечисляет
