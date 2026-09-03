@@ -217,6 +217,7 @@ ref/DOM не перезапускается ·
 с deprecated `composePlugins`/`withNx` (`@nx/next`) на голый `next.config` + явный
 `transpilePackages` ·
 [transpile-packages-array-presence-not-content](/.claude/docs/transpile-packages-array-presence-not-content.md)
+⭐ точка входа по теме `transpilePackages` — прочие доки ссылаются сюда за механизмом.
 ⚠️ ловушка обратного направления: для `@letar/*` работает **наличие** ключа `transpilePackages`
 (снимает `include: [dir]`), а не перечисленные в нём имена — bun линкует либы симлинком на
 `libs/`, реальный путь без `node_modules`, проверка по списку до них не доходит; отсутствие
