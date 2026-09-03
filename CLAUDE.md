@@ -737,7 +737,7 @@ import { getEnhancedPrisma } from '@/lib/db'
 
 ---
 
-**Обновлено:** 2026-08-10 | **Nx** 22.6 | **Next.js** 16.2 | **React** 19 | **Chakra** 3.34 | **Zod** 4.3 | **ZenStack** 3.5 | **Prisma** 7.6 | **Scope:** `@letar/*`
+**Обновлено:** 2026-09-03 | **Nx** 23.2 | **Next.js** 16.2 | **React** 19 | **Chakra** 3.34 | **Zod** 4.3 | **ZenStack** 3.5 | **Prisma** 7.6 | **Scope:** `@letar/*`
 
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->
