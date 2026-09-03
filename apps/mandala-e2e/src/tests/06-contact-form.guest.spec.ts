@@ -28,11 +28,11 @@ test.describe('Контактная форма', () => {
       await page.goto('/contacts')
 
       // Проверяем наличие поля email
-      const emailInput = page.locator('input[type="email"], input[name="email"]')
+      const emailInput = page.locator('[data-field-name="email"], input[type="email"]')
       await expect(emailInput).toBeVisible()
 
       // Проверяем наличие текстового поля для сообщения
-      const messageInput = page.locator('textarea, input[name="message"]')
+      const messageInput = page.locator('[data-field-name="message"], textarea')
       await expect(messageInput).toBeVisible()
     })
 
@@ -50,7 +50,7 @@ test.describe('Контактная форма', () => {
       await page.goto('/contacts')
 
       // Заполняем только сообщение
-      const messageInput = page.locator('textarea, input[name="message"]')
+      const messageInput = page.locator('[data-field-name="message"], textarea')
       await messageInput.click()
       await messageInput.fill('Тестовое сообщение')
 
@@ -70,12 +70,12 @@ test.describe('Контактная форма', () => {
       await page.goto('/contacts')
 
       // Заполняем невалидный email
-      const emailInput = page.locator('input[type="email"], input[name="email"]')
+      const emailInput = page.locator('[data-field-name="email"], input[type="email"]')
       await emailInput.click()
       await emailInput.fill('invalid-email')
 
       // Заполняем сообщение
-      const messageInput = page.locator('textarea, input[name="message"]')
+      const messageInput = page.locator('[data-field-name="message"], textarea')
       await messageInput.click()
       await messageInput.fill('Тестовое сообщение')
 
