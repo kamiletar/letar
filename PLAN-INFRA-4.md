@@ -1598,7 +1598,13 @@ lockfile-drift-гейт), обязана либо чекаутить submodule, 
       runNow подтверждён по логам dev-сервера (POST → `runJobNowAction` → задача выполнилась,
       статус в `/admin/jobs` показал ожидаемую `ECONNREFUSED 127.0.0.1:1025` — MailHog не поднят
       локально, конвейер работает)
-- [ ] Тираж: `aboi`, `time`, `svoichuzhie`
+- [x] Тираж на `aboi` (5 задач: `approve-referrals`, `birthday-promo`, `abandoned-cart`,
+      `review-request`, `activation-reminder`, 2026-09-03) — без `env_file:` в compose,
+      `JOBS_ENABLED` добавлен явной строкой (как у `driving-school`); `@letar/admin-ui` был
+      только в `implicitDependencies`, добавлен в реальные `dependencies` вместе с `@letar/jobs`;
+      старые `/api/cron/*` и записи в `dashboard-agent` намеренно не удалены (тот же порядок);
+      живой runNow на `approve-referrals` подтверждён — «Успешно, 611мс»
+- [ ] Тираж: `time`, `svoichuzhie`
 - [ ] `dashboard-agent`: режим наблюдателя (опрос `/api/jobs/status` + алерт по «давно не было
       успеха»), снятие монтирования чужих `.env.docker`
 - [ ] Инфра-задачи и бэкап Maddy — на systemd timers, конфиги в `infra/`, доставка через
