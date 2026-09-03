@@ -33,6 +33,7 @@ import { useDebounce, useOnlineStatus, usePendingMutations } from '@letar/hooks'
 | `useEventSource(opts)`            | Единое управление `EventSource` (SSE): backoff-переподключение, `visibilitychange`, кастомные события |
 | `useOfflineConsent(storageKey)`   | Согласие на оффлайн-режим в localStorage (парный UI — `OfflineConsentBanner` из `@letar/ui`)          |
 | `useOfflineServiceWorker(opts)`   | Регистрация Service Worker по этому согласию; при отзыве — снятие всех регистраций и очистка кешей    |
+| `useClientOrigin()`               | `window.location.origin`, безопасный для SSR — `''` до монтирования, реальный origin после            |
 
 ### TanStack Query Hooks
 
@@ -132,6 +133,27 @@ function SyncIndicator() {
   return <Badge>Синхронизация ({pendingCount})</Badge>
 }
 ```
+
+### Ссылка с origin текущего окружения (QR-код, share-ссылка)
+
+```tsx
+import { useClientOrigin } from '@letar/hooks'
+
+function InviteQr({ inviteKey }: { inviteKey: string }) {
+  const origin = useClientOrigin()
+  // origin === '' на сервере и на первом клиентском рендере — рендерим одинаково
+  const inviteUrl = origin ? `${origin}/invite/${inviteKey}` : null
+
+  return inviteUrl ? <QrCode value={inviteUrl} /> : <Spinner />
+}
+```
+
+⚠️ Не заменяй на `typeof window !== 'undefined' ? window.location.origin : ''` прямо в теле
+рендера — сервер и первый клиентский рендер дадут разный текст (`''` vs реальный origin), и
+React уронит hydration (error 418). Если origin нужен уже на сервере (например для ссылки,
+которая должна учитывать реальный домен за прокси на staging) — используй серверный источник
+(`headers()` внутри Server Component/Route Handler), а не этот хук — см. пример
+`getRequestOrigin()` в `apps/studio/src/lib/request-origin.ts`.
 
 ### SSE-поток (Server-Sent Events)
 

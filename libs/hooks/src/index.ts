@@ -6,6 +6,7 @@ export { useThrottle } from './lib/utility/use-throttle'
 
 // === Browser Hooks ===
 export { prefersReducedMotion } from './lib/browser/prefers-reduced-motion'
+export { useClientOrigin } from './lib/browser/use-client-origin'
 export {
   type EventSourceReconnectOptions,
   type EventSourceReconnectStrategy,

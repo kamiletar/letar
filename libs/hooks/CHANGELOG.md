@@ -2,6 +2,20 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.5.0] — 2026-09-03
+
+### Feature: `useClientOrigin` — безопасный для SSR `window.location.origin`
+
+Дедуплицирует паттерн `const [origin, setOrigin] = useState(''); useEffect(() =>
+setOrigin(window.location.origin), [])`, найденный в один день независимо в двух приложениях
+(`studio`, `grandslamcup`) как причина hydration mismatch (React error 418): вычисление
+`typeof window !== 'undefined' ? window.location.origin : ''` прямо в теле рендера даёт `''`
+на сервере и реальный origin на клиенте, тексты расходятся. Хук возвращает `''` до
+монтирования и правильный origin после — как и раньше, но в одном месте. Заменены обе копии
+в `grandslamcup` (`presenter-select-jury.tsx`, `wizard/step-select-jury.tsx`). `studio` чинил
+тот же баг иначе — серверным `getRequestOrigin()` через `headers()`, без клиентского мигания —
+и хук ему не нужен.
+
 ## [0.4.0] — 2026-09-03
 
 ### Feature: `useOfflineServiceWorker` — единая регистрация/снятие Service Worker
