@@ -1,11 +1,17 @@
 import createMDX from '@next/mdx'
 import withSerwistInit from '@serwist/next'
 
+// register: false — критично. По умолчанию Serwist инжектит собственный скрипт, который
+// регистрирует /sw.js на КАЖДОЙ странице безусловно, в обход согласия пользователя
+// (`useOfflineConsent` в src/app/_components/service-worker-registration.tsx). В dev не
+// воспроизводится: там Serwist отключён. Тот же разбор — apps/archetest/next.config.mjs
+// (2026-07-28) и apps/studio/next.config.mjs (2026-09-03, замер на прод-сборке).
 const withSerwist = withSerwistInit({
   swSrc: 'src/app/sw.ts',
   swDest: 'public/sw.js',
   cacheOnNavigation: true,
   reloadOnOnline: true,
+  register: false,
   disable: process.env.NODE_ENV === 'development',
 })
 
