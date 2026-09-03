@@ -3939,7 +3939,11 @@ mandala/pravda — в отличие от serwist, где рантайм-кеш 
 пересоздать кеш уже после нашей чистки. Снимается следующей загрузкой страницы, когда воркер
 контроль уже потерял — не воспроизведено у serwist-приложений (grandslamcup).
 
-⚠️ **Найден мёртвый экспорт при вынесении:** `useServiceWorker` в `libs/ui/src/lib/use-service-worker.ts`
-(другой хук, не путать с новым `useOfflineServiceWorker`) не имеет ни одного потребителя во всём
-монорепо (`git grep` по имени — только README и собственный файл). Кандидат на удаление, заведена
-задача — см. `spawn_task`.
+⚠️ **Проверено и опровергнуто:** `useServiceWorker` в `libs/ui/src/lib/use-service-worker.ts`
+(другой хук, не путать с `useOfflineServiceWorker`) казался мёртвым по `git grep` — только
+README и собственный файл. Ложноотрицательный результат: `git grep` не заходит в приватные
+submodule ([verification-pitfalls.md § git grep и приватные submodule](/.claude/docs/verification-pitfalls.md#парный-к-предыдущему-git-grep-врёт-в-успокаивающую-сторону--он-не-заходит-в-приватные-submodule)).
+Обычный рекурсивный grep по рабочему дереву находит живого потребителя — `driving-school`
+реэкспортирует хук из `@letar/ui` (`src/hooks/use-service-worker.ts`) и использует его в
+`service-worker-init.tsx`/`update-banner.tsx` (prefetch страниц, баннер обновления). Хук не
+удаляется.
