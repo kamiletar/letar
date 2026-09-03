@@ -4746,6 +4746,45 @@ PLAN-INFRA-\*.md» соблюдено было (§112 написан подро�
 query-provider` — все 41 тест, включая `devtools-isolation.spec.ts`, зелёные; `bun
 scripts/check-all.mjs --group=deps` зелёный.
 
+**Дополнение 2026-09-03 (второе) — разобраны 12 из 14 `unexplained`-пинов.** `typescript` и
+`@tanstack/react-devtools` оставлены в стороне (первый — отдельный план TS7, второй уже закрыт
+дополнением выше). Методика §107: смотреть в `bun.lock`, тянет ли пакет кто-то ещё СВОЕЙ
+`dependencies`-записью (не `peerDependencies`) — если да несовместимым диапазоном/точной версией,
+дедуп-риск реален и пин остаётся; если нет или тянут только через `peerDependencies` — диапазон
+безопасен.
+
+Переведены на caret (10, коммиты по группам): `@eslint/js`, `eslint-plugin-import`,
+`eslint-plugin-jsx-a11y`, `eslint-plugin-react`, `eslint-plugin-react-hooks` — тянут только
+через `peerDependencies` либо совместимыми caret-диапазонами (`eslint-config-next`,
+`@react-native/eslint-config`); `@testing-library/dom` (только `peerDependencies` от
+jest-dom/react/user-event), `@testing-library/react` (только root); `@types/nodemailer` (нет
+consumers через `dependencies`, в lock уже 2 разные физические копии — root и `libs/email`, дедуп
+между ними и не предполагался); `@swc-node/register` (только `peerDependencies` от `nx`);
+`satori` (только root, прямые импорты в grandslamcup/pravda). После каждой группы —
+`bun install` (резолв не менялся ни разу, "no changes") и целевая проверка (`nx lint dashboard`,
+`nx test @letar/hooks`, `nx typecheck:tsgo @letar/email`/`grandslamcup`/`animatrona-mobile`, `nx
+show projects` для swc-node — все `--skip-nx-cache`), все зелёные.
+
+Перенесены в `pins` (2, версия остаётся точной) — тот же паттерн, что у `zod` (§134), только
+источник конфликта не OR-диапазон, а голое равенство:
+
+- **`jiti`** — `nextron` требует его в своей `dependencies` ТОЧНО `"2.7.0"` (без caret), это
+  подтверждено прямо в `bun.lock`. Корневой пин сейчас совпадает буквально — единственная причина
+  единой физической копии. Caret на корне позволил бы будущему `bun update` увести резолв выше
+  2.7.0, а nextron продолжил бы требовать ровно `2.7.0` — раскол на две копии.
+- **`hermes-compiler`** — тот же паттерн с `react-native@0.87.1`, чья `dependencies` требует ТОЧНО
+  `"250829098.0.17"`. Дополнительно: `animatrona-mobile`/`animatrona-tv` уже держат отдельные
+  физические копии на `250829098.0.16` (другая версия react-native в этих приложениях) —
+  подтверждает, что версия хермеса жёстко следует за конкретным react-native, а не общий
+  диапазон; расхождение компилятора и рантайма для нативного байткода — не «дубль в
+  node_modules», а потенциально несовместимая сборка APK.
+
+**Не трогалось намеренно (вне scope задачи):** `typescript` (PLAN-INFRA-1.md § TypeScript 7),
+`@tanstack/react-devtools` (уже закрыт дополнением выше).
+
+Проверено: `node scripts/check-intentional-pins.mjs` зелёный, 8 записей в `pins` (было 4).
+`unexplained.packages` теперь содержит только `typescript`.
+
 ## §144 — `transpilePackages`: работает наличие ключа, а не имена в нём — «пробел» в studio оказался не пробелом (2026-09-03)
 
 **Триггер:** `apps/studio/next.config.mjs` импортирует `@letar/query-provider`, но не перечисляет

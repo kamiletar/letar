@@ -57,6 +57,26 @@
       "reason": "Бамп 1.73.0 → 1.80.0 откачен: новая версия включает React-correctness правила роллаута «React Compiler Support» (react/refs, react/set-state-in-effect, react/use-memo) и даёт ~28 новых находок в чужом коде. Находки реальные, но правка 28 файлов — отдельная задача, а не побочный эффект deps-update.",
       "doc": "PLAN-INFRA-4.md §114",
       "unpinWhen": "Разобраны 28 находок новых React-правил (отдельная сессия). После этого поднимать oxlint обычным порядком и переписать эту запись на новую версию — точную форму сохранить: набор находок линтера должен быть одинаковым у всех агентов и в CI."
+    },
+    {
+      "package": "jiti",
+      "version": "2.7.0",
+      "field": "devDependencies",
+      "since": "2026-09-03",
+      "commit": "TODO-разбор-§143",
+      "reason": "Дедуп с nextron: его собственная dependencies-запись требует jiti ТОЧНО \"2.7.0\" (без диапазона, не caret) — bun.lock подтверждает `\"nextron\": [\"nextron@10.3.0\", \"\", { \"dependencies\": { ..., \"jiti\": \"2.7.0\", ... } }]`. Пока корневая версия совпадает с этим точным требованием, физическая копия одна. Caret на корне (^2.7.0) позволит будущему bun update поднять корневую копию выше 2.7.0, а nextron продолжит требовать ровно 2.7.0 — резолв разъедется на две физические копии jiti (паттерн из §134 про zod, только требование не диапазон-с-OR, а голое равенство).",
+      "doc": "PLAN-INFRA-4.md §143 § Разбор unexplained-пинов",
+      "unpinWhen": "nextron перейдёт на диапазон вместо точного jiti в своей dependencies (проверить `grep -n '\"nextron\":' bun.lock` на предмет caret), либо nextron будет обновлён/заменён."
+    },
+    {
+      "package": "hermes-compiler",
+      "version": "250829098.0.17",
+      "field": "devDependencies",
+      "since": "2026-09-03",
+      "commit": "TODO-разбор-§143",
+      "reason": "Дедуп с react-native (0.87.1): его dependencies-запись требует hermes-compiler ТОЧНО \"250829098.0.17\" (без диапазона) — bun.lock подтверждает `\"react-native\": [\"react-native@0.87.1\", \"\", { \"dependencies\": { ..., \"hermes-compiler\": \"250829098.0.17\", ... } }]`. Та же схема, что у jiti/nextron: caret на корне рискует разъехаться с точным требованием react-native при следующем bun update, разводя на две физические копии нативного компилятора — для Hermes расхождение версии рантайма и компилятора не просто дубль в node_modules, а потенциально несовместимый байткод при сборке APK. animatrona-mobile/animatrona-tv уже держат СВОИ отдельные точные копии на 250829098.0.16 (другая версия react-native в этих приложениях) — подтверждает, что версия жёстко следует за конкретным react-native, не общий диапазон.",
+      "doc": "PLAN-INFRA-4.md §143 § Разбор unexplained-пинов",
+      "unpinWhen": "react-native перейдёт на диапазон вместо точного hermes-compiler в своей dependencies, либо появится задокументированное решение владельца, что расхождение версий компилятора и рантайма Hermes безопасно (маловероятно — нативный байткод)."
     }
   ],
 
@@ -105,19 +125,7 @@
       "deps-update, либо — если выяснится причина — перенести в pins с объяснением."
     ],
     "packages": {
-      "typescript": "Точный 6.0.3 с initial commit. Обновление 6 → 7 ведётся отдельным планом репозитория (PLAN-INFRA-1.md § TypeScript 7), из scope deps-update выведено решением владельца. Смежная ловушка — alias-схема двух компиляторов под bun isolated linker (.claude/docs/bun-isolated-linker-alias-shared-bucket-collision.md).",
-      "@eslint/js": "Точная версия с ca0eb7a7 (eslint 10). Причина точной формы не задокументирована.",
-      "eslint-plugin-import": "Точная версия с initial commit, причина не задокументирована.",
-      "eslint-plugin-jsx-a11y": "Точная версия с initial commit, причина не задокументирована.",
-      "eslint-plugin-react": "Точная версия с initial commit, причина не задокументирована.",
-      "eslint-plugin-react-hooks": "Точная версия с initial commit, причина не задокументирована.",
-      "@testing-library/dom": "Точная версия с initial commit, причина не задокументирована.",
-      "@testing-library/react": "Точная версия с initial commit, причина не задокументирована.",
-      "@types/nodemailer": "Точная версия с initial commit, причина не задокументирована.",
-      "@swc-node/register": "Точная версия с initial commit (последний бамп aa3bc619), причина не задокументирована.",
-      "hermes-compiler": "Точная версия с initial commit (последний бамп aa3bc619). Собственная схема версионирования апстрима (250829098.0.17) — caret на ней ведёт себя неочевидно, но явного решения в доках нет.",
-      "jiti": "Точная версия с initial commit, причина не задокументирована.",
-      "satori": "Точная версия с initial commit, причина не задокументирована."
+      "typescript": "Точный 6.0.3 с initial commit. Обновление 6 → 7 ведётся отдельным планом репозитория (PLAN-INFRA-1.md § TypeScript 7), из scope deps-update выведено решением владельца. Смежная ловушка — alias-схема двух компиляторов под bun isolated linker (.claude/docs/bun-isolated-linker-alias-shared-bucket-collision.md)."
     }
   }
 }
