@@ -116,6 +116,10 @@ dev-окружения (прод не затронут), а `cookiePrefix` на 
 cookie-jar, но другое следствие (не крэш, а путаница «какая сессия активна»), уже описанное
 поведением RFC 6265 для localhost, а не специфичным для `dashboard`.
 
+Комментарий — не единственная страховка: `scripts/check-cookie-cache-strategy.mjs` (gate в
+`bun scripts/check-all.mjs`) грепает все `apps/*/src/lib/auth.ts` на `strategy: 'jwt'/'jwe'` и
+падает, если у такого приложения нет своего `advanced.cookiePrefix`.
+
 ## Смежное
 
 - [better-auth-1.7-account-issuer-field](/.claude/docs/better-auth-1.7-account-issuer-field.md)
