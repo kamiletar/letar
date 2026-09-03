@@ -2,6 +2,49 @@
 
 Детальное описание всех реализованных фич.
 
+## Собственные cron-задачи переехали на `@letar/jobs` (§75) (2026-09-03)
+
+Три задачи (`dashboard-heartbeat`, `s2-pageview-count`, `s2-ssl-check`) перенесены с HTTP-опроса
+`dashboard-agent` на pg-boss внутри самого приложения — второй перенос после пилота `studio`.
+
+**Реализация:**
+
+- `src/jobs/{heartbeat,pageview-count,ssl-check}.ts` — `defineJob()`, каждый хендлер напрямую
+  вызывает существующую `lib`-функцию (`sendHeartbeatTelegram`/`sendUndeliveredAlertsTelegram`,
+  `updatePageViewCounts()`, `checkSslCertificates()`) без изменения логики.
+- `src/jobs/scheduler.ts` — `startDashboardJobs()` (кеш на `globalThis`, вызывается из
+  `instrumentation.ts`), `getDashboardJobStatuses()`, `runDashboardJobNow()`,
+  `applyDashboardJobOverride()`. `autoSchedule` включается только при `JOBS_ENABLED=true`.
+- Модель `JobOverride` (`schema.zmodel`, миграция `20260903063814_add_job_override`) — правка
+  расписания/включённости через UI переживает деплой.
+- `/jobs` — новая страница (`requireAdmin()`, `JobsTable` из `@letar/admin-ui`): расписание,
+  последний/следующий прогон, «Запустить сейчас», переключатель вкл/выкл.
+- `/api/jobs/status` — read-only снимок для будущего режима наблюдателя `dashboard-agent`
+  (`verifyCronSecret`).
+- Старые `/api/cron/{heartbeat,pageview-count,ssl-check}/route.ts` удалены целиком.
+- `deploy-affected.sh` — новый блокирующий гейт: прод-деплой приложения с `src/jobs/` без
+  `JOBS_ENABLED=true` в расшифрованном `.env.docker` останавливается явной ошибкой (защита от
+  инцидента `studio` 2026-08-13, где задачи сутки не тикали молча). Гейт применяется только к
+  проду — `.env.staging.enc` пока не заведён под этот флаг ни у одного приложения.
+- `JOBS_ENABLED=true` добавлен в `apps/dashboard/.env.docker.enc` через
+  `scripts/sops-env-set.sh dashboard docker JOBS_ENABLED true`.
+- Верификация: локальный `nx dev dashboard` + dev-session bypass — все три задачи видны на
+  `/jobs`, «Запустить сейчас» для `s2-pageview-count` прошёл (`Успешно`, 1.5с), консоль/сеть
+  чистые. Прод-деплой — коммит `93ef7a0a`, подтверждён deploy-agent-dev, миграции применены,
+  контейнер здоров.
+
+**Находка сессии (важно для будущего тиража):** удаление старых `/api/cron/*` роутов в том же
+коммите, что и перенос задач, тут же дало `dashboard-agent` 404 на все три тика вместо безопасного
+дублирования, которое предполагал план §75 — это активная ошибка, а не то, что можно отложить до
+живой проверки. Пойман и починен отдельным коммитом (`8ebecdfe`, параллельная сессия
+`dashboard-agent`) — три id сняты из `DEFAULT_CRON_JOBS`. Правило для оставшихся приложений
+тиража (`driving-school`, `dsperevod`, `aboi`, `time`, `svoichuzhie`) зафиксировано в
+`PLAN-INFRA-4.md` §75: если роуты удаляются сразу — записи `dashboard-agent` снимаются в том же
+PR, не откладываются.
+
+**Сознательно не сделано в этой сессии:** `libs/hooks`/`libs/ui`/другие библиотеки не трогались —
+чужой WIP параллельных сессий, замечен в `git status`, но вне scope этой задачи.
+
 ## Гейт `theme:check` подключён (2026-09-03)
 
 `nx g @letar/generators:theme-check-integrate dashboard` — четвёртый потребитель
