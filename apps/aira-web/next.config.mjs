@@ -17,6 +17,7 @@ const nextConfig = {
     '@letar/glitchtip',
     '@letar/hooks',
     '@letar/i18n-proxy',
+    '@letar/seo',
     '@letar/ui',
   ],
   // Typecheck отдельно через nx typecheck:tsgo — Next.js не понимает TS project references

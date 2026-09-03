@@ -40,6 +40,7 @@ const nextConfig = {
     '@letar/glitchtip',
     '@letar/hooks',
     '@letar/i18n-proxy',
+    '@letar/seo',
     '@letar/ui',
   ],
   typescript: {

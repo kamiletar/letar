@@ -35,6 +35,7 @@ const nextConfig = {
     '@letar/i18n-proxy',
     '@letar/image-upload',
     '@letar/seed-utils',
+    '@letar/seo',
     '@letar/ui',
     '@letar/upload-validation',
     '@letar/yandex-metrika',

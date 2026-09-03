@@ -25,7 +25,7 @@ const nextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
   // Workspace-либы вне корня приложения — без withNx (удалён, deprecated) webpack их не
   // транспилирует сам. См. .claude/docs/nextjs-nx-composeplugins-migration.md
-  transpilePackages: ['@letar/analytics', '@letar/chakra-provider', '@letar/glitchtip', '@letar/hooks', '@letar/ui'],
+  transpilePackages: ['@letar/analytics', '@letar/chakra-provider', '@letar/glitchtip', '@letar/hooks', '@letar/seo', '@letar/ui'],
   // Typecheck отдельно через nx typecheck:tsgo — Next.js не понимает TS project references
   // (см. tsconfig.json "references"), из-за чего собственный тайпчекер next build ложно валит
   // rootDir-проверку на любом path-mapped импорте из libs/ (e.g. @letar/chakra-provider). Тот же

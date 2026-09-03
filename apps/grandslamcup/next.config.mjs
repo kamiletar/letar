@@ -37,6 +37,7 @@ const nextConfig = {
     '@letar/image-upload',
     '@letar/query-provider',
     '@letar/seed-utils',
+    '@letar/seo',
     '@letar/ui',
     '@letar/upload-validation',
   ],

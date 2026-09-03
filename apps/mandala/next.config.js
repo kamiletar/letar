@@ -41,6 +41,7 @@ const nextConfig = {
     '@letar/image-upload',
     '@letar/pin-auth',
     '@letar/query-provider',
+    '@letar/seo',
     '@letar/ui',
   ],
   // Оптимизация изображений
