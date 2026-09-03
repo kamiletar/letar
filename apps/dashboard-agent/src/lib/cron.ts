@@ -607,6 +607,14 @@ const RETIRED_JOB_IDS: string[] = [
   'studio-check-budget-alerts',
   'studio-biweekly-hourly-invoices',
   'studio-check-long-timers',
+  // Тот же переезд на @letar/jobs, но для dashboard (коммит `8ebecdfe`) — задачи убраны из
+  // DEFAULT_CRON_JOBS, но этого недостаточно: loadAllCronJobs() никогда не удаляет запись
+  // из живого cron-jobs.json сама по себе, только через этот список. Без этой правки
+  // s2-pageview-count продолжал дёргать удалённую HTTP-ручку /api/cron/pageview-count
+  // каждые 10 минут и падал 404 (обнаружено по алерту GlitchTip 2026-09-03 14:20).
+  'dashboard-heartbeat',
+  's2-pageview-count',
+  's2-ssl-check',
 ]
 
 /**
