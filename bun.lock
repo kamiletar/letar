@@ -260,7 +260,7 @@
         "@types/minimatch": "^6.0.0",
         "@types/node": "^25.9.5",
         "@types/node-cron": "^3.0.11",
-        "@types/nodemailer": "8.0.1",
+        "@types/nodemailer": "^8.0.1",
         "@types/number-to-words": "^1.2.3",
         "@types/pg": "^8.23.1",
         "@types/punycode": "^2.1.4",
