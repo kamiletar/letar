@@ -234,6 +234,12 @@ model Alert {
   lastOccurredAt DateTime      @default(now())
   acknowledgedAt DateTime?
   resolvedAt     DateTime?
+  /// null — для этого алерта отправка вообще не пытается (например DEPS_VULNERABLE, см. lib/deps.ts,
+  /// сознательно только в БД); true — уведомление ушло; false — попытка была и провалилась.
+  /// Три состояния, не два: heartbeat должен реагировать только на явный провал доставки, а не
+  /// путать его с «для этого типа уведомление и не планировалось». Раньше heartbeat молчал при
+  /// ЛЮБОМ алерте за сутки, включая недоставленный (PLAN-INFRA-3.md §52, «сторож для сторожа»).
+  notified       Boolean?
 
   /// Сервер, с которого пришёл алерт (опционально для обратной совместимости)
   server         Server?       @relation(fields: [serverId], references: [id], onDelete: SetNull)

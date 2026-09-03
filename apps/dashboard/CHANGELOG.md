@@ -2,6 +2,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.25.0] — 2026-09-03
+
+### Added
+
+- `Alert.notified` — nullable-поле (`null`/`true`/`false`): различает «уведомление не пыталось
+  отправляться» (например `DEPS_VULNERABLE`, см. `lib/deps.ts`), «ушло» и «попытка провалилась».
+  Проставляется через `markAlertNotified()` в `POST /api/alerts` и `ssl-monitor.ts` после каждой
+  попытки `sendNotification()`.
+- Heartbeat (`/api/cron/heartbeat`, PLAN-INFRA-3.md §52 «сторож для сторожа») теперь реагирует и
+  на явно недоставленные алерты за 24 часа (`notified: false`), не только на их полное отсутствие —
+  раньше молчал при ЛЮБОМ алерте за сутки, включая тот, что не смог дойти до Telegram. Новое
+  сообщение `sendUndeliveredAlertsTelegram()` в `lib/notifications.ts`.
+
 ## [1.24.12] — 2026-09-01
 
 ### Fixed

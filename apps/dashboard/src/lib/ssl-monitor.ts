@@ -5,7 +5,14 @@
  * без этой проверки истечение сертификата обнаруживается только если кто-то зашёл на страницу.
  */
 
-import { AlertSeverity, AlertType, createAlert, getAlertSettings, resolveAlertsByType } from '@/lib/alerts'
+import {
+  AlertSeverity,
+  AlertType,
+  createAlert,
+  getAlertSettings,
+  markAlertNotified,
+  resolveAlertsByType,
+} from '@/lib/alerts'
 import { npmApi } from '@/lib/nginx-proxy-manager'
 import { sendNotification } from '@/lib/notifications'
 
@@ -85,7 +92,13 @@ export async function checkSslCertificates(): Promise<SslCheckResult> {
 
   const settings = await getAlertSettings()
   if (settings.enabled) {
-    await sendNotification(alert, settings.telegramEnabled, settings.telegramBotToken, settings.telegramChatId)
+    const sent = await sendNotification(
+      alert,
+      settings.telegramEnabled,
+      settings.telegramBotToken,
+      settings.telegramChatId,
+    )
+    await markAlertNotified(alert.id, sent)
   }
 
   return { checked: certificates.length, expiring }

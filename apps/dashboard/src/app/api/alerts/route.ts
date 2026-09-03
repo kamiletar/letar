@@ -1,4 +1,12 @@
-import { AlertSeverity, AlertType, createAlert, getActiveAlerts, getAlerts, getAlertSettings } from '@/lib/alerts'
+import {
+  AlertSeverity,
+  AlertType,
+  createAlert,
+  getActiveAlerts,
+  getAlerts,
+  getAlertSettings,
+  markAlertNotified,
+} from '@/lib/alerts'
 import { sendNotification } from '@/lib/notifications'
 import { verifyCronSecret } from '@letar/api-server'
 import { NextResponse } from 'next/server'
@@ -87,6 +95,10 @@ export async function POST(request: Request) {
         // это было видно в логах именно этого запроса, а не только внутри notifications.ts.
         console.warn(`[POST /api/alerts] Уведомление НЕ отправлено для alert ${alert.id} (type=${alert.type})`)
       }
+      // notified читает heartbeat (§52 «сторож для сторожа») — только для попыток отправки:
+      // settings.enabled=false ниже намеренно не трогает поле, остаётся null («не пыталось»),
+      // а не false («пыталось и провалилось») — owner сам выключил алертинг, это не поломка.
+      await markAlertNotified(alert.id, sent)
     } else {
       console.warn(
         `[POST /api/alerts] AlertSettings.enabled=false — alert ${alert.id} (type=${alert.type}) создан, уведомление не отправлялось`,

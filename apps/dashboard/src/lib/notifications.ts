@@ -180,6 +180,45 @@ export async function sendHeartbeatTelegram(botToken: string, chatId: string): P
 }
 
 /**
+ * Уведомление о недоставленных алертах — PLAN-INFRA-3.md §52 «сторож для сторожа».
+ * В отличие от heartbeat (тишина за сутки), здесь наоборот: алерт(ы) были, но
+ * `sendNotification()` вернул `false` — попытка доставки провалилась. Молчать в этом случае
+ * так же плохо, как молчать при мёртвом канале — owner не узнает о проблеме ни из Telegram
+ * (сообщение не дошло), ни из heartbeat (алерты были, не «всё хорошо»).
+ */
+export async function sendUndeliveredAlertsTelegram(
+  botToken: string,
+  chatId: string,
+  undeliveredCount: number,
+): Promise<boolean> {
+  try {
+    const serverName = getServerName()
+    const timestamp = new Date().toLocaleString('ru-RU')
+    const message = `🟠 <b>[${serverName}] Не доставлены уведомления</b>\n\n`
+      + `За последние 24 часа ${undeliveredCount} алерт(ов) не удалось отправить в Telegram.\n`
+      + `Сами алерты в БД есть — проверьте /alerts.\n\n`
+      + `<b>Time:</b> ${timestamp}`
+
+    const response = await fetch(`${TELEGRAM_API}/bot${botToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML' }),
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      console.error('Telegram API error (undelivered alerts):', error)
+      return false
+    }
+
+    return true
+  } catch (error) {
+    console.error('Error sending Telegram undelivered-alerts notice:', error)
+    return false
+  }
+}
+
+/**
  * Отправка уведомления (выбирает метод на основе настроек)
  *
  * PLAN-INFRA.md §52: раньше «отправить некуда» (Telegram выключен/не хватает токена) была

@@ -187,6 +187,21 @@ export async function createAlert(
 }
 
 /**
+ * Помечает, был ли алерт реально доставлен (уведомление в Telegram ушло) — PLAN-INFRA-3.md §52.
+ * Вызывается после каждой попытки отправки, а не только при создании: `sendNotification()`
+ * шлётся при каждом повторе алерта (не только при первом срабатывании), см. комментарий выше
+ * `createAlert()`. Ошибка записи не блокирует ответ вызывающего API-роута — сам алерт уже создан,
+ * а поле `notified` влияет только на heartbeat, не на факт события.
+ */
+export async function markAlertNotified(alertId: string, notified: boolean): Promise<void> {
+  try {
+    await prisma.alert.update({ where: { id: alertId }, data: { notified } })
+  } catch (error) {
+    console.error('Error updating alert.notified:', error)
+  }
+}
+
+/**
  * Подтверждение алерта (acknowledged)
  */
 export async function acknowledgeAlert(alertId: string): Promise<boolean> {
