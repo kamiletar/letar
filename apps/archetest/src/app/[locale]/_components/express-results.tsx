@@ -4,9 +4,10 @@ import { toaster } from '@/app/_components/ui/toaster'
 import { Link, useRouter } from '@/i18n/navigation'
 import { signInWithLetarAuth } from '@/lib/auth-client'
 import { Badge, Box, Button, Card, Container, Heading, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { useClientOrigin } from '@letar/hooks'
 import { useLocale, useTranslations } from 'next-intl'
 import { QRCodeSVG } from 'qrcode.react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { LuArrowRight, LuRotateCcw } from 'react-icons/lu'
 
 import { submitQuizAction } from '../_actions/quiz.action'
@@ -107,12 +108,9 @@ export function ExpressResults({ scores, seed, answers, isAuthenticated, onRetak
   const isRu = locale === 'ru'
   const router = useRouter()
   const [linking, setLinking] = useState(false)
-  const [fullTestUrl, setFullTestUrl] = useState('')
-
+  const origin = useClientOrigin()
   // URL полного теста для QR — только на клиенте (origin недоступен на сервере)
-  useEffect(() => {
-    setFullTestUrl(`${window.location.origin}/${locale}`)
-  }, [locale])
+  const fullTestUrl = origin ? `${origin}/${locale}` : ''
 
   const handleLinkAccount = async () => {
     // Локаль прохождения (5.9.5) — сервер сохранит её в сессию для будущих норм ru/en

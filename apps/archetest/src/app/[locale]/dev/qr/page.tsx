@@ -1,9 +1,9 @@
 'use client'
 
 import { Box, Container, Heading, Text, VStack } from '@chakra-ui/react'
+import { useClientOrigin } from '@letar/hooks'
 import { useParams } from 'next/navigation'
 import { QRCodeSVG } from 'qrcode.react'
-import { useEffect, useState } from 'react'
 
 /**
  * Print-friendly QR-коды для раздатки на фесте (этап 5.7): экспресс-тест и
@@ -13,11 +13,7 @@ import { useEffect, useState } from 'react'
 export default function QrDevPage() {
   const params = useParams<{ locale: string }>()
   const locale = params.locale ?? 'ru'
-  const [origin, setOrigin] = useState('')
-
-  useEffect(() => {
-    setOrigin(window.location.origin)
-  }, [])
+  const origin = useClientOrigin()
 
   const targets = [
     { label: 'Экспресс-тест', path: `/${locale}/express` },

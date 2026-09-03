@@ -5,6 +5,14 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.27.17] - 2026-09-03
+
+### Changed
+
+- Локальный паттерн `window.location.origin` (в состоянии + `useEffect`) в `dev/qr/page.tsx` и
+  `express-results.tsx` заменён на общий хук `useClientOrigin()` из `@letar/hooks` — тот же
+  паттерн уже дедуплицирован в `grandslamcup` (2026-09-03).
+
 ## [0.27.16] - 2026-09-03
 
 ### Fixed
