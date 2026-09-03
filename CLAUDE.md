@@ -201,6 +201,10 @@ ref/DOM не перезапускается ·
 только устаревший `.next/cache` ·
 [nextjs-standalone-tracing](/.claude/docs/nextjs-standalone-tracing.md)
 ECONNREFUSED/ERR_DLOPEN_FAILED при зелёном билде ·
+[nextjs-build-time-oidc-discovery-network-dependency](/.claude/docs/nextjs-build-time-oidc-discovery-network-dependency.md)
+⚠️ `nx build` hub-client приложения (kami/time/aprel8008/domwellbes) эagerly бьёт в сеть на OIDC
+discovery ещё на этапе `betterAuth()` — не баг `@letar/auth`, архитектура плагина `genericOAuth`;
+не путать с параллельным сетевым сбоем на совсем другом хосте в том же логе ·
 [nextjs-server-action-redirect-race](/.claude/docs/nextjs-server-action-redirect-race.md) ·
 [nextjs-server-action-decimal-serialization](/.claude/docs/nextjs-server-action-decimal-serialization.md)
 «Only plain objects can be passed to Client Components» ·
