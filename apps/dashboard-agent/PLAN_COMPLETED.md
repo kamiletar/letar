@@ -2,6 +2,24 @@
 
 Детальное описание всех реализованных фич.
 
+## Cron `s2-pageview-count` 404 — недоведённый ретир от 8ebecdfe (2026-09-03)
+
+GlitchTip-алерт: cron-задача `s2-pageview-count` на `s2.letar.best` падала `HTTP 404` на
+`POST /api/cron/pageview-count` каждые 10 минут. Root cause — коммит `8ebecdfe` того же дня убрал
+`pageview-count`/`ssl-check`/`heartbeat` из `DEFAULT_CRON_JOBS` (миграция на `@letar/jobs`), но
+этого недостаточно: `loadAllCronJobs()` (`src/lib/cron.ts`) никогда не удаляет запись из уже
+персистентного `cron-jobs.json` сама по себе — только через отдельный список
+`RETIRED_JOB_IDS`/`applyRetirement()`. Без записи в этом списке снятая с `DEFAULT_CRON_JOBS`
+задача продолжает жить в живом конфиге на сервере и дёргать удалённый HTTP-роут.
+
+**Фикс** (`fa463bb5`): добавлены `dashboard-heartbeat`, `s2-pageview-count`, `s2-ssl-check` в
+`RETIRED_JOB_IDS`. Задеплоено, деплой-запрос отправлен `deploy-agent-dev`.
+
+**Урок:** при переносе cron-задачи на `@letar/jobs` удаление из `DEFAULT_CRON_JOBS` — только
+половина работы, вторая обязательная половина — `RETIRED_JOB_IDS` в том же коммите.
+
+---
+
 ## Login-canary — реальные аккаунты во всех 9 production-БД + живая проверка алерта (2026-08-31, `0.15.30`)
 
 Закрыт «открытый вопрос» из `PLAN.md` §71 п.3.3, оставленный сессией `0.15.27`: реальные

@@ -11,6 +11,15 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.15.32] — 2026-09-03
+
+### Fixed
+
+- Cron `s2-pageview-count`/`s2-ssl-check`/`dashboard-heartbeat` дёргали удалённые
+  `/api/cron/*`-роуты (404 каждые 10 мин, GlitchTip-алерт) — коммит `8ebecdfe` того же дня убрал
+  их из `DEFAULT_CRON_JOBS`, но не добавил в `RETIRED_JOB_IDS`, а `loadAllCronJobs()` не удаляет
+  запись из живого `cron-jobs.json` сама по себе. Добавлены в `RETIRED_JOB_IDS`.
+
 ## [0.15.31] — 2026-09-03
 
 ### Changed
