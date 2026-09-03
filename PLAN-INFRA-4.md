@@ -1,4 +1,4 @@
-# PLAN-INFRA-4 — §62–§140
+# PLAN-INFRA-4 — §62–§141
 
 > Часть журнала `PLAN-INFRA.md` (журнал инфраструктурных треков монорепо letar, вне auth-плана).
 > Файл разрезан на части 2026-08-20 — исходный файл превысил 10000 строк, см.
@@ -4539,3 +4539,40 @@ list` показал, что `main` был красным **шестью про�
 закоммитил их, и только тогда `git -C apps/domwellbes push origin main` (`58864d4..ae255ee`), не
 трогая новый незакоммиченный файл (`inventory-count-reports.ts`), появившийся к тому моменту.
 `check-submodule-push-state.sh` подтвердил: 14/14 submodule синхронны.
+
+## §141 — `transpile-packages`: та же регрессия §140(4), но в приватных submodule, публичный CI их не видит (2026-09-03)
+
+**Триггер:** §140(4) починил 6 публичных приложений с недостающим `@letar/seo` в
+`transpilePackages`. Публичный CI не гоняет приватные submodule (`aboi`, `aprel8008`, `dsperevod`,
+`studio`, `svoichuzhie` и т.д.) — та же регрессия там осталась незамеченной. Пользователь дал
+готовый список из локального прогона `scripts/check-all.mjs --only=transpile-packages`.
+
+**Расхождение с заявкой:** заявленный список называл `svoichuzhie` не хватающим
+`@letar/demo-protection` — при реальном прогоне скрипта оказалось, что `demo-protection` там
+вообще не импортируется, не хватало `@letar/seo` (тот же пакет, что и у остальных четырёх).
+Не выполнил заявку слепо, сверился с живым выводом скрипта.
+
+**Фикс:** `@letar/demo-protection` → `aboi` (реально используется в `route.ts`/`cart.ts`/
+`checkout.ts`/`retry-payment.ts`/`shipping.action.ts` через `getClientIpFromHeaders`),
+`@letar/seo` → `aprel8008`/`dsperevod`/`studio`/`svoichuzhie`. Каждое приложение — отдельный
+коммит в своём submodule, `chore: bump submodule SHA` одним коммитом в letar
+(`GIT_ALLOW_MULTI_SCOPE_COMMIT=1`, 4 submodule сразу — bump-паттерн, не код).
+
+**Верификация:** `check-all.mjs --only=transpile-packages` зелёный по всем пяти. `nx build`
+зелёный для `aprel8008`/`studio`/`svoichuzhie`. `aboi` и `dsperevod` падают на прод-билде — но
+обе ошибки (`node:tls` в чанкинге `/[locale]/admin/payments` у aboi, `Failed to collect page
+data` на разных страницах у dsperevod при каждом прогоне) воспроизведены и **без** этой правки
+(временный откат + ребилд) — пред-существующие баги, не регрессия этой сессии, чинить не стал
+(вне scope находки).
+
+**Побочный эффект — гонка коммитов в `apps/studio/next.config.mjs`:** параллельная сессия
+(`studio-dev`) правила тот же файл (`register: false` у Serwist) одновременно. `git add
+next.config.mjs && git commit -- next.config.mjs` подхватил оба изменения в один коммит —
+не разделено постфактум (файл один, оба изменения легитимны для studio, конфликта содержимого не
+было). Попытка предупредить `studio-dev` через agent-mail не доставлена (identity была
+`retired` на момент отправки) — сама studio-dev сессия увидела и добавила запись в свой
+CHANGELOG отдельным коммитом, инцидент самоурегулировался.
+
+**Коммиты:** submodule — `5680e6d3` (aboi), `a17dbe26` (aprel8008), `3e6ff57d` (dsperevod),
+`d92401ff` (svoichuzhie), studio закрыт параллельной сессией (`bc41522e`). letar —
+`39cc4d67` (bump 4 submodule). Всё запушено с одобрения пользователя.
