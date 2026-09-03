@@ -4083,7 +4083,7 @@ runtime вставляет `import { jsx as _jsx } from 'react/jsx-runtime'`, и
 вхождениями. Если в будущем в одном compose-файле появится второй Postgres-сервис — переанализировать
 и заякорить тем же приёмом, что и `DB_CONTAINER` выше (awk-фильтр по top-level ключу `^  db:$`).
 
-## §129 — общий базовый Docker-образ для 20 из 22 `Dockerfile.production` (открыто, требует согласования)
+## §129 — общий базовый Docker-образ для 20 из 22 `Dockerfile.production` 🟡 ПИЛОТ (2026-09-03, ждёт staging-прогона)
 
 tz-блок (zoneinfo из Debian-образа + `ENV TZ`) сократили с 6-строчного комментария до одной строки
 во всех 22 `Dockerfile.production` — сам механизм не тронут, риск нулевой.
@@ -4105,6 +4105,35 @@ docker-cli` поверх.
 
 **Коммит (сокращение комментария):** `6b46d78d` (letar) + отдельные коммиты внутри 7 приватных
 submodule (aboi, aprel8008, domwellbes, driving-school, dsperevod, studio, svoichuzhie).
+
+### Пилот (2026-09-03)
+
+С разрешения владельца сделан первый реальный шаг:
+
+- **`infra/docker/letar-node-runtime/Dockerfile`** — общий runner-стейдж
+  (`node:24-alpine` + zoneinfo + `TZ=Europe/Moscow` + `nodejs`/`nextjs` uid/gid 1001), без
+  `NODE_OPTIONS`/памяти — это оказалось НЕ общей частью (проверено грепом: только 2 из 22
+  Dockerfile задают `max-old-space-size`, остальные — нет), осталось в приложении.
+- **`deploy-affected.sh`** — новый Step 3.5 перед циклом деплоя: если хотя бы у одного
+  затронутого приложения `Dockerfile.production` начинается с `FROM letar-node-runtime`, собрать
+  и затегать `letar-node-runtime:24` **локально на демоне сервера** (без публикации в registry —
+  тот же паттерн, что уже используют локальные теги `<app>:<sha>`). Docker-кэш делает повторную
+  сборку без изменений в базовом Dockerfile мгновенной.
+- **Пилотное приложение — `mandala`.** Выбрано, т.к. точно соответствует «стандартному» паттерну
+  (в отличие от `time`, который уже на экспериментальном `node:24-slim` из §130) и имеет
+  `docker-compose.staging.yml` — можно проверить деплоем на staging, не на проде. Runner-стейдж
+  Dockerfile сокращён с 17 строк до `FROM letar-node-runtime:24 AS runner` + свой
+  `NODE_OPTIONS`.
+- **Проверено локально:** `docker build -f infra/docker/letar-node-runtime/Dockerfile .` собирается
+  чисто (Docker Desktop на рабочей машине, не сервер) — синтаксис Dockerfile и порядок стейджей
+  корректны. `bash -n deploy-affected.sh` — синтаксис скрипта не сломан. **Не проверено:** реальный
+  деплой на staging через `deploy-agent-dev` (сам деплой не запускаю — см.
+  `.claude/rules/deploy-coordination.md`) — это следующий шаг, ждёт deploy-request.
+
+**Дальше:** deploy-request на `mandala` (staging) → если Step 3.5 отработал и контейнер поднялся
+штатно — тиражировать `FROM letar-node-runtime:24 AS runner` на оставшиеся 19 приложений
+(`dashboard` — с доп. слоем `ARG ALPINE_MIRROR` + `apk add docker-cli` поверх, как и
+планировалось).
 
 ## §130 — эксперимент `node:24-slim` вместо `node:24-alpine`: работает, не тиражируем ✅ ЗАКРЫТО (2026-08-28)
 

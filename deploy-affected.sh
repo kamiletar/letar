@@ -706,6 +706,20 @@ if [ "$DRY_RUN" = true ]; then
   exit 0
 fi
 
+# Step 3.5: Build shared base runner image (PLAN-INFRA-4.md §129) once per run,
+# только если хотя бы у одного из затронутых приложений Dockerfile.production
+# на неё ссылается (`FROM letar-node-runtime`). Дешёвая пересборка — Docker-кэш
+# делает повторный build за секунды, если infra/docker/letar-node-runtime/Dockerfile
+# не менялся; собирается локально на демоне сервера, в registry не публикуется.
+if grep -ql '^FROM letar-node-runtime' $(for app in $AFFECTED_APPS; do echo "apps/${app}/Dockerfile.production"; done 2>/dev/null) 2>/dev/null; then
+  echo -e "${YELLOW}🐳 Building shared base image letar-node-runtime:24...${NC}"
+  if docker build -f infra/docker/letar-node-runtime/Dockerfile -t letar-node-runtime:24 .; then
+    echo -e "${GREEN}✅ Base image letar-node-runtime:24 built${NC}"
+  else
+    echo -e "${RED}❌ Base image build failed — apps depending on it will fail below${NC}"
+  fi
+fi
+
 # Step 4: Deploy each affected application
 DEPLOYED_APPS=()
 FAILED_APPS=()
