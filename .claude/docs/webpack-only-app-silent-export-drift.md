@@ -15,6 +15,8 @@
 grep -l 'next build --webpack' apps/*/project.json
 ```
 
+<!-- doc-count: {"cmd": "grep -l 'next build --webpack' apps/*/project.json | wc -l", "expect": 15} -->
+
 Практическое следствие ошибки: webpack-специфичный класс бага перестаёт выглядеть как «частный
 случай Ключницы» и становится половиной репозитория. Так и вышло — на webpack-пути упала сборка
 `studio`, см. раздел «Второй подтверждённый случай» ниже.

@@ -131,14 +131,22 @@ const CHECKS = [
     group: 'tsconfig',
     title: 'transpilePackages next.config.* покрывает импортируемые @letar/*-алиасы tsconfig',
     run: ['node', ['scripts/check-transpile-packages.mjs']],
-    // gate: расхождение не ловится ни typecheck, ни lint — падает "Module parse failed:
-    // Unexpected token" на прод-сборке через --webpack без единой строки в логе от tsgo/lint.
+    // ⚠️ Красный прогон = «список разъехался с tsconfig», НЕ «прод-сборка сломана».
+    // Next читает только НАЛИЧИЕ ключа transpilePackages (`!!config.transpilePackages` в
+    // webpack-config.js), а не его содержимое: bun линкует @letar/* симлинком, webpack
+    // резолвит его в реальный путь libs/… без node_modules, и exclude отсеивает файл
+    // раньше, чем дело дойдёт до isResourceInPackages. Отсутствие записи о конкретном
+    // пакете сборку не ломает — ломает только удаление ключа целиком (доказано тремя
+    // сборками studio, .claude/docs/transpile-packages-array-presence-not-content.md).
+    // Проверка держит соглашение о единообразии литерала с @letar/*-алиасами tsconfig и
+    // страхует смену раскладки node_modules (публикация @letar/* в npm, смена линкера
+    // bun) — тогда содержимое списка станет работающим по назначению.
     // На момент регистрации (2026-09-01) долг из 3 приложений (auth-hub, form-docs,
     // animatrona/renderer) закрыт правкой их next.config.* в том же коммите.
     severity: 'gate',
     ci: 'partial',
     ciNote: 'приватные submodule не выкачаны — их next.config.*/tsconfig не проверены',
-    doc: '.claude/docs/nextjs-nx-composeplugins-migration.md',
+    doc: '.claude/docs/transpile-packages-array-presence-not-content.md',
   },
   {
     id: 'submodule-gitignore',
@@ -197,6 +205,21 @@ const CHECKS = [
     ci: 'no',
     ciNote: 'worktree-каталоги — локальный артефакт машины разработчика, в CI их нет',
     doc: 'PLAN-INFRA-4.md §120',
+  },
+  {
+    id: 'doc-counts',
+    group: 'docs',
+    title: 'счётные утверждения в .claude/docs (doc-count-аннотации) против реального состояния',
+    run: ['bun', ['scripts/check-doc-counts.mjs']],
+    // warn: расхождение счётчика — повод перечитать абзац и поправить число, а не
+    // сигнал сломанной сборки. Пилот на трёх доках (2026-09-03) после аудита
+    // 6fb3f93d — семь устаревших абсолютных утверждений, шесть из семи оказались
+    // обычными счётчиками. Не покрывает качественные оценки («контракт замкнут») —
+    // они не аннотируются, фолсифицировать их грепом нельзя.
+    severity: 'warn',
+    ci: 'no',
+    ciNote: 'команды считают приватные submodule — в CI не выкачаны, значения были бы искажены',
+    doc: '.claude/docs/theme-hardcode-gate-coverage.md',
   },
 ]
 

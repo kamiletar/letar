@@ -20,6 +20,8 @@
 grep -rl '"theme:check"' apps/*/project.json
 ```
 
+<!-- doc-count: {"cmd": "grep -rl 'theme:check' apps/*/project.json | wc -l", "expect": 4} -->
+
 ⚠️ `git grep` для этого не годится — он не заходит в submodule, а `aboi`/`domwellbes`/`studio` —
 именно submodule. Обычный рекурсивный `grep` по рабочему дереву их видит.
 
@@ -247,6 +249,8 @@ generator по интерфейсу, наброшенному выше, но э�
 ```bash
 for d in libs/*/; do [ -f "$d/package.json" ] && [ ! -f "$d/tsconfig.json" ] && echo "$d"; done
 ```
+
+<!-- doc-count: {"cmd": "for d in libs/*/; do [ -f \"$d/package.json\" ] && [ ! -f \"$d/tsconfig.json\" ] && echo \"$d\"; done | wc -l", "expect": 3} -->
 
 Проверено: `nx theme:check` всех трёх приложений даёт тот же результат (чисто), что и до
 рефакторинга; `nx typecheck:tsgo`/`lint` всех трёх, `nx test @letar/theme-check` (6 тестов) и
