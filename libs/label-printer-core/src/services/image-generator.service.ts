@@ -1,4 +1,4 @@
-import bwipjs from 'bwip-js'
+import bwipjs from 'bwip-js/node'
 import { Jimp } from 'jimp'
 import type { LabelConfig } from '../config/config.schema'
 import { Logger } from '../utils/logger'
