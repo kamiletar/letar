@@ -163,6 +163,9 @@ select ·
 монорепо — fontkit+subset-font (чтение cmap из woff2 и сам субсеттинг, не только верификация) ·
 [sharp-raw-composite-alpha-pitfall](/.claude/docs/sharp-raw-composite-alpha-pitfall.md) ⚠️
 `composite()` над raw-буферами тихо добавляет alpha-канал даже при `create({channels:3})` ·
+[sharp-svg-textpath-not-rendered](/.claude/docs/sharp-svg-textpath-not-rendered.md) ⚠️
+`<textPath>` не рендерится вовсе (0 закрашенных пикселей, без ошибки) — замена посимвольными
+списками `x`/`y`/`rotate` на `<text>` ·
 [gallery-pattern](/.claude/docs/gallery-pattern.md) Dropzone + SortablePhotoGrid ·
 [period-navigation-pattern](/.claude/docs/period-navigation-pattern.md) навигация по периоду без JS ·
 [data-flag-driving-ui](/.claude/docs/data-flag-driving-ui.md) ⚠️ `isDemo`/`isDraft` попал в условие
