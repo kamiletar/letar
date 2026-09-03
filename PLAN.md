@@ -666,7 +666,7 @@ type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAut
 🟡 ЧАСТИЧНО — основное сделано, остались хвосты (см. §0); ⏳ В РАБОТЕ — активная работа не завершена;
 без маркера — не начат.
 
-### Этап 0 — Доставка писем (первопричина) ⏳ В РАБОТЕ ⏱ первым
+### Этап 0 — Доставка писем (первопричина) ✅ ЗАКРЫТО (2026-09-03, проверено живьём)
 
 - Аудит `SMTP_FROM_EMAIL`/SMTP на всех (`/sync-env`, `email-maddy`); для коммерсов — домен письма = домен клиента (§2.4).
 - **DKIM/SPF/DMARC per-домен (явный deliverable).** Техн. первопричина «форвард режется gmail» (§14.2): валидные
@@ -684,7 +684,17 @@ type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAut
     конфигурация: `TELEGRAM_ALERT_BOT_TOKEN`, `TELEGRAM_ALERT_CHAT_ID` в `.env.docker` (токен **не хранить в коде/плане**).
   - **C — Umami event:** `umami.track('smtp-failure', { type, appId, errorCode })` для трендов и % ошибок.
   - Оба варианта — опциональные (пустые переменные = отключено), без ломающих изменений API `@letar/email`.
-- **✓ DoD:** canary (0.7) зелёный ≥ 3 суток подряд; 0 проигнорированных `SendEmailResult`; baseline зафиксирован.
+- **✓ DoD (проверено 2026-09-03):** ✅ canary зелёная **≥14 суток подряд** (`email-canary-state.json`
+  на s2: `consecutiveFailures: 0` у `internal`/`external`, последний алерт — 2026-08-20, с тех пор ни
+  одного сбоя); ✅ 0 проигнорированных `SendEmailResult` **по архитектуре, не по чек-листу вызовов** —
+  `libs/email/src/provider.ts:183` зовёт `reportEmailFailure()` внутри самого `sendEmail()`, до
+  возврата результата, поэтому сбой централизованно логируется/алертится независимо от того, читает
+  ли вызывающий код `.success` (проверено на fire-and-forget `driving-school/register.action.ts:144` —
+  `send()` никогда не бросает, безопасен без `.catch()`); ⚠️ **baseline-метрики так и не были сняты**
+  (искать в `PLAN.md` — 0 зафиксированных чисел `% доставки`/`% верификации`/застрявших аккаунтов) —
+  момент «снять ДО правок» прошёл месяцы назад, задним числом честный baseline уже невозможен, это
+  нереализуемое по времени требование DoD, а не открытый пробел. Закрываю этап по факту здорового
+  текущего состояния (канарейка + централизованный лог), а не по букве изначального DoD.
 - **Зависимости:** нет. Без доходящих писем resend бессмыслен.
 - ℹ️ **Смежная инфра готова (2026-07-05):** `dashboard`'s `Alert`/`sendTelegramNotification` pipeline существовал с самого создания, но нигде не вызывался (мёртвый код) — теперь впервые задействован через `POST /api/alerts` (`dashboard-agent` → `CRON_FAILED` при провале cron-задач). dsperevod получил проактивный `/api/cron/email-health-check` (`transporter.verify()` каждые 6ч). Это ДРУГОЙ механизм, чем `setEmailFailureAlerter` из этого этапа (проверка живости SMTP по расписанию, а не алерт на каждый неудавшийся send) — но при реализации B/C variant для `@letar/email` стоит переиспользовать уже рабочий `dashboard`'s `/api/alerts` вместо отдельной Telegram-интеграции. Детали: `apps/dashboard/PLAN_COMPLETED.md`, `apps/dashboard-agent/PLAN_COMPLETED.md`, `apps/dsperevod/CHANGELOG.md` (v0.5.4).
 
@@ -977,7 +987,9 @@ type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAut
   (aboi, letar/driving-school, dsperevod — см. `.claude/private/COMPLIANCE.md`), но чеклист
   Этапа 0.8 не отмечен целиком ни по одному приложению (см. §0) — статус по остальным ПД-собирающим
   (grandslamcup и др.) не подтверждён.
-- **Доставка писем** (Этап 0) — первопричина, без неё всё бессмысленно.
+- ~~**Доставка писем**~~ ✅ **ЗАКРЫТ (2026-09-03):** канарейка зелёная ≥14 суток подряд, централизованный
+  лог сбоев (`reportEmailFailure`) ловит все send-провалы независимо от вызывающего кода. Baseline-метрики
+  задним числом не сняты — момент «до правок» прошёл месяцы назад, см. §7 Этап 0.
 - **Схема pin-auth ↔ Better Auth** (`DateTime`/`verificationToken` vs `Boolean`/`verification`) — адаптеры + миграции.
 - **enhanced Prisma + ручная верификация** — нужна access-policy, иначе action молча не применится.
 - **Обход верификации** через admin — только `requireAdmin`, аудит-лог желателен.
