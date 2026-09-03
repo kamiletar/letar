@@ -1,5 +1,26 @@
 # Выполненные задачи: Archetest
 
+## Дедупликация `window.location.origin` через `useClientOrigin` (2026-09-03)
+
+Репо-широкий греп после фикса hydration mismatch в `grandslamcup` (React error 418 —
+`typeof window !== 'undefined' ? window.location.origin : ''` в теле рендера, вынесено в общий
+хук `useClientOrigin()` из `@letar/hooks`) нашёл ещё две копии того же паттерна в archetest.
+Здесь hydration mismatch не было (origin уже вычислялся в `useEffect`, не в рендере) — только
+дублирование кода, который теперь есть в общем хуке.
+
+**Фикс:**
+
+- `src/app/[locale]/dev/qr/page.tsx` — `useState('')`+`useEffect(() => setOrigin(...))` заменены
+  на `const origin = useClientOrigin()`.
+- `src/app/[locale]/_components/express-results.tsx` — тот же паттерн, но origin был частью
+  собранной строки (`fullTestUrl`). Оставлен только `useClientOrigin()`, `fullTestUrl` теперь
+  простое производное значение (`origin ? \` ${origin}/${locale}\` : ''`) без отдельного
+  состояния/эффекта.
+
+`@letar/hooks` уже был в `implicitDependencies` `package.json` (использовался в
+`hexagram-chart.tsx`) — довешивать зависимость не пришлось. `typecheck:tsgo`/`lint` зелёные.
+Коммит `629f794f`.
+
 ## Фикс снятия регистрации Service Worker — переход на общий `useOfflineServiceWorker` (2026-09-03)
 
 Локальный `_components/service-worker-registration.tsx` снимал регистрацию SW по
