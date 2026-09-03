@@ -2,6 +2,34 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## Фикс: e2e-регрессия — локаторы `input[name=...]` не находят поля `@letar/forms` (2026-09-03)
+
+Прогон staging e2e на коммите `6e8620b67` уронил 2 теста из 10: `01-public.spec.ts` «форма
+email/password видна» и `03-oidc-authorize.spec.ts` «/sign-in рендерит форму логина...» —
+`page.locator('input[name="email"]')` таймаутился, хотя заголовок «Войти» рендерился нормально.
+
+**Root cause:** миграция форм sign-in на `@letar/forms` (коммит `31f208b0`, 2026-08-25 06:18)
+произошла **после** последнего полного зелёного e2e-прогона того же дня (04:47, см. PLAN.md
+§18.7 M4) — регрессия жила незамеченной 9 дней, до следующего полного прогона 2026-09-03.
+`@letar/forms` не выставляет нативный HTML `name` (headless TanStack Form state поверх
+TanStack Form), только `data-field-name` на самом `<input>`. `/sign-up` (обычный Chakra
+`<Input name="email">`, форму не мигрировали) продолжал проходить — поэтому упали только 2
+теста из 10, а не все с email-полем.
+
+**Фикс:** локаторы в `apps/auth-hub-e2e/src/01-public.spec.ts`, `03-oidc-authorize.spec.ts`,
+`04-linked-email-login.spec.ts` переведены на `[data-field-name="..."]` — паттерн, уже
+устоявшийся в `domwellbes-e2e` для полей `@letar/forms`. На `/sign-in` `data-field-name="email"`
+встречается дважды (LoginForm + MagicLinkForm) — уточнено через `autocomplete="username
+webauthn"` (задан только у LoginForm, для passkey Conditional UI). Проверено полным прогоном
+`nx e2e auth-hub-e2e` против staging (`BASE_URL`, `DEV_SESSION_TOKEN` из `.env.staging.enc`) —
+обе изначально упавшие проверки зелёные. `nx lint auth-hub-e2e` — чисто (одно несвязанное
+предупреждение в `global-setup.ts`). Коммиты `6da9cc22` (фикс), `8b8b7428` (доки, PLAN.md
+§18.7.1). Не запушено.
+
+**Вне скоупа, не чинилось:** тот же полный прогон вскрыл 2 отдельных провала — «OAuth-кнопки
+видны» (Google не виден, похоже на гео-фильтр по IP этой сессии) и `ERR_CONNECTION_REFUSED` на
+прямом заходе на `/api/auth/oauth2/authorize` — не связаны с локаторами `@letar/forms`.
+
 ## Фикс: geo.ts брал первый (подделываемый) хоп x-forwarded-for (2026-09-01)
 
 Найдено попутно при консолидации `getClientIp` в aboi/demo-protection (тот же класс бага).
