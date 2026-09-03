@@ -59,6 +59,10 @@
   `/api/cron/{heartbeat,pageview-count,ssl-check}` удалены; соответствующие записи сняты и с
   `dashboard-agent` (`DEFAULT_CRON_JOBS`) в том же окне — иначе агент ловит 404, а не тихо
   дублирует (см. PLAN-INFRA-4.md §75, находка 03.09.2026)
+- `src/jobs/scheduler.ts` схлопнут с ~75 строк до 8 ре-экспортов — globalThis-кеш планировщика и
+  загрузка `JobOverride` вынесены в общую фабрику `createAppJobsModule` (`@letar/jobs`), тот же
+  код, что был дословно скопирован в `studio`. Публичные имена функций не менялись
+  (2026-09-03, см. `PLAN_COMPLETED.md`).
 
 ---
 

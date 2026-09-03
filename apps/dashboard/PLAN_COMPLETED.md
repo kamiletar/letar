@@ -2,6 +2,22 @@
 
 Детальное описание всех реализованных фич.
 
+## `src/jobs/scheduler.ts` на общую фабрику `createAppJobsModule` (2026-09-03)
+
+`scheduler.ts` studio и dashboard были почти дословными копиями друг друга (~75 строк):
+globalThis-кеш инстанса планировщика, `loadOverrides()` через `prisma.jobOverride.findMany()`,
+`start<App>Jobs()`/`get<App>JobStatuses()`/`run<App>JobNow()`/`apply<App>JobOverride()` —
+отличались только префиксом имён функций. Вынесено в `libs/jobs/src/lib/app-jobs-module.ts`:
+`createAppJobsModule({ cacheKey, jobs, prisma })` возвращает `{ start, getStatuses, runNow,
+applyOverride }`, `dashboard`/`studio` теперь — по 8 строк (импорт `jobs`, вызов фабрики,
+ре-экспорт под прежними публичными именами — вызывающий код в `_actions/*.ts` и
+`api/jobs/status/route.ts` не трогали).
+
+Проверено: `typecheck:tsgo`/`lint`/`nx test @letar/jobs` зелёные, живая проверка в браузере через
+dev-session bypass — `/jobs` рендерит статусы всех трёх задач, «Запустить сейчас» ставит задачу
+в очередь (проверено и на studio `/owner/jobs`, все 6 задач). Следующий перенос того же паттерна
+(driving-school и др., чек-лист PLAN-INFRA-4.md §75) получит готовую фабрику вместо копипаста.
+
 ## Собственные cron-задачи переехали на `@letar/jobs` (§75) (2026-09-03)
 
 Три задачи (`dashboard-heartbeat`, `s2-pageview-count`, `s2-ssl-check`) перенесены с HTTP-опроса
