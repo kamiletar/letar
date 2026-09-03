@@ -3866,3 +3866,37 @@ aboi/aprel8008 (`SortablePhotoGrid` → `@letar/format-utils`, см. `deploy-coo
 пока приложение полагалось на `withNx`-соседей по монорепо; после общего снятия `withNx`
 резолв путей и транспиляция TS-синтаксиса — разные механизмы, и без явного списка сборка через
 `--webpack` падает так же, как у остальных. Коммит `c302242c`, не запушено.
+
+## §74 — `@tanstack/store` subscribe(): дозачистка driving-school + удалена причина дедупа версий (2026-09-03)
+
+Кросс-репо аудит на баг `@tanstack/store` 0.9+: `store.subscribe(cb)` возвращает объект
+`{ unsubscribe }`, а не функцию-отписку — код под старую 0.7 (`const unsubscribe = ...; return
+unsubscribe`) падает `TypeError` при размонтировании (в dev StrictMode — сразу, закрывает
+страницу error-оверлеем). Уже было починено в `libs/forms`, `libs/admin-ui/seo-field.tsx` и
+`apps/aboi/checkout-form.tsx` (2026-09-02). Найдены и починены 4 оставшихся места — все в
+`apps/driving-school` (`instructor-profile-form.tsx` x3, `schedule-settings-form.tsx`), детали и
+коммиты — `apps/driving-school/PLAN_COMPLETED.md`.
+
+**Корневая причина, почему typecheck молчал:** в `bun.lock` одновременно резолвились три версии
+`@tanstack/store` (0.7.7/0.11.0/0.11.1). 0.7.7 тянулась не устаревшим кешем bun (проверено по
+методу `.claude/docs/bun-install-stale-isolated-cache.md` — сверка через `bun.lock`, не `ls
+node_modules/.bun`), а реальным, хоть и мёртвым, резолвом: корневой `package.json` держал
+неиспользуемый `@tanstack/zod-form-adapter@^0.42.1` (легаси `validatorAdapter` API TanStack Form
+до Standard Schema, запрещён `.claude/rules/forms.md` — везде только `@letar/forms`; 0 импортов
+во всём репозитории), который тянул `@tanstack/form-core@0.42.1` → `@tanstack/store@^0.7.0`.
+Из-за этого typecheck в aboi резолвил типы `subscribe()` в старую сигнатуру (bare-функция), пока
+в рантайм бандлилась 0.11 (`{ unsubscribe }`) — расхождение, которое не ловят ни typecheck, ни
+lint, ни unit-тесты, только живое открытие страницы (см. §note в
+`apps/aboi/PLAN_COMPLETED.md`/`CHANGELOG.md` за 2026-09-02).
+
+**Фикс:** `@tanstack/zod-form-adapter` удалён из корневого `package.json`, `bun install` —
+`bun.lock` теперь резолвит только 0.11.x. Разбор случая (реальная зависимость, а не кеш-артефакт)
+задокументирован как новый раздел в `bun-install-stale-isolated-cache.md`, устаревшая ссылка на
+эту зависимость в `root-pin-peer-drift.md` обновлена. `bun scripts/check-all.mjs --group=deps` —
+`peer-deps`/`patched-deps` зелёные (`electron-drift` падает отдельно, предсуществующий
+несвязанный дрейф). Коммиты: 2 внутри driving-school submodule + 2 бампа SHA в letar + 1 коммит
+доков в letar; удаление `@tanstack/zod-form-adapter` из `package.json`/`bun.lock` оказалось
+случайно объединено в несвязанный параллельный коммит `chore(deps): bump Nx 23.1.3 -> 23.2.0`
+(`0ff59c75`) — другая одновременно работавшая сессия закоммитила рабочее дерево, пока в нём лежала
+эта незакоммиченная правка. Содержимое корректно, пересобирать/разделять коммит задним числом не
+стал — см. `.claude/docs/git-multi-agent-incidents.md` про риски операций над чужими коммитами.
