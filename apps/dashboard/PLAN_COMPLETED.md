@@ -51,6 +51,26 @@
 браузере через dev-session bypass — бренд-цвет (`#CA9E67`) рендерится на активном пункте меню и
 бейдже «Загрузка...» без визуальных регрессий.
 
+## Дедуп ANSI-парсера DeployLogDialog/ansi-to-react (2026-09-03)
+
+Закрыт пункт «Замечено, но не в scope» из записи выше. `DeployLogDialog.tsx` держал свою копию
+ANSI-парсера (`ANSI_COLORS`, `AnsiSegment`, `parseAnsi`, `ANSI_REGEX`) с палитрой, отличной от
+`src/lib/ansi-to-react.tsx` (например `30`: `#1e1e1e` vs `#000000`) — при этом `ansi-to-react.tsx`
+уже был общей утилитой для `LogsDialog.tsx` и `DeployProgress.tsx`.
+
+Фикс: `DeployLogDialog.tsx` больше не парсит ANSI сам — использует `AnsiText` из
+`src/lib/ansi-to-react.tsx`. Уникальная часть локального `AnsiLine` (эвристика цвета строки без
+ANSI-кодов по содержимому: ✅/❌/⚠️/🚀/📋) сохранена как есть, только detection «есть ли ANSI»
+упрощён до `line.includes('\x1b')` вместо повторного regex-парсинга.
+
+`ansi-to-react.tsx` стал единственным источником маппинга ANSI-кодов в CSS — используется в трёх
+местах (`DeployLogDialog`, `LogsDialog`, `DeployProgress`). `allowedMatches` в
+`scripts/check-theme-hardcodes.mjs` актуализирован: запись для `DeployLogDialog.tsx` удалена
+(там больше нет HEX-литералов), комментарий у `ansi-to-react.tsx` обновлён под новый статус.
+
+Проверено: `nx lint dashboard`, `nx typecheck:tsgo dashboard`, `nx run dashboard:theme:check` —
+все зелёные.
+
 ## GlitchTip — проект создан и DSN подключён (2026-08-12, отмечено в плане 2026-09-03)
 
 Пункт «В процессе» в `PLAN.md` отстал от факта: GlitchTip-проект `dashboard` (id 2) был создан

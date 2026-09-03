@@ -2,6 +2,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.26.2] — 2026-09-03
+
+### Changed
+
+- Убран дубль ANSI-парсера: `DeployLogDialog.tsx` держал свою копию маппинга ANSI-кодов
+  (`ANSI_COLORS`, `parseAnsi`) с палитрой, отличной от общей `src/lib/ansi-to-react.tsx`
+  (уже переиспользуемой в `LogsDialog.tsx`/`DeployProgress.tsx`). Теперь `DeployLogDialog.tsx`
+  использует общий `AnsiText`, оставив только свою уникальную эвристику раскраски строк без
+  ANSI-кодов. `allowedMatches` в `scripts/check-theme-hardcodes.mjs` актуализирован.
+
 ## [1.26.1] — 2026-09-03
 
 ### Added

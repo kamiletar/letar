@@ -4,137 +4,39 @@
  * Диалог с real-time логами деплоя
  */
 
+import { AnsiText } from '@/lib/ansi-to-react'
 import { Box, Button, Dialog, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useEffect, useRef, useState } from 'react'
 import { LuCheck, LuX } from 'react-icons/lu'
 
-// =============================================================================
-// ANSI to HTML парсер
-// =============================================================================
-
-/** Маппинг ANSI кодов на CSS цвета */
-const ANSI_COLORS: Record<number, string> = {
-  // Стандартные цвета (30-37)
-  30: '#1e1e1e', // black
-  31: '#ef4444', // red
-  32: '#22c55e', // green
-  33: '#eab308', // yellow
-  34: '#3b82f6', // blue
-  35: '#a855f7', // magenta
-  36: '#06b6d4', // cyan
-  37: '#e5e5e5', // white
-  // Яркие цвета (90-97)
-  90: '#737373', // bright black (gray)
-  91: '#f87171', // bright red
-  92: '#4ade80', // bright green
-  93: '#facc15', // bright yellow
-  94: '#60a5fa', // bright blue
-  95: '#c084fc', // bright magenta
-  96: '#22d3ee', // bright cyan
-  97: '#ffffff', // bright white
-}
-
-interface AnsiSegment {
-  text: string
-  color?: string
-  bold?: boolean
-}
-
-// Регулярка для ANSI escape кодов — строим через new RegExp, чтобы избежать control char в литерале
-// eslint-disable-next-line no-control-regex
-const ANSI_REGEX = new RegExp('\u001B\\[([0-9;]*)m', 'g')
-
 /**
- * Парсит строку с ANSI escape кодами в массив сегментов
- */
-function parseAnsi(input: string): AnsiSegment[] {
-  const segments: AnsiSegment[] = []
-  const regex = new RegExp(ANSI_REGEX.source, 'g')
-
-  let lastIndex = 0
-  let currentColor: string | undefined
-  let currentBold = false
-  let match
-
-  while ((match = regex.exec(input)) !== null) {
-    // Добавляем текст до escape-последовательности
-    if (match.index > lastIndex) {
-      const text = input.slice(lastIndex, match.index)
-      if (text) {
-        segments.push({ text, color: currentColor, bold: currentBold })
-      }
-    }
-
-    // Парсим коды
-    const codes = match[1].split(';').map(Number)
-    for (const code of codes) {
-      if (code === 0) {
-        // Reset
-        currentColor = undefined
-        currentBold = false
-      } else if (code === 1) {
-        // Bold
-        currentBold = true
-      } else if (ANSI_COLORS[code]) {
-        currentColor = ANSI_COLORS[code]
-      }
-    }
-
-    lastIndex = regex.lastIndex
-  }
-
-  // Добавляем оставшийся текст
-  if (lastIndex < input.length) {
-    const text = input.slice(lastIndex)
-    if (text) {
-      segments.push({ text, color: currentColor, bold: currentBold })
-    }
-  }
-
-  return segments
-}
-
-/**
- * Компонент для отображения строки с ANSI цветами
+ * Строка лога деплоя. Если ANSI escape-кодов нет — цвет по смыслу содержимого
+ * (успех/ошибка/предупреждение), иначе рендер через общий ANSI-парсер `@/lib/ansi-to-react`.
  */
 function AnsiLine({ line }: { line: string }) {
-  const segments = parseAnsi(line)
-
-  // Если нет ANSI кодов, показываем как есть с умным определением цвета
-  if (segments.length === 1 && !segments[0].color) {
-    const text = segments[0].text
+  if (!line.includes('\x1b')) {
     let color = 'gray.100'
 
-    if (text.startsWith('✅') || text.includes('Successfully') || text.includes('success')) {
+    if (line.startsWith('✅') || line.includes('Successfully') || line.includes('success')) {
       color = 'green.400'
-    } else if (text.startsWith('❌') || text.includes('error') || text.includes('Error') || text.includes('failed')) {
+    } else if (line.startsWith('❌') || line.includes('error') || line.includes('Error') || line.includes('failed')) {
       color = 'red.400'
-    } else if (text.startsWith('⚠️') || text.includes('warning') || text.includes('Warning')) {
+    } else if (line.startsWith('⚠️') || line.includes('warning') || line.includes('Warning')) {
       color = 'yellow.400'
-    } else if (text.startsWith('🚀') || text.startsWith('📋')) {
+    } else if (line.startsWith('🚀') || line.startsWith('📋')) {
       color = 'blue.400'
     }
 
     return (
       <Box color={color} py="0.5">
-        {text}
+        {line}
       </Box>
     )
   }
 
   return (
     <Box py="0.5">
-      {segments.map((seg, i) => (
-        <span
-          key={i}
-          style={{
-            color: seg.color,
-            fontWeight: seg.bold ? 'bold' : 'normal',
-          }}
-        >
-          {seg.text}
-        </span>
-      ))}
+      <AnsiText text={line} />
     </Box>
   )
 }

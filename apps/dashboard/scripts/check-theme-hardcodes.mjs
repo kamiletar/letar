@@ -31,11 +31,12 @@ const ignoredDirectories = new Set(["generated"])
 // src/app/layout.tsx — `themeColor` в Next.js `viewport` — literal вне доступа к CSS-переменным
 // темы (класс 1).
 //
-// src/app/servers/_components/DeployLogDialog.tsx, src/lib/ansi-to-react.tsx — маппинг
-// стандартных ANSI-кодов терминала (30-37/90-97, плюс фон 40-47/100-107) в CSS-цвета для рендера
-// цветного лога деплоя/сборки. Значения — фиксированная палитра ANSI-эмулятора терминала (та же
-// у любого терминала), не UI-цвет компонента и не брендовая палитра — токенизировать через
-// Chakra semantic tokens нечего, это отдельный протокол, а не элемент дизайн-системы.
+// src/lib/ansi-to-react.tsx — единственный источник маппинга ANSI-кодов терминала (30-37/90-97,
+// плюс фон 40-47/100-107) в CSS-цвета для рендера цветного лога деплоя/сборки (переиспользуется
+// в DeployLogDialog.tsx, LogsDialog.tsx, DeployProgress.tsx). Значения — фиксированная палитра
+// ANSI-эмулятора терминала (та же у любого терминала), не UI-цвет компонента и не брендовая
+// палитра — токенизировать через Chakra semantic tokens нечего, это отдельный протокол, а не
+// элемент дизайн-системы.
 //
 // src/app/_components/apps/AppResourceHistory.tsx — #4299E1/#48BB78 не совпадают ни с одним
 // текущим токеном Chakra (blue.400/green.400 в этой версии — #60a5fa/#4ade80, см.
@@ -56,13 +57,6 @@ const ignoredDirectories = new Set(["generated"])
 const allowedMatches = new Map([
   ['src/app/auth/_actions/signin.action.ts', new Set(['#310'])],
   ['src/app/layout.tsx', new Set(['#CA9E67'])],
-  [
-    'src/app/servers/_components/DeployLogDialog.tsx',
-    new Set([
-      '#1e1e1e', '#ef4444', '#22c55e', '#eab308', '#3b82f6', '#a855f7', '#06b6d4', '#e5e5e5',
-      '#737373', '#f87171', '#4ade80', '#facc15', '#60a5fa', '#c084fc', '#22d3ee', '#ffffff',
-    ]),
-  ],
   [
     'src/lib/ansi-to-react.tsx',
     new Set([
