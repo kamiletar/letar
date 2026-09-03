@@ -56,9 +56,16 @@ interface QueryProviderProps {
   preset?: 'realtime' | 'standard' | 'static' | 'offline'
   defaultOptions?: DefaultOptions // Переопределяет пресет
   onMutationError?: (error: Error) => void
-  showDevtools?: boolean // По умолчанию: true в dev
+  showDevtools?: boolean // Только dev; по умолчанию true в dev
 }
 ```
+
+⚠️ **`showDevtools` не включает панель в production.** Панель девтулзов вырезается из
+production-сборки на этапе компиляции — иначе сборка падает целиком
+(`'use' is not exported from 'solid-js/web'`), потому что `next/dynamic(ssr: false)` исключает
+модуль из рендера, но не из резолва импортов серверным компилятором. Механика — в комментарии
+`src/lib/devtools-panel-lazy.tsx` и в
+[`.claude/docs/nextjs-dynamic-ssr-false-still-server-compiled.md`](/.claude/docs/nextjs-dynamic-ssr-false-still-server-compiled.md).
 
 ### PersistQueryProvider
 

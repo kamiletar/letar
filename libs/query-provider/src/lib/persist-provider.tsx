@@ -1,16 +1,12 @@
 'use client'
 
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
-import dynamic from 'next/dynamic'
 import type { ReactNode } from 'react'
 import { createQueryClient, type QueryClientConfig } from './create-query-client'
+// Панель девтулзов подключается только так — почему `dynamic(ssr:false)` тут не работает,
+// написано в самом модуле
+import { DevtoolsPanel } from './devtools-panel-lazy'
 import { createIDBPersister, type IDBPersisterOptions } from './idb-persister'
-
-// Динамический импорт: devtools рендерятся только при devtoolsEnabled (по умолчанию — только
-// в development), но статический import подтягивал их транзитивные зависимости (solid-js через
-// @tanstack/devtools-ui) в прод-бандл всегда — компиляция падала при рассинхроне версий solid-js,
-// независимо от того, что рантайм-флаг всё равно их не рендерил (driving-school, 2026-08-14).
-const DevtoolsPanel = dynamic(() => import('./devtools-panel').then((m) => m.DevtoolsPanel), { ssr: false })
 
 export interface PersistQueryProviderProps extends QueryClientConfig {
   children: ReactNode
@@ -29,7 +25,11 @@ export interface PersistQueryProviderProps extends QueryClientConfig {
    */
   buster?: string
   /**
-   * Показывать ли TanStack DevTools (Query + Form)
+   * Показывать ли TanStack DevTools (Query + Form) — работает только в development.
+   *
+   * В production панели нет в сборке вовсе (см. `devtools-panel-lazy.tsx`), поэтому
+   * `showDevtools: true` там ничего не включит. Флаг нужен, чтобы выключить панель в dev.
+   *
    * @default true в development, false в production
    */
   showDevtools?: boolean

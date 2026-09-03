@@ -2,19 +2,22 @@
 
 import { QueryClientProvider } from '@tanstack/react-query'
 import { QuerySettingsProvider } from '@zenstackhq/tanstack-query/react'
-import dynamic from 'next/dynamic'
 import type { ReactNode } from 'react'
 import { createQueryClient, type QueryClientConfig } from './create-query-client'
-
-// См. persist-provider.tsx: статический импорт devtools тянет transitively solid-js
-// (@tanstack/devtools-ui) в прод-бандл даже когда рантайм-флаг их не рендерит.
-const DevtoolsPanel = dynamic(() => import('./devtools-panel').then((m) => m.DevtoolsPanel), { ssr: false })
+// Панель девтулзов подключается только так — почему `dynamic(ssr:false)` тут не работает,
+// написано в самом модуле
+import { DevtoolsPanel } from './devtools-panel-lazy'
 
 export interface ZenStackQueryProviderProps extends QueryClientConfig {
   children: ReactNode
   /** API endpoint для ZenStack (по умолчанию '/api/model') */
   endpoint?: string
-  /** Показывать TanStack Devtools (по умолчанию в development) */
+  /**
+   * Показывать TanStack Devtools — работает только в development.
+   *
+   * В production панели нет в сборке вовсе (см. `devtools-panel-lazy.tsx`), поэтому
+   * `showDevtools: true` там ничего не включит. Флаг нужен, чтобы выключить панель в dev.
+   */
   showDevtools?: boolean
 }
 
