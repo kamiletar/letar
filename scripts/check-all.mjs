@@ -114,6 +114,20 @@ const CHECKS = [
     doc: '.claude/docs/better-auth-1.7-account-issuer-field.md',
   },
   {
+    id: 'cookie-cache-strategy',
+    group: 'auth',
+    title: 'session.cookieCache.strategy jwt/jwe без своего advanced.cookiePrefix',
+    run: ['node', ['scripts/check-cookie-cache-strategy.mjs']],
+    // gate: единственная защита от повтора бага — комментарий в
+    // apps/dashboard/src/lib/auth.ts, который никто не обязан читать перед тем как
+    // добавить jwt/jwe где-либо ещё. Ни typecheck, ни lint не ловят коллизию — она
+    // проявляется 500-кой на GET /api/auth/get-session в ЧУЖОМ приложении на localhost.
+    severity: 'gate',
+    ci: 'partial',
+    ciNote: 'приватные submodule не выкачаны — их src/lib/auth.ts не проверены',
+    doc: '.claude/docs/better-auth-localhost-cookie-jar-collision.md',
+  },
+  {
     id: 'lib-subpath-paths',
     group: 'tsconfig',
     title: 'потребители покрывают все subpath-экспорты @letar/*',
