@@ -2,6 +2,21 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [1.26.1] — 2026-09-03
+
+### Added
+
+- Гейт сырых UI-значений `theme:check` (`nx g @letar/generators:theme-check-integrate dashboard`,
+  `@letar/theme-check`) — подключён в `dependsOn` у `lint`. Первый прогон нашёл настоящие
+  находки: 5 мест с `transition="... 0.2s"` (magic-number длительность) переведены на
+  `transitionProperty` + `transitionDuration="moderate"`; палитра брендовой темы вынесена из
+  `theme-provider.tsx` в `src/theme/config.ts` (получила освобождение по `themePrefix`); цвета
+  графика в `SystemOverview.tsx`/`MetricsChart.tsx`, совпавшие с реальными Chakra-токенами
+  (`brand.500`/`green.400`/`blue.400`), переведены на `var(--chakra-colors-*, #fallback)`.
+  Остальные находки — легитимные исключения (ANSI-палитра терминала в `DeployLogDialog.tsx`/
+  `ansi-to-react.tsx`, `themeColor` в `layout.tsx`, ложное совпадение `#310` — номер ошибки React
+  в комментарии) — занесены в `allowedMatches` с пояснением. Детали — `PLAN_COMPLETED.md`.
+
 ## [1.26.0] — 2026-09-03
 
 ### Added

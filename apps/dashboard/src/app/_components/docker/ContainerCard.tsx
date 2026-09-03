@@ -68,7 +68,13 @@ export function ContainerCard({
   }
 
   return (
-    <Card.Root opacity={inTransition ? 0.7 : 1} transition="opacity 0.2s" position="relative" size="sm">
+    <Card.Root
+      opacity={inTransition ? 0.7 : 1}
+      transitionProperty="opacity"
+      transitionDuration="moderate"
+      position="relative"
+      size="sm"
+    >
       {/* Индикатор загрузки поверх карточки */}
       {inTransition && (
         <Box

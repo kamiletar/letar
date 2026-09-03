@@ -248,7 +248,7 @@ export function RemoteServerDeploy({ server }: Props) {
 
       {/* Incoming Commits */}
       {incomingCount > 0 && (
-        <Box mb="6" opacity={isPulling ? 0.7 : 1} transition="opacity 0.2s">
+        <Box mb="6" opacity={isPulling ? 0.7 : 1} transitionProperty="opacity" transitionDuration="moderate">
           <Card.Root borderColor="green.500" borderWidth="2px">
             <Card.Body position="relative">
               {isPulling && (

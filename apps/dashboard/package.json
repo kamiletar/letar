@@ -1,6 +1,6 @@
 {
   "name": "@letar/dashboard",
-  "version": "1.26.0",
+  "version": "1.26.1",
   "private": true,
   "nx": {
     "name": "dashboard",
@@ -18,7 +18,8 @@
       "@letar/env-load",
       "@letar/admin-ui",
       "@letar/jobs",
-      "@letar/format-utils"
+      "@letar/format-utils",
+      "@letar/theme-check"
     ]
   },
   "dependencies": {
@@ -33,6 +34,7 @@
     "@letar/env-load": "workspace:*",
     "@letar/admin-ui": "workspace:*",
     "@letar/jobs": "workspace:*",
-    "@letar/format-utils": "workspace:*"
+    "@letar/format-utils": "workspace:*",
+    "@letar/theme-check": "workspace:*"
   }
 }

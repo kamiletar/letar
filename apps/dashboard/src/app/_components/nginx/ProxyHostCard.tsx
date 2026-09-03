@@ -22,7 +22,12 @@ export function ProxyHostCard({ host, onToggle, onDelete, isTransitioning = fals
   const isEnabled = host.enabled === 1 || host.enabled === true
   const hasSSL = host.certificate_id > 0
   return (
-    <Card.Root opacity={isTransitioning ? 0.7 : 1} transition="opacity 0.2s" position="relative">
+    <Card.Root
+      opacity={isTransitioning ? 0.7 : 1}
+      transitionProperty="opacity"
+      transitionDuration="moderate"
+      position="relative"
+    >
       {/* Индикатор загрузки поверх карточки */}
       {isTransitioning && (
         <Box

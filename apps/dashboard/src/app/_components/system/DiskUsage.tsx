@@ -333,7 +333,8 @@ export const DiskUsage = memo(function DiskUsage() {
                   borderRadius="md"
                   position="relative"
                   opacity={isPending ? 0.7 : 1}
-                  transition="opacity 0.2s"
+                  transitionProperty="opacity"
+                  transitionDuration="moderate"
                 >
                   {isPending && (
                     <Box position="absolute" top={3} right={3}>

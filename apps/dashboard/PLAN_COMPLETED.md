@@ -2,6 +2,55 @@
 
 Детальное описание всех реализованных фич.
 
+## Гейт `theme:check` подключён (2026-09-03)
+
+`nx g @letar/generators:theme-check-integrate dashboard` — четвёртый потребитель
+`@letar/theme-check` после domwellbes/studio/aboi (см.
+`.claude/docs/theme-hardcode-gate-coverage.md`). `apps/dashboard/src/theme/` не существовал —
+гейт подключён без освобождения `themePrefix` для файлов темы, кроме тех, что перенесены (см.
+ниже).
+
+Первый прогон нашёл 34 срабатывания. Разбор по классам:
+
+**Настоящие находки, исправлены:**
+
+- 5×`transition="... 0.2s"` (`AppCard.tsx`, `RemoteServerDeploy.tsx`, `ContainerCard.tsx`,
+  `ProxyHostCard.tsx`, `DiskUsage.tsx`) → `transitionProperty="..."` + `transitionDuration="moderate"`
+  (Chakra-токен длительности, 200ms = ровно 0.2s) — тот же паттерн, что в aboi/grandslamcup.
+- Брендовая палитра (`brand.50`…`brand.950` + semantic tokens) жила прямо в
+  `src/app/_components/theme-provider.tsx` вместо каталога темы. Вынесена в
+  `src/theme/config.ts` (`themeConfig`, `defineConfig(...)`), `theme-provider.tsx` теперь только
+  собирает `createSystem(defaultConfig, themeConfig)` и рендерит провайдеры — 12 HEX-находок
+  закрылись автоматически через `themePrefix: 'src/theme/'`.
+- Цвета графиков в `SystemOverview.tsx` (`CHART_COLORS`) и дефолт `color` в `MetricsChart.tsx`
+  оказались точным совпадением с реальными Chakra-токенами этой версии (`brand.500=#CA9E67`,
+  `green.400=#4ade80`, `blue.400=#60a5fa` — проверено чтением
+  `node_modules/@chakra-ui/react/.../theme/tokens/colors.js`, не по памяти) — переведены на
+  `var(--chakra-colors-*, #fallback)`, тот же паттерн, что studio `revenue-chart.tsx`.
+
+**Легитимные исключения, занесены в `allowedMatches` со объяснением в самом скрипте:**
+
+- `src/app/servers/_components/DeployLogDialog.tsx` и `src/lib/ansi-to-react.tsx` — маппинг
+  стандартных ANSI-кодов терминала в CSS-цвета для рендера цветного лога деплоя. Новый, четвёртый
+  класс легитимного исключения (протокол терминала, не UI-цвет/брендовая палитра) — не подходил
+  ни под один из трёх задокументированных ранее.
+- `src/app/layout.tsx` — `themeColor` в Next.js `viewport` (класс 1, как в domwellbes/studio).
+- `src/app/auth/_actions/signin.action.ts` — `#310` не цвет, номер ошибки React в комментарии
+  (ложное совпадение по regex, тот же класс что studio `active-timer.tsx` «#418»).
+- `AppResourceHistory.tsx` (`#4299E1`/`#48BB78`) и сетка `MetricsChart.tsx`
+  (`#374151`/`#6B7280`) — проверены и НЕ совпали ни с одним текущим Chakra-токеном (устаревшие
+  значения из более старой палитры/Tailwind v3) — не дубликат, оставлены как собственный
+  decorative-цвет графика.
+
+**Замечено, но не в scope этой задачи:** `DeployLogDialog.tsx` и `ansi-to-react.tsx` — почти
+дословный дубль одного и того же ANSI-парсера (маппинг цветов + разбор escape-последовательностей)
+в двух местах. Кандидат на вынос в общую утилиту при следующей правке одного из них.
+
+Проверено: `nx run dashboard:theme:check` чисто, `nx lint dashboard`
+(`theme:check` в `dependsOn`), `nx typecheck:tsgo dashboard` — все зелёные. Живая проверка в
+браузере через dev-session bypass — бренд-цвет (`#CA9E67`) рендерится на активном пункте меню и
+бейдже «Загрузка...» без визуальных регрессий.
+
 ## GlitchTip — проект создан и DSN подключён (2026-08-12, отмечено в плане 2026-09-03)
 
 Пункт «В процессе» в `PLAN.md` отстал от факта: GlitchTip-проект `dashboard` (id 2) был создан

@@ -15,11 +15,12 @@ interface UptimeInfo {
   uptime: number
 }
 
-// Цвета графиков в соответствии с брендовой палитрой
+// Цвета графиков в соответствии с брендовой палитрой — через CSS-переменную темы, HEX только
+// fallback на случай отсутствия переменной в контексте инлайн-SVG (recharts)
 const CHART_COLORS = {
-  cpu: '#CA9E67', // Brand golden
-  memory: '#4ADE80', // Green
-  disk: '#60A5FA', // Blue
+  cpu: 'var(--chakra-colors-brand-500, #CA9E67)', // Brand golden
+  memory: 'var(--chakra-colors-green-400, #4ADE80)', // Green
+  disk: 'var(--chakra-colors-blue-400, #60A5FA)', // Blue
 }
 
 /**

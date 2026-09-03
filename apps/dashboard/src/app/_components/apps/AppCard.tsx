@@ -45,7 +45,11 @@ export function AppCard({ name, displayName, type, port, status, stats, storage 
 
   return (
     <Link href={`/apps/${name}`} style={{ textDecoration: 'none' }}>
-      <Card.Root _hover={{ borderColor: 'fg.default' }} transition="border-color 0.2s">
+      <Card.Root
+        _hover={{ borderColor: 'fg.default' }}
+        transitionProperty="border-color"
+        transitionDuration="moderate"
+      >
         <Card.Body gap="4">
           {/* Заголовок */}
           <HStack justify="space-between">

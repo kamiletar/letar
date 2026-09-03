@@ -3,7 +3,11 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/dashboard/src",
   "projectType": "application",
-  "tags": ["type:app", "scope:dashboard", "owner:letar"],
+  "tags": [
+    "type:app",
+    "scope:dashboard",
+    "owner:letar"
+  ],
   "targets": {
     "zenstack:generate": {
       "executor": "nx:run-commands",
@@ -23,10 +27,15 @@
           "runtime": "node -p process.platform"
         }
       ],
-      "outputs": ["{projectRoot}/src/generated"],
+      "outputs": [
+        "{projectRoot}/src/generated"
+      ],
       "metadata": {
         "description": "Generate Prisma schema from ZenStack",
-        "technologies": ["zenstack", "prisma"]
+        "technologies": [
+          "zenstack",
+          "prisma"
+        ]
       }
     },
     "db:generate": {
@@ -44,10 +53,14 @@
           "runtime": "node -p process.platform"
         }
       ],
-      "outputs": ["{workspaceRoot}/node_modules/.prisma/client"],
+      "outputs": [
+        "{workspaceRoot}/node_modules/.prisma/client"
+      ],
       "metadata": {
         "description": "Generate Prisma Client from schema",
-        "technologies": ["prisma"]
+        "technologies": [
+          "prisma"
+        ]
       }
     },
     "db:push": {
@@ -56,10 +69,14 @@
         "command": "prisma db push",
         "cwd": "apps/dashboard"
       },
-      "dependsOn": ["db:generate"],
+      "dependsOn": [
+        "db:generate"
+      ],
       "metadata": {
         "description": "Push Prisma schema changes to database (development)",
-        "technologies": ["prisma"]
+        "technologies": [
+          "prisma"
+        ]
       }
     },
     "db:push:data-loss": {
@@ -68,10 +85,14 @@
         "command": "prisma db push --accept-data-loss --force-reset",
         "cwd": "apps/dashboard"
       },
-      "dependsOn": ["db:generate"],
+      "dependsOn": [
+        "db:generate"
+      ],
       "metadata": {
         "description": "Push Prisma schema with data loss (reset)",
-        "technologies": ["prisma"]
+        "technologies": [
+          "prisma"
+        ]
       }
     },
     "db:migrate": {
@@ -80,10 +101,14 @@
         "command": "cross-env CI= VERCEL= GITHUB_ACTIONS= GITLAB= NETLIFY= HEROKU= prisma migrate dev",
         "cwd": "apps/dashboard"
       },
-      "dependsOn": ["db:generate"],
+      "dependsOn": [
+        "db:generate"
+      ],
       "metadata": {
         "description": "Create and apply database migration",
-        "technologies": ["prisma"]
+        "technologies": [
+          "prisma"
+        ]
       }
     },
     "db:migrate:deploy": {
@@ -94,7 +119,9 @@
       },
       "metadata": {
         "description": "Apply pending migrations (production)",
-        "technologies": ["prisma"]
+        "technologies": [
+          "prisma"
+        ]
       }
     },
     "db:studio": {
@@ -105,7 +132,9 @@
       },
       "metadata": {
         "description": "Open Prisma Studio database GUI",
-        "technologies": ["prisma"]
+        "technologies": [
+          "prisma"
+        ]
       }
     },
     "db:reset": {
@@ -116,11 +145,15 @@
       },
       "metadata": {
         "description": "Reset database and apply all migrations",
-        "technologies": ["prisma"]
+        "technologies": [
+          "prisma"
+        ]
       }
     },
     "typecheck": {
-      "dependsOn": ["zenstack:generate"],
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "executor": "nx:run-commands",
       "options": {
         "command": "tsc --noEmit",
@@ -135,11 +168,15 @@
       ],
       "metadata": {
         "description": "Type-check TypeScript files",
-        "technologies": ["typescript"]
+        "technologies": [
+          "typescript"
+        ]
       }
     },
     "typecheck:tsgo": {
-      "dependsOn": ["zenstack:generate"],
+      "dependsOn": [
+        "zenstack:generate"
+      ],
       "executor": "nx:run-commands",
       "options": {
         "command": "tsgo --noEmit",
@@ -154,7 +191,10 @@
       ],
       "metadata": {
         "description": "Type-check TypeScript files with tsgo (38x faster)",
-        "technologies": ["typescript", "tsgo"]
+        "technologies": [
+          "typescript",
+          "tsgo"
+        ]
       }
     },
     "oxlint": {
@@ -164,14 +204,22 @@
         "cwd": "apps/dashboard"
       },
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/.oxlintrc.json"],
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.oxlintrc.json"
+      ],
       "metadata": {
         "description": "Fast lint with oxlint (50-100x faster than ESLint)",
-        "technologies": ["oxlint"]
+        "technologies": [
+          "oxlint"
+        ]
       }
     },
     "lint": {
-      "dependsOn": ["oxlint"]
+      "dependsOn": [
+        "oxlint",
+        "theme:check"
+      ]
     },
     "lint:fix": {
       "executor": "nx:run-commands",
@@ -182,7 +230,9 @@
       "cache": false,
       "metadata": {
         "description": "Run ESLint with auto-fix",
-        "technologies": ["eslint"]
+        "technologies": [
+          "eslint"
+        ]
       }
     },
     "format": {
@@ -194,7 +244,9 @@
       "cache": false,
       "metadata": {
         "description": "Format files with dprint (~30x faster than Prettier)",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
       }
     },
     "format:check": {
@@ -204,21 +256,36 @@
         "cwd": "apps/dashboard"
       },
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/dprint.json"],
+      "inputs": [
+        "default",
+        "{workspaceRoot}/dprint.json"
+      ],
       "metadata": {
         "description": "Check file formatting with dprint",
-        "technologies": ["dprint"]
+        "technologies": [
+          "dprint"
+        ]
       }
     },
     "validate": {
       "executor": "nx:noop",
-      "dependsOn": ["lint", "format:check", "typecheck", "test"],
+      "dependsOn": [
+        "lint",
+        "format:check",
+        "typecheck",
+        "test"
+      ],
       "metadata": {
         "description": "Run all validation checks"
       }
     },
     "build": {
-      "dependsOn": ["zenstack:generate", "db:generate", "^build", "^typecheck"],
+      "dependsOn": [
+        "zenstack:generate",
+        "db:generate",
+        "^build",
+        "^typecheck"
+      ],
       "options": {
         "command": "next build --webpack"
       },
@@ -232,6 +299,20 @@
       },
       "metadata": {
         "description": "Start development server (без Turbopack из-за бага с гидратацией Emotion, см. .claude/docs/nextjs16-turbopack-default-emotion-hydration.md)"
+      }
+    },
+    "theme:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node scripts/check-theme-hardcodes.mjs",
+        "cwd": "apps/dashboard"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Reject raw UI colors, shadows and transition durations outside theme tokens",
+        "technologies": [
+          "chakra-ui"
+        ]
       }
     }
   }

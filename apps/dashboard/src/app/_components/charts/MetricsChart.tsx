@@ -46,7 +46,7 @@ const CustomTooltip = ({ active, payload, label, unit, metricLabel }: CustomTool
 
 export const MetricsChart = ({
   data,
-  color = '#CA9E67',
+  color = 'var(--chakra-colors-brand-500, #CA9E67)',
   gradientId = 'metricGradient',
   unit = '%',
   label = 'Value',
