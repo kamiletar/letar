@@ -3,7 +3,7 @@
  * Запуск: vitest bench src/lib/analytics/analytics.bench.ts
  */
 
-import { bench, describe } from 'vitest'
+import { describe, test } from 'vitest'
 import { createGtagAdapter } from './adapters/gtag'
 import { createPostHogAdapter } from './adapters/posthog'
 import { createUmamiAdapter } from './adapters/umami'
@@ -28,26 +28,38 @@ describe('Adapter track() throughput (без глобального объект
   const gtag = createGtagAdapter()
   const posthog = createPostHogAdapter()
 
-  bench('Umami focus event', () => {
-    umami.track(FOCUS_EVENT, 'form-1')
+  test('Umami focus event', async ({ bench }) => {
+    await bench('Umami focus event', () => {
+      umami.track(FOCUS_EVENT, 'form-1')
+    }).run()
   })
-  bench('Umami blur event', () => {
-    umami.track(BLUR_EVENT, 'form-1')
+  test('Umami blur event', async ({ bench }) => {
+    await bench('Umami blur event', () => {
+      umami.track(BLUR_EVENT, 'form-1')
+    }).run()
   })
-  bench('Yandex Metrika abandon', () => {
-    ym.track(ABANDON_EVENT, 'form-1')
+  test('Yandex Metrika abandon', async ({ bench }) => {
+    await bench('Yandex Metrika abandon', () => {
+      ym.track(ABANDON_EVENT, 'form-1')
+    }).run()
   })
-  bench('GA4 error event', () => {
-    gtag.track(ERROR_EVENT, 'form-1')
+  test('GA4 error event', async ({ bench }) => {
+    await bench('GA4 error event', () => {
+      gtag.track(ERROR_EVENT, 'form-1')
+    }).run()
   })
-  bench('PostHog abandon', () => {
-    posthog.track(ABANDON_EVENT, 'form-1')
+  test('PostHog abandon', async ({ bench }) => {
+    await bench('PostHog abandon', () => {
+      posthog.track(ABANDON_EVENT, 'form-1')
+    }).run()
   })
 
-  bench('все 4 адаптера на 1 event', () => {
-    umami.track(FOCUS_EVENT, 'form-1')
-    ym.track(FOCUS_EVENT, 'form-1')
-    gtag.track(FOCUS_EVENT, 'form-1')
-    posthog.track(FOCUS_EVENT, 'form-1')
+  test('все 4 адаптера на 1 event', async ({ bench }) => {
+    await bench('все 4 адаптера на 1 event', () => {
+      umami.track(FOCUS_EVENT, 'form-1')
+      ym.track(FOCUS_EVENT, 'form-1')
+      gtag.track(FOCUS_EVENT, 'form-1')
+      posthog.track(FOCUS_EVENT, 'form-1')
+    }).run()
   })
 })

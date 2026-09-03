@@ -14,7 +14,7 @@ import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { act, cleanup, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Profiler, type ProfilerOnRenderCallback, type ReactNode } from 'react'
-import { afterEach, bench, describe } from 'vitest'
+import { afterEach, describe, test } from 'vitest'
 
 import { Form } from './'
 
@@ -71,27 +71,29 @@ describe('Ре-рендеры: форма из 10 полей', () => {
   const fields = generateFieldNames(10)
   const initialValue = generateInitialValue(fields)
 
-  bench('ввод 10 символов в первое поле', async () => {
-    const tracker = createRenderTracker()
-    const user = userEvent.setup()
+  test('ввод 10 символов в первое поле', async ({ bench }) => {
+    await bench('ввод 10 символов в первое поле', async () => {
+      const tracker = createRenderTracker()
+      const user = userEvent.setup()
 
-    render(
-      <TestWrapper>
-        <Form initialValue={initialValue} onSubmit={async () => {}}>
-          {fields.map((name) => (
-            <tracker.Track key={name} id={name}>
-              <Form.Field.String name={name} label={name} />
-            </tracker.Track>
-          ))}
-        </Form>
-      </TestWrapper>,
-    )
+      render(
+        <TestWrapper>
+          <Form initialValue={initialValue} onSubmit={async () => {}}>
+            {fields.map((name) => (
+              <tracker.Track key={name} id={name}>
+                <Form.Field.String name={name} label={name} />
+              </tracker.Track>
+            ))}
+          </Form>
+        </TestWrapper>,
+      )
 
-    const input = screen.getAllByRole('textbox')[0]
+      const input = screen.getAllByRole('textbox')[0]
 
-    await act(async () => {
-      await user.type(input, 'benchmarks!')
-    })
+      await act(async () => {
+        await user.type(input, 'benchmarks!')
+      })
+    }).run()
   })
 })
 
@@ -99,26 +101,28 @@ describe('Ре-рендеры: форма из 20 полей', () => {
   const fields = generateFieldNames(20)
   const initialValue = generateInitialValue(fields)
 
-  bench('ввод 5 символов в первое поле', async () => {
-    const tracker = createRenderTracker()
-    const user = userEvent.setup()
+  test('ввод 5 символов в первое поле', async ({ bench }) => {
+    await bench('ввод 5 символов в первое поле', async () => {
+      const tracker = createRenderTracker()
+      const user = userEvent.setup()
 
-    render(
-      <TestWrapper>
-        <Form initialValue={initialValue} onSubmit={async () => {}}>
-          {fields.map((name) => (
-            <tracker.Track key={name} id={name}>
-              <Form.Field.String name={name} label={name} />
-            </tracker.Track>
-          ))}
-        </Form>
-      </TestWrapper>,
-    )
+      render(
+        <TestWrapper>
+          <Form initialValue={initialValue} onSubmit={async () => {}}>
+            {fields.map((name) => (
+              <tracker.Track key={name} id={name}>
+                <Form.Field.String name={name} label={name} />
+              </tracker.Track>
+            ))}
+          </Form>
+        </TestWrapper>,
+      )
 
-    const input = screen.getAllByRole('textbox')[0]
+      const input = screen.getAllByRole('textbox')[0]
 
-    await act(async () => {
-      await user.type(input, 'hello')
-    })
+      await act(async () => {
+        await user.type(input, 'hello')
+      })
+    }).run()
   })
 })
