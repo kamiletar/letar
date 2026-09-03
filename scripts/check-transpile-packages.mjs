@@ -3,15 +3,36 @@
 // ВСЕ пакеты @letar/*, которые реально импортируются где-то в src/ этого
 // приложения — а не только те, что были нужны на момент миграции с withNx.
 //
-// Почему это важно: после ухода от @nx/next composePlugins/withNx (PLAN.md §73,
-// .claude/docs/nextjs-nx-composeplugins-migration.md) синхронизацию
-// transpilePackages с графом зависимостей Nx делал withNx автоматически (пусть и
-// не всегда успешно). Теперь список — статический литерал, вычисленный вручную на
-// момент миграции. Добавил новый импорт из libs/* → забыл добавить и в
-// tsconfig.json paths, и в next.config transpilePackages → при сборке через
-// --webpack получаешь `Module parse failed: Unexpected token` на первом же
-// `interface`/`export type` внутри библиотеки — без единой ошибки от typecheck
-// или lint (tsgo резолвит paths корректно независимо от transpilePackages).
+// ⚠️ Чего эта проверка НЕ означает. Отсутствие конкретного пакета в списке
+// прод-сборку НЕ ломает. В next/dist/build/webpack-config.js (16.3.4, строки
+// 382–396) выражение `shouldIncludeExternalDirs = config.experimental.externalDir
+// || !!config.transpilePackages` читает только НАЛИЧИЕ массива — снимает
+// ограничение `include: [dir]`. Содержимое до @letar/* не доходит вовсе: bun
+// линкует workspace-либы симлинком (apps/<app>/node_modules/@letar/x ->
+// ../../../../libs/x/), webpack резолвит симлинк в реальный путь `libs/…` без
+// `node_modules` в нём, и `exclude` отсеивает файл раньше, чем дело дойдёт до
+// `isResourceInPackages` — единственного места, где список вообще читается.
+// Доказано тремя сборками studio: 18 пакетов — зелёный; ключ удалён — `Module
+// parse failed`; `transpilePackages: ['@letar/ui']` — зелёный, хотя
+// @letar/glitchtip (на котором падало без ключа) из списка убран. Механизм и
+// замеры — .claude/docs/transpile-packages-array-presence-not-content.md.
+//
+// Зачем тогда проверка — две причины, и ни одна из них не «иначе сборка упадёт»:
+//   1. Соглашение о единообразии. После ухода от @nx/next composePlugins/withNx
+//      (PLAN.md §73, .claude/docs/nextjs-nx-composeplugins-migration.md) список —
+//      статический литерал, вычисленный вручную на момент миграции; раньше его
+//      синхронизировал withNx по графу Nx, теперь не синхронизирует никто.
+//      Проверка держит литерал сверенным с @letar/*-алиасами tsconfig, чтобы он
+//      не превращался в археологический слой.
+//   2. Страховка на смену раскладки node_modules. Если @letar/* когда-нибудь
+//      окажутся физически внутри node_modules (публикация в npm, смена линкера
+//      bun на раскладку с реальными каталогами вместо симлинков) — реальный путь
+//      начнёт содержать `node_modules`, и содержимое списка станет работающим по
+//      назначению. Вот тогда расхождение станет настоящим багом сборки.
+//
+// Красный прогон читать как «список разъехался с tsconfig», НЕ как «прод-сборка
+// сломана». Отсутствие записи не объясняет падение сборки — причину ищи в другом
+// месте.
 //
 // Использование:
 //   node scripts/check-transpile-packages.mjs
@@ -137,7 +158,9 @@ function main() {
     process.exit(0)
   }
 
-  console.log(`❌ Найдены пакеты, импортируемые в src/, но отсутствующие в transpilePackages — ${findings.length} приложени(е/я/й):\n`)
+  console.log(
+    `❌ Найдены пакеты, импортируемые в src/, но отсутствующие в transpilePackages — ${findings.length} приложени(е/я/й):\n`,
+  )
   for (const { configPath, missing } of findings) {
     console.log(`${rel(configPath)}`)
     console.log(`  не хватает в transpilePackages (${missing.length}):`)
@@ -149,10 +172,13 @@ function main() {
     `Итого: ${findings.length} приложени(е/я/й) с неполным transpilePackages из ${checkedApps} проверенных.`,
   )
   console.log(
-    `Добавь недостающие пакеты в массив transpilePackages next.config.* —`,
+    `Добавь недостающие пакеты в массив transpilePackages next.config.*.`,
   )
   console.log(
-    `см. .claude/docs/nextjs-nx-composeplugins-migration.md.`,
+    `⚠️ Это расхождение соглашения, а НЕ поломка сборки: Next читает только наличие ключа`,
+  )
+  console.log(
+    `transpilePackages, а не его содержимое — .claude/docs/transpile-packages-array-presence-not-content.md.`,
   )
   process.exit(1)
 }
