@@ -1604,7 +1604,14 @@ lockfile-drift-гейт), обязана либо чекаутить submodule, 
       только в `implicitDependencies`, добавлен в реальные `dependencies` вместе с `@letar/jobs`;
       старые `/api/cron/*` и записи в `dashboard-agent` намеренно не удалены (тот же порядок);
       живой runNow на `approve-referrals` подтверждён — «Успешно, 611мс»
-- [ ] Тираж: `time`, `svoichuzhie`
+- [x] Тираж на `time` (1 задача: `notifications`, 2026-09-03) — единственное приложение тиража
+      без роли ADMIN/admin-панели вообще: нет `/admin/jobs`, нет ручного runNow через UI, только
+      автотик + read-only `/api/jobs/status`; `JobOverride` всё равно заведена (обязательна для
+      `createAppJobsModule`) с `@@deny('all', true)`; `env_file:` в compose, явной строки
+      `JOBS_ENABLED` не потребовалось; логика `notifications.ts` скопирована из старой ручки
+      без изменений (не вынесена в общий lib, чтобы не трогать код живой ручки); живая проверка —
+      `GET /api/jobs/status` вернул корректный статус задачи
+- [ ] Тираж: `svoichuzhie`
 - [ ] `dashboard-agent`: режим наблюдателя (опрос `/api/jobs/status` + алерт по «давно не было
       успеха»), снятие монтирования чужих `.env.docker`
 - [ ] Инфра-задачи и бэкап Maddy — на systemd timers, конфиги в `infra/`, доставка через
