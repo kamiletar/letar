@@ -1,4 +1,5 @@
 import { getSession } from '@/lib/auth'
+import { ServiceWorkerRegistration } from '@letar/ui'
 import type { Metadata } from 'next'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 
@@ -6,7 +7,6 @@ import { getExpressQuestionsAction } from '../_actions/express.action'
 import { ExpressContainer } from '../_components/express-container'
 import { KioskResetButton } from '../_components/kiosk-reset-button'
 import { OfflineConsentBanner } from '../_components/offline-consent-banner'
-import { ServiceWorkerRegistration } from '../_components/service-worker-registration'
 
 type Props = { params: Promise<{ locale: string }> }
 
@@ -35,7 +35,10 @@ export default async function ExpressPage({ params }: Props) {
     <>
       <ExpressContainer questions={questions} isAuthenticated={!!session} />
       {/* Offline-first (5.7): SW только по согласию, баннер предлагает включить */}
-      <ServiceWorkerRegistration />
+      <ServiceWorkerRegistration
+        consentKey="archetest-offline-consent"
+        scopes={['/express', '/en/express']}
+      />
       <OfflineConsentBanner />
       {/* Kiosk-режим (5.7): сброс между посетителями, активен при ?kiosk=1 */}
       <KioskResetButton />

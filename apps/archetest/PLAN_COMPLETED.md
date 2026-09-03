@@ -1,5 +1,32 @@
 # Выполненные задачи: Archetest
 
+## Фикс снятия регистрации Service Worker — переход на общий `useOfflineServiceWorker` (2026-09-03)
+
+Локальный `_components/service-worker-registration.tsx` снимал регистрацию SW по
+`registrationsRef.current` — снапшоту, заполняемому только собственным вызовом `register()` в
+текущем маунте компонента. Воркер, зарегистрированный в прошлой сессии браузера (или до появления
+консент-гейта), в этот ref не попадал — отзыв согласия на `/express` физически ничего не снимал.
+Тот же баг жил в четырёх копиях компонента по монорепо (studio, grandslamcup, mandala, archetest),
+ради дедупликации которых и был вынесен общий `useOfflineServiceWorker` в `libs/hooks` — там
+снятие идёт через `navigator.serviceWorker.getRegistrations()`, не зависящий от локального
+состояния конкретного маунта.
+
+Archetest — последний из четырёх, где баг оставался открытым. Особенность именно этого приложения:
+регистрирует SW сразу на два scope (`/express`, `/en/express`), не на `/` — хук уже поддерживал
+множественные scope параметром `scopes`, менять его не пришлось.
+
+**Фикс:** `apps/archetest/src/app/[locale]/express/page.tsx` — импорт `ServiceWorkerRegistration`
+переведён с локального компонента на `@letar/ui`, с явными `consentKey="archetest-offline-consent"`
+и `scopes={['/express', '/en/express']}`. Локальный
+`_components/service-worker-registration.tsx` удалён.
+
+**Проверка на прод-сборке** (`next build --webpack`, `next start`; Turbopack отдаёт протухший
+`sw.js`, см. `serwist-turbopack-stale-sw-artifact.md`): согласие → регистрация на обоих scope
+подтверждена (`getRegistrations()` → 2 записи). Сценарий бага воспроизведён и закрыт — консент
+выставлен в `declined` до маунта компонента (имитация SW, зарегистрированного в прошлой сессии,
+без записи в текущем ref), при заходе на `/express` `getRegistrations()` и `caches.keys()` дают
+пустой массив: обе регистрации сняты, кеш очищен.
+
 ## Разблокирован деплой issuer-backfill: OfflineConsentBanner перехватывал клик у StickyActionBar (2026-09-02)
 
 Прод-алерт `account-issuer-null-check` (dashboard-agent) показал 2 записи `Account.issuer IS

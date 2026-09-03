@@ -5,6 +5,19 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.27.16] - 2026-09-03
+
+### Fixed
+
+- Снятие регистрации Service Worker на `/express` шло по `registrationsRef` (снапшот с текущей
+  загрузки страницы), а не по `navigator.serviceWorker.getRegistrations()` — воркер,
+  зарегистрированный в прошлой сессии браузера (или до появления консент-гейта), в ref не попадал,
+  и отзыв согласия ничего не снимал. Тот же баг уже был найден и починен в studio/grandslamcup/mandala
+  (2026-09-03); archetest отличался только тем, что регистрирует SW сразу на двух scope
+  (`/express`, `/en/express`). Локальный компонент заменён на общий `ServiceWorkerRegistration`
+  (`@letar/ui` → `useOfflineServiceWorker`, `libs/hooks`), который уже поддерживает множественные
+  scope и снимает регистрацию через `getRegistrations()`.
+
 ## [0.27.15] - 2026-09-02
 
 ### Fixed
