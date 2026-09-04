@@ -71,7 +71,12 @@ services:
       # Порт КОНТЕЙНЕРА, не хостовый: Traefik ходит напрямую по сети traefik-network
       traefik.http.services.time-stage.loadbalancer.server.port: '3013'
     healthcheck:
-      test: ['CMD-SHELL', 'wget -q --spider http://0.0.0.0:3013/ || exit 1']
+      # node:24-slim не содержит wget/curl — проверка через встроенный http-модуль Node
+      test:
+        [
+          'CMD-SHELL',
+          "node -e \"require('http').get('http://0.0.0.0:3013/', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))\"",
+        ]
       interval: 5s
       timeout: 3s
       retries: 30
