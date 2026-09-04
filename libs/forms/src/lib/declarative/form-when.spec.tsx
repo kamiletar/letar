@@ -297,6 +297,69 @@ describe('FormWhen', () => {
     })
   })
 
+  describe('a11y: перенос фокуса при скрытии условного блока', () => {
+    it('переносит фокус на якорь, если скрываемое поле само себя прячет (было сфокусировано)', async () => {
+      // Реалистичный сценарий бага: пользователь печатает в условном поле, ввод триггерит
+      // Form.Watch, который скрывает блок вместе с самим полем — фокус ни на что не переводился
+      // явным кликом, значит без фикса он упадёт на <body>.
+      render(
+        <TestWrapper>
+          <Form initialValue={{ showDetails: true, note: '' }} onSubmit={vi.fn()}>
+            <FormWhen field="showDetails" is={true}>
+              <Form.Field.String name="note" label="Note" />
+              <Form.Watch
+                field="note"
+                onChange={(value, { setFieldValue }) => {
+                  if (value === 'hide') {
+                    setFieldValue('showDetails', false)
+                  }
+                }}
+              />
+            </FormWhen>
+          </Form>
+        </TestWrapper>,
+      )
+
+      const noteInput = await screen.findByLabelText('Note')
+      await userEvent.click(noteInput)
+      await userEvent.type(noteInput, 'hide')
+
+      await waitFor(() => {
+        expect(screen.queryByLabelText('Note')).not.toBeInTheDocument()
+      })
+
+      expect(document.activeElement).not.toBe(document.body)
+      expect(document.activeElement).toHaveAttribute('data-form-when-focus-anchor')
+    })
+
+    it('не трогает фокус, если он был вне скрываемого блока', async () => {
+      render(
+        <TestWrapper>
+          <Form initialValue={{ showDetails: true, other: '' }} onSubmit={vi.fn()}>
+            <Form.Field.String name="other" label="Other" />
+            <Form.Field.Checkbox name="showDetails" label="Show Details" />
+            <FormWhen field="showDetails" is={true}>
+              <span data-testid="details">Detailed Information</span>
+            </FormWhen>
+          </Form>
+        </TestWrapper>,
+      )
+
+      const otherInput = await screen.findByLabelText('Other')
+      await userEvent.click(otherInput)
+      expect(otherInput).toHaveFocus()
+
+      const checkbox = screen.getByRole('checkbox')
+      await userEvent.click(checkbox)
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('details')).not.toBeInTheDocument()
+      })
+
+      expect(document.activeElement).not.toHaveAttribute('data-form-when-focus-anchor')
+    })
+  })
+
   describe('nested values', () => {
     it('работает с вложенными полями', async () => {
       render(

@@ -1,6 +1,15 @@
 'use client'
 
-import { Children, isValidElement, type ReactNode, useContext, useEffect, useMemo, useRef } from 'react'
+import {
+  Children,
+  type CSSProperties,
+  isValidElement,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react'
 import { useFormGroup } from '../form-group'
 import { useDeclarativeForm } from './form-context'
 import { FormStepsContext } from './form-steps/form-steps-context'
@@ -120,6 +129,23 @@ export interface FormWhenProps<TValue = unknown> {
  * Internal component for handling field show/hide
  * Integrates with FormStepsContext to exclude hidden fields from validation
  */
+/**
+ * Визуально не занимающий места, но фокусируемый якорь. Рендерится всегда (не зависит от
+ * shouldRender), поэтому переживает размонтирование скрываемого блока — единственный DOM-узел,
+ * на который безопасно возвращать фокус после того, как контейнер с полями уже удалён из дерева.
+ */
+const focusAnchorStyle: CSSProperties = {
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  padding: 0,
+  margin: -1,
+  overflow: 'hidden',
+  clip: 'rect(0, 0, 0, 0)',
+  whiteSpace: 'nowrap',
+  outline: 'none',
+}
+
 function FormWhenContent({
   shouldRender,
   children,
@@ -133,6 +159,11 @@ function FormWhenContent({
 }): ReactNode {
   const stepsContext = useContext(FormStepsContext)
   const prevShouldRender = useRef<boolean | null>(null)
+
+  const containerRef = useRef<HTMLDivElement>(null)
+  const focusAnchorRef = useRef<HTMLSpanElement>(null)
+  const wasFocusInsideRef = useRef(false)
+  const prevShouldRenderForFocus = useRef(shouldRender)
 
   // Memoize field names — recalculate only when children change
   const fieldNames = useMemo(() => extractFieldNames(children, parentPath), [children, parentPath])
@@ -169,7 +200,43 @@ function FormWhenContent({
     }
   }, [shouldRender, stepsContext, fieldNames])
 
-  return shouldRender ? children : fallback
+  // Следим, находится ли текущий фокус внутри блока — по document-level 'focusin', а не по
+  // 'focusout' контейнера: удаление сфокусированного узла из DOM само по себе синхронно вызывает
+  // blur/focusout, и этот факт нельзя отличить от «пользователь ушёл сам». Слушаем только события
+  // РЕАЛЬНОГО перевода фокуса на новый элемент — тогда снятие DOM-узла эту логику не портит.
+  useEffect(() => {
+    const handleFocusIn = (event: FocusEvent): void => {
+      wasFocusInsideRef.current = !!containerRef.current && containerRef.current.contains(event.target as Node)
+    }
+
+    document.addEventListener('focusin', handleFocusIn)
+    return () => document.removeEventListener('focusin', handleFocusIn)
+  }, [])
+
+  // При скрытии блока, если фокус был внутри него — переносим на постоянный якорь-заглушку,
+  // чтобы клавиатурный/скринридер-пользователь не терял место в форме (фокус не падает на <body>).
+  useEffect(() => {
+    const wasVisible = prevShouldRenderForFocus.current
+    prevShouldRenderForFocus.current = shouldRender
+
+    if (wasVisible && !shouldRender && wasFocusInsideRef.current) {
+      wasFocusInsideRef.current = false
+      focusAnchorRef.current?.focus()
+    }
+  }, [shouldRender])
+
+  return (
+    <>
+      <span ref={focusAnchorRef} tabIndex={-1} style={focusAnchorStyle} data-form-when-focus-anchor="" />
+      {shouldRender
+        ? (
+          <div ref={containerRef} style={{ display: 'contents' }}>
+            {children}
+          </div>
+        )
+        : fallback}
+    </>
+  )
 }
 
 export function FormWhen<TValue = unknown>({
