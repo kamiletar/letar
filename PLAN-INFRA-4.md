@@ -840,11 +840,23 @@ SaaS-Sentry отпадает отдельно: тело ошибки тащит 
    (git short SHA) до `nx build` (см. п.4 — `NEXT_PUBLIC_*` инлайнится именно в этой фазе),
    грузит sourcemaps после успешной сборки для Next.js-приложений с `@letar/glitchtip` на
    клиенте, удаляет `.js.map` до `docker build` — не блокирует деплой при неудаче.
-   `initClient`/`initServer` в `@letar/glitchtip` получили опциональный `release`. `studio`
-   подключён первым (`productionBrowserSourceMaps: true`, apps/studio commit `2cc2c11`),
-   протестировано на реальной сборке (108 `.js.map`, все успешно загружены и удалены из образа).
-   Остальным ~16 кандидатам ничего дополнительно не нужно — интеграция сама обнаруживает
-   приложения по факту `@letar/glitchtip` в `instrumentation-client.ts`.
+   `initClient`/`initServer` в `@letar/glitchtip` получили опциональный `release`. `studio` —
+   первое приложение, где включён `productionBrowserSourceMaps: true` (apps/studio commit
+   `2cc2c11`), протестировано на реальной сборке (108 `.js.map`, все успешно загружены и удалены
+   из образа).
+
+   ⚠️ **Исправление (2026-09-04, тот же день):** формулировка выше «остальным ~16 не нужно
+   ничего» была ошибочной — не сверился с таблицей `infra/glitchtip/README.md` § «Подключённые
+   приложения» перед тем как написать. На деле GlitchTip DSN уже подключён к **23**
+   приложениям (не только studio), но у всех них `instrumentation.ts`/`instrumentation-client.ts`
+   — старая версия без `release`, а `next.config.*` без `productionBrowserSourceMaps`. Генератор
+   `glitchtip-integrate` их не трогает: идемпотентность специально сделана консервативной
+   (`existing.includes('@letar/glitchtip')` → пропуск, не апгрейд — см. `writeInstrumentationFile`
+   в `libs/generators/src/generators/glitchtip-integrate/generator.ts`), чтобы не затереть чужую
+   ручную правку файла. Значит бэкфилл `release`+`productionBrowserSourceMaps`+`GLITCHTIP_RELEASE`
+   в compose на уже подключённые 22 приложения (часть — приватные submodule, каждое требует
+   свой билд/коммит/деплой-запрос) — отдельная по объёму задача, не выполнена, требует решения
+   владельца о масштабе (все разом / по одному по мере надобности).
 7. Подключать по одному приложению, начиная с некоммерческого, и смотреть на объём событий: при
    шумном приложении бесплатный self-hosted быстро упирается в диск. `studio` (п.5) — первое,
    остальные не начаты. Список кандидатов (снят с `apps/*`, 2026-08-11):
