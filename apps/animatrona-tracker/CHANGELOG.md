@@ -7,6 +7,20 @@
 
 ---
 
+## [0.11.11] — 2026-09-04
+
+### Исправлено
+
+- **Мёртвая директива `@form.options` в `schema/content.zmodel`** — несуществующий ключ
+  парсер `@letar/zenstack-form-plugin` молча игнорировал (`catch {}`), опции `select`-полей
+  (`Content.category`, `Content.quality`, `Report.reason`) никогда не попадали в сгенерированную
+  Zod-схему. Заменено на рабочий `@form.props({ options: [...] })` (легитимный escape-кейс:
+  массив объектов нельзя выразить через `@meta`-синтаксис Фазы 3 — грамматика ZModel роняет
+  `zenstack generate` на `ObjectExpr` внутри `@meta`). Формы `Content`/`Report` сейчас нигде в UI
+  не рендерятся (legacy), баг был неактивен, но `nx zenstack:generate` теперь корректно
+  прокидывает `fieldProps.options` во все три поля — проверено по сгенерированным
+  `Content.form.ts`/`Report.form.ts`.
+
 ## [0.11.10] — 2026-09-04
 
 ### Добавлено

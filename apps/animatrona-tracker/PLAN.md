@@ -704,6 +704,12 @@ animatrona-tracker`, генератор `libs/generators`, обёртка над
 allowlist легитимных исключений собирается руками при первом прогоне. Разбор —
 `.claude/docs/theme-hardcode-gate-coverage.md`.
 
+- **Мёртвая директива `@form.options` в `schema/content.zmodel`** (2026-09-04, попутно обнаружено
+  при разборе broadcast `forms-coordinator-dev` о Фазе 3 миграции на `@meta`-синтаксис) —
+  3 вхождения (`Content.category`, `Content.quality`, `Report.reason`) никогда не работали
+  (несуществующий ключ парсера, молча проглатывался). Заменено на `@form.props({ options: [...] })`
+  — детали в `CHANGELOG.md`.
+
 ## Техдолг: закрыто
 
 - **Запрещённый Chakra `as=` на `Icon` — 194 вхождения в 33 файлах** (semgrep-правило
