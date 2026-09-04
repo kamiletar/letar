@@ -10,6 +10,10 @@ const isProduction = process.env.NODE_ENV === 'production'
  * @type {import('next').NextConfig}
  */
 const nextConfig = {
+  // Клиентские sourcemaps в проде — без них стектрейсы в GlitchTip приходят из минифицированного
+  // кода. .map-файлы не публикуются: сборка удаляет их после загрузки в GlitchTip
+  // (см. корневой scripts/glitchtip-upload-sourcemaps.mjs, PLAN-INFRA-4.md §70 п.6).
+  productionBrowserSourceMaps: true,
   // Статический экспорт только для production build (не для dev)
   output: isProduction ? 'export' : undefined,
   // Воркараунд https://github.com/vercel/next.js/issues/85374 (см. build/adapter.js) —
