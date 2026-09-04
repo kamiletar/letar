@@ -1926,3 +1926,12 @@ TypeScript 7 — ждём, пока экосистема React Native/Metro до
 низкорисковых minor-пакетов применены и провалидированы; единственная реальная регрессия
 (jsdom 30 rem-резолюция) найдена и закрыта; побочный баг типов `bwip-js` найден и закрыт;
 Babel 8 и Prisma 8-rc сознательно отложены с явной причиной каждый.
+
+**Дополнение (тот же день):** Vitest 5.0.0 при каждом прогоне `@letar/forms:test` и
+`@letar/forms-vue-shadcn:test` печатал `[MODULE_TYPELESS_PACKAGE_JSON]` — `libs/forms-core`
+ESM-only (`exports` целиком на `.ts`/`import`), но без `"type": "module"` в `package.json`.
+Добавлено поле, предупреждение пропало. Проверено: `@letar/forms-core:typecheck:tsgo`,
+`@letar/forms-core:test` (496/496), `@letar/forms:test` (746/747, единственный провал —
+предсуществующий флак `field-rich-text.spec.tsx`, зелёный при изолированном перезапуске),
+`@letar/forms-vue-shadcn:test` (81/81), `bun scripts/check-all.mjs --group=deps`. Коммит
+`81080db7`.
