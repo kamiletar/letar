@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useRef, useSyncExternalStore } from 'react'
+import { createContext, useContext, useEffect, useState, useSyncExternalStore } from 'react'
 import type { ReactNode } from 'react'
 
 /**
@@ -61,13 +61,10 @@ const noopSubscribe = () => () => {}
 const getEmptySnapshot = () => EMPTY_PATHS
 
 export function SensitiveFieldsProvider({ children }: { children: ReactNode }) {
-  const registryRef = useRef<SensitiveFieldsRegistry | null>(null)
-  if (!registryRef.current) {
-    registryRef.current = createSensitiveFieldsRegistry()
-  }
+  const [registry] = useState(createSensitiveFieldsRegistry)
 
   return (
-    <SensitiveFieldsRegistryContext.Provider value={registryRef.current}>
+    <SensitiveFieldsRegistryContext.Provider value={registry}>
       {children}
     </SensitiveFieldsRegistryContext.Provider>
   )
