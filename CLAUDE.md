@@ -215,6 +215,11 @@ Turbopack'ом (голый `next build` вместо `next build --webpack` из
 на нём не резолвится; выглядит как сломанный оффлайн-режим приложения. Там же — `register: false`
 у `withSerwistInit`: по умолчанию Serwist сам регистрирует воркер на каждой странице в обход
 консент-гейта ·
+[serwist-domwellbes-webpack-build-blocked](/.claude/docs/serwist-domwellbes-webpack-build-blocked.md)
+⚠️ `next build --webpack` (обязателен для `@serwist/next`) у `domwellbes` падает по двум
+независимым причинам — OOM на дефолтном лимите памяти V8 и `ContextError` ChakraProvider на
+`/_global-error` при поднятом лимите; Serwist оттуда откачен, реализован только `manifest.ts`
+(installable app shell без офлайн-кеша) ·
 [react-effect-stable-ref-pitfall](/.claude/docs/react-effect-stable-ref-pitfall.md) эффект с deps на
 ref/DOM не перезапускается ·
 [route-announcer-persistent-layout-required](/.claude/docs/route-announcer-persistent-layout-required.md)
