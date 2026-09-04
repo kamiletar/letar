@@ -1,0 +1,8 @@
+[Unit]
+Description=Бэкап критичных файлов Maddy (конфиг, credentials, DKIM) + rsync на s2
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/maddy/backup.sh

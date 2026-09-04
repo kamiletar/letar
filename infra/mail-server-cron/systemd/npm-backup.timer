@@ -1,0 +1,10 @@
+[Unit]
+Description=Ежедневный бэкап NPM на mail-сервере в 03:30 (было crontab root: 30 3 * * *)
+
+[Timer]
+OnCalendar=*-*-* 03:30:00
+Persistent=true
+RandomizedDelaySec=60
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,8 @@
+[Unit]
+Description=Обновление Let's Encrypt сертификата mail.letar.best (certbot standalone) + рестарт Maddy
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/maddy/renew-cert.sh

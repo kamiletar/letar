@@ -1,0 +1,8 @@
+[Unit]
+Description=Бэкап Nginx Proxy Manager (tg-proxy/tg-in) на mail-сервере + rsync на s2
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/npm-backup.sh

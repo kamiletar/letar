@@ -1,0 +1,9 @@
+[Unit]
+Description=Очистка демо-записей form-example
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/letar-form-example-cleanup.env
+ExecStart=/usr/bin/curl -sf "http://localhost:3022/api/cleanup?secret=${CLEANUP_SECRET}"

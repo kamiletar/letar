@@ -1,0 +1,10 @@
+[Unit]
+Description=Ежедневная очистка form-example в 03:00 (было crontab root: 0 3 * * *)
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+Persistent=true
+RandomizedDelaySec=60
+
+[Install]
+WantedBy=timers.target
