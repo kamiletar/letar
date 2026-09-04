@@ -7,7 +7,7 @@
  * чтобы избежать перехвата тапов во время анимации выхода.
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import { Haptics } from '@/services/haptics'
@@ -22,11 +22,13 @@ export function ResumeOverlay({ progressState }: ResumeOverlayProps) {
 
   // Локальное состояние для управления рендерингом
   const [shouldRender, setShouldRender] = useState(false)
-  const opacity = useRef(new Animated.Value(0)).current
+  // useState вместо useRef(...).current — см. NextEpisodeOverlay.tsx для объяснения
+  const [opacity] = useState(() => new Animated.Value(0))
 
-  // Управление появлением/исчезновением
+  // Управление появлением/исчезновением — легитимная синхронизация с Animated (внешняя система)
   useEffect(() => {
     if (showResumePrompt && savedPosition !== null) {
+      // oxlint-disable-next-line react/set-state-in-effect -- запуск Animated.timing, не производное значение
       setShouldRender(true)
       Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }).start()
     } else if (shouldRender) {

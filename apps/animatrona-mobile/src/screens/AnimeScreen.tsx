@@ -20,7 +20,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { getAnimeDetails, getPosterUrl } from '@/api'
-import { useAnimeLayout, useOrientation } from '@/hooks/useOrientation'
+import { type AnimeLayoutConfig, useAnimeLayout, useOrientation } from '@/hooks/useOrientation'
 import type { AnimeScreenProps } from '@/navigation/types'
 import { enqueueEpisodeDownload } from '@/services/downloadManager'
 import { Haptics } from '@/services/haptics'
@@ -58,6 +58,8 @@ export function AnimeScreen({ navigation, route }: AnimeScreenProps) {
   const isOffline = useOfflineStore((s) => !s.isServerReachable)
 
   useEffect(() => {
+    // Загрузка данных при монтировании и по retryCount, источник (сеть) внешний
+    // oxlint-disable-next-line react/set-state-in-effect -- синхронный setState неизбежен
     setLoading(true)
     setError(null)
 
@@ -339,59 +341,6 @@ export function AnimeScreen({ navigation, route }: AnimeScreenProps) {
     )
   }
 
-  // Левая панель (постер + метаданные) — для split-view
-  const LeftPanel = () => (
-    <View style={[styles.leftPanel, { width: layout.leftPanelWidth }]}>
-      <Image
-        source={{ uri: anime.posterPath || getPosterUrl(animeId) }}
-        style={[styles.posterLarge, { width: layout.posterWidth, height: layout.posterHeight }]}
-      />
-      <View style={styles.metaContainer}>
-        <Text style={styles.animeTitleSplit} numberOfLines={3}>
-          {anime.name}
-        </Text>
-        {anime.originalName && (
-          <Text style={styles.animeOriginalTitle} numberOfLines={1}>
-            {anime.originalName}
-          </Text>
-        )}
-        <View style={styles.animeMeta}>
-          {anime.year && <Text style={styles.animeMetaText}>{anime.year}</Text>}
-          {anime.rating && <Text style={styles.animeMetaText}>★ {anime.rating.toFixed(1)}</Text>}
-          <Text style={styles.animeMetaText}>{anime.episodeCount} эп.</Text>
-        </View>
-        {/* Жанры */}
-        {anime.genres.length > 0 && (
-          <View style={styles.genresWrap}>
-            {anime.genres.slice(0, 4).map((genre) => (
-              <View key={genre} style={styles.genreChip}>
-                <Text style={styles.genreText}>{genre}</Text>
-              </View>
-            ))}
-          </View>
-        )}
-        {/* Описание */}
-        {anime.description && (
-          <Text style={styles.descriptionSplit} numberOfLines={isLandscape ? 6 : 4}>
-            {anime.description}
-          </Text>
-        )}
-        {/* Кнопка "Продолжить" в landscape */}
-        {lastWatchedEpisode && (
-          <TouchableOpacity style={styles.continueButtonSplit} onPress={handleContinueWatching} activeOpacity={0.8}>
-            <Play size={20} color="#FFFFFF" style={{ marginLeft: 2 }} />
-            <View style={styles.continueTextContainer}>
-              <Text style={styles.continueTitle}>Продолжить</Text>
-              <Text style={styles.continueSubtitleSplit}>
-                Эп. {lastWatchedEpisode.episode.number} • {formatTime(lastWatchedEpisode.progress.position)}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        )}
-      </View>
-    </View>
-  )
-
   // Landscape: Split-view layout
   if (layout.useSplitView) {
     return (
@@ -415,7 +364,14 @@ export function AnimeScreen({ navigation, route }: AnimeScreenProps) {
         </SafeAreaView>
 
         <View style={styles.splitContainer}>
-          <LeftPanel />
+          <LeftPanel
+            anime={anime}
+            animeId={animeId}
+            layout={layout}
+            isLandscape={isLandscape}
+            lastWatchedEpisode={lastWatchedEpisode}
+            onContinueWatching={handleContinueWatching}
+          />
           {/* Правая панель — список эпизодов */}
           <SectionList
             style={styles.rightPanel}
@@ -508,6 +464,76 @@ export function AnimeScreen({ navigation, route }: AnimeScreenProps) {
         stickySectionHeadersEnabled
         contentContainerStyle={styles.episodesList}
       />
+    </View>
+  )
+}
+
+/** Левая панель (постер + метаданные) — для split-view. Вынесена на верхний уровень модуля,
+ * чтобы не пересоздаваться (и не терять состояние) при каждом рендере AnimeScreen. */
+function LeftPanel({
+  anime,
+  animeId,
+  layout,
+  isLandscape,
+  lastWatchedEpisode,
+  onContinueWatching,
+}: {
+  anime: AnimeDetails
+  animeId: string
+  layout: AnimeLayoutConfig
+  isLandscape: boolean
+  lastWatchedEpisode: { episode: Episode; progress: WatchProgressData } | null
+  onContinueWatching: () => void
+}) {
+  return (
+    <View style={[styles.leftPanel, { width: layout.leftPanelWidth }]}>
+      <Image
+        source={{ uri: anime.posterPath || getPosterUrl(animeId) }}
+        style={[styles.posterLarge, { width: layout.posterWidth, height: layout.posterHeight }]}
+      />
+      <View style={styles.metaContainer}>
+        <Text style={styles.animeTitleSplit} numberOfLines={3}>
+          {anime.name}
+        </Text>
+        {anime.originalName && (
+          <Text style={styles.animeOriginalTitle} numberOfLines={1}>
+            {anime.originalName}
+          </Text>
+        )}
+        <View style={styles.animeMeta}>
+          {anime.year && <Text style={styles.animeMetaText}>{anime.year}</Text>}
+          {anime.rating && <Text style={styles.animeMetaText}>★ {anime.rating.toFixed(1)}</Text>}
+          <Text style={styles.animeMetaText}>{anime.episodeCount} эп.</Text>
+        </View>
+        {/* Жанры */}
+        {anime.genres.length > 0 && (
+          <View style={styles.genresWrap}>
+            {anime.genres.slice(0, 4).map((genre) => (
+              <View key={genre} style={styles.genreChip}>
+                <Text style={styles.genreText}>{genre}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+        {/* Описание */}
+        {anime.description && (
+          <Text style={styles.descriptionSplit} numberOfLines={isLandscape ? 6 : 4}>
+            {anime.description}
+          </Text>
+        )}
+        {/* Кнопка "Продолжить" в landscape */}
+        {lastWatchedEpisode && (
+          <TouchableOpacity style={styles.continueButtonSplit} onPress={onContinueWatching} activeOpacity={0.8}>
+            <Play size={20} color="#FFFFFF" style={{ marginLeft: 2 }} />
+            <View style={styles.continueTextContainer}>
+              <Text style={styles.continueTitle}>Продолжить</Text>
+              <Text style={styles.continueSubtitleSplit}>
+                Эп. {lastWatchedEpisode.episode.number} • {formatTime(lastWatchedEpisode.progress.position)}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   )
 }

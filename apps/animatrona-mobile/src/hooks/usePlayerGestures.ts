@@ -15,7 +15,7 @@
  * - Горизонтальный свайп по центру: перемотка
  */
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { Dimensions } from 'react-native'
 import {
   Gesture,
@@ -272,37 +272,48 @@ export function usePlayerGestures({
     setGestureState((prev) => ({ ...prev, showSpeedBoost: false, isGestureActive: false }))
   }, [onSpeedChange])
 
-  // Создаём жесты
-  const singleTap = Gesture.Tap()
-    .maxDuration(250)
-    .onEnd(() => {
-      onTap()
-    })
+  // Создаём жесты (мемоизировано — билдеры Gesture не должны пересоздаваться каждый рендер)
+  const composedGesture = useMemo(() => {
+    const singleTap = Gesture.Tap()
+      .maxDuration(250)
+      .onEnd(() => {
+        onTap()
+      })
 
-  const doubleTap = Gesture.Tap().numberOfTaps(2).maxDuration(300).onEnd(handleDoubleTap)
+    const doubleTap = Gesture.Tap().numberOfTaps(2).maxDuration(300).onEnd(handleDoubleTap)
 
-  const panGesture = Gesture.Pan()
-    .minDistance(MIN_SWIPE_DISTANCE)
-    .onStart(handlePanStart)
-    .onUpdate(handlePanUpdate)
-    .onEnd(handlePanEnd)
-    .onFinalize(handlePanEnd)
+    // Обработчики (handlePanStart и т.д.) мутируют refs синхронно с touch-событиями (не при рендере) —
+    // компилятор ошибочно тянет это правило на сами ссылки на функции в цепочке билдера Gesture
+    const panGesture = Gesture.Pan()
+      .minDistance(MIN_SWIPE_DISTANCE)
+      // oxlint-disable-next-line react/refs -- см. комментарий выше
+      .onStart(handlePanStart)
+      // oxlint-disable-next-line react/refs -- см. комментарий выше
+      .onUpdate(handlePanUpdate)
+      // oxlint-disable-next-line react/refs -- см. комментарий выше
+      .onEnd(handlePanEnd)
+      // oxlint-disable-next-line react/refs -- см. комментарий выше
+      .onFinalize(handlePanEnd)
 
-  // Long press для 2x скорости (как YouTube)
-  const longPressGesture = Gesture.LongPress()
-    .minDuration(500) // 500ms удержания
-    .onStart(handleLongPressStart)
-    .onEnd(handleLongPressEnd)
-    .onFinalize(handleLongPressEnd)
+    // Long press для 2x скорости (как YouTube)
+    const longPressGesture = Gesture.LongPress()
+      .minDuration(500) // 500ms удержания
+      // oxlint-disable-next-line react/refs -- см. комментарий выше
+      .onStart(handleLongPressStart)
+      // oxlint-disable-next-line react/refs -- см. комментарий выше
+      .onEnd(handleLongPressEnd)
+      // oxlint-disable-next-line react/refs -- см. комментарий выше
+      .onFinalize(handleLongPressEnd)
 
-  // Комбинируем жесты: double-tap приоритетнее single-tap
-  const tapGesture = Gesture.Exclusive(doubleTap, singleTap)
+    // Комбинируем жесты: double-tap приоритетнее single-tap
+    const tapGesture = Gesture.Exclusive(doubleTap, singleTap)
 
-  // Long press работает отдельно от tap
-  const tapWithLongPress = Gesture.Exclusive(longPressGesture, tapGesture)
+    // Long press работает отдельно от tap
+    const tapWithLongPress = Gesture.Exclusive(longPressGesture, tapGesture)
 
-  // Все жесты могут работать одновременно
-  const composedGesture = Gesture.Simultaneous(tapWithLongPress, panGesture)
+    // Все жесты могут работать одновременно
+    return Gesture.Simultaneous(tapWithLongPress, panGesture)
+  }, [onTap, handleDoubleTap, handlePanStart, handlePanUpdate, handlePanEnd, handleLongPressStart, handleLongPressEnd])
 
   return {
     gesture: composedGesture,

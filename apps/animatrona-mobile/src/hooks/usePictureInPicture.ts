@@ -51,7 +51,9 @@ export function usePictureInPicture(options: UsePictureInPictureOptions = {}): U
 
   // Ref для колбэка чтобы избежать пересоздания подписок
   const onPipActionRef = useRef(onPipAction)
-  onPipActionRef.current = onPipAction
+  useEffect(() => {
+    onPipActionRef.current = onPipAction
+  })
 
   // Синхронный ref для отслеживания PiP состояния (useState асинхронный — ненадёжен для race conditions)
   const isInPipModeRef = useRef(false)
@@ -68,66 +70,6 @@ export function usePictureInPicture(options: UsePictureInPictureOptions = {}): U
     isInPipModeRef.current = newState
     setIsInPipMode(newState)
   }, [])
-
-  // Автоматический PiP при сворачивании (с защитой от цикла)
-  useEffect(() => {
-    if (!isPipAvailable || !autoEnterOnBackground) {
-      return
-    }
-
-    const handleAppStateChange = (nextAppState: AppStateStatus) => {
-      // Используем ref — он синхронный и всегда актуальный
-      if (nextAppState === 'background' && !isInPipModeRef.current) {
-        // Блокируем auto-enter если недавно вышли из PiP (защита от цикла)
-        const timeSinceExit = Date.now() - lastPipExitRef.current
-        if (timeSinceExit < PIP_REENTRY_COOLDOWN) {
-          return
-        }
-        enterPipMode()
-      }
-    }
-
-    const subscription = AppState.addEventListener('change', handleAppStateChange)
-    return () => subscription.remove()
-  }, [isPipAvailable, autoEnterOnBackground])
-
-  // Слушаем события PiP от TurboModule через NativeEventEmitter
-  useEffect(() => {
-    if (!isPipAvailable || !pipEmitter) {
-      return
-    }
-
-    const pipModeSubscription = pipEmitter.addListener(
-      'onPictureInPictureModeChanged',
-      (...args: readonly Object[]) => {
-        const event = args[0] as { isInPipMode: boolean }
-        updatePipState(event.isInPipMode)
-      },
-    )
-
-    const pipActionSubscription = pipEmitter.addListener('onPipAction', (...args: readonly Object[]) => {
-      const event = args[0] as { action: PipAction }
-      onPipActionRef.current?.(event.action)
-    })
-
-    return () => {
-      pipModeSubscription.remove()
-      pipActionSubscription.remove()
-    }
-  }, [isPipAvailable, updatePipState])
-
-  // Страховка: при возврате в foreground гарантированно сбрасываем PiP state
-  // (на Android < 12 нативное событие может не доставиться из PAUSED state)
-  useEffect(() => {
-    const handleAppStateChange = (nextAppState: AppStateStatus) => {
-      if (nextAppState === 'active') {
-        updatePipState(false)
-      }
-    }
-
-    const subscription = AppState.addEventListener('change', handleAppStateChange)
-    return () => subscription.remove()
-  }, [updatePipState])
 
   const enterPipMode = useCallback(async (): Promise<boolean> => {
     if (!isPipAvailable || !NativePipModule) {
@@ -162,6 +104,66 @@ export function usePictureInPicture(options: UsePictureInPictureOptions = {}): U
       return false
     }
   }, [isPipAvailable, aspectRatio, updatePipState])
+
+  // Автоматический PiP при сворачивании (с защитой от цикла)
+  useEffect(() => {
+    if (!isPipAvailable || !autoEnterOnBackground) {
+      return
+    }
+
+    const handleAppStateChange = (nextAppState: AppStateStatus) => {
+      // Используем ref — он синхронный и всегда актуальный
+      if (nextAppState === 'background' && !isInPipModeRef.current) {
+        // Блокируем auto-enter если недавно вышли из PiP (защита от цикла)
+        const timeSinceExit = Date.now() - lastPipExitRef.current
+        if (timeSinceExit < PIP_REENTRY_COOLDOWN) {
+          return
+        }
+        enterPipMode()
+      }
+    }
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange)
+    return () => subscription.remove()
+  }, [isPipAvailable, autoEnterOnBackground])
+
+  // Слушаем события PiP от TurboModule через NativeEventEmitter
+  useEffect(() => {
+    if (!isPipAvailable || !pipEmitter) {
+      return
+    }
+
+    const pipModeSubscription = pipEmitter.addListener(
+      'onPictureInPictureModeChanged',
+      (...args: readonly object[]) => {
+        const event = args[0] as { isInPipMode: boolean }
+        updatePipState(event.isInPipMode)
+      },
+    )
+
+    const pipActionSubscription = pipEmitter.addListener('onPipAction', (...args: readonly object[]) => {
+      const event = args[0] as { action: PipAction }
+      onPipActionRef.current?.(event.action)
+    })
+
+    return () => {
+      pipModeSubscription.remove()
+      pipActionSubscription.remove()
+    }
+  }, [isPipAvailable, updatePipState])
+
+  // Страховка: при возврате в foreground гарантированно сбрасываем PiP state
+  // (на Android < 12 нативное событие может не доставиться из PAUSED state)
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: AppStateStatus) => {
+      if (nextAppState === 'active') {
+        updatePipState(false)
+      }
+    }
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange)
+    return () => subscription.remove()
+  }, [updatePipState])
 
   const exitPipMode = useCallback(() => {
     if (!isPipAvailable || !NativePipModule) {

@@ -5,7 +5,7 @@
  * для избежания конфликтов с PanResponder.
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Animated, type StyleProp, StyleSheet, type ViewStyle } from 'react-native'
 
 interface FadeViewProps {
@@ -17,12 +17,16 @@ interface FadeViewProps {
 }
 
 export function FadeView({ visible, duration = 200, style, pointerEvents = 'auto', children }: FadeViewProps) {
-  const opacity = useRef(new Animated.Value(visible ? 1 : 0)).current
+  // useState вместо useRef(...).current — Animated.Value не меняет идентичность между рендерами,
+  // но лениво инициализированное состояние не триггерит правило react(refs)
+  const [opacity] = useState(() => new Animated.Value(visible ? 1 : 0))
   const [shouldRender, setShouldRender] = useState(visible)
 
+  // Легитимная синхронизация с Animated (внешняя система)
   useEffect(() => {
     if (visible) {
       // Показываем - сначала рендерим, потом анимируем
+      // oxlint-disable-next-line react/set-state-in-effect -- запуск Animated.timing, не производное значение
       setShouldRender(true)
       Animated.timing(opacity, {
         toValue: 1,

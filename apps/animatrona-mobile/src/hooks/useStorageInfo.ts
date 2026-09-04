@@ -34,6 +34,8 @@ export function useStorageInfo(): UseStorageInfoResult {
   }, [])
 
   useEffect(() => {
+    // Загрузка данных о хранилище при монтировании хука, источник (ФС) внешний
+    // oxlint-disable-next-line react/set-state-in-effect -- синхронный setState неизбежен
     refresh()
   }, [refresh])
 

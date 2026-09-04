@@ -73,31 +73,44 @@ export function SeekBar({ currentTime, duration, onSeek }: SeekBarProps) {
     [duration, onSeek],
   )
 
+  // Мутация `.value` shared values Reanimated внутри ворклетов — штатный API-контракт библиотеки
+  // (не React state), компилятор его не понимает и трактует как запрещённую мутацию/чтение рефа
   const pan = Gesture.Pan()
     .onBegin((e) => {
       'worklet'
       const ratio = Math.max(0, Math.min(1, e.x / Math.max(barWidth.value, 1)))
+      // oxlint-disable-next-line react/immutability -- см. комментарий выше
       dragRatio.value = ratio
+      // oxlint-disable-next-line react/immutability -- см. комментарий выше
       isDragging.value = true
+      // oxlint-disable-next-line react/immutability -- см. комментарий выше
       seekTargetRatio.value = -1 // Сброс при начале нового drag
+      // oxlint-disable-next-line react/immutability -- см. комментарий выше
       thumbScale.value = withSpring(THUMB_ACTIVE_SIZE / THUMB_SIZE, SPRING_CONFIG)
       runOnJS(triggerHaptic)()
     })
     .onUpdate((e) => {
       'worklet'
+      // oxlint-disable-next-line react/immutability -- см. комментарий выше
       dragRatio.value = Math.max(0, Math.min(1, e.x / Math.max(barWidth.value, 1)))
     })
+    // oxlint-disable-next-line react/refs -- тело onEnd мутирует shared values синхронно с жестом (не при рендере)
     .onEnd(() => {
       'worklet'
+      // oxlint-disable-next-line react/immutability -- см. комментарий выше
       thumbScale.value = withSpring(1, SPRING_CONFIG)
+      // oxlint-disable-next-line react/immutability -- см. комментарий выше
       seekTargetRatio.value = dragRatio.value // Залочить позицию пока плеер не seekнет
+      // oxlint-disable-next-line react/immutability -- см. комментарий выше
       isDragging.value = false
       runOnJS(commitSeek)(dragRatio.value)
       runOnJS(scheduleSeekReset)()
     })
     .onFinalize(() => {
       'worklet'
+      // oxlint-disable-next-line react/immutability -- см. комментарий выше
       thumbScale.value = withSpring(1, SPRING_CONFIG)
+      // oxlint-disable-next-line react/immutability -- см. комментарий выше
       isDragging.value = false
     })
     .minDistance(0) // Реагировать на тап без минимального расстояния
@@ -150,6 +163,8 @@ export function SeekBar({ currentTime, duration, onSeek }: SeekBarProps) {
           ref={barRef as never}
           style={styles.hitArea}
           onLayout={(e) => {
+            // Мутация shared value Reanimated в JS-обработчике onLayout (не при рендере) — штатный API
+            // oxlint-disable-next-line react/immutability -- см. комментарий выше
             barWidth.value = e.nativeEvent.layout.width
             barRef.current?.measureInWindow((x) => {
               barXRef.current = x

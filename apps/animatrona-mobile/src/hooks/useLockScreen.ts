@@ -141,18 +141,24 @@ export function useLockScreen(): UseLockScreenResult {
     [clearProgressInterval, isLocked, startIconTimer],
   )
 
+  // Обработчики (handleLongPressStart и т.д.) мутируют refs синхронно с touch-событиями (не при рендере) —
+  // компилятор ошибочно тянет это правило на сами ссылки на функции в цепочке билдера Gesture
   /** Long press для разблокировки */
   const longPressGesture = Gesture.LongPress()
     .enabled(isLocked)
     .minDuration(100)
     .maxDistance(50)
+    // oxlint-disable-next-line react/refs -- см. комментарий выше
     .onBegin(handleLongPressStart)
+    // oxlint-disable-next-line react/refs -- см. комментарий выше
     .onEnd(handleLongPressEnd)
+    // oxlint-disable-next-line react/refs -- см. комментарий выше
     .onFinalize(handleLongPressEnd)
 
   /** Tap для показа/скрытия иконки замка */
   const tapGesture = Gesture.Tap()
     .enabled(isLocked)
+    // oxlint-disable-next-line react/refs -- см. комментарий выше
     .onEnd(() => {
       if (iconVisible) {
         // Если иконка видна — скрыть

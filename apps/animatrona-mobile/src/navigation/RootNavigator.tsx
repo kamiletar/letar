@@ -40,19 +40,20 @@ const DarkTheme: Theme = {
 }
 
 export function RootNavigator() {
-  const [hydrated, setHydrated] = useState(false)
+  // Ленивая инициализация — если стор уже гидрировался к моменту монтирования,
+  // не нужен лишний синхронный setState в эффекте
+  const [hydrated, setHydrated] = useState(() => useServersStore.persist.hasHydrated())
 
   // Ждём гидрации Zustand persist чтобы знать есть ли серверы
   useEffect(() => {
-    if (useServersStore.persist.hasHydrated()) {
-      setHydrated(true)
+    if (hydrated) {
       return
     }
     const unsub = useServersStore.persist.onFinishHydration(() => {
       setHydrated(true)
     })
     return unsub
-  }, [])
+  }, [hydrated])
 
   const hasServers = useServersStore((state) => state.servers.length > 0)
 

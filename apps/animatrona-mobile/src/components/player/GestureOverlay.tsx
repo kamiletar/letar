@@ -89,8 +89,10 @@ export function GestureOverlay(props: GestureOverlayProps) {
 
   // Состояние UI
   const [indicatorText, setIndicatorText] = useState('')
-  const indicatorOpacity = useRef(new Animated.Value(0)).current
-  const indicatorScale = useRef(new Animated.Value(0.85)).current
+  // useState вместо useRef(...).current — Animated.Value не меняет идентичность между рендерами,
+  // но лениво инициализированное состояние не триггерит правило react(refs)
+  const [indicatorOpacity] = useState(() => new Animated.Value(0))
+  const [indicatorScale] = useState(() => new Animated.Value(0.85))
 
   // Состояние жестов
   const lastTapTimeRef = useRef(0)
@@ -173,8 +175,11 @@ export function GestureOverlay(props: GestureOverlayProps) {
     }
   }, [])
 
+  // Обработчики ниже мутируют refs (hasMovedRef, gestureActiveRef и т.д.) синхронно с touch-событиями
+  // (не при рендере) — стандартный паттерн PanResponder для 60fps жестов без задержки re-render через state
   const panResponder = useMemo(
     () =>
+      // oxlint-disable-next-line react/refs -- см. комментарий выше
       PanResponder.create({
         onStartShouldSetPanResponder: () => !disabled,
         onMoveShouldSetPanResponder: () => !disabled,
@@ -394,6 +399,8 @@ export function GestureOverlay(props: GestureOverlayProps) {
           // Обработка тапов (не было движения)
           if (!hasMovedRef.current && gestureActiveRef.current === 'none') {
             const { pageX } = evt.nativeEvent
+            // Вызывается внутри onPanResponderRelease (touch-обработчик, не рендер)
+            // oxlint-disable-next-line react/purity -- компилятор не различает функцию-литерал внутри useMemo
             const now = Date.now()
             const thirdWidth = screenWidth / 3
             const tapZone: 'left' | 'center' | 'right' = pageX < thirdWidth

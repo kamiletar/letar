@@ -135,6 +135,7 @@ export function LibraryScreen({ navigation }: LibraryScreenProps) {
 
   // Загрузка при смене сервера
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- загрузка данных с сервера при смене activeServerId
     fetchData()
   }, [fetchData, activeServerId])
 
@@ -153,6 +154,7 @@ export function LibraryScreen({ navigation }: LibraryScreenProps) {
   // Серверный поиск для Tracker (при изменении debouncedSearch)
   useEffect(() => {
     if (activeServerType === 'tracker' && debouncedSearch) {
+      // oxlint-disable-next-line react/set-state-in-effect -- серверный поиск по debounced-значению
       fetchData(false, debouncedSearch)
     } else if (activeServerType === 'tracker' && !debouncedSearch) {
       // Очистка поиска — загружаем полный каталог

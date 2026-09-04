@@ -16,7 +16,9 @@ import { useOfflineStore } from '@/store/offline'
 export function OfflineIndicator() {
   const { isConnected: hasNetwork } = useNetworkStatus()
   const isServerReachable = useOfflineStore((s) => s.isServerReachable)
-  const translateY = React.useRef(new Animated.Value(-50)).current
+  // useState вместо useRef(...).current — Animated.Value не меняет идентичность между рендерами,
+  // но лениво инициализированное состояние не триггерит правило react(refs)
+  const [translateY] = React.useState(() => new Animated.Value(-50))
 
   // Определяем нужно ли показывать баннер и какой текст
   const isOnline = hasNetwork && isServerReachable

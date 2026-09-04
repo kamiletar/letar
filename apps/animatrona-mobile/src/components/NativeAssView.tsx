@@ -77,7 +77,7 @@ export function NativeAssView({
 
   // Обновление масштаба шрифта
   useEffect(() => {
-    if (fontScale != null && viewRef.current) {
+    if (fontScale !== null && fontScale !== undefined && viewRef.current) {
       Commands.setFontScale(viewRef.current, fontScale)
     }
   }, [fontScale])
@@ -109,10 +109,16 @@ export function NativeAssView({
  */
 export function useAssContent(url: string | null): string {
   const [content, setContent] = useState('')
+  // Сброс контента синхронно при смене url — без эффекта (см. React docs
+  // "Adjusting state based on a prop change" вместо setState в эффекте)
+  const [trackedUrl, setTrackedUrl] = useState(url)
+  if (url !== trackedUrl) {
+    setTrackedUrl(url)
+    setContent('')
+  }
 
   useEffect(() => {
     if (!url) {
-      setContent('')
       return
     }
 

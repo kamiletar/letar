@@ -190,6 +190,8 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
   const pendingSeekRef = useRef<number | null>(null)
   const episodeCompletedRef = useRef(false) // чтобы не отправлять несколько раз
   const prefetchedEpisodeIdRef = useRef<string | null>(null)
+  // Сохраняем позицию для seek после загрузки видео
+  const resumePositionRef = useRef<number | null>(hasExternalStartTime ? initialStartTime! : null)
 
   // Хуки
   const lockState = useLockScreen()
@@ -223,6 +225,7 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
   // При входе в PiP — закрываем все модальные окна (иначе они перекрывают PiP)
   useEffect(() => {
     if (pip.isInPipMode) {
+      // oxlint-disable-next-line react/set-state-in-effect -- реакция на внешнюю систему (Android PiP), не производное значение
       setShowSpeedMenu(false)
       setShowSettingsMenu(false)
       setShowAudioMenu(false)
@@ -352,8 +355,9 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
     }
   }, [currentTime, duration, nextEpisode])
 
-  // Загрузка данных
+  // Загрузка данных эпизода — источник (сеть) внешний
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- синхронный setState неизбежен
     setLoading(true)
     setError(null)
     setShowNextEpisodeOverlay(false)
@@ -634,9 +638,6 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
       return () => clearTimeout(timer)
     }
   }, [watchProgress.showResumePrompt, watchProgress.savedPosition, userMadeResumeDecision])
-
-  // Сохраняем позицию для seek после загрузки видео
-  const resumePositionRef = useRef<number | null>(hasExternalStartTime ? initialStartTime! : null)
 
   const handleResumeFromSaved = useCallback((): number => {
     const position = watchProgress.resumeFromSaved()

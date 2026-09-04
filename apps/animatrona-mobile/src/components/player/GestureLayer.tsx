@@ -9,7 +9,7 @@
  * - Индикатор 2x скорости
  */
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Animated, type StyleProp, StyleSheet, Text, View, type ViewStyle } from 'react-native'
 import { GestureDetector } from 'react-native-gesture-handler'
 
@@ -43,7 +43,9 @@ function FadeView({
   children: React.ReactNode
   style?: StyleProp<ViewStyle>
 }) {
-  const opacity = useRef(new Animated.Value(0)).current
+  // useState вместо useRef(...).current — Animated.Value не меняет идентичность между рендерами,
+  // но лениво инициализированное состояние не триггерит правило react(refs)
+  const [opacity] = useState(() => new Animated.Value(0))
 
   useEffect(() => {
     Animated.timing(opacity, {
@@ -70,8 +72,8 @@ function ZoomFadeView({
   children: React.ReactNode
   style?: StyleProp<ViewStyle>
 }) {
-  const scale = useRef(new Animated.Value(0.3)).current
-  const opacity = useRef(new Animated.Value(0)).current
+  const [scale] = useState(() => new Animated.Value(0.3))
+  const [opacity] = useState(() => new Animated.Value(0))
 
   useEffect(() => {
     if (visible) {

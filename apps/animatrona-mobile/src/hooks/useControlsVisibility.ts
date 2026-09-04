@@ -77,11 +77,12 @@ export function useControlsVisibility({
     setVisible((prev) => !prev)
   }, [])
 
-  // Перезапускать таймер при изменении isPaused
+  // Перезапускать таймер при изменении isPaused — синхронизация с внешней системой (setTimeout)
   useEffect(() => {
     if (isPaused) {
       // При паузе показываем контролы и не скрываем
       clearHideTimeout()
+      // oxlint-disable-next-line react/set-state-in-effect -- сброс видимости при паузе, часть таймера
       setVisible(true)
     } else {
       // При воспроизведении запускаем таймер
@@ -93,6 +94,7 @@ export function useControlsVisibility({
   useEffect(() => {
     if (isGestureActive) {
       clearHideTimeout()
+      // oxlint-disable-next-line react/set-state-in-effect -- синхронизация с таймером (внешняя система)
       setVisible(true)
     } else if (!isPaused && !isLocked) {
       startHideTimeout()

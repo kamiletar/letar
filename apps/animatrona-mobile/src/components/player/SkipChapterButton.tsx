@@ -4,7 +4,7 @@
  * Появляется когда текущее время попадает в интро/аутро главу
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Animated, StyleSheet, Text, TouchableOpacity } from 'react-native'
 
 import { Haptics } from '@/services/haptics'
@@ -38,25 +38,26 @@ const SKIPPABLE_TITLES = [
 ]
 
 export function SkipChapterButton({ chapters, currentTime, onSkip }: SkipChapterButtonProps) {
-  const [activeChapter, setActiveChapter] = useState<Chapter | null>(null)
   const [shouldRender, setShouldRender] = useState(false)
-  const opacity = useRef(new Animated.Value(0)).current
-  const translateX = useRef(new Animated.Value(50)).current
+  // useState вместо useRef(...).current — см. NextEpisodeOverlay.tsx для объяснения
+  const [opacity] = useState(() => new Animated.Value(0))
+  const [translateX] = useState(() => new Animated.Value(50))
 
-  // Найти активную главу
-  useEffect(() => {
-    const chapter = chapters.find((ch) => {
-      const isInRange = currentTime >= ch.startTime && currentTime < ch.endTime
-      const isSkippable = SKIPPABLE_TITLES.some((t) => ch.title.toLowerCase().includes(t))
-      return isInRange && isSkippable
-    })
-
-    setActiveChapter(chapter || null)
+  // Найти активную главу — чистое вычисление из props, эффект не нужен
+  const activeChapter = useMemo(() => {
+    return (
+      chapters.find((ch) => {
+        const isInRange = currentTime >= ch.startTime && currentTime < ch.endTime
+        const isSkippable = SKIPPABLE_TITLES.some((t) => ch.title.toLowerCase().includes(t))
+        return isInRange && isSkippable
+      }) ?? null
+    )
   }, [chapters, currentTime])
 
-  // Анимация появления/скрытия
+  // Анимация появления/скрытия — легитимная синхронизация с Animated (внешняя система)
   useEffect(() => {
     if (activeChapter) {
+      // oxlint-disable-next-line react/set-state-in-effect -- запуск Animated.parallel, не производное значение
       setShouldRender(true)
       Animated.parallel([
         Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }),

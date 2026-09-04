@@ -23,15 +23,20 @@ interface NextEpisodeOverlayProps {
 export function NextEpisodeOverlay({ visible, nextEpisode, onPlayNext, onCancel }: NextEpisodeOverlayProps) {
   const [countdown, setCountdown] = useState(COUNTDOWN_SECONDS)
   const [shouldRender, setShouldRender] = useState(false)
-  const opacity = useRef(new Animated.Value(0)).current
+  // useState вместо useRef(...).current — Animated.Value не меняет идентичность между рендерами,
+  // но лениво инициализированное состояние не триггерит правило react(refs)
+  const [opacity] = useState(() => new Animated.Value(0))
 
   // Ref для callback — чтобы таймер не перезапускался при смене ссылки на onPlayNext
   const onPlayNextRef = useRef(onPlayNext)
-  onPlayNextRef.current = onPlayNext
+  useEffect(() => {
+    onPlayNextRef.current = onPlayNext
+  })
 
-  // Анимация появления/скрытия
+  // Анимация появления/скрытия — легитимная синхронизация с Animated (внешняя система)
   useEffect(() => {
     if (visible && nextEpisode) {
+      // oxlint-disable-next-line react/set-state-in-effect -- запуск Animated.timing, не производное значение
       setShouldRender(true)
       Animated.timing(opacity, { toValue: 1, duration: 300, useNativeDriver: true }).start()
     } else if (shouldRender) {
@@ -46,6 +51,7 @@ export function NextEpisodeOverlay({ visible, nextEpisode, onPlayNext, onCancel 
   // Обратный отсчёт
   useEffect(() => {
     if (!visible) {
+      // oxlint-disable-next-line react/set-state-in-effect -- сброс при скрытии, часть таймера ниже
       setCountdown(COUNTDOWN_SECONDS)
       return
     }

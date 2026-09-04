@@ -133,7 +133,9 @@ export function SrtSubtitleView({
   return (
     <View style={[styles.container, style]} pointerEvents={pointerEvents}>
       <View style={styles.textContainer}>
-        <Text style={[styles.subtitleText, fontSize != null && { fontSize }]}>{currentSubtitle.text}</Text>
+        <Text style={[styles.subtitleText, fontSize !== null && fontSize !== undefined && { fontSize }]}>
+          {currentSubtitle.text}
+        </Text>
       </View>
     </View>
   )
@@ -147,10 +149,16 @@ export function SrtSubtitleView({
  */
 export function useSrtContent(url: string | null): string {
   const [content, setContent] = useState('')
+  // Сброс контента синхронно при смене url — без эффекта (см. React docs
+  // "Adjusting state based on a prop change" вместо setState в эффекте)
+  const [trackedUrl, setTrackedUrl] = useState(url)
+  if (url !== trackedUrl) {
+    setTrackedUrl(url)
+    setContent('')
+  }
 
   useEffect(() => {
     if (!url) {
-      setContent('')
       return
     }
 
