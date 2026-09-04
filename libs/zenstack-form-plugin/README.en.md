@@ -234,6 +234,42 @@ portions: z.number()
   .meta({ ui: { fieldProps: { showValue: true } } })
 ```
 
+### Custom error text — trailing positional `message`, not `@meta` (v3.1.0)
+
+Native ZModel validation attributes (`@gte`, `@gt`, `@lte`, `@lt`, `@length`, `@email`, `@url`,
+`@regex`, ...) accept an optional trailing string argument. When present, it becomes the error
+message for that specific check when the generated Zod schema rejects the value:
+
+```zmodel
+price Int @gte(0, "Price cannot be negative")
+```
+
+Generates:
+
+```typescript
+price: applyNativeMessages(
+  z.number().int().gte(0),
+  [{ count: 1 }, { count: 1, message: 'Price cannot be negative' }],
+)
+```
+
+(`applyNativeMessages` is a small helper emitted inline into the generated file itself — the
+output has no runtime dependency on `@letar/zenstack-form-plugin`.)
+
+`@length(min, max, message)` sets one shared message for **both** bounds — a single string
+argument, not a pair, since `@length` maps to two Zod checks (`min_length`/`max_length`) from one
+attribute:
+
+```zmodel
+title String @length(2, 100, "Title must be 2–100 characters")
+```
+
+⚠️ Only literal string messages are supported in this release. i18n-key-based resolution
+(analogous to how `title`/`placeholder` resolve through `i18nKey` for `@letar/forms`) is **not**
+implemented yet — that remains a deliberate scope cut, not an oversight. `Decimal`-typed fields are
+also out of scope: they don't go through the same `ZodUtils.*` codepath and have no message
+support.
+
 ## Auto-excluded Fields
 
 - `id` — primary keys

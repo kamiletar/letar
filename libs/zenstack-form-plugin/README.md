@@ -275,6 +275,28 @@ email: z.string().email().meta({ ui: { title: 'Email' } })
 Ни одного дублирующего `form.props`-ключа не нужно — форма и ORM валидируют одинаково, потому что
 читают одно и то же место схемы.
 
+### Кастомный текст ошибки — последний позиционный `message`, не `@meta` (v3.1.0)
+
+Все атрибуты из таблицы выше (кроме `@trim`/`@lower`/`@upper` — они не могут провалиться) и
+числовые `@gte`/`@gt`/`@lte`/`@lt` принимают последним позиционным аргументом строку `message`,
+как в стандартной библиотеке ZModel:
+
+```zmodel
+price Int @gte(0, "Цена не может быть отрицательной") @meta("form.title", "Цена")
+
+email String @email("Введите настоящий email") @meta("form.title", "Email")
+```
+
+```typescript
+price: z.number().int().min(0, 'Цена не может быть отрицательной').meta({ ui: { title: 'Цена' } })
+```
+
+`message` — не `@meta`-ключ, он остаётся частью самого нативного атрибута ZModel. Для `@length`
+один `message` применяется к обеим границам (`min` и `max`), если заданы обе.
+
+⚠️ Пока это только литеральная строка, без i18n-резолюции ключа (в отличие от `title`/
+`placeholder`, у которых есть `i18nKey`) — см. `libs/forms/PLAN.md`.
+
 ### `form.props` для constraints — escape hatch, не основной путь
 
 `form.props.<constraint-ключ>` (`min`/`max`/`minLength`/`maxLength`/`pattern`/`email`/`url`/`uuid`/

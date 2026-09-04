@@ -301,6 +301,48 @@ describe('extractModelInfo', () => {
     expect(byName.sku?.formMeta.nativeAttributes).toEqual([{ name: '@upper' }])
   })
 
+  // ─── message-i18n: захват последнего позиционного `message` (v3.1.0) ─────
+
+  it('message-i18n: захватывает message последним позиционным аргументом, не передаёт его в args', () => {
+    const model = makeModel('Product', [
+      makeField({
+        name: 'price',
+        type: 'Int',
+        attributes: [{ refText: '@gte', args: [numberArg(0), stringArg('Цена не может быть отрицательной')] }],
+      }),
+      makeField({
+        name: 'sku',
+        type: 'String',
+        attributes: [{ refText: '@email' }], // без message — поле не задано
+      }),
+      makeField({
+        name: 'code',
+        type: 'String',
+        attributes: [{
+          refText: '@length',
+          args: [numberArg(2), numberArg(50), stringArg('От 2 до 50 символов')],
+        }],
+      }),
+    ])
+
+    const info = extractModelInfo(model, enumNames)
+    const byName = Object.fromEntries(info.fields.map((f) => [f.name, f]))
+
+    expect(byName.price?.formMeta.nativeAttributes).toEqual([
+      { name: '@gte', args: [{ name: 'value', value: 0 }], message: 'Цена не может быть отрицательной' },
+    ])
+    // message не просочился в args — ZodUtils.* не должен его увидеть
+    expect(byName.price?.formMeta.nativeAttributes?.[0]?.args).toEqual([{ name: 'value', value: 0 }])
+    expect(byName.sku?.formMeta.nativeAttributes).toEqual([{ name: '@email' }])
+    expect(byName.code?.formMeta.nativeAttributes).toEqual([
+      {
+        name: '@length',
+        args: [{ name: 'min', value: 2 }, { name: 'max', value: 50 }],
+        message: 'От 2 до 50 символов',
+      },
+    ])
+  })
+
   it('Фаза 1: @length на списке (List) валидирует количество элементов', () => {
     const model = makeModel('Post', [
       makeField({
@@ -578,6 +620,150 @@ describe('generateModelCode', () => {
 
     const code = generateModelCode(modelInfo, new Set())
     expect(code).toContain('withNative(z.array(z.string()), (s) => ZodUtils.addListValidation(s,')
+  })
+
+  // ─── message-i18n: applyNativeMessages (v3.1.0) ────────────────────────────
+
+  it('message-i18n: без message на nativeAttributes НЕ эмитит applyNativeMessages', () => {
+    const modelInfo: ModelInfo = {
+      name: 'User',
+      excludedFields: [],
+      fields: [field({ name: 'email', type: 'String', formMeta: { nativeAttributes: [{ name: '@email' }] } })],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    expect(code).not.toContain('applyNativeMessages')
+  })
+
+  it('message-i18n: атрибут с message оборачивается в applyNativeMessages(withNative(...), [{count,message}])', () => {
+    const modelInfo: ModelInfo = {
+      name: 'Product',
+      excludedFields: [],
+      fields: [
+        field({
+          name: 'price',
+          type: 'Float',
+          formMeta: {
+            nativeAttributes: [
+              { name: '@gte', args: [{ name: 'value', value: 0 }], message: 'Цена не может быть отрицательной' },
+            ],
+          },
+        }),
+      ],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    expect(code).toContain('function applyNativeMessages')
+    expect(code).toContain(
+      'price: applyNativeMessages(withNative(z.number(), (s) => ZodUtils.addNumberValidation(s, '
+        + "[{ name: '@gte', args: [{ name: 'value', value: { kind: 'literal', value: 0 } }] }])), "
+        + '[{ count: 1, message: "Цена не может быть отрицательной" }])',
+    )
+  })
+
+  it('message-i18n: Int-поле получает служебный leading {count:1} перед attrs — .int() пушит свой check первым', () => {
+    const modelInfo: ModelInfo = {
+      name: 'Recipe',
+      excludedFields: [],
+      fields: [
+        field({
+          name: 'rating',
+          type: 'Int',
+          formMeta: {
+            nativeAttributes: [
+              { name: '@gte', args: [{ name: 'value', value: 1 }], message: 'Оценка — от 1 до 5' },
+              { name: '@lte', args: [{ name: 'value', value: 5 }], message: 'Оценка — от 1 до 5' },
+            ],
+          },
+        }),
+      ],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    // leading {count:1} без message — «съедает» number_format-check от z.number().int(), иначе
+    // message @gte достаётся number_format, а @lte остаётся вовсе без подмены (живьём поймано).
+    expect(code).toContain(
+      'rating: applyNativeMessages(withNative(z.number().int(), (s) => ZodUtils.addNumberValidation(s, '
+        + "[{ name: '@gte', args: [{ name: 'value', value: { kind: 'literal', value: 1 } }] }, "
+        + "{ name: '@lte', args: [{ name: 'value', value: { kind: 'literal', value: 5 } }] }])), "
+        + '[{ count: 1 }, { count: 1, message: "Оценка — от 1 до 5" }, { count: 1, message: "Оценка — от 1 до 5" }])',
+    )
+  })
+
+  it('message-i18n: @length с общим message на min+max даёт count:2 (позиционно, не по типу check)', () => {
+    const modelInfo: ModelInfo = {
+      name: 'User',
+      excludedFields: [],
+      fields: [
+        field({
+          name: 'name',
+          type: 'String',
+          formMeta: {
+            nativeAttributes: [
+              {
+                name: '@length',
+                args: [{ name: 'min', value: 2 }, { name: 'max', value: 50 }],
+                message: 'От 2 до 50 символов',
+              },
+            ],
+          },
+        }),
+      ],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    expect(code).toContain('[{ count: 2, message: "От 2 до 50 символов" }]')
+  })
+
+  it('message-i18n: смешанные атрибуты (с message и без) сохраняют позицию через count у обоих', () => {
+    const modelInfo: ModelInfo = {
+      name: 'User',
+      excludedFields: [],
+      fields: [
+        field({
+          name: 'bio',
+          type: 'String',
+          formMeta: {
+            nativeAttributes: [
+              { name: '@trim' },
+              { name: '@length', args: [{ name: 'max', value: 500 }], message: 'Слишком длинно' },
+            ],
+          },
+        }),
+      ],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    // @trim — count:1 без message (транзитный overwrite-check, но занимает слот в checks[]),
+    // @length(max) без min — только один check, count:1
+    expect(code).toContain('[{ count: 1, message: undefined }, { count: 1, message: "Слишком длинно" }]')
+  })
+
+  it('message-i18n: @length на списке — applyNativeMessages поверх addListValidation', () => {
+    const modelInfo: ModelInfo = {
+      name: 'Post',
+      excludedFields: [],
+      fields: [
+        field({
+          name: 'tags',
+          type: 'String',
+          isList: true,
+          formMeta: {
+            nativeAttributes: [
+              {
+                name: '@length',
+                args: [{ name: 'min', value: 1 }, { name: 'max', value: 5 }],
+                message: 'От 1 до 5 тегов',
+              },
+            ],
+          },
+        }),
+      ],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    expect(code).toContain('applyNativeMessages(withNative(z.array(z.string()), (s) => ZodUtils.addListValidation(s,')
+    expect(code).toContain('[{ count: 2, message: "От 1 до 5 тегов" }]')
   })
 
   it('применяет числовые constraints (min/max/step/positive/negative)', () => {

@@ -251,6 +251,10 @@ const LIST_NATIVE_ATTRS: Record<string, NativeAttrSpec> = {
 
 /**
  * Сериализовать один атрибут в `NativeAttributeApplication` по его спецификации.
+ *
+ * `message` (если задан литералом-строкой) захватывается отдельно от `args` — он не идёт в
+ * `ZodUtils.*` (см. комментарий у `NativeAttributeApplication`), а используется только кодогеном
+ * `applyNativeMessages` для постфактум-подмены текста ошибки.
  */
 function serializeNativeAttribute(
   attr: DataFieldAttribute,
@@ -258,10 +262,18 @@ function serializeNativeAttribute(
   spec: NativeAttrSpec,
 ): NativeAttributeApplication {
   const args: NonNullable<NativeAttributeApplication['args']> = []
+  let message: string | undefined
 
   attr.args.forEach((argNode, index) => {
     const argName = spec.argNames[index]
-    if (!argName || argName === 'message') {
+    if (!argName) {
+      return
+    }
+    if (argName === 'message') {
+      const value = literalArgValue(argNode)
+      if (typeof value === 'string') {
+        message = value
+      }
       return
     }
     const value = literalArgValue(argNode)
@@ -270,7 +282,11 @@ function serializeNativeAttribute(
     }
   })
 
-  return args.length > 0 ? { name: refText, args } : { name: refText }
+  const application: NativeAttributeApplication = args.length > 0 ? { name: refText, args } : { name: refText }
+  if (message !== undefined) {
+    application.message = message
+  }
+  return application
 }
 
 /**
@@ -351,6 +367,74 @@ function renderNativeAttributesLiteral(attrs: NativeAttributeApplication[]): str
 }
 
 /**
+ * Атрибуты, у которых `ZodUtils.*` (`@zenstackhq/zod` 3.9.3, `addStringValidation`/
+ * `addNumberValidation`/`addBigIntValidation`) вызывает Zod-метод только при наличии основного
+ * позиционного аргумента (`if (value !== undefined) result = result...`) — источник истины:
+ * `node_modules/@zenstackhq/zod/dist/index.mjs`, зафиксировано canary-тестом
+ * `zod-native-message-mutation.spec.ts`. Атрибуты вне этого множества (`@email`/`@datetime`/
+ * `@date`/`@time`/`@url`/`@phone`/`@trim`/`@lower`/`@upper`) вызывают метод безусловно.
+ */
+const NATIVE_ATTRS_REQUIRING_ARG = new Set([
+  '@startsWith',
+  '@endsWith',
+  '@contains',
+  '@regex',
+  '@gte',
+  '@gt',
+  '@lte',
+  '@lt',
+])
+
+/**
+ * Сколько Zod-checks породит применение атрибута через `ZodUtils.*` — нужно, чтобы позиционно
+ * сопоставить `message` с элементом `schema._zod.def.checks` в `applyNativeMessages` (рантайм-
+ * хелпер, эмитится инлайн в generateModelCode). `ZodUtils.*` вызывает Zod-методы в ТОМ ЖЕ
+ * порядке, что и элементы `attrs`, по одному check на атрибут — кроме `@length`, который может
+ * дать 0/1/2 (независимо для `min` и `max`). Выводится заново из `name`/`args`, не хранится в
+ * `NativeAttributeApplication` — см. её комментарий в `types.ts`.
+ *
+ * ⚠️ Отражает конкретную версию `@zenstackhq/zod` (см. `NATIVE_ATTRS_REQUIRING_ARG` выше) —
+ * межверсионно не гарантировано, canary-тест обязан падать первым при апгрейде, не молча портить
+ * сообщения.
+ */
+function deriveNativeCheckCount(attr: NativeAttributeApplication): number {
+  if (attr.name === '@length') {
+    const hasMin = attr.args?.some((a) => a.name === 'min') ?? false
+    const hasMax = attr.args?.some((a) => a.name === 'max') ?? false
+    return (hasMin ? 1 : 0) + (hasMax ? 1 : 0)
+  }
+  if (NATIVE_ATTRS_REQUIRING_ARG.has(attr.name)) {
+    return attr.args && attr.args.length > 0 ? 1 : 0
+  }
+  return 1
+}
+
+/** Хотя бы один атрибут в списке несёт кастомный `message` — эмитить `applyNativeMessages`? */
+function hasAnyNativeMessage(attrs: NativeAttributeApplication[] | undefined): boolean {
+  return !!attrs?.some((a) => a.message !== undefined)
+}
+
+/**
+ * Отрендерить `{ count, message }[]` для `applyNativeMessages` — порядок и длина строго совпадают
+ * с `renderNativeAttributesLiteral` (тот же массив `attrs`, тот же `forEach`-порядок), это и даёт
+ * позиционное соответствие с `schema._zod.def.checks`.
+ *
+ * `leadingEntries` — служебные записи БЕЗ message перед атрибутами, для check'ов, которые
+ * пушит сам базовый Zod-тип (`PRISMA_TO_ZOD`) ДО того, как ZodUtils.* добавит свои — единственный
+ * такой случай сейчас: `Int` рендерится как `z.number().int()`, и `.int()` пушит один
+ * `number_format`-check раньше `.gte()/.lte()`. Без этого сдвига message съезжает на чужой check
+ * (живьём поймано на `@gte`/`@lte` для `Int`-поля, см. `applyElementNativeAttributes`).
+ */
+function renderNativeMessagesLiteral(attrs: NativeAttributeApplication[], leadingEntries: string[] = []): string {
+  const items = attrs.map((a) => {
+    const count = deriveNativeCheckCount(a)
+    const messagePart = a.message !== undefined ? JSON.stringify(a.message) : 'undefined'
+    return `{ count: ${count}, message: ${messagePart} }`
+  })
+  return `[${[...leadingEntries, ...items].join(', ')}]`
+}
+
+/**
  * Отрендерить `ModelValidation[]` в литерал, который читает `ZodUtils.addCustomValidation`
  * (Фаза 2, v2.5.0): массив `{ name: '@@validate', args: [{value}, {value}?, {value}?] }`, где
  * каждый `value` — уже сериализованный узел `Expression` (`serializeExpression`/литерал).
@@ -389,7 +473,13 @@ function applyElementNativeAttributes(
   if (!fn) {
     return zodType
   }
-  return `withNative(${zodType}, (s) => ZodUtils.${fn}(s, ${renderNativeAttributesLiteral(attrs)}))`
+  const applied = `withNative(${zodType}, (s) => ZodUtils.${fn}(s, ${renderNativeAttributesLiteral(attrs)}))`
+  if (!hasAnyNativeMessage(attrs)) {
+    return applied
+  }
+  // `Int` → `z.number().int()` (PRISMA_TO_ZOD) — `.int()` пушит свой check раньше native-checks.
+  const leading = prismaType === 'Int' ? ['{ count: 1 }'] : []
+  return `applyNativeMessages(${applied}, ${renderNativeMessagesLiteral(attrs, leading)})`
 }
 
 /** Обернуть `z.array(...)` в `withNative(..., ZodUtils.addListValidation)`, если есть `@length`. */
@@ -397,7 +487,12 @@ function applyListNativeAttributes(zodType: string, attrs: NativeAttributeApplic
   if (!attrs || attrs.length === 0) {
     return zodType
   }
-  return `withNative(${zodType}, (s) => ZodUtils.addListValidation(s, ${renderNativeAttributesLiteral(attrs)}))`
+  const applied = `withNative(${zodType}, (s) => ZodUtils.addListValidation(s, ${
+    renderNativeAttributesLiteral(attrs)
+  }))`
+  return hasAnyNativeMessage(attrs)
+    ? `applyNativeMessages(${applied}, ${renderNativeMessagesLiteral(attrs)})`
+    : applied
 }
 
 /**
@@ -863,6 +958,10 @@ export function generateModelCode(
   // Фаза 2 (v2.5.0) — кросс-полевая `@@validate` тоже идёт через ZodUtils (addCustomValidation).
   const usesCustomValidation = validations.length > 0
   const usesZodUtils = usesNativeAttributes || usesCustomValidation
+  // message-i18n (v3.1.0) — эмитить applyNativeMessages, только если хоть один нативный атрибут
+  // модели несёт кастомный message. `@@validate`.message сюда не относится — addCustomValidation
+  // уже принимает message нативно, без постфактум-мутации (см. libs/forms/PLAN.md).
+  const usesNativeMessages = fields.some((field) => hasAnyNativeMessage(field.formMeta.nativeAttributes))
 
   // Generate imports
   const imports = [`import { z } from 'zod/v4'`]
@@ -911,6 +1010,44 @@ function withNative<T extends z.ZodTypeAny>(schema: T, apply: (s: T) => unknown)
 `
     : ''
 
+  // message-i18n (v3.1.0) — постфактум-подмена error у Zod-checks, см. NativeAttributeApplication
+  // в types.ts и разбор блокера/находку в libs/forms/PLAN.md. Эмитится инлайн (та же логика, что
+  // withNativeHelper выше), только когда реально нужен — не тянуть мёртвый код в файлы моделей
+  // без кастомных message на нативных атрибутах.
+  const applyNativeMessagesHelper = usesNativeMessages
+    ? `
+/**
+ * Подставить кастомные message из ZModel-атрибутов (\`@gte(1, "…")\` и т.п.) — \`ZodUtils.*\`
+ * (@zenstackhq/zod) не читает message-аргумент ни в одном case-ветвлении (см. libs/forms/PLAN.md,
+ * разбор блокера message-i18n), поэтому текст ошибки подставляется постфактум мутацией
+ * недокументированного внутреннего поля Zod v4 \`check._zod.def.error\`. Порядок \`entries\`
+ * обязан совпадать с порядком атрибутов, переданных в ZodUtils.* — контракт закреплён
+ * canary-тестом (zod-native-message-mutation.spec.ts в @letar/zenstack-form-plugin), который
+ * падает первым при апгрейде Zod/ZodUtils, а не молча перестаёт подменять сообщения.
+ */
+function applyNativeMessages<T extends z.ZodTypeAny>(
+  schema: T,
+  entries: Array<{ count: number; message?: string }>,
+): T {
+  const checks = (schema as unknown as { _zod?: { def?: { checks?: unknown[] } } })._zod?.def?.checks
+  if (!Array.isArray(checks)) {
+    return schema
+  }
+  let index = 0
+  for (const entry of entries) {
+    for (let i = 0; i < entry.count; i++) {
+      const check = checks[index] as { _zod?: { def?: { error?: unknown } } } | undefined
+      if (check?._zod?.def && entry.message !== undefined) {
+        check._zod.def.error = () => entry.message
+      }
+      index++
+    }
+  }
+  return schema
+}
+`
+    : ''
+
   const objectLiteral = `${objectFn}({\n${schemaFields.join(',\n')}\n})`
 
   // Фаза 2 (v2.5.0) — кросс-полевая `@@validate` применяется только к CreateFormSchema.
@@ -949,7 +1086,7 @@ export const ${name}UpdateFormSchema = ${name}CreateFormSchema.partial()`
 // DO NOT EDIT MANUALLY
 
 ${imports.join('\n')}
-${withNativeHelper}
+${withNativeHelper}${applyNativeMessagesHelper}
 ${schemaExports}
 
 /**
