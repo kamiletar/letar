@@ -33,6 +33,32 @@
     "no-await-in-loop": "off",
     "nextjs/no-assign-module-variable": "off"
   },
+  "overrides": [
+    {
+      // Vue-библиотеки: composables названы по конвенции Vue `use*`, но не являются
+      // React-хуками — эвристика react-hooks/rules-of-hooks и react/* ошибочно
+      // матчит их как React-код (нет ни одного реального React-компонента в этих либах)
+      "files": ["libs/forms-vue/**", "libs/forms-vue-shadcn/**"],
+      "rules": {
+        "react-hooks/rules-of-hooks": "off",
+        "react/immutability": "off",
+        "react/refs": "off",
+        "react/set-state-in-effect": "off",
+        "react/purity": "off",
+        "react/preserve-manual-memoization": "off",
+        "react/static-components": "off"
+      }
+    },
+    {
+      // Playwright E2E-фикстуры: параметр колбэка `use` (`async ({ page }, use) => { await use(page) }`)
+      // матчится эвристикой react-hooks/rules-of-hooks как вызов React-хука `use()` — в тестовых
+      // приложениях нет ни одного настоящего React-компонента, ложное срабатывание системное
+      "files": ["apps/*-e2e/**"],
+      "rules": {
+        "react-hooks/rules-of-hooks": "off"
+      }
+    }
+  ],
   "ignorePatterns": [
     "**/dist/**",
     "**/build/**",
