@@ -243,20 +243,16 @@ model Product {
   price Decimal
 }
 
-// ✅ После: с политиками и @form.*
+// ✅ После: с политиками и @meta (основной синтаксис с Фазы 3 zenstack-form-plugin v3.0.0;
+// legacy /// @form.*-комментарии всё ещё работают, но deprecated)
 model Product {
   id    String @id @default(cuid())
 
-  /// @form.title("Название")
-  /// @form.placeholder("Введите название товара")
-  name  String
+  name  String @meta("form.title", "Название") @meta("form.placeholder", "Введите название товара")
 
-  /// @form.title("Цена")
-  /// @form.fieldType("currency")
-  price Decimal
+  price Decimal @meta("form.title", "Цена") @meta("form.fieldType", "currency")
 
-  /// @form.exclude
-  internalCode String?
+  internalCode String? @meta("form.exclude", true)
 
   // Access policies
   @@allow('read', true)

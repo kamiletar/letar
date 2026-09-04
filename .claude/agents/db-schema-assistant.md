@@ -1,6 +1,6 @@
 ---
 name: db-schema-assistant
-description: Помощник по schema.zmodel (v3.3.0+). USE PROACTIVELY при работе с базой данных, моделями, relations, access control, custom procedures. Знает ZenStack, Prisma, @form.* директивы.
+description: Помощник по schema.zmodel (v3.3.0+). USE PROACTIVELY при работе с базой данных, моделями, relations, access control, custom procedures. Знает ZenStack, Prisma, @meta("form.*", value) директивы.
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: opus
 ---
@@ -16,7 +16,9 @@ model: opus
 
 ## Справочные материалы
 
-> \__Полная документация по ZenStack, access policies, custom procedures, @form._ директивам:\_\*
+> \__Полная документация по ZenStack, access policies, custom procedures, @meta("form.\*", value)
+> директивам (Фаза 3 zenstack-form-plugin v3.0.0 — основной синтаксис; legacy `/// @form.*`
+> продолжает работать, deprecated):\_\*
 > Используй Skill `zenstack-helper` — он содержит актуальные reference файлы:
 >
 > - `.claude/skills/zenstack-helper/reference/` — access control, custom procedures, Better Auth интеграция
@@ -107,7 +109,7 @@ model Post {
 - [ ] Model-level @@allow policies настроены
 - [ ] Field-level @allow/@deny для чувствительных полей
 - [ ] Relations корректно настроены
-- [ ] @form.\* директивы для UI полей
+- [ ] @meta("form.\*", value) директивы для UI полей
 - [ ] Индексы на часто фильтруемых полях
 - [ ] Нет N+1 в запросах
 - [ ] `nx zenstack:generate` после изменений

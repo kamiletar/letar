@@ -1,5 +1,5 @@
 ---
-description: Миграции схемы БД через ZenStack/Prisma — генерация, push/migrate и @form.* директивы
+description: Миграции схемы БД через ZenStack/Prisma — генерация, push/migrate и @meta("form.*", value) директивы
 allowed-tools: Bash, Read, Grep, Glob
 ---
 
@@ -60,32 +60,29 @@ nx db:studio <app>
 model Product {
   id          String   @id @default(cuid())
 
-  /// @form.title("Название продукта")
-  /// @form.placeholder("Введите название")
-  title       String
+  title       String @meta("form.title", "Название продукта") @meta("form.placeholder", "Введите название")
 
-  /// @form.title("Цена")
-  /// @form.fieldType("currency")
-  /// @form.props({ min: 0, currency: "RUB" })
-  price       Int
+  // Объектный литерал в @meta ломает zenstack generate целиком (ObjectExpr не поддержан
+  // upstream-генератором TS-схемы) — form.props только плоским dot-path, не объектом.
+  price       Int @meta("form.title", "Цена") @meta("form.fieldType", "currency")
+    @meta("form.props.min", 0) @meta("form.props.currency", "RUB")
 
-  /// @form.title("Рейтинг")
-  /// @form.fieldType("rating")
-  /// @form.props({ count: 5, allowHalf: true })
-  rating      Float    @default(0)
+  rating      Float    @default(0) @meta("form.title", "Рейтинг") @meta("form.fieldType", "rating")
+    @meta("form.props.count", 5) @meta("form.props.allowHalf", true)
 
-  /// @form.title("Активен")
-  /// @form.fieldType("switch")
-  isActive    Boolean  @default(true)
+  isActive    Boolean  @default(true) @meta("form.title", "Активен") @meta("form.fieldType", "switch")
 
-  /// @form.title("Теги")
-  /// @form.fieldType("tags")
-  tags        String[]
+  tags        String[] @meta("form.title", "Теги") @meta("form.fieldType", "tags")
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 ```
+
+> ⚠️ **Legacy-синтаксис** (`/// @form.title("...")` и т.д.) продолжает работать — плагин печатает
+> deprecation-warning в консоль `nx zenstack:generate`, но сборка не ломается. Новый код пиши на
+> `@meta`, не мигрируй существующий вручную — для этого есть кодмод
+> `scripts/codemods/codemod-form-directives.mjs`.
 
 ### Добавление enum с метками
 
@@ -100,17 +97,20 @@ enum RecipeType {
 }
 ```
 
-### Поддерживаемые @form.\* директивы
+### Поддерживаемые директивы (основной синтаксис — `@meta`, Фаза 3 zenstack-form-plugin v3.0.0)
 
-| Директива                  | Описание               | Пример                                       |
-| -------------------------- | ---------------------- | -------------------------------------------- |
-| `@form.title("...")`       | Заголовок поля (label) | `/// @form.title("Название")`                |
-| `@form.placeholder("...")` | Placeholder            | `/// @form.placeholder("Введите...")`        |
-| `@form.description("...")` | Описание (helperText)  | `/// @form.description("Подсказка")`         |
-| `@form.fieldType("...")`   | Тип UI компонента      | `/// @form.fieldType("tags")`                |
-| `@form.props({...})`       | Constraints + UI props | `/// @form.props({ min: 1, max: 100 })`      |
-| `@form.relation({...})`    | Настройки relation     | `/// @form.relation({ labelField: "name" })` |
-| `@form.exclude`            | Исключить из формы     | `/// @form.exclude`                          |
+| Ключ `@meta("form.<key>", …)` | Описание               | Пример                                                    | Legacy (deprecated)                          |
+| ----------------------------- | ---------------------- | --------------------------------------------------------- | -------------------------------------------- |
+| `form.title`                  | Заголовок поля (label) | `@meta("form.title", "Название")`                         | `/// @form.title("Название")`                |
+| `form.placeholder`            | Placeholder            | `@meta("form.placeholder", "Введите...")`                 | `/// @form.placeholder("Введите...")`        |
+| `form.description`            | Описание (helperText)  | `@meta("form.description", "Подсказка")`                  | `/// @form.description("Подсказка")`         |
+| `form.fieldType`              | Тип UI компонента      | `@meta("form.fieldType", "tags")`                         | `/// @form.fieldType("tags")`                |
+| `form.props.<dotpath>`        | Constraints + UI props | `@meta("form.props.min", 1) @meta("form.props.max", 100)` | `/// @form.props({ min: 1, max: 100 })`      |
+| `form.relation.<dotpath>`     | Настройки relation     | `@meta("form.relation.labelField", "name")`               | `/// @form.relation({ labelField: "name" })` |
+| `form.exclude`                | Исключить из формы     | `@meta("form.exclude", true)`                             | `/// @form.exclude`                          |
+
+⚠️ `form.props`/`form.relation` — только плоский dot-path, не объект: `@meta(key, {...})` ломает
+`zenstack generate` целиком (`Unsupported attribute arg value: ObjectExpr`).
 
 ### Типы полей (fieldType)
 
@@ -128,14 +128,14 @@ enum RecipeType {
 - `id` — первичные ключи
 - `createdAt`, `updatedAt` — системные поля
 - Поля с `@relation` — relation поля
-- Поля с `@form.exclude`
+- Поля с `@meta("form.exclude", true)`
 
-> **Важно:** FK поля (`categoryId`) НЕ исключаются. Используй `@form.relation` или `@form.exclude`.
+> **Важно:** FK поля (`categoryId`) НЕ исключаются. Используй `form.relation` или `form.exclude`.
 
 ## Чеклист
 
 - [ ] Схема валидна (нет ошибок синтаксиса)
-- [ ] `/// @form.*` директивы добавлены для UI полей
+- [ ] `@meta("form.*", value)` директивы добавлены для UI полей
 - [ ] Enum'ы имеют `///` метки для значений
 - [ ] Генерация прошла успешно
 - [ ] БД обновлена (push/migrate)
@@ -151,5 +151,5 @@ npx prisma migrate reset --skip-seed
 ## Документация
 
 - [database.md](/.claude/docs/database.md) — работа с БД
-- [libs/forms/README.md](/libs/forms/README.md) — @form.\* директивы
+- [libs/forms/README.md](/libs/forms/README.md) — `@meta("form.*", value)` директивы
 - [libs/zenstack-form-plugin/README.md](/libs/zenstack-form-plugin/README.md) — плагин генерации

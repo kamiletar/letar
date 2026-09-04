@@ -10,7 +10,9 @@ model: sonnet
 ## Workflow
 
 1. **Понять требования** — какие поля, валидация, UI
-2. **Обновить schema.zmodel** — добавить @form.\* директивы
+2. **Обновить schema.zmodel** — добавить `@meta("form.*", value)` директивы (основной синтаксис
+   с Фазы 3 zenstack-form-plugin v3.0.0; legacy `/// @form.*`-комментарии всё ещё работают, но
+   deprecated)
 3. **Запустить генерацию** — `nx zenstack:generate <app>`
 4. **Создать компонент** — с useAppForm
 5. **Создать Server Action** — в \_actions/
@@ -18,7 +20,8 @@ model: sonnet
 
 ## Справочные материалы
 
-> \__Полная документация по @form._ директивам, fieldType, примерам schema.zmodel и компонентам форм:\_\*
+> \__Полная документация по @meta("form.\*", value) директивам, fieldType, примерам schema.zmodel
+> и компонентам форм:\_\*
 > Используй Skill `form-pipeline` — он содержит актуальные reference файлы:
 >
 > - `.claude/skills/form-pipeline/reference/` — паттерны, примеры, API
@@ -94,7 +97,7 @@ export async function createProductAction(input: unknown) {
 
 ## Чеклист
 
-- [ ] @form.\* директивы добавлены в schema.zmodel
+- [ ] @meta("form.\*", value) директивы добавлены в schema.zmodel
 - [ ] `nx zenstack:generate` выполнен
 - [ ] Компонент использует сгенерированную схему
 - [ ] Server Action с .strip() валидацией

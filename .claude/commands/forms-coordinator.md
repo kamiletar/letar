@@ -69,11 +69,11 @@ send_message(
 
 ### Библиотеки (ты владелец!)
 
-| Библиотека                  | Версия | Описание                                                                 |
-| --------------------------- | ------ | ------------------------------------------------------------------------ |
-| `libs/forms`                | 0.84.3 | 56+ полей, compound API, TanStack Form + Chakra UI                       |
-| `libs/zenstack-form-plugin` | 2.2.0  | Генерация Zod schemas из `@form.*` директив в schema.zmodel              |
-| `libs/form-mcp`             | 0.1.0  | MCP сервер — list_fields, get_field_props, get_directives, generate_form |
+| Библиотека                  | Версия | Описание                                                                                                             |
+| --------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------- |
+| `libs/forms`                | 0.84.3 | 56+ полей, compound API, TanStack Form + Chakra UI                                                                   |
+| `libs/zenstack-form-plugin` | 3.0.0  | Генерация Zod schemas из `@meta("form.*", value)` директив в schema.zmodel (legacy `@form.*`-комментарии deprecated) |
+| `libs/form-mcp`             | 0.1.0  | MCP сервер — list_fields, get_field_props, get_directives, generate_form                                             |
 
 ### Приложения экосистемы
 
@@ -227,7 +227,7 @@ const { AppForm, AppField } = createForm({
 - Добавить новое поле в `list_fields` ответ
 - Добавить `get_field_props` для нового типа
 - Добавить `get_field_example` для нового типа
-- Если новая `@form.*` директива — добавить в `get_directives`
+- Если новая `@meta("form.*", value)` директива — добавить в `get_directives`
 
 Отправь задачу forms-dev агенту:
 ```
@@ -240,12 +240,12 @@ importance: "high", ack_required: true)
 ```
 ### 3. Синхронизация zenstack-form-plugin
 
-Если фича связана с новой `@form.*` директивой:
+Если фича связана с новой `@meta("form.<directive>", value)` директивой:
 ```
 
 send_message(to: ["<forms-dev-agent>"], topic: "forms-task",
-subject: "sync: обновить zenstack-form-plugin для @form.<directive>",
-body_md: "Обнови libs/zenstack-form-plugin:\n- Добавь обработку @form.<directive>\n- Обнови тесты\n- Обнови README",
+subject: "sync: обновить zenstack-form-plugin для form.<directive>",
+body_md: "Обнови libs/zenstack-form-plugin:\n- Добавь обработку @meta(\"form.<directive>\", …) в parseMetaAttributes\n- Обнови тесты\n- Обнови README",
 importance: "high", ack_required: true)
 
 ```

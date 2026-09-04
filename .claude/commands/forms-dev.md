@@ -159,7 +159,7 @@ kebab-case имя ловило баг сервера agent-mail в `send_message
 **Порт:** 3022
 **Домен:** [forms-example.letar.best](https://forms-example.letar.best)
 **Описание:** Showcase приложение @letar/forms для внешних пользователей
-**Модели:** `schema.zmodel` с `@form.*` директивами → `src/generated/form-schemas/`
+**Модели:** `schema.zmodel` с `@meta("form.*", value)` директивами (legacy `@form.*`-комментарии deprecated) → `src/generated/form-schemas/`
 
 Страницы: basic, all-fields, validation, conditional, multi-step, groups, auto-fields, zenstack, theming, i18n, offline.
 
@@ -174,5 +174,5 @@ kebab-case имя ловило баг сервера agent-mail в `send_message
 ### @letar/zenstack-form-plugin (плагин)
 
 **Библиотека:** libs/zenstack-form-plugin
-**Версия:** 2.1.0
-**Описание:** Генерация Zod form schemas из `schema.zmodel` с `@form.*` директивами
+**Версия:** 3.0.0
+**Описание:** Генерация Zod form schemas из `schema.zmodel` с `@meta("form.*", value)` директивами (основной синтаксис с Фазы 3; legacy `/// @form.*`-комментарии deprecated, но рабочие)

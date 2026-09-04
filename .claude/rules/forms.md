@@ -12,7 +12,7 @@ paths: apps/**/*-form.tsx, apps/**/*Form.tsx, apps/**/_schemas/*.ts, libs/forms/
 
 При работе с формами **ОБЯЗАТЕЛЬНО** следуй этому порядку:
 
-1. **schema.zmodel** — начни с `@form.*` директив (Skill `zenstack-helper`, MCP `form-mcp` → `get_directives`)
+1. **schema.zmodel** — начни с `@meta("form.*", value)` (основной синтаксис с Фазы 3 `zenstack-form-plugin` v3.0.0; legacy `/// @form.*`-комментарии всё ещё работают, но deprecated) (Skill `zenstack-helper`, MCP `form-mcp` → `get_directives`)
 2. **Генерация** — запусти `nx zenstack:generate <app>` для создания form schemas
 3. **form-mcp** — вызови `list_fields` для проверки доступных полей, `get_form_pattern` для паттерна, `get_field_props` для пропсов
 4. **createForm инстанс** — используй app-specific инстанс (см. секцию ниже)
@@ -80,7 +80,9 @@ import { MyAppForm } from '@/my-app-form'
 
 ## ZenStack Form Plugin
 
-- **ОБЯЗАТЕЛЬНО** используй `@form.*` директивы в schema.zmodel вместо ручных Zod схем
+- **ОБЯЗАТЕЛЬНО** используй `@meta("form.*", value)` директивы в schema.zmodel вместо ручных Zod
+  схем (плоский dot-path — объектный литерал `@meta(key, {...})` ломает `zenstack generate`
+  целиком, `ObjectExpr` не поддержан upstream-генератором TS-схемы)
 - Проверяй `get_directives` (form-mcp) перед добавлением директив
 - Если нужной директивы нет → делегация через agent-mail
 
