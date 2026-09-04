@@ -209,9 +209,16 @@ describe('extractModelInfo', () => {
     const info = extractModelInfo(model, enumNames)
     const byName = Object.fromEntries(info.fields.map((f) => [f.name, f]))
 
-    expect(byName.email?.formMeta.constraints).toEqual({ email: true })
-    expect(byName.name?.formMeta.constraints).toEqual({ minLength: 2, maxLength: 50 })
-    expect(byName.code?.formMeta.constraints).toEqual({ pattern: '^[A-Z]+$' })
+    // Фаза 1 (v2.4.0, A3) — String/Int/Float/BigInt больше не идут в constraints,
+    // а сериализуются как nativeAttributes для ZodUtils.* (см. model-generator.ts)
+    expect(byName.email?.formMeta.constraints).toBeUndefined()
+    expect(byName.email?.formMeta.nativeAttributes).toEqual([{ name: '@email' }])
+    expect(byName.name?.formMeta.nativeAttributes).toEqual([
+      { name: '@length', args: [{ name: 'min', value: 2 }, { name: 'max', value: 50 }] },
+    ])
+    expect(byName.code?.formMeta.nativeAttributes).toEqual([
+      { name: '@regex', args: [{ name: 'regex', value: '^[A-Z]+$' }] },
+    ])
   })
 
   it('наследует @gte/@gt/@lte/@lt с поправкой на строгость (min/max vs exclusiveMin/exclusiveMax)', () => {
@@ -225,10 +232,94 @@ describe('extractModelInfo', () => {
     const info = extractModelInfo(model, enumNames)
     const byName = Object.fromEntries(info.fields.map((f) => [f.name, f]))
 
-    expect(byName.price?.formMeta.constraints).toEqual({ min: 0 })
-    expect(byName.age?.formMeta.constraints).toEqual({ exclusiveMin: 0 })
-    expect(byName.qty?.formMeta.constraints).toEqual({ max: 100 })
-    expect(byName.rating?.formMeta.constraints).toEqual({ exclusiveMax: 10 })
+    expect(byName.price?.formMeta.nativeAttributes).toEqual([
+      { name: '@gte', args: [{ name: 'value', value: 0 }] },
+    ])
+    expect(byName.age?.formMeta.nativeAttributes).toEqual([{ name: '@gt', args: [{ name: 'value', value: 0 }] }])
+    expect(byName.qty?.formMeta.nativeAttributes).toEqual([
+      { name: '@lte', args: [{ name: 'value', value: 100 }] },
+    ])
+    expect(byName.rating?.formMeta.nativeAttributes).toEqual([
+      { name: '@lt', args: [{ name: 'value', value: 10 }] },
+    ])
+  })
+
+  it('Фаза 1: наследует @startsWith/@endsWith/@contains/@datetime/@date/@time/@url/@phone/@trim/@lower/@upper', () => {
+    const model = makeModel('User', [
+      makeField({ name: 'slug', type: 'String', attributes: [{ refText: '@startsWith', args: [stringArg('usr-')] }] }),
+      makeField({ name: 'file', type: 'String', attributes: [{ refText: '@endsWith', args: [stringArg('.pdf')] }] }),
+      makeField({ name: 'bio', type: 'String', attributes: [{ refText: '@contains', args: [stringArg('привет')] }] }),
+      makeField({ name: 'startedAt', type: 'String', attributes: [{ refText: '@datetime' }] }),
+      makeField({ name: 'birthday', type: 'String', attributes: [{ refText: '@date' }] }),
+      makeField({ name: 'clockIn', type: 'String', attributes: [{ refText: '@time', args: [numberArg(3)] }] }),
+      makeField({ name: 'site', type: 'String', attributes: [{ refText: '@url' }] }),
+      makeField({ name: 'phone', type: 'String', attributes: [{ refText: '@phone' }] }),
+      makeField({ name: 'code', type: 'String', attributes: [{ refText: '@trim' }] }),
+      makeField({ name: 'tag', type: 'String', attributes: [{ refText: '@lower' }] }),
+      makeField({ name: 'sku', type: 'String', attributes: [{ refText: '@upper' }] }),
+    ])
+
+    const info = extractModelInfo(model, enumNames)
+    const byName = Object.fromEntries(info.fields.map((f) => [f.name, f]))
+
+    expect(byName.slug?.formMeta.nativeAttributes).toEqual([
+      { name: '@startsWith', args: [{ name: 'text', value: 'usr-' }] },
+    ])
+    expect(byName.file?.formMeta.nativeAttributes).toEqual([
+      { name: '@endsWith', args: [{ name: 'text', value: '.pdf' }] },
+    ])
+    expect(byName.bio?.formMeta.nativeAttributes).toEqual([
+      { name: '@contains', args: [{ name: 'text', value: 'привет' }] },
+    ])
+    expect(byName.startedAt?.formMeta.nativeAttributes).toEqual([{ name: '@datetime' }])
+    expect(byName.birthday?.formMeta.nativeAttributes).toEqual([{ name: '@date' }])
+    expect(byName.clockIn?.formMeta.nativeAttributes).toEqual([
+      { name: '@time', args: [{ name: 'precision', value: 3 }] },
+    ])
+    expect(byName.site?.formMeta.nativeAttributes).toEqual([{ name: '@url' }])
+    expect(byName.phone?.formMeta.nativeAttributes).toEqual([{ name: '@phone' }])
+    expect(byName.code?.formMeta.nativeAttributes).toEqual([{ name: '@trim' }])
+    expect(byName.tag?.formMeta.nativeAttributes).toEqual([{ name: '@lower' }])
+    expect(byName.sku?.formMeta.nativeAttributes).toEqual([{ name: '@upper' }])
+  })
+
+  it('Фаза 1: @length на списке (List) валидирует количество элементов', () => {
+    const model = makeModel('Post', [
+      makeField({
+        name: 'tags',
+        type: 'String',
+        array: true,
+        attributes: [{ refText: '@length', args: [numberArg(1), numberArg(5)] }],
+      }),
+    ])
+
+    const info = extractModelInfo(model, enumNames)
+    expect(info.fields[0]?.formMeta.nativeAttributes).toEqual([
+      { name: '@length', args: [{ name: 'min', value: 1 }, { name: 'max', value: 5 }] },
+    ])
+  })
+
+  it('Фаза 1: Decimal-поля игнорируют новые атрибуты (нет ветки в NUMBER_NATIVE_ATTRS)', () => {
+    const model = makeModel('Product', [
+      makeField({ name: 'price', type: 'Decimal', attributes: [{ refText: '@gte', args: [numberArg(0)] }] }),
+    ])
+
+    const info = extractModelInfo(model, enumNames)
+    // Decimal остаётся на старом механизме через constraints, не nativeAttributes
+    expect(info.fields[0]?.formMeta.constraints).toEqual({ min: 0 })
+    expect(info.fields[0]?.formMeta.nativeAttributes).toBeUndefined()
+  })
+
+  it('Фаза 1: исключает поля с @omit и @computed', () => {
+    const model = makeModel('Product', [
+      makeField({ name: 'internalNote', type: 'String', attributes: [{ refText: '@omit' }] }),
+      makeField({ name: 'total', type: 'Int', attributes: [{ refText: '@computed' }] }),
+      makeField({ name: 'name', type: 'String' }),
+    ])
+
+    const info = extractModelInfo(model, enumNames)
+    expect(info.excludedFields).toEqual(expect.arrayContaining(['internalNote', 'total']))
+    expect(info.fields.map((f) => f.name)).toEqual(['name'])
   })
 
   it('@form.props побеждает нативный атрибут при конфликте того же ключа', () => {
@@ -257,7 +348,12 @@ describe('extractModelInfo', () => {
     ])
 
     const info = extractModelInfo(model, enumNames)
-    expect(info.fields[0]?.formMeta.constraints).toEqual({ min: 0, step: 0.5 })
+    // step — не пересекается по ключу с @gte (min), поэтому оба сосуществуют раздельно:
+    // step остаётся в constraints (@form.props), @gte уходит в nativeAttributes (A3)
+    expect(info.fields[0]?.formMeta.constraints).toEqual({ step: 0.5 })
+    expect(info.fields[0]?.formMeta.nativeAttributes).toEqual([
+      { name: '@gte', args: [{ name: 'value', value: 0 }] },
+    ])
   })
 
   it('без нативных атрибутов formMeta.constraints остаётся как задал только @form.props', () => {
@@ -325,6 +421,78 @@ describe('generateModelCode', () => {
 
     const code = generateModelCode(modelInfo, new Set())
     expect(code).toContain('tags: z.array(z.string())')
+  })
+
+  it('Фаза 1: не импортирует ZodUtils и не эмитит withNative без nativeAttributes', () => {
+    const modelInfo: ModelInfo = {
+      name: 'Product',
+      excludedFields: [],
+      fields: [field({ name: 'name', type: 'String' })],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    expect(code).not.toContain('ZodUtils')
+    expect(code).not.toContain('function withNative')
+  })
+
+  it('Фаза 1: применяет нативный атрибут строкового поля через withNative(ZodUtils.addStringValidation)', () => {
+    const modelInfo: ModelInfo = {
+      name: 'User',
+      excludedFields: [],
+      fields: [
+        field({
+          name: 'email',
+          type: 'String',
+          formMeta: { nativeAttributes: [{ name: '@email' }] },
+        }),
+      ],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    expect(code).toContain(`import { ZodUtils } from '@zenstackhq/zod'`)
+    expect(code).toContain('function withNative')
+    expect(code).toContain(
+      "email: withNative(z.string(), (s) => ZodUtils.addStringValidation(s, [{ name: '@email' }]))",
+    )
+  })
+
+  it('Фаза 1: применяет нативный атрибут числового поля через withNative(ZodUtils.addNumberValidation)', () => {
+    const modelInfo: ModelInfo = {
+      name: 'Product',
+      excludedFields: [],
+      fields: [
+        field({
+          name: 'price',
+          type: 'Float',
+          formMeta: { nativeAttributes: [{ name: '@gte', args: [{ name: 'value', value: 0 }] }] },
+        }),
+      ],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    expect(code).toContain(
+      "price: withNative(z.number(), (s) => ZodUtils.addNumberValidation(s, [{ name: '@gte', args: [{ name: 'value', value: { kind: 'literal', value: 0 } }] }]))",
+    )
+  })
+
+  it('Фаза 1: @length на списке оборачивает z.array(...) через withNative(ZodUtils.addListValidation)', () => {
+    const modelInfo: ModelInfo = {
+      name: 'Post',
+      excludedFields: [],
+      fields: [
+        field({
+          name: 'tags',
+          type: 'String',
+          isList: true,
+          formMeta: {
+            nativeAttributes: [{ name: '@length', args: [{ name: 'min', value: 1 }, { name: 'max', value: 5 }] }],
+          },
+        }),
+      ],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    expect(code).toContain('withNative(z.array(z.string()), (s) => ZodUtils.addListValidation(s,')
   })
 
   it('применяет числовые constraints (min/max/step/positive/negative)', () => {

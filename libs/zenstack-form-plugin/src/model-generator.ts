@@ -1,6 +1,13 @@
 import type { DataField, DataFieldAttribute, DataModel } from '@zenstackhq/language/ast'
 import { parseFormMeta } from './parser.js'
-import type { FormFieldMeta, I18nConfig, ModelFieldInfo, ModelInfo, ZodConstraints } from './types.js'
+import type {
+  FormFieldMeta,
+  I18nConfig,
+  ModelFieldInfo,
+  ModelInfo,
+  NativeAttributeApplication,
+  ZodConstraints,
+} from './types.js'
 
 /**
  * Mapping from Prisma types to Zod types.
@@ -147,40 +154,20 @@ function literalArgValue(arg: unknown): number | string | boolean | undefined {
 }
 
 /**
- * Наследовать Zod-constraints из нативных ZModel-атрибутов валидации
- * (`@email`, `@length`, `@gte`/`@gt`/`@lte`/`@lt`, `@regex`) — ORM честно применяет их на
- * `create`/`update` через `@zenstackhq/zod`, но раньше генератор форм их полностью игнорировал:
- * поле с одним лишь нативным атрибутом получало форму без клиентской валидации.
+ * Наследовать `@gte`/`@gt`/`@lte`/`@lt` для **Decimal**-полей — единственный тип, который не
+ * проходит через `ZodUtils` (Фаза 0 spike, `libs/forms/PLAN.md`): `ZodUtils.addDecimalValidation`
+ * трансформирует `string → Decimal`-инстанс, а наш контракт формы — `Decimal → z.number()`.
+ * Остаётся на прежнем (Фаза 0-независимом) механизме: извлечение значения в `ZodConstraints`,
+ * рендер через `generateConstraints` (`.min()`/`.max()`/`.gt()`/`.lt()` на `z.number()`).
+ *
+ * Остальные типы (`String`/`Int`/`Float`/`BigInt`, включая списки) — Фаза 1, `collectNativeAttributes`
+ * ниже, сериализация в `NativeAttributeApplication[]` и применение через `ZodUtils.*` в кодогене.
  *
  * `@gt`/`@lt` дают отдельные ключи (`exclusiveMin`/`exclusiveMax`), а не `min`/`max` — Zod
  * `.min()`/`.max()` включительны и семантически соответствуют только `@gte`/`@lte`.
  */
-function extractNativeConstraints(field: DataField): ZodConstraints {
+function extractDecimalNativeConstraints(field: DataField): ZodConstraints {
   const constraints: ZodConstraints = {}
-
-  if (findAttribute(field, '@email')) {
-    constraints.email = true
-  }
-
-  const lengthAttr = findAttribute(field, '@length')
-  if (lengthAttr) {
-    const min = literalArgValue(lengthAttr.args[0])
-    const max = literalArgValue(lengthAttr.args[1])
-    if (typeof min === 'number') {
-      constraints.minLength = min
-    }
-    if (typeof max === 'number') {
-      constraints.maxLength = max
-    }
-  }
-
-  const regexAttr = findAttribute(field, '@regex')
-  if (regexAttr) {
-    const pattern = literalArgValue(regexAttr.args[0])
-    if (typeof pattern === 'string') {
-      constraints.pattern = pattern
-    }
-  }
 
   const gteAttr = findAttribute(field, '@gte')
   if (gteAttr) {
@@ -218,6 +205,179 @@ function extractNativeConstraints(field: DataField): ZodConstraints {
 }
 
 /**
+ * Спецификация одного нативного атрибута для сериализации в `NativeAttributeApplication` (A3).
+ */
+interface NativeAttrSpec {
+  /** Ключи `ZodConstraints`, которые покрывает этот атрибут — для проверки победы `@form.props` */
+  constraintKeys: (keyof ZodConstraints)[]
+  /**
+   * Имена аргументов в порядке объявления атрибута в `stdlib.zmodel` (позиционное сопоставление
+   * с `attr.args`, как и у существовавшего до Фазы 1 `extractDecimalNativeConstraints` выше).
+   * `'message'` в конце — не аргумент для сериализации: `ZodUtils.*` (пакет 3.9.3) не читает
+   * `message` ни в одном `case`-ветвлении, инлайнить его в литерал было бы мёртвым весом.
+   */
+  argNames: string[]
+}
+
+const STRING_NATIVE_ATTRS: Record<string, NativeAttrSpec> = {
+  '@length': { constraintKeys: ['minLength', 'maxLength'], argNames: ['min', 'max', 'message'] },
+  '@startsWith': { constraintKeys: ['startsWith'], argNames: ['text', 'message'] },
+  '@endsWith': { constraintKeys: ['endsWith'], argNames: ['text', 'message'] },
+  '@contains': { constraintKeys: ['contains'], argNames: ['text', 'message'] },
+  '@regex': { constraintKeys: ['pattern'], argNames: ['regex', 'message'] },
+  '@email': { constraintKeys: ['email'], argNames: ['message'] },
+  '@datetime': { constraintKeys: ['datetime'], argNames: ['message'] },
+  '@date': { constraintKeys: ['date'], argNames: ['message'] },
+  '@time': { constraintKeys: ['time'], argNames: ['precision', 'message'] },
+  '@url': { constraintKeys: ['url'], argNames: ['message'] },
+  '@phone': { constraintKeys: ['phone'], argNames: ['message'] },
+  '@trim': { constraintKeys: ['trim'], argNames: [] },
+  '@lower': { constraintKeys: ['lower'], argNames: [] },
+  '@upper': { constraintKeys: ['upper'], argNames: [] },
+}
+
+const NUMBER_NATIVE_ATTRS: Record<string, NativeAttrSpec> = {
+  '@gte': { constraintKeys: ['min'], argNames: ['value', 'message'] },
+  '@gt': { constraintKeys: ['exclusiveMin'], argNames: ['value', 'message'] },
+  '@lte': { constraintKeys: ['max'], argNames: ['value', 'message'] },
+  '@lt': { constraintKeys: ['exclusiveMax'], argNames: ['value', 'message'] },
+}
+
+/** `@length` на списке валидирует количество элементов, а не длину строки-элемента. */
+const LIST_NATIVE_ATTRS: Record<string, NativeAttrSpec> = {
+  '@length': { constraintKeys: ['minLength', 'maxLength'], argNames: ['min', 'max', 'message'] },
+}
+
+/**
+ * Сериализовать один атрибут в `NativeAttributeApplication` по его спецификации.
+ */
+function serializeNativeAttribute(
+  attr: DataFieldAttribute,
+  refText: string,
+  spec: NativeAttrSpec,
+): NativeAttributeApplication {
+  const args: NonNullable<NativeAttributeApplication['args']> = []
+
+  attr.args.forEach((argNode, index) => {
+    const argName = spec.argNames[index]
+    if (!argName || argName === 'message') {
+      return
+    }
+    const value = literalArgValue(argNode)
+    if (value !== undefined) {
+      args.push({ name: argName, value })
+    }
+  })
+
+  return args.length > 0 ? { name: refText, args } : { name: refText }
+}
+
+/**
+ * Наследовать нативные ZModel-атрибуты валидации для `String`/`Int`/`Float`/`BigInt`-полей
+ * (включая списки) в структуру, готовую для рендера через `ZodUtils.*` (Фаза 1, решение A3
+ * из Фазы 0 spike — `libs/forms/PLAN.md`).
+ *
+ * `@form.props` побеждает при пересечении ключей: `parser.ts` уже разобрал директиву к моменту
+ * вызова, поэтому проверка ниже — окончательная, без риска задвоить валидацию одного constraint.
+ */
+function collectNativeAttributes(
+  field: DataField,
+  fieldType: string,
+  fieldIsList: boolean,
+  formPropsConstraints: ZodConstraints | undefined,
+): NativeAttributeApplication[] {
+  let specs: Record<string, NativeAttrSpec>
+  if (fieldIsList) {
+    specs = LIST_NATIVE_ATTRS
+  } else if (fieldType === 'String') {
+    specs = STRING_NATIVE_ATTRS
+  } else if (fieldType === 'Int' || fieldType === 'Float' || fieldType === 'BigInt') {
+    specs = NUMBER_NATIVE_ATTRS
+  } else {
+    return []
+  }
+
+  const result: NativeAttributeApplication[] = []
+  for (const [refText, spec] of Object.entries(specs)) {
+    const attr = findAttribute(field, refText)
+    if (!attr) {
+      continue
+    }
+    const overridden = spec.constraintKeys.some((key) => formPropsConstraints && key in formPropsConstraints)
+    if (overridden) {
+      continue
+    }
+    result.push(serializeNativeAttribute(attr, refText, spec))
+  }
+  return result
+}
+
+/**
+ * Какую функцию `ZodUtils.*` вызывать для данного Prisma-типа. `Decimal` намеренно не входит —
+ * см. `extractDecimalNativeConstraints`.
+ */
+function nativeValidatorFnFor(
+  prismaType: string,
+): 'addStringValidation' | 'addNumberValidation' | 'addBigIntValidation' | undefined {
+  if (prismaType === 'String') {
+    return 'addStringValidation'
+  }
+  if (prismaType === 'BigInt') {
+    return 'addBigIntValidation'
+  }
+  if (prismaType === 'Int' || prismaType === 'Float') {
+    return 'addNumberValidation'
+  }
+  return undefined
+}
+
+/**
+ * Отрендерить `NativeAttributeApplication[]` как литерал массива `AttributeApplication` —
+ * структурный контракт, который `ZodUtils.*`/`ExpressionUtils.isLiteral` проверяют по форме
+ * (`{ kind: 'literal', value }`), не импортом `ExpressionUtils` — подтверждено прогоном spike.
+ */
+function renderNativeAttributesLiteral(attrs: NativeAttributeApplication[]): string {
+  const items = attrs.map((a) => {
+    if (!a.args || a.args.length === 0) {
+      return `{ name: '${a.name}' }`
+    }
+    const argsStr = a.args
+      .map((arg) => `{ name: '${arg.name}', value: { kind: 'literal', value: ${JSON.stringify(arg.value)} } }`)
+      .join(', ')
+    return `{ name: '${a.name}', args: [${argsStr}] }`
+  })
+  return `[${items.join(', ')}]`
+}
+
+/**
+ * Обернуть Zod-тип элемента (`String`/`Int`/`Float`/`BigInt`) в `withNative(...)`, если для поля
+ * есть нативные атрибуты. Для списков не вызывается — там нативные атрибуты относятся к самому
+ * массиву (`@length` на списке), см. `applyListNativeAttributes`.
+ */
+function applyElementNativeAttributes(
+  zodType: string,
+  prismaType: string,
+  attrs: NativeAttributeApplication[] | undefined,
+): string {
+  if (!attrs || attrs.length === 0) {
+    return zodType
+  }
+  const fn = nativeValidatorFnFor(prismaType)
+  if (!fn) {
+    return zodType
+  }
+  return `withNative(${zodType}, (s) => ZodUtils.${fn}(s, ${renderNativeAttributesLiteral(attrs)}))`
+}
+
+/** Обернуть `z.array(...)` в `withNative(..., ZodUtils.addListValidation)`, если есть `@length`. */
+function applyListNativeAttributes(zodType: string, attrs: NativeAttributeApplication[] | undefined): string {
+  if (!attrs || attrs.length === 0) {
+    return zodType
+  }
+  return `withNative(${zodType}, (s) => ZodUtils.addListValidation(s, ${renderNativeAttributesLiteral(attrs)}))`
+}
+
+/**
  * Extract model information from AST.
  */
 export function extractModelInfo(model: DataModel, enumNames: Set<string>): ModelInfo {
@@ -236,30 +396,47 @@ export function extractModelInfo(model: DataModel, enumNames: Set<string>): Mode
     const isId = field.attributes.some((attr: DataFieldAttribute) => attr.decl?.$refText === 'id')
     const hasRelationAttr = field.attributes.some((attr: DataFieldAttribute) => attr.decl?.$refText === 'relation')
     const isModelRef = isModelReference(field, enumNames)
+    // Фаза 1 (v2.4.0) — нативные `@omit`/`@computed` тоже исключают поле из формы, как и старый
+    // `@form.exclude`: `@omit` прячет поле из Zod-схемы ORM целиком, `@computed` — поле,
+    // вычисляемое сервером, недоступное для пользовательского ввода в принципе.
+    const isOmitted = field.attributes.some((attr: DataFieldAttribute) => attr.decl?.$refText === '@omit')
+    const isComputed = field.attributes.some((attr: DataFieldAttribute) => attr.decl?.$refText === '@computed')
 
     // Exclude: system fields, id, relation fields, model references
     // BUT: keep FK fields with @form.relation for select rendering
     const hasFormRelation = !!formMeta.relation
     const shouldExclude = formMeta.exclude || isId || hasRelationAttr || (isModelRef && !hasFormRelation)
-      || isSystemField
+      || isSystemField || isOmitted || isComputed
 
     if (shouldExclude) {
       excludedFields.push(field.name)
       continue
     }
 
-    // Нативные ZModel-атрибуты — базовый слой constraints, @form.props побеждает при
-    // пересечении ключей (обратная совместимость для намеренных расхождений клиент/сервер).
-    const nativeConstraints = extractNativeConstraints(field)
-    if (Object.keys(nativeConstraints).length > 0) {
-      formMeta.constraints = { ...nativeConstraints, ...formMeta.constraints }
+    const fieldIsList = isList(field)
+
+    if (fieldType === 'Decimal') {
+      // Decimal — единственный тип вне A3 (Фаза 0 spike, несовместимость с
+      // ZodUtils.addDecimalValidation), остаётся на прежнем механизме через constraints.
+      const decimalConstraints = extractDecimalNativeConstraints(field)
+      if (Object.keys(decimalConstraints).length > 0) {
+        formMeta.constraints = { ...decimalConstraints, ...formMeta.constraints }
+      }
+    } else {
+      // Остальные типы — A3: нативные атрибуты сериализуются отдельно от constraints и
+      // применяются в кодогене через ZodUtils.*, а не через строковый generateConstraints.
+      // @form.props побеждает при пересечении ключей — collectNativeAttributes уже это учитывает.
+      const nativeAttributes = collectNativeAttributes(field, fieldType, fieldIsList, formMeta.constraints)
+      if (nativeAttributes.length > 0) {
+        formMeta.nativeAttributes = nativeAttributes
+      }
     }
 
     const fieldInfo: ModelFieldInfo = {
       name: field.name,
       type: fieldType,
       isRequired: isRequired(field),
-      isList: isList(field),
+      isList: fieldIsList,
       isEnum: isEnumType(field, enumNames),
       enumName: isEnumType(field, enumNames) ? fieldType : undefined,
       defaultValue: getDefaultValue(field),
@@ -331,6 +508,41 @@ function generateConstraints(constraints: ZodConstraints | undefined, prismaType
     if (constraints.uuid) {
       parts.push('.uuid()')
     }
+    // Фаза 1 (v2.4.0) — рендерятся только если попали сюда через @form.props (переопределение
+    // нативного атрибута тем же ключом): собственно нативные @startsWith/.../@upper идут через
+    // ZodUtils.* в generateZodType, здесь дублируются только вручную заданные в @form.props.
+    if (constraints.startsWith !== undefined) {
+      parts.push(`.startsWith('${constraints.startsWith}')`)
+    }
+    if (constraints.endsWith !== undefined) {
+      parts.push(`.endsWith('${constraints.endsWith}')`)
+    }
+    if (constraints.contains !== undefined) {
+      parts.push(`.includes('${constraints.contains}')`)
+    }
+    if (constraints.datetime) {
+      parts.push('.datetime()')
+    }
+    if (constraints.date) {
+      parts.push('.date()')
+    }
+    if (constraints.time !== undefined) {
+      parts.push(typeof constraints.time === 'number' ? `.time({ precision: ${constraints.time} })` : '.time()')
+    }
+    if (constraints.phone) {
+      // Zod v4 не имеет встроенного .phone() — телефон валидируется как обычный regex-паттерн
+      // через ZodUtils на нативном пути; для @form.props-переопределения формат не диктуем.
+      parts.push('.regex(/^\\+?[0-9()\\-\\s]{7,20}$/)')
+    }
+    if (constraints.trim) {
+      parts.push('.trim()')
+    }
+    if (constraints.lower) {
+      parts.push('.toLowerCase()')
+    }
+    if (constraints.upper) {
+      parts.push('.toUpperCase()')
+    }
   }
 
   return parts.join('')
@@ -356,9 +568,19 @@ function generateZodType(field: ModelFieldInfo, _enumNames: Set<string>): string
     zodType = `${zodType}${constraintsStr}`
   }
 
+  // Фаза 1 (v2.4.0, A3) — нативные атрибуты элемента (String/Int/Float/BigInt), применяются
+  // ДО array-обёртки: ZodUtils.addStringValidation/addNumberValidation/addBigIntValidation
+  // работают на скалярном типе, не на z.array(...).
+  if (!field.isList) {
+    zodType = applyElementNativeAttributes(zodType, field.type, field.formMeta.nativeAttributes)
+  }
+
   // Arrays
   if (field.isList) {
     zodType = `z.array(${zodType})`
+    // Нативный @length на списке валидирует количество элементов — оборачивает уже готовый
+    // z.array(...), а не тип элемента.
+    zodType = applyListNativeAttributes(zodType, field.formMeta.nativeAttributes)
   }
 
   // Optional fields (Prisma ? means nullable, not undefined)
@@ -455,8 +677,18 @@ export function generateModelCode(
     }
   }
 
+  // Фаза 1 (v2.4.0, A3) — модель использует ZodUtils, только если хотя бы у одного поля есть
+  // нативные атрибуты валидации. Условный импорт — не тянуть ZodUtils (и decimal.js внутри
+  // него, Фаза 0 spike) в файлы моделей, где нативных атрибутов нет вовсе.
+  const usesNativeAttributes = fields.some(
+    (field) => field.formMeta.nativeAttributes && field.formMeta.nativeAttributes.length > 0,
+  )
+
   // Generate imports
   const imports = [`import { z } from 'zod/v4'`]
+  if (usesNativeAttributes) {
+    imports.push(`import { ZodUtils } from '@zenstackhq/zod'`)
+  }
   for (const enumName of enumImports) {
     imports.push(`import { ${enumName}FormSchema } from './enums/${enumName}.form'`)
   }
@@ -481,11 +713,25 @@ export function generateModelCode(
 
   const excludedFieldsStr = excludedFields.map((f) => `'${f}'`).join(', ')
 
+  // Фаза 1 (v2.4.0, A3) — типизированная обёртка, без которой ZodUtils.* стирает тип схемы
+  // до z.ZodSchema (z.infer становился бы unknown) — находка Фазы 0 spike, libs/forms/PLAN.md.
+  const withNativeHelper = usesNativeAttributes
+    ? `
+/**
+ * Применить ZodUtils.* с сохранением конкретного типа схемы (Фаза 0 spike: без этой обёртки
+ * возвращаемый тип ZodUtils.* — базовый z.ZodSchema, и z.infer вырождается в unknown).
+ */
+function withNative<T extends z.ZodTypeAny>(schema: T, apply: (s: T) => unknown): T {
+  return apply(schema) as T
+}
+`
+    : ''
+
   return `// AUTO-GENERATED by @letar/zenstack-form-plugin
 // DO NOT EDIT MANUALLY
 
 ${imports.join('\n')}
-
+${withNativeHelper}
 /**
  * Create schema for ${name} with UI metadata.
  */

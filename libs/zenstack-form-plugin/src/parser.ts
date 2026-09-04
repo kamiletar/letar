@@ -19,6 +19,18 @@ const ZOD_CONSTRAINT_NAMES = new Set([
   'uuid',
   'exclusiveMin',
   'exclusiveMax',
+  // Фаза 1 (v2.4.0) — паритет с нативными @startsWith/@endsWith/@contains/@datetime/@date/
+  // @time/@phone/@trim/@lower/@upper
+  'startsWith',
+  'endsWith',
+  'contains',
+  'datetime',
+  'date',
+  'time',
+  'phone',
+  'trim',
+  'lower',
+  'upper',
 ])
 
 /**

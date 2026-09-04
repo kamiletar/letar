@@ -181,15 +181,30 @@ export type RecipeUpdateForm = z.infer<typeof RecipeUpdateFormSchema>
 их на `create`/`update` через `@zenstackhq/zod` — плагин форм наследует те же constraints в
 клиентскую Zod-схему, так что источник валидации остаётся один:
 
-| ZModel-атрибут      | Zod-constraint                     |
-| ------------------- | ---------------------------------- |
-| `@email`            | `.email()`                         |
-| `@length(min, max)` | `.min(min)` / `.max(max)` (строки) |
-| `@gte(x)`           | `.min(x)` (включительно)           |
-| `@gt(x)`            | `.gt(x)` (строго больше)           |
-| `@lte(x)`           | `.max(x)` (включительно)           |
-| `@lt(x)`            | `.lt(x)` (строго меньше)           |
-| `@regex("...")`     | `.regex(/.../)`                    |
+| ZModel-атрибут       | Zod-constraint                                                                 |
+| -------------------- | ------------------------------------------------------------------------------ |
+| `@email`             | `.email()`                                                                     |
+| `@length(min, max)`  | `.min(min)` / `.max(max)` (строки и списки)                                    |
+| `@gte(x)`            | `.min(x)` (включительно)                                                       |
+| `@gt(x)`             | `.gt(x)` (строго больше)                                                       |
+| `@lte(x)`            | `.max(x)` (включительно)                                                       |
+| `@lt(x)`             | `.lt(x)` (строго меньше)                                                       |
+| `@regex("...")`      | `.regex(/.../)`                                                                |
+| `@startsWith("...")` | `.startsWith(...)`                                                             |
+| `@endsWith("...")`   | `.endsWith(...)`                                                               |
+| `@contains("...")`   | `.includes(...)`                                                               |
+| `@datetime`          | `.datetime()`                                                                  |
+| `@date`              | `.date()`                                                                      |
+| `@time(precision?)`  | `.time()` / `.time({ precision })`                                             |
+| `@url`               | `.url()`                                                                       |
+| `@phone`             | телефон как строка (валидируется через `ZodUtils`, формат не диктуется формой) |
+| `@trim`              | `.trim()`                                                                      |
+| `@lower`             | `.toLowerCase()`                                                               |
+| `@upper`             | `.toUpperCase()`                                                               |
+
+`Decimal`-поля не поддерживают эти атрибуты через нативный путь (несовместимость
+`ZodUtils.addDecimalValidation` с контрактом `Decimal → z.number()` формы) — для них по-прежнему
+работают только `@gte`/`@gt`/`@lte`/`@lt`.
 
 ```zmodel
 /// @form.title("Количество порций")
@@ -267,6 +282,8 @@ portions: z.number()
 - Поля с атрибутом `@relation` (relation поля)
 - Поля, ссылающиеся на модели (например `info RecipeInfo?`)
 - Поля с директивой `@form.exclude`
+- Поля с атрибутом `@omit` (скрыты из ORM-клиента целиком)
+- Поля с атрибутом `@computed` (вычисляются сервером, не вводятся пользователем)
 
 > **Примечание:** FK поля (`categoryId`, `userId`, etc.) не исключаются автоматически.
 > Используйте `@form.relation` для создания select-поля или `@form.exclude` для исключения.

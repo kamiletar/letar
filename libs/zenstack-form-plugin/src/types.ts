@@ -19,6 +19,37 @@ export interface ZodConstraints {
   // Exclusive number bounds (нативные @gt/@lt — .min()/.max() Zod включительны, этим двум нужны отдельные ключи)
   exclusiveMin?: number // → .gt()
   exclusiveMax?: number // → .lt()
+  // Фаза 1 (v2.4.0) — паритет с нативными @startsWith/@endsWith/@contains/@datetime/@date/@time/
+  // @phone/@trim/@lower/@upper. Ключи существуют, чтобы @form.props мог осознанно переопределить
+  // (или явно продублировать) нативный атрибут того же поля — см. правило переопределения в
+  // extractModelInfo (model-generator.ts).
+  startsWith?: string
+  endsWith?: string
+  contains?: string
+  datetime?: boolean
+  date?: boolean
+  time?: number | true // precision (@time(N)) или true (@time() без precision)
+  phone?: boolean
+  trim?: boolean
+  lower?: boolean
+  upper?: boolean
+}
+
+/**
+ * Один нативный ZModel-атрибут валидации, сериализованный для инлайна как литерал
+ * `AttributeApplication` в сгенерированном файле — рантайм-структура читается
+ * `ZodUtils.*` из `@zenstackhq/zod` (Фаза 1, решение spike A3, см. `libs/forms/PLAN.md`).
+ *
+ * `message`-аргумент атрибута сюда намеренно не попадает — `ZodUtils.*` (пакет 3.9.3) его не
+ * читает ни в одном из своих `case`-ветвлений, значение было бы мёртвым весом в литерале.
+ * Локализованные сообщения валидации для нативных атрибутов — отдельная нерешённая часть Фазы 1,
+ * см. `libs/forms/PLAN.md`.
+ */
+export interface NativeAttributeApplication {
+  /** Ref-текст атрибута с `@`, как хранит Langium в `decl.$refText` (например `'@gte'`) */
+  name: string
+  /** Позиционные аргументы в порядке объявления атрибута в stdlib.zmodel, только литералы */
+  args?: Array<{ name: string; value: number | string | boolean }>
 }
 
 /**
@@ -35,6 +66,14 @@ export interface FormFieldMeta {
   fieldType?: string
   /** Zod constraints (min, max, minLength, etc.) — become schema methods */
   constraints?: ZodConstraints
+  /**
+   * Нативные ZModel-атрибуты валидации, применяемые через `ZodUtils.*` (Фаза 1, A3).
+   * Уже отфильтрованы от атрибутов, чьи ключи-констрейнты переопределены через `@form.props`
+   * (см. `extractModelInfo` в `model-generator.ts`). `Decimal`-поля сюда не попадают —
+   * несовместимость с `ZodUtils.addDecimalValidation` зафиксирована в Фазе 0 spike, для них
+   * действует прежний путь через `constraints` (see выше).
+   */
+  nativeAttributes?: NativeAttributeApplication[]
   /** UI props (everything else — passed to fieldProps) */
   props?: Record<string, unknown>
   /** Relation configuration */
