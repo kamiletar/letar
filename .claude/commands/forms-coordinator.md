@@ -16,7 +16,7 @@ macro_start_session(
   program: "claude-code",
   model: "opus-4.6",
   agent_name: "forms-coordinator-dev",
-  registration_token: "RAN04gzgJ80SIqWl6C59zwyGQbMQlW56sXP4uWgOZrs",
+  registration_token: "<токен из agent_fixed_names_tokens.md>",
   task_description: "Forms Coordinator — координация экосистемы форм",
   file_reservation_paths: ["libs/forms/**", "libs/zenstack-form-plugin/**", "libs/form-mcp/**"],
   file_reservation_reason: "forms ecosystem ownership"
@@ -40,23 +40,35 @@ macro_start_session(
 > исключены из `retire_agent` — см. `.claude/commands/end-session.md`). Если всё же встретишь
 > «is retired and no longer accepts new messages» (сервер сам ретирит по 24ч простоя) — вызови
 > `unretire_agent(project_key: "c-web-letar", agent_name: "forms-coordinator-dev",
-> registration_token: "RAN04gzgJ80SIqWl6C59zwyGQbMQlW56sXP4uWgOZrs")`, потом `macro_start_session`.
+> registration_token: "<токен из agent_fixed_names_tokens.md>")`, потом `macro_start_session`.
 > Тот же приём нужен и для `forms-dev` при делегации задач — его токен см. `agent_fixed_names_tokens`
 > в памяти.
 
-2. Изучи текущее состояние:
+2. Выставь открытую contact policy — иначе первый запрос от незнакомого consumer-агента виснет
+   заявкой на подтверждение контакта (см. `.claude/rules/agent-mail.md`):
+
+```
+set_contact_policy(
+  project_key: "c-web-letar",
+  agent_name: "forms-coordinator-dev",
+  policy: "open",
+  registration_token: "<токен из agent_fixed_names_tokens.md>"
+)
+```
+
+3. Изучи текущее состояние:
    - `libs/forms/README.md` — API и компоненты
    - `libs/forms/PLAN.md` — backlog запросов
    - `.claude/rules/forms.md` — правила работы с формами
    - `.claude/rules/form-delegation.md` — протокол делегации
 
-3. Объяви о готовности:
+4. Объяви о готовности:
 
 ```
 send_message(
   project_key: "c-web-letar",
   sender_name: "forms-coordinator-dev",
-  sender_token: "RAN04gzgJ80SIqWl6C59zwyGQbMQlW56sXP4uWgOZrs",
+  sender_token: "<токен из agent_fixed_names_tokens.md>",
   to: [],
   broadcast: true,
   subject: "Forms Coordinator готов",
