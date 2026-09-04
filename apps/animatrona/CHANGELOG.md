@@ -4,6 +4,20 @@
 
 ## [Unreleased]
 
+## [0.55.35] - 2026-09-04
+
+### Changed
+
+- `Settings.torrentBackend` переведён с `String` + `@form.props({options:...})` (последнее живое
+  использование legacy comment-directive синтаксиса форм в приложении) на настоящий
+  `enum TorrentBackend { WEBTORRENT QBITTORRENT }` с `///`-лейблами — опции для `radioCard`
+  теперь генерируются автоматически, без ручного directive. Разблокирует удаление legacy-парсера
+  `@form.*`/`///` из `libs/zenstack-form-plugin` (задача от `forms-coordinator-dev`).
+  Миграция `20260904203936_convert_torrent_backend_enum` включает `UPDATE ... UPPER(...)` для
+  существующих строчных значений (`webtorrent`/`qbittorrent` → `WEBTORRENT`/`QBITTORRENT`) —
+  без этого шага Prisma Client не смог бы распарсить старые строки как enum-значения у
+  пользователей с уже существующей БД.
+
 ## [0.55.34] - 2026-09-03
 
 ### Fixed

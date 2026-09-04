@@ -9,6 +9,14 @@ import "./federation"
 import "./social"
 import "./shikimori"
 
+/// Бэкенд торрент-клиента
+enum TorrentBackend {
+  /// WebTorrent (встроенный)
+  WEBTORRENT
+  /// qBittorrent (рекомендуется)
+  QBITTORRENT
+}
+
 /// Настройки приложения (singleton)
 model Settings {
   id              String      @id @default("default")
@@ -71,8 +79,7 @@ model Settings {
 
   // === Торрент-клиент ===
 
-  /// @form.props({ options: [{"value":"webtorrent","label":"WebTorrent (встроенный)"},{"value":"qbittorrent","label":"qBittorrent (рекомендуется)"}] })
-  torrentBackend      String      @default("webtorrent") @meta("form.title", "Бэкенд торрент-клиента") @meta("form.fieldType", "radioCard") @meta("form.description", "WebTorrent качает в RAM → OOM на больших раздачах. qBittorrent работает отдельным процессом и качает на диск.")
+  torrentBackend      TorrentBackend @default(WEBTORRENT) @meta("form.title", "Бэкенд торрент-клиента") @meta("form.fieldType", "radioCard") @meta("form.description", "WebTorrent качает в RAM → OOM на больших раздачах. qBittorrent работает отдельным процессом и качает на диск.")
 
   qbittorrentUrl      String? @meta("form.title", "URL qBittorrent Web UI") @meta("form.placeholder", "http://localhost:8080") @meta("form.description", "Адрес Web UI qBittorrent (Tools → Options → Web UI)")
 

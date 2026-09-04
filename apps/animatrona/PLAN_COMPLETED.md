@@ -4,6 +4,38 @@
 
 > **Архив обновлён:** 2026-09-01
 
+## `Settings.torrentBackend`: `String` + legacy-directive → `enum TorrentBackend` (2026-09-04)
+
+По запросу `forms-coordinator-dev` (координация мажорного релиза `@letar/forms`, удаление legacy
+comment-directive парсера `@form.*`/`///` из `libs/zenstack-form-plugin`) — `torrentBackend`
+([settings.zmodel:75](schema/models/settings.zmodel)) было последним полем во всём приложении,
+державшим `/// @form.props({options:[...]})` вместо `@meta`, потому что объектный литерал не
+проходит в `@meta`-атрибут (упирается в `ObjectExpr` в upstream-генераторе ZenStack, см.
+[zmodel-comment-directives-vs-ast.md](/.claude/docs/zmodel-comment-directives-vs-ast.md)).
+Решение владельца — не искать эквивалент для объектного литерала, а признать `String` вместо
+`enum` архитектурным антипаттерном и завести настоящий `enum TorrentBackend { WEBTORRENT
+QBITTORRENT }` с `///`-лейблами на значениях (та же конвенция, что `VideoCodec`/`TrackPreference`
+в `media.zmodel`) — опции `radioCard` теперь генерируются автоматически, `@form.props` не нужен
+вовсе.
+
+**Данные:** локальная dev-БД пуста (таблица `Settings` — 0 строк), но поле хранило дефолт
+`'webtorrent'` в нижнем регистре у реальных пользователей. Копия строки в сгенерированной
+prisma-миграции (`RedefineTables`, table rebuild — стандартный способ ALTER COLUMN в SQLite)
+переносит значение как есть, поэтому в `migration.sql` вручную добавлен шаг `UPDATE
+"new_Settings" SET "torrentBackend" = UPPER("torrentBackend") WHERE ... IN ('webtorrent',
+'qbittorrent')` **между** `INSERT INTO new_Settings` и `DROP TABLE Settings` — без него у
+пользователей с уже существующей БД Prisma Client не смог бы распарсить старую строку как
+enum-значение при следующем запуске приложения (значение не входит в допустимый набор).
+
+**Побочное:** dev-БД имела нетронутый drift (`Anime.trackerAnimeId` — колонка, добавленная в
+`schema.zmodel` ранее без соответствующей миграции). `prisma migrate reset --force` (с явным
+согласием пользователя — dev-БД была полностью пустой) потребовался, чтобы `migrate dev` вообще
+смог сгенерировать новую миграцию; `trackerAnimeId` заодно попал в ту же миграцию как часть diff —
+ретроактивно задокументировал предсуществующее расхождение, а не добавил новый функционал.
+
+`nx zenstack:generate`/`typecheck:tsgo`/`lint animatrona` — зелёные (lint: 0 ошибок, только
+предсуществующие несвязанные warnings).
+
 ## Фабрики мутаций (`hooks-factory.ts`) защищены от `{ success: false }`-результатов (2026-09-03)
 
 Продолжение фикса ниже (delete-actions animatrona) на уровень общей инфраструктуры. Сам фикс
