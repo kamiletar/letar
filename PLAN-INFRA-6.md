@@ -2004,3 +2004,21 @@ agent-mail identity, ссылка на общий `app-workflow.md` вместо
 **Не тронуто намеренно:** порт-коллизии, где обе стороны — живые prod-сервисы, не переназначались
 без решения владельца (в этом аудите таких не встретилось — обе коллизии решились за счёт
 приложения без продакшена или без `.env` вовсе).
+
+## §153 — rollout smoke-test (`libs/deploy-engine`) требовал `wget` внутри контейнера — падал на `time` (Debian slim, §130) ✅ ЗАКРЫТО (2026-09-04)
+
+`apps/time/Dockerfile.production` сознательно на `node:24-slim` (§130 — эксперимент,
+задокументированное единственное отклонение от Alpine остальных приложений). Debian slim не
+содержит busybox/`wget`. Smoke-test rollout (`libs/deploy-engine/src/rollout.ts`, введён при
+инциденте mandala §18.6 — реальный HTTP-запрос поверх TCP-healthcheck) дёргал
+`docker exec <container> wget -q -O /dev/null <url>` — на `time` это падало `OCI runtime exec
+failed: ... exec: "wget": executable file not found in $PATH`, хотя контейнер уже был реально
+healthy. Rollout откатывался на этом шаге, `time` не мог выкатить ни одной новой версии, пока
+чинили healthcheck (commit `02cc27ca`, отдельная, более ранняя часть той же истории).
+
+**Фикс:** smoke-test переписан на `docker exec <container> node -e "require('http').get(...)"`
+вместо `wget` — `node` гарантированно есть в любом Node-образе независимо от дистрибутива/
+пакетного менеджера, в отличие от `wget`/`curl`. Коммит `51465453` (`libs/deploy-engine`
+0.1.2→0.1.3), тесты `rollout.spec.ts` обновлены под новую команду, `nx test/typecheck:tsgo/lint
+deploy-engine` — зелёные. Деплой `time` не выполнялся в рамках этой сессии — правило `git.md`
+запрещает прямой деплой, отправлен `deploy-request` на `deploy-agent-dev` (тред `deploy-time`).
