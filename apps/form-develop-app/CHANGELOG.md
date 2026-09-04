@@ -2,6 +2,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.4] - 2026-09-04
+
+### Added
+
+- `native-attributes-demo` — демо-страница Фазы 1 миграции `zenstack-form-plugin` (v2.4.0) на
+  нативные ZModel-атрибуты валидации. Использует реально сгенерированный `RecipeCreateFormSchema`
+  (не ручной Zod), показывает `@startsWith`/`@url`/`@phone`/`@date`/`@trim`/`@lower` в действии.
+- `schema.zmodel` (модель `Recipe`) — новые поля `slug`, `website`, `authorPhone`, `publishedOn`,
+  `internalNote` для демонстрации 11 новых нативных атрибутов и исключения поля через `@omit`.
+
 ## [0.1.3] - 2026-08-26
 
 ### Fixed

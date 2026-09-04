@@ -170,6 +170,18 @@ libs/forms/src/lib/declarative/
 
 ---
 
+## Native Attributes Demo (реализовано, Фаза 1 zenstack-form-plugin v2.4.0)
+
+`/native-attributes-demo` — рендерит реально сгенерированный `RecipeCreateFormSchema` (не ручной
+Zod), демонстрирует 4 из 11 новых нативных атрибутов (`@startsWith`+`@trim`+`@lower` на `slug`,
+`@url` на `website`, `@phone` на `authorPhone`, `@date` на `publishedOn`) плюс исключение поля
+через `@omit` (`internalNote`). Проверено живьём: невалидный `slug` («invalid-slug») даёт ошибку
+формы `Invalid string: must start with "recipe-"` — валидация приходит из
+`ZodUtils.addStringValidation`, ни строчки ручного кода. Полное решение — `libs/forms/PLAN.md`
+(Фаза 0 spike + Фаза 1), `libs/zenstack-form-plugin/CHANGELOG.md` v2.4.0.
+
+---
+
 ## E2E Тесты
 
 ### Покрытие тестами (21 файл)

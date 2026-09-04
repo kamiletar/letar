@@ -87,6 +87,11 @@ export default function HomePage() {
             Filters State (Form.Subscribe, Form.UrlSync, useFormRef, useActiveFiltersCount)
           </Link>
         </Button>
+        <Button asChild colorPalette="cyan" variant="outline" size="lg" width="fit-content">
+          <Link href="/native-attributes-demo">
+            Native Attributes (Фаза 1 zenstack-form-plugin: @startsWith/@url/@phone/@date/@trim/@lower)
+          </Link>
+        </Button>
       </VStack>
     </Container>
   )

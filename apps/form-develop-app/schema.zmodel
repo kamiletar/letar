@@ -111,6 +111,24 @@ model Recipe {
   /// Обратная связь для similarMyRecipes (implicit M:N, не используется в API)
   similarFor  RecipeInfoAdditional[] @relation("SimilarRecipes")
 
+  // Фаза 1 (v2.4.0) zenstack-form-plugin — демо-поля для 11 новых нативных
+  // атрибутов валидации (паритет с ORM, libs/forms/PLAN.md)
+
+  /// @form.title("Slug (нативные @startsWith/@trim/@lower)")
+  slug        String            @default("recipe-") @startsWith("recipe-") @trim() @lower()
+
+  /// @form.title("Сайт рецепта (нативный @url)")
+  website     String?           @url()
+
+  /// @form.title("Телефон автора (нативный @phone)")
+  authorPhone String?           @phone()
+
+  /// @form.title("Дата публикации (нативный @date)")
+  publishedOn String?           @date()
+
+  /// Служебная заметка — не должна попадать в форму (нативный @omit)
+  internalNote String?          @omit()
+
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 
