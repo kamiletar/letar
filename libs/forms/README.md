@@ -45,17 +45,17 @@ const Schema = z.object({
 
 ## Документация
 
-| Категория        | Документация                                             | Описание                                     |
-| ---------------- | -------------------------------------------------------- | -------------------------------------------- |
-| Field компоненты | [docs/fields.md](./docs/fields.md)                       | 56 типов полей (String, Number, Select, ...) |
-| Form-level       | [docs/form-level.md](./docs/form-level.md)               | Steps, When, Watch, Errors, Persistence      |
-| Schema генерация | [docs/schema-generation.md](./docs/schema-generation.md) | FromSchema, AutoFields, Builder, Templates   |
-| Server Errors    | [docs/server-errors.md](./docs/server-errors.md)         | Маппинг Prisma/ZenStack/Zod ошибок на поля   |
-| Offline          | [docs/offline.md](./docs/offline.md)                     | Оффлайн режим, очередь синхронизации         |
-| ZenStack         | [docs/zenstack.md](./docs/zenstack.md)                   | Плагин, @form.\* директивы, withUIMeta       |
-| i18n             | [docs/i18n.md](./docs/i18n.md)                           | Мультиязычность, перевод ошибок валидации    |
-| Analytics        | [docs/analytics.md](./docs/analytics.md)                 | Field-level аналитика, 4 адаптера            |
-| API Reference    | [docs/api-reference.md](./docs/api-reference.md)         | Хуки, контексты, типы                        |
+| Категория        | Документация                                             | Описание                                              |
+| ---------------- | -------------------------------------------------------- | ----------------------------------------------------- |
+| Field компоненты | [docs/fields.md](./docs/fields.md)                       | 56 типов полей (String, Number, Select, ...)          |
+| Form-level       | [docs/form-level.md](./docs/form-level.md)               | Steps, When, Watch, Errors, Persistence               |
+| Schema генерация | [docs/schema-generation.md](./docs/schema-generation.md) | FromSchema, AutoFields, Builder, Templates            |
+| Server Errors    | [docs/server-errors.md](./docs/server-errors.md)         | Маппинг Prisma/ZenStack/Zod ошибок на поля            |
+| Offline          | [docs/offline.md](./docs/offline.md)                     | Оффлайн режим, очередь синхронизации                  |
+| ZenStack         | [docs/zenstack.md](./docs/zenstack.md)                   | Плагин, @meta("form.\*", value) директивы, withUIMeta |
+| i18n             | [docs/i18n.md](./docs/i18n.md)                           | Мультиязычность, перевод ошибок валидации             |
+| Analytics        | [docs/analytics.md](./docs/analytics.md)                 | Field-level аналитика, 4 адаптера                     |
+| API Reference    | [docs/api-reference.md](./docs/api-reference.md)         | Хуки, контексты, типы                                 |
 
 ---
 
@@ -212,16 +212,17 @@ const Schema = z.object({
 
 ### ZenStack интеграция
 
+С Фазы 3 `zenstack-form-plugin` (v3.0.0) основной синтаксис — field-атрибут `@meta`, не
+doc-комментарий (legacy `/// @form.*` всё ещё работает, но deprecated — подробности в
+[docs/zenstack.md](./docs/zenstack.md)):
+
 ```zmodel
 model Product {
-  /// @form.title("Название продукта")
-  /// @form.placeholder("Введите название")
-  title String
+  title String @meta("form.title", "Название продукта") @meta("form.placeholder", "Введите название")
 
-  /// @form.title("Цена")
-  /// @form.fieldType("currency")
-  /// @form.props({ min: 0, currency: "RUB" })
   price Int
+    @meta("form.title", "Цена") @meta("form.fieldType", "currency")
+    @meta("form.props.min", 0) @meta("form.props.currency", "RUB")
 }
 ```
 
@@ -402,7 +403,7 @@ const myProvider: AddressProvider = {
 
 ## AI Tooling (MCP)
 
-MCP сервер [`@letar/form-mcp`](../form-mcp/README.md) предоставляет AI-ассистентам (Claude Code, Cursor, VS Code Copilot) полный контекст о библиотеке: 56 п��лей, паттерны форм, @form.\* директивы.
+MCP сервер [`@letar/form-mcp`](../form-mcp/README.md) предоставляет AI-ассистентам (Claude Code, Cursor, VS Code Copilot) полный контекст о библиотеке: 56 полей, паттерны форм, @meta("form.\*", value) директивы.
 
 ```json
 { "form-mcp": { "command": "npx", "args": ["-y", "@letar/form-mcp"] } }

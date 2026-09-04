@@ -58,52 +58,76 @@ export const RecipeTypeLabels = {
 
 ---
 
-## @form.\* директивы
+## `@meta("form.*", value)` директивы
 
-Используйте `///` doc-комментарии **ПЕРЕД** полем:
+С Фазы 3 `zenstack-form-plugin` (v3.0.0) основной синтаксис — **field-атрибут** `@meta`, не
+doc-комментарий. Ставится прямо на поле:
 
 ```zmodel
 model Product {
   id          String   @id @default(cuid())
 
-  /// @form.title("Название продукта")
-  /// @form.placeholder("Введите название")
-  title       String
+  title       String @meta("form.title", "Название продукта") @meta("form.placeholder", "Введите название")
 
-  /// @form.title("Цена")
-  /// @form.fieldType("currency")
-  /// @form.props({ min: 0, currency: "RUB" })
   price       Int
+    @meta("form.title", "Цена") @meta("form.fieldType", "currency")
+    @meta("form.props.min", 0) @meta("form.props.currency", "RUB")
 
-  /// @form.title("Рейтинг")
-  /// @form.fieldType("rating")
-  /// @form.props({ count: 5, allowHalf: true })
   rating      Float    @default(0)
+    @meta("form.title", "Рейтинг") @meta("form.fieldType", "rating")
+    @meta("form.props.count", 5) @meta("form.props.allowHalf", true)
 
-  /// @form.title("Активен")
-  /// @form.fieldType("switch")
   isActive    Boolean  @default(true)
+    @meta("form.title", "Активен") @meta("form.fieldType", "switch")
 
-  /// @form.title("Теги")
-  /// @form.fieldType("tags")
-  /// @form.placeholder("Добавить тег...")
   tags        String[]
+    @meta("form.title", "Теги") @meta("form.fieldType", "tags")
+    @meta("form.placeholder", "Добавить тег...")
 }
 ```
 
+⚠️ **Legacy-синтаксис** (`///`-комментарий **перед** полем) продолжает работать — плагин читает
+оба, `@meta` побеждает при конфликте на одном ключе метаданных. `nx zenstack:generate` печатает
+deprecation-warning при обнаружении `@form.*`, но не ломает сборку:
+
+```zmodel
+model Product {
+  /// @form.title("Название продукта")
+  /// @form.placeholder("Введите название")
+  title String
+}
+```
+
+### ⛔ Объектный литерал в `@meta` ломает `zenstack generate` целиком
+
+Это ограничение upstream-генератора TS-схемы самого ZenStack (`Unsupported attribute arg value:
+ObjectExpr`), не плагина. Поэтому `form.props`/`form.relation` (раньше принимавшие объект)
+заданы **плоским dot-path**, один `@meta` на ключ:
+
+```zmodel
+// ❌ Ломает generate целиком
+portions Int @meta("form.props", { min: 1, max: 100 })
+
+// ✅ Работает
+portions Int @meta("form.props.min", 1) @meta("form.props.max", 100)
+```
+
+Скаляры (строка/число/булево) и массивы в `@meta` работают без проблем — блокирован только
+«голый» объектный литерал.
+
 ### Поддерживаемые директивы
 
-| Директива                  | Описание               | Пример                                       |
-| -------------------------- | ---------------------- | -------------------------------------------- |
-| `@form.title("...")`       | Заголовок поля (label) | `/// @form.title("Название")`                |
-| `@form.placeholder("...")` | Placeholder            | `/// @form.placeholder("Введите...")`        |
-| `@form.description("...")` | Описание (helperText)  | `/// @form.description("Подсказка")`         |
-| `@form.fieldType("...")`   | Тип UI компонента      | `/// @form.fieldType("tags")`                |
-| `@form.props({...})`       | Constraints + UI props | `/// @form.props({ min: 1, max: 100 })`      |
-| `@form.relation({...})`    | Настройки relation     | `/// @form.relation({ labelField: "name" })` |
-| `@form.exclude`            | Исключить из формы     | `/// @form.exclude`                          |
+| Директива                 | Описание               | Пример                                                    |
+| ------------------------- | ---------------------- | --------------------------------------------------------- |
+| `form.title`              | Заголовок поля (label) | `@meta("form.title", "Название")`                         |
+| `form.placeholder`        | Placeholder            | `@meta("form.placeholder", "Введите...")`                 |
+| `form.description`        | Описание (helperText)  | `@meta("form.description", "Подсказка")`                  |
+| `form.fieldType`          | Тип UI компонента      | `@meta("form.fieldType", "tags")`                         |
+| `form.props.<dotpath>`    | Constraints + UI props | `@meta("form.props.min", 1) @meta("form.props.max", 100)` |
+| `form.relation.<dotpath>` | Настройки relation     | `@meta("form.relation.labelField", "name")`               |
+| `form.exclude`            | Исключить из формы     | `@meta("form.exclude", true)`                             |
 
-### Автоматическое разделение @form.props
+### Автоматическое разделение `form.props`
 
 **Zod constraints** (становятся методами схемы):
 
@@ -118,8 +142,7 @@ model Product {
 - `showValue`, `layout` (для slider, radioCard)
 
 ```zmodel
-/// @form.props({ min: 1, max: 100, showValue: true })
-portions Int
+portions Int @meta("form.props.min", 1) @meta("form.props.max", 100) @meta("form.props.showValue", true)
 ```
 
 Генерирует:
@@ -137,9 +160,9 @@ portions: z.number()
 - `id` — первичные ключи
 - `createdAt`, `updatedAt` — системные поля
 - Поля с `@relation` (relation поля)
-- Поля с `@form.exclude`
+- Поля с `@meta("form.exclude", true)` (или legacy `/// @form.exclude`)
 
-> **Важно:** FK поля (`categoryId`, `userId`) НЕ исключаются. Используйте `@form.relation` для select или `@form.exclude`.
+> **Важно:** FK поля (`categoryId`, `userId`) НЕ исключаются. Используйте `form.relation` для select или `form.exclude`.
 
 ### Использование схем
 

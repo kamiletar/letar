@@ -1047,7 +1047,7 @@ MCP сервер предоставляет AI-ассистентам прогр
 | `get_field_props`   | Пропсы и документация конкретного поля                                                               |
 | `get_field_example` | Код-пример использования поля                                                                        |
 | `get_form_pattern`  | Паттерны: crud-create, crud-edit, multi-step, offline, i18n, from-schema, declarative, server-action |
-| `get_directives`    | Описание @form.\* директив zenstack-form-plugin                                                      |
+| `get_directives`    | Описание @meta("form.\*", value) директив zenstack-form-plugin (+ legacy @form.\*)                   |
 | `generate_form`     | Генерация кода формы по спецификации полей                                                           |
 
 ### Resources

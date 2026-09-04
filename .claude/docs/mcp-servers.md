@@ -10,7 +10,7 @@
 | **next-devtools**            | `next-devtools-mcp`                                 | Документация Next.js 16, рантайм dev сервера, ошибки                                                                                                                                                                                                                                 |
 | **chakra-ui**                | `@chakra-ui/react-mcp`                              | Компоненты Chakra UI v3, props, примеры, темизация                                                                                                                                                                                                                                   |
 | **context7**                 | `@upstash/context7-mcp`                             | Документация любых библиотек (React, TanStack, etc.)                                                                                                                                                                                                                                 |
-| **form-mcp**                 | `@letar/form-mcp` (local) / `@letar/form-mcp` (npm) | 40+ field-компонентов, паттерны форм, @form.\* директивы                                                                                                                                                                                                                             |
+| **form-mcp**                 | `@letar/form-mcp` (local) / `@letar/form-mcp` (npm) | 40+ field-компонентов, паттерны форм, @meta("form.\*", value) директивы                                                                                                                                                                                                              |
 | **deploy-mcp**               | `@letar/deploy-mcp` (local)                         | Деплой через dashboard-agent (SSH-туннель): deploy_app, deploy_status, git_status, agent_health                                                                                                                                                                                      |
 | **postgres-driving-school**  | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД driving-school (read-only)                                                                                                                                                                                                                                          |
 | **postgres-kami**            | `@modelcontextprotocol/server-postgres`             | SQL запросы к dev-БД kami (read-only)                                                                                                                                                                                                                                                |
@@ -196,14 +196,14 @@ MCP сервер для AI-ассистентов, работающих с @leta
 
 ### Tools
 
-| Инструмент          | Описание                                                                                                   |
-| ------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `list_fields`       | Список 40+ типов полей, фильтр по категории (text, number, date, select, special)                          |
-| `get_field_props`   | Пропсы и документация конкретного поля                                                                     |
-| `get_field_example` | TSX код-пример использования поля                                                                          |
-| `get_form_pattern`  | Полные примеры: crud-create, crud-edit, multi-step, offline, i18n, from-schema, declarative, server-action |
-| `get_directives`    | Описание @form.\* директив zenstack-form-plugin                                                            |
-| `generate_form`     | Генерация кода формы по спецификации полей                                                                 |
+| Инструмент          | Описание                                                                                                                                            |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `list_fields`       | Список 40+ типов полей, фильтр по категории (text, number, date, select, special)                                                                   |
+| `get_field_props`   | Пропсы и документация конкретного поля                                                                                                              |
+| `get_field_example` | TSX код-пример использования поля                                                                                                                   |
+| `get_form_pattern`  | Полные примеры: crud-create, crud-edit, multi-step, offline, i18n, from-schema, declarative, server-action                                          |
+| `get_directives`    | Описание директив zenstack-form-plugin — возвращает и основной `@meta("form.*", value)` (поле `example`), и legacy `@form.*` (поле `legacyExample`) |
+| `generate_form`     | Генерация кода формы по спецификации полей                                                                                                          |
 
 ### Resources
 
@@ -214,7 +214,7 @@ MCP сервер для AI-ассистентов, работающих с @leta
 - `form-docs://schema-generation` — FromSchema, AutoFields, Builder
 - `form-docs://offline` — useOfflineForm, sync queue
 - `form-docs://i18n` — FormI18nProvider, локализация
-- `form-docs://zenstack` — @form.\* директивы, генерация из schema.zmodel
+- `form-docs://zenstack` — @meta("form.\*", value) директивы (+ legacy @form.\*), генерация из schema.zmodel
 - `form-docs://api-reference` — Hooks, contexts, типы
 
 ### Prompts
