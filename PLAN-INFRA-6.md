@@ -1148,7 +1148,11 @@ ESM-синтаксис в `.ts`-файле, воспринимаемом как 
 **Коммиты:** публичный репо `2e80cc72` (`__dirname` → `import.meta.dirname`, 26 файлов,
 multi-scope — repo-wide механическая правка); 8 submodule — по одному коммиту на каждый
 (`vitest.config.ts` → `.mts` + `__dirname`-фикс), SHA зафиксированы в letar коммитом `3114d4e9`.
-Не запушено — ждёт отдельного одобрения `git push` ([git.md](/.claude/rules/git.md)).
+
+✅ **Запушено (2026-09-05).** Проверено явно: все 8 submodule-SHA, записанных в `HEAD`
+(`apps/<app>`), подтверждённо являются предками `origin/main` соответствующего submodule-репо, и
+сам `3114d4e9` — предок `origin/main` letar. Деплой не требуется — правка касается только
+дев-тулинга (`vitest.config.*`), рантайм приложений не затрагивает.
 
 **Урок:** scope-guard-хук делит корневые файлы submodule (`project.json`/`vitest.config.mts`/
 `tsconfig.spec.json`) на разные scope, потому что для файла без каталога «первый сегмент пути» —
