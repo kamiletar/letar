@@ -375,7 +375,7 @@
     },
     "apps/animatrona": {
       "name": "@letar/animatrona",
-      "version": "0.55.34",
+      "version": "0.55.35",
       "dependencies": {
         "@letar/icon-generator": "workspace:*",
         "@letar/seed-utils": "workspace:*",
@@ -411,7 +411,7 @@
     },
     "apps/animatrona-tracker": {
       "name": "@letar/animatrona-tracker",
-      "version": "0.11.11",
+      "version": "0.11.12",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -523,7 +523,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.183.41",
+      "version": "0.183.44",
       "dependencies": {
         "@letar/demo-protection": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -590,7 +590,7 @@
     },
     "apps/form-develop-app": {
       "name": "form-develop-app",
-      "version": "0.1.7",
+      "version": "0.1.8",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/pg-url": "workspace:*",
@@ -952,6 +952,10 @@
         "puppeteer",
       ],
     },
+    "libs/data-export": {
+      "name": "@letar/data-export",
+      "version": "0.1.0",
+    },
     "libs/demo-protection": {
       "name": "@letar/demo-protection",
       "version": "0.1.0",
@@ -1035,7 +1039,7 @@
     },
     "libs/form-mcp": {
       "name": "@letar/form-mcp",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "dependencies": {
         "@modelcontextprotocol/sdk": "1.29.0",
         "zod": "4.3.6",
@@ -1050,7 +1054,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.9.0",
+      "version": "2.10.0",
       "dependencies": {
         "@tanstack/react-table": "^9.1.2",
         "@tanstack/react-virtual": "^3.13.23",
@@ -1217,6 +1221,14 @@
         "zod": ">=4.0.0",
       },
     },
+    "libs/fuzzy-search": {
+      "name": "@letar/fuzzy-search",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "@chakra-ui/react": ">=3.0.0",
+        "react": ">=19.0.0",
+      },
+    },
     "libs/generators": {
       "name": "@letar/generators",
       "version": "0.1.3",
@@ -1372,6 +1384,13 @@
       "name": "@letar/seo",
       "version": "0.2.0",
     },
+    "libs/slug-resolver": {
+      "name": "@letar/slug-resolver",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "next": ">=15.0.0",
+      },
+    },
     "libs/studio-mcp": {
       "name": "@letar/studio-mcp",
       "version": "0.1.2",
@@ -1435,9 +1454,25 @@
         "@letar/mcp-test-kit": "workspace:*",
       },
     },
+    "libs/undo-toast": {
+      "name": "@letar/undo-toast",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "@chakra-ui/react": ">=3.0.0",
+        "react": ">=19.0.0",
+      },
+    },
     "libs/upload-validation": {
       "name": "@letar/upload-validation",
       "version": "0.2.0",
+    },
+    "libs/url-query-state": {
+      "name": "@letar/url-query-state",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "next": ">=15.0.0",
+        "react": ">=19.0.0",
+      },
     },
     "libs/validation-utils": {
       "name": "@letar/validation-utils",
@@ -1465,7 +1500,7 @@
     },
     "libs/zenstack-form-plugin": {
       "name": "@letar/zenstack-form-plugin",
-      "version": "3.2.0",
+      "version": "4.0.0",
       "peerDependencies": {
         "@zenstackhq/sdk": ">=3.0.0",
         "@zenstackhq/zod": ">=3.0.0",
@@ -2424,6 +2459,8 @@
 
     "@letar/dashboard": ["@letar/dashboard@workspace:apps/dashboard"],
 
+    "@letar/data-export": ["@letar/data-export@workspace:libs/data-export"],
+
     "@letar/demo-protection": ["@letar/demo-protection@workspace:libs/demo-protection"],
 
     "@letar/deploy-engine": ["@letar/deploy-engine@workspace:libs/deploy-engine"],
@@ -2477,6 +2514,8 @@
     "@letar/forms-vue": ["@letar/forms-vue@workspace:libs/forms-vue"],
 
     "@letar/forms-vue-shadcn": ["@letar/forms-vue-shadcn@workspace:libs/forms-vue-shadcn"],
+
+    "@letar/fuzzy-search": ["@letar/fuzzy-search@workspace:libs/fuzzy-search"],
 
     "@letar/generators": ["@letar/generators@workspace:libs/generators"],
 
@@ -2540,6 +2579,8 @@
 
     "@letar/seo": ["@letar/seo@workspace:libs/seo"],
 
+    "@letar/slug-resolver": ["@letar/slug-resolver@workspace:libs/slug-resolver"],
+
     "@letar/studio": ["@letar/studio@workspace:apps/studio"],
 
     "@letar/studio-e2e": ["@letar/studio-e2e@workspace:apps/studio-e2e"],
@@ -2564,7 +2605,11 @@
 
     "@letar/umami-mcp": ["@letar/umami-mcp@workspace:libs/umami-mcp"],
 
+    "@letar/undo-toast": ["@letar/undo-toast@workspace:libs/undo-toast"],
+
     "@letar/upload-validation": ["@letar/upload-validation@workspace:libs/upload-validation"],
+
+    "@letar/url-query-state": ["@letar/url-query-state@workspace:libs/url-query-state"],
 
     "@letar/validation-utils": ["@letar/validation-utils@workspace:libs/validation-utils"],
 
