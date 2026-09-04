@@ -29,7 +29,7 @@
           "target": "build"
         }
       ],
-      "cache": true,
+      "cache": false,
       "inputs": [
         "{projectRoot}/schema.zmodel",
         "{projectRoot}/prisma/schema.prisma",
