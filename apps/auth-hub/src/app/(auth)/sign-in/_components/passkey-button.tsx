@@ -29,6 +29,8 @@ export function PasskeySignInButton({ callbackUrl = '/auth/post-login' }: Passke
 
   useEffect(() => {
     if (!browserSupportsWebAuthn()) {
+      // Синхронизация с feature-detect (внешняя система) после монтирования
+      // oxlint-disable-next-line react/set-state-in-effect
       setShowFallback(false)
       return
     }

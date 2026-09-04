@@ -10,6 +10,8 @@ export function UmamiScriptConsent() {
   const [hasConsent, setHasConsent] = useState(false)
 
   useEffect(() => {
+    // Чтение consent-состояния из localStorage (внешняя система) после монтирования
+    // oxlint-disable-next-line react/set-state-in-effect
     setHasConsent(readConsentState(storageKey)?.analytics === true)
 
     function onConsentChange(e: Event) {

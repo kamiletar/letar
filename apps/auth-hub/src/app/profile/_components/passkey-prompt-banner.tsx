@@ -35,6 +35,8 @@ export function PasskeyPromptBanner({ hasPasskeys }: PasskeyPromptBannerProps) {
     if (localStorage.getItem(DISMISSED_KEY)) {
       return
     }
+    // Синхронизация с localStorage/feature-detect (внешние системы) после монтирования
+    // oxlint-disable-next-line react/set-state-in-effect
     setVisible(true)
   }, [hasPasskeys])
 
