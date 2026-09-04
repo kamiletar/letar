@@ -5,6 +5,7 @@ import type { CellCoord, TableNavigationState } from '@letar/forms-core/table'
 import { coerceValue, getDefaultRow, parseTSV } from '@letar/forms-core/table'
 import { useDeclarativeForm, useFormGroup } from '@letar/forms-react'
 import { cn } from '@letar/tailwind-utils'
+import { useStore } from '@tanstack/react-form'
 import { type ClipboardEvent, type DragEvent, type ReactElement, useCallback, useRef, useState } from 'react'
 import { FieldError } from '../uikit/primitives/field-error'
 import { FieldLabel } from '../uikit/primitives/field-label'
@@ -117,18 +118,37 @@ export function FieldTableEditor({
     })
   }, [])
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function -- заменяется на реальный addRow ниже, до первого рендера
-  const addRowRef = { current: () => {} }
-  const rowCountRef = { current: 0 }
-  const canAddRef = { current: false }
+  // rows/rowCount/canAdd читаются напрямую из store формы (тот же приём, что в field-address.tsx/
+  // field-city.tsx), а не через объекты-псевдо-рефы, как раньше (`rowCountRef`/`canAddRef`/
+  // `addRowRef`, каждый — `{ current: ... }`, пересоздаваемый на каждый рендер). Раньше
+  // `rowCountRef.current`/`canAddRef.current` читались здесь ДО того, как рендер-проп
+  // `<form.Field mode="array">` ниже успевал их проставить (тот рендер-проп исполняется позже,
+  // при рендере отдельного дочернего компонента `form.Field`) — в useTableNavigation всегда
+  // попадали значения по умолчанию (0 / false), из-за чего "ArrowDown"/авто-добавление строки по
+  // Tab на последней ячейке не работали. `addRow` теперь тоже вызывает `form.pushFieldValue`
+  // напрямую — тот же метод, что дёргает `arrayField.pushValue` внутри рендер-пропа — вместо
+  // отложенного вызова через `addRowRef.current()`.
+  const rows = (useStore(form.store, () => form.getFieldValue(fullPath)) as Record<string, unknown>[] | undefined)
+    ?? []
+  const rowCount = rows.length
+  const canAddRow = maxRows === undefined || rowCount < maxRows
+
+  const addRow = useCallback(() => {
+    if (!canAddRow) {
+      return
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- fullPath динамический (строка), DeepKeysOfType не выводится
+    const pushFieldValue = form.pushFieldValue as any
+    pushFieldValue(fullPath, getDefaultRow(columns))
+  }, [canAddRow, form, fullPath, columns])
 
   const { containerRef, handleKeyDown } = useTableNavigation({
     columns,
-    rowCount: rowCountRef.current,
+    rowCount,
     editingCell: navigation.editingCell,
     setEditingCell,
-    addRow: () => addRowRef.current(),
-    canAdd: canAddRef.current,
+    addRow,
+    canAdd: canAddRow,
     readOnly,
   })
 
@@ -140,17 +160,6 @@ export function FieldTableEditor({
 
         const canAdd = maxRows === undefined || rows.length < maxRows
         const canRemove = minRows === undefined || rows.length > minRows
-
-        rowCountRef.current = rows.length
-        canAddRef.current = canAdd
-
-        const addRow = () => {
-          if (!canAdd) {
-            return
-          }
-          arrayField.pushValue(getDefaultRow(columns))
-        }
-        addRowRef.current = addRow
 
         const removeRow = (index: number) => {
           if (!canRemove) {

@@ -1,6 +1,6 @@
 'use client'
 
-import { Children, isValidElement, type ReactNode, useEffect, useMemo, useRef } from 'react'
+import { Children, isValidElement, type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { type StepInfo, useFormStepsContext } from './form-steps-context'
 
 export interface FormStepsStepProps {
@@ -35,7 +35,12 @@ function extractFieldNames(children: ReactNode): string[] {
 export function FormStepsStep({ title, description, icon, children, onEnter, onLeave }: FormStepsStepProps) {
   const { registerStep, unregisterStep, claimedIndicesRef, currentStep } = useFormStepsContext()
 
+  // indexRef — источник истины внутри эффектов (idempotent-гвард claim/unclaim, доступен
+  // синхронно между эффектами одного коммита). `index`-state — только чтобы рендер не читал
+  // ref напрямую (react/refs): state обновляется в тех же точках, что и ref, и вызывает
+  // локальный ре-рендер сразу, не полагаясь на побочный ре-рендер от родителя через контекст.
   const indexRef = useRef<number>(-1)
+  const [index, setIndex] = useState<number>(-1)
 
   useEffect(() => {
     if (indexRef.current < 0) {
@@ -44,6 +49,7 @@ export function FormStepsStep({ title, description, icon, children, onEnter, onL
       while (claimed.has(nextIndex)) { nextIndex++ }
       indexRef.current = nextIndex
       claimed.add(nextIndex)
+      setIndex(nextIndex)
     }
 
     // fieldNames извлекаются один раз при mount — children не в deps (пересоздаётся каждый рендер)
@@ -55,19 +61,21 @@ export function FormStepsStep({ title, description, icon, children, onEnter, onL
       if (indexRef.current >= 0) {
         unregisterStep(indexRef.current)
         indexRef.current = -1
+        setIndex(-1)
       }
     }
     // icon/children намеренно не в deps — icon это JSX-элемент, пересоздаётся каждый рендер
   }, [description, registerStep, title, unregisterStep, onEnter, onLeave, claimedIndicesRef])
 
-  const fieldNamesRef = useRef<string[]>([])
-  const currentFieldNames = useMemo(() => extractFieldNames(children), [])
-  const fieldNamesChanged = currentFieldNames.length !== fieldNamesRef.current.length
-    || currentFieldNames.some((name, i) => name !== fieldNamesRef.current[i])
-  if (fieldNamesChanged) { fieldNamesRef.current = currentFieldNames }
+  // extractFieldNames(children) — тот же приём «один раз при mount», что и в эффекте выше
+  // (deps: []), поэтому значение достаточно захватить как ленивую инициализацию ref, без
+  // сравнения/перезаписи в теле рендера.
+  const fieldNamesRef = useRef<string[]>(useMemo(() => extractFieldNames(children), []))
 
   const iconRef = useRef(icon)
-  iconRef.current = icon
+  useEffect(() => {
+    iconRef.current = icon
+  }, [icon])
 
   useEffect(() => {
     if (indexRef.current >= 0) {
@@ -83,7 +91,6 @@ export function FormStepsStep({ title, description, icon, children, onEnter, onL
     }
   }, [title, description, registerStep, onEnter, onLeave])
 
-  const index = indexRef.current
   if (index < 0) { return null }
   if (index !== currentStep) { return null }
 

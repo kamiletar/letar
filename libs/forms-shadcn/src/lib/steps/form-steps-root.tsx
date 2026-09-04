@@ -88,9 +88,18 @@ export function FormStepsRoot({
     setInternalStep,
   })
 
+  // Отложено (не переносим в useEffect): геттеры `steps`/`onStepComplete` ниже читаются
+  // синхронно во время рендера дочерних потребителей контекста (тот же render-проход, до
+  // коммита) — эффект применил бы новое значение только ПОСЛЕ коммита, на один рендер позже
+  // реального prop'а. Запись в реф вне deps здесь намеренная (см. комментарий у `useMemo` ниже:
+  // добавление `sortedSteps`/`onStepComplete` в deps даёт бесконечный цикл регистрации шагов,
+  // см. `use-step-navigation.ts`) — риск непроверенного рефакторинга этого механизма в общей для
+  // всего монорепо библиотеке признан выше пользы от закрытия одной lint-находки.
   const sortedStepsRef = useRef(sortedSteps)
+  // oxlint-disable-next-line react/refs -- см. комментарий выше
   sortedStepsRef.current = sortedSteps
   const onStepCompleteRef = useRef(onStepComplete)
+  // oxlint-disable-next-line react/refs -- см. комментарий выше
   onStepCompleteRef.current = onStepComplete
 
   const contextValue: FormStepsContextValue = useMemo(

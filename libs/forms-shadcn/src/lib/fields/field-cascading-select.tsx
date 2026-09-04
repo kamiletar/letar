@@ -116,7 +116,10 @@ function CascadingSelectContent({
   const [isLoading, setIsLoading] = useState(false)
   const prevParentValueRef = useRef<string | undefined>(parentValue)
   const loadOptionsRef = useRef(loadOptions)
-  loadOptionsRef.current = loadOptions
+
+  useEffect(() => {
+    loadOptionsRef.current = loadOptions
+  }, [loadOptions])
 
   useEffect(() => {
     const doLoad = async () => {
