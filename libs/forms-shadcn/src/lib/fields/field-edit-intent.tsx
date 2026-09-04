@@ -23,7 +23,12 @@ export const FieldEditIntent = createField<EditIntentFieldProps<unknown>, unknow
   // useFieldState (top-level), не внутри render-prop <form.Field> — там хуки недопустимы
   // (TanStack Form вызывает children из собственного useMemo).
   useFieldState: (componentProps, _resolved, { form, fullPath }) =>
-    useEditIntentField({ form, fullPath, emptyValue: componentProps.emptyValue }),
+    useEditIntentField({
+      form,
+      fullPath,
+      emptyValue: componentProps.emptyValue,
+      sensitive: componentProps.sensitive ?? true,
+    }),
 
   render: ({ fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const { isViewMode, startEdit, cancelEdit, editableContainerRef, triggerButtonRef } = fieldState

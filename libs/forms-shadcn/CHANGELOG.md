@@ -4,6 +4,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.35.0] - 2026-09-04
+
+### Added
+
+- **`FieldEditIntent` — проброс `sensitive` в реестр чувствительных полей.** `componentProps.sensitive
+  ?? true` теперь передаётся в `useEditIntentField` (`@letar/forms-react`, 0.4.0 → 0.5.0) — значение
+  регистрируется в `SensitiveFieldsProvider` наравне с Chakra-скином. Сам провайдер монтируется на
+  уровне `Form`/`FormRoot` — в этой библиотеке (поля-only скин, без своего root-компонента) менять
+  нечего, эффект появляется у форм, построенных на этом скине поверх `@letar/forms`' `FormRoot` или
+  собственного эквивалента, когда он появится.
+
 ## [0.34.0] - 2026-08-26
 
 ### Added

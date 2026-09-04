@@ -59,6 +59,13 @@ export type {
 export { useMaskField } from './lib/field/use-mask-field'
 export { useResolvedFieldProps } from './lib/field/use-resolved-field-props'
 
+// Реестр чувствительных полей (EditIntentValue security-инфраструктура)
+export {
+  SensitiveFieldsProvider,
+  useRegisterSensitiveField,
+  useSensitiveFieldPaths,
+} from './lib/sensitive-fields/sensitive-fields-context'
+
 // i18n форм (React-часть; словари и error map — в @letar/forms-core/i18n)
 export { FormI18nProvider, getLocalizedValue, useFormI18n, useLocalizedOptions } from './lib/i18n'
 export type { LocalizableOption, TranslateFunction, TranslateParams } from './lib/i18n'

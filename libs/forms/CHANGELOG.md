@@ -4,6 +4,26 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.9.0] - 2026-09-04
+
+### Added
+
+- **Security-инфраструктура `EditIntentValue<T>`** (`libs/forms/PLAN.md` backlog, частично
+  закрыто). `Form.Field.EditIntent` теперь регистрирует своё значение как чувствительное в
+  реестре `SensitiveFieldsProvider` (`@letar/forms-react`, монтируется `Form`/`FormRoot`
+  автоматически) — через новый проп `sensitive?: boolean` (`@default true`). Три существующих
+  потребителя снимка формы прогоняют его через `redactAtPaths`/`omitAtPaths`
+  (`@letar/forms-core/security`) перед тем, как значение покинет форму:
+  - **`Form.DebugValues`** — маскирует значение плейсхолдером (`••••••••`) в JSON-инспекторе
+    вместо показа реального секрета.
+  - **`useFormPersistence`** (через `useFormFeatures`) — вырезает значение из снимка перед
+    записью в `localStorage`.
+  - **`Form.UrlSync`** — пропускает чувствительные поля из whitelist при синхронизации с URL
+    (defense-in-depth, в дополнение к тому, что секреты туда обычно и не кладут).
+
+  Аналитика и offline-очередь пока не подключены — см. `libs/forms/PLAN.md` для оставшегося
+  объёма.
+
 ## [2.8.2] - 2026-09-04
 
 ### Fixed

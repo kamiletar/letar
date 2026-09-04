@@ -60,7 +60,10 @@ export interface FormPersistenceConfig {
   /**
    * Field keys that must NEVER be written to the saved snapshot
    * (password, card number, CVV, expiry date and similar sensitive data).
-   * Shallow omit only — nested sensitive fields are out of scope until a real case shows up.
+   * Shallow omit only — for `Form.Field.EditIntent`'s nested `${name}.value`, the
+   * `SensitiveFieldsProvider` registry (`@letar/forms-react`) already strips it from the value
+   * before it reaches `saveValues` (see `useFormFeatures`'s `subscribeToFormChanges`); this
+   * field is for top-level keys the registry doesn't cover.
    * @default undefined — nothing excluded
    */
   excludeFields?: string[]

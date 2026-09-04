@@ -1,5 +1,6 @@
 'use client'
 
+import { SensitiveFieldsProvider } from '@letar/forms-react'
 import type { ReactElement } from 'react'
 import type { FormPropsWithApi } from '../types'
 import type { FormComponent } from './form-compound-types'
@@ -78,10 +79,41 @@ function FormRoot<TData extends object>({
   // If api is provided — use FormWithApi, otherwise — simple form
   if (api) {
     return (
-      <FormWithApi
-        api={api}
+      <SensitiveFieldsProvider>
+        <FormWithApi
+          api={api}
+          initialValue={initialValue}
+          onSubmit={onSubmit}
+          schema={schema}
+          persistence={persistence}
+          offline={offline}
+          validateOn={validateOn}
+          disabled={disabled}
+          readOnly={readOnly}
+          debug={debug}
+          middleware={middleware}
+          addressProvider={addressProvider}
+          onFieldChange={onFieldChange}
+          honeypot={honeypot}
+          rateLimit={rateLimit}
+        >
+          {children}
+        </FormWithApi>
+      </SensitiveFieldsProvider>
+    )
+  }
+
+  // Simple mode — initialValue is required
+  if (!initialValue) {
+    throw new Error('Form requires either api prop or initialValue prop')
+  }
+
+  return (
+    <SensitiveFieldsProvider>
+      <FormSimple
         initialValue={initialValue}
         onSubmit={onSubmit}
+        formRef={formRef}
         schema={schema}
         persistence={persistence}
         offline={offline}
@@ -96,35 +128,8 @@ function FormRoot<TData extends object>({
         rateLimit={rateLimit}
       >
         {children}
-      </FormWithApi>
-    )
-  }
-
-  // Simple mode — initialValue is required
-  if (!initialValue) {
-    throw new Error('Form requires either api prop or initialValue prop')
-  }
-
-  return (
-    <FormSimple
-      initialValue={initialValue}
-      onSubmit={onSubmit}
-      formRef={formRef}
-      schema={schema}
-      persistence={persistence}
-      offline={offline}
-      validateOn={validateOn}
-      disabled={disabled}
-      readOnly={readOnly}
-      debug={debug}
-      middleware={middleware}
-      addressProvider={addressProvider}
-      onFieldChange={onFieldChange}
-      honeypot={honeypot}
-      rateLimit={rateLimit}
-    >
-      {children}
-    </FormSimple>
+      </FormSimple>
+    </SensitiveFieldsProvider>
   )
 }
 

@@ -1042,13 +1042,26 @@ inline-редактирование текста. Если `ReplaceValue` ока
       `field-edit-intent.spec.tsx` (7 тестов) и shadcn `field-edit-intent.spec.tsx` (5 тестов).
       **Не сделано:** disabled/loading state, reset после success, nested server error
       (`${name}.value` ошибка сервера), keyboard/screen-reader-names — отдельная задача;
-- [ ] security tests и сама security-инфраструктура — **не реализовано**. `sensitive` (default
-      `true`) сегодня — только маркер на пропе, не подключён ни к чему: в библиотеке вообще нет
-      общего redaction-слоя (`useFormPersistence`/`Form.UrlSync`/`FormDebugValues`/analytics
-      adapters/offline queue не умеют исключать поля по мете, только вручную через
-      `excludeFields`). До этой задачи такой инфраструктуры не было ни у одного поля —
-      строить её нужно отдельно, не только для `EditIntent`. Mask-as-input rejection —
-      ответственность server fixture (уже задокументирована в «Поведении» выше), не клиента;
+- [x] security-инфраструктура — **частично реализовано (2026-09-04)**. Общий framework-free
+      redaction-слой: `@letar/forms-core/security` → `getAtPath`/`redactAtPaths`/`omitAtPaths`/
+      `isKeyOrAncestorOfSensitivePath` (dot-путь, работает и с вложенным `${name}.value`,
+      0.10.0 → 0.11.0, тесты — `sensitive-path-utils.spec.ts`, 16 тестов) + реестр
+      `SensitiveFieldsProvider`/`useRegisterSensitiveField`/`useSensitiveFieldPaths`
+      (`@letar/forms-react`, `useSyncExternalStore`, 0.4.0 → 0.5.0, тесты —
+      `sensitive-fields-context.spec.tsx`, 6 тестов). Провайдер монтируется в `Form`/`FormRoot`
+      (`@letar/forms`, 2.8.2 → 2.9.0) автоматически — потребителю ничего включать не нужно.
+      `useEditIntentField` получил `sensitive?: boolean` (`@default true`) и регистрирует
+      `${fullPath}.value` сам; оба скина (`@letar/forms` и `@letar/forms-shadcn` 0.34.0 → 0.35.0)
+      пробрасывают `componentProps.sensitive ?? true`. Подключены три потребителя:
+      `Form.DebugValues` (маскирует плейсхолдером, тест — `form-debug-values.spec.tsx`),
+      `useFormPersistence`/`useFormFeatures` (вырезает из снимка перед `localStorage`, тест —
+      `use-form-features-sensitive-persistence.spec.tsx`, интеграционный, через реальный `<Form>`
+      + ввод текста), `Form.UrlSync` (пропускает чувствительные поля из whitelist,
+      defense-in-depth). **Не сделано:** analytics adapters и offline queue — тот же реестр,
+      но не подключён; `forms-shadcn` не имеет собственного `FormRoot`-эквивалента (это
+      fields-only скин), поэтому монтирование провайдера там появится только вместе с ним.
+      Mask-as-input rejection — ответственность server fixture (уже задокументирована в
+      «Поведении» выше), не клиента;
 - [x] generic tests: `string` API key и object `ValueType` — оба покрыты в
       `edit-intent-value.spec.ts` (`editIntentValueSchema(z.object({...}).strip())`);
 - [x] `@letar/forms-core/edit-intent` (тип + `editIntentValueSchema`/`emptyEditIntentValue`/

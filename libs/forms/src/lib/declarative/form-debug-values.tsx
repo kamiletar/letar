@@ -1,6 +1,8 @@
 'use client'
 
 import { Box, Heading } from '@chakra-ui/react'
+import { redactAtPaths } from '@letar/forms-core/security'
+import { useSensitiveFieldPaths } from '@letar/forms-react'
 import JsonView from '@uiw/react-json-view'
 import { githubDarkTheme } from '@uiw/react-json-view/githubDark'
 import { githubLightTheme } from '@uiw/react-json-view/githubLight'
@@ -68,6 +70,7 @@ export function FormDebugValues({
 }: FormDebugValuesProps): ReactElement | null {
   const { form } = useDeclarativeForm()
   const isDark = useIsDarkMode()
+  const sensitivePaths = useSensitiveFieldPaths()
 
   // Hide in production unless specified otherwise
   if (process.env.NODE_ENV === 'production' && !showInProduction) {
@@ -95,7 +98,7 @@ export function FormDebugValues({
             </Heading>
           )}
           <JsonView
-            value={values as object}
+            value={redactAtPaths(values, sensitivePaths) as object}
             collapsed={collapsed}
             displayDataTypes={false}
             style={{ ...jsonTheme, backgroundColor: 'transparent' }}

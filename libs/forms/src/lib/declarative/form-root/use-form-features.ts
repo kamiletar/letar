@@ -1,5 +1,7 @@
 'use client'
 
+import { omitAtPaths } from '@letar/forms-core/security'
+import { useSensitiveFieldPaths } from '@letar/forms-react'
 import { useCallback } from 'react'
 import { type FormOfflineConfig, useOfflineForm } from '../../offline'
 import { type FormPersistenceConfig, useFormPersistence } from '../form-persistence'
@@ -63,6 +65,7 @@ export function useFormFeatures<TData extends object>({
 }: UseFormFeaturesConfig<TData>): UseFormFeaturesResult<TData> {
   const isPersistenceEnabled = !!persistence
   const isOfflineEnabled = !!offline
+  const sensitivePaths = useSensitiveFieldPaths()
 
   // Hook persistence (if не вkeyён — используем disabled key)
   const persistenceResult = useFormPersistence<TData>(persistence ?? { key: '__disabled__' })
@@ -140,7 +143,8 @@ export function useFormFeatures<TData extends object>({
 
       const subscription = form.store.subscribe(() => {
         const values = form.state.values as TData
-        persistenceResult.saveValues(values)
+        const safeValues = sensitivePaths.length > 0 ? omitAtPaths(values, sensitivePaths) : values
+        persistenceResult.saveValues(safeValues)
       })
 
       // Совместимость: @tanstack/store 0.9+ returns Subscription, ранние — () => void
@@ -149,7 +153,7 @@ export function useFormFeatures<TData extends object>({
       }
       return () => subscription.unsubscribe()
     },
-    [isPersistenceEnabled, persistenceResult],
+    [isPersistenceEnabled, persistenceResult, sensitivePaths],
   )
 
   // Восстановление данных из persistence

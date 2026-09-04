@@ -1,5 +1,7 @@
 'use client'
 
+import { isKeyOrAncestorOfSensitivePath } from '@letar/forms-core/security'
+import { useSensitiveFieldPaths } from '@letar/forms-react'
 import { useEffect, useRef } from 'react'
 import { useDeclarativeForm } from './form-context'
 import { generatePrefillUrl } from './use-url-prefill'
@@ -142,6 +144,7 @@ export function FormUrlSync<TData extends object>({
 }: FormUrlSyncProps<TData>): null {
   const { form } = useDeclarativeForm()
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const sensitivePaths = useSensitiveFieldPaths()
 
   useEffect(() => {
     const unsubscribe = form.store.subscribe(() => {
@@ -156,6 +159,9 @@ export function FormUrlSync<TData extends object>({
         // Оставляем только поля из whitelist, отличающиеся от defaults
         const filtered: Record<string, unknown> = {}
         for (const field of fields) {
+          if (isKeyOrAncestorOfSensitivePath(field, sensitivePaths)) {
+            continue
+          }
           const val = values[field]
           const def = defaults[field] as unknown
           if (!isDefaultValue(val, def)) {
@@ -212,7 +218,7 @@ export function FormUrlSync<TData extends object>({
         clearTimeout(timerRef.current)
       }
     }
-  }, [form, fields, defaults, delay, replace, router])
+  }, [form, fields, defaults, delay, replace, router, sensitivePaths])
 
   return null
 }

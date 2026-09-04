@@ -4,6 +4,22 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.5.0] - 2026-09-04
+
+### Added
+
+- **`SensitiveFieldsProvider`/`useRegisterSensitiveField`/`useSensitiveFieldPaths`** —
+  реестр «чувствительных» dot-путей текущей формы
+  (`libs/forms/PLAN.md` backlog `EditIntentValue<T>`, security-инфраструктура). Поле вроде
+  `Form.Field.EditIntent` регистрирует `${fullPath}.value` при монтировании (пока `sensitive`
+  истинен), а потребители снимка формы (persistence/`Form.DebugValues`/`Form.UrlSync`) читают
+  текущий список реактивно через `useSyncExternalStore` и прогоняют его через
+  `redactAtPaths`/`omitAtPaths` (`@letar/forms-core/security`, тот же релиз) перед тем, как
+  значение покинет форму. Без `<SensitiveFieldsProvider>` выше по дереву регистрация и чтение —
+  no-op с пустым списком, не ошибка: формы без `EditIntentValue` не обязаны знать об этом
+  реестре. `useEditIntentField` получил параметр `sensitive?: boolean` (`@default true`) и
+  регистрирует свой путь автоматически.
+
 ## [0.4.0] - 2026-08-26
 
 ### Added

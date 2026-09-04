@@ -3,6 +3,7 @@
 import { type EditIntentValue, emptyEditIntentValue } from '@letar/forms-core/edit-intent'
 import { useStore } from '@tanstack/react-form'
 import { useCallback, useEffect, useRef } from 'react'
+import { useRegisterSensitiveField } from '../sensitive-fields/sensitive-fields-context'
 import type { AppFormApi } from '../types'
 
 export interface UseEditIntentFieldOptions<T> {
@@ -12,6 +13,12 @@ export interface UseEditIntentFieldOptions<T> {
   fullPath: string
   /** Значение, с которого стартует дочернее поле при входе в edit mode. */
   emptyValue: T
+  /**
+   * Помечает `${fullPath}.value` чувствительным в реестре `SensitiveFieldsProvider`
+   * (`@letar/forms-react`) — persistence/DebugValues/URL sync редактируют снимок формы перед
+   * тем, как он покинет форму. Регистрация — no-op вне провайдера. @default true
+   */
+  sensitive?: boolean
 }
 
 export interface UseEditIntentFieldResult {
@@ -59,12 +66,14 @@ function getByPath(source: unknown, path: string): unknown {
  * форма не оказывалась на мгновение в противоречивом `{isEdited: true, value: null}`.
  */
 export function useEditIntentField<T>(options: UseEditIntentFieldOptions<T>): UseEditIntentFieldResult {
-  const { form, fullPath, emptyValue } = options
+  const { form, fullPath, emptyValue, sensitive = true } = options
 
   const value = (useStore(form.store, (state: { values: unknown }) => getByPath(state.values, fullPath)) as
     | EditIntentValue<T>
     | undefined) ?? emptyEditIntentValue<T>()
   const isViewMode = !value.isEdited
+
+  useRegisterSensitiveField(`${fullPath}.value`, sensitive)
 
   const containerElRef = useRef<HTMLElement | null>(null)
   const triggerElRef = useRef<HTMLButtonElement | null>(null)
