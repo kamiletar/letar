@@ -86,7 +86,10 @@ export default function FriendlyModerationPage() {
     setLoading(false)
   }
 
+  // Загрузка заявок при монтировании и смене фильтра — легитимная синхронизация
+  // с внешней системой (Server Action)
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- fetch по filter через Server Action
     loadRequests(filter)
   }, [filter])
 

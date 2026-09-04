@@ -159,7 +159,9 @@ export function useTelegramMainButton(opts: {
   onClick: () => void
 }) {
   const callbackRef = useRef(opts.onClick)
-  callbackRef.current = opts.onClick
+  useEffect(() => {
+    callbackRef.current = opts.onClick
+  }, [opts.onClick])
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp

@@ -961,7 +961,7 @@ async function main() {
 
       // Не добавляем SCHEDULED матчи для завершённых сезонов
       const isFinishedSeason = sk === 'spb-s1' || sk === 'spb-s2' || sk === 'moscow-s1'
-      if (m.homeScore == null && isFinishedSeason) {
+      if ((m.homeScore === null || m.homeScore === undefined) && isFinishedSeason) {
         skippedMatches++
         continue
       }
@@ -1013,7 +1013,8 @@ async function main() {
       }
 
       const venueId = m.venue ? (venueMap.get(m.venue) ?? null) : null
-      const hasScore = m.homeScore != null && m.awayScore != null
+      const hasScore = m.homeScore !== null && m.homeScore !== undefined
+        && m.awayScore !== null && m.awayScore !== undefined
       const status = hasScore ? 'FINISHED' : 'SCHEDULED'
 
       // Турнирные очки

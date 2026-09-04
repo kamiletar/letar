@@ -83,7 +83,9 @@ export default function StagesPage() {
     setLoading(false)
   }, [seasonId])
 
+  // Загрузка данных при монтировании — легитимная синхронизация с внешней системой (Server Actions)
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- fetch-on-mount через Server Actions
     loadData()
   }, [loadData])
 

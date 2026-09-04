@@ -76,7 +76,9 @@ export function StepPoetResult({ match, matchState }: StepPoetResultProps) {
     }
     router.refresh()
   }, [match.id, router, isFirstPoet])
-  handleNextRef.current = handleNext
+  useEffect(() => {
+    handleNextRef.current = handleNext
+  }, [handleNext])
 
   if (!perf || !currentPerf) {
     return (

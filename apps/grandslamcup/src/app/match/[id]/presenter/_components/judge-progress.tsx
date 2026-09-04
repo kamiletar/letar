@@ -21,7 +21,7 @@ interface JudgeProgressProps {
 }
 
 export function JudgeProgress({ matchState }: JudgeProgressProps) {
-  const [now, setNow] = useState(Date.now())
+  const [now, setNow] = useState(() => Date.now())
 
   const isVotingActive = matchState?.phase === 'TEXT_VOTING' || matchState?.phase === 'DELIVERY_VOTING'
 

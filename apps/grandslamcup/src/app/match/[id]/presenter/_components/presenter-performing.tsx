@@ -72,7 +72,10 @@ export function PresenterPerforming({ match, matchState }: PresenterPerformingPr
     }
   }, [timer.isRunning, timer.startedAt, sessionKey])
 
-  // Обновление таймера
+  // Обновление таймера — синхронизация с внешними источниками: SSE-таймер и sessionStorage
+  // как резерв на случай ещё не пришедшего startedAt. effectiveStartedAt зависит от
+  // sessionStorage (внешнее хранилище), поэтому его нельзя вывести чисто из пропсов при
+  // рендере — установка elapsed для ветки "не идёт" остаётся частью этой синхронизации.
   useEffect(() => {
     // Если SSE ещё не пришёл (startedAt null), пробуем восстановить из sessionStorage
     const fallbackStartedAt = !timer.startedAt
@@ -85,6 +88,7 @@ export function PresenterPerforming({ match, matchState }: PresenterPerformingPr
     const effectiveStartedAt = timer.startedAt ?? fallbackStartedAt
 
     if (!timer.isRunning || !effectiveStartedAt) {
+      // oxlint-disable-next-line react/set-state-in-effect -- effectiveStartedAt читается из sessionStorage (внешняя система), не только из пропсов
       setElapsed(timer.accumulatedSec)
       cancelAnimationFrame(animFrameRef.current)
       return

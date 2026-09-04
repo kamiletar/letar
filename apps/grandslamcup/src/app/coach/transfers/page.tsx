@@ -105,8 +105,9 @@ export default function TransfersPage() {
     }
   }, [])
 
-  // Первоначальная проверка окна
+  // Первоначальная проверка окна — легитимная синхронизация с внешней системой (API)
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- fetch-on-mount через API
     searchPlayers('')
   }, [searchPlayers])
 

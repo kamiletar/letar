@@ -97,7 +97,9 @@ export function PresenterClient({ match }: PresenterClientProps) {
   const router = useRouter()
   // Ref объявляем ДО useMatchSSE, чтобы onEvent мог его использовать
   const routerRef = useRef(router)
-  routerRef.current = router
+  useEffect(() => {
+    routerRef.current = router
+  }, [router])
 
   const [isFullscreen, setIsFullscreen] = useState(false)
 

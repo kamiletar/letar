@@ -48,13 +48,15 @@ export function StepVoting({ match, matchState, dimension }: StepVotingProps) {
   const votedCount = judges.filter((j) => j.hasVoted).length
   const allVoted = votedCount >= 5
 
-  // Разблокируем кнопку «Завершить с неполным жюри» через 30 сек после старта голосования
+  // Разблокируем кнопку «Завершить с неполным жюри» через 30 сек после старта голосования —
+  // легитимная синхронизация с реальным временем (Date.now), не производное от пропсов значение
   useEffect(() => {
     if (!votingOpenedAt) {
       return
     }
     const elapsed = Date.now() - votingOpenedAt
     if (elapsed >= 30_000) {
+      // oxlint-disable-next-line react/set-state-in-effect -- зависит от Date.now() в момент эффекта, не только от votingOpenedAt
       setForceUnlockedAt(votingOpenedAt)
       return
     }
@@ -69,7 +71,9 @@ export function StepVoting({ match, matchState, dimension }: StepVotingProps) {
   const isTextComplete = phase === 'TEXT_COMPLETE'
   const isDeliveryComplete = phase === 'DELIVERY_COMPLETE'
   const canGoNext = dimension === 'TEXT' ? isTextComplete : isDeliveryComplete
-  canGoNextRef.current = canGoNext
+  useEffect(() => {
+    canGoNextRef.current = canGoNext
+  }, [canGoNext])
 
   // Считаем промежуточную сумму из введённых оценок
   const liveScore = useMemo(() => {
@@ -106,7 +110,9 @@ export function StepVoting({ match, matchState, dimension }: StepVotingProps) {
 
   // Enter подтверждает переход когда кнопка активна
   const handleNextDimensionRef = useRef(handleNextDimension)
-  handleNextDimensionRef.current = handleNextDimension
+  useEffect(() => {
+    handleNextDimensionRef.current = handleNextDimension
+  }, [handleNextDimension])
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {

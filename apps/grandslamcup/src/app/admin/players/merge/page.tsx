@@ -102,9 +102,11 @@ export default function MergePlayersPage() {
   const selectedSource = allPlayers.find((p) => p.id === sourceId)
   const selectedTarget = allPlayers.find((p) => p.id === targetId)
 
-  // Загрузка preview при выборе обоих игроков
+  // Загрузка preview при выборе обоих игроков — легитимная синхронизация с внешней системой
+  // (Server Action); сброс preview при отсутствии одного из ID — часть той же синхронизации.
   useEffect(() => {
     if (!sourceId || !targetId) {
+      // oxlint-disable-next-line react/set-state-in-effect -- fetch по sourceId/targetId, сброс — часть синхронизации
       setPreview(null)
       return
     }

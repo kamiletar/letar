@@ -53,7 +53,9 @@ export function StepPairResults({ match, matchState }: StepPairResultsProps) {
 
   // Enter нажимает кнопку «Следующая пара»
   const handleNextRef = useRef(handleNext)
-  handleNextRef.current = handleNext
+  useEffect(() => {
+    handleNextRef.current = handleNext
+  }, [handleNext])
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Enter') { return }

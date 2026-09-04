@@ -62,7 +62,9 @@ export default function ClaimsPage() {
     setLoading(false)
   }, [])
 
+  // Загрузка заявок при монтировании — легитимная синхронизация с внешней системой (Server Action)
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- fetch-on-mount через Server Action
     loadClaims()
   }, [loadClaims])
 

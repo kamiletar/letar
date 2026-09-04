@@ -11,7 +11,7 @@
 import type { MatchEventType } from '@/lib/sse/match-sse-manager'
 import type { ConnectedJudge, CurrentPerformance, TimerState, VotingPhase } from '@/lib/sse/match-state'
 import { useEventSource } from '@letar/hooks'
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 // === Типы ===
 
@@ -95,7 +95,9 @@ export function useMatchSSE({ matchId, role, token, onEvent, enabled = true }: U
   const [matchState, setMatchState] = useState<MatchSSEState | null>(null)
   const [lastEvent, setLastEvent] = useState<MatchSSEEvent | null>(null)
   const onEventRef = useRef(onEvent)
-  onEventRef.current = onEvent
+  useEffect(() => {
+    onEventRef.current = onEvent
+  }, [onEvent])
 
   const url = useMemo(() => {
     const params = new URLSearchParams({ role })

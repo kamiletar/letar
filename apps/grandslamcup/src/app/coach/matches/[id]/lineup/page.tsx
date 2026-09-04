@@ -72,7 +72,8 @@ export default async function MatchLineupPage({ params }: PageProps) {
   // Текущая заявка (если есть)
   const existingPlayerIds = match.lineups.map((l) => l.playerId)
 
-  // Часов до матча
+  // Часов до матча — Server Component, рендерится один раз на запрос
+  // oxlint-disable-next-line react/purity -- Server Component, вызывается один раз за запрос
   const hoursUntilMatch = match.scheduledAt ? (match.scheduledAt.getTime() - Date.now()) / (1000 * 60 * 60) : null
 
   return (

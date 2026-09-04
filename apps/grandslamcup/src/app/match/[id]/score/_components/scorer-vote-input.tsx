@@ -36,16 +36,27 @@ export function ScorerVoteInput({ matchId, performanceId, dimension, judges, onS
   const [error, setError] = useState<string | null>(null)
   const [, startTransition] = useTransition()
 
-  // Сбрасываем локальный стейт при смене выступления
-  useEffect(() => {
+  // Сброс локального стейта при смене выступления — корректировка состояния прямо во время
+  // рендера (без эффекта), см. https://react.dev/learn/you-might-not-need-an-effect
+  const resetKey = `${performanceId}-${dimension}`
+  const [lastResetKey, setLastResetKey] = useState(resetKey)
+  if (lastResetKey !== resetKey) {
+    setLastResetKey(resetKey)
     setSelectedScores({})
     setError(null)
-    onScoresChange?.({})
-  }, [performanceId, dimension])
+  }
+
+  // Уведомление родителя об изменении оценок (в т.ч. о сбросе) — легитимная синхронизация
+  // с внешней системой (колбэк родителя), не производное локальное состояние
+  useEffect(() => {
+    onScoresChange?.(selectedScores)
+  }, [selectedScores, onScoresChange])
 
   // Refs для актуальных значений в обработчике клавиш (не нужно перерегистрировать listener)
   const selectedScoresRef = useRef(selectedScores)
-  selectedScoresRef.current = selectedScores
+  useEffect(() => {
+    selectedScoresRef.current = selectedScores
+  }, [selectedScores])
 
   const handleVote = useCallback(
     async (judge: MatchSSEState['judges'][number], score: number) => {
@@ -63,11 +74,7 @@ export function ScorerVoteInput({ matchId, performanceId, dimension, judges, onS
           setError(res.error ?? 'Не удалось отменить оценку')
           return
         }
-        setSelectedScores((prev) => {
-          const next = { ...prev, [judge.judgeNumber]: null }
-          onScoresChange?.(next)
-          return next
-        })
+        setSelectedScores((prev) => ({ ...prev, [judge.judgeNumber]: null }))
         startTransition(() => {
           // пустой колбэк — помечает уже случившееся обновление состояния как low-priority transition
         })
@@ -83,11 +90,7 @@ export function ScorerVoteInput({ matchId, performanceId, dimension, judges, onS
         setError(res.error ?? 'Не удалось записать оценку')
         return
       }
-      setSelectedScores((prev) => {
-        const next = { ...prev, [judge.judgeNumber]: score }
-        onScoresChange?.(next)
-        return next
-      })
+      setSelectedScores((prev) => ({ ...prev, [judge.judgeNumber]: score }))
       startTransition(() => {
         // пустой колбэк — помечает уже случившееся обновление состояния как low-priority transition
       })
@@ -97,7 +100,9 @@ export function ScorerVoteInput({ matchId, performanceId, dimension, judges, onS
 
   // Ref для handleVote — чтобы не перерегистрировать слушатель клавиш при каждом рендере
   const handleVoteRef = useRef(handleVote)
-  handleVoteRef.current = handleVote
+  useEffect(() => {
+    handleVoteRef.current = handleVote
+  }, [handleVote])
 
   // Горячие клавиши: 1-5 заполняют ручные слоты слева направо.
   // Используем refs чтобы listener регистрировался один раз при монтировании

@@ -37,7 +37,10 @@ export function OfflineStatusBar({ matchId, scorerToken, matchData }: OfflineSta
     }
   }, [matchId])
 
+  // Синхронизация с внешней системой (IndexedDB) — легитимный polling,
+  // счётчик не выводится из пропсов/состояния компонента.
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- периодический опрос IndexedDB, не производное состояние
     refreshPendingCount()
     const interval = setInterval(refreshPendingCount, 5000)
     return () => clearInterval(interval)
@@ -52,15 +55,8 @@ export function OfflineStatusBar({ matchId, scorerToken, matchData }: OfflineSta
       })
   }, []) // intentionally empty: runs once on mount
 
-  // Автосинхронизация при восстановлении связи
-  useEffect(() => {
-    if (isOnline && pendingCount > 0) {
-      handleSync()
-    }
-  }, [isOnline]) // автосинк при восстановлении связи
-
   /** Ручная синхронизация */
-  const handleSync = async () => {
+  const handleSync = useCallback(async () => {
     if (!isOnline || syncing) {
       return
     }
@@ -76,7 +72,16 @@ export function OfflineStatusBar({ matchId, scorerToken, matchData }: OfflineSta
     } finally {
       setSyncing(false)
     }
-  }
+  }, [isOnline, syncing, matchId, scorerToken, refreshPendingCount])
+
+  // Автосинхронизация при восстановлении связи — легитимная синхронизация с внешней
+  // системой (сеть/сервер), запускается по факту восстановления online, не по пропсам
+  useEffect(() => {
+    if (isOnline && pendingCount > 0) {
+      // oxlint-disable-next-line react/set-state-in-effect -- handleSync синхронизируется с сетью/сервером, не производное состояние
+      handleSync()
+    }
+  }, [isOnline, pendingCount, handleSync]) // автосинк при восстановлении связи
 
   return (
     <Box

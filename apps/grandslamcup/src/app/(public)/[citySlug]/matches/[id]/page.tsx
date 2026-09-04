@@ -133,6 +133,9 @@ export default async function MatchPage({ params }: { params: Params }) {
 
   // Составы скрываем до -6ч до матча (за исключением тренера своей команды)
   const isScheduled = match.status === 'SCHEDULED'
+  // Server Component: рендерится один раз на запрос, Date.now() здесь не создаёт нестабильности
+  // ре-рендера как в клиентском компоненте — react-compiler heuristic не различает RSC/клиент
+  // oxlint-disable-next-line react/purity -- Server Component, вызывается один раз за запрос
   const hoursUntilMatch = match.scheduledAt ? (match.scheduledAt.getTime() - Date.now()) / (1000 * 60 * 60) : null
   const lineupsLocked = isScheduled && hoursUntilMatch !== null && hoursUntilMatch > 6
 

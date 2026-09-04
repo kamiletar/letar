@@ -10,7 +10,7 @@ import { toaster } from '@/app/_components/ui/toaster'
 import { createMatchAction } from '@/app/admin/matches/_actions/match-admin.action'
 import { Box, Button, Field, Flex, Heading, Input, NativeSelect, VStack } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState, useTransition } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 
 interface City {
   id: string
@@ -93,7 +93,9 @@ export function CreateMatchForm({
     return cities.filter((c) => organizerCityIds.includes(c.id))
   }, [cities, organizerCityIds])
 
-  const [cityId, setCityId] = useState('')
+  // Автопредвыбор города при инициализации, если организатор привязан только к одному —
+  // ленивый инициализатор состояния, а не эффект: availableCities не меняется после монтирования.
+  const [cityId, setCityId] = useState(() => (availableCities.length === 1 ? availableCities[0].id : ''))
   const [matchType, setMatchType] = useState<'REGULAR' | 'FRIENDLY'>('REGULAR')
   const [seasonId, setSeasonId] = useState('')
   const [tourId, setTourId] = useState('')
@@ -101,13 +103,6 @@ export function CreateMatchForm({
   const [awayTeamId, setAwayTeamId] = useState('')
   const [venueId, setVenueId] = useState('')
   const [scheduledAt, setScheduledAt] = useState('')
-
-  // Автопредвыбор города если организатор только одного
-  useEffect(() => {
-    if (availableCities.length === 1 && !cityId) {
-      setCityId(availableCities[0].id)
-    }
-  }, [availableCities, cityId])
 
   // Фильтрация по городу
   const filteredSeasons = useMemo(
@@ -138,15 +133,18 @@ export function CreateMatchForm({
     [activeTours, getExpected],
   )
 
-  // Автопредвыбор актуального тура при смене города (REGULAR)
-  useEffect(() => {
-    if (!cityId || matchType !== 'REGULAR' || tourId) { return }
-    if (toursWithSlots.length === 0) { return }
+  // Автопредвыбор актуального тура при смене города (REGULAR) — корректировка состояния
+  // прямо во время рендера (см. https://react.dev/learn/you-might-not-need-an-effect),
+  // не эффект: значение выводится из cityId/matchType/toursWithSlots.
+  const autoTourKey = `${cityId}:${matchType}`
+  const [lastAutoTourKey, setLastAutoTourKey] = useState<string | null>(null)
+  if (cityId && matchType === 'REGULAR' && !tourId && toursWithSlots.length > 0 && lastAutoTourKey !== autoTourKey) {
     const sorted = [...toursWithSlots].sort((a, b) =>
       a.roundNumber !== b.roundNumber ? a.roundNumber - b.roundNumber : a.number - b.number
     )
+    setLastAutoTourKey(autoTourKey)
     setTourId(sorted[0].id)
-  }, [cityId, matchType, toursWithSlots, tourId])
+  }
 
   const filteredVenues = useMemo(() => (cityId ? venues.filter((v) => v.cityId === cityId) : venues), [venues, cityId])
 

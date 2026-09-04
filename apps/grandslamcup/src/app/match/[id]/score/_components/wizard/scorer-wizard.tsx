@@ -12,7 +12,7 @@
 import { useMatchSSE } from '@/app/_hooks/use-match-sse'
 import { Box, VStack } from '@chakra-ui/react'
 import { useRouter } from 'next/navigation'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { computeWizardStep } from './compute-wizard-step'
 import { StepCoinFlip } from './step-coin-flip'
 import { StepFinalResults } from './step-final-results'
@@ -42,7 +42,9 @@ interface ScorerWizardProps {
 export function ScorerWizard({ match }: ScorerWizardProps) {
   const router = useRouter()
   const routerRef = useRef(router)
-  routerRef.current = router
+  useEffect(() => {
+    routerRef.current = router
+  }, [router])
 
   const { status: connectionStatus, matchState } = useMatchSSE({
     matchId: match.id,

@@ -42,7 +42,10 @@ export function TelegramLinkSection() {
     setLoading(false)
   }
 
+  // Загрузка данных при монтировании — легитимная синхронизация с внешней системой
+  // (Server Action), setLoading(true) в начале refresh() — часть этой синхронизации.
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- fetch-on-mount, refresh() дергает Server Action
     refresh()
   }, [])
 

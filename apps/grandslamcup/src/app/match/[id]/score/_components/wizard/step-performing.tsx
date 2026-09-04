@@ -39,7 +39,10 @@ interface StepPerformingProps {
 }
 
 export function StepPerforming({ match, matchState }: StepPerformingProps) {
-  const [elapsed, setElapsed] = useState(0)
+  // Тикающее значение обновляется только пока таймер реально идёт (внешние часы rAF).
+  // Когда таймер остановлен/сброшен — отображаемое значение выводится из timer.accumulatedSec
+  // прямо при рендере, без промежуточного setState в эффекте.
+  const [runningElapsed, setRunningElapsed] = useState(0)
   const [isPending, setIsPending] = useState(false)
   const [showEndDialog, setShowEndDialog] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -55,10 +58,9 @@ export function StepPerforming({ match, matchState }: StepPerformingProps) {
 
   const currentPerf = matchState?.currentPerformances[matchState?.currentPerformerIndex ?? 0]
 
-  // Обновление отображения таймера (read-only)
+  // Обновление отображения таймера (read-only) — синхронизация с внешними часами (rAF)
   useEffect(() => {
     if (!timer.isRunning || !timer.startedAt) {
-      setElapsed(timer.accumulatedSec)
       cancelAnimationFrame(animFrameRef.current)
       return
     }
@@ -69,7 +71,7 @@ export function StepPerforming({ match, matchState }: StepPerformingProps) {
         return
       }
       const currentElapsed = timer.accumulatedSec + (Date.now() - timer.startedAt!) / 1000
-      setElapsed(currentElapsed)
+      setRunningElapsed(currentElapsed)
       animFrameRef.current = requestAnimationFrame(tick)
     }
 
@@ -80,6 +82,8 @@ export function StepPerforming({ match, matchState }: StepPerformingProps) {
       cancelAnimationFrame(animFrameRef.current)
     }
   }, [timer.isRunning, timer.startedAt, timer.accumulatedSec])
+
+  const elapsed = timer.isRunning && timer.startedAt ? runningElapsed : timer.accumulatedSec
 
   // Вибрация при переходе через лимит
   useEffect(() => {

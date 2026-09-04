@@ -24,8 +24,11 @@ const EMPTY_META: UserMeta = {
 
 export function useUserMeta(userId: string | undefined) {
   const [meta, setMeta] = useState<UserMeta>(EMPTY_META)
+  // Загрузка меты с сервера по userId — легитимная синхронизация с внешней системой (API);
+  // сброс на EMPTY_META при отсутствии userId — часть той же синхронизации.
   useEffect(() => {
     if (!userId) {
+      // oxlint-disable-next-line react/set-state-in-effect -- fetch-on-mount/userId-change, сброс — часть синхронизации
       setMeta(EMPTY_META)
       return
     }

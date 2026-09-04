@@ -30,16 +30,19 @@ interface PerformanceTimerProps {
 }
 
 export function PerformanceTimer({ matchId, timer, showControls = false }: PerformanceTimerProps) {
-  const [elapsed, setElapsed] = useState(0)
+  // Тикающее значение обновляется только пока таймер реально идёт (внешние часы rAF).
+  // Когда таймер остановлен/сброшен — отображаемое значение выводится из timer.accumulatedSec
+  // прямо при рендере, без промежуточного setState в эффекте.
+  const [runningElapsed, setRunningElapsed] = useState(0)
+  const elapsed = timer.isRunning && timer.startedAt ? runningElapsed : timer.accumulatedSec
   const [isPending, setIsPending] = useState(false)
   const animFrameRef = useRef<number>(0)
   const vibratedWarningRef = useRef(false)
   const vibratedLimitRef = useRef(false)
 
-  // Обновление отображения таймера
+  // Обновление отображения таймера — синхронизация с внешними часами (requestAnimationFrame)
   useEffect(() => {
     if (!timer.isRunning || !timer.startedAt) {
-      setElapsed(timer.accumulatedSec)
       cancelAnimationFrame(animFrameRef.current)
       return
     }
@@ -51,7 +54,7 @@ export function PerformanceTimer({ matchId, timer, showControls = false }: Perfo
       }
       const now = Date.now()
       const currentElapsed = timer.accumulatedSec + (now - timer.startedAt!) / 1000
-      setElapsed(currentElapsed)
+      setRunningElapsed(currentElapsed)
       animFrameRef.current = requestAnimationFrame(tick)
     }
 

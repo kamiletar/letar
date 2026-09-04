@@ -38,7 +38,9 @@ export default function AdminNewsPage() {
     setLoading(false)
   }
 
+  // Загрузка данных при монтировании — легитимная синхронизация с внешней системой (Server Action)
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- fetch-on-mount через Server Action
     loadNews()
   }, [])
 

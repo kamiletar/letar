@@ -308,7 +308,9 @@ export default async function CoachDashboardPage() {
                 const isHome = match.homeTeamId === coach.teamSeasonId
                 const opponent = isHome ? match.awayTeam.team.name : match.homeTeam.team.name
                 const hasLineup = match.lineups.length > 0
+                // Server Component: рендерится один раз на запрос
                 const hoursUntil = match.scheduledAt
+                  // oxlint-disable-next-line react/purity -- Server Component, вызывается один раз за запрос
                   ? (new Date(match.scheduledAt).getTime() - Date.now()) / (1000 * 60 * 60)
                   : Infinity
                 const canSubmit = !hasLineup && hoursUntil >= 6

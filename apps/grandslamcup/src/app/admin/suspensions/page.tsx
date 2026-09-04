@@ -76,7 +76,10 @@ export default function AdminSuspensionsPage() {
     setLoading(false)
   }, [showActiveOnly])
 
+  // Загрузка данных при монтировании/смене фильтра — легитимная синхронизация
+  // с внешней системой (Server Action)
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- fetch через Server Action
     loadData()
   }, [loadData])
 

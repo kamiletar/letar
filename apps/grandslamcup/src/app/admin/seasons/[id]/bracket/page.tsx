@@ -32,7 +32,9 @@ export default function BracketPage() {
     setLoading(false)
   }, [seasonId])
 
+  // Загрузка данных при монтировании — легитимная синхронизация с внешней системой (Server Action)
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- fetch-on-mount через Server Action
     loadBracket()
   }, [loadBracket])
 

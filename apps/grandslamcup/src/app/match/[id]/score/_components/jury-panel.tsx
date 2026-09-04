@@ -39,7 +39,7 @@ interface JuryPanelProps {
 export function JuryPanel({ matchId, judges, judgeQueue = [], currentHalf, phase, votingOpenedAt }: JuryPanelProps) {
   const [inviteUrl, setInviteUrl] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [now, setNow] = useState(Date.now())
+  const [now, setNow] = useState(() => Date.now())
 
   const isVoting = phase === 'TEXT_VOTING' || phase === 'DELIVERY_VOTING'
 

@@ -87,7 +87,10 @@ export default function ModerationPage() {
     setLoading(false)
   }
 
+  // Загрузка заявок и счётчика при монтировании/смене фильтра — легитимная синхронизация
+  // с внешней системой (Server Actions)
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- fetch через Server Actions
     loadApps(filter)
     getPendingClaimsCountAction().then((r) => {
       if ('count' in r) { setClaimsCount(r.count) }

@@ -32,16 +32,18 @@ interface FullscreenTimerProps {
 }
 
 export function FullscreenTimer({ matchId, timer, onClose, performerName }: FullscreenTimerProps) {
-  const [elapsed, setElapsed] = useState(0)
+  // Тикающее значение обновляется только пока таймер реально идёт (внешние часы rAF).
+  // Когда таймер остановлен/сброшен — отображаемое значение выводится из timer.accumulatedSec
+  // прямо при рендере, без промежуточного setState в эффекте.
+  const [runningElapsed, setRunningElapsed] = useState(0)
   const [isPending, setIsPending] = useState(false)
   const animFrameRef = useRef<number>(0)
   const vibratedWarningRef = useRef(false)
   const vibratedLimitRef = useRef(false)
 
-  // Обновление отображения таймера (animation frame)
+  // Обновление отображения таймера (animation frame) — синхронизация с внешними часами
   useEffect(() => {
     if (!timer.isRunning || !timer.startedAt) {
-      setElapsed(timer.accumulatedSec)
       cancelAnimationFrame(animFrameRef.current)
       return
     }
@@ -51,7 +53,7 @@ export function FullscreenTimer({ matchId, timer, onClose, performerName }: Full
       if (!running) { return }
       const now = Date.now()
       const currentElapsed = timer.accumulatedSec + (now - timer.startedAt!) / 1000
-      setElapsed(currentElapsed)
+      setRunningElapsed(currentElapsed)
       animFrameRef.current = requestAnimationFrame(tick)
     }
 
@@ -62,6 +64,8 @@ export function FullscreenTimer({ matchId, timer, onClose, performerName }: Full
       cancelAnimationFrame(animFrameRef.current)
     }
   }, [timer.isRunning, timer.startedAt, timer.accumulatedSec])
+
+  const elapsed = timer.isRunning && timer.startedAt ? runningElapsed : timer.accumulatedSec
 
   // Вибрация на предупреждении и лимите
   useEffect(() => {

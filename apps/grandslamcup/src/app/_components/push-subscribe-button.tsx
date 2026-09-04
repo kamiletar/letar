@@ -14,23 +14,32 @@ import { toaster } from './ui/toaster'
 type SubState = 'loading' | 'unsupported' | 'denied' | 'subscribed' | 'unsubscribed'
 
 export function PushSubscribeButton() {
-  const [state, setState] = useState<SubState>('loading')
-
-  useEffect(() => {
+  // Определение поддержки браузером — читается из lazy-инициализатора состояния (не из эффекта):
+  // window/navigator недоступны при SSR, поэтому guard на typeof window.
+  const [state, setState] = useState<SubState>(() => {
+    if (typeof window === 'undefined') {
+      return 'loading'
+    }
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-      setState('unsupported')
-      return
+      return 'unsupported'
     }
     if (Notification.permission === 'denied') {
-      setState('denied')
+      return 'denied'
+    }
+    return 'loading'
+  })
+
+  // Проверка текущей подписки — асинхронная синхронизация с Service Worker/PushManager,
+  // выполняется только пока начальное состояние ещё 'loading' (поддержка уже определена выше)
+  useEffect(() => {
+    if (state !== 'loading') {
       return
     }
-    // Проверяем текущую подписку
     navigator.serviceWorker.ready.then(async (reg) => {
       const sub = await reg.pushManager.getSubscription()
       setState(sub ? 'subscribed' : 'unsubscribed')
     })
-  }, [])
+  }, [state])
 
   const subscribe = useCallback(async () => {
     try {
