@@ -1106,6 +1106,68 @@ await db.material.findMany({
 
 ---
 
+## Новые возможности v3.8.0 — Soft Delete (Preview, ещё не устоялось)
+
+> ⚠️ **TODO — внедрить проактивно, как только API стабилизируется.** `@zenstackhq/plugin-soft-delete`
+> закрывает паттерн, который до сих пор приходится писать руками в каждом приложении (булево поле
+> `isDeleted`/nullable `deletedAt` + вручную дописанный `where: { deletedAt: null }` в каждом запросе,
+> который не должен видеть удалённые строки). Плагин помечен `Preview Feature` — **может ломать
+> обратную совместимость в будущих релизах**, поэтому до внедрения в прод сверяться с changelog
+> `@zenstackhq/plugin-soft-delete` на момент старта задачи, не полагаться на описание ниже как на
+> зафиксированный контракт.
+
+### Как работает
+
+Единственный маркер — nullable `DateTime`-поле с `@deletedAt` (максимум одно на модель). Плагин
+перехватывает Kysely-запросы в рантайме:
+
+```zmodel
+plugin softDelete {
+    provider = '@zenstackhq/plugin-soft-delete'
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  deletedAt DateTime? @deletedAt
+}
+```
+
+```typescript
+import { SoftDeletePlugin } from '@zenstackhq/plugin-soft-delete'
+
+const db = new ZenStackClient(schema, { ... }).$use(new SoftDeletePlugin())
+
+await db.user.delete({ where: { id } }) // переписывается в UPDATE deletedAt = now()
+await db.user.findMany() // WHERE deletedAt IS NULL добавляется автоматически, включая join'ы
+```
+
+Модели без `@deletedAt` плагин не трогает вообще — внедрение точечное, не all-or-nothing.
+Действует и на низкоуровневый `$qb` (query builder escape hatch), не только на ORM API.
+
+### Грабли, которые ждут при первом внедрении (документированы заранее, из доков плагина)
+
+- **Не каскадирует.** Soft-delete родителя не трогает детей — ручное управление остаётся на
+  приложении (в отличие от `onDelete: Cascade`, который для hard-delete модели без `@deletedAt`
+  продолжает работать как обычно).
+- **Join/multi-table DELETE отклоняется**, а не тихо превращается в hard-delete — придётся сводить
+  к single-table delete там, где сейчас используется составной.
+- **`@unique` + tombstone.** Физически удалённая строка остаётся в таблице — обычный `@unique`
+  запрещает повторно использовать значение (email и т.п.), которое держит уже soft-deleted запись.
+  Митигация — partial unique index (`WHERE deletedAt IS NULL`) через ручную правку
+  `--create-only`-миграции; ZModel такой индекс выразить не может. Для MySQL (нет partial index)
+  обходной путь другой — `CASE WHEN deletedAt IS NULL THEN email END` в выражении индекса.
+
+### Кандидаты на первое внедрение
+
+Модели, где сейчас руками написан аналог soft-delete (`isDeleted`/`archivedAt`/подобное) —
+приоритет на замену штатным плагином, когда API станет stable. Конкретные модели-кандидаты — по
+факту audit при старте задачи, не фиксировать список здесь заранее (список моделей — не то, что
+стоит держать в публичном доке, см. `public-repo-hygiene.md`, если модель специфична для приватного
+приложения).
+
+---
+
 ## Устранение неполадок
 
 **"Cannot find module '@/generated/zod/...'" или "@/generated/prisma"**
