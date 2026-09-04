@@ -100,6 +100,9 @@ approval, kebab-case в `to`, обнулённая база
 `@@allow('create')` не даёт прочитать запись назад ·
 [zenstack-generated-prisma-client](/.claude/docs/zenstack-generated-prisma-client.md) лишний
 `generator client` — не признак дрейфа схемы ·
+[zenstack-view-unused-preview-feature](/.claude/docs/zenstack-view-unused-preview-feature.md)
+`view`-конструкция (SQL VIEW прямо в ZModel) — preview-фича, в монорепо пока не используется ни
+разу, миграции под неё ZenStack не генерирует ·
 [zenstack-v3-orm-error-codes](/.claude/docs/zenstack-v3-orm-error-codes.md) ⚠️ `error.dbErrorCode`
 (сырой `SQLSTATE`, `23505`), не Prisma-код `P2002` — classic `@prisma/client` в других
 приложениях монорепо ловит иначе, не путать ·
