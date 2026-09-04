@@ -196,6 +196,42 @@ await db.user.groupBy({
 в цикле. В `studio` `getTotalBillableSecondsForProject` был запросом-на-проект внутри `map` по
 проектам (N+1) — лечится не новым полем, а выбором существующего в общем `findMany`.
 
+## Доступ к клиенту — кто спрашивает (ZenStack v3.9.1+)
+
+`context` вторым аргументом несёт ещё и `client` — тот самый ORM-клиент, который выполняет
+текущий запрос. Смысл: identity пользователя живёт на клиенте (`$setAuth()`), а не в схеме, и
+до этой версии computed-поле не могло от неё зависеть.
+
+```typescript
+import { sql } from '@zenstackhq/orm/helpers'
+
+computedFields: {
+  Post: {
+    // client.$auth — identity, привязанная через $setAuth(); undefined у анонимного клиента
+    isMine: (eb, { client }) =>
+      client.$auth
+        ? sql<boolean>`${eb.ref('authorId')} = ${client.$auth.id}`
+        : eb.lit(false),
+  },
+}
+```
+
+`$setAuth()` возвращает новый клиент, не мутирует исходный — поэтому у каждого
+пользовательского клиента поле резолвится по своей identity:
+
+```typescript
+const userDb = db.$setAuth({ id: 1 })
+await userDb.post.findMany({ where: { isMine: true } }) // только посты юзера 1
+await db.post.findUnique({ where: { id: 1 } }) // исходный клиент анонимный → isMine: false
+```
+
+### Где в letar пригодится
+
+Заменяет ручное `post.authorId === session.user.id` в TS после каждого запроса — булевы поля
+вроде `isMine`/`canEdit`/`isOwner` становятся частью самого запроса (фильтруются, сортируются),
+а не пересчитываются построчно на клиенте после `findMany`. Кандидаты — списки с личным контекстом
+владения: «мои заявки», «мои проекты», где сейчас UI сам решает, показывать ли кнопку редактирования.
+
 ## Использование в запросах
 
 ```typescript
