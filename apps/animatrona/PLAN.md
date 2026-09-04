@@ -1879,6 +1879,151 @@ title}`), а не из мс IPFS-манифеста (`ManifestChapter`) — ну
 
 ---
 
+## ТЗ: Батч-импорт с Рутрекера + роли дубляжа (запланировано, 2026-09-04)
+
+### Концепция
+
+Скормить список ссылок на раздачи Рутрекера (по одной на строку) и получить полностью
+автоматический импорт: парсинг → матчинг с Shikimori → скачивание торрента → транскод →
+публикация в IPFS — без ручного подтверждения каждой раздачи. Плюс новое поле каталога «роли
+озвучивали» — актёры русского дубляжа/команда озвучки конкретной раздачи (не то же самое, что
+японские сэйю с Shikimori в `characters[].voiceActor`).
+
+Сейчас в приложении есть полный **ручной** pipeline (парсер → матчер → торрент → ImportQueue →
+транскод, см. ТЗ ниже), но только по одной ссылке за раз, с подтверждением на каждом шаге через
+UI. Задача — добавить batch-режим поверх существующих кирпичей, без дублирования уже написанной
+логики.
+
+### Решения (подтверждены пользователем 2026-09-04)
+
+1. Батч делает **полный пайплайн** (метаданные + скачивание + транскод + IPFS), не только каталог.
+2. Неуверенный матчинг с Shikimori (несколько кандидатов) → **не блокирует батч**: элемент уходит
+   в очередь на разбор, батч идёт дальше по списку.
+3. **Разбор неуверенных матчей делает не человек в UI, а Sonnet 5 в сессии Claude Code** (уточнение
+   2026-09-05) — по названию раздачи, году, числу серий, жанрам и описанию из поста Sonnet
+   однозначно определяет нужный `shikimoriId` среди кандидатов гораздо надёжнее эвристического
+   скоринга (`rankCandidates`). Ручной UI-выбор остаётся только крайним фоллбэком (когда и Claude
+   не уверен — например неполные/противоречивые данные в посте).
+4. «Роли озвучивали»/команда дубляжа **и субтитров** — свободный текст поста слишком разнородный
+   для регулярок, эта же логика подходит и сюда. **Уточнение 2026-09-05:** имя команды
+   озвучки/сабов нередко указано только в структуре файлов/папок торрента (например
+   `[AniLibria_HD]`, `Anidub`, `SHIZA Project` в имени файла или папки), а не в тексте поста —
+   значит источником для Claude должен быть и сырой текст поста, и список путей реально
+   скачанного торрента, оба сразу, не только один из них.
+5. Разбор неуверенных матчей, извлечение ролей дубляжа и команд озвучки/сабов делает **один и тот
+   же MCP-сервер** (Фаза 2), вызываемый из сессии Claude Code — не встроенный в приложение
+   LLM-вызов. В Фазе 1 закладывается только инфраструктура хранения (кандидаты + контекст
+   раздачи + текст поста + список файлов торрента — место под все три результата); сам
+   MCP-сервер — Фаза 2.
+
+### Что переиспользуется как есть
+
+- `main/services/rutracker/rutracker-parser.ts` → `parseRutrackerPage()`.
+- `main/services/rutracker/rutracker-import.ts` → `processRutrackerImport()` (авто-принятие
+  уверенных матчей через `isAutoMatchConfident`, иначе `needsConfirmation: true` + `candidates`).
+- `main/ipc/rutracker.handlers.ts` → `fetchRutrackerPage()` (вынести в переиспользуемый модуль).
+- `main/services/rutracker/rutracker-download-orchestrator.ts` → `startDownload()`; приватный
+  `buildImportQueueData()` уже показывает сборку `ImportQueueAddData` из скачанного торрента —
+  вынести в экспортируемую функцию, не дублировать.
+- `main/services/import-queue-controller.ts` (`ImportQueueController.getInstance()`) — очередь
+  транскода работает полностью в main process, `addItems()`/`startQueue()` не требуют renderer.
+
+### Фаза 1 — инфраструктура батча (эта задача)
+
+- [ ] **Схема** (`schema/models/import.zmodel`): `BulkImportItemStatus` enum (`PENDING`,
+      `FETCHING`, `MATCHING`, `NEEDS_REVIEW`, `DOWNLOADING`, `QUEUED`, `DONE`, `ERROR`,
+      `SKIPPED`) + `model BulkImportItem` (batchId, url, status, position, shikimoriId,
+      animeName, candidatesJson — кандидаты Shikimori для NEEDS_REVIEW, torrentInfoJson —
+      контекст раздачи для Claude: nameRu/nameOriginal/year/episodeCount/genres/studio/
+      description, resolvedShikimoriId — пишет MCP-инструмент ИЛИ ручной UI-фоллбэк, один и тот
+      же путь продолжения пайплайна, animeId, error) + `model DubExtractionTask` (animeId
+      unique-relation на Anime, rutrackerUrl, rawText — текст `post_body` целиком, fileListJson —
+      **список путей файлов/папок реально скачанного торрента** (`TorrentInfo.files[].path`, а не
+      только `fileList` из спойлера на странице поста — имя команды озвучки/сабов часто зашито
+      только в имени файла или папки, например `[AniLibria_HD]`/`Anidub`/`SHIZA Project`, и
+      далеко не всегда продублировано в тексте поста), status `PENDING|DONE|SKIPPED`, resultJson —
+      заполняется тем же MCP-сервером в Фазе 2). Связь `Anime.dubExtractionTask
+      DubExtractionTask?`. После правки — `nx zenstack:generate animatrona && nx db:push
+      animatrona`.
+- [ ] **Парсер**: `RutrackerTorrentInfo.rawPostText?: string` — `postBody.text().trim().slice(0,
+      30000)` в `parseRutrackerPage()` (main/services/rutracker/types.ts + rutracker-parser.ts).
+- [ ] **AnimeInfo/AnimeManifest** (`libs/animatrona-types/src`): новый тип
+      `AnimeManifestDubRole { character, actor, dubGroup? }` рядом с `AnimeManifestPerson` +
+      поле `AnimeInfo.dubCast?: AnimeManifestDubRole[]` рядом с уже существующими
+      `fandubbers?: string[]`/`fansubbers?: string[]` (сейчас нигде не заполняются с
+      Рутрекера — `resultJson` из `DubExtractionTask` несёт `{ dubCast?: AnimeManifestDubRole[],
+      fandubbers?: string[], fansubbers?: string[] }`, MCP-сервер в Фазе 2 заполняет все три из
+      текста поста **и** списка файлов торрента). `main/services/anime-info-generator.ts`
+      подмешивает все три поля из `DubExtractionTask` со `status: 'DONE'`, если она есть у аниме.
+- [ ] **`ImportQueueController.updateItemStatus()`**: добавить `this.emit('itemStatus', {
+      itemId, status, error })` рядом с существующим `emit2Windows(...)` — класс уже наследует
+      `EventEmitter`, просто не используется. Нужно batch-сервису, чтобы дождаться
+      `completed`/`error` конкретного item без polling.
+- [ ] **Новый сервис** `main/services/rutracker/rutracker-batch-import.ts` — синглтон,
+      последовательная обработка URL (не параллелить торренты/транскод, как и в ручном флоу):
+      fetch → parse+match → уверенный матч идёт в DOWNLOADING → QUEUED → DONE (с созданием
+      `DubExtractionTask`), неуверенный — сохраняет `candidatesJson`+`torrentInfoJson`, статус
+      NEEDS_REVIEW, пропускается дальше по списку. Пока батч активен — лёгкий poll-луп (например
+      раз в 30–60 сек) по `BulkImportItem` со `status: NEEDS_REVIEW` и заполненным
+      `resolvedShikimoriId` (его пишет MCP-инструмент из Фазы 2 ИЛИ ручной UI-фоллбэк — один и
+      тот же код продолжения): подхватывает элемент и ведёт его дальше по обычной ветке
+      DOWNLOADING → QUEUED → DONE, как уверенный матч. Poll, а не событие — MCP-сервер и
+      приложение живут в разных процессах, ничего не роняет, если Claude Code разбирает очередь,
+      пока приложение выключено (просто подхватится при следующем запуске/poll-тике). Состояние
+      батча живёт в БД (`BulkImportItem`), не в памяти — переживает перезапуск приложения
+      (`resumeBatch(batchId)` подхватывает всё не-`DONE`/`SKIPPED`). Методы разбора:
+      `resolveReview(itemId, shikimoriId)` (тот же путь, что и у MCP-инструмента — вызывается и
+      из ручного UI-фоллбэка, и из poll-лупа), `skipReview(itemId)`, `retryItem(itemId)`.
+- [ ] **IPC**: `main/ipc/rutracker-batch.handlers.ts` (`rutrackerBatch:start/getState/
+      resolveReview/skipReview/retryItem`) + preload + `renderer/src/types/electron.d.ts`.
+- [ ] **UI**: `renderer/src/app/import-rutracker/batch/page.tsx` — textarea со списком ссылок
+      (по одной на строку, формат `Посмотрено.txt`) + таблица статусов + блок «Требует
+      подтверждения» для NEEDS_REVIEW (переиспользовать рендер кандидатов из
+      `import-rutracker/page.tsx`). Подписка на `rutrackerBatch:progress` для live-обновлений.
+- [ ] Обновить `CHANGELOG.md` + bump `package.json`.
+
+### Фаза 2 — MCP-сервер разбора очереди (Claude Code: матчинг + роли дубляжа/сабов), не начата
+
+По решению пользователя — вызывается из сессии Claude Code, не из самого приложения (никакого
+API-ключа/SDK внутри Animatrona). Тонкий локальный MCP-сервер по паттерну
+`.claude/docs/mcp-server-pattern.md` (аналог `postgres-*`/`studio-mcp`), читает/пишет напрямую
+через `better-sqlite3` в `app.db` (dev — `apps/animatrona/prisma/data/app.db`, prod —
+`%APPDATA%/@letar/animatrona/data/app.db`). Два независимых набора инструментов на одном
+сервере:
+
+- **Разбор неуверенных матчей:** `list_pending_match_reviews()` (читает `BulkImportItem` со
+  `status: NEEDS_REVIEW` и `resolvedShikimoriId: null` — отдаёт `candidatesJson` +
+  `torrentInfoJson`), `submit_match_resolution(itemId, shikimoriId)` (пишет
+  `resolvedShikimoriId` — дальше подхватывает poll-луп batch-сервиса, см. Фазу 1),
+  `skip_match_review(itemId, reason)` (→ `SKIPPED`, когда неоднозначно даже для Claude —
+  например неполные/противоречивые данные в посте).
+- **Роли дубляжа и команды озвучки/сабов:** `list_pending_dub_tasks()` (отдаёт `rawText` **и**
+  `fileListJson` — оба источника сразу, имя команды часто есть только в путях файлов/папок, не в
+  тексте поста, см. решение 4 выше), `submit_dub_result(id, { dubCast?, fandubbers?,
+  fansubbers? })`, `skip_dub_task(id, reason)` — заполняет столько полей, сколько реально нашлось
+  (не все раздачи содержат роли по именам, но команда/студия в имени файла есть почти всегда).
+
+Claude Code периодически (или по команде пользователя) разбирает обе очереди своим языковым
+пониманием текста раздачи и структуры файлов. Результат матчинга подхватывает batch-сервис
+(продолжает пайплайн); результат ролей/команд приложение подхватывает при следующей регенерации
+AnimeInfo/манифеста (см. `anime-info-generator.ts` в Фазе 1).
+
+### Верификация (Фаза 1)
+
+1. `nx zenstack:generate animatrona && nx db:push animatrona`, `nx typecheck:tsgo animatrona` —
+   зелёные.
+2. Ручной прогон на 2–3 URL из `Посмотрено.txt` через `/import-rutracker/batch`: уверенные матчи
+   доходят до `DONE` (аниме в библиотеке, эпизоды транскодированы), неоднозначный тайтл уходит в
+   `NEEDS_REVIEW` с заполненным `torrentInfoJson`/`candidatesJson` и не блокирует остальные
+   строки. Ручное `resolveReview()` (без MCP, симулируя Фазу 2) доводит такой элемент до `DONE`.
+3. `nx db:studio animatrona` — после успешного импорта строка `DubExtractionTask` создана,
+   `rawText` не пустой, `status = 'PENDING'`.
+4. Перезапуск приложения с батчем в процессе — `rutrackerBatch:getState` возвращает
+   незавершённые элементы, продолжение не создаёт дублей `BulkImportItem`/`Anime`.
+5. `nx lint animatrona` — чисто.
+
+---
+
 ## ТЗ: Импорт из Рутрекера
 
 ### Концепция
