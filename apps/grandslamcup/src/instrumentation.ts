@@ -6,6 +6,7 @@ export async function register() {
     initServer({
       dsn: process.env.GLITCHTIP_DSN,
       environment: process.env.GLITCHTIP_ENVIRONMENT ?? 'development',
+      release: process.env.GLITCHTIP_RELEASE,
     })
   }
 }

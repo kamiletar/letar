@@ -17,6 +17,10 @@ const withSerwist = withSerwistInit({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Клиентские sourcemaps в проде — без них стектрейсы в GlitchTip приходят из минифицированного
+  // кода. .map-файлы не публикуются: сборка удаляет их после загрузки в GlitchTip
+  // (см. корневой scripts/glitchtip-upload-sourcemaps.mjs, PLAN-INFRA-4.md §70 п.6).
+  productionBrowserSourceMaps: true,
   output: 'standalone',
   // sharp грузит libvips-cpp.so через dlopen(), трейсер это не ловит — без явного
   // include контейнер падает с ERR_DLOPEN_FAILED (инцидент mandala 2026-07-12).
