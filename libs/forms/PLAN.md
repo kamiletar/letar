@@ -6,7 +6,7 @@
 
 ## Backlog (запросы от агентов)
 
-## [2026-09-04] `zenstack-form-plugin` не наследует нативные ZModel-атрибуты валидации
+## ✅ [2026-09-04] `zenstack-form-plugin` не наследует нативные ZModel-атрибуты валидации — закрыто
 
 - **Запросил:** domwellbes-dev
 - **Приоритет:** normal
@@ -49,8 +49,33 @@
      `mandala` и приватные submodule напрямую — это чужие приложения; координатор разошлёт им
      broadcast с той же инструкцией после того, как экосистемные демо готовы (14+15 occurrences
      из известных 29, плюс неизвестное число в приватных submodule).
-- **Статус:** делегировано `forms-dev` (msg id 1104 + 1105 + 1106 + 1107, `forms-task`), ждём
-  реализации.
+- **Реализовано (п.1, код):** `model-generator.ts` — `extractNativeConstraints()` читает
+  `@email`/`@length`/`@gte`/`@gt`/`@lte`/`@lt`/`@regex` из `field.attributes` (AST, `$refText` с
+  `@`, как у `@default`), мержит в `formMeta.constraints` с приоритетом уже распарсенного
+  `@form.props` (`{ ...native, ...explicit }`). `@gt`/`@lt` — новые ключи `exclusiveMin`/
+  `exclusiveMax` в `ZodConstraints` (Zod `.min()`/`.max()` включительны, семантически
+  соответствуют только `@gte`/`@lte`) → генерируются как `.gt()`/`.lt()`. `parser.ts` —
+  `exclusiveMin`/`exclusiveMax` добавлены в `ZOD_CONSTRAINT_NAMES`, чтобы `@form.props` тоже мог
+  их явно переопределять. 6 новых тестов в `model-generator.spec.ts` (наследование каждого
+  атрибута, конфликт ключа с `@form.props`, объединение разных ключей без конфликта,
+  `.gt()`/`.lt()` в сгенерированном коде) — 85/85 зелёных, `typecheck:tsgo`/`lint` чистые.
+- **Реализовано (п.2-4, документация):** `libs/zenstack-form-plugin/README.md` и
+  `.claude/skills/zenstack-helper/reference/form-directives.md` — секция про `@form.props`
+  переписана: таблица маппинга нативных атрибутов на Zod-constraints, `@form.props` явно назван
+  escape hatch с тремя описанными случаями (per-consumer override общей схемы, валидация
+  до/после нормализации, staged rollout серверного ограничения), пример `portions` заменён на
+  `@gte(1) @lte(100)` с `@form.props` только для UI-пропса. Заметка про вычистку избыточных
+  ключей — есть, без гейта.
+- **П.5 (чистка демо) — проверено, изменений не потребовалось.** В `apps/form-develop-app/
+  schema.zmodel` и `apps/form-example/schema.zmodel` найдено всего 4 вхождения `@form.props`
+  (не 14+15, как предполагалось в исходной оценке) — ни одно не дублирует нативный атрибут:
+  `portions`/`price` используют `@form.props({min/max})` **без** параллельного `@gte`/`@lte`
+  (сам тихий дрейф, не дубль — добавление нативных атрибутов сюда было бы миграцией существующих
+  мест, что явно не требовалось), `rating` в обоих — чистые UI-пропсы (`count`, `allowHalf`).
+  Пересборка `form-schemas`/e2e не потребовалась — файлы не менялись.
+- **Версия:** `@letar/zenstack-form-plugin` v2.3.0, `CHANGELOG.md`.
+- **Статус:** закрыто, ответ отправлен `forms-coordinator-dev` (thread `1102`). Broadcast
+  консьюмерам (`label-printer-desktop`, `mandala`, приватные submodule) — на координаторе.
 
 ## ✅ [2026-09-04] `Form.When` — потеря фокуса при скрытии условного блока — закрыто
 
