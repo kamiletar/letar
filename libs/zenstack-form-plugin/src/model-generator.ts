@@ -1,5 +1,11 @@
 import type { DataField, DataFieldAttribute, DataModel, DataModelAttribute, Expression } from '@zenstackhq/language/ast'
-import { mergeFormMeta, parseFormMeta, parseMetaAttributes } from './parser.js'
+import {
+  findUnknownFormDirectiveKeys,
+  findUnknownMetaFormPaths,
+  mergeFormMeta,
+  parseFormMeta,
+  parseMetaAttributes,
+} from './parser.js'
 import type {
   FormFieldMeta,
   I18nConfig,
@@ -643,6 +649,37 @@ function warnLegacyFormDirectives(modelName: string, fieldName: string, commentM
 }
 
 /**
+ * Warning на директиву `@form.<key>`/`@meta("form.<key>", …)`, чей `<key>` не входит в набор
+ * распознаваемых — иначе такая опечатка (или несуществующий ключ вроде `@form.options`)
+ * молча пропадает: ни `parseFormMeta`, ни `parseMetaAttributes` не бросают ошибку на
+ * несовпавшем ключе, `zenstack generate` тоже не видит проблемы (для AST-пути это просто
+ * строковый литерал атрибута). Живой прецедент — `@form.options` в трёх полях
+ * `animatrona-tracker/schema/content.zmodel` (2026-09-04, найдено вручную только при разборе
+ * contact-request с форм-координатором).
+ */
+function warnUnknownFormDirectives(
+  modelName: string,
+  fieldName: string,
+  commentKeys: string[],
+  metaPaths: string[],
+): void {
+  for (const key of commentKeys) {
+    console.warn(
+      `[zenstack-form-plugin] ${modelName}.${fieldName}: неизвестная директива @form.${key} — `
+        + `молча проигнорирована (опечатка?). Поддерживаемые ключи: title, placeholder, `
+        + `description, fieldType, props, relation, exclude.`,
+    )
+  }
+  for (const path of metaPaths) {
+    console.warn(
+      `[zenstack-form-plugin] ${modelName}.${fieldName}: неизвестный @meta("form.${path}", …) — `
+        + `молча проигнорирован (опечатка?). Поддерживаемые ключи: title, placeholder, `
+        + `description, fieldType, props.*, relation.*, exclude.`,
+    )
+  }
+}
+
+/**
  * Extract model information from AST.
  */
 export function extractModelInfo(model: DataModel, enumNames: Set<string>): ModelInfo {
@@ -659,6 +696,12 @@ export function extractModelInfo(model: DataModel, enumNames: Set<string>): Mode
     const commentMeta = parseFormMeta(field.comments)
     const metaAttrMeta = parseMetaAttributes(field.attributes)
     warnLegacyFormDirectives(model.name, field.name, commentMeta)
+    warnUnknownFormDirectives(
+      model.name,
+      field.name,
+      findUnknownFormDirectiveKeys(field.comments),
+      findUnknownMetaFormPaths(field.attributes),
+    )
     const formMeta = mergeFormMeta(commentMeta, metaAttrMeta)
 
     // Check if field should be excluded

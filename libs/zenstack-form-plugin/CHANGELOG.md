@@ -1,5 +1,28 @@
 # Changelog
 
+## [3.2.0] - 2026-09-04
+
+### Added
+
+- **Warning на неизвестную директиву `@form.<key>`/`@meta("form.<key>", …)`.** Оба парсера
+  (`parseFormMeta` — comment-синтаксис, `parseMetaAttributes` — `@meta`, Фаза 3) молча игнорируют
+  любой `<key>`, не входящий в распознаваемый набор (`title`/`placeholder`/`description`/
+  `fieldType`/`props`/`relation`/`exclude`) — ни `zenstack generate`, ни typecheck такую опечатку
+  не диагностируют, поле просто остаётся без метаданных. `nx zenstack:generate` теперь печатает
+  `console.warn` для каждого такого случая с именем модели/поля, самим ключом и списком
+  поддерживаемых — не ломает сборку, только предупреждает.
+- Новые экспорты `parser.ts`: `findUnknownFormDirectiveKeys(comments)` (comment-путь),
+  `findUnknownMetaFormPaths(attributes)` (`@meta`-путь). Общий источник правды набора известных
+  ключей — `KNOWN_FORM_DIRECTIVE_KEYS`.
+- Живой прецедент, из-за которого это сделано: `@form.options([...])` в трёх полях
+  `apps/animatrona-tracker/schema/content.zmodel` (`animatrona-tracker-dev`, 2026-09-04) —
+  несуществующая директива (правильный вариант — `@form.props({ options: [...] })`), молча
+  игнорировалась до этого фикса. Задокументирован массив-объектов-в-options как постоянный
+  escape-кейс legacy comment-синтаксиса — `@meta` не может выразить объектный литерал
+  (`ObjectExpr`), см. README.
+- 13 новых тестов (`parser.spec.ts`: 10, `model-generator.spec.ts`: 3 интеграционных на
+  `console.warn` через `extractModelInfo`). 139 → 152.
+
 ## [3.1.0] - 2026-09-04
 
 ### Added

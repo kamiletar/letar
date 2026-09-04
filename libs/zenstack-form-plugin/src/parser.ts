@@ -186,6 +186,40 @@ export function parseFormMeta(comments: string[]): FormFieldMeta {
   return meta
 }
 
+/** Единственный источник правды для набора распознаваемых ключей `@form.*`/`@meta("form.*", …)` — используется и парсерами выше, и детекторами опечаток ниже. */
+const KNOWN_FORM_DIRECTIVE_KEYS = new Set([
+  'title',
+  'placeholder',
+  'description',
+  'fieldType',
+  'props',
+  'relation',
+  'exclude',
+])
+
+/**
+ * Найти в comment-директивах ключи `@form.<key>`, которых нет среди распознаваемых
+ * (`KNOWN_FORM_DIRECTIVE_KEYS`). `parseFormMeta` выше молча пропускает любой `@form.<key>`,
+ * не совпавший ни с одним regex — опечатка или несуществующая директива (`@form.options`,
+ * `@form.widget`) не даёт ошибки, поле просто остаётся без нужных метаданных. Живой прецедент —
+ * `@form.options` в трёх полях `animatrona-tracker` (2026-09-04), не диагностировалось до этой
+ * функции. Возвращает уникальные найденные ключи в порядке появления, без дублей.
+ */
+export function findUnknownFormDirectiveKeys(comments: string[]): string[] {
+  if (!comments || comments.length === 0) {
+    return []
+  }
+  const allComments = comments.join('\n')
+  const found = new Set<string>()
+  for (const match of allComments.matchAll(/@form\.([a-zA-Z]\w*)/g)) {
+    const key = match[1]
+    if (!KNOWN_FORM_DIRECTIVE_KEYS.has(key)) {
+      found.add(key)
+    }
+  }
+  return [...found]
+}
+
 /**
  * Преобразовать AST-выражение `@meta(…)`-аргумента в plain JS-значение.
  *
@@ -289,6 +323,34 @@ export function parseMetaAttributes(attributes: readonly DataFieldAttribute[]): 
   }
 
   return meta
+}
+
+/**
+ * Найти в `@meta("form.<path>", …)`-атрибутах поля первый сегмент пути, не входящий в
+ * `KNOWN_FORM_DIRECTIVE_KEYS`. `parseMetaAttributes` выше молча `continue`-ит на любом
+ * несовпавшем `path` (последний `if/else if` в цепочке не имеет ветки `else` вовсе) — та же
+ * дыра, что у comment-синтаксиса (`findUnknownFormDirectiveKeys`), только для основного
+ * синтаксиса Фазы 3. `@meta("form.options", […])` синтаксически валиден для компилятора ZModel
+ * (это просто строка-ключ атрибута), поэтому ошибка на этапе `zenstack generate` не возникает —
+ * диагностировать может только сам плагин.
+ */
+export function findUnknownMetaFormPaths(attributes: readonly DataFieldAttribute[]): string[] {
+  const found = new Set<string>()
+  for (const attr of attributes) {
+    if (attr.decl?.$refText !== '@meta') {
+      continue
+    }
+    const keyArg = attr.args[0]?.value
+    if (keyArg?.$type !== 'StringLiteral' || !keyArg.value.startsWith('form.')) {
+      continue
+    }
+    const path = keyArg.value.slice('form.'.length)
+    const topLevelKey = path.split('.')[0]
+    if (!KNOWN_FORM_DIRECTIVE_KEYS.has(topLevelKey)) {
+      found.add(path)
+    }
+  }
+  return [...found]
 }
 
 /**

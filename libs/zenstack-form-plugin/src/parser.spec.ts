@@ -1,6 +1,14 @@
 import type { DataFieldAttribute } from '@zenstackhq/language/ast'
 import { describe, expect, it } from 'vitest'
-import { extractEnumLabel, mergeFormMeta, parseFormMeta, parseMetaAttributes, toTitleCase } from './parser.js'
+import {
+  extractEnumLabel,
+  findUnknownFormDirectiveKeys,
+  findUnknownMetaFormPaths,
+  mergeFormMeta,
+  parseFormMeta,
+  parseMetaAttributes,
+  toTitleCase,
+} from './parser.js'
 
 // ─── Фикстуры AST для @meta (Фаза 3, v3.0.0) ───────────────────────────────
 
@@ -188,6 +196,35 @@ describe('parseFormMeta', () => {
   })
 })
 
+describe('findUnknownFormDirectiveKeys (детектор опечаток в @form.*, живой прецедент @form.options)', () => {
+  it('пустой/отсутствующий массив комментариев — пустой результат', () => {
+    expect(findUnknownFormDirectiveKeys([])).toEqual([])
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect(findUnknownFormDirectiveKeys(undefined as any)).toEqual([])
+  })
+
+  it('только известные директивы — пустой результат', () => {
+    expect(findUnknownFormDirectiveKeys(['@form.title("X")', '@form.exclude'])).toEqual([])
+  })
+
+  it('несуществующий @form.options — попадает в результат (живой баг animatrona-tracker)', () => {
+    expect(findUnknownFormDirectiveKeys(['@form.options([1, 2, 3])'])).toEqual(['options'])
+  })
+
+  it('несколько неизвестных директив — каждая один раз, без дублей', () => {
+    const keys = findUnknownFormDirectiveKeys([
+      '@form.widget("x")',
+      '@form.options([1])',
+      '@form.options([2])', // повтор того же ключа — не дублируется
+    ])
+    expect(keys).toEqual(['widget', 'options'])
+  })
+
+  it('обычный текст комментария без @form.* — не даёт ложных срабатываний', () => {
+    expect(findUnknownFormDirectiveKeys(['просто комментарий про form.something в прозе'])).toEqual([])
+  })
+})
+
 describe('parseMetaAttributes (Фаза 3, v3.0.0)', () => {
   it('возвращает пустой объект без @meta-атрибутов', () => {
     expect(parseMetaAttributes([])).toEqual({})
@@ -261,6 +298,44 @@ describe('parseMetaAttributes (Фаза 3, v3.0.0)', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const attrs = [{ $type: 'DataFieldAttribute', decl: { $refText: '@meta' }, args: [{ value: numLit(1) }] } as any]
     expect(parseMetaAttributes(attrs)).toEqual({})
+  })
+})
+
+describe('findUnknownMetaFormPaths (детектор опечаток в @meta("form.*", …), та же дыра что у comment-синтаксиса)', () => {
+  it('без атрибутов — пустой результат', () => {
+    expect(findUnknownMetaFormPaths([])).toEqual([])
+  })
+
+  it('только известные пути — пустой результат', () => {
+    const attrs = [
+      metaAttr('form.title', strLit('X')),
+      metaAttr('form.props.min', numLit(1)),
+      metaAttr('form.relation.model', strLit('Category')),
+    ]
+    expect(findUnknownMetaFormPaths(attrs)).toEqual([])
+  })
+
+  it('@meta("form.options", …) — неизвестный top-level ключ, попадает в результат', () => {
+    const attrs = [metaAttr('form.options', arrLit([strLit('a')]))]
+    expect(findUnknownMetaFormPaths(attrs)).toEqual(['options'])
+  })
+
+  it('не @meta-атрибуты и не form.*-namespace — игнорируются, как в parseMetaAttributes', () => {
+    const attrs = [
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      { $type: 'DataFieldAttribute', decl: { $refText: '@gte' }, args: [] } as any,
+      metaAttr('description', strLit('ORM-level, не form.*')),
+    ]
+    expect(findUnknownMetaFormPaths(attrs)).toEqual([])
+  })
+
+  it('несколько неизвестных путей — каждый один раз, без дублей', () => {
+    const attrs = [
+      metaAttr('form.widget', strLit('x')),
+      metaAttr('form.options', arrLit([])),
+      metaAttr('form.options', arrLit([])), // повтор — не дублируется
+    ]
+    expect(findUnknownMetaFormPaths(attrs)).toEqual(['widget', 'options'])
   })
 })
 

@@ -270,6 +270,33 @@ implemented yet — that remains a deliberate scope cut, not an oversight. `Deci
 also out of scope: they don't go through the same `ZodUtils.*` codepath and have no message
 support.
 
+### Array of objects (`options: [{ value, label }]`) — legacy comment syntax only
+
+`@meta` cannot express an object literal as an attribute value (`ObjectExpr` breaks
+`zenstack generate` entirely — see `metaValueToPlain` in `src/parser.ts`), and the flat dot-path
+can't index into an array of objects (`form.props.options.0.value` doesn't work). For select
+fields with `{ value, label }[]`-shaped options, the only working path is the legacy comment
+directive:
+
+```zmodel
+category String
+  /// @form.props({ options: [{ value: "fruit", label: "Fruit" }, { value: "veg", label: "Vegetables" }] })
+```
+
+This is a **permanent, legitimate escape case**, not leftover unmigrated code — the codemod
+(`scripts/codemod-form-directives.mjs`) deliberately leaves it alone; there's nowhere to migrate
+an object-array to in `@meta`.
+
+### Warning on unknown directives (v3.2.0)
+
+Both the comment syntax (`@form.<key>`) and `@meta("form.<key>", …)` silently ignore any `<key>`
+outside the recognized set (`title`/`placeholder`/`description`/`fieldType`/`props`/`relation`/
+`exclude`) — a typo or a nonexistent directive (`@form.options`, `@form.widget`) produces no
+error at `zenstack generate` time or at type-check time; the field simply ends up missing the
+intended metadata. As of v3.2.0, `nx zenstack:generate` prints a `console.warn` for each such
+case — naming the model/field, the unknown key itself, and the list of supported ones. It doesn't
+break the build, only warns — same as the existing legacy-syntax deprecation warning.
+
 ## Auto-excluded Fields
 
 - `id` — primary keys

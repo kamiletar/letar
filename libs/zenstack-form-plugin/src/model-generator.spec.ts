@@ -1,5 +1,5 @@
 import type { DataField, DataModel } from '@zenstackhq/language/ast'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { extractModelInfo, generateModelCode } from './model-generator.js'
 import type { ModelFieldInfo, ModelInfo } from './types.js'
 
@@ -492,6 +492,59 @@ describe('extractModelInfo', () => {
     expect(info.isStrict).toBe(false)
   })
 })
+
+describe(
+  'extractModelInfo — warning на неизвестную директиву @form.*/@meta("form.*", …) (живой прецедент @form.options)',
+  () => {
+    const enumNames = new Set<string>()
+    let warnSpy: ReturnType<typeof vi.spyOn>
+
+    beforeEach(() => {
+      warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+      warnSpy.mockRestore()
+    })
+
+    it('неизвестная comment-директива @form.options — предупреждение с именем поля и ключа', () => {
+      const model = makeModel('Content', [
+        makeField({ name: 'category', type: 'String', comments: ['@form.options([1, 2, 3])'] }),
+      ])
+
+      extractModelInfo(model, enumNames)
+
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Content.category'))
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('@form.options'))
+    })
+
+    it('неизвестный @meta("form.options", …) — та же дыра для основного синтаксиса Фазы 3', () => {
+      const model = makeModel('Content', [
+        makeField({
+          name: 'quality',
+          type: 'String',
+          attributes: [{ refText: '@meta', args: [{ value: { $type: 'StringLiteral', value: 'form.options' } }] }],
+        }),
+      ])
+
+      extractModelInfo(model, enumNames)
+
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Content.quality'))
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('form.options'))
+    })
+
+    it('только известные директивы — предупреждения об опечатке нет (deprecation-warning не в счёт)', () => {
+      const model = makeModel('Content', [
+        makeField({ name: 'label', type: 'String', comments: ['@form.title("Название")'] }),
+      ])
+
+      extractModelInfo(model, enumNames)
+
+      const unknownDirectiveWarnings = warnSpy.mock.calls.filter((call) => String(call[0]).includes('неизвестн'))
+      expect(unknownDirectiveWarnings).toEqual([])
+    })
+  },
+)
 
 // ─── Тесты generateModelCode (чистая функция, ModelInfo → строка) ──────────
 
