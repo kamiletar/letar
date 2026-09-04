@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 
 import { isInputFocused, NAV_PATHS } from './shortcuts-config'
 
@@ -37,7 +37,11 @@ export function useGlobalShortcuts(callbacks: GlobalShortcutsCallbacks = {}) {
   // зависел от него напрямую, addEventListener/removeEventListener на window дёргались
   // бы при каждом рендере always-mounted layout вместо одного раза на весь app lifecycle.
   const callbacksRef = useRef(callbacks)
-  callbacksRef.current = callbacks
+  // Запись в ref вынесена из тела рендера в useLayoutEffect — правило react(refs)
+  // запрещает мутировать ref.current синхронно во время рендера
+  useLayoutEffect(() => {
+    callbacksRef.current = callbacks
+  })
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {

@@ -42,7 +42,11 @@ export function ImportErrorsSection({ animeId }: ImportErrorsSectionProps) {
   }, [animeId])
 
   useEffect(() => {
-    void loadErrors()
+    // Отложено в микротаску — loadErrors асинхронна, но react(set-state-in-effect)
+    // всё равно триггерится синхронным стартом промиса в теле эффекта
+    queueMicrotask(() => {
+      void loadErrors()
+    })
   }, [loadErrors])
 
   // Пометить ошибку как исправленную (dismiss)

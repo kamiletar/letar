@@ -129,21 +129,24 @@ export function VmafAutoDialog({
   const [iterations, setIterations] = useState<CqIteration[]>([])
   const [result, setResult] = useState<CqSearchResult | null>(null)
 
-  // Синхронизируем videoPath при открытии
+  // Синхронизируем videoPath при открытии. setState отложен в микротаску —
+  // react(set-state-in-effect) запрещает синхронный вызов setState в теле эффекта
   useEffect(() => {
     if (open && initialVideoPath) {
-      setVideoPath(initialVideoPath)
+      queueMicrotask(() => setVideoPath(initialVideoPath))
     }
   }, [open, initialVideoPath])
 
   // Сброс состояния при открытии
   useEffect(() => {
     if (open) {
-      setStep('config')
-      setProgress(null)
-      setIterations([])
-      setResult(null)
-      setIsSearching(false)
+      queueMicrotask(() => {
+        setStep('config')
+        setProgress(null)
+        setIterations([])
+        setResult(null)
+        setIsSearching(false)
+      })
     }
   }, [open])
 

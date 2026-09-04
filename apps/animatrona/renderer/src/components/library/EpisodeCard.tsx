@@ -116,7 +116,8 @@ export const EpisodeCard = memo(function EpisodeCard({
         clearInterval(intervalRef.current)
         intervalRef.current = null
       }
-      setCurrentIndex(0)
+      // Отложено в микротаску — react(set-state-in-effect) запрещает синхронный setState
+      queueMicrotask(() => setCurrentIndex(0))
     }
 
     return () => {

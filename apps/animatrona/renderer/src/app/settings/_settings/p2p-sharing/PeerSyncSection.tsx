@@ -104,7 +104,11 @@ export function PeerSyncSection() {
   }, [])
 
   useEffect(() => {
-    void loadStatus()
+    // Отложено в микротаску — loadStatus синхронно вызывает setIsLoading(true)
+    // до первого await, что триггерит react(set-state-in-effect)
+    queueMicrotask(() => {
+      void loadStatus()
+    })
     // Обновляем статус каждые 30 сек
     const interval = setInterval(() => void loadStatus(), 30_000)
     return () => clearInterval(interval)

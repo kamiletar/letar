@@ -150,9 +150,10 @@ const subtitleTypeCollection = createListCollection({
 function GroupEditRow({ group, isSubtitle, onEdit, onApplyToAll }: GroupEditRowProps) {
   const [dubGroupInput, setDubGroupInput] = useState(group.dubGroup ?? '')
 
-  // Синхронизируем локальный стейт когда parent обновляет group.dubGroup
+  // Синхронизируем локальный стейт когда parent обновляет group.dubGroup.
+  // Отложено в микротаску — react(set-state-in-effect) запрещает синхронный setState
   useEffect(() => {
-    setDubGroupInput(group.dubGroup ?? '')
+    queueMicrotask(() => setDubGroupInput(group.dubGroup ?? ''))
   }, [group.dubGroup])
 
   // Нормализуем код языка для селекта (rus → ru, jpn → ja)

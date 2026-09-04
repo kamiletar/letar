@@ -20,19 +20,27 @@ interface UseFullscreenOptions {
 export function useFullscreen(options: UseFullscreenOptions = {}) {
   const { element, lockOrientation = true, onFullscreenChange } = options
 
-  const [isFullscreen, setIsFullscreen] = useState(false)
-  const [isSupported, setIsSupported] = useState(false)
-
-  // Проверка поддержки
-  useEffect(() => {
-    setIsSupported(
+  // Поддержка и начальное состояние вычисляются сразу из доступных на момент рендера данных —
+  // без эффекта, чтобы не тратить лишний рендер на то, что известно уже при инициализации
+  const [isFullscreen, setIsFullscreen] = useState(() => !!document.fullscreenElement)
+  const [isSupported] = useState(
+    () =>
       typeof document.fullscreenEnabled !== 'undefined'
-        || typeof (document as unknown as { webkitFullscreenEnabled?: boolean }).webkitFullscreenEnabled
-          !== 'undefined',
-    )
+      || typeof (document as unknown as { webkitFullscreenEnabled?: boolean }).webkitFullscreenEnabled
+        !== 'undefined',
+  )
 
-    // Начальное состояние
-    setIsFullscreen(!!document.fullscreenElement)
+  // Попытка заблокировать ориентацию — объявлена до эффекта, который её использует,
+  // чтобы не читать переменную во время её собственной инициализации
+  const tryLockOrientation = useCallback(async () => {
+    try {
+      if (screen.orientation && 'lock' in screen.orientation) {
+        await screen.orientation.lock('landscape')
+      }
+    } catch {
+      // Игнорируем — не все браузеры поддерживают
+      // Ориентация не поддерживается — игнорируем
+    }
   }, [])
 
   // Слушаем изменения fullscreen
@@ -55,19 +63,7 @@ export function useFullscreen(options: UseFullscreenOptions = {}) {
       document.removeEventListener('fullscreenchange', handleFullscreenChange)
       document.removeEventListener('webkitfullscreenchange', handleFullscreenChange)
     }
-  }, [lockOrientation, onFullscreenChange])
-
-  // Попытка заблокировать ориентацию
-  const tryLockOrientation = useCallback(async () => {
-    try {
-      if (screen.orientation && 'lock' in screen.orientation) {
-        await screen.orientation.lock('landscape')
-      }
-    } catch {
-      // Игнорируем — не все браузеры поддерживают
-      // Ориентация не поддерживается — игнорируем
-    }
-  }, [])
+  }, [lockOrientation, onFullscreenChange, tryLockOrientation])
 
   // Попытка разблокировать ориентацию
   const tryUnlockOrientation = useCallback(() => {
@@ -93,7 +89,7 @@ export function useFullscreen(options: UseFullscreenOptions = {}) {
     } catch {
       // Игнорируем — fullscreen может быть недоступен
     }
-  }, [element])
+  }, [element?.current])
 
   // Выйти из fullscreen
   const exitFullscreen = useCallback(async () => {

@@ -289,9 +289,12 @@ export function AnimeMetadataSection({ animeId, shikimoriId }: AnimeMetadataSect
     }
   }, [animeId, data])
 
-  // Загрузить данные при первом рендере
+  // Загрузить данные при первом рендере. Отложено в микротаску — fetchMetadata
+  // синхронно вызывает setState до первого await (react(set-state-in-effect))
   useEffect(() => {
-    fetchMetadata()
+    queueMicrotask(() => {
+      void fetchMetadata()
+    })
   }, [fetchMetadata])
 
   // Загрузить локальные dubGroups для сопоставления с Shikimori

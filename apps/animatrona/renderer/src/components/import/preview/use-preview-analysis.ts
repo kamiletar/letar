@@ -587,10 +587,13 @@ export function usePreviewAnalysis(options: UsePreviewAnalysisOptions) {
     })
   }, [])
 
-  // Запускаем анализ при монтировании
+  // Запускаем анализ при монтировании. Отложено в микротаску — startAnalysis
+  // синхронно вызывает setState до первого await (react(set-state-in-effect))
   useEffect(() => {
     if (selectedFiles.length > 0 && analyses.length === 0) {
-      startAnalysis()
+      queueMicrotask(() => {
+        void startAnalysis()
+      })
     }
   }, [selectedFiles.length, analyses.length, startAnalysis])
 

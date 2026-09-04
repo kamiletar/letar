@@ -46,17 +46,20 @@ export function CommandPalette({ open, onOpenChange, onShowShortcuts, onImport }
     return result
   }, [groupedCommands])
 
-  // Сброс состояния при открытии/закрытии
+  // Сброс состояния при открытии/закрытии. Отложено в микротаску —
+  // react(set-state-in-effect) запрещает синхронный вызов нескольких setState
   useEffect(() => {
     if (open) {
-      setQuery('')
-      setSelectedIndex(0)
+      queueMicrotask(() => {
+        setQuery('')
+        setSelectedIndex(0)
+      })
     }
   }, [open])
 
   // Сброс индекса при изменении результатов
   useEffect(() => {
-    setSelectedIndex(0)
+    queueMicrotask(() => setSelectedIndex(0))
   }, [filteredCommands.length])
 
   // Выполнение команды

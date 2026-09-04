@@ -427,7 +427,7 @@ async function processAudio(
           error: errorMsg,
           stage: 'transcode',
           sourcePath,
-        }) // eslint-disable-next-line @typescript-eslint/no-empty-function
+        })
           .catch(() => {})
         return
       }
@@ -445,7 +445,7 @@ async function processAudio(
           error: errorMsg,
           stage: 'transcode',
           sourcePath,
-        }) // eslint-disable-next-line @typescript-eslint/no-empty-function
+        })
           .catch(() => {})
         return
       }

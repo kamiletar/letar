@@ -16,14 +16,10 @@ export function useWakeLock(options: UseWakeLockOptions = {}) {
   const { enabled = true } = options
 
   const [isActive, setIsActive] = useState(false)
-  const [isSupported, setIsSupported] = useState(false)
+  // Поддержка известна сразу при инициализации — не нужен отдельный эффект
+  const [isSupported] = useState(() => 'wakeLock' in navigator)
 
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
-
-  // Проверка поддержки
-  useEffect(() => {
-    setIsSupported('wakeLock' in navigator)
-  }, [])
 
   // Запросить wake lock
   const requestWakeLock = useCallback(async () => {

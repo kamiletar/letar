@@ -317,7 +317,7 @@ class RutrackerDownloadOrchestrator {
       episodesAired: shikimoriData.episodesAired ?? 0,
       airedOn: shikimoriData.airedOn
         ? [shikimoriData.airedOn.year, shikimoriData.airedOn.month, shikimoriData.airedOn.day]
-          .filter((v) => v != null)
+          .filter((v) => v !== null && v !== undefined)
           .join('-')
         : null,
       score: shikimoriData.score ?? null,

@@ -47,12 +47,15 @@ export function EpisodeNameEditor({ open, onOpenChange, episodes, animeId, onSav
   // Эпизоды отсортированные по номеру
   const sortedEpisodes = useMemo(() => [...episodes].sort((a, b) => a.number - b.number), [episodes])
 
-  // Инициализация текста при открытии
+  // Инициализация текста при открытии. Отложено в микротаску —
+  // react(set-state-in-effect) запрещает синхронный вызов нескольких setState
   useEffect(() => {
     if (open) {
       const lines = sortedEpisodes.map((ep) => ep.name || '')
-      setText(lines.join('\n'))
-      setSavedCount(0)
+      queueMicrotask(() => {
+        setText(lines.join('\n'))
+        setSavedCount(0)
+      })
     }
   }, [open, sortedEpisodes])
 

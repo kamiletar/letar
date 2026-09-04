@@ -52,7 +52,8 @@ export function UpdateDrawer() {
   // Загрузить changelog при открытии drawer
   useEffect(() => {
     if (open && status.updateInfo && !changelog && window.electronAPI?.updater) {
-      setIsLoadingChangelog(true)
+      // Отложено в микротаску — react(set-state-in-effect) запрещает синхронный setState
+      queueMicrotask(() => setIsLoadingChangelog(true))
       window.electronAPI.updater
         .getChangelog(status.updateInfo.version)
         .then((result) => {

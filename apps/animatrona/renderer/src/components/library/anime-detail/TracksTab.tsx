@@ -315,7 +315,7 @@ export function TracksTab({ audioTracks, subtitleTracks }: TracksTabProps) {
         }
       })
     },
-    [queryClient],
+    [queryClient, setDeleteTarget],
   )
 
   if (trackGroups.length === 0) {
@@ -573,7 +573,8 @@ function TrackGroupRow({
               {group.trackIds.length === 1 ? 'дорожка' : 'дорожек'}
               {group.codec && ` • ${group.codec.toUpperCase()}`}
               {group.channels && ` ${group.channels}`}
-              {group.bitrate != null && group.bitrate > 0 && ` • ${formatBitrate(group.bitrate)}`}
+              {group.bitrate !== null && group.bitrate !== undefined && group.bitrate > 0
+                && ` • ${formatBitrate(group.bitrate)}`}
               {group.totalSize > 0 && ` • ${formatBytes(group.totalSize)}`}
             </Text>
           </VStack>

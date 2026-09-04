@@ -82,10 +82,11 @@ export function PublishingSection({
     }>
   >([])
 
-  // Синхронизация с config когда он загружается
+  // Синхронизация с config когда он загружается. setState отложен в микротаску —
+  // react(set-state-in-effect) запрещает синхронный вызов setState в теле эффекта
   useEffect(() => {
     if (publisher.config?.libraryName && !libraryName) {
-      setLibraryName(publisher.config.libraryName)
+      queueMicrotask(() => setLibraryName(publisher.config!.libraryName!))
     }
   }, [publisher.config?.libraryName, libraryName])
 

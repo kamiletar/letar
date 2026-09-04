@@ -9,7 +9,7 @@
  */
 
 import { Box, Button } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
 import { LuSkipForward } from 'react-icons/lu'
 
 /** Тип главы для плеера (UPPERCASE) */
@@ -65,13 +65,11 @@ export function ChapterMarkers({
   onSeek,
   showSkipButton = true,
 }: ChapterMarkersProps) {
-  const [activeSkipChapter, setActiveSkipChapter] = useState<Chapter | null>(null)
-
-  // Определяем, находимся ли мы в пропускаемой главе
-  useEffect(() => {
+  // Определяем, находимся ли мы в пропускаемой главе — чистое производное значение
+  // от props, вычисляется в рендере через useMemo, без setState в эффекте
+  const activeSkipChapter = useMemo<Chapter | null>(() => {
     if (!showSkipButton || chapters.length === 0) {
-      setActiveSkipChapter(null)
-      return
+      return null
     }
 
     // Находим текущую главу
@@ -83,7 +81,7 @@ export function ChapterMarkers({
         && currentTime < chapter.endTime - 3, // Не показываем если осталось меньше 3 сек
     )
 
-    setActiveSkipChapter(currentChapter || null)
+    return currentChapter || null
   }, [chapters, currentTime, showSkipButton])
 
   /**

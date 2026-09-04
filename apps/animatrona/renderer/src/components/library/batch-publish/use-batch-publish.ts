@@ -82,7 +82,7 @@ export function useBatchPublish(animes: BatchAnimeItem[]) {
   const cleanupRef = useRef<(() => void) | null>(null)
 
   // Аниме с directoryCid (можно опубликовать)
-  const publishableAnimes = animes.filter((a) => a.directoryCid != null)
+  const publishableAnimes = animes.filter((a) => a.directoryCid !== null && a.directoryCid !== undefined)
 
   // Фильтрованный список по watchStatus
   const filteredAnimes = watchStatusFilter === 'ALL'

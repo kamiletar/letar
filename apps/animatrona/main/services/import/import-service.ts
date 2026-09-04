@@ -342,7 +342,10 @@ export class ImportService {
 
           // Сохраняем результаты как главы
           for (const result of introResults) {
-            if (result.introStartMs != null || result.outroStartMs != null) {
+            if (
+              (result.introStartMs !== null && result.introStartMs !== undefined)
+              || (result.outroStartMs !== null && result.outroStartMs !== undefined)
+            ) {
               const chapters: Array<{
                 startMs: number
                 endMs: number
@@ -350,7 +353,12 @@ export class ImportService {
                 type: string
                 skippable: boolean
               }> = []
-              if (result.introStartMs != null && result.introEndMs != null) {
+              if (
+                result.introStartMs !== null
+                && result.introStartMs !== undefined
+                && result.introEndMs !== null
+                && result.introEndMs !== undefined
+              ) {
                 chapters.push({
                   startMs: result.introStartMs,
                   endMs: result.introEndMs,
@@ -359,7 +367,12 @@ export class ImportService {
                   skippable: true,
                 })
               }
-              if (result.outroStartMs != null && result.outroEndMs != null) {
+              if (
+                result.outroStartMs !== null
+                && result.outroStartMs !== undefined
+                && result.outroEndMs !== null
+                && result.outroEndMs !== undefined
+              ) {
                 chapters.push({
                   startMs: result.outroStartMs,
                   endMs: result.outroEndMs,

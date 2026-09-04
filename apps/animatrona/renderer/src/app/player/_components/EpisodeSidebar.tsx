@@ -398,9 +398,7 @@ export const EpisodeSidebar = memo(function EpisodeSidebar({
                   Бонусы ({bonusVideos.length})
                 </Text>
                 <Collapsible.Context>
-                  {({ open }) => {
-                    open ? <LuChevronDown size={16} /> : <LuChevronRight size={16} />
-                  }}
+                  {({ open }) => open ? <LuChevronDown size={16} /> : <LuChevronRight size={16} />}
                 </Collapsible.Context>
               </Box>
             </Collapsible.Trigger>

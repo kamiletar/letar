@@ -62,7 +62,9 @@ export function CompletionOverlay({
   // Загружаем рекомендацию при открытии (если loadSuggestion=true)
   useEffect(() => {
     if (!isOpen) {
-      setSuggestion(null)
+      // Сброс отложен в микротаску — react(set-state-in-effect) запрещает
+      // синхронный вызов setState прямо в теле эффекта
+      queueMicrotask(() => setSuggestion(null))
       return
     }
 

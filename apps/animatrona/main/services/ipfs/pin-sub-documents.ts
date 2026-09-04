@@ -29,7 +29,9 @@ export async function pinSubDocuments(cids: Array<[label: string, cid: string | 
     return
   }
 
-  const toPin = cids.filter((pair): pair is [string, string] => pair[1] != null)
+  const toPin = cids.filter(
+    (pair): pair is [string, string] => pair[1] !== null && pair[1] !== undefined,
+  )
   if (toPin.length === 0) {
     return
   }

@@ -42,7 +42,8 @@ export function QBittorrentSettingsCard() {
   const [testResult, setTestResult] = useState<TestResult>({ status: 'idle' })
   const [showInstructions, setShowInstructions] = useState(false)
 
-  // Загружаем значения из БД
+  // Загружаем значения из БД. setState отложен в микротаску — react(set-state-in-effect)
+  // запрещает синхронный вызов нескольких setState прямо в теле эффекта
   useEffect(() => {
     if (!settings) {
       return
@@ -52,9 +53,11 @@ export function QBittorrentSettingsCard() {
       qbittorrentUsername?: string | null
       qbittorrentPassword?: string | null
     }
-    setUrl(s.qbittorrentUrl ?? DEFAULT_QB_URL)
-    setUsername(s.qbittorrentUsername ?? DEFAULT_QB_USERNAME)
-    setPassword(s.qbittorrentPassword ?? '')
+    queueMicrotask(() => {
+      setUrl(s.qbittorrentUrl ?? DEFAULT_QB_URL)
+      setUsername(s.qbittorrentUsername ?? DEFAULT_QB_USERNAME)
+      setPassword(s.qbittorrentPassword ?? '')
+    })
   }, [settings])
 
   // Сохранить настройки в БД

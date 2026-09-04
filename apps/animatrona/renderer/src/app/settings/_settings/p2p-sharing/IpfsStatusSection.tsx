@@ -51,8 +51,12 @@ export function IpfsStatusSection({ ipfs, onStart, onStop }: IpfsStatusSectionPr
   useEffect(() => {
     if (!ipfs.status?.isRunning) {
       prevBytesRef.current = null
-      setSpeeds({ inSpeed: 0, outSpeed: 0 })
-      setDiagnostics(null)
+      // Отложено в микротаску — react(set-state-in-effect) запрещает синхронный
+      // вызов нескольких setState прямо в теле эффекта
+      queueMicrotask(() => {
+        setSpeeds({ inSpeed: 0, outSpeed: 0 })
+        setDiagnostics(null)
+      })
       return
     }
 
@@ -131,7 +135,11 @@ export function IpfsStatusSection({ ipfs, onStart, onStop }: IpfsStatusSectionPr
       return
     }
 
-    loadDiagnostics()
+    // Отложено в микротаску — loadDiagnostics синхронно вызывает
+    // setIsLoadingDiagnostics(true) до первого await
+    queueMicrotask(() => {
+      void loadDiagnostics()
+    })
     const interval = setInterval(loadDiagnostics, 5000)
     return () => clearInterval(interval)
   }, [showDiagnostics, isRunning, loadDiagnostics])

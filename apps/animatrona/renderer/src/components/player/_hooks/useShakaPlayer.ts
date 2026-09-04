@@ -13,7 +13,7 @@
  * - Возвращаем isVideoReady state для сигнализации готовности
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import type { MutableRefObject, RefObject } from 'react'
 import type Shaka from 'shaka-player'
@@ -74,11 +74,16 @@ export function useShakaPlayer(options: UseShakaPlayerOptions): UseShakaPlayerRe
 
   // Стабильные рефы для коллбэков — НЕ должны перезапускать плеер при изменении
   const onErrorRef = useRef(onError)
-  onErrorRef.current = onError
   const onDurationChangeRef = useRef(onDurationChange)
-  onDurationChangeRef.current = onDurationChange
   const onVideoReadyRef = useRef(onVideoReady)
-  onVideoReadyRef.current = onVideoReady
+  // Запись в ref вынесена из тела рендера в useLayoutEffect — правило react(refs)
+  // запрещает мутировать ref.current синхронно во время рендера, useLayoutEffect
+  // выполняется сразу после коммита, до основного эффекта ниже
+  useLayoutEffect(() => {
+    onErrorRef.current = onError
+    onDurationChangeRef.current = onDurationChange
+    onVideoReadyRef.current = onVideoReady
+  })
 
   // State
   const [isVideoReady, setIsVideoReady] = useState(false)

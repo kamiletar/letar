@@ -16,14 +16,10 @@ export function usePiP(options: UsePiPOptions) {
   const { videoRef } = options
 
   const [isPiPActive, setIsPiPActive] = useState(false)
-  const [isSupported, setIsSupported] = useState(false)
-
-  // Проверка поддержки
-  useEffect(() => {
-    setIsSupported(
-      typeof document !== 'undefined' && 'pictureInPictureEnabled' in document && document.pictureInPictureEnabled,
-    )
-  }, [])
+  // Поддержка известна сразу при инициализации — не нужен отдельный эффект
+  const [isSupported] = useState(
+    () => typeof document !== 'undefined' && 'pictureInPictureEnabled' in document && document.pictureInPictureEnabled,
+  )
 
   // Слушаем события PiP
   useEffect(() => {

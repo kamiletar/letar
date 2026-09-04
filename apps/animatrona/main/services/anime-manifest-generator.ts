@@ -466,7 +466,7 @@ export async function generateAnimeManifest(input: GenerateAnimeManifestInput): 
         const relatedData = await getAnimeWithRelated(anime.shikimoriId)
         if (relatedData && relatedData.related.length > 0) {
           const relations: AnimeManifestRelation[] = relatedData.related
-            .filter((r) => r.anime != null)
+            .filter((r) => r.anime !== null && r.anime !== undefined)
             .map((r) => ({
               targetShikimoriId: Number(r.anime!.id),
               relationKind: r.relationKind,

@@ -180,11 +180,11 @@ export class ParallelTranscodeManager extends EventEmitter {
 
     // Устанавливаем лимиты ДО addBatch, иначе processQueue() запустит задачи
     // с дефолтным maxConcurrent (2) и пользовательская настройка не успеет примениться
-    if (concurrency?.videoMaxConcurrent != null) {
+    if (concurrency?.videoMaxConcurrent !== null && concurrency?.videoMaxConcurrent !== undefined) {
       this.videoPool.setMaxConcurrent(concurrency.videoMaxConcurrent)
       log.info('Video max concurrent set before batch', { value: concurrency.videoMaxConcurrent })
     }
-    if (concurrency?.audioMaxConcurrent != null) {
+    if (concurrency?.audioMaxConcurrent !== null && concurrency?.audioMaxConcurrent !== undefined) {
       this.audioPool.setMaxConcurrent(concurrency.audioMaxConcurrent)
       log.info('Audio max concurrent set before batch', { value: concurrency.audioMaxConcurrent })
     }

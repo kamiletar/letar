@@ -150,22 +150,26 @@ export function useExportDialogState({ anime, defaultExportPath, open, onOpenCha
   // Сброс состояния при открытии
   useEffect(() => {
     if (open) {
-      setStep('config')
-      // Выбираем первую аудиодорожку по умолчанию
-      if (audioTracks.length > 0 && selectedAudioKeys.length === 0) {
-        setSelectedAudioKeys([audioTracks[0].key])
-        setDefaultAudioKey(audioTracks[0].key)
-      }
-      // Сбрасываем default subtitle
-      setDefaultSubtitleKey(null)
-      // Выбираем все готовые эпизоды по умолчанию
-      setSelectedEpisodeNumbers(new Set(readyEpisodesList.map((ep) => ep.number)))
-      // Устанавливаем папку экспорта по умолчанию
-      if (defaultExportPath && !outputDir) {
-        setOutputDir(defaultExportPath)
-      }
-      // Устанавливаем паттерн по умолчанию
-      setNamingPattern(defaultPattern)
+      // Отложено в микротаску — react(set-state-in-effect) запрещает синхронный
+      // вызов нескольких setState прямо в теле эффекта
+      queueMicrotask(() => {
+        setStep('config')
+        // Выбираем первую аудиодорожку по умолчанию
+        if (audioTracks.length > 0 && selectedAudioKeys.length === 0) {
+          setSelectedAudioKeys([audioTracks[0].key])
+          setDefaultAudioKey(audioTracks[0].key)
+        }
+        // Сбрасываем default subtitle
+        setDefaultSubtitleKey(null)
+        // Выбираем все готовые эпизоды по умолчанию
+        setSelectedEpisodeNumbers(new Set(readyEpisodesList.map((ep) => ep.number)))
+        // Устанавливаем папку экспорта по умолчанию
+        if (defaultExportPath && !outputDir) {
+          setOutputDir(defaultExportPath)
+        }
+        // Устанавливаем паттерн по умолчанию
+        setNamingPattern(defaultPattern)
+      })
     }
   }, [open, audioTracks, readyEpisodesList, defaultExportPath, defaultPattern])
 

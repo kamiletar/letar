@@ -41,11 +41,12 @@ export function WelcomeDialog({ onOpenImport, onShowShortcuts }: WelcomeDialogPr
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState(0)
 
-  // Проверяем был ли показан Welcome Dialog
+  // Проверяем был ли показан Welcome Dialog. Отложено в микротаску —
+  // react(set-state-in-effect) запрещает синхронный setState в теле эффекта
   useEffect(() => {
     const wasShown = localStorage.getItem(WELCOME_SHOWN_KEY)
     if (!wasShown) {
-      setOpen(true)
+      queueMicrotask(() => setOpen(true))
     }
   }, [])
 

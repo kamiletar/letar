@@ -56,8 +56,11 @@ function saveTorrentSettings(settings: TorrentSettings): void {
 export function TorrentSettingsCard() {
   const [settings, setSettings] = useState<TorrentSettings>(DEFAULT_SETTINGS)
 
+  // Отложено в микротаску — react(set-state-in-effect) запрещает синхронный setState
+  // в теле эффекта (эффект оставлен: чтение localStorage должно происходить только на
+  // клиенте, а не во время Next.js static-export prerender)
   useEffect(() => {
-    setSettings(loadTorrentSettings())
+    queueMicrotask(() => setSettings(loadTorrentSettings()))
   }, [])
 
   const handleSave = useCallback(

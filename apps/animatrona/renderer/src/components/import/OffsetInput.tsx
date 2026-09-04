@@ -52,9 +52,10 @@ export function OffsetInput({
   // Локальное состояние для ввода
   const [inputValue, setInputValue] = useState(value.toString())
 
-  // Синхронизация с внешним значением
+  // Синхронизация с внешним значением. Отложено в микротаску —
+  // react(set-state-in-effect) запрещает синхронный setState в теле эффекта
   useEffect(() => {
-    setInputValue(value.toString())
+    queueMicrotask(() => setInputValue(value.toString()))
   }, [value])
 
   // Обработка ввода

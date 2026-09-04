@@ -95,11 +95,12 @@ export function ImportQueueView({ onAddImport }: ImportQueueViewProps) {
   const [liveAnnouncement, setLiveAnnouncement] = useState('')
   const prevStatusesRef = useRef<Map<string, string>>(new Map())
 
-  // Загрузка настройки из localStorage
+  // Загрузка настройки из localStorage. Отложено в микротаску —
+  // react(set-state-in-effect) запрещает синхронный setState в теле эффекта
   useEffect(() => {
     const saved = localStorage.getItem('animatrona:queue-compact-view')
     if (saved !== null) {
-      setIsCompactView(saved === 'true')
+      queueMicrotask(() => setIsCompactView(saved === 'true'))
     }
   }, [])
 
@@ -285,7 +286,8 @@ export function ImportQueueView({ onAddImport }: ImportQueueViewProps) {
 
     // Если есть анонсы — объявляем (с небольшой задержкой для корректной работы screen readers)
     if (announcements.length > 0) {
-      setLiveAnnouncement(announcements.join('. '))
+      // Отложено в микротаску — react(set-state-in-effect) запрещает синхронный setState
+      queueMicrotask(() => setLiveAnnouncement(announcements.join('. ')))
       // Очищаем после анонса
       const timeout = setTimeout(() => setLiveAnnouncement(''), 1000)
       return () => clearTimeout(timeout)

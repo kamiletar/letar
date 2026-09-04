@@ -101,10 +101,11 @@ function SettingsSection({
 }) {
   const [trackerName, setTrackerName] = useState(settings.data?.trackerName ?? '')
 
-  // Синхронизация с settings когда они загружаются
+  // Синхронизация с settings когда они загружаются. setState отложен в микротаску —
+  // react(set-state-in-effect) запрещает синхронный вызов setState в теле эффекта
   useEffect(() => {
     if (settings.data?.trackerName && !trackerName) {
-      setTrackerName(settings.data.trackerName)
+      queueMicrotask(() => setTrackerName(settings.data!.trackerName))
     }
   }, [settings.data?.trackerName, trackerName])
 

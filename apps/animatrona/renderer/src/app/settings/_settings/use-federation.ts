@@ -135,10 +135,13 @@ export function useFederation() {
     }
   }, [])
 
-  // Загружаем данные при монтировании
+  // Загружаем данные при монтировании. Отложено в микротаску — loadSettings/
+  // loadTrackers синхронно вызывают setState до первого await (react(set-state-in-effect))
   useEffect(() => {
-    void loadSettings()
-    void loadTrackers()
+    queueMicrotask(() => {
+      void loadSettings()
+      void loadTrackers()
+    })
   }, [loadSettings, loadTrackers])
 
   // ============================================================================

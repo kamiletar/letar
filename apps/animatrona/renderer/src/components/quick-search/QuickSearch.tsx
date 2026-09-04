@@ -73,23 +73,26 @@ export function QuickSearch({ open, onOpenChange, onShowShortcuts, onImport }: Q
   // Общее количество элементов для навигации
   const totalItems = displayMode === 'commands' ? flatCommands.length : results.length
 
-  // Сброс индекса при изменении результатов
+  // Сброс индекса при изменении результатов. Отложено в микротаску —
+  // react(set-state-in-effect) запрещает синхронный setState в теле эффекта
   useEffect(() => {
-    setSelectedIndex(0)
+    queueMicrotask(() => setSelectedIndex(0))
   }, [results])
 
   // Сброс при открытии
   useEffect(() => {
     if (open) {
-      setQuery('')
-      setSelectedIndex(0)
+      queueMicrotask(() => {
+        setQuery('')
+        setSelectedIndex(0)
+      })
       setTimeout(() => inputRef.current?.focus(), 50)
     }
   }, [open, setQuery])
 
   // Сброс индекса при смене режима
   useEffect(() => {
-    setSelectedIndex(0)
+    queueMicrotask(() => setSelectedIndex(0))
   }, [displayMode, flatCommands.length, results.length])
 
   // Переход к аниме

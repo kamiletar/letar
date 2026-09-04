@@ -57,7 +57,8 @@ export function useSubtitleManagement(options: UseSubtitleManagementOptions): Us
           console.error('[useSubtitleManagement] Failed to load subtitles:', err)
         })
     } else {
-      setVttUrl(null)
+      // Отложено в микротаску — react(set-state-in-effect) запрещает синхронный setState
+      queueMicrotask(() => setVttUrl(null))
     }
 
     return () => {

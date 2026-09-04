@@ -55,7 +55,7 @@ export async function upsertDiscoverWatchProgress(
         selectedAudioTrackId: data.selectedAudioTrackId,
         selectedSubtitleTrackId: data.selectedSubtitleTrackId,
         // Обновляем метаданные если переданы
-        ...(data.animeName != null ? { animeName: data.animeName } : {}),
+        ...(data.animeName !== null && data.animeName !== undefined ? { animeName: data.animeName } : {}),
         ...(data.posterCid !== undefined ? { posterCid: data.posterCid } : {}),
         ...(data.trackerAnimeId !== undefined ? { trackerAnimeId: data.trackerAnimeId } : {}),
         ...(data.directoryCid !== undefined ? { directoryCid: data.directoryCid } : {}),

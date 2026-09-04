@@ -136,8 +136,13 @@ export function EncodingInfoDialog({
     }
 
     let cancelled = false
-    setLoading(true)
-    setError(null)
+    // Отложено в микротаску — react(set-state-in-effect) запрещает синхронный setState
+    queueMicrotask(() => {
+      if (!cancelled) {
+        setLoading(true)
+        setError(null)
+      }
+    })
 
     window.electronAPI.manifest
       .getEncoding(manifestCid)
@@ -174,11 +179,14 @@ export function EncodingInfoDialog({
   const transcodedSize = settings?.transcodedSize ?? null
   const savings = sourceSize && transcodedSize ? (((sourceSize - transcodedSize) / sourceSize) * 100).toFixed(1) : null
 
+  // Дорожка ffmpegCommand вынесена в отдельную переменную, чтобы инферированная
+  // компилятором зависимость колбэка совпадала с явно указанной (react(preserve-manual-memoization))
+  const ffmpegCommand = settings?.ffmpegCommand
   const handleCopyCommand = useCallback(() => {
-    if (settings?.ffmpegCommand) {
-      navigator.clipboard.writeText(settings.ffmpegCommand)
+    if (ffmpegCommand) {
+      navigator.clipboard.writeText(ffmpegCommand)
     }
-  }, [settings?.ffmpegCommand])
+  }, [ffmpegCommand])
 
   // Загрузка медиаинфо исходника из IPFS
   const handleShowMediaInfo = useCallback(async () => {

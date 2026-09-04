@@ -102,9 +102,12 @@ export function FranchiseTab({
     [shikimoriId, animeName],
   )
 
-  // Загружаем граф и список аниме в библиотеке при монтировании
+  // Загружаем граф и список аниме в библиотеке при монтировании. Отложено в
+  // микротаску — loadGraph синхронно вызывает setIsLoading(true) до первого await
   useEffect(() => {
-    loadGraph()
+    queueMicrotask(() => {
+      void loadGraph()
+    })
 
     // Загружаем маппинг shikimoriId → dbId для выделения на графе и навигации
     getLibraryShikimoriMap().then((items) => {

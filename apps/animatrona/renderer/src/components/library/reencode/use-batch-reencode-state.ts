@@ -45,13 +45,16 @@ export function useBatchReencodeState({ open, onOpenChange }: UseBatchReencodeSt
   // Загружаем предпросмотр при открытии
   useEffect(() => {
     if (!open) {
-      // Сброс при закрытии
-      setStep('preview')
-      setPreview(null)
-      setProgress(null)
-      setResult(null)
-      setError(null)
-      setIsReencoding(false)
+      // Сброс отложен в микротаску — react(set-state-in-effect) запрещает синхронный
+      // вызов нескольких setState прямо в теле эффекта
+      queueMicrotask(() => {
+        setStep('preview')
+        setPreview(null)
+        setProgress(null)
+        setResult(null)
+        setError(null)
+        setIsReencoding(false)
+      })
       unsubRef.current?.()
       unsubRef.current = null
       return

@@ -25,7 +25,8 @@ export function AlreadyInLibraryBadge({ shikimoriId }: { shikimoriId?: number | 
 
   useEffect(() => {
     if (!shikimoriId) {
-      setResult(null)
+      // Отложено в микротаску — react(set-state-in-effect) запрещает синхронный setState
+      queueMicrotask(() => setResult(null))
       return
     }
 

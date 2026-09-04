@@ -179,7 +179,7 @@ export async function scanExternalSubs(
     // scanForExternalSubtitles возвращает { subtitles[] }, группируем в Map по episodeNumber
     const map = new Map<number, ExternalSubtitleMatch[]>()
     for (const sub of result.subtitles) {
-      if (sub.episodeNumber == null) {
+      if (sub.episodeNumber === null || sub.episodeNumber === undefined) {
         continue
       }
       const existing = map.get(sub.episodeNumber) ?? []

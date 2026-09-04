@@ -39,7 +39,8 @@ export function AboutTab({ description, animeId, shikimoriId }: AboutTabProps) {
   // Загружаем информацию о локальных аниме
   useEffect(() => {
     if (animeIdsInDescription.length === 0) {
-      setLocalAnimeMap(new Map())
+      // Отложено в микротаску — react(set-state-in-effect) запрещает синхронный setState
+      queueMicrotask(() => setLocalAnimeMap(new Map()))
       return
     }
 

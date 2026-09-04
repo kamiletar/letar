@@ -59,7 +59,9 @@ async function findCorrectSeasonViaRelated(
   }
 
   // Собираем всех кандидатов из related (sequel, prequel, side_story)
-  const relatedCandidates = withRelated.related.filter((rel) => rel.anime != null).map((rel) => rel.anime!)
+  const relatedCandidates = withRelated.related
+    .filter((rel) => rel.anime !== null && rel.anime !== undefined)
+    .map((rel) => rel.anime!)
 
   if (relatedCandidates.length === 0) {
     return null

@@ -402,7 +402,12 @@ function buildChaptersFromDetection(det: IntroDetectorResult): Array<{
     type: string
     skippable: boolean
   }> = []
-  if (det.introStartMs != null && det.introEndMs != null) {
+  if (
+    det.introStartMs !== null
+    && det.introStartMs !== undefined
+    && det.introEndMs !== null
+    && det.introEndMs !== undefined
+  ) {
     chapters.push({
       startMs: det.introStartMs,
       endMs: det.introEndMs,
@@ -411,7 +416,12 @@ function buildChaptersFromDetection(det: IntroDetectorResult): Array<{
       skippable: true,
     })
   }
-  if (det.outroStartMs != null && det.outroEndMs != null) {
+  if (
+    det.outroStartMs !== null
+    && det.outroStartMs !== undefined
+    && det.outroEndMs !== null
+    && det.outroEndMs !== undefined
+  ) {
     chapters.push({
       startMs: det.outroStartMs,
       endMs: det.outroEndMs,

@@ -112,7 +112,7 @@ export function ReencodeProgressStep({ state }: { state: UseReencodeDialogStateR
                         <Badge colorPalette="green">
                           <LuCheck />
                         </Badge>
-                        {track.savedBytes != null && track.savedBytes > 0 && (
+                        {track.savedBytes !== null && track.savedBytes !== undefined && track.savedBytes > 0 && (
                           <Text fontSize="xs" color="green.400">
                             -{formatBytes(track.savedBytes)}
                           </Text>

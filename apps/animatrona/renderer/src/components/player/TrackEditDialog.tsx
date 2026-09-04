@@ -65,11 +65,15 @@ export function TrackEditDialog({
   const [title, setTitle] = useState(currentTitle || '')
   const [isDeleting, setIsDeleting] = useState(false)
 
-  // Синхронизация title при открытии
+  // Синхронизация title при открытии. setState отложен в микротаску —
+  // react(set-state-in-effect) запрещает синхронный вызов нескольких setState
+  // прямо в теле эффекта
   useEffect(() => {
     if (isOpen) {
-      setTitle(currentTitle || '')
-      setIsDeleting(false)
+      queueMicrotask(() => {
+        setTitle(currentTitle || '')
+        setIsDeleting(false)
+      })
     }
   }, [isOpen, currentTitle])
 

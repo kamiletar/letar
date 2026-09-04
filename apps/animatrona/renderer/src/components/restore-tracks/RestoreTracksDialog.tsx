@@ -524,7 +524,8 @@ function TaskItem({ task }: { task: RestoreTaskDetail }) {
           {task.fileName}
         </Text>
         {/* Индикатор stale: нет обновлений прогресса > 60с */}
-        {isActive && task.lastProgressMs != null && task.lastProgressMs > 60_000 && (
+        {isActive && task.lastProgressMs !== null && task.lastProgressMs !== undefined
+          && task.lastProgressMs > 60_000 && (
           <Badge size="sm" colorPalette="orange" variant="subtle">
             ⏱ {Math.round(task.lastProgressMs / 1000)}с
           </Badge>

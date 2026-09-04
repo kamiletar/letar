@@ -50,7 +50,7 @@ export function AnimeDetailTabs({
   children,
 }: AnimeDetailTabsProps) {
   // Контролируемый режим (value + onValueChange) или неконтролируемый (defaultValue)
-  const tabsProps = value != null
+  const tabsProps = value !== null && value !== undefined
     ? { value, onValueChange: (details: { value: string }) => onValueChange?.(details.value) }
     : { defaultValue: 'episodes' as const }
 

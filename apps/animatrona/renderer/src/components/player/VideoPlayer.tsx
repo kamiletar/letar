@@ -14,7 +14,16 @@
  */
 
 import { Box, IconButton } from '@chakra-ui/react'
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { LuChevronLeft, LuChevronRight, LuPictureInPicture } from 'react-icons/lu'
 
 import { useGlobalVideoStore } from '@/components/global-video'
@@ -88,9 +97,13 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
   const onTimeUpdateRef = useRef(onTimeUpdate)
   const onEndedRef = useRef(onEnded)
   const onPlayStateChangeRef = useRef(onPlayStateChange)
-  onTimeUpdateRef.current = onTimeUpdate
-  onEndedRef.current = onEnded
-  onPlayStateChangeRef.current = onPlayStateChange
+  // Запись в ref вынесена из тела рендера в useLayoutEffect — правило react(refs)
+  // запрещает мутировать ref.current синхронно во время рендера
+  useLayoutEffect(() => {
+    onTimeUpdateRef.current = onTimeUpdate
+    onEndedRef.current = onEnded
+    onPlayStateChangeRef.current = onPlayStateChange
+  })
 
   // Состояние для оверлея информации о видео
   const [showVideoInfo, setShowVideoInfo] = useState(false)
@@ -130,7 +143,10 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
   // autoPlay через ref — используется в обработчике `loadeddata`, который навешивается один раз
   // на весь жизненный цикл video-элемента (см. эффект ниже), а не пересоздаётся на каждый рендер
   const autoPlayRef = useRef(autoPlay)
-  autoPlayRef.current = autoPlay
+  // Запись в ref вынесена из тела рендера в useLayoutEffect — правило react(refs)
+  useLayoutEffect(() => {
+    autoPlayRef.current = autoPlay
+  })
 
   // Перемещаем persistent video element в контейнер VideoPlayer
   useEffect(() => {
@@ -148,15 +164,20 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
 
     // Видео уже загружено (Shaka Player в Provider) — сразу готово. `loadeddata` в этом случае
     // уже отгремел до маунта компонента и повторно не сработает — автоплей проверяем и здесь.
+    // setState вынесен в микротаску, чтобы не вызывать его синхронно в теле эффекта
+    // (react(set-state-in-effect)) — по сути та же асинхронная семантика, что и у
+    // обработчика `loadeddata` в соседнем эффекте.
     if (video.readyState > 0) {
-      setIsVideoReady(true)
-      setIsLoading(false)
-      setDuration(video.duration)
-      if (autoPlayRef.current && video.paused) {
-        video.play().catch(() => {
-          /* ignore */
-        })
-      }
+      queueMicrotask(() => {
+        setIsVideoReady(true)
+        setIsLoading(false)
+        setDuration(video.duration)
+        if (autoPlayRef.current && video.paused) {
+          video.play().catch(() => {
+            /* ignore */
+          })
+        }
+      })
     }
 
     return () => {

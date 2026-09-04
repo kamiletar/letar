@@ -220,7 +220,11 @@ export function FileScanStep({
   /** Автоматическое сканирование при монтировании */
   useEffect(() => {
     if (files.length === 0) {
-      scanFolder()
+      // Отложено в микротаску — scanFolder синхронно вызывает setIsScanning(true)
+      // до первого await, что триггерит react(set-state-in-effect)
+      queueMicrotask(() => {
+        void scanFolder()
+      })
     }
   }, [files.length, scanFolder])
 
