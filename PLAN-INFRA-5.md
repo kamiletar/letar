@@ -1616,6 +1616,13 @@ peer-диапазон в `libs/query-provider/package.json` на будущее)
   флага (замена`useState`+`useEffect`под`react/set-state-in-effect`) триггерил`@typescript-eslint/no-empty-function`в ~10 файлах — правило разрешено для стрелочных функций
   глобально в корневом`eslint.config.mjs`. Запись про временный откат в`scripts/intentional-pins.json`удалена, заведена новая —`oxlint` держится на точной версии
   постоянно (не диапазоном), чтобы набор находок линтера был одинаковым у всех агентов и в CI.
+  - ✅ **Побочный эффект устранён отдельной сессией (2026-09-04):** 10 независимых копий идиомы
+    `useSyncExternalStore(() => () => {}, ...)` (driving-school, pravda, label-printer-desktop,
+    libs/chakra-provider, dashboard, libs/ui) сведены к одному хуку `useIsHydrated()` в
+    `@letar/hooks` (`libs/hooks/src/lib/browser/use-is-hydrated.ts`). Побочно вскрылась и
+    починена регрессия typecheck: барабан-реэкспорт `@letar/hooks` затягивает в программу
+    компиляции `chakra-provider` файлы с `window`/`localStorage`, которых там раньше не было —
+    `chakra-provider/tsconfig.lib.json` не имел `"dom"` в `lib`, добавлено.
 - **`jsdom` 29.1.1→30.0.1`— ОТКАЧЕН, найдена настоящая регрессия.** Под jsdom 30 тест`apps/studio/src/app/api/webhooks/tochka/route.test.ts`стабильно (не флаки) валился 11/14 —`Request.text()`вёл себя иначе внутри jsdom-окружения vitest, обработчик уходил в catch и
   возвращал`{ok: false}`. Откачен на`^29.1.1`.
   - ⚠️ **Уточнение при повторной проверке (в этой же сессии, после компакции):** после отката

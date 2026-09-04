@@ -71,7 +71,11 @@ projects --with-target` этого не ловит ·
   [shared-get-client-ip-consolidation](/.claude/docs/shared-get-client-ip-consolidation.md)
   консолидация дубля «последний хоп x-forwarded-for» (aboi + `@letar/demo-protection`) в
   `getClientIpFromHeaders`; третья копия в driving-school (`api-logger.ts`) осознанно оставлена
-  отдельной — другой контракт возврата и доп. заголовок `cf-connecting-ip`
+  отдельной — другой контракт возврата и доп. заголовок `cf-connecting-ip` ·
+  [lib-consumer-missing-lib-dom](/.claude/docs/lib-consumer-missing-lib-dom.md) ⚠️ барабанный
+  реэкспорт библиотеки (`@letar/hooks`) затягивает в `tsc --build` потребителя чужие файлы с
+  `window`/`StorageEvent` — падает не на своих исходниках, а на файле, который потребитель
+  вообще не импортирует напрямую; фикс — `"dom"` в `lib` потребителя, не в библиотеке-источнике
 
 **MCP-серверы:** [mcp-servers](/.claude/docs/mcp-servers.md) состав и назначение ·
 [mcp-server-pattern](/.claude/docs/mcp-server-pattern.md) тонкий локальный сервер по stdio ·
