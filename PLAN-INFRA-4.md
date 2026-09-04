@@ -869,6 +869,15 @@ SaaS-Sentry отпадает отдельно: тело ошибки тащит 
      `GLITCHTIP_RELEASE` в `docker-compose.production.yml` (`a1215f33`); ⚠️ приложение
      деплоится self-deploy по SSH, не через `deploy-affected.sh` — источник `GLITCHTIP_RELEASE`
      при таком деплое ещё не проверен/не заведён;
+     ✅ **источник заведён (repo-dev, 2026-09-04, `3ac94223`).** Уточнение по факту: и
+     `dashboard`, и `dashboard-agent` деплоятся не по SSH отдельным путём, а тем же
+     `deploy-affected.sh` — только с веткой self-deploy (`app = dashboard | dashboard-agent`,
+     строка ~1261): detached `RESTART_SCRIPT` через `sudo -n systemd-run`, переживающий
+     уничтожение cgroup собственного контейнера. Этот heredoc-скрипт — отдельный процесс, не
+     наследующий `export` родительского bash, поэтому `GLITCHTIP_RELEASE`, экспортируемый для
+     обычных Next.js-приложений (строка ~1113), до него не долетал. Фикс — `export
+     GLITCHTIP_RELEASE="${GIT_SHORT_SHA}"` прямо внутри heredoc (переменная уже вычислена
+     выше по скрипту и раскрывается при записи файла, т.к. `RESTART_EOF` без кавычек);
    - 6 приватных submodule (`aboi`, `aprel8008`, `domwellbes`, `driving-school`, `dsperevod`,
      `svoichuzhie`) — закоммичено внутри каждого submodule и **запушено на их origin** с
      одобрения владельца, SHA обновлён в `letar` (`da3a13c0`…`abfb0572`);
