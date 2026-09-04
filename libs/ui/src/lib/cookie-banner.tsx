@@ -2,7 +2,7 @@
 
 import { Box, Button, Checkbox, Container, HStack, Stack, Text } from '@chakra-ui/react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { type CookieConsentState, createConsentConfig } from './consent-types'
 import { usePublishedHeight } from './use-published-height'
 
@@ -61,6 +61,10 @@ export function CookieBanner({
   const [expanded, setExpanded] = useState(false)
   const [analytics, setAnalytics] = useState(false)
   const [marketing, setMarketing] = useState(false)
+  // Разворачивание панели размонтирует кнопку «Настроить» — без переноса фокуса он падает
+  // на <body>, и клавиатурный/скринридер-пользователь теряет место в UI (первый настоящий
+  // интерактивный чекбокс — «Аналитика», «Необходимые» перед ним disabled и нефокусируем).
+  const analyticsInputRef = useRef<HTMLInputElement>(null)
   // Публикует свою высоту в CSS-переменную, пока видим — StickyActionBar (тот же bottom:0)
   // читает её, чтобы приподняться над баннером, а не спрятаться под ним по pointer-events.
   const rootRef = usePublishedHeight(BANNER_HEIGHT_VAR, shown)
@@ -96,6 +100,12 @@ export function CookieBanner({
     window.addEventListener(config.openSettingsEvent, handleOpen)
     return () => window.removeEventListener(config.openSettingsEvent, handleOpen)
   }, [config.storageKey, config.openSettingsEvent, policyVersion])
+
+  useEffect(() => {
+    if (expanded) {
+      analyticsInputRef.current?.focus()
+    }
+  }, [expanded])
 
   function persist(state: CookieConsentState) {
     window.localStorage.setItem(config.storageKey, JSON.stringify(state))
@@ -199,7 +209,7 @@ export function CookieBanner({
                 minH={{ base: '2.75rem', md: 'auto' }}
                 alignItems="center"
               >
-                <Checkbox.HiddenInput />
+                <Checkbox.HiddenInput ref={analyticsInputRef} />
                 <Checkbox.Control />
                 <Checkbox.Label>
                   <Text as="span" fontSize="xs">

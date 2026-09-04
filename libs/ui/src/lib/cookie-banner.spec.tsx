@@ -76,6 +76,19 @@ describe('CookieBanner', () => {
     expect(necessaryCheckbox).toBeDisabled()
   })
 
+  it('«Настроить» переносит фокус на чекбокс «Аналитика», а не оставляет его на body', async () => {
+    // Кнопка «Настроить» размонтируется при разворачивании панели — без явного переноса
+    // фокус падает на <body>, и клавиатурный/скринридер-пользователь теряет место в UI.
+    const user = userEvent.setup()
+    renderWithProvider(
+      <CookieBanner appKey="test-app" analyticsLabel="Аналитика" marketingLabel="Маркетинг" />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Настроить' }))
+
+    expect(screen.getByRole('checkbox', { name: 'Аналитика' })).toHaveFocus()
+  })
+
   it('«Принять все» сохраняет analytics и marketing = true, скрывает баннер, шлёт POST', async () => {
     const user = userEvent.setup()
     const { storageKey, consentChangeEvent } = createConsentConfig('test-app', 'v1')
