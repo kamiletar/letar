@@ -1,0 +1,26 @@
+# Docker Compose для локальной разработки
+# Запуск: docker compose -f docker-compose.dev.yml up -d
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: form-develop-app-postgres-dev
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Moscow
+      POSTGRES_USER: form_develop_user
+      POSTGRES_PASSWORD: devpassword
+      POSTGRES_DB: form_develop
+    volumes:
+      - form_develop_app_postgres_dev:/var/lib/postgresql/data
+    ports:
+      - '5451:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U form_develop_user -d form_develop']
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  form_develop_app_postgres_dev:
+    driver: local
