@@ -1372,6 +1372,15 @@ npx zen studio --introspect
 - Также добавь `"cache": false` ко всем db таргетам, которые изменяют базу данных (`db:push`, `db:migrate`, `db:seed`, `db:reset` и их варианты)
 - Кэширование для генерации в локальной среде не критично, т.к. генерация работает достаточно быстро (~200ms)
 
+**Статус тиража (2026-09-05): закрыто на всех приложениях монорепо с БД.** Паттерн растиражирован
+с эталона `apps/driving-school/project.json` на все реально присутствующие db*/zenstack:generate
+таргеты в `animatrona-tracker`, `aboi`, `dsperevod`, `studio`, `svoichuzhie`, `domwellbes`,
+`archetest`, `auth-hub`, `dashboard`, `form-example`, `grandslamcup`, `kami`, `mandala`, `time`.
+Верифицировано двойным прогоном `nx zenstack:generate <app>` без `--skip-nx-cache` — второй прогон
+везде реально выполнял генерацию, кэш-хиты были только на посторонней зависимости
+`@letar/zenstack-form-plugin:build`. Новое приложение с БД — сразу копировать `cache: false` из
+`driving-school`, отдельно проверять и находить это уже не нужно.
+
 ## ⚠️ ZenStack v3 ORM — Особенности типизации
 
 **ZenStack v3** использует новый ORM на базе Kysely вместо Prisma Client. Это требует специальных паттернов при работе с типами.
