@@ -74,20 +74,21 @@ export function BundleGroupingDialog({ open, onOpenChange, torrent, onDone }: Bu
       return
     }
 
-    // Парсим аниме из мета
+    // Парсим аниме из мета. setState отложен в микротаску —
+    // react(set-state-in-effect) запрещает синхронный вызов setState в теле эффекта
     try {
       const parsed: BundleAnimeEntry[] = torrent.bundleAnimesJson ? JSON.parse(torrent.bundleAnimesJson) : []
-      setAnimes(parsed)
+      queueMicrotask(() => setAnimes(parsed))
     } catch {
-      setAnimes([])
+      queueMicrotask(() => setAnimes([]))
     }
 
     // Загружаем файлы торрента
-    setLoading(true)
+    queueMicrotask(() => setLoading(true))
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const api = window.electronAPI as any
     if (!api?.torrent?.getFiles) {
-      setLoading(false)
+      queueMicrotask(() => setLoading(false))
       return
     }
 

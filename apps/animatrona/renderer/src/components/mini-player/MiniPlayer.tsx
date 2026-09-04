@@ -73,7 +73,9 @@ export function MiniPlayer() {
     // Перемещаем video в mini-player контейнер
     container.appendChild(videoElement)
 
-    // Стили для video element в mini-player
+    // Стили для video element в mini-player — DOM-узел управляется императивно
+    // (глобальный <video>, персистентный между страницами), не React-состояние
+    // oxlint-disable-next-line react/immutability -- императивное управление DOM-узлом из глобального стора
     videoElement.style.width = '100%'
     videoElement.style.height = '100%'
     videoElement.style.objectFit = 'contain'
@@ -128,6 +130,7 @@ export function MiniPlayer() {
   const handleSeek = useCallback(
     (time: number) => {
       if (videoElement && isFinite(time)) {
+        // oxlint-disable-next-line react/immutability -- императивное управление DOM-узлом из глобального стора
         videoElement.currentTime = time
       }
     },

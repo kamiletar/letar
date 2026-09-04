@@ -60,14 +60,17 @@ export function useSearch(options: UseSearchOptions = {}): UseSearchResult {
   const [results, setResults] = useState<SearchResult[]>([])
   const [isDebouncing, setIsDebouncing] = useState(false)
 
-  // Debounce запроса
+  // Debounce запроса — синхронизация с внешней системой (таймер)
   useEffect(() => {
     if (!query || query.length < minLength) {
+      // oxlint-disable-next-line react/set-state-in-effect -- сброс при коротком запросе, часть debounce-таймера
       setDebouncedQuery('')
+      // oxlint-disable-next-line react/set-state-in-effect -- сброс при коротком запросе, часть debounce-таймера
       setResults([])
       return
     }
 
+    // oxlint-disable-next-line react/set-state-in-effect -- старт debounce-таймера
     setIsDebouncing(true)
     const timer = setTimeout(() => {
       setDebouncedQuery(query)
@@ -79,14 +82,16 @@ export function useSearch(options: UseSearchOptions = {}): UseSearchResult {
     }
   }, [query, debounceMs, minLength])
 
-  // Выполнение поиска при изменении debouncedQuery
+  // Выполнение поиска при изменении debouncedQuery — синхронизация с внешней системой (кэш поиска)
   useEffect(() => {
     if (!debouncedQuery) {
+      // oxlint-disable-next-line react/set-state-in-effect -- сброс результатов при пустом запросе
       setResults([])
       return
     }
 
     const searchResults = search(debouncedQuery)
+    // oxlint-disable-next-line react/set-state-in-effect -- результат синхронного поиска по внешнему кэшу
     setResults(searchResults)
   }, [debouncedQuery, search])
 
@@ -112,9 +117,10 @@ export function useSearchIds(query: string, debounceMs = 250): string[] | null {
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [ids, setIds] = useState<string[] | null>(null)
 
-  // Debounce запроса
+  // Debounce запроса — синхронизация с внешней системой (таймер)
   useEffect(() => {
     if (!query || query.length < 2) {
+      // oxlint-disable-next-line react/set-state-in-effect -- сброс при коротком запросе, часть debounce-таймера
       setDebouncedQuery('')
       setIds(null)
       return
@@ -131,6 +137,7 @@ export function useSearchIds(query: string, debounceMs = 250): string[] | null {
   useEffect(() => {
     if (!debouncedQuery || isLoading) {
       if (!query) {
+        // oxlint-disable-next-line react/set-state-in-effect -- сброс результатов при пустом запросе
         setIds(null)
       }
       return

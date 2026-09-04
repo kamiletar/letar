@@ -46,6 +46,7 @@ export function useWatchProgress() {
             cleaned[path] = entry
           }
         }
+        // oxlint-disable-next-line react/set-state-in-effect -- гидратация из localStorage (внешняя система)
         setStorage(cleaned)
         // Сохраняем очищенные данные обратно
         if (Object.keys(cleaned).length !== Object.keys(parsed).length) {

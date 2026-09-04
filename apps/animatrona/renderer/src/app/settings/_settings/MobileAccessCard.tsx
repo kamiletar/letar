@@ -25,12 +25,10 @@ export function MobileAccessCard() {
 
   const { mutateAsync: upsertSettings } = useUpsertSettings()
 
-  // Загрузка статуса при монтировании
-  useEffect(() => {
-    loadStatus()
-  }, [])
-
-  const loadStatus = async () => {
+  // Объявление вынесено ВЫШЕ эффекта, который его использует — react(immutability)
+  // запрещал чтение `loadStatus` в момент, когда его собственное объявление ещё
+  // не инициализировано в этой области видимости
+  const loadStatus = useCallback(async () => {
     if (!window.electronAPI?.mobileServer) {
       setIsLoading(false)
       return
@@ -51,7 +49,13 @@ export function MobileAccessCard() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
+
+  // Загрузка статуса при монтировании — синхронизация с внешней системой (IPC)
+  useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- загрузка данных из внешнего источника при монтировании
+    void loadStatus()
+  }, [loadStatus])
 
   const handleToggle = useCallback(
     async (enabled: boolean) => {

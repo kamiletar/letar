@@ -42,7 +42,9 @@ export function useStats() {
     }
   }, [])
 
+  // Загрузка при монтировании и подписка на обновления — синхронизация с внешней системой (IPC)
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- загрузка данных из внешнего источника при монтировании
     fetchStats()
 
     const api = window.electronAPI
@@ -92,7 +94,9 @@ export function useReputation() {
     }
   }, [])
 
+  // Загрузка при монтировании и подписка на обновления — синхронизация с внешней системой (IPC)
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- загрузка данных из внешнего источника при монтировании
     fetchReputation()
 
     const api = window.electronAPI
@@ -147,7 +151,9 @@ export function useAchievements() {
     }
   }, [])
 
+  // Загрузка при монтировании и подписка на обновления — синхронизация с внешней системой (IPC)
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- загрузка данных из внешнего источника при монтировании
     fetchAchievements()
 
     const api = window.electronAPI
@@ -210,7 +216,9 @@ export function useBonusPoints() {
     }
   }, [])
 
+  // Загрузка при монтировании и подписка на обновления — синхронизация с внешней системой (IPC)
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- загрузка данных из внешнего источника при монтировании
     fetchBonusPoints()
 
     const api = window.electronAPI

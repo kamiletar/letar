@@ -61,43 +61,44 @@ function getPhaseText(phase: AddTracksProgress['phase']): string {
 }
 
 /**
+ * Цвет по фазе обработки файла
+ */
+function getPhaseColor(phase: FileProgress['phase']) {
+  switch (phase) {
+    case 'waiting':
+      return 'gray'
+    case 'transcode':
+    case 'copy':
+      return 'purple'
+    case 'done':
+      return 'green'
+    case 'error':
+      return 'red'
+    default:
+      return 'gray'
+  }
+}
+
+/**
+ * Иконка по фазе обработки файла
+ *
+ * Карта объявлена на уровне модуля (не создаётся во время рендера) — react/static-components
+ * требует, чтобы JSX-тег ссылался на стабильное значение, а не на функцию, вычисляющую компонент.
+ */
+const PHASE_ICON_MAP: Record<FileProgress['phase'], React.ElementType> = {
+  waiting: LuLoader,
+  transcode: LuLoader,
+  copy: LuLoader,
+  done: LuCheck,
+  error: LuCircleAlert,
+}
+
+/**
  * Компонент прогресса отдельного файла
  */
 function FileProgressItem({ file }: { file: FileProgress }) {
-  const getPhaseColor = (phase: FileProgress['phase']) => {
-    switch (phase) {
-      case 'waiting':
-        return 'gray'
-      case 'transcode':
-      case 'copy':
-        return 'purple'
-      case 'done':
-        return 'green'
-      case 'error':
-        return 'red'
-      default:
-        return 'gray'
-    }
-  }
-
-  const getPhaseIcon = (phase: FileProgress['phase']) => {
-    switch (phase) {
-      case 'waiting':
-        return LuLoader
-      case 'transcode':
-      case 'copy':
-        return LuLoader
-      case 'done':
-        return LuCheck
-      case 'error':
-        return LuCircleAlert
-      default:
-        return LuLoader
-    }
-  }
-
   const color = getPhaseColor(file.phase)
-  const IconComponent = getPhaseIcon(file.phase)
+  const IconComponent = PHASE_ICON_MAP[file.phase]
   const isActive = file.phase === 'transcode' || file.phase === 'copy'
 
   return (

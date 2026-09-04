@@ -33,6 +33,7 @@ export function useFolderHistory() {
         // Очистка старых записей
         const now = Date.now()
         const cleaned = parsed.filter((entry) => now - entry.lastOpenedAt < MAX_AGE)
+        // oxlint-disable-next-line react/set-state-in-effect -- гидратация из localStorage (внешняя система)
         setHistory(cleaned)
         // Сохраняем очищенные данные обратно
         if (cleaned.length !== parsed.length) {

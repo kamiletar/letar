@@ -165,7 +165,7 @@ function collectMissingAnimes(
       if (!STRONG_RELATION_KINDS.has(rel.relationKind)) {
         continue
       }
-      if (rel.targetAnimeId != null) {
+      if (rel.targetAnimeId !== null && rel.targetAnimeId !== undefined) {
         continue
       } // загружено — не missing
       if (allLoadedShikimoriIds.has(rel.targetShikimoriId)) {

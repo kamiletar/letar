@@ -169,6 +169,7 @@ export function useImportQueue(): UseImportQueueResult {
   useEffect(() => {
     const api = window.electronAPI
     if (!api?.importQueue) {
+      // oxlint-disable-next-line react/set-state-in-effect -- обнаружение отсутствия внешнего API при монтировании
       setState((prev) => ({
         ...prev,
         isLoading: false,

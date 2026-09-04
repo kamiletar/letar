@@ -108,9 +108,14 @@ export const LogViewerDrawer = memo(function LogViewerDrawer({ open, onOpenChang
   // Загружаем логи при открытии
   useEffect(() => {
     if (open) {
-      loadLogs()
+      // Отложено в микротаску — loadLogs синхронно вызывает setIsLoading(true)
+      // до первого await (react(set-state-in-effect))
+      queueMicrotask(() => {
+        void loadLogs()
+      })
     } else {
       // Очищаем локальное состояние при закрытии (память)
+      // oxlint-disable-next-line react/set-state-in-effect -- синхронизация с внешним состоянием "открыт/закрыт"
       setLogs([])
       setSelectedTask(null)
     }

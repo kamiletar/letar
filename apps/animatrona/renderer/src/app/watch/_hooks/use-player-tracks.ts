@@ -66,12 +66,16 @@ export function usePlayerTracks(options: UsePlayerTracksOptions) {
 
   // Преобразуем аудиодорожки для VideoPlayer
   // Для библиотеки передаём только transcodedCid (IPFS-only подход)
+  // Локальная переменная через optional chaining — способ выровнять фактически читаемый путь
+  // с зависимостью useMemo (react/preserve-manual-memoization: иначе React Compiler не может
+  // сопоставить ручную мемоизацию с выводимой и пропускает оптимизацию компонента)
   const audioTracksForPlayer = useMemo((): AudioTrackInfo[] => {
-    if (!episode?.audioTracks) {
+    const audioTracks = episode?.audioTracks
+    if (!audioTracks) {
       return []
     }
 
-    return episode.audioTracks.map((track) => ({
+    return audioTracks.map((track) => ({
       id: track.id,
       language: track.language,
       title: track.title || undefined,
@@ -84,11 +88,12 @@ export function usePlayerTracks(options: UsePlayerTracksOptions) {
 
   // Преобразуем дорожки для TrackSelector
   const audioTracksForSelector = useMemo((): TrackInfo[] => {
-    if (!episode?.audioTracks) {
+    const audioTracks = episode?.audioTracks
+    if (!audioTracks) {
       return []
     }
 
-    return episode.audioTracks.map((track) => ({
+    return audioTracks.map((track) => ({
       id: track.id,
       // Не используем сырой код языка как fallback — пусть TrackSelector использует getLanguageName()
       label: track.title || undefined,
@@ -101,11 +106,12 @@ export function usePlayerTracks(options: UsePlayerTracksOptions) {
   }, [episode?.audioTracks])
 
   const subtitleTracksForSelector = useMemo((): TrackInfo[] => {
-    if (!episode?.subtitleTracks) {
+    const subtitleTracks = episode?.subtitleTracks
+    if (!subtitleTracks) {
       return []
     }
 
-    return episode.subtitleTracks.map((track) => ({
+    return subtitleTracks.map((track) => ({
       id: track.id,
       // Не используем сырой код языка как fallback — пусть TrackSelector использует getLanguageName()
       label: track.title || undefined,
@@ -117,6 +123,9 @@ export function usePlayerTracks(options: UsePlayerTracksOptions) {
   }, [episode?.subtitleTracks])
 
   // Текущий выбранный ID аудио — для библиотеки проверяем только IPFS CID
+  // Зависимость — весь `episode`, а не `episode?.audioTracks`: React Compiler инферит
+  // зависимость на этом уровне (react/preserve-manual-memoization), более широкая
+  // зависимость безопасна — лишний пересчёт при смене эпизода, не потеря обновлений
   const currentAudioId = useMemo(() => {
     if (selectedAudioTrackId) {
       return selectedAudioTrackId
@@ -131,46 +140,51 @@ export function usePlayerTracks(options: UsePlayerTracksOptions) {
     // Fallback — первая готовая дорожка (мигрированная в IPFS)
     const readyTrack = episode?.audioTracks?.find((t) => t.transcodedCid)
     return readyTrack?.id || episode?.audioTracks?.[0]?.id || null
-  }, [selectedAudioTrackId, episode?.audioTracks, trackPreference])
+  }, [selectedAudioTrackId, episode, trackPreference])
 
   // Текущая выбранная дорожка субтитров
+  // Локальные переменные через optional chaining — выравнивают фактически читаемые пути
+  // с зависимостями useMemo (react/preserve-manual-memoization)
   const currentSubtitleTrack = useMemo((): SubtitleTrackWithFonts | null => {
-    if (!episode?.subtitleTracks) {
+    const subtitleTracks = episode?.subtitleTracks
+    const audioTracks = episode?.audioTracks
+    if (!subtitleTracks || !audioTracks) {
       return null
     }
 
     // Если есть явно выбранный ID — используем его
     if (selectedSubtitleTrackId) {
-      return episode.subtitleTracks.find((t) => t.id === selectedSubtitleTrackId) ?? null
+      return subtitleTracks.find((t) => t.id === selectedSubtitleTrackId) ?? null
     }
 
     // Автовыбор по trackPreference из настроек
     if (!trackPreference) {
-      return episode.subtitleTracks[0] ?? null
+      return subtitleTracks[0] ?? null
     }
 
     // Проверяем является ли текущая аудио дорожка русской
-    const currentAudioTrack = episode.audioTracks.find((t) => t.id === currentAudioId)
+    const currentAudioTrack = audioTracks.find((t) => t.id === currentAudioId)
     const isRussianAudio = checkIsRussianAudio(currentAudioTrack)
 
     // Находим автовыбор и приводим к нужному типу
-    const autoSelected = selectSubtitleTrack(episode.subtitleTracks, trackPreference, isRussianAudio)
+    const autoSelected = selectSubtitleTrack(subtitleTracks, trackPreference, isRussianAudio)
     if (!autoSelected) {
       return null
     }
 
     // Ищем дорожку с fonts
-    return episode.subtitleTracks.find((t) => t.id === autoSelected.id) ?? null
+    return subtitleTracks.find((t) => t.id === autoSelected.id) ?? null
   }, [episode?.subtitleTracks, episode?.audioTracks, selectedSubtitleTrackId, trackPreference, currentAudioId])
 
   // URL'ы к шрифтам для текущих субтитров (для ASS)
   // Приоритет: IPFS CID > локальный путь
+  // Зависимость — весь `currentSubtitleTrack` (см. комментарий у currentAudioId выше)
   const currentSubtitleFonts = useMemo(() => {
     if (!currentSubtitleTrack?.fonts) {
       return []
     }
     return currentSubtitleTrack.fonts.map((f) => getFontUrl(f)).filter((url): url is string => url !== null)
-  }, [currentSubtitleTrack?.fonts])
+  }, [currentSubtitleTrack])
 
   // Обработчик изменения аудио дорожки
   const handleAudioTrackChange = useCallback(

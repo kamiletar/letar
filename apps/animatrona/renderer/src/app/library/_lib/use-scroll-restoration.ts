@@ -61,7 +61,7 @@ export function useScrollRestoration(ready: boolean, variant?: string) {
   useEffect(() => {
     let rafId: number | null = null
     const handleScroll = () => {
-      if (rafId != null) {
+      if (rafId !== null && rafId !== undefined) {
         return
       }
       rafId = requestAnimationFrame(() => {
@@ -78,7 +78,7 @@ export function useScrollRestoration(ready: boolean, variant?: string) {
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => {
       window.removeEventListener('scroll', handleScroll)
-      if (rafId != null) {
+      if (rafId !== null && rafId !== undefined) {
         cancelAnimationFrame(rafId)
       }
     }

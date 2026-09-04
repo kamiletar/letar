@@ -46,10 +46,11 @@ export function useTranscodeManager() {
     libraryPath: null,
   })
 
-  // Загрузка начального состояния
+  // Загрузка начального состояния — синхронизация с внешней системой (IPC)
   useEffect(() => {
     const api = window.electronAPI
     if (!api) {
+      // oxlint-disable-next-line react/set-state-in-effect -- обнаружение отсутствия внешнего API при монтировании
       setState((prev) => ({ ...prev, isLoading: false }))
       return
     }

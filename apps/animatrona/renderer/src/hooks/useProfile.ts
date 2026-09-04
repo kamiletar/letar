@@ -74,8 +74,9 @@ export function useProfile(): UseProfileReturn {
     }
   }, [api])
 
-  // Инициализация
+  // Инициализация — синхронизация с внешней системой (IPC)
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- загрузка данных из внешнего источника при монтировании
     loadProfile()
 
     // Подписываемся на обновления профиля

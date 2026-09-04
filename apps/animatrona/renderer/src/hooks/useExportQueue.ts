@@ -95,7 +95,8 @@ export function useExportQueue(): UseExportQueueReturn {
       return
     }
 
-    // Загрузить начальное состояние
+    // Загрузить начальное состояние — синхронизация с внешней системой (IPC)
+    // oxlint-disable-next-line react/set-state-in-effect -- загрузка данных из внешнего источника при монтировании
     refresh()
 
     // Подписки на события

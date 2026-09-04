@@ -75,8 +75,9 @@ export function useTemplates(): UseTemplatesReturn {
     }
   }, [])
 
-  // Загружаем шаблоны при монтировании
+  // Загружаем шаблоны при монтировании — синхронизация с внешней системой (IPC/файловое хранилище)
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- загрузка данных из внешнего источника при монтировании
     loadTemplates()
   }, [loadTemplates])
 

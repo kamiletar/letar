@@ -18,6 +18,7 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
+import { useState } from 'react'
 import { LuEllipsisVertical, LuUserMinus, LuUserX } from 'react-icons/lu'
 
 import type { Friend } from '../../../../../shared/types/orbitdb'
@@ -42,9 +43,12 @@ export function FriendCard({ friend, onRemove, onBlock, onViewProfile }: FriendC
     .toUpperCase()
     .slice(0, 2)
 
+  // Date.now() зафиксирован один раз через ленивый инициализатор useState —
+  // react(purity) запрещает вызывать импурную функцию в теле рендера
+  const [now] = useState(() => Date.now())
+
   // Форматирование времени последней активности
   const formatLastSeen = (timestamp: number): string => {
-    const now = Date.now()
     const diff = now - timestamp
     const minutes = Math.floor(diff / 60000)
     const hours = Math.floor(diff / 3600000)

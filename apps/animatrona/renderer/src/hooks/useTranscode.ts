@@ -43,28 +43,7 @@ export function useTranscode() {
     isProcessing: false,
   })
 
-  // Выбор папки
-  const selectFolder = useCallback(async () => {
-    const api = window.electronAPI
-    if (!api) {
-      return
-    }
-
-    const folder = await api.dialog.selectFolder()
-    if (folder) {
-      setState((prev) => ({
-        ...prev,
-        folderPath: folder,
-        step: 'analyze',
-        isProcessing: true,
-      }))
-
-      // Сканируем папку на видеофайлы
-      await scanFolder(folder)
-    }
-  }, [])
-
-  // Сканирование папки через IPC
+  // Сканирование папки через IPC (объявлена до selectFolder — используется в нём же)
   const scanFolder = async (folderPath: string) => {
     const api = window.electronAPI
     if (!api) {
@@ -103,6 +82,27 @@ export function useTranscode() {
       setState((prev) => ({ ...prev, isProcessing: false }))
     }
   }
+
+  // Выбор папки
+  const selectFolder = useCallback(async () => {
+    const api = window.electronAPI
+    if (!api) {
+      return
+    }
+
+    const folder = await api.dialog.selectFolder()
+    if (folder) {
+      setState((prev) => ({
+        ...prev,
+        folderPath: folder,
+        step: 'analyze',
+        isProcessing: true,
+      }))
+
+      // Сканируем папку на видеофайлы
+      await scanFolder(folder)
+    }
+  }, [])
 
   // Анализ файлов через FFprobe
   const analyzeFiles = useCallback(async () => {

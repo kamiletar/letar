@@ -55,10 +55,16 @@ export function useVirtualizedGrid(itemCount: number, { estimateSize, overscan =
   const cardWidth = columns > 0 ? (containerWidth - GRID_GAP * (columns - 1)) / columns : MIN_CARD_WIDTH
   const rowCount = Math.ceil(itemCount / columns)
 
+  // Чтение ref во время рендера здесь неизбежно: scrollMarginRef заполняется callback-ref'ом
+  // (containerRef) в момент реального монтирования контейнера, которое может произойти позже
+  // первого рендера (пока isLoading=true, рендерится скелетон без этого элемента) — эффект с
+  // пустыми deps этот момент бы не поймал. Подробности — react-effect-stable-ref-pitfall.md.
+  // oxlint-disable-next-line react/refs -- см. комментарий выше, задокументированная архитектура
   const rowVirtualizer = useWindowVirtualizer({
     count: rowCount,
     estimateSize: () => estimateSize(cardWidth),
     overscan,
+    // oxlint-disable-next-line react/refs -- см. комментарий выше, задокументированная архитектура
     scrollMargin: scrollMarginRef.current,
   })
 

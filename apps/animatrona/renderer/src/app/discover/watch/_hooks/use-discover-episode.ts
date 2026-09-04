@@ -264,7 +264,7 @@ export function useDiscoverEpisode(
     queryKey: ['discoverEpisode', directoryCid, episodeNumber, videoCidFallback],
     queryFn: async () => {
       // Если есть directoryCid — резолвим manifestCid через IPFS
-      if (directoryCid && episodeNumber != null) {
+      if (directoryCid && episodeNumber !== null && episodeNumber !== undefined) {
         try {
           const resolved = await resolveEpisodeManifestCid(directoryCid, episodeNumber)
           if (resolved?.manifestCid) {

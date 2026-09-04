@@ -101,14 +101,19 @@ export function useDiscoverProgress({
   const [savedAudioTrackId, setSavedAudioTrackId] = useState<string | null>(null)
   const [savedSubtitleTrackId, setSavedSubtitleTrackId] = useState<string | null>(null)
   const [showResumeOverlay, setShowResumeOverlay] = useState(false)
-  const resumeTimeRef = useRef(0)
+  const [savedResumeTime, setSavedResumeTime] = useState(0)
   const lastSaveRef = useRef(0)
   const metaRef = useRef(meta)
-  metaRef.current = meta
 
-  // Загрузка прогресса из БД
+  // Always-latest ref на meta — читается только в колбэках (saveProgress), не во время рендера
   useEffect(() => {
-    if (numericShikimoriId == null || epNum == null) {
+    metaRef.current = meta
+  }, [meta])
+
+  // Загрузка прогресса из БД — синхронизация с внешней системой (БД)
+  useEffect(() => {
+    if (numericShikimoriId === null || numericShikimoriId === undefined || epNum === null || epNum === undefined) {
+      // oxlint-disable-next-line react/set-state-in-effect -- сброс при отсутствии идентификаторов, часть загрузки из БД
       setShowResumeOverlay(false)
       return
     }
@@ -127,12 +132,13 @@ export function useDiscoverProgress({
           const remaining = entry.duration - entry.currentTime
           if (remaining > COMPLETED_THRESHOLD) {
             setShowResumeOverlay(true)
-            resumeTimeRef.current = entry.currentTime
+            setSavedResumeTime(entry.currentTime)
           }
         }
       }
     }
 
+    // oxlint-disable-next-line react/set-state-in-effect -- загрузка прогресса просмотра из БД
     load()
   }, [numericShikimoriId, epNum])
 
@@ -142,13 +148,19 @@ export function useDiscoverProgress({
 
   const handleStartOver = useCallback(() => {
     setShowResumeOverlay(false)
-    resumeTimeRef.current = 0
+    setSavedResumeTime(0)
   }, [])
 
   // Throttled сохранение прогресса в БД
   const saveProgress = useCallback(
     (time: number, duration: number, audioTrackId?: string | null, subtitleTrackId?: string | null) => {
-      if (numericShikimoriId == null || epNum == null || duration <= 0) {
+      if (
+        numericShikimoriId === null
+        || numericShikimoriId === undefined
+        || epNum === null
+        || epNum === undefined
+        || duration <= 0
+      ) {
         return
       }
 
@@ -203,8 +215,6 @@ export function useDiscoverProgress({
 
   const initialAudioTrackId = useMemo(() => savedAudioTrackId, [savedAudioTrackId])
   const initialSubtitleTrackId = useMemo(() => savedSubtitleTrackId, [savedSubtitleTrackId])
-
-  const savedResumeTime = resumeTimeRef.current
 
   return {
     showResumeOverlay,

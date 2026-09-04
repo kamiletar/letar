@@ -95,6 +95,7 @@ export function useWatchProgress(options: UseWatchProgressOptions) {
 
     // Показываем overlay если есть прогресс > 10 секунд и не досмотрено
     if (watchProgressData && !watchProgressData.completed && watchProgressData.currentTime > 10) {
+      // oxlint-disable-next-line react/set-state-in-effect -- синхронизация с загруженными данными прогресса из БД
       setSavedResumeTime(watchProgressData.currentTime)
       setShowResumeOverlay(true)
       // НЕ устанавливаем initialTime здесь — ждём выбора пользователя
