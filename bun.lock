@@ -411,7 +411,7 @@
     },
     "apps/animatrona-tracker": {
       "name": "@letar/animatrona-tracker",
-      "version": "0.11.10",
+      "version": "0.11.11",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -447,7 +447,7 @@
     },
     "apps/archetest": {
       "name": "@letar/archetest",
-      "version": "0.27.17",
+      "version": "0.27.18",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -523,7 +523,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.183.32",
+      "version": "0.183.41",
       "dependencies": {
         "@letar/demo-protection": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -590,7 +590,7 @@
     },
     "apps/form-develop-app": {
       "name": "form-develop-app",
-      "version": "0.1.3",
+      "version": "0.1.7",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/pg-url": "workspace:*",
@@ -606,7 +606,7 @@
     },
     "apps/form-docs": {
       "name": "form-docs",
-      "version": "0.6.2",
+      "version": "0.6.5",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
       },
@@ -617,7 +617,7 @@
     },
     "apps/form-example": {
       "name": "form-example",
-      "version": "0.1.6",
+      "version": "0.1.9",
       "dependencies": {
         "@letar/demo-protection": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -644,7 +644,7 @@
     },
     "apps/kami": {
       "name": "kami",
-      "version": "0.33.16",
+      "version": "0.33.17",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -1035,7 +1035,7 @@
     },
     "libs/form-mcp": {
       "name": "@letar/form-mcp",
-      "version": "1.0.3",
+      "version": "1.1.0",
       "dependencies": {
         "@modelcontextprotocol/sdk": "1.29.0",
         "zod": "4.3.6",
@@ -1465,7 +1465,7 @@
     },
     "libs/zenstack-form-plugin": {
       "name": "@letar/zenstack-form-plugin",
-      "version": "2.4.0",
+      "version": "3.2.0",
       "peerDependencies": {
         "@zenstackhq/sdk": ">=3.0.0",
         "@zenstackhq/zod": ">=3.0.0",
