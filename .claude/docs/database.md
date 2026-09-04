@@ -656,6 +656,31 @@ try {
 Вывод «колонки на месте» из dev-подключения ничего не говорит о проде — при том инциденте
 именно это увело первую диагностику в ложное «drift безобиден».
 
+### CLI-команды под nx-таргетами миграций — что реально происходит
+
+`nx db:migrate`/`db:migrate:deploy` — тонкие обёртки над `prisma migrate dev`/`prisma migrate
+deploy` (в летаре — Prisma CLI, не `zen` из официального ZenStack CLI, но команды и флаги
+идентичны один в один — ZenStack V3 сама реализована как обёртка над Prisma Migrate). Полезные
+флаги нижнего уровня, которых нет ни в одном nx-таргете, но которые иногда нужны напрямую внутри
+`apps/<app>` (там же, где `prisma.config.ts`):
+
+- **`prisma migrate dev --create-only --name <name>`** — сгенерировать файл миграции **без
+  применения**. Нужен, когда движок миграций не умеет сгенерировать нужный SQL сам (например,
+  `CREATE EXTENSION pg_trgm` под `@fuzzy` — см. выше, или Postgres views) — создаёшь пустую
+  миграцию, дописываешь SQL руками, применяешь обычным `prisma migrate dev`.
+- **`prisma migrate status`** — что из истории миграций применено на текущей БД, без изменений.
+  Дёшево прогнать перед `migrate deploy` в CI/деплое, если нужна ранняя диагностика дрейфа
+  (см. предупреждение выше про то, что сам `migrate status` дрейф схема↔БД не ловит — только
+  файлы↔таблица `_prisma_migrations`).
+- **`prisma migrate resolve --applied <name>` / `--rolled-back <name>`** — вручную пометить
+  конкретную миграцию как применённую/откаченную в таблице `_prisma_migrations`, не выполняя её
+  SQL. Нужен при ручном вмешательстве в БД в обход миграций (прямой `ALTER` на проде,
+  восстановление из бэкапа на другом состоянии схемы) — без этого `migrate deploy` следующего
+  деплоя откажется работать, видя рассинхрон истории.
+- **`prisma db pull`** — интроспекция существующей БД в `schema.prisma` при подключении к чужой/
+  унаследованной базе (для нас редкость — обычно `schema.zmodel` уже источник истины с первого
+  дня приложения).
+
 ### ⚠️ `prisma.config.ts` — источник истины для schema/migrations, не хардкод-путь
 
 Каждое приложение с БД (Prisma 7) имеет `apps/<app>/prisma.config.ts` с полями `schema` и
@@ -1136,7 +1161,8 @@ await db.material.findMany({
 1. **`_count` не поддерживается** — используй `include` + `.length`
 2. **Relations не отражаются в типах** — TypeScript не знает о включённых отношениях
 3. **Enum'ы возвращаются как `string`** — требуется явный type cast
-4. **`$transaction` не поддерживается** — используй последовательные операции
+4. **`$transaction` работает** (v3.8+, был убран в ранних v3, вернулся) — sequential-массив и
+   interactive-callback, синтаксис как в Prisma, см. ниже
 
 ### Паттерн: Relations и type assertions
 
@@ -1281,20 +1307,28 @@ const lesson = {
 }
 ```
 
-### Паттерн: Отсутствие `$transaction`
+### Паттерн: `$transaction` (v3.8+ — вернулся, была устаревшая рекомендация)
+
+⚠️ Раньше здесь было написано «`$transaction` не работает, используй последовательные операции
+без атомарности». Это относилось к ранним v3 (≤3.3) — в текущей 3.9.3 метод снова есть, в двух
+формах, синтаксис идентичен Prisma:
 
 ```typescript
-// ❌ НЕ РАБОТАЕТ в ZenStack v3
+// ✅ Interactive — callback с транзакционным клиентом, атомарность сохраняется
 await db.$transaction(async (tx) => {
-  await tx.lesson.update(...)
-  await tx.attendance.createMany(...)
+  await tx.lesson.update({ ... })
+  await tx.attendance.createMany({ ... })
 })
 
-// ✅ Используй последовательные операции
-// (атомарность теряется, но это единственный вариант)
-await db.lesson.update(...)
-await db.attendance.createMany(...)
+// ✅ Sequential — массив операций, выполняется по порядку в одной транзакции
+await db.$transaction([
+  db.lesson.update({ ... }),
+  db.attendance.createMany({ ... }),
+])
 ```
+
+Подробнее, включая Kysely escape hatch (`$qb`/`$expr`) и обработку `ORMError` —
+[zenstack-v3-orm.md](/.claude/skills/zenstack-helper/reference/zenstack-v3-orm.md).
 
 ### Чеклист для ZenStack v3
 
@@ -1302,7 +1336,7 @@ await db.attendance.createMany(...)
 - [ ] Создать явные интерфейсы для типов с relations
 - [ ] Использовать `as unknown as T[]` для type assertions
 - [ ] Кастовать enum'ы из `string` к правильному типу
-- [ ] Заменить `$transaction` на последовательные операции
+- [ ] `$transaction` работает как в Prisma (v3.8+) — переносить без изменений, не разбивать
 - [ ] Использовать `!= null` вместо `&&` для `unknown` типов в JSX
 
 ## ⚠️ postgres-* MCP искажает вывод timestamp без зоны

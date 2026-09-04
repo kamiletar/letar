@@ -36,15 +36,32 @@ const user = await db.user.findUnique({
 const ordersCount = user?.orders.length ?? 0
 ```
 
-### 3. Нет $transaction
+### 3. `$transaction` — вернулся (v3.8+, было отсутствие в ранних v3)
+
+⚠️ **Устаревшее утверждение ниже держалось в этом файле до 2026-09-04** — в v3.3 `$transaction`
+действительно отсутствовал, но в текущей 3.9.3 он снова есть, в двух формах.
 
 ```typescript
-// ❌ НЕ РАБОТАЕТ
-await db.$transaction([...])
+// ✅ Sequential — массив операций, выполняется по порядку, без взаимного доступа между шагами
+const [a, b] = await db.$transaction([
+  db.user.create({ data: { name: 'Alice' } }),
+  db.user.create({ data: { name: 'Bob' } }),
+])
 
-// ✅ РАБОТАЕТ — последовательные операции
-// или используй raw SQL через Prisma для транзакций
+// ✅ Interactive — callback с транзакционным клиентом, результат шага доступен следующему
+const post = await db.$transaction(async (tx) => {
+  const user = await tx.user.create({ data: { name: 'Alice' } })
+  return tx.post.create({ data: { title: 'Hi', authorId: user.id } })
+})
 ```
+
+> Результаты вызовов ORM — ленивые промисы, не выполняются до `await` (напрямую или внутри
+> `$transaction`).
+
+**Не путать с `client.$transaction.useSequential()`** (v3.7+) — это отдельный TanStack Query хук
+для последовательных мутаций **с фронта** (несколько связанных мутаций одним запросом), не метод
+серверного ORM-клиента. Описан в [data-fetching.md](/.claude/docs/data-fetching.md) («Паттерн 3.5»).
+Используется, когда фронту нужна атомарность нескольких `.mutate()` без ручного чейна.
 
 ### 4. Ограничения вложенных операций
 
@@ -233,6 +250,52 @@ type UserWithOrders = Prisma.UserGetPayload<{
 }>
 ```
 
+## Kysely escape hatch — `$qb` и `$expr`
+
+Когда ORM API не выражает нужный запрос — полный типизированный Kysely query builder на клиенте
+(API самого Kysely — https://kysely.dev):
+
+```typescript
+const rows = await db.$qb.selectFrom('User').select(['id', 'name']).where('age', '>', 18).execute()
+```
+
+`$expr` — вставка Kysely-выражения прямо в `where` ORM-запроса, смешивая оба API:
+
+```typescript
+await db.post.findMany({
+  where: {
+    published: true,
+    $expr: (eb) => eb('viewCount', '>', 100),
+  },
+})
+```
+
+⚠️ **`$qb` обходит access-политики и ORM-валидацию** — если на клиенте навешан policy-плагин
+(`getEnhancedPrisma`), `$qb` его не видит. Использовать только на заведомо доверенном пути
+(background job, admin-скрипт), не в user-facing запросе с enhanced-клиентом.
+
+## Обработка ошибок — `ORMError`
+
+Все ошибки ORM — экземпляры `ORMError` из `@zenstackhq/orm`. Поле `reason` — один из
+`CONFIG_ERROR`, `INVALID_INPUT`, `NOT_FOUND`, `REJECTED_BY_POLICY`, `DB_QUERY_ERROR`,
+`NOT_SUPPORTED`, `INTERNAL_ERROR`. Остальные поля: `model`, `dbErrorCode`, `dbErrorMessage`,
+`rejectedByPolicyReason`, и для `DB_QUERY_ERROR` — `sql`/`sqlParams`.
+
+```typescript
+import { ORMError } from '@zenstackhq/orm'
+
+try {
+  await userDb.post.create({ data: { title: '' } })
+} catch (e) {
+  if (e instanceof ORMError && e.reason === 'REJECTED_BY_POLICY') {
+    // обработка отказа доступа
+  }
+}
+```
+
+Про `dbErrorCode` конкретно (сырой `SQLSTATE` вроде `23505`, не Prisma-код `P2002`) — отдельный
+разбор с граблей на практике: [zenstack-v3-orm-error-codes.md](/.claude/docs/zenstack-v3-orm-error-codes.md).
+
 ## Отладка
 
 ### Логирование SQL
@@ -260,7 +323,8 @@ export default {
 При переходе с Prisma Client на ZenStack:
 
 1. Замени `_count` на include + length
-2. Разбей `$transaction` на последовательные операции
+2. `$transaction` работает как в Prisma (sequential-массив и interactive-callback) — переносится
+   без изменений, см. §3 выше
 3. Добавь type assertions для enum
 4. Используй Enhanced клиент вместо raw Prisma
 
