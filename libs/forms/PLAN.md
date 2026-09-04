@@ -513,14 +513,20 @@ Priority 3/4/5, остальное вручную):**
   `12-open-source.md`, `benchmarks.md`, плюс `ARTICLE.md` (чек-лист) и `visuals-needed.md`.
   Остальные 9 статей `@form.*` не упоминали — трогать было нечего.
 
-**НЕ сделано:**
+**Broadcast владельцам публичных приложений** (инструкция по `@meta`-синтаксису + кодмоду,
+`topic: form-feature-request`, тред начат сообщением `forms-dev` msg id 1126):
 
-- Broadcast владельцам публичных приложений (`animatrona`, `archetest`, `grandslamcup`, `kami`,
-  `label-printer-desktop`, `mandala`, `animatrona-tracker`) с инструкцией по кодмоду — не
-  отправлен.
+- ✅ Доставлено сразу: `archetest-dev`, `kami-dev`.
+- ✅ Доставлено после `unretire_agent` (штатный простой, не конфликт владения): `grandslamcup-dev`
+  (contact-request создан автоматически, ждёт `respond_contact` со стороны получателя),
+  `mandala-dev` (аналогично), `animatrona-tracker-dev` (аналогично).
+- ❌ Не удалось разбудить: `label-printer-desktop-dev`, `animatrona-dev` — токены из памяти
+  `agent_fixed_names_tokens.md` невалидны для `unretire_agent`. Восстановление через SQLite
+  (см. `.claude/rules/agent-mail.md`) не выполнялось — оба приложения вне зоны прямого владения
+  этой сессии (`forms-dev`), решать их владельцам при следующем запуске `/animatrona` /
+  `/label-printer-desktop`. Тред тот же (`form-feature-request`), можно дочитать при заходе.
 
-**Статус: Фаза 3 (код + вся запланированная документация) закрыта.** Broadcast — единственное,
-что осталось до полного закрытия фазы.
+**Статус: Фаза 3 (код + вся запланированная документация + broadcast) закрыта.**
 Документационный трек продолжается отдельными коммитами.
 
 ### Фаза 4 — миграция потребителей и удаление legacy (v4.0.0)
