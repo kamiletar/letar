@@ -7,6 +7,10 @@ allowed-tools: Bash
 
 Проведи аудит системы бэкапов: проверь что все бэкапы свежие, cron работает, репликация идёт, все приложения зарегистрированы.
 
+⚠️ **Все production-приложения на s2** (s1 выведен из эксплуатации 2026-06-20 — сервер больше не
+принадлежит letar, бэкапов/cron/dashboard-agent на нём нет). Подробнее —
+[backup-architecture.md](/.claude/docs/backup-architecture.md).
+
 ## Когда использовать
 
 - Еженедельно (плановая проверка)
@@ -19,9 +23,7 @@ allowed-tools: Bash
 SSH-команды выполняй через:
 
 ```bash
-# Подключение к серверам
 unset SSH_AUTH_SOCK && unset SSH_AGENT_PID
-S1="root@194.164.245.97"
 S2="root@s2.letar.best"
 SSH="/c/Windows/System32/OpenSSH/ssh.exe"
 ```
@@ -30,13 +32,7 @@ SSH="/c/Windows/System32/OpenSSH/ssh.exe"
 
 ### 1. Dashboard-Agent доступность
 
-Проверь что agent запущен и отвечает на обоих серверах:
-
 ```bash
-# S1
-$SSH $S1 'docker ps --filter name=dashboard-agent --format "{{.Status}}" && curl -sf localhost:3100/health'
-
-# S2
 $SSH $S2 'docker ps --filter name=dashboard-agent --format "{{.Status}}" && curl -sf localhost:3100/health'
 ```
 
@@ -45,13 +41,7 @@ $SSH $S2 'docker ps --filter name=dashboard-agent --format "{{.Status}}" && curl
 
 ### 2. Cron расписание
 
-Проверь что автоматические задачи настроены и активны:
-
 ```bash
-# S1
-$SSH $S1 'cat /home/deploy/letar/cron-jobs.json'
-
-# S2
 $SSH $S2 'cat /home/deploy/letar/cron-jobs.json'
 ```
 
@@ -59,44 +49,48 @@ $SSH $S2 'cat /home/deploy/letar/cron-jobs.json'
 
 | Job ID             | Расписание | Сервер | Описание        |
 | ------------------ | ---------- | ------ | --------------- |
-| s1-database-backup | 02:00 UTC  | s1     | pg_dump всех БД |
 | s2-database-backup | 02:00 UTC  | s2     | pg_dump всех БД |
-| nginx-backup       | 03:00 UTC  | s1     | NPM бэкап       |
 | nginx-backup-s2    | 03:00 UTC  | s2     | NPM бэкап       |
 
-- Все 4 задачи присутствуют
+- Обе задачи присутствуют
 - `enabled: true` у каждой
 - Расписание соответствует таблице
 
 ### 3. Свежесть бэкапов PostgreSQL
 
-Проверь наличие и свежесть дампов для каждого приложения:
-
 ```bash
-# S1 — список бэкапов с размерами
-$SSH $S1 'ls -lhS /home/deploy/letar/backups/*.sql.gz 2>/dev/null | tail -20'
-
-# S2
-$SSH $S2 'ls -lhS /home/deploy/letar/backups/*.sql.gz 2>/dev/null | tail -20'
+$SSH $S2 'ls -lhS /home/deploy/letar/backups/*.sql.gz 2>/dev/null | tail -30'
 ```
 
-Приложения для проверки:
+Приложения с PostgreSQL для проверки (сверено по `docker-compose.production.yml`, все на s2):
 
-| Приложение         | Сервер | Минимальный размер |
-| ------------------ | ------ | ------------------ |
-| premium-rosstil    | s1     | > 1 KB             |
-| imot               | s1     | > 1 KB             |
-| mandala            | s1     | > 1 KB             |
-| kami               | s1     | > 1 KB             |
-| umami              | s1     | > 1 KB             |
-| animatrona-tracker | s1     | > 1 KB             |
-| driving-school     | s2     | > 1 KB             |
-| dashboard          | s2     | > 1 KB             |
-| archetest          | s2     | > 1 KB             |
-| auth-hub           | s2     | > 1 KB             |
-| grandslamcup       | s2     | > 1 KB             |
-| time               | s2     | > 1 KB             |
-| form-example       | s2     | > 1 KB             |
+| Приложение         | Минимальный размер |
+| ------------------ | ------------------ |
+| aboi               | > 1 KB             |
+| animatrona-tracker | > 1 KB             |
+| aprel8008          | > 1 KB             |
+| archetest          | > 1 KB             |
+| auth-hub           | > 1 KB             |
+| dashboard          | > 1 KB             |
+| domwellbes         | > 1 KB             |
+| driving-school     | > 1 KB             |
+| dsperevod          | > 1 KB             |
+| form-example       | > 1 KB             |
+| grandslamcup       | > 1 KB             |
+| kami               | > 1 KB             |
+| mandala            | > 1 KB             |
+| studio             | > 1 KB             |
+| svoichuzhie        | > 1 KB             |
+| time               | > 1 KB             |
+| umami              | > 1 KB             |
+
+⚠️ Список получен грепом `image: postgres` по `apps/*/docker-compose.production.yml` — если
+приложение добавило БД после последней сверки этого файла, его тут может не быть. Перед аудитом
+можно пересверить:
+
+```bash
+for d in apps/*/docker-compose.production.yml; do grep -q "image: postgres" "$d" && dirname "$d"; done
+```
 
 Критерии:
 
@@ -106,71 +100,56 @@ $SSH $S2 'ls -lhS /home/deploy/letar/backups/*.sql.gz 2>/dev/null | tail -20'
 
 ### 4. Свежесть бэкапов Nginx Proxy Manager
 
-```bash
-# S1
-$SSH $S1 'ls -lh /home/deploy/letar/backups/nginx_*.tar.gz 2>/dev/null | tail -5'
+⚠️ Nginx Proxy Manager снят и с s3 (2026-08-08), и с s2 (2026-08-31) — на s2 сейчас Traefik
+([traefik/README.md](/infra/traefik/README.md)). Этот шаг актуален только если на сервере всё ещё
+остался NPM-бэкап от прежней конфигурации — проверь, действительно ли `nginx-backup-s2` в cron ещё
+нужен, прежде чем требовать его свежести.
 
-# S2
+```bash
 $SSH $S2 'ls -lh /home/deploy/letar/backups/nginx_*.tar.gz 2>/dev/null | tail -5'
 ```
 
-- Последний бэкап на каждом сервере **не старше 25 часов**
+- Последний бэкап **не старше 25 часов** (если задача ещё актуальна)
 - Размер **> 10 KB**
-- Ротация работает (не более ~7 файлов на сервер)
+- Ротация работает (не более ~7 файлов)
 
 ### 5. Регистрация приложений в dashboard-agent
 
 Сверь `APP_CONFIG` в коде с реальными docker-compose файлами:
 
 ```bash
-# Прочитай APP_CONFIG
 # Файл: apps/dashboard-agent/src/lib/database.ts
 ```
 
 Для каждого приложения с PostgreSQL в монорепо проверь:
 
 1. Приложение есть в `APP_CONFIG` (database.ts)
-2. Приложение есть в `SERVER_APPS` (server-config.ts)
+2. Приложение есть в `SERVER_APPS` (server-config.ts / `libs/infra-config`)
 3. Имя контейнера в APP_CONFIG совпадает с `docker-compose.production.yml`
 4. `.env.docker` примонтирован как secret в docker-compose agent
 
 ```bash
-# Проверь что все PG контейнеры на месте
-$SSH $S1 'docker ps --filter name=-postgres --format "{{.Names}}"'
 $SSH $S2 'docker ps --filter name=-postgres --format "{{.Names}}" && docker ps --filter name=-db --format "{{.Names}}"'
 ```
 
 ### 6. Resilio Sync репликация
 
 ```bash
-# Статус сервиса
-$SSH $S1 'systemctl is-active resilio-sync'
 $SSH $S2 'systemctl is-active resilio-sync'
-
-# Проверь что бэкапы НЕ в IgnoreList
-$SSH $S1 'cat /home/deploy/letar/.sync/IgnoreList 2>/dev/null'
 $SSH $S2 'cat /home/deploy/letar/.sync/IgnoreList 2>/dev/null'
 ```
 
-- `resilio-sync` активен на обоих серверах
+- `resilio-sync` активен на s2
 - `*.sql.gz` и `*.tar.gz` **отсутствуют** в IgnoreList
 - Локальная копия на Windows актуальна:
 
 ```bash
-# Проверь наличие бэкапов на Windows
-ls -lh /c/BackupSync/lena/s1/backups/*.sql.gz 2>/dev/null | tail -5
 ls -lh /c/BackupSync/lena/s2/backups/*.sql.gz 2>/dev/null | tail -5
 ```
 
 ### 7. Credentials (секреты)
 
-Проверь что dashboard-agent имеет доступ к credentials:
-
 ```bash
-# S1 — проверь монтирование секретов
-$SSH $S1 'docker inspect dashboard-agent --format "{{range .Mounts}}{{.Source}} -> {{.Destination}}{{println}}{{end}}" | grep secrets'
-
-# S2
 $SSH $S2 'docker inspect dashboard-agent --format "{{range .Mounts}}{{.Source}} -> {{.Destination}}{{println}}{{end}}" | grep secrets'
 ```
 
@@ -183,20 +162,19 @@ $SSH $S2 'docker inspect dashboard-agent --format "{{range .Mounts}}{{.Source}} 
 
 ### Critical
 
-- [ ] Dashboard-agent запущен и отвечает на s1 и s2
-- [ ] Cron задачи активны (4 шт: 2 DB + 2 NPM)
-- [ ] Бэкапы PostgreSQL свежие (< 25ч) для всех 12 приложений
+- [ ] Dashboard-agent запущен и отвечает на s2
+- [ ] Cron задачи активны (2 шт: DB + NPM, см. п.4 про актуальность NPM-бэкапа после Traefik)
+- [ ] Бэкапы PostgreSQL свежие (< 25ч) для всех приложений из п.3
 - [ ] Бэкапы PostgreSQL не пустые (> 1 KB)
-- [ ] Бэкапы NPM свежие (< 25ч) на обоих серверах
 - [ ] Credentials доступны agent (все .env.docker примонтированы)
 
 ### Important
 
 - [ ] Все PG-приложения зарегистрированы в APP_CONFIG
 - [ ] Имена контейнеров в APP_CONFIG совпадают с реальными
-- [ ] Resilio Sync активен на s1 и s2
+- [ ] Resilio Sync активен на s2
 - [ ] Бэкапы не исключены из Resilio Sync (IgnoreList)
-- [ ] Ротация NPM бэкапов работает (не более ~7 файлов)
+- [ ] Ротация NPM/архивных бэкапов работает (не более ~7 файлов), если задача ещё актуальна
 
 ### Recommended
 
@@ -212,14 +190,12 @@ $SSH $S2 'docker inspect dashboard-agent --format "{{range .Mounts}}{{.Source}} 
 
 | Область                | Статус | Детали                             |
 | ---------------------- | ------ | ---------------------------------- |
-| Agent s1               |        | Up / Down, время работы            |
 | Agent s2               |        | Up / Down, время работы            |
-| Cron задачи            |        | N/4 активных                       |
-| БД бэкапы s1           |        | N/6 свежих, мин/макс размер        |
-| БД бэкапы s2           |        | N/7 свежих, мин/макс размер        |
-| NPM бэкапы             |        | Свежесть s1/s2                     |
-| Регистрация приложений |        | N/13 зарегистрированы, пропущенные |
-| Resilio Sync           |        | Активен s1/s2, IgnoreList ok       |
+| Cron задачи            |        | N/2 активных                       |
+| БД бэкапы              |        | N/17 свежих, мин/макс размер       |
+| NPM/архивный бэкап     |        | Свежесть, актуальность задачи      |
+| Регистрация приложений |        | N/17 зарегистрированы, пропущенные |
+| Resilio Sync           |        | Активен, IgnoreList ok             |
 | Windows репликация     |        | Файлы актуальны / устаревшие       |
 | Credentials            |        | Все секреты примонтированы         |
 
