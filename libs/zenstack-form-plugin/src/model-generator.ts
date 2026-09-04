@@ -1,5 +1,5 @@
 import type { DataField, DataFieldAttribute, DataModel, DataModelAttribute, Expression } from '@zenstackhq/language/ast'
-import { parseFormMeta } from './parser.js'
+import { mergeFormMeta, parseFormMeta, parseMetaAttributes } from './parser.js'
 import type {
   FormFieldMeta,
   I18nConfig,
@@ -507,6 +507,47 @@ function hasStrictAttr(model: DataModel): boolean {
 }
 
 /**
+ * Собрать подсказку замены `@form.*` (comment) → `@meta("form.*", …)` (Фаза 3, v3.0.0) для
+ * deprecation-warning. Не претендует на идеальность (вложенные `props`/`relation` разворачиваются
+ * только на один уровень) — это подсказка человеку в логе, реальную миграцию делает
+ * `scripts/codemod-form-directives.mjs`.
+ */
+function buildMetaReplacementHint(meta: FormFieldMeta): string[] {
+  const lines: string[] = []
+  if (meta.title !== undefined) { lines.push(`@meta("form.title", ${JSON.stringify(meta.title)})`) }
+  if (meta.placeholder !== undefined) { lines.push(`@meta("form.placeholder", ${JSON.stringify(meta.placeholder)})`) }
+  if (meta.description !== undefined) { lines.push(`@meta("form.description", ${JSON.stringify(meta.description)})`) }
+  if (meta.fieldType !== undefined) { lines.push(`@meta("form.fieldType", ${JSON.stringify(meta.fieldType)})`) }
+  if (meta.exclude) { lines.push(`@meta("form.exclude", true)`) }
+  for (const [key, value] of Object.entries(meta.constraints ?? {})) {
+    lines.push(`@meta("form.props.${key}", ${JSON.stringify(value)})`)
+  }
+  for (const [key, value] of Object.entries(meta.props ?? {})) {
+    lines.push(`@meta("form.props.${key}", ${JSON.stringify(value)})`)
+  }
+  for (const [key, value] of Object.entries(meta.relation ?? {})) {
+    lines.push(`@meta("form.relation.${key}", ${JSON.stringify(value)})`)
+  }
+  return lines
+}
+
+/**
+ * Deprecation-warning для полей, всё ещё использующих comment-синтаксис `@form.*` (Фаза 3,
+ * v3.0.0). **Не ломает сборку** — только предупреждает, per-field, в stderr через `console.warn`.
+ */
+function warnLegacyFormDirectives(modelName: string, fieldName: string, commentMeta: FormFieldMeta): void {
+  if (Object.keys(commentMeta).length === 0) {
+    return
+  }
+  const hint = buildMetaReplacementHint(commentMeta)
+  console.warn(
+    `[zenstack-form-plugin] ${modelName}.${fieldName}: комментарий @form.* устарел (v3.0.0), `
+      + `используй @meta:\n  ${hint.join('\n  ')}\n`
+      + `  Автоматическая замена: node scripts/codemod-form-directives.mjs --dry-run`,
+  )
+}
+
+/**
  * Extract model information from AST.
  */
 export function extractModelInfo(model: DataModel, enumNames: Set<string>): ModelInfo {
@@ -518,7 +559,12 @@ export function extractModelInfo(model: DataModel, enumNames: Set<string>): Mode
 
   for (const field of model.fields) {
     const fieldType = getFieldType(field)
-    const formMeta = parseFormMeta(field.comments)
+    // Фаза 3 (v3.0.0) — @meta("form.*", …) теперь основной синтаксис, @form.*-комментарий
+    // остаётся рабочим для обратной совместимости и побеждается @meta при конфликте ключей.
+    const commentMeta = parseFormMeta(field.comments)
+    const metaAttrMeta = parseMetaAttributes(field.attributes)
+    warnLegacyFormDirectives(model.name, field.name, commentMeta)
+    const formMeta = mergeFormMeta(commentMeta, metaAttrMeta)
 
     // Check if field should be excluded
     const isSystemField = systemFields.includes(field.name)

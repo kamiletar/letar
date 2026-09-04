@@ -1,5 +1,20 @@
+import type { DataFieldAttribute } from '@zenstackhq/language/ast'
 import { describe, expect, it } from 'vitest'
-import { extractEnumLabel, parseFormMeta, toTitleCase } from './parser.js'
+import { extractEnumLabel, mergeFormMeta, parseFormMeta, parseMetaAttributes, toTitleCase } from './parser.js'
+
+// ─── Фикстуры AST для @meta (Фаза 3, v3.0.0) ───────────────────────────────
+
+const strLit = (value: string) => ({ $type: 'StringLiteral', value })
+const numLit = (value: number) => ({ $type: 'NumberLiteral', value: String(value) })
+const boolLit = (value: boolean) => ({ $type: 'BooleanLiteral', value })
+const arrLit = (items: unknown[]) => ({ $type: 'ArrayExpr', items })
+
+/** `@meta("form.<key>", value)` field attribute, как хранит Langium в `decl.$refText`/`args`. */
+function metaAttr(key: string, value?: unknown): DataFieldAttribute {
+  const args = value === undefined ? [{ value: strLit(key) }] : [{ value: strLit(key) }, { value }]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return { $type: 'DataFieldAttribute', decl: { $refText: '@meta' }, args } as any
+}
 
 describe('extractEnumLabel', () => {
   it('возвращает undefined для пустого массива комментариев', () => {
@@ -170,5 +185,117 @@ describe('parseFormMeta', () => {
     const meta = parseFormMeta(['@form.title("A")\n', '@form.placeholder("B")'])
     expect(meta.title).toBe('A')
     expect(meta.placeholder).toBe('B')
+  })
+})
+
+describe('parseMetaAttributes (Фаза 3, v3.0.0)', () => {
+  it('возвращает пустой объект без @meta-атрибутов', () => {
+    expect(parseMetaAttributes([])).toEqual({})
+  })
+
+  it('игнорирует атрибуты с другим именем (не @meta)', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const attrs = [{ $type: 'DataFieldAttribute', decl: { $refText: '@gte' }, args: [] } as any]
+    expect(parseMetaAttributes(attrs)).toEqual({})
+  })
+
+  it('игнорирует @meta с namespace, отличным от "form."', () => {
+    // upstream использует @meta("description", "...") — не наш namespace
+    const attrs = [metaAttr('description', strLit('ORM-level description'))]
+    expect(parseMetaAttributes(attrs)).toEqual({})
+  })
+
+  it('парсит form.title/placeholder/description/fieldType', () => {
+    const attrs = [
+      metaAttr('form.title', strLit('Название')),
+      metaAttr('form.placeholder', strLit('Введите...')),
+      metaAttr('form.description', strLit('Подсказка')),
+      metaAttr('form.fieldType', strLit('textarea')),
+    ]
+    expect(parseMetaAttributes(attrs)).toEqual({
+      title: 'Название',
+      placeholder: 'Введите...',
+      description: 'Подсказка',
+      fieldType: 'textarea',
+    })
+  })
+
+  it('парсит form.exclude со значением true', () => {
+    expect(parseMetaAttributes([metaAttr('form.exclude', boolLit(true))])).toEqual({ exclude: true })
+  })
+
+  it('form.exclude без второго аргумента тоже считается true', () => {
+    expect(parseMetaAttributes([metaAttr('form.exclude')])).toEqual({ exclude: true })
+  })
+
+  it('form.props.<key> разбирается на constraints/uiProps по тем же правилам, что @form.props', () => {
+    const attrs = [
+      metaAttr('form.props.min', numLit(1)), // ZOD_CONSTRAINT_NAMES → constraints
+      metaAttr('form.props.max', numLit(100)), // constraints
+      metaAttr('form.props.showValue', boolLit(true)), // UI-проп
+    ]
+    const meta = parseMetaAttributes(attrs)
+    expect(meta.constraints).toEqual({ min: 1, max: 100 })
+    expect(meta.props).toEqual({ showValue: true })
+  })
+
+  it('form.props с вложенным точечным путём собирается в объект', () => {
+    const meta = parseMetaAttributes([metaAttr('form.props.grid.cols', numLit(2))])
+    expect(meta.props).toEqual({ grid: { cols: 2 } })
+  })
+
+  it('form.props.<key> с массивом-значением', () => {
+    const meta = parseMetaAttributes([metaAttr('form.props.options', arrLit([strLit('p1'), strLit('p2')]))])
+    expect(meta.props).toEqual({ options: ['p1', 'p2'] })
+  })
+
+  it('form.relation.<key> собирается в meta.relation', () => {
+    const attrs = [
+      metaAttr('form.relation.model', strLit('Category')),
+      metaAttr('form.relation.labelField', strLit('name')),
+    ]
+    expect(parseMetaAttributes(attrs).relation).toEqual({ model: 'Category', labelField: 'name' })
+  })
+
+  it('первый аргумент не StringLiteral — атрибут игнорируется (не @meta("form.*", ...))', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const attrs = [{ $type: 'DataFieldAttribute', decl: { $refText: '@meta' }, args: [{ value: numLit(1) }] } as any]
+    expect(parseMetaAttributes(attrs)).toEqual({})
+  })
+})
+
+describe('mergeFormMeta (Фаза 3, v3.0.0)', () => {
+  it('без пересечений сохраняет оба источника', () => {
+    const merged = mergeFormMeta({ title: 'Comment title' }, { fieldType: 'textarea' })
+    expect(merged.title).toBe('Comment title')
+    expect(merged.fieldType).toBe('textarea')
+  })
+
+  it('@meta побеждает при конфликте по одному и тому же ключу', () => {
+    const merged = mergeFormMeta({ title: 'Старое' }, { title: 'Новое' })
+    expect(merged.title).toBe('Новое')
+  })
+
+  it('constraints мержатся по ключам, @meta побеждает при пересечении', () => {
+    const merged = mergeFormMeta(
+      { constraints: { min: 1, max: 100 } },
+      { constraints: { max: 50 } },
+    )
+    expect(merged.constraints).toEqual({ min: 1, max: 50 })
+  })
+
+  it('props мержатся по ключам, @meta побеждает при пересечении', () => {
+    const merged = mergeFormMeta(
+      { props: { showValue: true, count: 5 } },
+      { props: { count: 3 } },
+    )
+    expect(merged.props).toEqual({ showValue: true, count: 3 })
+  })
+
+  it('пустые оба источника дают пустой (не содержащий constraints/props ключей) результат', () => {
+    const merged = mergeFormMeta({}, {})
+    expect(merged.constraints).toBeUndefined()
+    expect(merged.props).toBeUndefined()
+    expect(merged.title).toBeUndefined()
   })
 })
