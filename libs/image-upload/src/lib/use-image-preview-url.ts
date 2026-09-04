@@ -57,10 +57,14 @@ export function useImagePreviewUrl(options: UseImagePreviewUrlOptions): UseImage
   const [isLoading, setIsLoading] = useState(false)
 
   const resolverRef = useRef<ImageUrlResolver>(createEndpointUrlResolver(imageEndpoint))
-  resolverRef.current = resolveImageUrl ?? createEndpointUrlResolver(imageEndpoint)
+  useEffect(() => {
+    resolverRef.current = resolveImageUrl ?? createEndpointUrlResolver(imageEndpoint)
+  }, [resolveImageUrl, imageEndpoint])
 
   useEffect(() => {
     if (!value) {
+      // Синхронизация с value — сброс превью при отсутствии значения
+      // oxlint-disable-next-line react/set-state-in-effect
       setPreviewUrl(null)
       setIsLoading(false)
       return

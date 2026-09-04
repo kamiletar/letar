@@ -1,7 +1,7 @@
 'use client'
 
 import { useTheme } from 'next-themes'
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 
 export type ColorMode = 'light' | 'dark' | 'system'
 export type ResolvedColorMode = 'light' | 'dark'
@@ -23,11 +23,12 @@ export interface UseColorModeReturn {
  */
 export function useColorMode(): UseColorModeReturn {
   const { theme, setTheme, resolvedTheme, systemTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  // Ждём гидратации: на сервере всегда false, на клиенте — true сразу после монтирования
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  )
 
   const colorMode = (mounted ? theme : 'system') as ColorMode
   const resolvedColorMode = mounted ? (resolvedTheme as ResolvedColorMode) : undefined

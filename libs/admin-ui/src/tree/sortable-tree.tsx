@@ -95,6 +95,9 @@ export function SortableTree<T extends OrderedTreeItem>({
   const dndContextId = useId()
 
   useEffect(() => {
+    // Синхронизация после внешнего обновления списка — nodes далее мутируется
+    // локально (drag-reorder), useMemo здесь не подходит
+    // oxlint-disable-next-line react/set-state-in-effect
     setNodes(items)
   }, [items])
 

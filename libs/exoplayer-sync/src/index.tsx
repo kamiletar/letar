@@ -107,7 +107,7 @@ export const SyncVideoPlayer = React.forwardRef<SyncVideoPlayerRef, SyncVideoPla
       }
 
       const nodeHandle = findNodeHandle(nativeRef.current)
-      if (nodeHandle == null) {
+      if (nodeHandle === null || nodeHandle === undefined) {
         return
       }
 

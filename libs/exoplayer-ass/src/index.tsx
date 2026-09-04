@@ -67,7 +67,7 @@ export function NativeAssView({
     }
 
     const nodeHandle = findNodeHandle(viewRef.current)
-    if (nodeHandle == null) {
+    if (nodeHandle === null || nodeHandle === undefined) {
       return
     }
 
@@ -86,7 +86,7 @@ export function NativeAssView({
     }
 
     const nodeHandle = findNodeHandle(viewRef.current)
-    if (nodeHandle == null) {
+    if (nodeHandle === null || nodeHandle === undefined) {
       return
     }
 
@@ -128,6 +128,8 @@ export function useAssContent(url: string | null): string {
 
   React.useEffect(() => {
     if (!url) {
+      // Синхронизация с внешним источником (url) — сброс при отсутствии URL
+      // oxlint-disable-next-line react/set-state-in-effect
       setContent('')
       return
     }

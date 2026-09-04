@@ -94,6 +94,8 @@ export function PvzPicker({ selectedPvzCode, onSelect, disabled, colorPalette = 
       clearTimeout(debounceRef.current)
     }
     if (cityQuery.length < 2) {
+      // Дебаунс-эффект синхронизируется с внешним запросом (CDEK API)
+      // oxlint-disable-next-line react/set-state-in-effect
       setCitySuggestions([])
       setShowDropdown(false)
       return
@@ -127,6 +129,8 @@ export function PvzPicker({ selectedPvzCode, onSelect, disabled, colorPalette = 
 
   useEffect(() => {
     if (!selectedCity) {
+      // Синхронизация с внешним запросом (CDEK API) — сброс при отсутствии выбранного города
+      // oxlint-disable-next-line react/set-state-in-effect
       setPoints([])
       setPvzError(null)
       return

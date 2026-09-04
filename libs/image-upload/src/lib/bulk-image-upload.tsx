@@ -129,6 +129,9 @@ export function BulkImageUpload({
       url: resolveUrl(id) ?? '',
       order: index + 1,
     }))
+    // Синхронизация внутреннего state со внешним value — images далее мутируется
+    // локально (upload/reorder), полноценный useMemo здесь не подходит
+    // oxlint-disable-next-line react/set-state-in-effect
     setImages(newImages)
   }, [value, resolveUrl])
 

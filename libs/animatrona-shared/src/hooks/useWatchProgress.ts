@@ -77,10 +77,12 @@ export function useWatchProgress({
 
   /** Ref для текущего времени — чтобы cleanup effect не зависел от currentTime */
   const currentTimeRef = useRef(currentTime)
-  currentTimeRef.current = currentTime
   /** Ref для duration */
   const durationRef = useRef(duration)
-  durationRef.current = duration
+  useEffect(() => {
+    currentTimeRef.current = currentTime
+    durationRef.current = duration
+  }, [currentTime, duration])
 
   const storageKey = `${storageKeyPrefix}${episodeId}`
 
@@ -142,7 +144,9 @@ export function useWatchProgress({
 
   /** Ref для saveProgress — стабильная ссылка на актуальную функцию */
   const saveProgressRef = useRef(saveProgress)
-  saveProgressRef.current = saveProgress
+  useEffect(() => {
+    saveProgressRef.current = saveProgress
+  }, [saveProgress])
 
   /** Очистить прогресс */
   const clearProgress = useCallback(async () => {

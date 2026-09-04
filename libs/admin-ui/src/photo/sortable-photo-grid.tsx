@@ -65,8 +65,10 @@ export function SortablePhotoGrid({
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
-  // Синхронизация после внешнего обновления списка (например router.refresh())
+  // Синхронизация после внешнего обновления списка (например router.refresh()) —
+  // photos далее мутируется локально (drag-reorder), useMemo здесь не подходит
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect
     setPhotos(items)
   }, [items])
 
@@ -206,6 +208,9 @@ function SortablePhotoCard({
   const [altDraft, setAltDraft] = useState(photo.alt ?? '')
 
   useEffect(() => {
+    // Синхронизация черновика с внешним обновлением photo.alt — altDraft далее
+    // редактируется локально (controlled input), useMemo здесь не подходит
+    // oxlint-disable-next-line react/set-state-in-effect
     setAltDraft(photo.alt ?? '')
   }, [photo.alt])
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: photo.id })
