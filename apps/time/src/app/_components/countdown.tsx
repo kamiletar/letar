@@ -16,6 +16,8 @@ export function Countdown() {
 
   useEffect(() => {
     const nextMilestone = getNextMilestone()
+    // Синхронизация с таймером (внешняя система) — время следующей вехи на момент монтирования
+    // oxlint-disable-next-line react/set-state-in-effect
     setMilestone(nextMilestone)
 
     function update() {

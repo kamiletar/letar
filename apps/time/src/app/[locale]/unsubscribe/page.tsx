@@ -19,6 +19,8 @@ function UnsubscribeContent() {
 
   useEffect(() => {
     if (!token) {
+      // Синхронизация с внешним источником (query-параметр URL) при монтировании
+      // oxlint-disable-next-line react/set-state-in-effect
       setStatus('error')
       return
     }

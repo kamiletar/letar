@@ -17,6 +17,8 @@ export default function WhatHourPage() {
   const [hour, setHour] = useState<number | null>(null)
 
   useEffect(() => {
+    // Синхронизация с системными часами (внешняя система), обновляется таймером ниже
+    // oxlint-disable-next-line react/set-state-in-effect
     setHour(getCurrentUnixHour())
 
     const interval = setInterval(() => {

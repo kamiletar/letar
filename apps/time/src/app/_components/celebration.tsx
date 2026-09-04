@@ -22,6 +22,8 @@ export function Celebration({ milestoneHour }: { milestoneHour: number }) {
       left: Math.random() * 100,
       delay: Math.random() * 3,
     }))
+    // Синхронизация со случайностью (Math.random) — не производное значение рендера
+    // oxlint-disable-next-line react/set-state-in-effect
     setParticles(items)
 
     // Скрыть через 5 минут
