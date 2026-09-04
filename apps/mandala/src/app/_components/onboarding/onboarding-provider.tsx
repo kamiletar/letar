@@ -42,6 +42,9 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
   useEffect(() => {
     const completed = localStorage.getItem(ONBOARDING_STORAGE_KEY)
     if (!completed) {
+      // синхронизация с localStorage (внешняя система), доступной только на клиенте: SSR рендерит
+      // isCompleted=true по умолчанию, эффект догружает реальное значение после гидратации
+      // oxlint-disable-next-line react/set-state-in-effect
       setIsCompleted(false)
       // Не запускаем автоматически — пользователь может запустить через меню
     }

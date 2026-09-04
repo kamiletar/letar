@@ -72,7 +72,9 @@ export function useCanvasEffect(props: UseCanvasEffectProps, options: UseCanvasE
 
   // Refs для анимации
   const accumulatedTimeRef = useRef(0)
-  const lastFrameTimeRef = useRef(performance.now())
+  // Начальное значение не важно — эффект анимации ниже перезаписывает его
+  // фактическим performance.now() перед первым кадром
+  const lastFrameTimeRef = useRef(0)
   const speedMultiplierRef = useRef(speedMultiplier)
   const prevMixBlendModeRef = useRef(mixBlendMode)
   const renderFrameRef = useRef(renderFrame)

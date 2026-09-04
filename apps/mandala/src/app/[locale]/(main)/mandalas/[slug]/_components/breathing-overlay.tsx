@@ -23,7 +23,11 @@ export function BreathingOverlay({ enabled, cycleDuration = 8, showHints = true 
   // Общий цикл примерно 10 секунд, но можно масштабировать
   useEffect(() => {
     if (!enabled) {
-      setPhase('inhale') // Сброс при отключении
+      // сброс синхронизирован с внешней системой (цепочка setTimeout цикла дыхания, останавливаемая
+      // этой же веткой) — чтобы повторное включение всегда начиналось с фазы вдоха, а не с последней
+      // перед выключением
+      // oxlint-disable-next-line react/set-state-in-effect
+      setPhase('inhale')
       return
     }
 

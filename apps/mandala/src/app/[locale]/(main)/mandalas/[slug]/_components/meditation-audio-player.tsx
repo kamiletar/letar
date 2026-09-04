@@ -173,12 +173,17 @@ export function MeditationAudioPlayer({
 
   // Если трек не выбран — не рендерим ничего
   // (ни кастомного, ни встроенного кроме 'none')
-  if (!trackUrl || (!customTrackBlobUrl && trackId === 'none')) {
-    // Сбрасываем ref при размонтировании
-    if (audioRef.current) {
+  const shouldRenderAudio = Boolean(trackUrl) && (Boolean(customTrackBlobUrl) || trackId !== 'none')
+
+  // Сбрасываем ref, когда рендер аудио-элемента прекращается — не во время самого рендера
+  useEffect(() => {
+    if (!shouldRenderAudio && audioRef.current) {
       onAudioRef?.(null)
       audioRef.current = null
     }
+  }, [shouldRenderAudio, onAudioRef])
+
+  if (!shouldRenderAudio) {
     return null
   }
 

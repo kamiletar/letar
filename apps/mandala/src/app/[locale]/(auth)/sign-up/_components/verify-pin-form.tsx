@@ -29,6 +29,9 @@ export function VerifyPinForm({ email }: VerifyPinFormProps) {
   // Таймер для повторной отправки
   useEffect(() => {
     if (resendCountdown <= 0) {
+      // синхронизация с внешней системой (setTimeout-таймер обратного отсчёта) — разрешаем повторную
+      // отправку по его завершении
+      // oxlint-disable-next-line react/set-state-in-effect
       setCanResend(true)
       return
     }

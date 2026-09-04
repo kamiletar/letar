@@ -139,6 +139,9 @@ export function useFullscreenControls({
     document.addEventListener('mousemove', handleMouseMove)
     document.addEventListener('touchstart', handleTouchStart, { passive: false })
     // Показать при входе в fullscreen
+    // синхронизация с внешней системой (переход в fullscreen) — по входу в него нужно показать
+    // контролы и запустить таймер скрытия
+    // oxlint-disable-next-line react/set-state-in-effect
     showControls()
 
     return () => {

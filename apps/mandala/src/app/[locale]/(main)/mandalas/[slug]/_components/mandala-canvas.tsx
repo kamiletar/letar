@@ -111,6 +111,9 @@ export function MandalaCanvas({
         ...currentLayerRef.current,
         centerImage: null,
       }
+      // синхронизация с внешней системой: фактическое состояние слоёв canvas живёт в рефах
+      // (императивная отрисовка), forceUpdate лишь запускает перерисовку после его изменения
+      // oxlint-disable-next-line react/set-state-in-effect
       forceUpdate((n) => n + 1)
     }
   }, [centerImageUrl])

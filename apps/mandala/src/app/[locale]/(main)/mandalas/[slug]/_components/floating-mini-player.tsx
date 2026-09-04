@@ -155,6 +155,9 @@ export function FloatingMiniPlayer({
    */
   useEffect(() => {
     if (visible) {
+      // синхронизация с внешней системой (setTimeout-таймер сворачивания) — сброс происходит по факту
+      // изменения видимости
+      // oxlint-disable-next-line react/set-state-in-effect
       resetCollapseTimer()
     }
     return () => {
@@ -172,6 +175,9 @@ export function FloatingMiniPlayer({
       if (collapseTimerRef.current) {
         clearTimeout(collapseTimerRef.current)
       }
+      // синхронизация с внешней системой (setTimeout-таймер сворачивания, останавливаемый строкой выше)
+      // — не производное значение
+      // oxlint-disable-next-line react/set-state-in-effect
       setIsCollapsed(false)
     } else if (visible) {
       resetCollapseTimer()

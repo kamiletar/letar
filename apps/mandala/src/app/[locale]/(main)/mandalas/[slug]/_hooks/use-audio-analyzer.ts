@@ -78,6 +78,9 @@ export function useAudioAnalyzer(
   const animationFrameRef = useRef<number | null>(null)
   const lastBeatTimeRef = useRef<number>(0)
   const connectedElementRef = useRef<HTMLAudioElement | null>(null)
+  // Ref на последнюю версию analyze — нужен, чтобы rAF-цикл мог рекурсивно
+  // планировать сам себя, не читая ещё не проинициализированную переменную analyze
+  const analyzeRef = useRef<() => void>(() => {})
   const microphoneStreamRef = useRef<MediaStream | null>(null)
   const currentSourceTypeRef = useRef<AudioSource | null>(null)
 
@@ -256,8 +259,12 @@ export function useAudioAnalyzer(
       beatIntensity,
     })
 
-    animationFrameRef.current = requestAnimationFrame(analyze)
+    animationFrameRef.current = requestAnimationFrame(() => analyzeRef.current())
   }, [enabled, energyThresholdMultiplier, minBassLevel, beatCooldown])
+
+  useEffect(() => {
+    analyzeRef.current = analyze
+  }, [analyze])
 
   /**
    * Запуск/остановка анализа.
@@ -292,7 +299,7 @@ export function useAudioAnalyzer(
       }
 
       if (analyzerRef.current) {
-        animationFrameRef.current = requestAnimationFrame(analyze)
+        animationFrameRef.current = requestAnimationFrame(() => analyzeRef.current())
       }
     }
 

@@ -33,7 +33,9 @@ export function useImageRotation(images: string[], rotationInterval = 10800): st
       return
     }
 
-    // После mount выбираем случайную картинку
+    // После mount выбираем случайную картинку. Math.random() — нечистая функция, но значение
+    // намеренно отложено до клиентского эффекта, чтобы SSR/CSR совпадали (см. lazy-инициализатор выше)
+    // oxlint-disable-next-line set-state-in-effect
     setCurrentImage(images[Math.floor(Math.random() * images.length)])
 
     const timer = setInterval(() => {

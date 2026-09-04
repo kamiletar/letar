@@ -42,6 +42,9 @@ export function MeditationTimer({ enabled, duration, onComplete, onCancel, visib
 
   // Сброс таймера при изменении длительности
   useEffect(() => {
+    // синхронизация с внешней системой (setInterval-таймер обратного отсчёта) — при смене
+    // длительности перезапускаем отсчёт
+    // oxlint-disable-next-line react/set-state-in-effect
     setRemainingSeconds(duration * 60)
     setIsPaused(false)
   }, [duration])

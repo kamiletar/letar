@@ -52,7 +52,9 @@ export function useCustomAudioTracks(): UseCustomAudioTracksResult {
 
   // Ref для актуального состояния треков (для использования в callbacks)
   const tracksRef = useRef<CustomAudioTrack[]>([])
-  tracksRef.current = tracks
+  useEffect(() => {
+    tracksRef.current = tracks
+  }, [tracks])
 
   // Кэш blob URL для воспроизведения
   const blobUrlCacheRef = useRef<Map<string, string>>(new Map())

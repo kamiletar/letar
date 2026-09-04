@@ -26,6 +26,9 @@ export function useViewerSettingsStorage(mandalaSlug: string, initialEffectIndex
         if (validated.success) {
           // Используем сохранённые настройки, но effectIndex берём из мандалы
           // (пользователь может захотеть начать с дефолтного эффекта конкретной мандалы)
+          // Синхронизация с localStorage (внешняя система), доступной только на клиенте:
+          // SSR рендерит дефолт, эффект догружает сохранённое значение после гидратации
+          // oxlint-disable-next-line react/set-state-in-effect
           setSettings({
             ...validated.data,
             effectIndex: initialEffectIndex,

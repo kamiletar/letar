@@ -47,6 +47,9 @@ export function AudioSpectrumVisualizer({
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null)
   const animationFrameRef = useRef<number | null>(null)
   const connectedElementRef = useRef<HTMLAudioElement | null>(null)
+  // Ref на последнюю версию draw — нужен, чтобы rAF-цикл мог рекурсивно
+  // планировать сам себя, не читая ещё не проинициализированную переменную draw
+  const drawRef = useRef<() => void>(() => {})
 
   /**
    * Инициализация Web Audio API
@@ -159,8 +162,12 @@ export function AudioSpectrumVisualizer({
     }
 
     // Следующий кадр
-    animationFrameRef.current = requestAnimationFrame(draw)
+    animationFrameRef.current = requestAnimationFrame(() => drawRef.current())
   }, [visible, color, intensity, bars, minBarHeight, maxBarHeight, innerRadiusPercent, mode])
+
+  useEffect(() => {
+    drawRef.current = draw
+  }, [draw])
 
   /**
    * Инициализация и запуск анимации
@@ -182,7 +189,7 @@ export function AudioSpectrumVisualizer({
     }
 
     // Запускаем анимацию
-    animationFrameRef.current = requestAnimationFrame(draw)
+    animationFrameRef.current = requestAnimationFrame(() => drawRef.current())
 
     return () => {
       if (animationFrameRef.current) {

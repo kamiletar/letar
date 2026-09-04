@@ -84,6 +84,9 @@ export function AudioProgressRing({
 
     // Инициализация
     if (audioElement.duration) {
+      // синхронизация с внешней системой: duration/currentTime аудио-элемента известны только после
+      // загрузки метаданных
+      // oxlint-disable-next-line react/set-state-in-effect
       setDuration(audioElement.duration)
       setProgress(audioElement.currentTime / audioElement.duration)
     }
@@ -127,6 +130,9 @@ export function AudioProgressRing({
   const seekTo = useCallback(
     (newProgress: number) => {
       if (audioElement && duration > 0) {
+        // false positive: audioElement — DOM-узел <audio>, управляется императивно через нативный
+        // HTMLMediaElement API, не React-состояние
+        // oxlint-disable-next-line react/immutability
         audioElement.currentTime = newProgress * duration
         setProgress(newProgress)
       }

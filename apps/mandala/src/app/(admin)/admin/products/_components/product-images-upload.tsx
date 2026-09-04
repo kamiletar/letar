@@ -60,12 +60,16 @@ export function ProductImagesUpload({
   // Инициализация из initialImages
   useEffect(() => {
     if (initialImages) {
+      // Легитимная синхронизация: images — независимое UI-состояние (drag-n-drop загрузка, reorder),
+      // которое здесь лишь предзаполняется из внешнего initialImages при его изменении (загрузка данных
+      // товара)
       const items: ImageItem[] = initialImages.map((pi) => ({
         id: pi.id,
         imageId: pi.imageId,
         order: pi.order,
         url: getImageUrl(pi.image.path),
       }))
+      // oxlint-disable-next-line react/set-state-in-effect
       setImages(items.sort((a, b) => a.order - b.order))
     }
   }, [initialImages])

@@ -53,7 +53,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Загрузка корзины из localStorage при монтировании
   useEffect(() => {
+    // Синхронизация с localStorage (внешняя система), доступной только на клиенте: SSR рендерит
+    // пустую корзину, эффект догружает сохранённую после гидратации
     const stored = loadCartFromStorage()
+    // oxlint-disable-next-line react/set-state-in-effect
     setItems(stored)
     setIsLoaded(true)
   }, [])

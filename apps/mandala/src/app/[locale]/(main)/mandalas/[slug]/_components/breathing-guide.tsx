@@ -83,6 +83,9 @@ export function BreathingGuide({
   const animationRef = useRef<number | null>(null)
   const startTimeRef = useRef<number>(0)
   const currentPhaseRef = useRef<Phase>('inhale')
+  // Ref на последнюю версию animate — нужен, чтобы rAF-цикл мог рекурсивно
+  // планировать сам себя, не читая ещё не проинициализированную переменную animate
+  const animateRef = useRef<(timestamp: number) => void>(() => {})
 
   /**
    * Получить паттерн дыхания (с учётом BPM если указан)
@@ -173,10 +176,14 @@ export function BreathingGuide({
       }
       setPhaseProgress(progress)
 
-      animationRef.current = requestAnimationFrame(animate)
+      animationRef.current = requestAnimationFrame((t) => animateRef.current(t))
     },
     [cycleDuration, pattern],
   )
+
+  useEffect(() => {
+    animateRef.current = animate
+  }, [animate])
 
   /**
    * Запуск/остановка анимации
@@ -188,12 +195,15 @@ export function BreathingGuide({
         animationRef.current = null
       }
       startTimeRef.current = 0
+      // сброс синхронизирован с внешней системой (rAF-цикл, останавливаемый этой же веткой), не
+      // производное состояние
+      // oxlint-disable-next-line react/set-state-in-effect
       setPhase('inhale')
       setPhaseProgress(0)
       return
     }
 
-    animationRef.current = requestAnimationFrame(animate)
+    animationRef.current = requestAnimationFrame((t) => animateRef.current(t))
 
     return () => {
       if (animationRef.current) {

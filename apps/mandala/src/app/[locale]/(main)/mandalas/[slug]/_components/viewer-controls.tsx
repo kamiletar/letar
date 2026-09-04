@@ -89,7 +89,9 @@ export function ViewerControls({
 
   // Стабильная ссылка на callback для избежания переустановки интервалов
   const onSettingsChangeRef = useRef(onSettingsChange)
-  onSettingsChangeRef.current = onSettingsChange
+  useEffect(() => {
+    onSettingsChangeRef.current = onSettingsChange
+  }, [onSettingsChange])
 
   // В fullscreen используем внешний isVisible, в normal — всегда видимо
   const panelVisible = isFullscreen ? isVisibleProp : true

@@ -105,11 +105,16 @@ export function SoundscapeSelector({
 
   /** Определить текущую выбранную категорию */
   useEffect(() => {
+    // Легитимная синхронизация: selectedCategory — независимое UI-состояние (пользователь листает
+    // категории кнопками), которое здесь лишь предзаполняется из внешних пропсов
+    // currentTrackId/currentCustomTrackId при их изменении
     if (currentCustomTrackId) {
+      // oxlint-disable-next-line react/set-state-in-effect
       setSelectedCategory('custom')
     } else {
       const track = MEDITATION_TRACKS.find((t) => t.id === currentTrackId)
       if (track) {
+        // oxlint-disable-next-line react/set-state-in-effect
         setSelectedCategory(track.category)
       }
     }
@@ -144,6 +149,9 @@ export function SoundscapeSelector({
   /** Очистка при закрытии */
   useEffect(() => {
     if (!isOpen) {
+      // синхронизация с внешней системой (аудио-превью и его таймер) — останавливаем воспроизведение
+      // при закрытии селектора
+      // oxlint-disable-next-line react/set-state-in-effect
       stopPreview()
     }
   }, [isOpen, stopPreview])

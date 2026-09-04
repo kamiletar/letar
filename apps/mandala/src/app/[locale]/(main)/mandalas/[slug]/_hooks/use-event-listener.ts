@@ -81,9 +81,23 @@ export function useEventListener(
   }, [target, eventName, options?.capture, options?.once, options?.passive])
 }
 
+/** Ref-подобный объект — принимается наравне с прямым значением цели */
+type RefLike<T> = { current: T | null }
+
+/** Достаёт актуальный элемент из прямого значения или ref-объекта */
+function resolveEventTarget<T extends EventTarget>(target: T | RefLike<T> | null | undefined): T | null {
+  if (target && typeof target === 'object' && 'current' in target) {
+    return target.current
+  }
+  return target ?? null
+}
+
 /**
  * Хук для добавления нескольких event listener'ов на один элемент.
  * Более эффективен, чем несколько вызовов useEventListener.
+ *
+ * Принимает либо сам элемент, либо ref-объект — во втором случае `.current`
+ * читается внутри эффекта, а не во время рендера (иначе `react/refs`).
  *
  * @example
  * useEventListeners(audioElement, {
@@ -94,7 +108,7 @@ export function useEventListener(
  * })
  */
 export function useEventListeners<T extends EventTarget>(
-  target: T | null | undefined,
+  target: T | RefLike<T> | null | undefined,
   handlers: Record<string, (event: Event) => void>,
   options?: AddEventListenerOptions,
 ): void {
@@ -106,7 +120,8 @@ export function useEventListeners<T extends EventTarget>(
   }, [handlers])
 
   useEffect(() => {
-    if (!target) {
+    const resolvedTarget = resolveEventTarget(target)
+    if (!resolvedTarget) {
       return
     }
 
@@ -121,12 +136,12 @@ export function useEventListeners<T extends EventTarget>(
         }
       }
       wrappedHandlers.set(eventName, wrapper)
-      target.addEventListener(eventName, wrapper, options)
+      resolvedTarget.addEventListener(eventName, wrapper, options)
     }
 
     return () => {
       for (const [eventName, wrapper] of wrappedHandlers.entries()) {
-        target.removeEventListener(eventName, wrapper, options)
+        resolvedTarget.removeEventListener(eventName, wrapper, options)
       }
     }
     // Намеренно используем отдельные свойства options вместо объекта,

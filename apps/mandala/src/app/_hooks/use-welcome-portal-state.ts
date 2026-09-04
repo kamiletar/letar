@@ -70,6 +70,9 @@ export function useWelcomePortalState({
       }
     }
 
+    // синхронизация с localStorage (внешняя система), доступной только на клиенте: проверка отложена
+    // до эффекта
+    // oxlint-disable-next-line react/set-state-in-effect
     setIsReady(true)
     return undefined
   }, [showDelay])

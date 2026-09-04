@@ -116,6 +116,9 @@ export function useAudioSyncedEffects({
   const [effects, setEffects] = useState<AudioSyncedEffects>(DEFAULT_EFFECTS)
   const lastBeatTimeRef = useRef<number>(0)
   const animationFrameRef = useRef<number | null>(null)
+  // Ref на последнюю версию computeEffects — нужен, чтобы rAF-цикл мог рекурсивно
+  // планировать сам себя, не читая ещё не проинициализированную переменную computeEffects
+  const computeEffectsRef = useRef<() => void>(() => {})
 
   // Нормализованные чувствительности (0-2, где 1 = стандартная)
   const normalizedBassSensitivity = bassSensitivity / 50
@@ -200,7 +203,7 @@ export function useAudioSyncedEffects({
     }))
 
     // Следующий кадр
-    animationFrameRef.current = requestAnimationFrame(computeEffects)
+    animationFrameRef.current = requestAnimationFrame(() => computeEffectsRef.current())
   }, [
     enabled,
     mode,
@@ -213,14 +216,21 @@ export function useAudioSyncedEffects({
     unifiedLerpFactor,
   ])
 
+  useEffect(() => {
+    computeEffectsRef.current = computeEffects
+  }, [computeEffects])
+
   // Запуск/остановка цикла вычислений
   useEffect(() => {
     if (enabled && mode !== 'off') {
-      animationFrameRef.current = requestAnimationFrame(computeEffects)
+      animationFrameRef.current = requestAnimationFrame(() => computeEffectsRef.current())
     } else {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current)
       }
+      // сброс эффектов синхронизирован с внешней системой (rAF-цикл, останавливаемый этой же веткой),
+      // не производное состояние
+      // oxlint-disable-next-line react/set-state-in-effect
       setEffects(DEFAULT_EFFECTS)
     }
 

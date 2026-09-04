@@ -76,6 +76,9 @@ export function useHueRotateEffect(audioData: AudioAnalyzerData | null, settings
   const beatJumpOffsetRef = useRef(0)
   const lastTimestampRef = useRef<number>(0)
   const animationFrameRef = useRef<number | null>(null)
+  // Ref на последнюю версию computeHueAngle — нужен, чтобы rAF-цикл мог рекурсивно
+  // планировать сам себя, не читая ещё не проинициализированную переменную computeHueAngle
+  const computeHueAngleRef = useRef<(timestamp: number) => void>(() => {})
 
   // Получаем конфигурацию режима
   const modeConfig = settings.audioSyncMode !== 'off' ? AUDIO_SYNC_MODE_CONFIGS[settings.audioSyncMode] : null
@@ -247,7 +250,7 @@ export function useHueRotateEffect(audioData: AudioAnalyzerData | null, settings
       setHueAngle(smoothedHue)
 
       // Следующий кадр
-      animationFrameRef.current = requestAnimationFrame(computeHueAngle)
+      animationFrameRef.current = requestAnimationFrame((t) => computeHueAngleRef.current(t))
     },
     [
       settings,
@@ -261,15 +264,22 @@ export function useHueRotateEffect(audioData: AudioAnalyzerData | null, settings
     ],
   )
 
+  useEffect(() => {
+    computeHueAngleRef.current = computeHueAngle
+  }, [computeHueAngle])
+
   // Запуск/остановка анимации
   useEffect(() => {
     if (settings.enabled) {
       lastTimestampRef.current = 0 // Сброс для правильного deltaTime
-      animationFrameRef.current = requestAnimationFrame(computeHueAngle)
+      animationFrameRef.current = requestAnimationFrame((t) => computeHueAngleRef.current(t))
     } else {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current)
       }
+      // сброс синхронизирован с внешней системой (rAF-цикл, останавливаемый этой же веткой), не
+      // производное состояние
+      // oxlint-disable-next-line react/set-state-in-effect
       setHueAngle(0)
       previousHueRef.current = 0
       cumulativeHueRef.current = 0

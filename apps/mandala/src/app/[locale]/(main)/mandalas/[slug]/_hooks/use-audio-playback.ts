@@ -232,6 +232,9 @@ export function useAudioPlayback({
 
     // Repeat one — перематываем текущий трек
     if (repeatMode === 'one') {
+      // false positive: audioElement — DOM-узел <audio>, управляется императивно через нативный
+      // HTMLMediaElement API, не React-состояние
+      // oxlint-disable-next-line react/immutability
       audioElement.currentTime = 0
       audioElement.play()
       return
@@ -265,6 +268,9 @@ export function useAudioPlayback({
   // Инициализируем duration при монтировании
   useEffect(() => {
     if (audioElement?.duration) {
+      // синхронизация с внешней системой: duration аудио-элемента становится известна асинхронно после
+      // загрузки метаданных
+      // oxlint-disable-next-line react/set-state-in-effect
       setDuration(audioElement.duration)
     }
   }, [audioElement])
@@ -293,6 +299,9 @@ export function useAudioPlayback({
   const handlePrevTrack = useCallback(() => {
     // Если воспроизведение > 3 сек — перемотать в начало текущего трека
     if (audioElement && audioElement.currentTime > 3) {
+      // false positive: audioElement — DOM-узел <audio>, управляется императивно через нативный
+      // HTMLMediaElement API, не React-состояние
+      // oxlint-disable-next-line react/immutability
       audioElement.currentTime = 0
       return
     }
@@ -310,6 +319,9 @@ export function useAudioPlayback({
         return
       }
       const clampedProgress = Math.max(0, Math.min(1, progress))
+      // false positive: audioElement — DOM-узел <audio>, управляется императивно через нативный
+      // HTMLMediaElement API, не React-состояние
+      // oxlint-disable-next-line react/immutability
       audioElement.currentTime = clampedProgress * duration
     },
     [audioElement, duration],

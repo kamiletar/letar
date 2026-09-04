@@ -14,6 +14,9 @@ export const Toaster = () => {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    // стандартный hydration-safe паттерн: Portal должен рендериться только после монтирования на
+    // клиенте, иначе SSR/CSR не совпадут
+    // oxlint-disable-next-line react/set-state-in-effect
     setMounted(true)
   }, [])
 

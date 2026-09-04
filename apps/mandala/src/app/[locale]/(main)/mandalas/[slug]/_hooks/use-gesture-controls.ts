@@ -265,8 +265,10 @@ export function useGestureControls({
   )
 
   // Подписка на события через useEventListeners
+  // Передаём сам ref-объект (не containerRef.current) — .current резолвится
+  // внутри эффекта хука, а не во время рендера
   useEventListeners(
-    enabled ? containerRef.current : null,
+    enabled ? containerRef : null,
     {
       touchstart: handleTouchStart as (e: Event) => void,
       touchmove: handleTouchMove as (e: Event) => void,

@@ -56,8 +56,6 @@ export function useBreathingScale({
 
   useEffect(() => {
     if (!enabled) {
-      setScale(maxScale)
-      setPhase('inhale')
       return
     }
 
@@ -122,7 +120,12 @@ export function useBreathingScale({
     }
   }, [enabled, pattern, minScale, maxScale])
 
-  return { scale, phase }
+  // Когда режим дыхания выключен, анимационный эффект не запускается —
+  // значения по умолчанию выводим прямо во время рендера, а не setState в эффекте
+  return {
+    scale: enabled ? scale : maxScale,
+    phase: enabled ? phase : 'inhale',
+  }
 }
 
 /**

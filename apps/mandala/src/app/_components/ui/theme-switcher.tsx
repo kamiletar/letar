@@ -27,6 +27,9 @@ export function ThemeSwitcher() {
 
   // Предотвращаем hydration mismatch — рендерим только после монтирования
   useEffect(() => {
+    // стандартный hydration-safe паттерн: resolvedTheme от next-themes известна только на клиенте,
+    // SSR и первый клиентский рендер должны совпадать
+    // oxlint-disable-next-line react/set-state-in-effect
     setMounted(true)
   }, [])
 

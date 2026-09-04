@@ -191,6 +191,9 @@ export function MandalaViewer({ mandala, allMandalas, initialIndex }: MandalaVie
   // Загрузка blob URL при выборе кастомного трека
   useEffect(() => {
     if (!settings.customAudioTrackId) {
+      // синхронизация с внешней системой (асинхронная загрузка blob URL из OPFS ниже) — сброс при
+      // отсутствии выбранного трека
+      // oxlint-disable-next-line react/set-state-in-effect
       setCustomTrackBlobUrl(null)
       return
     }
@@ -261,6 +264,9 @@ export function MandalaViewer({ mandala, allMandalas, initialIndex }: MandalaVie
     },
     onSeek: (deltaSeconds) => {
       if (audioElement) {
+        // false positive: audioElement — DOM-узел <audio>, управляется императивно через нативный
+        // HTMLMediaElement API, не React-состояние
+        // oxlint-disable-next-line react/immutability
         audioElement.currentTime = Math.max(0, Math.min(audioElement.duration, audioElement.currentTime + deltaSeconds))
       }
     },

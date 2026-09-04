@@ -123,6 +123,9 @@ export function useTooltipPosition({
   // Поиск целевого элемента
   useEffect(() => {
     if (!currentStep || !isActive) {
+      // синхронизация с внешней системой (поиск DOM-элемента по data-атрибуту ниже) — сброс при
+      // неактивном/отсутствующем шаге
+      // oxlint-disable-next-line react/set-state-in-effect
       setTargetElement(null)
       return
     }
@@ -191,6 +194,9 @@ export function useTargetHighlight(targetElement: HTMLElement | null): void {
     }
 
     // Добавляем подсветку
+    // false positive: targetElement — DOM-узел произвольного элемента страницы, стили применяются
+    // императивно, не React-состояние
+    // oxlint-disable-next-line react/immutability
     targetElement.style.position = 'relative'
     targetElement.style.zIndex = '10001'
     targetElement.style.boxShadow = '0 0 0 4px rgba(202, 158, 103, 0.5), 0 0 20px rgba(202, 158, 103, 0.3)'
