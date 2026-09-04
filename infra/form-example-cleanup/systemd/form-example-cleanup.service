@@ -6,4 +6,10 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 EnvironmentFile=/etc/letar-form-example-cleanup.env
-ExecStart=/usr/bin/curl -sf "http://localhost:3022/api/cleanup?secret=${CLEANUP_SECRET}"
+# Порт 3022 приложения не публикуется на хост (rollout-профиль, zero-downtime scale=2,
+# см. комментарий "Rollout-профиль" в apps/form-example/docker-compose.production.yml) —
+# localhost:3022 с хоста недостижим. Обращаемся через docker network alias
+# `form-example-app`, зарегистрированный в compose (networks.kami-network.aliases),
+# он резолвится независимо от того, сколько реплик и как они названы.
+ExecStart=/usr/bin/docker run --rm --network kami-network alpine:3 \
+  wget -qO- "http://form-example-app:3022/api/cleanup?secret=${CLEANUP_SECRET}"
