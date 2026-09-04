@@ -73,9 +73,14 @@ export function FormWatch({ field, onChange }: FormWatchProps): ReactElement | n
   // Полный путь с учётом группы
   const fullPath = parentGroup ? `${parentGroup.name}.${field}` : field
 
-  // Ref для актуального callback (избегаем переподписки)
+  // Ref для актуального callback (избегаем переподписки).
+  // Запись в ref.current вынесена из тела рендера в эффект без зависимостей — обновление
+  // выполняется после каждого коммита, до эффекта ниже, читающего onChangeRef.current
+  // (эффекты одного компонента выполняются в порядке объявления).
   const onChangeRef = useRef(onChange)
-  onChangeRef.current = onChange
+  useEffect(() => {
+    onChangeRef.current = onChange
+  })
 
   // Подписка на store
   const subscribe = useCallback(

@@ -14,7 +14,11 @@ export function useFormAnalytics(config?: FormAnalyticsConfig): UseFormAnalytics
 
   const [fieldAnalytics, setFieldAnalytics] = useState<Map<string, FieldAnalytics>>(new Map())
   const [lastFocusedField, setLastFocusedField] = useState<string | null>(null)
-  const startTimeRef = useRef(Date.now())
+  // useState вместо useRef: аргумент useRef вычисляется на каждом рендере (даже если
+  // React использует только первое значение), поэтому Date.now() прямо в useRef —
+  // нечистый вызов при каждом рендере. Ленивый инициализатор useState вызывается ровно
+  // один раз при монтировании и явно допускается React Compiler.
+  const [startTime, setStartTime] = useState(() => Date.now())
   const focusTimeRef = useRef<Map<string, number>>(new Map())
   const blurredFieldsRef = useRef<Set<string>>(new Set())
 
@@ -196,15 +200,21 @@ export function useFormAnalytics(config?: FormAnalyticsConfig): UseFormAnalytics
           filledFields: fieldAnalytics.size,
           totalFields: fieldAnalytics.size, // приблизительно
           timestamp: Date.now(),
-          totalTimeMs: Date.now() - startTimeRef.current,
+          totalTimeMs: Date.now() - startTime,
         })
       }
     }
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
-  }, [enabled, lastFocusedField, fieldAnalytics, emit])
+  }, [enabled, lastFocusedField, fieldAnalytics, emit, startTime])
 
-  const totalTimeMs = Date.now() - startTimeRef.current
+  // Снимок «сколько времени прошло с начала» на момент текущего рендера — намеренно
+  // нечистый (Date.now()) вызов: totalTimeMs — метрика live-состояния, читаемая потребителем
+  // на момент рендера, а не производное от стабильных пропсов значение. Пересчёт в разных
+  // рендерах в пределах одного тика (например под StrictMode double-render) даёт разницу
+  // в единицы миллисекунд, что не влияет на корректность аналитики.
+  // oxlint-disable-next-line react/purity
+  const totalTimeMs = Date.now() - startTime
   const totalErrors = Array.from(fieldAnalytics.values()).reduce((sum, fa) => sum + fa.errorCount, 0)
   // Completion = поля с blur / общее количество полей с хотя бы одним фокусом
   const fieldsWithBlur = Array.from(fieldAnalytics.values()).filter((fa) => fa.lastBlurAt !== null).length
@@ -218,25 +228,25 @@ export function useFormAnalytics(config?: FormAnalyticsConfig): UseFormAnalytics
       filledFields: fieldsWithBlur,
       totalFields: totalFieldsTracked,
       timestamp: Date.now(),
-      totalTimeMs: Date.now() - startTimeRef.current,
+      totalTimeMs: Date.now() - startTime,
     })
-  }, [lastFocusedField, fieldsWithBlur, totalFieldsTracked, emit])
+  }, [lastFocusedField, fieldsWithBlur, totalFieldsTracked, emit, startTime])
 
   const trackComplete = useCallback(() => {
     emit({
       type: 'form_complete',
-      totalTimeMs: Date.now() - startTimeRef.current,
+      totalTimeMs: Date.now() - startTime,
       fieldTimes: fieldAnalytics,
       timestamp: Date.now(),
     })
-  }, [fieldAnalytics, emit])
+  }, [fieldAnalytics, emit, startTime])
 
   const reset = useCallback(() => {
     setFieldAnalytics(new Map())
     setLastFocusedField(null)
     focusTimeRef.current.clear()
     blurredFieldsRef.current.clear()
-    startTimeRef.current = Date.now()
+    setStartTime(Date.now())
   }, [])
 
   return {

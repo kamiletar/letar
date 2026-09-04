@@ -159,6 +159,10 @@ export function useRateLimit(config: RateLimitConfig | undefined, formId?: strin
     }
     const attempts = getAttempts()
     if (attempts.length >= config.maxSubmits) {
+      // Легитимная синхронизация с внешней системой (sessionStorage через getAttempts()):
+      // состояние блокировки на момент монтирования недоступно до эффекта, читать
+      // sessionStorage в теле рендера/useState-инициализаторе тоже нельзя (см. ssr-hydration).
+      // oxlint-disable-next-line react/set-state-in-effect
       setIsBlocked(true)
       const oldestAttempt = Math.min(...attempts)
       const blockUntil = oldestAttempt + config.windowMs

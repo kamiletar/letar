@@ -2,6 +2,10 @@
 
 import { Box, Skeleton, VStack } from '@chakra-ui/react'
 import type { ReactElement } from 'react'
+import { useState } from 'react'
+
+/** Запас случайных ширин лейбл-скелетона — с запасом на любое реалистичное число полей */
+const MAX_LABEL_WIDTHS = 64
 
 export interface FormSkeletonProps {
   /** Количество полей (или Zod-схема для автодетекта) */
@@ -39,12 +43,19 @@ export function FormSkeleton({
     fieldCount = 5
   }
 
+  // Ширина лейбл-скелетона — случайная, но стабильная между рендерами одного маунта.
+  // useMemo не годится: react-compiler считает Math.random() внутри его callback'а
+  // нечистым вызовом «во время рендера» независимо от мемоизации. Ленивый инициализатор
+  // useState вызывается ровно один раз при монтировании — фиксированный запас (с индексацией
+  // по модулю) не зависит от fieldCount, поэтому не требует пересчёта при его изменении.
+  const [labelWidths] = useState(() => Array.from({ length: MAX_LABEL_WIDTHS }, () => 60 + Math.random() * 40))
+
   return (
     <VStack gap={gap} align="stretch">
       {Array.from({ length: fieldCount }, (_, i) => (
         <Box key={i}>
           {/* Label скелетон */}
-          <Skeleton height="14px" width={`${60 + Math.random() * 40}%`} mb={2} />
+          <Skeleton height="14px" width={`${labelWidths[i % MAX_LABEL_WIDTHS]}%`} mb={2} />
           {/* Input скелетон */}
           <Skeleton height={fieldHeight} borderRadius="md" />
         </Box>

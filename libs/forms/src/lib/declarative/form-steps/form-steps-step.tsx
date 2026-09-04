@@ -296,17 +296,32 @@ export function FormStepsStep({
     [fieldExtractionPath],
   )
 
-  // Update ref only if fieldNames actually changed
+  // Update ref only if fieldNames actually changed.
+  // ⚠️ Задокументированное исключение (не рефакторено): чтение/запись ref в теле рендера —
+  // намеренный паттерн ручной мемоизации по содержимому массива, а не по идентичности.
+  // Перевод на useState/useMemo здесь рискован: значение используется эффектом
+  // регистрации шага ниже, у которого children/icon намеренно исключены из deps
+  // (см. комментарий про infinite loop) — правильный порядок эффектов и защита от
+  // лишних перерегистраций шага при inline-children держится именно на синхронности
+  // этой ref-мутации с текущим рендером. Полный рефакторинг на state требует
+  // пересмотра всей схемы регистрации шагов (claimedIndicesRef, race condition —
+  // см. комментарии выше) — риск в основной shared-библиотеке форм не оправдан
+  // точечной чисткой линтера.
+  // oxlint-disable-next-line react/refs
   const fieldNamesChanged = currentFieldNames.length !== fieldNamesRef.current.length
+    // oxlint-disable-next-line react/refs
     || currentFieldNames.some((name, i) => name !== fieldNamesRef.current[i])
   if (fieldNamesChanged) {
+    // oxlint-disable-next-line react/refs
     fieldNamesRef.current = currentFieldNames
   }
 
   // Update step info if props change (but keep same index)
   // IMPORTANT: children and icon NOT included in deps — they change every render and cause infinite loop
   // icon — JSX element, recreated on every render
+  // ⚠️ Задокументированное исключение — та же причина, что и выше (fieldNamesRef).
   const iconRef = useRef(icon)
+  // oxlint-disable-next-line react/refs
   iconRef.current = icon
 
   useEffect(() => {
@@ -324,6 +339,15 @@ export function FormStepsStep({
     }
   }, [title, description, registerStep, onEnter, onLeave, isVisible, fieldExtractionPath])
 
+  // ⚠️ Задокументированное исключение: индекс шага — источник истины, намеренно живущий
+  // в ref (claimedIndicesRef — shared mutable Set между сиблингами), а не в state, именно
+  // чтобы избежать race condition при одновременном mount нескольких Step (см. комментарий
+  // у useEffect регистрации выше). Компонент полагается на то, что его перерендер триггерит
+  // родитель (FormSteps) через контекст при регистрации любого шага — переход на локальный
+  // useState здесь либо дублирует это (лишний ре-рендер), либо требует пересмотра всей схемы
+  // регистрации. Риск поведенческой регрессии в основной библиотеке форм не оправдан
+  // точечной чисткой линтера.
+  // oxlint-disable-next-line react/refs
   const index = indexRef.current
 
   // Animation variants for slide effect

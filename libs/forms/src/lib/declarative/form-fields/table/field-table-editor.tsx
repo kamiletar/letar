@@ -109,20 +109,32 @@ export function FieldTableEditor({
     })
   }, [])
 
-  // Стейт для addRow (будет определён внутри render callback)
-  // Хук навигации вызываем здесь, передаём addRow через ref
-  // Плейсхолдер — реальная функция переприсваивается ниже перед использованием
+  // ⚠️ Задокументированное исключение (не рефакторено): архитектурное ограничение —
+  // `useTableNavigation` обязан вызываться безусловно на верхнем уровне компонента (Rules of
+  // Hooks), а реальные rowCount/canAdd/addRow известны только внутри render-prop `form.Field`
+  // ниже, который выполняется в этом же рендере, но синтаксически позже вызова хука.
+  // `{ current }`-объекты — намеренная mutable-box развязка порядка объявления: хук получает
+  // снимок примитивов на момент вызова (rowCount/canAdd), а addRow — замыкание, читающее
+  // `addRowRef.current` в момент реального вызова (уже после того как render-prop ниже
+  // синхронно переприсвоил его в этом же рендере). Это не настоящий `useRef` (значения не
+  // должны переживать между рендерами), поэтому react-compiler ошибочно применяет к ним
+  // эвристику для refs/mutation-after-render. Полный рефакторинг потребовал бы вынести
+  // rowCount/canAdd/addRow из-под render-prop `<form.Field mode="array">`, что меняет модель
+  // подписки на массив — риск в основной библиотеке форм не оправдан точечной чисткой линтера.
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   const addRowRef = { current: () => {} }
   const rowCountRef = { current: 0 }
   const canAddRef = { current: false }
 
+  // oxlint-disable-next-line react/refs
   const { containerRef, handleKeyDown } = useTableNavigation({
     columns,
+    // oxlint-disable-next-line react/refs
     rowCount: rowCountRef.current,
     editingCell: navigation.editingCell,
     setEditingCell,
     addRow: () => addRowRef.current(),
+    // oxlint-disable-next-line react/refs
     canAdd: canAddRef.current,
     readOnly,
     commitEditingCellRef,
@@ -137,7 +149,8 @@ export function FieldTableEditor({
         const canAdd = maxRows === undefined || rows.length < maxRows
         const canRemove = minRows === undefined || rows.length > minRows
 
-        // Обновляем refs для навигации
+        // Обновляем mutable-box для навигации (см. пояснение у объявления addRowRef выше)
+        // oxlint-disable-next-line react/immutability
         rowCountRef.current = rows.length
         canAddRef.current = canAdd
 

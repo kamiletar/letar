@@ -40,9 +40,13 @@ function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
  */
 export function useFieldChangeListeners(form: AppFormApi, onFieldChange?: OnFieldChangeMap): void {
   // Храним актуальную версию callbacks в ref,
-  // чтобы не переподписываться при inline-объектах
+  // чтобы не переподписываться при inline-объектах.
+  // Запись в ref вынесена в эффект без зависимостей (выполняется после каждого коммита,
+  // до подписки в эффекте ниже — эффекты одного компонента идут в порядке объявления).
   const callbacksRef = useRef(onFieldChange)
-  callbacksRef.current = onFieldChange
+  useEffect(() => {
+    callbacksRef.current = onFieldChange
+  })
 
   // Предыдущие значения отслеживаемых полей
   const prevValuesRef = useRef<Record<string, unknown>>({})

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useId, useRef } from 'react'
+import { useCallback, useId, useState } from 'react'
 
 /**
  * Компонент-ловушка для ботов.
@@ -9,8 +9,12 @@ import { useCallback, useId, useRef } from 'react'
  */
 export function HoneypotField(): React.ReactElement {
   const id = useId()
-  // Рандомный суффикс для затруднения обхода
-  const nameRef = useRef(`hp_${id.replace(/:/g, '')}_${Math.random().toString(36).slice(2, 6)}`)
+  // Рандомный суффикс для затруднения обхода. Значение нужно стабильным между рендерами
+  // и используется прямо в JSX (id/name/htmlFor) — поэтому не ref (чтение ref.current в
+  // рендере запрещено react-compiler), а useState с ленивым инициализатором: вызов
+  // Math.random() происходит один раз при монтировании внутри init-функции, а не в теле
+  // рендера при каждом вызове компонента.
+  const [name] = useState(() => `hp_${id.replace(/:/g, '')}_${Math.random().toString(36).slice(2, 6)}`)
 
   return (
     <div
@@ -26,11 +30,11 @@ export function HoneypotField(): React.ReactElement {
         pointerEvents: 'none',
       }}
     >
-      <label htmlFor={nameRef.current}>
+      <label htmlFor={name}>
         {/* Лейбл для SEO/доступности — скрыт от пользователя */}
         Leave this field empty
       </label>
-      <input type="text" id={nameRef.current} name={nameRef.current} autoComplete="off" tabIndex={-1} />
+      <input type="text" id={name} name={name} autoComplete="off" tabIndex={-1} />
     </div>
   )
 }

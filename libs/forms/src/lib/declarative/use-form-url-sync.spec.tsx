@@ -1,5 +1,5 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, renderHook, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -76,28 +76,14 @@ describe('useFormUrlSync', () => {
   it('читает initialValue из URL с учётом defaults', () => {
     window.history.replaceState(null, '', '/?search=привет')
 
-    let result: { initialValue: typeof defaultFilters } | undefined
+    const { result } = renderHook(() => useFormUrlSync({ fields: ['search', 'category'], defaults: defaultFilters }))
 
-    function Probe() {
-      result = useFormUrlSync({ fields: ['search', 'category'], defaults: defaultFilters })
-      return null
-    }
-
-    render(<Probe />)
-
-    expect(result?.initialValue).toEqual({ search: 'привет', category: 'all' })
+    expect(result.current.initialValue).toEqual({ search: 'привет', category: 'all' })
   })
 
   it('возвращает defaults при отсутствии соответствующих query params', () => {
-    let result: { initialValue: typeof defaultFilters } | undefined
+    const { result } = renderHook(() => useFormUrlSync({ fields: ['search', 'category'], defaults: defaultFilters }))
 
-    function Probe() {
-      result = useFormUrlSync({ fields: ['search', 'category'], defaults: defaultFilters })
-      return null
-    }
-
-    render(<Probe />)
-
-    expect(result?.initialValue).toEqual(defaultFilters)
+    expect(result.current.initialValue).toEqual(defaultFilters)
   })
 })

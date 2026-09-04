@@ -56,6 +56,12 @@ export function useFormHistory<T>(
     try {
       const savedHistory = sessionStorage.getItem(persistKey)
       if (savedHistory) {
+        // Легитимная синхронизация с внешней системой (sessionStorage), не производное
+        // значение: значение недоступно на сервере/при первом клиентском рендере — попытка
+        // прочитать его в useState-инициализаторе развела бы SSR/CSR разметку (см. комментарий
+        // выше про ssr-hydration-persisted-state). setState здесь синхронизирует состояние
+        // React с внешним хранилищем ровно один раз после монтирования — по назначению эффекта.
+        // oxlint-disable-next-line react/set-state-in-effect
         setHistory(JSON.parse(savedHistory))
       }
       const savedIndex = sessionStorage.getItem(`${persistKey}-index`)

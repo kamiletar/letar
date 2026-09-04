@@ -260,6 +260,11 @@ export function FieldDataGrid({
   // Виртуализация
   const tableContainerRef = useRef<HTMLDivElement>(null)
   const { rows: tableRows } = table.getRowModel()
+  // react-compiler отмечает @tanstack/react-virtual как известную несовместимую библиотеку
+  // (API возвращает функции, которые нельзя безопасно мемоизировать) — это не баг в этом
+  // коде, компилятор сам корректно пропускает мемоизацию хука/компонента при обнаружении
+  // такого паттерна, точечных действий не требуется.
+  // oxlint-disable-next-line react/incompatible-library
   const rowVirtualizer = useVirtualizer({
     count: tableRows.length,
     getScrollElement: () => tableContainerRef.current,

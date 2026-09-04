@@ -62,6 +62,23 @@ export function ImagePopover({ editor, config, disabled }: ImagePopoverProps): R
   const acceptTypes = config.acceptTypes ?? ['image/*']
 
   /**
+   * Close popover and reset state
+   *
+   * Объявлен раньше handleUpload (который на него ссылается) намеренно: react-compiler
+   * (react/immutability) считает forward-reference на `const`, объявленный позже в том же
+   * компоненте, недопустимым доступом «во время инициализации», даже если фактический вызов
+   * отложен внутрь колбэка. Перестановка убирает предупреждение без изменения поведения —
+   * порядок объявления `useCallback` не влияет на семантику замыкания.
+   */
+  const handleClose = useCallback(() => {
+    setIsOpen(false)
+    setUploadState('idle')
+    setErrorMessage(null)
+    setPreviewUrl(null)
+    setIsDragging(false)
+  }, [])
+
+  /**
    * File upload на сервер
    */
   const handleUpload = useCallback(
@@ -123,7 +140,7 @@ export function ImagePopover({ editor, config, disabled }: ImagePopoverProps): R
         }
       }
     },
-    [editor, config, maxSize],
+    [editor, config, maxSize, handleClose],
   )
 
   /**
@@ -156,17 +173,6 @@ export function ImagePopover({ editor, config, disabled }: ImagePopoverProps): R
     },
     [handleUpload],
   )
-
-  /**
-   * Close popover and reset state
-   */
-  const handleClose = useCallback(() => {
-    setIsOpen(false)
-    setUploadState('idle')
-    setErrorMessage(null)
-    setPreviewUrl(null)
-    setIsDragging(false)
-  }, [])
 
   /**
    * Повторная попытка after ошибки

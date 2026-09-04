@@ -60,12 +60,17 @@ export function useFieldConstraints(name?: string): UseFieldConstraintsResult {
   }, [name, groupContext?.name])
 
   // Извлекаем constraints from schema
+  // Зависимость — весь `formContext`, а не `formContext?.schema`: доступ через optional
+  // chaining неотделим от идентичности самого объекта, React Compiler инферит зависимость
+  // на этом уровне и не может подтвердить более узкую ручную зависимость (react-compiler
+  // preserve-manual-memoization). Более широкая зависимость безопасна — лишний пересчёт,
+  // не пропущенный.
   const constraints = useMemo(() => {
     if (!formContext?.schema || !fullPath) {
       return undefined
     }
     return getZodConstraints(formContext.schema, fullPath)
-  }, [formContext?.schema, fullPath])
+  }, [formContext, fullPath])
 
   return { constraints, fullPath }
 }

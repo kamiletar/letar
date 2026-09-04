@@ -243,6 +243,10 @@ export function useFormPersistence<TData extends object>(config: FormPersistence
           timestamp = Date.now() // Unknown exact time, use current
         }
 
+        // Легитимная синхронизация с внешней системой (localStorage), не производное
+        // значение — данные недоступны на сервере/при первом клиентском рендере, поэтому
+        // не могут попасть в useState-инициализатор без рассинхрона SSR/CSR разметки.
+        // oxlint-disable-next-line react/set-state-in-effect
         setSavedData(data)
         setSavedAt(timestamp)
         setHasSavedData(true)

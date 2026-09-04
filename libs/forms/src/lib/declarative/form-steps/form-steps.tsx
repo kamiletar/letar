@@ -2,7 +2,7 @@
 
 import { Steps } from '@chakra-ui/react'
 import { type StepPersistenceConfig, useStepNavigation, useStepPersistence, useStepState } from '@letar/forms-react'
-import { type ReactNode, useCallback, useMemo, useRef, useState } from 'react'
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDeclarativeForm } from '../form-context'
 import { FormStepsContext, type FormStepsContextValue } from './form-steps-context'
 
@@ -142,13 +142,17 @@ export function FormSteps({
   // Refs for unstable values — prevents contextValue recreation
   // on each step registration (sortedSteps and hiddenFields change on registration)
   const sortedStepsRef = useRef(sortedSteps)
-  sortedStepsRef.current = sortedSteps
-
   const hiddenFieldsRef = useRef(hiddenFields)
-  hiddenFieldsRef.current = hiddenFields
-
   const onStepCompleteRef = useRef(onStepComplete)
-  onStepCompleteRef.current = onStepComplete
+
+  // Запись в refs вынесена из тела рендера в эффект без зависимостей — значения читаются
+  // только лениво (геттер контекста ниже, обработчики), а не синхронно в текущем рендере,
+  // поэтому обновление после коммита сохраняет исходное поведение.
+  useEffect(() => {
+    sortedStepsRef.current = sortedSteps
+    hiddenFieldsRef.current = hiddenFields
+    onStepCompleteRef.current = onStepComplete
+  })
 
   // Context value — depends only on stable values
   // sortedSteps, hiddenFields and onStepComplete via refs

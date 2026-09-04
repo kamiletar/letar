@@ -105,9 +105,14 @@ function CascadingSelectContent<TParent = string, TValue = string>({
   // Ref for tracking previous parent value
   const prevParentValueRef = useRef<TParent | undefined>(parentValue)
 
-  // Ref for stable loadOptions reference (avoid infinite loops with inline functions)
+  // Ref for stable loadOptions reference (avoid infinite loops with inline functions).
+  // Запись вынесена в эффект без зависимостей — выполняется после каждого коммита,
+  // раньше эффекта загрузки данных ниже (эффекты одного компонента идут по порядку
+  // объявления), поэтому к моменту вызова loadOptionsRef.current там уже актуальный колбэк.
   const loadOptionsRef = useRef(loadOptions)
-  loadOptionsRef.current = loadOptions
+  useEffect(() => {
+    loadOptionsRef.current = loadOptions
+  })
 
   // Effect for loading options when parentValue changes
   useEffect(() => {
