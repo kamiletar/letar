@@ -57,17 +57,26 @@ export function useScrollGate({
   const sentinelRef = useRef<HTMLDivElement | null>(null)
   const [reachedEnd, setReachedEnd] = useState(false)
 
+  // Легитимная синхронизация с внешней системой (IntersectionObserver над DOM-узлом sentinel),
+  // не производное значение и не инициализация: готовность DOM-узла (`sentinelRef.current`) и
+  // факт пересечения с вьюпортом известны только после монтирования/от асинхронного колбэка
+  // браузера — их нельзя вычислить во время рендера. `setState` здесь синхронизирует React с этим
+  // внешним источником по прямому назначению эффекта (см. rules/set-state-in-effect в задаче на
+  // апгрейд oxlint 1.81 — этот хук указан там как канонический пример допустимого исключения).
   useEffect(() => {
     // Гейт выключен — путь открыт
     if (!enabled) {
+      // oxlint-disable-next-line react/set-state-in-effect
       setReachedEnd(true)
       return
     }
+    // oxlint-disable-next-line react/set-state-in-effect
     setReachedEnd(false)
 
     const el = sentinelRef.current
     if (!el || typeof IntersectionObserver === 'undefined') {
       // Нет маркера или окружение без IO (SSR/старый браузер) — не блокируем
+      // oxlint-disable-next-line react/set-state-in-effect
       setReachedEnd(true)
       return
     }

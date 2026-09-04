@@ -1,7 +1,7 @@
 'use client'
 
 import NextTopLoader from 'nextjs-toploader'
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 
 export interface TopLoaderProps {
   /** Цвет индикатора (HEX). Если не указан — дефолт библиотеки */
@@ -28,12 +28,22 @@ export interface TopLoaderProps {
  * // Default (библиотечный дефолт)
  * <TopLoader />
  */
-export function TopLoader({ color, height = 3, showSpinner = false }: TopLoaderProps) {
-  const [mounted, setMounted] = useState(false)
+// Гидратация — не производное значение и не асинхронное событие: на сервере и при первом
+// клиентском рендере компонент обязан вернуть одинаковую разметку (`null`), иначе hydration
+// mismatch, а показать индикатор можно только после того, как React подтвердил совпадение дерева.
+// `useSyncExternalStore` с фиксированным `getServerSnapshot` — штатный примитив React 18+ именно
+// для этого случая, без `useEffect`+`setState` и лишнего цикла рендера после монтирования.
+const subscribeNoop = () => () => {}
+function useIsHydrated(): boolean {
+  return useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false,
+  )
+}
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+export function TopLoader({ color, height = 3, showSpinner = false }: TopLoaderProps) {
+  const mounted = useIsHydrated()
 
   if (!mounted) {
     return null

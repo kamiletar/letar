@@ -2,7 +2,7 @@
 
 import { Box, Button, CloseButton, HStack, Text, VStack } from '@chakra-ui/react'
 import { useOfflineConsent } from '@letar/hooks'
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useState, useSyncExternalStore } from 'react'
 import { LuDownload, LuWifiOff } from 'react-icons/lu'
 import { usePublishedHeight } from './use-published-height'
 
@@ -17,6 +17,16 @@ import { usePublishedHeight } from './use-published-height'
  * `StickyActionBar` перехватывался этим баннером, появляющимся через `delayMs` после интро.
  */
 const OFFLINE_BANNER_HEIGHT_VAR = '--letar-offline-consent-banner-height'
+
+// Гидратация — не производное значение и не асинхронное событие: см. тот же приём в top-loader.tsx.
+const subscribeNoop = () => () => {}
+function useIsHydrated(): boolean {
+  return useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false,
+  )
+}
 
 export interface OfflineConsentBannerProps {
   /** Namespace-ключ для {@link useOfflineConsent} (localStorage), например `'studio-offline-consent'` */
@@ -63,20 +73,25 @@ export function OfflineConsentBanner({
 }: OfflineConsentBannerProps) {
   const { shouldShowBanner, accept, decline } = useOfflineConsent(consentKey)
   const [isVisible, setIsVisible] = useState(false)
-  const [isReady, setIsReady] = useState(false)
+  const isReady = useIsHydrated()
   const [eligible, setEligible] = useState(!isEligible)
   // Публикует свою высоту, пока видим — StickyActionBar приподнимается над баннером вместо
   // того, чтобы отдавать ему клики по CTA (см. JSDoc переменной выше).
   const rootRef = usePublishedHeight(OFFLINE_BANNER_HEIGHT_VAR, isVisible)
 
   useEffect(() => {
+    // Легитимная синхронизация с внешней системой: `isEligible` — проп-функция, вызываемый код
+    // которой определяет сам потребитель (JSDoc пропа: «вычисляется на клиенте после
+    // монтирования») — он может читать DOM/localStorage/куки, недоступные или отличающиеся на
+    // сервере. Вызов в теле рендера развёл бы SSR/CSR разметку (та же причина, что у `isReady`
+    // в top-loader.tsx, только источник — внешняя функция, а не сам факт гидратации).
     if (isEligible) {
+      // oxlint-disable-next-line react/set-state-in-effect
       setEligible(isEligible())
     }
   }, [isEligible])
 
   useEffect(() => {
-    setIsReady(true)
     if (shouldShowBanner && eligible) {
       const timer = setTimeout(() => setIsVisible(true), delayMs)
       return () => clearTimeout(timer)

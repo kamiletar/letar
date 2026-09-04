@@ -114,6 +114,11 @@ export function ImageMagnifier({
   const [loaded, setLoaded] = useState(false)
   const [touched, setTouched] = useState(false)
   const [demoDone, setDemoDone] = useState(false)
+  // Размер контейнера для расчёта `scale`/`effectiveLensSize` (см. ниже) — раньше читался прямо
+  // из `containerRef.current` в теле рендера (react/refs: рефы не участвуют в рендере и чтение
+  // `.current` там не гарантирует обновление при их изменении). Источник истины — ResizeObserver,
+  // размер публикуется в состояние только из его колбэка (не синхронно в теле эффекта).
+  const [containerSize, setContainerSize] = useState<{ width: number; height: number } | null>(null)
 
   // Из кэша картинка успевает загрузиться до гидратации — событие load
   // тогда уже не придёт, и без этой проверки лупа не включится никогда
@@ -121,6 +126,23 @@ export function ImageMagnifier({
     if (imageRef.current?.complete) {
       setLoaded(true)
     }
+  }, [])
+
+  // Отслеживание размера контейнера: раньше `getBoundingClientRect()` читался прямо в теле
+  // рендера — здесь то же измерение, но синхронизируется с реальными изменениями layout'а
+  // (в т.ч. на узких экранах) через ResizeObserver, а не один раз молча совпадая по случайности
+  // с очередным ре-рендером по другой причине.
+  useEffect(() => {
+    const node = containerRef.current
+    if (!node || typeof ResizeObserver === 'undefined') {
+      return
+    }
+    const observer = new ResizeObserver(() => {
+      const box = node.getBoundingClientRect()
+      setContainerSize({ width: box.width, height: box.height })
+    })
+    observer.observe(node)
+    return () => observer.disconnect()
   }, [])
 
   // `touched` выставляется только реальным взаимодействием (мышь/тач/клавиатура),
@@ -284,11 +306,12 @@ export function ImageMagnifier({
 
   // Пиксели берутся из того же файла без масштабирования, поэтому
   // достаточно перевести координаты курсора в натуральные
-  const rect = containerRef.current?.getBoundingClientRect()
-  const scale = rect && rect.width > 0 ? naturalWidth / rect.width : 1
+  const scale = containerSize && containerSize.width > 0 ? naturalWidth / containerSize.width : 1
   // Весь эффект держится на контрасте «вокруг мелко — внутри крупно»: если лупа
   // закрывает почти весь кадр, сравнивать не с чем. На узких экранах ужимаем её
-  const effectiveLensSize = rect ? Math.min(lensSize, rect.width * 0.5, rect.height * 0.6) : lensSize
+  const effectiveLensSize = containerSize
+    ? Math.min(lensSize, containerSize.width * 0.5, containerSize.height * 0.6)
+    : lensSize
   const half = effectiveLensSize / 2
 
   return (

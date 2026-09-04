@@ -75,6 +75,14 @@ export function CookieBanner({
       if (raw) {
         const parsed = JSON.parse(raw) as CookieConsentState
         if (parsed.version === policyVersion) {
+          // Легитимная синхронизация с внешней системой (localStorage), не производное значение:
+          // значение недоступно на сервере/при первом клиентском рендере — попытка прочитать его
+          // в useState-инициализаторе развела бы SSR/CSR разметку (см. комментарий выше про LCP:
+          // баннер обязан сначала отрендериться `shown=true`, как на сервере). setState здесь
+          // синхронизирует React с внешним хранилищем один раз после монтирования — по
+          // назначению эффекта (тот же паттерн, что уже задокументирован в
+          // libs/forms/src/lib/history/use-form-history.ts).
+          // oxlint-disable-next-line react/set-state-in-effect
           setShown(false)
         }
       }

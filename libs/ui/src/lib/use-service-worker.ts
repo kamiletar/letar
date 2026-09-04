@@ -63,24 +63,30 @@ export function useServiceWorker(options: UseServiceWorkerOptions = {}) {
     waitingWorker: null,
   })
 
+  // Три причины «unsupported» ниже — не асинхронные события, а значения, производные от прав
+  // (`disabled`), сборочной константы (`NEXT_PUBLIC_DISABLE_SERVICE_WORKER`, инлайнится при
+  // сборке) и факта поддержки API браузером. Ни одно не требует эффекта для вычисления — эффект
+  // ниже использует их как условие раннего выхода (плюс лог для второго случая), а само значение
+  // `status` для отображения производится на рендере (см. `return` в конце хука).
+  const disabledByEnv = process.env.NEXT_PUBLIC_DISABLE_SERVICE_WORKER === 'true'
+  const supportedByBrowser = typeof window !== 'undefined' && 'serviceWorker' in navigator
+  const unsupported = disabled || disabledByEnv || !supportedByBrowser
+
   useEffect(() => {
     // Проверка программного отключения
     if (disabled) {
-      setState((prev) => ({ ...prev, status: 'unsupported' }))
       return
     }
 
     // Проверка отключения через env (NEXT_PUBLIC_ переменные инлайнятся при сборке)
-    if (process.env.NEXT_PUBLIC_DISABLE_SERVICE_WORKER === 'true') {
+    if (disabledByEnv) {
       // eslint-disable-next-line no-console
       console.log('[SW] Service Worker отключен (env)')
-      setState((prev) => ({ ...prev, status: 'unsupported' }))
       return
     }
 
     // Проверка поддержки Service Worker
-    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
-      setState((prev) => ({ ...prev, status: 'unsupported' }))
+    if (!supportedByBrowser) {
       return
     }
 
@@ -163,7 +169,7 @@ export function useServiceWorker(options: UseServiceWorkerOptions = {}) {
     return () => {
       navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange)
     }
-  }, [swPath, scope, disabled, onUpdateAvailable])
+  }, [swPath, scope, disabled, disabledByEnv, supportedByBrowser, onUpdateAvailable])
 
   /**
    * Применить обновление — активировать новый SW и перезагрузить страницу
@@ -242,6 +248,9 @@ export function useServiceWorker(options: UseServiceWorkerOptions = {}) {
 
   return {
     ...state,
+    // Производное значение — вычисляется здесь же на рендере вместо setState в эффекте
+    // (см. комментарий у `unsupported` выше).
+    status: unsupported ? 'unsupported' : state.status,
     applyUpdate,
     dismissUpdate,
     sendMessage,

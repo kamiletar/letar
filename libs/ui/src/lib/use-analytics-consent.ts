@@ -1,27 +1,32 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useSyncExternalStore } from 'react'
 import { createConsentConfig, readConsentState } from './consent-types'
 
 /**
  * Отслеживает согласие пользователя на аналитику (152-ФЗ, personal-data.md §5).
- * Читает состояние из localStorage при монтировании и реактивно обновляется
- * по событию `{appKey}:consent-change`, которое диспатчит `CookieBanner` при сохранении выбора.
+ * Читает состояние из localStorage и реактивно обновляется по событию
+ * `{appKey}:consent-change`, которое диспатчит `CookieBanner` ПОСЛЕ записи в localStorage
+ * (см. `persist()` в cookie-banner.tsx) — поэтому повторное чтение storage по этому событию
+ * всегда видит уже актуальное значение, отдельно передавать `event.detail` не нужно.
+ *
+ * `useSyncExternalStore` — штатный примитив React 18+ для внешнего изменяемого хранилища:
+ * не требует `useEffect`+`setState` для первого чтения (значит не «стреляет» set-state-in-effect)
+ * и одновременно даёт корректный SSR-снимок (`false` — согласия нет, пока не доказано обратное).
  */
 export function useAnalyticsConsent(appKey: string, policyVersion?: string): boolean {
   const { storageKey, consentChangeEvent } = createConsentConfig(appKey, policyVersion)
-  const [hasConsent, setHasConsent] = useState(false)
 
-  useEffect(() => {
-    setHasConsent(readConsentState(storageKey)?.analytics === true)
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => {
+      window.addEventListener(consentChangeEvent, onStoreChange)
+      return () => window.removeEventListener(consentChangeEvent, onStoreChange)
+    },
+    [consentChangeEvent],
+  )
 
-    function onConsentChange(e: Event) {
-      setHasConsent((e as CustomEvent<{ analytics: boolean }>).detail.analytics === true)
-    }
+  const getSnapshot = useCallback(() => readConsentState(storageKey)?.analytics === true, [storageKey])
+  const getServerSnapshot = useCallback(() => false, [])
 
-    window.addEventListener(consentChangeEvent, onConsentChange)
-    return () => window.removeEventListener(consentChangeEvent, onConsentChange)
-  }, [storageKey, consentChangeEvent])
-
-  return hasConsent
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 }
