@@ -88,6 +88,7 @@
         "@zenstackhq/plugin-policy": "^3.9.3",
         "@zenstackhq/schema": "^3.9.3",
         "@zenstackhq/server": "^3.9.3",
+        "@zenstackhq/zod": "^3.9.3",
         "@zxing/library": "^0.23.0",
         "ai": "^7.0.92",
         "async-mutex": "^0.5.0",
@@ -522,7 +523,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.183.17",
+      "version": "0.183.32",
       "dependencies": {
         "@letar/demo-protection": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -543,7 +544,7 @@
     },
     "apps/driving-school": {
       "name": "driving-school",
-      "version": "0.240.19",
+      "version": "0.240.21",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -1409,7 +1410,7 @@
     },
     "libs/ui": {
       "name": "@letar/ui",
-      "version": "0.19.7",
+      "version": "0.20.0",
       "dependencies": {
         "@letar/hooks": "workspace:*",
       },
@@ -1464,9 +1465,10 @@
     },
     "libs/zenstack-form-plugin": {
       "name": "@letar/zenstack-form-plugin",
-      "version": "2.2.1",
+      "version": "2.4.0",
       "peerDependencies": {
         "@zenstackhq/sdk": ">=3.0.0",
+        "@zenstackhq/zod": ">=3.0.0",
       },
     },
     "libs/zenstack-fragments": {
