@@ -160,6 +160,13 @@ export default function WatchPage({ params }: WatchPageProps) {
     episodeId,
   })
 
+  // Состояние для UpNext (время и длительность)
+  const [currentTimeForUpNext, setCurrentTimeForUpNext] = useState(0)
+  const [durationForUpNext, setDurationForUpNext] = useState(0)
+
+  // Состояние для CompletionOverlay
+  const [isCompletionOpen, setIsCompletionOpen] = useState(false)
+
   // Callback для показа экрана завершения
   const handleShowCompletion = useCallback(() => {
     setIsCompletionOpen(true)
@@ -172,13 +179,6 @@ export default function WatchPage({ params }: WatchPageProps) {
     saveProgress: progress.saveProgress,
     onShowCompletion: handleShowCompletion,
   })
-
-  // Состояние для UpNext (время и длительность)
-  const [currentTimeForUpNext, setCurrentTimeForUpNext] = useState(0)
-  const [durationForUpNext, setDurationForUpNext] = useState(0)
-
-  // Состояние для CompletionOverlay
-  const [isCompletionOpen, setIsCompletionOpen] = useState(false)
 
   // Хук для оверлея "Следующий эпизод"
   const upNext = useUpNext({

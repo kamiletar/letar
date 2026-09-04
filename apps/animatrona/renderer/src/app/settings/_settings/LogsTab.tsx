@@ -77,6 +77,8 @@ export function LogsTab() {
   }, [tailLines])
 
   useEffect(() => {
+    // Легитимная синхронизация с внешней системой — чтение файла логов через Electron IPC
+    // oxlint-disable-next-line react/set-state-in-effect
     void loadTail()
   }, [loadTail])
 

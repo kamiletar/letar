@@ -95,8 +95,8 @@ export default function HistoryPage() {
   const [libraryLoading, setLibraryLoading] = useState(true)
   const [libraryPage, setLibraryPage] = useState(0)
 
-  // Состояние для истории папок
-  const [folderHistory, setFolderHistory] = useState<FolderHistoryEntry[]>([])
+  // Состояние для истории папок — ленивая инициализация из localStorage, без эффекта
+  const [folderHistory, setFolderHistory] = useState<FolderHistoryEntry[]>(() => loadFolderHistory())
 
   // Состояние для раздела "Смотрел" (аниме)
   const [watchedAnime, setWatchedAnime] = useState<WatchedAnimeResult | null>(null)
@@ -118,11 +118,6 @@ export default function HistoryPage() {
     }
     loadLibraryHistory()
   }, [libraryPage])
-
-  // Загрузка истории папок
-  useEffect(() => {
-    setFolderHistory(loadFolderHistory())
-  }, [])
 
   // Загрузка раздела "Смотрел"
   useEffect(() => {

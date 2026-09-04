@@ -129,6 +129,8 @@ export function useFriendRequests(): UseFriendRequestsReturn {
 
   // Загрузка при монтировании и подписка на обновления
   useEffect(() => {
+    // Легитимная синхронизация с внешней системой — загрузка списка запросов через Electron IPC
+    // oxlint-disable-next-line react/set-state-in-effect
     refreshRequests()
 
     // Подписываемся на события

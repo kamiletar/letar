@@ -215,8 +215,10 @@ export function PlayerPage() {
   const [playbackSpeed, setPlaybackSpeed] = useState<PlaybackSpeed>(1)
 
   // Громкость (без UI регулировки)
+  // Ref не читаем при инициализации useState — вызываем getPlayerPreferences() напрямую,
+  // чтобы не обращаться к ref во время рендера
   const playerPrefs = useRef(getPlayerPreferences())
-  const [volume] = useState(playerPrefs.current.volume)
+  const [volume] = useState(() => getPlayerPreferences().volume)
 
   // Буферизация
   const [bufferedTime, setBufferedTime] = useState(0)
@@ -275,7 +277,7 @@ export function PlayerPage() {
   // Мемоизированные URL субтитров и шрифтов (чтобы избежать пересоздания SubtitlesOctopus)
   const subtitleUrl = useMemo(
     () => (currentSubtitleTrack?.fileCid ? getIpfsUrl(currentSubtitleTrack.fileCid) : null),
-    [currentSubtitleTrack?.fileCid],
+    [currentSubtitleTrack],
   )
   const subtitleFonts = useMemo(
     () => currentSubtitleTrack?.fontCids.map((cid) => getIpfsUrl(cid)) ?? [],
@@ -375,12 +377,12 @@ export function PlayerPage() {
     // Иначе оставляем needsFullscreen=true — может сработает по тапу
   }, [togglePlay, enterFullscreen, isFullscreenSupported, isFullscreen])
 
-  // Сбросить needsFullscreen если уже в fullscreen (fullscreen вызван при клике на эпизод)
-  useEffect(() => {
-    if (isFullscreen && needsFullscreen) {
-      setNeedsFullscreen(false)
-    }
-  }, [isFullscreen, needsFullscreen])
+  // Сбросить needsFullscreen если уже в fullscreen (fullscreen вызван при клике на эпизод).
+  // Паттерн "adjusting state during render" — оба значения уже доступны при рендере,
+  // эффект не нужен
+  if (isFullscreen && needsFullscreen) {
+    setNeedsFullscreen(false)
+  }
 
   // Автоплей для эпизодов с прогрессом (уже смотрели)
   useEffect(() => {
@@ -390,7 +392,9 @@ export function PlayerPage() {
 
     const hasProgress = (episode.progress?.currentTime ?? 0) > 10 // Если смотрели больше 10 сек
     if (hasProgress && showPlayOverlay) {
-      // Скрываем overlay и пробуем автоплей
+      // Скрываем overlay и пробуем автоплей — легитимная синхронизация с внешней системой
+      // (video.play() ниже — императивный DOM API)
+      // oxlint-disable-next-line react/set-state-in-effect
       setShowPlayOverlay(false)
       // Попытка автоплея (может не сработать на мобильных без gesture)
       togglePlay()
@@ -398,24 +402,31 @@ export function PlayerPage() {
     }
   }, [isReady, episode, showPlayOverlay, togglePlay, isFullscreen])
 
-  // Применение громкости при готовности видео
+  // Применение громкости при готовности видео.
+  // videoRef/audioRef — настоящие useRef из useMobilePlayer (внешний хук), не локальные —
+  // React Compiler не может подтвердить их стабильность через границу хука, но мутация
+  // .current.volume — легитимное присвоение нативного DOM-свойства, не React-состояния
   useEffect(() => {
     if (isReady) {
       if (videoRef.current) {
+        // oxlint-disable-next-line react/immutability
         videoRef.current.volume = volume
       }
       if (audioRef.current) {
+        // oxlint-disable-next-line react/immutability
         audioRef.current.volume = volume
       }
     }
   }, [isReady, volume, videoRef, audioRef])
 
-  // Применение скорости воспроизведения
+  // Применение скорости воспроизведения — та же причина, что и выше
   useEffect(() => {
     if (videoRef.current) {
+      // oxlint-disable-next-line react/immutability
       videoRef.current.playbackRate = playbackSpeed
     }
     if (audioRef.current) {
+      // oxlint-disable-next-line react/immutability
       audioRef.current.playbackRate = playbackSpeed
     }
   }, [playbackSpeed, videoRef, audioRef])
@@ -428,7 +439,10 @@ export function PlayerPage() {
 
     const animeId = searchParams.get('anime')
     if (!animeId) {
+      // Легитимная синхронизация с внешней системой — реакция на query-параметр URL
+      // oxlint-disable-next-line react/set-state-in-effect
       setError('Не указан ID аниме')
+      // oxlint-disable-next-line react/set-state-in-effect
       setLoading(false)
       return
     }
@@ -515,7 +529,8 @@ export function PlayerPage() {
     } catch (err) {
       console.error('Failed to save progress:', err)
     }
-  }, [episodeId, videoRef])
+    // videoRef — стабильный useRef из useMobilePlayer, не нужен в зависимостях
+  }, [episodeId])
 
   // Периодическое сохранение
   useEffect(() => {

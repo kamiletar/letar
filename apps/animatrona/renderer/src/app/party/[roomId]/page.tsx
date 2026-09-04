@@ -106,9 +106,11 @@ export default function WatchPartyPage() {
     return () => clearInterval(interval)
   }, [playbackState?.isPlaying])
 
-  // Синхронизация локальной позиции с хостом
+  // Синхронизация локальной позиции с хостом — playbackState приходит по сети (P2P) от хоста,
+  // это внешняя система, а не производное значение из собственных пропсов компонента
   useEffect(() => {
     if (playbackState) {
+      // oxlint-disable-next-line react/set-state-in-effect
       setLocalPosition(playbackState.position)
     }
   }, [playbackState?.position])

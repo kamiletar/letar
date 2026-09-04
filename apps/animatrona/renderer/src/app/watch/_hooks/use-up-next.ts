@@ -95,6 +95,9 @@ export function useUpNext(options: UseUpNextOptions) {
   useEffect(() => {
     // Не загружаем если есть следующий эпизод или нет animeId
     if (!navigation.isLastEpisode || !episode?.animeId) {
+      // Часть той же синхронизации с внешней системой (сеть/БД, getSequelSuggestion ниже) —
+      // сбрасываем результат предыдущего запроса, когда условия для него больше не выполняются
+      // oxlint-disable-next-line react/set-state-in-effect
       setSequelSuggestion(null)
       return
     }
@@ -158,7 +161,11 @@ export function useUpNext(options: UseUpNextOptions) {
     const remainingSeconds = duration - currentTime
 
     // Показываем за 30 секунд до конца
+    // Легитимная синхронизация с внешней системой (тики currentTime от плеера видео) —
+    // гистерезис видимости (показать/скрыть по разным порогам) требует реакции на поток
+    // внешних событий, а не однократного вывода из пропсов при рендере
     if (remainingSeconds <= SHOW_BEFORE_END_SECONDS && remainingSeconds > 0 && !isVisible) {
+      // oxlint-disable-next-line react/set-state-in-effect
       setIsVisible(true)
     }
 

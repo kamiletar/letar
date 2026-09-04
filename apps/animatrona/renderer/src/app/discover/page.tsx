@@ -82,6 +82,8 @@ export default function DiscoverPage() {
   }, [page, search])
 
   useEffect(() => {
+    // Легитимная синхронизация с внешней системой — загрузка каталога через трекер (IPC)
+    // oxlint-disable-next-line react/set-state-in-effect
     loadCatalog()
   }, [loadCatalog])
 

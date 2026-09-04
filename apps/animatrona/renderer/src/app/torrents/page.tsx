@@ -230,6 +230,8 @@ export function TorrentsContent() {
   }, [enrichWithLibraryStatus])
 
   useEffect(() => {
+    // Легитимная синхронизация с внешней системой — загрузка списка торрентов через Electron IPC
+    // oxlint-disable-next-line react/set-state-in-effect
     fetchTorrents()
 
     const api = window.electronAPI

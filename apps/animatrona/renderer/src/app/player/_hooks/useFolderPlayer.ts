@@ -62,6 +62,122 @@ export function useFolderPlayer() {
   }, [])
 
   /**
+   * Внутренняя функция сканирования дорожек
+   *
+   * @param allVideos Все видео папки (эпизоды + бонусы), а не только текущий —
+   * иначе fuzzyMatchToVideo в main-процессе считает единственный переданный файл
+   * фильмом и приписывает ему ВСЕ найденные субтитры/аудио папки, включая чужие серии.
+   */
+  const scanTracksForEpisodeInternal = useCallback(
+    async (folderPath: string, episode: FolderEpisode, allVideos: FolderEpisode[]) => {
+      if (!window.electronAPI) {
+        return
+      }
+
+      setState((s) => ({ ...s, isLoadingTracks: true, embeddedTracks: null }))
+
+      try {
+        // Подготавливаем данные для сканирования — весь список видео папки,
+        // чтобы matcher на стороне main мог сматчить субтитр к «своему» эпизоду по номеру,
+        // а не приписывал их все текущему (см. videoFiles.length === 1 branch в fuzzyMatchToVideo)
+        const videoFiles = allVideos.map((v) => ({
+          path: v.path,
+          episodeNumber: v.episodeNumber ?? 0,
+        }))
+
+        // Параллельно сканируем внешние дорожки и пробим MKV (с кэшированием)
+        // createHandler возвращает { success, data: ExternalAudioScanResult | ExternalSubtitleScanResult }
+        const [audioResultRaw, subsResultRaw, probeResult] = await Promise.all([
+          window.electronAPI.fs.scanExternalAudio(folderPath, videoFiles) as unknown as {
+            success: boolean
+            data?: ExternalAudioScanResult
+          },
+          window.electronAPI.fs.scanExternalSubtitles(folderPath, videoFiles) as unknown as {
+            success: boolean
+            data?: ExternalSubtitleScanResult
+          },
+          getCachedProbe(episode.path),
+        ])
+
+        // Извлекаем данные из обёртки createHandler
+        const audioResult: ExternalAudioScanResult = audioResultRaw.data || {
+          audioTracks: [],
+          audioDirs: [],
+          unmatchedFiles: [],
+        }
+        const subsResult: ExternalSubtitleScanResult = subsResultRaw.data || {
+          subtitles: [],
+          subsDirs: [],
+          fontsDirs: [],
+          unmatchedFiles: [],
+        }
+
+        // Фильтруем внешние дорожки для текущего эпизода
+        // Для фильмов (episodeNumber === null) берём все дорожки без фильтрации
+        const episodeNum = episode.episodeNumber
+        const externalTracks: ExternalTracksInfo = {
+          audio: episodeNum !== null
+            ? audioResult.audioTracks.filter((t) => t.episodeNumber === episodeNum)
+            : audioResult.audioTracks,
+          subtitles: episodeNum !== null
+            ? subsResult.subtitles.filter((t) => t.episodeNumber === episodeNum)
+            : subsResult.subtitles,
+          audioScanResult: audioResult,
+          subtitleScanResult: subsResult,
+        }
+
+        // Парсим встроенные дорожки из FFprobe
+        let embeddedTracks: EmbeddedTracksInfo | null = null
+        if (probeResult.success && probeResult.data) {
+          const mediaInfo = probeResult.data
+          embeddedTracks = {
+            audio: (mediaInfo.audioTracks ?? []).map((t) => ({
+              index: t.index,
+              language: t.language || 'und',
+              title: t.title || '',
+              codec: t.codec || 'unknown',
+              channels: t.channels || 2,
+              bitrate: t.bitrate,
+              isDefault: t.isDefault,
+              isForced: t.isForced,
+            })),
+            subtitles: (mediaInfo.subtitleTracks ?? []).map((t) => ({
+              index: t.index,
+              language: t.language || 'und',
+              title: t.title || '',
+              codec: t.codec || 'unknown',
+              isDefault: t.isDefault,
+              isForced: t.isForced,
+              subtitleType: t.subtitleType,
+            })),
+          }
+        }
+
+        setState((s) => ({
+          ...s,
+          externalTracks,
+          embeddedTracks,
+          isLoadingTracks: false,
+        }))
+      } catch (error) {
+        console.error('[useFolderPlayer] Ошибка сканирования дорожек:', error)
+        setState((s) => ({
+          ...s,
+          isLoadingTracks: false,
+          embeddedTracks: null,
+          externalTracks: {
+            audio: [],
+            subtitles: [],
+            audioScanResult: null,
+            subtitleScanResult: null,
+          },
+        }))
+      }
+    },
+    [],
+  )
+
+  /**
    * Внутренняя функция сканирования папки
    */
   const scanFolderInternal = useCallback(async (folderPath: string): Promise<boolean> => {
@@ -166,7 +282,7 @@ export function useFolderPlayer() {
       }))
       return false
     }
-  }, [])
+  }, [scanTracksForEpisodeInternal])
 
   /**
    * Сканирование папки и построение списка эпизодов (с диалогом)
@@ -197,123 +313,6 @@ export function useFolderPlayer() {
   )
 
   /**
-   * Внутренняя функция сканирования дорожек
-   *
-   * @param allVideos Все видео папки (эпизоды + бонусы), а не только текущий —
-   * иначе fuzzyMatchToVideo в main-процессе считает единственный переданный файл
-   * фильмом и приписывает ему ВСЕ найденные субтитры/аудио папки, включая чужие серии.
-   */
-  const scanTracksForEpisodeInternal = async (
-    folderPath: string,
-    episode: FolderEpisode,
-    allVideos: FolderEpisode[],
-  ) => {
-    if (!window.electronAPI) {
-      return
-    }
-
-    setState((s) => ({ ...s, isLoadingTracks: true, embeddedTracks: null }))
-
-    try {
-      // Подготавливаем данные для сканирования — весь список видео папки,
-      // чтобы matcher на стороне main мог сматчить субтитр к «своему» эпизоду по номеру,
-      // а не приписывал их все текущему (см. videoFiles.length === 1 branch в fuzzyMatchToVideo)
-      const videoFiles = allVideos.map((v) => ({
-        path: v.path,
-        episodeNumber: v.episodeNumber ?? 0,
-      }))
-
-      // Параллельно сканируем внешние дорожки и пробим MKV (с кэшированием)
-      // createHandler возвращает { success, data: ExternalAudioScanResult | ExternalSubtitleScanResult }
-      const [audioResultRaw, subsResultRaw, probeResult] = await Promise.all([
-        window.electronAPI.fs.scanExternalAudio(folderPath, videoFiles) as unknown as {
-          success: boolean
-          data?: ExternalAudioScanResult
-        },
-        window.electronAPI.fs.scanExternalSubtitles(folderPath, videoFiles) as unknown as {
-          success: boolean
-          data?: ExternalSubtitleScanResult
-        },
-        getCachedProbe(episode.path),
-      ])
-
-      // Извлекаем данные из обёртки createHandler
-      const audioResult: ExternalAudioScanResult = audioResultRaw.data || {
-        audioTracks: [],
-        audioDirs: [],
-        unmatchedFiles: [],
-      }
-      const subsResult: ExternalSubtitleScanResult = subsResultRaw.data || {
-        subtitles: [],
-        subsDirs: [],
-        fontsDirs: [],
-        unmatchedFiles: [],
-      }
-
-      // Фильтруем внешние дорожки для текущего эпизода
-      // Для фильмов (episodeNumber === null) берём все дорожки без фильтрации
-      const episodeNum = episode.episodeNumber
-      const externalTracks: ExternalTracksInfo = {
-        audio: episodeNum !== null
-          ? audioResult.audioTracks.filter((t) => t.episodeNumber === episodeNum)
-          : audioResult.audioTracks,
-        subtitles: episodeNum !== null
-          ? subsResult.subtitles.filter((t) => t.episodeNumber === episodeNum)
-          : subsResult.subtitles,
-        audioScanResult: audioResult,
-        subtitleScanResult: subsResult,
-      }
-
-      // Парсим встроенные дорожки из FFprobe
-      let embeddedTracks: EmbeddedTracksInfo | null = null
-      if (probeResult.success && probeResult.data) {
-        const mediaInfo = probeResult.data
-        embeddedTracks = {
-          audio: (mediaInfo.audioTracks ?? []).map((t) => ({
-            index: t.index,
-            language: t.language || 'und',
-            title: t.title || '',
-            codec: t.codec || 'unknown',
-            channels: t.channels || 2,
-            bitrate: t.bitrate,
-            isDefault: t.isDefault,
-            isForced: t.isForced,
-          })),
-          subtitles: (mediaInfo.subtitleTracks ?? []).map((t) => ({
-            index: t.index,
-            language: t.language || 'und',
-            title: t.title || '',
-            codec: t.codec || 'unknown',
-            isDefault: t.isDefault,
-            isForced: t.isForced,
-            subtitleType: t.subtitleType,
-          })),
-        }
-      }
-
-      setState((s) => ({
-        ...s,
-        externalTracks,
-        embeddedTracks,
-        isLoadingTracks: false,
-      }))
-    } catch (error) {
-      console.error('[useFolderPlayer] Ошибка сканирования дорожек:', error)
-      setState((s) => ({
-        ...s,
-        isLoadingTracks: false,
-        embeddedTracks: null,
-        externalTracks: {
-          audio: [],
-          subtitles: [],
-          audioScanResult: null,
-          subtitleScanResult: null,
-        },
-      }))
-    }
-  }
-
-  /**
    * Перейти к эпизоду по индексу
    */
   const goToEpisode = useCallback(
@@ -332,7 +331,7 @@ export function useFolderPlayer() {
 
       await scanTracksForEpisodeInternal(folderPath, episodes[index], [...episodes, ...bonusVideos])
     },
-    [state],
+    [state, scanTracksForEpisodeInternal],
   )
 
   /**
@@ -354,7 +353,7 @@ export function useFolderPlayer() {
 
       await scanTracksForEpisodeInternal(folderPath, bonusVideos[index], [...episodes, ...bonusVideos])
     },
-    [state],
+    [state, scanTracksForEpisodeInternal],
   )
 
   /**

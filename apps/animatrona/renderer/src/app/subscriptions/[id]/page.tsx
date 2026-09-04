@@ -64,6 +64,8 @@ export default function SubscriptionLibraryPage({ params }: SubscriptionPageProp
   }, [id])
 
   useEffect(() => {
+    // Легитимная синхронизация с внешней системой — загрузка подписки/библиотеки через IPFS IPC
+    // oxlint-disable-next-line react/set-state-in-effect
     void loadData()
   }, [loadData])
 

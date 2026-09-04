@@ -65,7 +65,8 @@ export function App() {
   // Page transition effect
   useEffect(() => {
     if (prefersReducedMotion) {
-      // Без анимации
+      // Без анимации — легитимная синхронизация с внешней системой (роутер)
+      // oxlint-disable-next-line react/set-state-in-effect
       setDisplayLocation(location)
       return
     }

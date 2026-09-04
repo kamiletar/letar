@@ -81,7 +81,10 @@ export function AnimePage() {
   })
 
   useEffect(() => {
+    // Легитимная синхронизация с внешней системой — загрузка данных аниме по сети
+    // oxlint-disable-next-line react/set-state-in-effect
     setLoading(true)
+    // oxlint-disable-next-line react/set-state-in-effect
     fetchData()
   }, [fetchData])
 

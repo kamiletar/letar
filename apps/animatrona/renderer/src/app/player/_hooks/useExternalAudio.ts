@@ -31,12 +31,21 @@ export function useExternalAudio({ videoRef, audioPath }: UseExternalAudioOption
 
   // === НЕМЕДЛЕННАЯ остановка при смене audioPath (ДО useEffect cleanup) ===
   // Это предотвращает воспроизведение двух дорожек одновременно
+  // Намеренно: audio нужно остановить синхронно во время рендера, а не в эффекте —
+  // иначе между рендером с новым audioPath и коммитом нового эффекта старая и новая
+  // дорожки на мгновение звучат одновременно (заметное для пользователя наложение звука).
+  // Мутация не влияет на результат рендера (JSX/state), только на внешний DOM-объект Audio.
+  // oxlint-disable-next-line react/refs
   if (prevAudioPathRef.current !== audioPath) {
     // Немедленно останавливаем предыдущий audio (синхронно, до любых асинхронных операций)
+    // oxlint-disable-next-line react/refs
     if (audioRef.current) {
+      // oxlint-disable-next-line react/refs
       audioRef.current.pause()
+      // oxlint-disable-next-line react/refs
       audioRef.current.src = ''
     }
+    // oxlint-disable-next-line react/refs
     prevAudioPathRef.current = audioPath
   }
 

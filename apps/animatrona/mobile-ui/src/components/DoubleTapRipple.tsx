@@ -37,6 +37,9 @@ export function DoubleTapRipple({ trigger }: DoubleTapRippleProps) {
       direction: trigger.direction,
     }
 
+    // Легитимная синхронизация с внешней системой (таймер) — добавляем ripple по внешнему
+    // trigger и планируем его удаление через setTimeout ниже
+    // oxlint-disable-next-line react/set-state-in-effect
     setRipples((prev) => [...prev, newRipple])
 
     // Удаляем ripple после анимации

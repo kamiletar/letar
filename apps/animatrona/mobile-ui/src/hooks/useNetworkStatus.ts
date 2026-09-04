@@ -116,7 +116,8 @@ export function useNetworkStatus(options: UseNetworkStatusOptions = {}): Network
 
   // Периодический ping
   useEffect(() => {
-    // Первоначальный ping
+    // Первоначальный ping — легитимная синхронизация с внешней системой (сетевой запрос)
+    // oxlint-disable-next-line react/set-state-in-effect
     pingDesktop()
 
     const intervalId = setInterval(pingDesktop, pingInterval)

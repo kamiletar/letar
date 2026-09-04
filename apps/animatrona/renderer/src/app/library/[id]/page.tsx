@@ -324,7 +324,7 @@ export default function AnimePage({ params }: AnimePageProps) {
     } finally {
       setIsPublishingToTracker(false)
     }
-  }, [anime?.directoryCid, anime?.id, queryClient])
+  }, [anime, queryClient])
 
   const handleDetectIntros = useCallback(async () => {
     if (!anime?.episodes?.length || !window.electronAPI?.introDetector) {
@@ -400,7 +400,7 @@ export default function AnimePage({ params }: AnimePageProps) {
     } finally {
       setIsDetectingIntros(false)
     }
-  }, [anime?.episodes, queryClient])
+  }, [anime, queryClient])
 
   // Наличие битых дорожек
   const hasBrokenTracks = anime?.episodes?.some(
@@ -493,14 +493,15 @@ export default function AnimePage({ params }: AnimePageProps) {
 
   // Суммарный IPFS размер
   const { totalIpfsSize, ipfsSizeBreakdown } = useMemo(() => {
-    if (!anime?.episodes) {
+    const episodes = anime?.episodes
+    if (!episodes) {
       return { totalIpfsSize: 0, ipfsSizeBreakdown: { video: 0, audio: 0, subtitles: 0, fonts: 0 } }
     }
     let video = 0,
       audio = 0,
       subtitles = 0,
       fonts = 0
-    for (const ep of anime.episodes) {
+    for (const ep of episodes) {
       video += ep.ipfsSize ?? 0
       for (const at of ep.audioTracks) {
         audio += at.ipfsSize ?? 0

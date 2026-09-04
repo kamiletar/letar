@@ -48,8 +48,10 @@ export default function LibraryError({ error, reset }: LibraryErrorProps) {
     console.error(`[Library] Ошибка (попытка ${retryCount}):`, error)
   }, [error, retryCount])
 
-  // Если это автоматическая первая попытка — показываем кратковременный спиннер
-  if (!autoRetried.current || retryCount < 1) {
+  // Если это автоматическая первая попытка — показываем кратковременный спиннер.
+  // retryCount становится >=1 не раньше, чем эффект выше выставит autoRetried.current = true
+  // (оба происходят вместе, внутри одного setTimeout) — проверка ref избыточна
+  if (retryCount < 1) {
     return null
   }
 

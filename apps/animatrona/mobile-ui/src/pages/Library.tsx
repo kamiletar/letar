@@ -93,6 +93,8 @@ export function LibraryPage() {
   })
 
   useEffect(() => {
+    // Легитимная синхронизация с внешней системой — загрузка библиотеки по сети
+    // oxlint-disable-next-line react/set-state-in-effect
     fetchData()
   }, [fetchData])
 

@@ -138,6 +138,8 @@ export default function HistoryPage() {
   }, [])
 
   useEffect(() => {
+    // Легитимная синхронизация с внешней системой — загрузка истории через Electron IPC
+    // oxlint-disable-next-line react/set-state-in-effect
     loadData()
   }, [loadData])
 

@@ -99,7 +99,7 @@ function DiscoverWatchContent() {
   const shikimoriId = animeDetail?.shikimoriId ? Number(animeDetail.shikimoriId) : null
   const { data: localAnimes } = useFindManyAnime(
     { where: { shikimoriId: shikimoriId ?? undefined }, select: { id: true } },
-    { enabled: shikimoriId != null },
+    { enabled: shikimoriId !== null && shikimoriId !== undefined },
   )
   const isInLibrary = (localAnimes?.length ?? 0) > 0
 
@@ -131,6 +131,8 @@ function DiscoverWatchContent() {
     try {
       const saved = localStorage.getItem(`${TRACK_MODE_PREFIX}${shikimoriId}`) as 'dub' | 'sub' | null
       if (saved) {
+        // Легитимная синхронизация с внешней системой (localStorage)
+        // oxlint-disable-next-line react/set-state-in-effect
         setTrackMode(saved)
       }
     } catch {
@@ -148,6 +150,9 @@ function DiscoverWatchContent() {
     } catch {
       // localStorage недоступен
     }
+    // Легитимная синхронизация с внешней системой (Settings из БД, при отсутствии
+    // per-anime override в localStorage)
+    // oxlint-disable-next-line react/set-state-in-effect
     setTrackMode(settingsDefault)
   }, [settingsDefault, animeDetail?.shikimoriId])
 
@@ -178,10 +183,10 @@ function DiscoverWatchContent() {
 
   // Навигация между эпизодами
   const currentEpIndex = useMemo(() => {
-    if (!animeDetail?.episodes || !episodeNumber) {
+    if (!episodeNumber) {
       return -1
     }
-    return animeDetail.episodes.findIndex((ep) => String(ep.number) === episodeNumber)
+    return animeDetail?.episodes.findIndex((ep) => String(ep.number) === episodeNumber) ?? -1
   }, [animeDetail?.episodes, episodeNumber])
 
   const prevEpisode = currentEpIndex > 0 ? animeDetail!.episodes[currentEpIndex - 1] : null
@@ -266,10 +271,7 @@ function DiscoverWatchContent() {
 
   // URL шрифтов для ASS субтитров
   const subtitleFonts = useMemo(() => {
-    if (!currentSubtitleTrack?.fonts) {
-      return []
-    }
-    return currentSubtitleTrack.fonts
+    return (currentSubtitleTrack?.fonts ?? [])
       .map((f) => (f.cid ? toPlayableUrl({ cid: f.cid }) : null))
       .filter((url): url is string => url !== null)
   }, [currentSubtitleTrack?.fonts])
@@ -325,7 +327,9 @@ function DiscoverWatchContent() {
 
   // Автопропуск OP/ED
   const autoSkipRef = useRef(autoSkipEnabled)
-  autoSkipRef.current = autoSkipEnabled
+  useEffect(() => {
+    autoSkipRef.current = autoSkipEnabled
+  }, [autoSkipEnabled])
   const lastSkipRef = useRef<string | null>(null)
 
   // Сохранение autoSkip в localStorage
@@ -400,7 +404,7 @@ function DiscoverWatchContent() {
       }
     },
     [
-      episodeData?.chapters,
+      episodeData,
       upNextContent,
       upNextDismissed,
       upNextVisible,

@@ -28,7 +28,7 @@ export default function DiscoverDetailPage({ params }: { params: Promise<{ id: s
   // Проверяем наличие в локальной библиотеке по shikimoriId (стабильный ключ)
   const shikimoriId = anime?.shikimoriId ?? null
   const { data: localMatch } = useFindManyAnime(
-    shikimoriId != null
+    shikimoriId !== null && shikimoriId !== undefined
       ? {
         where: { shikimoriId },
         select: { id: true, directoryCid: true, trackerPublishedCid: true },
@@ -90,6 +90,8 @@ export default function DiscoverDetailPage({ params }: { params: Promise<{ id: s
   }, [animeId])
 
   useEffect(() => {
+    // Легитимная синхронизация с внешней системой — загрузка деталей аниме через Electron IPC
+    // oxlint-disable-next-line react/set-state-in-effect
     loadDetail()
   }, [loadDetail])
 

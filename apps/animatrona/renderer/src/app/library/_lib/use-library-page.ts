@@ -64,6 +64,9 @@ export function useLibraryPage() {
     checkedOpenImport.current = true
     const params = new URLSearchParams(window.location.search)
     if (params.get('openImport') === 'true') {
+      // Легитимная синхронизация с внешней системой (query-параметр URL на момент монтирования,
+      // не реактивный проп) — открываем диалог импорта один раз по флагу из WelcomeDialog
+      // oxlint-disable-next-line react/set-state-in-effect
       setIsImportOpen(true)
       router.replace('/library', { scroll: false })
     }
@@ -112,13 +115,18 @@ export function useLibraryPage() {
     }
   }, [debouncedSearch, urlParams.search, setParam])
 
-  // Синхронизация URL → локальный state при навигации
-  // Намеренно исключаем searchInput и debouncedSearch из deps — иначе бесконечный цикл
-  useEffect(() => {
+  // Синхронизация URL → локальный state при навигации.
+  // Паттерн "adjusting state during render" (React docs) вместо эффекта — сравниваем
+  // urlParams.search с зеркальным prevUrlSearch и, если он реально сменился (навигация),
+  // подтягиваем его в searchInput. debouncedSearch по-прежнему исключён из сравнения,
+  // чтобы не перетирать то, что пользователь только что напечатал.
+  const [prevUrlSearch, setPrevUrlSearch] = useState(urlParams.search)
+  if (urlParams.search !== prevUrlSearch) {
+    setPrevUrlSearch(urlParams.search)
     if (urlParams.search !== searchInput && urlParams.search !== debouncedSearch) {
       setSearchInput(urlParams.search)
     }
-  }, [urlParams.search])
+  }
 
   // ===== Данные для фильтров =====
   const { data: genresData } = useAvailableGenres()
@@ -366,7 +374,12 @@ export function useLibraryPage() {
 
   // Множество всех загруженных shikimoriId для передачи в groupAnimeByFranchise
   const allLoadedShikimoriIds = useMemo(
-    () => new Set((allAnimeShikimoriIds || []).map((a) => a.shikimoriId).filter((id): id is number => id != null)),
+    () =>
+      new Set(
+        (allAnimeShikimoriIds || [])
+          .map((a) => a.shikimoriId)
+          .filter((id): id is number => id !== null && id !== undefined),
+      ),
     [allAnimeShikimoriIds],
   )
 
