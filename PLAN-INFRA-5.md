@@ -1581,7 +1581,7 @@ peer-диапазон в `libs/query-provider/package.json` на будущее)
 `kubo-rpc-client`/скачанный бинарник, не через npm-пакет `kubo`) — все зелёные. Коммит
 `2b222568` (`package.json` + `bun.lock`, multi-scope — оба файла одной логической правки).
 
-## §114 — продолжение `/infra:deps-update` ✅ ЗАКРЫТО (2026-08-26): eslint/better-sqlite3/dprint/electron-playwright-helpers применены, oxlint и jsdom откачены
+## §114 — продолжение `/infra:deps-update` ✅ ЗАКРЫТО (2026-08-26, oxlint дозакрыт 2026-09-04): eslint/better-sqlite3/dprint/electron-playwright-helpers/oxlint применены, jsdom откачен
 
 Разбор оставшихся пакетов из `bun outdated` по одному, с чтением changelog каждого:
 
@@ -1603,11 +1603,19 @@ peer-диапазон в `libs/query-provider/package.json` на будущее)
   чекаута). Верификация доделана постфактум:`dprint check`нашёл 1 файл
   ([.claude/scripts/dev-session-screenshot.mjs](/.claude/scripts/dev-session-screenshot.mjs)),
   переформатирован и закоммичен отдельно (`47e5a162`).
-- **`oxlint` 1.73.0→1.80.0`— ОТКАЧЕН.** Новая версия принесла ~28 новых находок нового
-  React-correctness правила (`react/refs`,`react/set-state-in-effect`,`react/use-memo` —
-  часть роллаута "React Compiler Support"). Находки реальные, не баг апдейта, но правка 28
-  файлов в чужом коде вне scope deps-update, тем более с другими агентами на связи — отложено
-  на отдельную сессию.
+- **`oxlint` 1.73.0→1.80.0`— ОТКАЧЕН, затем ✅ ЗАКРЫТО отдельной сессией (2026-09-04, бамп до
+  1.81.0).** Новая версия принесла React-correctness правила роллаута "React Compiler Support"
+  (`react/refs`,`react/set-state-in-effect`,`react/purity`,`react/immutability`,`react/preserve-manual-memoization`,`react/static-components`) — не ~28, а ~847 находок по
+  всему монорепо (первоначальная оценка была по неполному прогону). Разобраны все, отдельной
+  серией коммитов по scope (публичные приложения — напрямую, приватные submodule
+  бизнес-чувствительной логики — через фоновых агентов с проверкой diff перед мержем).
+  Систематический ложноположительный класс — Playwright`use(page)`фикстуры E2E-приложений
+  ошибочно матчились эвристикой`react-hooks/rules-of-hooks`как вызов React-хука`use()`,
+  закрыт одним override`.oxlintrc.json`на`apps/*-e2e/** `, а не точечными подавлениями.
+  Побочный эффект: паттерн`useSyncExternalStore(() => () => {}, ...)`для гидратационного
+  флага (замена`useState`+`useEffect`под`react/set-state-in-effect`) триггерил`@typescript-eslint/no-empty-function`в ~10 файлах — правило разрешено для стрелочных функций
+  глобально в корневом`eslint.config.mjs`. Запись про временный откат в`scripts/intentional-pins.json`удалена, заведена новая —`oxlint` держится на точной версии
+  постоянно (не диапазоном), чтобы набор находок линтера был одинаковым у всех агентов и в CI.
 - **`jsdom` 29.1.1→30.0.1`— ОТКАЧЕН, найдена настоящая регрессия.** Под jsdom 30 тест`apps/studio/src/app/api/webhooks/tochka/route.test.ts`стабильно (не флаки) валился 11/14 —`Request.text()`вёл себя иначе внутри jsdom-окружения vitest, обработчик уходил в catch и
   возвращал`{ok: false}`. Откачен на`^29.1.1`.
   - ⚠️ **Уточнение при повторной проверке (в этой же сессии, после компакции):** после отката
