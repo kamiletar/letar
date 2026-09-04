@@ -85,7 +85,8 @@ export function TableOfContents() {
   // Объединённый эффект: заголовки, scroll handler (прогресс + активный пункт)
   // pathname в зависимостях — перезапуск при клиентской навигации
   useEffect(() => {
-    // Сбрасываем состояние при смене страницы
+    // Синхронизация с навигацией (внешняя система) — сброс состояния при смене страницы
+    // oxlint-disable-next-line react/set-state-in-effect
     setActiveId('')
     setProgress(0)
 

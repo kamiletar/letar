@@ -51,6 +51,8 @@ export function MobileTOC() {
       }
     })
 
+    // Синхронизация с DOM (внешняя система) — заголовки собраны обходом дерева документа
+    // oxlint-disable-next-line react/set-state-in-effect
     setHeadings(items)
 
     // Scroll handler с throttle — прогресс чтения И активный пункт.

@@ -44,6 +44,8 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   useEffect(() => {
     if (open) {
       setQuery('')
+      // Синхронизация с открытием диалога (внешнее событие) — сброс выбранного индекса
+      // oxlint-disable-next-line react/set-state-in-effect
       setSelectedIndex(0)
       // Focus с задержкой для анимации
       setTimeout(() => inputRef.current?.focus(), 50)
@@ -82,6 +84,8 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 
   // Сброс индекса при изменении результатов
   useEffect(() => {
+    // Синхронизация с внешним поиском (results из useSearch) — сброс выбранного индекса
+    // oxlint-disable-next-line react/set-state-in-effect
     setSelectedIndex(0)
   }, [results])
 
