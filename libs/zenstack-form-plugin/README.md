@@ -274,6 +274,62 @@ portions: z.number()
 > дублирующий ключ теперь избыточен, можно вычистить по ходу работы. Это не гейт и не
 > принудительная миграция — новому коду просто не нужно копировать устаревший паттерн.
 
+## Кросс-полевая валидация: `@@validate` (Фаза 2, v2.5.0)
+
+Проверки, зависящие от нескольких полей сразу, задаются на уровне модели, не поля:
+
+```zmodel
+model Booking {
+  id       String   @id @default(cuid())
+  title    String
+  startsAt DateTime
+  endsAt   DateTime
+
+  @@validate(endsAt > startsAt, "Дата окончания раньше начала", ["endsAt"])
+}
+```
+
+Генерирует:
+
+```typescript
+export const BookingCreateFormSchema = withNative(
+  BookingBaseSchema,
+  (s) => ZodUtils.addCustomValidation(s, [{ name: '@@validate', args: [
+    { value: /* сериализованное выражение endsAt > startsAt */ },
+    { value: { kind: 'literal', value: 'Дата окончания раньше начала' } },
+    { value: { kind: 'array', type: 'String', items: [{ kind: 'literal', value: 'endsAt' }] } },
+  ] }]),
+)
+```
+
+Сигнатура — `@@validate(condition: Boolean, message: String?, path: String[]?)`, как в стандартной
+библиотеке ZModel. `condition` — произвольное булево выражение над полями модели (сравнения,
+`&&`/`||`, вызовы `length`/`startsWith`/... — всё, что умеет распознать `serializeExpression` в
+`model-generator.ts`). `message`/`path` — как у Zod `.refine()`: `path` привязывает ошибку к
+конкретному полю формы вместо общей ошибки формы.
+
+**Ограничения:**
+
+- **Только `{Model}CreateFormSchema`.** `{Model}UpdateFormSchema` строится из внутреннего
+  `{Model}BaseSchema` (до `.refine()`) через `.partial()` — у `ZodEffects`, которую возвращает
+  `.refine()`, нет метода `.partial()`, а частичный payload часто физически не может
+  удовлетворить проверке, рассчитанной на полную модель. Если форме редактирования тоже нужна
+  эта проверка — добавляйте её отдельно на уровне формы (`@letar/forms` уровневая валидация), это
+  не автоматизировано.
+- **`MemberAccessExpr` не поддержан.** Условие вида `related.field` (проход через relation) не
+  встречалось в `@@validate` моделей форм-плагина ни разу — попытка его сериализовать кидает
+  понятную ошибку кодогена, а не тихо портит рантайм-поведение.
+
+### `@@strict()` — реализован, но недоступен на `model`
+
+Кодогенерация под `@@strict()` (`z.strictObject(...)` вместо `z.object(...)`) в плагине есть
+(`ModelInfo.isStrict`), но **включить её на реальной модели нельзя**: стандартная библиотека
+ZModel разрешает `@@strict()` только на `type`-определениях (`zenstack generate` останавливается
+с «attribute "@@strict" can only be used on type definitions» при попытке поставить его на
+`model`). Это не риск и не недоделка нашего плагина — ограничение самого языка ZModel, найденное
+живым прогоном при верификации Фазы 2. Код оставлен на будущее, если ZenStack расширит область
+действия атрибута.
+
 ## Автоматически исключаемые поля
 
 - `id` — первичные ключи

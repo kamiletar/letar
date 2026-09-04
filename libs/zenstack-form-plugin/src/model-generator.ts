@@ -1,10 +1,11 @@
-import type { DataField, DataFieldAttribute, DataModel } from '@zenstackhq/language/ast'
+import type { DataField, DataFieldAttribute, DataModel, DataModelAttribute, Expression } from '@zenstackhq/language/ast'
 import { parseFormMeta } from './parser.js'
 import type {
   FormFieldMeta,
   I18nConfig,
   ModelFieldInfo,
   ModelInfo,
+  ModelValidation,
   NativeAttributeApplication,
   ZodConstraints,
 } from './types.js'
@@ -350,6 +351,28 @@ function renderNativeAttributesLiteral(attrs: NativeAttributeApplication[]): str
 }
 
 /**
+ * Отрендерить `ModelValidation[]` в литерал, который читает `ZodUtils.addCustomValidation`
+ * (Фаза 2, v2.5.0): массив `{ name: '@@validate', args: [{value}, {value}?, {value}?] }`, где
+ * каждый `value` — уже сериализованный узел `Expression` (`serializeExpression`/литерал).
+ * `path` рендерится только если задан `message` — сохраняет позиционность аргументов
+ * (`args?.[1]` — message, `args?.[2]` — path) без пустых placeholder-узлов.
+ */
+function renderValidationsLiteral(validations: ModelValidation[]): string {
+  const items = validations.map((v) => {
+    const args = [`{ value: ${v.conditionExpr} }`]
+    if (v.message !== undefined) {
+      args.push(`{ value: { kind: 'literal', value: ${JSON.stringify(v.message)} } }`)
+      if (v.path !== undefined) {
+        const pathItems = v.path.map((p) => `{ kind: 'literal', value: ${JSON.stringify(p)} }`).join(', ')
+        args.push(`{ value: { kind: 'array', type: 'String', items: [${pathItems}] } }`)
+      }
+    }
+    return `{ name: '@@validate', args: [${args.join(', ')}] }`
+  })
+  return `[${items.join(', ')}]`
+}
+
+/**
  * Обернуть Zod-тип элемента (`String`/`Int`/`Float`/`BigInt`) в `withNative(...)`, если для поля
  * есть нативные атрибуты. Для списков не вызывается — там нативные атрибуты относятся к самому
  * массиву (`@length` на списке), см. `applyListNativeAttributes`.
@@ -375,6 +398,112 @@ function applyListNativeAttributes(zodType: string, attrs: NativeAttributeApplic
     return zodType
   }
   return `withNative(${zodType}, (s) => ZodUtils.addListValidation(s, ${renderNativeAttributesLiteral(attrs)}))`
+}
+
+/**
+ * Сериализовать AST-выражение `@@validate` в рантайм-литерал `Expression`, который читает
+ * `evalExpression` внутри `ZodUtils.addCustomValidation` (Фаза 2, v2.5.0, тот же приём инлайна
+ * данных, что `NativeAttributeApplication` в Фазе 1 — но здесь форма другая: не плоские
+ * `{name, args}`, а рекурсивная структура `{kind, ...}` по `$type` Langium-узла).
+ *
+ * Поддержаны узлы, которые реально появляются в булевых условиях `@@validate` по стандартной
+ * грамматике ZModel (`Expression` в `@zenstackhq/language/ast`): литералы, ссылки на поля,
+ * унарный `!`, бинарные операторы, вызовы функций (`length`/`contains`/...), массивы, `this`,
+ * `null`. `MemberAccessExpr` не поддержан намеренно — в `@@validate` моделей форм-плагина не
+ * встречался; попытка сериализовать бросает понятную ошибку кодогена, а не тихо ломает рантайм.
+ */
+/**
+ * `ArrayExpression` рантайм-контракта (`@zenstackhq/schema`) требует поле `type` (тип элементов)
+ * помимо `items` — сам `evalExpression` его не читает (подтверждено чтением исходника
+ * `@zenstackhq/zod`), но TS-тип `Expression` того же пакета его требует структурно, иначе
+ * `tsgo`/`tsc` валят сгенерированный файл `TS2322`. Определяется по первому литералу массива —
+ * для `@@validate` в этом плагине массивы либо пустые, либо однородные (path-массивы строк).
+ */
+function inferArrayExprElementType(expr: Expression & { $type: 'ArrayExpr' }): string {
+  const first = expr.items[0]
+  switch (first?.$type) {
+    case 'NumberLiteral':
+      return 'Int'
+    case 'BooleanLiteral':
+      return 'Boolean'
+    default:
+      return 'String'
+  }
+}
+
+function serializeExpression(expr: Expression): string {
+  switch (expr.$type) {
+    case 'BooleanLiteral':
+      return `{ kind: 'literal', value: ${expr.value} }`
+    case 'NumberLiteral':
+      return `{ kind: 'literal', value: ${Number(expr.value)} }`
+    case 'StringLiteral':
+      return `{ kind: 'literal', value: ${JSON.stringify(expr.value)} }`
+    case 'ReferenceExpr':
+      return `{ kind: 'field', field: ${JSON.stringify(expr.target.$refText)} }`
+    case 'ThisExpr':
+      return `{ kind: 'this' }`
+    case 'NullExpr':
+      return `{ kind: 'null' }`
+    case 'UnaryExpr':
+      return `{ kind: 'unary', op: ${JSON.stringify(expr.operator)}, operand: ${serializeExpression(expr.operand)} }`
+    case 'BinaryExpr':
+      return `{ kind: 'binary', op: ${JSON.stringify(expr.operator)}, left: ${serializeExpression(expr.left)}, right: ${
+        serializeExpression(expr.right)
+      } }`
+    case 'ArrayExpr':
+      return `{ kind: 'array', type: ${JSON.stringify(inferArrayExprElementType(expr))}, items: [${
+        expr.items.map(serializeExpression).join(', ')
+      }] }`
+    case 'InvocationExpr':
+      return `{ kind: 'call', function: ${JSON.stringify(expr.function.$refText)}, args: [${
+        expr.args.map((a) => serializeExpression(a.value)).join(', ')
+      }] }`
+    default:
+      throw new Error(
+        `@@validate: неподдерживаемый узел выражения '${(expr as { $type: string }).$type}' — `
+          + `см. serializeExpression в model-generator.ts`,
+      )
+  }
+}
+
+/**
+ * Прочитать `@@validate(condition, message?, path?)` с модели (Фаза 2, v2.5.0). Модель до сих
+ * пор не читалась вообще — `extractModelInfo` смотрел только `model.fields`.
+ */
+function extractModelValidations(model: DataModel): ModelValidation[] {
+  const validations: ModelValidation[] = []
+
+  for (const attr of model.attributes as DataModelAttribute[]) {
+    if (attr.decl?.$refText !== '@@validate') {
+      continue
+    }
+    const conditionArg = attr.args[0]
+    if (!conditionArg) {
+      continue
+    }
+    const conditionExpr = serializeExpression(conditionArg.value)
+    const message = typeof literalArgValue(attr.args[1]) === 'string'
+      ? (literalArgValue(attr.args[1]) as string)
+      : undefined
+
+    let path: string[] | undefined
+    const pathArgValue = attr.args[2]?.value
+    if (pathArgValue?.$type === 'ArrayExpr') {
+      path = pathArgValue.items
+        .filter((item): item is Extract<Expression, { $type: 'StringLiteral' }> => item.$type === 'StringLiteral')
+        .map((item) => item.value)
+    }
+
+    validations.push({ conditionExpr, message, path })
+  }
+
+  return validations
+}
+
+/** `@@strict()` на модели — переключает `z.object(...)` на `z.strictObject(...)` (Фаза 2). */
+function hasStrictAttr(model: DataModel): boolean {
+  return (model.attributes as DataModelAttribute[]).some((attr) => attr.decl?.$refText === '@@strict')
 }
 
 /**
@@ -450,6 +579,8 @@ export function extractModelInfo(model: DataModel, enumNames: Set<string>): Mode
     name: model.name,
     fields,
     excludedFields,
+    validations: extractModelValidations(model),
+    isStrict: hasStrictAttr(model),
   }
 }
 
@@ -667,7 +798,7 @@ export function generateModelCode(
   enumNames: Set<string>,
   i18nConfig: I18nConfig | null = null,
 ): string {
-  const { name, fields, excludedFields } = modelInfo
+  const { name, fields, excludedFields, validations = [], isStrict = false } = modelInfo
 
   // Collect enum imports
   const enumImports = new Set<string>()
@@ -683,10 +814,13 @@ export function generateModelCode(
   const usesNativeAttributes = fields.some(
     (field) => field.formMeta.nativeAttributes && field.formMeta.nativeAttributes.length > 0,
   )
+  // Фаза 2 (v2.5.0) — кросс-полевая `@@validate` тоже идёт через ZodUtils (addCustomValidation).
+  const usesCustomValidation = validations.length > 0
+  const usesZodUtils = usesNativeAttributes || usesCustomValidation
 
   // Generate imports
   const imports = [`import { z } from 'zod/v4'`]
-  if (usesNativeAttributes) {
+  if (usesZodUtils) {
     imports.push(`import { ZodUtils } from '@zenstackhq/zod'`)
   }
   for (const enumName of enumImports) {
@@ -713,9 +847,13 @@ export function generateModelCode(
 
   const excludedFieldsStr = excludedFields.map((f) => `'${f}'`).join(', ')
 
+  // Фаза 2 (v2.5.0) — `@@strict()` переключает контейнер на z.strictObject(...). ⚠️ Не
+  // проверено живьём с submit-пайплайном @letar/forms — см. libs/forms/PLAN.md.
+  const objectFn = isStrict ? 'z.strictObject' : 'z.object'
+
   // Фаза 1 (v2.4.0, A3) — типизированная обёртка, без которой ZodUtils.* стирает тип схемы
   // до z.ZodSchema (z.infer становился бы unknown) — находка Фазы 0 spike, libs/forms/PLAN.md.
-  const withNativeHelper = usesNativeAttributes
+  const withNativeHelper = usesZodUtils
     ? `
 /**
  * Применить ZodUtils.* с сохранением конкретного типа схемы (Фаза 0 spike: без этой обёртки
@@ -727,22 +865,46 @@ function withNative<T extends z.ZodTypeAny>(schema: T, apply: (s: T) => unknown)
 `
     : ''
 
+  const objectLiteral = `${objectFn}({\n${schemaFields.join(',\n')}\n})`
+
+  // Фаза 2 (v2.5.0) — кросс-полевая `@@validate` применяется только к CreateFormSchema.
+  // UpdateFormSchema строится из БАЗОВОГО объекта до .refine()-обёртки: `addCustomValidation`
+  // возвращает ZodEffects, у которого нет `.partial()` — а .partial() на объекте, потом
+  // withNative(...) поверх него, дало бы partial-схему без кросс-полевой проверки для Update,
+  // что тоже осмысленно (частичное обновление обычно не обязано соблюдать инвариант целиком),
+  // но здесь выбран более простой путь: Update вообще без @@validate, Create — с ним.
+  const schemaExports = usesCustomValidation
+    ? `const ${name}BaseSchema = ${objectLiteral}
+
+/**
+ * Update schema for ${name} (all fields optional). Кросс-полевые \`@@validate\` не применяются —
+ * строится из схемы до withNative-обёртки, у которой нет .partial() (Фаза 2, v2.5.0).
+ */
+export const ${name}UpdateFormSchema = ${name}BaseSchema.partial()
+
+/**
+ * Create schema for ${name} with UI metadata + кросс-полевая валидация из \`@@validate\`.
+ */
+export const ${name}CreateFormSchema = withNative(
+  ${name}BaseSchema,
+  (s) => ZodUtils.addCustomValidation(s, ${renderValidationsLiteral(validations)}),
+)`
+    : `/**
+ * Create schema for ${name} with UI metadata.
+ */
+export const ${name}CreateFormSchema = ${objectLiteral}
+
+/**
+ * Update schema for ${name} (all fields optional).
+ */
+export const ${name}UpdateFormSchema = ${name}CreateFormSchema.partial()`
+
   return `// AUTO-GENERATED by @letar/zenstack-form-plugin
 // DO NOT EDIT MANUALLY
 
 ${imports.join('\n')}
 ${withNativeHelper}
-/**
- * Create schema for ${name} with UI metadata.
- */
-export const ${name}CreateFormSchema = z.object({
-${schemaFields.join(',\n')}
-})
-
-/**
- * Update schema for ${name} (all fields optional).
- */
-export const ${name}UpdateFormSchema = ${name}CreateFormSchema.partial()
+${schemaExports}
 
 /**
  * Fields excluded from forms.

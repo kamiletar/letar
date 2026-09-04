@@ -39,18 +39,36 @@ function makeField(overrides: {
   } as any
 }
 
-function makeModel(name: string, fields: DataField[]): DataModel {
+function makeModel(
+  name: string,
+  fields: DataField[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  modelAttributes: Array<{ refText: string; args?: unknown[] }> = [],
+): DataModel {
   return {
     $type: 'DataModel',
     name,
     comments: [],
-    attributes: [],
+    attributes: modelAttributes.map((a) => ({
+      $type: 'DataModelAttribute',
+      decl: { $refText: a.refText },
+      args: a.args ?? [],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    })) as any,
     isView: false,
     mixins: [],
     fields,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any
 }
+
+// ─── Фикстуры Expression AST для `@@validate` ──────────────────────────────
+
+const strLit = (value: string) => ({ $type: 'StringLiteral', value })
+const boolLit = (value: boolean) => ({ $type: 'BooleanLiteral', value })
+const fieldRef = (name: string) => ({ $type: 'ReferenceExpr', target: { $refText: name }, args: [] })
+const binary = (op: string, left: unknown, right: unknown) => ({ $type: 'BinaryExpr', operator: op, left, right })
+const strArr = (items: string[]) => ({ $type: 'ArrayExpr', items: items.map(strLit) })
 
 describe('extractModelInfo', () => {
   const enumNames = new Set(['RecipeType'])
@@ -363,6 +381,73 @@ describe('extractModelInfo', () => {
 
     const info = extractModelInfo(model, enumNames)
     expect(info.fields[0]?.formMeta.constraints).toEqual({ min: 5 })
+  })
+
+  // ─── Фаза 2 (v2.5.0): @@validate / @@strict ──────────────────────────────
+
+  it('извлекает @@validate с condition/message/path', () => {
+    const model = makeModel(
+      'Booking',
+      [
+        makeField({ name: 'startsAt', type: 'DateTime' }),
+        makeField({ name: 'endsAt', type: 'DateTime' }),
+      ],
+      [{
+        refText: '@@validate',
+        args: [
+          { value: binary('>', fieldRef('endsAt'), fieldRef('startsAt')) },
+          { value: strLit('Дата окончания раньше начала') },
+          { value: strArr(['endsAt']) },
+        ],
+      }],
+    )
+
+    const info = extractModelInfo(model, enumNames)
+
+    expect(info.validations).toHaveLength(1)
+    expect(info.validations?.[0]?.message).toBe('Дата окончания раньше начала')
+    expect(info.validations?.[0]?.path).toEqual(['endsAt'])
+    expect(info.validations?.[0]?.conditionExpr).toContain(`kind: 'binary'`)
+    expect(info.validations?.[0]?.conditionExpr).toContain(`field: "endsAt"`)
+  })
+
+  it('@@validate без message/path — args из одного элемента', () => {
+    const model = makeModel('Booking', [makeField({ name: 'startsAt', type: 'DateTime' })], [{
+      refText: '@@validate',
+      args: [{ value: boolLit(true) }],
+    }])
+
+    const info = extractModelInfo(model, enumNames)
+
+    expect(info.validations).toHaveLength(1)
+    expect(info.validations?.[0]?.message).toBeUndefined()
+    expect(info.validations?.[0]?.path).toBeUndefined()
+  })
+
+  it('модель без @@validate — validations пуст', () => {
+    const model = makeModel('Product', [makeField({ name: 'name', type: 'String' })])
+
+    const info = extractModelInfo(model, enumNames)
+
+    expect(info.validations).toEqual([])
+  })
+
+  it('распознаёт @@strict()', () => {
+    const model = makeModel('Booking', [makeField({ name: 'name', type: 'String' })], [
+      { refText: '@@strict' },
+    ])
+
+    const info = extractModelInfo(model, enumNames)
+
+    expect(info.isStrict).toBe(true)
+  })
+
+  it('без @@strict() — isStrict false', () => {
+    const model = makeModel('Product', [makeField({ name: 'name', type: 'String' })])
+
+    const info = extractModelInfo(model, enumNames)
+
+    expect(info.isStrict).toBe(false)
   })
 })
 
@@ -679,5 +764,80 @@ describe('generateModelCode', () => {
 
     const code = generateModelCode(modelInfo, new Set())
     expect(code).toContain('weird: z.string()')
+  })
+
+  // ─── Фаза 2 (v2.5.0): @@validate / @@strict ──────────────────────────────
+
+  it('@@validate: BaseSchema + withNative(ZodUtils.addCustomValidation) на CreateFormSchema', () => {
+    const modelInfo: ModelInfo = {
+      name: 'Booking',
+      excludedFields: [],
+      fields: [
+        field({ name: 'startsAt', type: 'DateTime' }),
+        field({ name: 'endsAt', type: 'DateTime' }),
+      ],
+      validations: [{
+        conditionExpr:
+          `{ kind: 'binary', op: '>', left: { kind: 'field', field: "endsAt" }, right: { kind: 'field', field: "startsAt" } }`,
+        message: 'Дата окончания раньше начала',
+        path: ['endsAt'],
+      }],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+
+    expect(code).toContain(`import { ZodUtils } from '@zenstackhq/zod'`)
+    expect(code).toContain('function withNative<T extends z.ZodTypeAny>')
+    expect(code).toContain('const BookingBaseSchema = z.object({')
+    expect(code).toContain('export const BookingUpdateFormSchema = BookingBaseSchema.partial()')
+    expect(code).toContain('export const BookingCreateFormSchema = withNative(')
+    expect(code).toContain('ZodUtils.addCustomValidation(s,')
+    expect(code).toContain(`name: '@@validate'`)
+    expect(code).toContain(`kind: 'literal', value: "Дата окончания раньше начала"`)
+    expect(code).toContain(`kind: 'array', type: 'String', items: [{ kind: 'literal', value: "endsAt" }]`)
+  })
+
+  it('без validations — прежний путь, BaseSchema не появляется', () => {
+    const modelInfo: ModelInfo = {
+      name: 'Product',
+      excludedFields: [],
+      fields: [field({ name: 'name', type: 'String' })],
+      validations: [],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+
+    expect(code).not.toContain('BaseSchema')
+    expect(code).not.toContain('ZodUtils')
+    expect(code).toContain('export const ProductCreateFormSchema = z.object({')
+  })
+
+  it('@@strict: z.strictObject(...) вместо z.object(...)', () => {
+    const modelInfo: ModelInfo = {
+      name: 'Booking',
+      excludedFields: [],
+      fields: [field({ name: 'name', type: 'String' })],
+      isStrict: true,
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+
+    expect(code).toContain('export const BookingCreateFormSchema = z.strictObject({')
+    expect(code).not.toContain('z.object({')
+  })
+
+  it('@@strict + @@validate вместе — strictObject как BaseSchema', () => {
+    const modelInfo: ModelInfo = {
+      name: 'Booking',
+      excludedFields: [],
+      fields: [field({ name: 'name', type: 'String' })],
+      isStrict: true,
+      validations: [{ conditionExpr: `{ kind: 'literal', value: true }` }],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+
+    expect(code).toContain('const BookingBaseSchema = z.strictObject({')
+    expect(code).toContain(`args: [{ value: { kind: 'literal', value: true } }]`)
   })
 })

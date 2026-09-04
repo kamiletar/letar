@@ -1,5 +1,40 @@
 # Changelog
 
+## [2.5.0] - 2026-09-04
+
+### Added
+
+- **`@@validate(condition, message?, path?)` — кросс-полевая валидация модели** (Фаза 2 миграции
+  на нативные ZModel-возможности). Условие — произвольное булево выражение ZModel (сравнения,
+  логика, вызовы `length`/`startsWith`/... над полями модели), сериализуется в рантайм-контракт
+  `Expression` пакета `@zenstackhq/zod` (`serializeExpression`, рекурсивный обход AST-узлов
+  Langium по `$type`: `BooleanLiteral`/`NumberLiteral`/`StringLiteral`/`ReferenceExpr`/
+  `ThisExpr`/`NullExpr`/`UnaryExpr`/`BinaryExpr`/`ArrayExpr`/`InvocationExpr`) и применяется как
+  `.refine()` через `ZodUtils.addCustomValidation` (уже существующий API `@zenstackhq/zod`, не
+  наш). `MemberAccessExpr` намеренно не поддержан — в `@@validate` моделей форм-плагина не
+  встречался, попытка сериализовать бросает понятную ошибку кодогена вместо тихой порчи
+  рантайма.
+- **`@@validate` и Update-схема**: кросс-полевая проверка применяется только к `{Model}CreateFormSchema`.
+  Update-схема (`.partial()`) строится из внутреннего, не экспортируемого `{Model}BaseSchema` —
+  результат `.refine()` (`ZodEffects`) не имеет метода `.partial()`, а partial-payload часто не
+  может удовлетворять инварианту, рассчитанному на полную модель. `presentFields`-параметр
+  `ZodUtils.addCustomValidation` (частичная проверка «только если оба поля присутствуют») в MVP
+  не подключён — намеренно вне объёма Фазы 2.
+- `ModelValidation` (`types.ts`) — новый тип, `ModelInfo.validations?: ModelValidation[]`.
+
+### Investigated, not shipped
+
+- **`@@strict()` (`z.strictObject` вместо `z.object`) — реализован в кодогене
+  (`ModelInfo.isStrict`, `hasStrictAttr`), но не может быть использован ни на одной `model`.**
+  Живой прогон `zenstack generate` подтвердил: стандартная библиотека ZModel объявляет
+  `attribute @@strict() @@@once @@@validation` разрешённым **только на `type`-определениях**
+  (`schema.zmodel:N - attribute "@@strict" can only be used on type definitions`) — на `model` он
+  синтаксическая ошибка схемы, а не рантайм-риск, как предполагал `libs/forms/PLAN.md` до этого
+  прогона. Код `isStrict`/`objectFn`/`z.strictObject(...)` в `generateModelCode` оставлен как
+  переносимая инфраструктура (юнит-тестами покрыт на синтетических `ModelInfo`-фикстурах — они не
+  идут через реальный парсер и потому не ловят это ограничение), но для `model` де-факто мёртв,
+  пока ZenStack не расширит область действия атрибута. Задел на будущее — не долг Фазы 2.
+
 ## [2.4.0] - 2026-09-04
 
 ### Added

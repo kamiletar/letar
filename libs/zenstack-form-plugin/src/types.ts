@@ -125,6 +125,24 @@ export interface ModelFieldInfo {
 }
 
 /**
+ * Кросс-полевая проверка из `@@validate(condition, message?, path?)` (Фаза 2, v2.5.0).
+ *
+ * `conditionExpr` — уже сериализованный TS-литерал рантайм-структуры `Expression`, которую
+ * читает `evalExpression` внутри `ZodUtils.addCustomValidation` (пакет `@zenstackhq/zod`):
+ * `{ kind: 'binary', op: '>', left: { kind: 'field', field: 'endsAt' }, ... }` и т.д. Не строка
+ * JS-кода — сериализатор AST-выражения `serializeExpression` (`model-generator.ts`), тот же
+ * приём инлайна данных, что и `NativeAttributeApplication` в Фазе 1.
+ */
+export interface ModelValidation {
+  /** Сериализованный литерал условия (Boolean-выражение) */
+  conditionExpr: string
+  /** Текст ошибки, если задан вторым аргументом (литерал-строка) */
+  message?: string
+  /** `path` третьим аргументом — к какому полю привязать ошибку */
+  path?: string[]
+}
+
+/**
  * Model information.
  */
 export interface ModelInfo {
@@ -134,6 +152,14 @@ export interface ModelInfo {
   fields: ModelFieldInfo[]
   /** Excluded field names */
   excludedFields: string[]
+  /** Кросс-полевые проверки из `@@validate` (Фаза 2). Опционально — старые фикстуры тестов без Фазы 2 не обязаны его задавать. */
+  validations?: ModelValidation[]
+  /**
+   * `@@strict()` на модели — генерировать `z.strictObject(...)` вместо `z.object(...)`
+   * (Фаза 2). ⚠️ Не проверено живьём с `@letar/forms` submit-пайплайном — см.
+   * `libs/forms/PLAN.md`, риск, что форма шлёт служебные поля, которых `.strict()` не простит.
+   */
+  isStrict?: boolean
 }
 
 /**
