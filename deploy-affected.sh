@@ -1273,6 +1273,11 @@ for app in $AFFECTED_APPS; do
 
     # Скрипт сам себе задаёт лог (exec > ... 2>&1) — не зависит от того, как его запустили
     # (systemd-run пишет stdout юнита в journal, не в перенаправление вызывающей команды).
+    # GLITCHTIP_RELEASE пробрасывается через переменную $GIT_SHORT_SHA, вычисленную выше по
+    # скрипту (строка ~1192): heredoc без кавычек у RESTART_EOF раскрывает её уже при записи
+    # файла — `sudo -n systemd-run` в отдельном процессе не наследует export родительского
+    # bash, поэтому обычный `export` перед этим блоком (как для остальных приложений,
+    # строка ~1113) сюда не долетает.
     RESTART_SCRIPT="/tmp/${app}-restart-$$.sh"
     RESTART_LOG="/tmp/${app}-restart-$$.log"
     cat > "$RESTART_SCRIPT" << RESTART_EOF
@@ -1283,6 +1288,7 @@ sleep 3
 docker stop ${OLD_CONTAINER} 2>/dev/null || true
 docker rm ${OLD_CONTAINER} 2>/dev/null || true
 cd "${WORKSPACE_ROOT}/${APP_DIR}"
+export GLITCHTIP_RELEASE="${GIT_SHORT_SHA}"
 docker compose -f $COMPOSE_FILE --env-file $ENV_FILE_NAME up -d app
 sleep 5
 ${POST_START_CMD}
