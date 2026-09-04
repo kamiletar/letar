@@ -1,6 +1,14 @@
 # Custom Procedures (ZenStack v3)
 
-Встроенная возможность ZenStack v3 для определения пользовательских процедур прямо в ZModel с реализацией на TypeScript.
+Встроенная возможность ZenStack v3 для определения пользовательских процедур прямо в ZModel с реализацией на TypeScript. Preview-фича, доступна с v3.2.0.
+
+⚠️ **Синтаксис ниже сверен с официальными доками (`orm/custom-proc`, `modeling/custom-proc`) и
+типом `ProcedureHandlerFunc` из `@zenstackhq/orm` на 2026-09-04** — до этой правки файл описывал
+устаревший/никогда не существовавший синтаксис (`proc` вместо `procedure`, позиционные
+`(client, args)` вместо объекта-контекста, вызов без обёртки `{ args: {...} }`). Если где-то в
+монорепо встретишь код по старому образцу — это не альтернативный валидный вариант, а расхождение
+с типами, которое стоит перепроверить (см. `.claude/docs/` на предмет открытой находки по
+`driving-school`, если её ещё не закрыли).
 
 ## Обзор
 
@@ -8,7 +16,7 @@ Custom Procedures позволяют:
 
 - Инкапсулировать сложную бизнес-логику в ZModel
 - Автоматически получать доступ через ORM клиент (`$procs`)
-- Генерировать HTTP API эндпоинты (`POST /api/$procs/procedureName`)
+- Генерировать HTTP API эндпоинты Query-as-a-Service (RPC- и RESTful-стиль)
 - Генерировать TanStack Query хуки
 
 ## Синтаксис
@@ -31,49 +39,53 @@ type TransferInput {
 
 ### Определение процедур
 
+Ключевое слово — `procedure` для чтения, `mutation procedure` для операций, которые пишут в БД
+(семантической разницы на уровне ORM пока нет, но она зарезервирована на будущее — например для
+кеширования запросов):
+
 ```zmodel
 // Процедура возвращает модель
-proc signUp(args: SignUpInput): User
+mutation procedure signUp(args: SignUpInput): User
 
 // Процедура возвращает nullable
-proc getCurrentUser(): User?
+procedure getCurrentUser(): User?
 
 // Процедура возвращает массив
-proc getUserFeeds(userId: String, limit: Int?): Post[]
+procedure getUserFeeds(userId: String, limit: Int?): Post[]
 
 // Процедура без возврата
-proc sendNotification(userId: String, message: String): Void
+mutation procedure sendNotification(userId: String, message: String): Void
 ```
+
+Параметры можно передавать и напрямую (без обёртки в `type`), и через именованный `type` — как
+в примере `signUp(args: SignUpInput)` выше.
 
 ## Реализация на TypeScript
 
-Процедуры реализуются при создании ZenStackClient в опции `procs`:
+Процедуры реализуются при создании `ZenStackClient` в опции `procedures`. Каждый обработчик —
+функция **одного** аргумента-контекста (не двух позиционных!) с полями `client` и `args`:
 
 ```typescript
 // lib/db.ts
 import { schema } from '@/generated/zenstack'
 import { ZenStackClient } from '@zenstackhq/orm'
 
-// Реализации процедур
-const procs = {
-  signUp: async (client, args: { email: string; name?: string }) => {
-    const hashedPassword = await hashPassword(args.password)
+const procedures = {
+  signUp: async ({ client, args }: { client: typeof client; args: { email: string; name?: string } }) => {
     const user = await client.user.create({
-      data: {
-        email: args.email,
-        name: args.name,
-        password: hashedPassword,
-      },
+      data: { email: args.email, name: args.name },
     })
     await sendWelcomeEmail(user.email)
     return user
   },
 
-  initiateTransfer: async (
+  initiateTransfer: async ({
     client,
-    args: { connectionId: string; toInstructorId: string; reason?: string; transferBalance: boolean },
-  ) => {
-    // Бизнес-логика передачи ученика
+    args,
+  }: {
+    client: typeof client
+    args: { connectionId: string; toInstructorId: string; reason?: string; transferBalance: boolean }
+  }) => {
     const connection = await client.studentInstructorConnection.findUnique({
       where: { id: args.connectionId },
     })
@@ -98,31 +110,39 @@ export function getEnhancedPrisma(user?: { id: string; roles: string[] }) {
   return new ZenStackClient(schema, {
     dialect: { type: 'postgres', connectionString: process.env.DATABASE_URL },
     user,
-    procs,
+    procedures,
   })
 }
 ```
 
+При типизации через сгенерированную схему `client`/`args` выводятся автоматически из объявления в
+`schema.zmodel` — аннотации типов в примере выше явные только для читаемости вне контекста
+конкретного приложения.
+
 ## Использование
 
 ### Через ORM клиент
+
+Методы процедур сгруппированы под `$procs`. Аргументы передаются **обёрнутыми** в объект с
+ключом `args` — это отдельный параметр вызова, не сами аргументы напрямую:
 
 ```typescript
 import { getEnhancedPrisma } from '@/lib/db'
 
 const db = getEnhancedPrisma(session?.user)
 
-// Вызов процедуры
+// ⚠️ args — обязательная обёртка, не db.$procs.signUp({ email, name })
 const user = await db.$procs.signUp({
-  email: 'user@example.com',
-  name: 'John',
+  args: { email: 'user@example.com', name: 'John' },
 })
 
 const transfer = await db.$procs.initiateTransfer({
-  connectionId: 'conn_123',
-  toInstructorId: 'inst_456',
-  reason: 'Переезд в другой район',
-  transferBalance: true,
+  args: {
+    connectionId: 'conn_123',
+    toInstructorId: 'inst_456',
+    reason: 'Переезд в другой район',
+    transferBalance: true,
+  },
 })
 ```
 
@@ -175,10 +195,10 @@ type TransferResult {
 }
 
 // Процедуры
-proc initiateTransfer(args: InitiateTransferInput): TransferResult
-proc acceptTransfer(transferId: String): TransferResult
-proc rejectTransfer(transferId: String, reason: String?): TransferResult
-proc cancelTransfer(transferId: String): TransferResult
+mutation procedure initiateTransfer(args: InitiateTransferInput): TransferResult
+mutation procedure acceptTransfer(transferId: String): TransferResult
+mutation procedure rejectTransfer(transferId: String, reason: String?): TransferResult
+mutation procedure cancelTransfer(transferId: String): TransferResult
 ```
 
 ### Lesson Module
@@ -190,10 +210,10 @@ type LessonResult {
   error     String?
 }
 
-proc confirmLesson(lessonId: String): LessonResult
-proc cancelLesson(lessonId: String, reason: String?): LessonResult
-proc completeLesson(lessonId: String, notes: String?): LessonResult
-proc markNoShow(lessonId: String): LessonResult
+mutation procedure confirmLesson(lessonId: String): LessonResult
+mutation procedure cancelLesson(lessonId: String, reason: String?): LessonResult
+mutation procedure completeLesson(lessonId: String, notes: String?): LessonResult
+mutation procedure markNoShow(lessonId: String): LessonResult
 ```
 
 ### Enrollment Module
@@ -205,8 +225,8 @@ type EnrollmentResult {
   error       String?
 }
 
-proc approveEnrollmentRequest(requestId: String): EnrollmentResult
-proc rejectEnrollmentRequest(requestId: String, reason: String?): EnrollmentResult
+mutation procedure approveEnrollmentRequest(requestId: String): EnrollmentResult
+mutation procedure rejectEnrollmentRequest(requestId: String, reason: String?): EnrollmentResult
 ```
 
 ## Преимущества перед Server Actions
@@ -240,10 +260,10 @@ export async function initiateTransfer(data: TransferData) {
 }
 
 // ✅ Стало — Custom Procedure в schema.zmodel
-proc initiateTransfer(args: InitiateTransferInput): TransferResult
+mutation procedure initiateTransfer(args: InitiateTransferInput): TransferResult
 
-// Использование (авторизация встроена):
-const result = await db.$procs.initiateTransfer({ connectionId, toInstructorId })
+// Использование (авторизация встроена, args — обязательная обёртка):
+const result = await db.$procs.initiateTransfer({ args: { connectionId, toInstructorId } })
 ```
 
 ---

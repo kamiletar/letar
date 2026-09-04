@@ -296,17 +296,40 @@ try {
 Про `dbErrorCode` конкретно (сырой `SQLSTATE` вроде `23505`, не Prisma-код `P2002`) — отдельный
 разбор с граблей на практике: [zenstack-v3-orm-error-codes.md](/.claude/docs/zenstack-v3-orm-error-codes.md).
 
+Когда `reason === 'REJECTED_BY_POLICY'`, дополнительно доступен `rejectedByPolicyReason`:
+`NO_ACCESS` (обычный отказ политикой), `CANNOT_READ_BACK` (запись прошла — часто именно `create` —
+но текущий актор не вправе прочитать результат назад), `OTHER`. `CANNOT_READ_BACK` — тот самый
+случай, который в этом монорепо обходится сырым `prisma`-клиентом заранее (см.
+[zenstack-public-write-read-back.md](/.claude/docs/zenstack-public-write-read-back.md)); ветка по
+этому коду нужна только если по какой-то причине остаёшься на enhanced-клиенте и хочешь
+обработать именно этот случай отдельно от обычного отказа доступа.
+
 ## Отладка
 
 ### Логирование SQL
 
+⚠️ **Ниже — реальный API.** До 2026-09-04 здесь был пример с несуществующим `zenstack.config.ts` —
+такого файла в конфигурации `ZenStackClient` нет, логирование настраивается опцией `log` прямо в
+конструкторе клиента (передаётся насквозь в Kysely):
+
 ```typescript
-// В zenstack.config.ts
-export default {
-  runtime: {
-    logLevel: 'debug', // Показывает генерируемый SQL
+// Список уровней — логирует в консоль
+const db = new ZenStackClient(schema, {
+  ...
+  log: ['query', 'error'],
+})
+
+// Или функция — полный контроль над форматом/приёмником
+const db = new ZenStackClient(schema, {
+  ...
+  log: (event) => {
+    // event.level: 'query' | 'error'
+    // event.query — CompiledQuery от Kysely (SQL + параметры)
+    // event.queryDurationMillis
+    // event.error — только при level === 'error'
+    console.log(`[${event.level}] ${event.queryDurationMillis}ms`)
   },
-}
+})
 ```
 
 ### Проверка политик
