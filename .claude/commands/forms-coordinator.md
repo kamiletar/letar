@@ -14,7 +14,7 @@ description: Координатор экосистемы форм forms-coordina
 macro_start_session(
   human_key: "C:/web/letar",
   program: "claude-code",
-  model: "opus-4.6",
+  model: "claude-opus-5",
   agent_name: "forms-coordinator-dev",
   registration_token: "<токен из agent_fixed_names_tokens.md>",
   task_description: "Forms Coordinator — координация экосистемы форм",

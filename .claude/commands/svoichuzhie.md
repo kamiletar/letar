@@ -26,15 +26,39 @@ description: Воркфлоу разработки сайта группы «С�
 
 Общий чек-лист — `.claude/rules/app-workflow.md`.
 
+## Работа с submodule
+
+Приложение — **приватный git submodule**. Перед редактированием:
+
+```bash
+cd apps/svoichuzhie && git checkout main && git pull origin main
+# ... правки ...
+git add . && git commit -m "feat(svoichuzhie): описание" && git push origin main
+cd ../.. && git add apps/svoichuzhie && git commit -m "chore: bump svoichuzhie submodule"
+```
+
+⚠️ Без `git checkout main` правки уйдут в detached HEAD и потеряются. Подробности:
+`.claude/rules/git.md` § «Работа с приватными submodule».
+
+## 152-ФЗ
+
+⚠️ Приложение собирает персональные данные (фан-клуб, покупка билетов через QTickets, заказы
+мерча через Альфа-Банк/CDEK). **Любая форма, собирающая персональные данные, ОБЯЗАНА:**
+
+- Записывать `ConsentLog` через `recordConsent()` из `@letar/consent`
+- Содержать **не предотмеченный** чекбокс согласия со ссылкой на `/privacy`
+- Cookie-баннер с opt-in
+
+Перед публичным запуском — чеклист `.claude/docs/personal-data.md`.
+
 ## Деплой
 
 Запрещено деплоить самостоятельно — см. `.claude/rules/app-workflow.md`.
 
 ## Учёт времени
 
-Проект ведётся для клиента студии по **почасовой оплате**. Когда заработает MCP-сервер учёта
-времени (`libs/studio-time-mcp`, Фаза 11 в `apps/studio/PLAN.md`) — стартовать таймер при начале
-работы:
+Проект ведётся для клиента студии по **почасовой оплате**. `studio-time-mcp` работает — таймер
+стартуется **сразу при начале работы**:
 
 ```
 time_start({ app: "svoichuzhie", description: "<что делаешь, языком клиента>" })

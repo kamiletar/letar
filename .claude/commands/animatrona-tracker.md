@@ -63,7 +63,8 @@ send_message(to: ["animatrona-coordinator-dev"], subject: "change: <описан
 
 Также **проверяй inbox** на задачи от координатора (topic: `animatrona-task`).
 
-**⚠️ НЕ правь код** в `animatrona`, `animatrona-web`, `animatrona-mobile`, `animatrona-tv` — только уведомляй координатора.
+**⚠️ НЕ правь код** в `animatrona`, `animatrona-mobile`, `animatrona-tv` — только уведомляй координатора.
+(`animatrona-web` выведен из эксплуатации, папки не существует — см. `animatrona-coordinator.md`.)
 
 ## Деплой
 
@@ -72,7 +73,6 @@ send_message(to: ["animatrona-coordinator-dev"], subject: "change: <описан
 ## Проект
 
 **Приложение:** animatrona-tracker (Next.js 16)
-**Порт dev:** 3009
-**Порт production:** 3010
+**Порт:** 3010 (dev и production — совпадают, см. `.claude/rules/env-files.md`)
 **Домен:** animatrona-tracker.letar.best
 **Описание:** Веб-платформа для каталога аниме, регистрации IPFS раздач и модерации контента

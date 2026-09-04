@@ -22,12 +22,24 @@ macro_start_session(
 )
 ```
 
-2. **Стартуй таймер** `time_start({ app: "dashboard-agent", ... })` — общий шаблон и правила
+2. **Выставь открытую contact policy** — иначе первое сообщение от незнакомого агента виснет
+   заявкой на подтверждение контакта (см. `.claude/rules/agent-mail.md`):
+
+```
+set_contact_policy(
+  project_key: "c-web-letar",
+  agent_name: "dashboard-agent-dev",
+  policy: "open",
+  registration_token: "<токен из agent_fixed_names_tokens.md>"
+)
+```
+
+3. **Стартуй таймер** `time_start({ app: "dashboard-agent", ... })` — общий шаблон и правила
    переключения/остановки см. `.claude/rules/app-workflow.md` и `.claude/rules/time-tracking.md`.
 
-3. Прочитай `apps/dashboard-agent/PLAN.md` для текущего состояния задач (если есть)
+4. Прочитай `apps/dashboard-agent/PLAN.md` для текущего состояния задач (если есть)
 
-4. Проверь inbox — могут быть входящие задачи от других агентов:
+5. Проверь inbox — могут быть входящие задачи от других агентов:
 
 ```
 fetch_inbox(
@@ -63,6 +75,6 @@ fetch_inbox(
 ## Проект
 
 **Приложение:** dashboard-agent (Node.js, Fastify)
-**Сервер:** s1 (194.164.245.97)
+**Сервер:** s2 (185.28.85.195) — s1 выведен из эксплуатации 2026-06-20; staging-инстанс на s3
 **Описание:** Лёгкий агент мониторинга — сбор метрик системы, Docker контейнеров, PostgreSQL
-**Особенности:** Без UI, фоновый сервис. Данные отправляет в dashboard (s2)
+**Особенности:** Без UI, фоновый сервис. Данные отправляет в dashboard (тот же сервер)
