@@ -57,6 +57,7 @@ async function main(): Promise<void> {
   initServer({
     dsn: process.env.GLITCHTIP_DSN,
     environment: process.env.GLITCHTIP_ENVIRONMENT ?? 'development',
+    release: process.env.GLITCHTIP_RELEASE,
   })
 
   const fastify = Fastify({

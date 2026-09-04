@@ -55,6 +55,7 @@ services:
       # бандла и NEXT_PUBLIC_* здесь не при чём.
       GLITCHTIP_DSN: ${GLITCHTIP_DSN}
       GLITCHTIP_ENVIRONMENT: ${GLITCHTIP_ENVIRONMENT}
+      GLITCHTIP_RELEASE: ${GLITCHTIP_RELEASE}
       # Этап 0.7 — канареечный мониторинг доставки email (см. lib/email-canary.ts)
       EMAIL_CANARY_SMTP_HOST: ${EMAIL_CANARY_SMTP_HOST}
       EMAIL_CANARY_SMTP_PORT: ${EMAIL_CANARY_SMTP_PORT}
