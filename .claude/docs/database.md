@@ -997,6 +997,99 @@ const orm = new ZenStackClient(schema, {
 - Исправлена генерация схемы Better-Auth с кастомными полями
 - Исправлена регрессия в QaaS с параметром `externalIdMapping`
 
+## Новые возможности v3.4.0-v3.6.0 — Slicing, `@zenstackhq/zod`, `$diagnostics`, relations в `type`
+
+> Аудит релизов между v3.3.0 и v3.7.0 (не был сделан раньше — эти версии вышли до того, как мы
+> начали системно сверяться с changelog). Мажорные фичи трёх релизов ниже.
+
+### Slicing ORM API (v3.4.0) — урезанный клиент для узкого назначения
+
+Опция `slicing` при создании/переконфигурации клиента ограничивает, какие модели, операции и виды
+фильтров ему видны — не access control (это делает `@@allow`/`@@deny`), а сокращение самой
+поверхности API:
+
+```typescript
+const slicedDb = db.$setOptions({
+  ...db.$options,
+  slicing: {
+    excludedModels: ['Comment'], // модель не существует для этого клиента вовсе
+    models: {
+      post: {
+        excludedOperations: ['deleteMany'],
+        fields: { title: { includedFilterKinds: ['Equality'] } }, // только `=`, не `contains`/`gt`
+      },
+    },
+  },
+})
+```
+
+**Кандидат на использование** — везде, где клиенту передаётся урезанный ORM-инстанс с намерением
+«эта часть кода не должна даже пытаться делать X» (кастомные процедуры, внешние интеграции,
+QaaS-подобные сценарии). Не подменяет access policies — сокращает форму запроса, а не проверяет
+права на конкретную строку.
+
+### `@zenstackhq/zod` — фабрика Zod-схем прямо из ZModel (v3.4.0)
+
+Отдельный пакет `@zenstackhq/zod` даёт `createSchemaFactory`/`makeModelSchema` — генерирует Zod-схемы
+для валидации моделей/типов/enum'ов **из самого ZModel**, независимо от ORM-клиента. Второй кусок
+той же фичи — `db.$zod`, схемы для валидации входных аргументов ORM-вызовов (`findUnique`,
+`createMany` и т.п.), полезно как раз когда пользовательский ввод идёт в ORM API через
+промежуточный слой (custom procedure, REST-хендлер).
+
+> ⚠️ **Это ядро активной миграции `zenstack-form-plugin` на нативные атрибуты**
+> (`libs/forms/PLAN.md`, раздел «Миграция на нативные возможности ZModel») — `ZodUtils` из этого
+> пакета уже держит полную карту нативных валидационных атрибутов → Zod-ограничений, которую наш
+> плагин частично дублирует руками. Важный контекст: пакет существует с v3.4.0 (март 2026), то
+> есть на момент миграции (сентябрь 2026) — уже полгода в проде у апстрима, не вчерашний preview.
+
+### `$diagnostics` — метрики производительности клиента (v3.5.0)
+
+```typescript
+const db = new ZenStackClient(schema, { ... })
+// db.$diagnostics — метрики выполнения запросов
+```
+
+Полезно как первый шаг при разборе «почему медленно» до того, как тянуть `EXPLAIN` через
+`postgres-*` MCP — точечно, не как постоянный мониторинг.
+
+### Relations в кастомных `type` (v3.6.0) — общие связи через миксин
+
+`type`-декларации (миксины) теперь могут объявлять relation-поля, не только скалярные — общую
+связь можно вынести в миксин и переиспользовать в нескольких моделях, а не дублировать в каждой:
+
+```zmodel
+type Timestamped {
+  createdAt DateTime @default(now())
+}
+
+type HasAuthor {
+  author   User @relation(fields: [authorId], references: [id])
+  authorId String
+}
+
+model Post with Timestamped, HasAuthor { id String @id @default(cuid()) }
+model Comment with Timestamped, HasAuthor { id String @id @default(cuid()) }
+```
+
+**Кандидат** — там, где одна и та же relation (типично `author`/`createdBy`/`organizationId`)
+сейчас руками повторена в нескольких моделях. Аудит конкретных моделей — по факту задачи, не
+здесь (см. правило `public-repo-hygiene.md` про список моделей приватных приложений).
+
+### `dangerouslyAllowRawSql` (v3.5.0) — сырой SQL при подключённом policy-плагине
+
+По умолчанию `executeRaw`/`queryRaw` **отклоняются** ORM-клиентом, если подключён policy-плагин —
+это отдельный механизм от `getEnhancedPrisma()`/сырого `prisma`-обхода в
+[zenstack-self-only-user-policy-staff-picker.md](/.claude/docs/zenstack-self-only-user-policy-staff-picker.md)
+(тот паттерн — про построчную read-политику `findMany`, не про сырой SQL). Опция явно
+отключает эту защиту, если raw-запрос действительно нужен внутри той же транзакции:
+
+```typescript
+const authDb = db.$use(new PolicyPlugin({ dangerouslyAllowRawSql: true }))
+```
+
+Не включать «на всякий случай» — по умолчанию запрет существует именно потому, что raw SQL
+обходит `@@allow`/`@@deny` целиком.
+
 ## Новые возможности v3.7.0 — Full-Text и Fuzzy Search (только Postgres)
 
 > ⚠️ **TODO — внедрить проактивно.** Мы давно ждали эту фичу под поиск по каталогам/спискам
