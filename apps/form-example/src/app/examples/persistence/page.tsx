@@ -34,6 +34,8 @@ export default function PersistencePage() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
       if (saved) {
+        // Синхронизация с localStorage (внешняя система) после монтирования
+        // oxlint-disable-next-line react/set-state-in-effect
         setInitialValue(JSON.parse(saved))
         setHasSaved(true)
       }

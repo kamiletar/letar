@@ -43,6 +43,8 @@ export function SkinProvider({ children }: { children: ReactNode }) {
     const storedSkin = readStorage(SKIN_STORAGE_KEY)
     const resolvedSkin = isSkin(urlSkin) ? urlSkin : isSkin(storedSkin) ? storedSkin : DEFAULT_SKIN
     if (resolvedSkin !== DEFAULT_SKIN) {
+      // Синхронизация с URL/localStorage (внешние источники) после гидратации
+      // oxlint-disable-next-line react/set-state-in-effect
       setSkinState(resolvedSkin)
     }
 

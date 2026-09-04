@@ -27,6 +27,8 @@ export default function OfflinePage() {
   const [queue, setQueue] = useState<Array<Record<string, unknown>>>([])
 
   useEffect(() => {
+    // Синхронизация с navigator.onLine (внешняя система) после монтирования
+    // oxlint-disable-next-line react/set-state-in-effect
     setIsOnline(navigator.onLine)
     const handleOnline = () => setIsOnline(true)
     const handleOffline = () => setIsOnline(false)

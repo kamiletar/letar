@@ -18,6 +18,8 @@ export default function OfflineDemoPage() {
   const [isOnline, setIsOnline] = useState(true)
 
   useEffect(() => {
+    // Синхронизация с navigator.onLine (внешняя система) после монтирования
+    // oxlint-disable-next-line react/set-state-in-effect
     setIsOnline(navigator.onLine)
     const on = () => setIsOnline(true)
     const off = () => setIsOnline(false)
