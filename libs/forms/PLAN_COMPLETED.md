@@ -1,5 +1,34 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-05 — Фаза 4 v4.0.0: документационный чек-лист миграции `@form.*` → `@meta` — Приоритет 4+5 закрыты
+
+Задача от `forms-coordinator-dev`: после удаления legacy comment-парсера `@form.*` из
+`zenstack-form-plugin` (v4.0.0) оставался незакрытым документационный чек-лист `PLAN.md`
+(Приоритет 4 — `apps/form-docs`/`apps/form-example`, Приоритет 5 — статьи).
+
+**Сделано:**
+
+- `apps/form-docs` — `zenstack-plugin.{mdx,ru.mdx}`, `relation-fields.{mdx,ru.mdx}`,
+  `mcp.{mdx,ru.mdx}`: убраны секция «Legacy syntax», `<details>`-блок с legacy-примером и поле
+  `legacyExample` в описании `get_directives` (сам MCP-реестр `directive-registry.ts` его уже не
+  отдаёт). `llms.txt/route.ts` уже был на `@meta` — без изменений.
+- `apps/form-example` — `README.md` переведён на `@meta("form.*", value)`; `schema.zmodel`
+  проверен кодмодом (`--dry-run`) — 0 legacy-директив, только `///`-комментарии enum-значений
+  (не форм-директивы).
+- `libs/forms/articles/08-zenstack-pipeline.md`, `11-mcp-ai.md` — убраны абзацы/примеры про
+  legacy `///`-синтаксис.
+- `12-open-source.md`, `benchmarks.md`, `visuals-needed.md`, `ARTICLE.md`,
+  `articles/images/08-zenstack-pipeline.svg` — при повторной проверке grep'ом уже 0 вхождений
+  `@form.` (числа из старого аудита устарели — эти файлы были обновлены в одну из предыдущих
+  фаз без отметки в чек-листе).
+
+Коммит `99569018` (multi-scope: `apps/form-docs` + `apps/form-example` + `libs/forms`,
+doc-only правка, `GIT_ALLOW_MULTI_SCOPE_COMMIT=1`). Отчёт отправлен `forms-coordinator-dev`
+(тред `forms-native-migration`). Регистрация/резервации/релиз через Agent Mail — штатно.
+
+**Не сделано в этой сессии:** таймер `studio-time-mcp` не был запущен в начале работы (пропуск
+дисциплины) — время сессии нигде не залогировано, восстановить задним числом нельзя.
+
 ## 2026-08-26 — `EditIntentValue<T>` / `Form.Field.EditIntent` — частично закрыто (backlog [2026-08-23])
 
 Запрос от владельца монорепо (high, напрямую): компонент для полей API-key/Client Secret,
