@@ -1,7 +1,7 @@
 'use client'
 
 import { createToaster, Portal, Spinner, Stack, Toast, Toaster as ChakraToaster } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 
 export const toaster: ReturnType<typeof createToaster> = createToaster({
   placement: 'bottom-end',
@@ -10,11 +10,12 @@ export const toaster: ReturnType<typeof createToaster> = createToaster({
 })
 
 export const Toaster = () => {
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  // Ждём гидратации: на сервере всегда false, на клиенте — true сразу после монтирования
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  )
 
   if (!mounted) {
     return null

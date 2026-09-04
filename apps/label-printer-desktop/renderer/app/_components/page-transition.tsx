@@ -19,7 +19,8 @@ export function PageTransition({ children }: PageTransitionProps) {
   const [displayChildren, setDisplayChildren] = useState(children)
 
   useEffect(() => {
-    // Скрываем контент при смене страницы
+    // Синхронизация с навигацией (внешняя система) — скрываем контент при смене страницы
+    // oxlint-disable-next-line react/set-state-in-effect
     setIsVisible(false)
 
     // Задержка перед показом нового контента

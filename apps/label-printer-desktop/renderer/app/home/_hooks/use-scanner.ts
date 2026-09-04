@@ -21,6 +21,8 @@ export function useScannerConnection({ onScan }: UseScannerConnectionProps) {
       return
     }
 
+    // Синхронизация с Electron IPC (внешняя система) — подписка установлена
+    // oxlint-disable-next-line react/set-state-in-effect
     setIsListening(true)
     const unsubscribe = window.electronAPI.on.scannerInput(onScan)
 
