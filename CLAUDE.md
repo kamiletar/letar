@@ -46,6 +46,11 @@ projects --with-target` этого не ловит ·
 на чистом дереве, гигиена (`.d.ts.map` в `.gitignore`) и cleanup-команда ·
 [bun-lockfile-private-submodules](/.claude/docs/bun-lockfile-private-submodules.md) ⚠️
 `--frozen-lockfile` падает везде, где submodule не выкачаны; чистка `bun.lock` не держится ·
+[bun-server-version-lockfile-format-incompatibility](/.claude/docs/bun-server-version-lockfile-format-incompatibility.md)
+⚠️ старый bun на сервере не парсит `lockfileVersion` новой версии вообще (`Unknown lockfile
+version`) — блокирует ВСЕ деплои на сервере разом, не только текущее приложение; фикс — апгрейд
+bun от **root**, не от `deploy` (`/usr/local/bin/bun` → симлинк на `/root/.bun/bin/bun`),
+проверка строго через `nsenter ... sudo -u deploy` execution path ·
 [bun-install-stale-isolated-cache](/.claude/docs/bun-install-stale-isolated-cache.md) ⚠️
 несколько версий пакета в `node_modules/.bun` после снятия пина — не признак незавершённого
 резолва, обычный `bun install` не прунит устаревшие isolated-копии; сверять по `bun.lock`,

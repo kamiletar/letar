@@ -95,8 +95,11 @@ bun install --lockfile-only && git diff --stat -- bun.lock   # показыва�
 ## Смежное
 
 - [PLAN-INFRA-4.md §73](/PLAN-INFRA-4.md) — история CI-гейта, включая рецидив этого дефекта.
-- [PLAN-INFRA-3.md §50](/PLAN-INFRA-3.md) — тот же флаг на прод-деплое; причина падения на **s3**
-  (где инициализирован весь набор submodule) этим механизмом **не** объясняется и пока не найдена.
+- [PLAN-INFRA-3.md §50](/PLAN-INFRA-3.md) — тот же флаг на прод-деплое.
+- [bun-server-version-lockfile-format-incompatibility.md](bun-server-version-lockfile-format-incompatibility.md) —
+  причина падения на **s3** (где submodule выкачаны полностью, значит не этот механизм) найдена
+  2026-09-05: несовместимость версии bun на сервере с форматом lockfile, никак не связанная с
+  submodule.
 - [repo-structure](/.claude/docs/repo-structure.md) — состав приватных submodule.
 - [verification-pitfalls](/.claude/docs/verification-pitfalls.md) — класс проверок, которые врут в
   успокаивающую сторону; локальный зелёный `--frozen-lockfile` — ровно такой случай.
