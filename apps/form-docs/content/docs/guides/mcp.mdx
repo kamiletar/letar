@@ -118,18 +118,18 @@ get_form_pattern({ pattern: "crud-create" })
 ### get_directives
 
 Get documentation for `@meta("form.*", value)` ZenStack directives. Each result includes the
-current `@meta` field-attribute syntax (`example`), the flat `metaKey` dot-path, the deprecated
-comment-based syntax for reference (`legacyExample`), and the generated Zod `.meta()` output.
+`@meta` field-attribute syntax (`example`), the flat `metaKey` dot-path, and the generated Zod
+`.meta()` output.
 
 ```
 get_directives({ directive: "@form.fieldType" })
-→ { name, metaKey, description, example, legacyExample, output }
+→ { name, metaKey, description, example, output }
 ```
 
 **Directives:** `@form.title`, `@form.placeholder`, `@form.description`, `@form.fieldType`, `@form.props`, `@form.relation`, `@form.exclude`
 
-Lookup is by the legacy short name (`@form.fieldType`) for backwards compatibility — the response
-itself shows the current `@meta("form.fieldType", ...)` syntax as the primary `example`.
+Lookup is by this short name (`@form.fieldType`) — it's an internal identifier for the MCP API,
+not a comment-based syntax; the schema syntax itself is `@meta("form.fieldType", ...)`.
 
 ### generate_form
 
@@ -160,7 +160,7 @@ The server also provides 7 documentation resources accessible via `form-docs://`
 | `form-docs://schema-generation` | FromSchema, AutoFields, Builder    |
 | `form-docs://offline`           | useOfflineForm, sync queue         |
 | `form-docs://i18n`              | FormI18nProvider, localized errors |
-| `form-docs://zenstack`          | @form.\* directives, schema.zmodel |
+| `form-docs://zenstack`          | @meta("form.\*", value) directives, schema.zmodel |
 | `form-docs://api-reference`     | Hooks, contexts, types             |
 
 ## Prompts

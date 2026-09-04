@@ -117,19 +117,19 @@ get_form_pattern({ pattern: "crud-create" })
 
 ### get_directives
 
-Документация по директивам ZenStack `@meta("form.*", value)`. Результат включает актуальный
-синтаксис field-атрибута `@meta` (`example`), плоский dot-path ключ `metaKey`, устаревший
-comment-синтаксис для справки (`legacyExample`) и генерируемый вывод Zod `.meta()`.
+Документация по директивам ZenStack `@meta("form.*", value)`. Результат включает синтаксис
+field-атрибута `@meta` (`example`), плоский dot-path ключ `metaKey` и генерируемый вывод Zod
+`.meta()`.
 
 ```
 get_directives({ directive: "@form.fieldType" })
-→ { name, metaKey, description, example, legacyExample, output }
+→ { name, metaKey, description, example, output }
 ```
 
 **Директивы:** `@form.title`, `@form.placeholder`, `@form.description`, `@form.fieldType`, `@form.props`, `@form.relation`, `@form.exclude`
 
-Поиск идёт по legacy-имени (`@form.fieldType`) ради обратной совместимости — сам ответ показывает
-актуальный синтаксис `@meta("form.fieldType", ...)` как основной `example`.
+Поиск идёт по этому короткому имени (`@form.fieldType`) — это внутренний идентификатор MCP API,
+не comment-синтаксис; синтаксис в самой схеме — `@meta("form.fieldType", ...)`.
 
 ### generate_form
 
@@ -160,7 +160,7 @@ generate_form({
 | `form-docs://schema-generation` | FromSchema, AutoFields, Builder       |
 | `form-docs://offline`           | useOfflineForm, очередь синхронизации |
 | `form-docs://i18n`              | FormI18nProvider, локализация ошибок  |
-| `form-docs://zenstack`          | @form.\* директивы, schema.zmodel     |
+| `form-docs://zenstack`          | @meta("form.\*", value) директивы, schema.zmodel |
 | `form-docs://api-reference`     | Хуки, контексты, типы                 |
 
 ## Промпты

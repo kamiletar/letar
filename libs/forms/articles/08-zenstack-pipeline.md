@@ -71,10 +71,6 @@ model Product {
 > ломает `zenstack generate` целиком (`Unsupported attribute arg value: ObjectExpr`, ограничение
 > upstream-генератора самого ZenStack, не плагина). Поэтому `form.props`/`form.relation` задаются
 > плоским dot-path: по одному `@meta` на ключ, как в примере выше.
->
-> Старый синтаксис через `///`-комментарий (`/// @form.title("...")`) по-прежнему работает —
-> плагин читает оба, `@meta` побеждает при конфликте на одном ключе — но считается deprecated и
-> печатает предупреждение при `zenstack:generate`.
 
 Запускаем генерацию:
 
@@ -261,9 +257,6 @@ export default async function EditProductPage({ params }) {
 | `form.props.<dotpath>`        | Кастомные пропсы (плоский dot-path — объект в `@meta` ломает generate) | `@meta("form.props.currency", "RUB")`            |
 | `form.relation.<dotpath>`     | Настройки relation-поля                                                | `@meta("form.relation.labelField", "name")`      |
 | `form.exclude`                | Скрыть из формы                                                        | `@meta("form.exclude", true)`                    |
-
-> Все примеры выше — основной синтаксис (Фаза 3, v3.0.0). Старый синтаксис через doc-комментарий
-> (`/// @form.title("...")`) продолжает работать как deprecated-фолбэк.
 
 ---
 

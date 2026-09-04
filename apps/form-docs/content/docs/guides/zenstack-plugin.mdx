@@ -66,23 +66,6 @@ literals are rejected.
 | `@meta("form.relation.<dotpath>", ...)`  | Relation select config    | `@meta("form.relation.labelField", "name")`   |
 | `@meta("form.exclude", true)`            | Exclude from form         | `@meta("form.exclude", true)`                 |
 
-### Legacy syntax (still works, but deprecated)
-
-The old `///` doc-comment directives before a field still work — the plugin reads both syntaxes,
-and `@meta` wins if the same key is set both ways on one field. `nx zenstack:generate` prints a
-deprecation warning when it sees `@form.*` comments, but the build doesn't break:
-
-```prisma
-model Product {
-  /// @form.title("Product Name")
-  /// @form.placeholder("Enter product name")
-  name String
-}
-```
-
-New schemas should use `@meta`; there's no need to migrate existing `@form.*` comments by hand
-unless you're already touching that model.
-
 ## Generated Output
 
 For the `Product` model above, the plugin generates:
@@ -351,7 +334,7 @@ These fields are automatically excluded from generated schemas:
 - Fields with `@relation` attribute
 - Fields with `@omit` attribute (hidden from the ORM client entirely)
 - Fields with `@computed` attribute (computed server-side)
-- Fields with `@meta("form.exclude", true)` (or legacy `/// @form.exclude`)
+- Fields with `@meta("form.exclude", true)`
 
 ## Links
 

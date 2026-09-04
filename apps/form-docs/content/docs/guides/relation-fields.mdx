@@ -29,21 +29,6 @@ model Recipe {
 `zenstack generate` entirely (`Unsupported attribute arg value: ObjectExpr`) — always use the
 flat dot-path form shown above, one `@meta` call per key.
 
-<details>
-<summary>Legacy syntax (still works, but deprecated)</summary>
-
-```prisma
-model Recipe {
-  /// @form.title("Category")
-  /// @form.relation({ labelField: "name" })
-  categoryId String
-
-  category Category @relation(fields: [categoryId], references: [id])
-}
-```
-
-</details>
-
 ## RelationFieldProvider
 
 Wrap your form to provide relation data:

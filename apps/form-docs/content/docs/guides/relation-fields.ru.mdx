@@ -29,21 +29,6 @@ model Recipe {
 `zenstack generate` целиком (`Unsupported attribute arg value: ObjectExpr`) — используйте только
 плоский dot-path, как выше, по одному вызову `@meta` на ключ.
 
-<details>
-<summary>Legacy-синтаксис (продолжает работать, но deprecated)</summary>
-
-```prisma
-model Recipe {
-  /// @form.title("Категория")
-  /// @form.relation({ labelField: "name" })
-  categoryId String
-
-  category Category @relation(fields: [categoryId], references: [id])
-}
-```
-
-</details>
-
 ## RelationFieldProvider
 
 Оберните форму для предоставления данных связей:

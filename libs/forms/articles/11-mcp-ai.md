@@ -100,13 +100,12 @@ AI → get_directives({ directive: "@form.fieldType" })
     metaKey: "form.fieldType",
     description: "Явный тип поля формы",
     example: '@meta("form.fieldType", "richText")',
-    legacyExample: '/// @form.fieldType("richText")',
     output: '.meta({ ui: { fieldType: "richText" } })'
   }
 ```
 
-Поле `example` — актуальный синтаксис (`@meta`, основной с Фазы 3 zenstack-form-plugin v3.0.0),
-`legacyExample` — старый doc-комментарий, всё ещё рабочий, но deprecated. Параметр `directive`
+Поле `example` — единственный синтаксис директивы (`@meta`, с Фазы 4 zenstack-form-plugin
+v4.0.0 legacy doc-комментарий `/// @form.*` убран из парсера полностью). Параметр `directive`
 принимает как короткое имя (`fieldType`), так и полное (`@form.fieldType`) — это lookup-ключ
 инструмента, не сама директива в schema.zmodel.
 

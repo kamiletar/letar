@@ -76,7 +76,7 @@ npm run dev
 
 ## ZenStack Plugin
 
-`schema.zmodel` defines database models with `@form.*` directives.
+`schema.zmodel` defines database models with `@meta("form.*", value)` directives.
 Generated schemas are in `src/generated/form-schemas/`.
 
 ```bash
