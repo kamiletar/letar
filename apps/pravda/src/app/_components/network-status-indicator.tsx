@@ -1,8 +1,7 @@
 'use client'
 
 import { Icon, Tooltip } from '@chakra-ui/react'
-import { useOfflineConsent, useOnlineStatus } from '@letar/hooks'
-import { useSyncExternalStore } from 'react'
+import { useIsHydrated, useOfflineConsent, useOnlineStatus } from '@letar/hooks'
 import { LuWifi, LuWifiOff } from 'react-icons/lu'
 
 /**
@@ -14,12 +13,7 @@ import { LuWifi, LuWifiOff } from 'react-icons/lu'
 export function NetworkStatusIndicator() {
   const { isAccepted } = useOfflineConsent('pravda-offline-consent')
   const isOnline = useOnlineStatus()
-  // Ждём гидратации: на сервере всегда false, на клиенте — true сразу после монтирования
-  const isReady = useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false,
-  )
+  const isReady = useIsHydrated()
 
   // Не показываем до гидратации или если оффлайн не включён
   if (!isReady || !isAccepted) {

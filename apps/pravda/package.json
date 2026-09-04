@@ -18,6 +18,7 @@
     ]
   },
   "dependencies": {
-    "@letar/glitchtip": "workspace:*"
+    "@letar/glitchtip": "workspace:*",
+    "@letar/hooks": "workspace:*"
   }
 }

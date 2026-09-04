@@ -1,8 +1,8 @@
 'use client'
 
 import { Box, Button, CloseButton, HStack, Text, VStack } from '@chakra-ui/react'
-import { useOfflineConsent } from '@letar/hooks'
-import { Fragment, useEffect, useState, useSyncExternalStore } from 'react'
+import { useIsHydrated, useOfflineConsent } from '@letar/hooks'
+import { Fragment, useEffect, useState } from 'react'
 import { LuDownload, LuWifiOff } from 'react-icons/lu'
 import { usePublishedHeight } from './use-published-height'
 
@@ -17,16 +17,6 @@ import { usePublishedHeight } from './use-published-height'
  * `StickyActionBar` перехватывался этим баннером, появляющимся через `delayMs` после интро.
  */
 const OFFLINE_BANNER_HEIGHT_VAR = '--letar-offline-consent-banner-height'
-
-// Гидратация — не производное значение и не асинхронное событие: см. тот же приём в top-loader.tsx.
-const subscribeNoop = () => () => {}
-function useIsHydrated(): boolean {
-  return useSyncExternalStore(
-    subscribeNoop,
-    () => true,
-    () => false,
-  )
-}
 
 export interface OfflineConsentBannerProps {
   /** Namespace-ключ для {@link useOfflineConsent} (localStorage), например `'studio-offline-consent'` */

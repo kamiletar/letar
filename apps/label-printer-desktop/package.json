@@ -10,13 +10,15 @@
     "implicitDependencies": [
       "@letar/query-provider",
       "@letar/electron-storage",
-      "@letar/icon-generator"
+      "@letar/icon-generator",
+      "@letar/hooks"
     ]
   },
   "dependencies": {
     "canvas": "^3.1.0",
     "pdfjs-dist": "^4.10.38",
-    "@letar/icon-generator": "workspace:*"
+    "@letar/icon-generator": "workspace:*",
+    "@letar/hooks": "workspace:*"
   },
   "devDependencies": {
     "electron": "44.1.1"

@@ -1,6 +1,9 @@
 {
   "name": "@letar/chakra-provider",
   "version": "0.0.1",
+  "dependencies": {
+    "@letar/hooks": "workspace:*"
+  },
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {

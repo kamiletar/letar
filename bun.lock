@@ -679,6 +679,7 @@
       "name": "@letar/label-printer-desktop",
       "version": "0.5.12",
       "dependencies": {
+        "@letar/hooks": "workspace:*",
         "@letar/icon-generator": "workspace:*",
         "canvas": "^3.1.0",
         "pdfjs-dist": "^4.10.38",
@@ -734,6 +735,7 @@
       "version": "1.9.5",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
+        "@letar/hooks": "workspace:*",
       },
     },
     "apps/pravda-e2e": {
@@ -929,6 +931,9 @@
     "libs/chakra-provider": {
       "name": "@letar/chakra-provider",
       "version": "0.0.1",
+      "dependencies": {
+        "@letar/hooks": "workspace:*",
+      },
     },
     "libs/consent": {
       "name": "@letar/consent",
@@ -1103,7 +1108,7 @@
     },
     "libs/forms-react": {
       "name": "@letar/forms-react",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },

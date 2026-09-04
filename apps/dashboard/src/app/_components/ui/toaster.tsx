@@ -1,7 +1,7 @@
 'use client'
 
 import { createToaster, Portal, Stack, Toast, Toaster as ChakraToaster } from '@chakra-ui/react'
-import { useSyncExternalStore } from 'react'
+import { useIsHydrated } from '@letar/hooks'
 
 export const toaster = createToaster({
   placement: 'bottom-end',
@@ -9,15 +9,8 @@ export const toaster = createToaster({
   max: 5,
 })
 
-// Определение «смонтировано на клиенте» — источник истины не в React-состоянии, а в самом факте
-// гидратации (внешняя по отношению к рендеру система). useSyncExternalStore с getServerSnapshot,
-// отличным от getSnapshot, — штатный способ получить это без setState в эффекте
-// (react/set-state-in-effect, oxlint 1.81).
-const subscribeNoop = () => () => {}
-const useHasMounted = () => useSyncExternalStore(subscribeNoop, () => true, () => false)
-
 export const Toaster = () => {
-  const mounted = useHasMounted()
+  const mounted = useIsHydrated()
 
   if (!mounted) {
     return null
