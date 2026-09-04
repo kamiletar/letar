@@ -1,5 +1,24 @@
 # Выполненные задачи — Animatrona Tracker
 
+## Nx-кэш `db:*`/`zenstack:generate` отключён (2026-09-04)
+
+В прошлой сессии (см. запись ниже про `Content.category`/`Content.quality`/`Report.reason`)
+`nx zenstack:generate`/`nx db:push` дважды подряд отдавали закэшированный результат
+(«already in sync», `Successfully ran target`) вместо реальной регенерации после правки
+`schema.zmodel` — помогло только `--skip-nx-cache`. Причина — известный Windows+Nx Cloud баг
+кэша (os error 87), задокументированный в `.claude/docs/database.md`, не проблема точности
+`inputs`/`outputs`.
+
+`apps/animatrona-tracker/project.json` приведён к эталонному паттерну `driving-school`:
+`"cache": false` выставлен явно на всех `db:*`-таргетах (`db:generate`, `db:push`,
+`db:push:data-loss`, `db:migrate`, `db:migrate:deploy`, `db:studio`, `db:seed`, `db:reset`,
+`db:reset:data-loss`) и на `zenstack:generate` (было `cache: true` у обоих последних). Проверено
+воспроизведением: два подряд прогона `nx zenstack:generate animatrona-tracker` без
+`--skip-nx-cache` — оба реально выполнили генерацию (кэшируется только независимая задача
+сборки `@letar/zenstack-form-plugin`, не сам таргет).
+
+Коммит `244884a1`.
+
 ## `Content.category`/`Content.quality`/`Report.reason` → enum (2026-09-04)
 
 Задача от координатора форм (`forms-coordinator-dev`) — последний блокер удаления legacy
