@@ -2,6 +2,23 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.6] - 2026-09-04
+
+### Added
+
+- `meta-syntax-demo` — демо-страница Фазы 3 миграции `zenstack-form-plugin` (v3.0.0):
+  `@meta("form.*", …)` как основной синтаксис вместо comment-директив `@form.*`. Модель
+  `MetaSyntaxDemo` в `schema.zmodel`, поле `legacyNote` намеренно оставлено на старом
+  `@form.title`-синтаксисе для демонстрации живой обратной совместимости и deprecation-warning.
+- `schema.zmodel` мигрирован кодмодом `scripts/codemods/codemod-form-directives.mjs`:
+  30 директив конвертированы, 2 случая ручной проверки (мёртвая позиционная форма
+  `@form.relation("Category", "name")` — переведена на `@meta("form.relation.model", …)`
+  `@meta("form.relation.labelField", …)`, чем заодно починен никогда не работавший
+  relation-select для `Recipe.category`).
+- `meta-syntax-demo.spec.ts` — 6 e2e тестов: рендер полей, `@meta`-лейбл/placeholder,
+  `@meta("form.description", …)` побеждает legacy на одном поле, legacy-синтаксис продолжает
+  рендериться, `form.exclude` скрывает поле, валидный сабмит.
+
 ## [0.1.5] - 2026-09-04
 
 ### Added

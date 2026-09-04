@@ -97,6 +97,11 @@ export default function HomePage() {
             Cross-Field Validation (Фаза 2 zenstack-form-plugin: @@validate)
           </Link>
         </Button>
+        <Button asChild colorPalette="cyan" variant="outline" size="lg" width="fit-content">
+          <Link href="/meta-syntax-demo">
+            Meta Syntax (Фаза 3 zenstack-form-plugin: @meta вместо @form.*)
+          </Link>
+        </Button>
       </VStack>
     </Container>
   )

@@ -201,9 +201,30 @@ Zod), демонстрирует 4 из 11 новых нативных атри�
 
 ---
 
+## Meta Syntax Demo (реализовано, Фаза 3 zenstack-form-plugin v3.0.0)
+
+`/meta-syntax-demo` — модель `MetaSyntaxDemo`, демонстрирует `@meta("form.*", …)` как основной
+синтаксис field-метаданных вместо comment-директив `@form.*`: `name` (`title`/`placeholder`),
+`rating` (`fieldType` + плоские `form.props.count`/`form.props.allowHalf` — объектный литерал
+`@meta(key, {...})` ломает `zenstack generate` целиком, `ObjectExpr` не поддержан
+upstream-генератором TS-схемы), `bio` (`description`), `hidden` (`exclude`). Поле `legacyNote`
+намеренно оставлено на старом `@form.title`-комментарии — единственное во всей экосистеме
+`form-develop-app`/`form-example` — чтобы demo показывал живой deprecation-warning в консоли
+`nx zenstack:generate`, а не описание постфактум.
+
+`schema.zmodel` целиком мигрирован кодмодом `scripts/codemods/codemod-form-directives.mjs`:
+30 директив в `Category`/`Recipe`/`RecipeInfoBase`/`Booking` конвертированы автоматически.
+Побочно найден и исправлен мёртвый `Recipe.category` — позиционный `@form.relation("Category",
+"name")` парсер плагина никогда не поддерживал (только объектный литерал), relation-select для
+этого поля не рендерился до фикса.
+
+Полное решение — `libs/forms/PLAN.md` (Фаза 3), `libs/zenstack-form-plugin/CHANGELOG.md` v3.0.0.
+
+---
+
 ## E2E Тесты
 
-### Покрытие тестами (21 файл)
+### Покрытие тестами (22 файла)
 
 | Файл                            | Описание                                                                                                                                                                                 |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -227,6 +248,7 @@ Zod), демонстрирует 4 из 11 новых нативных атри�
 | `auth-demo.spec.ts`             | PasswordStrength, OTPInput (Фаза 6)                                                                                                                                                      |
 | `offline-demo.spec.ts`          | Оффлайн формы: OfflineIndicator, SyncStatus, useOfflineForm (Фаза 7)                                                                                                                     |
 | `controlled-state-demo.spec.ts` | Form без onSubmit: controlled state, form.Subscribe, live preview (Фаза 10)                                                                                                              |
+| `meta-syntax-demo.spec.ts`      | `@meta("form.*", …)` вместо comment-директив, обратная совместимость с legacy-синтаксисом (Фаза 3 zenstack-form-plugin)                                                                  |
 | `constraints-demo.spec.ts`      | Автоматические Zod constraints: minLength/maxLength, aria-valuemin/max, min/max дат, minItems/maxItems массивов (Фаза 11)                                                                |
 
 ### Запуск тестов

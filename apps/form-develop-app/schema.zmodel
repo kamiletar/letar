@@ -56,17 +56,11 @@ enum RecipeType {
 model Category {
   id          String   @id @default(cuid())
 
-  /// @form.title("Название категории")
-  /// @form.placeholder("Например: Десерты")
-  name        String
+  name        String @meta("form.title", "Название категории") @meta("form.placeholder", "Например: Десерты")
 
-  /// @form.title("Описание")
-  /// @form.fieldType("textarea")
-  description String?
+  description String? @meta("form.title", "Описание") @meta("form.fieldType", "textarea")
 
-  /// @form.title("Цвет")
-  /// @form.fieldType("colorPicker")
-  color       String   @default("#3182CE")
+  color       String   @default("#3182CE") @meta("form.title", "Цвет") @meta("form.fieldType", "colorPicker")
 
   /// Рецепты в категории
   recipes     Recipe[]
@@ -81,20 +75,12 @@ model Category {
 model Recipe {
   id          String            @id @default(cuid())
 
-  /// @form.title("Название рецепта")
-  /// @form.placeholder("Введите название")
-  title       String
+  title       String @meta("form.title", "Название рецепта") @meta("form.placeholder", "Введите название")
 
-  /// @form.title("Количество порций")
-  /// @form.fieldType("numberInput")
-  /// @form.props({ min: 1, max: 100 })
-  portions    Int               @default(1)
+  portions    Int               @default(1) @meta("form.title", "Количество порций") @meta("form.fieldType", "numberInput") @meta("form.props.min", 1) @meta("form.props.max", 100)
 
   /// Категория рецепта
-  /// @form.title("Категория")
-  /// @form.fieldType("select")
-  /// @form.relation("Category", "name")
-  category    Category?         @relation(fields: [categoryId], references: [id])
+  category    Category?         @relation(fields: [categoryId], references: [id]) @meta("form.title", "Категория") @meta("form.fieldType", "select") @meta("form.relation.model", "Category") @meta("form.relation.labelField", "name")
   categoryId  String?
 
   /// Компоненты рецепта
@@ -103,10 +89,7 @@ model Recipe {
   /// Информация о рецепте (1:1)
   info        RecipeInfo?
 
-  /// @form.title("Теги")
-  /// @form.fieldType("tags")
-  /// @form.placeholder("Добавить тег...")
-  tags        String[]
+  tags        String[] @meta("form.title", "Теги") @meta("form.fieldType", "tags") @meta("form.placeholder", "Добавить тег...")
 
   /// Обратная связь для similarMyRecipes (implicit M:N, не используется в API)
   similarFor  RecipeInfoAdditional[] @relation("SimilarRecipes")
@@ -114,17 +97,13 @@ model Recipe {
   // Фаза 1 (v2.4.0) zenstack-form-plugin — демо-поля для 11 новых нативных
   // атрибутов валидации (паритет с ORM, libs/forms/PLAN.md)
 
-  /// @form.title("Slug (нативные @startsWith/@trim/@lower)")
-  slug        String            @default("recipe-") @startsWith("recipe-") @trim() @lower()
+  slug        String            @default("recipe-") @startsWith("recipe-") @trim() @lower() @meta("form.title", "Slug (нативные @startsWith/@trim/@lower)")
 
-  /// @form.title("Сайт рецепта (нативный @url)")
-  website     String?           @url()
+  website     String?           @url() @meta("form.title", "Сайт рецепта (нативный @url)")
 
-  /// @form.title("Телефон автора (нативный @phone)")
-  authorPhone String?           @phone()
+  authorPhone String?           @phone() @meta("form.title", "Телефон автора (нативный @phone)")
 
-  /// @form.title("Дата публикации (нативный @date)")
-  publishedOn String?           @date()
+  publishedOn String?           @date() @meta("form.title", "Дата публикации (нативный @date)")
 
   /// Служебная заметка — не должна попадать в форму (нативный @omit)
   internalNote String?          @omit()
@@ -178,14 +157,9 @@ model RecipeInfo {
 model RecipeInfoBase {
   id        String     @id @default(cuid())
 
-  /// @form.title("Тип рецепта")
-  /// @form.fieldType("radioCard")
-  type      RecipeType @default(SWEET)
+  type      RecipeType @default(SWEET) @meta("form.title", "Тип рецепта") @meta("form.fieldType", "radioCard")
 
-  /// @form.title("Рейтинг")
-  /// @form.fieldType("rating")
-  /// @form.props({ count: 5, allowHalf: true })
-  rating    Float      @default(0)
+  rating    Float      @default(0) @meta("form.title", "Рейтинг") @meta("form.fieldType", "rating") @meta("form.props.count", 5) @meta("form.props.allowHalf", true)
 
   info      RecipeInfo @relation(fields: [infoId], references: [id], onDelete: Cascade)
   infoId    String     @unique
@@ -216,16 +190,42 @@ model RecipeInfoAdditional {
 model Booking {
   id        String   @id @default(cuid())
 
-  /// @form.title("Название")
-  title     String
+  title     String @meta("form.title", "Название")
 
-  /// @form.title("Начало")
-  startsAt  DateTime
+  startsAt  DateTime @meta("form.title", "Начало")
 
-  /// @form.title("Окончание")
-  endsAt    DateTime
+  endsAt    DateTime @meta("form.title", "Окончание")
 
   @@validate(endsAt > startsAt, "Дата окончания раньше начала", ["endsAt"])
+
+  @@allow('all', true)
+}
+
+/// Демо Фазы 3 (v3.0.0): `@meta("form.*", …)` как основной синтаксис вместо comment-директив
+/// `@form.*`. `legacyNote` намеренно оставлено на старом `@form.title` — показывает, что оба
+/// синтаксиса продолжают работать одновременно (обратная совместимость), и что генератор
+/// печатает deprecation-warning в консоль (не ломает сборку) именно для этого поля.
+model MetaSyntaxDemo {
+  id          String @id @default(cuid())
+
+  /// @meta вместо @form.title/@form.placeholder — оба текстовых атрибута
+  name        String @meta("form.title", "Имя") @meta("form.placeholder", "Как вас зовут")
+
+  /// `@meta("form.props.*", …)` — плоский путь вместо объектного литерала `@form.props({...})`:
+  /// объектные литералы в `@meta` роняют `zenstack generate` целиком (`ObjectExpr`
+  /// не поддержан upstream-генератором TS-схемы), см. libs/forms/PLAN.md, Фаза 3.
+  rating      Int    @meta("form.title", "Оценка") @meta("form.fieldType", "rating")
+    @meta("form.props.count", 5) @meta("form.props.allowHalf", true)
+
+  bio         String? @meta("form.description", "Описание") @meta("form.fieldType", "textarea")
+
+  /// @form.title("Заметка (legacy)")
+  /// Поле намеренно НЕ переведено на @meta — единственное, что осталось на старом синтаксисе
+  /// во всей экосистеме form-develop-app/form-example, чтобы demo показывал живой
+  /// deprecation-warning в консоли `nx zenstack:generate`, не описание постфактум.
+  legacyNote  String?
+
+  hidden      String? @meta("form.exclude", true)
 
   @@allow('all', true)
 }
