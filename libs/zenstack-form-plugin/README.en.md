@@ -7,9 +7,12 @@ ZenStack plugin for generating Zod v4 schemas with UI metadata from `schema.zmod
 
 [Документация на русском](./README.ru.md)
 
-> **v3.0.0 (Phase 3):** the primary syntax for form metadata is now the field-level attribute
-> `@meta("form.*", value)`, placed directly on the field in `schema.zmodel`. The old `///
-> @form.*(...)` doc-comment directive still works (see "Legacy syntax" below), but is deprecated.
+> **v4.0.0 (Phase 4):** the field-level attribute `@meta("form.*", value)`, placed directly on the
+> field in `schema.zmodel`, is now the **only** syntax for form metadata. The old `/// @form.*(...)`
+> doc-comment directive (deprecated since v3.0.0) has been removed from the parser entirely — the
+> plugin no longer reads `field.comments` for form metadata at all. Migrating a schema that still
+> has it — use `scripts/codemods/codemod-form-directives.mjs` (see `CHANGELOG.md` for the
+> migration history).
 
 ## Installation
 
@@ -164,28 +167,19 @@ portions Int @meta("form.props.min", 1) @meta("form.props.max", 100)
 Scalars (string/number/boolean) and arrays work fine in `@meta` — only a bare object literal is
 blocked.
 
-### Legacy syntax (`///` doc comment) — deprecated but still working
+### Legacy syntax (`///` doc comment) — removed in v4.0.0
 
-The old `///` doc-comment syntax before a field still works — the plugin reads **both**, and
-`@meta` wins on conflict for the same metadata key on one field. `nx zenstack:generate` prints a
-deprecation warning when it finds `@form.*`, but the build doesn't break:
+The old `///` doc-comment syntax before a field (`@form.title(...)` etc.) is **no longer
+supported**. `parseFormMeta`/`mergeFormMeta` were removed from `parser.ts` — `field.comments` is
+not read at all anymore. Migrate a schema that still has live `@form.*` comments with the
+idempotent codemod `scripts/codemods/codemod-form-directives.mjs` (`--dry-run` for a preview)
+rather than rewriting directives by hand. The mapping table below is for reference if you're
+working from an old schema without the codemod:
 
-```zmodel
-model Recipe {
-  id        String @id @default(cuid())
-
-  /// @form.title("Recipe name")
-  /// @form.placeholder("Enter name")
-  title     String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-```
-
-Write new code with `@meta`; migrate existing schemas with the idempotent codemod
-`scripts/codemods/codemod-form-directives.mjs` (`--dry-run` for a preview) rather than rewriting
-directives by hand.
+⚠️ **No replacement for one case** — `@form.props({ options: [{value,label}, ...] })` (array of
+objects). The codemod never converted it (see the section below), and after v4.0.0 it no longer
+works at all — the only remaining syntax can't express it. Convert such a field to a real ZModel
+`enum` instead — there is nowhere left to leave it on the old syntax.
 
 | Legacy directive           | `@meta` equivalent                            |
 | -------------------------- | --------------------------------------------- |
@@ -270,32 +264,46 @@ implemented yet — that remains a deliberate scope cut, not an oversight. `Deci
 also out of scope: they don't go through the same `ZodUtils.*` codepath and have no message
 support.
 
-### Array of objects (`options: [{ value, label }]`) — legacy comment syntax only
+### Array of objects (`options: [{ value, label }]`) — use a real `enum` instead
 
 `@meta` cannot express an object literal as an attribute value (`ObjectExpr` breaks
 `zenstack generate` entirely — see `metaValueToPlain` in `src/parser.ts`), and the flat dot-path
-can't index into an array of objects (`form.props.options.0.value` doesn't work). For select
-fields with `{ value, label }[]`-shaped options, the only working path is the legacy comment
-directive:
+can't index into an array of objects (`form.props.options.0.value` doesn't work). Before v4.0.0
+there was a workaround — the legacy comment directive (`@form.props({ options: [...] })`), which
+stored the object array as a raw string rather than parsing it as a `@meta` attribute. With the
+legacy parser removed in v4.0.0, that workaround is gone with no replacement — for a select field
+with a fixed `{ value, label }[]` list, the only correct approach now is a real ZModel `enum`
+instead of `String`:
 
 ```zmodel
+// ❌ No longer works at all — the comment syntax is gone
 category String
   /// @form.props({ options: [{ value: "fruit", label: "Fruit" }, { value: "veg", label: "Vegetables" }] })
+
+// ✅ Enum values are the options, /// doc comment on each is the label (extractEnumLabel)
+enum ProductCategory {
+  /// Fruit
+  FRUIT
+  /// Vegetables
+  VEGETABLE
+}
+
+model Product {
+  category ProductCategory @meta("form.title", "Category")
+}
 ```
 
-This is a **permanent, legitimate escape case**, not leftover unmigrated code — the codemod
-(`scripts/codemod-form-directives.mjs`) deliberately leaves it alone; there's nowhere to migrate
-an object-array to in `@meta`.
+Select options are collected automatically from the enum's values (`extractEnumLabel`/
+`enum-generator.ts`) — no separate `@meta("form.props.options", …)` is needed at all.
 
 ### Warning on unknown directives (v3.2.0)
 
-Both the comment syntax (`@form.<key>`) and `@meta("form.<key>", …)` silently ignore any `<key>`
-outside the recognized set (`title`/`placeholder`/`description`/`fieldType`/`props`/`relation`/
-`exclude`) — a typo or a nonexistent directive (`@form.options`, `@form.widget`) produces no
-error at `zenstack generate` time or at type-check time; the field simply ends up missing the
-intended metadata. As of v3.2.0, `nx zenstack:generate` prints a `console.warn` for each such
-case — naming the model/field, the unknown key itself, and the list of supported ones. It doesn't
-break the build, only warns — same as the existing legacy-syntax deprecation warning.
+`@meta("form.<key>", …)` silently ignores any `<key>` outside the recognized set (`title`/
+`placeholder`/`description`/`fieldType`/`props`/`relation`/`exclude`) — a typo or a nonexistent
+directive (`@form.options`, `@form.widget`) produces no error at `zenstack generate` time or at
+type-check time; the field simply ends up missing the intended metadata. As of v3.2.0,
+`nx zenstack:generate` prints a `console.warn` for each such case — naming the model/field, the
+unknown key itself, and the list of supported ones. It doesn't break the build, only warns.
 
 ## Auto-excluded Fields
 
@@ -304,7 +312,7 @@ break the build, only warns — same as the existing legacy-syntax deprecation w
 - Fields with `@id` attribute
 - Fields with `@relation` attribute
 - Fields referencing models (e.g. `info RecipeInfo?`)
-- Fields with `@meta("form.exclude", true)` (or legacy `/// @form.exclude`)
+- Fields with `@meta("form.exclude", true)`
 
 > **Note:** FK fields (`categoryId`, `userId`, etc.) are NOT auto-excluded.
 > Use `form.relation` for a select field or `form.exclude` to skip.

@@ -65,6 +65,7 @@ function makeModel(
 // ─── Фикстуры Expression AST для `@@validate` ──────────────────────────────
 
 const strLit = (value: string) => ({ $type: 'StringLiteral', value })
+const numLit = (value: number) => ({ $type: 'NumberLiteral', value: String(value) })
 const boolLit = (value: boolean) => ({ $type: 'BooleanLiteral', value })
 const fieldRef = (name: string) => ({ $type: 'ReferenceExpr', target: { $refText: name }, args: [] })
 const binary = (op: string, left: unknown, right: unknown) => ({ $type: 'BinaryExpr', operator: op, left, right })
@@ -108,13 +109,16 @@ describe('extractModelInfo', () => {
     expect(info.excludedFields).toContain('author')
   })
 
-  it('оставляет поле-ссылку на модель, если задан @form.relation', () => {
+  it('оставляет поле-ссылку на модель, если задан @meta("form.relation.*", …)', () => {
     const model = makeModel('Order', [
       makeField({
         name: 'author',
         type: 'User',
         reference: 'User',
-        comments: ['@form.relation({ model: "User", labelField: "name" })'],
+        attributes: [
+          { refText: '@meta', args: [{ value: strLit('form.relation.model') }, { value: strLit('User') }] },
+          { refText: '@meta', args: [{ value: strLit('form.relation.labelField') }, { value: strLit('name') }] },
+        ],
       }),
     ])
 
@@ -124,9 +128,13 @@ describe('extractModelInfo', () => {
     expect(info.fields[0]?.formMeta.relation).toEqual({ model: 'User', labelField: 'name' })
   })
 
-  it('исключает поле с @form.exclude', () => {
+  it('исключает поле с @meta("form.exclude", true)', () => {
     const model = makeModel('Product', [
-      makeField({ name: 'secret', type: 'String', comments: ['@form.exclude'] }),
+      makeField({
+        name: 'secret',
+        type: 'String',
+        attributes: [{ refText: '@meta', args: [{ value: strLit('form.exclude') }, { value: boolLit(true) }] }],
+      }),
     ])
 
     const info = extractModelInfo(model, enumNames)
@@ -190,9 +198,13 @@ describe('extractModelInfo', () => {
     expect(byName.noDefault?.defaultValue).toBeUndefined()
   })
 
-  it('прокидывает formMeta из комментариев поля', () => {
+  it('прокидывает formMeta из @meta("form.title", …) атрибута поля', () => {
     const model = makeModel('Product', [
-      makeField({ name: 'name', type: 'String', comments: ['@form.title("Название")'] }),
+      makeField({
+        name: 'name',
+        type: 'String',
+        attributes: [{ refText: '@meta', args: [{ value: strLit('form.title') }, { value: strLit('Название') }] }],
+      }),
     ])
 
     const info = extractModelInfo(model, enumNames)
@@ -382,43 +394,51 @@ describe('extractModelInfo', () => {
     expect(info.fields.map((f) => f.name)).toEqual(['name'])
   })
 
-  it('@form.props побеждает нативный атрибут при конфликте того же ключа', () => {
+  it('@meta("form.props.min", …) побеждает нативный атрибут при конфликте того же ключа', () => {
     const model = makeModel('Product', [
       makeField({
         name: 'price',
         type: 'Int',
-        attributes: [{ refText: '@gte', args: [numberArg(0)] }],
-        comments: ['@form.props({ min: 10 })'],
+        attributes: [
+          { refText: '@gte', args: [numberArg(0)] },
+          { refText: '@meta', args: [{ value: strLit('form.props.min') }, { value: numLit(10) }] },
+        ],
       }),
     ])
 
     const info = extractModelInfo(model, enumNames)
-    // Нативный @gte(0) наследуется, но @form.props({min: 10}) на том же ключе побеждает
+    // Нативный @gte(0) наследуется, но @meta("form.props.min", 10) на том же ключе побеждает
     expect(info.fields[0]?.formMeta.constraints).toEqual({ min: 10 })
   })
 
-  it('нативный constraint и @form.props с разными ключами объединяются без конфликта', () => {
+  it('нативный constraint и @meta("form.props.step", …) с разными ключами объединяются без конфликта', () => {
     const model = makeModel('Product', [
       makeField({
         name: 'price',
         type: 'Int',
-        attributes: [{ refText: '@gte', args: [numberArg(0)] }],
-        comments: ['@form.props({ step: 0.5 })'],
+        attributes: [
+          { refText: '@gte', args: [numberArg(0)] },
+          { refText: '@meta', args: [{ value: strLit('form.props.step') }, { value: numLit(0.5) }] },
+        ],
       }),
     ])
 
     const info = extractModelInfo(model, enumNames)
     // step — не пересекается по ключу с @gte (min), поэтому оба сосуществуют раздельно:
-    // step остаётся в constraints (@form.props), @gte уходит в nativeAttributes (A3)
+    // step остаётся в constraints (@meta("form.props.step")), @gte уходит в nativeAttributes (A3)
     expect(info.fields[0]?.formMeta.constraints).toEqual({ step: 0.5 })
     expect(info.fields[0]?.formMeta.nativeAttributes).toEqual([
       { name: '@gte', args: [{ name: 'value', value: 0 }] },
     ])
   })
 
-  it('без нативных атрибутов formMeta.constraints остаётся как задал только @form.props', () => {
+  it('без нативных атрибутов formMeta.constraints остаётся как задал только @meta("form.props.min", …)', () => {
     const model = makeModel('Product', [
-      makeField({ name: 'price', type: 'Int', comments: ['@form.props({ min: 5 })'] }),
+      makeField({
+        name: 'price',
+        type: 'Int',
+        attributes: [{ refText: '@meta', args: [{ value: strLit('form.props.min') }, { value: numLit(5) }] }],
+      }),
     ])
 
     const info = extractModelInfo(model, enumNames)
@@ -494,7 +514,7 @@ describe('extractModelInfo', () => {
 })
 
 describe(
-  'extractModelInfo — warning на неизвестную директиву @form.*/@meta("form.*", …) (живой прецедент @form.options)',
+  'extractModelInfo — warning на неизвестный @meta("form.*", …) (живой прецедент @form.options)',
   () => {
     const enumNames = new Set<string>()
     let warnSpy: ReturnType<typeof vi.spyOn>
@@ -507,18 +527,7 @@ describe(
       warnSpy.mockRestore()
     })
 
-    it('неизвестная comment-директива @form.options — предупреждение с именем поля и ключа', () => {
-      const model = makeModel('Content', [
-        makeField({ name: 'category', type: 'String', comments: ['@form.options([1, 2, 3])'] }),
-      ])
-
-      extractModelInfo(model, enumNames)
-
-      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Content.category'))
-      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('@form.options'))
-    })
-
-    it('неизвестный @meta("form.options", …) — та же дыра для основного синтаксиса Фазы 3', () => {
+    it('неизвестный @meta("form.options", …) — предупреждение с именем поля и ключа', () => {
       const model = makeModel('Content', [
         makeField({
           name: 'quality',
@@ -533,9 +542,13 @@ describe(
       expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('form.options'))
     })
 
-    it('только известные директивы — предупреждения об опечатке нет (deprecation-warning не в счёт)', () => {
+    it('только известные директивы — предупреждения об опечатке нет', () => {
       const model = makeModel('Content', [
-        makeField({ name: 'label', type: 'String', comments: ['@form.title("Название")'] }),
+        makeField({
+          name: 'label',
+          type: 'String',
+          attributes: [{ refText: '@meta', args: [{ value: strLit('form.title') }, { value: strLit('Название') }] }],
+        }),
       ])
 
       extractModelInfo(model, enumNames)

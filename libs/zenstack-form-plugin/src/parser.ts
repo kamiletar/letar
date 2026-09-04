@@ -72,8 +72,8 @@ export function toTitleCase(str: string): string {
 }
 
 /**
- * Разложить объект пропов (из `@form.props({...})` или собранный из `@meta("form.props.*", …)`,
- * Фаза 3) на Zod-constraints и UI-пропы — общая логика для обоих источников синтаксиса.
+ * Разложить объект пропов, собранный из `@meta("form.props.*", …)`, на Zod-constraints
+ * и UI-пропы.
  */
 function applyPropsSplit(meta: FormFieldMeta, allProps: Record<string, unknown>): void {
   const constraints: ZodConstraints = {}
@@ -96,97 +96,7 @@ function applyPropsSplit(meta: FormFieldMeta, allProps: Record<string, unknown>)
   }
 }
 
-/**
- * Parse @form.* directives from field comments.
- *
- * ⚠️ Фаза 3 (v3.0.0): legacy-путь. Основной синтаксис теперь `@meta("form.*", …)` —
- * см. {@link parseMetaAttributes}. Comment-директивы остаются рабочими (обратная совместимость,
- * `@meta` побеждает при конфликте ключей — см. `mergeFormMeta` в `model-generator.ts`), но новый
- * код должен использовать `@meta`.
- *
- * Supported directives:
- * - @form.title("...")
- * - @form.placeholder("...")
- * - @form.description("...")
- * - @form.fieldType("...")
- * - @form.props({...})
- * - @form.relation({...})
- * - @form.exclude
- */
-export function parseFormMeta(comments: string[]): FormFieldMeta {
-  const meta: FormFieldMeta = {}
-
-  if (!comments || comments.length === 0) {
-    return meta
-  }
-
-  // Join all comments into a single string for parsing
-  const allComments = comments.join('\n')
-
-  // @form.title("...")
-  const titleMatch = allComments.match(/@form\.title\("([^"]+)"\)/)
-  if (titleMatch) {
-    meta.title = titleMatch[1]
-  }
-
-  // @form.placeholder("...")
-  const placeholderMatch = allComments.match(/@form\.placeholder\("([^"]+)"\)/)
-  if (placeholderMatch) {
-    meta.placeholder = placeholderMatch[1]
-  }
-
-  // @form.description("...")
-  const descriptionMatch = allComments.match(/@form\.description\("([^"]+)"\)/)
-  if (descriptionMatch) {
-    meta.description = descriptionMatch[1]
-  }
-
-  // @form.fieldType("...")
-  const fieldTypeMatch = allComments.match(/@form\.fieldType\("([^"]+)"\)/)
-  if (fieldTypeMatch) {
-    meta.fieldType = fieldTypeMatch[1]
-  }
-
-  // @form.props({...}) — JS object literal (not strict JSON)
-  // Split into Zod constraints (min, max, etc.) and UI props (everything else)
-  const propsMatch = allComments.match(/@form\.props\((\{[\s\S]*?\})\)/)
-  if (propsMatch) {
-    try {
-      // Convert JS object literal to valid JSON
-      const jsonStr = propsMatch[1]
-        .replace(/'/g, '"') // Single quotes → double
-        .replace(/(\w+)\s*:/g, '"$1":') // key: → "key":
-        .replace(/,\s*}/g, '}') // Remove trailing comma
-      const allProps = JSON.parse(jsonStr) as Record<string, unknown>
-      applyPropsSplit(meta, allProps)
-    } catch {
-      // Ignore parse errors
-    }
-  }
-
-  // @form.relation({...}) — JS object literal
-  const relationMatch = allComments.match(/@form\.relation\((\{[\s\S]*?\})\)/)
-  if (relationMatch) {
-    try {
-      const jsonStr = relationMatch[1]
-        .replace(/'/g, '"')
-        .replace(/(\w+)\s*:/g, '"$1":')
-        .replace(/,\s*}/g, '}')
-      meta.relation = JSON.parse(jsonStr)
-    } catch {
-      // Ignore parse errors
-    }
-  }
-
-  // @form.exclude
-  if (allComments.includes('@form.exclude')) {
-    meta.exclude = true
-  }
-
-  return meta
-}
-
-/** Единственный источник правды для набора распознаваемых ключей `@form.*`/`@meta("form.*", …)` — используется и парсерами выше, и детекторами опечаток ниже. */
+/** Единственный источник правды для набора распознаваемых ключей `@meta("form.*", …)` — используется детектором опечаток ниже. */
 const KNOWN_FORM_DIRECTIVE_KEYS = new Set([
   'title',
   'placeholder',
@@ -196,29 +106,6 @@ const KNOWN_FORM_DIRECTIVE_KEYS = new Set([
   'relation',
   'exclude',
 ])
-
-/**
- * Найти в comment-директивах ключи `@form.<key>`, которых нет среди распознаваемых
- * (`KNOWN_FORM_DIRECTIVE_KEYS`). `parseFormMeta` выше молча пропускает любой `@form.<key>`,
- * не совпавший ни с одним regex — опечатка или несуществующая директива (`@form.options`,
- * `@form.widget`) не даёт ошибки, поле просто остаётся без нужных метаданных. Живой прецедент —
- * `@form.options` в трёх полях `animatrona-tracker` (2026-09-04), не диагностировалось до этой
- * функции. Возвращает уникальные найденные ключи в порядке появления, без дублей.
- */
-export function findUnknownFormDirectiveKeys(comments: string[]): string[] {
-  if (!comments || comments.length === 0) {
-    return []
-  }
-  const allComments = comments.join('\n')
-  const found = new Set<string>()
-  for (const match of allComments.matchAll(/@form\.([a-zA-Z]\w*)/g)) {
-    const key = match[1]
-    if (!KNOWN_FORM_DIRECTIVE_KEYS.has(key)) {
-      found.add(key)
-    }
-  }
-  return [...found]
-}
 
 /**
  * Преобразовать AST-выражение `@meta(…)`-аргумента в plain JS-значение.
@@ -264,10 +151,8 @@ function setDeep(target: Record<string, unknown>, dotPath: string, value: unknow
 }
 
 /**
- * Parse `@meta("form.*", value)` field attributes (Фаза 3, v3.0.0) — AST-based, основной
- * синтаксис. Побеждает `parseFormMeta()` (comment-путь) при конфликте ключей — слияние делает
- * вызывающая сторона (`mergeFormMeta` в `model-generator.ts`), эта функция сама по себе ничего
- * не мержит с legacy-путём.
+ * Parse `@meta("form.*", value)` field attributes — AST-based, единственный синтаксис (Фаза 4,
+ * v4.0.0: legacy `///`-comment-директивы убраны целиком).
  *
  * Плоский namespace вместо объектного литерала — единственный рабочий вариант (см.
  * {@link metaValueToPlain}):
@@ -328,10 +213,9 @@ export function parseMetaAttributes(attributes: readonly DataFieldAttribute[]): 
 /**
  * Найти в `@meta("form.<path>", …)`-атрибутах поля первый сегмент пути, не входящий в
  * `KNOWN_FORM_DIRECTIVE_KEYS`. `parseMetaAttributes` выше молча `continue`-ит на любом
- * несовпавшем `path` (последний `if/else if` в цепочке не имеет ветки `else` вовсе) — та же
- * дыра, что у comment-синтаксиса (`findUnknownFormDirectiveKeys`), только для основного
- * синтаксиса Фазы 3. `@meta("form.options", […])` синтаксически валиден для компилятора ZModel
- * (это просто строка-ключ атрибута), поэтому ошибка на этапе `zenstack generate` не возникает —
+ * несовпавшем `path` (последний `if/else if` в цепочке не имеет ветки `else` вовсе).
+ * `@meta("form.options", […])` синтаксически валиден для компилятора ZModel (это просто
+ * строка-ключ атрибута), поэтому ошибка на этапе `zenstack generate` не возникает —
  * диагностировать может только сам плагин.
  */
 export function findUnknownMetaFormPaths(attributes: readonly DataFieldAttribute[]): string[] {
@@ -351,25 +235,4 @@ export function findUnknownMetaFormPaths(attributes: readonly DataFieldAttribute
     }
   }
   return [...found]
-}
-
-/**
- * Слить `@meta`-мету (AST, Фаза 3) поверх legacy comment-меты (`@form.*`) — `@meta` побеждает при
- * пересечении ключей на уровне каждого отдельного поля метаданных (не всего объекта целиком:
- * поле может задавать `title` через `@form.title`, а `fieldType` — через `@meta`, оба сохранятся).
- * `constraints`/`props` мержатся по ключам внутри объекта той же логикой.
- */
-export function mergeFormMeta(commentMeta: FormFieldMeta, metaAttrMeta: FormFieldMeta): FormFieldMeta {
-  return {
-    title: metaAttrMeta.title ?? commentMeta.title,
-    placeholder: metaAttrMeta.placeholder ?? commentMeta.placeholder,
-    description: metaAttrMeta.description ?? commentMeta.description,
-    fieldType: metaAttrMeta.fieldType ?? commentMeta.fieldType,
-    exclude: metaAttrMeta.exclude ?? commentMeta.exclude,
-    relation: metaAttrMeta.relation ?? commentMeta.relation,
-    constraints: (commentMeta.constraints || metaAttrMeta.constraints)
-      ? { ...commentMeta.constraints, ...metaAttrMeta.constraints }
-      : undefined,
-    props: (commentMeta.props || metaAttrMeta.props) ? { ...commentMeta.props, ...metaAttrMeta.props } : undefined,
-  }
 }

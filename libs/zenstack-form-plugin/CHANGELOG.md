@@ -1,5 +1,39 @@
 # Changelog
 
+## [4.0.0] - 2026-09-05
+
+### Removed (breaking)
+
+- **Legacy `///`-comment-директивы `@form.*` убраны целиком.** `@meta("form.*", …)` — единственный
+  синтаксис. Удалены `parseFormMeta`, `findUnknownFormDirectiveKeys`, `mergeFormMeta` из
+  `parser.ts`; `buildMetaReplacementHint`, `warnLegacyFormDirectives` из `model-generator.ts`.
+  `extractModelInfo` больше не читает `field.comments` для UI-метаданных формы — только
+  `field.attributes` через `parseMetaAttributes`.
+- Миграция всех потребителей монорепо на `@meta` завершена до удаления (Фаза 3→4,
+  `scripts/codemods/codemod-form-directives.mjs`): `mandala`, `svoichuzhie`, `driving-school`,
+  `aboi`, `animatrona`, `grandslamcup`, `animatrona-tracker` — 590+ директив сконвертировано.
+  4 поля с `options`-массивом объектов (`torrentBackend`, `Content.category`, `Content.quality`,
+  `Report.reason`), не выражаемые плоским `@meta` (upstream не компилирует `ObjectExpr`),
+  переведены на настоящий ZModel `enum` вместо `String` — не единственный, но архитектурно
+  правильный способ задать фиксированный список опций (см. `extractEnumLabel`/
+  `enum-generator.ts`). `apps/form-develop-app` сохраняет обе демо-страницы (comment-синтаксис и
+  `@meta`) как историческую иллюстрацию миграции — её собственная генерация форм этого поля не
+  требует парсера, полагается на статичный образец кода в MDX.
+- Два бага найдены и исправлены в `codemod-form-directives.mjs` по ходу миграции: CRLF-файлы
+  (`driving-school`) давали 0 конвертаций (`split('\n')` оставлял висячий `\r`, ломавший
+  `isCommentLine`-regex); массив объектов в `options` (`@form.props({ options: [{value,label}]})`)
+  флаттенился в невалидный `@meta(key, [{...}])` и ронял `zenstack generate` для всей схемы —
+  теперь такой случай явно уходит в «ТРЕБУЕТ РУЧНОЙ ПРОВЕРКИ» вместо тихой порчи вывода.
+
+### Changed
+
+- `parseMetaAttributes`/`findUnknownMetaFormPaths`/`applyPropsSplit` — единственные оставшиеся
+  функции разбора form-метаданных, доки обновлены (упоминания legacy-пути убраны).
+- `warnUnknownFormDirectives` больше не принимает `commentKeys` — только пути `@meta`.
+- 27 тестов, завязанных на удалённые функции/`comments`-фикстуры, удалены или переписаны на
+  `@meta`-атрибуты в `parser.spec.ts`/`model-generator.spec.ts`. 152 → 123 (net: удалены тесты
+  самого удалённого парсера, не потеря покрытия оставшегося кода).
+
 ## [3.2.0] - 2026-09-04
 
 ### Added
