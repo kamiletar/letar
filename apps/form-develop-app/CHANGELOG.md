@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.9] - 2026-09-05
+
+### Fixed
+
+- `meta-syntax-demo`: `MetaSyntaxDemo.legacyNote` переведён на `@meta` — legacy comment-синтаксис
+  `@form.*` убран из `zenstack-form-plugin` целиком (v4.0.0), поле тихо теряло title без фикса.
+  Текст демо-страницы обновлён под реальность после удаления парсера.
+
 ## [0.1.8] - 2026-09-05
 
 ### Added
