@@ -6,6 +6,7 @@ export async function register() {
     initServer({
       dsn: process.env.GLITCHTIP_DSN,
       environment: process.env.GLITCHTIP_ENVIRONMENT ?? 'development',
+      release: process.env.GLITCHTIP_RELEASE,
     })
 
     // @letar/jobs (PLAN-INFRA-4.md §75) — не требует нативных модулей, pg-boss ходит в БД по

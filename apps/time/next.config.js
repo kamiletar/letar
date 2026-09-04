@@ -6,6 +6,10 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
  * @type {import('next').NextConfig}
  */
 const nextConfig = {
+  // Клиентские sourcemaps в проде — без них стектрейсы в GlitchTip приходят из минифицированного
+  // кода. .map-файлы не публикуются: сборка удаляет их после загрузки в GlitchTip
+  // (см. корневой scripts/glitchtip-upload-sourcemaps.mjs, PLAN-INFRA-4.md §70 п.6).
+  productionBrowserSourceMaps: true,
   output: 'standalone',
   // @swc/helpers — трейсер (@vercel/nft) не докопировал пакет в .next/standalone при первом
   // полном ребилде (MODULE_NOT_FOUND на _interop_require_default.js, деплой 2026-08-19). Тот же
