@@ -49,16 +49,6 @@
       "unpinWhen": "Вышел стабильный 2.x @tamagui/lucide-icons — тогда обычный caret-диапазон."
     },
     {
-      "package": "oxlint",
-      "version": "1.73.0",
-      "field": "devDependencies",
-      "since": "2026-08-26",
-      "commit": "a1ffb4ee",
-      "reason": "Бамп 1.73.0 → 1.80.0 откачен: новая версия включает React-correctness правила роллаута «React Compiler Support» (react/refs, react/set-state-in-effect, react/use-memo) и даёт ~28 новых находок в чужом коде. Находки реальные, но правка 28 файлов — отдельная задача, а не побочный эффект deps-update.",
-      "doc": "PLAN-INFRA-5.md §114",
-      "unpinWhen": "Разобраны 28 находок новых React-правил (отдельная сессия). После этого поднимать oxlint обычным порядком и переписать эту запись на новую версию — точную форму сохранить: набор находок линтера должен быть одинаковым у всех агентов и в CI."
-    },
-    {
       "package": "jiti",
       "version": "2.7.0",
       "field": "devDependencies",

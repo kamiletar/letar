@@ -24,6 +24,16 @@ export default [
       'react-hooks/exhaustive-deps': 'warn',
     },
   },
+  // Пустая стрелочная функция — легитимный no-op unsubscribe для useSyncExternalStore
+  // (идиома «дождаться гидратации» без setState в эффекте, react/set-state-in-effect
+  // из oxlint 1.81: apps/pravda, libs/chakra-provider, libs/ui/top-loader и др.).
+  // Остальные формы функций (объявления, методы) по-прежнему проверяются.
+  {
+    files: ['**/*.ts', '**/*.tsx'],
+    rules: {
+      '@typescript-eslint/no-empty-function': ['error', { allow: ['arrowFunctions'] }],
+    },
+  },
   {
     ignores: [
       '**/dist',
