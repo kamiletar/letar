@@ -4,6 +4,11 @@ ZenStack плагин для генерации Zod схем с UI метада�
 
 [English documentation](./README.en.md)
 
+> **v3.0.0 (Фаза 3):** основной синтаксис метаданных формы — field-атрибут `@meta("form.*",
+> value)`, ставится прямо на поле ZModel. Старый синтаксис через doc-комментарий `///
+> @form.*(...)` по-прежнему работает (см. раздел «Legacy-синтаксис» ниже), но считается
+> deprecated.
+
 ## Установка
 
 ```bash
@@ -111,26 +116,22 @@ export const RecipeTypeLabels = {
 } as const
 ```
 
-### Модели с @form.\* директивами
+### Модели с `@meta("form.*", value)` директивами
 
-Используйте `///` doc-комментарии **ДО** поля (не после!):
+С Фазы 3 (v3.0.0) основной синтаксис — **field-атрибут** `@meta`, ставится прямо на поле, без
+doc-комментария:
 
 ```zmodel
 model Recipe {
   id          String @id @default(cuid())
 
-  /// @form.title("Название рецепта")
-  /// @form.placeholder("Введите название")
-  title       String
+  title       String @meta("form.title", "Название рецепта") @meta("form.placeholder", "Введите название")
 
-  /// @form.title("Количество порций")
-  /// @form.fieldType("numberInput")
   portions    Int @default(1) @gte(1) @lte(100)
+    @meta("form.title", "Количество порций") @meta("form.fieldType", "numberInput")
 
-  /// @form.title("Теги")
-  /// @form.fieldType("tags")
-  /// @form.placeholder("Добавить тег...")
-  tags        String[]
+  tags        String[] @meta("form.title", "Теги") @meta("form.fieldType", "tags")
+    @meta("form.placeholder", "Добавить тег...")
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -148,8 +149,10 @@ export const RecipeCreateFormSchema = z.object({
   portions: z
     .number()
     .int()
+    .min(1)
+    .max(100)
     .meta({
-      ui: { title: 'Количество порций', fieldType: 'numberInput', fieldProps: { min: 1, max: 100 } },
+      ui: { title: 'Количество порций', fieldType: 'numberInput' },
     }),
   tags: z.array(z.string()).meta({
     ui: { title: 'Теги', placeholder: 'Добавить тег...', fieldType: 'tags' },
@@ -163,21 +166,71 @@ export type RecipeCreateForm = z.infer<typeof RecipeCreateFormSchema>
 export type RecipeUpdateForm = z.infer<typeof RecipeUpdateFormSchema>
 ```
 
-## Поддерживаемые директивы
+## Поддерживаемые ключи `@meta`
 
-| Директива                  | Описание                                 | Пример                                       |
-| -------------------------- | ---------------------------------------- | -------------------------------------------- |
-| `@form.title("...")`       | Заголовок поля                           | `/// @form.title("Название")`                |
-| `@form.placeholder("...")` | Placeholder                              | `/// @form.placeholder("Введите...")`        |
-| `@form.description("...")` | Описание поля                            | `/// @form.description("Подсказка")`         |
-| `@form.fieldType("...")`   | Тип компонента                           | `/// @form.fieldType("tags")`                |
-| `@form.props({...})`       | UI-пропсы + escape hatch для constraints | `/// @form.props({ showValue: true })`       |
-| `@form.relation({...})`    | Настройки relation                       | `/// @form.relation({ labelField: "name" })` |
-| `@form.exclude`            | Исключить из формы                       | `/// @form.exclude`                          |
+| Ключ `@meta("form.<key>", …)` | Описание                                 | Пример                                      |
+| ----------------------------- | ---------------------------------------- | ------------------------------------------- |
+| `form.title`                  | Заголовок поля                           | `@meta("form.title", "Название")`           |
+| `form.placeholder`            | Placeholder                              | `@meta("form.placeholder", "Введите...")`   |
+| `form.description`            | Описание поля                            | `@meta("form.description", "Подсказка")`    |
+| `form.fieldType`              | Тип компонента                           | `@meta("form.fieldType", "tags")`           |
+| `form.props.<dotpath>`        | UI-пропсы + escape hatch для constraints | `@meta("form.props.showValue", true)`       |
+| `form.relation.<dotpath>`     | Настройки relation                       | `@meta("form.relation.labelField", "name")` |
+| `form.exclude`                | Исключить из формы                       | `@meta("form.exclude", true)`               |
+
+⚠️ **Объектный литерал в `@meta` ломает `zenstack generate` целиком** (`Unhandled error:
+Unsupported attribute arg value: ObjectExpr`) — это ограничение upstream-генератора TS-схемы
+самого ZenStack, не плагина. Поэтому `form.props`/`form.relation`, у которых раньше был объект
+(`@form.props({ min: 1, max: 100 })`), теперь задаются **плоским dot-path**, по одному `@meta` на
+ключ:
+
+```zmodel
+// ❌ Ломает generate целиком
+portions Int @meta("form.props", { min: 1, max: 100 })
+
+// ✅ Работает
+portions Int @meta("form.props.min", 1) @meta("form.props.max", 100)
+```
+
+Скаляры (строка/число/булево) и массивы в `@meta` работают без проблем — блокирован только
+«голый» объектный литерал.
+
+### Legacy-синтаксис (`///`-комментарий) — deprecated, но рабочий
+
+Старый синтаксис через doc-комментарий `///` перед полем продолжает работать — плагин читает
+**оба**, `@meta` побеждает при конфликте на одном ключе метаданных. `nx zenstack:generate`
+печатает deprecation-warning при обнаружении `@form.*`, но сборку не ломает:
+
+```zmodel
+model Recipe {
+  id          String @id @default(cuid())
+
+  /// @form.title("Название рецепта")
+  /// @form.placeholder("Введите название")
+  title       String
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+```
+
+Новый код пиши на `@meta`; существующую схему переводит идемпотентный кодмод
+`scripts/codemods/codemod-form-directives.mjs` (флаг `--dry-run` для превью) — не переписывай
+директивы вручную.
+
+| Legacy-директива           | Аналог в `@meta`                                     |
+| -------------------------- | ---------------------------------------------------- |
+| `@form.title("...")`       | `@meta("form.title", "...")`                         |
+| `@form.placeholder("...")` | `@meta("form.placeholder", "...")`                   |
+| `@form.description("...")` | `@meta("form.description", "...")`                   |
+| `@form.fieldType("...")`   | `@meta("form.fieldType", "...")`                     |
+| `@form.props({...})`       | `@meta("form.props.<key>", value)` на каждый ключ    |
+| `@form.relation({...})`    | `@meta("form.relation.<key>", value)` на каждый ключ |
+| `@form.exclude`            | `@meta("form.exclude", true)`                        |
 
 ## Constraints: нативные ZModel-атрибуты — рекомендуемый путь
 
-**Задавайте валидацию через нативные атрибуты ZModel, не через `@form.props`.** ORM уже применяет
+**Задавайте валидацию через нативные атрибуты ZModel, не через `form.props`.** ORM уже применяет
 их на `create`/`update` через `@zenstackhq/zod` — плагин форм наследует те же constraints в
 клиентскую Zod-схему, так что источник валидации остаётся один:
 
@@ -207,11 +260,9 @@ export type RecipeUpdateForm = z.infer<typeof RecipeUpdateFormSchema>
 работают только `@gte`/`@gt`/`@lte`/`@lt`.
 
 ```zmodel
-/// @form.title("Количество порций")
-portions Int @gte(1) @lte(100)
+portions Int @gte(1) @lte(100) @meta("form.title", "Количество порций")
 
-/// @form.title("Email")
-email String @email
+email String @email @meta("form.title", "Email")
 ```
 
 Генерирует:
@@ -221,44 +272,44 @@ portions: z.number().int().min(1).max(100).meta({ ui: { title: 'Количест
 email: z.string().email().meta({ ui: { title: 'Email' } })
 ```
 
-Ни одного дублирующего `@form.props({ min, max, ... })` не нужно — форма и ORM валидируют
-одинаково, потому что читают одно и то же место схемы.
+Ни одного дублирующего `form.props`-ключа не нужно — форма и ORM валидируют одинаково, потому что
+читают одно и то же место схемы.
 
-### `@form.props` для constraints — escape hatch, не основной путь
+### `form.props` для constraints — escape hatch, не основной путь
 
-`@form.props` как источник constraint-значения (`min`/`max`/`minLength`/`maxLength`/`pattern`/
-`email`/`url`/`uuid`/`exclusiveMin`/`exclusiveMax`) остаётся рабочим и **побеждает** нативный
-атрибут при конфликте того же ключа на одном поле — но это осознанный **escape hatch** для
-намеренного расхождения клиент/сервер, не способ задать constraint по умолчанию. UI-пропсы, для
-которых у ZModel нет аналога (`showValue`, `layout`, `count`, `allowHalf` и т.п.), в `@form.props`
-остаются как есть — это не костыль, просто ZModel про них ничего не знает.
+`form.props.<constraint-ключ>` (`min`/`max`/`minLength`/`maxLength`/`pattern`/`email`/`url`/`uuid`/
+`exclusiveMin`/`exclusiveMax`) остаётся рабочим и **побеждает** нативный атрибут при конфликте
+того же ключа на одном поле — но это осознанный **escape hatch** для намеренного расхождения
+клиент/сервер, не способ задать constraint по умолчанию. UI-пропсы, для которых у ZModel нет
+аналога (`showValue`, `layout`, `count`, `allowHalf` и т.п.), в `form.props` остаются как есть —
+это не костыль, просто ZModel про них ничего не знает.
 
-**Три случая, где `@form.props` осмысленно побеждает нативный атрибут как постоянный паттерн**
+**Три случая, где `form.props` осмысленно побеждает нативный атрибут как постоянный паттерн**
 (не только «уже так написано раньше»):
 
 1. **Общая библиотечная схема, разный контекст у потребителей.** Общий миксин (например
    `@letar/zenstack-fragments`) задаёт нативный атрибут, подходящий большинству приложений
-   (`@length(1, 200)` для generic-поля). Конкретное приложение переопределяет через `@form.props`
-   в своей форме, не форкая общую модель, — постоянная точка кастомизации per-consumer.
+   (`@length(1, 200)` для generic-поля). Конкретное приложение переопределяет через
+   `@meta("form.props.<key>", value)` в своей форме, не форкая общую модель, — постоянная точка
+   кастомизации per-consumer.
 2. **Валидация до нормализации ≠ валидация после.** Нативный атрибут (`@regex`) часто описывает
    **хранимый** формат (телефон в E.164 — так ORM пишет в БД). Форма принимает то, что реально
    печатает пользователь (произвольный формат), а normalize-transform приводит к хранимому
-   формату уже после валидации формы, перед отправкой на сервер. Здесь `@form.props` — не мягче
+   формату уже после валидации формы, перед отправкой на сервер. Здесь `form.props` — не мягче
    или строже, а **другой** constraint, потому что применяется к другому представлению данных на
    другом этапе пайплайна.
 3. **Осознанный staged rollout нового серверного ограничения.** Ужесточили нативный атрибут
    (`@gte(18)` вместо `@gte(0)`) для целостности данных на будущее, но конкретная форма в
    legacy-части приложения ещё не готова показывать это пользователю (не согласован UX-текст, идёт
-   постепенный вывод старого флоу) — форма временно остаётся мягче через `@form.props`, пока его
+   постепенный вывод старого флоу) — форма временно остаётся мягче через `form.props`, пока его
    явно не уберут. Отличие от случайного дрейфа — расхождение осознанное и временное.
 
 Пример UI-пропса рядом с нативным constraint (не конфликт, а дополнение):
 
 ```zmodel
-/// @form.title("Количество порций")
-/// @form.fieldType("numberInput")
-/// @form.props({ showValue: true })
 portions Int @gte(1) @lte(100)
+  @meta("form.title", "Количество порций") @meta("form.fieldType", "numberInput")
+  @meta("form.props.showValue", true)
 ```
 
 ```typescript
@@ -270,7 +321,7 @@ portions: z.number()
 ```
 
 > **Для уже существующего кода:** если на поле уже есть нативный атрибут с тем же значением, что
-> и constraint-ключ в `@form.props` (например `@gte(0)` рядом с `@form.props({ min: 0 })`) —
+> и constraint-ключ в `form.props` (например `@gte(0)` рядом с `@meta("form.props.min", 0)`) —
 > дублирующий ключ теперь избыточен, можно вычистить по ходу работы. Это не гейт и не
 > принудительная миграция — новому коду просто не нужно копировать устаревший паттерн.
 
@@ -337,14 +388,17 @@ ZModel разрешает `@@strict()` только на `type`-определе
 - Поля с атрибутом `@id`
 - Поля с атрибутом `@relation` (relation поля)
 - Поля, ссылающиеся на модели (например `info RecipeInfo?`)
-- Поля с директивой `@form.exclude`
+- Поля с `@meta("form.exclude", true)` (или legacy `/// @form.exclude`)
 - Поля с атрибутом `@omit` (скрыты из ORM-клиента целиком)
 - Поля с атрибутом `@computed` (вычисляются сервером, не вводятся пользователем)
 
 > **Примечание:** FK поля (`categoryId`, `userId`, etc.) не исключаются автоматически.
-> Используйте `@form.relation` для создания select-поля или `@form.exclude` для исключения.
+> Используйте `form.relation` для создания select-поля или `form.exclude` для исключения.
 
-## Важно: формат комментариев
+## Важно: формат legacy-комментариев `///`
+
+Актуально только для legacy-синтаксиса — `@meta` как field-атрибут стоит прямо на строке поля,
+никакой привязки к «следующему элементу» не возникает.
 
 ZenStack связывает doc-комментарии `///` с СЛЕДУЮЩИМ за ними элементом.
 
@@ -446,8 +500,9 @@ plugin formSchema {
 
 ## AI Tooling (MCP)
 
-MCP сервер [`@letar/form-mcp`](../form-mcp/README.md) предоставляет AI-ассистентам доступ к документации всех @form.\* директив через tool `get_directives`.
+MCP сервер [`@letar/form-mcp`](../form-mcp/README.md) предоставляет AI-ассистентам доступ к документации всех `form.*`-ключей (`@meta` и legacy `@form.*`) через tool `get_directives`.
 
 ## Версия
 
-Версия — в [package.json](package.json) и [CHANGELOG.md](CHANGELOG.md).
+Текущая версия — **3.0.0** (Фаза 3: `@meta("form.*", value)` как основной синтаксис). Полная
+история — в [package.json](package.json) и [CHANGELOG.md](CHANGELOG.md).

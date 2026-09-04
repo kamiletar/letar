@@ -7,6 +7,10 @@ ZenStack plugin for generating Zod v4 schemas with UI metadata from `schema.zmod
 
 [Документация на русском](./README.ru.md)
 
+> **v3.0.0 (Phase 3):** the primary syntax for form metadata is now the field-level attribute
+> `@meta("form.*", value)`, placed directly on the field in `schema.zmodel`. The old `///
+> @form.*(...)` doc-comment directive still works (see "Legacy syntax" below), but is deprecated.
+
 ## Installation
 
 ```bash
@@ -74,26 +78,21 @@ export const RecipeTypeFormSchema = z.enum(['SWEET', 'SALTY']).meta({
 })
 ```
 
-### Models with @form.\* directives
+### Models with `@meta("form.*", value)` directives
 
-Use `///` doc comments **BEFORE** the field (not after!):
+Since Phase 3 (v3.0.0), the primary syntax is the **field attribute** `@meta`, placed directly on
+the field — no doc comment needed:
 
 ```zmodel
 model Recipe {
   id        String @id @default(cuid())
 
-  /// @form.title("Recipe name")
-  /// @form.placeholder("Enter name")
-  title     String
+  title     String @meta("form.title", "Recipe name") @meta("form.placeholder", "Enter name")
 
-  /// @form.title("Servings")
-  /// @form.fieldType("numberInput")
-  /// @form.props({ min: 1, max: 100 })
-  portions  Int @default(1)
+  portions  Int @default(1) @gte(1) @lte(100)
+    @meta("form.title", "Servings") @meta("form.fieldType", "numberInput")
 
-  /// @form.title("Tags")
-  /// @form.fieldType("tags")
-  tags      String[]
+  tags      String[] @meta("form.title", "Tags") @meta("form.fieldType", "tags")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -110,8 +109,10 @@ export const RecipeCreateFormSchema = z.object({
   portions: z
     .number()
     .int()
+    .min(1)
+    .max(100)
     .meta({
-      ui: { title: 'Servings', fieldType: 'numberInput', fieldProps: { min: 1, max: 100 } },
+      ui: { title: 'Servings', fieldType: 'numberInput' },
     }),
   tags: z.array(z.string()).meta({
     ui: { title: 'Tags', fieldType: 'tags' },
@@ -134,21 +135,71 @@ import { RecipeCreateFormSchema } from './generated/form-schemas'
 />
 ```
 
-## Supported Directives
+## Supported `@meta` Keys
 
-| Directive                  | Description       | Example                                      |
-| -------------------------- | ----------------- | -------------------------------------------- |
-| `@form.title("...")`       | Field label       | `/// @form.title("Name")`                    |
-| `@form.placeholder("...")` | Placeholder       | `/// @form.placeholder("Enter...")`          |
-| `@form.description("...")` | Helper text       | `/// @form.description("Hint")`              |
-| `@form.fieldType("...")`   | Component type    | `/// @form.fieldType("tags")`                |
-| `@form.props({...})`       | Constraints/props | `/// @form.props({ min: 1, max: 100 })`      |
-| `@form.relation({...})`    | Relation config   | `/// @form.relation({ labelField: "name" })` |
-| `@form.exclude`            | Exclude from form | `/// @form.exclude`                          |
+| Key `@meta("form.<key>", …)` | Description       | Example                                     |
+| ---------------------------- | ----------------- | ------------------------------------------- |
+| `form.title`                 | Field label       | `@meta("form.title", "Name")`               |
+| `form.placeholder`           | Placeholder       | `@meta("form.placeholder", "Enter...")`     |
+| `form.description`           | Helper text       | `@meta("form.description", "Hint")`         |
+| `form.fieldType`             | Component type    | `@meta("form.fieldType", "tags")`           |
+| `form.props.<dotpath>`       | Constraints/props | `@meta("form.props.min", 1)`                |
+| `form.relation.<dotpath>`    | Relation config   | `@meta("form.relation.labelField", "name")` |
+| `form.exclude`               | Exclude from form | `@meta("form.exclude", true)`               |
 
-## Auto-splitting @form.props
+⚠️ **An object literal in `@meta` breaks `zenstack generate` entirely**
+(`Unhandled error: Unsupported attribute arg value: ObjectExpr`) — this is an upstream limitation
+of ZenStack's own TS-schema generator, not a plugin bug. That's why `form.props`/`form.relation`,
+which used to take an object (`@form.props({ min: 1, max: 100 })`), are now expressed as a **flat
+dot-path**, one `@meta` call per key:
 
-The plugin automatically separates `@form.props` into:
+```zmodel
+// ❌ Breaks generate entirely
+portions Int @meta("form.props", { min: 1, max: 100 })
+
+// ✅ Works
+portions Int @meta("form.props.min", 1) @meta("form.props.max", 100)
+```
+
+Scalars (string/number/boolean) and arrays work fine in `@meta` — only a bare object literal is
+blocked.
+
+### Legacy syntax (`///` doc comment) — deprecated but still working
+
+The old `///` doc-comment syntax before a field still works — the plugin reads **both**, and
+`@meta` wins on conflict for the same metadata key on one field. `nx zenstack:generate` prints a
+deprecation warning when it finds `@form.*`, but the build doesn't break:
+
+```zmodel
+model Recipe {
+  id        String @id @default(cuid())
+
+  /// @form.title("Recipe name")
+  /// @form.placeholder("Enter name")
+  title     String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+```
+
+Write new code with `@meta`; migrate existing schemas with the idempotent codemod
+`scripts/codemods/codemod-form-directives.mjs` (`--dry-run` for a preview) rather than rewriting
+directives by hand.
+
+| Legacy directive           | `@meta` equivalent                            |
+| -------------------------- | --------------------------------------------- |
+| `@form.title("...")`       | `@meta("form.title", "...")`                  |
+| `@form.placeholder("...")` | `@meta("form.placeholder", "...")`            |
+| `@form.description("...")` | `@meta("form.description", "...")`            |
+| `@form.fieldType("...")`   | `@meta("form.fieldType", "...")`              |
+| `@form.props({...})`       | `@meta("form.props.<key>", value)` per key    |
+| `@form.relation({...})`    | `@meta("form.relation.<key>", value)` per key |
+| `@form.exclude`            | `@meta("form.exclude", true)`                 |
+
+## Auto-splitting `form.props`
+
+The plugin automatically separates `form.props` keys into:
 
 **Zod constraints** — become schema methods:
 
@@ -163,9 +214,14 @@ The plugin automatically separates `@form.props` into:
 - `showValue`, `layout` (for slider, radioCard)
 - Any other props
 
+> Prefer setting constraints (`min`/`max`/`pattern`/`email`/...) via native ZModel attributes
+> (`@gte`/`@lte`/`@regex`/`@email`) instead — the ORM already applies them through
+> `@zenstackhq/zod`, so the form inherits the same constraints from one source. `form.props` for
+> constraints remains a working escape hatch for intentional client/server divergence, not the
+> primary path.
+
 ```zmodel
-/// @form.props({ min: 1, max: 100, showValue: true })
-portions Int
+portions Int @meta("form.props.min", 1) @meta("form.props.max", 100) @meta("form.props.showValue", true)
 ```
 
 Generates:
@@ -185,10 +241,10 @@ portions: z.number()
 - Fields with `@id` attribute
 - Fields with `@relation` attribute
 - Fields referencing models (e.g. `info RecipeInfo?`)
-- Fields with `@form.exclude` directive
+- Fields with `@meta("form.exclude", true)` (or legacy `/// @form.exclude`)
 
 > **Note:** FK fields (`categoryId`, `userId`, etc.) are NOT auto-excluded.
-> Use `@form.relation` for a select field or `@form.exclude` to skip.
+> Use `form.relation` for a select field or `form.exclude` to skip.
 
 ## Supported Prisma Types
 
@@ -274,6 +330,11 @@ plugin formSchema {
 **Resolution order:** custom file → built-in (en, ru) → English fallback.
 
 See the `ValidationTranslations` type export for the full interface.
+
+## Version
+
+Current version: **3.0.0** (Phase 3: `@meta("form.*", value)` as the primary syntax). Full
+history — see [package.json](package.json) and [CHANGELOG.md](CHANGELOG.md).
 
 ## Documentation
 
