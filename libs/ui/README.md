@@ -209,6 +209,9 @@ Box- и Button-обёртки с position-aware ripple на десктопе (э
 `Pressable` — обёртка для произвольного контента (например `Button asChild` с `Link` внутри,
 где сам `asChild`-паттерн не даёт использовать `PressableButton` напрямую). Требуют
 `pressableConfig` в `defineConfig()` приложения (ключевые кадры `ripple-expand`/`pressable-spring`).
+Низкоуровневые примитивы, на которых построен `Pressable` (нужны только при сборке своего
+кастомного pressable-компонента, не для обычного использования) — `useRipple()` (хук состояния
+ripple-точек) и `RippleEl` (рендер одной ripple-точки).
 
 ```tsx
 import { Pressable, PressableButton } from '@letar/ui'
@@ -379,6 +382,12 @@ const navItems = [
   </Header.MobileActions>
 </Header>
 ```
+
+`Header.Root` (= `HeaderRoot`) — та же обёртка (sticky/blur/фон), но без готового `Flex`-контейнера
+внутри; нужна, когда свою разметку детей нужно строить с нуля, а не через `<Header>` напрямую.
+`HeaderMobileProvider`/`useHeaderMobile` — контекст открытия/закрытия мобильного меню, которым
+пользуется `Header.MobileMenu` изнутри; нужны напрямую только при сборке собственного мобильного
+триггера вместо `Header.MobileMenu`.
 
 ### PriorityNav
 
