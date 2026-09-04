@@ -309,14 +309,10 @@ const Schema = z.object({
 
 ```zmodel
 model Product {
-  /// @form.title("Название продукта")
-  /// @form.placeholder("Введите название")
-  title String
+  title String @meta("form.title", "Название продукта") @meta("form.placeholder", "Введите название")
 
-  /// @form.title("Цена")
-  /// @form.fieldType("currency")
-  /// @form.props({ min: 0, currency: "RUB" })
-  price Int
+  price Int @meta("form.title", "Цена") @meta("form.fieldType", "currency")
+    @meta("form.props.min", 0) @meta("form.props.currency", "RUB")
 }
 ```
 

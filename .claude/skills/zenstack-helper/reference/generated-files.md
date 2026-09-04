@@ -41,7 +41,7 @@ nx zenstack:generate <app>
 ### 3. Импорты из generated
 
 ```typescript
-// Zod схемы для форм (с @form.* директивами)
+// Zod схемы для форм (с @meta("form.*", value) директивами)
 import { RecipeCreateFormSchema, RecipeUpdateFormSchema } from '@/generated/form-schemas/Recipe.form'
 
 // Enum схемы с метками
@@ -55,7 +55,8 @@ import type { RecipeCreateForm, RecipeUpdateForm } from '@/generated/form-schema
 
 ### form-schemas/ для моделей
 
-Генерируются из @form.\* директив:
+Генерируются из `@meta("form.*", value)` директив (legacy `@form.*`-комментарии — deprecated, но
+рабочий синтаксис):
 
 ```typescript
 // Recipe.form.ts

@@ -86,7 +86,8 @@
 
 ## fieldType в meta
 
-Указывай через @form.fieldType в schema.zmodel или через .meta():
+Указывай через `@meta("form.fieldType", "...")` в schema.zmodel (legacy `@form.fieldType(...)`-
+комментарий тоже работает, deprecated) или через `.meta()`:
 
 ```typescript
 z.string().meta({ ui: { fieldType: 'richText' } })

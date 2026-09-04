@@ -150,7 +150,7 @@ export const RecipeTypeFormSchema = z.enum(['SWEET', 'SALTY']).meta({
 
 ## withUIMeta — обогащение схем
 
-Для случаев когда @form.\* директивы не используются:
+Для случаев когда `@meta("form.*", value)` (или legacy `@form.*`) директивы не используются:
 
 ```typescript
 import { enumMeta, relationMeta, withUIMeta } from '@letar/forms'

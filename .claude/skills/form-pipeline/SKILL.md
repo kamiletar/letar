@@ -22,7 +22,7 @@ description: |
 
 ## Воркфлоу
 
-1. **Добавь @form.\* директивы** в `schema.zmodel`
+1. **Добавь `@meta("form.*", value)` директивы** в `schema.zmodel`
 2. **Генерируй** `nx zenstack:generate <app>`
 3. **Создай компонент** с `<Form>` API
 4. **Создай Server Action** в `_actions/`
@@ -54,4 +54,4 @@ import { Form } from '@letar/forms'
 
 ## Связанный Skill
 
-- `zenstack-helper` — @form.\* директивы, генерация схем
+- `zenstack-helper` — @meta("form.\*", value) директивы, генерация схем

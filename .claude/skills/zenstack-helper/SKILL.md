@@ -3,7 +3,7 @@ name: zenstack-helper
 description: |
   Помощник по ZenStack schema.zmodel (v3.3.0+). Используй при:
   - Редактировании моделей БД (schema.zmodel)
-  - Добавлении @form.* директив для генерации форм
+  - Добавлении @meta("form.*", value) директив для генерации форм
   - Настройке access control policies (@@allow/@@deny на уровне модели, @allow/@deny на уровне поля)
   - Работе с отношениями между моделями
   - Custom Procedures для кастомной логики
@@ -12,12 +12,12 @@ description: |
 
 # ZenStack Helper
 
-Помощник по ZenStack schema.zmodel (v3.3.0+). Используй при работе с моделями БД, @form.\* директивами, access control policies (model-level @@allow/@@deny и field-level @allow/@deny), отношениями между моделями, custom procedures.
+Помощник по ZenStack schema.zmodel (v3.3.0+). Используй при работе с моделями БД, @meta("form.\*", value) директивами (основной синтаксис с Фазы 3 zenstack-form-plugin v3.0.0; legacy @form.\* — deprecated), access control policies (model-level @@allow/@@deny и field-level @allow/@deny), отношениями между моделями, custom procedures.
 
 ## Когда использовать
 
 - Редактирование `schema.zmodel`
-- Добавление @form.\* директив для генерации форм
+- Добавление @meta("form.\*", value) директив для генерации форм
 - Настройка access control policies:
   - Model-level: `@@allow`/`@@deny`
   - Field-level: `@allow`/`@deny` (v3.3.0+)
@@ -41,7 +41,7 @@ description: |
 
 ## Reference файлы
 
-- `reference/form-directives.md` — @form.\* директивы (@letar/zenstack-form-plugin)
+- `reference/form-directives.md` — @meta("form.\*", value) директивы (@letar/zenstack-form-plugin, v3.0.0+)
 - `reference/access-policies.md` — @@allow/@@deny (model) + @allow/@deny (field) паттерны
 - `reference/custom-procedures.md` — Custom Procedures для бизнес-логики (v3.3.0+)
 - `reference/zenstack-better-auth.md` — интеграция с Better Auth Organizations (мультитенантность)
