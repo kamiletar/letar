@@ -7,7 +7,7 @@ import { SkinCodeFile } from '@/components/skin/skin-code-file'
 
 ## Overview
 
-Relation fields automatically load options from related database models. Powered by `RelationFieldProvider` and ZenStack's `@form.relation` directive.
+Relation fields automatically load options from related database models. Powered by `RelationFieldProvider` and ZenStack's `form.relation` directive.
 
 ## Full example
 
@@ -19,6 +19,21 @@ The complete sandbox example, read directly from the `form-develop-app` source a
 
 ```prisma
 model Recipe {
+  categoryId String @meta("form.title", "Category") @meta("form.relation.labelField", "name")
+
+  category Category @relation(fields: [categoryId], references: [id])
+}
+```
+
+⛔ `@meta("form.relation", { labelField: "name" })` with an object literal breaks
+`zenstack generate` entirely (`Unsupported attribute arg value: ObjectExpr`) — always use the
+flat dot-path form shown above, one `@meta` call per key.
+
+<details>
+<summary>Legacy syntax (still works, but deprecated)</summary>
+
+```prisma
+model Recipe {
   /// @form.title("Category")
   /// @form.relation({ labelField: "name" })
   categoryId String
@@ -26,6 +41,8 @@ model Recipe {
   category Category @relation(fields: [categoryId], references: [id])
 }
 ```
+
+</details>
 
 ## RelationFieldProvider
 

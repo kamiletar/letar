@@ -28,43 +28,60 @@ plugin formSchema {
 npx zenstack generate
 ```
 
-## Директивы @form.\*
+## Директивы `@meta("form.*", value)`
 
-Используйте `///` doc-комментарии **перед** полями для настройки поведения формы:
+Используйте field-атрибут `@meta` прямо на поле для настройки поведения формы:
 
 ```prisma
 model Product {
   id    String @id @default(cuid())
 
-  /// @form.title("Название товара")
-  /// @form.placeholder("Введите название")
-  name  String
+  name  String @meta("form.title", "Название товара") @meta("form.placeholder", "Введите название")
 
-  /// @form.title("Цена")
-  /// @form.fieldType("currency")
-  /// @form.props({ min: 0 })
-  price Decimal
+  price Decimal @meta("form.title", "Цена") @meta("form.fieldType", "currency")
+    @meta("form.props.min", 0)
 
-  /// @form.title("Категория")
-  /// @form.relation({ labelField: "name" })
-  categoryId String
+  categoryId String @meta("form.title", "Категория") @meta("form.relation.labelField", "name")
 
-  /// @form.exclude
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @meta("form.exclude", true)
 }
 ```
 
+⛔ **Объектный литерал в `@meta` ломает `zenstack generate` целиком** — `Unhandled error:
+Unsupported attribute arg value: ObjectExpr`. Это ограничение upstream-генератора TS-схемы самого
+ZenStack, не нашего плагина. Поэтому `form.props` и `form.relation` (у которых объект был бы
+естественным контейнером) заданы **плоским dot-path**, по одному вызову `@meta` на ключ, как
+выше — никогда `@meta("form.props", { min: 0 })`. Скаляры и массивы в `@meta` работают без
+проблем — блокирован только «голый» объектный литерал.
+
 ### Доступные директивы
 
-| Директива                  | Описание               | Пример                                       |
-| -------------------------- | ---------------------- | -------------------------------------------- |
-| `@form.title("...")`       | Заголовок поля         | `/// @form.title("Название")`                |
-| `@form.placeholder("...")` | Placeholder            | `/// @form.placeholder("Введите...")`        |
-| `@form.description("...")` | Подсказка              | `/// @form.description("Пояснение")`         |
-| `@form.fieldType("...")`   | Тип компонента         | `/// @form.fieldType("tags")`                |
-| `@form.props({...})`       | Constraints + UI props | `/// @form.props({ min: 1 })`                |
-| `@form.relation({...})`    | Настройки relation     | `/// @form.relation({ labelField: "name" })` |
-| `@form.exclude`            | Исключить из формы     | `/// @form.exclude`                          |
+| Директива                                | Описание                | Пример                                         |
+| ------------------------------------------ | ------------------------- | ----------------------------------------------- |
+| `@meta("form.title", "...")`               | Заголовок поля            | `@meta("form.title", "Название")`              |
+| `@meta("form.placeholder", "...")`         | Placeholder               | `@meta("form.placeholder", "Введите...")`      |
+| `@meta("form.description", "...")`         | Подсказка                 | `@meta("form.description", "Пояснение")`       |
+| `@meta("form.fieldType", "...")`           | Тип компонента            | `@meta("form.fieldType", "tags")`              |
+| `@meta("form.props.<dotpath>", ...)`       | Constraints + UI props    | `@meta("form.props.min", 1)`                   |
+| `@meta("form.relation.<dotpath>", ...)`    | Настройки relation        | `@meta("form.relation.labelField", "name")`    |
+| `@meta("form.exclude", true)`              | Исключить из формы        | `@meta("form.exclude", true)`                  |
+
+### Legacy-синтаксис (продолжает работать, но deprecated)
+
+Старые `///` doc-комментарии перед полем по-прежнему работают — плагин читает оба синтаксиса,
+`@meta` побеждает при конфликте на одном ключе одного поля. `nx zenstack:generate` печатает
+deprecation-warning при обнаружении `@form.*`-комментариев, но сборку не ломает:
+
+```prisma
+model Product {
+  /// @form.title("Название товара")
+  /// @form.placeholder("Введите название")
+  name String
+}
+```
+
+Новый код пишите на `@meta`; переписывать существующие `@form.*`-комментарии вручную не нужно,
+если модель и так не редактируется.
 
 ## Генерируемый код
 
@@ -125,19 +142,16 @@ export const StatusFormSchema = z.enum(['ACTIVE', 'ARCHIVED', 'DRAFT']).meta({
 ## Наследование нативных ZModel-атрибутов валидации
 
 **Рекомендуемый путь.** Задавайте валидацию через нативные атрибуты ZModel, а не через
-`@form.props` — ORM уже применяет их на `create`/`update` через `@zenstackhq/zod`, плагин
+`form.props` — ORM уже применяет их на `create`/`update` через `@zenstackhq/zod`, плагин
 форм наследует те же constraints в клиентскую Zod-схему, так что источник валидации остаётся
 один:
 
 ```prisma
-/// @form.title("Количество порций")
-portions Int @gte(1) @lte(100)
+portions Int @gte(1) @lte(100) @meta("form.title", "Количество порций")
 
-/// @form.title("Slug")
-slug String @startsWith("recipe-") @trim() @lower()
+slug String @startsWith("recipe-") @trim() @lower() @meta("form.title", "Slug")
 
-/// @form.title("Email")
-email String @email
+email String @email @meta("form.title", "Email")
 ```
 
 Генерирует:
@@ -154,9 +168,9 @@ email: z.string().email().meta({ ui: { title: 'Email' } })
 `Decimal`-поля поддерживают только `@gte`/`@gt`/`@lte`/`@lt` (несовместимость
 `ZodUtils.addDecimalValidation` с контрактом формы `Decimal → z.number()`).
 
-`@form.props` с тем же ключом-constraint (`min`, `startsWith` и т.д.) побеждает нативный
-атрибут — осознанный escape hatch для намеренного расхождения клиент/сервер, не способ задать
-constraint по умолчанию.
+`form.props` с тем же ключом-constraint (`min`, `startsWith` и т.д., заданным через
+`@meta("form.props.min", ...)`) побеждает нативный атрибут — осознанный escape hatch для
+намеренного расхождения клиент/сервер, не способ задать constraint по умолчанию.
 
 ## Кросс-полевая валидация: `@@validate`
 
@@ -209,11 +223,10 @@ only be used on type definitions» при попытке поставить ег
 
 ## Умное разделение Props
 
-Значения `@form.props` автоматически разделяются на **Zod constraints** и **UI props**:
+Значения `form.props` автоматически разделяются на **Zod constraints** и **UI props**:
 
 ```prisma
-/// @form.props({ min: 1, max: 100, showValue: true })
-portions Int
+portions Int @meta("form.props.min", 1) @meta("form.props.max", 100) @meta("form.props.showValue", true)
 ```
 
 Генерирует:
@@ -326,7 +339,7 @@ plugin formSchema {
 - Поля с атрибутом `@relation`
 - Поля с атрибутом `@omit` (скрыты из ORM-клиента целиком)
 - Поля с атрибутом `@computed` (вычисляются сервером)
-- Поля с директивой `/// @form.exclude`
+- Поля с `@meta("form.exclude", true)` (или legacy `/// @form.exclude`)
 
 ## Ссылки
 

@@ -24,7 +24,7 @@ function buildLlmsTxt(): string {
     `- [Field.* Reference](${PRODUCTION_URL}/docs/fields): полный список полей по категориям`,
     `- [Form Component API](${PRODUCTION_URL}/docs/api/form-component): пропсы Form, FormGroup, FormGroup.List`,
     `- [Hooks API](${PRODUCTION_URL}/docs/api/hooks): useAppForm, useOfflineForm и другие`,
-    `- [ZenStack Plugin](${PRODUCTION_URL}/docs/guides/zenstack-plugin): генерация форм из schema.zmodel через @form.* директивы`,
+    `- [ZenStack Plugin](${PRODUCTION_URL}/docs/guides/zenstack-plugin): генерация форм из schema.zmodel через @meta("form.*", value) директивы`,
     `- [Offline Mode](${PRODUCTION_URL}/docs/guides/offline): очередь синхронизации, индикаторы статуса`,
     `- [i18n](${PRODUCTION_URL}/docs/guides/i18n): локализация ошибок и опций`,
     `- [MCP Server](${PRODUCTION_URL}/docs/guides/mcp): @letar/form-mcp — доступ к документации и полям для AI-ассистентов`,

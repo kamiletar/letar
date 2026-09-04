@@ -28,43 +28,60 @@ Then run:
 npx zenstack generate
 ```
 
-## @form.\* Directives
+## `@meta("form.*", value)` Directives
 
-Use `///` doc comments **before** fields to configure form behavior:
+Use the `@meta` field attribute directly on a field to configure form behavior:
 
 ```prisma
 model Product {
   id    String @id @default(cuid())
 
-  /// @form.title("Product Name")
-  /// @form.placeholder("Enter product name")
-  name  String
+  name  String @meta("form.title", "Product Name") @meta("form.placeholder", "Enter product name")
 
-  /// @form.title("Price")
-  /// @form.fieldType("currency")
-  /// @form.props({ min: 0 })
-  price Decimal
+  price Decimal @meta("form.title", "Price") @meta("form.fieldType", "currency")
+    @meta("form.props.min", 0)
 
-  /// @form.title("Category")
-  /// @form.relation({ labelField: "name" })
-  categoryId String
+  categoryId String @meta("form.title", "Category") @meta("form.relation.labelField", "name")
 
-  /// @form.exclude
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @meta("form.exclude", true)
 }
 ```
+
+⛔ **An object literal in `@meta` breaks `zenstack generate` entirely** — `Unhandled error:
+Unsupported attribute arg value: ObjectExpr`. This is a limitation of ZenStack's own TS-schema
+generator, not of this plugin. That's why `form.props` and `form.relation` (which used to take an
+object) are expressed as a **flat dot-path**, one `@meta` call per key, as shown above — never
+`@meta("form.props", { min: 0 })`. Scalars and arrays work fine in `@meta`; only bare object
+literals are rejected.
 
 ### Available Directives
 
 | Directive                  | Description            | Example                                      |
-| -------------------------- | ---------------------- | -------------------------------------------- |
-| `@form.title("...")`       | Field label            | `/// @form.title("Name")`                    |
-| `@form.placeholder("...")` | Placeholder text       | `/// @form.placeholder("Enter...")`          |
-| `@form.description("...")` | Help text              | `/// @form.description("Hint")`              |
-| `@form.fieldType("...")`   | Component type         | `/// @form.fieldType("tags")`                |
-| `@form.props({...})`       | Constraints + UI props | `/// @form.props({ min: 1 })`                |
-| `@form.relation({...})`    | Relation select config | `/// @form.relation({ labelField: "name" })` |
-| `@form.exclude`            | Exclude from form      | `/// @form.exclude`                          |
+| ---------------------------------------- | ------------------------ | -------------------------------------------- |
+| `@meta("form.title", "...")`             | Field label               | `@meta("form.title", "Name")`                 |
+| `@meta("form.placeholder", "...")`       | Placeholder text          | `@meta("form.placeholder", "Enter...")`       |
+| `@meta("form.description", "...")`       | Help text                 | `@meta("form.description", "Hint")`           |
+| `@meta("form.fieldType", "...")`         | Component type            | `@meta("form.fieldType", "tags")`             |
+| `@meta("form.props.<dotpath>", ...)`     | Constraints + UI props    | `@meta("form.props.min", 1)`                  |
+| `@meta("form.relation.<dotpath>", ...)`  | Relation select config    | `@meta("form.relation.labelField", "name")`   |
+| `@meta("form.exclude", true)`            | Exclude from form         | `@meta("form.exclude", true)`                 |
+
+### Legacy syntax (still works, but deprecated)
+
+The old `///` doc-comment directives before a field still work — the plugin reads both syntaxes,
+and `@meta` wins if the same key is set both ways on one field. `nx zenstack:generate` prints a
+deprecation warning when it sees `@form.*` comments, but the build doesn't break:
+
+```prisma
+model Product {
+  /// @form.title("Product Name")
+  /// @form.placeholder("Enter product name")
+  name String
+}
+```
+
+New schemas should use `@meta`; there's no need to migrate existing `@form.*` comments by hand
+unless you're already touching that model.
 
 ## Generated Output
 
@@ -124,19 +141,16 @@ export const StatusFormSchema = z.enum(['ACTIVE', 'ARCHIVED', 'DRAFT']).meta({
 
 ## Inheriting native ZModel validation attributes
 
-**Recommended path.** Set validation through native ZModel attributes instead of `@form.props` —
+**Recommended path.** Set validation through native ZModel attributes instead of `form.props` —
 the ORM already applies them on `create`/`update` via `@zenstackhq/zod`, and the form plugin
 inherits the same constraints into the client Zod schema, keeping a single source of truth:
 
 ```prisma
-/// @form.title("Portions")
-portions Int @gte(1) @lte(100)
+portions Int @gte(1) @lte(100) @meta("form.title", "Portions")
 
-/// @form.title("Slug")
-slug String @startsWith("recipe-") @trim() @lower()
+slug String @startsWith("recipe-") @trim() @lower() @meta("form.title", "Slug")
 
-/// @form.title("Email")
-email String @email
+email String @email @meta("form.title", "Email")
 ```
 
 Generates:
@@ -153,9 +167,9 @@ Supported: `@email`, `@length`, `@gte`/`@gt`/`@lte`/`@lt`, `@regex`, `@startsWit
 fields only support `@gte`/`@gt`/`@lte`/`@lt` (`ZodUtils.addDecimalValidation` is incompatible
 with the form's `Decimal → z.number()` contract).
 
-`@form.props` with the same constraint key (`min`, `startsWith`, etc.) wins over the native
-attribute — a deliberate escape hatch for intentional client/server divergence, not the default
-way to set a constraint.
+`form.props` with the same constraint key (`min`, `startsWith`, etc., set via
+`@meta("form.props.min", ...)`) wins over the native attribute — a deliberate escape hatch for
+intentional client/server divergence, not the default way to set a constraint.
 
 ## Cross-field validation with `@@validate`
 
@@ -208,11 +222,10 @@ path is unit-tested and stays in place for when ZenStack extends where the attri
 
 ## Smart Props Splitting
 
-`@form.props` values are automatically split into **Zod constraints** and **UI props**:
+`form.props` values are automatically split into **Zod constraints** and **UI props**:
 
 ```prisma
-/// @form.props({ min: 1, max: 100, showValue: true })
-portions Int
+portions Int @meta("form.props.min", 1) @meta("form.props.max", 100) @meta("form.props.showValue", true)
 ```
 
 Generates:
@@ -338,7 +351,7 @@ These fields are automatically excluded from generated schemas:
 - Fields with `@relation` attribute
 - Fields with `@omit` attribute (hidden from the ORM client entirely)
 - Fields with `@computed` attribute (computed server-side)
-- Fields with `/// @form.exclude`
+- Fields with `@meta("form.exclude", true)` (or legacy `/// @form.exclude`)
 
 ## Links
 

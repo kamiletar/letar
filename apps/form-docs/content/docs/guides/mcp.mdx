@@ -117,14 +117,19 @@ get_form_pattern({ pattern: "crud-create" })
 
 ### get_directives
 
-Get documentation for `@form.*` ZenStack directives.
+Get documentation for `@meta("form.*", value)` ZenStack directives. Each result includes the
+current `@meta` field-attribute syntax (`example`), the flat `metaKey` dot-path, the deprecated
+comment-based syntax for reference (`legacyExample`), and the generated Zod `.meta()` output.
 
 ```
 get_directives({ directive: "@form.fieldType" })
-→ Syntax, example, generated output
+→ { name, metaKey, description, example, legacyExample, output }
 ```
 
 **Directives:** `@form.title`, `@form.placeholder`, `@form.description`, `@form.fieldType`, `@form.props`, `@form.relation`, `@form.exclude`
+
+Lookup is by the legacy short name (`@form.fieldType`) for backwards compatibility — the response
+itself shows the current `@meta("form.fieldType", ...)` syntax as the primary `example`.
 
 ### generate_form
 
