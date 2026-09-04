@@ -1,5 +1,27 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-05 — `getActiveUrlSyncFields` — diff-хелпер для `Form.UrlSync` (v2.10.0)
+
+Запрос `letar-dev` (msg 1157, Заповедь №18 студии — «Сбросить всё» видна только при активном
+фильтре, крестик на отдельном чипе). Реализовано координатором напрямую (тривиальный фикс —
+экспорт + тонкая обёртка), без делегации `forms-dev`. Полный экосистемный цикл:
+
+- **`libs/forms`** — `isDefaultValue` экспортирован, добавлена `getActiveUrlSyncFields(values,
+  fields, defaults)`, переиспользует `isDefaultValue` напрямую (не дублирует дифф, который
+  `Form.UrlSync` и так вычисляет внутри себя перед записью в URL). 6 новых тестов
+  (`use-form-url-sync.spec.ts`), README (новый раздел «URL Sync фильтров»). v2.10.0.
+- **`apps/form-develop-app`** — `filters-state-demo` дополнена `ActiveFilterChips` (крестик-сброс
+  на каждый активный фильтр), пример кода на странице обновлён. v0.1.8.
+- **`apps/form-develop-app-e2e`** — новый `filters-state-demo.spec.ts`, 4 теста; у этой демо-
+  страницы e2e-покрытия не было вообще.
+- **`apps/form-docs`** — RU+EN гайд `filters-state.mdx` дополнен разделом про новую функцию;
+  заодно почищена устаревшая таблица «Coming Soon» — она утверждала, что `useFormUrlSync`/
+  `useFormRef`/`useActiveFiltersCount`/`Form.Subscribe debounce` ещё не реализованы, хотя
+  используются прямо в демо на этой же странице.
+
+Коммиты: `c3bf35b3` (forms), `73b7aeb4` (form-develop-app), `71479267` (form-docs), `11ac19f6`
+(e2e). `typecheck:tsgo`/`lint`/`test`/`e2e` — зелёные везде.
+
 ## 2026-09-05 — Фаза 4 v4.0.0: документационный чек-лист миграции `@form.*` → `@meta` — Приоритет 4+5 закрыты
 
 Задача от `forms-coordinator-dev`: после удаления legacy comment-парсера `@form.*` из
