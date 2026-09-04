@@ -35,6 +35,9 @@ function SignInContent() {
   }, [searchParams])
 
   useEffect(() => {
+    // Синхронизация с внешней системой (редирект браузера на auth.letar.best),
+    // не производное от пропсов
+    // oxlint-disable-next-line react/set-state-in-effect
     attemptSignIn()
   }, [attemptSignIn])
 

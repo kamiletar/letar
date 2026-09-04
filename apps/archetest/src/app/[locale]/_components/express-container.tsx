@@ -62,8 +62,10 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
     }
     hydrated.current = true
     try {
-      // Ранее данное согласие (общий ключ с полным квизом)
+      // Ранее данное согласие (общий ключ с полным квизом) — читаем после
+      // монтирования (localStorage недоступен на сервере, hydration-safe паттерн)
       if (localStorage.getItem(DISCLAIMER_CONSENT_KEY) === '1') {
+        // oxlint-disable-next-line react/set-state-in-effect -- см. комментарий выше
         setDisclaimerAccepted(true)
       }
       const raw = localStorage.getItem(EXPRESS_RESULT_KEY)
@@ -195,7 +197,11 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
     setState('results')
   }, [answers, questions, seed, isRu])
 
-  handleFinishRef.current = handleFinish
+  // Обновляем ref вне рендера — чтение/запись ref.current в теле компонента
+  // не отслеживается React (react/refs), нужен эффект
+  useEffect(() => {
+    handleFinishRef.current = handleFinish
+  }, [handleFinish])
 
   const handleRetake = useCallback(() => {
     try {
@@ -282,6 +288,9 @@ export function ExpressContainer({ questions, isAuthenticated }: ExpressContaine
         <VStack gap={8}>
           <QuizProgressBar current={currentIndex} total={shuffledQuestions.length} answered={answers.size} />
           <QuizQuestionCard
+            // key на id вопроса — размонтирует/монтирует карточку заново при смене
+            // вопроса, сбрасывая локальный стейт без отдельного эффекта-синхронизации
+            key={currentQuestion.id}
             scenario={isRu ? currentQuestion.scenario : currentQuestion.scenarioEn}
             options={shuffledOptions}
             questionNumber={currentIndex + 1}

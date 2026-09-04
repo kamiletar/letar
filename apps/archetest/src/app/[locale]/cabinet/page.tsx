@@ -31,6 +31,9 @@ export default function CabinetPage() {
         setLoading(false)
       })
     } else {
+      // Ветка синхронизации с внешним источником роли (isPsychologist приходит из
+      // хука/сессии), для не-психолога сразу снимаем индикатор загрузки клиентов
+      // oxlint-disable-next-line react/set-state-in-effect
       setLoading(false)
     }
   }, [isPsychologist])

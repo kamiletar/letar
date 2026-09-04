@@ -16,10 +16,14 @@ const HIGH_CONTRAST_KEY = 'archetest-high-contrast'
 export function useHighContrast(): { enabled: boolean; toggle: () => void } {
   const [enabled, setEnabled] = useState(false)
 
-  // Гидратация из localStorage при монтировании
+  // Гидратация из localStorage при монтировании — намеренно НЕ в useState(() => ...):
+  // localStorage недоступен на сервере, инициализация в рендере дала бы разное
+  // значение на сервере и при первом клиентском рендере (hydration mismatch),
+  // см. .claude/docs/ssr-hydration-persisted-state.md
   useEffect(() => {
     try {
       const stored = localStorage.getItem(HIGH_CONTRAST_KEY) === '1'
+      // oxlint-disable-next-line react/set-state-in-effect -- см. комментарий выше
       setEnabled(stored)
     } catch {
       /* localStorage недоступен — остаёмся в обычном режиме */

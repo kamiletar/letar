@@ -35,6 +35,8 @@ export function QuizIntro({ onStart, progress, initialDisclaimerAccepted }: Quiz
   // Приоритет: сервер (БД) → localStorage — подтягиваем сохранённое согласие после монтирования
   useEffect(() => {
     if (!initialDisclaimerAccepted && localStorage.getItem(DISCLAIMER_CONSENT_KEY) === '1') {
+      // Гидратация из localStorage после монтирования, см. комментарий у useState выше
+      // oxlint-disable-next-line react/set-state-in-effect
       setDisclaimerAccepted(true)
     }
   }, [initialDisclaimerAccepted])

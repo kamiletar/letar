@@ -33,6 +33,9 @@ export function PsychologistLinkBlock() {
 
   useEffect(() => {
     if (session?.user) {
+      // Загрузка данных с сервера при монтировании/смене сессии, не производное
+      // от пропсов значение
+      // oxlint-disable-next-line react/set-state-in-effect
       loadLinks()
     }
   }, [session?.user, loadLinks])

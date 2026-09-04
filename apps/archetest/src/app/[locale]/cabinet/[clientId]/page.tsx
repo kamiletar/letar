@@ -53,6 +53,9 @@ export default function ClientDetailPage({ params }: { params: Promise<{ clientI
   }, [clientId])
 
   useEffect(() => {
+    // Загрузка данных с сервера при монтировании/смене clientId, не производное
+    // от пропсов значение
+    // oxlint-disable-next-line react/set-state-in-effect
     loadDetail()
   }, [loadDetail])
 
@@ -69,8 +72,13 @@ export default function ClientDetailPage({ params }: { params: Promise<{ clientI
   }
 
   // Данные для радарного чарта
+  // Локальные переменные ниже — не оптимизация, а способ выровнять фактически
+  // читаемые пути с зависимостями useMemo (detail?.foo вместо detail.foo!):
+  // React Compiler иначе не может сопоставить ручную мемоизацию с выводимой
+  // (react/preserve-manual-memoization) и пропускает оптимизацию компонента.
   const chartData = useMemo(() => {
-    if (!detail?.cumulativeScores) {
+    const cumulativeScores = detail?.cumulativeScores
+    if (!cumulativeScores) {
       return []
     }
     return PERSONALITY_TYPES.map((type) => {
@@ -80,29 +88,34 @@ export default function ClientDetailPage({ params }: { params: Promise<{ clientI
         type: type.code,
         label: `${label} ${archetype}\n(${isRu ? type.clinical : type.clinicalEn})`,
         clinicalLabel: isRu ? type.clinical : type.clinicalEn,
-        value: detail.cumulativeScores![type.code] ?? 0,
+        value: cumulativeScores[type.code] ?? 0,
       }
     })
   }, [detail?.cumulativeScores, isRu])
 
   // Ipsative-ранжирование профиля: нужно и «ведущим чертам», и контексту тёмного ядра
   const ipsativeRanking = useMemo(() => {
-    if (!detail?.cumulativeScores || !detail.scoreRelevantCounts) {
+    const cumulativeScores = detail?.cumulativeScores
+    const scoreRelevantCounts = detail?.scoreRelevantCounts
+    if (!cumulativeScores || !scoreRelevantCounts) {
       return null
     }
-    return computeIpsativeRanking(detail.cumulativeScores, detail.scoreRelevantCounts, { exclude: STATE_CODES })
+    return computeIpsativeRanking(cumulativeScores, scoreRelevantCounts, { exclude: STATE_CODES })
   }, [detail?.cumulativeScores, detail?.scoreRelevantCounts])
 
   // Индекс «Тёмное ядро». Гейт показа — сам модуль (structure !== 'insufficient'),
   // а не условие «балл > 0» в компоненте: оно не отличает «нет данных» от нуля
   const darkCore = useMemo(() => {
-    if (!detail?.cumulativeScores || !detail.scoreRelevantCounts || !detail.scoreConfidence) {
+    const cumulativeScores = detail?.cumulativeScores
+    const scoreRelevantCounts = detail?.scoreRelevantCounts
+    const scoreConfidence = detail?.scoreConfidence
+    if (!cumulativeScores || !scoreRelevantCounts || !scoreConfidence) {
       return null
     }
     return computeDarkCore({
-      normalized: detail.cumulativeScores,
-      relevantCounts: detail.scoreRelevantCounts,
-      confidence: detail.scoreConfidence,
+      normalized: cumulativeScores,
+      relevantCounts: scoreRelevantCounts,
+      confidence: scoreConfidence,
       ranking: ipsativeRanking ?? undefined,
     })
   }, [detail?.cumulativeScores, detail?.scoreRelevantCounts, detail?.scoreConfidence, ipsativeRanking])

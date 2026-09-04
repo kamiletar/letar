@@ -46,6 +46,9 @@ function useAnimatedScores(
   useEffect(() => {
     if (prefersReducedMotion()) {
       currentRef.current = { ...target }
+      // Синхронизация с внешней системой (requestAnimationFrame ниже), не
+      // производное от пропсов значение
+      // oxlint-disable-next-line react/set-state-in-effect
       setAnimated({ ...target })
       return
     }

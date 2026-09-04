@@ -34,12 +34,11 @@ export function QuizQuestionCard({
   const [justAnswered, setJustAnswered] = useState(false)
   // Оптимистичное выделение (5.4): подсветка выбранного варианта рендерится
   // мгновенно на клиенте, не дожидаясь round-trip через состояние родителя.
+  // Сброс при смене вопроса — не через эффект, а через remount: родитель обязан
+  // передавать `key`, зависящий от вопроса (id/questionNumber), тогда React сам
+  // обнуляет весь локальный стейт компонента (см. React docs: "Resetting all
+  // state when a prop changes").
   const [optimisticIndex, setOptimisticIndex] = useState<number | null>(null)
-
-  // Сбрасываем оптимистичное выделение при смене вопроса
-  useEffect(() => {
-    setOptimisticIndex(null)
-  }, [questionNumber])
 
   // Авто-переход через 400ms после ответа
   useEffect(() => {

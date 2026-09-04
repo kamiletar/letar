@@ -27,8 +27,10 @@ export function KioskResetButton() {
   const confirmTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // kiosk=1 читаем после маунта — параметр не влияет на SSR-рендер
+  // (window недоступен на сервере, инициализация в useState дала бы hydration mismatch)
   useEffect(() => {
     try {
+      // oxlint-disable-next-line react/set-state-in-effect -- см. комментарий выше
       setIsKiosk(new URLSearchParams(window.location.search).get('kiosk') === '1')
     } catch {
       /* window недоступен — не киоск */

@@ -139,7 +139,9 @@ export function QuizContainer({
       const pending: PendingQuiz = JSON.parse(pendingRaw)
       sessionStorage.removeItem(STORAGE_KEY)
 
-      // Автосабмит pending данных
+      // Автосабмит pending данных с сервера — легитимная синхронизация с внешней
+      // системой (sessionStorage + сетевой запрос), не производное от пропсов значение
+      // oxlint-disable-next-line react/set-state-in-effect -- см. комментарий выше
       setState('submitting')
       submitQuizAction({
         seed: pending.seed,
@@ -380,8 +382,11 @@ export function QuizContainer({
     }
   }, [answers, isAuthenticated, seed, calculateClientScores, skipped, mood, sessionLocale, showAchievementToasts])
 
-  // Обновляем ref для автозавершения
-  handleFinishRef.current = handleFinish
+  // Обновляем ref для автозавершения вне рендера — чтение/запись ref.current
+  // в теле компонента не отслеживается React (react/refs), нужен эффект
+  useEffect(() => {
+    handleFinishRef.current = handleFinish
+  }, [handleFinish])
 
   // Продолжить (загрузить новые вопросы и начать следующую порцию)
   const handleContinue = useCallback(async () => {
@@ -482,6 +487,10 @@ export function QuizContainer({
               : undefined}
           />
           <QuizQuestionCard
+            // key на id вопроса — размонтирует/монтирует карточку заново при смене
+            // вопроса, сбрасывая локальный стейт (optimisticIndex/justAnswered) без
+            // отдельного эффекта-синхронизации
+            key={currentQuestion.id}
             scenario={isRu ? currentQuestion.scenario : currentQuestion.scenarioEn}
             options={shuffledOptions}
             questionNumber={currentIndex + 1}
