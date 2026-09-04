@@ -301,6 +301,56 @@ model Booking {
   (`.claude/rules/security.md`). ⚠️ Проверить на `form-develop-app`, что `@letar/forms` не шлёт
   служебных полей в `parse` — иначе `.strict()` начнёт валить сабмиты.
 
+#### Фаза 2 — результаты (2026-09-04, `forms-dev`, v2.5.0)
+
+**Сделано:**
+
+- `@@validate(condition, message?, path?)` — генерируется `withNative(BaseSchema, (s) =>
+  ZodUtils.addCustomValidation(s, [...]))`. Уточнение к спеке выше: под капотом
+  `ZodUtils.addCustomValidation` вызывает `.refine()`, не `.superRefine()` (прочитано в
+  исходнике `@zenstackhq/zod` — `return schema.refine((data) => Boolean(evalExpression(data,
+  expr)), options)`); план ожидал `.superRefine()`, но раз это внутренний механизм upstream-
+  пакета, а не нашего кодогена, разница не влияет на публичный контракт.
+- `condition` сериализуется в рантайм-контракт `Expression` (`serializeExpression`,
+  рекурсивный обход Langium AST по `$type`) — тот же приём инлайна данных, что
+  `NativeAttributeApplication` в Фазе 1, но с рекурсивной, а не плоской формой узла.
+  `MemberAccessExpr` намеренно не поддержан (не встречался, кодоген кидает явную ошибку).
+- **Найдена и закрыта расходящаяся типовая форма контракта.** TS-тип `ArrayExpression`
+  пакета `@zenstackhq/schema` требует поле `type` (тип элементов) помимо `items` — рантайм
+  (`evalExpression`/`ExpressionUtils.isArray`) его не читает, но `tsgo`/`tsc` валят
+  сгенерированный файл `TS2322` без него. Поймано **живым** forced-mismatch прогоном
+  `typecheck:tsgo`, не по документации пакета — исправлено (`inferArrayExprElementType`,
+  дефолт `'String'` для path-массивов).
+- `path` из третьего аргумента `@@validate` действительно привязывает ошибку к полю, а не в
+  корень формы — подтверждено живьём на `apps/form-develop-app` `/cross-field-validation-demo`:
+  `endsAt` раньше `startsAt` даёт ошибку под полем `endsAt`, а не общей строкой формы.
+- **Update-схема не получает `@@validate`.** `{Model}UpdateFormSchema` строится из внутреннего
+  `{Model}BaseSchema` (до `.refine()`) через `.partial()` — у `ZodEffects` нет `.partial()`, и
+  partial-payload часто физически не может удовлетворить проверке для полной модели. Осознанное
+  архитектурное решение Фазы 2, не пробел.
+- Живая проверка в браузере + 3 e2e-теста (`cross-field-validation-demo.spec.ts`) на
+  `form-develop-app`, плюс showcase-модель `Event` в `form-example` (публичное приложение,
+  собственная миграция `20260904144257_event_cross_field_validate`).
+- Forced-mismatch типовая проба на `tsgo` (как в Фазе 1) подтвердила: `withNative` +
+  `ZodUtils.addCustomValidation` не стирают конкретный тип `{Model}CreateForm`.
+
+**НЕ сделано (не пробел, языковое ограничение, не решение плагина):**
+
+- **`@@strict()` реализован в кодогене, но неприменим ни к одной `model`.** ⚠️ Разошлось с
+  предположением плана выше («⚠️ Проверить на `form-develop-app`...») — до проверки не дошло,
+  потому что до неё не дошло дело: живой прогон `zenstack generate` с `@@strict()` на модели
+  `Booking` (`apps/form-develop-app`) остановился на этапе парсинга схемы: `attribute "@@strict"
+  can only be used on type definitions`. Стандартная библиотека ZModel (`stdlib.zmodel`)
+  объявляет его исключительно для `type`-определений — это ограничение самого языка, не риск
+  несовместимости с `@letar/forms`, который план предполагал заранее. `ModelInfo.isStrict`/
+  `hasStrictAttr`/`objectFn` в `model-generator.ts` оставлены как код (юнит-тестами покрыт на
+  синтетических фикстурах, которые не идут через реальный парсер и потому не ловят это
+  ограничение) — задел на случай, если ZenStack расширит область действия атрибута, не
+  активная фича Фазы 2.
+
+**Статус: Фаза 2 закрыта в объёме `@@validate`.** `@@strict()` — заблокирован языком ZModel, не
+задача Фазы 2. Фаза 3 может начинаться.
+
 ### Фаза 3 — `@meta` как основной синтаксис, `@form.*` в deprecation (v3.0.0)
 
 Мажор именно здесь: меняется рекомендованный контракт схемы (и, если spike выберет A2/A3, —
