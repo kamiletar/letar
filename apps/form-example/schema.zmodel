@@ -52,82 +52,50 @@ enum ContactSubject {
 model Product {
   id          String   @id @default(cuid())
 
-  /// @form.title("Product Name")
-  /// @form.placeholder("Enter product name")
-  name        String
+  name        String @meta("form.title", "Product Name") @meta("form.placeholder", "Enter product name")
 
-  /// @form.title("Description")
-  /// @form.fieldType("textarea")
-  /// @form.placeholder("Product description...")
-  description String?
+  description String? @meta("form.title", "Description") @meta("form.fieldType", "textarea") @meta("form.placeholder", "Product description...")
 
-  /// @form.title("Price")
-  /// @form.fieldType("currency")
-  /// @form.props({ min: 0 })
-  price       Float
+  price       Float @meta("form.title", "Price") @meta("form.fieldType", "currency") @meta("form.props.min", 0)
 
-  /// @form.title("Status")
-  status      Status   @default(DRAFT)
+  status      Status   @default(DRAFT) @meta("form.title", "Status")
 
-  /// @form.title("Tags")
-  /// @form.fieldType("tags")
-  /// @form.placeholder("Add tag...")
-  tags        String[]
+  tags        String[] @meta("form.title", "Tags") @meta("form.fieldType", "tags") @meta("form.placeholder", "Add tag...")
 
-  /// @form.title("Rating")
-  /// @form.fieldType("rating")
-  /// @form.props({ count: 5 })
-  rating      Int      @default(0)
+  rating      Int      @default(0) @meta("form.title", "Rating") @meta("form.fieldType", "rating") @meta("form.props.count", 5)
 
-  /// @form.title("SKU (native @startsWith/@trim/@upper)")
-  sku         String   @default("SKU-0000") @startsWith("SKU-") @trim() @upper()
+  sku         String   @default("SKU-0000") @startsWith("SKU-") @trim() @upper() @meta("form.title", "SKU (native @startsWith/@trim/@upper)")
 
-  /// @form.title("Website (native @url)")
-  website     String?  @url()
+  website     String?  @url() @meta("form.title", "Website (native @url)")
 
-  /// @form.exclude
-  createdAt   DateTime @default(now())
-  /// @form.exclude
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now()) @meta("form.exclude", true)
+  updatedAt   DateTime @updatedAt @meta("form.exclude", true)
 }
 
 model Event {
   id        String   @id @default(cuid())
 
-  /// @form.title("Event Name")
-  name      String
+  name      String @meta("form.title", "Event Name")
 
-  /// @form.title("Starts At")
-  startsAt  DateTime
+  startsAt  DateTime @meta("form.title", "Starts At")
 
-  /// @form.title("Ends At (@@validate: must be after Starts At)")
-  endsAt    DateTime
+  endsAt    DateTime @meta("form.title", "Ends At (@@validate: must be after Starts At)")
 
   @@validate(endsAt > startsAt, "End date must be after start date", ["endsAt"])
 
-  /// @form.exclude
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @meta("form.exclude", true)
 }
 
 model Contact {
   id        String         @id @default(cuid())
 
-  /// @form.title("Your Name")
-  /// @form.placeholder("John Doe")
-  name      String
+  name      String @meta("form.title", "Your Name") @meta("form.placeholder", "John Doe")
 
-  /// @form.title("Email")
-  /// @form.placeholder("john@example.com")
-  email     String
+  email     String @meta("form.title", "Email") @meta("form.placeholder", "john@example.com")
 
-  /// @form.title("Subject")
-  subject   ContactSubject
+  subject   ContactSubject @meta("form.title", "Subject")
 
-  /// @form.title("Message")
-  /// @form.fieldType("textarea")
-  /// @form.placeholder("How can we help?")
-  message   String
+  message   String @meta("form.title", "Message") @meta("form.fieldType", "textarea") @meta("form.placeholder", "How can we help?")
 
-  /// @form.exclude
-  createdAt DateTime       @default(now())
+  createdAt DateTime       @default(now()) @meta("form.exclude", true)
 }
