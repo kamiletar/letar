@@ -816,11 +816,13 @@ SaaS-Sentry отпадает отдельно: тело ошибки тащит 
    перед `nx build` — DSN появляется в `.next/static/chunks/*.js`. ✅ Задеплоено и проверено
    живьём (2026-08-11) — тестовая ошибка через браузер на `studio.letar.best` дошла до GlitchTip
    (issue id=2). Клиентский и серверный пути теперь оба подтверждены рабочими на проде.
-   ⚠️ **Тот же баг остаётся на staging** — `NEXT_PUBLIC_GLITCHTIP_DSN` в
-   `docker-compose.staging.yml` тоже литерал, а `apps/studio/.env.staging` существует только на
-   сервере (§18.8, не в этом чекауте) — агент не может отредактировать его напрямую.
-   Запрос BlackCove отправлен (2026-08-11, тред `deploy-studio-glitchtip`, `topic: infra`) —
-   добавить те же 4 строки в серверный `.env.staging` с `staging` вместо `production`, ответ ждём.
+   ✅ **Тот же баг на staging — исправлен (2026-09-04).** Ждать ответа BlackCove на заявку
+   `deploy-studio-glitchtip` больше не нужно: `apps/studio/.env.staging.enc` к этому моменту уже
+   заведён (заявка 2026-08-11 предполагала обратное — доку не обновили), значит агент может
+   редактировать его напрямую через `sops`/`scripts/sops-env-set.sh`, без похода на сервер.
+   `docker-compose.staging.yml` переведён на `${VAR}` (был литерал), 4 переменные добавлены в
+   `.env.staging.enc` (commit `17eefcb` в submodule `studio`). Живым прогоном на staging пока не
+   проверено — нужен деплой.
    **Найденный класс бага задокументирован отдельно** (не специфичен для GlitchTip — касается
    любой `NEXT_PUBLIC_*` переменной в любом приложении монорепо) —
    [nextjs-public-env-build-time-inlining.md](/.claude/docs/nextjs-public-env-build-time-inlining.md),
