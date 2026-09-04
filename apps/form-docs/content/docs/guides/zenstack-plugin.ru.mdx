@@ -122,6 +122,42 @@ export const StatusFormSchema = z.enum(['ACTIVE', 'ARCHIVED', 'DRAFT']).meta({
 })
 ```
 
+## Наследование нативных ZModel-атрибутов валидации
+
+**Рекомендуемый путь.** Задавайте валидацию через нативные атрибуты ZModel, а не через
+`@form.props` — ORM уже применяет их на `create`/`update` через `@zenstackhq/zod`, плагин
+форм наследует те же constraints в клиентскую Zod-схему, так что источник валидации остаётся
+один:
+
+```prisma
+/// @form.title("Количество порций")
+portions Int @gte(1) @lte(100)
+
+/// @form.title("Slug")
+slug String @startsWith("recipe-") @trim() @lower()
+
+/// @form.title("Email")
+email String @email
+```
+
+Генерирует:
+
+```typescript
+portions: z.number().int().min(1).max(100).meta({ ui: { title: 'Количество порций' } })
+slug: withNative(z.string(), (s) => ZodUtils.addStringValidation(s, [...])).meta({ ui: { title: 'Slug' } })
+email: z.string().email().meta({ ui: { title: 'Email' } })
+```
+
+Поддерживаются: `@email`, `@length`, `@gte`/`@gt`/`@lte`/`@lt`, `@regex`, `@startsWith`,
+`@endsWith`, `@contains`, `@datetime`, `@date`, `@time`, `@url`, `@phone`, `@trim`, `@lower`,
+`@upper`. `@length` на списке (`String[]`) валидирует количество элементов, а не длину строки.
+`Decimal`-поля поддерживают только `@gte`/`@gt`/`@lte`/`@lt` (несовместимость
+`ZodUtils.addDecimalValidation` с контрактом формы `Decimal → z.number()`).
+
+`@form.props` с тем же ключом-constraint (`min`, `startsWith` и т.д.) побеждает нативный
+атрибут — осознанный escape hatch для намеренного расхождения клиент/сервер, не способ задать
+constraint по умолчанию.
+
 ## Умное разделение Props
 
 Значения `@form.props` автоматически разделяются на **Zod constraints** и **UI props**:
@@ -239,6 +275,8 @@ plugin formSchema {
 - `createdAt`, `updatedAt` — системные поля
 - Поля с атрибутом `@id`
 - Поля с атрибутом `@relation`
+- Поля с атрибутом `@omit` (скрыты из ORM-клиента целиком)
+- Поля с атрибутом `@computed` (вычисляются сервером)
 - Поля с директивой `/// @form.exclude`
 
 ## Ссылки

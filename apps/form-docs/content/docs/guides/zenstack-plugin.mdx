@@ -122,6 +122,41 @@ export const StatusFormSchema = z.enum(['ACTIVE', 'ARCHIVED', 'DRAFT']).meta({
 })
 ```
 
+## Inheriting native ZModel validation attributes
+
+**Recommended path.** Set validation through native ZModel attributes instead of `@form.props` —
+the ORM already applies them on `create`/`update` via `@zenstackhq/zod`, and the form plugin
+inherits the same constraints into the client Zod schema, keeping a single source of truth:
+
+```prisma
+/// @form.title("Portions")
+portions Int @gte(1) @lte(100)
+
+/// @form.title("Slug")
+slug String @startsWith("recipe-") @trim() @lower()
+
+/// @form.title("Email")
+email String @email
+```
+
+Generates:
+
+```typescript
+portions: z.number().int().min(1).max(100).meta({ ui: { title: 'Portions' } })
+slug: withNative(z.string(), (s) => ZodUtils.addStringValidation(s, [...])).meta({ ui: { title: 'Slug' } })
+email: z.string().email().meta({ ui: { title: 'Email' } })
+```
+
+Supported: `@email`, `@length`, `@gte`/`@gt`/`@lte`/`@lt`, `@regex`, `@startsWith`, `@endsWith`,
+`@contains`, `@datetime`, `@date`, `@time`, `@url`, `@phone`, `@trim`, `@lower`, `@upper`.
+`@length` on a list (`String[]`) validates the element count, not string length. `Decimal`
+fields only support `@gte`/`@gt`/`@lte`/`@lt` (`ZodUtils.addDecimalValidation` is incompatible
+with the form's `Decimal → z.number()` contract).
+
+`@form.props` with the same constraint key (`min`, `startsWith`, etc.) wins over the native
+attribute — a deliberate escape hatch for intentional client/server divergence, not the default
+way to set a constraint.
+
 ## Smart Props Splitting
 
 `@form.props` values are automatically split into **Zod constraints** and **UI props**:
@@ -252,6 +287,8 @@ These fields are automatically excluded from generated schemas:
 - `createdAt`, `updatedAt` (timestamps)
 - Fields with `@id` attribute
 - Fields with `@relation` attribute
+- Fields with `@omit` attribute (hidden from the ORM client entirely)
+- Fields with `@computed` attribute (computed server-side)
 - Fields with `/// @form.exclude`
 
 ## Links

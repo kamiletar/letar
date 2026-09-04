@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.3] - 2026-09-04
+
+### Added
+
+- `guides/zenstack-plugin` (ru+en) — раздел «Наследование нативных ZModel-атрибутов валидации»:
+  все 18 поддержанных атрибутов (`@email`/`@length`/`@gte`/`@gt`/`@lte`/`@lt`/`@regex` + 11 новых
+  из Фазы 1 `zenstack-form-plugin` v2.4.0), правило победы `@form.props`, оговорка про `Decimal`.
+  Список автоматически исключаемых полей дополнен `@omit`/`@computed`.
+
 ## [0.6.2] - 2026-09-01
 
 ### Fixed
