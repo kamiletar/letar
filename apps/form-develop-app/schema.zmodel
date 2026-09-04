@@ -99,9 +99,18 @@ model Recipe {
 
   slug        String            @default("recipe-") @startsWith("recipe-") @trim() @lower() @meta("form.title", "Slug (нативные @startsWith/@trim/@lower)")
 
-  website     String?           @url() @meta("form.title", "Сайт рецепта (нативный @url)")
+  // message-i18n (v3.1.0) — последний позиционный аргумент нативного атрибута ZModel, не @meta.
+  // Постфактум подменяет текст ошибки Zod (ZodUtils.* сам message не читает) — см. разбор блокера
+  // и находку в libs/forms/PLAN.md, механизм — applyNativeMessages в model-generator.ts.
+  website     String?           @url("Введите корректный адрес сайта (https://...)") @meta("form.title", "Сайт рецепта (нативный @url с кастомным message)")
 
-  authorPhone String?           @phone() @meta("form.title", "Телефон автора (нативный @phone)")
+  authorPhone String?           @phone("Введите телефон в международном формате, например +79991234567") @meta("form.title", "Телефон автора (нативный @phone с кастомным message)")
+
+  // ⚠️ Намеренно БЕЗ form.props.min/max рядом: collectNativeAttributes (model-generator.ts)
+  // выкидывает нативный атрибут, если form.props переопределяет тот же constraintKey — тут нужно
+  // ровно противоположное, чтобы @gte/@lte реально дошли до ZodUtils.* и получили message.
+  /// message-i18n демо: общий message на @gte+@lte — оба check'а получают один и тот же текст
+  rating      Int?              @gte(1, "Оценка — от 1 до 5") @lte(5, "Оценка — от 1 до 5") @meta("form.title", "Оценка рецепта (нативные @gte/@lte с кастомным message)")
 
   publishedOn String?           @date() @meta("form.title", "Дата публикации (нативный @date)")
 

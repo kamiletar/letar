@@ -182,6 +182,20 @@ Zod), демонстрирует 4 из 11 новых нативных атри�
 
 ---
 
+## Native Attributes Message Demo (реализовано, message-i18n zenstack-form-plugin v3.1.0)
+
+Расширение Native Attributes Demo: `website` (`@url`) и `authorPhone` (`@phone`) получили
+кастомный `message`-текст ошибки третьим позиционным аргументом атрибута; добавлено новое поле
+`rating Int? @gte(1, "Оценка — от 1 до 5") @lte(5, "Оценка — от 1 до 5")` — специально без
+`@meta("form.props.min"/"max", ...)` рядом, иначе сработало бы правило подавления override в
+`collectNativeAttributes` и нативный атрибут (вместе с message) не применился бы вовсе. Проверено
+живьём через реально сгенерированную `RecipeCreateFormSchema`: невалидные значения (`rating=0`,
+`rating=99`, неверный `website`/`authorPhone`) дают именно заданные кастомные тексты, не дефолтные
+Zod-сообщения. Полное решение — `libs/forms/PLAN.md` («`message`-i18n — разбор блокера», секция
+результатов), `libs/zenstack-form-plugin/CHANGELOG.md` v3.1.0.
+
+---
+
 ## Cross-Field Validation Demo (реализовано, Фаза 2 zenstack-form-plugin v2.5.0)
 
 `/cross-field-validation-demo` — рендерит реально сгенерированный `BookingCreateFormSchema` из

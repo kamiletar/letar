@@ -2,6 +2,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.7] - 2026-09-04
+
+### Added
+
+- `schema.zmodel`: кастомный `message`-текст ошибки на native-атрибутах `website` (`@url`) и
+  `authorPhone` (`@phone`); новое поле `Recipe.rating Int? @gte(1, "Оценка — от 1 до 5") @lte(5,
+  "Оценка — от 1 до 5")` — демонстрирует message-i18n на `Int`-поле (leading-offset от `.int()`,
+  найденный и починенный в этой же сессии в `zenstack-form-plugin` v3.1.0).
+- Проверено живьём через реально сгенерированную `RecipeCreateFormSchema` — невалидные значения
+  дают заданный кастомный текст, не дефолтное сообщение Zod. Полное решение —
+  `libs/forms/PLAN.md` («`message`-i18n — разбор блокера», секция результатов).
+
 ## [0.1.6] - 2026-09-04
 
 ### Added
