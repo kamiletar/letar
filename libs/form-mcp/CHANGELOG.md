@@ -1,5 +1,16 @@
 # Changelog — @letar/form-mcp
 
+## 1.2.0 (2026-09-05)
+
+### Removed (следом за zenstack-form-plugin v4.0.0)
+
+- Поле `legacyExample` убрано из `DirectiveInfo` и всех записей `KNOWN_DIRECTIVES` —
+  legacy comment-синтаксис `@form.*` больше не существует в плагине вообще (Фаза 4), показывать
+  его как «deprecated, но рабочий» было бы неверно. `get_directives` больше не упоминает его
+  в описании инструмента.
+- `name`-ключ директив (`@form.title` и т.п.) сохранён как есть — это внутренний id для lookup'а
+  `get_directives`, не пример синтаксиса ZModel, менять не нужно.
+
 ## 1.1.0 (2026-09-04)
 
 ### Changed

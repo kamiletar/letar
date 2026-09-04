@@ -134,9 +134,9 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
 
   server.tool(
     'get_directives',
-    'Get descriptions of form-metadata directives for zenstack-form-plugin (v3.0.0+). Primary syntax is the '
-      + '@meta("form.<key>", value) field attribute (see `example`); the older /// @form.* comment directive '
-      + '(see `legacyExample`) still works but is deprecated. Without arguments returns all directives.',
+    'Get descriptions of form-metadata directives for zenstack-form-plugin (v4.0.0+). The only syntax is the '
+      + '@meta("form.<key>", value) field attribute (see `example`) — the older /// @form.* comment directive '
+      + 'was removed in v4.0.0. Without arguments returns all directives.',
     { directive: z.string().optional().describe('Directive name: @form.title, @form.props, etc.') },
     async ({ directive }) => {
       const directives = getDirectives(directiveRegistry, directive)
