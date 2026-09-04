@@ -198,11 +198,12 @@ release_file_reservations(
 
 ## Фиксированные имена координаторов
 
-| Агент            | Имя                          | Роль                           |
-| ---------------- | ---------------------------- | ------------------------------ |
-| Deploy Agent     | `deploy-agent-dev`           | Единственный кто деплоит       |
-| Forms Coord      | `forms-coordinator-dev`      | Владелец libs/forms ecosystem  |
-| Animatrona Coord | `animatrona-coordinator-dev` | Владелец libs/animatrona-types |
+| Агент            | Имя                          | Роль                                                    |
+| ---------------- | ---------------------------- | ------------------------------------------------------- |
+| Deploy Agent     | `deploy-agent-dev`           | Единственный кто деплоит                                |
+| Forms Coord      | `forms-coordinator-dev`      | Владелец libs/forms ecosystem                           |
+| Animatrona Coord | `animatrona-coordinator-dev` | Владелец libs/animatrona-types                          |
+| UI Coord         | `ui-coordinator-dev`         | Владелец libs/ui (заведён 2026-09-04, ~20 потребителей) |
 
 ⚠️ **2026-08-20: переименованы в единую схему `<роль>-dev`** (были `BlackCove`/`QuietRidge`/
 `GrayMill` — adjective+noun, заводились так из-за бага `send_message(to:)`, см.
