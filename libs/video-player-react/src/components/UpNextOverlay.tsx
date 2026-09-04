@@ -67,6 +67,8 @@ export function UpNextOverlay({
   // Сброс countdown при показе
   useEffect(() => {
     if (isVisible) {
+      // Синхронизация с таймером (внешняя система) — сброс countdown при показе
+      // oxlint-disable-next-line react/set-state-in-effect
       setCountdown(countdownSeconds)
     }
   }, [isVisible, countdownSeconds])

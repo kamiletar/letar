@@ -6,7 +6,7 @@
  * - Вычисляемые значения (usesSeparateAudio, currentAudioTrack, subtitleFormat)
  */
 
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import type { AudioTrackInfo, PlaybackSpeed, PlayerState, SubtitleFormat } from '../types'
 
@@ -102,7 +102,9 @@ export function usePlayerState(options: UsePlayerStateOptions): UsePlayerStateRe
   }, [audioTracks])
 
   // Храним в ref для использования в event handlers
-  usesSeparateAudioRef.current = usesSeparateAudio
+  useEffect(() => {
+    usesSeparateAudioRef.current = usesSeparateAudio
+  }, [usesSeparateAudio])
 
   // Текущая аудиодорожка — для библиотеки проверяем только IPFS CID
   const currentAudioTrack = useMemo(() => {

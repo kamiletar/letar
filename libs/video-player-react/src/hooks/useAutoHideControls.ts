@@ -57,6 +57,8 @@ export function useAutoHideControls(options: UseAutoHideControlsOptions): UseAut
 
   // Сброс таймаута при изменении isPlaying
   useEffect(() => {
+    // Синхронизация с таймером (внешняя система) — запуск/сброс автоскрытия
+    // oxlint-disable-next-line react/set-state-in-effect
     resetHideTimeout()
     return () => {
       if (hideTimeoutRef.current) {

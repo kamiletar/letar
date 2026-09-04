@@ -8,7 +8,7 @@
  */
 
 import { Box, Button } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
 import { LuSkipForward } from 'react-icons/lu'
 
 import { type Chapter, SKIP_LABELS, SKIPPABLE_CHAPTER_TYPES } from '../types'
@@ -28,16 +28,12 @@ export interface ChapterSkipButtonProps {
  * Позиционируется абсолютно — размести в контейнере с position: relative
  */
 export function ChapterSkipButton({ chapters, currentTime, onSeek }: ChapterSkipButtonProps) {
-  const [activeSkipChapter, setActiveSkipChapter] = useState<Chapter | null>(null)
-
-  // Определяем, находимся ли мы в пропускаемой главе
-  useEffect(() => {
+  // Определяем, находимся ли мы в пропускаемой главе — производное значение от chapters/currentTime
+  const activeSkipChapter = useMemo(() => {
     if (chapters.length === 0) {
-      setActiveSkipChapter(null)
-      return
+      return null
     }
 
-    // Находим текущую главу
     const currentChapter = chapters.find(
       (chapter) =>
         chapter.type
@@ -46,7 +42,7 @@ export function ChapterSkipButton({ chapters, currentTime, onSeek }: ChapterSkip
         && currentTime < chapter.endTime - 3, // Не показываем если осталось меньше 3 сек
     )
 
-    setActiveSkipChapter(currentChapter || null)
+    return currentChapter || null
   }, [chapters, currentTime])
 
   if (!activeSkipChapter) {

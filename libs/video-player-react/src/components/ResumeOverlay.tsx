@@ -51,7 +51,8 @@ export function ResumeOverlay({ savedTime, onResume, onStartOver, isOpen }: Resu
       return
     }
 
-    // Сброс countdown при открытии
+    // Синхронизация с таймером (внешняя система) — сброс countdown при открытии
+    // oxlint-disable-next-line react/set-state-in-effect
     setCountdown(AUTO_SELECT_DELAY)
 
     timerRef.current = setInterval(() => {
