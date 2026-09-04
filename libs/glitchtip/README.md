@@ -7,9 +7,12 @@
 Не `@sentry/nextjs`: это два изолированных подпакета (`./server`, `./client`), включаемые через
 нативные хуки Next.js 16 (`instrumentation.ts`/`instrumentation-client.ts`) без webpack/Turbopack
 плагина `@sentry/nextjs` — меньше поверхности, которая может разойтись с бандлером, и не нужен
-кастомный `next.config` wrapper. Цена: без автоматической загрузки sourcemaps (см. `infra/glitchtip/README.md`
-§«Что не сделано») и без Sentry-специфичных фич вроде session replay — на момент подключения первого
-приложения (studio) они не были нужны.
+кастомный `next.config` wrapper. Цена: без автоматической загрузки sourcemaps плагином `@sentry/nextjs` — загрузка сделана вручную,
+отдельным шагом деплоя (`scripts/glitchtip-upload-sourcemaps.mjs`, `PLAN-INFRA-4.md` §70 п.6),
+и без Sentry-специфичных фич вроде session replay — на момент подключения первого приложения
+(studio) они не были нужны. `initClient`/`initServer` принимают опциональный `release` —
+передавать `NEXT_PUBLIC_GLITCHTIP_RELEASE`/`GLITCHTIP_RELEASE`, иначе GlitchTip не свяжет
+стектрейс с загруженным sourcemap-бандлом.
 
 ## Установка
 

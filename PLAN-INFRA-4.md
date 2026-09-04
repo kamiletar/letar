@@ -828,10 +828,23 @@ SaaS-Sentry отпадает отдельно: тело ошибки тащит 
    любой `NEXT_PUBLIC_*` переменной в любом приложении монорепо) —
    [nextjs-public-env-build-time-inlining.md](/.claude/docs/nextjs-public-env-build-time-inlining.md),
    проиндексирован в `CLAUDE.md`.
-6. **Загрузка sourcemaps в CI** — без них стектрейс приходит из минифицированного кода и
-   бесполезен. Это половина ценности всей затеи, не откладывать «на потом». Не начато — стало
-   более заметно нужным именно из-за решения в п.4 (без `@sentry/nextjs` нет и его плагина
-   автозагрузки).
+6. ✅ **Загрузка sourcemaps в CI — сделано (2026-09-04, `d9b2ef86`).** Классический Sentry-эндпоинт
+   `releases/<version>/files/` отдаёт на GlitchTip v6 405 — сервер уже перешёл на
+   chunk-upload/artifact-bundle протокол (`apps/files/api.py`, `ChunkUploadEndpoint`), тот же, что
+   у `sentry-cli sourcemaps inject`+`upload`. Значит писать свой HTTP-клиент не понадобилось —
+   `@sentry/cli` добавлен в корневые `devDependencies`, обёрнут в
+   `scripts/glitchtip-upload-sourcemaps.mjs`. Токен org-wide (`project:read`+`project:releases`,
+   `infra/glitchtip/.env.docker.enc`) — `APIToken` в GlitchTip не привязан к проекту, доступ
+   проверяется по членству пользователя в организации, поэтому один секрет обслуживает все
+   проекты, не по одному на приложение. `deploy-affected.sh` экспортирует `GLITCHTIP_RELEASE`
+   (git short SHA) до `nx build` (см. п.4 — `NEXT_PUBLIC_*` инлайнится именно в этой фазе),
+   грузит sourcemaps после успешной сборки для Next.js-приложений с `@letar/glitchtip` на
+   клиенте, удаляет `.js.map` до `docker build` — не блокирует деплой при неудаче.
+   `initClient`/`initServer` в `@letar/glitchtip` получили опциональный `release`. `studio`
+   подключён первым (`productionBrowserSourceMaps: true`, apps/studio commit `2cc2c11`),
+   протестировано на реальной сборке (108 `.js.map`, все успешно загружены и удалены из образа).
+   Остальным ~16 кандидатам ничего дополнительно не нужно — интеграция сама обнаруживает
+   приложения по факту `@letar/glitchtip` в `instrumentation-client.ts`.
 7. Подключать по одному приложению, начиная с некоммерческого, и смотреть на объём событий: при
    шумном приложении бесплатный self-hosted быстро упирается в диск. `studio` (п.5) — первое,
    остальные не начаты. Список кандидатов (снят с `apps/*`, 2026-08-11):

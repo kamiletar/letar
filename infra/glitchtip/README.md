@@ -103,7 +103,8 @@ GlitchTip им физически некуда — оставлены как е�
 - SMTP не настроен — `EMAIL_URL=consolemail://`, письма только в лог контейнера. Подключение к
   Maddy на mail-сервере — отдельная задача, не блокирует основной функционал (события и алерты
   видны в самом UI).
-- Загрузка sourcemaps в CI — не начата.
+- ✅ Загрузка sourcemaps в CI — сделано (2026-09-04). `scripts/glitchtip-upload-sourcemaps.mjs`
+  (корень репо) + шаг в `deploy-affected.sh`, подробности — `PLAN-INFRA-4.md` §70 п.6.
 - Прод (s2) частично тронут: `studio-app` на s2 получил `GLITCHTIP_DSN`/`GLITCHTIP_ENVIRONMENT` в
   `docker-compose.production.yml`, но сам GlitchTip-сервис живёт только на s3 — прод-контейнер
   studio шлёт события через интернет на s3, не в изолированный контур. Для одного
