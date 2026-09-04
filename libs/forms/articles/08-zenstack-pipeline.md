@@ -4,19 +4,19 @@
 
 **TL;DR:**
 
-- `@form.*` директивы в `schema.zmodel` позволяют описать UI-метаданные прямо в модели БД — одно изменение обновляет всё
+- `@meta("form.*", value)` field-атрибуты в `schema.zmodel` позволяют описать UI-метаданные прямо в модели БД — одно изменение обновляет всё
 - Pipeline: schema.zmodel -> `zenstack:generate` -> Zod-схемы с `.meta()` -> `Form.FromSchema` — полный CRUD за 10 минут
 - Relation Fields автоматически превращаются в Combobox с загрузкой опций из БД через `RelationFieldProvider`
 
 **Кому полезно:**
 
 - Junior: понять full-stack pipeline от БД до формы и перестать описывать сущность в трёх местах
-- Middle: освоить @form.\* директивы и паттерн CRUD с Server Actions + сгенерированными схемами
+- Middle: освоить `@meta("form.*", value)` директивы и паттерн CRUD с Server Actions + сгенерированными схемами
 - Senior: оценить архитектуру single source of truth через ZenStack и стратегию Relation Fields
 
 ---
 
-> Восьмая статья из цикла «@letar/forms — от боли к декларативным формам». Полный pipeline: описываете модель в `schema.zmodel` -> добавляете `@form.*` директивы -> получаете готовую CRUD-форму с валидацией.
+> Восьмая статья из цикла «@letar/forms — от боли к декларативным формам». Полный pipeline: описываете модель в `schema.zmodel` -> добавляете `@meta("form.*", value)` директивы -> получаете готовую CRUD-форму с валидацией.
 
 ---
 
@@ -32,45 +32,49 @@
 
 ---
 
-## Решение: @form.\* директивы в schema.zmodel
+## Решение: `@meta("form.*", value)` директивы в schema.zmodel
 
-ZenStack уже генерирует Zod-схемы из моделей БД. Мы расширили генератор директивами `@form.*`:
+ZenStack уже генерирует Zod-схемы из моделей БД. Мы расширили генератор field-атрибутом `@meta` —
+с Фазы 3 (v3.0.0) это основной синтаксис метаданных формы, он ставится прямо на поле, без
+doc-комментария:
 
 ```zmodel
 model Product {
   id          String   @id @default(cuid())
   createdAt   DateTime @default(now())
 
-  /// @form.title("Название продукта")
-  /// @form.placeholder("Введите название")
   title       String
+    @meta("form.title", "Название продукта") @meta("form.placeholder", "Введите название")
 
-  /// @form.title("Описание")
-  /// @form.fieldType("richText")
   description String?
+    @meta("form.title", "Описание") @meta("form.fieldType", "richText")
 
-  /// @form.title("Цена")
-  /// @form.fieldType("currency")
-  /// @form.props({ currency: "RUB", min: 0 })
   price       Int
+    @meta("form.title", "Цена") @meta("form.fieldType", "currency")
+    @meta("form.props.currency", "RUB") @meta("form.props.min", 0)
 
-  /// @form.title("Категория")
   category    Category @relation(fields: [categoryId], references: [id])
+    @meta("form.title", "Категория")
   categoryId  String
 
-  /// @form.title("В наличии")
-  inStock     Boolean  @default(true)
+  inStock     Boolean  @default(true) @meta("form.title", "В наличии")
 
-  /// @form.title("Рейтинг")
-  /// @form.fieldType("rating")
-  /// @form.props({ max: 5 })
   rating      Float?
+    @meta("form.title", "Рейтинг") @meta("form.fieldType", "rating") @meta("form.props.max", 5)
 
-  /// @form.title("SKU")
-  /// @form.placeholder("ART-001")
   sku         String   @unique
+    @meta("form.title", "SKU") @meta("form.placeholder", "ART-001")
 }
 ```
+
+> ⚠️ `@meta` не принимает объектный литерал — `@meta("form.props", { currency: "RUB", min: 0 })`
+> ломает `zenstack generate` целиком (`Unsupported attribute arg value: ObjectExpr`, ограничение
+> upstream-генератора самого ZenStack, не плагина). Поэтому `form.props`/`form.relation` задаются
+> плоским dot-path: по одному `@meta` на ключ, как в примере выше.
+>
+> Старый синтаксис через `///`-комментарий (`/// @form.title("...")`) по-прежнему работает —
+> плагин читает оба, `@meta` побеждает при конфликте на одном ключе — но считается deprecated и
+> печатает предупреждение при `zenstack:generate`.
 
 Запускаем генерацию:
 
@@ -246,18 +250,20 @@ export default async function EditProductPage({ params }) {
 
 ---
 
-## Доступные @form.\* директивы
+## Доступные `@meta("form.*", value)` директивы
 
-| Директива           | Описание                | Пример                                       |
-| ------------------- | ----------------------- | -------------------------------------------- |
-| `@form.title`       | Label поля              | `/// @form.title("Имя пользователя")`        |
-| `@form.placeholder` | Placeholder             | `/// @form.placeholder("Введите...")`        |
-| `@form.description` | Подсказка (helperText)  | `/// @form.description("Макс 100 символов")` |
-| `@form.fieldType`   | Тип компонента          | `/// @form.fieldType("richText")`            |
-| `@form.props`       | Кастомные пропсы        | `/// @form.props({ currency: "RUB" })`       |
-| `@form.hidden`      | Скрыть из формы         | `/// @form.hidden`                           |
-| `@form.readonly`    | Только для чтения       | `/// @form.readonly`                         |
-| `@form.order`       | Порядок в автогенерации | `/// @form.order(1)`                         |
+| Ключ `@meta("form.<key>", …)` | Описание                                                               | Пример                                           |
+| ----------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------ |
+| `form.title`                  | Label поля                                                             | `@meta("form.title", "Имя пользователя")`        |
+| `form.placeholder`            | Placeholder                                                            | `@meta("form.placeholder", "Введите...")`        |
+| `form.description`            | Подсказка (helperText)                                                 | `@meta("form.description", "Макс 100 символов")` |
+| `form.fieldType`              | Тип компонента                                                         | `@meta("form.fieldType", "richText")`            |
+| `form.props.<dotpath>`        | Кастомные пропсы (плоский dot-path — объект в `@meta` ломает generate) | `@meta("form.props.currency", "RUB")`            |
+| `form.relation.<dotpath>`     | Настройки relation-поля                                                | `@meta("form.relation.labelField", "name")`      |
+| `form.exclude`                | Скрыть из формы                                                        | `@meta("form.exclude", true)`                    |
+
+> Все примеры выше — основной синтаксис (Фаза 3, v3.0.0). Старый синтаксис через doc-комментарий
+> (`/// @form.title("...")`) продолжает работать как deprecated-фолбэк.
 
 ---
 
@@ -269,7 +275,7 @@ schema.zmodel  →  zenstack:generate  →  Zod-схемы  →  Form.FromSchema
  Добавили поле              Автоматически   Автоматически
 ```
 
-Добавили `color String?` в модель Product с `@form.title("Цвет")` и `@form.fieldType("colorPicker")` → перегенерировали → форма автоматически содержит новое поле `ColorPicker`.
+Добавили `color String? @meta("form.title", "Цвет") @meta("form.fieldType", "colorPicker")` в модель Product → перегенерировали → форма автоматически содержит новое поле `ColorPicker`.
 
 Ноль ручной работы на уровне UI.
 
@@ -342,13 +348,13 @@ TanStack Query даёт кэширование, дедупликацию зап�
 
 ## Итоги
 
-| Что                    | Как                               |
-| ---------------------- | --------------------------------- |
-| UI-метаданные в модели | `/// @form.title("...")`          |
-| Тип поля               | `/// @form.fieldType("currency")` |
-| Генерация              | `nx zenstack:generate app`        |
-| Форма создания         | `ProductCreateFormSchema`         |
-| Форма редактирования   | `ProductUpdateFormSchema`         |
+| Что                    | Как                                   |
+| ---------------------- | ------------------------------------- |
+| UI-метаданные в модели | `@meta("form.title", "...")`          |
+| Тип поля               | `@meta("form.fieldType", "currency")` |
+| Генерация              | `nx zenstack:generate app`            |
+| Форма создания         | `ProductCreateFormSchema`             |
+| Форма редактирования   | `ProductUpdateFormSchema`             |
 
 Принцип: **модель БД — единственный источник правды**. Zod-схемы и формы — производные.
 

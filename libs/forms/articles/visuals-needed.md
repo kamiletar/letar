@@ -85,7 +85,7 @@
 
 - [ ] **Pipeline**: диаграмма потока данных
   ```
-  schema.zmodel + @form.* → zenstack:generate → Zod-схемы (.meta) → Form.FromSchema → UI
+  schema.zmodel + @meta("form.*", value) → zenstack:generate → Zod-схемы (.meta) → Form.FromSchema → UI
   ```
 
 ### Статья 09 — Offline архитектура

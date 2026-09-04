@@ -402,14 +402,14 @@ bun add @letar/forms
 
 - [ ] Объединить 07 (350 строк) и 08 (350 строк) в ~450 строк
 - [ ] Начать с проблемы: "одну сущность описываем 3 раза: в БД, в Zod, в JSX"
-- [ ] Показать полный pipeline: schema.zmodel → @form.\* директивы → zenstack:generate → Zod схемы → Form.FromSchema → UI
+- [ ] Показать полный pipeline: schema.zmodel → `@meta("form.*", value)` директивы → zenstack:generate → Zod схемы → Form.FromSchema → UI
 - [ ] Добавить спойлер "Что такое ZenStack и Prisma" для тех, кто не знаком
 - [ ] Добавить спойлер "Что такое ORM" для начинающих
 - [ ] Вставить P1 визуал: диаграмма pipeline (Excalidraw)
 - [ ] Вставить бенчмарк: время генерации для разного количества моделей
 - [ ] 4 уровня контроля: FromSchema → AutoFields → Compound → useAppForm (диаграмма)
 - [ ] CRUD пример: полный цикл create + edit для одной модели
-- [ ] Секция "Под капотом: как @form.\* директивы трансформируются в .meta()" для сеньёров
+- [ ] Секция "Под капотом: как `@meta("form.*", value)` директивы трансформируются в .meta()" для сеньёров
 - [ ] Вопрос: "Генерируете ли вы формы из схемы БД? Какие инструменты используете?"
 
 ---
@@ -944,7 +944,7 @@ Declarative form library for React — **50+ field types**, multi-step, offline-
 - [ ] Добавить hero-пример "было → стало" в самое начало (после заголовка):
   ```markdown
   **Before:** describe entity 3 times (Prisma model + Zod schema + JSX form)
-  **After:** one `schema.zmodel` with `@form.*` directives → everything generated
+  **After:** one `schema.zmodel` with `@meta("form.*", value)` directives → everything generated
   ```
 - [ ] Добавить ссылки:
   ```markdown

@@ -44,7 +44,7 @@
 }
 ```
 
-Одна строка конфига — и AI знает про все 50+ полей, паттерны форм, @form.\* директивы.
+Одна строка конфига — и AI знает про все 50+ полей, паттерны форм, `@meta("form.*", value)` директивы.
 
 ---
 
@@ -91,12 +91,24 @@ AI → get_form_pattern({ pattern: "crud-create" })
 
 Доступные паттерны: `crud-create`, `crud-edit`, `multi-step`, `offline`, `i18n`, `from-schema`, `declarative`, `server-action`.
 
-### 5. get_directives — @form.\* директивы
+### 5. get_directives — `@meta("form.*", value)` директивы
 
 ```
 AI → get_directives({ directive: "@form.fieldType" })
-← описание директивы, допустимые значения, примеры использования в schema.zmodel
+← {
+    name: "@form.fieldType",
+    metaKey: "form.fieldType",
+    description: "Явный тип поля формы",
+    example: '@meta("form.fieldType", "richText")',
+    legacyExample: '/// @form.fieldType("richText")',
+    output: '.meta({ ui: { fieldType: "richText" } })'
+  }
 ```
+
+Поле `example` — актуальный синтаксис (`@meta`, основной с Фазы 3 zenstack-form-plugin v3.0.0),
+`legacyExample` — старый doc-комментарий, всё ещё рабочий, но deprecated. Параметр `directive`
+принимает как короткое имя (`fieldType`), так и полное (`@form.fieldType`) — это lookup-ключ
+инструмента, не сама директива в schema.zmodel.
 
 ### 6. generate_form — генерация кода
 
@@ -201,7 +213,7 @@ libs/form-mcp/
 │   └── data/
 │       ├── fields.json      # Каталог полей
 │       ├── patterns.json    # Шаблоны форм
-│       └── directives.json  # @form.* директивы
+│       └── directives.json  # @meta("form.*", value) директивы
 ├── package.json           # @letar/form-mcp
 └── README.md
 ```
@@ -246,14 +258,14 @@ libs/form-mcp/
 
 ## Итоги
 
-| Инструмент          | Что делает                               |
-| ------------------- | ---------------------------------------- |
-| `list_fields`       | Каталог всех полей (с фильтрами)         |
-| `get_field_props`   | Детали и пропсы конкретного поля         |
-| `get_field_example` | Готовый код с примером                   |
-| `get_form_pattern`  | Шаблоны: CRUD, мультистеп, offline, i18n |
-| `get_directives`    | @form.\* директивы для ZenStack          |
-| `generate_form`     | Генерация кода формы по описанию         |
+| Инструмент          | Что делает                                      |
+| ------------------- | ----------------------------------------------- |
+| `list_fields`       | Каталог всех полей (с фильтрами)                |
+| `get_field_props`   | Детали и пропсы конкретного поля                |
+| `get_field_example` | Готовый код с примером                          |
+| `get_form_pattern`  | Шаблоны: CRUD, мультистеп, offline, i18n        |
+| `get_directives`    | `@meta("form.*", value)` директивы для ZenStack |
+| `generate_form`     | Генерация кода формы по описанию                |
 
 MCP — это не «фича для галочки». Это кратный прирост продуктивности: AI знает вашу библиотеку так же хорошо, как вы.
 

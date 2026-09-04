@@ -45,13 +45,13 @@
 
 ## Генерация ZenStack
 
-| Метрика                           | Значение   |
-| --------------------------------- | ---------- |
-| driving-school: моделей           | 89         |
-| driving-school: @form.\* директив | 93         |
-| Время генерации                   | **12.0 с** |
+| Метрика                                           | Значение   |
+| ------------------------------------------------- | ---------- |
+| driving-school: моделей                           | 89         |
+| driving-school: `@meta("form.*", value)` директив | 93         |
+| Время генерации                                   | **12.0 с** |
 
-> Генерация включает: Prisma schema, Zod schemas, form schemas с @form.\* метаданными, TypeScript типы.
+> Генерация включает: Prisma schema, Zod schemas, form schemas с `@meta("form.*", value)` метаданными, TypeScript типы.
 
 ## Тестирование
 
