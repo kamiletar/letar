@@ -4,4 +4,5 @@
 export * from './enums/Status.form'
 export * from './enums/ContactSubject.form'
 export * from './Product.form'
+export * from './Event.form'
 export * from './Contact.form'

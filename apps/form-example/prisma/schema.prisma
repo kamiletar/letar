@@ -62,6 +62,18 @@ model Product {
     updatedAt DateTime @updatedAt()
 }
 
+model Event {
+    id String @id() @default(cuid())
+    /// @form.title("Event Name")
+    name String
+    /// @form.title("Starts At")
+    startsAt DateTime
+    /// @form.title("Ends At (@@validate: must be after Starts At)")
+    endsAt DateTime
+    /// @form.exclude
+    createdAt DateTime @default(now())
+}
+
 model Contact {
     id String @id() @default(cuid())
     /// @form.title("Your Name")

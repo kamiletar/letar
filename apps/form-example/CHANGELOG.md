@@ -2,6 +2,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.8] - 2026-09-04
+
+### Added
+
+- Новая модель `Event` (`schema.zmodel`) с `@@validate(endsAt > startsAt, "End date must be after
+  start date", ["endsAt"])` — демонстрация Фазы 2 миграции `zenstack-form-plugin` (v2.5.0) на
+  кросс-полевую валидацию. Миграция `20260904144257_event_cross_field_validate`.
+- `examples/zenstack` — вторая форма на странице (`EventCreateFormSchema`): попытка поставить
+  дату окончания раньше даты начала даёт ошибку, привязанную к полю `endsAt` через `path`-аргумент
+  `@@validate`.
+
 ## [0.1.7] - 2026-09-04
 
 ### Added
