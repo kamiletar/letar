@@ -1,5 +1,37 @@
 # Выполненные задачи — Animatrona Tracker
 
+## `Content.category`/`Content.quality`/`Report.reason` → enum (2026-09-04)
+
+Задача от координатора форм (`forms-coordinator-dev`) — последний блокер удаления legacy
+comment-directive парсера директив форм (`libs/zenstack-form-plugin`, мажорный релиз v3.0.0,
+Фаза 3 плана `libs/forms/PLAN.md`). Три поля `schema/content.zmodel` были единственным местом в
+приложении, где ручной `@form.props({ options: [...] })` был не декоративным избытком, а
+единственным способом задать опции `select` — потому что поля были `String`, а не `enum`.
+
+Заведены `ContentCategory` (`ANIME`/`MOVIE`/`SERIES`/`OTHER`), `VideoQuality`
+(`P480`/`P720`/`P1080`/`P4K`), `ReportReason` (`COPYRIGHT`/`SPAM`/`INAPPROPRIATE`/`OTHER`) с
+`///`-doc-комментариями на значениях — options для select теперь генерируются автоматически из
+enum, ручной `@form.props` убран у всех трёх полей.
+
+Перед конвертацией проверено: обе таблицы (`Content`, `Report`) пустые в dev-БД, а модели нигде
+не используются в коде приложения (грепом — только докстринг в `db.ts` и неродственный
+`ORMError.reason`, не поле модели). Значения квалификации переименованы в валидные идентификаторы
+(`480p`→`P480` и т.п.), без `@map` — раз данных нет, сохранять обратную совместимость строк не
+требовалось.
+
+`nx zenstack:generate`/`nx db:push` пришлось запускать с `--skip-nx-cache` — иначе Nx отдавал
+закешированный результат («already in sync»), и БД физически не менялась, хотя команда
+завершалась успешно. `nx db:migrate` не удалось прогнать штатно (drift: `db:push` уже применил
+изменение раньше файла миграции) — файл миграции написан вручную с явным SQL-маппингом старых
+lowercase-строк на новые enum-идентификаторы (`CASE ... WHEN 'anime' THEN 'ANIME'::"..."`, не
+голый `::text::enum`-каст) на случай непустых данных на проде, проверен полным прогоном `prisma
+migrate deploy` с нуля на временной БД, помечен applied в dev через `prisma migrate resolve
+--applied`.
+
+`typecheck:tsgo`/`lint` зелёные. Коммиты `2e9e387f` (схема+доки), `530ddc23` (миграция).
+Уведомлены `forms-coordinator-dev`/`forms-dev` в треде `forms-native-migration` — со стороны
+animatrona-tracker блокеров для удаления legacy-парсера больше нет.
+
 ## Чистка запрещённого Chakra `Icon as=` — 194 вхождения в 33 файлах (2026-08-26)
 
 Кросс-приложенческая задача из корневого `PLAN.md` §61 (semgrep-правило
