@@ -147,6 +147,30 @@ Nx-плагин, импорт `@letar/*` из него падает в рант�
 существует). При правке регулярок меняй оба файла — расхождение регулярок ловит
 `port-parser.guard.spec.ts`.
 
+### Дрейф production-сервера (`app-server.ts`)
+
+Сервер приложения объявлен минимум в двух независимых местах (канон `SERVER_APPS` выше и
+`.claude/commands/<app>.md`), и командный файл канон не читает — расхождение молчаливое
+(прецедент: после вывода s1 из эксплуатации шесть командных файлов продолжали называть его
+текущим сервером, найдено только ручным аудитом 2026-09-04). Эти функции сверяют источники:
+
+```typescript
+/** Сервер из .claude/commands/<app>.md (первое вхождение sN сразу после "**Сервер:**"). */
+export function readCommandServer(workspaceRoot: string, app: string): InfraServer | undefined
+
+/** Декларации по приложениям, у которых командный файл вообще называет сервер. */
+export function collectServerDeclarations(workspaceRoot: string, apps: string[]): AppServerDeclaration[]
+
+/** Расхождения командного файла с каноном SERVER_APPS. */
+export function findServerDrift(declarations: AppServerDeclaration[]): ServerDrift[]
+
+/** Человекочитаемый отчёт — для сообщения об ошибке guard-теста. */
+export function formatServerDrift(drift: ServerDrift[]): string
+```
+
+Дрейф ловит `app-server.guard.spec.ts` (`nx test infra-config`). Приложения без строки
+`**Сервер:**` в командном файле (некоммерческие/локальные утилиты без деплоя) пропускаются.
+
 ## Команды
 
 ```bash
