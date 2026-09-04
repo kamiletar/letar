@@ -1843,9 +1843,19 @@ inline-редактирование текста. Если `ReplaceValue` ока
   - [ ] **Не сделано:** `forms-vue`/`forms-vue-shadcn`/`forms-angular` parity;
 - [x] `docs/fields.md` (таблица + детальный раздел), `CHANGELOG.md` и версии всех четырёх
       пакетов обновлены вместе с реализацией.
-  - [ ] **Не сделано:** `README.md` библиотеки, `form-docs`/`form-example` (демо-страницы),
-        `form-mcp` — детальный H2-раздел для `get_field_props`/`get_field_example` (таблица в
-        `docs/fields.md` уже даёт `list_fields`/базовый `get_field_props` без `details`).
+- [x] **2026-09-04:** `README.md` библиотеки — добавлен `Form.Field.EditIntent` в пример
+      «56 Field компонентов» (комментарий поясняет назначение: секрет, который сервер не
+      возвращает повторно).
+- [x] **2026-09-04 (проверено, отдельного действия не требовалось):** `form-mcp` —
+      `buildFieldRegistry` (`libs/form-mcp/src/data/field-registry.ts`) парсит `details` из
+      H2-секции `docs/fields.md` автоматически по совпадению `Form.Field.<Имя>` в заголовке —
+      секция «`## Form.Field.EditIntent — Замена значения без передачи старого`» уже присутствует
+      с момента реализации фичи, значит `get_field_props`/`get_field_example` уже отдают полный
+      `details` без отдельного кода в `form-mcp`. Ложно числилось как «не сделано» — источник
+      этой строки не проверялся против реального механизма генерации реестра.
+  - [ ] **Не сделано:** `form-docs`/`form-example` (интерактивные демо-страницы) —
+        отдельная задача, требует UI-обвязки (страница-пример с рабочим server action для
+        демонстрации reveal/replace), не покрывается точечной правкой.
 
 ### [2026-08-20] Баг: Form.Field.TableEditor застревает в нераскрытом Suspense-boundary (от form-example)
 

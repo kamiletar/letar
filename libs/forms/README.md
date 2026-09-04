@@ -86,6 +86,11 @@ const Schema = z.object({
 <Form.Field.Signature name="signature" />
 <Form.Field.CreditCard name="card" />
 
+// Секреты — сервер не отдаёт старое значение (API key, Client Secret)
+<Form.Field.EditIntent name="apiKey" displayValue="************P9x4" emptyValue="">
+  <Form.Field.Password name="apiKey.value" autoComplete="new-password" />
+</Form.Field.EditIntent>
+
 // Защита
 <Form.Captcha />
 ```
