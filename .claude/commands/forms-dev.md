@@ -15,7 +15,7 @@ description: Воркфлоу разработки @letar/forms — приори
    macro_start_session(
      human_key: "C:/web/letar",
      program: "claude-code",
-     model: "opus-4.6",
+     model: "claude-opus-5",
      agent_name: "forms-dev",
      registration_token: "<токен из agent_fixed_names_tokens.md>",
      task_description: "Разработка @letar/forms",
@@ -34,18 +34,30 @@ description: Воркфлоу разработки @letar/forms — приори
    ⚠️ **Фаза 7 разбивает библиотеку на несколько пакетов** — резервируй владение ими заранее (даже если
    папки ещё не созданы), чтобы параллельные сессии не разъехались по core/скинам.
 
-4. **Стартуй таймер** `time_start({ app: "forms", ... })` — общий шаблон и правила переключения/
+4. **Выставь открытую contact policy** — иначе первый запрос от незнакомого агента виснет заявкой
+   на подтверждение контакта (см. `.claude/rules/agent-mail.md`):
+
+   ```
+   set_contact_policy(
+     project_key: "c-web-letar",
+     agent_name: "forms-dev",
+     policy: "open",
+     registration_token: "<тот же токен>"
+   )
+   ```
+
+5. **Стартуй таймер** `time_start({ app: "forms", ... })` — общий шаблон и правила переключения/
    остановки см. `.claude/rules/app-workflow.md` и `.claude/rules/time-tracking.md`.
-5. **Проверь входящие запросы:**
+6. **Проверь входящие запросы:**
    ```
    fetch_inbox(topic: "form-feature-request", include_bodies: true)
    ```
-6. **Прочитай `libs/forms/PLAN.md` ЦЕЛИКОМ** (не только Backlog!) — там стратегический roadmap и
+7. **Прочитай `libs/forms/PLAN.md` ЦЕЛИКОМ** (не только Backlog!) — там стратегический roadmap и
    **активная фаза**. Сейчас активна **Фаза 7** (расслоение на `forms-core` + UI-скины Chakra/shadcn +
    Vue-пруф-адаптер, dependency-free ядро по Clean Architecture/DIP). Определи текущую фазу отсюда.
-7. **Проверь backlog:** `libs/forms/PLAN.md` → секция "Backlog (запросы от агентов)"
-8. Прочитай `apps/form-develop-app/PLAN.md` для текущего состояния задач песочницы
-9. **Приоритизация:** входящие запросы от агентов > backlog > активная фаза из `libs/forms/PLAN.md`
+8. **Проверь backlog:** `libs/forms/PLAN.md` → секция "Backlog (запросы от агентов)"
+9. Прочитай `apps/form-develop-app/PLAN.md` для текущего состояния задач песочницы
+10. **Приоритизация:** входящие запросы от агентов > backlog > активная фаза из `libs/forms/PLAN.md`
 
 ## Координация (Forms Coordinator)
 

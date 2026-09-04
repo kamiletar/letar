@@ -21,6 +21,26 @@ mcp__agent-mail__macro_start_session(
 
 Возвращает `{project, agent, file_reservations, inbox}` — сразу видно inbox и резервации.
 
+### Сразу после регистрации — `contact_policy: "open"`
+
+**Для ЛЮБОЙ identity — фиксированной (`<app>-dev`, координаторы) и временной (fallback через
+`create_agent_identity`, см. ниже) одинаково.** Иначе первое сообщение от незнакомого агента
+виснет заявкой `Contact request from <твоё-имя>`, требующей ручного `respond_contact` — неудобно
+и легко забыть, кто кому должен ответить:
+
+```
+set_contact_policy(
+  project_key: "c-web-letar",
+  agent_name: "<твоё-имя>",
+  policy: "open",
+  registration_token: "<твой токен>"
+)
+```
+
+Вызывай это единообразно во всех командах `.claude/commands/*.md`, которые регистрируют identity
+(`macro_start_session`/`register_agent`/`create_agent_identity`) — не только в тех, что ссылаются
+на `.claude/rules/app-workflow.md`.
+
 ### ⚠️ Всегда передавай `agent_name` + `registration_token`
 
 Без них сервер молча заведёт **новую** identity со случайным именем (`SunnyTower`, `WhiteMountain`)
@@ -72,7 +92,9 @@ print(cur.fetchone())
 построению, сколько бы сессий ни стартовало одновременно — в отличие от `register_agent` с
 угаданным именем, где уникальность проверяется по принципу check-then-act. Занеси новое имя в
 `agent_fixed_names_tokens.md` как «рабочее имя для `<app>`, пока `<app>-dev` занята» (см.
-`mandala-relay`/`studio-relay` как образец) и работай под ним.
+`mandala-relay`/`studio-relay` как образец) и работай под ним. **Сразу следом — `set_contact_policy`
+с `policy: "open"`** (см. выше): временная identity без него так же виснет на первой заявке
+контакта, как и постоянная, а `agent_fixed_names_tokens.md` про неё быстро забывают.
 
 ⚠️ **Токен из памяти может не подойти: база сервера иногда обнуляется.** Признак — в ответе
 `macro_start_session` приходит `id: 1` и **новый** `registration_token`, а `whois` по знакомому
