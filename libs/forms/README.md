@@ -311,6 +311,45 @@ const prefilled = useUrlPrefill({
 const url = generatePrefillUrl('/contact', { name: 'Иван', email: 'ivan@test.com' })
 ```
 
+### URL Sync фильтров (v2.10.0)
+
+Двусторонняя синхронизация whitelist-полей формы с URL query-параметрами: дефолты опускаются
+из URL, дебаунс записи, `push`/`replace` history, чувствительные поля исключаются.
+
+```tsx
+import { Form, getActiveUrlSyncFields, useFormUrlSync } from '@letar/forms'
+
+const defaultFilters = { search: '', category: 'all', minPrice: 0 }
+
+function FiltersPage() {
+  const { initialValue } = useFormUrlSync({ fields: ['search', 'category', 'minPrice'], defaults: defaultFilters })
+
+  return (
+    <Form schema={FilterSchema} initialValue={initialValue} onSubmit={async () => {}}>
+      <Form.UrlSync fields={['search', 'category', 'minPrice']} defaults={defaultFilters} />
+      <Form.Field.String name="search" />
+      <Form.Subscribe>
+        {(values) => {
+          const active = getActiveUrlSyncFields(values, ['search', 'category', 'minPrice'], defaultFilters)
+          return (
+            active.length > 0 && (
+              <>
+                <Button onClick={() => reset(defaultFilters)}>Сбросить всё</Button>
+                {active.map(({ field, value }) => <Chip key={field}>{field}: {String(value)}</Chip>)}
+              </>
+            )
+          )
+        }}
+      </Form.Subscribe>
+    </Form>
+  )
+}
+```
+
+`getActiveUrlSyncFields(values, fields, defaults)` — список полей, чьё значение отличается от
+дефолта (с тем же диффом, что `Form.UrlSync` использует для записи в URL). Для одного числа —
+`useActiveFiltersCount(defaults)`.
+
 ### DX фичи
 
 ```tsx

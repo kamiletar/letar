@@ -60,6 +60,8 @@ export {
   // State management helpers
   FormSubscribe,
   FormUrlSync,
+  getActiveUrlSyncFields,
+  isDefaultValue,
   numberMeta,
   // Relation field provider
   RelationFieldProvider,

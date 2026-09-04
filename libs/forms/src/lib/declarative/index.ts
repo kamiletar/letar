@@ -466,7 +466,14 @@ export { FieldHidden, type HiddenFieldProps } from './form-fields'
 export { FormSubscribe, type FormSubscribeProps } from './form-subscribe'
 export { useActiveFiltersCount } from './use-active-filters-count'
 export { useFormRef } from './use-form-ref'
-export { FormUrlSync, type FormUrlSyncOptions, type FormUrlSyncProps, useFormUrlSync } from './use-form-url-sync'
+export {
+  FormUrlSync,
+  type FormUrlSyncOptions,
+  type FormUrlSyncProps,
+  getActiveUrlSyncFields,
+  isDefaultValue,
+  useFormUrlSync,
+} from './use-form-url-sync'
 
 // Calculated field
 export { FieldCalculated } from './form-fields'

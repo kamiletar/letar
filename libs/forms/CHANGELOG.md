@@ -4,6 +4,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.10.0] - 2026-09-05
+
+### Added
+
+- **`getActiveUrlSyncFields`** (`libs/forms/src/lib/declarative/use-form-url-sync.ts`) — публичная
+  функция-хелпер, возвращает список полей `Form.UrlSync`/`useFormUrlSync`, чьё значение отличается
+  от дефолта, вместе со значением. Переиспользует тот же дифф (`isDefaultValue`, теперь тоже
+  экспортирован), что `Form.UrlSync` использует перед записью в URL — не дублирует его логику.
+  Запрошено `letar-dev` под «Заповедь №18 студии» (`.claude/private/WEBSTUDIO.md`): видимая кнопка
+  «Сбросить всё» и крестик на отдельном чипе фильтра. Для голого счётчика по-прежнему
+  `useActiveFiltersCount`. 6 новых тестов в `use-form-url-sync.spec.ts`.
+
 ## [2.9.0] - 2026-09-04
 
 ### Added

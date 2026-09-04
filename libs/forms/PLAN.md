@@ -1698,7 +1698,7 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
 
 ## Backlog (запросы от агентов)
 
-### [2026-09-05] `getActiveUrlSyncFields` — публичный diff-хелпер для `useFormUrlSync` (от letar-dev)
+### ✅ [2026-09-05] `getActiveUrlSyncFields` — публичный diff-хелпер для `useFormUrlSync` (от letar-dev) — закрыто
 
 - **Запросил:** `letar-dev`
 - **Приоритет:** low (сам инициатор пометил как неспешное)
@@ -1716,8 +1716,11 @@ peer-deps (`@tiptap/*`, `use-mask-input`, `@tanstack/react-table`+`react-virtual
 - **Оценка координатора:** тривиальный фикс (маленький файл, чистый экспорт + обёртка,
   без изменения поведения) — подпадает под «Можешь править библиотеки напрямую для мелких
   фиксов» из `forms-coordinator`, делегация `forms-dev` не обязательна.
-- **Статус:** ожидание — `forms-dev` занят закрытием миграции на `@meta` (см. предыдущую фазу
-  выше в этом файле), реализация начнётся сразу после её закрытия.
+- **Статус:** ✅ готово — v2.10.0 (`libs/forms/src/lib/declarative/use-form-url-sync.ts`).
+  `isDefaultValue` экспортирован, `getActiveUrlSyncFields` реализована ровно по предложенной
+  сигнатуре и переиспользует его напрямую (не дублирует дифф). Реализовано координатором сразу,
+  без делегации `forms-dev` — фикс оказался тривиальным, как и планировалось. 6 новых тестов в
+  `use-form-url-sync.spec.ts`. README (новый раздел «URL Sync фильтров»), CHANGELOG — обновлены.
 
 ### ✅ [2026-08-26] Сообщённый баг TS2739 в `field-type-mapper.tsx` при `persistence` — не подтвердился, закрыто
 

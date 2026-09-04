@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { readUrlValues } from './use-form-url-sync'
+import { getActiveUrlSyncFields, isDefaultValue, readUrlValues } from './use-form-url-sync'
 
 const defaults = {
   search: '',
@@ -52,5 +52,49 @@ describe('readUrlValues', () => {
     const result = readUrlValues(['search'], defaults, new URLSearchParams('search=hi'))
     expect(result.category).toBe('all')
     expect(result.minPrice).toBe(0)
+  })
+})
+
+describe('isDefaultValue', () => {
+  it('matches primitives by ===', () => {
+    expect(isDefaultValue('all', 'all')).toBe(true)
+    expect(isDefaultValue('books', 'all')).toBe(false)
+  })
+
+  it('matches equal arrays element-by-element (order-sensitive)', () => {
+    expect(isDefaultValue(['a', 'b'], ['a', 'b'])).toBe(true)
+    expect(isDefaultValue(['b', 'a'], ['a', 'b'])).toBe(false)
+    expect(isDefaultValue(['a'], ['a', 'b'])).toBe(false)
+  })
+})
+
+describe('getActiveUrlSyncFields', () => {
+  it('returns empty array when all values match defaults', () => {
+    const active = getActiveUrlSyncFields(defaults, ['search', 'category', 'minPrice'], defaults)
+    expect(active).toEqual([])
+  })
+
+  it('returns only fields differing from defaults, with their values', () => {
+    const values = { ...defaults, search: 'hello', minPrice: 500 }
+    const active = getActiveUrlSyncFields(values, ['search', 'category', 'minPrice'], defaults)
+    expect(active).toEqual([
+      { field: 'search', value: 'hello' },
+      { field: 'minPrice', value: 500 },
+    ])
+  })
+
+  it('respects the field whitelist (ignores fields outside it even if non-default)', () => {
+    const values = { ...defaults, search: 'hello', category: 'books' }
+    const active = getActiveUrlSyncFields(values, ['search'], defaults)
+    expect(active).toEqual([{ field: 'search', value: 'hello' }])
+  })
+
+  it('treats equal arrays as default (order-sensitive)', () => {
+    const values = { ...defaults, tags: ['react', 'forms'] }
+    const activeSame = getActiveUrlSyncFields({ ...values, tags: [] }, ['tags'], defaults)
+    expect(activeSame).toEqual([])
+
+    const activeDiff = getActiveUrlSyncFields(values, ['tags'], defaults)
+    expect(activeDiff).toEqual([{ field: 'tags', value: ['react', 'forms'] }])
   })
 })

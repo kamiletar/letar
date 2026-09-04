@@ -224,7 +224,7 @@ export function FormUrlSync<TData extends object>({
 }
 
 /** Проверяет, совпадает ли значение с дефолтным (с поддержкой массивов) */
-function isDefaultValue(value: unknown, defaultValue: unknown): boolean {
+export function isDefaultValue(value: unknown, defaultValue: unknown): boolean {
   if (value === defaultValue) {
     return true
   }
@@ -235,4 +235,34 @@ function isDefaultValue(value: unknown, defaultValue: unknown): boolean {
     return value.every((v, i) => v === defaultValue[i])
   }
   return false
+}
+
+/**
+ * Возвращает поля из whitelist, чьё текущее значение отличается от дефолта —
+ * тот же дифф, что `Form.UrlSync` вычисляет внутри себя перед записью в URL.
+ *
+ * Используется для UX-паттернов вида «активны фильтры → показать «Сбросить всё»»,
+ * не полагаясь на то, что каждый потребитель пересчитает дифф от `defaults` сам.
+ *
+ * @example
+ * ```tsx
+ * const active = getActiveUrlSyncFields(values, ['search', 'category'], defaultFilters)
+ * {active.length > 0 && <Button onClick={reset}>Сбросить всё</Button>}
+ * {active.map(({ field }) => <Chip key={field} onRemove={() => clear(field)}>{field}</Chip>)}
+ * ```
+ */
+export function getActiveUrlSyncFields<TData extends object>(
+  values: TData,
+  fields: (keyof TData & string)[],
+  defaults: TData,
+): Array<{ field: keyof TData & string; value: unknown }> {
+  const active: Array<{ field: keyof TData & string; value: unknown }> = []
+  for (const field of fields) {
+    const value = values[field]
+    const defaultValue = defaults[field]
+    if (!isDefaultValue(value, defaultValue)) {
+      active.push({ field, value })
+    }
+  }
+  return active
 }
