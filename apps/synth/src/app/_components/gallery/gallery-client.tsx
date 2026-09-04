@@ -35,7 +35,12 @@ export function GalleryClient({ patches }: GalleryClientProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [highlighted, setHighlighted] = useState<string | null>(null)
 
+  // Нельзя вычислить в useState(() => ...): window.location.hash недоступен на сервере, а
+  // инициализатор useState выполнился бы и при гидратации с другим результатом, чем SSR (null) —
+  // hydration mismatch на borderColor карточки; подсветка нужного патча по якорю намеренно
+  // применяется уже после гидратации.
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- см. комментарий выше useEffect
     setHighlighted(window.location.hash.replace('#', '') || null)
   }, [])
 

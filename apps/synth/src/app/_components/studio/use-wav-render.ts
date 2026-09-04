@@ -11,6 +11,10 @@ export type WavRenderStatus = 'idle' | 'rendering' | 'done' | 'error'
 export function useWavRender() {
   const [status, setStatus] = useState<WavRenderStatus>('idle')
   const [url, setUrl] = useState<string | null>(null)
+  // Имя файла для скачивания — фиксируется один раз, в момент готовности рендера (внутри
+  // колбэка renderPatchToWav().then, не в рендере компонента): Date.now() там — обычный
+  // обработчик события, а не чтение времени во время рендера (react(purity)).
+  const [downloadName, setDownloadName] = useState<string | null>(null)
 
   const render = useCallback((patch: Patch) => {
     setStatus('rendering')
@@ -22,10 +26,11 @@ export function useWavRender() {
           }
           return URL.createObjectURL(blob)
         })
+        setDownloadName(`synth-render-${Date.now()}.wav`)
         setStatus('done')
       })
       .catch(() => setStatus('error'))
   }, [])
 
-  return { status, url, render }
+  return { status, url, downloadName, render }
 }

@@ -15,12 +15,16 @@ interface UseArpeggiatorOptions {
 // ref, параметры читаются из замыкания на каждый шаг (paramsRef), чтобы не пересоздавать
 // экземпляр при каждом изменении ручки.
 export function useArpeggiator({ params, noteOn, noteOff }: UseArpeggiatorOptions) {
+  // Ref-зеркала — читаются из аудио-коллбэка (paramsRef на каждый шаг), запись перенесена
+  // в эффект: мутация ref в теле компонента считается нечистой для react(refs).
   const paramsRef = useRef(params)
-  paramsRef.current = params
   const noteOnRef = useRef(noteOn)
-  noteOnRef.current = noteOn
   const noteOffRef = useRef(noteOff)
-  noteOffRef.current = noteOff
+  useEffect(() => {
+    paramsRef.current = params
+    noteOnRef.current = noteOn
+    noteOffRef.current = noteOff
+  })
   const arpRef = useRef<Arpeggiator | null>(null)
 
   useEffect(() => {

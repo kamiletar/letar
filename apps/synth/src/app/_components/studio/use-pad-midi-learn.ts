@@ -8,7 +8,7 @@ import {
   resolvePad,
   savePadMidiMap,
 } from '@/lib/patch/pad-midi-map'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 export interface PadMidiLearn {
   map: PadMidiMap
@@ -30,12 +30,16 @@ export function usePadMidiLearn(): PadMidiLearn {
   const [active, setActive] = useState(false)
   const [armedPad, setArmedPad] = useState<number | null>(null)
 
+  // Ref-зеркала — читаются из handleLearnNote/resolve (колбэки MidiInputManager, не рендер),
+  // запись перенесена в эффект (react(refs)).
   const mapRef = useRef(map)
-  mapRef.current = map
   const activeRef = useRef(active)
-  activeRef.current = active
   const armedPadRef = useRef(armedPad)
-  armedPadRef.current = armedPad
+  useEffect(() => {
+    mapRef.current = map
+    activeRef.current = active
+    armedPadRef.current = armedPad
+  })
 
   const toggleActive = useCallback(() => {
     setActive((prev) => !prev)

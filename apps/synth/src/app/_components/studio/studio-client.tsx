@@ -76,15 +76,20 @@ export function StudioClient() {
   const midiRef = useRef<MidiInputManager | null>(null)
   const readTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Ref-зеркала для использования в аудио-коллбэках без stale-замыканий
+  // Ref-зеркала для использования в аудио-коллбэках без stale-замыканий. Запись — в эффекте
+  // (после рендера), не прямо в теле компонента: React Compiler считает мутацию ref во время
+  // рендера нечистым действием (react(refs)), хотя переприсваивание тут не влияет на текущий
+  // рендер — оно только готовит значение для следующего чтения из коллбэка.
   const patchRef = useRef(patch)
-  patchRef.current = patch
   const fmPatchRef = useRef(fmPatch)
-  fmPatchRef.current = fmPatch
   const drumPatchRef = useRef(drumPatch)
-  drumPatchRef.current = drumPatch
   const engineTypeRef = useRef(engineType)
-  engineTypeRef.current = engineType
+  useEffect(() => {
+    patchRef.current = patch
+    fmPatchRef.current = fmPatch
+    drumPatchRef.current = drumPatch
+    engineTypeRef.current = engineType
+  })
   // Счётчик ударов для VJ-режима: растёт на каждую живую ноту/пэд, читается прямо в rAF-цикле
   // спин-графа (SpinGraphCanvas) — без setState, чтобы не дёргать рендер студии на каждый удар
   const vjPulseRef = useRef(0)
@@ -131,6 +136,7 @@ export function StudioClient() {
   )
 
   const sequencer = useDrumSequencer({
+    drumPatch,
     drumEngineRef,
     drumPatchRef,
     setDrumPatch,
@@ -642,7 +648,7 @@ export function StudioClient() {
               {recording.recordingUrl && !recording.isRecording && (
                 <a
                   href={recording.recordingUrl}
-                  download={`synth-take-${Date.now()}.webm`}
+                  download={recording.downloadName ?? undefined}
                   style={{ fontSize: '9px', color: '#7fd88f', letterSpacing: '0.04em' }}
                 >
                   ↓ скачать запись
@@ -667,7 +673,7 @@ export function StudioClient() {
               {wavRender.status === 'done' && wavRender.url && (
                 <a
                   href={wavRender.url}
-                  download={`synth-render-${Date.now()}.wav`}
+                  download={wavRender.downloadName ?? undefined}
                   style={{ fontSize: '9px', color: '#7fd88f', letterSpacing: '0.04em' }}
                 >
                   ↓ скачать .wav
@@ -780,6 +786,7 @@ export function StudioClient() {
             onSelectDevice={hardwareRecording.setSelectedDeviceId}
             isRecording={hardwareRecording.isRecording}
             recordingUrl={hardwareRecording.recordingUrl}
+            downloadName={hardwareRecording.downloadName}
             error={hardwareRecording.error}
             onRefreshDevices={() => void hardwareRecording.refreshDevices()}
             onToggle={hardwareRecording.toggle}
@@ -801,6 +808,7 @@ export function StudioClient() {
             level={voiceChain.level}
             isRecording={voiceChain.isRecording}
             recordingUrl={voiceChain.recordingUrl}
+            downloadName={voiceChain.downloadName}
             onToggleRecording={voiceChain.toggleRecording}
           />
         )}

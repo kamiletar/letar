@@ -61,8 +61,12 @@ export function SpinGraphCanvas({
 }: SpinGraphCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const rafRef = useRef<number | null>(null)
+  // activeNoteCountRef — читается только из rAF-цикла ниже (не в рендере), запись перенесена
+  // в эффект (react(refs)).
   const activeNoteCountRef = useRef(activeNoteCount)
-  activeNoteCountRef.current = activeNoteCount
+  useEffect(() => {
+    activeNoteCountRef.current = activeNoteCount
+  })
 
   useEffect(() => {
     const maybeCanvas = canvasRef.current

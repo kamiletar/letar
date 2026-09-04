@@ -34,8 +34,14 @@ export function useTeleprompter(): Teleprompter {
   const rafRef = useRef<number | null>(null)
   const speedRef = useRef(speed)
 
+  // Нельзя перенести в useState(() => ...): loadTeleprompterLyrics/loadTeleprompterSpeed читают
+  // localStorage, значение на сервере и при первом клиентском рендере обязано совпадать
+  // ('' / DEFAULT_TELEPROMPTER_SPEED), иначе hydration mismatch; реальное значение подтягивается
+  // уже после гидратации, намеренно.
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- см. комментарий выше useEffect
     setLyricsState(loadTeleprompterLyrics())
+    // oxlint-disable-next-line react/set-state-in-effect -- см. комментарий выше useEffect
     setSpeedState(loadTeleprompterSpeed())
   }, [])
 

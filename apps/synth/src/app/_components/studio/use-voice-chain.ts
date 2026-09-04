@@ -34,6 +34,10 @@ export function useVoiceChain(masterBus: MasterBus | null) {
   const [level, setLevel] = useState<LevelReading>(EMPTY_LEVEL)
   const [isRecording, setIsRecording] = useState(false)
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null)
+  // Имя файла для скачивания — фиксируется один раз, в момент готовности записи (внутри
+  // колбэка recorder.stop().then, не в рендере компонента): Date.now() там — обычный
+  // обработчик события, а не чтение времени во время рендера (react(purity)).
+  const [downloadName, setDownloadName] = useState<string | null>(null)
 
   const streamRef = useRef<MediaStream | null>(null)
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null)
@@ -141,11 +145,13 @@ export function useVoiceChain(masterBus: MasterBus | null) {
           }
           return URL.createObjectURL(blob)
         })
+        setDownloadName(`synth-voice-${Date.now()}.webm`)
       })
       setIsRecording(false)
     } else {
       recorder.start()
       setRecordingUrl(null)
+      setDownloadName(null)
       setIsRecording(true)
     }
   }, [masterBus])
@@ -169,6 +175,7 @@ export function useVoiceChain(masterBus: MasterBus | null) {
     level,
     isRecording,
     recordingUrl,
+    downloadName,
     toggleRecording,
   }
 }

@@ -19,6 +19,9 @@ function emptySequence(): SequencerPattern {
 }
 
 interface UseDrumSequencerOptions {
+  // Живое значение для рендера (checkbox-сетка, bpm/swing-ручки) — в отличие от drumPatchRef,
+  // реактивно и не требует эффекта, чтобы попасть в текущий рендер.
+  drumPatch: DrumkitPatch
   drumEngineRef: RefObject<DrumEngine | null>
   drumPatchRef: RefObject<DrumkitPatch>
   setDrumPatch: Dispatch<SetStateAction<DrumkitPatch>>
@@ -34,13 +37,16 @@ interface UseDrumSequencerOptions {
 // по аудио-часам). Паттерн хранится прямо в `drumPatch.engine.sequence` — сохраняется/грузится
 // через обычный поток PatchLibrary (IndexedDB), отдельного стораджа для секвенсора не заводили.
 export function useDrumSequencer({
+  drumPatch,
   drumEngineRef,
   drumPatchRef,
   setDrumPatch,
   onPadHit,
   onBeat,
 }: UseDrumSequencerOptions) {
-  const sequence = drumPatchRef.current.engine.sequence ?? emptySequence()
+  // Читаем живой drumPatch (проп), не drumPatchRef — иначе значения для рендера (сетка,
+  // bpm/swing) отставали бы на один коммит от reference-зеркала, которое обновляется в эффекте.
+  const sequence = drumPatch.engine.sequence ?? emptySequence()
   const pattern = sequence.pattern
   const bpm = sequence.bpm
   const swing = sequence.swing ?? 0
@@ -48,8 +54,12 @@ export function useDrumSequencer({
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentStep, setCurrentStep] = useState(-1)
 
+  // patternRef — читается только из handleStep (аудио-коллбэк планировщика, не рендер),
+  // поэтому запись перенесена в эффект (react(refs)).
   const patternRef = useRef(pattern)
-  patternRef.current = pattern
+  useEffect(() => {
+    patternRef.current = pattern
+  })
   const schedulerRef = useRef<StepSequencer | null>(null)
 
   const handleStep = useCallback(

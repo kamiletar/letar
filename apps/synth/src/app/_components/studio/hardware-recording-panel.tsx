@@ -11,6 +11,8 @@ interface HardwareRecordingPanelProps {
   onSelectDevice: (deviceId: string) => void
   isRecording: boolean
   recordingUrl: string | null
+  /** Имя файла для скачивания — уже зафиксировано хуком в момент готовности записи */
+  downloadName: string | null
   error: string | null
   onRefreshDevices: () => void
   onToggle: () => void
@@ -34,6 +36,7 @@ export function HardwareRecordingPanel({
   onSelectDevice,
   isRecording,
   recordingUrl,
+  downloadName,
   error,
   onRefreshDevices,
   onToggle,
@@ -86,7 +89,7 @@ export function HardwareRecordingPanel({
               {recordingUrl && !isRecording && (
                 <a
                   href={recordingUrl}
-                  download={`synth-hardware-${Date.now()}.webm`}
+                  download={downloadName ?? undefined}
                   style={{ fontSize: '9px', color: '#7fd88f', letterSpacing: '0.04em' }}
                 >
                   ↓ скачать запись

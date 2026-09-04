@@ -13,6 +13,10 @@ export function useExternalAudioInput() {
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null)
   const [active, setActive] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // `analyser` живёт в state, а не читается напрямую из inputRef.current при каждом рендере —
+  // иначе возвращаемое значение хука менялось бы без предсказуемого триггера ре-рендера
+  // (react(refs): чтение ref в теле компонента считается нечистым).
+  const [analyser, setAnalyser] = useState<AnalyserNode | null>(null)
   const inputRef = useRef<ExternalAudioInput | null>(null)
 
   const refreshDevices = useCallback(async () => {
@@ -34,6 +38,7 @@ export function useExternalAudioInput() {
       const input = new ExternalAudioInput(getAudioContext())
       await input.start(selectedDeviceId)
       inputRef.current = input
+      setAnalyser(input.analyser)
       setActive(true)
       setError(null)
     } catch (err) {
@@ -44,6 +49,7 @@ export function useExternalAudioInput() {
   const stop = useCallback(() => {
     inputRef.current?.stop()
     inputRef.current = null
+    setAnalyser(null)
     setActive(false)
   }, [])
 
@@ -67,6 +73,6 @@ export function useExternalAudioInput() {
     error,
     refreshDevices,
     toggle,
-    analyser: inputRef.current?.analyser ?? null,
+    analyser,
   }
 }

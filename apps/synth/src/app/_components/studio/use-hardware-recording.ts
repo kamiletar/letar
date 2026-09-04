@@ -12,6 +12,10 @@ export function useHardwareRecording() {
   const [isRecording, setIsRecording] = useState(false)
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  // Имя файла для скачивания — фиксируется один раз, в момент готовности записи (внутри
+  // колбэка recorder.stop().then, не в рендере компонента): Date.now() там — обычный
+  // обработчик события, а не чтение времени во время рендера (react(purity)).
+  const [downloadName, setDownloadName] = useState<string | null>(null)
 
   const refreshDevices = useCallback(async () => {
     setError(null)
@@ -37,6 +41,7 @@ export function useHardwareRecording() {
           }
           return URL.createObjectURL(blob)
         })
+        setDownloadName(`synth-hardware-${Date.now()}.webm`)
       })
       setIsRecording(false)
       return
@@ -50,6 +55,7 @@ export function useHardwareRecording() {
       .start(selectedDeviceId)
       .then(() => {
         setRecordingUrl(null)
+        setDownloadName(null)
         setIsRecording(true)
       })
       .catch((err) => {
@@ -69,6 +75,7 @@ export function useHardwareRecording() {
     setSelectedDeviceId,
     isRecording,
     recordingUrl,
+    downloadName,
     error,
     refreshDevices,
     toggle,

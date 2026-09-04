@@ -1,7 +1,7 @@
 'use client'
 
 import type { ArpeggiatorParams, FmPatch, MelodicSequence, SubtractivePatch } from '@/lib/patch/schema'
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useArpeggiator } from './use-arpeggiator'
 import { emptyMelodicSequence, usePianoRoll } from './use-piano-roll'
 
@@ -37,8 +37,9 @@ export function useMelodicPerformance({
   clearActiveNotes,
   onBeat,
 }: UseMelodicPerformanceOptions) {
+  // Ref-зеркала — читаются из аудио-коллбэков вне рендера, запись перенесена в эффект
+  // (react(refs): мутация ref в теле компонента считается нечистой).
   const engineTypeRef = useRef(engineType)
-  engineTypeRef.current = engineType
 
   // Арпеджиатор активен только для текущего движка (SUB/FM)
   const currentArp = engineType === 'fm'
@@ -48,7 +49,10 @@ export function useMelodicPerformance({
     : DEFAULT_ARP
   const arpeggiator = useArpeggiator({ params: currentArp, noteOn: soundNoteOn, noteOff: soundNoteOff })
   const arpEnabledRef = useRef(currentArp.enabled)
-  arpEnabledRef.current = currentArp.enabled
+  useEffect(() => {
+    engineTypeRef.current = engineType
+    arpEnabledRef.current = currentArp.enabled
+  })
 
   const setArp = useCallback(
     (updater: (prev: ArpeggiatorParams) => ArpeggiatorParams) => {

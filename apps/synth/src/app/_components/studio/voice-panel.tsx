@@ -22,6 +22,7 @@ interface VoicePanelProps {
   level: LevelReading
   isRecording: boolean
   recordingUrl: string | null
+  downloadName: string | null
   onToggleRecording: () => void
 }
 
@@ -67,6 +68,7 @@ export function VoicePanel({
   level,
   isRecording,
   recordingUrl,
+  downloadName,
   onToggleRecording,
 }: VoicePanelProps) {
   const setCompressor = (k: keyof VoiceChainParams['compressor'], v: number) =>
@@ -236,7 +238,7 @@ export function VoicePanel({
             {recordingUrl && !isRecording && (
               <a
                 href={recordingUrl}
-                download={`synth-voice-${Date.now()}.webm`}
+                download={downloadName ?? undefined}
                 style={{ fontSize: '9px', color: '#7fd88f', letterSpacing: '0.04em' }}
               >
                 ↓ скачать дубль

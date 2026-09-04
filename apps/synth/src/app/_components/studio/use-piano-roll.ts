@@ -30,14 +30,19 @@ export function usePianoRoll({ sequence, setSequence, noteOn, noteOff, onBeat }:
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentStep, setCurrentStep] = useState(-1)
 
+  // Ref-зеркала последних значений — читаются из аудио-коллбэков секвенсора (не в рендере),
+  // поэтому запись в них перенесена в эффект (react(refs): мутация ref в теле компонента
+  // считается нечистой, хотя на текущий рендер она не влияет).
   const sequenceRef = useRef(current)
-  sequenceRef.current = current
   const noteOnRef = useRef(noteOn)
-  noteOnRef.current = noteOn
   const noteOffRef = useRef(noteOff)
-  noteOffRef.current = noteOff
   const onBeatRef = useRef(onBeat)
-  onBeatRef.current = onBeat
+  useEffect(() => {
+    sequenceRef.current = current
+    noteOnRef.current = noteOn
+    noteOffRef.current = noteOff
+    onBeatRef.current = onBeat
+  })
   const schedulerRef = useRef<MelodicSequencer | null>(null)
 
   useEffect(() => {

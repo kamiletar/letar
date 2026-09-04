@@ -73,6 +73,11 @@ export function useMasterBus(patch: SubtractivePatch, patchRef: RefObject<Subtra
     if (!bus) {
       return
     }
+    // `bus` хранит живые Web Audio узлы (внешняя система), не React-данные; `.gain.value` —
+    // штатный способ менять громкость audio-графа в реальном времени, замена узла целиком
+    // тут не нужна и не имеет смысла.
+    // eslint-disable-next-line react/immutability
+    // oxlint-disable-next-line react/immutability
     bus.reverbWet.gain.value = patch.engine.fx.reverb.wet
   }, [bus, patch.engine.fx.reverb.wet])
 

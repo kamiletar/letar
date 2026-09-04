@@ -28,10 +28,14 @@ export function useMentorEvents({ onLoadPatch, onMidiSequence }: UseMentorEvents
   const [focusSection, setFocusSection] = useState<MentorFocusSection>(null)
   const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Ref-зеркала — читаются из SSE-обработчика (не в рендере), запись перенесена в эффект
+  // (react(refs): мутация ref в теле компонента считается нечистой).
   const onLoadPatchRef = useRef(onLoadPatch)
-  onLoadPatchRef.current = onLoadPatch
   const onMidiSequenceRef = useRef(onMidiSequence)
-  onMidiSequenceRef.current = onMidiSequence
+  useEffect(() => {
+    onLoadPatchRef.current = onLoadPatch
+    onMidiSequenceRef.current = onMidiSequence
+  })
 
   useEventSource({
     url: '/api/mentor/events/',
@@ -96,8 +100,12 @@ export function useMentorEvents({ onLoadPatch, onMidiSequence }: UseMentorEvents
 /** Репортит текущее состояние студии на сервер (heartbeat) — читает MCP-ресурс daw://current-state */
 export function useMentorStateReport(report: MentorStateReport) {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // reportRef — читается только из отложенного fetch внутри setTimeout (не в рендере),
+  // запись перенесена в отдельный эффект (react(refs)).
   const reportRef = useRef(report)
-  reportRef.current = report
+  useEffect(() => {
+    reportRef.current = report
+  })
 
   useEffect(() => {
     if (timeoutRef.current) {
