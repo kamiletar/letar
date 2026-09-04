@@ -31,6 +31,16 @@ export function AudioUploader() {
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const addFiles = useCallback((files: File[]) => {
+    const newFiles: QueuedFile[] = files.map((file) => ({
+      id: `${Date.now()}-${Math.random().toString(36).substring(7)}`,
+      file,
+      title: titleFromFilename(file.name),
+      status: 'pending',
+    }))
+    setQueue((prev) => [...prev, ...newFiles])
+  }, [])
+
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     setIsDragging(true)
@@ -46,13 +56,13 @@ export function AudioUploader() {
     setIsDragging(false)
     const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith('audio/'))
     addFiles(files)
-  }, [])
+  }, [addFiles])
 
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []).filter((f) => f.type.startsWith('audio/'))
     addFiles(files)
     e.target.value = ''
-  }, [])
+  }, [addFiles])
 
   /** Ctrl+V — вставка файлов из буфера обмена */
   useEffect(() => {
@@ -66,17 +76,7 @@ export function AudioUploader() {
 
     document.addEventListener('paste', handlePaste)
     return () => document.removeEventListener('paste', handlePaste)
-  })
-
-  const addFiles = (files: File[]) => {
-    const newFiles: QueuedFile[] = files.map((file) => ({
-      id: `${Date.now()}-${Math.random().toString(36).substring(7)}`,
-      file,
-      title: titleFromFilename(file.name),
-      status: 'pending',
-    }))
-    setQueue((prev) => [...prev, ...newFiles])
-  }
+  }, [addFiles])
 
   const updateTitle = (id: string, title: string) => {
     setQueue((prev) => prev.map((f) => (f.id === id ? { ...f, title } : f)))

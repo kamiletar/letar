@@ -45,6 +45,9 @@ export function AudioSpectrumVisualizer({
   const columnRecipeRef = useRef<number[]>([])
   /** Позиция внутри текста рецепта для каждого столбца */
   const columnCharIdxRef = useRef<number[]>([])
+  /** Последняя версия `draw` — рекурсивный вызов идёт через ref, а не через саму `draw`,
+   * чтобы не читать переменную во время её собственной инициализации (react/immutability). */
+  const drawRef = useRef<() => void>(() => {})
 
   /** Инициализация столбцов — каждому назначается случайный рецепт (как на главной) */
   const initColumns = useCallback((columns: number) => {
@@ -57,7 +60,7 @@ export function AudioSpectrumVisualizer({
     const canvas = canvasRef.current
     const analyzer = getAnalyzer()
     if (!canvas || !analyzer) {
-      animationFrameRef.current = requestAnimationFrame(draw)
+      animationFrameRef.current = requestAnimationFrame(() => drawRef.current())
       return
     }
 
@@ -118,8 +121,12 @@ export function AudioSpectrumVisualizer({
       ctx.fillText(char, x, targetY)
     }
 
-    animationFrameRef.current = requestAnimationFrame(draw)
+    animationFrameRef.current = requestAnimationFrame(() => drawRef.current())
   }, [color, fontSize, fadeOpacity, bgRgb, initColumns, getAnalyzer])
+
+  useEffect(() => {
+    drawRef.current = draw
+  }, [draw])
 
   /** Запуск/остановка анимации */
   useEffect(() => {

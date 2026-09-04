@@ -32,6 +32,18 @@ export function ImageUploader() {
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const addFiles = useCallback((files: File[]) => {
+    const newFiles: QueuedFile[] = files.map((file) => ({
+      id: `${Date.now()}-${Math.random().toString(36).substring(7)}`,
+      file,
+      preview: URL.createObjectURL(file),
+      status: 'pending',
+      progress: 0,
+    }))
+
+    setQueue((prev) => [...prev, ...newFiles])
+  }, [])
+
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     setIsDragging(true)
@@ -48,26 +60,14 @@ export function ImageUploader() {
 
     const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith('image/'))
     addFiles(files)
-  }, [])
+  }, [addFiles])
 
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []).filter((f) => f.type.startsWith('image/'))
     addFiles(files)
     // Сбрасываем input для повторного выбора тех же файлов
     e.target.value = ''
-  }, [])
-
-  const addFiles = (files: File[]) => {
-    const newFiles: QueuedFile[] = files.map((file) => ({
-      id: `${Date.now()}-${Math.random().toString(36).substring(7)}`,
-      file,
-      preview: URL.createObjectURL(file),
-      status: 'pending',
-      progress: 0,
-    }))
-
-    setQueue((prev) => [...prev, ...newFiles])
-  }
+  }, [addFiles])
 
   const removeFromQueue = (id: string) => {
     setQueue((prev) => {

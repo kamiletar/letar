@@ -35,6 +35,9 @@ export function AudioSpectrogram({
 }: AudioSpectrogramProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationFrameRef = useRef<number | null>(null)
+  /** Последняя версия `draw` — рекурсивный вызов идёт через ref, а не через саму `draw`,
+   * чтобы не читать переменную во время её собственной инициализации (react/immutability). */
+  const drawRef = useRef<() => void>(() => {})
 
   // Парсим hex цвет в RGB для градиента
   const colorRgb = useRef({ r: 0, g: 255, b: 65 })
@@ -52,7 +55,7 @@ export function AudioSpectrogram({
     const canvas = canvasRef.current
     const analyzer = getAnalyzer()
     if (!canvas || !analyzer) {
-      animationFrameRef.current = requestAnimationFrame(draw)
+      animationFrameRef.current = requestAnimationFrame(() => drawRef.current())
       return
     }
 
@@ -100,8 +103,12 @@ export function AudioSpectrogram({
       }
     }
 
-    animationFrameRef.current = requestAnimationFrame(draw)
+    animationFrameRef.current = requestAnimationFrame(() => drawRef.current())
   }, [getAnalyzer, lightMode])
+
+  useEffect(() => {
+    drawRef.current = draw
+  }, [draw])
 
   /** Запуск/остановка анимации */
   useEffect(() => {
