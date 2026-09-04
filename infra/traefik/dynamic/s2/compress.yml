@@ -1,8 +1,18 @@
 # Сжатие статики (gzip/brotli/zstd) — PLAN-INFRA-2.md §48 M3, пункт 3 чек-листа.
 # Подключается глобально на entrypoint websecure (traefik.s2.yml), а не per-router —
 # закрывает разом категорию багов, где у части хостов NPM на s2 сжатие не было включено.
+#
+# ⚠️ encodings ЯВНО, порядок важен. Без него дефолтный порядок Traefik compress middleware
+# ставит gzip раньше br — при обычном браузерном заголовке `Accept-Encoding: br, gzip`
+# (порядок в заголовке ничего не значит без q-значений) сервер всегда выбирал gzip, хотя
+# brotli был технически доступен (curl с `Accept-Encoding: br` без gzip отдавал br честно).
+# Обнаружено 2026-09-04: все ресурсы уходили только gzip несмотря на `br` в заголовке браузера.
 
 http:
   middlewares:
     compress:
-      compress: {}
+      compress:
+        encodings:
+          - 'br'
+          - 'zstd'
+          - 'gzip'
