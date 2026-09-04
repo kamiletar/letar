@@ -10,13 +10,11 @@ import { useState } from 'react'
 import { DemoPageLayout, SubmittedDataPreview } from '../_components'
 
 /**
- * Демонстрация Фазы 3 миграции zenstack-form-plugin (v3.0.0): `@meta("form.*", …)` как основной
- * синтаксис вместо comment-директив `@form.*`.
+ * Демонстрация Фазы 3→4 миграции zenstack-form-plugin (v3.0.0 → v4.0.0): `@meta("form.*", …)` —
+ * единственный синтаксис, legacy comment-директивы `@form.*` убраны из парсера целиком в v4.0.0.
  *
  * Схема ниже — РЕАЛЬНО СГЕНЕРИРОВАННЫЙ `MetaSyntaxDemoCreateFormSchema` (модель `MetaSyntaxDemo`
- * в `schema.zmodel`). Поле `legacyNote` намеренно оставлено на старом `@form.title` — при
- * `nx zenstack:generate` печатается deprecation-warning в консоль, но сборка не ломается: оба
- * синтаксиса работают одновременно.
+ * в `schema.zmodel`).
  */
 const initialValue: MetaSyntaxDemoCreateForm = {
   name: '',
@@ -34,8 +32,8 @@ export default function MetaSyntaxDemoPage() {
 
   return (
     <DemoPageLayout
-      title="Meta Syntax Demo (Фаза 3)"
-      description="@meta('form.*', …) вместо @form.*-комментария. Объектные литералы в @meta ломают zenstack generate целиком (ObjectExpr не поддержан upstream) — поэтому form.props.* задаётся плоским точечным путём, не объектом."
+      title="Meta Syntax Demo (Фаза 3→4)"
+      description="@meta('form.*', …) — единственный синтаксис (legacy @form.*-комментарии убраны в v4.0.0). Объектные литералы в @meta ломают zenstack generate целиком (ObjectExpr не поддержан upstream) — поэтому form.props.* задаётся плоским точечным путём, не объектом."
       maxW="800px"
     >
       <Form initialValue={initialValue} schema={MetaSyntaxDemoCreateFormSchema} onSubmit={handleSubmit}>
@@ -64,8 +62,8 @@ export default function MetaSyntaxDemoPage() {
           <Box>
             <Form.Field.String name="legacyNote" />
             <Code fontSize="xs" mt={1}>
-              /// @form.title("Заметка (legacy)") — старый comment-синтаксис, при generate печатает deprecation-warning
-              в консоль, но продолжает работать
+              @meta("form.title", "Заметка (раньше — legacy-синтаксис)") — до v4.0.0 это поле было на старом
+              comment-синтаксисе @form.title(...)
             </Code>
           </Box>
 

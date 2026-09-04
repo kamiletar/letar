@@ -210,10 +210,10 @@ model Booking {
   @@allow('all', true)
 }
 
-/// Демо Фазы 3 (v3.0.0): `@meta("form.*", …)` как основной синтаксис вместо comment-директив
-/// `@form.*`. `legacyNote` намеренно оставлено на старом `@form.title` — показывает, что оба
-/// синтаксиса продолжают работать одновременно (обратная совместимость), и что генератор
-/// печатает deprecation-warning в консоль (не ломает сборку) именно для этого поля.
+/// Демо Фазы 3→4 (v3.0.0 → v4.0.0): `@meta("form.*", …)` — единственный синтаксис.
+/// До v4.0.0 здесь также демонстрировался старый comment-синтаксис `@form.*` на поле
+/// `legacyNote` (обратная совместимость + deprecation-warning) — в Фазе 4 legacy-парсер убран
+/// целиком, поле переведено на `@meta` вместе со всеми остальными.
 model MetaSyntaxDemo {
   id          String @id @default(cuid())
 
@@ -228,11 +228,9 @@ model MetaSyntaxDemo {
 
   bio         String? @meta("form.description", "Описание") @meta("form.fieldType", "textarea")
 
-  /// @form.title("Заметка (legacy)")
-  /// Поле намеренно НЕ переведено на @meta — единственное, что осталось на старом синтаксисе
-  /// во всей экосистеме form-develop-app/form-example, чтобы demo показывал живой
-  /// deprecation-warning в консоли `nx zenstack:generate`, не описание постфактум.
-  legacyNote  String?
+  /// До v4.0.0 — старый comment-синтаксис `@form.title("Заметка (legacy)")`. Убран в Фазе 4
+  /// вместе с самим парсером — переведено на `@meta`, как и всё остальное.
+  legacyNote  String? @meta("form.title", "Заметка (раньше — legacy-синтаксис)")
 
   hidden      String? @meta("form.exclude", true)
 
