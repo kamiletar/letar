@@ -47,8 +47,11 @@ export function useLocalStorage<T>(
   // DOM с чужим значением (см. .claude/docs/ssr-hydration-persisted-state.md)
   const [storedValue, setStoredValue] = useState<T>(initialValue)
 
-  // Синхронизация при монтировании (уже после гидратации)
+  // Синхронизация при монтировании (уже после гидратации) — намеренно синхронный
+  // setState в эффекте: readValue() читает внешнюю систему (localStorage),
+  // а не производится из props/state, доступных на момент рендера
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect
     setStoredValue(readValue())
   }, [readValue])
 

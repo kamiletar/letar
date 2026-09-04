@@ -44,7 +44,9 @@ export function usePolledData<T>(fetchFn: () => Promise<T>, options: UsePolledDa
   // fetchFn может пересоздаваться на каждый рендер вызывающего компонента —
   // держим последнюю версию в ref, чтобы не пересоздавать интервал/листенер
   const fetchFnRef = useRef(fetchFn)
-  fetchFnRef.current = fetchFn
+  useEffect(() => {
+    fetchFnRef.current = fetchFn
+  }, [fetchFn])
 
   const load = useCallback(async () => {
     try {

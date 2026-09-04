@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useSyncExternalStore } from 'react'
 
 /**
  * Хук для отслеживания CSS media query
@@ -23,31 +23,33 @@ import { useEffect, useState } from 'react'
  * ```
  */
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(false)
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => {
+      if (typeof window === 'undefined') {
+        return () => {}
+      }
 
-  useEffect(() => {
+      const mediaQuery = window.matchMedia(query)
+      mediaQuery.addEventListener('change', onStoreChange)
+
+      return () => {
+        mediaQuery.removeEventListener('change', onStoreChange)
+      }
+    },
+    [query],
+  )
+
+  const getSnapshot = useCallback(() => {
     if (typeof window === 'undefined') {
-      return
+      return false
     }
 
-    const mediaQuery = window.matchMedia(query)
-
-    // Установить начальное значение
-    setMatches(mediaQuery.matches)
-
-    // Слушать изменения
-    const handler = (event: MediaQueryListEvent) => {
-      setMatches(event.matches)
-    }
-
-    mediaQuery.addEventListener('change', handler)
-
-    return () => {
-      mediaQuery.removeEventListener('change', handler)
-    }
+    return window.matchMedia(query).matches
   }, [query])
 
-  return matches
+  const getServerSnapshot = useCallback(() => false, [])
+
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 }
 
 // Предопределённые breakpoints (соответствуют Chakra UI)

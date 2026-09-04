@@ -1,6 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
+
+const subscribeNoop = () => () => {}
+const getServerSnapshot = () => ''
+const getClientSnapshot = () => window.location.origin
 
 /**
  * `window.location.origin` известен только клиенту — до монтирования возвращает
@@ -15,11 +19,5 @@ import { useEffect, useState } from 'react'
  * ```
  */
 export function useClientOrigin(): string {
-  const [origin, setOrigin] = useState('')
-
-  useEffect(() => {
-    setOrigin(window.location.origin)
-  }, [])
-
-  return origin
+  return useSyncExternalStore(subscribeNoop, getClientSnapshot, getServerSnapshot)
 }

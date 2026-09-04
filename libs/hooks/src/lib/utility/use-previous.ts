@@ -26,5 +26,10 @@ export function usePrevious<T>(value: T): T | undefined {
     ref.current = value
   }, [value])
 
+  // Намеренное чтение ref во время рендера: назначение хука — вернуть значение,
+  // зафиксированное ПРЕДЫДУЩИМ рендером, до того как эффект выше его обновит.
+  // "Adjusting state during render" здесь не эквивалентно (ломает семантику при
+  // повторяющихся одинаковых значениях, см. use-previous.spec.ts)
+  // oxlint-disable-next-line react/refs
   return ref.current
 }

@@ -28,8 +28,8 @@ export function useThrottle<T extends (...args: unknown[]) => void>(callback: T,
   const lastRun = useRef(0)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  return useCallback(
-    ((...args: unknown[]) => {
+  const throttled = useCallback(
+    (...args: unknown[]) => {
       const now = Date.now()
 
       if (now - lastRun.current >= delay) {
@@ -48,7 +48,9 @@ export function useThrottle<T extends (...args: unknown[]) => void>(callback: T,
           delay - (now - lastRun.current),
         )
       }
-    }) as T,
+    },
     [callback, delay],
   )
+
+  return throttled as T
 }

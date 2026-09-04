@@ -1,7 +1,7 @@
 'use client'
 
 import type { DependencyList } from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 /**
  * Результат хука useApiSuggestions
@@ -45,9 +45,6 @@ export function useApiSuggestions<T>(
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
 
-  // Мемоизируем fetchFn, чтобы предотвратить бесконечные циклы (dependencies переданы явно)
-  const stableFetchFn = useCallback(fetchFn, dependencies)
-
   useEffect(() => {
     let cancelled = false
 
@@ -55,7 +52,7 @@ export function useApiSuggestions<T>(
       setIsLoading(true)
       setError(null)
       try {
-        const result = await stableFetchFn()
+        const result = await fetchFn()
         if (!cancelled) {
           setData(result)
         }
@@ -75,7 +72,9 @@ export function useApiSuggestions<T>(
     return () => {
       cancelled = true
     }
-  }, [stableFetchFn])
+    // dependencies — динамический список от вызывающего кода, не литерал массива по построению
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, dependencies)
 
   return { data, isLoading, error }
 }
