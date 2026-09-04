@@ -82,12 +82,19 @@
       завис на wait-healthy zero-downtime rollout и был отменён вручную (прод не пострадал,
       старый контейнер остался healthy). Заменено на встроенный `http`-модуль Node без внешних
       зависимостей (коммит `02cc27ca`).
-- [ ] ⚠️ Открытый вопрос: deploy-request на передеплой `time` (production, коммит `02cc27ca`,
-      thread `deploy-request: time` в Agent Mail) отправлен `deploy-agent-dev` 2026-09-04
-      21:38:13Z и на момент завершения сессии (~22:15Z, >35 минут) остался без ответа —
-      статус нового healthcheck на реальном контейнере не подтверждён. Следующей сессии: сверить
-      `fetch_inbox`/`search_messages` по этому thread, при отсутствии ответа — переспросить
-      deploy-agent-dev или задеплоить вручную с одобрения владельца.
+- [x] Deploy-request на передеплой (коммит `02cc27ca`, healthcheck-фикс) выявил ВТОРОЙ, отдельный
+      баг того же класса — smoke-test rollout (не healthcheck, `libs/deploy-engine/src/rollout.ts`)
+      тоже дёргал `wget` внутри контейнера, тоже падал `executable file not found in $PATH` на
+      `node:24-slim`. Контейнер был реально healthy, но rollout всё равно откатывался на шаге
+      smoke-test — `time` не мог выкатить ни одной версии, пока не починен и этот шаг. Заменено
+      на `docker exec ... node -e` (см. [PLAN-INFRA-6.md §153](/PLAN-INFRA-6.md#§153) — фикс
+      кросс-приложенческий, в `libs/deploy-engine`, не только про `time`). Коммит `51465453`.
+- [ ] ⚠️ Открытый вопрос: новый deploy-request на передеплой `time` (production, коммит
+      `51465453`, thread `deploy-time` в Agent Mail) отправлен `deploy-agent-dev` 2026-09-04
+      22:08:32Z. Следующей сессии: сверить `fetch_inbox`/`search_messages` по этому thread —
+      прошёл ли rollout целиком (включая smoke-test) на реальном контейнере; если деплой всё ещё
+      не прошёл — проверять `docker inspect`/логи контейнера на s2 на предмет ещё одной утилиты,
+      отсутствующей в `node:24-slim` (та же природа бага, что уже дважды всплывала).
 
 ---
 

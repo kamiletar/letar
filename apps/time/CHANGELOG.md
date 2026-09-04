@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.15 (2026-09-04)
+
+### Fixed
+
+- Zero-downtime rollout (`libs/deploy-engine`) откатывался на шаге smoke-test — тот же класс
+  бага, что healthcheck выше, но в другом месте: `docker exec ... wget` внутри контейнера, а
+  `wget` нет в `node:24-slim`. Контейнер был реально healthy (healthcheck-фикс уже сработал), но
+  rollout всё равно останавливался на `smoke-test` с `executable file not found in $PATH`.
+  Заменено на `docker exec ... node -e` в самом `libs/deploy-engine` (не в `apps/time`) —
+  подробности `PLAN-INFRA-6.md §153`.
+
 ## 0.5.14 (2026-09-04)
 
 ### Fixed
