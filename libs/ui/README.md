@@ -713,6 +713,33 @@ import { CopyToClipboardButton } from '@letar/ui'
 <CopyToClipboardButton text={() => window.location.href} label="Скопировать ссылку" />
 ```
 
+### createAppToaster
+
+Фабрика toaster-инстанса + компонента (`createToaster()` + `Portal`>`ChakraToaster` JSX-обёртка,
+стандартный сниппет `npx @chakra-ui/cli snippet add toaster`). Вынесена после того, как этот
+сниппет был независимо продублирован минимум в 12 приложениях монорепо с расхождениями в
+`placement`/`max`/наличии `Spinner` для loading-тоста/источнике `closable`-флага/наличии `Portal`.
+
+```tsx
+import { createAppToaster } from '@letar/ui'
+
+export const { toaster, Toaster } = createAppToaster({
+  toasterOptions: { placement: 'bottom-end', pauseOnPageIdle: true, max: 5 },
+  // SSR-приложения (Next.js) — waitForHydration: true снимает риск hydration mismatch
+  waitForHydration: true,
+  // если приложение показывает loading-тосты и кнопку действия
+  showLoadingSpinner: true,
+  showActionButton: true,
+  // источник closable-флага расходится по приложениям: toast.closable / toast.meta?.closable / всегда true
+  isClosable: (toast) => Boolean(toast.closable),
+})
+```
+
+`withPortal: false` + `insetInline: undefined` + `rootProps: { minW: '300px', maxW: '400px' }` —
+вариант без `Portal` (найден в dsperevod/grandslamcup/archetest, функция экспортировалась как
+`AppToaster`, не `Toaster` — переименовать можно через деструктуризацию:
+`const { toaster, Toaster: AppToaster } = createAppToaster(...)`).
+
 ## Утилиты
 
 ### chakraColorVar
