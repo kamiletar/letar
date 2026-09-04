@@ -124,6 +124,11 @@ append-only лог событий без статусного поля — те�
 [zenstack-multifile-schema-circular-imports](/.claude/docs/zenstack-multifile-schema-circular-imports.md)
 декомпозиция `schema.zmodel` на файлы — циклические импорты между ними подтверждённо рабочие,
 единственная ловушка — `import` до `datasource`/`generator`/`plugin` ·
+[zmodel-comment-directives-vs-ast](/.claude/docs/zmodel-comment-directives-vs-ast.md) `@meta`
+field-атрибут (AST) vs `///`-комментарий (regex) — два независимых парсера в
+`zenstack-form-plugin`, не один общий; почему объектный литерал ломает именно `@meta` (падает в
+upstream-генераторе TS-схемы, `ObjectExpr` не поддержан), а comment-директиву — нет; почему
+кодмод построчный, не AST-based ·
 [zenstack-field-level-allow-does-not-narrow](/.claude/docs/zenstack-field-level-allow-does-not-narrow.md)
 ⚠️ field-level `@allow` только добавляет разрешение поверх модельной `@@allow`, не сужает —
 сужение только через field-level `@deny`; найдено трижды подряд (`User.roles` privilege
