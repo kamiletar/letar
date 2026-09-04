@@ -72,6 +72,12 @@ model Product {
   /// @form.props({ count: 5 })
   rating      Int      @default(0)
 
+  /// @form.title("SKU (native @startsWith/@trim/@upper)")
+  sku         String   @default("SKU-0000") @startsWith("SKU-") @trim() @upper()
+
+  /// @form.title("Website (native @url)")
+  website     String?  @url()
+
   /// @form.exclude
   createdAt   DateTime @default(now())
   /// @form.exclude

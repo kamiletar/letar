@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.7] - 2026-09-04
+
+### Added
+
+- `examples/zenstack` — `Product.sku`/`Product.website` теперь демонстрируют Фазу 1 миграции
+  `zenstack-form-plugin` (v2.4.0) на нативные ZModel-атрибуты: `@startsWith`/`@trim`/`@upper` на
+  `sku`, `@url` на `website`. Валидация целиком приходит из `schema.zmodel`, ни строчки ручного
+  Zod на этой странице.
+
 ## [0.1.6] - 2026-09-02
 
 ### Fixed

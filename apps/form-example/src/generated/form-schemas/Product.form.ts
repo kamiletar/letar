@@ -2,7 +2,16 @@
 // DO NOT EDIT MANUALLY
 
 import { z } from 'zod/v4'
+import { ZodUtils } from '@zenstackhq/zod'
 import { StatusFormSchema } from './enums/Status.form'
+
+/**
+ * Применить ZodUtils.* с сохранением конкретного типа схемы (Фаза 0 spike: без этой обёртки
+ * возвращаемый тип ZodUtils.* — базовый z.ZodSchema, и z.infer вырождается в unknown).
+ */
+function withNative<T extends z.ZodTypeAny>(schema: T, apply: (s: T) => unknown): T {
+  return apply(schema) as T
+}
 
 /**
  * Create schema for Product with UI metadata.
@@ -31,6 +40,14 @@ export const ProductCreateFormSchema = z.object({
   rating: z.number().int().default(0)
     .meta({
       ui: { title: 'Rating', fieldType: 'rating', fieldProps: {"count":5} }
+    }),
+  sku: withNative(z.string(), (s) => ZodUtils.addStringValidation(s, [{ name: '@startsWith', args: [{ name: 'text', value: { kind: 'literal', value: "SKU-" } }] }, { name: '@trim' }, { name: '@upper' }])).default('SKU-0000')
+    .meta({
+      ui: { title: 'SKU (native @startsWith/@trim/@upper)' }
+    }),
+  website: withNative(z.string(), (s) => ZodUtils.addStringValidation(s, [{ name: '@url' }])).nullable().optional()
+    .meta({
+      ui: { title: 'Website (native @url)' }
     })
 })
 
