@@ -79,6 +79,16 @@ DSN приложения выдаёт `ProjectKey` при создании пр�
 `.env.docker`/`.env.staging` через `${VAR}` (см. PLAN-INFRA.md §70 п.5), не литералом в
 `docker-compose.*.yml`.
 
+✅ **2026-09-04: бэкфилл `release` + `productionBrowserSourceMaps` на все 22 ранее подключённых
+приложения** (23-е, `studio`, было эталоном и уже имело оба с начала сессии) — `release:
+process.env.(NEXT_PUBLIC_)GLITCHTIP_RELEASE` в `instrumentation(-client).ts`,
+`GLITCHTIP_RELEASE`/`NEXT_PUBLIC_GLITCHTIP_RELEASE` в `docker-compose.production.yml` +
+`docker-compose.staging.yml` (где есть), `productionBrowserSourceMaps: true` в `next.config.*`.
+Коммиты сделаны, submodule запушены только с одобрения владельца (см. `.claude/rules/git.md`) —
+если эта строка ещё не обновлена дальше, деплой мог не состояться. `dashboard-agent` (Fastify) —
+только серверная часть (`release` в `initServer`, без sourcemaps/next.config — им неоткуда
+взяться). Подробности — `PLAN-INFRA-4.md` §70 п.6.
+
 Новое приложение подключается генератором — `nx g @letar/generators:glitchtip-integrate <app>`,
 см. `libs/glitchtip/README.md` § «Подключение к приложению».
 
