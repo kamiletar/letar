@@ -5,6 +5,13 @@ export interface InitClientOptions {
   /** DSN проекта GlitchTip, например из NEXT_PUBLIC_GLITCHTIP_DSN. Не секрет — предназначен для клиентского бандла. */
   dsn: string | undefined
   environment: string
+  /**
+   * Идентификатор релиза — должен буквально совпадать с тем, что передан
+   * `scripts/glitchtip-upload-sourcemaps.mjs` при загрузке sourcemaps (PLAN-INFRA-4.md §70 п.6),
+   * иначе GlitchTip не свяжет стектрейс с загруженным debug-бандлом. Обычно
+   * `NEXT_PUBLIC_GLITCHTIP_RELEASE`, проставляется деплоем в `nx build` тем же git short SHA.
+   */
+  release?: string
 }
 
 /**
@@ -37,13 +44,14 @@ const MINIMAL_INTEGRATIONS = [
  * после отложенного вызова, не раньше. `setTimeout` — фолбэк для Safari/старых браузеров без
  * `requestIdleCallback`.
  */
-export function initClient({ dsn, environment }: InitClientOptions): void {
+export function initClient({ dsn, environment, release }: InitClientOptions): void {
   if (!dsn) { return }
 
   const run = () => {
     Sentry.init({
       dsn,
       environment,
+      release,
       integrations: MINIMAL_INTEGRATIONS,
       beforeSend: (event) => scrubPii(event),
     })

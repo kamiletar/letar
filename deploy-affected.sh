@@ -109,6 +109,24 @@ decrypt_sops_env() {
   fi
 }
 
+# Токен для загрузки sourcemaps в GlitchTip (PLAN-INFRA-4.md §70 п.6) — org-wide, не привязан к
+# приложению (apps/api_tokens/models.py: доступ по членству в организации, не по проекту), поэтому
+# один секрет в infra/glitchtip/.env.docker.enc на все приложения. Кэшируется в переменной, чтобы
+# не расшифровывать повторно на каждое приложение в цикле AFFECTED_APPS.
+GLITCHTIP_SOURCEMAPS_AUTH_TOKEN=""
+decrypt_glitchtip_sourcemaps_token() {
+  if [ -n "$GLITCHTIP_SOURCEMAPS_AUTH_TOKEN" ]; then
+    return 0
+  fi
+  local enc_file="$WORKSPACE_ROOT/infra/glitchtip/.env.docker.enc"
+  if [ ! -f "$enc_file" ] || [ -z "${SOPS_AGE_KEY_FILE:-}" ]; then
+    return 1
+  fi
+  GLITCHTIP_SOURCEMAPS_AUTH_TOKEN=$(sops --decrypt "$enc_file" 2>/dev/null \
+    | grep '^GLITCHTIP_SOURCEMAPS_AUTH_TOKEN=' | cut -d= -f2-)
+  [ -n "$GLITCHTIP_SOURCEMAPS_AUTH_TOKEN" ]
+}
+
 # Configuration
 BASE_BRANCH="main"
 WORKSPACE_ROOT=$(pwd)
@@ -1086,6 +1104,15 @@ for app in $AFFECTED_APPS; do
       fi
     fi
 
+    # git short SHA как release GlitchTip (PLAN-INFRA-4.md §70 п.6) — экспортируется ДО nx build,
+    # т.к. NEXT_PUBLIC_GLITCHTIP_RELEASE инлайнится в клиентский бандл на этой стадии, а не позже
+    # (nextjs-public-env-build-time-inlining.md). Безвреден для приложений без GlitchTip — просто
+    # неиспользуемая переменная окружения. Остаётся exported до `docker compose up` ниже — там же
+    # интерполируется в GLITCHTIP_RELEASE/NEXT_PUBLIC_GLITCHTIP_RELEASE compose-файла (если у
+    # приложения эти ключи объявлены).
+    export GLITCHTIP_RELEASE="$(git rev-parse --short HEAD)"
+    export NEXT_PUBLIC_GLITCHTIP_RELEASE="$GLITCHTIP_RELEASE"
+
     # Build the application
     NX_CACHE_FLAG=""
     if [ "$SKIP_NX_CACHE" = true ]; then
@@ -1132,6 +1159,26 @@ for app in $AFFECTED_APPS; do
       FAILED_APPS+=("$app")
       echo ""
       continue
+    fi
+  fi
+
+  # Sourcemaps → GlitchTip (PLAN-INFRA-4.md §70 п.6) — только для Next.js-приложений, реально
+  # подключивших @letar/glitchtip на клиенте, и только если productionBrowserSourceMaps дал
+  # .js.map в сборке. Некритично для деплоя — при неудаче предупреждаем и продолжаем, не роняем
+  # FAILED_APPS: отсутствие sourcemaps ухудшает диагностику ошибок, но не сам деплой.
+  if [ "$IS_NEXTJS_APP" = true ] && [ -d "$APP_DIR/.next/static" ] \
+    && grep -q "@letar/glitchtip" "$APP_DIR/src/instrumentation-client.ts" 2>/dev/null \
+    && find "$APP_DIR/.next/static" -name '*.js.map' -print -quit | grep -q .; then
+    if decrypt_glitchtip_sourcemaps_token; then
+      echo -e "${YELLOW}🗺️  Загрузка sourcemaps в GlitchTip для ${app} (release=${GLITCHTIP_RELEASE})...${NC}"
+      if GLITCHTIP_SOURCEMAPS_AUTH_TOKEN="$GLITCHTIP_SOURCEMAPS_AUTH_TOKEN" \
+        node "$WORKSPACE_ROOT/scripts/glitchtip-upload-sourcemaps.mjs" "$app" "$GLITCHTIP_RELEASE"; then
+        echo -e "${GREEN}✅ Sourcemaps загружены${NC}"
+      else
+        echo -e "${YELLOW}⚠️  Загрузка sourcemaps не удалась — деплой продолжается без них${NC}"
+      fi
+    else
+      echo -e "${YELLOW}⚠️  GLITCHTIP_SOURCEMAPS_AUTH_TOKEN недоступен — пропускаю загрузку sourcemaps${NC}"
     fi
   fi
 

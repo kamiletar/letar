@@ -267,6 +267,7 @@
     "@next/eslint-plugin-next": "^16.3.4",
     "@nx/devkit": "23.2.0",
     "@nx/esbuild": "23.2.0",
+    "@sentry/cli": "^3.7.0",
     "@nx/eslint": "23.2.0",
     "@nx/eslint-plugin": "23.2.0",
     "@nx/js": "23.2.0",

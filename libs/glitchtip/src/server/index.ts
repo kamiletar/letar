@@ -8,18 +8,25 @@ export interface InitServerOptions {
   dsn: string | undefined
   /** 'production' | 'staging' — тег окружения в GlitchTip, не NODE_ENV (см. env-files.md). */
   environment: string
+  /**
+   * Идентификатор релиза — должен буквально совпадать с тем, что передан
+   * `scripts/glitchtip-upload-sourcemaps.mjs` при загрузке sourcemaps (PLAN-INFRA-4.md §70 п.6).
+   * Обычно `GLITCHTIP_RELEASE`, проставляется деплоем в `nx build` тем же git short SHA.
+   */
+  release?: string
 }
 
 /**
  * Вызывать из instrumentation.ts → register(), только при NEXT_RUNTIME === 'nodejs'
  * (см. node_modules/next/dist/docs — edge-рантайм не поддерживает @sentry/node).
  */
-export function initServer({ dsn, environment }: InitServerOptions): void {
+export function initServer({ dsn, environment, release }: InitServerOptions): void {
   if (!dsn) { return }
 
   Sentry.init({
     dsn,
     environment,
+    release,
     beforeSend: (event) => scrubPii(event),
   })
 }
