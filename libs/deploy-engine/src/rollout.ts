@@ -175,7 +175,13 @@ async function resolveNewContainer(
  * healthcheck использует и который не всегда ловит 5xx — busybox wget в режиме `--spider`
  * иногда засчитывает сам факт соединения, не статус ответа). Найдено при инциденте mandala
  * (сессия №70, §18.6): контейнер был "healthy" по Docker, но каждая страница отдавала 500
- * (sharp/libvips). `wget` без `--spider` возвращает ненулевой exit code на реальный 4xx/5xx.
+ * (sharp/libvips).
+ *
+ * Запрос выполняется через `node -e` внутри контейнера, не `wget` — `wget` гарантированно есть
+ * только в Alpine/busybox-образах. `apps/time/Dockerfile.production` намеренно на `node:24-slim`
+ * (Debian, без busybox, §130 PLAN-INFRA-4.md) — там `docker exec ... wget` падает
+ * `executable file not found in $PATH`, хотя контейнер уже реально healthy (найдено 2026-09-04).
+ * `node` есть в любом Node-образе безусловно, независимо от дистрибутива/пакетного менеджера.
  *
  * Если URL healthcheck не удаётся извлечь из compose — не блокирует rollout (defense-in-depth,
  * не новая точка отказа): doctor уже требует healthcheck как обязательную проверку, отсутствие
@@ -193,11 +199,13 @@ async function smokeTest(
   if (!url) {
     return { ok: true, detail: 'healthcheck URL не извлечён из compose — smoke-test пропущен' }
   }
-  const res = await executor.runCommand('docker', ['exec', newContainer, 'wget', '-q', '-O', '/dev/null', url])
+  const script = `require('http').get(${JSON.stringify(url)}, r => process.exit(r.statusCode >= 500 ? 1 : 0))`
+    + `.on('error', () => process.exit(1))`
+  const res = await executor.runCommand('docker', ['exec', newContainer, 'node', '-e', script])
   if (res.exitCode !== 0) {
     return {
       ok: false,
-      detail: `wget вернул ошибку на ${url} (вероятно не-2xx ответ): ${
+      detail: `реальный HTTP-запрос к ${url} вернул 5xx или не удался: ${
         res.stderr.trim() || res.stdout.trim() || `exit ${res.exitCode}`
       }`,
     }

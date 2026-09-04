@@ -145,9 +145,16 @@ describe('runRollout', () => {
     const inspectCall = calls.find((c) => c.args[0] === 'inspect')
     expect(inspectCall?.args).toContain('time-app-2')
 
-    // smoke-test дёргает URL из healthcheck.test у нового контейнера, не через docker inspect
-    const smokeCall = calls.find((c) => c.args[0] === 'exec' && c.args.includes('wget'))
-    expect(smokeCall?.args).toEqual(['exec', 'time-app-2', 'wget', '-q', '-O', '/dev/null', 'http://0.0.0.0:3013/'])
+    // smoke-test дёргает URL из healthcheck.test у нового контейнера через node -e, не через wget
+    // (гарантированно есть в любом Node-образе, в отличие от wget — см. комментарий над smokeTest)
+    const smokeCall = calls.find((c) => c.args[0] === 'exec' && c.args.includes('node'))
+    expect(smokeCall?.args).toEqual([
+      'exec',
+      'time-app-2',
+      'node',
+      '-e',
+      expect.stringContaining('http://0.0.0.0:3013/'),
+    ])
 
     // старый (index 1) останавливается и удаляется, не новый
     expect(calls.find((c) => c.args[0] === 'stop')?.args).toContain('time-app-1')
@@ -269,8 +276,10 @@ describe('runRollout', () => {
         sequentialPsResults('time-app-1\n', 'time-app-1\ntime-app-2\n'),
         { match: (a) => a[0] === 'inspect', result: { stdout: 'healthy\n', stderr: '', exitCode: 0 } },
         {
-          match: (a) => a[0] === 'exec' && a.includes('wget'),
-          result: { stdout: '', stderr: 'wget: server returned error: HTTP/1.1 500', exitCode: 8 },
+          // node-скрипт сам решает по statusCode>=500 и выходит с exit 1 — никакого stderr от node,
+          // в отличие от старого wget-подхода (см. комментарий над smokeTest в rollout.ts).
+          match: (a) => a[0] === 'exec' && a.includes('node'),
+          result: { stdout: '', stderr: '', exitCode: 1 },
         },
       ],
     })
@@ -286,7 +295,7 @@ describe('runRollout', () => {
       'wait-healthy',
       'smoke-test',
     ])
-    expect(result.steps.at(-1)?.detail).toContain('500')
+    expect(result.steps.at(-1)?.detail).toContain('вернул 5xx или не удался')
     // ни nginx reload, ни stop/rm старого — старый контейнер продолжает обслуживать весь трафик
     expect(calls.some((c) => c.args[0] === 'exec' && c.args.includes('nginx'))).toBe(false)
     expect(calls.some((c) => c.args[0] === 'stop')).toBe(false)
@@ -367,7 +376,7 @@ services:
 
       // healthcheck и smoke-test бьют в реальный новый контейнер (-app-4), не в хардкод -app-2
       expect(calls.find((c) => c.args[0] === 'inspect')?.args).toContain('time-app-4')
-      expect(calls.find((c) => c.args[0] === 'exec' && c.args.includes('wget'))?.args).toContain('time-app-4')
+      expect(calls.find((c) => c.args[0] === 'exec' && c.args.includes('node'))?.args).toContain('time-app-4')
 
       // старый (-app-3) останавливается и удаляется, не новый
       expect(calls.find((c) => c.args[0] === 'stop')?.args).toContain('time-app-3')
