@@ -488,20 +488,39 @@ typecheck):**
   синтаксиса (в отличие от `form-develop-app`) — она показывает внешним пользователям только
   рекомендуемый `@meta`.
 
-**НЕ сделано в этой сессии (полный объём документации — Priority 0-5, отдельный трек, «половина
-фазы по объёму» по формулировке выше):**
+**Документация — Priority 0-5, сделано в этой же сессии следом (три фоновых агента параллельно на
+Priority 3/4/5, остальное вручную):**
 
-- Priority 0 (по плану — первым в фазе, не последним): `libs/form-mcp` `directive-registry.ts` —
-  машиночитаемый источник для `get_directives`, ещё не тронут.
-- Priority 1-5: `CLAUDE.md`, `.claude/rules/*`, `.claude/skills/*` (+ `sync-agent-skills.ts`),
-  README'ы плагина/библиотеки, `.claude/docs/*` (включая новый обязательный
-  `zmodel-comment-directives-vs-ast.md`), `apps/form-docs` (6 MDX, RU+EN), 14 статей
-  `libs/forms/articles/` — не начаты.
+- **Priority 0** — `libs/form-mcp` `directive-registry.ts`: `DirectiveInfo` получил `metaKey`/
+  `example`/`legacyExample`, `get_directives` и docs-запись `zenstack` теперь говорят про `@meta`
+  как основной синтаксис. Сделано первым, как требовал план.
+- **Priority 1** — `CLAUDE.md`, `.claude/rules/forms.md`, три субагента (`db-schema-assistant`,
+  `form-generator`, `refactor-expert`), три command-файла (`forms-coordinator`, `forms-dev`,
+  `infra/db-migrate`).
+- **Priority 2** — 7 файлов skill'ов (`zenstack-helper`/`form-pipeline`/`ui-ux-audit`),
+  `reference/form-directives.md` переписан целиком под `@meta`. Codex-зеркало `.agents/`
+  пересобрано `sync-agent-skills.ts` (не коммитится).
+- **Priority 3** — README'ы `zenstack-form-plugin` (RU+EN, версия → 3.0.0) и `libs/forms`
+  (`README.md` + `docs/zenstack.md`), точечные фиксы в `.claude/docs/{forms,database,
+  mcp-servers}.md`, новый обязательный `.claude/docs/zmodel-comment-directives-vs-ast.md`
+  (почему `@meta`/AST и `///`/regex — два независимых парсера, не один общий).
+- **Priority 4** — `apps/form-docs`: 3 MDX-гайда × RU+EN (`zenstack-plugin`, `relation-fields`,
+  `mcp`), `src/app/llms.txt/route.ts`, версия → 0.6.5.
+- **Priority 5** — из 14 статей `libs/forms/articles/` реально упоминали `@form.*` только 5:
+  `08-zenstack-pipeline.md` (основная правка, плюс попутно найдена и убрана таблица никогда не
+  существовавших директив `@form.hidden`/`@form.readonly`/`@form.order` — расхождение с реальным
+  плагином), его SVG-диаграмма (2 текстовых лейбла, layout не тронут), `11-mcp-ai.md`,
+  `12-open-source.md`, `benchmarks.md`, плюс `ARTICLE.md` (чек-лист) и `visuals-needed.md`.
+  Остальные 9 статей `@form.*` не упоминали — трогать было нечего.
+
+**НЕ сделано:**
+
 - Broadcast владельцам публичных приложений (`animatrona`, `archetest`, `grandslamcup`, `kami`,
   `label-printer-desktop`, `mandala`, `animatrona-tracker`) с инструкцией по кодмоду — не
   отправлен.
 
-**Статус: код Фазы 3 (плагин + кодмод + обе демо-миграции) закрыт и провалидирован живьём.**
+**Статус: Фаза 3 (код + вся запланированная документация) закрыта.** Broadcast — единственное,
+что осталось до полного закрытия фазы.
 Документационный трек продолжается отдельными коммитами.
 
 ### Фаза 4 — миграция потребителей и удаление legacy (v4.0.0)
