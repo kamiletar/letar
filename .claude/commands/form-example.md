@@ -48,7 +48,10 @@ fetch_inbox(project_key: "c-web-letar", agent_name: "form-example-dev", registra
 ## Проект
 
 **Приложение:** form-example (Next.js, PostgreSQL)
-**Порт:** 3022
+**Порт (dev):** 3027 (`.env`, добавлен 2026-09-04 — раньше .env не было вовсе, а документированный
+3022 коллидировал с synth при одновременном `nx dev`)
+**Порт (production, за Traefik):** 3022 — не связан с dev-портом, задаётся отдельно в
+`docker-compose.production.yml`/`.env.docker`, менять не нужно
 **Сервер:** s2 (185.28.85.195)
 **БД:** PostgreSQL + ZenStack
 **Описание:** Full-stack витрина @letar/forms — 16 интерактивных примеров

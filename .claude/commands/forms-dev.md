@@ -168,7 +168,7 @@ kebab-case имя ловило баг сервера agent-mail в `send_message
 ### form-example (showcase)
 
 **Приложение:** form-example
-**Порт:** 3022
+**Порт (dev):** 3027 (production за Traefik — 3022, не связан с dev-портом)
 **Домен:** [forms-example.letar.best](https://forms-example.letar.best)
 **Описание:** Showcase приложение @letar/forms для внешних пользователей
 **Модели:** `schema.zmodel` с `@meta("form.*", value)` директивами (legacy `@form.*`-комментарии deprecated) → `src/generated/form-schemas/`

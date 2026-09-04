@@ -48,5 +48,6 @@ send_message(to: ["animatrona-coordinator-dev"], subject: "change: <описан
 ## Проект
 
 **Приложение:** animatrona (Electron + Next.js)
-**Порт:** 3007 (renderer dev server)
+**Порт:** 3009 (renderer dev server) — сменён с 3007 2026-09-04: коллидировал с pravda (тоже
+web-сервис на 3007), у animatrona продакшена нет вовсе (Electron desktop), поэтому меняли его
 **Описание:** Десктоп-приложение для работы с видео-контентом

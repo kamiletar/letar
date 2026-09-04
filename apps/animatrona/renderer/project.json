@@ -28,7 +28,7 @@
     "dev": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "next dev -p 3007 --webpack",
+        "command": "next dev -p 3009 --webpack",
         "cwd": "apps/animatrona/renderer"
       }
     },
@@ -38,7 +38,7 @@
         "build"
       ],
       "options": {
-        "command": "npx serve out -p 3007",
+        "command": "npx serve out -p 3009",
         "cwd": "apps/animatrona/renderer"
       }
     },
