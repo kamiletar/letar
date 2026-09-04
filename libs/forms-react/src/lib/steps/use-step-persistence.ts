@@ -57,7 +57,14 @@ export function useStepPersistence(currentStep: number, config?: StepPersistence
   // Config через ref — предотвращает перезапуск useEffect
   // на каждый рендер из-за смены ссылки на объект
   const configRef = useRef(config)
-  configRef.current = config
+  // Синхронизация "последнего значения" в эффекте, не во время рендера — запись в ref.current
+  // прямо в теле компонента не позволяет react(refs) (React Compiler может отбросить/повторить
+  // рендер, не закоммитив его). Эффект коммитится синхронно после рендера, а конфиг читается
+  // только из колбэков (getPersistedStep/clearPersistence) и из useEffect ниже, вызываемых уже
+  // после коммита — задержки в один тик тут нет и быть не может.
+  useEffect(() => {
+    configRef.current = config
+  })
 
   const getPersistedStep = useCallback((): number | null => {
     const cfg = configRef.current

@@ -1,7 +1,7 @@
 'use client'
 
 import type { AnyFormApi } from '@tanstack/react-form'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { StepDirection, StepInfo } from './step-types'
 
 const EMPTY_HIDDEN_FIELDS: Set<string> = new Set()
@@ -80,28 +80,29 @@ export function useStepNavigation({
   const [direction, setDirection] = useState<StepDirection>('forward')
 
   const sortedStepsRef = useRef(sortedSteps)
-  sortedStepsRef.current = sortedSteps
-
   const stepCountRef = useRef(stepCount)
-  stepCountRef.current = stepCount
-
   const currentStepRef = useRef(currentStep)
-  currentStepRef.current = currentStep
-
   const hiddenFieldsRef = useRef(hiddenFields ?? EMPTY_HIDDEN_FIELDS)
-  hiddenFieldsRef.current = hiddenFields ?? EMPTY_HIDDEN_FIELDS
-
   const onStepChangeRef = useRef(onStepChange)
-  onStepChangeRef.current = onStepChange
-
   const onStepCompleteRef = useRef(onStepComplete)
-  onStepCompleteRef.current = onStepComplete
-
   const controlledStepRef = useRef(controlledStep)
-  controlledStepRef.current = controlledStep
-
   const validateOnNextRef = useRef(validateOnNext)
-  validateOnNextRef.current = validateOnNext
+
+  // Синхронизация "последнего значения" в эффекте, не во время рендера — запись в ref.current
+  // прямо в теле компонента не допускается react(refs) (React Compiler может отбросить или
+  // повторить незакоммиченный рендер). Эффект коммитится синхронно после рендера, а сами рефы
+  // читаются только внутри колбэков ниже (goToNext/goToPrev/goToStep/...), которые вызываются
+  // из обработчиков событий уже после коммита — отставания в один тик тут нет и быть не может.
+  useEffect(() => {
+    sortedStepsRef.current = sortedSteps
+    stepCountRef.current = stepCount
+    currentStepRef.current = currentStep
+    hiddenFieldsRef.current = hiddenFields ?? EMPTY_HIDDEN_FIELDS
+    onStepChangeRef.current = onStepChange
+    onStepCompleteRef.current = onStepComplete
+    controlledStepRef.current = controlledStep
+    validateOnNextRef.current = validateOnNext
+  })
 
   // Валидация полей текущего шага (кроме скрытых)
 

@@ -1,12 +1,30 @@
 'use client'
 
 import type { ComponentProps, ComponentType, ReactNode } from 'react'
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useSyncExternalStore } from 'react'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyComponent = ComponentType<any>
 
 type LazyImportFn<T> = () => Promise<{ default: T } | T>
+
+// Гейт "клиент уже гидратировался" через useSyncExternalStore, а не useState+useEffect.
+// setState внутри эффекта запускает второй рендер (react(set-state-in-effect), oxlint 1.81) —
+// useSyncExternalStore решает ту же задачу (сервер и первый клиентский рендер должны совпасть,
+// дальше — true) без каскадного ре-рендера: снапшот меняется между вызовом на сервере/при
+// гидратации и вызовом после неё, но сам механизм — не setState, а подписка на внешний источник,
+// для которого хук официально предназначен. "Внешний источник" тут — сам факт, что мы уже прошли
+// коммит на клиенте; store ни на что не подписывается (subscribe — no-op), это устоявшийся
+// приём для client-only гейтов (аналогично `useHydrated()` в usehooks-ts/Zustand persist).
+function subscribeNoop(): () => void {
+  return () => {}
+}
+function getClientSnapshot(): boolean {
+  return true
+}
+function getServerSnapshot(): boolean {
+  return false
+}
 
 /**
  * Создаёт ленивый компонент со встроенным Suspense и клиентским mounted-гейтом.
@@ -54,11 +72,7 @@ export function createLazyComponent<T extends AnyComponent>(
 
   // Wrapper с Suspense — монтируется только на клиенте, см. комментарий выше
   function LazyWrapper(props: ComponentProps<T>) {
-    const [mounted, setMounted] = useState(false)
-
-    useEffect(() => {
-      setMounted(true)
-    }, [])
+    const mounted = useSyncExternalStore(subscribeNoop, getClientSnapshot, getServerSnapshot)
 
     if (!mounted) {
       return fallback()
