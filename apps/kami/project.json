@@ -21,7 +21,7 @@
   "targets": {
     "db:generate": {
       "executor": "nx:run-commands",
-      "cache": true,
+      "cache": false,
       "inputs": [
         "{projectRoot}/src/generated/schema.prisma",
         "{projectRoot}/schema.zmodel",
@@ -43,6 +43,7 @@
     },
     "db:push": {
       "executor": "nx:run-commands",
+      "cache": false,
       "dependsOn": [
         "db:generate"
       ],
@@ -59,6 +60,7 @@
     },
     "db:migrate": {
       "executor": "nx:run-commands",
+      "cache": false,
       "dependsOn": [
         "db:generate"
       ],
@@ -75,6 +77,7 @@
     },
     "db:studio": {
       "executor": "nx:run-commands",
+      "cache": false,
       "metadata": {
         "description": "Open Prisma Studio database GUI",
         "technologies": [
@@ -88,6 +91,7 @@
     },
     "db:seed": {
       "executor": "nx:run-commands",
+      "cache": false,
       "dependsOn": [
         "zenstack:generate"
       ],
@@ -112,7 +116,7 @@
           "target": "build"
         }
       ],
-      "cache": true,
+      "cache": false,
       "inputs": [
         "{projectRoot}/schema.zmodel"
       ],
