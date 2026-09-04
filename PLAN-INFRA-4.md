@@ -1622,8 +1622,18 @@ lockfile-drift-гейт), обязана либо чекаутить submodule, 
       §75 закрыт полностью** (6 приложений: `dashboard`, `driving-school`, `dsperevod`, `aboi`,
       `time`, `svoichuzhie`) — следующие пункты порядка работ ниже (наблюдатель
       `dashboard-agent`, инфра-задачи на systemd timers) не начаты
-- [ ] `dashboard-agent`: режим наблюдателя (опрос `/api/jobs/status` + алерт по «давно не было
-      успеха»), снятие монтирования чужих `.env.docker`
+- [x] `dashboard-agent`: режим наблюдателя (2026-09-04) — `jobs-observer-check` (`*/15 * * * *`,
+      `lib/jobs-observer.ts`) опрашивает `GET /api/jobs/status` всех шести приложений тиража,
+      алертит `CRON_FAILED` на `autoSchedule: false` (та самая находка пилота ниже) и на
+      пропущенный тик (`nextRunAt` прошлого опроса миновал с запасом, `lastRunAt` не догнал);
+      дебаунс — тот же `shouldRepeatAlert`, что у email-канарейки/свежести бэкапов. Тесты —
+      `lib/jobs-observer.spec.ts`. **Снятие монтирования чужих `.env.docker` — сознательно не
+      сделано в этом же шаге:** пять из шести приложений (все, кроме `dashboard`) по-прежнему
+      держат в `DEFAULT_CRON_JOBS` дубль-записи на старые `/api/cron/*` (см. порядок работ выше —
+      retire отложен до живого прод-прогона), и они используют тот же `/secrets/<app>.env`
+      mount — снимать его раньше, чем эти записи ретирены, сломает их.
+- [ ] Инфра-задачи и бэкап Maddy — на systemd timers, конфиги в `infra/`, доставка через
+      `deploy_infra`
 - [ ] Инфра-задачи и бэкап Maddy — на systemd timers, конфиги в `infra/`, доставка через
       `deploy_infra`
 
