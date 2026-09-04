@@ -127,19 +127,28 @@ export function CronScheduleDialog({
     }
   }, [])
 
-  // Валидируем при открытии и изменении
+  // Валидируем при открытии и изменении — обращение к серверному API валидации cron-выражения,
+  // настоящая синхронизация с внешней системой (правило явно оставляет такой случай за эффектом).
   useEffect(() => {
     if (open && schedule) {
+      // validateSchedule синхронно выставляет isValidating перед сетевым запросом — это часть
+      // той же синхронизации с внешней системой, а не лишний ре-рендер.
+      // oxlint-disable-next-line react/set-state-in-effect
       validateSchedule(schedule)
     }
   }, [open, schedule, validateSchedule])
 
-  // Сброс при открытии
-  useEffect(() => {
+  // Сброс расписания при каждом открытии диалога — не синхронизация с внешней системой, а
+  // производное от смены пропа (open) значение. По паттерну React ("Adjusting state when a prop
+  // changes") делаем это во время рендера сравнением с предыдущим `open`, без эффекта и без
+  // лишнего кадра рассинхронизации.
+  const [prevOpen, setPrevOpen] = useState(open)
+  if (open !== prevOpen) {
+    setPrevOpen(open)
     if (open) {
       setSchedule(currentSchedule)
     }
-  }, [open, currentSchedule])
+  }
 
   // Обновление части расписания
   const updatePart = (index: number, value: string) => {

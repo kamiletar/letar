@@ -96,8 +96,13 @@ export function ServerContextProvider({ children }: ServerContextProviderProps) 
     }
   }, [currentServerId])
 
-  // Загрузка при монтировании
+  // Загрузка при монтировании — синхронизация с внешним источником (сетевой API), не производное
+  // значение и не инициализация из уже доступных данных: без сетевого запроса взять эти данные
+  // негде, поэтому эффект здесь обязателен (react-hooks: "Fetching data" — легитимный кейс).
   useEffect(() => {
+    // fetchServers синхронно обнуляет isLoading/error перед сетевым запросом — это сама
+    // синхронизация с внешней системой, о которой предупреждает правило, а не лишний ре-рендер.
+    // oxlint-disable-next-line react/set-state-in-effect
     fetchServers()
   }, [fetchServers])
 

@@ -2,6 +2,7 @@
 
 import { formatDateTime } from '@/lib/format'
 import { Badge, Box, Button, HStack, Text } from '@chakra-ui/react'
+import { useState } from 'react'
 import { LuCopy } from 'react-icons/lu'
 
 interface Props {
@@ -15,11 +16,17 @@ const COMMAND = 'bun scripts/deps-scan.ts'
  * Возраст lockfile: ≤7 дней скрыт, 7–14 жёлтый, >14 красный (§25 PLAN-INFRA.md).
  */
 export function DepsStalenessBanner({ lockfileUpdatedAt, lastScanAt }: Props) {
+  // "Текущее время" — не производное от пропсов значение, а нечистый вызов (react/purity).
+  // Дашборд неинтерактивен относительно этого баннера: не нужен тикающий счётчик, достаточно
+  // зафиксировать момент монтирования лениво-инициализированным состоянием — обновление страницы
+  // (или пере-фетч серверных данных) естественно даёт свежее значение.
+  const [now] = useState(() => Date.now())
+
   if (!lockfileUpdatedAt) {
     return null
   }
 
-  const days = Math.floor((Date.now() - new Date(lockfileUpdatedAt).getTime()) / (1000 * 60 * 60 * 24))
+  const days = Math.floor((now - new Date(lockfileUpdatedAt).getTime()) / (1000 * 60 * 60 * 24))
 
   if (days <= 7) {
     return null

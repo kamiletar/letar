@@ -128,15 +128,20 @@ export function useUnifiedStream({
   })
 
   // Отслеживаем число попыток и репортим финальную неудачу — сам useEventSource
-  // ретраит молча, наружу нужен и счётчик, и колбэк onError только при исчерпании попыток
+  // ретраит молча, наружу нужен и счётчик, и колбэк onError только при исчерпании попыток.
+  // Синхронизация с внешней системой (статус SSE-соединения) — легитимный случай для эффекта.
   useEffect(() => {
     if (status === 'connected') {
       attemptsRef.current = 0
+      // setReconnectAttempts здесь и есть сама синхронизация счётчика с внешним статусом
+      // соединения, а не производное значение рендера.
+      // oxlint-disable-next-line react/set-state-in-effect
       setReconnectAttempts(0)
       return
     }
     if (status === 'error') {
       attemptsRef.current += 1
+      // oxlint-disable-next-line react/set-state-in-effect -- см. комментарий выше
       setReconnectAttempts(attemptsRef.current)
       return
     }
@@ -145,9 +150,11 @@ export function useUnifiedStream({
     }
   }, [status, maxReconnectAttempts, onError])
 
+  // reconnectAttempts (state) всегда синхронизирован с attemptsRef.current эффектом выше — читаем
+  // его здесь вместо ref, чтобы не обращаться к ref.current во время рендера (react/refs)
   const error = status === 'error'
     ? 'Connection lost, reconnecting...'
-    : status === 'disconnected' && attemptsRef.current >= maxReconnectAttempts
+    : status === 'disconnected' && reconnectAttempts >= maxReconnectAttempts
     ? 'Max reconnection attempts reached'
     : null
 

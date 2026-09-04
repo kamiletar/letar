@@ -73,9 +73,14 @@ export function DeployLogDialog({ isOpen, serverId, appId, appName, onClose, onD
     }
   }, [status?.output])
 
-  // Запуск деплоя при открытии диалога
+  // Запуск деплоя при открытии диалога — эффект инициирует реальное внешнее действие (POST на
+  // сервер деплоя) в момент появления диалога, это и есть синхронизация с внешней системой,
+  // которую правило просит оставлять в эффекте, а не производное значение рендера.
   useEffect(() => {
     if (isOpen && !deployStarted) {
+      // setDeployStarted/setIsDeploying/setError/setStatus готовят UI к запуску сетевого запроса
+      // ниже — это часть той же синхронизации с внешней системой, а не лишний ре-рендер.
+      // oxlint-disable-next-line react/set-state-in-effect
       setDeployStarted(true)
       setIsDeploying(true)
       setError(null)

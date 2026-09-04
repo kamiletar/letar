@@ -13,7 +13,7 @@ import { Switch } from '@/app/_components/ui/switch'
 import { toaster } from '@/app/_components/ui/toaster'
 import { Badge, Box, Button, Card, Heading, HStack, Input, Text, VStack } from '@chakra-ui/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useOptimistic, useState, useTransition } from 'react'
+import { useOptimistic, useState, useTransition } from 'react'
 
 interface AlertSettings {
   enabled: boolean
@@ -129,19 +129,26 @@ export default function SettingsPage() {
     }),
   )
 
-  // Update local state when settings are fetched
-  useEffect(() => {
+  // Гидратация локального редактируемого состояния из загруженных настроек — это не
+  // синхронизация с внешней системой (сам запрос уже сделан TanStack Query), а производное от
+  // изменения query-данных значение. По паттерну React ("Adjusting state when a prop changes")
+  // делаем это во время рендера сравнением с предыдущим значением, без эффекта и без лишнего
+  // кадра, в котором форма ещё показывает дефолты после того как данные уже загружены.
+  const [prevSavedSettings, setPrevSavedSettings] = useState(savedSettings)
+  if (savedSettings !== prevSavedSettings) {
+    setPrevSavedSettings(savedSettings)
     if (savedSettings) {
       setSettings(savedSettings)
     }
-  }, [savedSettings])
+  }
 
-  // Update local state when backup settings are fetched
-  useEffect(() => {
+  const [prevSavedBackupSettings, setPrevSavedBackupSettings] = useState(savedBackupSettings)
+  if (savedBackupSettings !== prevSavedBackupSettings) {
+    setPrevSavedBackupSettings(savedBackupSettings)
     if (savedBackupSettings) {
       setBackupSettings(savedBackupSettings)
     }
-  }, [savedBackupSettings])
+  }
 
   // Обработчик toggle Alerts с useOptimistic
   const handleToggleAlerts = (checked: boolean) => {

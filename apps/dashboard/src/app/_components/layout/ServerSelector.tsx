@@ -7,6 +7,7 @@
 
 import { useServerContext } from '@/lib/contexts/ServerContext'
 import { Box, Button, MenuContent, MenuItem, MenuRoot, MenuTrigger, Spinner, Text } from '@chakra-ui/react'
+import { useState } from 'react'
 import { LuChevronDown, LuMonitor, LuServer, LuWifi, LuWifiOff } from 'react-icons/lu'
 
 export function ServerSelector() {
@@ -91,6 +92,11 @@ export function ServerSelector() {
  * Индикатор статуса сервера
  */
 function ServerStatus({ server }: { server: { lastSeen?: Date | null; isLocal: boolean } }) {
+  // "Текущее время" фиксируем один раз при монтировании индикатора (react/purity запрещает
+  // нечистый Date.now() прямо в теле рендера) — список серверов и так обновляется по своему циклу
+  // (ServerContext.fetchServers), поэтому живой тикающий таймер здесь не нужен.
+  const [now] = useState(() => Date.now())
+
   // Локальный сервер всегда онлайн
   if (server.isLocal) {
     return <LuWifi size={12} color="var(--chakra-colors-green-500)" />
@@ -100,7 +106,7 @@ function ServerStatus({ server }: { server: { lastSeen?: Date | null; isLocal: b
   // Считаем онлайн, если lastSeen < 1 минуты назад
   if (server.lastSeen) {
     const lastSeenDate = new Date(server.lastSeen)
-    const isOnline = Date.now() - lastSeenDate.getTime() < 60000
+    const isOnline = now - lastSeenDate.getTime() < 60000
 
     return isOnline
       ? <LuWifi size={12} color="var(--chakra-colors-green-500)" />
