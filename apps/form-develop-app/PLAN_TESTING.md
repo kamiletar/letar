@@ -5,7 +5,7 @@
 | Тип  | Количество | Статус |
 | ---- | ---------- | ------ |
 | Unit | 34         | Готово |
-| E2E  | 22 файла   | Готово |
+| E2E  | 23 файла   | Готово |
 
 ## Запуск тестов
 
@@ -16,7 +16,7 @@ nx e2e form-develop-app-e2e -- --project=chromium    # Только Chrome
 nx e2e form-develop-app-e2e -- --grep="Schedule"     # По названию
 ```
 
-## E2E тесты (22 файла)
+## E2E тесты (23 файла)
 
 | Файл                                  | Описание                                                                                |
 | ------------------------------------- | --------------------------------------------------------------------------------------- |
@@ -43,6 +43,7 @@ nx e2e form-develop-app-e2e -- --grep="Schedule"     # По названию
 | `constraints-demo.spec.ts`            | Автоматические Zod constraints (14 тестов × 3 браузера)                                 |
 | `native-attributes-demo.spec.ts`      | Фаза 1 zenstack-form-plugin: нативные `@startsWith`/`@url`/`@phone`/`@date`, `@omit`    |
 | `cross-field-validation-demo.spec.ts` | Фаза 2 zenstack-form-plugin: кросс-полевая `@@validate`, ошибка привязана к `path`-полю |
+| `filters-state-demo.spec.ts`          | `getActiveUrlSyncFields` — чипы активных фильтров, сброс по крестику                    |
 
 ## Unit тесты библиотеки
 

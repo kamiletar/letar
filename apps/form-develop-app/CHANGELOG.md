@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.8] - 2026-09-05
+
+### Added
+
+- `filters-state-demo`: чипы активных фильтров с крестиком-сбросом на каждый (`ActiveFilterChips`,
+  использует новую `getActiveUrlSyncFields` из `@letar/forms` v2.10.0) — демонстрация «Заповеди
+  №18 студии». Обновлён и пример кода на странице.
+
 ## [0.1.7] - 2026-09-04
 
 ### Added

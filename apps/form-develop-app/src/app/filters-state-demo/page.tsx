@@ -1,7 +1,7 @@
 'use client'
 
 import { Badge, Box, Button, Card, Grid, Heading, HStack, SimpleGrid, Tag, Text, VStack } from '@chakra-ui/react'
-import { Form, useActiveFiltersCount, useFormRef, useFormUrlSync } from '@letar/forms'
+import { Form, getActiveUrlSyncFields, useActiveFiltersCount, useFormRef, useFormUrlSync } from '@letar/forms'
 import { z } from 'zod/v4'
 
 // --- Схема фильтров ---
@@ -137,6 +137,47 @@ function ActiveFiltersCount() {
   )
 }
 
+// --- Чипы активных фильтров (использует getActiveUrlSyncFields) ---
+
+function ActiveFilterChips({ formRef }: { formRef: ReturnType<typeof useFormRef<Filters>> }) {
+  return (
+    <Form.Subscribe debounce={150}>
+      {(values) => {
+        const filters = values as unknown as Filters
+        const active = getActiveUrlSyncFields(
+          filters,
+          ['search', 'category', 'minRating', 'onlyFavorites'],
+          defaultFilters,
+        )
+        if (active.length === 0) {
+          return null
+        }
+        return (
+          <HStack wrap="wrap" gap={2} data-testid="active-filter-chips">
+            {active.map(({ field }) => (
+              <Tag.Root key={field} size="sm" variant="subtle" colorPalette="purple">
+                <Tag.Label>{field}</Tag.Label>
+                <Button
+                  size="2xs"
+                  variant="ghost"
+                  minW="auto"
+                  h="auto"
+                  p={0}
+                  ml={1}
+                  onClick={() => formRef.current?.setFieldValue(field, defaultFilters[field] as never)}
+                  aria-label={`Сбросить ${field}`}
+                >
+                  ✕
+                </Button>
+              </Tag.Root>
+            ))}
+          </HStack>
+        )
+      }}
+    </Form.Subscribe>
+  )
+}
+
 // --- Панель внешнего управления (использует useFormRef) ---
 
 function ExternalControls({ formRef }: { formRef: ReturnType<typeof useFormRef<Filters>> }) {
@@ -202,7 +243,7 @@ export default function FiltersStateDemoPage() {
             Form как менеджер состояния фильтров. Без onSubmit, с URL-синхронизацией.
             <br />
             Компоненты: <Badge>Form.Subscribe</Badge> · <Badge>Form.UrlSync</Badge> · <Badge>useFormRef</Badge> ·{' '}
-            <Badge>useActiveFiltersCount</Badge>
+            <Badge>useActiveFiltersCount</Badge> · <Badge>getActiveUrlSyncFields</Badge>
           </Text>
         </Box>
 
@@ -225,6 +266,7 @@ export default function FiltersStateDemoPage() {
               </Card.Header>
               <Card.Body>
                 <VStack gap={4} align="stretch">
+                  <ActiveFilterChips formRef={formRef} />
                   <Form.Field.String name="search" />
                   <Form.Field.Select
                     name="category"
@@ -309,7 +351,16 @@ function ActiveCount() {
   return <Badge>{count}</Badge>
 }
 
-// 5. Внешнее управление через ref
+// 5. Чипы активных фильтров с крестиком-сбросом (getActiveUrlSyncFields)
+const active = getActiveUrlSyncFields(values, ['search', 'category'], defaultFilters)
+active.map(({ field }) => (
+  <Tag key={field}>
+    {field}
+    <CloseButton onClick={() => formRef.current?.setFieldValue(field, defaultFilters[field])} />
+  </Tag>
+))
+
+// 6. Внешнее управление через ref
 formRef.current?.setFieldValue('category', 'frontend')`}
           </Box>
         </Box>
