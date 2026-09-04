@@ -42,7 +42,9 @@ function generateMapLines(config: KeymapConfig): string[] {
     lines.push(`  ${vkName(m.vk).padEnd(6)}\u2192  ${displayChar(m.char)}  ${m.label}`)
   }
 
-  const shifted = layout.mappings.filter((m: KeyMapping) => m.shiftChar != null)
+  const shifted = layout.mappings.filter(
+    (m: KeyMapping) => m.shiftChar !== null && m.shiftChar !== undefined,
+  )
   if (shifted.length > 0) {
     lines.push('')
     lines.push('AltGr + Shift:')

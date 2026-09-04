@@ -57,7 +57,7 @@ export function EditorPage() {
   const [undoStack, setUndoStack] = useState<string[]>([])
   const [redoStack, setRedoStack] = useState<string[]>([])
   const [flashVk, setFlashVk] = useState<number | null>(null)
-  const originalJson = useRef('')
+  const [originalJson, setOriginalJson] = useState('')
   const flashTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   // Загрузка данных
@@ -65,7 +65,7 @@ export function EditorPage() {
     Promise.all([window.electronAPI.config.get(), window.electronAPI.symbols.getAll()]).then(([cfg, syms]) => {
       setConfig(cfg)
       setSymbols(syms)
-      originalJson.current = JSON.stringify(cfg)
+      setOriginalJson(JSON.stringify(cfg))
       const idx = Math.max(
         0,
         cfg.layouts.findIndex((l) => l.name === cfg.activeLayout),
@@ -78,13 +78,13 @@ export function EditorPage() {
   useEffect(() => {
     return window.electronAPI.on.configChanged((newConfig) => {
       setConfig(newConfig)
-      originalJson.current = JSON.stringify(newConfig)
+      setOriginalJson(JSON.stringify(newConfig))
       setUndoStack([])
       setRedoStack([])
     })
   }, [])
 
-  const isDirty = config ? JSON.stringify(config) !== originalJson.current : false
+  const isDirty = config ? JSON.stringify(config) !== originalJson : false
 
   const pushUndo = useCallback(() => {
     if (!config) {
@@ -131,7 +131,7 @@ export function EditorPage() {
     }
     try {
       await window.electronAPI.config.save(config)
-      originalJson.current = JSON.stringify(config)
+      setOriginalJson(JSON.stringify(config))
       setUndoStack([])
       setRedoStack([])
       toaster.success({ title: 'Сохранено', duration: 2000 })
@@ -143,7 +143,7 @@ export function EditorPage() {
   const doReset = useCallback(async () => {
     const cfg = await window.electronAPI.config.get()
     setConfig(cfg)
-    originalJson.current = JSON.stringify(cfg)
+    setOriginalJson(JSON.stringify(cfg))
     setUndoStack([])
     setRedoStack([])
     setSelectedKey(null)

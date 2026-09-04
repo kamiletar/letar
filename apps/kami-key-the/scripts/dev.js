@@ -26,7 +26,8 @@ function startVite() {
       const msg = data.toString()
       process.stdout.write(`[vite] ${msg}`)
       if (!resolved) {
-        // Стрипаем ANSI escape коды перед парсингом порта
+        // Стрипаем ANSI escape коды перед парсингом порта — control-символ намеренный
+        // eslint-disable-next-line no-control-regex
         const clean = msg.replace(/\x1b\[[0-9;]*m/g, '')
         const match = clean.match(/localhost:(\d+)/)
         if (match) {

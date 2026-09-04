@@ -342,7 +342,7 @@ function paintOverlay(hwnd: unknown): void {
       const keyH = KEY_SIZE
 
       // Найти AltGr-маппинг
-      const mapping = key.vk != null ? vkMap.get(key.vk) : undefined
+      const mapping = key.vk !== null && key.vk !== undefined ? vkMap.get(key.vk) : undefined
       const half = Math.round(keyH / 2)
 
       // Фон клавиши (скруглённый прямоугольник)

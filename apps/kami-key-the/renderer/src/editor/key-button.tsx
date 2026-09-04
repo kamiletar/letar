@@ -36,6 +36,8 @@ export function KeyButton({ keyDef, mapping, isSelected, isFlashing, onClick, on
   const [flashActive, setFlashActive] = useState(false)
   useEffect(() => {
     if (isFlashing) {
+      // Синхронизация с таймером (внешняя система) — сброс подсветки через 400мс
+      // oxlint-disable-next-line react/set-state-in-effect
       setFlashActive(true)
       const timer = setTimeout(() => setFlashActive(false), 400)
       return () => clearTimeout(timer)

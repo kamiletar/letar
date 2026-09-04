@@ -43,7 +43,7 @@ export function getActiveLayoutName(): string {
 export function updateKeymap(config: KeymapConfig): void {
   const layout = getActiveLayout(config)
   _keymap = layout.mappings
-  _shiftKeymap = _keymap.filter((m) => m.shiftChar != null)
+  _shiftKeymap = _keymap.filter((m) => m.shiftChar !== null && m.shiftChar !== undefined)
   _specialActions = config.specialActions
   _activeLayoutName = layout.name
 }
