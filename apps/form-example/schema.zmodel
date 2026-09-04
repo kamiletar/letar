@@ -2,13 +2,20 @@
 // Run: npx zenstack generate
 // This generates both Prisma client AND form schemas with UI metadata!
 
+// Prisma 7: `url` в datasource-блоке схемы больше не поддерживается (P1012) — соединение
+// задаётся только в prisma.config.ts (datasource.url), как у остальных приложений на ZenStack v3.
 datasource db {
   provider = 'postgresql'
-  url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = 'prisma-client-js'
+// Прежде здесь был ручной `generator client { provider = 'prisma-client-js' }` — устаревший
+// паттерн (устаревший как минимум с мая 2026), который текущий ZenStack CLI молча игнорирует
+// (`"generator" is not used by ZenStack and should be removed`), из-за чего `prisma/schema.prisma`
+// переставал обновляться. Плагин `@core/prisma` сам вставляет минимальный `generator client` в
+// производную схему — см. .claude/docs/zenstack-generated-prisma-client.md.
+plugin prisma {
+  provider = '@core/prisma'
+  output = './prisma/schema.prisma'
 }
 
 // @letar/zenstack-form-plugin generates Zod schemas with .meta({ ui: {...} })
