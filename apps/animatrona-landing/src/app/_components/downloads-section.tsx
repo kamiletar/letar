@@ -329,7 +329,9 @@ export function DownloadsSection({ release }: DownloadsSectionProps) {
   const [macArch, setMacArch] = useState<MacArch | null>(null)
 
   useEffect(() => {
+    // Определение платформы браузера — недоступно на сервере, синхронизация при монтировании
     const platform = detectPlatform()
+    // oxlint-disable-next-line react/set-state-in-effect
     setCurrentPlatform(platform)
 
     // Определяем архитектуру Mac только если платформа macOS

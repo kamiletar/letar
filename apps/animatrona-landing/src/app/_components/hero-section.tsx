@@ -182,7 +182,9 @@ export function HeroSection({ release }: HeroSectionProps) {
   const [imageError, setImageError] = useState(false)
 
   useEffect(() => {
+    // Определение платформы браузера — недоступно на сервере, синхронизация при монтировании
     const detected = detectPlatform()
+    // oxlint-disable-next-line react/set-state-in-effect
     setPlatform(detected)
     if (detected === 'macos') {
       setMacArch(detectMacArch())
