@@ -1830,7 +1830,24 @@ indexType/гранулярности ключа/стратегии персис�
       `DEPLOY_SERVER_NAME`) — добавлен hostname-провайдера как fallback. Коммит `9d3b369e`.
       Разбор — `.claude/docs/deploy-affected-premigrate-dump-wrong-container.md`,
       `PLAN-INFRA-4.md` §81 (дополнение) и §128.
+- [x] **`GLITCHTIP_RELEASE` не долетал в self-deploy dashboard/dashboard-agent (repo-dev,
+      2026-09-04)** — не версия dashboard-agent, правка корневого `deploy-affected.sh`, коммит
+      `3ac94223`. Открытый вопрос из `PLAN-INFRA-4.md` §70 (тираж GlitchTip release+sourcemaps,
+      2026-09-04): для обычных Next.js-приложений `GLITCHTIP_RELEASE` экспортируется в основном
+      теле скрипта (строка ~1113) и интерполируется в `docker compose up`. Для `dashboard`/
+      `dashboard-agent` действует отдельная self-deploy ветка (строка ~1261) — она поднимает
+      контейнер не напрямую, а через detached `RESTART_SCRIPT`, запускаемый `sudo -n
+      systemd-run` (нужно пережить уничтожение cgroup собственного контейнера при
+      `force-recreate`). Этот heredoc — отдельный процесс, `export` родителя не наследует, и
+      `GLITCHTIP_RELEASE` интерполировался в `docker-compose.production.yml` пустым — `release`
+      в GlitchTip-событиях `dashboard-agent` всегда оставался пустым. Фикс — `export
+      GLITCHTIP_RELEASE="${GIT_SHORT_SHA}"` внутри самого heredoc (переменная уже вычислена
+      выше по скрипту и раскрывается при записи файла, т.к. `RESTART_EOF` — без кавычек).
+      Уточнение по факту: приложение деплоится не отдельным SSH-путём, а тем же
+      `deploy-affected.sh` (S2_APPS его перечисляет), просто с self-deploy веткой — прежняя
+      формулировка «self-deploy по SSH, не через deploy-affected.sh» в §70 неточная, поправлена
+      там же.
 
 ---
 
-**Последнее обновление:** 2026-08-28
+**Последнее обновление:** 2026-09-04
