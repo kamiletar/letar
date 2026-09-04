@@ -2,6 +2,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.5] - 2026-09-04
+
+### Changed
+
+- `guides/zenstack-plugin`/`relation-fields`/`mcp` (ru+en) — миграция на `@meta("form.*", value)`
+  как основной синтаксис (Фаза 3 `zenstack-form-plugin` v3.0.0): переписаны примеры схем, таблица
+  директив, добавлено предупреждение про `ObjectExpr` (объектный литерал ломает `zenstack
+  generate` целиком) и раздел «Legacy syntax» с одним примером старого `///`-комментария.
+  `src/app/llms.txt/route.ts` — обновлена строка про ZenStack Plugin.
+
 ## [0.6.4] - 2026-09-04
 
 ### Added
