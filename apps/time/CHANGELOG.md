@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.14 (2026-09-04)
+
+### Fixed
+
+- Healthcheck в `docker-compose.production.yml`/`docker-compose.staging.yml` использовал
+  `wget -q --spider`, которого нет в `node:24-slim` (Debian bookworm, эксперимент §130) — проверка
+  вечно падала (exit 127, `wget: not found`), деплой 2026-09-04 (коммит `ac3972a3`) завис на
+  wait-healthy zero-downtime rollout и был отменён вручную. Заменено на проверку через встроенный
+  `http`-модуль Node, не требующую внешних пакетов.
+
 ## 0.5.13 (2026-09-03)
 
 ### Added

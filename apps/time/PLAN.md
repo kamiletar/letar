@@ -77,6 +77,17 @@
       (2026-08-24, v0.5.9). Задеплоено на s2 2026-08-25 (коммит `a3f02048e`, zero-downtime rollout,
       smoke-test прошёл) — 401 на cron прекратились
 - [ ] Добавить List-Unsubscribe заголовок в email
+- [x] Healthcheck в docker-compose (production+staging) использовал `wget`, которого нет в
+      `node:24-slim` — CMD-SHELL вечно падал (exit 127), деплой 2026-09-04 (коммит `ac3972a3`)
+      завис на wait-healthy zero-downtime rollout и был отменён вручную (прод не пострадал,
+      старый контейнер остался healthy). Заменено на встроенный `http`-модуль Node без внешних
+      зависимостей (коммит `02cc27ca`).
+- [ ] ⚠️ Открытый вопрос: deploy-request на передеплой `time` (production, коммит `02cc27ca`,
+      thread `deploy-request: time` в Agent Mail) отправлен `deploy-agent-dev` 2026-09-04
+      21:38:13Z и на момент завершения сессии (~22:15Z, >35 минут) остался без ответа —
+      статус нового healthcheck на реальном контейнере не подтверждён. Следующей сессии: сверить
+      `fetch_inbox`/`search_messages` по этому thread, при отсутствии ответа — переспросить
+      deploy-agent-dev или задеплоить вручную с одобрения владельца.
 
 ---
 
