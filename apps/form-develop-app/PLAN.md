@@ -215,16 +215,13 @@ Zod-сообщения. Полное решение — `libs/forms/PLAN.md` («
 
 ---
 
-## Meta Syntax Demo (реализовано, Фаза 3 zenstack-form-plugin v3.0.0)
+## Meta Syntax Demo (реализовано, Фаза 3→4 zenstack-form-plugin v3.0.0 → v4.0.0)
 
-`/meta-syntax-demo` — модель `MetaSyntaxDemo`, демонстрирует `@meta("form.*", …)` как основной
-синтаксис field-метаданных вместо comment-директив `@form.*`: `name` (`title`/`placeholder`),
-`rating` (`fieldType` + плоские `form.props.count`/`form.props.allowHalf` — объектный литерал
+`/meta-syntax-demo` — модель `MetaSyntaxDemo`, демонстрирует `@meta("form.*", …)` — с v4.0.0
+**единственный** синтаксис field-метаданных: `name` (`title`/`placeholder`), `rating`
+(`fieldType` + плоские `form.props.count`/`form.props.allowHalf` — объектный литерал
 `@meta(key, {...})` ломает `zenstack generate` целиком, `ObjectExpr` не поддержан
-upstream-генератором TS-схемы), `bio` (`description`), `hidden` (`exclude`). Поле `legacyNote`
-намеренно оставлено на старом `@form.title`-комментарии — единственное во всей экосистеме
-`form-develop-app`/`form-example` — чтобы demo показывал живой deprecation-warning в консоли
-`nx zenstack:generate`, а не описание постфактум.
+upstream-генератором TS-схемы), `bio` (`description`), `hidden` (`exclude`).
 
 `schema.zmodel` целиком мигрирован кодмодом `scripts/codemods/codemod-form-directives.mjs`:
 30 директив в `Category`/`Recipe`/`RecipeInfoBase`/`Booking` конвертированы автоматически.
@@ -232,7 +229,15 @@ upstream-генератором TS-схемы), `bio` (`description`), `hidden` 
 "name")` парсер плагина никогда не поддерживал (только объектный литерал), relation-select для
 этого поля не рендерился до фикса.
 
-Полное решение — `libs/forms/PLAN.md` (Фаза 3), `libs/zenstack-form-plugin/CHANGELOG.md` v3.0.0.
+**[2026-09-05] Фаза 4 — `legacyNote` переведён на `@meta`.** До удаления legacy-парсера поле
+намеренно оставалось на старом `@form.title`-комментарии — единственное во всей экосистеме
+`form-develop-app`/`form-example` — чтобы demo показывал живой deprecation-warning в консоли
+`nx zenstack:generate`. С удалением парсера в v4.0.0 (`forms-dev`) это стало не «демонстрирует
+устаревание», а «тихо теряет метаданные» — поле и текст демо-страницы (`meta-syntax-demo/page.tsx`)
+переведены на `@meta` вместе со всем остальным.
+
+Полное решение — `libs/forms/PLAN.md` (Фаза 3→4), `libs/zenstack-form-plugin/CHANGELOG.md`
+v3.0.0/v4.0.0.
 
 ---
 
@@ -290,5 +295,6 @@ allowlist легитимных исключений собирается рук�
 
 ---
 
-**Последнее обновление:** 2026-08-26 — фикс пререндера `controlled-state-demo`/`filters-state-demo`
-(баг `@letar/forms` 2.7.6), детали в `PLAN_COMPLETED.md`.
+**Последнее обновление:** 2026-09-05 — `filters-state-demo` дополнена чипами активных фильтров
+(`ActiveFilterChips`, `getActiveUrlSyncFields` из `@letar/forms` v2.10.0) + e2e-покрытие; детали
+в `PLAN_COMPLETED.md` и `libs/forms/PLAN_COMPLETED.md`.
