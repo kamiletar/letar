@@ -12,31 +12,19 @@ import "./users"
 model City {
   id        String   @id @default(cuid())
   /// Название города
-  /// @form.title("Название")
-  /// @form.placeholder("Санкт-Петербург")
-  name      String   @unique
+  name      String   @unique @meta("form.title", "Название") @meta("form.placeholder", "Санкт-Петербург")
   /// URL-slug
-  /// @form.title("Slug (URL)")
-  /// @form.placeholder("spb")
-  slug      String   @unique
+  slug      String   @unique @meta("form.title", "Slug (URL)") @meta("form.placeholder", "spb")
   /// @deprecated Используй socialLinks
-  /// @form.title("Telegram")
-  /// @form.placeholder("https://t.me/grandslamcup")
-  telegramLink String?
+  telegramLink String? @meta("form.title", "Telegram") @meta("form.placeholder", "https://t.me/grandslamcup")
   /// ID Telegram-канала города (напр. @kbs_spb или -100...)
-  /// @form.title("Telegram Chat ID")
-  /// @form.placeholder("@kbs_spb или -1001234567890")
-  telegramChatId String?
+  telegramChatId String? @meta("form.title", "Telegram Chat ID") @meta("form.placeholder", "@kbs_spb или -1001234567890")
   /// Социальные ссылки JSON
-  /// @form.exclude
-  socialLinks  Json?
+  socialLinks  Json? @meta("form.exclude", true)
   /// Использовать терминологию «домашняя/гостевая» (для городов с домашними площадками)
-  /// @form.title("Домашние стадионы")
-  useHomeAway Boolean @default(false)
-  /// @form.exclude
-  createdAt DateTime @default(now())
-  /// @form.exclude
-  updatedAt DateTime @updatedAt
+  useHomeAway Boolean @default(false) @meta("form.title", "Домашние стадионы")
+  createdAt DateTime @default(now()) @meta("form.exclude", true)
+  updatedAt DateTime @updatedAt @meta("form.exclude", true)
 
   venues     Venue[]
   seasons    Season[]
@@ -71,49 +59,29 @@ model CityOrganizer {
 model Venue {
   id            String   @id @default(cuid())
   /// Название площадки
-  /// @form.title("Название")
-  /// @form.placeholder("Бар Глагол")
-  name          String
+  name          String @meta("form.title", "Название") @meta("form.placeholder", "Бар Глагол")
   /// URL-slug
-  /// @form.title("Slug (URL)")
-  /// @form.placeholder("glagol")
-  slug          String   @unique
+  slug          String   @unique @meta("form.title", "Slug (URL)") @meta("form.placeholder", "glagol")
   /// Город
-  /// @form.title("Город")
-  /// @form.fieldType("select")
-  cityId        String
+  cityId        String @meta("form.title", "Город") @meta("form.fieldType", "select")
   /// Адрес
-  /// @form.title("Адрес")
-  /// @form.placeholder("Невский пр., 1")
-  address       String?
+  address       String? @meta("form.title", "Адрес") @meta("form.placeholder", "Невский пр., 1")
   /// Широта (для карты)
-  /// @form.exclude
-  latitude      Float?
+  latitude      Float? @meta("form.exclude", true)
   /// Долгота (для карты)
-  /// @form.exclude
-  longitude     Float?
+  longitude     Float? @meta("form.exclude", true)
   /// Фото площадки
-  /// @form.exclude
-  photo         String?
+  photo         String? @meta("form.exclude", true)
   /// Описание
-  /// @form.title("Описание")
-  /// @form.fieldType("textarea")
-  description   String?
+  description   String? @meta("form.title", "Описание") @meta("form.fieldType", "textarea")
   /// @deprecated Используй socialLinks
-  /// @form.title("Telegram")
-  /// @form.placeholder("https://t.me/glagol")
-  telegramLink  String?
+  telegramLink  String? @meta("form.title", "Telegram") @meta("form.placeholder", "https://t.me/glagol")
   /// @deprecated Используй socialLinks
-  /// @form.title("Сайт")
-  /// @form.placeholder("https://glagol.bar")
-  websiteUrl    String?
+  websiteUrl    String? @meta("form.title", "Сайт") @meta("form.placeholder", "https://glagol.bar")
   /// Социальные ссылки JSON
-  /// @form.exclude
-  socialLinks   Json?
-  /// @form.exclude
-  createdAt     DateTime @default(now())
-  /// @form.exclude
-  updatedAt     DateTime @updatedAt
+  socialLinks   Json? @meta("form.exclude", true)
+  createdAt     DateTime @default(now()) @meta("form.exclude", true)
+  updatedAt     DateTime @updatedAt @meta("form.exclude", true)
 
   city    City    @relation(fields: [cityId], references: [id])
   teams   Team[]

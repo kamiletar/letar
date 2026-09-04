@@ -138,11 +138,9 @@ model Match {
   /// Тай-брейк (11-я пара при ничьей, Москва)
   hasTiebreak        Boolean        @default(false)
   /// URL постера/афиши матча
-  /// @form.title("Постер")
-  posterUrl          String?
+  posterUrl          String? @meta("form.title", "Постер")
   /// Поэт, который читал победное стихотворение после завершения матча (только для регулярных матчей)
-  /// @form.exclude
-  victoryPoemPlayerId String?
+  victoryPoemPlayerId String? @meta("form.exclude", true)
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
 

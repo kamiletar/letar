@@ -44,48 +44,31 @@ enum StageType {
 model Season {
   id        String       @id @default(cuid())
   /// Название сезона
-  /// @form.title("Название")
-  /// @form.placeholder("Сезон 2025-2026 СПб")
-  name      String
+  name      String @meta("form.title", "Название") @meta("form.placeholder", "Сезон 2025-2026 СПб")
   /// URL-slug
-  /// @form.title("Slug (URL)")
-  /// @form.placeholder("2025-2026-spb")
-  slug      String       @unique
+  slug      String       @unique @meta("form.title", "Slug (URL)") @meta("form.placeholder", "2025-2026-spb")
   /// Город
-  /// @form.title("Город")
-  /// @form.fieldType("select")
-  cityId    String
+  cityId    String @meta("form.title", "Город") @meta("form.fieldType", "select")
   /// Дата начала
-  /// @form.title("Дата начала")
-  startDate DateTime?
+  startDate DateTime? @meta("form.title", "Дата начала")
   /// Дата окончания
-  /// @form.title("Дата окончания")
-  endDate   DateTime?
+  endDate   DateTime? @meta("form.title", "Дата окончания")
   /// Статус сезона
-  /// @form.title("Статус")
-  status    SeasonStatus @default(UPCOMING)
+  status    SeasonStatus @default(UPCOMING) @meta("form.title", "Статус")
   /// Трансферное окно открыто
-  /// @form.title("Трансферное окно")
-  transferWindowOpen Boolean @default(false)
+  transferWindowOpen Boolean @default(false) @meta("form.title", "Трансферное окно")
   /// Формат турнира
-  /// @form.title("Формат")
-  format             TournamentFormat @default(ROUND_ROBIN)
+  format             TournamentFormat @default(ROUND_ROBIN) @meta("form.title", "Формат")
   /// Макс замен во 2-м тайме
-  /// @form.title("Макс замен во 2-м тайме")
-  maxSubstitutions   Int              @default(2)
+  maxSubstitutions   Int              @default(2) @meta("form.title", "Макс замен во 2-м тайме")
   /// Ничья разрешена (false = тай-брейк 11-я пара)
-  /// @form.title("Ничья разрешена")
-  drawAllowed        Boolean          @default(true)
+  drawAllowed        Boolean          @default(true) @meta("form.title", "Ничья разрешена")
   /// Домашние стадионы (false = площадку назначает оргкомитет)
-  /// @form.title("Домашние стадионы")
-  homeVenuesEnabled  Boolean          @default(true)
+  homeVenuesEnabled  Boolean          @default(true) @meta("form.title", "Домашние стадионы")
   /// Показывать счёт по ходу матча (false = только в конце)
-  /// @form.title("Промежуточный счёт")
-  showLiveScore      Boolean          @default(true)
-  /// @form.exclude
-  createdAt DateTime     @default(now())
-  /// @form.exclude
-  updatedAt DateTime     @updatedAt
+  showLiveScore      Boolean          @default(true) @meta("form.title", "Промежуточный счёт")
+  createdAt DateTime     @default(now()) @meta("form.exclude", true)
+  updatedAt DateTime     @updatedAt @meta("form.exclude", true)
 
   city              City              @relation(fields: [cityId], references: [id])
   leagues           League[]

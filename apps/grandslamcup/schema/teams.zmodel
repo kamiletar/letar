@@ -41,42 +41,25 @@ enum RosterAppType {
 model Team {
   id            String   @id @default(cuid())
   /// Название команды
-  /// @form.title("Название")
-  /// @form.placeholder("Чумные поэты")
-  name          String
+  name          String @meta("form.title", "Название") @meta("form.placeholder", "Чумные поэты")
   /// URL-slug
-  /// @form.title("Slug (URL)")
-  /// @form.placeholder("chumnye-poety")
-  slug          String   @unique
+  slug          String   @unique @meta("form.title", "Slug (URL)") @meta("form.placeholder", "chumnye-poety")
   /// Город
-  /// @form.title("Город")
-  /// @form.fieldType("select")
-  cityId        String
+  cityId        String @meta("form.title", "Город") @meta("form.fieldType", "select")
   /// Логотип
-  /// @form.exclude
-  logo          String?
+  logo          String? @meta("form.exclude", true)
   /// Описание команды
-  /// @form.title("Описание")
-  /// @form.fieldType("textarea")
-  description   String?
+  description   String? @meta("form.title", "Описание") @meta("form.fieldType", "textarea")
   /// Домашний стадион
-  /// @form.title("Домашний стадион")
-  /// @form.fieldType("select")
-  homeVenueId   String?
+  homeVenueId   String? @meta("form.title", "Домашний стадион") @meta("form.fieldType", "select")
   /// @deprecated Используй socialLinks
-  /// @form.title("Telegram")
-  /// @form.placeholder("https://t.me/team")
-  telegramLink  String?
+  telegramLink  String? @meta("form.title", "Telegram") @meta("form.placeholder", "https://t.me/team")
   /// Социальные ссылки JSON
-  /// @form.exclude
-  socialLinks   Json?
+  socialLinks   Json? @meta("form.exclude", true)
   /// История переименований (напр. "Болт" → "Вином")
-  /// @form.exclude
-  previousNames String[]
-  /// @form.exclude
-  createdAt     DateTime @default(now())
-  /// @form.exclude
-  updatedAt     DateTime @updatedAt
+  previousNames String[] @meta("form.exclude", true)
+  createdAt     DateTime @default(now()) @meta("form.exclude", true)
+  updatedAt     DateTime @updatedAt @meta("form.exclude", true)
 
   city        City         @relation(fields: [cityId], references: [id])
   homeVenue   Venue?       @relation(fields: [homeVenueId], references: [id])
@@ -270,10 +253,8 @@ model RosterApplication {
   /// Когда рассмотрена
   reviewedAt      DateTime?
 
-  /// @form.exclude
-  createdAt       DateTime          @default(now())
-  /// @form.exclude
-  updatedAt       DateTime          @updatedAt
+  createdAt       DateTime          @default(now()) @meta("form.exclude", true)
+  updatedAt       DateTime          @updatedAt @meta("form.exclude", true)
 
   player         Player?     @relation(fields: [playerId], references: [id])
   fromTeamSeason TeamSeason? @relation("AppFrom", fields: [fromTeamSeasonId], references: [id])

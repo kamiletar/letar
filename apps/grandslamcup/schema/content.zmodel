@@ -24,42 +24,28 @@ enum ImageCategory {
 model NewsPost {
   id          String    @id @default(cuid())
   /// Заголовок
-  /// @form.title("Заголовок")
-  title       String
+  title       String @meta("form.title", "Заголовок")
   /// URL-slug
-  /// @form.title("Slug (URL)")
-  slug        String    @unique
+  slug        String    @unique @meta("form.title", "Slug (URL)")
   /// Контент (Markdown)
-  /// @form.title("Контент")
-  /// @form.fieldType("textarea")
-  content     String
+  content     String @meta("form.title", "Контент") @meta("form.fieldType", "textarea")
   /// Краткое описание
-  /// @form.title("Описание")
-  excerpt     String?
+  excerpt     String? @meta("form.title", "Описание")
   /// Обложка (URL)
-  /// @form.title("Обложка")
-  coverImage  String?
+  coverImage  String? @meta("form.title", "Обложка")
   /// Связанный матч
-  /// @form.title("Матч")
-  /// @form.fieldType("select")
-  matchId     String?
+  matchId     String? @meta("form.title", "Матч") @meta("form.fieldType", "select")
   /// Опубликован
-  /// @form.title("Опубликован")
-  published   Boolean   @default(false)
+  published   Boolean   @default(false) @meta("form.title", "Опубликован")
   /// Дата публикации
   publishedAt DateTime?
   /// Автор
-  /// @form.exclude
-  authorId    String
-  /// @form.exclude
-  createdAt   DateTime  @default(now())
-  /// @form.exclude
-  updatedAt   DateTime  @updatedAt
+  authorId    String @meta("form.exclude", true)
+  createdAt   DateTime  @default(now()) @meta("form.exclude", true)
+  updatedAt   DateTime  @updatedAt @meta("form.exclude", true)
 
   /// Город
-  /// @form.title("Город")
-  /// @form.fieldType("select")
-  cityId     String?
+  cityId     String? @meta("form.title", "Город") @meta("form.fieldType", "select")
 
   match  Match? @relation(fields: [matchId], references: [id])
   author User   @relation("NewsAuthor", fields: [authorId], references: [id])
@@ -75,27 +61,18 @@ model NewsPost {
 model DonateLink {
   id        String   @id @default(cuid())
   /// Название
-  /// @form.title("Название")
-  /// @form.placeholder("Boosty, Перевод на карту...")
-  name      String
+  name      String @meta("form.title", "Название") @meta("form.placeholder", "Boosty, Перевод на карту...")
   /// URL
-  /// @form.title("Ссылка")
-  url       String
+  url       String @meta("form.title", "Ссылка")
   /// Описание
-  /// @form.title("Описание")
-  description String?
+  description String? @meta("form.title", "Описание")
   /// Порядок отображения
-  /// @form.title("Порядок")
-  order     Int      @default(0)
+  order     Int      @default(0) @meta("form.title", "Порядок")
   /// Активна
-  /// @form.title("Активна")
-  active    Boolean  @default(true)
+  active    Boolean  @default(true) @meta("form.title", "Активна")
   /// Город
-  /// @form.title("Город")
-  /// @form.fieldType("select")
-  cityId    String?
-  /// @form.exclude
-  createdAt DateTime @default(now())
+  cityId    String? @meta("form.title", "Город") @meta("form.fieldType", "select")
+  createdAt DateTime @default(now()) @meta("form.exclude", true)
 
   city City? @relation(fields: [cityId], references: [id])
 

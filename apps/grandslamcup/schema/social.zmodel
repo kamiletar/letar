@@ -17,10 +17,8 @@ model TelegramConfig {
   autoHalfTime     Boolean @default(false)
   /// Авторезультат при завершении матча
   autoResult       Boolean @default(false)
-  /// @form.exclude
-  createdAt DateTime @default(now())
-  /// @form.exclude
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @meta("form.exclude", true)
+  updatedAt DateTime @updatedAt @meta("form.exclude", true)
 
   @@allow('all', auth() != null && 'ADMIN' in auth().roles)
 }
