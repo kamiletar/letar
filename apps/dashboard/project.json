@@ -20,7 +20,7 @@
         "cwd": "apps/dashboard",
         "parallel": false
       },
-      "cache": true,
+      "cache": false,
       "inputs": [
         "{projectRoot}/schema.zmodel",
         {
@@ -44,7 +44,7 @@
         "command": "prisma generate",
         "cwd": "apps/dashboard"
       },
-      "cache": true,
+      "cache": false,
       "inputs": [
         "{projectRoot}/src/generated/schema.prisma",
         "{projectRoot}/schema.zmodel",
@@ -69,6 +69,7 @@
         "command": "prisma db push",
         "cwd": "apps/dashboard"
       },
+      "cache": false,
       "dependsOn": [
         "db:generate"
       ],
@@ -85,6 +86,7 @@
         "command": "prisma db push --accept-data-loss --force-reset",
         "cwd": "apps/dashboard"
       },
+      "cache": false,
       "dependsOn": [
         "db:generate"
       ],
@@ -101,6 +103,7 @@
         "command": "cross-env CI= VERCEL= GITHUB_ACTIONS= GITLAB= NETLIFY= HEROKU= prisma migrate dev",
         "cwd": "apps/dashboard"
       },
+      "cache": false,
       "dependsOn": [
         "db:generate"
       ],
@@ -117,6 +120,7 @@
         "command": "prisma migrate deploy",
         "cwd": "apps/dashboard"
       },
+      "cache": false,
       "metadata": {
         "description": "Apply pending migrations (production)",
         "technologies": [
@@ -130,6 +134,7 @@
         "command": "prisma studio",
         "cwd": "apps/dashboard"
       },
+      "cache": false,
       "metadata": {
         "description": "Open Prisma Studio database GUI",
         "technologies": [
@@ -143,6 +148,7 @@
         "command": "prisma migrate reset",
         "cwd": "apps/dashboard"
       },
+      "cache": false,
       "metadata": {
         "description": "Reset database and apply all migrations",
         "technologies": [
