@@ -12,19 +12,14 @@ import "./library"
 model User {
   id            String    @id @default(cuid())
 
-  /// @form.title("Email")
-  /// @form.fieldType("email")
-  email         String?   @unique
+  email         String?   @unique @meta("form.title", "Email") @meta("form.fieldType", "email")
 
-  /// @form.title("Имя")
-  name          String?
+  name          String? @meta("form.title", "Имя")
 
-  /// @form.title("Аватар")
   /// Стандартное имя Better Auth для аватара
-  image         String?
+  image         String? @meta("form.title", "Аватар")
 
-  /// @form.title("Роль")
-  role          UserRole  @default(USER)
+  role          UserRole  @default(USER) @meta("form.title", "Роль")
 
   // Better Auth fields
   emailVerified Boolean   @default(false)
@@ -47,9 +42,7 @@ model User {
   moderationLogs ModerationLog[] // Логи модерации
 
   // Настройки пользователя
-  /// @form.title("Кастомный IPFS Gateway")
-  /// @form.placeholder("https://...")
-  customGateway String?
+  customGateway String? @meta("form.title", "Кастомный IPFS Gateway") @meta("form.placeholder", "https://...")
 
   /// Предпочитаемый режим дорожек: 'RUSSIAN_DUB' | 'ORIGINAL_SUB'
   preferredTrackMode String? @default("RUSSIAN_DUB")
@@ -76,26 +69,19 @@ model User {
 model ApiKey {
   id          String    @id @default(cuid())
 
-  /// @form.title("Название")
-  /// @form.placeholder("Мой ключ для Animatrona")
-  name        String
+  name        String @meta("form.title", "Название") @meta("form.placeholder", "Мой ключ для Animatrona")
 
   /// SHA256 хэш ключа (сам ключ не хранится)
-  /// @form.exclude
-  key         String    @unique
+  key         String    @unique @meta("form.exclude", true)
 
   /// Последнее использование
-  /// @form.exclude
-  lastUsedAt  DateTime?
+  lastUsedAt  DateTime? @meta("form.exclude", true)
 
   /// Владелец ключа
-  /// @form.exclude
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  /// @form.exclude
-  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade) @meta("form.exclude", true)
+  userId      String @meta("form.exclude", true)
 
-  /// @form.exclude
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime  @default(now()) @meta("form.exclude", true)
 
   @@index([userId])
 

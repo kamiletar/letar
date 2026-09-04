@@ -12,18 +12,13 @@ import "./library"
 model Anime {
   id            String        @id @default(cuid())
 
-  /// @form.title("Название")
-  title         String
+  title         String @meta("form.title", "Название")
 
-  /// @form.title("Оригинальное название")
-  titleOriginal String?
+  titleOriginal String? @meta("form.title", "Оригинальное название")
 
-  /// @form.title("Описание")
-  /// @form.fieldType("richText")
-  description   String?       @db.Text
+  description   String?       @db.Text @meta("form.title", "Описание") @meta("form.fieldType", "richText")
 
-  /// @form.title("URL обложки")
-  coverUrl      String?
+  coverUrl      String? @meta("form.title", "URL обложки")
 
   /// CID корневой IPFS-директории аниме (уникальный идентификатор)
   directoryCid  String?       @unique
@@ -46,22 +41,16 @@ model Anime {
   franchiseKey      String?
 
   /// Аниме, которое эта запись замещает (self-relation)
-  /// @form.exclude
-  replacesAnime     Anime?        @relation("AnimeReplacement", fields: [replacesAnimeId], references: [id])
-  /// @form.exclude
-  replacesAnimeId   String?
+  replacesAnime     Anime?        @relation("AnimeReplacement", fields: [replacesAnimeId], references: [id]) @meta("form.exclude", true)
+  replacesAnimeId   String? @meta("form.exclude", true)
   /// Записи-кандидаты на замену этого аниме
-  /// @form.exclude
-  replacedBy        Anime[]       @relation("AnimeReplacement")
+  replacedBy        Anime[]       @relation("AnimeReplacement") @meta("form.exclude", true)
 
-  /// @form.title("Год выпуска")
-  year          Int?
+  year          Int? @meta("form.title", "Год выпуска")
 
-  /// @form.title("Студия")
-  studio        String?
+  studio        String? @meta("form.title", "Студия")
 
-  /// @form.title("Жанры")
-  genres        String[]
+  genres        String[] @meta("form.title", "Жанры")
 
   /// Возрастной рейтинг Shikimori (g, pg, pg_13, r, r_plus, rx)
   ageRating     String?
@@ -73,55 +62,41 @@ model Anime {
   voiceActing   String[]
 
   /// Эпизоды аниме
-  /// @form.exclude
-  episodes      AnimeEpisode[]
+  episodes      AnimeEpisode[] @meta("form.exclude", true)
 
   /// Раздачи этого аниме
-  /// @form.exclude
-  distributions Distribution[]
+  distributions Distribution[] @meta("form.exclude", true)
 
   /// Пин-сервер, на котором запинено это аниме (шардирование)
-  /// @form.exclude
-  pinnedOn      PinServer?    @relation("pinnedAnime", fields: [pinnedOnId], references: [id])
-  /// @form.exclude
-  pinnedOnId    String?
+  pinnedOn      PinServer?    @relation("pinnedAnime", fields: [pinnedOnId], references: [id]) @meta("form.exclude", true)
+  pinnedOnId    String? @meta("form.exclude", true)
 
   /// Задания на пиннинг
-  /// @form.exclude
-  pinJobs       PinJob[]
+  pinJobs       PinJob[] @meta("form.exclude", true)
 
   /// История замен CID (для очистки старых пинов)
-  /// @form.exclude
-  cidHistory    CidHistory[]
+  cidHistory    CidHistory[] @meta("form.exclude", true)
 
   /// Записи библиотек пользователей
-  /// @form.exclude
-  libraryItems  UserLibraryItem[]
+  libraryItems  UserLibraryItem[] @meta("form.exclude", true)
 
   /// Комментарии к аниме
-  /// @form.exclude
-  comments      AnimeComment[]
+  comments      AnimeComment[] @meta("form.exclude", true)
 
   /// Связи с другими аниме (сиквелы, приквелы и т.д.)
-  /// @form.exclude
-  sourceRelations AnimeRelation[] @relation("SourceRelations")
+  sourceRelations AnimeRelation[] @relation("SourceRelations") @meta("form.exclude", true)
   /// Аниме, ссылающиеся на это как на цель
-  /// @form.exclude
-  targetRelations AnimeRelation[] @relation("TargetRelations")
+  targetRelations AnimeRelation[] @relation("TargetRelations") @meta("form.exclude", true)
 
   /// Логи модерации
-  /// @form.exclude
-  moderationLogs ModerationLog[]
+  moderationLogs ModerationLog[] @meta("form.exclude", true)
 
   /// Кто загрузил аниме
-  /// @form.exclude
-  uploadedBy    User          @relation(fields: [uploadedById], references: [id])
-  /// @form.exclude
-  uploadedById  String
+  uploadedBy    User          @relation(fields: [uploadedById], references: [id]) @meta("form.exclude", true)
+  uploadedById  String @meta("form.exclude", true)
 
   /// Статус модерации
-  /// @form.title("Статус")
-  status        ContentStatus @default(PENDING)
+  status        ContentStatus @default(PENDING) @meta("form.title", "Статус")
 
   /// Количество уникальных зрителей (денормализовано для быстрой сортировки)
   viewCount     Int           @default(0)
@@ -132,10 +107,8 @@ model Anime {
   /// Средний рейтинг от пользователей (0-10, null = нет оценок)
   avgRating     Float?
 
-  /// @form.exclude
-  createdAt     DateTime      @default(now())
-  /// @form.exclude
-  updatedAt     DateTime      @updatedAt
+  createdAt     DateTime      @default(now()) @meta("form.exclude", true)
+  updatedAt     DateTime      @updatedAt @meta("form.exclude", true)
 
   @@index([title])
   @@index([status])
@@ -195,29 +168,22 @@ model AnimeEpisode {
   id          String   @id @default(cuid())
 
   /// Номер эпизода
-  /// @form.title("Номер")
-  number      Int
+  number      Int @meta("form.title", "Номер")
 
   /// Название эпизода
-  /// @form.title("Название")
-  title       String?
+  title       String? @meta("form.title", "Название")
 
   /// Длительность в секундах
-  /// @form.title("Длительность (сек)")
-  duration    Int?
+  duration    Int? @meta("form.title", "Длительность (сек)")
 
   /// CID видеофайла в IPFS
-  /// @form.title("Video CID")
-  videoCid    String
+  videoCid    String @meta("form.title", "Video CID")
 
   /// Связь с аниме
-  /// @form.exclude
-  anime       Anime    @relation(fields: [animeId], references: [id], onDelete: Cascade)
-  /// @form.exclude
-  animeId     String
+  anime       Anime    @relation(fields: [animeId], references: [id], onDelete: Cascade) @meta("form.exclude", true)
+  animeId     String @meta("form.exclude", true)
 
-  /// @form.exclude
-  createdAt   DateTime @default(now())
+  createdAt   DateTime @default(now()) @meta("form.exclude", true)
 
   // Уникальность: один номер эпизода на аниме
   @@unique([animeId, number])
