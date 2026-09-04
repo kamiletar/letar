@@ -48,8 +48,14 @@ jobs:
     # Часть unit-тестов (например animatrona-tracker/route.spec.ts) делает настоящие запросы
     # через ZenStack ORM, а не мокает БД — им нужен реальный Postgres, не просто синтаксически
     # валидная строка выше. Один сервер, отдельная БД на каждое такое приложение (шаг "Prepare
-    # test databases" ниже) — общая плоская БД рискует коллизией имён таблиц между приложениями
-    # (animatrona-tracker и svoichuzhie оба используют Better Auth модели User/Account/Session).
+    # test databases" ниже) — общая плоская БД рискует коллизией имён таблиц между приложениями,
+    # у которых одноимённые модели Better Auth (User/Account/Session).
+    #
+    # ⚠️ Сюда попадают только ПУБЛИЧНЫЕ проекты. svoichuzhie — приватный submodule
+    # (см. "Checkout" ниже, submodules: false) — в этом job его каталог пуст, и любой
+    # `nx run svoichuzhie:...` падает с "Cannot find project 'svoichuzhie'" (обнаружено
+    # 2026-09-04, run 33840862630). Тестовая БД для приватных submodule-приложений — их
+    # собственная забота (внутри submodule свой CI, если он есть), не этого workflow.
     services:
       postgres:
         image: postgres:16-alpine
@@ -114,14 +120,14 @@ jobs:
         if: always() && steps.install.outcome == 'success'
         run: bunx nx affected -t typecheck:tsgo --parallel=3
 
-      # Создаёт БД и накатывает схему для приложений, чьи unit-тесты бьют в настоящий Postgres
-      # (см. комментарий у `services.postgres` выше). Имя БД должно совпадать с тем, что задано
-      # в `test.env.DATABASE_URL` соответствующего `vitest.config.mts` — здесь это
-      # animatrona_tracker_ci и svoichuzhie_ci (отдельная БД — у обоих приложений одноимённые
-      # модели Better Auth User/Account/Session/Verification, общая БД рискует коллизией схем).
-      # `prisma db push` идёт со своим DATABASE_URL на шаг (не job-level), чтобы не задеть
-      # остальные проекты. Новое приложение с настоящим (не замоканным) Postgres в unit-тестах
-      # добавляется сюда отдельной строкой + своим `test.env` в vitest.config.mts.
+      # Создаёт БД и накатывает схему для ПУБЛИЧНЫХ приложений, чьи unit-тесты бьют в настоящий
+      # Postgres (см. комментарий у `services.postgres` выше). Имя БД должно совпадать с тем,
+      # что задано в `test.env.DATABASE_URL` соответствующего `vitest.config.mts` — здесь это
+      # animatrona_tracker_ci. `prisma db push` идёт со своим DATABASE_URL на шаг (не job-level),
+      # чтобы не задеть остальные проекты. Новое ПУБЛИЧНОЕ приложение с настоящим (не замоканным)
+      # Postgres в unit-тестах добавляется сюда отдельной строкой + своим `test.env` в
+      # vitest.config.mts. Приватные submodule-приложения сюда не добавлять — их каталог в этом
+      # job пуст (checkout без submodules), `nx run <private>:...` падает с "Cannot find project".
       - name: Prepare test databases
         if: always() && steps.install.outcome == 'success'
         env:
@@ -130,9 +136,6 @@ jobs:
           psql -h localhost -U ci -d ci -c 'CREATE DATABASE animatrona_tracker_ci'
           bunx nx run animatrona-tracker:zenstack:generate
           DATABASE_URL=postgresql://ci:ci@localhost:5432/animatrona_tracker_ci bunx nx run animatrona-tracker:db:push
-          psql -h localhost -U ci -d ci -c 'CREATE DATABASE svoichuzhie_ci'
-          bunx nx run svoichuzhie:zenstack:generate
-          DATABASE_URL=postgresql://ci:ci@localhost:5432/svoichuzhie_ci bunx nx run svoichuzhie:db:push
 
       # --parallel=2 (не 3, как у lint/typecheck) и ограничение воркеров vitest внутри каждого
       # проекта — иначе 3 nx-таски × собственный пул воркеров vitest на каждую одновременно
