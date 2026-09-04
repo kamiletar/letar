@@ -233,17 +233,34 @@ function DashboardPage() {
 }
 ```
 
-## Запланировано
+## Чипы активных фильтров
 
-Эти паттерны сейчас требуют ручного кода. Появятся в ближайших релизах:
+`useActiveFiltersCount` даёт число. Когда нужен сам список активных полей — для кнопки
+«Сбросить всё» и крестика на отдельном чипе — используй `getActiveUrlSyncFields`:
 
-| Фича                      | Описание                                               |
-| ------------------------- | ------------------------------------------------------ |
-| `useFormUrlSync`          | Двусторонняя URL ↔ форма синхронизация с debounce      |
-| `Form.Subscribe debounce` | Встроенный debounce: `<Form.Subscribe debounce={300}>` |
-| `onSubmit` опциональный   | Без `onSubmit={async () => {}}` для no-submit форм     |
-| `useFormRef`              | Доступ к инстансу формы снаружи дерева                 |
-| `useActiveFiltersCount`   | Счётчик полей, отличающихся от дефолтов                |
+```tsx
+import { getActiveUrlSyncFields } from '@letar/forms'
+
+<Form.Subscribe debounce={150}>
+  {(values) => {
+    const active = getActiveUrlSyncFields(values, ['search', 'category', 'minPrice'], defaults)
+    if (active.length === 0) return null
+    return (
+      <HStack wrap="wrap">
+        {active.map(({ field }) => (
+          <Tag key={field}>
+            {field}
+            <CloseButton onClick={() => formRef.current?.setFieldValue(field, defaults[field])} />
+          </Tag>
+        ))}
+      </HStack>
+    )
+  }}
+</Form.Subscribe>
+```
+
+Переиспользует тот же дифф, что `Form.UrlSync` вычисляет внутри себя перед записью в URL — не
+нужно пересчитывать «отличается ли поле от дефолта» в каждом месте использования.
 
 ## Смотрите также
 

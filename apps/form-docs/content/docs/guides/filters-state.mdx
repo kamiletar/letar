@@ -233,17 +233,34 @@ function DashboardPage() {
 }
 ```
 
-## Coming Soon
+## Active Filters as Chips
 
-These patterns currently require manual code. Planned for upcoming releases:
+`useActiveFiltersCount` gives you a number. When you need the actual list of active fields —
+for a "Clear all" button and a per-value ✕ chip — use `getActiveUrlSyncFields`:
 
-| Feature                   | Description                                          |
-| ------------------------- | ---------------------------------------------------- |
-| `useFormUrlSync`          | Bidirectional URL ↔ form state with debounce         |
-| `Form.Subscribe debounce` | Built-in debounce: `<Form.Subscribe debounce={300}>` |
-| Optional `onSubmit`       | No-submit forms without `onSubmit={async () => {}}`  |
-| `useFormRef`              | Access form instance outside the `<Form>` tree       |
-| `useActiveFiltersCount`   | Count fields differing from defaults                 |
+```tsx
+import { getActiveUrlSyncFields } from '@letar/forms'
+
+<Form.Subscribe debounce={150}>
+  {(values) => {
+    const active = getActiveUrlSyncFields(values, ['search', 'category', 'minPrice'], defaults)
+    if (active.length === 0) return null
+    return (
+      <HStack wrap="wrap">
+        {active.map(({ field }) => (
+          <Tag key={field}>
+            {field}
+            <CloseButton onClick={() => formRef.current?.setFieldValue(field, defaults[field])} />
+          </Tag>
+        ))}
+      </HStack>
+    )
+  }}
+</Form.Subscribe>
+```
+
+It reuses the same diff `Form.UrlSync` computes internally before writing to the URL — no need
+to re-derive "is this field non-default" at each call site.
 
 ## Related
 
