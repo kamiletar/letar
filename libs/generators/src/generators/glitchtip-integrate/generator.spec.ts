@@ -213,7 +213,21 @@ describe('glitchtip-integrate generator', () => {
     expect(compose).toContain('NODE_ENV: production')
   })
 
-  it('не трогает docker-compose, если все 4 переменные уже вставлены', async () => {
+  it('вставляет обе release-переменные с источником GLITCHTIP_RELEASE', async () => {
+    seedNextApp(tree, 'dashboard')
+    tree.write(
+      'apps/dashboard/docker-compose.production.yml',
+      ['services:', '  app:', '    environment:', '      NODE_ENV: production', ''].join('\n'),
+    )
+
+    await glitchtipIntegrateGenerator(tree, { app: 'dashboard', skipChecks: true })
+
+    const compose = tree.read('apps/dashboard/docker-compose.production.yml', 'utf-8') ?? ''
+    expect(compose).toContain('GLITCHTIP_RELEASE: ${GLITCHTIP_RELEASE}')
+    expect(compose).toContain('NEXT_PUBLIC_GLITCHTIP_RELEASE: ${GLITCHTIP_RELEASE}')
+  })
+
+  it('не трогает docker-compose, если все 6 переменных (DSN/environment/release) уже вставлены', async () => {
     seedNextApp(tree, 'dashboard')
     const original = [
       'services:',
@@ -223,6 +237,8 @@ describe('glitchtip-integrate generator', () => {
       '      GLITCHTIP_ENVIRONMENT: ${GLITCHTIP_ENVIRONMENT}',
       '      NEXT_PUBLIC_GLITCHTIP_DSN: ${NEXT_PUBLIC_GLITCHTIP_DSN}',
       '      NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT: ${NEXT_PUBLIC_GLITCHTIP_ENVIRONMENT}',
+      '      GLITCHTIP_RELEASE: ${GLITCHTIP_RELEASE}',
+      '      NEXT_PUBLIC_GLITCHTIP_RELEASE: ${GLITCHTIP_RELEASE}',
       '',
     ].join('\n')
     tree.write('apps/dashboard/docker-compose.production.yml', original)
@@ -240,6 +256,36 @@ describe('glitchtip-integrate generator', () => {
     await glitchtipIntegrateGenerator(tree, { app: 'dashboard', skipChecks: true })
 
     expect(tree.read('apps/dashboard/docker-compose.production.yml', 'utf-8')).toBe(original)
+  })
+
+  it('добавляет productionBrowserSourceMaps: true в next.config.js', async () => {
+    seedNextApp(tree, 'dashboard')
+    tree.write(
+      'apps/dashboard/next.config.js',
+      ['const nextConfig = {', "  output: 'standalone',", '}', '', 'module.exports = nextConfig', ''].join('\n'),
+    )
+
+    await glitchtipIntegrateGenerator(tree, { app: 'dashboard', skipChecks: true })
+
+    const config = tree.read('apps/dashboard/next.config.js', 'utf-8') ?? ''
+    expect(config).toContain('productionBrowserSourceMaps: true,')
+  })
+
+  it('не трогает next.config.js, если productionBrowserSourceMaps уже есть', async () => {
+    seedNextApp(tree, 'dashboard')
+    const original = [
+      'const nextConfig = {',
+      '  productionBrowserSourceMaps: true,',
+      '}',
+      '',
+      'module.exports = nextConfig',
+      '',
+    ].join('\n')
+    tree.write('apps/dashboard/next.config.js', original)
+
+    await glitchtipIntegrateGenerator(tree, { app: 'dashboard', skipChecks: true })
+
+    expect(tree.read('apps/dashboard/next.config.js', 'utf-8')).toBe(original)
   })
 
   it('возвращает GeneratorCallback, если skipChecks не передан', async () => {

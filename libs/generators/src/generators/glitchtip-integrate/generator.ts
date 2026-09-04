@@ -55,19 +55,29 @@ function writeInstrumentationFile(tree: Tree, targetPath: string, templateFileNa
   )
 }
 
+// name → shell-переменная-источник интерполяции. Для двух release-переменных источник один и тот
+// же GLITCHTIP_RELEASE (git short SHA, экспортирует deploy-affected.sh до nx build) — сервер
+// читает release из process.env.GLITCHTIP_RELEASE, клиент инлайнит NEXT_PUBLIC_-копию на билде.
+const COMPOSE_VARS: Array<{ name: string; source: string }> = [
+  ...ENV_VARS.map((name) => ({ name, source: name })),
+  { name: 'GLITCHTIP_RELEASE', source: 'GLITCHTIP_RELEASE' },
+  { name: 'NEXT_PUBLIC_GLITCHTIP_RELEASE', source: 'GLITCHTIP_RELEASE' },
+]
+
 /**
- * Точечная текстовая правка docker-compose production/staging: вставляет 4 переменные GlitchTip в
- * `services.app.environment` через `${VAR}` (НЕ литералом — см. libs/glitchtip/README.md и
- * .claude/docs/nextjs-public-env-build-time-inlining.md). Не парсит YAML целиком — конвенция
- * сервиса-приложения по имени "app" стабильна во всех docker-compose приложений монорепо
- * (см. .claude/rules/env-files.md § «Новая переменная окружения»).
+ * Точечная текстовая правка docker-compose production/staging: вставляет переменные GlitchTip
+ * (DSN/environment/release) в `services.app.environment` через `${VAR}` (НЕ литералом — см.
+ * libs/glitchtip/README.md и .claude/docs/nextjs-public-env-build-time-inlining.md). Не парсит
+ * YAML целиком — конвенция сервиса-приложения по имени "app" стабильна во всех docker-compose
+ * приложений монорепо (см. .claude/rules/env-files.md § «Новая переменная окружения»).
  */
 function upsertComposeEnvVars(content: string): { content: string; status: 'inserted' | 'already-present' | 'manual' } {
   const eol = content.includes('\r\n') ? '\r\n' : '\n'
   const lines = content.split(/\r\n|\n/)
 
-  const presentCount = ENV_VARS.filter((name) => lines.some((line) => new RegExp(`^\\s*${name}:`).test(line))).length
-  if (presentCount === ENV_VARS.length) {
+  const presentCount =
+    COMPOSE_VARS.filter(({ name }) => lines.some((line) => new RegExp(`^\\s*${name}:`).test(line))).length
+  if (presentCount === COMPOSE_VARS.length) {
     return { content, status: 'already-present' }
   }
   if (presentCount > 0) {
@@ -96,7 +106,7 @@ function upsertComposeEnvVars(content: string): { content: string; status: 'inse
     }
   }
 
-  const varLines = ENV_VARS.map((name) => `      ${name}: \${${name}}`)
+  const varLines = COMPOSE_VARS.map(({ name, source }) => `      ${name}: \${${source}}`)
 
   if (envIdx !== -1) {
     lines.splice(envIdx + 1, 0, ...varLines)
@@ -116,14 +126,16 @@ function upsertDockerCompose(tree: Tree, composePath: string): void {
   const result = upsertComposeEnvVars(content)
 
   if (result.status === 'already-present') {
-    logger.info(`⏭️  ${composePath} уже содержит все 4 переменные GlitchTip — пропущено.`)
+    logger.info(`⏭️  ${composePath} уже содержит все переменные GlitchTip — пропущено.`)
     return
   }
   if (result.status === 'manual') {
     logger.warn(
       `⚠️  ${composePath}: не удалось безопасно определить место вставки (частичное совпадение `
         + `переменных или нестандартная структура — сервис "app" не найден). Добавь вручную в `
-        + `services.app.environment:\n${ENV_VARS.map((v) => `      ${v}: \${${v}}`).join('\n')}`,
+        + `services.app.environment:\n${
+          COMPOSE_VARS.map(({ name, source }) => `      ${name}: \${${source}}`).join('\n')
+        }`,
     )
     return
   }
@@ -166,6 +178,46 @@ function upsertEnvDocker(
   }
 
   logger.info(`✅ ${envPath}: добавлено ${missing.length} переменных GlitchTip.`)
+}
+
+/**
+ * Точечная текстовая правка next.config.*: вставляет `productionBrowserSourceMaps: true` сразу
+ * после `const nextConfig = {` — без него Next.js не эмитит `.js.map` в проде, и грузить в
+ * GlitchTip нечего (deploy-affected.sh просто молча пропускает шаг — не найдёт ни одного `.map`,
+ * см. PLAN-INFRA-4.md §70 п.6). Не парсит AST — конвенция `const nextConfig = {...}` стабильна во
+ * всех приложениях монорепо на этом пресете (см. apps/dashboard, apps/mandala).
+ */
+function upsertProductionBrowserSourceMaps(tree: Tree, nextConfigPath: string): void {
+  if (!tree.exists(nextConfigPath)) {
+    return
+  }
+  const content = tree.read(nextConfigPath, 'utf-8') ?? ''
+  if (content.includes('productionBrowserSourceMaps')) {
+    logger.info(`⏭️  ${nextConfigPath} уже содержит productionBrowserSourceMaps — пропущено.`)
+    return
+  }
+
+  const eol = content.includes('\r\n') ? '\r\n' : '\n'
+  const lines = content.split(/\r\n|\n/)
+  const idx = lines.findIndex((line) => /^const nextConfig(?::[^=]+)?\s*=\s*\{/.test(line))
+  if (idx === -1) {
+    logger.warn(
+      `⚠️ ${nextConfigPath}: не нашёл "const nextConfig = {" — впиши вручную `
+        + `"productionBrowserSourceMaps: true," в объект конфигурации (без него sourcemaps не собираются).`,
+    )
+    return
+  }
+
+  lines.splice(
+    idx + 1,
+    0,
+    '  // Клиентские sourcemaps в проде — без них стектрейсы в GlitchTip приходят из минифицированного',
+    '  // кода. .map-файлы не публикуются: сборка удаляет их после загрузки в GlitchTip',
+    '  // (см. корневой scripts/glitchtip-upload-sourcemaps.mjs, PLAN-INFRA-4.md §70 п.6).',
+    '  productionBrowserSourceMaps: true,',
+  )
+  tree.write(nextConfigPath, lines.join(eol))
+  logger.info(`✅ ${nextConfigPath}: productionBrowserSourceMaps: true добавлен (проверь diff!).`)
 }
 
 function runChecksCallback(app: string): GeneratorCallback {
@@ -230,7 +282,7 @@ export default async function glitchtipIntegrateGenerator(
   const srcPrefix = hasSrcDir ? 'src' : ''
 
   logger.info(
-    `\n📋 Шаг 1/6 — создай проект в GlitchTip UI (ручной шаг, не автоматизирован намеренно — генератор не хранит `
+    `\n📋 Шаг 1/7 — создай проект в GlitchTip UI (ручной шаг, не автоматизирован намеренно — генератор не хранит `
       + `админ-токен GlitchTip):\n`
       + `  1. https://errors.s3.letar.best → Settings → Projects → New Project\n`
       + `  2. Platform: Next.js (или Node.js — платформа не влияет на SDK, только на подсказки в UI), slug: "${app}"\n`
@@ -239,7 +291,7 @@ export default async function glitchtipIntegrateGenerator(
       + `  5. Допиши строку "${app}" в таблицу «Подключённые приложения» infra/glitchtip/README.md\n`,
   )
 
-  logger.info('📋 Шаг 2/6 — instrumentation-файлы...')
+  logger.info('📋 Шаг 2/7 — instrumentation-файлы...')
   writeInstrumentationFile(tree, joinPathFragments(appDir, srcPrefix, 'instrumentation.ts'), 'instrumentation.ts', app)
   writeInstrumentationFile(
     tree,
@@ -248,7 +300,7 @@ export default async function glitchtipIntegrateGenerator(
     app,
   )
 
-  logger.info('📋 Шаг 3/6 — package.json (dependencies + nx.implicitDependencies)...')
+  logger.info('📋 Шаг 3/7 — package.json (dependencies + nx.implicitDependencies)...')
   updateJson(tree, packageJsonPath, (json) => {
     json.dependencies = json.dependencies ?? {}
     if (!json.dependencies['@letar/glitchtip']) {
@@ -262,7 +314,7 @@ export default async function glitchtipIntegrateGenerator(
     return json
   })
 
-  logger.info('📋 Шаг 4/6 — tsconfig.json (paths для ./server и ./client)...')
+  logger.info('📋 Шаг 4/7 — tsconfig.json (paths для ./server и ./client)...')
   const tsconfigPath = joinPathFragments(appDir, 'tsconfig.json')
   if (tree.exists(tsconfigPath)) {
     updateJson(tree, tsconfigPath, (json) => {
@@ -278,7 +330,7 @@ export default async function glitchtipIntegrateGenerator(
     logger.warn(`⚠️ ${tsconfigPath} не найден — пропущено. Пропиши paths вручную (см. libs/glitchtip/README.md).`)
   }
 
-  logger.info('📋 Шаг 5/6 — .env.docker/.env.staging (+ .example) и docker-compose.*.yml...')
+  logger.info('📋 Шаг 5/7 — .env.docker/.env.staging (+ .example) и docker-compose.*.yml...')
   upsertEnvDocker(tree, joinPathFragments(appDir, '.env.docker'), 'production', false)
   if (!tree.exists(joinPathFragments(appDir, '.env.docker.enc'))) {
     logger.warn(
@@ -308,12 +360,17 @@ export default async function glitchtipIntegrateGenerator(
   upsertDockerCompose(tree, joinPathFragments(appDir, 'docker-compose.production.yml'))
   upsertDockerCompose(tree, joinPathFragments(appDir, 'docker-compose.staging.yml'))
 
+  logger.info('📋 Шаг 6/7 — productionBrowserSourceMaps в next.config...')
+  for (const fileName of ['next.config.js', 'next.config.mjs', 'next.config.ts']) {
+    upsertProductionBrowserSourceMaps(tree, joinPathFragments(appDir, fileName))
+  }
+
   logger.info(`\n✅ apps/${app} подключён к @letar/glitchtip.`)
   logger.info(
-    '📋 Шаг 6/6 — обязательно проверь глазами diff docker-compose.*.yml (текстовая вставка, не YAML-парсер) '
-      + 'и .env.docker перед коммитом.',
+    '📋 Шаг 7/7 — обязательно проверь глазами diff docker-compose.*.yml/next.config.* (текстовая вставка, '
+      + 'не YAML/AST-парсер) и .env.docker перед коммитом.',
   )
-  logger.info(`Деплой — только через deploy-request BlackCove (.claude/rules/deploy-coordination.md), не сам.`)
+  logger.info(`Деплой — только через deploy-request deploy-agent-dev (.claude/rules/deploy-coordination.md), не сам.`)
 
   if (options.skipChecks) {
     return
