@@ -5,6 +5,14 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.27.18] - 2026-09-04
+
+### Changed
+
+- Директивы форм в `schema.zmodel` переведены на основной синтаксис `@meta("form.*", value)`
+  (`libs/zenstack-form-plugin` v3.0.0) — кодмодом, 2 директивы (`ProfessionalLead.name`/`email`),
+  без ручных правок. Старый `///`-комментарийный синтаксис оставался рабочим, но deprecated.
+
 ## [0.27.17] - 2026-09-03
 
 ### Changed
