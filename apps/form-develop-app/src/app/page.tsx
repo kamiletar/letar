@@ -92,6 +92,11 @@ export default function HomePage() {
             Native Attributes (Фаза 1 zenstack-form-plugin: @startsWith/@url/@phone/@date/@trim/@lower)
           </Link>
         </Button>
+        <Button asChild colorPalette="cyan" variant="outline" size="lg" width="fit-content">
+          <Link href="/cross-field-validation-demo">
+            Cross-Field Validation (Фаза 2 zenstack-form-plugin: @@validate)
+          </Link>
+        </Button>
       </VStack>
     </Container>
   )

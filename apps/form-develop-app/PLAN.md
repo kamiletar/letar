@@ -182,6 +182,25 @@ Zod), демонстрирует 4 из 11 новых нативных атри�
 
 ---
 
+## Cross-Field Validation Demo (реализовано, Фаза 2 zenstack-form-plugin v2.5.0)
+
+`/cross-field-validation-demo` — рендерит реально сгенерированный `BookingCreateFormSchema` из
+модели `Booking` (`startsAt`/`endsAt` DateTime) с `@@validate(endsAt > startsAt, "Дата окончания
+раньше начала", ["endsAt"])`. Проверено живьём: `endsAt` раньше `startsAt` даёт ошибку под полем
+`endsAt` (не общей строкой формы — сработал `path`-аргумент), валидная пара дат отправляется
+успешно. Forced-mismatch типовая проба на `tsgo` подтвердила отсутствие стирания типа через
+`withNative`+`ZodUtils.addCustomValidation` (тот же приём проверки, что и у Фазы 1).
+
+⚠️ **`@@strict()` в демо не участвует.** Живой прогон `zenstack generate` показал, что стандартная
+библиотека ZModel разрешает `@@strict()` только на `type`-определениях, не на `model` — попытка
+поставить его на `Booking` дала ошибку схемы ещё на этапе генерации. Кодогенерация под него в
+плагине реализована и юнит-протестирована, но для `model` де-факто неприменима — см.
+`libs/zenstack-form-plugin/CHANGELOG.md` v2.5.0, раздел «Investigated, not shipped».
+
+Полное решение — `libs/forms/PLAN.md` (Фаза 2), `libs/zenstack-form-plugin/CHANGELOG.md` v2.5.0.
+
+---
+
 ## E2E Тесты
 
 ### Покрытие тестами (21 файл)

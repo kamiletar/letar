@@ -2,6 +2,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.5] - 2026-09-04
+
+### Added
+
+- `cross-field-validation-demo` — демо-страница Фазы 2 миграции `zenstack-form-plugin` (v2.5.0) на
+  кросс-полевую валидацию `@@validate`. Использует реально сгенерированный `BookingCreateFormSchema`
+  (не ручной Zod), демонстрирует проверку `endsAt > startsAt` с ошибкой, привязанной к полю
+  `endsAt` через `path`-аргумент.
+- `schema.zmodel` — новая модель `Booking` (`title`, `startsAt`, `endsAt`) с
+  `@@validate(endsAt > startsAt, "Дата окончания раньше начала", ["endsAt"])`.
+
 ## [0.1.4] - 2026-09-04
 
 ### Added

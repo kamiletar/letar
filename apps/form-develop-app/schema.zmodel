@@ -205,3 +205,27 @@ model RecipeInfoAdditional {
 
   @@allow('all', true)
 }
+
+/// Демо Фазы 2 (v2.5.0): кросс-полевая проверка `@@validate`.
+/// Конец не раньше начала, ошибка привязывается к полю `endsAt`.
+/// ⚠️ `@@strict()` сюда НЕ добавлен — ZenStack (стандартная библиотека) разрешает этот атрибут
+/// только на `type`-определениях, не на `model` («can only be used on type definitions»,
+/// проверено live-прогоном `zenstack generate`). Кодогенерация `isStrict`/`z.strictObject`
+/// в @letar/zenstack-form-plugin реализована и юнит-тестами покрыта, но у `model` нет способа
+/// её включить — см. libs/forms/PLAN.md, Фаза 2, вывод по `@@strict`.
+model Booking {
+  id        String   @id @default(cuid())
+
+  /// @form.title("Название")
+  title     String
+
+  /// @form.title("Начало")
+  startsAt  DateTime
+
+  /// @form.title("Окончание")
+  endsAt    DateTime
+
+  @@validate(endsAt > startsAt, "Дата окончания раньше начала", ["endsAt"])
+
+  @@allow('all', true)
+}

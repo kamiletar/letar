@@ -18,30 +18,31 @@ nx e2e form-develop-app-e2e -- --grep="Schedule"     # По названию
 
 ## E2E тесты (22 файла)
 
-| Файл                             | Описание                                                                             |
-| -------------------------------- | ------------------------------------------------------------------------------------ |
-| `example.spec.ts`                | Навигация, заголовки страниц                                                         |
-| `form-submit.spec.ts`            | CRUD операции с рецептами                                                            |
-| `fields-demo.spec.ts`            | Все типы полей (String, Number, Date, Select, Combobox, Schedule…)                   |
-| `persistence-demo.spec.ts`       | localStorage сохранение черновиков                                                   |
-| `pin-input-demo.spec.ts`         | PinInput компонент                                                                   |
-| `slider-demo.spec.ts`            | Slider компонент                                                                     |
-| `rating-demo.spec.ts`            | Rating компонент                                                                     |
-| `file-upload-demo.spec.ts`       | FileUpload (button, dropzone, input)                                                 |
-| `rich-text-demo.spec.ts`         | RichText (Tiptap) редактор                                                           |
-| `when-demo.spec.ts`              | Form.When условный рендеринг                                                         |
-| `steps-demo.spec.ts`             | Form.Steps мультистеп формы                                                          |
-| `date-range-demo.spec.ts`        | DateRange с пресетами                                                                |
-| `tags-demo.spec.ts`              | Tags ввод тегов                                                                      |
-| `autocomplete-demo.spec.ts`      | Autocomplete с подсказками                                                           |
-| `numeric-demo.spec.ts`           | NumberInput, Currency, Percentage                                                    |
-| `masked-demo.spec.ts`            | Phone, MaskedInput с масками                                                         |
-| `advanced-demo.spec.ts`          | Address, Duration, DateTimePicker                                                    |
-| `auth-demo.spec.ts`              | PasswordStrength, OTPInput                                                           |
-| `offline-demo.spec.ts`           | Оффлайн формы: OfflineIndicator, SyncStatus                                          |
-| `controlled-state-demo.spec.ts`  | Controlled state, form.Subscribe, live preview                                       |
-| `constraints-demo.spec.ts`       | Автоматические Zod constraints (14 тестов × 3 браузера)                              |
-| `native-attributes-demo.spec.ts` | Фаза 1 zenstack-form-plugin: нативные `@startsWith`/`@url`/`@phone`/`@date`, `@omit` |
+| Файл                                  | Описание                                                                                |
+| ------------------------------------- | --------------------------------------------------------------------------------------- |
+| `example.spec.ts`                     | Навигация, заголовки страниц                                                            |
+| `form-submit.spec.ts`                 | CRUD операции с рецептами                                                               |
+| `fields-demo.spec.ts`                 | Все типы полей (String, Number, Date, Select, Combobox, Schedule…)                      |
+| `persistence-demo.spec.ts`            | localStorage сохранение черновиков                                                      |
+| `pin-input-demo.spec.ts`              | PinInput компонент                                                                      |
+| `slider-demo.spec.ts`                 | Slider компонент                                                                        |
+| `rating-demo.spec.ts`                 | Rating компонент                                                                        |
+| `file-upload-demo.spec.ts`            | FileUpload (button, dropzone, input)                                                    |
+| `rich-text-demo.spec.ts`              | RichText (Tiptap) редактор                                                              |
+| `when-demo.spec.ts`                   | Form.When условный рендеринг                                                            |
+| `steps-demo.spec.ts`                  | Form.Steps мультистеп формы                                                             |
+| `date-range-demo.spec.ts`             | DateRange с пресетами                                                                   |
+| `tags-demo.spec.ts`                   | Tags ввод тегов                                                                         |
+| `autocomplete-demo.spec.ts`           | Autocomplete с подсказками                                                              |
+| `numeric-demo.spec.ts`                | NumberInput, Currency, Percentage                                                       |
+| `masked-demo.spec.ts`                 | Phone, MaskedInput с масками                                                            |
+| `advanced-demo.spec.ts`               | Address, Duration, DateTimePicker                                                       |
+| `auth-demo.spec.ts`                   | PasswordStrength, OTPInput                                                              |
+| `offline-demo.spec.ts`                | Оффлайн формы: OfflineIndicator, SyncStatus                                             |
+| `controlled-state-demo.spec.ts`       | Controlled state, form.Subscribe, live preview                                          |
+| `constraints-demo.spec.ts`            | Автоматические Zod constraints (14 тестов × 3 браузера)                                 |
+| `native-attributes-demo.spec.ts`      | Фаза 1 zenstack-form-plugin: нативные `@startsWith`/`@url`/`@phone`/`@date`, `@omit`    |
+| `cross-field-validation-demo.spec.ts` | Фаза 2 zenstack-form-plugin: кросс-полевая `@@validate`, ошибка привязана к `path`-полю |
 
 ## Unit тесты библиотеки
 
