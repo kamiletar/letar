@@ -91,131 +91,93 @@ model Franchise {
 model Anime {
   id              String      @id @default(cuid())
 
-  /// @form.title("Название")
-  /// @form.placeholder("Например: Стальной алхимик")
   /// Русское название (приоритет) или английское если русского нет
-  name            String
+  name            String @meta("form.title", "Название") @meta("form.placeholder", "Например: Стальной алхимик")
 
-  /// @form.title("Оригинальное название")
-  /// @form.placeholder("Например: 鋼の錬金術師")
   /// Японское название (из Shikimori japanese)
-  originalName    String?
+  originalName    String? @meta("form.title", "Оригинальное название") @meta("form.placeholder", "Например: 鋼の錬金術師")
 
-  /// @form.exclude
   /// Английское название (из Shikimori english)
-  nameEn          String?
+  nameEn          String? @meta("form.exclude", true)
 
-  /// @form.exclude
   /// Альтернативные названия (JSON массив строк с Shikimori)
   /// Например: ["Человек-бензопила", "История Резе", "Gekijouban Chainsaw Man"]
-  synonyms        String?
+  synonyms        String? @meta("form.exclude", true)
 
-  /// @form.title("Год выпуска")
-  /// @form.fieldType("numberInput")
-  /// @form.props({ min: 1900, max: 2100 })
-  year            Int?
+  year            Int? @meta("form.title", "Год выпуска") @meta("form.fieldType", "numberInput") @meta("form.props.min", 1900) @meta("form.props.max", 2100)
 
-  /// @form.title("Статус")
-  /// @form.fieldType("radioCard")
-  status          AnimeStatus @default(ONGOING)
+  status          AnimeStatus @default(ONGOING) @meta("form.title", "Статус") @meta("form.fieldType", "radioCard")
 
-  /// @form.title("Количество серий")
-  /// @form.fieldType("numberInput")
-  /// @form.props({ min: 0 })
-  episodeCount    Int         @default(0)
+  episodeCount    Int         @default(0) @meta("form.title", "Количество серий") @meta("form.fieldType", "numberInput") @meta("form.props.min", 0)
 
-  /// @form.exclude
   /// Постер аниме (связь с File)
-  posterId        String?
+  posterId        String? @meta("form.exclude", true)
   poster          File?       @relation(fields: [posterId], references: [id], onDelete: SetNull)
 
-  /// @form.exclude
   /// CID постера в IPFS
-  posterCid       String?
+  posterCid       String? @meta("form.exclude", true)
 
-  /// @form.title("Рейтинг")
-  /// @form.fieldType("slider")
-  /// @form.props({ min: 0, max: 10, step: 0.1, showValue: true })
-  rating          Float?
+  rating          Float? @meta("form.title", "Рейтинг") @meta("form.fieldType", "slider") @meta("form.props.min", 0) @meta("form.props.max", 10) @meta("form.props.step", 0.1) @meta("form.props.showValue", true)
 
-  /// @form.title("Путь к папке")
-  /// @form.description("Путь к папке с файлами аниме")
-  folderPath      String?
+  folderPath      String? @meta("form.title", "Путь к папке") @meta("form.description", "Путь к папке с файлами аниме")
 
-  /// @form.exclude
   /// Источник — BDRemux/Bluray Remux (lossless качество)
-  isBdRemux       Boolean     @default(false)
+  isBdRemux       Boolean     @default(false) @meta("form.exclude", true)
 
-  /// @form.exclude
   /// CID каноничного AnimeInfo в IPFS (неизменяемые метаданные аниме)
-  animeInfoCid    String?
+  animeInfoCid    String? @meta("form.exclude", true)
 
-  /// @form.exclude
   /// CID корневой IPFS-директории аниме (один рекурсивный pin = весь контент)
-  directoryCid    String?
+  directoryCid    String? @meta("form.exclude", true)
   /// Количество IPFS блоков в directoryCid
   directoryBlocks Int?
   /// Размер directoryCid в байтах
   directorySize   Int?
 
-  /// @form.exclude
   /// Состояние контента после последней проверки/регенерации:
   /// 'complete' = всё на месте, 'degraded' = потеряны только косметические CID или шрифты,
   /// 'broken' = потеряны video/audio (нет смысла раздавать).
-  contentHealth     String?
-  /// @form.exclude
+  contentHealth     String? @meta("form.exclude", true)
   /// JSON-массив missingCids — описание потерянных CID для UI-отчёта
-  missingCidsJson   String?
-  /// @form.exclude
+  missingCidsJson   String? @meta("form.exclude", true)
   /// JSON-массив missingFonts — потерянные шрифты которые пользователь восстанавливает руками
-  missingFontsJson  String?
-  /// @form.exclude
+  missingFontsJson  String? @meta("form.exclude", true)
   /// Когда последний раз проверяли health (буду перерегенерировать)
-  lastHealthCheckAt DateTime?
+  lastHealthCheckAt DateTime? @meta("form.exclude", true)
 
-  /// @form.exclude
   /// Возрастной рейтинг из Shikimori (g, pg, pg_13, r, r_plus, rx)
-  ageRating       String?
+  ageRating       String? @meta("form.exclude", true)
 
-  /// @form.exclude
   /// Контент запиннен локально в Kubo (false = только на удалённых пирах, Cloud Library)
-  pinnedLocally   Boolean     @default(true)
+  pinnedLocally   Boolean     @default(true) @meta("form.exclude", true)
 
-  /// @form.exclude
   /// Требует перезаливки — контент раздавался через утраченный pinner-сервер (миграция
   /// backfill проставила true всей библиотеке на момент перехода на новую схему раздачи).
   /// Снимается вручную после успешного реимпорта/republish.
-  needsReupload   Boolean     @default(false)
+  needsReupload   Boolean     @default(false) @meta("form.exclude", true)
 
-  /// @form.exclude
   /// Дата публикации на трекер (null = никогда не публиковалось)
-  trackerPublishedAt DateTime?
+  trackerPublishedAt DateTime? @meta("form.exclude", true)
 
-  /// @form.exclude
   /// directoryCid на момент последней публикации (для сравнения с текущим)
-  trackerPublishedCid String?
+  trackerPublishedCid String? @meta("form.exclude", true)
 
-  /// @form.exclude
   /// ID аниме на трекере (кэш маппинга directoryCid → id, заполняется при регистрации
   /// раздачи в DistributionService — для быстрого lookup при push прогресса без похода
   /// за всем каталогом трекера)
-  trackerAnimeId  String?
+  trackerAnimeId  String? @meta("form.exclude", true)
 
-  /// @form.exclude
   /// ID на Shikimori для синхронизации метаданных
-  shikimoriId     Int?        @unique
+  shikimoriId     Int?        @unique @meta("form.exclude", true)
 
-  /// @form.exclude
   /// URL раздачи на Rutracker (сохраняется при импорте)
-  rutrackerUrl    String?
+  rutrackerUrl    String? @meta("form.exclude", true)
 
-  /// @form.exclude
   /// CID сырых байт .torrent файла раздачи в IPFS (source/source.torrent в directoryCid)
-  sourceTorrentCid String?
+  sourceTorrentCid String? @meta("form.exclude", true)
 
-  /// @form.exclude
   /// Франшиза к которой принадлежит аниме
-  franchiseId     String?
+  franchiseId     String? @meta("form.exclude", true)
   franchise       Franchise?  @relation(fields: [franchiseId], references: [id], onDelete: SetNull)
 
   // Связи
@@ -237,40 +199,29 @@ model Anime {
   /// Федеративный контент (импортирован из других трекеров) — v0.24.0
   federatedContent FederatedContent[]
 
-  /// @form.exclude
   /// Последняя выбранная аудиодорожка (dubGroup) — сохраняется между эпизодами
-  lastSelectedAudioDubGroup   String?
+  lastSelectedAudioDubGroup   String? @meta("form.exclude", true)
 
-  /// @form.exclude
   /// Язык последней выбранной аудиодорожки — fallback если dubGroup не найден
-  lastSelectedAudioLanguage   String?
+  lastSelectedAudioLanguage   String? @meta("form.exclude", true)
 
-  /// @form.exclude
   /// Последняя выбранная дорожка субтитров (dubGroup) — сохраняется между эпизодами
-  lastSelectedSubtitleDubGroup String?
+  lastSelectedSubtitleDubGroup String? @meta("form.exclude", true)
 
-  /// @form.exclude
   /// Язык последних выбранных субтитров — fallback если dubGroup не найден
-  lastSelectedSubtitleLanguage String?
+  lastSelectedSubtitleLanguage String? @meta("form.exclude", true)
 
-  /// @form.exclude
   /// Когда последний раз проверяли связи с другими аниме (для UX: null = не проверяли, дата = проверяли)
-  relationsCheckedAt DateTime?
+  relationsCheckedAt DateTime? @meta("form.exclude", true)
 
   // === Статус просмотра (v0.9.0) ===
 
-  /// @form.title("Статус просмотра")
-  /// @form.fieldType("radioCard")
-  watchStatus         WatchStatus @default(NOT_STARTED)
+  watchStatus         WatchStatus @default(NOT_STARTED) @meta("form.title", "Статус просмотра") @meta("form.fieldType", "radioCard")
 
-  /// @form.exclude
   /// Дата завершения просмотра
-  watchedAt           DateTime?
+  watchedAt           DateTime? @meta("form.exclude", true)
 
-  /// @form.title("Оценка")
-  /// @form.fieldType("slider")
-  /// @form.props({ min: 0, max: 10, step: 1, showValue: true })
-  userRating          Int?
+  userRating          Int? @meta("form.title", "Оценка") @meta("form.fieldType", "slider") @meta("form.props.min", 0) @meta("form.props.max", 10) @meta("form.props.step", 1) @meta("form.props.showValue", true)
 
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
@@ -290,11 +241,9 @@ model Anime {
 model Genre {
   id              String      @id @default(cuid())
 
-  /// @form.title("Название")
-  name            String      @unique
+  name            String      @unique @meta("form.title", "Название")
 
-  /// @form.title("Slug")
-  slug            String      @unique
+  slug            String      @unique @meta("form.title", "Slug")
 
   /// ID на Shikimori (для синхронизации)
   shikimoriId     Int?        @unique
@@ -323,8 +272,7 @@ model GenreOnAnime {
 model Theme {
   id              String      @id @default(cuid())
 
-  /// @form.title("Название")
-  name            String      @unique
+  name            String      @unique @meta("form.title", "Название")
 
   /// Название на русском (из Shikimori)
   nameRu          String?
@@ -389,29 +337,17 @@ model Season {
   anime           Anime       @relation(fields: [animeId], references: [id], onDelete: Cascade)
   animeId         String
 
-  /// @form.title("Номер сезона")
-  /// @form.fieldType("numberInput")
-  /// @form.props({ min: 1 })
-  number          Int         @default(1)
+  number          Int         @default(1) @meta("form.title", "Номер сезона") @meta("form.fieldType", "numberInput") @meta("form.props.min", 1)
 
-  /// @form.title("Название")
-  /// @form.placeholder("Например: 2nd Season")
-  name            String?
+  name            String? @meta("form.title", "Название") @meta("form.placeholder", "Например: 2nd Season")
 
-  /// @form.title("Тип")
-  /// @form.fieldType("radioCard")
-  type            SeasonType  @default(TV)
+  type            SeasonType  @default(TV) @meta("form.title", "Тип") @meta("form.fieldType", "radioCard")
 
-  /// @form.title("Год выпуска")
-  /// @form.fieldType("numberInput")
-  year            Int?
+  year            Int? @meta("form.title", "Год выпуска") @meta("form.fieldType", "numberInput")
 
-  /// @form.title("Количество эпизодов")
-  /// @form.fieldType("numberInput")
-  episodeCount    Int         @default(0)
+  episodeCount    Int         @default(0) @meta("form.title", "Количество эпизодов") @meta("form.fieldType", "numberInput")
 
-  /// @form.title("Путь к папке")
-  folderPath      String?
+  folderPath      String? @meta("form.title", "Путь к папке")
 
   episodes        Episode[]
 
@@ -435,30 +371,20 @@ model Episode {
   season          Season?     @relation(fields: [seasonId], references: [id], onDelete: SetNull)
   seasonId        String?
 
-  /// @form.title("Номер серии")
-  /// @form.fieldType("numberInput")
-  /// @form.props({ min: 0 })
-  number          Int
+  number          Int @meta("form.title", "Номер серии") @meta("form.fieldType", "numberInput") @meta("form.props.min", 0)
 
-  /// @form.title("Название")
-  name            String?
+  name            String? @meta("form.title", "Название")
 
-  /// @form.title("Длительность (мс)")
-  /// @form.fieldType("numberInput")
-  durationMs      Int?
+  durationMs      Int? @meta("form.title", "Длительность (мс)") @meta("form.fieldType", "numberInput")
 
-  /// @form.exclude
   /// Путь к папке эпизода (для сохранения прогресса в _user/)
-  folderPath      String?
+  folderPath      String? @meta("form.exclude", true)
 
   // Метаданные видео (только те, что нужны для фильтрации)
-  /// @form.exclude
-  videoWidth      Int?
-  /// @form.exclude
-  videoHeight     Int?
-  /// @form.exclude
+  videoWidth      Int? @meta("form.exclude", true)
+  videoHeight     Int? @meta("form.exclude", true)
   /// Битность цвета видео (8, 10, 12)
-  videoBitDepth   Int?
+  videoBitDepth   Int? @meta("form.exclude", true)
 
   // Связи с дорожками
   audioTracks     AudioTrack[]
@@ -469,49 +395,40 @@ model Episode {
 
   // === Настройки кодирования (v0.9.0) ===
 
-  /// @form.exclude
   /// ID использованного профиля кодирования
-  encodingProfileId     String?
+  encodingProfileId     String? @meta("form.exclude", true)
   encodingProfile       EncodingProfile? @relation(fields: [encodingProfileId], references: [id], onDelete: SetNull)
 
   // === IPFS Storage ===
 
-  /// @form.exclude
   /// CID транскодированного видео в IPFS
-  transcodedCid         String?
+  transcodedCid         String? @meta("form.exclude", true)
   /// Размер видео в IPFS (байты)
   ipfsSize              Int?
 
-  /// @form.exclude
   /// CID манифеста эпизода в IPFS
-  manifestCid           String?
+  manifestCid           String? @meta("form.exclude", true)
 
-  /// @form.exclude
   /// JSON массив CID thumbnail'ов в IPFS
-  thumbnailCids         String?
+  thumbnailCids         String? @meta("form.exclude", true)
 
-  /// @form.exclude
   /// JSON массив CID скриншотов в IPFS
-  screenshotCids        String?
+  screenshotCids        String? @meta("form.exclude", true)
 
-  /// @form.exclude
   /// CID seek-bar спрайта в IPFS (sprite.webp). Дублируется из ThumbnailsDocument
   /// чтобы переживать recovery — после регенерации обновляется тут, а ThumbnailsDocument
   /// строится заново из этих полей при необходимости.
-  spriteCid             String?
-  /// @form.exclude
+  spriteCid             String? @meta("form.exclude", true)
   /// CID seek-bar VTT-файла в IPFS (sprite.vtt). См. spriteCid.
-  vttCid                String?
+  vttCid                String? @meta("form.exclude", true)
 
-  /// @form.exclude
   /// CID ChaptersDocument в IPFS (главы — OP/ED markers).
   /// Дублируется из EpisodeManifest.chaptersCid чтобы переживать recovery
   /// (detectIntros восстанавливает по video.webm, новый CID сохраняется тут).
-  chaptersCid           String?
+  chaptersCid           String? @meta("form.exclude", true)
 
-  /// @form.exclude
   /// CID metadata.json в IPFS (результат ffprobe)
-  metadataCid           String?
+  metadataCid           String? @meta("form.exclude", true)
 
   // sourceMetadataJson удалён в v0.29.0 — данные в EpisodeManifest (IPFS)
 

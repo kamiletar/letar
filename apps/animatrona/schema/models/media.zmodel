@@ -80,13 +80,9 @@ model AudioTrack {
   /// Индекс дорожки в контейнере
   streamIndex     Int
 
-  /// @form.title("Язык")
-  /// @form.placeholder("ru, en, ja")
-  language        String      @default("und")
+  language        String      @default("und") @meta("form.title", "Язык") @meta("form.placeholder", "ru, en, ja")
 
-  /// @form.title("Название")
-  /// @form.placeholder("Например: Japanese 5.1")
-  title           String?
+  title           String? @meta("form.title", "Название") @meta("form.placeholder", "Например: Japanese 5.1")
 
   /// Название группы озвучки (имя папки-дублёра)
   /// Отображается в меню плеера как "Русский (FuegoAlma & Eladiel)"
@@ -128,11 +124,9 @@ model SubtitleTrack {
   /// Индекс дорожки в контейнере (-1 для внешних файлов)
   streamIndex     Int         @default(-1)
 
-  /// @form.title("Язык")
-  language        String      @default("und")
+  language        String      @default("und") @meta("form.title", "Язык")
 
-  /// @form.title("Название")
-  title           String?
+  title           String? @meta("form.title", "Название")
 
   /// Название группы субтитров (имя папки-сабберов)
   /// Отображается в меню плеера как "Русский (AniDUB)"
@@ -193,129 +187,70 @@ model SubtitleFont {
 model EncodingProfile {
   id              String       @id @default(cuid())
 
-  /// @form.title("Название")
-  /// @form.placeholder("Например: Blackwell UHQ")
-  name            String
+  name            String @meta("form.title", "Название") @meta("form.placeholder", "Например: Blackwell UHQ")
 
   /// Встроенный или пользовательский
   isBuiltIn       Boolean      @default(false)
 
-  /// @form.title("Профиль по умолчанию")
-  /// @form.fieldType("switch")
-  isDefault       Boolean      @default(false)
+  isDefault       Boolean      @default(false) @meta("form.title", "Профиль по умолчанию") @meta("form.fieldType", "switch")
 
   // === Видео ===
 
-  /// @form.title("Видеокодек")
-  /// @form.fieldType("radioCard")
-  codec           VideoCodec   @default(AV1)
+  codec           VideoCodec   @default(AV1) @meta("form.title", "Видеокодек") @meta("form.fieldType", "radioCard")
 
-  /// @form.title("Использовать GPU")
-  /// @form.fieldType("switch")
-  useGpu          Boolean      @default(true)
+  useGpu          Boolean      @default(true) @meta("form.title", "Использовать GPU") @meta("form.fieldType", "switch")
 
   // === Rate Control ===
 
-  /// @form.title("Rate Control")
-  /// @form.fieldType("radioCard")
-  rateControl     RateControl  @default(VBR)
+  rateControl     RateControl  @default(VBR) @meta("form.title", "Rate Control") @meta("form.fieldType", "radioCard")
 
-  /// @form.title("Качество (CQ/CRF)")
-  /// @form.fieldType("slider")
-  /// @form.props({ min: 15, max: 40, showValue: true })
-  /// @form.description("Меньше = лучше качество, больше размер")
-  cq              Int          @default(28)
+  cq              Int          @default(28) @meta("form.title", "Качество (CQ/CRF)") @meta("form.fieldType", "slider") @meta("form.props.min", 15) @meta("form.props.max", 40) @meta("form.props.showValue", true) @meta("form.description", "Меньше = лучше качество, больше размер")
 
-  /// @form.title("Макс. битрейт (Mbps)")
-  /// @form.fieldType("numberInput")
-  /// @form.props({ min: 1, max: 100 })
-  /// @form.description("Для VBR режима")
-  maxBitrate      Int?
+  maxBitrate      Int? @meta("form.title", "Макс. битрейт (Mbps)") @meta("form.fieldType", "numberInput") @meta("form.props.min", 1) @meta("form.props.max", 100) @meta("form.description", "Для VBR режима")
 
   // === Качество ===
 
-  /// @form.title("Пресет скорости")
-  /// @form.fieldType("select")
-  /// @form.props({ options: ["p1", "p2", "p3", "p4", "p5", "p6", "p7"] })
-  preset          String       @default("p5")
+  preset          String       @default("p5") @meta("form.title", "Пресет скорости") @meta("form.fieldType", "select") @meta("form.props.options", ["p1","p2","p3","p4","p5","p6","p7"])
 
-  /// @form.title("Tune")
-  /// @form.fieldType("radioCard")
-  tune            Tune         @default(HQ)
+  tune            Tune         @default(HQ) @meta("form.title", "Tune") @meta("form.fieldType", "radioCard")
 
-  /// @form.title("Multipass")
-  /// @form.fieldType("radioCard")
-  multipass       Multipass    @default(DISABLED)
+  multipass       Multipass    @default(DISABLED) @meta("form.title", "Multipass") @meta("form.fieldType", "radioCard")
 
   // === Adaptive Quantization ===
 
-  /// @form.title("Spatial AQ")
-  /// @form.fieldType("switch")
-  /// @form.description("Улучшает качество плоских областей")
-  spatialAq       Boolean      @default(true)
+  spatialAq       Boolean      @default(true) @meta("form.title", "Spatial AQ") @meta("form.fieldType", "switch") @meta("form.description", "Улучшает качество плоских областей")
 
-  /// @form.title("Temporal AQ")
-  /// @form.fieldType("switch")
-  /// @form.description("Адаптирует качество для движущихся сцен")
-  temporalAq      Boolean      @default(true)
+  temporalAq      Boolean      @default(true) @meta("form.title", "Temporal AQ") @meta("form.fieldType", "switch") @meta("form.description", "Адаптирует качество для движущихся сцен")
 
-  /// @form.title("AQ Strength")
-  /// @form.fieldType("slider")
-  /// @form.props({ min: 1, max: 15, showValue: true })
-  aqStrength      Int          @default(8)
+  aqStrength      Int          @default(8) @meta("form.title", "AQ Strength") @meta("form.fieldType", "slider") @meta("form.props.min", 1) @meta("form.props.max", 15) @meta("form.props.showValue", true)
 
   // === Lookahead ===
 
-  /// @form.title("Lookahead Frames")
-  /// @form.fieldType("slider")
-  /// @form.props({ min: 0, max: 250, showValue: true })
-  /// @form.description("Количество кадров для анализа (0 = авто)")
-  lookahead       Int?
+  lookahead       Int? @meta("form.title", "Lookahead Frames") @meta("form.fieldType", "slider") @meta("form.props.min", 0) @meta("form.props.max", 250) @meta("form.props.showValue", true) @meta("form.description", "Количество кадров для анализа (0 = авто)")
 
-  /// @form.title("Lookahead Level")
-  /// @form.fieldType("slider")
-  /// @form.props({ min: 0, max: 3, showValue: true })
-  lookaheadLevel  Int?
+  lookaheadLevel  Int? @meta("form.title", "Lookahead Level") @meta("form.fieldType", "slider") @meta("form.props.min", 0) @meta("form.props.max", 3) @meta("form.props.showValue", true)
 
   // === Keyframes ===
 
-  /// @form.title("GOP Size")
-  /// @form.fieldType("numberInput")
-  /// @form.props({ min: 1, max: 600 })
-  /// @form.description("Расстояние между ключевыми кадрами")
-  gopSize         Int          @default(240)
+  gopSize         Int          @default(240) @meta("form.title", "GOP Size") @meta("form.fieldType", "numberInput") @meta("form.props.min", 1) @meta("form.props.max", 600) @meta("form.description", "Расстояние между ключевыми кадрами")
 
-  /// @form.title("B-Ref Mode")
-  /// @form.fieldType("radioCard")
-  bRefMode        BRefMode     @default(DISABLED)
+  bRefMode        BRefMode     @default(DISABLED) @meta("form.title", "B-Ref Mode") @meta("form.fieldType", "radioCard")
 
   // === 10-bit ===
 
-  /// @form.title("Принудительно 10-bit")
-  /// @form.fieldType("switch")
-  /// @form.description("Выводить 10-bit даже для 8-bit источника")
-  force10Bit      Boolean      @default(false)
+  force10Bit      Boolean      @default(false) @meta("form.title", "Принудительно 10-bit") @meta("form.fieldType", "switch") @meta("form.description", "Выводить 10-bit даже для 8-bit источника")
 
   // === Blackwell-специфичные ===
 
-  /// @form.title("Temporal Filter")
-  /// @form.fieldType("switch")
-  /// @form.description("Blackwell+ только: +4-5% качества при движении")
-  temporalFilter  Boolean      @default(false)
+  temporalFilter  Boolean      @default(false) @meta("form.title", "Temporal Filter") @meta("form.fieldType", "switch") @meta("form.description", "Blackwell+ только: +4-5% качества при движении")
 
   // === CPU Fallback ===
 
-  /// @form.title("Предпочитать CPU")
-  /// @form.fieldType("switch")
-  /// @form.description("Принудительно использовать libsvtav1 вместо NVENC")
-  preferCpu       Boolean      @default(false)
+  preferCpu       Boolean      @default(false) @meta("form.title", "Предпочитать CPU") @meta("form.fieldType", "switch") @meta("form.description", "Принудительно использовать libsvtav1 вместо NVENC")
 
   // === Фильтры ===
 
-  /// @form.title("Deband фильтр")
-  /// @form.fieldType("switch")
-  /// @form.description("Убирает banding в градиентах (может вызывать краши на тяжёлых файлах)")
-  deband          Boolean      @default(true)
+  deband          Boolean      @default(true) @meta("form.title", "Deband фильтр") @meta("form.fieldType", "switch") @meta("form.description", "Убирает banding в градиентах (может вызывать краши на тяжёлых файлах)")
 
   // Обратные связи
   settings        Settings[]

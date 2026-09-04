@@ -35,12 +35,9 @@ model WatchProgress {
   episode         Episode     @relation(fields: [episodeId], references: [id], onDelete: Cascade)
   episodeId       String
 
-  /// @form.title("Текущее время (сек)")
-  currentTime     Float       @default(0)
+  currentTime     Float       @default(0) @meta("form.title", "Текущее время (сек)")
 
-  /// @form.title("Просмотрено полностью")
-  /// @form.fieldType("switch")
-  completed       Boolean     @default(false)
+  completed       Boolean     @default(false) @meta("form.title", "Просмотрено полностью") @meta("form.fieldType", "switch")
 
   /// ID выбранной аудиодорожки
   selectedAudioTrackId    String?

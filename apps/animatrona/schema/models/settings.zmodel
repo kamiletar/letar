@@ -15,142 +15,75 @@ model Settings {
 
   // === Транскодирование ===
 
-  /// @form.title("Использовать GPU")
-  /// @form.fieldType("switch")
-  /// @form.description("Использовать NVIDIA NVENC для транскодирования")
-  useGpu          Boolean     @default(true)
+  useGpu          Boolean     @default(true) @meta("form.title", "Использовать GPU") @meta("form.fieldType", "switch") @meta("form.description", "Использовать NVIDIA NVENC для транскодирования")
 
-  /// @form.title("Видеокодек")
-  /// @form.fieldType("radioCard")
-  videoCodec      VideoCodec  @default(AV1)
+  videoCodec      VideoCodec  @default(AV1) @meta("form.title", "Видеокодек") @meta("form.fieldType", "radioCard")
 
-  /// @form.title("Качество видео (CQ/CRF)")
-  /// @form.fieldType("slider")
-  /// @form.props({ min: 0, max: 51, showValue: true })
-  /// @form.description("Меньше = лучше качество, больше размер")
-  videoQuality    Int         @default(24)
+  videoQuality    Int         @default(24) @meta("form.title", "Качество видео (CQ/CRF)") @meta("form.fieldType", "slider") @meta("form.props.min", 0) @meta("form.props.max", 51) @meta("form.props.showValue", true) @meta("form.description", "Меньше = лучше качество, больше размер")
 
-  /// @form.title("Пресет скорости")
-  /// @form.fieldType("select")
-  /// @form.props({ options: ["p1", "p2", "p3", "p4", "p5", "p6", "p7"] })
-  videoPreset     String      @default("p5")
+  videoPreset     String      @default("p5") @meta("form.title", "Пресет скорости") @meta("form.fieldType", "select") @meta("form.props.options", ["p1","p2","p3","p4","p5","p6","p7"])
 
-  /// @form.title("Битрейт аудио (kbps)")
-  /// @form.fieldType("slider")
-  /// @form.props({ min: 64, max: 512, step: 32, showValue: true })
-  audioBitrate    Int         @default(192)
+  audioBitrate    Int         @default(192) @meta("form.title", "Битрейт аудио (kbps)") @meta("form.fieldType", "slider") @meta("form.props.min", 64) @meta("form.props.max", 512) @meta("form.props.step", 32) @meta("form.props.showValue", true)
 
   // === Библиотека ===
 
-  /// @form.title("Папка библиотеки")
-  /// @form.description("Путь к папке с медиафайлами")
-  libraryPath     String?
+  libraryPath     String? @meta("form.title", "Папка библиотеки") @meta("form.description", "Путь к папке с медиафайлами")
 
-  /// @form.title("Папка для транскодирования")
-  /// @form.description("Куда сохранять перекодированные файлы")
-  outputPath      String?
+  outputPath      String? @meta("form.title", "Папка для транскодирования") @meta("form.description", "Куда сохранять перекодированные файлы")
 
-  /// @form.title("Папка экспорта по умолчанию")
-  /// @form.description("Куда сохранять MKV файлы при экспорте")
-  exportPath      String?
+  exportPath      String? @meta("form.title", "Папка экспорта по умолчанию") @meta("form.description", "Куда сохранять MKV файлы при экспорте")
 
-  /// @form.title("Макс. размер IPFS хранилища (ГБ)")
-  /// @form.fieldType("slider")
-  /// @form.props({ min: 10, max: 4000, step: 10, showValue: true })
-  /// @form.description("Ограничение места для локального IPFS кеша")
-  ipfsStorageMaxGb  Int  @default(500)
+  ipfsStorageMaxGb  Int  @default(500) @meta("form.title", "Макс. размер IPFS хранилища (ГБ)") @meta("form.fieldType", "slider") @meta("form.props.min", 10) @meta("form.props.max", 4000) @meta("form.props.step", 10) @meta("form.props.showValue", true) @meta("form.description", "Ограничение места для локального IPFS кеша")
 
   // === Системный трей ===
 
-  /// @form.title("Сворачивать в трей")
-  /// @form.fieldType("switch")
-  /// @form.description("Приложение продолжит работать в фоне")
-  minimizeToTray    Boolean     @default(true)
+  minimizeToTray    Boolean     @default(true) @meta("form.title", "Сворачивать в трей") @meta("form.fieldType", "switch") @meta("form.description", "Приложение продолжит работать в фоне")
 
-  /// @form.title("Закрытие окна в трей")
-  /// @form.fieldType("switch")
-  /// @form.description("При нажатии на крестик сворачивать в трей вместо закрытия")
-  closeToTray       Boolean     @default(true)
+  closeToTray       Boolean     @default(true) @meta("form.title", "Закрытие окна в трей") @meta("form.fieldType", "switch") @meta("form.description", "При нажатии на крестик сворачивать в трей вместо закрытия")
 
-  /// @form.title("Показывать уведомление при сворачивании")
-  /// @form.fieldType("switch")
-  /// @form.description("Показывать уведомление при первом сворачивании в трей")
-  showTrayNotification Boolean  @default(true)
+  showTrayNotification Boolean  @default(true) @meta("form.title", "Показывать уведомление при сворачивании") @meta("form.fieldType", "switch") @meta("form.description", "Показывать уведомление при первом сворачивании в трей")
 
   // === Интерфейс ===
 
-  /// @form.title("Тёмная тема")
-  /// @form.fieldType("switch")
-  darkMode        Boolean     @default(true)
+  darkMode        Boolean     @default(true) @meta("form.title", "Тёмная тема") @meta("form.fieldType", "switch")
 
-  /// @form.title("Язык интерфейса")
-  /// @form.fieldType("select")
-  /// @form.props({ options: ["ru", "en", "ja"] })
-  language        String      @default("ru")
+  language        String      @default("ru") @meta("form.title", "Язык интерфейса") @meta("form.fieldType", "select") @meta("form.props.options", ["ru","en","ja"])
 
   // === Плеер ===
 
-  /// @form.title("Автопропуск опенинга")
-  /// @form.fieldType("switch")
-  skipOpening     Boolean     @default(false)
+  skipOpening     Boolean     @default(false) @meta("form.title", "Автопропуск опенинга") @meta("form.fieldType", "switch")
 
-  /// @form.title("Автопропуск эндинга")
-  /// @form.fieldType("switch")
-  skipEnding      Boolean     @default(false)
+  skipEnding      Boolean     @default(false) @meta("form.title", "Автопропуск эндинга") @meta("form.fieldType", "switch")
 
-  /// @form.title("Автовоспроизведение")
-  /// @form.fieldType("switch")
-  autoplay        Boolean     @default(true)
+  autoplay        Boolean     @default(true) @meta("form.title", "Автовоспроизведение") @meta("form.fieldType", "switch")
 
-  /// @form.title("Предпочтение дорожек")
-  /// @form.fieldType("radioCard")
-  /// @form.description("Какие дорожки выбирать автоматически при первом просмотре")
-  trackPreference TrackPreference @default(AUTO)
+  trackPreference TrackPreference @default(AUTO) @meta("form.title", "Предпочтение дорожек") @meta("form.fieldType", "radioCard") @meta("form.description", "Какие дорожки выбирать автоматически при первом просмотре")
 
-  /// @form.exclude
   /// Профиль кодирования по умолчанию
-  defaultProfileId String?
+  defaultProfileId String? @meta("form.exclude", true)
   defaultProfile  EncodingProfile? @relation(fields: [defaultProfileId], references: [id], onDelete: SetNull)
 
   // === Мобильный доступ ===
 
-  /// @form.title("Мобильный доступ")
-  /// @form.fieldType("switch")
-  /// @form.description("Доступ к библиотеке с мобильных устройств в локальной сети")
-  mobileAccessEnabled Boolean   @default(false)
+  mobileAccessEnabled Boolean   @default(false) @meta("form.title", "Мобильный доступ") @meta("form.fieldType", "switch") @meta("form.description", "Доступ к библиотеке с мобильных устройств в локальной сети")
 
-  /// @form.title("Порт мобильного сервера")
-  /// @form.fieldType("numberInput")
-  /// @form.props({ min: 1024, max: 65535 })
-  /// @form.description("HTTP порт для мобильного доступа")
-  mobileServerPort    Int       @default(4000)
+  mobileServerPort    Int       @default(4000) @meta("form.title", "Порт мобильного сервера") @meta("form.fieldType", "numberInput") @meta("form.props.min", 1024) @meta("form.props.max", 65535) @meta("form.description", "HTTP порт для мобильного доступа")
 
   // === Торрент-клиент ===
 
-  /// @form.title("Бэкенд торрент-клиента")
-  /// @form.fieldType("radioCard")
   /// @form.props({ options: [{"value":"webtorrent","label":"WebTorrent (встроенный)"},{"value":"qbittorrent","label":"qBittorrent (рекомендуется)"}] })
-  /// @form.description("WebTorrent качает в RAM → OOM на больших раздачах. qBittorrent работает отдельным процессом и качает на диск.")
-  torrentBackend      String      @default("webtorrent")
+  torrentBackend      String      @default("webtorrent") @meta("form.title", "Бэкенд торрент-клиента") @meta("form.fieldType", "radioCard") @meta("form.description", "WebTorrent качает в RAM → OOM на больших раздачах. qBittorrent работает отдельным процессом и качает на диск.")
 
-  /// @form.title("URL qBittorrent Web UI")
-  /// @form.placeholder("http://localhost:8080")
-  /// @form.description("Адрес Web UI qBittorrent (Tools → Options → Web UI)")
-  qbittorrentUrl      String?
+  qbittorrentUrl      String? @meta("form.title", "URL qBittorrent Web UI") @meta("form.placeholder", "http://localhost:8080") @meta("form.description", "Адрес Web UI qBittorrent (Tools → Options → Web UI)")
 
-  /// @form.title("Логин qBittorrent")
-  /// @form.placeholder("admin")
-  qbittorrentUsername String?
+  qbittorrentUsername String? @meta("form.title", "Логин qBittorrent") @meta("form.placeholder", "admin")
 
-  /// @form.title("Пароль qBittorrent")
-  /// @form.fieldType("password")
-  qbittorrentPassword String?
+  qbittorrentPassword String? @meta("form.title", "Пароль qBittorrent") @meta("form.fieldType", "password")
 
   // === Миграции данных ===
 
-  /// @form.exclude
   /// Флаг: главы мигрированы из SQLite в IPFS
-  chaptersMigrated  Boolean     @default(false)
+  chaptersMigrated  Boolean     @default(false) @meta("form.exclude", true)
 
   updatedAt       DateTime    @updatedAt
 
