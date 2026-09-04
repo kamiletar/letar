@@ -853,10 +853,42 @@ SaaS-Sentry отпадает отдельно: тело ошибки тащит 
    `glitchtip-integrate` их не трогает: идемпотентность специально сделана консервативной
    (`existing.includes('@letar/glitchtip')` → пропуск, не апгрейд — см. `writeInstrumentationFile`
    в `libs/generators/src/generators/glitchtip-integrate/generator.ts`), чтобы не затереть чужую
-   ручную правку файла. Значит бэкфилл `release`+`productionBrowserSourceMaps`+`GLITCHTIP_RELEASE`
-   в compose на уже подключённые 22 приложения (часть — приватные submodule, каждое требует
-   свой билд/коммит/деплой-запрос) — отдельная по объёму задача, не выполнена, требует решения
-   владельца о масштабе (все разом / по одному по мере надобности).
+   ручную правку файла.
+
+   ✅ **Бэкфилл сделан тем же днём (2026-09-04), владелец выбрал «все 23 сразу».** Генератор
+   `glitchtip-integrate` сам умеет дописать недостающие `GLITCHTIP_RELEASE`/
+   `NEXT_PUBLIC_GLITCHTIP_RELEASE` в `docker-compose.*.yml` и `productionBrowserSourceMaps` в
+   `next.config.*` (шаги 5–6 не гейтятся идемпотентностью instrumentation-файлов) — прогнан на
+   всех 15 публичных Next.js-приложений; `release:`-параметр в `instrumentation(-client).ts`
+   генератор не трогает вовсе (не его слой), дописан вручную по образцу `studio`. Итог:
+   - 15 публичных: `dashboard`, `time`, `archetest`, `grandslamcup`, `mandala`, `pravda`,
+     `aira-web`, `auth-hub`, `form-docs`, `form-example`, `animatrona-landing`,
+     `kami-key-the-landing`, `letar-landing`, `animatrona-tracker`, `kami` — закоммичено
+     построчно в `letar` (`edd5cc64`…`f0127752`), формат/lint/typecheck:tsgo зелёные;
+   - `dashboard-agent` (Fastify, серверная часть) — только `release` в `initServer()` +
+     `GLITCHTIP_RELEASE` в `docker-compose.production.yml` (`a1215f33`); ⚠️ приложение
+     деплоится self-deploy по SSH, не через `deploy-affected.sh` — источник `GLITCHTIP_RELEASE`
+     при таком деплое ещё не проверен/не заведён;
+   - 6 приватных submodule (`aboi`, `aprel8008`, `domwellbes`, `driving-school`, `dsperevod`,
+     `svoichuzhie`) — закоммичено внутри каждого submodule и **запушено на их origin** с
+     одобрения владельца, SHA обновлён в `letar` (`da3a13c0`…`abfb0572`);
+   - по ходу поймана и починена смежная порча — параллельная сессия перезаписала общий файл
+     `node_modules/.bun/@chakra-ui+react@.../recipes.gen.d.ts` через `theme:typegen`
+     (см. [chakra-typegen-shared-node-modules-race](/.claude/docs/chakra-typegen-shared-node-modules-race.md)),
+     чинилось `nx theme:typegen <app> --skip-nx-cache` для `driving-school` и `domwellbes`.
+
+   ⚠️ **`letar` (корень, 24 коммита) на конец сессии закоммичен, но НЕ запушен** — владелец
+   явно попросил отложить: репозиторий и так временно заблокирован на push своим же
+   pre-push-хуком из-за двух чужих незапушенных submodule (`domwellbes-e2e`,
+   `poster-microtext-desktop`), не относящихся к этой задаче. Деплой-запросы ни на одно из 22
+   приложений ещё не отправлены — следующий шаг после push `letar`.
+
+   - [ ] ⚠️ Открытый вопрос: когда пушить `letar` — ждать, пока `domwellbes-e2e`/
+         `poster-microtext-desktop` запушатся сами (владельцы — другие сессии), или сейчас
+         `GIT_ALLOW_UNPUSHED_SUBMODULES=1`. Решение не принято, отложено явно.
+   - [ ] ⚠️ Открытый вопрос: `dashboard-agent` деплоится self-deploy по SSH, не через
+         `deploy-affected.sh` — экспорт `GLITCHTIP_RELEASE` (git short SHA) для него нигде не
+         заведён, `release:` в событиях будет `undefined` до отдельного решения.
 7. Подключать по одному приложению, начиная с некоммерческого, и смотреть на объём событий: при
    шумном приложении бесплатный self-hosted быстро упирается в диск. `studio` (п.5) — первое,
    остальные не начаты. Список кандидатов (снят с `apps/*`, 2026-08-11):
