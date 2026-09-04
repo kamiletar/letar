@@ -413,12 +413,13 @@
 
 ### 9.4 Кнопка Fullscreen
 
-- ⏳ **Развернуть на весь экран**:
-  - Добавить `Maximize`/`Minimize` иконку (lucide-react) в `AudioPlayer` рядом с громкостью
-  - `containerRef.current.requestFullscreen()` / `document.exitFullscreen()`
-  - `document.fullscreenchange` event → обновлять состояние иконки
-  - В fullscreen: скрыть header/footer сайта через CSS `:fullscreen` псевдокласс
-  - Сложность: **тривиальная** (~15 минут)
+- ✅ **Развернуть на весь экран** (2026-09-04):
+  - `Maximize`/`Minimize` иконка (lucide-react) в `AudioPlayer` рядом с громкостью
+  - `document.documentElement.requestFullscreen()` / `document.exitFullscreen()` — таргет
+    `documentElement`, а не локальный контейнер плеера: `header`/`footer` уже рендерятся как
+    семантические теги (`Box as="header"`/`as="footer"`), поэтому `:fullscreen header,
+    :fullscreen footer { display: none }` в `global.css` работает без доп. id/ref
+  - `fullscreenchange` event → синхронизация иконки (в т.ч. выход через Esc)
 
 ### 9.5 Постер + сонограмма: slide-анимация
 
@@ -614,6 +615,7 @@
 | 2026-08-12 | ✅ GlitchTip (§70) + staging окружение впервые заведено (§18.7 M2), Keystatic NODE_ENV-баг           |
 | 2026-08-19 | 🔍 Аудит setRequestLocale/SSG: найден root cause, почему все страницы `ƒ Dynamic` (см. техдолг ниже) |
 | 2026-08-24 | ✅ §18.7 M2 e2e-гейт закрыт — staging e2e 150/150, добавлен в `E2E_GATED_APPS`                       |
+| 2026-09-04 | ✅ Фаза 9.4: кнопка fullscreen в AudioPlayer, скрытие header/footer через `:fullscreen`              |
 
 ## Техдолг: setRequestLocale не даёт SSG — root layout вызывает getSession() безусловно
 

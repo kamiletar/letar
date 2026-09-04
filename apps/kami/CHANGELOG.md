@@ -5,6 +5,14 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 проект придерживается [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.33.17] - 2026-09-04
+
+### Added
+
+- Кнопка fullscreen у `AudioPlayer` (Фаза 9.4 плана) — `Maximize`/`Minimize` рядом с громкостью,
+  `document.documentElement.requestFullscreen()`, скрытие `header`/`footer` через CSS
+  `:fullscreen` в `global.css`, синхронизация иконки на `fullscreenchange` (в т.ч. выход по Esc).
+
 ## [0.33.16] - 2026-09-02
 
 ### Fixed

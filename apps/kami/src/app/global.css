@@ -26,3 +26,9 @@
   font-size: 0.875rem;
   font-family: monospace;
 }
+
+/* Fullscreen-режим аудиоплеера — скрываем шапку и подвал сайта */
+:fullscreen header,
+:fullscreen footer {
+  display: none;
+}

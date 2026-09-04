@@ -2,7 +2,7 @@
 
 import { toaster } from '@/app/_components/ui/toaster'
 import { Box, Button, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
-import { Copy, Pause, Play, Volume2, VolumeX } from 'lucide-react'
+import { Copy, Maximize, Minimize, Pause, Play, Volume2, VolumeX } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
 interface AudioPlayerProps {
@@ -39,6 +39,7 @@ export function AudioPlayer({ src, title, duration: dbDuration, audioRef, isPlay
   const [volume, setVolume] = useState(1)
   const [isMuted, setIsMuted] = useState(false)
   const [isSeeking, setIsSeeking] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   // Обновляем duration если пришёл из metadata (более точное значение)
   const handleLoadedMetadata = useCallback(() => {
@@ -120,6 +121,23 @@ export function AudioPlayer({ src, title, duration: dbDuration, audioRef, isPlay
   const copyLink = useCallback(() => {
     navigator.clipboard.writeText(window.location.href)
     toaster.success({ title: 'Ссылка скопирована' })
+  }, [])
+
+  const toggleFullscreen = useCallback(() => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen()
+    } else {
+      document.documentElement.requestFullscreen()
+    }
+  }, [])
+
+  // Синхронизация иконки с реальным состоянием fullscreen (Esc тоже выходит из режима)
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      setIsFullscreen(document.fullscreenElement !== null)
+    }
+    document.addEventListener('fullscreenchange', onFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange)
   }, [])
 
   // Синхронизация состояния play/pause с audio элементом
@@ -225,6 +243,18 @@ export function AudioPlayer({ src, title, duration: dbDuration, audioRef, isPlay
             }}
           />
         </Box>
+
+        {/* Fullscreen */}
+        <IconButton
+          aria-label={isFullscreen ? 'Свернуть' : 'На весь экран'}
+          onClick={toggleFullscreen}
+          variant="ghost"
+          color="fg"
+          size="sm"
+          rounded="full"
+        >
+          {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
+        </IconButton>
       </HStack>
 
       <HStack justify="center">
