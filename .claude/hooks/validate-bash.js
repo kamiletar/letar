@@ -67,7 +67,7 @@ process.stdin.on('end', () => {
           'git reset --hard заблокирован! В монорепо это может удалить изменения других агентов. Используй git checkout <file> для конкретных файлов.',
       },
       {
-        pattern: /git\s+reset\s+HEAD(?!\^)(?!\~)/i,
+        pattern: /git\s+reset\s+HEAD(?!\^)(?!~)/i,
         message:
           'git reset HEAD заблокирован! Это сбросит staging всех файлов, включая изменения других агентов. Используй git reset HEAD <file> для конкретного файла.',
       },
@@ -87,7 +87,7 @@ process.stdin.on('end', () => {
       },
       {
         // Блокируем rm -rf с корневым путём (/ или \) без дальнейших компонентов
-        pattern: /rm\s+(-[rf]+\s+)+[\/\\]\s*$/i,
+        pattern: /rm\s+(-[rf]+\s+)+[/\\]\s*$/i,
         message: 'rm -rf / заблокирован! Опасная команда удаления.',
       },
       {
