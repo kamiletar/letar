@@ -16,6 +16,9 @@ export interface ZodConstraints {
   email?: boolean
   url?: boolean
   uuid?: boolean
+  // Exclusive number bounds (нативные @gt/@lt — .min()/.max() Zod включительны, этим двум нужны отдельные ключи)
+  exclusiveMin?: number // → .gt()
+  exclusiveMax?: number // → .lt()
 }
 
 /**

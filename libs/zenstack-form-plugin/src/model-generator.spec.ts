@@ -180,6 +180,94 @@ describe('extractModelInfo', () => {
     const info = extractModelInfo(model, enumNames)
     expect(info.fields[0]?.formMeta.title).toBe('Название')
   })
+
+  // ─── Наследование нативных ZModel-атрибутов валидации ────────────────────
+
+  function numberArg(value: number): { value: { $type: string; value: string } } {
+    return { value: { $type: 'NumberLiteral', value: String(value) } }
+  }
+
+  function stringArg(value: string): { value: { $type: string; value: string } } {
+    return { value: { $type: 'StringLiteral', value } }
+  }
+
+  it('наследует @email/@length/@regex как constraints без @form.props', () => {
+    const model = makeModel('User', [
+      makeField({ name: 'email', type: 'String', attributes: [{ refText: '@email' }] }),
+      makeField({
+        name: 'name',
+        type: 'String',
+        attributes: [{ refText: '@length', args: [numberArg(2), numberArg(50)] }],
+      }),
+      makeField({
+        name: 'code',
+        type: 'String',
+        attributes: [{ refText: '@regex', args: [stringArg('^[A-Z]+$')] }],
+      }),
+    ])
+
+    const info = extractModelInfo(model, enumNames)
+    const byName = Object.fromEntries(info.fields.map((f) => [f.name, f]))
+
+    expect(byName.email?.formMeta.constraints).toEqual({ email: true })
+    expect(byName.name?.formMeta.constraints).toEqual({ minLength: 2, maxLength: 50 })
+    expect(byName.code?.formMeta.constraints).toEqual({ pattern: '^[A-Z]+$' })
+  })
+
+  it('наследует @gte/@gt/@lte/@lt с поправкой на строгость (min/max vs exclusiveMin/exclusiveMax)', () => {
+    const model = makeModel('Product', [
+      makeField({ name: 'price', type: 'Int', attributes: [{ refText: '@gte', args: [numberArg(0)] }] }),
+      makeField({ name: 'age', type: 'Int', attributes: [{ refText: '@gt', args: [numberArg(0)] }] }),
+      makeField({ name: 'qty', type: 'Int', attributes: [{ refText: '@lte', args: [numberArg(100)] }] }),
+      makeField({ name: 'rating', type: 'Int', attributes: [{ refText: '@lt', args: [numberArg(10)] }] }),
+    ])
+
+    const info = extractModelInfo(model, enumNames)
+    const byName = Object.fromEntries(info.fields.map((f) => [f.name, f]))
+
+    expect(byName.price?.formMeta.constraints).toEqual({ min: 0 })
+    expect(byName.age?.formMeta.constraints).toEqual({ exclusiveMin: 0 })
+    expect(byName.qty?.formMeta.constraints).toEqual({ max: 100 })
+    expect(byName.rating?.formMeta.constraints).toEqual({ exclusiveMax: 10 })
+  })
+
+  it('@form.props побеждает нативный атрибут при конфликте того же ключа', () => {
+    const model = makeModel('Product', [
+      makeField({
+        name: 'price',
+        type: 'Int',
+        attributes: [{ refText: '@gte', args: [numberArg(0)] }],
+        comments: ['@form.props({ min: 10 })'],
+      }),
+    ])
+
+    const info = extractModelInfo(model, enumNames)
+    // Нативный @gte(0) наследуется, но @form.props({min: 10}) на том же ключе побеждает
+    expect(info.fields[0]?.formMeta.constraints).toEqual({ min: 10 })
+  })
+
+  it('нативный constraint и @form.props с разными ключами объединяются без конфликта', () => {
+    const model = makeModel('Product', [
+      makeField({
+        name: 'price',
+        type: 'Int',
+        attributes: [{ refText: '@gte', args: [numberArg(0)] }],
+        comments: ['@form.props({ step: 0.5 })'],
+      }),
+    ])
+
+    const info = extractModelInfo(model, enumNames)
+    expect(info.fields[0]?.formMeta.constraints).toEqual({ min: 0, step: 0.5 })
+  })
+
+  it('без нативных атрибутов formMeta.constraints остаётся как задал только @form.props', () => {
+    const model = makeModel('Product', [
+      makeField({ name: 'price', type: 'Int', comments: ['@form.props({ min: 5 })'] }),
+    ])
+
+    const info = extractModelInfo(model, enumNames)
+    expect(info.fields[0]?.formMeta.constraints).toEqual({ min: 5 })
+  })
 })
 
 // ─── Тесты generateModelCode (чистая функция, ModelInfo → строка) ──────────
@@ -271,6 +359,23 @@ describe('generateModelCode', () => {
 
     const code = generateModelCode(modelInfo, new Set())
     expect(code).toContain('email: z.string().min(5).max(100).email()')
+  })
+
+  it('применяет exclusiveMin/exclusiveMax через .gt()/.lt() (наследование @gt/@lt)', () => {
+    const modelInfo: ModelInfo = {
+      name: 'Product',
+      excludedFields: [],
+      fields: [
+        field({
+          name: 'discount',
+          type: 'Int',
+          formMeta: { constraints: { exclusiveMin: 0, exclusiveMax: 100 } },
+        }),
+      ],
+    }
+
+    const code = generateModelCode(modelInfo, new Set())
+    expect(code).toContain('discount: z.number().int().gt(0).lt(100)')
   })
 
   it('не применяет числовые constraints к строковому полю и наоборот', () => {

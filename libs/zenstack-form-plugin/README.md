@@ -125,8 +125,7 @@ model Recipe {
 
   /// @form.title("Количество порций")
   /// @form.fieldType("numberInput")
-  /// @form.props({ min: 1, max: 100 })
-  portions    Int @default(1)
+  portions    Int @default(1) @gte(1) @lte(100)
 
   /// @form.title("Теги")
   /// @form.fieldType("tags")
@@ -166,47 +165,99 @@ export type RecipeUpdateForm = z.infer<typeof RecipeUpdateFormSchema>
 
 ## Поддерживаемые директивы
 
-| Директива                  | Описание            | Пример                                       |
-| -------------------------- | ------------------- | -------------------------------------------- |
-| `@form.title("...")`       | Заголовок поля      | `/// @form.title("Название")`                |
-| `@form.placeholder("...")` | Placeholder         | `/// @form.placeholder("Введите...")`        |
-| `@form.description("...")` | Описание поля       | `/// @form.description("Подсказка")`         |
-| `@form.fieldType("...")`   | Тип компонента      | `/// @form.fieldType("tags")`                |
-| `@form.props({...})`       | Constraints + props | `/// @form.props({ min: 1, max: 100 })`      |
-| `@form.relation({...})`    | Настройки relation  | `/// @form.relation({ labelField: "name" })` |
-| `@form.exclude`            | Исключить из формы  | `/// @form.exclude`                          |
+| Директива                  | Описание                                 | Пример                                       |
+| -------------------------- | ---------------------------------------- | -------------------------------------------- |
+| `@form.title("...")`       | Заголовок поля                           | `/// @form.title("Название")`                |
+| `@form.placeholder("...")` | Placeholder                              | `/// @form.placeholder("Введите...")`        |
+| `@form.description("...")` | Описание поля                            | `/// @form.description("Подсказка")`         |
+| `@form.fieldType("...")`   | Тип компонента                           | `/// @form.fieldType("tags")`                |
+| `@form.props({...})`       | UI-пропсы + escape hatch для constraints | `/// @form.props({ showValue: true })`       |
+| `@form.relation({...})`    | Настройки relation                       | `/// @form.relation({ labelField: "name" })` |
+| `@form.exclude`            | Исключить из формы                       | `/// @form.exclude`                          |
 
-## Автоматическое разделение @form.props
+## Constraints: нативные ZModel-атрибуты — рекомендуемый путь
 
-Плагин автоматически разделяет `@form.props` на:
+**Задавайте валидацию через нативные атрибуты ZModel, не через `@form.props`.** ORM уже применяет
+их на `create`/`update` через `@zenstackhq/zod` — плагин форм наследует те же constraints в
+клиентскую Zod-схему, так что источник валидации остаётся один:
 
-**Zod constraints** — становятся методами схемы:
-
-- `min`, `max`, `step` → `.min()`, `.max()`, `.multipleOf()`
-- `minLength`, `maxLength` → `.min()`, `.max()` для строк
-- `pattern` → `.regex()`
-- `email`, `url`, `uuid` → `.email()`, `.url()`, `.uuid()`
-
-**UI props** — остаются в `fieldProps`:
-
-- `count`, `allowHalf` (для rating)
-- `showValue`, `layout` (для slider, radioCard)
-- Любые другие props
+| ZModel-атрибут      | Zod-constraint                     |
+| ------------------- | ---------------------------------- |
+| `@email`            | `.email()`                         |
+| `@length(min, max)` | `.min(min)` / `.max(max)` (строки) |
+| `@gte(x)`           | `.min(x)` (включительно)           |
+| `@gt(x)`            | `.gt(x)` (строго больше)           |
+| `@lte(x)`           | `.max(x)` (включительно)           |
+| `@lt(x)`            | `.lt(x)` (строго меньше)           |
+| `@regex("...")`     | `.regex(/.../)`                    |
 
 ```zmodel
-/// @form.props({ min: 1, max: 100, showValue: true })
-portions Int
+/// @form.title("Количество порций")
+portions Int @gte(1) @lte(100)
+
+/// @form.title("Email")
+email String @email
 ```
 
 Генерирует:
+
+```typescript
+portions: z.number().int().min(1).max(100).meta({ ui: { title: 'Количество порций' } })
+email: z.string().email().meta({ ui: { title: 'Email' } })
+```
+
+Ни одного дублирующего `@form.props({ min, max, ... })` не нужно — форма и ORM валидируют
+одинаково, потому что читают одно и то же место схемы.
+
+### `@form.props` для constraints — escape hatch, не основной путь
+
+`@form.props` как источник constraint-значения (`min`/`max`/`minLength`/`maxLength`/`pattern`/
+`email`/`url`/`uuid`/`exclusiveMin`/`exclusiveMax`) остаётся рабочим и **побеждает** нативный
+атрибут при конфликте того же ключа на одном поле — но это осознанный **escape hatch** для
+намеренного расхождения клиент/сервер, не способ задать constraint по умолчанию. UI-пропсы, для
+которых у ZModel нет аналога (`showValue`, `layout`, `count`, `allowHalf` и т.п.), в `@form.props`
+остаются как есть — это не костыль, просто ZModel про них ничего не знает.
+
+**Три случая, где `@form.props` осмысленно побеждает нативный атрибут как постоянный паттерн**
+(не только «уже так написано раньше»):
+
+1. **Общая библиотечная схема, разный контекст у потребителей.** Общий миксин (например
+   `@letar/zenstack-fragments`) задаёт нативный атрибут, подходящий большинству приложений
+   (`@length(1, 200)` для generic-поля). Конкретное приложение переопределяет через `@form.props`
+   в своей форме, не форкая общую модель, — постоянная точка кастомизации per-consumer.
+2. **Валидация до нормализации ≠ валидация после.** Нативный атрибут (`@regex`) часто описывает
+   **хранимый** формат (телефон в E.164 — так ORM пишет в БД). Форма принимает то, что реально
+   печатает пользователь (произвольный формат), а normalize-transform приводит к хранимому
+   формату уже после валидации формы, перед отправкой на сервер. Здесь `@form.props` — не мягче
+   или строже, а **другой** constraint, потому что применяется к другому представлению данных на
+   другом этапе пайплайна.
+3. **Осознанный staged rollout нового серверного ограничения.** Ужесточили нативный атрибут
+   (`@gte(18)` вместо `@gte(0)`) для целостности данных на будущее, но конкретная форма в
+   legacy-части приложения ещё не готова показывать это пользователю (не согласован UX-текст, идёт
+   постепенный вывод старого флоу) — форма временно остаётся мягче через `@form.props`, пока его
+   явно не уберут. Отличие от случайного дрейфа — расхождение осознанное и временное.
+
+Пример UI-пропса рядом с нативным constraint (не конфликт, а дополнение):
+
+```zmodel
+/// @form.title("Количество порций")
+/// @form.fieldType("numberInput")
+/// @form.props({ showValue: true })
+portions Int @gte(1) @lte(100)
+```
 
 ```typescript
 portions: z.number()
   .int()
   .min(1)
   .max(100)
-  .meta({ ui: { fieldProps: { showValue: true } } })
+  .meta({ ui: { title: 'Количество порций', fieldType: 'numberInput', fieldProps: { showValue: true } } })
 ```
+
+> **Для уже существующего кода:** если на поле уже есть нативный атрибут с тем же значением, что
+> и constraint-ключ в `@form.props` (например `@gte(0)` рядом с `@form.props({ min: 0 })`) —
+> дублирующий ключ теперь избыточен, можно вычистить по ходу работы. Это не гейт и не
+> принудительная миграция — новому коду просто не нужно копировать устаревший паттерн.
 
 ## Автоматически исключаемые поля
 

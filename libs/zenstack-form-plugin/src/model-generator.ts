@@ -119,6 +119,105 @@ function isModelReference(field: DataField, enumNames: Set<string>): boolean {
 }
 
 /**
+ * Найти атрибут поля по точному имени ссылки (с `@`, как хранит Langium в `decl.$refText`,
+ * например `'@email'`).
+ */
+function findAttribute(field: DataField, refText: string): DataFieldAttribute | undefined {
+  return field.attributes.find((attr: DataFieldAttribute) => attr.decl?.$refText === refText)
+}
+
+/**
+ * Извлечь примитивное значение позиционного аргумента атрибута (Number/String/Boolean literal).
+ */
+function literalArgValue(arg: unknown): number | string | boolean | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const value = (arg as any)?.value
+
+  if (value?.$type === 'NumberLiteral') {
+    return Number(value.value)
+  }
+  if (value?.$type === 'StringLiteral') {
+    return value.value
+  }
+  if (value?.$type === 'BooleanLiteral') {
+    return value.value
+  }
+
+  return undefined
+}
+
+/**
+ * Наследовать Zod-constraints из нативных ZModel-атрибутов валидации
+ * (`@email`, `@length`, `@gte`/`@gt`/`@lte`/`@lt`, `@regex`) — ORM честно применяет их на
+ * `create`/`update` через `@zenstackhq/zod`, но раньше генератор форм их полностью игнорировал:
+ * поле с одним лишь нативным атрибутом получало форму без клиентской валидации.
+ *
+ * `@gt`/`@lt` дают отдельные ключи (`exclusiveMin`/`exclusiveMax`), а не `min`/`max` — Zod
+ * `.min()`/`.max()` включительны и семантически соответствуют только `@gte`/`@lte`.
+ */
+function extractNativeConstraints(field: DataField): ZodConstraints {
+  const constraints: ZodConstraints = {}
+
+  if (findAttribute(field, '@email')) {
+    constraints.email = true
+  }
+
+  const lengthAttr = findAttribute(field, '@length')
+  if (lengthAttr) {
+    const min = literalArgValue(lengthAttr.args[0])
+    const max = literalArgValue(lengthAttr.args[1])
+    if (typeof min === 'number') {
+      constraints.minLength = min
+    }
+    if (typeof max === 'number') {
+      constraints.maxLength = max
+    }
+  }
+
+  const regexAttr = findAttribute(field, '@regex')
+  if (regexAttr) {
+    const pattern = literalArgValue(regexAttr.args[0])
+    if (typeof pattern === 'string') {
+      constraints.pattern = pattern
+    }
+  }
+
+  const gteAttr = findAttribute(field, '@gte')
+  if (gteAttr) {
+    const value = literalArgValue(gteAttr.args[0])
+    if (typeof value === 'number') {
+      constraints.min = value
+    }
+  }
+
+  const gtAttr = findAttribute(field, '@gt')
+  if (gtAttr) {
+    const value = literalArgValue(gtAttr.args[0])
+    if (typeof value === 'number') {
+      constraints.exclusiveMin = value
+    }
+  }
+
+  const lteAttr = findAttribute(field, '@lte')
+  if (lteAttr) {
+    const value = literalArgValue(lteAttr.args[0])
+    if (typeof value === 'number') {
+      constraints.max = value
+    }
+  }
+
+  const ltAttr = findAttribute(field, '@lt')
+  if (ltAttr) {
+    const value = literalArgValue(ltAttr.args[0])
+    if (typeof value === 'number') {
+      constraints.exclusiveMax = value
+    }
+  }
+
+  return constraints
+}
+
+/**
  * Extract model information from AST.
  */
 export function extractModelInfo(model: DataModel, enumNames: Set<string>): ModelInfo {
@@ -147,6 +246,13 @@ export function extractModelInfo(model: DataModel, enumNames: Set<string>): Mode
     if (shouldExclude) {
       excludedFields.push(field.name)
       continue
+    }
+
+    // Нативные ZModel-атрибуты — базовый слой constraints, @form.props побеждает при
+    // пересечении ключей (обратная совместимость для намеренных расхождений клиент/сервер).
+    const nativeConstraints = extractNativeConstraints(field)
+    if (Object.keys(nativeConstraints).length > 0) {
+      formMeta.constraints = { ...nativeConstraints, ...formMeta.constraints }
     }
 
     const fieldInfo: ModelFieldInfo = {
@@ -188,6 +294,12 @@ function generateConstraints(constraints: ZodConstraints | undefined, prismaType
     }
     if (constraints.max !== undefined) {
       parts.push(`.max(${constraints.max})`)
+    }
+    if (constraints.exclusiveMin !== undefined) {
+      parts.push(`.gt(${constraints.exclusiveMin})`)
+    }
+    if (constraints.exclusiveMax !== undefined) {
+      parts.push(`.lt(${constraints.exclusiveMax})`)
     }
     if (constraints.step !== undefined) {
       parts.push(`.multipleOf(${constraints.step})`)

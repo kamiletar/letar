@@ -17,6 +17,8 @@ const ZOD_CONSTRAINT_NAMES = new Set([
   'email',
   'url',
   'uuid',
+  'exclusiveMin',
+  'exclusiveMax',
 ])
 
 /**
