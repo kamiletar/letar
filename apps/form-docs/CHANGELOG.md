@@ -2,6 +2,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.4] - 2026-09-04
+
+### Added
+
+- `guides/zenstack-plugin` (ru+en) — раздел «Кросс-полевая валидация: `@@validate`» (Фаза 2
+  `zenstack-form-plugin` v2.5.0): сигнатура `@@validate(condition, message?, path?)`, ограничение
+  «только Create-схема» с объяснением через `.partial()`/`ZodEffects`, неподдержанный
+  `MemberAccessExpr`. Отдельный подраздел про `@@strict()` — реализован в кодогене, но недоступен
+  на `model` (только на `type` по правилам ZModel), найдено живым прогоном генерации.
+
 ## [0.6.3] - 2026-09-04
 
 ### Added

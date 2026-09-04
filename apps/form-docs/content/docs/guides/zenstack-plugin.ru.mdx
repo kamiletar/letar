@@ -158,6 +158,55 @@ email: z.string().email().meta({ ui: { title: 'Email' } })
 атрибут — осознанный escape hatch для намеренного расхождения клиент/сервер, не способ задать
 constraint по умолчанию.
 
+## Кросс-полевая валидация: `@@validate`
+
+Проверки, зависящие от нескольких полей сразу, задаются на уровне модели, не поля:
+
+```prisma
+model Booking {
+  id       String   @id @default(cuid())
+  title    String
+  startsAt DateTime
+  endsAt   DateTime
+
+  @@validate(endsAt > startsAt, "Дата окончания раньше начала", ["endsAt"])
+}
+```
+
+Генерирует:
+
+```typescript
+export const BookingCreateFormSchema = withNative(
+  BookingBaseSchema,
+  (s) => ZodUtils.addCustomValidation(s, [{ name: '@@validate', args: [...] }]),
+)
+```
+
+Сигнатура — `@@validate(condition: Boolean, message: String?, path: String[]?)`, как в стандартной
+библиотеке ZModel. `condition` — произвольное булево выражение над полями модели (сравнения,
+`&&`/`||`, вызовы вроде `length`/`startsWith`). `message`/`path` работают как у Zod `.refine()` —
+`path` привязывает ошибку к конкретному полю вместо ошибки уровня формы.
+
+**Ограничения:**
+
+- **Проверку получает только `{Model}CreateFormSchema`.** `{Model}UpdateFormSchema` строится из
+  внутреннего, не экспортируемого `{Model}BaseSchema` (до `.refine()`) через `.partial()` —
+  у `ZodEffects` (что возвращает `.refine()`) нет метода `.partial()`, а частичный payload часто
+  физически не может удовлетворить проверке, рассчитанной на полную модель. Если форме
+  редактирования тоже нужна эта проверка — добавьте её отдельно на уровне формы.
+- **`MemberAccessExpr` (проход через relation, `related.field`) не поддержан** — не встречался в
+  `@@validate` моделей форм-плагина. Попытка его сериализовать кидает понятную ошибку кодогена, а
+  не тихо портит рантайм-поведение.
+
+### `@@strict()` — реализован, но недоступен на `model`
+
+Кодогенерация под `@@strict()` (`z.strictObject(...)` вместо `z.object(...)`) в плагине есть, но
+включить её на реальной модели нельзя: стандартная библиотека ZModel разрешает `@@strict()`
+только на `type`-определениях (`zenstack generate` останавливается с «attribute '@@strict' can
+only be used on type definitions» при попытке поставить его на `model`). Это ограничение самого
+языка ZModel, найденное живым прогоном генерации, а не риск в коде плагина — кодогенерация
+покрыта юнит-тестами и остаётся на будущее, если ZenStack расширит область действия атрибута.
+
 ## Умное разделение Props
 
 Значения `@form.props` автоматически разделяются на **Zod constraints** и **UI props**:

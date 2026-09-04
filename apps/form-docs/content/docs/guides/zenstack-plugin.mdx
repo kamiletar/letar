@@ -157,6 +157,55 @@ with the form's `Decimal → z.number()` contract).
 attribute — a deliberate escape hatch for intentional client/server divergence, not the default
 way to set a constraint.
 
+## Cross-field validation with `@@validate`
+
+Checks that depend on more than one field are declared on the model, not on a field:
+
+```prisma
+model Booking {
+  id       String   @id @default(cuid())
+  title    String
+  startsAt DateTime
+  endsAt   DateTime
+
+  @@validate(endsAt > startsAt, "End date is before the start date", ["endsAt"])
+}
+```
+
+Generates:
+
+```typescript
+export const BookingCreateFormSchema = withNative(
+  BookingBaseSchema,
+  (s) => ZodUtils.addCustomValidation(s, [{ name: '@@validate', args: [...] }]),
+)
+```
+
+Signature is `@@validate(condition: Boolean, message: String?, path: String[]?)`, same as the
+ZModel standard library. `condition` is an arbitrary boolean expression over the model's fields
+(comparisons, `&&`/`||`, function calls like `length`/`startsWith`). `message`/`path` behave like
+Zod's `.refine()` — `path` attaches the error to a specific field instead of the form-level error.
+
+**Limitations:**
+
+- **Only `{Model}CreateFormSchema` gets the check.** `{Model}UpdateFormSchema` is built from an
+  internal, non-exported `{Model}BaseSchema` (before `.refine()`) via `.partial()` — `ZodEffects`
+  (what `.refine()` returns) has no `.partial()` method, and a partial payload often can't satisfy
+  a check written for the full model anyway. Add a form-level check separately if the edit form
+  needs the same validation.
+- **`MemberAccessExpr` (relation traversal, `related.field`) is not supported** — it hasn't come
+  up in this plugin's `@@validate` usage. Attempting to serialize one throws a clear codegen
+  error rather than silently producing wrong runtime behavior.
+
+### `@@strict()` — implemented, unavailable on `model`
+
+The plugin has codegen support for `@@strict()` (`z.strictObject(...)` instead of
+`z.object(...)`), but it cannot be turned on for an actual model: the ZModel standard library only
+allows `@@strict()` on `type` definitions (`zenstack generate` stops with "attribute '@@strict'
+can only be used on type definitions" if you put it on a `model`). This is a ZModel language
+limitation discovered by a live generate run, not a risk in the plugin's own code — the codegen
+path is unit-tested and stays in place for when ZenStack extends where the attribute applies.
+
 ## Smart Props Splitting
 
 `@form.props` values are automatically split into **Zod constraints** and **UI props**:
