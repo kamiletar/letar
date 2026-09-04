@@ -1,42 +1,11 @@
 'use client'
 
-import { createToaster, Portal, Spinner, Stack, Toast, Toaster as ChakraToaster } from '@chakra-ui/react'
-import { useIsHydrated } from '@letar/hooks'
+import { createAppToaster } from '@letar/ui'
 
-export const toaster: ReturnType<typeof createToaster> = createToaster({
-  placement: 'bottom-end',
-  pauseOnPageIdle: true,
-  max: 5,
+export const { toaster, Toaster } = createAppToaster({
+  toasterOptions: { placement: 'bottom-end', pauseOnPageIdle: true, max: 5 },
+  waitForHydration: true,
+  showLoadingSpinner: true,
+  showActionButton: true,
+  isClosable: (toast) => Boolean(toast.closable),
 })
-
-export const Toaster = () => {
-  const mounted = useIsHydrated()
-
-  if (!mounted) {
-    return null
-  }
-
-  return (
-    <Portal>
-      <ChakraToaster toaster={toaster} insetInline={{ mdDown: '4' }}>
-        {(toast) => (
-          <Toast.Root width={{ md: 'sm' }}>
-            {/* Spinner для loading, иначе стандартный индикатор */}
-            {toast.type === 'loading' ? <Spinner size="sm" color="blue.solid" /> : <Toast.Indicator />}
-
-            <Stack gap="1" flex="1" maxWidth="100%">
-              {toast.title && <Toast.Title>{toast.title}</Toast.Title>}
-              {toast.description && <Toast.Description>{toast.description}</Toast.Description>}
-            </Stack>
-
-            {/* Кнопка действия, если указана */}
-            {toast.action && <Toast.ActionTrigger>{toast.action.label}</Toast.ActionTrigger>}
-
-            {/* Кнопка закрытия */}
-            {toast.closable && <Toast.CloseTrigger />}
-          </Toast.Root>
-        )}
-      </ChakraToaster>
-    </Portal>
-  )
-}

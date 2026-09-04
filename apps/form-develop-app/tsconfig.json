@@ -31,6 +31,7 @@
       "@letar/forms-core/analytics": ["../../libs/forms-core/src/lib/analytics/index.ts"],
       "@letar/format-utils": ["../../libs/format-utils/src/index.ts"],
       "@letar/query-provider": ["../../libs/query-provider/src/index.ts"],
+      "@letar/ui": ["../../libs/ui/src/index.ts"],
       "@letar/zenstack-form-plugin": ["../../libs/zenstack-form-plugin/src/index.ts"],
       "@letar/forms/captcha/server": ["../../libs/forms/src/server/captcha/verify.ts"],
       "@letar/forms-core/edit-intent": ["../../libs/forms-core/src/lib/edit-intent/index.ts"],

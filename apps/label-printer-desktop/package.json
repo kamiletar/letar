@@ -11,7 +11,8 @@
       "@letar/query-provider",
       "@letar/electron-storage",
       "@letar/icon-generator",
-      "@letar/hooks"
+      "@letar/hooks",
+      "@letar/ui"
     ]
   },
   "dependencies": {

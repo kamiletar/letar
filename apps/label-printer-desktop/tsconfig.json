@@ -48,6 +48,7 @@
       "@letar/label-printer-core/*": ["../../libs/label-printer-core/src/*"],
       "@letar/electron-storage": ["../../libs/electron-storage/src/index.ts"],
       "@letar/hooks": ["../../libs/hooks/src/index.ts"],
+      "@letar/ui": ["../../libs/ui/src/index.ts"],
       "@letar/forms/captcha/server": ["../../libs/forms/src/server/captcha/verify.ts"],
       "@letar/forms-core/edit-intent": ["../../libs/forms-core/src/lib/edit-intent/index.ts"],
       "@letar/forms-core/mask": ["../../libs/forms-core/src/lib/mask/index.ts"],
@@ -76,7 +77,9 @@
     "../../libs/query-provider/src/**/*.tsx",
     "../../libs/label-printer-core/src/**/*.ts",
     "../../libs/electron-storage/src/**/*.ts",
-    "../../libs/hooks/src/**/*.ts"
+    "../../libs/hooks/src/**/*.ts",
+    "../../libs/ui/src/**/*.ts",
+    "../../libs/ui/src/**/*.tsx"
   ],
   "exclude": [
     "node_modules",

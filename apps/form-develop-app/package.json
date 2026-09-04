@@ -11,6 +11,7 @@
       "@letar/forms",
       "@letar/format-utils",
       "@letar/query-provider",
+      "@letar/ui",
       "@letar/pg-url",
       "@letar/env-load"
     ]

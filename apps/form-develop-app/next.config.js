@@ -26,6 +26,7 @@ const nextConfig = {
     '@letar/forms-core',
     '@letar/forms-react',
     '@letar/query-provider',
+    '@letar/ui',
     '@letar/zenstack-form-plugin',
   ],
 }

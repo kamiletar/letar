@@ -42,6 +42,8 @@
       "@letar/query-provider": ["../../../libs/query-provider/src/index.ts"],
       "@letar/label-printer-core": ["../../../libs/label-printer-core/src/index.ts"],
       "@letar/label-printer-core/*": ["../../../libs/label-printer-core/src/*"],
+      "@letar/hooks": ["../../../libs/hooks/src/index.ts"],
+      "@letar/ui": ["../../../libs/ui/src/index.ts"],
       "@letar/forms/captcha/server": ["../../../libs/forms/src/server/captcha/verify.ts"],
       "@letar/forms-core/credit-card": ["../../../libs/forms-core/src/lib/credit-card/index.ts"],
       "@letar/forms-core/edit-intent": ["../../../libs/forms-core/src/lib/edit-intent/index.ts"],
