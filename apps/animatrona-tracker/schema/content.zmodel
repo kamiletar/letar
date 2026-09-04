@@ -11,6 +11,42 @@ enum ReportStatus {
   RESOLVED
 }
 
+/// Категория контента
+enum ContentCategory {
+  /// Аниме
+  ANIME
+  /// Фильм
+  MOVIE
+  /// Сериал
+  SERIES
+  /// Другое
+  OTHER
+}
+
+/// Качество видео
+enum VideoQuality {
+  /// 480p
+  P480
+  /// 720p
+  P720
+  /// 1080p
+  P1080
+  /// 4K
+  P4K
+}
+
+/// Причина жалобы на контент
+enum ReportReason {
+  /// Нарушение авторских прав
+  COPYRIGHT
+  /// Спам
+  SPAM
+  /// Неприемлемый контент
+  INAPPROPRIATE
+  /// Другое
+  OTHER
+}
+
 // ============================================================================
 // CONTENT — Основная модель раздачи
 // ============================================================================
@@ -23,8 +59,7 @@ model Content {
 
   description String? @meta("form.title", "Описание") @meta("form.fieldType", "richText")
 
-  /// @form.props({ options: [{"value": "anime", "label": "Аниме"}, {"value": "movie", "label": "Фильм"}, {"value": "series", "label": "Сериал"}, {"value": "other", "label": "Другое"}] })
-  category    String        @default("other") @meta("form.title", "Категория") @meta("form.fieldType", "select")
+  category    ContentCategory @default(OTHER) @meta("form.title", "Категория") @meta("form.fieldType", "select")
 
   tags        String[] @meta("form.title", "Теги") @meta("form.fieldType", "tags")
 
@@ -39,8 +74,7 @@ model Content {
 
   duration    Int? @meta("form.title", "Длительность (секунды)")
 
-  /// @form.props({ options: [{"value": "480p", "label": "480p"}, {"value": "720p", "label": "720p"}, {"value": "1080p", "label": "1080p"}, {"value": "4K", "label": "4K"}] })
-  quality     String? @meta("form.title", "Качество") @meta("form.fieldType", "select")
+  quality     VideoQuality? @meta("form.title", "Качество") @meta("form.fieldType", "select")
 
   // Автор
   userId      String? @meta("form.exclude", true)
@@ -142,8 +176,7 @@ model Rating {
 model Report {
   id        String       @id @default(cuid())
 
-  /// @form.props({ options: [{"value": "copyright", "label": "Нарушение авторских прав"}, {"value": "spam", "label": "Спам"}, {"value": "inappropriate", "label": "Неприемлемый контент"}, {"value": "other", "label": "Другое"}] })
-  reason    String @meta("form.title", "Причина") @meta("form.fieldType", "select")
+  reason    ReportReason @meta("form.title", "Причина") @meta("form.fieldType", "select")
 
   details   String? @meta("form.title", "Подробности") @meta("form.fieldType", "textarea")
 

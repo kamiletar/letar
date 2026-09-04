@@ -709,6 +709,10 @@ allowlist легитимных исключений собирается рук�
   3 вхождения (`Content.category`, `Content.quality`, `Report.reason`) никогда не работали
   (несуществующий ключ парсера, молча проглатывался). Заменено на `@form.props({ options: [...] })`
   — детали в `CHANGELOG.md`.
+- **`Content.category`/`Content.quality`/`Report.reason` → `enum`** (2026-09-04, задача от
+  `forms-coordinator-dev`, последний блокер удаления legacy comment-directive парсера форм) —
+  ✅ done, детали в `CHANGELOG.md` v0.11.12. Уведомлён `forms-dev`/`forms-coordinator-dev` в треде
+  `forms-native-migration`.
 
 ## Техдолг: закрыто
 
