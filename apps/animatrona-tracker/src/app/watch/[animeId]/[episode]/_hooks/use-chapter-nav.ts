@@ -75,7 +75,11 @@ export function useChapterNav({ manifestChapters, currentTime, videoRef }: UseCh
   const [autoSkipEnabled, setAutoSkipEnabled] = useState(false)
 
   useEffect(() => {
+    // Синхронизация с localStorage: дефолт должен совпасть на сервере и при первом клиентском
+    // рендере (см. .claude/docs/ssr-hydration-persisted-state.md), поэтому чтение возможно
+    // только после монтирования, а не в ленивом инициализаторе useState
     if (localStorage.getItem(AUTOSKIP_KEY) === 'true') {
+      // oxlint-disable-next-line react/set-state-in-effect -- синхронизация с localStorage, см. выше
       setAutoSkipEnabled(true)
     }
   }, [])

@@ -43,8 +43,12 @@ export function useAudioSync({
   const usesSeparateAudioRef = useRef(false)
   const [isAudioBlocked, setIsAudioBlocked] = useState(false)
 
-  // Обновляем ref для использования в callbacks
-  usesSeparateAudioRef.current = usesSeparateAudio
+  // Обновляем ref для использования в callbacks — запись в ref.current вне эффекта
+  // считается доступом к рефу во время рендера (react(refs)), поэтому синхронизация
+  // вынесена в эффект без зависимостей, выполняющийся после каждого рендера
+  useEffect(() => {
+    usesSeparateAudioRef.current = usesSeparateAudio
+  })
 
   // Синхронизация аудио с видео
   useEffect(() => {

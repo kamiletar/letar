@@ -123,6 +123,7 @@ export function useShakaPlayer({
 
     Shaka.polyfill.installAll()
     if (!Shaka.Player.isBrowserSupported()) {
+      // oxlint-disable-next-line react/set-state-in-effect -- сообщаем об ошибке инициализации внешнего плеера
       setError('Браузер не поддерживается')
       return
     }

@@ -68,6 +68,9 @@ export function CommentsSection({ animeId, isAuthenticated, currentUserId, curre
   )
 
   useEffect(() => {
+    // Легитимная синхронизация с внешней системой (загрузка комментариев по API при монтировании) —
+    // не производное значение, которое можно вычислить во время рендера
+    // oxlint-disable-next-line react/set-state-in-effect -- fetchComments сразу выставляет loading/loadingMore
     fetchComments()
   }, [fetchComments])
 

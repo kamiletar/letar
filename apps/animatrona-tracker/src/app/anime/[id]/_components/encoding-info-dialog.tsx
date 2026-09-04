@@ -79,7 +79,10 @@ export function EncodingInfoDialog({ open, onOpenChange, episodeNumber, director
   }, [directoryCid, episodeNumber])
 
   useEffect(() => {
+    // Легитимная синхронизация с внешней системой (загрузка manifest.json из IPFS gateway при
+    // открытии диалога) — не производное значение, которое можно вычислить во время рендера
     if (open && !data && !loading) {
+      // oxlint-disable-next-line react/set-state-in-effect -- loadEncoding сразу выставляет loading/error/data
       loadEncoding()
     }
   }, [open, data, loading, loadEncoding])

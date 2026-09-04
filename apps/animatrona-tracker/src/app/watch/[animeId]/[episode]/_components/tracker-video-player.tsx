@@ -159,8 +159,13 @@ export function TrackerVideoPlayer({
 
   useEffect(() => {
     if (initialTrackMode) { return }
+    // Синхронизация с localStorage после монтирования — см. комментарий у initialTrackMode
+    // выше (.claude/docs/ssr-hydration-persisted-state.md)
     const saved = localStorage.getItem(TRACK_MODE_KEY) as TrackMode | null
-    if (saved) { setTrackMode(saved) }
+    if (saved) {
+      // oxlint-disable-next-line react/set-state-in-effect -- синхронизация с localStorage после монтирования
+      setTrackMode(saved)
+    }
   }, [initialTrackMode])
 
   // Вычисляемые URL
@@ -175,7 +180,7 @@ export function TrackerVideoPlayer({
   const subtitleUrl = useMemo(() => (currentSubtitle ? getSubtitleUrl(currentSubtitle) : null), [currentSubtitle])
   const fontUrls = useMemo(
     () => (currentSubtitle?.fonts ? getFontUrls(currentSubtitle.fonts) : []),
-    [currentSubtitle?.fonts],
+    [currentSubtitle],
   )
   const isAssSubtitle = currentSubtitle?.format === 'ass' || currentSubtitle?.format === 'ssa'
 
@@ -289,8 +294,11 @@ export function TrackerVideoPlayer({
     }
   }, [manifest.thumbnails, manifest.thumbnailsCid])
 
-  // AV1 проверка
+  // AV1 проверка — определение поддержки браузером доступно только после монтирования
+  // (MediaSource недоступен при SSR); дефолт true подобран так, чтобы не давать расхождения
+  // разметки при гидратации — сервер и первый клиентский рендер всегда показывают плеер
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- определение поддержки браузера после монтирования
     setAv1Supported(checkAV1Support())
   }, [])
 
@@ -307,6 +315,10 @@ export function TrackerVideoPlayer({
   }, [isPlaying])
 
   useEffect(() => {
+    // Легитимная синхронизация с внешней системой (setTimeout): нужно (пере)запустить таймер
+    // автоскрытия контролов при каждом изменении isPlaying, показ контролов — часть настройки
+    // этого таймера, а не производное значение
+    // oxlint-disable-next-line react/set-state-in-effect
     resetHideTimeout()
     return () => {
       if (hideTimeoutRef.current) {
@@ -676,7 +688,12 @@ export function TrackerVideoPlayer({
       {audioUrl && <audio key={audioUrl} ref={audioRef} src={audioUrl} preload="auto" />}
 
       {/* SubtitlesOctopus для ASS/SSA */}
-      {isAssSubtitle && subtitleUrl && isVideoReady && videoRef.current && (
+      {
+        /* videoRef.current не читается в условии рендера (react(refs)) — SubtitleOverlay сам
+          проверяет videoRef.current === null внутри своего эффекта и ничего не делает, пока
+          video-элемент не создан */
+      }
+      {isAssSubtitle && subtitleUrl && isVideoReady && (
         <SubtitleOverlayWrapper
           videoRef={videoRef}
           subtitleUrl={subtitleUrl}

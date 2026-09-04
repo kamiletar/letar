@@ -72,6 +72,9 @@ export const EpisodeCard = memo(function EpisodeCard({
         clearInterval(intervalRef.current)
         intervalRef.current = null
       }
+      // Легитимная синхронизация с внешней системой (таймер setInterval): сброс индекса —
+      // часть остановки цикла превью, а не производное значение
+      // oxlint-disable-next-line react/set-state-in-effect
       setCurrentIndex(0)
     }
 
