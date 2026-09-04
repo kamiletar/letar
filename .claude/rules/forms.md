@@ -12,7 +12,7 @@ paths: apps/**/*-form.tsx, apps/**/*Form.tsx, apps/**/_schemas/*.ts, libs/forms/
 
 При работе с формами **ОБЯЗАТЕЛЬНО** следуй этому порядку:
 
-1. **schema.zmodel** — начни с `@meta("form.*", value)` (основной синтаксис с Фазы 3 `zenstack-form-plugin` v3.0.0; legacy `/// @form.*`-комментарии всё ещё работают, но deprecated) (Skill `zenstack-helper`, MCP `form-mcp` → `get_directives`)
+1. **schema.zmodel** — начни с `@meta("form.*", value)` (единственный синтаксис с Фазы 4 `zenstack-form-plugin` v4.0.0; legacy `/// @form.*`-комментарии убраны из парсера целиком) (Skill `zenstack-helper`, MCP `form-mcp` → `get_directives`)
 2. **Генерация** — запусти `nx zenstack:generate <app>` для создания form schemas
 3. **form-mcp** — вызови `list_fields` для проверки доступных полей, `get_form_pattern` для паттерна, `get_field_props` для пропсов
 4. **createForm инстанс** — используй app-specific инстанс (см. секцию ниже)
