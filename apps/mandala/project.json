@@ -92,7 +92,7 @@
     },
     "db:generate": {
       "executor": "nx:run-commands",
-      "cache": true,
+      "cache": false,
       "inputs": [
         "{projectRoot}/src/generated/schema.prisma",
         "{projectRoot}/schema.zmodel"
@@ -113,6 +113,7 @@
     },
     "db:push": {
       "executor": "nx:run-commands",
+      "cache": false,
       "dependsOn": [
         "db:generate"
       ],
@@ -129,6 +130,7 @@
     },
     "db:migrate": {
       "executor": "nx:run-commands",
+      "cache": false,
       "dependsOn": [
         "db:generate"
       ],
@@ -145,6 +147,7 @@
     },
     "db:migrate:deploy": {
       "executor": "nx:run-commands",
+      "cache": false,
       "metadata": {
         "description": "Apply pending migrations (production)",
         "technologies": [
@@ -158,6 +161,7 @@
     },
     "db:studio": {
       "executor": "nx:run-commands",
+      "cache": false,
       "metadata": {
         "description": "Open Prisma Studio database GUI",
         "technologies": [
@@ -171,6 +175,7 @@
     },
     "db:seed": {
       "executor": "nx:run-commands",
+      "cache": false,
       "dependsOn": [
         "db:generate"
       ],
@@ -187,6 +192,7 @@
     },
     "db:reset": {
       "executor": "nx:run-commands",
+      "cache": false,
       "metadata": {
         "description": "Reset database and apply all migrations",
         "technologies": [
@@ -200,6 +206,7 @@
     },
     "db:reset:data-loss": {
       "executor": "nx:run-commands",
+      "cache": false,
       "metadata": {
         "description": "Reset database and apply all migrations (no confirmation)",
         "technologies": [
@@ -221,7 +228,7 @@
           "target": "build"
         }
       ],
-      "cache": true,
+      "cache": false,
       "inputs": [
         "{projectRoot}/schema.zmodel"
       ],
