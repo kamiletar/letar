@@ -4,7 +4,7 @@
  * Пульсирующие placeholder карточки вместо ActivityIndicator
  */
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Animated, StyleSheet, View } from 'react-native'
 
 /** Размеры совпадают с FocusableCard */
@@ -13,7 +13,9 @@ const CARD_HEIGHT = 360
 
 /** Пульсирующая skeleton карточка */
 function SkeletonCard(): React.JSX.Element {
-  const opacity = useRef(new Animated.Value(0.3)).current
+  // useState с ленивым инициализатором вместо useRef — стабильное значение без
+  // чтения `.current` в рендере (react(refs))
+  const [opacity] = useState(() => new Animated.Value(0.3))
 
   useEffect(() => {
     const animation = Animated.loop(

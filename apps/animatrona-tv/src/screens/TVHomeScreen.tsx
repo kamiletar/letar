@@ -8,7 +8,7 @@
  */
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { getLastWatched, getLibrary, getPosterUrl } from '@/api/client'
@@ -32,8 +32,12 @@ export function TVHomeScreen({ navigation }: Props): React.JSX.Element {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Focus memory — запоминаем последний выбранный анимеId
-  const lastFocusedAnimeIdRef = useRef<string | null>(null)
+  // Focus memory — запоминаем последний выбранный анимеId.
+  // Раньше был useRef с чтением `.current` прямо в JSX (react(refs) запрещает
+  // доступ к ref во время рендера) — заменено на обычное состояние, что заодно
+  // чинит реальный баг: без ре-рендера `focusedItemId` в TVRow не обновлялся
+  // после возврата на этот экран кнопкой "назад".
+  const [lastFocusedAnimeId, setLastFocusedAnimeId] = useState<string | null>(null)
 
   /** Загрузка данных */
   const loadData = useCallback(async () => {
@@ -52,15 +56,18 @@ export function TVHomeScreen({ navigation }: Props): React.JSX.Element {
     }
   }, [])
 
-  // Загружаем при монтировании
+  // Загружаем при монтировании — легитимная синхронизация с внешней системой
+  // (сетевой запрос), не производное состояние: значения приходят асинхронно
+  // от API, их нельзя вычислить во время рендера или в обработчике события.
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- data fetching on mount, см. комментарий выше
     loadData()
   }, [loadData])
 
   /** Навигация к аниме (с запоминанием для focus memory) */
   const handleAnimePress = useCallback(
     (animeId: string) => {
-      lastFocusedAnimeIdRef.current = animeId
+      setLastFocusedAnimeId(animeId)
       navigation.navigate('Anime', { animeId })
     },
     [navigation],
@@ -171,7 +178,7 @@ export function TVHomeScreen({ navigation }: Props): React.JSX.Element {
             }))}
             onItemPress={handleAnimePress}
             hasTVPreferredFocus={!lastWatched}
-            focusedItemId={lastFocusedAnimeIdRef.current}
+            focusedItemId={lastFocusedAnimeId}
           />
         )}
 
@@ -198,7 +205,7 @@ export function TVHomeScreen({ navigation }: Props): React.JSX.Element {
             imageUrl: getPosterUrl(anime.id),
           }))}
           onItemPress={handleAnimePress}
-          focusedItemId={lastFocusedAnimeIdRef.current}
+          focusedItemId={lastFocusedAnimeId}
         />
 
         {/* Отступ внизу */}

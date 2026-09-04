@@ -39,8 +39,11 @@ export function TVAnimeScreen({ navigation, route }: Props): React.JSX.Element {
     }
   }, [animeId])
 
-  // Загружаем при монтировании
+  // Загружаем при монтировании — легитимная синхронизация с внешней системой
+  // (сетевой запрос), не производное состояние: значения приходят асинхронно
+  // от API, их нельзя вычислить во время рендера или в обработчике события.
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- data fetching on mount, см. комментарий выше
     loadData()
   }, [loadData])
 

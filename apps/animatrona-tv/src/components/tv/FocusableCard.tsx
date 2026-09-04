@@ -72,7 +72,7 @@ export function FocusableCard({
             )}
 
           {/* Прогресс-бар просмотра */}
-          {progress != null && progress > 0 && progress < 100 && (
+          {progress !== null && progress !== undefined && progress > 0 && progress < 100 && (
             <View style={styles.progressBar}>
               <View style={[styles.progressFill, { width: `${progress}%` }]} />
             </View>

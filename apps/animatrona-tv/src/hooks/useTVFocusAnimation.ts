@@ -5,7 +5,7 @@
  * а также обработчики onFocus/onBlur для привязки к Pressable.
  */
 
-import { useRef } from 'react'
+import { useState } from 'react'
 import { Animated } from 'react-native'
 
 interface UseTVFocusAnimationOptions {
@@ -17,8 +17,11 @@ interface UseTVFocusAnimationOptions {
 
 /** Хук для плавной анимации фокуса */
 export function useTVFocusAnimation({ duration = 200, focusScale = 1.08 }: UseTVFocusAnimationOptions = {}) {
-  const scale = useRef(new Animated.Value(1)).current
-  const focusOpacity = useRef(new Animated.Value(0)).current
+  // useState с ленивым инициализатором вместо useRef — гарантированно стабильное
+  // значение на весь жизненный цикл компонента, без чтения `.current` в рендере
+  // (react(refs) запрещает доступ к ref во время рендера)
+  const [scale] = useState(() => new Animated.Value(1))
+  const [focusOpacity] = useState(() => new Animated.Value(0))
 
   const onFocus = () => {
     Animated.parallel([
