@@ -4,6 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.5.1] - 2026-09-04
+
+### Changed
+
+- `useEditIntentField` — локальная `getByPath` заменена импортом `getAtPath` из
+  `@letar/forms-core/security` (дублировала уже существующую утилиту). Чистый рефакторинг,
+  поведение не изменилось.
+
 ## [0.5.0] - 2026-09-04
 
 ### Added

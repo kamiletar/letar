@@ -1,6 +1,7 @@
 'use client'
 
 import { type EditIntentValue, emptyEditIntentValue } from '@letar/forms-core/edit-intent'
+import { getAtPath } from '@letar/forms-core/security'
 import { useStore } from '@tanstack/react-form'
 import { useCallback, useEffect, useRef } from 'react'
 import { useRegisterSensitiveField } from '../sensitive-fields/sensitive-fields-context'
@@ -40,16 +41,6 @@ export interface UseEditIntentFieldResult {
 
 const FOCUSABLE_SELECTOR = 'input, textarea, select, [contenteditable="true"]'
 
-/** Точечно резолвит `a.b.c` в объекте формы — тот же дот-путь, которым `form.setFieldValue` уже адресует вложенные значения. */
-function getByPath(source: unknown, path: string): unknown {
-  return path.split('.').reduce<unknown>((acc, key) => {
-    if (acc === null || acc === undefined || typeof acc !== 'object') {
-      return undefined
-    }
-    return (acc as Record<string, unknown>)[key]
-  }, source)
-}
-
 /**
  * Headless view/edit-контракт для `Form.Field.EditIntent` (Chakra/shadcn/Vue/Angular —
  * реализация одна, скины только рисуют кнопки и дочернее поле).
@@ -68,7 +59,7 @@ function getByPath(source: unknown, path: string): unknown {
 export function useEditIntentField<T>(options: UseEditIntentFieldOptions<T>): UseEditIntentFieldResult {
   const { form, fullPath, emptyValue, sensitive = true } = options
 
-  const value = (useStore(form.store, (state: { values: unknown }) => getByPath(state.values, fullPath)) as
+  const value = (useStore(form.store, (state: { values: unknown }) => getAtPath(state.values, fullPath)) as
     | EditIntentValue<T>
     | undefined) ?? emptyEditIntentValue<T>()
   const isViewMode = !value.isEdited
