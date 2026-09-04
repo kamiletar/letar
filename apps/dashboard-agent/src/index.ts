@@ -39,6 +39,7 @@ import { envRoutes } from './routes/env'
 import { gitRoutes } from './routes/git'
 import { healthRoutes } from './routes/health'
 import { healthCheckRoutes } from './routes/health-check'
+import { jobsObserverRoutes } from './routes/jobs-observer'
 import { logScanRoutes } from './routes/log-scan'
 import { loginCanaryRoutes } from './routes/login-canary'
 import { loginCanarySetupRoutes } from './routes/login-canary-setup'
@@ -135,6 +136,7 @@ async function main(): Promise<void> {
   await fastify.register(loginCanaryRoutes)
   await fastify.register(loginCanarySetupRoutes)
   await fastify.register(healthCheckRoutes)
+  await fastify.register(jobsObserverRoutes)
   await fastify.register(logScanRoutes)
   await fastify.register(dockerPruneRoutes)
   await fastify.register(nextCacheCleanupRoutes)

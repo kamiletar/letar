@@ -582,6 +582,17 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     enabled: true,
     server: 's2',
   },
+  {
+    id: 'jobs-observer-check',
+    name: 'Jobs Observer Check',
+    app: 'dashboard-agent',
+    endpoint: '/api/cron/jobs-observer-check',
+    schedule: '*/15 * * * *',
+    description:
+      'Наблюдатель за @letar/jobs-задачами тиража §75 (dashboard, driving-school, dsperevod, aboi, time, svoichuzhie): опрашивает /api/jobs/status каждого приложения, алертит CRON_FAILED на autoSchedule:false (забытый JOBS_ENABLED — находка пилота 13.08.2026) и на пропущенный тик задачи',
+    enabled: true,
+    server: 's2',
+  },
 ]
 
 /**
