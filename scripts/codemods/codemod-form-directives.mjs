@@ -23,7 +23,7 @@
  * `@meta("form.props.min", 1) @meta("form.props.max", 100)`.
  */
 
-import { readFileSync, writeFileSync, existsSync, globSync } from 'node:fs'
+import { existsSync, globSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 
 const args = process.argv.slice(2)
@@ -61,11 +61,30 @@ function parseJsObjectLiteral(src) {
   return JSON.parse(jsonStr)
 }
 
+/**
+ * Массив, содержащий хоть один объект (например `options: [{value,label}, ...]`), нельзя
+ * представить плоским `@meta(key, value)` — `zenstack generate` роняет `ObjectExpr` даже
+ * вложенный в массив (та же граница upstream-компилятора, что и для голого объектного
+ * литерала). Массив из примитивов (`["p1","p2","p3"]`) — не проблема, JSON.stringify кладёт
+ * его как есть. Найдено вживую: `animatrona`/`animatrona-tracker`, `form.props.options` с
+ * объектами — codemod раньше флаттенил такой массив как обычное значение и ронял генерацию
+ * молча для всей схемы (не для одного поля).
+ */
+function containsObjectInArray(value) {
+  if (Array.isArray(value)) {
+    return value.some((item) => item !== null && typeof item === 'object')
+  }
+  return false
+}
+
 /** Развернуть объект в плоские точечные пары [путь, значение] — рекурсивно для вложенных объектов. */
 function flattenToPairs(obj, prefix = '') {
   const pairs = []
   for (const [key, value] of Object.entries(obj)) {
     const dotKey = prefix ? `${prefix}.${key}` : key
+    if (containsObjectInArray(value)) {
+      throw new Error(`Массив объектов в "${dotKey}" не выражается плоским @meta — оставлен как есть`)
+    }
     if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
       pairs.push(...flattenToPairs(value, dotKey))
     } else {
@@ -104,8 +123,8 @@ function parseDirectiveLine(line) {
     try {
       const obj = parseJsObjectLiteral(propsMatch[1])
       return { metaCalls: flattenToPairs(obj).map(([k, v]) => metaCall(`props.${k}`, v)) }
-    } catch {
-      return { manualReview: `@form.props(...) — объект не распознан парсером кодмода: ${trimmed}` }
+    } catch (err) {
+      return { manualReview: `@form.props(...) — ${err.message}: ${trimmed}` }
     }
   }
 
@@ -114,8 +133,8 @@ function parseDirectiveLine(line) {
     try {
       const obj = parseJsObjectLiteral(relationMatch[1])
       return { metaCalls: flattenToPairs(obj).map(([k, v]) => metaCall(`relation.${k}`, v)) }
-    } catch {
-      return { manualReview: `@form.relation(...) — объект не распознан парсером кодмода: ${trimmed}` }
+    } catch (err) {
+      return { manualReview: `@form.relation(...) — ${err.message}: ${trimmed}` }
     }
   }
 
@@ -139,7 +158,12 @@ const manualReviewItems = []
 for (const filePath of files) {
   const relPath = path.relative(process.cwd(), filePath)
   const original = readFileSync(filePath, 'utf-8')
-  const lines = original.split('\n')
+  // CRLF-файлы (driving-school) иначе тихо пропускаются целиком: `split('\n')` оставляет
+  // висячий `\r` на конце каждой строки, и `isCommentLine`/`$` в regex-ах ниже перестают
+  // матчиться — не ошибка, а 0 найденных директив там, где их сотня. Нормализуем к `\n` на
+  // время обработки и возвращаем исходный стиль переноса строк при записи.
+  const eol = original.includes('\r\n') ? '\r\n' : '\n'
+  const lines = original.split(/\r\n|\n/)
   const output = []
   let pendingMetaCalls = []
   let fileConverted = 0
@@ -191,12 +215,14 @@ for (const filePath of files) {
   }
 
   if (pendingMetaCalls.length > 0) {
-    manualReviewItems.push(`${relPath}:EOF — директива(ы) в конце файла без поля-получателя: ${pendingMetaCalls.join(' ')}`)
+    manualReviewItems.push(
+      `${relPath}:EOF — директива(ы) в конце файла без поля-получателя: ${pendingMetaCalls.join(' ')}`,
+    )
   }
 
   if (fileConverted > 0) {
     totalConverted += fileConverted
-    const newContent = output.join('\n')
+    const newContent = output.join(eol)
     if (dryRun) {
       console.log(`[dry-run] ${relPath}: ${fileConverted} директив(ы) будут конвертированы`)
     } else {
