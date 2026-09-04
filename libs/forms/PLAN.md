@@ -1062,6 +1062,10 @@ inline-редактирование текста. Если `ReplaceValue` ока
       fields-only скин), поэтому монтирование провайдера там появится только вместе с ним.
       Mask-as-input rejection — ответственность server fixture (уже задокументирована в
       «Поведении» выше), не клиента;
+- [x] **2026-09-04:** `useEditIntentField` (`@letar/forms-react` 0.5.0 → 0.5.1) — локальная
+      `getByPath` (дублировала `getAtPath` из `@letar/forms-core/security`, добавленную тем же
+      релизом security-слоя) удалена, использует общую утилиту. Чистый рефакторинг, 97/97 тестов
+      `forms-react` + `typecheck:tsgo` `forms-react`/`forms` зелёные;
 - [x] generic tests: `string` API key и object `ValueType` — оба покрыты в
       `edit-intent-value.spec.ts` (`editIntentValueSchema(z.object({...}).strip())`);
 - [x] `@letar/forms-core/edit-intent` (тип + `editIntentValueSchema`/`emptyEditIntentValue`/
