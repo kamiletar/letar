@@ -1289,6 +1289,7 @@ docker stop ${OLD_CONTAINER} 2>/dev/null || true
 docker rm ${OLD_CONTAINER} 2>/dev/null || true
 cd "${WORKSPACE_ROOT}/${APP_DIR}"
 export GLITCHTIP_RELEASE="${GIT_SHORT_SHA}"
+export NEXT_PUBLIC_GLITCHTIP_RELEASE="${GIT_SHORT_SHA}"
 docker compose -f $COMPOSE_FILE --env-file $ENV_FILE_NAME up -d app
 sleep 5
 ${POST_START_CMD}
