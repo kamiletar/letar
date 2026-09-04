@@ -58,112 +58,53 @@ model Settings {
   id              String  @id @default("default")
 
   // Принтер
-  /// @form.title("Имя принтера")
-  /// @form.placeholder("TSC TE300")
-  printerName     String  @default("TSC_TE300")
+  printerName     String  @default("TSC_TE300") @meta("form.title", "Имя принтера") @meta("form.placeholder", "TSC TE300")
 
-  /// @form.title("Режим работы")
-  /// @form.fieldType("radioCard")
-  printerMode     PrinterMode @default(REAL)
+  printerMode     PrinterMode @default(REAL) @meta("form.title", "Режим работы") @meta("form.fieldType", "radioCard")
 
-  /// @form.title("Режим печати этикетки")
-  /// @form.description("BITMAP: отправляет готовое изображение. NATIVE: использует команды принтера для кодов")
-  /// @form.fieldType("radioCard")
-  labelPrintMode  LabelPrintMode @default(BITMAP)
+  labelPrintMode  LabelPrintMode @default(BITMAP) @meta("form.title", "Режим печати этикетки") @meta("form.description", "BITMAP: отправляет готовое изображение. NATIVE: использует команды принтера для кодов") @meta("form.fieldType", "radioCard")
 
-  /// @form.title("Скорость печати")
-  /// @form.fieldType("slider")
-  /// @form.props({ min: 1, max: 14, showValue: true })
-  printerSpeed    Int     @default(4)
+  printerSpeed    Int     @default(4) @meta("form.title", "Скорость печати") @meta("form.fieldType", "slider") @meta("form.props.min", 1) @meta("form.props.max", 14) @meta("form.props.showValue", true)
 
-  /// @form.title("Плотность печати")
-  /// @form.fieldType("slider")
-  /// @form.props({ min: 0, max: 15, showValue: true })
-  printerDensity  Int     @default(8)
+  printerDensity  Int     @default(8) @meta("form.title", "Плотность печати") @meta("form.fieldType", "slider") @meta("form.props.min", 0) @meta("form.props.max", 15) @meta("form.props.showValue", true)
 
-  /// @form.title("Количество копий")
-  /// @form.fieldType("numberInput")
-  /// @form.props({ min: 1, max: 100 })
-  copies          Int     @default(1)
+  copies          Int     @default(1) @meta("form.title", "Количество копий") @meta("form.fieldType", "numberInput") @meta("form.props.min", 1) @meta("form.props.max", 100)
 
   // Шаблон этикетки
-  /// @form.title("Шаблон")
-  /// @form.relation({ model: "Template", labelField: "name" })
-  templateId      String?
+  templateId      String? @meta("form.title", "Шаблон") @meta("form.relation.model", "Template") @meta("form.relation.labelField", "name")
   template        Template? @relation(fields: [templateId], references: [id])
 
   // Позиция DataMatrix
-  /// @form.title("DataMatrix X")
-  /// @form.fieldType("numberInput")
-  /// @form.props({ min: 0 })
-  datamatrixX     Int     @default(26)
+  datamatrixX     Int     @default(26) @meta("form.title", "DataMatrix X") @meta("form.fieldType", "numberInput") @meta("form.props.min", 0)
 
-  /// @form.title("DataMatrix Y")
-  /// @form.fieldType("numberInput")
-  /// @form.props({ min: 0 })
-  datamatrixY     Int     @default(160)
+  datamatrixY     Int     @default(160) @meta("form.title", "DataMatrix Y") @meta("form.fieldType", "numberInput") @meta("form.props.min", 0)
 
-  /// @form.title("Размер DataMatrix")
-  /// @form.description("Размер в пикселях (рекомендуется 160)")
-  /// @form.fieldType("numberInput")
-  /// @form.props({ min: 50, max: 200 })
-  datamatrixSize  Int     @default(160)
+  datamatrixSize  Int     @default(160) @meta("form.title", "Размер DataMatrix") @meta("form.description", "Размер в пикселях (рекомендуется 160)") @meta("form.fieldType", "numberInput") @meta("form.props.min", 50) @meta("form.props.max", 200)
 
   // Позиция GTIN
-  /// @form.title("GTIN X")
-  /// @form.fieldType("numberInput")
-  /// @form.props({ min: 0 })
-  gtinX           Int     @default(526)
+  gtinX           Int     @default(526) @meta("form.title", "GTIN X") @meta("form.fieldType", "numberInput") @meta("form.props.min", 0)
 
-  /// @form.title("GTIN Y")
-  /// @form.fieldType("numberInput")
-  /// @form.props({ min: 0 })
-  gtinY           Int     @default(10)
+  gtinY           Int     @default(10) @meta("form.title", "GTIN Y") @meta("form.fieldType", "numberInput") @meta("form.props.min", 0)
 
-  /// @form.title("Ширина GTIN")
-  /// @form.fieldType("numberInput")
-  /// @form.props({ min: 50, max: 300 })
-  gtinWidth       Int     @default(140)
+  gtinWidth       Int     @default(140) @meta("form.title", "Ширина GTIN") @meta("form.fieldType", "numberInput") @meta("form.props.min", 50) @meta("form.props.max", 300)
 
-  /// @form.title("Высота GTIN")
-  /// @form.fieldType("numberInput")
-  /// @form.props({ min: 100, max: 500 })
-  gtinHeight      Int     @default(440)
+  gtinHeight      Int     @default(440) @meta("form.title", "Высота GTIN") @meta("form.fieldType", "numberInput") @meta("form.props.min", 100) @meta("form.props.max", 500)
 
   // Поведение
-  /// @form.title("Разрешить дубликаты")
-  /// @form.fieldType("switch")
-  /// @form.description("Печатать этикетки для уже использованных кодов")
-  allowDuplicates Boolean @default(false)
+  allowDuplicates Boolean @default(false) @meta("form.title", "Разрешить дубликаты") @meta("form.fieldType", "switch") @meta("form.description", "Печатать этикетки для уже использованных кодов")
 
-  /// @form.title("Автопереподключение")
-  /// @form.fieldType("switch")
-  autoReconnect   Boolean @default(true)
+  autoReconnect   Boolean @default(true) @meta("form.title", "Автопереподключение") @meta("form.fieldType", "switch")
 
-  /// @form.title("Автообновление")
-  /// @form.fieldType("switch")
-  /// @form.description("Автоматически проверять обновления при запуске")
-  autoUpdate      Boolean @default(false)
+  autoUpdate      Boolean @default(false) @meta("form.title", "Автообновление") @meta("form.fieldType", "switch") @meta("form.description", "Автоматически проверять обновления при запуске")
 
-  /// @form.title("Попыток при ошибке")
-  /// @form.fieldType("numberInput")
-  /// @form.props({ min: 0, max: 10 })
-  retryAttempts   Int     @default(3)
+  retryAttempts   Int     @default(3) @meta("form.title", "Попыток при ошибке") @meta("form.fieldType", "numberInput") @meta("form.props.min", 0) @meta("form.props.max", 10)
 
   // Сканер
-  /// @form.title("COM-порт сканера")
-  /// @form.placeholder("COM5")
-  /// @form.description("Оставьте пустым для USB HID режима (клавиатура)")
-  scannerPort     String? @default("")
+  scannerPort     String? @default("") @meta("form.title", "COM-порт сканера") @meta("form.placeholder", "COM5") @meta("form.description", "Оставьте пустым для USB HID режима (клавиатура)")
 
-  /// @form.title("Скорость порта (baud)")
-  /// @form.fieldType("select")
-  /// @form.props({ options: [9600, 19200, 38400, 57600, 115200] })
-  scannerBaudRate Int     @default(9600)
+  scannerBaudRate Int     @default(9600) @meta("form.title", "Скорость порта (baud)") @meta("form.fieldType", "select") @meta("form.props.options", [9600,19200,38400,57600,115200])
 
-  /// @form.title("Сканер включен")
-  /// @form.fieldType("switch")
-  scannerEnabled  Boolean @default(true)
+  scannerEnabled  Boolean @default(true) @meta("form.title", "Сканер включен") @meta("form.fieldType", "switch")
 
   updatedAt       DateTime @updatedAt
 
@@ -175,26 +116,15 @@ model Settings {
 model Template {
   id          String   @id @default(cuid())
 
-  /// @form.title("Название")
-  name        String
+  name        String @meta("form.title", "Название")
 
-  /// @form.title("Путь к файлу")
-  /// @form.description("Относительный путь к PNG файлу")
-  path        String
+  path        String @meta("form.title", "Путь к файлу") @meta("form.description", "Относительный путь к PNG файлу")
 
-  /// @form.title("Ширина (px)")
-  /// @form.fieldType("numberInput")
-  /// @form.props({ min: 100, max: 2000 })
-  width       Int      @default(685)
+  width       Int      @default(685) @meta("form.title", "Ширина (px)") @meta("form.fieldType", "numberInput") @meta("form.props.min", 100) @meta("form.props.max", 2000)
 
-  /// @form.title("Высота (px)")
-  /// @form.fieldType("numberInput")
-  /// @form.props({ min: 100, max: 2000 })
-  height      Int      @default(461)
+  height      Int      @default(461) @meta("form.title", "Высота (px)") @meta("form.fieldType", "numberInput") @meta("form.props.min", 100) @meta("form.props.max", 2000)
 
-  /// @form.title("По умолчанию")
-  /// @form.fieldType("switch")
-  isDefault   Boolean  @default(false)
+  isDefault   Boolean  @default(false) @meta("form.title", "По умолчанию") @meta("form.fieldType", "switch")
 
   settings    Settings[]
   createdAt   DateTime @default(now())
@@ -207,36 +137,21 @@ model Template {
 model Product {
   id           String     @id @default(cuid())
 
-  /// @form.title("GTIN")
-  /// @form.placeholder("4610000000007")
-  /// @form.description("13-14 цифр штрихкода товара")
-  gtin         String     @unique
+  gtin         String     @unique @meta("form.title", "GTIN") @meta("form.placeholder", "4610000000007") @meta("form.description", "13-14 цифр штрихкода товара")
 
-  /// @form.title("Название товара")
-  /// @form.placeholder("Галстук Детский")
-  name         String
+  name         String @meta("form.title", "Название товара") @meta("form.placeholder", "Галстук Детский")
 
-  /// @form.title("Артикул")
-  /// @form.placeholder("ГМ")
-  articleCode  String?
+  articleCode  String? @meta("form.title", "Артикул") @meta("form.placeholder", "ГМ")
 
-  /// @form.title("Состав")
-  /// @form.placeholder("100% полиэстер")
-  composition  String?
+  composition  String? @meta("form.title", "Состав") @meta("form.placeholder", "100% полиэстер")
 
-  /// @form.title("Цвет")
-  /// @form.placeholder("разноцветный")
-  color        String?
+  color        String? @meta("form.title", "Цвет") @meta("form.placeholder", "разноцветный")
 
-  /// @form.title("Размер")
-  /// @form.placeholder("42")
-  size         String?
+  size         String? @meta("form.title", "Размер") @meta("form.placeholder", "42")
 
-  /// @form.title("Производитель")
-  manufacturer String?
+  manufacturer String? @meta("form.title", "Производитель")
 
-  /// @form.title("Категория")
-  category     String?
+  category     String? @meta("form.title", "Категория")
 
   printJobs    PrintJob[]
 
@@ -254,31 +169,23 @@ model Product {
 model PrintJob {
   id            String   @id @default(cuid())
 
-  /// @form.exclude
-  fullCode      String   @unique
+  fullCode      String   @unique @meta("form.exclude", true)
 
-  /// @form.title("GTIN")
-  gtin          String
+  gtin          String @meta("form.title", "GTIN")
 
-  /// @form.title("Серийный номер")
-  serialNumber  String
+  serialNumber  String @meta("form.title", "Серийный номер")
 
-  /// @form.exclude
-  cryptoCode    String?
+  cryptoCode    String? @meta("form.exclude", true)
 
-  /// @form.exclude
-  templateId    String?
+  templateId    String? @meta("form.exclude", true)
 
   /// Связь с товаром (опционально)
   productId     String?
   product       Product?  @relation(fields: [productId], references: [id])
 
-  /// @form.title("Сканирований")
-  scanCount     Int      @default(1)
+  scanCount     Int      @default(1) @meta("form.title", "Сканирований")
 
-  /// @form.title("Напечатано")
-  /// @form.fieldType("switch")
-  printed       Boolean  @default(false)
+  printed       Boolean  @default(false) @meta("form.title", "Напечатано") @meta("form.fieldType", "switch")
 
   firstScannedAt DateTime @default(now())
   lastScannedAt  DateTime @default(now())
