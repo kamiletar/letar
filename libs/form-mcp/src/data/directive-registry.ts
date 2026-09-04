@@ -1,60 +1,87 @@
 import type { DocSection } from './loader.js'
 
-/** Description of an @form.* directive */
+/**
+ * Описание директивы form-метаданных. С Фазы 3 (v3.0.0) основной синтаксис — field-атрибут
+ * `@meta("form.<key>", value)`, comment-директива `@form.*` — deprecated legacy-форма (плагин
+ * продолжает её читать, `@meta` побеждает при конфликте на одном поле). `name` остаётся ключом
+ * lookup'а (в т.ч. по короткому имени без `@form.`) ради обратной совместимости самого MCP-API —
+ * не переименовано, чтобы не ломать существующих потребителей `get_directives`.
+ */
 export interface DirectiveInfo {
-  /** Directive name, e.g. "@form.title" */
+  /** Ключ директивы для lookup'а, напр. "@form.title" (legacy-имя, используется и для @meta) */
   name: string
-  /** Description */
+  /** Плоский dot-path ключ для @meta, напр. "form.title" (form.props.* — без вложенных путей, см. props/relation ниже) */
+  metaKey: string
+  /** Описание */
   description: string
-  /** Syntax example */
+  /** Основной синтаксис (Фаза 3): @meta("form.<key>", value) */
   example: string
-  /** Generated output */
+  /** Устаревший синтаксис (продолжает работать, печатает deprecation-warning при generate) */
+  legacyExample: string
+  /** Сгенерированный вывод */
   output: string
 }
 
-/** Known directives with descriptions (supplemented from docs) */
+/** Известные директивы с описаниями (дополняются из документации) */
 const KNOWN_DIRECTIVES: DirectiveInfo[] = [
   {
     name: '@form.title',
+    metaKey: 'form.title',
     description: 'Field title in the form',
-    example: '/// @form.title("Recipe Name")',
+    example: '@meta("form.title", "Recipe Name")',
+    legacyExample: '/// @form.title("Recipe Name")',
     output: '.meta({ ui: { title: "Recipe Name" } })',
   },
   {
     name: '@form.placeholder',
+    metaKey: 'form.placeholder',
     description: 'Placeholder for an input field',
-    example: '/// @form.placeholder("Enter a name")',
+    example: '@meta("form.placeholder", "Enter a name")',
+    legacyExample: '/// @form.placeholder("Enter a name")',
     output: '.meta({ ui: { placeholder: "Enter a name" } })',
   },
   {
     name: '@form.description',
+    metaKey: 'form.description',
     description: 'Help text below the field',
-    example: '/// @form.description("Brief dish description")',
+    example: '@meta("form.description", "Brief dish description")',
+    legacyExample: '/// @form.description("Brief dish description")',
     output: '.meta({ ui: { description: "Brief dish description" } })',
   },
   {
     name: '@form.fieldType',
+    metaKey: 'form.fieldType',
     description: 'Explicit form field type override',
-    example: '/// @form.fieldType("tags")',
+    example: '@meta("form.fieldType", "tags")',
+    legacyExample: '/// @form.fieldType("tags")',
     output: '.meta({ ui: { fieldType: "tags" } })',
   },
   {
     name: '@form.props',
+    metaKey: 'form.props.<dotpath>',
     description:
-      'Field properties. Automatically split into Zod constraints (min, max, step) and UI props (layout, count)',
-    example: '/// @form.props({ min: 1, max: 100, step: 0.5 })',
+      'Field properties. Automatically split into Zod constraints (min, max, step) and UI props (layout, count). '
+      + '⚠️ @meta не принимает объектный литерал (Unsupported attribute arg value: ObjectExpr — ломает '
+      + 'zenstack generate целиком, ограничение upstream-генератора TS-схемы, не плагина) — каждый ключ отдельным вызовом @meta с плоским dot-path.',
+    example: '@meta("form.props.min", 1) @meta("form.props.max", 100) @meta("form.props.step", 0.5)',
+    legacyExample: '/// @form.props({ min: 1, max: 100, step: 0.5 })',
     output: 'z.number().min(1).max(100).step(0.5)',
   },
   {
     name: '@form.relation',
-    description: 'Configuration for relation fields (FK -> Select/Combobox)',
-    example: '/// @form.relation({ labelField: "name", searchable: true })',
+    metaKey: 'form.relation.<dotpath>',
+    description:
+      'Configuration for relation fields (FK -> Select/Combobox). Тот же запрет объектного литерала, что и у form.props — только плоский dot-path.',
+    example: '@meta("form.relation.labelField", "name") @meta("form.relation.searchable", true)',
+    legacyExample: '/// @form.relation({ labelField: "name", searchable: true })',
     output: '.meta({ ui: { fieldType: "combobox", relation: { labelField: "name", searchable: true } } })',
   },
   {
     name: '@form.exclude',
+    metaKey: 'form.exclude',
     description: 'Exclude field from generated form schemas',
-    example: '/// @form.exclude',
+    example: '@meta("form.exclude", true)',
+    legacyExample: '/// @form.exclude',
     output: 'Field will not appear in CreateFormSchema / UpdateFormSchema',
   },
 ]

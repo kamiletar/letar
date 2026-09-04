@@ -20,7 +20,8 @@ describe('buildDirectiveRegistry', () => {
     const registry = buildDirectiveRegistry([section])
     expect(registry.get('@form.title')?.description).toBe('Заголовок поля, отображаемый над инпутом.')
     // Остальные поля директивы не затронуты
-    expect(registry.get('@form.title')?.example).toBe('/// @form.title("Recipe Name")')
+    expect(registry.get('@form.title')?.example).toBe('@meta("form.title", "Recipe Name")')
+    expect(registry.get('@form.title')?.legacyExample).toBe('/// @form.title("Recipe Name")')
   })
 
   it('секция для неизвестной директивы не создаёт новую запись', () => {

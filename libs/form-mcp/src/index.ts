@@ -134,7 +134,9 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
 
   server.tool(
     'get_directives',
-    'Get descriptions of @form.* directives for zenstack-form-plugin. Without arguments returns all directives.',
+    'Get descriptions of form-metadata directives for zenstack-form-plugin (v3.0.0+). Primary syntax is the '
+      + '@meta("form.<key>", value) field attribute (see `example`); the older /// @form.* comment directive '
+      + '(see `legacyExample`) still works but is deprecated. Without arguments returns all directives.',
     { directive: z.string().optional().describe('Directive name: @form.title, @form.props, etc.') },
     async ({ directive }) => {
       const directives = getDirectives(directiveRegistry, directive)
@@ -185,7 +187,12 @@ export function createFormMcpServer(options: FormMcpServerOptions): McpServer {
     },
     { key: 'offline', name: 'Offline Support', description: 'useOfflineForm, sync queue, status indicators' },
     { key: 'i18n', name: 'Internationalization', description: 'FormI18nProvider, error and option localization' },
-    { key: 'zenstack', name: 'ZenStack Integration', description: '@form.* directives, generation from schema.zmodel' },
+    {
+      key: 'zenstack',
+      name: 'ZenStack Integration',
+      description:
+        '@meta("form.*", value) directives (legacy @form.* comments still supported), generation from schema.zmodel',
+    },
     { key: 'api-reference', name: 'API Reference', description: 'Hooks, contexts, types, utilities' },
   ]
 

@@ -1,5 +1,20 @@
 # Changelog — @letar/form-mcp
 
+## 1.1.0 (2026-09-04)
+
+### Changed
+
+- `directive-registry.ts` (Priority 0 миграции на Фазу 3 `zenstack-form-plugin` v3.0.0):
+  `@meta("form.<key>", value)` — основной синтаксис, поле `example` теперь показывает его вместо
+  comment-директивы; старый `/// @form.*` — в новом поле `legacyExample`, помечен как
+  deprecated-но-рабочий. Новое поле `metaKey` — плоский dot-path для `@meta` (напр. `form.title`,
+  `form.props.<dotpath>`, `form.relation.<dotpath>`).
+- `form.props`/`form.relation` — объектный литерал в `@meta` ломает `zenstack generate` целиком
+  (`ObjectExpr` не поддержан upstream), описание директивы и пример теперь показывают плоский
+  dot-path (`@meta("form.props.min", 1)`), не объект.
+- `get_directives` — описание MCP-инструмента и `docs`-запись `zenstack` обновлены: упоминают
+  `@meta` как основной синтаксис.
+
 ## 1.0.3 (2026-08-11)
 
 ### Fixed
