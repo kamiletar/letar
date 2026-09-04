@@ -4,15 +4,20 @@
 
 ## Поддерживаемые директивы
 
-| Директива                  | Описание            | Пример                                       |
-| -------------------------- | ------------------- | -------------------------------------------- |
-| `@form.title("...")`       | Заголовок поля      | `/// @form.title("Название")`                |
-| `@form.placeholder("...")` | Placeholder         | `/// @form.placeholder("Введите...")`        |
-| `@form.description("...")` | Описание поля       | `/// @form.description("Подсказка")`         |
-| `@form.fieldType("...")`   | Тип компонента      | `/// @form.fieldType("tags")`                |
-| `@form.props({...})`       | Constraints + props | `/// @form.props({ min: 1, max: 100 })`      |
-| `@form.relation({...})`    | Настройки relation  | `/// @form.relation({ labelField: "name" })` |
-| `@form.exclude`            | Исключить из формы  | `/// @form.exclude`                          |
+| Директива                  | Описание                                 | Пример                                       |
+| -------------------------- | ---------------------------------------- | -------------------------------------------- |
+| `@form.title("...")`       | Заголовок поля                           | `/// @form.title("Название")`                |
+| `@form.placeholder("...")` | Placeholder                              | `/// @form.placeholder("Введите...")`        |
+| `@form.description("...")` | Описание поля                            | `/// @form.description("Подсказка")`         |
+| `@form.fieldType("...")`   | Тип компонента                           | `/// @form.fieldType("tags")`                |
+| `@form.props({...})`       | UI-пропсы + escape hatch для constraints | `/// @form.props({ showValue: true })`       |
+| `@form.relation({...})`    | Настройки relation                       | `/// @form.relation({ labelField: "name" })` |
+| `@form.exclude`            | Исключить из формы                       | `/// @form.exclude`                          |
+
+⚠️ **Ограничения валидации (`min`/`max`/`minLength`/`pattern`/`email` и т.п.) задавай нативными
+атрибутами ZModel (`@gte`/`@lte`/`@length`/`@regex`/`@email`), не через `@form.props`** — см.
+раздел «Constraints: нативные атрибуты — рекомендуемый путь» ниже. `@form.props` для constraints —
+escape hatch для намеренных расхождений клиент/сервер, не основной механизм.
 
 ## Примеры
 
@@ -28,8 +33,7 @@ model Recipe {
 
   /// @form.title("Количество порций")
   /// @form.fieldType("numberInput")
-  /// @form.props({ min: 1, max: 100 })
-  portions    Int @default(1)
+  portions    Int @default(1) @gte(1) @lte(100)
 
   /// @form.title("Теги")
   /// @form.fieldType("tags")
@@ -75,26 +79,27 @@ export const RecipeTypeFormSchema = z.enum(['SWEET', 'SALTY']).meta({
 Живой прецедент — `libs/driving-school-db/schema.zmodel`, enum `AbsenceType`, и
 `apps/domwellbes/schema.zmodel`, enum `WallMaterial`/`HousePurpose`/`Floors`/`HouseStyle`.
 
-## Автоматическое разделение @form.props
+## Constraints: нативные атрибуты — рекомендуемый путь
 
-Плагин автоматически разделяет `@form.props` на:
+Генератор форм наследует Zod-constraints напрямую из нативных атрибутов ZModel — того же места,
+которое ORM уже применяет на `create`/`update` через `@zenstackhq/zod`. Один источник валидации
+вместо двух параллельных:
 
-**Zod constraints** — становятся методами схемы:
-
-- `min`, `max`, `step` → `.min()`, `.max()`, `.multipleOf()`
-- `minLength`, `maxLength` → `.min()`, `.max()` для строк
-- `pattern` → `.regex()`
-- `email`, `url`, `uuid` → `.email()`, `.url()`, `.uuid()`
-
-**UI props** — остаются в `fieldProps`:
-
-- `count`, `allowHalf` (для rating)
-- `showValue`, `layout` (для slider, radioCard)
-- Любые другие props
+| ZModel-атрибут      | Zod-constraint                     |
+| ------------------- | ---------------------------------- |
+| `@email`            | `.email()`                         |
+| `@length(min, max)` | `.min(min)` / `.max(max)` (строки) |
+| `@gte(x)`           | `.min(x)` (включительно)           |
+| `@gt(x)`            | `.gt(x)` (строго больше)           |
+| `@lte(x)`           | `.max(x)` (включительно)           |
+| `@lt(x)`            | `.lt(x)` (строго меньше)           |
+| `@regex("...")`     | `.regex(/.../)`                    |
 
 ```zmodel
-/// @form.props({ min: 1, max: 100, showValue: true })
-portions Int
+/// @form.title("Количество порций")
+/// @form.fieldType("numberInput")
+/// @form.props({ showValue: true })
+portions Int @gte(1) @lte(100)
 ```
 
 Генерирует:
@@ -104,8 +109,29 @@ portions: z.number()
   .int()
   .min(1)
   .max(100)
-  .meta({ ui: { fieldProps: { showValue: true } } })
+  .meta({ ui: { title: 'Количество порций', fieldType: 'numberInput', fieldProps: { showValue: true } } })
 ```
+
+`@form.props` здесь несёт только UI-пропс (`showValue`) — у ZModel для него нет аналога.
+
+### `@form.props` для constraints — escape hatch
+
+Constraint-ключ в `@form.props` (`min`/`max`/`minLength`/`maxLength`/`pattern`/`email`/`url`/
+`uuid`/`exclusiveMin`/`exclusiveMax`) **побеждает** нативный атрибут при конфликте того же ключа
+на одном поле. Это не основной механизм, а осознанный выход для трёх постоянных случаев:
+
+1. **Общая библиотечная схема, разный контекст у потребителей** — общий миксин задаёт нативный
+   атрибут для большинства, конкретное приложение переопределяет через `@form.props` в своей
+   форме, не форкая общую модель.
+2. **Валидация до нормализации ≠ после** — нативный атрибут описывает хранимый формат (E.164 для
+   телефона), форма принимает то, что печатает пользователь, до normalize-transform. Это не
+   мягче/строже, а другой constraint для другого этапа пайплайна.
+3. **Осознанный staged rollout** — ужесточили нативный атрибут для целостности данных на будущее,
+   но конкретная legacy-форма ещё не готова показать это пользователю (не согласован UX-текст) —
+   `@form.props` временно держит форму мягче, пока его явно не уберут.
+
+Если конфликт не подпадает ни под один из трёх случаев — это дрейф, а не намерение: дублирующий
+`@form.props`-ключ можно вычистить (не гейт, просто устаревший паттерн для нового кода).
 
 ## Автоматически исключаемые поля
 
