@@ -156,88 +156,52 @@ model ConsentLog {
 model Mandala {
   id          String   @id @default(cuid())
 
-  /// @form.title("URL-адрес")
-  /// @form.placeholder("harmony-mandala")
-  slug        String   @unique
+  slug        String   @unique @meta("form.title", "URL-адрес") @meta("form.placeholder", "harmony-mandala")
 
-  /// @form.title("Название мандалы")
-  /// @form.placeholder("Мандала гармонии")
-  name        String
+  name        String @meta("form.title", "Название мандалы") @meta("form.placeholder", "Мандала гармонии")
 
-  /// @form.title("Описание")
-  /// @form.fieldType("richText")
-  description String?
+  description String? @meta("form.title", "Описание") @meta("form.fieldType", "richText")
 
   // i18n поля (EN)
-  /// @form.title("Название (EN)")
-  /// @form.placeholder("Harmony Mandala")
-  nameEn            String?
+  nameEn            String? @meta("form.title", "Название (EN)") @meta("form.placeholder", "Harmony Mandala")
 
-  /// @form.title("Описание (EN)")
-  /// @form.fieldType("richText")
-  descriptionEn     String?
+  descriptionEn     String? @meta("form.title", "Описание (EN)") @meta("form.fieldType", "richText")
 
   // Связи с изображениями
-  /// @form.exclude
-  imageId     String
-  /// @form.exclude
-  image       Image    @relation("MandalaImage", fields: [imageId], references: [id])
+  imageId     String @meta("form.exclude", true)
+  image       Image    @relation("MandalaImage", fields: [imageId], references: [id]) @meta("form.exclude", true)
 
-  /// @form.exclude
-  centerImageId String?
-  /// @form.exclude
-  centerImage   Image?   @relation("MandalaCenterImage", fields: [centerImageId], references: [id])
+  centerImageId String? @meta("form.exclude", true)
+  centerImage   Image?   @relation("MandalaCenterImage", fields: [centerImageId], references: [id]) @meta("form.exclude", true)
 
-  /// @form.title("Квадратная мандала")
-  /// @form.description("Если включено: вращается центр. Иначе: вращается фон.")
-  /// @form.fieldType("switch")
-  isSquare Boolean @default(false)
+  isSquare Boolean @default(false) @meta("form.title", "Квадратная мандала") @meta("form.description", "Если включено: вращается центр. Иначе: вращается фон.") @meta("form.fieldType", "switch")
 
-  /// @form.exclude
-  watermarkId String?
-  /// @form.exclude
-  watermark   Image?   @relation("MandalaWatermark", fields: [watermarkId], references: [id])
+  watermarkId String? @meta("form.exclude", true)
+  watermark   Image?   @relation("MandalaWatermark", fields: [watermarkId], references: [id]) @meta("form.exclude", true)
 
   // SEO
-  /// @form.title("SEO заголовок")
-  metaTitle       String?
+  metaTitle       String? @meta("form.title", "SEO заголовок")
 
-  /// @form.title("SEO описание")
-  /// @form.fieldType("textarea")
-  metaDescription String?
+  metaDescription String? @meta("form.title", "SEO описание") @meta("form.fieldType", "textarea")
 
-  /// @form.title("SEO ключевые слова")
-  metaKeywords    String?
+  metaKeywords    String? @meta("form.title", "SEO ключевые слова")
 
   // SEO i18n (EN)
-  /// @form.title("SEO заголовок (EN)")
-  metaTitleEn       String?
+  metaTitleEn       String? @meta("form.title", "SEO заголовок (EN)")
 
-  /// @form.title("SEO описание (EN)")
-  /// @form.fieldType("textarea")
-  metaDescriptionEn String?
+  metaDescriptionEn String? @meta("form.title", "SEO описание (EN)") @meta("form.fieldType", "textarea")
 
-  /// @form.exclude
-  ogImageId   String?
-  /// @form.exclude
-  ogImage     Image?   @relation("MandalaOgImage", fields: [ogImageId], references: [id])
+  ogImageId   String? @meta("form.exclude", true)
+  ogImage     Image?   @relation("MandalaOgImage", fields: [ogImageId], references: [id]) @meta("form.exclude", true)
 
-  /// @form.title("Эффект по умолчанию")
-  /// @form.props({ min: 0, max: 6 })
-  defaultEffectIndex Int @default(0)
+  defaultEffectIndex Int @default(0) @meta("form.title", "Эффект по умолчанию") @meta("form.props.min", 0) @meta("form.props.max", 6)
 
-  /// @form.title("Порядок сортировки")
-  /// @form.props({ min: 0 })
-  order       Int      @default(0)
+  order       Int      @default(0) @meta("form.title", "Порядок сортировки") @meta("form.props.min", 0)
 
-  /// @form.title("Опубликовано")
-  /// @form.fieldType("switch")
-  published   Boolean  @default(true)
+  published   Boolean  @default(true) @meta("form.title", "Опубликовано") @meta("form.fieldType", "switch")
 
-  /// @form.exclude
-  createdAt   DateTime @default(now())
-  /// @form.exclude
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now()) @meta("form.exclude", true)
+  updatedAt   DateTime @updatedAt @meta("form.exclude", true)
 
   @@index([published, order])
   @@index([imageId])
@@ -252,77 +216,48 @@ model Mandala {
 model Product {
   id          String   @id @default(cuid())
 
-  /// @form.title("URL-адрес")
-  slug        String   @unique
+  slug        String   @unique @meta("form.title", "URL-адрес")
 
-  /// @form.title("Название товара")
-  name        String
+  name        String @meta("form.title", "Название товара")
 
-  /// @form.title("Описание")
-  /// @form.fieldType("richText")
-  description String
+  description String @meta("form.title", "Описание") @meta("form.fieldType", "richText")
 
   // i18n поля (EN)
-  /// @form.title("Название (EN)")
-  nameEn            String?
+  nameEn            String? @meta("form.title", "Название (EN)")
 
-  /// @form.title("Описание (EN)")
-  /// @form.fieldType("richText")
-  descriptionEn     String?
+  descriptionEn     String? @meta("form.title", "Описание (EN)") @meta("form.fieldType", "richText")
 
-  /// @form.title("Цена (₽)")
-  /// @form.props({ min: 0, step: 1 })
-  price       Float
+  price       Float @meta("form.title", "Цена (₽)") @meta("form.props.min", 0) @meta("form.props.step", 1)
 
-  /// @form.exclude
-  currency    String   @default("RUB")
+  currency    String   @default("RUB") @meta("form.exclude", true)
 
-  /// @form.exclude
-  images      ProductImage[]
+  images      ProductImage[] @meta("form.exclude", true)
 
-  /// @form.exclude
-  orderItems  OrderItem[]
+  orderItems  OrderItem[] @meta("form.exclude", true)
 
   // SEO
-  /// @form.title("SEO заголовок")
-  metaTitle       String?
+  metaTitle       String? @meta("form.title", "SEO заголовок")
 
-  /// @form.title("SEO описание")
-  /// @form.fieldType("textarea")
-  metaDescription String?
+  metaDescription String? @meta("form.title", "SEO описание") @meta("form.fieldType", "textarea")
 
   // SEO i18n (EN)
-  /// @form.title("SEO заголовок (EN)")
-  metaTitleEn       String?
+  metaTitleEn       String? @meta("form.title", "SEO заголовок (EN)")
 
-  /// @form.title("SEO описание (EN)")
-  /// @form.fieldType("textarea")
-  metaDescriptionEn String?
+  metaDescriptionEn String? @meta("form.title", "SEO описание (EN)") @meta("form.fieldType", "textarea")
 
-  /// @form.exclude
-  ogImageId       String?
-  /// @form.exclude
-  ogImageRel      Image?  @relation("ProductOgImage", fields: [ogImageId], references: [id])
+  ogImageId       String? @meta("form.exclude", true)
+  ogImageRel      Image?  @relation("ProductOgImage", fields: [ogImageId], references: [id]) @meta("form.exclude", true)
 
-  /// @form.title("Порядок сортировки")
-  /// @form.props({ min: 0 })
-  order       Int      @default(0)
+  order       Int      @default(0) @meta("form.title", "Порядок сортировки") @meta("form.props.min", 0)
 
-  /// @form.title("Опубликовано")
-  /// @form.fieldType("switch")
-  published   Boolean  @default(true)
+  published   Boolean  @default(true) @meta("form.title", "Опубликовано") @meta("form.fieldType", "switch")
 
-  /// @form.title("Количество в наличии")
-  /// @form.props({ min: 0, step: 1 })
-  stock       Int      @default(1)
+  stock       Int      @default(1) @meta("form.title", "Количество в наличии") @meta("form.props.min", 0) @meta("form.props.step", 1)
 
-  /// @form.exclude
-  inStock     Boolean  @default(true)
+  inStock     Boolean  @default(true) @meta("form.exclude", true)
 
-  /// @form.exclude
-  createdAt   DateTime @default(now())
-  /// @form.exclude
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now()) @meta("form.exclude", true)
+  updatedAt   DateTime @updatedAt @meta("form.exclude", true)
 
   @@index([published, order])
   @@allow('read', published)
@@ -351,54 +286,34 @@ model ProductImage {
 model ContentPage {
   id      String @id @default(cuid())
 
-  /// @form.title("URL-адрес")
-  /// @form.placeholder("about-us")
-  slug    String @unique
+  slug    String @unique @meta("form.title", "URL-адрес") @meta("form.placeholder", "about-us")
 
-  /// @form.title("Заголовок страницы")
-  title   String
+  title   String @meta("form.title", "Заголовок страницы")
 
-  /// @form.title("Содержимое")
-  /// @form.fieldType("richText")
-  content String
+  content String @meta("form.title", "Содержимое") @meta("form.fieldType", "richText")
 
   // i18n поля (EN)
-  /// @form.title("Заголовок (EN)")
-  titleEn   String?
+  titleEn   String? @meta("form.title", "Заголовок (EN)")
 
-  /// @form.title("Содержимое (EN)")
-  /// @form.fieldType("richText")
-  contentEn String?
+  contentEn String? @meta("form.title", "Содержимое (EN)") @meta("form.fieldType", "richText")
 
   // SEO
-  /// @form.title("SEO заголовок")
-  metaTitle       String?
+  metaTitle       String? @meta("form.title", "SEO заголовок")
 
-  /// @form.title("SEO описание")
-  /// @form.fieldType("textarea")
-  metaDescription String?
+  metaDescription String? @meta("form.title", "SEO описание") @meta("form.fieldType", "textarea")
 
   // SEO i18n (EN)
-  /// @form.title("SEO заголовок (EN)")
-  metaTitleEn       String?
+  metaTitleEn       String? @meta("form.title", "SEO заголовок (EN)")
 
-  /// @form.title("SEO описание (EN)")
-  /// @form.fieldType("textarea")
-  metaDescriptionEn String?
+  metaDescriptionEn String? @meta("form.title", "SEO описание (EN)") @meta("form.fieldType", "textarea")
 
-  /// @form.exclude
-  ogImageId       String?
-  /// @form.exclude
-  ogImageRel      Image?  @relation("ContentPageOgImage", fields: [ogImageId], references: [id])
+  ogImageId       String? @meta("form.exclude", true)
+  ogImageRel      Image?  @relation("ContentPageOgImage", fields: [ogImageId], references: [id]) @meta("form.exclude", true)
 
-  /// @form.title("Опубликовано")
-  /// @form.fieldType("switch")
-  published Boolean @default(true)
+  published Boolean @default(true) @meta("form.title", "Опубликовано") @meta("form.fieldType", "switch")
 
-  /// @form.exclude
-  createdAt DateTime @default(now())
-  /// @form.exclude
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @meta("form.exclude", true)
+  updatedAt DateTime @updatedAt @meta("form.exclude", true)
 
   @@allow('read', published)
   @@allow('all', auth().role == ADMIN)
@@ -411,16 +326,11 @@ model ContentPage {
 model ShortUrl {
   id       String @id @default(cuid())
 
-  /// @form.title("Короткий код")
-  /// @form.placeholder("promo2024")
-  code     String @unique
+  code     String @unique @meta("form.title", "Короткий код") @meta("form.placeholder", "promo2024")
 
-  /// @form.title("Полный URL")
-  /// @form.placeholder("/stickers/mandala-name")
-  fullUrl  String
+  fullUrl  String @meta("form.title", "Полный URL") @meta("form.placeholder", "/stickers/mandala-name")
 
-  /// @form.exclude
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @meta("form.exclude", true)
 
   @@index([code])
   @@allow('read', true)
@@ -484,27 +394,15 @@ model Image {
 model ContactMessage {
   id        String   @id @default(cuid())
 
-  /// @form.title("Имя")
-  /// @form.placeholder("Ваше имя")
-  /// @form.props({ minLength: 2, maxLength: 100 })
-  name      String
+  name      String @meta("form.title", "Имя") @meta("form.placeholder", "Ваше имя") @meta("form.props.minLength", 2) @meta("form.props.maxLength", 100)
 
-  /// @form.title("Email")
-  /// @form.placeholder("your@email.com")
-  /// @form.props({ email: true })
-  email     String
+  email     String @meta("form.title", "Email") @meta("form.placeholder", "your@email.com") @meta("form.props.email", true)
 
-  /// @form.title("Сообщение")
-  /// @form.fieldType("textarea")
-  /// @form.placeholder("Напишите ваше сообщение...")
-  /// @form.props({ minLength: 10, maxLength: 5000 })
-  message   String
+  message   String @meta("form.title", "Сообщение") @meta("form.fieldType", "textarea") @meta("form.placeholder", "Напишите ваше сообщение...") @meta("form.props.minLength", 10) @meta("form.props.maxLength", 5000)
 
-  /// @form.exclude
-  read      Boolean  @default(false)
+  read      Boolean  @default(false) @meta("form.exclude", true)
 
-  /// @form.exclude
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @meta("form.exclude", true)
 
   @@index([read, createdAt])
   @@allow('create', true)
@@ -519,22 +417,14 @@ model AppSettings {
   id                 String   @id @default("default")  // Фиксированный ID для singleton
 
   // === Telegram уведомления ===
-  /// @form.title("Telegram уведомления")
-  /// @form.fieldType("switch")
-  telegramEnabled    Boolean  @default(false)
+  telegramEnabled    Boolean  @default(false) @meta("form.title", "Telegram уведомления") @meta("form.fieldType", "switch")
 
-  /// @form.title("Bot Token")
-  /// @form.description("Токен от @BotFather")
-  /// @form.props({ type: "password" })
-  telegramBotToken   String?
+  telegramBotToken   String? @meta("form.title", "Bot Token") @meta("form.description", "Токен от @BotFather") @meta("form.props.type", "password")
 
-  /// @form.title("Chat ID")
-  /// @form.description("ID чата для уведомлений")
-  telegramChatId     String?
+  telegramChatId     String? @meta("form.title", "Chat ID") @meta("form.description", "ID чата для уведомлений")
 
   // === Метаданные ===
-  /// @form.exclude
-  updatedAt          DateTime @updatedAt
+  updatedAt          DateTime @updatedAt @meta("form.exclude", true)
 
   // Только админы могут читать и редактировать настройки
   @@allow('read,update', auth().role == ADMIN)
@@ -561,49 +451,27 @@ enum OrderStatus {
 model Order {
   id        String      @id @default(cuid())
 
-  /// @form.exclude
-  items     OrderItem[]
+  items     OrderItem[] @meta("form.exclude", true)
 
-  /// @form.exclude
-  userId    String?
-  /// @form.exclude
-  user      User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId    String? @meta("form.exclude", true)
+  user      User?       @relation(fields: [userId], references: [id], onDelete: SetNull) @meta("form.exclude", true)
 
-  /// @form.title("Имя")
-  /// @form.placeholder("Ваше имя")
-  name      String
+  name      String @meta("form.title", "Имя") @meta("form.placeholder", "Ваше имя")
 
-  /// @form.title("Телефон")
-  /// @form.placeholder("+7 (999) 123-45-67")
-  phone     String
+  phone     String @meta("form.title", "Телефон") @meta("form.placeholder", "+7 (999) 123-45-67")
 
-  /// @form.title("Email")
-  /// @form.placeholder("your@email.com")
-  /// @form.description("Для уведомлений о статусе заказа")
-  /// @form.props({ email: true })
-  email     String?
+  email     String? @meta("form.title", "Email") @meta("form.placeholder", "your@email.com") @meta("form.description", "Для уведомлений о статусе заказа") @meta("form.props.email", true)
 
-  /// @form.title("Адрес доставки")
-  /// @form.placeholder("Город, улица, дом, квартира")
-  /// @form.fieldType("textarea")
-  address   String?
+  address   String? @meta("form.title", "Адрес доставки") @meta("form.placeholder", "Город, улица, дом, квартира") @meta("form.fieldType", "textarea")
 
-  /// @form.title("Комментарий")
-  /// @form.placeholder("Пожелания к заказу")
-  /// @form.fieldType("textarea")
-  comment   String?
+  comment   String? @meta("form.title", "Комментарий") @meta("form.placeholder", "Пожелания к заказу") @meta("form.fieldType", "textarea")
 
-  /// @form.title("Статус")
-  status    OrderStatus @default(PENDING)
+  status    OrderStatus @default(PENDING) @meta("form.title", "Статус")
 
-  /// @form.title("Сумма (₽)")
-  /// @form.props({ min: 0 })
-  total     Int
+  total     Int @meta("form.title", "Сумма (₽)") @meta("form.props.min", 0)
 
-  /// @form.exclude
-  createdAt DateTime    @default(now())
-  /// @form.exclude
-  updatedAt DateTime    @updatedAt
+  createdAt DateTime    @default(now()) @meta("form.exclude", true)
+  updatedAt DateTime    @updatedAt @meta("form.exclude", true)
 
   @@index([status, createdAt])
   @@index([userId])
