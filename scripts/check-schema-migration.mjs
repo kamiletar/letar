@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// check-schema-migration.mjs — находит структурные изменения в staged schema.zmodel,
+// check-schema-migration.mjs — находит структурные изменения в staged *.zmodel-файлах,
 // для которых рядом нет новой папки prisma/migrations/<timestamp>_*/.
 //
 // Вызывается из scripts/hooks/pre-commit-schema-migration-check.sh. Логика вынесена в
@@ -8,6 +8,18 @@
 // «Изменил схему — файл миграции обязан ехать в ТОМ ЖЕ коммите»). Голый diff ловит и
 // правки @@allow/@@deny, ///-комментариев, @form.*-директив — которые миграции не требуют
 // и на которых хук постоянно бы шумел, обучая всех коммитить с --no-verify.
+//
+// Multi-file схемы (см. .claude/docs/zenstack-multifile-schema-circular-imports.md):
+// корневой `schema.zmodel` приложения может импортировать файлы-фрагменты из подкаталога
+// (`schema/house-config.zmodel`, `schema/auth.zmodel` и т.д. — domwellbes, animatrona,
+// animatrona-tracker, grandslamcup, kami). Структурное изменение может попасть в любой такой
+// фрагмент, не только в корневой файл — поэтому матчим ЛЮБОЙ staged `*.zmodel`, а не только
+// файлы с буквальным именем `schema.zmodel`. Для каждого найденного файла корень приложения
+// (и, соответственно, ожидаемый `prisma/migrations/`) определяется поиском ближайшего предка,
+// в котором лежит `schema.zmodel` (см. findSchemaRootDir) — не `path.dirname(файла)` самого
+// фрагмента. Раньше оба места (фильтр + резолв пути миграций) были завязаны на буквальное имя
+// `schema.zmodel`, из-за чего изменение только во фрагменте проходило мимо хука незамеченным
+// (см. .claude/docs/precommit-hook-install-staleness.md — инцидент 2026-09-05, domwellbes).
 //
 // Эвристика (не полноценный AST-парсер zmodel, а достаточно точное приближение):
 //   1. Строка "структурна", только если она внутри блока `model`/`enum` (не datasource/
@@ -29,6 +41,7 @@
 // Использует Bun.spawnSync (не node:child_process) — скрипт заведомо запускается только
 // через bun (хук pre-commit-schema-migration-check.sh это проверяет перед вызовом).
 
+import fs from 'node:fs'
 import path from 'node:path'
 
 function runGit(args) {
@@ -53,7 +66,7 @@ function stagedNameStatus() {
 }
 
 const entries = stagedNameStatus()
-const schemaFiles = entries.filter((e) => /(^|\/)schema\.zmodel$/.test(e.file))
+const schemaFiles = entries.filter((e) => /\.zmodel$/.test(e.file))
 
 if (schemaFiles.length === 0) {
   process.exit(0)
@@ -61,9 +74,24 @@ if (schemaFiles.length === 0) {
 
 const addedFiles = new Set(entries.filter((e) => e.status === 'A').map((e) => e.file))
 
-function hasNewMigration(schemaPath) {
-  const dir = path.posix.dirname(schemaPath)
-  const migrationsDir = dir === '.' ? 'prisma/migrations' : `${dir}/prisma/migrations`
+// Ищет ближайшего предка `zmodelPath`, в котором лежит корневой `schema.zmodel` приложения —
+// именно там ожидается `prisma/migrations/`, а не рядом с самим файлом-фрагментом. Читает
+// рабочее дерево напрямую (fs), не git-объекты: pre-commit-хук всегда исполняется с
+// материализованным checkout, а staged-версия корневого файла нас не интересует — важно,
+// существует ли он на диске как каталог-ориентир, не его содержимое.
+function findSchemaRootDir(zmodelPath) {
+  let dir = path.posix.dirname(zmodelPath)
+  for (let i = 0; i < 8; i++) {
+    if (fs.existsSync(path.posix.join(dir, 'schema.zmodel'))) { return dir }
+    const parent = path.posix.dirname(dir)
+    if (parent === dir) { return null }
+    dir = parent
+  }
+  return null
+}
+
+function hasNewMigration(appRootDir) {
+  const migrationsDir = appRootDir === '.' ? 'prisma/migrations' : `${appRootDir}/prisma/migrations`
   const prefix = `${migrationsDir}/`
   for (const file of addedFiles) {
     if (file.startsWith(prefix) && file.endsWith('/migration.sql')) { return true }
@@ -141,7 +169,12 @@ function parseHunkLineNumbers(diffText) {
 const findings = []
 
 for (const { file: schemaPath } of schemaFiles) {
-  if (hasNewMigration(schemaPath)) { continue }
+  const appRootDir = findSchemaRootDir(schemaPath)
+  // Не нашли корневой schema.zmodel — не можем определить, где ожидать миграции.
+  // Такое возможно только для файла, ещё не влитого в дерево импортов ни одного приложения;
+  // пропускаем, а не блокируем коммит вслепую.
+  if (appRootDir === null) { continue }
+  if (hasNewMigration(appRootDir)) { continue }
 
   const oldContent = readBlobAt(`HEAD:${schemaPath}`)
   const newContent = readBlobAt(`:${schemaPath}`) ?? ''
@@ -202,7 +235,7 @@ for (const { file: schemaPath } of schemaFiles) {
   const remainingAdded = addedStructural.filter((a) => !consumedAdded.has(a))
 
   if (remainingRemoved.length > 0 || remainingAdded.length > 0) {
-    findings.push({ schemaPath, removed: remainingRemoved, added: remainingAdded })
+    findings.push({ schemaPath, appRootDir, removed: remainingRemoved, added: remainingAdded })
   }
 }
 
@@ -213,13 +246,14 @@ if (findings.length === 0) {
 console.error('')
 console.error('⛔ pre-commit заблокирован: schema.zmodel меняет структуру БД, а новой миграции нет.')
 console.error('')
-for (const { schemaPath, removed, added } of findings) {
-  const dir = path.posix.dirname(schemaPath)
-  const app = dir === '.' ? null : dir.replace(/^apps\//, '')
+for (const { schemaPath, appRootDir, removed, added } of findings) {
+  const app = appRootDir === '.' ? null : appRootDir.replace(/^apps\//, '')
   console.error(`  ${schemaPath}:`)
   for (const a of added) { console.error(`    + ${a.text.trim()}`) }
   for (const r of removed) { console.error(`    - ${r.text.trim()}`) }
-  const migrationsHint = dir === '.' ? 'prisma/migrations/<timestamp>_*/' : `${dir}/prisma/migrations/<timestamp>_*/`
+  const migrationsHint = appRootDir === '.'
+    ? 'prisma/migrations/<timestamp>_*/'
+    : `${appRootDir}/prisma/migrations/<timestamp>_*/`
   console.error(`    ожидается новая папка ${migrationsHint} среди staged-файлов`)
   console.error(`    создать: nx db:migrate ${app ?? '<app>'}`)
   console.error('')

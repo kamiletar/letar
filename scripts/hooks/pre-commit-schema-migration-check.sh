@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# pre-commit-schema-migration-check.sh — блокирует коммит, где schema.zmodel меняет
-# физическую структуру БД (новые/изменённые поля, @@unique/@@index/@@id/@@map/...), а
-# рядом нет новой папки миграции.
+# pre-commit-schema-migration-check.sh — блокирует коммит, где *.zmodel-файл (корневой
+# schema.zmodel приложения или файл-фрагмент multi-file схемы, см. .claude/docs/
+# zenstack-multifile-schema-circular-imports.md) меняет физическую структуру БД
+# (новые/изменённые поля, @@unique/@@index/@@id/@@map/...), а рядом нет новой папки миграции.
 #
 # Зачем на коммит-пути: локальная разработка обычно идёт через `nx db:push`, который
 # молча приводит DEV-базу автора коммита в соответствие со схемой — рассинхрон невидим
@@ -34,7 +35,7 @@ if [[ -n "${GIT_ALLOW_SCHEMA_WITHOUT_MIGRATION:-}" ]]; then
 fi
 
 staged="$(git diff --cached --name-only --diff-filter=ACMR)"
-if ! grep -qE '(^|/)schema\.zmodel$' <<< "$staged"; then
+if ! grep -qE '\.zmodel$' <<< "$staged"; then
   exit 0
 fi
 
