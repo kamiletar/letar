@@ -523,13 +523,16 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.183.45",
+      "version": "0.183.52",
       "dependencies": {
         "@letar/demo-protection": "workspace:*",
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "@letar/theme-check": "workspace:*",
+        "@letar/ui": "workspace:*",
+        "@letar/undo-toast": "workspace:*",
+        "@letar/url-query-state": "workspace:*",
         "imapflow": "^1.7.1",
         "tus-js-client": "^4.3.1",
       },
@@ -745,7 +748,7 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.66.0",
+      "version": "0.67.0",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/env-load": "workspace:*",
