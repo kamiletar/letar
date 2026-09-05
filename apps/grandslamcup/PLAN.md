@@ -61,6 +61,22 @@
       («keep proxy checks fast, avoid fetching full content there»). Закрыт был именно самый
       широкий риск — перехват произвольного URL верхнего уровня.
 
+- [ ] **`opengraph-image.tsx` не подключён к `og:image` матча — подключить как fallback.**
+      Найдено 2026-09-05 при разборе бага сборки (`hb.wasm` ENOENT, см. `CHANGELOG.md`).
+      `src/app/(public)/matches/[id]/page.tsx` в `generateMetadata()` сам задаёт
+      `openGraph.images` из `match.posterUrl` (ручной аплоад постера) — это полностью
+      перебивает автоконвенцию `opengraph-image.tsx` в том же каталоге маршрута. У матча
+      без загруженного постера `ogImages: undefined` → тега `og:image` нет вообще, хотя
+      `opengraph-image.tsx` рабочий (генерирует счёт/MVP/стадион через satori) и сейчас
+      просто мёртвый код для целей превью в Telegram/VK. Проверено живьём на двух матчах
+      прод-базы: с постером (`cmmnkoazrd5w2t5s2q`) — тег есть, без постера
+      (`cmmnkoazdqv1s9d92n`) — тега нет.
+
+      **Фикс:** в `generateMetadata()` — если `match.posterUrl` не задан, не проставлять
+      `openGraph.images` вручную (оставить `undefined`/не задавать поле вовсе), чтобы Next.js
+      сам подставил автоконвенцию `opengraph-image.tsx` как fallback. Проверить, что при этом
+      явный постер по-прежнему приоритетнее авто-генерации.
+
 ## R — ОПЕРАЦИЯ РАЗВОРОТ → `resentiment`
 
 ### R.0 Контекст и суть пивота
