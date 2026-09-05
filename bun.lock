@@ -523,8 +523,9 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.183.54",
+      "version": "0.183.55",
       "dependencies": {
+        "@letar/data-export": "workspace:*",
         "@letar/demo-protection": "workspace:*",
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
