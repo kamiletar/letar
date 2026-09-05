@@ -22,7 +22,20 @@ async function acceptConsentAndStart(page: import('@playwright/test').Page) {
   await startButton.click()
 }
 
-/** Проходит все вопросы, кликая первый вариант; карточка авто-переходит через 400мс. */
+/**
+ * Проходит все вопросы, кликая первый вариант; карточка авто-переходит через 400мс.
+ *
+ * Раньше здесь после клика стоял фиксированный `waitForTimeout(500)`, подобранный под
+ * клиентский `setTimeout(400)` в `QuizQuestionCard`. Совпадение констант не держит нагрузку
+ * staging/WebKit: под более медленным рендером реальный переход иногда занимает дольше
+ * условных 500мс, следующая итерация цикла тогда ищет `quiz-option` первого попавшегося
+ * вопроса, которого ещё нет на экране, и падает по таймауту `waitFor` — не сам квиз сломан,
+ * а тайминг теста угадан неверно (найдено на staging 2026-09-05, локально не
+ * воспроизвелось). Вместо угадывания задержки ждём настоящий DOM-сигнал перехода: узел
+ * кликнутой кнопки уходит из DOM либо при ремаунте `QuizQuestionCard` на новый вопрос
+ * (родитель меняет `key`), либо при переходе всего квиза в RESULTS — оба случая покрывает
+ * `waitForElementState('hidden')` (Playwright считает элемент hidden и при полном detach).
+ */
 async function answerAllQuestions(page: import('@playwright/test').Page) {
   const resultsTitle = page.getByRole('heading', { name: 'Ваша гексаграмма' })
   // 24 вопроса + запас на возможные повторы рендера
@@ -32,9 +45,12 @@ async function answerAllQuestions(page: import('@playwright/test').Page) {
     }
     const option = page.getByTestId('quiz-option').first()
     await option.waitFor({ state: 'visible', timeout: 10_000 })
+    const optionHandle = await option.elementHandle()
     await option.click()
-    // Ждём авто-перехода (setTimeout 400мс в QuizQuestionCard)
-    await page.waitForTimeout(500)
+    if (optionHandle) {
+      await optionHandle.waitForElementState('hidden', { timeout: 15_000 }).catch(() => {})
+      await optionHandle.dispose()
+    }
   }
 }
 
