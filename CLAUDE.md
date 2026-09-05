@@ -80,7 +80,12 @@ bun от **root**, не от `deploy` (`/usr/local/bin/bun` → симлинк �
   [lib-consumer-missing-lib-dom](/.claude/docs/lib-consumer-missing-lib-dom.md) ⚠️ барабанный
   реэкспорт библиотеки (`@letar/hooks`) затягивает в `tsc --build` потребителя чужие файлы с
   `window`/`StorageEvent` — падает не на своих исходниках, а на файле, который потребитель
-  вообще не импортирует напрямую; фикс — `"dom"` в `lib` потребителя, не в библиотеке-источнике
+  вообще не импортирует напрямую; фикс — `"dom"` в `lib` потребителя, не в библиотеке-источнике ·
+  [webpack-emscripten-runtime-wasm-not-emitted](/.claude/docs/webpack-emscripten-runtime-wasm-not-emitted.md)
+  ⚠️ Emscripten-обвязка (`harfbuzzjs` у `satori`, прямой импорт — только в `grandslamcup`) ищет
+  свой `.wasm` по runtime-строке — webpack компилирует JS-чанк, но не копирует сам бинарник;
+  билд не падает, ловится на пререндере (SSG) или на первом реальном запросе (SSR) —
+  `ENOENT .../chunks/<имя>.wasm`; фикс — ручное копирование через `compiler.hooks.afterEmit`
 
 **MCP-серверы:** [mcp-servers](/.claude/docs/mcp-servers.md) состав и назначение ·
 [mcp-server-pattern](/.claude/docs/mcp-server-pattern.md) тонкий локальный сервер по stdio ·
