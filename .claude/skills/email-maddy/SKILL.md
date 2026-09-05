@@ -67,6 +67,12 @@ ssh root@mail.letar.best "docker exec -it maddy maddy creds password noreply@let
 ssh root@mail.letar.best "docker exec -it maddy maddy creds create user@letar.best"
 ```
 
+⚠️ **`creds create` сам по себе не даёт адресу принимать почту** — это только SMTP/IMAP-логин.
+Отдельная команда `maddy imap-acct create user@letar.best` заводит хранилище, без которого
+доставка на этот адрес падает `501 5.1.1 User does not exist` при формально существующем
+`creds list`. Разбор и рецепт проверки round-trip —
+[maddy-creds-create-missing-imap-acct.md](/.claude/docs/maddy-creds-create-missing-imap-acct.md).
+
 ### Доставка изменённых SMTP-настроек
 
 ⛔ `./scripts/sync-env-docker.sh` устарел. Правь зашифрованный файл и коммить — на сервер он

@@ -603,6 +603,10 @@ merging без ошибки компиляции, и другие TS-грабл�
 260 символов игнорирует системную настройку, обход — `subst` на короткую букву диска
 
 **Медиа, почта, звук:** [media-server](/.claude/docs/media-server.md) · [email](/.claude/docs/email.md) ·
+[maddy-creds-create-missing-imap-acct](/.claude/docs/maddy-creds-create-missing-imap-acct.md) ⚠️
+`maddy creds create` заводит только SMTP/IMAP-логин, не хранилище — приём почты на новый адрес
+требует ещё `maddy imap-acct create`, иначе `501 5.1.1 User does not exist` при формально
+существующем `creds list` ·
 [transactional-email-cron-pattern](/.claude/docs/transactional-email-cron-pattern.md) паттерн
 cron-рассылок: найти кандидатов → отправить → пометить дедуп-поле; транзакционное письмо vs
 маркетинг с консент-гейтом ·

@@ -159,6 +159,11 @@ docker exec -it maddy maddy creds create user@letar.best
 docker exec -it maddy maddy creds password user@letar.best
 ```
 
+⚠️ `creds create` не создаёт почтовый ящик, только SMTP/IMAP-логин — без второй команды
+`docker exec maddy maddy imap-acct create user@letar.best` письмо НА этот адрес отклоняется
+`501 5.1.1 User does not exist`. Разбор —
+[maddy-creds-create-missing-imap-acct.md](/.claude/docs/maddy-creds-create-missing-imap-acct.md).
+
 ### Просмотр логов
 
 ```bash

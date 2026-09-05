@@ -281,6 +281,19 @@ docker exec -it maddy maddy creds password user@domain.com
 docker exec maddy maddy creds remove user@domain.com
 ```
 
+⚠️ **Для приёма почты этого недостаточно** — `creds` заводит только SMTP/IMAP-аутентификацию
+(`local_authdb`). Доставка идёт через отдельное хранилище `storage.imapsql local_mailboxes`, у
+которого своя команда:
+
+```bash
+docker exec maddy maddy imap-acct create user@domain.com
+docker exec maddy maddy imap-acct list      # сверить с creds list — множества должны совпадать
+```
+
+Без неё письмо на формально существующий (`creds list`) адрес отклоняется `501 5.1.1 User does
+not exist`. Разбор и рецепт проверки round-trip —
+[maddy-creds-create-missing-imap-acct.md](/.claude/docs/maddy-creds-create-missing-imap-acct.md).
+
 ### Логи
 
 ```bash
