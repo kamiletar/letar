@@ -1,5 +1,9 @@
+import { createRequire } from 'node:module'
+
 import createMDX from '@next/mdx'
 import withSerwistInit from '@serwist/next'
+
+const require = createRequire(import.meta.url)
 
 // register: false — критично. По умолчанию Serwist инжектит собственный скрипт, который
 // регистрирует /sw.js на КАЖДОЙ странице безусловно, в обход согласия пользователя
@@ -22,6 +26,15 @@ const nextConfig = {
   // (см. корневой scripts/glitchtip-upload-sourcemaps.mjs, PLAN-INFRA-4.md §70 п.6).
   productionBrowserSourceMaps: true,
   output: 'standalone',
+  // next/og (opengraph-image.tsx) и src/lib/telegram/poster/render.ts используют satori →
+  // harfbuzzjs для text shaping. Emscripten-обвязка harfbuzzjs (hbjs.js) ищет hb.wasm рядом со
+  // своим бандлом ПО СТРОКОВОМУ ПУТИ во время выполнения — webpack не умеет статически
+  // проанализировать такой паттерн и не копирует бинарник в .next/server/chunks, поэтому чанк
+  // компилируется, но не эмиттится: "failed to asynchronously prepare wasm: ENOENT
+  // .next/server/chunks/hb.wasm". Воспроизводится детерминированно даже в изолированной сборке
+  // без параллельных билдов — не гонка за общий node_modules. serverExternalPackages сам по
+  // себе не чинит (next/og тянет свою копию satori внутри next/dist/compiled), нужна ручная
+  // копия wasm-файла в чанки после сборки (см. webpack() ниже).
   // sharp грузит libvips-cpp.so через dlopen(), трейсер это не ловит — без явного
   // include контейнер падает с ERR_DLOPEN_FAILED (инцидент mandala 2026-07-12).
   // Глоб без хардкода версии — переживёт апдейт sharp/bun.lock.
@@ -73,6 +86,37 @@ const nextConfig = {
   webpack: (config, { dev, isServer }) => {
     if (isServer || !dev) {
       config.resolve.alias['@tanstack/devtools-ui'] = false
+    }
+    // См. комментарий выше про hb.wasm: копируем бинарник harfbuzzjs в .next/server/chunks
+    // после сборки сервера — webpack эмиттит JS-чанк, но не сам wasm (runtime-путь, не
+    // статический import).
+    if (isServer) {
+      config.plugins.push({
+        apply(compiler) {
+          compiler.hooks.afterEmit.tapPromise('CopyHarfbuzzWasm', async () => {
+            const { copyFile } = await import('node:fs/promises')
+            const path = await import('node:path')
+            // harfbuzzjs — транзитивная зависимость satori (не своя dependency приложения),
+            // require.resolve с paths от satori находит её в изолированном дереве bun.
+            const hbWasmSrc = require.resolve('harfbuzzjs/hb.wasm', {
+              paths: [path.default.dirname(require.resolve('satori/package.json'))],
+            })
+            // outputPath уже указывает на .../server/chunks для основного серверного
+            // компилятора, но на другой путь для edge/middleware-прохода — добавляем
+            // 'chunks' только если его там ещё нет, и не падаем, если целевой каталог
+            // (edge-рантайм и т.п.) вообще не существует.
+            const outputPath = path.default.basename(compiler.outputPath) === 'chunks'
+              ? compiler.outputPath
+              : path.default.join(compiler.outputPath, 'chunks')
+            const dest = path.default.join(outputPath, 'hb.wasm')
+            try {
+              await copyFile(hbWasmSrc, dest)
+            } catch (err) {
+              if (err.code !== 'ENOENT') throw err
+            }
+          })
+        },
+      })
     }
     return config
   },
