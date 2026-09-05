@@ -22,6 +22,13 @@ const nextConfig = {
   outputFileTracingIncludes: {
     '/**/*': ['../../node_modules/.bun/@img+sharp-libvips-*/**/*.so*'],
   },
+  // uploads/ — Docker volume в проде (см. docker-compose.production.yml), содержимое
+  // перекрывается монтированием в рантайме. Без исключения трейсер всё равно копирует реальные
+  // загруженные файлы внутрь .next/standalone — раздувая образ впустую. См.
+  // .claude/docs/nextjs-dynamic-fs-path-tracing.md
+  outputFileTracingExcludes: {
+    '/**/*': ['./uploads/**'],
+  },
   // Workspace-либы вне корня приложения — без withNx (удалён, deprecated) webpack их не
   // транспилирует сам. См. .claude/docs/nextjs-nx-composeplugins-migration.md
   transpilePackages: [

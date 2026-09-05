@@ -28,6 +28,13 @@ const nextConfig = {
   outputFileTracingIncludes: {
     '/**/*': ['../../node_modules/.bun/@img+sharp-libvips-*/**/*.so*'],
   },
+  // uploads/ — Docker volume в проде (см. docker-compose.production.yml), содержимое
+  // перекрывается монтированием в рантайме. Без исключения трейсер всё равно копирует реальные
+  // загруженные файлы внутрь .next/standalone — раздувая образ впустую. См.
+  // .claude/docs/nextjs-dynamic-fs-path-tracing.md
+  outputFileTracingExcludes: {
+    '/**/*': ['./uploads/**'],
+  },
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
   // Пустой turbopack — подавляет ошибку при наличии webpack config от Serwist
   turbopack: {},
