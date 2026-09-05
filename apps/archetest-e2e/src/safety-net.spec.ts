@@ -3,6 +3,8 @@ import { expect, test } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 
+import { waitForQuizStepOrResults } from './quiz-flow'
+
 /**
  * E2E: триггер safety-net (этап 5.8) — при высоких DPR/BAR/BOR (≥60%) на экране
  * результатов полного квиза должен появиться кризисный блок с телефонами доверия
@@ -176,12 +178,7 @@ test.describe('Safety-net триггер (DPR/BAR/BOR)', () => {
     // (400ms) сразу ведёт на результаты, отдельная проверка isVisible() до этого гонится с рендером.
     const optionButtons = page.getByTestId('quiz-option')
     for (let i = 0; i < 60; i++) {
-      await Promise.race([
-        optionButtons.first().waitFor({ state: 'visible', timeout: 15_000 }),
-        resultsHeading.waitFor({ state: 'visible', timeout: 15_000 }),
-      ])
-
-      if (await resultsHeading.isVisible().catch(() => false)) {
+      if (await waitForQuizStepOrResults(optionButtons.first(), resultsHeading, 15_000)) {
         break
       }
 

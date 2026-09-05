@@ -1,6 +1,8 @@
 import { clickWithHydrationRetry } from '@letar/e2e-testing'
 import { expect, test } from '@playwright/test'
 
+import { waitForQuizStepOrResults } from './quiz-flow'
+
 /**
  * E2E экспресс-флоу (этап 5.8): intro → 24 вопроса → гексаграмма → QR/CTA.
  * Гостевой режим: без авторизации и БД, результат живёт в localStorage.
@@ -45,12 +47,7 @@ async function answerAllQuestions(page: import('@playwright/test').Page) {
   const option = page.getByTestId('quiz-option').first()
   // 24 вопроса + запас на возможные повторы рендера
   for (let i = 0; i < 40; i++) {
-    await Promise.race([
-      option.waitFor({ state: 'visible', timeout: 20_000 }),
-      resultsTitle.waitFor({ state: 'visible', timeout: 20_000 }),
-    ])
-
-    if (await resultsTitle.isVisible().catch(() => false)) {
+    if (await waitForQuizStepOrResults(option, resultsTitle, 20_000)) {
       return
     }
 
