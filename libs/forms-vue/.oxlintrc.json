@@ -4,6 +4,10 @@
   "rules": {
     // Пакет Vue, не React — `react-hooks/rules-of-hooks` ложно триггерится на Vue composables
     // (useForm, useAppFormContext), названных по конвенции `use*`, но не являющихся React Hook.
-    "react-hooks/rules-of-hooks": "off"
+    "react-hooks/rules-of-hooks": "off",
+    // Тот же класс ложного срабатывания: `react(immutability)` считает функцию `use*` React-хуком
+    // и запрещает переприсваивание замыкаемой переменной внутри возвращаемого колбэка — здесь это
+    // обычный Vue template-ref колбэк (`cvcInputRef`/`expiryInputRef`), не React-рендер.
+    "react/immutability": "off"
   }
 }
