@@ -2070,3 +2070,27 @@ healthy. Rollout откатывался на этом шаге, `time` не мо
 0.1.2→0.1.3), тесты `rollout.spec.ts` обновлены под новую команду, `nx test/typecheck:tsgo/lint
 deploy-engine` — зелёные. Деплой `time` не выполнялся в рамках этой сессии — правило `git.md`
 запрещает прямой деплой, отправлен `deploy-request` на `deploy-agent-dev` (тред `deploy-time`).
+
+## §154 — `check-schema-migration.mjs` не видел фрагменты multi-file zmodel-схем ✅ ЗАКРЫТО (2026-09-05)
+
+Найдено при разборе прод-инцидента domwellbes (`House.deletedAt` без миграции, коммит `0cbf176`,
+детали — `apps/domwellbes/PLAN_COMPLETED.md`): и `scripts/hooks/pre-commit-schema-migration-check.sh`
+(шелл-фильтр `grep`), и `scripts/check-schema-migration.mjs` матчили staged-файлы буквальным
+именем `schema\.zmodel$`. Структурное изменение, внесённое только во файл-фрагмент multi-file
+схемы (`schema/house-config.zmodel` и т.п. — domwellbes, animatrona, animatrona-tracker,
+grandslamcup, kami, см. `.claude/docs/zenstack-multifile-schema-circular-imports.md`), под этот
+паттерн не попадало вообще — хук не находил коммит безопасным, а физически не видел файл.
+
+**Фикс (коммит `c15677d2`):** оба слоя теперь матчат любой staged `*.zmodel`; путь до ожидаемого
+`prisma/migrations/` резолвится в `check-schema-migration.mjs` через новую `findSchemaRootDir()` —
+поиском ближайшего предка с корневым `schema.zmodel`, а не по каталогу самого изменённого файла
+(старая логика для фрагмента дала бы заведомо неверный путь даже если бы фильтр пропустил файл).
+Хуки переустановлены во всех submodule (`bash scripts/hooks/install.sh --all-submodules`).
+Проверено вручную на воссозданной в изолированном временном git-репозитории структуре domwellbes
+(4 сценария: структурное изменение во фрагменте без миграции → блок; с миграцией → пропуск;
+атрибутивная правка (комментарий) → пропуск; обычная одиночная схема без декомпозиции → как
+раньше) — формального теста для скрипта в репозитории не было и не заведено (см. spawn_task ниже).
+
+Разбор класса гэпа («хук установлен и свеж, но логика распознаёт не все формы того, что должна
+ловить» — отдельный случай от «хук устарел физически», уже описанного в документе) —
+дополнение в `.claude/docs/precommit-hook-install-staleness.md`.
