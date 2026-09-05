@@ -28,23 +28,32 @@ async function acceptConsentAndStart(page: import('@playwright/test').Page) {
  * Раньше здесь после клика стоял фиксированный `waitForTimeout(500)`, подобранный под
  * клиентский `setTimeout(400)` в `QuizQuestionCard`. Совпадение констант не держит нагрузку
  * staging/WebKit: под более медленным рендером реальный переход иногда занимает дольше
- * условных 500мс, следующая итерация цикла тогда ищет `quiz-option` первого попавшегося
- * вопроса, которого ещё нет на экране, и падает по таймауту `waitFor` — не сам квиз сломан,
- * а тайминг теста угадан неверно (найдено на staging 2026-09-05, локально не
- * воспроизвелось). Вместо угадывания задержки ждём настоящий DOM-сигнал перехода: узел
- * кликнутой кнопки уходит из DOM либо при ремаунте `QuizQuestionCard` на новый вопрос
- * (родитель меняет `key`), либо при переходе всего квиза в RESULTS — оба случая покрывает
- * `waitForElementState('hidden')` (Playwright считает элемент hidden и при полном detach).
+ * условных 500мс (найдено на staging 2026-09-05, локально не воспроизводилось).
+ *
+ * Первый фикс (замена на `waitForElementState('hidden')` на кликнутой кнопке) не закрыл
+ * проблему целиком: цикл проверял `resultsTitle.isVisible()` только В НАЧАЛЕ следующей
+ * итерации, а искал `quiz-option` уже отдельным блокирующим `waitFor` — если между уходом
+ * старой кнопки в hidden и появлением экрана результатов проходило больше времени, чем
+ * оставалось от 10с таймаута на `quiz-option`, тест падал по таймауту `waitFor`, хотя квиз
+ * на самом деле просто ещё дорисовывал результаты. Правильный сигнал — гонка ожиданий
+ * между «появился следующий вопрос» и «появился заголовок результатов», а не
+ * последовательная проверка одного after другого (тот же паттерн уже устойчиво работает в
+ * `safety-net.spec.ts`).
  */
 async function answerAllQuestions(page: import('@playwright/test').Page) {
   const resultsTitle = page.getByRole('heading', { name: 'Ваша гексаграмма' })
+  const option = page.getByTestId('quiz-option').first()
   // 24 вопроса + запас на возможные повторы рендера
   for (let i = 0; i < 40; i++) {
+    await Promise.race([
+      option.waitFor({ state: 'visible', timeout: 20_000 }),
+      resultsTitle.waitFor({ state: 'visible', timeout: 20_000 }),
+    ])
+
     if (await resultsTitle.isVisible().catch(() => false)) {
       return
     }
-    const option = page.getByTestId('quiz-option').first()
-    await option.waitFor({ state: 'visible', timeout: 10_000 })
+
     const optionHandle = await option.elementHandle()
     await option.click()
     if (optionHandle) {
@@ -63,6 +72,8 @@ test.describe('Express Scan', () => {
   })
 
   test('интро → согласие → 24 вопроса → гексаграмма с QR и CTA', async ({ page }) => {
+    // 24 вопроса × переход на медленном staging WebKit — дефолтных 30с недостаточно
+    test.setTimeout(90_000)
     // INTRO + информированное согласие
     await acceptConsentAndStart(page)
 
@@ -86,6 +97,7 @@ test.describe('Express Scan', () => {
   })
 
   test('результат сохраняется в localStorage и восстанавливается после перезагрузки', async ({ page }) => {
+    test.setTimeout(90_000)
     await acceptConsentAndStart(page)
     await answerAllQuestions(page)
     await expect(page.getByRole('heading', { name: 'Ваша гексаграмма' })).toBeVisible()

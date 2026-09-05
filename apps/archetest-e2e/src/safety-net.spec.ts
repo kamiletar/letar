@@ -154,7 +154,15 @@ test.describe('Safety-net триггер (DPR/BAR/BOR)', () => {
       const bestText = bestOptionByScenario.get(scenario)
 
       if (bestText) {
-        await optionButtons.filter({ hasText: bestText }).first().click()
+        const bestOption = optionButtons.filter({ hasText: bestText })
+        // Тихий откат на optionButtons.first() при несовпадении текста (кодировка/пробелы,
+        // расхождение WebKit-рендера с дампом) незаметно занижает итоговые DPR/BAR/BOR —
+        // именно такой скрытый сбой мог быть причиной непройденного порога 60% на staging
+        // WebKit (2026-09-05). Явная проверка превращает его в понятную ошибку теста.
+        await expect(bestOption.first(), `не найден вариант "${bestText}" для сценария "${scenario}"`).toBeVisible({
+          timeout: 5_000,
+        })
+        await bestOption.first().click()
       } else {
         // Вопрос вне статичного банка (attention-check) — не влияет на DPR/BAR/BOR
         await optionButtons.first().click()
