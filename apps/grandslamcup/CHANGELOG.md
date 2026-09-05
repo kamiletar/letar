@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.39.15] - 2026-09-05
+
+### Fixed
+
+- `hb.wasm` (harfbuzzjs, зависимость `satori`) не эмиттился webpack'ом в
+  `.next/server/chunks` — `ENOENT` при пререндере, 4 раза за прод-билд. Фикс — ручное
+  копирование через `compiler.hooks.afterEmit` в `next.config.mjs`. Разбор —
+  `.claude/docs/webpack-emscripten-runtime-wasm-not-emitted.md`.
+
 ## [3.39.14] - 2026-09-03
 
 ### Changed

@@ -2,6 +2,31 @@
 
 Детальное описание всех реализованных фич.
 
+## Фикс hb.wasm ENOENT в webpack-сборке (2026-09-05)
+
+Прод-деплой (`deployId 293d7830`) 4 раза за сборку ловил `failed to asynchronously prepare wasm:
+ENOENT .../hb.wasm` во время «Generating static pages». Изначальная гипотеза (побочный эффект
+свежедобавленного `outputFileTracingExcludes` для `uploads/**`) опровергнута изолированной
+локальной пересборкой — ошибка воспроизвелась детерминированно без какого-либо отношения к этому
+флагу (он влияет только на копирование в `.next/standalone` уже после сборки).
+
+**Реальная причина**: `hb.wasm` — бинарник `harfbuzzjs` (зависимость `satori`, прямой импорт
+единственный во всём монорепо — `src/lib/telegram/poster/render.ts`, рендер Telegram-постеров).
+Emscripten-обвязка ищет `.wasm` по runtime-строке — webpack компилирует JS-чанк, но не копирует
+сам бинарник в `.next/server/chunks`. Разбор класса бага —
+[webpack-emscripten-runtime-wasm-not-emitted](/.claude/docs/webpack-emscripten-runtime-wasm-not-emitted.md).
+
+**Фикс**: ручное копирование `hb.wasm` в `.next/server/chunks` через
+`compiler.hooks.afterEmit` в `next.config.mjs` (`webpack()`). Проверено 5 итерациями изолированной
+пересборки, задеплоено (`deployId 472f89e4`), build чистый.
+
+⚠️ **Побочное открытие, не относящееся к hb.wasm**: `opengraph-image.tsx` (автоконвенция
+`next/og`) на практике никогда не подключается к `og:image` матча — `page.tsx` в
+`generateMetadata()` сам задаёт `openGraph.images` из `match.posterUrl`, что полностью
+перебивает file-convention fallback. У матчей без загруженного постера `og:image` нет вообще,
+независимо от исправности `opengraph-image.tsx`. Заведена отдельная задача в `PLAN.md`
+(«Открытые вопросы») — подключить как fallback, когда постера нет.
+
 ## Дедупликация origin-паттерна через @letar/hooks (2026-09-03, v3.39.14)
 
 Продолжение фикса ниже (v3.39.13): тот же паттерн `useState('')`+`useEffect(() =>
