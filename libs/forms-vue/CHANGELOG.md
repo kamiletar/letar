@@ -1,5 +1,13 @@
 # Changelog @letar/forms-vue
 
+## 0.15.3 (2026-09-05)
+
+- **Fix:** CI-падение `nx affected -t lint` — oxlint-правило `react(immutability)` считало
+  Vue-composable `useCreditCardField` React-хуком (по конвенции имени `use*`) и запрещало
+  переприсваивание `cvcEl` в template-ref колбэке `use-credit-card-field.ts`. Отключено в
+  `.oxlintrc.json`, тот же класс ложного срабатывания, что уже закрыт для
+  `react-hooks/rules-of-hooks`.
+
 ## 0.15.2 (2026-08-17)
 
 - **Fix:** `@tiptap/vue-3` пинился на точную `3.29.2`, тогда как `@tiptap/starter-kit`/
