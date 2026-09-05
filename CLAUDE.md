@@ -451,6 +451,11 @@ unit-тест с настоящими (не замоканными) запрос
 легитимный мейнтейнер, не supply-chain compromise, действие не требуется
 
 **Тесты и форматирование:** [e2e-testing](/.claude/docs/e2e-testing.md) ·
+[persistent-e2e-user-resource-exhaustion](/.claude/docs/persistent-e2e-user-resource-exhaustion.md)
+⚠️ фиксированная identity e2e-теста против персистентной staging-БД со временем
+исчерпывает любой конечный per-identity ресурс (не только вопросы квиза) — симптом
+неотличим от настоящей регрессии, лечится либо свежей identity на прогон, либо
+сбросом состояния через существующую self-service-функцию приложения ·
 [playwright-testmatch-absolute-path-regex-anchor](/.claude/docs/playwright-testmatch-absolute-path-regex-anchor.md)
 ⚠️ якорный `RegExp` (`^`) в `testMatch`/`testIgnore` матчится против абсолютного пути файла, не
 относительно `testDir` — никогда не совпадает, чинится glob-строкой ·
