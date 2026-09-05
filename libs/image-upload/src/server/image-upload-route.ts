@@ -104,11 +104,17 @@ export function createImageUploadRoute<
       const filename = `${timestamp}-${randomString}.${extension}`
       const categoryFolder = category.toLowerCase()
 
-      const uploadsDir = path.join(uploadsRoot, categoryFolder)
-      await mkdir(uploadsDir, { recursive: true })
+      // turbopackIgnore: категория приходит из формы в рантайме, поэтому Turbopack
+      // не может статически определить границы этого пути — без подсказки он трассирует
+      // в standalone-сборку весь проект целиком (включая уже загруженные файлы в uploads/),
+      // раздувая образ Docker на порядок. Комментарий обязан стоять сразу после открывающей
+      // скобки вызова, а не перед динамическим аргументом — см.
+      // .claude/docs/nextjs-dynamic-fs-path-tracing.md
+      const uploadsDir = path.join(/* turbopackIgnore: true */ uploadsRoot, categoryFolder)
+      await mkdir(/* turbopackIgnore: true */ uploadsDir, { recursive: true })
 
       const buffer = Buffer.from(await file.arrayBuffer())
-      await writeFile(path.join(uploadsDir, filename), buffer)
+      await writeFile(path.join(/* turbopackIgnore: true */ uploadsDir, filename), buffer)
 
       const relPath = `${categoryFolder}/${filename}`
 
@@ -156,8 +162,8 @@ export function createImageUploadRoute<
         }
 
         const resolved = resolveUploadPath(uploadsRoot, image.path.split('/'))
-        if (resolved.ok && existsSync(resolved.absPath)) {
-          await unlink(resolved.absPath)
+        if (resolved.ok && existsSync(/* turbopackIgnore: true */ resolved.absPath)) {
+          await unlink(/* turbopackIgnore: true */ resolved.absPath)
         }
 
         await repository.deleteImageRecord(imageId)
@@ -175,8 +181,8 @@ export function createImageUploadRoute<
         return Response.json({ error: 'Некорректный URL' }, { status: 400 })
       }
 
-      if (existsSync(resolved.absPath)) {
-        await unlink(resolved.absPath)
+      if (existsSync(/* turbopackIgnore: true */ resolved.absPath)) {
+        await unlink(/* turbopackIgnore: true */ resolved.absPath)
       }
 
       try {
