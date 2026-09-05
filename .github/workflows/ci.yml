@@ -164,3 +164,13 @@ jobs:
       - name: Integrity checks
         if: always() && steps.install.outcome == 'success'
         run: bun scripts/check-all.mjs --ci
+
+      # scripts/ не Nx-проект, поэтому `nx affected -t test` выше его не видит —
+      # bun-скрипты (Bun.spawnSync) с тестами запускаются здесь напрямую через bun test.
+      # ⚠️ `bun test scripts/` (без конкретного файла) — не то же самое, что "тесты внутри
+      # scripts/": позиционный аргумент матчится по подстроке пути рекурсивно по всему
+      # репозиторию (задевает apps/*/scripts/), а не ограничивает поиск каталогом scripts/.
+      # Перечисляй файлы явно.
+      - name: Scripts tests
+        if: always() && steps.install.outcome == 'success'
+        run: bun test scripts/check-schema-migration.test.mjs
