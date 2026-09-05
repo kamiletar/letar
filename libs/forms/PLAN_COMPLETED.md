@@ -1,5 +1,18 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-05 — `forms-vue` — фикс красного CI (oxlint ложное срабатывание, v0.15.3)
+
+Пользователь попросил разобрать упавший GitHub Actions run (job `Lint`,
+`nx affected -t lint`). Причина — `@letar/forms-vue:oxlint` упал на
+`use-credit-card-field.ts:97`: правило `react(immutability)` приняло Vue-composable
+`useCreditCardField` за React-хук (по конвенции имени `use*`) и запретило переприсваивание
+`cvcEl` внутри template-ref колбэка. Тот же класс ложного срабатывания уже был закрыт в
+`.oxlintrc.json` для `react-hooks/rules-of-hooks` — теперь туда же добавлено отключение
+`react/immutability` с комментарием. Проверено локально (`bunx oxlint` зелёный), закоммичено и
+запушено вместе с двумя попутно найденными незапушенными submodule (`domwellbes`,
+`domwellbes-e2e` — чужая работа, не связана с этим фиксом, запушены по явному запросу
+пользователя, иначе pre-push хук блокировал бы push letar целиком).
+
 ## 2026-09-05 — `getActiveUrlSyncFields` — diff-хелпер для `Form.UrlSync` (v2.10.0)
 
 Запрос `letar-dev` (msg 1157, Заповедь №18 студии — «Сбросить всё» видна только при активном
