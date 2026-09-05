@@ -252,6 +252,13 @@ ref/DOM не перезапускается ·
 существующий список трогать не нужно (безвреден), но обязательным не является ·
 [nextjs-standalone-tracing](/.claude/docs/nextjs-standalone-tracing.md)
 ECONNREFUSED/ERR_DLOPEN_FAILED при зелёном билде ·
+[nextjs-dynamic-fs-path-tracing](/.claude/docs/nextjs-dynamic-fs-path-tracing.md) ⚠️ обратный
+случай того же класса — рантайм-путь в `fs`-вызове (`path.join(uploadsRoot, categoryFolder)` в
+`@letar/image-upload`) заставляет трейсер утащить в `.next/standalone` весь проект целиком
+(раздутый образ Docker, `aprel8008` — 3.47GB), фикс `/* turbopackIgnore: true */` работает
+только сразу после открывающей скобки вызова; статически ограниченный, но объёмный путь
+(`uploads/estates/<slug>/<file>`) предупреждения не даёт, но всё равно утаскивает всю
+директорию целиком ·
 [nextjs-build-time-oidc-discovery-network-dependency](/.claude/docs/nextjs-build-time-oidc-discovery-network-dependency.md)
 ⚠️ `nx build` hub-client приложения (kami/time/aprel8008/domwellbes) эagerly бьёт в сеть на OIDC
 discovery ещё на этапе `betterAuth()` — не баг `@letar/auth`, архитектура плагина `genericOAuth`;
