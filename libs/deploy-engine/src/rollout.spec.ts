@@ -338,6 +338,60 @@ services:
     expect(calls.some((c) => c.args[0] === 'exec' && c.args.includes('wget'))).toBe(false)
   })
 
+  it('smoke-test переключается на wget, если в образе нет node (статический экспорт на nginx:alpine)', async () => {
+    // Инцидент pravda (2026-09-05): финальный слой Dockerfile.production на nginx:alpine —
+    // `docker exec ... node -e ...` падает "executable file not found", хотя контейнер healthy.
+    const { executor, calls } = memoryExecutor({
+      composeText: READY_COMPOSE,
+      commandResults: [
+        sequentialPsResults('time-app-1\n', 'time-app-1\ntime-app-2\n'),
+        { match: (a) => a[0] === 'inspect', result: { stdout: 'healthy\n', stderr: '', exitCode: 0 } },
+        {
+          match: (a) => a[0] === 'exec' && a.includes('sh') && a.includes('command -v node'),
+          result: { stdout: '', stderr: 'command -v node: not found\n', exitCode: 127 },
+        },
+        {
+          match: (a) => a[0] === 'exec' && a.some((arg) => arg.includes('wget')),
+          result: { stdout: '200\n', stderr: '', exitCode: 0 },
+        },
+      ],
+    })
+
+    const result = await runRollout(executor, 'time', { npmContainerName: 'nginx-proxy-manager' }, noopSleep)
+
+    expect(result.ok).toBe(true)
+    const smokeStep = result.steps.find((s) => s.id === 'smoke-test')
+    expect(smokeStep?.ok).toBe(true)
+    // node -e не вызывался — только проверка наличия node и wget-фолбэк
+    expect(calls.some((c) => c.args[0] === 'exec' && c.args.includes('node') && c.args.includes('-e'))).toBe(false)
+    expect(calls.some((c) => c.args[0] === 'exec' && c.args.some((arg) => arg.includes('wget')))).toBe(true)
+  })
+
+  it('smoke-test через wget-фолбэк ловит реальный 5xx так же, как node-путь', async () => {
+    const { executor } = memoryExecutor({
+      composeText: READY_COMPOSE,
+      commandResults: [
+        sequentialPsResults('time-app-1\n', 'time-app-1\ntime-app-2\n'),
+        { match: (a) => a[0] === 'inspect', result: { stdout: 'healthy\n', stderr: '', exitCode: 0 } },
+        {
+          match: (a) => a[0] === 'exec' && a.includes('sh') && a.includes('command -v node'),
+          result: { stdout: '', stderr: 'command -v node: not found\n', exitCode: 127 },
+        },
+        {
+          match: (a) => a[0] === 'exec' && a.some((arg) => arg.includes('wget')),
+          result: { stdout: '500\n', stderr: '', exitCode: 0 },
+        },
+      ],
+    })
+
+    const result = await runRollout(executor, 'time', { npmContainerName: 'nginx-proxy-manager' }, noopSleep)
+
+    expect(result.ok).toBe(false)
+    const smokeStep = result.steps.find((s) => s.id === 'smoke-test')
+    expect(smokeStep?.ok).toBe(false)
+    expect(smokeStep?.detail).toContain('wget-фолбэк')
+  })
+
   it('резолвит legacy-имя старого контейнера (без суффикса -N) по compose-лейблам', async () => {
     // Контейнер создан ещё до перехода на rollout-профиль — явный container_name без суффикса.
     const { executor, calls } = memoryExecutor({

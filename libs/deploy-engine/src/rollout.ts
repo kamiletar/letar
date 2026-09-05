@@ -183,6 +183,16 @@ async function resolveNewContainer(
  * `executable file not found in $PATH`, хотя контейнер уже реально healthy (найдено 2026-09-04).
  * `node` есть в любом Node-образе безусловно, независимо от дистрибутива/пакетного менеджера.
  *
+ * ⚠️ Обратный случай (найдено 2026-09-05, `pravda`): финальный слой у приложений со статическим
+ * экспортом (`Dockerfile.production` на `nginx:alpine`, не на `node:*`) вообще не содержит
+ * `node` — `docker exec ... node -e ...` падает `executable file not found in $PATH` при
+ * реально healthy контейнере, той же ошибкой, что описана выше про `time`, но с
+ * противоположным виновником (нет `node`, а не нет `wget`). Поэтому сначала проверяем
+ * доступность `node` через `command -v` и только при её отсутствии переключаемся на
+ * `wget`-фолбэк (busybox `nginx:alpine`/Alpine-образы гарантированно несут `wget`) — статус-код
+ * достаём из заголовка ответа (`wget -S`), а не из exit-кода `wget` (он ненадёжен для 5xx, см.
+ * коммент выше про `--spider`).
+ *
  * Если URL healthcheck не удаётся извлечь из compose — не блокирует rollout (defense-in-depth,
  * не новая точка отказа): doctor уже требует healthcheck как обязательную проверку, отсутствие
  * извлекаемого URL — редкий edge case формата, не повод останавливать уже работающий пайплайн.
@@ -199,14 +209,33 @@ async function smokeTest(
   if (!url) {
     return { ok: true, detail: 'healthcheck URL не извлечён из compose — smoke-test пропущен' }
   }
-  const script = `require('http').get(${JSON.stringify(url)}, r => process.exit(r.statusCode >= 500 ? 1 : 0))`
-    + `.on('error', () => process.exit(1))`
-  const res = await executor.runCommand('docker', ['exec', newContainer, 'node', '-e', script])
-  if (res.exitCode !== 0) {
+
+  const nodeCheck = await executor.runCommand('docker', ['exec', newContainer, 'sh', '-c', 'command -v node'])
+  if (nodeCheck.exitCode === 0) {
+    const script = `require('http').get(${JSON.stringify(url)}, r => process.exit(r.statusCode >= 500 ? 1 : 0))`
+      + `.on('error', () => process.exit(1))`
+    const res = await executor.runCommand('docker', ['exec', newContainer, 'node', '-e', script])
+    if (res.exitCode !== 0) {
+      return {
+        ok: false,
+        detail: `реальный HTTP-запрос к ${url} вернул 5xx или не удался: ${
+          res.stderr.trim() || res.stdout.trim() || `exit ${res.exitCode}`
+        }`,
+      }
+    }
+    return { ok: true }
+  }
+
+  // node недоступен в образе (например nginx:alpine у статического экспорта) — фолбэк на wget,
+  // статус-код разбираем из заголовка ответа, не из exit-кода.
+  const wgetCmd = `wget -S -O /dev/null ${url} 2>&1 | grep -m1 -oE 'HTTP/[0-9.]+ [0-9]{3}' | grep -oE '[0-9]{3}$'`
+  const wgetRes = await executor.runCommand('docker', ['exec', newContainer, 'sh', '-c', wgetCmd])
+  const statusCode = Number.parseInt(wgetRes.stdout.trim(), 10)
+  if (!Number.isFinite(statusCode) || statusCode >= 500) {
     return {
       ok: false,
-      detail: `реальный HTTP-запрос к ${url} вернул 5xx или не удался: ${
-        res.stderr.trim() || res.stdout.trim() || `exit ${res.exitCode}`
+      detail: `реальный HTTP-запрос к ${url} вернул 5xx или не удался (wget-фолбэк, node недоступен в образе): статус ${
+        wgetRes.stdout.trim() || 'не определён'
       }`,
     }
   }
