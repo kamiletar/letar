@@ -3,7 +3,7 @@ import { runSeed } from '@letar/seed-utils'
 import { ZenStackClient } from '@zenstackhq/orm'
 import { PostgresDialect } from 'kysely'
 import { Pool } from 'pg'
-import { SkillLevel } from '../src/generated/prisma'
+import { SkillLevel, SocialPlatformType } from '../src/generated/prisma'
 import { schema } from '../src/generated/schema'
 
 if (!process.env.DATABASE_URL) {
@@ -536,6 +536,24 @@ async function main() {
       },
     ],
   })
+
+  // ========================================
+  // Платформы кросс-постинга (Фаза 7 Этап 2) — заготовки, выключены до заполнения токенов в админке
+  // ========================================
+
+  const socialPlatforms: Array<{ type: SocialPlatformType; name: string }> = [
+    { type: SocialPlatformType.TELEGRAM, name: 'Telegram' },
+    { type: SocialPlatformType.VK, name: 'ВКонтакте' },
+    { type: SocialPlatformType.FACEBOOK, name: 'Facebook' },
+  ]
+
+  for (const platform of socialPlatforms) {
+    await prisma.socialPlatform.upsert({
+      where: { type: platform.type },
+      update: {},
+      create: { type: platform.type, name: platform.name, enabled: false, config: {} },
+    })
+  }
 
   const projectCount = await prisma.project.count()
   console.log(`[seed] Database seeded successfully! projects in DB now: ${projectCount}`)

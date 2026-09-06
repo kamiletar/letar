@@ -346,7 +346,8 @@
 - ✅ Настройка Telegram прокси на mail.letar.best (tg-proxy.letar.best → api.telegram.org, SSL)
 - ✅ Настройка Facebook прокси на mail.letar.best (fb-proxy.letar.best → graph.facebook.com, SSL)
 - ✅ Facebook (Graph API v21.0) — через прокси на mail.letar.best
-- ⏳ Сид-данные для SocialPlatform (Telegram, VK, Facebook конфиги)
+- ✅ Сид-данные для SocialPlatform (Telegram, VK, Facebook — заготовки `enabled: false`,
+  `config: {}`, `upsert` по `type` не перетирает то, что потом настроят в админке)
 - ⏳ Node.js + Express прокси-сервис для заблокированных API
 - ⏳ LinkedIn (Share API) — через прокси на mail.letar.best
 - ⏳ X/Twitter (API v2)
@@ -364,7 +365,10 @@
 
 ## Фаза 8: Вынос компонентов
 
-- ⏳ Вынести "Который час?" в отдельное приложение (отдельный домен, своя стилистика)
+- ✅ Вынести "Который час?" в отдельное приложение (отдельный домен, своя стилистика) — уже
+  сделано в прошлой сессии (см. `CHANGELOG.md` v0.7.0 "Added" / позже "Removed" отсюда), просто не
+  было отмечено здесь. Приложение живёт как `apps/time`, в исходниках kami не осталось ни ссылок
+  на `whatHour`/`what-hour`, ни самого компонента — сверено грепом при обнаружении задачи.
 
 ---
 
@@ -665,6 +669,7 @@ routing-контракты (`GET /share` → 405 без locale-редирект�
 | 2026-09-06 | ✅ Фаза 9.1–9.3: swap визуализаций+цвет, офлайн-сонограмма, waveform-пики в сидбаре player           |
 | 2026-09-06 | ✅ Фаза 10 (первый слайс): `/share` route, модель `Link`, `/admin/links` — см. упрощения в разделе   |
 | 2026-09-06 | ✅ Фаза 9.5 (v1): постер+сонограмма slide, переключаемый вид, без виртуализации (см. упрощения)      |
+| 2026-09-06 | ✅ Фаза 8 отмечена (уже сделана ранее) + Фаза 7 Этап 2: сид-данные SocialPlatform                    |
 
 ## Техдолг: setRequestLocale не даёт SSG — root layout вызывает getSession() безусловно
 
