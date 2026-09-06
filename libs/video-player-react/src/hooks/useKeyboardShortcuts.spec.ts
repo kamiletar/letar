@@ -6,8 +6,8 @@ import { useKeyboardShortcuts } from './useKeyboardShortcuts'
 
 import type { UseKeyboardShortcutsOptions } from './useKeyboardShortcuts'
 
-function dispatchKey(key: string, target?: EventTarget) {
-  const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true })
+function dispatchKey(key: string, target?: EventTarget, init: KeyboardEventInit = {}) {
+  const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init })
   if (target) {
     Object.defineProperty(event, 'target', { value: target, configurable: true })
   }
@@ -117,6 +117,20 @@ describe('useKeyboardShortcuts', () => {
     dispatchKey('f')
     dispatchKey('а')
     expect(toggleFullscreen).toHaveBeenCalledTimes(2)
+  })
+
+  it('Alt+Enter вызывает toggleFullscreen', () => {
+    const toggleFullscreen = vi.fn()
+    renderHook(() => useKeyboardShortcuts(makeOptions({ toggleFullscreen })))
+    dispatchKey('Enter', undefined, { altKey: true })
+    expect(toggleFullscreen).toHaveBeenCalledTimes(1)
+  })
+
+  it('Enter без Alt не вызывает toggleFullscreen', () => {
+    const toggleFullscreen = vi.fn()
+    renderHook(() => useKeyboardShortcuts(makeOptions({ toggleFullscreen })))
+    dispatchKey('Enter')
+    expect(toggleFullscreen).not.toHaveBeenCalled()
   })
 
   it('"[" уменьшает скорость воспроизведения на 0.25, если передан adjustPlaybackSpeed', () => {

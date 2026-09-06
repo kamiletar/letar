@@ -6,7 +6,7 @@
  * - ←/→: перемотка назад/вперёд
  * - ↑/↓: громкость
  * - M: mute/unmute
- * - F: fullscreen
+ * - F, Alt+Enter: fullscreen
  * - [ / ]: скорость воспроизведения ±0.25x
  * - I: информация о видео
  */
@@ -100,6 +100,13 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions): void
           break
         case 'f':
         case 'а': // Русская раскладка (f)
+          e.preventDefault()
+          toggleFullscreen()
+          break
+        case 'Enter':
+          if (!e.altKey) {
+            break
+          }
           e.preventDefault()
           toggleFullscreen()
           break
