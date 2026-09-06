@@ -414,6 +414,13 @@ export default [
       'libs/*/src/lib/declarative/form-fields/utility/use-computed-value.ts',
       'src/lib/fields/use-computed-value.ts',
       'libs/*/src/lib/fields/use-computed-value.ts',
+      // @letar/query-provider — вырезание TanStack DevTools-панели из прод-сборки на этапе
+      // компиляции: сравнение с NODE_ENV здесь не decision-ветка "прод или стейджинг", а способ
+      // дать бандлеру Next.js буквально свернуть литерал и выбросить мёртвую ветку с импортом
+      // (@tanstack/devtools-ui → solid-js/web ломает серверную компиляцию иначе). Разбор —
+      // .claude/docs/nextjs-dynamic-ssr-false-still-server-compiled.md.
+      'src/lib/devtools-panel-lazy.tsx',
+      'libs/*/src/lib/devtools-panel-lazy.tsx',
     ],
     rules: {
       'no-restricted-syntax': 'off',
