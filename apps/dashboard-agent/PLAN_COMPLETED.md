@@ -2,6 +2,38 @@
 
 Детальное описание всех реализованных фич.
 
+## Per-app канарейка доставки email domwellbes (2026-09-06, `0.16.1`)
+
+Поводом послужил разбор жалобы пользователя на логин 05.09.2026: обнаружено, что служебный ящик
+`canary-domwellbes@letar.best` (email логин-канарейки domwellbes) не существовал вовсе —
+провижининг 28.08.2026 бился `501 5.1.1 User does not exist`. Причина — на Maddy `creds create`
+заводит только SMTP/IMAP-аутентификацию, отдельная (не задокументированная нигде до этой сессии)
+команда `imap-acct create` нужна для хранилища, куда реально идёт доставка. Разбор и рецепт
+проверки round-trip — `.claude/docs/maddy-creds-create-missing-imap-acct.md`, со ссылками из
+`email.md` и скилла `email-maddy`.
+
+Ящик заведён и проверен вручную (SMTP-отправка себе → IMAP-чтение → удаление тестового письма).
+По просьбе пользователя оформлено в постоянный мониторинг: новая cron-задача
+`domwellbes-email-canary-check` (`15 * * * *`, `lib/domwellbes-email-canary.ts`) — в отличие от
+общей `email-canary-check` (технический ящик `canary@letar.best`, проверяет только
+инфраструктуру Maddy целиком), эта шлёт через РЕАЛЬНЫЙ SMTP-аккаунт самого domwellbes
+(`getAppSmtpConfig('domwellbes')` — новая функция в `app-secrets.ts`, читает уже смонтированный
+`/secrets/domwellbes.env`, новых volume-маунтов не потребовалось) на `canary-domwellbes@letar.best`
+и ждёт получения по IMAP. IMAP-поллинг переиспользует `waitForCanaryMessage`, экспортированную из
+`email-canary.ts`, вместо копипасты — общий механизм жёсткого дедлайна не специфичен для
+глобальной канарейки. Алерты — тот же `shouldRepeatAlert` (порог 2 подряд-неудачи, повтор через
+удвоение), что у остальных канареек агента.
+
+Секрет `DOMWELLBES_EMAIL_CANARY_IMAP_PASSWORD` (пароль служебного ящика, не SMTP domwellbes)
+сгенерирован через `openssl rand` и записан в `.env.docker.enc` через `scripts/sops-env-set.sh`.
+Задеплоено на s2 через `deploy-agent-dev`, коммит `8f9ae317`. Тесты (`getAppSmtpConfig` — 5 кейсов)
+и typecheck зелёные.
+
+**Побочный процесс:** push letar был заблокирован pre-push хуком — непушнутый (но уже
+закоммиченный чужой сессией) коммит `apps/domwellbes` `43fecb8`. Запушен как есть, без касания
+рабочего дерева submodule (там было отдельное незакоммиченное чужое WIP в
+`schema/enums.zmodel`/`schema/retail-shop.zmodel` — не тронуто).
+
 ## Cron `s2-pageview-count` 404 — недоведённый ретир от 8ebecdfe (2026-09-03)
 
 GlitchTip-алерт: cron-задача `s2-pageview-count` на `s2.letar.best` падала `HTTP 404` на

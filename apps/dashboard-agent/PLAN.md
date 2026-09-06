@@ -174,6 +174,16 @@ success/error, вычисляемым из полей результата, ос
 хвосты imot/premium-rosstil, надёжность deploy-истории, cron-логи, метрики, безопасность) —
 `PLAN_COMPLETED.md`.
 
+- [ ] ⚠️ Открытый вопрос: распространить per-app канарейку доставки email (2026-09-06, по
+      образцу `domwellbes-email-canary-check`) на другие приложения с собственным SMTP? У
+      dashboard-agent уже смонтированы `/secrets/<app>.env` для 15 приложений — добавить проверку
+      для любого из них дёшево (`getAppSmtpConfig` уже написан, `waitForCanaryMessage`
+      переиспользуем), но каждая новая проверка — новый служебный ящик на Maddy (`creds create` +
+      `imap-acct create`) и новый секрет в `.env.docker.enc`. Не решалось владельцем — заведено
+      под конкретный домовельбесовский инцидент, не как общая инициатива. Кандидаты, у которых
+      есть свой SMTP (не через общий `noreply@letar.best`): dsperevod (уже свой
+      `email-health-check`, другой транспорт — Яндекс, не Maddy), driving-school, aboi, svoichuzhie.
+
 ---
 
 ## Команды разработки
