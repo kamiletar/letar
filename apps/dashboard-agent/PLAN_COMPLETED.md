@@ -2,6 +2,48 @@
 
 Детальное описание всех реализованных фич.
 
+## Плановая чистка `.nx/cache` (2026-09-06, `0.16.2`)
+
+Разбор инцидента «диск s2 100%» (06.09.2026, ~13:00–14:10 UTC): диск `/` заполнился до
+174G/174G, упал деплой (`SqliteFailure DiskFull`), реально упал контейнер `time-db`, повредились
+docker-network endpoint'ы у `svoichuzhie-db`/`dsperevod-db`. Ручной `docker image prune -a -f`
+освободил ~14GB и снял острую фазу, но диск остался на 95% — сигнал, что причина не только
+в Docker.
+
+`docker system df` после ручной чистки: images 13GB, build cache 17GB (reclaimable), volumes
+1.6GB — суммарно ~32GB. `df -h /` в этот момент показывал 165G занято из 174G. Разница нашлась
+через `du -h --max-depth=1 /` → `/home` (123G) → `/home/deploy/letar` (120G) →
+**`.nx/cache`: 64GB** — больше, чем весь Docker вместе взятый. Для этого каталога не было
+вообще никакой чистки: `docker-prune.ts` чистит только Docker, `next-cache-cleanup.ts` — только
+`apps/<app>/.next/cache`, а `.nx/cache` в корне чекаута (память результатов каждой Nx-задачи:
+build/lint/typecheck/test на свой входной хеш) никто не трогал. Штатный `nx reset` не подходит
+как cron-действие — сносит кэш целиком, а не по возрасту, обнуляя память всех задач разом.
+
+Замер возрастного распределения (295 записей `.nx/cache/<hash>` на s2): старше 1 дня — 36GB,
+старше 2 дней — 32GB, старше 3 дней — 15GB. Выбран порог 2 дня — симметрично `next-cache-cleanup`.
+
+Фикс — `lib/nx-cache-cleanup.ts` (по образцу `next-cache-cleanup.ts`): удаляет подкаталоги
+`.nx/cache/<hash>` по `mtime` старше `NX_CACHE_CLEANUP_DAYS`. Новые cron-задачи
+`nx-cache-cleanup-s2`/`nx-cache-cleanup-s3` (`40 4 * * *`, сразу после `next-cache-cleanup-*` в
+`30 4 * * *` и `docker-prune` в `0 4 * * *`, чтобы три чистки не спорили за I/O одновременно).
+3 unit-теста (`nx-cache-cleanup.spec.ts`, реальная файловая система через `mkdtemp`) — удаляет
+старое, не трогает свежее, не падает при отсутствии `.nx/cache`.
+
+Экстренно, до деплоя кода, вручную почищено на s2 (`find ... -mtime +2 | xargs rm -rf`): диск
+95% → 77% (8.9G → 41G свободно). Задеплоено через deploy-agent-dev (self-deploy dashboard-agent),
+подтверждено логом `[Cron] Запланирована: Nx Cache Cleanup (s2) - 40 4 * * *` и `[Cron] Сервер:
+s2, загружено 33 из 38 задач`. Разбор — `.claude/docs/docker-prune-cold-layer-network-flake.md`
+(раздел «Дополнение 2026-09-06»).
+
+**Побочная находка (не в scope этой сессии, уже подхвачена параллельным агентом):**
+deploy-agent-dev в отчёте о деплое отметил, что self-deploy dashboard-agent теряет собственную
+историю деплоя и логи cron — `rehydrate*FromRedis` падает на старте гонкой
+(`createRedisClient` с `lazyConnect: true` не ждёт `connect()`, а `enableOfflineQueue: false`
+рубит первую команду без ретрая). К моменту `/end-session` другая сессия уже правила
+`lib/redis.ts`/`cron.ts`/`routes/deploy.ts`/`lib/deploy-history-redis.ts` (незакоммичено на
+момент этой записи) — не тронуто, не задокументировано как открытый техдолг намеренно, чтобы не
+плодить устаревшую запись рядом с активным фиксом.
+
 ## Per-app канарейка доставки email domwellbes (2026-09-06, `0.16.1`)
 
 Поводом послужил разбор жалобы пользователя на логин 05.09.2026: обнаружено, что служебный ящик
