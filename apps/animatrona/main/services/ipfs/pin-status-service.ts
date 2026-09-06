@@ -15,7 +15,6 @@ import type { RemotePinStatus } from '../../prisma'
 import { prisma } from '../../utils/db'
 import { createModuleLogger } from '../../utils/logger'
 import { getKuboService } from '../kubo'
-import { normalizeAllPins } from './pin-normalizer'
 
 const log = createModuleLogger('PinStatusService')
 
@@ -284,78 +283,6 @@ export async function scanAndRegisterLocalCids(
 
   log.info('Регистрация завершена', { registered, skipped: existingSet.size })
   return { registered, skipped: existingSet.size }
-}
-
-// ─── Безопасный GC ────────────────────────────────────────────────────────────
-
-export interface SafeGcResult {
-  /** Блоки удалённые GC */
-  freedBlocks: number
-  /** CID защищённые от удаления (LOCAL_ONLY + PIN_QUEUED) */
-  protectedCids: number
-  /** Ошибки во время GC */
-  errors: number
-}
-
-export type SafeGcProgress = (step: string, current?: number, total?: number) => void
-
-/**
- * Безопасная сборка мусора в локальном Kubo.
- *
- * Алгоритм:
- * 1. Нормализуем пины (pin-normalizer учитывает PinStatus — LOCAL_ONLY остаются recursive)
- * 2. Запускаем repo.gc() — удаляет только unreferenced блоки
- *    - LOCAL_ONLY: защищены recursive пинами → не удаляются
- *    - PINNED_REMOTE: indirect или без пина → GC освобождает место
- *
- * Требует: все LOCAL_ONLY CID должны иметь recursive pin в Kubo.
- * pin-normalizer.ts гарантирует это после интеграции с PinStatus.
- */
-export async function safeLocalGc(onProgress?: SafeGcProgress): Promise<SafeGcResult> {
-  const kuboService = getKuboService()
-  const client = kuboService.getClientOrNull()
-  if (!client) {
-    throw new Error('Kubo не запущен')
-  }
-
-  // Шаг 1: нормализуем пины
-  // pin-normalizer пропустит LOCAL_ONLY/PIN_QUEUED CID → они сохранят recursive пин
-  onProgress?.('Нормализация пинов...')
-  log.info('Нормализация пинов перед GC')
-  await normalizeAllPins((step, current, total) => {
-    onProgress?.(`Нормализация: ${step}`, current, total)
-  })
-
-  // Шаг 2: проверяем сколько CID под защитой
-  const localOnlyCids = await getLocalOnlyCids()
-  const protectedCids = localOnlyCids.length
-  log.info('CID защищены от GC', { protectedCids })
-  onProgress?.(`Защищено от GC: ${protectedCids} CID`)
-
-  // Шаг 3: запускаем GC
-  onProgress?.('Запуск Kubo repo.gc()...')
-  log.info('Запуск Kubo repo.gc()')
-  let freedBlocks = 0
-  let errors = 0
-
-  try {
-    for await (const result of client.repo.gc()) {
-      if (result.err) {
-        log.debug('GC ошибка для блока', { err: result.err.message })
-        errors++
-      } else {
-        freedBlocks++
-      }
-    }
-  } catch (error) {
-    log.error('Ошибка Kubo repo.gc()', { error: String(error) })
-    throw error
-  }
-
-  log.info('Safe GC завершён', { freedBlocks, protectedCids, errors })
-  onProgress?.(`GC завершён: освобождено ${freedBlocks} блоков`)
-
-  return { freedBlocks, protectedCids, errors }
 }
 
 /**

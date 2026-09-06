@@ -14,6 +14,7 @@ import path from 'path'
 
 import type { IpfsAddResult, IpfsStatResult } from '../../../shared/types/ipfs'
 import { createModuleLogger } from '../../utils/logger'
+import { ImportQueueController } from '../import-queue-controller'
 import { getKuboService } from '../kubo'
 
 const log = createModuleLogger('UnifiedIPFS')
@@ -441,6 +442,14 @@ export async function addDirectory(
  * @returns Количество удалённых блоков и освобождённый размер
  */
 export async function repoGc(): Promise<{ blocksRemoved: number }> {
+  // Гейт: во время активного импорта суб-документы заливаются с pin:false в расчёте на
+  // будущую indirect-защиту через directoryCid, который ещё не собран и не сохранён в БД —
+  // в этом окне такой контент не защищён вообще ничем, и голый repo.gc() удалит его
+  // безвозвратно. См. тот же гейт в normalizeAllPins() (pin-normalizer.ts).
+  if (ImportQueueController.getInstance().hasActiveImport()) {
+    throw new Error('Garbage Collection недоступен во время активного импорта — дождитесь завершения очереди')
+  }
+
   const client = getClient()
 
   log.info('Запускаю Garbage Collection...')
