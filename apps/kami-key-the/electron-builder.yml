@@ -36,7 +36,14 @@ nsis:
   createStartMenuShortcut: true
   shortcutName: KamiKeyThe
 
-publish: null
+# Публикация на GitHub Releases — kamiletar/letar (публичный монорепо), релизы тегаются
+# префиксом kami-key-the-v* (тот же паттерн, что animatrona/label-printer-desktop)
+publish:
+  provider: github
+  owner: kamiletar
+  repo: letar
+  releaseType: release
+  private: false
 
 extraResources:
   - from: data/symbols.json
