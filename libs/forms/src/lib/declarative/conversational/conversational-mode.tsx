@@ -1,7 +1,7 @@
 'use client'
 
 import { Box, Button, Flex, HStack, Progress, Text, VStack } from '@chakra-ui/react'
-import { Children, type KeyboardEvent, type ReactElement, type ReactNode, useCallback, useRef } from 'react'
+import { Children, type KeyboardEvent, type ReactElement, type ReactNode, useCallback, useRef, useState } from 'react'
 import { useConversationalState } from './use-conversational-state'
 
 /** Props для ConversationalMode */
@@ -18,6 +18,8 @@ export interface ConversationalModeProps {
   prevLabel?: string
   /** Текст кнопки отправки (на последнем шаге) */
   submitLabel?: string
+  /** Текст кнопки начала (на welcome screen) */
+  startLabel?: string
   /** Показывать номер вопроса */
   showQuestionNumber?: boolean
   /** Показывать progress bar */
@@ -54,6 +56,7 @@ export function ConversationalMode({
   nextLabel = 'Далее',
   prevLabel = 'Назад',
   submitLabel = 'Отправить',
+  startLabel = 'Начать',
   showQuestionNumber = true,
   showProgress = true,
   onComplete,
@@ -61,6 +64,7 @@ export function ConversationalMode({
   const childArray = Children.toArray(children)
   const state = useConversationalState(childArray.length)
   const containerRef = useRef<HTMLDivElement>(null)
+  const [showWelcome, setShowWelcome] = useState(Boolean(welcomeScreen))
 
   /** Обработка клавиш */
   const handleKeyDown = useCallback(
@@ -89,6 +93,30 @@ export function ConversationalMode({
     },
     [state, onComplete],
   )
+
+  const dismissWelcome = useCallback(() => setShowWelcome(false), [])
+
+  const handleWelcomeKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        dismissWelcome()
+      }
+    },
+    [dismissWelcome],
+  )
+
+  // Welcome screen — показывается один раз перед первым полем
+  if (showWelcome) {
+    return (
+      <VStack minH="300px" justify="center" align="center" gap={6} py={12} onKeyDown={handleWelcomeKeyDown}>
+        {welcomeScreen}
+        <Button colorPalette="blue" onClick={dismissWelcome} autoFocus>
+          {startLabel} →
+        </Button>
+      </VStack>
+    )
+  }
 
   // Завершённое состояние
   if (state.isCompleted) {

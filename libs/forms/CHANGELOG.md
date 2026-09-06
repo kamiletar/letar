@@ -4,6 +4,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.11.0] - 2026-09-06
+
+### Added
+
+- **`welcomeScreen` в `ConversationalMode`** (`libs/forms/src/lib/declarative/conversational/conversational-mode.tsx`)
+  — проп был объявлен и задокументирован (в JSDoc и в `apps/form-docs`), но никогда не рендерился;
+  реализован фактически. Показывается один раз перед первым полем как отдельный шаг (не влияет на
+  индекс/прогресс `useConversationalState`), закрывается кнопкой (новый проп `startLabel`, дефолт
+  `'Начать'`) или клавишей Enter. 5 новых тестов в `conversational-mode.spec.tsx`.
+
 ## [2.10.0] - 2026-09-05
 
 ### Added
