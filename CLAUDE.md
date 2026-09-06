@@ -346,7 +346,16 @@ next-intl matcher не ловит `icon`/`apple-icon`/`opengraph-image`/`twitter
 ⚠️ server action, вызванный напрямую под vitest (минуя HTTP) — `headers()`/`revalidatePath()` вне
 request-scope бросают, мокать оба модуля; `redirect()` безопасен сам по себе, но 12 приложений
 глобально мокают `next/navigation` без него в `vitest.setup.tsx` — нужен `importOriginal` или
-проверка `.digest` подстрокой
+проверка `.digest` подстрокой ·
+[react-pdf-hyphenate-esm-only-exports-tsx-seed-crash](/.claude/docs/react-pdf-hyphenate-esm-only-exports-tsx-seed-crash.md)
+⚠️ `tsx`-скрипт (`db:seed`), впервые тянущий `@react-pdf/renderer` (`renderToBuffer`), падает
+`ERR_PACKAGE_PATH_NOT_EXPORTED` на `@react-pdf/hyphenate` (только `import`-условие в `exports`,
+динамический `import()` не спасает — `tsx` резолвит пути через CJS-хук независимо) — пофикшено
+глобально через `patchedDependencies` (`bun patch --ignore-scripts`, обычный `bun patch <pkg>`
+триггерит несвязанный сбой `ntsuspend`); следом `ReferenceError: React is not defined` — classic
+JSX-transform у esbuild на `"jsx": "preserve"` из `tsconfig.next-app.json`, чинится отдельным
+`prisma/tsconfig.seed.json` (`"jsx": "react-jsx"`) + `--tsconfig` у конкретного `db:seed`-таргета,
+без правок прикладного кода
 
 **Chakra v3 — ловушки:** [chakra-css-memo-prop-order-hydration](/.claude/docs/chakra-css-memo-prop-order-hydration.md)
 ⚠️ кеш `css()` считает ключ по отсортированным ключам объекта (регрессия 3.29.0), а результат
