@@ -19,8 +19,8 @@ const intlMiddleware = createIntlMiddleware(routing)
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // API routes — пропускаем intl middleware
-  if (pathname.startsWith('/api/')) {
+  // API routes и Web Share Target (/share — Android шлёт POST без локали в URL) — пропускаем intl middleware
+  if (pathname.startsWith('/api/') || pathname.startsWith('/share')) {
     return NextResponse.next()
   }
 

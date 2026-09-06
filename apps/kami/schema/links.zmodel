@@ -1,0 +1,27 @@
+// ========================================
+// Ссылки (закладки из Android Share)
+// ========================================
+
+// Сохранённая ссылка — приватный раздел, только владелец
+model Link {
+  id          String   @id @default(cuid())
+
+  url         String
+  title       String
+  description String?
+
+  // Классификация — свободные поля, без отдельных моделей категорий/меток (см. LearningItem)
+  category    String?
+  tags        String[]
+
+  read        Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Приватный раздел — читает и пишет только владелец (ADMIN)
+  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+
+  @@index([category])
+  @@index([read])
+}

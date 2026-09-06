@@ -5,6 +5,23 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 проект придерживается [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.33.21] - 2026-09-06
+
+### Added
+
+- Фаза 10 плана (первый слайс): раздел "Ссылки" — сохранение через Android Web Share Target.
+  - `POST /share` — обрабатывает `share_target` из `manifest.ts` (`title`/`text`/`url`), извлекает
+    URL из `text` регэкспом если Android не передал `url` отдельно, best-effort подтягивает
+    `<title>` страницы если title не пришёл. Только для владельца (ADMIN) — иначе редирект на вход.
+  - `proxy.ts` — `/share` исключён из `next-intl` middleware (аналогично `/api/`), иначе Android
+    получал бы 307-редирект на `/ru/share` и терял POST-тело.
+  - Модель `Link` в `schema/links.zmodel` — `url`/`title`/`description`/`category`/`tags` (плоские
+    поля по образцу `LearningItem`, без отдельных моделей категорий/меток), `read: Boolean`.
+  - `/admin/links` — список сохранённых ссылок, переключение "прочитано", удаление.
+  - Не сделано в этом слайсе (см. PLAN.md): офлайн-очередь на случай шаринга без сети, приём
+    файлов через тот же Share Target, объединение с `UploadedFile`, раздел "Видео", admin CRUD
+    категорий/тегов, полноценная форма редактирования метки (сейчас только просмотр/удаление).
+
 ## [0.33.20] - 2026-09-06
 
 ### Added
