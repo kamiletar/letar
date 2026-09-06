@@ -205,6 +205,9 @@ select ·
 `ZodNullable`/`ZodOptional` перед поиском `.meta()`, дропдаун рендерится пустым, хотя значение
 хранится и сабмитится корректно ·
 [ui-components](/.claude/docs/ui-components.md) · [images](/.claude/docs/images.md) ·
+[upload-storage-backend](/.claude/docs/upload-storage-backend.md) `StorageBackend` в
+`@letar/image-upload/server` — точка расширения на будущее S3-совместимое хранилище, S3-backend
+не реализован, список мест вне абстракции, разбор IPFS (отклонён для приватного контента) ·
 [font-cmap-coverage-verification](/.claude/docs/font-cmap-coverage-verification.md) описание
 шрифта на сайте лжёт — покрытие символов проверять разбором `cmap` файла; для Node-стека
 монорепо — fontkit+subset-font (чтение cmap из woff2 и сам субсеттинг, не только верификация) ·
