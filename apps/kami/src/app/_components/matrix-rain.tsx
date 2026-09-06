@@ -74,7 +74,6 @@ export function MatrixRain({
   bgRgb = '0, 0, 0',
   className,
 }: MatrixRainProps) {
-  console.log(fontSize)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const animationRef = useRef<number | undefined>(undefined)
