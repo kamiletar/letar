@@ -2718,9 +2718,14 @@ read-only не годится для миграций, а для преренд�
 - [x] `registry:2` на s3 за Traefik + basic-auth + ретеншн тегов. Закрыто 2026-09-06 —
       `infra/registry/` (`docker-compose.yml`, `secrets/`, `README.md`) + `scripts/registry-gc.sh`.
       Смоук-тест живьём: `docker login` + push/pull `hello-world:smoke` через
-      `registry.s3.letar.best` прошли. Ретеншн (`registry-gc.sh`) написан, но без cron-расписания
-      — запуск вручную до отдельной задачи по регистрации `/api/cron/*` в `dashboard-agent`
-      (см. README `infra/registry/README.md` § «Дальнейшие шаги»)
+      `registry.s3.letar.best` прошли.
+- [x] Cron-расписание ретеншна тегов. Закрыто 2026-09-06 — job `registry-gc-s3` в
+      `dashboard-agent` (`50 4 * * *`, server: `s3`), TS-порт `scripts/registry-gc.sh`
+      (`apps/dashboard-agent/src/lib/registry-gc.ts`, тесты — `registry-gc.spec.ts`), сам
+      bash-скрипт оставлен для ручных `DRY_RUN`-прогонов. Секреты `REGISTRY_USER`/`REGISTRY_PASS`
+      в `.env.docker.enc` dashboard-agent. Заявка на деплой (target=staging → s3) отправлена
+      `deploy-agent-dev` (thread `1250`, ack_required) — до подтверждения задача есть в коде,
+      но не выполняется на s3.
 - [ ] Пилот 1: приложение **без БД** (лендинг) — сборка на s3, push, pull и запуск на s2.
       Проверяет только канал доставки
 - [ ] Пилот 2: приложение **с БД, но без пререндера из БД** — добавляет туннель и миграции с s3
