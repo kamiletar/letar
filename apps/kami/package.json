@@ -1,6 +1,6 @@
 {
   "name": "kami",
-  "version": "0.33.21",
+  "version": "0.33.22",
   "private": true,
   "nx": {
     "implicitDependencies": [

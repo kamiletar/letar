@@ -1,12 +1,14 @@
 'use client'
 
-import { Box, Button, Card, Heading, HStack, Image, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Card, Heading, HStack, Icon, Image, Text, VStack } from '@chakra-ui/react'
 import { useColorMode } from '@letar/chakra-provider'
+import { Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useRef, useState } from 'react'
 import { AudioPlayer } from './audio-player'
 import { AudioSpectrogram } from './audio-spectrogram'
 import { AudioSpectrumVisualizer } from './audio-spectrum-visualizer'
+import { PosterSonogramSlider } from './poster-sonogram-slider'
 import { useOfflineSpectrogram } from './use-offline-spectrogram'
 
 interface AudioData {
@@ -49,6 +51,7 @@ export function AudioPageClient({ audio, locale }: AudioPageClientProps) {
   const audioUrl = `/api/files/${audio.path}`
   const audioRef = useRef<HTMLAudioElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [sliderView, setSliderView] = useState(false)
   const { columns: staticSpectrogramColumns } = useOfflineSpectrogram(audioUrl)
 
   /** Общий AnalyserNode — один на оба визуализатора */
@@ -110,12 +113,35 @@ export function AudioPageClient({ audio, locale }: AudioPageClientProps) {
       {/* Контент поверх */}
       <Box position="relative" zIndex={1} maxW="600px" mx="auto" py={12} px={4}>
         <VStack gap={6} align="stretch">
-          {/* Обложка */}
-          {audio.coverPath && (
-            <Box mx="auto" borderRadius="lg" overflow="hidden" maxW="300px">
-              <Image src={`/api/files/${audio.coverPath}`} alt={audio.title} width="300px" height="300px" />
-            </Box>
-          )}
+          {/* Обложка + слайдер сонограммы (Фаза 9.5) — переключаемые виды */}
+          {sliderView
+            ? (
+              <PosterSonogramSlider
+                coverPath={audio.coverPath}
+                title={audio.title}
+                audioRef={audioRef}
+                isPlaying={isPlaying}
+                duration={audio.duration}
+                staticColumns={staticSpectrogramColumns}
+                lightMode={isLight}
+              />
+            )
+            : (
+              audio.coverPath && (
+                <Box mx="auto" borderRadius="lg" overflow="hidden" maxW="300px">
+                  <Image src={`/api/files/${audio.coverPath}`} alt={audio.title} width="300px" height="300px" />
+                </Box>
+              )
+            )}
+
+          <HStack justify="center">
+            <Button variant="ghost" size="xs" onClick={() => setSliderView((v) => !v)} color="fg.muted">
+              <Icon>
+                <Sparkles size={14} />
+              </Icon>
+              {sliderView ? 'Обычный вид' : 'Постер + волна трека'}
+            </Button>
+          </HStack>
 
           <VStack
             gap={2}
