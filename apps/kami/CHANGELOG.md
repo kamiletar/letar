@@ -5,6 +5,19 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 проект придерживается [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.33.31] - 2026-09-06
+
+### Added
+
+- Фаза 10: офлайн-очередь для Web Share Target — POST `/share/`, до которого сеть не доехала,
+  сохраняется в IndexedDB (`kami-share-queue`) внутри Service Worker (`sw.template.js`) и
+  автоматически досылается, когда подключение вернётся: через Background Sync API
+  (`sync`-событие с тегом `kami-sync-share-queue`), при активации новой версии SW и
+  opportunistic-флашем при любой успешной навигации (fallback для браузеров без Background
+  Sync, например Firefox for Android). Пользователю в офлайне отдаётся inline-страница
+  подтверждения вместо ошибки сети. Реализация без npm-зависимостей — сырой `indexedDB` API,
+  так как `sw.template.js` раздаётся как статика в обход сборки.
+
 ## [0.33.30] - 2026-09-06
 
 ### Added

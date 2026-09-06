@@ -644,7 +644,20 @@ favicon-превью и inline-редактирование тегов не пр
 ### PWA
 
 - ✅ `share_target` в `manifest.ts` уже настроен (см. Фаза 4)
-- ⏳ Офлайн-очередь: если шаринг произошёл без сети — сохранить в IndexedDB и синхронизировать (см. `pwa-offline` skill)
+- ✅ Офлайн-очередь: если шаринг произошёл без сети — сохранить в IndexedDB и синхронизировать.
+  Реализовано на уровне Service Worker (`public/sw.template.js`), не через `pwa-offline`
+  skill (`useOfflineForm`/`useSyncQueue`) — та обвязка рассчитана на отправку из React-дерева,
+  а POST `/share/` от Android Share Target приходит сразу в SW, минуя JS-код приложения.
+  Без npm-зависимостей — сырой `indexedDB` API (`sw.template.js` раздаётся как статика, не
+  проходит сборку). Ветка `POST /share/` в `fetch`-обработчике → `handleShareSubmit`: пробует
+  `fetch(request)` как обычно, при сетевой ошибке — читает форму из клона запроса и складывает
+  в IndexedDB (`kami-share-queue` / `pending`), регистрирует `Background Sync`
+  (`self.registration.sync.register`), отдаёт inline HTML-страницу подтверждения. Синхронизация
+  — три канала: событие `sync` (тег `kami-sync-share-queue`, когда браузер поддерживает
+  Background Sync API), `activate` при обновлении SW, и opportunistic-флаш при любой успешной
+  навигации (fallback для браузеров без Background Sync, напр. Firefox for Android). Честное
+  ограничение: живая проверка (реальное Android-устройство + отключение сети) в этой сессии не
+  выполнена — только `nx typecheck:tsgo`/`nx lint` (оба зелёные), логика проверена чтением кода
 
 ### Загрузка остальных категорий файлов через Share
 
@@ -733,6 +746,7 @@ favicon-превью и inline-редактирование тегов не пр
 | 2026-09-06 | ✅ Фаза 10: публичная `/links` (фильтры+поиск+пагинация), `Link` стал публично читаемым              |
 | 2026-09-06 | ✅ Фаза 10: favicon-превью карточки + inline-редактирование категории/меток в `/admin/links`         |
 | 2026-09-06 | ✅ Фаза 10: `/admin/links/tags` — массовое переименование/удаление категорий и меток                 |
+| 2026-09-06 | ✅ Фаза 10: офлайн-очередь Share Target — IndexedDB + Background Sync в `sw.template.js`             |
 
 ## Техдолг: setRequestLocale не даёт SSG — root layout вызывает getSession() безусловно
 
