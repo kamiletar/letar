@@ -3,6 +3,7 @@
 import { Box, Container, Flex, HStack, Text, VStack } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { FaDownload, FaWindows } from 'react-icons/fa6'
+import { DOWNLOAD_VERSION } from './download-info'
 
 /** Примеры маппингов для демонстрации в герое */
 const HERO_MAPPINGS = [
@@ -186,7 +187,7 @@ export function HeroSection() {
             </Box>
 
             <Text className="font-mono" fontSize="xs" color="gray.500">
-              v1.2.0 {'\u00B7'} Windows 10+ {'\u00B7'} Бесплатно
+              v{DOWNLOAD_VERSION} {'\u00B7'} Windows 10+ {'\u00B7'} Бесплатно
             </Text>
           </VStack>
         </VStack>

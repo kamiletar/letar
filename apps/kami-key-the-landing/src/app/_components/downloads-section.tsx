@@ -3,10 +3,10 @@
 import { Box, Container, Heading, HStack, Text, VStack } from '@chakra-ui/react'
 import { FaWindows } from 'react-icons/fa6'
 import { LuDownload, LuTriangleAlert } from 'react-icons/lu'
+import { DOWNLOAD_SIZE, DOWNLOAD_URL, DOWNLOAD_VERSION } from './download-info'
 
 /**
  * Секция скачивания — карточка с информацией о загрузке
- * Server Component (нет интерактивности)
  */
 export function DownloadsSection() {
   return (
@@ -50,50 +50,45 @@ export function DownloadsSection() {
                   Windows 10+
                 </Text>
                 <HStack gap={3} color="gray.500" fontSize="xs" className="font-mono">
-                  <Text>v1.2.0</Text>
+                  <Text>v{DOWNLOAD_VERSION}</Text>
                   <Text>{'\u00B7'}</Text>
-                  <Text>~85 MB</Text>
+                  <Text>{DOWNLOAD_SIZE}</Text>
                   <Text>{'\u00B7'}</Text>
                   <Text>Electron</Text>
                 </HStack>
               </VStack>
 
-              {/* Кнопка скачивания (заглушка) */}
-              <button
-                disabled
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  padding: '12px 24px',
-                  borderRadius: '8px',
-                  background: 'rgba(57, 255, 20, 0.15)',
-                  color: '#718096',
-                  fontWeight: 600,
-                  fontSize: '14px',
-                  fontFamily: "'JetBrains Mono', monospace",
-                  cursor: 'not-allowed',
-                  border: '1px solid rgba(57, 255, 20, 0.2)',
-                  opacity: 0.6,
-                }}
-                aria-label="Скачать .exe (скоро будет доступно)"
+              {/* Кнопка скачивания */}
+              <Box
+                borderRadius="lg"
+                bg="rgba(57, 255, 20, 0.15)"
+                border="1px solid rgba(57, 255, 20, 0.2)"
+                transition="all 0.2s ease"
+                _hover={{ bg: 'rgba(57, 255, 20, 0.25)' }}
+                w="100%"
+                asChild
               >
-                <LuDownload size={16} />
-                Скачать .exe
-                <Box
-                  as="span"
-                  px={2}
-                  py={0.5}
-                  borderRadius="full"
-                  bg="rgba(57, 255, 20, 0.1)"
-                  color="brand.400"
-                  fontSize="xs"
+                <a
+                  href={DOWNLOAD_URL}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '12px 24px',
+                    color: '#4dff7a',
+                    fontWeight: 600,
+                    fontSize: '14px',
+                    fontFamily: "'JetBrains Mono', monospace",
+                    textDecoration: 'none',
+                  }}
+                  aria-label={`Скачать KamiKeyThe v${DOWNLOAD_VERSION} для Windows (.exe)`}
                 >
-                  Скоро
-                </Box>
-              </button>
+                  <LuDownload size={16} />
+                  Скачать .exe
+                </a>
+              </Box>
 
               {/* Предупреждение SmartScreen */}
               <Box
