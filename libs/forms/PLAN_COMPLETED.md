@@ -1,5 +1,27 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-06 — Разбор оставшихся 16 `react-hooks/exhaustive-deps` + 1 `no-explicit-any`
+
+Прошлая сессия добавила `libs/forms/eslint.config.mjs`, но сознательно не трогала уже вскрывшиеся
+16 предупреждений `react-hooks/exhaustive-deps` и 1 `no-explicit-any` — чтобы не рисковать
+поведением вслепую. Эта сессия разобрала каждое по отдельности.
+
+Один реальный stale-closure баг: в `field-data-grid.tsx` мемоизированные колонки TanStack Table
+не видели свежий `modifiedCells`/`data` — diff-highlighting изменённых ячеек мог показывать
+устаревшее состояние. Остальные — либо безопасные добавления зависимостей (guarded ref-ами
+`field-address`/`field-city`, стабильный ref `claimedIndicesRef` в `form-steps`), либо
+деструктуризация `props` перед `useCallback` там, где `exhaustive-deps` не умеет сузить
+зависимость до `props.onX` при опциональном вызове `props.onX?.()` (`captcha-field`,
+`field-otp-input`, `use-form-api`), либо осознанные и уже прежде задокументированные прозой
+исключения, которым просто не хватало настоящей `eslint-disable-next-line` директивы
+(`use-post-submit-reset-guard`, `form-steps-step`, `use-form-store-subscribe` — у последнего deps
+приходит параметром хука-обёртки, это архитектурно не проверяемо статически). `no-explicit-any` в
+`field-table-editor.tsx` — снят лишний `as any` на ref, типы совпадали и без каста.
+
+`nx test @letar/forms` — 763/763. `nx run-many -t oxlint,lint,typecheck:tsgo
+--projects=@letar/forms` — чистые. Коммит `3a87809d`, 13 файлов. Небиллируемая сессия
+(`time_discard`) — библиотечное обслуживание, не клиентская работа.
+
 ## 2026-09-06 — `ConversationalMode`: реализован задокументированный, но неиспользуемый `welcomeScreen`
 
 Пользователь указал, что `welcomeScreen?: ReactNode` в `ConversationalModeProps`
