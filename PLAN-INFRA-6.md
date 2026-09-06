@@ -2112,3 +2112,49 @@ scripts/check-schema-migration.test.mjs` (не через `nx affected -t test`,
 Разбор класса гэпа («хук установлен и свеж, но логика распознаёт не все формы того, что должна
 ловить» — отдельный случай от «хук устарел физически», уже описанного в документе) —
 дополнение в `.claude/docs/precommit-hook-install-staleness.md`.
+
+## §155 — CI run 33962540510: `synth:lint` и `electron-drift` — оба фикса ✅ ЗАКРЫТО (2026-09-06)
+
+Разобран упавший прогон `.github/workflows/ci.yml` (run `33962540510`) — два независимых
+gate-провала в шаге `quality`.
+
+**1. `synth:lint`.** `apps/synth/src/app/_components/studio/use-master-bus.ts:79` содержал
+`// eslint-disable-next-line react/immutability` — несуществующий rule ID (правило
+`immutability` живёт в неймспейсе `react-hooks`, не `react`, см.
+`node_modules/eslint-plugin-react-hooks`). ESLint 9 такое падает как ошибку («Definition for
+rule was not found»), а не молчаливо игнорирует. Соседняя строка `oxlint-disable-next-line
+react/immutability` — верна как есть: у oxlint своя таблица правил, `.oxlintrc.json` уже держит
+`"react/immutability": "off"` под этим именем. Фикс — только eslint-строка на
+`react-hooks/immutability` (коммит `bbd2bb1c`). После фикса `nx lint synth` зелёный (правило
+реально не срабатывает на эту строку — `eslint-disable` теперь просто неиспользуемый, это
+warning, не error).
+
+**2. `electron-drift`.** Три публичных приложения (`animatrona`, `kami-key-the`,
+`label-printer-desktop`) держали `electron@44.1.1` при корневом пине `^44.2.0` — gate из
+`scripts/check-all.mjs` ловит именно такие расхождения, но в CI не видит приватные submodule
+(«неполное покрытие» в выводе), из-за чего `poster-microtext-desktop` с тем же дрейфом прошёл
+CI незамеченным. Найден и исправлен локально (в CI не проверяется, но `bun scripts/check-all.mjs
+--only=electron-drift` без пропуска submodule ловит и его). Коммиты: `abdded52` (три публичных
+приложения + корневой `bun.lock`), `10e8687` внутри `poster-microtext-desktop` +
+`8d0eebe3` (bump submodule pointer + `bun.lock`).
+
+**Побочный инцидент при push.** `origin/main` letar успел уйти на один коммит вперёд (чужой bump
+`domwellbes`), который конфликтовал с уже существовавшим локальным bump того же submodule — оба
+указывали на **разные, разошедшиеся ветки** внутри `domwellbes` (общий предок `5c96421`, дальше
+разъезд). Разобрано и смерджено вручную: конфликт оказался только в одном файле
+(`CHANGELOG.md`, два независимых bullet-пункта под одной версией) — объединены оба, merge-коммит
+`ffa0d50` запушен в `letar-private-domwellbes`, затем аналогичный merge-коммит `87e1bccd` в самом
+`letar`. Этому классу гонки уже посвящён
+[git-multi-agent-incidents.md](/.claude/docs/git-multi-agent-incidents.md) — здесь не новый
+механизм, а очередное срабатывание того же (два агента бампают submodule-pointer параллельно, не
+видя работы друг друга до push).
+
+⚠️ Замечена странность git 2.51.0.windows.2 при разрешении именно submodule-конфликта:
+`git rebase --continue` после `git add <submodule>` стабильно отвечал «You must edit all merge
+conflicts…», хотя `git ls-files -u`/`status --porcelain=v2` не показывали ни одной unmerged
+записи. Прямой `git commit` в этот момент отрабатывал нормально, но сам rebase-sequencer после
+этого оставался рассинхронизирован с `.git/rebase-merge/done`. Обошли переключением на `git
+merge` вместо `rebase` — там та же ситуация разрешилась одним `git commit --no-edit` без
+дополнительных пляс. Не заводили отдельный doc-файл — сталкивались один раз, недостаточно данных
+для общего паттерна; если повторится — материала на
+`.claude/docs/git-multi-agent-incidents.md`.
