@@ -809,6 +809,7 @@ favicon-превью и inline-редактирование тегов не пр
 | 2026-09-06 | ✅ Техдолг: подключён theme:check — themePrefix на theme-provider.tsx, 4-й класс (Canvas 2D)               |
 | 2026-09-06 | ✅ Фаза 10: раздел «Видео» — модель Video (URL/FILE), /admin/videos, плеер в /links, попутный фикс фильтра |
 | 2026-09-06 | ✅ Редизайн блога: одна колонка, category article/dialogue, /blog/dialogues, сайдбар-теги (Хабр)           |
+| 2026-09-06 | ✅ Техдолг Dynamic-роутов: /hire — setRequestLocale, /blog/[slug] — getSession() убран из компонента       |
 
 ## ✅ Техдолг закрыт: SSG вернулась — getSession() вынесен из корневого layout (2026-09-06)
 
@@ -847,6 +848,35 @@ favicon-превью и inline-редактирование тегов не пр
 **Не входит в этот фикс** (отдельная, не связанная с layout причина): `/blog`, `/blog/[slug]`,
 `/data-deletion`, `/hire`, `/learning`, `/projects` остались `ƒ Dynamic` и после фикса — у каждой
 своя причина (не исследовано в этом заходе, не layout).
+
+## ✅ Техдолг закрыт (частично): разбор оставшихся Dynamic-роутов (2026-09-06)
+
+Разбор шести роутов, оставшихся `ƒ Dynamic` после фикса layout выше:
+
+- **`/hire` — реальный баг, исправлен.** Единственная страница в приложении, вообще не вызывавшая
+  `setRequestLocale()` (даже не принимала `params`) — next-intl не может статически определить
+  локаль без него, роут форсировался в Dynamic. Добавлен `params`/`setRequestLocale(locale)` по
+  образцу остальных страниц. Подтверждено `nx build kami`: `/ru/hire`, `/en/hire` — теперь `●`.
+- **`/blog/[slug]` — реальный баг, исправлен, эффект не виден локально.** Компонент вызывал
+  `getSession()` (`await headers()`, Dynamic API) ради `isAdmin` для `PublishButton` — тот же
+  класс бага, что и в layout. Перенесено в `PublishButton` через клиентский `useUser()`
+  (`@/app/_components/user-provider`). `nx build kami` локально всё равно показывает `ƒ` для этого
+  роута — не из-за оставшегося Dynamic API, а потому что `generateStaticParams` резолвит 0 постов:
+  Keystatic в проде читает контент из отдельного репозитория `kamiletar/kami-blog` (GitHub
+  storage, `KEYSTATIC_GITHUB_CLIENT_ID`), в этом окружении переменной нет и `content/posts`
+  локально не существует. На проде, где посты реально резолвятся, `generateStaticParams` должен
+  дать per-slug статические страницы.
+- **`/blog`, `/data-deletion`, `/learning` — не баг, легитимный Dynamic.** Все три читают
+  `searchParams` (фильтр по тегу, код подтверждения удаления, фильтр по типу/статусу) в Server
+  Component — само по себе Dynamic API в App Router. Убрать фильтрацию ради SSG было бы
+  регрессией функциональности, оставлено как есть.
+- **`/projects` — не техдолг.** Уже `export const dynamic = 'force-dynamic'` осознанно (см.
+  комментарий в файле от 2026-08-21, разбор staleness Full Route Cache после сида) — не проходил
+  проверку заново, не относится к этому классу проблемы.
+
+Проверено: `nx typecheck:tsgo kami`, `nx lint kami` — зелёные (0 ошибок, 4 предсуществующих
+warning `react-hooks/exhaustive-deps` в других файлах, не связаны с правкой). `nx build kami` —
+успешный, маркеры сверены построчно в выводе.
 
 ## ✅ Техдолг закрыт: theme:check подключён (2026-09-06)
 

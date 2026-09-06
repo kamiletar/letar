@@ -1,6 +1,5 @@
 import { BlogPostingJsonLd } from '@/app/_components/json-ld'
 import { Link } from '@/i18n/navigation'
-import { getSession } from '@/lib/auth'
 import { reader } from '@/lib/keystatic'
 import { prisma } from '@/lib/prisma'
 import {
@@ -78,8 +77,6 @@ export default async function BlogPostPage({ params }: Props) {
 
   const post = await reader.collections.posts.read(slug)
   const currentLocale = await getLocale()
-  const session = await getSession()
-  const isAdmin = Boolean(session?.user && Array.isArray(session.user.roles) && session.user.roles.includes('ADMIN'))
 
   if (!post) {
     notFound()
@@ -115,7 +112,7 @@ export default async function BlogPostPage({ params }: Props) {
                 <Text ml={2}>{currentLocale === 'ru' ? 'Назад к блогу' : 'Back to blog'}</Text>
               </Link>
             </Button>
-            <PublishButton slug={slug} isAdmin={isAdmin} />
+            <PublishButton slug={slug} />
           </HStack>
 
           <Grid templateColumns={{ base: '1fr', xl: '1fr 280px' }} gap={{ base: 8, xl: 12 }}>

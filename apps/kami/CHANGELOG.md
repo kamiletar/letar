@@ -5,6 +5,28 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 проект придерживается [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.35.1] - 2026-09-06
+
+### Fixed
+
+- `/hire` не вызывал `setRequestLocale()` вовсе — единственная страница в приложении без него,
+  из-за чего оставалась `ƒ Dynamic`. Добавлен `params`/`setRequestLocale(locale)` по образцу
+  остальных страниц — подтверждено `nx build kami`: `/ru/hire`, `/en/hire` теперь `●` (SSG).
+- `/blog/[slug]` вызывал `getSession()` (Dynamic API, `await headers()`) прямо в компоненте ради
+  `isAdmin` для `PublishButton` — тот же класс бага, что чинили в корневом `layout.tsx`
+  2026-09-06. Проверка перенесена в сам `PublishButton` через клиентский `useUser()`
+  (`@/app/_components/user-provider`, уже существующий контекст на `useSession()`). Локально
+  эффект не виден в `nx build` — `generateStaticParams` даёт 0 постов без `content/posts`
+  (Keystatic в проде читает контент из отдельного репозитория `kamiletar/kami-blog` через
+  GitHub storage, недоступного в этом окружении), но реальный Dynamic API из компонента убран.
+
+### Investigated (без изменений)
+
+- `/blog`, `/data-deletion`, `/learning` остаются `ƒ Dynamic` легитимно — каждая читает
+  `searchParams` (фильтр по тегу/статусу, код подтверждения) в Server Component, что само по
+  себе Dynamic API в App Router; уборка фильтрации ради SSG была бы регрессией функциональности.
+- `/projects` уже `force-dynamic` осознанно (см. комментарий в файле, 2026-08-21) — не техдолг.
+
 ## [0.35.0] - 2026-09-06
 
 ### Changed

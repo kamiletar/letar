@@ -1,13 +1,13 @@
 'use client'
 
 import { getEnabledPlatforms, getPostPublications, publishPost } from '@/app/_actions/crosspost.action'
+import { useUser } from '@/app/_components/user-provider'
 import { Badge, Box, Button, HStack, Text, VStack } from '@chakra-ui/react'
 import { Share2 } from 'lucide-react'
 import { useEffect, useState, useTransition } from 'react'
 
 interface PublishButtonProps {
   slug: string
-  isAdmin: boolean
 }
 
 interface Platform {
@@ -26,7 +26,8 @@ interface Publication {
 /**
  * Кнопка публикации блог-поста в соцсети (только для админов)
  */
-export function PublishButton({ slug, isAdmin }: PublishButtonProps) {
+export function PublishButton({ slug }: PublishButtonProps) {
+  const { isAdmin } = useUser()
   const [platforms, setPlatforms] = useState<Platform[]>([])
   const [publications, setPublications] = useState<Publication[]>([])
   const [isOpen, setIsOpen] = useState(false)

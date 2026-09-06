@@ -1,6 +1,6 @@
 import { Container, Heading, Text, VStack } from '@chakra-ui/react'
 import type { Metadata } from 'next'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { HireForm } from './_components/hire-form'
 
 type Props = {
@@ -20,7 +20,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function HirePage() {
+export default async function HirePage({ params }: Props) {
+  const { locale } = await params
+  setRequestLocale(locale)
+
   const t = await getTranslations('hire')
 
   return (
