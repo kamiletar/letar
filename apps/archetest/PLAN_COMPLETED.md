@@ -3,14 +3,18 @@
 ## Дедупликация ожидания перехода квиза в e2e — `waitForQuizStepOrResults` (2026-09-05)
 
 Точечная делегированная задача (не из PLAN.md): в `express.spec.ts` (`answerAllQuestions`) и
-`safety-net.spec.ts` дословно дублировался паттерн `Promise.race(option.waitFor, resultsHeading.waitFor)`
+`safety-net.spec.ts` дословно дублировался паттерн ожидания перехода квиза (`Promise.race` между
+следующим вопросом и заголовком результатов, затем `isVisible()`; см. запись про фикс флейков
+WebKit ниже — сам паттерн появился там). Вынесен общий хелпер
+`waitForQuizStepOrResults(optionLocator, resultsHeadingLocator, timeout)` в
+`apps/archetest-e2e/src/quiz-flow.ts` — возвращает `true`, если результаты уже видны. Оба спека
+переведены на хелпер, логика не менялась.
 
-- `isVisible()` (см. запись про фикс флейков WebKit ниже — паттерн появился там). Вынесен в
-  `apps/archetest-e2e/src/quiz-flow.ts` — `waitForQuizStepOrResults(optionLocator, resultsHeadingLocator,
-timeout)`, возвращает `true` если результаты уже видны. Оба спека переведены на хелпер, логика не
-  менялась. `nx lint archetest-e2e` — зелёный. Полный e2e-прогон в рабочей среде сессии недоступен
-  (нет сети до `auth.letar.best` для OIDC-дискавери на старте dev-сервера) — запрошен прогон у
-  deploy-agent-dev (тред `797`), деплоить приложение не требовалось. Коммит `c494d4fa`.
+Полный e2e-прогон в рабочей среде сессии был недоступен (нет сети до `auth.letar.best` для
+OIDC-дискавери на старте dev-сервера) — запрошен прогон у deploy-agent-dev (тред `797`), деплоить
+приложение не требовалось. Результат на staging (коммит `c494d4fa`): **21/21 passed, 0 unexpected,
+0 flaky** на chromium/firefox/webkit — рефакторинг поведение не изменил. `nx lint archetest-e2e` —
+зелёный.
 
 ## Фикс флейков WebKit e2e + hard e2e-gate снова пройден живым деплоем (2026-09-05)
 
