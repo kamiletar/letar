@@ -294,6 +294,25 @@ export const GET = createUploadsRoute({
 
 Всё это покрыто тестами — `src/server/serve-uploads.spec.ts`.
 
+### Хранилище файлов — `StorageBackend`
+
+И `createUploadsRoute`, и `createImageUploadRoute` пишут/читают файлы не напрямую через `node:fs`,
+а через интерфейс `StorageBackend`. Сегодня единственная реализация — `createLocalDiskBackend()`
+(локальный диск, поведение идентично прежнему); она подставляется автоматически, если `backend`
+не передан явно — существующий код приложений не меняется.
+
+Интерфейс — заранее подготовленный шов на случай роста `uploads/` за пределы диска сервера
+(например, S3-совместимое хранилище), а не готовая многопровайдерная система: второй реализации
+пока нет и не появится без выбранного провайдера. Подробный разбор, что уже сделано и что
+сознательно не сделано — [upload-storage-backend.md](/.claude/docs/upload-storage-backend.md).
+
+```ts
+import { createLocalDiskBackend, createUploadsRoute } from '@letar/image-upload/server'
+
+const backend = createLocalDiskBackend('/custom/uploads/root')
+export const GET = createUploadsRoute({ backend })
+```
+
 ### Заголовки безопасности
 
 `X-Content-Type-Options: nosniff` ставится всегда. Для `image/svg+xml` дополнительно

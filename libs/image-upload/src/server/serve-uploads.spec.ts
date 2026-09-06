@@ -4,6 +4,42 @@ import path from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { createUploadsRoute, parseRange, resolveUploadPath } from './serve-uploads'
+import type { StorageBackend } from './storage-backend'
+
+/** In-memory backend — доказывает, что маршрут реально делегирует backend'у, а не fs напрямую. */
+function makeFakeBackend(files: Record<string, string>): StorageBackend {
+  const store = new Map(Object.entries(files).map(([key, value]) => [key, Buffer.from(value)]))
+  const key = (segments: string[]) => segments.join('/')
+
+  return {
+    async stat(segments) {
+      const data = store.get(key(segments))
+      return data ? { ok: true, size: data.byteLength } : { ok: false, reason: 'not-found' }
+    },
+    createReadStream(segments, range) {
+      const data = store.get(key(segments))
+      if (!data) {
+        throw new Error('not found')
+      }
+      const bytes = range ? data.subarray(range.start, range.end + 1) : data
+      return new ReadableStream({
+        start(controller) {
+          controller.enqueue(bytes)
+          controller.close()
+        },
+      })
+    },
+    async write(segments, data) {
+      store.set(key(segments), data)
+    },
+    async delete(segments) {
+      store.delete(key(segments))
+    },
+    async read(segments) {
+      return store.get(key(segments)) ?? null
+    },
+  }
+}
 
 let root: string
 /** Каталог рядом с корнем — цель попыток выхода наружу. */
@@ -237,5 +273,18 @@ describe('createUploadsRoute', () => {
     const response = await call(handler, ['notes.xyz'])
 
     expect(response.headers.get('Content-Type')).toBe('application/x-custom')
+  })
+
+  it('делегирует чтение переданному backend вместо диска', async () => {
+    const backend = makeFakeBackend({ 'images/fake.png': 'FAKE-DATA' })
+    const handler = createUploadsRoute({ root, backend })
+
+    const response = await call(handler, ['images', 'fake.png'])
+    expect(response.status).toBe(200)
+    expect(await response.text()).toBe('FAKE-DATA')
+
+    // Файла с таким именем на реальном диске нет — значит ответ пришёл только из backend'а.
+    const onDisk = await call(createUploadsRoute({ root }), ['images', 'fake.png'])
+    expect(onDisk.status).toBe(404)
   })
 })

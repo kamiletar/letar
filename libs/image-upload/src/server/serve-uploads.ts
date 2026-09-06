@@ -1,7 +1,6 @@
-import { createReadStream } from 'node:fs'
-import { realpath, stat } from 'node:fs/promises'
 import path from 'node:path'
-import { Readable } from 'node:stream'
+
+import { createLocalDiskBackend, type StorageBackend } from './storage-backend'
 
 /**
  * MIME-типы по расширению (с точкой, в нижнем регистре).
@@ -115,6 +114,11 @@ export interface CreateUploadsRouteOptions {
    * Типовой случай — `Content-Disposition` с оригинальным именем из БД.
    */
   headers?: (ctx: UploadFileContext) => Promise<Record<string, string> | undefined> | Record<string, string> | undefined
+  /**
+   * Хранилище файлов. По умолчанию — локальный диск (`root`), как и раньше.
+   * Точка расширения на будущее (например, S3-совместимое хранилище) — см. `storage-backend.ts`.
+   */
+  backend?: StorageBackend
 }
 
 type RouteContext = { params: Promise<{ path: string[] }> }
@@ -136,20 +140,12 @@ export function createUploadsRoute(options: CreateUploadsRouteOptions = {}) {
     mimeTypes,
     cacheControl = DEFAULT_CACHE_CONTROL,
     headers: headersHook,
+    backend = createLocalDiskBackend(root),
   } = options
 
   const mimeMap: Record<string, string> = mimeTypes
     ? { ...DEFAULT_MIME_TYPES, ...mimeTypes }
     : { ...DEFAULT_MIME_TYPES }
-
-  // Разыменованный корень вычисляем один раз и переиспользуем: он нужен на
-  // каждом запросе для проверки симлинков, а меняться в рантайме не может.
-  let realRootPromise: Promise<string | null> | undefined
-
-  const getRealRoot = () => {
-    realRootPromise ??= realpath(path.resolve(/* turbopackIgnore: true */ root)).catch(() => null)
-    return realRootPromise
-  }
 
   return async function GET(request: Request, context: RouteContext): Promise<Response> {
     try {
@@ -162,36 +158,16 @@ export function createUploadsRoute(options: CreateUploadsRouteOptions = {}) {
         })
       }
 
-      let fileStat
-      try {
-        fileStat = await stat(/* turbopackIgnore: true */ resolved.absPath)
-      } catch {
-        return new Response('Not found', { status: 404 })
-      }
-
-      // Каталог — это не «ошибка сервера», а именно отсутствие файла.
-      if (!fileStat.isFile()) {
-        return new Response('Not found', { status: 404 })
-      }
-
-      // Симлинк внутри uploads/ может указывать наружу — нормализация пути
-      // этого не видит, поэтому сверяем ещё и реальные пути.
-      const realRoot = await getRealRoot()
-      if (realRoot) {
-        const realFile = await realpath(/* turbopackIgnore: true */ resolved.absPath).catch(() => null)
-        if (!realFile) {
-          return new Response('Not found', { status: 404 })
-        }
-
-        const realRel = path.relative(realRoot, realFile)
-        if (realRel === '' || realRel === '..' || realRel.startsWith(`..${path.sep}`) || path.isAbsolute(realRel)) {
-          return new Response('Forbidden', { status: 403 })
-        }
+      const statResult = await backend.stat(segments)
+      if (!statResult.ok) {
+        return new Response(statResult.reason === 'forbidden' ? 'Forbidden' : 'Not found', {
+          status: statResult.reason === 'forbidden' ? 403 : 404,
+        })
       }
 
       const ext = path.extname(resolved.absPath).toLowerCase()
       const mime = mimeMap[ext] ?? FALLBACK_MIME
-      const size = fileStat.size
+      const size = statResult.size
 
       const responseHeaders = new Headers({
         'Content-Type': mime,
@@ -235,7 +211,7 @@ export function createUploadsRoute(options: CreateUploadsRouteOptions = {}) {
         responseHeaders.set('Content-Length', String(chunkSize))
         responseHeaders.set('Content-Range', `bytes ${range.start}-${range.end}/${size}`)
 
-        return new Response(toWebStream(resolved.absPath, range), {
+        return new Response(backend.createReadStream(segments, range), {
           status: 206,
           headers: responseHeaders,
         })
@@ -248,7 +224,7 @@ export function createUploadsRoute(options: CreateUploadsRouteOptions = {}) {
         return new Response(null, { headers: responseHeaders })
       }
 
-      return new Response(toWebStream(resolved.absPath), { headers: responseHeaders })
+      return new Response(backend.createReadStream(segments), { headers: responseHeaders })
     } catch (error) {
       console.error('[uploads] Ошибка раздачи файла:', error)
       return new Response('Internal server error', { status: 500 })
@@ -299,9 +275,4 @@ export function parseRange(header: string | null, size: number): ParsedRange {
   }
 
   return { start, end }
-}
-
-function toWebStream(absPath: string, range?: { start: number; end: number }): ReadableStream<Uint8Array> {
-  const stream = range ? createReadStream(absPath, { start: range.start, end: range.end }) : createReadStream(absPath)
-  return Readable.toWeb(stream) as ReadableStream<Uint8Array>
 }

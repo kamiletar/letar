@@ -1,3 +1,6 @@
+// === Хранилище файлов (Node-only) — точка расширения на будущее (S3 и т.п.) ===
+export { createLocalDiskBackend, type StorageBackend, type StorageStatResult } from './storage-backend'
+
 // === Раздача загруженных файлов (Node-only) ===
 // Отдельная точка входа: серверный код не должен тянуть за собой
 // React/Chakra из основного `src/index.ts`.

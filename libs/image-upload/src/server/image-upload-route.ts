@@ -1,8 +1,7 @@
-import { existsSync } from 'node:fs'
-import { mkdir, unlink, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { resolveUploadPath } from './serve-uploads'
+import { createLocalDiskBackend, type StorageBackend } from './storage-backend'
 
 export interface ImageUploadRouteImage {
   id: string
@@ -44,6 +43,11 @@ export interface CreateImageUploadRouteOptions<
   getImageUrl: (relPath: string) => string
   /** Корень `uploads/`. По умолчанию `<cwd>/uploads`. */
   uploadsRoot?: string
+  /**
+   * Хранилище файлов. По умолчанию — локальный диск (`uploadsRoot`), как и раньше.
+   * Точка расширения на будущее (например, S3-совместимое хранилище) — см. `storage-backend.ts`.
+   */
+  backend?: StorageBackend
 }
 
 /**
@@ -68,6 +72,7 @@ export function createImageUploadRoute<
     repository,
     getImageUrl,
     uploadsRoot = path.join(process.cwd(), 'uploads'),
+    backend = createLocalDiskBackend(uploadsRoot),
   } = options
 
   async function POST(request: Request): Promise<Response> {
@@ -103,18 +108,10 @@ export function createImageUploadRoute<
       const extension = file.name.split('.').pop()
       const filename = `${timestamp}-${randomString}.${extension}`
       const categoryFolder = category.toLowerCase()
-
-      // turbopackIgnore: категория приходит из формы в рантайме, поэтому Turbopack
-      // не может статически определить границы этого пути — без подсказки он трассирует
-      // в standalone-сборку весь проект целиком (включая уже загруженные файлы в uploads/),
-      // раздувая образ Docker на порядок. Комментарий обязан стоять сразу после открывающей
-      // скобки вызова, а не перед динамическим аргументом — см.
-      // .claude/docs/nextjs-dynamic-fs-path-tracing.md
-      const uploadsDir = path.join(/* turbopackIgnore: true */ uploadsRoot, categoryFolder)
-      await mkdir(/* turbopackIgnore: true */ uploadsDir, { recursive: true })
+      const segments = [categoryFolder, filename]
 
       const buffer = Buffer.from(await file.arrayBuffer())
-      await writeFile(path.join(/* turbopackIgnore: true */ uploadsDir, filename), buffer)
+      await backend.write(segments, buffer)
 
       const relPath = `${categoryFolder}/${filename}`
 
@@ -161,11 +158,7 @@ export function createImageUploadRoute<
           return Response.json({ error: 'Изображение не найдено' }, { status: 404 })
         }
 
-        const resolved = resolveUploadPath(uploadsRoot, image.path.split('/'))
-        if (resolved.ok && existsSync(/* turbopackIgnore: true */ resolved.absPath)) {
-          await unlink(/* turbopackIgnore: true */ resolved.absPath)
-        }
-
+        await backend.delete(image.path.split('/'))
         await repository.deleteImageRecord(imageId)
         return Response.json({ success: true })
       }
@@ -181,9 +174,7 @@ export function createImageUploadRoute<
         return Response.json({ error: 'Некорректный URL' }, { status: 400 })
       }
 
-      if (existsSync(/* turbopackIgnore: true */ resolved.absPath)) {
-        await unlink(/* turbopackIgnore: true */ resolved.absPath)
-      }
+      await backend.delete(relPath.split('/'))
 
       try {
         await repository.deleteImageByPath(relPath)
