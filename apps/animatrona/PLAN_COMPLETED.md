@@ -55,6 +55,20 @@ production-билд Electron и GUI, недоступные в песочниц�
 
 Коммит: `1e4f892d`.
 
+### Дополнение: чище фикс tsgo-инференса вместо eslint-disable (2026-09-06)
+
+Отдельная сессия проверила, есть ли способ починить инференс `TArgs` в `createHandler`/
+`createHandlerWithEvent` (8 сайтов) без `eslint-disable-next-line
+@typescript-eslint/no-inferrable-types` на каждом. Нашлось: первопричина — именно
+default-значение параметра (`x = default`) в generic-контексте, а не отсутствие аннотации
+типа само по себе. Убрано `= default` из сигнатуры, параметр аннотирован `T | undefined`
+(или `?:`, если он идёт после уже опционального параметра — `TS1016` иначе), дефолт
+подставлен через `?? default` в теле. tsgo выводит `TArgs` корректно, конфликта с
+`no-inferrable-types` больше нет — все 8 `eslint-disable`-комментариев удалены.
+
+Задокументировано: [tsgo-generic-default-param-inference](/.claude/docs/tsgo-generic-default-param-inference.md).
+`nx typecheck:main`/`typecheck:tsgo`/`lint animatrona` — зелёные. Коммит `45ab1798`.
+
 ## Перенос renderer-части папочного плеера в libs (Фаза 1, шаг 2) (2026-09-06)
 
 Продолжение задачи из плана «Animatrona Player» (§5 «Фаза 1 — вынос в библиотеки»): каркасы
