@@ -4,6 +4,21 @@
 
 ## [Unreleased]
 
+## [0.55.39] - 2026-09-06
+
+### Fixed
+
+- `ipfs:repoGc` (голый `client.repo.gc()` за IPC, единственный путь, реально подключённый к
+  UI-кнопке GC) не имел гейта активного импорта — `repoGc()` (`unified-ipfs-service.ts`) теперь
+  тоже проверяет `ImportQueueController.hasActiveImport()`, как и `normalizeAllPins()`. Без него
+  ручной GC во время батч-импорта мог безвозвратно удалить суб-документы аниме, залитые с
+  `pin:false` в ожидании будущей indirect-защиты через ещё не собранный `directoryCid`.
+
+### Removed
+
+- Удалён неиспользуемый `safeLocalGc()` (`pin-status-service.ts`) — дублировал ту же защиту
+  (нормализация + GC), но не вызывался ни одним потребителем.
+
 ## [0.55.38] - 2026-09-06
 
 ### Fixed

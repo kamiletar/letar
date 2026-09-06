@@ -4,6 +4,29 @@
 
 > **Архив обновлён:** 2026-09-06
 
+## Гейт активного импорта перед `ipfs:repoGc()`, удалён мёртвый `safeLocalGc()` (2026-09-06)
+
+Закрывает открытый вопрос предыдущей сессии (гейт нормализации pins, коммит `c8c82bfd`): тогда
+защиту получил только `normalizeAllPins()`, а голый `repo.gc()` за IPC-хендлером `ipfs:repoGc`
+([ipfs.handlers.ts](main/ipc/ipfs.handlers.ts), реализация в
+[unified-ipfs-service.ts](main/services/ipfs/unified-ipfs-service.ts)) оставался незащищённым —
+единственный путь, реально подключённый к UI. Во время батч-импорта суб-документы аниме
+заливаются в Kubo с `pin:false` в расчёте на будущую indirect-защиту через `directoryCid`,
+который ещё не собран и не сохранён в БД — в этом окне такой контент не имеет никакого пина,
+и нажатие кнопки GC в UI удалило бы его безвозвратно.
+
+Фикс — тот же гейт `ImportQueueController.getInstance().hasActiveImport()`, что уже стоит в
+`normalizeAllPins()`, добавлен в начало `repoGc()`.
+
+Заодно решён параллельный вопрос: `safeLocalGc()` ([pin-status-service.ts](main/services/ipfs/pin-status-service.ts))
+реализовывал ту же защиту (нормализация + GC) полнее, но не вызывался ни одним потребителем —
+удалён как мёртвый код вместе с типами `SafeGcResult`/`SafeGcProgress` и осиротевшим импортом
+`normalizeAllPins`. Подключать его вместо голого `repoGc()` не стали: это поменяло бы форму
+ответа IPC-хендлера (`SafeGcResult` вместо `{blocksRemoved}`), потребовав правок
+preload/`electron.d.ts`/renderer — за рамками точечного security-фикса.
+
+`nx typecheck:tsgo animatrona`/`nx lint animatrona` — зелёные. Коммит `12f13082`.
+
 ## Глобальный лимит конкурентности на IPFS pin/upload перед батч-импортом (2026-09-06)
 
 Закрывает пункт, оставленный «не тронуто намеренно» в предыдущей сессии (см. ниже) — фоновый
