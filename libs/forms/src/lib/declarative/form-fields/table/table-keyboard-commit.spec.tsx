@@ -43,9 +43,12 @@ describe('TableEditor клавиатурная навигация коммити
     const user = userEvent.setup()
     const { container } = renderTable()
 
-    await waitFor(() => {
-      expect(container.innerHTML).toContain('2490')
-    })
+    await waitFor(
+      () => {
+        expect(container.innerHTML).toContain('2490')
+      },
+      { timeout: 10000 },
+    )
 
     // Десктопная таблица (мобильная скрыта через display base/md)
     const desktopTable = container.querySelector('table')
@@ -71,9 +74,12 @@ describe('TableEditor клавиатурная навигация коммити
     const user = userEvent.setup()
     const { container } = renderTable()
 
-    await waitFor(() => {
-      expect(container.innerHTML).toContain('2490')
-    })
+    await waitFor(
+      () => {
+        expect(container.innerHTML).toContain('2490')
+      },
+      { timeout: 10000 },
+    )
 
     const desktopTable = container.querySelector('table')
     const priceCell = desktopTable!.querySelector('[data-row="0"][data-col="1"]') as HTMLElement

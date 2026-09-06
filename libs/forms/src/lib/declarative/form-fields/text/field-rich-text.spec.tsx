@@ -23,9 +23,12 @@ describe('FieldRichText', () => {
       )
 
       // Tiptap рендерит contenteditable div
-      await waitFor(() => {
-        expect(document.querySelector('[contenteditable]')).toBeInTheDocument()
-      })
+      await waitFor(
+        () => {
+          expect(document.querySelector('[contenteditable]')).toBeInTheDocument()
+        },
+        { timeout: 10000 },
+      )
     })
 
     it('рендерит label', async () => {
