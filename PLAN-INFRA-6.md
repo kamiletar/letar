@@ -1,4 +1,4 @@
-# PLAN-INFRA-6 — §115–§150
+# PLAN-INFRA-6 — §115–§157
 
 > Продолжение [PLAN-INFRA-5.md](/PLAN-INFRA-5.md) — часть журнала `PLAN-INFRA.md`, отрезанная от
 > неё 2026-09-03 (см. [plan-decomposition-pattern.md](/.claude/docs/plan-decomposition-pattern.md)).
@@ -2218,3 +2218,49 @@ OOM; после фикса эти файлы не матчатся вовсе. �
 
 Разбор, воспроизведение и рецепты —
 [nx-vitest-plugin-worker-oom-shared-machine.md](/.claude/docs/nx-vitest-plugin-worker-oom-shared-machine.md).
+
+## §157 — Сборка переезжает на s3, s2 только `pull` + `up -d` 🆕 (план, не начато, 2026-09-06)
+
+**Проблема:** s2 (прод) кончился местом на диске — сборка (`bun install`, `nx build`,
+`nx typecheck:tsgo`, `docker build`) идёт прямо на нём, значит там же живут `node_modules`, bun
+cache, `.next` cache, Nx cache для всего монорепо. Разбор конкретного инцидента с местом —
+вне скоупа этой секции (занимается deploy-agent-dev самостоятельно).
+
+**Решение (согласовано с владельцем 2026-09-06):** перенести всю сборку на s3, оставить s2
+только раскладку готовых образов. Механика:
+
+1. **Remote BuildKit builder.** `docker buildx create --name s3builder --driver remote
+   ssh://deploy@s3.letar.best` (или `docker-container` driver поверх SSH-контекста) — сборка
+   физически идёт на s3, вывод стримится обратно.
+2. **Registry.** Нужен self-hosted `registry:2` (за Traefik, с базовой аутентификацией — по
+   аналогии с уже существующей SOPS/age-дисциплиной) — буилдер пушит образ по тегу коммита,
+   `deploy-affected.sh` на s2 делает `pull` по тому же тегу.
+3. **Прод-БД во время сборки (пререндер).** Часть страниц использует `getStaticProps`/
+   `generateStaticParams` с прямым запросом к прод-БД на этапе `next build`. Раз сборка теперь
+   физически на s3 — узкое firewall-правило s3→s2 на порт Postgres, **отдельный read-only**
+   пользователь БД для сборки (не рантайм-креденшл), по аналогии с `postgres-*-prod` MCP.
+4. **`deploy-affected.sh`:** шаг `docker build`/`nx build`/`nx typecheck:tsgo` заменяется на
+   диспетч на s3-буилдер (`docker buildx build --builder s3builder --push`); на s2 остаётся
+   только `docker compose pull && docker compose up -d` + применение миграций внутри уже
+   пришедшего контейнера (`docker compose run --rm app npx prisma migrate deploy` — не требует
+   node/bun на хосте, Prisma CLI уже внутри образа).
+5. **`nx affected`** (расчёт списка приложений под пересборку) тоже логично считать на s3, а не
+   на s2 — иначе `node_modules` на s2 всё равно понадобится ради графа Nx.
+6. **Итог для s2:** `node_modules`/`.bun`/Nx-кэш убираются с хоста полностью — остаётся только
+   git-чекаут ради `docker-compose.production.yml`, `.env.docker.enc` и файлов миграций, плюс
+   уже готовые Docker-образы (это и сейчас так, новой нагрузки не добавляет).
+
+**Взаимодействие с §19.1 (Трек 1/1b — typecheck-гейт в деплое):** после переезда сборки на s3
+typecheck для staging и production физически будет выполняться на одной и той же машине — логика
+Трека 1b (пропуск typecheck на проде для `HARD_GATED_APPS`, раз staging того же коммита уже
+прошёл) не меняется концептуально, но теперь обе стадии буквально соседствуют на s3, а не
+разнесены по разным серверам — реализацию `deploy-affected.sh` нужно будет свести с этим планом,
+а не делать independently.
+
+**Не начато.** Следующий шаг — поднять `registry:2` + `s3builder` и обкатать на одном
+некритичном приложении (staging target) до переноса продовых.
+
+Sources (best-practice для remote-buildx и разделения build/runtime для Next.js) —
+[docker/buildx](https://github.com/docker/buildx),
+[Next.js: Deploying](https://nextjs.org/docs/pages/building-your-application/deploying),
+[Next.js: Production checklist](https://nextjs.org/docs/app/guides/production-checklist).
