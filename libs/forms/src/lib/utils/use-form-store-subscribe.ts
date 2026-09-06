@@ -31,6 +31,11 @@ interface FormStoreLike {
  * ```
  */
 export function useFormStoreSubscribe(form: FormStoreLike, callback: () => void, deps: unknown[]): void {
+  // Обёртка над useEffect с пробрасываемым извне deps-массивом — сигнатура хука намеренно
+  // отдаёт выбор зависимостей вызывающему коду (аналог useDeepCompareEffect и подобных
+  // библиотечных хуков), поэтому статическая проверка exhaustive-deps здесь неприменима:
+  // `form`/`callback` пересоздаются на каждом рендере вызывающего компонента, а ресабскрайб
+  // должен происходить только по значениям из явно переданного `deps`.
   useEffect(() => {
     const subscription = form.store.subscribe(callback)
     return () => {
@@ -40,5 +45,6 @@ export function useFormStoreSubscribe(form: FormStoreLike, callback: () => void,
         subscription.unsubscribe()
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- deps приходит параметром хука, см. комментарий выше
   }, deps)
 }

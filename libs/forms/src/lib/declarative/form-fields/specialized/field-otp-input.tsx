@@ -54,6 +54,7 @@ export const FieldOTPInput = createField<OTPInputFieldProps, string, OTPFieldSta
   useFieldState: (props) => {
     const [countdown, setCountdown] = useState(0)
     const [isResending, setIsResending] = useState(false)
+    const { onResend, resendTimeout } = props
 
     // Countdown timer effect
     useEffect(() => {
@@ -69,18 +70,18 @@ export const FieldOTPInput = createField<OTPInputFieldProps, string, OTPFieldSta
     }, [countdown])
 
     const handleResend = useCallback(async () => {
-      if (!props.onResend || countdown > 0) {
+      if (!onResend || countdown > 0) {
         return
       }
 
       setIsResending(true)
       try {
-        await props.onResend()
-        setCountdown(props.resendTimeout ?? 60)
+        await onResend()
+        setCountdown(resendTimeout ?? 60)
       } finally {
         setIsResending(false)
       }
-    }, [props.onResend, countdown, props.resendTimeout])
+    }, [onResend, countdown, resendTimeout])
 
     // Format countdown as MM:SS
     const formatCountdown = (seconds: number): string => {

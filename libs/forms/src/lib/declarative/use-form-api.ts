@@ -43,17 +43,19 @@ export function useFormApi<TData extends object>(
   const createMutation = config.mutations.create()
   const updateMutation = config.mutations.update()
 
+  const { id: configId, transformData } = config
+
   // Submit handler
   const submit = useCallback(
     async (values: TData) => {
       const mode = isEditMode ? 'update' : 'create'
 
       // Transform data if transformer provided, otherwise use raw values
-      const data = config.transformData ? config.transformData(values, mode) : values
+      const data = transformData ? transformData(values, mode) : values
 
-      if (isEditMode && config.id) {
+      if (isEditMode && configId) {
         await updateMutation.mutateAsync({
-          where: { id: config.id },
+          where: { id: configId },
           data,
         })
       } else {
@@ -62,7 +64,7 @@ export function useFormApi<TData extends object>(
         })
       }
     },
-    [isEditMode, config.id, config.transformData, createMutation, updateMutation],
+    [isEditMode, configId, transformData, createMutation, updateMutation],
   )
 
   // Get mutation error (whichever one was used)

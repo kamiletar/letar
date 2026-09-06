@@ -187,11 +187,13 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
       if (queryData && componentProps.getLabel && componentProps.getValue) {
         const getLabel = componentProps.getLabel
         const getValue = componentProps.getValue
+        const getGroup = componentProps.getGroup
+        const getDisabled = componentProps.getDisabled
         return (queryData as unknown[]).map((item) => ({
           label: getLabel(item),
           value: getValue(item),
-          group: componentProps.getGroup?.(item),
-          disabled: componentProps.getDisabled?.(item),
+          group: getGroup?.(item),
+          disabled: getDisabled?.(item),
         }))
       }
 

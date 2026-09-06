@@ -227,7 +227,7 @@ export function FieldTableEditor({
               {/* Десктопный вид — таблица */}
               {}
               <Box
-                ref={containerRef as any}
+                ref={containerRef}
                 display={{ base: 'none', md: 'block' }}
                 overflowX="auto"
                 borderWidth="1px"

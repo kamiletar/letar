@@ -210,6 +210,7 @@ export function FormSteps({
       clearPersistence,
       registerStep,
       unregisterStep,
+      claimedIndicesRef,
       validateOnNext,
       linear,
       orientation,

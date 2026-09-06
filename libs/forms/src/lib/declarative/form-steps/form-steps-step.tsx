@@ -273,6 +273,7 @@ export function FormStepsStep({
     }
     // IMPORTANT: children и icon намеренно НЕ включены — вызывают infinite loop
     // icon — JSX элемент, пересоздаётся каждый рендер
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- см. комментарий выше
   }, [
     description,
     registerStep,
@@ -292,7 +293,7 @@ export function FormStepsStep({
     () => extractFieldNames(children, fieldExtractionPath),
     // Use segment path as proxy to determine when structure may change
     // children NOT included — they change every render
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- см. комментарий выше
     [fieldExtractionPath],
   )
 

@@ -37,6 +37,9 @@ export function usePostSubmitResetGuard<TData>(
     }
     // watchedDefaultValues — единственная реальная зависимость: эффект должен перепроверить
     // состояние формы на каждом рендере, где родитель мог передать новый initialValue.
+    // `form` — стабильный объект AppFormApi от useAppForm (не пересоздаётся между рендерами),
+    // добавление его в deps ничего не меняет в поведении, но и не нужно.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- см. комментарий выше
   }, [watchedDefaultValues])
 
   return {

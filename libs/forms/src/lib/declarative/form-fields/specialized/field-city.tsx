@@ -105,7 +105,7 @@ export const FieldCity = createField<CityFieldProps, string, CityFieldState>({
         initializedRef.current = true
         setInputValue(fieldValue)
       }
-    }, [fieldValue])
+    }, [fieldValue, inputValue])
 
     // Fetch city suggestions from provider
     const fetchSuggestions = useCallback(

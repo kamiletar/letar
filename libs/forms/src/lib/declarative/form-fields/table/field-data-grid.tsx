@@ -108,7 +108,10 @@ export function FieldDataGrid({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const arrayField = useField({ form, name: fullPath, mode: 'array' }) as any
-  const data = (arrayField.state.value as Record<string, unknown>[] | undefined) ?? []
+  const arrayFieldValue = arrayField.state.value as Record<string, unknown>[] | undefined
+  // Мемоизация — иначе `?? []` создаёт новый массив на каждом рендере, что заставляет
+  // tableColumns (useMemo ниже, где `data` в зависимостях) пересчитываться на каждый рендер
+  const data = useMemo(() => arrayFieldValue ?? [], [arrayFieldValue])
 
   // Состояние TanStack Table
   const [sorting, setSorting] = useState<SortingState>([])
@@ -230,7 +233,7 @@ export function FieldDataGrid({
     }
 
     return cols
-  }, [columnDefs, resolvedCols, editingCell, disabled, fullPath, form, data, onRowSave, rowSelection])
+  }, [columnDefs, resolvedCols, editingCell, disabled, fullPath, form, data, onRowSave, rowSelection, modifiedCells])
 
   const table = useTable({
     features: fieldDataGridFeatures,

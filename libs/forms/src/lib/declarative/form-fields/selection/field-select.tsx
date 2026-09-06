@@ -66,19 +66,16 @@ export const FieldSelect = createField<SelectFieldProps, string | number, Select
     componentProps: Omit<SelectFieldProps, keyof BaseFieldProps>,
     resolved: ResolvedFieldProps,
   ): SelectFieldState => {
-    // Options: props take priority, fallback to schema meta
-    const sourceOptions = componentProps.options ?? resolved.options ?? []
-
     // Normalize options — value always string for the UIKit contract
-    const normalizedOptions: NormalizedOption[] = useMemo(
-      () =>
-        sourceOptions.map((opt) => ({
-          label: opt.label,
-          value: String(opt.value),
-          disabled: opt.disabled,
-        })),
-      [sourceOptions],
-    )
+    const normalizedOptions: NormalizedOption[] = useMemo(() => {
+      // Options: props take priority, fallback to schema meta
+      const sourceOptions = componentProps.options ?? resolved.options ?? []
+      return sourceOptions.map((opt) => ({
+        label: opt.label,
+        value: String(opt.value),
+        disabled: opt.disabled,
+      }))
+    }, [componentProps.options, resolved.options])
 
     // Auto-determine clearable: show clear button if field is optional
     const resolvedClearable = componentProps.clearable ?? !resolved.required

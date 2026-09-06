@@ -50,6 +50,11 @@ export function CaptchaField(props: CaptchaFieldProps) {
 
   const [, setToken] = useState<string | null>(null)
 
+  // Деструктурируем колбэки отдельно от `props` — react-hooks/exhaustive-deps
+  // не умеет сузить зависимость до `props.onX` при опциональном вызове (`props.onX?.(...)`)
+  // и в этом случае требует весь объект `props`, который меняется на каждый рендер
+  const { onSuccess, onError, onExpire } = props
+
   // Все хуки ОБЯЗАНЫ быть до условных return (rules of hooks)
   const handleSuccess = useCallback(
     (captchaToken: string) => {
@@ -60,9 +65,9 @@ export function CaptchaField(props: CaptchaFieldProps) {
         formCtx.form.setFieldValue(CAPTCHA_TOKEN_FIELD, captchaToken)
       }
 
-      props.onSuccess?.(captchaToken)
+      onSuccess?.(captchaToken)
     },
-    [formCtx, props.onSuccess],
+    [formCtx, onSuccess],
   )
 
   const handleError = useCallback(
@@ -71,9 +76,9 @@ export function CaptchaField(props: CaptchaFieldProps) {
       if (formCtx?.form) {
         formCtx.form.setFieldValue(CAPTCHA_TOKEN_FIELD, '')
       }
-      props.onError?.(error)
+      onError?.(error)
     },
-    [formCtx, props.onError],
+    [formCtx, onError],
   )
 
   const handleExpire = useCallback(() => {
@@ -81,8 +86,8 @@ export function CaptchaField(props: CaptchaFieldProps) {
     if (formCtx?.form) {
       formCtx.form.setFieldValue(CAPTCHA_TOKEN_FIELD, '')
     }
-    props.onExpire?.()
-  }, [formCtx, props.onExpire])
+    onExpire?.()
+  }, [formCtx, onExpire])
 
   // Условные return ПОСЛЕ всех хуков
   if (!provider || !siteKey) {
