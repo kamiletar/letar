@@ -1,5 +1,24 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-06 — Фикс 2 падающих тестов (`field-rich-text`, `table-keyboard-commit`) — не rAF-регресс, а короткий `waitFor` timeout
+
+Пользователь заметил 2/758 падающих теста в `nx test @letar/forms` и попросил разобрать, не
+регресс ли это задокументированного бага «зависший SSR Suspense на rAF»
+(`.claude/docs/letar-forms-lazy-component-ssr-stuck-suspense.md`).
+
+Разбор: `useSyncExternalStore`-гейт в `libs/forms-react/src/lib/lazy/create-lazy-component.tsx`
+(введён 2026-09-04 при переносе oxlint-фикса `react(set-state-in-effect)`) работает корректно и в
+jsdom — не регресс. Настоящая причина проще: оба спека дожидаются реального (немокнутого)
+`React.lazy()`-импорта тяжёлых модулей (`@tiptap/*`, `TableEditor`), и под полным прогоном 758
+тестов (shared modules, `isolate: false`) это иногда не укладывается в дефолтный `waitFor`
+timeout `@testing-library/dom` (1000мс) — при этом Suspense-fallback и домаунтовый fallback
+визуально неотличимы (оба — `Skeleton`), что маскирует причину под старый баг.
+
+Фикс — `{ timeout: 10000 }` в четырёх `waitFor`-вызовах (`field-rich-text.spec.tsx`,
+`table-keyboard-commit.spec.tsx`), коммит `4a18492e`. Добавлен раздел в существующий doc-файл
+(не заводился новый — тот же механизм `createLazyComponent`, другая причина симптома).
+`nx test @letar/forms` — 758/758, `typecheck:tsgo`/`lint` чистые.
+
 ## 2026-09-05 — `forms-vue` — фикс красного CI (oxlint ложное срабатывание, v0.15.3)
 
 Пользователь попросил разобрать упавший GitHub Actions run (job `Lint`,
