@@ -63,13 +63,20 @@ REGISTRY_USER=admin REGISTRY_PASS=<пароль> scripts/registry-gc.sh
 DRY_RUN=true REGISTRY_USER=admin REGISTRY_PASS=<пароль> scripts/registry-gc.sh
 ```
 
-⚠️ **Автоматическое расписание (cron) пока не заведено.** Остальные плановые чистки в этом
-репозитории (`nx-cache-cleanup`, `next-cache-cleanup`, `docker-prune`) живут как эндпоинты
-`/api/cron/*` внутри `dashboard-agent` — заведение нового требует трёх правок вне scope этого
-пилота (`CRON_SECRET`, регистрация в `dashboard-agent/cron.ts`, порт/host в infra-config, см.
-[cron-endpoint-registration-checklist.md](/.claude/docs/cron-endpoint-registration-checklist.md)).
-До заведения — запускать `registry-gc.sh` вручную по мере роста `registry-data` volume
-(`docker system df -v | grep registry-data`).
+**Автоматическое расписание заведено (2026-09-06).** `dashboard-agent` на s3 гоняет TS-порт
+скрипта каждую ночь через `POST /api/cron/registry-gc` (job `registry-gc-s3`, `50 4 * * *` —
+то же ночное окно, что у `next-cache-cleanup-s3`/`nx-cache-cleanup-s3`, до общей чистки Docker
+build cache). Логика 1:1 повторяет bash-версию, но HTTP через `fetch` (в контейнере агента нет
+`curl`/`jq`) и `garbage-collect` через уже используемый в приложении `dockerode`-клиент, а не
+через `docker-cli` — см. `apps/dashboard-agent/src/lib/registry-gc.ts`.
+`REGISTRY_USER`/`REGISTRY_PASS` — в `.env.docker.enc` dashboard-agent (тот же SOPS-конвейер, что
+у прочих секретов приложения; `env_file:` секции `services.app` в `docker-compose.s3.yml`
+прокидывает переменные в контейнер автоматически, отдельная правка `environment:` не нужна).
+`KEEP_TAGS`/`DRY_RUN` из bash-версии стали `REGISTRY_GC_KEEP_TAGS`/`REGISTRY_GC_DRY_RUN`
+(тот же смысл, дефолты те же: 3 и `false`).
+
+`scripts/registry-gc.sh` остаётся — им по-прежнему удобно пользоваться руками (например
+`DRY_RUN=true` перед первым прогоном нового окружения), плановый запуск его не вызывает.
 
 ## Секреты
 
@@ -97,5 +104,4 @@ sops --encrypt --in-place infra/registry/secrets/registry-users.enc
 ## Дальнейшие шаги (не входят в этот пилот)
 
 - Пилот 2/3 из §157 — remote build на s3, `docker push` в этот registry, `pull` на s2.
-- Cron-регистрация `registry-gc.sh` внутри `dashboard-agent` (см. предупреждение выше).
-- Если объём образов вырастет заметно — пересмотреть `KEEP_TAGS` (сейчас 3, консервативно).
+- Если объём образов вырастет заметно — пересмотреть `REGISTRY_GC_KEEP_TAGS` (сейчас 3, консервативно).
