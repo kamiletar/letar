@@ -90,7 +90,6 @@ export const DatabaseCardSkeleton = () => (
 export const TableRowSkeleton = ({ columns = 4 }: { columns?: number }) => (
   <tr>
     {Array.from({ length: columns }).map((_, i) => (
-      /* oxlint-disable-next-line eslint-plugin-react/no-array-index-key -- Static placeholder array */
       <td key={i} style={{ padding: '12px' }}>
         <Skeleton height="20px" />
       </td>
@@ -182,9 +181,6 @@ export const SkeletonGrid = ({
     }}
     gap="6"
   >
-    {Array.from({ length: count }).map((_, i) => (
-      /* oxlint-disable-next-line eslint-plugin-react/no-array-index-key -- Static placeholder array */
-      <SkeletonComponent key={i} />
-    ))}
+    {Array.from({ length: count }).map((_, i) => <SkeletonComponent key={i} />)}
   </Grid>
 )

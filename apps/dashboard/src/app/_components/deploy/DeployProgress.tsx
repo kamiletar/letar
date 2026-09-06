@@ -175,7 +175,6 @@ export const DeployProgress = ({ enabled = true }: DeployProgressProps) => {
             >
               <VStack align="stretch" gap={0}>
                 {allLogs.map((log, index) => (
-                  /* oxlint-disable-next-line eslint-plugin-react/no-array-index-key -- Log lines are append-only */
                   <Box key={index} fontFamily="mono" fontSize="xs" whiteSpace="pre-wrap" wordBreak="break-all">
                     <AnsiText text={log} />
                   </Box>

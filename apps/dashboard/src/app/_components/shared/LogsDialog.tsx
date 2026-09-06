@@ -172,7 +172,6 @@ export function LogsDialog({
                 : logs
                 ? (
                   logs.split('\n').map((line, index) => (
-                    /* oxlint-disable-next-line eslint-plugin-react/no-array-index-key -- Log lines are append-only */
                     <Box key={index} display="block">
                       <AnsiText text={line} />
                     </Box>
