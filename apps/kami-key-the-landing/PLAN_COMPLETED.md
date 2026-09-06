@@ -1,5 +1,21 @@
 # Выполненные задачи
 
+## Версия 0.4.0 — реальное скачивание + страница /changelog (2026-09-06)
+
+Заглушка «Скоро» на секции «Скачать» и hero-бейдже заменена на реальную ссылку —
+`kami-key-the-v1.7.2` на GitHub Releases (`kamiletar/letar`, первый реальный релиз в
+репозитории — детали фикса инсталлятора в `apps/kami-key-the/PLAN.md`). Версия/размер вынесены в
+`src/app/_components/download-info.ts`, обновлять вручную при следующем релизе.
+
+Добавлена страница `/changelog` — живой fetch GitHub Releases API через общий
+`@letar/github-releases` (ISR 1ч), `react-markdown`+`remark-gfm` для рендера release notes, по
+образцу `apps/animatrona-landing/src/app/_components/changelog-section.tsx` (но отдельным
+роутом, а не секцией на главной — у сайта нет раздела «блог»/«докс», под который её можно было бы
+подверстать). Ссылки в navbar и футере, попутно почищена мёртвая ссылка «GitHub (скоро)» в
+футере — ведёт на реальную страницу релизов.
+
+Задеплоено на прод (s2) через deploy-agent-dev, кнопка скачивания проверена живым скачиванием.
+
 ## `--webpack` в dev/build — превентивный фикс Turbopack+Emotion hydration (2026-08-25)
 
 Часть аудита `.claude/docs/nextjs16-turbopack-default-emotion-hydration.md` (раздел «Аудит по
