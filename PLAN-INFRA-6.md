@@ -2712,8 +2712,9 @@ read-only не годится для миграций, а для преренд�
 
 #### Порядок работ
 
-- [ ] **Гейт: изоляция Nx-кеша по окружению** (`NX_CACHE_DIRECTORY`), плюс научить `nx-cache-cleanup`
-      обоим каталогам. Без этого переезд запрещён — см. блок выше
+- [x] **Гейт: изоляция Nx-кеша по окружению** (`NX_CACHE_DIRECTORY` + `NX_WORKSPACE_DATA_DIRECTORY`
+      — вторая переменная обязательна, см. «✅ Закрыто» ниже), `nx-cache-cleanup` обходит все
+      `.nx/cache*`. Закрыто 2026-09-06
 - [ ] `registry:2` на s3 за Traefik + basic-auth + ретеншн тегов
 - [ ] Пилот 1: приложение **без БД** (лендинг) — сборка на s3, push, pull и запуск на s2.
       Проверяет только канал доставки
@@ -2816,6 +2817,28 @@ read-only не годится для миграций, а для преренд�
 
 Деплой не требуется: правки вступают в силу при следующем обычном деплое. Отдельный
 `deploy-request` по этой задаче слать не нужно.
+
+##### ✅ Закрыто (2026-09-06)
+
+Реализовано ровно по постановке (`NX_CACHE_DIRECTORY`, `.gitignore`, `nx-cache-cleanup.ts` обход
+всех `.nx/cache*`, `--clean` зависит от выбранного каталога) — **плюс одна поправка, найденная
+только эмпирической проверкой**, обязательной по постановке этой же задачи: одной
+`NX_CACHE_DIRECTORY` **недостаточно**. С Nx 19+ (у нас 23.2) hash→результат резолвится через
+отдельный DB-кеш, чей SQLite-индекс живёт в `NX_WORKSPACE_DATA_DIRECTORY` (дефолт
+`.nx/workspace-data`) — независимо от `cacheDirectory`/`NX_CACHE_DIRECTORY`, которая двигает
+только каталог файлов-артефактов. Без второй переменной второй прогон с другим `NEXT_PUBLIC_*`
+всё равно получал `Nx read the output from the cache` при пустом целевом `.nx/cache-staging` на
+диске — то есть ровно тот силентно-неработающий фикс, от которого постановка предостерегала.
+Разбор — [nx-cache-directory-env-not-isolated-by-cachedirectory.md](/.claude/docs/nx-cache-directory-env-not-isolated-by-cachedirectory.md).
+
+Итоговый фикс разводит **обе** переменные (`NX_CACHE_DIRECTORY` и `NX_WORKSPACE_DATA_DIRECTORY`)
+по `.nx/cache-staging`+`.nx/workspace-data-staging` / `.nx/cache-prod`+`.nx/workspace-data-prod`.
+Red→Green доказано на `time` (`NEXT_PUBLIC_APP_URL`): без изоляции второй билд с другим значением
+получал cache hit и нёс URL от первого билда в бандле; с обеими переменными разведёнными —
+`Cache: 0/1 hit` на каждом окружении и корректное значение в каждом бандле. Побочный эффект —
+project graph пересчитывается отдельно на первый билд каждого окружения (не на каждый деплой),
+принят как обоснованная цена изоляции. `nx test dashboard-agent` и `nx typecheck dashboard-agent`
+зелёные.
 
 ## §158 — `libs/admin-ui` не имел `lint`/`oxlint` вообще ✅ ЗАКРЫТО (2026-09-06)
 

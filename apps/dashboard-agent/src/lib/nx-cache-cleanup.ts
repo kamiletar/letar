@@ -25,10 +25,6 @@ export interface NxCacheCleanupResult {
   removedBytes: number
 }
 
-const REPO_PATH = process.env['REPO_PATH'] || '/home/deploy/letar'
-/** Порог простоя — сколько дней держать запись `.nx/cache/<hash>`, прежде чем удалить. */
-const MAX_AGE_DAYS = Number(process.env['NX_CACHE_CLEANUP_DAYS'] ?? 2)
-
 async function dirSizeBytes(dir: string): Promise<number> {
   let total = 0
   const entries = await readdir(dir, { withFileTypes: true }).catch(() => [])
@@ -43,17 +39,17 @@ async function dirSizeBytes(dir: string): Promise<number> {
   return total
 }
 
-export async function runNxCacheCleanup(): Promise<NxCacheCleanupResult> {
-  const checkedAt = new Date().toISOString()
-  const cacheDir = path.join(REPO_PATH, '.nx', 'cache')
-  const maxAgeMs = MAX_AGE_DAYS * 24 * 60 * 60 * 1000
-
+/** Чистит один каталог кеша (`.nx/cache`, `.nx/cache-staging`, `.nx/cache-prod`, ...). */
+async function cleanupOneCacheDir(
+  cacheDir: string,
+  maxAgeMs: number,
+): Promise<{ removedCount: number; removedBytes: number }> {
   let entries: string[]
   try {
     entries = await readdir(cacheDir)
   } catch (error) {
     console.error(`[NxCacheCleanup] Не удалось прочитать ${cacheDir}:`, error)
-    return { checkedAt, maxAgeDays: MAX_AGE_DAYS, removedCount: 0, removedBytes: 0 }
+    return { removedCount: 0, removedBytes: 0 }
   }
 
   let removedCount = 0
@@ -82,10 +78,54 @@ export async function runNxCacheCleanup(): Promise<NxCacheCleanupResult> {
     }
   }
 
+  return { removedCount, removedBytes }
+}
+
+export async function runNxCacheCleanup(): Promise<NxCacheCleanupResult> {
+  // Читаются на каждый вызов, а не как module-level const: тесты переставляют
+  // process.env['REPO_PATH']/['NX_CACHE_CLEANUP_DAYS'] в beforeEach на каждый прогон, а
+  // vite-транспилятор под vitest не гарантирует переисполнение module-level кода при
+  // повторном dynamic import с cache-busting query.
+  const REPO_PATH = process.env['REPO_PATH'] || '/home/deploy/letar'
+  // Порог простоя — сколько дней держать запись .nx/cache*/<hash>, прежде чем удалить.
+  const MAX_AGE_DAYS = Number(process.env['NX_CACHE_CLEANUP_DAYS'] ?? 2)
+
+  const checkedAt = new Date().toISOString()
+  const nxDir = path.join(REPO_PATH, '.nx')
+  const maxAgeMs = MAX_AGE_DAYS * 24 * 60 * 60 * 1000
+
+  // PLAN-INFRA-6.md §157 задача №1: кеш Nx разведён по окружению (deploy-affected.sh
+  // экспортирует NX_CACHE_DIRECTORY=".nx/cache-staging"/".nx/cache-prod"), поэтому чистка
+  // обходит ВСЕ каталоги `.nx/cache*`, а не только исторический `.nx/cache` — иначе
+  // прод/staging-кеш продолжит копиться без чистки вообще.
+  let nxEntries: string[]
+  try {
+    nxEntries = await readdir(nxDir)
+  } catch (error) {
+    console.error(`[NxCacheCleanup] Не удалось прочитать ${nxDir}:`, error)
+    return { checkedAt, maxAgeDays: MAX_AGE_DAYS, removedCount: 0, removedBytes: 0 }
+  }
+
+  const cacheDirNames = nxEntries.filter((name) => name === 'cache' || name.startsWith('cache-'))
+
+  let removedCount = 0
+  let removedBytes = 0
+
+  for (const cacheDirName of cacheDirNames) {
+    const cacheDir = path.join(nxDir, cacheDirName)
+    const entryStats = await stat(cacheDir).catch(() => null)
+    if (!entryStats?.isDirectory()) {
+      continue
+    }
+    const result = await cleanupOneCacheDir(cacheDir, maxAgeMs)
+    removedCount += result.removedCount
+    removedBytes += result.removedBytes
+  }
+
   if (removedCount > 0) {
     const removedMb = removedBytes / 1024 / 1024
     console.warn(
-      `[NxCacheCleanup] Удалено ${removedCount} записей .nx/cache старше ${MAX_AGE_DAYS}д, освобождено ${
+      `[NxCacheCleanup] Удалено ${removedCount} записей .nx/cache* старше ${MAX_AGE_DAYS}д, освобождено ${
         removedMb.toFixed(1)
       }MB`,
     )

@@ -54,7 +54,11 @@ testem.log
 Thumbs.db
 
 .nx/cache
+.nx/cache-staging
+.nx/cache-prod
 .nx/workspace-data
+.nx/workspace-data-staging
+.nx/workspace-data-prod
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
 

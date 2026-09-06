@@ -47,6 +47,13 @@ projects --with-target` этого не ловит ·
 `--max-old-space-size`), раздутый безусловной (без `include`) регистрацией `@nx/vitest` в
 `nx.json`, цепляющей `vitest.config.*` внутри вложенных `node_modules`; воркэраунд —
 `NODE_OPTIONS=--max-old-space-size=8192` (форвардится воркеру как есть) ·
+[nx-cache-directory-env-not-isolated-by-cachedirectory](/.claude/docs/nx-cache-directory-env-not-isolated-by-cachedirectory.md)
+⚠️ `NX_CACHE_DIRECTORY` двигает только каталог файлов-артефактов — решение «отдать cache hit»
+принимает отдельный DB-кеш Nx 19+, чей SQLite-индекс живёт в `NX_WORKSPACE_DATA_DIRECTORY`
+(дефолт `.nx/workspace-data`), независимо от `cacheDirectory`; изоляция staging/production
+требует развести ОБЕ переменные разом, эмпирически доказано повторной сборкой с разным
+`NEXT_PUBLIC_APP_URL` — с одной только `NX_CACHE_DIRECTORY` второй прогон всё равно даёт
+cache hit при пустом целевом каталоге на диске ·
 [tsgo-stray-declarations](/.claude/docs/tsgo-stray-declarations.md) ⚠️ `typecheck:tsgo` иногда
 эмитит `.d.ts`/`.d.ts.map` рядом с исходником вместо `outDir` — не воспроизведено детерминированно
 на чистом дереве, гигиена (`.d.ts.map` в `.gitignore`) и cleanup-команда ·

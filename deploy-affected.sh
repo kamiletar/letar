@@ -267,11 +267,28 @@ if [ "$STAGING" = true ]; then
   DEPLOY_ENV="staging"
   # При staging игнорируем SERVER_APPS — деплоим на любом сервере
   SERVER_APPS=""
+  # PLAN-INFRA-6.md §157 задача №1: изолируем кеш Nx по окружению. Без этого сборка
+  # staging и сборка production одного коммита дают одинаковый ключ кеша (nx.json не
+  # объявляет ни одного {"env": ...}-инпута) — прод-билд может получить cache hit на
+  # staging-артефакт с чужими NEXT_PUBLIC_*. Экспорт обязан произойти до первого вызова nx.
+  #
+  # ⚠️ ОБЕ переменные обязательны, одной NX_CACHE_DIRECTORY недостаточно (проверено эмпирически
+  # при постановке задачи, см. .claude/docs/nx-cache-directory-env-not-isolated-by-cachedirectory.md):
+  # с Nx 19+ (у нас 23.2) hash→результат резолвится через DB-кеш, чей SQLite живёт в
+  # NX_WORKSPACE_DATA_DIRECTORY (дефолт .nx/workspace-data), НЕЗАВИСИМО от cacheDirectory/
+  # NX_CACHE_DIRECTORY — та переменная двигает только каталог артефактов, не индекс хешей.
+  # Без второй переменной второй билд с другим NEXT_PUBLIC_* всё равно получает cache hit
+  # (реально воспроизведено: builder дал "Nx read the output from the cache" при пустом
+  # .nx/cache-staging на диске).
+  export NX_CACHE_DIRECTORY=".nx/cache-staging"
+  export NX_WORKSPACE_DATA_DIRECTORY=".nx/workspace-data-staging"
 else
   BASE_COMPOSE_FILE="docker-compose.production.yml"
   ENV_FILE_NAME=".env.docker"
   DOCKER_TAG_SUFFIX=":latest"
   DEPLOY_ENV="production"
+  export NX_CACHE_DIRECTORY=".nx/cache-prod"
+  export NX_WORKSPACE_DATA_DIRECTORY=".nx/workspace-data-prod"
 fi
 COMPOSE_FILE="$BASE_COMPOSE_FILE"
 
@@ -448,7 +465,7 @@ if [ "$SKIP_GIT" = false ]; then
   # Полный сброс — флагом --clean.
   echo -e "${YELLOW}🔄 Resetting Nx project graph...${NC}"
   npx nx daemon --stop 2>/dev/null || true
-  rm -rf .nx/workspace-data 2>/dev/null || true
+  rm -rf "${NX_WORKSPACE_DATA_DIRECTORY:-.nx/workspace-data}" 2>/dev/null || true
   echo -e "${GREEN}✅ Nx project graph cleared${NC}"
   echo ""
 fi
@@ -456,7 +473,9 @@ fi
 # Step 3: Install dependencies
 if [ "$CLEAN_INSTALL" = true ]; then
   echo -e "${YELLOW}🧹 Cleaning node_modules and caches...${NC}"
-  rm -rf node_modules .nx/cache
+  # NX_CACHE_DIRECTORY — только свой каталог (staging/production), не оба сразу:
+  # --clean на проде не должен сносить чужой (staging) кеш и наоборот (PLAN-INFRA-6.md §157 задача №1).
+  rm -rf node_modules "${NX_CACHE_DIRECTORY:-.nx/cache}"
   echo -e "${YELLOW}📦 Fresh installing dependencies...${NC}"
 else
   echo -e "${YELLOW}📦 Installing dependencies...${NC}"
@@ -1117,9 +1136,10 @@ for app in $AFFECTED_APPS; do
     NX_CACHE_FLAG=""
     if [ "$SKIP_NX_CACHE" = true ]; then
       NX_CACHE_FLAG="--skip-nx-cache"
-      # Также очищаем локальный Nx кэш для этого приложения
+      # Также очищаем локальный Nx кэш для этого приложения. NX_CACHE_DIRECTORY — только
+      # свой каталог по окружению (PLAN-INFRA-6.md §157 задача №1), не оба сразу.
       echo -e "${YELLOW}🧹 Clearing Nx cache...${NC}"
-      rm -rf ".nx/cache" 2>/dev/null || true
+      rm -rf "${NX_CACHE_DIRECTORY:-.nx/cache}" 2>/dev/null || true
       echo -e "${YELLOW}🔨 Building ${app} with ${BUILD_TARGET} (cache disabled)...${NC}"
     else
       echo -e "${YELLOW}🔨 Building ${app} with ${BUILD_TARGET} (Nx cache enabled)...${NC}"
