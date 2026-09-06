@@ -7,42 +7,8 @@
 
 import type { AnimeStatus, SeasonType } from '../../../renderer/src/generated/prisma'
 
-/**
- * Ограничитель параллельных операций (простая реализация p-limit)
- */
-export function createConcurrencyLimiter(concurrency: number) {
-  const queue: Array<() => void> = []
-  let activeCount = 0
-
-  const next = () => {
-    if (queue.length > 0 && activeCount < concurrency) {
-      activeCount++
-      const fn = queue.shift()
-      if (fn) {
-        fn()
-      }
-    }
-  }
-
-  return <T>(fn: () => Promise<T>): Promise<T> => {
-    return new Promise<T>((resolve, reject) => {
-      const run = async () => {
-        try {
-          const result = await fn()
-          resolve(result)
-        } catch (error) {
-          reject(error)
-        } finally {
-          activeCount--
-          next()
-        }
-      }
-
-      queue.push(run)
-      next()
-    })
-  }
-}
+/** Реэкспорт для обратной совместимости — сама реализация теперь в utils (не только для import-домена) */
+export { createConcurrencyLimiter } from '../../utils/concurrency-limiter'
 
 /**
  * Формирует полный URL постера Shikimori

@@ -14,6 +14,7 @@ import path from 'path'
 
 import { createModuleLogger } from '../../utils/logger'
 import { getKuboService } from '../kubo'
+import { kuboLimiter } from './kubo-concurrency'
 import { getIpfsDataDir } from './peer-id-manager'
 import { stat } from './unixfs-service'
 
@@ -142,7 +143,8 @@ export class PinManager extends EventEmitter {
     if (client) {
       try {
         const cidObj = (await getCidCtor()).parse(cid)
-        await client.pin.add(cidObj)
+        // Общий лимит конкурентности к Kubo — см. kubo-concurrency.ts
+        await kuboLimiter(() => client.pin.add(cidObj))
         log.debug('Контент закреплён в Kubo', { cid })
       } catch (error) {
         log.warn('Предупреждение при pin в Kubo', { error: String(error) })

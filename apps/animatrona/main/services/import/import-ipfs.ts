@@ -6,6 +6,7 @@
  */
 
 import { createModuleLogger } from '../../utils/logger'
+import { kuboLimiter } from '../ipfs/kubo-concurrency'
 import { addFile } from '../ipfs/unixfs-service'
 
 const log = createModuleLogger('ImportIPFS')
@@ -40,7 +41,8 @@ export function stopCidTracking(): void {
  */
 export async function uploadToIpfs(filePath: string): Promise<{ cid: string; size: number } | null> {
   try {
-    const result = await addFile(filePath)
+    // Единственный чокпоинт загрузки в IPFS — лимитируем здесь, не в каждом вызывающем месте
+    const result = await kuboLimiter(() => addFile(filePath))
     activeCidCollector?.add(result.cid)
     return { cid: result.cid, size: result.size }
   } catch (error) {
