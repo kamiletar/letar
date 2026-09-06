@@ -414,6 +414,35 @@ duration-токен; дублированный HEX Matrix-палитры в CSS
 четвёртый: Canvas 2D (`ctx.fillStyle`/`strokeStyle` у аудио-визуализаторов и `MatrixRain` не
 резолвит CSS-переменные темы). Разбор — `.claude/docs/theme-hardcode-gate-coverage.md`.
 
+### Техдолг Dynamic-роутов: разбор оставшихся 6, 2 реальных фикса (2026-09-06)
+
+Продолжение предыдущей записи — разобраны `/blog`, `/blog/[slug]`, `/data-deletion`, `/hire`,
+`/learning`, `/projects`, оставшиеся `ƒ Dynamic` после фикса layout.
+
+**Реальные баги, исправлены:**
+
+- `/hire` не вызывал `setRequestLocale()` вовсе — единственная страница в приложении без него
+  (даже `params` не принимала). Добавлен `params`/`setRequestLocale(locale)` по образцу
+  остальных страниц. `nx build kami` подтвердил: `/ru/hire`, `/en/hire` стали `●` (SSG).
+- `/blog/[slug]` вызывал `getSession()` (`await headers()`, Dynamic API) прямо в компоненте ради
+  `isAdmin` для `PublishButton` — тот же класс бага, что чинили в layout. Перенесено в сам
+  `PublishButton` через клиентский `useUser()` (`@/app/_components/user-provider`). Эффект не
+  виден в локальном `nx build` — `generateStaticParams` резолвит 0 постов, т.к. `content/posts`
+  локально не существует (прод читает контент из отдельного репозитория `kamiletar/kami-blog`
+  через Keystatic GitHub storage, `KEYSTATIC_GITHUB_CLIENT_ID` в этом окружении нет) — но реальный
+  Dynamic API из серверного компонента убран.
+
+**Не баги, оставлено как есть:**
+
+- `/blog`, `/data-deletion`, `/learning` легитимно `ƒ Dynamic` — все три читают `searchParams`
+  (фильтр по тегу, код подтверждения удаления, фильтр по типу/статусу) в Server Component, что
+  само по себе Dynamic API в App Router. Убирать фильтрацию ради SSG было бы регрессией.
+- `/projects` уже `export const dynamic = 'force-dynamic'` осознанно (комментарий в файле,
+  2026-08-21, staleness Full Route Cache после сида) — не техдолг.
+
+Проверено: `nx typecheck:tsgo kami`, `nx lint kami` — зелёные, `nx build kami` — маркеры сверены
+построчно. Коммит `2eafe4c5`.
+
 ---
 
 **Последнее обновление:** 2026-09-06
