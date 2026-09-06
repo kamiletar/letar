@@ -386,6 +386,7 @@
     "libs/*"
   ],
   "patchedDependencies": {
-    "@chakra-ui/react@3.37.0": "patches/@chakra-ui%2Freact@3.37.0.patch"
+    "@chakra-ui/react@3.37.0": "patches/@chakra-ui%2Freact@3.37.0.patch",
+    "@react-pdf/hyphenate@0.1.0": "patches/@react-pdf%2Fhyphenate@0.1.0.patch"
   }
 }

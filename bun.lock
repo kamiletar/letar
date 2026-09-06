@@ -375,7 +375,7 @@
     },
     "apps/animatrona": {
       "name": "@letar/animatrona",
-      "version": "0.55.45",
+      "version": "0.55.51",
       "dependencies": {
         "@letar/icon-generator": "workspace:*",
         "@letar/seed-utils": "workspace:*",
@@ -523,7 +523,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.183.88",
+      "version": "0.183.89",
       "dependencies": {
         "@letar/data-export": "workspace:*",
         "@letar/demo-protection": "workspace:*",
@@ -654,7 +654,7 @@
     },
     "apps/kami": {
       "name": "kami",
-      "version": "0.33.25",
+      "version": "0.33.31",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -673,14 +673,14 @@
     },
     "apps/kami-key-the": {
       "name": "kami-key-the",
-      "version": "1.7.1",
+      "version": "1.7.2",
       "devDependencies": {
         "electron": "44.2.0",
       },
     },
     "apps/kami-key-the-landing": {
       "name": "@letar/kami-key-the-landing",
-      "version": "0.2.2",
+      "version": "0.4.0",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
       },
@@ -1048,6 +1048,17 @@
     },
     "libs/file-scan": {
       "name": "@letar/file-scan",
+      "version": "0.1.0",
+    },
+    "libs/folder-player-react": {
+      "name": "@letar/folder-player-react",
+      "version": "0.1.0",
+      "peerDependencies": {
+        "react": ">=18.0.0",
+      },
+    },
+    "libs/folder-scan": {
+      "name": "@letar/folder-scan",
       "version": "0.1.0",
     },
     "libs/form-mcp": {
@@ -1525,6 +1536,7 @@
     },
   },
   "patchedDependencies": {
+    "@react-pdf/hyphenate@0.1.0": "patches/@react-pdf%2Fhyphenate@0.1.0.patch",
     "@chakra-ui/react@3.37.0": "patches/@chakra-ui%2Freact@3.37.0.patch",
   },
   "overrides": {
@@ -2510,6 +2522,10 @@
     "@letar/exoplayer-sync": ["@letar/exoplayer-sync@workspace:libs/exoplayer-sync"],
 
     "@letar/file-scan": ["@letar/file-scan@workspace:libs/file-scan"],
+
+    "@letar/folder-player-react": ["@letar/folder-player-react@workspace:libs/folder-player-react"],
+
+    "@letar/folder-scan": ["@letar/folder-scan@workspace:libs/folder-scan"],
 
     "@letar/form-develop-app-shadcn": ["@letar/form-develop-app-shadcn@workspace:apps/form-develop-app-shadcn"],
 
