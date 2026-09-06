@@ -41,6 +41,12 @@ projects --with-target` этого не ловит ·
 ⚠️ временный distDir внутри `apps/` (`NEXT_DIST_DIR=.next-prodcheck`) роняет граф Nx **у всех**
 параллельных агентов, а ошибка не намекает на чужой каталог; закрыто шаблонами в `.nxignore` —
 там же, почему `**/dist*` брать нельзя и как проверить, что правило вправду исключает ·
+[nx-vitest-plugin-worker-oom-shared-machine](/.claude/docs/nx-vitest-plugin-worker-oom-shared-machine.md)
+⚠️ `Plugin worker "@nx/vitest" exited unexpectedly` при `nx dev` — не баг воркера, а
+`JavaScript heap out of memory` (дефолтный лимит V8 ~4.3 ГБ, `nx` не задаёт
+`--max-old-space-size`), раздутый безусловной (без `include`) регистрацией `@nx/vitest` в
+`nx.json`, цепляющей `vitest.config.*` внутри вложенных `node_modules`; воркэраунд —
+`NODE_OPTIONS=--max-old-space-size=8192` (форвардится воркеру как есть) ·
 [tsgo-stray-declarations](/.claude/docs/tsgo-stray-declarations.md) ⚠️ `typecheck:tsgo` иногда
 эмитит `.d.ts`/`.d.ts.map` рядом с исходником вместо `outDir` — не воспроизведено детерминированно
 на чистом дереве, гигиена (`.d.ts.map` в `.gitignore`) и cleanup-команда ·
