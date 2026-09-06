@@ -3017,6 +3017,18 @@ HEAD. Подтверждено изолированным репро вне го
 для отдельного дока — паттерн уже есть в
 [git-pathspec-commit-worktree-not-index.md](/.claude/docs/git-pathspec-commit-worktree-not-index.md).
 
+**Дополнение (2026-09-06/07):** комментарий в `check-stray-dts.mjs` про то, что resolve корня
+через `import.meta.url` ломается в скопированной `.git/hooks/`-локации, оказался общим для трёх
+скриптов сразу (`check-section-numbers.mjs`, `next-section-number.mjs` дублировали ту же логику
+`git rev-parse --show-toplevel` независимо). Вынесено в
+[scripts/lib/repo-root.mjs](/scripts/lib/repo-root.mjs) (по образцу `lib/fs-walk.mjs`,
+`lib/submodules.mjs`) — единый `execFileSync`-хелпер, работающий и под bun, и под node.
+`install.sh` теперь копирует и `lib/repo-root.mjs` в `.git/hooks/lib/` рядом с самими чекерами —
+без этого относительный импорт `./lib/repo-root.mjs` из скопированной копии не резолвился бы,
+воспроизведя тот же класс бага, который чинили в §160. Проверено: все три скрипта напрямую
+(node/bun) и копии в `.git/hooks/_check-stray-dts.mjs`/`_check-section-numbers.mjs` после
+`install.sh --all-submodules` — поведение не изменилось. Коммит `c2219057`.
+
 **Открыт вопрос §115 не закрыт этой сессией:** причина, почему tsgo вообще эмитит эти файлы,
 всё ещё не воспроизведена детерминированно — гейт лечит симптом (не даёт артефакту доехать до
 git), не причину. Остаётся открытым до тех пор, пока кто-то не наткнётся на воспроизводимый
