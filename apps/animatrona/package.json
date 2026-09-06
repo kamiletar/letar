@@ -1,6 +1,6 @@
 {
   "name": "@letar/animatrona",
-  "version": "0.55.55",
+  "version": "0.55.56",
   "private": true,
   "description": "Desktop application for anime transcoding and viewing with IPFS support",
   "author": "Kami Letar",
@@ -18,8 +18,8 @@
     ]
   },
   "scripts": {
-    "postinstall": "node -e \"process.platform!=='linux'&&require('child_process').execFileSync('npx', ['--no','@electron/rebuild','-f','-w','classic-level','-v','44.1.0'],{stdio:'inherit',shell:true})\" && node -e \"process.platform==='win32'&&require('child_process').execFileSync('node', ['../../node_modules/ntsuspend/install.cjs'],{stdio:'inherit',cwd:__dirname})\"",
-    "postinstall:dev": "npx --no @electron/rebuild -f -w classic-level -v 44.1.0 && node -e \"process.platform==='win32'&&require('child_process').execFileSync('node', ['../../node_modules/ntsuspend/install.cjs'],{stdio:'inherit',cwd:__dirname})\""
+    "postinstall": "node -e \"process.platform!=='linux'&&require('child_process').execFileSync('npx', ['--no','@electron/rebuild','-f','-w','classic-level','-v','44.2.0'],{stdio:'inherit',shell:true})\" && node -e \"process.platform==='win32'&&require('child_process').execFileSync('node', ['../../node_modules/ntsuspend/install.cjs'],{stdio:'inherit',cwd:__dirname})\"",
+    "postinstall:dev": "npx --no @electron/rebuild -f -w classic-level -v 44.2.0 && node -e \"process.platform==='win32'&&require('child_process').execFileSync('node', ['../../node_modules/ntsuspend/install.cjs'],{stdio:'inherit',cwd:__dirname})\""
   },
   "dependencies": {
     "cheerio": "^1.2.0",
