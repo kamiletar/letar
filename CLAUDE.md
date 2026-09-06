@@ -494,6 +494,10 @@ unit-тест с настоящими (не замоканными) запрос
 pre-commit-хука не видел `.exe`-shim на Windows ·
 [dprint-eslint-curly-conflict](/.claude/docs/dprint-eslint-curly-conflict.md) `--fix` и `fmt`
 откатывают друг друга ·
+[oxlint-eslint-disable-directive-namespace-mismatch](/.claude/docs/oxlint-eslint-disable-directive-namespace-mismatch.md)
+⚠️ `oxlint-disable*` и `eslint-disable*` — раздельные неймспейсы директив подавления, не
+взаимозаменяемые даже при совпадении имени правила (`react-hooks/exhaustive-deps` реализован в
+обоих линтерах отдельно) — найдено и исправлено 9 мест без парной директивы ·
 [dprint-typescript-nested-aschild-comment-instability](/.claude/docs/dprint-typescript-nested-aschild-comment-instability.md)
 ⚠️ `Formatting not stable` — комментарий перед JSX на третьем уровне вложенных `Box asChild` ·
 [dprint-markdown-table-reformat](/.claude/docs/dprint-markdown-table-reformat.md) ⚠️ dprint

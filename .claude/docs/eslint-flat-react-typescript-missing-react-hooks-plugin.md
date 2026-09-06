@@ -123,3 +123,6 @@ export default [
 - `apps/animatrona/eslint.config.mjs` — исходный точечный фикс до централизации, комментарий там
   объясняет то же самое.
 - [PLAN-JOURNAL-2.md §52](/PLAN-JOURNAL-2.md) — разбор сессии, в которой найдено и исправлено.
+- [oxlint-eslint-disable-directive-namespace-mismatch.md](/.claude/docs/oxlint-eslint-disable-directive-namespace-mismatch.md) —
+  общий принцип, отдельным документом: `oxlint-disable*` и `eslint-disable*` — раздельные
+  неймспейсы директив, не взаимозаменяемые ни для одного правила, не только для `react-hooks/*`.

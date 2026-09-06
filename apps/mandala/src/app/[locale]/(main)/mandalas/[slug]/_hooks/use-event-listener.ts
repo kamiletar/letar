@@ -78,6 +78,7 @@ export function useEventListener(
     // Намеренно используем отдельные свойства options вместо объекта,
     // чтобы избежать ререндеров при изменении только ссылки
     // oxlint-disable-next-line eslint-plugin-react-hooks(exhaustive-deps)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [target, eventName, options?.capture, options?.once, options?.passive])
 }
 
@@ -147,5 +148,6 @@ export function useEventListeners<T extends EventTarget>(
     // Намеренно используем отдельные свойства options вместо объекта,
     // чтобы избежать ререндеров при изменении только ссылки
     // oxlint-disable-next-line eslint-plugin-react-hooks(exhaustive-deps)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [target, options?.capture, options?.once, options?.passive])
 }
