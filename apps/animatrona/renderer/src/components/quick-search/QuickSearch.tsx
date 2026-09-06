@@ -262,6 +262,7 @@ export function QuickSearch({ open, onOpenChange, onShowShortcuts, onImport }: Q
                         <VStack align="stretch" gap={0}>
                           {commands.map((cmd) => {
                             const isSelected = flatCommands[selectedIndex]?.id === cmd.id
+                            const CmdIcon = cmd.icon
 
                             return (
                               <Flex
@@ -280,7 +281,12 @@ export function QuickSearch({ open, onOpenChange, onShowShortcuts, onImport }: Q
                                 transition="all 0.1s ease-out"
                               >
                                 {/* Иконка */}
-                                <Box as={cmd.icon} color={isSelected ? 'primary.fg' : 'fg.muted'} flexShrink={0} />
+                                <CmdIcon
+                                  color={isSelected
+                                    ? 'var(--chakra-colors-primary-fg)'
+                                    : 'var(--chakra-colors-fg-muted)'}
+                                  style={{ flexShrink: 0 }}
+                                />
 
                                 {/* Текст */}
                                 <Box flex={1}>

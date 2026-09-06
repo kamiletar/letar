@@ -4,7 +4,7 @@
 
 ## Черновик (новые идеи)
 
-## Техдолг: `as=` на Chakra-компонентах — Box/Text/Heading (не Icon)
+## Техдолг: `as=` на Chakra-компонентах — Box/Text/Heading (не Icon) [ЗАКРЫТО 2026-09-06]
 
 `<Icon as={IconComponent}>` теперь почищен полностью и в `renderer/src/components/**` (475
 вхождений в 114 файлах, см. PLAN_COMPLETED.md запись 2026-08-26), и в `renderer/src/app/**` (42
@@ -29,12 +29,14 @@ update}/*`. Разбор на `asChild` + нативный тег — отдел
       `CommandPalette.tsx`/`EncodingStatusCard.tsx`/`EmptyLibraryState.tsx`/`QuickSearch.tsx`/
       `UpdateNotificationToast.tsx` — тот же класс правила, отдельная задача ниже.
 
-- [ ] Почистить `Box as={Component}` (иконка через компонент, не строка) в
+- [x] Почистить `Box as={Component}`/`Icon as={Component}` (иконка через компонент, не строка) в
       `CommandPalette.tsx`/`EncodingStatusCard.tsx`/`EmptyLibraryState.tsx`/`QuickSearch.tsx`/
-      `UpdateNotificationToast.tsx` — найдено 2026-09-06 при чистке `as="строка-тега"` выше, тот
-      же семгреп-запрет, но другой рецепт (пункты 1-3
-      [chakra-icon-as-prop-cleanup-pattern.md](/.claude/docs/chakra-icon-as-prop-cleanup-pattern.md),
-      не §7) — не тронуто намеренно, чтобы не выходить за рамки уже согласованной задачи.
+      `UpdateNotificationToast.tsx` (2026-09-06) — по пунктам 1-3
+      [chakra-icon-as-prop-cleanup-pattern.md](/.claude/docs/chakra-icon-as-prop-cleanup-pattern.md).
+      Статические/тернарные/динамические (`cmd.icon`) случаи — переменная `PascalCase` +
+      прямой рендер react-icons-компонента, цвет — CSS-переменная `var(--chakra-colors-*)`.
+      Полная проверка `grep -rn 'as={[A-Za-z]' renderer/src mobile-ui/src` по всему приложению —
+      0 срабатываний. format/lint/typecheck зелёные.
 
 - [ ] **Аудит `_active: scale()` в теме renderer'а на `pressScale`** (`@letar/ui`) — задача
       описана в [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md).

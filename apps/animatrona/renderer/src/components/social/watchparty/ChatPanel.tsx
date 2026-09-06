@@ -101,26 +101,28 @@ export function ChatPanel({ messages, onSendMessage, onSendReaction, messagesEnd
       </HStack>
 
       {/* Форма ввода */}
-      <Box as="form" onSubmit={handleSubmit} px={4} py={3} borderTopWidth={1} borderColor="border.subtle">
-        <HStack gap={2}>
-          <Input
-            ref={inputRef}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Написать сообщение..."
-            size="sm"
-            disabled={isSending}
-          />
-          <Button
-            type="submit"
-            colorPalette="blue"
-            size="sm"
-            disabled={!inputValue.trim() || isSending}
-            loading={isSending}
-          >
-            <LuSend />
-          </Button>
-        </HStack>
+      <Box asChild px={4} py={3} borderTopWidth={1} borderColor="border.subtle">
+        <form onSubmit={handleSubmit}>
+          <HStack gap={2}>
+            <Input
+              ref={inputRef}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Написать сообщение..."
+              size="sm"
+              disabled={isSending}
+            />
+            <Button
+              type="submit"
+              colorPalette="blue"
+              size="sm"
+              disabled={!inputValue.trim() || isSending}
+              loading={isSending}
+            >
+              <LuSend />
+            </Button>
+          </HStack>
+        </form>
       </Box>
     </VStack>
   )

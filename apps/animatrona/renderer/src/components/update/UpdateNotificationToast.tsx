@@ -7,7 +7,7 @@
 
 'use client'
 
-import { Box, Button, HStack, Icon, IconButton, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import { LuDownload, LuInfo, LuX } from 'react-icons/lu'
 
 interface UpdateNotificationToastProps {
@@ -56,7 +56,7 @@ export function UpdateNotificationToast({
 }: UpdateNotificationToastProps) {
   // Определяем цветовую схему в зависимости от типа
   const colorScheme = type === 'error' ? 'red' : 'purple'
-  const icon = type === 'available' ? LuDownload : type === 'downloaded' ? LuInfo : LuInfo
+  const IconComponent = type === 'available' ? LuDownload : type === 'downloaded' ? LuInfo : LuInfo
 
   // Заголовок
   const title = type === 'available'
@@ -89,7 +89,7 @@ export function UpdateNotificationToast({
       <HStack align="start" gap="3">
         {/* Иконка */}
         <Box p="2" bg={`${colorScheme}.subtle`} color={`${colorScheme}.fg`} borderRadius="md" flexShrink={0}>
-          <Icon fontSize="xl" as={icon} />
+          <IconComponent size={20} />
         </Box>
 
         {/* Контент */}

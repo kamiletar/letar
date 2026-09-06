@@ -163,7 +163,7 @@ export function CommandPalette({ open, onOpenChange, onShowShortcuts, onImport }
         >
           {/* Поле поиска */}
           <Flex px={4} py={3} borderBottomWidth={1} borderColor="border.subtle" align="center" gap={3}>
-            <Box as={LuSearch} color="fg.subtle" flexShrink={0} />
+            <LuSearch color="var(--chakra-colors-fg-subtle)" style={{ flexShrink: 0 }} />
             <Input
               placeholder="Поиск команд..."
               value={query}
@@ -212,6 +212,7 @@ export function CommandPalette({ open, onOpenChange, onShowShortcuts, onImport }
                     <VStack align="stretch" gap={0}>
                       {commands.map((cmd) => {
                         const isSelected = flatCommands[selectedIndex]?.id === cmd.id
+                        const CmdIcon = cmd.icon
 
                         return (
                           <Flex
@@ -230,7 +231,10 @@ export function CommandPalette({ open, onOpenChange, onShowShortcuts, onImport }
                             transition="all 0.1s ease-out"
                           >
                             {/* Иконка */}
-                            <Box as={cmd.icon} color={isSelected ? 'primary.fg' : 'fg.muted'} flexShrink={0} />
+                            <CmdIcon
+                              color={isSelected ? 'var(--chakra-colors-primary-fg)' : 'var(--chakra-colors-fg-muted)'}
+                              style={{ flexShrink: 0 }}
+                            />
 
                             {/* Текст */}
                             <Box flex={1}>
@@ -280,7 +284,7 @@ export function CommandPalette({ open, onOpenChange, onShowShortcuts, onImport }
               </HStack>
             </HStack>
             <HStack gap={1} color="fg.muted">
-              <Box as={LuCommand} />
+              <LuCommand />
               <Text fontSize="xs">Command Palette</Text>
             </HStack>
           </Flex>

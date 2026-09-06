@@ -5,7 +5,7 @@
  * Показывает прогресс текущего кодирования, количество в очереди
  */
 
-import { Badge, Box, HStack, Icon, Progress, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, HStack, Progress, Text, VStack } from '@chakra-ui/react'
 import Link from 'next/link'
 import { memo } from 'react'
 import { LuLoader, LuPause, LuZap } from 'react-icons/lu'
@@ -65,6 +65,7 @@ export const EncodingStatusCard = memo(function EncodingStatusCard() {
     }
   }
   const stage = getStageLabel()
+  const StatusIcon = isPaused ? LuPause : isProcessing ? LuLoader : LuZap
 
   return (
     <Link href="/transcode">
@@ -84,12 +85,13 @@ export const EncodingStatusCard = memo(function EncodingStatusCard() {
           {/* Заголовок */}
           <HStack justify="space-between" overflow="hidden">
             <HStack gap={2} minW={0} flex={1}>
-              <Icon
-                as={isPaused ? LuPause : isProcessing ? LuLoader : LuZap}
-                boxSize={4}
-                color={isPaused ? 'orange.400' : 'green.400'}
-                animation={isProcessing && !isPaused ? 'spin 2s linear infinite' : undefined}
-                flexShrink={0}
+              <StatusIcon
+                size={16}
+                color={isPaused ? 'var(--chakra-colors-orange-400)' : 'var(--chakra-colors-green-400)'}
+                style={{
+                  animation: isProcessing && !isPaused ? 'spin 2s linear infinite' : undefined,
+                  flexShrink: 0,
+                }}
               />
               <Text fontSize="xs" fontWeight="semibold" color={isPaused ? 'orange.300' : 'green.300'} truncate>
                 {isPaused ? 'Пауза' : 'Кодирование'}

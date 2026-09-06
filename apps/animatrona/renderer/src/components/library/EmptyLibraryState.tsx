@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Button, EmptyState, Kbd, Text, VStack } from '@chakra-ui/react'
+import { Button, EmptyState, Kbd, Text, VStack } from '@chakra-ui/react'
 import { LuFilm, LuFolderPlus, LuKeyboard } from 'react-icons/lu'
 
 interface EmptyLibraryStateProps {
@@ -22,7 +22,7 @@ export function EmptyLibraryState({ onImport, onShowShortcuts }: EmptyLibrarySta
       <EmptyState.Content>
         {/* Иконка */}
         <EmptyState.Indicator>
-          <Box as={LuFilm} color="primary.fg" />
+          <LuFilm color="var(--chakra-colors-primary-fg)" />
         </EmptyState.Indicator>
 
         {/* Текст */}

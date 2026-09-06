@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [0.55.42] - 2026-09-06
+
+### Changed
+
+- Добита чистка `as=` на Chakra-компонентах: динамические/статические `Box as={Component}`/
+  `Icon as={Component}` (иконки через ссылку на компонент, не строку) в `CommandPalette.tsx`,
+  `EncodingStatusCard.tsx`, `EmptyLibraryState.tsx`, `QuickSearch.tsx`,
+  `UpdateNotificationToast.tsx`, плюс `Box as="form"` в `ChatPanel.tsx` (найден отдельным
+  прогоном, вне исходного списка). Итог: `grep -rn` по всему `apps/animatrona` (`renderer/src` +
+  `mobile-ui/src`) на любой `as="строка"`/`as={Компонент}` — 0 срабатываний, техдолг закрыт
+  полностью.
+
 ## [0.55.41] - 2026-09-06
 
 ### Changed
