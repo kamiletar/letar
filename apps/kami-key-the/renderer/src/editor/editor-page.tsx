@@ -17,6 +17,7 @@ import { KeyPage } from './key-page'
 import { findKeyByVk } from './keyboard-data'
 import { KeyboardView } from './keyboard-view'
 import { LayoutTabs } from './layout-tabs'
+import { describeSymbolConflict, findSymbolConflict } from './symbol-conflict'
 import { Toolbar } from './toolbar'
 
 const MAX_UNDO = 50
@@ -269,6 +270,8 @@ export function EditorPage() {
       const mappings = [...layout.mappings]
       const idx = mappings.findIndex((m) => m.vk === selectedKey.vk)
 
+      const conflict = findSymbolConflict(layout.mappings, char, selectedKey.vk, slot)
+
       if (slot === 'char') {
         if (idx === -1) {
           mappings.push({ vk: selectedKey.vk, char, label: name })
@@ -287,6 +290,9 @@ export function EditorPage() {
       const layouts = config.layouts.map((l, i) => (i === activeLayoutIndex ? { ...l, mappings } : l))
       setConfig({ ...config, layouts })
       triggerFlash(selectedKey.vk)
+      if (conflict) {
+        toaster.create({ title: describeSymbolConflict(conflict), type: 'warning', duration: 4000 })
+      }
     },
     [config, selectedKey, activeLayoutIndex, pushUndo, triggerFlash],
   )
@@ -301,6 +307,8 @@ export function EditorPage() {
       const layout = config.layouts[activeLayoutIndex]
       const mappings = [...layout.mappings]
       const idx = mappings.findIndex((m) => m.vk === vk)
+
+      const conflict = findSymbolConflict(layout.mappings, char, vk, slot)
 
       if (slot === 'char') {
         if (idx === -1) {
@@ -320,6 +328,9 @@ export function EditorPage() {
       const layouts = config.layouts.map((l, i) => (i === activeLayoutIndex ? { ...l, mappings } : l))
       setConfig({ ...config, layouts })
       triggerFlash(vk)
+      if (conflict) {
+        toaster.create({ title: describeSymbolConflict(conflict), type: 'warning', duration: 4000 })
+      }
     },
     [config, activeLayoutIndex, pushUndo, triggerFlash],
   )
