@@ -5,6 +5,10 @@ import { defineSlotRecipe } from '@chakra-ui/react'
  *
  * Решает проблему дефолтного курсора на чекбоксах.
  * colorPalette устанавливается в base.root для фирменного цвета.
+ *
+ * Глубина нажатия control НЕ переведена на общую `pressScale` (@letar/ui) — control чекбокса
+ * мельче нижнего шага шкалы (`2xs` = 0.94), ему нужно более заметное проседание. См. JSDoc
+ * `pressScale` в libs/ui, раздел «Когда НЕ использовать эту шкалу».
  */
 export const checkboxRecipe = defineSlotRecipe({
   slots: ['root', 'label', 'control', 'indicator', 'group'],

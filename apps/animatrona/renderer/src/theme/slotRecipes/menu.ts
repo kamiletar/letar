@@ -1,7 +1,9 @@
 import { defineSlotRecipe } from '@chakra-ui/react'
+import { pressScale } from '@letar/ui'
 
 /**
- * Menu slot recipe с тактильной обратной связью
+ * Menu slot recipe с тактильной обратной связью.
+ * Глубина нажатия item — общая шкала @letar/ui (`pressScale.lg`).
  */
 export const menuRecipe = defineSlotRecipe({
   slots: [
@@ -41,7 +43,7 @@ export const menuRecipe = defineSlotRecipe({
         item: {
           _active: {
             bg: 'bg.muted',
-            transform: 'scale(0.98)',
+            transform: pressScale.lg,
           },
         },
       },

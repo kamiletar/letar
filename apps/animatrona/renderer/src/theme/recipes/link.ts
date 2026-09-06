@@ -1,17 +1,16 @@
 import { defineRecipe } from '@chakra-ui/react'
+import { pressScale } from '@letar/ui'
 
 /**
- * Link recipe с визуальной обратной связью
- *
- * Все варианты ссылок имеют:
- * - Плавные переходы
- * - transform: scale() при нажатии
+ * Link recipe с визуальной обратной связью.
+ * Глубина нажатия — общая шкала @letar/ui (`pressScale`): у ссылки нет собственного
+ * размера, поэтому шаг по умолчанию — `md`.
  */
 export const linkRecipe = defineRecipe({
   base: {
     transition: 'all 0.1s ease-out',
     _active: {
-      transform: 'scale(0.95)',
+      transform: pressScale.md,
     },
   },
   variants: {

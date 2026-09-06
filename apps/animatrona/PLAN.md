@@ -38,8 +38,19 @@ update}/*`. Разбор на `asChild` + нативный тег — отдел
       Полная проверка `grep -rn 'as={[A-Za-z]' renderer/src mobile-ui/src` по всему приложению —
       0 срабатываний. format/lint/typecheck зелёные.
 
-- [ ] **Аудит `_active: scale()` в теме renderer'а на `pressScale`** (`@letar/ui`) — задача
-      описана в [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md).
+- [x] **Аудит `_active: scale()` в теме renderer'а на `pressScale`** (`@letar/ui`, 2026-09-06) —
+      задача описана в [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md).
+      Найдено 4 места: `recipes/button.ts` (base + все 5 size-вариантов → `pressScale.md/xs/sm/
+      md/lg/xl` по образцу уже аудированного `driving-school`), `recipes/link.ts` (нет своего
+      размера → дефолтный `pressScale.md`), `slotRecipes/menu.ts` (`item` варианта `subtle` →
+      `pressScale.lg`, числовое совпадение со старым `scale(0.98)`). Пятое место —
+      `slotRecipes/checkbox.ts` (`control`, `scale(0.9)`) — исключение №1 из JSDoc `pressScale`
+      (control мельче нижнего шага шкалы `2xs`=0.94), оставлено как есть с комментарием, не
+      переведено. mobile-ui своей темы не имеет — второго места для аудита нет.
+      lint/typecheck:tsgo animatrona — зелёные (0 ошибок, только преэкзистентные warnings).
+      Визуально не проверялось — GUI Electron-приложения не тестируется в этой песочнице
+      (см. `.claude/rules/electron.md`), правки — только числовые значения `transform` без
+      изменения структуры JSX.
 
 - [ ] **AniList как источник английского описания (`descriptionEn`) в AnimeInfo/directoryCid**
       (план от 2026-08-08) — идея: раз в раздаче уже бывают английские аудиодорожки и субтитры,

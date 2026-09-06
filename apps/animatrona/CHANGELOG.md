@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+## [0.55.44] - 2026-09-06
+
+### Changed
+
+- Тема renderer'а сведена на общую шкалу глубины нажатия `pressScale` (`@letar/ui`):
+  `recipes/button.ts` (все размеры), `recipes/link.ts`, `slotRecipes/menu.ts` — по образцу
+  уже аудированного `driving-school`. `slotRecipes/checkbox.ts` — задокументированное
+  исключение (control мельче нижнего шага шкалы), значение не менялось.
+
 ## [0.55.43] - 2026-09-06
 
 ### Added
