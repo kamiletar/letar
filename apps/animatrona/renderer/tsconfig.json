@@ -41,6 +41,8 @@
       "@letar/animatrona-utils": ["../../../libs/animatrona-utils/src/index.ts"],
       "@letar/animatrona-ui": ["../../../libs/animatrona-ui/src/index.ts"],
       "@letar/hooks": ["../../../libs/hooks/src/index.ts"],
+      "@letar/folder-scan": ["../../../libs/folder-scan/src/index.ts"],
+      "@letar/folder-player-react": ["../../../libs/folder-player-react/src/index.ts"],
       "@letar/forms/captcha/server": ["../../../libs/forms/src/server/captcha/verify.ts"],
       "@letar/forms-core/credit-card": ["../../../libs/forms-core/src/lib/credit-card/index.ts"],
       "@letar/forms-core/edit-intent": ["../../../libs/forms-core/src/lib/edit-intent/index.ts"],

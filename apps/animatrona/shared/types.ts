@@ -3,7 +3,7 @@
  * Единый источник истины — избегаем дублирования
  */
 
-import type { SubtitleType } from './utils/subtitle-type'
+import type { SubtitleType } from '@letar/folder-scan'
 
 export type { SubtitleType }
 

@@ -12,7 +12,7 @@ import { useCallback, useState } from 'react'
 import { LuCheck, LuFileVideo, LuFolder, LuFolderOpen, LuX } from 'react-icons/lu'
 
 import { toaster } from '@/components/ui/toaster'
-import { parseEpisodeNumber } from '@/lib/parse-filename'
+import { parseEpisodeNumber } from '@letar/folder-player-react'
 import type { ParsedFile } from './FileScanStep'
 
 interface DonorSelectStepProps {

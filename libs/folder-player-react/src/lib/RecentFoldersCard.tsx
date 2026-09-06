@@ -11,7 +11,7 @@ import { ru } from 'date-fns/locale'
 import { memo, useCallback } from 'react'
 import { LuFolderOpen, LuTrash2 } from 'react-icons/lu'
 
-import type { FolderHistoryEntry } from '../types'
+import type { FolderHistoryEntry } from './types'
 
 interface RecentFoldersCardProps {
   /** История папок */

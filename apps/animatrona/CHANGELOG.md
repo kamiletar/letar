@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [0.55.52] - 2026-09-06
+
+### Changed
+
+- Перенесена renderer-часть папочного плеера в `libs/folder-player-react`/`libs/folder-scan`
+  (Фаза 1 плана «Animatrona Player», PLAN.md) — `FolderPlayerHost`/`FolderPlayerStorage` как
+  абстракция над `window.electronAPI`/`localStorage`, хуки `useFolderPlayer`/`useWatchProgress`/
+  `useFolderHistory`/`useExternalAudio`, компоненты `EpisodeSidebar`/`RecentFoldersCard`, парсер
+  имён файлов и классификатор типа субтитров. `renderer/src/app/player/page.tsx` собирает хост из
+  своего `electronAPI`; старые файлы в `app/player/{types,_hooks,_components}` удалены. Main-часть
+  (`MediaProber`) и новое отдельное приложение — следующие шаги той же фазы.
+
 ## [0.55.51] - 2026-09-06
 
 ### Added

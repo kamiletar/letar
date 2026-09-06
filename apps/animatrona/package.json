@@ -1,6 +1,6 @@
 {
   "name": "@letar/animatrona",
-  "version": "0.55.51",
+  "version": "0.55.52",
   "private": true,
   "description": "Desktop application for anime transcoding and viewing with IPFS support",
   "author": "Kami Letar",
@@ -12,7 +12,9 @@
       "@letar/electron-storage",
       "@letar/hooks",
       "@letar/seed-utils",
-      "@letar/icon-generator"
+      "@letar/icon-generator",
+      "@letar/folder-scan",
+      "@letar/folder-player-react"
     ]
   },
   "scripts": {

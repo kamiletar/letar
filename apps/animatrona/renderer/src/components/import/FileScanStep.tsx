@@ -21,8 +21,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { LuFileVideo, LuHash, LuRefreshCw } from 'react-icons/lu'
 
 import { formatFileSize } from '@/lib/format-utils'
-import { type EpisodeType, type ParsedEpisodeInfo, parseEpisodeInfo } from '@/lib/parse-filename'
 import type { MediaFileInfo } from '@/types/electron'
+import { type EpisodeType, type ParsedEpisodeInfo, parseEpisodeInfo } from '@letar/folder-player-react'
 
 // Реэкспорт типов для обратной совместимости
 export type { EpisodeType, ParsedEpisodeInfo }

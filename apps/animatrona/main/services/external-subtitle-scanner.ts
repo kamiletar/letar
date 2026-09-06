@@ -8,9 +8,9 @@
  * - Warning для несматченных файлов
  */
 
+import { detectSubtitleType, type SubtitleType } from '@letar/folder-scan'
 import { readdir } from 'fs/promises'
 import path from 'path'
-import { detectSubtitleType, type SubtitleType } from '../../shared/utils/subtitle-type'
 import { scanDirectoryRecursive } from '../utils/fs-utils'
 import { createModuleLogger } from '../utils/logger'
 import { getSubtitleInfo } from './subtitle-parser'
@@ -43,7 +43,7 @@ const SUBTITLE_EXTENSIONS = new Set(['.ass', '.ssa', '.srt', '.vtt'])
 const FONT_EXTENSIONS = new Set(['.ttf', '.otf', '.woff', '.woff2', '.eot'])
 
 /**
- * Тип субтитров — реэкспорт единого источника (`shared/utils/subtitle-type`).
+ * Тип субтитров — реэкспорт единого источника (`@letar/folder-scan`).
  * Классификатор там же и работает одинаково для внешних файлов и встроенных дорожек.
  */
 export type { SubtitleType }

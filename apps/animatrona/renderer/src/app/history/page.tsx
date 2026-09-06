@@ -18,8 +18,8 @@ import {
   type WatchedAnimeResult,
   type WatchHistoryResult,
 } from '@/app/_actions/watch-progress.action'
-import type { FolderHistoryEntry } from '@/app/player/types'
 import { Header } from '@/components/layout'
+import type { FolderHistoryEntry } from '@letar/folder-player-react'
 
 /** Ключ для localStorage */
 const FOLDER_HISTORY_STORAGE_KEY = 'animatrona-folder-history'

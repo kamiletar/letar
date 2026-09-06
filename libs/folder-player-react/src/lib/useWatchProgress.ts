@@ -1,13 +1,14 @@
 /**
- * Хук для сохранения позиции просмотра в localStorage
+ * Хук для сохранения позиции просмотра в персистентном хранилище
  * Используется в папочном режиме плеера (без БД)
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import type { WatchProgressEntry, WatchProgressStorage } from '../types'
+import type { FolderPlayerStorage } from './host'
+import type { WatchProgressEntry, WatchProgressStorage } from './types'
 
-/** Ключ для localStorage */
+/** Ключ хранилища */
 const STORAGE_KEY = 'animatrona-folder-player-progress'
 
 /** Интервал автосохранения (мс) */
@@ -25,17 +26,17 @@ const MAX_PROGRESS_PERCENT = 95
 /**
  * Хук для управления прогрессом просмотра
  */
-export function useWatchProgress() {
-  const [storage, setStorage] = useState<WatchProgressStorage>({})
+export function useWatchProgress(storage: FolderPlayerStorage) {
+  const [progressStorage, setProgressStorage] = useState<WatchProgressStorage>({})
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const pendingUpdatesRef = useRef<Map<string, WatchProgressEntry>>(new Map())
 
   /**
-   * Загрузка данных из localStorage при монтировании
+   * Загрузка данных из хранилища при монтировании
    */
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY)
+      const raw = storage.getItem(STORAGE_KEY)
       if (raw) {
         const parsed = JSON.parse(raw) as WatchProgressStorage
         // Очистка старых записей
@@ -46,43 +47,44 @@ export function useWatchProgress() {
             cleaned[path] = entry
           }
         }
-        // oxlint-disable-next-line react/set-state-in-effect -- гидратация из localStorage (внешняя система)
-        setStorage(cleaned)
+        // oxlint-disable-next-line react/set-state-in-effect -- гидратация из хранилища (внешняя система)
+        setProgressStorage(cleaned)
         // Сохраняем очищенные данные обратно
         if (Object.keys(cleaned).length !== Object.keys(parsed).length) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned))
+          storage.setItem(STORAGE_KEY, JSON.stringify(cleaned))
         }
       }
     } catch (error) {
-      console.error('[useWatchProgress] Ошибка загрузки из localStorage:', error)
+      console.error('[useWatchProgress] Ошибка загрузки из хранилища:', error)
     }
+    // Загрузка только при монтировании — storage считается стабильным на весь жизненный цикл хоста
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   /**
-   * Сохранение в localStorage (debounced)
+   * Сохранение в хранилище (debounced)
    */
   const flushToStorage = useCallback(() => {
     if (pendingUpdatesRef.current.size === 0) {
       return
     }
 
-    setStorage((prev) => {
+    setProgressStorage((prev) => {
       const updated = { ...prev }
       for (const [path, entry] of pendingUpdatesRef.current) {
         updated[path] = entry
       }
       pendingUpdatesRef.current.clear()
 
-      // Сохраняем в localStorage
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+        storage.setItem(STORAGE_KEY, JSON.stringify(updated))
       } catch (error) {
-        console.error('[useWatchProgress] Ошибка сохранения в localStorage:', error)
+        console.error('[useWatchProgress] Ошибка сохранения в хранилище:', error)
       }
 
       return updated
     })
-  }, [])
+  }, [storage])
 
   /**
    * Очистка при размонтировании
@@ -90,6 +92,7 @@ export function useWatchProgress() {
   useEffect(() => {
     return () => {
       // Сохраняем все pending обновления
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- ref, не state; актуален на момент unmount
       if (pendingUpdatesRef.current.size > 0) {
         flushToStorage()
       }
@@ -104,9 +107,9 @@ export function useWatchProgress() {
    */
   const getProgress = useCallback(
     (filePath: string): WatchProgressEntry | null => {
-      return storage[filePath] ?? pendingUpdatesRef.current.get(filePath) ?? null
+      return progressStorage[filePath] ?? pendingUpdatesRef.current.get(filePath) ?? null
     },
-    [storage],
+    [progressStorage],
   )
 
   /**
@@ -150,18 +153,21 @@ export function useWatchProgress() {
   /**
    * Удалить прогресс для файла
    */
-  const clearProgress = useCallback((filePath: string) => {
-    pendingUpdatesRef.current.delete(filePath)
-    setStorage((prev) => {
-      const { [filePath]: _removed, ...rest } = prev
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(rest))
-      } catch (error) {
-        console.error('[useWatchProgress] Ошибка удаления из localStorage:', error)
-      }
-      return rest
-    })
-  }, [])
+  const clearProgress = useCallback(
+    (filePath: string) => {
+      pendingUpdatesRef.current.delete(filePath)
+      setProgressStorage((prev) => {
+        const { [filePath]: _removed, ...rest } = prev
+        try {
+          storage.setItem(STORAGE_KEY, JSON.stringify(rest))
+        } catch (error) {
+          console.error('[useWatchProgress] Ошибка удаления из хранилища:', error)
+        }
+        return rest
+      })
+    },
+    [storage],
+  )
 
   /**
    * Проверить, нужно ли показывать "продолжить с места"
@@ -218,8 +224,8 @@ export function useWatchProgress() {
    * Получить все записи прогресса
    */
   const getAllProgress = useCallback((): WatchProgressStorage => {
-    return { ...storage }
-  }, [storage])
+    return { ...progressStorage }
+  }, [progressStorage])
 
   return {
     /** Получить прогресс для файла */

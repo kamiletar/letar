@@ -2,12 +2,7 @@
  * FFprobe модуль — получение информации о медиафайлах
  */
 
-import {
-  detectSubtitleType,
-  isDispositionFlagSet,
-  type StreamDisposition,
-  type SubtitleType,
-} from '../../shared/utils/subtitle-type'
+import { detectSubtitleType, isDispositionFlagSet, type StreamDisposition, type SubtitleType } from '@letar/folder-scan'
 import { spawnFFprobe } from '../utils/ffmpeg-spawn'
 import type { AudioTrack, MediaInfo, VideoTrack } from './types'
 import { extractBitrate, getBitDepth } from './utils'

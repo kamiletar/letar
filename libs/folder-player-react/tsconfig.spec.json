@@ -3,8 +3,18 @@
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
     "types": ["vitest/globals", "node"],
-    "rootDir": ".",
-    "jsx": "react-jsx"
+    "rootDir": "..",
+    "jsx": "react-jsx",
+    "paths": {
+      "@letar/folder-scan": ["../folder-scan/src/index.ts"]
+    }
   },
-  "include": ["vitest.config.mts", "src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "vitest.setup.ts"]
+  "include": [
+    "vitest.config.mts",
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "vitest.setup.ts",
+    "../folder-scan/src/**/*.ts"
+  ]
 }

@@ -170,7 +170,7 @@ export interface MediaFileInfo {
   extension: string
 }
 
-/** Тип субтитров — реэкспорт единого источника (`shared/utils/subtitle-type`) */
+/** Тип субтитров — реэкспорт единого источника (`@letar/folder-scan`) */
 export type { SubtitleType }
 
 /** Результат матчинга внешнего субтитра */

@@ -10,7 +10,7 @@ import type { ParsedFile } from '../FileScanStep'
 /**
  * Тип субтитров: полные, надписи (signs), песни (songs).
  * Реэкспорт единого источника — сам тип и классификатор живут в
- * `shared/utils/subtitle-type.ts`, одинаково для внешних файлов и встроенных дорожек.
+ * `@letar/folder-scan` (`detectSubtitleType`), одинаково для внешних файлов и встроенных дорожек.
  */
 export type { SubtitleType }
 

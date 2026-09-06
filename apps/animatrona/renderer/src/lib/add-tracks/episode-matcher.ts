@@ -65,10 +65,10 @@ const AUDIO_EXTENSIONS = new Set(['.mp3', '.aac', '.flac', '.opus', '.m4a', '.wa
 /** Расширения субтитров */
 const SUBTITLE_EXTENSIONS = new Set(['.ass', '.ssa', '.srt', '.vtt', '.sub'])
 
-import { parseEpisodeNumber } from '../parse-filename'
+import { parseEpisodeNumber } from '@letar/folder-player-react'
 
 // Реэкспорт как extractEpisodeNumber для обратной совместимости
-export { parseEpisodeNumber as extractEpisodeNumber } from '../parse-filename'
+export const extractEpisodeNumber = parseEpisodeNumber
 
 /**
  * Определить тип контента: серия, спешл или неизвестно

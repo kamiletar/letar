@@ -10,7 +10,7 @@ import { Button, CloseButton, Dialog, HStack, Portal, Text, VStack } from '@chak
 import { useEffect, useMemo } from 'react'
 import { LuCheck, LuClock, LuTrash2 } from 'react-icons/lu'
 
-import type { WatchProgressEntry, WatchProgressStorage } from '@/app/player/types'
+import type { WatchProgressEntry, WatchProgressStorage } from '@letar/folder-player-react'
 
 /** Ключ для localStorage (должен совпадать с useWatchProgress) */
 const STORAGE_KEY = 'animatrona-folder-player-progress'

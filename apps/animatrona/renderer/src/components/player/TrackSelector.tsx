@@ -14,7 +14,7 @@ import { LuCaptions, LuCheck, LuLanguages, LuPencil, LuTrash2, LuVolume2 } from 
 
 import { formatSubtitleType } from '@/constants/dub-groups'
 
-import type { SubtitleType } from '../../../../shared/utils/subtitle-type'
+import type { SubtitleType } from '@letar/folder-scan'
 import { usePlayerContainer } from './PlayerContext'
 
 /** Информация о дорожке */

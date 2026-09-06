@@ -4,10 +4,13 @@
     "lib": ["es2022", "dom", "dom.iterable"],
     "outDir": "dist",
     "types": ["node"],
-    "rootDir": "src",
+    "rootDir": "..",
     "jsx": "react-jsx",
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
-    "ignoreDeprecations": "6.0"
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@letar/folder-scan": ["../folder-scan/src/index.ts"]
+    }
   },
   "exclude": [
     "out-tsc",
@@ -21,5 +24,5 @@
     "eslint.config.cjs",
     "eslint.config.mjs"
   ],
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "../folder-scan/src/**/*.ts"]
 }

@@ -48,6 +48,8 @@
       "@letar/animatrona-utils": ["../../libs/animatrona-utils/src/index.ts"],
       "@letar/animatrona-ui": ["../../libs/animatrona-ui/src/index.ts"],
       "@letar/electron-storage": ["../../libs/electron-storage/src/index.ts"],
+      "@letar/folder-scan": ["../../libs/folder-scan/src/index.ts"],
+      "@letar/folder-player-react": ["../../libs/folder-player-react/src/index.ts"],
       "@letar/hooks": ["../../libs/hooks/src/index.ts"],
       "@letar/seed-utils": ["../../libs/seed-utils/src/index.ts"],
       "@letar/forms/captcha/server": ["../../libs/forms/src/server/captcha/verify.ts"],
@@ -86,7 +88,10 @@
     "../../libs/animatrona-ui/src/**/*.ts",
     "../../libs/animatrona-ui/src/**/*.tsx",
     "../../libs/electron-storage/src/**/*.ts",
-    "../../libs/hooks/src/**/*.ts"
+    "../../libs/hooks/src/**/*.ts",
+    "../../libs/folder-scan/src/**/*.ts",
+    "../../libs/folder-player-react/src/**/*.ts",
+    "../../libs/folder-player-react/src/**/*.tsx"
   ],
   "exclude": [
     "node_modules",

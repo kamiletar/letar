@@ -5,10 +5,14 @@
 
 import { type RefObject, useEffect, useRef } from 'react'
 
+import type { FolderPlayerHost } from './host'
+
 /** Порог рассинхронизации в секундах */
 const SYNC_THRESHOLD = 0.15
 
 interface UseExternalAudioOptions {
+  /** Хост — источник `toMediaUrl` для внешнего аудиофайла */
+  host: FolderPlayerHost
   /** Ref к video элементу */
   videoRef: RefObject<HTMLVideoElement | null>
   /** Путь к внешнему аудиофайлу (null = использовать звук из видео) */
@@ -23,7 +27,7 @@ interface UseExternalAudioOptions {
  * - Mute'ит оригинальное аудио в видео
  * - Синхронизирует play/pause/seek/rate/volume
  */
-export function useExternalAudio({ videoRef, audioPath }: UseExternalAudioOptions) {
+export function useExternalAudio({ host, videoRef, audioPath }: UseExternalAudioOptions) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const isActiveRef = useRef(false)
   // Ref для хранения предыдущего пути — для немедленной остановки при смене
@@ -77,8 +81,7 @@ export function useExternalAudio({ videoRef, audioPath }: UseExternalAudioOption
       }
 
       // Создать audio элемент
-      const normalizedPath = audioPath.replace(/\\/g, '/')
-      audio = new Audio(`media://${normalizedPath}`)
+      audio = new Audio(host.toMediaUrl(audioPath))
       audioRef.current = audio
 
       // Mute видео
@@ -199,7 +202,7 @@ export function useExternalAudio({ videoRef, audioPath }: UseExternalAudioOption
         cleanupFn()
       }
     }
-  }, [audioPath, videoRef])
+  }, [audioPath, videoRef, host])
 
   return audioRef
 }

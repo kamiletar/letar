@@ -1,13 +1,14 @@
 /**
- * Хук для хранения истории открытых папок в localStorage
+ * Хук для хранения истории открытых папок в персистентном хранилище
  * Используется в папочном режиме плеера
  */
 
 import { useCallback, useEffect, useState } from 'react'
 
-import type { FolderHistoryEntry, FolderHistoryStorage } from '../types'
+import type { FolderPlayerStorage } from './host'
+import type { FolderHistoryEntry, FolderHistoryStorage } from './types'
 
-/** Ключ для localStorage */
+/** Ключ хранилища */
 const STORAGE_KEY = 'animatrona-folder-history'
 
 /** Максимальное количество папок в истории */
@@ -19,42 +20,47 @@ const MAX_AGE = 90 * 24 * 60 * 60 * 1000
 /**
  * Хук для управления историей папок
  */
-export function useFolderHistory() {
+export function useFolderHistory(storage: FolderPlayerStorage) {
   const [history, setHistory] = useState<FolderHistoryStorage>([])
 
   /**
-   * Загрузка данных из localStorage при монтировании
+   * Загрузка данных из хранилища при монтировании
    */
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY)
+      const raw = storage.getItem(STORAGE_KEY)
       if (raw) {
         const parsed = JSON.parse(raw) as FolderHistoryStorage
         // Очистка старых записей
         const now = Date.now()
         const cleaned = parsed.filter((entry) => now - entry.lastOpenedAt < MAX_AGE)
-        // oxlint-disable-next-line react/set-state-in-effect -- гидратация из localStorage (внешняя система)
+        // oxlint-disable-next-line react/set-state-in-effect -- гидратация из хранилища (внешняя система)
         setHistory(cleaned)
         // Сохраняем очищенные данные обратно
         if (cleaned.length !== parsed.length) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned))
+          storage.setItem(STORAGE_KEY, JSON.stringify(cleaned))
         }
       }
     } catch (error) {
-      console.error('[useFolderHistory] Ошибка загрузки из localStorage:', error)
+      console.error('[useFolderHistory] Ошибка загрузки из хранилища:', error)
     }
+    // Загрузка только при монтировании — storage считается стабильным на весь жизненный цикл хоста
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   /**
-   * Сохранить историю в localStorage
+   * Сохранить историю в хранилище
    */
-  const saveToStorage = useCallback((data: FolderHistoryStorage) => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-    } catch (error) {
-      console.error('[useFolderHistory] Ошибка сохранения в localStorage:', error)
-    }
-  }, [])
+  const saveToStorage = useCallback(
+    (data: FolderHistoryStorage) => {
+      try {
+        storage.setItem(STORAGE_KEY, JSON.stringify(data))
+      } catch (error) {
+        console.error('[useFolderHistory] Ошибка сохранения в хранилище:', error)
+      }
+    },
+    [storage],
+  )
 
   /**
    * Добавить папку в историю (или обновить существующую)

@@ -12,17 +12,94 @@ import { LuArrowLeft, LuFile, LuFolderOpen, LuPlay } from 'react-icons/lu'
 
 import { useRouter } from 'next/navigation'
 
+import {
+  EpisodeSidebar,
+  type FolderPlayerHost,
+  type MediaProbeResult,
+  RecentFoldersCard,
+  useFolderHistory,
+  useFolderPlayer,
+  useWatchProgress,
+} from '@letar/folder-player-react'
+
 import { useGlobalVideoStore } from '@/components/global-video'
 import { ImportWizardDialog } from '@/components/import/ImportWizardDialog'
 import { Header } from '@/components/layout'
 import type { VideoPlayerRef } from '@/components/player'
+import { toMediaUrl } from '@/lib/media-url'
 
-import { EpisodeSidebar } from './_components/EpisodeSidebar'
-import { RecentFoldersCard } from './_components/RecentFoldersCard'
-import { useFolderHistory } from './_hooks/useFolderHistory'
 import { useFolderModeUI } from './_hooks/useFolderModeUI'
-import { useFolderPlayer } from './_hooks/useFolderPlayer'
-import { useWatchProgress } from './_hooks/useWatchProgress'
+
+/** Хост папочного плеера — собран из `window.electronAPI` Animatrona */
+const folderPlayerHost: FolderPlayerHost = {
+  selectFolder: () => {
+    if (!window.electronAPI) {
+      console.warn('[PlayerPage] electronAPI not available')
+      return Promise.resolve(null)
+    }
+    return window.electronAPI.dialog.selectFolder()
+  },
+  selectFile: (filters) => {
+    if (!window.electronAPI) {
+      console.warn('[PlayerPage] electronAPI not available')
+      return Promise.resolve(null)
+    }
+    return window.electronAPI.dialog.selectFile(filters)
+  },
+  scanFolder: async (folderPath, recursive, mediaTypes) => {
+    if (!window.electronAPI) {
+      return { success: false, files: [] }
+    }
+    const result = await window.electronAPI.fs.scanFolder(folderPath, recursive, mediaTypes)
+    return { success: result.success, files: result.files ?? [] }
+  },
+  scanExternalAudio: (folderPath, videoFiles) => {
+    if (!window.electronAPI) {
+      return Promise.resolve({ audioDirs: [], audioTracks: [], unmatchedFiles: [] })
+    }
+    return window.electronAPI.fs.scanExternalAudio(folderPath, videoFiles)
+  },
+  scanExternalSubtitles: (folderPath, videoFiles) => {
+    if (!window.electronAPI) {
+      return Promise.resolve({ subsDirs: [], fontsDirs: [], subtitles: [], unmatchedFiles: [] })
+    }
+    return window.electronAPI.fs.scanExternalSubtitles(folderPath, videoFiles)
+  },
+  probe: async (filePath): Promise<MediaProbeResult> => {
+    if (!window.electronAPI) {
+      return { success: false, error: 'electronAPI недоступен' }
+    }
+    const result = await window.electronAPI.ffmpeg.probe(filePath)
+    if (!result.success || !result.data) {
+      return { success: false, error: result.error }
+    }
+    return {
+      success: true,
+      data: {
+        audioTracks: result.data.audioTracks.map((track) => ({
+          index: track.index,
+          language: track.language,
+          title: track.title,
+          codec: track.codec ?? 'unknown',
+          channels: track.channels ?? 0,
+          bitrate: track.bitrate,
+          isDefault: track.isDefault,
+          isForced: track.isForced,
+        })),
+        subtitleTracks: result.data.subtitleTracks.map((track) => ({
+          index: track.index,
+          language: track.language,
+          title: track.title,
+          codec: track.codec,
+          isDefault: track.isDefault,
+          isForced: track.isForced,
+          subtitleType: track.subtitleType,
+        })),
+      },
+    }
+  },
+  toMediaUrl: (path) => toMediaUrl(path) ?? path,
+}
 
 // Dynamic import для VideoPlayer — загружается только когда нужен (~500KB)
 const VideoPlayer = dynamic(() => import('@/components/player/VideoPlayer').then((mod) => mod.VideoPlayer), {
@@ -51,9 +128,9 @@ export default function PlayerPage() {
   const lastSavedTimeRef = useRef<number>(0)
 
   // === Hooks ===
-  const folderPlayer = useFolderPlayer()
-  const watchProgress = useWatchProgress()
-  const folderHistory = useFolderHistory()
+  const folderPlayer = useFolderPlayer(folderPlayerHost)
+  const watchProgress = useWatchProgress(localStorage)
+  const folderHistory = useFolderHistory(localStorage)
 
   // === Computed ===
   const isFolderMode = folderPlayer.isFolderMode
@@ -62,6 +139,7 @@ export default function PlayerPage() {
 
   // === Folder Mode UI ===
   const folderModeUI = useFolderModeUI({
+    host: folderPlayerHost,
     folderPlayer,
     watchProgress,
     playerRef,

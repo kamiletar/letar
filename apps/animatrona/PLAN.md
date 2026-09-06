@@ -600,19 +600,39 @@ Chromium играет не всё, а папочный плеер играет �
       (framework-free, Node). Только скаффолд генератором — typecheck:tsgo/lint/test пустого
       каркаса зелёные на обеих. Перенос кода и подключение к Animatrona — следующие пункты этой
       фазы, ещё не начаты.
-- [ ] Перенести renderer-часть, заменить `window.electronAPI` на `FolderPlayerHost`,
-      `localStorage` — на `FolderPlayerStorage`, убрать `next/*`
+- [x] Перенесена renderer-часть (2026-09-06): `libs/folder-scan` получил `subtitle-type.ts`
+      (классификатор, framework-free), `libs/folder-player-react` — `host.ts` (контракты
+      `FolderPlayerHost`/`FolderPlayerStorage`), `types.ts`, `parse-filename.ts`, `probe-cache.ts`,
+      `useWatchProgress`/`useFolderHistory`/`useExternalAudio`/`useFolderPlayer` (все принимают
+      `host`/`storage` параметром вместо прямого `window.electronAPI`/`localStorage`),
+      `EpisodeSidebar`, `RecentFoldersCard`. `renderer/src/app/player/page.tsx` собирает
+      `folderPlayerHost: FolderPlayerHost` из своего `window.electronAPI` и передаёт его в хуки;
+      `useWatchProgress(localStorage)`/`useFolderHistory(localStorage)` — `window.localStorage`
+      структурно удовлетворяет `FolderPlayerStorage`. Старые файлы в `app/player/{types,_hooks,
+      _components}` и `renderer/src/lib/{parse-filename,cache/}` удалены, не оставлены копией.
+      ⚠️ **`useFolderModeUI.tsx` намеренно НЕ перенесён** — импортирует `TrackInfo`/`TrackSelector`/
+      `VideoPlayerRef` из `@/components/player`, которые app-local, не часть `@letar/video-player-react`
+      (вынос потребовал бы либо тащить видео-плеер компоненты следом, либо параметризовать хук
+      инжектируемыми типами/компонентами — оверинжиниринг для этого шага). Хук остался в приложении,
+      но принимает `host: FolderPlayerHost` и использует `useExternalAudio`/`UseFolderPlayerReturn`
+      из новой либы — частичная миграция этого одного файла.
 - [ ] Перенести main-часть, ввести `MediaProber`, `FfprobeProber` оставить в Animatrona как адаптер
-- [ ] Animatrona: `renderer/src/app/player/page.tsx` собирает хост из своего `electronAPI` и
-      передаёт слоты (мастер импорта, Header); старые файлы удалить, не оставлять копию
-- [ ] `main/webpack.config.js` — alias на `libs/folder-scan/src` (по образцу существующих
-      `@letar/animatrona-utils`/`@letar/animatrona-types`)
-- [ ] `renderer/next.config.js` — `@letar/folder-player-react` в `transpilePackages`
-      (и в `turbopack.resolveAlias`, как сделано для `@letar/animatrona-ui`)
-- [ ] **Приёмка:** `nx lint animatrona && nx typecheck:tsgo animatrona && nx build animatrona`,
-      затем e2e `04-player` в electron-режиме + ручная проверка папки с внешними ASS и аудио.
+      (пока перенесён только `subtitle-type.ts` — детектор типа субтитров, не сам проберинг)
+- [x] `main/webpack.config.js` + `main/tsconfig.json` — alias/paths на `libs/folder-scan/src`
+      (по образцу существующих `@letar/animatrona-utils`/`@letar/animatrona-types`); esbuild-таргет
+      (`animatrona-main:build`) резолвит через `tsConfig`, отдельного списка алиасов не требует
+- [x] `renderer/next.config.js` — `@letar/folder-player-react` и `@letar/folder-scan` в
+      `transpilePackages`; `apps/animatrona/renderer/tsconfig.json` (у renderer свой набор `paths`,
+      отдельный от `apps/animatrona/tsconfig.json`) — обе либы добавлены туда же, иначе
+      `next build --webpack` падает `Module not found` даже при зелёном `typecheck:tsgo`
+- [ ] **Приёмка:** `nx lint animatrona && nx typecheck:tsgo animatrona && nx build animatrona` —
+      зелёные (2026-09-06, только на renderer-срезе выше; main-часть и e2e ещё впереди). Осталось:
+      e2e `04-player` в electron-режиме + ручная проверка папки с внешними ASS и аудио.
       ⚠️ `typecheck:tsgo` зелёный не доказывает, что прод-билд соберётся — прецедент
-      `SortablePhotoGrid` (2026-07-21), поэтому `nx build` обязателен
+      `SortablePhotoGrid` (2026-07-21), поэтому `nx build` обязателен. Свежий прецедент того же
+      класса на этой самой задаче: `typecheck:tsgo` был зелёным, а `next build --webpack` падал
+      `Module not found` — у `apps/animatrona/renderer/` свой `tsconfig.json` с собственными
+      `paths`, отдельными от `apps/animatrona/tsconfig.json` (который читает только `typecheck:tsgo`)
 
 ### 6. Фаза 2 — каркас нового приложения
 

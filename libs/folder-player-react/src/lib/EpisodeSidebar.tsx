@@ -17,7 +17,7 @@ import {
   LuX,
 } from 'react-icons/lu'
 
-import type { FolderEpisode } from '../types'
+import type { FolderEpisode } from './types'
 
 /** Пропсы компонента */
 interface EpisodeSidebarProps {

@@ -63,6 +63,8 @@ const nextConfig = {
     '@letar/animatrona-types',
     '@letar/animatrona-ui',
     '@letar/animatrona-utils',
+    '@letar/folder-player-react',
+    '@letar/folder-scan',
     '@letar/forms',
     '@letar/hooks',
     '@letar/query-provider',

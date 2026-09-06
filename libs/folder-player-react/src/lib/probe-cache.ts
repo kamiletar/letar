@@ -1,14 +1,11 @@
 /**
- * LRU кэш для результатов ffmpeg.probe
+ * LRU кэш для результатов пробы медиафайла (`host.probe`)
  *
  * Уменьшает количество IPC вызовов при навигации между эпизодами.
  * Результаты probe редко меняются — можно безопасно кэшировать.
  */
 
-import type { MediaInfo, OperationResult } from '../../../../shared/types'
-
-/** Тип результата ffmpeg.probe */
-export type ProbeResult = OperationResult & { data?: MediaInfo }
+import type { FolderPlayerHost, MediaProbeResult } from './host'
 
 /** Максимальное количество записей в кэше */
 const MAX_CACHE_SIZE = 100
@@ -17,7 +14,7 @@ const MAX_CACHE_SIZE = 100
 const CACHE_TTL_MS = 30 * 60 * 1000
 
 interface CacheEntry {
-  result: ProbeResult
+  result: MediaProbeResult
   timestamp: number
 }
 
@@ -25,9 +22,9 @@ interface CacheEntry {
 const probeCache = new Map<string, CacheEntry>()
 
 /**
- * Получить результат probe из кэша или выполнить IPC вызов
+ * Получить результат пробы из кэша или выполнить запрос через хост
  */
-export async function getCachedProbe(filePath: string): Promise<ProbeResult> {
+export async function getCachedProbe(host: FolderPlayerHost, filePath: string): Promise<MediaProbeResult> {
   // Проверяем кэш
   const cached = probeCache.get(filePath)
   if (cached) {
@@ -42,12 +39,7 @@ export async function getCachedProbe(filePath: string): Promise<ProbeResult> {
     probeCache.delete(filePath)
   }
 
-  // Выполняем IPC вызов
-  if (!window.electronAPI) {
-    return { success: false, error: 'electronAPI недоступен' }
-  }
-
-  const result = await window.electronAPI.ffmpeg.probe(filePath)
+  const result = await host.probe(filePath)
 
   // Кэшируем только успешные результаты
   if (result.success) {

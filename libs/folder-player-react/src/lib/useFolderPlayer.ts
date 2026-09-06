@@ -5,12 +5,11 @@
 
 import { useCallback, useState } from 'react'
 
-import { getCachedProbe } from '@/lib/cache'
-import { parseEpisodeInfo } from '@/lib/parse-filename'
-import type { ExternalAudioScanResult, ExternalSubtitleScanResult } from '@/types/electron'
-
-import type { EmbeddedTracksInfo, ExternalTracksInfo, FolderEpisode, FolderPlayerState } from '../types'
-import { isBonusVideo } from '../types'
+import type { FolderPlayerHost } from './host'
+import { parseEpisodeInfo } from './parse-filename'
+import { getCachedProbe } from './probe-cache'
+import type { EmbeddedTracksInfo, ExternalTracksInfo, FolderEpisode, FolderPlayerState } from './types'
+import { isBonusVideo } from './types'
 
 /** Начальное состояние */
 const initialState: FolderPlayerState = {
@@ -37,7 +36,7 @@ const initialState: FolderPlayerState = {
 /**
  * Хук для управления папочным режимом плеера
  */
-export function useFolderPlayer() {
+export function useFolderPlayer(host: FolderPlayerHost) {
   const [state, setState] = useState<FolderPlayerState>(initialState)
 
   /**
@@ -65,52 +64,28 @@ export function useFolderPlayer() {
    * Внутренняя функция сканирования дорожек
    *
    * @param allVideos Все видео папки (эпизоды + бонусы), а не только текущий —
-   * иначе fuzzyMatchToVideo в main-процессе считает единственный переданный файл
-   * фильмом и приписывает ему ВСЕ найденные субтитры/аудио папки, включая чужие серии.
+   * иначе fuzzy-матчер хоста считает единственный переданный файл фильмом и приписывает ему
+   * ВСЕ найденные субтитры/аудио папки, включая чужие серии.
    */
   const scanTracksForEpisodeInternal = useCallback(
     async (folderPath: string, episode: FolderEpisode, allVideos: FolderEpisode[]) => {
-      if (!window.electronAPI) {
-        return
-      }
-
       setState((s) => ({ ...s, isLoadingTracks: true, embeddedTracks: null }))
 
       try {
         // Подготавливаем данные для сканирования — весь список видео папки,
-        // чтобы matcher на стороне main мог сматчить субтитр к «своему» эпизоду по номеру,
-        // а не приписывал их все текущему (см. videoFiles.length === 1 branch в fuzzyMatchToVideo)
+        // чтобы matcher на стороне хоста мог сматчить субтитр к «своему» эпизоду по номеру,
+        // а не приписывал их все текущему
         const videoFiles = allVideos.map((v) => ({
           path: v.path,
           episodeNumber: v.episodeNumber ?? 0,
         }))
 
-        // Параллельно сканируем внешние дорожки и пробим MKV (с кэшированием)
-        // createHandler возвращает { success, data: ExternalAudioScanResult | ExternalSubtitleScanResult }
-        const [audioResultRaw, subsResultRaw, probeResult] = await Promise.all([
-          window.electronAPI.fs.scanExternalAudio(folderPath, videoFiles) as unknown as {
-            success: boolean
-            data?: ExternalAudioScanResult
-          },
-          window.electronAPI.fs.scanExternalSubtitles(folderPath, videoFiles) as unknown as {
-            success: boolean
-            data?: ExternalSubtitleScanResult
-          },
-          getCachedProbe(episode.path),
+        // Параллельно сканируем внешние дорожки и пробим медиафайл (с кэшированием)
+        const [audioResult, subsResult, probeResult] = await Promise.all([
+          host.scanExternalAudio(folderPath, videoFiles),
+          host.scanExternalSubtitles(folderPath, videoFiles),
+          getCachedProbe(host, episode.path),
         ])
-
-        // Извлекаем данные из обёртки createHandler
-        const audioResult: ExternalAudioScanResult = audioResultRaw.data || {
-          audioTracks: [],
-          audioDirs: [],
-          unmatchedFiles: [],
-        }
-        const subsResult: ExternalSubtitleScanResult = subsResultRaw.data || {
-          subtitles: [],
-          subsDirs: [],
-          fontsDirs: [],
-          unmatchedFiles: [],
-        }
 
         // Фильтруем внешние дорожки для текущего эпизода
         // Для фильмов (episodeNumber === null) берём все дорожки без фильтрации
@@ -126,7 +101,7 @@ export function useFolderPlayer() {
           subtitleScanResult: subsResult,
         }
 
-        // Парсим встроенные дорожки из FFprobe
+        // Парсим встроенные дорожки из пробы
         let embeddedTracks: EmbeddedTracksInfo | null = null
         if (probeResult.success && probeResult.data) {
           const mediaInfo = probeResult.data
@@ -174,133 +149,116 @@ export function useFolderPlayer() {
         }))
       }
     },
-    [],
+    [host],
   )
 
   /**
    * Внутренняя функция сканирования папки
    */
-  const scanFolderInternal = useCallback(async (folderPath: string): Promise<boolean> => {
-    if (!window.electronAPI) {
-      console.error('[useFolderPlayer] electronAPI недоступен')
-      return false
-    }
+  const scanFolderInternal = useCallback(
+    async (folderPath: string): Promise<boolean> => {
+      setState((s) => ({
+        ...s,
+        isScanning: true,
+        error: null,
+        folderPath,
+        folderName: folderPath.split(/[/\\]/).pop() || 'Папка',
+      }))
 
-    setState((s) => ({
-      ...s,
-      isScanning: true,
-      error: null,
-      folderPath,
-      folderName: folderPath.split(/[/\\]/).pop() || 'Папка',
-    }))
+      try {
+        const result = await host.scanFolder(folderPath, true, ['video'])
+        const files = result.files ?? []
 
-    try {
-      // Сканируем видеофайлы
-      // createHandler оборачивает в { success, data: { files } }
-      const result = await window.electronAPI.fs.scanFolder(folderPath, true, ['video'])
-      // Результат: { success: boolean, data?: { files: [...] } } или { success: false, error: string }
-      const rawResult = result as {
-        success: boolean
-        data?: { files: Array<{ path: string; name: string; size: number; extension: string }> }
-        files?: Array<{ path: string; name: string; size: number; extension: string }>
-      }
-      // Поддерживаем оба формата: data.files (новый) и files (старый)
-      const files = rawResult.data?.files || rawResult.files || []
+        if (!result.success || files.length === 0) {
+          setState((s) => ({
+            ...s,
+            isScanning: false,
+            error: 'Видеофайлы не найдены в папке',
+          }))
+          return false
+        }
 
-      if (!rawResult.success || files.length === 0) {
+        // Парсим и разделяем на эпизоды и бонусы
+        const episodes: FolderEpisode[] = []
+        const bonusVideos: FolderEpisode[] = []
+
+        for (const file of files) {
+          const episodeInfo = parseEpisodeInfo(file.name)
+          const isBonus = isBonusVideo(file.path)
+
+          const episode: FolderEpisode = {
+            ...file,
+            episodeNumber: episodeInfo?.number ?? null,
+            episodeType: episodeInfo?.type ?? 'regular',
+            isBonus,
+          }
+
+          if (isBonus) {
+            bonusVideos.push(episode)
+          } else {
+            episodes.push(episode)
+          }
+        }
+
+        // Сортируем эпизоды по номеру (null в конец)
+        episodes.sort((a, b) => {
+          if (a.episodeNumber === null && b.episodeNumber === null) {
+            return 0
+          }
+          if (a.episodeNumber === null) {
+            return 1
+          }
+          if (b.episodeNumber === null) {
+            return -1
+          }
+          return a.episodeNumber - b.episodeNumber
+        })
+
+        // Сортируем бонусы по имени
+        bonusVideos.sort((a, b) => a.name.localeCompare(b.name))
+
+        setState((s) => ({
+          ...s,
+          mode: 'folder',
+          episodes,
+          bonusVideos,
+          currentIndex: episodes.length > 0 ? 0 : -1,
+          isCurrentBonus: false,
+          currentBonusIndex: -1,
+          isScanning: false,
+          error: null,
+        }))
+
+        // Сканируем дорожки для первого эпизода
+        if (episodes.length > 0) {
+          await scanTracksForEpisodeInternal(folderPath, episodes[0], [...episodes, ...bonusVideos])
+        }
+
+        return true
+      } catch (error) {
+        console.error('[useFolderPlayer] Ошибка сканирования:', error)
         setState((s) => ({
           ...s,
           isScanning: false,
-          error: 'Видеофайлы не найдены в папке',
+          error: error instanceof Error ? error.message : 'Ошибка сканирования',
         }))
         return false
       }
-
-      // Парсим и разделяем на эпизоды и бонусы
-      const episodes: FolderEpisode[] = []
-      const bonusVideos: FolderEpisode[] = []
-
-      for (const file of files) {
-        const episodeInfo = parseEpisodeInfo(file.name)
-        const isBonus = isBonusVideo(file.path)
-
-        const episode: FolderEpisode = {
-          ...file,
-          episodeNumber: episodeInfo?.number ?? null,
-          episodeType: episodeInfo?.type ?? 'regular',
-          isBonus,
-        }
-
-        if (isBonus) {
-          bonusVideos.push(episode)
-        } else {
-          episodes.push(episode)
-        }
-      }
-
-      // Сортируем эпизоды по номеру (null в конец)
-      episodes.sort((a, b) => {
-        if (a.episodeNumber === null && b.episodeNumber === null) {
-          return 0
-        }
-        if (a.episodeNumber === null) {
-          return 1
-        }
-        if (b.episodeNumber === null) {
-          return -1
-        }
-        return a.episodeNumber - b.episodeNumber
-      })
-
-      // Сортируем бонусы по имени
-      bonusVideos.sort((a, b) => a.name.localeCompare(b.name))
-
-      setState((s) => ({
-        ...s,
-        mode: 'folder',
-        episodes,
-        bonusVideos,
-        currentIndex: episodes.length > 0 ? 0 : -1,
-        isCurrentBonus: false,
-        currentBonusIndex: -1,
-        isScanning: false,
-        error: null,
-      }))
-
-      // Сканируем дорожки для первого эпизода
-      if (episodes.length > 0) {
-        await scanTracksForEpisodeInternal(folderPath, episodes[0], [...episodes, ...bonusVideos])
-      }
-
-      return true
-    } catch (error) {
-      console.error('[useFolderPlayer] Ошибка сканирования:', error)
-      setState((s) => ({
-        ...s,
-        isScanning: false,
-        error: error instanceof Error ? error.message : 'Ошибка сканирования',
-      }))
-      return false
-    }
-  }, [scanTracksForEpisodeInternal])
+    },
+    [host, scanTracksForEpisodeInternal],
+  )
 
   /**
    * Сканирование папки и построение списка эпизодов (с диалогом)
    */
   const selectFolder = useCallback(async () => {
-    if (!window.electronAPI) {
-      console.error('[useFolderPlayer] electronAPI недоступен')
-      return
-    }
-
-    // Preload уже разворачивает { success, data } и возвращает string | null
-    const folderPath = await window.electronAPI.dialog.selectFolder()
+    const folderPath = await host.selectFolder()
     if (!folderPath) {
       return
     }
 
     await scanFolderInternal(folderPath)
-  }, [scanFolderInternal])
+  }, [host, scanFolderInternal])
 
   /**
    * Открыть папку по указанному пути (без диалога)

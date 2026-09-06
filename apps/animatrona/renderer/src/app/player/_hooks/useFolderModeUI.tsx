@@ -10,16 +10,16 @@
 
 import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { type TrackInfo, TrackSelector, type VideoPlayerRef } from '@/components/player'
-import { toMediaUrl } from '@/lib/media-url'
+import type { FolderPlayerHost, UseFolderPlayerReturn, useWatchProgress } from '@letar/folder-player-react'
+import { useExternalAudio } from '@letar/folder-player-react'
 
-import { useExternalAudio } from './useExternalAudio'
-import type { useFolderPlayer } from './useFolderPlayer'
-import type { useWatchProgress } from './useWatchProgress'
+import { type TrackInfo, TrackSelector, type VideoPlayerRef } from '@/components/player'
 
 interface UseFolderModeUIOptions {
+  /** Хост — источник `toMediaUrl` для конвертации путей субтитров/аудио в воспроизводимые URL */
+  host: FolderPlayerHost
   /** Данные из useFolderPlayer */
-  folderPlayer: ReturnType<typeof useFolderPlayer>
+  folderPlayer: UseFolderPlayerReturn
   /** Данные из useWatchProgress */
   watchProgress: ReturnType<typeof useWatchProgress>
   /** Ref на плеер */
@@ -63,7 +63,7 @@ interface UseFolderModeUIReturn {
  * Хук для UI логики папочного режима плеера
  */
 export function useFolderModeUI(options: UseFolderModeUIOptions): UseFolderModeUIReturn {
-  const { folderPlayer, watchProgress, playerRef, currentVideoPath } = options
+  const { host, folderPlayer, watchProgress, playerRef, currentVideoPath } = options
 
   // === State ===
   // Формат ID: 'embedded:{index}' или 'external:{index}'
@@ -184,6 +184,7 @@ export function useFolderModeUI(options: UseFolderModeUIOptions): UseFolderModeU
 
   // Синхронизация внешнего аудио с видео
   useExternalAudio({
+    host,
     videoRef: videoElementRef,
     audioPath: externalAudioPath,
   })
@@ -195,11 +196,11 @@ export function useFolderModeUI(options: UseFolderModeUIOptions): UseFolderModeU
     ? folderPlayer.externalTracks.subtitles[selectedSubtitleIndex]
     : null
 
-  // Конвертируем пути в media:// URL (file:// заблокирован Electron)
+  // Конвертируем пути в воспроизводимый URL (file:// заблокирован Electron)
   const currentSubtitlePath = currentSubtitleTrack?.filePath
-    ? (toMediaUrl(currentSubtitleTrack.filePath) ?? undefined)
+    ? host.toMediaUrl(currentSubtitleTrack.filePath)
     : undefined
-  const currentSubtitleFonts = currentSubtitleTrack?.matchedFonts.map((f) => toMediaUrl(f.path) ?? f.path)
+  const currentSubtitleFonts = currentSubtitleTrack?.matchedFonts.map((f) => host.toMediaUrl(f.path))
 
   // === TrackSelector элемент ===
 

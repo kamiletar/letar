@@ -23,7 +23,7 @@ import { toaster } from '@/components/ui/toaster'
 import { formatFileSize } from '@/lib/format-utils'
 import { useCreateEpisode } from '@/lib/hooks'
 import { type BaseScannedFile, useScanFolder } from '@/lib/hooks/use-scan-folder'
-import { parseEpisodeNumber } from '@/lib/parse-filename'
+import { parseEpisodeNumber } from '@letar/folder-player-react'
 
 interface ScanFolderDialogProps {
   open: boolean
