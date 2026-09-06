@@ -23,6 +23,7 @@
 //   GIT_ALLOW_SECTION_DUP=1 git commit ...
 
 import fs from 'node:fs'
+import { repoRoot } from './lib/repo-root.mjs'
 
 const FAMILIES = [
   { name: 'INFRA', member: /^PLAN-INFRA(-\d+)?\.md$/ },
@@ -32,10 +33,6 @@ const FAMILIES = [
 function gitRun(args) {
   const result = Bun.spawnSync(['git', ...args], { stdout: 'pipe', stderr: 'pipe' })
   return { ok: result.exitCode === 0, text: result.stdout.toString('utf8') }
-}
-
-function repoRoot() {
-  return gitRun(['rev-parse', '--show-toplevel']).text.trim()
 }
 
 function stagedFiles() {

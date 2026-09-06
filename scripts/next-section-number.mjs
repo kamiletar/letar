@@ -25,20 +25,14 @@
 //   bun scripts/next-section-number.mjs PLAN-INFRA-6.md             # печатает: 150
 //   bun scripts/next-section-number.mjs PLAN-JOURNAL-2.md --verbose  # + известные дубли внутри семейства
 //
-// Использует Bun.spawnSync (не node:child_process), как остальные хелперы в scripts/.
-
 import fs from 'node:fs'
 import path from 'node:path'
+import { repoRoot } from './lib/repo-root.mjs'
 
 const FAMILIES = [
   { name: 'INFRA', member: /^PLAN-INFRA(-\d+)?\.md$/ },
   { name: 'JOURNAL', member: /^(PLAN|PLAN-JOURNAL-\d+)\.md$/ },
 ]
-
-function repoRoot() {
-  const result = Bun.spawnSync(['git', 'rev-parse', '--show-toplevel'], { stdout: 'pipe' })
-  return result.stdout.toString('utf8').trim()
-}
 
 function familyFor(fileBaseName) {
   return FAMILIES.find((f) => f.member.test(fileBaseName)) ?? null

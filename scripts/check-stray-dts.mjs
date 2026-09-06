@@ -30,16 +30,17 @@
 import { execFileSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
+import { repoRoot } from './lib/repo-root.mjs'
 
-// НЕ резолвить repoRoot через путь этого файла (import.meta.url) — install.sh копирует
+// НЕ резолвить корень через путь этого файла (import.meta.url) — install.sh копирует
 // чекер в .git/hooks/_check-stray-dts.mjs, и относительный путь "на уровень выше" там
-// указывает на .git, а не на корень репозитория. git rev-parse работает из любого cwd
-// внутри репозитория и не зависит от того, где физически лежит сам скрипт.
-const repoRoot = execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim()
+// указывает на .git, а не на корень репозитория. repoRoot() из lib/repo-root.mjs спрашивает
+// git и не зависит от того, где физически лежит сам скрипт.
+const root = repoRoot()
 
 function trackedFiles(pattern) {
   const out = execFileSync('git', ['ls-files', '-z', '--', pattern], {
-    cwd: repoRoot,
+    cwd: root,
     encoding: 'utf8',
   })
   return out.split('\0').filter(Boolean)
@@ -54,8 +55,8 @@ const stray = []
 for (const relPath of candidates) {
   const isMap = relPath.endsWith('.d.ts.map')
   const base = relPath.slice(0, relPath.length - (isMap ? '.d.ts.map'.length : '.d.ts'.length))
-  const hasSibling = existsSync(path.join(repoRoot, `${base}.ts`))
-    || existsSync(path.join(repoRoot, `${base}.tsx`))
+  const hasSibling = existsSync(path.join(root, `${base}.ts`))
+    || existsSync(path.join(root, `${base}.tsx`))
   if (hasSibling) {
     stray.push(relPath)
   }

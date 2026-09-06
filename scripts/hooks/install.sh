@@ -56,6 +56,10 @@ install_into() {
   cp "$SRC_DIR/../check-section-numbers.mjs" "$hooks_dir/_check-section-numbers.mjs"
   cp "$SRC_DIR/pre-commit-stray-dts-check.sh" "$hooks_dir/_pre-commit-stray-dts-check.sh"
   cp "$SRC_DIR/../check-stray-dts.mjs" "$hooks_dir/_check-stray-dts.mjs"
+  # check-section-numbers.mjs и check-stray-dts.mjs импортируют './lib/repo-root.mjs'
+  # относительно своего расположения — рядом с копией в hooks_dir нужна и копия lib/.
+  mkdir -p "$hooks_dir/lib"
+  cp "$SRC_DIR/../lib/repo-root.mjs" "$hooks_dir/lib/repo-root.mjs"
   chmod +x "$hooks_dir/_pre-commit-scope-guard.sh" "$hooks_dir/_pre-commit-sops.sh" \
     "$hooks_dir/_pre-commit-semgrep.sh" "$hooks_dir/_pre-commit-dprint-check.sh" \
     "$hooks_dir/_pre-commit-deps-integrity.sh" "$hooks_dir/_pre-commit-schema-migration-check.sh" \
