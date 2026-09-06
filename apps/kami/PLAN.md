@@ -493,21 +493,34 @@
 
 **Концепция:** кнопка «Визуализация» открывает fullscreen с butterchurn — точный порт WinAmp Milkdrop 2 на WebGL. UI/UX продумывается отдельно.
 
-- ⏳ **Установка:** `npm i butterchurn butterchurn-presets`
-- ⏳ **Интеграция:**
+- ✅ **Установка:** `bun add butterchurn butterchurn-presets` (в `apps/kami/package.json`,
+  ambient-типы в `src/types/butterchurn.d.ts` — пакеты не публикуют `.d.ts`)
+- ✅ **Интеграция:**
   - Новый компонент `ButterchurnVisualizer` — WebGL canvas на весь экран
-  - Получает тот же `AnalyserNode` (общий через `getAnalyzer()` из `audio-page-client`)
-  - Инициализация: `butterchurn.createVisualizer(audioCtx, canvas, { width, height })`
-  - Передача FFT: `visualizer.render({ frequencyData, timeData })` в `requestAnimationFrame`
+  - Получает тот же `AnalyserNode` (общий через `getAnalyzer()` из `audio-page-client`) через
+    `visualizer.connectAudio(analyzer)` — не пробрасывает FFT-массивы вручную, butterchurn сам
+    читает их из подключённого `AudioNode`
+  - Инициализация: `butterchurn.createVisualizer(audioCtx, canvas, { width, height, pixelRatio })`
+  - Рендер — `visualizer.render()` в `requestAnimationFrame`-лупе (без ручной передачи FFT — см. выше)
   - Смена пресетов: `visualizer.loadPreset(preset, blendTime)` — плавный переход между пресетами
-- ⏳ **Пресеты:** `butterchurn-presets` содержит ~100 пресетов; показывать список с превью или случайный
-- ⏳ **Fullscreen режим:**
-  - `document.documentElement.requestFullscreen()` на контейнер с canvas
-  - При выходе (Esc / кнопка) — `document.exitFullscreen()`
-  - Скрыть header/footer через `:fullscreen` CSS
-- ⏳ **Кнопка запуска:** расположение и дизайн кнопки — UI/UX на усмотрение (продумывается отдельно)
-- ⏳ **Производительность:** WebGL — GPU, не нагружает CPU. `dynamic import` компонента чтобы не тянуть WebGL без нужды
+- ✅ **Пресеты:** случайный стартовый + кнопка "следующий" (циклический перебор по списку имён из
+  `butterchurn-presets`). Список с превью-миниатюрами не делали — потребовал бы пререндер
+  скриншотов каждого из ~100 пресетов, не оправдано для v1
+- ✅ **Fullscreen режим:**
+  - `document.documentElement.requestFullscreen()` при открытии (мягкий catch — политика браузера
+    может отклонить, тогда работает как fixed-оверлей на весь viewport без скрытия браузерного UI)
+  - При выходе (Esc / кнопка ×) — `document.exitFullscreen()` + `fullscreenchange`-listener
+    закрывает компонент при выходе из fullscreen любым способом
+  - Скрытие header/footer через уже существующий `:fullscreen` CSS (заведён в Фазе 9.4)
+- ✅ **Кнопка запуска:** `<Button variant="ghost">` с иконкой `Wand2` рядом с существующей кнопкой
+  переключения вида (Фаза 9.5), подпись "Визуализация"
+- ✅ **Производительность:** `next/dynamic(..., { ssr: false })` — WebGL-бандл с ~100 пресетами
+  грузится только по клику на кнопку, не в основном чанке страницы
 - Сложность: **средняя** (~3–4 часа)
+
+**Live-проверка не выполнена** — та же причина, что и в Фазе 9.5: dev-БД без записей `AudioFile`,
+нет OAuth-логина под рукой в этой сессии. Подтверждено только `nx typecheck:tsgo`/`nx lint`
+(оба зелёные, без новых предупреждений).
 
 ### 9.7 Hydra — VJ live-coding режим
 
@@ -671,6 +684,7 @@ routing-контракты (`GET /share` → 405 без locale-редирект�
 | 2026-09-06 | ✅ Фаза 9.5 (v1): постер+сонограмма slide, переключаемый вид, без виртуализации (см. упрощения)      |
 | 2026-09-06 | ✅ Фаза 8 отмечена (уже сделана ранее) + Фаза 7 Этап 2: сид-данные SocialPlatform                    |
 | 2026-09-06 | ✅ Фаза 6 Matrix Rain отмечена (уже реализована), убран забытый `console.log`                        |
+| 2026-09-06 | ✅ Фаза 9.6: Butterchurn fullscreen-визуализация (WebGL, ~100 пресетов), см. упрощения               |
 
 ## Техдолг: setRequestLocale не даёт SSG — root layout вызывает getSession() безусловно
 

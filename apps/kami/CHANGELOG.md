@@ -5,6 +5,19 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 проект придерживается [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.33.25] - 2026-09-06
+
+### Added
+
+- Фаза 9.6: fullscreen-визуализация Butterchurn (WebGL-порт WinAmp Milkdrop 2) на странице
+  аудиотрека — кнопка "Визуализация" рядом с переключателем вида (Фаза 9.5). Подключается к
+  общему `AnalyserNode` через `connectAudio()` (не пробрасывает FFT вручную), случайный стартовый
+  пресет + циклическая смена кнопкой, реальный Fullscreen API с auto-close по `fullscreenchange`,
+  `next/dynamic({ ssr: false })` — WebGL-бандл с ~100 пресетами грузится только по клику.
+  Ambient-типы для `butterchurn`/`butterchurn-presets` (пакеты без `.d.ts`) — `src/types/butterchurn.d.ts`.
+  Live-проверка в браузере не выполнена (пустая dev-БД `AudioFile`, нет OAuth под рукой) —
+  подтверждено только `nx typecheck:tsgo`/`nx lint`.
+
 ## [0.33.24] - 2026-09-06
 
 ### Fixed

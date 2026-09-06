@@ -2,7 +2,8 @@
 
 import { Box, Button, Card, Heading, HStack, Icon, Image, Text, VStack } from '@chakra-ui/react'
 import { useColorMode } from '@letar/chakra-provider'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, Wand2 } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useCallback, useRef, useState } from 'react'
 import { AudioPlayer } from './audio-player'
@@ -10,6 +11,12 @@ import { AudioSpectrogram } from './audio-spectrogram'
 import { AudioSpectrumVisualizer } from './audio-spectrum-visualizer'
 import { PosterSonogramSlider } from './poster-sonogram-slider'
 import { useOfflineSpectrogram } from './use-offline-spectrogram'
+
+// WebGL + ~100 пресетов — тяжёлый бандл, грузим только по клику на кнопку "Визуализация"
+const ButterchurnVisualizer = dynamic(
+  () => import('./butterchurn-visualizer').then((m) => m.ButterchurnVisualizer),
+  { ssr: false },
+)
 
 interface AudioData {
   title: string
@@ -52,6 +59,7 @@ export function AudioPageClient({ audio, locale }: AudioPageClientProps) {
   const audioRef = useRef<HTMLAudioElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [sliderView, setSliderView] = useState(false)
+  const [butterchurnOpen, setButterchurnOpen] = useState(false)
   const { columns: staticSpectrogramColumns } = useOfflineSpectrogram(audioUrl)
 
   /** Общий AnalyserNode — один на оба визуализатора */
@@ -94,6 +102,8 @@ export function AudioPageClient({ audio, locale }: AudioPageClientProps) {
     }
   }, [])
 
+  const getAudioContext = useCallback(() => audioContextRef.current, [])
+
   const { resolvedColorMode } = useColorMode()
   const isLight = resolvedColorMode === 'light'
 
@@ -134,14 +144,28 @@ export function AudioPageClient({ audio, locale }: AudioPageClientProps) {
               )
             )}
 
-          <HStack justify="center">
+          <HStack justify="center" gap={3} flexWrap="wrap">
             <Button variant="ghost" size="xs" onClick={() => setSliderView((v) => !v)} color="fg.muted">
               <Icon>
                 <Sparkles size={14} />
               </Icon>
               {sliderView ? 'Обычный вид' : 'Постер + волна трека'}
             </Button>
+            <Button variant="ghost" size="xs" onClick={() => setButterchurnOpen(true)} color="fg.muted">
+              <Icon>
+                <Wand2 size={14} />
+              </Icon>
+              Визуализация
+            </Button>
           </HStack>
+
+          {butterchurnOpen && (
+            <ButterchurnVisualizer
+              getAudioContext={getAudioContext}
+              getAnalyzer={getAnalyzer}
+              onClose={() => setButterchurnOpen(false)}
+            />
+          )}
 
           <VStack
             gap={2}
