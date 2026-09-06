@@ -43,7 +43,7 @@ import {
   notifyImportWarning,
   notifyQueueCompleted,
 } from './import-queue-notifications'
-import { markTorrentImported, resetTorrentImportStatus } from './import-queue-torrent'
+import { removeTorrentSource, resetTorrentImportStatus } from './import-queue-torrent'
 import { ImportService } from './import/import-service'
 import { prewarmCache } from './ipfs/image-uploader'
 
@@ -779,8 +779,10 @@ export class ImportQueueController extends EventEmitter {
         } else {
           notifyImportCompleted(animeName)
         }
-        // Помечаем торрент как импортированный (для авто-удаления по ratio)
-        markTorrentImported(item.folderPath)
+        // Удаляем исходную раздачу — контент уже перекодирован и лежит в локальном Kubo
+        removeTorrentSource(item.folderPath).catch(() => {
+          /* ошибка уже залогирована внутри removeTorrentSource */
+        })
 
         // После retranscode — пере-аудитить оригинальный item
         if (item.isRetranscode && item.existingAnimeId) {

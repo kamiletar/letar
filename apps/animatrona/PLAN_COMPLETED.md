@@ -4,6 +4,38 @@
 
 > **Архив обновлён:** 2026-09-06
 
+## Удаление исходного торрента после успешного ручного импорта (2026-09-06)
+
+Закрывает пробел, найденный при доработке плана «Дисковая гигиена батча» (§ про
+`rutracker-batch-import.ts`): успешный ручной импорт через `import-service.ts` не вызывал
+`getTorrentService().remove(infoHash, true)` ни на одном пути — только
+`import-failure-cleanup.ts` трогал файлы, и то при ошибке/отмене. Скачанный торрент оставался
+сидировать в qBittorrent бессрочно, а его файлы — висеть в `Downloads/Animatrona/<torrent>/`
+навсегда. `post-process-runner.ts` удаляет только рабочую папку библиотеки
+(`createdAnimeFolder`) — это не то же самое, что папка скачанного торрента.
+
+Фикс не потребовал новой функции в `import-service.ts` — переиспользован уже существовавший в
+`import-queue-controller.ts` механизм: `markTorrentImported(folderPath)`
+([import-queue-torrent.ts](main/services/import-queue-torrent.ts)) сопоставлял торрент с папкой
+импорта (`folderPath.startsWith(t.path)`) и только ставил `importStatus: 'imported'` для бейджа
+на странице `/torrents` — реального авто-удаления по ratio в приложении не было, удаление
+оставалось ручным UI-шагом пользователя. Функция заменена на `removeTorrentSource(folderPath)`:
+то же сопоставление, но вместо `updateMeta` — `await getTorrentService().remove(infoHash, true)`
+(тот же вызов, что `cancelDownload()` делает при отмене в
+[rutracker-download-orchestrator.ts](main/services/rutracker/rutracker-download-orchestrator.ts)).
+Вызывается из той же точки в `import-queue-controller.ts` (`updateItemStatus`, ветка
+`status === 'completed'`) — общая для одиночного ручного импорта и будущего батча, поэтому
+отдельная `finalizeSuccessfulDownload(infoHash)`, упомянутая в PLAN.md как возможный вариант,
+не понадобилась.
+
+Безопасность: обычный drag&drop-импорт файлов не имеет соответствующего торрента — совпадения
+по `folderPath` не найдётся, `removeTorrentSource` тихо ничего не делает (та же гарантия, что
+была у `markTorrentImported`). Ошибка удаления (торрент уже не существует, TorrentService не
+инициализирован) — логируется и не прерывает завершение импорта.
+
+`nx typecheck:tsgo animatrona`/`nx lint animatrona` — зелёные (0 ошибок, только заранее
+существовавшие warnings). Изменены `import-queue-torrent.ts`, `import-queue-controller.ts`.
+
 ## Гейт активного импорта перед `ipfs:repoGc()`, удалён мёртвый `safeLocalGc()` (2026-09-06)
 
 Закрывает открытый вопрос предыдущей сессии (гейт нормализации pins, коммит `c8c82bfd`): тогда
