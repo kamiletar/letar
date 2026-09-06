@@ -28,7 +28,13 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
         <Breadcrumb.Item>
           <Breadcrumb.Link asChild>
             <Link href="/" aria-label="Home">
-              <Icon boxSize={4} color="fg.muted" _hover={{ color: 'fg' }} transition="color 0.2s">
+              <Icon
+                boxSize={4}
+                color="fg.muted"
+                _hover={{ color: 'fg' }}
+                transitionProperty="color"
+                transitionDuration="fast"
+              >
                 <Home />
               </Icon>
             </Link>
@@ -51,7 +57,8 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
                     color="fg.muted"
                     fontSize="sm"
                     _hover={{ color: 'fg.500' }}
-                    transition="color 0.2s"
+                    transitionProperty="color"
+                    transitionDuration="fast"
                   >
                     <Link href={item.href}>{item.label}</Link>
                   </Breadcrumb.Link>

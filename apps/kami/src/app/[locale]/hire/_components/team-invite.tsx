@@ -188,7 +188,11 @@ export function TeamInvite({ companyName }: TeamInviteProps) {
                 </Text>
               </VStack>
             </HStack>
-            <Icon transition="transform 0.2s" transform={isExpanded ? 'rotate(45deg)' : undefined}>
+            <Icon
+              transitionProperty="transform"
+              transitionDuration="fast"
+              transform={isExpanded ? 'rotate(45deg)' : undefined}
+            >
               <LuPlus />
             </Icon>
           </HStack>

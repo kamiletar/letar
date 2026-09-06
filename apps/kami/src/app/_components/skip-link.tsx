@@ -20,7 +20,8 @@ export function SkipLink() {
       _focusWithin={{
         transform: 'translateY(0)',
       }}
-      transition="transform 0.2s"
+      transitionProperty="transform"
+      transitionDuration="fast"
     >
       <Button
         asChild

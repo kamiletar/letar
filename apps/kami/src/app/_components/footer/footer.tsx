@@ -66,7 +66,13 @@ export function Footer() {
             {navLinks.map((link) => (
               // trailingSlash:true не проходит через клиентскую навигацию next/link
               <Link key={link.href} href={`${link.href}/`}>
-                <Text fontSize="sm" color="fg.muted" _hover={{ color: 'fg.500' }} transition="color 0.2s">
+                <Text
+                  fontSize="sm"
+                  color="fg.muted"
+                  _hover={{ color: 'fg.500' }}
+                  transitionProperty="color"
+                  transitionDuration="fast"
+                >
                   {tNav(link.labelKey)}
                 </Text>
               </Link>
@@ -87,7 +93,8 @@ export function Footer() {
                 fontSize="sm"
                 color="fg.muted"
                 _hover={{ color: 'fg.500' }}
-                transition="color 0.2s"
+                transitionProperty="color"
+                transitionDuration="fast"
                 aria-label={t('emailAria')}
               >
                 {CONTACT.email}
@@ -104,7 +111,8 @@ export function Footer() {
                 fontSize="sm"
                 color="fg.muted"
                 _hover={{ color: 'fg.500' }}
-                transition="color 0.2s"
+                transitionProperty="color"
+                transitionDuration="fast"
                 aria-label={t('rssAria')}
               >
                 {t('rssFeed')}

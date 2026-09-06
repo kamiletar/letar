@@ -75,14 +75,16 @@ export const FaqSection = memo(function FaqSection() {
                     bg: { base: 'gray.50', _dark: 'gray.800' },
                   }}
                   transitionProperty="background-color"
-                  transitionDuration="0.2s"
+                  transitionDuration="fast"
                 >
                   <Text fontWeight="medium" flex="1" textAlign="left">
                     {item.question}
                   </Text>
                   <Box
                     css={{
-                      transition: 'transform 0.3s ease-in-out',
+                      transitionProperty: 'transform',
+                      transitionDuration: 'moderate',
+                      transitionTimingFunction: 'ease-in-out',
                       transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                     }}
                   >

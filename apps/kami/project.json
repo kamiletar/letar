@@ -241,7 +241,8 @@
     },
     "lint": {
       "dependsOn": [
-        "oxlint"
+        "oxlint",
+        "theme:check"
       ]
     },
     "lint:fix": {
@@ -296,6 +297,20 @@
       ],
       "options": {
         "config": "vitest.config.mts"
+      }
+    },
+    "theme:check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node scripts/check-theme-hardcodes.mjs",
+        "cwd": "apps/kami"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Reject raw UI colors, shadows and transition durations outside theme tokens",
+        "technologies": [
+          "chakra-ui"
+        ]
       }
     }
   }

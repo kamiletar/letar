@@ -25,7 +25,7 @@ export function ChatButton({ onClick }: ChatButtonProps) {
         shadow="lg"
         _hover={{ transform: 'scale(1.05)' }}
         transitionProperty="transform"
-        transitionDuration="0.2s"
+        transitionDuration="fast"
       >
         <Icon boxSize={6}>
           <MessageSquare />

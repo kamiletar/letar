@@ -813,13 +813,42 @@ favicon-превью и inline-редактирование тегов не пр
 `/data-deletion`, `/hire`, `/learning`, `/projects` остались `ƒ Dynamic` и после фикса — у каждой
 своя причина (не исследовано в этом заходе, не layout).
 
-## Техдолг: подключить theme:check
+## ✅ Техдолг закрыт: theme:check подключён (2026-09-06)
 
-Гейт сырых цветов/теней/transition в UI-коде (`nx g @letar/generators:theme-check-integrate
-kami`, генератор `libs/generators`, обёртка над `@letar/theme-check`) пока не подключён. Уже
-подключено: domwellbes, studio, aboi. **Особый случай:** у kami нет каталога `src/theme/`
-(использует общий `@letar/chakra-provider` без локальных оверрайдов) — генератор в этом случае
-не находит `themePrefix`, и все найденные HEX/rgba формально считаются «вне темы» (87 находок по
-замеру 2026-08-19, часть из них — легитимные значения общей темы, не баги). Перед первым прогоном
-свериться с разбором «kami — особый случай» в `.claude/docs/theme-hardcode-gate-coverage.md`, не
-заносить находки в allowlist не глядя. Подключать по одному, не пакетно.
+Гейт сырых цветов/теней/transition (`nx g @letar/generators:theme-check-integrate kami`) вешён и
+проходит зелёным, встроен в `lint` через `dependsOn` — как у domwellbes/studio/aboi/pravda.
+
+**Уточнение к «особому случаю» из прежней версии этого раздела:** у kami действительно нет
+каталога `src/theme/`, но роль темы играет не отсутствие переопределений (`@letar/chakra-provider`
+как есть), а **один файл** — `src/app/_components/theme-provider.tsx`
+(`createSystem`/`defineConfig`, изумрудно-зелёная Matrix-палитра, semantic tokens, recipe кнопки
+со spring-нажатием). `themePrefix` в скрипте указывает прямо на этот файл (а не на директорию) —
+тот же трюк, что предлагает сам генератор («заведёте каталог темы — впишите сюда»), только вместо
+каталога — конкретный файл. Это автоматически закрыло основную часть из 87 находок замера
+2026-08-19 без единого allowlist-исключения.
+
+**Первый прогон дал 132 находки** (больше, чем 87 — замер 2026-08-19 не учитывал компоненты,
+появившиеся позже: аудио-плеер, share-target, canvas-визуализаторы). Триаж:
+
+- **Исправлено по существу** (не allowlist) — 12 мест: `transition="X Ns"`/`transitionDuration="Ns"`
+  → `transitionProperty` + именованный duration-токен Chakra (`fast`/`moderate`) в
+  breadcrumbs.tsx, footer.tsx (×3), skip-link.tsx, chat-button.tsx, team-invite.tsx,
+  faq-section.tsx, projects/page.tsx; `projects/page.tsx` — дублированный raw HEX
+  Matrix-палитры в CSS-градиенте (`#10B981`/`#059669`/…) заменён на
+  `var(--chakra-colors-fg-500)` и т.д. — тот же цвет, но теперь единый источник с
+  `theme-provider.tsx`, а не скопированное число.
+- **Allowlist с обоснованием** (`apps/kami/scripts/check-theme-hardcodes.mjs`) — три
+  задокументированных класса (metadata Next.js/`manifest.ts`, рендер без Chakra-провайдеров,
+  одноразовый декоративный эффект) плюс **новый четвёртый класс, специфичный для kami**:
+  Canvas 2D API (`ctx.fillStyle`/`strokeStyle` у аудио-визуализаторов и `MatrixRain` — тот же
+  класс проблемы, что у satori/next-og: нет доступа к `var(--chakra-colors-*)`, нужен конкретный
+  цвет). Сюда же — официальные брендовые цвета логотипа Google, fallback-тема шрифта shiki,
+  HTML email-шаблоны (SMTP, вне React/Chakra) и `scale()`-находки внутри самого
+  `theme-provider.tsx` (press-feedback кнопки, keyframes `matrix-zoom`) — последние проверяются
+  всегда (`includeTheme: true`), даже в файле темы.
+- **Живая проверка** (`nx dev` + Browser pane, светлая/тёмная тема) — Matrix-hero, свечение
+  заголовка, карточки проектов с градиентом на новых CSS-переменных: визуальных регрессий нет.
+
+Четвёртый класс исключения (Canvas 2D) стоит зафиксировать и в
+`.claude/docs/theme-hardcode-gate-coverage.md` при следующей правке этого документа — на
+2026-09-06 там ещё нет.

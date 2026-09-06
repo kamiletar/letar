@@ -5,6 +5,19 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 проект придерживается [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.33.35] - 2026-09-06
+
+### Added
+
+- Подключён гейт сырых UI-цветов/теней/transition `theme:check` (`@letar/theme-check`, встроен в
+  `lint`) — как у domwellbes/studio/aboi/pravda. `themePrefix` указан на конкретный файл
+  `src/app/_components/theme-provider.tsx` (роль `src/theme/` у kami играет он один, отдельного
+  каталога темы нет). Первый прогон — 132 находки: 12 исправлены по существу
+  (`transitionProperty`+именованный duration-токен вместо raw `Ns`; дублированный HEX
+  Matrix-палитры в CSS-градиенте `projects/page.tsx` → `var(--chakra-colors-fg-*)`), остальные —
+  allowlist по трём известным классам плюс новый четвёртый (Canvas 2D — аудио-визуализаторы,
+  `MatrixRain`: рисующий код не резолвит CSS-переменные темы).
+
 ## [0.33.34] - 2026-09-06
 
 ### Fixed

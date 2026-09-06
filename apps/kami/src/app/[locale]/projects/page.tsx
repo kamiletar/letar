@@ -107,7 +107,7 @@ export default async function ProjectsPage({ params }: Props) {
                   boxShadow: 'xl',
                 }}
                 transitionProperty="border-color, transform, box-shadow"
-                transitionDuration="0.3s"
+                transitionDuration="moderate"
                 position="relative"
               >
                 {/* Featured бейдж */}
@@ -121,8 +121,8 @@ export default async function ProjectsPage({ params }: Props) {
                 <Box
                   h="160px"
                   bg={{
-                    base: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                    _dark: 'linear-gradient(135deg, #064E3B 0%, #065F46 100%)',
+                    base: 'linear-gradient(135deg, var(--chakra-colors-fg-500) 0%, var(--chakra-colors-fg-600) 100%)',
+                    _dark: 'linear-gradient(135deg, var(--chakra-colors-fg-900) 0%, var(--chakra-colors-fg-800) 100%)',
                   }}
                   display="flex"
                   alignItems="center"
