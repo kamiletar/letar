@@ -4,6 +4,27 @@
 
 ## [Unreleased]
 
+## [0.55.49] - 2026-09-06
+
+### Fixed
+
+- **Блокер 1 (риск потери истории просмотра):** реимпорт уже существующего аниме не через
+  страницу торрентов/«Добавить эпизоды» + падение импорта дальше по пайплайну удаляли аниме
+  целиком вместе с `WatchProgress`/`watchStatus`/`userRating` — `createAnimeRecord` ставил
+  `createdAnimeId` даже когда `upsertAnime` матчился на уже существующую запись по
+  `shikimoriId`. Теперь `db.animeExistsByShikimoriId()` проверяется до upsert,
+  `createAnimeRecord` возвращает `{ id, isNewlyCreated }`, и cleanup при ошибке удаляет только
+  то, что этот запуск сам создал.
+- `Anime.rating` не заполнялся при импорте, хотя `selectedAnime.score` уже был доступен —
+  чистая плюмбинг-недостача, `createAnimeRecord` его просто не передавал в `upsertAnime`.
+
+### Added
+
+- `AnimeInfo.nameEn`/`.synonyms` — fallback на свежие данные Shikimori (`shikimoriData.english`/
+  `.synonyms`) внутри `buildAnimeInfo()`, если в БД (`Anime.nameEn`/`.synonyms`) пусто. Импорт по
+  клику на карточку поиска не сохраняет расширенные Shikimori-поля в БД вовсе — фикс закрывает
+  IPFS-манифест не трогая эту часть пайплайна.
+
 ## [0.55.48] - 2026-09-06
 
 ### Added

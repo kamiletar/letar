@@ -103,27 +103,46 @@ export async function downloadAndSavePoster(
   }
 }
 
+export interface CreateAnimeRecordResult {
+  id: string
+  /**
+   * `false`, если под этим `shikimoriId` уже была запись до вызова — тогда `upsertAnime` внутри
+   * пошёл по ветке `update`, а не `create`. Вызывающий код (`import-service.ts`) обязан выставлять
+   * `createdAnimeId` только при `true` — иначе откат неудачного импорта удалит **чужое**,
+   * уже существовавшее аниме вместе со всей историей просмотра (см. PLAN.md, Блокер 1).
+   */
+  isNewlyCreated: boolean
+}
+
 export async function createAnimeRecord(
   selectedAnime: ImportQueueEntry['selectedAnime'],
   parsedInfo: ImportQueueEntry['parsedInfo'],
   folderPath: string,
   posterId?: string,
-): Promise<string> {
+): Promise<CreateAnimeRecordResult> {
+  const shikimoriId = parseInt(selectedAnime.id, 10)
+  // Проверяем существование ДО upsert — сам upsert не сообщает, была ли строка создана или
+  // обновлена, а именно это решает, безопасно ли удалить аниме при откате импорта.
+  const existedBefore = await db.animeExistsByShikimoriId(shikimoriId)
+
   const animeResult = await db.upsertAnime({
     name: selectedAnime.russian ?? selectedAnime.name,
     originalName: selectedAnime.name,
     nameEn: null,
     year: selectedAnime.airedOn ? parseInt(selectedAnime.airedOn.split('-')[0]) : null,
     status: mapShikimoriStatus(selectedAnime.status ?? 'released'),
-    shikimoriId: parseInt(selectedAnime.id, 10),
+    shikimoriId,
     posterId,
     folderPath,
     episodeCount: selectedAnime.episodes ?? 0,
+    // Уже доступно на selectedAnime (Shikimori GraphQL score) — раньше не передавалось в upsert,
+    // хотя схема и upsertAnime его принимают (PLAN.md, Блокер 3).
+    rating: selectedAnime.score ?? null,
     isBdRemux: parsedInfo.isBdRemux,
     rutrackerUrl: parsedInfo.rutrackerUrl ?? null,
     sourceTorrentCid: parsedInfo.sourceTorrentCid ?? null,
   })
-  return animeResult.id
+  return { id: animeResult.id, isNewlyCreated: !existedBefore }
 }
 
 export async function createSeasonRecord(

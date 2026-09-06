@@ -163,6 +163,17 @@ export async function findAnimeByShikimoriId(shikimoriId: number) {
   })
 }
 
+/**
+ * Существует ли уже аниме с таким shikimoriId — вызывать ДО upsertAnime.
+ *
+ * `upsert` сам не сообщает, была ли строка создана или обновлена — а от этого зависит,
+ * можно ли безопасно удалить аниме при откате неудачного импорта (см. `createAnimeRecord`).
+ */
+export async function animeExistsByShikimoriId(shikimoriId: number): Promise<boolean> {
+  const existing = await prisma.anime.findUnique({ where: { shikimoriId }, select: { id: true } })
+  return existing !== null
+}
+
 // === AudioTrack ===
 
 export async function createAudioTrack(data: {

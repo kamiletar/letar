@@ -181,9 +181,19 @@ export class ImportService {
         log.debug('Постер', { posterId: posterId ?? 'нет' })
 
         this.emitProgress(2, 'Создание записи в БД...', 'creating_anime')
-        animeId = await createAnimeRecord(entry.selectedAnime, entry.parsedInfo, animeFolderPath, posterId)
-        this.createdAnimeId = animeId
-        log.info('Аниме создано в БД', { animeId })
+        const animeRecordResult = await createAnimeRecord(
+          entry.selectedAnime,
+          entry.parsedInfo,
+          animeFolderPath,
+          posterId,
+        )
+        animeId = animeRecordResult.id
+        // Откат неудачного импорта удаляет аниме целиком (каскадом, включая WatchProgress) —
+        // это можно делать только если запись создана именно этим запуском, а не найдена по
+        // shikimoriId (см. PLAN.md, Блокер 1: реимпорт уже существующего аниме иначе стирает
+        // историю просмотра при любой ошибке/отмене дальше по пайплайну).
+        this.createdAnimeId = animeRecordResult.isNewlyCreated ? animeId : null
+        log.info('Аниме создано в БД', { animeId, isNewlyCreated: animeRecordResult.isNewlyCreated })
 
         // 2. Жанры и темы
         await saveGenresIfAvailable(animeId, entry.selectedAnime)

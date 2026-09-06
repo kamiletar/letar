@@ -226,9 +226,16 @@ update}/*`. Разбор на `asChild` + нативный тег — отдел
   - [ ] **Бэкап `%APPDATA%/@letar/animatrona/data/app.db` (+ `-wal`) до первого импорта.**
         Это единственная страховка.
   - [ ] Заливать только через страницу торрентов / «Добавить эпизоды».
-  - [ ] Фикс: не ставить `createdAnimeId`, если `upsertAnime` вернул уже существующее аниме
-        (сравнить `createdAt`, либо проверять существование до вызова). Cleanup должен удалять
-        только то, что этот запуск сам и создал.
+  - [x] Фикс (2026-09-06): не ставить `createdAnimeId`, если `upsertAnime` вернул уже
+        существующее аниме. Реализовано через явную проверку существования **до** upsert —
+        новая `db.animeExistsByShikimoriId()`
+        ([import-db.ts](main/services/import/import-db.ts)), вызывается в `createAnimeRecord()`
+        ([anime-record-setup.ts](main/services/import/anime-record-setup.ts)), которая теперь
+        возвращает `{ id, isNewlyCreated }` вместо голого `id`. `import-service.ts` ставит
+        `this.createdAnimeId` только при `isNewlyCreated === true` — cleanup при ошибке/отмене
+        удаляет только то, что этот запуск сам и создал. Тесты —
+        `main/services/import/__tests__/anime-record-setup.spec.ts` (4 теста, мокает
+        `import-db`/`shikimori/client`/`import-ipfs`).
 
   ### 🚫 Блокер 2 — старый спрайт перебивает новый (то самое «положили не то»)
 
@@ -272,9 +279,28 @@ update}/*`. Разбор на `asChild` + нативный тег — отдел
   случай, которого квест и должен избежать: данные были доступны в момент импорта и не попали в
   раздачу.
 
-  - [ ] Фикс: передавать `nameEn`/`synonyms`/`rating` из `selectedAnime` в `createAnimeRecord`;
-        заполнять `Episode.name`. Дешевле — fallback в `buildAnimeInfo` на `shikimoriData`,
-        но тогда данные останутся только в IPFS, не в БД.
+  - [x] Частично реализовано (2026-09-06), взят «дешёвый» вариант из двух описанных выше:
+    - `rating` — оказался чистой плюмбинг-ошибкой: `selectedAnime.score` уже был доступен и на
+      renderer (добавлен в payload очереди, `ImportWizardDialog.tsx`), и в типе
+      `ImportQueueSelectedAnime`, просто не передавался в `upsertAnime`. Теперь `rating:
+      selectedAnime.score ?? null` в `createAnimeRecord` — попадает и в БД (`Anime.rating`),
+      и оттуда в манифест.
+    - `nameEn`/`synonyms` — путь через БД дороже, чем казалось: сценарий выбора аниме кликом по
+      карточке результата поиска (`ShikimoriSearchStep.tsx`, самый частый путь) кладёт в
+      `selectedAnime` **superficial** `ShikimoriAnimePreview` без `english`/`synonyms` вообще —
+      полные `ShikimoriAnimeDetails` подгружаются только для `preselectedShikimoriId`-потока.
+      Правильный фикс требует трогать flow выбора в поиске, а не только `createAnimeRecord`.
+      Взят «дешёвый» вариант, отдельно упомянутый выше: `buildAnimeInfo()`
+      ([anime-info-generator.ts](main/services/anime-info-generator.ts)) теперь берёт
+      `nameEn`/`synonyms` из БД, а если там пусто — из `shikimoriData.english`/`.synonyms`
+      (свежий запрос к Shikimori, который и так уже делается для того же `AnimeInfo`). Это
+      закрывает `meta/info.json`, но НЕ `Anime.nameEn`/`Anime.synonyms` в БД — и по «Принципу
+      минимума БД» (`CLAUDE.md`) это ровно то место, где эти поля и должны жить (IPFS —
+      источник истины, БД — только то, что нужно для WHERE/ORDER/JOIN, а `nameEn`/`synonyms`
+      в фильтрах библиотеки не участвуют).
+    - `Episode.name` — не тронут, остаётся открытым (требует прокидывать имя эпизода от
+      Shikimori через уже написанный путь импорта файлов, отдельная задача не в рамках этого
+      прохода).
 
   ### ⚠️ Важное, но не блокирующее
 

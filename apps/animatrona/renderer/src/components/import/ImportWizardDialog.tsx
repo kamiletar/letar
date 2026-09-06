@@ -424,6 +424,7 @@ export function ImportWizardDialog({
         kind: selectedAnime.kind,
         status: selectedAnime.status,
         episodes: selectedAnime.episodes,
+        score: selectedAnime.score,
         airedOn: selectedAnime.airedOn
           ? `${selectedAnime.airedOn.year}-${String(selectedAnime.airedOn.month ?? 1).padStart(2, '0')}-${
             String(

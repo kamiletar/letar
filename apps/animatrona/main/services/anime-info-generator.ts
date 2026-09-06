@@ -66,6 +66,14 @@ export async function buildAnimeInfo(params: {
   const fandubbers = shikimoriData?.fandubbers?.length ? shikimoriData.fandubbers : undefined
   const fansubbers = shikimoriData?.fansubbers?.length ? shikimoriData.fansubbers : undefined
 
+  // nameEn/synonyms не сохраняются в БД при импорте (см. PLAN.md, Блокер 3) — fallback на
+  // свежие данные Shikimori, запрошенные для этого же AnimeInfo, чтобы манифест не оставался
+  // без них даже когда `anime.nameEn`/`anime.synonyms` в БД пустые.
+  const resolvedNameEn = nameEn ?? shikimoriData?.english ?? undefined
+  const resolvedSynonyms = synonyms?.length
+    ? synonyms
+    : (shikimoriData?.synonyms?.length ? shikimoriData.synonyms : undefined)
+
   // AniList — единственный источник настоящего англоязычного synopsis (не перевода).
   // Non-fatal: отсутствие AniList-данных не должно ронять генерацию AnimeInfo целиком.
   let descriptionEn: string | undefined
@@ -92,8 +100,8 @@ export async function buildAnimeInfo(params: {
     // Идентификация
     name,
     originalName,
-    nameEn,
-    synonyms: synonyms?.length ? synonyms : undefined,
+    nameEn: resolvedNameEn,
+    synonyms: resolvedSynonyms,
     year,
 
     // Классификация
