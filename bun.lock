@@ -375,10 +375,13 @@
     },
     "apps/animatrona": {
       "name": "@letar/animatrona",
-      "version": "0.55.58",
+      "version": "0.55.60",
       "dependencies": {
+        "@letar/electron-storage": "workspace:*",
         "@letar/folder-scan": "workspace:*",
+        "@letar/hooks": "workspace:*",
         "@letar/icon-generator": "workspace:*",
+        "@letar/query-provider": "workspace:*",
         "@letar/seed-utils": "workspace:*",
         "cheerio": "^1.2.0",
       },
@@ -524,7 +527,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.184.13",
+      "version": "0.184.14",
       "dependencies": {
         "@letar/data-export": "workspace:*",
         "@letar/demo-protection": "workspace:*",

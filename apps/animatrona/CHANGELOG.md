@@ -4,6 +4,20 @@
 
 ## [Unreleased]
 
+## [0.55.61] - 2026-09-06
+
+### Fixed
+
+- Три `@letar/*`-пакета (`electron-storage`, `hooks`, `query-provider`), реально импортируемые в
+  `main/ipc/tracker.handlers.ts`, `main/services/distribution-service.ts`,
+  `main/services/pinata-service.ts`, `main/services/regen-checkpoint.ts`, были подключены только
+  через `nx.implicitDependencies`/tsconfig paths — без реальной `dependency` в `package.json` bun
+  не создавал симлинк в `node_modules`. Тот же класс проблемы, что закрыт для
+  `@letar/folder-scan` в 0.55.59 — текущие тесты не тянули эти файлы транзитивно, поэтому падение
+  ещё не проявилось, но было бы неизбежным для следующего теста на них. Добавлены
+  `"@letar/electron-storage"`, `"@letar/hooks"`, `"@letar/query-provider"` в `dependencies`.
+  166 тестов зелёные.
+
 ## [0.55.60] - 2026-09-06
 
 ### Changed
