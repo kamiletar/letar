@@ -1234,22 +1234,10 @@ resolveTracks({ mode, preferredAudioLang, preferredSubLang, preferredGroup, avai
       см. отдельную находку ниже.
 - [x] ⏰ Привязка к §15.3 выполнена: поле добавлено в манифест до массовой перезаливки библиотеки
 
-**⚠️ Новая находка (2026-09-06), не относится к isForced — гейт тестов теперь неполон:**
-`nx test animatrona` красный на самом сборе тестов: `main/services/import/anime-record-setup.spec.ts`
-не собирается — цепочка импортов `anime-record-setup.ts` → `external-subtitle-scanner.ts` →
-`@letar/folder-scan` падает в vitest (`Cannot find package '@letar/folder-scan'`), хотя
-`typecheck:tsgo` (резолвит через `paths` в `tsconfig.json`) и упакованная сборка (через
-webpack/esbuild-алиасы `main/`) видят пакет нормально. Причина — тот же класс, что в
-[vitest-unlinked-workspace-lib-imports.md](/.claude/docs/vitest-unlinked-workspace-lib-imports.md):
-`@letar/folder-scan` только в `nx.implicitDependencies` (`apps/animatrona/package.json:16`) и
-`tsconfig.json` `paths`, не в настоящих `dependencies` — bun не создал симлинк в
-`node_modules/@letar/folder-scan`, а `vitest.config.mts` `resolve.alias` пакет тоже не покрывает
-(`@` → `./main`, и всё). Существовало до этой сессии (`external-subtitle-scanner.ts` уже
-импортировал пакет), моя правка `demux.ts` того же пакета этот разрыв не создала, но полагаться
-на «`nx test animatrona` зелёный» сейчас нельзя — 1 из 9 тестовых файлов не собирается вовсе
-(остальные 162 теста внутри собравшихся файлов прошли). Фикс — добавить `@letar/folder-scan` в
-настоящие `dependencies` `apps/animatrona/package.json` + `bun install`, отдельная задача не в
-рамках этой правки.
+**✅ Находка выше устранена (2026-09-06, релиз 0.55.59)** — `@letar/folder-scan` добавлен в
+настоящие `dependencies` `apps/animatrona/package.json` (см. CHANGELOG.md), `nx test animatrona`
+снова полностью зелёный: 9/9 файлов, 166/166 тестов (подтверждено повторно в сессии консолидации
+Prisma select ниже).
 
 - [x] Консолидация трёх дублей Prisma `select` из пункта выше (2026-09-06) — вынесены
       `AUDIO_TRACK_MANIFEST_SELECT`/`SUBTITLE_TRACK_MANIFEST_SELECT` в `import-db.ts`,
