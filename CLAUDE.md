@@ -265,6 +265,11 @@ ref/DOM не перезапускается ·
 ⚠️ прежний claim «`transpilePackages` для `@letar/*` обязателен и в nextron-рендерере
 (`animatrona`)» опровергнут причинной проверкой 2026-09-03 — сборка зелёная и без ключа вовсе;
 существующий список трогать не нужно (безвреден), но обязательным не является ·
+[electron-nextron-dual-tsconfig-paths-drift](/.claude/docs/electron-nextron-dual-tsconfig-paths-drift.md)
+⚠️ у Nextron-приложения (`animatrona`, `label-printer-desktop`, `poster-microtext-desktop`) свой
+`renderer/tsconfig.json` с независимым набором `@letar/*`-путей — `typecheck:tsgo` читает
+верхнеуровневый `tsconfig.json`, `next build` читает `renderer/tsconfig.json`; новый алиас,
+добавленный только в один файл, даёт зелёный typecheck и красный `Module not found` на билде ·
 [nextjs-standalone-tracing](/.claude/docs/nextjs-standalone-tracing.md)
 ECONNREFUSED/ERR_DLOPEN_FAILED при зелёном билде ·
 [nextjs-dynamic-fs-path-tracing](/.claude/docs/nextjs-dynamic-fs-path-tracing.md) ⚠️ обратный
