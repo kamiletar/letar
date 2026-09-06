@@ -5,6 +5,14 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 проект придерживается [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.33.20] - 2026-09-06
+
+### Added
+
+- Фаза 9.2 плана: статичная сонограмма всего трека до старта воспроизведения
+  (`useOfflineSpectrogram` — офлайн-анализ через `OfflineAudioContext`/`AnalyserNode` с
+  suspend/resume по 300 точкам). После первого play естественно сменяется живым рендером.
+
 ## [0.33.19] - 2026-09-06
 
 ### Added

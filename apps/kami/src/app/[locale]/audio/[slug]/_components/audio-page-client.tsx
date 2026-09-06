@@ -7,6 +7,7 @@ import { useCallback, useRef, useState } from 'react'
 import { AudioPlayer } from './audio-player'
 import { AudioSpectrogram } from './audio-spectrogram'
 import { AudioSpectrumVisualizer } from './audio-spectrum-visualizer'
+import { useOfflineSpectrogram } from './use-offline-spectrogram'
 
 interface AudioData {
   title: string
@@ -45,8 +46,10 @@ function formatDuration(seconds: number): string {
  * Управляет audioRef, isPlaying и общим AnalyserNode для визуализаторов.
  */
 export function AudioPageClient({ audio, locale }: AudioPageClientProps) {
+  const audioUrl = `/api/files/${audio.path}`
   const audioRef = useRef<HTMLAudioElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
+  const { columns: staticSpectrogramColumns } = useOfflineSpectrogram(audioUrl)
 
   /** Общий AnalyserNode — один на оба визуализатора */
   const analyzerRef = useRef<AnalyserNode | null>(null)
@@ -90,7 +93,6 @@ export function AudioPageClient({ audio, locale }: AudioPageClientProps) {
 
   const { resolvedColorMode } = useColorMode()
   const isLight = resolvedColorMode === 'light'
-  const audioUrl = `/api/files/${audio.path}`
 
   return (
     <Box position="relative" minH="calc(100vh - 60px)" overflow="hidden">
@@ -101,6 +103,7 @@ export function AudioPageClient({ audio, locale }: AudioPageClientProps) {
           isPlaying={isPlaying}
           getAnalyzer={getAnalyzer}
           lightMode={isLight}
+          staticColumns={staticSpectrogramColumns}
         />
       </Box>
 

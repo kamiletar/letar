@@ -16,6 +16,8 @@ interface AudioSpectrogramProps {
   color?: string
   /** Светлая тема — рисовать тёмным по светлому */
   lightMode?: boolean
+  /** Столбцы офлайн-анализа всего трека (useOfflineSpectrogram) — статичная картина до первого play */
+  staticColumns?: Uint8Array[] | null
 }
 
 /**
@@ -32,9 +34,13 @@ export function AudioSpectrogram({
   height,
   color = '#00FF41',
   lightMode = false,
+  staticColumns = null,
 }: AudioSpectrogramProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationFrameRef = useRef<number | null>(null)
+  /** Воспроизведение уже стартовало хотя бы раз — после этого статичная картина больше не рисуется,
+   * даёт живому scroll-рендеру постепенно перекрыть её реальными данными */
+  const hasStartedRef = useRef(false)
   /** Последняя версия `draw` — рекурсивный вызов идёт через ref, а не через саму `draw`,
    * чтобы не читать переменную во время её собственной инициализации (react/immutability). */
   const drawRef = useRef<() => void>(() => {})
@@ -49,6 +55,59 @@ export function AudioSpectrogram({
       b: Number.parseInt(hex.substring(4, 6), 16),
     }
   }, [color])
+
+  /** Отмечаем первый старт воспроизведения — дальше статичная картина больше не перерисовывается */
+  useEffect(() => {
+    if (isPlaying) {
+      hasStartedRef.current = true
+    }
+  }, [isPlaying])
+
+  /** Рисует весь офлайн-анализ трека одним изображением на всю ширину canvas */
+  const drawStatic = useCallback(() => {
+    const canvas = canvasRef.current
+    if (!canvas || !staticColumns || staticColumns.length === 0 || hasStartedRef.current) {
+      return
+    }
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      return
+    }
+
+    const dpr = window.devicePixelRatio || 1
+    const w = canvas.width / dpr
+    const h = canvas.height / dpr
+
+    ctx.fillStyle = lightMode ? '#f5f5f5' : 'black'
+    ctx.fillRect(0, 0, w, h)
+
+    const { r, g, b } = colorRgb.current
+    const drawR = lightMode ? 0 : r
+    const drawG = lightMode ? 140 : g
+    const drawB = lightMode ? 20 : b
+    const columnWidth = w / staticColumns.length
+
+    for (let ci = 0; ci < staticColumns.length; ci++) {
+      const bins = staticColumns[ci]
+      const x = ci * columnWidth
+
+      for (let i = 0; i < h; i++) {
+        const freqIndex = Math.floor(((h - 1 - i) / h) * bins.length)
+        const value = bins[freqIndex] / 255
+
+        if (value > 0.01) {
+          const intensity = lightMode ? Math.min(value * 1.5, 1) : value * value
+          ctx.fillStyle = `rgba(${drawR}, ${drawG}, ${drawB}, ${intensity})`
+          ctx.fillRect(x, i, Math.max(columnWidth, 1), 1)
+        }
+      }
+    }
+  }, [staticColumns, lightMode])
+
+  useEffect(() => {
+    drawStatic()
+  }, [drawStatic])
 
   /** Рендер спектрограммы — сдвиг влево + новый столбец справа */
   const draw = useCallback(() => {
@@ -148,13 +207,14 @@ export function AudioSpectrogram({
         if (ctx) {
           ctx.scale(dpr, dpr)
         }
+        drawStatic()
       }
     })
 
     resizeObserver.observe(canvas.parentElement || canvas)
 
     return () => resizeObserver.disconnect()
-  }, [])
+  }, [drawStatic])
 
   /** Очистка при размонтировании */
   useEffect(() => {
