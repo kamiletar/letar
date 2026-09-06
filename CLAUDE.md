@@ -564,6 +564,14 @@ rollout-приложений после перехода s2/s3 на Traefik — 
 plaintext с произвольным именем не совпадает с creation_rules; плюс dotenv vs бинарный формат
 `.enc` требует разных флагов на decrypt/encrypt — рецепт `scripts/sops-env-set.sh` ·
 [redis-security](/.claude/docs/redis-security.md) ·
+[redis-client-not-ready-at-startup](/.claude/docs/redis-client-not-ready-at-startup.md) ⚠️
+`getRedis()` из `@letar/redis-client` отдаёт **не-null** клиент со статусом `connecting`
+(`lazyConnect` + `connect()` без await), а `enableOfflineQueue: false` не даёт первой команде
+подождать — любое чтение из Redis **на пути старта процесса** падает
+`Stream isn't writeable`, `try/catch` его честно логирует, но повторной попытки нет и
+состояние теряется безвозвратно; ловушка второго порядка к фиксу 2026-08-08 — очередь
+возвращать НЕЛЬЗЯ, ждать нужно события `ready` с границей по времени, причём внешний
+`withTimeout` обязан быть больше внутреннего ожидания ·
 [cron-endpoint-registration-checklist](/.claude/docs/cron-endpoint-registration-checklist.md) ⚠️
 новый `/api/cron/*` требует три правки не в scope пишущего приложения (`CRON_SECRET`,
 `dashboard-agent/cron.ts`, порт/host в `infra-config`) — иначе тихий 401 или ненайденный маршрут
