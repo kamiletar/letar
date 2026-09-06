@@ -198,8 +198,11 @@ update}/*`. Разбор на `asChild` + нативный тег — отдел
   билдер полезет скачивать `video.webm` и пересобирать спрайт заново — впустую, при том что
   готовый уже лежит в IPFS.
 
-  - [ ] Фикс: добавить `spriteCid`/`vttCid`/`chaptersCid` в сброс retranscode **и** писать
-        `spriteCid`/`vttCid` в `updateEpisode` постпроцесса.
+  - [x] Фикс (2026-09-06): `spriteCid`/`vttCid`/`chaptersCid` добавлены в сброс retranscode
+        ([episode-file-processor.ts](main/services/import/episode-file-processor.ts)), и
+        `spriteCid`/`vttCid` теперь пишутся в `updateEpisode` постпроцесса
+        ([post-process-runner.ts](main/services/import/post-process-runner.ts)) сразу из
+        `spriteData`, а не только в манифест.
 
   Паттерн формализован отдельным кросс-репо документом —
   [animatrona-db-manifest-dual-source.md](/.claude/docs/animatrona-db-manifest-dual-source.md)
@@ -1927,16 +1930,38 @@ UI. Задача — добавить batch-режим поверх сущест
   вынести в экспортируемую функцию, не дублировать.
 - `main/services/import-queue-controller.ts` (`ImportQueueController.getInstance()`) — очередь
   транскода работает полностью в main process, `addItems()`/`startQueue()` не требуют renderer.
+- `main/services/content-deletion.ts` → `unpinAnimeContent(animeId)` — уже реализованное открепление
+  контента аниме из локального Kubo с `requireRemotePin: true` (пропускает CID, ещё не
+  подтверждённые на удалённых пинерах) и простановкой `Anime.pinnedLocally = false`; аниме остаётся
+  в библиотеке. Ровно то, что нужно шагу ARCHIVING — не писать новую логику отпина, вызвать эту.
+- `main/services/pinata-service.ts` + `main/ipc/remote-pin.handlers.ts` → `pinata.pinByCid(cid)` /
+  `pinata.isPinned(cid)` — существующий клиент удалённого пиннинга (Pinata). Сейчас вызывается
+  только руками из UI (см. §22.1 в разделе «ТЗ: Импорт из Рутрекера» ниже — автоматизация была
+  запланирована, но не сделана); батч — первое место, где это становится автоматическим шагом
+  пайплайна, а не отложенной инфраструктурной задачей.
+- `main/services/rutracker/rutracker-download-orchestrator.ts` → `cancelDownload(infoHash,
+  deleteFiles=true)` уже показывает вызов `getTorrentService().remove(infoHash, deleteFiles)` —
+  тот же вызов, только не при отмене, а при успешном завершении шага ARCHIVING (см. ниже,
+  почему сейчас это не происходит само).
 
 ### Фаза 1 — инфраструктура батча (эта задача)
 
 - [ ] **Схема** (`schema/models/import.zmodel`): `BulkImportItemStatus` enum (`PENDING`,
-      `FETCHING`, `MATCHING`, `NEEDS_REVIEW`, `DOWNLOADING`, `QUEUED`, `DONE`, `ERROR`,
-      `SKIPPED`) + `model BulkImportItem` (batchId, url, status, position, shikimoriId,
-      animeName, candidatesJson — кандидаты Shikimori для NEEDS_REVIEW, torrentInfoJson —
+      `FETCHING`, `MATCHING`, `NEEDS_REVIEW`, `DOWNLOADING`, `QUEUED`, `ARCHIVING`, `DONE`,
+      `ERROR`, `SKIPPED`) — `ARCHIVING` вставлена между `QUEUED` и `DONE`: элемент уже
+      транскодирован и лежит в БД, но ещё не прошёл дисковую гигиену (см. «Дисковая гигиена
+      батча» ниже) — `DONE` теперь означает не только «аниме импортировано», но и «место после
+      него уже освобождено» — + `model BulkImportItem` (batchId, url, status, position,
+      shikimoriId, animeName, infoHash — infoHash активной/завершённой торрент-загрузки этого
+      элемента (нужен на шаге ARCHIVING, чтобы найти и убрать раздачу из qBittorrent, и чтобы
+      `resumeBatch` после перезапуска приложения знал, какой торрент довычищать), candidatesJson —
+      кандидаты Shikimori для NEEDS_REVIEW, torrentInfoJson —
       контекст раздачи для Claude: nameRu/nameOriginal/year/episodeCount/genres/studio/
       description, resolvedShikimoriId — пишет MCP-инструмент ИЛИ ручной UI-фоллбэк, один и тот
-      же путь продолжения пайплайна, animeId, error) + `model DubExtractionTask` (animeId
+      же путь продолжения пайплайна, animeId, diskCleanupJson — прогресс дисковой гигиены
+      `{ sourceDeletedAt?, remotePinRequestedAt?, remotePinConfirmedAt?, localUnpinnedAt? }`, один
+      JSON вместо четырёх колонок по аналогии с `candidatesJson`/`torrentInfoJson`, error) +
+      `model DubExtractionTask` (animeId
       unique-relation на Anime, rutrackerUrl, rawText — текст `post_body` целиком, fileListJson —
       **список путей файлов/папок реально скачанного торрента** (`TorrentInfo.files[].path`, а не
       только `fileList` из спойлера на странице поста — имя команды озвучки/сабов часто зашито

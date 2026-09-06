@@ -361,6 +361,12 @@ export async function runPostProcess(
         thumbnailCids: thumbnailCidsJson,
         screenshotCids: screenshotCidsJson,
         metadataCid: metadataCid ?? undefined,
+        // Пишем sprite/vtt CID сразу в БД, не только в манифест — колонки существуют
+        // специально, чтобы переживать recovery (см. animatrona-db-manifest-dual-source.md).
+        // Без этого директория при retranscode находит БД пустой и берёт CID из манифеста
+        // (корректно с фикса выше), но колонка так и остаётся null до первого recovery-прохода.
+        spriteCid: spriteData?.spriteCid ?? undefined,
+        vttCid: spriteData?.vttCid ?? undefined,
         // Проверяем существование профиля (мог быть удалён re-seedом во время транскодирования)
         encodingProfileId: data.encodingProfileId
           ? ((await db.findEncodingProfile(data.encodingProfileId))?.id ?? null)
