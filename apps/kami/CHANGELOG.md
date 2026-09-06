@@ -5,6 +5,17 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 проект придерживается [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.33.29] - 2026-09-06
+
+### Added
+
+- Фаза 10: favicon-превью в карточке ссылки — `/admin/links` и публичная `/links` (сервис Google
+  `s2/favicons`, всегда возвращает иконку, даже дефолтную для незнакомых доменов — fallback на
+  ошибку загрузки не нужен).
+- Фаза 10: inline-редактирование категории/меток прямо в строке таблицы `/admin/links` — клик по
+  бейджам открывает два `Input` (категория, метки через запятую) + Сохранить/Отмена, без перехода
+  на отдельную страницу. Новый server action `updateLinkClassificationAction` (Zod + `.strip()`).
+
 ## [0.33.28] - 2026-09-06
 
 ### Added

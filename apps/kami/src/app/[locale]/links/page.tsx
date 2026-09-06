@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/db'
 import { ADMIN_PAGE_SIZE } from '@/lib/utils/constants'
-import { Badge, Box, Card, Heading, HStack, Input, Text, VStack, Wrap } from '@chakra-ui/react'
+import { Badge, Box, Card, Heading, HStack, Image, Input, Text, VStack, Wrap } from '@chakra-ui/react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
@@ -35,6 +35,11 @@ function extractDomain(url: string): string {
   } catch {
     return url
   }
+}
+
+/** Favicon домена через сервис Google — всегда возвращает иконку (дефолтную для неизвестных доменов) */
+function faviconUrl(domain: string): string {
+  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=32`
 }
 
 /** Собирает href с текущими фильтрами + переопределением одного параметра (undefined — снять фильтр) */
@@ -184,6 +189,7 @@ export default async function LinksPage({ params, searchParams }: LinksPageProps
                           </Text>
                         )}
                         <HStack gap={2} flexWrap="wrap" fontSize="xs" color="fg.muted">
+                          <Image src={faviconUrl(extractDomain(link.url))} alt="" boxSize="14px" borderRadius="sm" />
                           <Text>{extractDomain(link.url)}</Text>
                           {link.category && <Badge size="sm" colorPalette="purple">{link.category}</Badge>}
                           {link.tags.map((t) => <Text key={t} color="teal.fg">#{t}</Text>)}
