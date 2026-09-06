@@ -1,5 +1,24 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-06 — `ConversationalMode`: реализован задокументированный, но неиспользуемый `welcomeScreen`
+
+Пользователь указал, что `welcomeScreen?: ReactNode` в `ConversationalModeProps`
+(`conversational-mode.tsx`) был объявлен, задокументирован в JSDoc и в `apps/form-docs`, но нигде
+не рендерился — асимметрично симметричному `completedScreen`, который рендерится. Прошлая сессия
+оставила это как явный lint-warning `no-unused-vars` (не переименовала в `_welcomeScreen`),
+специально чтобы пробел не потерялся.
+
+Разобрал `use-conversational-state.ts` — welcome screen сделан отдельным шагом до старта
+`state.currentIndex`, не завязанным на его индекс/прогресс: локальный
+`useState(Boolean(welcomeScreen))`, закрывается новой кнопкой (проп `startLabel`, дефолт
+`'Начать'`) или Enter. Оставлять как задокументированный, но мёртвый API не стал — раз он уже
+публично обещан в `apps/form-docs`, реализация была меньшим злом, чем breaking-change по его
+удалению.
+
+5 новых тестов в `conversational-mode.spec.tsx` (welcome показывается/скрывается, клик и Enter
+закрывают, повторно не появляется при возврате назад). `nx test/lint/typecheck:tsgo @letar/forms`
+зелёные. `2.10.0 → 2.11.0`, коммит `63cf8701`.
+
 ## 2026-09-06 — Фикс 2 падающих тестов (`field-rich-text`, `table-keyboard-commit`) — не rAF-регресс, а короткий `waitFor` timeout
 
 Пользователь заметил 2/758 падающих теста в `nx test @letar/forms` и попросил разобрать, не
