@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [0.55.40] - 2026-09-06
+
+### Fixed
+
+- Успешный ручной импорт (`import-service.ts`) не удалял исходный торрент — раздача сидировала
+  в qBittorrent бессрочно, а скачанные файлы висели в `Downloads/Animatrona/<torrent>/` навсегда
+  (`post-process-runner.ts` чистит только рабочую папку библиотеки, не папку торрента).
+  `markTorrentImported(folderPath)` в `import-queue-torrent.ts` заменена на
+  `removeTorrentSource(folderPath)` — то же сопоставление торрента с папкой импорта, но вместо
+  пометки `importStatus: 'imported'` вызывает `getTorrentService().remove(infoHash, true)`, как
+  при отмене загрузки. Drag&drop-импорт файлов без соответствующего торрента не затронут.
+
 ## [0.55.39] - 2026-09-06
 
 ### Fixed
