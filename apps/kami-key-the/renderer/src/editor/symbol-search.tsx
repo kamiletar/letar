@@ -38,14 +38,17 @@ interface SymbolSearchProps {
   symbols: SymbolEntry[]
   onAssign: (char: string, name: string, slot: 'char' | 'shiftChar') => void
   keyLabel: string
+  /** Активная категория (id из SYMBOL_CATEGORIES), null — «Все». Управляется извне — часть route. */
+  category: string | null
+  onCategoryChange: (id: string) => void
 }
 
-export function SymbolSearch({ symbols, onAssign, keyLabel }: SymbolSearchProps) {
+export function SymbolSearch({ symbols, onAssign, keyLabel, category, onCategoryChange }: SymbolSearchProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SymbolEntry[]>([])
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [highlightIndex, setHighlightIndex] = useState(-1)
-  const [categoryId, setCategoryId] = useState('all')
+  const categoryId = category ?? 'all'
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
   const resultsRef = useRef<HTMLDivElement>(null)
 
@@ -106,6 +109,12 @@ export function SymbolSearch({ symbols, onAssign, keyLabel }: SymbolSearchProps)
     timerRef.current = setTimeout(() => search(query.trim()), 300)
     return () => clearTimeout(timerRef.current)
   }, [query, search])
+
+  // Сброс подсветки/пагинации при смене категории (сама категория теперь управляется извне)
+  useEffect(() => {
+    setHighlightIndex(-1)
+    setVisibleCount(PAGE_SIZE)
+  }, [categoryId])
 
   // Скролл к подсвеченному элементу
   useEffect(() => {
@@ -180,11 +189,7 @@ export function SymbolSearch({ symbols, onAssign, keyLabel }: SymbolSearchProps)
             color={categoryId === cat.id ? '#8a9af0' : '#666'}
             border={categoryId === cat.id ? '1px solid #5a5a8a' : '1px solid transparent'}
             _hover={{ color: '#aaa', bg: '#2a2a4a' }}
-            onClick={() => {
-              setCategoryId(cat.id)
-              setHighlightIndex(-1)
-              setVisibleCount(PAGE_SIZE)
-            }}
+            onClick={() => onCategoryChange(cat.id)}
           >
             {cat.label}
             {cat.id !== 'all' && (

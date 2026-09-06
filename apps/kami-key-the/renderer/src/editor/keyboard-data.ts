@@ -99,6 +99,14 @@ export const KEYBOARD_ROWS: KeyDef[][] = [
   ],
 ]
 
+/** Плоский список всех клавиш (основной блок + физические стрелки) — для поиска по VK */
+const ALL_KEYS: KeyDef[] = [...KEYBOARD_ROWS.flat(), ARROW_KEYS.up, ARROW_KEYS.left, ARROW_KEYS.down, ARROW_KEYS.right]
+
+/** Найти определение клавиши по VK-коду (для восстановления route из URL) */
+export function findKeyByVk(vk: number): KeyDef | undefined {
+  return ALL_KEYS.find((k) => k.vk === vk)
+}
+
 /** Отображаемый символ для невидимых Unicode */
 export function displayChar(char: string): string {
   if (char === '\u2009') {

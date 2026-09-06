@@ -12,8 +12,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { SymbolEntry } from '../../../shared/ipc-types'
 import type { KeymapConfig, KeyMapping } from '../../../src/types'
 import { toaster } from '../lib/toaster'
-import { EditorPanel } from './editor-panel'
-import type { KeyDef } from './keyboard-data'
+import { parseRoute, stepBack, syncRouteToLocation } from './editor-route'
+import { KeyPage } from './key-page'
+import { findKeyByVk } from './keyboard-data'
 import { KeyboardView } from './keyboard-view'
 import { LayoutTabs } from './layout-tabs'
 import { Toolbar } from './toolbar'
@@ -52,7 +53,8 @@ function validateImportData(data: unknown): data is { name: string; mappings: Ke
 export function EditorPage() {
   const [config, setConfig] = useState<KeymapConfig | null>(null)
   const [symbols, setSymbols] = useState<SymbolEntry[]>([])
-  const [selectedKey, setSelectedKey] = useState<KeyDef | null>(null)
+  const [route, setRoute] = useState(() => parseRoute(window.location.hash))
+  const selectedKey = route.keyVk != null ? findKeyByVk(route.keyVk) ?? null : null
   const [activeLayoutIndex, setActiveLayoutIndex] = useState(0)
   const [undoStack, setUndoStack] = useState<string[]>([])
   const [redoStack, setRedoStack] = useState<string[]>([])
@@ -82,6 +84,19 @@ export function EditorPage() {
       setUndoStack([])
       setRedoStack([])
     })
+  }, [])
+
+  // Зеркалим route в адресную строку — адресуемое состояние экрана (клавиша + категория пикера)
+  useEffect(() => {
+    syncRouteToLocation(route)
+  }, [route])
+
+  const goBack = useCallback(() => {
+    setRoute(stepBack)
+  }, [])
+
+  const onCategoryChange = useCallback((id: string) => {
+    setRoute((prev) => ({ ...prev, category: id === 'all' ? null : id }))
   }, [])
 
   const isDirty = config ? JSON.stringify(config) !== originalJson : false
@@ -146,7 +161,7 @@ export function EditorPage() {
     setOriginalJson(JSON.stringify(cfg))
     setUndoStack([])
     setRedoStack([])
-    setSelectedKey(null)
+    setRoute({ keyVk: null, category: null })
     const idx = Math.max(
       0,
       cfg.layouts.findIndex((l) => l.name === cfg.activeLayout),
@@ -168,12 +183,12 @@ export function EditorPage() {
         e.preventDefault()
         doSave()
       } else if (e.key === 'Escape') {
-        setSelectedKey(null)
+        goBack()
       }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [doUndo, doRedo, doSave])
+  }, [doUndo, doRedo, doSave, goBack])
 
   // Flash-анимация на клавише
   const triggerFlash = useCallback((vk: number) => {
@@ -228,7 +243,7 @@ export function EditorPage() {
           }
           setConfig(newConfig)
           setActiveLayoutIndex(newConfig.layouts.length - 1)
-          setSelectedKey(null)
+          setRoute({ keyVk: null, category: null })
           toaster.success({
             title: `Раскладка "${name}" импортирована`,
             description: `${raw.mappings.length} маппингов`,
@@ -365,7 +380,7 @@ export function EditorPage() {
         activeIndex={activeLayoutIndex}
         onSelect={(i) => {
           setActiveLayoutIndex(i)
-          setSelectedKey(null)
+          setRoute({ keyVk: null, category: null })
         }}
         onAdd={(name) => {
           pushUndo()
@@ -375,7 +390,7 @@ export function EditorPage() {
           }
           setConfig(newConfig)
           setActiveLayoutIndex(newConfig.layouts.length - 1)
-          setSelectedKey(null)
+          setRoute({ keyVk: null, category: null })
           toaster.success({ title: `Раскладка "${name}" создана`, duration: 2000 })
         }}
         onDelete={(i) => {
@@ -385,7 +400,7 @@ export function EditorPage() {
           const newIdx = Math.min(activeLayoutIndex, layouts.length - 1)
           setConfig({ ...config, layouts, activeLayout: layouts[newIdx].name })
           setActiveLayoutIndex(newIdx)
-          setSelectedKey(null)
+          setRoute({ keyVk: null, category: null })
           toaster.create({ title: `Раскладка "${deletedName}" удалена`, type: 'info', duration: 2000 })
         }}
         onRename={(i, name) => {
@@ -400,25 +415,30 @@ export function EditorPage() {
         }}
       />
 
-      <KeyboardView
-        mappingByVk={mappingByVk}
-        selectedVk={selectedKey?.vk ?? null}
-        flashVk={flashVk}
-        onKeyClick={setSelectedKey}
-        onDropOnKey={dropOnKey}
-      />
-
-      {selectedKey && (
-        <EditorPanel
-          selectedKey={selectedKey}
-          mapping={mappingByVk.get(selectedKey.vk) ?? null}
-          symbols={symbols}
-          isDirty={isDirty}
-          onAssign={assignSymbol}
-          onRemove={removeMapping}
-          onSave={doSave}
-        />
-      )}
+      {selectedKey
+        ? (
+          <KeyPage
+            keyDef={selectedKey}
+            mapping={mappingByVk.get(selectedKey.vk) ?? null}
+            symbols={symbols}
+            isDirty={isDirty}
+            category={route.category}
+            onCategoryChange={onCategoryChange}
+            onAssign={assignSymbol}
+            onRemove={removeMapping}
+            onSave={doSave}
+            onBack={goBack}
+          />
+        )
+        : (
+          <KeyboardView
+            mappingByVk={mappingByVk}
+            selectedVk={null}
+            flashVk={flashVk}
+            onKeyClick={(key) => setRoute({ keyVk: key.vk, category: null })}
+            onDropOnKey={dropOnKey}
+          />
+        )}
 
       <Toolbar
         isDirty={isDirty}

@@ -17,12 +17,16 @@ interface EditorPanelProps {
   mapping: KeyMapping | null
   symbols: SymbolEntry[]
   isDirty: boolean
+  category: string | null
+  onCategoryChange: (id: string) => void
   onAssign: (char: string, name: string, slot: 'char' | 'shiftChar') => void
   onRemove: (slot: 'char' | 'shiftChar') => void
   onSave: () => void
 }
 
-export function EditorPanel({ selectedKey, mapping, symbols, isDirty, onAssign, onRemove, onSave }: EditorPanelProps) {
+export function EditorPanel(
+  { selectedKey, mapping, symbols, isDirty, category, onCategoryChange, onAssign, onRemove, onSave }: EditorPanelProps,
+) {
   const keyLabel = selectedKey.label || `VK ${toHex(selectedKey.vk)}`
   const keyRu = selectedKey.ru ? ` / ${selectedKey.ru}` : ''
 
@@ -142,7 +146,13 @@ export function EditorPanel({ selectedKey, mapping, symbols, isDirty, onAssign, 
       </Text>
 
       {/* Поиск символов */}
-      <SymbolSearch symbols={symbols} onAssign={onAssign} keyLabel={keyLabel} />
+      <SymbolSearch
+        symbols={symbols}
+        onAssign={onAssign}
+        keyLabel={keyLabel}
+        category={category}
+        onCategoryChange={onCategoryChange}
+      />
 
       {/* Прямой ввод Unicode */}
       <DirectInput onAssign={onAssign} keyLabel={keyLabel} />
