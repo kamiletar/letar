@@ -125,13 +125,19 @@ export async function processEpisodeFile(
         videoWidth: demuxResult.video?.width,
         videoHeight: demuxResult.video?.height,
         videoBitDepth: demuxResult.video?.bitDepth,
-        // Сбрасываем CID — будут заново установлены в постпроцессе
+        // Сбрасываем CID — будут заново установлены в постпроцессе.
+        // spriteCid/vttCid/chaptersCid включены сюда же: без сброса при retranscode
+        // билдер directoryCid подхватывает старый CID из БД в приоритете и игнорирует
+        // свежий, записанный только в манифест (см. animatrona-db-manifest-dual-source.md)
         transcodedCid: null,
         manifestCid: null,
         ipfsSize: null,
         thumbnailCids: null,
         screenshotCids: null,
         metadataCid: null,
+        spriteCid: null,
+        vttCid: null,
+        chaptersCid: null,
       })
     } else {
       // Новый эпизод в retranscode-режиме: создаём как обычно
