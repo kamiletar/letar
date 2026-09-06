@@ -4,6 +4,31 @@
 
 > **Архив обновлён:** 2026-09-06
 
+## Глобальный лимит конкурентности на IPFS pin/upload перед батч-импортом (2026-09-06)
+
+Закрывает пункт, оставленный «не тронуто намеренно» в предыдущей сессии (см. ниже) — фоновый
+аудит риска батч-импорта нашёл, что нигде в пайплайне импорта нет лимита конкурентности на
+операции с Kubo (`pin.add`/`add`): `uploadManyToIpfs()` ([import-ipfs.ts](main/services/import/import-ipfs.ts))
+и `PinManager.pin()` ([pin-manager.ts](main/services/ipfs/pin-manager.ts)) могли уйти в Kubo
+неограниченным числом параллельных запросов при десятках файлов на эпизод × десятках эпизодов
+в батче.
+
+Решение — **два чокпоинта, а не патч в каждом месте вызова**: `uploadToIpfs()` в
+[import-ipfs.ts](main/services/import/import-ipfs.ts) — единственная точка загрузки в IPFS (через
+неё идут `uploadManyToIpfs`, дорожки субтитров, постеры, скриншоты, спрайты, манифест — проверено
+грепом по вызывающим местам), и `client.pin.add` внутри `PinManager.pin()`. Оба обёрнуты общим
+`kuboLimiter` (concurrency=4) из нового [kubo-concurrency.ts](main/services/ipfs/kubo-concurrency.ts) —
+значение выбрано по аналогии с `createConcurrencyLimiter(2)` для демукса (CPU/IO-тяжелее) и
+батчами по 3 в `cid-recovery.ts`; сам лимитер — обобщённый `createConcurrencyLimiter`, вынесенный
+из `services/import/helpers.ts` в [utils/concurrency-limiter.ts](main/utils/concurrency-limiter.ts)
+(IPFS-слой не должен зависеть от import-домена).
+
+`anime-directory-builder.ts` (уже имеет свою retry-логику на `pin.add` — таймаут 90с, 3 попытки)
+намеренно не тронут — задача касалась лимита на число ОДНОВРЕМЕННЫХ запросов, не ретраев одного.
+
+`nx typecheck:tsgo animatrona`/`nx lint animatrona` — зелёные (в lint только предсуществующие
+несвязанные warnings). Коммит `7d9397ff`.
+
 ## Три фикса, устраняющие необходимость ручной регенерации манифеста (2026-09-06)
 
 Подготовка к предстоящему батч-импорту с Рутрекера: пользователь спросил, что делает
@@ -39,8 +64,9 @@
      `false`, и `unpin()` не вызывался вовсе. При батче с неизбежными частичными сбоями это
      копило orphan-пины на диске. Убрана лишняя проверка.
 
-**Не тронуто намеренно** (заведены отдельные чипы `spawn_task` на конец сессии): отсутствие
-глобального лимита конкурентности на IPFS pin/upload-операции; `isSafeToUnpinLocally()`
+**Не тронуто намеренно** (заведён отдельный чип `spawn_task` на конец сессии, закрыт следующей
+сессией — см. «Глобальный лимит конкурентности на IPFS pin/upload» выше): отсутствие глобального
+лимита конкурентности на IPFS pin/upload-операции. Остаётся открытым: `isSafeToUnpinLocally()`
 (`pin-status-service.ts:98`) считает CID без записи `PinStatus` безопасным для снятия пина —
 теоретическая гонка со свежезалитым во время активного импорта контентом.
 
@@ -2590,3 +2616,37 @@ for (const [hash, torrent] of Object.entries(sync.torrents ?? {})) {
       `MatchResult`, `CandidateScore` в обоих файлах) заменены на канонические импорты из
       `@/types/electron`, устраняя источник будущего дрейфа типов. `Box as="img"` заменён на
       Chakra `Image` (полиморфный `as="img"` не типизировал `src`).
+
+#### Гейт нормализации pins на время активного импорта (2026-09-06)
+
+- [x] **Аудит гонки `isSafeToUnpinLocally` vs `addFile` при батч-импорте** — фоновый субагент
+      флагнул потенциальную гонку в [pin-status-service.ts:91](main/services/ipfs/pin-status-service.ts)
+      (`isSafeToUnpinLocally`, единственный гейт перед `pin.rm` в `pin-normalizer.ts:142`).
+      Проверка кодом дала более широкую картину, чем исходная гипотеза:
+  - `markAsLocalOnly`/`markAsQueued`/`markAsPinnedRemote` нигде не вызываются в реальном
+    пайплайне (только в собственном файле) — таблица `PinStatus` пуста для всего свежего
+    контента, `isSafeToUnpinLocally()` сейчас всегда возвращает `true`. Механизм рассчитан на
+    batch-спеку из §14/§22.1 (`rutracker-batch-import.ts`), которая пока не реализована —
+    файла не существует.
+  - Сам `normalizeAllPins()` эту гонку не ловит структурно: трогает только CID, уже reachable
+    через `client.refs(directoryCid)`, то есть уже часть закоммиченного в БД дерева.
+    Незалинкованный `pin:false`-контент (суб-документы аниме, добавленные в расчёте на будущую
+    indirect-защиту через ещё не собранный `directoryCid`) для нормализатора попросту невидим —
+    не в `pin.ls` (не запинен), не в `refs()` (ещё не в дереве). Потерять его через
+    `normalizeAllPins()` нельзя даже с always-`true` гейтом.
+  - Реальный риск — необёрнутый `client.repo.gc()` за IPC `ipfs:repoGc`
+    (`unified-ipfs-service.ts:443`): без нормализации, без проверки `PinStatus`, без гейта
+    активного импорта. `safeLocalGc()` (`pin-status-service.ts:314`, нормализация + GC перед
+    ним) существует, но не вызывается вообще ниоткуда — мёртвый код, к UI не подключён.
+  - Демон Kubo стартует без `--enable-gc` (`kubo-daemon.ts`) — автоматического
+    периодического GC нет, `repo.gc()` запускается только вручную через UI/IPC. Снижает
+    вероятность, но не убирает риск.
+- [x] **Фикс** — точечный, только в двух файлах: `ImportQueueController.hasActiveImport()`
+      (`import-queue-controller.ts`, singleton уже хранит очередь+статусы, метод проверяет
+      `currentId`/статусы `preparing`/`transcoding`/`postprocess`) + throw в начале
+      `normalizeAllPins()` (`pin-normalizer.ts`) при активном импорте. `nx typecheck:tsgo` и
+      `nx lint` зелёные. Коммит `c8c82bfd`.
+- [ ] ⚠️ Не закрыто в этой сессии: `ipfs:repoGc` тем же гейтом не защищён — заведена отдельная
+      фоновая задача (см. PLAN.md §22.2), результат которой нужно проверить в следующей сессии.
+
+> Перенесено из PLAN.md: 2026-09-06
