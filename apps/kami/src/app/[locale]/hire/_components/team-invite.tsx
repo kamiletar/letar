@@ -217,7 +217,6 @@ export function TeamInvite({ companyName }: TeamInviteProps) {
                     <>
                       {/* Шаг 2: Добавление email'ов */}
                       <VStack gap={3} align="stretch">
-                        {/* oxlint-disable-next-line react/no-array-index-key -- Редактируемый список */}
                         {emails.map((email, index) => (
                           <HStack key={index} gap={2}>
                             <Field.Root flex={1}>
