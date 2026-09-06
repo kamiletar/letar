@@ -17,6 +17,19 @@
 
 ---
 
+## Релиз v1.7.2 на GitHub Releases + фикс инсталлятора (2026-09-06)
+
+Первая публикация реального релиза в репозитории. По пути найдены и починены две грабли
+electron-builder — полный разбор в `PLAN.md` § «Технический долг»:
+
+- `files` не исключал `node_modules` → инсталлятор тащил весь `node_modules` монорепо
+  (511 МБ → 108 МБ после фикса).
+- `koffi.node` лежит в отдельном пакете `@koromix/koffi-{platform}-{arch}`, не в самом `koffi` —
+  без него собранный `.exe` падал при старте (`Cannot find the native Koffi module`).
+
+`publish: null` → GitHub Releases (`kamiletar/letar`, тег `kami-key-the-v*`). Задействовано в
+скачивании на `kami-key-the-landing` (см. её `PLAN.md`/`PLAN_COMPLETED.md`).
+
 ## Electron 40.6.1 → 43.3.0 (2026-08-09)
 
 Часть сессии-апдейта Electron разом во всех Electron-приложениях монорепо (см.
