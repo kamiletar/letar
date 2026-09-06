@@ -98,7 +98,6 @@ const SetLayeredWindowAttributes = user32.func('bool SetLayeredWindowAttributes(
 const LoadCursorW = user32.func('void* LoadCursorW(void*, intptr_t)')
 const SetWindowPos = user32.func('bool SetWindowPos(void*, void*, int, int, int, int, uint32)')
 
-const SWP_NOSIZE = 0x0001
 const SWP_NOZORDER = 0x0004
 const BeginPaint = user32.func('void* BeginPaint(void*, _Out_ PAINTSTRUCT_N*)')
 const EndPaint = user32.func('bool EndPaint(void*, PAINTSTRUCT_N*)')
@@ -125,6 +124,10 @@ let bgBrush: unknown = null
 let textFont: unknown = null
 let hideTimer: ReturnType<typeof setTimeout> | null = null
 let currentText = ''
+// Текущий размер окна — по умолчанию NOTIFY_WIDTH/HEIGHT, но showNotification может временно
+// показать более широкое/долгоживущее уведомление (см. opts) для более длинного текста
+let currentWidth = NOTIFY_WIDTH
+let currentHeight = NOTIFY_HEIGHT
 
 // Переиспользуемый RECT
 const tmpRect = { left: 0, top: 0, right: 0, bottom: 0 }
@@ -142,8 +145,8 @@ function paintNotification(hwnd: unknown): void {
   // Фон
   tmpRect.left = 0
   tmpRect.top = 0
-  tmpRect.right = NOTIFY_WIDTH
-  tmpRect.bottom = NOTIFY_HEIGHT
+  tmpRect.right = currentWidth
+  tmpRect.bottom = currentHeight
   FillRect(hdc, tmpRect, bgBrush)
 
   // Текст по центру
@@ -236,22 +239,34 @@ export function initNotification(): boolean {
   }
 }
 
-/** Показать уведомление с текстом, автоскрытие через NOTIFY_DURATION мс */
-export function showNotification(text: string): void {
+export interface NotificationOptions {
+  /** Ширина окна, px (по умолчанию NOTIFY_WIDTH=300) — шире для более длинного текста */
+  width?: number
+  /** Высота окна, px (по умолчанию NOTIFY_HEIGHT=60) */
+  height?: number
+  /** Автоскрытие через N мс (по умолчанию NOTIFY_DURATION=1000) — дольше для важных предупреждений */
+  durationMs?: number
+}
+
+/** Показать уведомление с текстом, автоскрытие через `opts.durationMs` (по умолчанию 1000мс) */
+export function showNotification(text: string, opts?: NotificationOptions): void {
   if (!notifyHwnd) {
     return
   }
 
   currentText = text
+  currentWidth = opts?.width ?? NOTIFY_WIDTH
+  currentHeight = opts?.height ?? NOTIFY_HEIGHT
+  const duration = opts?.durationMs ?? NOTIFY_DURATION
 
   // Сбросить предыдущий таймер
   if (hideTimer) {
     clearTimeout(hideTimer)
   }
 
-  // Переместить на монитор с активным окном
-  const pos = getCenterOnActiveMonitor(NOTIFY_WIDTH, NOTIFY_HEIGHT)
-  SetWindowPos(notifyHwnd, null, pos.x, pos.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER)
+  // Переместить на монитор с активным окном + подогнать размер под currentWidth/currentHeight
+  const pos = getCenterOnActiveMonitor(currentWidth, currentHeight)
+  SetWindowPos(notifyHwnd, null, pos.x, pos.y, currentWidth, currentHeight, SWP_NOZORDER)
 
   ShowWindow(notifyHwnd, SW_SHOWNOACTIVATE)
   InvalidateRect(notifyHwnd, null, 1)
@@ -260,7 +275,7 @@ export function showNotification(text: string): void {
   hideTimer = setTimeout(() => {
     ShowWindow(notifyHwnd, SW_HIDE)
     hideTimer = null
-  }, NOTIFY_DURATION)
+  }, duration)
 }
 
 /** Уничтожить окно уведомления и освободить GDI объекты */

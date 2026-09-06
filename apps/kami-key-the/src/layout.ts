@@ -25,11 +25,20 @@ const ALTGR_LAYOUTS: Record<number, { name: string; conflicts: string[] }> = {
   0x0405: { name: 'Чешская', conflicts: ['AltGr+буквы=ěšřžýáíé'] },
 }
 
-/** Раскладки без AltGr (безопасные) */
+/** Раскладки без конфликтов AltGr, но где сам AltGr реально работает */
 const SAFE_LAYOUTS: Record<number, string> = {
-  0x0409: 'US English',
   0x0419: 'Русская',
   0x0422: 'Украинская',
+}
+
+/**
+ * Раскладки, где Right Alt физически НЕ синтезирует Ctrl+Alt вовсе (AltGr не определён в
+ * драйвере раскладки) — это не «конфликт маппингов», а «RegisterHotKey с MOD_CONTROL|MOD_ALT
+ * никогда не сработает», принципиально другая проблема. См. PLAN.md «Сигнализация о
+ * несовместимой раскладке при показе overlay».
+ */
+const NO_ALTGR_LAYOUTS: Record<number, string> = {
+  0x0409: 'US English',
 }
 
 export interface LayoutInfo {
@@ -43,6 +52,8 @@ export interface LayoutInfo {
   hasConflicts: boolean
   /** Список конфликтов */
   conflicts: string[]
+  /** Определён ли AltGr в этой раскладке вообще (false → хоткеи AltGr физически не сработают) */
+  hasAltGr: boolean
 }
 
 /** Получить информацию о текущей раскладке */
@@ -63,6 +74,19 @@ export function getCurrentLayout(): LayoutInfo {
       name: altgrLayout.name,
       hasConflicts: true,
       conflicts: altgrLayout.conflicts,
+      hasAltGr: true,
+    }
+  }
+
+  const noAltGrName = NO_ALTGR_LAYOUTS[langId]
+  if (noAltGrName) {
+    return {
+      hkl,
+      langId,
+      name: noAltGrName,
+      hasConflicts: false,
+      conflicts: [],
+      hasAltGr: false,
     }
   }
 
@@ -73,6 +97,7 @@ export function getCurrentLayout(): LayoutInfo {
     name: safeName ?? `Неизвестная (0x${langId.toString(16).padStart(4, '0')})`,
     hasConflicts: false,
     conflicts: [],
+    hasAltGr: true,
   }
 }
 
@@ -85,5 +110,10 @@ export function logLayoutInfo(): void {
     console.warn(`  ⚠ Раскладка имеет собственные AltGr-маппинги:`)
     console.warn(`    ${layout.conflicts.join(', ')}`)
     console.warn(`    Некоторые хоткеи KamiKeyThe могут конфликтовать`)
+  }
+
+  if (!layout.hasAltGr) {
+    console.warn(`  ⚠ В этой раскладке AltGr не определён вовсе — хоткеи KamiKeyThe не сработают`)
+    console.warn(`    Переключите раскладку на русскую (или другую с AltGr)`)
   }
 }

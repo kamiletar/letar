@@ -26,7 +26,7 @@ import {
   unregisterSystemHotkeys,
 } from '../src/hotkeys'
 import { getActiveLayoutName, getKeymap, getShiftKeymap, updateKeymap } from '../src/keymap'
-import { logLayoutInfo } from '../src/layout'
+import { getCurrentLayout, logLayoutInfo } from '../src/layout'
 import { destroyNotification, initNotification, showNotification } from '../src/notification'
 import { destroyOverlay, hideOverlay, initOverlay, rebuildVkMap, showOverlay } from '../src/overlay'
 import { incrementStat, initStats, shutdownStats } from '../src/stats'
@@ -303,7 +303,18 @@ app.whenReady().then(() => {
   // Инициализация GUI (GDI overlay + notification)
   initOverlay()
   rebuildVkMap()
-  setOverlayCallbacks(showOverlay, hideOverlay)
+  setOverlayCallbacks(() => {
+    showOverlay()
+    // Раскладка проверяется в момент показа overlay (а не только при старте) — см. PLAN.md
+    // «Сигнализация о несовместимой раскладке»: US English физически не синтезирует AltGr
+    const layout = getCurrentLayout()
+    if (!layout.hasAltGr) {
+      showNotification(`AltGr не работает — раскладка ${layout.name}`, {
+        width: 480,
+        durationMs: 2500,
+      })
+    }
+  }, hideOverlay)
   setCharSentCallback(incrementStat)
   setLayoutCharCallback((layoutName, hotkeyId) => {
     const layout = config.layouts.find((l) => l.name === layoutName)
