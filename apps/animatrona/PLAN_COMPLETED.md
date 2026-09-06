@@ -2,7 +2,49 @@
 
 Детальное описание всех реализованных фич.
 
-> **Архив обновлён:** 2026-09-06
+> **Архив обновлён:** 2026-09-07
+
+## Постер в папочном режиме + Episode.name из AniList (2026-09-07)
+
+**Контекст:** аудит `directoryCid` (PLAN.md, Блокер 3) оставлял `Episode.name` открытым с
+ошибочной формулировкой «прокинуть от Shikimori» — проверка всех GraphQL-запросов
+([queries.ts](main/services/shikimori/queries.ts)) показала, что у Shikimori вообще нет
+потитульных названий отдельных серий (только `episodes`/`episodesAired` как числа).
+
+**Реализация:**
+
+1. **Постер в папочном режиме плеера.** Быстрое открытие папки (`app/player/`, без импорта в
+   библиотеку) было полностью локальным и не показывало ничего похожего на обложку. Новый хук
+   `useFolderShikimoriMatch` ([useFolderShikimoriMatch.ts](renderer/src/app/player/_hooks/useFolderShikimoriMatch.ts))
+   переиспользует существующий `parseFolderName`/`generateSearchQueries` (тот же парсер, что уже
+   автозаполняет поиск в мастере импорта), ищет в Shikimori и подставляет постер только при
+   **однозначном** совпадении (`findConfidentAnimeMatch`,
+   [folder-match.ts](renderer/src/lib/shikimori/folder-match.ts) — ровно один результат точно
+   совпал по `name`/`russian`, иначе `null`). Гонки между последовательными открытиями папок
+   защищены токеном запроса. `EpisodeSidebar` (`@letar/folder-player-react`) получил опциональный
+   проп `posterUrl`. Заодно вынесен общий `getShikimoriPosterUrl()`
+   ([poster-url.ts](renderer/src/lib/shikimori/poster-url.ts)) — раньше был приватной функцией
+   внутри `ShikimoriAnimeCard.tsx`.
+2. **`Episode.name` — best-effort из AniList `streamingEpisodes`.** Список эпизодов со
+   стриминговых площадок (Crunchyroll/HIDIVE/...) — не канонично, формат заголовка задаёт
+   площадка. Запрос `streamingEpisodes { title }` добавлен в уже существующий AniList-запрос
+   ([client.ts](main/services/anilist/client.ts)), переиспользует тот же TTL-кэш по ключу
+   `anilistId/malId`, что и `descriptionEn` — второй сетевой запрос не нужен. Чистая функция
+   `buildAniListEpisodeNameMap()` ([episode-names.ts](main/services/anilist/episode-names.ts))
+   парсит `"Episode N - Title"`/`"Ep. N: Title"`/`"N - Title"` (включая `—`/`–`) в карту «номер →
+   название»; заголовок без текста после разделителя названия не даёт. При дубле номера с разных
+   площадок — первое найденное. Подключено в
+   [anime-manifest-generator.ts](main/services/anime-manifest-generator.ts): только при свежей
+   генерации `AnimeInfo` (не при переиспользовании `animeInfoCid` из кеша БД), пишет `Episode.name`
+   в БД для эпизодов без имени и сразу отражает в собираемом манифесте. Non-fatal — ошибка
+   AniList/записи в БД не роняет генерацию манифеста.
+
+**Не сделано:** парсинг названия серии из имени файла (альтернативный источник) — не исследован,
+большинство аниме-релизов не включают тайтл серии в имя файла, только номер.
+
+**Тесты:** 13 новых (`episode-names.spec.ts`), typecheck:tsgo/lint/test (179/179) — зелёные.
+Визуально постер в папочном режиме не проверялся — GUI Electron-приложения не тестируется в этой
+песочнице (`.claude/rules/electron.md`).
 
 ## isForced у SubtitleTrack/AudioTrack — библиотечный режим (2026-09-06)
 
