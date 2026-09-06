@@ -16,7 +16,7 @@ export function getConfigPath(): string {
   return store.getPath()
 }
 
-/** Дефолтный конфиг с 14 маппингами (литералы, без импорта из keymap.ts) */
+/** Дефолтный конфиг с 25 маппингами (литералы, без импорта из keymap.ts) */
 export function getDefaultConfig(): KeymapConfig {
   return {
     version: 2,
@@ -37,15 +37,24 @@ export function getDefaultConfig(): KeymapConfig {
           },
           { vk: 0xbe, char: '\u2026', label: '… многоточие' },
           { vk: 0x20, char: '\u2009', label: '(тонкий пробел)' },
-          { vk: 0x43, char: '\u00A9', label: '© копирайт' },
+          { vk: 0x43, char: '\u00A9', shiftChar: '\u00A2', label: '© копирайт', shiftLabel: '¢ цент' },
           { vk: 0x52, char: '\u00AE', shiftChar: '\u2122', label: '® рег. знак', shiftLabel: '™ торговая марка' },
           { vk: 0x53, char: '\u00A7', label: '§ параграф' },
           { vk: 0x4e, char: '\u2116', label: '№ номер' },
           { vk: 0x44, char: '\u00B0', label: '° градус' },
           { vk: 0x45, char: '\u20AC', label: '€ евро' },
+          { vk: 0x59, char: '\u00A5', label: '¥ иена' },
+          { vk: 0x4c, char: '\u00A3', label: '£ фунт' },
           { vk: 0x58, char: '\u00D7', label: '× умножение' },
+          { vk: 0xbf, char: '\u00F7', label: '÷ деление' },
+          { vk: 0x50, char: '\u00B1', label: '± плюс-минус' },
+          { vk: 0x38, char: '\u2022', label: '• маркер списка' },
           { vk: 0xbb, char: '\u2260', shiftChar: '\u2248', label: '≠ не равно', shiftLabel: '≈ приблизительно' },
           { vk: 0x0d, char: '\u0301', label: '◌́ ударение (U+0301)' },
+          { vk: 0x26, char: '\u2191', label: '↑ стрелка вверх' },
+          { vk: 0x25, char: '\u2190', label: '← стрелка влево' },
+          { vk: 0x28, char: '\u2193', label: '↓ стрелка вниз' },
+          { vk: 0x27, char: '\u2192', label: '→ стрелка вправо' },
         ],
       },
     ],
