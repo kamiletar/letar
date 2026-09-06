@@ -64,7 +64,7 @@ export function SpeedSelector({ currentSpeed, onSpeedChange, visible, onClose }:
           {PLAYBACK_SPEEDS.map((speed) => (
             <Box
               key={speed}
-              as="button"
+              asChild
               display="flex"
               alignItems="center"
               justifyContent="space-between"
@@ -74,15 +74,19 @@ export function SpeedSelector({ currentSpeed, onSpeedChange, visible, onClose }:
               cursor="pointer"
               transition="all 0.2s"
               _hover={{ bg: currentSpeed === speed ? 'purple.800' : 'gray.800' }}
-              onClick={() => {
-                onSpeedChange(speed)
-                onClose()
-              }}
             >
-              <Text color="white" fontWeight={currentSpeed === speed ? 'semibold' : 'normal'}>
-                {formatSpeed(speed)}
-              </Text>
-              {currentSpeed === speed && <LuCheck size={20} color="var(--chakra-colors-purple-400)" />}
+              <button
+                type="button"
+                onClick={() => {
+                  onSpeedChange(speed)
+                  onClose()
+                }}
+              >
+                <Text color="white" fontWeight={currentSpeed === speed ? 'semibold' : 'normal'}>
+                  {formatSpeed(speed)}
+                </Text>
+                {currentSpeed === speed && <LuCheck size={20} color="var(--chakra-colors-purple-400)" />}
+              </button>
             </Box>
           ))}
         </VStack>

@@ -132,7 +132,7 @@ export function ExpandableText({
       {/* Кнопка развернуть/свернуть */}
       {needsExpansion && (
         <Box
-          as="button"
+          asChild
           display="flex"
           alignItems="center"
           gap={1}
@@ -140,24 +140,25 @@ export function ExpandableText({
           color="purple.400"
           fontSize="sm"
           fontWeight="medium"
-          onClick={handleToggle}
           transition="all 0.2s"
           _hover={{ color: 'purple.300' }}
           _active={{ transform: 'scale(0.98)' }}
         >
-          {isExpanded
-            ? (
-              <>
-                <LuChevronUp size={16} />
-                Свернуть
-              </>
-            )
-            : (
-              <>
-                <LuChevronDown size={16} />
-                Показать полностью
-              </>
-            )}
+          <button type="button" onClick={handleToggle}>
+            {isExpanded
+              ? (
+                <>
+                  <LuChevronUp size={16} />
+                  Свернуть
+                </>
+              )
+              : (
+                <>
+                  <LuChevronDown size={16} />
+                  Показать полностью
+                </>
+              )}
+          </button>
         </Box>
       )}
     </Box>

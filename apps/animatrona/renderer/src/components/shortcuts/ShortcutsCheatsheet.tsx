@@ -26,12 +26,14 @@ export function ShortcutsCheatsheet({ open, onOpenChange }: ShortcutsCheatsheetP
         <Dialog.Content bg="bg.panel" borderColor="border.subtle" borderWidth={1} maxW="600px">
           <Dialog.Header borderBottomWidth={1} borderColor="border.subtle">
             <HStack gap={2}>
-              <Box as={LuKeyboard} color="purple.400" />
+              <LuKeyboard color="var(--chakra-colors-purple-400)" />
               <Dialog.Title>Горячие клавиши</Dialog.Title>
             </HStack>
             <Dialog.CloseTrigger asChild position="absolute" top={3} right={3}>
-              <Box as="button" p={2} borderRadius="md" _hover={{ bg: 'bg.subtle' }} cursor="pointer">
-                <LuX />
+              <Box asChild p={2} borderRadius="md" _hover={{ bg: 'bg.subtle' }} cursor="pointer">
+                <button type="button">
+                  <LuX />
+                </button>
               </Box>
             </Dialog.CloseTrigger>
           </Dialog.Header>

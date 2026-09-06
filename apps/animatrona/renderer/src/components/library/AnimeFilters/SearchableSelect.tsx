@@ -92,8 +92,8 @@ export function SearchableSelect({
           <Text truncate>{selectedLabel}</Text>
           <HStack gap={1}>
             {isActive && (
-              <Box as="span" color="purple.500">
-                •
+              <Box asChild color="purple.500">
+                <span>•</span>
               </Box>
             )}
             <LuChevronDown size={16} color="var(--chakra-colors-fg-subtle)" />

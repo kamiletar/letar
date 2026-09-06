@@ -136,8 +136,7 @@ export function Sidebar() {
 
   return (
     <Box
-      as="nav"
-      data-testid="sidebar"
+      asChild
       w="220px"
       h="calc(100vh - 32px)"
       bg="bg.panel"
@@ -148,114 +147,118 @@ export function Sidebar() {
       top={0}
       flexShrink={0}
     >
-      {/* Логотип */}
-      <Box px={4} mb={6}>
-        <Text fontSize="xl" fontWeight="bold" color="primary.fg">
-          Animatrona
-        </Text>
-      </Box>
-
-      {/* Навигация */}
-      <VStack gap={1} align="stretch" px={2} mb={4}>
-        {navItems.map((item) => {
-          const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href))
-          const NavIcon = item.icon
-
-          return (
-            <Box
-              key={item.href}
-              as="button"
-              onClick={() => router.push(item.href)}
-              display="flex"
-              alignItems="center"
-              gap={3}
-              px={3}
-              py={2}
-              w="full"
-              borderRadius="md"
-              bg={isActive ? 'state.selected.bg' : 'transparent'}
-              color={isActive ? 'state.selected.fg' : 'fg.muted'}
-              _hover={{ bg: 'state.hover', color: 'fg' }}
-              _active={{ transform: 'scale(0.98)', bg: 'state.active' }}
-              transition="all 0.1s ease-out"
-              textAlign="left"
-            >
-              <NavIcon size={20} />
-              <Text fontSize="sm" fontWeight="medium">
-                {item.label}
-              </Text>
-            </Box>
-          )
-        })}
-      </VStack>
-
-      {/* Продолжить смотреть */}
-      <ContinueWatchingCard />
-
-      {/* Что смотреть дальше */}
-      <WatchNextCard />
-
-      {/* Инфо внизу */}
-      <Box position="absolute" bottom={4} left={0} right={0} px={2}>
-        {/* Статус кодирования */}
-        <EncodingStatusCard />
-
-        {/* Блокировка сна */}
-        <Box
-          as="button"
-          onClick={togglePowerSave}
-          p={2}
-          mx={2}
-          mb={2}
-          borderRadius="md"
-          bg={powerSave?.isBlocking ? 'yellow.900/30' : 'bg.muted'}
-          border="1px"
-          borderColor={powerSave?.isBlocking ? 'yellow.700/50' : 'border'}
-          _hover={{ bg: powerSave?.isBlocking ? 'yellow.900/50' : 'bg.emphasized' }}
-          transition="all 0.15s"
-          cursor="pointer"
-          w="calc(100% - 16px)"
-        >
-          <HStack gap={2} justify="center">
-            <LuCoffee
-              size={16}
-              color={powerSave?.isBlocking ? 'var(--chakra-colors-yellow-400)' : 'var(--chakra-colors-fg-subtle)'}
-            />
-            <Text fontSize="xs" color={powerSave?.isBlocking ? 'yellow.300' : 'fg.subtle'}>
-              {powerSave?.isBlocking ? 'Не спать' : 'Сон разрешён'}
-            </Text>
-          </HStack>
+      <nav data-testid="sidebar">
+        {/* Логотип */}
+        <Box px={4} mb={6}>
+          <Text fontSize="xl" fontWeight="bold" color="primary.fg">
+            Animatrona
+          </Text>
         </Box>
 
-        {/* Размер IPFS хранилища и место на диске */}
-        <Box p={3} mx={2} borderRadius="md" bg="bg.muted" border="1px" borderColor="border">
-          {/* Размер IPFS хранилища */}
-          <HStack gap={2} mb={2}>
-            <LuDatabase size={14} color="var(--chakra-colors-fg-subtle)" />
-            <Text fontSize="xs" color="fg.subtle">
-              IPFS:
-            </Text>
-            <Text fontSize="xs" color="fg" fontWeight="medium">
-              {librarySize !== null ? formatBytes(librarySize) : '—'}
-            </Text>
-          </HStack>
+        {/* Навигация */}
+        <VStack gap={1} align="stretch" px={2} mb={4}>
+          {navItems.map((item) => {
+            const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href))
+            const NavIcon = item.icon
 
-          {/* Место на диске */}
-          <Text fontSize="xs" color="fg.subtle" mb={1}>
-            Место на диске
-          </Text>
-          <Box h="4px" bg="bg.emphasized" borderRadius="full" overflow="hidden">
-            <Box
-              w={diskInfo ? `${diskInfo.usedPercent}%` : '0%'}
-              h="full"
-              bg={diskInfo && diskInfo.usedPercent > 90 ? 'error.solid' : 'primary.solid'}
-            />
+            return (
+              <Box
+                key={item.href}
+                asChild
+                display="flex"
+                alignItems="center"
+                gap={3}
+                px={3}
+                py={2}
+                w="full"
+                borderRadius="md"
+                bg={isActive ? 'state.selected.bg' : 'transparent'}
+                color={isActive ? 'state.selected.fg' : 'fg.muted'}
+                _hover={{ bg: 'state.hover', color: 'fg' }}
+                _active={{ transform: 'scale(0.98)', bg: 'state.active' }}
+                transition="all 0.1s ease-out"
+                textAlign="left"
+              >
+                <button type="button" onClick={() => router.push(item.href)}>
+                  <NavIcon size={20} />
+                  <Text fontSize="sm" fontWeight="medium">
+                    {item.label}
+                  </Text>
+                </button>
+              </Box>
+            )
+          })}
+        </VStack>
+
+        {/* Продолжить смотреть */}
+        <ContinueWatchingCard />
+
+        {/* Что смотреть дальше */}
+        <WatchNextCard />
+
+        {/* Инфо внизу */}
+        <Box position="absolute" bottom={4} left={0} right={0} px={2}>
+          {/* Статус кодирования */}
+          <EncodingStatusCard />
+
+          {/* Блокировка сна */}
+          <Box
+            asChild
+            p={2}
+            mx={2}
+            mb={2}
+            borderRadius="md"
+            bg={powerSave?.isBlocking ? 'yellow.900/30' : 'bg.muted'}
+            border="1px"
+            borderColor={powerSave?.isBlocking ? 'yellow.700/50' : 'border'}
+            _hover={{ bg: powerSave?.isBlocking ? 'yellow.900/50' : 'bg.emphasized' }}
+            transition="all 0.15s"
+            cursor="pointer"
+            w="calc(100% - 16px)"
+          >
+            <button type="button" onClick={togglePowerSave}>
+              <HStack gap={2} justify="center">
+                <LuCoffee
+                  size={16}
+                  color={powerSave?.isBlocking ? 'var(--chakra-colors-yellow-400)' : 'var(--chakra-colors-fg-subtle)'}
+                />
+                <Text fontSize="xs" color={powerSave?.isBlocking ? 'yellow.300' : 'fg.subtle'}>
+                  {powerSave?.isBlocking ? 'Не спать' : 'Сон разрешён'}
+                </Text>
+              </HStack>
+            </button>
           </Box>
-          <Text fontSize="xs" color="fg.subtle" mt={1}>
-            {diskInfo ? `${formatBytes(diskInfo.used)} / ${formatBytes(diskInfo.total)}` : 'Загрузка...'}
-          </Text>
+
+          {/* Размер IPFS хранилища и место на диске */}
+          <Box p={3} mx={2} borderRadius="md" bg="bg.muted" border="1px" borderColor="border">
+            {/* Размер IPFS хранилища */}
+            <HStack gap={2} mb={2}>
+              <LuDatabase size={14} color="var(--chakra-colors-fg-subtle)" />
+              <Text fontSize="xs" color="fg.subtle">
+                IPFS:
+              </Text>
+              <Text fontSize="xs" color="fg" fontWeight="medium">
+                {librarySize !== null ? formatBytes(librarySize) : '—'}
+              </Text>
+            </HStack>
+
+            {/* Место на диске */}
+            <Text fontSize="xs" color="fg.subtle" mb={1}>
+              Место на диске
+            </Text>
+            <Box h="4px" bg="bg.emphasized" borderRadius="full" overflow="hidden">
+              <Box
+                w={diskInfo ? `${diskInfo.usedPercent}%` : '0%'}
+                h="full"
+                bg={diskInfo && diskInfo.usedPercent > 90 ? 'error.solid' : 'primary.solid'}
+              />
+            </Box>
+            <Text fontSize="xs" color="fg.subtle" mt={1}>
+              {diskInfo ? `${formatBytes(diskInfo.used)} / ${formatBytes(diskInfo.total)}` : 'Загрузка...'}
+            </Text>
+          </Box>
         </Box>
-      </Box>
+      </nav>
     </Box>
   )
 }

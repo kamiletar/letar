@@ -106,7 +106,7 @@ export function AnimePage() {
       <Container py={8}>
         <ErrorState type="network" title="Ошибка загрузки" message={error} onRetry={fetchData} />
         <Box
-          as="button"
+          asChild
           display="flex"
           alignItems="center"
           gap={2}
@@ -115,10 +115,11 @@ export function AnimePage() {
           color="gray.400"
           minH="44px"
           px={4}
-          onClick={() => navigate('/')}
         >
-          <LuArrowLeft size={18} />
-          Назад к библиотеке
+          <button type="button" onClick={() => navigate('/')}>
+            <LuArrowLeft size={18} />
+            Назад к библиотеке
+          </button>
         </Box>
       </Container>
     )
@@ -297,33 +298,34 @@ export function AnimePage() {
                       borderColor="gray.800"
                     >
                       <Box
-                        as="button"
+                        asChild
                         display="flex"
                         alignItems="center"
                         justifyContent="space-between"
                         w="100%"
                         minH="44px"
-                        onClick={() => toggleSeason(seasonNum)}
                         transition="all 0.2s"
                         _active={{ opacity: 0.7 }}
                       >
-                        <VStack align="start" gap={0}>
-                          <Text fontWeight="semibold" color="white">
-                            Сезон {seasonNum}
-                            {seasonName && ` — ${seasonName}`}
-                          </Text>
-                          <Text fontSize="xs" color="gray.500">
-                            {watchedInSeason}/{episodes.length} эпизодов просмотрено
-                          </Text>
-                        </VStack>
+                        <button type="button" onClick={() => toggleSeason(seasonNum)}>
+                          <VStack align="start" gap={0}>
+                            <Text fontWeight="semibold" color="white">
+                              Сезон {seasonNum}
+                              {seasonName && ` — ${seasonName}`}
+                            </Text>
+                            <Text fontSize="xs" color="gray.500">
+                              {watchedInSeason}/{episodes.length} эпизодов просмотрено
+                            </Text>
+                          </VStack>
 
-                        <Box
-                          color="gray.400"
-                          transition="transform 0.2s"
-                          transform={isCollapsed ? 'rotate(0)' : 'rotate(180deg)'}
-                        >
-                          <LuChevronUp size={20} />
-                        </Box>
+                          <Box
+                            color="gray.400"
+                            transition="transform 0.2s"
+                            transform={isCollapsed ? 'rotate(0)' : 'rotate(180deg)'}
+                          >
+                            <LuChevronUp size={20} />
+                          </Box>
+                        </button>
                       </Box>
                     </Box>
                   )}

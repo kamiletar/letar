@@ -185,7 +185,7 @@ export function LibraryPage() {
               {/* Кнопка сортировки */}
               <Box position="relative">
                 <Box
-                  as="button"
+                  asChild
                   px={3}
                   py={2}
                   minH="44px"
@@ -196,13 +196,14 @@ export function LibraryPage() {
                   bg="gray.800"
                   color="gray.300"
                   fontSize="sm"
-                  onClick={() => setSortMenuOpen(!sortMenuOpen)}
                   transition="all 0.2s"
                   _hover={{ bg: 'gray.700' }}
                   _active={{ transform: 'scale(0.98)' }}
                 >
-                  <LuArrowDownUp size={16} />
-                  {SORT_OPTIONS.find((o) => o.value === sortBy)?.label}
+                  <button type="button" onClick={() => setSortMenuOpen(!sortMenuOpen)}>
+                    <LuArrowDownUp size={16} />
+                    {SORT_OPTIONS.find((o) => o.value === sortBy)?.label}
+                  </button>
                 </Box>
 
                 {/* Dropdown меню */}
@@ -235,7 +236,7 @@ export function LibraryPage() {
                       {SORT_OPTIONS.map((option) => (
                         <Box
                           key={option.value}
-                          as="button"
+                          asChild
                           display="block"
                           w="100%"
                           px={4}
@@ -246,12 +247,16 @@ export function LibraryPage() {
                           bg={sortBy === option.value ? 'gray.700' : 'transparent'}
                           _hover={{ bg: 'gray.700' }}
                           transition="all 0.15s"
-                          onClick={() => {
-                            setSortBy(option.value)
-                            setSortMenuOpen(false)
-                          }}
                         >
-                          {option.label}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSortBy(option.value)
+                              setSortMenuOpen(false)
+                            }}
+                          >
+                            {option.label}
+                          </button>
                         </Box>
                       ))}
                     </Box>
@@ -300,7 +305,7 @@ export function LibraryPage() {
               {WATCH_STATUS_FILTERS.map((filter) => (
                 <Box
                   key={filter.value}
-                  as="button"
+                  asChild
                   px={4}
                   py={2}
                   minH="44px"
@@ -312,12 +317,13 @@ export function LibraryPage() {
                   whiteSpace="nowrap"
                   bg={statusFilter === filter.value ? 'purple.600' : 'gray.800'}
                   color={statusFilter === filter.value ? 'white' : 'gray.300'}
-                  onClick={() => setStatusFilter(filter.value)}
                   transition="all 0.2s"
                   _hover={{ bg: statusFilter === filter.value ? 'purple.500' : 'gray.700' }}
                   _active={{ transform: 'scale(0.98)' }}
                 >
-                  {filter.label}
+                  <button type="button" onClick={() => setStatusFilter(filter.value)}>
+                    {filter.label}
+                  </button>
                 </Box>
               ))}
             </HStack>

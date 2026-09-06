@@ -106,8 +106,8 @@ export const CompactQueueItem = memo(function CompactQueueItem({
       {/* Название и кол-во эпизодов */}
       <Text flex={1} fontSize="sm" lineClamp={1} title={animeName}>
         {animeName}
-        <Text as="span" color="fg.muted" ml={1}>
-          ({selectedFilesCount} эп.)
+        <Text asChild color="fg.muted" ml={1}>
+          <span>({selectedFilesCount} эп.)</span>
         </Text>
       </Text>
 

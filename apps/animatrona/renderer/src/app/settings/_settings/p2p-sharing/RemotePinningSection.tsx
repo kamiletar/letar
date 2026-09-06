@@ -139,8 +139,8 @@ export function RemotePinningSection({
                 )}
               <Text fontSize="xs" color="fg.subtle" mt={2}>
                 Получите JWT на{' '}
-                <Text as="span" color="pink.400">
-                  pinata.cloud/keys
+                <Text asChild color="pink.400">
+                  <span>pinata.cloud/keys</span>
                 </Text>
               </Text>
             </Box>

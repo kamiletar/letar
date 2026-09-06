@@ -457,7 +457,7 @@ export function AnimeMetadataSection({ animeId, shikimoriId }: AnimeMetadataSect
             <Collapsible.Root open={isExpanded} onOpenChange={(e) => setIsExpanded(e.open)}>
               <Collapsible.Trigger asChild>
                 <Box
-                  as="button"
+                  asChild
                   display="flex"
                   alignItems="center"
                   justifyContent="space-between"
@@ -466,11 +466,13 @@ export function AnimeMetadataSection({ animeId, shikimoriId }: AnimeMetadataSect
                   cursor="pointer"
                   _hover={{ color: 'fg.muted' }}
                 >
-                  <HStack>
-                    <LuUsers color="var(--chakra-colors-fg-muted)" />
-                    <Heading size="sm">Персонажи ({mainCharacters.length + supportingCharacters.length})</Heading>
-                  </HStack>
-                  <ExpandIcon />
+                  <button type="button">
+                    <HStack>
+                      <LuUsers color="var(--chakra-colors-fg-muted)" />
+                      <Heading size="sm">Персонажи ({mainCharacters.length + supportingCharacters.length})</Heading>
+                    </HStack>
+                    <ExpandIcon />
+                  </button>
                 </Box>
               </Collapsible.Trigger>
               <Collapsible.Content>

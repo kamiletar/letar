@@ -284,12 +284,12 @@ export function IpfsStatusSection({ ipfs, onStart, onStop }: IpfsStatusSectionPr
                                 Входящие / Исходящие:
                               </Text>
                               <Text fontSize="xs" fontWeight="medium">
-                                <Text as="span" color="green.400">
-                                  {diagnostics.inbound}
+                                <Text asChild color="green.400">
+                                  <span>{diagnostics.inbound}</span>
                                 </Text>
                                 {' / '}
-                                <Text as="span" color="blue.400">
-                                  {diagnostics.outbound}
+                                <Text asChild color="blue.400">
+                                  <span>{diagnostics.outbound}</span>
                                 </Text>
                               </Text>
                             </HStack>

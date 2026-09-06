@@ -244,9 +244,8 @@ export const EditQueueItemDialog = memo(function EditQueueItemDialog({
                           <Text fontSize="sm" lineClamp={1}>
                             {file.name}
                             {file.episodeNumber && (
-                              <Text as="span" color="fg.muted">
-                                {' '}
-                                (эп. {file.episodeNumber})
+                              <Text asChild color="fg.muted">
+                                <span>(эп. {file.episodeNumber})</span>
                               </Text>
                             )}
                           </Text>

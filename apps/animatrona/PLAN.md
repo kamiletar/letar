@@ -21,9 +21,20 @@ update}/*`. Разбор на `asChild` + нативный тег — отдел
 переносом того же рецепта). Не блокирует pre-commit (WARNING), но входит в общую цель §61
 корневого `PLAN.md` (полная чистка `apps/*` перед возвратом правила к ERROR).
 
-- [ ] Почистить оставшиеся `as="button"`/`as="span"` (Box/Text/Heading) на Chakra-компонентах в
-      `apps/animatrona` (renderer/app + components + mobile-ui) — точное число уточнить свежим
-      semgrep-прогоном, старая цифра 284 включала уже исправленный `Icon as=`
+- [x] Почистить оставшиеся `as="button"`/`as="span"` (Box/Text/Heading) на Chakra-компонентах в
+      `apps/animatrona` — 27 файлов (`renderer/src` + `mobile-ui/src`), ~46 узлов, `asChild` +
+      нативный тег по рецепту [chakra-icon-as-prop-cleanup-pattern.md § 7](/.claude/docs/chakra-icon-as-prop-cleanup-pattern.md)
+      (2026-09-06). Полная проверка грепом по этим двум деревьям — 0 срабатываний. Остались
+      непочищенные `Box as={Component}` (иконки, не строки) вне этого списка —
+      `CommandPalette.tsx`/`EncodingStatusCard.tsx`/`EmptyLibraryState.tsx`/`QuickSearch.tsx`/
+      `UpdateNotificationToast.tsx` — тот же класс правила, отдельная задача ниже.
+
+- [ ] Почистить `Box as={Component}` (иконка через компонент, не строка) в
+      `CommandPalette.tsx`/`EncodingStatusCard.tsx`/`EmptyLibraryState.tsx`/`QuickSearch.tsx`/
+      `UpdateNotificationToast.tsx` — найдено 2026-09-06 при чистке `as="строка-тега"` выше, тот
+      же семгреп-запрет, но другой рецепт (пункты 1-3
+      [chakra-icon-as-prop-cleanup-pattern.md](/.claude/docs/chakra-icon-as-prop-cleanup-pattern.md),
+      не §7) — не тронуто намеренно, чтобы не выходить за рамки уже согласованной задачи.
 
 - [ ] **Аудит `_active: scale()` в теме renderer'а на `pressScale`** (`@letar/ui`) — задача
       описана в [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md).

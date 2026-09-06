@@ -94,8 +94,8 @@ export function QualityFilterGroup({
           <LuMonitor />
           {getButtonLabel()}
           {hasActiveFilters && (
-            <Box as="span" color="purple.500" ml={1}>
-              •
+            <Box asChild color="purple.500" ml={1}>
+              <span>•</span>
             </Box>
           )}
           <LuChevronDown />
@@ -142,8 +142,8 @@ export function QualityFilterGroup({
                             <HStack justify="space-between" w="full">
                               <span>{item.label}</span>
                               {counts?.resolution?.[item.value] !== undefined && (
-                                <Text as="span" fontSize="xs" color="fg.subtle">
-                                  ({counts.resolution[item.value]})
+                                <Text asChild fontSize="xs" color="fg.subtle">
+                                  <span>({counts.resolution[item.value]})</span>
                                 </Text>
                               )}
                             </HStack>
@@ -178,8 +178,8 @@ export function QualityFilterGroup({
                             <HStack justify="space-between" w="full">
                               <span>{item.label}</span>
                               {counts?.bitDepth?.[item.value] !== undefined && (
-                                <Text as="span" fontSize="xs" color="fg.subtle">
-                                  ({counts.bitDepth[item.value]})
+                                <Text asChild fontSize="xs" color="fg.subtle">
+                                  <span>({counts.bitDepth[item.value]})</span>
                                 </Text>
                               )}
                             </HStack>

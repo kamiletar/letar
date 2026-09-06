@@ -167,7 +167,7 @@ const EpisodeItem = memo(function EpisodeItem({
 
   return (
     <Box
-      as="button"
+      asChild
       w="full"
       textAlign="left"
       px={3}
@@ -177,54 +177,55 @@ const EpisodeItem = memo(function EpisodeItem({
       _hover={{ bg: isActive ? 'brand.500/30' : 'whiteAlpha.100' }}
       _active={{ transform: 'scale(0.98)' }}
       transition="all 0.15s ease-out"
-      onClick={onSelect}
       cursor="pointer"
     >
-      <HStack gap={2} align="start">
-        {/* Индикатор воспроизведения */}
-        <Box w={5} h={5} flexShrink={0} mt={0.5}>
-          {isActive
-            ? <LuPlay size={20} color="var(--chakra-colors-brand-400)" />
-            : (
-              <Text fontSize="sm" color="fg.subtle" fontWeight="medium" textAlign="center">
-                {episode.episodeNumber ?? index + 1}
+      <button type="button" onClick={onSelect}>
+        <HStack gap={2} align="start">
+          {/* Индикатор воспроизведения */}
+          <Box w={5} h={5} flexShrink={0} mt={0.5}>
+            {isActive
+              ? <LuPlay size={20} color="var(--chakra-colors-brand-400)" />
+              : (
+                <Text fontSize="sm" color="fg.subtle" fontWeight="medium" textAlign="center">
+                  {episode.episodeNumber ?? index + 1}
+                </Text>
+              )}
+          </Box>
+
+          {/* Информация об эпизоде */}
+          <VStack align="start" gap={0.5} flex={1} minW={0}>
+            <HStack gap={1.5} w="full">
+              <Text fontSize="sm" fontWeight={isActive ? 'semibold' : 'normal'} color="fg" truncate flex={1}>
+                {displayName}
               </Text>
-            )}
-        </Box>
+              {typeBadge && (
+                <Badge size="xs" colorPalette={typeBadge.colorPalette}>
+                  {typeBadge.label}
+                </Badge>
+              )}
+            </HStack>
 
-        {/* Информация об эпизоде */}
-        <VStack align="start" gap={0.5} flex={1} minW={0}>
-          <HStack gap={1.5} w="full">
-            <Text fontSize="sm" fontWeight={isActive ? 'semibold' : 'normal'} color="fg" truncate flex={1}>
-              {displayName}
+            {/* Прогресс-бар */}
+            {progressPercent > 0 && (
+              <Progress.Root
+                value={progressPercent}
+                size="xs"
+                colorPalette={progressPercent >= 90 ? 'green' : 'brand'}
+                w="full"
+              >
+                <Progress.Track bg="whiteAlpha.200" h="2px">
+                  <Progress.Range />
+                </Progress.Track>
+              </Progress.Root>
+            )}
+
+            {/* Размер файла */}
+            <Text fontSize="xs" color="fg.subtle">
+              {formatFileSize(episode.size)}
             </Text>
-            {typeBadge && (
-              <Badge size="xs" colorPalette={typeBadge.colorPalette}>
-                {typeBadge.label}
-              </Badge>
-            )}
-          </HStack>
-
-          {/* Прогресс-бар */}
-          {progressPercent > 0 && (
-            <Progress.Root
-              value={progressPercent}
-              size="xs"
-              colorPalette={progressPercent >= 90 ? 'green' : 'brand'}
-              w="full"
-            >
-              <Progress.Track bg="whiteAlpha.200" h="2px">
-                <Progress.Range />
-              </Progress.Track>
-            </Progress.Root>
-          )}
-
-          {/* Размер файла */}
-          <Text fontSize="xs" color="fg.subtle">
-            {formatFileSize(episode.size)}
-          </Text>
-        </VStack>
-      </HStack>
+          </VStack>
+        </HStack>
+      </button>
     </Box>
   )
 })
@@ -254,7 +255,7 @@ const BonusItem = memo(function BonusItem({
 
   return (
     <Box
-      as="button"
+      asChild
       w="full"
       textAlign="left"
       px={3}
@@ -264,15 +265,16 @@ const BonusItem = memo(function BonusItem({
       _hover={{ bg: isActive ? 'orange.500/30' : 'whiteAlpha.100' }}
       _active={{ transform: 'scale(0.98)' }}
       transition="all 0.15s ease-out"
-      onClick={onSelect}
       cursor="pointer"
     >
-      <HStack gap={2}>
-        <ItemIcon size={16} color={isActive ? 'var(--chakra-colors-orange-400)' : 'var(--chakra-colors-fg-subtle)'} />
-        <Text fontSize="sm" fontWeight={isActive ? 'semibold' : 'normal'} color={isActive ? 'fg' : 'fg'} truncate>
-          {truncateName(bonus.name, 30)}
-        </Text>
-      </HStack>
+      <button type="button" onClick={onSelect}>
+        <HStack gap={2}>
+          <ItemIcon size={16} color={isActive ? 'var(--chakra-colors-orange-400)' : 'var(--chakra-colors-fg-subtle)'} />
+          <Text fontSize="sm" fontWeight={isActive ? 'semibold' : 'normal'} color={isActive ? 'fg' : 'fg'} truncate>
+            {truncateName(bonus.name, 30)}
+          </Text>
+        </HStack>
+      </button>
     </Box>
   )
 })
@@ -382,7 +384,7 @@ export const EpisodeSidebar = memo(function EpisodeSidebar({
           <Collapsible.Root defaultOpen={false}>
             <Collapsible.Trigger asChild>
               <Box
-                as="button"
+                asChild
                 w="full"
                 px={3}
                 py={1}
@@ -393,13 +395,15 @@ export const EpisodeSidebar = memo(function EpisodeSidebar({
                 _hover={{ color: 'fg' }}
                 cursor="pointer"
               >
-                <LuStar size={16} />
-                <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" flex={1} textAlign="left">
-                  Бонусы ({bonusVideos.length})
-                </Text>
-                <Collapsible.Context>
-                  {({ open }) => open ? <LuChevronDown size={16} /> : <LuChevronRight size={16} />}
-                </Collapsible.Context>
+                <button type="button">
+                  <LuStar size={16} />
+                  <Text fontSize="xs" fontWeight="semibold" textTransform="uppercase" flex={1} textAlign="left">
+                    Бонусы ({bonusVideos.length})
+                  </Text>
+                  <Collapsible.Context>
+                    {({ open }) => open ? <LuChevronDown size={16} /> : <LuChevronRight size={16} />}
+                  </Collapsible.Context>
+                </button>
               </Box>
             </Collapsible.Trigger>
 

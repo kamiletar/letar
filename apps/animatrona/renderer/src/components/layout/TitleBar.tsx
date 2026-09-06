@@ -41,8 +41,7 @@ function WindowButton({
 }) {
   return (
     <Flex
-      as="button"
-      aria-label={label}
+      asChild
       align="center"
       justify="center"
       h="32px"
@@ -57,10 +56,15 @@ function WindowButton({
         bg: isClose ? 'red.700' : 'state.active',
       }}
       transition="all 0.1s"
-      onClick={onClick}
-      style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
     >
-      {children}
+      <button
+        type="button"
+        aria-label={label}
+        onClick={onClick}
+        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+      >
+        {children}
+      </button>
     </Flex>
   )
 }
@@ -79,36 +83,15 @@ function MacControls({
 }) {
   return (
     <HStack gap={2} px={3} style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
-      <Box
-        as="button"
-        aria-label="Закрыть"
-        w="12px"
-        h="12px"
-        borderRadius="full"
-        bg="red.500"
-        _hover={{ bg: 'red.400' }}
-        onClick={onClose}
-      />
-      <Box
-        as="button"
-        aria-label="Свернуть"
-        w="12px"
-        h="12px"
-        borderRadius="full"
-        bg="yellow.500"
-        _hover={{ bg: 'yellow.400' }}
-        onClick={onMinimize}
-      />
-      <Box
-        as="button"
-        aria-label="Развернуть"
-        w="12px"
-        h="12px"
-        borderRadius="full"
-        bg="green.500"
-        _hover={{ bg: 'green.400' }}
-        onClick={onMaximize}
-      />
+      <Box w="12px" h="12px" borderRadius="full" bg="red.500" _hover={{ bg: 'red.400' }} asChild>
+        <button type="button" aria-label="Закрыть" onClick={onClose} />
+      </Box>
+      <Box w="12px" h="12px" borderRadius="full" bg="yellow.500" _hover={{ bg: 'yellow.400' }} asChild>
+        <button type="button" aria-label="Свернуть" onClick={onMinimize} />
+      </Box>
+      <Box w="12px" h="12px" borderRadius="full" bg="green.500" _hover={{ bg: 'green.400' }} asChild>
+        <button type="button" aria-label="Развернуть" onClick={onMaximize} />
+      </Box>
     </HStack>
   )
 }
@@ -152,7 +135,7 @@ export function TitleBar() {
 
   return (
     <Flex
-      as="header"
+      asChild
       h="32px"
       bg="bg.panel"
       borderBottom="1px"
@@ -164,32 +147,33 @@ export function TitleBar() {
       left={0}
       right={0}
       zIndex={1000}
-      style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
     >
-      {/* Левая часть: кнопки macOS или название */}
-      <HStack gap={2} px={isMac ? 0 : 3}>
-        {isMac && <MacControls onClose={handleClose} onMinimize={handleMinimize} onMaximize={handleMaximize} />}
-        <Text fontSize="xs" fontWeight="medium" color="fg.muted">
-          Animatrona
-        </Text>
-      </HStack>
-
-      {/* Правая часть: кнопки Windows/Linux */}
-      {!isMac && (
-        <HStack gap={0}>
-          <WindowButton onClick={handleMinimize} label="Свернуть">
-            <LuMinus size={16} />
-          </WindowButton>
-
-          <WindowButton onClick={handleMaximize} label={isMaximized ? 'Восстановить' : 'Развернуть'}>
-            {isMaximized ? <RestoreIcon /> : <LuSquare size={14} />}
-          </WindowButton>
-
-          <WindowButton onClick={handleClose} label="Закрыть" isClose>
-            <LuX size={16} />
-          </WindowButton>
+      <header style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}>
+        {/* Левая часть: кнопки macOS или название */}
+        <HStack gap={2} px={isMac ? 0 : 3}>
+          {isMac && <MacControls onClose={handleClose} onMinimize={handleMinimize} onMaximize={handleMaximize} />}
+          <Text fontSize="xs" fontWeight="medium" color="fg.muted">
+            Animatrona
+          </Text>
         </HStack>
-      )}
+
+        {/* Правая часть: кнопки Windows/Linux */}
+        {!isMac && (
+          <HStack gap={0}>
+            <WindowButton onClick={handleMinimize} label="Свернуть">
+              <LuMinus size={16} />
+            </WindowButton>
+
+            <WindowButton onClick={handleMaximize} label={isMaximized ? 'Восстановить' : 'Развернуть'}>
+              {isMaximized ? <RestoreIcon /> : <LuSquare size={14} />}
+            </WindowButton>
+
+            <WindowButton onClick={handleClose} label="Закрыть" isClose>
+              <LuX size={16} />
+            </WindowButton>
+          </HStack>
+        )}
+      </header>
     </Flex>
   )
 }

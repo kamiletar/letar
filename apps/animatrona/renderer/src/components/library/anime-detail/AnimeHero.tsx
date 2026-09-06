@@ -221,12 +221,14 @@ export function AnimeHero({
               <WatchStatusIcon size={12} />
               {watchStatusInfo.label}
               {watchStatus === 'COMPLETED' && watchedAt && (
-                <Text as="span" fontWeight="normal" opacity={0.8}>
-                  {new Date(watchedAt).toLocaleDateString('ru-RU', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                  })}
+                <Text asChild fontWeight="normal" opacity={0.8}>
+                  <span>
+                    {new Date(watchedAt).toLocaleDateString('ru-RU', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </span>
                 </Text>
               )}
             </Badge>

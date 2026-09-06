@@ -612,9 +612,8 @@ export function ChapterEditor({
                 <Text fontSize="sm" flex={1}>
                   Эпизод {ep.number}
                   {ep.name && (
-                    <Text as="span" color="fg.muted">
-                      {' '}
-                      — {ep.name}
+                    <Text asChild color="fg.muted">
+                      <span>— {ep.name}</span>
                     </Text>
                   )}
                 </Text>

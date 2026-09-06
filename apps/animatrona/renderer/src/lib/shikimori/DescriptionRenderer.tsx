@@ -30,18 +30,21 @@ function SpoilerText({ content }: { content: string }) {
 
   return (
     <Box
-      as="span"
+      asChild
       bg={isRevealed ? 'transparent' : 'gray.700'}
       color={isRevealed ? 'inherit' : 'transparent'}
       px={1}
       borderRadius="sm"
       cursor="pointer"
       transition="all 0.2s"
-      onClick={() => setIsRevealed(!isRevealed)}
-      title={isRevealed ? 'Нажмите чтобы скрыть' : 'Нажмите чтобы показать спойлер'}
       _hover={{ opacity: 0.8 }}
     >
-      {content}
+      <span
+        onClick={() => setIsRevealed(!isRevealed)}
+        title={isRevealed ? 'Нажмите чтобы скрыть' : 'Нажмите чтобы показать спойлер'}
+      >
+        {content}
+      </span>
     </Box>
   )
 }
@@ -56,14 +59,10 @@ function renderSegment(segment: DescriptionSegment, index: number, localAnimeMap
     case 'person':
       // Персонажи и люди — просто выделенный текст
       return (
-        <Text
-          key={index}
-          as="span"
-          color="purple.300"
-          fontWeight="medium"
-          title={`${segment.type === 'character' ? 'Персонаж' : 'Человек'} #${segment.id}`}
-        >
-          {segment.name}
+        <Text key={index} asChild color="purple.300" fontWeight="medium">
+          <span title={`${segment.type === 'character' ? 'Персонаж' : 'Человек'} #${segment.id}`}>
+            {segment.name}
+          </span>
         </Text>
       )
 
@@ -116,15 +115,15 @@ function renderSegment(segment: DescriptionSegment, index: number, localAnimeMap
 
     case 'bold':
       return (
-        <Text key={index} as="span" fontWeight="bold">
-          {segment.content}
+        <Text key={index} asChild fontWeight="bold">
+          <span>{segment.content}</span>
         </Text>
       )
 
     case 'italic':
       return (
-        <Text key={index} as="span" fontStyle="italic">
-          {segment.content}
+        <Text key={index} asChild fontStyle="italic">
+          <span>{segment.content}</span>
         </Text>
       )
 

@@ -182,17 +182,18 @@ export function MobileAccessCard() {
                       Порт: {status.port} • Запросов: {status.requestCount}
                     </Text>
                     <Box
-                      as="button"
+                      asChild
                       display="flex"
                       alignItems="center"
                       gap={1}
                       color="fg.subtle"
                       fontSize="sm"
-                      onClick={handleRefreshIp}
                       _hover={{ color: 'fg' }}
                     >
-                      <LuRefreshCw size={12} />
-                      Обновить IP
+                      <button type="button" onClick={handleRefreshIp}>
+                        <LuRefreshCw size={12} />
+                        Обновить IP
+                      </button>
                     </Box>
                   </HStack>
 

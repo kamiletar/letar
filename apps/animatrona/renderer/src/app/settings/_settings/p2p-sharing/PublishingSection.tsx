@@ -652,23 +652,23 @@ export function PublishingSection({
               </Text>
               <HStack gap={3} flexWrap="wrap">
                 <Text fontSize="sm">
-                  <Text as="span" color="green.fg" fontWeight={500}>
-                    ✅ {healthSummary.complete}
+                  <Text asChild color="green.fg" fontWeight={500}>
+                    <span>✅ {healthSummary.complete}</span>
                   </Text>{' '}
                   полных
                 </Text>
                 {healthSummary.degraded > 0 && (
                   <Text fontSize="sm">
-                    <Text as="span" color="orange.fg" fontWeight={500}>
-                      ⚠️ {healthSummary.degraded}
+                    <Text asChild color="orange.fg" fontWeight={500}>
+                      <span>⚠️ {healthSummary.degraded}</span>
                     </Text>{' '}
                     неполных (без скринов/шрифтов)
                   </Text>
                 )}
                 {healthSummary.broken > 0 && (
                   <Text fontSize="sm">
-                    <Text as="span" color="red.fg" fontWeight={500}>
-                      ❌ {healthSummary.broken}
+                    <Text asChild color="red.fg" fontWeight={500}>
+                      <span>❌ {healthSummary.broken}</span>
                     </Text>{' '}
                     повреждённых (нет видео/аудио)
                   </Text>

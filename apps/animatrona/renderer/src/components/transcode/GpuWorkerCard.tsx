@@ -128,8 +128,8 @@ export const GpuWorkerCard = memo(
               {fps !== undefined && fps > 0 && (
                 <HStack gap={2}>
                   <Text>
-                    <Text as="span" color={useCpuFallback ? 'blue.400' : 'green.400'} fontWeight="medium">
-                      {fps.toFixed(0)}
+                    <Text asChild color={useCpuFallback ? 'blue.400' : 'green.400'} fontWeight="medium">
+                      <span>{fps.toFixed(0)}</span>
                     </Text>
                     {' fps'}
                   </Text>

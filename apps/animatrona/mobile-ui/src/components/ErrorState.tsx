@@ -46,7 +46,7 @@ export function ErrorState({
 
       {onRetry && (
         <Box
-          as="button"
+          asChild
           display="flex"
           alignItems="center"
           gap={2}
@@ -60,10 +60,11 @@ export function ErrorState({
           transition="all 0.2s"
           _hover={{ bg: 'purple.500' }}
           _active={{ transform: 'scale(0.98)' }}
-          onClick={onRetry}
         >
-          <LuRefreshCw size={18} />
-          {retryText}
+          <button type="button" onClick={onRetry}>
+            <LuRefreshCw size={18} />
+            {retryText}
+          </button>
         </Box>
       )}
     </VStack>

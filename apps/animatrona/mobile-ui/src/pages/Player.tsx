@@ -824,17 +824,18 @@ export function PlayerPage() {
           onRetry={() => window.location.reload()}
         />
         <Box
-          as="button"
+          asChild
           display="flex"
           alignItems="center"
           gap={2}
           color="gray.400"
           minH="44px"
           px={4}
-          onClick={() => navigate(-1)}
         >
-          <LuArrowLeft size={18} />
-          Назад
+          <button type="button" onClick={() => navigate(-1)}>
+            <LuArrowLeft size={18} />
+            Назад
+          </button>
         </Box>
       </Flex>
     )
@@ -922,7 +923,7 @@ export function PlayerPage() {
       {/* Кнопка пропуска OP/ED */}
       {showSkipButton && currentChapter && (
         <Box
-          as="button"
+          asChild
           position="absolute"
           bottom={24}
           right={4}
@@ -939,16 +940,20 @@ export function PlayerPage() {
           fontSize="sm"
           fontWeight="medium"
           cursor="pointer"
-          onClick={(e) => {
-            e.stopPropagation()
-            skipChapter()
-          }}
           transition="all 0.2s"
           _hover={{ bg: 'purple.500' }}
           _active={{ transform: 'scale(0.98)' }}
         >
-          <LuRotateCw size={18} />
-          Пропустить {getChapterTypeName(currentChapter.type)}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              skipChapter()
+            }}
+          >
+            <LuRotateCw size={18} />
+            Пропустить {getChapterTypeName(currentChapter.type)}
+          </button>
         </Box>
       )}
 
@@ -974,7 +979,7 @@ export function PlayerPage() {
             </Text>
             <Flex gap={4}>
               <Box
-                as="button"
+                asChild
                 display="flex"
                 alignItems="center"
                 gap={2}
@@ -985,14 +990,15 @@ export function PlayerPage() {
                 color="white"
                 borderRadius="lg"
                 fontWeight="medium"
-                onClick={goToNextEpisode}
                 _active={{ transform: 'scale(0.98)' }}
               >
-                <LuPlay size={20} />
-                Смотреть сейчас
+                <button type="button" onClick={goToNextEpisode}>
+                  <LuPlay size={20} />
+                  Смотреть сейчас
+                </button>
               </Box>
               <Box
-                as="button"
+                asChild
                 display="flex"
                 alignItems="center"
                 gap={2}
@@ -1003,11 +1009,12 @@ export function PlayerPage() {
                 color="white"
                 borderRadius="lg"
                 fontWeight="medium"
-                onClick={cancelAutoNext}
                 _active={{ transform: 'scale(0.98)' }}
               >
-                <LuX size={20} />
-                Отмена
+                <button type="button" onClick={cancelAutoNext}>
+                  <LuX size={20} />
+                  Отмена
+                </button>
               </Box>
             </Flex>
           </VStack>
@@ -1136,7 +1143,7 @@ export function PlayerPage() {
             )}
 
             <Box
-              as="button"
+              asChild
               display="flex"
               alignItems="center"
               justifyContent="center"
@@ -1149,10 +1156,11 @@ export function PlayerPage() {
               color="white"
               borderRadius="lg"
               fontWeight="medium"
-              onClick={() => setShowTrackMenu(false)}
               _active={{ transform: 'scale(0.98)' }}
             >
-              Закрыть
+              <button type="button" onClick={() => setShowTrackMenu(false)}>
+                Закрыть
+              </button>
             </Box>
           </Box>
         </Box>

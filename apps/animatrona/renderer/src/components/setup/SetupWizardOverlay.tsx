@@ -111,8 +111,8 @@ export function SetupWizardOverlay() {
 
             <Text fontSize="xs" color="fg.subtle" textAlign="center">
               IPFS хранилище будет создано автоматически как подпапка{' '}
-              <Box as="span" fontFamily="mono" color="fg">
-                {libraryPath ? `${libraryPath}/ipfs` : '...'}
+              <Box asChild fontFamily="mono" color="fg">
+                <span>{libraryPath ? `${libraryPath}/ipfs` : '...'}</span>
               </Box>
             </Text>
 

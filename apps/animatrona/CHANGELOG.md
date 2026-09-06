@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+## [0.55.41] - 2026-09-06
+
+### Changed
+
+- Убран запрещённый семгрепом проп `as="строка-html-тега"` (`Box`/`Flex`/`Text` as
+  `button`/`span`/`nav`/`header` и т.п.) на Chakra-компонентах — 27 файлов в `renderer/src` и
+  `mobile-ui/src` (layout: `Header`/`Sidebar`/`TitleBar`, библиотека, плеер, транскод, импорт,
+  настройки p2p). Везде заменено на `asChild` + нативный тег внутри, по рецепту
+  [chakra-icon-as-prop-cleanup-pattern.md § 7](/.claude/docs/chakra-icon-as-prop-cleanup-pattern.md).
+  Поведение и разметка не изменились, только механизм получения нативного DOM-узла.
+
 ## [0.55.40] - 2026-09-06
 
 ### Fixed

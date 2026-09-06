@@ -84,7 +84,7 @@ export function OfflineIndicator({ status, onRetry }: OfflineIndicatorProps) {
         {/* Кнопка повторить */}
         {onRetry && (
           <Box
-            as="button"
+            asChild
             px={3}
             py={2}
             borderRadius="lg"
@@ -96,13 +96,14 @@ export function OfflineIndicator({ status, onRetry }: OfflineIndicatorProps) {
             alignItems="center"
             gap={2}
             minH="40px"
-            onClick={onRetry}
             transition="all 0.2s"
             _hover={{ bg: isFullyOffline ? 'red.600' : 'orange.600' }}
             _active={{ transform: 'scale(0.95)' }}
           >
-            <LuRefreshCw size={14} />
-            Повторить
+            <button type="button" onClick={onRetry}>
+              <LuRefreshCw size={14} />
+              Повторить
+            </button>
           </Box>
         )}
       </Flex>

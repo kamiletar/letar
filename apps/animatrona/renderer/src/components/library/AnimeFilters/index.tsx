@@ -481,8 +481,8 @@ export function AnimeFilters({
                     <Select.Trigger {...(status && { colorPalette: 'purple', variant: 'subtle' })} minH="44px">
                       <Select.ValueText placeholder="Статус" />
                       {status && (
-                        <Box as="span" color="purple.500" ml={1}>
-                          •
+                        <Box asChild color="purple.500" ml={1}>
+                          <span>•</span>
                         </Box>
                       )}
                     </Select.Trigger>
@@ -494,8 +494,8 @@ export function AnimeFilters({
                           <HStack justify="space-between" w="full">
                             <span>{item.label}</span>
                             {item.value && counts?.status?.[item.value] !== undefined && (
-                              <Text as="span" fontSize="xs" color="fg.subtle">
-                                ({counts.status[item.value]})
+                              <Text asChild fontSize="xs" color="fg.subtle">
+                                <span>({counts.status[item.value]})</span>
                               </Text>
                             )}
                           </HStack>
@@ -566,8 +566,8 @@ export function AnimeFilters({
                       {item.icon && <item.icon />}
                       {item.label}
                       {item.value && counts?.watchStatus?.[item.value] !== undefined && (
-                        <Text as="span" fontSize="2xs" opacity={0.7}>
-                          {counts.watchStatus[item.value]}
+                        <Text asChild fontSize="2xs" opacity={0.7}>
+                          <span>{counts.watchStatus[item.value]}</span>
                         </Text>
                       )}
                     </Button>
