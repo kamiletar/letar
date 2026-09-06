@@ -1138,6 +1138,26 @@ for app in $AFFECTED_APPS; do
     fi
   fi
 
+  # PLAN-INFRA-1.md §19.1 Трек 1 — блокирующий гейт типов. `nx typecheck:tsgo` — единственная
+  # реальная проверка типов в проекте, до этого нигде не вызывалась автоматически (ни в CI, ни в
+  # git-хуках, ни здесь) — держалась только на ручной дисциплине «прогнал перед коммитом».
+  # Без условия по $DEPLOY_ENV — одинаково для прода (s2) и стейджа (s3), для всех приложений.
+  TYPECHECK_TARGET="typecheck:tsgo"
+  if ! nx show project $app --json 2>/dev/null | grep -q '"typecheck:tsgo"'; then
+    # На 2026-09-06 единственное исключение — dashboard-agent (нет typecheck:tsgo, есть typecheck).
+    TYPECHECK_TARGET="typecheck"
+  fi
+  echo -e "${YELLOW}🔎 Typecheck (${TYPECHECK_TARGET}) for ${app}...${NC}"
+  if nx $TYPECHECK_TARGET $app; then
+    echo -e "${GREEN}✅ Typecheck passed for ${app}${NC}"
+  else
+    echo -e "${RED}❌ Typecheck failed for ${app} — деплой прерван${NC}"
+    phase_marker build fail
+    FAILED_APPS+=("$app")
+    echo ""
+    continue
+  fi
+
   # Check for build output (skip for Node.js apps - they build inside Docker)
   if [ "$IS_NODE_APP" = true ]; then
     echo -e "${BLUE}ℹ️  Skipping build output check (Node.js app builds inside Docker)${NC}"
