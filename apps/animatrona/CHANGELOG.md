@@ -4,6 +4,16 @@
 
 ## [Unreleased]
 
+## [0.55.60] - 2026-09-06
+
+### Changed
+
+- Консолидированы три независимых дубля Prisma `select` для аудио/субтитров эпизода
+  (`import-db.ts`, `manifest.handlers.ts`, `episode-manifest-regen.ts`) в единые константы
+  `AUDIO_TRACK_MANIFEST_SELECT`/`SUBTITLE_TRACK_MANIFEST_SELECT`. Сверка нашла реальное
+  расхождение — `episode-manifest-regen.ts` не запрашивал `ipfsSize`, из-за чего фолбэк размера
+  файла терялся бы при регенерации манифеста для новых CID.
+
 ## [0.55.59] - 2026-09-06
 
 ### Fixed

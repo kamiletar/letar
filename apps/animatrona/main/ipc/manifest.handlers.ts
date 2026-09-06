@@ -18,6 +18,7 @@ import type {
   ThumbnailsDocument,
 } from '../../shared/types/manifest'
 import { updateAnimeManifest } from '../services/anime-manifest-generator'
+import { AUDIO_TRACK_MANIFEST_SELECT, SUBTITLE_TRACK_MANIFEST_SELECT } from '../services/import/import-db'
 import { addBytes, addFile, cat } from '../services/ipfs/unixfs-service'
 import {
   generateManifestFromDemux,
@@ -105,34 +106,11 @@ export function registerManifestHandlers(): void {
       where: { id: episodeId },
       select: {
         audioTracks: {
-          select: {
-            streamIndex: true,
-            language: true,
-            title: true,
-            codec: true,
-            channels: true,
-            bitrate: true,
-            isDefault: true,
-            isForced: true,
-            dubGroup: true,
-            transcodedCid: true,
-            ipfsSize: true,
-          },
+          select: AUDIO_TRACK_MANIFEST_SELECT,
           orderBy: { streamIndex: 'asc' },
         },
         subtitleTracks: {
-          select: {
-            streamIndex: true,
-            language: true,
-            title: true,
-            format: true,
-            isDefault: true,
-            isForced: true,
-            dubGroup: true,
-            fileCid: true,
-            ipfsSize: true,
-            fonts: { select: { fontName: true, fileCid: true, fileExt: true, ipfsSize: true } },
-          },
+          select: SUBTITLE_TRACK_MANIFEST_SELECT,
           orderBy: { streamIndex: 'asc' },
         },
       },

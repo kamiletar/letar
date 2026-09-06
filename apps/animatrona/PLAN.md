@@ -1251,6 +1251,14 @@ webpack/esbuild-алиасы `main/`) видят пакет нормально. 
 настоящие `dependencies` `apps/animatrona/package.json` + `bun install`, отдельная задача не в
 рамках этой правки.
 
+- [x] Консолидация трёх дублей Prisma `select` из пункта выше (2026-09-06) — вынесены
+      `AUDIO_TRACK_MANIFEST_SELECT`/`SUBTITLE_TRACK_MANIFEST_SELECT` в `import-db.ts`,
+      `manifest.handlers.ts` и `episode-manifest-regen.ts` теперь импортируют их вместо своих
+      копий. Сверка нашла реальное расхождение: `EPISODE_TRACKS_SELECT` не запрашивал `ipfsSize`
+      — фолбэк размера файла в `rebuildManifestTracks` терялся бы при регенерации манифеста для
+      CID, которого ещё нет в старом манифесте. Подробности —
+      [PLAN_COMPLETED.md § Консолидация Prisma select для треков манифеста](/apps/animatrona/PLAN_COMPLETED.md).
+
 #### 19.5 Приёмка
 
 Папка, где есть `ja` и `ru` аудио плюс `ru` и `en` субтитры: переключение режима меняет **обе**

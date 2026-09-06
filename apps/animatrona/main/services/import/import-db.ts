@@ -332,23 +332,33 @@ export async function findManyAudioTracks(episodeId: string) {
   })
 }
 
+/**
+ * Общий Prisma select для аудиодорожек эпизода, нужных для перестройки манифеста.
+ *
+ * Единый источник истины для трёх мест: первичный импорт (`findAudioTracksForManifest` ниже),
+ * ручная перестройка из UI (`manifest:rebuildTracksFromDb` в `manifest.handlers.ts`) и полная
+ * регенерация всех манифестов (`episode-manifest-regen.ts`). Раньше набор полей дублировался
+ * построчно в каждом месте и расходился незаметно для typecheck/lint.
+ */
+export const AUDIO_TRACK_MANIFEST_SELECT = {
+  streamIndex: true,
+  language: true,
+  title: true,
+  codec: true,
+  channels: true,
+  bitrate: true,
+  isDefault: true,
+  isForced: true,
+  dubGroup: true,
+  transcodedCid: true,
+  ipfsSize: true,
+} as const satisfies Prisma.AudioTrackSelect
+
 /** Полные данные аудиодорожек для rebuildManifestTracksFromFile */
 export async function findAudioTracksForManifest(episodeId: string) {
   return prisma.audioTrack.findMany({
     where: { episodeId },
-    select: {
-      streamIndex: true,
-      language: true,
-      title: true,
-      codec: true,
-      channels: true,
-      bitrate: true,
-      isDefault: true,
-      isForced: true,
-      dubGroup: true,
-      transcodedCid: true,
-      ipfsSize: true,
-    },
+    select: AUDIO_TRACK_MANIFEST_SELECT,
   })
 }
 
@@ -359,29 +369,36 @@ export async function findManySubtitleTracks(episodeId: string) {
   })
 }
 
+/**
+ * Общий Prisma select для субтитров эпизода (включая шрифты), нужных для перестройки манифеста.
+ * См. `AUDIO_TRACK_MANIFEST_SELECT` выше — тот же паттерн консолидации.
+ */
+export const SUBTITLE_TRACK_MANIFEST_SELECT = {
+  streamIndex: true,
+  language: true,
+  title: true,
+  format: true,
+  subtitleType: true,
+  isDefault: true,
+  isForced: true,
+  dubGroup: true,
+  fileCid: true,
+  ipfsSize: true,
+  fonts: {
+    select: {
+      fontName: true,
+      fileCid: true,
+      fileExt: true,
+      ipfsSize: true,
+    },
+  },
+} as const satisfies Prisma.SubtitleTrackSelect
+
 /** Полные данные субтитров для rebuildManifestTracksFromFile */
 export async function findSubtitleTracksForManifest(episodeId: string) {
   return prisma.subtitleTrack.findMany({
     where: { episodeId },
-    select: {
-      streamIndex: true,
-      language: true,
-      title: true,
-      format: true,
-      isDefault: true,
-      isForced: true,
-      dubGroup: true,
-      fileCid: true,
-      ipfsSize: true,
-      fonts: {
-        select: {
-          fontName: true,
-          fileCid: true,
-          fileExt: true,
-          ipfsSize: true,
-        },
-      },
-    },
+    select: SUBTITLE_TRACK_MANIFEST_SELECT,
   })
 }
 

@@ -11,6 +11,7 @@ import { prisma } from '../utils/db'
 import { hasSufficientDiskSpace, LOW_DISK_THRESHOLD_GB } from '../utils/disk-space'
 import { createModuleLogger } from '../utils/logger'
 import { updateAnimeManifest } from './anime-manifest-generator'
+import { AUDIO_TRACK_MANIFEST_SELECT, SUBTITLE_TRACK_MANIFEST_SELECT } from './import/import-db'
 import { pinSubDocuments } from './ipfs/pin-sub-documents'
 import { addBytes, cat } from './ipfs/unixfs-service'
 import { rebuildManifestTracks } from './manifest-generator'
@@ -20,33 +21,11 @@ const log = createModuleLogger('EpisodeManifestRegen')
 /** Общий Prisma select для аудио/субтитров эпизода (используется в обеих функциях) */
 const EPISODE_TRACKS_SELECT = {
   audioTracks: {
-    select: {
-      streamIndex: true,
-      language: true,
-      title: true,
-      codec: true,
-      channels: true,
-      bitrate: true,
-      isDefault: true,
-      isForced: true,
-      dubGroup: true,
-      transcodedCid: true,
-    },
+    select: AUDIO_TRACK_MANIFEST_SELECT,
     orderBy: { streamIndex: 'asc' as const },
   },
   subtitleTracks: {
-    select: {
-      streamIndex: true,
-      language: true,
-      title: true,
-      format: true,
-      subtitleType: true,
-      isDefault: true,
-      isForced: true,
-      dubGroup: true,
-      fileCid: true,
-      fonts: { select: { fontName: true, fileCid: true, fileExt: true } },
-    },
+    select: SUBTITLE_TRACK_MANIFEST_SELECT,
     orderBy: { streamIndex: 'asc' as const },
   },
 } as const

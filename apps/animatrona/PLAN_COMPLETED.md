@@ -38,6 +38,26 @@
 
 lint/typecheck:tsgo animatrona — зелёные (0 ошибок, только преэкзистентные warnings).
 
+## Консолидация Prisma select для треков манифеста (2026-09-06)
+
+**Проблема:** пункт 5 выше («три места дублирования select») был исправлен точечно — поля
+добавлены в три места по отдельности, но сама структура select оставалась продублирована
+построчно в `import-db.ts` (`findAudioTracksForManifest`/`findSubtitleTracksForManifest`),
+`manifest.handlers.ts` (`manifest:rebuildTracksFromDb`) и `episode-manifest-regen.ts`
+(`EPISODE_TRACKS_SELECT`). Сверка поле-в-поле нашла реальное расхождение: `EPISODE_TRACKS_SELECT`
+не запрашивал `ipfsSize` ни у аудиодорожек, ни у субтитров/шрифтов — `rebuildManifestTracks`
+использует его как fallback для `size`, когда старый манифест ещё не содержит запись с этим CID
+(`manifest-generator.ts:382,423,431`), то есть при регенерации размер файла в такой ситуации
+терялся бы (оставался `undefined`), хотя в БД он есть. Второе расхождение (`subtitleType` был
+только в `EPISODE_TRACKS_SELECT`) не функциональное — поле нигде не читается
+`rebuildManifestTracks`/`DbSubtitleTrackData`, просто лишнее в select.
+
+**Реализация:** вынесены `AUDIO_TRACK_MANIFEST_SELECT`/`SUBTITLE_TRACK_MANIFEST_SELECT` (as const
+satisfies `Prisma.AudioTrackSelect`/`Prisma.SubtitleTrackSelect`) в `import-db.ts` как единый
+источник истины (объединение полей всех трёх мест, включая `ipfsSize` и `subtitleType`) —
+`manifest.handlers.ts` и `episode-manifest-regen.ts` теперь импортируют константы вместо
+собственных копий select. lint/typecheck:tsgo/test animatrona — зелёные (166 тестов).
+
 ⚠️ **Побочная находка, не пофикшена в рамках этой задачи:** `nx test animatrona` не собирает
 `main/services/import/__tests__/anime-record-setup.spec.ts` — цепочка импортов до
 `external-subtitle-scanner.ts` → `@letar/folder-scan` падает под vitest
