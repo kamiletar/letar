@@ -557,7 +557,7 @@ export async function generateAnimeManifest(input: GenerateAnimeManifestInput): 
         && manifest.relationsCid === oldManifest.relationsCid
         && manifest.episodePreviewsCid === oldManifest.episodePreviewsCid
         && manifest.isBdRemux === oldManifest.isBdRemux
-        && manifest.sourceUrl === (oldManifest as Record<string, unknown>).sourceUrl
+        && manifest.sourceUrl === oldManifest.sourceUrl
         && manifest.creatorPeerId === oldManifest.creatorPeerId
 
       if (contentEqual && !forceUpdatedAt) {

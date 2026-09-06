@@ -347,7 +347,7 @@ async function getChaptersAndAttachments(
         const data = JSON.parse(stdout)
 
         // Главы
-        const chapters: MediaInfo['chapters'] =
+        const chapters: NonNullable<MediaInfo['chapters']> =
           data.chapters?.map((ch: { start_time?: string; end_time?: string; tags?: { title?: string } }) => ({
             start: Number.parseFloat(ch.start_time || '0'),
             end: Number.parseFloat(ch.end_time || '0'),

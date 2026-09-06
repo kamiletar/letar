@@ -416,7 +416,7 @@ export async function regenerateAllEpisodeManifests(options?: {
   // Включает Shikimori refresh (студии, персонал, персонажи, изображения)
   try {
     const allAnimesForRefresh = await prisma.anime.findMany({
-      where: { manifestCid: { not: null } },
+      where: { animeInfoCid: { not: null } },
       select: { id: true, name: true },
       orderBy: { name: 'asc' },
     })

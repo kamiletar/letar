@@ -255,6 +255,13 @@
     "typecheck:tsgo": {
       "command": "tsgo --project apps/animatrona/tsconfig.json --noEmit",
       "dependsOn": [
+        "zenstack:generate",
+        "typecheck:main"
+      ]
+    },
+    "typecheck:main": {
+      "command": "tsgo --project apps/animatrona/main/tsconfig.json --noEmit",
+      "dependsOn": [
         "zenstack:generate"
       ]
     },

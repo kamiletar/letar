@@ -84,6 +84,8 @@ export interface AnimeManifest {
 
   /** BDRemux / Bluray Remux (lossless качество) */
   isBdRemux?: boolean
+  /** URL источника раздачи (например rutracker) */
+  sourceUrl?: string
   /** PeerId создателя манифеста */
   creatorPeerId?: string
   /** Дата создания (ISO string) */

@@ -86,6 +86,10 @@ export class WebExportManager extends EventEmitter {
       }
 
       // Режимы embedded и referenced — стандартный путь со скачиванием
+      if (!options.outputDir) {
+        return { success: false, error: 'outputDir обязателен для режимов embedded/referenced' }
+      }
+
       // Создаём директорию экспорта
       const outputDir = path.join(options.outputDir, this.sanitizeFolderName(config.animeName))
       await fs.mkdir(outputDir, { recursive: true })
@@ -254,12 +258,11 @@ export class WebExportManager extends EventEmitter {
    */
   private async publishToIpfs(dirPath: string): Promise<string> {
     // Динамический импорт для избежания циклических зависимостей
-    const { UnixFSService } = await import('../ipfs/unixfs-service')
-    const unixfs = UnixFSService.getInstance()
+    const { addDirectory } = await import('../ipfs/unixfs-service')
 
     // Добавляем директорию в IPFS
-    const cid = await unixfs.addDirectory(dirPath)
-    return cid.toString()
+    const { rootCid } = await addDirectory(dirPath)
+    return rootCid
   }
 
   /**

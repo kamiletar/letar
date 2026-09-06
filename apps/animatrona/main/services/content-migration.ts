@@ -111,22 +111,27 @@ export async function migrateContentToIpfs(options?: {
 
       // Загружаем в IPFS
       log.debug('Загружаю видео в IPFS', { episodeId: ep.id, videoPath })
-      const cid = await addFile(videoPath)
+      const addResult = await addFile(videoPath)
 
-      if (!cid) {
-        throw new Error('addFile вернул null')
+      if (!addResult?.cid) {
+        throw new Error('addFile вернул пустой результат')
       }
 
       // Обновляем БД
       await prisma.episode.update({
         where: { id: ep.id },
         data: {
-          transcodedCid: cid,
+          transcodedCid: addResult.cid,
         },
       })
 
       result.migrated++
-      log.info('Эпизод мигрирован', { episodeId: ep.id, cid, animeName: ep.animeName, number: ep.number })
+      log.info('Эпизод мигрирован', {
+        episodeId: ep.id,
+        cid: addResult.cid,
+        animeName: ep.animeName,
+        number: ep.number,
+      })
     } catch (error) {
       result.failed++
       const errorMessage = error instanceof Error ? error.message : String(error)

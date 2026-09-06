@@ -209,7 +209,7 @@ export async function processEpisodeFile(
     episodeNumber: file.episodeNumber,
     hasFileAnalysis: !!ctx.fileAnalyses?.find((a) => a.episodeNumber === file.episodeNumber),
     embeddedAudioCount: demuxResult.audioTracks?.length ?? 0,
-    embeddedSubCount: demuxResult.subtitleTracks?.length ?? 0,
+    embeddedSubCount: demuxResult.subtitles?.length ?? 0,
     externalSubsForEpisode: ctx.externalSubsMap.get(file.episodeNumber)?.length ?? 0,
   })
   const audioTracksToTranscode = await createAudioTracks(episodeId, demuxResult, ctx.fileAnalyses, file.episodeNumber)

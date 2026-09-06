@@ -4,6 +4,31 @@
 
 ## [Unreleased]
 
+## [0.55.54] - 2026-09-06
+
+### Fixed
+
+- **Main-процесс теперь типизируется** (PLAN.md — «Main-процесс не типизируется вообще ничем»).
+  `main/tsconfig.json` переписан под реальную структуру исходников (`module`/`moduleResolution`
+  → `ESNext`/`bundler`, снят фантомный `references`, снят `rootDir`/`outDir`, `include` расширен
+  до `**/*.ts`). Разгребено 295 ошибок tsgo. Попутно найдены и починены давние функциональные
+  баги, молчавшие только из-за отсутствия проверки типов: сохранение жанров/тем аниме при
+  локальном torrent-импорте (несуществующие поля в Prisma-запросе, ошибка глушилась try/catch),
+  `AnimeRelation.upsert` по несуществующему compound-ключу, весь `AchievementService` вызывался
+  без `await`, watchdog зависших видео-задач в `video-pool.ts` читал поля не с того объекта и не
+  срабатывал никогда, ретрай скачивания постера не срабатывал из-за неверной проверки результата,
+  автостарт синхронизации трекеров терял `await` у конфига, `tracker.handlers.ts` упал бы при
+  первом вызове `syncLibrary` (не импортированы `path`/`app`/`fs`), `resumeTask` в `base-pool.ts`
+  не проверял `process` на `null` (в отличие от парного `pauseTask`), `web-export-manager.ts`
+  звал несуществующий класс `UnixFSService.getInstance()` (гарантированный краш при публикации в
+  IPFS), `manifest-generator.ts` писал несуществующее поле `path` вместо обязательного `cid`.
+  Добавлен постоянный гейт — Nx-таргет `typecheck:main` (`tsgo --project main/tsconfig.json
+  --noEmit`), подключён как `dependsOn` к `typecheck:tsgo`.
+- **4 e2e-теста плеера, молча скипавшихся** (`04-player/folder-player.electron.spec.ts`) —
+  `getByRole('link', { name: /плеер/i })` заменён на `getByRole('button', ...)` (пункты сайдбара
+  — `Box asChild` вокруг `<button>`, не `<a>`), по образцу уже исправленного `video-click` спека;
+  там же поправлен локатор «Библиотека» в четвёртом тесте той же причиной.
+
 ## [0.55.53] - 2026-09-06
 
 ### Fixed

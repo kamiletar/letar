@@ -12,7 +12,7 @@ import type {
   DemuxedVideo,
   DemuxOptions,
   DemuxResult,
-} from '../shared/types'
+} from '../../shared/types'
 import { spawnFFmpeg, spawnFFprobe } from '../utils/ffmpeg-spawn'
 import { createModuleLogger } from '../utils/logger'
 import { parseTimeToSeconds } from './progress-parser'

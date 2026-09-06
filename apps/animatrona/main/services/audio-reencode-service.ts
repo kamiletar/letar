@@ -364,7 +364,7 @@ export async function reencodeAnimeAudio(
     savedBytes: progress.savedBytes,
   }
 
-  log.info('Перекодировка завершена', result)
+  log.info('Перекодировка завершена', { ...result })
   return result
 }
 
@@ -526,6 +526,6 @@ export async function batchReencodeAudio(
     animeResults,
   }
 
-  log.info('Пакетная перекодировка завершена', result)
+  log.info('Пакетная перекодировка завершена', { ...result })
   return result
 }

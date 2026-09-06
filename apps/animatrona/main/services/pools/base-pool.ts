@@ -157,7 +157,7 @@ export abstract class BasePool<TTask extends BasePoolTask> extends EventEmitter 
   /** Возобновить задачу */
   resumeTask(taskId: string): boolean {
     const running = this.runningTasks.get(taskId)
-    if (!running || !this.pausedTasks.has(taskId)) {
+    if (!running || !running.process || !this.pausedTasks.has(taskId)) {
       return false
     }
 

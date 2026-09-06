@@ -245,6 +245,9 @@ model Genre {
 
   slug            String      @unique @meta("form.title", "Slug")
 
+  /// Название на русском (из Shikimori)
+  nameRu          String?
+
   /// ID на Shikimori (для синхронизации)
   shikimoriId     Int?        @unique
 

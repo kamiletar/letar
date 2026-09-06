@@ -400,7 +400,7 @@ export async function getDefaultEncodingProfile() {
  */
 export async function saveGenresAndThemes(
   animeId: string,
-  genres: Array<{ id: string; name: string; russian: string; kind: 'genre' | 'theme' }>,
+  genres: Array<{ id: number; name: string; russian: string; kind: 'genre' | 'theme' }>,
 ) {
   // Разделяем на жанры и темы
   const genreItems = genres.filter((g) => g.kind === 'genre')
@@ -409,9 +409,9 @@ export async function saveGenresAndThemes(
   // Upsert жанры
   for (const g of genreItems) {
     const genre = await prisma.genre.upsert({
-      where: { name: g.name },
-      create: { name: g.name, russian: g.russian },
-      update: { russian: g.russian },
+      where: { slug: g.name },
+      create: { name: g.russian || g.name, slug: g.name, nameRu: g.russian },
+      update: { nameRu: g.russian },
     })
     await prisma.genreOnAnime.upsert({
       where: { animeId_genreId: { animeId, genreId: genre.id } },
@@ -424,8 +424,8 @@ export async function saveGenresAndThemes(
   for (const t of themeItems) {
     const theme = await prisma.theme.upsert({
       where: { name: t.name },
-      create: { name: t.name, russian: t.russian },
-      update: { russian: t.russian },
+      create: { name: t.name, nameRu: t.russian },
+      update: { nameRu: t.russian },
     })
     await prisma.themeOnAnime.upsert({
       where: { animeId_themeId: { animeId, themeId: theme.id } },
@@ -454,18 +454,20 @@ export async function syncAnimeRelations(
     if (targetAnime) {
       await prisma.animeRelation.upsert({
         where: {
-          sourceAnimeId_targetAnimeId: {
+          sourceAnimeId_targetShikimoriId: {
             sourceAnimeId: animeId,
-            targetAnimeId: targetAnime.id,
+            targetShikimoriId: rel.targetShikimoriId,
           },
         },
         create: {
           sourceAnimeId: animeId,
+          targetShikimoriId: rel.targetShikimoriId,
           targetAnimeId: targetAnime.id,
-          kind: rel.relationKind as Prisma.AnimeRelationCreateInput['kind'],
+          relationKind: rel.relationKind as Prisma.AnimeRelationCreateInput['relationKind'],
         },
         update: {
-          kind: rel.relationKind as Prisma.AnimeRelationUpdateInput['kind'],
+          targetAnimeId: targetAnime.id,
+          relationKind: rel.relationKind as Prisma.AnimeRelationUpdateInput['relationKind'],
         },
       })
     }

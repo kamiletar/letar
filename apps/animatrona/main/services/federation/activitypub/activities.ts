@@ -4,7 +4,7 @@
  * Обработка входящих и исходящих activities.
  */
 
-import type { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '../../../../renderer/src/generated/prisma'
 
 import type {
   ActivityPubActivity,

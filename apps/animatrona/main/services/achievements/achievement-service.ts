@@ -109,7 +109,7 @@ class AchievementService extends EventEmitter {
       }
       this.checkDebounceTimer = setTimeout(() => {
         this.checkDebounceTimer = null
-        this.checkAllAchievements()
+        void this.checkAllAchievements()
       }, 2000)
     }
 
@@ -135,13 +135,13 @@ class AchievementService extends EventEmitter {
   /**
    * Проверить все достижения
    */
-  checkAllAchievements(): void {
+  async checkAllAchievements(): Promise<void> {
     const context = this.getCheckContext()
-    const achievements = loadAchievements()
+    const achievements = await loadAchievements()
 
     for (const achievement of ACHIEVEMENTS) {
       // Пропускаем уже разблокированные
-      if (isAchievementUnlocked(achievement.id)) {
+      if (await isAchievementUnlocked(achievement.id)) {
         continue
       }
 
@@ -149,13 +149,13 @@ class AchievementService extends EventEmitter {
 
       // Обновляем прогресс
       if (result.progress !== achievements.progress[achievement.id]) {
-        updateProgress(achievement.id, result.progress)
+        await updateProgress(achievement.id, result.progress)
         this.emit('achievements:progress', achievement.id, result.progress)
       }
 
       // Разблокируем если выполнено
       if (result.isCompleted) {
-        this.unlock(achievement)
+        await this.unlock(achievement)
       }
     }
   }
@@ -163,9 +163,9 @@ class AchievementService extends EventEmitter {
   /**
    * Разблокировать достижение
    */
-  private unlock(achievement: Achievement): void {
+  private async unlock(achievement: Achievement): Promise<void> {
     try {
-      unlockAchievement(achievement.id)
+      await unlockAchievement(achievement.id)
 
       const event: AchievementUnlockedEvent = {
         achievement,
@@ -182,8 +182,8 @@ class AchievementService extends EventEmitter {
   /**
    * Получить все достижения с прогрессом
    */
-  getAllWithProgress(): AchievementWithProgress[] {
-    const achievements = loadAchievements()
+  async getAllWithProgress(): Promise<AchievementWithProgress[]> {
+    const achievements = await loadAchievements()
     const context = this.getCheckContext()
 
     return ACHIEVEMENTS.map((achievement) => {
@@ -202,15 +202,15 @@ class AchievementService extends EventEmitter {
   /**
    * Получить разблокированные достижения
    */
-  getUnlocked(): AchievementWithProgress[] {
-    return this.getAllWithProgress().filter((a) => a.isUnlocked)
+  async getUnlocked(): Promise<AchievementWithProgress[]> {
+    return (await this.getAllWithProgress()).filter((a) => a.isUnlocked)
   }
 
   /**
    * Получить заблокированные достижения
    */
-  getLocked(): AchievementWithProgress[] {
-    return this.getAllWithProgress().filter((a) => !a.isUnlocked)
+  async getLocked(): Promise<AchievementWithProgress[]> {
+    return (await this.getAllWithProgress()).filter((a) => !a.isUnlocked)
   }
 
   /**
@@ -223,7 +223,7 @@ class AchievementService extends EventEmitter {
   /**
    * Получить данные достижений
    */
-  getAchievements(): UserAchievements {
+  getAchievements(): Promise<UserAchievements> {
     return loadAchievements()
   }
 
@@ -237,7 +237,7 @@ class AchievementService extends EventEmitter {
   /**
    * Сбросить достижения (для тестов)
    */
-  reset(): UserAchievements {
+  reset(): Promise<UserAchievements> {
     return resetAchievements()
   }
 }

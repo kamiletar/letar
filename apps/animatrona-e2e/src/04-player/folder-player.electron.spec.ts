@@ -45,7 +45,7 @@ test.describe('Folder Player', () => {
     await expect(nav).toBeVisible()
 
     // Кликаем на ссылку "Плеер" в сайдбаре
-    const playerLink = nav.getByRole('link', { name: /плеер/i })
+    const playerLink = nav.getByRole('button', { name: /плеер/i })
     const isPlayerLinkVisible = await playerLink.isVisible().catch(() => false)
 
     if (!isPlayerLinkVisible) {
@@ -79,7 +79,7 @@ test.describe('Folder Player', () => {
 
     // Навигируем на страницу плеера через UI
     const nav = ctx.page.getByRole('navigation')
-    const playerLink = nav.getByRole('link', { name: /плеер/i })
+    const playerLink = nav.getByRole('button', { name: /плеер/i })
     const isPlayerLinkVisible = await playerLink.isVisible().catch(() => false)
 
     if (!isPlayerLinkVisible) {
@@ -123,7 +123,7 @@ test.describe('Folder Player', () => {
 
     // Навигируем на страницу плеера через UI
     const nav = ctx.page.getByRole('navigation')
-    const playerLink = nav.getByRole('link', { name: /плеер/i })
+    const playerLink = nav.getByRole('button', { name: /плеер/i })
     const isPlayerLinkVisible = await playerLink.isVisible().catch(() => false)
 
     if (!isPlayerLinkVisible) {
@@ -162,7 +162,7 @@ test.describe('Folder Player', () => {
   test('навигация плеер → библиотека работает', async () => {
     // Навигируем на страницу плеера через UI
     const nav = ctx.page.getByRole('navigation')
-    const playerLink = nav.getByRole('link', { name: /плеер/i })
+    const playerLink = nav.getByRole('button', { name: /плеер/i })
     const isPlayerLinkVisible = await playerLink.isVisible().catch(() => false)
 
     if (!isPlayerLinkVisible) {
@@ -174,7 +174,7 @@ test.describe('Folder Player', () => {
     await ctx.page.waitForTimeout(2000)
 
     // Кликаем на ссылку "Библиотека" в навигации
-    const libraryLink = nav.getByRole('link', { name: /библиотека/i })
+    const libraryLink = nav.getByRole('button', { name: /библиотека/i })
     const isLibraryVisible = await libraryLink.isVisible().catch(() => false)
 
     if (isLibraryVisible) {

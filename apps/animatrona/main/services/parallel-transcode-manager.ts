@@ -361,7 +361,6 @@ export class ParallelTranscodeManager extends EventEmitter {
     // Создаём видео-задачу
     const videoTask: VideoPoolTask = {
       id: `video-${item.id}`,
-      type: 'video',
       queueItemId: item.id,
       animeQueueItemId: item.animeQueueItemId,
       episodeId: item.episodeId,

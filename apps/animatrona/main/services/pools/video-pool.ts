@@ -369,14 +369,16 @@ export class VideoPool extends BasePool<VideoPoolTask> {
   private checkStalledTasks(): void {
     const now = Date.now()
 
-    for (const [taskId, task] of this.runningTasks) {
+    for (const [taskId, runningTask] of this.runningTasks) {
+      const task = runningTask.task
+
       // Проверяем только активные задачи (не на паузе)
       if (task.status !== 'running') {
         continue
       }
 
-      const process = task.process
-      const lastUpdate = this.lastProgressUpdate.get(taskId) ?? task.startedAt ?? now
+      const process = runningTask.process
+      const lastUpdate = this.lastProgressUpdate.get(taskId) ?? runningTask.startTime ?? now
 
       // 1. Проверка: процесс существует и жив?
       if (process && process.exitCode !== null) {

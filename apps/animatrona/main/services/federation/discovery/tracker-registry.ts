@@ -5,7 +5,7 @@
  * Поддерживает локальный реестр и опционально — публичный.
  */
 
-import type { PrismaClient } from '@prisma/client'
+import type { PrismaClient, TrustLevel as DbTrustLevel } from '../../../../renderer/src/generated/prisma'
 
 import type { TrackerInfo, TrustLevel } from '../../../../shared/types/federation'
 import { createModuleLogger } from '../../../utils/logger'
@@ -328,8 +328,8 @@ export class TrackerRegistry {
     }
   }
 
-  private trustLevelToDb(level: TrustLevel): string {
-    const map: Record<number, string> = {
+  private trustLevelToDb(level: TrustLevel): DbTrustLevel {
+    const map: Record<number, DbTrustLevel> = {
       0: 'BLOCKED',
       1: 'UNTRUSTED',
       2: 'KNOWN',

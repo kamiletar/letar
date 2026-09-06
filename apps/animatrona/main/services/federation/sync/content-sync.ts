@@ -5,7 +5,7 @@
  * Получает контент с удалённых трекеров и сохраняет в локальную БД.
  */
 
-import type { PrismaClient, Tracker } from '@prisma/client'
+import type { PrismaClient, Tracker, TrustLevel as DbTrustLevel } from '../../../../renderer/src/generated/prisma'
 
 import type { SyncOptions, SyncResult, TrustLevel, VideoSeriesObject } from '../../../../shared/types/federation'
 import { createModuleLogger } from '../../../utils/logger'
@@ -293,8 +293,8 @@ export class ContentSyncService {
   /**
    * Получить trust levels выше указанного
    */
-  private getTrustLevelsAbove(minLevel: number): string[] {
-    const levels = ['BLOCKED', 'UNTRUSTED', 'KNOWN', 'TRUSTED', 'VERIFIED']
+  private getTrustLevelsAbove(minLevel: number): DbTrustLevel[] {
+    const levels: DbTrustLevel[] = ['BLOCKED', 'UNTRUSTED', 'KNOWN', 'TRUSTED', 'VERIFIED']
     return levels.slice(minLevel)
   }
 }

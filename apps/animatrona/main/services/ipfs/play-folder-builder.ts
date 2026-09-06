@@ -100,7 +100,13 @@ export async function buildPlayFolderEntries(
     episodesWithVideo.map(async (ep) => {
       const chaptersCid = chaptersByEp?.get(ep.id)
       // generateManifest() читает ep.chapters.length без null-проверки — всегда массив, не undefined
-      const chapters = (chaptersCid ? await readChapters(chaptersCid) : undefined) ?? []
+      const rawChapters = (chaptersCid ? await readChapters(chaptersCid) : undefined) ?? []
+      const chapters = rawChapters.map((ch) => ({
+        startMs: ch.startMs,
+        endMs: ch.endMs,
+        title: ch.title ?? undefined,
+        type: ch.type,
+      }))
 
       return {
         id: ep.id,

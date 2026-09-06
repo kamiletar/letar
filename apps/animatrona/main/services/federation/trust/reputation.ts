@@ -5,7 +5,7 @@
  * Сохраняет историю проверок и вычисляет метрики.
  */
 
-import type { PrismaClient } from '@prisma/client'
+import type { PrismaClient, TrustLevel as DbTrustLevel } from '../../../../renderer/src/generated/prisma'
 
 import type { TrustLevel, TrustMetrics } from '../../../../shared/types/federation'
 import { calculateTrustScore, calculateUptime, getTrustLevel } from './trust-scoring'
@@ -225,8 +225,8 @@ export class ReputationTracker {
     return map[level] ?? 1
   }
 
-  private trustLevelToDb(level: TrustLevel): string {
-    const map: Record<number, string> = {
+  private trustLevelToDb(level: TrustLevel): DbTrustLevel {
+    const map: Record<number, DbTrustLevel> = {
       0: 'BLOCKED',
       1: 'UNTRUSTED',
       2: 'KNOWN',

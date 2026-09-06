@@ -52,7 +52,7 @@ export async function bulkUnpin(cids: string[], onProgress?: BulkUnpinProgress):
       const idx = cursor++
       const cid = cids[idx]
       try {
-        await client.pin.rm(CID.parse(cid))
+        await client!.pin.rm(CID.parse(cid))
         unpinned++
       } catch (error) {
         // "not pinned" — нормально, просто игнор

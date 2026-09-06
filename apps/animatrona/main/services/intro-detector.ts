@@ -148,7 +148,9 @@ export async function detectIntros(
       outroFingerprints.set(ep.id, outroFp)
       outroOffsets.set(ep.id, outroStart)
     } catch (err) {
-      log.warn(`Не удалось извлечь fingerprint для ${ep.id}:`, err instanceof Error ? err.message : err)
+      log.warn(`Не удалось извлечь fingerprint для ${ep.id}`, {
+        error: err instanceof Error ? err.message : String(err),
+      })
     }
   }
 

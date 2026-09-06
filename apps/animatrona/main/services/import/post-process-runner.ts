@@ -199,7 +199,6 @@ export async function runPostProcess(
             temporalAq: data.videoOptions.temporalAq,
             aqStrength: data.videoOptions.aqStrength,
             force10Bit: data.videoOptions.force10Bit,
-            cropFilter: data.videoOptions.cropFilter,
             vmafScore: data.vmafScore,
             encoderType: data.encoderType ?? 'gpu',
             ffmpegCommand: encodingMeta?.ffmpegCommand,
@@ -369,9 +368,13 @@ export async function runPostProcess(
         spriteCid: spriteData?.spriteCid ?? undefined,
         vttCid: spriteData?.vttCid ?? undefined,
         // Проверяем существование профиля (мог быть удалён re-seedом во время транскодирования)
-        encodingProfileId: data.encodingProfileId
-          ? ((await db.findEncodingProfile(data.encodingProfileId))?.id ?? null)
-          : undefined,
+        ...(data.encodingProfileId
+          ? {
+            encodingProfile: (await db.findEncodingProfile(data.encodingProfileId))
+              ? { connect: { id: data.encodingProfileId } }
+              : { disconnect: true },
+          }
+          : {}),
       })
 
       // Удаляем папку эпизода

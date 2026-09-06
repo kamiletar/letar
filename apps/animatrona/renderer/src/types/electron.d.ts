@@ -1688,8 +1688,8 @@ export interface ElectronAPI {
     updateNavigation: (
       manifestPath: string,
       navigation: {
-        nextEpisode?: { id: string; manifestPath: string }
-        prevEpisode?: { id: string; manifestPath: string }
+        nextEpisode?: { id: string; manifestCid: string }
+        prevEpisode?: { id: string; manifestCid: string }
       },
     ) => Promise<{ success: boolean; error?: string }>
     /** Обновить thumbnails в манифесте (с CID для IPFS) */

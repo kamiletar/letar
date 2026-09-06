@@ -5,6 +5,7 @@
 export type {
   AudioTrack,
   AudioTranscodeOptions,
+  AudioTranscodeVBROptions,
   BRefModeType,
   EncodingProfileOptions,
   MediaInfo,

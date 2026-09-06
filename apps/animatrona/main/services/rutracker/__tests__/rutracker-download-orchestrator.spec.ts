@@ -114,8 +114,10 @@ function createTestTorrentInfo(): TorrentInfo {
     downloadSpeed: 0,
     uploadSpeed: 0,
     numPeers: 5,
+    ratio: 0,
     status: 'seeding',
     path: '/tmp/Animatrona',
+    addedAt: Date.now(),
     files: [
       {
         name: '[SubGroup] Test Anime - 01 [1080p].mkv',
@@ -137,7 +139,6 @@ function createTestTorrentInfo(): TorrentInfo {
 describe('RutrackerDownloadOrchestrator', () => {
   beforeEach(() => {
     // Сбрасываем singleton
-    // @ts-expect-error — доступ к private static для тестов
     const OrchestratorClass = getDownloadOrchestrator().constructor
     // @ts-expect-error — сброс singleton
     OrchestratorClass.instance = null

@@ -11,7 +11,7 @@
 
 import { CID } from 'multiformats/cid'
 
-import type { RemotePinStatus } from '../../prisma'
+import type { RemotePinStatus } from '../../../renderer/src/generated/prisma'
 import { prisma } from '../../utils/db'
 import { createModuleLogger } from '../../utils/logger'
 import { getKuboService } from '../kubo'
@@ -275,7 +275,6 @@ export async function scanAndRegisterLocalCids(
     const batch = toRegister.slice(i, i + BATCH)
     await prisma.pinStatus.createMany({
       data: batch.map((cid) => ({ cid, status: 'LOCAL_ONLY' as RemotePinStatus })),
-      skipDuplicates: true,
     })
     registered += batch.length
     onProgress?.(registered, toRegister.length)

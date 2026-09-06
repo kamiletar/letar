@@ -59,8 +59,8 @@ export function registerManifestHandlers(): void {
     (
       manifestPath: string,
       navigation: {
-        nextEpisode?: { id: string; manifestPath: string }
-        prevEpisode?: { id: string; manifestPath: string }
+        nextEpisode?: { id: string; manifestCid: string }
+        prevEpisode?: { id: string; manifestCid: string }
       },
     ) => {
       const success = updateManifestNavigation(manifestPath, navigation)

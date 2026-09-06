@@ -59,15 +59,20 @@ const EXTENSIONS_BY_TYPE: Record<MediaType, Set<string>> = {
  */
 export function registerFsHandlers(): void {
   // Сканирование папки на медиафайлы
-  createHandler('fs:scanFolder', async (folderPath: string, recursive = true, mediaTypes: MediaType[] = ['video']) => {
-    // Добавляем папку в whitelist для media:// протокола
-    allowPath(folderPath)
-    const files = await scanFolderForMedia(folderPath, recursive, mediaTypes)
-    return { files }
-  })
+  createHandler(
+    'fs:scanFolder',
+    // eslint-disable-next-line @typescript-eslint/no-inferrable-types -- без явной аннотации tsgo выводит TArgs createHandler как unknown
+    async (folderPath: string, recursive: boolean = true, mediaTypes: MediaType[] = ['video']) => {
+      // Добавляем папку в whitelist для media:// протокола
+      allowPath(folderPath)
+      const files = await scanFolderForMedia(folderPath, recursive, mediaTypes)
+      return { files }
+    },
+  )
 
   // Удаление файла или папки
-  createHandler('fs:delete', async (targetPath: string, moveToTrash = true) => {
+  // eslint-disable-next-line @typescript-eslint/no-inferrable-types -- без явной аннотации tsgo выводит TArgs createHandler как unknown
+  createHandler('fs:delete', async (targetPath: string, moveToTrash: boolean = true) => {
     // КРИТИЧЕСКАЯ ЗАЩИТА: Проверка что путь в библиотеке
     const { safe, reason } = isPathInsideLibrary(targetPath)
     if (!safe) {
@@ -134,7 +139,7 @@ export function registerFsHandlers(): void {
     const { width, height } = image.getSize()
 
     // Генерируем blur placeholder (10x10px JPEG в base64)
-    const blurImage = image.resize({ width: 10, height: 10, quality: 'low' })
+    const blurImage = image.resize({ width: 10, height: 10, quality: 'good' })
     const blurBuffer = blurImage.toJPEG(50)
     const blurDataURL = `data:image/jpeg;base64,${blurBuffer.toString('base64')}`
 

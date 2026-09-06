@@ -5,12 +5,13 @@
  * Поддерживает подписанные запросы и обработку ответов.
  */
 
-import type { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '../../../../renderer/src/generated/prisma'
 
 import type {
   ActivityPubActivity,
   ActivityPubActor,
   AnnounceActivity,
+  CreateActivity,
   VideoSeriesObject,
 } from '../../../../shared/types/federation'
 import { createModuleLogger } from '../../../utils/logger'
@@ -232,14 +233,14 @@ export class ActivityPubClient {
       return false
     }
 
-    const activity: ActivityPubActivity = {
+    const activity: CreateActivity = {
       '@context': ['https://www.w3.org/ns/activitystreams'],
       id: `urn:animatrona:create:${content.id}:${Date.now()}`,
       type: 'Create',
       actor: `${settings.trackerName}/federation/actor`,
       published: new Date().toISOString(),
-    } // Добавляем object
-    ;(activity as Record<string, unknown>).object = content
+      object: content,
+    }
 
     return this.sendActivity(inboxUrl, activity)
   }

@@ -523,8 +523,8 @@ export class TranscodeManager extends EventEmitter {
    * Генерировать рекомендации для дорожек
    */
   private generateRecommendations(demuxResult: DemuxResult): PerFileTranscodeSettings['trackRecommendations'] {
-    const videoRec = {
-      action: 'transcode' as const,
+    const videoRec: { action: 'transcode' | 'skip' | 'copy'; reason: string } = {
+      action: 'transcode',
       reason: 'Перекодировать в AV1 для уменьшения размера',
     }
 

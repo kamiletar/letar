@@ -10,6 +10,10 @@
  * - tracker:cancelBatch — Отменить пакетную публикацию
  */
 
+import { app } from 'electron'
+import fs from 'fs'
+import path from 'path'
+
 import { createJsonStore } from '@letar/electron-storage'
 import { CID } from 'multiformats/cid'
 import type {
@@ -496,9 +500,10 @@ export function registerTrackerHandlers(): void {
   })
 
   // Автозапуск фоновой синхронизации при наличии настроенного трекера
-  const trackerConfig = loadTrackerConfig()
-  if (trackerConfig.enabled && trackerConfig.apiKey) {
-    // Запускаем sync после инициализации всех IPC
-    setTimeout(() => getTrackerSyncService().initialize(), 5000)
-  }
+  void loadTrackerConfig().then((trackerConfig) => {
+    if (trackerConfig.enabled && trackerConfig.apiKey) {
+      // Запускаем sync после инициализации всех IPC
+      setTimeout(() => getTrackerSyncService().initialize(), 5000)
+    }
+  })
 }

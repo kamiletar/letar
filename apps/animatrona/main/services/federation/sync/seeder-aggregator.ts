@@ -5,7 +5,7 @@
  * Позволяет узнать, сколько пиров сидируют конкретный контент.
  */
 
-import type { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '../../../../renderer/src/generated/prisma'
 
 import type { GlobalSeederStats, SeederInfo } from '../../../../shared/types/federation'
 import { createModuleLogger } from '../../../utils/logger'

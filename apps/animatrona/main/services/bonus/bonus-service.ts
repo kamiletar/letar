@@ -268,7 +268,6 @@ class BonusService extends EventEmitter {
       balance: oldBalance + amount,
       description: reason,
       createdAt: new Date().toISOString(),
-      metadata: { adjustedAt: new Date().toISOString() },
     }
 
     this.bonusPoints = addTransaction(this.bonusPoints, transaction)

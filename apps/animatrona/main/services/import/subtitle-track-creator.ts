@@ -37,7 +37,7 @@ interface ExternalSubtitleMatch {
 /** Анализ файла */
 interface FileAnalysisLike {
   episodeNumber: number
-  subtitleRecommendations: SubtitleRecommendation[]
+  subtitleRecommendations?: SubtitleRecommendation[]
 }
 
 /**
@@ -52,7 +52,7 @@ export async function createSubtitleTracks(
   externalSubsMap: Map<number, ExternalSubtitleMatch[]>,
 ): Promise<void> {
   const fileAnalysis = fileAnalyses?.find((a) => a.episodeNumber === episodeNumber)
-  const selectedSubs = fileAnalysis?.subtitleRecommendations.filter((r) => r.enabled) || []
+  const selectedSubs = fileAnalysis?.subtitleRecommendations?.filter((r) => r.enabled) || []
 
   if (selectedSubs.length > 0) {
     await processSelectedSubtitles(episodeId, demuxResult, selectedSubs, episodeOutputDir)

@@ -40,7 +40,7 @@ function getResourcePath(cid: string, relativePath: string, mode: WebPlayerResou
  * Конвертирует главы в формат Web Player
  */
 function convertChapters(
-  chapters: Array<{ startMs: number; endMs: number; title: string | null; type: string }>,
+  chapters: Array<{ startMs: number; endMs: number; title?: string; type?: string }>,
 ): WebPlayerChapter[] {
   return chapters.map((ch) => ({
     start: ch.startMs / 1000,
@@ -115,7 +115,7 @@ export function generateManifest(options: ManifestOptions): WebPlayerManifest {
       video: getResourcePath(ep.videoCid, `episodes/${String(ep.number).padStart(2, '0')}/video.webm`, mode),
       audio: audioTracks,
       subtitles: subtitleTracks,
-      chapters: ep.chapters.length > 0 ? convertChapters(ep.chapters) : undefined,
+      chapters: ep.chapters && ep.chapters.length > 0 ? convertChapters(ep.chapters) : undefined,
     }
   })
 

@@ -70,7 +70,8 @@ function readNewLines(filePath: string, offset: number): { lines: string[]; newS
 
 export function registerLogsHandlers(): void {
   /** Получить tail последних N строк */
-  createHandler('logs:tail', (linesCount = 200): { content: string; filePath: string | null } => {
+  // eslint-disable-next-line @typescript-eslint/no-inferrable-types -- без явной аннотации tsgo выводит TArgs createHandler как unknown
+  createHandler('logs:tail', (linesCount: number = 200): { content: string; filePath: string | null } => {
     const filePath = getLogFilePath()
     if (!filePath || !fs.existsSync(filePath)) {
       return { content: '[Лог-файл ещё не создан]', filePath }

@@ -25,7 +25,7 @@
 
 import { ipcMain } from 'electron'
 import { z } from 'zod'
-import type { TranscodeProgressExtended } from '../../shared/types'
+import type { AudioTranscodeVBROptions, TranscodeProgressExtended, VideoTranscodeOptions } from '../../shared/types'
 import type {
   AggregatedProgress,
   BatchAudioTrackInput,
@@ -51,7 +51,7 @@ let isRegistered = false
 const batchVideoInputSchema: z.ZodType<BatchVideoInput> = z.object({
   inputPath: absolutePathSchema,
   outputPath: absolutePathSchema,
-  options: z.record(z.string(), z.unknown()), // VideoTranscodeOptions
+  options: z.custom<VideoTranscodeOptions>(),
 })
 
 /** Схема для аудио-трека в batch import */
@@ -60,7 +60,7 @@ const batchAudioTrackSchema: z.ZodType<BatchAudioTrackInput> = z.object({
   trackIndex: z.number().int(), // Может быть -1 для внешних аудиофайлов
   inputPath: absolutePathSchema,
   outputPath: absolutePathSchema,
-  options: z.record(z.string(), z.unknown()), // AudioTranscodeVBROptions
+  options: z.custom<AudioTranscodeVBROptions>(),
   useStreamMapping: z.boolean().optional(),
   syncOffset: z.number().optional(),
   isExternal: z.boolean().optional(),

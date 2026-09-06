@@ -19,6 +19,7 @@
  */
 
 import type { ImportQueueEntry } from '../../../shared/types/import-queue'
+import type { ManifestChapter } from '../../../shared/types/manifest'
 import type { BatchImportItem } from '../../../shared/types/parallel-transcode'
 import { getFFmpegVersion } from '../../utils/ffmpeg-spawn'
 import { createModuleLogger } from '../../utils/logger'
@@ -356,13 +357,7 @@ export class ImportService {
               (result.introStartMs !== null && result.introStartMs !== undefined)
               || (result.outroStartMs !== null && result.outroStartMs !== undefined)
             ) {
-              const chapters: Array<{
-                startMs: number
-                endMs: number
-                title: string | null
-                type: string
-                skippable: boolean
-              }> = []
+              const chapters: ManifestChapter[] = []
               if (
                 result.introStartMs !== null
                 && result.introStartMs !== undefined

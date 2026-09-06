@@ -1680,20 +1680,34 @@ Animatrona: библиотека, каталог, импорт, очередь, 
       класс проблемы, что и `Module not found` для `@ark-ui/react/*` в соседнем пункте плана.
       Разбор — [nextron-renderer-transpile-packages-required.md](/.claude/docs/nextron-renderer-transpile-packages-required.md#дополнение-2026-09-01-транзиентный-invarianterror-на-_not-found--тоже-гонка-за-node_modules).
       Если падение повторится — сначала переприбить чистым прогоном, не чинить код на веру
-- [ ] 🔴 **Main-процесс не типизируется вообще ничем.**
-      `apps/animatrona/main/tsconfig.json` имеет `include: ["src/**/*.ts", "preload/**/*.ts",
-"../shared/**/*.ts"]`, а код лежит в `main/ffmpeg`, `main/services`, `main/ipc`, `main.ts` —
-      под `src/**` не попадает почти ничего. Корневой `tsconfig.json` приложения `main` вообще
-      исключает, а webpack собирает через `ts-loader` с `transpileOnly: true`. Ad-hoc прогон tsgo по
-      исправленному include даёт **337 ошибок** (часть — артефакты `moduleResolution: node16`, но
-      далеко не все). Задача: починить include, разделить конфиг под реальную сборку, разгрести
-      ошибки. До этого любая правка в `main/` типами не проверена
-- [ ] **Все 4 e2e-теста плеера молча скипались** (`04-player/folder-player.electron.spec.ts`):
-      искали `getByRole('link', { name: /плеер/i })`, а пункты сайдбара — `Box as="button"`
+- [x] **Main-процесс не типизировался вообще ничем — исправлено (2026-09-06).**
+      `apps/animatrona/main/tsconfig.json` был переписан под реальную структуру исходников
+      (`module`/`moduleResolution` → `ESNext`/`bundler` вместо `Node16`, снят фантомный
+      `references` в `tsconfig.spec.json`, снят `rootDir`/`outDir`, `include` расширен до
+      `**/*.ts`). Из 295 реальных ошибок (после починки конфига) разгребены все 295 — часть
+      оказалась одними лишь пробелами в типах, часть — настоящими давними багами, молчавшими
+      только потому что main/ никогда не проверялся: жанры/темы аниме не сохранялись через
+      локальный torrent-импорт (`Genre`/`Theme` писались с несуществующими полями, ошибка
+      Prisma глушилась try/catch), `AnimeRelation.upsert` бил по несуществующему compound-ключу,
+      весь `AchievementService` был без `await` (методы `achievements-store.ts` асинхронны),
+      watchdog зависших видео-задач (`video-pool.ts`) читал поля не с того объекта и никогда не
+      срабатывал, ретрай скачивания постера не срабатывал из-за неверной проверки результата,
+      автостарт синхронизации трекеров терял `await` у конфига, `tracker.handlers.ts` падал бы
+      при первом вызове `syncLibrary` (не импортированы `path`/`app`/`fs`), `resumeTask` в
+      `base-pool.ts` не проверял `process` на `null` (в отличие от парного `pauseTask`).
+      Добавлен постоянный гейт — таргет `typecheck:main` (`tsgo --project main/tsconfig.json
+      --noEmit`), подключён как `dependsOn` к `typecheck:tsgo` — теперь любая новая ошибка в
+      `main/` ловится тем же прогоном, что и raньше проверял только `renderer`/`shared`
+- [x] **Все 4 e2e-теста плеера молча скипались — исправлено (2026-09-06).**
+      `04-player/folder-player.electron.spec.ts` искал `getByRole('link', { name: /плеер/i })`,
+      а пункты сайдбара — `Box asChild` вокруг `<button type="button">`
       ([Sidebar.tsx:160](renderer/src/components/layout/Sidebar.tsx)). Локатор не находился →
-      `test.skip()` → зелёный репорт при нулевой проверке. В новом `video-click` спеке locator
-      исправлен и скипы убраны; остальные четыре ждут той же правки (и, вероятно, покажут реальные
-      баги, когда наконец начнут выполняться)
+      `test.skip()` → зелёный репорт при нулевой проверке. Заменено на `getByRole('button', ...)`
+      по образцу уже исправленного `video-click` спека (там же — тот же фикс для локатора
+      «Библиотека», задетого той же причиной в четвёртом тесте). Прогнать вживую не удалось —
+      нужен production-билд Electron и GUI, недоступные в песочнице агента (см.
+      `.claude/rules/electron.md` § «GUI-уровень невозможно проверить в сендбоксе»); проверено
+      статически — regex локаторов совпадает с реальными `label` из `navItems` в `Sidebar.tsx`
 - [x] **Два форматтера с противоречащими конфигами** — перепроверено 2026-09-06, больше не
       воспроизводится: ни `.prettierrc`, ни `prettier`/`prettier-plugin-organize-imports` в
       `apps/animatrona` не найдено (`.prettierrc` отсутствует в файловой системе и не встречается

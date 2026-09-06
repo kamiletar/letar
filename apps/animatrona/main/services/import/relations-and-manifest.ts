@@ -65,7 +65,7 @@ export async function syncRelations(animeId: string, selectedAnime: ImportQueueE
     const rootShikimoriId = Math.min(...allIds)
     try {
       const franchise = await db.upsertFranchise(rootShikimoriId, animeWithRelated.russian || animeWithRelated.name)
-      await db.updateAnime(animeId, { franchiseId: franchise.id })
+      await db.updateAnime(animeId, { franchise: { connect: { id: franchise.id } } })
     } catch (franchiseError) {
       log.warn('Не удалось создать франшизу', { error: String(franchiseError) })
     }

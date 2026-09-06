@@ -55,22 +55,23 @@ export async function downloadAndSavePoster(
 
     // Скачиваем постер с retry (Shikimori DDoS-Guard может блокировать первую попытку)
     let posterResult = await downloadPoster(posterUrl, selectedAnime.id, { savePath: folderPath })
-    if (!posterResult) {
+    if (!posterResult.success || !posterResult.localPath) {
       log.info('Первая попытка скачивания постера не удалась, повторяем через 3сек', { posterUrl })
       await new Promise((resolve) => setTimeout(resolve, 3000))
       posterResult = await downloadPoster(posterUrl, selectedAnime.id, { savePath: folderPath })
     }
-    if (!posterResult) {
+    if (!posterResult.success || !posterResult.localPath) {
       log.warn('Постер не скачан после 2 попыток', { posterUrl, animeId: selectedAnime.id })
       return undefined
     }
+    const localPath = posterResult.localPath
 
     // Загружаем постер в IPFS
-    const ipfsResult = await uploadToIpfs(posterResult.localPath)
+    const ipfsResult = await uploadToIpfs(localPath)
     const posterCid = ipfsResult?.cid
     if (!posterCid) {
       log.warn('Постер скачан, но IPFS upload вернул null — файл сохранён без CID', {
-        localPath: posterResult.localPath,
+        localPath,
         animeId: selectedAnime.id,
       })
     }
@@ -90,7 +91,7 @@ export async function downloadAndSavePoster(
     // Удаляем локальный файл
     if (posterCid) {
       try {
-        fs.unlinkSync(posterResult.localPath)
+        fs.unlinkSync(localPath)
       } catch {
         /* не критично */
       }
@@ -165,7 +166,9 @@ export async function saveGenresIfAvailable(
   selectedAnime: ImportQueueEntry['selectedAnime'],
 ): Promise<void> {
   // selectedAnime может содержать genres из расширенных данных Shikimori
-  const extAnime = selectedAnime as { genres?: Array<{ id: number; name: string; russian: string; kind?: string }> }
+  const extAnime = selectedAnime as {
+    genres?: Array<{ id: number; name: string; russian: string; kind?: 'genre' | 'theme' }>
+  }
   if (!extAnime.genres?.length) {
     return
   }

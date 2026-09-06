@@ -286,7 +286,7 @@ async function collectDirectoryCids(dirCid: string): Promise<string[]> {
   async function walk(cid: string): Promise<void> {
     cids.push(cid)
     try {
-      for await (const entry of client.ls(CID.parse(cid))) {
+      for await (const entry of client!.ls(CID.parse(cid))) {
         if (entry.type === 'dir') {
           await walk(entry.cid.toString())
         } else {

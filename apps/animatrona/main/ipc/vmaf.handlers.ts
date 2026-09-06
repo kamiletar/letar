@@ -43,7 +43,8 @@ export function registerVmafHandlers(): void {
       inputPath: string,
       videoOptions: Omit<VideoTranscodeOptions, 'cq'>,
       options?: Partial<CqSearchOptions>,
-      preferCpu = false,
+      // eslint-disable-next-line @typescript-eslint/no-inferrable-types -- без явной аннотации tsgo выводит TArgs createHandlerWithEvent как unknown
+      preferCpu: boolean = false,
       itemId?: string,
     ) => {
       const win = BrowserWindow.fromWebContents(event.sender)

@@ -155,7 +155,8 @@ export async function generateManifestFromDemux(
 
     // Генерируем информацию о видео
     const video: ManifestVideo = {
-      path: demuxResult.video.path,
+      // cid проставляется позже, после загрузки в IPFS (см. присвоение manifest.video.cid ниже)
+      cid: '',
       durationMs: secToMs(demuxResult.video.duration),
       width: demuxResult.video.width,
       height: demuxResult.video.height,

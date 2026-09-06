@@ -10,7 +10,7 @@
 
 import * as crypto from 'crypto'
 
-import type { PrismaClient } from '@prisma/client'
+import type { PrismaClient, TrustLevel as DbTrustLevel } from '../../../renderer/src/generated/prisma'
 
 import type {
   ActivityPubActor,
@@ -22,9 +22,8 @@ import type {
   SyncOptions,
   SyncResult,
   TrackerInfo,
-  TrustLevel,
 } from '../../../shared/types/federation'
-import { DEFAULT_FEDERATION_SETTINGS } from '../../../shared/types/federation'
+import { DEFAULT_FEDERATION_SETTINGS, TrustLevel } from '../../../shared/types/federation'
 
 // Singleton instance
 let federationService: FederationService | null = null
@@ -265,7 +264,7 @@ export class FederationService {
         data: {
           url: normalizedUrl,
           name: options.name ?? 'Unknown Tracker',
-          trustLevel: options.trustLevel ?? 'UNTRUSTED',
+          trustLevel: this.enumToDbTrustLevel(options.trustLevel ?? TrustLevel.UNTRUSTED),
         },
       })
 
@@ -501,8 +500,8 @@ export class FederationService {
   /**
    * Преобразовать TrustLevel enum в строку БД
    */
-  private enumToDbTrustLevel(level: TrustLevel): string {
-    const map: Record<TrustLevel, string> = {
+  private enumToDbTrustLevel(level: TrustLevel): DbTrustLevel {
+    const map: Record<TrustLevel, DbTrustLevel> = {
       0: 'BLOCKED',
       1: 'UNTRUSTED',
       2: 'KNOWN',
@@ -529,8 +528,8 @@ export class FederationService {
   /**
    * Получить trust levels выше указанного
    */
-  private getTrustLevelsAbove(minLevel: number): string[] {
-    const levels = ['BLOCKED', 'UNTRUSTED', 'KNOWN', 'TRUSTED', 'VERIFIED']
+  private getTrustLevelsAbove(minLevel: number): DbTrustLevel[] {
+    const levels: DbTrustLevel[] = ['BLOCKED', 'UNTRUSTED', 'KNOWN', 'TRUSTED', 'VERIFIED']
     return levels.slice(minLevel)
   }
 }

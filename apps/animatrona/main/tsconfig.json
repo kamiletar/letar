@@ -1,11 +1,9 @@
 {
   "compilerOptions": {
-    "module": "Node16",
-    "moduleResolution": "node16",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "target": "ES2022",
     "lib": ["ES2022"],
-    "outDir": "../../../dist/apps/animatrona/main",
-    "rootDir": ".",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -24,11 +22,9 @@
     "noUncheckedSideEffectImports": false,
     "ignoreDeprecations": "6.0"
   },
-  "include": ["src/**/*.ts", "preload/**/*.ts", "../shared/**/*.ts"],
-  "exclude": ["node_modules", "dist"],
-  "references": [
-    {
-      "path": ".."
-    }
-  ]
+  "include": [
+    "**/*.ts",
+    "../shared/**/*.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
 }

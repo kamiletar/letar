@@ -2,7 +2,7 @@
  * IPC handlers для торрент-клиента
  */
 
-import type { AddTorrentOptions } from '../services/torrent'
+import type { AddTorrentOptions, TorrentMetaUpdate } from '../services/torrent'
 import { getTorrentService, initTorrentService } from '../services/torrent'
 import { QBittorrentClient } from '../services/torrent/qbittorrent-client'
 import { createHandler } from '../utils/ipc-handler-factory'
@@ -63,7 +63,7 @@ export function registerTorrentHandlers(): void {
   // Обновить метаданные торрента (importStatus, isBundle и т.д.)
   createHandler(
     'torrent:updateMeta',
-    (infoHash: string, update: { importStatus?: string; isBundle?: boolean; bundleAnimesJson?: string }) => {
+    (infoHash: string, update: TorrentMetaUpdate) => {
       getTorrentService().updateMeta(infoHash, update)
       return true
     },

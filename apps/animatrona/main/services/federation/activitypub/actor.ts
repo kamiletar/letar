@@ -5,7 +5,7 @@
  * Actor представляет Animatrona трекер в федеративной сети.
  */
 
-import type { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '../../../../renderer/src/generated/prisma'
 
 import type { ActivityPubActor, ActivityPubPublicKey, TrackerMetadata } from '../../../../shared/types/federation'
 import { ACTIVITYPUB_CONTEXT, SECURITY_CONTEXT } from '../../../../shared/types/federation'
@@ -60,7 +60,7 @@ export async function createLocalActor(options: CreateActorOptions): Promise<Act
     id: actorId,
     type: 'Service',
     name: settings?.trackerName ?? 'My Animatrona',
-    summary: settings?.trackerDescription,
+    summary: settings?.trackerDescription ?? undefined,
     inbox: `${baseUrl}/federation/inbox`,
     outbox: `${baseUrl}/federation/outbox`,
     publicKey,

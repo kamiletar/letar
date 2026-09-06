@@ -14,6 +14,7 @@ import { app, Menu, nativeImage, Tray } from 'electron'
 import path from 'path'
 
 import type { TraySettings } from './ipc/tray.handlers'
+import { isQuitting } from './utils/quit-state'
 
 let tray: Tray | null = null
 let mainWindowRef: BrowserWindow | null = null
@@ -139,7 +140,7 @@ export function initTray(mainWindow: BrowserWindow, isProd: boolean): Tray {
 
   // Обработка закрытия окна — минимизировать в трей
   mainWindow.on('close', (event) => {
-    if (traySettings.closeToTray && !app.isQuitting) {
+    if (traySettings.closeToTray && !isQuitting()) {
       event.preventDefault()
       mainWindow.hide()
 

@@ -113,7 +113,7 @@ export interface RecoveredCidEntry {
   kind: string
   oldCid: string
   newCid: string
-  via: 'shikimori' | 'sprite-from-video' | 'downscale-from-video' | 'regen-from-db'
+  via: 'shikimori' | 'sprite-from-video' | 'downscale-from-video' | 'regen-from-db' | 'detect-intros'
 }
 
 /** Результат построения директории */
@@ -364,7 +364,12 @@ export async function buildAnimeDirectory(
     const withCid = allEntities.filter((e) => (e as { imageCid?: string }).imageCid).length
     if (withCid > 0) {
       detail('info', `   → images: проверяю ${withCid}/${allEntities.length} изображений…`)
-      const imagesEntry = await buildImagesEntriesWithRecovery(animeInfo, probeOrRecover)
+      const { entry: imagesEntry, recovered: recoveredImages } = await buildImagesEntriesWithRecovery(
+        animeInfo,
+        probeOrRecover,
+        detail,
+      )
+      recovered.push(...recoveredImages)
       if (imagesEntry) {
         const imgCount = imagesEntry.children?.length ?? 0
         detail('info', `   ✓ images: ${imgCount} категорий`)
@@ -1284,9 +1289,12 @@ type ProbeOrRecoverFn = (
 async function buildImagesEntriesWithRecovery(
   info: AnimeInfo,
   probeOrRecover: ProbeOrRecoverFn,
-): Promise<DirEntry | null> {
+  onDetail: (level: 'info' | 'warn' | 'success' | 'error', message: string, meta?: Record<string, unknown>) => void,
+): Promise<{ entry: DirEntry | null; recovered: RecoveredCidEntry[] }> {
   const cidToPath = new Map<string, string>()
   const usedNames = new Map<string, Set<string>>() // category → set of used filenames
+  const recovered: RecoveredCidEntry[] = []
+  const detail = onDetail
 
   function reserveSlot(category: 'studios' | 'persons' | 'characters', name: string): string {
     const namesInCategory = usedNames.get(category) ?? new Set<string>()
@@ -1389,7 +1397,7 @@ async function buildImagesEntriesWithRecovery(
   }
 
   if (cidToPath.size === 0) {
-    return null
+    return { entry: null, recovered }
   }
 
   // Группируем по категориям
@@ -1408,7 +1416,7 @@ async function buildImagesEntriesWithRecovery(
     children.push({ name: category, type: 'directory', children: files })
   }
 
-  return { name: 'images', type: 'directory', children }
+  return { entry: { name: 'images', type: 'directory', children }, recovered }
 }
 
 /**

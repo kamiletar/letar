@@ -262,8 +262,8 @@ export const manifestPreload = {
   updateNavigation: (
     manifestPath: string,
     navigation: {
-      nextEpisode?: { id: string; manifestPath: string }
-      prevEpisode?: { id: string; manifestPath: string }
+      nextEpisode?: { id: string; manifestCid: string }
+      prevEpisode?: { id: string; manifestCid: string }
     },
   ): Promise<{ success: boolean; error?: string }> =>
     ipcRenderer.invoke('manifest:updateNavigation', manifestPath, navigation),

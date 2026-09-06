@@ -116,6 +116,7 @@ import { createMainWindow, createSplashWindow } from './services/window-manager'
 import { destroyTray, initTray } from './tray'
 import { initAutoUpdater } from './updater'
 import { createModuleLogger } from './utils/logger'
+import { setQuitting } from './utils/quit-state'
 
 const log = createModuleLogger('App')
 
@@ -414,16 +415,9 @@ app.on('window-all-closed', () => {
   }
 })
 
-// Расширяем тип app для флага isQuitting
-declare module 'electron' {
-  interface App {
-    isQuitting?: boolean
-  }
-}
-
 // Cleanup при выходе
 app.on('before-quit', async () => {
-  app.isQuitting = true
+  setQuitting(true)
 
   // Останавливаем powerSaveBlocker для IPFS
   if (ipfsPowerSaveBlockerId !== null && powerSaveBlocker.isStarted(ipfsPowerSaveBlockerId)) {
