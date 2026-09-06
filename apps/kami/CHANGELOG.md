@@ -5,6 +5,18 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 проект придерживается [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.33.34] - 2026-09-06
+
+### Fixed
+
+- Корневой `layout.tsx` вызывал `getSession()`+`isAdmin()` безусловно (`await headers()` внутри —
+  Dynamic API), форсируя динамический рендеринг всего дерева `[locale]/*` независимо от
+  `setRequestLocale` в конкретной странице. `UserProvider` переписан на клиентский `useSession()`
+  (тот же паттерн, что уже использовал `AuthButton`) — серверный проброс сессии в layout был
+  мёртвым кодом, единственный потребитель контекста (`OnlyFor`) нигде не применялся. Результат:
+  `/`, `/about`, `/403`, `/consulting`, `/cv`, `/skills`, `/privacy`, `/terms`, `/offline`,
+  `/audio` вернулись к SSG (`nx build kami` — `●` вместо `ƒ`).
+
 ## [0.33.33] - 2026-09-06
 
 ### Added

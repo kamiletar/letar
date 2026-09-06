@@ -8,10 +8,9 @@ import { JsonLd } from '@/app/_components/json-ld'
 import { SkipLink } from '@/app/_components/skip-link'
 import { ThemeProvider } from '@/app/_components/theme-provider'
 import { Toaster } from '@/app/_components/ui/toaster'
-import { type UserContextValue, UserProvider } from '@/app/_components/user-provider'
+import { UserProvider } from '@/app/_components/user-provider'
 import '@/app/global.css'
 import { routing } from '@/i18n/routing'
-import { getSession, isAdmin } from '@/lib/auth'
 import { Box, Flex } from '@chakra-ui/react'
 import { UmamiScript } from '@letar/analytics'
 import { ColorModeProvider } from '@letar/chakra-provider'
@@ -114,18 +113,10 @@ export default async function LocaleLayout({ children, params }: Props) {
   // Включаем статическую генерацию
   setRequestLocale(locale)
 
-  // Получаем сообщения и сессию для текущей локали
-  const [messages, session, admin] = await Promise.all([getMessages(), getSession(), isAdmin()])
-
-  const userContext: UserContextValue = {
-    id: session?.user?.id ?? null,
-    name: session?.user?.name ?? null,
-    email: session?.user?.email ?? null,
-    image: session?.user?.image ?? null,
-    roles: ((session?.user as { roles?: string[] })?.roles ?? []) as UserContextValue['roles'],
-    isAuthenticated: !!session,
-    isAdmin: admin,
-  }
+  // Сообщения для текущей локали — сессия пользователя больше не читается здесь (см. UserProvider):
+  // getSession()/isAdmin() требовали await headers() (Dynamic API), что форсировало динамический
+  // рендеринг всего дерева [locale]/* независимо от setRequestLocale в конкретных страницах
+  const messages = await getMessages()
 
   return (
     <html lang={locale} className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
@@ -143,7 +134,7 @@ export default async function LocaleLayout({ children, params }: Props) {
           >
             <NextIntlClientProvider messages={messages}>
               <FormI18nWrapper>
-                <UserProvider value={userContext}>
+                <UserProvider>
                   <SkipLink />
                   <HeaderScrollPadding cssVar="--kami-header-h" />
                   <Flex direction="column" minH="100vh">

@@ -773,41 +773,45 @@ favicon-превью и inline-редактирование тегов не пр
 | 2026-09-06 | ✅ Фаза 10: офлайн-очередь Share Target — IndexedDB + Background Sync в `sw.template.js`             |
 | 2026-09-06 | ✅ Фаза 10: Share Target принимает файлы — audio→`/admin/audio`, остальное→`/admin/files`            |
 | 2026-09-06 | ✅ Фаза 10: объединённая витрина `/links` — `Link`+`UploadedFile`, фильтр по типу                    |
+| 2026-09-06 | ✅ Техдолг: getSession() вынесен из root layout в клиент — SSG вернулась 10 роутам                   |
 
-## Техдолг: setRequestLocale не даёт SSG — root layout вызывает getSession() безусловно
+## ✅ Техдолг закрыт: SSG вернулась — getSession() вынесен из корневого layout (2026-09-06)
 
-По аналогии со studio/aira-web проверялась гипотеза «страницам не хватает `setRequestLocale`
-в `page.tsx`, из-за чего `next build` печатает `ƒ` вместо `●`/`○`». Гипотеза не подтвердилась.
+Было: `nx build kami` показывал `ƒ Dynamic` для всех роутов `[locale]/*`, потому что
+`src/app/[locale]/layout.tsx` вызывал `getSession()` безусловно (`await headers()` — Dynamic API,
+форсирует динамику для всего дерева-потомка независимо от `setRequestLocale` в конкретной
+`page.tsx`, см. разбор ниже для истории). Три варианта фикса были описаны в PLAN.md (клиентский
+`useSession()`, PPR, смириться с SSR) — выбран первый.
 
-`nx build kami` показывает `ƒ Dynamic` **для всех** роутов `[locale]/*`, включая те, что уже
-вызывали `setRequestLocale` до этой сессии (`about`, `cv`, `page` (главная), `blog`,
-`blog/[slug]`, `learning`, `skills`, `projects`, `privacy`, `terms`, `data-deletion`). Добавление
-`setRequestLocale` в ещё пять кандидатов (`hire`, `offline`, `403`, `(auth)/sign-up`,
-`auth/signin`) и разбор `consulting/page.tsx` на серверную обёртку + клиентский компонент маркер
-не изменили — правки отменены (`git checkout`), в коде ничего не осталось.
+**Фикс:** решающая находка — `UserProvider`/`useUser()` (в которые заходил результат
+`getSession()`+`isAdmin()`) фактически **никем не читались** в UI: единственный потребитель,
+`OnlyFor`, нигде не использовался, а `AuthButton` (реальная кнопка входа/меню в шапке) уже
+независимо дублировал ту же логику через клиентский `useSession()` из `@/lib/auth-client`. То
+есть серверный проброс сессии в layout был мёртвым кодом, оставшимся после того, как `AuthButton`
+перешёл на клиентский паттерн, а `layout.tsx` — нет.
 
-**Причина:** `src/app/[locale]/layout.tsx` (корневой layout, общий для всего дерева) вызывает
-`getSession()` безусловно — `Promise.all([getMessages(), getSession(), isAdmin()])` — чтобы
-собрать `UserContextValue` для `UserProvider`/шапки на каждой странице. `getSession()` из
-`@letar/auth/server` (`createSessionHelpers`) внутри делает `await headers()`
-(`libs/auth/src/server/session.ts:36`) — это Dynamic API Next.js, которое форсирует динамический
-рендеринг для всего маршрута, где вызывается, включая общего предка. Раз вызов в корневом
-layout — весь `[locale]`-поддерево не может стать SSG независимо от `setRequestLocale` в
-конкретной `page.tsx`.
+- `UserProvider` (`src/app/_components/user-provider.tsx`) переписан: `'use client'`, сам вызывает
+  `useSession()` (тот же клиентский Better Auth cookie-cache/fetch, что и `AuthButton`) вместо
+  приёма `value` пропом из сервера. Проп `value` убран из `UserProviderProps`.
+- `layout.tsx`: убраны `getSession`/`isAdmin` импорт и вызов, `Promise.all([getMessages(),
+  getSession(), isAdmin()])` → просто `await getMessages()`. `<UserProvider value={userContext}>`
+  → `<UserProvider>` без пропа.
+- Компромисс: на первом клиентском рендере, пока `useSession()` не резолвилась, `useUser()`
+  отдаёт `isAuthenticated: false`/`isAdmin: false` — короткая вспышка «гостя» до гидратации
+  cookie-cache. Не влияет на реальную защиту `/admin/*` — она проверяется отдельно на сервере
+  (`requireAdmin()`/`isAdmin()` в каждой admin-странице), контекст даёт только UI-хинты
+  (`OnlyFor`, пока не используется нигде).
 
-Это тот же класс причины, что нашли в aboi (`requireAdmin()` на layout), но на уровень выше:
-не гейт конкретного раздела, а общий header/user-context на **всём** сайте.
+**Результат (`nx build kami`, сравнение до/после):** `/`, `/about`, `/403`, `/consulting`, `/cv`,
+`/skills`, `/privacy`, `/terms`, `/offline`, `/audio` — все стали `●` (SSG), включая главную
+страницу сайта. Живая проверка — `nx dev kami`, `/ru` и `/ru/about`, кнопка «Войти» в шапке
+рендерится корректно (проверено анонимным состоянием; авторизованное/admin-состояние не
+проверено — нет тестовых учётных данных под рукой в этой среде, тот же класс ограничения, что и
+у прочих auth-зависимых проверок в этой сессии).
 
-**Что нужно, чтобы вернуться к SSG хотя бы для части страниц** (не сделано в этой сессии —
-архитектурное изменение вне объёма задачи «добавить setRequestLocale»):
-
-- Либо вынести получение сессии для шапки в клиентский компонент (fetch на клиенте /
-  `authClient.useSession()`), либо
-- Partial Prerendering (Next.js PPR, экспериментальная фича) — статический shell + динамический
-  slot для user-context, либо
-- Явно смириться с тем, что весь сайт рендерится динамически (SSR каждый запрос) — тогда
-  `setRequestLocale` всё равно стоит добавлять по мере правок каждой страницы ради корректной
-  работы `getTranslations`/`getLocale` без предупреждений next-intl в dev, но не ради SSG-маркера.
+**Не входит в этот фикс** (отдельная, не связанная с layout причина): `/blog`, `/blog/[slug]`,
+`/data-deletion`, `/hire`, `/learning`, `/projects` остались `ƒ Dynamic` и после фикса — у каждой
+своя причина (не исследовано в этом заходе, не layout).
 
 ## Техдолг: подключить theme:check
 
