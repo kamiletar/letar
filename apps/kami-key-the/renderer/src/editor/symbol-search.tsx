@@ -7,6 +7,13 @@
  * - Недавно использованные символы
  * - Фильтрация по категориям Unicode-блоков
  * - Drag-and-drop символов на клавиши клавиатуры
+ *
+ * Производительность на ~1700 символах: `toLowerCase()`/`parseInt(hex)` для каждого символа
+ * посчитаны один раз в `searchIndex` (при загрузке `symbols`, а не на каждое нажатие) — сам поиск
+ * остаётся линейным сканом, но без повторной строковой обработки при каждом фильтре. Полноценный
+ * инвертированный индекс по ключевым словам не заведён сознательно: на 1700 записях линейный скан
+ * по предвычисленным строкам укладывается в доли миллисекунды, а поддержка индекса (токенизация,
+ * инвалидация при обновлении базы символов) добавила бы сложность без измеримой выгоды.
  */
 
 import { Box, Button, Flex, Input, Text } from '@chakra-ui/react'
@@ -61,18 +68,31 @@ export function SymbolSearch({ symbols, onAssign, keyLabel, category, onCategory
   // Категория для фильтрации
   const activeCategory = SYMBOL_CATEGORIES.find((c) => c.id === categoryId) ?? SYMBOL_CATEGORIES[0]
 
+  // Предвычисленные lowercase-строки и codepoint — считаются один раз при загрузке базы символов,
+  // а не на каждое нажатие/смену категории (см. заметку о производительности в шапке файла)
+  const searchIndex = useMemo(
+    () =>
+      symbols.map((s) => ({
+        entry: s,
+        nameLower: s.n.toLowerCase(),
+        synLower: s.s ? s.s.toLowerCase() : '',
+        codepoint: parseInt(s.c, 16),
+      })),
+    [symbols],
+  )
+
   // Количество символов в каждой категории (мемоизировано)
   const categoryCounts = useMemo(() => {
     const counts = new Map<string, number>()
     for (const cat of SYMBOL_CATEGORIES) {
       if (cat.id === 'all') {
-        counts.set(cat.id, symbols.length)
+        counts.set(cat.id, searchIndex.length)
       } else {
-        counts.set(cat.id, symbols.filter((s) => matchesCategory(parseInt(s.c, 16), cat)).length)
+        counts.set(cat.id, searchIndex.filter((s) => matchesCategory(s.codepoint, cat)).length)
       }
     }
     return counts
-  }, [symbols])
+  }, [searchIndex])
 
   // Видимые категории — только те, в которых есть символы
   const visibleCategories = SYMBOL_CATEGORIES.filter((c) => (categoryCounts.get(c.id) ?? 0) > 0)
@@ -82,7 +102,7 @@ export function SymbolSearch({ symbols, onAssign, keyLabel, category, onCategory
       if (!q || q.length < 2) {
         // Если выбрана категория — показать все символы этой категории
         if (categoryId !== 'all') {
-          const catResults = symbols.filter((s) => matchesCategory(parseInt(s.c, 16), activeCategory))
+          const catResults = searchIndex.filter((s) => matchesCategory(s.codepoint, activeCategory)).map((s) => s.entry)
           setResults(catResults)
         } else {
           setResults([])
@@ -91,17 +111,15 @@ export function SymbolSearch({ symbols, onAssign, keyLabel, category, onCategory
         return
       }
       const lower = q.toLowerCase()
-      let matches = symbols.filter(
-        (s) => s.n.toLowerCase().includes(lower) || (s.s && s.s.toLowerCase().includes(lower)),
-      )
+      let matches = searchIndex.filter((s) => s.nameLower.includes(lower) || s.synLower.includes(lower))
       // Фильтр по категории
       if (categoryId !== 'all') {
-        matches = matches.filter((s) => matchesCategory(parseInt(s.c, 16), activeCategory))
+        matches = matches.filter((s) => matchesCategory(s.codepoint, activeCategory))
       }
-      setResults(matches)
+      setResults(matches.map((s) => s.entry))
       setHighlightIndex(-1)
     },
-    [symbols, categoryId, activeCategory],
+    [searchIndex, categoryId, activeCategory],
   )
 
   useEffect(() => {
