@@ -108,7 +108,7 @@ describe('Form.Divider', () => {
 
 describe('Form.Field.Hidden', () => {
   it('не рендерит видимый элемент', () => {
-    const { container } = render(
+    render(
       <TestWrapper>
         <Form initialValue={{ name: '', secret: '' }} onSubmit={vi.fn()}>
           <Form.Field.String name="name" label="Имя" />

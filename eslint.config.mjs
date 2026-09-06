@@ -472,6 +472,7 @@ export default [
       '**/test-*.ts',
       '**/scripts/**',
       '**/*.spec.ts',
+      '**/*.spec.tsx',
       '**/*.test.ts',
       '**/*.test.tsx',
       '**/fixtures/**',

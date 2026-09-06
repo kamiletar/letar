@@ -121,7 +121,7 @@ export function FieldTableEditor({
   // эвристику для refs/mutation-after-render. Полный рефакторинг потребовал бы вынести
   // rowCount/canAdd/addRow из-под render-prop `<form.Field mode="array">`, что меняет модель
   // подписки на массив — риск в основной библиотеке форм не оправдан точечной чисткой линтера.
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
+
   const addRowRef = { current: () => {} }
   const rowCountRef = { current: 0 }
   const canAddRef = { current: false }

@@ -209,7 +209,7 @@ interface FileUploadFieldState {
 export const FieldFileUpload = createField<FileUploadFieldProps, File[], FileUploadFieldState>({
   displayName: 'FieldFileUpload',
 
-  useFieldState: (componentProps) => {
+  useFieldState: (_componentProps) => {
     const [securityError, setSecurityError] = useState<string | null>(null)
     return { securityError, setSecurityError }
   },

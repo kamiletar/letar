@@ -217,7 +217,7 @@ describe('useSyncQueue', () => {
       const { result } = renderHook(() => useSyncQueue())
 
       const handler = vi.fn()
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
+
       const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
       await act(async () => {

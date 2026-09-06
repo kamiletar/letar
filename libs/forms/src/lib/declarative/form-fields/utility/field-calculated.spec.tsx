@@ -12,8 +12,6 @@ const TestWrapper = ({ children }: { children: ReactNode }) => (
 
 describe('Form.Field.Calculated', () => {
   it('вычисляет значение на основе других полей', async () => {
-    const user = userEvent.setup()
-
     render(
       <TestWrapper>
         <Form initialValue={{ price: 10, qty: 2, total: 0 }} onSubmit={vi.fn()}>

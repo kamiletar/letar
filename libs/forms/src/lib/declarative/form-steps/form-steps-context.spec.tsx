@@ -12,22 +12,22 @@ function createMockStepsContext(overrides?: Partial<FormStepsContextValue>): For
     stepCount: 3,
     steps: [],
     goToNext: async () => true,
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
+
     goToPrev: () => {},
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
+
     goToStep: () => {},
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
+
     skipToEnd: () => {},
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
+
     triggerSubmit: () => {},
     canGoNext: true,
     canGoPrev: false,
     isCompleted: false,
     isLastStep: false,
     isFirstStep: true,
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
+
     registerStep: () => {},
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
+
     unregisterStep: () => {},
     validateOnNext: true,
     linear: false,
@@ -39,11 +39,11 @@ function createMockStepsContext(overrides?: Partial<FormStepsContextValue>): For
     animationDuration: 0.3,
     direction: 'forward',
     hiddenFields: new Set(),
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
+
     hideFieldsFromValidation: () => {},
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
+
     showFieldsForValidation: () => {},
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
+
     clearStepPersistence: () => {},
     ...overrides,
   }

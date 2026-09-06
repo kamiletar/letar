@@ -35,6 +35,6 @@ import type { AppFormApi } from './types'
  * }
  * ```
  */
-export function useFormRef<TData extends object = object>(): RefObject<AppFormApi | null> {
+export function useFormRef<_TData extends object = object>(): RefObject<AppFormApi | null> {
   return useRef<AppFormApi | null>(null)
 }

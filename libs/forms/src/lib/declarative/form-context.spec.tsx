@@ -26,7 +26,6 @@ describe('DeclarativeFormContext', () => {
     })
 
     it('должен выбросить ошибку вне контекста Form', () => {
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
       const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
 
       const TestComponent = () => {

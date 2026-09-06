@@ -137,7 +137,6 @@ export function useFormFeatures<TData extends object>({
       state: { values: unknown }
     }) => {
       if (!isPersistenceEnabled) {
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
         return () => {}
       }
 
