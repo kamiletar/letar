@@ -27,6 +27,29 @@
         "command": "dprint fmt",
         "cwd": "libs/admin-ui"
       }
+    },
+    "oxlint": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.oxlintrc.json"
+      ],
+      "metadata": {
+        "description": "Fast lint with oxlint",
+        "technologies": [
+          "oxlint"
+        ]
+      },
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "libs/admin-ui"
+      }
+    },
+    "lint": {
+      "dependsOn": [
+        "oxlint"
+      ]
     }
   }
 }

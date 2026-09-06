@@ -49,9 +49,9 @@ function renderSeoField(
   props: Partial<React.ComponentProps<typeof SeoField<TestValues>>> = {},
 ) {
   const form = createMockForm(initialValues)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const utils = render(
     <ChakraProvider value={defaultSystem}>
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- минимальный мок формы, не реализует полный DeclarativeFormContextValue */}
       <DeclarativeFormContext.Provider value={{ form } as any}>
         <SeoField<TestValues>
           titleSourceName="name"
