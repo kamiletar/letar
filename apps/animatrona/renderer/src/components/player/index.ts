@@ -37,7 +37,7 @@ export type { TrackInfo, TrackSelectorProps } from './TrackSelector'
 export { TrackEditDialog } from './TrackEditDialog'
 export type { TrackEditDialogProps } from './TrackEditDialog'
 
-export { ChapterMarkers, detectChapterTypes } from './ChapterMarkers'
+export { ChapterMarkers } from './ChapterMarkers'
 export type { Chapter, ChapterMarkersProps } from './ChapterMarkers'
 
 export { ChapterEditor } from './ChapterEditor'

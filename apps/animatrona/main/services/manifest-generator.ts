@@ -16,7 +16,6 @@ import type {
   MANIFEST_VERSION,
   ManifestAudioTrack,
   ManifestChapter,
-  ManifestChapterType,
   ManifestEncodingInfo,
   ManifestSubtitleFont,
   ManifestSubtitleTrack,
@@ -25,45 +24,10 @@ import type {
   ThumbnailsDocument,
   TrackOverride,
 } from '../../shared/types/manifest'
+import { detectChapterType, isChapterSkippable } from '../../shared/utils/chapters'
 import { matchFonts } from './font-matcher'
 import { addBytes } from './ipfs/unixfs-service'
 import { getFontsFromASS } from './subtitle-parser'
-
-/**
- * Определяет тип главы по названию
- */
-function detectChapterType(title: string): ManifestChapterType {
-  const lowerTitle = title.toLowerCase()
-
-  // Опенинг
-  if (lowerTitle.includes('open') || lowerTitle.includes('op') || lowerTitle.includes('opening')) {
-    return 'op'
-  }
-
-  // Эндинг
-  if (lowerTitle.includes('end') || lowerTitle.includes('ed') || lowerTitle.includes('ending')) {
-    return 'ed'
-  }
-
-  // Рекап
-  if (lowerTitle.includes('recap') || lowerTitle.includes('summary') || lowerTitle.includes('previous')) {
-    return 'recap'
-  }
-
-  // Превью следующей серии
-  if (lowerTitle.includes('preview') || lowerTitle.includes('next')) {
-    return 'preview'
-  }
-
-  return 'chapter'
-}
-
-/**
- * Определяет, можно ли пропустить главу
- */
-function isChapterSkippable(type: ManifestChapterType): boolean {
-  return type === 'op' || type === 'ed' || type === 'recap' || type === 'preview'
-}
 
 /**
  * Конвертирует секунды в миллисекунды
@@ -214,7 +178,7 @@ export async function generateManifestFromDemux(
         endMs: secToMs(chapter.end),
         title: chapter.title,
         type,
-        skippable: isChapterSkippable(type),
+        skippable: isChapterSkippable(chapter.title),
       }
     })
 
@@ -356,6 +320,7 @@ interface DbAudioTrackData {
   channels: string
   bitrate: number | null
   isDefault: boolean
+  isForced?: boolean
   dubGroup: string | null
   transcodedCid: string | null
   ipfsSize?: number | null
@@ -370,6 +335,7 @@ interface DbSubtitleTrackData {
   title: string | null
   format: string
   isDefault: boolean
+  isForced?: boolean
   dubGroup: string | null
   fileCid: string | null
   ipfsSize?: number | null
@@ -409,6 +375,7 @@ export function rebuildManifestTracks(
       channels: t.channels,
       bitrate: t.bitrate ?? undefined,
       isDefault: t.isDefault,
+      isForced: t.isForced ?? false,
       cid: t.transcodedCid!,
       dubGroup: t.dubGroup ?? undefined,
       // Сохраняем size из старого манифеста (match по CID) или из БД
@@ -418,18 +385,21 @@ export function rebuildManifestTracks(
   // Сравниваем значимые поля (без size — он может быть undefined)
   const serializeAudio = (tracks: ManifestAudioTrack[]) =>
     JSON.stringify(
-      tracks.map(({ id, streamIndex, language, title, codec, channels, bitrate, isDefault, cid, dubGroup }) => ({
-        id,
-        streamIndex,
-        language,
-        title,
-        codec,
-        channels,
-        bitrate,
-        isDefault,
-        cid,
-        dubGroup,
-      })),
+      tracks.map(
+        ({ id, streamIndex, language, title, codec, channels, bitrate, isDefault, isForced, cid, dubGroup }) => ({
+          id,
+          streamIndex,
+          language,
+          title,
+          codec,
+          channels,
+          bitrate,
+          isDefault,
+          isForced,
+          cid,
+          dubGroup,
+        }),
+      ),
     )
 
   if (serializeAudio(manifest.audioTracks) !== serializeAudio(newAudioTracks)) {
@@ -447,6 +417,7 @@ export function rebuildManifestTracks(
       title: t.title || `Subtitles ${i + 1}`,
       format: t.format,
       isDefault: t.isDefault,
+      isForced: t.isForced ?? false,
       cid: t.fileCid!,
       dubGroup: t.dubGroup ?? undefined,
       size: manifest.subtitleTracks.find((m) => m.cid === t.fileCid)?.size ?? (t.ipfsSize || undefined),
@@ -463,13 +434,14 @@ export function rebuildManifestTracks(
 
   const serializeSub = (tracks: ManifestSubtitleTrack[]) =>
     JSON.stringify(
-      tracks.map(({ id, streamIndex, language, title, format, isDefault, cid, dubGroup }) => ({
+      tracks.map(({ id, streamIndex, language, title, format, isDefault, isForced, cid, dubGroup }) => ({
         id,
         streamIndex,
         language,
         title,
         format,
         isDefault,
+        isForced,
         cid,
         dubGroup,
       })),

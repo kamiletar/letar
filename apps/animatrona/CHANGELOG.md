@@ -4,6 +4,23 @@
 
 ## [Unreleased]
 
+## [0.55.57] - 2026-09-06
+
+### Fixed
+
+- `main/services/manifest-generator.ts` держал приватный дубль title-only классификатора глав
+  (`detectChapterType`/`isChapterSkippable`), разошедшийся с `shared/utils/chapters.ts` —
+  главы для IPFS-манифеста при первичной генерации эпизода могли классифицироваться иначе, чем
+  те же главы, дописываемые позже через `main/services/import/chapter-creator.ts`. Заменён на
+  импорт из `shared/utils/chapters.ts`.
+
+### Removed
+
+- Мёртвый дубль позиционного классификатора `detectChapterTypes` (title + позиция/длительность)
+  из `renderer/src/components/player/ChapterMarkers.tsx` — копипаста
+  `@letar/video-player-react`/`utils/detect-chapter-types.ts`, нигде не вызывалась ни в одном
+  файле репозитория. Версия в `libs/video-player-react` оставлена как задел на будущее.
+
 ## [0.55.56] - 2026-09-06
 
 ### Fixed
