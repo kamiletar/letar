@@ -171,7 +171,6 @@ async function loadCustomTranslations(
     const mod = await import(fullPath)
     return mod.default ?? mod
   } catch {
-    // eslint-disable-next-line no-console
     console.warn(`[zenstack-form-plugin] Could not load custom translations from ${translationsPath}`)
     return undefined
   }

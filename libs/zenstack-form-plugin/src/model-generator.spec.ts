@@ -42,7 +42,6 @@ function makeField(overrides: {
 function makeModel(
   name: string,
   fields: DataField[],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   modelAttributes: Array<{ refText: string; args?: unknown[] }> = [],
 ): DataModel {
   return {
