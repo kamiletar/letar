@@ -183,8 +183,10 @@
 
 ### UX
 
-- ⏳ Аудит `_active: scale()` в теме на `pressScale` (`@letar/ui`) — задача описана в
-  [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md)
+- ✅ Аудит `_active: scale()` в теме на `pressScale` (`@letar/ui`) — не применимо (2026-09-06):
+  `apps/kami/src/theme/` не существует (kami использует общий `@letar/chakra-provider` без
+  локальных recipe-оверрайдов), `grep -rn "_active.*scale(" apps/kami/src` — ноль совпадений.
+  Задача описана в [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md)
 - ✅ Микро-анимации (Framer Motion)
 - ✅ Accessibility audit (SkipLink, ARIA landmarks)
 - ✅ Performance optimization (dynamic imports, React.memo, Prisma select)
