@@ -1247,6 +1247,16 @@ Prisma select ниже).
       CID, которого ещё нет в старом манифесте. Подробности —
       [PLAN_COMPLETED.md § Консолидация Prisma select для треков манифеста](/apps/animatrona/PLAN_COMPLETED.md).
 
+- [x] Тот же класс проблемы, что у `@letar/folder-scan` выше, найден превентивно (2026-09-06,
+      релиз 0.55.61) ещё в трёх пакетах: `@letar/electron-storage`, `@letar/hooks`,
+      `@letar/query-provider` — реально импортируются в `main/ipc/tracker.handlers.ts`,
+      `main/services/distribution-service.ts`, `main/services/pinata-service.ts`,
+      `main/services/regen-checkpoint.ts`, но были подключены только через
+      `nx.implicitDependencies`/tsconfig paths, без записи в `dependencies`. Ещё не проявилось
+      падением (текущие `*.spec.ts` не тянут эти файлы транзитивно), но следующий тест на них упал
+      бы с тем же `Cannot find package`. Добавлены в `dependencies`, `bun install` создал симлинки,
+      `nx test`/`lint`/`typecheck:tsgo animatrona` — зелёные (166 тестов).
+
 #### 19.5 Приёмка
 
 Папка, где есть `ja` и `ru` аудио плюс `ru` и `en` субтитры: переключение режима меняет **обе**
