@@ -79,6 +79,12 @@ export interface AnimeInfo {
 
   /** Описание */
   description?: string
+  /**
+   * Английское описание (synopsis) — из AniList (`Media.description`), не перевод.
+   * Shikimori отдаёт только один `description`/`descriptionHtml`, уже переводной; манифест
+   * должен быть самодостаточен и для англоязычного зрителя.
+   */
+  descriptionEn?: string
 
   // === Производство ===
 

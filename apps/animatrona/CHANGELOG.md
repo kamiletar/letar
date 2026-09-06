@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+## [0.55.48] - 2026-09-06
+
+### Added
+
+- `AnimeInfo.descriptionEn` — англоязычный synopsis из AniList (`Media.description`), не
+  перевод с Shikimori (у него только одно уже переводное поле `description`). Новый
+  `main/services/anilist/` (GraphQL-клиент `graphql.anilist.co`, inline-throttle 2.1с,
+  in-memory TTL-кэш), вызывается внутри `buildAnimeInfo()` — non-fatal, отсутствие AniList-данных
+  не роняет генерацию `AnimeInfo`. Заодно обратное обогащение `externalIds.anilist` из ответа
+  AniList, если Shikimori своей ссылки не дал.
+
 ## [0.55.47] - 2026-09-06
 
 ### Changed

@@ -9,6 +9,7 @@ import type { ANIME_INFO_VERSION, AnimeInfo, GenerateAnimeInfoResult } from '../
 import type { AnimeManifestExternalIds, AnimeManifestGenre } from '../../shared/types/anime-manifest'
 import { prisma } from '../utils/db'
 import { createModuleLogger } from '../utils/logger'
+import { getAniListDescription } from './anilist'
 import { addBytes } from './ipfs/unixfs-service'
 import { getAnimeExtended, getAnimeRestData } from './shikimori'
 import {
@@ -65,6 +66,26 @@ export async function buildAnimeInfo(params: {
   const fandubbers = shikimoriData?.fandubbers?.length ? shikimoriData.fandubbers : undefined
   const fansubbers = shikimoriData?.fansubbers?.length ? shikimoriData.fansubbers : undefined
 
+  // AniList — единственный источник настоящего англоязычного synopsis (не перевода).
+  // Non-fatal: отсутствие AniList-данных не должно ронять генерацию AnimeInfo целиком.
+  let descriptionEn: string | undefined
+  if (externalIds.anilist || externalIds.mal) {
+    try {
+      const media = await getAniListDescription({ anilistId: externalIds.anilist, malId: externalIds.mal })
+      descriptionEn = media?.description ?? undefined
+      // Обратное обогащение: Shikimori не дал прямой ссылки на AniList, но AniList нашёлся по malId
+      if (media?.id && !externalIds.anilist) {
+        externalIds.anilist = media.id
+      }
+    } catch (error) {
+      log.warn('Не удалось получить descriptionEn из AniList', {
+        anilistId: externalIds.anilist,
+        malId: externalIds.mal,
+        error: error instanceof Error ? error.message : String(error),
+      })
+    }
+  }
+
   return {
     version: 1 as typeof ANIME_INFO_VERSION,
 
@@ -101,6 +122,7 @@ export async function buildAnimeInfo(params: {
 
     // Описание
     description: shikimoriData?.description ?? undefined,
+    descriptionEn,
 
     // Производство
     studios: shikimoriData ? await mapStudios(shikimoriData) : undefined,

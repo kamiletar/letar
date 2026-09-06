@@ -52,10 +52,10 @@ update}/*`. Разбор на `asChild` + нативный тег — отдел
       (см. `.claude/rules/electron.md`), правки — только числовые значения `transform` без
       изменения структуры JSX.
 
-- [ ] **AniList как источник английского описания (`descriptionEn`) в AnimeInfo/directoryCid**
-      (план от 2026-08-08) — идея: раз в раздаче уже бывают английские аудиодорожки и субтитры,
-      логично класть в `directoryCid` и английское описание — манифест должен быть
-      самодостаточен для любого зрителя, не только русскоязычного.
+- [x] **AniList как источник английского описания (`descriptionEn`) в AnimeInfo/directoryCid**
+      (план от 2026-08-08, реализовано 2026-09-06) — идея: раз в раздаче уже бывают английские
+      аудиодорожки и субтитры, логично класть в `directoryCid` и английское описание — манифест
+      должен быть самодостаточен для любого зрителя, не только русскоязычного.
 
   **Уточнение по ходу обсуждения:** у Shikimori GraphQL (`ShikimoriAnimeDetails`/`Extended` в
   [types.ts](main/services/shikimori/types.ts)) есть только одно поле `description`/
@@ -112,6 +112,32 @@ update}/*`. Разбор на `asChild` + нативный тег — отдел
   **⚠️ Приземлить ДО массового перезалива (см. пункт ниже).** Перезаливка всей библиотеки —
   дорогой проход (ffmpeg/IPFS на каждое аниме). Если `descriptionEn` появится после — второй
   такой же дорогой проход только ради одного поля. Делать одним заходом.
+
+  **Реализация (2026-09-06) — план выполнен буквально по всем 4 пунктам:**
+  1. `AnimeInfo.descriptionEn?: string` добавлено в
+     [anime-info.ts:87](../../libs/animatrona-types/src/anime-info.ts), сразу после
+     `description`. Библиотека подключена в `animatrona` «смешанной моделью» (прямой glob
+     `include` + `paths` на `src/index.ts`) — пересборка `dist/` не нужна, поле видно сразу.
+  2. Создан `main/services/anilist/` — `types.ts` (`AniListMedia`, `GetAniListDescriptionParams`,
+     `AniListMediaResponse`), `client.ts` (`getAniListDescription`, `clearAniListCache`),
+     `index.ts`. Проще Shikimori-клиента, как и планировалось: один эндпоинт
+     `https://graphql.anilist.co`, глобальный `fetch`, inline-throttle 2.1с
+     (`MIN_REQUEST_INTERVAL_MS`) прямо в `client.ts` без отдельного `throttle.ts`, in-memory
+     TTL-кэш (5 минут).
+  3. Вызов — внутри `buildAnimeInfo()` в
+     [anime-info-generator.ts:69-87](main/services/anime-info-generator.ts), единственная точка
+     как и планировалось (используется и `generateAnimeInfo()`, и `anime-manifest-generator.ts`).
+     Условие вызова — `externalIds.anilist || externalIds.mal` (хотя бы один идентификатор),
+     ошибки — `try/catch` + `log.warn`, не роняют генерацию `AnimeInfo`.
+  4. Обратное обогащение `externalIds.anilist` из ответа AniList (`media.id`) реализовано —
+     мутирует объект `externalIds`, переданный по ссылке из `generateAnimeInfo()`.
+  5. Тесты — `main/services/anilist/__tests__/client.spec.ts` (8 тестов): пустые параметры,
+     запрос по `id`/`idMal`, попадание в кэш, `clearAniListCache()`, `Media: null`, HTTP-ошибка
+     и GraphQL `errors` (обе — non-fatal на уровне клиента, перехватываются вызывающим кодом).
+     Мокался глобальный `fetch` через `vi.stubGlobal` — прецедента такого мокинга в
+     `main/services/` до этого не было, паттерн заведён этой задачей.
+  6. `nx test/lint/typecheck:tsgo animatrona` — все зелёные (175/175 тестов, 0 ошибок lint,
+     только преэкзистентные 40 warnings).
 
 - [ ] **Аудит содержимого `directoryCid` перед массовым перезаливом библиотеки** (план от
       2026-08-08) — вся текущая библиотека помечена `needsReupload` (v0.52.2, раздача через
