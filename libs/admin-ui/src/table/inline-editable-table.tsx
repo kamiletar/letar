@@ -117,10 +117,7 @@ export function InlineEditableTable<TItem>({
             <Table.Root size="sm">
               <Table.Header>
                 <Table.Row>
-                  {columns.map((column, index) => (
-                    // eslint-disable-next-line react/no-array-index-key -- набор колонок статичен для всей жизни таблицы
-                    <Table.ColumnHeader key={index}>{column.header}</Table.ColumnHeader>
-                  ))}
+                  {columns.map((column, index) => <Table.ColumnHeader key={index}>{column.header}</Table.ColumnHeader>)}
                   <Table.ColumnHeader />
                 </Table.Row>
               </Table.Header>
@@ -136,7 +133,6 @@ export function InlineEditableTable<TItem>({
                     : (
                       <Table.Row key={id} _hover={{ bg: 'bg.subtle' }}>
                         {columns.map((column, index) => (
-                          // eslint-disable-next-line react/no-array-index-key -- набор колонок статичен для всей жизни таблицы
                           <Table.Cell key={index} {...column.cellProps}>
                             {column.render(item)}
                           </Table.Cell>
