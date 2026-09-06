@@ -2766,4 +2766,20 @@ for (const [hash, torrent] of Object.entries(sync.torrents ?? {})) {
 - [ ] ⚠️ Не закрыто в этой сессии: `ipfs:repoGc` тем же гейтом не защищён — заведена отдельная
       фоновая задача (см. PLAN.md §22.2), результат которой нужно проверить в следующей сессии.
 
+#### Документирование ловушки dual-tsconfig paths у Nextron-приложений (2026-09-06)
+
+- [x] Прецедент из этой сессии (см. PLAN.md, «Фаза 1», коммит `c4cad00e`) — `apps/animatrona/
+      renderer/tsconfig.json` имеет собственный набор `@letar/*`-`paths`, отдельный от
+      верхнеуровневого `apps/animatrona/tsconfig.json`; `typecheck:tsgo` читает первый, `next build`
+      второй — обобщён в отдельный документ
+      [electron-nextron-dual-tsconfig-paths-drift.md](/.claude/docs/electron-nextron-dual-tsconfig-paths-drift.md).
+- [x] Проверены остальные Nextron-приложения монорепо (`kami-key-the`, `label-printer-desktop`,
+      `poster-microtext-desktop`) — тот же паттерн раздельных tsconfig подтверждён у
+      `label-printer-desktop`/`poster-microtext-desktop` (списки синхронны на момент проверки),
+      `kami-key-the` не подвержен (минимальный каркас, `renderer/tsconfig.json` не переопределяет
+      `paths`).
+- [x] Ссылка на новый документ добавлена в индекс корневого `CLAUDE.md` (раздел
+      «Next.js — ловушки»). Коммит `2249b0fe` (только `.claude/docs/` + `CLAUDE.md`, без кода
+      приложения — не биллируемая внутренняя работа над инфраструктурой студии, `time_discard`).
+
 > Перенесено из PLAN.md: 2026-09-06

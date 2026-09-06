@@ -633,6 +633,11 @@ Chromium играет не всё, а папочный плеер играет �
       класса на этой самой задаче: `typecheck:tsgo` был зелёным, а `next build --webpack` падал
       `Module not found` — у `apps/animatrona/renderer/` свой `tsconfig.json` с собственными
       `paths`, отдельными от `apps/animatrona/tsconfig.json` (который читает только `typecheck:tsgo`)
+- [x] Обобщён в отдельный документ (2026-09-06):
+      [electron-nextron-dual-tsconfig-paths-drift.md](/.claude/docs/electron-nextron-dual-tsconfig-paths-drift.md) —
+      проверено, что тот же паттерн (раздельный `@letar/*`-набор `paths` в корневом и в
+      `renderer/tsconfig.json`) есть и у `label-printer-desktop`/`poster-microtext-desktop`, у всех
+      трёх списки синхронны на момент проверки
 
 ### 6. Фаза 2 — каркас нового приложения
 
