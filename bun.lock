@@ -375,8 +375,9 @@
     },
     "apps/animatrona": {
       "name": "@letar/animatrona",
-      "version": "0.55.51",
+      "version": "0.55.58",
       "dependencies": {
+        "@letar/folder-scan": "workspace:*",
         "@letar/icon-generator": "workspace:*",
         "@letar/seed-utils": "workspace:*",
         "cheerio": "^1.2.0",
@@ -504,7 +505,7 @@
     },
     "apps/dashboard-agent": {
       "name": "dashboard-agent",
-      "version": "0.16.1",
+      "version": "0.16.5",
       "dependencies": {
         "@fastify/cors": "^11.3.0",
         "@fastify/rate-limit": "^10",
@@ -523,7 +524,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.183.89",
+      "version": "0.184.13",
       "dependencies": {
         "@letar/data-export": "workspace:*",
         "@letar/demo-protection": "workspace:*",
@@ -546,7 +547,7 @@
     },
     "apps/domwellbes-e2e": {
       "name": "@letar/domwellbes-e2e",
-      "version": "0.0.10",
+      "version": "0.0.22",
       "dependencies": {
         "@letar/e2e-testing": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -654,13 +655,14 @@
     },
     "apps/kami": {
       "name": "kami",
-      "version": "0.33.32",
+      "version": "0.35.0",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "@letar/seed-utils": "workspace:*",
+        "@letar/theme-check": "workspace:*",
         "butterchurn": "^2.6.7",
         "butterchurn-presets": "^2.4.7",
         "hydra-synth": "^1.4.0",
@@ -1054,7 +1056,11 @@
       "name": "@letar/folder-player-react",
       "version": "0.1.0",
       "peerDependencies": {
+        "@chakra-ui/react": "^3.0.0",
+        "@letar/folder-scan": "workspace:*",
+        "date-fns": "^4.0.0",
         "react": ">=18.0.0",
+        "react-icons": "^5.0.0",
       },
     },
     "libs/folder-scan": {
@@ -1078,7 +1084,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.10.0",
+      "version": "2.11.0",
       "dependencies": {
         "@tanstack/react-table": "^9.1.2",
         "@tanstack/react-virtual": "^3.13.23",
@@ -1306,7 +1312,7 @@
     },
     "libs/image-upload": {
       "name": "@letar/image-upload",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "peerDependencies": {
         "@chakra-ui/react": ">=3.0.0",
         "react": ">=18.0.0",
@@ -1395,7 +1401,7 @@
     },
     "libs/redis-client": {
       "name": "@letar/redis-client",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "dependencies": {
         "ioredis": "^6.0.0",
       },

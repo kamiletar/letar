@@ -2969,4 +2969,19 @@ for (const [hash, torrent] of Object.entries(sync.torrents ?? {})) {
       «Next.js — ловушки»). Коммит `2249b0fe` (только `.claude/docs/` + `CLAUDE.md`, без кода
       приложения — не биллируемая внутренняя работа над инфраструктурой студии, `time_discard`).
 
+#### Фикс `nx test animatrona` — `@letar/folder-scan` не резолвился под vitest (2026-09-06)
+
+- [x] `apps/animatrona/main/services/import/__tests__/anime-record-setup.spec.ts` падал на сборе
+      (`Cannot find package '@letar/folder-scan'`) — пакет был подключён только в
+      `nx.implicitDependencies` и в `paths`/`include` `tsconfig.json`, но не в реальных
+      `dependencies` `package.json`, поэтому bun не создавал симлинк
+      `apps/animatrona/node_modules/@letar/folder-scan`, а `vitest.config.mts` `resolve.alias`
+      покрывает только `'@' → './main'`. `typecheck:tsgo` (резолвит через `tsconfig.json` paths) и
+      прод-сборка (webpack/esbuild-алиасы) пакет видели — падал только vitest. Класс проблемы —
+      [vitest-unlinked-workspace-lib-imports.md](/.claude/docs/vitest-unlinked-workspace-lib-imports.md).
+- [x] Фикс — добавлена `"@letar/folder-scan": "workspace:*"` в `dependencies` (тот же формат, что
+      уже используют `@letar/seed-utils`/`@letar/icon-generator` в этом же файле), `bun install` из
+      корня создал симлинк. `nx test animatrona` — 9/9 файлов, 166 тестов зелёных (было 8/9 файлов
+      собиралось). `nx lint`/`nx typecheck:tsgo` без регрессий.
+
 > Перенесено из PLAN.md: 2026-09-06

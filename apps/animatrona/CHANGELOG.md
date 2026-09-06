@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+## [0.55.59] - 2026-09-06
+
+### Fixed
+
+- `nx test animatrona` падал на сборе `anime-record-setup.spec.ts` (`Cannot find package
+  '@letar/folder-scan'`) — пакет был подключён только через `nx.implicitDependencies`/tsconfig
+  paths, без реальной `dependency` в `package.json` bun не создавал симлинк в `node_modules`.
+  Добавлена `"@letar/folder-scan": "workspace:*"` в `dependencies`. 166 тестов зелёные.
+
 ## [0.55.58] - 2026-09-06
 
 ### Added
