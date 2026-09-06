@@ -39,7 +39,7 @@ CI, координация агентов, документация — всё, 
 | [PLAN-INFRA-3.md](/PLAN-INFRA-3.md) | §49–§61      | firewall, hard e2e-gate, cron-задачи, security-инциденты            |
 | [PLAN-INFRA-4.md](/PLAN-INFRA-4.md) | §62–§75      | канарейка (второй заход), GlitchTip, ревизия конфигурации агентов   |
 | [PLAN-INFRA-5.md](/PLAN-INFRA-5.md) | §76–§114     | CI-гейт test/eslint, Agent Mail root cause, `zenstack:generate`     |
-| [PLAN-INFRA-6.md](/PLAN-INFRA-6.md) | §115–§157    | Nx-граф/worktree-инциденты, деплой-барьеры, обновление зависимостей |
+| [PLAN-INFRA-6.md](/PLAN-INFRA-6.md) | §115–§159    | Nx-граф/worktree-инциденты, деплой-барьеры, обновление зависимостей |
 
 Нужен конкретный `§NN` — ищи диапазон в таблице выше и открывай соответствующий файл. Это
 **единственная** карта диапазонов: в самих частях её копий нет.
