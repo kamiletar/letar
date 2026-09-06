@@ -1142,20 +1142,40 @@ for app in $AFFECTED_APPS; do
   # реальная проверка типов в проекте, до этого нигде не вызывалась автоматически (ни в CI, ни в
   # git-хуках, ни здесь) — держалась только на ручной дисциплине «прогнал перед коммитом».
   # Без условия по $DEPLOY_ENV — одинаково для прода (s2) и стейджа (s3), для всех приложений.
-  TYPECHECK_TARGET="typecheck:tsgo"
-  if ! nx show project $app --json 2>/dev/null | grep -q '"typecheck:tsgo"'; then
-    # На 2026-09-06 единственное исключение — dashboard-agent (нет typecheck:tsgo, есть typecheck).
-    TYPECHECK_TARGET="typecheck"
+
+  # §19.1 Трек 1b — снятие дублирования для HARD_GATED_APPS на проде. deploy-mcp (evaluateE2eGate)
+  # уже ОТКАЗЫВАЕТ в production-деплое этих приложений без свежего зелёного e2e на staging для
+  # текущего коммита (не affected с прогона) — а staging-деплой того же коммита уже прогнал этот
+  # самый typecheck (Трек 1 безусловен для staging). Повторный прогон на проде — чистое
+  # дублирование по времени, не по надёжности. Не распространяется на STAGING=true (там typecheck
+  # и есть то, что делает гейт возможным) и на резервный SSH-канал в обход deploy-mcp — если
+  # bun/резолв списка не удался, безопасный дефолт — НЕ пропускать (typecheck остаётся).
+  SKIP_TYPECHECK=false
+  if [ "$STAGING" != true ]; then
+    IS_HARD_GATED=$(bun -e "import('./libs/infra-config/src/index.ts').then(m => console.log(m.HARD_GATED_APPS.includes('$app')))" 2>/dev/null)
+    if [ "$IS_HARD_GATED" = "true" ]; then
+      SKIP_TYPECHECK=true
+    fi
   fi
-  echo -e "${YELLOW}🔎 Typecheck (${TYPECHECK_TARGET}) for ${app}...${NC}"
-  if nx $TYPECHECK_TARGET $app; then
-    echo -e "${GREEN}✅ Typecheck passed for ${app}${NC}"
+
+  if [ "$SKIP_TYPECHECK" = true ]; then
+    echo -e "${BLUE}ℹ️  Typecheck пропущен для ${app} — hard e2e-gate уже подтвердил зелёный typecheck на staging для этого коммита (§19.1 Трек 1b)${NC}"
   else
-    echo -e "${RED}❌ Typecheck failed for ${app} — деплой прерван${NC}"
-    phase_marker build fail
-    FAILED_APPS+=("$app")
-    echo ""
-    continue
+    TYPECHECK_TARGET="typecheck:tsgo"
+    if ! nx show project $app --json 2>/dev/null | grep -q '"typecheck:tsgo"'; then
+      # На 2026-09-06 единственное исключение — dashboard-agent (нет typecheck:tsgo, есть typecheck).
+      TYPECHECK_TARGET="typecheck"
+    fi
+    echo -e "${YELLOW}🔎 Typecheck (${TYPECHECK_TARGET}) for ${app}...${NC}"
+    if nx $TYPECHECK_TARGET $app; then
+      echo -e "${GREEN}✅ Typecheck passed for ${app}${NC}"
+    else
+      echo -e "${RED}❌ Typecheck failed for ${app} — деплой прерван${NC}"
+      phase_marker build fail
+      FAILED_APPS+=("$app")
+      echo ""
+      continue
+    fi
   fi
 
   # Check for build output (skip for Node.js apps - they build inside Docker)
