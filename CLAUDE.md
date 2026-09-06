@@ -52,6 +52,10 @@ projects --with-target` этого не ловит ·
 на чистом дереве, гигиена (`.d.ts.map` в `.gitignore`) и cleanup-команда ·
 [bun-lockfile-private-submodules](/.claude/docs/bun-lockfile-private-submodules.md) ⚠️
 `--frozen-lockfile` падает везде, где submodule не выкачаны; чистка `bun.lock` не держится ·
+[bun-lock-drift-unpushed-commits-blocks-all-deploys](/.claude/docs/bun-lock-drift-unpushed-commits-blocks-all-deploys.md)
+⚠️ версии `package.json` бампнуты и закоммичены, но коммит не запушен — `origin/main` тянет
+устаревший `bun.lock`, `--frozen-lockfile` роняет деплой ЛЮБОГО приложения, не только того, чья
+версия разъехалась; фикс — запушить, не пересобирать `bun install` в грязном общем чекауте ·
 [bun-server-version-lockfile-format-incompatibility](/.claude/docs/bun-server-version-lockfile-format-incompatibility.md)
 ⚠️ старый bun на сервере не парсит `lockfileVersion` новой версии вообще (`Unknown lockfile
 version`) — блокирует ВСЕ деплои на сервере разом, не только текущее приложение; фикс — апгрейд
@@ -521,6 +525,10 @@ Playwright-скрипт через Bash вместо navigate/UI-логина ·
 `dl-cdn.alpinelinux.org` вообще (ни IPv4, ни IPv6, ни с хоста, ни из контейнера) при рабочих
 GitHub/npm/registry — `apk add` в сборке падает, фикс — зеркало; там же ловушка диагностики:
 `nc` на s3 не установлен и даёт ложный FAIL на любом адресе ·
+[docker-network-endpoint-corruption-diskfull](/.claude/docs/docker-network-endpoint-corruption-diskfull.md)
+⚠️ диск на 100% рвёт docker-network endpoint (пустой IP) у части контейнеров БД —
+`getaddrinfo ENOTFOUND`, healthcheck внутри контейнера этого не видит, чинится строго
+`docker restart <db>` **до** `docker restart <app>` ·
 [docker-prune-cold-layer-network-flake](/.claude/docs/docker-prune-cold-layer-network-flake.md)
 ⚠️ ночной `pruneBuilder()` без фильтра сносит build cache целиком (`ACTIVE 0` при 76GB) —
 первый деплой каждого приложения после 04:00 идёт в сеть и ловит `TLS: unspecified error` на
