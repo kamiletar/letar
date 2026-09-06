@@ -199,6 +199,7 @@ export async function runPostProcess(
             temporalAq: data.videoOptions.temporalAq,
             aqStrength: data.videoOptions.aqStrength,
             force10Bit: data.videoOptions.force10Bit,
+            cropFilter: data.videoOptions.cropFilter,
             vmafScore: data.vmafScore,
             encoderType: data.encoderType ?? 'gpu',
             ffmpegCommand: encodingMeta?.ffmpegCommand,

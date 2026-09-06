@@ -191,6 +191,22 @@ export function usePreviewAnalysis(options: UsePreviewAnalysisOptions) {
         }
       })
 
+      // Автодетект чёрных полос — только детекция, ничего не применяет само по себе.
+      // Ошибка детекции не должна валить весь анализ файла (аудио/субтитры уже готовы).
+      const videoTrack = mediaInfo.videoTracks[0]
+      let cropDetection: FileAnalysis['cropDetection']
+      if (videoTrack?.width && videoTrack?.height && mediaInfo.duration > 0) {
+        try {
+          cropDetection = await api.ffmpeg.detectCrop(file.path, {
+            sourceWidth: videoTrack.width,
+            sourceHeight: videoTrack.height,
+            duration: mediaInfo.duration,
+          })
+        } catch {
+          cropDetection = undefined
+        }
+      }
+
       return {
         file,
         mediaInfo,
@@ -198,6 +214,8 @@ export function usePreviewAnalysis(options: UsePreviewAnalysisOptions) {
         error: null,
         audioRecommendations,
         subtitleRecommendations,
+        cropDetection,
+        cropConfirmed: false,
       }
     } catch (error) {
       return {
@@ -431,6 +449,15 @@ export function usePreviewAnalysis(options: UsePreviewAnalysisOptions) {
     )
   }, [])
 
+  /** Подтверждение/отмена найденного кропа чёрных полос — обрезка при транскоде необратима */
+  const handleToggleCrop = useCallback((episodeNumber: number, confirmed: boolean) => {
+    setAnalyses((prev) =>
+      prev.map((analysis) =>
+        analysis.file.episodeNumber === episodeNumber ? { ...analysis, cropConfirmed: confirmed } : analysis
+      )
+    )
+  }, [])
+
   /**
    * Редактирование группы дорожек (язык/dubGroup)
    * Применяется только к ТЕКУЩЕМУ эпизоду
@@ -620,6 +647,7 @@ export function usePreviewAnalysis(options: UsePreviewAnalysisOptions) {
     startAnalysis,
     handleToggleTrack,
     handleToggleSubtitle,
+    handleToggleCrop,
     handleTrackGroupEdit,
     applyTrackGroupToAll,
   }

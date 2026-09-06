@@ -175,6 +175,12 @@ export interface VideoTranscodeOptions {
   anime4kShaderPath?: string
   /** Применить hqdn3d денойз перед кодированием */
   denoiseEnabled?: boolean
+  /**
+   * Готовая строка `crop=W:H:X:Y` из автодетекта чёрных полос (см. main/ffmpeg/cropdetect.ts).
+   * Задаётся только после явного подтверждения пользователем в превью импорта — сама детекция
+   * ничего не решает за пользователя, обрезка при транскоде необратима.
+   */
+  cropFilter?: string
 }
 
 /** Поколение GPU NVIDIA */

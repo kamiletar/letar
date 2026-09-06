@@ -917,13 +917,19 @@ export class VideoPool extends BasePool<VideoPoolTask> {
     args.push('-i', inputPath)
 
     // Видео фильтры
+    // crop идёт первым в цепочке — обрезает исходный кадр до применения деинтерлейса/денойза/апскейла
     if (task.anime4kFilter) {
       // Anime4K уже включает деинтерлейс если нужно
-      args.push('-vf', task.anime4kFilter)
+      const vf = options.cropFilter ? `${options.cropFilter},${task.anime4kFilter}` : task.anime4kFilter
+      args.push('-vf', vf)
     } else {
       // Авто-деинтерлейс и опциональный денойз для обычного транскода
       const fo = task.sourceFieldOrder
       const vfParts: string[] = []
+
+      if (options.cropFilter) {
+        vfParts.push(options.cropFilter)
+      }
 
       if (fo === 'tt' || fo === 'bb') {
         // mode=0: один кадр на входной, сохраняет исходный fps (29.97 для 1080i)

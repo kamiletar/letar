@@ -525,6 +525,8 @@ export function ImportWizardDialog({
               subtitleType: r.subtitleType,
               matchedFonts: r.matchedFonts,
             })),
+          // Подтверждённый пользователем crop — только если явно включён чекбоксом в превью
+          cropFilter: a.cropConfirmed ? a.cropDetection?.filter : undefined,
         })),
     }
 

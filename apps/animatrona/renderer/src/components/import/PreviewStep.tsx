@@ -134,6 +134,7 @@ export function PreviewStep({ files, folderPath, sourceYear, onAnalysisComplete,
                     folderPath={folderPath}
                     onToggleTrack={analysis.handleToggleTrack}
                     onToggleSubtitle={analysis.handleToggleSubtitle}
+                    onToggleCrop={analysis.handleToggleCrop}
                     onTrackGroupEdit={analysis.handleTrackGroupEdit}
                     onApplyToAll={analysis.applyTrackGroupToAll}
                   />
@@ -170,6 +171,7 @@ export function PreviewStep({ files, folderPath, sourceYear, onAnalysisComplete,
               folderPath={folderPath}
               onToggleTrack={analysis.handleToggleTrack}
               onToggleSubtitle={analysis.handleToggleSubtitle}
+              onToggleCrop={analysis.handleToggleCrop}
               onTrackGroupEdit={analysis.handleTrackGroupEdit}
               onApplyToAll={analysis.applyTrackGroupToAll}
             />

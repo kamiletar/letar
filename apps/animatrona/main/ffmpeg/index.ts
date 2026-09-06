@@ -8,6 +8,9 @@ export * from './types'
 // Probe (анализ файлов)
 export { getAudioTracks, getVideoDuration, getVideoTracks, probeFile } from './probe'
 
+// Автообрезка чёрных полос
+export { type CropDetectResult, type CropRect, detectCropFilter } from './cropdetect'
+
 // Транскодирование
 export {
   defaultAudioOptions,

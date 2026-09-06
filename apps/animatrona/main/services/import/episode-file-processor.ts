@@ -244,6 +244,9 @@ export async function processEpisodeFile(
     if (ctx.importSettings?.denoiseEnabled) {
       videoOptions.denoiseEnabled = true
     }
+    if (fileAnalysis?.cropFilter) {
+      videoOptions.cropFilter = fileAnalysis.cropFilter
+    }
 
     // Обновляем postProcessData
     const existing = ctx.postProcessDataMap.get(episodeId)
@@ -266,6 +269,7 @@ export async function processEpisodeFile(
           lookahead: videoOptions.lookahead ?? undefined,
           bRefMode: videoOptions.bRefMode,
           force10Bit: videoOptions.force10Bit,
+          cropFilter: videoOptions.cropFilter,
         },
         vmafScore: ctx.vmafScore,
         encoderType: ctx.useCpuFallback ? 'cpu' : 'gpu',

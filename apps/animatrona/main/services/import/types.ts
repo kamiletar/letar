@@ -54,6 +54,7 @@ export interface PostProcessData {
     lookahead?: number
     bRefMode?: string
     force10Bit?: boolean
+    cropFilter?: string
   }
   vmafScore?: number
   encoderType?: 'gpu' | 'cpu'

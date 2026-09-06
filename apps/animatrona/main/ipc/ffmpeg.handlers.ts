@@ -14,7 +14,9 @@ import type {
   VideoTranscodeOptions,
 } from '../../shared/types'
 import {
+  type CropDetectResult,
   demuxFile,
+  detectCropFilter,
   encodeSample,
   extractFontsFromFile,
   extractStream,
@@ -213,6 +215,18 @@ export function registerFFmpegHandlers(): void {
       })
       const outputStat = await stat(output)
       return { outputPath: output, outputSize: outputStat.size }
+    },
+  )
+
+  // Автообрезка чёрных полос — только детекция, ffmpeg-фильтр не применяется без явного
+  // подтверждения пользователя в UI превью импорта (обрезка при транскоде необратима)
+  createHandler(
+    'ffmpeg:detectCrop',
+    async (
+      inputPath: string,
+      options: { sourceWidth: number; sourceHeight: number; duration: number },
+    ): Promise<CropDetectResult | null> => {
+      return await detectCropFilter(inputPath, options)
     },
   )
 

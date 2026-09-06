@@ -24,8 +24,18 @@ export function FileCard({
   onToggleSubtitle,
   onTrackGroupEdit,
   onApplyToAll,
+  onToggleCrop,
 }: FileCardProps) {
-  const { file, mediaInfo, isAnalyzing, error, audioRecommendations, subtitleRecommendations } = analysis
+  const {
+    file,
+    mediaInfo,
+    isAnalyzing,
+    error,
+    audioRecommendations,
+    subtitleRecommendations,
+    cropDetection,
+    cropConfirmed,
+  } = analysis
   const videoTrack = mediaInfo?.videoTracks[0]
 
   // Группировка дорожек для batch-редактирования
@@ -112,6 +122,31 @@ export function FileCard({
                   <Text>{formatDuration(videoTrack.duration)}</Text>
                   <Text>{formatBytes(mediaInfo.size)}</Text>
                 </HStack>
+              </HStack>
+            )}
+
+            {/* Автодетект чёрных полос — требует явного подтверждения, обрезка при транскоде необратима */}
+            {cropDetection && (
+              <HStack p={2} bg="bg.subtle" borderRadius="md" justify="space-between">
+                <HStack gap={3}>
+                  <Checkbox.Root
+                    checked={cropConfirmed ?? false}
+                    onCheckedChange={(e) => onToggleCrop?.(file.episodeNumber ?? 0, e.checked === true)}
+                  >
+                    <Checkbox.HiddenInput />
+                    <Checkbox.Control />
+                  </Checkbox.Root>
+                  <VStack align="start" gap={0}>
+                    <Text fontSize="sm">Обрезать чёрные полосы</Text>
+                    <Text fontSize="xs" color="fg.subtle">
+                      Найдено: {cropDetection.rect.width}×{cropDetection.rect.height} (было{' '}
+                      {videoTrack?.width}×{videoTrack?.height}) — необратимо при транскоде
+                    </Text>
+                  </VStack>
+                </HStack>
+                <Badge colorPalette={cropConfirmed ? 'green' : 'gray'} variant="subtle">
+                  {cropConfirmed ? 'Обрежется' : 'Не применяется'}
+                </Badge>
               </HStack>
             )}
 

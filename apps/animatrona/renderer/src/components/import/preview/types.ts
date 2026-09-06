@@ -94,6 +94,13 @@ export interface FileAnalysis {
   error: string | null
   audioRecommendations: AudioRecommendation[]
   subtitleRecommendations: SubtitleRecommendation[]
+  /** Результат автодетекта чёрных полос (ffmpeg cropdetect) — `undefined`, если не нашлось */
+  cropDetection?: { filter: string; rect: { width: number; height: number; x: number; y: number } }
+  /**
+   * Подтверждение пользователя на применение найденного кропа при транскоде.
+   * По умолчанию `false` — обрезка необратима, включается явно чекбоксом в UI.
+   */
+  cropConfirmed?: boolean
 }
 
 /** Props для PreviewStep */
@@ -120,6 +127,8 @@ export interface FileCardProps {
   onTrackGroupEdit?: (episodeNumber: number, type: 'audio' | 'subtitle', groupId: string, edit: TrackGroupEdit) => void
   /** Callback для применения настроек ко всем эпизодам */
   onApplyToAll?: (type: 'audio' | 'subtitle', groupId: string, edit: TrackGroupEdit) => void
+  /** Callback подтверждения/отмены найденного кропа чёрных полос для этого эпизода */
+  onToggleCrop?: (episodeNumber: number, confirmed: boolean) => void
 }
 
 /** Опции видео для VMAF теста */

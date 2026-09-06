@@ -332,6 +332,12 @@ export interface ImportQueueFileAnalysis {
   audioRecommendations: ImportQueueAudioRecommendation[]
   /** Рекомендации по субтитрам (выбранные пользователем) */
   subtitleRecommendations?: ImportQueueSubtitleRecommendation[]
+  /**
+   * Подтверждённый пользователем crop-фильтр (`crop=W:H:X:Y`) из автодетекта чёрных полос
+   * в PreviewStep — задаётся только явным подтверждением, детекция сама по себе ничего
+   * не решает (см. main/ffmpeg/cropdetect.ts). Обрезка при транскоде необратима.
+   */
+  cropFilter?: string
 }
 
 /**

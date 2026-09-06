@@ -63,6 +63,19 @@ export const ffmpegPreload = {
   ): Promise<OperationResult & { outputPath?: string }> =>
     ipcRenderer.invoke('ffmpeg:transcodeAudioVBR', input, output, options),
 
+  /**
+   * Автообрезка чёрных полос — только детекция, ничего не применяет.
+   * Возвращает найденную рамку (или `undefined`, если устойчивого леттербокса не нашлось) —
+   * решение обрезать при транскоде принимает пользователь в UI превью импорта.
+   */
+  detectCrop: async (
+    inputPath: string,
+    options: { sourceWidth: number; sourceHeight: number; duration: number },
+  ): Promise<{ filter: string; rect: { width: number; height: number; x: number; y: number } } | undefined> => {
+    const result = await ipcRenderer.invoke('ffmpeg:detectCrop', inputPath, options)
+    return result.success ? (result.data ?? undefined) : undefined
+  },
+
   /** Кодирование тестового сэмпла */
   encodeSample: (options: {
     inputPath: string
