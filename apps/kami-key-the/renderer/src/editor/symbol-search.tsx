@@ -61,8 +61,10 @@ export function SymbolSearch({ symbols, onAssign, keyLabel, category, onCategory
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
   const resultsRef = useRef<HTMLDivElement>(null)
 
-  // Недавно использованные
-  const [recentCodes] = useState(loadRecent)
+  // Недавно использованные — читаются из localStorage, обновляются после каждого назначения
+  // (см. handleAssign), иначе список «Недавние» не отражает символ, назначенный в этой же сессии
+  // на другую клавишу, пока компонент не перемонтируется
+  const [recentCodes, setRecentCodes] = useState(loadRecent)
   const recentSymbols = recentCodes.map((c) => symbols.find((s) => s.c === c)).filter((s): s is SymbolEntry => !!s)
 
   // Категория для фильтрации
@@ -137,6 +139,7 @@ export function SymbolSearch({ symbols, onAssign, keyLabel, category, onCategory
     const cp = parseInt(entry.c, 16)
     const ch = String.fromCodePoint(cp)
     pushRecent(entry.c)
+    setRecentCodes(loadRecent())
     onAssign(ch, entry.n, slot)
   }
 
