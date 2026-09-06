@@ -2,7 +2,7 @@
 // Ссылки (закладки из Android Share)
 // ========================================
 
-// Сохранённая ссылка — приватный раздел, только владелец
+// Сохранённая ссылка — публичная витрина для чтения, пишет только владелец
 model Link {
   id          String   @id @default(cuid())
 
@@ -19,8 +19,9 @@ model Link {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Приватный раздел — читает и пишет только владелец (ADMIN)
-  @@allow('all', auth() != null && 'ADMIN' in auth().roles)
+  // Публичный раздел для чтения (витрина закладок на сайте) — пишет только владелец (ADMIN)
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
 
   @@index([category])
   @@index([read])
