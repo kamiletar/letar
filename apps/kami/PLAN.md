@@ -774,6 +774,7 @@ favicon-превью и inline-редактирование тегов не пр
 | 2026-09-06 | ✅ Фаза 10: Share Target принимает файлы — audio→`/admin/audio`, остальное→`/admin/files`            |
 | 2026-09-06 | ✅ Фаза 10: объединённая витрина `/links` — `Link`+`UploadedFile`, фильтр по типу                    |
 | 2026-09-06 | ✅ Техдолг: getSession() вынесен из root layout в клиент — SSG вернулась 10 роутам                   |
+| 2026-09-06 | ✅ Техдолг: подключён theme:check — themePrefix на theme-provider.tsx, 4-й класс (Canvas 2D)         |
 
 ## ✅ Техдолг закрыт: SSG вернулась — getSession() вынесен из корневого layout (2026-09-06)
 

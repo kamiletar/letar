@@ -367,4 +367,53 @@ Prisma/ZenStack-клиента) — вынесен в `createImageRepository()`.
 
 ---
 
-**Последнее обновление:** 2026-08-06
+---
+
+## 2026-09-06 — Share Target файлы, единая витрина /links, фикс SSG, theme:check
+
+### Web Share Target принимает файлы
+
+`manifest.ts` `share_target.enctype` → `multipart/form-data` + `params.files` (`image/*`,
+`application/pdf`, `audio/*`). `/share/route.ts` теперь ветвится: аудио-файл → `saveAudioFile()`
+(новый `src/lib/audio/save-audio-file.ts`, вынесен из `/api/audio/upload`), прочий файл →
+`saveUploadedFile()` (новый `src/lib/files/save-uploaded-file.ts`, вынесен из
+`/api/arbitrary-upload`), без файлов — прежняя логика создания `Link`. Оба обработчика загрузки
+переиспользуют общие хелперы вместо дублирования ID3/дискового сохранения. Offline-очередь
+(`public/sw.template.js`) расширена под multipart: `Blob` из `File`-полей сохраняется в
+IndexedDB, при повторной отправке восстанавливается `FormData`. `UploadedFile` получил поля
+`category`/`tags` (миграция `20260906141527_add_uploaded_file_category_tags`) с той же инлайн-
+редактируемой UI, что у `Link`.
+
+### Единая публичная витрина /links
+
+`[locale]/links/page.tsx` смёржил `Link` и `UploadedFile` (не аудио) в общий `FeedItem[]` —
+две параллельные Prisma-выборки с одинаковыми фильтрами (`category`/`tag`/`q`), сортировка и
+пагинация — в памяти приложения (осознанно, без новой унифицирующей модели `SavedItem` — объём
+данных персональный, не multi-tenant). Добавлен чип-фильтр `type` (`Всё`/`Ссылки`/`Файлы`).
+
+### Техдолг закрыт: SSG вернулась
+
+Корневой `[locale]/layout.tsx` вызывал `getSession()`/`isAdmin()` безусловно — Dynamic API
+(`headers()`) форсировал динамический рендер всего поддерева независимо от `setRequestLocale`
+в конкретной странице. `UserProvider` переписан на клиентский `useSession()` (тот же паттерн,
+что уже использовал `AuthButton`) — обнаружено, что серверный проброс сессии в layout был мёртвым
+кодом (единственный потребитель контекста, `OnlyFor`, нигде не применялся). После фикса
+`/`, `/about`, `/403`, `/consulting`, `/cv`, `/skills`, `/privacy`, `/terms`, `/offline`, `/audio`
+вернулись к SSG (подтверждено диффом таблицы роутов `nx build kami`). `/blog`, `/hire`,
+`/learning`, `/projects`, `/data-deletion` остались динамическими по отдельным, не исследованным
+в этом заходе причинам.
+
+### Техдолг закрыт: подключён theme:check
+
+Гейт сырых цветов/теней/transition (`nx g @letar/generators:theme-check-integrate kami`) вешён
+и встроен в `lint`. У kami нет каталога `src/theme/` — роль темы играет один файл,
+`src/app/_components/theme-provider.tsx`; `themePrefix` указан прямо на него. Первый прогон —
+132 находки: 12 исправлено по существу (`transition="X Ns"` → `transitionProperty`+именованный
+duration-токен; дублированный HEX Matrix-палитры в CSS-градиенте `projects/page.tsx` →
+`var(--chakra-colors-fg-*)`), остальные — allowlist по трём известным классам плюс новый
+четвёртый: Canvas 2D (`ctx.fillStyle`/`strokeStyle` у аудио-визуализаторов и `MatrixRain` не
+резолвит CSS-переменные темы). Разбор — `.claude/docs/theme-hardcode-gate-coverage.md`.
+
+---
+
+**Последнее обновление:** 2026-09-06
