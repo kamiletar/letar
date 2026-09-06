@@ -4,6 +4,68 @@
 
 > **Архив обновлён:** 2026-09-06
 
+## Перенос renderer-части папочного плеера в libs (Фаза 1, шаг 2) (2026-09-06)
+
+Продолжение задачи из плана «Animatrona Player» (§5 «Фаза 1 — вынос в библиотеки»): каркасы
+`libs/folder-player-react` и `libs/folder-scan` были заведены генератором в предыдущей сессии
+(2026-09-06), эта сессия перенесла в них реальный код renderer-стороны.
+
+**`libs/folder-scan`** получил `subtitle-type.ts` — классификатор типа субтитров (полные/надписи/
+песни), framework-free, без Node-зависимостей.
+
+**`libs/folder-player-react`** получил:
+
+- `host.ts` — контракты `FolderPlayerHost` (абстракция над `window.electronAPI`: `selectFolder`,
+  `selectFile`, `scanFolder`, `scanExternalAudio`, `scanExternalSubtitles`, `probe`, `toMediaUrl`)
+  и `FolderPlayerStorage` (минимальный синхронный `{getItem, setItem}`, которому структурно
+  удовлетворяет сам `window.localStorage`);
+- `types.ts`, `parse-filename.ts`, `probe-cache.ts` — перенесены с изменением сигнатур на приём
+  `host`/`storage` параметром;
+- хуки `useFolderPlayer`/`useWatchProgress`/`useFolderHistory`/`useExternalAudio` — та же замена
+  прямых обращений к `window.electronAPI`/`localStorage` на инжектируемые `host`/`storage`;
+- компоненты `EpisodeSidebar`, `RecentFoldersCard` — перенесены практически без изменений (не
+  имели electron/next-зависимостей).
+
+`apps/animatrona/renderer/src/app/player/page.tsx` теперь собирает `folderPlayerHost:
+FolderPlayerHost` из `window.electronAPI` и передаёт его в хуки; `useWatchProgress(localStorage)`/
+`useFolderHistory(localStorage)` получают `window.localStorage` напрямую. Старые файлы в
+`app/player/{types,_hooks,_components}` и `renderer/src/lib/{parse-filename,cache/}` удалены, не
+оставлены копией/реэкспортом.
+
+**Осознанное исключение:** `useFolderModeUI.tsx` НЕ перенесён в либу — импортирует `TrackInfo`/
+`TrackSelector`/`VideoPlayerRef` из `@/components/player`, которые app-local (не входят в
+`@letar/video-player-react`). Вынос потребовал бы либо тащить видео-плеер компоненты следом (вне
+скоупа), либо параметризовать хук инжектируемыми типами/компонентами (оверинжиниринг для этого
+шага). Хук остался в приложении, но принимает `host: FolderPlayerHost` и использует
+`useExternalAudio`/`UseFolderPlayerReturn` из новой либы — частичная миграция.
+
+**Найденные и исправленные проблемы (не были очевидны из `typecheck:tsgo`):**
+
+1. Сиблинг-зависимость либы на другую workspace-либу (`folder-player-react` → `folder-scan`)
+   требует `paths`/`rootDir`/`include` в **собственных** `tsconfig.lib.json`/`tsconfig.spec.json`
+   зависимой либы, а не только в приложении-потребителе — зеркалирован существующий паттерн
+   `libs/video-player-react` → `@letar/video-player-core`.
+2. `oxlint-disable-next-line` не подавляет ESLint-правило `react-hooks/exhaustive-deps` — разные
+   линтеры, разные неймспейсы правил. Нужен `eslint-disable-next-line`.
+3. **Главная находка:** `apps/animatrona/renderer/tsconfig.json` — у renderer СВОЙ набор `paths`,
+   отдельный от `apps/animatrona/tsconfig.json` (который читает только `typecheck:tsgo`). Добавив
+   новые либы только в корневой tsconfig приложения, получили зелёный `typecheck:tsgo`, но
+   `next build --webpack` падал `Module not found` — прод-сборка резолвит модули через
+   `renderer/tsconfig.json`. Тот же класс ловушки, что и `SortablePhotoGrid` (2026-07-21):
+   typecheck зелёный не доказывает, что соберётся прод-билд.
+4. Реэкспорт `export { X as Y } from '@letar/pkg'` (через границу `transpilePackages`) давал
+   предупреждение webpack «not exported» при живом успешном экспорте — заменено на
+   `import { X } from '@letar/pkg'; export const Y = X`.
+
+**Проверено:** `nx typecheck:tsgo animatrona`, `nx lint animatrona` (0 новых warnings), `nx
+run-many -t format --projects=animatrona,folder-player-react,folder-scan`, `nx build animatrona`
+(webpack renderer + esbuild/webpack main) — все зелёные. Изолированный `nx test`/`typecheck:tsgo`/
+`lint` на обеих новых либах — зелёный. E2E (`04-player` в electron-режиме) и ручная проверка
+внешних ASS/аудио — не выполнялись в этой сессии, следующий шаг.
+
+Main-часть (`MediaProber`/`FfprobeProber`) и само отдельное приложение `animatrona-player` —
+следующие шаги той же Фазы 1/2, не начаты.
+
 ## Удаление исходного торрента после успешного ручного импорта (2026-09-06)
 
 Закрывает пробел, найденный при доработке плана «Дисковая гигиена батча» (§ про
