@@ -1898,6 +1898,15 @@ driving-school (реальный read/write round-trip через новый `xl
   ⚠️ Первая попытка (`bun install --force`) упала на постороннем `postinstall`-скрипте
   `@letar/animatrona` до записи lock-файла — не признак того, что override не сработал, просто
   прерванная установка; повторный `bun install --force` прошёл штатно.
+  ⚠️ **Дополнение 2026-09-06: безпробельный flat-key ломал npm/npx, не только bun.** Синтаксис
+  `"@libsql/isomorphic-ws>ws"` — scoped override, специфичный для bun 1.4.1+; npm-парсер
+  оверрайдов его вообще не понимает и падает `Override without name` на любом вызове `npx` в
+  монорепо (нашлось на `nx build:win kami-key-the`, который дёргает `npx` внутри `run-commands`).
+  Починено переписыванием во вложенный объект `"@libsql/isomorphic-ws": { "ws": "^8.21.3" }` —
+  валиден и для npm, и для bun: собственная секция `overrides` внутри `bun.lock` уже хранила
+  этот оверрайд именно в такой форме независимо от исходного синтаксиса `package.json`, так что
+  поведение для bun не изменилось. `bun install` — без изменений, `npx webpack` в
+  kami-key-the — без ошибок. Коммит `e3b3de7d`.
 - Всё остальное (`js-yaml`, `brace-expansion`, `hono`, `mysql2`, `@grpc/grpc-js`, `ip-address`,
   `nanoid`, `postcss`, `svgo`, `browserslist`, `tmp`, `piscina`, `lodash` через
   keystatic/prisma, `defu`, `effect`, `deepmerge-ts` и т.п.) — проверено грепом: ни один не
