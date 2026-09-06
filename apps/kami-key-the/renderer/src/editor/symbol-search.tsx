@@ -2,6 +2,7 @@
  * Поиск символов по названию/синонимам с debounce 300мс
  *
  * Возможности:
+ * - Виртуализация списка результатов (рендерятся только видимые строки + запас)
  * - Клавиатурная навигация (стрелки вверх/вниз, Enter)
  * - Недавно использованные символы
  * - Фильтрация по категориям Unicode-блоков
@@ -9,13 +10,15 @@
  */
 
 import { Box, Button, Flex, Input, Text } from '@chakra-ui/react'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { SymbolEntry } from '../../../shared/ipc-types'
 import { matchesCategory, SYMBOL_CATEGORIES } from './symbol-categories'
 
 const RECENT_KEY = 'kami-key-the-recent-symbols'
 const MAX_RECENT = 8
-const PAGE_SIZE = 50
+/** Оценка высоты строки для виртуализатора — уточняется через measureElement (описание может занять 2 строки) */
+const ROW_HEIGHT_ESTIMATE = 44
 
 /** Загрузить недавние символы из localStorage */
 function loadRecent(): string[] {
@@ -46,7 +49,6 @@ interface SymbolSearchProps {
 export function SymbolSearch({ symbols, onAssign, keyLabel, category, onCategoryChange }: SymbolSearchProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SymbolEntry[]>([])
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [highlightIndex, setHighlightIndex] = useState(-1)
   const categoryId = category ?? 'all'
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
@@ -86,7 +88,6 @@ export function SymbolSearch({ symbols, onAssign, keyLabel, category, onCategory
           setResults([])
         }
         setHighlightIndex(-1)
-        setVisibleCount(PAGE_SIZE)
         return
       }
       const lower = q.toLowerCase()
@@ -99,7 +100,6 @@ export function SymbolSearch({ symbols, onAssign, keyLabel, category, onCategory
       }
       setResults(matches)
       setHighlightIndex(-1)
-      setVisibleCount(PAGE_SIZE)
     },
     [symbols, categoryId, activeCategory],
   )
@@ -110,19 +110,10 @@ export function SymbolSearch({ symbols, onAssign, keyLabel, category, onCategory
     return () => clearTimeout(timerRef.current)
   }, [query, search])
 
-  // Сброс подсветки/пагинации при смене категории (сама категория теперь управляется извне)
+  // Сброс подсветки при смене категории (сама категория теперь управляется извне)
   useEffect(() => {
     setHighlightIndex(-1)
-    setVisibleCount(PAGE_SIZE)
   }, [categoryId])
-
-  // Скролл к подсвеченному элементу
-  useEffect(() => {
-    if (highlightIndex >= 0 && resultsRef.current) {
-      const el = resultsRef.current.children[highlightIndex] as HTMLElement | undefined
-      el?.scrollIntoView({ block: 'nearest' })
-    }
-  }, [highlightIndex])
 
   const handleAssign = (entry: SymbolEntry, slot: 'char' | 'shiftChar') => {
     const cp = parseInt(entry.c, 16)
@@ -148,25 +139,40 @@ export function SymbolSearch({ symbols, onAssign, keyLabel, category, onCategory
   }
 
   const fullList = results.length > 0 ? results : query.trim().length < 2 && categoryId === 'all' ? recentSymbols : []
-  const activeList = fullList.slice(0, visibleCount)
-  const hasMore = fullList.length > visibleCount
   const showingRecent = results.length === 0 && query.trim().length < 2 && categoryId === 'all'
     && recentSymbols.length > 0
 
+  // oxlint-disable-next-line react/incompatible-library -- @tanstack/react-virtual возвращает немемоизируемые функции (getVirtualItems/measureElement) намеренно; строки ниже не обёрнуты в memo, устаревший UI не грозит
+  const virtualizer = useVirtualizer({
+    count: fullList.length,
+    getScrollElement: () => resultsRef.current,
+    estimateSize: () => ROW_HEIGHT_ESTIMATE,
+    overscan: 8,
+    getItemKey: (index) => fullList[index]?.c ?? index,
+  })
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (activeList.length === 0) {
+    if (fullList.length === 0) {
       return
     }
 
     if (e.key === 'ArrowDown') {
       e.preventDefault()
-      setHighlightIndex((prev) => (prev < activeList.length - 1 ? prev + 1 : 0))
+      setHighlightIndex((prev) => {
+        const next = prev < fullList.length - 1 ? prev + 1 : 0
+        virtualizer.scrollToIndex(next, { align: 'auto' })
+        return next
+      })
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
-      setHighlightIndex((prev) => (prev > 0 ? prev - 1 : activeList.length - 1))
+      setHighlightIndex((prev) => {
+        const next = prev > 0 ? prev - 1 : fullList.length - 1
+        virtualizer.scrollToIndex(next, { align: 'auto' })
+        return next
+      })
     } else if (e.key === 'Enter' && highlightIndex >= 0) {
       e.preventDefault()
-      const entry = activeList[highlightIndex]
+      const entry = fullList[highlightIndex]
       // Shift+Enter → назначить в shiftChar, Enter → в char
       handleAssign(entry, e.shiftKey ? 'shiftChar' : 'char')
     }
@@ -220,93 +226,88 @@ export function SymbolSearch({ symbols, onAssign, keyLabel, category, onCategory
         </Text>
       )}
 
-      {activeList.length > 0 && (
+      {fullList.length > 0 && (
         <Box ref={resultsRef} maxH="300px" overflowY="auto" border="1px solid #3a3a5a" borderRadius="6px">
-          {activeList.map((s, idx) => {
-            const cp = parseInt(s.c, 16)
-            const ch = String.fromCodePoint(cp)
-            const isHighlighted = idx === highlightIndex
-            return (
-              <Flex
-                key={s.c}
-                align="center"
-                gap="2"
-                px="3"
-                py="1.5"
-                borderBottom="1px solid #2a2a4a"
-                _last={{ borderBottom: 'none' }}
-                bg={isHighlighted ? '#3a3a6a' : 'transparent'}
-                _hover={{ bg: '#2a2a4a' }}
-                cursor="grab"
-                draggable
-                onDragStart={(e) => handleDragStart(e, s)}
-                onMouseEnter={() =>
-                  setHighlightIndex(idx)}
-                onClick={() =>
-                  handleAssign(s, 'char')}
-              >
-                <Text fontSize="2xl" w="36px" textAlign="center" pointerEvents="none">
-                  {ch}
-                </Text>
-                <Text color="#6c7ae0" fontSize="xs" fontFamily="monospace" w="60px" pointerEvents="none">
-                  U+{s.c}
-                </Text>
-                <Text flex="1" fontSize="sm" pointerEvents="none">
-                  {s.n}
-                  {s.s && (
-                    <Text as="span" color="#888">
-                      {' \u2014 '}
-                      {s.s}
-                    </Text>
-                  )}
-                </Text>
-                <Flex gap="1">
-                  <Button
-                    size="xs"
-                    bg="#1e3a4a"
-                    color="#4ac"
-                    border="1px solid #2a5a6a"
-                    _hover={{ bg: '#2a5a6a' }}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleAssign(s, 'char')
-                    }}
-                    title={`Назначить на AltGr+${keyLabel}`}
-                  >
-                    AltGr+{keyLabel}
-                  </Button>
-                  <Button
-                    size="xs"
-                    bg="#1e2a4a"
-                    color="#6c7ae0"
-                    border="1px solid #3a4a7a"
-                    _hover={{ bg: '#2a3a6a' }}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleAssign(s, 'shiftChar')
-                    }}
-                    title={`Назначить на AltGr+Shift+${keyLabel}`}
-                  >
-                    +Shift+{keyLabel}
-                  </Button>
+          <Box position="relative" width="100%" height={`${virtualizer.getTotalSize()}px`}>
+            {virtualizer.getVirtualItems().map((virtualRow) => {
+              const s = fullList[virtualRow.index]
+              const cp = parseInt(s.c, 16)
+              const ch = String.fromCodePoint(cp)
+              const isHighlighted = virtualRow.index === highlightIndex
+              return (
+                <Flex
+                  key={s.c}
+                  ref={virtualizer.measureElement}
+                  data-index={virtualRow.index}
+                  position="absolute"
+                  top={0}
+                  left={0}
+                  width="100%"
+                  transform={`translateY(${virtualRow.start}px)`}
+                  align="center"
+                  gap="2"
+                  px="3"
+                  py="1.5"
+                  borderBottom="1px solid #2a2a4a"
+                  bg={isHighlighted ? '#3a3a6a' : 'transparent'}
+                  _hover={{ bg: '#2a2a4a' }}
+                  cursor="grab"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, s)}
+                  onMouseEnter={() =>
+                    setHighlightIndex(virtualRow.index)}
+                  onClick={() =>
+                    handleAssign(s, 'char')}
+                >
+                  <Text fontSize="2xl" w="36px" textAlign="center" pointerEvents="none">
+                    {ch}
+                  </Text>
+                  <Text color="#6c7ae0" fontSize="xs" fontFamily="monospace" w="60px" pointerEvents="none">
+                    U+{s.c}
+                  </Text>
+                  <Text flex="1" fontSize="sm" pointerEvents="none">
+                    {s.n}
+                    {s.s && (
+                      <Text as="span" color="#888">
+                        {' — '}
+                        {s.s}
+                      </Text>
+                    )}
+                  </Text>
+                  <Flex gap="1">
+                    <Button
+                      size="xs"
+                      bg="#1e3a4a"
+                      color="#4ac"
+                      border="1px solid #2a5a6a"
+                      _hover={{ bg: '#2a5a6a' }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleAssign(s, 'char')
+                      }}
+                      title={`Назначить на AltGr+${keyLabel}`}
+                    >
+                      AltGr+{keyLabel}
+                    </Button>
+                    <Button
+                      size="xs"
+                      bg="#1e2a4a"
+                      color="#6c7ae0"
+                      border="1px solid #3a4a7a"
+                      _hover={{ bg: '#2a3a6a' }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleAssign(s, 'shiftChar')
+                      }}
+                      title={`Назначить на AltGr+Shift+${keyLabel}`}
+                    >
+                      +Shift+{keyLabel}
+                    </Button>
+                  </Flex>
                 </Flex>
-              </Flex>
-            )
-          })}
-          {hasMore && (
-            <Flex justify="center" py="2" borderTop="1px solid #2a2a4a">
-              <Button
-                size="xs"
-                variant="ghost"
-                color="#6c7ae0"
-                _hover={{ bg: '#2a2a4a' }}
-                onClick={() =>
-                  setVisibleCount((prev) => prev + PAGE_SIZE)}
-              >
-                Показать ещё ({fullList.length - visibleCount} из {fullList.length})
-              </Button>
-            </Flex>
-          )}
+              )
+            })}
+          </Box>
         </Box>
       )}
 
@@ -316,9 +317,9 @@ export function SymbolSearch({ symbols, onAssign, keyLabel, category, onCategory
         </Text>
       )}
 
-      {activeList.length > 0 && (
+      {fullList.length > 0 && (
         <Text color="#555" fontSize="xs" mt="1" px="1">
-          {'\u2191\u2193'} навигация, Enter — AltGr, Shift+Enter — +Shift, перетащи на клавишу
+          {'↑↓'} навигация, Enter — AltGr, Shift+Enter — +Shift, перетащи на клавишу
         </Text>
       )}
     </Box>
