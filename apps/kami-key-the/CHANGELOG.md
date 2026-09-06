@@ -7,6 +7,16 @@
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-09-06
+
+### Docs
+
+- Инвентаризация физических клавиш вне основного блока (PLAN.md) — таблица «клавиша → доступна
+  для AltGr-хука? → стоит ли использовать» для Insert/Home/PageUp/Delete/End/PageDown, Numpad,
+  F1–F12, PrintScreen/ScrollLock/Pause. Главная находка: `AltGr+Delete` невозможен в принципе —
+  физически неотличим от `Ctrl+Alt+Delete` (Secure Attention Sequence, перехватывается Winlogon
+  раньше любого пользовательского хука)
+
 ## [1.4.0] - 2026-09-06
 
 ### Added
