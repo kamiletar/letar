@@ -370,24 +370,23 @@
 
 ### 9.1 Визуализации (swap + цвет)
 
-- ⏳ **Поменять местами** `AudioSpectrumVisualizer` и `AudioSpectrogram`:
+- ✅ **Поменять местами** `AudioSpectrumVisualizer` и `AudioSpectrogram` (2026-09-06):
   - `AudioSpectrogram` (сонограмма) → фон на весь экран (`position="absolute" inset={0}`)
   - `AudioSpectrumVisualizer` (матрица букв) → внутрь `Card.Body` (высота ~100px)
-  - В `audio-page-client.tsx`: убрать фоновый Box для матрицы, добавить фоновый Box для сонограммы
-  - `AudioSpectrumVisualizer` получает проп `height?: number` (default 100) — убрать из рендера абсолютное позиционирование
-  - `AudioSpectrogram` получает `height?: number` без default — если не передан, `height: '100%'` и `borderRadius: 'none'`
-  - `fadeOpacity={0.08}` для матрицы в карточке (меньший след в маленьком контейнере)
+  - `audio-page-client.tsx` обновлён: фоновый Box теперь у сонограммы, матрица — внутри Card.Body
+  - `AudioSpectrumVisualizer` получил проп `height?: number` (default 100), абсолютное
+    позиционирование убрано из рендера
+  - `AudioSpectrogram` получил `height?: number` без default — если не передан, `height: '100%'`
+    и `borderRadius: 'none'`
+  - `fadeOpacity={0.08}` для матрицы в карточке
 
-- ⏳ **Цвет по высоте (эквалайзер)** в `AudioSpectrumVisualizer`:
-  - Убрать фиксированный `color` проп
-  - В `draw()` для каждого символа вычислять `hsl` по Y-позиции:
-    ```ts
-    const yNorm = targetY / h // 0 = верх, 1 = низ
-    const hue = 185 - yNorm * 55 // 185° голубой (верх) → 130° зелёный (низ)
-    const lum = isLight ? '28%' : '55%'
-    ctx.fillStyle = `hsl(${hue}, 100%, ${lum})`
-    ```
-  - Обновить deps в `useCallback`: убрать `color`, добавить `isLight`
+- ✅ **Цвет по высоте (эквалайзер)** в `AudioSpectrumVisualizer` (2026-09-06):
+  - Убран фиксированный `color` проп, цвет вычисляется по Y-позиции символа:
+    `hue = 185 - yNorm * 55` (185° голубой вверху → 130° зелёный внизу), `lum` зависит от темы
+  - deps `useCallback` обновлены: `color` убран, добавлен `isLight`
+  - Проверено: `nx lint kami`, `nx typecheck:tsgo kami` — зелёные. Живая проверка в браузере
+    заблокирована локальным окружением (`auth-hub` dev-сервер для OIDC-discovery падал/не
+    стабилизировался при параллельном перезапуске превью), не связано с самими правками.
 
 ### 9.2 Сонограмма до воспроизведения (офлайн анализ)
 

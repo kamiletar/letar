@@ -16,6 +16,8 @@ interface AudioSpectrumVisualizerProps {
   fontSize?: number
   /** Прозрачность trail-эффекта (меньше = длиннее след) */
   fadeOpacity?: number
+  /** Высота визуализатора в px — компонент теперь встраивается в карточку, а не на весь экран */
+  height?: number
 }
 
 /**
@@ -24,6 +26,7 @@ interface AudioSpectrumVisualizerProps {
  * Количество столбцов динамическое — `columns = Math.floor(width / fontSize)`,
  * точно как Matrix rain на главной. Каждый столбец показывает символ из
  * случайного рецепта, позиция Y определяется амплитудой соответствующей частоты.
+ * Цвет каждого символа — по Y-позиции (эквалайзер): голубой вверху → зелёный внизу.
  */
 export function AudioSpectrumVisualizer({
   audioRef,
@@ -31,12 +34,11 @@ export function AudioSpectrumVisualizer({
   getAnalyzer,
   fontSize = 16,
   fadeOpacity = 0.05,
+  height = 100,
 }: AudioSpectrumVisualizerProps) {
   const { resolvedColorMode } = useColorMode()
   const isLight = resolvedColorMode === 'light'
 
-  // Цвета зависят от темы: тёмно-зелёный на белом, яркий на чёрном
-  const color = isLight ? '#047857' : '#00FF41'
   const bgRgb = isLight ? '255, 255, 255' : '0, 0, 0'
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationFrameRef = useRef<number | null>(null)
@@ -87,7 +89,6 @@ export function AudioSpectrumVisualizer({
     ctx.fillRect(0, 0, w, h)
 
     // Настройки текста
-    ctx.fillStyle = color
     ctx.font = `${fontSize}px monospace`
 
     // Инициализация столбцов при первом рендере или при изменении ширины
@@ -109,6 +110,12 @@ export function AudioSpectrumVisualizer({
       // value=1 → вверху canvas, value=0 → внизу
       const targetY = h - value * (h - fontSize)
 
+      // Цвет по Y-позиции (эквалайзер): 185° голубой (верх) → 130° зелёный (низ)
+      const yNorm = targetY / h
+      const hue = 185 - yNorm * 55
+      const lum = isLight ? '28%' : '55%'
+      ctx.fillStyle = `hsl(${hue}, 100%, ${lum})`
+
       // Берём следующий символ из рецепта (как на главной)
       const recipe = RECIPES[columnRecipeRef.current[i]]
       const charIdx = columnCharIdxRef.current[i] % recipe.length
@@ -122,7 +129,7 @@ export function AudioSpectrumVisualizer({
     }
 
     animationFrameRef.current = requestAnimationFrame(() => drawRef.current())
-  }, [color, fontSize, fadeOpacity, bgRgb, initColumns, getAnalyzer])
+  }, [isLight, fontSize, fadeOpacity, bgRgb, initColumns, getAnalyzer])
 
   useEffect(() => {
     drawRef.current = draw
@@ -202,7 +209,13 @@ export function AudioSpectrumVisualizer({
   }, [])
 
   return (
-    <Box position="absolute" inset={0} zIndex={0} bg={{ base: 'white', _dark: 'black' }} overflow="hidden">
+    <Box
+      width="100%"
+      height={`${height}px`}
+      bg={{ base: 'white', _dark: 'black' }}
+      borderRadius="md"
+      overflow="hidden"
+    >
       <canvas
         ref={canvasRef}
         style={{

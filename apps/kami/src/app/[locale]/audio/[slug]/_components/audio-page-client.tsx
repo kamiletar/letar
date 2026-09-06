@@ -94,8 +94,15 @@ export function AudioPageClient({ audio, locale }: AudioPageClientProps) {
 
   return (
     <Box position="relative" minH="calc(100vh - 60px)" overflow="hidden">
-      {/* Matrix rain визуализатор на фоне */}
-      <AudioSpectrumVisualizer audioRef={audioRef} isPlaying={isPlaying} getAnalyzer={getAnalyzer} />
+      {/* Спектрограмма (сонограмма) на фоне — на весь экран */}
+      <Box position="absolute" inset={0} zIndex={0}>
+        <AudioSpectrogram
+          audioRef={audioRef}
+          isPlaying={isPlaying}
+          getAnalyzer={getAnalyzer}
+          lightMode={isLight}
+        />
+      </Box>
 
       {/* Контент поверх */}
       <Box position="relative" zIndex={1} maxW="600px" mx="auto" py={12} px={4}>
@@ -137,12 +144,12 @@ export function AudioPageClient({ audio, locale }: AudioPageClientProps) {
             borderColor={{ base: 'white/30', _dark: 'border' }}
           >
             <Card.Body gap={3}>
-              {/* Спектрограмма (сонограмма) — как в foobar2000 */}
-              <AudioSpectrogram
+              {/* Matrix rain визуализатор спектра */}
+              <AudioSpectrumVisualizer
                 audioRef={audioRef}
                 isPlaying={isPlaying}
                 getAnalyzer={getAnalyzer}
-                lightMode={isLight}
+                fadeOpacity={0.08}
               />
 
               <AudioPlayer

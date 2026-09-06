@@ -29,7 +29,7 @@ export function AudioSpectrogram({
   audioRef,
   isPlaying,
   getAnalyzer,
-  height = 100,
+  height,
   color = '#00FF41',
   lightMode = false,
 }: AudioSpectrogramProps) {
@@ -168,9 +168,9 @@ export function AudioSpectrogram({
   return (
     <Box
       width="100%"
-      height={`${height}px`}
+      height={height ? `${height}px` : '100%'}
       bg={{ base: 'gray.100', _dark: 'black' }}
-      borderRadius="md"
+      borderRadius={height ? 'md' : 'none'}
       overflow="hidden"
     >
       <canvas
