@@ -1,6 +1,6 @@
 # KamiKeyThe — План развития
 
-## Текущая версия: 1.7.1
+## Текущая версия: 1.7.2
 
 ## Черновик (новые идеи)
 
@@ -150,6 +150,45 @@ _Название созвучно с «Камикадзе», что подче�
 `kami-key-the` — если такой же паттерн понадобится другому Electron-приложению,
 тогда есть смысл выносить абстракцию, а не раньше — сейчас это единственный случай).
 До этого — `stats.ts` остаётся с ручной атомарной записью (tmp + renameSync) как есть.
+
+---
+
+## Технический долг
+
+### ~~electron-builder тащил весь node_modules монорепо в инсталлятор~~ ✅ 2026-09-06
+
+Первая сборка релиза (`nx build:win`) дала инсталлятор **511 МБ** (2.3 ГБ распакованный,
+`app.asar` — 1.2 ГБ). Причина: `files` в `electron-builder.yml` не исключал `node_modules` —
+без явного `!node_modules`/`!node_modules/**/*` electron-builder не смог построить дерево
+зависимостей под bun-изолированным линкером (лог: «no node modules found in collection,
+utilizing file traversal collector») и просто сгрёб **весь общий `node_modules` монорепо**:
+Electron (368 МБ), `@next`, React Native/`hermes-compiler`, `canvas`, `better-sqlite3`, `ssh2`
+и десятки других пакетов, ни один из которых kami-key-the не использует.
+
+Фикс — тот же паттерн, что уже применён в `apps/animatrona/electron-builder.yml`: исключить
+`node_modules` целиком из `files`, единственную реально нужную рантайму нативную зависимость
+(`koffi` — external в `main/webpack.config.js`, `require()` не бандлится) прописать точечно
+через `extraResources` с прямым путём в `.bun/koffi@<версия>/node_modules/koffi` (симлинк
+верхнего уровня `node_modules/koffi` electron-builder не разворачивает при копировании).
+
+**Вторая грабля на том же фиксе:** копии одного `node_modules/koffi` недостаточно — сам
+`koffi.node` лежит не в пакете `koffi`, а в отдельном опциональном платформенном пакете
+`@koromix/koffi-{platform}-{arch}`, который koffi ищет по фиксированному относительному пути
+(`resolveNative()` в `koffi/src/koffi/index.cjs`: `${__dirname}/../../../@koromix/koffi-${pkg}`).
+Без него собранный инсталлятор проходит сборку без единой ошибки, но **падает при запуске**:
+`Uncaught Exception: Error: Cannot find the native Koffi module; did you bundle it correctly?`
+— не ловится ни на этапе `electron-builder`, ни линтом/тайпчеком, только живым запуском
+собранного `.exe`. Добавлен второй `extraResources`-блок с тем же паттерном пути под
+`.bun/@koromix+koffi-win32-x64@<версия>/...`.
+
+Итог: инсталлятор **511 МБ → 108 МБ**. Проверено живым запуском собранного
+`dist-electron/win-unpacked/KamiKeyThe.exe` — процесс стабильно живёт (было: падение с
+error-диалогом сразу после старта main-процесса).
+
+⚠️ **Урок для будущих обновлений koffi:** путь в `electron-builder.yml` захардкожен на точную
+версию (`koffi@3.2.1`, `@koromix/koffi-win32-x64@3.2.1`), как и в `animatrona` — при апгрейде
+koffi через `bun update` эти два пути надо обновить вручную, иначе `nx build:win` упадёт с
+ENOENT на `from:`-пути (громкий сбой сборки, не тихий баг в рантайме).
 
 ---
 

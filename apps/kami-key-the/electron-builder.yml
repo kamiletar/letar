@@ -11,13 +11,14 @@ files:
     filter:
       - package.json
       - app
+      - '!node_modules'
+      - '!node_modules/**/*'
 
 extraMetadata:
   main: app/background.js
 
 asarUnpack:
   - '**/*.node'
-  - '**/koffi/**'
 
 win:
   target:
@@ -42,3 +43,22 @@ extraResources:
     to: data/symbols.json
   - from: resources/icon.png
     to: icon.png
+  # koffi — нативный модуль (Win32 API), external в webpack (main/webpack.config.js).
+  # bun isolated linker кладёт реальный пакет в .bun/, node_modules/koffi — симлинк, который
+  # electron-builder не разворачивает при копировании (тот же класс проблемы — animatrona
+  # решает так же для своих native-зависимостей, см. apps/animatrona/electron-builder.yml).
+  # Кладём на реальный ФС рядом с app.asar — require('koffi') из background.js внутри asar
+  # резолвится сюда по стандартному Node-алгоритму подъёма по node_modules.
+  - from: ../../node_modules/.bun/koffi@3.2.1/node_modules/koffi
+    to: node_modules/koffi
+    filter:
+      - '**/*'
+  # Сам koffi.node — не в пакете koffi, а в отдельном опциональном платформенном пакете:
+  # koffi ищет его по фиксированному относительному пути
+  # `node_modules/koffi/src/koffi/../../../@koromix/koffi-{platform}-{arch}/koffi.node`
+  # (см. resolveNative() в koffi/src/koffi/index.cjs) — без него падает с
+  # "Cannot find the native Koffi module" при живом require('koffi') без ошибок.
+  - from: ../../node_modules/.bun/@koromix+koffi-win32-x64@3.2.1/node_modules/@koromix/koffi-win32-x64
+    to: node_modules/@koromix/koffi-win32-x64
+    filter:
+      - '**/*'
