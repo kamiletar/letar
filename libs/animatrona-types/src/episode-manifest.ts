@@ -46,6 +46,8 @@ export interface ManifestAudioTrack {
   bitrate?: number
   /** Дорожка по умолчанию */
   isDefault: boolean
+  /** Принудительная дорожка (forced — контейнер просит включать её всегда) */
+  isForced?: boolean
   /** CID аудиофайла в IPFS */
   cid?: string
   /** Группа озвучки (AniDUB, AniLibria и т.д.) */
@@ -70,6 +72,8 @@ export interface ManifestSubtitleTrack {
   cid?: string
   /** Дорожка по умолчанию */
   isDefault: boolean
+  /** Принудительная дорожка (forced — контейнер просит включать её всегда) */
+  isForced?: boolean
   /** Шрифты для ASS субтитров */
   fonts?: ManifestSubtitleFont[]
   /** Группа субтитров (HorribleSubs, FanSub Team и т.д.) */
