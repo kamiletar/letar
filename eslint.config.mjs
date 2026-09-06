@@ -29,7 +29,7 @@ export default [
   // из oxlint 1.81: apps/pravda, libs/chakra-provider, libs/ui/top-loader и др.).
   // Остальные формы функций (объявления, методы) по-прежнему проверяются.
   {
-    files: ['**/*.ts', '**/*.tsx'],
+    files: ['**/*.ts', '**/*.tsx', '**/*.mjs'],
     rules: {
       '@typescript-eslint/no-empty-function': ['error', { allow: ['arrowFunctions'] }],
     },
