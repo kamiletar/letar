@@ -87,6 +87,22 @@ const CHECKS = [
     doc: '.claude/docs/root-pin-peer-drift.md',
   },
   {
+    id: 'implicit-deps',
+    group: 'deps',
+    title: '@letar/*-пакеты в nx.implicitDependencies без записи в dependencies',
+    run: ['node', ['scripts/check-implicit-deps.mjs']],
+    // warn: признак (sibling-spec) надёжный, но не исчерпывающий — часть
+    // рискованных связок он не ловит (импорт без своего spec-файла рядом), и
+    // наоборот, «genuinely imported anywhere» без sibling-spec может быть
+    // безопасен ещё долго. gate был бы слишком шумным решением для находки,
+    // которая пока чинилась только по факту падения vitest — см. аудит
+    // 2026-09-07 (6 приложений, 15 пакетов).
+    severity: 'warn',
+    ci: 'partial',
+    ciNote: 'приватные submodule не выкачаны — их package.json/исходники не проверены',
+    doc: '.claude/docs/vitest-unlinked-workspace-lib-imports.md',
+  },
+  {
     id: 'electron-drift',
     group: 'deps',
     title: 'версии electron в приложениях против корневой',
