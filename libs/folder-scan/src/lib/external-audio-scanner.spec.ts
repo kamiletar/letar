@@ -6,7 +6,7 @@ import {
   extractTitleFromAudioFilename,
   fuzzyMatchToVideo,
   normalizeLanguageCode,
-} from '../external-audio-scanner'
+} from './external-audio-scanner'
 
 // === extractGroupNameFromAudioDir ===
 

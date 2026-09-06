@@ -6,6 +6,7 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 
+import { getFontsFromASS, matchFonts } from '@letar/folder-scan'
 import type { Chapter as DemuxChapter, DemuxResult } from '../../shared/types'
 import type {
   ChaptersDocument,
@@ -25,9 +26,7 @@ import type {
   TrackOverride,
 } from '../../shared/types/manifest'
 import { detectChapterType, isChapterSkippable } from '../../shared/utils/chapters'
-import { matchFonts } from './font-matcher'
 import { addBytes } from './ipfs/unixfs-service'
-import { getFontsFromASS } from './subtitle-parser'
 
 /**
  * Конвертирует секунды в миллисекунды

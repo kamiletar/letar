@@ -11,8 +11,8 @@ import { exec } from 'child_process'
 import { readdir } from 'fs/promises'
 import path from 'path'
 import { promisify } from 'util'
-import { scanDirectoryRecursive } from '../utils/fs-utils'
-import { createModuleLogger } from '../utils/logger'
+import { scanDirectoryRecursive } from './fs-utils'
+import { createModuleLogger } from './logger'
 
 const log = createModuleLogger('AudioScanner')
 const execAsync = promisify(exec)

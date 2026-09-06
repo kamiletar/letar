@@ -2,11 +2,10 @@
  * Анализатор медиафайлов — сканирование папок и организация контента
  */
 
+import { getSubtitleInfo, matchFonts, type SubtitleInfo } from '@letar/folder-scan'
 import * as fs from 'fs'
 import * as path from 'path'
 import { type AudioTrack, type MediaInfo, probeFile } from '../ffmpeg'
-import { matchFonts } from './font-matcher'
-import { getSubtitleInfo, type SubtitleInfo } from './subtitle-parser'
 
 /** Расширения видеофайлов */
 const VIDEO_EXTENSIONS = ['.mkv', '.mp4', '.avi', '.webm', '.mov', '.wmv']

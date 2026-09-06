@@ -6,13 +6,13 @@
  * на `this` (emitProgress/isCancelled/videoEncodingMeta), теперь принимает контекст явно.
  */
 
+import type { ExternalSubtitleMatch } from '@letar/folder-scan'
 import type { EncodingProfile } from '../../../renderer/src/generated/prisma'
 import type { ImportQueueEntry } from '../../../shared/types/import-queue'
 import type { BatchImportItem } from '../../../shared/types/parallel-transcode'
 import { getAnime4KShaderPath, isAnime4KAvailable } from '../../ffmpeg/anime4k'
 import { demuxFile } from '../../ffmpeg/demux'
 import { createModuleLogger } from '../../utils/logger'
-import type { ExternalSubtitleMatch } from '../external-subtitle-scanner'
 import { ensureEpisodeDirectory } from '../output-path-resolver'
 import { createAudioTracks } from './audio-track-creator'
 import { createChapters } from './chapter-creator'

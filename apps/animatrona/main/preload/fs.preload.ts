@@ -4,9 +4,8 @@
  * Операции с файлами, сканирование, субтитры.
  */
 
+import type { ExternalAudioScanResult, ExternalSubtitleScanResult } from '@letar/folder-scan'
 import { ipcRenderer, webUtils } from 'electron'
-import type { ExternalAudioScanResult } from '../services/external-audio-scanner'
-import type { ExternalSubtitleScanResult } from '../services/external-subtitle-scanner'
 
 /** Файловая система */
 export const fsPreload = {

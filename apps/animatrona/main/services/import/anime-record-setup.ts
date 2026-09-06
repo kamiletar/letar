@@ -6,11 +6,11 @@
  * принимают все данные явными аргументами.
  */
 
+import { type ExternalSubtitleMatch, scanForExternalSubtitles } from '@letar/folder-scan'
 import fs from 'fs'
 
 import type { ImportQueueEntry } from '../../../shared/types/import-queue'
 import { createModuleLogger } from '../../utils/logger'
-import { type ExternalSubtitleMatch, scanForExternalSubtitles } from '../external-subtitle-scanner'
 import { downloadPoster } from '../shikimori/client'
 import { getPosterUrl, mapSeasonType, mapShikimoriStatus } from './helpers'
 import * as db from './import-db'

@@ -652,8 +652,24 @@ Chromium играет не всё, а папочный плеер играет �
       инжектируемыми типами/компонентами — оверинжиниринг для этого шага). Хук остался в приложении,
       но принимает `host: FolderPlayerHost` и использует `useExternalAudio`/`UseFolderPlayerReturn`
       из новой либы — частичная миграция этого одного файла.
-- [ ] Перенести main-часть, ввести `MediaProber`, `FfprobeProber` оставить в Animatrona как адаптер
-      (пока перенесён только `subtitle-type.ts` — детектор типа субтитров, не сам проберинг)
+- [x] Перенести main-часть, ввести `MediaProber`, `FfprobeProber` оставить в Animatrona как адаптер
+      (2026-09-07). В `libs/folder-scan` перенесены: `external-audio-scanner.ts` (+spec),
+      `external-subtitle-scanner.ts`, `font-matcher.ts`, `subtitle-parser.ts`, `fs-utils.ts`,
+      консольный `logger.ts` (без Electron — файловый `main/utils/logger.ts` не годится
+      библиотеке), обобщённые `allowed-paths.ts`/`media-protocol.ts` (whitelist и media://
+      протокол параметризованы функцией `isPathAllowed`/списком seed-путей, а не завязаны на
+      `app.getPath`), новый `scan-folder.ts` (`scanFolderForMedia`, вынесен из
+      `main/ipc/fs.handlers.ts`) и `media-prober.ts` — интерфейс `MediaProber` + нормализованные
+      `AudioTrack`/`SubtitleTrack`/`VideoTrack`/`MediaChapter`/`MediaInfo`, которые
+      `apps/animatrona/shared/types.ts` теперь ре-экспортирует вместо локальных копий.
+      `main/ffmpeg/probe.ts` (webpack-таргет `animatrona:build`, использует `ffmpeg.handlers.ts`)
+      экспортирует `ffprobeProber: MediaProber = { probe: probeFile }` — тонкая обёртка без
+      изменения существующей логики. `main/protocols/allowed-paths.ts` и `media.protocol.ts`
+      остались тонкими Animatrona-адаптерами (сидят whitelist библиотекой/temp/userData,
+      инжектируют свой `isPathAllowed` в протокол). `main/src/ffmpeg` (esbuild-таргет
+      `animatrona-main:build`) сознательно не тронут — уже задокументированный дрейф
+      (`animatrona-dual-build-alias-drift.md`), используется другими хендлерами
+      (vmaf/import-queue-controller), не участвует в папочном плеере.
 - [x] `main/webpack.config.js` + `main/tsconfig.json` — alias/paths на `libs/folder-scan/src`
       (по образцу существующих `@letar/animatrona-utils`/`@letar/animatrona-types`); esbuild-таргет
       (`animatrona-main:build`) резолвит через `tsConfig`, отдельного списка алиасов не требует
@@ -661,8 +677,9 @@ Chromium играет не всё, а папочный плеер играет �
       `transpilePackages`; `apps/animatrona/renderer/tsconfig.json` (у renderer свой набор `paths`,
       отдельный от `apps/animatrona/tsconfig.json`) — обе либы добавлены туда же, иначе
       `next build --webpack` падает `Module not found` даже при зелёном `typecheck:tsgo`
-- [ ] **Приёмка:** `nx lint animatrona && nx typecheck:tsgo animatrona && nx build animatrona` —
-      зелёные (2026-09-06, только на renderer-срезе выше; main-часть и e2e ещё впереди). Осталось:
+- [x] **Приёмка:** `nx lint animatrona && nx typecheck:tsgo animatrona && nx build animatrona` —
+      зелёные (2026-09-07, включая main-часть после переноса выше: `typecheck:main`,
+      `nx lint folder-scan`, `nx test folder-scan` — 61/61 тестов — тоже зелёные). Осталось:
       e2e `04-player` в electron-режиме + ручная проверка папки с внешними ASS и аудио.
       ⚠️ `typecheck:tsgo` зелёный не доказывает, что прод-билд соберётся — прецедент
       `SortablePhotoGrid` (2026-07-21), поэтому `nx build` обязателен. Свежий прецедент того же

@@ -2,7 +2,13 @@
  * FFprobe модуль — получение информации о медиафайлах
  */
 
-import { detectSubtitleType, isDispositionFlagSet, type StreamDisposition, type SubtitleType } from '@letar/folder-scan'
+import {
+  detectSubtitleType,
+  isDispositionFlagSet,
+  type MediaProber,
+  type StreamDisposition,
+  type SubtitleType,
+} from '@letar/folder-scan'
 import { spawnFFprobe } from '../utils/ffmpeg-spawn'
 import type { AudioTrack, MediaInfo, VideoTrack } from './types'
 import { extractBitrate, getBitDepth } from './utils'
@@ -406,4 +412,9 @@ export async function probeFile(filePath: string): Promise<MediaInfo> {
     chapters: chaptersAndFonts.chapters,
     attachmentFonts: chaptersAndFonts.attachmentFonts,
   }
+}
+
+/** Реализация `MediaProber` поверх ffprobe (бинарь ffmpeg уже в комплекте Animatrona) */
+export const ffprobeProber: MediaProber = {
+  probe: probeFile,
 }

@@ -4,6 +4,22 @@
 
 ## [Unreleased]
 
+## [0.55.63] - 2026-09-07
+
+### Changed
+
+- **Main-часть папочного плеера перенесена в `@letar/folder-scan`.** `external-audio-scanner`,
+  `external-subtitle-scanner`, `font-matcher`, `subtitle-parser`, `fs-utils`, whitelist разрешённых
+  путей и обработчик `media://` протокола (оба обобщены — параметризованы функцией
+  `isPathAllowed`/seed-путями вместо завязки на `app.getPath`), а также новые `scanFolderForMedia`
+  и интерфейс `MediaProber` (нормализованные `AudioTrack`/`SubtitleTrack`/`VideoTrack`/
+  `MediaChapter`/`MediaInfo`) — теперь общий код, переиспользуемый будущим `animatrona-player`.
+  `main/ffmpeg/probe.ts` экспортирует `ffprobeProber: MediaProber` как тонкую обёртку над
+  существующим `probeFile`. `main/protocols/allowed-paths.ts` и `media.protocol.ts` остались
+  тонкими адаптерами библиотеки под Animatrona (Electron-специфичная инициализация путей).
+  `apps/animatrona/shared/types.ts` ре-экспортирует медиа-типы из библиотеки вместо локальных
+  копий. Поведение не изменилось — рефакторинг без изменения контракта IPC-хендлеров.
+
 ## [0.55.62] - 2026-09-07
 
 ### Added
