@@ -115,6 +115,7 @@ export function GlobalVideoProvider({ children }: GlobalVideoProviderProps) {
       // Сохраняем в store
       useGlobalVideoStore.getState().setVideoElement(video)
       useGlobalVideoStore.getState().setAudioElement(audio)
+      useGlobalVideoStore.getState().setShakaPlayer(player)
 
       cleanup = () => {
         player.removeEventListener('error', onShakaError)
@@ -128,6 +129,7 @@ export function GlobalVideoProvider({ children }: GlobalVideoProviderProps) {
         playerRef.current = null
         useGlobalVideoStore.getState().setVideoElement(null)
         useGlobalVideoStore.getState().setAudioElement(null)
+        useGlobalVideoStore.getState().setShakaPlayer(null)
       }
     })()
 

@@ -8,6 +8,7 @@
 
 import { create } from 'zustand'
 
+import type Shaka from 'shaka-player'
 import type { GlobalVideoState, PlaybackMetadata, VideoDisplayMode } from './types'
 
 /** Интерфейс Zustand store */
@@ -16,6 +17,8 @@ interface GlobalVideoStore extends GlobalVideoState {
   videoElement: HTMLVideoElement | null
   /** Ссылка на audio element для отдельных дорожек */
   audioElement: HTMLAudioElement | null
+  /** Ссылка на Shaka Player (persistent, создаётся в Provider) — источник реального fps дорожки */
+  shakaPlayer: Shaka.Player | null
 
   // === Actions ===
 
@@ -56,6 +59,9 @@ interface GlobalVideoStore extends GlobalVideoState {
   /** Установить audio element */
   setAudioElement: (element: HTMLAudioElement | null) => void
 
+  /** Установить Shaka Player */
+  setShakaPlayer: (player: Shaka.Player | null) => void
+
   /** Установить URL отдельной аудиодорожки */
   setAudioSrc: (src: string | null) => void
 
@@ -70,6 +76,7 @@ interface GlobalVideoStore extends GlobalVideoState {
 const initialState: GlobalVideoState & {
   videoElement: HTMLVideoElement | null
   audioElement: HTMLAudioElement | null
+  shakaPlayer: Shaka.Player | null
 } = {
   mode: 'hidden',
   src: null,
@@ -82,6 +89,7 @@ const initialState: GlobalVideoState & {
   metadata: null,
   videoElement: null,
   audioElement: null,
+  shakaPlayer: null,
 }
 
 /**
@@ -158,6 +166,8 @@ export const useGlobalVideoStore = create<GlobalVideoStore>()((set, get) => ({
   setVideoElement: (element) => set({ videoElement: element }),
 
   setAudioElement: (element) => set({ audioElement: element }),
+
+  setShakaPlayer: (player) => set({ shakaPlayer: player }),
 
   setAudioSrc: (src) => set({ audioSrc: src }),
 

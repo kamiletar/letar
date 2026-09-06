@@ -24,7 +24,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { LuChevronLeft, LuChevronRight, LuPictureInPicture } from 'react-icons/lu'
+import { LuChevronLeft, LuChevronRight, LuPictureInPicture, LuStepBack, LuStepForward } from 'react-icons/lu'
 
 import { useGlobalVideoStore } from '@/components/global-video'
 
@@ -44,7 +44,7 @@ import {
   usePlayerState,
   useSubtitleManagement,
 } from './_hooks'
-
+import { FRAME_STEP_COUNT, getShakaFrameRate } from './frame-step-utils'
 import { NativeSubtitleOverlay } from './NativeSubtitleOverlay'
 import { PlayerContextProvider } from './PlayerContext'
 import type { VideoPlayerProps, VideoPlayerRef } from './types'
@@ -137,6 +137,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
   // НЕ создаём новый — используем из store.
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const globalVideoElement = useGlobalVideoStore((s) => s.videoElement)
+  const shakaPlayer = useGlobalVideoStore((s) => s.shakaPlayer)
   const [isVideoReady, setIsVideoReady] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -267,6 +268,29 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
   }, [])
 
   /**
+   * Покадровая перемотка на паузе — FRAME_STEP_COUNT кадров назад/вперёд.
+   *
+   * Если видео играло — сначала ставим на паузу (как в mpv/VLC): шаг по кадрам
+   * во время воспроизведения не имеет смысла, следующий рендер кадра сразу же
+   * уедет дальше вычисленной позиции.
+   */
+  const stepFrame = useCallback(
+    (forward: boolean) => {
+      const video = videoRef.current
+      if (!video) {
+        return
+      }
+      if (!video.paused) {
+        controls.pause()
+      }
+      const fps = getShakaFrameRate(shakaPlayer)
+      const delta = ((forward ? 1 : -1) * FRAME_STEP_COUNT) / fps
+      controls.seek(video.currentTime + delta)
+    },
+    [controls, shakaPlayer],
+  )
+
+  /**
    * Одиночный клик по кадру — пауза/воспроизведение.
    *
    * Задержки нет намеренно: пауза должна отзываться сразу. Браузер на двойном клике
@@ -319,6 +343,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
     toggleFullscreen: controls.toggleFullscreen,
     adjustPlaybackSpeed,
     toggleVideoInfo,
+    stepFrame,
   })
 
   // Хук субтитров
@@ -541,24 +566,52 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function
     )
   }, [hasPrevEpisode, hasNextEpisode, onPrevEpisode, onNextEpisode, prevEpisodeTooltip, nextEpisodeTooltip])
 
-  // Слот дополнительных кнопок (PiP)
+  // Слот дополнительных кнопок (покадровая перемотка на паузе + PiP)
   const extraControlsSlot = useMemo(
     () => (
-      <Tooltip content={isPiP ? 'Выйти из PiP' : 'Картинка в картинке'}>
-        <IconButton
-          aria-label={isPiP ? 'Exit PiP' : 'Enter PiP'}
-          variant="ghost"
-          colorPalette="whiteAlpha"
-          size="sm"
-          onClick={togglePiP}
-        >
-          <LuPictureInPicture
-            color={isPiP ? 'var(--chakra-colors-primary-fg)' : 'var(--chakra-colors-player-control)'}
-          />
-        </IconButton>
-      </Tooltip>
+      <>
+        {!state.isPlaying && (
+          <>
+            <Tooltip content={`${FRAME_STEP_COUNT} кадров назад (,)`}>
+              <IconButton
+                aria-label="Step back"
+                variant="ghost"
+                colorPalette="whiteAlpha"
+                size="sm"
+                onClick={() => stepFrame(false)}
+              >
+                <LuStepBack color="var(--chakra-colors-player-control)" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip content={`${FRAME_STEP_COUNT} кадров вперёд (.)`}>
+              <IconButton
+                aria-label="Step forward"
+                variant="ghost"
+                colorPalette="whiteAlpha"
+                size="sm"
+                onClick={() => stepFrame(true)}
+              >
+                <LuStepForward color="var(--chakra-colors-player-control)" />
+              </IconButton>
+            </Tooltip>
+          </>
+        )}
+        <Tooltip content={isPiP ? 'Выйти из PiP' : 'Картинка в картинке'}>
+          <IconButton
+            aria-label={isPiP ? 'Exit PiP' : 'Enter PiP'}
+            variant="ghost"
+            colorPalette="whiteAlpha"
+            size="sm"
+            onClick={togglePiP}
+          >
+            <LuPictureInPicture
+              color={isPiP ? 'var(--chakra-colors-primary-fg)' : 'var(--chakra-colors-player-control)'}
+            />
+          </IconButton>
+        </Tooltip>
+      </>
     ),
-    [isPiP, togglePiP],
+    [isPiP, togglePiP, state.isPlaying, stepFrame],
   )
 
   return (
