@@ -4,6 +4,57 @@
 
 > **Архив обновлён:** 2026-09-06
 
+## Типизация main-процесса (tsgo) + починка 4 e2e-тестов плеера (2026-09-06)
+
+Main-процесс не проверялся типами вообще: `main/tsconfig.json` имел `include`, не покрывающий
+реальную структуру исходников (`main/ffmpeg`, `main/services`, `main/ipc`), корневой
+`tsconfig.json` приложения `main` исключал, а webpack собирал через `ts-loader` с
+`transpileOnly: true`.
+
+**Фикс конфига:** `module`/`moduleResolution` → `ESNext`/`bundler` (было `Node16`), снят
+фантомный `references` на `tsconfig.spec.json`, снят `rootDir`/`outDir`, `include` расширен до
+`**/*.ts`.
+
+**Разгребено 295 ошибок tsgo.** Часть — типовые пробелы (виджет `unknown` из-за инференса
+дефолтных параметров внутри generic `createHandler<TArgs, TResult>`, потеря const-narrowing
+через вложенные `function`-объявления, конфликт `declare module 'electron'` с типами самого
+electron — TS2300). Часть — настоящие давние функциональные баги, молчавшие только из-за
+отсутствия проверки:
+
+- жанры/темы аниме не сохранялись при локальном torrent-импорте (`Genre`/`Theme` писались с
+  несуществующими полями, ошибка Prisma глушилась try/catch) — добавлено поле `Genre.nameRu` в
+  `schema.zmodel` + миграция `20260906185655_genre_add_name_ru`
+- `AnimeRelation.upsert` бил по несуществующему compound-ключу
+- весь `AchievementService` вызывался без `await` (методы `achievements-store.ts` асинхронны)
+- watchdog зависших видео-задач (`video-pool.ts`) читал поля не с того объекта и никогда не
+  срабатывал
+- ретрай скачивания постера не срабатывал из-за неверной проверки результата
+- автостарт синхронизации трекеров терял `await` у конфига
+- `tracker.handlers.ts` упал бы при первом вызове `syncLibrary` (не были импортированы
+  `path`/`app`/`fs`)
+- `resumeTask` в `base-pool.ts` не проверял `process` на `null` (в отличие от парного
+  `pauseTask`)
+- `web-export-manager.ts` звал несуществующий класс `UnixFSService.getInstance()` — гарантированный
+  краш при публикации в IPFS
+- `manifest-generator.ts` писал несуществующее поле `path` вместо обязательного `cid`
+- `content-migration.ts` записывал в БД весь объект `IpfsAddResult` вместо строки CID
+- `episode-manifest-regen.ts` фильтровал `Anime` по несуществующему полю `manifestCid` (нужно
+  `animeInfoCid`)
+- `relations-and-manifest.ts`/`post-process-runner.ts` писали relation FK напрямую скаляром
+  вместо Prisma `connect`/`disconnect`
+
+Добавлен постоянный гейт — Nx-таргет `typecheck:main` (`tsgo --project main/tsconfig.json
+--noEmit`), подключён как `dependsOn` к `typecheck:tsgo`.
+
+**E2E:** все 4 теста `04-player/folder-player.electron.spec.ts` молча скипались —
+`getByRole('link', { name: /плеер/i })` не находился, потому что пункты сайдбара — `Box asChild`
+вокруг `<button>` ([Sidebar.tsx:160](renderer/src/components/layout/Sidebar.tsx)), не `<a>`.
+Заменено на `getByRole('button', ...)` по образцу уже исправленного `video-click` спека; та же
+правка для локатора «Библиотека» в четвёртом тесте. Прогнать вживую не удалось — нужен
+production-билд Electron и GUI, недоступные в песочнице агента.
+
+Коммит: `1e4f892d`.
+
 ## Перенос renderer-части папочного плеера в libs (Фаза 1, шаг 2) (2026-09-06)
 
 Продолжение задачи из плана «Animatrona Player» (§5 «Фаза 1 — вынос в библиотеки»): каркасы
