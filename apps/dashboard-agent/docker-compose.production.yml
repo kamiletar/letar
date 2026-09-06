@@ -71,6 +71,13 @@ services:
       EMAIL_CANARY_EXTERNAL_IMAP_SECURE: ${EMAIL_CANARY_EXTERNAL_IMAP_SECURE}
       EMAIL_CANARY_EXTERNAL_IMAP_USER: ${EMAIL_CANARY_EXTERNAL_IMAP_USER}
       EMAIL_CANARY_EXTERNAL_IMAP_PASSWORD: ${EMAIL_CANARY_EXTERNAL_IMAP_PASSWORD}
+      # Per-app канарейка доставки email domwellbes (см. lib/domwellbes-email-canary.ts) — IMAP
+      # служебного ящика canary-domwellbes@letar.best. SMTP-сторона отдельного секрета не требует:
+      # берётся из уже смонтированного /secrets/domwellbes.env (getAppSmtpConfig).
+      DOMWELLBES_EMAIL_CANARY_IMAP_HOST: ${DOMWELLBES_EMAIL_CANARY_IMAP_HOST}
+      DOMWELLBES_EMAIL_CANARY_IMAP_PORT: ${DOMWELLBES_EMAIL_CANARY_IMAP_PORT}
+      DOMWELLBES_EMAIL_CANARY_IMAP_SECURE: ${DOMWELLBES_EMAIL_CANARY_IMAP_SECURE}
+      DOMWELLBES_EMAIL_CANARY_IMAP_PASSWORD: ${DOMWELLBES_EMAIL_CANARY_IMAP_PASSWORD}
     volumes:
       # Docker socket для управления контейнерами
       - /var/run/docker.sock:/var/run/docker.sock

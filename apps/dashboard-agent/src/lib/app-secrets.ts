@@ -115,3 +115,38 @@ export function getAppOrigin(app: string): string | null {
 
   return origin || null
 }
+
+export interface AppSmtpConfig {
+  host: string
+  port: number
+  secure: boolean
+  user: string
+  password: string
+}
+
+/**
+ * SMTP-реквизиты приложения из его же `.env.docker` (см. `libs/email` — `SMTP_HOST`/`SMTP_PORT`/
+ * `SMTP_SECURE`/`SMTP_USER`/`SMTP_PASSWORD`). Используется per-app канарейкой доставки почты
+ * (`domwellbes-email-canary.ts`), чтобы отправлять тестовое письмо от лица РЕАЛЬНОГО SMTP-аккаунта
+ * приложения — тот же аккаунт, которым приложение шлёт письма клиентам, а не общий технический
+ * ящик, как у глобальной `email-canary.ts`. `null`, если в файле секретов нет SMTP-блока целиком
+ * (не смонтирован файл, приложение ещё не настроило почту).
+ */
+export function getAppSmtpConfig(app: string): AppSmtpConfig | null {
+  const env = parseEnvFile(path.join(getSecretsDir(), `${app}.env`))
+  const host = env['SMTP_HOST']
+  const user = env['SMTP_USER']
+  const password = env['SMTP_PASSWORD']
+
+  if (!host || !user || !password) {
+    return null
+  }
+
+  return {
+    host,
+    port: Number(env['SMTP_PORT']) || 587,
+    secure: env['SMTP_SECURE'] === 'true',
+    user,
+    password,
+  }
+}

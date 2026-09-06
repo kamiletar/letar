@@ -1,6 +1,6 @@
 # Dashboard Agent — План развития
 
-## Текущая версия: 0.15.30
+## Текущая версия: 0.16.1
 
 Легковесный агент мониторинга для удалённых серверов.
 
@@ -18,6 +18,7 @@
 | Плановая чистка `.next/cache` в host-чекауте (s2+s3, 2 дня idle)        | ✅ Готово (2026-08-28, `0.15.19`) | P1        |
 | Ежедневная проверка `Account.issuer = NULL` (better-auth 1.7 регрессия) | ✅ Готово (2026-08-28, `0.15.20`) | P1        |
 | Синтетическая канареечная проверка входа (30 мин, 9 приложений)         | ✅ Готово (2026-08-31, `0.15.30`) | P1        |
+| Per-app канарейка доставки email domwellbes (реальный SMTP приложения)  | ✅ Готово (2026-09-06, `0.16.1`)  | P2        |
 
 **Синтетическая канареечная проверка входа (2026-08-28, PLAN.md корня §71 п.3.3):** дополняет
 `account-issuer-null-check` (ловит один конкретный класс регрессии) — эта проверка ловит ЛЮБУЮ
@@ -31,6 +32,22 @@ svoichuzhie, dsperevod. Алерт `AUTH_LOGIN_CANARY_FAILED` при HTTP-отв
 Учётные данные канареечных аккаунтов — реестр `LOGIN_CANARY_<APP>_EMAIL`/`_PASSWORD` в
 `apps/dashboard/.env.docker.enc` (все 9 приложений уже были смонтированы в
 `docker-compose.production.yml` для `database.ts` — новых mount'ов не потребовалось).
+**Per-app канарейка доставки email domwellbes (2026-09-06, `0.16.1`):** обнаружено при разборе
+жалобы пользователя на логин 05.09.2026, что ящик `canary-domwellbes@letar.best` (email
+логин-канарейки domwellbes) не существовал — провижининг 28.08.2026 бился `501 5.1.1 User does
+not exist` (фикс инфраструктуры — `.claude/docs/maddy-creds-create-missing-imap-acct.md`, у
+Maddy `creds create` и `imap-acct create` — два независимых шага). Раз ящик уже заведён и
+проверен round-trip'ом вручную — оформлено в постоянную cron-задачу
+`domwellbes-email-canary-check` (`15 * * * *`, `lib/domwellbes-email-canary.ts`): в отличие от
+общей `email-canary-check` (технический ящик `canary@letar.best`), эта шлёт через РЕАЛЬНЫЙ
+SMTP-аккаунт приложения (`getAppSmtpConfig('domwellbes')` — новая функция в `app-secrets.ts`,
+читает уже смонтированный `/secrets/domwellbes.env`) — так проверяется именно то, что может
+сломаться у самого приложения (SMTP-реквизиты, DKIM домена `domwellbes.ru`), а не общая
+инфраструктура Maddy. IMAP-проверка переиспользует `waitForCanaryMessage` (экспортирован из
+`email-canary.ts`). Секрет — `DOMWELLBES_EMAIL_CANARY_IMAP_PASSWORD` в
+`apps/dashboard-agent/.env.docker.enc` (пароль служебного ящика, не SMTP domwellbes — тот уже
+доступен агенту через смонтированный `/secrets/domwellbes.env`).
+
 Провижининг самих аккаунтов — одноразовый `POST /api/admin/login-canary-setup`
 (`lib/login-canary-setup.ts`): регистрирует через собственный `/api/auth/sign-up/email`
 приложения (пароль хешируется его алгоритмом, включая bcrypt driving-school), затем снимает

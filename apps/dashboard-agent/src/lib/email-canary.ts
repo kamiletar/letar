@@ -203,7 +203,7 @@ async function sendCanaryEmail(token: string): Promise<{ ok: boolean; error: str
   return { ok: result.success, error: result.error ?? null }
 }
 
-type WaitResult = {
+export type WaitResult = {
   ok: boolean
   latencyMs: number | null
   error: string | null
@@ -223,7 +223,11 @@ function failedWait(error: string): WaitResult {
  * `.claude/docs/imapflow-error-listener-hang-pitfall.md` за тем, почему одного слушателя
  * `'error'` недостаточно и почему нужен внешний жёсткий дедлайн.
  */
-async function waitForCanaryMessage(opts: {
+/**
+ * Экспортирована для переиспользования per-app канарейками (см. `domwellbes-email-canary.ts`) —
+ * сам поллинг IMAP-ящика с жёстким дедлайном не специфичен для глобального `canary@letar.best`.
+ */
+export async function waitForCanaryMessage(opts: {
   host: string
   port: number
   secure: boolean

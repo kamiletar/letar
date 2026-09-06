@@ -11,6 +11,23 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.16.1] — 2026-09-06
+
+### Added
+
+- Per-app канареечный мониторинг доставки email для domwellbes (`lib/domwellbes-email-canary.ts`,
+  новая cron-задача `domwellbes-email-canary-check`, `15 * * * *`): в отличие от общей
+  `email-canary-check` (технический `canary@letar.best`), эта проверка шлёт через РЕАЛЬНЫЙ
+  SMTP-аккаунт приложения (`getAppSmtpConfig('domwellbes')`, читает уже смонтированный
+  `/secrets/domwellbes.env`) на выделенный служебный ящик `canary-domwellbes@letar.best` и ждёт
+  получения через IMAP (`waitForCanaryMessage`, экспортирован из `email-canary.ts` для
+  переиспользования). Найдено поводом: провижининг login-canary аккаунта domwellbes 28.08.2026
+  упёрся в `501 5.1.1 User does not exist` — ящик не существовал вовсе (разобрано 05.09.2026,
+  фикс — `.claude/docs/maddy-creds-create-missing-imap-acct.md`). `GET
+  /api/cron/domwellbes-email-canary-check/status` — снимок состояния без нового прогона.
+- `getAppSmtpConfig()` в `app-secrets.ts` — читает `SMTP_HOST`/`SMTP_PORT`/`SMTP_SECURE`/
+  `SMTP_USER`/`SMTP_PASSWORD` приложения из того же файла, что и `CRON_SECRET`.
+
 ## [0.16.0] — 2026-09-04
 
 ### Added

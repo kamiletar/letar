@@ -344,6 +344,23 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     timeoutMs: 130_000,
   },
   {
+    id: 'domwellbes-email-canary-check',
+    name: 'Email Canary Check (domwellbes)',
+    app: 'dashboard-agent',
+    endpoint: '/api/cron/domwellbes-email-canary-check',
+    // Смещено на :15, чтобы не бить одновременно с общей email-canary-check (:00) — разные
+    // ноги проверки, но обе идут через один и тот же mail.letar.best.
+    schedule: '15 * * * *',
+    description: 'Канареечный round-trip доставки email domwellbes (найдено при разборе жалобы на логин '
+      + '05.09.2026): отправка через РЕАЛЬНЫЙ SMTP-аккаунт приложения (noreply@domwellbes.ru) на служебный '
+      + 'ящик canary-domwellbes@letar.best + IMAP-проверка получения — lib/domwellbes-email-canary.ts',
+    enabled: true,
+    server: 's2',
+    // Тот же бюджет, что у email-canary-check: одна нога вместо двух, но тот же waitForCanaryMessage
+    // (POLL_TIMEOUT_MS 90с + hard deadline 15с) — берём с тем же запасом.
+    timeoutMs: 130_000,
+  },
+  {
     id: 'maddy-backup-freshness-check',
     name: 'Maddy Backup Freshness Check',
     app: 'dashboard-agent',

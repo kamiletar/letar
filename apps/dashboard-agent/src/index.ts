@@ -33,6 +33,7 @@ import { databaseRoutes } from './routes/database'
 import { deployRoutes } from './routes/deploy'
 import { dockerRoutes } from './routes/docker'
 import { dockerPruneRoutes } from './routes/docker-prune'
+import { domwellbesEmailCanaryRoutes } from './routes/domwellbes-email-canary'
 import { e2eRoutes } from './routes/e2e'
 import { emailCanaryRoutes } from './routes/email-canary'
 import { envRoutes } from './routes/env'
@@ -132,6 +133,7 @@ async function main(): Promise<void> {
   await fastify.register(gitRoutes)
   await fastify.register(envRoutes)
   await fastify.register(emailCanaryRoutes)
+  await fastify.register(domwellbesEmailCanaryRoutes)
   await fastify.register(backupFreshnessRoutes)
   await fastify.register(accountIssuerCheckRoutes)
   await fastify.register(loginCanaryRoutes)

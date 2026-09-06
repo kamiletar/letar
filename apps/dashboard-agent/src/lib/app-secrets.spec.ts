@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os'
 import path from 'path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { clearEnvCache, getAppCronSecret, parseEnvFile } from './app-secrets'
+import { clearEnvCache, getAppCronSecret, getAppSmtpConfig, parseEnvFile } from './app-secrets'
 
 describe('app-secrets', () => {
   let secretsDir: string
@@ -110,6 +110,52 @@ describe('app-secrets', () => {
       delete process.env.CRON_SECRET
 
       expect(getAppCronSecret('dashboard-agent')).toBeNull()
+    })
+  })
+
+  // Используется per-app канарейкой доставки email (domwellbes-email-canary.ts) — читает
+  // РЕАЛЬНЫЙ SMTP-аккаунт приложения из того же смонтированного файла, что и CRON_SECRET.
+  describe('getAppSmtpConfig', () => {
+    it('собирает конфиг из полного SMTP-блока', () => {
+      writeSecrets(
+        'domwellbes',
+        'SMTP_HOST=mail.letar.best\nSMTP_PORT=587\nSMTP_SECURE=false\nSMTP_USER=noreply@domwellbes.ru\nSMTP_PASSWORD=пароль\n',
+      )
+
+      expect(getAppSmtpConfig('domwellbes')).toEqual({
+        host: 'mail.letar.best',
+        port: 587,
+        secure: false,
+        user: 'noreply@domwellbes.ru',
+        password: 'пароль',
+      })
+    })
+
+    it('дефолтит порт 587 и secure=false при отсутствии явных значений', () => {
+      writeSecrets('domwellbes', 'SMTP_HOST=mail.letar.best\nSMTP_USER=noreply@domwellbes.ru\nSMTP_PASSWORD=пароль\n')
+
+      const config = getAppSmtpConfig('domwellbes')
+      expect(config?.port).toBe(587)
+      expect(config?.secure).toBe(false)
+    })
+
+    it('secure=true только при явном SMTP_SECURE=true', () => {
+      writeSecrets(
+        'domwellbes',
+        'SMTP_HOST=mail.letar.best\nSMTP_SECURE=true\nSMTP_USER=x\nSMTP_PASSWORD=y\n',
+      )
+
+      expect(getAppSmtpConfig('domwellbes')?.secure).toBe(true)
+    })
+
+    it('возвращает null, если не хватает хотя бы одного обязательного поля', () => {
+      writeSecrets('domwellbes', 'SMTP_HOST=mail.letar.best\nSMTP_USER=noreply@domwellbes.ru\n')
+
+      expect(getAppSmtpConfig('domwellbes')).toBeNull()
+    })
+
+    it('возвращает null для несмонтированного приложения', () => {
+      expect(getAppSmtpConfig('приложение-без-маунта')).toBeNull()
     })
   })
 })
