@@ -28,35 +28,19 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { walk } from './lib/fs-walk.mjs'
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(scriptDir, '..')
 
 const rel = (p) => path.relative(repoRoot, p).split(path.sep).join('/')
 
+// Расширенный набор относительно DEFAULT_SKIP_DIRS из fs-walk.mjs (там нет
+// .turbo/coverage/generated) — намеренный override, не объединение.
 const SKIP_DIRS = new Set(['node_modules', '.next', 'dist', 'out', '.turbo', 'coverage', 'generated', '.git', '.nx'])
 
 function walkTsFiles(dir) {
-  const files = []
-  function walk(d) {
-    let entries
-    try {
-      entries = readdirSync(d, { withFileTypes: true })
-    } catch {
-      return
-    }
-    for (const e of entries) {
-      if (SKIP_DIRS.has(e.name)) { continue }
-      const full = path.join(d, e.name)
-      if (e.isDirectory()) {
-        walk(full)
-      } else if (/\.(ts|tsx)$/.test(e.name)) {
-        files.push(full)
-      }
-    }
-  }
-  walk(dir)
-  return files
+  return walk(dir, (name) => /\.(ts|tsx)$/.test(name), Infinity, SKIP_DIRS)
 }
 
 const Q1 = "'"
