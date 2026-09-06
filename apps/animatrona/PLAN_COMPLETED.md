@@ -4,6 +4,51 @@
 
 > **Архив обновлён:** 2026-09-06
 
+## isForced у SubtitleTrack/AudioTrack — библиотечный режим (2026-09-06)
+
+**Проблема:** флаг `disposition.forced` контейнера (форсированные субтитры/аудио — например
+надписи на неродном языке, которые плеер должен показывать даже при выключенных субтитрах) уже
+читался и учитывался в папочном режиме плеера (`main/ffmpeg/probe.ts`, `isForced` в
+`MediaInfo`/`TrackSelector`), но полностью терялся в библиотечном режиме (импорт в БД →
+транскод → раздача по IPFS) — там хранить его было негде: ни в схеме, ни в манифесте.
+
+**Реализация:**
+
+1. `schema/models/media.zmodel` — поле `isForced Boolean @default(false)` у `SubtitleTrack` и
+   `AudioTrack`. Миграция `prisma/migrations/20260906203900_add_track_is_forced/`.
+2. `libs/animatrona-types/src/episode-manifest.ts` — `isForced?: boolean` в
+   `ManifestAudioTrack`/`ManifestSubtitleTrack`.
+3. `apps/animatrona/shared/types.ts` — `isForced?: boolean` в `DemuxedAudio`/`DemuxedSubtitle`.
+4. `main/ffmpeg/demux.ts` — раньше ffprobe вызывался без запроса `disposition` вообще (в отличие
+   от `probe.ts`, где это уже было). Добавлено поле `disposition?: StreamDisposition` в тип
+   потока и заполнение `isForced` через `isDispositionFlagSet` (`@letar/folder-scan`, тот же
+   детектор, что уже использует папочный режим) при пуше в `audioTracks`/`subtitles`.
+5. Прокинуто по всему конвейеру: `audio-track-creator.ts`/`subtitle-track-creator.ts` (создание
+   БД-записей из демукс-результата) → `import-db.ts` (`createAudioTrack`/`createSubtitleTrack` +
+   оба `findXForManifest`) → `manifest-generator.ts` (`rebuildManifestTracks`, включая сравнение
+   в `serializeAudio`/`serializeSub`, чтобы регенерация манифеста реагировала на изменение
+   флага). Дополнительно исправлены три места, где Prisma `select` дублируется отдельно от
+   `import-db.ts` (`manifest.handlers.ts`, `episode-manifest-regen.ts`
+   `EPISODE_TRACKS_SELECT`) — иначе поле осело бы в БД, но не доехало бы до манифеста.
+6. Внешние дорожки (drag&drop файлы, не встроенные в контейнер) флага не несут —
+   `isForced: false` по умолчанию.
+
+Закрывает PLAN.md §19.4 «Библиотечный режим» — задача была привязана к дедлайну «до массовой
+перезаливки библиотеки» (§15.3, из-за дороговизны повторного прохода по всей библиотеке).
+
+lint/typecheck:tsgo animatrona — зелёные (0 ошибок, только преэкзистентные warnings).
+
+⚠️ **Побочная находка, не пофикшена в рамках этой задачи:** `nx test animatrona` не собирает
+`main/services/import/__tests__/anime-record-setup.spec.ts` — цепочка импортов до
+`external-subtitle-scanner.ts` → `@letar/folder-scan` падает под vitest
+(`Cannot find package '@letar/folder-scan'`), хотя `typecheck:tsgo` и продовая сборка (через
+webpack/esbuild-алиасы `main/`) резолвят пакет нормально. Причина — пакет только в
+`nx.implicitDependencies`/`tsconfig.json` `paths`, не в настоящих `dependencies`
+`apps/animatrona/package.json`, симлинка в `node_modules` нет. Существовало до этой сессии.
+Остальные 162 теста в собравшихся файлах прошли. Заведена отдельная задача (см. ниже).
+
+Коммиты: `3d778376` (`@letar/animatrona-types`), `a6ce1057` (`animatrona`).
+
 ## Автоопределение глав (OP/ED) в папочном режиме плеера (2026-09-06)
 
 **Проблема:** при импорте в библиотеку главы из контейнера классифицируются
