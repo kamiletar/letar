@@ -45,6 +45,23 @@ import { upsertAnimeRelations } from './utils/anime-relation-upsert'
 
 const log = createModuleLogger('AnimeManifestGenerator')
 
+/** TTL графа франшизы — «раз в неделю», как обещано комментарием в schema.zmodel */
+export const FRANCHISE_GRAPH_TTL_MS = 7 * 24 * 60 * 60 * 1000
+
+/**
+ * Устарел ли кешированный граф франшизы и нужно ли перезапросить его у Shikimori.
+ *
+ * `graphUpdatedAt` раньше нигде не читался для принятия решения — граф запрашивался один раз
+ * при первом попадании франшизы в библиотеку и переиспользовался бессрочно (PLAN.md, находка
+ * аудита directoryCid). `null`/`undefined` (графа ещё не было) считается устаревшим.
+ */
+export function isFranchiseGraphStale(graphUpdatedAt: Date | null | undefined): boolean {
+  if (!graphUpdatedAt) {
+    return true
+  }
+  return Date.now() - graphUpdatedAt.getTime() > FRANCHISE_GRAPH_TTL_MS
+}
+
 /** Вывести сообщение в UI-лог регенерации (если активна) */
 function detail(level: 'info' | 'warn' | 'success' | 'error', message: string): void {
   if (regenerationState.getStatus().isRegenerating) {
@@ -371,14 +388,25 @@ export async function generateAnimeManifest(input: GenerateAnimeManifestInput): 
         // Проверяем есть ли уже graphCid у франшизы в БД
         const franchise = await prisma.franchise.findFirst({
           where: { animes: { some: { id: animeId } } },
-          select: { id: true, graphCid: true },
+          select: { id: true, graphCid: true, graphUpdatedAt: true },
         })
 
-        if (franchise?.graphCid) {
+        // Если с тех пор вышел сиквел/фильм/OVA — устаревший граф вморожен в directoryCid ВСЕХ
+        // аниме этой франшизы, не только текущего (см. isFranchiseGraphStale выше).
+        const isStale = isFranchiseGraphStale(franchise?.graphUpdatedAt)
+
+        if (franchise?.graphCid && !isStale) {
           franchiseGraphCid = franchise.graphCid
           detail('info', `   ✓ franchise graph: из кеша`)
           log.info('FranchiseGraphDocument из БД', { franchiseGraphCid })
         } else {
+          if (franchise?.graphCid && isStale) {
+            detail('info', `   ↻ franchise graph: кеш устарел (>7д), перезапрашиваем`)
+            log.info('FranchiseGraphDocument устарел, перезапрашиваем', {
+              franchiseId: franchise.id,
+              graphUpdatedAt: franchise.graphUpdatedAt,
+            })
+          }
           detail('info', `   ↻ Shikimori: граф франшизы…`)
           const apiGraph = await getFranchiseGraph(anime.shikimoriId)
           if (apiGraph && apiGraph.nodes.length > 0) {

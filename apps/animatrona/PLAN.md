@@ -193,6 +193,14 @@ update}/*`. Разбор на `asChild` + нативный тег — отдел
   сделать `regenerateAll` (или сам билдер) перезапрашивать граф франшизы, если
   `graphUpdatedAt` старше недели, вместо безусловного cache-hit.
 
+  - [x] Фикс (2026-09-06): извлечена чистая функция `isFranchiseGraphStale(graphUpdatedAt)`
+        ([anime-manifest-generator.ts](main/services/anime-manifest-generator.ts), TTL — неделя,
+        `FRANCHISE_GRAPH_TTL_MS`). Ветка кеша теперь перезапрашивает граф у Shikimori, если
+        `graphUpdatedAt` устарел (или графа не было вовсе), вместо безусловного `if
+        (franchise?.graphCid)`. Тесты — `main/services/__tests__/anime-manifest-generator.spec.ts`
+        (4 теста на граничные случаи TTL). Актуально и для реимпорта, не только для
+        `regenerateAll` — фикс в общей точке входа, обе ветки используют один код.
+
   **⚠️ Уточнение (2026-08-08): перезаливка идёт полным реимпортом, не `regenerateAll`.** Это
   меняет картину. `regenerateAll` пересобирает директорию из того, что **уже** в БД — там
   работают probe/recovery. Полный реимпорт пишет БД заново, поэтому действует правило:
