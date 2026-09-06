@@ -133,6 +133,29 @@ describe('useKeyboardShortcuts', () => {
     expect(toggleFullscreen).not.toHaveBeenCalled()
   })
 
+  it('"," и русская "б" вызывают stepFrame(false)', () => {
+    const stepFrame = vi.fn()
+    renderHook(() => useKeyboardShortcuts(makeOptions({ stepFrame })))
+    dispatchKey(',')
+    dispatchKey('б')
+    expect(stepFrame).toHaveBeenNthCalledWith(1, false)
+    expect(stepFrame).toHaveBeenNthCalledWith(2, false)
+  })
+
+  it('"." и русская "ю" вызывают stepFrame(true)', () => {
+    const stepFrame = vi.fn()
+    renderHook(() => useKeyboardShortcuts(makeOptions({ stepFrame })))
+    dispatchKey('.')
+    dispatchKey('ю')
+    expect(stepFrame).toHaveBeenNthCalledWith(1, true)
+    expect(stepFrame).toHaveBeenNthCalledWith(2, true)
+  })
+
+  it('не бросает исключение при "," без переданного stepFrame', () => {
+    renderHook(() => useKeyboardShortcuts(makeOptions()))
+    expect(() => dispatchKey(',')).not.toThrow()
+  })
+
   it('"[" уменьшает скорость воспроизведения на 0.25, если передан adjustPlaybackSpeed', () => {
     const adjustPlaybackSpeed = vi.fn()
     renderHook(() => useKeyboardShortcuts(makeOptions({ adjustPlaybackSpeed })))

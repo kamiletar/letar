@@ -9,6 +9,7 @@
  * - F, Alt+Enter: fullscreen
  * - [ / ]: скорость воспроизведения ±0.25x
  * - I: информация о видео
+ * - , / .: покадровая перемотка назад/вперёд (на паузе)
  */
 
 import { useEffect } from 'react'
@@ -36,6 +37,8 @@ export interface UseKeyboardShortcutsOptions {
   adjustPlaybackSpeed?: (delta: number) => void
   /** Переключить оверлей информации о видео */
   toggleVideoInfo?: () => void
+  /** Покадровая перемотка: forward=true — вперёд, false — назад */
+  stepFrame?: (forward: boolean) => void
   /** Хук отключен */
   disabled?: boolean
 }
@@ -52,6 +55,7 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions): void
     toggleFullscreen,
     adjustPlaybackSpeed,
     toggleVideoInfo,
+    stepFrame,
     disabled = false,
   } = options
 
@@ -125,6 +129,16 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions): void
           e.preventDefault()
           toggleVideoInfo?.()
           break
+        case ',':
+        case 'б': // Русская раскладка (,)
+          e.preventDefault()
+          stepFrame?.(false)
+          break
+        case '.':
+        case 'ю': // Русская раскладка (.)
+          e.preventDefault()
+          stepFrame?.(true)
+          break
       }
     }
 
@@ -132,5 +146,15 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions): void
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [videoRef, togglePlay, skipTimeFn, toggleMute, toggleFullscreen, adjustPlaybackSpeed, toggleVideoInfo, disabled])
+  }, [
+    videoRef,
+    togglePlay,
+    skipTimeFn,
+    toggleMute,
+    toggleFullscreen,
+    adjustPlaybackSpeed,
+    toggleVideoInfo,
+    stepFrame,
+    disabled,
+  ])
 }
