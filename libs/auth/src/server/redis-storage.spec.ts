@@ -28,7 +28,7 @@ describe('createRedisStorageFromClient', () => {
 
   it('get() возвращает null вместо зависания, если Redis не отвечает дольше timeoutMs', async () => {
     vi.useFakeTimers()
-    // eslint-disable-next-line @typescript-eslint/no-empty-function -- никогда не резолвится, эмулирует зависший Redis
+    // Промис никогда не резолвится — эмулирует зависший Redis
     const client = fakeClient({ get: vi.fn().mockReturnValue(new Promise(() => {})) })
     const storage = createRedisStorageFromClient(client, { timeoutMs: 50 })
 
