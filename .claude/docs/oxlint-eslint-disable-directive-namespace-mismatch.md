@@ -94,6 +94,59 @@ useEffect(() => {
 ESLint или скопированные с более старого паттерна. Все 9 мест дополнены парной
 `eslint-disable-next-line` тем же коммитом, что и этот документ.
 
+## Дополнение 2026-09-06: третий класс — директива на правило, которое не проверяет НИ ОДИН линтер
+
+Расширенный аудит (прогон `nx lint` на нескольких приложениях с разным профилем — обычный
+Next.js, приложение со своим `.oxlintrc.json`-оверрайдом, Vue-либа — и сверка предупреждений с
+существующими inline-директивами) нашёл иной класс путаницы, не описанный выше: директива
+подавляет предупреждение, которого физически не может возникнуть — правило не подключено вовсе
+ни в `.oxlintrc.json` (не входит ни в одну включённую категорию: `correctness` — единственная
+включённая категория репозитория, `suspicious`/`perf` явно выключены, а
+`react/no-array-index-key` относится к другой категории и отдельно нигде не включён), ни в
+ESLint-конфиге (`eslint-plugin-react` зарегистрирован в `nx.configs['flat/react-typescript']`
+(`react-jsx.js`) с явным точечным списком правил — `no-array-index-key` в него не входит).
+
+Проверено эмпирически, не только по конфигу: копия файла без директивы прогнана и через
+`oxlint --config .oxlintrc.json`, и через `bunx eslint` — оба линтера отработали с exit 0 и без
+единой строки предупреждения. Значит директива не гасит вообще ничего ни в одном линтере —
+мёртвый комментарий, а не пропущенная пара.
+
+Найдено 7 мест с `(oxlint|eslint)-disable-next-line react/no-array-index-key` (и вариантом
+полного имени `eslint-plugin-react/no-array-index-key` — oxlint принимает такой алиас, но это
+не меняет того, что сама категория правила не включена):
+
+- `apps/dashboard/src/app/_components/deploy/DeployProgress.tsx`
+- `apps/dashboard/src/app/_components/shared/LogsDialog.tsx`
+- `apps/dashboard/src/app/_components/ui/skeletons.tsx` (2 места)
+- `apps/kami/src/app/[locale]/hire/_components/team-invite.tsx`
+- `libs/admin-ui/src/table/inline-editable-table.tsx` (2 места, `eslint-disable-next-line`,
+  но `@letar/admin-ui` вдобавок не имеет ни `eslint.config.mjs`, ни таргета `lint`/`oxlint`
+  вовсе — эти строки не проверял никто ни разу)
+
+Директивы удалены тем же коммитом, что и это дополнение — сам `key={index}` (обоснованно
+безопасный для статичных/append-only списков) остался без изменений, убран только
+неработающий комментарий-заглушка.
+
+### Побочная находка при разборе (не баг, задокументировано на будущее)
+
+При проверке версии `eslint-plugin-react-hooks` (7.1.1) обнаружилось, что её `configs.recommended`
+в новой версии объединяет классические `rules-of-hooks`/`exhaustive-deps` с целым набором
+React Compiler правил под тем же префиксом `react-hooks/*` (`react-hooks/set-state-in-effect`,
+`react-hooks/refs`, `react-hooks/immutability` и т.д. — по сути дубли `react/*`-правил oxlint,
+но под другим именем плагина). `nx.configs['flat/react-typescript']` (`react-jsx.js`)
+формально подключает именно `configs.recommended.rules` для всех `.ts(x)`/`.js(x)` файлов —
+на первый взгляд похоже на потенциальный источник массовой путаници (219 существующих
+`oxlint-disable-next-line react/set-state-in-effect` без пары).
+
+Проверено эмпирически (`eslint --print-config` на реальном файле с живым `set-state-in-effect`,
+затем `bunx eslint` без директивы) — компилятор-правила `react-hooks/*` в мёрженом конфиге
+отсутствуют вовсе, только `react-hooks/rules-of-hooks` и `react-hooks/exhaustive-deps`. Похоже,
+`eslint_plugin_react_hooks_1.default.configs.recommended` в установленной сборке 7.1.1 не
+экспортирует полный `recommendedRuleConfigs` там, где его берёт `react-jsx.js` (или берётся не
+та ветка экспорта) — фактического дублирования нет. Действие не требуется, но при апгрейде
+`eslint-plugin-react-hooks` эту связку стоит перепроверить тем же эмпирическим способом
+(`--print-config`, не чтением исходников плагина), а не полагаться на код конфига.
+
 ## Связанное
 
 - [eslint-flat-react-typescript-missing-react-hooks-plugin.md](/.claude/docs/eslint-flat-react-typescript-missing-react-hooks-plugin.md) —
