@@ -38,6 +38,14 @@
       "label": ""
     }
   },
+  "VideoSource": {
+    "URL": {
+      "label": ""
+    },
+    "FILE": {
+      "label": ""
+    }
+  },
   "SkillLevel": {
     "BEGINNER": {
       "label": "Beginner"

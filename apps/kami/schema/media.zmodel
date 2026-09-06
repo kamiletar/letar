@@ -85,3 +85,48 @@ model UploadedFile {
   @@allow('read', true)
   @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
 }
+
+// ========================================
+// Видео (Share Target — ссылка ИЛИ файл)
+// ========================================
+
+// Откуда взято видео — определяет, какие поля заполнены и как рендерится плеер
+enum VideoSource {
+  /// Внешняя ссылка (YouTube/Vimeo) — рендерится через iframe-embed провайдера
+  URL
+  /// Расшаренный видеофайл — рендерится через <video>, отдаётся из uploads/videos/
+  FILE
+}
+
+model Video {
+  id           String      @id @default(cuid())
+  source       VideoSource
+
+  // Поля для source = URL (провайдер распознан в момент шаринга — parseVideoUrl)
+  url          String?                   // Исходная ссылка
+  provider     String?                   // 'youtube' | 'vimeo'
+  externalId   String?                   // videoId провайдера (для embed URL)
+
+  // Поля для source = FILE
+  filename     String?                   // Оригинальное имя файла
+  storedName   String?                   // Имя на диске (уникальное)
+  path         String?     @unique       // Путь в uploads/videos/
+  mimeType     String?                   // MIME-тип файла
+  size         Int?                      // Размер в байтах
+
+  title        String
+  description  String?
+  thumbnailUrl String?                   // Превью (для YouTube — стандартный img.youtube.com)
+  category     String?                   // Свободная категория (как у Link/UploadedFile)
+  tags         String[]    @default([])  // Свободные метки
+
+  uploadedById String?
+  uploadedBy   User?       @relation("uploadedVideos", fields: [uploadedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([path])
+  @@index([category])
+  @@allow('read', true)
+  @@allow('create,update,delete', auth() != null && 'ADMIN' in auth().roles)
+}

@@ -45,6 +45,9 @@ model User {
   // Загруженные произвольные файлы
   uploadedFiles   UploadedFile[] @relation("uploadedFiles")
 
+  // Сохранённые видео (Share Target — ссылка или файл)
+  uploadedVideos  Video[] @relation("uploadedVideos")
+
   // Логи согласий на обработку cookie/ПДн (152-ФЗ)
   consentLogs     ConsentLog[]
 

@@ -5,6 +5,27 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 проект придерживается [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.34.0] - 2026-09-06
+
+### Added
+
+- Раздел «Видео» в Share Target (Фаза 10) — новая модель `Video` (`source: URL | FILE`),
+  единая и для расшаренных ссылок YouTube/Vimeo, и для видеофайлов. `parseVideoUrl()` распознаёт
+  провайдера по regex без сетевых запросов; `/share` создаёт `Video` вместо `Link`, когда ссылка
+  распознана, иначе — прежнее поведение. Видеофайлы (`video/*`, добавлено в `share_target.params`
+  манифеста) идут через `saveVideoFile()` по образцу `saveAudioFile`/`saveUploadedFile`, отдаются
+  `/api/videos/[...path]` (Range-запросы для перемотки, как и `/api/files`). Публичная витрина
+  `/links` получила третий тип карточек (`kind: 'video'`) со встроенным плеером (`VideoPlayer`:
+  iframe-embed для YouTube/Vimeo, `<video controls>` для файлов) и чип-фильтр «Видео» — заодно
+  исправлен скрытый баг фильтрации по типу (Link/UploadedFile-запросы игнорировали
+  `type=video`/будущие типы). Админка — `/admin/videos` с inline-редактированием
+  категории/меток, тем же паттерном, что `/admin/links`/`/admin/files`.
+  Живая проверка: `nx dev`, тестовая запись `Video` (YouTube) вставлена напрямую в dev-БД и
+  удалена после проверки — embed рендерится, метаданные и фильтр по типу работают корректно.
+  Путь с видеофайлом (Share от Android с `video/*`) не проверен живьём — код зеркалит уже
+  проверенный `saveAudioFile`/`saveUploadedFile`, но нет тестового устройства под рукой в этой
+  сессии.
+
 ## [0.33.35] - 2026-09-06
 
 ### Added

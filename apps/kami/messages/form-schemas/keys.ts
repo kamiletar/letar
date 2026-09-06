@@ -48,6 +48,8 @@ export type FormI18nKey =
   | 'SurveyQuestionType.TEXT.label'
   | 'UserRole.ADMIN.label'
   | 'UserRole.USER.label'
+  | 'VideoSource.FILE.label'
+  | 'VideoSource.URL.label'
   | 'validation.custom'
   | 'validation.invalid_element'
   | 'validation.invalid_format.base64'
@@ -86,6 +88,6 @@ export type FormI18nKey =
   | 'validation.unrecognized_keys'
 
 /**
- * Total key count: 73
+ * Total key count: 75
  */
-export const FORM_I18N_KEY_COUNT = 73
+export const FORM_I18N_KEY_COUNT = 75

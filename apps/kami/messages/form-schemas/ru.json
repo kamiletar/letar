@@ -38,6 +38,14 @@
       "label": "Прочее"
     }
   },
+  "VideoSource": {
+    "URL": {
+      "label": "Внешняя ссылка (YouTube/Vimeo) — рендерится через iframe-embed провайдера"
+    },
+    "FILE": {
+      "label": "Расшаренный видеофайл — рендерится через <video>, отдаётся из uploads/videos/"
+    }
+  },
   "SkillLevel": {
     "BEGINNER": {
       "label": "Начинающий"

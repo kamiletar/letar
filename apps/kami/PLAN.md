@@ -696,85 +696,118 @@ favicon-превью и inline-редактирование тегов не пр
   на `/api/files/{path}` вместо внешнего `url`, иконка вместо favicon (`lucide-react` `FileText`).
   Живая проверка в браузере — `nx dev kami`, `/ru/links` и `/ru/links?type=file` рендерятся без
   ошибок в консоли (дев-БД пуста — только пустое состояние, ни одной реальной записи не было)
-- ⏳ **Раздел "Видео"** — отдельная категория, подход обсудим отдельно (пользователь расскажет детали позже)
+- ✅ **Раздел "Видео"** (2026-09-06): по уточнению владельца — оба источника (ссылка YouTube/Vimeo
+  И видеофайл), встроенный плеер на странице. Единая модель `Video` (`source: URL | FILE`) вместо
+  двух раздельных моделей — упрощает и объединённую витрину `/links`, и админку, при этом поля
+  каждого источника (`url`/`provider`/`externalId` vs `filename`/`storedName`/`path`) остаются
+  опциональными и заполняются только для своего `source`.
+  - `parseVideoUrl()` (`src/lib/video/parse-video-url.ts`) — regex-распознавание YouTube/Vimeo
+    ссылок без сетевых запросов (id → embed URL + превью для YouTube через `img.youtube.com`,
+    для Vimeo превью не выводится без похода в oEmbed API — не делали ради простоты v1)
+  - `/share`: ссылка, распознанная как YouTube/Vimeo → `Video` (source: URL) вместо `Link`;
+    нераспознанная ссылка — прежнее поведение (`Link`). Файл `video/*` (добавлено в
+    `manifest.ts` `share_target.params.files.accept`) → `saveVideoFile()` → `Video` (source: FILE),
+    по образцу `saveAudioFile`/`saveUploadedFile` — без длительности/превью (потребовал бы ffmpeg,
+    которого в приложении нет; `<video>` показывает первый кадр сам)
+  - `/api/videos/[...path]` — раздача видеофайлов, тот же `createUploadsRoute()` с Range-запросами,
+    что и `/api/files`
+  - `VideoPlayer` (`links/_components/video-player.tsx`) — iframe-embed для `source=URL`
+    (YouTube/Vimeo), `<video controls>` для `source=FILE`
+  - Публичная `/links`: третий `kind: 'video'` в объединённой витрине, карточка видео не
+    оборачивается в переходную ссылку (клик по плееру не должен уводить со страницы) — плеер
+    сверху, метаданные снизу в той же `Card.Root`. Новый чип-фильтр «Видео»
+  - **Попутный фикс:** при добавлении третьего типа обнаружился и исправлен скрытый баг —
+    guard-условия `type === 'file' ? [] : ...` / `type === 'link' ? [] : ...` у запросов
+    Link/UploadedFile были неполными (не учитывали значения `type`, отличные от двух известных),
+    из-за чего `?type=video` до этой правки всё равно тянул бы записи `Link`/`UploadedFile` из
+    БД впустую. Переписано на `type && type !== 'link' ? [] : ...` — симметрично для всех трёх
+    типов
+  - `/admin/videos` — список с favicon/превью, inline-редактирование категории/меток (тот же
+    UX-паттерн, что `/admin/links`/`/admin/files`), пункт в сайдбаре
+  - Живая проверка: `nx dev` + тестовая запись `Video` (YouTube), вставленная напрямую в dev-БД
+    и удалённая после проверки — embed рендерится без ошибок консоли, метаданные и фильтрация по
+    `type` работают. Путь с видеофайлом через реальный Android Share (`video/*`) не проверен
+    живьём — нет тестового устройства под рукой в этой сессии; код зеркалит уже
+    живо-непроверенный, но структурно идентичный `saveAudioFile`/`saveUploadedFile`
 
 ---
 
 ## Обновления
 
-| Дата       | Изменение                                                                                            |
-| ---------- | ---------------------------------------------------------------------------------------------------- |
-| 2025-12-08 | Создан план, настроен i18n                                                                           |
-| 2025-12-08 | Chakra UI v3, Header/Footer, Matrix-эффект, Hero, E2E тесты                                          |
-| 2025-12-08 | Страница "О себе" с компонентами StatCard и FeatureCard                                              |
-| 2025-12-08 | База данных: Prisma + ZenStack, модели, сиды, страница навыков                                       |
-| 2025-12-08 | Страница проектов, SEO (meta, OG, sitemap, robots)                                                   |
-| 2025-12-08 | Блог: Keystatic + Markdoc, список статей, страница статьи                                            |
-| 2025-12-23 | Добавлена Фаза 5: Консалтинг                                                                         |
-| 2025-12-23 | Страница CV/Резюме, страница "Который час?" (UNIX эпоха)                                             |
-| 2025-12-23 | RSS-фид для блога, JSON-LD разметка, Auth.js v5 с GitHub OAuth                                       |
-| 2025-12-23 | Полная авторизация с БД: OAuth (GitHub, Google, Yandex), email/password                              |
-| 2025-12-23 | Telegram OAuth, email верификация (Nodemailer), страница verify-email                                |
-| 2025-12-27 | Docker-конфигурация: Dockerfile.production, docker-compose.production.yml                            |
-| 2025-12-27 | Magic Link: вход по ссылке без пароля                                                                |
-| 2025-12-27 | Форма "Позвать на работу": 7-шаговый wizard с Form.Steps, email-уведомления                          |
-| 2025-12-27 | PWA: Serwist, manifest.ts, Service Worker, офлайн-страница, Web Share Target                         |
-| 2025-12-27 | UX: Framer Motion анимации (Hero, StatCard, FeatureCard, motion компоненты)                          |
-| 2025-12-27 | Accessibility: SkipLink, ARIA landmarks (banner, navigation, contentinfo)                            |
-| 2025-12-27 | Performance: dynamic import Hero, React.memo карточки, Prisma select                                 |
-| 2025-12-27 | Consulting: страница услуг, модели ConsultingService/Request, форма заявки                           |
-| 2025-12-27 | Consulting: email-уведомления о новых заявках (HTML-шаблон, MailHog для dev)                         |
-| 2025-12-27 | Google Calendar API: интеграция SlotPicker с реальными слотами                                       |
-| 2025-12-27 | Yandex Metrica: компонент аналитики с NEXT_PUBLIC_YM_COUNTER_ID                                      |
-| 2025-12-27 | Админ-панель: dashboard, requests, testimonials, cases, slots, learning                              |
-| 2025-12-27 | Комментарии в блоге: BlogComment модель с вложенными ответами                                        |
-| 2025-12-27 | Списки изученного: LearningItem модель, публичная /learning страница                                 |
-| 2025-12-27 | AI-чатбот: Claude + Vercel AI SDK v6, плавающий виджет ChatWidget                                    |
-| 2025-12-31 | Добавлена Фаза 7: Кросс-постинг в соцсети (Telegram, VK, X, FB, IG и др.)                            |
-| 2025-12-31 | Запланирована миграция на Better Auth (Auth.js в maintenance mode)                                   |
-| 2026-01-01 | ✅ Миграция на Better Auth: схема БД, auth.ts, actions, client, удалены старые verify pages          |
-| 2026-01-01 | ✅ Замена Serwist на ручной SW: sw.template.js, update-sw-version.mjs (совместимость с Turbopack)    |
-| 2026-01-03 | ✅ Рефакторинг: KamiForm (createForm + extraSelects), унификация форм на KamiForm                    |
-| 2026-01-03 | ✅ Рефакторинг: консолидация labels (kami-form/labels.ts), устранение дублирования в admin           |
-| 2026-01-03 | ✅ Рефакторинг: UI токены (bg.panel, bg.subtle, border.subtle, fg.muted вместо hardcoded RGB)        |
-| 2026-01-03 | ✅ Аудит i18n: toaster, CONTACT, RSS Feed, форматирование дат — всё уже корректно                    |
-| 2026-01-03 | ✅ Better Auth organizations: команды, участники, приглашения                                        |
-| 2026-01-03 | ✅ Team Surveys: опросы для оценки кандидата командой работодателя                                   |
-| 2026-01-03 | ✅ Rate limiting: database storage, strict rules, IP headers, client error handling                  |
-| 2026-01-03 | ✅ Forms audit: zenstack-form-plugin, i18n labels, SelectSurveyQuestionType, generated labels        |
-| 2026-02-01 | ✅ Admin Learning CRUD: /admin/learning/new, /admin/learning/[id] (создание/редактирование)          |
-| 2026-02-01 | ✅ Admin Skills CRUD: /admin/skills (навыки), /admin/skills/categories (категории навыков)           |
-| 2026-02-01 | ✅ Skill startYear: поле года начала практики, автоматический расчёт опыта                           |
-| 2026-03-20 | ✅ Quiz v2: 3 новые шкалы (BAR/PAG/DPR), 290 вопросов, 13 осей на радаре                             |
-| 2026-03-20 | ✅ Quiz: формула TZ v2, BAR-фильтр, кризисный блок, дисклеймер                                       |
-| 2026-03-20 | ✅ Quiz: светлые стороны, взаимодействия типов (45 пар), модификаторы                                |
-| 2026-03-20 | ✅ Quiz: пропуск вопросов (QuizSkippedQuestion), исключение повторов                                 |
-| 2026-03-20 | ✅ Quiz: все переводы RU→EN (1649 текстов + 1450 вопросов), деплой на прод                           |
-| 2026-03-21 | ✅ Quiz: стратифицированное перемешивание, убрано досрочное завершение порции                        |
-| 2026-03-21 | ✅ Фаза 7 Этап 1: кросс-постинг Telegram + VK (модели, сервисы, actions, admin UI, PublishButton)    |
-| 2026-03-21 | ✅ Фаза 7: Facebook кросс-постинг, прокси tg-proxy/fb-proxy на mail.letar.best с SSL                 |
-| 2026-06-16 | Запланирована Фаза 10: раздел "Ссылки" — сохранение через Android Share Target, категории, метки     |
-| 2026-06-16 | Фаза 10 расширена: загрузка остальных категорий файлов через Share, раздел "Видео" — детали позже    |
-| 2026-08-12 | ✅ GlitchTip (§70) + staging окружение впервые заведено (§18.7 M2), Keystatic NODE_ENV-баг           |
-| 2026-08-19 | 🔍 Аудит setRequestLocale/SSG: найден root cause, почему все страницы `ƒ Dynamic` (см. техдолг ниже) |
-| 2026-08-24 | ✅ §18.7 M2 e2e-гейт закрыт — staging e2e 150/150, добавлен в `E2E_GATED_APPS`                       |
-| 2026-09-04 | ✅ Фаза 9.4: кнопка fullscreen в AudioPlayer, скрытие header/footer через `:fullscreen`              |
-| 2026-09-06 | ✅ Фаза 9.1–9.3: swap визуализаций+цвет, офлайн-сонограмма, waveform-пики в сидбаре player           |
-| 2026-09-06 | ✅ Фаза 10 (первый слайс): `/share` route, модель `Link`, `/admin/links` — см. упрощения в разделе   |
-| 2026-09-06 | ✅ Фаза 9.5 (v1): постер+сонограмма slide, переключаемый вид, без виртуализации (см. упрощения)      |
-| 2026-09-06 | ✅ Фаза 8 отмечена (уже сделана ранее) + Фаза 7 Этап 2: сид-данные SocialPlatform                    |
-| 2026-09-06 | ✅ Фаза 6 Matrix Rain отмечена (уже реализована), убран забытый `console.log`                        |
-| 2026-09-06 | ✅ Фаза 9.6: Butterchurn fullscreen-визуализация (WebGL, ~100 пресетов), см. упрощения               |
-| 2026-09-06 | ✅ Фаза 9.7: Hydra VJ live-coding режим — редактор+пресеты+localStorage, инструкция-страница ⏳      |
-| 2026-09-06 | ✅ Фаза 9.8: оценка wavesurfer.js/audiomotion-analyzer — решение оставить кастом, не устанавливать   |
-| 2026-09-06 | ✅ Фаза 10: публичная `/links` (фильтры+поиск+пагинация), `Link` стал публично читаемым              |
-| 2026-09-06 | ✅ Фаза 10: favicon-превью карточки + inline-редактирование категории/меток в `/admin/links`         |
-| 2026-09-06 | ✅ Фаза 10: `/admin/links/tags` — массовое переименование/удаление категорий и меток                 |
-| 2026-09-06 | ✅ Фаза 10: офлайн-очередь Share Target — IndexedDB + Background Sync в `sw.template.js`             |
-| 2026-09-06 | ✅ Фаза 10: Share Target принимает файлы — audio→`/admin/audio`, остальное→`/admin/files`            |
-| 2026-09-06 | ✅ Фаза 10: объединённая витрина `/links` — `Link`+`UploadedFile`, фильтр по типу                    |
-| 2026-09-06 | ✅ Техдолг: getSession() вынесен из root layout в клиент — SSG вернулась 10 роутам                   |
-| 2026-09-06 | ✅ Техдолг: подключён theme:check — themePrefix на theme-provider.tsx, 4-й класс (Canvas 2D)         |
+| Дата       | Изменение                                                                                                  |
+| ---------- | ---------------------------------------------------------------------------------------------------------- |
+| 2025-12-08 | Создан план, настроен i18n                                                                                 |
+| 2025-12-08 | Chakra UI v3, Header/Footer, Matrix-эффект, Hero, E2E тесты                                                |
+| 2025-12-08 | Страница "О себе" с компонентами StatCard и FeatureCard                                                    |
+| 2025-12-08 | База данных: Prisma + ZenStack, модели, сиды, страница навыков                                             |
+| 2025-12-08 | Страница проектов, SEO (meta, OG, sitemap, robots)                                                         |
+| 2025-12-08 | Блог: Keystatic + Markdoc, список статей, страница статьи                                                  |
+| 2025-12-23 | Добавлена Фаза 5: Консалтинг                                                                               |
+| 2025-12-23 | Страница CV/Резюме, страница "Который час?" (UNIX эпоха)                                                   |
+| 2025-12-23 | RSS-фид для блога, JSON-LD разметка, Auth.js v5 с GitHub OAuth                                             |
+| 2025-12-23 | Полная авторизация с БД: OAuth (GitHub, Google, Yandex), email/password                                    |
+| 2025-12-23 | Telegram OAuth, email верификация (Nodemailer), страница verify-email                                      |
+| 2025-12-27 | Docker-конфигурация: Dockerfile.production, docker-compose.production.yml                                  |
+| 2025-12-27 | Magic Link: вход по ссылке без пароля                                                                      |
+| 2025-12-27 | Форма "Позвать на работу": 7-шаговый wizard с Form.Steps, email-уведомления                                |
+| 2025-12-27 | PWA: Serwist, manifest.ts, Service Worker, офлайн-страница, Web Share Target                               |
+| 2025-12-27 | UX: Framer Motion анимации (Hero, StatCard, FeatureCard, motion компоненты)                                |
+| 2025-12-27 | Accessibility: SkipLink, ARIA landmarks (banner, navigation, contentinfo)                                  |
+| 2025-12-27 | Performance: dynamic import Hero, React.memo карточки, Prisma select                                       |
+| 2025-12-27 | Consulting: страница услуг, модели ConsultingService/Request, форма заявки                                 |
+| 2025-12-27 | Consulting: email-уведомления о новых заявках (HTML-шаблон, MailHog для dev)                               |
+| 2025-12-27 | Google Calendar API: интеграция SlotPicker с реальными слотами                                             |
+| 2025-12-27 | Yandex Metrica: компонент аналитики с NEXT_PUBLIC_YM_COUNTER_ID                                            |
+| 2025-12-27 | Админ-панель: dashboard, requests, testimonials, cases, slots, learning                                    |
+| 2025-12-27 | Комментарии в блоге: BlogComment модель с вложенными ответами                                              |
+| 2025-12-27 | Списки изученного: LearningItem модель, публичная /learning страница                                       |
+| 2025-12-27 | AI-чатбот: Claude + Vercel AI SDK v6, плавающий виджет ChatWidget                                          |
+| 2025-12-31 | Добавлена Фаза 7: Кросс-постинг в соцсети (Telegram, VK, X, FB, IG и др.)                                  |
+| 2025-12-31 | Запланирована миграция на Better Auth (Auth.js в maintenance mode)                                         |
+| 2026-01-01 | ✅ Миграция на Better Auth: схема БД, auth.ts, actions, client, удалены старые verify pages                |
+| 2026-01-01 | ✅ Замена Serwist на ручной SW: sw.template.js, update-sw-version.mjs (совместимость с Turbopack)          |
+| 2026-01-03 | ✅ Рефакторинг: KamiForm (createForm + extraSelects), унификация форм на KamiForm                          |
+| 2026-01-03 | ✅ Рефакторинг: консолидация labels (kami-form/labels.ts), устранение дублирования в admin                 |
+| 2026-01-03 | ✅ Рефакторинг: UI токены (bg.panel, bg.subtle, border.subtle, fg.muted вместо hardcoded RGB)              |
+| 2026-01-03 | ✅ Аудит i18n: toaster, CONTACT, RSS Feed, форматирование дат — всё уже корректно                          |
+| 2026-01-03 | ✅ Better Auth organizations: команды, участники, приглашения                                              |
+| 2026-01-03 | ✅ Team Surveys: опросы для оценки кандидата командой работодателя                                         |
+| 2026-01-03 | ✅ Rate limiting: database storage, strict rules, IP headers, client error handling                        |
+| 2026-01-03 | ✅ Forms audit: zenstack-form-plugin, i18n labels, SelectSurveyQuestionType, generated labels              |
+| 2026-02-01 | ✅ Admin Learning CRUD: /admin/learning/new, /admin/learning/[id] (создание/редактирование)                |
+| 2026-02-01 | ✅ Admin Skills CRUD: /admin/skills (навыки), /admin/skills/categories (категории навыков)                 |
+| 2026-02-01 | ✅ Skill startYear: поле года начала практики, автоматический расчёт опыта                                 |
+| 2026-03-20 | ✅ Quiz v2: 3 новые шкалы (BAR/PAG/DPR), 290 вопросов, 13 осей на радаре                                   |
+| 2026-03-20 | ✅ Quiz: формула TZ v2, BAR-фильтр, кризисный блок, дисклеймер                                             |
+| 2026-03-20 | ✅ Quiz: светлые стороны, взаимодействия типов (45 пар), модификаторы                                      |
+| 2026-03-20 | ✅ Quiz: пропуск вопросов (QuizSkippedQuestion), исключение повторов                                       |
+| 2026-03-20 | ✅ Quiz: все переводы RU→EN (1649 текстов + 1450 вопросов), деплой на прод                                 |
+| 2026-03-21 | ✅ Quiz: стратифицированное перемешивание, убрано досрочное завершение порции                              |
+| 2026-03-21 | ✅ Фаза 7 Этап 1: кросс-постинг Telegram + VK (модели, сервисы, actions, admin UI, PublishButton)          |
+| 2026-03-21 | ✅ Фаза 7: Facebook кросс-постинг, прокси tg-proxy/fb-proxy на mail.letar.best с SSL                       |
+| 2026-06-16 | Запланирована Фаза 10: раздел "Ссылки" — сохранение через Android Share Target, категории, метки           |
+| 2026-06-16 | Фаза 10 расширена: загрузка остальных категорий файлов через Share, раздел "Видео" — детали позже          |
+| 2026-08-12 | ✅ GlitchTip (§70) + staging окружение впервые заведено (§18.7 M2), Keystatic NODE_ENV-баг                 |
+| 2026-08-19 | 🔍 Аудит setRequestLocale/SSG: найден root cause, почему все страницы `ƒ Dynamic` (см. техдолг ниже)       |
+| 2026-08-24 | ✅ §18.7 M2 e2e-гейт закрыт — staging e2e 150/150, добавлен в `E2E_GATED_APPS`                             |
+| 2026-09-04 | ✅ Фаза 9.4: кнопка fullscreen в AudioPlayer, скрытие header/footer через `:fullscreen`                    |
+| 2026-09-06 | ✅ Фаза 9.1–9.3: swap визуализаций+цвет, офлайн-сонограмма, waveform-пики в сидбаре player                 |
+| 2026-09-06 | ✅ Фаза 10 (первый слайс): `/share` route, модель `Link`, `/admin/links` — см. упрощения в разделе         |
+| 2026-09-06 | ✅ Фаза 9.5 (v1): постер+сонограмма slide, переключаемый вид, без виртуализации (см. упрощения)            |
+| 2026-09-06 | ✅ Фаза 8 отмечена (уже сделана ранее) + Фаза 7 Этап 2: сид-данные SocialPlatform                          |
+| 2026-09-06 | ✅ Фаза 6 Matrix Rain отмечена (уже реализована), убран забытый `console.log`                              |
+| 2026-09-06 | ✅ Фаза 9.6: Butterchurn fullscreen-визуализация (WebGL, ~100 пресетов), см. упрощения                     |
+| 2026-09-06 | ✅ Фаза 9.7: Hydra VJ live-coding режим — редактор+пресеты+localStorage, инструкция-страница ⏳            |
+| 2026-09-06 | ✅ Фаза 9.8: оценка wavesurfer.js/audiomotion-analyzer — решение оставить кастом, не устанавливать         |
+| 2026-09-06 | ✅ Фаза 10: публичная `/links` (фильтры+поиск+пагинация), `Link` стал публично читаемым                    |
+| 2026-09-06 | ✅ Фаза 10: favicon-превью карточки + inline-редактирование категории/меток в `/admin/links`               |
+| 2026-09-06 | ✅ Фаза 10: `/admin/links/tags` — массовое переименование/удаление категорий и меток                       |
+| 2026-09-06 | ✅ Фаза 10: офлайн-очередь Share Target — IndexedDB + Background Sync в `sw.template.js`                   |
+| 2026-09-06 | ✅ Фаза 10: Share Target принимает файлы — audio→`/admin/audio`, остальное→`/admin/files`                  |
+| 2026-09-06 | ✅ Фаза 10: объединённая витрина `/links` — `Link`+`UploadedFile`, фильтр по типу                          |
+| 2026-09-06 | ✅ Техдолг: getSession() вынесен из root layout в клиент — SSG вернулась 10 роутам                         |
+| 2026-09-06 | ✅ Техдолг: подключён theme:check — themePrefix на theme-provider.tsx, 4-й класс (Canvas 2D)               |
+| 2026-09-06 | ✅ Фаза 10: раздел «Видео» — модель Video (URL/FILE), /admin/videos, плеер в /links, попутный фикс фильтра |
 
 ## ✅ Техдолг закрыт: SSG вернулась — getSession() вынесен из корневого layout (2026-09-06)
 

@@ -1,9 +1,11 @@
 import { prisma } from '@/lib/db'
 import { ADMIN_PAGE_SIZE } from '@/lib/utils/constants'
+import { buildEmbedUrl } from '@/lib/video/parse-video-url'
 import { Badge, Box, Card, Heading, HStack, Icon, Image, Input, Text, VStack, Wrap } from '@chakra-ui/react'
 import { FileText } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { VideoPlayer } from './_components/video-player'
 
 interface LinksPageProps {
   params: Promise<{ locale: string }>
@@ -72,10 +74,10 @@ function buildFilterHref(
   return `/${locale}/links${query ? `?${query}` : ''}`
 }
 
-/** Объединённая карточка витрины — либо сохранённая ссылка, либо загруженный файл */
+/** Объединённая карточка витрины — сохранённая ссылка, загруженный файл или видео */
 type FeedItem = {
   id: string
-  kind: 'link' | 'file'
+  kind: 'link' | 'file' | 'video'
   title: string
   description: string | null
   category: string | null
@@ -84,6 +86,13 @@ type FeedItem = {
   href: string
   sourceLabel: string
   faviconSrc: string | null
+  /** Только для kind='video' — данные для встроенного плеера */
+  video?: {
+    source: 'URL' | 'FILE'
+    embedUrl: string | null
+    fileSrc: string | null
+    mimeType: string | null
+  }
 }
 
 export default async function LinksPage({ params, searchParams }: LinksPageProps) {
@@ -91,12 +100,13 @@ export default async function LinksPage({ params, searchParams }: LinksPageProps
   const { category, tag, q, type, page: pageParam } = await searchParams
   const page = Number(pageParam) || 1
 
-  // Списки для фильтров — по всем записям (обоих типов), не только по текущей выборке
-  const [allLinksForFilters, allFilesForFilters] = await Promise.all([
+  // Списки для фильтров — по всем записям (всех типов), не только по текущей выборке
+  const [allLinksForFilters, allFilesForFilters, allVideosForFilters] = await Promise.all([
     prisma.link.findMany({ select: { category: true, tags: true } }),
     prisma.uploadedFile.findMany({ select: { category: true, tags: true } }),
+    prisma.video.findMany({ select: { category: true, tags: true } }),
   ])
-  const allForFilters = [...allLinksForFilters, ...allFilesForFilters]
+  const allForFilters = [...allLinksForFilters, ...allFilesForFilters, ...allVideosForFilters]
   const categories = [...new Set(allForFilters.map((l) => l.category).filter((c): c is string => Boolean(c)))].sort()
   const tags = [...new Set(allForFilters.flatMap((l) => l.tags))].sort()
 
@@ -109,9 +119,9 @@ export default async function LinksPage({ params, searchParams }: LinksPageProps
   }
 
   // Личная коллекция закладок — объёмы малы (десятки/сотни записей), поэтому пагинация делается
-  // в памяти после объединения двух источников, а не на уровне БД у каждого запроса по отдельности
-  const [links, files] = await Promise.all([
-    type === 'file' ? Promise.resolve([]) : prisma.link.findMany({
+  // в памяти после объединения трёх источников, а не на уровне БД у каждого запроса по отдельности
+  const [links, files, videos] = await Promise.all([
+    type && type !== 'link' ? Promise.resolve([]) : prisma.link.findMany({
       where: {
         ...where,
         ...(q
@@ -127,7 +137,7 @@ export default async function LinksPage({ params, searchParams }: LinksPageProps
       orderBy: { createdAt: 'desc' },
       select: { id: true, url: true, title: true, description: true, category: true, tags: true, createdAt: true },
     }),
-    type === 'link' ? Promise.resolve([]) : prisma.uploadedFile.findMany({
+    type && type !== 'file' ? Promise.resolve([]) : prisma.uploadedFile.findMany({
       where: {
         ...where,
         ...(q
@@ -149,6 +159,34 @@ export default async function LinksPage({ params, searchParams }: LinksPageProps
         category: true,
         tags: true,
         uploadedAt: true,
+      },
+    }),
+    type && type !== 'video' ? Promise.resolve([]) : prisma.video.findMany({
+      where: {
+        ...where,
+        ...(q
+          ? {
+            OR: [
+              { title: { contains: q, mode: 'insensitive' } },
+              { description: { contains: q, mode: 'insensitive' } },
+            ],
+          }
+          : {}),
+      },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        source: true,
+        url: true,
+        provider: true,
+        externalId: true,
+        path: true,
+        mimeType: true,
+        title: true,
+        description: true,
+        category: true,
+        tags: true,
+        createdAt: true,
       },
     }),
   ])
@@ -178,6 +216,25 @@ export default async function LinksPage({ params, searchParams }: LinksPageProps
       sourceLabel: file.mimeType,
       faviconSrc: null,
     })),
+    ...videos.map((video): FeedItem => {
+      const embedUrl = video.source === 'URL' && video.provider && video.externalId
+        ? buildEmbedUrl(video.provider, video.externalId)
+        : null
+      const fileSrc = video.source === 'FILE' && video.path ? `/api/videos/${video.path}` : null
+      return {
+        id: video.id,
+        kind: 'video',
+        title: video.title,
+        description: video.description,
+        category: video.category,
+        tags: video.tags,
+        createdAt: video.createdAt,
+        href: video.url || fileSrc || '#',
+        sourceLabel: video.provider || video.mimeType || 'video',
+        faviconSrc: null,
+        video: { source: video.source, embedUrl, fileSrc, mimeType: video.mimeType },
+      }
+    }),
   ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
 
   const total = items.length
@@ -210,6 +267,9 @@ export default async function LinksPage({ params, searchParams }: LinksPageProps
           </Badge>
           <Badge asChild variant={type === 'file' ? 'solid' : 'outline'} colorPalette="gray" cursor="pointer">
             <Link href={buildFilterHref(locale, currentFilters, { type: 'file' })}>Файлы</Link>
+          </Badge>
+          <Badge asChild variant={type === 'video' ? 'solid' : 'outline'} colorPalette="gray" cursor="pointer">
+            <Link href={buildFilterHref(locale, currentFilters, { type: 'video' })}>Видео</Link>
           </Badge>
         </Wrap>
 
@@ -258,39 +318,68 @@ export default async function LinksPage({ params, searchParams }: LinksPageProps
           )
           : (
             <VStack gap={3} align="stretch">
-              {pageItems.map((item) => (
-                <Card.Root key={`${item.kind}-${item.id}`} asChild _hover={{ shadow: 'md', borderColor: 'purple.200' }}>
-                  <a href={item.href} target="_blank" rel="noopener noreferrer">
-                    <Card.Body py={3} px={4}>
-                      <VStack gap={1} align="stretch">
-                        <HStack justify="space-between" align="start">
-                          <Text fontWeight="medium">{item.title}</Text>
-                          <Text fontSize="xs" color="fg.muted" flexShrink={0}>
-                            {new Date(item.createdAt).toLocaleDateString('ru-RU')}
-                          </Text>
-                        </HStack>
-                        {item.description && (
-                          <Text fontSize="sm" color="fg.muted" lineClamp={2}>
-                            {item.description}
-                          </Text>
+              {pageItems.map((item) => {
+                const meta = (
+                  <VStack gap={1} align="stretch">
+                    <HStack justify="space-between" align="start">
+                      <Text fontWeight="medium">{item.title}</Text>
+                      <Text fontSize="xs" color="fg.muted" flexShrink={0}>
+                        {new Date(item.createdAt).toLocaleDateString('ru-RU')}
+                      </Text>
+                    </HStack>
+                    {item.description && (
+                      <Text fontSize="sm" color="fg.muted" lineClamp={2}>
+                        {item.description}
+                      </Text>
+                    )}
+                    <HStack gap={2} flexWrap="wrap" fontSize="xs" color="fg.muted">
+                      {item.faviconSrc
+                        ? <Image src={item.faviconSrc} alt="" boxSize="14px" borderRadius="sm" />
+                        : (
+                          <Icon boxSize="14px">
+                            <FileText />
+                          </Icon>
                         )}
-                        <HStack gap={2} flexWrap="wrap" fontSize="xs" color="fg.muted">
-                          {item.faviconSrc
-                            ? <Image src={item.faviconSrc} alt="" boxSize="14px" borderRadius="sm" />
-                            : (
-                              <Icon boxSize="14px">
-                                <FileText />
-                              </Icon>
-                            )}
-                          <Text>{item.sourceLabel}</Text>
-                          {item.category && <Badge size="sm" colorPalette="purple">{item.category}</Badge>}
-                          {item.tags.map((t) => <Text key={t} color="teal.fg">#{t}</Text>)}
-                        </HStack>
-                      </VStack>
-                    </Card.Body>
-                  </a>
-                </Card.Root>
-              ))}
+                      <Text>{item.sourceLabel}</Text>
+                      {item.category && <Badge size="sm" colorPalette="purple">{item.category}</Badge>}
+                      {item.tags.map((t) => <Text key={t} color="teal.fg">#{t}</Text>)}
+                    </HStack>
+                  </VStack>
+                )
+
+                // Видео — встроенный плеер, карточка не оборачивается в переходную ссылку
+                // (клик по iframe/<video> не должен уводить со страницы)
+                if (item.kind === 'video' && item.video) {
+                  return (
+                    <Card.Root key={`${item.kind}-${item.id}`}>
+                      <VideoPlayer
+                        source={item.video.source}
+                        embedUrl={item.video.embedUrl}
+                        fileSrc={item.video.fileSrc}
+                        mimeType={item.video.mimeType}
+                        title={item.title}
+                      />
+                      <Card.Body py={3} px={4}>
+                        {meta}
+                      </Card.Body>
+                    </Card.Root>
+                  )
+                }
+
+                return (
+                  <Card.Root
+                    key={`${item.kind}-${item.id}`}
+                    asChild
+                    _hover={{ shadow: 'md', borderColor: 'purple.200' }}
+                  >
+                    <a href={item.href} target="_blank" rel="noopener noreferrer">
+                      <Card.Body py={3} px={4}>
+                        {meta}
+                      </Card.Body>
+                    </a>
+                  </Card.Root>
+                )
+              })}
             </VStack>
           )}
 
