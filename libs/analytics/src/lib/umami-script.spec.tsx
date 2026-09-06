@@ -28,7 +28,7 @@ describe('UmamiScript', () => {
   })
 
   it('рендерит скрипт с явными props scriptUrl/websiteId', () => {
-    const { container } = render(
+    render(
       <UmamiScript scriptUrl="https://stats.letar.best/script.js" websiteId="explicit-id" />,
     )
 
@@ -42,7 +42,7 @@ describe('UmamiScript', () => {
     process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL = 'https://stats.letar.best/env-script.js'
     process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID = 'env-id'
 
-    const { container } = render(<UmamiScript />)
+    render(<UmamiScript />)
 
     const script = document.head.querySelector('script[data-website-id="env-id"]')
     expect(script).not.toBeNull()
@@ -53,7 +53,7 @@ describe('UmamiScript', () => {
     process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL = 'https://stats.letar.best/env-script.js'
     process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID = 'env-id'
 
-    const { container } = render(
+    render(
       <UmamiScript scriptUrl="https://stats.letar.best/prop-script.js" websiteId="prop-id" />,
     )
 
@@ -91,7 +91,7 @@ describe('UmamiScript', () => {
   })
 
   it('рендерится, если hasConsent === true', () => {
-    const { container } = render(
+    render(
       <UmamiScript
         scriptUrl="https://stats.letar.best/script.js"
         websiteId="explicit-id"
@@ -103,7 +103,7 @@ describe('UmamiScript', () => {
   })
 
   it('рендерится, если hasConsent === undefined (обратная совместимость)', () => {
-    const { container } = render(
+    render(
       <UmamiScript scriptUrl="https://stats.letar.best/script.js" websiteId="explicit-id" />,
     )
 

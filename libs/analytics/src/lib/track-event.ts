@@ -82,9 +82,7 @@ export function sanitizeEventData(
   const safe: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(eventData)) {
     if (forbiddenKeys.test(key) || looksLikePersonalData(value)) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn(`[analytics] поле "${key}" не отправлено в аналитику: похоже на персональные данные`)
-      }
+      console.warn(`[analytics] поле "${key}" не отправлено в аналитику: похоже на персональные данные`)
       continue
     }
     safe[key] = value
