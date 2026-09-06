@@ -50,6 +50,7 @@ import { metricsRoutes } from './routes/metrics'
 import { nextCacheCleanupRoutes } from './routes/next-cache-cleanup'
 import { nginxRoutes } from './routes/nginx'
 import { nxCacheCleanupRoutes } from './routes/nx-cache-cleanup'
+import { registryGcRoutes } from './routes/registry-gc'
 import { stagingIdleShutdownRoutes } from './routes/staging-idle-shutdown'
 import { systemRoutes } from './routes/system'
 import { traefikRoutes } from './routes/traefik'
@@ -147,6 +148,7 @@ async function main(): Promise<void> {
   await fastify.register(dockerPruneRoutes)
   await fastify.register(nextCacheCleanupRoutes)
   await fastify.register(nxCacheCleanupRoutes)
+  await fastify.register(registryGcRoutes)
   await fastify.register(stagingIdleShutdownRoutes)
   await fastify.register(metricsRoutes)
 

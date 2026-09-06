@@ -348,6 +348,21 @@ export const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's3',
   },
   {
+    id: 'registry-gc-s3',
+    name: 'Registry GC (ретеншн тегов, s3)',
+    app: 'dashboard-agent',
+    endpoint: '/api/cron/registry-gc',
+    // Ночное окно, как у остальных чисток s3 (next-cache-cleanup/nx-cache-cleanup — 04:30/04:40).
+    // Официальная рекомендация Docker — не пушить в registry во время garbage-collect (race с
+    // конкурентным push), окно низкой нагрузки закрывает и это (см. scripts/registry-gc.sh).
+    schedule: '50 4 * * *',
+    description: 'Удаляет SHA-теги registry.s3.letar.best старше REGISTRY_GC_KEEP_TAGS (по умолчанию 3) '
+      + 'через registry API, затем `garbage-collect` внутри контейнера registry — TS-порт '
+      + 'scripts/registry-gc.sh (infra/registry/README.md § «Ретеншн тегов», PLAN-INFRA-6.md §157)',
+    enabled: true,
+    server: 's3',
+  },
+  {
     id: 'staging-idle-shutdown',
     name: 'Staging Idle Shutdown (s3)',
     app: 'dashboard-agent',
