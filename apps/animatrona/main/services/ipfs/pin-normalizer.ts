@@ -20,6 +20,7 @@ import { CID } from 'multiformats/cid'
 
 import { prisma } from '../../utils/db'
 import { createModuleLogger } from '../../utils/logger'
+import { ImportQueueController } from '../import-queue-controller'
 import { getKuboService } from '../kubo'
 import { isSafeToUnpinLocally } from './pin-status-service'
 
@@ -44,6 +45,16 @@ export type NormalizeProgress = (step: string, current?: number, total?: number)
  * Нормализует все pins в Kubo относительно known directoryCid'ов из БД.
  */
 export async function normalizeAllPins(onProgress?: NormalizeProgress): Promise<NormalizePinsResult> {
+  // Гейт: во время активного импорта в Kubo есть CID, добавленные с pin:false в расчёте
+  // на будущую indirect-защиту через directoryCid, который ещё не собран и не сохранён
+  // в БД — такой CID не виден ни client.pin.ls, ни client.refs(directoryCid), поэтому
+  // нормализация его не тронет напрямую, но именно это окно небезопасно для последующего
+  // GC. Проще запретить нормализацию целиком на время импорта, чем полагаться на то, что
+  // пользователь не запустит её вручную не вовремя.
+  if (ImportQueueController.getInstance().hasActiveImport()) {
+    throw new Error('Нормализация pins недоступна во время активного импорта — дождитесь завершения очереди')
+  }
+
   const client = getKuboService().getClientOrNull()
   if (!client) {
     log.warn('Kubo клиент недоступен')

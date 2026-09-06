@@ -103,6 +103,23 @@ export class ImportQueueController extends EventEmitter {
     return ImportQueueController.instance
   }
 
+  /**
+   * Есть ли сейчас активный импорт (batch-контент в процессе загрузки в IPFS).
+   *
+   * Используется как гейт перед операциями обслуживания IPFS-репозитория
+   * (нормализация pins, GC) — во время 'preparing'/'transcoding'/'postprocess'
+   * в Kubo появляются CID, добавленные с pin:false в расчёте на будущую indirect-защиту
+   * через directoryCid, который ещё не собран и не сохранён в БД. Запуск обслуживания
+   * в этом окне может задеть контент, ещё не покрытый ни одним pin.
+   */
+  hasActiveImport(): boolean {
+    if (this.currentId !== null) {
+      return true
+    }
+    const activeStatuses: ImportQueueStatus[] = ['preparing', 'transcoding', 'postprocess']
+    return [...this.queue.values()].some((item) => activeStatuses.includes(item.status))
+  }
+
   // ==========================================
   // === Команды от renderer ===
   // ==========================================
