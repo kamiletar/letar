@@ -11,6 +11,17 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.16.2] — 2026-09-06
+
+### Added
+
+- Плановая чистка `.nx/cache` (`lib/nx-cache-cleanup.ts`, cron-задачи `nx-cache-cleanup-s2`/`-s3`,
+  `40 4 * * *`) — удаляет записи `.nx/cache/<hash>` старше `NX_CACHE_CLEANUP_DAYS` (по умолчанию
+  2 дня, тот же порог, что у `next-cache-cleanup.ts`). Найдено при разборе инцидента 100%-диска
+  на s2 06.09.2026: `.nx/cache` занимал 64GB — больше, чем Docker images (13GB) и build cache
+  (17GB) вместе взятые, и для него не было вообще никакой чистки, ни разовой, ни плановой.
+  Разбор — `.claude/docs/docker-prune-cold-layer-network-flake.md` (дополнение).
+
 ## [0.16.1] — 2026-09-06
 
 ### Added

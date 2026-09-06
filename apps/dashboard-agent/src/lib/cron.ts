@@ -490,6 +490,29 @@ const DEFAULT_CRON_JOBS: CronJob[] = [
     server: 's3',
   },
   {
+    id: 'nx-cache-cleanup-s2',
+    name: 'Nx Cache Cleanup (s2)',
+    app: 'dashboard-agent',
+    endpoint: '/api/cron/nx-cache-cleanup',
+    schedule: '40 4 * * *',
+    description: 'Удаляет записи `.nx/cache/<hash>` в чекауте репозитория старше NX_CACHE_CLEANUP_DAYS '
+      + '(mtime, по умолчанию 2 дня) — отдельный от `.next/cache` источник места. Найдено при разборе '
+      + 'инцидента 2026-09-06 (диск s2 100%): `.nx/cache` занимал 64GB, больше, чем Docker images и build '
+      + 'cache вместе взятые, и для него не было ни разовой, ни плановой чистки вовсе.',
+    enabled: true,
+    server: 's2',
+  },
+  {
+    id: 'nx-cache-cleanup-s3',
+    name: 'Nx Cache Cleanup (s3)',
+    app: 'dashboard-agent',
+    endpoint: '/api/cron/nx-cache-cleanup',
+    schedule: '40 4 * * *',
+    description: 'То же самое, что nx-cache-cleanup-s2, но для staging-чекаута на s3.',
+    enabled: true,
+    server: 's3',
+  },
+  {
     id: 'staging-idle-shutdown',
     name: 'Staging Idle Shutdown (s3)',
     app: 'dashboard-agent',
