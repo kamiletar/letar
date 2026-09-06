@@ -2,10 +2,11 @@
 
 import { useConfirmDialog } from '@/app/_components/ui/confirm-dialog'
 import { toaster } from '@/app/_components/ui/toaster'
-import { Box, Button, HStack, Table, Text, VStack } from '@chakra-ui/react'
-import { Copy, ExternalLink, Trash2 } from 'lucide-react'
+import { Badge, Box, Button, HStack, Icon, Input, Table, Text, VStack } from '@chakra-ui/react'
+import { Check, Copy, ExternalLink, Pencil, Trash2, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useCallback, useTransition } from 'react'
+import { useCallback, useState, useTransition } from 'react'
+import { updateFileClassificationAction } from '../_actions/files.action'
 
 interface UploadedFile {
   id: string
@@ -14,6 +15,8 @@ interface UploadedFile {
   mimeType: string
   size: number
   description: string | null
+  category: string | null
+  tags: string[]
   uploadedAt: Date
 }
 
@@ -36,6 +39,29 @@ export function FilesTable({ files }: FilesTableProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const { confirm, ConfirmDialog } = useConfirmDialog()
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [categoryDraft, setCategoryDraft] = useState('')
+  const [tagsDraft, setTagsDraft] = useState('')
+
+  const handleStartEdit = (file: UploadedFile) => {
+    setEditingId(file.id)
+    setCategoryDraft(file.category ?? '')
+    setTagsDraft(file.tags.join(', '))
+  }
+
+  const handleCancelEdit = () => setEditingId(null)
+
+  const handleSaveEdit = (id: string) => {
+    const tags = tagsDraft
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean)
+    startTransition(async () => {
+      await updateFileClassificationAction({ id, category: categoryDraft.trim() || null, tags })
+      setEditingId(null)
+      router.refresh()
+    })
+  }
 
   const handleDelete = useCallback(
     async (id: string, filename: string) => {
@@ -80,6 +106,7 @@ export function FilesTable({ files }: FilesTableProps) {
           <Table.Header>
             <Table.Row>
               <Table.ColumnHeader>Файл</Table.ColumnHeader>
+              <Table.ColumnHeader>Категория / метки</Table.ColumnHeader>
               <Table.ColumnHeader>Тип</Table.ColumnHeader>
               <Table.ColumnHeader>Размер</Table.ColumnHeader>
               <Table.ColumnHeader>Дата</Table.ColumnHeader>
@@ -87,55 +114,103 @@ export function FilesTable({ files }: FilesTableProps) {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {files.map((file) => (
-              <Table.Row key={file.id}>
-                <Table.Cell>
-                  <VStack align="start" gap={0}>
-                    <Text fontSize="sm" fontWeight="medium">
-                      {file.filename}
-                    </Text>
-                    {file.description && (
-                      <Text fontSize="xs" color="fg.muted">
-                        {file.description}
+            {files.map((file) => {
+              const isEditing = editingId === file.id
+              return (
+                <Table.Row key={file.id}>
+                  <Table.Cell>
+                    <VStack align="start" gap={0}>
+                      <Text fontSize="sm" fontWeight="medium">
+                        {file.filename}
                       </Text>
-                    )}
-                  </VStack>
-                </Table.Cell>
-                <Table.Cell>
-                  <Text fontSize="xs" color="fg.muted">
-                    {file.mimeType}
-                  </Text>
-                </Table.Cell>
-                <Table.Cell>{formatSize(file.size)}</Table.Cell>
-                <Table.Cell>
-                  <Text fontSize="xs" color="fg.muted">
-                    {new Date(file.uploadedAt).toLocaleDateString('ru-RU')}
-                  </Text>
-                </Table.Cell>
-                <Table.Cell>
-                  <HStack gap={1} justify="flex-end">
-                    <Button size="xs" variant="ghost" onClick={() => copyLink(file.path)} title="Копировать ссылку">
-                      <Copy size={14} />
-                    </Button>
-                    <Button size="xs" variant="ghost" asChild title="Открыть файл">
-                      <a href={`/api/files/${file.path}`} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink size={14} />
-                      </a>
-                    </Button>
-                    <Button
-                      size="xs"
-                      variant="ghost"
-                      colorPalette="red"
-                      onClick={() => handleDelete(file.id, file.filename)}
-                      loading={isPending}
-                      title="Удалить"
-                    >
-                      <Trash2 size={14} />
-                    </Button>
-                  </HStack>
-                </Table.Cell>
-              </Table.Row>
-            ))}
+                      {file.description && (
+                        <Text fontSize="xs" color="fg.muted">
+                          {file.description}
+                        </Text>
+                      )}
+                    </VStack>
+                  </Table.Cell>
+                  <Table.Cell>
+                    {isEditing
+                      ? (
+                        <HStack gap={2} flexWrap="wrap">
+                          <Input
+                            size="sm"
+                            value={categoryDraft}
+                            onChange={(e) => setCategoryDraft(e.target.value)}
+                            placeholder="Категория"
+                            maxW="160px"
+                          />
+                          <Input
+                            size="sm"
+                            value={tagsDraft}
+                            onChange={(e) => setTagsDraft(e.target.value)}
+                            placeholder="метка1, метка2"
+                            maxW="220px"
+                          />
+                          <Button size="xs" colorPalette="green" onClick={() => handleSaveEdit(file.id)}>
+                            <Icon>
+                              <Check />
+                            </Icon>
+                          </Button>
+                          <Button size="xs" variant="ghost" onClick={handleCancelEdit}>
+                            <Icon>
+                              <X />
+                            </Icon>
+                          </Button>
+                        </HStack>
+                      )
+                      : (
+                        <HStack gap={1} flexWrap="wrap" cursor="pointer" onClick={() => handleStartEdit(file)}>
+                          {file.category && <Badge variant="subtle">{file.category}</Badge>}
+                          {file.tags.map((tag) => (
+                            <Badge key={tag} variant="outline">
+                              {tag}
+                            </Badge>
+                          ))}
+                          {!file.category && file.tags.length === 0 && <Text color="fg.muted">—</Text>}
+                          <Icon color="fg.muted" boxSize="12px">
+                            <Pencil />
+                          </Icon>
+                        </HStack>
+                      )}
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Text fontSize="xs" color="fg.muted">
+                      {file.mimeType}
+                    </Text>
+                  </Table.Cell>
+                  <Table.Cell>{formatSize(file.size)}</Table.Cell>
+                  <Table.Cell>
+                    <Text fontSize="xs" color="fg.muted">
+                      {new Date(file.uploadedAt).toLocaleDateString('ru-RU')}
+                    </Text>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <HStack gap={1} justify="flex-end">
+                      <Button size="xs" variant="ghost" onClick={() => copyLink(file.path)} title="Копировать ссылку">
+                        <Copy size={14} />
+                      </Button>
+                      <Button size="xs" variant="ghost" asChild title="Открыть файл">
+                        <a href={`/api/files/${file.path}`} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink size={14} />
+                        </a>
+                      </Button>
+                      <Button
+                        size="xs"
+                        variant="ghost"
+                        colorPalette="red"
+                        onClick={() => handleDelete(file.id, file.filename)}
+                        loading={isPending}
+                        title="Удалить"
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                    </HStack>
+                  </Table.Cell>
+                </Table.Row>
+              )
+            })}
           </Table.Body>
         </Table.Root>
       </Table.ScrollArea>

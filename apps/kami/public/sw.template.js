@@ -91,7 +91,7 @@ async function removeFromShareQueue(id) {
   })
 }
 
-/** Пытается отправить все отложенные ссылки на реальный /share/ — останавливается на первой сетевой ошибке */
+/** Пытается отправить все отложенные шаринги на реальный /share/ — останавливается на первой сетевой ошибке */
 async function flushShareQueue() {
   let items
   try {
@@ -101,7 +101,15 @@ async function flushShareQueue() {
   }
   for (const item of items) {
     try {
-      const body = new URLSearchParams({ title: item.title, text: item.text, url: item.url })
+      // multipart/form-data (не urlencoded) — share_target с files требует именно его,
+      // и fetch сам выставляет boundary, когда body — FormData
+      const body = new FormData()
+      body.set('title', item.title)
+      body.set('text', item.text)
+      body.set('url', item.url)
+      for (const f of item.files || []) {
+        body.append(f.fieldName, f.blob, f.filename)
+      }
       const response = await fetch('/share/', { method: 'POST', body, credentials: 'same-origin' })
       // 3xx (редирект после сохранения) или ok — сервер принял; дальнейшую логику решает сам /share
       if (response.ok || response.redirected || (response.status >= 300 && response.status < 400)) {
@@ -121,10 +129,18 @@ async function handleShareSubmit(request) {
     return await fetch(request)
   } catch {
     const formData = await requestForQueue.formData()
+    // Файлы (картинка/аудио/PDF из Android Share) — IndexedDB умеет хранить Blob напрямую
+    const files = []
+    for (const [fieldName, value] of formData.entries()) {
+      if (value instanceof File) {
+        files.push({ fieldName, filename: value.name, blob: value })
+      }
+    }
     await addToShareQueue({
       title: formData.get('title') || '',
       text: formData.get('text') || '',
       url: formData.get('url') || '',
+      files,
       queuedAt: Date.now(),
     })
     if ('sync' in self.registration) {

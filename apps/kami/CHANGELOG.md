@@ -5,6 +5,22 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 проект придерживается [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.33.32] - 2026-09-06
+
+### Added
+
+- Фаза 10: Web Share Target теперь принимает файлы, не только ссылки — `manifest.ts`
+  (`enctype: 'multipart/form-data'`, `params.files` с `image/*`/`application/pdf`/`audio/*`).
+  Расшаренный `audio/*` идёт в тот же пайплайн, что и ручная загрузка через `/admin/audio`
+  (ID3-теги, обложка, slug); остальные типы — в `UploadedFile`/`/admin/files`. Логика сохранения
+  вынесена в переиспользуемые `saveAudioFile()`/`saveUploadedFile()` — используются и штатными
+  аплоадерами (`/api/audio/upload`, `/api/arbitrary-upload`), и роутом `/share`, без дублирования.
+- `UploadedFile` получил `category`/`tags` (тот же паттерн, что у `Link`) и inline-редактирование
+  в `/admin/files`, тем же UX, что и `/admin/links` — новый server action
+  `updateFileClassificationAction`.
+- Офлайн-очередь Share Target (см. предыдущий релиз) обновлена под multipart — IndexedDB хранит
+  файлы как `Blob`, повторная отправка при восстановлении сети пересобирает `FormData`.
+
 ## [0.33.31] - 2026-09-06
 
 ### Added

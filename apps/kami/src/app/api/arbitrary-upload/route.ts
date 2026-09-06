@@ -1,6 +1,7 @@
 import { getSession } from '@/lib/auth'
 import { prisma } from '@/lib/db'
-import { deleteFileFromDisk, extractAndValidateFile, generateFilename, saveFileToDisk } from '@letar/upload-validation'
+import { saveUploadedFile } from '@/lib/files/save-uploaded-file'
+import { deleteFileFromDisk, extractAndValidateFile } from '@letar/upload-validation'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
@@ -21,29 +22,14 @@ export async function POST(request: NextRequest) {
     if (error) {
       return error
     }
-    const description = (formData.get('description') as string | null)?.trim() || null
+    const description = formData.get('description') as string | null
 
-    const storedName = generateFilename(file.name)
-    await saveFileToDisk(file, 'files', storedName)
-
-    const path = `files/${storedName}`
-
-    const uploaded = await prisma.uploadedFile.create({
-      data: {
-        filename: file.name,
-        storedName,
-        path,
-        mimeType: file.type || 'application/octet-stream',
-        size: file.size,
-        description,
-        uploadedById: session.user.id,
-      },
-    })
+    const uploaded = await saveUploadedFile(file, session.user.id, { description })
 
     return NextResponse.json({
       success: true,
       id: uploaded.id,
-      url: `/api/files/${path}`,
+      url: `/api/files/${uploaded.path}`,
       filename: uploaded.filename,
     })
   } catch (error) {

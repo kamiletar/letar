@@ -654,7 +654,7 @@
     },
     "apps/kami": {
       "name": "kami",
-      "version": "0.33.31",
+      "version": "0.33.32",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",

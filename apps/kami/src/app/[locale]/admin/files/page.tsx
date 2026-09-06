@@ -28,6 +28,8 @@ export default async function AdminFilesPage({ params }: PageProps) {
         mimeType: true,
         size: true,
         description: true,
+        category: true,
+        tags: true,
         uploadedAt: true,
       },
     }),

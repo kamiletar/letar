@@ -1,5 +1,7 @@
+import { saveAudioFile } from '@/lib/audio/save-audio-file'
 import { getSession } from '@/lib/auth'
 import { getEnhancedPrisma } from '@/lib/db'
+import { saveUploadedFile } from '@/lib/files/save-uploaded-file'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
@@ -28,8 +30,13 @@ async function fetchPageTitle(url: string): Promise<string | null> {
 }
 
 /**
- * POST /share — Web Share Target (Android "Поделиться" → сохранение ссылки в Kami).
- * Настроен в `manifest.ts` (`share_target`, enctype `application/x-www-form-urlencoded`).
+ * POST /share — Web Share Target (Android "Поделиться" → сохранение в Kami).
+ * Настроен в `manifest.ts` (`share_target`, enctype `multipart/form-data`).
+ *
+ * Три ветки в зависимости от того, что расшарено:
+ * - файл `audio/*` → тот же пайплайн, что и ручная загрузка в `/admin/audio` (ID3-теги, обложка)
+ * - любой другой файл (картинка, PDF) → `UploadedFile`, раздел `/admin/files`
+ * - только текст/ссылка (файлов нет) → `Link`, раздел `/admin/links` (поведение до Фазы 10.х)
  */
 export async function POST(request: NextRequest) {
   const session = await getSession()
@@ -42,7 +49,23 @@ export async function POST(request: NextRequest) {
   const sharedText = (formData.get('text') as string | null)?.trim() || ''
   const sharedUrl = (formData.get('url') as string | null)?.trim() || ''
 
-  // Android иногда кладёт URL в text, а не в url
+  const files = formData.getAll('files').filter((entry): entry is File => entry instanceof File && entry.size > 0)
+
+  if (files.length > 0) {
+    const hasAudio = files.some((file) => file.type.startsWith('audio/'))
+
+    for (const file of files) {
+      if (file.type.startsWith('audio/')) {
+        await saveAudioFile(file, session.user.id, sharedTitle || null)
+      } else {
+        await saveUploadedFile(file, session.user.id, { description: sharedText || null })
+      }
+    }
+
+    return NextResponse.redirect(new URL(hasAudio ? '/admin/audio' : '/admin/files', request.url), 303)
+  }
+
+  // Файлов нет — обычный шаринг ссылки
   const url = sharedUrl || extractUrl(sharedText) || extractUrl(sharedTitle)
   if (!url) {
     return NextResponse.redirect(new URL('/admin/links?error=no-url', request.url), 303)

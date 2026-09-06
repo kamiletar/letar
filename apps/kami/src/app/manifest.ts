@@ -64,11 +64,19 @@ export default function manifest(): MetadataRoute.Manifest {
     share_target: {
       action: '/share/',
       method: 'POST',
-      enctype: 'application/x-www-form-urlencoded',
+      // multipart/form-data — единственный enctype, допускающий files (см. спеку Web Share Target);
+      // текстовые поля (title/text/url) остаются обычными полями формы и в этом enctype
+      enctype: 'multipart/form-data',
       params: {
         title: 'title',
         text: 'text',
         url: 'url',
+        files: [
+          {
+            name: 'files',
+            accept: ['image/*', 'application/pdf', 'audio/*'],
+          },
+        ],
       },
     },
     // Связанные приложения (опционально)
