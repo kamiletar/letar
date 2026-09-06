@@ -2715,7 +2715,12 @@ read-only не годится для миграций, а для преренд�
 - [x] **Гейт: изоляция Nx-кеша по окружению** (`NX_CACHE_DIRECTORY` + `NX_WORKSPACE_DATA_DIRECTORY`
       — вторая переменная обязательна, см. «✅ Закрыто» ниже), `nx-cache-cleanup` обходит все
       `.nx/cache*`. Закрыто 2026-09-06
-- [ ] `registry:2` на s3 за Traefik + basic-auth + ретеншн тегов
+- [x] `registry:2` на s3 за Traefik + basic-auth + ретеншн тегов. Закрыто 2026-09-06 —
+      `infra/registry/` (`docker-compose.yml`, `secrets/`, `README.md`) + `scripts/registry-gc.sh`.
+      Смоук-тест живьём: `docker login` + push/pull `hello-world:smoke` через
+      `registry.s3.letar.best` прошли. Ретеншн (`registry-gc.sh`) написан, но без cron-расписания
+      — запуск вручную до отдельной задачи по регистрации `/api/cron/*` в `dashboard-agent`
+      (см. README `infra/registry/README.md` § «Дальнейшие шаги»)
 - [ ] Пилот 1: приложение **без БД** (лендинг) — сборка на s3, push, pull и запуск на s2.
       Проверяет только канал доставки
 - [ ] Пилот 2: приложение **с БД, но без пререндера из БД** — добавляет туннель и миграции с s3
