@@ -2,7 +2,7 @@
 
 import { Box, Button, Card, Heading, HStack, Icon, Image, Text, VStack } from '@chakra-ui/react'
 import { useColorMode } from '@letar/chakra-provider'
-import { Sparkles, Wand2 } from 'lucide-react'
+import { Sparkles, Terminal, Wand2 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useCallback, useRef, useState } from 'react'
@@ -15,6 +15,12 @@ import { useOfflineSpectrogram } from './use-offline-spectrogram'
 // WebGL + ~100 пресетов — тяжёлый бандл, грузим только по клику на кнопку "Визуализация"
 const ButterchurnVisualizer = dynamic(
   () => import('./butterchurn-visualizer').then((m) => m.ButterchurnVisualizer),
+  { ssr: false },
+)
+
+// WebGL + live-coding редактор — тяжёлый бандл, грузим только по клику на кнопку "VJ-режим"
+const HydraVisualizer = dynamic(
+  () => import('./hydra-visualizer').then((m) => m.HydraVisualizer),
   { ssr: false },
 )
 
@@ -60,6 +66,7 @@ export function AudioPageClient({ audio, locale }: AudioPageClientProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [sliderView, setSliderView] = useState(false)
   const [butterchurnOpen, setButterchurnOpen] = useState(false)
+  const [hydraOpen, setHydraOpen] = useState(false)
   const { columns: staticSpectrogramColumns } = useOfflineSpectrogram(audioUrl)
 
   /** Общий AnalyserNode — один на оба визуализатора */
@@ -157,6 +164,12 @@ export function AudioPageClient({ audio, locale }: AudioPageClientProps) {
               </Icon>
               Визуализация
             </Button>
+            <Button variant="ghost" size="xs" onClick={() => setHydraOpen(true)} color="fg.muted">
+              <Icon>
+                <Terminal size={14} />
+              </Icon>
+              VJ-режим
+            </Button>
           </HStack>
 
           {butterchurnOpen && (
@@ -166,6 +179,8 @@ export function AudioPageClient({ audio, locale }: AudioPageClientProps) {
               onClose={() => setButterchurnOpen(false)}
             />
           )}
+
+          {hydraOpen && <HydraVisualizer getAnalyzer={getAnalyzer} onClose={() => setHydraOpen(false)} />}
 
           <VStack
             gap={2}

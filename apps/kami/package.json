@@ -1,6 +1,6 @@
 {
   "name": "kami",
-  "version": "0.33.25",
+  "version": "0.33.26",
   "private": true,
   "nx": {
     "implicitDependencies": [
@@ -30,6 +30,7 @@
     "@letar/seed-utils": "workspace:*",
     "butterchurn": "^2.6.7",
     "butterchurn-presets": "^2.4.7",
+    "hydra-synth": "^1.4.0",
     "shiki": "^4.1.0"
   }
 }
