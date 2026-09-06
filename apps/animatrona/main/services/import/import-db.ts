@@ -185,6 +185,7 @@ export async function createAudioTrack(data: {
   channels: string
   bitrate?: number | null
   isDefault: boolean
+  isForced?: boolean
   dubGroup?: string
 }) {
   return prisma.audioTrack.create({
@@ -197,6 +198,7 @@ export async function createAudioTrack(data: {
       channels: data.channels,
       bitrate: data.bitrate ?? null,
       isDefault: data.isDefault,
+      isForced: data.isForced ?? false,
       dubGroup: data.dubGroup ?? null,
     },
   })
@@ -215,6 +217,7 @@ export async function createSubtitleTrack(data: {
   title?: string
   format: string
   isDefault: boolean
+  isForced?: boolean
   fileCid?: string
   ipfsSize?: number
   dubGroup?: string
@@ -228,6 +231,7 @@ export async function createSubtitleTrack(data: {
       title: data.title ?? null,
       format: data.format,
       isDefault: data.isDefault,
+      isForced: data.isForced ?? false,
       fileCid: data.fileCid ?? null,
       ipfsSize: data.ipfsSize ?? null,
       dubGroup: data.dubGroup ?? null,
@@ -340,6 +344,7 @@ export async function findAudioTracksForManifest(episodeId: string) {
       channels: true,
       bitrate: true,
       isDefault: true,
+      isForced: true,
       dubGroup: true,
       transcodedCid: true,
       ipfsSize: true,
@@ -364,6 +369,7 @@ export async function findSubtitleTracksForManifest(episodeId: string) {
       title: true,
       format: true,
       isDefault: true,
+      isForced: true,
       dubGroup: true,
       fileCid: true,
       ipfsSize: true,

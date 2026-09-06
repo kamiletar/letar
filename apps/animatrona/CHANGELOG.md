@@ -4,6 +4,20 @@
 
 ## [Unreleased]
 
+## [0.55.58] - 2026-09-06
+
+### Added
+
+- `isForced` у `SubtitleTrack`/`AudioTrack` (библиотечный режим импорт + IPFS-раздача) — миграция
+  `20260906203900_add_track_is_forced`, поле в `ManifestAudioTrack`/`ManifestSubtitleTrack`
+  (`@letar/animatrona-types`). Значение читается из `disposition.forced` контейнера через
+  ffprobe (`main/ffmpeg/demux.ts`, `isDispositionFlagSet` из `@letar/folder-scan` — тот же
+  детектор, что уже использует папочный режим плеера) и прокидывается через весь конвейер
+  импорта (`audio-track-creator.ts`/`subtitle-track-creator.ts` → `import-db.ts` →
+  `manifest-generator.ts`). Внешние дорожки (drag&drop файлы, не встроенные в контейнер)
+  флаг не несут — `isForced: false` по умолчанию. Закрывает PLAN.md §19.4 «Библиотечный режим»
+  (задача была привязана к дедлайну «до массового перезаливa библиотеки», §15.3).
+
 ## [0.55.57] - 2026-09-06
 
 ### Fixed

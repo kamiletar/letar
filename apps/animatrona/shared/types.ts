@@ -450,6 +450,8 @@ export interface DemuxedAudio {
    * Используется когда path=null — для кодирования напрямую из исходника
    */
   sourceFile?: string
+  /** Дорожка помечена forced в контейнере (`disposition.forced`) */
+  isForced?: boolean
 }
 
 /** Информация об извлечённых субтитрах */
@@ -466,6 +468,8 @@ export interface DemuxedSubtitle {
   title: string
   /** Размер файла в байтах */
   size: number
+  /** Дорожка помечена forced в контейнере (`disposition.forced`) */
+  isForced?: boolean
 }
 
 /** Глава (chapter) */

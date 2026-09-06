@@ -87,6 +87,7 @@ async function processSelectedSubtitles(
             title: embeddedTrack.title || undefined,
             format: embeddedTrack.format,
             isDefault: isFirstSub,
+            isForced: embeddedTrack.isForced ?? false,
             fileCid: subUploadResult?.cid ?? undefined,
             ipfsSize: subUploadResult?.size ?? undefined,
             dubGroup: rec.dubGroup || undefined,
@@ -173,6 +174,7 @@ async function processEmbeddedSubtitles(episodeId: string, demuxResult: DemuxRes
         title: track.title || undefined,
         format: track.format,
         isDefault: idx === 0,
+        isForced: track.isForced ?? false,
         fileCid: embSubResult?.cid ?? undefined,
         ipfsSize: embSubResult?.size ?? undefined,
       })

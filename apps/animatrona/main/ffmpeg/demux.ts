@@ -2,6 +2,7 @@
  * FFmpeg Demux модуль — извлечение потоков из контейнера без перекодирования
  */
 
+import { isDispositionFlagSet, type StreamDisposition } from '@letar/folder-scan'
 import { mkdir, stat, writeFile } from 'fs/promises'
 import path from 'path'
 import type {
@@ -41,6 +42,8 @@ interface FFProbeOutput {
     sample_rate?: string
     /** Формат пикселей (yuv420p, yuv420p10le и т.д.) */
     pix_fmt?: string
+    /** Флаги дорожки (default/forced и т.д.) — присутствуют в JSON-выводе -show_streams без доп. флагов */
+    disposition?: StreamDisposition
     /** Теги потока — могут содержать BPS для MKV */
     tags?: {
       language?: string
@@ -434,6 +437,7 @@ export async function demuxFile(
           bitrate,
           duration: totalDuration,
           size: audioSize,
+          isForced: isDispositionFlagSet(as.disposition?.forced),
         })
       } else {
         // Не извлекаем — будет кодироваться напрямую из исходника
@@ -456,6 +460,7 @@ export async function demuxFile(
           bitrate,
           duration: totalDuration,
           size: 0, // Не извлечено
+          isForced: isDispositionFlagSet(as.disposition?.forced),
         })
       }
     }
@@ -503,6 +508,7 @@ export async function demuxFile(
             language: lang,
             title: ss.tags?.title || getLanguageName(lang) || `Subtitles ${i + 1}`,
             size: await getFileSize(subPath),
+            isForced: isDispositionFlagSet(ss.disposition?.forced),
           })
         } catch {
           // Не удалось извлечь субтитры — пропускаем

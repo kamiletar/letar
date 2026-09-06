@@ -1212,10 +1212,44 @@ resolveTracks({ mode, preferredAudioLang, preferredSubLang, preferredGroup, avai
 
 **Библиотечный режим (импорт в БД + раздача по IPFS) — здесь хранить действительно негде:**
 
-- [ ] Миграция БД: `isForced` у `SubtitleTrack` и `AudioTrack` (в схеме есть только `isDefault`)
-- [ ] Поле в `AnimeManifest`/`EpisodeManifest` — при транскоде и раздаче флаг из контейнера теряется,
-      а в папочном режиме он всегда под рукой. Это и есть причина разницы между двумя случаями
-- [ ] ⏰ Привязка к §15.3: поле в манифест добавлять **до** массовой перезаливки библиотеки
+- [x] Миграция БД: `isForced` у `SubtitleTrack` и `AudioTrack` (2026-09-06,
+      `20260906203900_add_track_is_forced`)
+- [x] Поле в `AnimeManifest`/`EpisodeManifest` (2026-09-06) — `ManifestAudioTrack.isForced`/
+      `ManifestSubtitleTrack.isForced` в `@letar/animatrona-types`. Источник — то же самое
+      `disposition.forced` из ffprobe, что уже читает папочный режим
+      (`isDispositionFlagSet` из `@letar/folder-scan`), только раньше `main/ffmpeg/demux.ts`
+      (используется библиотечным импортом, не путать с `main/ffmpeg/probe.ts` для папочного
+      режима) вовсе не запрашивал `disposition` у ffprobe и не прокидывал его дальше. Флаг
+      теперь течёт через весь конвейер: `demux.ts` → `audio-track-creator.ts`/
+      `subtitle-track-creator.ts` → `import-db.ts` (create + оба `findXForManifest`) →
+      `manifest-generator.ts` (`rebuildManifestTracks`, включая сравнение в `serializeAudio`/
+      `serializeSub`) → манифест эпизода. Дополнительно проставлен в трёх местах, где Prisma
+      `select` дублируется отдельно от `import-db.ts` (`manifest.handlers.ts`,
+      `episode-manifest-regen.ts` `EPISODE_TRACKS_SELECT`) — иначе поле осело бы в БД, но не
+      доехало до `rebuildManifestTracks`. Внешние дорожки (drag&drop, не из контейнера) флага не
+      несут, `isForced: false` по умолчанию. lint/typecheck:tsgo animatrona — зелёные (0 ошибок).
+      ⚠️ Полный прогон тестов не завершён этой задачей — `nx test animatrona` падает на
+      несвязанном пред-существующем разрыве (`Cannot find package '@letar/folder-scan'` из
+      vitest для `main/services/external-subtitle-scanner.ts`, файл этой задачей не тронут) —
+      см. отдельную находку ниже.
+- [x] ⏰ Привязка к §15.3 выполнена: поле добавлено в манифест до массовой перезаливки библиотеки
+
+**⚠️ Новая находка (2026-09-06), не относится к isForced — гейт тестов теперь неполон:**
+`nx test animatrona` красный на самом сборе тестов: `main/services/import/anime-record-setup.spec.ts`
+не собирается — цепочка импортов `anime-record-setup.ts` → `external-subtitle-scanner.ts` →
+`@letar/folder-scan` падает в vitest (`Cannot find package '@letar/folder-scan'`), хотя
+`typecheck:tsgo` (резолвит через `paths` в `tsconfig.json`) и упакованная сборка (через
+webpack/esbuild-алиасы `main/`) видят пакет нормально. Причина — тот же класс, что в
+[vitest-unlinked-workspace-lib-imports.md](/.claude/docs/vitest-unlinked-workspace-lib-imports.md):
+`@letar/folder-scan` только в `nx.implicitDependencies` (`apps/animatrona/package.json:16`) и
+`tsconfig.json` `paths`, не в настоящих `dependencies` — bun не создал симлинк в
+`node_modules/@letar/folder-scan`, а `vitest.config.mts` `resolve.alias` пакет тоже не покрывает
+(`@` → `./main`, и всё). Существовало до этой сессии (`external-subtitle-scanner.ts` уже
+импортировал пакет), моя правка `demux.ts` того же пакета этот разрыв не создала, но полагаться
+на «`nx test animatrona` зелёный» сейчас нельзя — 1 из 9 тестовых файлов не собирается вовсе
+(остальные 162 теста внутри собравшихся файлов прошли). Фикс — добавить `@letar/folder-scan` в
+настоящие `dependencies` `apps/animatrona/package.json` + `bun install`, отдельная задача не в
+рамках этой правки.
 
 #### 19.5 Приёмка
 

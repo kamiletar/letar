@@ -81,6 +81,7 @@ export async function createAudioTracks(
         channels: formatChannels(track.channels),
         bitrate: track.bitrate,
         isDefault: track.index === 0,
+        isForced: track.isForced ?? false,
         dubGroup: rec?.dubGroup || rec?.groupName || undefined,
       })
 
