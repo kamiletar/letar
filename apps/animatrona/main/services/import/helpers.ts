@@ -101,38 +101,8 @@ export function mapSeasonType(kind: string | null): SeasonType {
   }
 }
 
-/**
- * Определяет тип главы по названию
- */
-export function detectChapterType(title: string | null): 'op' | 'ed' | 'recap' | 'preview' | 'chapter' {
-  if (!title) {
-    return 'chapter'
-  }
-  const lowerTitle = title.toLowerCase()
-
-  if (lowerTitle.includes('open') || lowerTitle.includes('op')) {
-    return 'op'
-  }
-  if (lowerTitle.includes('end') || lowerTitle.includes('ed')) {
-    return 'ed'
-  }
-  if (lowerTitle.includes('recap') || lowerTitle.includes('previous')) {
-    return 'recap'
-  }
-  if (lowerTitle.includes('preview') || lowerTitle.includes('next')) {
-    return 'preview'
-  }
-
-  return 'chapter'
-}
-
-/**
- * Определяет, можно ли пропустить главу
- */
-export function isChapterSkippable(title: string | null): boolean {
-  const type = detectChapterType(title)
-  return type === 'op' || type === 'ed' || type === 'recap' || type === 'preview'
-}
+/** Реэкспорт для обратной совместимости — сама реализация в shared (нужна и renderer'у для папочного режима плеера, см. `.claude/rules/electron.md` про паттерн `shared/`) */
+export { detectChapterType, isChapterSkippable } from '../../../shared/utils/chapters'
 
 /**
  * Построить имя файла для аудио/субтитров

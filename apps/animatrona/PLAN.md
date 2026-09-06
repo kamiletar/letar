@@ -1765,40 +1765,20 @@ Animatrona: библиотека, каталог, импорт, очередь, 
     «Грабли») — после апдейта нужен реальный живой запуск у Ками, не считать «собралось» за
     «работает».
 
-- [ ] **Автоопределение глав (OP/ED) для папочного режима плеера (`/player`)**
+- [x] **Автоопределение глав (OP/ED) для папочного режима плеера (`/player`)** — сделано
+      2026-09-06, v0.55.55 (детали реализации — PLAN_COMPLETED.md). `ProbedChapter` в
+      `@letar/folder-player-react` (host + state), классификация `detectChapterType`/
+      `isChapterSkippable` вынесена из `main/services/import/helpers.ts` (реэкспорт для обратной
+      совместимости) в `shared/utils/chapters.ts` — один источник для main и renderer, без
+      дублирования. `probeChapterToPlayerChapter()` в `chapter-utils.ts`, `useChapterAutoSkip`
+      переиспользован для автопропуска по `Settings.skipOpening`/`skipEnding`.
 
-  ⚠️ **Переносится в Фазу 3 плана Animatrona Player** (см. раздел выше): после введения
-  интерфейса `MediaProber` главы отдают обе реализации, и кнопка «Пропустить опенинг» появляется
-  сразу в двух приложениях. Классификацию брать из `@letar/video-player-react`
-  (`utils/detect-chapter-types.ts`), а не дублировать из `main/services/import/helpers.ts`.
-
-  **Проблема:** при импорте в библиотеку (`main/services/import/chapter-creator.ts`
-  `createChapters()`) главы из контейнера (ffprobe `-show_chapters`) классифицируются через
-  `detectChapterType`/`isChapterSkippable` (`main/services/import/helpers.ts`) и попадают в
-  IPFS-манифест эпизода → плеер показывает кнопку «Пропустить опенинг/эндинг». В папочном режиме
-  (`/player`, просмотр файлов с диска без импорта в библиотеку) этого нет вообще — `useFolderPlayer.ts`
-  (`scanTracksForEpisodeInternal`) вызывает `getCachedProbe()`, который уже возвращает
-  `mediaInfo.chapters` (`main/ffmpeg/probe.ts` `getChaptersAndAttachments()` — `-show_chapters`
-  входит в тот же ffprobe-вызов, что уже делается для аудио/видео/субтитров, **дополнительного
-  прохода ffmpeg не требуется**), но `embeddedTracks` в `useFolderPlayer.ts` (строки ~262–281)
-  берёт из `mediaInfo` только `audioTracks`/`subtitleTracks` — `chapters` отбрасывается.
-
-  **План реализации:**
-  1. `useFolderPlayer.ts`: прокинуть `mediaInfo.chapters` в `embeddedTracks` (или отдельное поле
-     `FolderPlayerState.chapters`) наряду с audio/subtitles.
-  2. Классификация типа (OP/ED/RECAP/PREVIEW) — переиспользовать `detectChapterType`/
-     `isChapterSkippable` из `main/services/import/helpers.ts` (та же логика, что при импорте, не
-     дублировать эвристику).
-  3. Конвертация в формат плеера — по аналогии с `manifestChapterToPlayerChapter()`
-     (`renderer/src/components/player/chapter-utils.ts`), но из секунд ffprobe (`{start, end,
-title}`), а не из мс IPFS-манифеста (`ManifestChapter`) — нужен паралелльный конвертер
-     `probeChapterToPlayerChapter()` рядом с существующим.
-  4. Передать `chapters` в `<VideoPlayer>` на `/player/page.tsx` (проп уже поддерживается
-     компонентом для библиотечного режима — `ChapterEditor.tsx`/кнопка пропуска уже умеют её
-     рендерить, нужно только запитать данными в папочном режиме).
-
-  По ресурсам — бесплатно (данные уже вычисляются существующим ffprobe-вызовом), вся работа в
-  этой задаче — прокинуть уже готовые данные через слои, которые их сейчас отбрасывают.
+  ⚠️ **Не консолидировано с `@letar/video-player-react` (`utils/detect-chapter-types.ts`)** —
+  это отдельный, более функциональный классификатор (title + позиция/длительность,
+  `Chapter[] → Chapter[]`), уже используемый где-то за пределами animatrona; сделано сознательно
+  минимально, по конкретным шагам, ранее записанным в этой же задаче, а не по абстрактной
+  отметке «Фаза 3 плана Animatrona Player» (интерфейс `MediaProber` пока не существует).
+  Консолидация классификаторов — отдельная будущая задача, не блокирует эту.
 
 ### Производительность
 

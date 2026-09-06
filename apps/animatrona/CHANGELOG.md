@@ -4,6 +4,22 @@
 
 ## [Unreleased]
 
+## [0.55.55] - 2026-09-06
+
+### Added
+
+- **Автоопределение глав (OP/ED) в папочном режиме плеера (`/player`)** — раньше главы,
+  вычисляемые тем же ffprobe-вызовом, что и аудио/субтитры, отбрасывались на уровне контракта
+  (`MediaProbeInfo` в `@letar/folder-player-react` не имел поля `chapters`). Добавлено:
+  `ProbedChapter` в хосте `useFolderPlayer`, поле `FolderPlayerState.chapters`, классификация
+  OP/ED/RECAP/PREVIEW (`detectChapterType`/`isChapterSkippable`) вынесена из
+  `main/services/import/helpers.ts` в `shared/utils/chapters.ts` (паттерн `shared/` — общий код
+  для main и renderer), новый конвертер `probeChapterToPlayerChapter()` в
+  `renderer/src/components/player/chapter-utils.ts`. Папочный режим теперь показывает маркеры
+  глав на прогресс-баре и автоматически пропускает опенинг/эндинг по тем же настройкам
+  `Settings.skipOpening`/`skipEnding`, что и библиотечный режим (`useChapterAutoSkip`
+  переиспользован как есть).
+
 ## [0.55.54] - 2026-09-06
 
 ### Fixed

@@ -4,6 +4,50 @@
 
 > **Архив обновлён:** 2026-09-06
 
+## Автоопределение глав (OP/ED) в папочном режиме плеера (2026-09-06)
+
+**Проблема:** при импорте в библиотеку главы из контейнера классифицируются
+(`detectChapterType`/`isChapterSkippable`, `main/services/import/helpers.ts`) и попадают в
+IPFS-манифест → плеер показывает маркеры и пропускает опенинг/эндинг. В папочном режиме
+(`/player`, файлы с диска без импорта в БД) те же данные уже вычислялись тем же ffprobe-вызовом
+(`main/ffmpeg/probe.ts` `getChaptersAndAttachments()`), но отбрасывались на уровне контракта:
+`MediaProbeInfo` в `@letar/folder-player-react` вообще не имел поля `chapters`.
+
+**Реализация:**
+
+1. `libs/folder-player-react/src/lib/host.ts` — новый тип `ProbedChapter {start, end, title}`,
+   поле `chapters?: ProbedChapter[]` в `MediaProbeInfo`.
+2. `libs/folder-player-react/src/lib/types.ts` — поле `chapters: ProbedChapter[] | null` в
+   `FolderPlayerState`.
+3. `libs/folder-player-react/src/lib/useFolderPlayer.ts` — `scanTracksForEpisodeInternal`
+   заполняет `chapters` из результата пробы параллельно с `embeddedTracks`, сбрасывает в `null`
+   при старте нового скана и при ошибке.
+4. `apps/animatrona/shared/utils/chapters.ts` (новый файл) — `detectChapterType`/
+   `isChapterSkippable` перенесены сюда из `main/services/import/helpers.ts` (паттерн `shared/`
+   — общий рантайм-код для main и renderer, см. `.claude/rules/electron.md`). В
+   `main/services/import/helpers.ts` оставлен реэкспорт — оба существующих вызывающих места
+   (`chapter-creator.ts`, `manifest-generator.ts`) не тронуты.
+5. `apps/animatrona/renderer/src/components/player/chapter-utils.ts` — новый конвертер
+   `probeChapterToPlayerChapter()` (секунды → секунды, классификация по заголовку через
+   `detectChapterType`), рядом с существующим `manifestChapterToPlayerChapter()` (мс → секунды,
+   уже классифицированный тип из манифеста).
+6. `apps/animatrona/renderer/src/app/player/page.tsx` — `folderPlayerHost.probe()` пробрасывает
+   `chapters` из `window.electronAPI.ffmpeg.probe()`; `playerChapters` (useMemo);
+   `useChapterAutoSkip` (переиспользован как есть из `@/app/watch/_hooks`, ранее использовался
+   только в библиотечном режиме — общий, не завязан на манифест/эпизод из БД) подключает
+   автопропуск по `Settings.skipOpening`/`skipEnding`; `chapters`/`onChapterSeek` переданы в
+   `<VideoPlayer>` для маркеров на прогресс-баре.
+
+**Не сделано намеренно:** ручная кнопка override автопропуска (как в `watch/[episodeId]/page.tsx`)
+— не входила в исходную формулировку задачи, автопропуск работает по глобальным настройкам.
+Консолидация с более продвинутым классификатором `@letar/video-player-react`
+(`utils/detect-chapter-types.ts`, title + позиция/длительность) — открытый пункт, см. пометку в
+PLAN.md, не блокирует эту задачу.
+
+**Верификация:** `nx typecheck:tsgo animatrona` и `nx lint animatrona` — зелёные (0 ошибок).
+GUI-уровень (реальное воспроизведение файла с главами в папочном режиме) не проверялся в
+песочнице Claude Code — недоступно по правилам `.claude/rules/electron.md`.
+
 ## Типизация main-процесса (tsgo) + починка 4 e2e-тестов плеера (2026-09-06)
 
 Main-процесс не проверялся типами вообще: `main/tsconfig.json` имел `include`, не покрывающий

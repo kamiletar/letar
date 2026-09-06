@@ -3,6 +3,9 @@
  * Конвертация между форматами ManifestChapter (мс, lowercase) и плеера (секунды, UPPERCASE)
  */
 
+import type { ProbedChapter } from '@letar/folder-player-react'
+
+import { detectChapterType } from '../../../../shared/utils/chapters'
 import type { ManifestChapter, ManifestChapterType } from '../../types/electron'
 import type { Chapter, PlayerChapterType } from './ChapterMarkers'
 
@@ -61,4 +64,20 @@ export function playerChapterToManifestChapter(chapter: Chapter): ManifestChapte
  */
 export function isSkippableChapter(type: PlayerChapterType | undefined): boolean {
   return type !== undefined && SKIPPABLE_TYPES.has(type)
+}
+
+/**
+ * Конвертирует главу из формата пробы ffprobe (папочный режим, без импорта в БД) в формат плеера
+ * Проба отдаёт сырой заголовок из контейнера без классификации — тип определяется здесь,
+ * той же эвристикой, что и при импорте в библиотеку (`detectChapterType`)
+ */
+export function probeChapterToPlayerChapter(chapter: ProbedChapter, index: number): Chapter {
+  const type = MANIFEST_TO_PLAYER_TYPE[detectChapterType(chapter.title)]
+  return {
+    id: `ch-${index}`,
+    title: chapter.title || type,
+    startTime: chapter.start,
+    endTime: chapter.end,
+    type,
+  }
 }

@@ -22,10 +22,12 @@ import {
   useWatchProgress,
 } from '@letar/folder-player-react'
 
+import { useChapterAutoSkip } from '@/app/watch/_hooks'
 import { useGlobalVideoStore } from '@/components/global-video'
 import { ImportWizardDialog } from '@/components/import/ImportWizardDialog'
 import { Header } from '@/components/layout'
 import type { VideoPlayerRef } from '@/components/player'
+import { probeChapterToPlayerChapter } from '@/components/player/chapter-utils'
 import { toMediaUrl } from '@/lib/media-url'
 
 import { useFolderModeUI } from './_hooks/useFolderModeUI'
@@ -94,6 +96,11 @@ const folderPlayerHost: FolderPlayerHost = {
           isDefault: track.isDefault,
           isForced: track.isForced,
           subtitleType: track.subtitleType,
+        })),
+        chapters: result.data.chapters?.map((chapter) => ({
+          start: chapter.start,
+          end: chapter.end,
+          title: chapter.title,
         })),
       },
     }
@@ -191,6 +198,24 @@ export default function PlayerPage() {
     folderHistory,
   ])
 
+  // Главы текущего эпизода (OP/ED/recap/preview) — в формате плеера
+  const playerChapters = useMemo(
+    () => (folderPlayer.chapters ?? []).map(probeChapterToPlayerChapter),
+    [folderPlayer.chapters],
+  )
+
+  // Текущее время воспроизведения — для автопропуска глав
+  const [currentPlaybackTime, setCurrentPlaybackTime] = useState(0)
+
+  // Хук сам вызывает seek() на плеере при попадании в skippable-главу по настройкам Settings —
+  // возвращаемое значение (toggle ручного override) здесь не используется, кнопки нет в v1
+  useChapterAutoSkip({
+    playerRef,
+    chapters: playerChapters,
+    currentPlaybackTime,
+    episodeId: currentVideoPath ?? '',
+  })
+
   /** Данные для быстрого импорта из папочного режима */
   const importInitialData = useMemo(() => {
     if (!folderPlayer.folderPath) {
@@ -241,6 +266,8 @@ export default function PlayerPage() {
   /** Обработчик обновления времени (для сохранения прогресса) */
   const handleTimeUpdate = useCallback(
     (currentTime: number, duration: number) => {
+      setCurrentPlaybackTime(currentTime)
+
       if (!currentVideoPath || duration === 0) {
         return
       }
@@ -253,6 +280,11 @@ export default function PlayerPage() {
     },
     [currentVideoPath, watchProgress],
   )
+
+  /** Seek по клику на маркер главы в прогресс-баре */
+  const handleChapterSeek = useCallback((time: number) => {
+    playerRef.current?.seek(time)
+  }, [])
 
   /** Обработчик окончания видео */
   const handleVideoEnded = useCallback(() => {
@@ -389,6 +421,9 @@ export default function PlayerPage() {
                   onTimeUpdate={handleTimeUpdate}
                   onEnded={handleVideoEnded}
                   onError={handleVideoError}
+                  // Главы (OP/ED/recap/preview) — маркеры на прогресс-баре + автопропуск по Settings
+                  chapters={playerChapters.map((c) => ({ id: c.id, title: c.title, startTime: c.startTime }))}
+                  onChapterSeek={handleChapterSeek}
                   // Навигация между эпизодами (только в folder mode)
                   hasPrevEpisode={isFolderMode && folderPlayer.hasPrev}
                   hasNextEpisode={isFolderMode && folderPlayer.hasNext}
