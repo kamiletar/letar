@@ -42,7 +42,12 @@ export function Footer() {
               _hover={{ color: 'brand.400' }}
               asChild
             >
-              <a href="#" aria-label="GitHub (скоро)">
+              <a
+                href="https://github.com/kamiletar/letar/releases"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Релизы на GitHub"
+              >
                 <FaGithub size={14} />
                 GitHub
               </a>
@@ -62,6 +67,19 @@ export function Footer() {
                 Letar.best
                 <LuExternalLink size={12} />
               </a>
+            </Box>
+            <Box
+              display="inline-flex"
+              alignItems="center"
+              gap={1.5}
+              fontSize="xs"
+              color="gray.500"
+              className="font-mono"
+              transition="color 0.2s ease"
+              _hover={{ color: 'brand.400' }}
+              asChild
+            >
+              <NextLink href="/changelog">Ченджлог</NextLink>
             </Box>
             <Box
               display="inline-flex"

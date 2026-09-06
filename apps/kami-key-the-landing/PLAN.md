@@ -1,13 +1,9 @@
 # План разработки kami-key-the-landing
 
-## Текущий статус: v0.3.0 — Первый релиз на скачивание
+## Текущий статус: v0.4.0 — Релиз на скачивание + ченджлог
 
 ### Планируется
 
-- [ ] Страница/секция с ченджлогом релизов (запрос владельца, 2026-09-06) — источник данных:
-      GitHub Releases `kamiletar/letar` с тегом `kami-key-the-v*` (уже используется как хостинг
-      .exe, см. «Сделано» ниже). Варианты: серверный fetch GitHub Releases API на билде/ISR,
-      либо ручное ведение markdown-файла в репо. Не решено, какой — на усмотрение при реализации.
 - [ ] Аудит `_active: scale()` в теме на `pressScale` (`@letar/ui`) — задача описана в
       [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md)
 - [ ] Заменить `transition="all ..."` на явный `transitionProperty` (сужает анимацию до реально
@@ -21,6 +17,15 @@
 
 ### Сделано
 
+- [x] Страница `/changelog` — история релизов, живой fetch GitHub Releases API
+      (`kamiletar/letar`, `tagPrefix: 'kami-key-the-v'`) через общий `@letar/github-releases`
+      (`libs/github-releases`, ISR 1ч, без своей БД). Ссылка на скачивание .exe и размер файла —
+      прямо в карточке релиза. Rendering release notes — `react-markdown` + `remark-gfm`, по
+      образцу `apps/animatrona-landing/src/app/_components/changelog-section.tsx` (та же либа,
+      тот же паттерн, но отдельная страница, а не секция на главной — у kami-key-the-landing
+      навигация без раздела «блог»/«докс», отдельный роут проще встроить). Ссылка в navbar и
+      футере; попутно поправлена мёртвая ссылка «GitHub (скоро)» в футере — теперь ведёт на
+      реальную страницу релизов.
 - [x] Секция «Скачать» и hero-бейдж версии переведены с заглушки на реальный релиз —
       `kami-key-the-v1.7.2` на GitHub Releases (`kamiletar/letar`). Версия/размер вынесены в
       общий модуль `src/app/_components/download-info.ts`, обновлять вручную при каждом

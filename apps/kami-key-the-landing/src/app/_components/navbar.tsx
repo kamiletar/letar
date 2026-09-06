@@ -1,6 +1,7 @@
 'use client'
 
 import { Box, Container, Flex, HStack, IconButton, Text } from '@chakra-ui/react'
+import NextLink from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { FaKeyboard } from 'react-icons/fa6'
 import { LuMenu, LuX } from 'react-icons/lu'
@@ -110,6 +111,20 @@ export function Navbar() {
                 {section.label}
               </Box>
             ))}
+            <Box
+              px={3}
+              py={1.5}
+              borderRadius="md"
+              fontSize="sm"
+              fontWeight="500"
+              className="font-mono"
+              color="gray.400"
+              transition="all 0.2s ease"
+              _hover={{ color: 'brand.400', bg: 'rgba(57, 255, 20, 0.05)' }}
+              asChild
+            >
+              <NextLink href="/changelog">Ченджлог</NextLink>
+            </Box>
           </HStack>
 
           {/* Мобильный бургер */}
@@ -147,6 +162,23 @@ export function Navbar() {
                 {section.label}
               </Box>
             ))}
+            <Box
+              display="block"
+              w="100%"
+              textAlign="left"
+              px={4}
+              py={3}
+              fontSize="sm"
+              fontWeight="500"
+              className="font-mono"
+              color="gray.400"
+              _hover={{ color: 'brand.400', bg: 'rgba(57, 255, 20, 0.05)' }}
+              onClick={() =>
+                setMobileOpen(false)}
+              asChild
+            >
+              <NextLink href="/changelog">Ченджлог</NextLink>
+            </Box>
           </Box>
         )}
       </Container>

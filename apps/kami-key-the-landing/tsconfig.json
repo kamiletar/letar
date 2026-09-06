@@ -43,6 +43,12 @@
       ],
       "@letar/glitchtip/server": [
         "../../libs/glitchtip/src/server/index.ts"
+      ],
+      "@letar/github-releases": [
+        "../../libs/github-releases/src/index.ts"
+      ],
+      "@letar/format-utils": [
+        "../../libs/format-utils/src/index.ts"
       ]
     },
     "types": [],
