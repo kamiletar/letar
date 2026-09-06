@@ -299,6 +299,7 @@ export const defaultAudioVBROptions: AudioTranscodeVBROptions = {
  * @param profile Профиль кодирования
  * @param sourceBitDepth Битность исходного видео (опционально, для автоопределения 10-bit)
  * @param onProgress Callback для прогресса
+ * @param cropFilter Готовая строка `crop=W:H:X:Y` из cropdetect (см. cropdetect.ts) — опционально
  */
 export async function transcodeVideoWithProfile(
   inputPath: string,
@@ -306,6 +307,7 @@ export async function transcodeVideoWithProfile(
   profile: EncodingProfileOptions,
   sourceBitDepth = 8,
   onProgress?: (progress: TranscodeProgress) => void,
+  cropFilter?: string,
 ): Promise<void> {
   const duration = await getVideoDuration(inputPath)
 
@@ -313,7 +315,7 @@ export async function transcodeVideoWithProfile(
   // Перестраиваем аргументы правильно
   const finalArgs: string[] = ['-y']
 
-  // Стратегия кодирования определяет hwaccel и deband
+  // Стратегия кодирования определяет hwaccel и цепочку видеофильтров
   const strategy = getEncoderStrategy(profile.useGpu)
 
   // Сначала hwaccel опции (если есть) — они должны идти до -i
@@ -322,11 +324,12 @@ export async function transcodeVideoWithProfile(
   // Затем input
   finalArgs.push('-i', inputPath)
 
-  // Deband фильтр для аниме контента (убирает banding в градиентах)
-  // Параметры 0.02 — мягкие, не вызывают артефактов но эффективно убирают banding
-  // Опционально отключается через profile.deband для тяжёлых файлов
-  if (profile.deband !== false) {
-    finalArgs.push('-vf', strategy.buildDebandFilter())
+  // Crop (обрезка чёрных полос, см. cropdetect.ts) + deband для аниме контента (убирает
+  // banding в градиентах, параметры 0.02 — мягкие, не вызывают артефактов). Deband опционально
+  // отключается через profile.deband для тяжёлых файлов.
+  const videoFilter = strategy.buildVideoFilterChain({ deband: profile.deband !== false, cropFilter })
+  if (videoFilter) {
+    finalArgs.push('-vf', videoFilter)
   }
 
   // Затем все аргументы кодирования (без hwaccel — они уже добавлены выше)
@@ -394,7 +397,7 @@ export async function encodeSample(
   sourceBitDepth = 8,
   onProgress?: (progress: TranscodeProgress) => void,
 ): Promise<{ success: boolean; outputPath: string; encodingTime: number; outputSize: number }> {
-  // Стратегия кодирования определяет hwaccel и deband
+  // Стратегия кодирования определяет hwaccel и цепочку видеофильтров
   const strategy = getEncoderStrategy(profile.useGpu)
   const encodingArgs = strategy.buildArgs(profile, sourceBitDepth)
 
@@ -412,9 +415,11 @@ export async function encodeSample(
   // Input
   args.push('-i', inputPath)
 
-  // Deband фильтр для аниме контента (опционально)
-  if (profile.deband !== false) {
-    args.push('-vf', strategy.buildDebandFilter())
+  // Deband фильтр для аниме контента (опционально). Без crop — сэмпл только для оценки
+  // качества/скорости профиля, не для финального транскода.
+  const sampleVideoFilter = strategy.buildVideoFilterChain({ deband: profile.deband !== false })
+  if (sampleVideoFilter) {
+    args.push('-vf', sampleVideoFilter)
   }
 
   // Encoding args

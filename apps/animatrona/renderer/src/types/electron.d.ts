@@ -687,6 +687,8 @@ export interface ManifestEncodingInfo {
   sourceHeight?: number
   sourceBitrate?: number
   sourceBitDepth?: number
+  /** Применённый crop-фильтр (`crop=W:H:X:Y`) — задан, только если автообрезка чёрных полос сработала */
+  cropFilter?: string
 }
 
 /** Полный манифест эпизода */

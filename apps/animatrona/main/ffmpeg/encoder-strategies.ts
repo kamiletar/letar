@@ -4,14 +4,26 @@
 
 import type { EncodingProfileOptions } from './types'
 
+/** Опции для сборки цепочки видеофильтров (`-vf`) */
+export interface VideoFilterChainOptions {
+  /** Включён ли deband-фильтр (аниме-градиенты) */
+  deband: boolean
+  /** Готовая строка `crop=W:H:X:Y` из cropdetect (см. cropdetect.ts), либо не задана */
+  cropFilter?: string
+}
+
 /** Интерфейс стратегии кодирования */
 export interface EncoderStrategy {
-  /** Построить аргументы ffmpeg для кодирования (без hwaccel, без deband) */
+  /** Построить аргументы ffmpeg для кодирования (без hwaccel, без фильтров) */
   buildArgs(profile: EncodingProfileOptions, sourceBitDepth: number): string[]
   /** Построить аргументы hwaccel (должны идти до -i) */
   buildHwaccelArgs(): string[]
-  /** Построить строку deband видеофильтра */
-  buildDebandFilter(): string
+  /**
+   * Построить строку `-vf`: crop (опционально) + deband (опционально), с учётом того, что
+   * GPU-конвейер (NVENC) держит кадр в VRAM и требует hwdownload/hwupload вокруг CPU-фильтров.
+   * `undefined`, если ни один из фильтров не нужен.
+   */
+  buildVideoFilterChain(options: VideoFilterChainOptions): string | undefined
 }
 
 /** Маппинг кодеков GPU (NVENC) */
@@ -44,14 +56,21 @@ export class NvencEncoderStrategy implements EncoderStrategy {
   }
 
   /**
-   * Deband фильтр для GPU:
-   * hwdownload → deband (CPU) → hwupload_cuda
-   * hwdownload переносит данные из VRAM в RAM для CPU фильтра,
+   * Цепочка CPU-фильтров для GPU-конвейера:
+   * hwdownload → [crop] → [deband] → hwupload_cuda
+   * hwdownload переносит данные из VRAM в RAM для CPU-фильтров (crop, deband),
    * format=nv12 обеспечивает совместимость между GPU и CPU,
-   * hwupload_cuda возвращает данные обратно в VRAM для NVENC
+   * hwupload_cuda возвращает данные обратно в VRAM для NVENC.
    */
-  buildDebandFilter(): string {
-    return 'hwdownload,format=nv12,deband=1thr=0.02:2thr=0.02:3thr=0.02:4thr=0.02,format=nv12,hwupload_cuda'
+  buildVideoFilterChain({ deband, cropFilter }: VideoFilterChainOptions): string | undefined {
+    if (!deband && !cropFilter) {
+      return undefined
+    }
+    const parts = [
+      cropFilter,
+      deband ? 'deband=1thr=0.02:2thr=0.02:3thr=0.02:4thr=0.02' : undefined,
+    ].filter(Boolean)
+    return `hwdownload,format=nv12,${parts.join(',')},format=nv12,hwupload_cuda`
   }
 
   /** Построить аргументы кодирования NVENC (без hwaccel — они добавляются отдельно) */
@@ -144,9 +163,16 @@ export class CpuEncoderStrategy implements EncoderStrategy {
     return []
   }
 
-  /** Deband фильтр для CPU — напрямую без GPU трансфера */
-  buildDebandFilter(): string {
-    return 'deband=1thr=0.02:2thr=0.02:3thr=0.02:4thr=0.02'
+  /** Цепочка фильтров для CPU-кодирования — crop и deband напрямую, без GPU-трансфера */
+  buildVideoFilterChain({ deband, cropFilter }: VideoFilterChainOptions): string | undefined {
+    if (!deband && !cropFilter) {
+      return undefined
+    }
+    const parts = [
+      cropFilter,
+      deband ? 'deband=1thr=0.02:2thr=0.02:3thr=0.02:4thr=0.02' : undefined,
+    ].filter(Boolean)
+    return parts.join(',')
   }
 
   /** Построить аргументы кодирования CPU */

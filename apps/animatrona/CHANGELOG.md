@@ -4,6 +4,20 @@
 
 ## [Unreleased]
 
+## [0.55.45] - 2026-09-06
+
+### Added
+
+- Автоопределение чёрных полос (леттербокс/пилларбокс) через `ffmpeg cropdetect` —
+  `main/ffmpeg/cropdetect.ts` (`detectCropFilter`: сэмплирование нескольких точек таймлайна,
+  мода найденных рамок, пороги консенсуса и минимальной обрезки), покрыто unit-тестами.
+  `EncoderStrategy.buildDebandFilter()` заменён на `buildVideoFilterChain({ deband, cropFilter })`
+  в `encoder-strategies.ts` — композиция crop+deband для GPU (с hwdownload/hwupload) и CPU
+  путей. `transcodeVideoWithProfile()` принимает опциональный `cropFilter`. Поле
+  `ManifestEncodingInfo.cropFilter` — для записи применённого кропа.
+  ⚠️ Только backend-инфраструктура: подключение к живому импорту и обязательный предпоказ
+  рамки перед необратимой обрезкой — не реализованы, см. `PLAN.md`.
+
 ## [0.55.44] - 2026-09-06
 
 ### Changed
