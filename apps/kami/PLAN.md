@@ -808,6 +808,7 @@ favicon-превью и inline-редактирование тегов не пр
 | 2026-09-06 | ✅ Техдолг: getSession() вынесен из root layout в клиент — SSG вернулась 10 роутам                         |
 | 2026-09-06 | ✅ Техдолг: подключён theme:check — themePrefix на theme-provider.tsx, 4-й класс (Canvas 2D)               |
 | 2026-09-06 | ✅ Фаза 10: раздел «Видео» — модель Video (URL/FILE), /admin/videos, плеер в /links, попутный фикс фильтра |
+| 2026-09-06 | ✅ Редизайн блога: одна колонка, category article/dialogue, /blog/dialogues, сайдбар-теги (Хабр)           |
 
 ## ✅ Техдолг закрыт: SSG вернулась — getSession() вынесен из корневого layout (2026-09-06)
 

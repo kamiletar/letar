@@ -48,6 +48,16 @@ export default config({
           label: 'Дата публикации',
           validation: { isRequired: true },
         }),
+        category: fields.select({
+          label: 'Раздел',
+          description: 'Статья — обычный пост, попадает на главную ленту блога. Диалог с ИИ — экспорт разговора '
+            + '(см. навык ai-dialog-to-post), не засоряет главную ленту, живёт в отдельном разделе /blog/dialogues',
+          options: [
+            { label: 'Статья', value: 'article' },
+            { label: 'Диалог с ИИ', value: 'dialogue' },
+          ],
+          defaultValue: 'article',
+        }),
         tags: fields.array(fields.text({ label: 'Тег' }), {
           label: 'Теги',
           itemLabel: (props) => props.value,

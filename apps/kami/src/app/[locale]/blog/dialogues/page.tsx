@@ -1,10 +1,12 @@
+import { Link } from '@/i18n/navigation'
 import { reader } from '@/lib/keystatic'
 import { createLocalizer } from '@/lib/localized-text'
-import { Box, Container, Grid, GridItem, Heading, Text, VStack } from '@chakra-ui/react'
+import { Box, Container, Grid, GridItem, Heading, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import { getLocale, getTranslations, setRequestLocale } from 'next-intl/server'
-import { BlogSidebar } from './_components/blog-sidebar'
-import { PostCard } from './_components/post-card'
+import { BlogSidebar } from '../_components/blog-sidebar'
+import { PostCard } from '../_components/post-card'
 
 type Props = {
   params: Promise<{ locale: string }>
@@ -16,17 +18,16 @@ export async function generateMetadata({ params }: { params: Props['params'] }):
   const t = await getTranslations({ locale, namespace: 'blog' })
 
   return {
-    title: t('title'),
-    description: t('description'),
+    title: t('dialoguesTitle'),
+    description: t('dialoguesDescription'),
     alternates: {
-      canonical: `/${locale}/blog`,
-      languages: { ru: '/ru/blog', en: '/en/blog' },
+      canonical: `/${locale}/blog/dialogues`,
+      languages: { ru: '/ru/blog/dialogues', en: '/en/blog/dialogues' },
     },
-    openGraph: { url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://kami.letar.best'}/${locale}/blog` },
   }
 }
 
-export default async function BlogPage({ params, searchParams }: Props) {
+export default async function DialoguesPage({ params, searchParams }: Props) {
   const { locale } = await params
   const { tag } = await searchParams
   setRequestLocale(locale)
@@ -36,12 +37,10 @@ export default async function BlogPage({ params, searchParams }: Props) {
   const t = await getTranslations('blog')
   const l = createLocalizer(currentLocale)
 
-  // Раздел «Диалоги с ИИ» — отдельная лента (см. /blog/dialogues), не засоряет главный список
-  const articlePosts = allPosts.filter((post) => (post.entry.category ?? 'article') === 'article')
-  const dialogueCount = allPosts.length - articlePosts.length
+  const dialoguePosts = allPosts.filter((post) => post.entry.category === 'dialogue')
 
-  const tags = [...new Set(articlePosts.flatMap((post) => post.entry.tags ?? []))].sort()
-  const filteredPosts = tag ? articlePosts.filter((post) => post.entry.tags?.includes(tag)) : articlePosts
+  const tags = [...new Set(dialoguePosts.flatMap((post) => post.entry.tags ?? []))].sort()
+  const filteredPosts = tag ? dialoguePosts.filter((post) => post.entry.tags?.includes(tag)) : dialoguePosts
 
   const sortedPosts = filteredPosts.sort((a, b) => {
     const dateA = new Date(a.entry.publishedAt || 0)
@@ -53,11 +52,20 @@ export default async function BlogPage({ params, searchParams }: Props) {
     <Box py={{ base: 12, md: 20 }}>
       <Container maxW="1100px">
         <VStack gap={4} textAlign="center" mb={{ base: 10, md: 12 }}>
+          <Link href="/blog/">
+            <HStack gap={2} color="fg.subtle" fontSize="sm" justify="center" _hover={{ color: 'fg' }}>
+              <Icon boxSize={4}>
+                <ArrowLeft />
+              </Icon>
+              <Text>{t('backToBlog')}</Text>
+            </HStack>
+          </Link>
+
           <Heading as="h1" fontSize={{ base: '3xl', md: '5xl' }} fontWeight="bold">
-            {t('title')}
+            {t('dialoguesTitle')}
           </Heading>
           <Text fontSize={{ base: 'md', md: 'lg' }} color="fg.subtle" maxW="2xl">
-            {l('Мысли, туториалы и заметки о разработке', 'Thoughts, tutorials and notes about development')}
+            {t('dialoguesDescription')}
           </Text>
         </VStack>
 
@@ -78,6 +86,7 @@ export default async function BlogPage({ params, searchParams }: Props) {
                       entry={{ ...post.entry, tags: post.entry.tags ?? [] }}
                       href={`/blog/${post.slug}/`}
                       l={l}
+                      dialogueBadgeLabel={t('dialoguesBadge')}
                     />
                   ))}
                 </VStack>
@@ -88,17 +97,9 @@ export default async function BlogPage({ params, searchParams }: Props) {
             <BlogSidebar
               tags={tags}
               currentTag={tag}
-              basePath="/blog"
+              basePath="/blog/dialogues"
               allLabel={t('allTags')}
               tagsLabel={t('tagsLabel')}
-              dialogues={dialogueCount > 0
-                ? {
-                  href: '/blog/dialogues/',
-                  title: t('dialoguesCard.title'),
-                  description: t('dialoguesCard.description'),
-                  count: dialogueCount,
-                }
-                : undefined}
             />
           </GridItem>
         </Grid>

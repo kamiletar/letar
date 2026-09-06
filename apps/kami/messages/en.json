@@ -72,6 +72,18 @@
     "description": "Articles about frontend development, architecture and tools",
     "readMore": "Read More",
     "minRead": "min read",
+    "noPosts": "No posts yet",
+    "allTags": "All tags",
+    "tagsLabel": "Tags",
+    "dialoguesTitle": "AI Dialogues",
+    "dialoguesDescription": "Conversations with AI about physics, philosophy and more — kept out of the main feed so they don't crowd out articles",
+    "dialoguesCard": {
+      "title": "AI Dialogues",
+      "description": "Conversations with AI, formatted as posts — separate from articles"
+    },
+    "dialoguesBadge": "AI Dialogue",
+    "backToBlog": "All posts",
+    "backToDialogues": "All dialogues",
     "comments": {
       "title": "Comments",
       "placeholder": "Write a comment...",
