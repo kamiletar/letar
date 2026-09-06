@@ -24,6 +24,8 @@ import { authMiddleware } from './lib/auth'
 import { rehydrateExecutionLogsFromRedis, startScheduler } from './lib/cron'
 import { startHistoryCollection } from './lib/history'
 import { ipWhitelistMiddleware } from './lib/ip-whitelist'
+import { REDIS_READY_TIMEOUT_MS } from './lib/redis'
+import { withTimeout } from './lib/with-timeout'
 import { accountIssuerCheckRoutes } from './routes/account-issuer-check'
 import { acmeDnsRoutes } from './routes/acme-dns'
 import { appsRoutes } from './routes/apps'
@@ -169,7 +171,16 @@ async function main(): Promise<void> {
     }
 
     // Автозапуск cron планировщика (всегда, агент работает только в production)
-    await rehydrateExecutionLogsFromRedis()
+    //
+    // Граница по времени обязательна: этот await стоит внутри try/catch, который на любой
+    // ошибке делает process.exit(1) — то есть Redis, повисший на пути старта, получил бы право
+    // не пустить агента подняться. Доктрина — lib/with-timeout.ts. Внутри функция дополнительно
+    // ждёт перехода клиента в ready (REDIS_READY_TIMEOUT_MS), поэтому внешняя граница больше.
+    await withTimeout(rehydrateExecutionLogsFromRedis(), {
+      ms: REDIS_READY_TIMEOUT_MS + 2000,
+      fallback: undefined,
+      label: 'восстановление логов выполнения cron из Redis',
+    })
     fastify.log.info('Starting cron scheduler...')
     startScheduler()
 

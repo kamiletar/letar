@@ -9,7 +9,7 @@ import * as cron from 'node-cron'
 import { getAppUrl } from './app-registry'
 import { getAppCronSecret } from './app-secrets'
 import { postDashboardAlert } from './dashboard-alert'
-import { getRedis } from './redis'
+import { getRedis, getRedisWhenReady } from './redis'
 import { type CronServer, getCurrentServer, SERVER_APPS } from './server-config'
 
 export type { CronServer }
@@ -125,7 +125,9 @@ async function persistJobLogs(jobId: string): Promise<void> {
  * реальный исход неизвестен dashboard-agent'у после рестарта.
  */
 export async function rehydrateExecutionLogsFromRedis(): Promise<void> {
-  const r = getRedis()
+  // Не getRedis(): на старте процесса клиент ещё не в ready, и команда была бы немедленно
+  // отклонена (`Stream isn't writeable`) без повторной попытки — см. getRedisWhenReady
+  const r = await getRedisWhenReady('восстановление логов выполнения cron')
   if (!r) {
     return
   }

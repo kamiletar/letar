@@ -5,7 +5,7 @@
  */
 
 import type { DeployStatus } from './deploy-history'
-import { getRedis } from './redis'
+import { getRedis, getRedisWhenReady } from './redis'
 
 const REDIS_KEY_PREFIX = 'dashboard-agent:deploy:'
 const REDIS_INDEX_KEY = `${REDIS_KEY_PREFIX}index`
@@ -91,7 +91,9 @@ export function flushPersist(deploy: DeployStatus): void {
  * этот модуль только заполняет его при старте.
  */
 export async function rehydrateFromRedis(deployHistory: DeployStatus[]): Promise<void> {
-  const r = getRedis()
+  // Не getRedis(): на старте процесса клиент ещё не в ready, и команда была бы немедленно
+  // отклонена (`Stream isn't writeable`) без повторной попытки — см. getRedisWhenReady
+  const r = await getRedisWhenReady('восстановление истории деплоев')
   if (!r) {
     return
   }

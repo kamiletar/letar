@@ -34,6 +34,7 @@ import {
 } from '../lib/deploy-process'
 import { hostExecArgs } from '../lib/host-exec'
 import { getHostLock, releaseHostLock, tryAcquireHostLock } from '../lib/host-lock'
+import { REDIS_READY_TIMEOUT_MS } from '../lib/redis'
 import { getCurrentServer } from '../lib/server-config'
 import { withTimeout } from '../lib/with-timeout'
 import type { ApiResponse } from '../types'
@@ -61,9 +62,15 @@ export async function deployRoutes(fastify: FastifyInstance): Promise<void> {
   // не происходит вовсе, происходит зависание.
   //
   // История деплоев — вещь необязательная (это кеш в памяти, восстанавливаемый из Redis), поэтому
-  // 3 секунды и продолжаем без неё. Терять её неприятно, не подняться — недопустимо.
+  // ждём ограниченное время и продолжаем без неё. Терять её неприятно, не подняться — недопустимо.
+  //
+  // Бюджет: REDIS_READY_TIMEOUT_MS (3с) уходит внутри rehydrateHistory на ожидание перехода
+  // клиента в ready (фикс гонки старта 2026-09-06, см. lib/redis.ts), оставшееся — на сами
+  // lrange+mget. Внешняя граница ОБЯЗАНА быть больше внутренней: при равных значениях таймаут
+  // срабатывал бы ровно в момент готовности клиента и снова терял историю — тот же симптом,
+  // другая причина. Потолок сверху — pluginTimeout Fastify (10с на плагин), в него укладываемся.
   await withTimeout(rehydrateHistory(), {
-    ms: 3000,
+    ms: REDIS_READY_TIMEOUT_MS + 2000,
     fallback: undefined,
     label: 'восстановление истории деплоев из Redis',
   })
