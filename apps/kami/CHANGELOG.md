@@ -5,6 +5,13 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 проект придерживается [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.33.19] - 2026-09-06
+
+### Added
+
+- Фаза 9.3 плана: waveform-пики на seekbar аудиоплеера (`useAudioPeaks` + `AudioWaveform`) —
+  сыгранная часть трека подсвечивается зелёным, оставшаяся — серым, hover показывает время.
+
 ## [0.33.18] - 2026-09-06
 
 ### Changed

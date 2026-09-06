@@ -4,6 +4,9 @@ import { toaster } from '@/app/_components/ui/toaster'
 import { Box, Button, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import { Copy, Maximize, Minimize, Pause, Play, Volume2, VolumeX } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import { AudioWaveform } from './audio-waveform'
+import { formatTime } from './format-time'
+import { useAudioPeaks } from './use-audio-peaks'
 
 interface AudioPlayerProps {
   src: string
@@ -18,16 +21,6 @@ interface AudioPlayerProps {
   setIsPlaying: (playing: boolean) => void
 }
 
-/** Форматирование секунд в M:SS */
-function formatTime(seconds: number): string {
-  if (!Number.isFinite(seconds) || seconds < 0) {
-    return '0:00'
-  }
-  const m = Math.floor(seconds / 60)
-  const s = Math.floor(seconds % 60)
-  return `${m}:${s.toString().padStart(2, '0')}`
-}
-
 /**
  * Кастомный аудиоплеер — показывает длительность сразу (из БД),
  * не дожидаясь загрузки metadata браузером.
@@ -40,6 +33,9 @@ export function AudioPlayer({ src, title, duration: dbDuration, audioRef, isPlay
   const [isMuted, setIsMuted] = useState(false)
   const [isSeeking, setIsSeeking] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [hover, setHover] = useState<{ x: number; time: number } | null>(null)
+
+  const { peaks } = useAudioPeaks(src)
 
   // Обновляем duration если пришёл из metadata (более точное значение)
   const handleLoadedMetadata = useCallback(() => {
@@ -90,6 +86,23 @@ export function AudioPlayer({ src, title, duration: dbDuration, audioRef, isPlay
     }
     setIsSeeking(false)
   }, [audioRef, currentTime])
+
+  const handleSeekbarMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (audioDuration <= 0) {
+        return
+      }
+      const rect = e.currentTarget.getBoundingClientRect()
+      const x = e.clientX - rect.left
+      const ratio = Math.min(Math.max(x / rect.width, 0), 1)
+      setHover({ x, time: ratio * audioDuration })
+    },
+    [audioDuration],
+  )
+
+  const handleSeekbarMouseLeave = useCallback(() => {
+    setHover(null)
+  }, [])
 
   const handleVolumeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -186,8 +199,22 @@ export function AudioPlayer({ src, title, duration: dbDuration, audioRef, isPlay
           {isPlaying ? <Pause size={18} /> : <Play size={18} />}
         </IconButton>
 
-        {/* Seekbar */}
-        <Box flex={1} position="relative">
+        {/* Seekbar с waveform-пиками */}
+        <Box
+          flex={1}
+          position="relative"
+          height="28px"
+          display="flex"
+          alignItems="center"
+          onMouseMove={handleSeekbarMouseMove}
+          onMouseLeave={handleSeekbarMouseLeave}
+        >
+          <AudioWaveform
+            peaks={peaks}
+            progress={audioDuration > 0 ? currentTime / audioDuration : 0}
+            hoverX={hover?.x ?? null}
+            hoverTime={hover?.time ?? null}
+          />
           <input
             type="range"
             min={0}
@@ -201,10 +228,13 @@ export function AudioPlayer({ src, title, duration: dbDuration, audioRef, isPlay
             onTouchEnd={handleSeekEnd}
             aria-label="Перемотка"
             style={{
+              position: 'relative',
+              zIndex: 1,
               width: '100%',
               height: '4px',
               cursor: 'pointer',
               accentColor: 'var(--chakra-colors-fg)',
+              background: 'transparent',
             }}
           />
         </Box>
