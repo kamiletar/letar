@@ -1312,6 +1312,29 @@ JSON внутри директории меняет только CID дирек�
       `pin.rm`), `repoGc` в [pin-status-service.ts](main/services/ipfs/pin-status-service.ts),
       [orphan-audit.ts](main/services/ipfs/orphan-audit.ts) для поиска осиротевших пинов
 - [ ] ⚠️ Никогда не наоборот. Unpin+gc до проверки полноты — это потеря данных без права на отмену
+- [x] **Аудит гонки нормализации/GC vs активный импорт** (2026-09-06): при батч-импорте
+      суб-документы аниме заливаются в Kubo с `pin:false` в расчёте на будущую indirect-защиту
+      через `directoryCid`, который ещё не собран и не сохранён в БД — в этом окне контент не
+      виден ни `pin.ls`, ни `refs(directoryCid)`. Находки:
+  - `markAsLocalOnly`/`markAsQueued`/`markAsPinnedRemote` (`pin-status-service.ts`) нигде не
+    вызываются в реальном пайплайне — таблица `PinStatus` пуста для всего свежего контента,
+    `isSafeToUnpinLocally()` сейчас всегда возвращает `true`. Актуально только когда/если
+    заработает §22.1/§14 batch-спека с `rutracker-batch-import.ts` (файл пока не существует).
+  - `normalizeAllPins()` (`pin-normalizer.ts`) саму гонку не ловит: трогает только CID, уже
+    reachable через `refs(directoryCid)` — то есть уже часть закоммиченного в БД дерева.
+    Незалинкованный `pin:false`-контент для него невидим в принципе, потерять его так нельзя.
+  - Реальный риск — голый `repo.gc()` за IPC `ipfs:repoGc` (`unified-ipfs-service.ts:443`):
+    никакой защиты, никакой проверки активного импорта. `safeLocalGc()`
+    (`pin-status-service.ts:314`, нормализация + GC) существует, но не вызывается вообще
+    ниоткуда — мёртвый код.
+  - Фикс, внесённый в этой сессии: `ImportQueueController.hasActiveImport()`
+    (`import-queue-controller.ts`) + гейт в начале `normalizeAllPins()` — throw при активном
+    импорте (`preparing`/`transcoding`/`postprocess`). Коммит `c8c82bfd`.
+  - [ ] ⚠️ Открытый вопрос/незакрытый хвост: `ipfs:repoGc` тем же гейтом не защищён (гонка
+        всё ещё возможна через кнопку GC в UI во время импорта) — заведено отдельной сессией
+        (task_f511ca24, идёт в фоне на момент завершения этой сессии). Проверить её результат
+        и, если не доехало, доделать: либо гейт в `repoGc()`, либо подключить `safeLocalGc()`
+        вместо голого `repoGc()` в IPC-хендлере.
 
 #### 22.3 Возобновляемость: прогон на десятки часов упадёт хотя бы раз
 
