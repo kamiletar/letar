@@ -31,6 +31,7 @@ import { probeChapterToPlayerChapter } from '@/components/player/chapter-utils'
 import { toMediaUrl } from '@/lib/media-url'
 
 import { useFolderModeUI } from './_hooks/useFolderModeUI'
+import { useFolderShikimoriMatch } from './_hooks/useFolderShikimoriMatch'
 
 /** Хост папочного плеера — собран из `window.electronAPI` Animatrona */
 const folderPlayerHost: FolderPlayerHost = {
@@ -143,6 +144,9 @@ export default function PlayerPage() {
   const isFolderMode = folderPlayer.isFolderMode
   const currentVideoPath = isFolderMode ? folderPlayer.currentVideoPath : singleVideoPath
   const currentVideoName = isFolderMode ? (folderPlayer.currentEpisode?.name ?? 'Видео') : singleVideoName
+
+  // === Опознание аниме по имени папки (для постера в сайдбаре) ===
+  const { posterUrl: folderPosterUrl } = useFolderShikimoriMatch(isFolderMode ? folderPlayer.folderPath : null)
 
   // === Folder Mode UI ===
   const folderModeUI = useFolderModeUI({
@@ -384,6 +388,7 @@ export default function PlayerPage() {
         {isFolderMode && !sidebarCollapsed && (
           <EpisodeSidebar
             folderName={folderPlayer.folderName}
+            posterUrl={folderPosterUrl}
             episodes={folderPlayer.episodes}
             bonusVideos={folderPlayer.bonusVideos}
             currentIndex={folderPlayer.currentIndex}

@@ -1,8 +1,10 @@
 /**
- * Клиент AniList GraphQL API — только для англоязычного synopsis (`descriptionEn`).
+ * Клиент AniList GraphQL API — англоязычный synopsis (`descriptionEn`) и, best-effort,
+ * англоязычные названия серий (`streamingEpisodes`, см. `episode-names.ts`).
  *
- * Сильно проще Shikimori-клиента: один эндпоинт, один запрос, единственный потребитель
- * (`buildAnimeInfo`) — поэтому inline-throttle прямо здесь, без отдельного `throttle.ts`.
+ * Сильно проще Shikimori-клиента: один эндпоинт, один запрос, оба потребителя
+ * (`buildAnimeInfo`, `anime-manifest-generator.ts`) переиспользуют один и тот же ответ через
+ * TTL-кэш ниже — поэтому inline-throttle прямо здесь, без отдельного `throttle.ts`.
  */
 
 import { createModuleLogger } from '../../utils/logger'
@@ -18,6 +20,9 @@ const QUERY = `
       id
       idMal
       description(asHtml: false)
+      streamingEpisodes {
+        title
+      }
     }
   }
 `

@@ -7,6 +7,7 @@
 import { Badge, Box, HStack, Image, Text, VStack } from '@chakra-ui/react'
 import { LuBookOpen, LuStar } from 'react-icons/lu'
 
+import { getShikimoriPosterUrl } from '@/lib/shikimori/poster-url'
 import type { ShikimoriAnimePreview } from '@/types/electron'
 
 interface ShikimoriAnimeCardProps {
@@ -63,19 +64,6 @@ function formatKind(kind: string | null): string {
 /**
  * Карточка результата поиска аниме
  */
-/** Формирует полный URL постера */
-function getPosterUrl(mainUrl: string | undefined): string | null {
-  if (!mainUrl) {
-    return null
-  }
-  // Если URL уже полный — возвращаем как есть
-  if (mainUrl.startsWith('http://') || mainUrl.startsWith('https://')) {
-    return mainUrl
-  }
-  // Иначе добавляем домен
-  return `https://shikimori.one${mainUrl}`
-}
-
 export function ShikimoriAnimeCard({
   anime,
   isSelected,
@@ -84,7 +72,7 @@ export function ShikimoriAnimeCard({
   libraryEpisodeCount,
 }: ShikimoriAnimeCardProps) {
   const statusInfo = formatStatus(anime.status)
-  const posterUrl = getPosterUrl(anime.poster?.mainUrl)
+  const posterUrl = getShikimoriPosterUrl(anime.poster?.mainUrl)
   const isDisabled = !!isInLibrary
 
   const hoverStyle = isDisabled

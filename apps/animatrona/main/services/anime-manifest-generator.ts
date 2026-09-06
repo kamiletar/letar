@@ -32,6 +32,7 @@ import type {
 } from '../../shared/types/anime-manifest'
 import { prisma } from '../utils/db'
 import { createModuleLogger } from '../utils/logger'
+import { buildAniListEpisodeNameMap, getAniListDescription } from './anilist'
 import { buildAnimeInfo } from './anime-info-generator'
 import { pinSubDocuments } from './ipfs/pin-sub-documents'
 import { addBytes, cat } from './ipfs/unixfs-service'
@@ -333,6 +334,37 @@ export async function generateAnimeManifest(input: GenerateAnimeManifestInput): 
       // pin: false — animeInfoCid попадёт в directoryCid и будет защищён через indirect pin
       animeInfoCid = await addBytes(animeInfoBuffer, { pin: false })
       log.info('AnimeInfo опубликован', { animeId, animeInfoCid })
+    }
+
+    // Best-effort англоязычные названия серий с AniList — Shikimori их не хранит вовсе (PLAN.md,
+    // аудит directoryCid, Блокер 3). Реюзает тот же TTL-кэш AniList-клиента, что и вызов
+    // getAniListDescription внутри buildAnimeInfo выше: тот же ключ (anilistId/malId, backfilled
+    // по ссылке в externalIds) — второй сетевой запрос не требуется. Не трогаем эпизоды, если
+    // AnimeInfo взят из кеша БД (animeInfo === null) — названия уже могли быть заполнены в
+    // прошлый прогон, а Shikimori/AniList в этом случае намеренно не дёргаются вовсе.
+    if (animeInfo && (externalIds.anilist || externalIds.mal)) {
+      try {
+        const media = await getAniListDescription({ anilistId: externalIds.anilist, malId: externalIds.mal })
+        const episodeNames = buildAniListEpisodeNameMap(media?.streamingEpisodes)
+        for (const ep of anime.episodes) {
+          const name = episodeNames.get(ep.number)
+          if (!name || ep.name) {
+            continue
+          }
+          ep.name = name // отражаем сразу в собираемом ниже манифесте, не дожидаясь следующего прогона
+          await prisma.episode.update({ where: { id: ep.id }, data: { name } }).catch((error) => {
+            log.warn('Не удалось сохранить название серии из AniList', {
+              episodeId: ep.id,
+              error: error instanceof Error ? error.message : String(error),
+            })
+          })
+        }
+      } catch (error) {
+        log.warn('Не удалось получить названия серий из AniList', {
+          animeId,
+          error: error instanceof Error ? error.message : String(error),
+        })
+      }
     }
 
     // Собираем эпизоды

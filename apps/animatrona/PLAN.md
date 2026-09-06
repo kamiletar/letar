@@ -306,9 +306,29 @@ update}/*`. Разбор на `asChild` + нативный тег — отдел
       минимума БД» (`CLAUDE.md`) это ровно то место, где эти поля и должны жить (IPFS —
       источник истины, БД — только то, что нужно для WHERE/ORDER/JOIN, а `nameEn`/`synonyms`
       в фильтрах библиотеки не участвуют).
-    - `Episode.name` — не тронут, остаётся открытым (требует прокидывать имя эпизода от
-      Shikimori через уже написанный путь импорта файлов, отдельная задача не в рамках этого
-      прохода).
+    - `Episode.name` — **реализовано (2026-09-07), best-effort через AniList.** ⚠️ Прежняя
+      формулировка «прокинуть имя эпизода от Shikimori» была ошибочна — проверены все
+      GraphQL-запросы к Shikimori ([queries.ts](main/services/shikimori/queries.ts)), у `Anime`
+      есть только `episodes`/`episodesAired` (числа), потитульных названий отдельных серий
+      Shikimori не хранит вообще (в отличие от AniDB/TVDB). Источник — `Media.streamingEpisodes`
+      AniList (список эпизодов со стриминговых площадок Crunchyroll/HIDIVE/...), заголовки не
+      канонические и формат задаёт площадка, не AniList — поэтому чисто best-effort: не
+      распарсилось — просто не заполняем.
+      - Запрос `streamingEpisodes { title }` добавлен в существующий AniList-запрос
+        ([client.ts](main/services/anilist/client.ts)) — тот же TTL-кэш по ключу
+        `anilistId/malId`, что и `descriptionEn`, второй сетевой запрос не нужен.
+      - Чистая функция `buildAniListEpisodeNameMap()` ([episode-names.ts](main/services/anilist/episode-names.ts))
+        парсит `"Episode N - Title"`/`"Ep. N: Title"`/`"N - Title"` (и `—`/`–` вариации тире) в
+        карту «номер серии → название»; заголовок без текста после разделителя (просто
+        `"Episode 5"`) не даёт названия. При дубле номера с разных площадок — первое найденное.
+        13 тестов ([episode-names.spec.ts](main/services/anilist/__tests__/episode-names.spec.ts)).
+      - Подключено в [anime-manifest-generator.ts](main/services/anime-manifest-generator.ts) —
+        только при свежей генерации `AnimeInfo` (не при переиспользовании `animeInfoCid` из кеша
+        БД), пишет `Episode.name` в БД для эпизодов без имени и сразу отражает в собираемом
+        манифесте, не дожидаясь следующего прогона. Non-fatal — ошибка AniList/записи в БД не
+        роняет генерацию манифеста.
+      - Not done: парсинг имени серии из имени файла (альтернативный источник) — не исследован,
+        большинство аниме-релизов не включают тайтл серии в имя файла, только номер.
 
   ### ⚠️ Важное, но не блокирующее
 
@@ -359,6 +379,22 @@ update}/*`. Разбор на `asChild` + нативный тег — отдел
   4. Только потом — массовый реимпорт.
 
   Все фиксы дешёвые. Дорога сама перезаливка — экономим её, а не код.
+
+- [x] **Папочный режим плеера: постер по имени папки, если Shikimori опознаётся однозначно**
+      (2026-09-07) — папочный режим (быстрое открытие папки без импорта, `app/player/`) полностью
+      локален и не показывал вообще ничего похожего на постер. Реализовано через уже
+      существующий парсинг `parseFolderName`/`generateSearchQueries` (тот же, что автозаполняет
+      поиск в мастере импорта) — новый хук `useFolderShikimoriMatch`
+      ([useFolderShikimoriMatch.ts](renderer/src/app/player/_hooks/useFolderShikimoriMatch.ts))
+      ищет по Shikimori и подставляет постер в `EpisodeSidebar`, только если ровно один результат
+      точно совпал по названию (`findConfidentAnimeMatch`,
+      [folder-match.ts](renderer/src/lib/shikimori/folder-match.ts)) — при неоднозначности или
+      недоступности Shikimori (нет сети, VPN) молча остаётся без постера, воспроизведение не
+      блокируется. `EpisodeSidebar` (`@letar/folder-player-react`, используется и другими
+      Animatrona-приложениями) получил новый опциональный проп `posterUrl`. Заодно вынесен общий
+      `getShikimoriPosterUrl()` ([poster-url.ts](renderer/src/lib/shikimori/poster-url.ts)) —
+      раньше был приватной функцией внутри `ShikimoriAnimeCard.tsx`, теперь общий с новым хуком.
+      typecheck:tsgo/lint/test (179/179) — зелёные.
 
 - [x] **Плеер: фуллскрин по двойному клику и Alt+Enter** (план от 2026-07-30, закрыто 2026-09-06) —
       двойной клик по видео уже переключал fullscreen (`handleVideoClick`/`handleVideoDoubleClick`
