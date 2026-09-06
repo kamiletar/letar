@@ -2865,3 +2865,56 @@ lint`/`typecheck`/`test` (150/150) зелёные. Коммит `5a04b553`.
 `eslint.config.mjs` (включая активно используемую `libs/forms`) — список см. в тексте
 запущенной фоновой задачи `task_17a4e7c3` («Добавить eslint.config.mjs остальным libs без
 lint»), сессия по ней уже стартована пользователем отдельно на момент закрытия этого пункта.
+
+##### ✅ Продолжение закрыто (2026-09-06, отдельная сессия по `task_17a4e7c3`)
+
+Обработаны все ~28 оставшихся библиотек: analytics, animatrona-franchise-graph,
+animatrona-shared, animatrona-types, animatrona-ui, animatrona-utils, api-server, auth,
+contract-generator, demo-protection, deploy-engine, deploy-mcp, driving-school-db,
+eager-jsx-check, email, exoplayer-ass, exoplayer-sync, form-mcp, forms, hooks, icon-generator,
+infra-config, label-printer-core, pin-auth, query-provider, theme-check, validation-utils,
+zenstack-form-plugin — плюс `zenstack-form-plugin` и `driving-school-db`, пропущенные в
+исходной постановке задачи и найденные повторной сверкой списка `libs/*` уже в процессе работы.
+
+Три «шлюзовые» библиотеки без единого `.ts`/`.tsx`-файла (`eager-jsx-check`, `icon-generator`,
+`theme-check`) — только `.mjs` — тоже подтверждённо получили рабочий `lint` через инференс
+`@nx/eslint/plugin` после добавления конфига; отдельная проверка была нужна, потому что до
+этого не было прецедента лита plain-`.mjs` библиотеки в этом репо.
+
+Находок было немного — большинство библиотек оказались уже линтер-чистыми, реальные фиксы
+потребовались только в трёх местах:
+
+- **`analytics`** — 1 ошибка (`NODE_ENV`-гейт вокруг `console.warn` в `sanitizeEventData`,
+  снят) + 5 warning (неиспользуемая деструктуризация `container` в тестах).
+- **`query-provider`** — 1 ошибка, но не баг: легитимное архитектурное исключение
+  (`NODE_ENV`-сравнение — единственный способ заставить бандлер Next.js статически вырезать
+  ветку с импортом `@tanstack/devtools-ui`/`solid-js/web`, ломающим серверную компиляцию иначе,
+  см. [nextjs-dynamic-ssr-false-still-server-compiled.md](/.claude/docs/nextjs-dynamic-ssr-false-still-server-compiled.md)).
+  Добавлено в allowlist корневого `eslint.config.mjs`, а не переписано.
+- **`icon-generator`** — 1 ошибка: `no-empty-function`-исключение для стрелочных функций в
+  корневом конфиге было ограничено `**/*.ts`/`**/*.tsx`, `.mjs`-библиотеки под него не
+  попадали. Расширено на `**/*.mjs`.
+
+`libs/forms` (крупнейшая и самая используемая, как и предполагалось в постановке) — 0 ошибок,
+19 warning после чистки (было 46: 15 устаревших `eslint-disable-next-line` авто-починены через
+`lint:fix`, 4 тривиальных unused-var — руками, плюс найден и закрыт отдельный пробел в самом
+корневом конфиге — `**/*.spec.tsx` отсутствовал в allowlist `no-console`, хотя стоял в соседнем
+allowlist `no-empty-function`, из-за чего `render-count.spec.tsx` давал 8 ложных warning).
+Осознанно не тронуто как риск для активно используемой библиотеки: ~15
+`react-hooks/exhaustive-deps`, 1 `no-explicit-any` (`field-table-editor.tsx:230`), и один
+unused-prop `welcomeScreen` в `conversational-mode.tsx` — при чтении кода оказалось, что это
+похоже на недоделанную фичу (шаг welcome-screen нигде не рендерится), а не на опечатку в имени,
+поэтому переименование в `_welcomeScreen` не сделано — это замаскировало бы реальный пробел
+вместо документирования его. `nx test @letar/forms`: 2 из 758 тестов красные
+(`field-rich-text.spec.tsx`, `table-keyboard-commit.spec.tsx`) — не связаны с этой сессией
+(файлы не в диффе), похоже на известный класс
+[letar-forms-lazy-component-ssr-stuck-suspense](/.claude/docs/letar-forms-lazy-component-ssr-stuck-suspense.md).
+
+`libs/driving-school-db` (приватный submodule) обработан отдельно от остальных — по факту
+оказался крошечной библиотекой (8 файлов, единственный исходник `src/index.ts`), а не
+предполагавшейся большой. `eslint .` прошёл чисто сразу. Коммит внутри submodule + bump SHA в
+letar — по стандартному воркфлоу `.claude/rules/git.md`.
+
+Каждая библиотека закоммичена отдельным точечным коммитом (см. `git log`, коммиты
+`2e4ad4c6`…`60ea7f80`). Ни один push не выполнен — ждёт отдельного одобрения по
+`.claude/rules/git.md`.
