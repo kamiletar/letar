@@ -25,8 +25,9 @@ IPFS-манифест → плеер показывает маркеры и пр
 4. `apps/animatrona/shared/utils/chapters.ts` (новый файл) — `detectChapterType`/
    `isChapterSkippable` перенесены сюда из `main/services/import/helpers.ts` (паттерн `shared/`
    — общий рантайм-код для main и renderer, см. `.claude/rules/electron.md`). В
-   `main/services/import/helpers.ts` оставлен реэкспорт — оба существующих вызывающих места
-   (`chapter-creator.ts`, `manifest-generator.ts`) не тронуты.
+   `main/services/import/helpers.ts` оставлен реэкспорт — вызывающее место `chapter-creator.ts`
+   не тронуто, `manifest-generator.ts` на тот момент оставлен со своим приватным дублем (см. ниже
+   — консолидировано отдельной сессией 2026-09-06).
 5. `apps/animatrona/renderer/src/components/player/chapter-utils.ts` — новый конвертер
    `probeChapterToPlayerChapter()` (секунды → секунды, классификация по заголовку через
    `detectChapterType`), рядом с существующим `manifestChapterToPlayerChapter()` (мс → секунды,
@@ -47,6 +48,38 @@ PLAN.md, не блокирует эту задачу.
 **Верификация:** `nx typecheck:tsgo animatrona` и `nx lint animatrona` — зелёные (0 ошибок).
 GUI-уровень (реальное воспроизведение файла с главами в папочном режиме) не проверялся в
 песочнице Claude Code — недоступно по правилам `.claude/rules/electron.md`.
+
+## Консолидация классификаторов типа главы OP/ED (2026-09-06)
+
+**Проблема:** ревью открытого пункта из задачи выше показало, что независимых реализаций
+классификации глав на деле четыре, не две:
+
+1. `shared/utils/chapters.ts` (title-only) — активный, `chapter-creator.ts` + папочный режим.
+2. `main/services/manifest-generator.ts` — **приватный дубль** той же title-only логики
+   (`detectChapterType`/`isChapterSkippable`, не импортировал `shared/utils/chapters.ts`) —
+   разошёлся с №1: главы для IPFS-манифеста при первичной генерации эпизода
+   (`generateManifestFromDemux`, пайплайн `import/post-process-runner.ts`) классифицировались
+   иначе, чем те же главы, дописываемые позже через `chapter-creator.ts`.
+3. `libs/video-player-react/src/utils/detect-chapter-types.ts` (title + позиция/длительность,
+   `Chapter[] → Chapter[]`) — по грепу всего репозитория нигде не используется, только в
+   собственном spec-файле.
+4. `renderer/src/components/player/ChapterMarkers.tsx` — буквальная копипаста №3, экспортирована
+   через `player/index.ts`, тоже без единого вызова.
+
+**Решение (по итогам обсуждения с владельцем):**
+
+- №2 заменён на импорт из `shared/utils/chapters.ts` (`isChapterSkippable(chapter.title)` вместо
+  `isChapterSkippable(type)` — сигнатуры разные, но семантически эквивалентно: тип и так
+  выводится из title). Неиспользуемый после этого импорт `ManifestChapterType` убран.
+- №4 удалён как мёртвый код (вместе с реэкспортом из `player/index.ts`), №3 в `libs` оставлен —
+  не мёртв концептуально, просто пока ничем не потреблён.
+- Позиционный фоллбэк (опенинг в первые ~180с длиной 60-150с) сознательно не подключается никуда:
+  в animatrona уже есть `main/services/intro-detector.ts` — рабочий аудио-фингерпринт
+  (Chromaprint, попарное сравнение эпизодов), заведомо точнее догадки по типовой длине опенинга.
+  `MediaProber` (Фаза 3 плана Animatrona Player) по-прежнему не существует.
+
+**Верификация:** `nx typecheck:tsgo animatrona` и `nx lint animatrona` — зелёные (0 ошибок).
+Коммит `5d0fb5cd`.
 
 ## Типизация main-процесса (tsgo) + починка 4 e2e-тестов плеера (2026-09-06)
 
