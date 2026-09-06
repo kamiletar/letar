@@ -2,7 +2,19 @@
  * Сайдбар со списком эпизодов для папочного режима плеера
  */
 
-import { Badge, Box, Button, Collapsible, Flex, HStack, IconButton, Progress, Text, VStack } from '@chakra-ui/react'
+import {
+  Badge,
+  Box,
+  Button,
+  Collapsible,
+  Flex,
+  HStack,
+  IconButton,
+  Image,
+  Progress,
+  Text,
+  VStack,
+} from '@chakra-ui/react'
 import { memo, useMemo } from 'react'
 import {
   LuChevronDown,
@@ -23,6 +35,8 @@ import type { FolderEpisode } from './types'
 interface EpisodeSidebarProps {
   /** Название папки */
   folderName: string | null
+  /** URL постера аниме — заполняется только при однозначном опознании папки по Shikimori */
+  posterUrl?: string | null
   /** Основные эпизоды */
   episodes: FolderEpisode[]
   /** Бонусные видео */
@@ -284,6 +298,7 @@ const BonusItem = memo(function BonusItem({
  */
 export const EpisodeSidebar = memo(function EpisodeSidebar({
   folderName,
+  posterUrl,
   episodes,
   bonusVideos,
   currentIndex,
@@ -320,7 +335,13 @@ export const EpisodeSidebar = memo(function EpisodeSidebar({
     >
       {/* Заголовок */}
       <Flex px={3} py={2} borderBottom="1px" borderColor="border.subtle" align="center" gap={2}>
-        <LuFolder size={20} color="var(--chakra-colors-brand-400)" />
+        {posterUrl
+          ? (
+            <Box w="28px" h="40px" flexShrink={0} borderRadius="sm" overflow="hidden">
+              <Image src={posterUrl} alt="" w="full" h="full" objectFit="cover" />
+            </Box>
+          )
+          : <LuFolder size={20} color="var(--chakra-colors-brand-400)" />}
         <Text fontSize="sm" fontWeight="semibold" color="fg" flex={1} truncate title={folderName ?? 'Папка'}>
           {folderName ?? 'Папка'}
         </Text>
