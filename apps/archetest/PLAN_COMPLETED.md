@@ -1,5 +1,17 @@
 # Выполненные задачи: Archetest
 
+## Дедупликация ожидания перехода квиза в e2e — `waitForQuizStepOrResults` (2026-09-05)
+
+Точечная делегированная задача (не из PLAN.md): в `express.spec.ts` (`answerAllQuestions`) и
+`safety-net.spec.ts` дословно дублировался паттерн `Promise.race(option.waitFor, resultsHeading.waitFor)`
+
+- `isVisible()` (см. запись про фикс флейков WebKit ниже — паттерн появился там). Вынесен в
+  `apps/archetest-e2e/src/quiz-flow.ts` — `waitForQuizStepOrResults(optionLocator, resultsHeadingLocator,
+timeout)`, возвращает `true` если результаты уже видны. Оба спека переведены на хелпер, логика не
+  менялась. `nx lint archetest-e2e` — зелёный. Полный e2e-прогон в рабочей среде сессии недоступен
+  (нет сети до `auth.letar.best` для OIDC-дискавери на старте dev-сервера) — запрошен прогон у
+  deploy-agent-dev (тред `797`), деплоить приложение не требовалось. Коммит `c494d4fa`.
+
 ## Фикс флейков WebKit e2e + hard e2e-gate снова пройден живым деплоем (2026-09-05)
 
 Продолжение диагностики из предыдущих раундов (см. запись 2026-07-29 ниже) — деплой archetest
