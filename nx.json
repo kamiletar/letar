@@ -85,7 +85,11 @@
         "testTargetName": "vitest:test",
         "ciTargetName": "test-ci",
         "testMode": "watch"
-      }
+      },
+      "include": [
+        "apps/*/{vite,vitest}.config.*",
+        "libs/*/{vite,vitest}.config.*"
+      ]
     },
     {
       "plugin": "@nx/vitest",
