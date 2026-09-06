@@ -221,6 +221,20 @@ const CHECKS = [
     doc: 'PLAN-INFRA-4.md §120',
   },
   {
+    id: 'stray-dts',
+    group: 'hygiene',
+    title: 'закоммиченные .d.ts/.d.ts.map — побочные артефакты typecheck:tsgo',
+    run: ['node', ['scripts/check-stray-dts.mjs']],
+    // gate: коммит артефакта не ловится ничем другим — typecheck/lint/build на его
+    // присутствие не реагируют, а .gitignore закрывает только .d.ts.map (у .d.ts
+    // бывают легитимные ambient-декларации без одноимённого .ts). Прецедент —
+    // 529 untracked-артефактов накопились в 14 либах молча (2026-09-06), и 2 таких
+    // файла уже были закоммичены в animatrona-e2e (69fdf2ea) до появления проверки.
+    severity: 'gate',
+    ci: 'full',
+    doc: '.claude/docs/tsgo-stray-declarations.md',
+  },
+  {
     id: 'doc-counts',
     group: 'docs',
     title: 'счётные утверждения в .claude/docs (doc-count-аннотации) против реального состояния',

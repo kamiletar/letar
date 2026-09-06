@@ -15,6 +15,9 @@
 #   - pre-commit-section-number-check.sh — блокирует commit, вводящий дубль §NN в
 #                                   PLAN.md/PLAN-INFRA*.md/PLAN-JOURNAL-*.md (только в
 #                                   корне letar — семейство живёт там, не в submodule)
+#   - pre-commit-stray-dts-check.sh — блокирует commit .d.ts/.d.ts.map, похожего на
+#                                   побочный артефакт typecheck:tsgo (лежит рядом с
+#                                   одноимённым .ts/.tsx)
 #   - pre-push-submodule-check.sh — блокирует push, если записанный SHA submodule ещё не
 #                                   существует на его origin (иначе падает деплой ВСЕХ
 #                                   приложений: `upload-pack: not our ref`)
@@ -51,10 +54,12 @@ install_into() {
   cp "$SRC_DIR/../check-schema-migration.mjs" "$hooks_dir/_check-schema-migration.mjs"
   cp "$SRC_DIR/pre-commit-section-number-check.sh" "$hooks_dir/_pre-commit-section-number-check.sh"
   cp "$SRC_DIR/../check-section-numbers.mjs" "$hooks_dir/_check-section-numbers.mjs"
+  cp "$SRC_DIR/pre-commit-stray-dts-check.sh" "$hooks_dir/_pre-commit-stray-dts-check.sh"
+  cp "$SRC_DIR/../check-stray-dts.mjs" "$hooks_dir/_check-stray-dts.mjs"
   chmod +x "$hooks_dir/_pre-commit-scope-guard.sh" "$hooks_dir/_pre-commit-sops.sh" \
     "$hooks_dir/_pre-commit-semgrep.sh" "$hooks_dir/_pre-commit-dprint-check.sh" \
     "$hooks_dir/_pre-commit-deps-integrity.sh" "$hooks_dir/_pre-commit-schema-migration-check.sh" \
-    "$hooks_dir/_pre-commit-section-number-check.sh"
+    "$hooks_dir/_pre-commit-section-number-check.sh" "$hooks_dir/_pre-commit-stray-dts-check.sh"
 
   cat > "$hooks_dir/pre-commit" <<'DISPATCH'
 #!/usr/bin/env bash
@@ -79,6 +84,9 @@ if [[ $status -eq 0 ]]; then
   bash "$DIR/_pre-commit-section-number-check.sh" || status=$?
 fi
 if [[ $status -eq 0 ]]; then
+  bash "$DIR/_pre-commit-stray-dts-check.sh" || status=$?
+fi
+if [[ $status -eq 0 ]]; then
   bash "$DIR/_pre-commit-sops.sh" || status=$?
 fi
 exit $status
@@ -101,7 +109,7 @@ exec bash "$DIR/_pre-push-submodule-check.sh" "$@"
 PUSH_DISPATCH
   chmod +x "$hooks_dir/pre-push"
 
-  echo "✅ $label → $hooks_dir/pre-commit (scope-guard + semgrep + dprint-check + deps-integrity + schema-migration-check + section-number-check + sops)"
+  echo "✅ $label → $hooks_dir/pre-commit (scope-guard + semgrep + dprint-check + deps-integrity + schema-migration-check + section-number-check + stray-dts-check + sops)"
   echo "   $label → $hooks_dir/pre-push (submodule-check)"
 }
 
