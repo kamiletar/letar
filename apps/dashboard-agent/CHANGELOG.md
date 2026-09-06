@@ -11,6 +11,17 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.16.5] — 2026-09-06
+
+### Added
+
+- **Плановый ретеншн тегов Docker Registry (s3)** — job `registry-gc-s3` (`50 4 * * *`),
+  TS-порт `scripts/registry-gc.sh` (`lib/registry-gc.ts` + `routes/registry-gc.ts`,
+  `POST /api/cron/registry-gc`). `fetch` вместо `curl`/`jq`, `garbage-collect` через
+  `dockerode` (`container.exec()`), не `docker-cli`. Секреты `REGISTRY_USER`/`REGISTRY_PASS` —
+  в `.env.docker.enc`. Закрывает разрыв, описанный в `infra/registry/README.md`
+  (`PLAN-INFRA-6.md` §157).
+
 ## [0.16.4] — 2026-09-06
 
 ### Changed
