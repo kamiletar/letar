@@ -134,6 +134,12 @@ export interface BuildAnimeDirectoryResult {
   missingFonts: MissingFontEntry[]
   /** Восстановленные CID — успешные регенерации */
   recovered: RecoveredCidEntry[]
+  /**
+   * true, если directoryCid реально закреплён в Kubo (pin.add подтверждён).
+   * false — pin.add не удался (таймаут/ошибка): вызывающий код НЕ должен откреплять
+   * старый directoryCid в этом случае, иначе контент остаётся вообще без защиты от GC.
+   */
+  pinned: boolean
 }
 
 /**
@@ -1078,12 +1084,17 @@ export async function buildAnimeDirectory(
   // и directoryCid станет недоступен. Видео/аудио-файлы защищены своими индивидуальными пинами,
   // но сама структура директории — только через этот pin.add.
   // pin.rm на дочерние CID не нужен — избыточная оптимизация, создаёт лишние риски.
+  //
+  // `pinned` пробрасывается в возврат функции: вызывающий код (anime-manifest-generator.ts)
+  // открепляет СТАРЫЙ directoryCid только когда pinned===true — иначе при неудачном pin.add
+  // (таймаут/сбой) старая директория теряла защиту от GC, а новая её так и не получала —
+  // ровно та гонка pin/unpin, из-за которой приходится прибегать к regenerateAll.
+  let pinned = false
   try {
     const pinClient = getKuboService().getClientOrNull()
     if (pinClient) {
       const PIN_TIMEOUT_MS = 90_000
       const MAX_PIN_RETRIES = 3
-      let pinned = false
       for (let attempt = 1; attempt <= MAX_PIN_RETRIES; attempt++) {
         try {
           await pinClient.pin.add(CID.parse(directoryCid), { timeout: PIN_TIMEOUT_MS })
@@ -1167,6 +1178,7 @@ export async function buildAnimeDirectory(
     missingCids,
     missingFonts,
     recovered,
+    pinned,
   }
 }
 

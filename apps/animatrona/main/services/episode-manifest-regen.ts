@@ -183,12 +183,21 @@ export async function regenerateAnimeEpisodeManifests(
 
       // Проход 2: пересобрать IPFS-директорию (directoryCid) — включает новый manifestCid
       const { buildAnimeDirectory } = await import('./ipfs/anime-directory-builder')
-      const { directoryCid } = await buildAnimeDirectory(animeId)
-      await prisma.anime.update({
-        where: { id: animeId },
-        data: { directoryCid },
-      })
-      log.info('IPFS-директория пересобрана', { animeId, directoryCid })
+      const { directoryCid, pinned } = await buildAnimeDirectory(animeId)
+      if (!pinned) {
+        // pin.add не подтверждён — не перезаписываем directoryCid в БД непроверенным
+        // значением: старый (реально запиненный) directoryCid остаётся в силе.
+        log.warn('Новый directoryCid не закреплён в Kubo — БД не обновлена, старый directoryCid сохранён', {
+          animeId,
+          directoryCid,
+        })
+      } else {
+        await prisma.anime.update({
+          where: { id: animeId },
+          data: { directoryCid },
+        })
+        log.info('IPFS-директория пересобрана', { animeId, directoryCid })
+      }
     } catch (error) {
       log.error('Ошибка обновления AnimeManifest/directoryCid', {
         animeId,

@@ -674,7 +674,7 @@ export async function updateAnimeManifest(
     // (episode manifests, thumbnails-img) теряют защиту от GC до пина нового.
     const { buildAnimeDirectory: rebuildDirectory } = await import('./ipfs/anime-directory-builder')
     const buildResult = await rebuildDirectory(animeId, { manifestCidOverride: retryResult.manifestCid })
-    const { directoryCid, totalBlocks, totalSize, missingCids, missingFonts } = buildResult
+    const { directoryCid, totalBlocks, totalSize, missingCids, missingFonts, pinned } = buildResult
 
     const hasCriticalLoss2 = missingCids.some((m) => m.kind === 'video' || m.kind === 'audio' || m.kind === 'sub')
     const hasAnyLoss2 = missingCids.length > 0 || missingFonts.length > 0
@@ -698,8 +698,15 @@ export async function updateAnimeManifest(
       },
     })
 
-    // Теперь безопасно открепить старый directoryCid — новый уже закреплён
-    if (oldAnime?.directoryCid && oldAnime.directoryCid !== directoryCid) {
+    // Открепляем старый directoryCid только если новый РЕАЛЬНО закреплён — см. пояснение
+    // у аналогичной проверки выше по файлу (основной путь регенерации)
+    if (!pinned) {
+      log.warn('Новый directoryCid не закреплён в Kubo — старый directoryCid НЕ откреплён', {
+        animeId,
+        directoryCid,
+        oldDirectoryCid: oldAnime?.directoryCid,
+      })
+    } else if (oldAnime?.directoryCid && oldAnime.directoryCid !== directoryCid) {
       try {
         const { CID } = await import('multiformats/cid')
         const client = getKuboService().getClientOrNull()
@@ -760,7 +767,8 @@ export async function updateAnimeManifest(
       try {
         const { buildAnimeDirectory } = await import('./ipfs/anime-directory-builder')
         const buildResult = await buildAnimeDirectory(animeId, { manifestCidOverride: result.manifestCid })
-        const { directoryCid, episodeCount, totalBlocks, totalSize, missingCids, missingFonts, recovered } = buildResult
+        const { directoryCid, episodeCount, totalBlocks, totalSize, missingCids, missingFonts, recovered, pinned } =
+          buildResult
 
         // Вычисляем contentHealth — broken если потеряны video/audio/sub, иначе degraded
         const hasCriticalLoss = missingCids.some((m) => m.kind === 'video' || m.kind === 'audio' || m.kind === 'sub')
@@ -801,8 +809,16 @@ export async function updateAnimeManifest(
           recoveredCount: recovered.length,
         })
 
-        // Открепляем старый directoryCid только ПОСЛЕ того как новый закреплён и сохранён
-        if (oldAnime?.directoryCid && oldAnime.directoryCid !== directoryCid) {
+        // Открепляем старый directoryCid только когда новый РЕАЛЬНО закреплён (pinned===true).
+        // Иначе pin.add мог упасть по таймауту/сбою — новый directoryCid остаётся без защиты
+        // от GC, и открепление старого оставило бы контент вообще без единого пина.
+        if (!pinned) {
+          log.warn('Новый directoryCid не закреплён в Kubo — старый directoryCid НЕ откреплён', {
+            animeId,
+            directoryCid,
+            oldDirectoryCid: oldAnime?.directoryCid,
+          })
+        } else if (oldAnime?.directoryCid && oldAnime.directoryCid !== directoryCid) {
           try {
             const { CID } = await import('multiformats/cid')
             const client = getKuboService().getClientOrNull()
