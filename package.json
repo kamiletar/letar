@@ -47,7 +47,9 @@
     "socket.io-adapter": "^2.5.8",
     "socket.io-parser": "^4.2.7",
     "undici": "^7.29.0",
-    "@libsql/isomorphic-ws>ws": "^8.21.3"
+    "@libsql/isomorphic-ws": {
+      "ws": "^8.21.3"
+    }
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.49",
