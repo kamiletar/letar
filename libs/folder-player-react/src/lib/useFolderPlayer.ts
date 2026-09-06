@@ -28,6 +28,7 @@ const initialState: FolderPlayerState = {
     audioScanResult: null,
   },
   embeddedTracks: null,
+  chapters: null,
   isScanning: false,
   isLoadingTracks: false,
   error: null,
@@ -69,7 +70,7 @@ export function useFolderPlayer(host: FolderPlayerHost) {
    */
   const scanTracksForEpisodeInternal = useCallback(
     async (folderPath: string, episode: FolderEpisode, allVideos: FolderEpisode[]) => {
-      setState((s) => ({ ...s, isLoadingTracks: true, embeddedTracks: null }))
+      setState((s) => ({ ...s, isLoadingTracks: true, embeddedTracks: null, chapters: null }))
 
       try {
         // Подготавливаем данные для сканирования — весь список видео папки,
@@ -132,6 +133,7 @@ export function useFolderPlayer(host: FolderPlayerHost) {
           ...s,
           externalTracks,
           embeddedTracks,
+          chapters: probeResult.success ? (probeResult.data?.chapters ?? null) : null,
           isLoadingTracks: false,
         }))
       } catch (error) {
@@ -140,6 +142,7 @@ export function useFolderPlayer(host: FolderPlayerHost) {
           ...s,
           isLoadingTracks: false,
           embeddedTracks: null,
+          chapters: null,
           externalTracks: {
             audio: [],
             subtitles: [],

@@ -12,6 +12,7 @@ import type {
   ExternalSubtitleMatch,
   ExternalSubtitleScanResult,
   MediaFileInfo,
+  ProbedChapter,
 } from './host'
 
 /** Эпизод в папочном режиме (без импорта в БД) */
@@ -69,6 +70,8 @@ export interface FolderPlayerState {
   currentBonusIndex: number
   externalTracks: ExternalTracksInfo
   embeddedTracks: EmbeddedTracksInfo | null
+  /** Главы (OP/ED/recap/preview) текущего эпизода, найденные пробой контейнера */
+  chapters: ProbedChapter[] | null
   isScanning: boolean
   isLoadingTracks: boolean
   error: string | null

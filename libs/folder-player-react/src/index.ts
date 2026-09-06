@@ -11,6 +11,7 @@ export type {
   MediaProbeInfo,
   MediaProbeResult,
   ProbedAudioTrack,
+  ProbedChapter,
   ProbedSubtitleTrack,
 } from './lib/host'
 

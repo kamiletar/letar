@@ -86,10 +86,18 @@ export interface ProbedSubtitleTrack {
   subtitleType?: SubtitleType
 }
 
+/** Глава медиафайла (OP/ED/recap/preview из контейнера) — время в секундах */
+export interface ProbedChapter {
+  start: number
+  end: number
+  title: string
+}
+
 /** Данные, которые пробa (ffprobe / MediaInfo) отдаёт о медиафайле */
 export interface MediaProbeInfo {
   audioTracks?: ProbedAudioTrack[]
   subtitleTracks?: ProbedSubtitleTrack[]
+  chapters?: ProbedChapter[]
 }
 
 /** Результат пробы медиафайла */
