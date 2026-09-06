@@ -595,7 +595,11 @@ Chromium играет не всё, а папочный плеер играет �
 
 ### 5. Фаза 1 — вынос в библиотеки, Animatrona переходит на них
 
-- [ ] `nx g @letar/generators:new-lib folder-player-react` и `… new-lib folder-scan`
+- [x] `nx g @letar/generators:new-lib folder-player-react` и `… new-lib folder-scan` (2026-09-06) —
+      `libs/folder-player-react` (`--react`, каркас Chakra/React) и `libs/folder-scan`
+      (framework-free, Node). Только скаффолд генератором — typecheck:tsgo/lint/test пустого
+      каркаса зелёные на обеих. Перенос кода и подключение к Animatrona — следующие пункты этой
+      фазы, ещё не начаты.
 - [ ] Перенести renderer-часть, заменить `window.electronAPI` на `FolderPlayerHost`,
       `localStorage` — на `FolderPlayerStorage`, убрать `next/*`
 - [ ] Перенести main-часть, ввести `MediaProber`, `FfprobeProber` оставить в Animatrona как адаптер

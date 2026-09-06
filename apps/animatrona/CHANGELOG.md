@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+## [0.55.51] - 2026-09-06
+
+### Added
+
+- Заведены `libs/folder-player-react` и `libs/folder-scan` — Фаза 1, шаг 1 плана «Animatrona
+  Player» (отдельное лёгкое приложение для папочного просмотра, PLAN.md). Пока пустые каркасы
+  генератора `new-lib`, перенос кода из `renderer/src/app/player`/main-сервисов и подключение к
+  Animatrona — следующие шаги.
+
 ## [0.55.50] - 2026-09-06
 
 ### Fixed
