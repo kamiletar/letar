@@ -1,5 +1,8 @@
 import { prisma } from '@/lib/db'
 import { ADMIN_PAGE_SIZE } from '@/lib/utils/constants'
+import { Box, HStack, Icon, Text } from '@chakra-ui/react'
+import { Tags } from 'lucide-react'
+import Link from 'next/link'
 import { AdminPageLayout } from '../_components'
 import { LinksTable } from './_components/links-table'
 
@@ -41,6 +44,20 @@ export default async function LinksAdminPage({ params, searchParams }: LinksAdmi
       basePath={`/${locale}/admin/links`}
       emptyText="Ссылок пока нет — поделитесь страницей с телефона через Android Share"
       isEmpty={links.length === 0}
+      headerExtra={
+        <HStack justify="flex-end">
+          <Box asChild>
+            <Link href={`/${locale}/admin/links/tags`}>
+              <HStack gap={1} color="fg.muted" fontSize="sm">
+                <Icon boxSize="14px">
+                  <Tags />
+                </Icon>
+                <Text>Категории и метки</Text>
+              </HStack>
+            </Link>
+          </Box>
+        </HStack>
+      }
     >
       <LinksTable links={links} />
     </AdminPageLayout>
