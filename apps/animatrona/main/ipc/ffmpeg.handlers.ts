@@ -207,11 +207,16 @@ export function registerFFmpegHandlers(): void {
   // Транскодирование видео с профилем
   createHandlerWithEvent(
     'ffmpeg:transcodeWithProfile',
-    // eslint-disable-next-line @typescript-eslint/no-inferrable-types -- без явной аннотации tsgo выводит TArgs createHandlerWithEvent как unknown
-    async (event, input: string, output: string, profile: EncodingProfileOptions, sourceBitDepth: number = 8) => {
+    async (
+      event,
+      input: string,
+      output: string,
+      profile: EncodingProfileOptions,
+      sourceBitDepth: number | undefined,
+    ) => {
       await mkdir(path.dirname(output), { recursive: true })
       const win = BrowserWindow.fromWebContents(event.sender)
-      await transcodeVideoWithProfile(input, output, profile, sourceBitDepth, (progress) => {
+      await transcodeVideoWithProfile(input, output, profile, sourceBitDepth ?? 8, (progress) => {
         win?.webContents.send('ffmpeg:progress', { type: 'video-profile', profileName: profile.name, ...progress })
       })
       const outputStat = await stat(output)

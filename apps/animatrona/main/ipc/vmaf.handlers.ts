@@ -43,8 +43,7 @@ export function registerVmafHandlers(): void {
       inputPath: string,
       videoOptions: Omit<VideoTranscodeOptions, 'cq'>,
       options?: Partial<CqSearchOptions>,
-      // eslint-disable-next-line @typescript-eslint/no-inferrable-types -- без явной аннотации tsgo выводит TArgs createHandlerWithEvent как unknown
-      preferCpu: boolean = false,
+      preferCpu?: boolean,
       itemId?: string,
     ) => {
       const win = BrowserWindow.fromWebContents(event.sender)
@@ -62,7 +61,7 @@ export function registerVmafHandlers(): void {
           // Отправляем прогресс в renderer
           win?.webContents.send('vmaf:progress', progress)
         },
-        preferCpu,
+        preferCpu ?? false,
       )
 
       // Очищаем прогресс после завершения

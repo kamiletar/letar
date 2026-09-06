@@ -61,18 +61,16 @@ export function registerFsHandlers(): void {
   // Сканирование папки на медиафайлы
   createHandler(
     'fs:scanFolder',
-    // eslint-disable-next-line @typescript-eslint/no-inferrable-types -- без явной аннотации tsgo выводит TArgs createHandler как unknown
-    async (folderPath: string, recursive: boolean = true, mediaTypes: MediaType[] = ['video']) => {
+    async (folderPath: string, recursive: boolean | undefined, mediaTypes: MediaType[] | undefined) => {
       // Добавляем папку в whitelist для media:// протокола
       allowPath(folderPath)
-      const files = await scanFolderForMedia(folderPath, recursive, mediaTypes)
+      const files = await scanFolderForMedia(folderPath, recursive ?? true, mediaTypes ?? ['video'])
       return { files }
     },
   )
 
   // Удаление файла или папки
-  // eslint-disable-next-line @typescript-eslint/no-inferrable-types -- без явной аннотации tsgo выводит TArgs createHandler как unknown
-  createHandler('fs:delete', async (targetPath: string, moveToTrash: boolean = true) => {
+  createHandler('fs:delete', async (targetPath: string, moveToTrash: boolean | undefined) => {
     // КРИТИЧЕСКАЯ ЗАЩИТА: Проверка что путь в библиотеке
     const { safe, reason } = isPathInsideLibrary(targetPath)
     if (!safe) {

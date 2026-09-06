@@ -15,7 +15,6 @@ export function registerSubtitleHandlers(): void {
   // Предпросмотр сдвига (первые N событий)
   createHandler(
     'subtitle:previewShift',
-    // eslint-disable-next-line @typescript-eslint/no-inferrable-types -- без явной аннотации tsgo выводит TArgs createHandler как unknown
-    (inputPath: string, offsetMs: number, limit: number = 5) => previewShift(inputPath, offsetMs, limit),
+    (inputPath: string, offsetMs: number, limit: number | undefined) => previewShift(inputPath, offsetMs, limit ?? 5),
   )
 }

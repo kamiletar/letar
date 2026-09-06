@@ -70,13 +70,12 @@ function readNewLines(filePath: string, offset: number): { lines: string[]; newS
 
 export function registerLogsHandlers(): void {
   /** Получить tail последних N строк */
-  // eslint-disable-next-line @typescript-eslint/no-inferrable-types -- без явной аннотации tsgo выводит TArgs createHandler как unknown
-  createHandler('logs:tail', (linesCount: number = 200): { content: string; filePath: string | null } => {
+  createHandler('logs:tail', (linesCount: number | undefined): { content: string; filePath: string | null } => {
     const filePath = getLogFilePath()
     if (!filePath || !fs.existsSync(filePath)) {
       return { content: '[Лог-файл ещё не создан]', filePath }
     }
-    const content = tailFile(filePath, Math.min(2000, Math.max(1, linesCount)))
+    const content = tailFile(filePath, Math.min(2000, Math.max(1, linesCount ?? 200)))
     return { content, filePath }
   })
 

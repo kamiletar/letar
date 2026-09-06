@@ -57,6 +57,11 @@ cache hit при пустом целевом каталоге на диске ·
 [tsgo-stray-declarations](/.claude/docs/tsgo-stray-declarations.md) ⚠️ `typecheck:tsgo` иногда
 эмитит `.d.ts`/`.d.ts.map` рядом с исходником вместо `outDir` — не воспроизведено детерминированно
 на чистом дереве, гигиена (`.d.ts.map` в `.gitignore`) и cleanup-команда ·
+[tsgo-generic-default-param-inference](/.claude/docs/tsgo-generic-default-param-inference.md) ⚠️
+generic-обёртка (`TArgs extends unknown[]`, `createHandler` в animatrona `main/`) с
+callback-параметром вида `(x = default) => ...` — tsgo выводит `TArgs` как `unknown[]`; фикс не
+явная аннотация+eslint-disable, а `x: T | undefined` (или `?:` после уже опционального
+параметра) с `?? default` в теле, без конфликта с `no-inferrable-types` ·
 [bun-lockfile-private-submodules](/.claude/docs/bun-lockfile-private-submodules.md) ⚠️
 `--frozen-lockfile` падает везде, где submodule не выкачаны; чистка `bun.lock` не держится ·
 [bun-lock-drift-unpushed-commits-blocks-all-deploys](/.claude/docs/bun-lock-drift-unpushed-commits-blocks-all-deploys.md)

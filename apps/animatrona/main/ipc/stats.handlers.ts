@@ -15,8 +15,7 @@ export function registerStatsHandlers(): void {
   createHandler('stats:get', () => tracker.getStats())
 
   // Получить историю по дням
-  // eslint-disable-next-line @typescript-eslint/no-inferrable-types -- без явной аннотации tsgo выводит TArgs createHandler как unknown
-  createHandler('stats:getDailyHistory', (days: number = 30) => getDailyHistory(days))
+  createHandler('stats:getDailyHistory', (days: number | undefined) => getDailyHistory(days ?? 30))
 
   // Сбросить статистику (для тестов/отладки)
   createHandler('stats:reset', () => resetStats())

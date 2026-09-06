@@ -57,8 +57,10 @@ export function registerIpfsHandlers(): void {
 
   // === Операции с контентом ===
   createHandler('ipfs:addFile', (filePath: string) => addFile(filePath))
-  // eslint-disable-next-line @typescript-eslint/no-inferrable-types -- без явной аннотации tsgo выводит TArgs createHandler как unknown
-  createHandler('ipfs:addDirectory', (dirPath: string, recursive: boolean = true) => addDirectory(dirPath, recursive))
+  createHandler(
+    'ipfs:addDirectory',
+    (dirPath: string, recursive: boolean | undefined) => addDirectory(dirPath, recursive ?? true),
+  )
   createHandler('ipfs:cat', async (cid: string) => {
     const content = await cat(cid)
     // Возвращаем как base64 для передачи через IPC
