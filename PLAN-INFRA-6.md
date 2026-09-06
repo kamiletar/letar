@@ -3040,3 +3040,60 @@ git), не причину. Остаётся открытым до тех пор,
 причине (implicit `any` + нерезолвившийся `@letar/folder-scan` в `apps/animatrona/**`, код
 параллельной сессии, не эта задача) — см. `.claude/docs/verification-pitfalls.md` про то, что
 красный CI не всегда означает поломку своей же работы.
+
+## §161 — implicitDependencies/dependencies-расхождение: аудит 6 приложений + постоянный гейт (2026-09-07)
+
+Продолжение находки animatrona (`0dbe15ba`/`57128f29`, §157-158-ish выше) — тот же класс бага
+(`@letar/*`-пакет только в `nx.implicitDependencies`, без записи в `dependencies` → `bun install`
+не создаёт симлинк → vitest падает `Cannot find package`) проверен по всем `apps/*/package.json`
+монорепо, а не только по одному уже найденному приложению.
+
+**Масштаб находки:** буквальное применение правила «пакет реально импортируется где-то в коде
+приложения → добавить в dependencies» задело бы ~200 записей в 33 приложениях — то есть
+implicitDependencies практически везде шире dependencies намеренно (пакет резолвится через
+`customConditions` для typecheck/сборки, а не через npm-граф). Делать это одной кампанией —
+несоразмерный риск ради находки, которая пока проявилась только один раз.
+
+**Сужение риска (решение владельца):** чинить только пакеты, у которых импортирующий файл —
+уже `.ts`-логика (не `page.tsx`/`layout.tsx`/чистый компонент) со своим sibling
+`.spec.ts`/`.test.ts` рядом — надёжный признак, что vitest уже реально доходит до этого импорта.
+Более широкий признак «импортируется где-то в spec-файле по совпадению basename» отброшен —
+шумит на generic-именах (`route`, `auth`, `prisma`, `index`).
+
+**Результат аудита — 6 приложений, 15 пакетов:**
+
+| Приложение       | Пакеты                                                                                          |
+| ---------------- | ----------------------------------------------------------------------------------------------- |
+| `aboi`           | `@letar/format-utils`, `@letar/analytics`, `@letar/email`, `@letar/image-upload`, `@letar/seo`  |
+| `aprel8008`      | `@letar/image-upload`                                                                           |
+| `domwellbes`     | `@letar/analytics`, `@letar/format-utils`, `@letar/consent`, `@letar/email`, `@letar/file-scan` |
+| `driving-school` | `@letar/forms-core`                                                                             |
+| `dsperevod`      | `@letar/analytics`                                                                              |
+| `studio`         | `@letar/email`, `@letar/consent`                                                                |
+
+Каждое приложение — отдельный коммит внутри своего submodule (`package.json` dependencies +
+version bump + `CHANGELOG.md`), затем один коммит в корне `letar` бампающий все 6 gitlink +
+`bun.lock` (`8582eabc`) — по образцу уже принятого паттерна `GIT_ALLOW_MULTI_SCOPE_COMMIT`
+(механически одно связанное изменение, не 6 независимых).
+
+**Верификация — без регрессий:** `nx test lint typecheck:tsgo` по всем 6 приложениям. Упавшие
+таски (`aboi:test`, `aboi:typecheck:tsgo`, `domwellbes:test`, `domwellbes:typecheck:tsgo`) —
+все пред-существующие и не связаны с этой правкой (диф трогал только `package.json`/
+`CHANGELOG.md`, ни одного `.ts(x)`-файла с ошибкой): `checkout.test.ts` (`server-only`-импорт в
+клиентском модуле), Chakra recipe-вариант `TS2322` на `Badge`/`Card`/`Button`, Postgres
+serialization-флакиность (`40001`) в `src/lib/projects/**` — уже известный класс
+(`vitest-serializable-transaction-cross-file-flake.md`). `Cannot find package` — 0 вхождений и
+до, и после фикса (баг был латентным, не проявившимся ни в одном из проверенных 21 приложения на
+момент baseline-прогона).
+
+**Постоянный гейт — [scripts/check-implicit-deps.mjs](/scripts/check-implicit-deps.mjs).**
+По образцу `check-lib-subpath-paths.mjs`: та же эвристика sibling-spec, зарегистрирован в
+`check-all.mjs` (`id: implicit-deps`, `group: deps`, `severity: warn` — намеренно не gate,
+признак надёжный, но не исчерпывающий; `ci: partial`, приватные submodule не выкачаны в CI).
+Прогнан на текущем состоянии репо — 0 находок (все 6 приложений уже закрыты этой же сессией).
+Коммит `29329df0`.
+
+Документация — существующий `.claude/docs/vitest-unlinked-workspace-lib-imports.md` (без правок,
+находка соответствует уже описанному классу, не новому).
+
+Push submodule и корня не выполнен — ждёт отдельного одобрения владельца.
