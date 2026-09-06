@@ -16,6 +16,14 @@ export interface KeyDef {
 /** VK-коды для спецклавиш (не имеют символьного маппинга) */
 export const MODIFIER_VKS = new Set([0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0x5b, 0x5c, 0x5d, 0x14, 0x09])
 
+/** Физический блок стрелок (VK_LEFT/UP/RIGHT/DOWN) — отдельно от основного блока, как на реальной клавиатуре */
+export const ARROW_KEYS = {
+  up: { label: '↑', vk: 0x26 },
+  left: { label: '←', vk: 0x25 },
+  down: { label: '↓', vk: 0x28 },
+  right: { label: '→', vk: 0x27 },
+} satisfies Record<string, KeyDef>
+
 /** 5 рядов ANSI клавиатуры */
 export const KEYBOARD_ROWS: KeyDef[][] = [
   [
