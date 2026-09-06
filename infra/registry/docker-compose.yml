@@ -1,0 +1,49 @@
+# Self-hosted Docker Registry — PLAN-INFRA-6.md §157, «Пилот 1».
+#
+# Назначение: приёмник образов от будущего remote-буилдера на s3 (deploy-affected.sh на s2
+# делает `docker compose pull` вместо `docker build`). Бэкап НЕ нужен — образы воспроизводимы
+# из git, registry здесь кеш, а не источник истины (см. README).
+#
+# Аутентификация — на уровне Traefik (basicAuth middleware), не встроенная auth самого
+# registry:2: переиспользует уже смонтированный ./auth у Traefik (infra/traefik/docker-compose.yml)
+# без правки/рестарта самого Traefik — см. infra/registry/secrets/deploy.conf.
+#
+# Запуск: scripts/deploy-infra.sh registry (из корня letar, на s3)
+
+services:
+  registry:
+    image: 'registry:2'
+    container_name: registry
+    restart: unless-stopped
+    environment:
+      # Нужно для ретеншна — scripts/registry-gc.sh удаляет манифесты через API,
+      # без этого флага DELETE /v2/<name>/manifests/<digest> отвечает 405.
+      REGISTRY_STORAGE_DELETE_ENABLED: 'true'
+    volumes:
+      - registry-data:/var/lib/registry
+    networks:
+      - traefik-network
+    labels:
+      traefik.enable: 'true'
+      traefik.docker.network: 'traefik-network'
+      traefik.http.routers.registry.rule: 'Host(`registry.s3.letar.best`)'
+      traefik.http.routers.registry.entrypoints: 'websecure'
+      # ⛔ Только `tls: 'true'`, без своего certresolver — см.
+      # infra/traefik/README.md § «Как подключить приложение»: домен уже покрыт wildcard
+      # *.s3.letar.best, выпущенным роутером дашборда. Отдельный certresolver здесь заказал
+      # бы ОТДЕЛЬНЫЙ сертификат на registry.s3.letar.best и упал бы 404 (регистрация нового
+      # acme-dns аккаунта закрыта нарочно).
+      traefik.http.routers.registry.tls: 'true'
+      traefik.http.routers.registry.middlewares: 'registry-auth'
+      traefik.http.services.registry.loadbalancer.server.port: '5000'
+      # usersfile — путь ВНУТРИ контейнера traefik (уже монтирует ./auth как /etc/traefik/auth,
+      # см. infra/traefik/docker-compose.yml), не путь на этом контейнере или на хосте.
+      traefik.http.middlewares.registry-auth.basicauth.usersfile: '/etc/traefik/auth/registry-users'
+      traefik.http.middlewares.registry-auth.basicauth.removeheader: 'true'
+
+volumes:
+  registry-data:
+
+networks:
+  traefik-network:
+    external: true
