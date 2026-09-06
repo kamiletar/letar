@@ -11,6 +11,16 @@
 - Отправка метрик в Dashboard
 - WebSocket для real-time
 
+## [0.16.4] — 2026-09-06
+
+### Changed
+
+- **Рефакторинг: `lib/cron.ts` (1187 строк) разнесён на 7 тематических модулей** —
+  `cron-types.ts`, `cron-default-jobs.ts`, `cron-config.ts`, `cron-logs.ts`,
+  `cron-logs-redis.ts`, `cron-execution.ts`, `cron-scheduler.ts`. Сам `cron.ts` остаётся тонкой
+  точкой входа с реэкспортами, внешние импорты (`src/index.ts`, `src/routes/cron.ts`) не менялись.
+  Поведение не менялось.
+
 ## [0.16.3] — 2026-09-06
 
 ### Fixed

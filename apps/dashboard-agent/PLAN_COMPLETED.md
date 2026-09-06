@@ -2,6 +2,36 @@
 
 Детальное описание всех реализованных фич.
 
+## Рефакторинг: декомпозиция lib/cron.ts (2026-09-06, `0.16.4`)
+
+Файл вырос до 1187 строк, смешивая четыре независимые заботы. Разрезан на:
+
+- `lib/cron-types.ts` — типы `CronJob`, `CronExecutionLog`, `CronJobStatus`.
+- `lib/cron-default-jobs.ts` — данные без логики: `DEFAULT_CRON_JOBS` (каталог задач по
+  умолчанию) и `RETIRED_JOB_IDS` (список выведенных из эксплуатации, PLAN-INFRA.md §56).
+- `lib/cron-config.ts` — `filterJobsForCurrentServer`, чтение/запись `cron-jobs.json`,
+  `loadAllCronJobs`/`loadCronConfig`/`saveCronConfig`, `applyRetirement`.
+- `lib/cron-logs.ts` — in-memory ring-buffer логов выполнения (`executionLogs`, `addLog`,
+  `updateLog`, `getJobLogs`, `getLastJobLog`, `rehydrateExecutionLogsFromRedis`).
+- `lib/cron-logs-redis.ts` — best-effort персистентность логов в Redis (`persistJobLogs`,
+  `restorePersistedLogsInto`). Не владеет `executionLogs` — принимает Map параметром из
+  `cron-logs.ts`, чтобы не создавать циклический импорт (та же схема, что у
+  `deploy-history.ts`/`deploy-history-redis.ts`, см. запись про декомпозицию `routes/deploy.ts`
+  ниже).
+- `lib/cron-execution.ts` — `executeJob` (HTTP-вызов эндпоинта задачи с таймаутом и секретом
+  приложения) и `notifyDashboardAlert`.
+- `lib/cron-scheduler.ts` — node-cron планировщик (`startScheduler`/`stopScheduler`/
+  `scheduleJob`/`unscheduleJob`), сводные статусы (`getJobStatus`/`getAllJobStatuses`/
+  `getNextRunDate`) и `updateJob`.
+
+`lib/cron.ts` (1187 → 32 строки) — тонкий барель с реэкспортами, внешние импорты
+(`src/index.ts`, `src/routes/cron.ts`, `cron-retirement.spec.ts`) не менялись. Поведение и оба
+критичных комментария-решения перенесены дословно: комментарий про `getRedisWhenReady()` в
+rehydrate (не голый `getRedis()` — фикс гонки старта, см. запись выше) и про UI-only `schedule`
+в `DEFAULT_CRON_JOBS` (решение владельца 2026-09-03, PLAN-INFRA.md §56 — код не должен
+перетирать правки расписания, сделанные через UI дашборда). `nx typecheck`/`nx test`/`nx build
+dashboard-agent` — зелёные без правок тестов (152 passed / 1 skipped).
+
 ## Гонка старта: восстановление состояния из Redis до готовности клиента (2026-09-06, `0.16.3`)
 
 Воспроизведено на s2 при деплое `c8e18e3c3`: при каждом старте процесса обе функции восстановления
