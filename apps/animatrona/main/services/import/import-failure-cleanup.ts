@@ -52,9 +52,12 @@ export async function cleanupAfterImportFailure(params: ImportFailureCleanupPara
       let unpinned = 0
       for (const cid of trackedCids) {
         try {
-          const isPinned = await pinManager.isPinned(cid)
-          if (isPinned) {
-            await pinManager.unpin(cid)
+          // Без предварительного isPinned(): видео/манифесты пинятся напрямую в Kubo
+          // (client.add с pin:true), минуя PinManager — его локальный pins.json почти
+          // никогда не содержит эти CID, isPinned() ложно возвращал false, и unpin()
+          // ниже вообще не вызывался. unpin() сам безопасно обрабатывает "не запинен".
+          const wasUnpinned = await pinManager.unpin(cid)
+          if (wasUnpinned) {
             unpinned++
           }
         } catch {

@@ -66,6 +66,13 @@ export class PinManager extends EventEmitter {
   private static instance: PinManager | null = null
   private pins: Map<string, PinInfo> = new Map()
   private initialized = false
+  /**
+   * Хвост цепочки записей save() — сериализует конкурентные вызовы.
+   * Без этого при батч-импорте (десятки pin()/unpin() почти одновременно) снимок
+   * Map берётся синхронно, а fs.writeFile асинхронна: более старый снимок может
+   * физически лечь на диск ПОСЛЕ более нового и стереть только что добавленную запись.
+   */
+  private saveQueue: Promise<void> = Promise.resolve()
 
   private constructor() {
     super()
@@ -303,24 +310,38 @@ export class PinManager extends EventEmitter {
     }
   }
 
-  /** Сохранить pins в файл */
+  /**
+   * Сохранить pins в файл.
+   *
+   * Снимок Map берётся синхронно ЗДЕСЬ (актуальное состояние на момент вызова), а сама
+   * запись на диск сериализуется через `saveQueue` — гарантирует, что записи на диск
+   * происходят строго в том же порядке, в каком были сделаны снимки, даже если несколько
+   * pin()/unpin() вызваны почти одновременно (батч-импорт).
+   */
   private async save(): Promise<void> {
-    try {
-      const pinsPath = await this.getPinsFilePath()
-      const ipfsDir = path.dirname(pinsPath)
-
-      // Создаём директорию если нужно
-      await fs.mkdir(ipfsDir, { recursive: true })
-
-      const data: PinsData = {
-        version: 1,
-        pins: Array.from(this.pins.values()),
-      }
-
-      await fs.writeFile(pinsPath, JSON.stringify(data, null, 2), 'utf-8')
-    } catch (error) {
-      log.error('Ошибка сохранения pins', { error: String(error) })
+    const data: PinsData = {
+      version: 1,
+      pins: Array.from(this.pins.values()),
     }
+
+    const task = this.saveQueue
+      .then(() => this.writePinsFile(data))
+      .catch((error) => {
+        log.error('Ошибка сохранения pins', { error: String(error) })
+      })
+    this.saveQueue = task
+    return task
+  }
+
+  /** Собственно запись файла — вызывается только из очереди save() */
+  private async writePinsFile(data: PinsData): Promise<void> {
+    const pinsPath = await this.getPinsFilePath()
+    const ipfsDir = path.dirname(pinsPath)
+
+    // Создаём директорию если нужно
+    await fs.mkdir(ipfsDir, { recursive: true })
+
+    await fs.writeFile(pinsPath, JSON.stringify(data, null, 2), 'utf-8')
   }
 }
 
