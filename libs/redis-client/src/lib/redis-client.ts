@@ -18,6 +18,15 @@
  * библиотеки уже спроектированы на «Redis может отказать в любой момент», так что для них это
  * строго лучше зависания. Переопределяется через `redisOptions.enableOfflineQueue: true`, если
  * конкретному потребителю нужна старая семантика.
+ *
+ * ⚠️ Лог ошибок схлопывается, и это тоже не косметика. `retryStrategy` переподключается
+ * бесконечно, поэтому при лежащем Redis событие `error` приходит вечно — сначала раз в секунду,
+ * дальше раз в 30 секунд. Печать каждого события забивает `docker logs` (у `dashboard-agent`,
+ * живущего сутками, это основной инструмент разбора инцидентов) и маскирует настоящие ошибки.
+ * Поэтому печатается только первая ошибка каждого текста, повторы копятся молча, а при
+ * восстановлении соединения выводится одна итоговая строка с их числом. Смена текста ошибки
+ * (ECONNREFUSED → WRONGPASS и т.п.) — это новая информация, она печатается сразу и дублем не
+ * считается.
  */
 
 import Redis, { type RedisOptions } from 'ioredis'
@@ -27,7 +36,7 @@ export interface CreateRedisClientOptions {
   envVar?: string
   /** URL по умолчанию, если переменная окружения не задана (например для локальной разработки). */
   fallbackUrl?: string
-  /** Подавить console.error/console.warn при ошибках подключения. */
+  /** Подавить весь вывод в консоль (ошибки подключения и сообщение о восстановлении). */
   silent?: boolean
   /** Доп. опции ioredis поверх дефолтных (maxRetriesPerRequest, enableOfflineQueue, lazyConnect, retryStrategy). */
   redisOptions?: RedisOptions
@@ -47,6 +56,10 @@ export function createRedisClient(options: CreateRedisClientOptions = {}): GetRe
 
   let client: Redis | null = null
   let connectionFailed = false
+  /** Текст последней напечатанной ошибки — по нему отличаем повтор от новой ошибки. */
+  let lastLoggedError: string | null = null
+  /** Сколько повторов последней ошибки проглочено с момента её печати. */
+  let suppressedErrors = 0
 
   return function getRedis(): Redis | null {
     const url = process.env[envVar] || fallbackUrl
@@ -67,13 +80,35 @@ export function createRedisClient(options: CreateRedisClientOptions = {}): GetRe
       })
 
       client.on('error', (err) => {
-        if (!silent) {
-          console.error(`${logPrefix} Ошибка:`, err.message)
+        if (silent) {
+          return
         }
+
+        // Тот же текст, что и в прошлый раз, — молчим до восстановления соединения
+        if (err.message === lastLoggedError) {
+          suppressedErrors++
+          return
+        }
+
+        // Ошибка сменилась: это новая информация, а не дубль. Заодно отчитываемся за то,
+        // что успели проглотить по прошлой — иначе счётчик потеряется до самого reconnect.
+        const suffix = suppressedErrors > 0 ? ` (подавлено повторов предыдущей ошибки: ${suppressedErrors})` : ''
+        console.error(`${logPrefix} Ошибка:`, `${err.message}${suffix}`)
+        lastLoggedError = err.message
+        suppressedErrors = 0
       })
 
       client.on('connect', () => {
         connectionFailed = false
+
+        // Первое подключение (ошибок не было) проходит молча — сообщать не о чем
+        if (!silent && lastLoggedError !== null) {
+          const tail = suppressedErrors > 0 ? `, подавлено повторов: ${suppressedErrors}` : ''
+          console.warn(`${logPrefix} Соединение восстановлено${tail}`)
+        }
+
+        lastLoggedError = null
+        suppressedErrors = 0
       })
 
       client.connect().catch(() => {
