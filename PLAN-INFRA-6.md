@@ -2816,3 +2816,29 @@ read-only не годится для миграций, а для преренд�
 
 Деплой не требуется: правки вступают в силу при следующем обычном деплое. Отдельный
 `deploy-request` по этой задаче слать не нужно.
+
+## §158 — `libs/admin-ui` не имел `lint`/`oxlint` вообще ✅ ЗАКРЫТО (2026-09-06)
+
+`libs/admin-ui` не имел ни своего `eslint.config.mjs`, ни таргетов `lint`/`oxlint` в
+`project.json` — `@nx/eslint/plugin` инферит `lint` только при наличии резолвящегося
+eslint-конфига в самом проекте, а `oxlint` в этом репо не автогенерится, его заводят явным
+таргетом (см. `libs/format-utils/project.json`). Итог — код библиотеки (потребители минимум
+`dashboard`, `driving-school`, `aboi`, `studio`, `svoichuzhie`, `aprel8008`, `domwellbes`,
+`mandala` — по `grep '"@letar/admin-ui"'`) годами не проверялся ни одним линтером при обычном
+`nx lint`/CI.
+
+**Фикс:** `eslint.config.mjs` по образцу `libs/ui` (`import baseConfig from
+'../../eslint.config.mjs'; export default [...baseConfig]`) + явный `oxlint` target и
+`lint.dependsOn: [oxlint]` по образцу `libs/format-utils`. Первый настоящий прогон нашёл 4
+находки: 2 живых `@typescript-eslint/no-explicit-any` + 2 мёртвых `eslint-disable-next-line`
+рядом с ними (директива стояла на строке до `render(...)`, а не прямо перед строкой с
+`as any` двумя строками ниже — то же семейство «мёртвая директива», что и недавние коммиты
+`e820ddf3`/`6c018038`/`d85100ac`/`ccc474b7`, только для нового парного правила). Починено
+переносом директивы к нужной строке в `seo-field.spec.tsx`/`slug-field.spec.tsx`. Остальные
+9 существующих `eslint-disable`/`oxlint-disable` в библиотеке проверены — все живые. `nx
+lint`/`typecheck`/`test` (150/150) зелёные. Коммит `5a04b553`.
+
+⚠️ **Находка того же прогона, ещё не закрыта:** ~28 других `libs/*` тоже не имеют своего
+`eslint.config.mjs` (включая активно используемую `libs/forms`) — список см. в тексте
+запущенной фоновой задачи `task_17a4e7c3` («Добавить eslint.config.mjs остальным libs без
+lint»), сессия по ней уже стартована пользователем отдельно на момент закрытия этого пункта.
