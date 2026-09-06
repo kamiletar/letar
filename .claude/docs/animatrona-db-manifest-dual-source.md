@@ -94,10 +94,17 @@ retranscode эту колонку не сбрасывает и не обновл
 не только сторону потребления — см. [verification-pitfalls.md](/.claude/docs/verification-pitfalls.md)
 про тот же урок применительно к этому конкретному аудиту.
 
-## Открытый вопрос (не исправлено в рамках аудита 2026-08-08)
+## Исправлено (2026-09-06)
 
-Фикс не сделан — это только фиксация паттерна. Варианты фикса (из PLAN.md/PLAN_COMPLETED.md
-аудита): либо добавить `spriteCid: null, vttCid: null, chaptersCid: null` в reset-блок
-`updateEpisode()` при retranscode, либо после `updateManifestThumbnails()`/generateManifestFromDemux
-сразу писать те же CID в колонки БД. Второй вариант ближе к замыслу схемы («колонки переживают
-recovery») и не требует, чтобы билдер заново регенерировал их при следующей сборке.
+Выбран первый из двух вариантов фикса: `spriteCid: null, vttCid: null, chaptersCid: null`
+добавлены в reset-блок retranscode —
+[episode-file-processor.ts:128-137](/apps/animatrona/main/services/import/episode-file-processor.ts#L128-L137)
+(код переехал из `import-service.ts` в отдельный файл при рефакторинге, строки в этой доке
+выше устарели).
+
+Билдер (`ep.field ?? parsed?.field` для chapters, аналогичный приоритетный список для
+sprite/vtt) теперь после retranscode находит БД-колонку пустой и подхватывает свежий CID из
+манифеста вместо старого — цепочка рассинхрона разорвана. Компромисс осознанный: колонка не
+получает новое значение сразу (recovery-путь builder'а её не трогает, если manifest-CID живой),
+он заполнится заново только когда сработает настоящий recovery (video.webm regen) — но это не
+регрессия относительно варианта 2, а то же поведение, что было у нового эпизода изначально.
