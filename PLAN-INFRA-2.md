@@ -1094,6 +1094,22 @@ Traefik-лейблам `docker-compose.production.yml` (`auth.letar.best`, `dash
 Это закрывает DoD-пункт «у каждого приложения... есть `metadataBase`» **по всему монорепо**
 (27/27 `layout.tsx`), не только по исходным 10 из §33 Части B.
 
+### Дополнение 2026-09-06 — деплой второй волны фиксов, найден пробел в первом батче
+
+Фиксы `isProductionDomain()`/`NEXT_PUBLIC_BASE_URL` из «Дополнение 2026-09-02» (10 приложений)
+были закоммичены и запушены **2026-09-02**, но батч-деплой §33/§70 (2026-09-04/05, thread `1174`,
+commit `cfea620f`) прошёл только по 9 из совсем другого, более раннего списка приложений
+(`driving-school`, `pravda`, `aira-web`, `form-docs`, `animatrona-landing`, `kami-key-the-landing`,
+`letar-landing`, `aboi`, `studio`) — `archetest` был заблокирован hard e2e-гейтом (webkit-флейк),
+почин**ен и задеплоен отдельной сессией позже** (`c494d4fa`/`69bf1ac7`/`6c36a0ea`/`e5c03c2b`,
+подтверждено `dd11e812`, 21/21 e2e зелёных).
+
+**Оставшиеся 8 приложений из второй волны — код в `origin/main` с 2026-09-02, но ни разу не
+деплоились:** `kami`, `mandala`, `grandslamcup`, `time`, `form-example`, `aprel8008`, `dsperevod`,
+`svoichuzhie`. Отправлен `deploy-request` (`letar-dev` → `deploy-agent-dev`, 2026-09-06,
+thread `1211`) — новых правок кода не требуется, только довезти уже готовый фикс до прода/staging.
+`aprel8008`/`dsperevod`/`svoichuzhie` — `HARD_GATED_APPS`, пройдут штатный fail-closed e2e-гейт.
+
 ### Что сделано (2026-08-06)
 
 - [x] `libs/seo` (`@letar/seo`) — `getBaseUrl(productionUrl)`/`isProductionDomain(productionUrl)`,
