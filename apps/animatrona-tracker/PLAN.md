@@ -507,8 +507,8 @@ CreateServerSchema не включает `pinQueueUrl`/`pinQueueSecret`. При 
       `hasStatusMix` (реальный микс статусов), не как отдельная колонка таблицы (таблицы больше нет)
 - [x] **Карточка "Моя библиотека" → пункт навигации** — кнопка внутри таба «Статистика», не
       отдельная sidebar-карточка
-- [ ] **Аватар — загрузка фото** — сейчас просто буква на цветном круге. Решение владельца
-      (2026-09-07): свой upload через `@letar/image-upload`, не gravatar. См. подзадачу ниже
+- [x] **Аватар — загрузка фото** — сделано 2026-09-07. Решение владельца: свой upload через
+      `@letar/image-upload`, не gravatar. См. подзадачу ниже
 - [x] **Mobile: sidebar бесконечный скролл** — снято как побочный эффект P0 (sidebar теперь только
       одна компактная карточка, не 7)
 
@@ -523,14 +523,15 @@ CreateServerSchema не включает `pinQueueUrl`/`pinQueueSecret`. При 
 - [x] **Обложки + жанры + эпизоды** — уже в переиспользуемом `AnimeCard` (постер, жанры, бейдж
       эпизодов, рейтинг, просмотры)
 
-#### Подзадача: загрузка аватара (2026-09-07, в работе)
+#### Подзадача: загрузка аватара ✅ (2026-09-07)
 
-- [ ] Endpoint загрузки фото через `@letar/image-upload` (путь `uploads/avatars/<userId>/...`,
-      с учётом `.claude/docs/upload-path-traversal.md`)
-- [ ] UI в sidebar профиля — клик по аватару/кнопка загрузки, предпросмотр, сохранение
-- [ ] Server Action, обновляющий `User.image` через `getEnhancedPrisma`
-- [ ] Рендер фото вместо буквы там, где сейчас `user.name?.[0]` (sidebar профиля,
-      `profile-public-client.tsx`, карточки модерации со ссылкой на аплоадера — если применимо)
+- [x] Endpoint раздачи через `createUploadsRoute` (`GET /api/files/[...path]`), запись —
+      `uploads/avatars/<userId>/<uuid>.webp` через `createLocalDiskBackend`
+      (`resolveUploadPath` — защита от path traversal)
+- [x] UI в sidebar профиля — клик по аватару открывает выбор файла, обработка через
+      `processUploadImage` (EXIF-ротация, ресайз 256×256, WebP)
+- [x] Server Action `uploadAvatarAction`, обновляющий `User.image` через `getEnhancedPrisma`
+- [x] Рендер фото вместо буквы — детали в `CHANGELOG.md` v0.11.13
 
 ### Фаза 2 (ранее): Социальный UX
 
