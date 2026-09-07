@@ -14,6 +14,8 @@ import { LuFolderOpen } from 'react-icons/lu'
 
 import type { VideoPlayerSubtitle } from './_components/VideoPlayer'
 import { VideoPlayer } from './_components/VideoPlayer'
+import type { CodecSupportResult } from './_lib/codec-support'
+import { checkCodecSupport } from './_lib/codec-support'
 import { toMediaUrl } from './_lib/media-url'
 
 /**
@@ -173,6 +175,41 @@ export default function HomePage() {
 
   const subtitle = externalSubtitle ?? embeddedSubtitle
 
+  // Детекция кодеков, которые Chromium не декодирует (Hi10P, AC3/DTS/TrueHD) — до старта
+  // воспроизведения, а не после чёрного экрана. Пробует напрямую через electronAPI.probe (полный
+  // MediaInfo с videoTracks), в обход host.probe() — тот отдаёт узкий MediaProbeInfo без
+  // видеодорожек (нужны только audio/subtitle-селекторам, см. @letar/folder-player-react/host.ts)
+  const [codecSupport, setCodecSupport] = useState<CodecSupportResult | null>(null)
+  useEffect(() => {
+    setCodecSupport(null)
+    if (!mounted || !currentVideoPath) {
+      return
+    }
+    let cancelled = false
+    void window.electronAPI.probe(currentVideoPath).then((result) => {
+      if (cancelled || !result.success || !result.data) {
+        return
+      }
+      setCodecSupport(checkCodecSupport(result.data.videoTracks, result.data.audioTracks))
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [mounted, currentVideoPath])
+
+  const [openInSystemPlayerError, setOpenInSystemPlayerError] = useState<string | null>(null)
+  const handleOpenInSystemPlayer = useCallback(() => {
+    if (!currentVideoPath) {
+      return
+    }
+    setOpenInSystemPlayerError(null)
+    void window.electronAPI.shell.openPath(currentVideoPath).then((result) => {
+      if (!result.success) {
+        setOpenInSystemPlayerError(result.error ?? 'Не удалось открыть системный плеер')
+      }
+    })
+  }, [currentVideoPath])
+
   const resumeTime = currentVideoPath ? watchProgress.getResumeTime(currentVideoPath) : 0
 
   // Последний известный прогресс — нужен в handleEnded, у которого своих currentTime/duration нет
@@ -243,20 +280,38 @@ export default function HomePage() {
       )}
 
       <Box flex={1} bg="black" position="relative">
-        {currentVideoPath && (
-          <VideoPlayer
-            key={currentVideoPath}
-            src={toMediaUrl(currentVideoPath)}
-            subtitle={subtitle}
-            startTime={resumeTime}
-            hasPrev={player.hasPrev}
-            hasNext={player.hasNext}
-            onPrev={() => void player.goPrev()}
-            onNext={() => void player.goNext()}
-            onTimeUpdate={handleTimeUpdate}
-            onEnded={handleEnded}
-          />
-        )}
+        {currentVideoPath && codecSupport && !codecSupport.supported
+          ? (
+            <Center h="full" p={8}>
+              <VStack gap={4} maxW="lg" color="white" textAlign="center">
+                <Text fontSize="xl" fontWeight="bold">Плеер не может проиграть этот файл</Text>
+                {codecSupport.issues.map((issue) => <Text key={issue.kind} color="fg.muted">{issue.message}</Text>)}
+                <Flex gap={3} wrap="wrap" justify="center">
+                  <Button colorPalette="brand" onClick={handleOpenInSystemPlayer}>
+                    Открыть в системном плеере
+                  </Button>
+                  <Button variant="outline" disabled title="Появится в следующей версии">
+                    Включить расширенную поддержку форматов
+                  </Button>
+                </Flex>
+                {openInSystemPlayerError && <Text color="fg.error">{openInSystemPlayerError}</Text>}
+              </VStack>
+            </Center>
+          )
+          : currentVideoPath && (
+            <VideoPlayer
+              key={currentVideoPath}
+              src={toMediaUrl(currentVideoPath)}
+              subtitle={subtitle}
+              startTime={resumeTime}
+              hasPrev={player.hasPrev}
+              hasNext={player.hasNext}
+              onPrev={() => void player.goPrev()}
+              onNext={() => void player.goNext()}
+              onTimeUpdate={handleTimeUpdate}
+              onEnded={handleEnded}
+            />
+          )}
 
         {currentEpisode && (
           <Text

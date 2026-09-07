@@ -69,6 +69,10 @@ const electronAPI = {
     extractEmbedded: (filePath: string): Promise<EmbeddedSubtitlesResult> =>
       ipcRenderer.invoke('subtitles:extractEmbedded', filePath),
   },
+  shell: {
+    openPath: (filePath: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('app:openInSystemPlayer', filePath),
+  },
 }
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI)

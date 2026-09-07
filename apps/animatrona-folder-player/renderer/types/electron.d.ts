@@ -38,6 +38,9 @@ export interface ElectronAPI {
   subtitles: {
     extractEmbedded: (filePath: string) => Promise<EmbeddedSubtitlesIpcResult>
   }
+  shell: {
+    openPath: (filePath: string) => Promise<{ success: boolean; error?: string }>
+  }
 }
 
 declare global {
