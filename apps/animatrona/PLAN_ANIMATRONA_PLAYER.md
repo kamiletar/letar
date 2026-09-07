@@ -255,8 +255,39 @@ nx g @letar/generators:electron-app animatrona-player --displayName="Animatrona 
       ⚠️ GUI-уровень (открытие окна, клики) не проверялся — недоступно в сендбоксе Claude Code
       (`.claude/rules/electron.md`), нужен живой запуск `nx dev animatrona-player` у владельца.
 
-- [ ] Подключить `@letar/folder-player-react`, `@letar/folder-scan`, `@letar/video-player-react`,
-      `@letar/video-player-core`, `@letar/electron-storage`
+- [x] Подключены `@letar/folder-player-react` и `@letar/folder-scan` (2026-09-08). Ещё не начаты:
+      `@letar/video-player-react`, `@letar/video-player-core`, `@letar/electron-storage`.
+      - `tsconfig.json`/`renderer/tsconfig.json` — `paths`+`include` на обе библиотеки (main
+      видит обе, renderer только `folder-player-react` — `folder-scan` Node-only);
+      `package.json` `dependencies` + `bun install` (симлинк в `node_modules/@letar/`).
+      - `main/webpack.config.js` — alias `@letar/folder-scan` на `libs/folder-scan/src`, тот же
+      паттерн, что у `label-printer-desktop` (см. `.claude/docs/animatrona-dual-build-alias-drift.md`).
+      - Main-процесс: `main/protocols/allowed-paths.ts`+`media.protocol.ts` — тонкие обёртки над
+      библиотекой (без папки библиотеки, только userData/temp + папки, выбранные пользователем);
+      `main/ipc/dialog.handlers.ts` (`dialog:selectFile`/`selectFolder`), `main/ipc/fs.handlers.ts`
+      (`fs:scanFolder`/`scanExternalAudio`/`scanExternalSubtitles`) — портированы из Animatrona,
+      но raw `ipcMain.handle()` (без `createHandler`-фабрики — её обёртка `{success,data,error}`
+      не совпадает с прямыми формами, которых ждёт `FolderPlayerHost`). `background.ts`:
+      `registerMediaProtocol()` до `app.whenReady()`, `setupMediaProtocolHandler()`+
+      `initAllowedPaths()` после — тот же порядок, что в Animatrona.
+      - `preload.ts`/`renderer/types/electron.d.ts` — `window.electronAPI.dialog.*`/`fs.*`.
+      - `renderer/app/page.tsx` — переписан: строит `FolderPlayerHost` из `window.electronAPI`
+      (`probe()` — заглушка, `MediaInfoWasmProber` не подключён, отдельный пункт ниже), рендерит
+      `EpisodeSidebar`+`RecentFoldersCard`+`<video>` через `useFolderPlayer`/`useFolderHistory`/
+      `useWatchProgress`. `toMediaUrl()` — упрощённая версия без IPFS-логики Animatrona
+      (`renderer/app/_lib/media-url.ts`).
+      - ⚠️ Пойманная и исправленная грабля: статический экспорт (`next export`) пререндерит
+      страницу на этапе сборки — `window.electronAPI`/`window.localStorage` там не существуют,
+      `ReferenceError: window is not defined` в `next build`. Фикс — `mounted`-флаг
+      (`useState`+`useEffect`) и no-op host/storage до монтирования, реальные подставляются
+      только в браузере.
+      - Проверено: `nx typecheck:tsgo animatrona-player`, `nx lint animatrona-player`,
+      `next build --webpack renderer` (статический экспорт) и `webpack --config
+        main/webpack.config.js` — все зелёные. GUI-уровень не проверялся (недоступно в сендбоксе,
+      см. запись выше про Фазу 2) — нужен живой `nx dev animatrona-player`.
+- [ ] `app://` вместо `file://` (§6.1 ниже) — пока не сделано, `background.ts` всё ещё грузит
+      рендерер через `loadFile()`. Не блокирует уже подключённые библиотеки (внешние
+      субтитры/аудио не используют Worker/WASM), понадобится для SubtitlesOctopus.
 - [ ] `MediaInfoWasmProber` на `mediainfo.js`; тест-сравнение с `FfprobeProber` (см. риск в §3)
 - [ ] Встроенные ASS-субтитры и шрифты — без ffmpeg, через
       [matroska-subtitles](https://github.com/mathiasvr/matroska-subtitles) (стримовый JS-парсер,

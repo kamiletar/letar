@@ -48,7 +48,8 @@
       "@letar/forms-core/i18n": ["../../../libs/forms-core/src/lib/i18n/index.ts"],
       "@letar/forms-core/uikit": ["../../../libs/forms-core/src/lib/uikit/index.ts"],
       "@letar/forms-core/testing": ["../../../libs/forms-core/src/lib/testing/index.ts"],
-      "@letar/chakra-provider": ["../../../libs/chakra-provider/src/index.ts"]
+      "@letar/chakra-provider": ["../../../libs/chakra-provider/src/index.ts"],
+      "@letar/folder-player-react": ["../../../libs/folder-player-react/src/index.ts"]
     },
     "noUncheckedSideEffectImports": false,
     "ignoreDeprecations": "6.0"

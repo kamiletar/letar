@@ -10,7 +10,9 @@
     "implicitDependencies": ["@letar/forms", "@letar/icon-generator"]
   },
   "dependencies": {
-    "@letar/icon-generator": "workspace:*"
+    "@letar/icon-generator": "workspace:*",
+    "@letar/folder-player-react": "workspace:*",
+    "@letar/folder-scan": "workspace:*"
   },
   "devDependencies": {
     "electron": "44.2.0",

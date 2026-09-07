@@ -422,6 +422,8 @@
       "name": "@letar/animatrona-player",
       "version": "0.1.0",
       "dependencies": {
+        "@letar/folder-player-react": "workspace:*",
+        "@letar/folder-scan": "workspace:*",
         "@letar/icon-generator": "workspace:*",
       },
       "devDependencies": {
@@ -1116,7 +1118,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.11.0",
+      "version": "2.11.1",
       "dependencies": {
         "@tanstack/react-table": "^9.2.4",
         "@tanstack/react-virtual": "^3.13.23",

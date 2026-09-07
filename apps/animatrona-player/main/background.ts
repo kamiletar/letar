@@ -1,6 +1,11 @@
 import { app, BrowserWindow } from 'electron'
 import path from 'node:path'
 import { registerIpcHandlers } from './ipc'
+import { initAllowedPaths } from './protocols/allowed-paths'
+import { registerMediaProtocol, setupMediaProtocolHandler } from './protocols/media.protocol'
+
+// Регистрация привилегий схемы media:// — обязательно до app.whenReady()
+registerMediaProtocol()
 
 process.on('uncaughtException', (error) => {
   console.error('[UncaughtException]', error)
@@ -50,6 +55,8 @@ async function createWindow(): Promise<void> {
 }
 
 app.whenReady().then(async () => {
+  setupMediaProtocolHandler()
+  initAllowedPaths()
   registerIpcHandlers(() => mainWindow)
   await createWindow()
 

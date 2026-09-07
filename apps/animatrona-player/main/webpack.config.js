@@ -13,6 +13,9 @@ module.exports = {
   },
   resolve: {
     extensions: ['.ts', '.js'],
+    alias: {
+      '@letar/folder-scan': path.resolve(__dirname, '../../../libs/folder-scan/src'),
+    },
   },
   module: {
     rules: [
