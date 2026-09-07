@@ -19,9 +19,10 @@ import { toMediaUrl } from './_lib/media-url'
 /**
  * Хост папочного плеера, построенный из `window.electronAPI` этого приложения.
  *
- * `probe()` пока заглушка — MediaInfoWasmProber (mediainfo.js) не подключён, это отдельная
- * задача плана. Без пробы недоступны только встроенные (в контейнере) аудио/субтитр-дорожки
- * и главы — внешние субтитры/аудио (Rus Sub/, Rus Sound/ и т.п.) сканируются штатно.
+ * `probe()` мапит полную `MediaInfo` (MediaInfoWasmProber, main-процесс) в узкую
+ * `MediaProbeInfo`, нужную UI — audio/subtitle-селекторы. Главы сейчас всегда `undefined`
+ * (см. комментарий в `main/services/media-info-prober.ts` про Menu-трек MediaInfoLib) —
+ * кнопка «Пропустить опенинг» появится, когда прочтение глав будет решено отдельной задачей.
  */
 function createFolderPlayerHost(): FolderPlayerHost {
   return {
@@ -32,8 +33,37 @@ function createFolderPlayerHost(): FolderPlayerHost {
     scanExternalAudio: (folderPath, videoFiles) => window.electronAPI.fs.scanExternalAudio(folderPath, videoFiles),
     scanExternalSubtitles: (folderPath, videoFiles) =>
       window.electronAPI.fs.scanExternalSubtitles(folderPath, videoFiles),
-    probe: (): Promise<MediaProbeResult> =>
-      Promise.resolve({ success: false, error: 'Проба медиафайла (MediaInfoWasmProber) ещё не подключена' }),
+    probe: async (filePath): Promise<MediaProbeResult> => {
+      const result = await window.electronAPI.probe(filePath)
+      if (!result.success || !result.data) {
+        return { success: false, error: result.error ?? 'Не удалось получить данные о медиафайле' }
+      }
+      return {
+        success: true,
+        data: {
+          audioTracks: result.data.audioTracks.map((t) => ({
+            index: t.index,
+            language: t.language,
+            title: t.title,
+            codec: t.codec ?? '',
+            channels: t.channels ?? 0,
+            bitrate: t.bitrate,
+            isDefault: t.isDefault,
+            isForced: t.isForced,
+          })),
+          subtitleTracks: result.data.subtitleTracks.map((t) => ({
+            index: t.index,
+            language: t.language,
+            title: t.title,
+            codec: t.codec,
+            isDefault: t.isDefault,
+            isForced: t.isForced,
+            subtitleType: t.subtitleType,
+          })),
+          chapters: result.data.chapters?.map((c) => ({ start: c.start, end: c.end, title: c.title })),
+        },
+      }
+    },
     toMediaUrl,
   }
 }

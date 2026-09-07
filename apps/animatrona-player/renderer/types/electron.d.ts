@@ -4,6 +4,13 @@ import type {
   FileFilter,
   MediaFileInfo,
 } from '@letar/folder-player-react'
+import type { MediaInfo } from '@letar/folder-scan'
+
+export interface ProbeResult {
+  success: boolean
+  data?: MediaInfo
+  error?: string
+}
 
 export interface ElectronAPI {
   getVersion: () => Promise<string>
@@ -26,6 +33,7 @@ export interface ElectronAPI {
       videoFiles: Array<{ path: string; episodeNumber: number }>,
     ) => Promise<ExternalSubtitleScanResult>
   }
+  probe: (filePath: string) => Promise<ProbeResult>
 }
 
 declare global {

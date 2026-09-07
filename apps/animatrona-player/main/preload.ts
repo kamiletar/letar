@@ -25,6 +25,12 @@ interface ExternalSubtitleScanResult {
   unmatchedFiles: string[]
 }
 
+interface ProbeResult {
+  success: boolean
+  data?: unknown
+  error?: string
+}
+
 /**
  * API, доступный в renderer process через window.electronAPI.
  * Добавляй новые методы сюда и в main/ipc/*.handlers.ts — IPC единственный
@@ -52,6 +58,7 @@ const electronAPI = {
       videoFiles: Array<{ path: string; episodeNumber: number }>,
     ): Promise<ExternalSubtitleScanResult> => ipcRenderer.invoke('fs:scanExternalSubtitles', folderPath, videoFiles),
   },
+  probe: (filePath: string): Promise<ProbeResult> => ipcRenderer.invoke('probe:file', filePath),
 }
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI)

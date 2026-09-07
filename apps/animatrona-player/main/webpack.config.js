@@ -38,6 +38,10 @@ module.exports = {
     electron: 'commonjs electron',
     // TypeScript — не нужен в runtime
     typescript: 'commonjs typescript',
+    // mediainfo.js — Emscripten-обвязка вокруг MediaInfoModule.wasm, локатор которой
+    // (`locateFile` в media-info-prober.ts) резолвит путь через require.resolve() в рантайме;
+    // бандлинг webpack'ом сломал бы этот путь и раздул бы main-бандл WASM-глу-кодом впустую
+    'mediainfo.js': 'commonjs mediainfo.js',
     // Нативные (.node) модули добавляй сюда по мере необходимости (sharp, canvas...) —
     // см. .claude/rules/electron.md § «Грабли» про транзитивные зависимости под Bun
   },

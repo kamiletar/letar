@@ -317,7 +317,51 @@ nx g @letar/generators:electron-app animatrona-player --displayName="Animatrona 
 - [ ] `app://` вместо `file://` (§6.1 ниже) — пока не сделано, `background.ts` всё ещё грузит
       рендерер через `loadFile()`. Не блокирует уже подключённые библиотеки (внешние
       субтитры/аудио не используют Worker/WASM), понадобится для SubtitlesOctopus.
-- [ ] `MediaInfoWasmProber` на `mediainfo.js`; тест-сравнение с `FfprobeProber` (см. риск в §3)
+- [x] `MediaInfoWasmProber` на `mediainfo.js` (0.3.7 — реально поддерживаемый релиз, не
+      устаревшие плейсхолдеры `1.0.x`) — `main/services/media-info-prober.ts`, реализует
+      `MediaProber` из `@letar/folder-scan` (та же нормализованная `MediaInfo`, что и
+      `ffprobeProber` в Animatrona).
+      - Node-паттерн из `src/cli.ts` самой библиотеки (канонический источник — отдельного
+      `examples/node` у пакета нет): `fsPromises.open` → `analyzeData(() => fileSize, readChunk)`
+      → `close()` в `finally`.
+      - WASM грузится через `locateFile`, резолвящий `mediainfo.js/MediaInfoModule.wasm`
+      (реальный exports-подпуть пакета) в рантайме. **Ловушка:** обычный `require.resolve` со
+      строкой-шаблоном webpack пытается разрешить статически на этапе сборки и падает
+      (`Package path . is exported ... but no valid target file was found`) — фикс:
+      `__non_webpack_require__.resolve(...)`, алиас нативного Node `require`, который webpack не
+      анализирует. `mediainfo.js` также добавлен в `externals` `main/webpack.config.js` (та же
+      логика, что и `electron`/`typescript`) — иначе бандл тащил бы Emscripten-глу впустую.
+      - IPC: `main/ipc/probe.handlers.ts` (`probe:file`, raw `{success,data,error}`, без
+      `createHandler`-обёртки — конвенция уже установлена в этом приложении для `fs.handlers.ts`),
+      `main/preload.ts` (`electronAPI.probe`), `renderer/types/electron.d.ts`.
+      - `renderer/app/page.tsx` — `probe()` больше не заглушка: мапит полную `MediaInfo` в узкую
+      `MediaProbeInfo` (audio/subtitle-дорожки), тот же приём, что в
+      `apps/animatrona/renderer/src/app/player/page.tsx`.
+      - ⚠️ **Открытый риск, не закрыт этой задачей** (см. §3): `index` аудио/субтитр-дорожки —
+      `StreamOrder` из mediainfo.js ("порядок потока для этого типа, счёт с 0"), не гарантированно
+      совпадает с ffprobe stream index (тот нумерует сквозным индексом по всем типам разом,
+      mediainfo.js — по каждому типу отдельно). Тест-сравнение `FfprobeProber` vs
+      `MediaInfoWasmProber` на одинаковых файлах (§11) остаётся отдельной, не начатой задачей —
+      в песочнице нет ни одной MKV/MP4-фикстуры для эмпирической проверки.
+      - ⚠️ **Главы намеренно не реализованы** (`chapters: undefined`) — MediaInfoLib отдаёт их
+      только как внутренние позиции `Chapters_Pos_Begin`/`Chapters_Pos_End`, ссылающиеся на
+      необёрнутый `Get()`-API; реальные метки времени (по общим знаниям о MediaInfoLib) лежат в
+      динамических timecode-ключах `extra`-словаря Menu-трека, но точный формат ключей не
+      проверен на реальном файле — фикстур с главами в репозитории нет. Решение — не гадать с
+      парсингом, который мог бы подсунуть плееру неверные границы, а оставить `undefined` явно
+      прокомментированным до появления тестового файла. Кнопка «Пропустить опенинг» (§7) от этого
+      всё ещё не подключена.
+      - `attachmentFonts` тоже `undefined` — эта JS-обвязка над MediaInfoLib не отдаёт вложения
+      MKV отдельным списком (в отличие от ffprobe `-show_streams`).
+      - Проверено: `nx typecheck:tsgo animatrona-player`, `nx lint animatrona-player`, `webpack
+        --config main/webpack.config.js` (главная проверка — что `mediainfo.js`-обвязка вообще
+      собирается) и `next build renderer` — все зелёные. Дополнительно прогнан headless-прогон
+      main-процесса (`bun build ... --target=node --format=cjs --external electron --external
+        mediainfo.js` + `../../node_modules/.bin/electron.exe scripts/<verify>.cjs`, приём из
+      `.claude/rules/electron.md`) на произвольном файле — WASM реально загрузился и
+      `probeFile()` вернул корректный `MediaInfo` (включая формат/размер), подтверждает, что
+      `locateFile`/`__non_webpack_require__` работает в живом Electron main-процессе, а не только
+      компилируется. Временные verify-скрипты удалены после проверки, в репозитории не осели.
 - [ ] Встроенные ASS-субтитры и шрифты — без ffmpeg, через
       [matroska-subtitles](https://github.com/mathiasvr/matroska-subtitles) (стримовый JS-парсер,
       отдаёт ASS/SRT-дорожки **и вложенные шрифты** из attachments) + SubtitlesOctopus (`libass-wasm`,
