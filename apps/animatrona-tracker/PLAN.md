@@ -1,27 +1,7 @@
 # Animatrona Tracker — План развития
 
-# Новые вводные.
-
-## Открытые вопросы
-
-- [x] ⚠️ Soft-404 (2026-08-28, сквозной аудит монорепо): `notFound()` из кода страницы отдаёт
-      **HTTP 200**, а не 404 — причина корневой `src/app/loading.tsx` (Suspense-граница),
-      оборачивающий всё приложение целиком. Механизм и разбор —
-      [nextjs-streaming-soft-404-loading-boundary](/.claude/docs/nextjs-streaming-soft-404-loading-boundary.md).
-
-      **Решение владельца (2026-08-28): принять как есть.** Тег `noindex` уже стоит на
-      `/anime/[id]` — индексации это не вредит. Работа не требуется.
-
-## Черновик (новые идеи)
-
-- [x] **Аудит `_active: scale()` в теме на `pressScale`** (`@letar/ui`) — сделано 2026-09-08 вместе
-      с подключением `theme:check`. 14 значений в `src/app/_components/ui/provider.tsx` сверены со
-      шкалой и приведены к её шагам; 3 легитимных исключения (мелкие поверхности, рост thumb
-      слайдера) оставлены с комментарием и занесены в `allowedMatches`.
-
-- [x] **Покадровая перемотка на паузе** — сделано 2026-09-08. `Shift+←`/`Shift+→` работают только
-      на паузе, шаг 5 кадров. `frameRate` берётся из активного видеотрека Shaka Player
-      (`player.getVariantTracks()`), дефолт 24fps если Shaka его не сообщает.
+> Выполненные задачи — [PLAN_COMPLETED.md](./PLAN_COMPLETED.md) (история старше ~2026-08-08 —
+> [PLAN_COMPLETED_2026_09_08.md](./PLAN_COMPLETED_2026_09_08.md)).
 
 ## Фаза N: Шеринг, тайм-коды, настройка дорожек и комментарии с привязкой ко времени (план, без реализации)
 
@@ -66,9 +46,8 @@
 
 ### N.3 Комментарии с тайм-кодами — модель и три уровня (франшиза / аниме / серия)
 
-**Текущее состояние:** `AnimeComment` в `schema.zmodel` (строка ~991) привязан только к
-`animeId`, без эпизода и без тайм-кода. `comments-section.tsx`/`comment-card.tsx` уже есть на
-`anime/[id]`.
+**Текущее состояние:** `AnimeComment` в `schema.zmodel` привязан только к `animeId`, без эпизода
+и без тайм-кода. `comments-section.tsx`/`comment-card.tsx` уже есть на `anime/[id]`.
 
 - [ ] **Расширить модель вместо трёх новых** — добавить в `AnimeComment` опциональные поля
       `episodeId String?` (relation на `AnimeEpisode`, для комментария к конкретной серии) и
@@ -102,13 +81,12 @@
 ### N.4 Встроенный чат — по образцу driving-school
 
 **Референс изучен:** `apps/driving-school` — модели `Chat/ChatParticipant/ChatMessage/
-MessageReaction` (schema.zmodel ~2856–3013) с ZenStack access policies вместо ручной
-модерации; реалтайм гибрид — **Socket.IO** (`src/app/api/socket/route.ts`, Redis-адаптер для
-multi-instance) для самих сообщений + **SSE** (`src/lib/sse/chat-sse-manager.ts`, singleton
-через `globalThis`, переживает HMR) только для лёгких уведомлений (счётчик непрочитанных), не
-гружая сокетом весь сайт. История сообщений — SSR + Server Actions
-(`_actions/chat-messages.action.ts`), live-обновления — сокеты. Клиентский хук
-`use-chat-socket.ts` держит буфер `MAX_MESSAGES=200`.
+MessageReaction` с ZenStack access policies вместо ручной модерации; реалтайм гибрид —
+**Socket.IO** (`src/app/api/socket/route.ts`, Redis-адаптер для multi-instance) для самих
+сообщений + **SSE** (`src/lib/sse/chat-sse-manager.ts`, singleton через `globalThis`, переживает
+HMR) только для лёгких уведомлений (счётчик непрочитанных), не гружая сокетом весь сайт. История
+сообщений — SSR + Server Actions (`_actions/chat-messages.action.ts`), live-обновления — сокеты.
+Клиентский хук `use-chat-socket.ts` держит буфер `MAX_MESSAGES=200`.
 
 - [ ] **Определить масштаб чата для tracker** — в отличие от driving-school (личные/групповые
       чаты по ролям), здесь нужен, вероятнее всего, **чат по аниме/серии** (публичный, как
@@ -143,510 +121,35 @@ multi-instance) для самих сообщений + **SSE** (`src/lib/sse/cha
 4. `ShareButton`/`useShare` — сразу в `libs/@letar/ui` (shared-first) или сначала в
    animatrona-tracker, вынос потом?
 
-## Шардирование пиннинга ✅ (2026-04-10)
-
-Переход от полного резервирования (все CID на все пинеры) к шардированию — каждое аниме на одном пинере.
-
-- [x] **Модель Anime: `pinnedOnId`** — привязка к PinServer, миграция `add_pinned_on_sharding`
-- [x] **`autoPinAnime()` → шардирование** — выбирает наименее загруженный ONLINE сервер, при обновлении CID перепиннит на том же сервере
-- [x] **Автоочистка старого CID** — `syncPinJobStatuses()` при переходе в PINNED unpinит старый CID из CidHistory
-- [x] **Убран `replicaCount`** из `/api/admin/pin/[animeId]` и `/api/admin/moderate-anime/[id]`
-- [x] **153 PUBLISHED аниме распределены 77/76** между pinner1 и pinner3
-
-## Публичный API пин-серверов ✅ (2026-04-10)
-
-Endpoint для автосинхронизации Kubo config в desktop Animatrona app — без хардкода адресов.
-
-- [x] **`GET /api/pin-servers/public`** — публичный, без авторизации, `Cache-Control: max-age=300`
-- [x] **Enum `PinServerRole`** (PINNER/RELAY/GATEWAY) + поле `role` в модели
-- [x] **Поле `swarmAddrs String[]`** — multiaddrs для bootstrap/peering (TCP + QUIC)
-- [x] **Relay как запись PinServer** (id=`relay-mail`) с role=RELAY
-- [x] **`peeringRole`** выводится из role: RELAY→peering, PINNER→both, GATEWAY→bootstrap
-- [x] **Desktop sync реализован PurpleForge** — читает endpoint, синхронизирует Bootstrap/Peering.Peers
-- [x] **Periodic reconnect** в desktop — сбрасывает зависшие QUIC bitswap сессии (не отключаем QUIC, решение через reconnect)
-
-## Pin-queue резилиентность ✅ (2026-04-10)
-
-Исправления в `infra/animatrona-pin-queue/` (Go сервис).
-
-- [x] **Переподключение стрима pin/add** до 50 раз (`maxStreamReconnects`) — Kubo обрывает pin/add стрим через ~4 мин, блоки остаются в datastore, новый pin/add продолжает с места
-- [x] **TTL фильтр state.json** — при `load()` отбрасываются `pinned`/`failed` старше 24h (COMPLETED_TTL_HOURS)
-- [x] **Удалена папка `infra/animatrona-pinner2/`** — сервер списан (OOM, плохой HDD)
-- [x] **Обновлён `infra/animatrona-pinner/setup.sh`** — pinner3 и gateway добавлены в Peering.Peers, pinner3 в bootstrap
-
-## Заметки по инфраструктуре пинеров (для pinner4+)
-
-### Сервер s3 и его роль в экосистеме (2026-06-14)
-
-Запланирован **сервер s3 (HDD S16, 16 ГБ RAM)** — см. **[PLAN-INFRA-1.md §15](../../PLAN-INFRA-1.md#15--сервер-s3--медиа-e2e-ipfs-бэкап-)**.
-Его Kubo-нод (`ipfs.letar.best`) — **отдельный от pinner1/pinner3** и обслуживает другую задачу:
-хранение общих медиафайлов веб-приложений (svoichuzhie, kami и др.) через Pin Registry с `appId`.
-
-**Разграничение ролей:**
-
-|              | pinner1 / pinner3                   | s3 Kubo                                    |
-| ------------ | ----------------------------------- | ------------------------------------------ |
-| Контент      | Аниме (HLS, большие файлы, 100s GB) | Веб-медиа (MP4, музыкальные видео, фото)   |
-| Шардирование | по `Anime.pinnedOnId`               | по `PinRef.appId` (multi-tenant)           |
-| Шлюз         | `gateway.letar.best`                | `ipfs.letar.best`                          |
-| Pin-queue    | Go-сервис `animatrona-pin-queue`    | Node.js піннер с Pin Registry (PostgreSQL) |
-| Апстрим      | Desktop app → tracker API           | Медиа-сервер `media.letar.best`            |
-
-**s3 как pinner4 (опция на будущее):**
-Когда pinner1/pinner3 заполнятся, s3 можно добавить как `pinner4` в таблицу `PinServer`
-трекера — добавить запись с `swarmAddrs`, `pinQueueUrl`, `role=PINNER`. Kubo на s3 уже будет
-запущен, потребуется только развернуть `animatrona-pin-queue` рядом и добавить запись через
-`POST /api/admin/pin-servers`. ⚠️ API-эндпоинт не включает `pinQueueUrl/pinQueueSecret` в схему
-(CreateServerSchema) — нужно добавить поля или вставлять через psql (см. ниже).
-
-**Pending:** `POST /api/admin/pin-servers` не принимает `pinQueueUrl`/`pinQueueSecret` —
-обновить `CreateServerSchema` прежде чем добавлять pinner4 через API.
-
-### PebbleDS миграция (Kubo v0.40.0)
-
-1. Помимо config нужно перезаписать `$IPFS_PATH/datastore_spec` файл с новой конфигурацией PebbleDS
-2. Удалить старые `blocks/` и `datastore/` директории перед запуском
-3. `Provide` формат: `{"Strategy": "disabled", "DHT": {"Interval": "0"}}` (НЕ `Reprovider` — deprecated FATAL)
-
-### HTTPS — Caddy вместо NPM
-
-NPM v2.14.0 сломал API для headless setup (sqlite хак + API создания proxy → 500 Internal Error).
-Используй **Caddy** — автоматический Let's Encrypt, один Caddyfile, zero UI.
-См. `infra/animatrona-pinner3/Caddyfile` и `docker-compose.npm.yml`
-
-### Relay Reservation — QUIC отключён, TCP-only (TESTING)
-
-**Проблема:** Desktop Kubo (v0.40.1) не получал relay reservation. Reserve() проваливался с пустой ошибкой `{}` за 130мс, relay не видел входящий stream.
-
-**Корневая причина (гипотеза):** Несовместимость QUIC stream negotiation между go-libp2p v0.47 (relay) и Kubo 0.40.1 (Desktop). Peering подключался через QUIC первым, AutoRelay переиспользовал эту connection, и circuit relay v2 stream не проходил.
-
-**Что сделано:**
-
-1. ✅ Pin-queue: swarm connect к провайдерам перед pin/add (`PROVIDER_PEERS` env)
-2. ✅ Pin-queue: heartbeat-регистрация пинеров на relay (`RELAY_REGISTER_URL` env)
-3. ✅ Relay: external address fix (Docker анонсировал 127.0.0.1 вместо 193.37.68.73)
-4. ✅ Relay: обновлён go-libp2p v0.38→v0.47 (совместимость с Kubo 0.40)
-5. ✅ Desktop: Pinner3 добавлен в Peering + Bootstrap
-6. ✅ Desktop: StaticRelays, Peering, Bootstrap теперь применяются в applyKuboConfig
-7. ✅ Desktop: ForceReachabilityPrivate + Routing.Type autoclient
-8. ✅ Desktop: Pre-registration на relay ДО запуска Kubo демона
-9. ✅ Desktop: GOLOG_LOG_LEVEL=autorelay=debug + stderr→warn для диагностики
-10. ✅ Relay: QUIC отключён — TCP-only (go-libp2p v0.47 QUIC несовместим с Kubo 0.40.1)
-11. ✅ Relay: улучшено логирование ACL (AllowReserve ALLOWED/DENIED с деталями)
-12. ✅ Desktop: убран QUIC из Peering.Peers для relay (предотвращает QUIC connection reuse)
-
-**Текущий статус (2026-03-25):**
-
-- Relay задеплоен TCP-only на mail (193.37.68.73:41001)
-- Health: `{"addrs": ["/ip4/193.37.68.73/tcp/41001"], "status": "ok"}`
-- **Ожидает тестирования Desktop** — нужно пересобрать Desktop с обновлённым kubo-config и проверить, что Reserve() проходит
-
-**Верификация:**
-
-1. Пересобрать Desktop (kubo-config.ts обновлён — убран QUIC из relay Peering)
-2. Запустить Desktop → проверить логи autorelay
-3. На relay: `docker logs -f animatrona-relay` → должен показать `AllowReserve ALLOWED`
-4. Desktop должен объявить relay-адрес в своих multiaddrs
-
-### API POST /api/admin/pin-servers — нет pinQueueUrl
-
-CreateServerSchema не включает `pinQueueUrl`/`pinQueueSecret`. При добавлении нового пинера через API нужно либо обновить схему, либо добавлять через psql.
-
-Мы сделали animatrona-web, полноценный плеер библиотеки пользователя (моей)
-В неё можно найти плеер, страницу аниме, группировку франшиз и прочее
-
-## Список дел
-
-### Баги
-
-- [x] **Баннер «Укажите дату рождения» не исчезал после сохранения** — Better Auth кэшировал сессию в cookie 5 мин (`cookieCache`). Route handler `/api/user/birth-date` теперь удаляет `better-auth.session_data` cookie после обновления → следующий запрос перечитывает сессию из БД
-- [x] **Счётчик «Аниме» в профиле завышен** — включал HIDDEN (архивные после `approve_replacement`). Добавлен фильтр `status: { not: 'HIDDEN' }` в запросы профиля
-- [x] **Двойной хедер на странице профиля** — `ProfileClient` рендерил собственный nav-блок поверх глобального `Header`. Удалён лишний блок и неиспользуемые импорты
-
-- [x] **Не сохраняются данные о просмотре от animatrona-mobile** — tracker-side: инференс duration из AnimeEpisode, защита от перезаписи нулём, summary учитывает записи без duration. Mobile-side фиксы (duration в onSave, sync queue) → уведомлён координатор
-
-### Пин-серверы
-
-- [x] **Флаг MAINTENANCE для пин-серверов** — кнопка «На паузу» / «Включить» на карточке в админке (PATCH API)
-- [x] **Cleanup threshold** — порог 1 день вместо 30, проверяет только PUBLISHED аниме
-- [x] **fix pin-queue unpin** — всегда вызывает `pin rm` на Kubo (ранее удалял из очереди без `pin rm`)
-- [x] **Аудит сиротских пинов** — POST /api/admin/audit-pins (dry-run работает, нашёл 284+211 сиротских)
-
-- [x] **Async unpin сиротских пинов + полная синхронизация библиотеки с пин-серверами**
-
-  **Проблема:** Оба пин-сервера переполнены (pinner1: 447/492 GB, pinner3: 467/493 GB). Аудит нашёл 284+211 сиротских пинов, но HTTP unpin таймаутится (Nginx 60 сек, 495 последовательных pin rm на HDD).
-
-  **Что нужно:**
-  1. **Async endpoint** — POST /api/admin/audit-pins/run запускает фоновую задачу, возвращает jobId. GET /api/admin/audit-pins/status?jobId=xxx — прогресс и результат. Без HTTP таймаута.
-  2. **Полная синхронизация** — не только `directoryCid` из PUBLISHED аниме, но ВСЕ CID из библиотеки пользователя (аналог desktop orphan-audit): directoryCid → manifest → episodesDocument → episode manifests → audioTracks CID, subtitleTracks CID, fontCids, thumbnails, screenshots. Только так можно корректно определить какие блоки действительно сиротские.
-  3. **GC после unpin** — автоматически вызвать `repo/gc` на Kubo после завершения unpin. На HDD может занять 10-30 мин.
-  4. **UI в админке** — кнопка «Аудит пинов» на вкладке пин-серверов, прогресс-бар, результат (N сиротских, N распинено, N ошибок, освобождено X GB).
-  5. **Health check обновление usedBytes** — после GC обновить usedBytes в БД через `repo/stat`.
-
-  **Контекст:**
-  - Desktop orphan-audit: `apps/animatrona/main/services/ipfs/orphan-audit.ts` — эталонная реализация
-  - Desktop нашёл и удалил 3147 сиротских пинов из 35744
-  - На пин-серверах pin ls через bash зависает (HDD), нужен NDJSON stream parsing
-  - pin-queue уже исправлен (unpin → pin rm на Kubo), новые сироты не будут накапливаться
-  - Текущий endpoint `/api/admin/audit-pins` работает для dry-run, но unpin таймаутится
-
-- [x] трекер регистрирует раздачи и ведёт учёт сидов, нужна роль модератора
-- [x] аниматрона десктоп высылает на трекер информацию о своих раздачах
-- [x] модератор проверяет и одобряет раздачу, после чего раздача появляется в публичном интерфейсе плеера
-- [x] для одобренной раздачи нужна возможность её запинить
-- [x] управление пин-серверами (Kubo API), пиннинг на конкретном или автовыбор наименее загруженного
-- [x] автопиннинг при одобрении (опционально, ADMIN), health check серверов, retry упавших заданий
-- [x] автоматический пиннинг на нескольких серверах с выбором количества
-- [x] сравнение аудиодорожек и субтитров при замене (данные из IPFS манифестов)
-- [x] lazy-сравнение под спойлер (Collapsible) + загрузка треков по клику через API
-- [x] optimistic updates в модерации (карточка исчезает мгновенно)
-- [x] batch-модерация (debounced batch endpoint вместо N параллельных запросов)
-- [x] LRU-кеш для IPFS fetch + unmountOnExit для polling вкладок
-- [x] DB Pool увеличен до max: 20
-
-## Авторизация (Ключница / Better Auth OIDC)
-
-### Выполнено ✅
-
-- [x] **Better Auth hub-client** — вход через Ключница (`auth.letar.best`) по OIDC (`signIn.oauth2({ providerId: 'letar-auth' })`)
-- [x] **RP-initiated logout** — выход также завершает сессию в Ключнице (`endSessionUrl`)
-- [x] **Rate limit** — глобальный лимит поднят до 100 req/60s (был 10 — исчерпывался `useSession()` на каждом рендере). Кастомные правила: `/sign-in/*` 5/900s, `/sign-up/*` 3/3600s
-- [x] **Auth UX** — кнопка «Войти» в хедере сразу отправляет на Ключницу (без промежуточной страницы); `callbackURL` = текущий путь
-- [x] **returnTo фикс** — `sign-in/page.tsx` возвращает на `/` по умолчанию (не на `/browse`)
-- [x] **UserMenu** — универсальный компонент из `@letar/ui`: кнопка «Войти» / dropdown с профилем, Ключницей, доп. пунктами и Выйти; применён в десктопном хедере
-- [x] **MobileAuthSection** — самодельная auth-секция в мобильном drawer заменена на `MobileAuthSection` из `@letar/ui` (2026-06-26)
-- [x] **Owner migration (Этап 8.5)** — `kami@letar.best` присвоен ADMIN роль; 1155 Anime, 144 UserLibraryItem, 2901 Distribution, 1144 PinJob, 1226 ModerationLog перенесены; старые аккаунты удалены (2026-06-11)
-
-### Pending ⏳
-
-- [ ] **`/sync-env` OIDC vars** — переменные `BETTER_AUTH_OIDC_ISSUER` и OIDC client ID/secret добавлены вручную на s2, но не попали в локальный `.env.docker.enc`. Нужно: `/sync-env pull animatrona-tracker` → re-encrypt SOPS
-
----
-
-## Текущая версия: v0.11.0
-
-Веб-платформа для просмотра аниме из IPFS. Каталог с полными страницами аниме (портированы из animatrona-web), франшизы с 3 режимами визуализации, видеоплеер (Shaka + SubtitlesOctopus), прогресс просмотра в БД, облачная библиотека пользователя, trackMode per-anime.
-
----
-
-## Реализовано ✅
-
-### Инфраструктура
-
-- [x] Next.js 16 + App Router
-- [x] Chakra UI v3
-- [x] ZenStack 3.2 + PostgreSQL
-- [x] Better Auth (OAuth: Google, Yandex, VK)
-- [x] Docker-compose для production
-
-### Модели данных
-
-| Модель            | Описание                                        |
-| ----------------- | ----------------------------------------------- |
-| User              | Пользователи с ролями                           |
-| Anime             | Аниме из Animatrona (manifestCid)               |
-| AnimeEpisode      | Эпизоды с videoCid                              |
-| ApiKey            | Ключи для API публикации                        |
-| Content           | Универсальный контент (legacy)                  |
-| Rating            | Оценки контента                                 |
-| Report            | Жалобы на контент                               |
-| Distribution      | Раздачи (кто сидирует контент)                  |
-| PinServer         | Серверы для пиннинга (Kubo API)                 |
-| PinJob            | Задания на пиннинг CID                          |
-| UserLibraryItem   | Аниме в библиотеке пользователя (Cloud Library) |
-| UserWatchProgress | Прогресс просмотра эпизодов (Cloud Library)     |
-| AnimeComment      | Комментарии к аниме (с ответами на 1 уровень)   |
-| ModerationLog     | Аудит-лог модерации (кто, когда, что)           |
-| DistributionStats | Статистика раздач пользователя                  |
-| CidHistory        | История замен directoryCid (для очистки пинов)  |
-
-### API
-
-- [x] `POST /api/anime` — публикация из Animatrona (API Key auth)
-- [x] `GET /api/anime` — список аниме с фильтрами и пагинацией
-- [x] `POST /api/admin/pin/[animeId]` — запинить аниме на сервере
-- [x] `POST /api/admin/unpin/[animeId]` — распинить аниме с сервера
-- [x] `GET /api/admin/pin-jobs` — список заданий на пиннинг
-- [x] `GET/POST /api/admin/pin-servers` — управление пин-серверами
-- [x] `POST /api/admin/pin-servers/health-check` — проверка доступности серверов
-- [x] `POST /api/admin/pin-jobs/[jobId]/retry` — повтор упавших заданий
-- [x] `POST /api/admin/pin-jobs/sync` — синхронизация статусов с Kubo/pin-queue
-- [x] `POST /api/admin/moderate-anime/[id]` — модерация с опциональным автопином
-- [x] `POST /api/admin/moderate-anime/batch` — batch-модерация (debounced)
-- [x] `GET /api/admin/track-diff` — загрузка аудио/субтитров из IPFS манифестов
-- [x] `GET /api/pin-servers/public` — публичный API для синхронизации Kubo config в desktop app (без авторизации)
-- [x] `POST /api/distributions` — регистрация раздачи (Desktop API Key)
-- [x] `PATCH /api/distributions/[id]` — обновление heartbeat раздачи
-- [x] `GET/POST /api/watch-progress` — прогресс просмотра (upsert каждые 5 сек)
-- [x] `GET /api/watch-progress/continue` — последние незавершённые для "Продолжить"
-- [x] `GET/POST /api/user/library` — облачная библиотека пользователя
-- [x] `POST /api/user/library/sync` — синхронизация библиотеки Desktop ↔ Tracker
-- [x] `GET /api/ipfs/[...path]` — fallback IPFS прокси
-- [x] `GET /api/comments` — список комментариев к аниме (cursor-пагинация)
-- [x] `POST /api/comments` — создание комментария/ответа
-- [x] `PATCH /api/comments/[id]` — редактирование своего комментария
-- [x] `DELETE /api/comments/[id]` — удаление (автор/модератор/админ)
-- [x] `GET /api/admin/moderation-log` — аудит-лог модерации (cursor-пагинация)
-- [x] `POST /api/admin/cleanup-old-pins` — очистка устаревших пинов (30+ дней)
-- [x] `GET /api/admin/cleanup-old-pins` — статус ожидающих очистки
-- [x] `POST /api/admin/recalc-stats` — пересчёт viewCount/libraryCount/avgRating/uploaderScore
-- [x] `GET /api/rss/feed.xml` — RSS 2.0 фид (50 последних релизов, кэш 15 мин)
-- [x] `GET /api/rss/genre/[slug]` — RSS фид по жанру
-- [x] `GET /api/leaderboard` — лидерборд загрузчиков (с Redis кэшем)
-
-### Страницы
-
-- [x] `/` — Landing page с категориями
-- [x] `/anime` — Каталог аниме
-- [x] `/anime/[id]` — Детальная страница аниме
-- [x] `/browse` — Каталог всего контента
-- [x] `/watch/[animeId]/[episode]` — Видеоплеер (Shaka + SubtitlesOctopus)
-- [x] `/profile/library` — Библиотека пользователя
-- [x] `/profile` — Профиль пользователя
-- [x] `/profile/api-keys` — Управление API ключами
-- [x] `/admin` — Модерация (табы: модерация, пин-серверы, задания, раздачи, лог, очистка пинов)
-- [x] `/leaderboard` — Лидерборд загрузчиков
-- [x] `/profile/[userId]` — Публичный профиль пользователя
-- [x] `/sign-in`, `/sign-up` — Авторизация
-
----
-
-## Завершено недавно ✅
-
-### Фаза 1.5: Портирование из animatrona-web ✅
-
-| Задача                                                 | Статус  | Приоритет |
-| ------------------------------------------------------ | ------- | --------- |
-| manifest-loader (загрузка из IPFS)                     | ✅ Done | P0        |
-| Внешние ссылки + malId/anilistId                       | ✅ Done | P1        |
-| Полная страница аниме (hero, tabs, episodes, about)    | ✅ Done | P1        |
-| Связанные аниме + видео (Related, VideoSection)        | ✅ Done | P1        |
-| Франшизы (граф React Flow + список + таймлайн)         | ✅ Done | P1        |
-| Видеоплеер IPFS (Shaka + SubtitlesOctopus)             | ✅ Done | P1        |
-| Прогресс просмотра в БД (WatchProgress)                | ✅ Done | P1        |
-| Nginx proxy_cache для gateway (шрифты, JSON, картинки) | ✅ Done | P2        |
-| Облачная библиотека (Cloud Library + sync)             | ✅ Done | P1        |
-
-### Фаза 1: MVP доработки
-
-| Задача                              | Статус  | Приоритет |
-| ----------------------------------- | ------- | --------- |
-| Счётчик категорий на главной        | ✅ Done | P2        |
-| Кастомный IPFS Gateway в настройках | ⏳ TODO | P3        |
-| Полнотекстовый поиск                | ✅ Done | P2        |
-
----
-
-## Backlog 📋
-
-### Возрастной фильтр (ageRating) — от animatrona desktop
-
-**Контекст:** В Animatrona desktop (v0.48.0) добавлено поле `ageRating` в модель Anime. Shikimori рейтинг: g, pg, pg_13, r, r_plus, rx. В AnimeInfo (IPFS) поле `ageRating` уже есть и заполняется.
-
-- [x] **Незарегистрированные пользователи:** каталог показывает ТОЛЬКО аниме с `ageRating ∈ {g, pg, pg_13}` (до 13 лет). Остальные полностью скрыты
-- [x] **Регистрация:** поле «Дата рождения» (`birthDate`) на sign-up + форма дозаполнения /complete-profile
-- [x] **Зарегистрированные пользователи:** фильтр по возрасту (<13: g,pg; 13-16: g,pg,pg_13; 17+: всё)
-- [x] **API каталога:** ручной фильтр `ageRating` в GET /api/anime (вместо ZenStack policy — нельзя вычислять возраст)
-- [x] **IPFS → БД:** ageRating извлекается из AnimeInfo/manifest при импорте
-- [x] **Backfill:** POST /api/admin/backfill-age-rating для существующих аниме
-- [x] **UI:** бейджи ageRating на карточках каталога, баннер дозаполнения birthDate в header
-- ~~**animatrona-web:** выводится из эксплуатации, не реализуем~~
-
-### Фаза 2: UI/UX Polish (аудит 2026-03-16)
-
-#### 🔴 Критичные (P0)
-
-- [x] **loading.tsx для всех страниц** — skeleton screens: `app/loading.tsx`, `app/anime/loading.tsx`, `app/anime/[id]/loading.tsx`, `app/profile/loading.tsx`, `app/profile/library/loading.tsx`, `app/leaderboard/loading.tsx`, `app/admin/loading.tsx`
-- [x] **error.tsx для критичных маршрутов** — error boundaries: `app/error.tsx`, `app/anime/[id]/error.tsx`, `app/watch/[animeId]/[episode]/error.tsx`, `app/admin/error.tsx`
-- [x] **Мобильная навигация (hamburger + drawer)** — drawer с полной навигацией на mobile
-
-#### 🟠 Важные (P1)
-
-- [x] **Заменить `confirm()` на Chakra Dialog** — стилизованный Dialog с кнопками Отмена/Удалить
-- [x] **Hardcoded цвета в franchise-graph.css** — заменены на CSS variables Chakra (`--chakra-colors-*`)
-- [x] **Active route indicator в header** — bold + brand.500 для активного маршрута
-- [x] **Empty states для лидерборда** — иконка + описание вместо просто текста
-- [x] **Кастомная 404 страница** — `app/not-found.tsx` со стилизацией
-
-#### 🟡 Улучшения (P2)
-
-- [x] **Формы: миграция на @letar/forms** — `add-pin-server-dialog.tsx` и `api-keys-client.tsx` мигрированы на Form API с Zod-схемами, per-field валидацией и Form.Field.Password
-- [x] **Skeleton loaders вместо Spinner** — seeds-tab и pin-jobs-tab заменены на skeleton layout
-- [x] **Плеер: semantic tokens в chapter list** — `bg.panel`/`border.muted`/`fg.muted` вместо gray.\*
-- [x] **Плеер: responsive chapter list** — responsive minW/maxH для mobile
-- [x] **Breadcrumbs для глубоких маршрутов** — `/anime/[id]`, `/profile/library`, `/profile/api-keys`, каталог
-- [x] **Консистентность цветов** — проверено: `color="white"` используется только на overlay (оправдано)
-- [x] **Debounced поиск в каталоге** — 400мс debounce вместо form submit
-
-#### 💡 Идеи (P3)
-
-- [x] **"Продолжить просмотр" — первая секция** — для залогиненных первая секция с poster + progress bar
-- [x] **Keyboard shortcuts overlay в плеере** — по `?` показывается overlay со всеми горячими клавишами
-- [x] **Watch progress indicators в каталоге** — progress bar + бейдж "N/M эп." на карточках (каталог + главная)
-- [x] **Рекомендации "Похожие аниме"** — вкладка на странице аниме с ранжированием по пересечению жанров
+## Активные задачи (не привязаны к Фазе N)
+
+- [ ] **`/sync-env` OIDC vars** — переменные `BETTER_AUTH_OIDC_ISSUER` и OIDC client ID/secret
+      добавлены вручную на s2, но не попали в локальный `.env.docker.enc`. Нужно: `/sync-env pull
+      animatrona-tracker` → re-encrypt SOPS
+- [ ] **Кастомный IPFS Gateway в настройках** (Фаза 1 MVP, P3)
 - [ ] **PWA / Offline support** — Service Worker + offline fallback page
-
-### Фаза 2.5: Редизайн профиля (аудит 2026-04-09)
-
-⚠️ **2026-09-07: чек-лист был устаревшим** — при проверке перед новой сессией выяснилось, что
-почти все пункты P0/P1 уже реализованы в текущем коде (`profile-client.tsx`), просто не были
-отмечены (возможно, потеряно при squash-коммите `69fdf2ea chore: initial commit`). Отмечены
-задним числом по факту чтения кода, не по памяти о том, кто их делал.
-
-Страница `/profile` перегружена — 7 секций в sidebar, таблица на 153+ аниме без пагинации.
-
-#### 🔴 Критичные (P0)
-
-- [x] **Таблица аниме → карточки с пагинацией** — `Grid` карточек `AnimeCard` (как в каталоге),
-      debounced-поиск (400мс), серверная пагинация
-- [x] **Sidebar → табы** — «Мои аниме» / «Статистика» / «Настройки»; sidebar — только карточка
-      профиля (аватар-буква, имя, роль, краткая статистика)
-- [x] **Пагинация списка аниме** — серверная пагинация через `searchParams`, 20 на страницу
-
-#### 🟠 Важные (P1)
-
-- [x] **Колонка "Статус"** — бейджи «Опубликовано»/«На модерации» показываются только при
-      `hasStatusMix` (реальный микс статусов), не как отдельная колонка таблицы (таблицы больше нет)
-- [x] **Карточка "Моя библиотека" → пункт навигации** — кнопка внутри таба «Статистика», не
-      отдельная sidebar-карточка
-- [x] **Аватар — загрузка фото** — сделано 2026-09-07. Решение владельца: свой upload через
-      `@letar/image-upload`, не gravatar. См. подзадачу ниже
-- [x] **Mobile: sidebar бесконечный скролл** — снято как побочный эффект P0 (sidebar теперь только
-      одна компактная карточка, не 7)
-
-#### 🟡 Улучшения (P2)
-
-- [x] **Статистику раздач визуализировать** — progress bar для ratio (`RatioProgressBar`,
-      2026-09-07): зелёный при ratio ≥ 1, оранжевый ниже, капается на 100% визуально при ratio > 1
-- [ ] **Breadcrumbs** — пункт не актуален: кнопки «← Аниме» в текущем `profile-client.tsx` нет,
-      `/profile` — корневой маршрут личного кабинета, не «глубокий» (breadcrumbs для глубоких
-      маршрутов уже покрыты отдельным пунктом ниже в Фазе 2)
-- [x] **Кнопки "Библиотека" и "API ключи"** — уже в табах (не sidebar-карточки)
-- [x] **Обложки + жанры + эпизоды** — уже в переиспользуемом `AnimeCard` (постер, жанры, бейдж
-      эпизодов, рейтинг, просмотры)
-
-#### Подзадача: загрузка аватара ✅ (2026-09-07)
-
-- [x] Endpoint раздачи через `createUploadsRoute` (`GET /api/files/[...path]`), запись —
-      `uploads/avatars/<userId>/<uuid>.webp` через `createLocalDiskBackend`
-      (`resolveUploadPath` — защита от path traversal)
-- [x] UI в sidebar профиля — клик по аватару открывает выбор файла, обработка через
-      `processUploadImage` (EXIF-ротация, ресайз 256×256, WebP)
-- [x] Server Action `uploadAvatarAction`, обновляющий `User.image` через `getEnhancedPrisma`
-- [x] Рендер фото вместо буквы — детали в `CHANGELOG.md` v0.11.13
-
-### Фаза 2 (ранее): Социальный UX
-
-- [x] Секция "Продолжить просмотр" на главной странице
-- [x] Неавторизованные пользователи могут смотреть только 1-й эпизод; остальные — с замком и ссылкой на авторизацию
-- [x] Комментарии к аниме (модель AnimeComment, API CRUD, вкладка на странице аниме с ответами)
-- [ ] Уведомления о новых эпизодах
-
-### Фаза 3: Социальные функции
-
-- [x] Профили пользователей (публичные) — `/profile/[userId]` с аватаром, ролью, статистикой, опубликованными аниме
-- [x] Ссылки на профиль из лидерборда и карточки модерации
-- [x] Статистика загрузок — viewCount, libraryCount, avgRating на аниме; бейджи в каталоге и на странице; сортировка по популярности/рейтингу
-- [x] Рейтинг загрузчиков — uploaderScore + uploaderRank; формула из публикаций, зрителей, библиотек, рейтинга, IPFS раздачи; ранги (Новичок → Легенда); прогресс-бар на профиле; вкладка "Рейтинг" на лидерборде; API пересчёта
-- [ ] Подписка на пользователей
-
-### Фаза 4: Расширенная модерация
-
-- [ ] Очередь модерации с предпросмотром видео
-- [x] Дедупликация PENDING заявок по shikimoriId (тот же пользователь → обновление вместо дубликата)
-- [x] Обновления своих аниме тоже через модерацию (PENDING кандидат на замену → одобрить + запинить)
-- [x] Конкурирующие заявки: бейдж "⚔ N конкурентов" на карточке при одинаковом shikimoriId
-- [x] Логирование действий модераторов — модель ModerationLog, таб "Лог" в админке, cursor-пагинация
-- [x] Массовые операции (batch-модерация с debounce 300ms)
-- [x] Diff названий эпизодов: показывает "старое → новое"
-
-### Фаза 5: Интеграции
-
-- [x] Shikimori синхронизация — OAuth вход, импорт user_rates в библиотеку, маппинг статусов/оценок, секция «Привязанные аккаунты» в профиле
-- [ ] Shikimori экспорт (push оценок/статусов обратно)
-- [ ] MAL синхронизация
-- [x] **QR-код для подключения mobile** — диалог с QR-кодом (`animatrona://<host>?key=<apiKey>&type=tracker`) на странице API ключей, показывается при создании ключа
-- [ ] **Passkey-ссылка для подключения трекера** — одноразовая ссылка с токеном, при открытии в Animatrona Desktop автоматически добавляет трекер в настройки программы (URL + API Key). Поток: трекер генерирует ссылку → пользователь кликает → Animatrona Desktop перехватывает deep link → трекер добавлен
-- [x] RSS фиды для новых релизов — `/api/rss/feed.xml` + `/api/rss/genre/[slug]`, RSS 2.0 XML, кэш 15 мин, автодетект в `<head>`, иконка RSS в каталоге
-- [x] Hover preview скриншотов на карточках эпизодов — cycling 500ms, индикаторы-точки, slideshow (LightboxViewer), диалог информации о кодировании (из IPFS manifest)
-- [x] Очистка устаревших пинов — CidHistory отслеживает замены directoryCid, автоотмена QUEUED пинов при замене CID, API очистки пинов старше 30 дней, кнопка в админке
-- [ ] Telegram бот для уведомлений
-
----
-
-## Технические улучшения
-
-- [ ] Rate limiting для API
-- [x] Кэширование списков (Redis) — лидерборд 15м, профиль 5м, жанры 5м, invalidate при мутациях
-- [x] Redis для онлайн-статуса раздач — heartbeat в Redis с TTL 1ч, счётчик сидов на странице аниме, обновлённый admin UI
-- [ ] Мониторинг (Sentry)
-- [x] **Базовый E2E-сьют** — `apps/animatrona-tracker-e2e`, 15 тестов Playwright, все зелёные локально (публичный каталог/поиск/RSS, sign-in/sign-up формы, dev-session логин по конвенции `createDevSessionRoute` из `@letar/auth/server`, доступ к `/admin` — редирект неавторизованных + дашборд/пользователи/вкладки для ADMIN). Новый роут `src/app/api/auth/dev-session/route.ts`. Часть тиража N (`PLAN.md` §18.7 корневого репо) — подготовка перед подключением к staging-e2e-гейту
-- [ ] **Filecoin Cold Storage** — бесплатное холодное хранилище для каталога, автовосстановление, донаты в FIL. [ТЗ](docs/FILECOIN_COLD_STORAGE.md)
-
----
-
-## Инфраструктура: IPFS пинеры
-
-### Текущее состояние (2026-04-10)
-
-Два активных пинера + relay на mail. Pinner2 списан (OOM, плохой HDD).
-
-**Pinner1 (mail.letar.best, 193.37.68.73):**
-
-- Kubo v0.40.1, FlatFS datastore (1.9 GB RAM — мало для PebbleDS)
-- Swarm: `/ip4/193.37.68.73/tcp/43001` + QUIC
-- API: `https://ipfsstor1.letar.best` (порт 5011), pin-queue на 42080
-- 492 GB диск (~440 GB свободно после очистки)
-- PeerId: `12D3KooWLJ3juXbEmfhBu4YTWBKQJCkgC5k9N8SMeBqTzscSxq9j`
-- Docker-compose v1 на сервере (важно при пересборке)
-
-**Pinner3 (188.127.235.38):**
-
-- Kubo v0.40.1, **FlatFS datastore** (мигрирован с PebbleDS 2026-04-10 — PebbleDS вызывал зависания pin/add)
-- 500 GB HDD + SSD cache, 4GB RAM
-- Swarm: `/ip4/188.127.235.38/tcp/4001` + QUIC
-- API: `https://ipfsstor3.letar.best` (порт 5001 localhost only), pin-queue на 42080
-- Caddy auto-HTTPS (НЕ NPM — API v2.14 сломан)
-- PeerId: `12D3KooWP5hrqw8HHXUGaepSSRhsa8isoTAbcnRnKkjgHhWRLxiV`
-
-**Relay (mail.letar.best):**
-
-- go-libp2p с `WithInfiniteLimits()`, кастомный бинарник
-- Swarm: `/ip4/193.37.68.73/tcp/41001`
-- PeerId: `12D3KooWJYUBfi5RmMC8WU74nf7C26KTdAeftM6msYyg9995PkgA`
-- Registration API: `POST http://193.37.68.73:41080/register`
-- Запись в БД PinServer: id=`relay-mail`, role=RELAY
-
-### Архитектура пиннинга
-
-- **Шардирование:** каждое аниме закреплено за одним пинером (поле `Anime.pinnedOnId`)
-- **Pin-queue:** Go сервис, последовательный пиннинг, переподключение стрима до 50 раз при обрыве, TTL фильтр state.json
-- **Resilience:** после обрыва pin/add стрима блоки остаются в datastore Kubo, retry продолжает с места
-- **Desktop sync:** читает `/api/pin-servers/public` при старте, обновляет Bootstrap/Peering.Peers, periodic reconnect раз в 30 мин
-
-### Ограничения HDD
-
-- Bulk pinning ~5 GB/h — потолок
-- Последовательный пиннинг (1 CID за раз) обязателен
-- PebbleDS на малой RAM (<4GB) даёт зависания pin/add — использовать FlatFS
-- Routing.Type=none, Provide disabled — снижает random I/O
-
-### Планируемая миграция Pinner3 (~апрель-май 2026)
-
-Переезд на VPS [tnahosting.net](https://tnahosting.net/hybrid-vps/) — 1TB HDD RAID10 с SSD кэшем, 24 GB ECC RAM.
-
-**Ожидаемый эффект:**
-
-- SSD кэш покроет hot reads (index, метаданные)
-- RAID10 даст 200+ MB/s sequential throughput
-- 24 GB RAM → можно вернуть PebbleDS с cacheSize 8-12 GB
-- Пиннинг и раздача ограничены сетью, не диском
-
-**При миграции:**
-
-- Поднять Kubo с PebbleDS + все текущие оптимизации
-- Обновить `PinServer.swarmAddrs` в БД трекера — desktop подхватит через `/api/pin-servers/public`
-- Обновить Peering конфиг на relay, pinner1, gateway
+- [ ] **Уведомления о новых эпизодах**
+- [ ] **Подписка на пользователей**
+- [ ] **Очередь модерации с предпросмотром видео**
+- [ ] **Shikimori экспорт** (push оценок/статусов обратно)
+- [ ] **MAL синхронизация**
+- [ ] **Passkey-ссылка для подключения трекера** — одноразовая ссылка с токеном, при открытии в
+      Animatrona Desktop автоматически добавляет трекер в настройки программы (URL + API Key).
+      Поток: трекер генерирует ссылку → пользователь кликает → Animatrona Desktop перехватывает
+      deep link → трекер добавлен
+- [ ] **Telegram бот для уведомлений**
+- [ ] **Rate limiting для API**
+- [ ] **Мониторинг (Sentry)**
+- [ ] **Filecoin Cold Storage** — бесплатное холодное хранилище для каталога, автовосстановление,
+      донаты в FIL. [ТЗ](docs/FILECOIN_COLD_STORAGE.md)
+- [ ] **`CreateServerSchema` не принимает `pinQueueUrl`/`pinQueueSecret`** — блокирует добавление
+      pinner4 через `POST /api/admin/pin-servers` (иначе только через psql). Контекст — архив
+      [PLAN_COMPLETED_2026_09_08_FEATURES.md](./PLAN_COMPLETED_2026_09_08_FEATURES.md) § «Заметки
+      по инфраструктуре пинеров».
+- [ ] ⚠️ **Открытый вопрос: статус миграции Pinner3 на tnahosting.net** — план был на
+      апрель-май 2026 (VPS с RAID10+SSD кэш, 24 GB RAM), дата давно прошла, а в текущей сессии не
+      проверялось, состоялась ли миграция. Уточнить у Ками или проверить конфиг пинера при
+      следующей инфраструктурной задаче по пинерам.
 
 ---
 
@@ -724,62 +227,8 @@ nx typecheck:tsgo animatrona-tracker
 nx build animatrona-tracker
 ```
 
-## Техдолг
-
-- **Мёртвая директива `@form.options` в `schema/content.zmodel`** (2026-09-04, попутно обнаружено
-  при разборе broadcast `forms-coordinator-dev` о Фазе 3 миграции на `@meta`-синтаксис) —
-  3 вхождения (`Content.category`, `Content.quality`, `Report.reason`) никогда не работали
-  (несуществующий ключ парсера, молча проглатывался). Заменено на `@form.props({ options: [...] })`
-  — детали в `CHANGELOG.md`.
-- **`Content.category`/`Content.quality`/`Report.reason` → `enum`** (2026-09-04, задача от
-  `forms-coordinator-dev`, последний блокер удаления legacy comment-directive парсера форм) —
-  ✅ done, детали в `CHANGELOG.md` v0.11.12. Уведомлён `forms-dev`/`forms-coordinator-dev` в треде
-  `forms-native-migration`.
-
-## Техдолг: закрыто
-
-- **Дубль `getShakaFrameRate`/`FRAME_STEP_COUNT` vs `animatrona`** (2026-09-08) — найден при
-  сведении соседнего дубля `use-keyboard-shortcuts.ts` (см. запись ниже). Инлайновая логика
-  определения fps активной дорожки Shaka в `use-shaka-player.ts` дословно повторяла
-  `frame-step-utils.ts` из `apps/animatrona`. Вынесено в `@letar/video-player-core`
-  (реэкспорт из `@letar/video-player-react`), оба приложения переведены на общий импорт.
-  `animatrona-folder-player` (третий потребитель) своей копии не имел. Детали — `CHANGELOG.md`
-  v0.11.17.
-- **Дубль `use-keyboard-shortcuts.ts` vs общий `@letar/video-player-react`** (2026-09-08) —
-  проверено, кто ещё пользуется общим хуком (`animatrona`, `animatrona-folder-player`), сведены
-  реально одинаковые ветки (play/pause, стрелки/время, громкость, mute, fullscreen), а
-  специфичные для tracker вещи (переключение дорожек `T`, оверлей помощи `?`/`Escape`,
-  Shift+стрелки только на паузе) добавлены в общий хук опциональными параметрами — обратно
-  совместимо для двух других потребителей. Локальный дубль удалён, детали — `CHANGELOG.md`
-  v0.11.16.
-- **`theme:check` подключён** (2026-09-08, `nx g @letar/generators:theme-check-integrate
-  animatrona-tracker`) — гейт сырых цветов/теней/transition в UI-коде теперь запускается перед
-  `lint`. `themePrefix` указывает на файл `src/app/_components/ui/provider.tsx` (не каталог —
-  приложение не имеет `src/theme/`). Первый прогон нашёл 14 нарушений `scale()` (аудит на
-  `pressScale`, отдельный пункт выше) и 15 нарушений (сырые `transition`/`rgba`) в 9 файлах —
-  все исправлены, детали в `CHANGELOG.md` v0.11.14.
-- **Запрещённый Chakra `as=` на `Icon` — 194 вхождения в 33 файлах** (semgrep-правило
-  `letar-chakra-as-prop-forbidden`, кросс-приложенческая задача — см. корневой `PLAN.md` §61).
-  Все `<Icon as={IconComponent} .../>` заменены на прямой рендер react-icons компонента.
-  `boxSize`→`size` (×4px), статичный `color="токен"` без общего родителя →
-  `color="var(--chakra-colors-<kebab-token>)"`, динамический `as={cond ? A : B}`/`as={var}` →
-  локальная capitalized-переменная перед JSX, spacing-пропы (`mr`/`mb` и т.п.) без гарантированного
-  `gap` у родителя → `style={{ marginRight: 'Npx' }}`. Один нестандартный случай — RSS-иконка в
-  `anime/_components/anime-catalog-client.tsx` с `_hover` (react-icons такого пропа не
-  поддерживает) — решён оборачиванием ссылки в `<Box asChild _hover={{...}}>`, иконка наследует
-  цвет через `currentColor`. `typecheck:tsgo` и `lint` зелёные, dev-сервер проверен (каталог,
-  страница входа) — SVG рендерятся, ошибок в консоли нет. Повторный semgrep-прогон: 0 срабатываний
-  `Icon as=`; 28 оставшихся находок — другой класс (`Heading as="h1"`, `Box as="button"` и т.п.),
-  вне рамок этой задачи, не путать.
-
-- **Дубли в `implicitDependencies`** (`project.json` строки 4–16) — список из 6 зависимостей был
-  продублирован дважды подряд (11 строк вместо 6), вероятно из-за неаккуратного слияния правок.
-  Не было багом (Nx нормально обрабатывает повторы), но замусоривало дифф. Убраны повторы, порядок
-  первого вхождения сохранён. Сверено `nx typecheck:tsgo` и `nx show project --json` — состав рёбер
-  графа зависимостей не изменился (8 уникальных: 6 из `project.json` + `@letar/pg-url` и
-  `@letar/env-load` из `package.json`, дублей в `package.json` не было).
-
 ---
 
-**Последнее обновление:** 2026-08-26 (сессия: чистка запрещённого Chakra `Icon as=` — 194
-вхождения, semgrep `letar-chakra-as-prop-forbidden`)
+**Последнее обновление:** 2026-09-08 (сессия: theme:check, аудит pressScale, покадровая
+перемотка, дедуп `use-keyboard-shortcuts`/`getShakaFrameRate`, архивация
+`/workflow:archive-completed`)

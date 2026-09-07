@@ -1,6 +1,8 @@
 # Выполненные задачи — Animatrona Tracker
 
-## Сессия 2026-09-08: theme:check, аудит pressScale, покадровая перемотка
+> История старше ~2026-08-08 — в [PLAN_COMPLETED_2026_09_08.md](./PLAN_COMPLETED_2026_09_08.md).
+
+## Сессия 2026-09-08: theme:check, аудит pressScale, покадровая перемотка, дедуп хука
 
 **Аватар-загрузка (закрыта задним числом, реализована 2026-09-07)** — чек-лист Фазы 2.5 отставал
 от кода на день; фича закоммичена `9c7a9a7b`, пункты отмечены `9a91e5c1`.
@@ -23,8 +25,33 @@
 `use-shaka-player.ts` берёт `frameRate` активного видеотрека через
 `player.getVariantTracks()`, дефолт 24fps.
 
+**Дубль `use-keyboard-shortcuts.ts` vs общий `@letar/video-player-react`** (v0.11.16, задача
+заведена этой сессией через `spawn_task`, выполнена отдельной фоновой сессией) — проверено, кто
+ещё пользуется общим хуком (`animatrona`, `animatrona-folder-player`), реально одинаковые ветки
+(play/pause, стрелки/время, громкость, mute, fullscreen) сведены в один хук библиотеки, а
+специфичные для tracker вещи (переключение дорожек `T`, оверлей помощи `?`/`Escape`,
+Shift+стрелки только на паузе) добавлены в общий хук опциональными параметрами — обратно
+совместимо для двух других потребителей. Локальный дубль `_hooks/use-keyboard-shortcuts.ts`
+удалён; `tracker-video-player.tsx` импортирует хук из `@letar/video-player-react`. Детали —
+`CHANGELOG.md` v0.11.16.
+
+**Дубль `getShakaFrameRate`/`FRAME_STEP_COUNT` vs `animatrona`** (v0.11.17) — найден при сведении
+соседнего дубля `use-keyboard-shortcuts.ts` выше. Инлайновая логика определения fps активной
+дорожки Shaka в `use-shaka-player.ts` дословно повторяла `frame-step-utils.ts` из
+`apps/animatrona`. Вынесено в `@letar/video-player-core` (реэкспорт из `@letar/video-player-react`),
+оба приложения переведены на общий импорт; `animatrona-folder-player` (третий потребитель) своей
+копии не имел. Детали — `CHANGELOG.md` v0.11.17.
+
 Всё запушено в `origin/main` (`73883d14`), запрошен деплой у `deploy-agent-dev`
 (тред `deploy-animatrona-tracker-20260908`).
+
+## Soft-404 на `notFound()` — принято как есть (2026-08-28)
+
+Сквозной аудит монорепо нашёл: `notFound()` из кода страницы отдаёт HTTP 200, а не 404 — причина
+корневой `src/app/loading.tsx` (Suspense-граница), оборачивающий всё приложение целиком (разбор —
+[nextjs-streaming-soft-404-loading-boundary](/.claude/docs/nextjs-streaming-soft-404-loading-boundary.md)).
+**Решение владельца:** принять как есть — тег `noindex` уже стоит на `/anime/[id]`, индексации
+это не вредит, работа не требуется.
 
 ## Nx-кэш `db:*`/`zenstack:generate` отключён (2026-09-04)
 
@@ -109,6 +136,16 @@ Dev-сервер поднят, каталог аниме и страница в�
 **0 срабатываний на `Icon as=`**; 28 оставшихся находок — другой класс (`Heading as="h1"`,
 `Box as="button"` и т.п.), вне рамок этой задачи, severity правила не поднималась (задачей
 запрещено, пока не почищен весь `apps/*`).
+
+## Чистка конфига (2026-08-25)
+
+Убраны дублирующиеся записи в `implicitDependencies` (`project.json`) — список из 6
+зависимостей был продублирован дважды подряд (11 строк вместо 6), вероятно из-за неаккуратного
+слияния правок. Не было багом (Nx нормально обрабатывает повторы), но замусоривало дифф. Убраны
+повторы, порядок первого вхождения сохранён. Сверено `nx typecheck:tsgo` и
+`nx show project --json` — состав рёбер графа зависимостей не изменился (8 уникальных: 6 из
+`project.json` + `@letar/pg-url` и `@letar/env-load` из `package.json`, дублей в `package.json`
+не было).
 
 ## Проверка ложного `react-hooks/rules-of-hooks` в e2e-фикстурах — не применимо (2026-08-25)
 
@@ -197,220 +234,6 @@ DOM с чужим значением и переключатель автопр�
 `src/app/robots.ts` с безусловным `Disallow: /`, по образцу `auth-hub`/`dashboard`.
 
 `typecheck:tsgo` зелёный. Commit `22e92b77`.
-
-## `tsconfig.json`: убраны `references` на библиотеки — TS6305/TS6059 (2026-08-07)
-
-Тот же баг и фикс, что в `dashboard-agent` (0.11.1, `.claude/rules/libs.md` § «Тот же редирект
-под обычным `tsc`»): `references` на `../../libs/*` вели на solution-конфиг библиотек и
-редиректили на `tsconfig.spec.json`, давая вечный `TS6305`. Массив `references` убран целиком.
-
-Два побочных эффекта:
-
-1. `TS6059: not under rootDir` для путей-алиасов на библиотеки — фикс `"rootDir": "../.."`.
-2. Приложение и так использует «смешанную модель» (часть библиотек инлайнится напрямую через
-   `include: ["../../libs/X/src/**/*.ts"]`) — без `references` эти glob'ы стали пропускать
-   `*.spec.ts(x)` библиотек прямо в основную программу (раньше их отсекал сам механизм project
-   references), дав ~650 сторонних ошибок компиляции тестовых файлов. Фикс — добавить
-   `../../libs/**/*.spec.ts(x)` и `*.test.ts(x)` в `exclude`, аналогично тому, что уже было для
-   `src/**` самого приложения.
-
-Проверено: `nx typecheck:tsgo animatrona-tracker --skip-nx-cache` — было 40 ошибок TS6059, стало 0.
-`nx build animatrona-tracker` падает на `ECONNREFUSED 127.0.0.1:5439` при пререндере — не связано
-с этой правкой, в песочнице агента нет локального Postgres (порт закрыт, проверено `Test-NetConnection`),
-воспроизводится независимо от tsconfig.
-
-## Turbopack по умолчанию + Chakra/next-themes — риск гидратации (2026-08-04)
-
-Аудит по мотивам находки в `apps/mandala` ([доки](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md)):
-Next.js 16 без явного `--webpack`/`--turbopack` выбирает Turbopack, что в связке с
-`ChakraProvider`'s `<Global>` (emotion, SSR рендерит `<style>`, клиент — `null`) и
-`next-themes`'ным `<script>` (`ColorModeProvider`, `apps/animatrona-tracker/src/app/_components/ui/color-mode.tsx`)
-может триггерить hydration mismatch.
-
-Подтверждено: `nx dev animatrona-tracker` (без флага) стартовал именно на Turbopack
-(`▲ Next.js 16.3.0 (Turbopack)`), провайдер собран по тому же паттерну
-(`ChakraProvider` → `ColorModeProvider`/`NextThemesProvider`), что и в mandala.
-Точную click-race репродукцию (клик по ссылке сразу после навигации, как в mandala) через
-Browser pane сделать не удалось — окружение показывало «ref map not initialized»/failed
-screenshot из-за скрытой панели браузера (см. `reference_browser_pane_hidden_raf` в памяти),
-а не из-за самого приложения.
-
-Применён тот же фикс, что в mandala: явный `--webpack` в `dev`/`build`. `build` был уже
-явным таргетом в `project.json` — добавлен флаг. `dev`-таргет раньше инферился Nx-плагином
-`@nx/next` без флага — добавлен явный override с тем же executor'ом (`nx:run-commands`),
-что и у инферированного. Проверено: `nx dev`/сервер поднимается на webpack
-(`▲ Next.js 16.3.0 (webpack)`), страница рендерится без ошибок в консоли.
-
-`nx e2e animatrona-tracker-e2e` не удалось прогнать — `webServer` конфиг playwright слушает
-порт из `.env` (`PORT=3010`), который на машине уже занят посторонним процессом
-(`EADDRINUSE`, не связано с этим фиксом — воспроизводилось и до правки).
-
-## Фикс: CookieBanner вне ChakraProvider ронял первый визит (2026-08-04)
-
-В `layout.tsx` `<CookieBanner appKey="animatrona-tracker" />` рендерился после закрывающего
-`</Provider>` — вне дерева ChakraProvider. `CookieBanner` (`libs/ui/src/lib/cookie-banner.tsx`)
-использует Chakra-компоненты и `useContext`, который требует `ChakraProvider` выше по дереву.
-
-Баннер по умолчанию скрыт и раскрывается через `useEffect` только при первом посещении (когда в
-localStorage ещё нет ключа cookie-согласия) — поэтому баг не ловился в обычной ручной проверке и
-в e2e, где localStorage уже содержит согласие. Любой настоящий первый посетитель без сохранённого
-согласия получал `ContextError` и пустой экран «This page couldn't load».
-
-Исправление: перенёс `<CookieBanner>` внутрь `<Provider>`/`<QueryProvider>`, рядом с
-`Header`/`children`/`Toaster`. Проверено вручную в браузере с очищенным `localStorage` —
-баннер отображается, ошибок в консоли нет. `Script`/`UmamiScript` оставлены снаружи `Provider`
-(не Chakra-компоненты, ChakraProvider им не нужен).
-
-## 152-ФЗ: consent-инфраструктура с нуля (2026-07-28)
-
-Часть кросс-приложенческого аудита 152-ФЗ (root `PLAN.md`, Этап 0.8, сессия root-weaver). Приложение
-собирает email (Better Auth, hub-client), но не имело ни одного элемента чек-листа 152-ФЗ. Добавлено:
-
-- `ConsentLog` в `schema.zmodel` + миграция (`prisma/migrations/20260728041010_add_consent_log`)
-- `POST /api/consent` — sha256-хэш IP, без email/точного IP
-- `CookieBanner`/`CookieSettingsButton` из `@letar/ui` в layout/header
-- Страница `/privacy`
-
-Локальная dev-БД (свежий пустой контейнер) имела рассинхрон с историей миграций (`prisma migrate
-deploy` падал `P3018` на уже существующих колонках) — устранён `prisma migrate reset --force` с
-явного разрешения владельца в чате (2026-07-28), затем применена вся история миграций + новая
-`add_consent_log`. `nx zenstack:generate`+lint+typecheck зелёные.
-
-## Техдолг (2026-07-07)
-
-Аудит после планового `bun update` — сравнение typecheck/lint до/после обновления зависимостей
-выявил предсуществующие ошибки, не связанные с обновлением. Исправлены:
-
-- **`admin-section.tsx`** — `isTruncated` (Chakra v2) → `truncate` (Chakra v3 API)
-- **TS6305 dist-цепочка** — `libs/animatrona-ui` не имел вообще никаких Nx-таргетов, из-за чего
-  `dist/*.d.ts` никогда не мог быть сгенерирован → падал `typecheck:tsgo` у `animatrona-tracker`
-  через всю цепочку `animatrona-ui → animatrona-franchise-graph → video-player-react →
-video-player-core`. Добавлен `typecheck`-таргет (зеркально `animatrona-franchise-graph`) +
-  `oxlint`/`lint`. Попутно всплыл смежный баг — `animatrona-franchise-graph` не собирался из-за
-  отсутствия `declare module '*.css'` (добавлен `css.d.ts` по образцу `libs/ui`, `driving-school`).
-- **`EpisodeCardBase.tsx`** (libs/animatrona-ui) — `eqeqeq`, всплыло только после появления
-  lint-таргета у библиотеки.
-- **`header.tsx`** — `curly` (if без фигурных скобок) в `isActiveRoute` и `Header`.
-- **`lib/ipfs-fetch.ts`** — `preserve-caught-error`, добавлен `cause: primaryError` в финальный throw.
-
-Итог: `typecheck:tsgo` у `animatrona-tracker` — с 11 ошибок до 1 (осталась только заранее известная
-и вне-скоуповая `libs/auth` OIDCOptions cast, не относится к animatrona-экосистеме).
-
-## Версия 0.9.0 (2026-03-19)
-
-### Redis для онлайн-статуса раздач
-
-- Heartbeat от Desktop → Redis SET с TTL 1ч (без записи в PostgreSQL)
-- Пир без heartbeat >1ч = офлайн (TTL истёк)
-- Страница аниме показывает "N сидов онлайн"
-- Admin seeds: "N онлайн / M всего", сводка с общим кол-вом онлайн
-- `src/lib/redis-distributions.ts` — setOnline, isOnline, getOnlineForAnime, getOnlineCount
-
-## Версия 0.8.0 (2026-03-19)
-
-### Очистка старых IPFS пинов
-
-- Модель CidHistory — отслеживание замен directoryCid
-- Автоотмена QUEUED пинов при обновлении CID (PINNING не трогаем)
-- API очистки пинов старше 30 дней с dry-run и safety checks
-- Кнопка в админке (вкладка Pin Jobs)
-
-### RSS фиды
-
-- `/api/rss/feed.xml` — 50 последних релизов (RSS 2.0, кэш 15 мин)
-- `/api/rss/genre/[slug]` — фид по жанру
-- Мета-тег `<link rel="alternate">` + иконка RSS в каталоге
-
-## Версия 0.7.0 (2026-03-18)
-
-### Статистика и рейтинги
-
-- viewCount, libraryCount, avgRating — денормализованные счётчики на аниме
-- uploaderScore + uploaderRank — формула рейтинга загрузчиков
-- Лидерборд `/leaderboard` с прогресс-барами
-- API пересчёта `POST /api/admin/recalc-stats`
-
-### Shikimori синхронизация
-
-- OAuth провайдер для Shikimori
-- Импорт user_rates в библиотеку трекера
-- Маппинг статусов и оценок
-- Секция «Привязанные аккаунты» в профиле
-
-### Hover preview эпизодов
-
-- Cycling скриншотов 500ms при наведении
-- Индикаторы-точки, slideshow (LightboxViewer)
-- Диалог технической информации (кодек, разрешение из IPFS)
-
-### Redis кэширование
-
-- Лидерборд 15 мин, профиль 5 мин, жанры 5 мин
-- Инвалидация при мутациях
-
-### Модерация
-
-- ModerationLog — аудит-лог с cursor-пагинацией
-- Таб "Лог" в админке
-
-## Версия 0.6.x (2026-03-17)
-
-### Комментарии
-
-- Модель AnimeComment (ответы 1 уровень)
-- API CRUD с cursor-пагинацией
-- Вкладка на странице аниме
-
-### UX Polish
-
-- Рекомендации "Похожие аниме" по жанрам
-- Breadcrumbs, debounced поиск
-- Loading/error boundaries для всех маршрутов
-- Мобильная навигация (drawer)
-- "Продолжить просмотр" на главной
-- Watch progress indicators в каталоге
-
-## Версия 0.5.x (2026-03-16)
-
-### Портирование из animatrona-web
-
-- Manifest-loader (загрузка из IPFS)
-- Полная страница аниме (hero, tabs, episodes, about)
-- Франшизы (React Flow граф + список + таймлайн)
-- Видеоплеер (Shaka + SubtitlesOctopus)
-- Прогресс просмотра в БД
-- Облачная библиотека (sync Desktop ↔ Tracker)
-
-### Модерация
-
-- Batch-модерация с debounce
-- Дедупликация PENDING по shikimoriId
-- Конкурирующие заявки, diff треков
-- Автопиннинг при одобрении
-- Pin-queue интеграция с прогрессом
-
-## Версия 0.1.0 (2026-01-30)
-
-### Инфраструктура
-
-- Next.js 16, Chakra UI v3, ZenStack, Better Auth, Docker
-- API публикации из Animatrona (API Key auth)
-- Каталог, плеер, профиль, модерация
-
-## Чистка конфига (2026-08-25)
-
-- Убраны дублирующиеся записи в `implicitDependencies` (`project.json`) — список из 6
-  зависимостей был продублирован дважды подряд. Сверено `nx typecheck:tsgo` и
-  `nx show project --json` — состав графа зависимостей не изменился.
-
-## Дедуп `getShakaFrameRate`/`FRAME_STEP_COUNT` (2026-09-08)
-
-- Найден при аудите после сведения соседнего дубля `use-keyboard-shortcuts.ts`. Инлайновая логика
-  определения fps активной дорожки Shaka в `use-shaka-player.ts` дословно повторяла
-  `frame-step-utils.ts` из `apps/animatrona`, только без `try/catch` на случай неготового
-  плеера. Вынесено в `@letar/video-player-core` (реэкспорт из `@letar/video-player-react`,
-  6 новых тестов), оба приложения переведены на общий импорт. `animatrona-folder-player`
-  (третий потребитель библиотеки) своей копии не имел. Детали — `CHANGELOG.md` v0.11.17.
 
 ---
 
