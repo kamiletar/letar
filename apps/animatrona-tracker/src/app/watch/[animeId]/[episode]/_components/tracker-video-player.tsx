@@ -765,7 +765,8 @@ export function TrackerVideoPlayer({
           onClick={(e) => e.stopPropagation()}
           opacity={showControls ? 1 : 0}
           pointerEvents={showControls ? 'auto' : 'none'}
-          transition="opacity 0.3s"
+          transitionProperty="opacity"
+          transitionDuration="0.3s"
         >
           <Text fontSize="xs" color="fg.muted" fontWeight="bold" mb={2}>
             Главы

@@ -67,7 +67,8 @@ export function AnimeComparisonBlock({ current, replacement }: AnimeComparisonBl
           borderColor="orange.200"
           cursor="pointer"
           _hover={{ bg: 'orange.100', _dark: { bg: 'orange.950/50' } }}
-          transition="backgrounds 0.2s"
+          transitionProperty="background"
+          transitionDuration="0.2s"
         >
           <HStack gap={2} justify="space-between">
             <HStack gap={2}>
@@ -78,7 +79,12 @@ export function AnimeComparisonBlock({ current, replacement }: AnimeComparisonBl
                 Сравнение с текущей раздачей
               </Text>
             </HStack>
-            <Icon color="orange.500" transform={open ? 'rotate(180deg)' : undefined} transition="transform 0.2s">
+            <Icon
+              color="orange.500"
+              transform={open ? 'rotate(180deg)' : undefined}
+              transitionProperty="transform"
+              transitionDuration="0.2s"
+            >
               <LuChevronDown />
             </Icon>
           </HStack>

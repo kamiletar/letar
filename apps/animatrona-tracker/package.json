@@ -1,6 +1,6 @@
 {
   "name": "@letar/animatrona-tracker",
-  "version": "0.11.13",
+  "version": "0.11.14",
   "private": true,
   "nx": {
     "name": "animatrona-tracker",
@@ -13,13 +13,15 @@
       "@letar/glitchtip",
       "@letar/pg-url",
       "@letar/env-load",
-      "@letar/image-upload"
+      "@letar/image-upload",
+      "@letar/theme-check"
     ]
   },
   "dependencies": {
     "@letar/glitchtip": "workspace:*",
     "@letar/pg-url": "workspace:*",
     "@letar/env-load": "workspace:*",
-    "@letar/image-upload": "workspace:*"
+    "@letar/image-upload": "workspace:*",
+    "@letar/theme-check": "workspace:*"
   }
 }

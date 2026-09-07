@@ -10,25 +10,29 @@ import {
 } from '@chakra-ui/react'
 import { ColorModeProvider, type ColorModeProviderProps } from '@letar/chakra-provider'
 import { FormI18nProvider } from '@letar/forms'
-import { pressableConfig } from '@letar/ui'
+import { pressableConfig, pressScale } from '@letar/ui'
 import { useEffect } from 'react'
 
 // ─── Recipes с :active тактильной обратной связью ──────────────────────
+// Глубина нажатия — общая шкала pressScale (@letar/ui), см. её JSDoc за логикой шагов
+// и двумя классами легитимных исключений (мелкие поверхности, рост вместо проседания).
 
 /** Кнопки: scale при нажатии, адаптация по размеру */
 const buttonRecipe = defineRecipe({
   base: {
     transition: 'all 0.15s ease-out',
-    _active: { transform: 'scale(0.95)' },
+    _active: { transform: pressScale.md },
     _disabled: { _active: { transform: 'none' } },
   },
   variants: {
     size: {
+      // xs/sm — мелкая поверхность (компактная кнопка), вне диапазона шкалы, как
+      // iconButtonRecipe/checkboxRecipe в driving-school — см. allowedMatches ниже по файлу.
       xs: { _active: { transform: 'scale(0.9)' } },
       sm: { _active: { transform: 'scale(0.9)' } },
-      md: { _active: { transform: 'scale(0.95)' } },
-      lg: { _active: { transform: 'scale(0.97)' } },
-      xl: { _active: { transform: 'scale(0.98)' } },
+      md: { _active: { transform: pressScale.md } },
+      lg: { _active: { transform: pressScale.lg } },
+      xl: { _active: { transform: pressScale.xl } },
     },
     variant: {
       solid: { _active: { bg: 'colorPalette.solid/80' } },
@@ -45,7 +49,7 @@ const buttonRecipe = defineRecipe({
 const linkRecipe = defineRecipe({
   base: {
     transition: 'all 0.1s ease-out',
-    _active: { transform: 'scale(0.95)', opacity: 0.7 },
+    _active: { transform: pressScale.xs, opacity: 0.7 },
   },
 })
 
@@ -55,7 +59,7 @@ const tabsRecipe = defineSlotRecipe({
   base: {
     trigger: {
       transition: 'all 0.1s ease-out',
-      _active: { transform: 'scale(0.95)' },
+      _active: { transform: pressScale.xs },
     },
   },
 })
@@ -80,7 +84,7 @@ const menuRecipe = defineSlotRecipe({
       subtle: {
         item: {
           transition: 'all 0.1s ease-out',
-          _active: { bg: 'bg.muted', transform: 'scale(0.98)' },
+          _active: { bg: 'bg.muted', transform: pressScale.lg },
         },
       },
     },
@@ -93,7 +97,7 @@ const accordionRecipe = defineSlotRecipe({
   base: {
     itemTrigger: {
       transition: 'all 0.1s ease-out',
-      _active: { bg: 'bg.subtle', transform: 'scale(0.99)' },
+      _active: { bg: 'bg.subtle', transform: pressScale['2xl'] },
     },
   },
 })
@@ -107,6 +111,7 @@ const checkboxRecipe = defineSlotRecipe({
     control: {
       cursor: 'pointer',
       transition: 'all 0.1s ease-out',
+      // Мелкая поверхность (control чекбокса) — вне диапазона pressScale, см. её JSDoc.
       _active: { transform: 'scale(0.9)' },
     },
   },
@@ -121,6 +126,7 @@ const radioRecipe = defineSlotRecipe({
     control: {
       cursor: 'pointer',
       transition: 'all 0.1s ease-out',
+      // Мелкая поверхность (control радио) — вне диапазона pressScale, см. её JSDoc.
       _active: { transform: 'scale(0.9)' },
     },
   },
@@ -144,6 +150,7 @@ const tagRecipe = defineSlotRecipe({
     closeTrigger: {
       cursor: 'pointer',
       transition: 'all 0.1s ease-out',
+      // Мелкая поверхность (close-триггер тега) — вне диапазона pressScale, см. её JSDoc.
       _active: { transform: 'scale(0.85)' },
     },
   },
@@ -167,6 +174,7 @@ const sliderRecipe = defineSlotRecipe({
     root: { colorPalette: 'brand' },
     thumb: {
       transition: 'all 0.1s ease-out',
+      // Рост при захвате, не проседание — другая механика, pressScale не подходит по семантике.
       _active: { transform: 'scale(1.1)' },
     },
   },

@@ -45,9 +45,10 @@ export function PlayerHeader({
       justify="space-between"
       px={4}
       py={3}
-      bg="linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 100%)"
+      bg="linear-gradient(180deg, var(--chakra-colors-black-alpha-700) 0%, transparent 100%)"
       opacity={visible ? 1 : 0}
-      transition="opacity 0.3s"
+      transitionProperty="opacity"
+      transitionDuration="0.3s"
       pointerEvents={visible ? 'auto' : 'none'}
       zIndex={10}
     >

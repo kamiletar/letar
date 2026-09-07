@@ -22,6 +22,7 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import type { AnimeManifestVideo } from '@letar/animatrona-types'
+import { pressScale } from '@letar/ui'
 import { useState } from 'react'
 import { LuExternalLink, LuFilm, LuPlay, LuX } from 'react-icons/lu'
 
@@ -74,8 +75,9 @@ function VideoCard({ video, onPlay }: { video: AnimeManifestVideo; onPlay: () =>
       transitionProperty="border-color, transform"
       transitionDuration="0.15s"
       transitionTimingFunction="ease-out"
+      // Рост при наведении, не проседание — другая механика, pressScale не подходит по семантике.
       _hover={{ borderColor: 'purple.500', transform: 'scale(1.02)' }}
-      _active={{ transform: 'scale(0.98)', borderColor: 'purple.600' }}
+      _active={{ transform: pressScale.lg, borderColor: 'purple.600' }}
       onClick={onPlay}
     >
       <AspectRatio ratio={16 / 9}>
@@ -97,7 +99,8 @@ function VideoCard({ video, onPlay }: { video: AnimeManifestVideo; onPlay: () =>
             alignItems="center"
             justifyContent="center"
             opacity={0}
-            transition="opacity 0.2s"
+            transitionProperty="opacity"
+            transitionDuration="0.2s"
             _groupHover={{ opacity: 1 }}
           >
             <LuPlay size={48} color="white" />

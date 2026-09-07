@@ -14,9 +14,10 @@
 
 ## Черновик (новые идеи)
 
-- [ ] **Аудит `_active: scale()` в теме на `pressScale`** (`@letar/ui`) — задача описана в
-      [press-scale-audit-task.md](/.claude/docs/press-scale-audit-task.md). Значения раскиданы
-      по `src/app/_components/ui/provider.tsx` (не в `src/theme`, как у большинства приложений).
+- [x] **Аудит `_active: scale()` в теме на `pressScale`** (`@letar/ui`) — сделано 2026-09-08 вместе
+      с подключением `theme:check`. 14 значений в `src/app/_components/ui/provider.tsx` сверены со
+      шкалой и приведены к её шагам; 3 легитимных исключения (мелкие поверхности, рост thumb
+      слайдера) оставлены с комментарием и занесены в `allowedMatches`.
 
 - [ ] **Покадровая перемотка на паузе** — при паузе кнопки/горячие клавиши +/- 5 кадров. Shaka Player: `video.currentTime += frameDuration` или seek по кадрам через `requestVideoFrameCallback`
 
@@ -720,13 +721,7 @@ nx typecheck:tsgo animatrona-tracker
 nx build animatrona-tracker
 ```
 
-## Техдолг: подключить theme:check
-
-Гейт сырых цветов/теней/transition в UI-коде (`nx g @letar/generators:theme-check-integrate
-animatrona-tracker`, генератор `libs/generators`, обёртка над `@letar/theme-check`) пока не
-подключён. Уже подключено: domwellbes, studio, aboi. Подключать по одному, не пакетно —
-allowlist легитимных исключений собирается руками при первом прогоне. Разбор —
-`.claude/docs/theme-hardcode-gate-coverage.md`.
+## Техдолг
 
 - **Мёртвая директива `@form.options` в `schema/content.zmodel`** (2026-09-04, попутно обнаружено
   при разборе broadcast `forms-coordinator-dev` о Фазе 3 миграции на `@meta`-синтаксис) —
@@ -740,6 +735,12 @@ allowlist легитимных исключений собирается рук�
 
 ## Техдолг: закрыто
 
+- **`theme:check` подключён** (2026-09-08, `nx g @letar/generators:theme-check-integrate
+  animatrona-tracker`) — гейт сырых цветов/теней/transition в UI-коде теперь запускается перед
+  `lint`. `themePrefix` указывает на файл `src/app/_components/ui/provider.tsx` (не каталог —
+  приложение не имеет `src/theme/`). Первый прогон нашёл 14 нарушений `scale()` (аудит на
+  `pressScale`, отдельный пункт выше) и 15 нарушений (сырые `transition`/`rgba`) в 9 файлах —
+  все исправлены, детали в `CHANGELOG.md` v0.11.14.
 - **Запрещённый Chakra `as=` на `Icon` — 194 вхождения в 33 файлах** (semgrep-правило
   `letar-chakra-as-prop-forbidden`, кросс-приложенческая задача — см. корневой `PLAN.md` §61).
   Все `<Icon as={IconComponent} .../>` заменены на прямой рендер react-icons компонента.

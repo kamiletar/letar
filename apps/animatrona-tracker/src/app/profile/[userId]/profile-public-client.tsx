@@ -254,7 +254,14 @@ export function PublicProfileClient({
                         <Text>{next.minScore - user.uploaderScore} очков</Text>
                       </Flex>
                       <Box h="8px" bg="bg.muted" borderRadius="full" overflow="hidden">
-                        <Box h="100%" bg="brand.500" w={`${progress}%`} borderRadius="full" transition="width 0.3s" />
+                        <Box
+                          h="100%"
+                          bg="brand.500"
+                          w={`${progress}%`}
+                          borderRadius="full"
+                          transitionProperty="width"
+                          transitionDuration="0.3s"
+                        />
                       </Box>
                     </VStack>
                   )

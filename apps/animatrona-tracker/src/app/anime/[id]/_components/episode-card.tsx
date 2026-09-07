@@ -217,7 +217,8 @@ export const EpisodeCard = memo(function EpisodeCard({
                     h={1.5}
                     borderRadius="full"
                     bg={i === currentIndex ? 'white' : 'whiteAlpha.500'}
-                    transition="background 0.2s"
+                    transitionProperty="background"
+                    transitionDuration="0.2s"
                   />
                 ))}
               </HStack>

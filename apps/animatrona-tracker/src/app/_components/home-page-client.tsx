@@ -340,7 +340,13 @@ function LatestAnimeCard({ anime, progress }: { anime: LatestAnimeItem; progress
           {/* Прогресс-бар */}
           {hasProgress && overallProgress > 0 && overallProgress < 100 && (
             <Box position="absolute" bottom={0} left={0} right={0} h="3px" bg="whiteAlpha.300">
-              <Box h="100%" bg="brand.500" w={`${overallProgress}%`} transition="width 0.3s" />
+              <Box
+                h="100%"
+                bg="brand.500"
+                w={`${overallProgress}%`}
+                transitionProperty="width"
+                transitionDuration="0.3s"
+              />
             </Box>
           )}
           {hasProgress && overallProgress >= 100 && (

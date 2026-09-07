@@ -7,6 +7,29 @@
 
 ---
 
+## [0.11.14] — 2026-09-08
+
+### Добавлено
+
+- **Гейт `theme:check`** — подключён через `nx g @letar/generators:theme-check-integrate`
+  (запускается перед `lint`). Приложение не имело каталога `src/theme/` — палитра/recipes живут
+  в одном файле `src/app/_components/ui/provider.tsx`, поэтому `themePrefix` указывает на файл
+  напрямую (тот же приём, что у `apps/kami`), а не на директорию.
+
+### Исправлено
+
+- **Глубина нажатия (`_active.transform: scale()`) в `provider.tsx`** — 14 значений сверены со
+  шкалой `pressScale` (`@letar/ui`) и приведены к её шагам (`buttonRecipe`, `linkRecipe`,
+  `tabsRecipe`, `menuRecipe`, `accordionRecipe`); три легитимных исключения (мелкие поверхности
+  чекбокса/радио/close-триггера тега, рост thumb слайдера при захвате) оставлены как есть с
+  пояснительным комментарием и занесены в `allowedMatches` скрипта проверки.
+- **Сырые `transition="prop Ns"` шорткаты** в 9 файлах (`anime-comparison-block.tsx`,
+  `episode-card.tsx`, `video-section.tsx`, `profile-public-client.tsx`, `anime-card.tsx`,
+  `player-header.tsx`, `tracker-video-player.tsx`, `continue-watching-section.tsx`,
+  `home-page-client.tsx`) — разбиты на `transitionProperty`+`transitionDuration`.
+- **`rgba(0,0,0,0.7)` в градиенте `player-header.tsx`** — заменён на CSS-переменную семантического
+  токена `var(--chakra-colors-black-alpha-700)`.
+
 ## [0.11.13] — 2026-09-07
 
 ### Добавлено

@@ -78,6 +78,7 @@ export function ContinueWatchingSection() {
             borderRadius="lg"
             overflow="hidden"
             bg="bg.muted"
+            // Рост при наведении, не проседание — другая механика, pressScale не подходит по семантике.
             _hover={{ transform: 'scale(1.02)', shadow: 'lg' }}
             transitionProperty="transform, box-shadow"
             transitionDuration="0.2s"
@@ -101,7 +102,8 @@ export function ContinueWatchingSection() {
                 bg="blackAlpha.400"
                 opacity={0}
                 _hover={{ opacity: 1 }}
-                transition="opacity 0.2s"
+                transitionProperty="opacity"
+                transitionDuration="0.2s"
               >
                 <Box bg="purple.500" borderRadius="full" p={3}>
                   <LuPlay size={24} color="white" />
@@ -114,7 +116,8 @@ export function ContinueWatchingSection() {
                   h="100%"
                   bg="purple.500"
                   w={`${getProgress(item.currentTime, item.duration)}%`}
-                  transition="width 0.3s"
+                  transitionProperty="width"
+                  transitionDuration="0.3s"
                 />
               </Box>
             </Box>
