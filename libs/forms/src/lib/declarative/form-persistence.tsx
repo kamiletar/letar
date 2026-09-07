@@ -58,7 +58,8 @@ export interface FormPersistenceConfig {
 
   /**
    * Clear draft button text (for ClearDraftButton)
-   * @default 'Clear draft'
+   * @default 'Очистить черновик' (переопределяется через FormI18nProvider — ключ
+   * `formPersistence.clearDraftButton`)
    */
   clearDraftButtonText?: string
 
@@ -219,7 +220,7 @@ export function useFormPersistence<TData extends object>(config: FormPersistence
     dialogDescription = 'У вас есть несохранённые изменения с предыдущей сессии.',
     restoreButtonText = 'Восстановить',
     discardButtonText = 'Начать заново',
-    clearDraftButtonText = 'Clear draft',
+    clearDraftButtonText = 'Очистить черновик',
     excludeFields,
   } = config
 
@@ -243,6 +244,11 @@ export function useFormPersistence<TData extends object>(config: FormPersistence
     i18n,
     'formPersistence.restoreDialog.discardButton',
     discardButtonText,
+  )
+  const resolvedClearDraftButtonText = localizeOrFallback(
+    i18n,
+    'formPersistence.clearDraftButton',
+    clearDraftButtonText,
   )
 
   // State
@@ -447,10 +453,10 @@ export function useFormPersistence<TData extends object>(config: FormPersistence
 
     return (
       <Button variant="ghost" size="sm" colorPalette="red" onClick={clearSavedData}>
-        {clearDraftButtonText}
+        {resolvedClearDraftButtonText}
       </Button>
     )
-  }, [hasSavedData, isDialogOpen, clearSavedData, clearDraftButtonText])
+  }, [hasSavedData, isDialogOpen, clearSavedData, resolvedClearDraftButtonText])
 
   // Cleanup on unmount
   useEffect(() => {

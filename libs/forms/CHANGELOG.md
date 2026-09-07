@@ -4,6 +4,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.11.4] - 2026-09-08
+
+### Fixed
+
+- **Кнопка «Очистить черновик» (`ClearDraftButton` из `useFormPersistence`) оставалась
+  захардкожена на английском ("Clear draft")** — вне скоупа фикса локализации диалога
+  восстановления черновика из 2.11.3. Дефолт `clearDraftButtonText` переведён на русский
+  ("Очистить черновик"), переопределение резолвится через `FormI18nProvider`/`useFormI18n`
+  по ключу `formPersistence.clearDraftButton`, тем же `localizeOrFallback`-паттерном, что и
+  остальные строки диалога.
+
 ## [2.11.3] - 2026-09-08
 
 ### Fixed
