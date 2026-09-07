@@ -21,8 +21,5 @@ export type {
 export { useAudioSync } from './useAudioSync'
 export type { UseAudioSyncOptions } from './useAudioSync'
 
-export { useShakaPlayer } from './useShakaPlayer'
-export type { UseShakaPlayerOptions, UseShakaPlayerReturn } from './useShakaPlayer'
-
 export { useSubtitleManagement } from './useSubtitleManagement'
 export type { UseSubtitleManagementOptions, UseSubtitleManagementReturn } from './useSubtitleManagement'

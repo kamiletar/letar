@@ -231,4 +231,5 @@ nx build animatrona-tracker
 
 **Последнее обновление:** 2026-09-08 (сессия: theme:check, аудит pressScale, покадровая
 перемотка, дедуп `use-keyboard-shortcuts`/`getShakaFrameRate`, архивация
-`/workflow:archive-completed`)
+`/workflow:archive-completed`, аудит `use-shaka-player.ts` — не дубль, см.
+[shaka-player-hook-dedup-audit.md](/.claude/docs/shaka-player-hook-dedup-audit.md))

@@ -447,7 +447,11 @@ reset (`preflight`) уже задаёт своё явное значение —
 as="строка-тега"`) — четыре сессии независимо изобрели один и тот же паттерн ·
 [header-drawer-dedup-audit](/.claude/docs/header-drawer-dedup-audit.md) 7 реализаций Header+Drawer
 между приложениями — общий `libs/ui`-примитив не заводить (разные оси расходятся по-настоящему),
-но 3 файла ролевых шапок внутри grandslamcup — реальный дубль, кандидат на локальное извлечение
+но 3 файла ролевых шапок внутри grandslamcup — реальный дубль, кандидат на локальное извлечение ·
+[shaka-player-hook-dedup-audit](/.claude/docs/shaka-player-hook-dedup-audit.md) `useShakaPlayer`
+(lib, потребитель — folder-player) vs `use-shaka-player.ts` (tracker) — не сводить, владение
+состоянием и набор фич расходятся по-настоящему; `apps/animatrona` местная копия оказалась
+мёртвым кодом (persistent-video `GlobalVideoProvider` инициализирует Shaka инлайном) и удалена
 
 **Библиотеки и публикация:** [lib-entry-points](/.claude/docs/lib-entry-points.md) подпути
 `./server`/`./client`, границы, ESLint-ловушки ·

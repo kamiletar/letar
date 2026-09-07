@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [0.55.65] - 2026-09-08
+
+### Removed
+
+- **Мёртвый код: локальный `_hooks/useShakaPlayer.ts`.** Аудит на предмет дублирования с
+  `use-shaka-player.ts` (`animatrona-tracker`) и `useShakaPlayer.ts` (`@letar/video-player-react`)
+  показал, что хук не вызывается ни одним компонентом — `VideoPlayer.tsx` инициализацию Shaka не
+  делает вовсе, она инлайном живёт в `GlobalVideoProvider.tsx` (persistent video с момента
+  перехода на архитектуру, которая не пересоздаёт `MediaSource` при навигации). Хук и его экспорт
+  из `_hooks/index.ts` удалены. Разбор аудита и почему остальные два хука НЕ сведены в один —
+  [shaka-player-hook-dedup-audit.md](/.claude/docs/shaka-player-hook-dedup-audit.md).
+
 ## [0.55.64] - 2026-09-08
 
 ### Changed
