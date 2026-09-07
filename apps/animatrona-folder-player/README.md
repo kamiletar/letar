@@ -1,4 +1,4 @@
-# Animatrona Player
+# Animatrona Folder Player
 
 Плеер аниме из папки — без импорта, IPFS и транскодирования
 
@@ -14,10 +14,10 @@
 ## Быстрый старт
 
 ```bash
-nx dev animatrona-player              # разработка
-nx typecheck:tsgo animatrona-player
-nx lint animatrona-player
-nx build:win animatrona-player        # dist/*.exe (NSIS)
+nx dev animatrona-folder-player              # разработка
+nx typecheck:tsgo animatrona-folder-player
+nx lint animatrona-folder-player
+nx build:win animatrona-folder-player        # dist/*.exe (NSIS)
 ```
 
 ## После генерации

@@ -1,7 +1,7 @@
 /**
  * Извлечение встроенных (в контейнере MKV) ASS/SSA/SRT-субтитров и вложенных шрифтов —
  * без ffmpeg, потоковым JS-парсером `matroska-subtitles`. Аналог `extractStream`/
- * `extractFontsFromFile` из Animatrona (`main/ffmpeg/demux.ts`), но animatrona-player
+ * `extractFontsFromFile` из Animatrona (`main/ffmpeg/demux.ts`), но animatrona-folder-player
  * принципиально не тащит ffmpeg-бинарь — только эта библиотека читает EBML-контейнер сама.
  *
  * `matroska-subtitles` не собирает готовый .ass-файл — отдаёт только заголовок

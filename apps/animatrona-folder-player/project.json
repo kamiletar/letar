@@ -1,14 +1,14 @@
 {
-  "name": "animatrona-player",
+  "name": "animatrona-folder-player",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/animatrona-player",
+  "sourceRoot": "apps/animatrona-folder-player",
   "projectType": "application",
-  "tags": ["type:app", "scope:animatrona-player", "owner:letar", "platform:electron"],
+  "tags": ["type:app", "scope:animatrona-folder-player", "owner:letar", "platform:electron"],
   "targets": {
     "dev": {
       "command": "node scripts/dev.js",
       "options": {
-        "cwd": "apps/animatrona-player"
+        "cwd": "apps/animatrona-folder-player"
       }
     },
     "build:win": {
@@ -19,7 +19,7 @@
           "npx webpack --config main/webpack.config.js",
           "npx electron-builder --win"
         ],
-        "cwd": "apps/animatrona-player",
+        "cwd": "apps/animatrona-folder-player",
         "parallel": false
       }
     },
@@ -27,16 +27,16 @@
       "executor": "@nx/eslint:lint",
       "options": {
         "lintFilePatterns": [
-          "apps/animatrona-player/main/**/*.{ts,tsx}",
-          "apps/animatrona-player/renderer/**/*.{ts,tsx}"
+          "apps/animatrona-folder-player/main/**/*.{ts,tsx}",
+          "apps/animatrona-folder-player/renderer/**/*.{ts,tsx}"
         ]
       }
     },
     "typecheck:tsgo": {
-      "command": "tsgo --project apps/animatrona-player/tsconfig.json --noEmit"
+      "command": "tsgo --project apps/animatrona-folder-player/tsconfig.json --noEmit"
     },
     "format": {
-      "command": "dprint fmt apps/animatrona-player/**/*.{ts,tsx,json}"
+      "command": "dprint fmt apps/animatrona-folder-player/**/*.{ts,tsx,json}"
     }
   }
 }

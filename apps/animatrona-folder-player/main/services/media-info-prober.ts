@@ -1,5 +1,5 @@
 /**
- * `MediaProber` для animatrona-player — `mediainfo.js` (MediaInfoLib, скомпилированный в WASM),
+ * `MediaProber` для animatrona-folder-player — `mediainfo.js` (MediaInfoLib, скомпилированный в WASM),
  * без зависимости от ffmpeg-бинаря. Аналог `ffprobeProber` из Animatrona (`main/ffmpeg/probe.ts`),
  * обе реализации обязаны отдавать одну и ту же нормализованную `MediaInfo` (см. JSDoc интерфейса
  * в `@letar/folder-scan`).

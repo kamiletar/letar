@@ -1,15 +1,15 @@
-# PLAN — Animatrona Player
+# PLAN — Animatrona Folder Player
 
-## ⚠️ Задача от координатора (animatrona-coordinator-dev, 2026-09-08)
+## ✅ Переименование из `animatrona-player` (2026-09-08)
 
-- [ ] **Переименовать приложение `animatrona-player` → `animatrona-folder-player`** (решение
-      владельца). Каталог `apps/animatrona-player/` → `apps/animatrona-folder-player/`, `name` в
-      `project.json`/`package.json`, `appId`/`productName` в `electron-builder.yml`, заголовок и
-      упоминания в `README.md`/`PLAN.md`/`PLAN_TESTING.md`. Приложение ещё в Фазе 1 MVP (ничего не
-      реализовано) — рефакторинг дешёвый, других веток/агентов на текущее имя не завязано. Каскада
-      на другие animatrona-приложения нет (не импортирует `@letar/animatrona-types`, изолирован).
-      Задача не была доставлена через Agent Mail — identity `animatrona-dev` была retired на
-      момент отправки, поэтому зафиксирована здесь.
+Приложение переименовано в `animatrona-folder-player` по решению владельца (задача от
+`animatrona-coordinator-dev`, доставлена не через Agent Mail — identity `animatrona-dev` была
+retired на момент отправки, зафиксирована прямо здесь координатором). Каталог, `name` в
+`project.json`/`package.json`, `appId` в `electron-builder.yml`, упоминания в
+`README.md`/`PLAN.md`/`PLAN_TESTING.md` — обновлены. Продуктовое имя (`productName`/
+`shortcutName` в `electron-builder.yml`) оставлено «Animatrona Player» — это отображаемое
+пользователю название, не внутренний слаг. Каскада на другие animatrona-приложения не было
+(не импортирует `@letar/animatrona-types`, изолирован).
 
 ## Фаза 1 — MVP
 
@@ -17,4 +17,4 @@
 - [ ] Бизнес-логика в `main/services/`
 - [ ] IPC-хендлеры в `main/ipc/`
 - [ ] UI в `renderer/app/page.tsx`
-- [ ] Проверка dev-режима и упакованной сборки (`nx build:win animatrona-player`)
+- [ ] Проверка dev-режима и упакованной сборки (`nx build:win animatrona-folder-player`)

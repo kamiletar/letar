@@ -1,6 +1,6 @@
 /**
  * Конвертирует локальный путь в `media://` URL, воспроизводимый в `<video>`.
- * Без IPFS — animatrona-player работает только с локальными папками.
+ * Без IPFS — animatrona-folder-player работает только с локальными папками.
  */
 export function toMediaUrl(path: string | null | undefined): string {
   if (!path) {

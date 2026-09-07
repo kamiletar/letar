@@ -394,6 +394,25 @@
         "electron": "44.2.0",
       },
     },
+    "apps/animatrona-folder-player": {
+      "name": "@letar/animatrona-folder-player",
+      "version": "0.1.0",
+      "dependencies": {
+        "@letar/electron-storage": "workspace:*",
+        "@letar/folder-player-react": "workspace:*",
+        "@letar/folder-scan": "workspace:*",
+        "@letar/icon-generator": "workspace:*",
+        "@letar/video-player-core": "workspace:*",
+        "@letar/video-player-react": "workspace:*",
+        "matroska-subtitles": "^3.3.2",
+        "mediainfo.js": "^0.3.7",
+        "shaka-player": "^5.2.9",
+      },
+      "devDependencies": {
+        "electron": "44.2.0",
+        "electron-builder": "26.15.3",
+      },
+    },
     "apps/animatrona-landing": {
       "name": "@letar/animatrona-landing",
       "version": "0.4.7",
@@ -418,28 +437,9 @@
         "react-native-worklets": "0.12.1",
       },
     },
-    "apps/animatrona-player": {
-      "name": "@letar/animatrona-player",
-      "version": "0.1.0",
-      "dependencies": {
-        "@letar/electron-storage": "workspace:*",
-        "@letar/folder-player-react": "workspace:*",
-        "@letar/folder-scan": "workspace:*",
-        "@letar/icon-generator": "workspace:*",
-        "@letar/video-player-core": "workspace:*",
-        "@letar/video-player-react": "workspace:*",
-        "matroska-subtitles": "^3.3.2",
-        "mediainfo.js": "^0.3.7",
-        "shaka-player": "^5.2.9",
-      },
-      "devDependencies": {
-        "electron": "44.2.0",
-        "electron-builder": "26.15.3",
-      },
-    },
     "apps/animatrona-tracker": {
       "name": "@letar/animatrona-tracker",
-      "version": "0.11.13",
+      "version": "0.11.15",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -554,7 +554,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.184.29",
+      "version": "0.184.31",
       "dependencies": {
         "@letar/analytics": "workspace:*",
         "@letar/consent": "workspace:*",
@@ -2491,6 +2491,8 @@
 
     "@letar/animatrona": ["@letar/animatrona@workspace:apps/animatrona"],
 
+    "@letar/animatrona-folder-player": ["@letar/animatrona-folder-player@workspace:apps/animatrona-folder-player"],
+
     "@letar/animatrona-franchise-graph": ["@letar/animatrona-franchise-graph@workspace:libs/animatrona-franchise-graph"],
 
     "@letar/animatrona-landing": ["@letar/animatrona-landing@workspace:apps/animatrona-landing"],
@@ -2498,8 +2500,6 @@
     "@letar/animatrona-landing-e2e": ["@letar/animatrona-landing-e2e@workspace:apps/animatrona-landing-e2e"],
 
     "@letar/animatrona-mobile": ["@letar/animatrona-mobile@workspace:apps/animatrona-mobile"],
-
-    "@letar/animatrona-player": ["@letar/animatrona-player@workspace:apps/animatrona-player"],
 
     "@letar/animatrona-shared": ["@letar/animatrona-shared@workspace:libs/animatrona-shared"],
 
