@@ -145,6 +145,17 @@ renderer'у требуются серверные возможности Next.js
   паттерн, только для медиа.
 - `poster-microtext-desktop` — статический экспорт под `file://` с `assetPrefix: './'`: Worker'ов и
   WASM ему не нужно, поэтому дешёвый вариант достаточен.
+- `animatrona-folder-player` — рабочий пример именно связки `app://` + `protocol.handle` для
+  статического экспорта Next.js (выбор по умолчанию из таблицы выше): `main/protocols/app.protocol.ts`
+  регистрирует схему `app` (`registerAppProtocol()` — до `whenReady`, `setupAppProtocolHandler()` —
+  после), резолвит `pathname` в файл внутри `renderer/out` с защитой от path traversal
+  (`path.normalize` + проверка `startsWith(outDir)`, фоллбэк на `index.html`), сам расставляет
+  MIME-типы по расширению и отдаёт файл через `createReadStream` + обёртку в Web `ReadableStream`
+  (не `net.fetch(pathToFileURL(...))`, как в примере выше, — здесь стриминг собран вручную).
+  `main/background.ts` вызывает `registerAppProtocol()` на верхнем уровне модуля,
+  `setupAppProtocolHandler()` — внутри `app.whenReady()`, и грузит `loadURL('app://local/index.html')`
+  вместо `loadFile()`. Следствие в `renderer/next.config.js` — `assetPrefix: './'` из конфига убран,
+  абсолютные `/_next/...` резолвятся от корня схемы сами.
 
 ## Границы применимости
 
