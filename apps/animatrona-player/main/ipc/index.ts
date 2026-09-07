@@ -1,6 +1,7 @@
 import type { BrowserWindow } from 'electron'
 import { registerAppHandlers } from './app.handlers'
 import { registerDialogHandlers } from './dialog.handlers'
+import { registerEmbeddedSubtitlesHandlers } from './embedded-subtitles.handlers'
 import { registerFsHandlers } from './fs.handlers'
 import { registerProbeHandlers } from './probe.handlers'
 
@@ -12,4 +13,5 @@ export function registerIpcHandlers(_getMainWindow: () => BrowserWindow | null):
   registerDialogHandlers()
   registerFsHandlers()
   registerProbeHandlers()
+  registerEmbeddedSubtitlesHandlers()
 }

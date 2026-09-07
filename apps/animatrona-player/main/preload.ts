@@ -31,6 +31,12 @@ interface ProbeResult {
   error?: string
 }
 
+interface EmbeddedSubtitlesResult {
+  success: boolean
+  data?: unknown
+  error?: string
+}
+
 /**
  * API, доступный в renderer process через window.electronAPI.
  * Добавляй новые методы сюда и в main/ipc/*.handlers.ts — IPC единственный
@@ -59,6 +65,10 @@ const electronAPI = {
     ): Promise<ExternalSubtitleScanResult> => ipcRenderer.invoke('fs:scanExternalSubtitles', folderPath, videoFiles),
   },
   probe: (filePath: string): Promise<ProbeResult> => ipcRenderer.invoke('probe:file', filePath),
+  subtitles: {
+    extractEmbedded: (filePath: string): Promise<EmbeddedSubtitlesResult> =>
+      ipcRenderer.invoke('subtitles:extractEmbedded', filePath),
+  },
 }
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI)

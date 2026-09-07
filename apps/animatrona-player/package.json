@@ -17,7 +17,8 @@
     "@letar/video-player-core": "workspace:*",
     "@letar/electron-storage": "workspace:*",
     "shaka-player": "^5.2.9",
-    "mediainfo.js": "^0.3.7"
+    "mediainfo.js": "^0.3.7",
+    "matroska-subtitles": "^3.3.2"
   },
   "devDependencies": {
     "electron": "44.2.0",

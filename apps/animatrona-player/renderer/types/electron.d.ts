@@ -5,6 +5,7 @@ import type {
   MediaFileInfo,
 } from '@letar/folder-player-react'
 import type { MediaInfo } from '@letar/folder-scan'
+import type { EmbeddedSubtitlesIpcResult } from '../../main/ipc/embedded-subtitles.handlers'
 
 export interface ProbeResult {
   success: boolean
@@ -34,6 +35,9 @@ export interface ElectronAPI {
     ) => Promise<ExternalSubtitleScanResult>
   }
   probe: (filePath: string) => Promise<ProbeResult>
+  subtitles: {
+    extractEmbedded: (filePath: string) => Promise<EmbeddedSubtitlesIpcResult>
+  }
 }
 
 declare global {

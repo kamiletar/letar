@@ -362,10 +362,56 @@ nx g @letar/generators:electron-app animatrona-player --displayName="Animatrona 
       `probeFile()` вернул корректный `MediaInfo` (включая формат/размер), подтверждает, что
       `locateFile`/`__non_webpack_require__` работает в живом Electron main-процессе, а не только
       компилируется. Временные verify-скрипты удалены после проверки, в репозитории не осели.
-- [ ] Встроенные ASS-субтитры и шрифты — без ffmpeg, через
-      [matroska-subtitles](https://github.com/mathiasvr/matroska-subtitles) (стримовый JS-парсер,
-      отдаёт ASS/SRT-дорожки **и вложенные шрифты** из attachments) + SubtitlesOctopus (`libass-wasm`,
-      уже в зависимостях Animatrona)
+- [x] Встроенные ASS/SRT-субтитры и шрифты — без ffmpeg, через `matroska-subtitles`
+      (0.3.7 → фактически 3.3.2, npm; без своих типов — амбиентная декларация по месту
+      использования) + SubtitlesOctopus (уже в зависимостях). `main/services/embedded-subtitles.ts`,
+      IPC `subtitles:extractEmbedded` (`main/ipc/embedded-subtitles.handlers.ts`).
+      - Библиотека — стримовый `Transform` (`fs.createReadStream(mkv).pipe(new SubtitleParser())`),
+      **не** собирает готовый .ass/.srt файл сама: отдаёт заголовок трека (`CodecPrivate` —
+      `[Script Info]`+`[V4+ Styles]`) один раз (`tracks`) и распарсенные поля каждой ASS
+      Dialogue-строки по одному (`subtitle` — `layer/style/name/margin*/effect/text`, время —
+      отдельно `time`/`duration` самого блока) + вложения-шрифты (`file` — `filename`/`mimetype`/
+      `data: Buffer`, реальные байты, без доп. извлечения). Сборка валидного .ass/.srt текста —
+      целиком на нашей стороне (`buildAssContent`/`buildSrtContent`).
+      - ⚠️ **Найдено эмпирически, не только по документации библиотеки:** `CodecPrivate`
+      (`track.header`), которую кладут реальные мюксеры (проверено на ffmpeg), уже содержит
+      собственную — пустую — секцию `[Events]`/`Format:`. Наивная конкатенация «header + своя
+      секция Events» даёт файл с ДВУМЯ блоками `[Events]` подряд (первый пустой). Фикс —
+      `stripEventsSection()` обрезает header по первому вхождению `[Events]` перед тем, как
+      добавить собственную секцию с гарантированно совпадающим порядком полей Format/Dialogue.
+      - `VideoPlayerSubtitle` (`renderer/app/_components/VideoPlayer.tsx`) расширен опциональным
+      `content` (alternative к `url`) — прокидывается в `subtitleContent` `SubtitleOverlay`
+      (`@letar/video-player-react`, уже поддерживал этот проп, просто не был использован).
+      Шрифты — `Blob`/`URL.createObjectURL()` в рендерере (данные приходят по IPC как
+      `Uint8Array`), `SubtitleOverlay.fonts` фетчит их как обычные URL, blob: ничем не хуже
+      `media://`.
+      - `page.tsx`: встроенные субтитры — **фоллбэк**, только когда для эпизода не нашлось ни
+      одного внешнего файла (`player.externalTracks.subtitles.length === 0`) — потоковое чтение
+      всего файла ради субтитров/шрифтов (seek не помогает, они рассеяны по контейнеру) дорого
+      для больших видео, гонять его на каждый эпизод с уже имеющимися внешними Rus Sub/ не нужно.
+      Выбор дорожки при нескольких встроенных субтитрах — берётся первая (`tracks[0]`); полноценный
+      выбор по языку/дефолтности — отдельная задача, вне scope (у `matroska-subtitles` `tracks`
+      нет флагов default/forced в принципе, только `number/language/type/name/header`).
+      - Проверено принципиально иначе, чем предыдущие пункты — не только typecheck/lint/build, а
+      реальным MKV-файлом, собранным на месте через локальный ffmpeg (`ffmpeg -attach ... -c:s ass`
+      / `-c:s srt`, embedded ASS-трек + вложенный `arial.ttf` в одном файле, отдельно —
+      embedded SRT-трек). Headless-прогон через `../../node_modules/.bin/electron.exe` (приём из
+      `.claude/rules/electron.md`) реально распарсил оба файла: извлёк кириллицу и латиницу без
+      повреждений, корректные тайминги, шрифт побайтово совпал с исходным (1045720 байт).
+      Дополнительно результат для ASS-трека прогнан через `ffmpeg -vf ass=reconstructed.ass`
+      (тот же libass, что и в SubtitlesOctopus/libass-wasm) — лог подтвердил `Added subtitle
+      file: 'reconstructed.ass' (2 styles, 2 events)` и успешный подбор шрифта (`fontselect:
+        Arial → ArialMT`), т.е. собранный файл — не просто синтаксически похож на .ass, а реально
+      принимается движком рендеринга. Именно этим прогоном была найдена и исправлена ошибка с
+      двойной секцией `[Events]` выше — типизация и сборка её не ловили. Тестовые MKV — в
+      scratchpad-каталоге сессии, в репозиторий не попали.
+      - Отдельно найдена и исправлена языковая ловушка (не относится к архитектуре): литеральная
+      подстрока `*/` внутри собственного JSDoc-комментария (`margin*/effect`) закрывает блок
+      комментария раньше времени — весь код после нём начинает парситься как код, `tsgo` в этом
+      случае даёт нечитаемый каскад из полусотни синтаксических ошибок, из которого причина не
+      очевидна. Не баг tsgo — обычное поведение `/* ... */`, просто с непривычно шумной
+      диагностикой у этого парсера конкретно на многострочных template literals после места
+      обрыва.
 - [ ] Детекция неподдерживаемых кодеков + сообщение + «открыть в системном плеере» (`shell.openPath`).
       Проверять через `navigator.mediaCapabilities.decodingInfo()` — точнее, чем `canPlayType()`
 - [ ] Приёмка: папка на 24 серии + внешние ASS + внешняя озвучка → играет, дорожки

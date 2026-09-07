@@ -26,7 +26,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu'
 
 export interface VideoPlayerSubtitle {
-  url: string
+  /** URL к субтитрам — обязателен для `srt`/`vtt` (нативный `<track>`), опционален для `ass`/`ssa` */
+  url?: string
+  /** Содержимое .ass/.ssa (встроенные субтитры без извлечённого файла) — альтернатива `url` */
+  content?: string
   format: 'ass' | 'ssa' | 'srt' | 'vtt'
   fonts: string[]
 }
@@ -143,7 +146,10 @@ function ShakaVideoPlayer({
 
   // Нативные субтитры (SRT/VTT) — грузим через track-элемент после готовности видео
   useEffect(() => {
-    if (!isVideoReady || !subtitle || subtitle.format !== 'srt' && subtitle.format !== 'vtt') {
+    if (
+      !isVideoReady || !subtitle || !subtitle.url
+      || (subtitle.format !== 'srt' && subtitle.format !== 'vtt')
+    ) {
       return
     }
     void loadNative(subtitle.url)
@@ -258,6 +264,7 @@ function ShakaVideoPlayer({
         <SubtitleOverlay
           videoRef={videoRef}
           subtitleUrl={subtitle.url}
+          subtitleContent={subtitle.content}
           fonts={subtitle.fonts}
           topOffset={0}
           bottomOffset={showControls ? 80 : 0}

@@ -110,7 +110,7 @@ export default function HomePage() {
 
   // Внешний субтитр текущего эпизода — берём первый найденный матч
   // (выбор дорожки из нескольких вариантов — отдельная задача плана)
-  const subtitle = useMemo<VideoPlayerSubtitle | null>(() => {
+  const externalSubtitle = useMemo<VideoPlayerSubtitle | null>(() => {
     const match = player.externalTracks.subtitles[0]
     if (!match) {
       return null
@@ -121,6 +121,57 @@ export default function HomePage() {
       fonts: match.matchedFonts.map((f) => toMediaUrl(f.path)),
     }
   }, [player.externalTracks.subtitles])
+
+  const hasExternalSubtitle = player.externalTracks.subtitles.length > 0
+  const [embeddedSubtitle, setEmbeddedSubtitle] = useState<VideoPlayerSubtitle | null>(null)
+  const embeddedBlobUrlsRef = useRef<string[]>([])
+
+  // Встроенные субтитры (в контейнере MKV) — фоллбэк, только когда внешних субтитров для
+  // эпизода не нашлось (Rus Sub/ и т.п. рядом с видео). Извлечение потоковое, без ffmpeg
+  // (matroska-subtitles), поэтому запускается только по необходимости, не на каждый эпизод.
+  useEffect(() => {
+    for (const url of embeddedBlobUrlsRef.current) {
+      URL.revokeObjectURL(url)
+    }
+    embeddedBlobUrlsRef.current = []
+    setEmbeddedSubtitle(null)
+
+    if (!currentVideoPath || hasExternalSubtitle) {
+      return
+    }
+
+    let cancelled = false
+    void window.electronAPI.subtitles.extractEmbedded(currentVideoPath).then((result) => {
+      if (cancelled || !result.success || !result.data) {
+        return
+      }
+      // Первая дорожка контейнера — выбор конкретной дорожки из нескольких (по языку/
+      // дефолтности) не входит в эту задачу, см. риск нумерации в PLAN_ANIMATRONA_PLAYER.md
+      const track = result.data.tracks[0]
+      if (!track) {
+        return
+      }
+
+      const fontUrls = result.data.fonts.map((f) =>
+        URL.createObjectURL(new Blob([new Uint8Array(f.data)], { type: f.mimetype || 'font/ttf' }))
+      )
+      embeddedBlobUrlsRef.current.push(...fontUrls)
+
+      if (track.format === 'srt') {
+        const subtitleUrl = URL.createObjectURL(new Blob([track.content], { type: 'text/plain' }))
+        embeddedBlobUrlsRef.current.push(subtitleUrl)
+        setEmbeddedSubtitle({ url: subtitleUrl, format: 'srt', fonts: [] })
+      } else {
+        setEmbeddedSubtitle({ content: track.content, format: track.format, fonts: fontUrls })
+      }
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [currentVideoPath, hasExternalSubtitle])
+
+  const subtitle = externalSubtitle ?? embeddedSubtitle
 
   const resumeTime = currentVideoPath ? watchProgress.getResumeTime(currentVideoPath) : 0
 
