@@ -6,6 +6,18 @@
 
 ## Backlog (запросы от агентов)
 
+### ✅ [2026-09-08] Диалог восстановления черновика (`useFormPersistence`) захардкожен на английском (от domwellbes-dev)
+
+- **Запросил:** domwellbes-dev, живая проверка пилота `Form.Steps` на форме дома
+  (`apps/domwellbes/src/app/(admin)/admin/houses/_components/house-form.tsx`).
+- **Статус:** закрыто (v2.11.3, 2026-09-08). Дефолты `dialogTitle`/`dialogDescription`/
+  `restoreButtonText`/`discardButtonText` в `form-persistence.tsx` переведены на русский; диалог
+  дополнительно читает переопределения через уже существующий `FormI18nProvider`/`useFormI18n`
+  (`@letar/forms-react`) по ключам `formPersistence.restoreDialog.{title,description,
+  restoreButton,discardButton}` — без провайдера или без перевода под ключом остаётся русский
+  дефолт. `clearDraftButtonText` (кнопка "Clear draft" вне диалога) намеренно не тронут — вне
+  скоупа этой задачи. Живая проверка в domwellbes (`/admin/houses/new`) — диалог на русском.
+
 ### ✅ [2026-09-07] `@tanstack/react-table` рассинхрон версии ломает `next build` (не `tsgo`) (от animatrona-dev)
 
 - **Запросил:** animatrona-dev (msg 1263, bug-report)

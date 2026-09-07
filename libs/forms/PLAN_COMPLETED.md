@@ -1,5 +1,27 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-08 — Локализация диалога восстановления черновика формы (`useFormPersistence`)
+
+Заведено при живой проверке пилота `Form.Steps` на форме дома в `domwellbes` — диалог
+восстановления черновика («Restore saved data?» / «You have unsaved changes from a previous
+session.» / «Start fresh» / «Restore») оказался полностью на английском независимо от локали
+приложения.
+
+`form-persistence.tsx`: дефолты четырёх строк диалога (`dialogTitle`, `dialogDescription`,
+`restoreButtonText`, `discardButtonText`) переведены на русский. Дополнительно диалог теперь
+подключает `useFormI18n()` из `@letar/forms-react` (тот же контекст, что уже использует
+`use-resolved-field-props.ts` для полей) и резолвит переопределения по ключам
+`formPersistence.restoreDialog.{title,description,restoreButton,discardButton}` через новый
+локальный хелпер `localizeOrFallback` — если `FormI18nProvider` не подключён или перевод под
+ключом не задан (либо равен самому ключу — конвенция next-intl), остаётся русский дефолт.
+`clearDraftButtonText` (кнопка вне диалога) намеренно не тронут — не входил в заявленный скоуп.
+
+`nx lint forms` / `nx typecheck:tsgo forms` — чистые. Живая проверка в domwellbes
+(`/admin/houses/new`, dev-сессия через `/api/auth/dev-session`): заполнил поле «Название»,
+перезагрузил страницу — диалог восстановления появился на русском с корректными кнопками.
+
+v2.11.3, коммит `f0303382`.
+
 ## 2026-09-06 — Разбор оставшихся 16 `react-hooks/exhaustive-deps` + 1 `no-explicit-any`
 
 Прошлая сессия добавила `libs/forms/eslint.config.mjs`, но сознательно не трогала уже вскрывшиеся
