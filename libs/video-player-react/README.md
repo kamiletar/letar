@@ -271,6 +271,12 @@ useKeyboardShortcuts({
   toggleFullscreen: () => void
   adjustPlaybackSpeed?: (delta: number) => void
   toggleVideoInfo?: () => void
+  stepFrame?: (forward: boolean) => void
+  // Shift+←/→ вызывает stepFrame вместо skipTime, только если isPlaying === false
+  isPlaying?: boolean
+  toggleTrackMode?: () => void // клавиша T
+  showShortcuts?: boolean // текущее состояние оверлея — управляет `?` и Escape
+  setShowShortcuts?: (value: boolean | ((prev: boolean) => boolean)) => void
   disabled?: boolean
 })
 ```

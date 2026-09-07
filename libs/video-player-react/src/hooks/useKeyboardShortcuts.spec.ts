@@ -182,6 +182,76 @@ describe('useKeyboardShortcuts', () => {
     expect(toggleVideoInfo).toHaveBeenCalledTimes(1)
   })
 
+  it('Shift+ArrowLeft вызывает stepFrame(false), если isPlaying === false', () => {
+    const stepFrame = vi.fn()
+    const skipTime = vi.fn()
+    renderHook(() => useKeyboardShortcuts(makeOptions({ stepFrame, skipTime, isPlaying: false })))
+    dispatchKey('ArrowLeft', undefined, { shiftKey: true })
+    expect(stepFrame).toHaveBeenCalledWith(false)
+    expect(skipTime).not.toHaveBeenCalled()
+  })
+
+  it('Shift+ArrowRight вызывает stepFrame(true), если isPlaying === false', () => {
+    const stepFrame = vi.fn()
+    const skipTime = vi.fn()
+    renderHook(() => useKeyboardShortcuts(makeOptions({ stepFrame, skipTime, isPlaying: false })))
+    dispatchKey('ArrowRight', undefined, { shiftKey: true })
+    expect(stepFrame).toHaveBeenCalledWith(true)
+    expect(skipTime).not.toHaveBeenCalled()
+  })
+
+  it('Shift+ArrowLeft вызывает skipTime, если isPlaying === true (без покадровой перемотки)', () => {
+    const stepFrame = vi.fn()
+    const skipTime = vi.fn()
+    renderHook(() => useKeyboardShortcuts(makeOptions({ stepFrame, skipTime, isPlaying: true })))
+    dispatchKey('ArrowLeft', undefined, { shiftKey: true })
+    expect(stepFrame).not.toHaveBeenCalled()
+    expect(skipTime).toHaveBeenCalledWith(-10)
+  })
+
+  it('Shift+ArrowLeft вызывает skipTime, если isPlaying не передан', () => {
+    const stepFrame = vi.fn()
+    const skipTime = vi.fn()
+    renderHook(() => useKeyboardShortcuts(makeOptions({ stepFrame, skipTime })))
+    dispatchKey('ArrowLeft', undefined, { shiftKey: true })
+    expect(stepFrame).not.toHaveBeenCalled()
+    expect(skipTime).toHaveBeenCalledWith(-10)
+  })
+
+  it('"t" и русская "е" вызывают toggleTrackMode, если передан', () => {
+    const toggleTrackMode = vi.fn()
+    renderHook(() => useKeyboardShortcuts(makeOptions({ toggleTrackMode })))
+    dispatchKey('t')
+    dispatchKey('е')
+    expect(toggleTrackMode).toHaveBeenCalledTimes(2)
+  })
+
+  it('не бросает исключение при "t" без переданного toggleTrackMode', () => {
+    renderHook(() => useKeyboardShortcuts(makeOptions()))
+    expect(() => dispatchKey('t')).not.toThrow()
+  })
+
+  it('"?" переключает showShortcuts через setShowShortcuts, если передан', () => {
+    const setShowShortcuts = vi.fn()
+    renderHook(() => useKeyboardShortcuts(makeOptions({ showShortcuts: false, setShowShortcuts })))
+    dispatchKey('?')
+    expect(setShowShortcuts).toHaveBeenCalledWith(expect.any(Function))
+  })
+
+  it('Escape закрывает оверлей, если showShortcuts === true', () => {
+    const setShowShortcuts = vi.fn()
+    renderHook(() => useKeyboardShortcuts(makeOptions({ showShortcuts: true, setShowShortcuts })))
+    dispatchKey('Escape')
+    expect(setShowShortcuts).toHaveBeenCalledWith(false)
+  })
+
+  it('Escape ничего не делает, если showShortcuts === false', () => {
+    const setShowShortcuts = vi.fn()
+    renderHook(() => useKeyboardShortcuts(makeOptions({ showShortcuts: false, setShowShortcuts })))
+    dispatchKey('Escape')
+    expect(setShowShortcuts).not.toHaveBeenCalled()
+  })
+
   it('игнорирует нажатия, когда фокус на input', () => {
     const togglePlay = vi.fn()
     renderHook(() => useKeyboardShortcuts(makeOptions({ togglePlay })))

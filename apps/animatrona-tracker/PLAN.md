@@ -738,6 +738,13 @@ nx build animatrona-tracker
 
 ## Техдолг: закрыто
 
+- **Дубль `use-keyboard-shortcuts.ts` vs общий `@letar/video-player-react`** (2026-09-08) —
+  проверено, кто ещё пользуется общим хуком (`animatrona`, `animatrona-folder-player`), сведены
+  реально одинаковые ветки (play/pause, стрелки/время, громкость, mute, fullscreen), а
+  специфичные для tracker вещи (переключение дорожек `T`, оверлей помощи `?`/`Escape`,
+  Shift+стрелки только на паузе) добавлены в общий хук опциональными параметрами — обратно
+  совместимо для двух других потребителей. Локальный дубль удалён, детали — `CHANGELOG.md`
+  v0.11.16.
 - **`theme:check` подключён** (2026-09-08, `nx g @letar/generators:theme-check-integrate
   animatrona-tracker`) — гейт сырых цветов/теней/transition в UI-коде теперь запускается перед
   `lint`. `themePrefix` указывает на файл `src/app/_components/ui/provider.tsx` (не каталог —

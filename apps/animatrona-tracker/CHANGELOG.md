@@ -7,6 +7,23 @@
 
 ---
 
+## [0.11.16] — 2026-09-08
+
+### Исправлено
+
+- **Дублирование `use-keyboard-shortcuts.ts` с общим хуком `@letar/video-player-react`** —
+  локальный хук горячих клавиш (добавлен в v0.11.15 вместе с покадровой перемоткой) почти
+  дословно повторял `useKeyboardShortcuts` из `libs/video-player-react`, которым уже пользуются
+  `animatrona` и `animatrona-folder-player`. Общий хук расширен опциональными параметрами
+  (`isPlaying` — гейтит `Shift+←/→` на `stepFrame` только при `isPlaying === false`,
+  `toggleTrackMode` — клавиша `T`, `showShortcuts`/`setShowShortcuts` — `?` и `Escape`), полностью
+  обратно совместимо: оба существующих потребителя эти параметры не передают, их поведение не
+  изменилось. `tracker-video-player.tsx` переведён на общий хук, локальный дубль удалён.
+  Playback-speed переведена с индексного `handlePlaybackSpeedChange(speed)` внутри хука на
+  `adjustPlaybackSpeed(delta)`-обёртку в компоненте — тот же паттерн, что уже был в
+  `apps/animatrona/renderer/.../VideoPlayer.tsx`. Тесты расширены в
+  `libs/video-player-react/src/hooks/useKeyboardShortcuts.spec.ts`.
+
 ## [0.11.15] — 2026-09-08
 
 ### Добавлено

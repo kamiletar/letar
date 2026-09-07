@@ -15,12 +15,14 @@ import {
   ChapterList,
   ChapterSkipButton,
   parseSpriteCues,
+  PLAYBACK_SPEEDS,
   type PlaybackSpeed,
   PlayerLoadingOverlay,
   SharedPlayerControls,
   type SpriteCue,
   SubtitleOverlay,
   Tooltip,
+  useKeyboardShortcuts,
 } from '@letar/video-player-react'
 import Link from 'next/link'
 import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -30,7 +32,6 @@ import { getAudioUrl, getFontUrls, getSubtitleUrl, getVideoUrl, toPlayerUrl } fr
 
 import { useAudioSync } from '../_hooks/use-audio-sync'
 import { useChapterNav } from '../_hooks/use-chapter-nav'
-import { useKeyboardShortcuts } from '../_hooks/use-keyboard-shortcuts'
 import { useShakaPlayer } from '../_hooks/use-shaka-player'
 import { useWatchProgress } from '../_hooks/use-watch-progress'
 import { KeyboardShortcutsOverlay } from './keyboard-shortcuts-overlay'
@@ -414,6 +415,21 @@ export function TrackerVideoPlayer({
     }
   }, [])
 
+  const adjustPlaybackSpeed = useCallback(
+    (delta: number) => {
+      const currentIndex = PLAYBACK_SPEEDS.indexOf(playbackRate)
+      if (currentIndex === -1) {
+        return
+      }
+      const newIndex = Math.max(0, Math.min(PLAYBACK_SPEEDS.length - 1, currentIndex + Math.sign(delta)))
+      handlePlaybackSpeedChange(PLAYBACK_SPEEDS[newIndex])
+    },
+    [playbackRate, handlePlaybackSpeedChange],
+  )
+
+  // Общий хук принимает stepFrame(forward: boolean), а Shaka-хук — stepFrame(direction: 1|-1)
+  const stepFrameBool = useCallback((forward: boolean) => stepFrame(forward ? 1 : -1), [stepFrame])
+
   const handleAudioChange = useCallback((index: number) => {
     setAudioTrackIndex(index)
   }, [])
@@ -513,13 +529,12 @@ export function TrackerVideoPlayer({
     videoRef,
     togglePlay,
     skipTime,
-    stepFrame,
-    isPlaying,
     toggleMute,
     toggleFullscreen,
-    handlePlaybackSpeedChange,
-    playbackRate,
+    adjustPlaybackSpeed,
     toggleVideoInfo,
+    stepFrame: stepFrameBool,
+    isPlaying,
     toggleTrackMode,
     showShortcuts,
     setShowShortcuts,
