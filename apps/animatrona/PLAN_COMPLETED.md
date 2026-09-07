@@ -4,6 +4,32 @@
 
 > **Архив обновлён:** 2026-09-07
 
+## Main-часть папочного плеера перенесена в @letar/folder-scan (2026-09-07)
+
+**Контекст:** последний открытый пункт плана «Animatrona Player» из блока «что уже готово» —
+main-процесс папочного режима (внешние сканеры аудио/субтитров, whitelist путей для `media://`,
+сам обработчик протокола, сканирование папки на медиафайлы) ещё жил внутри `apps/animatrona/main/`
+и не был переиспользуем будущим `animatrona-player`.
+
+**Реализация:** `external-audio-scanner.ts`, `external-subtitle-scanner.ts`, `font-matcher.ts`,
+`subtitle-parser.ts`, `fs-utils.ts` перенесены в `libs/folder-scan/src/lib/` без изменения логики
+(только импорты). `allowed-paths.ts` (whitelist) и `media.protocol.ts` (обработчик `media://`)
+обобщены — вместо жёсткой привязки к `app.getPath()` теперь принимают seed-пути/колбэк
+`isPathAllowed` параметром, а в `apps/animatrona/main/protocols/` остались тонкие адаптеры,
+подставляющие Electron-специфичные пути (`getDefaultLibraryPath()`, `app.getPath('temp')`,
+`app.getPath('userData')`). Новый `scanFolderForMedia` вынесен из `fs.handlers.ts`. Добавлен
+интерфейс `MediaProber` с нормализованными `AudioTrack`/`SubtitleTrack`/`VideoTrack`/
+`MediaChapter`/`MediaInfo` — `apps/animatrona/shared/types.ts` теперь ре-экспортирует их вместо
+локальных копий, а `main/ffmpeg/probe.ts` экспортирует `ffprobeProber: MediaProber` как тонкую
+обёртку над существующим `probeFile` (логика ffprobe не тронута — это чисто типовой адаптер).
+`main/src/ffmpeg/` (esbuild-сборка, `vmaf.handlers.ts`/`import-queue-controller.ts`) оставлен как
+есть — это архитектурно отдельная, ранее задокументированная развилка
+([animatrona-dual-build-alias-drift.md](/.claude/docs/animatrona-dual-build-alias-drift.md)),
+трогать не требовалось.
+
+`nx lint`/`typecheck:tsgo`/`build`/`test` animatrona и `nx test`/`lint` folder-scan — все зелёные.
+Коммит `61ba1d00`.
+
 ## Постер в папочном режиме + Episode.name из AniList (2026-09-07)
 
 **Контекст:** аудит `directoryCid` (PLAN.md, Блокер 3) оставлял `Episode.name` открытым с
