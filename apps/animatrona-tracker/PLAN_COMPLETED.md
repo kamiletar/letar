@@ -1,5 +1,31 @@
 # Выполненные задачи — Animatrona Tracker
 
+## Сессия 2026-09-08: theme:check, аудит pressScale, покадровая перемотка
+
+**Аватар-загрузка (закрыта задним числом, реализована 2026-09-07)** — чек-лист Фазы 2.5 отставал
+от кода на день; фича закоммичена `9c7a9a7b`, пункты отмечены `9a91e5c1`.
+
+**`theme:check` подключён** (`10b979a9`) — гейт сырых цветов/теней/transition (`@letar/theme-check`)
+через `nx g @letar/generators:theme-check-integrate`. `themePrefix` указывает прямо на файл
+`src/app/_components/ui/provider.tsx` (нет каталога `src/theme/`, как у `apps/kami`). Первый
+прогон нашёл:
+
+- 14 нарушений `_active: scale()` в теме — сверены со шкалой `pressScale` (`@letar/ui`) и
+  приведены к её шагам; 3 легитимных исключения (мелкие поверхности control'ов
+  чекбокса/радио/close-триггера тега, рост thumb слайдера при захвате) оставлены с комментарием
+  и занесены в `allowedMatches`;
+- 15 нарушений (сырые `transition="prop Ns"` + один `rgba()` в градиенте) в 9 файлах, никогда
+  раньше не проверявшихся — разбиты на `transitionProperty`+`transitionDuration`, `rgba` заменён
+  на `var(--chakra-colors-black-alpha-700)`.
+
+**Покадровая перемотка на паузе** (`f361a923`) — `Shift+←`/`Shift+→` дают шаг 5 кадров, работают
+только когда видео на паузе (без Shift — обычная перемотка на 10с). `stepFrame()` в
+`use-shaka-player.ts` берёт `frameRate` активного видеотрека через
+`player.getVariantTracks()`, дефолт 24fps.
+
+Всё запушено в `origin/main` (`73883d14`), запрошен деплой у `deploy-agent-dev`
+(тред `deploy-animatrona-tracker-20260908`).
+
 ## Nx-кэш `db:*`/`zenstack:generate` отключён (2026-09-04)
 
 В прошлой сессии (см. запись ниже про `Content.category`/`Content.quality`/`Report.reason`)
