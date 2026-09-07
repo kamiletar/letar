@@ -4,6 +4,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.11.3] - 2026-09-08
+
+### Fixed
+
+- **Диалог восстановления черновика (`useFormPersistence`/`FormWithPersistence`) был захардкожен
+  на английском** — "Restore saved data?", "You have unsaved changes from a previous session.",
+  "Start fresh"/"Restore". Дефолты `dialogTitle`/`dialogDescription`/`restoreButtonText`/
+  `discardButtonText` переведены на русский, а сам диалог (`form-persistence.tsx`) теперь читает
+  переопределения через уже существующий `FormI18nProvider`/`useFormI18n` (`@letar/forms-react`)
+  по ключам `formPersistence.restoreDialog.{title,description,restoreButton,discardButton}` —
+  если провайдер не подключён или перевод под ключом не задан, остаётся русский дефолт компонента.
+  Найдено при живой проверке пилота `Form.Steps` на форме дома в `domwellbes`.
+
 ## [2.11.2] - 2026-09-08
 
 ### Fixed

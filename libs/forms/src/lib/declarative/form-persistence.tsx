@@ -1,6 +1,7 @@
 'use client'
 
 import { Button, CloseButton, Dialog, Portal, Text } from '@chakra-ui/react'
+import { useFormI18n } from '@letar/forms-react'
 import { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 
 /**
@@ -29,25 +30,29 @@ export interface FormPersistenceConfig {
 
   /**
    * Dialog title
-   * @default 'Restore saved data?'
+   * @default 'Восстановить сохранённые данные?' (переопределяется через FormI18nProvider —
+   * ключ `formPersistence.restoreDialog.title`)
    */
   dialogTitle?: string
 
   /**
    * Dialog description
-   * @default 'You have unsaved changes from a previous session.'
+   * @default 'У вас есть несохранённые изменения с предыдущей сессии.' (переопределяется через
+   * FormI18nProvider — ключ `formPersistence.restoreDialog.description`)
    */
   dialogDescription?: string
 
   /**
    * Restore button text
-   * @default 'Restore'
+   * @default 'Восстановить' (переопределяется через FormI18nProvider — ключ
+   * `formPersistence.restoreDialog.restoreButton`)
    */
   restoreButtonText?: string
 
   /**
    * Discard button text
-   * @default 'Start fresh'
+   * @default 'Начать заново' (переопределяется через FormI18nProvider — ключ
+   * `formPersistence.restoreDialog.discardButton`)
    */
   discardButtonText?: string
 
@@ -157,6 +162,26 @@ export interface FormPersistenceResult<TData> {
 const STORAGE_PREFIX = 'form-persistence:'
 
 /**
+ * Переводит строку диалога через FormI18nProvider, если он подключён и перевод под ключом
+ * реально задан; иначе — переданный дефолт (русский текст компонента)
+ */
+function localizeOrFallback(i18n: ReturnType<typeof useFormI18n>, key: string, fallback: string): string {
+  if (!i18n) {
+    return fallback
+  }
+
+  try {
+    const translated = i18n.t(key)
+    if (!translated || translated === key) {
+      return fallback
+    }
+    return translated
+  } catch {
+    return fallback
+  }
+}
+
+/**
  * Hook for persisting form data in localStorage
  *
  * Automatically saves form state and shows a dialog
@@ -190,15 +215,35 @@ export function useFormPersistence<TData extends object>(config: FormPersistence
     key,
     debounceMs = 500,
     ttl,
-    dialogTitle = 'Restore saved data?',
-    dialogDescription = 'You have unsaved changes from a previous session.',
-    restoreButtonText = 'Restore',
-    discardButtonText = 'Start fresh',
+    dialogTitle = 'Восстановить сохранённые данные?',
+    dialogDescription = 'У вас есть несохранённые изменения с предыдущей сессии.',
+    restoreButtonText = 'Восстановить',
+    discardButtonText = 'Начать заново',
     clearDraftButtonText = 'Clear draft',
     excludeFields,
   } = config
 
   const storageKey = `${STORAGE_PREFIX}${key}`
+
+  // FormI18nProvider опционален — при его отсутствии (или без перевода под ключом) остаются
+  // русские дефолты выше, а не хардкод на одном языке
+  const i18n = useFormI18n()
+  const resolvedDialogTitle = localizeOrFallback(i18n, 'formPersistence.restoreDialog.title', dialogTitle)
+  const resolvedDialogDescription = localizeOrFallback(
+    i18n,
+    'formPersistence.restoreDialog.description',
+    dialogDescription,
+  )
+  const resolvedRestoreButtonText = localizeOrFallback(
+    i18n,
+    'formPersistence.restoreDialog.restoreButton',
+    restoreButtonText,
+  )
+  const resolvedDiscardButtonText = localizeOrFallback(
+    i18n,
+    'formPersistence.restoreDialog.discardButton',
+    discardButtonText,
+  )
 
   // State
   const [savedData, setSavedData] = useState<TData | null>(null)
@@ -360,17 +405,17 @@ export function useFormPersistence<TData extends object>(config: FormPersistence
           <Dialog.Positioner>
             <Dialog.Content>
               <Dialog.Header>
-                <Dialog.Title>{dialogTitle}</Dialog.Title>
+                <Dialog.Title>{resolvedDialogTitle}</Dialog.Title>
               </Dialog.Header>
               <Dialog.Body>
-                <Text>{dialogDescription}</Text>
+                <Text>{resolvedDialogDescription}</Text>
               </Dialog.Body>
               <Dialog.Footer gap={3}>
                 <Button variant="outline" onClick={rejectRestore}>
-                  {discardButtonText}
+                  {resolvedDiscardButtonText}
                 </Button>
                 <Button colorPalette="blue" onClick={() => acceptRestore()}>
-                  {restoreButtonText}
+                  {resolvedRestoreButtonText}
                 </Button>
               </Dialog.Footer>
               <Dialog.CloseTrigger asChild>
@@ -384,10 +429,10 @@ export function useFormPersistence<TData extends object>(config: FormPersistence
   }, [
     hasSavedData,
     isDialogOpen,
-    dialogTitle,
-    dialogDescription,
-    restoreButtonText,
-    discardButtonText,
+    resolvedDialogTitle,
+    resolvedDialogDescription,
+    resolvedRestoreButtonText,
+    resolvedDiscardButtonText,
     closeDialog,
     rejectRestore,
     acceptRestore,
