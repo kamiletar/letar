@@ -15,7 +15,7 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
-          "cd renderer && next build",
+          "next build renderer",
           "npx webpack --config main/webpack.config.js",
           "npx electron-builder --win"
         ],
