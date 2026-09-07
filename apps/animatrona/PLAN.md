@@ -1808,6 +1808,131 @@ Animatrona: библиотека, каталог, импорт, очередь, 
       корневой `CLAUDE.md`. Пункт был описан со слов наблюдения на 2026-07-30 — либо файл убрали
       без обновления плана, либо конфликт был локальным артефактом IDE. Действие не требуется
 
+## Animatrona Viewer — отдельное приложение для IPFS-просмотра
+
+**Статус:** план (2026-09-07), к реализации не приступали.
+**Решено с владельцем (2026-09-07):**
+
+| Вопрос                               | Решение                                                                                                                                                                                                                                                 |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Отношение к «Animatrona Player» выше | **Отдельное третье приложение**, не расширение папочного плеера. Три продукта по аналогии с K-Lite Lite/Full/Mega: `animatrona-player` (папки, без IPFS) — Lite; `animatrona-viewer` (IPFS-просмотр, без импорта) — Standard; `animatrona` (всё) — Mega |
+| Судьба самой Animatrona              | **Не трогаем** — остаётся полнофункциональной (импорт + кодирование + просмотр + библиотека). У релиз-мейкеров тоже есть потребность смотреть залитое, отбирать функциональность у них незачем                                                          |
+| IPFS-доступ у нового приложения      | **Полный узел Kubo** (не HTTP-gateway) — участвует в раздаче (сидирует), соответствует духу P2P-проекта, не зависит от доступности стороннего шлюза                                                                                                     |
+| Имя nx-проекта                       | `apps/animatrona-viewer` — по аналогии с `animatrona-player`, не путается с `animatrona-tracker` (это отдельный веб-каталог/модерация, не desktop-клиент)                                                                                               |
+
+**Идея:** подавляющему большинству пользователей не нужны импорт с Rutracker/торрентов, ffmpeg
+транскодирование, профили кодирования, сборка MKV — они хотят посмотреть уже готовый релиз,
+которым кто-то поделился через IPFS. Сейчас за это приходится ставить тот же инсталлятор
+(**282 МБ**), что и релиз-мейкеры используют для создания контента. Третье приложение —
+IPFS-библиотека + плеер + подписки/discover, без единого байта кода импорта/кодирования.
+
+### 1. Инвентаризация (факты по коду на 2026-09-07, без предложений по переносу)
+
+**Renderer-роуты** (`apps/animatrona/renderer/src/app/*`, оценка по строкам):
+
+| Категория              | Роуты                                                                                                  | Файлов | Строк |
+| ---------------------- | ------------------------------------------------------------------------------------------------------ | ------ | ----- |
+| **viewer**             | `discover`, `library`, `party`, `player`, `watch`, `subscriptions`, `history`, `friends`, `reputation` | 75     | 8 700 |
+| **creator/import**     | `import`, `import-cid`, `import-rutracker`, `transcode`, `test-encoding`, `torrents`                   | 16     | 4 184 |
+| **settings (смешано)** | `settings/_settings/*` — 14 карточек, `settings/profiles/*`                                            | 82     | 9 549 |
+
+⚠️ `torrents` — про статус раздачи/сидирования (P2P), не про просмотр напрямую; нужно смотреть
+содержимое отдельно при переносе — может понадобиться и viewer'у (он тоже сидирует через Kubo).
+
+**`settings/_settings/*` — 14 карточек, требуют ручной классификации по имени файла:**
+creator-only: `EncodingProfilesCard`, `TranscodingSettingsCard`, `QBittorrentSettingsCard`,
+`TorrentSettingsCard`, `TrackerPublishingCard`. viewer-relevant: `LibrarySettingsCard`,
+`PlayerSettingsCard`, `ThemeSettingsCard`, `MobileAccessCard`, `TraySettingsCard`,
+`UpdateSettingsCard`(+`New`), `FederationCard`, `P2PSharingCard` (сидирование — нужно и viewer'у).
+
+**IPC-хендлеры** (`apps/animatrona/main/ipc/*.handlers.ts`, 42 файла) — классификация по имени,
+не по содержимому (требует ревизии при реализации):
+
+- **creator-only** (явно про импорт/кодирование): `import-queue.handlers`, `transcode.handlers`,
+  `parallel-transcode.handlers`, `ffmpeg.handlers` (частично — probe нужен и viewer'у),
+  `rutracker.handlers`, `restore-tracks.handlers`, `audio-reencode.handlers`,
+  `intro-detector.handlers`, `vmaf.handlers`, `web-export.handlers`, `export-queue.handlers`,
+  `templates.handlers`.
+- **viewer-relevant**: `ipfs.handlers`, `anime-manifest.handlers`, `manifest.handlers`,
+  `library.handlers`, `subscription.handlers`, `federation.handlers`, `watch-party.handlers`,
+  `history.handlers`, `friends.handlers`, `reputation.handlers`, `bonus.handlers`,
+  `achievements.handlers`, `franchise.handlers`, `presence.handlers`, `remote-pin.handlers`,
+  `subtitle.handlers`, `stats.handlers`, `shikimori.handlers` (поиск/метаданные при просмотре).
+- **общие/инфраструктурные** (нужны обоим): `app.handlers`, `dialog.handlers`, `fs.handlers`,
+  `window.handlers`, `tray.handlers`, `updater.handlers`, `deep-link.handlers`, `logs.handlers`,
+  `scheduler.handlers`, `profile.handlers`, `mobile-server.handlers`, `torrent.handlers`,
+  `tracker.handlers`, `publisher.handlers` (публикация — вероятно creator-only, требует проверки).
+
+**`main/services/*` — крупнейшие директории (нетривиальный вес переноса):**
+
+| Директория/файл                                                                    | Вес    | Категория (предварительно)                                     |
+| ---------------------------------------------------------------------------------- | ------ | -------------------------------------------------------------- |
+| `ipfs/anime-directory-builder.ts`                                                  | 62 КБ  | viewer — строит структуру раздачи для чтения манифеста         |
+| `ipfs/unified-ipfs-service.ts`                                                     | 18 КБ  | viewer — обёртка над IPFS-операциями                           |
+| `ipfs/pin-manager.ts`, `pin-status-service.ts`, `pin-normalizer.ts`                | ~29 КБ | viewer — участие в раздаче (сидирование через P2P)             |
+| `kubo/kubo-service.ts`                                                             | 27 КБ  | viewer — обёртка над Kubo-нодой, нужна и creator'у (общий код) |
+| `kubo/kubo-daemon.ts`                                                              | 26 КБ  | viewer — запуск/жизненный цикл Kubo-процесса, общий код        |
+| `kubo/peer-sync-service.ts`                                                        | 16 КБ  | viewer — P2P синхронизация пиров                               |
+| `import/*`, `transcode-manager.ts`, `parallel-transcode-manager.ts`, `rutracker/*` | —      | **creator-only**, не переносить                                |
+| `shikimori/*`                                                                      | —      | общее — поиск метаданных нужен и при импорте, и при discover   |
+| `federation/*`                                                                     | —      | viewer — подписки на чужие раздачи/трекеры                     |
+| `mobile-server/*`                                                                  | —      | общее — раздача на мобильные клиенты в локальной сети          |
+
+**`schema.zmodel` — модели верхнего уровня (38 моделей):**
+
+- **viewer**: `Anime`, `Season`, `Episode`, `Genre`/`GenreOnAnime`, `Theme`/`ThemeOnAnime`,
+  `AnimeRelation`, `Franchise`, `WatchProgress`, `DiscoverWatchProgress`, `Subscription`,
+  `Tracker`, `FederatedContent`, `FederationSettings`, `File`, `PinStatus`, `AudioTrack`,
+  `SubtitleTrack`, `SubtitleFont` (дорожки уже готового релиза — не создаются, только читаются),
+  `UserStats`, `DailyStats`, `UserReputation`, `UserAchievement`, `AchievementProgress`,
+  `UserBonusPoints`, `BonusTransaction`, `LocalUserProfile`, `Friend`, `FriendRequest`,
+  `ShikimoriStudio`/`ShikimoriPerson`/`ShikimoriCharacter`, `SyncQueueItem`, `Settings` (частично).
+- **creator-only**: `ImportError`, `ImportQueueItem`, `TorrentDownload`, `EncodingProfile`.
+- Пересечение почти полное — БД у viewer'а нужна практически такая же тяжёлая (SQLite+Prisma+
+  ZenStack+миграции), в отличие от папочного `animatrona-player`, у которого её нет вовсе
+  (localStorage). **Это ключевое архитектурное отличие от уже реализованного плана Player** —
+  здесь сокращения веса на БД не будет, экономия идёт только за счёт отсутствия ffmpeg/кодеков.
+
+### 2. Чего НЕТ готового (в отличие от Player, где `@letar/video-player-core/react` уже переиспользуемы)
+
+- **Нет общей библиотеки для IPFS/Kubo** — весь код в `apps/animatrona/main/services/ipfs/` и
+  `kubo/` (~180 КБ суммарно по перечисленным выше файлам), ни один файл не вынесен в `libs/`.
+  Перенос в новый `libs/ipfs-kubo-core` (по аналогии с `libs/folder-scan`) — предварительное
+  условие, иначе получится вторая копия, которая разъедется с оригиналом (тот же урок, что
+  зафиксирован в решении «Общий код» для Player).
+- **Нет разделения `unified-ipfs-service.ts`/`kubo-service.ts` на «нужно для publish» vs «нужно
+  для read»** — не проверялось, требует чтения содержимого перед переносом.
+- **`kubo.exe` (84 МБ) уже используется как отдельный бинарь** — в отличие от Player, который
+  ЗАМЕНЯЕТ ffprobe на `mediainfo.js`, здесь Kubo остаётся (по решению владельца — полный узел),
+  экономии на этом компоненте не будет. Реальная экономия — только `ffmpeg.exe` (202 МБ, если
+  Shaka Player справляется с уже готовыми (транскодированными) контейнерами без доп. кодеков) и
+  отсутствие Prisma-миграций/инструментов импорта/UI импорта.
+
+### 3. Оценка веса (предварительно, требует уточнения после реального разделения)
+
+| Компонент              | Animatrona (текущая) | Animatrona Viewer (оценка)                                                                                                                              |
+| ---------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ffmpeg.exe`           | 202 МБ               | нет (просмотр — работа Shaka Player, не ffmpeg)                                                                                                         |
+| `ffprobe.exe`          | 193 МБ               | под вопросом — нужен ли вообще для чтения уже готового манифеста (метаданные дорожек уже в IPFS JSON, см. «Принцип минимума БД» в CLAUDE.md приложения) |
+| `kubo.exe`             | 84 МБ                | **остаётся** (решение владельца — полный узел)                                                                                                          |
+| SQLite/Prisma/миграции | есть                 | **остаётся** (модели почти те же, см. выше)                                                                                                             |
+| **Итог**               | ~282 МБ              | ориентировочно 80–130 МБ (грубая прикидка, без реального прогона)                                                                                       |
+
+### 4. Следующие шаги (для будущей сессии — не начинать без прямой команды владельца)
+
+- [ ] Прочитать содержимое `unified-ipfs-service.ts`/`kubo-service.ts`/`kubo-daemon.ts` целиком —
+      определить реальную границу read/write API (что нужно только для публикации новых релизов).
+- [ ] Решить: `libs/ipfs-kubo-core` — общая библиотека для main-процесса Animatrona + Viewer +
+      Tracker (веб, если у него тоже что-то похожее) — или пока только Animatrona+Viewer.
+- [ ] Уточнить объём `ffprobe`-зависимости у viewer'а — можно ли полностью обойтись метаданными
+      из IPFS-манифеста без локального probe готового файла.
+- [ ] Расписать разделение `settings/_settings/*` по карточкам явно (не по названию, по факту
+      использования — что читает/пишет `EncodingProfile`/`ImportQueueItem` и т.п.).
+- [ ] Только после этого — `nx g @letar/generators:electron-app animatrona-viewer` и перенос по
+      готовому списку, тем же паттерном, что уже отработан на `@letar/folder-scan` (перенос →
+      обобщение через интерфейсы там, где Viewer и Animatrona расходятся — например read-only vs
+      read-write доступ к Kubo).
+
 ## Открытые задачи
 
 - [ ] ⚠️ **Открытый вопрос: `nx dev animatrona` (интерактивный Electron dev через nextron)
