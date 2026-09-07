@@ -4,6 +4,22 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.11.1] - 2026-09-07
+
+### Fixed
+
+- **`@tanstack/react-table` рассинхрон версии ломал `next build` у потребителей `Form.Table`/
+  `field-data-grid`** — `libs/forms/package.json` держал собственный `^9.1.2` в `dependencies`,
+  корень монорепо уже был на `^9.2.4`. Код (`field-data-grid.tsx`, `create-form.tsx`) написан под
+  API v9.2.4 (`getIsAllPageRowsSelected`, `getFilterValue`/`setFilterValue`,
+  `getCanSort`/`getToggleSortingHandler`, `getSize`/`getResizeHandler`, `previousPage`/`nextPage`,
+  `size` в `ColumnDef`, `onSortingChange` в `TableOptions`). `nx typecheck:tsgo` этого не видел
+  (другой чекер), а собственный TS-чекер `next build` — видел, у любого потребителя без
+  `typescript.ignoreBuildErrors`. Версия синхронизирована с корневой (`^9.2.4`), подтверждено
+  чистым `nx build form-develop-app` (`/data-grid-demo`, `/table-editor-demo`) без обхода.
+  Обходы у `label-printer-desktop`/`animatrona-player` (`ignoreBuildErrors: true`) теперь можно
+  снимать — не их зона, сообщено отдельно.
+
 ## [2.11.0] - 2026-09-06
 
 ### Added

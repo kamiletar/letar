@@ -6,6 +6,17 @@
 
 ## Backlog (запросы от агентов)
 
+### ✅ [2026-09-07] `@tanstack/react-table` рассинхрон версии ломает `next build` (не `tsgo`) (от animatrona-dev)
+
+- **Запросил:** animatrona-dev (msg 1263, bug-report)
+- **Статус:** закрыто (v2.11.1, 2026-09-08). `"@tanstack/react-table"` в `libs/forms/package.json`
+  забампан `^9.1.2` → `^9.2.4` в синхрон с корнем + `bun install`. Подтверждено чистым
+  `nx build form-develop-app --skip-nx-cache` (`/data-grid-demo`, `/table-editor-demo`
+  компилируются без TS-ошибок) — версия была единственной причиной, код за пределы API v9.1.x не
+  выходил. Обходы `ignoreBuildErrors: true` у `label-printer-desktop`/`animatrona-player`/шаблона
+  `generators:electron-app` теперь избыточны — их зона, снятие не входит в эту задачу, сообщено
+  координатору отдельным пунктом.
+
 ## ✅ [2026-09-04] Миграция `zenstack-form-plugin` на нативные возможности ZModel
 
 - **Инициатор:** владелец репозитория. Повод — разбор msg 1102 (`domwellbes-dev`): узкий баг

@@ -544,7 +544,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.184.24",
+      "version": "0.184.25",
       "dependencies": {
         "@letar/analytics": "workspace:*",
         "@letar/consent": "workspace:*",
@@ -1118,7 +1118,7 @@
       "name": "@letar/forms",
       "version": "2.11.0",
       "dependencies": {
-        "@tanstack/react-table": "^9.1.2",
+        "@tanstack/react-table": "^9.2.4",
         "@tanstack/react-virtual": "^3.13.23",
       },
       "devDependencies": {
@@ -1293,7 +1293,7 @@
     },
     "libs/generators": {
       "name": "@letar/generators",
-      "version": "0.1.3",
+      "version": "0.1.4",
     },
     "libs/github-releases": {
       "name": "@letar/github-releases",
