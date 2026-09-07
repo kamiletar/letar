@@ -12,7 +12,6 @@ export { AUDIO_SYNC_THRESHOLD, HIDE_CONTROLS_TIMEOUT, SKIP_TIME, VOLUME_STEP } f
 
 // Хуки (для расширения плеера)
 export {
-  useAudioSync,
   useAutoHideControls,
   useKeyboardShortcuts,
   usePlayerControls,

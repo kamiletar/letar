@@ -2,7 +2,7 @@
  * Экспорт хуков для VideoPlayer
  *
  * 4 хука re-exported из @letar/video-player-react (shared)
- * 3 хука остаются локальными (Electron-специфичные)
+ * 1 хук остаётся локальным (Electron-специфичный)
  */
 
 // Shared хуки из библиотеки
@@ -17,9 +17,6 @@ export type {
   UsePlayerStateReturn,
 } from '@letar/video-player-react'
 
-// Electron-специфичные хуки
-export { useAudioSync } from './useAudioSync'
-export type { UseAudioSyncOptions } from './useAudioSync'
-
+// Electron-специфичный хук
 export { useSubtitleManagement } from './useSubtitleManagement'
 export type { UseSubtitleManagementOptions, UseSubtitleManagementReturn } from './useSubtitleManagement'
