@@ -6,7 +6,7 @@
  * определение первого кадра для корректного показа/скрытия лоадера.
  */
 
-import { type RefObject, useEffect, useRef, useState } from 'react'
+import { type RefObject, useCallback, useEffect, useRef, useState } from 'react'
 
 interface UseShakaPlayerOptions {
   /** URL видео (DASH/HLS/MP4) */
@@ -46,6 +46,12 @@ interface UseShakaPlayerReturn {
   setIsVideoBlocked: (v: boolean) => void
   /** Установить isLoading */
   setIsLoading: (v: boolean) => void
+  /**
+   * Покадровая перемотка (на паузе). Ставит видео на паузу и сдвигает currentTime на
+   * `frames` кадров в сторону `direction`, используя frameRate активного видеотрека Shaka
+   * Player (`getVariantTracks()`), либо 24fps по умолчанию, если Shaka его не сообщает.
+   */
+  stepFrame: (direction: 1 | -1, frames?: number) => void
 }
 
 /** Ждём реальный первый кадр видео */
@@ -72,6 +78,7 @@ export function useShakaPlayer({
   initialDuration = 0,
 }: UseShakaPlayerOptions): UseShakaPlayerReturn {
   const videoRef = useRef<HTMLVideoElement | null>(null)
+  const playerRef = useRef<{ getVariantTracks: () => { active: boolean; frameRate: number | null }[] } | null>(null)
   const [shakaModule, setShakaModule] = useState<unknown>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -129,6 +136,7 @@ export function useShakaPlayer({
     }
 
     const player = new Shaka.Player()
+    playerRef.current = player
     player.attach(video)
     player.addEventListener('error', (event: { detail?: { message?: string } }) => {
       if (isMounted) {
@@ -220,10 +228,23 @@ export function useShakaPlayer({
       video.removeEventListener('canplay', handleCanPlay)
       player.unload()
       player.destroy()
+      playerRef.current = null
       video.remove()
       videoRef.current = null
     }
   }, [shakaModule, videoUrl])
+
+  const stepFrame = useCallback((direction: 1 | -1, frames = 5) => {
+    const video = videoRef.current
+    if (!video) {
+      return
+    }
+    video.pause()
+    const activeTrack = playerRef.current?.getVariantTracks().find((t) => t.active)
+    const frameRate = activeTrack?.frameRate || 24
+    const step = (frames / frameRate) * direction
+    video.currentTime = Math.max(0, Math.min(video.currentTime + step, video.duration || video.currentTime))
+  }, [])
 
   return {
     videoRef,
@@ -238,5 +259,6 @@ export function useShakaPlayer({
     isVideoBlocked,
     setIsVideoBlocked,
     setIsLoading,
+    stepFrame,
   }
 }

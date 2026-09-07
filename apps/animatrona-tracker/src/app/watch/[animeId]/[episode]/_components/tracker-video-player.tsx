@@ -198,6 +198,7 @@ export function TrackerVideoPlayer({
     isMuted,
     isVideoBlocked,
     setIsVideoBlocked,
+    stepFrame,
   } = useShakaPlayer({
     videoUrl,
     startTime,
@@ -512,6 +513,8 @@ export function TrackerVideoPlayer({
     videoRef,
     togglePlay,
     skipTime,
+    stepFrame,
+    isPlaying,
     toggleMute,
     toggleFullscreen,
     handlePlaybackSpeedChange,

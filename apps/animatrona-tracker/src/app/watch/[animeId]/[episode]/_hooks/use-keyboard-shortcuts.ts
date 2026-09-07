@@ -2,7 +2,8 @@
  * Хук горячих клавиш плеера
  *
  * Space/K — play/pause, стрелки — перемотка/громкость,
- * M — mute, F — fullscreen, [/] — скорость, I — инфо, T — дорожки, ? — помощь.
+ * Shift+стрелки — покадровая перемотка на паузе (5 кадров), M — mute, F — fullscreen,
+ * [/] — скорость, I — инфо, T — дорожки, ? — помощь.
  */
 
 import { PLAYBACK_SPEEDS, type PlaybackSpeed } from '@letar/video-player-react'
@@ -15,6 +16,10 @@ interface UseKeyboardShortcutsOptions {
   togglePlay: () => void
   /** Пропустить N секунд */
   skipTime: (seconds: number) => void
+  /** Покадровая перемотка (только на паузе) */
+  stepFrame: (direction: 1 | -1, frames?: number) => void
+  /** Играет ли видео сейчас — Shift+стрелки работают только на паузе */
+  isPlaying: boolean
   /** Переключить mute */
   toggleMute: () => void
   /** Переключить fullscreen */
@@ -37,6 +42,8 @@ export function useKeyboardShortcuts({
   videoRef,
   togglePlay,
   skipTime,
+  stepFrame,
+  isPlaying,
   toggleMute,
   toggleFullscreen,
   handlePlaybackSpeedChange,
@@ -60,11 +67,19 @@ export function useKeyboardShortcuts({
           break
         case 'ArrowLeft':
           e.preventDefault()
-          skipTime(-10)
+          if (e.shiftKey && !isPlaying) {
+            stepFrame(-1)
+          } else {
+            skipTime(-10)
+          }
           break
         case 'ArrowRight':
           e.preventDefault()
-          skipTime(10)
+          if (e.shiftKey && !isPlaying) {
+            stepFrame(1)
+          } else {
+            skipTime(10)
+          }
           break
         case 'ArrowUp':
           e.preventDefault()
@@ -133,6 +148,8 @@ export function useKeyboardShortcuts({
   }, [
     togglePlay,
     skipTime,
+    stepFrame,
+    isPlaying,
     toggleMute,
     toggleFullscreen,
     handlePlaybackSpeedChange,

@@ -21,6 +21,8 @@ const SHORTCUT_GROUPS: { title: string; items: ShortcutItem[] }[] = [
       { keys: ['Space', 'K'], description: 'Пауза / Воспроизведение' },
       { keys: ['←'], description: 'Назад на 10 секунд' },
       { keys: ['→'], description: 'Вперёд на 10 секунд' },
+      { keys: ['Shift', '←'], description: 'На паузе — назад на 5 кадров' },
+      { keys: ['Shift', '→'], description: 'На паузе — вперёд на 5 кадров' },
       { keys: ['['], description: 'Уменьшить скорость' },
       { keys: [']'], description: 'Увеличить скорость' },
     ],
