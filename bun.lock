@@ -418,6 +418,17 @@
         "react-native-worklets": "0.12.1",
       },
     },
+    "apps/animatrona-player": {
+      "name": "@letar/animatrona-player",
+      "version": "0.1.0",
+      "dependencies": {
+        "@letar/icon-generator": "workspace:*",
+      },
+      "devDependencies": {
+        "electron": "44.2.0",
+        "electron-builder": "26.15.3",
+      },
+    },
     "apps/animatrona-tracker": {
       "name": "@letar/animatrona-tracker",
       "version": "0.11.12",
@@ -533,7 +544,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.184.18",
+      "version": "0.184.24",
       "dependencies": {
         "@letar/analytics": "workspace:*",
         "@letar/consent": "workspace:*",
@@ -561,7 +572,7 @@
     },
     "apps/domwellbes-e2e": {
       "name": "@letar/domwellbes-e2e",
-      "version": "0.0.24",
+      "version": "0.0.25",
       "dependencies": {
         "@letar/e2e-testing": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -2477,6 +2488,8 @@
     "@letar/animatrona-landing-e2e": ["@letar/animatrona-landing-e2e@workspace:apps/animatrona-landing-e2e"],
 
     "@letar/animatrona-mobile": ["@letar/animatrona-mobile@workspace:apps/animatrona-mobile"],
+
+    "@letar/animatrona-player": ["@letar/animatrona-player@workspace:apps/animatrona-player"],
 
     "@letar/animatrona-shared": ["@letar/animatrona-shared@workspace:libs/animatrona-shared"],
 

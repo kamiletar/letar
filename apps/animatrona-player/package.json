@@ -1,0 +1,19 @@
+{
+  "name": "@letar/animatrona-player",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Плеер аниме из папки — без импорта, IPFS и транскодирования",
+  "author": "Kami Letar",
+  "main": "app/background.js",
+  "nx": {
+    "name": "animatrona-player",
+    "implicitDependencies": ["@letar/forms", "@letar/icon-generator"]
+  },
+  "dependencies": {
+    "@letar/icon-generator": "workspace:*"
+  },
+  "devDependencies": {
+    "electron": "44.2.0",
+    "electron-builder": "26.15.3"
+  }
+}

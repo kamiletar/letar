@@ -1,0 +1,42 @@
+{
+  "name": "animatrona-player",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/animatrona-player",
+  "projectType": "application",
+  "tags": ["type:app", "scope:animatrona-player", "owner:letar", "platform:electron"],
+  "targets": {
+    "dev": {
+      "command": "node scripts/dev.js",
+      "options": {
+        "cwd": "apps/animatrona-player"
+      }
+    },
+    "build:win": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "next build renderer",
+          "npx webpack --config main/webpack.config.js",
+          "npx electron-builder --win"
+        ],
+        "cwd": "apps/animatrona-player",
+        "parallel": false
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": [
+          "apps/animatrona-player/main/**/*.{ts,tsx}",
+          "apps/animatrona-player/renderer/**/*.{ts,tsx}"
+        ]
+      }
+    },
+    "typecheck:tsgo": {
+      "command": "tsgo --project apps/animatrona-player/tsconfig.json --noEmit"
+    },
+    "format": {
+      "command": "dprint fmt apps/animatrona-player/**/*.{ts,tsx,json}"
+    }
+  }
+}
