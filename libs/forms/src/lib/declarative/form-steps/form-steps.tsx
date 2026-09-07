@@ -2,7 +2,7 @@
 
 import { Steps } from '@chakra-ui/react'
 import { type StepPersistenceConfig, useStepNavigation, useStepPersistence, useStepState } from '@letar/forms-react'
-import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { type ReactNode, useCallback, useMemo, useRef, useState } from 'react'
 import { useDeclarativeForm } from '../form-context'
 import { FormStepsContext, type FormStepsContextValue } from './form-steps-context'
 
@@ -145,14 +145,22 @@ export function FormSteps({
   const hiddenFieldsRef = useRef(hiddenFields)
   const onStepCompleteRef = useRef(onStepComplete)
 
-  // Запись в refs вынесена из тела рендера в эффект без зависимостей — значения читаются
-  // только лениво (геттер контекста ниже, обработчики), а не синхронно в текущем рендере,
-  // поэтому обновление после коммита сохраняет исходное поведение.
-  useEffect(() => {
-    sortedStepsRef.current = sortedSteps
-    hiddenFieldsRef.current = hiddenFields
-    onStepCompleteRef.current = onStepComplete
-  })
+  // ⚠️ Запись должна происходить синхронно в теле рендера, не в useEffect.
+  // Причина: contextValue (useMemo ниже) пересчитывается в ТОМ ЖЕ рендере, где меняется
+  // stepCount (например 0 → 4, когда все Step регистрируются одним батчем при монтировании).
+  // Provider уведомляет consumers (FormStepsIndicator и др.) синхронно в этом же проходе
+  // рендера — до того, как успевает отработать useEffect. Запись в ref внутри useEffect
+  // всегда на один рендер позади: consumer читает geter `steps` и получает ПРЕДЫДУЩЕЕ значение
+  // (пустой массив), а следующего рендера, который обновил бы ref, может больше не быть —
+  // индикатор шагов навсегда остаётся пустым. Мутация ref в теле рендера безопасна здесь:
+  // она не читается синхронно в этом же рендере (только лениво через геттер) и не вызывает
+  // побочных setState.
+  // oxlint-disable-next-line react/refs
+  sortedStepsRef.current = sortedSteps
+  // oxlint-disable-next-line react/refs
+  hiddenFieldsRef.current = hiddenFields
+  // oxlint-disable-next-line react/refs
+  onStepCompleteRef.current = onStepComplete
 
   // Context value — depends only on stable values
   // sortedSteps, hiddenFields and onStepComplete via refs
