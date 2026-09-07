@@ -1650,3 +1650,12 @@ peer-диапазон в `libs/query-provider/package.json` на будущее)
 Отдельные коммиты по scope: `2395bb06` (mcp-test-kit, новая либа), `27c3b2af` (studio-mcp),
 `f6c41c9e` (glitchtip-mcp), `fe6bc781` (umami-mcp), `66d0c575` (studio-time-mcp), `323e913b`
 (form-mcp).
+
+**Дополнение 2026-09-08: `infra/media-server` redis — `noeviction` вместо `allkeys-lru`.**
+GlitchTip-подобный лог-варнинг Redis у BullMQ-очереди транскода
+(`infra/media-server/docker-compose.production.yml`, сервис `redis`/`media-redis`): под
+memory-pressure `allkeys-lru` молча вытесняет из памяти сами задания вместо отказа в записи —
+потеря video-job без единой ошибки в логах приложения (стандартная рекомендация BullMQ,
+https://docs.bullmq.io/guide/going-to-production#maxmemory-policy). На момент фикса очередь
+пустая (0 job'ов за 30 дней) — баг непроявленный, поправлено превентивно. Коммит `33245f69`,
+deploy-request отправлен `deploy-agent-dev` (тред `deploy-media-server-redis-noeviction`).
