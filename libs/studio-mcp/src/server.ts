@@ -192,6 +192,54 @@ export function createStudioAdminMcpServer(): McpServer {
     },
   )
 
+  const TIME_STATUS = z.enum(['DRAFT', 'APPROVED', 'INVOICED'])
+
+  server.tool(
+    'studio_project_time_entries',
+    [
+      'Записи времени проекта — для аудита ПЕРЕД переключением billingMode на HOURLY или ручной',
+      'корректировкой банка включённых часов: проверить, нет ли среди APPROVED-записей старых часов,',
+      'уже оплаченных по фикс-прайсу (billable должен быть false — иначе они уйдут в следующий',
+      'почасовой счёт). Список неограничен по размеру — на больших проектах фильтруй status/billable.',
+    ].join(' '),
+    {
+      id: z.string().min(1),
+      status: TIME_STATUS.optional(),
+      billable: z.boolean().optional(),
+    },
+    async ({ id, status, billable }) => {
+      const res = await studioAdminRequest({
+        path: `/api/mcp/admin/projects/${id}/time-entries`,
+        query: { status, billable: billable === undefined ? undefined : String(billable) },
+      })
+      if (!res.ok) {
+        return errorText(`❌ studio_project_time_entries(${id}): ${pretty(res.json)}`)
+      }
+      return text(pretty(res.json.data))
+    },
+  )
+
+  server.tool(
+    'studio_project_set_included_hours',
+    [
+      'Разовая ручная корректировка банка включённых часов проекта (§11.19) — НЕ штатное пополнение',
+      '(это делает крон абонентки на каждый цикл). Используй при переводе проекта на HOURLY после того,',
+      'как банк уже накопился по старым правилам, или чтобы вручную вернуть/списать часы клиенту.',
+    ].join(' '),
+    { id: z.string().min(1), hours: z.number().min(0).describe('Новый остаток банка в часах (заменяет текущий)') },
+    async ({ id, hours }) => {
+      const res = await studioAdminRequest({
+        method: 'PATCH',
+        path: `/api/mcp/admin/projects/${id}/included-hours`,
+        body: { balanceSec: Math.round(hours * 3600) },
+      })
+      if (!res.ok) {
+        return errorText(`❌ studio_project_set_included_hours(${id}): ${pretty(res.json)}`)
+      }
+      return text(`✅ Банк включённых часов обновлён.\n\n${pretty(res.json.data)}`)
+    },
+  )
+
   // ─── Абонентки (RecurringInvoice) ───────────────────────────────────────────
 
   server.tool(
