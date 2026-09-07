@@ -230,6 +230,31 @@ nx g @letar/generators:electron-app animatrona-player --displayName="Animatrona 
 (`animatrona`, `label-printer-desktop`, `poster-microtext-desktop`, `animatrona-player`) — завести
 такой скилл стоит, задача записана в §13.
 
+- [x] Каркас сгенерирован (2026-09-07): `apps/animatrona-player`, `nx lint` /
+      `nx typecheck:tsgo` / `nx build:win` — зелёные, установщик собран (**112 МБ** unpacked-базы,
+      без единой либы плеера — ориентир из §2 «≤130 МБ» пока не под угрозой).
+      **Найден и исправлен реальный баг генератора** (не специфичный для этого приложения — ловит
+      ЛЮБОЙ свежесгенерированный `electron-app`): таргет `build:win` делал `cd renderer && next
+      build` без явного пути. У `renderer/` нет своего `package.json`, поэтому Next резолвит
+      корень проекта через подъём к ближайшему `package.json` — попадает на `apps/<app>/`
+      (на уровень выше `renderer/`), не находит там `app/` и падает `Couldn't find any pages or
+      app directory`. У уже существующих Electron-приложений (`label-printer-desktop` и др.) баг
+      маскировался — там `apps/<app>/app/` случайно существует как каталог **скомпилированного
+      main-процесса** (`background.js`), и его самого существования достаточно, чтобы проверка
+      Next не бросила исключение — реальная сборка страниц при этом шла бы из неверного корня.
+      Фикс — `next build renderer` (относительный путь как позиционный аргумент, без `cd`) и в
+      `libs/generators/src/generators/electron-app/files/project.json.template`, и в уже
+      сгенерированном `apps/animatrona-player/project.json`.
+      Заодно всплыл сквозной баг `@letar/forms`/`@letar/forms-core` (не наш, докладываю
+      отдельно forms-coordinator-dev): собственный typecheck `next build` (не `tsgo`) валит
+      declarative table-поле (`field-data-grid.tsx`) — типы `@tanstack/react-table` разошлись с
+      версией, под которую писался код. `nx typecheck:tsgo` этой проблемы не видит (другой чекер).
+      Обход — `typescript: { ignoreBuildErrors: true }` в `next.config.js`, тот же паттерн уже стоял
+      в `label-printer-desktop` по той же причине; добавлен и в шаблон генератора, и в это
+      приложение — иначе каждое новое Electron-приложение будет натыкаться на то же самое.
+      ⚠️ GUI-уровень (открытие окна, клики) не проверялся — недоступно в сендбоксе Claude Code
+      (`.claude/rules/electron.md`), нужен живой запуск `nx dev animatrona-player` у владельца.
+
 - [ ] Подключить `@letar/folder-player-react`, `@letar/folder-scan`, `@letar/video-player-react`,
       `@letar/video-player-core`, `@letar/electron-storage`
 - [ ] `MediaInfoWasmProber` на `mediainfo.js`; тест-сравнение с `FfprobeProber` (см. риск в §3)
