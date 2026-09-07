@@ -1,7 +1,7 @@
 'use client'
 
 import type { TranslateFunction, TranslateParams } from '@letar/forms-core/i18n'
-import { createFormErrorMap } from '@letar/forms-core/i18n'
+import { createBuiltinTranslateFunction, createFormErrorMap } from '@letar/forms-core/i18n'
 import { createContext, type ReactNode, useContext, useEffect } from 'react'
 import { z } from 'zod/v4'
 
@@ -42,8 +42,11 @@ interface FormI18nProviderProps {
   /**
    * Автоматически настроить глобальный Zod error map для i18n
    *
-   * При включении, Zod ошибки будут переводиться через функцию t()
-   * с ключами вида `validation.{code}.{origin?}`
+   * При включении, Zod ошибки переводятся через `t()` с ключами вида
+   * `validation.{code}.{origin?}`. Если `t` не задан, или не находит перевод для
+   * конкретного ключа, используется встроенный словарь (ru/en, см.
+   * `createBuiltinTranslateFunction`) по текущей `locale` — так `setupZodErrorMap`
+   * работает «из коробки» и в приложениях без next-intl.
    *
    * @example
    * ```json
@@ -95,15 +98,33 @@ export function FormI18nProvider({ t, locale, children, setupZodErrorMap = false
   // Fallback t-функция: возвращает ключ как есть (без перевода)
   const resolvedT: TranslateFunction = t ?? ((key: string) => key)
 
-  // Настраиваем глобальный Zod error map при включённом флаге
+  // Настраиваем глобальный Zod error map при включённом флаге.
+  // t (если задан приложением) пробуется первым, встроенный словарь по locale — fallback.
   useEffect(() => {
-    if (setupZodErrorMap && t) {
-      const errorMap = createFormErrorMap({ t })
-      // Type assertion: наш error map совместим с Zod v4 API,
-      // но TypeScript не может вывести это автоматически
-      z.config({ customError: errorMap as z.core.$ZodErrorMap<z.core.$ZodIssue> })
+    if (!setupZodErrorMap) {
+      return
     }
-  }, [setupZodErrorMap, t])
+
+    const builtinT = createBuiltinTranslateFunction(locale)
+    const combinedT: TranslateFunction = (key, params) => {
+      if (t) {
+        try {
+          const custom = t(key, params)
+          if (custom && custom !== key) {
+            return custom
+          }
+        } catch {
+          // игнорируем — падаем на встроенный словарь
+        }
+      }
+      return builtinT(key, params)
+    }
+
+    const errorMap = createFormErrorMap({ t: combinedT })
+    // Type assertion: наш error map совместим с Zod v4 API,
+    // но TypeScript не может вывести это автоматически
+    z.config({ customError: errorMap as z.core.$ZodErrorMap<z.core.$ZodIssue> })
+  }, [setupZodErrorMap, t, locale])
 
   return <FormI18nContext.Provider value={{ t: resolvedT, locale, enabled: !!t }}>{children}</FormI18nContext.Provider>
 }

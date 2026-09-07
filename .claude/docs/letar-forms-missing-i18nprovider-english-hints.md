@@ -10,6 +10,11 @@
 
 Ни typecheck, ни lint, ни рендер без ошибок в консоли это не ловят — страница выглядит рабочей.
 
+⚠️ **Это не то же самое, что английское сообщение ПОСЛЕ неудачного сабмита** (например
+`Too small: expected string to have >=2 characters` вместо `Минимум 2 символов`, найдено на
+`domwellbes` 2026-09-07). Это два независимых механизма — см. раздел «Второй, независимый
+пробел» ниже.
+
 ## Причина
 
 Constraint hints (`generateConstraintHint()`,
@@ -99,3 +104,42 @@ function FormI18n({ children }: { children: ReactNode }) {
 Ни у одного из двух генераторов нет next-intl-варианта — там всегда хардкод `"ru"`, как у
 приложений без next-intl в таблице выше. Приложение, добавляющее next-intl после генерации,
 переключает обёртку на `useLocale()` вручную, тем же способом, что и `aboi`/`kami` в таблице.
+
+## Второй, независимый пробел: сообщение ПОСЛЕ сабмита не переводилось вовсе (2026-09-07)
+
+Найдено на `domwellbes` (`admin/houses/new`, поле «Название», `HouseSchema` —
+`z.string().min(2)` без кастомного `.meta()`-сообщения): даже с уже подключённым
+`<FormI18nProvider locale="ru">` реальное сообщение об ошибке, которое Zod кладёт в
+`error.issues[0].message` после `safeParse`, оставалось англоязычным дефолтом Zod
+(`Too small: expected string to have >=2 characters`).
+
+**Это не регресс и не тот же баг, что выше** — constraint hints (`generateConstraintHint`,
+раздел «Причина») и сообщение об ошибке после валидации — два независимых механизма с разными
+словарями:
+
+- Constraint hint — проактивная подсказка под полем ДО ввода/сабмита, берёт локаль из
+  `FormI18nProvider` и всегда была переводима одним `locale="ru"` (её словарь —
+  `RU_TRANSLATIONS`/`EN_TRANSLATIONS` в
+  [constraint-hints.ts](/libs/forms-core/src/lib/schema/constraint-hints.ts), с корректной
+  плюрализацией через `Intl.PluralRules`: «Минимум 2 символ**а**»).
+- Сообщение ПОСЛЕ неудачной валидации — реальный `issue.message` от Zod v4, подменяется только
+  установкой `z.config({ customError: errorMap })` внутри `FormI18nProvider` при
+  `setupZodErrorMap={true}`. До фикса ниже это требовало ОБЯЗАТЕЛЬНОГО параметра `t`
+  (`createFormErrorMap({ t })`, JSDoc в `form-i18n-provider.tsx`) — полноценной функции перевода
+  вида `useTranslations()` из next-intl с собственным JSON-словарём по ключам
+  `validation.{code}.{origin?}`. Приложение без next-intl (как `domwellbes`) физически не имело
+  такой функции, поэтому `setupZodErrorMap` было бессмысленно включать — итоговое сообщение
+  «Минимум 2 символ**ов**» (обратите внимание на другую форму слова — это НЕ constraint hint,
+  а именно ошибка после сабмита) оставалось на дефолте Zod.
+
+**Фикс (v4.1.0, `@letar/forms-core`+`@letar/forms-react`):** встроенный ru/en словарь для
+`validation.{code}.{origin?}` —
+[builtin-error-translations.ts](/libs/forms-core/src/lib/i18n/builtin-error-translations.ts),
+`createBuiltinTranslateFunction(locale)`. `FormI18nProvider` теперь строит error map из
+`t` приложения (если задан) с откатом на встроенный словарь по `locale`, и включается флагом
+`setupZodErrorMap` уже без обязательного `t` — работает «из коробки» и без next-intl.
+
+**Вывод:** приложение с `<FormI18nProvider locale="ru">` без `setupZodErrorMap` получает русские
+constraint hints, но английские сообщения после сабмита — это ожидаемо для версий библиотеки до
+v4.1.0, а не повторение бага из раздела выше. Чтобы получить перевод и там и там — добавить
+`setupZodErrorMap` (пример — `apps/domwellbes/src/app/_components/providers.tsx`).

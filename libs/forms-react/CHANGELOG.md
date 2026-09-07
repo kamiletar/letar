@@ -4,6 +4,23 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.0] - 2026-09-08
+
+### Fixed
+
+- **`FormI18nProvider` `setupZodErrorMap` работает без `t` от приложения.** Раньше флаг был
+  бесполезен без next-intl (или другого источника `t`) — `createFormErrorMap({ t })` требовал
+  полноценную функцию перевода со своим JSON-словарём, а без неё сообщения об ошибках ПОСЛЕ
+  сабмита (`error.issues[0].message` от Zod) оставались на английском дефолте Zod, даже когда
+  проактивные constraint hints под полем уже были переведены через один `locale="ru"`. Теперь
+  `FormI18nProvider` строит error map из `t` приложения (если задан, пробуется первым) с
+  откатом на встроенный ru/en словарь `@letar/forms-core/i18n`
+  (`createBuiltinTranslateFunction`) — `setupZodErrorMap` переводит стандартные коды Zod v4
+  (`too_small`/`too_big`/`invalid_format`/... с учётом `origin`) сразу по `locale`, без
+  next-intl. Найдено на `domwellbes` (Form.Steps пилот на форме дома, 2026-09-07) — подробности
+  и разбор двух независимых механизмов в
+  [letar-forms-missing-i18nprovider-english-hints.md](/.claude/docs/letar-forms-missing-i18nprovider-english-hints.md).
+
 ## [0.5.1] - 2026-09-04
 
 ### Changed
