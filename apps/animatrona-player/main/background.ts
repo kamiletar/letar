@@ -3,6 +3,7 @@ import path from 'node:path'
 import { registerIpcHandlers } from './ipc'
 import { initAllowedPaths } from './protocols/allowed-paths'
 import { registerMediaProtocol, setupMediaProtocolHandler } from './protocols/media.protocol'
+import { getInitialWindowState, trackWindowBounds } from './services/window-bounds.service'
 
 // Регистрация привилегий схемы media:// — обязательно до app.whenReady()
 registerMediaProtocol()
@@ -26,9 +27,10 @@ const isProd = app.isPackaged || process.env.NODE_ENV === 'production'
 let mainWindow: BrowserWindow | null = null
 
 async function createWindow(): Promise<void> {
+  const initialState = getInitialWindowState()
+
   mainWindow = new BrowserWindow({
-    width: 1100,
-    height: 780,
+    ...initialState.bounds,
     minWidth: 820,
     minHeight: 600,
     webPreferences: {
@@ -39,7 +41,17 @@ async function createWindow(): Promise<void> {
     show: false,
   })
 
-  mainWindow.once('ready-to-show', () => mainWindow?.show())
+  trackWindowBounds(mainWindow)
+
+  mainWindow.once('ready-to-show', () => {
+    if (initialState.isMaximized) {
+      mainWindow?.maximize()
+    }
+    if (initialState.isFullScreen) {
+      mainWindow?.setFullScreen(true)
+    }
+    mainWindow?.show()
+  })
   mainWindow.on('closed', () => {
     mainWindow = null
   })

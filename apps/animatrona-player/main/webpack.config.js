@@ -15,6 +15,7 @@ module.exports = {
     extensions: ['.ts', '.js'],
     alias: {
       '@letar/folder-scan': path.resolve(__dirname, '../../../libs/folder-scan/src'),
+      '@letar/electron-storage': path.resolve(__dirname, '../../../libs/electron-storage/src'),
     },
   },
   module: {

@@ -284,8 +284,7 @@ nx g @letar/generators:electron-app animatrona-player --displayName="Animatrona 
       `next build --webpack renderer` (статический экспорт) и `webpack --config
         main/webpack.config.js` — все зелёные. GUI-уровень не проверялся (недоступно в сендбоксе,
       см. запись выше про Фазу 2) — нужен живой `nx dev animatrona-player`.
-- [x] Подключены `@letar/video-player-react` и `@letar/video-player-core` (2026-09-08). Ещё не
-      начаты: `@letar/electron-storage`.
+- [x] Подключены `@letar/video-player-react` и `@letar/video-player-core` (2026-09-08).
       - `apps/animatrona-player/renderer/app/_components/VideoPlayer.tsx` — новый компонент,
       собственный `containerRef`/`useShakaPlayer` (не переиспользует `GlobalVideoProvider` из
       Animatrona — тот нужен там для персистентности видео между роутами, здесь навигации между
@@ -374,7 +373,28 @@ protocol.registerSchemesAsPrivileged([
       посреди серии; снимать на паузе и при выходе
 - [ ] `backgroundThrottling: false` у `webPreferences` — иначе при неактивном окне таймеры
       прогресса/автоскрытия контролов начинают врать
-- [ ] Запоминать размер, позицию и полноэкранность окна между запусками (`@letar/electron-storage`)
+- [x] Запоминать размер, позицию и полноэкранность окна между запусками (`@letar/electron-storage`,
+      2026-09-08). `main/services/window-bounds.service.ts` —
+      `createJsonStore<WindowBoundsState>('window-bounds.json', ..., { mergeDefaults: true })`.
+      `getInitialWindowState()` вызывается синхронно (`loadSync`) до создания `BrowserWindow` и
+      валидирует сохранённые bounds против `screen.getAllDisplays()` — если окно в прошлый раз
+      было на мониторе, который сейчас отключён, откатывается к дефолту вместо появления за
+      пределами видимой области. `trackWindowBounds(window)` — дебаунс 500мс на `resize`/`move`,
+      немедленное сохранение на `maximize`/`unmaximize`/`enter-full-screen`/`leave-full-screen`/
+      `close`. Пока окно maximized/fullscreen, «нормальные» bounds не перезаписываются текущими
+      (раздутыми) — берётся последнее сохранённое значение, иначе после первого разворачивания
+      восстановленный размер навсегда стал бы «во весь экран».
+      Подключение — как в `poster-microtext-desktop`/`label-printer-desktop`: `implicitDependencies`
+      было бы недостаточно само по себе (см. `libs.md`), здесь библиотека сразу и в
+      `dependencies`, и в `paths`/`include` обоих tsconfig, и в alias `main/webpack.config.js`
+      (иначе резолв `@letar/electron-storage` в бандле main-процесса не находит `node_modules/`).
+      Только main-процесс — renderer не тронут: `FolderPlayerStorage` (интерфейс
+      прогресса/истории папок) синхронный (`getItem`/`setItem`, как `localStorage`), а
+      `createJsonStore` — асинхронный/main-only API за IPC-границей; мост между ними (например
+      через `ipcRenderer.sendSync`) — отдельное архитектурное решение, не часть этой задачи.
+      Проверено: `nx typecheck:tsgo animatrona-player`, `nx lint animatrona-player`,
+      `webpack --config main/webpack.config.js` — все зелёные. GUI-уровень (реальное
+      восстановление позиции окна) не проверялся — недоступно в сендбоксе.
 - [ ] Кэш probe на диске, а не только LRU в памяти: ключ `путь + mtime + размер`. Повторное
       открытие той же папки не должно снова пробивать все серии
 - [ ] Проверить, что 1080p/4K декодируются на GPU, а не на CPU (`chrome://gpu` в devtools окна;

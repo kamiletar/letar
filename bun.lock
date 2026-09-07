@@ -422,6 +422,7 @@
       "name": "@letar/animatrona-player",
       "version": "0.1.0",
       "dependencies": {
+        "@letar/electron-storage": "workspace:*",
         "@letar/folder-player-react": "workspace:*",
         "@letar/folder-scan": "workspace:*",
         "@letar/icon-generator": "workspace:*",

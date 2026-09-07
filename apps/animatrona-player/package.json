@@ -15,6 +15,7 @@
     "@letar/folder-scan": "workspace:*",
     "@letar/video-player-react": "workspace:*",
     "@letar/video-player-core": "workspace:*",
+    "@letar/electron-storage": "workspace:*",
     "shaka-player": "^5.2.9"
   },
   "devDependencies": {
