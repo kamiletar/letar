@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Button, Center, Flex, HStack, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Center, Flex, Text, VStack } from '@chakra-ui/react'
 import type { FolderPlayerHost, FolderPlayerStorage, MediaProbeResult } from '@letar/folder-player-react'
 import {
   EpisodeSidebar,
@@ -12,6 +12,8 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { LuFolderOpen } from 'react-icons/lu'
 
+import type { VideoPlayerSubtitle } from './_components/VideoPlayer'
+import { VideoPlayer } from './_components/VideoPlayer'
 import { toMediaUrl } from './_lib/media-url'
 
 /**
@@ -65,7 +67,6 @@ export default function HomePage() {
   const player = useFolderPlayer(host)
   const history = useFolderHistory(storage)
   const watchProgress = useWatchProgress(storage)
-  const videoRef = useRef<HTMLVideoElement>(null)
 
   const { currentEpisode, currentVideoPath, folderName, folderPath, episodes, totalEpisodes } = player
 
@@ -77,33 +78,42 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [player.isFolderMode, folderPath, folderName, totalEpisodes])
 
-  // Восстанавливаем позицию просмотра при смене эпизода
-  useEffect(() => {
-    const el = videoRef.current
-    if (!el || !currentVideoPath) {
-      return
+  // Внешний субтитр текущего эпизода — берём первый найденный матч
+  // (выбор дорожки из нескольких вариантов — отдельная задача плана)
+  const subtitle = useMemo<VideoPlayerSubtitle | null>(() => {
+    const match = player.externalTracks.subtitles[0]
+    if (!match) {
+      return null
     }
-    const resumeTime = watchProgress.getResumeTime(currentVideoPath)
-    if (resumeTime > 0) {
-      el.currentTime = resumeTime
+    return {
+      url: toMediaUrl(match.filePath),
+      format: match.format,
+      fonts: match.matchedFonts.map((f) => toMediaUrl(f.path)),
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentVideoPath])
+  }, [player.externalTracks.subtitles])
 
-  const handleTimeUpdate = useCallback(() => {
-    const el = videoRef.current
-    if (!el || !currentVideoPath || !el.duration) {
-      return
-    }
-    watchProgress.saveProgress(currentVideoPath, el.currentTime, el.duration)
-  }, [currentVideoPath, watchProgress])
+  const resumeTime = currentVideoPath ? watchProgress.getResumeTime(currentVideoPath) : 0
+
+  // Последний известный прогресс — нужен в handleEnded, у которого своих currentTime/duration нет
+  const lastProgressRef = useRef({ currentTime: 0, duration: 0 })
+
+  const handleTimeUpdate = useCallback(
+    (currentTime: number, duration: number) => {
+      lastProgressRef.current = { currentTime, duration }
+      if (!currentVideoPath || !duration) {
+        return
+      }
+      watchProgress.saveProgress(currentVideoPath, currentTime, duration)
+    },
+    [currentVideoPath, watchProgress],
+  )
 
   const handleEnded = useCallback(() => {
-    const el = videoRef.current
-    if (!el || !currentVideoPath) {
+    if (!currentVideoPath) {
       return
     }
-    watchProgress.saveProgressNow(currentVideoPath, el.currentTime, el.duration || 0)
+    const { currentTime, duration } = lastProgressRef.current
+    watchProgress.saveProgressNow(currentVideoPath, currentTime, duration)
     if (player.hasNext) {
       void player.goNext()
     }
@@ -153,26 +163,19 @@ export default function HomePage() {
 
       <Box flex={1} bg="black" position="relative">
         {currentVideoPath && (
-          <video
+          <VideoPlayer
             key={currentVideoPath}
-            ref={videoRef}
             src={toMediaUrl(currentVideoPath)}
-            controls
-            autoPlay
-            style={{ width: '100%', height: '100%' }}
+            subtitle={subtitle}
+            startTime={resumeTime}
+            hasPrev={player.hasPrev}
+            hasNext={player.hasNext}
+            onPrev={() => void player.goPrev()}
+            onNext={() => void player.goNext()}
             onTimeUpdate={handleTimeUpdate}
             onEnded={handleEnded}
           />
         )}
-
-        <HStack position="absolute" bottom={4} left={4} gap={2}>
-          <Button size="sm" variant="subtle" disabled={!player.hasPrev} onClick={() => void player.goPrev()}>
-            Пред. эпизод
-          </Button>
-          <Button size="sm" variant="subtle" disabled={!player.hasNext} onClick={() => void player.goNext()}>
-            След. эпизод
-          </Button>
-        </HStack>
 
         {currentEpisode && (
           <Text

@@ -255,8 +255,7 @@ nx g @letar/generators:electron-app animatrona-player --displayName="Animatrona 
       ⚠️ GUI-уровень (открытие окна, клики) не проверялся — недоступно в сендбоксе Claude Code
       (`.claude/rules/electron.md`), нужен живой запуск `nx dev animatrona-player` у владельца.
 
-- [x] Подключены `@letar/folder-player-react` и `@letar/folder-scan` (2026-09-08). Ещё не начаты:
-      `@letar/video-player-react`, `@letar/video-player-core`, `@letar/electron-storage`.
+- [x] Подключены `@letar/folder-player-react` и `@letar/folder-scan` (2026-09-08).
       - `tsconfig.json`/`renderer/tsconfig.json` — `paths`+`include` на обе библиотеки (main
       видит обе, renderer только `folder-player-react` — `folder-scan` Node-only);
       `package.json` `dependencies` + `bun install` (симлинк в `node_modules/@letar/`).
@@ -285,6 +284,37 @@ nx g @letar/generators:electron-app animatrona-player --displayName="Animatrona 
       `next build --webpack renderer` (статический экспорт) и `webpack --config
         main/webpack.config.js` — все зелёные. GUI-уровень не проверялся (недоступно в сендбоксе,
       см. запись выше про Фазу 2) — нужен живой `nx dev animatrona-player`.
+- [x] Подключены `@letar/video-player-react` и `@letar/video-player-core` (2026-09-08). Ещё не
+      начаты: `@letar/electron-storage`.
+      - `apps/animatrona-player/renderer/app/_components/VideoPlayer.tsx` — новый компонент,
+      собственный `containerRef`/`useShakaPlayer` (не переиспользует `GlobalVideoProvider` из
+      Animatrona — тот нужен там для персистентности видео между роутами, здесь навигации между
+      страницами нет). `shaka-player` грузится динамическим `import()` внутри `useEffect` (ссылка
+      на `self` в топ-левел коде пакета падает на SSR/пререндере статического экспорта) — тот же
+      паттерн, что в `GlobalVideoProvider.tsx` Animatrona.
+      - Хуки/компоненты библиотеки использованы напрямую: `useShakaPlayer`, `usePlayerState`,
+      `usePlayerControls`, `useAutoHideControls`, `useKeyboardShortcuts`, `useSubtitles`,
+      `SharedPlayerControls`, `SubtitleOverlay`, `PlayerLoadingOverlay`, `Tooltip`.
+      - `renderer/app/_theme/system.ts` — `createSystem(defaultConfig, defineConfig({...}))` с
+      `playerSemanticTokens` из `@letar/video-player-react`, подключён через `RootChakraProvider
+      value={system}` в `providers.tsx` (Animatrona вместо этого дублирует токены локально в
+      своей теме — здесь выбран более правильный вариант, реальное потребление экспорта библиотеки).
+      - `renderer/public/` — вендорные ассеты SubtitlesOctopus (`subtitles-octopus.js` +
+      `-worker.wasm`/`libassjs-worker.js`/`default.woff2`), скопированы из Animatrona; `<Script
+      src="/subtitles-octopus.js" strategy="beforeInteractive" />` в `layout.tsx`.
+      - `page.tsx` — плоский `<video>` заменён на `<VideoPlayer>`; субтитр берётся первым матчем
+      из `player.externalTracks.subtitles` (уже отфильтрован по текущему эпизоду в
+      `useFolderPlayer`), `matchedFonts`/`filePath` пропускаются через `toMediaUrl()`.
+      - **Осознанно не подключено** (в компоненте — JSDoc-комментарий с той же формулировкой):
+      - раздельные внешние аудиодорожки — `AudioTrackInfo`/`usesSeparateAudio` в
+      `@letar/video-player-core` завязаны на IPFS `transcodedCid`, для локальных файлов из
+      `@letar/folder-scan` не подходят напрямую; `usesSeparateAudioRef` всегда `false`;
+      - главы (`ChapterList`/`ChapterSkipButton`) — нет `MediaInfoWasmProber`, нет данных;
+      - Picture-in-Picture, sprite-превью на ховере прогресс-бара, кадр-степпинг — Animatrona-
+      специфичные надстройки, не портированы.
+      - Проверено: `nx typecheck:tsgo animatrona-player`, `nx lint animatrona-player`,
+      `next build renderer` (статический экспорт, Turbopack) и `webpack --config
+        main/webpack.config.js` — все зелёные. GUI-уровень не проверялся (недоступно в сендбоксе).
 - [ ] `app://` вместо `file://` (§6.1 ниже) — пока не сделано, `background.ts` всё ещё грузит
       рендерер через `loadFile()`. Не блокирует уже подключённые библиотеки (внешние
       субтитры/аудио не используют Worker/WASM), понадобится для SubtitlesOctopus.

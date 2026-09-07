@@ -425,6 +425,9 @@
         "@letar/folder-player-react": "workspace:*",
         "@letar/folder-scan": "workspace:*",
         "@letar/icon-generator": "workspace:*",
+        "@letar/video-player-core": "workspace:*",
+        "@letar/video-player-react": "workspace:*",
+        "shaka-player": "^5.2.9",
       },
       "devDependencies": {
         "electron": "44.2.0",
@@ -546,7 +549,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.184.25",
+      "version": "0.184.26",
       "dependencies": {
         "@letar/analytics": "workspace:*",
         "@letar/consent": "workspace:*",

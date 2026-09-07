@@ -12,7 +12,10 @@
   "dependencies": {
     "@letar/icon-generator": "workspace:*",
     "@letar/folder-player-react": "workspace:*",
-    "@letar/folder-scan": "workspace:*"
+    "@letar/folder-scan": "workspace:*",
+    "@letar/video-player-react": "workspace:*",
+    "@letar/video-player-core": "workspace:*",
+    "shaka-player": "^5.2.9"
   },
   "devDependencies": {
     "electron": "44.2.0",
