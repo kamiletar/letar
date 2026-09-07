@@ -2,7 +2,7 @@
 #
 # ⛔ ПОДНИМАТЬ ТОЛЬКО С `--env-file`:
 #
-#     docker compose -f docker-compose.production.yml --env-file .env.docker up -d
+#     docker compose -f docker-compose.yml --env-file .env.docker up -d
 #
 # Без флага compose подставит в `environment:` ниже ПУСТЫЕ СТРОКИ и предупредит об этом одной
 # строкой «Defaulting to a blank string» на каждую переменную — но команда завершится успешно, а

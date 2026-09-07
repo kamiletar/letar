@@ -188,7 +188,7 @@ curl -s -X POST http://127.0.0.1:8053/register
    chmod 600 /home/deploy/lego/acme-dns-accounts.json
    ```
 6. Traefik перечитает файл при следующем заказе сертификата — роутер `media` уже несёт
-   `tls.certresolver=dns` (`infra/media-server/docker-compose.production.yml`).
+   `tls.certresolver=dns` (`infra/media-server/docker-compose.yml`).
 
 ℹ️ **`allowfrom` при регистрации сознательно не используем.** acme-dns умеет ограничивать аккаунт
 списком source-IP, но здесь это второй экземпляр той же самой защиты: API уже закрыт access-list'ом

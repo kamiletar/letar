@@ -200,11 +200,20 @@ enum VideoStatus {
 
 ## Деплой
 
+Через `deploy-mcp` (`deploy_infra({ service: "media-server", server: "s3" })`) — как и остальные
+`infra/*`-сервисы. Файл называется `docker-compose.yml` (без `.production`/`.<server>` в имени)
+именно затем, чтобы совпадать с дефолтной конвенцией `scripts/deploy-infra.sh`. До 2026-09-08 имя
+было `docker-compose.production.yml` по ошибочной аналогии с приложениями (у `infra/*` нет
+staging/production выбора — сервис живёт на одном конкретном сервере), из-за чего `deploy_infra`
+падал с `no such file or directory` ещё до старта.
+
+Резервный канал (сырой SSH, если агент недоступен):
+
 ```bash
 cd infra/media-server
 sops --decrypt .env.docker.enc > .env.docker
-docker compose -f docker-compose.production.yml --env-file .env.docker build
-docker compose -f docker-compose.production.yml --env-file .env.docker up -d
+docker compose -f docker-compose.yml --env-file .env.docker build
+docker compose -f docker-compose.yml --env-file .env.docker up -d
 ```
 
 Проверка:
