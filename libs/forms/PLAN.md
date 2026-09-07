@@ -15,8 +15,10 @@
   дополнительно читает переопределения через уже существующий `FormI18nProvider`/`useFormI18n`
   (`@letar/forms-react`) по ключам `formPersistence.restoreDialog.{title,description,
   restoreButton,discardButton}` — без провайдера или без перевода под ключом остаётся русский
-  дефолт. `clearDraftButtonText` (кнопка "Clear draft" вне диалога) намеренно не тронут — вне
-  скоупа этой задачи. Живая проверка в domwellbes (`/admin/houses/new`) — диалог на русском.
+  дефолт. Живая проверка в domwellbes (`/admin/houses/new`) — диалог на русском.
+  `clearDraftButtonText` (кнопка "Clear draft" вне диалога) был намеренно не тронут в этой задаче
+  — закрыт отдельно тем же днём (v2.11.4): дефолт "Очистить черновик", ключ
+  `formPersistence.clearDraftButton`.
 
 ### ✅ [2026-09-07] `@tanstack/react-table` рассинхрон версии ломает `next build` (не `tsgo`) (от animatrona-dev)
 
