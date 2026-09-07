@@ -8,6 +8,9 @@
 # Что делает:
 #   1. расшифровывает infra/<сервис>/secrets/*.enc по манифесту secrets/deploy.conf
 #      в целевые пути с нужными правами (файлы, не KEY=value — другой примитив, чем .env.docker);
+#   1b. ИЛИ, если у сервиса вместо манифеста есть infra/<сервис>/.env.docker.enc (тот же
+#       примитив, что у apps/* — KEY=value через --env-file), расшифровывает его во временный
+#       .env.docker и передаёт docker compose флагом --env-file;
 #   2. поднимает docker compose.
 #
 # Манифест secrets/deploy.conf — путь и права описаны РЯДОМ с секретом, не в голове
@@ -15,13 +18,20 @@
 #   <имя>.enc:<целевой_путь>:<права_chmod>
 # Строки, начинающиеся с '#', и пустые строки игнорируются.
 #
+# ⚠️ Оба примитива (secrets/deploy.conf и .env.docker.enc) взаимоисключающие способы доставки
+# секретов сервису — не путать и не заводить оба сразу одному сервису. Если ни одного нет,
+# `docker compose up -d` без --env-file незаметно подставит ПУСТЫЕ СТРОКИ во все ${VAR} из
+# environment: контейнеры поднимутся и будут выглядеть здоровыми, а секреты внутри — пустыми
+# (найдено на media-server 2026-09-08 — до этого пункта 1b здесь не было вовсе, и сервис без
+# secrets/deploy.conf, но с .env.docker.enc, тихо терял ключи при каждом деплое через этот скрипт).
+#
 # Использование (на сервере, из корня letar):
 #   scripts/deploy-infra.sh traefik
 #   scripts/deploy-infra.sh acme-dns
 #
-# Требует SOPS_AGE_KEY_FILE в окружении, если у сервиса есть секреты — как и остальной
-# SOPS-конвейер (.claude/docs/secret-manager.md). Сервис без secrets/deploy.conf просто
-# пропускает шаг 1.
+# Требует SOPS_AGE_KEY_FILE в окружении, если у сервиса есть секреты (манифест или
+# .env.docker.enc) — как и остальной SOPS-конвейер (.claude/docs/secret-manager.md). Сервис без
+# того и другого просто пропускает расшифровку.
 
 set -euo pipefail
 
@@ -68,6 +78,8 @@ if [[ -f "$SERVICE_DIR/secrets/deploy.${SERVER_NAME}.conf" ]]; then
   echo "[deploy-infra] серверный манифест секретов: deploy.${SERVER_NAME}.conf"
 fi
 
+ENV_FILE_ARGS=()
+
 if [[ -f "$MANIFEST" ]]; then
   if ! command -v sops &>/dev/null; then
     echo "[deploy-infra] sops не найден, а у $SERVICE есть секреты в манифесте — прерываю" >&2
@@ -97,11 +109,35 @@ if [[ -f "$MANIFEST" ]]; then
     chmod "$mode" "$target"
     echo "[deploy-infra]   $name → $target (chmod $mode)"
   done <"$MANIFEST"
+elif [[ -f "$SERVICE_DIR/.env.docker.enc" ]]; then
+  if ! command -v sops &>/dev/null; then
+    echo "[deploy-infra] sops не найден, а у $SERVICE есть .env.docker.enc — прерываю" >&2
+    exit 1
+  fi
+  if [[ -z "${SOPS_AGE_KEY_FILE:-}" || ! -f "${SOPS_AGE_KEY_FILE}" ]]; then
+    echo "[deploy-infra] SOPS_AGE_KEY_FILE не задан или файл не найден — прерываю" >&2
+    exit 1
+  fi
+
+  ENV_FILE="$SERVICE_DIR/.env.docker"
+  # Плейнтекст временный — удаляется при любом исходе (включая set -e из середины скрипта).
+  trap 'rm -f "$ENV_FILE"' EXIT
+  umask 077
+  sops --decrypt "$SERVICE_DIR/.env.docker.enc" >"$ENV_FILE"
+  echo "[deploy-infra] Расшифрован .env.docker.enc → .env.docker (временный, удалится после деплоя)"
+  ENV_FILE_ARGS=(--env-file "$ENV_FILE")
 else
-  echo "[deploy-infra] $SERVICE без secrets/deploy.conf — пропускаю расшифровку"
+  echo "[deploy-infra] $SERVICE без secrets/deploy.conf и без .env.docker.enc — пропускаю расшифровку"
 fi
 
-echo "[deploy-infra] docker compose -f $COMPOSE_FILE up -d ($SERVICE)"
-(cd "$SERVICE_DIR" && docker compose -f "$COMPOSE_FILE" up -d)
+if [[ ${#ENV_FILE_ARGS[@]} -gt 0 ]]; then
+  echo "[deploy-infra] docker compose -f $COMPOSE_FILE ${ENV_FILE_ARGS[*]} up -d --build ($SERVICE)"
+else
+  echo "[deploy-infra] docker compose -f $COMPOSE_FILE up -d --build ($SERVICE)"
+fi
+# --build — no-op для сервисов без build: (traefik, acme-dns и т.п., только image:), но обязателен
+# для media-server/animatrona-*: без него compose переиспользует старый образ при изменении
+# Dockerfile/src, даже когда сам docker-compose.yml не менялся.
+(cd "$SERVICE_DIR" && docker compose -f "$COMPOSE_FILE" "${ENV_FILE_ARGS[@]}" up -d --build)
 
 echo "[deploy-infra] Готово: $SERVICE"
