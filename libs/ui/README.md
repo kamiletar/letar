@@ -446,6 +446,34 @@ import { RoleStat, StatCard } from '@letar/ui'
 <RoleStat role="ADMIN" count={5} />
 ```
 
+### BarChart
+
+Серверный inline-SVG bar-chart без зависимостей: горизонтальные направляющие на 25/50/75/100%,
+столбики со скруглением, подпись значения над столбиком и подпись под ним. Поддерживает
+один слой данных (например деньги) или два — фоновый + накладка поверх (например общее время
+vs billable-часть). Цвета передаются как CSS-переменные Chakra с HEX-фолбэком, форматирование
+значений и максимума шкалы — снаружи.
+
+```tsx
+import { BarChart } from '@letar/ui'
+
+// Один слой
+<BarChart
+  ariaLabel="График поступлений по месяцам"
+  data={months.map((m) => ({ key: m.key, label: m.label, value: m.amount }))}
+  formatValue={formatShort}
+  formatMaxLabel={formatMoney}
+/>
+
+// Два слоя — фон + накладка
+<BarChart
+  ariaLabel="График часов по месяцам"
+  data={months.map((m) => ({ key: m.key, label: m.label, value: m.totalSec, overlayValue: m.billableSec }))}
+  formatValue={formatDuration}
+  backgroundColor="var(--chakra-colors-gray-400, #A0AEC0)"
+/>
+```
+
 ### OptimizedAvatar
 
 Оптимизированный аватар с lazy loading.

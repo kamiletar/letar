@@ -1,6 +1,9 @@
 // Токены и цвета
 export { chakraColorVar } from './lib/chakra-color-var'
 
+// Графики
+export { BarChart, type BarChartDatum, type BarChartProps } from './lib/bar-chart'
+
 // Оверлеи
 export { AdminEditOverlay, type AdminEditOverlayProps } from './lib/admin-edit-overlay'
 export {
