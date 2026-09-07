@@ -95,7 +95,10 @@ services:
   redis:
     image: redis:7-alpine
     container_name: media-redis
-    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    # noeviction — очередь BullMQ не переживает вытеснение собственных заданий из памяти;
+    # при memory-pressure Redis должен отказывать в записи, а не тихо терять job'ы транскода.
+    # См. https://docs.bullmq.io/guide/going-to-production#maxmemory-policy
+    command: redis-server --maxmemory 256mb --maxmemory-policy noeviction
     networks:
       - kami-network
     restart: unless-stopped
