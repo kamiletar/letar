@@ -45,6 +45,19 @@ Shift+стрелки только на паузе) добавлены в общ�
 Всё запушено в `origin/main` (`73883d14`), запрошен деплой у `deploy-agent-dev`
 (тред `deploy-animatrona-tracker-20260908`).
 
+**Аудит `use-shaka-player.ts` vs `useShakaPlayer` (`@letar/video-player-react`) — не дубль**
+(v0.11.18, `5ab218d3`, отдельная сессия) — проверен третий кандидат на дедуп после двух
+предыдущих находок выше. Реально живых реализаций оказалось две (не три): lib-хук использует
+только `animatrona-folder-player`, локальный `apps/animatrona/.../_hooks/useShakaPlayer.ts`
+не вызывался нигде (мёртвый код, animatrona с персистентным видео давно инициализирует Shaka
+инлайном в `GlobalVideoProvider.tsx`) — удалён вместе с экспортом. Оставшиеся два живых хука
+расходятся по-настоящему: владение состоянием (снаружи хука + `usePlayerState` у lib-версии vs
+внутри самого хука у tracker) и уникальные фичи tracker (детект первого декодированного кадра
+для лоадера, детект блокировки autoplay, покадровая перемотка). Решение — не сводить, аналогично
+`header-drawer-dedup-audit.md`. Разбор —
+[shaka-player-hook-dedup-audit.md](/.claude/docs/shaka-player-hook-dedup-audit.md).
+Не запушено — ждёт одобрения на push.
+
 ## Soft-404 на `notFound()` — принято как есть (2026-08-28)
 
 Сквозной аудит монорепо нашёл: `notFound()` из кода страницы отдаёт HTTP 200, а не 404 — причина

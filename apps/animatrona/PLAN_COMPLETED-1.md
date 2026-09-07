@@ -1,7 +1,21 @@
 # Animatrona — Выполненные задачи (Часть 1)
 
 > Точка входа и карта всех частей — [PLAN_COMPLETED.md](./PLAN_COMPLETED.md).
-> Диапазон: 2026-09-04 — 2026-09-07.
+> Диапазон: 2026-09-04 — 2026-09-08.
+
+## Удалён мёртвый код `_hooks/useShakaPlayer.ts` (2026-09-08)
+
+**Контекст:** аудит на предмет дублирования `useShakaPlayer` между `animatrona`,
+`animatrona-tracker` и `@letar/video-player-react` (запущен со стороны `animatrona-tracker`,
+см. её `PLAN_COMPLETED.md` v0.11.18) обнаружил, что локальная копия хука в `apps/animatrona`
+не вызывается ни одним компонентом — `VideoPlayer.tsx` инициализацию Shaka не делает вовсе,
+она инлайном живёт в `GlobalVideoProvider.tsx` (persistent video, не пересоздаётся при
+навигации между страницами). Хук и его экспорт из `_hooks/index.ts` удалены. Разбор —
+[shaka-player-hook-dedup-audit.md](/.claude/docs/shaka-player-hook-dedup-audit.md).
+
+⚠️ Побочная находка вне скоупа: `_hooks/useAudioSync.ts` в той же папке выглядит так же —
+не вызывается нигде (`GlobalVideoProvider.tsx` синхронизирует раздельные аудиодорожки
+инлайном) — не тронут, требует отдельной проверки.
 
 ## Main-часть папочного плеера перенесена в @letar/folder-scan (2026-09-07)
 
