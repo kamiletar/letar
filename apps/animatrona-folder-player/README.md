@@ -38,3 +38,14 @@ nx build:win animatrona-folder-player        # dist/*.exe (NSIS)
 Nextron: Electron main (`main/`) + Next.js renderer (`renderer/`), статический экспорт
 (`output: 'export'`) — без сервера внутри приложения, вся логика идёт через Electron IPC
 (`window.electronAPI`, см. `main/preload.ts` + `renderer/types/electron.d.ts`).
+
+## Документация
+
+- [PLAN.md](./PLAN.md) — план и история реализации
+- [PLAN_COMPLETED.md](./PLAN_COMPLETED.md) — сводка выполненного
+- [PLAN_TESTING.md](./PLAN_TESTING.md) — план тестирования
+- [CHANGELOG.md](./CHANGELOG.md) — история изменений
+
+---
+
+**Последнее обновление:** 2026-09-08
