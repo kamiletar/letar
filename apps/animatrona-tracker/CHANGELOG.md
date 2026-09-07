@@ -7,6 +7,26 @@
 
 ---
 
+## [0.11.13] — 2026-09-07
+
+### Добавлено
+
+- **Загрузка аватара профиля** — клик по кругу-аватару в sidebar `/profile` открывает выбор
+  файла (JPEG/PNG/WebP, до 5MB), обрабатывается через `@letar/image-upload`
+  (`processUploadImage`: EXIF-ротация, ресайз 256×256 cover, перекодирование в WebP) и
+  сохраняется в `uploads/avatars/<userId>/<uuid>.webp` через `createLocalDiskBackend`
+  (защита от path traversal — `resolveUploadPath` внутри бэкенда). Раздача — новый
+  `GET /api/files/[...path]` (`createUploadsRoute`, без прямого доступа к `uploads/`).
+  Server Action `uploadAvatarAction` обновляет `User.image` через `getEnhancedPrisma`.
+- **Progress bar для ratio раздач** — `RatioProgressBar` в табе «Статистика»: зелёный при
+  ratio ≥ 1, оранжевый ниже, визуально капается на 100% при значениях выше нормы.
+
+### Изменено
+
+- **`PLAN.md` § Фаза 2.5 (редизайн профиля)** — чек-лист был устаревшим: большинство пунктов
+  P0/P1 (таблица→карточки, sidebar→табы, пагинация, обложки в карточках) оказались уже
+  реализованы в коде, отмечены задним числом по факту чтения `profile-client.tsx`.
+
 ## [0.11.12] — 2026-09-04
 
 ### Изменено

@@ -11,6 +11,7 @@ import {
   Heading,
   HStack,
   Input,
+  Progress,
   Stat,
   Tabs,
   Text,
@@ -41,12 +42,14 @@ import {
 import { AnimeCard, type AnimeCardItem } from '@/app/_components/anime-card'
 import { toaster } from '@/app/_components/ui/toaster'
 import { signIn } from '@/lib/auth-client'
+import { AvatarUpload } from './avatar-upload'
 
 interface User {
   id: string
   name: string | null
   email: string
   role: string
+  image?: string | null
   customGateway?: string | null
   preferredTrackMode?: string | null
 }
@@ -100,6 +103,23 @@ function calcRatio(uploaded: number, downloaded: number): string {
     return uploaded > 0 ? '∞' : '—'
   }
   return (uploaded / downloaded).toFixed(2)
+}
+
+/** Прогресс-бар ratio: 1.0 = 100% (норма), выше — насыщенный зелёный, ниже 1.0 — оранжевый */
+function RatioProgressBar({ uploaded, downloaded }: { uploaded: number; downloaded: number }) {
+  if (downloaded === 0) {
+    return null
+  }
+  const ratio = uploaded / downloaded
+  const percent = Math.min(ratio, 1) * 100
+  const colorPalette = ratio >= 1 ? 'green' : 'orange'
+  return (
+    <Progress.Root value={percent} size="xs" colorPalette={colorPalette} mt={2}>
+      <Progress.Track>
+        <Progress.Range />
+      </Progress.Track>
+    </Progress.Root>
+  )
 }
 
 export function ProfileClient({
@@ -194,21 +214,8 @@ export function ProfileClient({
               top={{ lg: '100px' }}
             >
               <VStack gap={4}>
-                {/* Аватар */}
-                <Box
-                  w={16}
-                  h={16}
-                  borderRadius="full"
-                  bg="brand.500"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  color="white"
-                  fontSize="2xl"
-                  fontWeight="bold"
-                >
-                  {user.name?.[0] || user.email[0].toUpperCase()}
-                </Box>
+                {/* Аватар — клик открывает выбор файла */}
+                <AvatarUpload name={user.name} email={user.email} image={user.image ?? null} />
 
                 <VStack gap={1}>
                   <Text fontWeight="semibold" fontSize="lg">
@@ -403,6 +410,10 @@ export function ProfileClient({
                           <Stat.ValueText>
                             {calcRatio(distributionStats.totalBytesUploaded, distributionStats.totalBytesDownloaded)}
                           </Stat.ValueText>
+                          <RatioProgressBar
+                            uploaded={distributionStats.totalBytesUploaded}
+                            downloaded={distributionStats.totalBytesDownloaded}
+                          />
                         </Stat.Root>
                         <Stat.Root>
                           <Stat.Label>

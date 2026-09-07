@@ -1,6 +1,6 @@
 {
   "name": "@letar/animatrona-tracker",
-  "version": "0.11.12",
+  "version": "0.11.13",
   "private": true,
   "nx": {
     "name": "animatrona-tracker",
@@ -12,12 +12,14 @@
       "@letar/redis-client",
       "@letar/glitchtip",
       "@letar/pg-url",
-      "@letar/env-load"
+      "@letar/env-load",
+      "@letar/image-upload"
     ]
   },
   "dependencies": {
     "@letar/glitchtip": "workspace:*",
     "@letar/pg-url": "workspace:*",
-    "@letar/env-load": "workspace:*"
+    "@letar/env-load": "workspace:*",
+    "@letar/image-upload": "workspace:*"
   }
 }

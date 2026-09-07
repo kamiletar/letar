@@ -14,6 +14,15 @@
       "@letar/env-load": [
         "../../libs/env-load/src/index.ts"
       ],
+      "@letar/image-upload": [
+        "../../libs/image-upload/src/index.ts"
+      ],
+      "@letar/image-upload/server": [
+        "../../libs/image-upload/src/server/index.ts"
+      ],
+      "@letar/image-upload/server/versioned-upload-url": [
+        "../../libs/image-upload/src/server/versioned-upload-url.ts"
+      ],
       "@letar/chakra-provider": [
         "../../libs/chakra-provider/src/index.ts"
       ],
