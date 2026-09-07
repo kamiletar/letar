@@ -1,6 +1,6 @@
 {
   "name": "@letar/video-player-core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Vanilla JS ядро видеоплеера на базе Shaka Player",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

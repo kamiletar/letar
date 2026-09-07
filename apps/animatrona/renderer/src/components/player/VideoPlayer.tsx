@@ -29,6 +29,8 @@ import { LuChevronLeft, LuChevronRight, LuPictureInPicture, LuStepBack, LuStepFo
 import { useGlobalVideoStore } from '@/components/global-video'
 
 import {
+  FRAME_STEP_COUNT,
+  getShakaFrameRate,
   PLAYBACK_SPEEDS,
   type PlaybackSpeed,
   PlayerLoadingOverlay,
@@ -44,7 +46,6 @@ import {
   usePlayerState,
   useSubtitleManagement,
 } from './_hooks'
-import { FRAME_STEP_COUNT, getShakaFrameRate } from './frame-step-utils'
 import { NativeSubtitleOverlay } from './NativeSubtitleOverlay'
 import { PlayerContextProvider } from './PlayerContext'
 import type { VideoPlayerProps, VideoPlayerRef } from './types'

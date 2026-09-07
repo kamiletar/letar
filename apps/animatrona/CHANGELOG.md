@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+## [0.55.64] - 2026-09-08
+
+### Changed
+
+- **`getShakaFrameRate`/`FRAME_STEP_COUNT` вынесены в `@letar/video-player-core`.** Локальный
+  `frame-step-utils.ts` дословно дублировался в `animatrona-tracker` (`use-shaka-player.ts`, без
+  `try/catch`). Утилита теперь общая (реэкспортирована из `@letar/video-player-react`), оба
+  приложения используют один источник истины. Поведение не изменилось.
+
 ## [0.55.63] - 2026-09-07
 
 ### Changed

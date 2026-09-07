@@ -2,8 +2,6 @@
  * Утилиты для покадровой перемотки на паузе
  */
 
-import type Shaka from 'shaka-player'
-
 /** Сколько кадров пропускаем за одно нажатие клавиши/клик кнопки */
 export const FRAME_STEP_COUNT = 5
 
@@ -11,11 +9,20 @@ export const FRAME_STEP_COUNT = 5
 const FALLBACK_FPS = 24
 
 /**
+ * Минимальная часть API Shaka Player, нужная для определения fps активной дорожки.
+ * Не привязано к нominal-типу `shaka.Player`, чтобы принимать и упрощённые
+ * структурные обёртки над плеером (например частично типизированный `playerRef`).
+ */
+export interface ShakaFrameRateSource {
+  getVariantTracks: () => { active: boolean; frameRate: number | null }[]
+}
+
+/**
  * Реальный fps активной видео-дорожки из Shaka Player.
  * Возвращает FALLBACK_FPS, если плеер не готов или дорожка не сообщает frameRate
  * (не все контейнеры/манифесты его содержат).
  */
-export function getShakaFrameRate(player: Shaka.Player | null): number {
+export function getShakaFrameRate(player: ShakaFrameRateSource | null | undefined): number {
   if (!player) {
     return FALLBACK_FPS
   }

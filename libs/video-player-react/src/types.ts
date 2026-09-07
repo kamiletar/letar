@@ -34,9 +34,14 @@ export type { SubtitleRenderFormat as SubtitleFormat } from '@letar/video-player
 
 export {
   AUDIO_SYNC_THRESHOLD,
+  FRAME_STEP_COUNT,
   HIDE_CONTROLS_TIMEOUT,
   SKIP_LABELS,
   SKIP_TIME,
   SKIPPABLE_CHAPTER_TYPES,
   VOLUME_STEP,
 } from '@letar/video-player-core'
+
+// ─── Покадровая перемотка ───────────────────────────────────────────
+
+export { getShakaFrameRate } from '@letar/video-player-core'

@@ -8,6 +8,8 @@
 
 import { type RefObject, useCallback, useEffect, useRef, useState } from 'react'
 
+import { getShakaFrameRate } from '@letar/video-player-react'
+
 interface UseShakaPlayerOptions {
   /** URL видео (DASH/HLS/MP4) */
   videoUrl: string | null
@@ -240,8 +242,7 @@ export function useShakaPlayer({
       return
     }
     video.pause()
-    const activeTrack = playerRef.current?.getVariantTracks().find((t) => t.active)
-    const frameRate = activeTrack?.frameRate || 24
+    const frameRate = getShakaFrameRate(playerRef.current)
     const step = (frames / frameRate) * direction
     video.currentTime = Math.max(0, Math.min(video.currentTime + step, video.duration || video.currentTime))
   }, [])

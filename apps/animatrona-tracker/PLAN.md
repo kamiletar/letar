@@ -738,6 +738,13 @@ nx build animatrona-tracker
 
 ## Техдолг: закрыто
 
+- **Дубль `getShakaFrameRate`/`FRAME_STEP_COUNT` vs `animatrona`** (2026-09-08) — найден при
+  сведении соседнего дубля `use-keyboard-shortcuts.ts` (см. запись ниже). Инлайновая логика
+  определения fps активной дорожки Shaka в `use-shaka-player.ts` дословно повторяла
+  `frame-step-utils.ts` из `apps/animatrona`. Вынесено в `@letar/video-player-core`
+  (реэкспорт из `@letar/video-player-react`), оба приложения переведены на общий импорт.
+  `animatrona-folder-player` (третий потребитель) своей копии не имел. Детали — `CHANGELOG.md`
+  v0.11.17.
 - **Дубль `use-keyboard-shortcuts.ts` vs общий `@letar/video-player-react`** (2026-09-08) —
   проверено, кто ещё пользуется общим хуком (`animatrona`, `animatrona-folder-player`), сведены
   реально одинаковые ветки (play/pause, стрелки/время, громкость, mute, fullscreen), а
