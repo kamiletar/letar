@@ -17,6 +17,6 @@
     "@modelcontextprotocol/sdk": "1.29.0"
   },
   "devDependencies": {
-    "zod": "4.3.6"
+    "zod": "4.4.3"
   }
 }
