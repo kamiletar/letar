@@ -340,9 +340,23 @@ nx g @letar/generators:electron-app animatrona-player --displayName="Animatrona 
       - Проверено: `nx typecheck:tsgo animatrona-player`, `nx lint animatrona-player`,
       `next build renderer` (статический экспорт, Turbopack) и `webpack --config
         main/webpack.config.js` — все зелёные. GUI-уровень не проверялся (недоступно в сендбоксе).
-- [ ] `app://` вместо `file://` (§6.1 ниже) — пока не сделано, `background.ts` всё ещё грузит
-      рендерер через `loadFile()`. Не блокирует уже подключённые библиотеки (внешние
-      субтитры/аудио не используют Worker/WASM), понадобится для SubtitlesOctopus.
+- [x] `app://` вместо `file://` (§6.1 ниже, 2026-09-08) — `main/protocols/app.protocol.ts`:
+      привилегированная схема (`standard/secure/supportFetchAPI/corsEnabled/stream`), обработчик
+      раздаёт файлы из `renderer/out/` (prod — `process.resourcesPath/renderer/out`, dev не
+      используется — там `loadURL(http://localhost:port)` как и раньше). `resolveOutFile()`
+      нормализует путь и защищён от path traversal (`../..` откатывается на `index.html`, не
+      выходит за пределы `outDir`). `background.ts`: `registerAppProtocol()` до `whenReady()`
+      рядом с `registerMediaProtocol()`, `setupAppProtocolHandler()` после — `loadFile(...)`
+      заменён на `loadURL(APP_INDEX_URL)` (`app://local/index.html`). `renderer/next.config.js`:
+      убран хак `assetPrefix: './'` — абсолютные пути `/_next/...` резолвятся от корня схемы
+      `app://local/`, как в обычном вебе (снято и ограничение «только одна страница на корне»,
+      хотя пока используется только одна).
+      Проверено: `nx typecheck:tsgo`/`nx lint` зелёные, `next build renderer` (реальный
+      статический экспорт, абсолютные пути `/_next/static/chunks/*.js` подтверждены в
+      `index.html`) и `webpack --config main/webpack.config.js` — зелёные. `resolveOutFile()`
+      прогнан на реальных файлах экспорта (index.html, вложенный chunk, path-traversal попытка)
+      — все три случая резолвятся корректно. GUI-уровень (реальная загрузка окна) не проверялся —
+      недоступно в сендбоксе Claude Code, нужен живой `nx dev`/`build:win` у владельца.
 - [x] `MediaInfoWasmProber` на `mediainfo.js` (0.3.7 — реально поддерживаемый релиз, не
       устаревшие плейсхолдеры `1.0.x`) — `main/services/media-info-prober.ts`, реализует
       `MediaProber` из `@letar/folder-scan` (та же нормализованная `MediaInfo`, что и
@@ -607,7 +621,7 @@ protocol.registerSchemesAsPrivileged([
 | Два инсталлятора = двойная поддержка и два канала обновлений          | общий код в libs, единый workflow-шаблон; сначала починить релизы Animatrona |
 | ASS внутри MKV + шрифты                                               | `matroska-subtitles` + SubtitlesOctopus, проверить на реальных раздачах      |
 | Ожидание «собралось = работает» для GUI Electron                      | первый живой запуск руками, до релиза                                        |
-| Worker/WASM под `file://` молча не запускаются → ASS не рендерится    | схема `app://` вместо `file://`, решение принимать до кода (§6.1)            |
+| Worker/WASM под `file://` молча не запускаются → ASS не рендерится    | схема `app://` вместо `file://` реализована (§6.1, 2026-09-08)               |
 | «Лёгкость» уплывает по мере роста фич                                 | шаг проверки веса установщика в CI (§8), а не обещание в README              |
 
 ### 13. Открытые вопросы и задачи вокруг

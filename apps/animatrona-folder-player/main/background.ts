@@ -2,11 +2,13 @@ import { app, BrowserWindow } from 'electron'
 import path from 'node:path'
 import { registerIpcHandlers } from './ipc'
 import { initAllowedPaths } from './protocols/allowed-paths'
+import { APP_INDEX_URL, registerAppProtocol, setupAppProtocolHandler } from './protocols/app.protocol'
 import { registerMediaProtocol, setupMediaProtocolHandler } from './protocols/media.protocol'
 import { getInitialWindowState, trackWindowBounds } from './services/window-bounds.service'
 
-// Регистрация привилегий схемы media:// — обязательно до app.whenReady()
+// Регистрация привилегий схем media:// и app:// — обязательно до app.whenReady()
 registerMediaProtocol()
+registerAppProtocol()
 
 process.on('uncaughtException', (error) => {
   console.error('[UncaughtException]', error)
@@ -57,8 +59,9 @@ async function createWindow(): Promise<void> {
   })
 
   if (isProd) {
-    // Рендерер — статический экспорт Next.js (без сервера, без API routes: вся логика через IPC)
-    await mainWindow.loadFile(path.join(process.resourcesPath, 'renderer', 'out', 'index.html'))
+    // Рендерер — статический экспорт Next.js, отдаётся через привилегированную схему app://
+    // (не file:// — под ним origin null, Chromium блокирует Worker/WASM, нужные SubtitlesOctopus)
+    await mainWindow.loadURL(APP_INDEX_URL)
   } else {
     const port = process.argv[2] || 8888
     await mainWindow.loadURL(`http://localhost:${port}`)
@@ -68,6 +71,7 @@ async function createWindow(): Promise<void> {
 
 app.whenReady().then(async () => {
   setupMediaProtocolHandler()
+  setupAppProtocolHandler()
   initAllowedPaths()
   registerIpcHandlers(() => mainWindow)
   await createWindow()
