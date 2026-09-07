@@ -9,6 +9,7 @@ import {
   useFolderPlayer,
   useWatchProgress,
 } from '@letar/folder-player-react'
+import type { DragEvent } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { LuFolderOpen } from 'react-icons/lu'
 
@@ -16,6 +17,7 @@ import type { VideoPlayerSubtitle } from './_components/VideoPlayer'
 import { VideoPlayer } from './_components/VideoPlayer'
 import type { CodecSupportResult } from './_lib/codec-support'
 import { checkCodecSupport } from './_lib/codec-support'
+import { isVideoFilePath } from './_lib/dropped-path'
 import { toMediaUrl } from './_lib/media-url'
 
 /**
@@ -210,6 +212,43 @@ export default function HomePage() {
     })
   }, [currentVideoPath])
 
+  // Двойной клик по ассоциированному файлу или повторный запуск с файлом (main/background.ts,
+  // app:openFile) — открываем его напрямую, минуя диалог выбора
+  useEffect(() => {
+    if (!mounted) {
+      return
+    }
+    return window.electronAPI.onOpenFile((filePath) => {
+      void player.openSingleFile(filePath)
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted, player.openSingleFile])
+
+  // Drag&drop файла или папки в окно — webUtils.getPathForFile, т.к. File.path удалён в Electron ≥32
+  const handleDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+  }, [])
+  const handleDrop = useCallback(
+    (event: DragEvent<HTMLDivElement>) => {
+      event.preventDefault()
+      const file = event.dataTransfer.files[0]
+      if (!file) {
+        return
+      }
+      const filePath = window.electronAPI.getPathForFile(file)
+      if (!filePath) {
+        return
+      }
+      if (isVideoFilePath(filePath)) {
+        void player.openSingleFile(filePath)
+      } else {
+        void player.openFolder(filePath)
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [player.openSingleFile, player.openFolder],
+  )
+
   const resumeTime = currentVideoPath ? watchProgress.getResumeTime(currentVideoPath) : 0
 
   // Последний известный прогресс — нужен в handleEnded, у которого своих currentTime/duration нет
@@ -239,7 +278,7 @@ export default function HomePage() {
 
   if (!player.isFolderMode && !player.isSingleMode) {
     return (
-      <Center minH="100vh" p={8}>
+      <Center minH="100vh" p={8} onDragOver={handleDragOver} onDrop={handleDrop}>
         <VStack gap={6} maxW="md" w="full">
           <Text fontSize="2xl" fontWeight="bold">Animatrona Player</Text>
           <Text color="fg.muted" textAlign="center">
@@ -261,7 +300,7 @@ export default function HomePage() {
   }
 
   return (
-    <Flex h="100vh" overflow="hidden">
+    <Flex h="100vh" overflow="hidden" onDragOver={handleDragOver} onDrop={handleDrop}>
       {player.isFolderMode && (
         <EpisodeSidebar
           folderName={folderName}

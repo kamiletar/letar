@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, webUtils } from 'electron'
 
 interface FileFilter {
   name: string
@@ -72,6 +72,20 @@ const electronAPI = {
   shell: {
     openPath: (filePath: string): Promise<{ success: boolean; error?: string }> =>
       ipcRenderer.invoke('app:openInSystemPlayer', filePath),
+  },
+  power: {
+    setPreventSleep: (enabled: boolean): Promise<void> => ipcRenderer.invoke('power:setPreventSleep', enabled),
+  },
+  /** Путь на диске для перетащенного `File` — `File.path` удалён в Electron ≥32 */
+  getPathForFile: (file: File): string => webUtils.getPathForFile(file),
+  /**
+   * Файл, открытый двойным кликом (ассоциация) или переданный уже запущенному окну повторным
+   * запуском/`open-file` (macOS). Возвращает функцию отписки.
+   */
+  onOpenFile: (callback: (filePath: string) => void): () => void => {
+    const listener = (_event: Electron.IpcRendererEvent, filePath: string) => callback(filePath)
+    ipcRenderer.on('app:openFile', listener)
+    return () => ipcRenderer.removeListener('app:openFile', listener)
   },
 }
 

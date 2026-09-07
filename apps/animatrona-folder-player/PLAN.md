@@ -525,17 +525,45 @@ protocol.registerSchemesAsPrivileged([
 В Animatrona этого нет вовсе (она запускается как приложение-библиотека), поэтому это чистая
 новая работа:
 
-- [ ] `fileAssociations` в `electron-builder.yml` — `.mkv`, `.mp4`, `.webm`, `.avi`, `.mov`, `.m4v`
-      («Открыть с помощью» и опционально «сделать плеером по умолчанию»)
-- [ ] Открытие переданного файла: `process.argv` (Windows/Linux) и событие `open-file` (macOS)
-- [ ] `app.requestSingleInstanceLock()` + `second-instance` — второй двойной щелчок открывает файл
-      **в уже запущенном окне**, а не поднимает вторую копию Electron
-- [ ] Drag&drop файла и папки в окно — ⚠️ через `webUtils.getPathForFile(file)`; `File.path` в
-      Electron ≥32 удалён, и это выглядит как «перетаскивание молча не работает»
-- [ ] `powerSaveBlocker` (`prevent-display-sleep`) на время воспроизведения — иначе экран гаснет
-      посреди серии; снимать на паузе и при выходе
-- [ ] `backgroundThrottling: false` у `webPreferences` — иначе при неактивном окне таймеры
-      прогресса/автоскрытия контролов начинают врать
+- [x] `fileAssociations` в `electron-builder.yml` + открытие переданного файла + single instance +
+      drag&drop + `powerSaveBlocker` + `backgroundThrottling: false` (2026-09-08, всё разом —
+      пункты плотно связаны одним потоком «файл пришёл откуда угодно → открылся в плеере»).
+      - `electron-builder.yml`: `fileAssociations` на `mkv/mp4/avi/webm/mov/wmv/flv/m4v/ts/m2ts`
+      (набор синхронизирован с новым `VIDEO_EXTENSIONS` в `main/constants/file-filters.ts`, а не
+      с более узким списком из этого пункта плана — взят из сканера `@letar/folder-scan`, это и
+      есть источник истины «что вообще считается видео»).
+      - `main/services/file-args.service.ts` — `findVideoFileInArgv(argv)`, чистая функция без
+      Electron-зависимостей (проверена вручную на реалистичных argv: путь к файлу вперемешку с
+      exe/dev-портом/флагами — находит корректно, порт с dev-сервера не путает с файлом).
+      - `main/background.ts`: `app.requestSingleInstanceLock()` в самом верху модуля (до
+      регистрации протоколов) — вторая копия завершается сразу (`app.quit()` +
+      `process.exit(0)`); `second-instance` фокусирует окно и шлёт файл из `commandLine`;
+      `open-file` (macOS) — обязателен до `whenReady()`, файл ставится в `pendingFilePath`, если
+      окно ещё не готово; общий `sendOpenFile()`/флаг `rendererReady` (выставляется в
+      `did-finish-load`, сбрасывается на `closed`) не даёт послать IPC в ещё не загруженную
+      страницу. `backgroundThrottling: false` — в `webPreferences` `BrowserWindow`.
+      - IPC: `app:openFile` (main → renderer, не `handle`, а `send`/`on` — событие, не запрос) +
+      `preload.ts` `onOpenFile()` возвращает функцию отписки; `getPathForFile(file)` —
+      `webUtils.getPathForFile` (тот же паттерн, что в `poster-microtext-desktop`); `power:
+        setPreventSleep` (`main/ipc/power.handlers.ts`, новый) — `powerSaveBlocker.start/stop`
+      с проверкой `isStarted` (идемпотентно на повторные вызовы с одним и тем же состоянием).
+      - `renderer/app/page.tsx`: подписка на `onOpenFile` → `player.openSingleFile(path)` (уже
+      существующий метод хука, минуя диалог выбора); `onDragOver`/`onDrop` на обоих корневых
+      элементах (idle-экран и экран плеера) — расширение пути через новый
+      `_lib/dropped-path.ts` `isVideoFilePath()` решает файл это или папка (сам путь дублирует
+      список расширений `file-filters.ts`, не импортирует — main и renderer собираются раздельными
+      бандлерами, общий модуль не резолвится без отдельной настройки алиасов, дублировать короче).
+      - `renderer/app/_components/VideoPlayer.tsx`: `power.setPreventSleep(state.isPlaying)`
+      эффектом на изменение состояния воспроизведения + отдельный cleanup-эффект на
+      размонтирование (смена эпизода/выход из плеера) — гарантирует снятие блокировки даже если
+      воспроизведение не было явно поставлено на паузу.
+      Проверено: `nx typecheck:tsgo`/`nx lint`/`next build renderer`/`webpack --config
+        main/webpack.config.js` — зелёные (lint потребовал `eslint-disable-next-line
+        react-hooks/exhaustive-deps` на двух хуках с `player.openSingleFile`/`openFolder` в
+      зависимостях — тот же паттерн, что уже стоял в файле для `player.isFolderMode`). YAML
+      `electron-builder.yml` распарсен Python `yaml.safe_load` — синтаксис `fileAssociations`
+      корректен. GUI-уровень (реальный двойной клик, drag&drop, спящий экран) не проверялся —
+      недоступно в сендбоксе, нужен живой прогон `build:win` + установка у владельца.
 - [x] Запоминать размер, позицию и полноэкранность окна между запусками (`@letar/electron-storage`,
       2026-09-08). `main/services/window-bounds.service.ts` —
       `createJsonStore<WindowBoundsState>('window-bounds.json', ..., { mergeDefaults: true })`.

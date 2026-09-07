@@ -41,6 +41,11 @@ export interface ElectronAPI {
   shell: {
     openPath: (filePath: string) => Promise<{ success: boolean; error?: string }>
   }
+  power: {
+    setPreventSleep: (enabled: boolean) => Promise<void>
+  }
+  getPathForFile: (file: File) => string
+  onOpenFile: (callback: (filePath: string) => void) => () => void
 }
 
 declare global {

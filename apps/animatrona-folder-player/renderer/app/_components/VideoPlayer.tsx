@@ -134,6 +134,17 @@ function ShakaVideoPlayer({
 
   const { showControls, resetHideTimeout } = useAutoHideControls({ isPlaying: state.isPlaying })
 
+  // Не даём экрану гаснуть посреди серии — снимается на паузе и при размонтировании (смена
+  // эпизода/выход из плеера, см. `key={currentVideoPath}` в page.tsx)
+  useEffect(() => {
+    void window.electronAPI.power.setPreventSleep(state.isPlaying)
+  }, [state.isPlaying])
+  useEffect(() => {
+    return () => {
+      void window.electronAPI.power.setPreventSleep(false)
+    }
+  }, [])
+
   useKeyboardShortcuts({
     videoRef,
     togglePlay: controls.togglePlay,

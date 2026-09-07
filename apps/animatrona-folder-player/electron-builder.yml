@@ -17,6 +17,15 @@ files:
 extraMetadata:
   main: app/background.js
 
+# Главный способ запуска плеера — двойной клик по файлу, не иконка на рабочем столе.
+# Список расширений держать синхронно с VIDEO_EXTENSIONS в main/constants/file-filters.ts.
+fileAssociations:
+  - ext: [mkv, mp4, avi, webm, mov, wmv, flv, m4v, ts, m2ts]
+    name: Видеофайл
+    description: Видеофайл, воспроизводимый Animatrona Player
+    role: Viewer
+    icon: resources/icon.ico
+
 # Нативные (.node) модули нельзя паковать в asar — добавляй сюда паттерны по мере
 # появления зависимостей вроде sharp/canvas (см. .claude/rules/electron.md § «Грабли»)
 asarUnpack:

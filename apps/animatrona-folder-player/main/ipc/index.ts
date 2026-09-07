@@ -3,6 +3,7 @@ import { registerAppHandlers } from './app.handlers'
 import { registerDialogHandlers } from './dialog.handlers'
 import { registerEmbeddedSubtitlesHandlers } from './embedded-subtitles.handlers'
 import { registerFsHandlers } from './fs.handlers'
+import { registerPowerHandlers } from './power.handlers'
 import { registerProbeHandlers } from './probe.handlers'
 
 /**
@@ -14,4 +15,5 @@ export function registerIpcHandlers(_getMainWindow: () => BrowserWindow | null):
   registerFsHandlers()
   registerProbeHandlers()
   registerEmbeddedSubtitlesHandlers()
+  registerPowerHandlers()
 }
