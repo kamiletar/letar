@@ -3258,6 +3258,18 @@ Do not call Hooks inside useEffect(...), useMemo(...), or other built-in Hooks.
 
 - [x] `Form.Field.ColorPicker` — исправлено извлечением `ColorPickerFieldContent`
 
+### Исправлено в v0.6.0 (`@letar/forms-react`) / v0.12.0 (`@letar/forms-core`), 2026-09-08
+
+- [x] **`FormI18nProvider.setupZodErrorMap` требовал `t` от приложения** — без next-intl (или
+      аналога) сообщения об ошибках Zod ПОСЛЕ неудачного сабмита оставались на английском
+      дефолте, даже когда constraint hints уже переводились одним `locale`. Найдено на
+      `domwellbes` (Form.Steps пилот, форма дома). Фикс — встроенный ru/en словарь-fallback
+      (`createBuiltinTranslateFunction`,
+      [libs/forms-core/src/lib/i18n/builtin-error-translations.ts](/libs/forms-core/src/lib/i18n/builtin-error-translations.ts)):
+      `t` приложения пробуется первым, встроенный словарь по `locale` — fallback. Разбор двух
+      независимых механизмов i18n (constraint hints vs ошибки после сабмита) —
+      [.claude/docs/letar-forms-missing-i18nprovider-english-hints.md](/.claude/docs/letar-forms-missing-i18nprovider-english-hints.md).
+
 ---
 
 ## Backlog / Очередь задач
