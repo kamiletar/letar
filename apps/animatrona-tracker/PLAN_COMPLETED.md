@@ -403,6 +403,15 @@ video-player-core`. Добавлен `typecheck`-таргет (зеркальн�
   зависимостей был продублирован дважды подряд. Сверено `nx typecheck:tsgo` и
   `nx show project --json` — состав графа зависимостей не изменился.
 
+## Дедуп `getShakaFrameRate`/`FRAME_STEP_COUNT` (2026-09-08)
+
+- Найден при аудите после сведения соседнего дубля `use-keyboard-shortcuts.ts`. Инлайновая логика
+  определения fps активной дорожки Shaka в `use-shaka-player.ts` дословно повторяла
+  `frame-step-utils.ts` из `apps/animatrona`, только без `try/catch` на случай неготового
+  плеера. Вынесено в `@letar/video-player-core` (реэкспорт из `@letar/video-player-react`,
+  6 новых тестов), оба приложения переведены на общий импорт. `animatrona-folder-player`
+  (третий потребитель библиотеки) своей копии не имел. Детали — `CHANGELOG.md` v0.11.17.
+
 ---
 
-**Последнее обновление:** 2026-08-25
+**Последнее обновление:** 2026-09-08
