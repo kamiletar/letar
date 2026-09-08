@@ -1,5 +1,6 @@
 // Каталог аниме: франшизы, тайтлы, жанры, темы, связи, сезоны, эпизоды
 
+import "../../../../libs/zenstack-fragments/src/animatrona"
 import "./common"
 import "./media"
 import "./import"
@@ -29,33 +30,6 @@ enum SeasonType {
   MOVIE
   /// Спешл
   SPECIAL
-}
-
-enum RelationKind {
-  /// Продолжение
-  SEQUEL
-  /// Предыстория
-  PREQUEL
-  /// Побочная история
-  SIDE_STORY
-  /// Родительская история
-  PARENT_STORY
-  /// Краткое содержание
-  SUMMARY
-  /// Полная версия
-  FULL_STORY
-  /// Спин-офф
-  SPIN_OFF
-  /// Адаптация
-  ADAPTATION
-  /// Общие персонажи
-  CHARACTER
-  /// Альтернативная версия
-  ALTERNATIVE_VERSION
-  /// Альтернативный сеттинг
-  ALTERNATIVE_SETTING
-  /// Другое
-  OTHER
 }
 
 /// Франшиза — группа связанных аниме

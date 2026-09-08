@@ -72,6 +72,60 @@ type TrackerFields {
   @@index([lastCheckedAt])
 }
 
+/// Предпочтения выбора дорожек при просмотре
+enum TrackPreference {
+  /// Русская озвучка + субтитры надписей
+  RUSSIAN_DUB
+  /// Оригинальная дорожка + полные субтитры
+  ORIGINAL_SUB
+  /// Автовыбор по доступности
+  AUTO
+}
+
+/// Статус просмотра аниме (как на Shikimori)
+enum WatchStatus {
+  /// Не начато
+  NOT_STARTED
+  /// Смотрю
+  WATCHING
+  /// Просмотрено
+  COMPLETED
+  /// Отложено
+  ON_HOLD
+  /// Брошено
+  DROPPED
+  /// Запланировано
+  PLANNED
+}
+
+/// Тип связи между аниме (сиквел, приквел, спин-офф и т.д.)
+enum RelationKind {
+  /// Продолжение
+  SEQUEL
+  /// Предыстория
+  PREQUEL
+  /// Побочная история
+  SIDE_STORY
+  /// Родительская история
+  PARENT_STORY
+  /// Краткое содержание
+  SUMMARY
+  /// Полная версия
+  FULL_STORY
+  /// Спин-офф
+  SPIN_OFF
+  /// Адаптация
+  ADAPTATION
+  /// Общие персонажи
+  CHARACTER
+  /// Альтернативная версия
+  ALTERNATIVE_VERSION
+  /// Альтернативный сеттинг
+  ALTERNATIVE_SETTING
+  /// Другое
+  OTHER
+}
+
 /// Прогресс просмотра — пересечение `WatchProgress` (IPFS Player) и `DiscoverWatchProgress`
 /// (Animatrona). Идентичность (`releaseKey` vs `shikimoriId`+`episodeNumber`) и `@@unique` у
 /// каждой модели разные — сюда идёт только «полезная нагрузка» просмотра, ключи и остальные

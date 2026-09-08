@@ -1,5 +1,6 @@
 // Настройки приложения
 
+import "../../../../libs/zenstack-fragments/src/animatrona"
 import "./common"
 import "./anime"
 import "./media"

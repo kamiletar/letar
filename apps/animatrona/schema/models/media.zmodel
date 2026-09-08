@@ -20,16 +20,6 @@ enum VideoCodec {
   COPY
 }
 
-/// Предпочтения выбора дорожек при просмотре
-enum TrackPreference {
-  /// Русская озвучка + субтитры надписей
-  RUSSIAN_DUB
-  /// Оригинальная дорожка + полные субтитры
-  ORIGINAL_SUB
-  /// Автовыбор по доступности (русская если есть, иначе оригинал)
-  AUTO
-}
-
 enum RateControl {
   /// Variable Bitrate с CQ target (рекомендуется)
   VBR
