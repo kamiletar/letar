@@ -4,6 +4,20 @@
 
 ## [Unreleased]
 
+## [0.55.69] - 2026-09-08
+
+### Changed
+
+- **Вынесен общий (SHARED, без Prisma) IPFS/Kubo-код в `libs/ipfs-kubo-core`.** Задача
+  координатора экосистемы Animatrona — общая библиотека для `animatrona` и будущего
+  `animatrona-ipfs-player`. Перенесены `main/services/kubo/*`, `tracker-client.ts`,
+  `pin-manager.ts`/`kubo-concurrency.ts`/`peer-id-manager.ts`/`unixfs-service.ts`, утилиты
+  (`logger`, `port-finder`, `concurrency-limiter`) и типы. `unified-ipfs-service.ts` разделён по
+  экспортам: READ (`cat`/`stat`/`has`/`safeCat`/`probeCidAvailable`/`saveToFile`) ушёл в либу,
+  WRITE (`addFile`/`addBytes`/`addDirectory`/`createDirectoryFromCids`/`repoGc`) остался в
+  Animatrona. Поведение не изменилось — typecheck, обе сборки main (webpack + esbuild), тесты и
+  lint зелёные.
+
 ## [0.55.68] - 2026-09-08
 
 ### Fixed
