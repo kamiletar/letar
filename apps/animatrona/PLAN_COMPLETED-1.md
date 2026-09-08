@@ -519,3 +519,23 @@ enum-значение при следующем запуске приложен�
 
 `nx zenstack:generate`/`typecheck:tsgo`/`lint animatrona` — зелёные (lint: 0 ошибок, только
 предсуществующие несвязанные warnings).
+
+## 2026-09-08: `prisma.config.ts` datasource.url резолвился мимо репозитория
+
+Находка пришла из соседней сессии `animatrona-ipfs-player` — там тот же баг был обнаружен первым
+(путь скопирован дословно оттуда). `file:../../../prisma/data/app.db` всплывал на три уровня выше
+cwd таргета (`apps/animatrona`, см. `cwd` у `db:push`/`db:migrate` в `project.json`), то есть
+резолвился в `C:\web\prisma\data\app.db` — мимо всего репозитория.
+
+Проверено эмпирически: до фикса `nx db:push animatrona` печатал `SQLite database "app.db" at
+"file:../../../prisma/data/app.db"` и реально писал файл по этому пути, а настоящая dev-БД
+(`apps/animatrona/prisma/data/app.db`, которую обновляет сам Electron через
+`applyPrismaMigrations()`/sql.js, не Prisma CLI) оставалась побайтово нетронутой. Баг был
+безвреден на практике только потому, что разработка не гоняет `prisma db push`/`db:migrate`
+руками в обычном workflow — но любой ручной вызов не имел эффекта на реальную БД.
+
+**Фикс:** `url: 'file:prisma/data/app.db'` в [prisma.config.ts](../prisma.config.ts). После
+фикса `nx db:push animatrona` находит существующую БД («database is already in sync»), данные не
+тронуты (сверено побайтово с бэкапом до/после). `label-printer-desktop/prisma.config.ts` проверен
+отдельно — там путь уже без лишнего всплытия, этого бага нет. Разбор перенесён в
+[apps/animatrona/CLAUDE.md](../CLAUDE.md).

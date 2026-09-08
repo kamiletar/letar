@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+## [0.55.68] - 2026-09-08
+
+### Fixed
+
+- **`prisma.config.ts` `datasource.url` резолвился мимо репозитория** — `file:../../../prisma/data/app.db`
+  всплывал на три уровня выше cwd таргета (`apps/animatrona`) в `C:\web\prisma\data\app.db`, а не
+  в `apps/animatrona/prisma/data/app.db`; `nx db:push`/`db:migrate` писали мимо реальной dev-БД.
+  Найдено как копипаст того же бага из `animatrona-ipfs-player`. Фикс — `file:prisma/data/app.db`.
+
 ## [0.55.67] - 2026-09-08
 
 ### Changed
