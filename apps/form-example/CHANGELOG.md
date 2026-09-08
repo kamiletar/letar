@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.18] - 2026-09-09
+
+### Changed
+
+- `README.md` полностью переписан: старые команды ссылались на несуществующий standalone-репозиторий
+  (`git clone .../form-example.git`) — заменены на реальный monorepo-воркфлоу (`nx dev
+  form-example`, `nx run form-example:zenstack:generate`/`db:push`/`db:seed`). Список примеров
+  расширен с устаревших 16 до всех 46, сгруппирован по тем же 6 категориям, что и сайдбар.
+
 ## [0.1.17] - 2026-09-09
 
 ### Changed

@@ -1,5 +1,22 @@
 # Выполненные задачи — form-example
 
+## P2: README — полная документация (2026-09-09)
+
+Старый `README.md` описывал 16 примеров (из текущих 46) и давал команды для несуществующего
+standalone-репозитория (`git clone .../form-example.git`, `npm install`, `npx prisma db push`) —
+приложение живёт внутри монорепо `letar` и таких команд никогда не было в актуальном виде.
+
+Переписано целиком:
+
+- Quick Start — реальный воркфлоу монорепо (`git clone` самого `letar`, `bun install`, `nx dev
+  form-example`, `nx run form-example:zenstack:generate`/`db:push`/`db:seed`), плюс Docker-запуск
+  из каталога приложения.
+- Component Examples — таблица всех 46 examples, сгруппированная по тем же 6 категориям, что и
+  сайдбар (`nav.tsx`) после [P2: Категоризация сайдбара](#p2-категоризация-сайдбара-2026-09-09) —
+  README и сайдбар теперь описывают одну и ту же структуру, не расходятся.
+- Tech Stack — добавлены `@letar/forms-core`/`@letar/form-mcp`, актуальные версии (Next.js 16,
+  Chakra v3, Zod v4, ZenStack/Prisma 7).
+
 ## P2: Категоризация сайдбара (2026-09-09)
 
 `nav.tsx` держал один плоский список из 46 ссылок под заголовком EXAMPLES. PLAN.md давно

@@ -26,7 +26,7 @@ Example-приложение @letar/forms: демо + стартовый шаб�
   PATTERNS: offline, persistence, autosave, i18n, security, captcha, autofill, edit-intent, recipes
   ADVANCED: analytics, undo-redo, server-errors, readonly, skeleton, theming, calculated, utility, async-validation, comparison, depends-on, debug-values, testing-utilities, url-prefill
   ```
-- [ ] README — полная документация с быстрым стартом
+- [x] README — полная документация с быстрым стартом
 
 ## P1.5 — DX фичи (из исследования болей разработчиков, апрель 2026)
 
@@ -54,3 +54,4 @@ Example-приложение @letar/forms: демо + стартовый шаб�
 | 2026-09-09 | ✅ P1 Recipes — добавлены Profile Edit, Checkout, Feedback (4 → 7 карточек), см. PLAN_COMPLETED.md                                                                                                                                     |
 | 2026-09-09 | ✅ P1 Offline — переведено на реальный `@letar/forms/offline` (`useOfflineForm`/`useSyncQueue`/`FormOfflineIndicator`/`FormSyncStatus`) + кнопка Simulate Offline, см. PLAN_COMPLETED.md                                               |
 | 2026-09-09 | ✅ P2 Категоризация сайдбара — 6 групп (BASICS/LAYOUT/FIELDS/GENERATION/PATTERNS/ADVANCED), все 46 examples распределены; заодно устранён дубль секции P2 в этом файле, см. PLAN_COMPLETED.md                                          |
+| 2026-09-09 | ✅ P2 README — полностью переписан: реальные monorepo-команды (`nx dev form-example` вместо несуществующего standalone-репозитория), таблицы всех 46 examples по 6 категориям, актуальный tech stack, см. PLAN_COMPLETED.md            |
