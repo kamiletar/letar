@@ -1,5 +1,6 @@
 // P2P/федерация: подписки, трекеры, раздачи, настройки федерации
 
+import "../../../../libs/zenstack-fragments/src/animatrona"
 import "./common"
 import "./anime"
 import "./media"
@@ -59,24 +60,7 @@ enum TrustLevel {
 }
 
 /// Удалённый трекер в федеративной сети
-model Tracker {
-  id                  String        @id @default(cuid())
-
-  /// URL трекера (уникальный идентификатор)
-  url                 String        @unique
-
-  /// Название трекера
-  name                String
-
-  /// Описание трекера
-  description         String?
-
-  /// Тема контента (anime, drama, movie и т.д.)
-  theme               String        @default("anime")
-
-  /// Основной язык контента
-  language            String        @default("ru")
-
+model Tracker with TrackerFields {
   /// PEM-кодированный публичный ключ для верификации подписей
   publicKeyPem        String?
 
@@ -108,23 +92,13 @@ model Tracker {
   /// Последняя успешная синхронизация
   lastSyncAt          DateTime?
 
-  /// Последняя проверка доступности
-  lastCheckedAt       DateTime?
-
   // === Связи ===
 
   /// Импортированный контент
   importedContent     FederatedContent[]
 
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
-
-  // Политики доступа (desktop приложение без аутентификации)
-  @@allow('all', true)
-
   @@index([trustLevel])
   @@index([lastSyncAt])
-  @@index([lastCheckedAt])
 }
 
 /// Федеративный контент — импортированный из другого трекера
