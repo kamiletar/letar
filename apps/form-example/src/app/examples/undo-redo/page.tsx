@@ -1,8 +1,14 @@
 'use client'
 
+/**
+ * Реальное подключение useFormHistory + HistoryControls — раньше страница только описывала
+ * шаги подключения текстом, ничего не рендерила. FormHistoryPanel читает form через
+ * useDeclarativeForm() (доступен только внутри <Form>), поэтому вынесен отдельным компонентом.
+ */
+
 import { PageH1 } from '@/components/page-h1'
 import { Box, Text, VStack } from '@chakra-ui/react'
-import { Form } from '@letar/forms'
+import { Form, HistoryControls, useDeclarativeForm, useFormHistory } from '@letar/forms'
 import { z } from 'zod/v4'
 
 const ArticleSchema = z.object({
@@ -18,14 +24,28 @@ const ArticleSchema = z.object({
   published: z.boolean().meta({ ui: { title: 'Опубликовать' } }),
 })
 
+function FormHistoryPanel() {
+  const { form } = useDeclarativeForm()
+  const history = useFormHistory(form)
+
+  return (
+    <Box p={4} bg="bg.muted" borderRadius="md">
+      <HistoryControls history={history} />
+      <Text fontSize="xs" color="fg.muted" mt={2}>
+        Ctrl+Z / Ctrl+Y работают в любом месте страницы — useFormHistory вешает глобальный keydown-листенер.
+      </Text>
+    </Box>
+  )
+}
+
 export default function UndoRedoExamplePage() {
   return (
     <VStack gap={8} align="stretch" maxW="600px" mx="auto" py={8}>
       <Box>
         <PageH1 size="lg">Undo / Redo</PageH1>
         <Text color="fg.muted" mt={2}>
-          Ctrl+Z / Ctrl+Y для отмены и повтора изменений в форме. useFormHistory подписывается на form.store и
-          записывает снапшоты с debounce.
+          Ctrl+Z / Ctrl+Y для отмены и повтора изменений в форме. <code>useFormHistory</code>{' '}
+          подписывается на form.store и записывает снапшоты с debounce.
         </Text>
       </Box>
 
@@ -36,21 +56,14 @@ export default function UndoRedoExamplePage() {
           // демо: отправка не требуется
         }}
       >
+        <FormHistoryPanel />
         <Form.Field.String name="title" />
         <Form.Field.String name="slug" />
         <Form.Field.Textarea name="content" />
         <Form.Field.Switch name="published" />
+        <Form.DebugValues showInProduction />
         <Form.Button.Submit>Сохранить</Form.Button.Submit>
       </Form>
-
-      <Box p={4} bg="bg.muted" borderRadius="md" fontSize="sm">
-        <Text fontWeight="bold" mb={2}>
-          Как подключить:
-        </Text>
-        <Text>1. const history = useFormHistory(form)</Text>
-        <Text>2. {'<HistoryControls history={history} />'}</Text>
-        <Text>3. Keyboard shortcuts работают автоматически</Text>
-      </Box>
     </VStack>
   )
 }

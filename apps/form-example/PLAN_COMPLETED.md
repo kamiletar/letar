@@ -1,5 +1,35 @@
 # Выполненные задачи — form-example
 
+## P1.5: Верификация 6 DX-страниц + фикс Undo/Redo (2026-09-09)
+
+PLAN.md держал все 6 пунктов P1.5 unchecked, хотя директории `analytics/`, `undo-redo/`,
+`server-errors/`, `readonly/`, `skeleton/`, `comparison/` уже существовали с initial commit —
+как и в случае с Groups/Recipes/Offline, потребовалась проверка кода, а не факта существования
+файла.
+
+Пять из шести оказались реально реализованы на настоящих компонентах библиотеки:
+
+- **analytics** — `useFormAnalytics` + `AnalyticsPanel`, живая панель метрик
+  (completion/errors/fields/lastFocused).
+- **server-errors** — `mapServerErrors()` на 4 реальных форматах ошибок (Prisma P2002, ZenStack
+  policy, Zod flatten, ActionResult).
+- **readonly** — `FormReadOnlyView` (обычный + compact режим).
+- **skeleton** — `FormSkeleton` из Zod-схемы и по числу полей.
+- **comparison** — `FormComparison` (все поля / только изменённые).
+
+Шестой — [`/examples/undo-redo`](src/app/examples/undo-redo/page.tsx) — был **текстовой
+заглушкой**: страница описывала шаги подключения (`1. const history = useFormHistory(form)`,
+`2. <HistoryControls history={history} />`) как инструкцию для читателя, но ни один из этих
+вызовов не был в коде — ни истории, ни кнопок, ни keyboard-шорткатов. Библиотека при этом уже
+содержит рабочий `useFormHistory`/`HistoryControls` (`libs/forms/src/lib/history/`).
+
+Исправлено — реальное подключение: `useFormHistory(form)` читает `form` через
+`useDeclarativeForm()` (доступен только внутри `<Form>`, поэтому вынесен в дочерний
+`FormHistoryPanel`), `HistoryControls` рендерит кнопки Undo/Redo со счётчиком. Проверено вживую
+(Browser pane, `form_input` + `javascript_tool`): ввод текста в заголовок довёл счётчик до
+`2/2` (снапшот записался после debounce), клик по Undo вернул поле к пустому значению и
+счётчик к `1/1`.
+
 ## P2: README — полная документация (2026-09-09)
 
 Старый `README.md` описывал 16 примеров (из текущих 46) и давал команды для несуществующего

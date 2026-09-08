@@ -30,12 +30,13 @@ Example-приложение @letar/forms: демо + стартовый шаб�
 
 ## P1.5 — DX фичи (из исследования болей разработчиков, апрель 2026)
 
-- [ ] `/examples/analytics` — демо аналитики с live-панелью (drop-off, время на полях)
-- [ ] `/examples/undo-redo` — Undo/Redo с keyboard shortcuts
-- [ ] `/examples/server-errors` — маппинг серверных ошибок (Prisma, Zod, ZenStack)
-- [ ] `/examples/readonly` — read-only режим формы
-- [ ] `/examples/skeleton` — loading skeleton из схемы
-- [ ] `/examples/comparison` — diff-view (было → стало)
+- [x] `/examples/analytics` — демо аналитики с live-панелью (drop-off, время на полях)
+- [x] `/examples/undo-redo` — Undo/Redo с keyboard shortcuts (страница была текстовой заглушкой
+      без реального подключения — реализовано, см. PLAN_COMPLETED.md)
+- [x] `/examples/server-errors` — маппинг серверных ошибок (Prisma, Zod, ZenStack)
+- [x] `/examples/readonly` — read-only режим формы
+- [x] `/examples/skeleton` — loading skeleton из схемы
+- [x] `/examples/comparison` — diff-view (было → стало)
 
 ## P3 — Качество кода
 
@@ -44,14 +45,15 @@ Example-приложение @letar/forms: демо + стартовый шаб�
 
 ## Журнал сессий
 
-| Дата       | Событие                                                                                                                                                                                                                                |
-| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-08-24 | ✅ §18.7 M2 e2e-гейт закрыт — staging e2e 48/48, добавлен в `E2E_GATED_APPS`                                                                                                                                                           |
-| 2026-09-09 | ✅ Побочная находка: hydration mismatch на всех страницах — реальная причина Turbopack+Chakra Global, не `as="nav"`; фикс `--webpack`, см. PLAN_COMPLETED.md                                                                           |
-| 2026-09-08 | ✅ P0 Groups — sortable drag&drop + вложенные массивы (уже реализовано с initial commit, проверено вживую); найден и делегирован в `@letar/forms` баг hydration mismatch на `DndDescribedBy` в sortable-списках, см. PLAN_COMPLETED.md |
-| 2026-09-08 | ✅ P1 Schedule page — новая страница `/examples/schedule` с `Form.Field.Schedule` (расписание инструктора + кастомизация days/dayNames/showCopyToWeekdays), см. PLAN_COMPLETED.md                                                      |
-| 2026-09-08 | ✅ P1 MCP Demo page — новая страница `/examples/mcp-demo`, статичный (без live-подключения) слепок вывода `form-mcp` (`list_fields`/`generate_form`) + живой эквивалент на текущем API, см. PLAN_COMPLETED.md                          |
-| 2026-09-09 | ✅ P1 Recipes — добавлены Profile Edit, Checkout, Feedback (4 → 7 карточек), см. PLAN_COMPLETED.md                                                                                                                                     |
-| 2026-09-09 | ✅ P1 Offline — переведено на реальный `@letar/forms/offline` (`useOfflineForm`/`useSyncQueue`/`FormOfflineIndicator`/`FormSyncStatus`) + кнопка Simulate Offline, см. PLAN_COMPLETED.md                                               |
-| 2026-09-09 | ✅ P2 Категоризация сайдбара — 6 групп (BASICS/LAYOUT/FIELDS/GENERATION/PATTERNS/ADVANCED), все 46 examples распределены; заодно устранён дубль секции P2 в этом файле, см. PLAN_COMPLETED.md                                          |
-| 2026-09-09 | ✅ P2 README — полностью переписан: реальные monorepo-команды (`nx dev form-example` вместо несуществующего standalone-репозитория), таблицы всех 46 examples по 6 категориям, актуальный tech stack, см. PLAN_COMPLETED.md            |
+| Дата       | Событие                                                                                                                                                                                                                                             |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-24 | ✅ §18.7 M2 e2e-гейт закрыт — staging e2e 48/48, добавлен в `E2E_GATED_APPS`                                                                                                                                                                        |
+| 2026-09-09 | ✅ Побочная находка: hydration mismatch на всех страницах — реальная причина Turbopack+Chakra Global, не `as="nav"`; фикс `--webpack`, см. PLAN_COMPLETED.md                                                                                        |
+| 2026-09-08 | ✅ P0 Groups — sortable drag&drop + вложенные массивы (уже реализовано с initial commit, проверено вживую); найден и делегирован в `@letar/forms` баг hydration mismatch на `DndDescribedBy` в sortable-списках, см. PLAN_COMPLETED.md              |
+| 2026-09-08 | ✅ P1 Schedule page — новая страница `/examples/schedule` с `Form.Field.Schedule` (расписание инструктора + кастомизация days/dayNames/showCopyToWeekdays), см. PLAN_COMPLETED.md                                                                   |
+| 2026-09-08 | ✅ P1 MCP Demo page — новая страница `/examples/mcp-demo`, статичный (без live-подключения) слепок вывода `form-mcp` (`list_fields`/`generate_form`) + живой эквивалент на текущем API, см. PLAN_COMPLETED.md                                       |
+| 2026-09-09 | ✅ P1 Recipes — добавлены Profile Edit, Checkout, Feedback (4 → 7 карточек), см. PLAN_COMPLETED.md                                                                                                                                                  |
+| 2026-09-09 | ✅ P1 Offline — переведено на реальный `@letar/forms/offline` (`useOfflineForm`/`useSyncQueue`/`FormOfflineIndicator`/`FormSyncStatus`) + кнопка Simulate Offline, см. PLAN_COMPLETED.md                                                            |
+| 2026-09-09 | ✅ P2 Категоризация сайдбара — 6 групп (BASICS/LAYOUT/FIELDS/GENERATION/PATTERNS/ADVANCED), все 46 examples распределены; заодно устранён дубль секции P2 в этом файле, см. PLAN_COMPLETED.md                                                       |
+| 2026-09-09 | ✅ P2 README — полностью переписан: реальные monorepo-команды (`nx dev form-example` вместо несуществующего standalone-репозитория), таблицы всех 46 examples по 6 категориям, актуальный tech stack, см. PLAN_COMPLETED.md                         |
+| 2026-09-09 | ✅ P1.5 — проверены все 6 DX-страниц; 5 уже были реализованы по-настоящему (analytics/server-errors/readonly/skeleton/comparison), Undo/Redo был текстовой заглушкой — подключён реальный `useFormHistory`+`HistoryControls`, см. PLAN_COMPLETED.md |

@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.19] - 2026-09-09
+
+### Fixed
+
+- `/examples/undo-redo` был текстовой заглушкой — описывал шаги подключения
+  (`const history = useFormHistory(form)`), но ничего не рендерил. Подключён реальный
+  `useFormHistory` + `HistoryControls` через дочерний компонент с `useDeclarativeForm()`;
+  Ctrl+Z/Ctrl+Y и кнопки undo/redo теперь действительно работают.
+
 ## [0.1.18] - 2026-09-09
 
 ### Changed
