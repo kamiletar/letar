@@ -11,7 +11,7 @@ Example-приложение @letar/forms: демо + стартовый шаб�
 ## P1 — Новые страницы
 
 - [x] Schedule page — форма инструктора с Schedule компонентом
-- [ ] MCP Demo page — статичная демо MCP-генерации
+- [x] MCP Demo page — статичная демо MCP-генерации
 - [ ] Recipes — добавить Profile Edit, Checkout, Feedback
 - [ ] Offline — улучшить наглядность (OfflineIndicator, Simulate Offline, очередь)
 
@@ -55,3 +55,4 @@ Example-приложение @letar/forms: демо + стартовый шаб�
 | 2026-09-09 | ✅ Побочная находка: hydration mismatch на всех страницах — реальная причина Turbopack+Chakra Global, не `as="nav"`; фикс `--webpack`, см. PLAN_COMPLETED.md                                                                           |
 | 2026-09-08 | ✅ P0 Groups — sortable drag&drop + вложенные массивы (уже реализовано с initial commit, проверено вживую); найден и делегирован в `@letar/forms` баг hydration mismatch на `DndDescribedBy` в sortable-списках, см. PLAN_COMPLETED.md |
 | 2026-09-08 | ✅ P1 Schedule page — новая страница `/examples/schedule` с `Form.Field.Schedule` (расписание инструктора + кастомизация days/dayNames/showCopyToWeekdays), см. PLAN_COMPLETED.md                                                      |
+| 2026-09-08 | ✅ P1 MCP Demo page — новая страница `/examples/mcp-demo`, статичный (без live-подключения) слепок вывода `form-mcp` (`list_fields`/`generate_form`) + живой эквивалент на текущем API, см. PLAN_COMPLETED.md                          |

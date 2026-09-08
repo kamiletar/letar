@@ -21,6 +21,7 @@ const examples = [
   { href: '/examples/multi-step', label: 'Multi-Step' },
   { href: '/examples/groups', label: 'Groups & Arrays' },
   { href: '/examples/schedule', label: 'Schedule' },
+  { href: '/examples/mcp-demo', label: 'MCP Demo' },
   { href: '/examples/auto-fields', label: 'Auto Fields' },
   { href: '/examples/auto-fields-advanced', label: 'Auto Advanced' },
   { href: '/examples/zenstack', label: 'ZenStack' },

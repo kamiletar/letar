@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.14] - 2026-09-08
+
+### Added
+
+- Новая страница `/examples/mcp-demo` — статичный walkthrough генерации формы через
+  `@letar/form-mcp` (`list_fields`/`generate_form`) с живым эквивалентом на текущем API. Пункт
+  "MCP Demo" добавлен в навигацию.
+
 ## [0.1.13] - 2026-09-08
 
 ### Added

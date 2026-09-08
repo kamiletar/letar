@@ -1,5 +1,26 @@
 # Выполненные задачи — form-example
 
+## P1: MCP Demo page (2026-09-08)
+
+Новая страница [/examples/mcp-demo](src/app/examples/mcp-demo/page.tsx) — walkthrough того, как
+AI-агент генерирует форму через `@letar/form-mcp`. Страница статичная: `form-mcp` работает по
+stdio для агентов в редакторе, у него нет HTTP-эндпоинта, который можно было бы вызвать из
+браузера — поэтому вместо live-запроса показан **дословный слепок** реального вывода
+инструментов (`list_fields`/`generate_form`), сверенный построчно с
+`libs/form-mcp/src/index.ts` (`generateFormCode`/`mapFieldTypeToZod`/`getDefaultValue`) на
+конкретном примере (ContactForm: name/email/message).
+
+Четыре шага: 1) текстовый запрос пользователя → 2) вызов `list_fields` и его результат →
+3) вызов `generate_form` и сгенерированный код (в старом API `useAppForm`, как реально отдаёт
+инструмент) → 4) тот же набор полей, отрендеренный живьём через актуальный декларативный `Form`
+API — чтобы показать, что сгенерированный код реально работает.
+
+Пункт "MCP Demo" добавлен в [nav.tsx](src/components/nav.tsx) после Schedule. Проверено вживую:
+все 4 шага рендерятся, живая форма (шаг 4) принимает ввод и сабмитится, ошибок гидратации нет
+(только фоновый HMR-websocket шум dev-режима). При первой проверке `message` в живой форме
+ошибочно показывал required-звёздочку, хотя в сгенерированном коде поле необязательное — исправлено
+(`.optional()` в Zod-схеме демо). `nx lint`/`typecheck:tsgo` зелёные.
+
 ## P1: Schedule page (2026-09-08)
 
 Новая страница [/examples/schedule](src/app/examples/schedule/page.tsx), showcase для
