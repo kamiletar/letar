@@ -4,6 +4,24 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.12.1] - 2026-09-08
+
+### Fixed
+
+- **`Form.Steps` не регистрировал ни одного шага, будучи вложенным в Chakra `Tabs.Content`**
+  (`.chakra-steps__trigger`/`.chakra-steps__content` — 0, `--percent: NaN%`). Причина —
+  `Steps.Root` (Chakra/Ark UI, `@zag-js/steps`-машина) монтировался с `count={stepCount}`, а
+  `stepCount` растёт `0 → N` только через несколько ре-рендеров (двухфазная async-регистрация
+  каждого `Form.Steps.Step` через собственный `useEffect` и общий `claimedIndicesRef`). Внутри
+  `Tabs.Content` `zag-js`-машина не пересчитывала внутренний прогресс/видимость шагов при этом
+  позднем изменении `count` — снаружи табов та же гонка была безобидна чисто по времени
+  монтирования. Фикс — синхронный верхний предел числа шагов по дереву `children`
+  (`countDeclaredSteps()`), переданный в `Steps.Root` как `effectiveStepCount =
+  Math.max(stepCount, declaredStepCount)` уже на первом рендере; все остальные использования
+  `stepCount` (навигация, контекст) не изменены.
+
+  Найдено `domwellbes-dev` (msg 1315, urgent — редактирование дома через `?tab=form`).
+
 ## [2.12.0] - 2026-09-08
 
 ### Added

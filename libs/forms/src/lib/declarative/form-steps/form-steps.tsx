@@ -2,11 +2,43 @@
 
 import { Steps } from '@chakra-ui/react'
 import { type StepPersistenceConfig, useStepNavigation, useStepPersistence, useStepState } from '@letar/forms-react'
-import { type ReactNode, useCallback, useMemo, useRef, useState } from 'react'
+import { Children, isValidElement, type ReactNode, useCallback, useMemo, useRef, useState } from 'react'
 import { useDeclarativeForm } from '../form-context'
 import { FormStepsContext, type FormStepsContextValue } from './form-steps-context'
+import { FormStepsStep } from './form-steps-step'
 
 export type { StepPersistenceConfig }
+
+/**
+ * Синхронный (по дереву `children`, без ожидания эффектов регистрации) верхний предел числа
+ * шагов — сколько `Form.Steps.Step` объявлено в разметке, включая скрытые через `when`.
+ *
+ * Нужен затем, чтобы `Steps.Root` монтировался с корректным `count` уже на ПЕРВОМ рендере, а не
+ * только после того, как все `Form.Steps.Step` синхронизируют регистрацию через собственные
+ * `useEffect` (двухфазный процесс — `stepCount` растёт 0 → N через несколько ре-рендеров).
+ * `zag-js`-машина Chakra `Steps` не всегда пересчитывает свои внутренние индикаторы/прогресс при
+ * ПОЗДНЕМ изменении `count` — если сам `Steps.Root` при первом коммите монтируется с `count=0`
+ * (единственный вариант при чисто эффект-based регистрации), содержимое шагов может не
+ * появиться вовсе, даже когда `stepCount` в React-состоянии позже становится верным. Подробности
+ * найденного класса бага — `.claude/docs/forms-steps-count-must-be-synchronous.md`.
+ */
+function countDeclaredSteps(children: ReactNode): number {
+  let count = 0
+  Children.forEach(children, (child) => {
+    if (!isValidElement(child)) {
+      return
+    }
+    if (child.type === FormStepsStep) {
+      count++
+      return
+    }
+    const props = child.props as { children?: ReactNode } | undefined
+    if (props?.children) {
+      count += countDeclaredSteps(props.children)
+    }
+  })
+  return count
+}
 
 export interface FormStepsProps {
   /** Form.Steps content (Step, Indicator, Navigation, CompletedContent) */
@@ -121,6 +153,12 @@ export function FormSteps({
     hideFieldsFromValidation,
     showFieldsForValidation,
   } = useStepState()
+
+  // Верхний предел по дереву children — см. countDeclaredSteps. Пересчитывается только при
+  // смене ссылки на children (обычно стабильна между рендерами одного и того же дерева).
+  // oxlint-disable-next-line react-hooks/exhaustive-deps
+  const declaredStepCount = useMemo(() => countDeclaredSteps(children), [children])
+  const effectiveStepCount = Math.max(stepCount, declaredStepCount)
 
   // Persistence: save step changes
   useStepPersistence(currentStep, stepPersistence)
@@ -251,7 +289,7 @@ export function FormSteps({
       <Steps.Root
         step={currentStep}
         onStepChange={handleStepChange}
-        count={stepCount}
+        count={effectiveStepCount}
         orientation={orientation}
         size={size}
         variant={variant}

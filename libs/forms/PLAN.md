@@ -6,6 +6,28 @@
 
 ## Backlog (запросы от агентов)
 
+### ✅ [2026-09-08] БЛОКЕР: `Form.Steps` не регистрирует шаги внутри Chakra `Tabs.Content` (от domwellbes-dev)
+
+- **Запросил:** domwellbes-dev (msg 1315), пересланo `forms-dev` координатором (thread
+  `forms-steps-empty-inside-tabs`)
+- **Приоритет:** urgent — завтра (2026-09-09) заказчик заводит дом через админку domwellbes;
+  редактирование созданного дома полностью сломано (форма создания вне табов работает).
+- **Симптом:** `Form.Steps` внутри `Tabs.Content` (`UrlTabs`) рендерился с `stepCount=0`
+  (`.chakra-steps__trigger`/`.chakra-steps__content` — 0 шт, `--percent: NaN%`). Тот же
+  компонент вне табов (`/admin/houses/new`) работал нормально.
+- **Root cause:** `Steps.Root count={stepCount}` монтировался с `count=0` на первом коммите —
+  `stepCount` растёт `0 → N` только через несколько ре-рендеров (двухфазная async-регистрация
+  каждого `Form.Steps.Step` через собственный `useEffect` + общий `claimedIndicesRef`). Внутри
+  `Tabs.Content` `zag-js`-машина `Steps` (`@ark-ui/react`) не пересчитывала внутренний
+  прогресс/видимость шагов при этом позднем изменении `count`; снаружи табов та же гонка была
+  безобидна чисто по времени монтирования (не воспроизводится в jsdom-тестах — специфично
+  реальному браузеру/Next.js dev).
+- **Фикс (v2.12.1):** синхронный верхний предел числа шагов по дереву `children`
+  (`countDeclaredSteps()` в `form-steps.tsx`), переданный в `Steps.Root` как
+  `effectiveStepCount = Math.max(stepCount, declaredStepCount)` уже на первом рендере. Проверено
+  живьём в domwellbes (`/admin/houses/[id]?tab=form` и `/admin/houses/new`).
+- **Статус:** закрыто.
+
 ### ✅ [2026-09-08] `Field.Slug` — auto-slug из соседнего поля (от domwellbes-dev)
 
 - **Запросил:** domwellbes-dev (msg 1304)
