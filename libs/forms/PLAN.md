@@ -6,6 +6,35 @@
 
 ## Backlog (запросы от агентов)
 
+### [2026-09-09] `apps/form-example` не подключает `FormI18nProvider` (от forms-coordinator-dev)
+
+- **Запросил:** forms-coordinator-dev (аудит покрытия после фикса v2.12.3)
+- **Приоритет:** normal
+- **Описание:** аудит всех приложений на `<FormI18nProvider locale="ru">` (после фикса запятой,
+  v2.12.3) нашёл, что `form-example` — showcase-витрина самой `@letar/forms` для внешних
+  пользователей, реально использующая поля (`captcha-demo` и др. через `createForm`) — не
+  оборачивает дерево в `FormI18nProvider` вовсе. Значит `Field.Number`/`Currency`/`Percentage` там
+  сейчас работают только на точке (en-US default), запятая даёт явную ошибку валидации — плохая
+  демонстрация для внешней аудитории library.
+- **Фикс:** добавить `<FormI18nProvider locale="ru">` в провайдеры `apps/form-example` (образец —
+  `apps/form-develop-app/src/app/_components/provider.tsx`). Минутная правка.
+- **Статус:** ожидание
+
+### [2026-09-09] `@letar/forms-shadcn` Field.Currency не передаёт `locale` — тот же класс бага, что был в Chakra-скине (от forms-coordinator-dev)
+
+- **Запросил:** forms-coordinator-dev (аудит покрытия после фикса v2.12.3)
+- **Приоритет:** normal
+- **Описание:** фикс v2.12.3 (передача `locale` из `useFormI18n()` в `NumberInput.Root` +
+  дефолтные `formatOptions`, форсирующие locale-aware парсер вместо голого `parseFloat`) сделан
+  только в Chakra-скине (`libs/forms`). `libs/forms-shadcn/src/lib/fields/field-currency.tsx` —
+  отдельная реализация, `locale` не передаёт вовсе. Не проверял живьём остальные числовые поля
+  этого скина (`field-number.tsx`/`field-number-input.tsx`/`field-percentage.tsx`, если есть) —
+  вероятно тот же паттерн, нужно перепроверить все аналогично Chakra-версии.
+- **Фикс:** применить тот же паттерн (`locale` из `useFormI18n()`, дефолтные `formatOptions` при
+  отсутствии явных) во всех числовых полях `forms-shadcn`, с теми же регресс-тестами (en-US точка /
+  ru запятая), что уже есть в `field-number-input.spec.tsx`/`field-currency.spec.tsx` Chakra-скина.
+- **Статус:** ожидание
+
 ### ✅ [2026-09-08] Русская запятая как десятичный разделитель — проверить Field.Number/NumberInput (закрыт v2.12.3, от domwellbes-dev)
 
 - **Запросил:** domwellbes-dev (msg 1401, topic `form-feature-request`), переслано `forms-coordinator-dev`
