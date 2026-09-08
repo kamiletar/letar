@@ -2,6 +2,67 @@
 
 Детальное описание всех реализованных фич Animatrona TV.
 
+## Версия 0.6.2 (2026-09-08)
+
+### Фикс: `nx lint animatrona-tv` не существовал в графе Nx вообще
+
+Блок `lint` в `project.json` выглядел настроенным (`options.args: ["**/*.{ts,tsx}"]`), но был
+без `executor` — классическая ловушка `.claude/docs/nx-target-without-executor-silent-noop.md`.
+`@nx/eslint/plugin` не порождает inferred-таргет `lint` там, где нет `eslint.config.*`, а такого
+файла у tv не было. Практическое следствие: обязательный шаг чек-листа «перед коммитом
+`nx lint <app>`» на этом приложении молча не проверял ничего — судя по всему, с самого создания.
+
+Обнаружено параллельно двумя сторонами: я упёрлась независимо, `animatrona-mobile-dev`
+одновременно получила задачу «завести `eslint.config.mjs` для RN-приложений (и согласовать
+tv)». Скоординировались через Agent Mail (тред `rn-eslint-config`) вместо дублирования работы:
+она отдала готовую, уже отлаженную форму конфига, я применила дословно.
+
+- `apps/animatrona-tv/eslint.config.mjs` — три обхода несовместимости ESLint 10, найденные
+  mobile-dev: `@react-native/eslint-config/flat` целиком не грузится
+  (`eslint-plugin-eslint-comments@3.2.0` падает на `context.getSourceCode is not a function`),
+  та же несовместимость у `eslint-plugin-react-native@5.0.0` (значит `no-unused-styles`/
+  `no-inline-styles`/`split-platform-components` пока недоступны — долг, не наша правка чинит),
+  `@react-native/eslint-plugin` резолвится через `createRequire` от entry-файла
+  `@react-native/eslint-config/flat` (транзитивная зависимость, изолированная установка bun её
+  не видит напрямую)
+- `project.json`: мёртвый блок `lint` заменён на связку `oxlint` (executor `nx:run-commands`) +
+  `lint: dependsOn: [oxlint]`, по образцу `animatrona-tracker`
+- Первый реальный прогон по всем 32 файлам (проверено через `eslint . -f json`, не по
+  «Successfully ran target» — mobile-dev предупредила именно об этой ловушке) нашёл 4 находки:
+  `no-console` в `index.js` (осознанный паттерн версионирования JS bundle, тот же что в mobile —
+  оставлен), 3× `react-hooks/exhaustive-deps` в `TVPlayerScreen.tsx` — `setError`/
+  `setSelectedAudio`/`setSelectedSubtitle` приходят не из локального `useState`, а из кастомного
+  хука `usePlayerEpisode`; статический анализ не может доказать стабильность через границу
+  хука (в отличие от прямого `useState`, где React это гарантирует). Добавлены в зависимости
+  `useCallback` — правки безопасны, паттерн на практике стабилен, просто раньше не был явным
+
+### Фикс: экран уходил в скринсейвер во время просмотра
+
+`WAKE_LOCK` был объявлен в `AndroidManifest.xml`, но ничего его не использовало — на TV D-pad
+трогают редко (не тач-экран как на mobile), системный скринсейвер срабатывал посреди серии.
+
+Фикс — `WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON` на `MainActivity.onCreate()`, держится
+весь activity lifecycle, а не только на экране плеера. Осознанное отличие от `useWakeLock` в
+`animatrona-mobile` (TurboModule, включается только на время воспроизведения): TV всегда от
+розетки, батарею жалеть незачем, поэтому не нужен ни TurboModule (инфраструктуры TurboModule в
+tv нет вообще, в отличие от mobile), ни JS-мост — двух строк в `MainActivity.kt` достаточно.
+Заодно убран сам `WAKE_LOCK` permission из манифеста — был объявлен под несуществующий
+`PowerManager.WakeLock`, вводил в заблуждение.
+
+Проверено: `nx typecheck:tsgo` зелёный, `nx build-android` — BUILD SUCCESSFUL (нативная часть
+пересобрана).
+
+### Фикс: убраны локальные пины `react-native`/`@react-native/*`
+
+Найдено `animatrona-mobile-dev`, подтверждено координатором: `react-native`/
+`@react-native/codegen`/`@react-native/gradle-plugin` в `package.json` были запинены на
+`0.87.0`, при корневых уже `0.87.1` — тот же класс дрейфа версий, что раньше был у `react`
+(19.2.3/19.2.8, см. версия 0.5.0 ниже). Версии заменены на `"*"` (паттерн
+`@letar/animatrona-shared`) — резолв только через hoisting из корня.
+
+Проверено: `bun install` из корня схлопнул tv на `react-native@0.87.1` (отдельная запись для tv
+исчезла из `bun.lock`), `nx typecheck:tsgo` зелёный, `nx build-android` — BUILD SUCCESSFUL.
+
 ## Версия 0.6.0
 
 ### Фикс: Android toolchain под RN 0.87 (перенос из animatrona-mobile)

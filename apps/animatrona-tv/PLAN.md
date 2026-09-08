@@ -196,7 +196,16 @@ nx clean animatrona-tv
       экран уходил в системный скринсейвер посреди серии (D-pad трогают редко). Фикс —
       `FLAG_KEEP_SCREEN_ON` на весь `MainActivity` (не JS/TurboModule — TV всегда от розетки,
       батарею жалеть незачем, в отличие от `useWakeLock` в animatrona-mobile)
-- [ ] Тестирование на реальном Android TV устройстве
+- [x] Завести `nx lint` — таргета не было в графе Nx вообще (блок без `executor`, silent
+      no-op), первый прогон по 32 файлам нашёл и починил 3 живых `react-hooks/exhaustive-deps`
+      (детали — CHANGELOG v0.6.2, PLAN_COMPLETED.md)
+- [ ] ⚠️ Открытый вопрос: тестирование на реальном Android TV устройстве/эмуляторе — не
+      выполнялось ни разу после миграции на RN 0.87 (2026-08-20) и смены Android toolchain
+      (2026-08-25), только собирался APK. AVD `Television_1080p` есть, но пакет `emulator` и
+      system-image `android-36;android-tv;x86` из `C:/Android/Sdk` пропали (доступны для
+      доустановки через `sdkmanager`, ~1.5 ГБ). Решение — поднять эмулятор заново или
+      дождаться реального устройства — не принято, нужен выбор пользователя. Детали —
+      PLAN_TESTING.md
 
 ---
 
