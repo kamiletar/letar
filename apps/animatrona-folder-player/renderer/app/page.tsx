@@ -459,6 +459,8 @@ export default function HomePage() {
               onNext={() => void player.goNext()}
               onTimeUpdate={handleTimeUpdate}
               onEnded={handleEnded}
+              host={host}
+              externalAudioTracks={player.externalTracks.audio}
               trackSelectorSlot={
                 <SubtitleTrackSelector
                   options={subtitleOptions}

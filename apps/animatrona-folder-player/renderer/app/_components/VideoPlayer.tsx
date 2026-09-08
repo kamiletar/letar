@@ -3,12 +3,19 @@
 /**
  * VideoPlayer — обёртка над Shaka Player из `@letar/video-player-react`/`@letar/video-player-core`.
  *
- * Без раздельных аудиодорожек (`usesSeparateAudioRef` всегда `false` — выбор внешней
- * аудиодорожки, найденной `@letar/folder-scan`, отдельная задача плана) и без глав
- * (`MediaInfoWasmProber` ещё не подключён — `main/page.tsx`).
+ * Аудио — два независимых источника, объединённые в один `AudioTrackSelector`:
+ * - встроенные в контейнер дорожки (`embedded:<audioId>`) — переключаются через Shaka
+ *   `getVariantTracks()`/`selectVariantTrack()`, см. `useAudioTracks`;
+ * - внешние аудиофайлы рядом с видео (`external:<индекс>`, найдены `@letar/folder-scan`,
+ *   например папка «Rus sound» с русской озвучкой) — синхронизируются отдельным `<audio>`
+ *   элементом через `useExternalAudio` (`@letar/folder-player-react`), видео при этом мьютится.
+ *
+ * Без глав (`MediaInfoWasmProber` ещё не подключён — `main/page.tsx`).
  */
 
 import { Box, Center, IconButton, Spinner } from '@chakra-ui/react'
+import type { ExternalAudioMatch, FolderPlayerHost } from '@letar/folder-player-react'
+import { useExternalAudio } from '@letar/folder-player-react'
 import type { MediaChapter } from '@letar/folder-scan'
 import type { PlaybackSpeed } from '@letar/video-player-core'
 import {
@@ -66,6 +73,10 @@ export interface VideoPlayerProps {
   onNext: () => void
   /** Кнопка выбора дорожки субтитров (`SubtitleTrackSelector`) — рендерится в `SharedPlayerControls` */
   trackSelectorSlot?: ReactNode
+  /** Хост — источник `toMediaUrl` для `useExternalAudio` (конвертация пути внешнего аудио в URL) */
+  host: FolderPlayerHost
+  /** Внешние аудиофайлы текущего эпизода (`player.externalTracks.audio`, уже отфильтрованы по номеру серии) */
+  externalAudioTracks: ExternalAudioMatch[]
 }
 
 /** Минимальный интерфейс Shaka Player, ожидаемый `useShakaPlayer` */
@@ -123,6 +134,8 @@ function ShakaVideoPlayer({
   onPrev,
   onNext,
   trackSelectorSlot,
+  host,
+  externalAudioTracks,
   Shaka,
 }: VideoPlayerProps & { Shaka: ShakaModule }) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -152,19 +165,48 @@ function ShakaVideoPlayer({
     onDurationChange: setDuration,
   })
 
-  // Аудиодорожки внутри уже загруженного файла (не путать с внешними аудиофайлами из
-  // @letar/folder-scan — той задачи ещё нет). См. риск в PLAN.md §17: не проверено эмпирически
-  // на всех кодеках/контейнерах, что Chromium реально отдаёт несколько дорожек.
+  // Аудиодорожки внутри уже загруженного файла, переключаемые через Shaka (`embedded:<audioId>`).
   const { audioTracks, selectAudioTrack } = useAudioTracks({ playerRef, isVideoReady })
-  const audioOptions = useMemo(
-    () => audioTracks.map((t) => ({ id: t.audioId, label: formatAudioTrackLabel(t.language, t.label) })),
+  const embeddedAudioOptions = useMemo(
+    () => audioTracks.map((t) => ({ id: `embedded:${t.audioId}`, label: formatAudioTrackLabel(t.language, t.label) })),
     [audioTracks],
   )
-  const selectedAudioId = useMemo(() => {
+  // Внешние аудиофайлы (например «Rus sound» рядом с видео) — второй источник дорожек,
+  // объединяется с встроенными в один dropdown (`external:<индекс>`).
+  const externalAudioOptions = useMemo(
+    () =>
+      externalAudioTracks.map((t, i) => ({
+        id: `external:${i}`,
+        label: formatAudioTrackLabel(t.language, t.title || t.groupName),
+      })),
+    [externalAudioTracks],
+  )
+  const audioOptions = useMemo(
+    () => [...embeddedAudioOptions, ...externalAudioOptions],
+    [embeddedAudioOptions, externalAudioOptions],
+  )
+  // Ручной выбор пользователя перебивает автовыбор Shaka (активная встроенная дорожка) —
+  // компонент полностью пересоздаётся на смену эпизода (`key={...}` в page.tsx), поэтому
+  // сбрасывать это состояние вручную не нужно.
+  const [manualAudioId, setManualAudioId] = useState<string | null>(null)
+  const defaultEmbeddedAudioId = useMemo(() => {
     const active = audioTracks.find((t) => t.active)
-    return active ? active.audioId : (audioOptions[0]?.id ?? '')
-  }, [audioTracks, audioOptions])
-  const handleSelectAudio = useCallback((id: string) => selectAudioTrack(id), [selectAudioTrack])
+    return active ? `embedded:${active.audioId}` : (embeddedAudioOptions[0]?.id ?? null)
+  }, [audioTracks, embeddedAudioOptions])
+  const selectedAudioId = manualAudioId ?? defaultEmbeddedAudioId ?? externalAudioOptions[0]?.id ?? ''
+  const handleSelectAudio = useCallback(
+    (id: string) => {
+      setManualAudioId(id)
+      if (id.startsWith('embedded:')) {
+        selectAudioTrack(id.slice('embedded:'.length))
+      }
+    },
+    [selectAudioTrack],
+  )
+  const externalAudioPath = selectedAudioId.startsWith('external:')
+    ? (externalAudioTracks[Number(selectedAudioId.split(':')[1])]?.filePath ?? null)
+    : null
+  useExternalAudio({ host, videoRef, audioPath: externalAudioPath })
 
   const controls = usePlayerControls({
     videoRef,
