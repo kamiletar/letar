@@ -1,7 +1,8 @@
 'use client'
 
 import { Combobox, Field, Portal, Spinner, useFilter } from '@chakra-ui/react'
-import { type ReactElement, type ReactNode, useMemo } from 'react'
+import { useStore } from '@tanstack/react-form'
+import { type ReactElement, type ReactNode, useEffect, useMemo, useRef } from 'react'
 import type { BaseFieldProps, FieldSize, GroupableOption } from '../../types'
 import {
   type AsyncQueryFn,
@@ -49,6 +50,27 @@ export interface ComboboxFieldProps<T = string, TData = unknown> extends BaseFie
    * Required when using useQuery
    */
   getValue?: (item: TData) => T
+
+  /**
+   * Label to show for `initialValue`/`defaultValues` when using `useQuery`.
+   *
+   * Static `options` resolve the initial label automatically. Async search cannot: the item
+   * matching the current value may not be present in the current (empty, pre-search) result
+   * page, so there is nothing to look the label up in on mount. Pass the label explicitly here
+   * when editing an entity with a pre-selected value.
+   *
+   * @example
+   * ```tsx
+   * <Form.Field.Combobox
+   *   name="userId"
+   *   useQuery={(search) => useFindManyUser({ where: { name: { contains: search } } })}
+   *   getLabel={(user) => user.name}
+   *   getValue={(user) => user.id}
+   *   initialLabel={initialValues.userName}
+   * />
+   * ```
+   */
+  initialLabel?: string
 
   /**
    * Get group key from data element
@@ -156,6 +178,7 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
   useFieldState: (
     componentProps: Omit<ComboboxFieldProps, keyof BaseFieldProps>,
     resolved: ResolvedFieldProps,
+    { form, fullPath },
   ): ComboboxFieldState => {
     // Async search with debounce via shared hook
     const {
@@ -168,6 +191,30 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
       debounce: componentProps.debounce ?? 300,
       minChars: componentProps.minChars ?? 1,
     })
+
+    // Инициализация `inputValue` из значения поля (сценарий `defaultValues` при редактировании).
+    // `Combobox.Root` контролируем по `inputValue` отдельно от `value` (см. `render` ниже) —
+    // `useAsyncSearch` стартует с пустой строкой независимо от того, что значение уже выбрано,
+    // поэтому без явной синхронизации поле показывает пустой инпут при непустом значении.
+    // `useStore` (не render-prop `<form.Field>`) — даёт значение поля до монтирования
+    // `<form.Field>`, как и в `field-city.tsx`/`field-address.tsx`.
+    const initializedRef = useRef(false)
+    const fieldValue = useStore(form.store, () => form.getFieldValue(fullPath)) as string | undefined
+    useEffect(() => {
+      if (initializedRef.current || !fieldValue || inputValue) {
+        return
+      }
+      initializedRef.current = true
+
+      if (componentProps.options) {
+        const matchedOption = componentProps.options.find((opt) => String(opt.value) === String(fieldValue))
+        if (matchedOption) {
+          setInputValue(getOptionLabel(matchedOption))
+        }
+      } else if (componentProps.initialLabel !== undefined) {
+        setInputValue(componentProps.initialLabel)
+      }
+    }, [fieldValue, inputValue, componentProps.options, componentProps.initialLabel, setInputValue])
 
     // Filter for static options
     const { contains } = useFilter({ sensitivity: 'base' })

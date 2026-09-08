@@ -6,7 +6,7 @@
 
 ## Backlog (запросы от агентов)
 
-### [2026-09-08] `Field.Combobox` с начальным значением рендерится пустым (от domwellbes-dev)
+### ✅ [2026-09-08] `Field.Combobox` с начальным значением рендерится пустым (от domwellbes-dev)
 
 - **Запросил:** domwellbes-dev, живая проверка формы состава дома
   (`apps/domwellbes` → `/admin/houses/<id>/?tab=items`, карандаш на строке).
@@ -24,8 +24,15 @@
 - **Предлагаемое поведение:** при монтировании (и при внешней смене `field.state.value`)
   подставлять в `inputValue` label опции с этим value из `options`; для async-варианта, где label
   ещё не загружен, нужен явный вход — `initialLabel` или `getLabelForValue`.
-- **Статус:** ожидание. Отправить письмом не удалось (в сессии не было `registration_token`
-  domwellbes-dev) — запись здесь единственный канал, координатору стоит забрать её отсюда.
+- **Статус:** закрыто (v2.11.5, 2026-09-08). `useFieldState` теперь синхронизирует `inputValue`
+  с текущим значением поля на монтировании через `useStore(form.store, ...)` (паттерн из
+  `field-city.tsx`/`field-address.tsx`): для статических `options` — поиском подходящей опции по
+  `value`; для `useQuery` — через новый проп `initialLabel` (label для значения не всегда
+  доступен на монтировании — асинхронный поиск ещё не выполнялся). Регресс-проверка —
+  `apps/form-develop-app` `/fields-demo` (`country: 'us'` в `initialValues`, DOM-проверкой
+  подтверждено `input.value === "United States"`); документация — `apps/form-docs`
+  `content/docs/fields/select.mdx`/`.ru.mdx`, раздел «Editing an existing value with async
+  search»/«Редактирование существующего значения при асинхронном поиске».
 
 ### ✅ [2026-09-08] Диалог восстановления черновика (`useFormPersistence`) захардкожен на английском (от domwellbes-dev)
 
