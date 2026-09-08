@@ -15,6 +15,7 @@
  * ```
  */
 
+import { useDebounce } from '@letar/hooks'
 import { useEffect, useState } from 'react'
 
 import type { SearchResult } from '@/app/_actions/search.action'
@@ -56,31 +57,14 @@ export function useSearch(options: UseSearchOptions = {}): UseSearchResult {
   const { search, isLoading, error } = useSearchContext()
 
   const [query, setQuery] = useState('')
-  const [debouncedQuery, setDebouncedQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
-  const [isDebouncing, setIsDebouncing] = useState(false)
 
-  // Debounce запроса — синхронизация с внешней системой (таймер)
-  useEffect(() => {
-    if (!query || query.length < minLength) {
-      // oxlint-disable-next-line react/set-state-in-effect -- сброс при коротком запросе, часть debounce-таймера
-      setDebouncedQuery('')
-      // oxlint-disable-next-line react/set-state-in-effect -- сброс при коротком запросе, часть debounce-таймера
-      setResults([])
-      return
-    }
-
-    // oxlint-disable-next-line react/set-state-in-effect -- старт debounce-таймера
-    setIsDebouncing(true)
-    const timer = setTimeout(() => {
-      setDebouncedQuery(query)
-      setIsDebouncing(false)
-    }, debounceMs)
-
-    return () => {
-      clearTimeout(timer)
-    }
-  }, [query, debounceMs, minLength])
+  // Слишком короткий запрос гасим до debounce: результаты должны пропадать сразу,
+  // как только пользователь стёр строку, а не спустя debounceMs.
+  const activeQuery = query.length >= minLength ? query : ''
+  const settledQuery = useDebounce(activeQuery, debounceMs)
+  const debouncedQuery = activeQuery === '' ? '' : settledQuery
+  const isDebouncing = activeQuery !== debouncedQuery
 
   // Выполнение поиска при изменении debouncedQuery — синхронизация с внешней системой (кэш поиска)
   useEffect(() => {
@@ -114,30 +98,18 @@ export function useSearch(options: UseSearchOptions = {}): UseSearchResult {
  */
 export function useSearchIds(query: string, debounceMs = 250): string[] | null {
   const { searchIds, isLoading } = useSearchContext()
-  const [debouncedQuery, setDebouncedQuery] = useState('')
   const [ids, setIds] = useState<string[] | null>(null)
 
-  // Debounce запроса — синхронизация с внешней системой (таймер)
-  useEffect(() => {
-    if (!query || query.length < 2) {
-      // oxlint-disable-next-line react/set-state-in-effect -- сброс при коротком запросе, часть debounce-таймера
-      setDebouncedQuery('')
-      setIds(null)
-      return
-    }
-
-    const timer = setTimeout(() => {
-      setDebouncedQuery(query)
-    }, debounceMs)
-
-    return () => clearTimeout(timer)
-  }, [query, debounceMs])
+  // Как и в useSearch: короткий запрос сбрасывает выборку немедленно, без ожидания таймера.
+  const activeQuery = query.length >= 2 ? query : ''
+  const settledQuery = useDebounce(activeQuery, debounceMs)
+  const debouncedQuery = activeQuery === '' ? '' : settledQuery
 
   // Выполнение поиска
   useEffect(() => {
     if (!debouncedQuery || isLoading) {
-      if (!query) {
-        // oxlint-disable-next-line react/set-state-in-effect -- сброс результатов при пустом запросе
+      if (!activeQuery) {
+        // oxlint-disable-next-line react/set-state-in-effect -- сброс выборки при слишком коротком запросе
         setIds(null)
       }
       return
@@ -145,7 +117,7 @@ export function useSearchIds(query: string, debounceMs = 250): string[] | null {
 
     const searchResults = searchIds(debouncedQuery)
     setIds(searchResults)
-  }, [debouncedQuery, searchIds, isLoading, query])
+  }, [debouncedQuery, searchIds, isLoading, activeQuery])
 
   return ids
 }

@@ -16,6 +16,7 @@
  */
 
 import { Box, HStack, IconButton, Slider, Text, VStack } from '@chakra-ui/react'
+import { formatTime } from '@letar/video-player-core'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   LuChevronLeft,
@@ -318,12 +319,6 @@ export function DualVideoPlayer({
   }, [togglePlay, adjustOffset, onOffsetChange, toggleMute, toggleDonor, toggleFullscreen, isFullscreen, stepFrame])
 
   // Форматирование времени
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
-
   // Форматирование смещения
   const formatOffset = (ms: number) => {
     const sign = ms >= 0 ? '+' : ''

@@ -1,6 +1,7 @@
 'use client'
 
 import { Box, Button, HStack, IconButton, Slider, Text } from '@chakra-ui/react'
+import { formatTime } from '@letar/video-player-core'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   LuArrowLeftRight,
@@ -257,12 +258,6 @@ export function ComparePlayer({ videoA, videoB, labelA, labelB, onClose: _onClos
   }, [togglePlay, seek, stepFrame, toggleMute, swapVideos, toggleFullscreen, isFullscreen])
 
   // Форматирование времени
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
-
   return (
     <Box
       ref={containerRef}

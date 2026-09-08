@@ -3,11 +3,17 @@
  */
 
 import { Box, Text, VStack } from '@chakra-ui/react'
+import type { PlaybackSpeed } from '@letar/video-player-core'
 import { LuCheck } from 'react-icons/lu'
 
-/** Доступные скорости воспроизведения */
-export const PLAYBACK_SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2] as const
-export type PlaybackSpeed = (typeof PLAYBACK_SPEEDS)[number]
+/**
+ * Скорости, доступные на телефоне — намеренно короче десктопного набора из
+ * `@letar/video-player-core` (без 0.25 и 1.75): пальцем по короткому списку не промахиваешься.
+ * Тип берём из библиотеки, чтобы наборы не разъехались по значениям.
+ */
+export const PLAYBACK_SPEEDS: readonly PlaybackSpeed[] = [0.5, 0.75, 1, 1.25, 1.5, 2]
+
+export type { PlaybackSpeed }
 
 interface SpeedSelectorProps {
   /** Текущая скорость */

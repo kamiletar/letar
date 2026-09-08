@@ -22,6 +22,7 @@ import { toMediaUrl } from '@/lib/media-url'
 import { Badge, Box, Button, HStack, Portal, Text, Tooltip, VStack } from '@chakra-ui/react'
 import { AnimeHeroBase } from '@letar/animatrona-ui'
 import { getAnimeStatusConfig } from '@letar/animatrona-utils'
+import { formatTime } from '@letar/video-player-core'
 import { type ReactNode, useMemo } from 'react'
 import { LuCalendar, LuCheck, LuClock, LuPause, LuPlay, LuStar, LuX } from 'react-icons/lu'
 
@@ -83,12 +84,6 @@ export interface AnimeHeroProps {
 }
 
 /** Форматирует время в MM:SS */
-function formatTime(seconds: number): string {
-  const mins = Math.floor(seconds / 60)
-  const secs = Math.floor(seconds % 60)
-  return `${mins}:${secs.toString().padStart(2, '0')}`
-}
-
 /** Определяет целевой эпизод и информацию для CTA */
 function getPlayTarget(
   episodes: AnimeHeroProps['episodes'],

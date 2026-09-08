@@ -11,6 +11,7 @@
  */
 
 import { Box, HStack, IconButton, Slider, Text } from '@chakra-ui/react'
+import { formatTime } from '@letar/video-player-core'
 import { memo } from 'react'
 import { LuExpand, LuPause, LuPictureInPicture, LuPlay, LuX } from 'react-icons/lu'
 
@@ -40,15 +41,6 @@ export interface MiniPlayerControlsProps {
 /**
  * Форматирует время в mm:ss
  */
-function formatTime(seconds: number): string {
-  if (!isFinite(seconds) || isNaN(seconds)) {
-    return '0:00'
-  }
-  const m = Math.floor(seconds / 60)
-  const s = Math.floor(seconds % 60)
-  return `${m}:${s.toString().padStart(2, '0')}`
-}
-
 /**
  * Упрощённые контролы для mini-player
  */

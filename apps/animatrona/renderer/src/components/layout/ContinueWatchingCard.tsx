@@ -8,6 +8,7 @@
 
 import { Box, Flex, HStack, Text, VStack } from '@chakra-ui/react'
 import { usePolledData } from '@letar/hooks'
+import { formatTime } from '@letar/video-player-core'
 import { formatDistanceToNow } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { usePathname, useRouter } from 'next/navigation'
@@ -17,12 +18,6 @@ import { LuPlay } from 'react-icons/lu'
 import { findGlobalLastWatched } from '@/app/_actions/watch-progress.action'
 
 /** Форматирует время в минуты:секунды */
-function formatTime(seconds: number): string {
-  const mins = Math.floor(seconds / 60)
-  const secs = Math.floor(seconds % 60)
-  return `${mins}:${secs.toString().padStart(2, '0')}`
-}
-
 /**
  * Компонент карточки "Продолжить смотреть"
  * Отображается в Sidebar когда есть незавершённый просмотр
