@@ -75,6 +75,13 @@ interface TranscodeIpcResult {
   error?: string
 }
 
+interface TranscodeStreamingIpcResult {
+  success: boolean
+  cached?: boolean
+  outputPath?: string
+  error?: string
+}
+
 interface SpriteIpcResult {
   success: boolean
   spritePath?: string
@@ -139,6 +146,14 @@ const electronAPI = {
   transcode: {
     /** Готовит файл к воспроизведению; `request` — см. TranscodeRequest в main/services/ffmpeg */
     prepare: (request: unknown): Promise<TranscodeIpcResult> => ipcRenderer.invoke('transcode:prepare', request),
+    /**
+     * Потоковая подготовка — не ждёт всего файла: байты фрагментированного MP4 приходят через
+     * `onStreamChunk` по мере кодирования, воспроизведение можно начинать сразу через
+     * `MediaSource`. Если файл уже в кэше — `cached: true`, стрим не запускается, работает как
+     * обычный `prepare`.
+     */
+    prepareStreaming: (request: unknown): Promise<TranscodeStreamingIpcResult> =>
+      ipcRenderer.invoke('transcode:prepareStreaming', request),
     cancel: (): Promise<void> => ipcRenderer.invoke('transcode:cancel'),
     getCacheSize: (): Promise<number> => ipcRenderer.invoke('transcode:getCacheSize'),
     clearCache: (): Promise<void> => ipcRenderer.invoke('transcode:clearCache'),
@@ -146,6 +161,26 @@ const electronAPI = {
       const listener = (_event: Electron.IpcRendererEvent, progress: TranscodeProgress) => callback(progress)
       ipcRenderer.on('transcode:progress', listener)
       return () => ipcRenderer.removeListener('transcode:progress', listener)
+    },
+    onStreamChunk: (callback: (chunk: Uint8Array) => void): () => void => {
+      const listener = (_event: Electron.IpcRendererEvent, chunk: Uint8Array) => callback(chunk)
+      ipcRenderer.on('transcode:streamChunk', listener)
+      return () => ipcRenderer.removeListener('transcode:streamChunk', listener)
+    },
+    onStreamProgress: (callback: (progress: TranscodeProgress) => void): () => void => {
+      const listener = (_event: Electron.IpcRendererEvent, progress: TranscodeProgress) => callback(progress)
+      ipcRenderer.on('transcode:streamProgress', listener)
+      return () => ipcRenderer.removeListener('transcode:streamProgress', listener)
+    },
+    onStreamEnd: (callback: (result: { outputPath: string }) => void): () => void => {
+      const listener = (_event: Electron.IpcRendererEvent, result: { outputPath: string }) => callback(result)
+      ipcRenderer.on('transcode:streamEnd', listener)
+      return () => ipcRenderer.removeListener('transcode:streamEnd', listener)
+    },
+    onStreamError: (callback: (message: string) => void): () => void => {
+      const listener = (_event: Electron.IpcRendererEvent, message: string) => callback(message)
+      ipcRenderer.on('transcode:streamError', listener)
+      return () => ipcRenderer.removeListener('transcode:streamError', listener)
     },
   },
   sprite: {

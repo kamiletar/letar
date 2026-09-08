@@ -20,7 +20,7 @@ import { app } from 'electron'
 import { spawn } from 'node:child_process'
 import type { ChildProcess } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { existsSync } from 'node:fs'
+import { createWriteStream, existsSync } from 'node:fs'
 import { mkdir, readdir, rename, rm, stat } from 'node:fs/promises'
 import path from 'node:path'
 
@@ -136,6 +136,37 @@ function buildFfmpegArgs(request: TranscodeRequest, outputPath: string): string[
 }
 
 /**
+ * То же самое, но вывод — фрагментированный MP4 в stdout (`pipe:1`), пригодный для потокового
+ * добавления в `MediaSource.SourceBuffer` по мере поступления байт. Прогресс уводим на отдельный
+ * дескриптор `pipe:3` (в `stdio` третий индекс сверх `stdin/stdout/stderr`), иначе он смешается
+ * с самими медиаданными на stdout.
+ */
+function buildStreamingFfmpegArgs(request: TranscodeRequest): string[] {
+  const audioIndex = request.audioTrackIndex ?? 0
+
+  return [
+    '-y',
+    '-hide_banner',
+    '-nostdin',
+    '-i',
+    request.filePath,
+    '-map',
+    '0:v:0',
+    '-map',
+    `0:a:${audioIndex}?`,
+    ...buildCodecArgs(request.plan),
+    // Фрагментированный MP4 — без финального moov-атома, можно писать в неперематываемый вывод
+    // (stdout) и начинать воспроизведение до завершения кодирования всего файла
+    '-movflags',
+    'frag_keyframe+empty_moov+default_base_moof',
+    '-progress',
+    'pipe:3',
+    '-nostats',
+    'pipe:1',
+  ]
+}
+
+/**
  * Готовит файл к воспроизведению. Возвращает путь к готовому MP4 — либо из кэша, либо только
  * что созданный. Бросает, если ffmpeg недоступен, отменён или завершился с ошибкой.
  */
@@ -206,6 +237,113 @@ export async function transcodeFile(
   await pruneCache().catch((error) => log.warn('Не удалось почистить кэш', { error: String(error) }))
 
   return { outputPath, fromCache: false }
+}
+
+export interface StreamingTranscodeHandlers {
+  onChunk: (chunk: Buffer) => void
+  onProgress: (progress: TranscodeProgress) => void
+  onEnd: (result: TranscodeResult) => void
+  onError: (message: string) => void
+}
+
+export type StreamingTranscodeStart = { cached: true; outputPath: string } | { cached: false }
+
+/**
+ * Потоковый вариант `transcodeFile` — не ждёт завершения, а зовёт `handlers.onChunk` по мере
+ * поступления байт от ffmpeg (см. `buildStreamingFfmpegArgs`). Параллельно пишет те же байты на
+ * диск в кэш — при удачном завершении повторный просмотр той же серии, как и раньше, мгновенный.
+ *
+ * Функция сама не бросает и не возвращает Promise, привязанный к завершению всего файла —
+ * результат (`onEnd`/`onError`) приходит позже через колбэки, а не через возврат функции.
+ * Если файл уже в кэше — стриминг не нужен, возвращается `{ cached: true, outputPath }`
+ * синхронно, и вызывающая сторона использует обычный путь воспроизведения готового файла.
+ */
+export async function startStreamingTranscode(
+  request: TranscodeRequest,
+  handlers: StreamingTranscodeHandlers,
+): Promise<StreamingTranscodeStart> {
+  const status = await getFfmpegStatus()
+  if (!status.available || !status.ffmpegPath) {
+    throw new Error('ffmpeg не установлен — включите расширенную поддержку форматов')
+  }
+
+  const cacheDir = getCacheDir()
+  await mkdir(cacheDir, { recursive: true })
+
+  const outputPath = path.join(cacheDir, `${await buildCacheKey(request)}.mp4`)
+  if (existsSync(outputPath)) {
+    log.info('Готовый файл взят из кэша (потоковый запрос)', { outputPath })
+    return { cached: true, outputPath }
+  }
+
+  const partialPath = `${outputPath}.part.mp4`
+  const totalSec = (request.durationMs ?? 0) / 1000
+  cancelled = false
+
+  const args = buildStreamingFfmpegArgs(request)
+  log.info('Запуск ffmpeg (потоковый режим)', { strategy: request.plan.strategy, file: request.filePath })
+
+  const child = spawn(status.ffmpegPath, args, {
+    windowsHide: true,
+    // Индекс 3 сверх stdin/stdout/stderr — отдельный канал под `-progress pipe:3`
+    stdio: ['ignore', 'pipe', 'pipe', 'pipe'],
+  })
+  activeProcess = child
+
+  const cacheWrite = createWriteStream(partialPath)
+  let stderrTail = ''
+  let progressBuf = ''
+
+  child.stdout?.on('data', (chunk: Buffer) => {
+    cacheWrite.write(chunk)
+    handlers.onChunk(chunk)
+  })
+
+  const progressPipe = child.stdio[3] as NodeJS.ReadableStream | undefined
+  progressPipe?.on('data', (chunk: Buffer) => {
+    progressBuf += chunk.toString()
+    const blocks = progressBuf.split('progress=')
+    progressBuf = blocks.pop() ?? ''
+    for (const block of blocks) {
+      const progress = parseProgressChunk(block, totalSec)
+      if (progress) {
+        handlers.onProgress(progress)
+      }
+    }
+  })
+
+  child.stderr?.on('data', (chunk: Buffer) => {
+    stderrTail = (stderrTail + chunk.toString()).slice(-2000)
+  })
+
+  child.on('error', (error) => {
+    activeProcess = null
+    cacheWrite.destroy()
+    rm(partialPath, { force: true }).catch(() => {})
+    handlers.onError(error.message)
+  })
+
+  child.on('close', (code) => {
+    activeProcess = null
+    cacheWrite.end()
+    if (cancelled) {
+      rm(partialPath, { force: true }).catch(() => {})
+      handlers.onError('Подготовка отменена')
+      return
+    }
+    if (code !== 0) {
+      rm(partialPath, { force: true }).catch(() => {})
+      handlers.onError(`ffmpeg завершился с кодом ${code}: ${stderrTail.trim().split('\n').slice(-3).join(' ')}`)
+      return
+    }
+
+    rename(partialPath, outputPath)
+      .then(() => pruneCache().catch((error) => log.warn('Не удалось почистить кэш', { error: String(error) })))
+      .then(() => handlers.onEnd({ outputPath, fromCache: false }))
+      .catch((error) => handlers.onError(error instanceof Error ? error.message : String(error)))
+  })
+
+  return { cached: false }
 }
 
 /** Прерывает идущую подготовку — `transcodeFile` отклонится и удалит частичный файл */

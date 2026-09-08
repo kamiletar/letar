@@ -27,6 +27,7 @@ import {
   cancelTranscode,
   clearTranscodeCache,
   getTranscodeCacheSize,
+  startStreamingTranscode,
   transcodeFile,
 } from '../services/ffmpeg/transcode.service'
 
@@ -41,6 +42,14 @@ export interface TranscodeIpcResult {
   /** Путь к готовому файлу — рендерер отдаёт его в `<video>` через `media://` */
   outputPath?: string
   fromCache?: boolean
+  error?: string
+}
+
+export interface TranscodeStreamingIpcResult {
+  success: boolean
+  /** Файл уже в кэше — стрим не запускался, рендерер использует `outputPath` как обычно */
+  cached?: boolean
+  outputPath?: string
   error?: string
 }
 
@@ -92,6 +101,43 @@ export function registerFfmpegHandlers(): void {
       return { success: false, error: error instanceof Error ? error.message : String(error) }
     }
   })
+
+  ipcMain.handle(
+    'transcode:prepareStreaming',
+    async (event, request: TranscodeRequest): Promise<TranscodeStreamingIpcResult> => {
+      try {
+        const start = await startStreamingTranscode(request, {
+          onChunk: (chunk) => {
+            if (!event.sender.isDestroyed()) {
+              event.sender.send('transcode:streamChunk', chunk)
+            }
+          },
+          onProgress: (progress: TranscodeProgress) => {
+            if (!event.sender.isDestroyed()) {
+              event.sender.send('transcode:streamProgress', progress)
+            }
+          },
+          onEnd: (result) => {
+            if (!event.sender.isDestroyed()) {
+              event.sender.send('transcode:streamEnd', { outputPath: result.outputPath })
+            }
+          },
+          onError: (message) => {
+            if (!event.sender.isDestroyed()) {
+              event.sender.send('transcode:streamError', message)
+            }
+          },
+        })
+
+        if (start.cached) {
+          return { success: true, cached: true, outputPath: start.outputPath }
+        }
+        return { success: true, cached: false }
+      } catch (error) {
+        return { success: false, error: error instanceof Error ? error.message : String(error) }
+      }
+    },
+  )
 
   ipcMain.handle('transcode:cancel', (): void => {
     cancelTranscode()

@@ -54,6 +54,12 @@ export interface VideoPlayerSubtitle {
 export interface VideoPlayerProps {
   src: string
   /**
+   * MIME-тип `src` — обязателен для `blob:`-URL на `MediaSource` (потоковая Hi10P-подготовка,
+   * см. `use-transcode-stream.ts`): без него Shaka пытается определить тип по сети (DASH/HLS
+   * sniffing) и не находит содержимого. Для обычного `media://`-пути не нужен вовсе.
+   */
+  mimeType?: string
+  /**
    * Реальный путь к файлу на диске (без `media://`), с которого читает `src` — нужен отдельно
    * от `src`, чтобы нарезать превью-спрайт через ffmpeg (main-процесс работает с путями, не
    * с протоколом). При Hi10P/AC3 и т.п. это путь к УЖЕ подготовленной копии из `transcode`,
@@ -122,6 +128,7 @@ export function VideoPlayer(props: VideoPlayerProps) {
 
 function ShakaVideoPlayer({
   src,
+  mimeType,
   filePath,
   chapters: mediaChapters,
   subtitle,
@@ -156,6 +163,7 @@ function ShakaVideoPlayer({
 
   const { videoRef, playerRef, isVideoReady, isLoading } = useShakaPlayer({
     src,
+    mimeType,
     startTime,
     autoPlay,
     containerRef,

@@ -15,11 +15,19 @@ import type { MediaInfo } from '@letar/folder-scan'
 import { buildTranscodePlan } from '@shared/transcode-plan'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import type { UseTranscodeStreamResult } from '../_hooks/use-transcode-stream'
+
 interface ExtendedFormatsPanelProps {
   filePath: string
   mediaInfo: MediaInfo
-  /** Файл готов — путь к обработанной копии, её и надо отдавать в плеер */
+  /** Файл готов целиком — путь к обработанной копии, её и надо отдавать в плеер */
   onReady: (outputPath: string) => void
+  /**
+   * Потоковая подготовка (Hi10P → VP9) — владеет ей родитель (`page.tsx`), не сама панель:
+   * слушатели IPC-чанков должны жить, даже когда эта панель уже размонтирована (воспроизведение
+   * началось до конца кодирования, см. `use-transcode-stream.ts`)
+   */
+  stream: UseTranscodeStreamResult
 }
 
 type Phase = 'idle' | 'installing' | 'preparing'
@@ -31,11 +39,14 @@ function formatMb(bytes: number): string {
 const COST_HINTS: Record<string, string> = {
   cheap: 'Быстро — потоки копируются без пережатия.',
   moderate: 'Обычно занимает меньше минуты на серию — пережимается только звук.',
-  expensive: 'Может занять несколько минут — видео пережимается целиком. Результат сохранится, '
+  expensive: 'Видео пережимается целиком в фоне — воспроизведение начнётся через несколько секунд, '
+    + 'не дожидаясь конца. Результат сохранится, повторный просмотр запустится сразу.',
+  // Показывается, только если потоковый режим недоступен (см. stream.supported в компоненте)
+  'expensive-no-stream': 'Может занять несколько минут — видео пережимается целиком. Результат сохранится, '
     + 'повторный просмотр запустится сразу.',
 }
 
-export function ExtendedFormatsPanel({ filePath, mediaInfo, onReady }: ExtendedFormatsPanelProps) {
+export function ExtendedFormatsPanel({ filePath, mediaInfo, onReady, stream }: ExtendedFormatsPanelProps) {
   const [status, setStatus] = useState<FfmpegStatus | null>(null)
   const [phase, setPhase] = useState<Phase>('idle')
   const [installProgress, setInstallProgress] = useState<FfmpegInstallProgress | null>(null)
@@ -59,6 +70,14 @@ export function ExtendedFormatsPanel({ filePath, mediaInfo, onReady }: ExtendedF
   useEffect(() => window.electronAPI.ffmpeg.onInstallProgress(setInstallProgress), [])
   useEffect(() => window.electronAPI.transcode.onProgress(setTranscodeProgress), [])
 
+  // Потоковый путь уже был запущен раньше (например при возврате на этот экран) и успел
+  // обнаружить готовый файл в кэше — доигрываем как обычный `onReady`, без повторной подготовки
+  useEffect(() => {
+    if (stream.phase === 'done' && stream.outputPath && !stream.src) {
+      onReady(stream.outputPath)
+    }
+  }, [stream.phase, stream.outputPath, stream.src, onReady])
+
   const handleInstall = useCallback(async () => {
     setError(null)
     setPhase('installing')
@@ -76,6 +95,13 @@ export function ExtendedFormatsPanel({ filePath, mediaInfo, onReady }: ExtendedF
   }, [])
 
   const handlePrepare = useCallback(async () => {
+    // Hi10P (video-and-audio) с известной codec-строкой — стрим, воспроизведение начинается
+    // через секунды, не дожидаясь конца кодирования всей серии (см. use-transcode-stream.ts)
+    if (stream.supported) {
+      stream.start()
+      return
+    }
+
     setError(null)
     setPhase('preparing')
     setTranscodeProgress(null)
@@ -93,15 +119,19 @@ export function ExtendedFormatsPanel({ filePath, mediaInfo, onReady }: ExtendedF
     } else {
       setError(result.error ?? 'Не удалось подготовить файл')
     }
-  }, [filePath, plan, mediaInfo.duration, onReady])
+  }, [stream, filePath, plan, mediaInfo.duration, onReady])
 
   const handleCancel = useCallback(() => {
+    if (stream.phase === 'connecting' || stream.phase === 'streaming') {
+      stream.cancel()
+      return
+    }
     if (phase === 'installing') {
       void window.electronAPI.ffmpeg.cancelInstall()
     } else if (phase === 'preparing') {
       void window.electronAPI.transcode.cancel()
     }
-  }, [phase])
+  }, [phase, stream])
 
   if (phase === 'installing') {
     const percent = installProgress?.percent ?? 0
@@ -127,6 +157,30 @@ export function ExtendedFormatsPanel({ filePath, mediaInfo, onReady }: ExtendedF
           )
           : null}
         <Button size="sm" variant="ghost" onClick={handleCancel}>Отменить</Button>
+      </VStack>
+    )
+  }
+
+  if (stream.phase === 'connecting') {
+    return (
+      <VStack gap={3} w="full">
+        <Text fontSize="sm">Буферизуем — воспроизведение начнётся через несколько секунд…</Text>
+        <Progress.Root value={null} w="full" size="sm" colorPalette="brand">
+          <Progress.Track>
+            <Progress.Range />
+          </Progress.Track>
+        </Progress.Root>
+        <Button size="sm" variant="ghost" onClick={handleCancel}>Отменить</Button>
+      </VStack>
+    )
+  }
+
+  if (stream.phase === 'error' && stream.error) {
+    // Ошибка потокового пути — молча падать некуда, показываем и даём попробовать целиковый режим
+    return (
+      <VStack gap={2} w="full">
+        <Text fontSize="sm" color="fg.error">{stream.error}</Text>
+        <Button colorPalette="brand" onClick={() => void handlePrepare()}>Попробовать снова</Button>
       </VStack>
     )
   }
@@ -182,13 +236,17 @@ export function ExtendedFormatsPanel({ filePath, mediaInfo, onReady }: ExtendedF
 
   return (
     <VStack gap={2} w="full">
-      <Button colorPalette="brand" onClick={handlePrepare}>Подготовить и проиграть</Button>
+      <Button colorPalette="brand" onClick={() => void handlePrepare()}>
+        {stream.supported ? 'Смотреть' : 'Подготовить и проиграть'}
+      </Button>
       <Box maxW="sm">
         {plan.reasons.map((reason) => (
           <Text key={reason} fontSize="xs" color="fg.muted" textAlign="center">{reason}</Text>
         ))}
         <Text fontSize="xs" color="fg.muted" textAlign="center" mt={1}>
-          {COST_HINTS[plan.cost] ?? ''}
+          {(plan.cost === 'expensive' && !stream.supported
+            ? COST_HINTS['expensive-no-stream']
+            : COST_HINTS[plan.cost]) ?? ''}
         </Text>
       </Box>
       <Flex gap={2} align="center" wrap="wrap" justify="center">

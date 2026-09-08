@@ -6,7 +6,12 @@ import type {
 } from '@letar/folder-player-react'
 import type { MediaInfo } from '@letar/folder-scan'
 import type { EmbeddedSubtitlesIpcResult } from '../../main/ipc/embedded-subtitles.handlers'
-import type { FfmpegInstallResult, SpriteIpcResult, TranscodeIpcResult } from '../../main/ipc/ffmpeg.handlers'
+import type {
+  FfmpegInstallResult,
+  SpriteIpcResult,
+  TranscodeIpcResult,
+  TranscodeStreamingIpcResult,
+} from '../../main/ipc/ffmpeg.handlers'
 import type { FfmpegInstallProgress, FfmpegStatus } from '../../main/services/ffmpeg/ffmpeg-installer.service'
 import type { TranscodeProgress, TranscodeRequest } from '../../main/services/ffmpeg/transcode.service'
 
@@ -17,6 +22,7 @@ export type {
   TranscodeIpcResult,
   TranscodeProgress,
   TranscodeRequest,
+  TranscodeStreamingIpcResult,
 }
 
 export interface ProbeResult {
@@ -67,10 +73,15 @@ export interface ElectronAPI {
   }
   transcode: {
     prepare: (request: TranscodeRequest) => Promise<TranscodeIpcResult>
+    prepareStreaming: (request: TranscodeRequest) => Promise<TranscodeStreamingIpcResult>
     cancel: () => Promise<void>
     getCacheSize: () => Promise<number>
     clearCache: () => Promise<void>
     onProgress: (callback: (progress: TranscodeProgress) => void) => () => void
+    onStreamChunk: (callback: (chunk: Uint8Array) => void) => () => void
+    onStreamProgress: (callback: (progress: TranscodeProgress) => void) => () => void
+    onStreamEnd: (callback: (result: { outputPath: string }) => void) => () => void
+    onStreamError: (callback: (message: string) => void) => () => void
   }
   sprite: {
     generate: (filePath: string, durationSec: number) => Promise<SpriteIpcResult>

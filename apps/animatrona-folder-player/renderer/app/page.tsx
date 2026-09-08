@@ -18,12 +18,14 @@ import type { MediaInfo } from '@letar/folder-scan'
 
 import type { CodecSupportResult } from '@shared/codec-support'
 import { checkCodecSupport } from '@shared/codec-support'
+import { buildTranscodePlan } from '@shared/transcode-plan'
 import type { EmbeddedSubtitlesIpcResult } from '../../main/ipc/embedded-subtitles.handlers'
 import { ExtendedFormatsPanel } from './_components/ExtendedFormatsPanel'
 import type { SubtitleTrackOption } from './_components/SubtitleTrackSelector'
 import { SubtitleTrackSelector } from './_components/SubtitleTrackSelector'
 import type { VideoPlayerSubtitle } from './_components/VideoPlayer'
 import { VideoPlayer } from './_components/VideoPlayer'
+import { useTranscodeStream } from './_hooks/use-transcode-stream'
 import { isVideoFilePath } from './_lib/dropped-path'
 import { toMediaUrl } from './_lib/media-url'
 
@@ -299,6 +301,58 @@ export default function HomePage() {
     setPreparedPath(null)
   }, [currentVideoPath])
 
+  /**
+   * Потоковый старт для Hi10P (VP9-таргет с известной codec-строкой, см. use-transcode-stream.ts)
+   * — `blob:`-URL на `MediaSource`, дозаполняемый по мере кодирования. Хук живёт на уровне
+   * страницы, а не внутри `ExtendedFormatsPanel`: IPC-слушатели чанков не должны обрываться,
+   * когда панель размонтируется после старта воспроизведения.
+   */
+  const transcodePlan = useMemo(() => {
+    if (!mediaInfo || !currentVideoPath) {
+      return null
+    }
+    return buildTranscodePlan({
+      videoTracks: mediaInfo.videoTracks,
+      audioTracks: mediaInfo.audioTracks,
+      filePath: currentVideoPath,
+    })
+  }, [mediaInfo, currentVideoPath])
+
+  const stream = useTranscodeStream({
+    filePath: currentVideoPath ?? '',
+    plan: transcodePlan
+      ?? {
+        strategy: 'direct',
+        videoAction: 'copy',
+        audioAction: 'copy',
+        needsFfmpeg: false,
+        cost: 'none',
+        reasons: [],
+      },
+    durationMs: mediaInfo ? mediaInfo.duration * 1000 : 0,
+  })
+
+  const [streamedSrc, setStreamedSrc] = useState<string | null>(null)
+  useEffect(() => {
+    setStreamedSrc(null)
+  }, [currentVideoPath])
+
+  useEffect(() => {
+    if (stream.src) {
+      setStreamedSrc(stream.src)
+      setPreparedPath(null)
+    }
+  }, [stream.src])
+
+  // Смена эпизода посреди стрима — отменяем фоновую подготовку прошлого файла, иначе ffmpeg
+  // продолжает кодировать и пушить чанки в MediaSource, который уже никто не показывает
+  useEffect(() => {
+    return () => {
+      stream.cancel()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentVideoPath])
+
   const [openInSystemPlayerError, setOpenInSystemPlayerError] = useState<string | null>(null)
   const handleOpenInSystemPlayer = useCallback(() => {
     if (!currentVideoPath) {
@@ -423,7 +477,7 @@ export default function HomePage() {
       )}
 
       <Box flex={1} bg="black" position="relative">
-        {currentVideoPath && codecSupport && !codecSupport.supported && !preparedPath
+        {currentVideoPath && codecSupport && !codecSupport.supported && !preparedPath && !streamedSrc
           ? (
             <Center h="full" p={8}>
               <VStack gap={4} maxW="lg" color="white" textAlign="center">
@@ -434,6 +488,7 @@ export default function HomePage() {
                     filePath={currentVideoPath}
                     mediaInfo={mediaInfo}
                     onReady={setPreparedPath}
+                    stream={stream}
                   />
                 )}
                 <Flex gap={3} wrap="wrap" justify="center">
@@ -447,8 +502,9 @@ export default function HomePage() {
           )
           : currentVideoPath && (
             <VideoPlayer
-              key={preparedPath ?? currentVideoPath}
-              src={toMediaUrl(preparedPath ?? currentVideoPath)}
+              key={streamedSrc ?? preparedPath ?? currentVideoPath}
+              src={streamedSrc ?? toMediaUrl(preparedPath ?? currentVideoPath)}
+              mimeType={streamedSrc ? 'video/mp4' : undefined}
               filePath={preparedPath ?? currentVideoPath}
               chapters={mediaInfo?.chapters}
               subtitle={subtitle}
