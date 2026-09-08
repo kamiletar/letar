@@ -2,6 +2,19 @@
 
 Детальное описание всех реализованных фич.
 
+## Fail-open Telegram webhook secret (2026-09-08)
+
+Аудит безопасности (`.claude/rules/env-files.md`-класс: «нет переменной — значит пускаем»,
+повод — `apps/synth`) нашёл `validateSecret` в `src/app/api/telegram/webhook/route.ts`:
+`if (!WEBHOOK_SECRET) return true` — при не настроенном `TELEGRAM_WEBHOOK_SECRET` вебхук
+пропускал любые запросы. Путь `/api/telegram/webhook` предсказуем, а сам секрет не был прописан
+ни в `docker-compose.production.yml`, ни (насколько можно судить по бинарному `.env.docker.enc`)
+в переменных окружения — то есть дыра была реально открыта в проде: кто угодно мог POST'ить
+поддельный Telegram-апдейт и привязать `telegramChatId` к произвольному `userId`, либо
+подделать реакции на сообщения бота. Исправлено на fail-closed (коммит `aed5bddb`).
+
+⚠️ Открытый вопрос — см. `PLAN.md` § «Открытые вопросы».
+
 ## Фикс hb.wasm ENOENT в webpack-сборке (2026-09-05)
 
 Прод-деплой (`deployId 293d7830`) 4 раза за сборку ловил `failed to asynchronously prepare wasm:
