@@ -59,6 +59,9 @@
       "inputs": [
         "{projectRoot}/schema.zmodel",
         "{workspaceRoot}/libs/zenstack-fragments/src/*.zmodel"
+      ],
+      "outputs": [
+        "{projectRoot}/renderer/src/generated"
       ]
     },
     "db:push": {
