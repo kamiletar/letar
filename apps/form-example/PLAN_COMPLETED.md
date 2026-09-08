@@ -1,5 +1,32 @@
 # Выполненные задачи — form-example
 
+## P0: Groups — sortable drag&drop + вложенные массивы (2026-09-08)
+
+Задача из PLAN.md значилась невыполненной, но реализация присутствовала на странице
+[groups/page.tsx](src/app/examples/groups/page.tsx) с самого initial commit (`69fdf2ea`) — просто
+не была отмечена в чек-листе. Три секции:
+
+1. Nested Object + Dynamic Array (address + contacts)
+2. Sortable Array (Drag & Drop) — `Form.Group.List name="skills" sortable` +
+   `Form.Group.List.Button.DragHandle`
+3. Nested Arrays (Course → Modules → Lessons) — два уровня вложенных `Form.Group.List`
+
+Проверено вживую через Browser pane: все три секции рендерятся, Add Contact/Add Lesson/Add
+Module корректно добавляют элементы на любом уровне вложенности (модуль 1→2, урок 2→3).
+
+**Побочная находка — делегирована в `@letar/forms`:** секция 2 (sortable) даёт hydration
+mismatch на каждой полной перезагрузке — `aria-describedby="DndDescribedBy-N"` расходится
+между сервером и клиентом. Root cause: `SortableWrapper`
+(`libs/forms/src/lib/declarative/form-group/form-group-list-sortable.tsx`) рендерит
+`<DndContext>` без явного `id` — `@dnd-kit/utilities` `useUniqueId("DndDescribedBy", id)` без
+`value` берёт номер из module-level счётчика (`ids[prefix]++`), не детерминированного между SSR
+и клиентской гидратацией. Технически безвредно (React не патчит эти атрибуты), но шумит в
+консоли на любой странице с `Form.Group.List sortable`. Предложенный фикс — прокинуть уже
+вычисляемый `fullPath` как явный `id` в `SortableWrapper`/`DndContext` (при заданном `value`
+`useUniqueId` счётчик не трогает). Задача не в компетенции form-example — отправлена
+`forms-coordinator-dev` (agent-mail, thread `forms-bug-sortable-dnddescribedby`), запись в
+`libs/forms/PLAN.md` § Backlog.
+
 ## fix: hydration mismatch на всех страницах — Turbopack+Chakra Global, не `as="nav"` (2026-09-09)
 
 Побочная находка при живой проверке (не связана с задачей по локали десятичного разделителя):
