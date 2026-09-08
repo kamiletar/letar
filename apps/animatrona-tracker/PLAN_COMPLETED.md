@@ -390,6 +390,15 @@ DOM с чужим значением и переключатель автопр�
 
 `typecheck:tsgo` зелёный. Commit `22e92b77`.
 
+## Рассинхрон `PORT` в env-файлах (2026-09-08)
+
+`.env` держал `PORT=3010`, а `.env.local` (`NEXT_PUBLIC_APP_URL`/`BETTER_AUTH_URL`) и
+`.claude/launch.json` уже использовали 3009 — `nx dev animatrona-tracker` без явного override
+стартовал на 3010, конфликтуя с другим процессом на этом порту (обнаружено в сессии 2026-09-08 (6),
+см. PLAN.md). Фикс: `.env` `PORT` переведён на 3009, все три места согласованы. Production-порт
+3010 (`docker-compose.production.yml`, `Dockerfile.production` `ENV PORT=3010`) не трогался —
+отдельный контур, завязанный на NPM/Traefik-роутинг. Commit `c52b2ce1`.
+
 ---
 
 **Последнее обновление:** 2026-09-08
