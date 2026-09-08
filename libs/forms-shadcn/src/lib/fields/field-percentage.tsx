@@ -1,9 +1,14 @@
 'use client'
 
+import { useFormI18n } from '@letar/forms-react'
 import type { ReactElement } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
 import type { PercentageFieldProps } from './types'
+
+interface PercentageFieldState {
+  locale: string | undefined
+}
 
 /**
  * Form.Field.Percentage — shadcn-скин.
@@ -12,10 +17,12 @@ import type { PercentageFieldProps } from './types'
  * `%` — соседний `<span>`, не встроенное Intl-форматирование внутри инпута (тот же принцип, что
  * у `FieldCurrency`).
  */
-export const FieldPercentage = createField<PercentageFieldProps, number | undefined>({
+export const FieldPercentage = createField<PercentageFieldProps, number | undefined, PercentageFieldState>({
   displayName: 'FieldPercentage',
 
-  render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps }): ReactElement => {
+  useFieldState: (): PercentageFieldState => ({ locale: useFormI18n()?.locale }),
+
+  render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const { min = 0, max = 100, step = 1 } = componentProps
     const value = field.state.value as number | undefined
 
@@ -32,6 +39,7 @@ export const FieldPercentage = createField<PercentageFieldProps, number | undefi
               step={step}
               disabled={resolved.disabled}
               readOnly={resolved.readOnly}
+              locale={fieldState.locale}
               data-field-name={fullPath}
             />
           </div>

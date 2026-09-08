@@ -1,3 +1,4 @@
+import { FormI18nProvider } from '@letar/forms-react'
 import { TestForm } from '@letar/forms-react/testing'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
@@ -12,7 +13,7 @@ describe('FieldCurrency (shadcn)', () => {
     )
 
     expect(screen.getByText('Цена')).toBeInTheDocument()
-    expect(document.querySelector('input[type="number"]')).toHaveValue(100)
+    expect(screen.getByRole('spinbutton')).toHaveValue('100')
     expect(screen.getByText('₽')).toBeInTheDocument()
   })
 
@@ -33,12 +34,54 @@ describe('FieldCurrency (shadcn)', () => {
       </TestForm>,
     )
 
-    const input = document.querySelector('input[type="number"]') as HTMLInputElement
+    const input = screen.getByRole('spinbutton')
     fireEvent.change(input, { target: { value: '250.50' } })
 
-    expect(input).toHaveValue(250.5)
+    expect(input).toHaveValue('250.50')
   })
 
   // @ts-expect-error — min обязан быть number, негативный контроль типов
   const _typeCheck = <FieldCurrency name="price" min="0" />
+
+  describe('локаль (десятичный разделитель)', () => {
+    it('без FormI18nProvider парсит точку (en-US по умолчанию)', () => {
+      render(
+        <TestForm defaultValues={{ price: undefined }}>
+          <FieldCurrency name="price" />
+        </TestForm>,
+      )
+
+      const input = screen.getByRole('spinbutton')
+      fireEvent.change(input, { target: { value: '234.65' } })
+      expect(input).toHaveAttribute('aria-valuenow', '234.65')
+    })
+
+    it('с FormI18nProvider locale="ru" парсит запятую как десятичный разделитель', () => {
+      render(
+        <FormI18nProvider locale="ru">
+          <TestForm defaultValues={{ price: undefined }}>
+            <FieldCurrency name="price" />
+          </TestForm>
+        </FormI18nProvider>,
+      )
+
+      const input = screen.getByRole('spinbutton')
+      fireEvent.change(input, { target: { value: '234,65' } })
+      expect(input).toHaveAttribute('aria-valuenow', '234.65')
+    })
+
+    it('с FormI18nProvider locale="ru" точка тоже парсится как десятичный разделитель', () => {
+      render(
+        <FormI18nProvider locale="ru">
+          <TestForm defaultValues={{ price: undefined }}>
+            <FieldCurrency name="price" />
+          </TestForm>
+        </FormI18nProvider>,
+      )
+
+      const input = screen.getByRole('spinbutton')
+      fireEvent.change(input, { target: { value: '234.65' } })
+      expect(input).toHaveAttribute('aria-valuenow', '234.65')
+    })
+  })
 })

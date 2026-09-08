@@ -1,5 +1,6 @@
 'use client'
 
+import { useFormI18n } from '@letar/forms-react'
 import { cn } from '@letar/tailwind-utils'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import type { ReactElement } from 'react'
@@ -7,15 +8,21 @@ import { createField, FieldWrapper } from '../uikit/primitives'
 import { shadcnUIKit } from '../uikit/uikit-shadcn'
 import type { NumberInputFieldProps } from './types'
 
+interface NumberInputFieldState {
+  locale: string | undefined
+}
+
 /**
  * Form.Field.NumberInput — shadcn-скин. Как `Form.Field.Number`, но с видимыми
  * степпер-кнопками (increment/decrement) поверх `shadcnUIKit.NumberInput` — тот же примитив,
  * что у `FieldNumber`/`FieldCurrency`/`FieldPercentage`.
  */
-export const FieldNumberInput = createField<NumberInputFieldProps, number | undefined>({
+export const FieldNumberInput = createField<NumberInputFieldProps, number | undefined, NumberInputFieldState>({
   displayName: 'FieldNumberInput',
 
-  render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps }): ReactElement => {
+  useFieldState: (): NumberInputFieldState => ({ locale: useFormI18n()?.locale }),
+
+  render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const { min, max, step = 1 } = componentProps
     const value = field.state.value as number | undefined
     const disabled = resolved.disabled || resolved.readOnly
@@ -50,6 +57,7 @@ export const FieldNumberInput = createField<NumberInputFieldProps, number | unde
             step={step}
             disabled={resolved.disabled}
             readOnly={resolved.readOnly}
+            locale={fieldState.locale}
             data-field-name={fullPath}
           />
           <div className="absolute inset-y-0 right-1 flex flex-col justify-center py-0.5">

@@ -1,5 +1,6 @@
 'use client'
 
+import { useFormI18n } from '@letar/forms-react'
 import type { ReactElement } from 'react'
 import { useMemo } from 'react'
 import { createField, FieldWrapper } from '../uikit/primitives'
@@ -8,6 +9,7 @@ import type { CurrencyFieldProps } from './types'
 
 interface CurrencyFieldState {
   symbol: string
+  locale: string | undefined
 }
 
 /**
@@ -29,7 +31,7 @@ export const FieldCurrency = createField<CurrencyFieldProps, number | undefined,
       return parts.find((p) => p.type === 'currency')?.value ?? currency
     }, [currency, currencyDisplay])
 
-    return { symbol }
+    return { symbol, locale: useFormI18n()?.locale }
   },
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
@@ -49,6 +51,7 @@ export const FieldCurrency = createField<CurrencyFieldProps, number | undefined,
               step={step}
               disabled={resolved.disabled}
               readOnly={resolved.readOnly}
+              locale={fieldState.locale}
               data-field-name={fullPath}
             />
           </div>

@@ -12,10 +12,10 @@ describe('FieldDuration (shadcn)', () => {
     )
 
     expect(screen.getByText('Длительность')).toBeInTheDocument()
-    const inputs = document.querySelectorAll('input[type="number"]')
+    const inputs = screen.getAllByRole('spinbutton')
     expect(inputs).toHaveLength(2)
-    expect(inputs[0]).toHaveValue(1) // часы
-    expect(inputs[1]).toHaveValue(35) // минуты
+    expect(inputs[0]).toHaveValue('1') // часы
+    expect(inputs[1]).toHaveValue('35') // минуты
   })
 
   it('изменение часов пересчитывает итоговое значение в минутах', () => {
@@ -25,10 +25,10 @@ describe('FieldDuration (shadcn)', () => {
       </TestForm>,
     )
 
-    const [hoursInput] = document.querySelectorAll('input[type="number"]')
+    const [hoursInput] = screen.getAllByRole('spinbutton')
     fireEvent.change(hoursInput, { target: { value: '2' } })
 
-    expect(hoursInput).toHaveValue(2)
+    expect(hoursInput).toHaveValue('2')
   })
 
   it('minutes формат: один NumberInput, значение — сами минуты', () => {
@@ -38,9 +38,9 @@ describe('FieldDuration (shadcn)', () => {
       </TestForm>,
     )
 
-    const inputs = document.querySelectorAll('input[type="number"]')
+    const inputs = screen.getAllByRole('spinbutton')
     expect(inputs).toHaveLength(1)
-    expect(inputs[0]).toHaveValue(45)
+    expect(inputs[0]).toHaveValue('45')
   })
 
   it('minutes формат: изменение значения клампится по min/max', () => {
@@ -50,10 +50,10 @@ describe('FieldDuration (shadcn)', () => {
       </TestForm>,
     )
 
-    const [input] = document.querySelectorAll('input[type="number"]')
+    const [input] = screen.getAllByRole('spinbutton')
     fireEvent.change(input, { target: { value: '999' } })
 
-    expect(input).toHaveValue(60)
+    expect(input).toHaveValue('60')
   })
 
   // @ts-expect-error — format обязан быть 'HH:MM' | 'minutes', негативный контроль типов

@@ -4,6 +4,29 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.36.0] - 2026-09-09
+
+### Fixed
+
+- **`shadcnUIKit.NumberInput` — русская запятая как десятичный разделитель.** Задача от
+  `forms-coordinator-dev` (тред `forms-shadcn-locale-parity`): под `FormI18nProvider locale="ru"`
+  ввод `234,65` в числовых полях (`Form.Field.Number`, `NumberInput`, `Currency`, `Percentage`)
+  раньше не парсился вовсе. Причина архитектурно глубже, чем «тот же паттерн, что у Chakra-скина» —
+  примитив рендерил нативный `<input type="number">`, а HTML5 value sanitization algorithm сбрасывает
+  `.value` в `""` для любой строки с запятой ещё **до** того, как она долетает до `onChange`; JS-нормализация
+  готового `e.target.value` физически не может восстановить то, что браузер уже отбросил.
+  Фикс — `shadcnUIKit.NumberInput` (`uikit/primitives/number-input.tsx`) переведён на
+  `type="text"` + вручную выставленные `role="spinbutton"`/`aria-value*` (тот же ARIA-контракт,
+  что и у `@zag-js/number-input`, на котором построен Chakra-скин), разбор десятичного
+  разделителя — через нативный `Intl.NumberFormat(locale).formatToParts(1.1)`, без новой
+  зависимости (beta-упрощение библиотеки сохранено — не подключали `@internationalized/number`).
+  Новый `locale?: string` проброшен во всех четырёх числовых полях
+  (`FieldNumber`/`FieldNumberInput`/`FieldCurrency`/`FieldPercentage`) через `useFieldState` →
+  `useFormI18n()?.locale`, контракт расширен в `UIKitNumberInputProps`
+  (`@letar/forms-core/uikit`, 0.12.0 → без mismatch, поле опциональное).
+  Регресс-тесты (en-US точка / ru запятая / ru точка тоже работает) добавлены во все четыре
+  spec-файла полей, по образцу уже существующих тестов Chakra-скина.
+
 ## [0.35.1] - 2026-09-08
 
 ### Added

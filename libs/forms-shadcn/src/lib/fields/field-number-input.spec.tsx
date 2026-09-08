@@ -1,3 +1,4 @@
+import { FormI18nProvider } from '@letar/forms-react'
 import { TestForm } from '@letar/forms-react/testing'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
@@ -12,7 +13,7 @@ describe('FieldNumberInput (shadcn)', () => {
     )
 
     expect(screen.getByText('Количество')).toBeInTheDocument()
-    expect(screen.getByRole('spinbutton')).toHaveValue(5)
+    expect(screen.getByRole('spinbutton')).toHaveValue('5')
   })
 
   it('увеличивает значение по клику "Увеличить"', () => {
@@ -23,7 +24,7 @@ describe('FieldNumberInput (shadcn)', () => {
     )
 
     fireEvent.click(screen.getByLabelText('Увеличить'))
-    expect(screen.getByRole('spinbutton')).toHaveValue(7)
+    expect(screen.getByRole('spinbutton')).toHaveValue('7')
   })
 
   it('уменьшает значение по клику "Уменьшить"', () => {
@@ -34,7 +35,7 @@ describe('FieldNumberInput (shadcn)', () => {
     )
 
     fireEvent.click(screen.getByLabelText('Уменьшить'))
-    expect(screen.getByRole('spinbutton')).toHaveValue(4)
+    expect(screen.getByRole('spinbutton')).toHaveValue('4')
   })
 
   it('клампит по max при инкременте', () => {
@@ -65,7 +66,7 @@ describe('FieldNumberInput (shadcn)', () => {
     )
 
     fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '42' } })
-    expect(screen.getByRole('spinbutton')).toHaveValue(42)
+    expect(screen.getByRole('spinbutton')).toHaveValue('42')
   })
 
   it('disabled блокирует степпер-кнопки', () => {
@@ -77,5 +78,47 @@ describe('FieldNumberInput (shadcn)', () => {
 
     expect(screen.getByLabelText('Увеличить')).toBeDisabled()
     expect(screen.getByLabelText('Уменьшить')).toBeDisabled()
+  })
+
+  describe('локаль (десятичный разделитель)', () => {
+    it('без FormI18nProvider парсит точку (en-US по умолчанию)', () => {
+      render(
+        <TestForm defaultValues={{ price: undefined }}>
+          <FieldNumberInput name="price" />
+        </TestForm>,
+      )
+
+      const input = screen.getByRole('spinbutton')
+      fireEvent.change(input, { target: { value: '234.65' } })
+      expect(input).toHaveAttribute('aria-valuenow', '234.65')
+    })
+
+    it('с FormI18nProvider locale="ru" парсит запятую как десятичный разделитель', () => {
+      render(
+        <FormI18nProvider locale="ru">
+          <TestForm defaultValues={{ price: undefined }}>
+            <FieldNumberInput name="price" />
+          </TestForm>
+        </FormI18nProvider>,
+      )
+
+      const input = screen.getByRole('spinbutton')
+      fireEvent.change(input, { target: { value: '234,65' } })
+      expect(input).toHaveAttribute('aria-valuenow', '234.65')
+    })
+
+    it('с FormI18nProvider locale="ru" точка тоже парсится как десятичный разделитель', () => {
+      render(
+        <FormI18nProvider locale="ru">
+          <TestForm defaultValues={{ price: undefined }}>
+            <FieldNumberInput name="price" />
+          </TestForm>
+        </FormI18nProvider>,
+      )
+
+      const input = screen.getByRole('spinbutton')
+      fireEvent.change(input, { target: { value: '234.65' } })
+      expect(input).toHaveAttribute('aria-valuenow', '234.65')
+    })
   })
 })

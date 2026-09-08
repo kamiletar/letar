@@ -1,3 +1,4 @@
+import { FormI18nProvider } from '@letar/forms-react'
 import { TestForm } from '@letar/forms-react/testing'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
@@ -12,7 +13,7 @@ describe('FieldPercentage (shadcn)', () => {
     )
 
     expect(screen.getByText('Скидка')).toBeInTheDocument()
-    expect(document.querySelector('input[type="number"]')).toHaveValue(15)
+    expect(screen.getByRole('spinbutton')).toHaveValue('15')
     expect(screen.getByText('%')).toBeInTheDocument()
   })
 
@@ -23,7 +24,7 @@ describe('FieldPercentage (shadcn)', () => {
       </TestForm>,
     )
 
-    const input = document.querySelector('input[type="number"]')
+    const input = screen.getByRole('spinbutton')
     expect(input).toHaveAttribute('min', '0')
     expect(input).toHaveAttribute('max', '100')
   })
@@ -35,12 +36,54 @@ describe('FieldPercentage (shadcn)', () => {
       </TestForm>,
     )
 
-    const input = document.querySelector('input[type="number"]') as HTMLInputElement
+    const input = screen.getByRole('spinbutton')
     fireEvent.change(input, { target: { value: '42' } })
 
-    expect(input).toHaveValue(42)
+    expect(input).toHaveValue('42')
   })
 
   // @ts-expect-error — max обязан быть number, негативный контроль типов
   const _typeCheck = <FieldPercentage name="discount" max="100" />
+
+  describe('локаль (десятичный разделитель)', () => {
+    it('без FormI18nProvider парсит точку (en-US по умолчанию)', () => {
+      render(
+        <TestForm defaultValues={{ discount: undefined }}>
+          <FieldPercentage name="discount" min={0} max={100} />
+        </TestForm>,
+      )
+
+      const input = screen.getByRole('spinbutton')
+      fireEvent.change(input, { target: { value: '42.5' } })
+      expect(input).toHaveAttribute('aria-valuenow', '42.5')
+    })
+
+    it('с FormI18nProvider locale="ru" парсит запятую как десятичный разделитель', () => {
+      render(
+        <FormI18nProvider locale="ru">
+          <TestForm defaultValues={{ discount: undefined }}>
+            <FieldPercentage name="discount" min={0} max={100} />
+          </TestForm>
+        </FormI18nProvider>,
+      )
+
+      const input = screen.getByRole('spinbutton')
+      fireEvent.change(input, { target: { value: '42,5' } })
+      expect(input).toHaveAttribute('aria-valuenow', '42.5')
+    })
+
+    it('с FormI18nProvider locale="ru" точка тоже парсится как десятичный разделитель', () => {
+      render(
+        <FormI18nProvider locale="ru">
+          <TestForm defaultValues={{ discount: undefined }}>
+            <FieldPercentage name="discount" min={0} max={100} />
+          </TestForm>
+        </FormI18nProvider>,
+      )
+
+      const input = screen.getByRole('spinbutton')
+      fireEvent.change(input, { target: { value: '42.5' } })
+      expect(input).toHaveAttribute('aria-valuenow', '42.5')
+    })
+  })
 })
