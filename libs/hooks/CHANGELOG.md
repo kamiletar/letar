@@ -2,6 +2,27 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.0] — 2026-09-08
+
+### Breaking (мягко): подпути exports `./utility`, `./browser`, `./query`
+
+Корневой `src/index.ts` смешивал платформенно-нейтральные утилиты (`useDebounce`, `usePrevious`,
+`useThrottle`, `useLocalStorage`), browser-хуки (`window`/`localStorage`/`ServiceWorker`) и
+TanStack Query хуки в одном барабанном реэкспорте — библиотека была непригодна для React Native
+потребителей (Metro резолвит статические импорты всего графа модулей без tree-shaking, импорт
+одного хука тянул за собой browser API и optional-peer `@tanstack/react-query`).
+
+Добавлены подпути `@letar/hooks/utility`, `@letar/hooks/browser`, `@letar/hooks/query` — каждый
+изолирует свою группу. Корневой `.` остаётся полным реэкспортом всех трёх для обратной
+совместимости ~20 существующих потребителей — их код не меняется. `paths` прописаны во все 18
+tsconfig.json потребителей (публичные приложения + submodule) через
+`scripts/add-lib-tsconfig-path.mjs`, проверено `scripts/check-lib-subpath-paths.mjs`.
+
+Повод — `animatrona-mobile` (React Native): ручной `setTimeout`-debounce в
+`LibraryScreen.tsx` нельзя было заменить на `useDebounce` из корня библиотеки именно из-за
+затягивания несовместимого кода в Metro-бандл. Подключение `@letar/hooks/utility` в само
+`animatrona-mobile` (правка `metro.config.js`) не входит в эту сессию — отдельная задача.
+
 ## [0.5.0] — 2026-09-03
 
 ### Feature: `useClientOrigin` — безопасный для SSR `window.location.origin`
