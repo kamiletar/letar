@@ -38,8 +38,20 @@ services:
       # остаётся публичным сознательно, риск принят как низкий (см. чеклист выше).
       - '8098:80'
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # `templates/` — официальный механизм nginx-образа: docker-entrypoint envsubst'ит `*.template`
+      # переменными окружения и кладёт результат в conf.d/ САМ, при каждом старте контейнера.
+      # Не статический `conf.d/default.conf:ro` — список доменов valid_referers (GATEWAY_VALID_REFERERS
+      # ниже) не должен попадать в git текстом (§57 DoD, public-repo-hygiene.md), а `include`
+      # отдельного файла с `valid_referers` не работает — квирк парсера, см. комментарий в
+      # nginx.conf у `valid_referers`.
+      - ./nginx.conf:/etc/nginx/templates/default.conf.template:ro
       - gateway-cache-data:/var/cache/nginx/ipfs
+    environment:
+      # `.env` — НЕ коммитится (см. `infra/*/.env` в корневом .gitignore), реальный список доменов
+      # только там. `.env.example` рядом — шаблон. letar.best сам по себе не коммерческий домен
+      # клиента (см. комментарий в nginx.conf), но если завтра появится клиентский потребитель —
+      # его дописывают только в `.env` на сервере.
+      GATEWAY_VALID_REFERERS: ${GATEWAY_VALID_REFERERS:?см. .env.example — .env на сервере обязателен}
     restart: unless-stopped
     healthcheck:
       test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1/nginx-health']

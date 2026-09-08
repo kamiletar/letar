@@ -51,6 +51,67 @@
 - Порт 8098 свободен (`ss -tlnp | grep 8098`) — если занят, поменять в трёх местах разом:
   `docker-compose.yml` (`ports:`), NPM Forward Port (шаг 3), плюс сверить с этим README, если
   порт меняли задним числом.
+- `.env` создан из шаблона (файл не в git, см. `.gitignore` → `infra/*/.env`):
+  ```bash
+  cp infra/gateway-cache/.env.example infra/gateway-cache/.env
+  ```
+  Дописывать в него коммерческие клиентские домены (если появится ещё один потребитель кроме
+  animatrona-tracker) можно только здесь, на сервере — никогда в `.example`-файл или в git
+  (public-repo-hygiene.md).
+
+## Обновление конфига на уже поднятом контейнере (nginx.conf/.env)
+
+`nginx.conf` — теперь шаблон для envsubst (`/etc/nginx/templates/default.conf.template`,
+официальный механизм образа `nginx:alpine`), а не статический `conf.d/default.conf` — список
+доменов `valid_referers` (`GATEWAY_VALID_REFERERS`) подставляется docker-entrypoint'ом ИЗ
+переменной окружения при каждом старте контейнера, поэтому правка `.env` требует пересоздания
+контейнера (`up -d`), а не только `restart` — переменные окружения читаются при создании
+контейнера, не при restart существующего:
+
+```bash
+cd /home/deploy/letar/infra/gateway-cache   # или актуальный путь клона на mail
+git pull   # если правка пришла из git
+docker compose up -d   # НЕ restart — новые env/volumes подхватываются только при recreate
+curl -s http://127.0.0.1:8098/nginx-health   # → ok
+```
+
+⚠️ **Найдено вживую 2026-09-08:** `valid_referers` через `include` отдельного файла ломает
+парсер nginx `:alpine` 1.31 (`"valid_referers" directive is not allowed here` на include'нутом
+файле) — воспроизведено дважды на минимальном примере, при этом тот же `include` с `add_header`
+и прямое объявление `valid_referers` в том же файле оба работают без ошибок. Похоже на квирк
+модуля `ngx_http_referer_module` при парсинге через `include`, не связан с содержимым файла.
+Отсюда — шаблон envsubst, а не `include` статического файла со значением: значение остаётся вне
+git (переменная окружения), а сама директива `valid_referers` — литеральная строка в `nginx.conf`.
+
+### Живая проверка access-control (valid_referers) после обновления
+
+```bash
+# Без Referer — сейчас разрешено (valid_referers none ...), НЕ путать с «доступ закрыт кому угодно»
+curl -sI -H 'Host: gateway.letar.best' http://127.0.0.1:8098/ipfs/<CID_мелкого_файла> | head -1
+
+# С посторонним Referer — должно быть 403
+curl -sI -H 'Host: gateway.letar.best' -e 'https://example.com/' http://127.0.0.1:8098/ipfs/<CID> | head -1
+
+# ⚠️ Ключевая проверка — 403 не должен закешироваться под тем же ключом ($uri, без Referer):
+# запрос с валидным Referer СРАЗУ ПОСЛЕ 403-запроса выше должен отдать файл, а не закешированный 403
+curl -sI -H 'Host: gateway.letar.best' -e 'https://animatrona-tracker.letar.best/' http://127.0.0.1:8098/ipfs/<CID> | grep -iE 'x-cache-status|^HTTP'
+```
+
+### Живая проверка `proxy_max_temp_file_size 0` (не пишет на диск)
+
+```bash
+# До запроса — снимок диска
+df -h / | tail -1
+
+# Прогнать через прокси заведомо крупный файл (видео/аудио — некешируемый Content-Type,
+# проходит через proxy_pass целиком, но не должен лечь во временный файл)
+curl -s -o /dev/null -H 'Host: gateway.letar.best' http://127.0.0.1:8098/ipfs/<CID_крупного_видео>
+
+# Во время запроса (в отдельном терминале) и сразу после — второй снимок
+df -h / | tail -1
+ls -la /var/lib/docker/... # или найти реальный proxy_temp_path внутри контейнера:
+docker exec gateway-cache-nginx sh -c 'ls -la /var/cache/nginx/ 2>/dev/null; find / -xdev -name "*.tmp" -newer /etc/nginx/nginx.conf 2>/dev/null'
+```
 
 ## ⚠️ Порт 8098 публичен напрямую, мимо NPM — осознанный риск, не баг
 

@@ -1,3 +1,22 @@
+# Animatrona Pinner (pinner1) ⛔ ИСТОРИЯ — узла не существует физически
+
+**Проверено вживую 2026-09-08** (§57 DoD, doc-cleanup): на `mail.letar.best` контейнера
+`animatrona-pinner` нет (`docker ps` — только `animatrona-relay`, `gateway-cache-nginx`,
+`nginx-proxy-manager`, `maddy`). Узел списан. Это подтверждает более раннюю пометку в
+`infra/animatrona-pinner3/README.md` («на 2026-08-08 не существует физически») — на 2026-09-08
+она по-прежнему верна, теперь проверена отдельно и напрямую, а не по цепочке ссылок.
+
+**Не запускать `setup.sh`/`docker-compose.yml` ниже** без предварительной сверки актуальной
+сетевой топологии — упоминания `pinner1` в `bootstrap-all.sh`/README соседних узлов
+(`animatrona-relay`, `animatrona-pinner3`, `animatrona-gateway`) тоже устарели и не переписаны
+этой правкой (вне заявленного скоупа §57 DoD, см. PLAN-INFRA-3.md §57). Реальная топология сети
+на 2026-09-08 — один узел Kubo на s3, `infra/letar-ipfs/` (см. его README, раздел «Не путать с»).
+
+Каталог оставлен как история, не удалён — ниже оригинальное содержимое README на момент, когда
+узел ещё существовал.
+
+---
+
 # Animatrona Pinner (pinner1)
 
 IPFS-пиннер (Kubo) на `mail.letar.best` — пинит контент по запросу трекера, API защищён
