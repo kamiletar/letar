@@ -13,6 +13,18 @@
       барабанный экспорт, он затянет в граф Metro browser-хуки и `@tanstack/react-query`,
       которого нет в зависимостях приложения.
 
+- [ ] ⚠️ **`react-native` разъехался между корнем и приложениями** (найдено 2026-09-08). Корневой
+      `package.json` — `0.87.1` (вместе с `@react-native/babel-preset|metro-config|
+      typescript-config`), а `animatrona-mobile` и `animatrona-tv` пинят локально `0.87.0`
+      (`react-native`, `@react-native/codegen`, `@react-native/gradle-plugin`). В дереве
+      физически 4 копии: три `react-native@0.87.0+<hash>` и одна `0.87.1`. Тот же класс, что
+      уже дважды чинили в каскаде RN 0.87 (`react`, `react-native-gesture-handler`): локальный
+      пин перекрывает корневой через bun workspace resolution. Не горит (typecheck зелёный,
+      сборка 25.08 прошла), но `metro.config.js` тянет `@react-native/metro-config` из корня
+      `0.87.1`, а сам `react-native` — из приложения `0.87.0`; из такого смешанного резолва
+      раньше и вылезали `TS2719` и «Tried to register two views». Решение за координатором
+      (задето и `animatrona-tv`) — сообщено письмом #1404.
+
 - [ ] ⚠️ **ESLint не запускается для этого приложения вообще.** У `animatrona-mobile` (и у
       `animatrona-tv`) нет `eslint.config.*`, поэтому `@nx/eslint/plugin` не заводит им
       inferred-таргет, а блок `"lint"` в `project.json` — только `options` без `executor`,
