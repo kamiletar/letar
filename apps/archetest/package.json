@@ -15,7 +15,8 @@
       "@letar/hooks",
       "@letar/i18n-proxy",
       "@letar/pg-url",
-      "@letar/env-load"
+      "@letar/env-load",
+      "@letar/zenstack-fragments"
     ]
   },
   "dependencies": {

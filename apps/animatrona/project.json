@@ -298,7 +298,13 @@
         ],
         "cwd": "apps/animatrona",
         "parallel": false
-      }
+      },
+      "inputs": [
+        "{projectRoot}/schema.zmodel",
+        "{projectRoot}/schema/**/*.zmodel",
+        "{workspaceRoot}/libs/zenstack-fragments/src/*.zmodel"
+      ],
+      "cache": false
     },
     "db:push": {
       "executor": "nx:run-commands",

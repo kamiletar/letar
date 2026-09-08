@@ -19,7 +19,8 @@
       "@letar/admin-ui",
       "@letar/jobs",
       "@letar/format-utils",
-      "@letar/theme-check"
+      "@letar/theme-check",
+      "@letar/zenstack-fragments"
     ]
   },
   "dependencies": {

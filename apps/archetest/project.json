@@ -109,7 +109,8 @@
       "executor": "nx:run-commands",
       "cache": false,
       "inputs": [
-        "{projectRoot}/schema.zmodel"
+        "{projectRoot}/schema.zmodel",
+        "{workspaceRoot}/libs/zenstack-fragments/src/*.zmodel"
       ],
       "outputs": [
         "{projectRoot}/src/generated"

@@ -135,7 +135,8 @@
       ],
       "cache": false,
       "inputs": [
-        "{projectRoot}/schema.zmodel"
+        "{projectRoot}/schema.zmodel",
+        "{projectRoot}/schema/**/*.zmodel"
       ],
       "outputs": [
         "{projectRoot}/src/generated"

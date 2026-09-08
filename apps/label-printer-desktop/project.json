@@ -129,7 +129,11 @@
         ],
         "cwd": "apps/label-printer-desktop",
         "parallel": false
-      }
+      },
+      "inputs": [
+        "{projectRoot}/schema.zmodel"
+      ],
+      "cache": false
     },
     "db:template": {
       "command": "bun run scripts/db-template-safe.ts",

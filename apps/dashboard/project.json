@@ -23,6 +23,7 @@
       "cache": false,
       "inputs": [
         "{projectRoot}/schema.zmodel",
+        "{workspaceRoot}/libs/zenstack-fragments/src/*.zmodel",
         {
           "runtime": "node -p process.platform"
         }

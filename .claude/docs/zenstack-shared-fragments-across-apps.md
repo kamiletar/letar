@@ -163,34 +163,75 @@ grep -c collectAllFields libs/zenstack-form-plugin/dist/model-generator.js
 ⚠️ **Заводишь новому приложению `zenstack:generate` — скопируй и этот `dependsOn`.** Без него
 приложение окажется единственным, где ловушка живая и при штатном запуске.
 
-## ⚠️ Ловушка: Nx не знает про зависимость от ФРАГМЕНТА (в отличие от плагина)
+## Связь фрагмент → приложение в графе Nx (ловушка закрыта 2026-09-08)
 
-Различие проверено прямым замером `nx show projects --affected --files=...` (2026-09-08):
-
-| Что правим                                        | Кого Nx считает затронутым                                     |
-| ------------------------------------------------- | -------------------------------------------------------------- |
-| `libs/zenstack-form-plugin/src/*.ts` (плагин)     | `@letar/zenstack-form-plugin` **+ приложения-потребители** ✅  |
-| `libs/zenstack-fragments/src/*.zmodel` (фрагмент) | только `@letar/zenstack-fragments`, приложений в списке нет ⛔ |
-
-Разница в том, что плагин связан с приложениями явным `dependsOn` у `zenstack:generate`, а
+⚠️ **До 2026-09-08 здесь была живая ловушка:** правка общего фрагмента не помечала потребителей
+как affected. Плагин форм связан с приложениями явным `dependsOn` у `zenstack:generate`, а
 фрагмент подключается **файловым путём** внутри `schema.zmodel` — ни TS-алиаса, ни таргета, за
-которые граф мог бы зацепиться:
+которые граф мог бы зацепиться. Замер до починки:
 
-- ни одно приложение-потребитель не объявляет `@letar/zenstack-fragments` в
-  `implicitDependencies` (проверено на `aprel8008`/`archetest`/`dashboard`/`domwellbes`);
-- у таргета `zenstack:generate` в `inputs` перечислен только `{projectRoot}/schema.zmodel` —
-  ни доменные файлы `schema/`, ни фрагмент из `libs/` туда не входят.
-
-Практически: **правка общего фрагмента не помечает потребителей как affected**, и `nx affected`
-их не перегенерирует (для плагина, повторим, это неверно — там связь есть). Регенерацию каждого потребителя после правки фрагмента нужно запускать
-руками:
-
-```bash
-nx zenstack:generate <app>
+```
+nx show projects --affected --files=libs/zenstack-fragments/src/better-auth.zmodel
+→ ["@letar/zenstack-fragments"]   # приложений в списке нет
 ```
 
-Спасает от порчи артефактов только то, что у большинства приложений `zenstack:generate` объявлен
-с `cache: false` — прогон всегда настоящий. Но узнать, что прогон **нужен**, Nx не поможет.
+Закрыто двумя правками у каждого потребителя:
+
+1. `@letar/zenstack-fragments` в `nx.implicitDependencies` его `package.json` — это и есть
+   ребро графа. Симлинк в `node_modules` и запись в `dependencies` тут **не нужны**: фрагмент
+   не импортируется из TS, только файловым путём из `.zmodel`, поэтому оговорка про `TS2307` в
+   [libs.md § Подключение к приложению](/.claude/rules/libs.md) на него не распространяется.
+2. Путь к фрагменту в `inputs` у `zenstack:generate`:
+   `{workspaceRoot}/libs/zenstack-fragments/src/*.zmodel`. При `cache: false` на хеш это не
+   влияет — `inputs` здесь единственное место, где связь читаема человеком.
+
+Замер после:
+
+```
+nx show projects --affected --files=libs/zenstack-fragments/src/better-auth.zmodel
+→ ["@letar/zenstack-fragments","animatrona","animatrona-renderer","animatrona-main",
+   "animatrona-e2e","domwellbes","domwellbes-e2e","aprel8008","archetest","archetest-e2e",
+   "dashboard"]
+```
+
+### ⚠️ Что осталось: гранулярность проектная, не файловая
+
+`implicitDependencies` — ребро «проект → проект», поэтому Nx **не различает, какой именно
+фрагмент правили**: изменение `animatrona.zmodel` помечает affected и `domwellbes`/`aprel8008`/
+`archetest`/`dashboard` (потребителей `better-auth.zmodel`), и наоборот — оба замера выше
+возвращают один и тот же список. Это over-approximation: она безопасна (потребитель не может
+быть пропущен), но шумна — лишние приложения попадают в `nx affected`, а значит и в деплой по
+affected.
+
+Файловая точность потребовала бы своего Nx-плагина с `createDependencies`, разбирающего
+`import` внутри `.zmodel`. Не сделано намеренно: два фрагмента и пять потребителей плагин не
+окупают.
+
+⚠️ **Заводишь нового потребителя фрагмента — добавь обе записи.** Без них ловушка вернётся
+точечно, ровно на этом приложении, и снаружи это выглядит как «у остальных ведь работает».
+
+### Смежное, поправленное заодно
+
+- `inputs` у `zenstack:generate` перечисляли только `{projectRoot}/schema.zmodel`, поэтому у
+  семи приложений с многофайловой схемой доменные файлы не входили в inputs вовсе. Добавлены
+  `{projectRoot}/schema/**/*.zmodel` (`animatrona`, `animatrona-tracker`, `domwellbes`,
+  `grandslamcup`, `kami`) и `{projectRoot}/models/**/*.zmodel` (`aboi`, `driving-school` —
+  у них каталог называется иначе, глоб по `schema/` их не покрывает).
+- Пять приложений (`animatrona`, `aprel8008`, `driving-school`, `form-develop-app`,
+  `label-printer-desktop`) не имели `inputs` у этого таргета вообще — приведены к общему виду.
+- `animatrona` и `label-printer-desktop` не объявляли `cache: false`. Фактически таргет и так
+  не кешировался (ни `cache: true` у проекта, ни `targetDefaults` для `zenstack:generate` нет),
+  так что это явная запись уже действовавшего поведения, а не смена. Теперь `cache: false` стоит
+  у всех 19.
+
+⚠️ **Общую часть `zenstack:generate` в `targetDefaults` выносить нельзя** — проверено
+2026-09-08. `dependsOn` на `@letar/zenstack-form-plugin` продублирован у 14 приложений не по
+недосмотру: ровно эти 14 подключают плагин в своём `schema.zmodel`, а пять оставшихся
+(`aprel8008`, `archetest`, `auth-hub`, `dashboard`, `time`) — нет. `targetDefaults` навязал
+бы им сборку плагина. `inputs` и `outputs` тоже неоднородны (разные каталоги схемы, у
+`driving-school` вывод вообще в `libs/driving-school-db`), а проектный `inputs` дефолт из
+`targetDefaults` не дополняет, а **перекрывает** — общего остаётся только `cache: false` и
+`metadata`, ради чего заводить дефолт не стоит.
 
 ## Порядок работы при правке общего фрагмента
 
@@ -198,7 +239,9 @@ nx zenstack:generate <app>
 Изменение поля во фрагменте = изменение схемы у каждого потребителя, каждому нужна своя миграция.
 
 1. Правишь `libs/<lib>/src/<fragment>.zmodel`
-2. Для **каждого** потребителя (список — грепом по `import`, Nx не подскажет):
+2. Для **каждого** потребителя (`nx show projects --affected --files=<путь к фрагменту>`
+   с 2026-09-08 их показывает — с оговоркой про проектную гранулярность выше; точный список
+   импортёров — грепом по `import`):
    `nx zenstack:generate <app>` → `git diff apps/<app>/src/generated/schema.prisma` — сверить, что
    изменилось ровно ожидаемое → миграция (`nx db:migrate <app>`, для локальных SQLite — `db:push`)
 3. `nx typecheck:tsgo <app>` на каждом
@@ -223,3 +266,13 @@ nx zenstack:generate <app>
 | Фрагмент                                                                                                | Потребители                                         | Способ      |
 | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ----------- |
 | `libs/zenstack-fragments/src/better-auth.zmodel` (`AccountFields`/`SessionFields`/`VerificationFields`) | `aprel8008`, `archetest`, `dashboard`, `domwellbes` | 1 (миксины) |
+| `libs/zenstack-fragments/src/animatrona.zmodel` (`Tracker`/`CachedRelease`)                             | `animatrona`                                        | 2 (остров)  |
+
+Список сверять грепом, а не по таблице:
+
+```bash
+grep -rn --include=*.zmodel "zenstack-fragments" apps/
+```
+
+⚠️ Импортёров может быть больше, чем приложений: `domwellbes` импортирует `better-auth` дважды —
+в корневом `schema.zmodel` и в `schema/auth.zmodel` (импорты не транзитивны, см. выше).

@@ -14,7 +14,8 @@
       "@letar/seed-utils",
       "@letar/icon-generator",
       "@letar/folder-scan",
-      "@letar/folder-player-react"
+      "@letar/folder-player-react",
+      "@letar/zenstack-fragments"
     ]
   },
   "scripts": {

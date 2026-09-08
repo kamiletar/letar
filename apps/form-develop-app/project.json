@@ -97,6 +97,7 @@
         }
       ],
       "cache": false,
+      "inputs": ["{projectRoot}/schema.zmodel"],
       "metadata": {
         "description": "Generate Prisma schema from ZenStack",
         "technologies": ["zenstack", "prisma"]
