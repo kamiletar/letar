@@ -29,6 +29,22 @@ Turbopack (дефолтный бандлер `next dev`/`next build` в Next 16 
 
 Коммит `24c5280b`.
 
+**Расширенная проверка (2026-09-09), отдельная сессия:** первоначальная проверка охватывала
+только `/` и `/examples/all-fields`. Дополнительно прогнаны через Browser pane с полной
+перезагрузкой (`force: true`/`window.location.href`) пять интерактивных страниц:
+`/examples/multi-step` (переход между шагами кнопкой Next с сохранением значений),
+`/examples/conditional` (переключение radio Personal/Business → появление Company Name/Tax ID,
+чекбокс newsletter → появление Email frequency), `/examples/watch` (`onFieldChange` name→slug,
+`Form.Watch` country→currency/greeting), `/examples/groups` (`+ Add Contact` на динамический
+массив) и `/products/new` (заполнение полей + клик Submit — кнопка живая, корректно
+заблокировала отправку валидацией на пустом обязательном Tags). Ни на одной странице не
+воспроизвелась ни ошибка «Hydration failed» в консоли, ни класс бага «мёртвая кнопка без ошибок
+в консоли» (найденный ранее на auth-hub, см.
+[nextjs16-turbopack-default-emotion-hydration.md](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md)
+§ «Найдено на auth-hub») — все интерактивные элементы (кнопки, radio, checkbox, combobox, submit)
+реагировали сразу после полной перезагрузки страницы. `--webpack`-фикс подтверждён шире одной
+страницы.
+
 ## fix: `@letar/demo-protection` резолв через bun isolated linker (2026-09-01)
 
 Тот же класс бага, что уже был найден и исправлен в aboi: пакет числился только в
