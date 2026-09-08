@@ -552,14 +552,14 @@ pre-commit `schema-migration-check` верно потребовал миграц
       (`Anime`/`Episode`/`Subscription`/`FederatedContent`/`UserStats`/`Reputation`/
       `Achievements`/`Bonus`) отпал целиком: он был про удержание в экосистеме, не про
       «посмотреть по CID». `PinStatus` тоже не понадобился — см. 0.3.
-- [ ] `libs/ipfs-kubo-core` — решить порядок переноса: сначала выделить SHARED-часть
-      (`kubo-service`/`kubo-daemon`/`peer-sync-service`/`pin-manager`) из Animatrona в либу, обновить
-      Animatrona на импорт из либы, только потом заводить IPFS Player на готовую либу — не
-      копипастить в IPFS Player, чтобы не создать вторую копию, которая разъедется с оригиналом.
-- [ ] Расщепить `unified-ipfs-service.ts` на READ/WRITE — READ-часть в либу, WRITE-часть
-      остаётся в Animatrona.
-- [ ] Написать компактный UI «добавить трекер → посмотреть по CID» с нуля, не резать
-      `FederationCard`.
+- [x] `libs/ipfs-kubo-core` — вынесена координатором (коммиты `2d07a906`/`03991a38` в
+      Animatrona) и подключена к IPFS Player — см. раздел «Подключение `libs/ipfs-kubo-core`»
+      ниже.
+- [x] Расщепление READ/WRITE решилось само собой при переносе: `libs/ipfs-kubo-core` несёт
+      READ-функции (`cat()` и т.п.), IPFS Player использует только их — `unified-ipfs-service.ts`
+      с WRITE-частью в Animatrona не трогался и не копировался.
+- [x] UI «добавить трекер → посмотреть по CID» написан с нуля в `renderer/app/page.tsx` —
+      `FederationCard` Animatrona не резался.
 
 ## Фаза 1 — MVP (каркас, из шаблона генератора)
 
