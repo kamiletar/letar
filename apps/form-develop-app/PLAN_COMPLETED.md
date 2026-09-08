@@ -1550,3 +1550,9 @@ function App({ children }) {
 ---
 
 **Последнее обновление:** 2026-08-09
+
+## Починка графа Nx (2026-09-09)
+
+- [x] `@letar/forms-core` реально импортировался в коде, но не был объявлен ни в
+      `dependencies`, ни в `nx.implicitDependencies` (PLAN-INFRA-6.md §169). Добавлен в
+      `dependencies` (`workspace:*`), проверено format/lint/typecheck:tsgo.

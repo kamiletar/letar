@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.12] - 2026-09-09
+
+### Fixed
+
+- `package.json`: `@letar/forms-core` не был объявлен ни в `dependencies`, ни в
+  `nx.implicitDependencies`, хотя реально импортируется — граф Nx не видел это ребро. Добавлен
+  в `dependencies` (`workspace:*`).
+
 ## [0.1.11] - 2026-09-08
 
 ### Added

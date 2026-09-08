@@ -1,6 +1,6 @@
 {
   "name": "form-develop-app",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "private": true,
   "nx": {
     "tags": [
@@ -17,7 +17,8 @@
     ]
   },
   "dependencies": {
-    "@letar/pg-url": "workspace:*",
-    "@letar/env-load": "workspace:*"
+    "@letar/env-load": "workspace:*",
+    "@letar/forms-core": "workspace:*",
+    "@letar/pg-url": "workspace:*"
   }
 }
