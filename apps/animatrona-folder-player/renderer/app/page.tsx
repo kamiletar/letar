@@ -18,11 +18,20 @@ import type { MediaInfo } from '@letar/folder-scan'
 
 import type { CodecSupportResult } from '@shared/codec-support'
 import { checkCodecSupport } from '@shared/codec-support'
+import type { EmbeddedSubtitlesIpcResult } from '../../main/ipc/embedded-subtitles.handlers'
 import { ExtendedFormatsPanel } from './_components/ExtendedFormatsPanel'
+import type { SubtitleTrackOption } from './_components/SubtitleTrackSelector'
+import { SubtitleTrackSelector } from './_components/SubtitleTrackSelector'
 import type { VideoPlayerSubtitle } from './_components/VideoPlayer'
 import { VideoPlayer } from './_components/VideoPlayer'
 import { isVideoFilePath } from './_lib/dropped-path'
 import { toMediaUrl } from './_lib/media-url'
+
+/** Читаемая подпись дорожки для меню: язык + название/группа, если есть */
+function formatTrackLabel(language: string, title?: string): string {
+  const lang = (language || 'und').toUpperCase()
+  return title ? `${title} (${lang})` : lang
+}
 
 /**
  * Хост папочного плеера, построенный из `window.electronAPI` этого приложения.
@@ -135,10 +144,54 @@ export default function HomePage() {
     }
   }, [mounted, player.isFolderMode, folderPath])
 
-  // Внешний субтитр текущего эпизода — берём первый найденный матч
-  // (выбор дорожки из нескольких вариантов — отдельная задача плана)
+  // Выбор дорожки субтитров — внешние файлы (`player.externalTracks.subtitles`) и встроенные в
+  // контейнер MKV (`player.embeddedTracks.subtitles`, лёгкие метаданные из уже сделанной пробы).
+  // id кодирует источник: `off` | `external:<индекс>` | `embedded:<индекс>`.
+  const subtitleOptions = useMemo<SubtitleTrackOption[]>(() => {
+    const external = player.externalTracks.subtitles.map((t, i) => ({
+      id: `external:${i}`,
+      label: formatTrackLabel(t.language, t.title || t.groupName),
+    }))
+    const embedded = (player.embeddedTracks?.subtitles ?? []).map((t, i) => ({
+      id: `embedded:${i}`,
+      label: formatTrackLabel(t.language, t.title),
+    }))
+    return [{ id: 'off', label: 'Выключены' }, ...external, ...embedded]
+  }, [player.externalTracks.subtitles, player.embeddedTracks])
+
+  const [selectedSubtitleId, setSelectedSubtitleId] = useState('off')
+  // true, когда пользователь выбрал дорожку сам — до этого действует автовыбор по умолчанию
+  // (внешний субтитр эпизода, иначе первая встроенная дорожка — как было раньше, до появления
+  // селектора). Сбрасывается на каждую смену эпизода.
+  const subtitleAutoSelectedRef = useRef(false)
+  useEffect(() => {
+    subtitleAutoSelectedRef.current = false
+    setSelectedSubtitleId('off')
+  }, [currentVideoPath])
+
+  useEffect(() => {
+    if (subtitleAutoSelectedRef.current) {
+      return
+    }
+    const firstExternal = subtitleOptions.find((o) => o.id.startsWith('external:'))
+    const firstEmbedded = subtitleOptions.find((o) => o.id.startsWith('embedded:'))
+    const preferred = firstExternal ?? firstEmbedded
+    if (preferred) {
+      setSelectedSubtitleId(preferred.id)
+      subtitleAutoSelectedRef.current = true
+    }
+  }, [subtitleOptions])
+
+  const handleSelectSubtitle = useCallback((id: string) => {
+    subtitleAutoSelectedRef.current = true
+    setSelectedSubtitleId(id)
+  }, [])
+
   const externalSubtitle = useMemo<VideoPlayerSubtitle | null>(() => {
-    const match = player.externalTracks.subtitles[0]
+    if (!selectedSubtitleId.startsWith('external:')) {
+      return null
+    }
+    const match = player.externalTracks.subtitles[Number(selectedSubtitleId.split(':')[1])]
     if (!match) {
       return null
     }
@@ -147,15 +200,39 @@ export default function HomePage() {
       format: match.format,
       fonts: match.matchedFonts.map((f) => toMediaUrl(f.path)),
     }
-  }, [player.externalTracks.subtitles])
+  }, [selectedSubtitleId, player.externalTracks.subtitles])
 
-  const hasExternalSubtitle = player.externalTracks.subtitles.length > 0
+  const isEmbeddedSubtitleSelected = selectedSubtitleId.startsWith('embedded:')
+  const [embeddedSubsResult, setEmbeddedSubsResult] = useState<EmbeddedSubtitlesIpcResult['data'] | null>(null)
+  const embeddedExtractedForRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    setEmbeddedSubsResult(null)
+    embeddedExtractedForRef.current = null
+  }, [currentVideoPath])
+
+  // Извлечение — потоковый разбор всего файла (matroska-subtitles, без ffmpeg), поэтому
+  // запускается только когда встроенная дорожка реально выбрана, не на каждый эпизод.
+  useEffect(() => {
+    if (!isEmbeddedSubtitleSelected || !currentVideoPath || embeddedExtractedForRef.current === currentVideoPath) {
+      return
+    }
+    embeddedExtractedForRef.current = currentVideoPath
+
+    let cancelled = false
+    void window.electronAPI.subtitles.extractEmbedded(currentVideoPath).then((result) => {
+      if (!cancelled && result.success && result.data) {
+        setEmbeddedSubsResult(result.data)
+      }
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [isEmbeddedSubtitleSelected, currentVideoPath])
+
   const [embeddedSubtitle, setEmbeddedSubtitle] = useState<VideoPlayerSubtitle | null>(null)
   const embeddedBlobUrlsRef = useRef<string[]>([])
 
-  // Встроенные субтитры (в контейнере MKV) — фоллбэк, только когда внешних субтитров для
-  // эпизода не нашлось (Rus Sub/ и т.п. рядом с видео). Извлечение потоковое, без ffmpeg
-  // (matroska-subtitles), поэтому запускается только по необходимости, не на каждый эпизод.
   useEffect(() => {
     for (const url of embeddedBlobUrlsRef.current) {
       URL.revokeObjectURL(url)
@@ -163,42 +240,29 @@ export default function HomePage() {
     embeddedBlobUrlsRef.current = []
     setEmbeddedSubtitle(null)
 
-    if (!currentVideoPath || hasExternalSubtitle) {
+    if (!isEmbeddedSubtitleSelected || !embeddedSubsResult) {
+      return
+    }
+    const track = embeddedSubsResult.tracks[Number(selectedSubtitleId.split(':')[1])]
+    if (!track) {
       return
     }
 
-    let cancelled = false
-    void window.electronAPI.subtitles.extractEmbedded(currentVideoPath).then((result) => {
-      if (cancelled || !result.success || !result.data) {
-        return
-      }
-      // Первая дорожка контейнера — выбор конкретной дорожки из нескольких (по языку/
-      // дефолтности) не входит в эту задачу, см. риск нумерации в PLAN_ANIMATRONA_PLAYER.md
-      const track = result.data.tracks[0]
-      if (!track) {
-        return
-      }
+    const fontUrls = embeddedSubsResult.fonts.map((f) =>
+      URL.createObjectURL(new Blob([new Uint8Array(f.data)], { type: f.mimetype || 'font/ttf' }))
+    )
+    embeddedBlobUrlsRef.current.push(...fontUrls)
 
-      const fontUrls = result.data.fonts.map((f) =>
-        URL.createObjectURL(new Blob([new Uint8Array(f.data)], { type: f.mimetype || 'font/ttf' }))
-      )
-      embeddedBlobUrlsRef.current.push(...fontUrls)
-
-      if (track.format === 'srt') {
-        const subtitleUrl = URL.createObjectURL(new Blob([track.content], { type: 'text/plain' }))
-        embeddedBlobUrlsRef.current.push(subtitleUrl)
-        setEmbeddedSubtitle({ url: subtitleUrl, format: 'srt', fonts: [] })
-      } else {
-        setEmbeddedSubtitle({ content: track.content, format: track.format, fonts: fontUrls })
-      }
-    })
-
-    return () => {
-      cancelled = true
+    if (track.format === 'srt') {
+      const subtitleUrl = URL.createObjectURL(new Blob([track.content], { type: 'text/plain' }))
+      embeddedBlobUrlsRef.current.push(subtitleUrl)
+      setEmbeddedSubtitle({ url: subtitleUrl, format: 'srt', fonts: [] })
+    } else {
+      setEmbeddedSubtitle({ content: track.content, format: track.format, fonts: fontUrls })
     }
-  }, [currentVideoPath, hasExternalSubtitle])
+  }, [isEmbeddedSubtitleSelected, embeddedSubsResult, selectedSubtitleId])
 
-  const subtitle = externalSubtitle ?? embeddedSubtitle
+  const subtitle = selectedSubtitleId === 'off' ? null : (externalSubtitle ?? embeddedSubtitle)
 
   // Детекция кодеков, которые Chromium не декодирует (Hi10P, AC3/DTS/TrueHD) — до старта
   // воспроизведения, а не после чёрного экрана. Пробует напрямую через electronAPI.probe (полный
@@ -395,6 +459,13 @@ export default function HomePage() {
               onNext={() => void player.goNext()}
               onTimeUpdate={handleTimeUpdate}
               onEnded={handleEnded}
+              trackSelectorSlot={
+                <SubtitleTrackSelector
+                  options={subtitleOptions}
+                  selectedId={selectedSubtitleId}
+                  onSelect={handleSelectSubtitle}
+                />
+              }
             />
           )}
 

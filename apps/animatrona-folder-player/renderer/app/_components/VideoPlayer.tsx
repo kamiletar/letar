@@ -26,6 +26,7 @@ import {
   useShakaPlayer,
   useSubtitles,
 } from '@letar/video-player-react'
+import type { ReactNode } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu'
 
@@ -61,6 +62,8 @@ export interface VideoPlayerProps {
   hasNext: boolean
   onPrev: () => void
   onNext: () => void
+  /** Кнопка выбора дорожки субтитров (`SubtitleTrackSelector`) — рендерится в `SharedPlayerControls` */
+  trackSelectorSlot?: ReactNode
 }
 
 /** Минимальный интерфейс Shaka Player, ожидаемый `useShakaPlayer` */
@@ -111,6 +114,7 @@ function ShakaVideoPlayer({
   hasNext,
   onPrev,
   onNext,
+  trackSelectorSlot,
   Shaka,
 }: VideoPlayerProps & { Shaka: ShakaModule }) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -371,6 +375,7 @@ function ShakaVideoPlayer({
         onPlaybackSpeedChange={handlePlaybackSpeedChange}
         beforeControlsSlot={prevEpisodeSlot}
         afterControlsSlot={nextEpisodeSlot}
+        trackSelectorSlot={trackSelectorSlot}
         spriteUrl={spriteUrl}
         spriteCues={spriteCues}
         chapters={chapterInfos}
