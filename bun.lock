@@ -380,7 +380,7 @@
     },
     "apps/animatrona": {
       "name": "@letar/animatrona",
-      "version": "0.55.63",
+      "version": "0.55.66",
       "dependencies": {
         "@letar/electron-storage": "workspace:*",
         "@letar/folder-scan": "workspace:*",
@@ -396,7 +396,7 @@
     },
     "apps/animatrona-folder-player": {
       "name": "@letar/animatrona-folder-player",
-      "version": "0.1.0",
+      "version": "0.6.0",
       "dependencies": {
         "@letar/electron-storage": "workspace:*",
         "@letar/folder-player-react": "workspace:*",
@@ -413,9 +413,20 @@
         "electron-builder": "26.15.3",
       },
     },
+    "apps/animatrona-ipfs-player": {
+      "name": "@letar/animatrona-ipfs-player",
+      "version": "0.1.0",
+      "dependencies": {
+        "@letar/icon-generator": "workspace:*",
+      },
+      "devDependencies": {
+        "electron": "44.2.0",
+        "electron-builder": "26.15.3",
+      },
+    },
     "apps/animatrona-landing": {
       "name": "@letar/animatrona-landing",
-      "version": "0.4.7",
+      "version": "0.4.9",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
       },
@@ -439,7 +450,7 @@
     },
     "apps/animatrona-tracker": {
       "name": "@letar/animatrona-tracker",
-      "version": "0.11.15",
+      "version": "0.11.18",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -554,7 +565,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.184.31",
+      "version": "0.188.0",
       "dependencies": {
         "@letar/analytics": "workspace:*",
         "@letar/consent": "workspace:*",
@@ -638,7 +649,7 @@
     },
     "apps/form-develop-app": {
       "name": "form-develop-app",
-      "version": "0.1.9",
+      "version": "0.1.11",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/pg-url": "workspace:*",
@@ -654,7 +665,7 @@
     },
     "apps/form-docs": {
       "name": "form-docs",
-      "version": "0.6.5",
+      "version": "0.6.6",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
       },
@@ -665,7 +676,7 @@
     },
     "apps/form-example": {
       "name": "form-example",
-      "version": "0.1.9",
+      "version": "0.1.10",
       "dependencies": {
         "@letar/demo-protection": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -797,7 +808,7 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.68.0",
+      "version": "0.69.2",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/consent": "workspace:*",
@@ -1126,8 +1137,9 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.11.1",
+      "version": "2.12.2",
       "dependencies": {
+        "@letar/format-utils": "workspace:*",
         "@tanstack/react-table": "^9.2.4",
         "@tanstack/react-virtual": "^3.13.23",
       },
@@ -1178,14 +1190,14 @@
     },
     "libs/forms-core": {
       "name": "@letar/forms-core",
-      "version": "0.11.0",
+      "version": "0.12.0",
       "dependencies": {
         "@tanstack/table-core": "^9.1.2",
       },
     },
     "libs/forms-react": {
       "name": "@letar/forms-react",
-      "version": "0.5.1",
+      "version": "0.6.1",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },
@@ -1200,7 +1212,7 @@
     },
     "libs/forms-shadcn": {
       "name": "@letar/forms-shadcn",
-      "version": "0.35.0",
+      "version": "0.35.1",
       "devDependencies": {
         "@letar/eager-jsx-check": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -1501,7 +1513,7 @@
     },
     "libs/ui": {
       "name": "@letar/ui",
-      "version": "0.20.0",
+      "version": "0.21.0",
       "dependencies": {
         "@letar/hooks": "workspace:*",
       },
@@ -1552,14 +1564,14 @@
     },
     "libs/video-player-core": {
       "name": "@letar/video-player-core",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "peerDependencies": {
         "shaka-player": "^4.0.0",
       },
     },
     "libs/video-player-react": {
       "name": "@letar/video-player-react",
-      "version": "0.1.0",
+      "version": "0.2.2",
       "peerDependencies": {
         "@letar/video-player-core": "workspace:*",
         "react": "^19.0.0",
@@ -1572,7 +1584,7 @@
     },
     "libs/zenstack-form-plugin": {
       "name": "@letar/zenstack-form-plugin",
-      "version": "4.0.0",
+      "version": "4.0.1",
       "peerDependencies": {
         "@zenstackhq/sdk": ">=3.0.0",
         "@zenstackhq/zod": ">=3.0.0",
@@ -1580,7 +1592,7 @@
     },
     "libs/zenstack-fragments": {
       "name": "@letar/zenstack-fragments",
-      "version": "0.1.0",
+      "version": "0.2.0",
     },
   },
   "patchedDependencies": {
@@ -2494,6 +2506,8 @@
     "@letar/animatrona-folder-player": ["@letar/animatrona-folder-player@workspace:apps/animatrona-folder-player"],
 
     "@letar/animatrona-franchise-graph": ["@letar/animatrona-franchise-graph@workspace:libs/animatrona-franchise-graph"],
+
+    "@letar/animatrona-ipfs-player": ["@letar/animatrona-ipfs-player@workspace:apps/animatrona-ipfs-player"],
 
     "@letar/animatrona-landing": ["@letar/animatrona-landing@workspace:apps/animatrona-landing"],
 
