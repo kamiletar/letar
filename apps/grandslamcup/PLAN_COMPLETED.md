@@ -15,6 +15,14 @@
 
 ⚠️ Открытый вопрос — см. `PLAN.md` § «Открытые вопросы».
 
+## Консолидация fail-closed проверки секрета через `@letar/api-server` (2026-09-08)
+
+Тот же ручной `validateSecret` (см. выше) переписан на общую `verifySharedSecret` из
+`libs/api-server` — она уже используется в `cron-secret.ts` и покрыта тестами, дублировать её
+логику в приложении не было причин. `@letar/api-server` подключён в `dependencies`/
+`implicitDependencies`/`tsconfig.paths`. Поведение не изменилось (по-прежнему fail-closed),
+открытый вопрос про непрописанный секрет в проде — тот же, см. выше.
+
 ## Фикс hb.wasm ENOENT в webpack-сборке (2026-09-05)
 
 Прод-деплой (`deployId 293d7830`) 4 раза за сборку ловил `failed to asynchronously prepare wasm:

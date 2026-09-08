@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.39.16] - 2026-09-08
+
+### Changed
+
+- Ручная проверка `TELEGRAM_WEBHOOK_SECRET` в `/api/telegram/webhook` заменена на общую
+  `verifySharedSecret` из `@letar/api-server` (та же fail-closed логика, что уже используется
+  в cron-эндпоинтах). Поведение не изменилось.
+
 ## [3.39.15] - 2026-09-05
 
 ### Fixed
