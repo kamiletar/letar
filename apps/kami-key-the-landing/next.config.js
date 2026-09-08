@@ -8,7 +8,13 @@ const nextConfig = {
   // кода. .map-файлы не публикуются: сборка удаляет их после загрузки в GlitchTip
   // (см. корневой scripts/glitchtip-upload-sourcemaps.mjs, PLAN-INFRA-4.md §70 п.6).
   productionBrowserSourceMaps: true,
-  transpilePackages: ['@letar/analytics', '@letar/glitchtip', '@letar/seo', '@letar/ui'],
+  transpilePackages: [
+    '@letar/analytics',
+    '@letar/github-releases',
+    '@letar/glitchtip',
+    '@letar/seo',
+    '@letar/ui',
+  ],
   // Standalone output для Docker production сборки
   output: 'standalone',
   // Trailing slash для консистентных URL

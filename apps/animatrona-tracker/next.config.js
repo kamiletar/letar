@@ -24,6 +24,7 @@ const nextConfig = {
     '@letar/forms-core',
     '@letar/forms-react',
     '@letar/glitchtip',
+    '@letar/image-upload',
     '@letar/query-provider',
     '@letar/redis-client',
     '@letar/ui',
