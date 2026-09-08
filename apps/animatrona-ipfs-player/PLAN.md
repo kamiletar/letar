@@ -533,18 +533,19 @@ model Settings {
 pre-commit `schema-migration-check` верно потребовал миграцию в том же коммите, что и первый
 `schema.zmodel`; это не ложное срабатывание, обходить флагом не пришлось.
 
-### Отложено намеренно (не делать в этой итерации)
+### Закрыто
 
-- **Консолидация `TrackPreference` во фрагмент.** Enum живёт в creator-файле
-  `media.zmodel` Animatrona рядом с кодеками. Перенос требует одновременного удаления оттуда и
-  добавления во фрагмент — иначе после 0.4 (Animatrona уже импортирует фрагмент, см.
-  `apps/animatrona/schema/models/federation.zmodel`) получится дублирующее объявление
-  `enum TrackPreference` и `zenstack generate` у Animatrona сломается. Плюс `media.zmodel`
-  придётся заставить импортировать фрагмент напрямую (импорты не транзитивны). Единственный
-  безопасный способ — редактировать `libs/zenstack-fragments` и `apps/animatrona` одним
-  атомарным коммитом; правка `apps/animatrona` не входит в объём этого приложения (см.
-  запрет в командном воркфлоу) — задача передана `animatrona-coordinator-dev`
-  (2026-09-08, тред `trackpreference-fragment-consolidation`).
+**Консолидация `TrackPreference` во фрагмент — сделано (2026-09-09).** Задача была передана
+`animatrona-coordinator-dev` (2026-09-08, тред `trackpreference-fragment-consolidation`), так как
+enum жил в creator-файле `media.zmodel` Animatrona и перенос требовал одновременной правки
+`apps/animatrona` (не входит в объём этого приложения). Координатор поручил `animatrona-dev`
+одним коммитом убрать локальные `TrackPreference`/`WatchStatus` из `apps/animatrona/schema/` и
+подключить фрагмент в `settings.zmodel` (не `media.zmodel` — после удаления enum имя
+`TrackPreference` там больше не встречается, ссылается только `Settings.trackPreference`), плюс
+попутно перевести `DiscoverWatchProgress` на `with WatchProgressFields`. Подтверждено
+(сообщение 1427): дубли удалены, миксин подключён везде. С нашей стороны — убрана локальная
+копия `enum TrackPreference` из `schema.zmodel`, она резолвится через уже существующий импорт
+фрагмента в шапке файла. `zenstack:generate`/`db:push`/`typecheck:tsgo`/`lint` зелёные.
 
 **`WatchProgressFields` во фрагмент — сделано (2026-09-08).** В отличие от `TrackPreference`,
 это новое имя типа — добавление в `libs/zenstack-fragments/src/animatrona.zmodel` было

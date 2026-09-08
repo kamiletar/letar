@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **Локальный дубль `enum TrackPreference` убран из `schema.zmodel`** — теперь резолвится через
+  фрагмент `libs/zenstack-fragments/src/animatrona.zmodel` (импорт в шапке файла уже был).
+  Консолидация выполнена `animatrona-dev` по задаче, переданной через `animatrona-coordinator-dev`
+  (тред `trackpreference-fragment-consolidation`): локальные `TrackPreference`/`WatchStatus`
+  Animatrona удалены, `Settings.trackPreference` теперь ссылается на фрагмент через
+  `settings.zmodel`. `zenstack:generate`/`db:push`/`typecheck:tsgo`/`lint` зелёные.
+
 ### Added
 
 - **`WatchProgressFields` вынесен в общий фрагмент** (`libs/zenstack-fragments/src/animatrona.zmodel`)

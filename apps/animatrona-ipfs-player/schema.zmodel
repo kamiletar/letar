@@ -24,19 +24,6 @@ plugin formSchema {
   output   = "./renderer/src/generated/form-schemas"
 }
 
-/// Предпочтение дорожек при первом просмотре
-///
-/// ⚠️ Временная локальная копия enum'а из `apps/animatrona/schema/models/media.zmodel`.
-/// Консолидация во фрагмент отложена намеренно — см. PLAN.md § «Отложено намеренно».
-enum TrackPreference {
-  /// Русская озвучка + субтитры надписей
-  RUSSIAN_DUB
-  /// Оригинальная дорожка + полные субтитры
-  ORIGINAL_SUB
-  /// Автовыбор по доступности
-  AUTO
-}
-
 /// Трекер — источник раздач. Все поля из общего миксина, своих не нужно.
 model Tracker with TrackerFields {
   /// Обратная сторона relation — раздачи, открытые через этот трекер
