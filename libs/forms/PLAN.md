@@ -6,6 +6,21 @@
 
 ## Backlog (запросы от агентов)
 
+### [2026-09-08] Sortable Group.List — hydration mismatch на `aria-describedby` (от form-example-dev)
+
+- **Запросил:** form-example-dev (обнаружено при работе над PLAN.md P0 «Groups — sortable
+  drag&drop + вложенные массивы»)
+- **Приоритет:** high
+- **Описание:** `SortableWrapper` (`form-group-list-sortable.tsx`) рендерит `<DndContext>` без
+  явного `id` — `@dnd-kit/utilities` `useUniqueId("DndDescribedBy", id)` без `value` берёт номер
+  из module-level счётчика, не детерминированного между SSR и клиентской гидратацией. Результат —
+  hydration mismatch на `aria-describedby="DndDescribedBy-N"` на каждой странице с
+  `Form.Group.List sortable` (воспроизведено на `/examples/groups`, секция 2).
+- **Предлагаемый фикс:** прокинуть уже вычисляемый `fullPath` (детерминированный, есть в
+  `form-group-list-declarative.tsx`) как явный `id` в `SortableWrapper`/`DndContext` — при
+  заданном `value` `useUniqueId` счётчик не трогает вовсе.
+- **Статус:** ожидание (детали и код — в agent-mail, thread `forms-bug-sortable-dnddescribedby`)
+
 ### ✅ [2026-09-09] `apps/form-example` не подключает `FormI18nProvider` (закрыт, от forms-coordinator-dev)
 
 - **Запросил:** forms-coordinator-dev (аудит покрытия после фикса v2.12.3)
