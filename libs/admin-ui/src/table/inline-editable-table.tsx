@@ -26,6 +26,14 @@ export interface InlineEditableTableProps<TItem> {
   renderCreateForm: () => ReactNode
   emptyMessage: ReactNode
   addLabel?: string
+  /**
+   * Доступные имена кнопок строки — уходят и в `aria-label`, и в `title` (подсказка мышью).
+   * Кнопки только с иконкой без имени читаются скринридером как «кнопка, кнопка», и отличить
+   * правку от удаления нельзя, поэтому дефолты заданы всегда. Переопределять стоит там, где
+   * действие называется иначе («Открыть», «Снять с публикации»)
+   */
+  editLabel?: string
+  deleteLabel?: string
   /** Пояснение над таблицей (напр. «Расход указывается на 1 м² работы») */
   note?: ReactNode
   cardProps?: React.ComponentProps<typeof Card.Root>
@@ -83,6 +91,8 @@ export function InlineEditableTable<TItem>({
   renderCreateForm,
   emptyMessage,
   addLabel = 'Добавить',
+  editLabel = 'Редактировать',
+  deleteLabel = 'Удалить',
   note,
   cardProps,
 }: InlineEditableTableProps<TItem>) {
@@ -139,10 +149,23 @@ export function InlineEditableTable<TItem>({
                         ))}
                         <Table.Cell>
                           <Flex gap={1} justify="flex-end">
-                            <Button size="xs" variant="ghost" onClick={() => onEdit(id)}>
+                            <Button
+                              size="xs"
+                              variant="ghost"
+                              aria-label={editLabel}
+                              title={editLabel}
+                              onClick={() => onEdit(id)}
+                            >
                               <Pencil size={14} />
                             </Button>
-                            <Button size="xs" variant="ghost" colorPalette="red" onClick={() => onDelete(id)}>
+                            <Button
+                              size="xs"
+                              variant="ghost"
+                              colorPalette="red"
+                              aria-label={deleteLabel}
+                              title={deleteLabel}
+                              onClick={() => onDelete(id)}
+                            >
                               <Trash2 size={14} />
                             </Button>
                           </Flex>
