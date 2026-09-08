@@ -79,6 +79,9 @@ export default function HomePage() {
         <Button asChild colorPalette="green" variant="outline" size="lg" width="fit-content">
           <Link href="/credit-card-demo">CreditCard (Ввод данных карты)</Link>
         </Button>
+        <Button asChild colorPalette="green" variant="outline" size="lg" width="fit-content">
+          <Link href="/slug-demo">Slug (URL-слаг, зеркалит соседнее поле)</Link>
+        </Button>
         <Button asChild colorPalette="orange" variant="outline" size="lg" width="fit-content">
           <Link href="/captcha-demo">CAPTCHA (Turnstile, reCAPTCHA, hCaptcha)</Link>
         </Button>
