@@ -6,6 +6,13 @@
 
 ### Added
 
+- **Сохранение прогресса просмотра.** `main/ipc/watch-progress.handlers.ts`
+  (`watchProgress:get`/`listForRelease`/`upsert`) поверх модели `WatchProgress`. `releaseKey`
+  теперь реально вычисляется в `manifest:openByCid` (`AnimeManifest.animeInfoCid` →
+  `AnimeInfo.externalIds.shikimori`, деградация до `cid:<directoryCid>` при ошибке или
+  отсутствии). `EpisodePlayer` резюмирует позицию и выбор дорожек при повторном открытии
+  эпизода, сохраняет раз в 10 сек + на паузе/окончании/закрытии. Не проверено живым прогоном
+  (нет тестового CID).
 - **Видеоплеер эпизода.** `renderer/app/_components/EpisodePlayer.tsx` — Shaka Player через
   `@letar/video-player-react`/`@letar/video-player-core`, раздельные аудио/субтитры (отдельные
   IPFS-файлы, не embedded MKV-дорожки), выбор дорожек (`AudioTrackSelector`/

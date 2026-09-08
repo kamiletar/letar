@@ -1,7 +1,8 @@
 import type { OpenByCidResult, ReleaseEpisodeManifest } from '../../main/ipc/manifest.handlers'
 import type { RecentReleaseUpsertInput } from '../../main/ipc/recent-release.handlers'
 import type { TrackerInput } from '../../main/ipc/tracker.handlers'
-import type { RecentRelease, Settings, Tracker } from '../src/generated/prisma'
+import type { WatchProgressUpsertInput } from '../../main/ipc/watch-progress.handlers'
+import type { RecentRelease, Settings, Tracker, WatchProgress } from '../src/generated/prisma'
 
 export interface ElectronAPI {
   getVersion: () => Promise<string>
@@ -31,6 +32,12 @@ export interface ElectronAPI {
   ipfs: {
     start: () => Promise<void>
     getGatewayUrl: () => Promise<string | null>
+  }
+
+  watchProgress: {
+    get: (releaseKey: string, episodeNumber: number) => Promise<WatchProgress | null>
+    listForRelease: (releaseKey: string) => Promise<WatchProgress[]>
+    upsert: (input: WatchProgressUpsertInput) => Promise<WatchProgress>
   }
 }
 

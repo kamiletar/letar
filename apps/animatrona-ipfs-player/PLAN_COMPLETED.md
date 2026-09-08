@@ -76,6 +76,21 @@ AST не содержит полей миксина (они в `model.mixins`), 
 
 ---
 
+## Версия 0.6.0 (2026-09-08) — Фаза 1: сохранение прогресса просмотра
+
+- `releaseKey` реально вычисляется в `manifest:openByCid`: `AnimeManifest.animeInfoCid` →
+  читается `AnimeInfo` → `externalIds.shikimori`; если `animeInfoCid` нет или чтение упало —
+  деградация до `cid:<directoryCid>` (try/catch, не валит открытие раздачи).
+- `main/ipc/watch-progress.handlers.ts` — `watchProgress:get`/`listForRelease`/`upsert` поверх
+  модели `WatchProgress` (`@@unique([releaseKey, episodeNumber])`).
+- `EpisodePlayer` при открытии эпизода читает прошлый прогресс: резюмирует позицию (если не
+  `completed` и прогресс дальше 5 сек), восстанавливает выбор аудио/субтитров, если такие
+  дорожки ещё есть в манифесте эпизода. Сохранение — раз в 10 сек во время воспроизведения +
+  на `pause`/`ended`/размонтировании компонента (переключение эпизода, закрытие плеера).
+- Не проверено живым прогоном (нет тестового CID) — тот же пробел, что у самого плеера.
+
+---
+
 ## Версия 0.5.0 (2026-09-08) — Фаза 1: видеоплеер эпизода
 
 - `EpisodePlayer` (`renderer/app/_components/`) — полноэкранный плеер на Shaka Player

@@ -11,6 +11,20 @@ export interface ReleaseManifest {
   episodes?: ReleaseManifestEpisode[]
   createdAt?: string
   updatedAt?: string
+  /** CID документа AnimeInfo (метаданные) — источник `externalIds.shikimori` для releaseKey */
+  animeInfoCid?: string
+}
+
+/** Подмножество AnimeInfo, нужное только для releaseKey — см. PLAN.md § «Ключ прогресса просмотра» */
+interface ReleaseAnimeInfo {
+  externalIds?: {
+    shikimori?: number
+  }
+}
+
+/** Стабильный ключ раздачи: shikimoriId, иначе CID директории — решение владельца, PLAN.md */
+export function getReleaseKey(shikimoriId: number | undefined, directoryCid: string): string {
+  return shikimoriId !== undefined ? `shikimori:${shikimoriId}` : `cid:${directoryCid}`
 }
 
 export interface ReleaseManifestEpisode {
@@ -74,6 +88,8 @@ export interface OpenByCidResult {
   directoryCid: string
   manifest: ReleaseManifest
   episodes: ReleaseManifestEpisode[]
+  /** Стабильный ключ раздачи для WatchProgress — см. `getReleaseKey` */
+  releaseKey: string
 }
 
 /**
@@ -91,7 +107,18 @@ async function openByCid(directoryCid: string): Promise<OpenByCidResult> {
     episodes = doc.episodes
   }
 
-  return { directoryCid, manifest, episodes }
+  // shikimoriId — не обязательное поле AnimeInfo, чтение не должно валить открытие раздачи
+  let shikimoriId: number | undefined
+  if (manifest.animeInfoCid) {
+    try {
+      const animeInfo = await readJsonFromIpfs<ReleaseAnimeInfo>(manifest.animeInfoCid)
+      shikimoriId = animeInfo.externalIds?.shikimori
+    } catch {
+      shikimoriId = undefined
+    }
+  }
+
+  return { directoryCid, manifest, episodes, releaseKey: getReleaseKey(shikimoriId, directoryCid) }
 }
 
 /** Прочитать EpisodeManifest эпизода по CID (сам манифест — JSON-документ, не директория) */

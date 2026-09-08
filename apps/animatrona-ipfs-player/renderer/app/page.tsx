@@ -24,6 +24,7 @@ interface OpenedRelease {
   directoryCid: string
   name: string
   episodes: OpenedReleaseEpisode[]
+  releaseKey: string
 }
 
 export default function HomePage() {
@@ -72,9 +73,9 @@ export default function HomePage() {
     setError(null)
     setOpening(true)
     try {
-      const { manifest, episodes } = await window.electronAPI.manifest.openByCid(directoryCid)
+      const { manifest, episodes, releaseKey } = await window.electronAPI.manifest.openByCid(directoryCid)
       const sortedEpisodes = [...episodes].sort((a, b) => a.number - b.number)
-      setOpenedRelease({ directoryCid, name: manifest.name, episodes: sortedEpisodes })
+      setOpenedRelease({ directoryCid, name: manifest.name, episodes: sortedEpisodes, releaseKey })
       await window.electronAPI.recentRelease.open({
         directoryCid,
         name: manifest.name,
@@ -95,6 +96,8 @@ export default function HomePage() {
       <EpisodePlayer
         key={episode.manifestCid}
         manifestCid={episode.manifestCid}
+        releaseKey={openedRelease.releaseKey}
+        episodeNumber={episode.number}
         episodeLabel={`${openedRelease.name} — эп. ${episode.number}${episode.name ? ` «${episode.name}»` : ''}`}
         onClose={() => setSelectedEpisodeIndex(null)}
         hasPrev={selectedEpisodeIndex > 0}

@@ -1,8 +1,9 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import type { RecentRelease, Settings, Tracker } from '../renderer/src/generated/prisma'
+import type { RecentRelease, Settings, Tracker, WatchProgress } from '../renderer/src/generated/prisma'
 import type { OpenByCidResult, ReleaseEpisodeManifest } from './ipc/manifest.handlers'
 import type { RecentReleaseUpsertInput } from './ipc/recent-release.handlers'
 import type { TrackerInput } from './ipc/tracker.handlers'
+import type { WatchProgressUpsertInput } from './ipc/watch-progress.handlers'
 
 /**
  * API, доступный в renderer process через window.electronAPI.
@@ -39,6 +40,15 @@ const electronAPI = {
   ipfs: {
     start: (): Promise<void> => ipcRenderer.invoke('ipfs:start'),
     getGatewayUrl: (): Promise<string | null> => ipcRenderer.invoke('ipfs:getGatewayUrl'),
+  },
+
+  watchProgress: {
+    get: (releaseKey: string, episodeNumber: number): Promise<WatchProgress | null> =>
+      ipcRenderer.invoke('watchProgress:get', releaseKey, episodeNumber),
+    listForRelease: (releaseKey: string): Promise<WatchProgress[]> =>
+      ipcRenderer.invoke('watchProgress:listForRelease', releaseKey),
+    upsert: (input: WatchProgressUpsertInput): Promise<WatchProgress> =>
+      ipcRenderer.invoke('watchProgress:upsert', input),
   },
 }
 

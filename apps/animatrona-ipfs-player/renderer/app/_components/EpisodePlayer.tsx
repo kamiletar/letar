@@ -11,6 +11,10 @@
  * `apps/animatrona-folder-player` (VideoPlayer.tsx), но: аудио всегда раздельное (отдельные
  * файлы, не embedded-дорожки MKV), без глав/превью-спрайта (эти документы вне объёма плеера —
  * см. PLAN.md «Только просмотр»).
+ *
+ * Прогресс просмотра (WatchProgress) — резюме позиции и выбор дорожек читается при открытии
+ * эпизода, сохраняется периодически + на паузе/окончании/закрытии (unmount). Ключ —
+ * `releaseKey` (см. `getReleaseKey` в main/ipc/manifest.handlers.ts) + номер эпизода.
  */
 
 import { Box, Center, IconButton, Spinner, Text } from '@chakra-ui/react'
@@ -36,6 +40,10 @@ import { SubtitleTrackSelector } from './SubtitleTrackSelector'
 
 export interface EpisodePlayerProps {
   manifestCid: string
+  /** Стабильный ключ раздачи (см. `getReleaseKey` в main/ipc/manifest.handlers.ts) — для WatchProgress */
+  releaseKey: string
+  /** Номер эпизода — вместе с releaseKey образует ключ WatchProgress */
+  episodeNumber: number
   episodeLabel: string
   onClose: () => void
   hasPrev: boolean
@@ -43,6 +51,12 @@ export interface EpisodePlayerProps {
   onPrev: () => void
   onNext: () => void
 }
+
+/** Досматриваем — не считать «незаконченным» последние несколько секунд ролика/интро выходных титров */
+const COMPLETED_THRESHOLD_SEC = 3
+/** Не резюмировать с самого начала — если бросили в первые секунды, начинаем заново */
+const RESUME_MIN_TIME_SEC = 5
+const SAVE_PROGRESS_INTERVAL_MS = 10_000
 
 /** Читаемая подпись дорожки: язык + название, если есть */
 function formatTrackLabel(language: string, title: string): string {
@@ -86,13 +100,17 @@ export function EpisodePlayer(props: EpisodePlayerProps) {
 }
 
 function ShakaEpisodePlayer(
-  { manifestCid, episodeLabel, onClose, hasPrev, hasNext, onPrev, onNext, Shaka }: EpisodePlayerProps & {
-    Shaka: ShakaModule
-  },
+  { manifestCid, releaseKey, episodeNumber, episodeLabel, onClose, hasPrev, hasNext, onPrev, onNext, Shaka }:
+    & EpisodePlayerProps
+    & {
+      Shaka: ShakaModule
+    },
 ) {
   const containerRef = useRef<HTMLDivElement>(null)
   const audioRef = useRef<HTMLAudioElement>(null)
   const usesSeparateAudioRef = useRef(true)
+  /** Позиция для резюме — выставляется в эффекте загрузки манифеста, применяется, когда видео готово */
+  const resumeTimeRef = useRef<number | null>(null)
 
   const [manifest, setManifest] = useState<ReleaseEpisodeManifest | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -107,13 +125,15 @@ function ShakaEpisodePlayer(
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [playbackSpeed, setPlaybackSpeed] = useState<PlaybackSpeed>(1)
 
-  // Загрузка манифеста эпизода — запускает Kubo-ноду (если ещё не запущена) и читает EpisodeManifest
+  // Загрузка манифеста эпизода — запускает Kubo-ноду (если ещё не запущена) и читает EpisodeManifest.
+  // Заодно читает WatchProgress — резюме позиции и выбор дорожек с прошлого просмотра, если он был.
   useEffect(() => {
     let cancelled = false
     setManifest(null)
     setLoadError(null)
     setSelectedAudioId('')
     setSelectedSubtitleId('off')
+    resumeTimeRef.current = null
 
     void (async () => {
       try {
@@ -125,9 +145,35 @@ function ShakaEpisodePlayer(
         if (cancelled) {
           return
         }
+
+        let audioId = data.audioTracks.find((t) => t.isDefault)?.id ?? data.audioTracks[0]?.id ?? ''
+        let subtitleId = data.subtitleTracks.find((t) => t.isDefault)?.id ?? 'off'
+
+        // Прогресс — не критичен для просмотра, ошибка чтения не должна ронять открытие эпизода
+        try {
+          const progress = await window.electronAPI.watchProgress.get(releaseKey, episodeNumber)
+          if (progress && !cancelled) {
+            if (!progress.completed && progress.currentTime > RESUME_MIN_TIME_SEC) {
+              resumeTimeRef.current = progress.currentTime
+            }
+            if (progress.selectedAudioTrackId && data.audioTracks.some((t) => t.id === progress.selectedAudioTrackId)) {
+              audioId = progress.selectedAudioTrackId
+            }
+            subtitleId = progress.selectedSubtitleTrackId
+                && data.subtitleTracks.some((t) => t.id === progress.selectedSubtitleTrackId)
+              ? progress.selectedSubtitleTrackId
+              : 'off'
+          }
+        } catch {
+          // резюме недоступно — начинаем эпизод сначала, это не ошибка воспроизведения
+        }
+
+        if (cancelled) {
+          return
+        }
         setManifest(data)
-        setSelectedAudioId(data.audioTracks.find((t) => t.isDefault)?.id ?? data.audioTracks[0]?.id ?? '')
-        setSelectedSubtitleId(data.subtitleTracks.find((t) => t.isDefault)?.id ?? 'off')
+        setSelectedAudioId(audioId)
+        setSelectedSubtitleId(subtitleId)
       } catch (err) {
         if (!cancelled) {
           setLoadError(err instanceof Error ? err.message : 'Не удалось загрузить манифест эпизода')
@@ -138,7 +184,7 @@ function ShakaEpisodePlayer(
     return () => {
       cancelled = true
     }
-  }, [manifestCid])
+  }, [manifestCid, releaseKey, episodeNumber])
 
   const videoSrc = manifest ? toIpfsUrl(manifest.video.cid) : null
 
@@ -160,6 +206,18 @@ function ShakaEpisodePlayer(
     isVideoReady,
     currentAudioTrackId: selectedAudioId,
   })
+
+  // Резюме позиции с прошлого просмотра — как только видео готово принять seek
+  useEffect(() => {
+    if (!isVideoReady || resumeTimeRef.current === null) {
+      return
+    }
+    const video = videoRef.current
+    if (video) {
+      video.currentTime = resumeTimeRef.current
+    }
+    resumeTimeRef.current = null
+  }, [isVideoReady, videoRef])
 
   const audioOptions = useMemo(
     () => (manifest?.audioTracks ?? []).map((t) => ({ id: t.id, label: formatTrackLabel(t.language, t.title) })),
@@ -251,6 +309,46 @@ function ShakaEpisodePlayer(
       document.removeEventListener('fullscreenchange', handleFullscreenChange)
     }
   }, [isVideoReady, videoRef])
+
+  const saveProgress = useCallback(() => {
+    const video = videoRef.current
+    if (!video || !isVideoReady || !video.duration) {
+      return
+    }
+    void window.electronAPI.watchProgress.upsert({
+      releaseKey,
+      episodeNumber,
+      currentTime: video.currentTime,
+      duration: video.duration,
+      completed: video.currentTime >= video.duration - COMPLETED_THRESHOLD_SEC,
+      selectedAudioTrackId: selectedAudioId || null,
+      selectedSubtitleTrackId: selectedSubtitleId === 'off' ? null : selectedSubtitleId,
+    })
+  }, [videoRef, isVideoReady, releaseKey, episodeNumber, selectedAudioId, selectedSubtitleId])
+
+  // Периодическое сохранение прогресса + на паузе/окончании/закрытии плеера (cleanup при размонтировании)
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) {
+      return
+    }
+
+    const interval = setInterval(() => {
+      if (!video.paused) {
+        saveProgress()
+      }
+    }, SAVE_PROGRESS_INTERVAL_MS)
+
+    video.addEventListener('pause', saveProgress)
+    video.addEventListener('ended', saveProgress)
+
+    return () => {
+      clearInterval(interval)
+      video.removeEventListener('pause', saveProgress)
+      video.removeEventListener('ended', saveProgress)
+      saveProgress()
+    }
+  }, [videoRef, saveProgress])
 
   const handlePlaybackSpeedChange = useCallback(
     (speed: PlaybackSpeed) => {
