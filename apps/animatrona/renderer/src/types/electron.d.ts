@@ -580,143 +580,32 @@ export interface ShikimoriSearchOptions {
 
 // === Manifest Types ===
 
-/** Информация о видео в манифесте */
-export interface ManifestVideo {
-  path: string
-  durationMs: number
-  width: number
-  height: number
-  codec: string
-  bitrate?: number
-}
+/**
+ * Канонические типы манифеста живут в `@letar/animatrona-types` — их же использует
+ * main-процесс через `shared/types/manifest.ts`. Раньше здесь лежала их вторая копия, и она
+ * разошлась с тем, что main реально кладёт в манифест: `video.path` вместо `video.cid`,
+ * `subtitleTrack.filePath` вместо `cid`, `navigation.*.manifestPath` вместо `manifestCid`,
+ * плюс отсутствовали `isForced`/`cid`/`size` у дорожек. То есть описание границы IPC врало,
+ * а рабочий код (`use-discover-episode.ts`) уже читал канонические поля.
+ */
+export type {
+  ChaptersDocument,
+  EncodingDocument,
+  EpisodeManifest,
+  ManifestAudioTrack,
+  ManifestChapter,
+  ManifestChapterType,
+  ManifestEncodingInfo,
+  ManifestInfo,
+  ManifestNavigation,
+  ManifestSubtitleFont,
+  ManifestSubtitleTrack,
+  ManifestThumbnails,
+  ManifestVideo,
+  ThumbnailsDocument,
+} from '@letar/animatrona-types'
 
-/** Аудиодорожка в манифесте */
-export interface ManifestAudioTrack {
-  id: string
-  streamIndex: number
-  language: string
-  title: string
-  codec: string
-  channels: string
-  bitrate?: number
-  isDefault: boolean
-  /** Группа озвучки (AniDUB, AniLibria и т.д.) */
-  dubGroup?: string
-}
-
-/** Субтитры в манифесте */
-export interface ManifestSubtitleTrack {
-  id: string
-  streamIndex: number
-  language: string
-  title: string
-  format: string
-  filePath: string
-  isDefault: boolean
-  fonts?: { name: string; path: string }[]
-  /** Группа субтитров (HorribleSubs, FanSub Team и т.д.) */
-  dubGroup?: string
-}
-
-/** Тип главы */
-export type ManifestChapterType = 'chapter' | 'op' | 'ed' | 'recap' | 'preview'
-
-/** Глава в манифесте */
-export interface ManifestChapter {
-  startMs: number
-  endMs: number
-  title: string | null
-  type: ManifestChapterType
-  skippable: boolean
-}
-
-/** Информация об эпизоде */
-export interface ManifestInfo {
-  animeName: string
-  seasonNumber: number
-  episodeNumber: number
-  episodeName?: string
-}
-
-/** Переопределение дорожки (для передачи language/dubGroup из UI в манифест) */
-export interface TrackOverride {
-  /** Индекс потока (или -1 для внешних) */
-  streamIndex: number
-  /** Язык (ISO 639-1) */
-  language?: string
-  /** Группа озвучки/субтитров */
-  dubGroup?: string
-}
-
-/** Превью кадры (sprite sheet) */
-export interface ManifestThumbnails {
-  vttCid: string
-  spriteCid: string
-}
-
-/** Информация о кодировании */
-export interface ManifestEncodingInfo {
-  profileName: string
-  codec: string
-  cq: number
-  preset: string
-  rateControl: string
-  tune?: string
-  multipass?: string
-  spatialAq?: boolean
-  temporalAq?: boolean
-  aqStrength?: number
-  gopSize?: number
-  lookahead?: number
-  bRefMode?: string
-  force10Bit?: boolean
-  vmafScore?: number
-  encoderType: 'gpu' | 'cpu'
-  hardwareModel?: string
-  ffmpegVersion?: string
-  ffmpegCommand?: string
-  transcodeDurationMs?: number
-  activeGpuWorkers?: number
-  videoMaxConcurrent?: number
-  audioMaxConcurrent?: number
-  sourceSize?: number
-  transcodedSize?: number
-  compressionRatio?: number
-  sourceCodec?: string
-  sourceWidth?: number
-  sourceHeight?: number
-  sourceBitrate?: number
-  sourceBitDepth?: number
-  /** Применённый crop-фильтр (`crop=W:H:X:Y`) — задан, только если автообрезка чёрных полос сработала */
-  cropFilter?: string
-}
-
-/** Полный манифест эпизода */
-export interface EpisodeManifest {
-  version: 1
-  episodeId: string
-  info: ManifestInfo
-  video: ManifestVideo
-  audioTracks: ManifestAudioTrack[]
-  subtitleTracks: ManifestSubtitleTrack[]
-  /** @deprecated Главы инлайн (для обратной совместимости) */
-  chapters: ManifestChapter[]
-  /** CID документа глав (ChaptersDocument) в IPFS */
-  chaptersCid?: string
-  /** @deprecated Превью инлайн (для обратной совместимости) */
-  thumbnails?: ManifestThumbnails
-  /** CID документа превью (ThumbnailsDocument) в IPFS */
-  thumbnailsCid?: string
-  navigation?: {
-    nextEpisode?: { id: string; manifestPath: string }
-    prevEpisode?: { id: string; manifestPath: string }
-  }
-  /** @deprecated Кодирование инлайн (для обратной совместимости) */
-  encoding?: ManifestEncodingInfo
-  /** CID документа кодирования (EncodingDocument) в IPFS */
-  encodingCid?: string
-  generatedAt: string
-}
+export type { TrackOverride } from '../../../shared/types/manifest'
 
 // === AnimeManifest Types ===
 
@@ -741,185 +630,33 @@ export interface GenerateAnimeManifestResult {
   error?: string
 }
 
-/** Ссылка на эпизод в AnimeManifest */
-export interface AnimeManifestEpisode {
-  number: number
-  season?: number
-  name?: string
-  manifestCid: string
-  videoCid?: string
-  size: number
-  durationMs?: number
-}
-
-/** Жанр/Тема в AnimeManifest */
-export interface AnimeManifestGenre {
-  name: string
-  nameRu?: string
-}
-
-/** Студия в AnimeManifest */
-export interface AnimeManifestStudio {
-  /** Shikimori ID студии */
-  id?: number
-  name: string
-  /** URL логотипа (legacy, внешняя ссылка) */
-  imageUrl?: string
-  /** CID логотипа в IPFS */
-  imageCid?: string
-}
-
-/** Персона в AnimeManifest */
-export interface AnimeManifestPerson {
-  /** Shikimori ID персоны */
-  id?: number
-  name: string
-  nameRu?: string
-  role: string
-  /** URL изображения (legacy, внешняя ссылка) */
-  imageUrl?: string
-  /** CID изображения в IPFS */
-  imageCid?: string
-}
-
-/** Персонаж в AnimeManifest */
-export interface AnimeManifestCharacter {
-  /** Shikimori ID персонажа */
-  id?: number
-  name: string
-  nameRu?: string
-  role?: string
-  /** URL изображения (legacy, внешняя ссылка) */
-  imageUrl?: string
-  /** CID изображения в IPFS */
-  imageCid?: string
-  voiceActor?: {
-    id?: number
-    name: string
-    nameRu?: string
-  }
-}
-
-/** Внешние ID */
-export interface AnimeManifestExternalIds {
-  mal?: number
-  anilist?: number
-  shikimori?: number
-  anidb?: number
-}
-
-/** Внешняя ссылка */
-export interface AnimeManifestExternalLink {
-  kind: string
-  url: string
-}
-
-/** Видео материал */
-export interface AnimeManifestVideo {
-  kind: string
-  name?: string
-  url: string
-  imageUrl?: string
-}
-
-/** AnimeManifest — Данные раздачи аниме для IPFS */
-export interface AnimeManifest {
-  version: 1
-  /** CID AnimeInfo в IPFS (метаданные аниме) */
-  animeInfoCid: string
-  /** Название (для поиска и отображения) */
-  name: string
-  /** CID EpisodesDocument в IPFS (список эпизодов) */
-  episodesCid: string
-  /** CID постера в IPFS */
-  posterCid?: string
-  /** CID FranchiseGraphDocument в IPFS (полный граф франшизы) */
-  franchiseGraphCid?: string
-  /** CID RelationsDocument в IPFS (связи с другими аниме) */
-  relationsCid?: string
-  /** BDRemux / Bluray Remux */
-  isBdRemux?: boolean
-  /** PeerId создателя */
-  creatorPeerId?: string
-  createdAt: string
-  updatedAt: string
-}
-
-/** Документ графа франшизы в IPFS */
-export interface FranchiseGraphDocument {
-  version: 1
-  rootShikimoriId: number
-  name: string
-  nodes: FranchiseGraphNode[]
-  links: FranchiseGraphLink[]
-}
-
-/** Узел графа франшизы */
-export interface FranchiseGraphNode {
-  id: number
-  name: string
-  kind: string
-  year: number | null
-  image_url: string
-  url: string
-  weight: number
-}
-
-/** Связь в графе франшизы */
-export interface FranchiseGraphLink {
-  source_id: number
-  target_id: number
-  relation: string
-  weight: number
-}
-
-/** Документ связей аниме в IPFS */
-export interface RelationsDocument {
-  version: 1
-  relations: AnimeManifestRelation[]
-}
-
-/** Связь с другим аниме */
-export interface AnimeManifestRelation {
-  targetShikimoriId: number
-  relationKind: string
-  targetName?: string
-  targetYear?: number
-  targetKind?: string
-  targetPosterUrl?: string
-}
+/**
+ * Ниже — те же канонические типы из `@letar/animatrona-types`, что использует main-процесс.
+ * Локальные копии были урезаны (у жанров не было id/slug, у externalIds — anidb/worldArt/
+ * kinopoisk), из-за чего IPC-контракт описывал меньше, чем реально приходит из main.
+ */
+export type {
+  AnimeManifest,
+  AnimeManifestCharacter,
+  AnimeManifestEpisode,
+  AnimeManifestExternalIds,
+  AnimeManifestExternalLink,
+  AnimeManifestGenre,
+  AnimeManifestPerson,
+  AnimeManifestRelation,
+  AnimeManifestStudio,
+  AnimeManifestVideo,
+  EpisodesDocument,
+  FranchiseGraphDocument,
+  FranchiseGraphLink,
+  FranchiseGraphNode,
+  RelationsDocument,
+} from '@letar/animatrona-types'
 
 // === AnimeInfo Types (каноничные неизменяемые метаданные) ===
 
 /** Каноничный документ с метаданными аниме */
-export interface AnimeInfo {
-  version: 1
-  name: string
-  originalName?: string
-  nameEn?: string
-  synonyms?: string[]
-  year?: number
-  kind?: string
-  ageRating?: string
-  duration?: number
-  source?: string
-  episodeCount?: number
-  status?: string
-  rating?: number
-  licensor?: string
-  nextEpisodeAt?: string
-  description?: string
-  genres?: AnimeManifestGenre[]
-  themes?: AnimeManifestGenre[]
-  studios?: AnimeManifestStudio[]
-  staff?: AnimeManifestPerson[]
-  characters?: AnimeManifestCharacter[]
-  fandubbers?: string[]
-  fansubbers?: string[]
-  externalIds: AnimeManifestExternalIds
-  externalLinks?: AnimeManifestExternalLink[]
-  videos?: AnimeManifestVideo[]
-}
+export type { AnimeInfo } from '@letar/animatrona-types'
 
 /** Результат генерации AnimeInfo */
 export interface GenerateAnimeInfoResult {
