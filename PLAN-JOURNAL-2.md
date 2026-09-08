@@ -1,4 +1,4 @@
-# PLAN-JOURNAL-2 — §52–§80
+# PLAN-JOURNAL-2 — §52–§81
 
 > Продолжение [PLAN-JOURNAL-1.md](/PLAN-JOURNAL-1.md). Карта всех частей и точка входа —
 > [PLAN.md](/PLAN.md), раздел «Журнал сессий».
@@ -1546,3 +1546,36 @@ submodule (`dsperevod`, `svoichuzhie`, `aprel8008`, `domwellbes`, `studio`, `dri
 `apps/dashboard/src/lib/auth.ts` дало ожидаемый ❌ с понятным сообщением, после отката — чисто
 зелёный прогон (16 приложений проверено), `git diff` пуст. `bun scripts/check-all.mjs --ci`
 подтверждён — новая проверка корректно помечена `(покрытие неполное)`.
+
+## §81 — аудит ручных debounce-таймеров: `useDebouncedCallback` не заведён, 5 мест переведены на существующий `useDebounce` (2026-09-08)
+
+Повод: в `@letar/hooks` есть только `useDebounce(value, delay)` (дебаунс значения) — при
+консолидации ручных таймеров в `animatrona-tracker` (`admin-client.tsx`, флаш batch-очереди
+модерации) выяснилось, что дебаунсера действия/колбэка нет. Замер по монорепо дал 7 мест с
+ручным `ref`+`setTimeout` debounce в пяти приложениях.
+
+**Триаж (до кода):** из 7 мест только 2 оказались реальным дебаунсом действия без наблюдаемого
+значения — `admin-client.tsx` (флаш очереди, оставлен ручным по решению с
+`animatrona-coordinator-dev`, тред 1402) и `CheckoutDraftSync` в `apps/aboi/src/app/[locale]/
+(shop)/checkout/_components/checkout-form.tsx` (дебаунсит подписку на `@letar/forms` store, не
+React state). Остальные 5 — обычный дебаунс значения (поисковая строка/query), просто
+реализованный вручную вместо `useDebounce`.
+
+**Решение: `useDebouncedCallback` не заводить.** Порог из задачи — 3+ места в группе действия;
+реально годных (за вычетом уже решённого `admin-client.tsx`) — 1. Заводить хук ради него было бы
+преждевременной абстракцией.
+
+**Переведены на существующий `useDebounce` (value+effect вместо ref+setTimeout):**
+`apps/aboi/.../pvz-picker.tsx` (поиск города СДЭК, submodule), `apps/animatrona/renderer/
+src/components/import/BundleAnimesPanel.tsx` (поиск на Shikimori), `apps/grandslamcup/src/app/
+_components/search-input.tsx` (URL-фильтр), `apps/grandslamcup/.../user-detail-client.tsx`
+(`PlayerLinkBlock`, поиск поэта без привязки), `apps/kami-key-the/renderer/src/editor/
+symbol-search.tsx` (поиск символа).
+
+`@letar/hooks` пришлось дополнительно подключить в двух приложениях, где его раньше не было:
+`aboi` (tsconfig `paths`, по конвенции остальных `@letar/*` в этом приложении — без
+node_modules-симлинка, как и `@letar/ui`/`@letar/consent` там же) и `kami-key-the` (Vite `resolve.
+alias` в `renderer/vite.config.ts`, по образцу уже существующего алиаса `@letar/ui`) — у
+`animatrona`/`grandslamcup` уже был подключён. `typecheck:tsgo`/`lint` зелёные на всех четырёх
+приложениях. Закоммичено 4 коммитами (aboi — сначала внутри submodule, затем bump SHA в letar),
+push не выполнялся.
