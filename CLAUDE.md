@@ -592,6 +592,10 @@ rollout-приложений после перехода s2/s3 на Traefik — 
 [server-provision](/.claude/docs/server-provision.md) · [server-recovery](/.claude/docs/server-recovery.md) ·
 [server-migration-letar](/.claude/docs/server-migration-letar.md) архив переезда ·
 [firewall](/.claude/docs/firewall.md) ⚠️ `ufw` не фильтрует порты Docker ·
+[nginx-referer-and-header-quirks](/.claude/docs/nginx-referer-and-header-quirks.md) ⚠️
+`valid_referers` внутри `include` не парсится (`directive is not allowed here`) — только
+литерал в файле или envsubst-шаблон; `proxy_ignore_headers` не убирает заголовок из ответа
+клиенту, нужен `proxy_hide_header` ·
 [backup-architecture](/.claude/docs/backup-architecture.md) ·
 [secret-manager](/.claude/docs/secret-manager.md) SOPS + age ·
 [sops-env-encrypt-input-path-matching](/.claude/docs/sops-env-encrypt-input-path-matching.md) ⚠️
