@@ -6,8 +6,10 @@
  * 2. `remux` — проблема только в контейнере, поток копируется байт в байт (секунды на серию);
  * 3. `audio-only` — перекодируется звук (AC3/DTS/TrueHD → AAC), видео копируется. Самый частый
  *    случай в аниме и почти бесплатный: звук считается в десятки раз быстрее реального времени;
- * 4. `video-and-audio` — Hi10P-видео нужно пережать в 8-битный H.264. Дорого, нагружает CPU/GPU,
- *    поэтому только когда иначе никак.
+ * 4. `video-and-audio` — Hi10P-видео нужно перекодировать. Целевой кодек — VP9 profile 2
+ *    (сохраняет 10-бит цвет, не «убивает» его в 8 бит) — Chromium декодирует его софтверно
+ *    (libvpx), без зависимости от GPU/системы, в отличие от Hi10P AVC, который не декодирует
+ *    вообще никогда. Дорого, нагружает CPU, поэтому только когда иначе никак.
  *
  * Функция чистая и не зависит от electron — тестируется обычным vitest, используется и в main
  * (строит команду ffmpeg), и в renderer (объясняет пользователю, что произойдёт).
@@ -57,7 +59,7 @@ export function buildTranscodePlan(
   const video = videoTracks[0]
   const videoNeedsTranscode = isHi10pVideo(video)
   if (videoNeedsTranscode) {
-    reasons.push('видео в 10-битном цвете (Hi10P) — пережимаем в 8-битный H.264')
+    reasons.push('видео в 10-битном цвете (Hi10P) — перекодируем в VP9, сохраняя 10 бит')
   }
 
   const audio = audioTrackIndex === undefined ? pickDefaultTrack(audioTracks) : audioTracks[audioTrackIndex]
@@ -99,8 +101,12 @@ export function buildTranscodePlan(
  * Аргументы кодеков для ffmpeg по плану. Контейнер/вывод сюда не входят — их задаёт вызывающий
  * (HLS-сегменты, прогрессивный fMP4 и т.п.).
  *
- * `-crf 20` + `preset veryfast` — компромисс для потокового транскода на лету: качество, при
- * котором артефакты не заметны на аниме, при скорости выше реального времени на обычном CPU.
+ * Видео (Hi10P → VP9 profile 2, 10-бит): `-crf 30 -b:v 0` — VBR с постоянным качеством
+ * (аналог x264 `-crf`, шкала VP9 другая — 0..63), `-deadline realtime -cpu-used 5 -row-mt 1` —
+ * компромисс скорость/сжатие ради приемлемого времени ожидания, проверено эмпирически на
+ * реальном Hi10P-файле (~6x реалтайма на обычном CPU, PLAN.md). До 2026-09-08 здесь стоял
+ * `libx264 -preset veryfast -crf 20 -pix_fmt yuv420p` — приводил Hi10P к 8-битному цвету, что
+ * само по себе не нужно (проблема была в кодеке, не в глубине цвета).
  * Аппаратные энкодеры сюда намеренно не подставляются: у них другой набор ключей на каждого
  * вендора, а промах по доступности даёт падение ffmpeg вместо картинки.
  */
@@ -108,7 +114,24 @@ export function buildCodecArgs(plan: TranscodePlan): string[] {
   const args: string[] = []
 
   if (plan.videoAction === 'transcode') {
-    args.push('-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-pix_fmt', 'yuv420p')
+    args.push(
+      '-c:v',
+      'libvpx-vp9',
+      '-pix_fmt',
+      'yuv420p10le',
+      '-profile:v',
+      '2',
+      '-crf',
+      '30',
+      '-b:v',
+      '0',
+      '-deadline',
+      'realtime',
+      '-cpu-used',
+      '5',
+      '-row-mt',
+      '1',
+    )
   } else {
     args.push('-c:v', 'copy')
   }

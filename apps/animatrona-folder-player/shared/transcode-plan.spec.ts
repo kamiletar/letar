@@ -164,18 +164,24 @@ describe('buildCodecArgs', () => {
     reasons: [],
   }
 
-  it('videoAction: copy — есть -c:v copy, libx264 не встречается', () => {
+  it('videoAction: copy — есть -c:v copy, libvpx-vp9 не встречается', () => {
     const args = buildCodecArgs({ ...basePlan, videoAction: 'copy' })
     expect(args).toEqual(expect.arrayContaining(['-c:v', 'copy']))
-    expect(args).not.toContain('libx264')
+    expect(args).not.toContain('libvpx-vp9')
   })
 
-  it('videoAction: transcode — есть libx264 и -pix_fmt yuv420p (приведение Hi10P к 8 битам)', () => {
+  it('videoAction: transcode — есть libvpx-vp9, profile 2 и -pix_fmt yuv420p10le (10 бит сохраняется)', () => {
     const args = buildCodecArgs({ ...basePlan, videoAction: 'transcode' })
-    expect(args).toContain('libx264')
+    expect(args).toContain('libvpx-vp9')
+    expect(args).not.toContain('libx264')
+
     const pixFmtIndex = args.indexOf('-pix_fmt')
     expect(pixFmtIndex).toBeGreaterThanOrEqual(0)
-    expect(args[pixFmtIndex + 1]).toBe('yuv420p')
+    expect(args[pixFmtIndex + 1]).toBe('yuv420p10le')
+
+    const profileIndex = args.indexOf('-profile:v')
+    expect(profileIndex).toBeGreaterThanOrEqual(0)
+    expect(args[profileIndex + 1]).toBe('2')
   })
 
   it('audioAction: transcode — есть aac и -ac 2', () => {
