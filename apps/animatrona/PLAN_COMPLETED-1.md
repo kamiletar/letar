@@ -695,3 +695,37 @@ consolidation`) — консолидация трёх независимых д�
 `nx db:push animatrona` подтвердил «database is already in sync» (только перенос объявлений между
 файлами, набор значений/полей не менялся структурно — миграция не нужна). `typecheck:tsgo`/`lint`
 — зелёные. Коммит `45771cd6`.
+
+## 2026-09-09: §169 PLAN-INFRA-6.md — дописаны недостающие `dependencies` в package.json
+
+Задача из репозиторной находки (`PLAN-INFRA-6.md` §169, разрыв графа Nx у 22 из 56 приложений) —
+7 из 8 импортируемых `@letar/*`-библиотек (`forms`, `animatrona-types`, `video-player-core`,
+`animatrona-utils`, `video-player-react`, `ui`, `animatrona-ui`) не были объявлены ни в
+`dependencies`, ни в `nx.implicitDependencies` `apps/animatrona/package.json`.
+
+**Уточнение к формулировке §169.** Эмпирическая проверка (`nx show projects --affected
+--files=libs/<lib>/src/index.ts` по каждой библиотеке) показала, что `nx affected` уже ДО правки
+корректно видел `animatrona`/`animatrona-main`/`animatrona-renderer` затронутыми — граф строится
+не только из `package.json`, но и парсингом TS-импортов плагином `@nx/js` по всему воркспейсу.
+Заявление §169 «граф Nx не видел эти рёбра» для `animatrona` не подтвердилось. Реальная проблема
+уже, чем описано: `package.json` не отражал фактические зависимости, из-за чего в
+`node_modules/@letar/` не было симлинков для этих 7 библиотек (bun isolated linker создаёт их
+только по записи в `dependencies`) — риск для любого пути резолва мимо `tsconfig.paths`
+(`libs.md` § «Оговорка неверна для библиотеки...»).
+
+**Правка сделана не вручную.** Во время верификационного `nx build animatrona-main` исполнитель
+`@nx/esbuild:esbuild` (опция `updateBuildableProjectDepsInPackageJson`) сам дописал 7 недостающих
+`dependencies` в `apps/animatrona/package.json` и триггернул `bun install` — симлинки появились,
+`bun.lock` обновился. Восьмая, `@letar/animatrona-shared`, используется только в
+`apps/animatrona/mobile-ui` (отдельный Nx-проект `animatrona-mobile-ui`, резолвится через явные
+alias'ы `vite.config.ts`, не через `node_modules`) — вне уже сложившихся границ этой библиотеки.
+
+Проверено: `typecheck:tsgo`/`lint`/`build animatrona-renderer`/`build animatrona-main` — зелёные;
+`test` — 134/135 (единственный фейл — локально сломанная установка Electron, `Файл существует
+(os error 80)`, не связано с этой правкой); `bun scripts/check-all.mjs --group=deps` — зелёный.
+Коммит `9420b6b3` (`apps/animatrona/package.json` + `bun.lock`, multi-scope через
+`GIT_ALLOW_MULTI_SCOPE_COMMIT=1` — pre-commit-хук иначе не даёт коммитить пару package.json+lock
+одним коммитом).
+
+Остальные 21 приложение из §169 не тронуты (по границам задачи — часть приватные submodule,
+чинить не в эту сессию).
