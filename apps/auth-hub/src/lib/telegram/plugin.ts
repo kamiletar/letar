@@ -13,7 +13,9 @@
  * Переменные окружения:
  *   TELEGRAM_BOT_TOKEN       — токен бота от @BotFather (обязателен)
  *   TELEGRAM_BOT_USERNAME    — @username бота без @ (обязателен)
- *   TELEGRAM_WEBHOOK_SECRET  — секрет для X-Telegram-Bot-Api-Secret-Token (рекомендован)
+ *   TELEGRAM_WEBHOOK_SECRET  — секрет для X-Telegram-Bot-Api-Secret-Token (обязателен: без него
+ *                              вебхук отклоняет все запросы — путь предсказуем, это единственный
+ *                              барьер против форджированных вызовов извне Telegram)
  */
 
 import { createAuthEndpoint, getSessionFromCtx } from 'better-auth/api'
@@ -107,10 +109,12 @@ export function telegramPlugin(): BetterAuthPlugin {
       // Telegram вызывает этот эндпоинт при каждом сообщении боту.
       // Обрабатывает только /start <token> в приватном чате.
       telegramWebhook: createAuthEndpoint('/telegram/webhook', { method: 'POST' }, async (ctx) => {
-        // Валидация секрета — защищает от поддельных вызовов
+        // Валидация секрета — защищает от поддельных вызовов. Fail-closed: секрет не настроен →
+        // отклоняем всё, а не пропускаем — auth-hub раздаёт сессии для всех приложений монорепо,
+        // забытая переменная не должна тихо открывать канал привязки Telegram-аккаунта.
         const secretHeader = ctx.headers?.get('x-telegram-bot-api-secret-token')
         const expectedSecret = process.env.TELEGRAM_WEBHOOK_SECRET
-        if (expectedSecret && secretHeader !== expectedSecret) {
+        if (!expectedSecret || secretHeader !== expectedSecret) {
           return ctx.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
