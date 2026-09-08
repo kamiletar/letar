@@ -10,6 +10,7 @@
  * трекер сам резолвит все метаданные через IPFS gateway.
  */
 
+import type { RelationKind } from '@/generated/prisma'
 import type {
   AnimeInfo,
   AnimeManifest,
@@ -168,7 +169,7 @@ export async function resolveFranchiseKey(manifest: AnimeManifest): Promise<stri
 /** Связь из franchise graph */
 export interface ResolvedRelation {
   targetShikimoriId: number
-  relationKind: string
+  relationKind: RelationKind
 }
 
 /**
@@ -192,6 +193,6 @@ export async function resolveRelations(
     .filter((link) => link.source_id === shikimoriId)
     .map((link) => ({
       targetShikimoriId: link.target_id,
-      relationKind: link.relation ?? 'OTHER',
+      relationKind: (link.relation ?? 'OTHER').toUpperCase() as RelationKind,
     }))
 }

@@ -7,6 +7,23 @@
 
 ---
 
+## [0.11.22] — 2026-09-08
+
+### Изменено
+
+- **`AnimeRelation.relationKind` переведён со `String` на общий `enum RelationKind`**
+  (`libs/zenstack-fragments/src/animatrona.zmodel`, дедуп с `animatrona`). До этого трекер писал
+  значения в нижнем регистре (`sequel`, `prequel`...) вперемешку с фоллбэком `OTHER` в верхнем —
+  теперь везде UPPER_SNAKE_CASE, как у Desktop. Прод-данные (656 строк) нормализованы вручную
+  (`UPDATE ... SET relationKind = UPPER(relationKind)`) перед миграцией.
+- **`ipfs-resolver.ts` → `resolveRelations()`** теперь нормализует `link.relation` в верхний
+  регистр перед записью — раньше писал как есть из Shikimori (нижний регистр).
+
+### Исправлено
+
+- **`relationLabels` в `related-section.tsx`** не содержал ключ `character` — 8 реальных связей
+  на проде рендерились как «Другое». Добавлен лейбл «Персонажи».
+
 ## [0.11.21] — 2026-09-08
 
 ### Изменено

@@ -22,6 +22,7 @@ const relationLabels: Record<string, { label: string; colorPalette: string }> = 
   parent_story: { label: 'Основная история', colorPalette: 'teal' },
   alternative_setting: { label: 'Альт. сеттинг', colorPalette: 'yellow' },
   alternative_version: { label: 'Альт. версия', colorPalette: 'yellow' },
+  character: { label: 'Персонажи', colorPalette: 'pink' },
   other: { label: 'Другое', colorPalette: 'gray' },
 }
 

@@ -3,6 +3,7 @@ import "./auth"
 import "./distribution"
 import "./pinning"
 import "./library"
+import "../../../libs/zenstack-fragments/src/animatrona"
 
 // ============================================================================
 // ANIME — Аниме из Animatrona
@@ -150,8 +151,8 @@ model AnimeRelation {
   targetAnime       Anime?  @relation("TargetRelations", fields: [targetAnimeId], references: [id], onDelete: SetNull)
   targetAnimeId     String?
 
-  /// Тип связи: SEQUEL, PREQUEL, SIDE_STORY, PARENT_STORY, SUMMARY, FULL_STORY, SPIN_OFF, ADAPTATION, OTHER
-  relationKind      String
+  /// Тип связи
+  relationKind      RelationKind
 
   @@index([animeId])
   @@index([targetShikimoriId])
