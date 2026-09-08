@@ -2,6 +2,14 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## Починка графа Nx (2026-09-09)
+
+`package.json`: `@letar/auth`, `@letar/email`, `@letar/forms` реально импортируются в коде, но
+не были объявлены ни в `dependencies`, ни в `nx.implicitDependencies` — граф Nx не видел эти
+рёбра, `nx affected` не помечал auth-hub затронутым при изменениях в этих библиотеках. Добавлены
+в `dependencies` (`workspace:*`), по образцу фикса `animatrona-tracker` (см. `PLAN-INFRA-6.md`
+§169).
+
 ## Fail-open Telegram webhook secret (2026-09-08)
 
 Аудит безопасности (повод — `apps/synth`, тот же класс, что `ALLOW_DEV_SESSION`) нашёл в

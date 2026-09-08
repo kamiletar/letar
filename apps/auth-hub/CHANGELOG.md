@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [0.7.20] - 2026-09-09
+
 ### Changed
 
 - Ручная проверка `TELEGRAM_WEBHOOK_SECRET` в `telegramWebhook` (better-auth плагин) заменена
@@ -17,6 +19,9 @@
   падало 2 теста из 10 на staging-гейте. Локаторы переведены на `[data-field-name="..."]`
   (паттерн `domwellbes-e2e`), email на `/sign-in` уточнён через `autocomplete="username webauthn"`
   (два поля с одинаковым `data-field-name` — LoginForm и MagicLinkForm). См. PLAN.md §18.7.1.
+- `package.json`: `@letar/auth`, `@letar/email`, `@letar/forms` не были объявлены ни в
+  `dependencies`, ни в `nx.implicitDependencies`, хотя реально импортируются — граф Nx не видел
+  эти рёбра. Добавлены в `dependencies` (`workspace:*`).
 
 ## [0.7.17] - 2026-09-01
 
