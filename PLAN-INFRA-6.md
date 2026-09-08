@@ -3538,3 +3538,18 @@ package.json решает — не разрыв `nx affected`, а отсутст
 отсутствие симлинков в `node_modules/@letar/` под изолированным линковщиком bun (риск для
 любого пути резолва мимо `tsconfig.paths`, см. `.claude/rules/libs.md` § «Оговорка неверна для
 библиотеки...» и `vitest-unlinked-workspace-lib-imports.md`).
+
+**2026-09-09: уточнение подтверждено ещё на трёх приложениях из списка, `.claude/rules/libs.md`
+поправлен.** Тот же замер (`nx show projects --affected --files=libs/<lib>/src/index.ts` ДО
+правки package.json) прогнан на `kami` (4/4 недостающих: `auth`, `email`, `forms`, `ui`),
+`mandala` (5/5: `admin-ui`, `auth`, `email`, `pin-auth`, `query-provider`) и `dashboard` (1/1:
+`auth`) — итого 10/10 подтверждают: граф Nx уже видел ребро без единой записи о библиотеке ни в
+`dependencies`, ни в `implicitDependencies`. Раздел «Подключение к приложению» в
+`.claude/rules/libs.md` переформулирован — обязательность `dependencies` обоснована симлинком
+bun, не защитой `nx affected`. Разбор — новый файл
+[nx-affected-source-based-inference.md](/.claude/docs/nx-affected-source-based-inference.md).
+⚠️ **Не проверено:** динамический `import()`, реэкспорт через баррель другого пакета, и
+остальные 17 приложений исходного списка. ⚠️ **Найдено попутно, не починено:** комментарий в
+`scripts/check-nx-graph-deps.mjs` (строки 8 и 16) всё ещё апеллирует к «`nx affected` не
+помечает приложение затронутым» — та же устаревшая формулировка, что была в исходном поводе
+этого раздела; заведено отдельным чипом (`spawn_task`), не тронуто в этой сессии.
