@@ -3141,3 +3141,105 @@ serialization-флакиность (`40001`) в `src/lib/projects/**` — уже
 находка соответствует уже описанному классу, не новому).
 
 Push submodule и корня не выполнен — ждёт отдельного одобрения владельца.
+
+## §162 — фрагменты `schema.zmodel` не были связаны с приложениями в графе Nx ✅ ЗАКРЫТО (2026-09-08)
+
+**Проблема.** `libs/zenstack-fragments/src/*.zmodel` подключаются в приложениях **файловым
+путём** внутри `schema.zmodel` (`import "../../libs/zenstack-fragments/src/better-auth"`), а не
+через TS-алиас или зависимость пакета. Ни ребра графа, ни таргета, за которые Nx мог бы
+зацепиться. Замер до:
+
+```
+nx show projects --affected --files=libs/zenstack-fragments/src/better-auth.zmodel
+→ ["@letar/zenstack-fragments"]   # приложений в списке нет
+```
+
+Плагин форм для сравнения связан корректно — у `zenstack:generate` есть `dependsOn` на
+`@letar/zenstack-form-plugin:build`, и его правка потребителей как affected помечает.
+
+Практическое следствие: после правки общего фрагмента список потребителей приходилось помнить
+руками. Порчи артефактов не происходило только потому, что `zenstack:generate` объявлен с
+`cache: false` — прогон всегда настоящий, но узнать, что прогон **нужен**, Nx не помогал.
+
+**Потребители (грепом, не по памяти — часть в приватных submodule, `git grep` их не видит):**
+
+```bash
+grep -rn --include=*.zmodel "zenstack-fragments" apps/
+```
+
+| Фрагмент             | Потребители                                         |
+| -------------------- | --------------------------------------------------- |
+| `better-auth.zmodel` | `aprel8008`, `archetest`, `dashboard`, `domwellbes` |
+| `animatrona.zmodel`  | `animatrona` (`schema/models/federation.zmodel`)    |
+
+⚠️ Импортёров больше, чем приложений: `domwellbes` импортирует `better-auth` дважды — в корневом
+`schema.zmodel` и в `schema/auth.zmodel` (импорты не транзитивны).
+
+**Фикс — две правки у каждого потребителя:**
+
+1. `@letar/zenstack-fragments` в `nx.implicitDependencies` его `package.json`. Симлинк в
+   `node_modules` и запись в `dependencies` не нужны — фрагмент не импортируется из TS, поэтому
+   оговорка про `TS2307` из [libs.md § Подключение к приложению](/.claude/rules/libs.md) на него
+   не распространяется (в отличие от §161, где именно она и была причиной).
+2. Путь к фрагменту в `inputs` у `zenstack:generate`:
+   `{workspaceRoot}/libs/zenstack-fragments/src/*.zmodel`.
+
+Проверено, что Nx **объединяет** `implicitDependencies` из `package.json` и `project.json`
+(bare-имя `zenstack-form-plugin` из `project.json` animatrona нормализуется в
+`@letar/zenstack-form-plugin` и добавляется к списку из `package.json`) — правка одного файла
+безопасна, второй список не перетирается.
+
+**Замер после:**
+
+```
+nx show projects --affected --files=libs/zenstack-fragments/src/better-auth.zmodel
+→ ["@letar/zenstack-fragments","animatrona","animatrona-renderer","animatrona-main",
+   "animatrona-e2e","domwellbes","domwellbes-e2e","aprel8008","archetest","archetest-e2e",
+   "dashboard"]
+```
+
+**Что осталось осознанно: гранулярность проектная, не файловая.** `implicitDependencies` — ребро
+«проект → проект», поэтому оба замера (`better-auth.zmodel` и `animatrona.zmodel`) возвращают
+один и тот же список. Over-approximation безопасна (потребитель не может быть пропущен), но
+шумна — лишние приложения попадают в `nx affected`, а значит и в деплой по affected. Файловая
+точность потребовала бы своего Nx-плагина с `createDependencies`, разбирающего `import` внутри
+`.zmodel`; два фрагмента и пять потребителей его не окупают.
+
+**Смежное, поправленное заодно (аудит всех 19 приложений с `zenstack:generate`):**
+
+- `inputs` перечисляли только `{projectRoot}/schema.zmodel`, поэтому у **семи** приложений с
+  многофайловой схемой доменные файлы не входили в inputs вовсе. Добавлены
+  `{projectRoot}/schema/**/*.zmodel` (`animatrona`, `animatrona-tracker`, `domwellbes`,
+  `grandslamcup`, `kami`) и `{projectRoot}/models/**/*.zmodel` (`aboi`, `driving-school`).
+  ⚠️ Последние два в исходной постановке задачи не значились — у них каталог называется
+  `models/`, а не `schema/`, и глоб по `schema/` их не покрывает.
+- Пяти приложениям (`animatrona`, `aprel8008`, `driving-school`, `form-develop-app`,
+  `label-printer-desktop`) `inputs` добавлен — его не было вовсе.
+- `animatrona` и `label-printer-desktop` получили явный `cache: false`. Таргет и так не
+  кешировался (ни `cache: true` у проекта, ни `targetDefaults` для `zenstack:generate` нет) —
+  это запись уже действовавшего поведения, а не смена. Теперь `cache: false` у всех 19.
+
+**`targetDefaults` для `zenstack:generate` заводить НЕ нужно — проверено, решение отрицательное.**
+`dependsOn` на `@letar/zenstack-form-plugin` продублирован у 14 приложений не по недосмотру:
+ровно эти 14 подключают `plugin formSchema` в своём `schema.zmodel`, а пять оставшихся
+(`aprel8008`, `archetest`, `auth-hub`, `dashboard`, `time`) — нет, и `targetDefaults` навязал бы
+им сборку плагина. `inputs`/`outputs` тоже неоднородны (разные каталоги схемы; у
+`driving-school` вывод вообще в `libs/driving-school-db`), а проектный `inputs` дефолт из
+`targetDefaults` не дополняет, а **перекрывает**. Общего остаётся `cache: false` и `metadata` —
+ради этого дефолт не окупается.
+
+**Верификация.** `nx zenstack:generate archetest` и `nx zenstack:generate dashboard` — зелёные,
+`git status` после прогона чист (дрейфа сгенерированной схемы нет). `bun scripts/check-all.mjs` —
+в том же состоянии, что и до правок: `implicit-deps` зелёный, единственный красный gate
+`transpile-packages` пред-существующий и не связан (4 посторонних приложения,
+`@letar/zenstack-fragments` в его выводе не фигурирует, файлы в `src/` не трогались).
+
+Документация: раздел «⚠️ Ловушка: Nx не знает про зависимость от ФРАГМЕНТА» в
+[zenstack-shared-fragments-across-apps](/.claude/docs/zenstack-shared-fragments-across-apps.md)
+переписан (ловушка закрыта, оставшаяся гранулярность описана), индексная строка в `CLAUDE.md`
+обновлена — заодно снято устаревшее утверждение «form-плагин молча теряет все поля миксина»
+(закрыто в v4.0.1 2026-09-08, индекс за доком не поспел).
+
+Коммиты: `d14dd7a` (aboi), `b490ef2` (driving-school), `9e22849` (aprel8008), `be1e344`
+(domwellbes), `b274e6ea` (letar). Push submodule и корня не выполнен — ждёт отдельного
+одобрения владельца.
