@@ -304,6 +304,9 @@
         "{projectRoot}/schema/**/*.zmodel",
         "{workspaceRoot}/libs/zenstack-fragments/src/*.zmodel"
       ],
+      "outputs": [
+        "{projectRoot}/renderer/src/generated"
+      ],
       "cache": false
     },
     "db:push": {
