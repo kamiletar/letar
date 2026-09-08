@@ -3315,3 +3315,31 @@ submodule не существуют вовсе — конфликта по по�
 **Практическое следствие (уже действовавшее, теперь явно записано):** для `dsperevod`,
 `svoichuzhie`, `aprel8008` `nx affected -t e2e` не запускает e2e автоматически ни локально, ни
 в CI — при правке одного из этих трёх приложений нужно гонять `nx e2e <app>-e2e` явно.
+
+## §165 — красный gate `transpile-packages` закрыт (4 приложения) ✅ ЗАКРЫТО (2026-09-08)
+
+**Проблема.** Накопленный долг из §140(4)/§141/§144, мешал отличать новые поломки от старых при
+каждом прогоне `check-all.mjs` (лишний ручной шаг «убедиться, что красный именно этот, а не
+новый» — упомянут в самой заявке на эту задачу по §162).
+
+**Прогон `--only=transpile-packages` на 2026-09-08 показал 4 приложения:**
+
+- `animatrona-tracker` — не хватало `@letar/image-upload`
+- `domwellbes` (приватный submodule) — не хватало `@letar/data-export`, `@letar/query-provider`,
+  `@letar/slug-resolver`, `@letar/undo-toast`, `@letar/url-query-state`
+- `form-docs` — не хватало `@letar/forms-core`
+- `kami-key-the-landing` — не хватало `@letar/github-releases`
+
+**Фикс:** добавлены недостающие пакеты в массив `transpilePackages` каждого `next.config.*`.
+Как и в §140/§141/§144 — расхождение соглашения, не поломка сборки (Next читает наличие ключа
+`transpilePackages`, а не его содержимое, см.
+[transpile-packages-array-presence-not-content](/.claude/docs/transpile-packages-array-presence-not-content.md)).
+
+**Верификация:** `nx build` на всех четырёх приложениях — зелёный (проверено ДО и ПОСЛЕ правки,
+подтверждает, что сборка не была сломана). `bun scripts/check-all.mjs --only=transpile-packages`
+и полный `bun scripts/check-all.mjs` — все gate зелёные, остались только два известных warn-долга
+(`submodule-gitignore`, `doc-counts`), не связанных с этой задачей.
+
+**Коммиты:** `d26aaac` внутри submodule `domwellbes`, `9e0e798f` в letar (bump SHA `domwellbes` +
+три остальных `next.config.*`, `GIT_ALLOW_MULTI_SCOPE_COMMIT=1` — четыре разных приложения,
+осознанно). Не запушено — ждёт одобрения владельца.
