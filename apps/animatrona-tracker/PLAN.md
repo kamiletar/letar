@@ -126,7 +126,18 @@ HMR) только для лёгких уведомлений (счётчик н�
 - [ ] **`/sync-env` OIDC vars** — переменные `BETTER_AUTH_OIDC_ISSUER` и OIDC client ID/secret
       добавлены вручную на s2, но не попали в локальный `.env.docker.enc`. Нужно: `/sync-env pull
       animatrona-tracker` → re-encrypt SOPS
-- [ ] **Кастомный IPFS Gateway в настройках** (Фаза 1 MVP, P3)
+- [x] **Кастомный IPFS Gateway в настройках** — сделано 2026-09-08. Бэкенд (`User.customGateway`,
+      `GET/PATCH /api/profile/settings`, `getGateway()` в `lib/ipfs.ts`) уже существовал, но нигде
+      не применялся: в профиле не было поля ввода, а все вызовы `getIpfsUrl`/`getVideoUrl` по
+      приложению не передавали `userSettings`. Добавлено: поле в `/profile` (таб «Настройки») с
+      debounce-сохранением; клиентский хук `useIpfsGateway()` (`lib/use-ipfs-gateway.ts`, читает
+      `customGateway` из `useSession()` — better-auth `additionalFields`) подключён во все
+      клиентские точки построения IPFS URL (`episode-card`, `metadata-section`,
+      `encoding-info-dialog`, `tracker-video-player` через новый `useMediaUrlHelpers()` в
+      `lib/media-url.ts`); серверный fallback-прокси `/api/ipfs/[...path]` тоже учитывает
+      `customGateway` из сессии. После сохранения gateway `authClient.getSession({
+      disableCookieCache: true })` форсирует обновление сессии — новое значение подхватывается
+      без перезагрузки страницы.
 - [ ] **PWA / Offline support** — Service Worker + offline fallback page
 - [ ] **Уведомления о новых эпизодах**
 - [ ] **Подписка на пользователей**

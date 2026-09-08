@@ -10,7 +10,7 @@
  * - Индикаторы-точки текущего preview
  */
 
-import { getIpfsUrl } from '@/lib/ipfs'
+import { useIpfsGateway } from '@/lib/use-ipfs-gateway'
 import { Box, HStack, IconButton, Image } from '@chakra-ui/react'
 import { EpisodeCardBase } from '@letar/animatrona-ui'
 import { LightboxViewer } from '@letar/ui'
@@ -60,6 +60,7 @@ export const EpisodeCard = memo(function EpisodeCard({
   const [encodingInfoOpen, setEncodingInfoOpen] = useState(false)
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const { getIpfsUrl } = useIpfsGateway()
 
   // Hover preview — переключаем скриншоты каждые 500ms
   useEffect(() => {
@@ -116,7 +117,7 @@ export const EpisodeCard = memo(function EpisodeCard({
         src: getIpfsUrl(cid),
         alt: `Эпизод ${number} — кадр ${i + 1}`,
       })),
-    [screenshotCids, number],
+    [screenshotCids, number, getIpfsUrl],
   )
 
   return (

@@ -7,7 +7,7 @@
  * Показывает: кодек, разрешение, CQ, preset, размеры, encoder.
  */
 
-import { getIpfsUrl } from '@/lib/ipfs'
+import { useIpfsGateway } from '@/lib/use-ipfs-gateway'
 import { Box, CloseButton, DataList, Dialog, HStack, Portal, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useCallback, useEffect, useState } from 'react'
 import { LuCpu, LuInfo, LuMonitor, LuVideo } from 'react-icons/lu'
@@ -52,6 +52,7 @@ function formatSize(bytes: number): string {
 }
 
 export function EncodingInfoDialog({ open, onOpenChange, episodeNumber, directoryCid }: EncodingInfoDialogProps) {
+  const { getIpfsUrl } = useIpfsGateway()
   const [data, setData] = useState<EncodingData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -76,7 +77,7 @@ export function EncodingInfoDialog({ open, onOpenChange, episodeNumber, director
     } finally {
       setLoading(false)
     }
-  }, [directoryCid, episodeNumber])
+  }, [directoryCid, episodeNumber, getIpfsUrl])
 
   useEffect(() => {
     // Легитимная синхронизация с внешней системой (загрузка manifest.json из IPFS gateway при

@@ -7,6 +7,20 @@
 
 ---
 
+## [0.11.20] — 2026-09-08
+
+### Добавлено
+
+- **Кастомный IPFS Gateway в настройках профиля реально применяется.** Бэкенд (`User.customGateway`,
+  `/api/profile/settings`, `getGateway()`) существовал и раньше, но нигде не применялся — не было
+  ни поля ввода в UI, ни передачи `userSettings` в вызовы `getIpfsUrl`/`getVideoUrl` по приложению.
+  Добавлены: поле ввода в `/profile` → «Настройки», клиентский хук `useIpfsGateway()`
+  (`lib/use-ipfs-gateway.ts`, источник — `useSession().user.customGateway`), `useMediaUrlHelpers()`
+  в `lib/media-url.ts` для плеера. Подключено во все точки построения IPFS URL: карточка эпизода,
+  метаданные аниме (студии/персонал/персонажи), диалог кодирования, видео-плеер, серверный
+  fallback-прокси `/api/ipfs/[...path]`. После сохранения — `authClient.getSession({
+  disableCookieCache: true })`, новый gateway применяется без перезагрузки страницы.
+
 ## [0.11.19] — 2026-09-08
 
 ### Исправлено

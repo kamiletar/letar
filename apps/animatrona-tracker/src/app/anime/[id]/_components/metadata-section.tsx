@@ -7,14 +7,18 @@
  * Адаптация из animatrona-web MetadataSection.
  */
 
-import { getIpfsUrl } from '@/lib/ipfs'
+import { useIpfsGateway } from '@/lib/use-ipfs-gateway'
 import { Badge, Box, Button, Flex, Heading, HStack, Image, SimpleGrid, Text, VStack, Wrap } from '@chakra-ui/react'
 import type { AnimeManifestCharacter, AnimeManifestPerson, AnimeManifestStudio } from '@letar/animatrona-types'
 import { useState } from 'react'
 import { LuChevronDown, LuChevronUp } from 'react-icons/lu'
 
 /** URL изображения: CID или legacy URL */
-function getImageUrl(imageCid?: string | null, imageUrl?: string | null): string | null {
+function getImageUrl(
+  getIpfsUrl: (cid: string) => string,
+  imageCid?: string | null,
+  imageUrl?: string | null,
+): string | null {
   if (imageCid) {
     return getIpfsUrl(imageCid)
   }
@@ -43,6 +47,7 @@ interface MetadataSectionProps {
 
 /** Секция студий */
 function Studios({ studios }: { studios: AnimeManifestStudio[] }) {
+  const { getIpfsUrl } = useIpfsGateway()
   return (
     <Box>
       <Heading size="sm" mb={3} color="fg.muted">
@@ -50,7 +55,7 @@ function Studios({ studios }: { studios: AnimeManifestStudio[] }) {
       </Heading>
       <HStack gap={3} flexWrap="wrap">
         {studios.map((studio) => {
-          const logoUrl = getImageUrl(studio.imageCid, studio.imageUrl)
+          const logoUrl = getImageUrl(getIpfsUrl, studio.imageCid, studio.imageUrl)
           return (
             <HStack key={studio.name} gap={2} bg="bg.subtle" px={3} py={2} borderRadius="md">
               {logoUrl && <Image src={logoUrl} alt={studio.name} h="24px" objectFit="contain" />}
@@ -67,6 +72,7 @@ function Studios({ studios }: { studios: AnimeManifestStudio[] }) {
 
 /** Секция персонала */
 function Staff({ staff }: { staff: AnimeManifestPerson[] }) {
+  const { getIpfsUrl } = useIpfsGateway()
   const sorted = [...staff].sort((a, b) => {
     const aIdx = KEY_ROLES.indexOf(a.role)
     const bIdx = KEY_ROLES.indexOf(b.role)
@@ -90,7 +96,7 @@ function Staff({ staff }: { staff: AnimeManifestPerson[] }) {
       </Heading>
       <SimpleGrid columns={{ base: 1, sm: 2 }} gap={2}>
         {visible.map((person, i) => {
-          const photoUrl = getImageUrl(person.imageCid, person.imageUrl)
+          const photoUrl = getImageUrl(getIpfsUrl, person.imageCid, person.imageUrl)
           return (
             <HStack key={`${person.name}-${person.role}-${i}`} gap={2} bg="bg.subtle" px={3} py={2} borderRadius="md">
               {photoUrl && (
@@ -114,6 +120,7 @@ function Staff({ staff }: { staff: AnimeManifestPerson[] }) {
 
 /** Секция персонажей */
 function Characters({ characters }: { characters: AnimeManifestCharacter[] }) {
+  const { getIpfsUrl } = useIpfsGateway()
   const [expanded, setExpanded] = useState(false)
   const INITIAL_COUNT = 6
   const visible = expanded ? characters : characters.slice(0, INITIAL_COUNT)
@@ -126,7 +133,7 @@ function Characters({ characters }: { characters: AnimeManifestCharacter[] }) {
       </Heading>
       <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} gap={2}>
         {visible.map((char, i) => {
-          const photoUrl = getImageUrl(char.imageCid, char.imageUrl)
+          const photoUrl = getImageUrl(getIpfsUrl, char.imageCid, char.imageUrl)
           return (
             <HStack key={`${char.name}-${i}`} gap={2} bg="bg.subtle" px={3} py={2} borderRadius="md">
               {photoUrl && <Image src={photoUrl} alt={char.name} boxSize="40px" objectFit="cover" borderRadius="md" />}

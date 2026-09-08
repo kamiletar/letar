@@ -28,7 +28,7 @@ import Link from 'next/link'
 import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { LuChevronLeft, LuChevronRight, LuLanguages, LuList, LuSkipForward } from 'react-icons/lu'
 
-import { getAudioUrl, getFontUrls, getSubtitleUrl, getVideoUrl, toPlayerUrl } from '@/lib/media-url'
+import { useMediaUrlHelpers } from '@/lib/media-url'
 
 import { useAudioSync } from '../_hooks/use-audio-sync'
 import { useChapterNav } from '../_hooks/use-chapter-nav'
@@ -170,18 +170,22 @@ export function TrackerVideoPlayer({
   }, [initialTrackMode])
 
   // Вычисляемые URL
-  const videoUrl = useMemo(() => getVideoUrl(manifest.video), [manifest.video])
+  const { getVideoUrl, getAudioUrl, getSubtitleUrl, getFontUrls, toPlayerUrl } = useMediaUrlHelpers()
+  const videoUrl = useMemo(() => getVideoUrl(manifest.video), [manifest.video, getVideoUrl])
   const usesSeparateAudio = !!manifest.audioTracks[audioTrackIndex]?.cid
   const currentAudioTrack = manifest.audioTracks[audioTrackIndex]
   const currentSubtitle = subtitleTrackIndex >= 0 ? manifest.subtitleTracks[subtitleTrackIndex] : null
   const audioUrl = useMemo(
     () => (usesSeparateAudio && currentAudioTrack ? getAudioUrl(currentAudioTrack) : null),
-    [usesSeparateAudio, currentAudioTrack],
+    [usesSeparateAudio, currentAudioTrack, getAudioUrl],
   )
-  const subtitleUrl = useMemo(() => (currentSubtitle ? getSubtitleUrl(currentSubtitle) : null), [currentSubtitle])
+  const subtitleUrl = useMemo(
+    () => (currentSubtitle ? getSubtitleUrl(currentSubtitle) : null),
+    [currentSubtitle, getSubtitleUrl],
+  )
   const fontUrls = useMemo(
     () => (currentSubtitle?.fonts ? getFontUrls(currentSubtitle.fonts) : []),
-    [currentSubtitle],
+    [currentSubtitle, getFontUrls],
   )
   const isAssSubtitle = currentSubtitle?.format === 'ass' || currentSubtitle?.format === 'ssa'
 
@@ -247,7 +251,7 @@ export function TrackerVideoPlayer({
   const spriteUrl = useMemo(() => {
     const thumbs = manifest.thumbnails
     return thumbs?.spriteCid ? toPlayerUrl(thumbs.spriteCid) : undefined
-  }, [manifest.thumbnails])
+  }, [manifest.thumbnails, toPlayerUrl])
 
   useEffect(() => {
     const thumbs = manifest.thumbnails
@@ -294,7 +298,7 @@ export function TrackerVideoPlayer({
     return () => {
       cancelled = true
     }
-  }, [manifest.thumbnails, manifest.thumbnailsCid])
+  }, [manifest.thumbnails, manifest.thumbnailsCid, toPlayerUrl])
 
   // AV1 проверка — определение поддержки браузером доступно только после монтирования
   // (MediaSource недоступен при SSR); дефолт true подобран так, чтобы не давать расхождения

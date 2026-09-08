@@ -10,9 +10,17 @@
 
 import { type NextRequest, NextResponse } from 'next/server'
 
+import { getSession } from '@/lib/auth'
 import { getIpfsUrl } from '@/lib/ipfs'
 
 type Params = Promise<{ path: string[] }>
+
+/** Настройки IPFS-gateway текущего пользователя (кастомный gateway, если задан) */
+async function getUserIpfsSettings() {
+  const session = await getSession()
+  const customGateway = session?.user.customGateway
+  return customGateway ? { customGateway } : undefined
+}
 
 export async function GET(request: NextRequest, { params }: { params: Params }) {
   const { path } = await params
@@ -22,7 +30,7 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
     return NextResponse.json({ error: 'CID обязателен' }, { status: 400 })
   }
 
-  const url = getIpfsUrl(cid)
+  const url = getIpfsUrl(cid, undefined, await getUserIpfsSettings())
 
   // Проксируем Range header для seek в видео
   const headers: HeadersInit = {}
@@ -70,7 +78,7 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
 export async function HEAD(_request: NextRequest, { params }: { params: Params }) {
   const { path } = await params
   const cid = path.join('/')
-  const url = getIpfsUrl(cid)
+  const url = getIpfsUrl(cid, undefined, await getUserIpfsSettings())
 
   try {
     const response = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(120_000) })

@@ -28,6 +28,7 @@ import {
   LuClock,
   LuDownload,
   LuFilm,
+  LuGlobe,
   LuHardDrive,
   LuKey,
   LuLanguages,
@@ -41,7 +42,7 @@ import {
 
 import { AnimeCard, type AnimeCardItem } from '@/app/_components/anime-card'
 import { toaster } from '@/app/_components/ui/toaster'
-import { signIn } from '@/lib/auth-client'
+import { authClient, signIn } from '@/lib/auth-client'
 import { AvatarUpload } from './avatar-upload'
 
 interface User {
@@ -154,6 +155,54 @@ export function ProfileClient({
       setIsSavingTrackMode(false)
     }
   }, [])
+
+  // Кастомный IPFS gateway
+  const [gatewayInput, setGatewayInput] = useState(user.customGateway ?? '')
+  const [gatewayError, setGatewayError] = useState<string | null>(null)
+  const [isSavingGateway, setIsSavingGateway] = useState(false)
+  const gatewayDebounceRef = useRef<ReturnType<typeof setTimeout>>(null)
+  const handleSaveGateway = useCallback(async (value: string) => {
+    const trimmed = value.trim()
+    if (trimmed) {
+      try {
+        new URL(trimmed)
+      } catch {
+        setGatewayError('Некорректный URL')
+        return
+      }
+    }
+    setGatewayError(null)
+    setIsSavingGateway(true)
+    try {
+      const res = await fetch('/api/profile/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customGateway: trimmed || null }),
+      })
+      if (!res.ok) {
+        setGatewayError('Не удалось сохранить')
+        return
+      }
+      // Сбрасываем cookie-кэш better-auth, чтобы useSession() в других компонентах
+      // (плеер, карточки эпизодов) сразу увидел новый customGateway без перезагрузки страницы
+      await authClient.getSession({ query: { disableCookieCache: true } })
+      toaster.success({ title: trimmed ? 'Gateway сохранён' : 'Gateway сброшен на стандартный' })
+    } catch {
+      setGatewayError('Ошибка сети')
+    } finally {
+      setIsSavingGateway(false)
+    }
+  }, [])
+  const handleGatewayInputChange = (value: string) => {
+    setGatewayInput(value)
+    setGatewayError(null)
+    if (gatewayDebounceRef.current) {
+      clearTimeout(gatewayDebounceRef.current)
+    }
+    gatewayDebounceRef.current = setTimeout(() => {
+      handleSaveGateway(value)
+    }, 800)
+  }
 
   // Обновление URL
   const updateParams = (updates: Record<string, string>) => {
@@ -510,6 +559,31 @@ export function ProfileClient({
                         Оригинал + субтитры
                       </Button>
                     </HStack>
+                  </Box>
+
+                  {/* Кастомный IPFS gateway */}
+                  <Box bg="bg.panel" p={6} borderRadius="xl" borderWidth="1px">
+                    <HStack mb={4}>
+                      <LuGlobe />
+                      <Heading size="sm">IPFS Gateway</Heading>
+                    </HStack>
+                    <Text fontSize="sm" color="fg.muted" mb={3}>
+                      Свой gateway вместо стандартного (gateway.letar.best) — например, локальный Kubo-нод. Оставьте
+                      пустым, чтобы использовать стандартный.
+                    </Text>
+                    <Input
+                      value={gatewayInput}
+                      onChange={(e) => handleGatewayInputChange(e.target.value)}
+                      placeholder="https://gateway.letar.best"
+                      size="sm"
+                      maxW="400px"
+                      disabled={isSavingGateway}
+                    />
+                    {gatewayError && (
+                      <Text fontSize="xs" color="fg.error" mt={2}>
+                        {gatewayError}
+                      </Text>
+                    )}
                   </Box>
 
                   {/* Привязанные аккаунты */}
