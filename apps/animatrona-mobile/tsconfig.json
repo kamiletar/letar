@@ -30,7 +30,7 @@
       "@letar/animatrona-types": ["../../libs/animatrona-types/src"],
       "@letar/animatrona-utils": ["../../libs/animatrona-utils/src"]
     },
-    "types": ["react-native"]
+    "types": ["react-native", "vitest/globals"]
   },
   "include": ["src/**/*", "index.js", "App.tsx"],
   "exclude": ["node_modules", "android", "ios"]

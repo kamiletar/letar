@@ -6,6 +6,17 @@
 
 ## [Unreleased]
 
+## [0.7.12] - 2026-09-08
+
+### Added
+
+- Заведено unit-тестирование (vitest) — до этого приложение не имело ни одного теста. Добавлены
+  `vitest.config.mts` (по образцу `animatrona-tv`: alias `@` → `src`, `environment: 'node'`) и
+  `vitest/globals` в `types` `tsconfig.json`. Первый тестовый файл —
+  `src/api/client.spec.ts`, 26 тестов на `src/api/client.ts` (кэш-адаптер, кэш-фоллбэк для
+  оффлайн-режима, приоритет скачанных файлов над серверным адаптером) — детали в
+  `PLAN_TESTING.md`.
+
 ## [0.7.11] - 2026-09-08
 
 ### Fixed

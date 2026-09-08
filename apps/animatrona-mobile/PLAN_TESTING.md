@@ -4,7 +4,7 @@
 
 | Тип         | Количество | Статус      |
 | ----------- | ---------- | ----------- |
-| Unit        | 0          | Планируется |
+| Unit        | 26         | В процессе  |
 | Integration | 0          | Планируется |
 | E2E         | 0          | Планируется |
 
@@ -25,7 +25,17 @@ nx typecheck animatrona-mobile
 
 ### Фаза 1: Unit тесты
 
-- [ ] API клиент (`src/api/client.ts`)
+- [x] API клиент (`src/api/client.ts`) — 26 тестов (vitest, `environment: 'node'`), по образцу
+      конфигурации `animatrona-tv` (`vitest.config.mts`, alias `@` → `src`, `vitest/globals` в
+      `tsconfig.json`). Покрыто: `getAdapter()` (кэширование по `activeServerId`),
+      `withCacheFallback()` (успех/сетевая ошибка/любая ошибка/ошибка без кэша),
+      `getLibrary()` (обход кэша при `options.search`), `getAnimeDetails()`, свой вариант
+      кэш-фоллбэка в `getLastWatched()` (возвращает `null` без кэша, не бросает),
+      `saveProgress()` (без кэш-фоллбэка, всегда пробрасывает ошибку),
+      `getEpisodeVideoUrl()`/`getEpisodeAudioUrl()`/`getDownloadedSubtitlePaths()` (приоритет
+      скачанного файла над адаптером). `useServersStore`/`useOfflineStore`/`useDownloadsStore`
+      и `@/services/cache` замоканы через `vi.mock` — реальные Zustand-сторы и AsyncStorage не
+      участвуют.
 - [ ] Zustand stores (`src/store/`)
 - [ ] Утилиты и хелперы
 
@@ -76,4 +86,4 @@ nx typecheck animatrona-mobile
 
 ---
 
-**Последнее обновление:** 2026-02-03
+**Последнее обновление:** 2026-09-08
