@@ -20,6 +20,14 @@
 //     // ... поля, нужные только этому приложению
 //   }
 //
+//   model WatchProgress with WatchProgressFields {
+//     releaseKey    String
+//     episodeNumber Int
+//     @@allow('all', true)
+//     @@unique([releaseKey, episodeNumber])
+//     @@index([lastWatchedAt])
+//   }
+//
 // Полный разбор механизма, границ и ловушек:
 // /.claude/docs/zenstack-shared-fragments-across-apps.md
 
@@ -62,4 +70,25 @@ type TrackerFields {
   @@allow('all', true)
 
   @@index([lastCheckedAt])
+}
+
+/// Прогресс просмотра — пересечение `WatchProgress` (IPFS Player) и `DiscoverWatchProgress`
+/// (Animatrona). Идентичность (`releaseKey` vs `shikimoriId`+`episodeNumber`) и `@@unique` у
+/// каждой модели разные — сюда идёт только «полезная нагрузка» просмотра, ключи и остальные
+/// специфичные поля (у Animatrona — `animeName`/`posterCid`/`trackerAnimeId`/`directoryCid` для
+/// истории и навигации) каждая модель объявляет сама поверх миксина.
+type WatchProgressFields {
+  /// Текущая позиция (сек)
+  currentTime             Float    @default(0)
+  /// Длительность (сек)
+  duration                Float    @default(0)
+  /// Досмотрен до конца
+  completed                Boolean  @default(false)
+
+  /// ID выбранной аудиодорожки из манифеста
+  selectedAudioTrackId    String?
+  /// ID выбранных субтитров из манифеста (null — выключены)
+  selectedSubtitleTrackId String?
+
+  lastWatchedAt           DateTime @default(now())
 }

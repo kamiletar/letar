@@ -6,6 +6,13 @@
 
 ### Added
 
+- **`WatchProgressFields` вынесен в общий фрагмент** (`libs/zenstack-fragments/src/animatrona.zmodel`)
+  — `currentTime`/`duration`/`completed`/`selectedAudioTrackId`/`selectedSubtitleTrackId`/
+  `lastWatchedAt`, ключи (`releaseKey`/`episodeNumber`) остаются локальными. `WatchProgress`
+  переведён на `with WatchProgressFields`. Безопасно сделано без правки `apps/animatrona`
+  (новое имя типа, ничего не конфликтует) — в отличие от `TrackPreference`, который требует
+  одновременной правки `media.zmodel` Animatrona и передан задачей `animatrona-coordinator-dev`.
+
 - **Упакованная сборка (`nx build:win`) проверена.** `next build` → `webpack` →
   `electron-builder --win` прошли без ошибок, собраны `dist/win-unpacked/Animatrona IPFS
   Player.exe` и NSIS-инсталлятор `Animatrona IPFS Player Setup 0.6.0.exe`. Все пункты Фазы 1

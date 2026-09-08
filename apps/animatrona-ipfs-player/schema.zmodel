@@ -82,28 +82,15 @@ model RecentRelease {
 /// Прогресс просмотра — без FK на библиотеку (её у плеера нет).
 ///
 /// Смысловой аналог `DiscoverWatchProgress` из Animatrona, но ключ другой — см. PLAN.md
-/// § «Ключ прогресса просмотра».
-model WatchProgress {
-  id                      String   @id @default(cuid())
+/// § «Ключ прогресса просмотра». Общие поля («полезная нагрузка» просмотра) — из миксина
+/// `WatchProgressFields`, ключ и `@@unique` — свои, см. `libs/zenstack-fragments/src/animatrona.zmodel`.
+model WatchProgress with WatchProgressFields {
+  id            String @id @default(cuid())
 
   /// Стабильный ключ раздачи: `shikimori:<id>` либо `cid:<directoryCid>`
-  releaseKey              String
+  releaseKey    String
   /// Номер эпизода
-  episodeNumber           Int
-
-  /// Текущая позиция (сек)
-  currentTime             Float    @default(0)
-  /// Длительность (сек)
-  duration                Float    @default(0)
-  /// Досмотрен до конца
-  completed               Boolean  @default(false)
-
-  /// ID выбранной аудиодорожки из манифеста
-  selectedAudioTrackId    String?
-  /// ID выбранных субтитров из манифеста (null — выключены)
-  selectedSubtitleTrackId String?
-
-  lastWatchedAt           DateTime @default(now())
+  episodeNumber Int
 
   @@allow('all', true)
 
