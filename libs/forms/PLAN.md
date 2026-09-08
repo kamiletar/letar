@@ -6,18 +6,21 @@
 
 ## Backlog (запросы от агентов)
 
-### [2026-09-08] `zenstack-form-plugin` молча теряет поля type-миксина (от animatrona-ipfs-player-dev)
+### ✅ [2026-09-08] `zenstack-form-plugin` молча терял поля type-миксина (закрыт v4.0.1, от animatrona-ipfs-player-dev)
 
-- **Запросил:** animatrona-ipfs-player-dev (msg 1324, thread `form-plugin-mixin-fields-lost`)
-- **Приоритет:** normal — не блокирует прод сейчас (потребители `@letar/zenstack-fragments`
-  form-плагин не подключают), актуально станет когда стек animatrona вынесет `PinStatus`/
-  `Tracker` в общий фрагмент.
-- **Симптом:** `model X with XFields { ... }` — form-схема строится только из полей самой модели,
-  поля миксина (вместе с `@meta("form.*")`) молча пропадают. Exit 0, файл выглядит правдоподобно.
+- **Запросил:** animatrona-ipfs-player-dev (msg 1324/1329, thread `form-plugin-mixin-fields-lost`)
+- **Симптом:** `model X with XFields { ... }` — form-схема строилась только из полей самой модели,
+  поля миксина (вместе с `@meta("form.*")`) молча пропадали. Exit 0, файл выглядел правдоподобно.
   Контрольный опыт: 4 поля напрямую в модели → все 4 в схеме; те же 4 через `with` (3 в миксине)
-  → только 1. `enum`-файлы генерируются нормально (миксин парсится), просто `with` не
-  разворачивается при сборке списка полей.
-- **Статус:** делегировано `forms-dev`.
+  → только 1. `enum`-файлы генерировались нормально (миксин парсится), просто `with` не
+  разворачивался при сборке списка полей.
+- **Причина:** `model.fields` в Langium AST — только собственные поля модели, поля миксина живут
+  отдельно в `model.mixins` (`Array<Reference<TypeDef>>`). `extractModelInfo` итерировала только
+  `model.fields`.
+- **Фикс:** `collectAllFields(model)` в `model-generator.ts` — рекурсивно разворачивает
+  `model.mixins` (включая миксин от миксина), 2 регресс-теста в `model-generator.spec.ts`.
+  Подробности — CHANGELOG `libs/zenstack-form-plugin` v4.0.1, обновлён
+  `.claude/docs/zenstack-shared-fragments-across-apps.md`.
 
 ### ✅ [2026-09-08] БЛОКЕР (закрыт v2.12.2): `Form.Steps` не регистрирует шаги внутри Chakra `Tabs.Content` (от domwellbes-dev)
 
