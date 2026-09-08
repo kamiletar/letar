@@ -2,6 +2,93 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 0.7.8
+
+### ESLint заведён — до этого не запускался для приложения вообще (2026-09-08)
+
+Не «настроен неудачно», а отсутствовал в графе Nx. У приложения не было `eslint.config.*`,
+поэтому `@nx/eslint/plugin` (`nx.json`, `targetName: "lint"`) не порождал inferred-таргет,
+а блок в `project.json` состоял из одних `options` без `executor`:
+
+```json
+"lint": { "options": { "args": ["**/*.{ts,tsx}"] } }
+```
+
+Это добавка к inferred-таргету, которого нет. `nx lint animatrona-mobile` падал с
+«Cannot find configuration for task», `nx show projects --with-target lint` приложение не
+показывал. Практическое следствие: обязательный шаг чек-листа перед коммитом молча не выполнял
+ничего — проверка шла только через `typecheck:tsgo` и ручной `oxlint`. Класс бага —
+`.claude/docs/nx-target-without-executor-silent-noop.md`.
+
+#### Почему конфиг не на пять строк: три находки
+
+1. **Пресет `@react-native/eslint-config/flat` подключить нельзя** — он тянет
+   `eslint-plugin-eslint-comments@3.2.0`, зовущий удалённый в ESLint 10 `context.getSourceCode()`.
+   Это не «одно правило сломалось»: падает загрузка правила → падает линт всего файла → ноль
+   полезной работы на любом прогоне.
+2. **`eslint-plugin-react-native@5.0.0` несовместим так же** (`lib/util/Components.js`). Выпали
+   именно RN-специфичные проверки: `no-unused-styles`, `no-inline-styles`, `no-color-literals`,
+   `split-platform-components`, `no-single-element-style-arrays`. Лечится только апстримом.
+3. **`@react-native/eslint-plugin` (`no-deep-imports`) работает**, но не резолвится голым
+   импортом: под изолированной установкой bun это транзитивная зависимость
+   `@react-native/eslint-config`, в корневом `node_modules` её нет. Обход — `createRequire` от
+   entry-файла пакета-родителя.
+
+Сигнал был виден заранее и не в логе ESLint, а в `bun scripts/check-all.mjs --group=deps`:
+`@react-native/eslint-config требует eslint@^8.0.0 || ^9.0.0, установлен 10.9.1`. Проверка
+`peer-deps` имеет уровень «отчёт», поэтому строка годами лежала в фоновом шуме.
+
+#### Что получилось
+
+`apps/animatrona-mobile/eslint.config.mjs`: `nx.configs['flat/react-typescript']` (16 правил
+`react/*`) + корневой `eslint.config.mjs` (оттуда приезжает `eslint-plugin-react-hooks`) +
+глобалы рантайма RN, переписанные руками из `@react-native/eslint-config/shared.js` +
+`@react-native/no-deep-imports` + игноры `android/**`, `ios/**`, `dist/**`, `build/**`,
+`.bundle/**`, `vendor/**`.
+
+В `project.json` мёртвый блок заменён на связку как у `animatrona-tracker`: таргет `oxlint` +
+`"lint": { "dependsOn": ["oxlint"] }`, сам `eslint .` приезжает inferred-таргетом.
+
+#### Как проверялось, что линт не пустышка
+
+Намеренно не по «Successfully ran target» — ровно та ловушка, из-за которой проблема и жила:
+
+- `eslint . -f json` → **85 файлов** (48 ts, 32 tsx, 4 js, 1 mjs), 5.8 с, 2 задачи в графе;
+- `nx show projects --with-target lint` теперь показывает `animatrona-mobile`;
+- позитивный тест конкретного RN-правила: временный файл с
+  `import { Text } from 'react-native/Libraries/Text/Text'` даёт
+  `error @react-native/no-deep-imports`.
+
+#### Находки линта: 2 закрыто, 13 в долг
+
+Закрыты как мёртвый код:
+
+- `timeTextStyle` в `SeekBar.tsx` — `useAnimatedStyle`, ни к чему не применённый; worklet
+  пересчитывался на каждом кадре drag впустую;
+- состояние `searching` в `LibraryScreen.tsx` — писалось в трёх местах, не читалось нигде.
+  Индикатора поиска на экране нет, два лишних ре-рендера на запрос уходили в никуда. Ветка
+  `else if (searchQuery)` оставлена с комментарием: полноэкранный лоадер во время поиска не
+  показывается намеренно, он сбрасывает фокус с поля ввода.
+
+Остальные 13 (9 × `no-console`, 4 × `react-hooks/exhaustive-deps`) занесены в `PLAN.md` долгом
+с пофайловым списком. Правила не глушились: `no-console` требует логгера под `__DEV__` (простая
+замена на `warn` засыпет LogBox, а лог версии бандла в `index.js` предписан `CLAUDE.md`
+приложения), `exhaustive-deps` — все четыре в плеере, где эффекты завязаны на жизненный цикл
+ExoPlayer, разбирать по одному с проверкой на устройстве.
+
+#### Смежное
+
+- `animatrona-tv` — та же дыра, но чужая зона. Владелец (`animatrona-tv-dev`) параллельно
+  стартовал сессию по tv и попросил его файлы не трогать; отлаженный конфиг и фикс `project.json`
+  переданы письмом (тред `rn-eslint-config`, координатор в копии).
+- Разбор вынесен в `.claude/docs/react-native-eslint-flat-config-eslint10.md` + строка в индексе
+  корневого `CLAUDE.md`.
+- Ориентир «образец — соседний `animatrona-mobile-ui`» из прежней формулировки задачи оказался
+  ложным: этот проект живёт в `apps/animatrona/mobile-ui`, к React Native отношения не имеет,
+  RN-специфики в его конфиге нет.
+
+---
+
 ## Версия 0.7.6
 
 ### react-native 0.87.0 — тест на реальном устройстве пройден (2026-08-25)
