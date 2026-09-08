@@ -6,11 +6,9 @@ module.exports = {
   output: 'export',
   distDir: '.next',
   trailingSlash: true,
-  // В упакованном приложении страница грузится через file:// — абсолютные пути ("/_next/...")
-  // резолвятся от корня диска и ломают загрузку чанков. Относительный префикс чинит это
-  // (страница ровно одна, на глубине 0 — out/index.html рядом с out/_next/). Если добавляешь
-  // вложенные роуты — читай .claude/rules/electron.md § «Грабли».
-  assetPrefix: isProd ? './' : undefined,
+  // Упакованное приложение грузит рендерер через привилегированную схему app://local/
+  // (main/protocols/app.protocol.ts), не через file:// — абсолютные пути ("/_next/...")
+  // резолвятся от корня схемы штатно, как в обычном вебе. assetPrefix не нужен.
   images: {
     unoptimized: true,
   },

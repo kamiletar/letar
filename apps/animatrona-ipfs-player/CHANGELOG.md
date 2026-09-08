@@ -6,6 +6,18 @@
 
 ### Added
 
+- **Видеоплеер эпизода.** `renderer/app/_components/EpisodePlayer.tsx` — Shaka Player через
+  `@letar/video-player-react`/`@letar/video-player-core`, раздельные аудио/субтитры (отдельные
+  IPFS-файлы, не embedded MKV-дорожки), выбор дорожек (`AudioTrackSelector`/
+  `SubtitleTrackSelector`, перенос из `animatrona-folder-player`). Новый IPC —
+  `manifest:openEpisode` (EpisodeManifest по CID) + `ipfs:getGatewayUrl` (сам медиаконтент
+  стримится напрямую с HTTP-шлюза Kubo, не через IPC). Список эпизодов раздачи выведен в UI,
+  клик открывает полноэкранный плеер. Renderer переведён с `file://`/`loadFile()` на
+  привилегированную схему `app://` (порт `main/protocols/app.protocol.ts` из
+  `animatrona-folder-player`) — без этого ASS-субтитры (SubtitlesOctopus = Worker+WASM) не
+  работали бы под `file://`. Проверено статически (typecheck/lint/webpack/`next build`
+  зелёные, все ассеты SubtitlesOctopus в `out/`) — живой прогон с реальной раздачей не
+  пройден (нет тестового CID), сохранение прогресса просмотра ещё не реализовано.
 - **Фаза 1 продолжена: подключён `libs/ipfs-kubo-core`, реализовано чтение раздачи по CID.**
   `main/services/ipfs.ts` (ленивый запуск Kubo-ноды), `main/ipc/manifest.handlers.ts`
   (`manifest:openByCid` — манифест + список эпизодов), UI: кнопка «Открыть» запускает ноду,

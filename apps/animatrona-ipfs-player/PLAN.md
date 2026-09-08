@@ -579,14 +579,59 @@ pre-commit `schema-migration-check` верно потребовал миграц
 - [x] UI в `renderer/app/page.tsx` — список трекеров (добавление/удаление) + поле «посмотреть по
       CID»: запускает Kubo-ноду при первом обращении, читает манифест, показывает карточку
       раздачи (название, число эпизодов) и сохраняет в `RecentRelease`
+- [x] Видеоплеер эпизода — `renderer/app/_components/EpisodePlayer.tsx` (Shaka Player через
+      `@letar/video-player-react`/`@letar/video-player-core`), см. раздел «Видеоплеер эпизода»
+      ниже
 - [ ] Проверка dev-режима и упакованной сборки (`nx build:win animatrona-ipfs-player`)
 
-### Открытый вопрос: сам просмотр видео (плеер) — не начат
+### Видеоплеер эпизода (2026-09-08)
 
-«Посмотреть по CID» сейчас читает манифест и показывает карточку раздачи, но не запускает
-воспроизведение — интеграция видеоплеера (Shaka Player + субтитры, см. `animatrona.md` §
-«Особенности») в объём этой сессии не входила и не была явным пунктом плана. Следующий шаг Фазы 1
-для реального MVP «посмотрел по CID → посмотрел серию».
+Список эпизодов раздачи (уже читался `manifest:openByCid`) выведен в UI карточки раздачи —
+клик по эпизоду открывает полноэкранный `EpisodePlayer` поверх страницы (эта же страница, без
+роутинга — см. ниже почему).
+
+**Новый IPC-путь до самого видео:** `manifest:openEpisode(manifestCid)` — читает
+`EpisodeManifest` (подмножество типов из `libs/animatrona-types`, локальная копия формы данных
+в `main/ipc/manifest.handlers.ts` — приложение осознанно не импортирует `@letar/animatrona-types`, см. раздел «Особенности
+проекта» в командном воркфлоу приложения). Сам видео/аудио/
+субтитровый контент — **не через IPC**: он стримится напрямую с HTTP-шлюза Kubo
+(`ipfs:getGatewayUrl` возвращает `http://127.0.0.1:<port>`, порт нефиксирован — та же логика,
+что у `apiUrl` в headless-верификации предыдущей сессии). IPC на структурное клонирование
+гигабайт видео не годится в принципе — только на JSON-манифест.
+
+**Аудио и субтитры эпизода — отдельные файлы в IPFS** (не embedded-дорожки MKV, как в
+`animatrona-folder-player`), поэтому режим плеера — раздельное аудио
+(`usesSeparateAudioRef=true`, `<audio src>` + `useAudioSync`), не нативные
+`HTMLMediaElement.audioTracks`. `AudioTrackSelector`/`SubtitleTrackSelector`/
+`TrackDropdownButton` — прямой перенос из `apps/animatrona-folder-player` (общий UI-паттерн
+дропдауна дорожек), не общая либа — тонкая обвязка, привязанная к `@letar/video-player-react`
+двумя разными приложениями независимо, выносить в `libs/` пока нет третьего потребителя со
+своим форматом дорожек.
+
+⚠️ **ASS/SSA-субтитры потребовали смены протокола раздачи renderer'а.** SubtitlesOctopus
+(рендер ASS) — Worker + WASM, а под `file://` (как грузился renderer до этой сессии) origin
+`null` блокирует оба. Перенесена схема `app://` из `apps/animatrona-folder-player`
+(`main/protocols/app.protocol.ts`, дословный порт) — `main/background.ts` теперь регистрирует
+привилегии до `whenReady()` и грузит `app://local/index.html` вместо `loadFile()`, `next.config.js`
+лишился хака `assetPrefix: './'` (больше не нужен — абсолютные `/_next/...` резолвятся от корня
+схемы). Разбор класса проблемы и альтернативы — `.claude/docs/electron-app-protocol.md`. Четыре
+статических ассета SubtitlesOctopus (`default.woff2`, `libassjs-worker.js`,
+`subtitles-octopus.js`, `subtitles-octopus-worker.wasm`) скопированы в `renderer/public/` из
+того же приложения.
+
+**Проверено статически, не живым запуском** (см. `verification-pitfalls.md` — GUI-уровень
+Electron нельзя проверить в сендбоксе): `nx typecheck:tsgo`/`nx lint` зелёные, main-процесс
+собирается webpack'ом (включая новый `app.protocol.ts` и IPC-хендлеры), renderer собирается
+`next build --webpack` (статический экспорт, `shaka-player`/`@letar/video-player-react`
+компилируются без `self is not defined` — динамический `import('shaka-player')` внутри эффекта
+защищает от SSR-пререндера), `out/` содержит все 4 ассета SubtitlesOctopus рядом с
+`index.html`. Реального CID с эпизодом для сквозной проверки воспроизведения не было (тот же
+пробел, что в предыдущей сессии для чтения манифеста) — живой прогон плеера не пройден,
+следующая сессия с реальной раздачей должна это закрыть в первую очередь.
+
+**Не начато:** сохранение прогресса просмотра (`WatchProgress` — модель в схеме уже есть, IPC
+для неё ещё нет) и `hasPrev`/`hasNext` навигация проверены только на статически собранном
+списке эпизодов текущей раздачи, не на реальном воспроизведении.
 
 ### Инфраструктура main-процесса (2026-09-08)
 

@@ -76,6 +76,36 @@ AST не содержит полей миксина (они в `model.mixins`), 
 
 ---
 
+## Версия 0.5.0 (2026-09-08) — Фаза 1: видеоплеер эпизода
+
+- `EpisodePlayer` (`renderer/app/_components/`) — полноэкранный плеер на Shaka Player
+  (`@letar/video-player-react`/`@letar/video-player-core`, тот же стек, что
+  `animatrona-folder-player`), открывается кликом по эпизоду из карточки открытой раздачи.
+- Аудио и субтитры эпизода — отдельные файлы в IPFS (не embedded-дорожки MKV) → режим плеера
+  раздельное аудио (`usesSeparateAudioRef=true`, `<audio src>` + `useAudioSync`).
+  `AudioTrackSelector`/`SubtitleTrackSelector`/`TrackDropdownButton` перенесены из
+  `animatrona-folder-player` (общий UI-паттерн, не выносился в `libs/` — второй независимый
+  потребитель, третьего пока нет).
+- `main/ipc/manifest.handlers.ts` — `manifest:openEpisode(manifestCid)` читает
+  `EpisodeManifest` (локальная копия формы типов из `libs/animatrona-types`, приложение не
+  импортирует библиотеку напрямую). `main/services/ipfs.ts` — `getGatewayUrl()`. Сам медиа-
+  контент (видео/аудио/субтитры) стримится в renderer напрямую с HTTP-шлюза Kubo, минуя IPC —
+  структурное клонирование гигабайтного видео через IPC не годится.
+- **Renderer переведён с `file://` на схему `app://`** — `main/protocols/app.protocol.ts`
+  (дословный перенос из `animatrona-folder-player`), `main/background.ts` регистрирует
+  привилегии до `whenReady()` и грузит `app://local/index.html`. Причина: SubtitlesOctopus
+  (рендер ASS-субтитров) — Worker + WASM, блокируются под `file://` (origin `null`). Заодно
+  снят хак `assetPrefix: './'` из `next.config.js` — больше не нужен. Четыре статических
+  ассета SubtitlesOctopus скопированы в `renderer/public/` из того же приложения.
+- **Проверено статически**: `nx typecheck:tsgo`/`nx lint` зелёные, main-процесс собирается
+  webpack'ом, renderer — `next build --webpack` (статический экспорт), `out/` содержит все
+  ассеты SubtitlesOctopus рядом с `index.html`. Живой прогон плеера не пройден — нет
+  тестового CID с реальным эпизодом в dev-окружении.
+- **Не начато**: сохранение прогресса просмотра (модель `WatchProgress` в схеме уже есть, IPC
+  для неё ещё нет).
+
+---
+
 ## Версия 0.4.0 (2026-09-08) — Фаза 1: подключение libs/ipfs-kubo-core, чтение по CID
 
 - `libs/ipfs-kubo-core` готова координатором (коммиты `2d07a906`/`03991a38` в Animatrona) —

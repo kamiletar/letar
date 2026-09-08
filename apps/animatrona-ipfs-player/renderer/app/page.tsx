@@ -2,7 +2,9 @@
 
 import { Box, Button, Container, Heading, HStack, IconButton, Input, Separator, Text, VStack } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
-import { LuTrash2 } from 'react-icons/lu'
+import { LuPlay, LuTrash2 } from 'react-icons/lu'
+
+import { EpisodePlayer } from './_components/EpisodePlayer'
 
 interface TrackerRow {
   id: string
@@ -11,10 +13,17 @@ interface TrackerRow {
   description: string | null
 }
 
+interface OpenedReleaseEpisode {
+  number: number
+  season?: number
+  name?: string
+  manifestCid: string
+}
+
 interface OpenedRelease {
   directoryCid: string
   name: string
-  episodesCount: number
+  episodes: OpenedReleaseEpisode[]
 }
 
 export default function HomePage() {
@@ -25,6 +34,7 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null)
   const [opening, setOpening] = useState(false)
   const [openedRelease, setOpenedRelease] = useState<OpenedRelease | null>(null)
+  const [selectedEpisodeIndex, setSelectedEpisodeIndex] = useState<number | null>(null)
 
   const reloadTrackers = () => {
     window.electronAPI.tracker.list().then(setTrackers)
@@ -63,7 +73,8 @@ export default function HomePage() {
     setOpening(true)
     try {
       const { manifest, episodes } = await window.electronAPI.manifest.openByCid(directoryCid)
-      setOpenedRelease({ directoryCid, name: manifest.name, episodesCount: episodes.length })
+      const sortedEpisodes = [...episodes].sort((a, b) => a.number - b.number)
+      setOpenedRelease({ directoryCid, name: manifest.name, episodes: sortedEpisodes })
       await window.electronAPI.recentRelease.open({
         directoryCid,
         name: manifest.name,
@@ -76,6 +87,22 @@ export default function HomePage() {
     } finally {
       setOpening(false)
     }
+  }
+
+  if (openedRelease && selectedEpisodeIndex !== null) {
+    const episode = openedRelease.episodes[selectedEpisodeIndex]
+    return (
+      <EpisodePlayer
+        key={episode.manifestCid}
+        manifestCid={episode.manifestCid}
+        episodeLabel={`${openedRelease.name} — эп. ${episode.number}${episode.name ? ` «${episode.name}»` : ''}`}
+        onClose={() => setSelectedEpisodeIndex(null)}
+        hasPrev={selectedEpisodeIndex > 0}
+        hasNext={selectedEpisodeIndex < openedRelease.episodes.length - 1}
+        onPrev={() => setSelectedEpisodeIndex((i) => (i !== null && i > 0 ? i - 1 : i))}
+        onNext={() => setSelectedEpisodeIndex((i) => i !== null && i < openedRelease.episodes.length - 1 ? i + 1 : i)}
+      />
+    )
   }
 
   return (
@@ -110,9 +137,31 @@ export default function HomePage() {
           {openedRelease && (
             <Box mt={3} borderWidth="1px" borderRadius="md" p={3}>
               <Text fontWeight="medium">{openedRelease.name}</Text>
-              <Text fontSize="sm" color="fg.muted">
-                {openedRelease.episodesCount} эп. · {openedRelease.directoryCid}
+              <Text fontSize="sm" color="fg.muted" mb={3}>
+                {openedRelease.episodes.length} эп. · {openedRelease.directoryCid}
               </Text>
+              <VStack align="stretch" gap={1} maxH="240px" overflowY="auto">
+                {openedRelease.episodes.map((episode, index) => (
+                  <HStack
+                    key={episode.manifestCid}
+                    justify="space-between"
+                    px={2}
+                    py={1.5}
+                    borderRadius="sm"
+                    _hover={{ bg: 'bg.subtle' }}
+                    cursor="pointer"
+                    onClick={() => setSelectedEpisodeIndex(index)}
+                  >
+                    <Text fontSize="sm">
+                      Эп. {episode.number}
+                      {episode.name ? ` — ${episode.name}` : ''}
+                    </Text>
+                    <IconButton aria-label="Смотреть" size="xs" variant="ghost">
+                      <LuPlay />
+                    </IconButton>
+                  </HStack>
+                ))}
+              </VStack>
             </Box>
           )}
         </Box>

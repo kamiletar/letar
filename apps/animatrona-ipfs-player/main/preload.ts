@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type { RecentRelease, Settings, Tracker } from '../renderer/src/generated/prisma'
-import type { OpenByCidResult } from './ipc/manifest.handlers'
+import type { OpenByCidResult, ReleaseEpisodeManifest } from './ipc/manifest.handlers'
 import type { RecentReleaseUpsertInput } from './ipc/recent-release.handlers'
 import type { TrackerInput } from './ipc/tracker.handlers'
 
@@ -32,10 +32,13 @@ const electronAPI = {
   manifest: {
     openByCid: (directoryCid: string): Promise<OpenByCidResult> =>
       ipcRenderer.invoke('manifest:openByCid', directoryCid),
+    openEpisode: (manifestCid: string): Promise<ReleaseEpisodeManifest> =>
+      ipcRenderer.invoke('manifest:openEpisode', manifestCid),
   },
 
   ipfs: {
     start: (): Promise<void> => ipcRenderer.invoke('ipfs:start'),
+    getGatewayUrl: (): Promise<string | null> => ipcRenderer.invoke('ipfs:getGatewayUrl'),
   },
 }
 

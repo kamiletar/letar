@@ -48,7 +48,9 @@
       "@letar/forms-core/testing": ["../../libs/forms-core/src/lib/testing/index.ts"],
       "@letar/forms-react/testing": ["../../libs/forms-react/src/lib/testing/index.ts"],
       "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
-      "@letar/ipfs-kubo-core": ["../../libs/ipfs-kubo-core/src/index.ts"]
+      "@letar/ipfs-kubo-core": ["../../libs/ipfs-kubo-core/src/index.ts"],
+      "@letar/video-player-react": ["../../libs/video-player-react/src/index.ts"],
+      "@letar/video-player-core": ["../../libs/video-player-core/src/index.ts"]
     },
     "ignoreDeprecations": "6.0"
   },
@@ -65,7 +67,10 @@
     "../../libs/forms-core/src/**/*.ts",
     "../../libs/forms-react/src/**/*.ts",
     "../../libs/forms-react/src/**/*.tsx",
-    "../../libs/ipfs-kubo-core/src/**/*.ts"
+    "../../libs/ipfs-kubo-core/src/**/*.ts",
+    "../../libs/video-player-react/src/**/*.ts",
+    "../../libs/video-player-react/src/**/*.tsx",
+    "../../libs/video-player-core/src/**/*.ts"
   ],
   "exclude": [
     "node_modules",

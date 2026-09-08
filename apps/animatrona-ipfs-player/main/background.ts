@@ -1,8 +1,14 @@
 import { app, BrowserWindow } from 'electron'
 import path from 'node:path'
 import { registerIpcHandlers } from './ipc'
+import { APP_INDEX_URL, registerAppProtocol, setupAppProtocolHandler } from './protocols/app.protocol'
 import { initializeDatabase } from './services/database'
 import { closePrismaClient, initializePrismaDb } from './utils/db'
+
+// Регистрация привилегий схемы app:// — обязательно до app.whenReady() (нужна для ASS-субтитров
+// эпизодов через SubtitlesOctopus: Worker+WASM не работают под file://, см.
+// .claude/docs/electron-app-protocol.md)
+registerAppProtocol()
 
 process.on('uncaughtException', (error) => {
   console.error('[UncaughtException]', error)
@@ -42,8 +48,9 @@ async function createWindow(): Promise<void> {
   })
 
   if (isProd) {
-    // Рендерер — статический экспорт Next.js (без сервера, без API routes: вся логика через IPC)
-    await mainWindow.loadFile(path.join(process.resourcesPath, 'renderer', 'out', 'index.html'))
+    // Рендерер — статический экспорт Next.js, отдаётся через привилегированную схему app://
+    // (не file:// — под ним origin null, Chromium блокирует Worker/WASM, нужные SubtitlesOctopus)
+    await mainWindow.loadURL(APP_INDEX_URL)
   } else {
     const port = process.argv[2] || 8888
     await mainWindow.loadURL(`http://localhost:${port}`)
@@ -52,6 +59,7 @@ async function createWindow(): Promise<void> {
 }
 
 app.whenReady().then(async () => {
+  setupAppProtocolHandler()
   await initializeDatabase()
   await initializePrismaDb()
 

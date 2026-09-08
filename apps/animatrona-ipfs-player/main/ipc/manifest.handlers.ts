@@ -1,6 +1,6 @@
 import { cat } from '@letar/ipfs-kubo-core'
 import { ipcMain } from 'electron'
-import { ensureIpfsStarted } from '../services/ipfs'
+import { ensureIpfsStarted, getGatewayUrl } from '../services/ipfs'
 
 /** Подмножество AnimeManifest (v1/v2), нужное плееру — все поля, кроме обязательных, опциональны */
 export interface ReleaseManifest {
@@ -26,6 +26,43 @@ export interface ReleaseManifestEpisode {
 interface EpisodesDocument {
   version: number
   episodes: ReleaseManifestEpisode[]
+}
+
+/** Подмножество EpisodeManifest (`libs/animatrona-types`), нужное плееру — не импортируется
+ * напрямую (см. правило проекта «не импортирует @letar/animatrona-types»), только локальная
+ * копия формы данных. */
+export interface ReleaseEpisodeVideo {
+  cid: string
+  durationMs: number
+}
+
+export interface ReleaseEpisodeAudioTrack {
+  id: string
+  language: string
+  title: string
+  cid?: string
+  isDefault: boolean
+}
+
+export interface ReleaseEpisodeSubtitleFont {
+  name: string
+  cid?: string
+}
+
+export interface ReleaseEpisodeSubtitleTrack {
+  id: string
+  language: string
+  title: string
+  format: 'ass' | 'ssa' | 'srt' | 'vtt'
+  cid?: string
+  isDefault: boolean
+  fonts?: ReleaseEpisodeSubtitleFont[]
+}
+
+export interface ReleaseEpisodeManifest {
+  video: ReleaseEpisodeVideo
+  audioTracks: ReleaseEpisodeAudioTrack[]
+  subtitleTracks: ReleaseEpisodeSubtitleTrack[]
 }
 
 async function readJsonFromIpfs<T>(cidPath: string): Promise<T> {
@@ -57,12 +94,26 @@ async function openByCid(directoryCid: string): Promise<OpenByCidResult> {
   return { directoryCid, manifest, episodes }
 }
 
+/** Прочитать EpisodeManifest эпизода по CID (сам манифест — JSON-документ, не директория) */
+async function openEpisode(manifestCid: string): Promise<ReleaseEpisodeManifest> {
+  await ensureIpfsStarted()
+  return readJsonFromIpfs<ReleaseEpisodeManifest>(manifestCid)
+}
+
 export function registerManifestHandlers(): void {
   ipcMain.handle('manifest:openByCid', async (_event, directoryCid: string) => {
     return openByCid(directoryCid)
   })
 
+  ipcMain.handle('manifest:openEpisode', async (_event, manifestCid: string) => {
+    return openEpisode(manifestCid)
+  })
+
   ipcMain.handle('ipfs:start', async () => {
     await ensureIpfsStarted()
+  })
+
+  ipcMain.handle('ipfs:getGatewayUrl', () => {
+    return getGatewayUrl()
   })
 }

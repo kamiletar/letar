@@ -17,3 +17,8 @@ export function ensureIpfsStarted(): Promise<void> {
 export function getIpfsStatus(): KuboServiceStatus {
   return getKuboService().getStatus()
 }
+
+/** URL HTTP-шлюза Kubo (`http://127.0.0.1:<port>`) — null, пока нода не запущена */
+export function getGatewayUrl(): string | null {
+  return getKuboService().getGatewayUrl()
+}

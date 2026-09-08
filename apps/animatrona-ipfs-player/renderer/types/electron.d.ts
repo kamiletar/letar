@@ -1,4 +1,4 @@
-import type { OpenByCidResult } from '../../main/ipc/manifest.handlers'
+import type { OpenByCidResult, ReleaseEpisodeManifest } from '../../main/ipc/manifest.handlers'
 import type { RecentReleaseUpsertInput } from '../../main/ipc/recent-release.handlers'
 import type { TrackerInput } from '../../main/ipc/tracker.handlers'
 import type { RecentRelease, Settings, Tracker } from '../src/generated/prisma'
@@ -25,10 +25,12 @@ export interface ElectronAPI {
 
   manifest: {
     openByCid: (directoryCid: string) => Promise<OpenByCidResult>
+    openEpisode: (manifestCid: string) => Promise<ReleaseEpisodeManifest>
   }
 
   ipfs: {
     start: () => Promise<void>
+    getGatewayUrl: () => Promise<string | null>
   }
 }
 
