@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.4] - 2026-09-09
+
+### Fixed
+
+- `package.json`: `@letar/exoplayer-ass` и `@letar/exoplayer-sync` не были объявлены ни в
+  `dependencies`, ни в `nx.implicitDependencies`, хотя реально используются — граф Nx не видел
+  эти рёбра. Добавлены в `dependencies` (версия `*`, как остальные локальные RN-либы приложения).
+
 ## [0.6.3] - 2026-09-08
 
 ### Added

@@ -295,3 +295,9 @@ RN 0.87 нашла класс несовместимостей Android toolchain
 ---
 
 **Последнее обновление:** 2026-03-02
+
+## Починка графа Nx (2026-09-09)
+
+- [x] `@letar/exoplayer-ass` и `@letar/exoplayer-sync` реально импортировались в коде, но не были
+      объявлены ни в `dependencies`, ни в `nx.implicitDependencies` (PLAN-INFRA-6.md §169).
+      Добавлены в `dependencies` (`*`), проверено format/lint/typecheck:tsgo.

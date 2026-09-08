@@ -1,6 +1,6 @@
 {
   "name": "@letar/animatrona-tv",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@letar/animatrona-shared": "*",
+    "@letar/exoplayer-ass": "*",
+    "@letar/exoplayer-sync": "*",
     "react-native": "*",
     "@react-native/codegen": "*",
     "@react-native/gradle-plugin": "*"
