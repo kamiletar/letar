@@ -3167,13 +3167,19 @@ nx show projects --affected --files=libs/zenstack-fragments/src/better-auth.zmod
 grep -rn --include=*.zmodel "zenstack-fragments" apps/
 ```
 
-| Фрагмент             | Потребители                                         |
-| -------------------- | --------------------------------------------------- |
-| `better-auth.zmodel` | `aprel8008`, `archetest`, `dashboard`, `domwellbes` |
-| `animatrona.zmodel`  | `animatrona` (`schema/models/federation.zmodel`)    |
+| Фрагмент             | Потребители                                                                |
+| -------------------- | -------------------------------------------------------------------------- |
+| `better-auth.zmodel` | `aprel8008`, `archetest`, `dashboard`, `domwellbes`                        |
+| `animatrona.zmodel`  | `animatrona` (`schema/models/federation.zmodel`), `animatrona-ipfs-player` |
 
 ⚠️ Импортёров больше, чем приложений: `domwellbes` импортирует `better-auth` дважды — в корневом
 `schema.zmodel` и в `schema/auth.zmodel` (импорты не транзитивны).
+
+⚠️ **Список живой:** `animatrona-ipfs-player` появился прямо во время этой сессии (коммит
+`f3728417` параллельного агента) — новое приложение импортирует фрагмент и пришло без обеих
+записей, то есть ловушка на нём была живая с первой минуты. Ровно тот сценарий, ради которого
+в доке стоит предупреждение «заводишь нового потребителя — добавь обе записи»: сверять грепом,
+а не по любому записанному списку, включая этот.
 
 **Фикс — две правки у каждого потребителя:**
 
@@ -3203,7 +3209,7 @@ nx show projects --affected --files=libs/zenstack-fragments/src/better-auth.zmod
 один и тот же список. Over-approximation безопасна (потребитель не может быть пропущен), но
 шумна — лишние приложения попадают в `nx affected`, а значит и в деплой по affected. Файловая
 точность потребовала бы своего Nx-плагина с `createDependencies`, разбирающего `import` внутри
-`.zmodel`; два фрагмента и пять потребителей его не окупают.
+`.zmodel`; два фрагмента и шесть потребителей его не окупают.
 
 **Смежное, поправленное заодно (аудит всех 19 приложений с `zenstack:generate`):**
 
@@ -3217,7 +3223,8 @@ nx show projects --affected --files=libs/zenstack-fragments/src/better-auth.zmod
   `label-printer-desktop`) `inputs` добавлен — его не было вовсе.
 - `animatrona` и `label-printer-desktop` получили явный `cache: false`. Таргет и так не
   кешировался (ни `cache: true` у проекта, ни `targetDefaults` для `zenstack:generate` нет) —
-  это запись уже действовавшего поведения, а не смена. Теперь `cache: false` у всех 19.
+  это запись уже действовавшего поведения, а не смена. Теперь `cache: false` у всех 20 (20-е —
+  `animatrona-ipfs-player`, дочинено тем же порядком).
 
 **`targetDefaults` для `zenstack:generate` заводить НЕ нужно — проверено, решение отрицательное.**
 `dependsOn` на `@letar/zenstack-form-plugin` продублирован у 14 приложений не по недосмотру:

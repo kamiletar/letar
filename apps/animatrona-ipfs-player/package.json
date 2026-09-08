@@ -7,7 +7,11 @@
   "main": "app/background.js",
   "nx": {
     "name": "animatrona-ipfs-player",
-    "implicitDependencies": ["@letar/forms", "@letar/icon-generator"]
+    "implicitDependencies": [
+      "@letar/forms",
+      "@letar/icon-generator",
+      "@letar/zenstack-fragments"
+    ]
   },
   "dependencies": {
     "@letar/icon-generator": "workspace:*"

@@ -54,7 +54,12 @@
         ],
         "cwd": "apps/animatrona-ipfs-player",
         "parallel": false
-      }
+      },
+      "cache": false,
+      "inputs": [
+        "{projectRoot}/schema.zmodel",
+        "{workspaceRoot}/libs/zenstack-fragments/src/*.zmodel"
+      ]
     },
     "db:push": {
       "executor": "nx:run-commands",

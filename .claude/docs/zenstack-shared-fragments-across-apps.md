@@ -204,7 +204,7 @@ nx show projects --affected --files=libs/zenstack-fragments/src/better-auth.zmod
 affected.
 
 Файловая точность потребовала бы своего Nx-плагина с `createDependencies`, разбирающего
-`import` внутри `.zmodel`. Не сделано намеренно: два фрагмента и пять потребителей плагин не
+`import` внутри `.zmodel`. Не сделано намеренно: два фрагмента и шесть потребителей плагин не
 окупают.
 
 ⚠️ **Заводишь нового потребителя фрагмента — добавь обе записи.** Без них ловушка вернётся
@@ -222,7 +222,7 @@ affected.
 - `animatrona` и `label-printer-desktop` не объявляли `cache: false`. Фактически таргет и так
   не кешировался (ни `cache: true` у проекта, ни `targetDefaults` для `zenstack:generate` нет),
   так что это явная запись уже действовавшего поведения, а не смена. Теперь `cache: false` стоит
-  у всех 19.
+  у всех 20.
 
 ⚠️ **Общую часть `zenstack:generate` в `targetDefaults` выносить нельзя** — проверено
 2026-09-08. `dependsOn` на `@letar/zenstack-form-plugin` продублирован у 14 приложений не по
@@ -266,7 +266,7 @@ affected.
 | Фрагмент                                                                                                | Потребители                                         | Способ      |
 | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ----------- |
 | `libs/zenstack-fragments/src/better-auth.zmodel` (`AccountFields`/`SessionFields`/`VerificationFields`) | `aprel8008`, `archetest`, `dashboard`, `domwellbes` | 1 (миксины) |
-| `libs/zenstack-fragments/src/animatrona.zmodel` (`Tracker`/`CachedRelease`)                             | `animatrona`                                        | 2 (остров)  |
+| `libs/zenstack-fragments/src/animatrona.zmodel` (`Tracker`/`CachedRelease`)                             | `animatrona`, `animatrona-ipfs-player`              | 2 (остров)  |
 
 Список сверять грепом, а не по таблице:
 
