@@ -27,7 +27,7 @@ import { LuCheck, LuExternalLink, LuX } from 'react-icons/lu'
 export const metadata: Metadata = {
   title: 'Animatrona Player — плеер для аниме из папки',
   description:
-    'Бесплатный плеер для аниме из локальной папки: внешние аудиодорожки и ASS-субтитры, шрифты, без установки библиотеки и без транскодирования. Ничего не скачивает и не ищет — только проигрывает то, что уже есть на диске.',
+    'Бесплатный плеер для аниме из локальной папки: внешние аудиодорожки и ASS-субтитры, шрифты, старые раздачи Hi10P и AC3/DTS. Ничего не скачивает и не ищет — только проигрывает то, что уже есть на диске.',
   keywords: [
     'плеер для аниме',
     'плеер аниме из папки',
@@ -35,13 +35,14 @@ export const metadata: Metadata = {
     'внешние аудиодорожки',
     'anime player',
     'mkv плеер',
+    'hi10p плеер',
   ],
   alternates: {
     canonical: 'https://animatrona.letar.best/player',
   },
   openGraph: {
     title: 'Animatrona Player — плеер для аниме из папки',
-    description: 'Внешние аудиодорожки и ASS-субтитры, без установки библиотеки, без транскодирования',
+    description: 'Внешние аудиодорожки и ASS-субтитры, без установки библиотеки. Играет и старые раздачи',
     url: 'https://animatrona.letar.best/player',
     siteName: 'Animatrona',
     locale: 'ru_RU',
@@ -53,6 +54,7 @@ const COMPARISON_ROWS: { feature: string; player: boolean | string; full: boolea
   { feature: 'Просмотр из локальной папки', player: true, full: true },
   { feature: 'Внешние аудиодорожки и ASS/SRT-субтитры', player: true, full: true },
   { feature: 'Библиотека: каталог, метаданные с Shikimori', player: false, full: true },
+  { feature: 'Старые раздачи: Hi10P, AC3/DTS/TrueHD', player: 'по требованию, докачкой ffmpeg', full: true },
   { feature: 'GPU-транскодирование AV1/HEVC на лету', player: false, full: true },
   { feature: 'Импорт из внешних источников', player: false, full: true },
   { feature: 'Вес установщика', player: '≤130 МБ', full: 'значительно больше (ffmpeg, движок кодирования)' },
@@ -79,12 +81,13 @@ const SUPPORTED_FORMATS: { title: string; items: string[]; ok: boolean }[] = [
     ok: true,
   },
   {
-    title: 'Чего нет из коробки',
+    title: 'Старые раздачи — по требованию',
     items: [
-      'Видеокодеки, которые не декодирует Chromium: Hi10P (10-bit H.264), некоторые старые сборки',
-      'Аудиокодеки AC3/E-AC3/DTS/TrueHD — Chromium их не проигрывает',
+      'Hi10P (10-битный H.264) и звук AC3/E-AC3/DTS/TrueHD — движок браузера их не декодирует',
+      'Плеер предложит один раз докачать ffmpeg и подготовит такой файл сам — без выхода в другой плеер',
+      'Подготовленный файл сохраняется: второй просмотр серии стартует сразу',
     ],
-    ok: false,
+    ok: true,
   },
 ]
 
@@ -117,8 +120,8 @@ export default async function PlayerPage() {
               </Heading>
               <Text color="gray.400" fontSize={{ base: 'md', md: 'lg' }} maxW="2xl">
                 Открываете папку с уже скачанными сериями — плеер сам находит внешние аудиодорожки и ASS/SRT-субтитры,
-                подставляет нужные шрифты и запоминает, на чём вы остановились. Никакой библиотеки, никакого
-                транскодирования — только воспроизведение.
+                подставляет нужные шрифты и запоминает, на чём вы остановились. Никакой библиотеки и импорта — только
+                воспроизведение, включая старые раздачи, которые обычно требуют отдельного плеера.
               </Text>
               <Box
                 borderWidth="1px"
@@ -235,8 +238,9 @@ export default async function PlayerPage() {
                 ))}
               </SimpleGrid>
               <Text fontSize="sm" color="gray.500" textAlign="center" maxW="2xl">
-                Если файл использует кодек, который не декодирует Chromium, плеер честно об этом сообщит и предложит
-                кнопку «Открыть в системном плеере» — вместо чёрного экрана.
+                Если файл использует кодек, который не декодирует браузерный движок, плеер честно об этом скажет —
+                вместо чёрного экрана — и предложит два пути: подготовить файл своими силами (один раз докачав ffmpeg)
+                или открыть его в системном плеере.
               </Text>
             </VStack>
           </Container>
@@ -247,8 +251,12 @@ export default async function PlayerPage() {
         release={latestRelease}
         windowsPortableAsset={windowsPortable}
         requirementsNote={{
-          primary: 'Транскодирования нет — воспроизведение идёт декодером браузерного движка (Chromium)',
-          secondary: 'NVIDIA GPU не требуется: аппаратное декодирование включается автоматически, если доступно',
+          primary: 'Обычные файлы играют без транскодирования — декодером браузерного движка, GPU не требуется',
+          secondary: 'Для старых раздач (Hi10P, AC3/DTS) плеер по вашему согласию один раз докачает ffmpeg',
+        }}
+        platformRequirements={{
+          windows: ['Windows 10+', 'Видеокарта не требуется'],
+          linux: ['Ubuntu 18.04+', 'Debian, Fedora, Arch', 'Видеокарта не требуется'],
         }}
       />
     </Box>

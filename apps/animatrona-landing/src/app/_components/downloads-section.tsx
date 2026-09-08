@@ -13,6 +13,11 @@ interface DownloadsSectionProps {
   windowsPortableAsset?: ReleaseAsset | null
   /** Заметка под карточками платформ — по умолчанию про GPU-транскодирование (актуально только для полной Animatrona) */
   requirementsNote?: { primary: string; secondary?: string }
+  /**
+   * Переопределение списка требований в карточке платформы. Нужно продуктам без
+   * GPU-транскодирования: дефолтная строка «NVIDIA GPU (опционально)» для них бессмысленна.
+   */
+  platformRequirements?: Partial<Record<Platform, string[]>>
 }
 
 const DEFAULT_REQUIREMENTS_NOTE = {
@@ -25,6 +30,8 @@ interface PlatformCardProps {
   release: ParsedRelease | null
   isCurrentPlatform: boolean
   portableAsset?: ReleaseAsset | null
+  /** Переопределённые требования — если не передано, берутся из `PLATFORM_INFO` */
+  requirements?: string[]
 }
 
 const PLATFORM_INFO: Record<
@@ -154,12 +161,14 @@ interface MacOSCardProps {
   release: ParsedRelease | null
   isCurrentPlatform: boolean
   detectedArch: MacArch | null
+  /** Переопределённые требования — если не передано, берутся из `PLATFORM_INFO` */
+  requirements?: string[]
 }
 
 /**
  * Карточка macOS с двумя кнопками скачивания (Apple Silicon и Intel)
  */
-function MacOSCard({ release, isCurrentPlatform, detectedArch }: MacOSCardProps) {
+function MacOSCard({ release, isCurrentPlatform, detectedArch, requirements }: MacOSCardProps) {
   const info = PLATFORM_INFO.macos
   const PlatformIcon = info.icon
   const macAssets = release?.assets.macos
@@ -243,7 +252,7 @@ function MacOSCard({ release, isCurrentPlatform, detectedArch }: MacOSCardProps)
 
           {/* Требования */}
           <VStack gap={1} align="start" pt={2}>
-            {info.requirements.map((req) => (
+            {(requirements ?? info.requirements).map((req) => (
               <HStack key={req} gap={2}>
                 <LuCheck color="var(--chakra-colors-green-400)" size={12} />
                 <Text fontSize="xs" color="gray.500">
@@ -258,7 +267,7 @@ function MacOSCard({ release, isCurrentPlatform, detectedArch }: MacOSCardProps)
   )
 }
 
-function PlatformCard({ platform, release, isCurrentPlatform, portableAsset }: PlatformCardProps) {
+function PlatformCard({ platform, release, isCurrentPlatform, portableAsset, requirements }: PlatformCardProps) {
   const info = PLATFORM_INFO[platform]
   const PlatformIcon = info.icon
   // Для Windows и Linux — обычный ассет
@@ -334,7 +343,7 @@ function PlatformCard({ platform, release, isCurrentPlatform, portableAsset }: P
 
           {/* Требования */}
           <VStack gap={1} align="start" pt={2}>
-            {info.requirements.map((req) => (
+            {(requirements ?? info.requirements).map((req) => (
               <HStack key={req} gap={2}>
                 <LuCheck color="var(--chakra-colors-green-400)" size={12} />
                 <Text fontSize="xs" color="gray.500">
@@ -350,7 +359,8 @@ function PlatformCard({ platform, release, isCurrentPlatform, portableAsset }: P
 }
 
 export function DownloadsSection(
-  { release, windowsPortableAsset, requirementsNote = DEFAULT_REQUIREMENTS_NOTE }: DownloadsSectionProps,
+  { release, windowsPortableAsset, requirementsNote = DEFAULT_REQUIREMENTS_NOTE, platformRequirements }:
+    DownloadsSectionProps,
 ) {
   const [currentPlatform, setCurrentPlatform] = useState<Platform | null>(null)
   const [macArch, setMacArch] = useState<MacArch | null>(null)
@@ -405,6 +415,7 @@ export function DownloadsSection(
                       release={release}
                       isCurrentPlatform={currentPlatform === 'macos'}
                       detectedArch={macArch}
+                      requirements={platformRequirements?.macos}
                     />
                   )
                   : (
@@ -414,6 +425,7 @@ export function DownloadsSection(
                       release={release}
                       isCurrentPlatform={platform === currentPlatform}
                       portableAsset={platform === 'windows' ? windowsPortableAsset : undefined}
+                      requirements={platformRequirements?.[platform]}
                     />
                   )
               )}
