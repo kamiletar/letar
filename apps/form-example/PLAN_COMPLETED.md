@@ -1,5 +1,32 @@
 # Выполненные задачи — form-example
 
+## P1: Offline — реальный @letar/forms/offline (2026-09-09)
+
+[`/examples/offline`](src/app/examples/offline/page.tsx) описывал в тексте страницы
+«Uses `@letar/forms/offline`», но фактически имитировал офлайн локальным `useState` +
+`navigator.onLine`/`window.addEventListener` и не имел настоящей персистентной очереди.
+
+Переписано на реальный API библиотеки:
+
+- `useOfflineForm<ReportValues>({ actionType, onlineSubmit, onSuccess, onQueued, onError })` —
+  при реальном отключении сети (`navigator.onLine`) сам кладёт данные в IndexedDB-очередь и
+  автоматически синхронизирует при восстановлении соединения.
+- `FormOfflineIndicator` и `FormSyncStatus` — готовые бейджи библиотеки вместо кастомного
+  `Badge` на локальном стейте.
+- Кнопка **Simulate Offline**. Библиотека не предоставляет способ форсировать `isOffline`
+  программно (индикаторы читают настоящий `navigator.onLine` через `useOfflineStatus`), поэтому
+  симуляция не подделывает индикаторы, а маршрутизирует `onSubmit` напрямую в `addAction` из
+  `useSyncQueue()` — тот же singleton-стор очереди, что `useOfflineForm` использует внутри.
+
+Проверено вживую (Browser pane, `javascript_tool` — form_input/computer click оказались
+ненадёжны на этой странице, как и в предыдущих сессиях): переключение Simulate Offline меняет
+текст кнопки и показывает бейдж "Simulated offline"; submit в этом режиме кладёт запись в
+очередь (`onQueued` коллбэк сработал) — и тут же обнаруживается корректное поведение реальной
+библиотеки: поскольку браузер **на самом деле** онлайн, встроенный в `useOfflineForm` эффект
+автосинхронизации почти мгновенно обрабатывает и очищает добавленную запись, поэтому счётчик
+успевает вернуться к "Queue empty" раньше, чем его можно замерить руками — это ожидаемое
+сквозное поведение настоящей библиотеки, не баг демо-страницы.
+
 ## P1: Recipes — Profile Edit, Checkout, Feedback (2026-09-09)
 
 [`/examples/recipes`](src/app/examples/recipes/page.tsx) имел 4 карточки (Login, Registration,

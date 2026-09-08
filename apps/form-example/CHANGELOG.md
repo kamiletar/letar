@@ -2,6 +2,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.16] - 2026-09-09
+
+### Changed
+
+- `/examples/offline` переведён с самодельной имитации (`navigator.onLine` + локальный `useState`
+  для очереди) на реальный `@letar/forms/offline`: `useOfflineForm` + `useSyncQueue` (настоящая
+  IndexedDB-очередь), `FormOfflineIndicator`/`FormSyncStatus`. Добавлена кнопка "Simulate Offline"
+  — библиотека не даёт форсировать offline-статус программно, поэтому симуляция маршрутизирует
+  submit напрямую в `addAction` того же singleton-стора очереди, не подделывая индикаторы.
+
 ## [0.1.15] - 2026-09-09
 
 ### Added
