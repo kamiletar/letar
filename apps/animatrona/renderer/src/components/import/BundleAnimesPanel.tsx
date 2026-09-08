@@ -14,7 +14,8 @@
  */
 
 import { Badge, Button, Card, Heading, HStack, Icon, Input, Spinner, Text, VStack } from '@chakra-ui/react'
-import { useCallback, useRef, useState } from 'react'
+import { useDebounce } from '@letar/hooks'
+import { useCallback, useEffect, useState } from 'react'
 import { LuArrowDown, LuArrowUp, LuCheck, LuLayers, LuPlus, LuSearch, LuX } from 'react-icons/lu'
 
 export interface BundleAnimeEntry {
@@ -43,27 +44,27 @@ export function BundleAnimesPanel({
   reorderable = false,
 }: BundleAnimesPanelProps) {
   const [searchQuery, setSearchQuery] = useState('')
+  const debouncedSearchQuery = useDebounce(searchQuery, 400)
   const [searchResults, setSearchResults] = useState<Array<{ id: number; name: string; russian: string | null }>>([])
   const [searching, setSearching] = useState(false)
   const [loadingRelated, setLoadingRelated] = useState(false)
-  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const handleSearch = useCallback((query: string) => {
-    setSearchQuery(query)
-    if (searchTimerRef.current) {
-      clearTimeout(searchTimerRef.current)
-    }
-    if (!query.trim()) {
+  // Поиск на Shikimori по дебаунсированному запросу — debounce самого значения (@letar/hooks),
+  // а не действия: запрос уже наблюдаемый state (searchQuery), эффект просто следует за ним.
+  useEffect(() => {
+    const query = debouncedSearchQuery.trim()
+    if (!query) {
       setSearchResults([])
       return
     }
-    searchTimerRef.current = setTimeout(async () => {
-      setSearching(true)
+    let cancelled = false
+    setSearching(true)
+    void (async () => {
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const api = window.electronAPI as any
         const res = await api?.shikimori?.search({ search: query, limit: 8 })
-        if (res?.success && res.data) {
+        if (!cancelled && res?.success && res.data) {
           setSearchResults(
             res.data.map((a: { id: string; name: string; russian: string | null }) => ({
               id: Number(a.id),
@@ -73,10 +74,15 @@ export function BundleAnimesPanel({
           )
         }
       } finally {
-        setSearching(false)
+        if (!cancelled) {
+          setSearching(false)
+        }
       }
-    }, 400)
-  }, [])
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [debouncedSearchQuery])
 
   const handleAdd = useCallback(
     (entry: BundleAnimeEntry) => {
@@ -221,7 +227,7 @@ export function BundleAnimesPanel({
           <Input
             placeholder="Поиск аниме на Shikimori..."
             value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
+            onChange={(e) => setSearchQuery(e.target.value)}
             size="sm"
           />
           {searching && <Spinner size="sm" />}
