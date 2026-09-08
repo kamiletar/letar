@@ -563,17 +563,30 @@ pre-commit `schema-migration-check` верно потребовал миграц
 
 ## Фаза 1 — MVP (каркас, из шаблона генератора)
 
-- [ ] Заменить placeholder-иконку и заголовок
+- [x] Заменить placeholder-иконку и заголовок — заголовок был готов раньше («Animatrona IPFS
+      Player» в layout/page), иконка (`resources/icon.svg`) переделана: бирюзово-синий градиент
+      (отличается от фиолетово-розового Animatrona), play-треугольник в центре узла сети с
+      линиями к соседним узлам (символ P2P/IPFS) вместо заглушки-буквы «A» от генератора
 - [x] Закрыть **Фазу 0** (общий фрагмент схемы) и оставшиеся «Открытые вопросы» — предварительное
       условие для реальной бизнес-логики, не начинать с UI/IPC вперёд схемы
-- [ ] Бизнес-логика в `main/services/` — Kubo-нода (SHARED из будущей `libs/ipfs-kubo-core`),
-      чтение манифеста по CID — **блокировано**: запрос на вынос `libs/ipfs-kubo-core` отправлен
-      `animatrona-coordinator-dev` (тред `ipfs-kubo-core-extraction`), ответа пока нет
+- [x] Бизнес-логика в `main/services/` — Kubo-нода из `libs/ipfs-kubo-core` (готова, коммиты
+      `2d07a906`/`03991a38` в Animatrona координатора), чтение манифеста по CID —
+      `main/services/ipfs.ts` (ленивый старт ноды) + `main/ipc/manifest.handlers.ts`
+      (`manifest:openByCid` — `cat()` READ-функция из либы, `manifest.json` → опционально
+      `EpisodesDocument`)
 - [x] IPC-хендлеры в `main/ipc/` — `tracker.handlers.ts`, `recent-release.handlers.ts`,
-      `settings.handlers.ts` (CRUD поверх Prisma, без IPFS-логики — она ждёт `libs/ipfs-kubo-core`)
+      `settings.handlers.ts`, `manifest.handlers.ts` (`manifest:openByCid`, `ipfs:start`)
 - [x] UI в `renderer/app/page.tsx` — список трекеров (добавление/удаление) + поле «посмотреть по
-      CID» (пока заглушка с сообщением об ожидании выноса либы)
+      CID»: запускает Kubo-ноду при первом обращении, читает манифест, показывает карточку
+      раздачи (название, число эпизодов) и сохраняет в `RecentRelease`
 - [ ] Проверка dev-режима и упакованной сборки (`nx build:win animatrona-ipfs-player`)
+
+### Открытый вопрос: сам просмотр видео (плеер) — не начат
+
+«Посмотреть по CID» сейчас читает манифест и показывает карточку раздачи, но не запускает
+воспроизведение — интеграция видеоплеера (Shaka Player + субтитры, см. `animatrona.md` §
+«Особенности») в объём этой сессии не входила и не была явным пунктом плана. Следующий шаг Фазы 1
+для реального MVP «посмотрел по CID → посмотрел серию».
 
 ### Инфраструктура main-процесса (2026-09-08)
 
@@ -597,3 +610,46 @@ pre-commit `schema-migration-check` верно потребовал миграц
   2. `__non_webpack_require__` в `database.ts` (защита от статического бандлинга
      `fts5-sql-bundle`) — webpack подставляет его сам, `bun build` нет; entry-скрипт верификации
      подставляет `globalThis.__non_webpack_require__ = require` перед импортом.
+
+### Подключение `libs/ipfs-kubo-core` (2026-09-08)
+
+Три точки подключения — по образцу `apps/animatrona/main` (та же схема, без dual-build esbuild,
+у нас один общий `tsconfig.json`, не `main/tsconfig.json`):
+
+- `package.json` — `@letar/ipfs-kubo-core: workspace:*` в `dependencies` + `implicitDependencies`
+- `tsconfig.json` — путь-алиас в `paths` + glob в `include` (нужен `bun install` из корня после
+  добавления зависимости — линкер иначе не заведёт symlink в `node_modules/@letar/`)
+- `main/webpack.config.js` — `resolve.alias` на `libs/ipfs-kubo-core/src` + **новое**:
+  `resolve.extensionAlias: { '.js': ['.ts', '.js'] }` — либа компилируется под node16/nodenext,
+  её внутренние относительные импорты пишут явный `.js` (TS-конвенция), без alias webpack не
+  резолвит `.js` в фактический `.ts` (`Module not found: './peer-sync-service.js'`)
+
+`main/services/ipfs.ts` — ленивый `ensureIpfsStarted()` (singleton promise, `getKuboService()
+.initialize({ libraryPath: app.getPath('userData') })`, повторные вызовы ждут ту же
+инициализацию, нода не стартует при каждом запуске приложения без причины — только по первому
+обращению к CID). `main/ipc/manifest.handlers.ts` — `manifest:openByCid` дергает
+`ensureIpfsStarted()`, затем `cat()` (READ-функция из либы) на `${directoryCid}/manifest.json`,
+затем опционально `EpisodesDocument` по `episodesCid`, если `episodes[]` не встроен прямо в
+манифест.
+
+**Бинарник Kubo не в git** (`resources/kubo/` в `.gitignore`, как у Animatrona) — для dev/
+верификации скопирован локально с `apps/animatrona/resources/kubo/win/kubo.exe` (тот же
+дистрибутив, downloader-скрипт свой не заводился — задача взять готовый вместо повторного
+скачивания). `electron-builder.yml` дополнен `extraResources` записью `resources/kubo/win →
+kubo/win` — перед `nx build:win` бинарник нужно положить туда вручную (или скопировать оттуда же).
+
+**Headless-верификация реального запуска Kubo-ноды пройдена** (тот же `bun build`-бандл + прямой
+`electron.exe`, что и для БД/IPC): `ensureIpfsStarted()` реально поднял embedded Kubo 0.40.1,
+зарегистрировался на relay, RPC-клиент подключился — `getIpfsStatus()` вернул `isRunning: true,
+mode: "embedded", peerId: "12D3KooW...", apiUrl: "http://127.0.0.1:5011"`. Единственная грабля
+верификации (не относится к реальному приложению): `app.getAppPath()` в headless-скрипте,
+запущенном напрямую как `electron.exe scripts/.verify-bundle.cjs`, резолвится в `scripts/` (нет
+`package.json` с `main` рядом со входным файлом) — Kubo искал бинарник в
+`scripts/resources/kubo/win/kubo.exe`. В реальном dev/prod запуске (`main`-точка входа —
+`app/background.js`, `package.json` рядом) `app.getAppPath()` корректно указывает на корень
+приложения. Фикс для верификации — временный junction `scripts/resources` → `../resources`, не
+коммитится.
+
+Реального CID для проверки чтения манифеста не было (нет опубликованной раздачи в dev-окружении)
+— проверено только то, что нода поднимается и IPC-путь не падает синтаксически/типово
+(`typecheck:tsgo`+`lint` зелёные, `nx build`-сборка webpack чистая без предупреждений).

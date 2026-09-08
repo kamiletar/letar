@@ -1,3 +1,4 @@
+import type { OpenByCidResult } from '../../main/ipc/manifest.handlers'
 import type { RecentReleaseUpsertInput } from '../../main/ipc/recent-release.handlers'
 import type { TrackerInput } from '../../main/ipc/tracker.handlers'
 import type { RecentRelease, Settings, Tracker } from '../src/generated/prisma'
@@ -20,6 +21,14 @@ export interface ElectronAPI {
   settings: {
     get: () => Promise<Settings>
     update: (patch: Partial<Settings>) => Promise<Settings>
+  }
+
+  manifest: {
+    openByCid: (directoryCid: string) => Promise<OpenByCidResult>
+  }
+
+  ipfs: {
+    start: () => Promise<void>
   }
 }
 

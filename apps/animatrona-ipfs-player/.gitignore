@@ -15,3 +15,6 @@ next-env.d.ts
 
 # База данных (локальные данные)
 /prisma/data/
+
+# Kubo (IPFS) binaries (скачиваются при сборке — см. resources/kubo/README.md)
+resources/kubo/

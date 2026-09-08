@@ -13,6 +13,16 @@ module.exports = {
   },
   resolve: {
     extensions: ['.ts', '.js'],
+    // libs/ipfs-kubo-core компилируется под node16/nodenext — относительные импорты внутри неё
+    // пишут явный '.js' (per TS-конвенцию), extensionAlias учит webpack резолвить его в '.ts'
+    extensionAlias: {
+      '.js': ['.ts', '.js'],
+    },
+    alias: {
+      // SHARED IPFS/Kubo-логика (только READ-часть нужна плееру) — та же схема алиаса,
+      // что apps/animatrona/main/webpack.config.js
+      '@letar/ipfs-kubo-core': path.resolve(__dirname, '../../../libs/ipfs-kubo-core/src'),
+    },
   },
   module: {
     rules: [

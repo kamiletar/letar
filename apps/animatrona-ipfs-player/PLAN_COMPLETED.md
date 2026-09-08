@@ -76,6 +76,32 @@ AST не содержит полей миксина (они в `model.mixins`), 
 
 ---
 
+## Версия 0.4.0 (2026-09-08) — Фаза 1: подключение libs/ipfs-kubo-core, чтение по CID
+
+- `libs/ipfs-kubo-core` готова координатором (коммиты `2d07a906`/`03991a38` в Animatrona) —
+  подключена по образцу `apps/animatrona/main`: `package.json` dependency +
+  `implicitDependencies`, `tsconfig.json` path-алиас + `include`-glob, `main/webpack.config.js`
+  `resolve.alias` + новый `resolve.extensionAlias: { '.js': ['.ts', '.js'] }` (либа на
+  node16/nodenext, внутренние относительные импорты пишут явный `.js`).
+- `main/services/ipfs.ts` — `ensureIpfsStarted()` (ленивый singleton-старт Kubo-ноды,
+  `getKuboService().initialize({ libraryPath: app.getPath('userData') })`).
+- `main/ipc/manifest.handlers.ts` — `manifest:openByCid` (манифест + `EpisodesDocument`),
+  `ipfs:start`.
+- UI: кнопка «Открыть» в `renderer/app/page.tsx` реально запускает ноду, читает манифест,
+  показывает карточку раздачи (название, число эпизодов), сохраняет в `RecentRelease`.
+- Новая иконка приложения (`resources/icon.svg`) — бирюзовый градиент, play-треугольник в узле
+  сети с линиями к соседним узлам, вместо заглушки-буквы «A» от генератора.
+- `electron-builder.yml` — `extraResources` запись для `resources/kubo/win` (бинарник не в git,
+  как у Animatrona — копируется вручную перед сборкой).
+- **Headless-верификация реального запуска Kubo-ноды пройдена**: embedded Kubo 0.40.1 поднялся,
+  зарегистрировался на relay, RPC-клиент подключился (`getIpfsStatus()` → `isRunning: true`).
+  Реального CID для сквозной проверки чтения манифеста не было (нет опубликованной раздачи в
+  dev-окружении) — код проверен статически (`typecheck:tsgo`/`lint`/webpack-сборка зелёные).
+- **Не начато**: сам видеоплеер (воспроизведение эпизодов) — вне объёма этой сессии, следующий
+  шаг Фазы 1 для полного MVP «посмотрел по CID → посмотрел серию».
+
+---
+
 ## Версия 0.3.0 (2026-09-08) — Фаза 1 (частично): main-процесс
 
 - `main/utils/db.ts` — синглтон `PrismaClient` на `@prisma/adapter-libsql`, dev/prod-пути к БД

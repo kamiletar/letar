@@ -1,5 +1,6 @@
 import type { BrowserWindow } from 'electron'
 import { registerAppHandlers } from './app.handlers'
+import { registerManifestHandlers } from './manifest.handlers'
 import { registerRecentReleaseHandlers } from './recent-release.handlers'
 import { registerSettingsHandlers } from './settings.handlers'
 import { registerTrackerHandlers } from './tracker.handlers'
@@ -12,4 +13,5 @@ export function registerIpcHandlers(_getMainWindow: () => BrowserWindow | null):
   registerTrackerHandlers()
   registerRecentReleaseHandlers()
   registerSettingsHandlers()
+  registerManifestHandlers()
 }

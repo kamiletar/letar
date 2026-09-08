@@ -11,12 +11,20 @@ interface TrackerRow {
   description: string | null
 }
 
+interface OpenedRelease {
+  directoryCid: string
+  name: string
+  episodesCount: number
+}
+
 export default function HomePage() {
   const [trackers, setTrackers] = useState<TrackerRow[]>([])
   const [trackerName, setTrackerName] = useState('')
   const [trackerUrl, setTrackerUrl] = useState('')
   const [cidInput, setCidInput] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [opening, setOpening] = useState(false)
+  const [openedRelease, setOpenedRelease] = useState<OpenedRelease | null>(null)
 
   const reloadTrackers = () => {
     window.electronAPI.tracker.list().then(setTrackers)
@@ -46,13 +54,28 @@ export default function HomePage() {
     reloadTrackers()
   }
 
-  const handleOpenByCid = () => {
-    if (!cidInput.trim()) {
+  const handleOpenByCid = async () => {
+    const directoryCid = cidInput.trim()
+    if (!directoryCid || opening) {
       return
     }
-    // TODO: чтение манифеста по directoryCid через Kubo-узел — ждёт libs/ipfs-kubo-core
-    // (запрос выноса отправлен animatrona-coordinator-dev, тред ipfs-kubo-core-extraction).
-    setError('Просмотр по CID пока не реализован — ждём вынос libs/ipfs-kubo-core из Animatrona')
+    setError(null)
+    setOpening(true)
+    try {
+      const { manifest, episodes } = await window.electronAPI.manifest.openByCid(directoryCid)
+      setOpenedRelease({ directoryCid, name: manifest.name, episodesCount: episodes.length })
+      await window.electronAPI.recentRelease.open({
+        directoryCid,
+        name: manifest.name,
+        posterCid: manifest.posterCid ?? null,
+        episodesCount: episodes.length,
+      })
+    } catch (err) {
+      setOpenedRelease(null)
+      setError(err instanceof Error ? err.message : 'Не удалось открыть раздачу по CID')
+    } finally {
+      setOpening(false)
+    }
   }
 
   return (
@@ -75,8 +98,23 @@ export default function HomePage() {
               value={cidInput}
               onChange={(e) => setCidInput(e.target.value)}
             />
-            <Button onClick={handleOpenByCid}>Открыть</Button>
+            <Button onClick={handleOpenByCid} loading={opening}>
+              Открыть
+            </Button>
           </HStack>
+          {opening && (
+            <Text color="fg.muted" fontSize="sm" mt={2}>
+              Запускаю IPFS-узел и читаю манифест — при первом запуске это может занять минуту…
+            </Text>
+          )}
+          {openedRelease && (
+            <Box mt={3} borderWidth="1px" borderRadius="md" p={3}>
+              <Text fontWeight="medium">{openedRelease.name}</Text>
+              <Text fontSize="sm" color="fg.muted">
+                {openedRelease.episodesCount} эп. · {openedRelease.directoryCid}
+              </Text>
+            </Box>
+          )}
         </Box>
 
         <Separator />

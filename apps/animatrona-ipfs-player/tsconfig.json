@@ -47,7 +47,8 @@
       "@letar/forms-core/field-widgets": ["../../libs/forms-core/src/lib/field-widgets/index.ts"],
       "@letar/forms-core/testing": ["../../libs/forms-core/src/lib/testing/index.ts"],
       "@letar/forms-react/testing": ["../../libs/forms-react/src/lib/testing/index.ts"],
-      "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"]
+      "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
+      "@letar/ipfs-kubo-core": ["../../libs/ipfs-kubo-core/src/index.ts"]
     },
     "ignoreDeprecations": "6.0"
   },
@@ -63,7 +64,8 @@
     "../../libs/forms/src/**/*.tsx",
     "../../libs/forms-core/src/**/*.ts",
     "../../libs/forms-react/src/**/*.ts",
-    "../../libs/forms-react/src/**/*.tsx"
+    "../../libs/forms-react/src/**/*.tsx",
+    "../../libs/ipfs-kubo-core/src/**/*.ts"
   ],
   "exclude": [
     "node_modules",

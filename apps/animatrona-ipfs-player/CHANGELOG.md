@@ -6,6 +6,14 @@
 
 ### Added
 
+- **Фаза 1 продолжена: подключён `libs/ipfs-kubo-core`, реализовано чтение раздачи по CID.**
+  `main/services/ipfs.ts` (ленивый запуск Kubo-ноды), `main/ipc/manifest.handlers.ts`
+  (`manifest:openByCid` — манифест + список эпизодов), UI: кнопка «Открыть» запускает ноду,
+  читает манифест, показывает карточку раздачи и сохраняет в `RecentRelease`. Новая иконка
+  приложения (бирюзовый P2P-узел вместо заглушки-буквы генератора). Три точки подключения либы
+  (package.json/tsconfig/webpack alias) + `resolve.extensionAlias` для node16/nodenext-импортов
+  либы. Headless-верификация подтвердила реальный запуск embedded Kubo 0.40.1. Актуальный вопрос
+  вне объёма этой сессии — сам видеоплеер (Shaka Player) для просмотра эпизодов ещё не начат.
 - **Фаза 1 (частично): main-процесс — БД, IPC, UI-каркас.** `main/utils/db.ts` (синглтон
   `PrismaClient` + `@prisma/adapter-libsql`, dev/prod-пути к БД), `main/services/database.ts`
   (применение миграций через `sql.js` в упакованной сборке), IPC-хендлеры

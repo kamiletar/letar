@@ -47,3 +47,10 @@ extraResources:
     to: renderer/out
     filter:
       - '**/*'
+  # Kubo (Go IPFS) — полный узел для чтения/сидирования раздач по CID.
+  # Бинарник НЕ в git (resources/kubo/ в .gitignore) — скачивается вручную перед сборкой,
+  # тот же дистрибутив, что apps/animatrona/resources/kubo/win/kubo.exe
+  - from: resources/kubo/win
+    to: kubo/win
+    filter:
+      - kubo.exe

@@ -6,12 +6,20 @@
 import { app } from 'electron'
 import { registerIpcHandlers } from '../main/ipc'
 import { initializeDatabase } from '../main/services/database'
+import { ensureIpfsStarted, getIpfsStatus } from '../main/services/ipfs'
 import { closePrismaClient, getPrismaClient, initializePrismaDb } from '../main/utils/db'
 
 process.on('uncaughtException', (error) => {
   console.error('[FAIL] uncaughtException:', error)
   process.exit(1)
 })
+
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error(`${label}: таймаут ${ms}мс`)), ms)),
+  ])
+}
 
 app.whenReady().then(async () => {
   try {
@@ -24,6 +32,11 @@ app.whenReady().then(async () => {
     const settingsCount = await db.settings.count()
     console.log('[OK] initializeDatabase + initializePrismaDb + registerIpcHandlers прошли без ошибок')
     console.log(`[OK] tracker.count() = ${trackerCount}, settings.count() = ${settingsCount}`)
+
+    await withTimeout(ensureIpfsStarted(), 90_000, 'ensureIpfsStarted')
+    const status = getIpfsStatus()
+    console.log('[OK] ensureIpfsStarted прошёл без исключений')
+    console.log(`[OK] getIpfsStatus() = ${JSON.stringify(status)}`)
 
     await closePrismaClient()
     app.exit(0)

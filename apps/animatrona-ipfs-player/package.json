@@ -1,6 +1,6 @@
 {
   "name": "@letar/animatrona-ipfs-player",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "description": "Лёгкий IPFS-плеер аниме — просмотр раздач по CID, без импорта и кодирования",
   "author": "Kami Letar",
@@ -10,11 +10,13 @@
     "implicitDependencies": [
       "@letar/forms",
       "@letar/icon-generator",
+      "@letar/ipfs-kubo-core",
       "@letar/zenstack-fragments"
     ]
   },
   "dependencies": {
-    "@letar/icon-generator": "workspace:*"
+    "@letar/icon-generator": "workspace:*",
+    "@letar/ipfs-kubo-core": "workspace:*"
   },
   "devDependencies": {
     "electron": "44.2.0",

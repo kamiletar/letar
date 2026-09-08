@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type { RecentRelease, Settings, Tracker } from '../renderer/src/generated/prisma'
+import type { OpenByCidResult } from './ipc/manifest.handlers'
 import type { RecentReleaseUpsertInput } from './ipc/recent-release.handlers'
 import type { TrackerInput } from './ipc/tracker.handlers'
 
@@ -26,6 +27,15 @@ const electronAPI = {
   settings: {
     get: (): Promise<Settings> => ipcRenderer.invoke('settings:get'),
     update: (patch: Partial<Settings>): Promise<Settings> => ipcRenderer.invoke('settings:update', patch),
+  },
+
+  manifest: {
+    openByCid: (directoryCid: string): Promise<OpenByCidResult> =>
+      ipcRenderer.invoke('manifest:openByCid', directoryCid),
+  },
+
+  ipfs: {
+    start: (): Promise<void> => ipcRenderer.invoke('ipfs:start'),
   },
 }
 
