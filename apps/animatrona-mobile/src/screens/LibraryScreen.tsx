@@ -92,14 +92,12 @@ export function LibraryScreen({ navigation }: LibraryScreenProps) {
     return () => clearTimeout(timer)
   }, [search])
 
-  const [searching, setSearching] = useState(false)
-
   const fetchData = useCallback(async (isRefresh = false, searchQuery?: string) => {
     if (isRefresh) {
       setRefreshing(true)
     } else if (searchQuery) {
-      // Поиск — не показываем полноэкранный лоадер, чтобы не сбрасывать фокус
-      setSearching(true)
+      // Поиск — намеренно ничего не показываем: полноэкранный лоадер сбрасывает фокус
+      // с поля ввода. Отдельного индикатора поиска пока нет.
     } else {
       setLoading(true)
     }
@@ -129,7 +127,6 @@ export function LibraryScreen({ navigation }: LibraryScreenProps) {
     } finally {
       setLoading(false)
       setRefreshing(false)
-      setSearching(false)
     }
   }, [])
 

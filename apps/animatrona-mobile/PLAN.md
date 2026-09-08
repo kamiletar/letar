@@ -25,18 +25,50 @@
       раньше и вылезали `TS2719` и «Tried to register two views». Решение за координатором
       (задето и `animatrona-tv`) — сообщено письмом #1404.
 
-- [ ] ⚠️ **ESLint не запускается для этого приложения вообще.** У `animatrona-mobile` (и у
-      `animatrona-tv`) нет `eslint.config.*`, поэтому `@nx/eslint/plugin` не заводит им
-      inferred-таргет, а блок `"lint"` в `project.json` — только `options` без `executor`,
-      то есть мёртвая добавка к несуществующему таргету (`nx lint animatrona-mobile` →
-      «Cannot find configuration for task»). Проверка идёт только через `nx typecheck:tsgo`
-      и ручной `oxlint`. Завести конфиг по образцу `animatrona-mobile-ui` — у него таргет есть.
+- [x] ⚠️ **ESLint не запускался для этого приложения вообще** (закрыто 2026-09-08). Не было
+      `eslint.config.*`, поэтому `@nx/eslint/plugin` не заводил inferred-таргет, а блок `"lint"`
+      в `project.json` — только `options` без `executor`, мёртвая добавка к несуществующему
+      таргету (`nx lint animatrona-mobile` → «Cannot find configuration for task»). Заведён
+      `eslint.config.mjs`, блок `lint` заменён на связку `oxlint` → inferred `eslint .`, как у
+      `animatrona-tracker`. Проверено не по «Successfully ran target», а по числу файлов
+      (`eslint . -f json`): **85 файлов**, 5.8 с. `animatrona-tv` — не моя зона, конфиг передан
+      `animatrona-tv-dev` письмом (тред `rn-eslint-config`), применяет у себя сама.
+      ⚠️ Ориентир «по образцу `animatrona-mobile-ui`» из прежней формулировки был ложным:
+      этот проект живёт в `apps/animatrona/mobile-ui` и к React Native отношения не имеет —
+      его конфиг это три строки поверх корневого, RN-специфики в нём нет.
+
+- [ ] **Долг: правила `eslint-plugin-react-native` недоступны на ESLint 10.** Плагин
+      `eslint-plugin-react-native@5.0.0` (и `eslint-plugin-eslint-comments@3.2.0`, который тянет
+      пресет `@react-native/eslint-config/flat`) падают на ESLint 10 с
+      `TypeError: context.getSourceCode is not a function` — не «шумят», а роняют весь прогон,
+      поэтому подключить их нельзя вовсе. Выпали именно RN-специфичные проверки:
+      `react-native/no-unused-styles`, `no-inline-styles`, `no-color-literals`,
+      `split-platform-components`, `no-single-element-style-arrays`. Лечится только апдейтом
+      плагинов апстримом — перепроверять при каждом `deps update`. Из RN-пресета сейчас взято
+      вручную то, что работает: плагин `@react-native` (`no-deep-imports`) и список глобалов.
+
+- [ ] **Долг: 9 предупреждений `no-console`** (`index.js:11`, `src/navigation/RootNavigator.tsx:70`,
+      `src/screens/ConnectScreen.tsx:65,67,86`, `src/store/servers.ts:14,138,141,211`).
+      Правило корневого конфига разрешает только `console.warn`/`console.error`. Механически
+      заменять на `warn` **нельзя**: это засорит LogBox жёлтыми оверлеями на каждом запуске,
+      а лог версии бандла в `index.js` вообще предписан `CLAUDE.md` этого приложения как
+      обязательный (борьба с кэшированием Metro/Gradle). Правильное закрытие — маленький
+      логгер, гасящий вывод вне `__DEV__`, и точечный `eslint-disable` на версионных строках.
+      Отдельная задача, не часть настройки линта.
+
+- [ ] **Долг: 4 предупреждения `react-hooks/exhaustive-deps`**
+      (`src/hooks/usePictureInPicture.ts:128` — `enterPipMode`;
+      `src/screens/PlayerScreen.tsx:223` — `pip`, `:424` — `applyViewingModeToEpisode`,
+      `preferredAudioIndex`, `preferredSubtitleIndex`, `viewingMode`, `:575` — `episodeId`).
+      Все четыре — в плеере, где порядок эффектов завязан на жизненный цикл ExoPlayer:
+      добавление зависимости может перезапустить эффект на каждом кадре воспроизведения.
+      Разбирать по одному с проверкой на устройстве, не пакетным «дописать в массив».
 
 - [ ] **Вернуть обратную связь на тапы (haptic)** — удалён `react-native-haptic-feedback`, но `NativeHapticsModule` (TurboModule) уже есть. Нужно подключить `Haptics.light()` / `Haptics.medium()` в кнопки плеера, жесты, тапы по карточкам
 - [ ] **QR-сканер на ConnectScreen** — сейчас только ручной ввод адреса, нужна кнопка «Сканировать QR-код» для подключения к Desktop/Tracker
 - [ ] **Покадровая перемотка на паузе** — при паузе кнопки +/- 5 кадров. ExoPlayer: `player.seekTo()` с `SeekParameters.EXACT` или `player.seekToNext/PreviousMediaItem()` на уровне кадров
 
-## Текущая версия: 0.7.7
+## Текущая версия: 0.7.8
 
 ---
 

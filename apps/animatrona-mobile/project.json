@@ -56,12 +56,28 @@
         "cwd": "apps/animatrona-mobile/android"
       }
     },
-    "lint": {
-      "options": {
-        "args": [
-          "**/*.{ts,tsx}"
+    "oxlint": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.oxlintrc.json"
+      ],
+      "metadata": {
+        "description": "Fast lint with oxlint",
+        "technologies": [
+          "oxlint"
         ]
+      },
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "apps/animatrona-mobile"
       }
+    },
+    "lint": {
+      "dependsOn": [
+        "oxlint"
+      ]
     },
     "typecheck": {
       "command": "tsc --noEmit",

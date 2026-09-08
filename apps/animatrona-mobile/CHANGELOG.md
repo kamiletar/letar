@@ -6,6 +6,30 @@
 
 ## [Unreleased]
 
+## [0.7.8] - 2026-09-08
+
+### Added
+
+- Заведён `eslint.config.mjs` — до этого ESLint не запускался для приложения **вообще**.
+  `@nx/eslint/plugin` не порождал inferred-таргет без конфига, а блок `"lint"` в `project.json`
+  состоял из одних `options` без `executor` — мёртвая добавка к несуществующему таргету, из-за
+  которой `nx lint animatrona-mobile` падал с «Cannot find configuration for task». Обязательный
+  шаг чек-листа перед коммитом молча не выполнял ничего. Состав конфига:
+  `nx.configs['flat/react-typescript']` + корневой `eslint.config.mjs` + глобалы рантайма RN
+  (`__DEV__`, `ErrorUtils`, …) + правило `@react-native/no-deep-imports` + игноры `android/**`,
+  `ios/**`, `build/**`. Проверено по числу файлов, а не по зелёному статусу: 85 файлов, 5.8 с
+- Таргет `oxlint` и `lint.dependsOn: ["oxlint"]` — как у `animatrona-tracker`, чтобы `nx lint`
+  делал обещанное в корневом `CLAUDE.md`: сначала oxlint (fast-fail), затем ESLint
+
+### Removed
+
+- `timeTextStyle` в `SeekBar.tsx` — `useAnimatedStyle`, который ни к чему не применялся:
+  worklet считался на каждом кадре drag впустую
+- Состояние `searching` в `LibraryScreen.tsx` — писалось в трёх местах и не читалось нигде.
+  Индикатора поиска на экране нет, так что два лишних ре-рендера на каждый запрос уходили
+  в никуда. Ветка `else if (searchQuery)` осталась с комментарием: полноэкранный лоадер во
+  время поиска не показывается намеренно, он сбрасывает фокус с поля ввода
+
 ## [0.7.7] - 2026-09-08
 
 ### Changed

@@ -143,12 +143,6 @@ export function SeekBar({ currentTime, duration, onSeek }: SeekBarProps) {
     }
   })
 
-  // Текст времени — при drag показываем seek-позицию
-  // (dragRatio — shared value, нужен animated text)
-  const timeTextStyle = useAnimatedStyle(() => {
-    return { opacity: 1 } // Для re-render при drag
-  })
-
   return (
     <View style={styles.container}>
       <Text style={styles.timeText}>{formatDuration(currentTime)}</Text>
