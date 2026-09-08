@@ -89,7 +89,7 @@ function NavLink({ href, label, description }: { href: string; label: string; de
 export function Nav() {
   return (
     <Box
-      as="nav"
+      asChild
       w="240px"
       minH="100vh"
       borderRightWidth="1px"
@@ -99,48 +99,50 @@ export function Nav() {
       left={0}
       overflowY="auto"
     >
-      <Heading size="md" mb={4}>
-        <Link asChild color="inherit" _hover={{ textDecoration: 'none' }}>
-          <NextLink href="/">@letar/forms</NextLink>
+      <nav>
+        <Heading size="md" mb={4}>
+          <Link asChild color="inherit" _hover={{ textDecoration: 'none' }}>
+            <NextLink href="/">@letar/forms</NextLink>
+          </Link>
+        </Heading>
+
+        <Text fontSize="xs" fontWeight="bold" color="fg.muted" mb={2} px={3}>
+          APP
+        </Text>
+        <Stack gap={1} mb={4}>
+          {appPages.map((p) => <NavLink key={p.href} {...p} />)}
+        </Stack>
+
+        <Separator mb={4} />
+
+        <Text fontSize="xs" fontWeight="bold" color="fg.muted" mb={2} px={3}>
+          EXAMPLES
+        </Text>
+        <Stack gap={0.5}>
+          {examples.map((ex) => <NavLink key={ex.href} {...ex} />)}
+        </Stack>
+
+        <Separator my={4} />
+
+        <Link
+          href="https://github.com/kamiletar/letar/tree/main/apps/form-example"
+          target="_blank"
+          rel="noopener noreferrer"
+          display="block"
+          px={3}
+          py={1.5}
+          borderRadius="md"
+          color="fg.muted"
+          _hover={{ bg: 'brand.subtle', color: 'fg' }}
+        >
+          <HStack gap={1.5}>
+            <LuGithub />
+            <Text fontWeight="medium" fontSize="sm">
+              GitHub
+            </Text>
+          </HStack>
         </Link>
-      </Heading>
-
-      <Text fontSize="xs" fontWeight="bold" color="fg.muted" mb={2} px={3}>
-        APP
-      </Text>
-      <Stack gap={1} mb={4}>
-        {appPages.map((p) => <NavLink key={p.href} {...p} />)}
-      </Stack>
-
-      <Separator mb={4} />
-
-      <Text fontSize="xs" fontWeight="bold" color="fg.muted" mb={2} px={3}>
-        EXAMPLES
-      </Text>
-      <Stack gap={0.5}>
-        {examples.map((ex) => <NavLink key={ex.href} {...ex} />)}
-      </Stack>
-
-      <Separator my={4} />
-
-      <Link
-        href="https://github.com/kamiletar/letar/tree/main/apps/form-example"
-        target="_blank"
-        rel="noopener noreferrer"
-        display="block"
-        px={3}
-        py={1.5}
-        borderRadius="md"
-        color="fg.muted"
-        _hover={{ bg: 'brand.subtle', color: 'fg' }}
-      >
-        <HStack gap={1.5}>
-          <LuGithub />
-          <Text fontWeight="medium" fontSize="sm">
-            GitHub
-          </Text>
-        </HStack>
-      </Link>
+      </nav>
     </Box>
   )
 }

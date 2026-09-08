@@ -39,7 +39,16 @@
       ],
       "outputs": ["{projectRoot}/src/generated"]
     },
-    "build": {},
+    "build": {
+      "options": {
+        "command": "next build --webpack"
+      }
+    },
+    "dev": {
+      "options": {
+        "command": "next dev --webpack"
+      }
+    },
     "typecheck:tsgo": {
       "dependsOn": ["zenstack:generate"],
       "executor": "nx:run-commands",

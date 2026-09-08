@@ -32,16 +32,15 @@ export default function ServerErrorsExamplePage() {
         {Object.keys(ERRORS).map((key) => (
           <Box
             key={key}
-            as="button"
+            asChild
             px={3}
             py={1.5}
             fontSize="sm"
             borderRadius="md"
             bg={selected === key ? 'blue.600' : 'gray.subtle'}
             color={selected === key ? 'white' : 'fg.default'}
-            onClick={() => setSelected(key)}
           >
-            {key}
+            <button onClick={() => setSelected(key)}>{key}</button>
           </Box>
         ))}
       </HStack>
