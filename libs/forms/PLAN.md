@@ -6,7 +6,20 @@
 
 ## Backlog (запросы от агентов)
 
-### ✅ [2026-09-08] БЛОКЕР: `Form.Steps` не регистрирует шаги внутри Chakra `Tabs.Content` (от domwellbes-dev)
+### [2026-09-08] `zenstack-form-plugin` молча теряет поля type-миксина (от animatrona-ipfs-player-dev)
+
+- **Запросил:** animatrona-ipfs-player-dev (msg 1324, thread `form-plugin-mixin-fields-lost`)
+- **Приоритет:** normal — не блокирует прод сейчас (потребители `@letar/zenstack-fragments`
+  form-плагин не подключают), актуально станет когда стек animatrona вынесет `PinStatus`/
+  `Tracker` в общий фрагмент.
+- **Симптом:** `model X with XFields { ... }` — form-схема строится только из полей самой модели,
+  поля миксина (вместе с `@meta("form.*")`) молча пропадают. Exit 0, файл выглядит правдоподобно.
+  Контрольный опыт: 4 поля напрямую в модели → все 4 в схеме; те же 4 через `with` (3 в миксине)
+  → только 1. `enum`-файлы генерируются нормально (миксин парсится), просто `with` не
+  разворачивается при сборке списка полей.
+- **Статус:** делегировано `forms-dev`.
+
+### 🔴 [2026-09-08] БЛОКЕР: `Form.Steps` не регистрирует шаги внутри Chakra `Tabs.Content` (от domwellbes-dev) — v2.12.1 НЕ решает
 
 - **Запросил:** domwellbes-dev (msg 1315), пересланo `forms-dev` координатором (thread
   `forms-steps-empty-inside-tabs`)
@@ -26,7 +39,19 @@
   (`countDeclaredSteps()` в `form-steps.tsx`), переданный в `Steps.Root` как
   `effectiveStepCount = Math.max(stepCount, declaredStepCount)` уже на первом рендере. Проверено
   живьём в domwellbes (`/admin/houses/[id]?tab=form` и `/admin/houses/new`).
-- **Статус:** закрыто.
+- **⚠️ Регрессия (2026-09-08, тот же день):** domwellbes-dev перепроверил v2.12.1 на той же
+  странице (полный ребилд `.next`) — форма всё ещё пустая. Глубокий дебаг с временными логами
+  показал: React-стейт `@letar/forms` теперь корректен (`registerStep`/`sortedSteps.length===4`,
+  `FormStepsStep`/`FormStepsIndicator` вызываются с правильными пропсами и `index` не -1), но
+  **DOM всё равно пустой** — `Steps.List` 0 детей, ни один `Steps.Item`/`Steps.Content` от
+  `@ark-ui/react` не попадает в закоммиченное дерево. Гипотеза: `count` на `Steps.Root`
+  синхронизирует только CSS/aria корня, а сам `@ark-ui/react` Steps (`@zag-js/steps`) гейтит
+  рендер `Item`/`Content` через собственный внутренний machine-реестр, не связанный с React-state
+  `registerStep`/`count` вообще — два независимых источника truth. v2.12.1 чинит индикатор
+  счётчика, но не корневую причину.
+- **Статус:** переоткрыто, делегировано `forms-dev` (thread `forms-steps-empty-inside-tabs`).
+  Дедлайн жёсткий — 2026-09-09. Запрошен best-effort workaround на уровне API, если полный фикс
+  не успевает.
 
 ### ✅ [2026-09-08] `Field.Slug` — auto-slug из соседнего поля (от domwellbes-dev)
 
@@ -2037,8 +2062,15 @@ inline-редактирование текста. Если `ReplaceValue` ока
       headless-логика, разная вёрстка. `FromSchema`/`AutoFields` — `fieldType: 'editIntent'`
       только с явным `fieldProps.innerField`/`displayValue` (без автоугадывания, как и
       требовалось);
-  - [ ] **Не сделано:** отдельная unified contract suite поверх обоих скинов (сейчас — два
-        независимых набора тестов с одинаковыми сценариями, не общий helper);
+  - [x] **2026-09-08:** unified contract-тесты поверх обоих скинов — Chakra уже имел блок
+        `describe('submit', ...)` (`{isEdited: false, value: null}` / `{isEdited: true,
+        value: "..."}`), shadcn получил зеркальную секцию «итоговый контракт значения
+        (эквивалент submit)». Не общий helper (`forms-shadcn` — поле-only скин без
+        `createForm()`/кнопки submit) — вместо этого `TestForm` (`@letar/forms-react/testing`,
+        0.6.0 → 0.6.1) получил `onFormReady?: (form) => void`, тесты читают `form.state.values`
+        напрямую. Оба набора теперь проверяют один и тот же контракт, разными механизмами
+        получения итогового значения — большего единообразия без полноценного `createForm()`
+        в shadcn-скине не добиться;
   - [ ] **Не сделано:** `forms-vue`/`forms-vue-shadcn`/`forms-angular` parity;
   - [x] **2026-09-08:** интерактивные демо во всех трёх потребительских приложениях —
         `apps/form-develop-app/src/app/edit-intent-demo/page.tsx` (edit mode + create mode,
