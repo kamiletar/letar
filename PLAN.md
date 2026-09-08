@@ -387,37 +387,7 @@ type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAut
 🟡 ЧАСТИЧНО — основное сделано, остались хвосты (см. §0); ⏳ В РАБОТЕ — активная работа не завершена;
 без маркера — не начат.
 
-### Этап 0 — Доставка писем (первопричина) ✅ ЗАКРЫТО (2026-09-03, проверено живьём)
-
-- Аудит `SMTP_FROM_EMAIL`/SMTP на всех (`/sync-env`, `email-maddy`); для коммерсов — домен письма = домен клиента (§2.4).
-- **DKIM/SPF/DMARC per-домен (явный deliverable).** Техн. первопричина «форвард режется gmail» (§14.2): валидные
-  DNS-записи для каждого отправляющего домена (`letar.best` и доменов коммерческих приложений — список в
-  `.claude/private/COMPLIANCE.md`). Без них письма в спам/режутся даже при верном `SMTP_FROM`.
-- **Baseline-метрики (снять ДО правок).** Зафиксировать старт: % доставки, % верификации, число застрявших
-  аккаунтов (`emailVerified` пусто/false). Иначе успех Этапа 0/2 недоказуем.
-- ✅ **Централизованный лог `success === false` в `@letar/email`** (сессия №1): `reportEmailFailure({ type, to, error })`
-  → `[email] send failed {...}` (виден в `docker logs`); `setEmailFailureAlerter` — env-gated точка расширения
-  для Telegram/Umami (интеграции — инфра-сессия); bump 0.1.0→0.2.0 + CHANGELOG. ✅ Фикс игнорируемого результата
-  в mandala (register/resend actions). aboi — submodule, отдельная сессия.
-- **Алертинг (Вариант B + C — §13.4):**
-  - **B — Telegram-webhook:** при `success === false` опциональный вызов в `@letar/email`;
-    дебаунс — алерт только на 3 подряд `success === false` одного типа;
-    конфигурация: `TELEGRAM_ALERT_BOT_TOKEN`, `TELEGRAM_ALERT_CHAT_ID` в `.env.docker` (токен **не хранить в коде/плане**).
-  - **C — Umami event:** `umami.track('smtp-failure', { type, appId, errorCode })` для трендов и % ошибок.
-  - Оба варианта — опциональные (пустые переменные = отключено), без ломающих изменений API `@letar/email`.
-- **✓ DoD (проверено 2026-09-03):** ✅ canary зелёная **≥14 суток подряд** (`email-canary-state.json`
-  на s2: `consecutiveFailures: 0` у `internal`/`external`, последний алерт — 2026-08-20, с тех пор ни
-  одного сбоя); ✅ 0 проигнорированных `SendEmailResult` **по архитектуре, не по чек-листу вызовов** —
-  `libs/email/src/provider.ts:183` зовёт `reportEmailFailure()` внутри самого `sendEmail()`, до
-  возврата результата, поэтому сбой централизованно логируется/алертится независимо от того, читает
-  ли вызывающий код `.success` (проверено на fire-and-forget `driving-school/register.action.ts:144` —
-  `send()` никогда не бросает, безопасен без `.catch()`); ⚠️ **baseline-метрики так и не были сняты**
-  (искать в `PLAN.md` — 0 зафиксированных чисел `% доставки`/`% верификации`/застрявших аккаунтов) —
-  момент «снять ДО правок» прошёл месяцы назад, задним числом честный baseline уже невозможен, это
-  нереализуемое по времени требование DoD, а не открытый пробел. Закрываю этап по факту здорового
-  текущего состояния (канарейка + централизованный лог), а не по букве изначального DoD.
-- **Зависимости:** нет. Без доходящих писем resend бессмыслен.
-- ℹ️ **Смежная инфра готова (2026-07-05):** `dashboard`'s `Alert`/`sendTelegramNotification` pipeline существовал с самого создания, но нигде не вызывался (мёртвый код) — теперь впервые задействован через `POST /api/alerts` (`dashboard-agent` → `CRON_FAILED` при провале cron-задач). dsperevod получил проактивный `/api/cron/email-health-check` (`transporter.verify()` каждые 6ч). Это ДРУГОЙ механизм, чем `setEmailFailureAlerter` из этого этапа (проверка живости SMTP по расписанию, а не алерт на каждый неудавшийся send) — но при реализации B/C variant для `@letar/email` стоит переиспользовать уже рабочий `dashboard`'s `/api/alerts` вместо отдельной Telegram-интеграции. Детали: `apps/dashboard/PLAN_COMPLETED.md`, `apps/dashboard-agent/PLAN_COMPLETED.md`, `apps/dsperevod/CHANGELOG.md` (v0.5.4).
+### Этап 0 — Доставка писем (первопричина) ✅ ЗАКРЫТО (2026-09-03) — перенесено в `PLAN_COMPLETED.md`
 
 ### Этап 0.6 — Завершение ренейма `lena` → `letar` (исторические хвосты) 🟡 ЧАСТИЧНО
 
@@ -814,122 +784,12 @@ resolve --applied` (не `--rolled-back`, как планировалось из
 
 ---
 
-## 13. Предложения архитектора (поверхностный анализ — нужны уточнения)
+## 13. Предложения архитектора — все пункты закрыты, перенесено в `PLAN_COMPLETED.md`
 
-> ⚠️ **Предупреждение:** Это результат поверхностного анализа кода и документации без глубокого погружения
-> в runtime-поведение и edge-case'ы. Каждый пункт требует обсуждения перед включением в план.
-> Вопросы для уточнения — в §13.0.
-
-### 13.0 Вопросы для уточнения — ЗАКРЫТЫ
-
-1. **D1 / приоритет:** ✅ **aboi** — первый эталон Этапа 2.
-2. **Passkeys:** ✅ **Делаем** — Этап 6.5, через Ключницу, для kami/time/grandslamcup.
-3. **SMTP-алертинг:** ✅ **Вариант B + C** — Telegram-webhook + Umami events (Этап 0).
-   Конфиг: `TELEGRAM_ALERT_BOT_TOKEN`, `TELEGRAM_ALERT_CHAT_ID` в `.env.docker`. Токен — только в `.env`, не в коде.
-4. **Tier 2 / динамика:** ✅ **Отложено** до заключительных этапов — D8 в §9, spike перед реализацией.
-5. **Ключница OIDC / refresh:** 🔲 Не подтверждено. Проверить при работе над Этапом 6 (kami).
-6. **Rate-limit NAT:** ✅ NAT не актуален (пользователи из разных мест) — IP-based достаточен.
-
----
-
-### 13.1 Уязвимость: SSE endpoint с email в URL
-
-**Проблема.** Текущая реализация SSE: `/api/auth/verification-stream/${email}` — email в URL.
-Любой может подписаться на поток чужого email и узнать факт верификации (enumeration юзеров).
-
-**Рекомендация.** Заменить email-параметр на одноразовый `streamToken` (UUID), который:
-
-- генерируется в сервер-экшене при создании PIN,
-- хранится в `verificationToken.streamToken`,
-- инвалидируется при верификации или истечении PIN.
-
-```typescript
-// Вместо /api/auth/verification-stream/${email}
-// → /api/auth/verification-stream/${streamToken}
-```
-
-**Объём:** небольшой — `token-manager.ts`, SSE-роут, клиентский `useVerificationStream`.
-**Зависимости:** Этап 1 (рефакторинг pin-auth). Включить как sub-task Этапа 1.
-
----
-
-### 13.2 Timing-атака на PIN: нужен constant-time compare
-
-**Проблема.** В `pin-validator.ts:90`: `verificationToken.pin !== pin` — строковое сравнение
-уязвимо к timing-атаке (теоретически, при короткой сети и предсказуемом серверном времени).
-
-**Рекомендация.** Заменить на `crypto.timingSafeEqual`:
-
-```typescript
-import { timingSafeEqual } from 'crypto'
-
-const storedPin = Buffer.from(verificationToken.pin, 'utf8')
-const inputPin = Buffer.from(pin.padEnd(storedPin.length), 'utf8')
-const match = storedPin.length === inputPin.length && timingSafeEqual(storedPin, inputPin)
-```
-
-**Объём:** 5 строк в `pin-validator.ts`. Низкий риск регрессий.
-**Зависимости:** нет — сделать в Этапе 1 как hardening.
-
----
-
-### 13.3 Rate-limit: два уровня (IP + email) ✅ уточнено
-
-NAT не актуален (§13.0.6). Итоговая конфигурация:
-
-- **IP-уровень:** `{ window: 60, max: 10 }` — защита от burst-flood.
-- **Email-уровень:** `{ window: 3600, max: 5 }` — защита от targeted harassment на конкретный адрес.
-- Реализация: `rateLimit.customRules` Better Auth, ключ = `ip + email`.
-
----
-
-### 13.4 SMTP graceful degradation: UX при failure ✅ включено в план
-
-Включено в Этап 0 (алертинг B+C) и Этап 1 (UX `useResendCountdown`):
-
-- Cooldown не применяется при `success === false`.
-- Пользователю: нейтральное сообщение без деталей ошибки.
-- Telegram: 3 подряд failure → webhook. Umami: event на каждый failure для трендов.
-- ⚠️ `TELEGRAM_ALERT_BOT_TOKEN` и `TELEGRAM_ALERT_CHAT_ID` — только в `.env.docker`, не в коде.
-
----
-
-### 13.5 Динамика OAuth-провайдеров Better Auth ✅ отложено → D8
-
-Для существующих коммерческих приложений (каждое — отдельный деплой) динамика не нужна.
-Актуально только для будущей «SaaS Ключницы». Перенесено в D8 §9, spike перед реализацией.
-
----
-
-### 13.6 Passkeys / WebAuthn ✅ делаем → Этап 6.5
-
-Решено. Описание — Этап 6.5 (детали — в `PLAN_COMPLETED.md`).
-
----
-
-### 13.7 Ключница OIDC: refresh-token handling 🔲 проверить в Этапе 6
-
-Sub-task для Этапа 6 (kami): проверить `accessTokenExpiration`, реакцию на 401, необходимость
-`offline_access` scope. Включено в описание Этапа 6.
-
----
-
-### 13.8 Авто-логин токен: гарантия single-use ✅ включено в план → Этап 1
-
-Включено в security hardening Этапа 1. Адаптер `updateTokenForAutoLogin` — delete + create, не update.
-
----
-
-### 13.9 Наблюдаемость: KPI верификации ✅ включено → Этап 0 + Этап 2
-
-Umami events: отправка письма, успешная верификация, resend — добавить в server actions Этапа 2 (aboi).
-Telegram alerting — в Этапе 0. Вместе дают картину: % доставки + % верификации.
-
----
-
-### 13.10 Nx module-boundary tags ✅ включено → Этап 0.5
-
-Описание — Этап 0.5 (детали — в `PLAN_COMPLETED.md`).
+> Разовый поверхностный аудит (SSE-токен, timing-safe PIN, rate-limit, SMTP degradation,
+> динамика OAuth, passkeys, refresh-token, single-use auto-login токен, KPI, module-boundary
+> tags) — все 10 пунктов закрыты, решения отражены в roadmap §7 и §9. Полный текст с деталями —
+> [PLAN_COMPLETED.md](/PLAN_COMPLETED.md).
 
 ---
 
