@@ -35,7 +35,9 @@ import type { FolderEpisode } from './types'
 interface EpisodeSidebarProps {
   /** Название папки */
   folderName: string | null
-  /** URL постера аниме — заполняется только при однозначном опознании папки по Shikimori */
+  /** URL постера аниме — источник зависит от потребителя (Shikimori-опознание в animatrona,
+   * локальный файл poster/cover/folder.jpg в animatrona-folder-player), `null`/`undefined`,
+   * если постер не найден */
   posterUrl?: string | null
   /** Основные эпизоды */
   episodes: FolderEpisode[]
