@@ -529,6 +529,13 @@ unit-тест с настоящими (не замоканными) запрос
 pre-commit-хука не видел `.exe`-shim на Windows ·
 [dprint-eslint-curly-conflict](/.claude/docs/dprint-eslint-curly-conflict.md) `--fix` и `fmt`
 откатывают друг друга ·
+[react-native-eslint-flat-config-eslint10](/.claude/docs/react-native-eslint-flat-config-eslint10.md)
+⚠️ пресет `@react-native/eslint-config/flat` под ESLint 10 роняет прогон целиком
+(`context.getSourceCode is not a function` из `eslint-plugin-eslint-comments@3.2.0`), та же
+несовместимость у `eslint-plugin-react-native@5.0.0` — RN-правила (`no-unused-styles`,
+`no-inline-styles`, …) недоступны; рабочий `@react-native/eslint-plugin` резолвится только
+через `createRequire`, а сам файл конфига без починки блока `lint` в `project.json` таргет
+не создаёт ·
 [oxlint-eslint-disable-directive-namespace-mismatch](/.claude/docs/oxlint-eslint-disable-directive-namespace-mismatch.md)
 ⚠️ `oxlint-disable*` и `eslint-disable*` — раздельные неймспейсы директив подавления, не
 взаимозаменяемые даже при совпадении имени правила (`react-hooks/exhaustive-deps` реализован в
