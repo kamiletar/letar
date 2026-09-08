@@ -70,7 +70,7 @@ const nativeSelectOptions = [
 // --- Zod-схема со всеми полями ---
 
 const Schema = z.object({
-  // === Текстовые (7) ===
+  // === Текстовые (8) ===
   name: z.string().meta({ ui: { title: 'String', placeholder: 'Single-line text' } }),
   bio: z.string().meta({ ui: { title: 'Textarea', placeholder: 'Multi-line text...' } }),
   password: z.string().meta({ ui: { title: 'Password' } }),
@@ -81,6 +81,7 @@ const Schema = z.object({
   nickname: z.string().meta({ ui: { title: 'Editable (click to edit)' } }),
   passport: z.string().meta({ ui: { title: 'MaskedInput (passport)' } }),
   content: z.string().meta({ ui: { title: 'RichText (WYSIWYG)' } }),
+  slug: z.string().meta({ ui: { title: 'Slug (mirrors "String" above)' } }),
 
   // === Числовые (6) ===
   quantity: z.number().meta({ ui: { title: 'Number' } }),
@@ -195,6 +196,7 @@ export default function AllFieldsPage() {
           nickname: 'Click to edit',
           passport: '',
           content: '',
+          slug: '',
           // Числовые
           quantity: 1,
           itemCount: 5,
@@ -239,8 +241,8 @@ export default function AllFieldsPage() {
         onSubmit={async (data) => alert(JSON.stringify(data, null, 2))}
       >
         <Stack gap={4}>
-          {/* === ТЕКСТОВЫЕ (7) === */}
-          <Heading size="sm">Text Fields (7)</Heading>
+          {/* === ТЕКСТОВЫЕ (8) === */}
+          <Heading size="sm">Text Fields (8)</Heading>
           <Form.Field.String name="name" />
           <Form.Field.Textarea name="bio" />
           <Form.Field.Password name="password" />
@@ -248,6 +250,7 @@ export default function AllFieldsPage() {
           <Form.Field.Editable name="nickname" />
           <Form.Field.MaskedInput name="passport" mask="99 99 999999" />
           <Form.Field.RichText name="content" minHeight="120px" />
+          <Form.Field.Slug name="slug" source="name" />
 
           <Separator />
 
