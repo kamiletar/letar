@@ -169,11 +169,11 @@
       `pin-manager.ts` держит в `pins.json`, не в БД. Пересечение сводится к `id`/`cid`/
       таймстемпам — слишком тонко, чтобы оправдать связанность двух приложений. Решать в 0.2,
       когда станет ясно, нужна ли плееру вообще таблица пинов.
-- [ ] **0.4 Перевести Animatrona на фрагмент** — правка `apps/animatrona/schema/models/`,
-      **не в scope этого приложения**, идёт задачей через `animatrona-coordinator-dev`.
-      Приёмка: `nx zenstack:generate animatrona` → `git diff` по сгенерированной
-      `schema.prisma` показывает только изменение порядка объявлений, не состава полей →
-      `nx db:push animatrona` не находит дрейфа → `nx typecheck:tsgo animatrona` зелёный.
+- [x] **0.4 Перевести Animatrona на фрагмент** — ✅ выполнено `animatrona-dev` 2026-09-08,
+      коммит `0da07607` (`federation.zmodel`: −28 строк, `model Tracker with TrackerFields`).
+      Проверено независимо с нашей стороны: состав `Tracker` в её сгенерированной
+      `schema.prisma` **совпал со слепком до перевода** — те же 24 строки полей/атрибутов/
+      индексов, дрейфа нет, миграция не потребовалась. Путь для схемы плеера свободен.
 - [ ] **0.5 Завести `schema.zmodel` плеера** на готовом фрагменте: `datasource` sqlite,
       `plugin policy` (обязателен, иначе `@@allow` из фрагмента не резолвится), `plugin prisma`,
       свои модели (кэш раздачи по CID, урезанный `Settings`).
@@ -267,6 +267,30 @@ Animatrona (прогресс **без FK** на библиотеку — ров�
 `chaptersMigrated`. `ipfsStorageMaxGb` дефолт снижен с 500 до 100 ГБ — плеер не держит свою
 библиотеку на раздаче.
 
+### Ключ прогресса просмотра — решено владельцем (2026-09-08)
+
+`releaseKey` = **`shikimoriId`, когда он есть, иначе `directoryCid`**. Владелец подтвердил: в
+манифестах `shikimoriId` должен быть всегда, `directoryCid` — страховка на случай, если его
+почему-то не оказалось.
+
+Где брать (точный путь для реализации): `AnimeManifest.animeInfoCid` → достать по этому CID
+документ `AnimeInfo` → `animeInfo.externalIds.shikimori`. В типах
+(`libs/animatrona-types/src/anime-info.ts:108`) поле `externalIds` **обязательное**, а
+`shikimori?: number` внутри — опциональный: отсюда и страховка.
+
+Почему не просто `directoryCid`: он меняется при **каждом** обновлении раздачи (вышла новая
+серия → новый CID директории), и весь прогресс по сериалу осиротел бы еженедельно.
+
+```ts
+/** Стабильный ключ раздачи: shikimoriId, иначе CID директории */
+export function getReleaseKey(shikimoriId: number | undefined, directoryCid: string): string {
+  return shikimoriId !== undefined ? `shikimori:${shikimoriId}` : `cid:${directoryCid}`
+}
+```
+
+Префиксы обязательны — без них числовой ID и CID могут теоретически совпасть по строке, а
+`@@unique([releaseKey, episodeNumber])` этого не заметит.
+
 ### Что это добавляет к общему фрагменту
 
 Два новых кандидата, оба — чистое пересечение без relation'ов:
@@ -281,6 +305,218 @@ Animatrona (прогресс **без FK** на библиотеку — ров�
   модель объявляет сама.
 
 Оба требуют правки `apps/animatrona` → идут задачей координатору, вместе с 0.4.
+
+## Задание на реализацию (шаги 0.5 и 0.6) — готово к исполнению
+
+Всё спроектировано и проверено, ниже — то, что можно делать без повторного исследования.
+Фрагмент `TrackerFields` уже в репозитории (коммит `346990c0`), синтаксис ниже прогнан на
+реальном `zenstack generate` 3.9.3.
+
+### Шаг 0.5 — завести `apps/animatrona-ipfs-player/schema.zmodel`
+
+Файл целиком, можно вставлять как есть:
+
+```zmodel
+import "../../libs/zenstack-fragments/src/animatrona"
+
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider      = "prisma-client-js"
+  output        = "./prisma"
+  binaryTargets = ["native", "windows"]
+}
+
+plugin policy {
+  provider = "@zenstackhq/plugin-policy"
+}
+
+plugin prisma {
+  provider = "@core/prisma"
+  output   = "./renderer/src/generated/schema.prisma"
+}
+
+plugin formSchema {
+  provider = "../../libs/zenstack-form-plugin/dist/index.js"
+  output   = "./renderer/src/generated/form-schemas"
+}
+
+/// Предпочтение дорожек при первом просмотре
+///
+/// ⚠️ Временная локальная копия enum'а из `apps/animatrona/schema/models/media.zmodel`.
+/// Консолидация во фрагмент отложена намеренно — см. «Отложено» ниже.
+enum TrackPreference {
+  /// Русская озвучка + субтитры надписей
+  RUSSIAN_DUB
+  /// Оригинальная дорожка + полные субтитры
+  ORIGINAL_SUB
+  /// Автовыбор по доступности
+  AUTO
+}
+
+/// Трекер — источник раздач. Все поля из общего миксина, своих не нужно.
+model Tracker with TrackerFields {
+}
+
+/// Недавно открытая раздача — тонкая карточка для списка «недавнее».
+///
+/// НЕ кеш метаданных: всё содержательное лежит в IPFS по `directoryCid` и неизменяемо.
+/// Здесь ровно то, чем нарисовать карточку, когда сети нет.
+model RecentRelease {
+  id             String    @id @default(cuid())
+
+  /// CID директории раздачи — что именно открывали
+  directoryCid   String    @unique
+
+  /// Название (из манифеста, для отображения)
+  name           String
+
+  /// CID постера
+  posterCid      String?
+
+  /// Количество эпизодов в раздаче
+  episodesCount  Int       @default(0)
+
+  /// Shikimori ID — стабильный ключ раздачи между её версиями
+  shikimoriId    Int?
+
+  /// Откуда пришла раздача; null — CID ввели руками
+  trackerId      String?
+  tracker        Tracker?  @relation(fields: [trackerId], references: [id], onDelete: SetNull)
+
+  firstOpenedAt  DateTime  @default(now())
+  lastOpenedAt   DateTime  @default(now())
+
+  // Desktop-приложение без аутентификации
+  @@allow('all', true)
+
+  @@index([lastOpenedAt])
+  @@index([shikimoriId])
+}
+
+/// Прогресс просмотра — без FK на библиотеку (её у плеера нет).
+///
+/// Смысловой аналог `DiscoverWatchProgress` из Animatrona, но ключ другой — см. раздел
+/// «Ключ прогресса просмотра» выше.
+model WatchProgress {
+  id                      String   @id @default(cuid())
+
+  /// Стабильный ключ раздачи: `shikimori:<id>` либо `cid:<directoryCid>`
+  releaseKey              String
+  /// Номер эпизода
+  episodeNumber           Int
+
+  /// Текущая позиция (сек)
+  currentTime             Float    @default(0)
+  /// Длительность (сек)
+  duration                Float    @default(0)
+  /// Досмотрен до конца
+  completed               Boolean  @default(false)
+
+  /// ID выбранной аудиодорожки из манифеста
+  selectedAudioTrackId    String?
+  /// ID выбранных субтитров из манифеста (null — выключены)
+  selectedSubtitleTrackId String?
+
+  lastWatchedAt           DateTime @default(now())
+
+  @@allow('all', true)
+
+  @@unique([releaseKey, episodeNumber])
+  @@index([lastWatchedAt])
+}
+
+/// Настройки приложения (singleton) — 12 полей против 30 у Animatrona
+model Settings {
+  id                   String          @id @default("default")
+
+  // === IPFS ===
+
+  /// Путь к репозиторию Kubo
+  ipfsRepoPath         String?         @meta("form.title", "Папка IPFS-хранилища")
+
+  ipfsStorageMaxGb     Int             @default(100) @meta("form.title", "Макс. размер IPFS хранилища (ГБ)") @meta("form.fieldType", "slider") @meta("form.props.min", 10) @meta("form.props.max", 4000) @meta("form.props.step", 10) @meta("form.props.showValue", true)
+
+  // === Системный трей ===
+
+  minimizeToTray       Boolean         @default(true) @meta("form.title", "Сворачивать в трей") @meta("form.fieldType", "switch")
+
+  closeToTray          Boolean         @default(true) @meta("form.title", "Закрытие окна в трей") @meta("form.fieldType", "switch")
+
+  showTrayNotification Boolean         @default(true) @meta("form.title", "Уведомление при сворачивании") @meta("form.fieldType", "switch")
+
+  // === Интерфейс ===
+
+  darkMode             Boolean         @default(true) @meta("form.title", "Тёмная тема") @meta("form.fieldType", "switch")
+
+  language             String          @default("ru") @meta("form.title", "Язык интерфейса") @meta("form.fieldType", "select") @meta("form.props.options", ["ru","en","ja"])
+
+  // === Плеер ===
+
+  skipOpening          Boolean         @default(false) @meta("form.title", "Автопропуск опенинга") @meta("form.fieldType", "switch")
+
+  skipEnding           Boolean         @default(false) @meta("form.title", "Автопропуск эндинга") @meta("form.fieldType", "switch")
+
+  autoplay             Boolean         @default(true) @meta("form.title", "Автовоспроизведение") @meta("form.fieldType", "switch")
+
+  trackPreference      TrackPreference @default(AUTO) @meta("form.title", "Предпочтение дорожек") @meta("form.fieldType", "radioCard")
+
+  /// Громкость плеера (0–1) — общая, а не на каждый эпизод
+  volume               Float           @default(1)
+
+  updatedAt            DateTime        @updatedAt
+
+  @@allow('all', true)
+}
+```
+
+### Шаг 0.6 — таргеты в `project.json`
+
+Сейчас у приложения только `dev`/`build:win`/`lint`/`typecheck:tsgo`/`format` — ни
+`zenstack:generate`, ни `db:push` нет вовсе. Брать за образец `apps/animatrona/project.json`
+(тот же стек: sqlite + libsql-адаптер + генерация в `renderer/src/generated`).
+
+### Чек-лист исполнителю — грабли, на которых легко потерять час
+
+1. **Перед первой генерацией — `nx build zenstack-form-plugin`.** Плагин подключается путём к
+   `dist/`, а `dist/` не коммитится. Проверка, что артефакт свежий:
+   `grep -c collectAllFields libs/zenstack-form-plugin/dist/model-generator.js` → должно быть > 0.
+   Иначе поля миксина молча пропадут из form-схем (баг был закрыт в v4.0.1 — но старый `dist`
+   вернёт его).
+2. **`plugin policy` обязателен.** Без него `@@allow` из фрагмента не резолвится, и ошибка
+   покажет на строку **фрагмента**, хотя причина в схеме приложения.
+3. **`import` — первой строкой**, до `datasource`/`generator`/`plugin`. Иначе
+   `Expecting token of type 'EOF' but found 'import'`.
+4. **Не переопределять поля миксина.** Добавить `@unique` к `url` «для надёжности» нельзя —
+   `Duplicated declaration name`. Оно там уже есть.
+5. **Nx не свяжет фрагмент с приложением.** После любой правки
+   `libs/zenstack-fragments/src/animatrona.zmodel` регенерацию каждого потребителя запускать
+   руками, `nx affected` их не увидит.
+6. **Pre-commit `schema-migration-check` может ложно сработать.** На переводе Animatrona
+   (коммит `0da07607`) хук принял удаление полей, уехавших в миксин, за структурное изменение
+   схемы и потребовал миграцию, которой не нужно. Обходится
+   `GIT_ALLOW_SCHEMA_WITHOUT_MIGRATION=1` — но **только** предъявив доказательство: вывод
+   `nx db:push` со словами «already in sync». Обоснование писать в тело коммита.
+   У нас случай другой (новая схема с нуля, а не правка существующей), но хук может
+   среагировать так же.
+
+Приёмка шага: `nx zenstack:generate animatrona-ipfs-player` отрабатывает, в
+`renderer/src/generated/schema.prisma` четыре модели и enum, `nx typecheck:tsgo` и `nx lint`
+зелёные.
+
+### Отложено намеренно (не делать в этой итерации)
+
+- **Консолидация `TrackPreference` во фрагмент.** Enum живёт в creator-файле
+  `media.zmodel` Animatrona рядом с кодеками. Перенос требует одновременного удаления оттуда и
+  добавления во фрагмент — иначе после 0.4 (когда Animatrona начнёт импортировать фрагмент)
+  получится дублирующее объявление. Плюс `media.zmodel` придётся заставить импортировать
+  фрагмент напрямую (импорты не транзитивны). Ради enum'а из трёх значений это лишний риск
+  прямо сейчас — плеер держит локальную копию, консолидация отдельной задачей.
+- **`WatchProgressFields` во фрагмент** — та же причина: требует правки двух моделей
+  Animatrona, а выигрыш пять полей. Делать вместе с консолидацией `TrackPreference`, одной
+  задачей координатору.
 
 ## Открытые вопросы
 
