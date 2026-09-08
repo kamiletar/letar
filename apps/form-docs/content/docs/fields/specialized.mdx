@@ -159,3 +159,39 @@ Weekly schedule picker — select working hours for each day.
 ```tsx
 <Form.Field.Schedule name="workingHours" />
 ```
+
+## EditIntent
+
+**API:** `Form.Field.EditIntent`
+
+Explicit replacement for a secret the server never sends back to the client (API key, Client
+Secret, and similar). View mode shows only a safe `displayValue` (a mask like
+`************P9x4`) and a "Replace" button; the server never round-trips the real value. `isEdited`
+is a user intent, not derived from `isDirty` — the old secret is intentionally unknown to the
+client, so there is nothing to diff against.
+
+```tsx
+import { editIntentValueSchema, emptyEditIntentValue } from '@letar/forms-core/edit-intent'
+
+const Schema = z.object({
+  apiKey: editIntentValueSchema(z.string().min(20)),
+}).strip()
+
+<Form initialValue={{ apiKey: emptyEditIntentValue<string>() }} schema={Schema} onSubmit={handleSubmit}>
+  <Form.Field.EditIntent name="apiKey" displayValue="************P9x4" emptyValue="">
+    <Form.Field.Password name="apiKey.value" autoComplete="new-password" />
+  </Form.Field.EditIntent>
+</Form>
+```
+
+On submit without touching the field, `{ isEdited: false, value: null }` is sent — the server
+must leave the stored value untouched. After entering a new value, `{ isEdited: true, value: '...'
+}` is sent — the server replaces the value and revalidates it as `T`. For a brand-new secret
+(create mode), start the field already in edit mode: `{ isEdited: true, value: '' }`.
+
+Content is treated as sensitive by default (`sensitive` prop, `@default true`) and is
+automatically excluded from `useFormPersistence`/`localStorage`, `Form.UrlSync`, and
+`Form.DebugValues` masking. The server fixture must separately reject the UI mask itself as a
+"new" value — the client schema is not a security boundary.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/edit-intent-demo/page.tsx" title="EditIntent" />

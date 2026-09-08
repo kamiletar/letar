@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.6] - 2026-09-08
+
+### Added
+
+- `content/docs/fields/specialized.mdx`/`.ru.mdx` — новая секция «EditIntent»
+  (`Form.Field.EditIntent`): поведение view/edit mode, submit-контракт
+  (`{ isEdited, value }`), sensitive-исключение из persistence/UrlSync/DebugValues, ссылка на
+  живой пример через `<SkinCodeFile>` (`apps/form-develop-app/edit-intent-demo`).
+
 ## [0.6.5] - 2026-09-04
 
 ### Changed

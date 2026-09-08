@@ -142,3 +142,39 @@ const Schema = z.object({
 ```tsx
 <Form.Field.OTPInput name="otp" />
 ```
+
+## EditIntent
+
+**API:** `Form.Field.EditIntent`
+
+Явная замена секрета, который сервер никогда не отдаёт клиенту обратно (API key, Client Secret и
+подобное). View mode показывает только безопасный `displayValue` (маска вида `************P9x4`)
+и кнопку «Заменить» — реальное значение по сети не ходит. `isEdited` — пользовательский intent, а
+не производная от `isDirty`: старый secret намеренно неизвестен клиенту, сравнивать значения не
+с чем.
+
+```tsx
+import { editIntentValueSchema, emptyEditIntentValue } from '@letar/forms-core/edit-intent'
+
+const Schema = z.object({
+  apiKey: editIntentValueSchema(z.string().min(20)),
+}).strip()
+
+<Form initialValue={{ apiKey: emptyEditIntentValue<string>() }} schema={Schema} onSubmit={handleSubmit}>
+  <Form.Field.EditIntent name="apiKey" displayValue="************P9x4" emptyValue="">
+    <Form.Field.Password name="apiKey.value" autoComplete="new-password" />
+  </Form.Field.EditIntent>
+</Form>
+```
+
+При submit без правки уходит `{ isEdited: false, value: null }` — сервер обязан оставить
+сохранённое значение как есть. После ввода нового значения уходит `{ isEdited: true, value: '...'
+}` — сервер заменяет значение и заново валидирует его как `T`. Для нового секрета (create mode)
+поле стартует сразу в edit mode: `{ isEdited: true, value: '' }`.
+
+Содержимое по умолчанию чувствительное (`sensitive`, `@default true`) и автоматически исключается
+из `useFormPersistence`/`localStorage`, `Form.UrlSync` и маскировки `Form.DebugValues`. Отдельно
+серверная схема обязана отклонять саму UI-маску как «новое» значение — клиентская схема не
+является security boundary.
+
+<SkinCodeFile chakra="apps/form-develop-app/src/app/edit-intent-demo/page.tsx" title="EditIntent" />
