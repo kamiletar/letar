@@ -85,6 +85,29 @@ describe('FieldCurrency', () => {
 
       expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ price: 234.65 }))
     })
+
+    it('с FormI18nProvider locale="ru" точка тоже парсится как десятичный разделитель', async () => {
+      // В ru-локали точка не входит в набор служебных символов формата (там нет "." вообще),
+      // поэтому @internationalized/number пропускает её как есть — оба разделителя равнозначны.
+      const user = userEvent.setup()
+      const onSubmit = vi.fn()
+      render(
+        <FormI18nProvider locale="ru">
+          <Form initialValue={{ price: undefined }} onSubmit={onSubmit}>
+            <Form.Field.Currency name="price" />
+            <Form.Button.Submit>Submit</Form.Button.Submit>
+          </Form>
+        </FormI18nProvider>,
+        { wrapper: TestWrapper },
+      )
+
+      const input = screen.getByRole('spinbutton')
+      await user.click(input)
+      await user.paste('234.65')
+      await user.click(screen.getByRole('button', { name: 'Submit' }))
+
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ price: 234.65 }))
+    })
   })
 
   describe('minorUnitScale (копейки↔рубли)', () => {
