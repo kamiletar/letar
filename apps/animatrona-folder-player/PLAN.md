@@ -645,8 +645,16 @@ protocol.registerSchemesAsPrivileged([
       до загрузки в релиз. Не запускался живьём по той же причине, что пункт выше.
 - [ ] Автообновление (`electron-updater`) — включать только после того, как первый релиз в letar
       реально появился и `latest.yml` отдаётся
-- [ ] **Портативная сборка** вторым target'ом (`portable` для Windows, обычный `.AppImage` для Linux
-      уже портативен). Плеер часто хотят запустить без установки — с флешки, на чужой машине
+- [x] **Портативная сборка** вторым target'ом (2026-09-08). `electron-builder.yml`: `win.target`
+      получил второй элемент `{ target: portable, arch: [x64] }` рядом с `nsis`; `artifactName`
+      задан для обоих (`${productName}-Setup-${version}.exe` / `${productName}-portable-
+      ${version}.exe`), чтобы имена не пересекались и предсказуемо матчились в CI. `.AppImage`
+      для Linux уже портативен сам по себе, отдельного target'а там не заводилось.
+      `release-animatrona-folder-player.yml` (job `build-windows`): проверка веса и загрузка в
+      релиз переписаны с «первый попавшийся `*.exe`» на цикл по всем `dist/*.exe` — с двумя exe
+      старая версия либо проверила/залила бы не тот файл, либо пропустила второй молча.
+      Проверено: YAML обоих файлов валиден (`yaml.safe_load`), `nx lint animatrona-folder-player`
+      зелёный. Живой прогон сборки (нужен Windows-раннер electron-builder) не выполнялся.
 
 **Побочная находка, отдельная задача:** релизный контур Animatrona рассинхронизирован —
 `electron-builder.yml` публикует в `repo: letar` (где релизов нет), а workflow загружает ассеты в

@@ -114,17 +114,24 @@ jobs:
         working-directory: apps/animatrona-folder-player
         shell: bash
         run: |
-          EXE=$(ls dist/*.exe 2>/dev/null | head -1)
-          if [ -z "$EXE" ]; then
-            echo "⚠️ No .exe file found"
+          # Два .exe (NSIS-инсталлятор + portable, см. electron-builder.yml win.target) —
+          # проверяем вес каждого отдельно, не только первого попавшегося.
+          shopt -s nullglob
+          EXES=(dist/*.exe)
+          if [ ${#EXES[@]} -eq 0 ]; then
+            echo "⚠️ No .exe files found"
             exit 1
           fi
-          SIZE_MB=$(du -m "$EXE" | cut -f1)
-          echo "Installer size: ${SIZE_MB} МБ (лимит ${MAX_INSTALLER_SIZE_MB} МБ)"
-          if [ "$SIZE_MB" -gt "$MAX_INSTALLER_SIZE_MB" ]; then
-            echo "❌ Установщик весит ${SIZE_MB} МБ — превышен лимит ${MAX_INSTALLER_SIZE_MB} МБ (PLAN.md §2)"
-            exit 1
-          fi
+          FAILED=0
+          for EXE in "${EXES[@]}"; do
+            SIZE_MB=$(du -m "$EXE" | cut -f1)
+            echo "$(basename "$EXE"): ${SIZE_MB} МБ (лимит ${MAX_INSTALLER_SIZE_MB} МБ)"
+            if [ "$SIZE_MB" -gt "$MAX_INSTALLER_SIZE_MB" ]; then
+              echo "❌ $(basename "$EXE") весит ${SIZE_MB} МБ — превышен лимит ${MAX_INSTALLER_SIZE_MB} МБ (PLAN.md §2)"
+              FAILED=1
+            fi
+          done
+          exit $FAILED
 
       - name: Upload to release
         working-directory: apps/animatrona-folder-player
@@ -132,14 +139,16 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $TAG = "${{ needs.create-release.outputs.tag }}"
-          $EXE = Get-ChildItem -Path dist/*.exe | Select-Object -First 1
+          $EXES = Get-ChildItem -Path dist/*.exe
 
-          if ($EXE) {
+          if ($EXES.Count -eq 0) {
+            Write-Host "⚠️ No .exe files found"
+            exit 1
+          }
+
+          foreach ($EXE in $EXES) {
             Write-Host "Uploading $($EXE.Name) to release $TAG"
             gh release upload "$TAG" "$($EXE.FullName)" --repo kamiletar/letar --clobber
-          } else {
-            Write-Host "⚠️ No .exe file found"
-            exit 1
           }
 
       - name: Upload artifacts (backup)

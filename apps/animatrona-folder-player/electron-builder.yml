@@ -36,6 +36,11 @@ win:
     - target: nsis
       arch:
         - x64
+    # Портативная сборка — запуск без установки (флешка, чужая машина). AppImage для Linux
+    # уже портативен сам по себе, отдельного target'а там не нужно.
+    - target: portable
+      arch:
+        - x64
   icon: resources/icon.ico
   signAndEditExecutable: false
 
@@ -46,6 +51,10 @@ nsis:
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: Animatrona Player
+  artifactName: '${productName}-Setup-${version}.${ext}'
+
+portable:
+  artifactName: '${productName}-portable-${version}.${ext}'
 
 # Provider настроен для `--publish` в release-workflow — само автообновление в приложении
 # (electron-updater) не подключено, включать только после первого реального релиза

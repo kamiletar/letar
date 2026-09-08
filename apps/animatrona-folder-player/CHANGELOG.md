@@ -6,6 +6,8 @@
 
 ### Added
 
+- Портативная сборка Windows (`electron-builder.yml` `win.target: portable`) вторым артефактом
+  рядом с NSIS-инсталлятором — запуск без установки, с флешки/на чужой машине.
 - Таргеты сборки/релиза (`build`, `build:linux`, `release:win`) и CI-workflow
   `release-animatrona-folder-player.yml` для релизов из монорепо `kamiletar/letar` (без
   зеркалирования исходников, без публикации через `electron-updater` — только упаковка и
