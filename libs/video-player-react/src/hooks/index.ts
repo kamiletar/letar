@@ -3,7 +3,10 @@
  */
 
 export { useShakaPlayer } from './useShakaPlayer'
-export type { UseShakaPlayerOptions, UseShakaPlayerReturn } from './useShakaPlayer'
+export type { ShakaPlayerInstance, ShakaTrack, UseShakaPlayerOptions, UseShakaPlayerReturn } from './useShakaPlayer'
+
+export { useAudioTracks } from './useAudioTracks'
+export type { AudioTrackOption, UseAudioTracksOptions, UseAudioTracksReturn } from './useAudioTracks'
 
 export { useAudioSync } from './useAudioSync'
 export type { UseAudioSyncOptions } from './useAudioSync'

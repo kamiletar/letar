@@ -19,13 +19,33 @@ interface ShakaPlayerInterface {
   }
 }
 
-interface ShakaPlayerInstance {
+/**
+ * Вариант-трек Shaka Player. В режиме `src=` (прямой URL, не DASH/HLS-манифест — наш случай для
+ * локальных MKV) Shaka проксирует нативные `HTMLMediaElement.audioTracks` браузера как
+ * variant-треки: у файла с N встроенными аудиодорожками и одной видеодорожкой получаем N
+ * вариантов с одинаковым `videoId`/различным `audioId`. См. `useAudioTracks.ts`.
+ */
+export interface ShakaTrack {
+  id: number
+  active: boolean
+  language: string
+  audioId: number | null
+  videoId: number | null
+  label: string | null
+  roles: string[]
+}
+
+export interface ShakaPlayerInstance {
   attach: (video: HTMLVideoElement) => void
   load: (url: string, startTime?: number) => Promise<void>
   unload: () => Promise<void>
   destroy: () => void
   addEventListener: (event: string, callback: (event: unknown) => void) => void
   removeEventListener: (event: string, callback: (event: unknown) => void) => void
+  /** Все варианты (видео×аудио комбинации) текущей загрузки — источник данных для выбора аудиодорожки */
+  getVariantTracks: () => ShakaTrack[]
+  /** Переключить на другой вариант — `clearBuffer: true` даёт мгновенный эффект вместо ожидания конца буфера */
+  selectVariantTrack: (track: ShakaTrack, clearBuffer?: boolean) => void
 }
 
 export interface UseShakaPlayerOptions {

@@ -19,6 +19,7 @@ import {
   type SpriteCue,
   SubtitleOverlay,
   Tooltip,
+  useAudioTracks,
   useAutoHideControls,
   useKeyboardShortcuts,
   usePlayerControls,
@@ -27,11 +28,12 @@ import {
   useSubtitles,
 } from '@letar/video-player-react'
 import type { ReactNode } from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu'
 
 import { useChapterSkip } from '../_hooks/use-chapter-skip'
 import { toMediaUrl } from '../_lib/media-url'
+import { AudioTrackSelector } from './AudioTrackSelector'
 
 export interface VideoPlayerSubtitle {
   /** URL к субтитрам — обязателен для `srt`/`vtt` (нативный `<track>`), опционален для `ass`/`ssa` */
@@ -68,6 +70,12 @@ export interface VideoPlayerProps {
 
 /** Минимальный интерфейс Shaka Player, ожидаемый `useShakaPlayer` */
 type ShakaModule = Parameters<typeof useShakaPlayer>[0]['Shaka']
+
+/** Читаемая подпись аудиодорожки для меню: язык + название, если есть */
+function formatAudioTrackLabel(language: string, label: string): string {
+  const lang = (language || 'und').toUpperCase()
+  return label ? `${label} (${lang})` : lang
+}
 
 /**
  * shaka-player ссылается на `self` в топ-левел коде пакета — падает при Next.js
@@ -133,7 +141,7 @@ function ShakaVideoPlayer({
     setPlaybackSpeed,
   } = usePlayerState({})
 
-  const { videoRef, isVideoReady, isLoading } = useShakaPlayer({
+  const { videoRef, playerRef, isVideoReady, isLoading } = useShakaPlayer({
     src,
     startTime,
     autoPlay,
@@ -143,6 +151,20 @@ function ShakaVideoPlayer({
     Shaka,
     onDurationChange: setDuration,
   })
+
+  // Аудиодорожки внутри уже загруженного файла (не путать с внешними аудиофайлами из
+  // @letar/folder-scan — той задачи ещё нет). См. риск в PLAN.md §17: не проверено эмпирически
+  // на всех кодеках/контейнерах, что Chromium реально отдаёт несколько дорожек.
+  const { audioTracks, selectAudioTrack } = useAudioTracks({ playerRef, isVideoReady })
+  const audioOptions = useMemo(
+    () => audioTracks.map((t) => ({ id: String(t.audioId), label: formatAudioTrackLabel(t.language, t.label) })),
+    [audioTracks],
+  )
+  const selectedAudioId = useMemo(() => {
+    const active = audioTracks.find((t) => t.active)
+    return active ? String(active.audioId) : (audioOptions[0]?.id ?? '')
+  }, [audioTracks, audioOptions])
+  const handleSelectAudio = useCallback((id: string) => selectAudioTrack(Number(id)), [selectAudioTrack])
 
   const controls = usePlayerControls({
     videoRef,
@@ -375,7 +397,12 @@ function ShakaVideoPlayer({
         onPlaybackSpeedChange={handlePlaybackSpeedChange}
         beforeControlsSlot={prevEpisodeSlot}
         afterControlsSlot={nextEpisodeSlot}
-        trackSelectorSlot={trackSelectorSlot}
+        trackSelectorSlot={
+          <>
+            {trackSelectorSlot}
+            <AudioTrackSelector options={audioOptions} selectedId={selectedAudioId} onSelect={handleSelectAudio} />
+          </>
+        }
         spriteUrl={spriteUrl}
         spriteCues={spriteCues}
         chapters={chapterInfos}

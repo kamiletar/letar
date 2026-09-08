@@ -6,6 +6,16 @@
 
 ### Added
 
+- **Выбор аудиодорожки** — вторая кнопка на панели плеера (`AudioTrackSelector`) рядом с выбором
+  субтитров, переключает встроенную в MKV аудиодорожку без пересоздания плеера. Новый хук
+  `useAudioTracks` в `@letar/video-player-react` (0.2.4 → 0.2.5, аддитивно) — Shaka Player в
+  режиме прямого `src=` (не DASH/HLS-манифест, наш случай для локальных файлов) проксирует
+  нативные `HTMLMediaElement.audioTracks` браузера как variant-треки; хук схлопывает их по
+  `audioId` в список уникальных аудиодорожек и переключает через `selectVariantTrack` с
+  сохранением текущей видеодорожки. `ShakaPlayerInstance` (`useShakaPlayer.ts`) расширен
+  методами `getVariantTracks`/`selectVariantTrack` — аддитивно, не меняет поведение существующих
+  потребителей (`animatrona-tracker`, у которого свой независимый хук, не задет вовсе). Кнопка не
+  показывается, если у файла всего одна аудиодорожка.
 - **Выбор дорожки субтитров** — кнопка на панели плеера (`SubtitleTrackSelector`, кастомный
   dropdown по образцу `SpeedSelector` — Chakra `Menu.Positioner` ломается в fullscreen-контейнере
   плеера, не Chakra `Menu`). Список объединяет внешние файлы (`player.externalTracks.subtitles`)
