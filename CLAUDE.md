@@ -159,6 +159,14 @@ append-only лог событий без статусного поля — те�
 [zenstack-multifile-schema-circular-imports](/.claude/docs/zenstack-multifile-schema-circular-imports.md)
 декомпозиция `schema.zmodel` на файлы — циклические импорты между ними подтверждённо рабочие,
 единственная ловушка — `import` до `datasource`/`generator`/`plugin` ·
+[zenstack-shared-fragments-across-apps](/.claude/docs/zenstack-shared-fragments-across-apps.md)
+переиспользование кусков схемы **между приложениями** (`libs/*.zmodel`): `type`-миксин несёт не
+только поля, но и `@@index`/`@@allow`/`enum` (вопреки прежней формулировке README
+`zenstack-fragments`), нельзя — relation на модель потребителя и переопределение поля миксина;
+альтернатива «остров» из целых связанных моделей. ⚠️ `@letar/zenstack-form-plugin` **молча теряет
+все поля миксина** (exit 0, правдоподобный неполный `<Model>.form.ts`) — латентно, потому что ни
+один нынешний потребитель фрагментов form-плагин не подключает; ⚠️ Nx не видит связи
+фрагмент→приложение, `nx affected` потребителей не поймает ·
 [zmodel-comment-directives-vs-ast](/.claude/docs/zmodel-comment-directives-vs-ast.md) `@meta`
 field-атрибут (AST) vs `///`-комментарий (regex) — два независимых парсера в
 `zenstack-form-plugin`, не один общий; почему объектный литерал ломает именно `@meta` (падает в
