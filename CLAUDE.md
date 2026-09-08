@@ -713,7 +713,10 @@ cron-рассылок: найти кандидатов → отправить �
 слушателя `'error'` у `ImapFlow` достаточно, чтобы не уронить процесс, но не достаточно, чтобы
 гарантировать возврат из зависшего `await` — нужен внешний `Promise.race` с жёстким дедлайном ·
 [web-push](/.claude/docs/web-push.md) ·
-[offlineaudiocontext-suspend-render-race](/.claude/docs/offlineaudiocontext-suspend-render-race.md)
+[offlineaudiocontext-suspend-render-race](/.claude/docs/offlineaudiocontext-suspend-render-race.md) ·
+[chromium-video-codec-limits](/.claude/docs/chromium-video-codec-limits.md) ⚠️ Chromium/Electron не
+декодирует H.264 Hi10P (запрет профиля, не пробел ffmpeg) — обход через WASM+WebCodecs
+(`@libmedia/avplayer`), не через патч рантайма или встраивание mpv в окно
 
 **Продукт и контент:** [ecommerce-cart-orders](/.claude/docs/ecommerce-cart-orders.md) ·
 [ecommerce-cart-orders § Anonymous-сессии](/.claude/docs/ecommerce-cart-orders.md#7-anonymous-сессии-better-auth-anonymous-plugin--новая-per-user-модель-требует-двух-согласованных-правок)
