@@ -10,6 +10,7 @@ export default defineConfig({
       '@letar/animatrona-shared': path.resolve(__dirname, '../../../libs/animatrona-shared/src/index.ts'),
       '@letar/video-player-react': path.resolve(__dirname, '../../../libs/video-player-react/src/index.ts'),
       '@letar/video-player-core': path.resolve(__dirname, '../../../libs/video-player-core/src/index.ts'),
+      '@letar/hooks': path.resolve(__dirname, '../../../libs/hooks/src/index.ts'),
     },
     // Дедупликация React — важно для библиотек с хуками
     dedupe: ['react', 'react-dom'],

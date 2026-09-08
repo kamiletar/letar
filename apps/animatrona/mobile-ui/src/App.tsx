@@ -9,6 +9,7 @@
  */
 
 import { Box } from '@chakra-ui/react'
+import { breakpoints, useMediaQuery } from '@letar/hooks'
 import { useCallback, useEffect, useState } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 
@@ -18,30 +19,10 @@ import { AnimePage } from './pages/Anime'
 import { LibraryPage } from './pages/Library'
 import { PlayerPage } from './pages/Player'
 
-/** Хук для определения prefers-reduced-motion */
-function useReducedMotion(): boolean {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-  )
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-
-    const handleChange = (event: MediaQueryListEvent) => {
-      setPrefersReducedMotion(event.matches)
-    }
-
-    mediaQuery.addEventListener('change', handleChange)
-    return () => mediaQuery.removeEventListener('change', handleChange)
-  }, [])
-
-  return prefersReducedMotion
-}
-
 export function App() {
   const location = useLocation()
   const networkStatus = useNetworkStatus()
-  const prefersReducedMotion = useReducedMotion()
+  const prefersReducedMotion = useMediaQuery(breakpoints.prefersReducedMotion)
   const [isNavigating, setIsNavigating] = useState(false)
   const [displayLocation, setDisplayLocation] = useState(location)
 

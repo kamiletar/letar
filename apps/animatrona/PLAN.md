@@ -511,14 +511,24 @@ creator-only: `EncodingProfilesCard`, `TranscodingSettingsCard`, `QBittorrentSet
       даже если добавить `--webpack`, подтвердить фикс живым прогоном можно только руками
       пользователя.
 
-- [ ] ⚠️ **Открытый вопрос: заводить ли `@letar/*` зависимости в `mobile-ui`?** При аудите дублей
-      `prefers-reduced-motion` (2026-08-20) нашлись ещё два инлайн-вхождения в
-      `mobile-ui/src/App.tsx` (реактивный `useReducedMotion`) и `mobile-ui/src/components/ExpandableText.tsx`
-      (пер-рендерное чтение) — не тронуты. `mobile-ui` сейчас изолированный Vite-пакет без единой
-      `@letar/*` зависимости (`package.json` содержит только `@chakra-ui/react`/`react`/`react-router-dom`),
-      предположительно намеренно — под мобильный бандл. Если это архитектурное решение подтверждено —
-      вопрос закрыт как есть. Если нет — стоит подключить `@letar/hooks` и унифицировать так же, как
-      в `renderer`.
+- [x] **Вопрос закрыт (2026-09-08): `@letar/*` зависимости в `mobile-ui` — уже используются, просто
+      не через `package.json`.** Предпосылка «изолированный пакет без единой `@letar/*` зависимости»
+      оказалась неточной: `vite.config.ts` уже держит `resolve.alias` на три библиотеки
+      (`@letar/animatrona-shared`, `@letar/video-player-react`, `@letar/video-player-core`) —
+      исходники подключаются напрямую из `libs/*/src`, в обход `node_modules`/собственного
+      `bun.lock` пакета (тот же паттерн, что webpack `resolve.alias` у `label-printer-desktop`, см.
+      `animatrona-dual-build-alias-drift.md`). Значит собственный `bun.lock` — изоляция именно
+      сторонних npm-пакетов (бандл для телефона), а не изоляция от `libs/` монорепо.
+
+      Добавлена ещё одна строка алиаса на `@letar/hooks` (сама библиотека без единой зависимости
+      кроме `peerDependencies: react` — раздутия бандла нет). Два дубля `prefers-reduced-motion`
+      заменены на импорт из неё: реактивный `useReducedMotion` в `App.tsx` → `useMediaQuery(
+      breakpoints.prefersReducedMotion)` (тот же паттерн, что в `renderer`), разовое чтение в
+      `ExpandableText.tsx` → `prefersReducedMotion()`. Заодно чинит скрытую нереактивность —
+      `ExpandableText` раньше не узнавал о смене OS-настройки во время просмотра, если не
+      перерендеривался по другой причине. `nx build animatrona-mobile-ui` ✅, `tsc --noEmit` без
+      новых ошибок (найденные ошибки — предсуществующие, не в этих файлах), `eslint` на оба файла
+      чисто.
 
 - [x] **Обновить Electron 42.8.0 → 43.2.0** — задача устарела сама собой: на 2026-09-06 корневой
       `package.json` и все 4 electron-приложения (`animatrona`, `kami-key-the`,

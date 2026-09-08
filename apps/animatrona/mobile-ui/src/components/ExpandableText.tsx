@@ -5,6 +5,7 @@
  */
 
 import { Box, Text } from '@chakra-ui/react'
+import { prefersReducedMotion as getPrefersReducedMotion } from '@letar/hooks'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { LuChevronDown, LuChevronUp } from 'react-icons/lu'
 
@@ -37,7 +38,7 @@ export function ExpandableText({
 
   // Проверяем prefers-reduced-motion
   const prefersReducedMotion = respectReducedMotion && typeof window !== 'undefined'
-    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ? getPrefersReducedMotion()
     : false
 
   // Измеряем высоту текста для определения необходимости кнопки
