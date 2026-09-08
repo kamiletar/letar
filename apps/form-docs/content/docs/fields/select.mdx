@@ -91,6 +91,29 @@ TanStack Query (`{ data, isLoading, error }`):
 />
 ```
 
+### Editing an existing value with async search
+
+With static `options`, the label for the current value is always available, so the field shows
+it as soon as it mounts. With `useQuery`, the item matching the current value may not be in the
+first (pre-search) result page — there's nothing to look the label up in yet. Pass `initialLabel`
+explicitly when editing an entity with a pre-selected value, otherwise the field shows an empty
+input even though the value is set:
+
+```tsx
+<Form.Field.Combobox
+  name="userId"
+  useQuery={(search) =>
+    useFindManyUser({
+      where: { name: { contains: search, mode: 'insensitive' } },
+      take: 20,
+    })
+  }
+  getLabel={(u) => u.name}
+  getValue={(u) => u.id}
+  initialLabel={initialValues.userName}
+/>
+```
+
 ## RadioGroup
 
 **API:** `Form.Field.RadioGroup`

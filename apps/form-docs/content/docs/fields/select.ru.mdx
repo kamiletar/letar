@@ -71,6 +71,29 @@ TanStack Query (`{ data, isLoading, error }`):
 />
 ```
 
+### Редактирование существующего значения при асинхронном поиске
+
+Для статических `options` label текущего значения всегда доступен, поэтому поле показывает его
+сразу при монтировании. С `useQuery` элемент, соответствующий текущему значению, может
+отсутствовать в первой (до-поисковой) странице результатов — искать label ещё не в чем. Передавай
+`initialLabel` явно при редактировании сущности с уже выбранным значением — иначе поле покажет
+пустой инпут, хотя значение выставлено верно:
+
+```tsx
+<Form.Field.Combobox
+  name="userId"
+  useQuery={(search) =>
+    useFindManyUser({
+      where: { name: { contains: search, mode: 'insensitive' } },
+      take: 20,
+    })
+  }
+  getLabel={(u) => u.name}
+  getValue={(u) => u.id}
+  initialLabel={initialValues.userName}
+/>
+```
+
 ## RadioGroup
 
 **API:** `Form.Field.RadioGroup`
