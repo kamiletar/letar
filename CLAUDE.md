@@ -474,6 +474,12 @@ as="строка-тега"`) — четыре сессии независимо 
 
 **Библиотеки и публикация:** [lib-entry-points](/.claude/docs/lib-entry-points.md) подпути
 `./server`/`./client`, границы, ESLint-ловушки ·
+[electron-storage-shared-default-value-mutation](/.claude/docs/electron-storage-shared-default-value-mutation.md)
+⚠️ `createJsonStore` на фолбэке (файла нет/не читается) без `mergeDefaults` отдавал саму ссылку
+на `defaultValue` — мутация результата на месте (`push`/`sort`/переприсваивание поля) портила
+дефолт на весь процесс; проявлялось только при повторном фолбэке после мутации, не сразу;
+починено — фолбэк всегда `structuredClone(defaultValue)`; реальные находки без обхода —
+`label-printer-desktop` profiles/database/export handlers ·
 [fumadocs-core-staticsource-config-indexed-access-inference](/.claude/docs/fumadocs-core-staticsource-config-indexed-access-inference.md)
 ⚠️ `loader()` из `fumadocs-core/source` откатывает `page.data`/`meta.data` до базовых
 `PageData`/`MetaData` — `Config` в `StaticSource<Config>` достижим только через индексный доступ,
