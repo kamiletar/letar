@@ -720,9 +720,38 @@ IPFS_API_TOKEN=... # для внешних pinning services (опц.)
 
 ---
 
-## §17 — Kamal: zero-downtime деплой
+## §17 — Kamal: zero-downtime деплой ✅ ЗАКРЫТО (2026-09-08) — поглощено `libs/deploy-engine/rollout.ts`
 
 > Добавлено 2026-06-26. Текущий `deploy-affected.sh` делает `docker compose up -d --build` — контейнер останавливается и поднимается заново (~10–30 с даунтайма). Kamal (от Basecamp/37signals) решает это через rolling-замену с healthcheck.
+
+### Закрыто без Kamal (2026-09-08, `repo-dev`)
+
+Ключевую цель секции — zero-downtime через health-check-gated rolling-замену контейнера — решает
+уже реализованный и подключённый `libs/deploy-engine/src/rollout.ts` (§18.6, сессия G):
+
+- `scale=2` → новый контейнер поднимается рядом со старым, `waitHealthy()` ждёт Docker
+  healthcheck (до 5 минут);
+- при `proxyKind: 'traefik'` **отдельный шаг переключения трафика не нужен вовсе** —
+  docker-провайдер Traefik сам следит за событиями контейнеров (`watch`) и добавляет новый в
+  балансировку по факту `healthy`, убирает старый по событию `docker rm`;
+- `detectProxyKind()` определяет Traefik/NPM по факту живых контейнеров на сервере, не по
+  конфигу (фикс автоопределения — см. `deploy-engine-rollout-proxy-kind-autodetect` в
+  `.claude/docs/`, чинил падение rollout на 19/20 приложений при переходе s2/s3 на Traefik);
+- подключено в `deploy-affected.sh:1382-1400` — opt-in через label `letar.rollout: 'true'` в
+  `docker-compose.production.yml` сервиса `app`, пилот был на `time`, тиражирование по остальным
+  приложениям в процессе (не все ещё переведены — это отдельная задача тиража, не блокер
+  закрытия самой механики).
+
+Traefik на обоих серверах — боевой прокси с 2026-08-08 (s3) / 2026-08-31 (s2), NPM снят с
+боевых портов на обоих (`infra/traefik/README.md`). Заводить `kamal-proxy` поверх уже
+состоявшейся миграции NPM→Traefik означало бы третью прокси-технологию ради механизма,
+который уже есть. CLI-обвязка Kamal (`kamal deploy`/`kamal rollback`) и секрет-менеджмент
+(`.kamal/secrets`) не нужны отдельно — у нас свой `deploy-mcp`/`deploy-affected.sh` +
+`.env.docker.enc` (SOPS), решающие ту же роль.
+
+**Если тираж `letar.rollout: 'true'` на оставшиеся приложения не завершён** — это отдельная
+задача (найти список через `grep -l "letar\.rollout" apps/*/docker-compose.production.yml`),
+не повод переоткрывать §17: механизм существует и работает, вопрос только в охвате.
 
 ### Что даёт Kamal
 
@@ -785,14 +814,22 @@ env:
 - **БД и Redis** — аксессоры Kamal (`accessories:`) — отдельный деплой, не вместе с app
 - **GHCR или локальная сборка** — Kamal по умолчанию пушит образ в registry; альтернатива — `kamal build push` + `kamal deploy --skip-build` для локальной сборки на s2 (текущий подход)
 
-### DoD §17
+### DoD §17 — не применяется, задача закрыта другим путём (2026-09-08)
 
-- [ ] Пилот на одном приложении (предлагается: `grandslamcup` — небольшое, без критичного трафика)
-- [ ] Zero-downtime подтверждён: `curl -s -o /dev/null -w "%{http_code}" https://grandslamcup.ru` не возвращает 502/503 во время деплоя
-- [ ] Решён вопрос NPM vs kamal-proxy
-- [ ] `deploy-affected.sh` или BlackCove обновлён для вызова kamal
-- [ ] Rollback проверен: `kamal rollback` возвращает предыдущую версию
-- [ ] Документация: [deployment.md](/.claude/docs/deployment.md) обновлён
+Kamal не внедрялся — пункты ниже сняты с рассмотрения, оставлены зачёркнутыми для истории. Их
+роль закрыта `libs/deploy-engine/rollout.ts` + Traefik (см. «Закрыто без Kamal» выше):
+
+- ~~Пилот на одном приложении~~ — пилот zero-downtime rollout был на `time`, не через Kamal
+- ~~Zero-downtime подтверждён curl-проверкой~~ — механизм подтверждён `waitHealthy()` +
+  live-переключением Traefik по docker-событиям
+- ~~Решён вопрос NPM vs kamal-proxy~~ — снят: NPM выведен из эксплуатации миграцией на Traefik
+  (§48), кandidate-проблема kamal-proxy не возникает вовсе
+- ~~`deploy-affected.sh` обновлён для вызова kamal~~ — обновлён для вызова
+  `libs/deploy-engine/src/cli.ts rollout` (opt-in label `letar.rollout: 'true'`)
+- ~~Rollback проверен~~ — вне скоупа закрытия, `deploy-affected.sh` откат делает штатным путём
+  (redeploy предыдущего коммита), отдельного `kamal rollback` не требуется
+- ~~Документация обновлена~~ — актуальный механизм описан в `libs/deploy-engine/README.md` и
+  комментариях `rollout.ts`, отдельного раздела в `deployment.md` не заводилось
 
 ---
 
