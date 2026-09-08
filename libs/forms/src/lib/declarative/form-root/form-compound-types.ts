@@ -31,6 +31,7 @@ import type {
   SelectFieldProps,
   SignatureFieldProps,
   SliderFieldProps,
+  SlugFieldProps,
   TagsFieldProps,
   YesNoFieldProps,
 } from '../form-fields'
@@ -113,6 +114,7 @@ export interface FormFieldComponents {
   Editable: (props: EditableFieldProps) => ReactElement
   EditIntent: <T = unknown>(props: EditIntentFieldProps<T>) => ReactElement
   RichText: (props: RichTextFieldProps) => ReactElement
+  Slug: (props: SlugFieldProps) => ReactElement
   MaskedInput: (props: { name?: string; label?: string; mask: string; placeholder?: string }) => ReactElement
 
   // Numberвые поля

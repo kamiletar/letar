@@ -83,6 +83,7 @@ export { FieldMaskedInput } from './text/field-masked-input'
 export { FieldPassword } from './text/field-password'
 export { FieldPasswordStrength } from './text/field-password-strength'
 export { FieldRichText, type RichTextFieldProps } from './text/field-rich-text'
+export { FieldSlug, type SlugFieldProps } from './text/field-slug'
 export { FieldString } from './text/field-string'
 export { FieldTextarea } from './text/field-textarea'
 export {

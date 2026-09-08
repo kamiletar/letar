@@ -28,6 +28,7 @@ import type {
   SegmentedGroupFieldProps,
   SelectFieldProps,
   SliderFieldProps,
+  SlugFieldProps,
   TagsFieldProps,
   YesNoFieldProps,
 } from './form-fields'
@@ -205,6 +206,7 @@ interface ExtendedFormField {
   Switch: (props: SwitchFieldProps) => ReactElement
   ColorPicker: (props: ColorPickerFieldProps) => ReactElement
   Editable: (props: EditableFieldProps) => ReactElement
+  Slug: (props: SlugFieldProps) => ReactElement
   Schedule: (props: ScheduleFieldProps) => ReactElement
   FileUpload: (props: FileUploadFieldProps) => ReactElement
   RichText: (props: RichTextFieldProps) => ReactElement

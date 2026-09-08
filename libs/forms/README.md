@@ -68,6 +68,7 @@ const Schema = z.object({
 <Form.Field.String name="title" />
 <Form.Field.Textarea name="description" />
 <Form.Field.RichText name="content" />
+<Form.Field.Slug name="slug" source="title" />
 
 // Числовые
 <Form.Field.Number name="price" />
@@ -496,7 +497,7 @@ import { FieldString, FieldTextarea } from '@letar/forms/fields/text'
 @letar/forms-react   React + TanStack Form, ноль UI-библиотек — сборка поля (createField,
                      FieldWrapper, error boundary), контекст формы, хуки поля
         ↑
-@letar/forms         Chakra-скин — chakraUIKit + 62 поле
+@letar/forms         Chakra-скин — chakraUIKit + 63 поле
 ```
 
 Зависимость идёт внутрь (Clean Architecture / DIP): не ядро зависит от React, а скин — от
