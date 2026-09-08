@@ -40,7 +40,7 @@ test.describe('Система автообновлений', () => {
 
   test('UpdateBadge отображается при доступном обновлении', async () => {
     // Ждём полной загрузки страницы
-    await ctx.page.waitForLoadState('networkidle')
+    await ctx.page.waitForLoadState('load')
 
     // Симулируем доступное обновление через Zustand setState
     await ctx.page.evaluate(() => {
@@ -83,7 +83,7 @@ test.describe('Система автообновлений', () => {
 
   test('UpdateDrawer открывается при клике на badge', async () => {
     // Ждём полной загрузки страницы
-    await ctx.page.waitForLoadState('networkidle')
+    await ctx.page.waitForLoadState('load')
 
     // Симулируем доступное обновление
     await ctx.page.evaluate(() => {
@@ -137,7 +137,7 @@ test.describe('Система автообновлений', () => {
 
   test('Прогресс загрузки отображается корректно', async () => {
     // Ждём полной загрузки страницы
-    await ctx.page.waitForLoadState('networkidle')
+    await ctx.page.waitForLoadState('load')
 
     // Симулируем статус загрузки
     await ctx.page.evaluate(() => {
@@ -194,7 +194,7 @@ test.describe('Система автообновлений', () => {
 
   test('Статус "Готово к установке" отображается', async () => {
     // Ждём полной загрузки страницы
-    await ctx.page.waitForLoadState('networkidle')
+    await ctx.page.waitForLoadState('load')
 
     // Симулируем загруженное обновление
     await ctx.page.evaluate(() => {
@@ -332,21 +332,19 @@ test.describe('Система автообновлений', () => {
     await ctx.page.waitForTimeout(300)
 
     // Проверяем, что состояние изменилось
-    const newState = await notificationsCheckbox.isChecked()
-    expect(newState).not.toBe(initialState)
+    await expect(notificationsCheckbox).toBeChecked({ checked: !initialState })
 
     // Переключаем обратно
     await switchControl.click({ force: true })
     await ctx.page.waitForTimeout(300)
 
     // Проверяем, что вернулось к начальному состоянию
-    const finalState = await notificationsCheckbox.isChecked()
-    expect(finalState).toBe(initialState)
+    await expect(notificationsCheckbox).toBeChecked({ checked: initialState })
   })
 
   test('Кнопка "Пропустить версию" работает', async () => {
     // Ждём полной загрузки страницы
-    await ctx.page.waitForLoadState('networkidle')
+    await ctx.page.waitForLoadState('load')
 
     // Симулируем доступное обновление
     await ctx.page.evaluate(() => {

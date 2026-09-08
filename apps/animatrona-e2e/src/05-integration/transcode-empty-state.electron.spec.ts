@@ -316,14 +316,12 @@ test.describe('Transcode Queue - Tab Navigation', () => {
     await ctx.page.waitForTimeout(500)
 
     // Второй таб должен стать активным
-    const isSecondActive = await tabs[1].getAttribute('aria-selected')
-    expect(isSecondActive).toBe('true')
+    await expect(tabs[1]).toHaveAttribute('aria-selected', 'true')
 
     // Возвращаемся к первому
     await tabs[0].click()
     await ctx.page.waitForTimeout(500)
 
-    const isFirstActive = await tabs[0].getAttribute('aria-selected')
-    expect(isFirstActive).toBe('true')
+    await expect(tabs[0]).toHaveAttribute('aria-selected', 'true')
   })
 })
