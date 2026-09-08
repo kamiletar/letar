@@ -5,7 +5,7 @@
  * чтобы не дублировать паттерн с fallback во всех сервисах.
  */
 
-import { getKuboService } from '../services/kubo'
+import { getKuboService } from '@letar/ipfs-kubo-core'
 
 /** Fallback Gateway URL если Kubo не запущен */
 const DEFAULT_GATEWAY = 'http://127.0.0.1:8081'

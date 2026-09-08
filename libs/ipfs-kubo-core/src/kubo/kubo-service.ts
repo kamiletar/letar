@@ -16,8 +16,8 @@ import type { ChildProcess } from 'child_process'
 import { EventEmitter } from 'events'
 import type { KuboRPCClient } from 'kubo-rpc-client' with { 'resolution-mode': 'import' }
 
-import type { IpfsServiceStatus, P2PDiagnostics } from '../../../shared/types/ipfs'
-import { createModuleLogger } from '../../utils/logger'
+import type { IpfsServiceStatus, P2PDiagnostics } from '../types/ipfs'
+import { createModuleLogger } from '../utils/logger'
 import { KUBO_PORTS } from './kubo-config'
 import { getKuboBinaryPath, getKuboRepoPath, prepareKuboRepo, spawnKuboDaemon, validateKuboBinary } from './kubo-daemon'
 import { detectIpfsDesktop, type IpfsDesktopInfo, isIpfsDesktopAlive } from './kubo-detector'

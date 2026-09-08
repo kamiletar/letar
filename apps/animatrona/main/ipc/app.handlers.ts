@@ -2,11 +2,11 @@
  * IPC handlers для информации о приложении
  */
 
+import { getKuboService } from '@letar/ipfs-kubo-core'
 import { app, type BrowserWindow, Notification, powerSaveBlocker, shell } from 'electron'
 import * as fs from 'fs'
 import * as os from 'os'
 import path from 'path'
-import { getKuboService } from '../services/kubo'
 import { runLibraryMigration } from '../services/library/library-migration'
 import { CacheManager } from '../utils/cache-manager'
 import { prisma } from '../utils/db'

@@ -12,6 +12,6 @@
  * по 3 в cid-recovery.ts. IPFS pin/add — сетевой RPC-вызов к локальному демону, дешевле
  * демукса, поэтому лимит чуть выше, но не безграничный.
  */
-import { createConcurrencyLimiter } from '../../utils/concurrency-limiter'
+import { createConcurrencyLimiter } from '../utils/concurrency-limiter'
 
 export const kuboLimiter = createConcurrencyLimiter(4)

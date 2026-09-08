@@ -8,7 +8,7 @@
 import http from 'http'
 import type { KuboRPCClient } from 'kubo-rpc-client' with { 'resolution-mode': 'import' }
 
-import { createModuleLogger } from '../../utils/logger'
+import { createModuleLogger } from '../utils/logger'
 import { isIpfsDesktopAlive } from './kubo-detector'
 import type { KuboMode } from './kubo-types'
 

@@ -15,6 +15,16 @@ import fs from 'fs'
 import path from 'path'
 
 import { createJsonStore } from '@letar/electron-storage'
+import {
+  addToLibraryViaTracker,
+  fetchLibraryFromTracker,
+  fetchTrackerAnimeDetail,
+  fetchTrackerCatalog,
+  getKuboService,
+  publishToTracker,
+  syncLibraryToTracker,
+  testTrackerConnection,
+} from '@letar/ipfs-kubo-core'
 import { CID } from 'multiformats/cid'
 import type {
   TrackerAnimeDetailResult,
@@ -32,16 +42,6 @@ import type {
 
 import { repinAnimeContent, unpinAnimeContent } from '../services/content-deletion'
 import { getDistributionService } from '../services/distribution-service'
-import { getKuboService } from '../services/kubo'
-import {
-  addToLibraryViaTracker,
-  fetchLibraryFromTracker,
-  fetchTrackerAnimeDetail,
-  fetchTrackerCatalog,
-  publishToTracker,
-  syncLibraryToTracker,
-  testTrackerConnection,
-} from '../services/tracker-client'
 import { getTrackerSyncService } from '../services/tracker-sync'
 import { prisma } from '../utils/db'
 import { broadcastToWindows, createHandler } from '../utils/ipc-handler-factory'

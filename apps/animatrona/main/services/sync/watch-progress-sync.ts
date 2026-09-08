@@ -15,11 +15,11 @@ import { EventEmitter } from 'events'
 
 import type { Message } from 'kubo-rpc-client'
 
+import { getKuboService } from '@letar/ipfs-kubo-core'
 import type { WatchProgress } from '../../../renderer/src/generated/prisma'
 import { getPrismaClient } from '../../utils/db'
 import { withDbRetry } from '../../utils/db-retry'
 import { createModuleLogger } from '../../utils/logger'
-import { getKuboService } from '../kubo'
 
 const log = createModuleLogger('WatchProgressSync')
 

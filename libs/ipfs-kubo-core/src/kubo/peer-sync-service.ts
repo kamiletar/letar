@@ -15,8 +15,8 @@ import { app } from 'electron'
 import fs from 'fs'
 import path from 'path'
 
-import { createModuleLogger } from '../../utils/logger'
 import { fetchPinServers } from '../tracker-client'
+import { createModuleLogger } from '../utils/logger'
 import * as kuboApi from './kubo-api-client'
 import { KUBO_CONFIG, PINNER3_PEER_ID, PINNER4_PEER_ID, PINNER_PEER_ID } from './kubo-config'
 import type {

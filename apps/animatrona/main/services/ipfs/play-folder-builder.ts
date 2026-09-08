@@ -14,14 +14,15 @@
  */
 
 import type { ChaptersDocument } from '@letar/animatrona-types'
+import { safeCat } from '@letar/ipfs-kubo-core'
 import type { NamingPattern } from '../../../shared/types/export'
 import type { QueueEpisodeExportData, QueueExportConfig } from '../../../shared/types/export-queue'
 import { resolveTrackKey } from '../../../shared/types/track-key'
 import { createModuleLogger } from '../../utils/logger'
 import { buildDirectoryStructure } from '../web-export/asset-bundler'
 import { generateManifest } from '../web-export/manifest-generator'
+
 import type { DirEntry } from './unified-ipfs-service'
-import { safeCat } from './unified-ipfs-service'
 
 const log = createModuleLogger('PlayFolderBuilder')
 

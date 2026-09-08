@@ -14,10 +14,10 @@ import { EventEmitter } from 'events'
 
 import type { Message } from 'kubo-rpc-client'
 
+import { getKuboService } from '@letar/ipfs-kubo-core'
 import type { Friend, FriendRequest } from '../../../renderer/src/generated/prisma'
 import { getPrismaClient } from '../../utils/db'
 import { createModuleLogger } from '../../utils/logger'
-import { getKuboService } from '../kubo'
 
 /** Тип handler'а для PubSub */
 type PubSubHandler = (msg: Message) => void

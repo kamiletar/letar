@@ -1,17 +1,22 @@
 /**
- * UnixFS Service — Работа с файлами в IPFS
+ * UnixFS Service — Работа с файлами в IPFS (compat-обёртка Animatrona)
  *
- * ТЕПЕРЬ ИСПОЛЬЗУЕТ Kubo (Go-IPFS) через UnifiedIPFSService!
- *
- * Этот файл является thin wrapper для обратной совместимости.
- * Все операции делегируются в unified-ipfs-service.ts который
- * использует kubo-rpc-client для работы с Kubo демоном.
+ * ⚠️ Отклонение от буквального плана переноса: этот файл НЕ переехал в `@letar/ipfs-kubo-core`
+ * целиком, хотя по объёму он SHARED-код. Причина — он одновременно оборачивает READ-функции
+ * (cat/stat/has/saveToFile, теперь живут в либе) и WRITE-функции
+ * (addFile/addDirectory/addBytes/createDirectoryFromCids, остались в Animatrona, завязаны на
+ * `ImportQueueController`). Перенос файла целиком создал бы обратную зависимость
+ * либа→приложение, что архитектурно запрещено. Поэтому файл остался в Animatrona как тонкая
+ * объединяющая обёртка над обеими половинами — публичный API (сигнатуры, имена экспортов) не
+ * изменился, ни один из 13 потребителей в `apps/animatrona/main/**` править не пришлось.
  *
  * Преимущества Kubo:
  * - Стабильный DHT (Go реализация)
  * - Лучший NAT traversal
  * - Автоматический provide в DHT
  */
+
+import { unixfsCat, unixfsHas, unixfsSaveToFile, unixfsStat } from '@letar/ipfs-kubo-core'
 
 import type { IpfsAddResult, IpfsStatResult } from '../../../shared/types/ipfs'
 import { createModuleLogger } from '../../utils/logger'
@@ -71,8 +76,8 @@ export async function addBytes(content: Buffer, opts?: { pin?: boolean }): Promi
  * @returns Buffer с содержимым
  */
 export async function cat(cidPath: string): Promise<Buffer> {
-  log.debug('cat → UnifiedIPFS', { cidPath })
-  return UnifiedIPFS.cat(cidPath)
+  log.debug('cat → @letar/ipfs-kubo-core', { cidPath })
+  return unixfsCat(cidPath)
 }
 
 /**
@@ -82,8 +87,8 @@ export async function cat(cidPath: string): Promise<Buffer> {
  * @returns Статистика (размер, тип, количество блоков)
  */
 export async function stat(cidPath: string): Promise<IpfsStatResult> {
-  log.debug('stat → UnifiedIPFS', { cidPath })
-  return UnifiedIPFS.stat(cidPath)
+  log.debug('stat → @letar/ipfs-kubo-core', { cidPath })
+  return unixfsStat(cidPath)
 }
 
 /**
@@ -93,7 +98,7 @@ export async function stat(cidPath: string): Promise<IpfsStatResult> {
  * @returns true если контент доступен локально
  */
 export async function has(cidString: string): Promise<boolean> {
-  return UnifiedIPFS.hasBlock(cidString)
+  return unixfsHas(cidString)
 }
 
 /**
@@ -103,7 +108,7 @@ export async function has(cidString: string): Promise<boolean> {
  * @param outputPath - Путь для сохранения
  */
 export async function saveToFile(cidString: string, outputPath: string): Promise<void> {
-  return UnifiedIPFS.saveToFile(cidString, outputPath)
+  return unixfsSaveToFile(cidString, outputPath)
 }
 
 /**

@@ -49,6 +49,7 @@
       "@letar/animatrona-ui": ["../../libs/animatrona-ui/src/index.ts"],
       "@letar/electron-storage": ["../../libs/electron-storage/src/index.ts"],
       "@letar/folder-scan": ["../../libs/folder-scan/src/index.ts"],
+      "@letar/ipfs-kubo-core": ["../../libs/ipfs-kubo-core/src/index.ts"],
       "@letar/folder-player-react": ["../../libs/folder-player-react/src/index.ts"],
       "@letar/hooks": ["../../libs/hooks/src/index.ts"],
       "@letar/seed-utils": ["../../libs/seed-utils/src/index.ts"],
@@ -90,6 +91,7 @@
     "../../libs/electron-storage/src/**/*.ts",
     "../../libs/hooks/src/**/*.ts",
     "../../libs/folder-scan/src/**/*.ts",
+    "../../libs/ipfs-kubo-core/src/**/*.ts",
     "../../libs/folder-player-react/src/**/*.ts",
     "../../libs/folder-player-react/src/**/*.tsx"
   ],

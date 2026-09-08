@@ -12,9 +12,9 @@ import { EventEmitter } from 'events'
 
 import type { Message } from 'kubo-rpc-client'
 
+import { getKuboService } from '@letar/ipfs-kubo-core'
 import type { PresenceMessage, PresenceSettings, WatchingInfo } from '../../../shared/types/orbitdb'
 import { createModuleLogger } from '../../utils/logger'
-import { getKuboService } from '../kubo'
 
 /** Тип handler'а для PubSub */
 type PubSubHandler = (msg: Message) => void

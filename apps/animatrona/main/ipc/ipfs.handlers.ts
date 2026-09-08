@@ -23,6 +23,7 @@
  * - ipns:republish — Переопубликовать все записи
  */
 
+import { getKuboService, getPeerSyncService } from '@letar/ipfs-kubo-core'
 import {
   addDirectory,
   addFile,
@@ -37,7 +38,6 @@ import {
 import { bulkUnpin } from '../services/ipfs/bulk-unpin'
 import { findOrphanedPins } from '../services/ipfs/orphan-audit'
 import { normalizeAllPins } from '../services/ipfs/pin-normalizer'
-import { getKuboService } from '../services/kubo'
 import { broadcastToWindows, createHandler, forwardEvents } from '../utils/ipc-handler-factory'
 
 /**
@@ -87,7 +87,6 @@ export function registerIpfsHandlers(): void {
 
   // === PeerSync — синхронизация Kubo peers из API трекера ===
   createHandler('kubo:getSyncedPeers', async () => {
-    const { getPeerSyncService } = await import('../services/kubo/peer-sync-service')
     return getPeerSyncService().getStatus()
   })
 
@@ -96,7 +95,6 @@ export function registerIpfsHandlers(): void {
     if (!apiUrl) {
       return { success: false, error: 'Kubo API недоступен' }
     }
-    const { getPeerSyncService } = await import('../services/kubo/peer-sync-service')
     return getPeerSyncService().syncNow(apiUrl)
   })
 
@@ -105,7 +103,6 @@ export function registerIpfsHandlers(): void {
     if (!apiUrl) {
       return { success: false, error: 'Kubo API недоступен' }
     }
-    const { getPeerSyncService } = await import('../services/kubo/peer-sync-service')
     await getPeerSyncService().reconnectCycle(apiUrl)
     return { success: true }
   })

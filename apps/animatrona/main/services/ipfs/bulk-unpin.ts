@@ -11,8 +11,8 @@
 
 import { CID } from 'multiformats/cid'
 
+import { getKuboService } from '@letar/ipfs-kubo-core'
 import { createModuleLogger } from '../../utils/logger'
-import { getKuboService } from '../kubo'
 
 const log = createModuleLogger('BulkUnpin')
 

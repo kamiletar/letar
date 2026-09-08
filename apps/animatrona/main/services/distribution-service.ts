@@ -6,12 +6,18 @@
  */
 
 import { createJsonStore } from '@letar/electron-storage'
+import {
+  fetchTrackerCatalog,
+  getKuboService,
+  registerDistribution,
+  reportStats,
+  updateDistribution,
+} from '@letar/ipfs-kubo-core'
+
 import type { TrackerConfig, TrackerDistribution } from '../../shared/types/tracker'
 import { prisma } from '../utils/db'
 import { createModuleLogger } from '../utils/logger'
-import { getKuboService } from './kubo'
 import { getUnreportedDelta, markReported } from './stats/stats-store'
-import { fetchTrackerCatalog, registerDistribution, reportStats, updateDistribution } from './tracker-client'
 
 const log = createModuleLogger('DistributionService')
 

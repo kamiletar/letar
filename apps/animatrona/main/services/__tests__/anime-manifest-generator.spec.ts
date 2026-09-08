@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from 'vitest'
 vi.mock('../../utils/db', () => ({ prisma: {} }))
 vi.mock('../ipfs/pin-sub-documents', () => ({ pinSubDocuments: vi.fn() }))
 vi.mock('../ipfs/unixfs-service', () => ({ addBytes: vi.fn(), cat: vi.fn() }))
-vi.mock('../kubo', () => ({ getKuboService: vi.fn() }))
+vi.mock('@letar/ipfs-kubo-core', () => ({ getKuboService: vi.fn() }))
 vi.mock('../shikimori', () => ({ getAnimeExtended: vi.fn(), getAnimeRestData: vi.fn(), getAnimeWithRelated: vi.fn() }))
 vi.mock('../shikimori/franchise-api', () => ({ getFranchiseGraph: vi.fn() }))
 vi.mock('../anime-info-generator', () => ({ buildAnimeInfo: vi.fn() }))

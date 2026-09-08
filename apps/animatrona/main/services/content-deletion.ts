@@ -6,12 +6,12 @@
 
 import { CID } from 'multiformats/cid'
 
+import { getKuboService } from '@letar/ipfs-kubo-core'
 import type { EpisodeManifest } from '../../shared/types/manifest'
 import { prisma } from '../utils/db'
 import { createModuleLogger } from '../utils/logger'
 import { isSafeToUnpinLocally } from './ipfs/pin-status-service'
 import { cat } from './ipfs/unixfs-service'
-import { getKuboService } from './kubo'
 
 const log = createModuleLogger('ContentDeletion')
 

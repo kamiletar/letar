@@ -336,7 +336,7 @@
     },
     "apps/aboi": {
       "name": "@letar/aboi",
-      "version": "0.83.3",
+      "version": "0.83.5",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/analytics": "workspace:*",
@@ -380,12 +380,13 @@
     },
     "apps/animatrona": {
       "name": "@letar/animatrona",
-      "version": "0.55.66",
+      "version": "0.55.68",
       "dependencies": {
         "@letar/electron-storage": "workspace:*",
         "@letar/folder-scan": "workspace:*",
         "@letar/hooks": "workspace:*",
         "@letar/icon-generator": "workspace:*",
+        "@letar/ipfs-kubo-core": "workspace:*",
         "@letar/query-provider": "workspace:*",
         "@letar/seed-utils": "workspace:*",
         "cheerio": "^1.2.0",
@@ -396,7 +397,7 @@
     },
     "apps/animatrona-folder-player": {
       "name": "@letar/animatrona-folder-player",
-      "version": "0.6.0",
+      "version": "0.6.2",
       "dependencies": {
         "@letar/electron-storage": "workspace:*",
         "@letar/folder-player-react": "workspace:*",
@@ -415,7 +416,7 @@
     },
     "apps/animatrona-ipfs-player": {
       "name": "@letar/animatrona-ipfs-player",
-      "version": "0.1.0",
+      "version": "0.3.0",
       "dependencies": {
         "@letar/icon-generator": "workspace:*",
       },
@@ -565,7 +566,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.188.0",
+      "version": "0.188.4",
       "dependencies": {
         "@letar/analytics": "workspace:*",
         "@letar/consent": "workspace:*",
@@ -1104,7 +1105,7 @@
     },
     "libs/folder-player-react": {
       "name": "@letar/folder-player-react",
-      "version": "0.1.0",
+      "version": "0.1.2",
       "peerDependencies": {
         "@chakra-ui/react": "^3.0.0",
         "@letar/folder-scan": "workspace:*",
@@ -1376,6 +1377,10 @@
       "name": "@letar/infra-config",
       "version": "0.2.2",
     },
+    "libs/ipfs-kubo-core": {
+      "name": "@letar/ipfs-kubo-core",
+      "version": "0.1.0",
+    },
     "libs/jobs": {
       "name": "@letar/jobs",
       "version": "0.3.0",
@@ -1571,7 +1576,7 @@
     },
     "libs/video-player-react": {
       "name": "@letar/video-player-react",
-      "version": "0.2.2",
+      "version": "0.2.3",
       "peerDependencies": {
         "@letar/video-player-core": "workspace:*",
         "react": "^19.0.0",
@@ -2638,6 +2643,8 @@
     "@letar/image-upload": ["@letar/image-upload@workspace:libs/image-upload"],
 
     "@letar/infra-config": ["@letar/infra-config@workspace:libs/infra-config"],
+
+    "@letar/ipfs-kubo-core": ["@letar/ipfs-kubo-core@workspace:libs/ipfs-kubo-core"],
 
     "@letar/jobs": ["@letar/jobs@workspace:libs/jobs"],
 

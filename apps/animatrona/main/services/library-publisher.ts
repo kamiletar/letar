@@ -5,9 +5,9 @@
  * Реэкспортирует все публичные функции для обратной совместимости.
  */
 
+import { getKuboService } from '@letar/ipfs-kubo-core'
 import { createModuleLogger } from '../utils/logger'
 import { getIpnsService } from './ipfs'
-import { getKuboService } from './kubo'
 import {
   generatePublishedLibrary as _generatePublishedLibrary,
   getAnimesForPublishing as _getAnimesForPublishing,

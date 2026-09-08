@@ -7,7 +7,7 @@
  * Паттерн взят из kubo-relay.ts (swarm/connect пример).
  */
 
-import { createModuleLogger } from '../../utils/logger'
+import { createModuleLogger } from '../utils/logger'
 
 const log = createModuleLogger('KuboApiClient')
 

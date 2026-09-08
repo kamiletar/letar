@@ -10,7 +10,7 @@ import { promises as fs } from 'fs'
 import path from 'path'
 
 import type { PeerId, PrivateKey } from '@libp2p/interface' with { 'resolution-mode': 'import' }
-import { createModuleLogger } from '../../utils/logger'
+import { createModuleLogger } from '../utils/logger'
 
 const log = createModuleLogger('PeerIdManager')
 

@@ -12,11 +12,11 @@ import { EventEmitter } from 'events'
 import { promises as fs } from 'fs'
 import path from 'path'
 
-import { createModuleLogger } from '../../utils/logger'
 import { getKuboService } from '../kubo'
+import { createModuleLogger } from '../utils/logger'
 import { kuboLimiter } from './kubo-concurrency'
 import { getIpfsDataDir } from './peer-id-manager'
-import { stat } from './unixfs-service'
+import { stat } from './unified-ipfs-read'
 
 const log = createModuleLogger('PinManager')
 

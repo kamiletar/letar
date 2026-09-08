@@ -5,9 +5,9 @@
  * Для каждого файла с CID, но без ipfsSize, вызывает stat() и сохраняет размер в БД.
  */
 
+import { stat } from '@letar/ipfs-kubo-core'
 import { prisma } from '../../utils/db'
 import { createModuleLogger } from '../../utils/logger'
-import { stat } from './unified-ipfs-service'
 
 const log = createModuleLogger('BackfillIpfsSizes')
 

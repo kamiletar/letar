@@ -88,6 +88,7 @@ if (process.env.DEBUG_LIBP2P === '1' && !process.env.DEBUG) {
   console.log('[libp2p] DEBUG логирование включено через DEBUG env')
 }
 
+import { getKuboService } from '@letar/ipfs-kubo-core'
 import { app, BrowserWindow, crashReporter, dialog, Menu, powerMonitor, powerSaveBlocker } from 'electron'
 import path from 'path'
 import { registerIpcHandlers } from './ipc'
@@ -99,7 +100,6 @@ import { getBonusService } from './services/bonus'
 import { initializeDatabase, migrateFromOldPath } from './services/database'
 import { getDeepLinkService } from './services/deep-link'
 import { getDistributionService } from './services/distribution-service'
-import { getKuboService } from './services/kubo'
 import { getMobileServer } from './services/mobile-server'
 import { mobileProgressEvents } from './services/mobile-server/progress-events'
 import { startNextServer, stopNextServer } from './services/next-server'

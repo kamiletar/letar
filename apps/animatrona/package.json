@@ -28,6 +28,7 @@
     "@letar/folder-scan": "workspace:*",
     "@letar/hooks": "workspace:*",
     "@letar/icon-generator": "workspace:*",
+    "@letar/ipfs-kubo-core": "workspace:*",
     "@letar/query-provider": "workspace:*",
     "@letar/seed-utils": "workspace:*"
   },

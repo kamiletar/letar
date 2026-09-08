@@ -11,10 +11,10 @@
 
 import { CID } from 'multiformats/cid'
 
+import { getKuboService } from '@letar/ipfs-kubo-core'
 import type { RemotePinStatus } from '../../../renderer/src/generated/prisma'
 import { prisma } from '../../utils/db'
 import { createModuleLogger } from '../../utils/logger'
-import { getKuboService } from '../kubo'
 
 const log = createModuleLogger('PinStatusService')
 

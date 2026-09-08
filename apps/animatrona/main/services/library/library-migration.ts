@@ -7,9 +7,9 @@ import type { Dirent } from 'fs'
 import { promises as fs } from 'fs'
 import path from 'path'
 
+import { getKuboService } from '@letar/ipfs-kubo-core'
 import { prisma } from '../../utils/db'
 import { createModuleLogger } from '../../utils/logger'
-import { getKuboService } from '../kubo'
 import { getDefaultLibraryPath } from '../output-path-resolver'
 
 const log = createModuleLogger('LibraryMigration')

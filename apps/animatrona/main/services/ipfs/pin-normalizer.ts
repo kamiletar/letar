@@ -18,10 +18,10 @@
 
 import { CID } from 'multiformats/cid'
 
+import { getKuboService } from '@letar/ipfs-kubo-core'
 import { prisma } from '../../utils/db'
 import { createModuleLogger } from '../../utils/logger'
 import { ImportQueueController } from '../import-queue-controller'
-import { getKuboService } from '../kubo'
 import { isSafeToUnpinLocally } from './pin-status-service'
 
 const log = createModuleLogger('PinNormalizer')

@@ -25,7 +25,9 @@ import { uploadToIpfs } from '../import/import-ipfs'
 import { detectIntros, type IntroDetectorResult } from '../intro-detector'
 import { downloadPoster } from '../shikimori/client'
 
-import { addBytes, saveToFile } from './unified-ipfs-service'
+import { saveToFile } from '@letar/ipfs-kubo-core'
+
+import { addBytes } from './unified-ipfs-service'
 
 const log = createModuleLogger('CidRecovery')
 

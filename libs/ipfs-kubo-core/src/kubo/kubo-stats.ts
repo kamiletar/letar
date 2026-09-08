@@ -6,8 +6,8 @@
 
 import type { KuboRPCClient } from 'kubo-rpc-client' with { 'resolution-mode': 'import' }
 
-import type { IpfsServiceStatus } from '../../../shared/types/ipfs'
-import { createModuleLogger } from '../../utils/logger'
+import type { IpfsServiceStatus } from '../types/ipfs'
+import { createModuleLogger } from '../utils/logger'
 
 const log = createModuleLogger('KuboStats')
 

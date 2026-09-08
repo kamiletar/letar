@@ -5,7 +5,7 @@
  * Если да — Animatrona использует его вместо запуска собственного Kubo.
  */
 
-import { createModuleLogger } from '../../utils/logger'
+import { createModuleLogger } from '../utils/logger'
 import { IPFS_DESKTOP_API_URL, IPFS_DESKTOP_PORTS } from './kubo-config'
 
 const log = createModuleLogger('KuboDetector')

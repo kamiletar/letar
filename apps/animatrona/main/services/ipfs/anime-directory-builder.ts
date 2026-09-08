@@ -61,7 +61,8 @@ import type { EpisodeManifest } from '../../../shared/types/manifest'
 import { prisma } from '../../utils/db'
 import { createModuleLogger } from '../../utils/logger'
 
-import { getKuboService } from '../kubo'
+import { getKuboService } from '@letar/ipfs-kubo-core'
+import { cat, probeCidAvailable, safeCat, stat } from '@letar/ipfs-kubo-core'
 import { regenerationState } from '../regeneration-state'
 import {
   recoverChapters,
@@ -71,8 +72,9 @@ import {
   regenerateMetadataJson,
 } from './cid-recovery'
 import { buildPlayFolderEntries } from './play-folder-builder'
+
 import type { DirEntry } from './unified-ipfs-service'
-import { addBytes, cat, createDirectoryFromCids, probeCidAvailable, safeCat, stat } from './unified-ipfs-service'
+import { addBytes, createDirectoryFromCids } from './unified-ipfs-service'
 
 const log = createModuleLogger('AnimeDirectoryBuilder')
 

@@ -16,7 +16,7 @@
 import { app } from 'electron'
 import http from 'http'
 
-import { createModuleLogger } from '../../utils/logger'
+import { createModuleLogger } from '../utils/logger'
 import { PRIVATE_RELAY, RELAY_REGISTER_URL } from './kubo-config'
 
 const log = createModuleLogger('KuboRelay')

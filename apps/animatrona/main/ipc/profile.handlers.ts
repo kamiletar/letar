@@ -5,7 +5,7 @@
  * Использует SQLite (UserProfileSync) + IPNS для синхронизации.
  */
 
-import { getKuboService } from '../services/kubo'
+import { getKuboService } from '@letar/ipfs-kubo-core'
 import { getUserProfileSync } from '../services/sync'
 import { generateFriendCode, isValidFriendCodeFormat, verifyFriendCode } from '../services/sync/friend-code'
 import type { ProfileUpdate } from '../services/sync/user-profile-sync'

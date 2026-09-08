@@ -10,13 +10,20 @@
 import { app } from 'electron'
 import fs from 'fs'
 import path from 'path'
+
+import {
+  fetchProfile,
+  fetchWatchProgressSince,
+  getPinManager,
+  pushWatchProgress,
+  syncLibraryToTracker,
+} from '@letar/ipfs-kubo-core'
+
 import type { WatchStatus } from '../../renderer/src/generated/prisma'
 import type { TrackerConfig, TrackerServerItem, TrackerWatchProgressItem } from '../../shared/types/tracker'
 import { prisma } from '../utils/db'
 import { broadcastToWindows } from '../utils/ipc-handler-factory'
 import { createModuleLogger } from '../utils/logger'
-import { getPinManager } from './ipfs/pin-manager'
-import { fetchProfile, fetchWatchProgressSince, pushWatchProgress, syncLibraryToTracker } from './tracker-client'
 
 const log = createModuleLogger('TrackerSync')
 

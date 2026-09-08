@@ -13,10 +13,10 @@
 
 import { EventEmitter } from 'events'
 
+import { getKuboService } from '@letar/ipfs-kubo-core'
 import type { LocalUserProfile } from '../../../renderer/src/generated/prisma'
 import { getPrismaClient } from '../../utils/db'
 import { createModuleLogger } from '../../utils/logger'
-import { getKuboService } from '../kubo'
 
 import { generateFriendCode } from './friend-code'
 

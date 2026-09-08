@@ -366,6 +366,17 @@ export default [
       'no-restricted-syntax': 'off',
     },
   },
+  // Allow-list: `libs/ipfs-kubo-core` — код, вынесенный из `apps/animatrona/main/` (2026-09-08,
+  // задача координатора экосистемы Animatrona), потребляется ТОЛЬКО из Electron main-процессов
+  // desktop-линейки (animatrona, будущий animatrona-ipfs-player) — тот же случай, что и
+  // allow-list `apps/*/main/**/*.ts` выше, просто путь теперь вне `apps/*/main/`, потому что
+  // это shared-библиотека, а не код одного приложения.
+  {
+    files: ['libs/ipfs-kubo-core/src/**/*.ts'],
+    rules: {
+      'no-restricted-syntax': 'off',
+    },
+  },
   // Allow-list: разобранные точечно случаи, где паттерн безопасен (проверено 2026-08-12,
   // см. .claude/docs/node-env-not-production-signal.md § Ревизия ESLint-правила):
   // — `secure: NODE_ENV === 'production'` для cookie — корректно для ЛЮБОЙ собранной

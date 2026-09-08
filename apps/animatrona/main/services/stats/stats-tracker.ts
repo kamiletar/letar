@@ -7,9 +7,9 @@
 
 import { EventEmitter } from 'events'
 
+import { getKuboService } from '@letar/ipfs-kubo-core'
 import type { StatsUpdatedEvent, UserStats } from '../../../shared/types/stats'
 import { createModuleLogger } from '../../utils/logger'
-import { getKuboService } from '../kubo'
 import * as statsStore from './stats-store'
 
 const log = createModuleLogger('StatsTracker')

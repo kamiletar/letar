@@ -4,7 +4,7 @@
  * Отправляет directoryCid на tracker — трекер сам извлекает метаданные из IPFS.
  */
 
-import type { StatsReportDelta } from '../../shared/types/stats'
+import type { StatsReportDelta } from './types/stats'
 import type {
   TrackerAddToLibraryResult,
   TrackerAnimeDetailResult,
@@ -16,8 +16,8 @@ import type {
   TrackerSyncResult,
   TrackerUserProfile,
   TrackerWatchProgressItem,
-} from '../../shared/types/tracker'
-import { createModuleLogger } from '../utils/logger'
+} from './types/tracker'
+import { createModuleLogger } from './utils/logger'
 
 const log = createModuleLogger('TrackerClient')
 

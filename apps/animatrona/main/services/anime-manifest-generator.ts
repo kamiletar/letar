@@ -16,6 +16,7 @@
  * 6. Возвращает CID
  */
 
+import { getKuboService } from '@letar/ipfs-kubo-core'
 import type {
   ANIME_MANIFEST_VERSION,
   AnimeManifest,
@@ -36,7 +37,6 @@ import { buildAniListEpisodeNameMap, getAniListDescription } from './anilist'
 import { buildAnimeInfo } from './anime-info-generator'
 import { pinSubDocuments } from './ipfs/pin-sub-documents'
 import { addBytes, cat } from './ipfs/unixfs-service'
-import { getKuboService } from './kubo'
 import { regenerationState } from './regeneration-state'
 import { getAnimeExtended, getAnimeRestData, getAnimeWithRelated } from './shikimori'
 import { extractExternalIds } from './shikimori-mapper'

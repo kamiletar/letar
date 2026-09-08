@@ -5,8 +5,8 @@
  * Работает в main process — никакого IPC overhead.
  */
 
+import { kuboLimiter } from '@letar/ipfs-kubo-core'
 import { createModuleLogger } from '../../utils/logger'
-import { kuboLimiter } from '../ipfs/kubo-concurrency'
 import { addFile } from '../ipfs/unixfs-service'
 
 const log = createModuleLogger('ImportIPFS')

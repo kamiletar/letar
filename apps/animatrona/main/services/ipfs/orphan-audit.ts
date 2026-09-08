@@ -9,10 +9,10 @@
  * Никаких `cat()`/`refs()` обращений к IPFS — только Kubo `pin.ls` + Prisma.
  */
 
+import { getKuboService } from '@letar/ipfs-kubo-core'
 import type { PinInfo } from '../../../shared/types/ipfs'
 import { prisma } from '../../utils/db'
 import { createModuleLogger } from '../../utils/logger'
-import { getKuboService } from '../kubo'
 import { stat } from './unixfs-service'
 
 const log = createModuleLogger('OrphanAudit')
