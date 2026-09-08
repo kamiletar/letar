@@ -11,6 +11,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 
 import { Haptics } from '@/services/haptics'
+import { formatDuration } from '@letar/animatrona-shared'
 
 interface SeekBarProps {
   /** Текущее время воспроизведения (секунды) */
@@ -19,13 +20,6 @@ interface SeekBarProps {
   duration: number
   /** Колбэк seek — вызывается при отпускании */
   onSeek: (time: number) => void
-}
-
-/** Форматирование времени мм:сс */
-function formatTime(seconds: number): string {
-  const mins = Math.floor(seconds / 60)
-  const secs = Math.floor(seconds % 60)
-  return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
 const THUMB_SIZE = 20
@@ -157,7 +151,7 @@ export function SeekBar({ currentTime, duration, onSeek }: SeekBarProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.timeText}>{formatTime(currentTime)}</Text>
+      <Text style={styles.timeText}>{formatDuration(currentTime)}</Text>
       <GestureDetector gesture={pan}>
         <Animated.View
           ref={barRef as never}
@@ -179,7 +173,7 @@ export function SeekBar({ currentTime, duration, onSeek }: SeekBarProps) {
           <Animated.View style={[styles.thumb, thumbStyle]} />
         </Animated.View>
       </GestureDetector>
-      <Text style={styles.timeText}>-{formatTime(Math.max(0, duration - currentTime))}</Text>
+      <Text style={styles.timeText}>-{formatDuration(Math.max(0, duration - currentTime))}</Text>
     </View>
   )
 }

@@ -657,13 +657,6 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
     setUserMadeResumeDecision(true)
   }, [watchProgress])
 
-  // Форматирование времени
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
-
   // Обработчик тапа по видео (от нативного SyncVideoView)
   const handleVideoTap = useCallback(() => {
     if (!lockState.isLocked) {

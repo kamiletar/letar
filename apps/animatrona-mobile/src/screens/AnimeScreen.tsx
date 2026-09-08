@@ -27,19 +27,12 @@ import { Haptics } from '@/services/haptics'
 import { useDownloadsStore } from '@/store/downloads'
 import { useOfflineStore } from '@/store/offline'
 import type { AnimeDetails, Episode } from '@letar/animatrona-shared'
-import { getStoredProgress, type WatchProgressData } from '@letar/animatrona-shared'
+import { formatDuration, getStoredProgress, type WatchProgressData } from '@letar/animatrona-shared'
 
 interface SeasonSection {
   title: string
   data: Episode[]
   seasonNumber: number
-}
-
-/** Форматирование времени для отображения (мм:сс) */
-function formatTime(seconds: number): string {
-  const mins = Math.floor(seconds / 60)
-  const secs = Math.floor(seconds % 60)
-  return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
 export function AnimeScreen({ navigation, route }: AnimeScreenProps) {
@@ -357,7 +350,7 @@ export function AnimeScreen({ navigation, route }: AnimeScreenProps) {
             <TouchableOpacity style={styles.continueButtonHeader} onPress={handleContinueWatching}>
               <Play size={12} color="#FFFFFF" style={{ marginLeft: 1 }} />
               <Text style={styles.continueTextHeader}>
-                Эп. {lastWatchedEpisode.episode.number} • {formatTime(lastWatchedEpisode.progress.position)}
+                Эп. {lastWatchedEpisode.episode.number} • {formatDuration(lastWatchedEpisode.progress.position)}
               </Text>
             </TouchableOpacity>
           )}
@@ -429,7 +422,7 @@ export function AnimeScreen({ navigation, route }: AnimeScreenProps) {
                 Эпизод {lastWatchedEpisode.episode.number}
                 {lastWatchedEpisode.episode.name ? ` • ${lastWatchedEpisode.episode.name}` : ''}
                 {' • '}
-                {formatTime(lastWatchedEpisode.progress.position)}
+                {formatDuration(lastWatchedEpisode.progress.position)}
               </Text>
             </View>
           </View>
@@ -528,7 +521,7 @@ function LeftPanel({
             <View style={styles.continueTextContainer}>
               <Text style={styles.continueTitle}>Продолжить</Text>
               <Text style={styles.continueSubtitleSplit}>
-                Эп. {lastWatchedEpisode.episode.number} • {formatTime(lastWatchedEpisode.progress.position)}
+                Эп. {lastWatchedEpisode.episode.number} • {formatDuration(lastWatchedEpisode.progress.position)}
               </Text>
             </View>
           </TouchableOpacity>

@@ -5,12 +5,26 @@
 - [x] **Экран гаснет во время просмотра видео** — подключён `useWakeLock({ enabled: isPlaying })` в PlayerScreen (f1d9fa1d0)
 - [x] **Субтитры смещены при первом рендере** — субтитры рендерятся только после `videoLoaded`, когда videoStyle корректен (f1d9fa1d0)
 
+- [x] **DRY: 4 копии `formatTime` → `formatDuration` из `@letar/animatrona-shared`** (2026-09-08,
+      задача координатора). Заодно починены таймкоды длиннее часа (`95:30` → `1:35:30`) и
+      `NaN:NaN` на битой длительности; в `PlayerScreen.tsx` копия оказалась мёртвым кодом.
+      Второй пункт письма координатора (`useDebounce` из `@letar/hooks` в `LibraryScreen.tsx`)
+      — **отклонён**, обоснование в CHANGELOG и в ответе координатору: у `@letar/hooks` только
+      барабанный экспорт, он затянет в граф Metro browser-хуки и `@tanstack/react-query`,
+      которого нет в зависимостях приложения.
+
+- [ ] ⚠️ **ESLint не запускается для этого приложения вообще.** У `animatrona-mobile` (и у
+      `animatrona-tv`) нет `eslint.config.*`, поэтому `@nx/eslint/plugin` не заводит им
+      inferred-таргет, а блок `"lint"` в `project.json` — только `options` без `executor`,
+      то есть мёртвая добавка к несуществующему таргету (`nx lint animatrona-mobile` →
+      «Cannot find configuration for task»). Проверка идёт только через `nx typecheck:tsgo`
+      и ручной `oxlint`. Завести конфиг по образцу `animatrona-mobile-ui` — у него таргет есть.
+
 - [ ] **Вернуть обратную связь на тапы (haptic)** — удалён `react-native-haptic-feedback`, но `NativeHapticsModule` (TurboModule) уже есть. Нужно подключить `Haptics.light()` / `Haptics.medium()` в кнопки плеера, жесты, тапы по карточкам
 - [ ] **QR-сканер на ConnectScreen** — сейчас только ручной ввод адреса, нужна кнопка «Сканировать QR-код» для подключения к Desktop/Tracker
-- [ ] **Синхронизировать React 19.2.3 → 19.2.5** — в animatrona-mobile/package.json отличается от корня
 - [ ] **Покадровая перемотка на паузе** — при паузе кнопки +/- 5 кадров. ExoPlayer: `player.seekTo()` с `SeekParameters.EXACT` или `player.seekToNext/PreviousMediaItem()` на уровне кадров
 
-## Текущая версия: 0.7.3
+## Текущая версия: 0.7.7
 
 ---
 
@@ -215,4 +229,4 @@ Storage Access Framework (SAF): пользователь выбирает дер
 
 > Завершённые фазы: [PLAN_COMPLETED.md](PLAN_COMPLETED.md)
 
-**Последнее обновление:** 2026-05-29
+**Последнее обновление:** 2026-09-08

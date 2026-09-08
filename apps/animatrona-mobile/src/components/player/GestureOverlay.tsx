@@ -18,6 +18,7 @@
  */
 
 import { Haptics } from '@/services/haptics'
+import { formatDuration } from '@letar/animatrona-shared'
 import { ChevronsLeft, ChevronsRight, FastForward } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Animated, Dimensions, PanResponder, StyleSheet, Text, View } from 'react-native'
@@ -54,18 +55,6 @@ const VERTICAL_SENSITIVITY = 0.003
 const ZOOM_MIN = 1.0
 const ZOOM_MAX = 4.0
 const ZOOM_SNAP_THRESHOLD = 1.05
-
-/** Форматирование времени mm:ss или h:mm:ss */
-function formatTime(seconds: number): string {
-  const s = Math.max(0, Math.floor(seconds))
-  const h = Math.floor(s / 3600)
-  const m = Math.floor((s % 3600) / 60)
-  const sec = s % 60
-  if (h > 0) {
-    return `${h}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`
-  }
-  return `${m}:${sec.toString().padStart(2, '0')}`
-}
 
 /** Расстояние между двумя точками касания */
 function getDistance(touches: { pageX: number; pageY: number }[]): number {
@@ -348,7 +337,7 @@ export function GestureOverlay(props: GestureOverlayProps) {
             const newTime = Math.max(0, Math.min(p.duration, gestureStartValueRef.current + seekDelta))
             const deltaSeconds = Math.round(newTime - gestureStartValueRef.current)
             const sign = deltaSeconds >= 0 ? '+' : ''
-            showIndicator(`${formatTime(newTime)} [${sign}${deltaSeconds}с]`)
+            showIndicator(`${formatDuration(newTime)} [${sign}${deltaSeconds}с]`)
           }
         },
         onPanResponderRelease: (evt, gestureState) => {
