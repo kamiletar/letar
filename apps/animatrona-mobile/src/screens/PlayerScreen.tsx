@@ -216,11 +216,12 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
     aspectRatio: [16, 9],
     onPipAction: handlePipAction,
   })
+  const { updatePlaybackState } = pip
 
   // Синхронизация состояния воспроизведения с PiP кнопками
   useEffect(() => {
-    pip.updatePlaybackState(isPlaying)
-  }, [isPlaying, pip.updatePlaybackState])
+    updatePlaybackState(isPlaying)
+  }, [isPlaying, updatePlaybackState])
 
   // При входе в PiP — закрываем все модальные окна (иначе они перекрывают PiP)
   useEffect(() => {
@@ -421,7 +422,11 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
         setError(err instanceof Error ? err.message : 'Ошибка загрузки')
       })
       .finally(() => setLoading(false))
-  }, [animeId, episodeId, retryCount])
+    // preferredAudioIndex/preferredSubtitleIndex/viewingMode читаются как актуальное значение
+    // в момент загрузки эпизода, а не как триггер — иначе смена аудио/сабов/режима просмотра
+    // (обычное действие во время просмотра) перезапускала бы fetch и сбрасывала видео на старте
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [animeId, episodeId, retryCount, applyViewingModeToEpisode])
 
   // Обработчик загрузки видео
   const handleLoad = useCallback((data: OnLoadData) => {
@@ -572,7 +577,7 @@ export function PlayerScreen({ navigation, route }: PlayerScreenProps) {
       }
       setShowAudioMenu(false)
     },
-    [currentTime, episode, animeId, setAudioTrackIndex],
+    [currentTime, episode, animeId, episodeId, setAudioTrackIndex],
   )
 
   // Выбор субтитров

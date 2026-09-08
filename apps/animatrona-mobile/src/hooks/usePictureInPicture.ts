@@ -105,6 +105,13 @@ export function usePictureInPicture(options: UsePictureInPictureOptions = {}): U
     }
   }, [isPipAvailable, aspectRatio, updatePipState])
 
+  // Ref для enterPipMode — сама функция нестабильна (aspectRatio-дефолт пересоздаётся
+  // каждый рендер), но подписка на AppState ниже не должна пересоздаваться из-за этого
+  const enterPipModeRef = useRef(enterPipMode)
+  useEffect(() => {
+    enterPipModeRef.current = enterPipMode
+  })
+
   // Автоматический PiP при сворачивании (с защитой от цикла)
   useEffect(() => {
     if (!isPipAvailable || !autoEnterOnBackground) {
@@ -119,7 +126,7 @@ export function usePictureInPicture(options: UsePictureInPictureOptions = {}): U
         if (timeSinceExit < PIP_REENTRY_COOLDOWN) {
           return
         }
-        enterPipMode()
+        enterPipModeRef.current()
       }
     }
 
