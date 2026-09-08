@@ -903,11 +903,19 @@ creator-only: `EncodingProfilesCard`, `TranscodingSettingsCard`, `QBittorrentSet
       `useWatchProgress`, `AnimeCard`, `TrackSelector`, два standalone веб-плеера, два
       IPFS Range-прокси — см. `.claude/docs/shaka-player-hook-dedup-audit.md` и
       `header-drawer-dedup-audit.md`.
-- [ ] **DRY в animatrona-tracker/mobile/tv** — за пределами прав этой команды
-      (`/animatrona` правит только `apps/animatrona`), передано координатору
-      `animatrona-coordinator-dev` сообщением в треде `animatrona-dry-audit`. Там же —
-      `libs/animatrona-franchise-graph/src/types.ts`: свести его словарь с каноническим можно,
-      но единственный потребитель — tracker, и правка меняет видимые подписи.
+- [x] **DRY в animatrona-tracker/mobile/tv** (закрыто силами самих приложений, 2026-09-08) —
+      за пределами прав этой команды (`/animatrona` правит только `apps/animatrona`), поэтому
+      передано координатору `animatrona-coordinator-dev`. Каскад разошёлся и закрыт: tracker
+      свёл словари, `formatTime` и debounce, включая `libs/animatrona-franchise-graph`
+      (`356c24e1`); mobile и tv свели `formatTime` и попутно починили пин `react-native`.
+      Подтверждено сообщением координатора 1423 и проверено грепом — локальных копий словаря
+      связей и `formatTime` в трёх приложениях не осталось.
+- [ ] ⚠️ Открытый вопрос: правит ли сессия `/animatrona` код в `animatrona-tracker`,
+      `animatrona-mobile`, `animatrona-tv`, когда находка касается их. Во время DRY-сессии
+      2026-09-08 вопрос был задан владельцу («остаться в рамках и передать координатору или
+      править самому?») и остался без ответа — работа велась строго в рамках, каскад ушёл
+      через координатора и закрылся силами самих приложений. Пока ответа нет, действует запрет
+      из `.claude/commands/animatrona.md`: только уведомлять координатора.
 
 ---
 
