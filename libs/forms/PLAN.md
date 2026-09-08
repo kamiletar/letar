@@ -6,34 +6,36 @@
 
 ## Backlog (запросы от агентов)
 
-### [2026-09-09] `apps/form-example` не подключает `FormI18nProvider` (от forms-coordinator-dev)
+### ✅ [2026-09-09] `apps/form-example` не подключает `FormI18nProvider` (закрыт, от forms-coordinator-dev)
 
 - **Запросил:** forms-coordinator-dev (аудит покрытия после фикса v2.12.3)
-- **Приоритет:** normal
 - **Описание:** аудит всех приложений на `<FormI18nProvider locale="ru">` (после фикса запятой,
   v2.12.3) нашёл, что `form-example` — showcase-витрина самой `@letar/forms` для внешних
   пользователей, реально использующая поля (`captcha-demo` и др. через `createForm`) — не
   оборачивает дерево в `FormI18nProvider` вовсе. Значит `Field.Number`/`Currency`/`Percentage` там
-  сейчас работают только на точке (en-US default), запятая даёт явную ошибку валидации — плохая
-  демонстрация для внешней аудитории library.
-- **Фикс:** добавить `<FormI18nProvider locale="ru">` в провайдеры `apps/form-example` (образец —
-  `apps/form-develop-app/src/app/_components/provider.tsx`). Минутная правка.
-- **Статус:** ожидание
+  работали только на точке (en-US default), запятая давала явную ошибку валидации.
+- **Фикс:** `<FormI18nProvider locale="ru">` добавлен в `apps/form-example/src/components/providers.tsx`
+  (образец — `apps/form-develop-app`). `typecheck:tsgo`/`lint` зелёные.
 
-### [2026-09-09] `@letar/forms-shadcn` Field.Currency не передаёт `locale` — тот же класс бага, что был в Chakra-скине (от forms-coordinator-dev)
+### ✅ [2026-09-09] `@letar/forms-shadcn` Field.Currency/Number не передавали `locale` (закрыт v0.36.0, от forms-coordinator-dev)
 
 - **Запросил:** forms-coordinator-dev (аудит покрытия после фикса v2.12.3)
-- **Приоритет:** normal
 - **Описание:** фикс v2.12.3 (передача `locale` из `useFormI18n()` в `NumberInput.Root` +
-  дефолтные `formatOptions`, форсирующие locale-aware парсер вместо голого `parseFloat`) сделан
-  только в Chakra-скине (`libs/forms`). `libs/forms-shadcn/src/lib/fields/field-currency.tsx` —
-  отдельная реализация, `locale` не передаёт вовсе. Не проверял живьём остальные числовые поля
-  этого скина (`field-number.tsx`/`field-number-input.tsx`/`field-percentage.tsx`, если есть) —
-  вероятно тот же паттерн, нужно перепроверить все аналогично Chakra-версии.
-- **Фикс:** применить тот же паттерн (`locale` из `useFormI18n()`, дефолтные `formatOptions` при
-  отсутствии явных) во всех числовых полях `forms-shadcn`, с теми же регресс-тестами (en-US точка /
-  ru запятая), что уже есть в `field-number-input.spec.tsx`/`field-currency.spec.tsx` Chakra-скина.
-- **Статус:** ожидание
+  дефолтные `formatOptions`) был сделан только в Chakra-скине. `forms-shadcn` — отдельная
+  реализация UIKit-контракта, `locale` не передавала вовсе ни в одном из четырёх числовых полей.
+- **Уточнение к формулировке «тот же паттерн»:** оказалось архитектурно глубже. `shadcnUIKit.NumberInput`
+  рендерил нативный `<input type="number">` — HTML5 value sanitization algorithm сбрасывает
+  `.value` в `""` для любой строки с запятой ещё **до** `onChange`, JS-нормализация уже готового
+  `e.target.value` восстановить это не может. Тот же ARIA-паттерн, что у `@zag-js/number-input`
+  в Chakra-скине (текстовый инпут + ручной `role="spinbutton"`/`aria-value*`), пришлось повторить
+  и здесь.
+- **Фикс (v0.36.0):** `uikit/primitives/number-input.tsx` переведён на `type="text"` + ручной
+  ARIA-контракт, разбор разделителя — нативный `Intl.NumberFormat(locale).formatToParts(1.1)`
+  (без новой зависимости, beta-упрощение сохранено). `locale` проброшен через `useFieldState` →
+  `useFormI18n()?.locale` во всех четырёх полях (`FieldNumber`/`FieldNumberInput`/`FieldCurrency`/
+  `FieldPercentage`). `UIKitNumberInputProps` (`@letar/forms-core` 0.12.0→0.12.1) расширен полем
+  `locale?: string`. Регресс-тесты (en-US точка / ru запятая / ru точка тоже работает) — во всех
+  четырёх spec-файлах. `nx typecheck:tsgo`/`lint` зелёные, vitest 253/253.
 
 ### ✅ [2026-09-08] Русская запятая как десятичный разделитель — проверить Field.Number/NumberInput (закрыт v2.12.3, от domwellbes-dev)
 
@@ -62,6 +64,8 @@
 - **Ответ на вопрос 3 (подсветка невалидной ячейки в таблицах массового редактирования вне
   формы) — не проверялось, вне рамок этой задачи.** Кандидат на отдельный backlog-запрос, если
   понадобится домвэллбесу отдельно от перехода на `Field.*`.
+- **Дополнение [2026-09-09]:** тот же класс бага в `forms-shadcn` (отдельная реализация полей)
+  закрыт отдельной записью выше — v0.36.0.
 
 ### ✅ [2026-09-08] Денежное поле: transform копейки↔рубли на границе значения (закрыт v2.13.0, от domwellbes-dev)
 
