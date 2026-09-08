@@ -1,0 +1,65 @@
+// Общие поля моделей стека Animatrona, переиспользуемые несколькими приложениями линейки
+// (`animatrona` — Mega, `animatrona-ipfs-player` — Standard) через ZenStack mixin
+// (`type ... { }` + `model X with Y`) вместо копипасты между приложениями.
+//
+// ⚠️ Миксин — это ПЕРЕСЕЧЕНИЕ потребностей, а не объединение. Поле, попавшее сюда, получают все
+// потребители; убрать его у одного или переопределить с другим атрибутом нельзя
+// (`Duplicated declaration name`). Специфика каждого приложения дописывается в его модели
+// ПОВЕРХ миксина. Поэтому здесь нет ни trust-системы федерации, ни relation'ов — см. ниже.
+//
+// В отличие от `better-auth.zmodel`, политика доступа вынесена СЮДА: весь desktop-стек
+// Animatrona работает без аутентификации, `@@allow('all', true)` одинаков во всех приложениях
+// линейки. Механизм это позволяет (проверено на zenstack 3.9.3) — формулировка «в миксин идут
+// только поля» относится к Better Auth, где политики намеренно разные.
+//
+// Использование в apps/<app>/schema.zmodel:
+//
+//   import "../../libs/zenstack-fragments/src/animatrona"
+//
+//   model Tracker with TrackerFields {
+//     // ... поля, нужные только этому приложению
+//   }
+//
+// Полный разбор механизма, границ и ловушек:
+// /.claude/docs/zenstack-shared-fragments-across-apps.md
+
+/// Трекер — источник раздач. Общая часть: идентификация и описание источника.
+///
+/// НЕ входит сюда (осознанно, остаётся в `apps/animatrona`):
+/// - `publicKeyPem` — верификация подписей, нужна только федерации;
+/// - `trustLevel`/`uptimePercent`/`avgResponseTimeMs`/`contentQuality`/`successfulSyncs`/
+///   `failedSyncs` — trust-система федерации;
+/// - `contentSynced`/`lastSyncAt` — статистика подписок с авто-обновлением;
+/// - `importedContent` — relation на `FederatedContent`; relation на модель приложения в миксин
+///   положить нельзя технически (`Could not resolve reference to TypeDeclaration`).
+///
+/// У IPFS Player при объёме «только просмотр» ничего из перечисленного нет.
+type TrackerFields {
+  id            String    @id @default(cuid())
+
+  /// URL трекера (уникальный идентификатор)
+  url           String    @unique
+
+  /// Название трекера
+  name          String
+
+  /// Описание трекера
+  description   String?
+
+  /// Тема контента (anime, drama, movie и т.д.)
+  theme         String    @default("anime")
+
+  /// Основной язык контента
+  language      String    @default("ru")
+
+  /// Последняя проверка доступности
+  lastCheckedAt DateTime?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Desktop-приложение без аутентификации — политика одинакова во всей линейке
+  @@allow('all', true)
+
+  @@index([lastCheckedAt])
+}

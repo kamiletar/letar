@@ -1,10 +1,11 @@
 # @letar/zenstack-fragments
 
-Общие ZenStack zmodel-фрагменты для Better Auth моделей (Account/Session/Verification).
+Общие ZenStack zmodel-фрагменты — куски схемы БД, переиспользуемые несколькими приложениями
+монорепо. Каждый файл в `src/` — независимый фрагмент под свою предметную область.
 
 ⚠️ Это **не обычная TS-библиотека** — код в `src/index.ts` пуст (заглушка для соответствия
-конвенции `new-lib`). Реальное содержимое — `.zmodel`-файл с ZenStack `type`-миксинами,
-подключаемый напрямую через `import` в `schema.zmodel` приложения (файловый путь, а не
+конвенции `new-lib`). Реальное содержимое — `.zmodel`-файлы с ZenStack `type`-миксинами,
+подключаемые напрямую через `import` в `schema.zmodel` приложения (файловый путь, а не
 модульная система TypeScript/`@letar/*`-алиасы).
 
 ## Что внутри
@@ -14,6 +15,24 @@
 - `AccountFields` — Better Auth привязки OAuth/credentials-аккаунтов
 - `SessionFields` — Better Auth сессии
 - `VerificationFields` — Better Auth токены верификации email/сброса пароля
+
+`src/animatrona.zmodel` — общие модели линейки Animatrona (`animatrona` — Mega,
+`animatrona-ipfs-player` — Standard):
+
+- `TrackerFields` — источник раздач: идентификация и описание. Trust-система федерации,
+  `publicKeyPem` и relation на `FederatedContent` сюда **не** входят — они есть только у
+  `animatrona`, дописываются в её модели поверх миксина.
+
+⚠️ В отличие от Better Auth, этот фрагмент **несёт и политику** (`@@allow('all', true)`): весь
+desktop-стек Animatrona работает без аутентификации, политика одинакова во всей линейке.
+
+## Общее правило для любого фрагмента: миксин — это пересечение
+
+Поле, попавшее в `type`-миксин, получают **все** потребители. Убрать его у одного или
+переопределить с другим атрибутом нельзя — `Duplicated declaration name`. Поэтому во фрагмент
+идёт только пересечение потребностей, а специфика дописывается каждым приложением поверх.
+Механизм, границы и ловушки (включая то, что Nx не видит связи фрагмент→приложение) —
+[zenstack-shared-fragments-across-apps](/.claude/docs/zenstack-shared-fragments-across-apps.md).
 
 ## Почему только поля, а не целые модели
 
