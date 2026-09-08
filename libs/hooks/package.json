@@ -11,6 +11,21 @@
       "import": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./utility": {
+      "types": "./src/utility.ts",
+      "import": "./src/utility.ts",
+      "default": "./src/utility.ts"
+    },
+    "./browser": {
+      "types": "./src/browser.ts",
+      "import": "./src/browser.ts",
+      "default": "./src/browser.ts"
+    },
+    "./query": {
+      "types": "./src/query.ts",
+      "import": "./src/query.ts",
+      "default": "./src/query.ts"
+    },
     "./package.json": "./package.json"
   },
   "peerDependencies": {

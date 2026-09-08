@@ -20,6 +20,9 @@
       "@letar/hooks": [
         "../../libs/hooks/src/index.ts"
       ],
+      "@letar/hooks/utility": ["../../libs/hooks/src/utility.ts"],
+      "@letar/hooks/browser": ["../../libs/hooks/src/browser.ts"],
+      "@letar/hooks/query": ["../../libs/hooks/src/query.ts"],
       "@letar/i18n-proxy": [
         "../../libs/i18n-proxy/src/index.ts"
       ],

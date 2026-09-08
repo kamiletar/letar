@@ -44,6 +44,9 @@
       "@letar/hooks": [
         "../../libs/hooks/src/index.ts"
       ],
+      "@letar/hooks/utility": ["../../libs/hooks/src/utility.ts"],
+      "@letar/hooks/browser": ["../../libs/hooks/src/browser.ts"],
+      "@letar/hooks/query": ["../../libs/hooks/src/query.ts"],
       "@letar/admin-ui": [
         "../../libs/admin-ui/src/index.ts"
       ],
