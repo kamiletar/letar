@@ -393,28 +393,83 @@ creator-only: `EncodingProfilesCard`, `TranscodingSettingsCard`, `QBittorrentSet
 
 ### 3. Оценка веса (предварительно, требует уточнения после реального разделения)
 
-| Компонент              | Animatrona (текущая) | Animatrona Viewer (оценка)                                                                                                                              |
-| ---------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ffmpeg.exe`           | 202 МБ               | нет (просмотр — работа Shaka Player, не ffmpeg)                                                                                                         |
-| `ffprobe.exe`          | 193 МБ               | под вопросом — нужен ли вообще для чтения уже готового манифеста (метаданные дорожек уже в IPFS JSON, см. «Принцип минимума БД» в CLAUDE.md приложения) |
-| `kubo.exe`             | 84 МБ                | **остаётся** (решение владельца — полный узел)                                                                                                          |
-| SQLite/Prisma/миграции | есть                 | **остаётся** (модели почти те же, см. выше)                                                                                                             |
-| **Итог**               | ~282 МБ              | ориентировочно 80–130 МБ (грубая прикидка, без реального прогона)                                                                                       |
+| Компонент              | Animatrona (текущая) | Animatrona Viewer (оценка)                                                                                                                                                                                     |
+| ---------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ffmpeg.exe`           | 202 МБ               | нет (просмотр — работа Shaka Player, не ffmpeg)                                                                                                                                                                |
+| `ffprobe.exe`          | 193 МБ               | **не нужен** — подтверждено разбором кода 2026-09-08 (см. §4 ниже), все метаданные дорожек уже в IPFS-манифесте, даже creator-путь восстановления битых CID не перечитывает видео через ffprobe для метаданных |
+| `kubo.exe`             | 84 МБ                | **остаётся** (решение владельца — полный узел)                                                                                                                                                                 |
+| SQLite/Prisma/миграции | есть                 | **остаётся** (модели почти те же, см. выше)                                                                                                                                                                    |
+| **Итог**               | ~282 МБ              | ориентировочно 80–130 МБ (грубая прикидка, без реального прогона)                                                                                                                                              |
 
 ### 4. Следующие шаги (для будущей сессии — не начинать без прямой команды владельца)
 
-- [ ] Прочитать содержимое `unified-ipfs-service.ts`/`kubo-service.ts`/`kubo-daemon.ts` целиком —
-      определить реальную границу read/write API (что нужно только для публикации новых релизов).
-- [ ] Решить: `libs/ipfs-kubo-core` — общая библиотека для main-процесса Animatrona + Viewer +
-      Tracker (веб, если у него тоже что-то похожее) — или пока только Animatrona+Viewer.
-- [ ] Уточнить объём `ffprobe`-зависимости у viewer'а — можно ли полностью обойтись метаданными
-      из IPFS-манифеста без локального probe готового файла.
-- [ ] Расписать разделение `settings/_settings/*` по карточкам явно (не по названию, по факту
-      использования — что читает/пишет `EncodingProfile`/`ImportQueueItem` и т.п.).
+- [x] **Прочитать `unified-ipfs-service.ts`/`kubo-service.ts`/`kubo-daemon.ts`/`anime-directory-builder.ts`/
+      `pin-manager.ts`/`pin-status-service.ts`/`pin-normalizer.ts`/`peer-sync-service.ts` целиком, определить
+      границу read/write** (2026-09-08, разбор двумя фоновыми агентами). Итог:
+  - **Чистый SHARED (переносить как есть, без изменений):** `kubo-service.ts` (767 строк),
+    `kubo-daemon.ts` (602 строки), `peer-sync-service.ts` (486 строк) — ни одной Prisma/
+    `ImportQueueController`-зависимости во всех трёх; жизненный цикл демона, конфиг (в т.ч.
+    `Provide.Strategy: 'roots'`), bootstrap/peering sync одинаково нужны и creator, и viewer.
+    `pin-manager.ts` (353 строки) тоже чистый SHARED — весь стейт в локальном `pins.json`, без БД.
+  - **Чистый WRITE/creator-only:** `anime-directory-builder.ts` (1445 строк, `buildAnimeDirectory()`
+    строит `directoryCid` из полной Prisma-модели библиотеки — Anime/Episode/треки/шрифты),
+    `pin-status-service.ts` (312 строк, `scanAndRegisterLocalCids()` сканирует всю творческую БД,
+    защищает от GC contentещё не подтверждённый на удалённых pin-серверах), `pin-normalizer.ts`
+    (182 строки, `normalizeAllPins()`, гейтится через `ImportQueueController.hasActiveImport()`).
+  - **Смешанный файл, нужен splitting по экспортам, не по файлу целиком:**
+    `unified-ipfs-service.ts` (504 строки) — `cat/stat/has/safeCat/probeCidAvailable/saveToFile`
+    READ (нужны viewer'у как есть), `addFile/addBytes/addDirectory/createDirectoryFromCids` WRITE
+    (публикация), `repoGc()` формально универсален, но жёстко гейтится через
+    `ImportQueueController.hasActiveImport()` — при переносе в общую библиотеку нужно решить, чем
+    заменить гейт для viewer'а (скорее всего просто убрать, у viewer'а очереди импорта нет).
+  - **Побочная находка:** `repoGc()` и `normalizeAllPins()` оба импортируют `ImportQueueController`
+    — creator-специфичная примесь состояния очереди импорта внутри generic-выглядящих утилит
+    обслуживания хранилища. Полный разбор с построчной таблицей READ/WRITE/SHARED по каждой
+    публичной функции — в истории сессии 2026-09-08 (не задокументирован отдельным файлом, при
+    необходимости переиспользовать выводы — начинать реализацию с перечисленных выше файлов).
+- [ ] Решить: `libs/ipfs-kubo-core` — общая библиотека для main-процесса Animatrona + IPFS Player +
+      Tracker (веб, если у него тоже что-то похожее) — или пока только Animatrona+IPFS Player.
+      Разбор границы read/write (пункт выше) даёт достаточно данных для этого решения, но само
+      решение владелец ещё не принимал.
+- [x] **Уточнить объём `ffprobe`-зависимости у viewer'а** (2026-09-08) — **не нужен вообще**. Ни
+      одного прямого импорта ffprobe/ffmpeg в восьми разобранных файлах; единственная косвенная
+      связь — `regenerateMetadataJson()` в `anime-directory-builder.ts` берёт `durationMs`/
+      `videoWidth`/`videoHeight`/`videoBitDepth` из полей БД `Episode`, не пересчитывает ffprobe'ом
+      заново. `recoverSprite`/`recoverThumbnailsImg` гоняют ffmpeg (не ffprobe) для рендера превью
+      при аварийном восстановлении битых CID — только creator-flow, не путь чтения/просмотра.
+- [x] **Расписать разделение `settings/_settings/*` по карточкам явно, по факту использования**
+      (2026-09-08, разбор фоновым агентом, 24 файла включая подпапку `p2p-sharing/`). Полная
+      таблица классификации — в истории сессии; сводка:
+  - **CREATOR-ONLY:** `EncodingProfilesCard`, `TranscodingSettingsCard`, `QBittorrentSettingsCard`,
+    `TorrentSettingsCard`, `TrackerPublishingCard`, `p2p-sharing/PublishingSection.tsx`+
+    `use-publisher.ts` (генерация/публикация IPNS-манифеста своей библиотеки).
+  - **VIEWER:** `MobileAccessCard`, `PlayerSettingsCard`, `p2p-sharing/IpfsStatusSection.tsx`+
+    `use-ipfs.ts`, `p2p-sharing/PeerSyncSection.tsx`, `p2p-sharing/SubscriptionsSection.tsx`+
+    `use-subscriptions.ts` (подписка на чужую IPNS-библиотеку — основной способ получить контент
+    без импорта), `p2p-sharing/SchedulerSection.tsx`+`use-scheduler.ts`, `p2p-sharing/P2PStatsTab.tsx`+
+    `use-p2p-stats.ts`.
+  - **SHARED:** `ThemeSettingsCard`, `TraySettingsCard`, `UpdateSettingsCard(New)`, `LogsTab`
+    (упущен в черновой классификации — просмотр `main.log`, ничего contentного),
+    `p2p-sharing/IpfsAuditSection.tsx`+`use-ipfs-audit.ts`, `p2p-sharing/RemotePinningSection.tsx`+
+    `use-remote-pin.ts`, `p2p-sharing/format-utils.ts`/`types.ts`/`index.ts`.
+  - **Расхождения с черновой классификацией по имени файла:** `P2PSharingCard` целиком считался
+    viewer-relevant — по факту `PublishingSection`/`use-publisher.ts` внутри него creator-only,
+    карточку придётся разбивать, не переносить одним компонентом. `LibrarySettingsCard` в целом
+    viewer, но поле `outputPath` (папка транскодирования) внутри неё — creator-only.
+    `FederationCard`+`use-federation.ts` смешанная: `sync`/`discover` (получение чужого контента)
+    ближе к viewer, но `generateKeys`/управление доверием трекеров (превращение узла в хаб
+    федерации) — издательская роль; требует явного решения владельца, не выведено из кода
+    однозначно. `use-p2p-sharing.ts` (композитный хук) и `use-settings.ts` тянут creator-only
+    зависимости (`usePublisher`, `useFindManyEncodingProfile`) вместе с viewer-релевантными —
+    при переносе оба хука потребуют расщепления, копировать как есть нельзя.
+  - **UNCLEAR (нужно решение владельца):** жив ли `UpdateSettingsCard.tsx` (старая версия) —
+    `page.tsx` импортирует `UpdateSettingsCardNew` напрямую, минуя барабанный `index.ts`, который
+    экспортирует именно старую карточку — похоже на мёртвый код, не проверялось отдельно. Объём
+    федерации в IPFS Player (только приём контента или полноценный хаб) — см. выше.
 - [ ] Только после этого — `nx g @letar/generators:electron-app animatrona-ipfs-player` и перенос по
       готовому списку, тем же паттерном, что уже отработан на `@letar/folder-scan` (перенос →
-      обобщение через интерфейсы там, где Viewer и Animatrona расходятся — например read-only vs
-      read-write доступ к Kubo).
+      обобщение через интерфейсы там, где IPFS Player и Animatrona расходятся — например read-only
+      vs read-write доступ к Kubo).
 
 ## Открытые задачи
 
