@@ -2362,3 +2362,9 @@ production-деплоем, не только теоретически реали
   заменён на общий компонент; `apps/archetest/.../offline-consent-banner.tsx` теперь тонкая
   обёртка, маппит `useTranslations('offlineBanner')` в пропы `@letar/ui` и задаёт
   `colorPalette="purple"`. Детали — `PLAN.md` §64 в корне репо.
+
+## Починка графа Nx (2026-09-09)
+
+- [x] `@letar/forms` реально импортировался в коде, но не был объявлен ни в `dependencies`, ни в
+      `nx.implicitDependencies` (PLAN-INFRA-6.md §169). Добавлен в `dependencies`
+      (`workspace:*`), проверено format/lint/typecheck:tsgo.

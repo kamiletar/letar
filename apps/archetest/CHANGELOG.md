@@ -5,6 +5,14 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 версионирование следует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.27.20] - 2026-09-09
+
+### Fixed
+
+- `package.json`: `@letar/forms` не был объявлен ни в `dependencies`, ни в
+  `nx.implicitDependencies`, хотя реально импортируется — граф Nx не видел это ребро. Добавлен
+  в `dependencies` (`workspace:*`).
+
 ## [0.27.19] - 2026-09-05
 
 ### Fixed
