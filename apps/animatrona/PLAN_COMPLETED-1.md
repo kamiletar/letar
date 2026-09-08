@@ -3,6 +3,78 @@
 > Точка входа и карта всех частей — [PLAN_COMPLETED.md](./PLAN_COMPLETED.md).
 > Диапазон: 2026-09-04 — 2026-09-08.
 
+## DRY-рефакторинг экосистемы Animatrona (2026-09-08, v0.55.72)
+
+**Контекст:** прямая задача владельца — провести дедупликацию по всем `animatrona*`-приложениям и
+библиотекам. Аудит вёлся четырьмя параллельными read-only агентами с явной установкой уважать два
+уже задокументированных отказа от сведения (`shaka-player-hook-dedup-audit`,
+`header-drawer-dedup-audit`).
+
+**Что сведено:**
+
+| Дубль                                        | Куда                                       | Итог      |
+| -------------------------------------------- | ------------------------------------------ | --------- |
+| 8 JSON-хранилищ main-процесса                | `@letar/electron-storage`                  | −298/+191 |
+| 5 копий словаря типов связей/типов аниме     | `@letar/animatrona-utils`                  | −132/+29  |
+| 3 списка медиарасширений                     | `@letar/folder-scan`                       | −27/+18   |
+| 5 копий `formatTime`, 2 самодельных debounce | `@letar/video-player-core`, `@letar/hooks` | −5 копий  |
+| Копия типов манифеста в `electron.d.ts`      | `@letar/animatrona-types`                  | −312/+49  |
+
+**Новые публичные экспорты в библиотеках** (ничего не удалено, обратная совместимость сохранена):
+`RELATION_KIND_CONFIG`/`getRelationKindInfo`/`ANIME_KIND_CONFIG`/`getAnimeKindInfo` в
+`@letar/animatrona-utils`; подпуть `@letar/folder-scan/media-extensions` (чистый модуль без
+`node:*` — годится для рендерера); `swarmConnectOrThrow`/`nodeId`/`BandwidthStats` в
+`@letar/ipfs-kubo-core`.
+
+**Две ловушки, из-за которых пришлось отойти от предложенного агентом решения:**
+
+1. `createJsonStore` без `mergeDefaults` отдаёт на фолбэке **ту же ссылку** на `defaultValue`, а не
+   свежий литерал (`fallbackValue()` копирует только при `mergeDefaults: true`). Сторы с массивом по
+   умолчанию (history, subscriptions, templates, трекеры и контент федерации) вызывающий код мутирует
+   на месте — `push`/`splice`/`unshift`. Наружу теперь идёт копия; то же для объектных дефолтов
+   bonus-points и настроек федерации.
+2. `createJsonStore.ensureDir` создаёт только свой корень (`userData`), не подпапку из имени файла.
+   Агент вынес гарантию существования `federation/` в отдельную функцию и оставил её на читающих
+   методах, обосновав тем, что «остальные пути получают её через предшествующий `getXxx()`». Схема
+   ломается на первом же write-only методе — `clearAllFederatedContent` уже был таким, и на чистом
+   профиле упал бы `ENOENT`. Гарантия перенесена в три обёртки записи (`saveSettings`/`saveTrackers`/
+   `saveContent`), из чтения убрана — отсутствие файла стор отдаёт дефолтом.
+
+**Побочно найденные баги (исправлены вместе с дедупликацией):** локальные `formatTime` не умели
+часы (`65:30` вместо `1:05:30`); в `DiscoverRelatedList` не было ключа `spin_off` вовсе — спин-оффы
+рендерились без подписи; в `RelatedAnimeRow` не было цветов для `spin_off`/`character`/
+`alternative_*`; копия типов манифеста в `electron.d.ts` врала про границу IPC (`video.path` вместо
+`video.cid`, `filePath` вместо `cid` у субтитров, `manifestPath` вместо `manifestCid`, отсутствующие
+`isForced`/`size`, урезанные `AnimeManifestGenre`/`AnimeManifestExternalIds`, несуществующий
+`cropFilter`); `media-analyzer` не знал `.flv`/`.m4v` в видео и `.m4a`/`.wav`/`.ac3`/`.dts` в аудио.
+
+**Осознанное изменение видимого поведения:** свести пять разошедшихся словарей в один нельзя без
+выбора одной формулировки. `sequel` теперь везде «Сиквел» (был и «Продолжение»), `parent_story` —
+«Основная история» (была и «Основа»), `tv` — «TV» (был и «TV Сериал»).
+
+**Наборы расширений выбирались по смыслу, а не механическим объединением:** `media-analyzer` и
+`episode-matcher` берут `VIDEO_EXTENSIONS` без `.ts` (они ходят по пользовательским папкам, где
+`.ts` спутался бы с исходниками TypeScript), `rutracker-download-orchestrator` —
+`PLAYABLE_VIDEO_EXTENSIONS` с `.ts`/`.m2ts` (там список файлов торрента, коллизии нет, и `.ts` в
+копии уже был).
+
+**Проверка:** `format` → `lint` (0 errors, 39 warnings — все дошли из прошлого состояния) →
+`typecheck:tsgo` → `test` 138/138 → **`nx build animatrona --skip-nx-cache`** (обе сборки: Next.js
+renderer и webpack main). Билд гонялся отдельно намеренно — `typecheck:tsgo` резолвит через
+tsconfig `paths`, а `main/` собирается ещё и webpack'ом со своим списком алиасов, зелёный typecheck
+там ничего не доказывает (`animatrona-dual-build-alias-drift`). В `main/` импорт взят из барреля
+`@letar/folder-scan` (уже в `webpack.config.js`), в рендерере — из подпути `/media-extensions`:
+баррель тянет `node:fs`. `bun scripts/check-all.mjs` — все gate-проверки зелёные, включая
+`lib-subpath-paths` (подпуть потребовал записи в пяти tsconfig, иначе гейт красный).
+
+**Осознанно НЕ сведено** (расхождение настоящее, а не дрейф): `useShakaPlayer`, `useWatchProgress`
+(×3), `AnimeCard`, `TrackSelector`, два standalone веб-плеера, два IPFS Range-прокси. Отклонена и
+рекомендация агента вынести `pickDefaultTrack` — это `find(t => t.isDefault) ?? tracks[0]`, тянуть
+ради одной строки `@letar/animatrona-utils` в два приложения не окупается.
+
+**Коммиты:** `48d9c717`, `e9035502`, `c031242d`, `5cb18bcd`, `faf357b7`, `be64ea94`, `c2a2ddeb`,
+`d7abed56`, `a3849dc0`.
+
 ## `Tracker` переведён на общий миксин `TrackerFields` (2026-09-08, v0.55.67)
 
 **Контекст:** задача координатора экосистемы Animatrona (тред `cascade-tracker-fields-mixin`) —
