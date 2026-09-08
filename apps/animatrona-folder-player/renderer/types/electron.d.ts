@@ -45,6 +45,7 @@ export interface ElectronAPI {
       folderPath: string,
       videoFiles: Array<{ path: string; episodeNumber: number }>,
     ) => Promise<ExternalSubtitleScanResult>
+    findPoster: (folderPath: string) => Promise<string | null>
   }
   probe: (filePath: string) => Promise<ProbeResult>
   subtitles: {

@@ -29,9 +29,13 @@
   генерации): нарезка спрайт-листа через ffmpeg в фоне после старта воспроизведения, кэш в
   `userData/sprites/` (потолок 512 МБ), без установленного ffmpeg превью просто не появляется,
   без ошибок — `shared/sprite-layout.ts`, `main/services/ffmpeg/sprite.service.ts`, IPC `sprite:*`.
+- **Локальный постер серии** — поиск `poster`/`cover`/`folder`.`jpg`/`.jpeg`/`.png`/`.webp` в
+  корне открытой папки (`main/services/poster-finder.service.ts`, IPC `fs:findPoster`), отдаётся
+  через уже существующий `media://`. Раньше `EpisodeSidebar.posterUrl` не передавался вовсе —
+  сайдбар всегда показывал generic-иконку папки.
 - `shared/` — рантайм-код, общий для main и renderer: `codec-support.ts` (переехал из
   `renderer/app/_lib/`), `transcode-plan.ts`, `sprite-layout.ts`, `chapter-mapping.ts`.
-  Алиас `@shared/*`. 86 unit-тестов (vitest), таргет `nx test animatrona-folder-player`.
+  Алиас `@shared/*`. 94 unit-теста (vitest), таргет `nx test animatrona-folder-player`.
 - `scripts/verify-ffmpeg.cjs` — headless-проверка ffmpeg-части main-процесса без GUI; с путём к
   видеофайлу аргументом прогоняет настоящую подготовку.
 
@@ -61,6 +65,12 @@
 - Матчинг внешних субтитров: язык/группа из суффикса имени файла (`.jp_netflix` и т.п.) не
   извлекались ни для одной папки с несколькими сериями — терялись молча из-за неверного
   порядка шагов в `fuzzyMatchToVideo`.
+- Стандартное меню Electron «File Edit View Window» под заголовком окна убрано
+  (`Menu.setApplicationMenu(null)`) — плееру оно не нужно, фидбек с первого живого запуска.
+- Отсутствующие иконки в `resources/` (`icon.ico`/`icon.png`/`icon-*.png`) — падал
+  `build:win` (`electron-builder`) с `cannot find specified resource "resources/icon.ico"`.
+  Скрипт генерации (`scripts/generate-icons.mjs`) был готов, но никогда не запускался для этого
+  приложения.
 
 ### Changed
 

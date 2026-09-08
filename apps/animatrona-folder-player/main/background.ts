@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, Menu } from 'electron'
 import path from 'node:path'
 import { registerIpcHandlers } from './ipc'
 import { initAllowedPaths } from './protocols/allowed-paths'
@@ -131,6 +131,9 @@ async function createWindow(): Promise<void> {
 }
 
 app.whenReady().then(async () => {
+  // Без этого Electron рисует стандартное меню «File Edit View Window» — плееру оно не нужно
+  // (фидбек «верхняя панель выглядит некрасиво»)
+  Menu.setApplicationMenu(null)
   setupMediaProtocolHandler()
   setupAppProtocolHandler()
   initAllowedPaths()

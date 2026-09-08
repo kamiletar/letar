@@ -10,6 +10,7 @@ import {
 import { ipcMain } from 'electron'
 
 import { allowPath } from '../protocols/allowed-paths'
+import { findFolderPoster } from '../services/poster-finder.service'
 
 export function registerFsHandlers(): void {
   ipcMain.handle(
@@ -42,5 +43,10 @@ export function registerFsHandlers(): void {
       videoFolderPath: string,
       videoFiles: Array<{ path: string; episodeNumber: number }>,
     ): Promise<ExternalSubtitleScanResult> => scanForExternalSubtitles(videoFolderPath, videoFiles),
+  )
+
+  ipcMain.handle(
+    'fs:findPoster',
+    (_event, folderPath: string): Promise<string | null> => findFolderPoster(folderPath),
   )
 }

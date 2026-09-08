@@ -108,6 +108,8 @@ const electronAPI = {
       folderPath: string,
       videoFiles: Array<{ path: string; episodeNumber: number }>,
     ): Promise<ExternalSubtitleScanResult> => ipcRenderer.invoke('fs:scanExternalSubtitles', folderPath, videoFiles),
+    /** Локальный постер серии в папке (poster/cover/folder.jpg|png|webp) — `null`, если не найден */
+    findPoster: (folderPath: string): Promise<string | null> => ipcRenderer.invoke('fs:findPoster', folderPath),
   },
   probe: (filePath: string): Promise<ProbeResult> => ipcRenderer.invoke('probe:file', filePath),
   subtitles: {

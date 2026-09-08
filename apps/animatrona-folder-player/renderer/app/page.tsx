@@ -115,6 +115,25 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [player.isFolderMode, folderPath, folderName, totalEpisodes])
 
+  // Локальный постер серии (poster/cover/folder.jpg|png|webp рядом с видео) — иначе EpisodeSidebar
+  // показывает generic-иконку папки
+  const [posterPath, setPosterPath] = useState<string | null>(null)
+  useEffect(() => {
+    setPosterPath(null)
+    if (!mounted || !player.isFolderMode || !folderPath) {
+      return
+    }
+    let cancelled = false
+    void window.electronAPI.fs.findPoster(folderPath).then((found) => {
+      if (!cancelled) {
+        setPosterPath(found)
+      }
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [mounted, player.isFolderMode, folderPath])
+
   // Внешний субтитр текущего эпизода — берём первый найденный матч
   // (выбор дорожки из нескольких вариантов — отдельная задача плана)
   const externalSubtitle = useMemo<VideoPlayerSubtitle | null>(() => {
@@ -320,6 +339,7 @@ export default function HomePage() {
       {player.isFolderMode && (
         <EpisodeSidebar
           folderName={folderName}
+          posterUrl={posterPath ? toMediaUrl(posterPath) : null}
           episodes={episodes}
           bonusVideos={player.bonusVideos}
           currentIndex={player.currentIndex}
