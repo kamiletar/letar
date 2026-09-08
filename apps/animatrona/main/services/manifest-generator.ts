@@ -109,7 +109,7 @@ export async function generateManifestFromDemux(
   options: GenerateManifestOptions,
 ): Promise<GenerateManifestResult> {
   try {
-    const { episodeId, outputDir, animeInfo, audioTrackOverrides, subtitleTrackOverrides } = options
+    const { episodeId, outputDir, animeInfo, audioTrackOverrides, subtitleTrackOverrides, detectedChapters } = options
 
     // Проверяем наличие видео
     if (!demuxResult.video) {
@@ -170,7 +170,7 @@ export async function generateManifestFromDemux(
     })
 
     // Генерируем главы и загружаем в IPFS как отдельный ChaptersDocument
-    const chapters: ManifestChapter[] = demuxResult.metadata.chapters.map((chapter: DemuxChapter) => {
+    const containerChapters: ManifestChapter[] = demuxResult.metadata.chapters.map((chapter: DemuxChapter) => {
       const type = detectChapterType(chapter.title)
       return {
         startMs: secToMs(chapter.start),
@@ -180,6 +180,10 @@ export async function generateManifestFromDemux(
         skippable: isChapterSkippable(chapter.title),
       }
     })
+
+    // Автоопределённые OP/ED — запасной источник: детектор запускается только для эпизодов,
+    // у которых глав в контейнере не оказалось, поэтому конфликта с containerChapters быть не может.
+    const chapters = containerChapters.length > 0 ? containerChapters : (detectedChapters ?? [])
 
     let chaptersCid: string | undefined
     if (chapters.length > 0) {

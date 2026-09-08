@@ -35,7 +35,6 @@ import {
   saveGenresIfAvailable,
   scanExternalSubs,
 } from './anime-record-setup'
-import { updateChaptersInManifest } from './chapter-creator'
 import { type EpisodeFileProcessingContext, processEpisodeFile } from './episode-file-processor'
 import { createConcurrencyLimiter } from './helpers'
 import * as db from './import-db'
@@ -387,8 +386,17 @@ export class ImportService {
                 })
               }
               if (chapters.length > 0) {
-                await updateChaptersInManifest(result.episodeId, chapters)
-                log.info('OP/ED сохранены', { episodeId: result.episodeId, chapters: chapters.length })
+                // Манифеста эпизода на этой фазе ещё нет (создаётся в пост-обработке), поэтому
+                // запись в него здесь молча терялась — откладываем главы до сборки манифеста.
+                const postProcessData = postProcessDataMap.get(result.episodeId)
+                if (postProcessData) {
+                  postProcessDataMap.set(result.episodeId, { ...postProcessData, detectedChapters: chapters })
+                  log.info('OP/ED сохранены', { episodeId: result.episodeId, chapters: chapters.length })
+                } else {
+                  log.warn('OP/ED определены, но эпизода нет в очереди пост-обработки — главы потеряны', {
+                    episodeId: result.episodeId,
+                  })
+                }
               }
             }
           }
@@ -522,19 +530,44 @@ export class ImportService {
         }
       }
 
-      const warning = warnings.length > 0 ? warnings.join('; ') : undefined
-
       // Реимпорт (retranscode) на новый pinner-сервер прошёл чисто — снимаем метку needsReupload.
       // При частичном успехе (failedCount/postProcessFailedEpisodes > 0) флаг оставляем —
       // contentHealth/missingCids всё равно покажут что не хватает, пусть пользователь перезальёт ещё раз.
       if (entry.isRetranscode && entry.existingAnimeId && failedCount === 0 && postProcessFailedEpisodes.length === 0) {
-        await db.updateAnime(entry.existingAnimeId, { needsReupload: false }).catch((err) => {
-          log.warn('Не удалось снять needsReupload после реимпорта', {
-            animeId: entry.existingAnimeId,
-            error: String(err),
+        // Долив части серий («Добавить эпизоды», retryMissingEpisodes) проходит так же чисто,
+        // как полная перезаливка — failedCount считает только файлы ЭТОГО entry. Флаг снимаем
+        // лишь когда прогон покрыл все эпизоды аниме: иначе остальные остаются на старой раздаче.
+        const episodesInDb = await db.findManyEpisodes(entry.existingAnimeId).catch(() => null)
+        const processedNumbers = new Set(selectedFiles.map((f) => f.episodeNumber))
+        const untouched = episodesInDb?.filter((ep) => !processedNumbers.has(ep.number)) ?? []
+
+        if (episodesInDb && untouched.length === 0) {
+          await db.updateAnime(entry.existingAnimeId, { needsReupload: false }).catch((err) => {
+            log.warn('Не удалось снять needsReupload после реимпорта', {
+              animeId: entry.existingAnimeId,
+              error: String(err),
+            })
           })
-        })
+        } else {
+          // Эпизоды, которых не было в этом прогоне, остались со старыми CID: если раздача
+          // сменилась или сократилась — они мёртвые и утянут contentHealth в broken.
+          const numbers = untouched.map((ep) => ep.number).sort((a, b) => a - b)
+          if (numbers.length > 0) {
+            warnings.push(
+              `Эп. ${
+                numbers.join(', ')
+              } не входили в этот прогон — остались со старыми CID, метка «нужна перезаливка» сохранена`,
+            )
+          }
+          log.info('needsReupload сохранён: перезалита только часть эпизодов', {
+            animeId: entry.existingAnimeId,
+            reuploadedEpisodes: successCount,
+            untouchedEpisodes: numbers,
+          })
+        }
       }
+
+      const warning = warnings.length > 0 ? warnings.join('; ') : undefined
 
       return {
         success: true,

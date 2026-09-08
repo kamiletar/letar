@@ -53,6 +53,11 @@ export interface GenerateManifestOptions {
   audioTrackOverrides?: TrackOverride[]
   /** Переопределения для субтитров (язык, dubGroup из UI) */
   subtitleTrackOverrides?: TrackOverride[]
+  /**
+   * Главы, найденные автоопределением OP/ED, а не взятые из контейнера.
+   * Применяются только когда в контейнере глав нет: они и детектируются лишь для таких эпизодов.
+   */
+  detectedChapters?: import('@letar/animatrona-types').ManifestChapter[]
 }
 
 /** Результат генерации манифеста */

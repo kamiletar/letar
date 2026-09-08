@@ -6,7 +6,7 @@
  */
 
 import type { DemuxResult } from '../../../shared/types'
-import type { TrackOverride } from '../../../shared/types/manifest'
+import type { ManifestChapter, TrackOverride } from '../../../shared/types/manifest'
 import type { AggregatedProgress } from '../../../shared/types/parallel-transcode'
 
 /** Стадии обработки импорта */
@@ -67,6 +67,11 @@ export interface PostProcessData {
   audioMaxConcurrent?: number
   audioTrackOverrides?: TrackOverride[]
   subtitleTrackOverrides?: TrackOverride[]
+  /**
+   * OP/ED, найденные автоопределением до пост-обработки. Попадают в манифест при его сборке:
+   * писать их раньше некуда — манифеста эпизода на тот момент ещё не существует.
+   */
+  detectedChapters?: ManifestChapter[]
 }
 
 /** Результат импорта */

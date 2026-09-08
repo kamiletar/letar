@@ -148,6 +148,7 @@ export async function runPostProcess(
         },
         audioTrackOverrides: data.audioTrackOverrides,
         subtitleTrackOverrides: data.subtitleTrackOverrides,
+        detectedChapters: data.detectedChapters,
       })
 
       if (spriteData) {
