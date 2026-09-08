@@ -117,7 +117,14 @@ describe('useShakaPlayer', () => {
     const { options, playerInstance } = makeOptions({ src: '/x.mpd', startTime: 42 })
     renderHook(() => useShakaPlayer(options))
 
-    expect(playerInstance.load).toHaveBeenCalledWith('/x.mpd', 42)
+    expect(playerInstance.load).toHaveBeenCalledWith('/x.mpd', 42, undefined)
+  })
+
+  it('передаёт mimeType в player.load() — нужен, чтобы Shaka не пытался определить тип по сети', () => {
+    const { options, playerInstance } = makeOptions({ src: 'blob:x', startTime: 0, mimeType: 'video/mp4' })
+    renderHook(() => useShakaPlayer(options))
+
+    expect(playerInstance.load).toHaveBeenCalledWith('blob:x', 0, 'video/mp4')
   })
 
   it('после успешной загрузки: isVideoReady=true, isLoading=false, вызывается onVideoReady/onDurationChange', async () => {

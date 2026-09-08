@@ -44,7 +44,7 @@ export interface ShakaTrack {
 
 export interface ShakaPlayerInstance {
   attach: (video: HTMLVideoElement) => void
-  load: (url: string, startTime?: number) => Promise<void>
+  load: (url: string, startTime?: number, mimeType?: string) => Promise<void>
   unload: () => Promise<void>
   destroy: () => void
   addEventListener: (event: string, callback: (event: unknown) => void) => void
@@ -58,6 +58,13 @@ export interface ShakaPlayerInstance {
 export interface UseShakaPlayerOptions {
   /** URL или путь к видеофайлу */
   src: string
+  /**
+   * Явный MIME-тип — заставляет Shaka пропустить сетевое определение типа манифеста (DASH/HLS)
+   * и сразу перейти в нативный режим `src=`. Обязателен для `blob:`-URL на `MediaSource`
+   * (потоковая подготовка Hi10P, см. `use-transcode-stream.ts` в animatrona-folder-player):
+   * такой URL не отдаёт контент по сетевому запросу, sniffing на нём не сработает.
+   */
+  mimeType?: string
   /** Время начала воспроизведения */
   startTime?: number
   /** Автоматическое воспроизведение */
@@ -97,6 +104,7 @@ export interface UseShakaPlayerReturn {
 export function useShakaPlayer(options: UseShakaPlayerOptions): UseShakaPlayerReturn {
   const {
     src,
+    mimeType,
     startTime = 0,
     autoPlay = false,
     containerRef,
@@ -140,7 +148,7 @@ export function useShakaPlayer(options: UseShakaPlayerOptions): UseShakaPlayerRe
     setIsLoading(true)
     try {
       await player.unload()
-      await player.load(src, startTimeRef.current)
+      await player.load(src, startTimeRef.current, mimeType)
 
       onDurationChange?.(video.duration)
       setIsVideoReady(true)
@@ -154,7 +162,7 @@ export function useShakaPlayer(options: UseShakaPlayerOptions): UseShakaPlayerRe
     } finally {
       setIsLoading(false)
     }
-  }, [src, autoPlay, onError, onDurationChange, onVideoReady])
+  }, [src, mimeType, autoPlay, onError, onDurationChange, onVideoReady])
 
   // Инициализация Shaka Player
   useEffect(() => {
@@ -213,7 +221,7 @@ export function useShakaPlayer(options: UseShakaPlayerOptions): UseShakaPlayerRe
     // Загрузка источника
     const loadSource = async () => {
       try {
-        await player.load(src, startTimeRef.current)
+        await player.load(src, startTimeRef.current, mimeType)
 
         if (!isMounted) {
           return
@@ -283,6 +291,7 @@ export function useShakaPlayer(options: UseShakaPlayerOptions): UseShakaPlayerRe
     }
   }, [
     src,
+    mimeType,
     autoPlay,
     containerRef,
     audioRef,
