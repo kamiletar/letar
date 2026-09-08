@@ -289,7 +289,20 @@ update}/*`. Разбор на `asChild` + нативный тег — отдел
       IPFS-веб-плеер, перезалив библиотеки) — теперь в
       [PLAN_ANIMATRONA_ECOSYSTEM.md](./PLAN_ANIMATRONA_ECOSYSTEM.md).
 
-## Animatrona IPFS Player — отдельное приложение для IPFS-просмотра
+## Animatrona IPFS Player — отдельное приложение для IPFS-просмотра [ВЫНЕСЕНО 2026-09-08]
+
+Каркас сгенерирован (`apps/animatrona-ipfs-player`), собственный план и исследование границы
+read/write физически перенесены в
+[apps/animatrona-ipfs-player/PLAN.md](/apps/animatrona-ipfs-player/PLAN.md) — по тому же
+паттерну, что и `animatrona-folder-player` выше. Разработка координируется через отдельную
+identity `animatrona-ipfs-player-dev` и команду `/animatrona-ipfs-player`, не отсюда.
+
+Раздел ниже оставлен как есть (историческая последовательность решений от 2026-09-07/08,
+включая нелинейную правку объёма федерации в течение одной сессии) — не переписывать, при
+противоречии с новым планом верен новый план.
+
+<details>
+<summary>Исторический раздел (свёрнут, для справки)</summary>
 
 **Статус:** план (2026-09-07), к реализации не приступали. **Переименован из «Animatrona Viewer»
 в «Animatrona IPFS Player» 2026-09-08** (решение владельца) — ниже везде актуальное имя, старое
@@ -475,10 +488,9 @@ creator-only: `EncodingProfilesCard`, `TranscodingSettingsCard`, `QBittorrentSet
     `page.tsx` импортирует `UpdateSettingsCardNew` напрямую, минуя барабанный `index.ts`, который
     экспортирует именно старую карточку — похоже на мёртвый код, не проверялось отдельно. Объём
     федерации в IPFS Player (только приём контента или полноценный хаб) — см. выше.
-- [ ] Только после этого — `nx g @letar/generators:electron-app animatrona-ipfs-player` и перенос по
-      готовому списку, тем же паттерном, что уже отработан на `@letar/folder-scan` (перенос →
-      обобщение через интерфейсы там, где IPFS Player и Animatrona расходятся — например read-only
-      vs read-write доступ к Kubo).
+- [x] Каркас сгенерирован 2026-09-08 — `apps/animatrona-ipfs-player`, план продолжается там.
+
+</details>
 
 ## Открытые задачи
 

@@ -1,0 +1,42 @@
+{
+  "name": "animatrona-ipfs-player",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/animatrona-ipfs-player",
+  "projectType": "application",
+  "tags": ["type:app", "scope:animatrona-ipfs-player", "owner:letar", "platform:electron"],
+  "targets": {
+    "dev": {
+      "command": "node scripts/dev.js",
+      "options": {
+        "cwd": "apps/animatrona-ipfs-player"
+      }
+    },
+    "build:win": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "next build renderer",
+          "npx webpack --config main/webpack.config.js",
+          "npx electron-builder --win"
+        ],
+        "cwd": "apps/animatrona-ipfs-player",
+        "parallel": false
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": [
+          "apps/animatrona-ipfs-player/main/**/*.{ts,tsx}",
+          "apps/animatrona-ipfs-player/renderer/**/*.{ts,tsx}"
+        ]
+      }
+    },
+    "typecheck:tsgo": {
+      "command": "tsgo --project apps/animatrona-ipfs-player/tsconfig.json --noEmit"
+    },
+    "format": {
+      "command": "dprint fmt apps/animatrona-ipfs-player/**/*.{ts,tsx,json}"
+    }
+  }
+}

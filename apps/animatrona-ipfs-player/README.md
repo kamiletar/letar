@@ -1,0 +1,40 @@
+# Animatrona IPFS Player
+
+Лёгкий IPFS-плеер аниме — просмотр раздач по CID, без импорта и кодирования
+
+## Версия и стек
+
+| Параметр     | Значение                           |
+| ------------ | ---------------------------------- |
+| **Версия**   | 0.1.0                              |
+| **Electron** | 44.2.0                             |
+| **Next.js**  | 16 (renderer, статический экспорт) |
+| **UI**       | Chakra UI v3                       |
+
+## Быстрый старт
+
+```bash
+nx dev animatrona-ipfs-player              # разработка
+nx typecheck:tsgo animatrona-ipfs-player
+nx lint animatrona-ipfs-player
+nx build:win animatrona-ipfs-player        # dist/*.exe (NSIS)
+```
+
+## После генерации
+
+1. Замени `resources/icon.svg` на свою иконку (или отредактируй сгенерированный
+   placeholder), затем `node scripts/generate-icons.mjs` — сгенерирует PNG/ICO.
+2. Добавь бизнес-логику: `main/services/` (тяжёлые вычисления — используй `onProgress`-паттерн
+   для длинных операций, см. пример в `apps/poster-microtext-desktop`), `main/ipc/*.handlers.ts`
+   (IPC-хендлеры), `renderer/app/page.tsx` (UI).
+3. Если приложение должно быть приватным — заведи submodule, см.
+   `.claude/commands/create/new-app.md` § «Приватные приложения».
+4. Если добавляешь нативный (`.node`) модуль (sharp, canvas, serialport...) — читай
+   `.claude/rules/electron.md` § «Грабли» (externals в webpack, asarUnpack, транзитивные
+   зависимости под Bun).
+
+## Архитектура
+
+Nextron: Electron main (`main/`) + Next.js renderer (`renderer/`), статический экспорт
+(`output: 'export'`) — без сервера внутри приложения, вся логика идёт через Electron IPC
+(`window.electronAPI`, см. `main/preload.ts` + `renderer/types/electron.d.ts`).

@@ -1,0 +1,19 @@
+{
+  "name": "@letar/animatrona-ipfs-player",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Лёгкий IPFS-плеер аниме — просмотр раздач по CID, без импорта и кодирования",
+  "author": "Kami Letar",
+  "main": "app/background.js",
+  "nx": {
+    "name": "animatrona-ipfs-player",
+    "implicitDependencies": ["@letar/forms", "@letar/icon-generator"]
+  },
+  "dependencies": {
+    "@letar/icon-generator": "workspace:*"
+  },
+  "devDependencies": {
+    "electron": "44.2.0",
+    "electron-builder": "26.15.3"
+  }
+}
