@@ -20,38 +20,39 @@ tree-shaking по статическим импортам (Metro в React Native
 сборку. Поэтому новый код — только через нужный подпуть:
 
 ```typescript
-import { useMediaQuery, useOnlineStatus, useWindowSize } from '@letar/hooks/browser'
+import { useLocalStorage, useMediaQuery, useOnlineStatus, useWindowSize } from '@letar/hooks/browser'
 import { useInvalidateQueries, usePendingMutations } from '@letar/hooks/query'
-import { useDebounce, useLocalStorage, usePrevious, useThrottle } from '@letar/hooks/utility'
+import { useDebounce, usePrevious, useThrottle } from '@letar/hooks/utility'
 ```
 
 `@letar/hooks/utility` не тянет ни `window`, ни `@tanstack/react-query` — единственный подпуть,
-безопасный для React Native/Electron main-процесса и прочих сред без DOM.
+безопасный для React Native/Electron main-процесса и прочих сред без DOM. `useLocalStorage`
+использует `window`/`localStorage`/`StorageEvent`, поэтому живёт в `./browser`, не в `./utility`.
 
 ## API
 
 ### Utility Hooks
 
-| Хук                                     | Описание                               |
-| --------------------------------------- | -------------------------------------- |
-| `useDebounce<T>(value, delay?)`         | Debounce значения (по умолчанию 300ms) |
-| `useThrottle<T>(callback, delay?)`      | Throttle функции (по умолчанию 300ms)  |
-| `usePrevious<T>(value)`                 | Предыдущее значение переменной         |
-| `useLocalStorage<T>(key, initialValue)` | Синхронизация с localStorage           |
+| Хук                                | Описание                               |
+| ---------------------------------- | -------------------------------------- |
+| `useDebounce<T>(value, delay?)`    | Debounce значения (по умолчанию 300ms) |
+| `useThrottle<T>(callback, delay?)` | Throttle функции (по умолчанию 300ms)  |
+| `usePrevious<T>(value)`            | Предыдущее значение переменной         |
 
 ### Browser Hooks
 
-| Хук                               | Описание                                                                                              |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `useOnlineStatus()`               | Статус подключения к интернету (boolean)                                                              |
-| `useScrollDirection(threshold?)`  | Направление скролла ('up' \| 'down' \| null)                                                          |
-| `useMediaQuery(query)`            | Отслеживание CSS media query                                                                          |
-| `useWindowSize()`                 | Размеры окна { width, height }                                                                        |
-| `useInfiniteScrollSentinel(opts)` | Infinite scroll через sentinel-элемент + IntersectionObserver, возвращает callback-ref                |
-| `useEventSource(opts)`            | Единое управление `EventSource` (SSE): backoff-переподключение, `visibilitychange`, кастомные события |
-| `useOfflineConsent(storageKey)`   | Согласие на оффлайн-режим в localStorage (парный UI — `OfflineConsentBanner` из `@letar/ui`)          |
-| `useOfflineServiceWorker(opts)`   | Регистрация Service Worker по этому согласию; при отзыве — снятие всех регистраций и очистка кешей    |
-| `useClientOrigin()`               | `window.location.origin`, безопасный для SSR — `''` до монтирования, реальный origin после            |
+| Хук                                     | Описание                                                                                              |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `useOnlineStatus()`                     | Статус подключения к интернету (boolean)                                                              |
+| `useScrollDirection(threshold?)`        | Направление скролла ('up' \| 'down' \| null)                                                          |
+| `useMediaQuery(query)`                  | Отслеживание CSS media query                                                                          |
+| `useWindowSize()`                       | Размеры окна { width, height }                                                                        |
+| `useInfiniteScrollSentinel(opts)`       | Infinite scroll через sentinel-элемент + IntersectionObserver, возвращает callback-ref                |
+| `useEventSource(opts)`                  | Единое управление `EventSource` (SSE): backoff-переподключение, `visibilitychange`, кастомные события |
+| `useOfflineConsent(storageKey)`         | Согласие на оффлайн-режим в localStorage (парный UI — `OfflineConsentBanner` из `@letar/ui`)          |
+| `useOfflineServiceWorker(opts)`         | Регистрация Service Worker по этому согласию; при отзыве — снятие всех регистраций и очистка кешей    |
+| `useClientOrigin()`                     | `window.location.origin`, безопасный для SSR — `''` до монтирования, реальный origin после            |
+| `useLocalStorage<T>(key, initialValue)` | Синхронизация с localStorage                                                                          |
 
 ### TanStack Query Hooks
 

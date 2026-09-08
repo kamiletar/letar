@@ -13,6 +13,7 @@ export {
   type UseInfiniteScrollSentinelOptions,
 } from './lib/browser/use-infinite-scroll-sentinel'
 export { useIsHydrated } from './lib/browser/use-is-hydrated'
+export { useLocalStorage } from './lib/browser/use-local-storage'
 export { breakpoints, useMediaQuery } from './lib/browser/use-media-query'
 export { type OfflineConsentState, useOfflineConsent } from './lib/browser/use-offline-consent'
 export { useOfflineServiceWorker, type UseOfflineServiceWorkerOptions } from './lib/browser/use-offline-service-worker'

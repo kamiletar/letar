@@ -4,16 +4,20 @@
 // package.json — либо в dependencies/devDependencies/peerDependencies, либо
 // в nx.implicitDependencies.
 //
-// Почему это важно: неопознанный импорт — это ребро графа Nx, которого граф
-// не видит. `nx affected` не помечает приложение затронутым при изменении
-// такой библиотеки — не пересобирает, не прогоняет lint/typecheck/тесты.
-// Регрессия в библиотеке молча доезжает до прод-сборки приложения, минуя
-// весь CI этого приложения.
+// Почему это важно: дело не в графе Nx — `@nx/js` строит рёбра парсингом самих
+// TS-импортов, и `nx affected` корректно видит потребителя затронутым даже без
+// записи в dependencies/implicitDependencies (см. nx-affected-source-based-inference.md,
+// PLAN-INFRA-6.md §169). Настоящая причина — bun: изолированный линковщик создаёт
+// симлинк `node_modules/@letar/<lib>` только по записи в `dependencies`,
+// `implicitDependencies` для bun невидим. Без симлинка падает резолв мимо
+// tsconfig.paths — `typecheck:tsgo`, vitest через sibling-spec. Регрессия в
+// библиотеке молча доезжает до прод-сборки приложения, минуя typecheck/тесты
+// этого приложения.
 //
-// Отличие от check-implicit-deps.mjs: та проверка — узкая и про другой
+// Отличие от check-implicit-deps.mjs: та проверка — узкая и про один конкретный
 // симптом (пакет ТОЛЬКО в implicitDependencies без dependencies, что рвёт
-// vitest-резолвер через sibling-spec). Эта проверка — про полноту графа Nx
-// вообще, симптом «nx affected не видит ребро», не «vitest падает».
+// vitest-резолвер через sibling-spec). Эта проверка — про полноту dependencies
+// вообще, любой отсутствующий импорт, а не только сценарий vitest.
 //
 // Найдено на animatrona-tracker (2026-09-08): 8 из 17 импортируемых
 // @letar/*-библиотек не были объявлены нигде. Тот же замер по всем apps/*

@@ -2,6 +2,27 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.1] — 2026-09-09
+
+### Fixed: `useLocalStorage` перенесён из `./utility` в `./browser`
+
+`useLocalStorage` использует `window`/`localStorage`/`StorageEvent` — он browser-only, а не
+платформенно-нейтральный, как остальные три хука `./utility` (`useDebounce`, `usePrevious`,
+`useThrottle`). Физическое расположение файла (`src/lib/utility/use-local-storage.ts`) не
+совпадало с его реальной платформенной группой ещё с введения подпутей в 0.6.0.
+
+Из-за этого потребитель, импортирующий из `@letar/hooks/utility` (например
+`animatrona-mobile`), компилировал `useLocalStorage` вместе с нужными ему хуками — и был
+вынужден держать `"dom"` в `lib` своего `tsconfig.json`, хотя сам не использует ничего
+browser-специфичного. Перенос файла в `src/lib/browser/use-local-storage.ts` и правка
+`utility.ts`/`browser.ts` убирает эту связь; `animatrona-mobile` больше не нуждается в `"dom"`
+(см. его `PLAN.md`/`CHANGELOG.md`).
+
+Обратной совместимости не нарушено: корневой `@letar/hooks` и `@letar/hooks/browser`
+по-прежнему экспортируют `useLocalStorage`, поменялся только физический путь исходника и подпуть
+`./utility`, из которого хук больше не доступен (единственный существующий потребитель через
+`@letar/hooks/utility` использовал только другие хуки барреля).
+
 ## [0.6.0] — 2026-09-08
 
 ### Breaking (мягко): подпути exports `./utility`, `./browser`, `./query`
