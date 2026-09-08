@@ -10,15 +10,16 @@
     "implicitDependencies": ["@letar/forms", "@letar/icon-generator"]
   },
   "dependencies": {
-    "@letar/icon-generator": "workspace:*",
+    "@letar/electron-storage": "workspace:*",
     "@letar/folder-player-react": "workspace:*",
     "@letar/folder-scan": "workspace:*",
-    "@letar/video-player-react": "workspace:*",
+    "@letar/icon-generator": "workspace:*",
     "@letar/video-player-core": "workspace:*",
-    "@letar/electron-storage": "workspace:*",
-    "shaka-player": "^5.2.9",
+    "@letar/video-player-react": "workspace:*",
+    "@libmedia/avplayer": "^1.3.1",
+    "matroska-subtitles": "^3.3.2",
     "mediainfo.js": "^0.3.7",
-    "matroska-subtitles": "^3.3.2"
+    "shaka-player": "^5.2.9"
   },
   "devDependencies": {
     "electron": "44.2.0",

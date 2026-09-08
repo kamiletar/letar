@@ -380,7 +380,7 @@
     },
     "apps/animatrona": {
       "name": "@letar/animatrona",
-      "version": "0.55.69",
+      "version": "0.55.71",
       "dependencies": {
         "@letar/electron-storage": "workspace:*",
         "@letar/folder-scan": "workspace:*",
@@ -397,7 +397,7 @@
     },
     "apps/animatrona-folder-player": {
       "name": "@letar/animatrona-folder-player",
-      "version": "0.6.6",
+      "version": "0.7.1",
       "dependencies": {
         "@letar/electron-storage": "workspace:*",
         "@letar/folder-player-react": "workspace:*",
@@ -405,6 +405,7 @@
         "@letar/icon-generator": "workspace:*",
         "@letar/video-player-core": "workspace:*",
         "@letar/video-player-react": "workspace:*",
+        "@libmedia/avplayer": "^1.3.1",
         "matroska-subtitles": "^3.3.2",
         "mediainfo.js": "^0.3.7",
         "shaka-player": "^5.2.9",
@@ -416,7 +417,7 @@
     },
     "apps/animatrona-ipfs-player": {
       "name": "@letar/animatrona-ipfs-player",
-      "version": "0.4.0",
+      "version": "0.6.0",
       "dependencies": {
         "@letar/icon-generator": "workspace:*",
         "@letar/ipfs-kubo-core": "workspace:*",
@@ -455,7 +456,7 @@
     },
     "apps/animatrona-tracker": {
       "name": "@letar/animatrona-tracker",
-      "version": "0.11.18",
+      "version": "0.11.22",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -570,7 +571,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.188.4",
+      "version": "0.188.5",
       "dependencies": {
         "@letar/analytics": "workspace:*",
         "@letar/consent": "workspace:*",
@@ -1580,7 +1581,7 @@
     },
     "libs/video-player-react": {
       "name": "@letar/video-player-react",
-      "version": "0.2.6",
+      "version": "0.2.8",
       "peerDependencies": {
         "@letar/video-player-core": "workspace:*",
         "react": "^19.0.0",
@@ -2733,6 +2734,30 @@
     "@letar/zenstack-fragments": ["@letar/zenstack-fragments@workspace:libs/zenstack-fragments"],
 
     "@levischuck/tiny-cbor": ["@levischuck/tiny-cbor@0.2.11", "", {}, "sha512-llBRm4dT4Z89aRsm6u2oEZ8tfwL/2l6BwpZ7JcyieouniDECM5AqNgr/y08zalEIvW3RSK4upYyybDcmjXqAow=="],
+
+    "@libmedia/audioresample": ["@libmedia/audioresample@1.3.1", "", { "dependencies": { "@libmedia/avutil": "1.3.1", "@libmedia/cheap": "~1.3.1", "@libmedia/common": "~2.3.0" } }, "sha512-RCvJhEa+4IUNvj629vBU33MNGf7DkVfbdGmeOWRkPkR0U2LaUJPjvqbGAldL8W8zQKBW1w0wnDbd9zIqJzJQ1Q=="],
+
+    "@libmedia/audiostretchpitch": ["@libmedia/audiostretchpitch@1.3.1", "", { "dependencies": { "@libmedia/cheap": "~1.3.1" } }, "sha512-hVYAKVJpRXURL3E2MTqkof7TkYHq4FKODQRjHY4WuzNIQtxjwlzL7oeHWLxbKPtRj83O/gZzcq7SjF2YfLuN6A=="],
+
+    "@libmedia/avcodec": ["@libmedia/avcodec@1.3.1", "", { "dependencies": { "@libmedia/avformat": "1.3.1", "@libmedia/avutil": "1.3.1", "@libmedia/cheap": "~1.3.1", "@libmedia/common": "~2.3.0" } }, "sha512-NtuVxz2eANARdl/53P6sHma2NSrgtCiV08TQN5w2yNYrcaPWv61fxa23kHaVoYdWw+pzcbiNHGPIAM8Mt4+mQQ=="],
+
+    "@libmedia/avformat": ["@libmedia/avformat@1.3.1", "", { "dependencies": { "@libmedia/avcodec": "1.3.1", "@libmedia/avprotocol": "1.3.1", "@libmedia/avutil": "1.3.1", "@libmedia/cheap": "~1.3.1", "@libmedia/common": "~2.3.0" } }, "sha512-pWvtbKvfxRcU5PPb6KWzphZkz4jeLxHU46hGTdEGdZvPLeiEcrTy94UEoF8pYQ4/CGqjQ5YL8hxjfEm2FyR9LQ=="],
+
+    "@libmedia/avnetwork": ["@libmedia/avnetwork@1.3.1", "", { "dependencies": { "@libmedia/avformat": "1.3.1", "@libmedia/avprotocol": "1.3.1", "@libmedia/avutil": "1.3.1", "@libmedia/cheap": "~1.3.1", "@libmedia/common": "~2.3.0" } }, "sha512-/nVocpuWbH3E0GYcicFoY4/Tm7ukwJ6QVP0erWwBcxQLqaautYj+22j3LVrlsH1ZeDnaeGQTJR9dTiIa9oAXlQ=="],
+
+    "@libmedia/avpipeline": ["@libmedia/avpipeline@1.3.1", "", { "dependencies": { "@libmedia/audioresample": "1.3.1", "@libmedia/audiostretchpitch": "1.3.1", "@libmedia/avcodec": "1.3.1", "@libmedia/avformat": "1.3.1", "@libmedia/avnetwork": "1.3.1", "@libmedia/avprotocol": "1.3.1", "@libmedia/avrender": "1.3.1", "@libmedia/avutil": "1.3.1", "@libmedia/cheap": "~1.3.1", "@libmedia/common": "~2.3.0" } }, "sha512-dRDazU+MSQ3rMvulJ85voie71VodH4eFXL+gmPpHPxgsZuCHoWLzWGe1NoL9rZrjSk8pH/0oP9tnLvR7nUsSJQ=="],
+
+    "@libmedia/avplayer": ["@libmedia/avplayer@1.3.1", "", { "dependencies": { "@libmedia/audioresample": "1.3.1", "@libmedia/audiostretchpitch": "1.3.1", "@libmedia/avcodec": "1.3.1", "@libmedia/avformat": "1.3.1", "@libmedia/avnetwork": "1.3.1", "@libmedia/avpipeline": "1.3.1", "@libmedia/avprotocol": "1.3.1", "@libmedia/avrender": "1.3.1", "@libmedia/avutil": "1.3.1", "@libmedia/cheap": "~1.3.1", "@libmedia/common": "~2.3.0", "ass-compiler": "^0.1.13", "assjs": "^0.1.1" } }, "sha512-wRELj99DbfS0t9iKkts5p1v/PSlyGkQ7A5Vy/GNTFg4ZiNo+OWTkkW/ioQuoT8seeljqizN0lWYJjJ9Ra32fcA=="],
+
+    "@libmedia/avprotocol": ["@libmedia/avprotocol@1.3.1", "", { "dependencies": { "@libmedia/avutil": "1.3.1", "@libmedia/cheap": "~1.3.1", "@libmedia/common": "~2.3.0" } }, "sha512-ACX8PMpj1o0qqP/WMikT5dxEcNRJv9oquIF7J9Nt9uKagQilR8HnFYGccWPUBI72cYabXTRxxdYYOnE4aa9ifw=="],
+
+    "@libmedia/avrender": ["@libmedia/avrender@1.3.1", "", { "dependencies": { "@libmedia/avutil": "1.3.1", "@libmedia/cheap": "~1.3.1", "@libmedia/common": "~2.3.0" } }, "sha512-qxnv5WS+QyP6psmIfIcjB/kiq07OhQNb6Zr8ofvUrlEt00KL3IHL8QkKAR6HA4kwIPuwIxN9z394BZ7j3AUe6g=="],
+
+    "@libmedia/avutil": ["@libmedia/avutil@1.3.1", "", { "dependencies": { "@libmedia/cheap": "~1.3.1", "@libmedia/common": "~2.3.0" } }, "sha512-JIucrOKVKA5sacC3X21GxWTrO//QG0Vl665dLRvNWJZUH0Bb56jQWzVkcWKB8+JX8Dt74IidbwXJ1JsdyGSVSg=="],
+
+    "@libmedia/cheap": ["@libmedia/cheap@1.3.1", "", { "dependencies": { "@libmedia/common": "~2.3.0", "commander": "^13.1.0" } }, "sha512-bCbYDCBinaVlaTy4vBjUoIJyCThK9JzVWEPZYZeJkHUxNKZ5g5BZ5hlft/nmS/c7ojaEyHMaRGOUNZ72nA7f6A=="],
+
+    "@libmedia/common": ["@libmedia/common@2.3.0", "", {}, "sha512-fD8v6oDs2EeD+/BU6jhsuPF5MTJx2f18+avhTB7gTgkpQDPzrgpCz6e8qHJDuWA+rbNQA89hwMTBOhzL6b8HEQ=="],
 
     "@libp2p/crypto": ["@libp2p/crypto@5.1.23", "", { "dependencies": { "@libp2p/interface": "^3.3.0", "@noble/curves": "^2.0.1", "@noble/hashes": "^2.0.1", "multiformats": "^14.0.0", "protons-runtime": "^7.0.0", "uint8arraylist": "^3.0.2", "uint8arrays": "^6.1.1" } }, "sha512-u6XVMD1YpUJgjS5MAayrxlzi+hQcj3FHY0wS6/M/T93ntyCW13BmmRzFb2ESamk65PEuSCAChmQeSzRV2sh2rQ=="],
 
@@ -4614,7 +4639,11 @@
 
     "asn1js": ["asn1js@3.0.10", "", { "dependencies": { "pvtsutils": "^1.3.6", "pvutils": "^1.1.5", "tslib": "^2.8.1" } }, "sha512-S2s3aOytiKdFRdulw2qPE51MzjzVOisppcVv7jVFR+Kw0kxwvFrDcYA0h7Ndqbmj0HkMIXYWaoj7fli8kgx1eg=="],
 
+    "ass-compiler": ["ass-compiler@0.1.16", "", {}, "sha512-t6RvH8ebL47t5a62XcrxMwxh1JQoOykydpT5bSVqqf9HA9/rbFl+9JgckBVTA5QdvfwuhYD5yrSc2n3u1tsjhA=="],
+
     "assertion-error": ["assertion-error@2.0.1", "", {}, "sha512-Izi8RQcffqCeNVgFigKli1ssklIbpHnCYc6AknXGYoB6grJqyeby7jv12JUQgmTAnIDnbck1uxksT4dzN3PWBA=="],
+
+    "assjs": ["assjs@0.1.10", "", {}, "sha512-pzJ+LVqAypIb+JjfvYn/LID7xrMOydTpjZ2U53m6nWa5VqPMkKtGBB7xHF6p0Y9UBtsiW3ehY9JQsgCDLXg/ow=="],
 
     "ast-types": ["ast-types@0.16.1", "", { "dependencies": { "tslib": "^2.0.1" } }, "sha512-6t10qk83GOG8p0vKmaCr8eiilZwO171AvbROMtvvNiwrTly62t+7XkA8RdIIVbpMhCASAsxgAzdRSwh6nw/5Dg=="],
 
@@ -8483,6 +8512,8 @@
     "@letar/studio-time-mcp/@modelcontextprotocol/sdk": ["@modelcontextprotocol/sdk@1.29.0", "", { "dependencies": { "@hono/node-server": "^1.19.9", "ajv": "^8.17.1", "ajv-formats": "^3.0.1", "content-type": "^1.0.5", "cors": "^2.8.5", "cross-spawn": "^7.0.5", "eventsource": "^3.0.2", "eventsource-parser": "^3.0.0", "express": "^5.2.1", "express-rate-limit": "^8.2.1", "hono": "^4.11.4", "jose": "^6.1.3", "json-schema-typed": "^8.0.2", "pkce-challenge": "^5.0.0", "raw-body": "^3.0.0", "zod": "^3.25 || ^4.0", "zod-to-json-schema": "^3.25.1" }, "peerDependencies": { "@cfworker/json-schema": "^4.1.1" }, "optionalPeers": ["@cfworker/json-schema"] }, "sha512-zo37mZA9hJWpULgkRpowewez1y6ML5GsXJPY8FI0tBBCd77HEvza4jDqRKOXgHNn867PVGCyTdzqpz0izu5ZjQ=="],
 
     "@letar/umami-mcp/@modelcontextprotocol/sdk": ["@modelcontextprotocol/sdk@1.29.0", "", { "dependencies": { "@hono/node-server": "^1.19.9", "ajv": "^8.17.1", "ajv-formats": "^3.0.1", "content-type": "^1.0.5", "cors": "^2.8.5", "cross-spawn": "^7.0.5", "eventsource": "^3.0.2", "eventsource-parser": "^3.0.0", "express": "^5.2.1", "express-rate-limit": "^8.2.1", "hono": "^4.11.4", "jose": "^6.1.3", "json-schema-typed": "^8.0.2", "pkce-challenge": "^5.0.0", "raw-body": "^3.0.0", "zod": "^3.25 || ^4.0", "zod-to-json-schema": "^3.25.1" }, "peerDependencies": { "@cfworker/json-schema": "^4.1.1" }, "optionalPeers": ["@cfworker/json-schema"] }, "sha512-zo37mZA9hJWpULgkRpowewez1y6ML5GsXJPY8FI0tBBCd77HEvza4jDqRKOXgHNn867PVGCyTdzqpz0izu5ZjQ=="],
+
+    "@libmedia/cheap/commander": ["commander@13.1.0", "", {}, "sha512-/rFeCpNJQbhSZjGVwO9RFV3xPqbnERS8MmIQzCtD/zl6gpJuV/bMLuN92oG3F7d8oDEHHRrujSXNUr8fpjntKw=="],
 
     "@libp2p/crypto/@noble/hashes": ["@noble/hashes@2.3.0", "", {}, "sha512-oN+QwyX7VSHotibwubG3kpzbwKrfnyR6OOO+3Nk/53ADL7FmgHHz4TgrbaYKvvOw09u6QTx0oiH1cNCIOuN0CQ=="],
 
