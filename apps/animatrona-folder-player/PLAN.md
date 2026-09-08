@@ -765,6 +765,51 @@ protocol.registerSchemesAsPrivileged([
       отметить: Animatrona ffmpeg-gpl **поставляет внутри инсталлятора** — там как минимум нужен
       текст лицензии и ссылка на исходники в «О программе». Проверить, есть ли (отдельная задача)
 
+#### 10.1 Превью-спрайт для перемотки
+
+> Обнаружено при вопросе владельца «а для перемотки показывается превью?» (2026-09-08):
+> отображающая часть (`TimelinePreview`, `parseSpriteCues`/`sprite-vtt.ts`, проп `spriteUrl`/
+> `spriteCues` у `SharedPlayerControls`/`SharedProgressBar` из `@letar/video-player-react`) уже
+> существует и уже подключена в `VideoPlayer.tsx` — тем же кодом, что и в `animatrona`. Спрайты
+> никогда не генерировались только потому, что у плеера папок не было ffmpeg до Фазы 6. Теперь
+> есть — добавлена генерация.
+
+- [x] Раскладка и WebVTT — чистая логика без зависимости от electron/ffmpeg,
+      `shared/sprite-layout.ts`: `planSpriteLayout(durationSec)` (интервал между кадрами не реже
+      `MIN_INTERVAL_SEC=5` сек, число кадров не больше `TARGET_FRAME_COUNT=200`, сетка до 10
+      столбцов), `formatVttTimestamp`, `buildSpriteVtt` (координаты `xywh` по сетке слева
+      направо/сверху вниз, последний cue тянется до реальной длительности файла, а не до
+      `frameCount * intervalSec`), `buildSpriteFilter` — строка `-vf` для одного вызова ffmpeg
+      (`fps=1/N,scale=...,crop=...,tile=ColxRow`, один кадр `-frames:v 1` — весь спрайт-лист
+      получается одним проходом, без ручной сборки кадров).
+- [x] Нарезка через ffmpeg — `main/services/ffmpeg/sprite.service.ts`: `generateSprite(filePath,
+      durationSec)`. Работает, только если ffmpeg доступен (`getFfmpegStatus()` из Фазы 6) —
+      иначе `null`, без ошибки пользователю. Кэш в `userData/sprites/`, ключ —
+      `sha1(путь + mtime + size)`, `.part.jpg` → `rename` только на успех, потолок 512 МБ с
+      LRU-вытеснением пары `.jpg`+`.vtt`. `cancelSpriteGeneration()` — обрывает при смене эпизода.
+- [x] IPC `sprite:generate`/`sprite:cancel`/`sprite:getCacheSize`/`sprite:clearCache` —
+      `main/ipc/ffmpeg.handlers.ts`, `main/preload.ts`, `renderer/types/electron.d.ts`.
+- [x] Подключение в `VideoPlayer.tsx`: новый обязательный проп `filePath` (реальный путь на
+      диске, для Hi10P/AC3 — путь к уже подготовленной transcode-копии, не тот же `src`, что
+      прошёл через `media://`). Нарезка запускается **в фоне после старта воспроизведения**
+      (`isVideoReady && state.duration`, ref-гвард `spriteRequestedForRef` — не блокирует старт
+      просмотра и не перезапускается на промежуточные уточнения `duration` от Shaka), результат
+      передаётся в уже существующие `spriteUrl`/`spriteCues` `SharedPlayerControls`. Смена файла
+      обрывает предыдущую нарезку через `sprite.cancel()` в cleanup эффекта.
+      `page.tsx` передаёт `filePath={preparedPath ?? currentVideoPath}` — тот же путь, что уже
+      используется для `src`.
+- [x] Unit-тесты чистой логики — `shared/sprite-layout.spec.ts` (66 тестов на весь `shared/`,
+      написаны делегированным агентом): границы `planSpriteLayout` (0/NaN/Infinity → `null`,
+      нижний порог интервала на коротком видео, верхний предел кадров на длинном, `columns` не
+      больше `frameCount` для совсем короткого видео), `formatVttTimestamp` (округление
+      миллисекунд, часы, отрицательные значения), `buildSpriteVtt` (число cue = `frameCount`,
+      последний cue тянется до `durationSec`, переход на вторую строку сетки), `buildSpriteFilter`
+      (порядок частей фильтра). `nx test`/`nx lint`/`nx build` — зелёные.
+- [ ] Приёмка на реальном файле — не проверено, тот же блокер песочницы (нет MKV-фикстур, нет
+      GUI), что и у §10/§3/§6/§11: наведение на полосу перемотки должно показать превью после
+      первого прохода нарезки; без установленного ffmpeg превью просто не появляется, без ошибок
+      в UI; повторное открытие той же серии отдаёт спрайт из кэша мгновенно.
+
 ### 11. Тесты
 
 - [x] Unit (vitest) — `parse-filename` и `detect-chapter-types` уже были покрыты тестами до

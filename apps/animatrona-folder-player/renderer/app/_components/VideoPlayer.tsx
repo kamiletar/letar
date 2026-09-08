@@ -11,8 +11,10 @@
 import { Box, Center, IconButton, Spinner } from '@chakra-ui/react'
 import type { PlaybackSpeed } from '@letar/video-player-core'
 import {
+  parseSpriteCues,
   PlayerLoadingOverlay,
   SharedPlayerControls,
+  type SpriteCue,
   SubtitleOverlay,
   Tooltip,
   useAutoHideControls,
@@ -25,6 +27,8 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu'
 
+import { toMediaUrl } from '../_lib/media-url'
+
 export interface VideoPlayerSubtitle {
   /** URL к субтитрам — обязателен для `srt`/`vtt` (нативный `<track>`), опционален для `ass`/`ssa` */
   url?: string
@@ -36,6 +40,13 @@ export interface VideoPlayerSubtitle {
 
 export interface VideoPlayerProps {
   src: string
+  /**
+   * Реальный путь к файлу на диске (без `media://`), с которого читает `src` — нужен отдельно
+   * от `src`, чтобы нарезать превью-спрайт через ffmpeg (main-процесс работает с путями, не
+   * с протоколом). При Hi10P/AC3 и т.п. это путь к УЖЕ подготовленной копии из `transcode`,
+   * при обычном файле — тот же путь, что закодирован в `src`.
+   */
+  filePath: string
   subtitle: VideoPlayerSubtitle | null
   autoPlay?: boolean
   startTime?: number
@@ -84,6 +95,7 @@ export function VideoPlayer(props: VideoPlayerProps) {
 
 function ShakaVideoPlayer({
   src,
+  filePath,
   subtitle,
   autoPlay = true,
   startTime = 0,
@@ -226,6 +238,46 @@ function ShakaVideoPlayer({
     onEnded,
   ])
 
+  // Превью кадров для перемотки (PLAN.md §10.1) — нарезается ffmpeg'ом В ФОНЕ, уже после
+  // старта воспроизведения: требует полного прохода по файлу и на серию занимает десятки
+  // секунд, задерживать из-за него начало просмотра нельзя. Появляется само, когда готово.
+  const [spriteUrl, setSpriteUrl] = useState<string | undefined>(undefined)
+  const [spriteCues, setSpriteCues] = useState<SpriteCue[] | undefined>(undefined)
+  // Нарезаем ровно один раз на файл — duration стабилизируется не сразу (Shaka сообщает
+  // промежуточные значения), а перезапускать нарезку на каждое уточнение не нужно
+  const spriteRequestedForRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    setSpriteUrl(undefined)
+    setSpriteCues(undefined)
+    spriteRequestedForRef.current = null
+    // Смена файла (следующий эпизод) обрывает нарезку предыдущего — иначе ffmpeg продолжал бы
+    // работать в фоне над файлом, который уже не смотрят
+    return () => {
+      void window.electronAPI.sprite.cancel()
+    }
+  }, [filePath])
+
+  useEffect(() => {
+    if (!isVideoReady || !state.duration || spriteRequestedForRef.current === filePath) {
+      return
+    }
+    spriteRequestedForRef.current = filePath
+
+    let cancelled = false
+    void window.electronAPI.sprite.generate(filePath, state.duration).then((result) => {
+      if (cancelled || !result.success || !result.spritePath || !result.vtt) {
+        return
+      }
+      setSpriteUrl(toMediaUrl(result.spritePath))
+      setSpriteCues(parseSpriteCues(result.vtt))
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [isVideoReady, filePath, state.duration])
+
   const navigationSlot = (hasPrev || hasNext)
     ? (
       <>
@@ -301,6 +353,8 @@ function ShakaVideoPlayer({
         playbackSpeed={playbackSpeed}
         onPlaybackSpeedChange={handlePlaybackSpeedChange}
         navigationSlot={navigationSlot}
+        spriteUrl={spriteUrl}
+        spriteCues={spriteCues}
       />
     </Box>
   )

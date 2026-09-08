@@ -17,9 +17,14 @@
     повторный просмотр серии стартует мгновенно;
   - если найденный ffmpeg собран без нужных декодеров (частый случай для `essentials`-сборок —
     в проверенной системной ffmpeg 8.0 не было DTS), панель предлагает докачать полную сборку.
+- **Превью-спрайт для перемотки** — наведение на полосу прогресса показывает миниатюру кадра в
+  этом месте видео (отображающая часть уже была в `@letar/video-player-react`, не хватало только
+  генерации): нарезка спрайт-листа через ffmpeg в фоне после старта воспроизведения, кэш в
+  `userData/sprites/` (потолок 512 МБ), без установленного ffmpeg превью просто не появляется,
+  без ошибок — `shared/sprite-layout.ts`, `main/services/ffmpeg/sprite.service.ts`, IPC `sprite:*`.
 - `shared/` — рантайм-код, общий для main и renderer: `codec-support.ts` (переехал из
-  `renderer/app/_lib/`) и новый `transcode-plan.ts`. Алиас `@shared/*`. 46 unit-тестов (vitest),
-  таргет `nx test animatrona-folder-player`.
+  `renderer/app/_lib/`), `transcode-plan.ts`, `sprite-layout.ts`. Алиас `@shared/*`.
+  112 unit-тестов (vitest), таргет `nx test animatrona-folder-player`.
 - `scripts/verify-ffmpeg.cjs` — headless-проверка ffmpeg-части main-процесса без GUI; с путём к
   видеофайлу аргументом прогоняет настоящую подготовку.
 

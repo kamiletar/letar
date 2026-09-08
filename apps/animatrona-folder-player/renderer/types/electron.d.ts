@@ -6,11 +6,18 @@ import type {
 } from '@letar/folder-player-react'
 import type { MediaInfo } from '@letar/folder-scan'
 import type { EmbeddedSubtitlesIpcResult } from '../../main/ipc/embedded-subtitles.handlers'
-import type { FfmpegInstallResult, TranscodeIpcResult } from '../../main/ipc/ffmpeg.handlers'
+import type { FfmpegInstallResult, SpriteIpcResult, TranscodeIpcResult } from '../../main/ipc/ffmpeg.handlers'
 import type { FfmpegInstallProgress, FfmpegStatus } from '../../main/services/ffmpeg/ffmpeg-installer.service'
 import type { TranscodeProgress, TranscodeRequest } from '../../main/services/ffmpeg/transcode.service'
 
-export type { FfmpegInstallProgress, FfmpegStatus, TranscodeIpcResult, TranscodeProgress, TranscodeRequest }
+export type {
+  FfmpegInstallProgress,
+  FfmpegStatus,
+  SpriteIpcResult,
+  TranscodeIpcResult,
+  TranscodeProgress,
+  TranscodeRequest,
+}
 
 export interface ProbeResult {
   success: boolean
@@ -63,6 +70,12 @@ export interface ElectronAPI {
     getCacheSize: () => Promise<number>
     clearCache: () => Promise<void>
     onProgress: (callback: (progress: TranscodeProgress) => void) => () => void
+  }
+  sprite: {
+    generate: (filePath: string, durationSec: number) => Promise<SpriteIpcResult>
+    cancel: () => Promise<void>
+    getCacheSize: () => Promise<number>
+    clearCache: () => Promise<void>
   }
   getPathForFile: (file: File) => string
   onOpenFile: (callback: (filePath: string) => void) => () => void

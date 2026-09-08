@@ -16,6 +16,12 @@ import {
   installFfmpeg,
   uninstallFfmpeg,
 } from '../services/ffmpeg/ffmpeg-installer.service'
+import {
+  cancelSpriteGeneration,
+  clearSpriteCache,
+  generateSprite,
+  getSpriteCacheSize,
+} from '../services/ffmpeg/sprite.service'
 import type { TranscodeProgress, TranscodeRequest } from '../services/ffmpeg/transcode.service'
 import {
   cancelTranscode,
@@ -35,6 +41,15 @@ export interface TranscodeIpcResult {
   /** Путь к готовому файлу — рендерер отдаёт его в `<video>` через `media://` */
   outputPath?: string
   fromCache?: boolean
+  error?: string
+}
+
+export interface SpriteIpcResult {
+  success: boolean
+  /** Путь к спрайту — рендерер отдаёт его в `<img>`/фон через `media://` */
+  spritePath?: string
+  /** Содержимое WebVTT — парсится `parseSpriteCues` из `@letar/video-player-react` */
+  vtt?: string
   error?: string
 }
 
@@ -85,4 +100,27 @@ export function registerFfmpegHandlers(): void {
   ipcMain.handle('transcode:getCacheSize', (): Promise<number> => getTranscodeCacheSize())
 
   ipcMain.handle('transcode:clearCache', (): Promise<void> => clearTranscodeCache())
+
+  ipcMain.handle(
+    'sprite:generate',
+    async (_event, filePath: string, durationSec: number): Promise<SpriteIpcResult> => {
+      try {
+        const result = await generateSprite(filePath, durationSec)
+        if (!result) {
+          return { success: false, error: 'Превью недоступно' }
+        }
+        return { success: true, spritePath: result.spritePath, vtt: result.vtt }
+      } catch (error) {
+        return { success: false, error: error instanceof Error ? error.message : String(error) }
+      }
+    },
+  )
+
+  ipcMain.handle('sprite:cancel', (): void => {
+    cancelSpriteGeneration()
+  })
+
+  ipcMain.handle('sprite:getCacheSize', (): Promise<number> => getSpriteCacheSize())
+
+  ipcMain.handle('sprite:clearCache', (): Promise<void> => clearSpriteCache())
 }

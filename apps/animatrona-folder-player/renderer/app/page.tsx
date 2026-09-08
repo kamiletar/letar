@@ -361,6 +361,7 @@ export default function HomePage() {
             <VideoPlayer
               key={preparedPath ?? currentVideoPath}
               src={toMediaUrl(preparedPath ?? currentVideoPath)}
+              filePath={preparedPath ?? currentVideoPath}
               subtitle={subtitle}
               startTime={resumeTime}
               hasPrev={player.hasPrev}

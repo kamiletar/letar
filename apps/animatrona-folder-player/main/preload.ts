@@ -75,6 +75,13 @@ interface TranscodeIpcResult {
   error?: string
 }
 
+interface SpriteIpcResult {
+  success: boolean
+  spritePath?: string
+  vtt?: string
+  error?: string
+}
+
 /**
  * API, доступный в renderer process через window.electronAPI.
  * Добавляй новые методы сюда и в main/ipc/*.handlers.ts — IPC единственный
@@ -138,6 +145,14 @@ const electronAPI = {
       ipcRenderer.on('transcode:progress', listener)
       return () => ipcRenderer.removeListener('transcode:progress', listener)
     },
+  },
+  sprite: {
+    /** Нарезает превью-спрайт для файла (или отдаёт из кэша). `null`, если ffmpeg недоступен. */
+    generate: (filePath: string, durationSec: number): Promise<SpriteIpcResult> =>
+      ipcRenderer.invoke('sprite:generate', filePath, durationSec),
+    cancel: (): Promise<void> => ipcRenderer.invoke('sprite:cancel'),
+    getCacheSize: (): Promise<number> => ipcRenderer.invoke('sprite:getCacheSize'),
+    clearCache: (): Promise<void> => ipcRenderer.invoke('sprite:clearCache'),
   },
   /** Путь на диске для перетащенного `File` — `File.path` удалён в Electron ≥32 */
   getPathForFile: (file: File): string => webUtils.getPathForFile(file),
