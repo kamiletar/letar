@@ -13,10 +13,17 @@ import { NextResponse } from 'next/server'
 
 const WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET
 
-/** Проверка секрета webhook */
+/**
+ * Проверка секрета webhook. Путь `/api/telegram/webhook` предсказуем (общая конвенция Telegram),
+ * поэтому это единственный барьер против форджированных вызовов извне Telegram.
+ * Fail-closed: секрет не настроен → отклоняем всё, а не пропускаем как раньше — иначе забытая
+ * `TELEGRAM_WEBHOOK_SECRET` тихо открывает привязку telegramChatId к чужому userId и обработку
+ * поддельных реакций кому угодно, кто знает URL.
+ */
 function validateSecret(request: Request): boolean {
-  if (!WEBHOOK_SECRET) { return true // Если секрет не настроен — пропускаем
-   }
+  if (!WEBHOOK_SECRET) {
+    return false
+  }
   const secret = request.headers.get('X-Telegram-Bot-Api-Secret-Token')
   return secret === WEBHOOK_SECRET
 }
