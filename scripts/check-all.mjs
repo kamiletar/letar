@@ -103,6 +103,23 @@ const CHECKS = [
     doc: '.claude/docs/vitest-unlinked-workspace-lib-imports.md',
   },
   {
+    id: 'nx-graph-deps',
+    group: 'deps',
+    title: 'импортируемые @letar/* без записи ни в dependencies, ни в nx.implicitDependencies',
+    run: ['node', ['scripts/check-nx-graph-deps.mjs']],
+    // warn: долг на момент регистрации (2026-09-08) — 22 из 56 приложений (~39%),
+    // найдено на animatrona-tracker (8 из 17 импортов), разово починенном в той же
+    // сессии. Слишком большой объём для немедленного gate — поднять до gate, когда
+    // список на чистом дереве опустеет (см. прецедент transpile-packages).
+    // Отличие от implicit-deps выше: та проверка — про узкий симптом (пакет только
+    // в implicitDependencies рвёт vitest через sibling-spec), эта — про полноту
+    // графа Nx вообще (nx affected не видит ребро зависимости).
+    severity: 'warn',
+    ci: 'partial',
+    ciNote: 'приватные submodule не выкачаны — их package.json/исходники не проверены',
+    doc: 'PLAN-INFRA.md §169',
+  },
+  {
     id: 'electron-drift',
     group: 'deps',
     title: 'версии electron в приложениях против корневой',
