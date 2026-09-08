@@ -23,6 +23,13 @@
       застрахован — вопреки прежней формулировке доки). Проверено сборкой JS bundle — Metro
       резолвит без `Unable to resolve module`.
 
+- [x] **`"dom"` в `tsconfig.json` снят** (2026-09-09) — root cause был не в приложении, а в
+      расположении `useLocalStorage` внутри `@letar/hooks`: физически лежал в `src/lib/utility/`
+      вместе с платформенно-нейтральными хуками, хотя сам использует `window`/`StorageEvent`.
+      Перенесён в `src/lib/browser/` (`@letar/hooks` 0.6.1), `./utility` теперь действительно
+      не тянет DOM-типы. `"dom"` убран из `lib` в `tsconfig.json`, `typecheck:tsgo` зелёный без
+      него.
+
 - [x] ⚠️ **`react-native` разъехался между корнем и приложениями — снято (2026-09-08).** Три
       строки (`react-native`, `@react-native/codegen`, `@react-native/gradle-plugin`) в
       `package.json` заменены на `"*"` — версия резолвится только из корня (`0.87.1`), как у

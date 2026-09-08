@@ -6,6 +6,16 @@
 
 ## [Unreleased]
 
+## [0.7.14] - 2026-09-09
+
+### Fixed
+
+- `tsconfig.json`: убран `"dom"` из `lib`. Root cause 0.7.13 был не в приложении, а в
+  `@letar/hooks`: `useLocalStorage` физически лежал в `src/lib/utility/` рядом с
+  платформенно-нейтральными хуками, хотя использует `window`/`StorageEvent` — перенесён в
+  `src/lib/browser/` (`@letar/hooks` 0.6.1). `./utility` больше не тянет DOM-типы,
+  `typecheck:tsgo` зелёный без `"dom"`.
+
 ## [0.7.13] - 2026-09-09
 
 ### Changed
