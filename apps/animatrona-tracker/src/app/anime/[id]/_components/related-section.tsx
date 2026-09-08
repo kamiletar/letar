@@ -8,37 +8,12 @@
 
 import { Badge, Box, Heading, HStack, Image, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import type { AnimeManifestRelation } from '@letar/animatrona-types'
+import { getAnimeKindInfo, getRelationKindInfo } from '@letar/animatrona-utils'
 import Link from 'next/link'
 import { LuExternalLink } from 'react-icons/lu'
 
-/** Локализация типов связей */
-const relationLabels: Record<string, { label: string; colorPalette: string }> = {
-  sequel: { label: 'Сиквел', colorPalette: 'green' },
-  prequel: { label: 'Приквел', colorPalette: 'blue' },
-  side_story: { label: 'Побочная история', colorPalette: 'purple' },
-  spin_off: { label: 'Спин-офф', colorPalette: 'orange' },
-  summary: { label: 'Краткое содержание', colorPalette: 'gray' },
-  full_story: { label: 'Полная история', colorPalette: 'cyan' },
-  parent_story: { label: 'Основная история', colorPalette: 'teal' },
-  alternative_setting: { label: 'Альт. сеттинг', colorPalette: 'yellow' },
-  alternative_version: { label: 'Альт. версия', colorPalette: 'yellow' },
-  character: { label: 'Персонажи', colorPalette: 'pink' },
-  other: { label: 'Другое', colorPalette: 'gray' },
-}
-
-/** Локализация типов аниме */
-const kindLabels: Record<string, string> = {
-  tv: 'TV',
-  movie: 'Фильм',
-  ova: 'OVA',
-  ona: 'ONA',
-  special: 'Спешл',
-  music: 'Клип',
-  tv_special: 'TV Спешл',
-}
-
 function getRelationInfo(kind: string): { label: string; colorPalette: string } {
-  return relationLabels[kind.toLowerCase()] ?? relationLabels.other!
+  return getRelationKindInfo(kind) ?? { label: 'Другое', colorPalette: 'gray' }
 }
 
 export interface RelatedSectionProps {
@@ -50,7 +25,9 @@ export interface RelatedSectionProps {
 /** Карточка связанного аниме */
 function RelationCard({ relation, librarySlug }: { relation: AnimeManifestRelation; librarySlug?: string }) {
   const relationInfo = getRelationInfo(relation.relationKind)
-  const kindLabel = relation.targetKind ? kindLabels[relation.targetKind.toLowerCase()] || relation.targetKind : null
+  const kindLabel = relation.targetKind
+    ? getAnimeKindInfo(relation.targetKind)?.label ?? relation.targetKind
+    : null
 
   const cardContent = (
     <HStack

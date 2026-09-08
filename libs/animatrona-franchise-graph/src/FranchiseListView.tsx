@@ -13,9 +13,9 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useMemo } from 'react'
 import { LuCheck, LuLibrary } from 'react-icons/lu'
 
+import { getAnimeKindInfo } from '@letar/animatrona-utils'
 import { computeChronologicalOrder } from './compute-chronological-order'
 import { useFranchiseGraphConfig } from './config'
-import { KIND_LABELS } from './types'
 
 export interface FranchiseListViewProps {
   /** Граф франшизы из IPFS */
@@ -114,7 +114,7 @@ export function FranchiseListView({ graph, currentShikimoriId, libraryMap = new 
                   <HStack gap="2" fontSize="sm" color="fg.muted">
                     <Text>{node.year || '—'}</Text>
                     <Badge size="sm" colorPalette="gray" variant="subtle">
-                      {KIND_LABELS[node.kind] || node.kind}
+                      {getAnimeKindInfo(node.kind)?.label ?? node.kind}
                     </Badge>
                   </HStack>
                 </VStack>

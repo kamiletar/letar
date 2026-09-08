@@ -8,6 +8,7 @@
  */
 
 import { Box, Flex, Heading, HStack, Image, LinkBox, LinkOverlay, Text, VStack } from '@chakra-ui/react'
+import { formatDuration } from '@letar/animatrona-utils'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { LuPlay } from 'react-icons/lu'
@@ -26,12 +27,6 @@ interface ContinueWatchingItem {
 }
 
 /** Форматировать время в MM:SS */
-function formatTime(seconds: number): string {
-  const mins = Math.floor(seconds / 60)
-  const secs = Math.floor(seconds % 60)
-  return `${mins}:${secs.toString().padStart(2, '0')}`
-}
-
 /** Процент просмотра */
 function getProgress(currentTime: number, duration: number): number {
   if (duration <= 0) {
@@ -132,7 +127,7 @@ export function ContinueWatchingSection() {
                 </Link>
               </LinkOverlay>
               <Text fontSize="xs" color="fg.muted">
-                Эп. {item.episodeNumber} — {formatTime(item.currentTime)}
+                Эп. {item.episodeNumber} — {formatDuration(item.currentTime)}
               </Text>
             </VStack>
           </LinkBox>

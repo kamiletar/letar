@@ -9,7 +9,6 @@ export { FranchiseGraphView, type FranchiseGraphViewProps } from './FranchiseGra
 export { FranchiseListView, type FranchiseListViewProps } from './FranchiseListView'
 export { FranchiseTimelineView, type FranchiseTimelineViewProps } from './FranchiseTimelineView'
 export { RelationEdge } from './RelationEdge'
-export { KIND_COLORS, KIND_LABELS, RELATION_LABELS } from './types'
 export type {
   AnimeNode as AnimeNodeType,
   AnimeNodeData,

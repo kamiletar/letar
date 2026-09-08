@@ -9,8 +9,8 @@ import dagre from '@dagrejs/dagre'
 import type { FranchiseGraphDocument, FranchiseGraphNode } from '@letar/animatrona-types'
 import { useMemo } from 'react'
 
+import { getRelationKindInfo } from '@letar/animatrona-utils'
 import type { AnimeNode, AnimeNodeData, RelationEdge, RelationEdgeData } from './types'
-import { RELATION_LABELS } from './types'
 
 /** Размеры узла аниме */
 const NODE_WIDTH = 180
@@ -128,7 +128,7 @@ export function useFranchiseGraph({
       if (currentPriority < existingPriority) {
         const data: RelationEdgeData = {
           relation: link.relation,
-          relationLabel: RELATION_LABELS[link.relation] || link.relation,
+          relationLabel: getRelationKindInfo(link.relation)?.label ?? link.relation,
         }
 
         edgeMap.set(pairKey, {

@@ -125,6 +125,9 @@
       "@letar/animatrona-utils": [
         "../../libs/animatrona-utils/src/index.ts"
       ],
+      "@letar/hooks": [
+        "../../libs/hooks/src/index.ts"
+      ],
       "@letar/animatrona-franchise-graph": [
         "../../libs/animatrona-franchise-graph/src/index.ts"
       ],
@@ -179,6 +182,8 @@
     "../../libs/query-provider/src/**/*.tsx",
     "../../libs/animatrona-types/src/**/*.ts",
     "../../libs/animatrona-utils/src/**/*.ts",
+    "../../libs/hooks/src/**/*.ts",
+    "../../libs/hooks/src/**/*.tsx",
     "../../libs/animatrona-franchise-graph/src/**/*.ts",
     "../../libs/animatrona-franchise-graph/src/**/*.tsx",
     "../../libs/animatrona-ui/src/**/*.ts",

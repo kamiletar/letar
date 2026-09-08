@@ -17,6 +17,7 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
+import { useDebounce } from '@letar/hooks'
 import NextLink from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -139,9 +140,9 @@ export function ProfileClient({
   const router = useRouter()
   const searchParams = useSearchParams()
   const [query, setQuery] = useState(initialQuery)
+  const debouncedQuery = useDebounce(query, 400)
   const [trackMode, setTrackMode] = useState(user.preferredTrackMode || 'RUSSIAN_DUB')
   const [isSavingTrackMode, setIsSavingTrackMode] = useState(false)
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null)
   const handleTrackModeChange = useCallback(async (newMode: string) => {
     setTrackMode(newMode)
     setIsSavingTrackMode(true)
@@ -160,7 +161,10 @@ export function ProfileClient({
   const [gatewayInput, setGatewayInput] = useState(user.customGateway ?? '')
   const [gatewayError, setGatewayError] = useState<string | null>(null)
   const [isSavingGateway, setIsSavingGateway] = useState(false)
-  const gatewayDebounceRef = useRef<ReturnType<typeof setTimeout>>(null)
+  const debouncedGateway = useDebounce(gatewayInput, 800)
+  // Последнее сохранённое значение — чтобы debounced-эффект не сохранял то, что уже на сервере
+  // (в т.ч. на первом рендере, где debouncedGateway сразу равен исходному)
+  const lastSavedGatewayRef = useRef(user.customGateway ?? '')
   const handleSaveGateway = useCallback(async (value: string) => {
     const trimmed = value.trim()
     if (trimmed) {
@@ -183,6 +187,7 @@ export function ProfileClient({
         setGatewayError('Не удалось сохранить')
         return
       }
+      lastSavedGatewayRef.current = value
       // Сбрасываем cookie-кэш better-auth, чтобы useSession() в других компонентах
       // (плеер, карточки эпизодов) сразу увидел новый customGateway без перезагрузки страницы
       await authClient.getSession({ query: { disableCookieCache: true } })
@@ -196,13 +201,15 @@ export function ProfileClient({
   const handleGatewayInputChange = (value: string) => {
     setGatewayInput(value)
     setGatewayError(null)
-    if (gatewayDebounceRef.current) {
-      clearTimeout(gatewayDebounceRef.current)
-    }
-    gatewayDebounceRef.current = setTimeout(() => {
-      handleSaveGateway(value)
-    }, 800)
   }
+
+  // Debounced сохранение gateway
+  useEffect(() => {
+    if (debouncedGateway === lastSavedGatewayRef.current) {
+      return
+    }
+    handleSaveGateway(debouncedGateway)
+  }, [debouncedGateway, handleSaveGateway])
 
   // Обновление URL
   const updateParams = (updates: Record<string, string>) => {
@@ -232,21 +239,11 @@ export function ProfileClient({
 
   // Debounced поиск
   useEffect(() => {
-    if (query === initialQuery) {
+    if (debouncedQuery === initialQuery) {
       return
     }
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current)
-    }
-    debounceRef.current = setTimeout(() => {
-      updateParams({ q: query, tab: initialTab })
-    }, 400)
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current)
-      }
-    }
-  }, [query])
+    updateParams({ q: debouncedQuery, tab: initialTab })
+  }, [debouncedQuery])
 
   return (
     <Box minH="100vh" bg="bg">

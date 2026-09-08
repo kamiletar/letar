@@ -380,7 +380,7 @@
     },
     "apps/animatrona": {
       "name": "@letar/animatrona",
-      "version": "0.55.71",
+      "version": "0.55.72",
       "dependencies": {
         "@letar/electron-storage": "workspace:*",
         "@letar/folder-scan": "workspace:*",
@@ -443,7 +443,7 @@
     },
     "apps/animatrona-mobile": {
       "name": "@letar/animatrona-mobile",
-      "version": "0.7.6",
+      "version": "0.7.7",
       "dependencies": {
         "@letar/animatrona-shared": "*",
         "@react-native/codegen": "0.87.0",
@@ -456,10 +456,11 @@
     },
     "apps/animatrona-tracker": {
       "name": "@letar/animatrona-tracker",
-      "version": "0.11.22",
+      "version": "0.12.0",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
+        "@letar/hooks": "workspace:*",
         "@letar/image-upload": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "@letar/theme-check": "workspace:*",
@@ -571,7 +572,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.188.5",
+      "version": "0.188.6",
       "dependencies": {
         "@letar/analytics": "workspace:*",
         "@letar/consent": "workspace:*",
@@ -925,6 +926,9 @@
     "libs/animatrona-franchise-graph": {
       "name": "@letar/animatrona-franchise-graph",
       "version": "0.1.0",
+      "dependencies": {
+        "@letar/animatrona-utils": "workspace:*",
+      },
     },
     "libs/animatrona-shared": {
       "name": "@letar/animatrona-shared",

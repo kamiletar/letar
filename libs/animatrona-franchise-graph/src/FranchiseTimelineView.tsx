@@ -13,8 +13,8 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useMemo } from 'react'
 import { LuCheck } from 'react-icons/lu'
 
+import { getAnimeKindInfo } from '@letar/animatrona-utils'
 import { computeChronologicalOrder } from './compute-chronological-order'
-import { KIND_LABELS } from './types'
 
 export interface FranchiseTimelineViewProps {
   /** Граф франшизы из IPFS */
@@ -156,7 +156,7 @@ export function FranchiseTimelineView({
                       {node.name}
                     </Text>
                     <Text fontSize="2xs" color="fg.muted">
-                      {KIND_LABELS[node.kind] || node.kind}
+                      {getAnimeKindInfo(node.kind)?.label ?? node.kind}
                     </Text>
                   </Box>
                 </Box>

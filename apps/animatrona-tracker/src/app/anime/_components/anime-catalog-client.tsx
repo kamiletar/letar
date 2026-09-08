@@ -14,8 +14,9 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
+import { useDebounce } from '@letar/hooks'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   LuChevronDown,
   LuChevronLeft,
@@ -145,6 +146,7 @@ export function AnimeCatalogClient({
   const searchParams = useSearchParams()
 
   const [query, setQuery] = useState(initialQuery)
+  const debouncedQuery = useDebounce(query, 400)
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(
     !!(initialStudio || initialDirector || initialEpFrom || initialEpTo),
   )
@@ -164,8 +166,6 @@ export function AnimeCatalogClient({
         // Молча игнорируем — прогресс опциональный
       })
   }, [])
-
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null)
 
   // Количество активных фильтров (не считая поиск и сортировку)
   const activeFilterCount = useMemo(() => {
@@ -263,24 +263,11 @@ export function AnimeCatalogClient({
 
   // Debounced поиск
   useEffect(() => {
-    if (query === initialQuery) {
+    if (debouncedQuery === initialQuery) {
       return
     }
-
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current)
-    }
-
-    debounceRef.current = setTimeout(() => {
-      updateFilters({ q: query })
-    }, 400)
-
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current)
-      }
-    }
-  }, [query])
+    updateFilters({ q: debouncedQuery })
+  }, [debouncedQuery])
 
   // Динамическая иконка «свернуть/развернуть» — react-icons требует Capitalized-компонент, не переменную as=
   const MoreFiltersIcon = moreFiltersOpen ? LuChevronUp : LuChevronDown

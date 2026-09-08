@@ -9,6 +9,7 @@
  */
 
 import { Button } from '@chakra-ui/react'
+import { formatDuration } from '@letar/animatrona-utils'
 import Link from 'next/link'
 import { LuPlay } from 'react-icons/lu'
 
@@ -21,12 +22,6 @@ interface ContinueWatchingButtonProps {
 }
 
 /** Форматирует время в MM:SS */
-function formatTime(seconds: number): string {
-  const mins = Math.floor(seconds / 60)
-  const secs = Math.floor(seconds % 60)
-  return `${mins}:${secs.toString().padStart(2, '0')}`
-}
-
 interface PlayTarget {
   episodeNumber: number
   label: string
@@ -50,7 +45,7 @@ function getPlayTarget(
       if (p && p.currentTime > 10 && p.percent < 90) {
         return {
           episodeNumber: ep.number,
-          label: `Продолжить Эп.${ep.number} — ${formatTime(p.currentTime)}`,
+          label: `Продолжить Эп.${ep.number} — ${formatDuration(p.currentTime)}`,
         }
       }
     }

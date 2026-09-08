@@ -7,7 +7,8 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "types": ["vitest/globals", "node"],
     "paths": {
-      "@letar/animatrona-types": ["../animatrona-types/src/index.ts"]
+      "@letar/animatrona-types": ["../animatrona-types/src/index.ts"],
+      "@letar/animatrona-utils": ["../animatrona-utils/src/index.ts"]
     },
     "ignoreDeprecations": "6.0",
     "rootDir": "."
@@ -16,6 +17,9 @@
   "references": [
     {
       "path": "../animatrona-types"
+    },
+    {
+      "path": "../animatrona-utils"
     }
   ]
 }

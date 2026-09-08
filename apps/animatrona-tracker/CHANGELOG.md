@@ -7,6 +7,38 @@
 
 ---
 
+## [0.12.0] — 2026-09-08
+
+### Изменено
+
+- **Словари типов связей и типов аниме — из `@letar/animatrona-utils`.** `related-section.tsx`
+  держал третью независимую копию (`relationLabels`/`kindLabels`), а
+  `libs/animatrona-franchise-graph` — четвёртую (`RELATION_LABELS`/`KIND_LABELS`/`KIND_COLORS`).
+  Обе заменены каноническими `getRelationKindInfo()`/`getAnimeKindInfo()`. ⚠️ Часть подписей и
+  цветов у пользователя изменилась — это цель консолидации, а не побочный эффект: `special`
+  «Спешл» → «Спецвыпуск», `full_story` «Полная история» → «Полная версия», `tv` в графе франшизы
+  «TV Сериал» → «TV»; цвета `parent_story` (teal → orange), `full_story` (cyan → teal), `spin_off`
+  (orange → red), `alternative_*` (yellow → cyan). Заодно граф франшизы и страница аниме
+  перестали показывать разные подписи для одной и той же связи, а `adaptation` и `tv_special`
+  появились там, где их не было.
+- **`formatTime` → `formatDuration` из `@letar/animatrona-utils`** в `continue-watching-section`
+  и `continue-watching-button` (две побайтово одинаковые локальные копии). Канон дополнительно
+  умеет часы — эпизод длиннее часа больше не рисуется как `95:12`.
+- **Ручные ref-таймеры debounce → `useDebounce` из `@letar/hooks`** — поиск в каталоге аниме,
+  поиск в профиле и сохранение кастомного IPFS gateway. Библиотека подключена к приложению
+  впервые (`package.json`, `tsconfig.json`, `transpilePackages`).
+  Батч-таймер модерации в `admin-client.tsx` намеренно оставлен на ручном `setTimeout`: он
+  дебаунсит не значение, а флаш очереди действий в ref — `useDebounce` (дебаунсер значения) там
+  потребовал бы фиктивного state-счётчика и сделал бы код хуже.
+
+### Удалено
+
+- `RELATION_LABELS`/`KIND_LABELS`/`KIND_COLORS` из публичного API
+  `@letar/animatrona-franchise-graph` — единственным потребителем библиотеки был сам трекер, и он
+  их не импортировал.
+
+---
+
 ## [0.11.23] — 2026-09-08
 
 ### Добавлено

@@ -23,6 +23,7 @@ const nextConfig = {
     '@letar/forms',
     '@letar/forms-core',
     '@letar/forms-react',
+    '@letar/hooks',
     '@letar/glitchtip',
     '@letar/image-upload',
     '@letar/query-provider',
