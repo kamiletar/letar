@@ -199,6 +199,10 @@ nx clean animatrona-tv
 - [x] Завести `nx lint` — таргета не было в графе Nx вообще (блок без `executor`, silent
       no-op), первый прогон по 32 файлам нашёл и починил 3 живых `react-hooks/exhaustive-deps`
       (детали — CHANGELOG v0.6.2, PLAN_COMPLETED.md)
+- [x] Завести unit-тестирование (`nx test`, vitest) — было 0 тестов с марта 2026. Покрыта
+      чистая логика без React Native Testing Library: `focusableStyle`, выбор дефолтных
+      audio/subtitle-дорожек в `usePlayerEpisode`, обёртки `api/client.ts`/`store/connection.ts`
+      (детали — CHANGELOG v0.6.3, PLAN_TESTING.md, PLAN_COMPLETED.md)
 - [ ] ⚠️ Открытый вопрос: тестирование на реальном Android TV устройстве/эмуляторе — не
       выполнялось ни разу после миграции на RN 0.87 (2026-08-20) и смены Android toolchain
       (2026-08-25), только собирался APK. AVD `Television_1080p` есть, но пакет `emulator` и

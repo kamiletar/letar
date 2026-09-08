@@ -2,6 +2,60 @@
 
 Детальное описание всех реализованных фич Animatrona TV.
 
+## Версия 0.6.3 (2026-09-08)
+
+### Заведено unit-тестирование — 22 теста в 4 файлах
+
+`PLAN_TESTING.md` держал строку «Unit | 0 | Планируется» с марта 2026. Задача пришла из
+отдельной сессии (делегирована явным заданием, не из собственного TODO приложения).
+
+Покрыта чистая логика, не требующая React Native Testing Library:
+
+- **`src/utils/tvStyles.spec.ts`** (6 тестов) — `focusableStyle` целиком: без фокуса
+  `focusedStyle` не подмешивается (`focused && focusedStyle` даёт `false`, а не пропуск
+  элемента — это важно, массив стилей RN спокойно фильтрует falsy-элементы через
+  `flattenStyle`), в фокусе подмешивается, несколько base-стилей сохраняют порядок,
+  `after`-стили добавляются и с фокусом, и без, дефолтный `after=[]` не добавляет лишних
+  элементов массива.
+- **`src/hooks/usePlayerEpisode.spec.ts`** (12 тестов) — через `@testing-library/react`
+  `renderHook` с `@vitest-environment jsdom` (нужен для рендера тестового компонента-обёртки;
+  сам хук ничего из `react-native` не рендерит, поэтому обычный `@testing-library/react`
+  подошёл без `react-native-testing-library`). `@/api/client` замокан через `vi.mock` —
+  реальная сеть и `@letar/animatrona-shared` не участвуют. Покрыт весь путь выбора дефолтных
+  дорожек: аудио — по `isDefault`, с фоллбэком на первую дорожку при отсутствии явного
+  дефолта, `null` при пустом списке; субтитры — **только** по `isDefault`, без фоллбэка на
+  первую (асимметрия с аудио — так и было в исходном коде, зафиксирована тестом, а не
+  «исправлена» как предполагаемый баг). Отдельно — «эпизод не найден в списке» даёт
+  `error: 'Эпизод не найден'`, `Error`-исключение из API пробрасывает своё `message`,
+  не-`Error`-исключение (например строка) даёт дефолтное `'Ошибка загрузки'`, смена
+  `episodeId` между рендерами триггерит повторный вызов `getAnimeDetails`, и `setError`
+  доступен наружу для ручного управления ошибкой из экрана плеера.
+- **`src/api/client.spec.ts`** (3 теста) и **`src/store/connection.spec.ts`** (1 тест) —
+  тонкие обёртки над `createApiClient`/`createConnectionStore` из `@letar/animatrona-shared`.
+  Сама фабрика уже покрыта тестами библиотеки (`libs/animatrona-shared/src/**/*.spec.ts`),
+  здесь смысл — поймать регресс в самой обвязке tv: неверный `getState`-геттер, опечатку в
+  уникальном `storageKey` (`'animatrona-tv-connection'`), потерянный при реэкспорте метод API.
+  Для `client.spec.ts` понадобился `vi.resetModules()` в `beforeEach` — модуль выполняет
+  `createApiClient()` на верхнем уровне при импорте, без сброса реестра модулей повторный
+  `await import('./client')` во втором тесте вернул бы закешированный из первого теста модуль,
+  и счётчик вызовов мока не совпал бы с ожиданием «ровно один раз на тест».
+
+**Инфраструктура:**
+
+- `vitest.config.mts` заведён по образцу `apps/animatrona-folder-player` (alias `@` → `src`,
+  `environment: 'node'` по умолчанию). Отдельный таргет в `project.json` не нужен — `@nx/vitest`
+  сам порождает inferred-таргет `test` по наличию файла `vitest.config.mts` в `apps/*`.
+- `tsconfig.json`: `vitest/globals` добавлен в `compilerOptions.types` — без него
+  `typecheck:tsgo` не видел глобальные `describe`/`it`/`expect`/`vi` из спек-файлов
+  (`TS2593: Cannot find name 'it'`, `TS2304: Cannot find name 'expect'`).
+
+Проверено: `nx test animatrona-tv` (22/22 зелёных), `nx lint animatrona-tv` (0 ошибок, тот же
+1 осознанный warning что и раньше), `nx typecheck:tsgo animatrona-tv` (зелёный).
+
+**Не покрыто в этой волне** (следующие кандидаты — см. PLAN_TESTING.md): RN-компоненты
+(экраны, `TVRow`/`FocusableCard`/плеер — потребовали бы React Native Testing Library, out of
+scope этой задачи), `useWatchProgress` (нужно сверить, не покрыт ли уже со стороны mobile).
+
 ## Версия 0.6.2 (2026-09-08)
 
 ### Фикс: `nx lint animatrona-tv` не существовал в графе Nx вообще
