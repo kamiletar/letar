@@ -47,6 +47,11 @@ projects --with-target` этого не ловит ·
 `--max-old-space-size`), раздутый безусловной (без `include`) регистрацией `@nx/vitest` в
 `nx.json`, цепляющей `vitest.config.*` внутри вложенных `node_modules`; воркэраунд —
 `NODE_OPTIONS=--max-old-space-size=8192` (форвардится воркеру как есть) ·
+[nx-e2e-implicit-deps-public-repo-private-app-exception](/.claude/docs/nx-e2e-implicit-deps-public-repo-private-app-exception.md)
+⚠️ `dsperevod-e2e`/`svoichuzhie-e2e`/`aprel8008-e2e` (публичные каталоги) намеренно не держат
+`implicitDependencies` на своё приложение (submodule) — на CI без submodule это уронит весь граф
+Nx через `assertWorkspaceValidity`; `aboi-e2e`/`driving-school-e2e`/`studio-e2e`/`domwellbes-e2e`
+ту же связь держат безопасно, потому что сами являются submodule и на CI-чекауте не существуют ·
 [nx-cache-directory-env-not-isolated-by-cachedirectory](/.claude/docs/nx-cache-directory-env-not-isolated-by-cachedirectory.md)
 ⚠️ `NX_CACHE_DIRECTORY` двигает только каталог файлов-артефактов — решение «отдать cache hit»
 принимает отдельный DB-кеш Nx 19+, чей SQLite-индекс живёт в `NX_WORKSPACE_DATA_DIRECTORY`
