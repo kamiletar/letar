@@ -9,12 +9,22 @@ import { LuCheck, LuDownload } from 'react-icons/lu'
 
 interface DownloadsSectionProps {
   release: ParsedRelease | null
+  /** Портативная Windows-сборка (второй `.exe` в релизе) — необязательна, показывается доп. ссылкой под основной кнопкой */
+  windowsPortableAsset?: ReleaseAsset | null
+  /** Заметка под карточками платформ — по умолчанию про GPU-транскодирование (актуально только для полной Animatrona) */
+  requirementsNote?: { primary: string; secondary?: string }
+}
+
+const DEFAULT_REQUIREMENTS_NOTE = {
+  primary: 'Рекомендуется: NVIDIA GPU с NVENC для GPU-ускорения (RTX серия)',
+  secondary: 'Без GPU приложение использует CPU кодирование (libsvtav1)',
 }
 
 interface PlatformCardProps {
   platform: Platform
   release: ParsedRelease | null
   isCurrentPlatform: boolean
+  portableAsset?: ReleaseAsset | null
 }
 
 const PLATFORM_INFO: Record<
@@ -248,7 +258,7 @@ function MacOSCard({ release, isCurrentPlatform, detectedArch }: MacOSCardProps)
   )
 }
 
-function PlatformCard({ platform, release, isCurrentPlatform }: PlatformCardProps) {
+function PlatformCard({ platform, release, isCurrentPlatform, portableAsset }: PlatformCardProps) {
   const info = PLATFORM_INFO[platform]
   const PlatformIcon = info.icon
   // Для Windows и Linux — обычный ассет
@@ -307,6 +317,21 @@ function PlatformCard({ platform, release, isCurrentPlatform }: PlatformCardProp
           {/* Кнопка скачивания */}
           <DownloadButton asset={asset} label="Скачать" isPrimary={isCurrentPlatform} />
 
+          {/* Портативная версия (Windows) — без установки, запуск сразу из папки */}
+          {portableAsset && (
+            <Link
+              href={portableAsset.browser_download_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              fontSize="xs"
+              color="gray.500"
+              textAlign="center"
+              _hover={{ color: 'gray.300' }}
+            >
+              или портативная версия ({formatFileSize(portableAsset.size)}) — без установки
+            </Link>
+          )}
+
           {/* Требования */}
           <VStack gap={1} align="start" pt={2}>
             {info.requirements.map((req) => (
@@ -324,7 +349,9 @@ function PlatformCard({ platform, release, isCurrentPlatform }: PlatformCardProp
   )
 }
 
-export function DownloadsSection({ release }: DownloadsSectionProps) {
+export function DownloadsSection(
+  { release, windowsPortableAsset, requirementsNote = DEFAULT_REQUIREMENTS_NOTE }: DownloadsSectionProps,
+) {
   const [currentPlatform, setCurrentPlatform] = useState<Platform | null>(null)
   const [macArch, setMacArch] = useState<MacArch | null>(null)
 
@@ -386,6 +413,7 @@ export function DownloadsSection({ release }: DownloadsSectionProps) {
                       platform={platform}
                       release={release}
                       isCurrentPlatform={platform === currentPlatform}
+                      portableAsset={platform === 'windows' ? windowsPortableAsset : undefined}
                     />
                   )
               )}
@@ -394,11 +422,13 @@ export function DownloadsSection({ release }: DownloadsSectionProps) {
             {/* Системные требования */}
             <VStack gap={2} textAlign="center">
               <Text color="gray.500" fontSize="sm">
-                Рекомендуется: NVIDIA GPU с NVENC для GPU-ускорения (RTX серия)
+                {requirementsNote.primary}
               </Text>
-              <Text color="gray.600" fontSize="xs">
-                Без GPU приложение использует CPU кодирование (libsvtav1)
-              </Text>
+              {requirementsNote.secondary && (
+                <Text color="gray.600" fontSize="xs">
+                  {requirementsNote.secondary}
+                </Text>
+              )}
               <Text color="gray.600" fontSize="xs" pt={2}>
                 * macOS: Приложение не подписано. При первом запуске откройте{' '}
                 <Text asChild color="gray.400">

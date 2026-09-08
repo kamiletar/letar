@@ -1,8 +1,29 @@
-import type { MacOSAssets, ParsedRelease, Platform, Release, ReleaseChange } from '@/types/release'
+import type { MacOSAssets, ParsedRelease, Platform, Release, ReleaseAsset, ReleaseChange } from '@/types/release'
 import { fetchLatestRelease, fetchReleases } from '@letar/github-releases'
 
-const OWNER = process.env.GITHUB_OWNER || 'kamiletar'
-const REPO = process.env.GITHUB_REPO || 'animatrona'
+/**
+ * Откуда брать релизы — owner/repo GitHub плюс опциональный префикс тега. Префикс нужен, когда
+ * репозиторий публикует несколько продуктов монорепо под одними Releases (см. README
+ * `@letar/github-releases`) — без него релизы разных продуктов было бы не различить.
+ */
+export interface ReleaseSource {
+  owner: string
+  repo: string
+  tagPrefix?: string
+}
+
+/** Полная Animatrona — собственный репозиторий, один продукт на репо, префикс не нужен */
+export const ANIMATRONA_SOURCE: ReleaseSource = {
+  owner: process.env.GITHUB_OWNER || 'kamiletar',
+  repo: process.env.GITHUB_REPO || 'animatrona',
+}
+
+/** Плеер аниме из папки — релизы едут прямо из монорепо `kamiletar/letar`, без зеркалирования исходников */
+export const FOLDER_PLAYER_SOURCE: ReleaseSource = {
+  owner: 'kamiletar',
+  repo: 'letar',
+  tagPrefix: 'animatrona-folder-player-v',
+}
 
 /**
  * @letar/github-releases типизирует ответ узким срезом полей (см. его README) — сам ответ
@@ -14,18 +35,18 @@ function asRelease(release: Awaited<ReturnType<typeof fetchLatestRelease>>): Rel
 }
 
 /**
- * Получить последний релиз
+ * Получить последний релиз указанного продукта (по умолчанию — полная Animatrona)
  */
-export async function getLatestRelease(): Promise<Release | null> {
-  const release = await fetchLatestRelease({ owner: OWNER, repo: REPO, token: process.env.GITHUB_TOKEN })
+export async function getLatestRelease(source: ReleaseSource = ANIMATRONA_SOURCE): Promise<Release | null> {
+  const release = await fetchLatestRelease({ ...source, token: process.env.GITHUB_TOKEN })
   return asRelease(release)
 }
 
 /**
- * Получить все релизы
+ * Получить все релизы указанного продукта (по умолчанию — полная Animatrona)
  */
-export async function getAllReleases(limit = 10): Promise<Release[]> {
-  const releases = await fetchReleases({ owner: OWNER, repo: REPO, token: process.env.GITHUB_TOKEN, limit })
+export async function getAllReleases(source: ReleaseSource = ANIMATRONA_SOURCE, limit = 10): Promise<Release[]> {
+  const releases = await fetchReleases({ ...source, token: process.env.GITHUB_TOKEN, limit })
   return releases as unknown as Release[]
 }
 
@@ -87,6 +108,18 @@ export function findAssetForPlatform(release: Release, platform: Platform) {
 }
 
 /**
+ * Найти оба Windows-ассета релиза — NSIS-инсталлятор и портативную сборку. В отличие от
+ * `findAssetForPlatform('windows')` (берёт первый `.exe`), различает их по имени артефакта —
+ * нужно продуктам с двумя `.exe` в одном релизе (см. `electron-builder.yml` `win.target`).
+ */
+export function findWindowsAssets(release: Release): { installer: ReleaseAsset | null; portable: ReleaseAsset | null } {
+  const exeAssets = release.assets.filter((asset) => /\.exe$/i.test(asset.name))
+  const portable = exeAssets.find((asset) => /portable/i.test(asset.name)) || null
+  const installer = exeAssets.find((asset) => asset !== portable) || null
+  return { installer, portable }
+}
+
+/**
  * Найти ассеты macOS для обеих архитектур
  */
 export function findMacOSAssets(release: Release): MacOSAssets {
@@ -118,7 +151,7 @@ export function parseRelease(release: Release): ParsedRelease {
     changes: parseReleaseNotes(release.body),
     rawBody: release.body,
     assets: {
-      windows: findAssetForPlatform(release, 'windows'),
+      windows: findWindowsAssets(release).installer,
       macos: findMacOSAssets(release),
       linux: findAssetForPlatform(release, 'linux'),
     },
@@ -128,9 +161,9 @@ export function parseRelease(release: Release): ParsedRelease {
 /**
  * Получить версию для отображения (fallback если нет релизов)
  */
-export function getDisplayVersion(release: Release | null): string {
+export function getDisplayVersion(release: Release | null, fallback = '0.7.0'): string {
   if (!release) {
-    return '0.7.0'
-  } // Fallback версия
+    return fallback
+  }
   return release.tag_name.replace(/^v/, '')
 }

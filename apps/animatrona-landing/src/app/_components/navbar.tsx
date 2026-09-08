@@ -26,6 +26,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: 'Возможности', href: '#features' },
   { label: 'Скачать', href: '#downloads' },
+  { label: 'Плеер', href: '/player', isPage: true },
   { label: 'FAQ', href: '#faq' },
   { label: 'Документация', href: '/docs', isPage: true },
   { label: 'Изменения', href: '#changelog' },

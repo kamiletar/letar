@@ -2,6 +2,21 @@
 
 Все изменения в проекте animatrona-landing документируются в этом файле.
 
+## [0.4.8] - 2026-09-08
+
+### Added
+
+- Страница `/player` — второй продукт семейства Animatrona (плеер аниме из локальной папки,
+  `apps/animatrona-folder-player`): отличия от полной Animatrona, поддерживаемые форматы,
+  скачивание релизов напрямую из `kamiletar/letar` (без зеркалирования исходников). Ссылка
+  «Плеер» в навбаре.
+- `src/lib/github.ts` — параметризован под несколько продуктов монорепо: `ReleaseSource
+  { owner, repo, tagPrefix }`, `ANIMATRONA_SOURCE`/`FOLDER_PLAYER_SOURCE`, `findWindowsAssets()`
+  (различает NSIS-инсталлятор и portable-сборку в одном релизе).
+- `DownloadsSection` — необязательные пропы `windowsPortableAsset` (доп. ссылка на portable-сборку)
+  и `requirementsNote` (текст под карточками платформ переопределяется для продуктов без
+  GPU-транскодирования); дефолты сохраняют прежнее поведение главной страницы.
+
 ## [0.4.7] - 2026-09-02
 
 ### Added
