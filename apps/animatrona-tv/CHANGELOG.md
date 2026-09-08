@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.6.2] - 2026-09-08
+
+### Fixed
+
+- **`nx lint animatrona-tv` не существовал в графе Nx вообще**, при этом блок `lint` в
+  `project.json` выглядел настроенным (`options.args`, без `executor`) — классическая ловушка
+  `.claude/docs/nx-target-without-executor-silent-noop.md`. Практическое следствие: обязательный
+  шаг чек-листа «перед коммитом `nx lint <app>`» на tv молча не проверял ничего, вероятно с самого
+  создания приложения. Заведён `apps/animatrona-tv/eslint.config.mjs` (форма и три обхода
+  несовместимости ESLint 10 — от `animatrona-mobile-dev`, тред `rn-eslint-config`), `project.json`
+  получил связку `oxlint` + `lint: dependsOn: [oxlint]` по образцу `animatrona-tracker`
+- Первый прогон линтера по всем 32 файлам (`nx lint`, никогда не запускался) нашёл 3 живых
+  `react-hooks/exhaustive-deps` в `TVPlayerScreen.tsx` — `setError`/`setSelectedAudio`/
+  `setSelectedSubtitle` приходят не из локального `useState`, а из кастомного хука
+  `usePlayerEpisode`, эту стабильность ESLint не может доказать статически через границу хука.
+  Добавлены в зависимости `useCallback`
+
 ## [0.6.1] - 2026-09-08
 
 ### Fixed

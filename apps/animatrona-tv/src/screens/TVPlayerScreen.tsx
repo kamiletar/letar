@@ -216,10 +216,13 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
   }, [])
 
   /** Ошибка */
-  const handleError = useCallback((err: OnErrorData) => {
-    setError(err.message)
-    setIsPlaying(false)
-  }, [])
+  const handleError = useCallback(
+    (err: OnErrorData) => {
+      setError(err.message)
+      setIsPlaying(false)
+    },
+    [setError],
+  )
 
   /** Выбор аудио */
   const handleAudioSelect = useCallback(
@@ -233,7 +236,7 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
       }
       setShowAudioSelector(false)
     },
-    [episode],
+    [episode, setSelectedAudio],
   )
 
   /** Выбор субтитров */
@@ -252,7 +255,7 @@ export function TVPlayerScreen({ navigation, route }: Props): React.JSX.Element 
       }
       setShowSubtitleSelector(false)
     },
-    [episode],
+    [episode, setSelectedSubtitle],
   )
 
   // Очистка таймера при размонтировании

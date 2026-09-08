@@ -56,12 +56,28 @@
         "cwd": "apps/animatrona-tv/android"
       }
     },
-    "lint": {
-      "options": {
-        "args": [
-          "**/*.{ts,tsx}"
+    "oxlint": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.oxlintrc.json"
+      ],
+      "metadata": {
+        "description": "Fast lint with oxlint (50-100x faster than ESLint)",
+        "technologies": [
+          "oxlint"
         ]
+      },
+      "options": {
+        "command": "bunx oxlint src --config ../../.oxlintrc.json",
+        "cwd": "apps/animatrona-tv"
       }
+    },
+    "lint": {
+      "dependsOn": [
+        "oxlint"
+      ]
     },
     "typecheck": {
       "command": "tsc --noEmit",
