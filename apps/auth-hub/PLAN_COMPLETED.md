@@ -2,6 +2,17 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## Fail-open Telegram webhook secret (2026-09-08)
+
+Аудит безопасности (повод — `apps/synth`, тот же класс, что `ALLOW_DEV_SESSION`) нашёл в
+`src/lib/telegram/plugin.ts` `telegramWebhook`: `if (expectedSecret && secretHeader !==
+expectedSecret) return 401` — при не заданном `TELEGRAM_WEBHOOK_SECRET` проверка не срабатывала
+вовсе. auth-hub — центральный SSO для всех приложений монорепо. Секрет также не прописан в
+`docker-compose.production.yml`. Исправлено на fail-closed, комментарий в файле обновлён с
+«рекомендован» на «обязателен» (коммит `b6da3fb0`).
+
+⚠️ Открытый вопрос — см. `PLAN.md` § «Открытые вопросы».
+
 ## Фикс: e2e-регрессия — локаторы `input[name=...]` не находят поля `@letar/forms` (2026-09-03)
 
 Прогон staging e2e на коммите `6e8620b67` уронил 2 теста из 10: `01-public.spec.ts` «форма

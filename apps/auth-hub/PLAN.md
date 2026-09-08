@@ -1,5 +1,17 @@
 # План разработки auth-hub
 
+## ⚠️ Открытый вопрос: `TELEGRAM_WEBHOOK_SECRET` не настроен в проде (2026-09-08)
+
+После фикса fail-open проверки (`PLAN_COMPLETED.md` § «Fail-open Telegram webhook secret»)
+`telegramWebhook` стал fail-closed — а `TELEGRAM_WEBHOOK_SECRET` не прописан ни в
+`.env.docker.enc`, ни в `docker-compose.production.yml`. Значит Telegram-логин сейчас в проде
+не работает вообще (раньше был «открыт», а не «настроен»). Нужно: сгенерировать секрет
+(`openssl rand -base64 32`), прописать в `.env.docker.enc` + `environment:` compose,
+переустановить webhook у бота с `secret_token` — и задеплоить. Решение и выполнение —
+deploy-agent-dev/владелец, не текущая сессия.
+
+- [ ] ⚠️ Открытый вопрос: сгенерировать и прописать `TELEGRAM_WEBHOOK_SECRET` в проде, переустановить webhook
+
 ## Аудит prismaAdapter/ZenStack (2026-08-31)
 
 - [x] Проверить живьём, повторяет ли auth-hub баг, найденный и починенный в mandala/domwellbes/
