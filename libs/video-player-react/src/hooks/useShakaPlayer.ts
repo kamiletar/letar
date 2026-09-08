@@ -31,6 +31,13 @@ export interface ShakaTrack {
   language: string
   audioId: number | null
   videoId: number | null
+  /**
+   * Нативный `AudioTrack.id` браузера (строка) — в режиме `src=` Shaka не заполняет числовой
+   * `audioId` вовсе (см. `useAudioTracks.ts`), реальный стабильный идентификатор дорожки лежит
+   * только здесь.
+   */
+  originalAudioId: string | null
+  originalVideoId: string | null
   label: string | null
   roles: string[]
 }

@@ -11,6 +11,13 @@ import { getInitialWindowState, trackWindowBounds } from './services/window-boun
 registerMediaProtocol()
 registerAppProtocol()
 
+// HTMLMediaElement.audioTracks/videoTracks — экспериментальная фича Blink, по умолчанию
+// выключена (свойство `undefined` на <video>). Без неё Shaka Player в режиме `src=` (см.
+// useAudioTracks в @letar/video-player-react) не видит embedded-аудиодорожки локального MKV
+// вообще — не «пустой список», а отсутствие самого API. Подтверждено эмпирически: без флага
+// audioTracks === undefined, с флагом — корректный список с языком/лейблом каждой дорожки.
+app.commandLine.appendSwitch('enable-blink-features', 'AudioVideoTracks')
+
 // Главный способ запуска плеера — двойной клик по файлу (fileAssociations в electron-builder.yml),
 // а не иконка на рабочем столе. Второй двойной клик не должен поднимать вторую копию Electron —
 // он обязан открыть файл в уже запущенном окне.

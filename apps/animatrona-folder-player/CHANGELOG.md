@@ -4,6 +4,22 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- **Кнопка выбора аудиодорожки не появлялась вовсе** («не вижу выбора аудиодорожки») —
+  живой баг-репорт сразу после релиза выбора аудиодорожки (см. запись ниже). Две независимые
+  причины, обе воспроизведены детерминированно на синтетическом MKV с двумя AAC-дорожками через
+  Playwright/Electron по собранному `dist/win-unpacked`:
+  1. `HTMLMediaElement.audioTracks` — выключенная по умолчанию экспериментальная фича Blink,
+     `video.audioTracks === undefined` без флага (не «пустой список» — самого API нет). Фикс —
+     `app.commandLine.appendSwitch('enable-blink-features', 'AudioVideoTracks')` в
+     `main/background.ts`, до `app.whenReady()`.
+  2. В режиме `src=` Shaka не заполняет числовой `audioId`/`videoId` варианта (оба `null`) —
+     реальный нативный `AudioTrack.id` лежит в `originalAudioId`/`originalVideoId` (строка).
+     `useAudioTracks` фильтровал по `audioId === null` и никогда не находил дорожек. Фикс —
+     хук теперь ключуется на `originalAudioId`/`originalVideoId`, `AudioTrackOption.audioId`
+     сменил тип `number → string` (`@letar/video-player-react` 0.2.5 → 0.2.6).
+
 ### Added
 
 - **Выбор аудиодорожки** — вторая кнопка на панели плеера (`AudioTrackSelector`) рядом с выбором

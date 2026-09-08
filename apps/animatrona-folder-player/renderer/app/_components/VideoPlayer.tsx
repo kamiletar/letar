@@ -157,14 +157,14 @@ function ShakaVideoPlayer({
   // на всех кодеках/контейнерах, что Chromium реально отдаёт несколько дорожек.
   const { audioTracks, selectAudioTrack } = useAudioTracks({ playerRef, isVideoReady })
   const audioOptions = useMemo(
-    () => audioTracks.map((t) => ({ id: String(t.audioId), label: formatAudioTrackLabel(t.language, t.label) })),
+    () => audioTracks.map((t) => ({ id: t.audioId, label: formatAudioTrackLabel(t.language, t.label) })),
     [audioTracks],
   )
   const selectedAudioId = useMemo(() => {
     const active = audioTracks.find((t) => t.active)
-    return active ? String(active.audioId) : (audioOptions[0]?.id ?? '')
+    return active ? active.audioId : (audioOptions[0]?.id ?? '')
   }, [audioTracks, audioOptions])
-  const handleSelectAudio = useCallback((id: string) => selectAudioTrack(Number(id)), [selectAudioTrack])
+  const handleSelectAudio = useCallback((id: string) => selectAudioTrack(id), [selectAudioTrack])
 
   const controls = usePlayerControls({
     videoRef,
