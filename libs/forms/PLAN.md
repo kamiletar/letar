@@ -2040,6 +2040,12 @@ inline-редактирование текста. Если `ReplaceValue` ока
   - [ ] **Не сделано:** отдельная unified contract suite поверх обоих скинов (сейчас — два
         независимых набора тестов с одинаковыми сценариями, не общий helper);
   - [ ] **Не сделано:** `forms-vue`/`forms-vue-shadcn`/`forms-angular` parity;
+  - [x] **2026-09-08:** интерактивные демо во всех трёх потребительских приложениях —
+        `apps/form-develop-app/src/app/edit-intent-demo/page.tsx` (edit mode + create mode,
+        ссылка с главной), `apps/form-docs` `content/docs/fields/specialized.mdx`/`.ru.mdx`
+        (новая секция «EditIntent» + `<SkinCodeFile>`, читает демо-файл с диска на сборке),
+        `apps/form-example/src/app/examples/edit-intent/page.tsx` (+ пункт навигации). Проверено
+        живьём в браузере на всех трёх (edit→cancel/replace/submit-цикл, RU/EN версии доков).
 - [x] `docs/fields.md` (таблица + детальный раздел), `CHANGELOG.md` и версии всех четырёх
       пакетов обновлены вместе с реализацией.
 - [x] **2026-09-04:** `README.md` библиотеки — добавлен `Form.Field.EditIntent` в пример
