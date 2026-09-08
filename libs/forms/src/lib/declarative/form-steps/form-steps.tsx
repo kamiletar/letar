@@ -2,10 +2,10 @@
 
 import { Steps } from '@chakra-ui/react'
 import { type StepPersistenceConfig, useStepNavigation, useStepPersistence, useStepState } from '@letar/forms-react'
-import { Children, isValidElement, type ReactNode, useCallback, useMemo, useRef, useState } from 'react'
+import { Children, cloneElement, isValidElement, type ReactNode, useCallback, useMemo, useRef, useState } from 'react'
 import { useDeclarativeForm } from '../form-context'
 import { FormStepsContext, type FormStepsContextValue } from './form-steps-context'
-import { FormStepsStep } from './form-steps-step'
+import { FormStepsStep, type FormStepsStepProps } from './form-steps-step'
 
 export type { StepPersistenceConfig }
 
@@ -38,6 +38,46 @@ function countDeclaredSteps(children: ReactNode): number {
     }
   })
   return count
+}
+
+/**
+ * Клонирует дерево `children`, назначая КАЖДОМУ `Form.Steps.Step` без `when` последовательный
+ * `__declaredIndex` — синхронный, по позиции в разметке, а не через `useEffect`-регистрацию.
+ *
+ * Устраняет ещё одно проявление того же класса бага, что и `countDeclaredSteps`: без него
+ * `Form.Steps.Step` рендерит `null` до тех пор, пока его СОБСТВЕННЫЙ эффект регистрации не
+ * присвоит ему индекс (`indexRef.current < 0`) — видимая вспышка пустого контента между первым
+ * коммитом и первым проходом эффектов. Заметно на медленных dev-сборках и при монтировании
+ * `Form.Steps` внутри `Tabs.Content` (все панели монтируются сразу, просто скрыты) — форма
+ * успевает «мигнуть» пустой до появления полей.
+ *
+ * Останавливается на первом `Form.Steps.Step` с `when` (и на всех последующих) — их видимость и
+ * итоговый индекс зависят от значения поля, синхронно не выводятся. Для формы без `when`-шагов
+ * (типичный случай) это покрывает 100% шагов.
+ */
+function assignDeclaredIndices(children: ReactNode, counter: { next: number; stopped: boolean }): ReactNode {
+  return Children.map(children, (child) => {
+    if (!isValidElement(child)) {
+      return child
+    }
+    if (child.type === FormStepsStep) {
+      const stepProps = child.props as FormStepsStepProps
+      if (counter.stopped || stepProps.when) {
+        counter.stopped = true
+        return child
+      }
+      const declaredIndex = counter.next
+      counter.next += 1
+      return cloneElement(child, { __declaredIndex: declaredIndex } as Partial<FormStepsStepProps>)
+    }
+    const props = child.props as { children?: ReactNode } | undefined
+    if (props?.children) {
+      return cloneElement(child, {
+        children: assignDeclaredIndices(props.children, counter),
+      } as Partial<{ children: ReactNode }>)
+    }
+    return child
+  })
 }
 
 export interface FormStepsProps {
@@ -159,6 +199,14 @@ export function FormSteps({
   // oxlint-disable-next-line react-hooks/exhaustive-deps
   const declaredStepCount = useMemo(() => countDeclaredSteps(children), [children])
   const effectiveStepCount = Math.max(stepCount, declaredStepCount)
+
+  // Дети с проставленным __declaredIndex — см. assignDeclaredIndices. Убирает вспышку пустого
+  // контента до первого прохода эффектов регистрации.
+  // oxlint-disable-next-line react-hooks/exhaustive-deps
+  const childrenWithDeclaredIndices = useMemo(
+    () => assignDeclaredIndices(children, { next: 0, stopped: false }),
+    [children],
+  )
 
   // Persistence: save step changes
   useStepPersistence(currentStep, stepPersistence)
@@ -296,7 +344,7 @@ export function FormSteps({
         colorPalette={colorPalette}
         linear={linear}
       >
-        {children}
+        {childrenWithDeclaredIndices}
       </Steps.Root>
     </FormStepsContext.Provider>
   )

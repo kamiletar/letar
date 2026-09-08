@@ -55,6 +55,12 @@ export interface FormStepsStepProps {
    * ```
    */
   segment?: string
+  /**
+   * @internal Синхронный порядковый индекс от `Form.Steps` (см. `assignDeclaredIndices` в
+   * `form-steps.tsx`) — только для шагов без `when`. Не задавай вручную, инъецируется
+   * автоматически клонированием дерева `children`.
+   */
+  __declaredIndex?: number
 }
 
 /**
@@ -174,6 +180,7 @@ export function FormStepsStep({
   onLeave,
   when,
   segment,
+  __declaredIndex,
 }: FormStepsStepProps) {
   const { form } = useDeclarativeForm()
   const { registerStep, unregisterStep, claimedIndicesRef, currentStep, animated, animationDuration, direction } =
@@ -196,7 +203,22 @@ export function FormStepsStep({
 
   // Calculate index based on render order
   // We use a ref to track the registered index
-  const indexRef = useRef<number>(-1)
+  //
+  // ⚠️ Инициализация из __declaredIndex (не всегда -1) — устраняет вспышку пустого рендера
+  // (return null ниже) до того, как эффект регистрации успеет отработать. __declaredIndex
+  // задаётся только шагам без `when` (см. assignDeclaredIndices в form-steps.tsx) — для `when`
+  // всегда -1, видимость и индекс по-прежнему выясняются асинхронно.
+  const indexRef = useRef<number>(when ? -1 : (__declaredIndex ?? -1))
+  const hasClaimedDeclaredIndexRef = useRef(false)
+  // Синхронный клейм в claimedIndicesRef — тот же паттерн «безопасная мутация ref в теле
+  // рендера», что и sortedStepsRef/hiddenFieldsRef в form-steps.tsx. Нужен, чтобы эффект
+  // регистрации ниже (который иначе сам сделал бы claimedIndicesRef.current.add(...)) не
+  // выдал этот индекс повторно другому шагу — эффект пропускает клейм, если indexRef.current
+  // уже >= 0 (см. условие `if (indexRef.current < 0)` там).
+  if (!when && __declaredIndex !== undefined && !hasClaimedDeclaredIndexRef.current) {
+    claimedIndicesRef.current.add(__declaredIndex)
+    hasClaimedDeclaredIndexRef.current = true
+  }
   const wasVisibleRef = useRef(isVisible)
 
   // Subscribe to when field changes
