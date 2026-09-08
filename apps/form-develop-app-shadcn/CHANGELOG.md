@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.1 (2026-09-09)
+
+### Fixed
+
+- `package.json`: `@letar/forms-core` и `@letar/forms-react` не были объявлены ни в
+  `dependencies`, ни в `nx.implicitDependencies`, хотя реально импортируются — граф Nx не видел
+  эти рёбра. Добавлены в `dependencies` (`workspace:*`).
+
 ## 0.2.0 (2026-08-13)
 
 - Мега-страница `src/app/page.tsx` (556 строк, 47 полей + 6 beta-компонентов в одной форме)

@@ -135,3 +135,9 @@
   (в отличие от `form-develop-app` с его 21 e2e)
 - Порт 3026, добавлен в `.claude/launch.json`
 - Коммиты: `c47b0259` (приложение), `e9387253` (launch.json)
+
+## Починка графа Nx (2026-09-09)
+
+- [x] `@letar/forms-core` и `@letar/forms-react` реально импортировались в коде, но не были
+      объявлены ни в `dependencies`, ни в `nx.implicitDependencies` (PLAN-INFRA-6.md §169).
+      Добавлены в `dependencies` (`workspace:*`), проверено format/lint/typecheck:tsgo.

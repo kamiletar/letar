@@ -1,9 +1,13 @@
 {
   "name": "@letar/form-develop-app-shadcn",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "nx": {
     "name": "form-develop-app-shadcn",
     "implicitDependencies": ["@letar/analytics", "@letar/forms-shadcn", "@letar/tailwind-utils"]
+  },
+  "dependencies": {
+    "@letar/forms-core": "workspace:*",
+    "@letar/forms-react": "workspace:*"
   }
 }
