@@ -26,6 +26,16 @@ import type { TranscodePlan } from '@shared/transcode-plan'
 
 const MIME_CODEC = 'video/mp4; codecs="vp09.02.10.10,mp4a.40.2"'
 
+/**
+ * Отключено 2026-09-08: race condition с кэш-хитом починена (см. `start()` ниже), но и после
+ * фикса воспроизведение не стартует даже когда ffmpeg реально запускается в потоковом режиме —
+ * баг где-то глубже в связке SourceBuffer/Shaka `mimeType`, не диагностирован. Живая проверка
+ * подтвердила зависание (лоадер крутится, видео не появляется). Пока флаг `false` — пользователь
+ * попадает на прежний, рабочий путь ожидания целого файла (PLAN.md §18/§19 — план на MPV как
+ * системную замену транскодирования вообще).
+ */
+const STREAMING_ENABLED = false
+
 export interface UseTranscodeStreamInput {
   filePath: string
   plan: TranscodePlan
@@ -53,7 +63,8 @@ export interface UseTranscodeStreamResult {
 export function useTranscodeStream(input: UseTranscodeStreamInput): UseTranscodeStreamResult {
   const { filePath, plan, durationMs, audioTrackIndex } = input
 
-  const supported = plan.videoAction === 'transcode'
+  const supported = STREAMING_ENABLED
+    && plan.videoAction === 'transcode'
     && typeof MediaSource !== 'undefined'
     && MediaSource.isTypeSupported(MIME_CODEC)
 
@@ -123,11 +134,17 @@ export function useTranscodeStream(input: UseTranscodeStreamInput): UseTranscode
       }
     }, { once: true })
 
-    setSrc(objectUrl)
-    setPhase('streaming')
-
+    // `src` (и, соответственно, монтирование плеера на этот blob:-URL) выставляем ТОЛЬКО
+    // после подтверждения, что это реально стрим — не кэш-хит. Раньше `src` ставился сразу
+    // здесь и почти сейчас же сбрасывался в null при `cached: true` — плеер успевал
+    // смонтироваться на уже отозванный `MediaSource` и зависал с крутящимся лоадером
+    // (найдено 2026-09-08 на реальном повторном открытии уже закэшированного эпизода).
     window.electronAPI.transcode.prepareStreaming({ filePath, plan, durationMs, audioTrackIndex })
       .then((result) => {
+        if (mediaSourceRef.current !== mediaSource) {
+          // start() успели вызвать повторно/отменить, пока ждали ответ — этот результат устарел
+          return
+        }
         if (!result.success) {
           setPhase('error')
           setError(result.error ?? 'Не удалось начать потоковую подготовку')
@@ -139,11 +156,16 @@ export function useTranscodeStream(input: UseTranscodeStreamInput): UseTranscode
           // готового файла; сигнализируем через outputPath, src остаётся null
           setPhase('done')
           setOutputPath(result.outputPath)
-          setSrc(null)
           cleanup()
+          return
         }
+        setSrc(objectUrl)
+        setPhase('streaming')
       })
       .catch((invokeError: unknown) => {
+        if (mediaSourceRef.current !== mediaSource) {
+          return
+        }
         setPhase('error')
         setError(invokeError instanceof Error ? invokeError.message : String(invokeError))
         cleanup()
