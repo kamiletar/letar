@@ -1,5 +1,23 @@
 # Выполненные задачи — form-example
 
+## P1: Schedule page (2026-09-08)
+
+Новая страница [/examples/schedule](src/app/examples/schedule/page.tsx), showcase для
+`Form.Field.Schedule` — недельного редактора рабочих часов из `@letar/forms`. Две секции:
+
+1. **Instructor Schedule** — форма с `instructorName` + `specialty` (enum) + полное недельное
+   расписание (`Form.Field.Schedule`, все дефолты — 7 дней, кнопка "Copy Mon to weekdays").
+   Реальный прообраз — `apps/driving-school` (`schedule-settings-form.tsx`, форма настроек
+   расписания инструктора автошколы).
+2. **Weekdays Only (Customized)** — та же схема данных, но с `days` (только будни),
+   кастомными `dayNames` (короткие Mon/Tue/…) и `showCopyToWeekdays={false}` — демонстрация
+   пропсов кастомизации компонента.
+
+Добавлен пункт "Schedule" в [nav.tsx](src/components/nav.tsx) между Groups & Arrays и Auto
+Fields. Проверено вживую через Browser pane: обе секции рендерятся, toggle дня (Saturday
+off→on) корректно меняет значение в форме (`null` → `{ open, close }`), `nx lint`/
+`typecheck:tsgo` зелёные.
+
 ## P0: Groups — sortable drag&drop + вложенные массивы (2026-09-08)
 
 Задача из PLAN.md значилась невыполненной, но реализация присутствовала на странице

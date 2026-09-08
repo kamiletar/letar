@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.13] - 2026-09-08
+
+### Added
+
+- Новая страница `/examples/schedule` — showcase `Form.Field.Schedule` (недельный редактор
+  рабочих часов): форма расписания инструктора и демо кастомизации (`days`, `dayNames`,
+  `showCopyToWeekdays`). Пункт "Schedule" добавлен в навигацию.
+
 ## [0.1.12] - 2026-09-09
 
 ### Fixed
