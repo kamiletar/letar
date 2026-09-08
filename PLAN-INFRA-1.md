@@ -2034,7 +2034,7 @@ ESLint `curly` снят без ослабления самого правила.
 
 ---
 
-## §22 — JSON-LD (schema.org) дублируется между приложениями 🟡 ЧАСТИЧНО (2026-08-12)
+## §22 — JSON-LD (schema.org) дублируется между приложениями ✅ ЗАКРЫТО (2026-08-12, JsonLdScript — 2026-09-08)
 
 > Найдено 2026-07-28 при SEO-аудите `aboi` (маркетинговая сессия, §S у `apps/aboi/PLAN.md`).
 
@@ -2101,13 +2101,22 @@ ESLint `curly` снят без ослабления самого правила.
 - [x] Выбран вариант (п.2, вынести сейчас) — решение владельца 2026-08-12
 - [x] `breadcrumbJsonLd`/`organizationJsonLd` в `@letar/seo`, `aboi` мигрирован (тонкие обёртки,
       не удаление — публичный API `aboi/src/lib/seo.ts` не менялся)
-- [ ] `svoichuzhie` — нечего мигрировать сейчас (нет собственных `breadcrumbJsonLd`/
-      `organizationJsonLd`); если появятся — использовать общую версию сразу
+- [x] `svoichuzhie` — сознательно не трогается: нет собственных `breadcrumbJsonLd`/
+      `organizationJsonLd`, а её JSON-LD `<script>` намеренно рендерит через children (не
+      `dangerouslySetInnerHTML`, см. явный комментарий в её коде) — другой, а не идентичный
+      паттерн, объединять с `JsonLdScript` ниже не стоит
 - [x] **Решено (не переносить):** `productJsonLd` остаётся локальным в каждом приложении —
       форма `Offer` товароспецифична (см. разбор выше), общая функция была бы неправильной
       абстракцией
-- [ ] `JsonLdScript`-компонент не объединён — `libs/seo` без JSX-инфраструктуры, отдельная
-      структурная задача
+- [x] **Закрыто (2026-09-08, `repo-dev`).** `JsonLdScript`/`toJsonLdHtml` подняты в
+      `@letar/seo` (`libs/seo/src/lib/json-ld-script.tsx`) — библиотеке добавлена JSX-поддержка
+      (`jsx: react-jsx`, `lib: dom`, по образцу `libs/analytics`) в `tsconfig.lib.json`/
+      `tsconfig.spec.json`. `aboi` переведён на общую версию во всех трёх местах (`[locale]/
+      page.tsx`, `catalog/[slug]/page.tsx`, `(shop)/faq/page.tsx`), локальный
+      `apps/aboi/src/app/_components/json-ld-script.tsx` удалён — поведение не изменилось
+      (тот же код, дословно перенесён). `svoichuzhie` не трогался (см. пункт выше).
+      `nx run-many -t typecheck:tsgo lint test --projects=seo,aboi` — зелёные, кроме
+      предсуществующего `aboi:test` падения на `checkout.test.ts` (не связано, известно из §161).
 
 ---
 

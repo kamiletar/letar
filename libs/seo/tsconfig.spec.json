@@ -2,8 +2,14 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
-    "types": ["vitest/globals", "node"],
+    "types": ["vitest/globals", "@testing-library/jest-dom", "node"],
+    "jsx": "react-jsx",
     "rootDir": "."
   },
-  "include": ["vitest.config.mts", "src/**/*.ts", "src/**/*.d.ts"]
+  "include": [
+    "vitest.config.mts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.d.ts"
+  ]
 }

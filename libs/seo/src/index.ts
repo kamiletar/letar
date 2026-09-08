@@ -7,3 +7,4 @@ export {
   organizationJsonLd,
   type OrganizationJsonLdParams,
 } from './lib/json-ld'
+export { JsonLdScript, toJsonLdHtml } from './lib/json-ld-script'
