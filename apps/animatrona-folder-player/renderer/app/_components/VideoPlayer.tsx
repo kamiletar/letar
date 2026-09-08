@@ -9,8 +9,10 @@
  */
 
 import { Box, Center, IconButton, Spinner } from '@chakra-ui/react'
+import type { MediaChapter } from '@letar/folder-scan'
 import type { PlaybackSpeed } from '@letar/video-player-core'
 import {
+  ChapterSkipButton,
   parseSpriteCues,
   PlayerLoadingOverlay,
   SharedPlayerControls,
@@ -27,6 +29,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { LuChevronLeft, LuChevronRight } from 'react-icons/lu'
 
+import { useChapterSkip } from '../_hooks/use-chapter-skip'
 import { toMediaUrl } from '../_lib/media-url'
 
 export interface VideoPlayerSubtitle {
@@ -47,6 +50,8 @@ export interface VideoPlayerProps {
    * при обычном файле — тот же путь, что закодирован в `src`.
    */
   filePath: string
+  /** Главы файла (OP/ED, ffprobe) — `undefined`, если ffmpeg недоступен или глав в файле нет */
+  chapters?: MediaChapter[]
   subtitle: VideoPlayerSubtitle | null
   autoPlay?: boolean
   startTime?: number
@@ -96,6 +101,7 @@ export function VideoPlayer(props: VideoPlayerProps) {
 function ShakaVideoPlayer({
   src,
   filePath,
+  chapters: mediaChapters,
   subtitle,
   autoPlay = true,
   startTime = 0,
@@ -278,6 +284,9 @@ function ShakaVideoPlayer({
     }
   }, [isVideoReady, filePath, state.duration])
 
+  // Главы (OP/ED) — кнопка «Пропустить опенинг» + маркеры на прогресс-баре (PLAN.md §7)
+  const { chapters, chapterInfos } = useChapterSkip(mediaChapters, state.duration)
+
   const navigationSlot = (hasPrev || hasNext)
     ? (
       <>
@@ -336,6 +345,10 @@ function ShakaVideoPlayer({
 
       <PlayerLoadingOverlay isLoading={isLoading} />
 
+      {chapters.length > 0 && (
+        <ChapterSkipButton chapters={chapters} currentTime={state.currentTime} onSeek={controls.seek} />
+      )}
+
       <SharedPlayerControls
         isPlaying={state.isPlaying}
         currentTime={state.currentTime}
@@ -355,6 +368,8 @@ function ShakaVideoPlayer({
         navigationSlot={navigationSlot}
         spriteUrl={spriteUrl}
         spriteCues={spriteCues}
+        chapters={chapterInfos}
+        onChapterSeek={controls.seek}
       />
     </Box>
   )

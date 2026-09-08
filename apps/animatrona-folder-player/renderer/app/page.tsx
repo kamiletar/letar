@@ -362,6 +362,7 @@ export default function HomePage() {
               key={preparedPath ?? currentVideoPath}
               src={toMediaUrl(preparedPath ?? currentVideoPath)}
               filePath={preparedPath ?? currentVideoPath}
+              chapters={mediaInfo?.chapters}
               subtitle={subtitle}
               startTime={resumeTime}
               hasPrev={player.hasPrev}

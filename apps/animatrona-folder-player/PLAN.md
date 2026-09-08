@@ -605,10 +605,51 @@ protocol.registerSchemesAsPrivileged([
 
 ### 7. Фаза 3 — главы OP/ED (закрывает открытую задачу ниже, теперь для обоих приложений)
 
-`MediaProber` отдаёт главы у обеих реализаций, поэтому кнопка «Пропустить опенинг» появляется
-и в Animatrona, и в новом приложении одним изменением. Классификацию (`detectChapterType`/
-`isChapterSkippable`) переиспользуем — она уже лежит в `@letar/video-player-react`
-(`utils/detect-chapter-types.ts`), в `main/services/import/helpers.ts` дублировать не нужно.
+> **Уточнение 2026-09-08:** формулировка «`MediaProber` отдаёт главы у обеих реализаций» была
+> неточной для этого приложения — `mediaInfoWasmProber` **сознательно** возвращает
+> `chapters: undefined` (см. комментарий в `main/services/media-info-prober.ts`: формат
+> динамических timecode-ключей Menu-трека MediaInfoLib не проверен без реальных MKV-фикстур с
+> главами). Закрыто не доработкой mediainfo.js-биндинга, а вторым источником — **ffprobe**
+> (теперь доступен благодаря Фазе 6): `-show_chapters -print_format json` — документированный
+> стабильный формат, не требующий проверки на реальном файле, чтобы доверять схеме, в отличие от
+> внутреннего API MediaInfoLib.
+
+- [x] `main/services/ffmpeg/chapters.service.ts` — `probeChaptersWithFfprobe(filePath)`. Работает,
+      только если ffmpeg доступен (`getFfmpegStatus()` из Фазы 6); иначе `undefined`, без ошибки
+      — файл без глав играется как раньше, просто без кнопки «Пропустить опенинг». Не кэшируется
+      отдельно (`ffprobe -show_chapters` не декодирует видео, быстрый) — вызывается заново на
+      каждую пробу, вне дискового кэша `probe-disk-cache.service.ts`, чтобы доступность ffmpeg
+      (могли поставить после первой пробы файла) проверялась актуально, а не застревала в кэше.
+- [x] `main/ipc/probe.handlers.ts` — если `mediaInfoWasmProber` не дал глав (всегда так),
+      подмешивает результат `probeChaptersWithFfprobe`.
+- [x] Классификация — переиспользована `detectChapterTypes` из `@letar/video-player-react`
+      (`utils/detect-chapter-types.ts`), **но она не была реэкспортирована из публичного API
+      библиотеки** (`utils/index.ts` содержал только `formatTime`/`parseSpriteCues`) — нигде в
+      монорепо не использовалась до этой задачи, несмотря на существующие тесты. Добавлена в
+      `utils/index.ts`, версия библиотеки бампнута (0.2.1 → 0.2.2). Проверено: typecheck самой
+      библиотеки и всех известных потребителей (`animatrona`, `animatrona-tracker`,
+      `animatrona-folder-player`) — зелёные, чисто аддитивный экспорт.
+- [x] Конвертация `MediaChapter[]` (ffprobe, `{start,end,title}`) → `Chapter[]` с `type`,
+      определённым `detectChapterTypes` (в отличие от `animatrona-tracker`, где тип уже приходит
+      готовым из `ManifestChapter` — здесь манифеста нет, определяется по названию/позиции
+      эвристикой). Логика — в `shared/chapter-mapping.ts` (`classifyMediaChapters`), не в самом
+      хуке: `vitest.config.mts` не включает `renderer/**` в тесты (та же конвенция, что у
+      `animatrona`/`label-printer-desktop`/`poster-microtext-desktop`), поэтому чистая логика
+      выносится в `shared/`, а `renderer/app/_hooks/use-chapter-skip.ts` остаётся тонкой
+      мемоизирующей обёрткой без собственной логики для покрытия тестами.
+- [x] `VideoPlayer.tsx` — `ChapterSkipButton` (кнопка «Пропустить опенинг/эндинг» поверх видео,
+      готовый компонент из `@letar/video-player-react`, ранее использовался только в
+      `animatrona-tracker`) + маркеры глав на прогресс-баре через существующий проп
+      `chapters`/`onChapterSeek` у `SharedPlayerControls`. Seek — `controls.seek(time)`
+      (абсолютные секунды), не `controls.handleSeek` (принимает проценты 0-100 для прогресс-бара,
+      разные сигнатуры — заметил при подключении).
+      Без автопропуска и списка глав (`ChapterList`/toggle из `animatrona-tracker`) — эта задача
+      про кнопку, не про полноценный менеджер глав; список глав можно добавить отдельно, если
+      понадобится.
+- [ ] Приёмка на реальном файле — не проверено, тот же блокер песочницы (нет MKV-фикстур с
+      реальными главами, нет GUI), что у §10/§10.1/§3/§6/§11: файл с главами в MKV показывает
+      кнопку «Пропустить опенинг» в первые ~90 сек и «Пропустить эндинг» в последние; файл без
+      глав или без ffmpeg — без кнопки, без ошибок; маркеры глав видны на прогресс-баре.
 
 ### 8. Фаза 4 — сборка и публикация
 

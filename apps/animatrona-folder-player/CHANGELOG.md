@@ -17,14 +17,21 @@
     повторный просмотр серии стартует мгновенно;
   - если найденный ffmpeg собран без нужных декодеров (частый случай для `essentials`-сборок —
     в проверенной системной ffmpeg 8.0 не было DTS), панель предлагает докачать полную сборку.
+- **Главы OP/ED** — кнопка «Пропустить опенинг/эндинг» и маркеры глав на прогресс-баре. Главы
+  берутся через ffprobe (`main/services/ffmpeg/chapters.service.ts`) — `mediainfo.js`
+  сознательно их не отдаёт (формат Menu-трека MediaInfoLib не проверен без фикстур), а
+  `ffprobe -show_chapters` — документированный стабильный формат. Без установленного ffmpeg
+  кнопка просто не появляется. Классификация OP/ED по названию/позиции — `detectChapterTypes`
+  из `@letar/video-player-react` (реэкспортирована из публичного API библиотеки этой задачей,
+  версия 0.2.1 → 0.2.2).
 - **Превью-спрайт для перемотки** — наведение на полосу прогресса показывает миниатюру кадра в
   этом месте видео (отображающая часть уже была в `@letar/video-player-react`, не хватало только
   генерации): нарезка спрайт-листа через ffmpeg в фоне после старта воспроизведения, кэш в
   `userData/sprites/` (потолок 512 МБ), без установленного ffmpeg превью просто не появляется,
   без ошибок — `shared/sprite-layout.ts`, `main/services/ffmpeg/sprite.service.ts`, IPC `sprite:*`.
 - `shared/` — рантайм-код, общий для main и renderer: `codec-support.ts` (переехал из
-  `renderer/app/_lib/`), `transcode-plan.ts`, `sprite-layout.ts`. Алиас `@shared/*`.
-  112 unit-тестов (vitest), таргет `nx test animatrona-folder-player`.
+  `renderer/app/_lib/`), `transcode-plan.ts`, `sprite-layout.ts`, `chapter-mapping.ts`.
+  Алиас `@shared/*`. 86 unit-тестов (vitest), таргет `nx test animatrona-folder-player`.
 - `scripts/verify-ffmpeg.cjs` — headless-проверка ffmpeg-части main-процесса без GUI; с путём к
   видеофайлу аргументом прогоняет настоящую подготовку.
 
