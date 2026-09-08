@@ -6,6 +6,15 @@
 
 ### Added
 
+- **Фаза 1 (частично): main-процесс — БД, IPC, UI-каркас.** `main/utils/db.ts` (синглтон
+  `PrismaClient` + `@prisma/adapter-libsql`, dev/prod-пути к БД), `main/services/database.ts`
+  (применение миграций через `sql.js` в упакованной сборке), IPC-хендлеры
+  `tracker`/`recentRelease`/`settings` (CRUD поверх Prisma), UI в `renderer/app/page.tsx` (список
+  трекеров + заглушка «посмотреть по CID» — ждёт вынос `libs/ipfs-kubo-core`). Фикс
+  `main/webpack.config.js`: `libsql` в `externals` (без него сборка падает на 60 ошибках —
+  webpack пытается распарсить нативные `.node`/`README.md` платформенных суб-пакетов
+  `@libsql/win32-x64-msvc` как JS). Headless-верификация `app.whenReady()` (без создания окна,
+  паттерн `.claude/rules/electron.md`) пройдена — инициализация БД и регистрация IPC работают.
 - **Шаги 0.5/0.6 Фазы 0 закрыты**: заведён `schema.zmodel` (4 модели + `TrackPreference`),
   таргеты `zenstack:generate`/`db:push`/`db:push:data-loss`/`db:migrate`/`db:migrate:deploy`/
   `db:studio` в `project.json`. `nx typecheck:tsgo`/`nx lint` зелёные, `nx db:push` синхронизирует

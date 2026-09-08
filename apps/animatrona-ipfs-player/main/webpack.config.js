@@ -34,6 +34,10 @@ module.exports = {
     electron: 'commonjs electron',
     // TypeScript — не нужен в runtime
     typescript: 'commonjs typescript',
+    // libsql — native SQLite driver для Prisma 7 (N-API pre-built binding), не бандлится
+    // webpack'ом (README.md/.node внутри платформенных пакетов не парсятся как модули) —
+    // тот же паттерн, что apps/animatrona/main/webpack.config.js
+    libsql: 'commonjs libsql',
     // Нативные (.node) модули добавляй сюда по мере необходимости (sharp, canvas...) —
     // см. .claude/rules/electron.md § «Грабли» про транзитивные зависимости под Bun
   },

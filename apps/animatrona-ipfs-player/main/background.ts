@@ -1,6 +1,8 @@
 import { app, BrowserWindow } from 'electron'
 import path from 'node:path'
 import { registerIpcHandlers } from './ipc'
+import { initializeDatabase } from './services/database'
+import { closePrismaClient, initializePrismaDb } from './utils/db'
 
 process.on('uncaughtException', (error) => {
   console.error('[UncaughtException]', error)
@@ -50,6 +52,9 @@ async function createWindow(): Promise<void> {
 }
 
 app.whenReady().then(async () => {
+  await initializeDatabase()
+  await initializePrismaDb()
+
   registerIpcHandlers(() => mainWindow)
   await createWindow()
 
@@ -65,4 +70,8 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
+})
+
+app.on('before-quit', () => {
+  void closePrismaClient()
 })

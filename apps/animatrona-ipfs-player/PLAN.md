@@ -564,10 +564,36 @@ pre-commit `schema-migration-check` верно потребовал миграц
 ## Фаза 1 — MVP (каркас, из шаблона генератора)
 
 - [ ] Заменить placeholder-иконку и заголовок
-- [ ] Закрыть **Фазу 0** (общий фрагмент схемы) и оставшиеся «Открытые вопросы» — предварительное
+- [x] Закрыть **Фазу 0** (общий фрагмент схемы) и оставшиеся «Открытые вопросы» — предварительное
       условие для реальной бизнес-логики, не начинать с UI/IPC вперёд схемы
 - [ ] Бизнес-логика в `main/services/` — Kubo-нода (SHARED из будущей `libs/ipfs-kubo-core`),
-      чтение манифеста по CID
-- [ ] IPC-хендлеры в `main/ipc/`
-- [ ] UI в `renderer/app/page.tsx` — список трекеров + поле «посмотреть по CID»
+      чтение манифеста по CID — **блокировано**: запрос на вынос `libs/ipfs-kubo-core` отправлен
+      `animatrona-coordinator-dev` (тред `ipfs-kubo-core-extraction`), ответа пока нет
+- [x] IPC-хендлеры в `main/ipc/` — `tracker.handlers.ts`, `recent-release.handlers.ts`,
+      `settings.handlers.ts` (CRUD поверх Prisma, без IPFS-логики — она ждёт `libs/ipfs-kubo-core`)
+- [x] UI в `renderer/app/page.tsx` — список трекеров (добавление/удаление) + поле «посмотреть по
+      CID» (пока заглушка с сообщением об ожидании выноса либы)
 - [ ] Проверка dev-режима и упакованной сборки (`nx build:win animatrona-ipfs-player`)
+
+### Инфраструктура main-процесса (2026-09-08)
+
+- `main/utils/db.ts` — синглтон `PrismaClient` с `@prisma/adapter-libsql`, путь к БД разный для
+  dev (`prisma/data/app.db` в корне приложения) и упакованной сборки (`app.getPath('userData')`)
+- `main/services/database.ts` — применение миграций через `sql.js` (WASM) в рантайме упакованного
+  приложения (Prisma CLI недоступен без нативных модулей) — тот же паттерн, что в `animatrona`
+- `main/webpack.config.js` — добавлен `libsql: 'commonjs libsql'` в `externals` (был только
+  `electron`/`typescript`) — без этого webpack пытается распарсить нативный `.node`/`README.md`
+  из `@libsql/win32-x64-msvc` как JS-модуль, сборка падает on 60 ошибках
+- **Headless-верификация main-процесса пройдена** (`.claude/rules/electron.md` § паттерн
+  `app.whenReady()` без создания окна): `bun build` отдельного entry-скрипта
+  (`scripts/verify-main-init-entry.ts`, не коммитится — временный, воспроизводится по рецепту в
+  доке) → `electron.exe scripts/.verify-bundle.cjs` → `initializeDatabase` + `initializePrismaDb`
+  - `registerIpcHandlers` отработали без исключений, `tracker.count()`/`settings.count()` = 0 на
+    чистой БД. Две грабли по пути (решение — в реальном приложении не нужно, только для
+    bun-бандла верификации):
+  1. `require('libsql')` не резолвится из `bun build`-бандла в `scripts/` — пакет не хостится в
+     корневой `node_modules` (изолированный линкер bun, транзитивная зависимость), нужен junction
+     `node_modules/libsql` → `.bun/libsql@.../node_modules/libsql` на время прогона (не коммитить).
+  2. `__non_webpack_require__` в `database.ts` (защита от статического бандлинга
+     `fts5-sql-bundle`) — webpack подставляет его сам, `bun build` нет; entry-скрипт верификации
+     подставляет `globalThis.__non_webpack_require__ = require` перед импортом.

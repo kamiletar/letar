@@ -76,6 +76,29 @@ AST не содержит полей миксина (они в `model.mixins`), 
 
 ---
 
+## Версия 0.3.0 (2026-09-08) — Фаза 1 (частично): main-процесс
+
+- `main/utils/db.ts` — синглтон `PrismaClient` на `@prisma/adapter-libsql`, dev/prod-пути к БД
+  (`prisma/data/app.db` в dev, `app.getPath('userData')` в упакованной сборке).
+- `main/services/database.ts` — применение миграций через `sql.js` (WASM) в рантайме упакованного
+  приложения (Prisma CLI недоступен без нативных модулей — тот же паттерн, что в `animatrona`).
+- IPC-хендлеры `tracker`/`recentRelease`/`settings` — CRUD поверх Prisma без IPFS-логики (она
+  блокирована выносом `libs/ipfs-kubo-core`, запрос отправлен `animatrona-coordinator-dev`).
+- UI-каркас в `renderer/app/page.tsx` — список трекеров (добавить/удалить), поле «посмотреть по
+  CID» пока заглушка.
+- **Фикс `main/webpack.config.js`**: `libsql` не был в `externals` — webpack пытался распарсить
+  нативные `.node`/`README.md` из `@libsql/win32-x64-msvc` как JS-модуль, 60 ошибок сборки.
+- **Headless-верификация пройдена** (`app.whenReady()` без создания окна, паттерн
+  `.claude/rules/electron.md`): временный `bun build`-бандл отдельного entry-скрипта →
+  `electron.exe` напрямую (обход `npx EOVERRIDE`) — `initializeDatabase`/`initializePrismaDb`/
+  `registerIpcHandlers` отработали без исключений на чистой БД. Две грабли этого способа
+  верификации (не связаны с самим приложением — только с bun-бандлом): `require('libsql')` не
+  резолвится из чужого каталога под изолированным линкером bun (нужен временный junction), и
+  `__non_webpack_require__` (защита `database.ts` от статического бандлинга `fts5-sql-bundle`)
+  webpack подставляет сам, а `bun build` — нет (подставлен вручную в entry-скрипте верификации).
+
+---
+
 ## Версия 0.1.0 (2026-09-08)
 
 ### Каркас приложения
