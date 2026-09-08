@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.6.3] - 2026-09-08
+
+### Added
+
+- Первые unit-тесты приложения (`nx test animatrona-tv`, 22 теста в 4 файлах) — до этого
+  `PLAN_TESTING.md` с марта 2026 держал строку «Unit | 0 | Планируется». Заведён
+  `vitest.config.mts` (environment: node, alias `@` → `src`, по образцу
+  `apps/animatrona-folder-player`) — таргет `test` появляется в графе Nx автоматически через
+  инферренс-плагин `@nx/vitest`, без ручного блока в `project.json`
+  - `src/utils/tvStyles.spec.ts` — чистая функция `focusableStyle`, все ветки (без фокуса, в
+    фокусе, несколько base-стилей, `after`-стили, дефолтный `after=[]`)
+  - `src/hooks/usePlayerEpisode.spec.ts` — через `@testing-library/react` `renderHook`
+    (`@vitest-environment jsdom`), `@/api/client` замокан, реальный сетевой слой не участвует.
+    Покрыт выбор дефолтной аудиодорожки (по `isDefault`, с фоллбэком на первую, с пустым
+    списком), асимметрия аудио/субтитров (у субтитров нет фоллбэка на первую дорожку — так и
+    задумано в коде), обработка «эпизод не найден», `Error`/не-`Error` исключения из API,
+    перезапрос при смене `episodeId`, ручное управление `setError`
+  - `src/api/client.spec.ts` и `src/store/connection.spec.ts` — тонкие обёртки над
+    `createApiClient`/`createConnectionStore` из `@letar/animatrona-shared` (сама фабрика уже
+    покрыта тестами библиотеки); проверяют только монтаж — правильный `getState`-геттер,
+    уникальный `storageKey`, полнота реэкспорта методов API
+- `types.vitest/globals` в `tsconfig.json` — без него `typecheck:tsgo` не видел глобальные
+  `describe`/`it`/`expect`/`vi` из спек-файлов (`TS2593`/`TS2304`)
+
 ## [0.6.2] - 2026-09-08
 
 ### Fixed

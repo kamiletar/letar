@@ -26,7 +26,7 @@
       "@letar/animatrona-utils": ["../../libs/animatrona-utils/src"],
       "@letar/animatrona-types": ["../../libs/animatrona-types/src"]
     },
-    "types": ["react-native"],
+    "types": ["react-native", "vitest/globals"],
     "ignoreDeprecations": "6.0"
   },
   "include": ["src/**/*", "index.js", "App.tsx"],
