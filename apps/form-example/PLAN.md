@@ -12,7 +12,7 @@ Example-приложение @letar/forms: демо + стартовый шаб�
 
 - [x] Schedule page — форма инструктора с Schedule компонентом
 - [x] MCP Demo page — статичная демо MCP-генерации
-- [ ] Recipes — добавить Profile Edit, Checkout, Feedback
+- [x] Recipes — добавить Profile Edit, Checkout, Feedback
 - [ ] Offline — улучшить наглядность (OfflineIndicator, Simulate Offline, очередь)
 
 ## P2 — UX и навигация
@@ -56,3 +56,4 @@ Example-приложение @letar/forms: демо + стартовый шаб�
 | 2026-09-08 | ✅ P0 Groups — sortable drag&drop + вложенные массивы (уже реализовано с initial commit, проверено вживую); найден и делегирован в `@letar/forms` баг hydration mismatch на `DndDescribedBy` в sortable-списках, см. PLAN_COMPLETED.md |
 | 2026-09-08 | ✅ P1 Schedule page — новая страница `/examples/schedule` с `Form.Field.Schedule` (расписание инструктора + кастомизация days/dayNames/showCopyToWeekdays), см. PLAN_COMPLETED.md                                                      |
 | 2026-09-08 | ✅ P1 MCP Demo page — новая страница `/examples/mcp-demo`, статичный (без live-подключения) слепок вывода `form-mcp` (`list_fields`/`generate_form`) + живой эквивалент на текущем API, см. PLAN_COMPLETED.md                          |
+| 2026-09-09 | ✅ P1 Recipes — добавлены Profile Edit, Checkout, Feedback (4 → 7 карточек), см. PLAN_COMPLETED.md                                                                                                                                     |

@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.15] - 2026-09-09
+
+### Added
+
+- `/examples/recipes` — три новые карточки: Profile Edit (name/bio/website/publicProfile),
+  Checkout (адрес доставки + `Form.Field.CreditCard`), Feedback (`Form.Field.Likert` + comment +
+  wouldRecommend). Всего 7 готовых паттернов форм на странице.
+
 ## [0.1.14] - 2026-09-08
 
 ### Added

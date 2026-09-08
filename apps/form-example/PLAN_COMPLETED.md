@@ -1,5 +1,21 @@
 # Выполненные задачи — form-example
 
+## P1: Recipes — Profile Edit, Checkout, Feedback (2026-09-09)
+
+[`/examples/recipes`](src/app/examples/recipes/page.tsx) имел 4 карточки (Login, Registration,
+Contact, Settings) — по PLAN.md ожидались ещё три. Добавлены:
+
+- **Profile Edit** — `name`/`bio` (Textarea, max 280)/`website`/`publicProfile` (Switch).
+- **Checkout** — адрес доставки (`fullName`/`address`/`city`/`zip`) + `Form.Field.CreditCard`
+  (`layout="inline"`, тот же паттерн, что на `/examples/credit-card`).
+- **Feedback** — `Form.Field.Likert` с якорями `['Terrible', 'Bad', 'OK', 'Good', 'Excellent']`
+  (паттерн взят с `/examples/conversational`), Textarea-комментарий, Checkbox
+  `wouldRecommend`.
+
+Проверено вживую через Browser pane (`get_page_text` на `/examples/recipes`) — все 7 карточек
+рендерятся, форма Feedback показывает `Form Values` с `rating: undefined` до выбора (поле
+`optional()` в схеме).
+
 ## P1: MCP Demo page (2026-09-08)
 
 Новая страница [/examples/mcp-demo](src/app/examples/mcp-demo/page.tsx) — walkthrough того, как

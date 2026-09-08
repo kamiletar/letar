@@ -78,6 +78,41 @@ const themeOptions = [
   { value: 'system', label: 'System' },
 ]
 
+// ─── Profile Edit ───────────────────────────────────────
+const ProfileEditSchema = z.object({
+  name: z.string().min(2).meta({ ui: { title: 'Full Name' } }),
+  bio: z
+    .string()
+    .max(280)
+    .optional()
+    .meta({ ui: { title: 'Bio', placeholder: 'Tell us about yourself' } }),
+  website: z.url().optional().meta({ ui: { title: 'Website' } }),
+  publicProfile: z.boolean().meta({ ui: { title: 'Make profile public' } }),
+})
+
+// ─── Checkout ───────────────────────────────────────────
+const CheckoutSchema = z.object({
+  fullName: z.string().min(2).meta({ ui: { title: 'Full Name' } }),
+  address: z.string().min(5).meta({ ui: { title: 'Shipping Address' } }),
+  city: z.string().min(2).meta({ ui: { title: 'City' } }),
+  zip: z.string().min(3).meta({ ui: { title: 'ZIP Code' } }),
+  card: z.object({
+    number: z.string(),
+    expiry: z.string(),
+    cvc: z.string(),
+  }).meta({ ui: { title: 'Payment Card' } }),
+})
+
+// ─── Feedback ───────────────────────────────────────────
+const FeedbackSchema = z.object({
+  rating: z.number().optional().meta({ ui: { title: 'How do you rate our service?' } }),
+  comment: z
+    .string()
+    .optional()
+    .meta({ ui: { title: 'Comments', placeholder: 'What could we improve?' } }),
+  wouldRecommend: z.boolean().meta({ ui: { title: 'I would recommend this to a friend' } }),
+})
+
 export default function RecipesPage() {
   return (
     <Stack gap={8}>
@@ -196,6 +231,98 @@ export default function RecipesPage() {
               <Form.Field.RadioGroup name="theme" options={themeOptions} orientation="horizontal" />
               <Form.DebugValues showInProduction />
               <Form.Button.Submit loadingText="Saving...">Save Settings</Form.Button.Submit>
+            </Stack>
+          </Form>
+        </Card.Body>
+      </Card.Root>
+
+      <Separator />
+
+      {/* Profile Edit */}
+      <Card.Root>
+        <Card.Body>
+          <Heading size="sm" mb={4}>
+            Profile Edit Form
+          </Heading>
+          <Form
+            schema={ProfileEditSchema}
+            initialValue={{ name: 'John Doe', bio: '', website: '', publicProfile: true }}
+            onSubmit={async (data) => {
+              await new Promise((r) => setTimeout(r, 1500))
+              alert(`Profile saved: ${data.name}`)
+            }}
+          >
+            <Stack gap={3}>
+              <Form.Field.String name="name" />
+              <Form.Field.Textarea name="bio" />
+              <Form.Field.String name="website" />
+              <Form.Field.Switch name="publicProfile" />
+              <Form.DebugValues showInProduction />
+              <Form.Button.Submit loadingText="Saving...">Save Profile</Form.Button.Submit>
+            </Stack>
+          </Form>
+        </Card.Body>
+      </Card.Root>
+
+      <Separator />
+
+      {/* Checkout */}
+      <Card.Root>
+        <Card.Body>
+          <Heading size="sm" mb={4}>
+            Checkout Form
+          </Heading>
+          <Form
+            schema={CheckoutSchema}
+            initialValue={{
+              fullName: '',
+              address: '',
+              city: '',
+              zip: '',
+              card: { number: '', expiry: '', cvc: '' },
+            }}
+            onSubmit={async (data) => {
+              await new Promise((r) => setTimeout(r, 1500))
+              alert(`Order placed for: ${data.fullName}`)
+            }}
+          >
+            <Stack gap={3}>
+              <Form.Field.String name="fullName" />
+              <Form.Field.String name="address" />
+              <Form.Field.String name="city" />
+              <Form.Field.String name="zip" />
+              <Form.Field.CreditCard name="card" layout="inline" />
+              <Form.Button.Submit loadingText="Placing order...">Pay</Form.Button.Submit>
+            </Stack>
+          </Form>
+        </Card.Body>
+      </Card.Root>
+
+      <Separator />
+
+      {/* Feedback */}
+      <Card.Root>
+        <Card.Body>
+          <Heading size="sm" mb={4}>
+            Feedback Form
+          </Heading>
+          <Form
+            schema={FeedbackSchema}
+            initialValue={{ rating: undefined, comment: '', wouldRecommend: true }}
+            onSubmit={async (data) => {
+              await new Promise((r) => setTimeout(r, 1500))
+              alert(`Feedback submitted: rating ${data.rating}`)
+            }}
+          >
+            <Stack gap={3}>
+              <Form.Field.Likert
+                name="rating"
+                anchors={['Terrible', 'Bad', 'OK', 'Good', 'Excellent']}
+              />
+              <Form.Field.Textarea name="comment" />
+              <Form.Field.Checkbox name="wouldRecommend" />
+              <Form.DebugValues showInProduction />
+              <Form.Button.Submit loadingText="Sending...">Submit Feedback</Form.Button.Submit>
             </Stack>
           </Form>
         </Card.Body>
