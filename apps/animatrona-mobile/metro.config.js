@@ -20,6 +20,10 @@ const singletonPackages = {
   '@letar/exoplayer-ass': path.resolve(monorepoRoot, 'libs/exoplayer-ass/src'),
   '@letar/exoplayer-sync': path.resolve(monorepoRoot, 'libs/exoplayer-sync/src'),
   '@letar/animatrona-shared': path.resolve(monorepoRoot, 'libs/animatrona-shared/src'),
+  '@letar/hooks': path.resolve(monorepoRoot, 'libs/hooks/src'),
+  '@letar/hooks/utility': path.resolve(monorepoRoot, 'libs/hooks/src/utility.ts'),
+  '@letar/hooks/browser': path.resolve(monorepoRoot, 'libs/hooks/src/browser.ts'),
+  '@letar/hooks/query': path.resolve(monorepoRoot, 'libs/hooks/src/query.ts'),
 }
 
 const config = {

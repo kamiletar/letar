@@ -9,6 +9,7 @@
  * - Продолжить просмотр
  */
 
+import { useDebounce } from '@letar/hooks/utility'
 import { useFocusEffect } from '@react-navigation/native'
 import { Download, Play, Settings2 } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -72,7 +73,7 @@ export function LibraryScreen({ navigation }: LibraryScreenProps) {
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
-  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const debouncedSearch = useDebounce(search, 300)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [lastWatched, setLastWatched] = useState<LastWatched | null>(null)
   const [sortBy] = useState<SortOption>('lastWatched')
@@ -83,14 +84,6 @@ export function LibraryScreen({ navigation }: LibraryScreenProps) {
     const server = state.servers.find((s) => s.id === state.activeServerId)
     return server?.type ?? 'desktop'
   })
-
-  // Debounce поиска
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(search)
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [search])
 
   const fetchData = useCallback(async (isRefresh = false, searchQuery?: string) => {
     if (isRefresh) {

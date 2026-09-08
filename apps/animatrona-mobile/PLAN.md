@@ -9,9 +9,19 @@
       задача координатора). Заодно починены таймкоды длиннее часа (`95:30` → `1:35:30`) и
       `NaN:NaN` на битой длительности; в `PlayerScreen.tsx` копия оказалась мёртвым кодом.
       Второй пункт письма координатора (`useDebounce` из `@letar/hooks` в `LibraryScreen.tsx`)
-      — **отклонён**, обоснование в CHANGELOG и в ответе координатору: у `@letar/hooks` только
-      барабанный экспорт, он затянет в граф Metro browser-хуки и `@tanstack/react-query`,
-      которого нет в зависимостях приложения.
+      был тогда **отклонён** — у `@letar/hooks` был только барабанный экспорт, он затянул бы в
+      граф Metro browser-хуки и `@tanstack/react-query`, которого нет в зависимостях приложения.
+
+- [x] **`useDebounce` из `@letar/hooks` в `LibraryScreen.tsx`** (2026-09-09) — доведён после
+      появления подпутей `@letar/hooks/utility|browser|query` (коммит `68bde65f`). Ручной
+      `useEffect`+`setTimeout` дебаунс заменён на `useDebounce` из `./utility`. Метро — три
+      подпути прописаны поимённо в `extraNodeModules` (Metro не резолвит `exports` пакета
+      подпутями сам). Typecheck потребовал `"dom"` в `lib` приложения — подпуть `./utility`
+      физически барабан (`useDebounce`+`useLocalStorage`+`usePrevious`+`useThrottle`), и
+      `useLocalStorage` использует `window`/`StorageEvent` (тот же класс, что в
+      `.claude/docs/lib-consumer-missing-lib-dom.md`, но и сам `typecheck:tsgo` от него не
+      застрахован — вопреки прежней формулировке доки). Проверено сборкой JS bundle — Metro
+      резолвит без `Unable to resolve module`.
 
 - [x] ⚠️ **`react-native` разъехался между корнем и приложениями — снято (2026-09-08).** Три
       строки (`react-native`, `@react-native/codegen`, `@react-native/gradle-plugin`) в

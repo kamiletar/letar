@@ -5,6 +5,7 @@
     "strict": true,
     "ignoreDeprecations": "6.0",
     "lib": [
+      "dom",
       "es2019",
       "es2020.bigint",
       "es2020.date",
@@ -28,7 +29,11 @@
       "@letar/exoplayer-sync/*": ["../../libs/exoplayer-sync/src/*"],
       "@letar/animatrona-shared": ["../../libs/animatrona-shared/src"],
       "@letar/animatrona-types": ["../../libs/animatrona-types/src"],
-      "@letar/animatrona-utils": ["../../libs/animatrona-utils/src"]
+      "@letar/animatrona-utils": ["../../libs/animatrona-utils/src"],
+      "@letar/hooks": ["../../libs/hooks/src"],
+      "@letar/hooks/utility": ["../../libs/hooks/src/utility"],
+      "@letar/hooks/browser": ["../../libs/hooks/src/browser"],
+      "@letar/hooks/query": ["../../libs/hooks/src/query"]
     },
     "types": ["react-native", "vitest/globals"]
   },

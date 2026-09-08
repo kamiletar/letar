@@ -1,6 +1,6 @@
 {
   "name": "@letar/animatrona-mobile",
-  "version": "0.7.12",
+  "version": "0.7.13",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -11,6 +11,9 @@
   },
   "dependencies": {
     "@letar/animatrona-shared": "*",
+    "@letar/exoplayer-ass": "*",
+    "@letar/exoplayer-sync": "*",
+    "@letar/hooks": "*",
     "@react-native/codegen": "*",
     "@react-native/gradle-plugin": "*",
     "react-native": "*",

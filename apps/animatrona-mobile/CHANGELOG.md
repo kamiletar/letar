@@ -6,6 +6,28 @@
 
 ## [Unreleased]
 
+## [0.7.13] - 2026-09-09
+
+### Changed
+
+- Подключена `@letar/hooks` (подпуть `./utility`) — `useDebounce` из библиотеки заменил ручной
+  `useEffect`+`setTimeout` дебаунс поиска в `LibraryScreen.tsx`. Follow-up к разделению
+  `@letar/hooks` на подпути `utility/browser/query` (коммит `68bde65f`), где сама
+  animatrona-mobile осталась не подключена.
+- `package.json`: `@letar/hooks: "*"` в зависимостях (симлинк создаёт `bun install` из корня).
+- `metro.config.js`: `@letar/hooks` и все три подпути (`./utility`, `./browser`, `./query`)
+  добавлены в `extraNodeModules` поимённо — Metro не резолвит подпути `exports` пакета сам по
+  себе, нужна отдельная запись на каждый файл.
+- `tsconfig.json`: добавлен `"dom"` в `lib` — подпуть `./utility` физически является барабаном
+  (`useDebounce`, `useLocalStorage`, `usePrevious`, `useThrottle` в одном файле), и `useLocalStorage`
+  использует `window`/`StorageEvent`. Без `"dom"` `typecheck:tsgo` падает `TS2304` на чужом файле
+  библиотеки, хотя сам используемый хук (`useDebounce`) DOM не касается — тот же класс, что
+  описан в `.claude/docs/lib-consumer-missing-lib-dom.md`. Также добавлены `paths` на все три
+  подпути `@letar/hooks/*` по правилу «полный набор подпутей, не только используемый»
+  (`libs.md § Несколько точек входа`).
+- Проверено сборкой JS bundle (`react-native bundle --platform android`) — Metro резолвит
+  `@letar/hooks/utility` без `Unable to resolve module`, код `useDebounce` присутствует в бандле.
+
 ## [0.7.12] - 2026-09-08
 
 ### Added
