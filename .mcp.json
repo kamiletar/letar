@@ -111,6 +111,16 @@
         "apps/synth/src/mcp/cli.ts"
       ]
     },
+    "domwellbes-assist-mcp": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "bunx",
+        "tsx",
+        "apps/domwellbes/src/mcp/cli.ts"
+      ]
+    },
     "agent-mail": {
       "type": "http",
       "url": "http://127.0.0.1:8765/mcp"
