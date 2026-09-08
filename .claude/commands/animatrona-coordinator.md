@@ -70,14 +70,15 @@ send_message(
 
 ### Приложения и их роли
 
-| Приложение                 | Тип                | Плеер        | Роль                                                                                                                                                   |
-| -------------------------- | ------------------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `animatrona`               | Electron + Next.js | Shaka Player | Десктоп: транскодирование, публикация в IPFS, плеер, управление библиотекой                                                                            |
-| `animatrona-tracker`       | Next.js (s1)       | Shaka Player | Трекер: каталог, модерация, пиннинг, веб-плеер, прогресс просмотра                                                                                     |
-| `animatrona-mobile`        | React Native       | ExoPlayer    | Мобильный плеер: просмотр аниме с мобильных устройств                                                                                                  |
-| `animatrona-tv`            | React Native       | ExoPlayer    | TV-плеер: просмотр аниме на ТВ                                                                                                                         |
-| `animatrona-web`           | ~~Next.js (s2)~~   | —            | ⛔ **Выведен из эксплуатации** (был POC, функции перенесены в tracker)                                                                                 |
-| `animatrona-folder-player` | Electron + Next.js | Shaka Player | 🏝️ **Изолирован** — standalone-плеер локальных папок, без ffmpeg/IPFS, не импортирует `@letar/animatrona-types`, вне графа зависимостей и каскадов ниже |
+| Приложение                 | Тип                | Плеер        | Роль                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| -------------------------- | ------------------ | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `animatrona`               | Electron + Next.js | Shaka Player | Десктоп: транскодирование, публикация в IPFS, плеер, управление библиотекой                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `animatrona-tracker`       | Next.js (s1)       | Shaka Player | Трекер: каталог, модерация, пиннинг, веб-плеер, прогресс просмотра                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `animatrona-mobile`        | React Native       | ExoPlayer    | Мобильный плеер: просмотр аниме с мобильных устройств                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `animatrona-tv`            | React Native       | ExoPlayer    | TV-плеер: просмотр аниме на ТВ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `animatrona-web`           | ~~Next.js (s2)~~   | —            | ⛔ **Выведен из эксплуатации** (был POC, функции перенесены в tracker)                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `animatrona-folder-player` | Electron + Next.js | Shaka Player | 🏝️ **Изолирован** — standalone-плеер локальных папок, без ffmpeg/IPFS, не импортирует `@letar/animatrona-types`, вне графа зависимостей и каскадов ниже                                                                                                                                                                                                                                                                                                                                                            |
+| `animatrona-ipfs-player`   | Electron + Next.js | Shaka Player | Каркас создан 2026-09-08. **Только просмотр** (решение владельца) — добавить трекер в список + посмотреть раздачу по `directoryCid`, без подписок/discover/федерации/публикации. Не импортирует `@letar/animatrona-types` (нет своей библиотеки на публикацию), но **не изолирован** от `animatrona` на уровне IPFS/Kubo-кода — общая SHARED-часть (`kubo-service`/`kubo-daemon`/`peer-sync-service`/`pin-manager`) планируется через будущую `libs/ipfs-kubo-core`, план — `apps/animatrona-ipfs-player/PLAN.md` |
 
 ### Граф зависимостей
 
@@ -94,7 +95,18 @@ libs/animatrona-types/        ← SINGLE SOURCE OF TRUTH (ты владелец!
   └── animatrona-tv (8 файлов) — отображает, плеер (ExoPlayer)
   ⛔ animatrona-web — ВЫВЕДЕН ИЗ ЭКСПЛУАТАЦИИ
 
-🏝️ animatrona-folder-player — НЕ импортирует, вне графа, каскады его не касаются
+🏝️ animatrona-folder-player — НЕ импортирует, вне графа, каскады `libs/animatrona-types` его не касаются
+
+libs/ipfs-kubo-core/         ← ПЛАНИРУЕТСЯ (2026-09-08, ещё не создана)
+  └── SHARED IPFS/Kubo-код, выносится из apps/animatrona/main/services/{ipfs,kubo}/
+       ↓ будет импортироваться
+  ├── animatrona (после переноса SHARED-части из текущего main/services/)
+  └── animatrona-ipfs-player (единственный текущий потребитель нового приложения)
+
+⚠️ animatrona-ipfs-player НЕ импортирует libs/animatrona-types (нет своей публикуемой
+библиотеки), но и не изолирован как animatrona-folder-player — как только заведётся
+libs/ipfs-kubo-core, правки в её SHARED-функциях (kubo-service/kubo-daemon/peer-sync-service/
+pin-manager) затрагивают оба приложения сразу, каскад нужен.
 ```
 
 ### Потоки данных
