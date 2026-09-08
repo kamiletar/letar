@@ -107,7 +107,10 @@ bun от **root**, не от `deploy` (`/usr/local/bin/bun` → симлинк �
   [lib-consumer-missing-lib-dom](/.claude/docs/lib-consumer-missing-lib-dom.md) ⚠️ барабанный
   реэкспорт библиотеки (`@letar/hooks`) затягивает в `tsc --build` потребителя чужие файлы с
   `window`/`StorageEvent` — падает не на своих исходниках, а на файле, который потребитель
-  вообще не импортирует напрямую; фикс — `"dom"` в `lib` потребителя, не в библиотеке-источнике ·
+  вообще не импортирует напрямую; фикс — `"dom"` в `lib` потребителя, не в библиотеке-источнике;
+  ⚠️ у React Native-потребителя того же барреля выхода нет вовсе — Metro резолвит весь граф до
+  tree-shaking, и `@tanstack/react-query` из чужой ветки `index.ts` роняет сборку бандла
+  (`@letar/hooks` в `animatrona-mobile`), лечится только подпутями-экспортами в самой либе ·
   [webpack-emscripten-runtime-wasm-not-emitted](/.claude/docs/webpack-emscripten-runtime-wasm-not-emitted.md)
   ⚠️ Emscripten-обвязка (`harfbuzzjs` у `satori`, прямой импорт — только в `grandslamcup`) ищет
   свой `.wasm` по runtime-строке — webpack компилирует JS-чанк, но не копирует сам бинарник;
