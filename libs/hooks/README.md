@@ -10,6 +10,24 @@ Shared React хуки для приложений Letar монорепозито
 import { useDebounce, useOnlineStatus, usePendingMutations } from '@letar/hooks'
 ```
 
+### Подпути exports — предпочитай их корневому импорту
+
+Корневой `@letar/hooks` реэкспортирует всё (обратная совместимость), но физически смешивает три
+несовместимые группы: платформенно-нейтральные утилиты, browser-хуки (`window`/`localStorage`/
+`ServiceWorker`) и TanStack Query хуки (тянут `@tanstack/react-query`). Для бандлеров без
+tree-shaking по статическим импортам (Metro в React Native — резолвит весь граф модулей,
+не отбрасывая неиспользуемое) импорт одного хука из корня тянёт за собой всё лишнее и валит
+сборку. Поэтому новый код — только через нужный подпуть:
+
+```typescript
+import { useMediaQuery, useOnlineStatus, useWindowSize } from '@letar/hooks/browser'
+import { useInvalidateQueries, usePendingMutations } from '@letar/hooks/query'
+import { useDebounce, useLocalStorage, usePrevious, useThrottle } from '@letar/hooks/utility'
+```
+
+`@letar/hooks/utility` не тянет ни `window`, ни `@tanstack/react-query` — единственный подпуть,
+безопасный для React Native/Electron main-процесса и прочих сред без DOM.
+
 ## API
 
 ### Utility Hooks
