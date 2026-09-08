@@ -179,6 +179,22 @@ const CHECKS = [
     doc: '.claude/docs/transpile-packages-array-presence-not-content.md',
   },
   {
+    id: 'zenstack-generate-inputs',
+    group: 'tsconfig',
+    title: 'zenstack:generate объявляет Nx зависимость от фрагмента и доменных .zmodel-файлов',
+    run: ['node', ['scripts/check-zenstack-generate-inputs.mjs']],
+    // gate: признак детерминированный (парсинг import/inputs, не эвристика), находок на
+    // выровненном дереве быть не должно. Долг из 20 приложений закрыт вручную PLAN-INFRA-6.md
+    // §162 (2026-09-08) — сам инцидент, ради которого заводится проверка, произошёл в ТУ ЖЕ
+    // сессию: apps/animatrona-ipfs-player завели параллельно и оно пришло без обеих записей,
+    // ловушка была живая с первой минуты нового приложения. Ручная дисциплина эту дыру не
+    // закрывает, нужен исполняемый гейт.
+    severity: 'gate',
+    ci: 'partial',
+    ciNote: 'приватные submodule не выкачаны — их schema.zmodel/project.json не проверены',
+    doc: '.claude/docs/zenstack-shared-fragments-across-apps.md',
+  },
+  {
     id: 'submodule-gitignore',
     group: 'submodule',
     title: 'шаблоны .gitignore во всех submodule',

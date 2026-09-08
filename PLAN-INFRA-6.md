@@ -3250,3 +3250,38 @@ nx show projects --affected --files=libs/zenstack-fragments/src/better-auth.zmod
 Коммиты: `d14dd7a` (aboi), `b490ef2` (driving-school), `9e22849` (aprel8008), `be1e344`
 (domwellbes), `b274e6ea` (letar). Push submodule и корня не выполнен — ждёт отдельного
 одобрения владельца.
+
+## §163 — гейт покрытия `inputs` у `zenstack:generate` ✅ ЗАКРЫТО (2026-09-08)
+
+**Проблема.** §162 закрыл дрейф вручную на 20 приложениях, но не защитил от возврата. Довод не
+абстрактный: `apps/animatrona-ipfs-player` завели параллельно **в ту же сессию**, где закрывался
+§162 (коммит `f3728417`) — приложение импортирует фрагмент и пришло без обеих записей из §162.
+Ловушка была живая с первой минуты его существования. Ручная дисциплина эту дыру не закрывает.
+
+**Фикс.** `scripts/check-zenstack-generate-inputs.mjs`, зарегистрирован в `scripts/check-all.mjs`
+как `zenstack-generate-inputs` (`severity: gate`, `ci: partial`). Для каждого приложения с
+таргетом `zenstack:generate` проверяет три независимых признака:
+
+1. **Фрагмент.** Парсит все `.zmodel`-файлы приложения (корневой и доменные — импорты между
+   `.zmodel` не транзитивны) на `import`, резолвящийся в `libs/zenstack-fragments/`. Если найден
+   — требует `@letar/zenstack-fragments` в `nx.implicitDependencies` (объединяет `package.json` и
+   `project.json`, как это делает сам Nx) И путь к фрагменту в `inputs`.
+2. **Доменные файлы схемы.** Если есть `.zmodel` не в корне приложения (имя каталога не
+   захардкожено — берётся из факта наличия файла, не из списка `schema/`/`models/`) — требует
+   покрывающий глоб в `inputs`. Это ловит и регрессию «доменные файлы схемы вне inputs» из §162,
+   не только фрагмент.
+3. Отсутствие `inputs` у таргета целиком — отдельная находка.
+
+Признак детерминированный (парсинг, не эвристика вида sibling-spec у `check-implicit-deps.mjs`),
+поэтому `gate`, а не `warn`: новый потребитель без обеих записей роняет прогон сразу, а не ждёт
+следующего ручного аудита.
+
+**Верификация.** `bun scripts/check-zenstack-generate-inputs.mjs` — 0 находок на 20 приложениях
+из §162 (включая `animatrona-ipfs-player`, дочиненный в этой же сессии коммитом `bd52d52e`).
+`bun scripts/check-all.mjs --list` показывает новую запись; полный прогон `check-all.mjs` не дал
+новых красных gate — прежние warn (`submodule-gitignore`, `doc-counts`) не изменились.
+
+Документация: раздел «Гейт (§163)» в
+[zenstack-shared-fragments-across-apps](/.claude/docs/zenstack-shared-fragments-across-apps.md)
+делает исполняемым существовавшее там предупреждение «заводишь нового потребителя — добавь обе
+записи».
