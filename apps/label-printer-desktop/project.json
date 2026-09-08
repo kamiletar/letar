@@ -133,6 +133,9 @@
       "inputs": [
         "{projectRoot}/schema.zmodel"
       ],
+      "outputs": [
+        "{projectRoot}/src/generated"
+      ],
       "cache": false
     },
     "db:template": {
