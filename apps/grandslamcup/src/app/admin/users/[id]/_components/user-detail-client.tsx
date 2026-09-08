@@ -25,9 +25,10 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
+import { useDebounce } from '@letar/hooks'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { LuArrowLeft, LuLink, LuPlus, LuShield, LuShieldOff, LuTrash2, LuUnlink, LuUserRound } from 'react-icons/lu'
 
 interface UserData {
@@ -303,36 +304,38 @@ interface SearchResult {
 function PlayerLinkBlock({ userId, player }: { userId: string; player: { id: string; name: string } | null }) {
   const router = useRouter()
   const [query, setQuery] = useState('')
+  const debouncedQuery = useDebounce(query, 300)
   const [results, setResults] = useState<SearchResult[]>([])
   const [searching, setSearching] = useState(false)
   const [linking, setLinking] = useState(false)
   const [unlinking, setUnlinking] = useState(false)
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null)
 
-  /** Поиск поэтов по имени (debounce) */
-  const handleSearch = (value: string) => {
-    setQuery(value)
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current)
-    }
-
-    if (value.trim().length < 2) {
+  /** Поиск поэтов по имени — debounce самого запроса (@letar/hooks) */
+  useEffect(() => {
+    const trimmed = debouncedQuery.trim()
+    if (trimmed.length < 2) {
+      // oxlint-disable-next-line react/set-state-in-effect -- сброс результатов синхронизирован с debouncedQuery, не отдельная деривация
       setResults([])
       return
     }
-
-    debounceRef.current = setTimeout(async () => {
-      setSearching(true)
+    let cancelled = false
+    setSearching(true)
+    void (async () => {
       try {
-        const result = await searchUnlinkedPlayersAction({ query: value.trim() })
-        if ('data' in result && result.data) {
+        const result = await searchUnlinkedPlayersAction({ query: trimmed })
+        if (!cancelled && 'data' in result && result.data) {
           setResults(result.data as SearchResult[])
         }
       } finally {
-        setSearching(false)
+        if (!cancelled) {
+          setSearching(false)
+        }
       }
-    }, 300)
-  }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [debouncedQuery])
 
   /** Привязать выбранного поэта */
   const handleLink = async (playerId: string) => {
@@ -405,7 +408,7 @@ function PlayerLinkBlock({ userId, player }: { userId: string; player: { id: str
                   size="sm"
                   placeholder="Поиск поэта по имени..."
                   value={query}
-                  onChange={(e) => handleSearch(e.target.value)}
+                  onChange={(e) => setQuery(e.target.value)}
                 />
               </Box>
               {searching && (

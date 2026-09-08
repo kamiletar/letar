@@ -6,8 +6,9 @@
  */
 
 import { Box, Input } from '@chakra-ui/react'
+import { useDebounce } from '@letar/hooks'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { LuSearch } from 'react-icons/lu'
 
 interface SearchInputProps {
@@ -23,7 +24,7 @@ export function SearchInput({ placeholder = 'Поиск...', basePath, paramName
   const router = useRouter()
   const searchParams = useSearchParams()
   const [value, setValue] = useState(searchParams.get(paramName) ?? '')
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const debouncedValue = useDebounce(value, 300)
 
   const updateUrl = useCallback(
     (query: string) => {
@@ -39,22 +40,16 @@ export function SearchInput({ placeholder = 'Поиск...', basePath, paramName
     [router, searchParams, basePath, paramName],
   )
 
-  /** Debounce 300ms */
+  /** Debounce 300ms — обновляем URL только когда пользователь перестал печатать */
   useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current)
-      }
+    if (debouncedValue !== (searchParams.get(paramName) ?? '')) {
+      updateUrl(debouncedValue)
     }
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- обновление URL только по debouncedValue, не при каждом изменении searchParams/updateUrl
+  }, [debouncedValue])
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const newValue = e.target.value
-    setValue(newValue)
-    if (timerRef.current) {
-      clearTimeout(timerRef.current)
-    }
-    timerRef.current = setTimeout(() => updateUrl(newValue), 300)
+    setValue(e.target.value)
   }
 
   return (
