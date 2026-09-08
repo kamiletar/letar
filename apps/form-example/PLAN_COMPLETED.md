@@ -1,5 +1,34 @@
 # Выполненные задачи — form-example
 
+## fix: hydration mismatch на всех страницах — Turbopack+Chakra Global, не `as="nav"` (2026-09-09)
+
+Побочная находка при живой проверке (не связана с задачей по локали десятичного разделителя):
+консоль на `/examples/all-fields` (и на всех остальных страницах, включая `/`) стабильно печатала
+«Hydration failed because the server rendered HTML didn't match the client» на каждой полной
+перезагрузке.
+
+**Первая гипотеза (частично верна, но не root cause):** [nav.tsx](src/components/nav.tsx) держал
+`<Box as="nav">` — запрещённый проп по правилу `.claude/rules/components.md` ⛔. Исправлено на
+`asChild` + `<nav>`, заодно найден и исправлен второй случай — `Box as="button"` в
+[server-errors/page.tsx](src/app/examples/server-errors/page.tsx). Это было правильно сделать
+независимо от исхода, но после фикса ошибка гидратации никуда не делась — воспроизводилась так же
+стабильно на всех страницах, не только на той, что использует `Nav`.
+
+**Реальная причина:** диф React в оверлее Next dev показал `<Insertion> +<nav> -<style
+data-emotion="css-global ad1llf">` — точная сигнатура задокументированного бага
+[nextjs16-turbopack-default-emotion-hydration](/.claude/docs/nextjs16-turbopack-default-emotion-hydration.md):
+Turbopack (дефолтный бандлер `next dev`/`next build` в Next 16 без явного флага) + Chakra
+`ChakraProvider`'s внутренний `<Global>` дают структурный SSR/CSR-мисматч. `form-example` просто не
+попал в аудит 2026-08-04/25 по остальным ~10 приложениям монорепо.
+
+**Фикс** — `--webpack` в `dev`/`build` [project.json](project.json) (частичный override поверх
+инференса `@nx/next`, тот же паттерн, что `auth-hub`/`aira-web`/`dashboard`). Проверено вживую
+через Browser pane: до фикса — ошибка на `/` и `/examples/all-fields` при каждой полной
+перезагрузке (`force: true`/`window.location.href`); после — консоль чистая на обеих страницах,
+`nx lint`/`nx typecheck:tsgo form-example` зелёные.
+
+Коммит `24c5280b`.
+
 ## fix: `@letar/demo-protection` резолв через bun isolated linker (2026-09-01)
 
 Тот же класс бага, что уже был найден и исправлен в aboi: пакет числился только в

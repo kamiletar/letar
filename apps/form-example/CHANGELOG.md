@@ -2,6 +2,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.12] - 2026-09-09
+
+### Fixed
+
+- `nav.tsx`/`server-errors/page.tsx`: убран запрещённый проп `as=` (Chakra UI v3) — `asChild` +
+  нативный элемент.
+- Реальная причина hydration mismatch на всех страницах — не `as=`, а известный баг Turbopack +
+  Chakra `ChakraProvider`'s `<Global>`. Фикс — `--webpack` в `dev`/`build` (`project.json`), по
+  образцу `auth-hub`/`aira-web`/`dashboard`. Подробности — `PLAN_COMPLETED.md`.
+
 ## [0.1.11] - 2026-09-09
 
 ### Fixed
