@@ -17,6 +17,7 @@
  */
 
 import { Box, Button, Flex, Input, Text } from '@chakra-ui/react'
+import { useDebounce } from '@letar/hooks'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { SymbolEntry } from '../../../shared/ipc-types'
@@ -55,10 +56,10 @@ interface SymbolSearchProps {
 
 export function SymbolSearch({ symbols, onAssign, keyLabel, category, onCategoryChange }: SymbolSearchProps) {
   const [query, setQuery] = useState('')
+  const debouncedQuery = useDebounce(query, 300)
   const [results, setResults] = useState<SymbolEntry[]>([])
   const [highlightIndex, setHighlightIndex] = useState(-1)
   const categoryId = category ?? 'all'
-  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
   const resultsRef = useRef<HTMLDivElement>(null)
 
   // Недавно использованные — читаются из localStorage, обновляются после каждого назначения
@@ -125,10 +126,8 @@ export function SymbolSearch({ symbols, onAssign, keyLabel, category, onCategory
   )
 
   useEffect(() => {
-    clearTimeout(timerRef.current)
-    timerRef.current = setTimeout(() => search(query.trim()), 300)
-    return () => clearTimeout(timerRef.current)
-  }, [query, search])
+    search(debouncedQuery.trim())
+  }, [debouncedQuery, search])
 
   // Сброс подсветки при смене категории (сама категория теперь управляется извне)
   useEffect(() => {

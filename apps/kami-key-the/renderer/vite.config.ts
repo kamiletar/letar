@@ -8,6 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@letar/ui': path.resolve(__dirname, '../../../libs/ui/src/index.ts'),
+      '@letar/hooks': path.resolve(__dirname, '../../../libs/hooks/src/index.ts'),
     },
     dedupe: ['react', 'react-dom'],
   },
