@@ -13,25 +13,21 @@
       барабанный экспорт, он затянет в граф Metro browser-хуки и `@tanstack/react-query`,
       которого нет в зависимостях приложения.
 
-- [ ] ⚠️ **`react-native` разъехался между корнем и приложениями** (найдено 2026-09-08). Корневой
-      `package.json` — `0.87.1` (вместе с `@react-native/babel-preset|metro-config|
-      typescript-config`), а `animatrona-mobile` и `animatrona-tv` пинят локально `0.87.0`
-      (`react-native`, `@react-native/codegen`, `@react-native/gradle-plugin`). В дереве
-      физически 4 копии: три `react-native@0.87.0+<hash>` и одна `0.87.1`. Тот же класс, что
-      уже дважды чинили в каскаде RN 0.87 (`react`, `react-native-gesture-handler`): локальный
-      пин перекрывает корневой через bun workspace resolution. Не горит (typecheck зелёный,
-      сборка 25.08 прошла), но `metro.config.js` тянет `@react-native/metro-config` из корня
-      `0.87.1`, а сам `react-native` — из приложения `0.87.0`; из такого смешанного резолва
-      раньше и вылезали `TS2719` и «Tried to register two views». Решение за координатором
-      (задето и `animatrona-tv`) — сообщено письмом #1404.
-      ✅ **Координатор ответил (письмо #1408, 2026-09-08): снять локальный пин.** Проверил сам,
-      подтвердил тот же класс, что уже чинили с `react` 19.2.3 vs 19.2.8; политика монорепо —
-      версии задаются только в корне. Действие: убрать три строки (`react-native`,
-      `@react-native/codegen`, `@react-native/gradle-plugin`) из `apps/animatrona-mobile/package.json`,
-      `bun install` из корня, перепроверить `typecheck:tsgo` **и сборку APK**. `animatrona-tv`
-      делает то же у себя — его файл не трогать. Не сделано в сессии 2026-09-08 (линт): правка
-      двигает общий `bun.lock`, который на момент сессии был уже изменён чужой работой в рабочем
-      дереве — сливать в один коммит с настройкой линта было бы гонкой.
+- [x] ⚠️ **`react-native` разъехался между корнем и приложениями — снято (2026-09-08).** Три
+      строки (`react-native`, `@react-native/codegen`, `@react-native/gradle-plugin`) в
+      `package.json` заменены на `"*"` — версия резолвится только из корня (`0.87.1`), как у
+      `animatrona-tv`. `bun install` (потребовал `--force` — обычный прогон не пронул устаревшие
+      isolated-копии `0.87.0` в `node_modules/.bun`, см.
+      `.claude/docs/bun-install-stale-isolated-cache.md`), проверено symlink'ами в
+      `node_modules/@react-native/{codegen,gradle-plugin}` и `node_modules/react-native` — все
+      резолвятся в `0.87.1`. `typecheck:tsgo` зелёный. Сборка APK (`react-native bundle` +
+      `gradlew assembleDebug`) поймала независимую проблему: ninja на `armeabi-v7a` падал на
+      Windows-лимите длины пути (260 симв.) для сгенерированного codegen-объекта
+      `react-native-gesture-handler` — не связано с версией RN, воспроизводилось и на `0.87.0`
+      (см. `.claude/docs/android-agp9-windows-toolchain-pitfalls.md`, тот же класс). Обойдено
+      разовым `subst X: C:\web\letar` (сессионный, не сохраняется) — сборка прошла чисто.
+      Постоянного фикса (короче путь репо, либо отключить `armeabi-v7a`) не делалось — вне
+      объёма этой задачи.
 
 - [x] ⚠️ **ESLint не запускался для этого приложения вообще** (закрыто 2026-09-08). Не было
       `eslint.config.*`, поэтому `@nx/eslint/plugin` не заводил inferred-таргет, а блок `"lint"`

@@ -6,6 +6,23 @@
 
 ## [Unreleased]
 
+## [0.7.11] - 2026-09-08
+
+### Fixed
+
+- Снят локальный пин `react-native`/`@react-native/codegen`/`@react-native/gradle-plugin`
+  (`0.87.0` → `"*"`), версия теперь резолвится только из корневого `package.json` (`0.87.1`), по
+  решению координатора (письмо #1408). Тот же класс, что уже дважды чинили в каскаде RN 0.87
+  (`react`, `react-native-gesture-handler`) — локальный пин перекрывал корневой через bun
+  workspace resolution, `metro.config.js` тянул `@react-native/metro-config` из корня, а сам
+  `react-native` — из приложения, разные версии. `bun install --force` (обычный не пронул
+  устаревшие isolated-копии `0.87.0`). Перепроверено: `typecheck:tsgo` зелёный, сборка debug
+  APK (`react-native bundle` + `gradlew assembleDebug`) прошла чисто.
+- Заодно поймана и обойдена независимая проблема сборки на Windows: ninja падал на
+  `armeabi-v7a` из-за превышения лимита длины пути (260 символов) для codegen-объекта
+  `react-native-gesture-handler` — воспроизводится и на `0.87.0`, не связано с версией RN.
+  Обход в этой сессии — `subst X: C:\web\letar` (постоянного фикса нет, вне объёма задачи).
+
 ## [0.7.10] - 2026-09-08
 
 ### Fixed
