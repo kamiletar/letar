@@ -3,7 +3,18 @@
  */
 
 export { isValidCid } from './cid'
-export { ANIME_STATUS_CONFIG, type AnimeStatusInfo, getAnimeStatusConfig, PUBLISH_STATUS_CONFIG } from './constants'
+export {
+  ANIME_KIND_CONFIG,
+  ANIME_STATUS_CONFIG,
+  type AnimeKindInfo,
+  type AnimeStatusInfo,
+  getAnimeKindInfo,
+  getAnimeStatusConfig,
+  getRelationKindInfo,
+  PUBLISH_STATUS_CONFIG,
+  RELATION_KIND_CONFIG,
+  type RelationKindInfo,
+} from './constants'
 export { buildExternalLinks, type ExternalLinkEntry } from './external-links'
 export {
   calculateCompressionRatio,
