@@ -4,6 +4,8 @@ import { describe, expect, it } from 'vitest'
 import { FieldEditIntent } from './field-edit-intent'
 import { FieldPassword } from './field-password'
 
+type FormLike = { state: { values: Record<string, unknown> } }
+
 describe('FieldEditIntent (shadcn)', () => {
   it('view mode: показывает displayValue и кнопку «Заменить», дочернее поле не смонтировано', () => {
     render(
@@ -76,5 +78,47 @@ describe('FieldEditIntent (shadcn)', () => {
     )
 
     expect(screen.getByRole('button', { name: 'Обновить ключ' })).toBeInTheDocument()
+  })
+
+  describe('итоговый контракт значения (эквивалент submit)', () => {
+    it('при isEdited: false итоговое значение — {isEdited: false, value: null}', () => {
+      let form: FormLike | undefined
+      render(
+        <TestForm
+          defaultValues={{ apiKey: { isEdited: false, value: null } }}
+          onFormReady={(f) => {
+            form = f as unknown as FormLike
+          }}
+        >
+          <FieldEditIntent name="apiKey" displayValue="****" emptyValue="">
+            <FieldPassword name="apiKey.value" />
+          </FieldEditIntent>
+        </TestForm>,
+      )
+
+      expect(form?.state.values.apiKey).toEqual({ isEdited: false, value: null })
+    })
+
+    it('после ввода нового значения итоговое значение — {isEdited: true, value: "..."}', () => {
+      let form: FormLike | undefined
+      render(
+        <TestForm
+          defaultValues={{ apiKey: { isEdited: false, value: null } }}
+          onFormReady={(f) => {
+            form = f as unknown as FormLike
+          }}
+        >
+          <FieldEditIntent name="apiKey" displayValue="****" emptyValue="">
+            <FieldPassword name="apiKey.value" />
+          </FieldEditIntent>
+        </TestForm>,
+      )
+
+      fireEvent.click(screen.getByRole('button', { name: 'Заменить' }))
+      const input = document.querySelector('input[data-field-name="apiKey.value"]') as HTMLInputElement
+      fireEvent.change(input, { target: { value: 'sk_live_new_secret' } })
+
+      expect(form?.state.values.apiKey).toEqual({ isEdited: true, value: 'sk_live_new_secret' })
+    })
   })
 })

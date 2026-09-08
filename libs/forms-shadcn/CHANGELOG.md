@@ -4,6 +4,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.35.1] - 2026-09-08
+
+### Added
+
+- **`FieldEditIntent` — тесты на итоговый контракт значения** (`field-edit-intent.spec.tsx`,
+  секция «итоговый контракт значения (эквивалент submit)»): паритет с Chakra-скином, где такие
+  тесты уже были в блоке `describe('submit', ...)`. Использует новый `onFormReady` из
+  `@letar/forms-react/testing` (0.6.1) — `TestForm` не имеет кнопки submit (поле-only скин),
+  поэтому проверка идёт напрямую по `form.state.values`.
+
 ## [0.35.0] - 2026-09-04
 
 ### Added
