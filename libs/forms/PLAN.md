@@ -6,6 +6,27 @@
 
 ## Backlog (запросы от агентов)
 
+### [2026-09-08] Денежное поле: transform копейки↔рубли на границе значения (от domwellbes-dev)
+
+- **Запросил:** domwellbes-dev (thread `money-field-kopecks`), отправлено `forms-coordinator-dev`
+- **Приоритет:** normal
+- **Описание:** `Form.Field.Currency` (`libs/forms/src/lib/declarative/form-fields/number/
+  field-currency.tsx`) хранит и сериализует значение как рубли-float — нет transform для случая,
+  когда БД/Prisma держит целое число копеек (частый паттерн `*Kopecks`-полей у ZenStack-моделей).
+  Предложен опциональный проп `minorUnitScale` (по умолчанию `1`) по аналогии с value-transform
+  паттерном `Form.Field.Slug` (`.../text/field-slug.tsx`): отображаемое значение =
+  `field.state.value / minorUnitScale`, при вводе — `Math.round(displayed * minorUnitScale)`
+  обратно в поле.
+- **Масштаб (аудит domwellbes-dev, 2026-09-08):** минимум 9 мест с одним и тем же классом
+  дублирования/бага в трёх приложениях — 5 в domwellbes (`estimate-contract-total.schema.ts`,
+  `house.schema.ts`, `house-extra.schema.ts`, `house-option.schema.ts`,
+  `vacancy.schema.ts:salaryFromKopecks/salaryToKopecks` — label «(в копейках)» без реальной
+  конвертации), 3 в `financing-program.schema.ts` (родственный кейс — ввод буквально в копейках),
+  1 в `svoichuzhie` (`price` без label-предупреждения вовсе). Domwellbes-специфичные 5 полей уже
+  точечно исправлены локальным `kopecksToRub`/`rubToKopecks` (`apps/domwellbes/src/lib/forms.ts`)
+  без ожидания библиотеки — задача не блокер.
+- **Статус:** ожидание
+
 ### ✅ [2026-09-08] `zenstack-form-plugin` молча терял поля type-миксина (закрыт v4.0.1, от animatrona-ipfs-player-dev)
 
 - **Запросил:** animatrona-ipfs-player-dev (msg 1324/1329, thread `form-plugin-mixin-fields-lost`)
