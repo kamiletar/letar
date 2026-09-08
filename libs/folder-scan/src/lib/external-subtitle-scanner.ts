@@ -12,6 +12,7 @@ import { readdir } from 'fs/promises'
 import path from 'path'
 import { scanDirectoryRecursive } from './fs-utils'
 import { createModuleLogger } from './logger'
+import { FONT_EXTENSIONS, SUBTITLE_EXTENSIONS } from './media-extensions'
 import { getSubtitleInfo } from './subtitle-parser'
 import { detectSubtitleType, type SubtitleType } from './subtitle-type'
 
@@ -35,12 +36,6 @@ const SUBTITLE_FOLDER_PATTERNS = [
 
 /** Паттерны папок шрифтов (case-insensitive) */
 const FONT_FOLDER_PATTERNS = ['fonts', 'font', 'шрифты']
-
-/** Расширения файлов субтитров */
-const SUBTITLE_EXTENSIONS = new Set(['.ass', '.ssa', '.srt', '.vtt'])
-
-/** Расширения файлов шрифтов */
-const FONT_EXTENSIONS = new Set(['.ttf', '.otf', '.woff', '.woff2', '.eot'])
 
 /**
  * Тип субтитров — реэкспорт единого источника (`./subtitle-type`).

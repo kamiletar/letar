@@ -27,7 +27,7 @@ const log = createModuleLogger('FsUtils')
  */
 export async function* scanDirectoryRecursive(
   dir: string,
-  extensions: Set<string>,
+  extensions: ReadonlySet<string>,
   maxDepth = 3,
   currentDepth = 0,
 ): AsyncGenerator<string> {

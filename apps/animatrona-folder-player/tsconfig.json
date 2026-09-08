@@ -51,6 +51,7 @@
       "@letar/chakra-provider": ["../../libs/chakra-provider/src/index.ts"],
       "@letar/folder-player-react": ["../../libs/folder-player-react/src/index.ts"],
       "@letar/folder-scan": ["../../libs/folder-scan/src/index.ts"],
+      "@letar/folder-scan/media-extensions": ["../../libs/folder-scan/src/lib/media-extensions.ts"],
       "@letar/video-player-react": ["../../libs/video-player-react/src/index.ts"],
       "@letar/video-player-core": ["../../libs/video-player-core/src/index.ts"],
       "@letar/electron-storage": ["../../libs/electron-storage/src/index.ts"]

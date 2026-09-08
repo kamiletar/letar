@@ -16,6 +16,12 @@ module.exports = {
     alias: {
       // Рантайм-код, общий для main и renderer (codec-support, transcode-plan) — см. shared/
       '@shared': path.resolve(__dirname, '../shared'),
+      // Подпуть — строго ДО общего алиаса: webpack берёт первый совпавший ключ, а общий
+      // увёл бы запрос в несуществующий `src/media-extensions` (файл лежит в `src/lib/`).
+      '@letar/folder-scan/media-extensions': path.resolve(
+        __dirname,
+        '../../../libs/folder-scan/src/lib/media-extensions',
+      ),
       '@letar/folder-scan': path.resolve(__dirname, '../../../libs/folder-scan/src'),
       '@letar/electron-storage': path.resolve(__dirname, '../../../libs/electron-storage/src'),
     },

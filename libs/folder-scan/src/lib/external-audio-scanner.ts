@@ -13,6 +13,7 @@ import path from 'path'
 import { promisify } from 'util'
 import { scanDirectoryRecursive } from './fs-utils'
 import { createModuleLogger } from './logger'
+import { AUDIO_EXTENSIONS } from './media-extensions'
 
 const log = createModuleLogger('AudioScanner')
 const execAsync = promisify(exec)
@@ -45,9 +46,6 @@ const AUDIO_FOLDER_PATTERNS = [
   'dub',
   'voices',
 ]
-
-/** Расширения аудиофайлов */
-const AUDIO_EXTENSIONS = new Set(['.mka', '.m4a', '.flac', '.opus', '.mp3', '.aac', '.wav', '.ogg', '.ac3', '.dts'])
 
 /** Результат матчинга аудио */
 export interface ExternalAudioMatch {

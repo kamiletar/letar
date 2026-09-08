@@ -5,6 +5,8 @@
 import { readdir, stat } from 'fs/promises'
 import path from 'path'
 
+import { AUDIO_EXTENSIONS, VIDEO_EXTENSIONS } from './media-extensions'
+
 /** Информация о медиафайле */
 export interface MediaFileInfo {
   path: string
@@ -17,9 +19,9 @@ export interface MediaFileInfo {
 export type MediaType = 'video' | 'audio'
 
 /** Расширения по типам медиа */
-const EXTENSIONS_BY_TYPE: Record<MediaType, Set<string>> = {
-  video: new Set(['.mkv', '.mp4', '.avi', '.webm', '.mov', '.wmv', '.flv', '.m4v']),
-  audio: new Set(['.mka', '.m4a', '.flac', '.opus', '.mp3', '.aac', '.wav', '.ogg', '.ac3', '.dts']),
+const EXTENSIONS_BY_TYPE: Record<MediaType, ReadonlySet<string>> = {
+  video: VIDEO_EXTENSIONS,
+  audio: AUDIO_EXTENSIONS,
 }
 
 /**

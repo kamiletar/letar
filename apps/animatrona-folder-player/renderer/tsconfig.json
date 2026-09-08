@@ -25,6 +25,7 @@
       // (см. .claude/docs/electron-nextron-dual-tsconfig-paths-drift.md)
       "@shared/*": ["../shared/*"],
       "@letar/folder-scan": ["../../../libs/folder-scan/src/index.ts"],
+      "@letar/folder-scan/media-extensions": ["../../../libs/folder-scan/src/lib/media-extensions.ts"],
       "@letar/forms": ["../../../libs/forms/src/index.ts"],
       "@letar/forms-core": ["../../../libs/forms-core/src/index.ts"],
       "@letar/forms-core/validators/ru": ["../../../libs/forms-core/src/lib/validators/ru/index.ts"],

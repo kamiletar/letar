@@ -1,12 +1,13 @@
 /**
- * Определяет, является ли перетащенный путь видеофайлом (иначе считаем его папкой) —
- * тот же набор расширений, что и `main/constants/file-filters.ts` (`VIDEO_EXTENSIONS`).
- * Дублируется, а не импортируется: main и renderer собираются раздельными бандлерами
- * (webpack / Next.js), общий модуль сюда не резолвится без отдельной настройки алиасов.
+ * Определяет, является ли перетащенный путь видеофайлом (иначе считаем его папкой).
+ *
+ * Набор расширений общий с main-процессом. Раньше он был здесь скопирован — считалось, что
+ * общий модуль сюда не резолвится, потому что main и renderer собираются разными бандлерами.
+ * Это верно для бареля `@letar/folder-scan` (он тянет `node:fs`/`electron`), но не для
+ * подпути `/media-extensions`: там нет ни одной зависимости от рантайма.
  */
-const VIDEO_EXTENSIONS = new Set(['mkv', 'mp4', 'avi', 'webm', 'mov', 'wmv', 'flv', 'm4v', 'ts', 'm2ts'])
+import { hasExtension, PLAYABLE_VIDEO_EXTENSIONS } from '@letar/folder-scan/media-extensions'
 
 export function isVideoFilePath(filePath: string): boolean {
-  const ext = filePath.split('.').pop()?.toLowerCase()
-  return !!ext && VIDEO_EXTENSIONS.has(ext)
+  return hasExtension(filePath, PLAYABLE_VIDEO_EXTENSIONS)
 }

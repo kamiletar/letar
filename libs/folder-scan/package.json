@@ -9,6 +9,11 @@
       "import": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./media-extensions": {
+      "types": "./src/lib/media-extensions.ts",
+      "import": "./src/lib/media-extensions.ts",
+      "default": "./src/lib/media-extensions.ts"
+    },
     "./package.json": "./package.json"
   },
   "peerDependencies": {
