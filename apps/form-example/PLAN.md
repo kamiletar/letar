@@ -17,7 +17,15 @@ Example-приложение @letar/forms: демо + стартовый шаб�
 
 ## P2 — UX и навигация
 
-- [ ] Категоризация сайдбара (APP / BASICS / PATTERNS / GENERATION / ADVANCED)
+- [x] Категоризация сайдбара:
+  ```
+  BASICS: basic, all-fields, advanced-fields, validation, constraints
+  LAYOUT: conditional, watch, multi-step, groups
+  FIELDS: schedule, documents, credit-card, signature, survey-fields, table-editor, data-grid, matrix-choice
+  GENERATION: auto-fields, auto-fields-advanced, templates, conversational, mcp-demo, zenstack
+  PATTERNS: offline, persistence, autosave, i18n, security, captcha, autofill, edit-intent, recipes
+  ADVANCED: analytics, undo-redo, server-errors, readonly, skeleton, theming, calculated, utility, async-validation, comparison, depends-on, debug-values, testing-utilities, url-prefill
+  ```
 - [ ] README — полная документация с быстрым стартом
 
 ## P1.5 — DX фичи (из исследования болей разработчиков, апрель 2026)
@@ -28,19 +36,6 @@ Example-приложение @letar/forms: демо + стартовый шаб�
 - [ ] `/examples/readonly` — read-only режим формы
 - [ ] `/examples/skeleton` — loading skeleton из схемы
 - [ ] `/examples/comparison` — diff-view (было → стало)
-
-## P2 — UX и навигация
-
-- [ ] Категоризация сайдбара:
-  ```
-  BASICS: basic, validation, constraints, all-fields
-  LAYOUT: groups, multi-step, conditional, watch
-  FIELDS: documents, credit-card, signature, survey-fields, table-editor, data-grid
-  GENERATION: auto-fields, templates, conversational
-  PATTERNS: offline, persistence, autosave, i18n, security, captcha
-  ADVANCED: analytics, undo-redo, server-errors, readonly, skeleton, theming
-  ```
-- [ ] README — полная документация с быстрым стартом
 
 ## P3 — Качество кода
 
@@ -58,3 +53,4 @@ Example-приложение @letar/forms: демо + стартовый шаб�
 | 2026-09-08 | ✅ P1 MCP Demo page — новая страница `/examples/mcp-demo`, статичный (без live-подключения) слепок вывода `form-mcp` (`list_fields`/`generate_form`) + живой эквивалент на текущем API, см. PLAN_COMPLETED.md                          |
 | 2026-09-09 | ✅ P1 Recipes — добавлены Profile Edit, Checkout, Feedback (4 → 7 карточек), см. PLAN_COMPLETED.md                                                                                                                                     |
 | 2026-09-09 | ✅ P1 Offline — переведено на реальный `@letar/forms/offline` (`useOfflineForm`/`useSyncQueue`/`FormOfflineIndicator`/`FormSyncStatus`) + кнопка Simulate Offline, см. PLAN_COMPLETED.md                                               |
+| 2026-09-09 | ✅ P2 Категоризация сайдбара — 6 групп (BASICS/LAYOUT/FIELDS/GENERATION/PATTERNS/ADVANCED), все 46 examples распределены; заодно устранён дубль секции P2 в этом файле, см. PLAN_COMPLETED.md                                          |

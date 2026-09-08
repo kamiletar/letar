@@ -1,5 +1,32 @@
 # Выполненные задачи — form-example
 
+## P2: Категоризация сайдбара (2026-09-09)
+
+`nav.tsx` держал один плоский список из 46 ссылок под заголовком EXAMPLES. PLAN.md давно
+описывал целевую схему из 6 категорий, но сам файл был к тому же продублирован — секция «P2 —
+UX и навигация» встречалась в PLAN.md дважды (короткая версия без деталей и полная со схемой) —
+консолидировано в одну.
+
+`exampleCategories` — массив из 6 групп (`{ title, items }`) вместо плоского `examples`; рендер
+в `Nav()` — `.map()` по категориям вместо одного `Stack`. Итоговое распределение всех 46
+examples (включая Schedule и MCP Demo, которых не было в исходной схеме PLAN.md — размещены в
+FIELDS и GENERATION соответственно, по типу контента, не по дате появления):
+
+- **BASICS** (5): basic, all-fields, advanced-fields, validation, constraints
+- **LAYOUT** (4): conditional, watch, multi-step, groups
+- **FIELDS** (8): schedule, documents, credit-card, signature, survey-fields, table-editor,
+  data-grid, matrix-choice
+- **GENERATION** (6): auto-fields, auto-fields-advanced, templates, conversational, mcp-demo,
+  zenstack
+- **PATTERNS** (9): offline, persistence, autosave, i18n, security, captcha, autofill,
+  edit-intent, recipes
+- **ADVANCED** (14): analytics, undo-redo, server-errors, readonly, skeleton, theming,
+  calculated, utility, async-validation, comparison, depends-on, debug-values,
+  testing-utilities, url-prefill
+
+Проверено вживую (Browser pane, `get_page_text` на `/`) — все 6 заголовков категорий и все 46
+ссылок отрендерились, активная подсветка (`NavLink`) не тронута.
+
 ## P1: Offline — реальный @letar/forms/offline (2026-09-09)
 
 [`/examples/offline`](src/app/examples/offline/page.tsx) описывал в тексте страницы

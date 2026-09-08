@@ -10,53 +10,83 @@ const appPages = [
   { href: '/contacts', label: 'Contacts', description: 'Form → Server Action' },
 ]
 
-const examples = [
-  { href: '/examples/basic', label: 'Basic Form' },
-  { href: '/examples/all-fields', label: 'All Fields (39)' },
-  { href: '/examples/advanced-fields', label: 'Advanced Fields' },
-  { href: '/examples/validation', label: 'Validation' },
-  { href: '/examples/constraints', label: 'Constraints' },
-  { href: '/examples/conditional', label: 'Conditional' },
-  { href: '/examples/watch', label: 'Watch & onChange' },
-  { href: '/examples/multi-step', label: 'Multi-Step' },
-  { href: '/examples/groups', label: 'Groups & Arrays' },
-  { href: '/examples/schedule', label: 'Schedule' },
-  { href: '/examples/mcp-demo', label: 'MCP Demo' },
-  { href: '/examples/auto-fields', label: 'Auto Fields' },
-  { href: '/examples/auto-fields-advanced', label: 'Auto Advanced' },
-  { href: '/examples/zenstack', label: 'ZenStack' },
-  { href: '/examples/recipes', label: 'Recipes' },
-  { href: '/examples/theming', label: 'Theming' },
-  { href: '/examples/persistence', label: 'Persistence' },
-  { href: '/examples/i18n', label: 'i18n' },
-  { href: '/examples/offline', label: 'Offline' },
-  { href: '/examples/autofill', label: 'Smart Autofill' },
-  { href: '/examples/calculated', label: 'Calculated Fields' },
-  { href: '/examples/utility', label: 'Utility Components' },
-  { href: '/examples/security', label: 'Security' },
-  { href: '/examples/edit-intent', label: 'EditIntent' },
-  { href: '/examples/signature', label: 'Signature' },
-  { href: '/examples/documents', label: 'Russian Documents' },
-  { href: '/examples/table-editor', label: 'Table Editor' },
-  { href: '/examples/matrix-choice', label: 'Matrix Choice' },
-  { href: '/examples/survey-fields', label: 'Survey Fields' },
-  { href: '/examples/async-validation', label: 'Async Validation' },
-  { href: '/examples/templates', label: 'Form Templates' },
-  { href: '/examples/autosave', label: 'Autosave' },
-  { href: '/examples/conversational', label: 'Conversational' },
-  { href: '/examples/data-grid', label: 'Data Grid' },
-  { href: '/examples/credit-card', label: 'Credit Card' },
-  { href: '/examples/captcha', label: 'CAPTCHA' },
-  { href: '/examples/analytics', label: 'Analytics' },
-  { href: '/examples/server-errors', label: 'Server Errors' },
-  { href: '/examples/readonly', label: 'ReadOnly View' },
-  { href: '/examples/skeleton', label: 'Skeleton Loading' },
-  { href: '/examples/undo-redo', label: 'Undo/Redo' },
-  { href: '/examples/comparison', label: 'Comparison Diff' },
-  { href: '/examples/depends-on', label: 'DependsOn' },
-  { href: '/examples/debug-values', label: 'Debug Values' },
-  { href: '/examples/testing-utilities', label: 'Testing Utilities' },
-  { href: '/examples/url-prefill', label: 'URL Prefill' },
+const exampleCategories = [
+  {
+    title: 'BASICS',
+    items: [
+      { href: '/examples/basic', label: 'Basic Form' },
+      { href: '/examples/all-fields', label: 'All Fields (39)' },
+      { href: '/examples/advanced-fields', label: 'Advanced Fields' },
+      { href: '/examples/validation', label: 'Validation' },
+      { href: '/examples/constraints', label: 'Constraints' },
+    ],
+  },
+  {
+    title: 'LAYOUT',
+    items: [
+      { href: '/examples/conditional', label: 'Conditional' },
+      { href: '/examples/watch', label: 'Watch & onChange' },
+      { href: '/examples/multi-step', label: 'Multi-Step' },
+      { href: '/examples/groups', label: 'Groups & Arrays' },
+    ],
+  },
+  {
+    title: 'FIELDS',
+    items: [
+      { href: '/examples/schedule', label: 'Schedule' },
+      { href: '/examples/documents', label: 'Russian Documents' },
+      { href: '/examples/credit-card', label: 'Credit Card' },
+      { href: '/examples/signature', label: 'Signature' },
+      { href: '/examples/survey-fields', label: 'Survey Fields' },
+      { href: '/examples/table-editor', label: 'Table Editor' },
+      { href: '/examples/data-grid', label: 'Data Grid' },
+      { href: '/examples/matrix-choice', label: 'Matrix Choice' },
+    ],
+  },
+  {
+    title: 'GENERATION',
+    items: [
+      { href: '/examples/auto-fields', label: 'Auto Fields' },
+      { href: '/examples/auto-fields-advanced', label: 'Auto Advanced' },
+      { href: '/examples/templates', label: 'Form Templates' },
+      { href: '/examples/conversational', label: 'Conversational' },
+      { href: '/examples/mcp-demo', label: 'MCP Demo' },
+      { href: '/examples/zenstack', label: 'ZenStack' },
+    ],
+  },
+  {
+    title: 'PATTERNS',
+    items: [
+      { href: '/examples/offline', label: 'Offline' },
+      { href: '/examples/persistence', label: 'Persistence' },
+      { href: '/examples/autosave', label: 'Autosave' },
+      { href: '/examples/i18n', label: 'i18n' },
+      { href: '/examples/security', label: 'Security' },
+      { href: '/examples/captcha', label: 'CAPTCHA' },
+      { href: '/examples/autofill', label: 'Smart Autofill' },
+      { href: '/examples/edit-intent', label: 'EditIntent' },
+      { href: '/examples/recipes', label: 'Recipes' },
+    ],
+  },
+  {
+    title: 'ADVANCED',
+    items: [
+      { href: '/examples/analytics', label: 'Analytics' },
+      { href: '/examples/undo-redo', label: 'Undo/Redo' },
+      { href: '/examples/server-errors', label: 'Server Errors' },
+      { href: '/examples/readonly', label: 'ReadOnly View' },
+      { href: '/examples/skeleton', label: 'Skeleton Loading' },
+      { href: '/examples/theming', label: 'Theming' },
+      { href: '/examples/calculated', label: 'Calculated Fields' },
+      { href: '/examples/utility', label: 'Utility Components' },
+      { href: '/examples/async-validation', label: 'Async Validation' },
+      { href: '/examples/comparison', label: 'Comparison Diff' },
+      { href: '/examples/depends-on', label: 'DependsOn' },
+      { href: '/examples/debug-values', label: 'Debug Values' },
+      { href: '/examples/testing-utilities', label: 'Testing Utilities' },
+      { href: '/examples/url-prefill', label: 'URL Prefill' },
+    ],
+  },
 ]
 
 function NavLink({ href, label, description }: { href: string; label: string; description?: string }) {
@@ -117,12 +147,16 @@ export function Nav() {
 
         <Separator mb={4} />
 
-        <Text fontSize="xs" fontWeight="bold" color="fg.muted" mb={2} px={3}>
-          EXAMPLES
-        </Text>
-        <Stack gap={0.5}>
-          {examples.map((ex) => <NavLink key={ex.href} {...ex} />)}
-        </Stack>
+        {exampleCategories.map((category) => (
+          <Box key={category.title} mb={4}>
+            <Text fontSize="xs" fontWeight="bold" color="fg.muted" mb={2} px={3}>
+              {category.title}
+            </Text>
+            <Stack gap={0.5}>
+              {category.items.map((ex) => <NavLink key={ex.href} {...ex} />)}
+            </Stack>
+          </Box>
+        ))}
 
         <Separator my={4} />
 

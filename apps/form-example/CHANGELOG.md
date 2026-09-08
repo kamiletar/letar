@@ -2,6 +2,13 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.17] - 2026-09-09
+
+### Changed
+
+- `nav.tsx` — сайдбар разбит на 6 категорий (BASICS / LAYOUT / FIELDS / GENERATION / PATTERNS /
+  ADVANCED) вместо одного плоского списка на 46 ссылок.
+
 ## [0.1.16] - 2026-09-09
 
 ### Changed
