@@ -82,4 +82,25 @@ describe('ChapterSkipButton', () => {
 
     await expect(user.click(screen.getByRole('button'))).resolves.not.toThrow()
   })
+
+  it('останавливает всплытие клика — не даёт родительскому togglePlay сработать', async () => {
+    // Кнопка рендерится внутри кликабельного видеоконтейнера (клик по нему = play/pause).
+    // Без stopPropagation клик по кнопке всплывает наверх и сразу ставит видео на паузу
+    // после перемотки — регрессия против этого.
+    const user = userEvent.setup()
+    const onSeek = vi.fn()
+    const onContainerClick = vi.fn()
+
+    renderWithProvider(
+      // oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+      <div onClick={onContainerClick}>
+        <ChapterSkipButton chapters={chapters} currentTime={10} onSeek={onSeek} />
+      </div>,
+    )
+
+    await user.click(screen.getByRole('button'))
+
+    expect(onSeek).toHaveBeenCalledWith(90)
+    expect(onContainerClick).not.toHaveBeenCalled()
+  })
 })

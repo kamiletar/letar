@@ -11,6 +11,8 @@ import { Box, Button } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import { LuSkipForward } from 'react-icons/lu'
 
+import type { MouseEvent } from 'react'
+
 import { type Chapter, SKIP_LABELS, SKIPPABLE_CHAPTER_TYPES } from '../types'
 
 export interface ChapterSkipButtonProps {
@@ -49,7 +51,11 @@ export function ChapterSkipButton({ chapters, currentTime, onSeek }: ChapterSkip
     return null
   }
 
-  const handleSkip = () => {
+  const handleSkip = (event: MouseEvent) => {
+    // Кнопка лежит внутри кликабельного видеоконтейнера (click = togglePlay) — без
+    // stopPropagation клик всплывает наверх и ставит видео на паузу сразу после перемотки.
+    // Тот же паттерн уже применён в SharedPlayerControls/SharedProgressBar.
+    event.stopPropagation()
     if (onSeek) {
       onSeek(activeSkipChapter.endTime)
     }

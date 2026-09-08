@@ -1,6 +1,6 @@
 {
   "name": "@letar/animatrona-folder-player",
-  "version": "0.6.7",
+  "version": "0.6.8",
   "private": true,
   "description": "Плеер аниме из папки — без импорта, IPFS и транскодирования",
   "author": "Kami Letar",
