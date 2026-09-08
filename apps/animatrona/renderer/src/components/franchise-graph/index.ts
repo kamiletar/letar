@@ -6,7 +6,6 @@
 export { default, FranchiseGraph } from './FranchiseGraph'
 
 // Типы
-export { KIND_COLORS, KIND_LABELS, RELATION_LABELS } from './types'
 export type {
   AnimeNode as AnimeNodeType,
   AnimeNodeData,

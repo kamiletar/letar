@@ -3,33 +3,9 @@
 import { Badge, Box, HStack, Image, Text, VStack } from '@chakra-ui/react'
 import { LuCheck, LuDownload, LuFilm, LuPlay, LuTv } from 'react-icons/lu'
 
+import { getRelationKindInfo } from '@letar/animatrona-utils'
+
 import { useRouter } from 'next/navigation'
-
-/** Маппинг типов на русские названия */
-const RELATION_KIND_LABELS: Record<string, string> = {
-  SEQUEL: 'Продолжение',
-  PREQUEL: 'Предыстория',
-  SIDE_STORY: 'Побочная история',
-  PARENT_STORY: 'Основа',
-  SUMMARY: 'Краткое содержание',
-  FULL_STORY: 'Полная версия',
-  SPIN_OFF: 'Спин-офф',
-  ADAPTATION: 'Адаптация',
-  CHARACTER: 'Общие персонажи',
-  ALTERNATIVE_VERSION: 'Альт. версия',
-  ALTERNATIVE_SETTING: 'Альт. сеттинг',
-  OTHER: 'Связано',
-}
-
-/** Маппинг типов на цвета */
-const RELATION_KIND_COLORS: Record<string, string> = {
-  SEQUEL: 'green',
-  PREQUEL: 'blue',
-  SIDE_STORY: 'purple',
-  SPIN_OFF: 'orange',
-  ADAPTATION: 'teal',
-  OTHER: 'gray',
-}
 
 /** Маппинг типов аниме на иконки */
 const KIND_ICONS: Record<string, typeof LuTv> = {
@@ -74,8 +50,10 @@ export function RelatedAnimeRow({
 }: RelatedAnimeRowProps) {
   const router = useRouter()
   const isLoaded = !!localAnimeId
-  const label = RELATION_KIND_LABELS[relationKind] || 'Связано'
-  const color = RELATION_KIND_COLORS[relationKind] || 'gray'
+  // relationKind приходит из БД в UPPER_CASE — регистр нормализует сам геттер
+  const relation = getRelationKindInfo(relationKind)
+  const label = relation?.label ?? 'Связано'
+  const color = relation?.colorPalette ?? 'gray'
   const KindIcon = kind ? KIND_ICONS[kind] || LuPlay : LuPlay
 
   const content = (

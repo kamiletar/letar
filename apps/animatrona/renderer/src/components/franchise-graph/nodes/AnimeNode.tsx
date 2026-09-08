@@ -6,12 +6,12 @@
 
 import { Badge, Box, HoverCard, HStack, Image, Portal, Progress, Text, VStack } from '@chakra-ui/react'
 
+import { getAnimeKindInfo } from '@letar/animatrona-utils'
 import { Handle, type NodeProps, Position } from '@xyflow/react'
 import { memo, useContext } from 'react'
 import { LuCheck, LuClock, LuLibrary, LuPause, LuPlay, LuX } from 'react-icons/lu'
 import { FranchiseClickContext } from '../context'
 import type { AnimeNodeData } from '../types'
-import { KIND_COLORS, KIND_LABELS } from '../types'
 
 /** Иконки статусов просмотра */
 const STATUS_ICONS: Record<string, React.ElementType> = {
@@ -41,7 +41,9 @@ function AnimeNodeComponent(props: NodeProps) {
   const { onNodeClick } = useContext(FranchiseClickContext)
   const StatusIcon = data.watchStatus ? STATUS_ICONS[data.watchStatus] : null
   const statusColor = data.watchStatus ? STATUS_COLORS[data.watchStatus] : 'gray'
-  const kindColor = KIND_COLORS[data.kind] || 'gray'
+  const kindInfo = getAnimeKindInfo(data.kind)
+  const kindColor = kindInfo?.colorPalette ?? 'gray'
+  const kindLabel = kindInfo?.label ?? data.kind
 
   return (
     <>
@@ -137,7 +139,7 @@ function AnimeNodeComponent(props: NodeProps) {
                   {data.year || '—'}
                 </Text>
                 <Badge colorPalette={kindColor} variant="subtle" size="sm">
-                  {KIND_LABELS[data.kind] || data.kind}
+                  {kindLabel}
                 </Badge>
               </HStack>
 
@@ -174,7 +176,7 @@ function AnimeNodeComponent(props: NodeProps) {
                     </Badge>
                   )}
                   <Badge colorPalette={kindColor} variant="subtle">
-                    {KIND_LABELS[data.kind] || data.kind}
+                    {kindLabel}
                   </Badge>
                   {data.chronologicalOrder && (
                     <Badge colorPalette="blue" variant="solid">

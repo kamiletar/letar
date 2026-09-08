@@ -12,52 +12,11 @@ import { LuLink2 } from 'react-icons/lu'
 
 import { getGatewayBaseUrl } from '@/lib/media-url'
 import type { AnimeManifestRelation } from '@letar/animatrona-types'
+import { getAnimeKindInfo, getRelationKindInfo } from '@letar/animatrona-utils'
 
 interface DiscoverRelatedListProps {
   /** Связанные аниме из RelationsDocument */
   relations: AnimeManifestRelation[]
-}
-
-/** Локализация типов связи */
-const relationLabels: Record<string, { label: string; color: string }> = {
-  sequel: { label: 'Сиквел', color: 'green' },
-  prequel: { label: 'Приквел', color: 'blue' },
-  side_story: { label: 'Побочная история', color: 'purple' },
-  parent_story: { label: 'Основная история', color: 'orange' },
-  summary: { label: 'Краткое содержание', color: 'gray' },
-  full_story: { label: 'Полная версия', color: 'teal' },
-  alternative_version: { label: 'Альтернативная версия', color: 'cyan' },
-  alternative_setting: { label: 'Альтернативный сеттинг', color: 'cyan' },
-  character: { label: 'Персонаж', color: 'pink' },
-  other: { label: 'Другое', color: 'gray' },
-  adaptation: { label: 'Адаптация', color: 'yellow' },
-  SEQUEL: { label: 'Сиквел', color: 'green' },
-  PREQUEL: { label: 'Приквел', color: 'blue' },
-  SIDE_STORY: { label: 'Побочная история', color: 'purple' },
-  PARENT_STORY: { label: 'Основная история', color: 'orange' },
-  SUMMARY: { label: 'Краткое содержание', color: 'gray' },
-  FULL_STORY: { label: 'Полная версия', color: 'teal' },
-  ALTERNATIVE_VERSION: { label: 'Альтернативная версия', color: 'cyan' },
-  ALTERNATIVE_SETTING: { label: 'Альтернативный сеттинг', color: 'cyan' },
-  CHARACTER: { label: 'Персонаж', color: 'pink' },
-  OTHER: { label: 'Другое', color: 'gray' },
-  ADAPTATION: { label: 'Адаптация', color: 'yellow' },
-}
-
-/** Локализация типов аниме */
-const kindLabels: Record<string, string> = {
-  tv: 'TV',
-  movie: 'Фильм',
-  ova: 'OVA',
-  ona: 'ONA',
-  special: 'Спешл',
-  music: 'Клип',
-  TV: 'TV',
-  MOVIE: 'Фильм',
-  OVA: 'OVA',
-  ONA: 'ONA',
-  SPECIAL: 'Спешл',
-  MUSIC: 'Клип',
 }
 
 /** Получить URL постера через gateway */
@@ -96,9 +55,14 @@ export function DiscoverRelatedList({ relations }: DiscoverRelatedListProps) {
 
           <SimpleGrid columns={{ base: 2, sm: 3, md: 4, lg: 5 }} gap={3}>
             {relations.map((rel, index) => {
-              const info = relationLabels[rel.relationKind] ?? { label: rel.relationKind, color: 'gray' }
+              // Оба регистра ключа (lowercase из IPFS, UPPER_CASE из БД) нормализует геттер
+              const relation = getRelationKindInfo(rel.relationKind)
+              const info = {
+                label: relation?.label ?? rel.relationKind,
+                color: relation?.colorPalette ?? 'gray',
+              }
               const posterUrl = getPosterUrl(rel.targetPosterUrl)
-              const kindLabel = rel.targetKind ? (kindLabels[rel.targetKind] ?? rel.targetKind) : null
+              const kindLabel = rel.targetKind ? (getAnimeKindInfo(rel.targetKind)?.label ?? rel.targetKind) : null
 
               return (
                 <Card.Root

@@ -4,9 +4,9 @@
 
 import { computeChronologicalOrder } from '@/lib/franchise'
 import type { ShikimoriFranchiseGraph, ShikimoriRelationKind } from '@/types/electron.d'
+import { getRelationKindInfo } from '@letar/animatrona-utils'
 import { useMemo } from 'react'
 import type { AnimeNode, AnimeNodeData, RelationEdge, RelationEdgeData } from '../types'
-import { RELATION_LABELS } from '../types'
 
 /**
  * Важные типы связей для отображения на графе.
@@ -130,7 +130,7 @@ export function useFranchiseGraph({
       if (currentPriority < existingPriority) {
         const data: RelationEdgeData = {
           relation: link.relation,
-          relationLabel: RELATION_LABELS[link.relation] || link.relation,
+          relationLabel: getRelationKindInfo(link.relation)?.label ?? link.relation,
         }
 
         edgeMap.set(pairKey, {

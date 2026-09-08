@@ -10,6 +10,7 @@
 import type { Anime, RelationKind } from '@/generated/prisma'
 import { prisma } from '@/lib/db'
 import { toPlayableUrl } from '@/lib/media-url'
+import { getRelationKindInfo } from '@letar/animatrona-utils'
 
 /** Данные о рекомендованном сиквеле */
 export interface SequelSuggestion {
@@ -57,20 +58,9 @@ const RELATION_PRIORITY: Record<RelationKind, number> = {
   OTHER: 100, // Другое — игнорируем
 }
 
-/** Локализованные названия типов связи */
-const RELATION_LABELS: Record<RelationKind, string> = {
-  SEQUEL: 'Продолжение',
-  PREQUEL: 'Предыстория',
-  SIDE_STORY: 'Побочная история',
-  PARENT_STORY: 'Основная история',
-  SUMMARY: 'Краткое содержание',
-  FULL_STORY: 'Полная версия',
-  SPIN_OFF: 'Спин-офф',
-  ADAPTATION: 'Адаптация',
-  CHARACTER: 'Общие персонажи',
-  ALTERNATIVE_VERSION: 'Альтернативная версия',
-  ALTERNATIVE_SETTING: 'Альтернативный сеттинг',
-  OTHER: 'Другое',
+/** Подпись типа связи — канонический словарь; UPPER_CASE-ключ нормализует геттер */
+function relationLabel(kind: RelationKind): string {
+  return getRelationKindInfo(kind)?.label ?? kind
 }
 
 /** Причины для рекомендации */
@@ -155,7 +145,7 @@ export async function getSequelSuggestion(animeId: string): Promise<SequelSugges
     posterPath: toPlayableUrl({ cid: targetAnime?.poster?.cid ?? targetAnime?.posterCid }) ?? null,
     year: targetAnime?.year ?? null,
     relationType: best.relationKind,
-    relationLabel: RELATION_LABELS[best.relationKind],
+    relationLabel: relationLabel(best.relationKind),
     reason: RELATION_REASONS[best.relationKind],
     isInLibrary,
     watchStatus: targetAnime?.watchStatus ?? null,
@@ -317,7 +307,7 @@ export async function getFranchiseRelations(animeId: string): Promise<
         episodeCount: rel.targetAnime._count.episodes,
       },
       relationType: rel.relationKind,
-      relationLabel: RELATION_LABELS[rel.relationKind],
+      relationLabel: relationLabel(rel.relationKind),
       isCurrentAnime: false,
     })
   }
@@ -342,7 +332,7 @@ export async function getFranchiseRelations(animeId: string): Promise<
         episodeCount: rel.sourceAnime._count.episodes,
       },
       relationType: invertedKind,
-      relationLabel: RELATION_LABELS[invertedKind],
+      relationLabel: relationLabel(invertedKind),
       isCurrentAnime: false,
     })
   }
