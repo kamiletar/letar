@@ -121,6 +121,19 @@ React (`useState` + `useEffect`), RN-совместим полностью. Но
 — `"dom"` в её `tsconfig.json`, без правок самой библиотеки (переносить `useLocalStorage` в
 `browser.ts` не входило в эту задачу и затронуло бы других потребителей `./utility`).
 
+### Root cause закрыт (2026-09-09) — `useLocalStorage` перенесён в `browser.ts`
+
+`@letar/hooks` 0.6.1: `use-local-storage.ts` физически перемещён из `src/lib/utility/` в
+`src/lib/browser/`, `utility.ts` больше не реэкспортирует `useLocalStorage`, `browser.ts` — да.
+Единственный существующий потребитель через `@letar/hooks/utility` (`animatrona-mobile`)
+использовал только `useDebounce`, поэтому перенос не задел ничьих импортов. `"dom"` убран из
+`apps/animatrona-mobile/tsconfig.json`, `typecheck:tsgo` зелёный без него — подтверждено, что
+причиной был именно барабан внутри `utility.ts`, а не что-то специфичное для React Native/Metro.
+
+Раздел выше («доведено до конца, но категоризация осталась смешанной») оставлен как есть —
+описывает промежуточное состояние между 0.6.0 и 0.6.1, полезен для понимания, почему временный
+фикс через `"dom"` вообще понадобился.
+
 ## Не путать с
 
 - [libs.md § «устаревший `libs/<name>/dist/*.d.ts`»](/.claude/rules/libs.md) — там причина в
