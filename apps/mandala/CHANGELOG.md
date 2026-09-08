@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.40.29] - 2026-09-09
+
+### Fixed
+
+- `package.json`: `@letar/admin-ui`, `@letar/auth`, `@letar/email`, `@letar/pin-auth`,
+  `@letar/query-provider` не были объявлены ни в `dependencies`, ни в
+  `nx.implicitDependencies`, хотя реально импортируются — граф Nx не видел эти рёбра. Добавлены
+  в `dependencies` (`workspace:*`).
+
 ## [0.40.28] - 2026-09-03
 
 ### Fixed

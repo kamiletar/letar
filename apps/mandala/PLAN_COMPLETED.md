@@ -2105,3 +2105,10 @@ admin.id`, плюс `deleteMany` legacy-строки по старому клю�
 фактор (баннер); раунд 8 закрыл оставшееся. `unexpected` дошёл до нуля.
 
 **Последнее обновление:** 2026-09-01
+
+## Починка графа Nx (2026-09-09)
+
+- [x] `@letar/admin-ui`, `@letar/auth`, `@letar/email`, `@letar/pin-auth`,
+      `@letar/query-provider` реально импортировались в коде, но не были объявлены ни в
+      `dependencies`, ни в `nx.implicitDependencies` (PLAN-INFRA-6.md §169). Добавлены в
+      `dependencies` (`workspace:*`), проверено format/lint/typecheck:tsgo.
