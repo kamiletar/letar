@@ -4,9 +4,7 @@
  * Хранит достижения в JSON файле в userData директории (main process).
  */
 
-import { app } from 'electron'
-import { readFile, writeFile } from 'node:fs/promises'
-import * as path from 'path'
+import { createJsonStore } from '@letar/electron-storage'
 
 import { createModuleLogger } from '../../utils/logger'
 
@@ -20,16 +18,20 @@ import {
 const ACHIEVEMENTS_FILE = 'user-achievements.json'
 const log = createModuleLogger('AchievementsStore')
 
-/** In-memory кэш — читаем файл один раз, дальше работаем с памятью */
+/**
+ * In-memory кэш — читаем файл один раз, дальше работаем с памятью.
+ *
+ * Собственный кэш модуля, не `cacheTtlMs` стора: у store'а он выключен
+ * (значение по умолчанию 0), а `saveAchievements` намеренно кладёт значение
+ * в кэш ДО попытки записи на диск — если запись упадёт, в памяти всё равно
+ * останется новое значение (оригинальная оптимистичная семантика).
+ */
 let cache: UserAchievements | null = null
 
-/**
- * Получить путь к файлу достижений
- */
-function getAchievementsPath(): string {
-  const userDataPath = app.getPath('userData')
-  return path.join(userDataPath, ACHIEVEMENTS_FILE)
-}
+const achievementsStore = createJsonStore<UserAchievements>(ACHIEVEMENTS_FILE, INITIAL_USER_ACHIEVEMENTS, {
+  mergeDefaults: true,
+  logger: log,
+})
 
 /**
  * Загрузить достижения (из кэша или файла)
@@ -38,24 +40,8 @@ export async function loadAchievements(): Promise<UserAchievements> {
   if (cache) {
     return cache
   }
-  try {
-    const filePath = getAchievementsPath()
-    const data = await readFile(filePath, 'utf-8')
-    const achievements = JSON.parse(data) as UserAchievements
-
-    // Миграция: добавляем недостающие поля
-    cache = {
-      ...INITIAL_USER_ACHIEVEMENTS,
-      ...achievements,
-    }
-    return cache
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-      log.error('Ошибка загрузки достижений', { error })
-    }
-    cache = { ...INITIAL_USER_ACHIEVEMENTS }
-    return cache
-  }
+  cache = await achievementsStore.load()
+  return cache
 }
 
 /**
@@ -63,13 +49,7 @@ export async function loadAchievements(): Promise<UserAchievements> {
  */
 export async function saveAchievements(achievements: UserAchievements): Promise<void> {
   cache = achievements
-  try {
-    const filePath = getAchievementsPath()
-    await writeFile(filePath, JSON.stringify(achievements, null, 2), 'utf-8')
-  } catch (error) {
-    log.error('Ошибка сохранения достижений', { error })
-    throw error
-  }
+  await achievementsStore.save(achievements)
 }
 
 /**

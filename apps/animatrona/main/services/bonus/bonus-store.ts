@@ -2,9 +2,7 @@
  * Bonus Store — JSON хранилище бонусных очков
  */
 
-import { app } from 'electron'
-import { readFile, writeFile } from 'node:fs/promises'
-import path from 'node:path'
+import { createJsonStore } from '@letar/electron-storage'
 
 import type { BonusPoints, BonusTransaction } from '../../../shared/types/bonus-points'
 import { createModuleLogger } from '../../utils/logger'
@@ -29,12 +27,21 @@ function createInitialBonusPoints(): BonusPoints {
   }
 }
 
+// mergeDefaults не используется — валидация формы (isValidBonusPoints) собственная,
+// на разбор чисел/массива createJsonStore не влияет
+const bonusStore = createJsonStore<BonusPoints>(BONUS_FILE, createInitialBonusPoints(), { logger: log })
+
 /**
- * Получает путь к файлу бонусов
+ * Проверяет, что загруженный объект соответствует форме BonusPoints —
+ * createJsonStore разбирает JSON, но не проверяет форму результата
  */
-function getBonusFilePath(): string {
-  const userDataPath = app.getPath('userData')
-  return path.join(userDataPath, BONUS_FILE)
+function isValidBonusPoints(value: BonusPoints): boolean {
+  return (
+    typeof value.balance === 'number'
+    && typeof value.totalEarned === 'number'
+    && typeof value.totalSpent === 'number'
+    && Array.isArray(value.transactions)
+  )
 }
 
 /**
@@ -45,33 +52,18 @@ export async function loadBonusPoints(): Promise<BonusPoints> {
     return cache
   }
 
-  const filePath = getBonusFilePath()
+  const loaded = await bonusStore.load()
 
-  try {
-    const data = await readFile(filePath, 'utf-8')
-    const parsed = JSON.parse(data) as BonusPoints
-
-    // Валидация данных
-    if (
-      typeof parsed.balance !== 'number'
-      || typeof parsed.totalEarned !== 'number'
-      || typeof parsed.totalSpent !== 'number'
-      || !Array.isArray(parsed.transactions)
-    ) {
-      log.warn('Неверный формат данных, создаём новые')
-      cache = createInitialBonusPoints()
-      return cache
-    }
-
-    cache = parsed
+  if (!isValidBonusPoints(loaded)) {
+    log.warn('Неверный формат данных, создаём новые')
+    cache = createInitialBonusPoints()
     return cache
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-      log.error('Ошибка загрузки бонусов', { error })
-    }
   }
 
-  cache = createInitialBonusPoints()
+  // Копия: без mergeDefaults createJsonStore отдаёт на фолбэке (нет файла) ту же
+  // ссылку на дефолт, а не свежий объект — как раньше делал createInitialBonusPoints().
+  // Мутация снаружи испортила бы дефолт на весь процесс.
+  cache = { ...loaded, transactions: [...loaded.transactions] }
   return cache
 }
 
@@ -79,19 +71,19 @@ export async function loadBonusPoints(): Promise<BonusPoints> {
  * Сохраняет бонусы в файл (async, обновляет кэш)
  */
 export async function saveBonusPoints(bonusPoints: BonusPoints): Promise<void> {
-  const filePath = getBonusFilePath()
+  // Ограничиваем количество транзакций
+  const limitedBonusPoints: BonusPoints = {
+    ...bonusPoints,
+    transactions: bonusPoints.transactions.slice(-MAX_TRANSACTIONS),
+  }
+
+  cache = limitedBonusPoints
 
   try {
-    // Ограничиваем количество транзакций
-    const limitedBonusPoints: BonusPoints = {
-      ...bonusPoints,
-      transactions: bonusPoints.transactions.slice(-MAX_TRANSACTIONS),
-    }
-
-    cache = limitedBonusPoints
-    await writeFile(filePath, JSON.stringify(limitedBonusPoints, null, 2), 'utf-8')
-  } catch (error) {
-    log.error('Ошибка сохранения бонусов', { error })
+    await bonusStore.save(limitedBonusPoints)
+  } catch {
+    // Ошибка уже залогирована store'ом — сохраняем оригинальное поведение:
+    // saveBonusPoints не пробрасывает исключение дальше
   }
 }
 

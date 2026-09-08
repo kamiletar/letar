@@ -6,9 +6,7 @@
  * Поддерживает историю по дням (последние 30 дней).
  */
 
-import { app } from 'electron'
-import * as fs from 'fs'
-import * as path from 'path'
+import { createJsonStore } from '@letar/electron-storage'
 
 import type { DailyStats, StatsReportDelta, UserStats } from '../../../shared/types/stats'
 import { INITIAL_USER_STATS } from '../../../shared/types/stats'
@@ -19,6 +17,14 @@ const log = createModuleLogger('StatsStore')
 const STATS_FILE = 'user-stats.json'
 const MAX_DAILY_HISTORY = 30 // Хранить 30 дней
 const MAX_KNOWN_PEERS = 5000 // Лимит knownBitswapPeers для предотвращения утечки памяти
+
+// mergeDefaults: true воспроизводит прежнее `{ ...INITIAL_USER_STATS, ...stats }` —
+// дальнейшая миграция типов (BigInt→string, knownBitswapPeers) остаётся в migrateStats,
+// т.к. это доменная логика, а не общий паттерн JSON-хранилища
+const statsStore = createJsonStore<UserStats>(STATS_FILE, INITIAL_USER_STATS, {
+  mergeDefaults: true,
+  logger: log,
+})
 
 // ============================================================================
 // Helpers для работы с BigInt как string
@@ -32,14 +38,6 @@ function addBigIntStrings(a: string, b: string): string {
 }
 
 /**
- * Получить путь к файлу статистики
- */
-function getStatsPath(): string {
-  const userDataPath = app.getPath('userData')
-  return path.join(userDataPath, STATS_FILE)
-}
-
-/**
  * Получить текущую дату в формате YYYY-MM-DD
  */
 function getCurrentDate(): string {
@@ -47,59 +45,50 @@ function getCurrentDate(): string {
 }
 
 /**
+ * Миграция загруженных данных: конвертирует числовые BigInt-поля в строки,
+ * чинит knownBitswapPeers и пересчитывает производные от него поля.
+ *
+ * Идемпотентна на уже валидных данных (в т.ч. на INITIAL_USER_STATS) — можно
+ * применять безусловно после store.loadSync(), не только к «настоящим» файлам.
+ */
+function migrateStats(stats: UserStats): UserStats {
+  return {
+    ...stats,
+    // Убедимся что BigInt поля — строки
+    bytesUploaded: String(stats.bytesUploaded ?? '0'),
+    bytesDownloaded: String(stats.bytesDownloaded ?? '0'),
+    totalSeedingTimeMs: String(stats.totalSeedingTimeMs ?? '0'),
+    currentSessionMs: String(stats.currentSessionMs ?? '0'),
+    // Миграция: knownBitswapPeers
+    knownBitswapPeers: Array.isArray(stats.knownBitswapPeers) ? stats.knownBitswapPeers : [],
+    // Миграция: сброс невалидного peersHelped (был на основе swarm peers)
+    // Теперь peersHelped = knownBitswapPeers.length (пересчитывается)
+    peersHelped: Array.isArray(stats.knownBitswapPeers) ? stats.knownBitswapPeers.length : 0,
+    // Миграция lastReported полей
+    lastReportedBytesUploaded: String(stats.lastReportedBytesUploaded ?? '0'),
+    lastReportedBytesDownloaded: String(stats.lastReportedBytesDownloaded ?? '0'),
+    lastReportedSeedingTimeMs: String(stats.lastReportedSeedingTimeMs ?? '0'),
+    lastReportedPeersHelped: Array.isArray(stats.knownBitswapPeers)
+      ? Math.min(stats.lastReportedPeersHelped ?? 0, stats.knownBitswapPeers.length)
+      : 0,
+    // Миграция: аптайм
+    totalUptimeMs: String(stats.totalUptimeMs ?? '0'),
+    lastReportedUptimeMs: String(stats.lastReportedUptimeMs ?? '0'),
+  }
+}
+
+/**
  * Загрузить статистику из файла
  */
 export function loadStats(): UserStats {
-  try {
-    const filePath = getStatsPath()
-    if (!fs.existsSync(filePath)) {
-      return { ...INITIAL_USER_STATS }
-    }
-    const data = fs.readFileSync(filePath, 'utf-8')
-    const stats = JSON.parse(data) as UserStats
-
-    // Миграция: добавляем недостающие поля и конвертируем number в string
-    return {
-      ...INITIAL_USER_STATS,
-      ...stats,
-      // Убедимся что BigInt поля — строки
-      bytesUploaded: String(stats.bytesUploaded ?? '0'),
-      bytesDownloaded: String(stats.bytesDownloaded ?? '0'),
-      totalSeedingTimeMs: String(stats.totalSeedingTimeMs ?? '0'),
-      currentSessionMs: String(stats.currentSessionMs ?? '0'),
-      // Миграция: knownBitswapPeers
-      knownBitswapPeers: Array.isArray(stats.knownBitswapPeers) ? stats.knownBitswapPeers : [],
-      // Миграция: сброс невалидного peersHelped (был на основе swarm peers)
-      // Теперь peersHelped = knownBitswapPeers.length (пересчитывается)
-      peersHelped: Array.isArray(stats.knownBitswapPeers) ? stats.knownBitswapPeers.length : 0,
-      // Миграция lastReported полей
-      lastReportedBytesUploaded: String(stats.lastReportedBytesUploaded ?? '0'),
-      lastReportedBytesDownloaded: String(stats.lastReportedBytesDownloaded ?? '0'),
-      lastReportedSeedingTimeMs: String(stats.lastReportedSeedingTimeMs ?? '0'),
-      lastReportedPeersHelped: Array.isArray(stats.knownBitswapPeers)
-        ? Math.min(stats.lastReportedPeersHelped ?? 0, stats.knownBitswapPeers.length)
-        : 0,
-      // Миграция: аптайм
-      totalUptimeMs: String(stats.totalUptimeMs ?? '0'),
-      lastReportedUptimeMs: String(stats.lastReportedUptimeMs ?? '0'),
-    }
-  } catch (error) {
-    log.error('Ошибка загрузки статистики', { error })
-    return { ...INITIAL_USER_STATS }
-  }
+  return migrateStats(statsStore.loadSync())
 }
 
 /**
  * Сохранить статистику в файл
  */
 export function saveStats(stats: UserStats): void {
-  try {
-    const filePath = getStatsPath()
-    fs.writeFileSync(filePath, JSON.stringify(stats, null, 2), 'utf-8')
-  } catch (error) {
-    log.error('Ошибка сохранения статистики', { error })
-    throw error
-  }
+  statsStore.saveSync(stats)
 }
 
 /**

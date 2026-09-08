@@ -5,6 +5,7 @@
  * в JSON файлах в userData директории.
  */
 
+import { createJsonStore } from '@letar/electron-storage'
 import { app } from 'electron'
 import * as fs from 'fs'
 import * as path from 'path'
@@ -52,6 +53,7 @@ export interface StoredFederationSettings extends FederationSettings {
 // Константы
 // ============================================================================
 
+const FEDERATION_SUBDIR = 'federation'
 const SETTINGS_FILE = 'federation-settings.json'
 const TRACKERS_FILE = 'federation-trackers.json'
 const CONTENT_FILE = 'federation-content.json'
@@ -63,44 +65,17 @@ const MAX_CONTENT_ENTRIES = 1000
 // ============================================================================
 
 /**
- * Получить путь к директории федерации
+ * Гарантировать существование подпапки `federation` в userData.
+ *
+ * `createJsonStore` создаёт директорию только для своего корня (userData), а не
+ * для вложенных подпапок в имени файла — подпапку создаём сами, перед каждой
+ * записью (как раньше делала getFederationDir()). Чтению она не нужна: отсутствие
+ * файла стор отдаёт дефолтом.
  */
-function getFederationDir(): string {
-  const userDataPath = app.getPath('userData')
-  const federationDir = path.join(userDataPath, 'federation')
-  if (!fs.existsSync(federationDir)) {
-    fs.mkdirSync(federationDir, { recursive: true })
-  }
-  return federationDir
-}
-
-/**
- * Загрузить JSON файл
- */
-function loadJson<T>(filename: string, defaultValue: T): T {
-  try {
-    const filePath = path.join(getFederationDir(), filename)
-    if (!fs.existsSync(filePath)) {
-      return defaultValue
-    }
-    const data = fs.readFileSync(filePath, 'utf-8')
-    return JSON.parse(data)
-  } catch (error) {
-    log.error(`Ошибка загрузки ${filename}`, { error })
-    return defaultValue
-  }
-}
-
-/**
- * Сохранить JSON файл
- */
-function saveJson<T>(filename: string, data: T): void {
-  try {
-    const filePath = path.join(getFederationDir(), filename)
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8')
-  } catch (error) {
-    log.error(`Ошибка сохранения ${filename}`, { error })
-    throw error
+function ensureFederationDir(): void {
+  const dir = path.join(app.getPath('userData'), FEDERATION_SUBDIR)
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true })
   }
 }
 
@@ -119,11 +94,48 @@ const DEFAULT_SETTINGS: StoredFederationSettings = {
   hasPrivateKey: false,
 }
 
+// mergeDefaults не используется — раньше loadJson на успешном чтении возвращал
+// распарсенный JSON как есть, без слияния с дефолтами
+const settingsStore = createJsonStore<StoredFederationSettings>(
+  path.join(FEDERATION_SUBDIR, SETTINGS_FILE),
+  DEFAULT_SETTINGS,
+  { logger: log },
+)
+const trackersStore = createJsonStore<StoredTracker[]>(path.join(FEDERATION_SUBDIR, TRACKERS_FILE), [], {
+  logger: log,
+})
+const contentStore = createJsonStore<StoredFederatedContent[]>(path.join(FEDERATION_SUBDIR, CONTENT_FILE), [], {
+  logger: log,
+})
+
+/**
+ * Обёртки записи. Подпапку `federation` библиотека не создаёт (её `ensureDir` покрывает
+ * только корень userData), поэтому гарантия висит здесь, а не на том, что перед каждой
+ * записью кто-то сделал чтение: первая же функция, пишущая без предварительного чтения,
+ * иначе упала бы ENOENT на чистом профиле.
+ */
+function saveSettings(value: StoredFederationSettings): void {
+  ensureFederationDir()
+  settingsStore.saveSync(value)
+}
+
+function saveTrackers(value: StoredTracker[]): void {
+  ensureFederationDir()
+  trackersStore.saveSync(value)
+}
+
+function saveContent(value: StoredFederatedContent[]): void {
+  ensureFederationDir()
+  contentStore.saveSync(value)
+}
+
 /**
  * Получить настройки федерации
  */
 export function getFederationSettings(): StoredFederationSettings {
-  return loadJson<StoredFederationSettings>(SETTINGS_FILE, DEFAULT_SETTINGS)
+  // Копия: без mergeDefaults фолбэк (нет файла) — это сама ссылка на DEFAULT_SETTINGS,
+  // а не свежий объект; наружу её выпускать нельзя
+  return { ...settingsStore.loadSync() }
 }
 
 /**
@@ -137,7 +149,7 @@ export function updateFederationSettings(
     ...current,
     ...update,
   }
-  saveJson(SETTINGS_FILE, updated)
+  saveSettings(updated)
   log.info('Настройки обновлены')
   return updated
 }
@@ -153,7 +165,7 @@ export function saveKeys(privateKeyPem: string, publicKeyPem: string): void {
     publicKeyPem,
     hasPrivateKey: true,
   }
-  saveJson(SETTINGS_FILE, updated)
+  saveSettings(updated)
   log.info('Ключи сохранены')
 }
 
@@ -181,7 +193,9 @@ export function getPublicKey(): string | undefined {
  * Получить все трекеры
  */
 export function getAllTrackers(): StoredTracker[] {
-  return loadJson<StoredTracker[]>(TRACKERS_FILE, [])
+  // Копия — раньше loadJson на фолбэке возвращал свежий литерал `[]` на
+  // каждый вызов, а не переиспользованную ссылку из createJsonStore
+  return [...trackersStore.loadSync()]
 }
 
 /**
@@ -220,7 +234,7 @@ export function addTracker(data: TrackerData): StoredTracker {
   }
 
   trackers.push(newTracker)
-  saveJson(TRACKERS_FILE, trackers)
+  saveTrackers(trackers)
   log.info('Добавлен трекер', { name: data.name, url: data.url })
 
   return newTracker
@@ -244,7 +258,7 @@ export function updateTracker(id: string, update: Partial<TrackerData>): StoredT
   }
 
   trackers[index] = updated
-  saveJson(TRACKERS_FILE, trackers)
+  saveTrackers(trackers)
   log.info('Обновлён трекер', { name: updated.name })
 
   return updated
@@ -262,7 +276,7 @@ export function removeTracker(id: string): boolean {
   }
 
   const removed = trackers.splice(index, 1)[0]
-  saveJson(TRACKERS_FILE, trackers)
+  saveTrackers(trackers)
   log.info('Удалён трекер', { name: removed.name })
 
   return true
@@ -333,7 +347,9 @@ export function unblockTracker(id: string): StoredTracker | undefined {
  * Получить весь федеративный контент
  */
 export function getAllFederatedContent(): StoredFederatedContent[] {
-  return loadJson<StoredFederatedContent[]>(CONTENT_FILE, [])
+  // Копия — раньше loadJson на фолбэке возвращал свежий литерал `[]` на
+  // каждый вызов, а не переиспользованную ссылку из createJsonStore
+  return [...contentStore.loadSync()]
 }
 
 /**
@@ -363,7 +379,7 @@ export function addFederatedContent(data: FederatedContentData): StoredFederated
       receivedAt: now,
     }
     content[existingIndex] = updated
-    saveJson(CONTENT_FILE, content)
+    saveContent(content)
     return updated
   }
 
@@ -381,7 +397,7 @@ export function addFederatedContent(data: FederatedContentData): StoredFederated
     content.splice(MAX_CONTENT_ENTRIES)
   }
 
-  saveJson(CONTENT_FILE, content)
+  saveContent(content)
   log.info('Добавлен контент', { remoteId: data.remoteId, trackerId: data.trackerId })
 
   return newContent
@@ -396,7 +412,7 @@ export function removeFederatedContentByTracker(trackerId: string): number {
   const removed = content.length - filtered.length
 
   if (removed > 0) {
-    saveJson(CONTENT_FILE, filtered)
+    saveContent(filtered)
     log.info('Удалён контент трекера', { trackerId, count: removed })
   }
 
@@ -423,6 +439,8 @@ export function findContentByAnilistId(anilistId: number): StoredFederatedConten
  * Очистить весь контент
  */
 export function clearAllFederatedContent(): void {
-  saveJson(CONTENT_FILE, [])
+  // Единственный write-путь модуля без предварительного чтения через getAllFederatedContent() —
+  // подпапку нужно гарантировать явно
+  saveContent([])
   log.info('Весь федеративный контент очищен')
 }

@@ -5,9 +5,7 @@
  * Используется для P2P Sharing — подписка на библиотеки других пользователей.
  */
 
-import { app } from 'electron'
-import * as fs from 'fs'
-import * as path from 'path'
+import { createJsonStore } from '@letar/electron-storage'
 import { v4 as uuidv4 } from 'uuid'
 
 import type {
@@ -23,42 +21,24 @@ const log = createModuleLogger('SubscriptionStore')
 
 const SUBSCRIPTIONS_FILE = 'subscriptions.json'
 
-/**
- * Получить путь к файлу подписок
- */
-function getSubscriptionsPath(): string {
-  const userDataPath = app.getPath('userData')
-  return path.join(userDataPath, SUBSCRIPTIONS_FILE)
-}
+const subscriptionsStore = createJsonStore<Subscription[]>(SUBSCRIPTIONS_FILE, [], { logger: log })
 
 /**
  * Загрузить подписки из файла
+ *
+ * Копия (spread) — раньше каждый вызов возвращал свежий литерал `[]` на
+ * фолбэке, а не переиспользованную ссылку из createJsonStore; вызывающий код
+ * (addSubscription и т.п.) мутирует результат на месте (push/splice)
  */
 function loadSubscriptions(): Subscription[] {
-  try {
-    const filePath = getSubscriptionsPath()
-    if (!fs.existsSync(filePath)) {
-      return []
-    }
-    const data = fs.readFileSync(filePath, 'utf-8')
-    return JSON.parse(data)
-  } catch (error) {
-    log.error('Ошибка загрузки подписок', { error })
-    return []
-  }
+  return [...subscriptionsStore.loadSync()]
 }
 
 /**
  * Сохранить подписки в файл
  */
 function saveSubscriptions(subscriptions: Subscription[]): void {
-  try {
-    const filePath = getSubscriptionsPath()
-    fs.writeFileSync(filePath, JSON.stringify(subscriptions, null, 2), 'utf-8')
-  } catch (error) {
-    log.error('Ошибка сохранения подписок', { error })
-    throw error
-  }
+  subscriptionsStore.saveSync(subscriptions)
 }
 
 /**

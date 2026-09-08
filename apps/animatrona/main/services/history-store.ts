@@ -5,9 +5,7 @@
  * Максимум 100 записей, старые автоматически удаляются.
  */
 
-import { app } from 'electron'
-import * as fs from 'fs'
-import * as path from 'path'
+import { createJsonStore } from '@letar/electron-storage'
 import { v4 as uuidv4 } from 'uuid'
 
 import type {
@@ -23,42 +21,24 @@ const log = createModuleLogger('HistoryStore')
 const HISTORY_FILE = 'import-history.json'
 const MAX_HISTORY_ENTRIES = 100
 
-/**
- * Получить путь к файлу истории
- */
-function getHistoryPath(): string {
-  const userDataPath = app.getPath('userData')
-  return path.join(userDataPath, HISTORY_FILE)
-}
+const historyStore = createJsonStore<ImportHistoryEntry[]>(HISTORY_FILE, [], { logger: log })
 
 /**
  * Загрузить историю из файла
+ *
+ * Копия (spread) — раньше каждый вызов возвращал свежий литерал `[]` на
+ * фолбэке, а не переиспользованную ссылку из createJsonStore; вызывающий код
+ * (addHistoryEntry и т.п.) мутирует результат на месте (unshift/splice)
  */
 function loadHistory(): ImportHistoryEntry[] {
-  try {
-    const filePath = getHistoryPath()
-    if (!fs.existsSync(filePath)) {
-      return []
-    }
-    const data = fs.readFileSync(filePath, 'utf-8')
-    return JSON.parse(data)
-  } catch (error) {
-    log.error('Ошибка загрузки истории', { error })
-    return []
-  }
+  return [...historyStore.loadSync()]
 }
 
 /**
  * Сохранить историю в файл
  */
 function saveHistory(history: ImportHistoryEntry[]): void {
-  try {
-    const filePath = getHistoryPath()
-    fs.writeFileSync(filePath, JSON.stringify(history, null, 2), 'utf-8')
-  } catch (error) {
-    log.error('Ошибка сохранения истории', { error })
-    throw error
-  }
+  historyStore.saveSync(history)
 }
 
 /**

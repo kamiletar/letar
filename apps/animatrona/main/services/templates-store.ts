@@ -5,9 +5,7 @@
  * Это простой подход, который можно позже мигрировать в SQLite.
  */
 
-import { app } from 'electron'
-import * as fs from 'fs'
-import * as path from 'path'
+import { createJsonStore } from '@letar/electron-storage'
 import { v4 as uuidv4 } from 'uuid'
 
 import type {
@@ -21,42 +19,24 @@ const log = createModuleLogger('TemplatesStore')
 
 const TEMPLATES_FILE = 'import-templates.json'
 
-/**
- * Получить путь к файлу шаблонов
- */
-function getTemplatesPath(): string {
-  const userDataPath = app.getPath('userData')
-  return path.join(userDataPath, TEMPLATES_FILE)
-}
+const templatesStore = createJsonStore<ImportTemplate[]>(TEMPLATES_FILE, [], { logger: log })
 
 /**
  * Загрузить шаблоны из файла
+ *
+ * Копия (spread) — раньше каждый вызов возвращал свежий литерал `[]` на
+ * фолбэке, а не переиспользованную ссылку из createJsonStore; вызывающий код
+ * (createTemplate и т.п.) мутирует результат на месте (push/splice)
  */
 function loadTemplates(): ImportTemplate[] {
-  try {
-    const filePath = getTemplatesPath()
-    if (!fs.existsSync(filePath)) {
-      return []
-    }
-    const data = fs.readFileSync(filePath, 'utf-8')
-    return JSON.parse(data)
-  } catch (error) {
-    log.error('Ошибка загрузки шаблонов', { error })
-    return []
-  }
+  return [...templatesStore.loadSync()]
 }
 
 /**
  * Сохранить шаблоны в файл
  */
 function saveTemplates(templates: ImportTemplate[]): void {
-  try {
-    const filePath = getTemplatesPath()
-    fs.writeFileSync(filePath, JSON.stringify(templates, null, 2), 'utf-8')
-  } catch (error) {
-    log.error('Ошибка сохранения шаблонов', { error })
-    throw error
-  }
+  templatesStore.saveSync(templates)
 }
 
 /**
