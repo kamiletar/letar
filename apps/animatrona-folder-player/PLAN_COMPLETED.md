@@ -161,3 +161,9 @@ AC3/E-AC3/DTS/DTS-HD/TrueHD блокируются, HEVC — нет (аппар�
 ---
 
 **Последнее обновление:** 2026-09-09
+
+## Починка графа Nx (2026-09-09)
+
+- [x] `@letar/chakra-provider` реально импортировался в коде, но не был объявлен ни в
+      `dependencies`, ни в `nx.implicitDependencies` (PLAN-INFRA-6.md §169). Добавлен в
+      `dependencies` (`workspace:*`), проверено format/lint/typecheck:tsgo.

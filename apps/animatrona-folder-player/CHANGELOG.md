@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `package.json`: `@letar/chakra-provider` не был объявлен ни в `dependencies`, ни в
+  `nx.implicitDependencies`, хотя реально импортируется — граф Nx не видел это ребро. Добавлен
+  в `dependencies` (`workspace:*`).
+
 ### Added
 
 - **Потоковый старт воспроизведения для Hi10P-видео** — раньше плеер ждал перекодирования ВСЕГО
