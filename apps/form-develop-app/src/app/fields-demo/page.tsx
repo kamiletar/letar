@@ -256,7 +256,10 @@ const initialValues: DemoFormData = {
   password: '',
   framework: '',
   theme: undefined,
-  country: '',
+  // Непустой initialValue нарочно — регресс-проверка на баг «Combobox с начальным значением
+  // рендерится пустым» (libs/forms CHANGELOG 2.11.5): при открытии страница должна сразу
+  // показывать "United States" в поле, а не пустой инпут с плейсхолдером.
+  country: 'us',
   language: undefined,
   role: '',
   skills: undefined,
