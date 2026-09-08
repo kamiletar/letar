@@ -23,6 +23,7 @@ import { TrackerVideoPlayer } from './_components/tracker-video-player'
 
 interface WatchPageProps {
   params: Promise<{ animeId: string; episode: string }>
+  searchParams: Promise<{ t?: string; audio?: string; sub?: string }>
 }
 
 /**
@@ -123,8 +124,9 @@ async function loadUserPreferredTrackMode(user: Parameters<typeof getEnhancedPri
   return found?.preferredTrackMode as string | null
 }
 
-export default async function WatchPage({ params }: WatchPageProps) {
+export default async function WatchPage({ params, searchParams }: WatchPageProps) {
   const { animeId: slug, episode: episodeParam } = await params
+  const sp = await searchParams
   const episodeNumber = parseInt(episodeParam, 10)
 
   if (Number.isNaN(episodeNumber) || episodeNumber < 1) {
@@ -283,6 +285,38 @@ export default async function WatchPage({ params }: WatchPageProps) {
     }
   }
 
+  // Явная ссылка (?t=&audio=&sub=) — от кнопки «Поделиться» — всегда переопределяет
+  // восстановленный из БД прогресс и дефолты манифеста
+  const audioTracks = episodeResult.manifest.audioTracks ?? []
+  const subtitleTracks = episodeResult.manifest.subtitleTracks ?? []
+
+  if (sp.t !== undefined) {
+    const tOverride = Number(sp.t)
+    if (Number.isFinite(tOverride) && tOverride >= 0) {
+      startTime = tOverride
+    }
+  }
+  if (sp.audio !== undefined) {
+    const audioOverride = Number(sp.audio)
+    if (Number.isInteger(audioOverride) && audioOverride >= 0 && audioOverride < audioTracks.length) {
+      initialAudioTrack = audioOverride
+    }
+  }
+  if (sp.sub === 'off') {
+    initialSubtitleTrack = -1
+  } else if (sp.sub !== undefined) {
+    const subOverride = Number(sp.sub)
+    if (Number.isInteger(subOverride) && subOverride >= 0 && subOverride < subtitleTracks.length) {
+      initialSubtitleTrack = subOverride
+    }
+  }
+
+  // Дорожки ещё не выбраны осознанно (ни прогресса по этому эпизоду, ни явной ссылки) —
+  // клиент может подставить последний ручной выбор пользователя для этого аниме из localStorage
+  // (см. TrackerVideoPlayer: персистентность per-anime, не покрывает случай первого эпизода
+  // вообще без сохранённого выбора, но закрывает переход между эпизодами одного аниме)
+  const tracksAreDefault = !watchProgress && sp.audio === undefined && sp.sub === undefined
+
   // Приоритет trackMode: per-anime override > глобальный из профиля > null (клиент решит)
   const initialTrackMode = (watchData?.trackMode ?? userPreferredTrackMode ?? null) as
     | 'RUSSIAN_DUB'
@@ -299,6 +333,7 @@ export default async function WatchPage({ params }: WatchPageProps) {
       initialAudioTrack={initialAudioTrack}
       initialSubtitleTrack={initialSubtitleTrack}
       initialTrackMode={initialTrackMode}
+      tracksAreDefault={tracksAreDefault}
     />
   )
 }

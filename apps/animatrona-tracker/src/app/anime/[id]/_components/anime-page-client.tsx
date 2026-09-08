@@ -7,7 +7,7 @@
  * Hero + Tabs (Episodes, About, Related, Franchise, Videos).
  */
 
-import { Box, Container } from '@chakra-ui/react'
+import { Box, Container, HStack } from '@chakra-ui/react'
 import type {
   AnimeManifest,
   AnimeManifestRelation,
@@ -16,6 +16,7 @@ import type {
 } from '@letar/animatrona-types'
 
 import { Breadcrumbs } from '@/app/_components/breadcrumbs'
+import { ShareAnimeButton } from '@/app/_components/share-anime-button'
 
 import { AboutSection } from './about-section'
 import { AdminSection } from './admin-section'
@@ -184,7 +185,12 @@ export function AnimePageClient({
         avgRating={anime.avgRating}
         onlineSeedCount={onlineSeedCount}
         episodes={episodes}
-        ctaButton={<ContinueWatchingButton animeSlug={animeSlug} episodes={episodes} />}
+        ctaButton={
+          <HStack gap={2}>
+            <ContinueWatchingButton animeSlug={animeSlug} episodes={episodes} />
+            <ShareAnimeButton title={anime.title} />
+          </HStack>
+        }
       />
 
       {/* Вкладки с контентом */}

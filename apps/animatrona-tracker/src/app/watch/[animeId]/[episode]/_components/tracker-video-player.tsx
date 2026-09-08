@@ -10,6 +10,7 @@
 
 import { Box, Center, IconButton, Text, VStack } from '@chakra-ui/react'
 import type { EpisodeManifest, ManifestAudioTrack, ManifestSubtitleTrack } from '@letar/animatrona-types'
+import { useShare } from '@letar/ui'
 import {
   AutoplayBlockedOverlay,
   ChapterList,
@@ -26,8 +27,9 @@ import {
 } from '@letar/video-player-react'
 import Link from 'next/link'
 import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { LuChevronLeft, LuChevronRight, LuLanguages, LuList, LuSkipForward } from 'react-icons/lu'
+import { LuChevronLeft, LuChevronRight, LuLanguages, LuList, LuShare2, LuSkipForward } from 'react-icons/lu'
 
+import { toaster } from '@/app/_components/ui/toaster'
 import { useMediaUrlHelpers } from '@/lib/media-url'
 
 import { useAudioSync } from '../_hooks/use-audio-sync'
@@ -56,7 +58,13 @@ export interface TrackerVideoPlayerProps {
   initialSubtitleTrack?: number
   /** Начальный trackMode (из БД: per-anime > профиль > null) */
   initialTrackMode?: 'RUSSIAN_DUB' | 'ORIGINAL_SUB' | null
+  /** true — дорожки взяты из дефолтов манифеста, не из осознанного выбора (нет прогресса по
+   * этому эпизоду и нет явной ссылки с &audio=/&sub=) — можно подставить сохранённый в
+   * localStorage выбор пользователя для этого аниме */
+  tracksAreDefault?: boolean
 }
+
+const TRACKS_STORAGE_PREFIX = 'animatrona-tracks-'
 
 // ─── Track selection helpers ────────────────────────────────────────────
 
@@ -139,6 +147,7 @@ export function TrackerVideoPlayer({
   initialAudioTrack = 0,
   initialSubtitleTrack = -1,
   initialTrackMode,
+  tracksAreDefault = false,
 }: TrackerVideoPlayerProps) {
   // Refs
   const containerRef = useRef<HTMLDivElement>(null)
@@ -168,6 +177,37 @@ export function TrackerVideoPlayer({
       setTrackMode(saved)
     }
   }, [initialTrackMode])
+
+  // Персистентность ручного выбора дорожек per-anime: если сервер отдал дефолты манифеста
+  // (нет прогресса по этому эпизоду, нет явной ссылки), подставляем последний осознанный выбор
+  // пользователя для этого аниме — закрывает переход между эпизодами без сброса на дефолт.
+  useEffect(() => {
+    if (!tracksAreDefault) { return }
+    try {
+      const raw = localStorage.getItem(`${TRACKS_STORAGE_PREFIX}${animeId}`)
+      if (!raw) { return }
+      const saved = JSON.parse(raw) as { audio?: number; sub?: number }
+      if (typeof saved.audio === 'number' && manifest.audioTracks[saved.audio]?.cid) {
+        // oxlint-disable-next-line react/set-state-in-effect -- синхронизация с localStorage после монтирования
+        setAudioTrackIndex(saved.audio)
+      }
+      if (typeof saved.sub === 'number' && saved.sub < manifest.subtitleTracks.length) {
+        // oxlint-disable-next-line react/set-state-in-effect -- синхронизация с localStorage после монтирования
+        setSubtitleTrackIndex(saved.sub)
+      }
+    } catch {
+      /* приватный режим/недоступен localStorage — тихо игнорируем */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- один раз при монтировании для этого эпизода
+  }, [tracksAreDefault, animeId])
+
+  const persistTrackSelection = useCallback((audio: number, sub: number) => {
+    try {
+      localStorage.setItem(`${TRACKS_STORAGE_PREFIX}${animeId}`, JSON.stringify({ audio, sub }))
+    } catch {
+      /* приватный режим/недоступен localStorage — тихо игнорируем */
+    }
+  }, [animeId])
 
   // Вычисляемые URL
   const { getVideoUrl, getAudioUrl, getSubtitleUrl, getFontUrls, toPlayerUrl } = useMediaUrlHelpers()
@@ -436,15 +476,37 @@ export function TrackerVideoPlayer({
 
   const handleAudioChange = useCallback((index: number) => {
     setAudioTrackIndex(index)
-  }, [])
+    persistTrackSelection(index, subtitleTrackIndex)
+  }, [subtitleTrackIndex, persistTrackSelection])
 
   const handleSubtitleChange = useCallback((index: number) => {
     setSubtitleTrackIndex(index)
-  }, [])
+    persistTrackSelection(audioTrackIndex, index)
+  }, [audioTrackIndex, persistTrackSelection])
 
   const toggleVideoInfo = useCallback(() => {
     setShowVideoInfo((prev) => !prev)
   }, [])
+
+  // ─── Поделиться ────────────────────────────────────────────────────
+
+  const { share } = useShare()
+
+  const handleShare = useCallback(async () => {
+    const url = new URL(window.location.pathname, window.location.origin)
+    const time = Math.floor(videoRef.current?.currentTime ?? currentTime)
+    if (time > 0) {
+      url.searchParams.set('t', String(time))
+    }
+    url.searchParams.set('audio', String(audioTrackIndex))
+    url.searchParams.set('sub', subtitleTrackIndex >= 0 ? String(subtitleTrackIndex) : 'off')
+
+    const shareText = `${manifest.info.animeName}, серия ${manifest.info.episodeNumber}`
+    const outcome = await share({ title: shareText, url: url.toString() }, url.toString())
+    if (outcome === 'copied') {
+      toaster.success({ title: 'Ссылка скопирована' })
+    }
+  }, [share, currentTime, audioTrackIndex, subtitleTrackIndex, manifest.info])
 
   // Быстрое переключение дорожек
   const toggleTrackMode = useCallback(() => {
@@ -632,6 +694,18 @@ export function TrackerVideoPlayer({
           subtitleTrackIndex={subtitleTrackIndex}
           onSubtitleChange={handleSubtitleChange}
         />
+        <Tooltip content="Поделиться моментом">
+          <IconButton
+            aria-label="Поделиться"
+            size="sm"
+            variant="ghost"
+            color="white"
+            onClick={handleShare}
+            _hover={{ bg: 'whiteAlpha.200' }}
+          >
+            <LuShare2 />
+          </IconButton>
+        </Tooltip>
       </>
     ),
     [
@@ -648,6 +722,7 @@ export function TrackerVideoPlayer({
       manifest.subtitleTracks,
       subtitleTrackIndex,
       handleSubtitleChange,
+      handleShare,
     ],
   )
 

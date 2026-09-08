@@ -18,6 +18,7 @@ function StarIcon() {
 }
 
 import { Breadcrumbs } from '@/app/_components/breadcrumbs'
+import { ShareAnimeButton } from '@/app/_components/share-anime-button'
 
 type Params = Promise<{ key: string }>
 
@@ -88,6 +89,7 @@ export default async function FranchisePage({ params }: { params: Params }) {
               <Badge colorPalette="purple" size="md">
                 {animeList.length} тайтлов
               </Badge>
+              <ShareAnimeButton title={franchiseTitle} />
             </HStack>
           </VStack>
         </Container>
