@@ -3,6 +3,53 @@
 > Точка входа и карта всех частей — [PLAN_COMPLETED.md](./PLAN_COMPLETED.md).
 > Диапазон: 2026-09-04 — 2026-09-08.
 
+## `Tracker` переведён на общий миксин `TrackerFields` (2026-09-08, v0.55.67)
+
+**Контекст:** задача координатора экосистемы Animatrona (тред `cascade-tracker-fields-mixin`) —
+общая часть модели `Tracker` для `animatrona` и будущего `animatrona-ipfs-player` вынесена в
+`libs/zenstack-fragments/src/animatrona.zmodel` (новый миксин `TrackerFields`).
+
+**Реализация:** `apps/animatrona/schema/models/federation.zmodel` — добавлен
+`import "../../../../libs/zenstack-fragments/src/animatrona"`, `model Tracker with
+TrackerFields { ... }`, из тела удалены 9 полей миксина (`id`/`url`/`name`/`description`/
+`theme`/`language`/`lastCheckedAt`/`createdAt`/`updatedAt`) + `@@index([lastCheckedAt])` +
+`@@allow('all', true)` (наследуются). `PinStatus` не тронут (сознательно исключён из миксина).
+`nx db:push animatrona` подтвердил отсутствие дрейфа («already in sync»).
+
+## Вынесен общий IPFS/Kubo-код в `libs/ipfs-kubo-core` (2026-09-08, v0.55.69)
+
+**Контекст:** задача координатора экосистемы Animatrona (тред `ipfs-kubo-core-extraction`) —
+подготовка общей библиотеки для `animatrona` и будущего `animatrona-ipfs-player`, который
+заберёт готовую либу отдельной сессией.
+
+**Реализация:** перенесены целиком `main/services/kubo/*` (демон, RPC-клиент, peer-sync, 12
+файлов), `main/services/tracker-client.ts`, из `ipfs/` — `pin-manager.ts`, `kubo-concurrency.ts`,
+`peer-id-manager.ts`, `unixfs-service.ts`; утилиты (`logger`, `port-finder`,
+`concurrency-limiter`) и типы (`ipfs`, `stats`, `tracker`). `unified-ipfs-service.ts` разделён по
+экспортам: READ (`cat`/`stat`/`has`/`hasBlock`/`safeCat`/`probeCidAvailable`/`saveToFile`) ушёл в
+либу как `unified-ipfs-read.ts`, WRITE (`addFile`/`addBytes`/`addDirectory`/
+`createDirectoryFromCids`/`repoGc`) остался в Animatrona — вне объёма переноса.
+
+**Отклонение от исходного плана координатора:** `unixfs-service.ts` не перенесён в либу целиком —
+файл одновременно оборачивал и READ, и WRITE половины; перенос как есть создал бы обратную
+зависимость либа→приложение. Оставлен в Animatrona тонкой обёрткой, публичный API не изменился.
+
+**Подключение** — три места из-за двойной сборки `main/` (webpack `animatrona:build` + esbuild
+`animatrona-main:build`, см. [animatrona-dual-build-alias-drift](/.claude/docs/animatrona-dual-build-alias-drift.md)):
+`package.json` (реальная `dependency`, не только `implicitDependencies`), `main/webpack.config.js`
+`resolve.alias`, `main/tsconfig.json` + корневой `tsconfig.json` `paths`.
+
+**Побочные правки:** 3 динамических `import()` `peer-sync-service` в `ipfs.handlers.ts` заменены
+на статический (`@nx/enforce-module-boundaries` запрещает смешивать статический и динамический
+импорт одной либы в разных файлах). `eslint.config.mjs` — добавлен allow-list
+`no-restricted-syntax` (`NODE_ENV === 'production'`) для `libs/ipfs-kubo-core/src/**` — тот же
+случай, что уже закрыт для `apps/*/main/**` (Electron-main-only код, просто физически вне пути
+`apps/*/main/`).
+
+**Проверено:** `nx typecheck:tsgo animatrona`, `nx build animatrona` (webpack), `nx run
+animatrona-main:build` (esbuild), `nx test animatrona` (135/135), `nx lint animatrona` + `nx lint
+ipfs-kubo-core` — все зелёные.
+
 ## Удалён мёртвый код `_hooks/useShakaPlayer.ts` (2026-09-08)
 
 **Контекст:** аудит на предмет дублирования `useShakaPlayer` между `animatrona`,
