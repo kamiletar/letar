@@ -1,0 +1,300 @@
+# Автоматический релиз Animatrona Folder Player для всех платформ
+# Триггер: git push origin animatrona-folder-player-vX.Y.Z
+# Результат: релиз с бинарниками прямо в kamiletar/letar — без зеркалирования исходников
+# в отдельный репозиторий (в отличие от release-animatrona.yml), т.к. этот код уже в
+# публичном letar. Без ZenStack/Prisma-шагов — приложение без БД (см. PLAN.md §1).
+
+name: Release Animatrona Folder Player
+
+on:
+  push:
+    tags:
+      - 'animatrona-folder-player-v*.*.*'
+
+# Максимальный вес установщика (МБ) — цель из PLAN.md §2 «≤130 МБ». Падение здесь не даёт
+# «лёгкости» тихо уплыть через пару фич, как это произошло с Animatrona (282 МБ).
+env:
+  MAX_INSTALLER_SIZE_MB: 130
+
+# Релиз пишется в тот же репозиторий (kamiletar/letar), поэтому штатного GITHUB_TOKEN
+# достаточно — в отличие от release-animatrona.yml, где нужен PAT (secrets.GH_TOKEN) для
+# записи в ЧУЖОЙ репозиторий kamiletar/animatrona.
+permissions:
+  contents: write
+
+jobs:
+  # 1. Создание draft release с notes из CHANGELOG
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.parse-version.outputs.version }}
+      tag: ${{ steps.parse-version.outputs.tag }}
+
+    steps:
+      - name: Checkout letar monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Parse version from tag
+        id: parse-version
+        run: |
+          # animatrona-folder-player-v0.4.1 → 0.4.1
+          VERSION=${GITHUB_REF#refs/tags/animatrona-folder-player-v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Extract release notes from CHANGELOG
+        id: changelog
+        run: |
+          VERSION="${{ steps.parse-version.outputs.version }}"
+          CHANGELOG="apps/animatrona-folder-player/CHANGELOG.md"
+
+          NOTES=$(awk '/## \['"$VERSION"'\]/{flag=1; next} /## \[/{flag=0} flag' "$CHANGELOG")
+
+          if [ -z "$NOTES" ]; then
+            # Fallback: последние коммиты по каталогу приложения
+            NOTES=$(git log --pretty=format:"- %s" -10 --no-merges -- apps/animatrona-folder-player/)
+          fi
+
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.parse-version.outputs.tag }}" \
+            --repo kamiletar/letar \
+            --draft \
+            --title "Animatrona Player ${{ steps.parse-version.outputs.version }}" \
+            --notes "${{ steps.changelog.outputs.notes }}"
+
+          echo "Created draft release: ${{ steps.parse-version.outputs.tag }}"
+
+  # 2. Сборка Windows
+  build-windows:
+    needs: create-release
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout letar monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build renderer + main
+        working-directory: apps/animatrona-folder-player
+        run: |
+          next build renderer
+          npx webpack --config main/webpack.config.js
+
+      - name: Package with electron-builder
+        working-directory: apps/animatrona-folder-player
+        run: npx electron-builder --win --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check installer size
+        working-directory: apps/animatrona-folder-player
+        shell: bash
+        run: |
+          EXE=$(ls dist/*.exe 2>/dev/null | head -1)
+          if [ -z "$EXE" ]; then
+            echo "⚠️ No .exe file found"
+            exit 1
+          fi
+          SIZE_MB=$(du -m "$EXE" | cut -f1)
+          echo "Installer size: ${SIZE_MB} МБ (лимит ${MAX_INSTALLER_SIZE_MB} МБ)"
+          if [ "$SIZE_MB" -gt "$MAX_INSTALLER_SIZE_MB" ]; then
+            echo "❌ Установщик весит ${SIZE_MB} МБ — превышен лимит ${MAX_INSTALLER_SIZE_MB} МБ (PLAN.md §2)"
+            exit 1
+          fi
+
+      - name: Upload to release
+        working-directory: apps/animatrona-folder-player
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $TAG = "${{ needs.create-release.outputs.tag }}"
+          $EXE = Get-ChildItem -Path dist/*.exe | Select-Object -First 1
+
+          if ($EXE) {
+            Write-Host "Uploading $($EXE.Name) to release $TAG"
+            gh release upload "$TAG" "$($EXE.FullName)" --repo kamiletar/letar --clobber
+          } else {
+            Write-Host "⚠️ No .exe file found"
+            exit 1
+          }
+
+      - name: Upload artifacts (backup)
+        uses: actions/upload-artifact@v4
+        with:
+          name: animatrona-folder-player-windows
+          path: apps/animatrona-folder-player/dist/*.exe
+          retention-days: 7
+
+  # 3. Сборка Linux
+  build-linux:
+    needs: create-release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout letar monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build renderer + main
+        working-directory: apps/animatrona-folder-player
+        run: |
+          npx next build renderer
+          npx webpack --config main/webpack.config.js
+
+      - name: Package with electron-builder
+        working-directory: apps/animatrona-folder-player
+        run: npx electron-builder --linux --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check installer size
+        working-directory: apps/animatrona-folder-player
+        run: |
+          APPIMAGE=$(ls dist/*.AppImage 2>/dev/null | head -1)
+          if [ -z "$APPIMAGE" ]; then
+            echo "⚠️ No .AppImage file found"
+            exit 1
+          fi
+          SIZE_MB=$(du -m "$APPIMAGE" | cut -f1)
+          echo "Installer size: ${SIZE_MB} МБ (лимит ${MAX_INSTALLER_SIZE_MB} МБ)"
+          if [ "$SIZE_MB" -gt "$MAX_INSTALLER_SIZE_MB" ]; then
+            echo "❌ Установщик весит ${SIZE_MB} МБ — превышен лимит ${MAX_INSTALLER_SIZE_MB} МБ (PLAN.md §2)"
+            exit 1
+          fi
+
+      - name: Upload to release
+        working-directory: apps/animatrona-folder-player
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ needs.create-release.outputs.tag }}"
+          APPIMAGE=$(ls dist/*.AppImage 2>/dev/null | head -1)
+          echo "Uploading $APPIMAGE to release $TAG"
+          gh release upload "$TAG" "$APPIMAGE" --repo kamiletar/letar --clobber
+
+      - name: Upload artifacts (backup)
+        uses: actions/upload-artifact@v4
+        with:
+          name: animatrona-folder-player-linux
+          path: apps/animatrona-folder-player/dist/*.AppImage
+          retention-days: 7
+
+  # 4. Сборка macOS
+  build-macos:
+    needs: create-release
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout letar monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build renderer + main
+        working-directory: apps/animatrona-folder-player
+        run: |
+          npx next build renderer
+          npx webpack --config main/webpack.config.js
+
+      - name: Package with electron-builder
+        working-directory: apps/animatrona-folder-player
+        run: npx electron-builder --mac --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check installer size
+        working-directory: apps/animatrona-folder-player
+        run: |
+          DMG=$(ls dist/*.dmg 2>/dev/null | head -1)
+          if [ -z "$DMG" ]; then
+            echo "⚠️ No .dmg file found"
+            exit 1
+          fi
+          SIZE_MB=$(du -m "$DMG" | cut -f1)
+          echo "Installer size: ${SIZE_MB} МБ (лимит ${MAX_INSTALLER_SIZE_MB} МБ)"
+          if [ "$SIZE_MB" -gt "$MAX_INSTALLER_SIZE_MB" ]; then
+            echo "❌ Установщик весит ${SIZE_MB} МБ — превышен лимит ${MAX_INSTALLER_SIZE_MB} МБ (PLAN.md §2)"
+            exit 1
+          fi
+
+      - name: Upload to release
+        working-directory: apps/animatrona-folder-player
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ needs.create-release.outputs.tag }}"
+          DMG_FILE=$(ls dist/*.dmg 2>/dev/null | head -1)
+          echo "Uploading $DMG_FILE to release $TAG"
+          gh release upload "$TAG" "$DMG_FILE" --repo kamiletar/letar --clobber
+
+      - name: Upload artifacts (backup)
+        uses: actions/upload-artifact@v4
+        with:
+          name: animatrona-folder-player-macos
+          path: apps/animatrona-folder-player/dist/*.dmg
+          retention-days: 7
+
+  # 5. Публикация релиза
+  publish-release:
+    needs: [create-release, build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ needs.create-release.outputs.tag }}"
+          gh release edit "$TAG" --repo kamiletar/letar --draft=false
+          echo "✅ Release published: https://github.com/kamiletar/letar/releases/tag/$TAG"

@@ -6,6 +6,10 @@
 
 ### Added
 
+- Таргеты сборки/релиза (`build`, `build:linux`, `release:win`) и CI-workflow
+  `release-animatrona-folder-player.yml` для релизов из монорепо `kamiletar/letar` (без
+  зеркалирования исходников, без публикации через `electron-updater` — только упаковка и
+  загрузка в GitHub Release). Шаг проверки веса установщика (≤130 МБ) в каждой build-джобе.
 - Дисковый кэш результатов пробы медиафайла (`probe-cache.json` в userData) — переживает
   перезапуск приложения, в отличие от in-memory LRU рендерера. Инвалидация по `mtime`+`size`
   файла, без TTL.

@@ -612,28 +612,41 @@ protocol.registerSchemesAsPrivileged([
 
 ### 8. Фаза 4 — сборка и публикация
 
-- [ ] `project.json`: `dev`, `build`, `build:win`, `build:linux`, `release:win`, `lint`,
-      `typecheck:tsgo`, `format`, `test`. Никаких `db:*`/`zenstack:*`
+- [x] `project.json`: `dev`, `build`, `build:win`, `build:linux`, `release:win`, `lint`,
+      `typecheck:tsgo`, `format` (2026-09-08). `test` намеренно не заведён — у приложения пока
+      нет vitest-инфраструктуры вовсе, заводить таргет без единого теста бессмысленно, это
+      отдельная задача §11 «Тесты писать через агентов». `build` — компиляция без паковки
+      (`next build renderer` + webpack main), `build:linux`/`release:win` — по образцу
+      `build:win` (`electron-builder --linux` / `--win --publish always`). Никаких `db:*`/
+      `zenstack:*` — приложение без БД. Проверено: `nx typecheck:tsgo`/`nx lint` зелёные.
 - [x] `electron-builder.yml`: `appId com.letar.animatrona-folder-player` — сделано попутно
       переименованием 2026-09-08 (см. §0), раньше первоначально задуманного момента этой фазы
-- [ ] `electron-builder.yml`: NSIS (`oneClick: false`),
-      `publish: { provider: github, owner: kamiletar, repo: letar }`
-- [ ] ⚠️ **Точная** версия electron в `devDependencies` (`"42.6.1"`, не `"^42.6.1"`) — иначе
-      electron-builder не определит бинарник
-- [ ] ⚠️ electron-builder ищет `node_modules` от `projectDir`, а не `appDir` — в Nx-монорепо это
-      известная поломка ([electron-builder#9445](https://github.com/electron-userland/electron-builder/issues/9445)).
-      Версию `electron-builder` фиксировать и не поднимать вслепую
-- [ ] `.github/workflows/release-animatrona-folder-player.yml` по тегу `animatrona-folder-player-v*`:
-      build win/linux/mac → релиз **в `kamiletar/letar`**. Без шага зеркалирования исходников
-      (в отличие от `release-animatrona.yml`) — исходники уже в публичном letar
-- [ ] ⚠️ В `kamiletar/letar` **сейчас нет ни одного релиза**, а npm-пакеты тегаются `forms-v*`/
-      `form-mcp-v*` — проверить, что новый тег не ломает [publish-npm.yml](/.github/workflows/publish-npm.yml)
+- [x] `electron-builder.yml`: NSIS (`oneClick: false`) — уже стояло;
+      `publish: { provider: github, owner: kamiletar, repo: letar }` вместо `publish: null`
+      (2026-09-08). Само автообновление (`electron-updater`) в приложении не подключено —
+      отдельный пункт ниже, блокирован на состояние релизного канала Animatrona.
+- [x] ⚠️ **Точная** версия electron в `devDependencies` — уже стояла (`"44.2.0"`, точная).
+- [x] ⚠️ electron-builder ищет `node_modules` от `projectDir`, а не `appDir` — версия
+      `electron-builder` уже зафиксирована точно (`"26.15.3"`, не `^26.15.3`) в `devDependencies`.
+- [x] `.github/workflows/release-animatrona-folder-player.yml` по тегу `animatrona-folder-player-v*`
+      (2026-09-08): build win/linux/mac → релиз **в `kamiletar/letar`**. Без шага зеркалирования
+      исходников (в отличие от `release-animatrona.yml`) и без ZenStack/Prisma-шагов — приложение
+      без БД. `permissions: contents: write` + штатный `GITHUB_TOKEN` (не PAT `secrets.GH_TOKEN`,
+      как у Animatrona) — релиз пишется в тот же репозиторий, не в чужой.
+      ⚠️ **Проверено:** [publish-npm.yml](/.github/workflows/publish-npm.yml) триггерится только
+      на `forms-v*.*.*`/`form-mcp-v*.*.*`/`zenstack-form-plugin-v*.*.*` — новый тег
+      `animatrona-folder-player-v*` под эти паттерны не подходит, конфликта нет. YAML
+      провалидирован `yaml.safe_load` (jobs: create-release/build-windows/build-linux/
+      build-macos/publish-release). **Не проверено живым прогоном** — реальный push тега и
+      публикация релиза не выполнялись (нужен git push, требует отдельного одобрения; см.
+      `.claude/rules/git.md`), поэтому workflow не гонялся в GitHub Actions ни разу.
+- [x] **Шаг проверки веса в CI**: падать, если установщик > 130 МБ — реализовано в каждом из
+      трёх build-джобов workflow (`du -m`, сравнение с `env.MAX_INSTALLER_SIZE_MB: 130`),
+      до загрузки в релиз. Не запускался живьём по той же причине, что пункт выше.
 - [ ] Автообновление (`electron-updater`) — включать только после того, как первый релиз в letar
       реально появился и `latest.yml` отдаётся
 - [ ] **Портативная сборка** вторым target'ом (`portable` для Windows, обычный `.AppImage` для Linux
       уже портативен). Плеер часто хотят запустить без установки — с флешки, на чужой машине
-- [ ] **Шаг проверки веса в CI**: падать, если установщик > 130 МБ. Без автоматической проверки
-      «лёгкость» тихо уплывёт через пару фич — как уплыла до 282 МБ у Animatrona
 
 **Побочная находка, отдельная задача:** релизный контур Animatrona рассинхронизирован —
 `electron-builder.yml` публикует в `repo: letar` (где релизов нет), а workflow загружает ассеты в

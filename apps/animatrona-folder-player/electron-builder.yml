@@ -47,8 +47,13 @@ nsis:
   createStartMenuShortcut: true
   shortcutName: Animatrona Player
 
-# Без автообновления по умолчанию — если нужно, настрой provider: github и убери publish: null
-publish: null
+# Provider настроен для `--publish` в release-workflow — само автообновление в приложении
+# (electron-updater) не подключено, включать только после первого реального релиза
+# (см. apps/animatrona-folder-player/PLAN.md §8)
+publish:
+  provider: github
+  owner: kamiletar
+  repo: letar
 
 extraResources:
   # Статический экспорт Next.js (без сервера — вся логика через Electron IPC)

@@ -11,6 +11,17 @@
         "cwd": "apps/animatrona-folder-player"
       }
     },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "next build renderer",
+          "npx webpack --config main/webpack.config.js"
+        ],
+        "cwd": "apps/animatrona-folder-player",
+        "parallel": false
+      }
+    },
     "build:win": {
       "executor": "nx:run-commands",
       "options": {
@@ -18,6 +29,30 @@
           "next build renderer",
           "npx webpack --config main/webpack.config.js",
           "npx electron-builder --win"
+        ],
+        "cwd": "apps/animatrona-folder-player",
+        "parallel": false
+      }
+    },
+    "build:linux": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "next build renderer",
+          "npx webpack --config main/webpack.config.js",
+          "npx electron-builder --linux"
+        ],
+        "cwd": "apps/animatrona-folder-player",
+        "parallel": false
+      }
+    },
+    "release:win": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "next build renderer",
+          "npx webpack --config main/webpack.config.js",
+          "npx electron-builder --win --publish always"
         ],
         "cwd": "apps/animatrona-folder-player",
         "parallel": false
