@@ -17,6 +17,7 @@ import { app } from 'electron'
 import http from 'http'
 
 import { createModuleLogger } from '../utils/logger'
+import { nodeId, swarmConnectOrThrow } from './kubo-api-client'
 import { PRIVATE_RELAY, RELAY_REGISTER_URL } from './kubo-config'
 
 const log = createModuleLogger('KuboRelay')
@@ -314,16 +315,10 @@ export function stopRelayMonitor(interval: ReturnType<typeof setInterval> | null
  * Проверить, есть ли /p2p-circuit адрес в announced addresses Kubo
  */
 async function hasRelayReservation(apiUrl: string): Promise<boolean> {
-  const res = await fetch(`${apiUrl}/api/v0/id`, {
-    method: 'POST',
-    signal: AbortSignal.timeout(15000),
-  })
-  if (!res.ok) {
-    return false
-  }
-
-  const data = (await res.json()) as { Addresses?: string[] }
-  const addrs = data.Addresses ?? []
+  // Недоступный API — это тоже «reservation нет»: счётчик промахов должен расти, иначе
+  // упавшая нода никогда не дотянет до порога рестарта.
+  const data = await nodeId(apiUrl, { timeout: 15_000 }).catch(() => null)
+  const addrs = data?.Addresses ?? []
   return addrs.some((addr) => addr.includes('/p2p-circuit'))
 }
 
@@ -337,18 +332,9 @@ async function hasRelayReservation(apiUrl: string): Promise<boolean> {
  */
 async function forceSwarmConnect(apiUrl: string, relayMultiaddr: string): Promise<void> {
   try {
-    const res = await fetch(`${apiUrl}/api/v0/swarm/connect?arg=${encodeURIComponent(relayMultiaddr)}`, {
-      method: 'POST',
-      signal: AbortSignal.timeout(10000),
-    })
-
-    if (res.ok) {
-      log.info('Swarm connect к relay успешен — ожидаем re-reservation')
-    } else {
-      const text = await res.text()
-      log.warn('Swarm connect к relay не удался', { status: res.status, body: text.slice(0, 200) })
-    }
+    await swarmConnectOrThrow(apiUrl, relayMultiaddr)
+    log.info('Swarm connect к relay успешен — ожидаем re-reservation')
   } catch (err) {
-    log.warn('Swarm connect к relay: ошибка', { error: String(err) })
+    log.warn('Swarm connect к relay не удался', { error: String(err) })
   }
 }

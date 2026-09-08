@@ -95,15 +95,47 @@ export async function bootstrapRm(apiUrl: string, multiaddr: string): Promise<vo
 // Swarm API
 // ========================
 
-/** Подключиться к peer по multiaddr */
+/**
+ * Подключиться к peer по multiaddr, пробросив ошибку наверх.
+ *
+ * Нужен вызывающим, которые хотят отличить успех от неудачи (например залогировать
+ * «reservation сейчас восстановится»). Кому это не важно — `swarmConnect`.
+ */
+export async function swarmConnectOrThrow(apiUrl: string, multiaddr: string): Promise<void> {
+  await kuboRequest(apiUrl, `/api/v0/swarm/connect?arg=${encodeURIComponent(multiaddr)}`)
+  log.debug('swarmConnect', { multiaddr })
+}
+
+/** Подключиться к peer по multiaddr; неудача не считается ошибкой */
 export async function swarmConnect(apiUrl: string, multiaddr: string): Promise<void> {
   try {
-    await kuboRequest(apiUrl, `/api/v0/swarm/connect?arg=${encodeURIComponent(multiaddr)}`)
-    log.debug('swarmConnect', { multiaddr })
+    await swarmConnectOrThrow(apiUrl, multiaddr)
   } catch (error) {
     // Swarm connect часто фейлится при network issues — логируем и продолжаем
     log.warn('swarmConnect failed', { multiaddr, error: String(error) })
   }
+}
+
+// ========================
+// Node identity
+// ========================
+
+/** Ответ `/api/v0/id` в той части, которую реально читают вызывающие */
+export interface KuboNodeId {
+  ID?: string
+  Addresses?: string[]
+  AgentVersion?: string
+}
+
+/**
+ * Идентификация ноды и её анонсированные адреса.
+ *
+ * Бросает при недоступном API — вызывающие фолбэчатся по-разному (пустой список адресов,
+ * `false` у проверки reservation, ретрай у health-check).
+ */
+export async function nodeId(apiUrl: string, opts: RequestOptions = {}): Promise<KuboNodeId> {
+  const res = await kuboRequest(apiUrl, '/api/v0/id', opts)
+  return (await res.json()) as KuboNodeId
 }
 
 /**

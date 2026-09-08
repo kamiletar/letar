@@ -18,6 +18,7 @@ import type { KuboRPCClient } from 'kubo-rpc-client' with { 'resolution-mode': '
 
 import type { IpfsServiceStatus, P2PDiagnostics } from '../types/ipfs'
 import { createModuleLogger } from '../utils/logger'
+import { nodeId } from './kubo-api-client'
 import { KUBO_PORTS } from './kubo-config'
 import { getKuboBinaryPath, getKuboRepoPath, prepareKuboRepo, spawnKuboDaemon, validateKuboBinary } from './kubo-daemon'
 import { detectIpfsDesktop, type IpfsDesktopInfo, isIpfsDesktopAlive } from './kubo-detector'
@@ -462,16 +463,10 @@ export class KuboService extends EventEmitter {
       const apiUrl = this.getApiUrl()
       if (apiUrl) {
         try {
-          const res = await fetch(`${apiUrl}/api/v0/id`, {
-            method: 'POST',
-            signal: AbortSignal.timeout(5000),
-          })
-          if (res.ok) {
-            const idData = (await res.json()) as { Addresses?: string[]; AgentVersion?: string }
-            listenAddrs = idData.Addresses ?? []
-          }
+          const idData = await nodeId(apiUrl, { timeout: 5000 })
+          listenAddrs = idData.Addresses ?? []
         } catch {
-          // Игнорируем
+          // Игнорируем — адреса не критичны для сводки по соединениям
         }
       }
 
