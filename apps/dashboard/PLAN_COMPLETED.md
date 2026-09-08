@@ -1579,3 +1579,9 @@ dashboard никогда не попадают, только число.
 - `src/app/api/cron/ssl-check/route.ts`
 - `schema.zmodel`, `prisma/migrations/20260729232641_add_ssl_expiring_alert_type/`
 - `apps/dashboard-agent/src/lib/cron.ts`
+
+## Починка графа Nx (2026-09-09)
+
+- [x] `@letar/auth` реально импортировался в коде, но не был объявлен ни в `dependencies`, ни в
+      `nx.implicitDependencies` (PLAN-INFRA-6.md §169). Добавлен в `dependencies`
+      (`workspace:*`), проверено format/lint/typecheck:tsgo.

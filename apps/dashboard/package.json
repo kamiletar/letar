@@ -1,6 +1,6 @@
 {
   "name": "@letar/dashboard",
-  "version": "1.26.5",
+  "version": "1.26.6",
   "private": true,
   "nx": {
     "name": "dashboard",
@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@letar/ui": "workspace:*",
+    "@letar/auth": "workspace:*",
     "@letar/forms": "workspace:*",
     "@letar/analytics": "workspace:*",
     "@letar/chakra-provider": "workspace:*",
