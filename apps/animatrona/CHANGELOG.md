@@ -4,6 +4,16 @@
 
 ## [Unreleased]
 
+## [0.55.67] - 2026-09-08
+
+### Changed
+
+- **`Tracker` переведён на общий миксин `TrackerFields`** (`libs/zenstack-fragments/src/animatrona.zmodel`)
+  — задача координатора экосистемы Animatrona, общая часть модели для `animatrona` и будущего
+  `animatrona-ipfs-player`. Состав полей не изменился (`id`, `url`, `name`, `description`, `theme`,
+  `language`, `lastCheckedAt`, `createdAt`, `updatedAt` теперь наследуются из миксина), `db:push`
+  подтвердил отсутствие дрейфа.
+
 ## [0.55.66] - 2026-09-08
 
 ### Removed
