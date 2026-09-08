@@ -47,6 +47,11 @@ projects --with-target` этого не ловит ·
 `--max-old-space-size`), раздутый безусловной (без `include`) регистрацией `@nx/vitest` в
 `nx.json`, цепляющей `vitest.config.*` внутри вложенных `node_modules`; воркэраунд —
 `NODE_OPTIONS=--max-old-space-size=8192` (форвардится воркеру как есть) ·
+[nx-playwright-plugin-project-graph-race](/.claude/docs/nx-playwright-plugin-project-graph-race.md)
+⚠️ `Failed to process project graph` на `@nx/playwright/plugin` («Unexpected module status 0»,
+«race condition ... Promise.all()») — гонка загрузчика ESM при параллельном чтении конфигов
+**всех** playwright-проектов воркспейса разом, упавший файл может принадлежать постороннему
+приложению; `NX_PREFER_NODE_STRIP_TYPES=false` не помогает, лечится обычным повторным запуском ·
 [nx-e2e-implicit-deps-public-repo-private-app-exception](/.claude/docs/nx-e2e-implicit-deps-public-repo-private-app-exception.md)
 ⚠️ `dsperevod-e2e`/`svoichuzhie-e2e`/`aprel8008-e2e` (публичные каталоги) намеренно не держат
 `implicitDependencies` на своё приложение (submodule) — на CI без submodule это уронит весь граф
