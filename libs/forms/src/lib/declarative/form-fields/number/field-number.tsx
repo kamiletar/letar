@@ -1,7 +1,8 @@
 'use client'
 
 import { NumberInput } from '@chakra-ui/react'
-import type { ReactElement } from 'react'
+import { useFormI18n } from '@letar/forms-react'
+import { type ReactElement, useMemo } from 'react'
 import type { NumberFieldProps } from '../../types'
 import { createField, FieldWrapper } from '../base'
 
@@ -24,9 +25,33 @@ import { createField, FieldWrapper } from '../base'
  * // With z.number().min(1).max(100) automatically: min={1} max={100} helperText="From 1 to 100"
  * ```
  */
-export const FieldNumber = createField<NumberFieldProps, number | undefined>({
+interface NumberFieldState {
+  /** BCP-47 locale для парсинга/форматирования — из `FormI18nProvider`, влияет на десятичный разделитель */
+  locale: string | undefined
+  /**
+   * zag-js `parseValue`/`formatValue` парсят `parseFloat`/`value.toString()` (игнорируя `locale`
+   * целиком), пока `formatOptions` не задан — см. `@zag-js/number-input` `number-input.utils`.
+   * Без явного объекта здесь запятая как десятичный разделитель (RU-локаль) не распознаётся вообще,
+   * даже с корректным `locale`. `useGrouping: false` + `maximumFractionDigits: 20` воспроизводят
+   * прежний вид без forma­tOptions (как `value.toString()`) для en/без i18n, включая локаль-зависимый
+   * разделитель для остальных языков.
+   */
+  formatOptions: Intl.NumberFormatOptions
+}
+
+export const FieldNumber = createField<NumberFieldProps, number | undefined, NumberFieldState>({
   displayName: 'FieldNumber',
-  render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps }): ReactElement => {
+
+  useFieldState: () => {
+    const locale = useFormI18n()?.locale
+    const formatOptions = useMemo<Intl.NumberFormatOptions>(
+      () => ({ useGrouping: false, maximumFractionDigits: 20 }),
+      [],
+    )
+    return { locale, formatOptions }
+  },
+
+  render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const value = field.state.value as number | undefined
     const { constraints } = resolved
 
@@ -53,6 +78,8 @@ export const FieldNumber = createField<NumberFieldProps, number | undefined>({
           min={shouldApplyMinMax ? min : undefined}
           max={shouldApplyMinMax ? max : undefined}
           step={step}
+          locale={fieldState.locale}
+          formatOptions={fieldState.formatOptions}
         >
           <NumberInput.Control>
             <NumberInput.IncrementTrigger />

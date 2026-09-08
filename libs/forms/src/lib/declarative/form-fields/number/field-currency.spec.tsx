@@ -1,5 +1,7 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
+import { FormI18nProvider } from '@letar/forms-react'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -59,6 +61,29 @@ describe('FieldCurrency', () => {
       )
 
       expect(screen.getByText('Укажите стоимость')).toBeInTheDocument()
+    })
+  })
+
+  describe('локаль (десятичный разделитель)', () => {
+    it('с FormI18nProvider locale="ru" парсит запятую как десятичный разделитель', async () => {
+      const user = userEvent.setup()
+      const onSubmit = vi.fn()
+      render(
+        <FormI18nProvider locale="ru">
+          <Form initialValue={{ price: undefined }} onSubmit={onSubmit}>
+            <Form.Field.Currency name="price" />
+            <Form.Button.Submit>Submit</Form.Button.Submit>
+          </Form>
+        </FormI18nProvider>,
+        { wrapper: TestWrapper },
+      )
+
+      const input = screen.getByRole('spinbutton')
+      await user.click(input)
+      await user.paste('234,65')
+      await user.click(screen.getByRole('button', { name: 'Submit' }))
+
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ price: 234.65 }))
     })
   })
 })

@@ -1,6 +1,7 @@
 'use client'
 
 import { NumberInput } from '@chakra-ui/react'
+import { useFormI18n } from '@letar/forms-react'
 import { type ReactElement, useMemo } from 'react'
 import type { CurrencyFieldProps } from '../../types'
 import { createField, FieldWrapper } from '../base'
@@ -34,6 +35,8 @@ import { createField, FieldWrapper } from '../base'
 interface CurrencyFieldState {
   /** Memoized format options */
   formatOptions: Intl.NumberFormatOptions
+  /** BCP-47 locale для парсинга/форматирования — из `FormI18nProvider`, влияет на десятичный разделитель */
+  locale: string | undefined
 }
 
 export const FieldCurrency = createField<CurrencyFieldProps, number | undefined, CurrencyFieldState>({
@@ -41,6 +44,7 @@ export const FieldCurrency = createField<CurrencyFieldProps, number | undefined,
 
   useFieldState: (props) => {
     const { currency = 'RUB', currencyDisplay = 'symbol', decimalScale = 2 } = props
+    const locale = useFormI18n()?.locale
 
     // Memoize formatOptions at component top level
     const formatOptions = useMemo(
@@ -54,7 +58,7 @@ export const FieldCurrency = createField<CurrencyFieldProps, number | undefined,
       [currency, currencyDisplay, decimalScale],
     )
 
-    return { formatOptions }
+    return { formatOptions, locale }
   },
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
@@ -62,7 +66,7 @@ export const FieldCurrency = createField<CurrencyFieldProps, number | undefined,
 
     const { min, max, step = 0.01, size } = componentProps
 
-    const { formatOptions } = fieldState
+    const { formatOptions, locale } = fieldState
 
     return (
       <FieldWrapper resolved={resolved} hasError={hasError} errorMessage={errorMessage} fullPath={fullPath}>
@@ -77,6 +81,7 @@ export const FieldCurrency = createField<CurrencyFieldProps, number | undefined,
           max={max}
           step={step}
           formatOptions={formatOptions}
+          locale={locale}
           clampValueOnBlur
           size={size}
         >

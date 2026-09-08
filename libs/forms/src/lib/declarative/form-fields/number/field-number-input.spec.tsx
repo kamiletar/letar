@@ -1,4 +1,5 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
+import { FormI18nProvider } from '@letar/forms-react'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
@@ -92,6 +93,50 @@ describe('FieldNumberInput', () => {
       )
 
       expect(screen.getByRole('spinbutton')).toBeDisabled()
+    })
+  })
+
+  describe('локаль (десятичный разделитель)', () => {
+    it('без FormI18nProvider парсит точку (en-US по умолчанию)', async () => {
+      const user = userEvent.setup()
+      const onSubmit = vi.fn()
+      render(
+        <TestWrapper>
+          <Form initialValue={{ price: undefined }} onSubmit={onSubmit}>
+            <Form.Field.NumberInput name="price" />
+            <Form.Button.Submit>Submit</Form.Button.Submit>
+          </Form>
+        </TestWrapper>,
+      )
+
+      const input = screen.getByRole('spinbutton')
+      await user.click(input)
+      await user.paste('234.65')
+      await user.click(screen.getByRole('button', { name: 'Submit' }))
+
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ price: 234.65 }))
+    })
+
+    it('с FormI18nProvider locale="ru" парсит запятую как десятичный разделитель', async () => {
+      const user = userEvent.setup()
+      const onSubmit = vi.fn()
+      render(
+        <TestWrapper>
+          <FormI18nProvider locale="ru">
+            <Form initialValue={{ price: undefined }} onSubmit={onSubmit}>
+              <Form.Field.NumberInput name="price" />
+              <Form.Button.Submit>Submit</Form.Button.Submit>
+            </Form>
+          </FormI18nProvider>
+        </TestWrapper>,
+      )
+
+      const input = screen.getByRole('spinbutton')
+      await user.click(input)
+      await user.paste('234,65')
+      await user.click(screen.getByRole('button', { name: 'Submit' }))
+
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ price: 234.65 }))
     })
   })
 })

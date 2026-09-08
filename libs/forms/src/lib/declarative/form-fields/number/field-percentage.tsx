@@ -1,6 +1,7 @@
 'use client'
 
 import { NumberInput } from '@chakra-ui/react'
+import { useFormI18n } from '@letar/forms-react'
 import { type ReactElement, useMemo } from 'react'
 import type { PercentageFieldProps } from '../../types'
 import { createField, FieldWrapper } from '../base'
@@ -30,6 +31,8 @@ import { createField, FieldWrapper } from '../base'
 interface PercentageFieldState {
   /** Memoized format options */
   formatOptions: Intl.NumberFormatOptions
+  /** BCP-47 locale для парсинга/форматирования — из `FormI18nProvider`, влияет на десятичный разделитель */
+  locale: string | undefined
 }
 
 export const FieldPercentage = createField<PercentageFieldProps, number | undefined, PercentageFieldState>({
@@ -37,6 +40,7 @@ export const FieldPercentage = createField<PercentageFieldProps, number | undefi
 
   useFieldState: (props) => {
     const { decimalScale = 0 } = props
+    const locale = useFormI18n()?.locale
 
     // Use 'unit' style with percent to store whole numbers (50 = 50%)
     // Chakra's 'percent' style expects decimals (0.5 = 50%)
@@ -51,7 +55,7 @@ export const FieldPercentage = createField<PercentageFieldProps, number | undefi
       [decimalScale],
     )
 
-    return { formatOptions }
+    return { formatOptions, locale }
   },
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
@@ -59,7 +63,7 @@ export const FieldPercentage = createField<PercentageFieldProps, number | undefi
 
     const { min = 0, max = 100, step = 1, size } = componentProps
 
-    const { formatOptions } = fieldState
+    const { formatOptions, locale } = fieldState
 
     return (
       <FieldWrapper resolved={resolved} hasError={hasError} errorMessage={errorMessage} fullPath={fullPath}>
@@ -74,6 +78,7 @@ export const FieldPercentage = createField<PercentageFieldProps, number | undefi
           max={max}
           step={step}
           formatOptions={formatOptions}
+          locale={locale}
           clampValueOnBlur
           size={size}
         >

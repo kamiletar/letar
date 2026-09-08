@@ -1,9 +1,20 @@
 'use client'
 
 import { NumberInput } from '@chakra-ui/react'
+import { useFormI18n } from '@letar/forms-react'
 import type { ReactElement } from 'react'
 import type { NumberInputFieldProps } from '../../types'
 import { createField, FieldWrapper } from '../base'
+
+/**
+ * zag-js `parseValue`/`formatValue` парсят `parseFloat`/`value.toString()` (игнорируя `locale`
+ * целиком), пока `formatOptions` не задан — см. `@zag-js/number-input` `number-input.utils`. Без
+ * явного объекта запятая как десятичный разделитель (RU-локаль) не распознаётся вообще, даже с
+ * корректным `locale`. `useGrouping: false` + `maximumFractionDigits: 20` воспроизводят прежний
+ * вид без formatOptions (как `value.toString()`) для en/без i18n — применяется только когда сам
+ * потребитель не задал `formatOptions` явно (иначе перебьёт его выбор группировки/стиля).
+ */
+const DEFAULT_FORMAT_OPTIONS: Intl.NumberFormatOptions = { useGrouping: false, maximumFractionDigits: 20 }
 
 /**
  * Form.Field.NumberInput - Number field with extended options
@@ -29,11 +40,19 @@ import { createField, FieldWrapper } from '../base'
  * <Form.Field.NumberInput name="count" allowMouseWheel />
  * ```
  */
-export const FieldNumberInput = createField<NumberInputFieldProps, number | undefined>({
+interface NumberInputFieldState {
+  /** BCP-47 locale для парсинга/форматирования — из `FormI18nProvider`, влияет на десятичный разделитель */
+  locale: string | undefined
+}
+
+export const FieldNumberInput = createField<NumberInputFieldProps, number | undefined, NumberInputFieldState>({
   displayName: 'FieldNumberInput',
 
-  render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps }): ReactElement => {
+  useFieldState: () => ({ locale: useFormI18n()?.locale }),
+
+  render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
     const value = field.state.value as number | undefined
+    const formatOptions = componentProps.formatOptions ?? DEFAULT_FORMAT_OPTIONS
 
     return (
       <FieldWrapper resolved={resolved} hasError={hasError} errorMessage={errorMessage} fullPath={fullPath}>
@@ -47,7 +66,8 @@ export const FieldNumberInput = createField<NumberInputFieldProps, number | unde
           min={componentProps.min}
           max={componentProps.max}
           step={componentProps.step}
-          formatOptions={componentProps.formatOptions}
+          formatOptions={formatOptions}
+          locale={fieldState.locale}
           allowMouseWheel={componentProps.allowMouseWheel}
           clampValueOnBlur={componentProps.clampValueOnBlur ?? true}
           spinOnPress={componentProps.spinOnPress ?? true}

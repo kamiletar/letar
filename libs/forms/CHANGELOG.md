@@ -4,6 +4,25 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.12.3] - 2026-09-09
+
+### Fixed
+
+- **`Form.Field.Number`/`NumberInput`/`Currency`/`Percentage` не распознавали запятую как
+  десятичный разделитель ни при какой локали** (от `domwellbes-dev`, backlog). Причина в две
+  части: (1) ни одно из полей не передавало `locale` в `NumberInput.Root` — zag-js использовал
+  жёстко зашитый `en-US`; (2) даже с `locale`, `Form.Field.Number`/`NumberInput` без явного
+  `formatOptions` заставляют `@zag-js/number-input` парсить значение через голый `parseFloat`
+  (см. `number-input.utils.ts`: `if (!prop("formatOptions")) return parseFloat(value)`) — locale
+  в этой ветке вообще не участвует, поэтому первой правки одной было недостаточно (проверено
+  тестом: `"234,65"` парсилось как `234`, обрезаясь на запятой). Фикс — оба поля теперь всегда
+  передают `formatOptions` (по умолчанию `{ useGrouping: false, maximumFractionDigits: 20 }`,
+  что при отсутствии `FormI18nProvider` даёт тот же вид, что раньше давал голый
+  `value.toString()`), включая locale-aware парсинг через `@internationalized/number`.
+  `Form.Field.Currency`/`Percentage` уже задавали свой `formatOptions` — им не хватало только
+  `locale`. Требует `<FormI18nProvider locale="ru">` в дереве провайдеров — без него используется
+  `en-US` (десятичная точка), как и раньше.
+
 ## [2.12.2] - 2026-09-08
 
 ### Fixed
