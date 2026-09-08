@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.11] - 2026-09-08
+
+### Added
+
+- `edit-intent-demo`: демо `Form.Field.EditIntent` (`@letar/forms-core/edit-intent`) — сценарий
+  редактирования существующего секрета (маска → «Заменить» → ввод → submit
+  `{ isEdited: true, value }`) и сценарий создания нового секрета (поле сразу в edit mode).
+  Ссылка добавлена на главную.
+
 ## [0.1.10] - 2026-09-08
 
 ### Added

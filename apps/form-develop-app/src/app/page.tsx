@@ -82,6 +82,9 @@ export default function HomePage() {
         <Button asChild colorPalette="green" variant="outline" size="lg" width="fit-content">
           <Link href="/slug-demo">Slug (URL-слаг, зеркалит соседнее поле)</Link>
         </Button>
+        <Button asChild colorPalette="red" variant="outline" size="lg" width="fit-content">
+          <Link href="/edit-intent-demo">EditIntent (замена секрета без передачи старого клиенту)</Link>
+        </Button>
         <Button asChild colorPalette="orange" variant="outline" size="lg" width="fit-content">
           <Link href="/captcha-demo">CAPTCHA (Turnstile, reCAPTCHA, hCaptcha)</Link>
         </Button>
