@@ -136,7 +136,7 @@ interface MatchResult {
  * Нормализовать код языка в ISO 639-1 (2 буквы)
  * ru, rus → ru | en, eng → en | ja, jp, jpn → ja
  */
-function normalizeLanguageCode(code: string): string {
+export function normalizeLanguageCode(code: string): string {
   const lower = code.toLowerCase()
 
   // Русский
@@ -167,7 +167,7 @@ function normalizeLanguageCode(code: string): string {
  *
  * Суффикс формата `.jp_netflix` содержит язык и источник субтитров.
  */
-function fuzzyMatchToVideo(
+export function fuzzyMatchToVideo(
   subtitleFileName: string,
   videoFiles: Array<{ path: string; episodeNumber: number }>,
 ): MatchResult | null {
@@ -188,13 +188,13 @@ function fuzzyMatchToVideo(
     if (subBaseName === videoBaseName) {
       return { episodeNumber: video.episodeNumber }
     }
-    if (subBaseName.startsWith(videoBaseName) || videoBaseName.startsWith(subBaseName)) {
-      return { episodeNumber: video.episodeNumber }
-    }
   }
 
   // 2. Fallback: попробовать убрать суффикс .lang_group
-  // Паттерн: .{lang}_{group} где lang = 2-3 буквы, group = любое название
+  // Паттерн: .{lang}_{group} где lang = 2-3 буквы, group = любое название.
+  // Обязательно ДО общего prefix-матча (шаг 3) — иначе subBaseName вида
+  // "<videoBaseName>.jp_netflix" матчится как startsWith на шаге 3 раньше, чем код
+  // успевает разобрать суффикс, и язык/группа субтитра из имени файла теряются.
   const suffixMatch = subBaseName.match(/\.([a-z]{2,3})_([^.]+)$/i)
   if (suffixMatch) {
     const strippedName = subBaseName.replace(/\.[a-z]{2,3}_[^.]+$/i, '')
@@ -210,7 +210,15 @@ function fuzzyMatchToVideo(
     }
   }
 
-  // 3. Fallback по номеру эпизода: если имена не совпадают по строке,
+  // 3. Prefix-матч в обе стороны (тэги вида "ep01 [Audio]" ↔ "ep01 [BDRip][1080p]")
+  for (const video of videoFiles) {
+    const videoBaseName = path.basename(video.path, path.extname(video.path)).toLowerCase()
+    if (subBaseName.startsWith(videoBaseName) || videoBaseName.startsWith(subBaseName)) {
+      return { episodeNumber: video.episodeNumber }
+    }
+  }
+
+  // 4. Fallback по номеру эпизода: если имена не совпадают по строке,
   // извлекаем номер из обоих имён и ищем единственный видеофайл с тем же номером.
   // Это покрывает случаи разного форматирования тегов (напр., "ep01 [Audio]" vs "ep01 [BDRip][1080p]")
   const subEpisodeNumber = _extractEpisodeNumber(subtitleFileName)
@@ -229,7 +237,7 @@ function fuzzyMatchToVideo(
 /**
  * Проверить является ли директория папкой субтитров
  */
-function isSubtitleFolder(dirName: string): boolean {
+export function isSubtitleFolder(dirName: string): boolean {
   const lower = dirName.toLowerCase()
   return SUBTITLE_FOLDER_PATTERNS.some((pattern) => lower.includes(pattern))
 }
@@ -237,7 +245,7 @@ function isSubtitleFolder(dirName: string): boolean {
 /**
  * Проверить является ли директория папкой шрифтов
  */
-function isFontFolder(dirName: string): boolean {
+export function isFontFolder(dirName: string): boolean {
   const lower = dirName.toLowerCase()
   return FONT_FOLDER_PATTERNS.some((pattern) => lower === pattern || lower.includes(pattern))
 }
@@ -296,7 +304,7 @@ async function collectFonts(fontDirs: string[]): Promise<Map<string, string>> {
 /**
  * Матчить имена шрифтов из ASS к файлам
  */
-function matchFontsToFiles(
+export function matchFontsToFiles(
   fontNames: string[],
   availableFonts: Map<string, string>,
 ): Array<{ name: string; path: string }> {
@@ -330,7 +338,7 @@ function matchFontsToFiles(
  *
  * Ищет [GroupName] в имени папки субтитров и родительских папках subsDir
  */
-function extractGroupNameFromSubsDir(subsDir: string): string | undefined {
+export function extractGroupNameFromSubsDir(subsDir: string): string | undefined {
   // Нормализуем путь
   const normalized = subsDir.replace(/\\/g, '/')
   const parts = normalized.split('/')

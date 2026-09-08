@@ -681,7 +681,21 @@ protocol.registerSchemesAsPrivileged([
 - [ ] Скачивание по требованию в `userData` (не в инсталлятор): UI с прогрессом, проверка
       контрольной суммы, возможность удалить. Скрипт [download-ffmpeg.ts](scripts/download-ffmpeg.ts)
       переиспользовать как основу, но качать **только `ffmpeg`** (без ffprobe — метаданные уже
-      читает mediainfo). Найти сборку легче BtbN-gpl (202 МБ на бинарь) — задача-исследование
+      читает mediainfo). Найти сборку легче BtbN-gpl (202 МБ на бинарь) — задача-исследование.
+      **Веб-разведка (2026-09-08), реализация не начата:** готовых официальных Windows-сборок
+      «только ffmpeg.exe без ffprobe» не существует — и BtbN, и gyan.dev распространяют пакет
+      целиком (ffmpeg+ffprobe+ffplay), gyan.dev `essentials` меньше `full` (набор кодеков уже),
+      но всё равно с ffprobe внутри архива. Реальных путей к экономии два: 1) взять `essentials`
+      вместо `full`/`gpl` и **не копировать** `ffprobe.exe` из распакованного архива в
+      `userData` — экономит не на скачивании, а на итоговом весе того, что кладём пользователю
+      (сам архив тянуть всё равно придётся целиком, если только не парсить его по частям);
+      2) собрать свой минимальный бинарь из исходников (`--disable-everything` +
+      точечные `--enable-*` только под нужные кодеки — Hi10P/H.264, AC3/DTS/TrueHD) — есть
+      сторонние примеры (`macrobond/minimal-ffmpeg-build`, `alberthdev` tiny-ffmpeg wiki), но
+      ни один не Windows-сборка «из коробки» — потребует свой CI-пайплайн сборки под MinGW/MSVC,
+      это отдельная инфраструктурная задача, а не выбор готового артефакта. Для v1 Фазы 6
+      реалистичный путь — вариант 1 (essentials + не копировать ffprobe), не обязательно
+      собственная сборка.
 - [ ] Эскалация по стоимости, а не «всегда транскод»: 1. **ремукс** (`-c copy`) — когда проблема в контейнере; 2. **только звук** (AC3/DTS → AAC/Opus, видео `copy`) — самый частый случай в аниме; 3. **видео** (Hi10P/HEVC-software → H.264 8-bit) — последний вариант, нужен GPU
 - [ ] Отдача потока: локальный HTTP на `127.0.0.1` + HLS-сегменты (перезапуск ffmpeg на seek, как
       у Jellyfin). Прогрессивный fMP4 проще, но ломает перемотку — проверить оба
@@ -696,14 +710,43 @@ protocol.registerSchemesAsPrivileged([
 
 ### 11. Тесты
 
-- [ ] Unit (vitest): `parse-filename`, матчинг внешних дорожек, `detect-chapter-types`,
-      **сравнение `FfprobeProber` vs `MediaInfoWasmProber`** на одинаковых файлах
-- [ ] `nx g @letar/generators:e2e-suite animatrona-folder-player` — smoke + папочный сценарий
+- [x] Unit (vitest) — `parse-filename` и `detect-chapter-types` уже были покрыты тестами до
+      этой задачи (найдено при ревизии 2026-09-08, не переписывались). Написаны через
+      делегированного агента (2026-09-08, по инструкции ниже):
+      `libs/folder-scan/src/lib/external-subtitle-scanner.spec.ts` (31 тест — матчинг внешних
+      субтитров к сериям, разбор языка/группы из имени файла, поиск папок субтитров/шрифтов),
+      `libs/folder-scan/src/lib/font-matcher.spec.ts` (20 тестов — поиск и сопоставление
+      шрифтов, с реальной временной ФС через `mkdtempSync`), `libs/folder-player-react/src/lib/
+      probe-cache.spec.ts` (11 тестов — in-memory LRU-кэш probe, TTL, инвалидация). Для
+      тестируемости из `external-subtitle-scanner.ts` экспортированы ранее module-private
+      функции (`fuzzyMatchToVideo`, `normalizeLanguageCode`, `extractGroupNameFromSubsDir`,
+      `isSubtitleFolder`, `isFontFolder`, `matchFontsToFiles`) — по образцу уже экспортированных
+      аналогов в `external-audio-scanner.ts`, логика при экспорте не менялась.
+      `nx test folder-scan` — 112/112, `nx test folder-player-react` — 34/34, `nx lint` обеих
+      либ — чисто.
+      ⚠️ **Найден и исправлен реальный баг** (агент только задокументировал в тесте, фикс — этой
+      же сессией сразу следом, до коммита): `fuzzyMatchToVideo` в `external-subtitle-scanner.ts`
+      сливал шаг 1 (точный матч) и общий bidirectional `startsWith` в одну проверку, из-за чего
+      шаг 2 (разбор суффикса `.lang_group` типа `.jp_netflix`/`.ru_AniLibria`) был недостижим
+      для любой папки с несколькими сериями — subBaseName вида `<videoBaseName>.jp_netflix`
+      всегда матчился по `startsWith` раньше, чем код успевал распознать суффикс. Язык/группа
+      субтитра из имени файла терялись молча (работал только спецкейс одного видео-файла —
+      фильма, где эта логика вынесена в отдельную раннюю ветку). Порядок шагов исправлен по
+      образцу `external-audio-scanner.ts` (точный матч → стрип суффикса → общий prefix-матч).
+      — **Сравнение `FfprobeProber` vs `MediaInfoWasmProber` на одинаковых файлах остаётся не
+      начатым** — блокировано отсутствием MKV/MP4-фикстур в песочнице (см. §3/§6 — тот же
+      блокер, что и раньше).
+- [ ] `nx g @letar/generators:e2e-suite animatrona-folder-player` — smoke + папочный сценарий.
+      ⚠️ Генератор рассчитан на веб-приложения (`baseURL`/`webServer` на dev-порт) — у этого
+      приложения Electron-плеер без фиксированного порта (`scripts/dev.js` сам подбирает
+      свободный, см. `.env-files.md`), применимость под вопросом, не проверялась
 - [ ] Animatrona: существующий сьют `04-player` — регрессионный гейт для Фазы 1
 - [ ] ⚠️ GUI-уровень (нативные диалоги, drag&drop) в песочнице не проверяется — main-процесс
       гонять headless: `npx electron scripts/verify-*.cjs` (паттерн из
       [.claude/rules/electron.md](/.claude/rules/electron.md))
-- [ ] Тесты писать через агентов (`e2e-test-writer` / `/workflow:test-write`), не руками
+- [x] Тесты писать через агентов (`e2e-test-writer` / `/workflow:test-write`), не руками —
+      применено к unit-тестам выше через `Agent` (general-purpose, не `e2e-test-writer` — это
+      были vitest unit-тесты, не Playwright)
 
 ### 12. Риски
 
