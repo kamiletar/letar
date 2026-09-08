@@ -5,6 +5,14 @@
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
 проект придерживается [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [0.35.2] - 2026-09-09
+
+### Fixed
+
+- `package.json`: `@letar/auth`, `@letar/email`, `@letar/forms`, `@letar/ui` не были объявлены
+  ни в `dependencies`, ни в `nx.implicitDependencies`, хотя реально импортируются — граф Nx не
+  видел эти рёбра. Добавлены в `dependencies` (`workspace:*`).
+
 ## [0.35.1] - 2026-09-06
 
 ### Fixed

@@ -446,3 +446,10 @@ duration-токен; дублированный HEX Matrix-палитры в CSS
 ---
 
 **Последнее обновление:** 2026-09-06
+
+## Починка графа Nx (2026-09-09)
+
+- [x] `@letar/auth`, `@letar/email`, `@letar/forms`, `@letar/ui` реально импортировались в коде,
+      но не были объявлены ни в `dependencies`, ни в `nx.implicitDependencies`
+      (PLAN-INFRA-6.md §169). Добавлены в `dependencies` (`workspace:*`), проверено
+      format/lint/typecheck:tsgo.

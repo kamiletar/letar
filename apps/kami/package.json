@@ -1,6 +1,6 @@
 {
   "name": "kami",
-  "version": "0.35.1",
+  "version": "0.35.2",
   "private": true,
   "nx": {
     "implicitDependencies": [
@@ -24,15 +24,19 @@
     "seed": "npx tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@letar/auth": "workspace:*",
+    "@letar/email": "workspace:*",
     "@letar/env-load": "workspace:*",
+    "@letar/forms": "workspace:*",
     "@letar/glitchtip": "workspace:*",
     "@letar/i18n-proxy": "workspace:*",
     "@letar/pg-url": "workspace:*",
     "@letar/seed-utils": "workspace:*",
+    "@letar/theme-check": "workspace:*",
+    "@letar/ui": "workspace:*",
     "butterchurn": "^2.6.7",
     "butterchurn-presets": "^2.4.7",
     "hydra-synth": "^1.4.0",
-    "shiki": "^4.1.0",
-    "@letar/theme-check": "workspace:*"
+    "shiki": "^4.1.0"
   }
 }
