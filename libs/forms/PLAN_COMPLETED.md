@@ -1,5 +1,42 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-09 — Русская запятая: ru-точка тоже работает (Chakra) + locale-parity в shadcn-скине
+
+Продолжение сессии v2.12.3 (comma-decimal-separator фикс). Три части:
+
+1. **Ответ на прямой вопрос владельца** — подтверждено живьём через `NumberParser`, что под
+   `FormI18nProvider locale="ru"` `1,5` и `1.5` эквивалентны (ru-RU формат не использует `.` как
+   служебный символ, поэтому обе точки распознаются). Без provider работает только точка.
+2. **Регресс-тест на точку в ru-локали** (по явному запросу) — добавлен в
+   `field-number-input.spec.tsx` и `field-currency.spec.tsx` (Chakra-скин), рядом с уже
+   существующим тестом на запятую. Коммит `652a7e00`.
+3. **Два входящих таска от `forms-coordinator-dev`** (проверены через inbox, обработаны
+   автономно по приоритету координатора):
+   - `apps/form-example` не подключал `FormI18nProvider` — добавлен в `providers.tsx`, коммит
+     `55e8a29e`.
+   - `forms-shadcn` — все четыре числовых поля не передавали `locale` вовсе. Оказалось глубже
+     «того же паттерна», что в Chakra: `shadcnUIKit.NumberInput` рендерил нативный
+     `<input type="number">`, а HTML5 value sanitization algorithm сбрасывает `.value` в `""` для
+     строки с запятой ещё **до** `onChange` — JS-нормализация уже готового значения ничего не
+     может восстановить. Фикс — примитив (`uikit/primitives/number-input.tsx`) переведён на
+     `type="text"` + ручной ARIA-контракт (`role="spinbutton"`/`aria-value*`), тот же паттерн, что
+     уже использует `@zag-js/number-input` под Chakra-скином. Разбор десятичного разделителя —
+     нативный `Intl.NumberFormat(locale).formatToParts(1.1)`, без новой зависимости.
+     `UIKitNumberInputProps` (`@letar/forms-core`, 0.12.0→0.12.1) расширен полем `locale?: string`.
+     Регресс-тесты (en-US точка / ru запятая / ru точка тоже работает) добавлены во все четыре
+     spec-файла (`field-number`/`field-number-input`/`field-currency`/`field-percentage`);
+     существующие тесты, завязанные на `input[type="number"]`, переведены на
+     `getByRole('spinbutton')` (плюс `field-duration.spec.tsx`, тот же примитив, разделитель ему
+     не нужен, но DOM-контракт сменился так же). `forms-shadcn` → v0.36.0. Коммиты `fa19eeeb`
+     (forms-core) и `f4d6ec21` (forms-shadcn). Полный vitest-прогон forms-shadcn: 253/253.
+
+Обе задачи закрыты в agent-mail (треды `forms-shadcn-locale-parity`,
+`form-example-missing-i18n-provider`), backlog в `PLAN.md` отмечен `✅`.
+
+Отдельно (не форс-скоуп этой сессии, зафиксировано для памяти): параллельная сессия в этом же
+`apps/form-example` нашла и починила настоящий hydration mismatch (баг Turbopack+Chakra `Global`,
+не связан с `FormI18nProvider`), коммит `24c5280b`.
+
 ## 2026-09-08 — Локализация кнопки «Очистить черновик» (`ClearDraftButton`)
 
 Довершение предыдущей задачи — `clearDraftButtonText` был намеренно оставлен вне скоупа
