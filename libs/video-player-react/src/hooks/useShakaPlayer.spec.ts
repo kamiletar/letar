@@ -215,4 +215,24 @@ describe('useShakaPlayer', () => {
     const secondVideo = container.querySelector('video')
     expect(secondVideo).not.toBe(firstVideo)
   })
+
+  it('НЕ переинициализирует плеер, если меняется только startTime (тот же src)', async () => {
+    const { options, container, playerInstance } = makeOptions({ src: '/first.mpd', startTime: 0 })
+    const { rerender } = renderHook((props: UseShakaPlayerOptions) => useShakaPlayer(props), {
+      initialProps: options,
+    })
+
+    await waitFor(() => expect(playerInstance.load).toHaveBeenCalledTimes(1))
+    const video = container.querySelector('video')
+
+    // Имитация фонового автосохранения прогресса просмотра — тот же src, обновилось только
+    // время резюме. Раньше это было в deps основного эффекта и полностью пересоздавало плеер
+    // (findings 2026-09-08: «видео играет пару секунд, потом спиннер, потом продолжает»).
+    rerender({ ...options, startTime: 137 })
+
+    expect(playerInstance.unload).not.toHaveBeenCalled()
+    expect(playerInstance.destroy).not.toHaveBeenCalled()
+    expect(playerInstance.load).toHaveBeenCalledTimes(1)
+    expect(container.querySelector('video')).toBe(video)
+  })
 })

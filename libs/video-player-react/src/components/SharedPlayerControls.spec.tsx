@@ -54,24 +54,24 @@ describe('SharedPlayerControls', () => {
     expect(screen.getByText('1:05 / 10:00')).toBeInTheDocument()
   })
 
-  it('вызывает onSkipTime(-SKIP_TIME) при клике на "Skip back"', async () => {
+  it('вызывает onSkipTime(-SKIP_TIME) при клике на кнопку «назад»', async () => {
     const user = userEvent.setup()
     const onSkipTime = vi.fn()
 
     renderWithProvider(<SharedPlayerControls {...baseProps({ onSkipTime })} />)
 
-    await user.click(screen.getByRole('button', { name: 'Skip back' }))
+    await user.click(screen.getByRole('button', { name: 'Назад 10 секунд' }))
 
     expect(onSkipTime).toHaveBeenCalledWith(-10)
   })
 
-  it('вызывает onSkipTime(SKIP_TIME) при клике на "Skip forward"', async () => {
+  it('вызывает onSkipTime(SKIP_TIME) при клике на кнопку «вперёд»', async () => {
     const user = userEvent.setup()
     const onSkipTime = vi.fn()
 
     renderWithProvider(<SharedPlayerControls {...baseProps({ onSkipTime })} />)
 
-    await user.click(screen.getByRole('button', { name: 'Skip forward' }))
+    await user.click(screen.getByRole('button', { name: 'Вперёд 10 секунд' }))
 
     expect(onSkipTime).toHaveBeenCalledWith(10)
   })

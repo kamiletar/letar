@@ -19,7 +19,7 @@
 
 import { Box, HStack, IconButton, Text } from '@chakra-ui/react'
 import { memo, type ReactNode } from 'react'
-import { LuMaximize, LuMinimize, LuPause, LuPlay, LuSkipBack, LuSkipForward } from 'react-icons/lu'
+import { LuMaximize, LuMinimize, LuPause, LuPlay, LuRotateCcw, LuRotateCw } from 'react-icons/lu'
 
 import type { ChapterInfo, PlaybackSpeed } from '../types'
 import { SKIP_TIME } from '../types'
@@ -141,13 +141,24 @@ export const SharedPlayerControls = memo(function SharedPlayerControls({
         <HStack gap={2}>
           <Tooltip content={`Назад ${SKIP_TIME} сек (←)`}>
             <IconButton
-              aria-label="Skip back"
+              aria-label={`Назад ${SKIP_TIME} секунд`}
               variant="ghost"
               colorPalette="whiteAlpha"
               size="sm"
+              position="relative"
               onClick={() => onSkipTime(-SKIP_TIME)}
             >
-              <LuSkipBack size={20} color="var(--chakra-colors-player-control)" />
+              <LuRotateCcw size={20} color="var(--chakra-colors-player-control)" />
+              <Text
+                position="absolute"
+                fontSize="9px"
+                fontWeight="bold"
+                color="player.control"
+                pointerEvents="none"
+                userSelect="none"
+              >
+                {SKIP_TIME}
+              </Text>
             </IconButton>
           </Tooltip>
 
@@ -167,13 +178,24 @@ export const SharedPlayerControls = memo(function SharedPlayerControls({
 
           <Tooltip content={`Вперёд ${SKIP_TIME} сек (→)`}>
             <IconButton
-              aria-label="Skip forward"
+              aria-label={`Вперёд ${SKIP_TIME} секунд`}
               variant="ghost"
               colorPalette="whiteAlpha"
               size="sm"
+              position="relative"
               onClick={() => onSkipTime(SKIP_TIME)}
             >
-              <LuSkipForward size={20} color="var(--chakra-colors-player-control)" />
+              <LuRotateCw size={20} color="var(--chakra-colors-player-control)" />
+              <Text
+                position="absolute"
+                fontSize="9px"
+                fontWeight="bold"
+                color="player.control"
+                pointerEvents="none"
+                userSelect="none"
+              >
+                {SKIP_TIME}
+              </Text>
             </IconButton>
           </Tooltip>
 

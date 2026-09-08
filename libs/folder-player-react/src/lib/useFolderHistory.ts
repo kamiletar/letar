@@ -44,9 +44,13 @@ export function useFolderHistory(storage: FolderPlayerStorage) {
     } catch (error) {
       console.error('[useFolderHistory] Ошибка загрузки из хранилища:', error)
     }
-    // Загрузка только при монтировании — storage считается стабильным на весь жизненный цикл хоста
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    // Deps: [storage], не []. Потребитель может сначала передать noop-заглушку (SSR/pre-mount
+    // гейт вида `mounted ? window.localStorage : noopStorage` — так делает
+    // animatrona-folder-player) и заменить её на настоящее хранилище уже после монтирования.
+    // При deps=[] эффект загрузки успевал бы отработать только с заглушкой один раз и никогда
+    // не перечитывал бы реальную историю — баг именно с такими симптомами (история не
+    // сохранялась между перезапусками приложения) найден 2026-09-08.
+  }, [storage])
 
   /**
    * Сохранить историю в хранилище

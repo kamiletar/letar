@@ -89,6 +89,19 @@ export function useShakaPlayer(options: UseShakaPlayerOptions): UseShakaPlayerRe
   const [isVideoReady, setIsVideoReady] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
+  // startTime нужен только как точка старта в момент (пере)загрузки src — если держать его в
+  // deps эффекта ниже, плеер будет полностью пересоздаваться при каждом изменении ЗНАЧЕНИЯ
+  // startTime, а не только при смене видео. У потребителей (animatrona-folder-player,
+  // animatrona-tracker) это число обычно приходит из позиции просмотра, которая фоново
+  // пересчитывается во время самого воспроизведения (автосохранение прогресса раз в несколько
+  // секунд) — без снапшота через ref это выглядит как «видео играет пару секунд, потом спиннер,
+  // потом продолжает с той же позиции»: полный unload/destroy/пересоздание video-элемента и
+  // повторный player.load() посреди штатного проигрывания. Найдено 2026-09-08.
+  const startTimeRef = useRef(startTime)
+  useEffect(() => {
+    startTimeRef.current = startTime
+  }, [startTime])
+
   // Reload функция
   const reload = useCallback(async () => {
     const player = playerRef.current
@@ -100,7 +113,7 @@ export function useShakaPlayer(options: UseShakaPlayerOptions): UseShakaPlayerRe
     setIsLoading(true)
     try {
       await player.unload()
-      await player.load(src, startTime)
+      await player.load(src, startTimeRef.current)
 
       onDurationChange?.(video.duration)
       setIsVideoReady(true)
@@ -114,7 +127,7 @@ export function useShakaPlayer(options: UseShakaPlayerOptions): UseShakaPlayerRe
     } finally {
       setIsLoading(false)
     }
-  }, [src, startTime, autoPlay, onError, onDurationChange, onVideoReady])
+  }, [src, autoPlay, onError, onDurationChange, onVideoReady])
 
   // Инициализация Shaka Player
   useEffect(() => {
@@ -173,7 +186,7 @@ export function useShakaPlayer(options: UseShakaPlayerOptions): UseShakaPlayerRe
     // Загрузка источника
     const loadSource = async () => {
       try {
-        await player.load(src, startTime)
+        await player.load(src, startTimeRef.current)
 
         if (!isMounted) {
           return
@@ -243,7 +256,6 @@ export function useShakaPlayer(options: UseShakaPlayerOptions): UseShakaPlayerRe
     }
   }, [
     src,
-    startTime,
     autoPlay,
     containerRef,
     audioRef,
