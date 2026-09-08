@@ -4,6 +4,36 @@
 
 ## [Unreleased]
 
+## [0.55.72] - 2026-09-08
+
+### Changed
+
+- **Дедупликация по всей экосистеме Animatrona (DRY).** Дубли сведены к общим библиотекам, без
+  изменения поведения там, где оно расходилось с дефолтами библиотек:
+  - Восемь JSON-хранилищ main-процесса (статистика, история, подписки, шаблоны, репутация,
+    федерация, достижения, бонусы) — на `createJsonStore` из `@letar/electron-storage`
+    вместо своих копий «путь к userData + try/catch + `JSON.stringify(null, 2)`».
+  - Пять копий словаря типов связей и типов аниме в renderer — на `RELATION_KIND_CONFIG` /
+    `ANIME_KIND_CONFIG` из `@letar/animatrona-utils`.
+  - Три последних списка медиарасширений — на канонические наборы `@letar/folder-scan`.
+  - Пять локальных `formatTime` — на `@letar/video-player-core`; два самодельных debounce в
+    поиске — на `useDebounce` из `@letar/hooks`.
+  - `renderer/src/types/electron.d.ts` — реэкспорт типов манифеста из `@letar/animatrona-types`
+    вместо копии на 312 строк.
+
+### Fixed
+
+- **Длинные видео в подписях больше не показывают `65:30` вместо `1:05:30`.** Пять локальных
+  копий `formatTime` не умели часы; канонический вариант из `@letar/video-player-core` умеет.
+- **Спин-оффы получили подпись.** В `DiscoverRelatedList` не было ключа `spin_off` вовсе, в
+  `RelatedAnimeRow` — цвета для `spin_off`/`character`/`alternative_*`.
+- **`electron.d.ts` больше не врёт про границу IPC.** Копия типов манифеста разошлась с
+  каноном: `video.path` вместо `video.cid`, `filePath` вместо `cid` у субтитров,
+  `manifestPath` вместо `manifestCid` в навигации, отсутствующие `isForced`/`size`, урезанные
+  `AnimeManifestGenre`/`AnimeManifestExternalIds` и несуществующий `cropFilter`.
+- **Медиафайлы распознаются полнее.** `media-analyzer` не знал `.flv`/`.m4v` в видео и
+  `.m4a`/`.wav`/`.ac3`/`.dts` в аудио, `episode-matcher` — `.wmv`/`.flv`.
+
 ## [0.55.71] - 2026-09-08
 
 ### Fixed

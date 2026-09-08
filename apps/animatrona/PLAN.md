@@ -892,6 +892,22 @@ creator-only: `EncodingProfilesCard`, `TranscodingSettingsCard`, `QBittorrentSet
       `watchStatus`/`userRating`, а пользователь в этот момент был на странице деталей — она не
       обновлялась до ручного перехода. Добавлена `queryClient.invalidateQueries({ queryKey:
 ['anime'] })` по аналогии с `MobileProgressSync.tsx`.
+- [x] **DRY по экосистеме Animatrona** (v0.55.72, 2026-09-08) — аудит дублей между
+      `animatrona*`-приложениями и библиотеками. Сведено: 8 JSON-хранилищ main-процесса на
+      `@letar/electron-storage`, 5 копий словаря типов связей на `@letar/animatrona-utils`,
+      3 списка медиарасширений на `@letar/folder-scan`, 5 копий `formatTime` на
+      `@letar/video-player-core`, 2 самодельных debounce на `@letar/hooks`, копия типов
+      манифеста в `electron.d.ts` на реэкспорт из `@letar/animatrona-types`. Попутно вскрылись
+      два бага (`formatTime` без часов, спин-оффы без подписи) — см. CHANGELOG.
+      **Осознанно НЕ сведено** (расхождение настоящее, а не дрейф): `useShakaPlayer`,
+      `useWatchProgress`, `AnimeCard`, `TrackSelector`, два standalone веб-плеера, два
+      IPFS Range-прокси — см. `.claude/docs/shaka-player-hook-dedup-audit.md` и
+      `header-drawer-dedup-audit.md`.
+- [ ] **DRY в animatrona-tracker/mobile/tv** — за пределами прав этой команды
+      (`/animatrona` правит только `apps/animatrona`), передано координатору
+      `animatrona-coordinator-dev` сообщением в треде `animatrona-dry-audit`. Там же —
+      `libs/animatrona-franchise-graph/src/types.ts`: свести его словарь с каноническим можно,
+      но единственный потребитель — tracker, и правка меняет видимые подписи.
 
 ---
 
