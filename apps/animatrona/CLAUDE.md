@@ -23,6 +23,31 @@ schema.zmodel → zenstack generate → schema.prisma → prisma migrate → SQL
 | `nx db:migrate animatrona -- --name feature` | **Production: создать миграцию**        |
 | `nx db:reset animatrona`                     | Сбросить БД и применить все миграции    |
 
+### ⚠️ 2026-09-08: `prisma.config.ts` `datasource.url` — был неверный относительный путь
+
+`file:../../../prisma/data/app.db` в `prisma.config.ts` резолвился не в
+`apps/animatrona/prisma/data/app.db`, а на три уровня выше **cwd таргета** (`apps/animatrona`,
+см. `cwd` у `db:push`/`db:migrate` в `project.json`) — то есть в `C:\web\prisma\data\app.db`,
+мимо всего репозитория. Эмпирически подтверждено прогоном `nx db:push animatrona`: лог печатал
+`SQLite database "app.db" at "file:../../../prisma/data/app.db"` и реально создавал/писал файл
+там, а настоящая dev-БД (`apps/animatrona/prisma/data/app.db`, которую обновляет сам Electron
+через `applyPrismaMigrations()`) оставалась побайтово нетронутой.
+
+Баг был безвреден на практике только потому, что разработка обычно не гоняет `prisma db push`
+руками — schema изменения применяет `applyPrismaMigrations()` в `main.ts` через sql.js, а не
+Prisma CLI (см. «Особенности Electron» ниже). Но любой ручной `nx db:push animatrona` /
+`nx db:migrate animatrona` не имел эффекта на реальную БД, только на стрей-файл вне репо.
+
+Тот же паттерн (скопированный дословно из этого файла) был и в
+`apps/animatrona-ipfs-player/prisma.config.ts` — найден первым, отсюда и проверка здесь.
+`label-printer-desktop/prisma.config.ts` проверен — там путь `file:./prisma/data/app.db` без
+лишнего всплытия, этого бага там нет.
+
+**Фикс:** `url: 'file:prisma/data/app.db'` (без всплытия наверх — относительно cwd таргета,
+который уже указывает на корень приложения). Проверено: `nx db:push animatrona` после фикса
+печатает `SQLite database "app.db" at "file:prisma/data/app.db"` и корректно находит
+существующую БД («database is already in sync»), данные не тронуты.
+
 ### Workflow изменения схемы
 
 **Development (быстрые итерации):**
