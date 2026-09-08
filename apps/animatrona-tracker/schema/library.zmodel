@@ -1,26 +1,11 @@
 import "./enums"
 import "./auth"
 import "./anime"
+import "../../../libs/zenstack-fragments/src/animatrona"
 
 // ============================================================================
 // USER LIBRARY — Библиотека пользователя (Cloud Library)
 // ============================================================================
-
-/// Статус просмотра аниме (синхронизируется с Desktop)
-enum WatchStatus {
-  /// Не начато
-  NOT_STARTED
-  /// Смотрю
-  WATCHING
-  /// Просмотрено
-  COMPLETED
-  /// Отложено
-  ON_HOLD
-  /// Брошено
-  DROPPED
-  /// Запланировано
-  PLANNED
-}
 
 /// Аниме в библиотеке пользователя (синхронизируется между Desktop и Tracker)
 model UserLibraryItem {

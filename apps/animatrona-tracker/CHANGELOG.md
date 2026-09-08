@@ -7,6 +7,16 @@
 
 ---
 
+## [0.11.21] — 2026-09-08
+
+### Изменено
+
+- **WatchStatus консолидирован в общий фрагмент.** Локальный `enum WatchStatus` в
+  `schema/library.zmodel` заменён импортом из `libs/zenstack-fragments/src/animatrona.zmodel`
+  (`@letar/zenstack-fragments`) — дедуп с `animatrona`/`animatrona-ipfs-player`, значения и
+  поведение не изменились. `project.json` дополнен `implicitDependencies` и `inputs` для
+  `zenstack:generate`, чтобы Nx корректно инвалидировал кэш при правке фрагмента.
+
 ## [0.11.20] — 2026-09-08
 
 ### Добавлено
