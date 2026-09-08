@@ -18,11 +18,19 @@
     ]
   },
   "dependencies": {
+    "@letar/animatrona-franchise-graph": "workspace:*",
+    "@letar/animatrona-types": "workspace:*",
+    "@letar/animatrona-utils": "workspace:*",
+    "@letar/auth": "workspace:*",
     "@letar/env-load": "workspace:*",
+    "@letar/forms": "workspace:*",
     "@letar/glitchtip": "workspace:*",
     "@letar/hooks": "workspace:*",
     "@letar/image-upload": "workspace:*",
     "@letar/pg-url": "workspace:*",
-    "@letar/theme-check": "workspace:*"
+    "@letar/query-provider": "workspace:*",
+    "@letar/theme-check": "workspace:*",
+    "@letar/ui": "workspace:*",
+    "@letar/video-player-react": "workspace:*"
   }
 }
