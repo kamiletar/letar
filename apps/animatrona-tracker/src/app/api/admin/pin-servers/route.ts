@@ -1,3 +1,4 @@
+import { PinServerRole } from '@/generated/prisma'
 import { isAuthError, requireAdmin, requireModeratorOrAdmin } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
 import { serializeBigIntArray, serializeBigIntFields } from '@/lib/serialize'
@@ -29,9 +30,13 @@ export async function GET() {
 const CreateServerSchema = z
   .object({
     name: z.string().min(1).max(100),
+    role: z.enum(PinServerRole).optional(),
     apiUrl: z.url(),
     peerId: z.string().optional(),
     authSecret: z.string().optional(),
+    swarmAddrs: z.array(z.string()).optional(),
+    pinQueueUrl: z.url().optional(),
+    pinQueueSecret: z.string().optional(),
     capacityBytes: z.number().int().min(0).optional(),
   })
   .strip()
@@ -56,9 +61,13 @@ export async function POST(request: NextRequest) {
     const server = await prisma.pinServer.create({
       data: {
         name: parsed.data.name,
+        role: parsed.data.role,
         apiUrl: parsed.data.apiUrl,
         peerId: parsed.data.peerId,
         authSecret: parsed.data.authSecret,
+        swarmAddrs: parsed.data.swarmAddrs,
+        pinQueueUrl: parsed.data.pinQueueUrl,
+        pinQueueSecret: parsed.data.pinQueueSecret,
         capacityBytes: BigInt(parsed.data.capacityBytes ?? 0),
       },
     })

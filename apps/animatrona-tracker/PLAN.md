@@ -142,10 +142,10 @@ HMR) только для лёгких уведомлений (счётчик н�
 - [ ] **Мониторинг (Sentry)**
 - [ ] **Filecoin Cold Storage** — бесплатное холодное хранилище для каталога, автовосстановление,
       донаты в FIL. [ТЗ](docs/FILECOIN_COLD_STORAGE.md)
-- [ ] **`CreateServerSchema` не принимает `pinQueueUrl`/`pinQueueSecret`** — блокирует добавление
-      pinner4 через `POST /api/admin/pin-servers` (иначе только через psql). Контекст — архив
-      [PLAN_COMPLETED_2026_09_08_FEATURES.md](./PLAN_COMPLETED_2026_09_08_FEATURES.md) § «Заметки
-      по инфраструктуре пинеров».
+- [x] **`CreateServerSchema` не принимает `pinQueueUrl`/`pinQueueSecret`** — исправлено
+      2026-09-08: `CreateServerSchema` (`POST /api/admin/pin-servers`) дополнена `role`,
+      `swarmAddrs`, `pinQueueUrl`, `pinQueueSecret` — теперь добавление pinner4 через API не
+      требует psql.
 - [ ] ⚠️ **Открытый вопрос: статус миграции Pinner3 на tnahosting.net** — план был на
       апрель-май 2026 (VPS с RAID10+SSD кэш, 24 GB RAM), дата давно прошла, а в текущей сессии не
       проверялось, состоялась ли миграция. Уточнить у Ками или проверить конфиг пинера при
