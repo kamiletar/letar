@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+## [0.5.13] - 2026-09-09
+
+### Fixed
+
+- `package.json`: `@letar/chakra-provider`, `@letar/forms`, `@letar/label-printer-core` не были
+  объявлены ни в `dependencies`, ни в `nx.implicitDependencies`, хотя реально импортируются —
+  граф Nx не видел эти рёбра. Добавлены в `dependencies` (`workspace:*`).
+
 ## [0.5.12] - 2026-09-01
 
 ### Fixed
