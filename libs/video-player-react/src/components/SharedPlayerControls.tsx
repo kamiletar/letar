@@ -65,8 +65,12 @@ export interface SharedPlayerControlsProps {
   playbackSpeed?: PlaybackSpeed
   /** Изменение скорости воспроизведения */
   onPlaybackSpeedChange?: (speed: PlaybackSpeed) => void
-  /** Слот для кнопок навигации (prev/next episode) */
+  /** Слот для кнопок навигации (prev/next episode) — рендерится после таймера, справа от блока play/seek */
   navigationSlot?: ReactNode
+  /** Слот перед блоком перемотки/play (например «предыдущий эпизод» в MPC-раскладке транспортных кнопок) */
+  beforeControlsSlot?: ReactNode
+  /** Слот сразу после блока перемотки/play, перед таймером (например «следующий эпизод») */
+  afterControlsSlot?: ReactNode
   /** Слот для выбора дорожек (audio/subtitle) */
   trackSelectorSlot?: ReactNode
   /** Слот для дополнительных кнопок (PiP, VideoInfo и др.) */
@@ -102,6 +106,8 @@ export const SharedPlayerControls = memo(function SharedPlayerControls({
   playbackSpeed = 1,
   onPlaybackSpeedChange,
   navigationSlot,
+  beforeControlsSlot,
+  afterControlsSlot,
   trackSelectorSlot,
   extraControlsSlot,
   spriteUrl,
@@ -139,6 +145,9 @@ export const SharedPlayerControls = memo(function SharedPlayerControls({
       <HStack justify="space-between" align="center">
         {/* Левая часть: воспроизведение и время */}
         <HStack gap={2}>
+          {/* MPC-раскладка транспортных кнопок: prev-эпизод, перемотка назад, play, перемотка вперёд, next-эпизод */}
+          {beforeControlsSlot}
+
           <Tooltip content={`Назад ${SKIP_TIME} сек (←)`}>
             <IconButton
               aria-label={`Назад ${SKIP_TIME} секунд`}
@@ -199,11 +208,16 @@ export const SharedPlayerControls = memo(function SharedPlayerControls({
             </IconButton>
           </Tooltip>
 
+          {afterControlsSlot}
+
           <Text color="player.control" fontSize="sm" ml={2}>
             {formatTime(currentTime)} / {formatTime(duration)}
           </Text>
 
-          {/* Навигация между эпизодами (платформо-специфичная) */}
+          {
+            /* Навигация между эпизодами (платформо-специфичная) — legacy-позиция после таймера,
+              для потребителей, не перешедших на before/afterControlsSlot */
+          }
           {navigationSlot}
         </HStack>
 

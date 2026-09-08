@@ -1,6 +1,7 @@
 'use client'
 
 import { Box, Button, Center, Flex, Text, VStack } from '@chakra-ui/react'
+import { ColorModeButton } from '@letar/chakra-provider'
 import type { FolderPlayerHost, FolderPlayerStorage, MediaProbeResult } from '@letar/folder-player-react'
 import {
   EpisodeSidebar,
@@ -313,7 +314,10 @@ export default function HomePage() {
 
   if (!player.isFolderMode && !player.isSingleMode) {
     return (
-      <Center minH="100vh" p={8} onDragOver={handleDragOver} onDrop={handleDrop}>
+      <Center minH="100vh" p={8} onDragOver={handleDragOver} onDrop={handleDrop} position="relative">
+        <Box position="absolute" top={4} right={4}>
+          <ColorModeButton />
+        </Box>
         <VStack gap={6} maxW="md" w="full">
           <Text fontSize="2xl" fontWeight="bold">Animatrona Player</Text>
           <Text color="fg.muted" textAlign="center">

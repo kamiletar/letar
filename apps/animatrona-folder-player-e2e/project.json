@@ -1,0 +1,36 @@
+{
+  "name": "animatrona-folder-player-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/animatrona-folder-player-e2e/src",
+  "implicitDependencies": ["animatrona-folder-player"],
+  "targets": {
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dprint fmt",
+        "cwd": "apps/animatrona-folder-player-e2e"
+      },
+      "cache": false,
+      "metadata": {
+        "description": "Format files with dprint",
+        "technologies": ["dprint"]
+      }
+    },
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/playwright-report/{projectName}"],
+      "options": {
+        "config": "apps/animatrona-folder-player-e2e/playwright.config.ts"
+      }
+    },
+    "fixtures:create": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx tsx apps/animatrona-folder-player-e2e/fixtures/create-test-videos.ts",
+        "cwd": "{workspaceRoot}"
+      }
+    }
+  },
+  "tags": ["owner:letar"]
+}

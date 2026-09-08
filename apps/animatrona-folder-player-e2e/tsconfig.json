@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@helpers/*": ["helpers/*"],
+      "@fixtures/*": ["fixtures/*"]
+    },
+    "typeRoots": ["../../node_modules/@types"],
+    "ignoreDeprecations": "6.0"
+  },
+  "include": ["**/*.ts", "playwright.config.ts"]
+}

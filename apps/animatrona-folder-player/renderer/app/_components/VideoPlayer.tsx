@@ -287,34 +287,38 @@ function ShakaVideoPlayer({
   // Главы (OP/ED) — кнопка «Пропустить опенинг» + маркеры на прогресс-баре (PLAN.md §7)
   const { chapters, chapterInfos } = useChapterSkip(mediaChapters, state.duration)
 
-  const navigationSlot = (hasPrev || hasNext)
+  // MPC-раскладка транспортных кнопок: prev-эпизод — перемотка назад — play — перемотка вперёд — next-эпизод
+  const prevEpisodeSlot = (hasPrev || hasNext)
     ? (
-      <>
-        <Tooltip content="Предыдущий эпизод">
-          <IconButton
-            aria-label="Previous episode"
-            variant="ghost"
-            colorPalette="whiteAlpha"
-            size="sm"
-            disabled={!hasPrev}
-            onClick={onPrev}
-          >
-            <LuChevronLeft color="var(--chakra-colors-player-control)" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip content="Следующий эпизод">
-          <IconButton
-            aria-label="Next episode"
-            variant="ghost"
-            colorPalette="whiteAlpha"
-            size="sm"
-            disabled={!hasNext}
-            onClick={onNext}
-          >
-            <LuChevronRight color="var(--chakra-colors-player-control)" />
-          </IconButton>
-        </Tooltip>
-      </>
+      <Tooltip content="Предыдущий эпизод">
+        <IconButton
+          aria-label="Previous episode"
+          variant="ghost"
+          colorPalette="whiteAlpha"
+          size="sm"
+          disabled={!hasPrev}
+          onClick={onPrev}
+        >
+          <LuChevronLeft color="var(--chakra-colors-player-control)" />
+        </IconButton>
+      </Tooltip>
+    )
+    : undefined
+
+  const nextEpisodeSlot = (hasPrev || hasNext)
+    ? (
+      <Tooltip content="Следующий эпизод">
+        <IconButton
+          aria-label="Next episode"
+          variant="ghost"
+          colorPalette="whiteAlpha"
+          size="sm"
+          disabled={!hasNext}
+          onClick={onNext}
+        >
+          <LuChevronRight color="var(--chakra-colors-player-control)" />
+        </IconButton>
+      </Tooltip>
     )
     : undefined
 
@@ -365,7 +369,8 @@ function ShakaVideoPlayer({
         onSkipTime={controls.skipTime}
         playbackSpeed={playbackSpeed}
         onPlaybackSpeedChange={handlePlaybackSpeedChange}
-        navigationSlot={navigationSlot}
+        beforeControlsSlot={prevEpisodeSlot}
+        afterControlsSlot={nextEpisodeSlot}
         spriteUrl={spriteUrl}
         spriteCues={spriteCues}
         chapters={chapterInfos}

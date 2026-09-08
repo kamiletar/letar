@@ -6,6 +6,21 @@
 
 ### Added
 
+- **E2E-тесты (Playwright + Electron)** — новый `apps/animatrona-folder-player-e2e`, по образцу
+  `animatrona-e2e`, но упрощённый (нет БД/welcome-онбординга): smoke-запуск + открытие папки
+  → сайдбар с эпизодами → клик по эпизоду запускает воспроизведение. Фикстуры (`anime-folder/` с
+  3 короткими mkv) генерируются `nx fixtures:create animatrona-folder-player-e2e` через bundled
+  ffmpeg desktop-версии `animatrona` (только build-time инструмент, сама Animatrona Player его не
+  тащит). 8/8 тестов зелёные локально на упакованном `build:win`.
+- **Раскладка транспортных кнопок плеера — MPC-стиль** (`prev-эпизод → перемотка назад →
+  play/pause → перемотка вперёд → next-эпизод`, симметрично вокруг play, как в Media Player
+  Classic). Реализовано аддитивно в `@letar/video-player-react` (`SharedPlayerControls`) —
+  новые `beforeControlsSlot`/`afterControlsSlot`, старый `navigationSlot` не тронут ради
+  обратной совместимости с `animatrona`/`animatrona-tracker` (версия библиотеки 0.2.3 → 0.2.4).
+- **Переключатель тёмной/светлой темы** на экране выбора папки (`ColorModeButton` из
+  `@letar/chakra-provider`, ранее подключённый только инфраструктурно через `ColorModeProvider`,
+  без видимой кнопки). Дефолтные семантические токены Chakra (`bg`, `fg`, `fg.muted` и т.д.) уже
+  поддерживали `_dark` — не хватало только UI-переключателя.
 - **Расширенная поддержка форматов (Фаза 6)** — файлы, которые Chromium не проигрывает
   (Hi10P-видео, AC3/E-AC3/DTS/TrueHD-звук, контейнеры AVI/WMV/FLV/TS), теперь играются в самом
   плеере, а не только «через системный плеер»:

@@ -186,6 +186,10 @@ apps/animatrona-e2e/fixtures/videos/
 apps/animatrona-e2e/fixtures/anime-folder/
 apps/animatrona-e2e/test-videos/
 apps/animatrona-e2e/test-results/
+apps/animatrona-folder-player-e2e/fixtures/anime-folder/
+apps/animatrona-folder-player-e2e/test-videos/
+apps/animatrona-folder-player-e2e/test-results/
+apps/animatrona-folder-player-e2e/tsconfig.tsbuildinfo
 /.playwright-mcp/
 tmpclaude-*
 apps/animatrona/resources/template.db
