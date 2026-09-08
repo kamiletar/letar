@@ -366,3 +366,9 @@ bunx playwright test`, минуя зависающий в dev-режиме `nx e
 поэтому добавлено `"rootDir": "../.."` (корень монорепо).
 
 После фикса `typecheck:tsgo` — 0 ошибок (лучше базовой линии в 15), `nx build time` — зелёный.
+
+## Починка графа Nx (2026-09-09)
+
+- [x] `@letar/ui` реально импортировался в коде, но не был объявлен ни в `dependencies`, ни в
+      `nx.implicitDependencies` (PLAN-INFRA-6.md §169). Добавлен в `dependencies`
+      (`workspace:*`), проверено format/lint/typecheck:tsgo.

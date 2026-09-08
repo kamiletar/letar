@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.16 (2026-09-09)
+
+### Fixed
+
+- `package.json`: `@letar/ui` не был объявлен ни в `dependencies`, ни в
+  `nx.implicitDependencies`, хотя реально импортируется — граф Nx не видел это ребро. Добавлен
+  в `dependencies` (`workspace:*`).
+
 ## 0.5.15 (2026-09-04)
 
 ### Fixed
