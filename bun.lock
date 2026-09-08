@@ -382,13 +382,20 @@
       "name": "@letar/animatrona",
       "version": "0.55.72",
       "dependencies": {
+        "@letar/animatrona-types": "workspace:*",
+        "@letar/animatrona-ui": "workspace:*",
+        "@letar/animatrona-utils": "workspace:*",
         "@letar/electron-storage": "workspace:*",
         "@letar/folder-scan": "workspace:*",
+        "@letar/forms": "workspace:*",
         "@letar/hooks": "workspace:*",
         "@letar/icon-generator": "workspace:*",
         "@letar/ipfs-kubo-core": "workspace:*",
         "@letar/query-provider": "workspace:*",
         "@letar/seed-utils": "workspace:*",
+        "@letar/ui": "workspace:*",
+        "@letar/video-player-core": "workspace:*",
+        "@letar/video-player-react": "workspace:*",
         "cheerio": "^1.2.0",
       },
       "devDependencies": {
@@ -399,6 +406,7 @@
       "name": "@letar/animatrona-folder-player",
       "version": "0.7.1",
       "dependencies": {
+        "@letar/chakra-provider": "workspace:*",
         "@letar/electron-storage": "workspace:*",
         "@letar/folder-player-react": "workspace:*",
         "@letar/folder-scan": "workspace:*",
@@ -419,6 +427,7 @@
       "name": "@letar/animatrona-ipfs-player",
       "version": "0.6.0",
       "dependencies": {
+        "@letar/chakra-provider": "workspace:*",
         "@letar/icon-generator": "workspace:*",
         "@letar/ipfs-kubo-core": "workspace:*",
         "@letar/video-player-core": "workspace:*",
@@ -443,9 +452,11 @@
     },
     "apps/animatrona-mobile": {
       "name": "@letar/animatrona-mobile",
-      "version": "0.7.8",
+      "version": "0.7.12",
       "dependencies": {
         "@letar/animatrona-shared": "*",
+        "@letar/exoplayer-ass": "*",
+        "@letar/exoplayer-sync": "*",
         "@react-native/codegen": "*",
         "@react-native/gradle-plugin": "*",
         "react-native": "*",
@@ -456,14 +467,22 @@
     },
     "apps/animatrona-tracker": {
       "name": "@letar/animatrona-tracker",
-      "version": "0.12.0",
+      "version": "0.12.1",
       "dependencies": {
+        "@letar/animatrona-franchise-graph": "workspace:*",
+        "@letar/animatrona-types": "workspace:*",
+        "@letar/animatrona-utils": "workspace:*",
+        "@letar/auth": "workspace:*",
         "@letar/env-load": "workspace:*",
+        "@letar/forms": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/hooks": "workspace:*",
         "@letar/image-upload": "workspace:*",
         "@letar/pg-url": "workspace:*",
+        "@letar/query-provider": "workspace:*",
         "@letar/theme-check": "workspace:*",
+        "@letar/ui": "workspace:*",
+        "@letar/video-player-react": "workspace:*",
       },
     },
     "apps/animatrona-tracker-e2e": {
@@ -472,9 +491,11 @@
     },
     "apps/animatrona-tv": {
       "name": "@letar/animatrona-tv",
-      "version": "0.6.2",
+      "version": "0.6.3",
       "dependencies": {
         "@letar/animatrona-shared": "*",
+        "@letar/exoplayer-ass": "*",
+        "@letar/exoplayer-sync": "*",
         "@react-native/codegen": "*",
         "@react-native/gradle-plugin": "*",
         "react-native": "*",
@@ -499,6 +520,7 @@
       "version": "0.27.19",
       "dependencies": {
         "@letar/env-load": "workspace:*",
+        "@letar/forms": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
         "@letar/pg-url": "workspace:*",
@@ -538,6 +560,7 @@
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/analytics": "workspace:*",
+        "@letar/auth": "workspace:*",
         "@letar/chakra-provider": "workspace:*",
         "@letar/env-load": "workspace:*",
         "@letar/format-utils": "workspace:*",
@@ -572,7 +595,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.188.9",
+      "version": "0.189.1",
       "dependencies": {
         "@letar/analytics": "workspace:*",
         "@letar/consent": "workspace:*",
@@ -659,6 +682,7 @@
       "version": "0.1.11",
       "dependencies": {
         "@letar/env-load": "workspace:*",
+        "@letar/forms-core": "workspace:*",
         "@letar/pg-url": "workspace:*",
       },
     },
@@ -669,11 +693,16 @@
     "apps/form-develop-app-shadcn": {
       "name": "@letar/form-develop-app-shadcn",
       "version": "0.2.0",
+      "dependencies": {
+        "@letar/forms-core": "workspace:*",
+        "@letar/forms-react": "workspace:*",
+      },
     },
     "apps/form-docs": {
       "name": "form-docs",
       "version": "0.6.6",
       "dependencies": {
+        "@letar/forms-core": "workspace:*",
         "@letar/glitchtip": "workspace:*",
       },
     },
@@ -686,6 +715,7 @@
       "version": "0.1.10",
       "dependencies": {
         "@letar/demo-protection": "workspace:*",
+        "@letar/forms-core": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/pg-url": "workspace:*",
       },
@@ -712,12 +742,16 @@
       "name": "kami",
       "version": "0.35.1",
       "dependencies": {
+        "@letar/auth": "workspace:*",
+        "@letar/email": "workspace:*",
         "@letar/env-load": "workspace:*",
+        "@letar/forms": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "@letar/seed-utils": "workspace:*",
         "@letar/theme-check": "workspace:*",
+        "@letar/ui": "workspace:*",
         "butterchurn": "^2.6.7",
         "butterchurn-presets": "^2.4.7",
         "hydra-synth": "^1.4.0",
@@ -750,8 +784,11 @@
       "name": "@letar/label-printer-desktop",
       "version": "0.5.12",
       "dependencies": {
+        "@letar/chakra-provider": "workspace:*",
+        "@letar/forms": "workspace:*",
         "@letar/hooks": "workspace:*",
         "@letar/icon-generator": "workspace:*",
+        "@letar/label-printer-core": "workspace:*",
         "canvas": "^3.1.0",
         "pdfjs-dist": "^4.10.38",
       },
@@ -774,10 +811,15 @@
       "name": "@letar/mandala",
       "version": "0.40.28",
       "dependencies": {
+        "@letar/admin-ui": "workspace:*",
+        "@letar/auth": "workspace:*",
+        "@letar/email": "workspace:*",
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
         "@letar/pg-url": "workspace:*",
+        "@letar/pin-auth": "workspace:*",
+        "@letar/query-provider": "workspace:*",
       },
     },
     "apps/mandala-e2e": {
@@ -788,6 +830,7 @@
       "name": "@letar/poster-microtext-desktop",
       "version": "0.19.0",
       "dependencies": {
+        "@letar/chakra-provider": "workspace:*",
         "@letar/icon-generator": "workspace:*",
         "detect-libc": "^2.1.2",
         "font-list": "^2.1.0",
@@ -821,6 +864,7 @@
         "@letar/consent": "workspace:*",
         "@letar/email": "workspace:*",
         "@letar/env-load": "workspace:*",
+        "@letar/forms": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/hooks": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
@@ -855,6 +899,7 @@
         "@letar/glitchtip": "workspace:*",
         "@letar/jobs": "workspace:*",
         "@letar/pg-url": "workspace:*",
+        "@letar/redis-client": "workspace:*",
         "qrcode": "^1.5.4",
         "tus-js-client": "^4.3.1",
         "typograf": "^7.7.0",
@@ -889,6 +934,7 @@
         "@letar/i18n-proxy": "workspace:*",
         "@letar/jobs": "workspace:*",
         "@letar/pg-url": "workspace:*",
+        "@letar/ui": "workspace:*",
       },
     },
     "apps/time-e2e": {
@@ -1353,7 +1399,7 @@
     },
     "libs/hooks": {
       "name": "@letar/hooks",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "peerDependencies": {
         "@tanstack/react-query": ">=5.0.0",
         "react": ">=18.0.0",

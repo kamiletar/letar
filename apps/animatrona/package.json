@@ -24,13 +24,20 @@
   },
   "dependencies": {
     "cheerio": "^1.2.0",
+    "@letar/animatrona-types": "workspace:*",
+    "@letar/animatrona-ui": "workspace:*",
+    "@letar/animatrona-utils": "workspace:*",
     "@letar/electron-storage": "workspace:*",
     "@letar/folder-scan": "workspace:*",
+    "@letar/forms": "workspace:*",
     "@letar/hooks": "workspace:*",
     "@letar/icon-generator": "workspace:*",
     "@letar/ipfs-kubo-core": "workspace:*",
     "@letar/query-provider": "workspace:*",
-    "@letar/seed-utils": "workspace:*"
+    "@letar/seed-utils": "workspace:*",
+    "@letar/ui": "workspace:*",
+    "@letar/video-player-core": "workspace:*",
+    "@letar/video-player-react": "workspace:*"
   },
   "devDependencies": {
     "electron": "44.2.0"
