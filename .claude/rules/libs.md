@@ -43,9 +43,25 @@ libs/my-lib/
 не копируй туда подробности. Расползшаяся копия 2026-08-04 стоила пяти одинаковых правок
 подряд (корневой `PLAN-JOURNAL-1.md` §29).
 
-**Обязательное — одно:** чтобы Nx видел ребро графа. Если библиотеки нет в `dependencies`
-приложения — пропиши её в `nx.implicitDependencies` его `package.json`. Это даёт корректные
-`nx affected`, порядок сборки и инвалидацию кэша.
+**Обязательное — одно:** библиотека должна быть в реальных `dependencies` приложения
+(`workspace:*`), не только в `nx.implicitDependencies`. Причина — не граф Nx (см. ⚠️ ниже), а
+симлинк в `node_modules/@letar/<lib>` под изолированным линковщиком bun: его создаёт **только**
+`bun install` по записи в `dependencies`, `implicitDependencies` для bun невидим. Без симлинка
+падает любой резолв мимо `tsconfig.paths` — `typecheck:tsgo`, vitest через sibling-spec (см.
+оговорку и оба прецедента чуть ниже).
+
+⚠️ **`nx affected` не является причиной держать `dependencies`/`implicitDependencies` в
+актуальном состоянии — вопреки прежней формулировке этого правила.** Эмпирическая проверка
+(`nx show projects --affected --files=libs/<lib>/src/index.ts` ДО правки package.json,
+§169 `PLAN-INFRA-6.md`) на `animatrona` (7 из 8 недостающих библиотек), `kami` (4/4: `auth`,
+`email`, `forms`, `ui`), `mandala` (5/5: `admin-ui`, `auth`, `email`, `pin-auth`,
+`query-provider`) и `dashboard` (`auth`) показала: граф Nx уже видел приложение затронутым
+**без единой записи** о библиотеке ни в `dependencies`, ни в `implicitDependencies`. Плагин
+`@nx/js` строит рёбра source-based инференсом — парсит TS-импорты по всему воркспейсу
+независимо от package.json. Проверено только для статических `import` в TS/TSX; не проверено
+для динамического `import()` и для реэкспорта через баррель другого пакета — не считать
+доказанным для этих случаев без отдельного замера. Разбор —
+[nx-affected-source-based-inference.md](/.claude/docs/nx-affected-source-based-inference.md).
 
 **Резолв самого импорта `@letar/*` от настроек приложения не зависит.** Он держится на
 `customConditions: ["@letar/source"]` в корневом `tsconfig.base.json` + `exports` с этим условием
