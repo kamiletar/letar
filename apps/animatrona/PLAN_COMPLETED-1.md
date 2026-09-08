@@ -586,3 +586,28 @@ cwd таргета (`apps/animatrona`, см. `cwd` у `db:push`/`db:migrate` в 
 тронуты (сверено побайтово с бэкапом до/после). `label-printer-desktop/prisma.config.ts` проверен
 отдельно — там путь уже без лишнего всплытия, этого бага нет. Разбор перенесён в
 [apps/animatrona/CLAUDE.md](../CLAUDE.md).
+
+## 2026-09-08: TrackPreference/WatchStatus/RelationKind вынесены в общий фрагмент zenstack-fragments
+
+Задача координатора экосистемы (`animatrona-coordinator-dev`, тред `trackpreference-fragment-
+consolidation`) — консолидация трёх независимых дублей между приложениями линейки Animatrona:
+`TrackPreference` (совпадал с `animatrona-ipfs-player`), `WatchStatus` (совпадал с
+`animatrona-tracker`), `RelationKind` (добавление к задаче, отдельный follow-up).
+
+**Найдено расхождение с исходным предложением координатора.** Координатор утверждал, что
+`WatchStatus` «побайтово идентичен» между `animatrona` и `animatrona-tracker`, предложив во
+фрагмент 5 значений (`NOT_STARTED`/`WATCHING`/`COMPLETED`/`ON_HOLD`/`DROPPED`). По факту у
+`animatrona` шестое значение — `PLANNED`, реально используемое в UI (`WatchStatusSelector.tsx`,
+`AnimeHero.tsx`, `mobile-ui/src/pages/{Library,Anime}.tsx}`). Добавлено во фрагмент — для tracker
+это лишнее неиспользуемое значение enum, вреда не несёт.
+
+`DiscoverWatchProgress` переведена на миксин `WatchProgressFields` (уже существовал, добавлен
+`animatrona-ipfs-player-dev` для своей модели `WatchProgress`) — устранён дубль шести полей
+(`currentTime`/`duration`/`completed`/`selectedAudioTrackId`/`selectedSubtitleTrackId`/
+`lastWatchedAt`).
+
+Затронутые файлы: `libs/zenstack-fragments/src/animatrona.zmodel` (добавлены три enum),
+`apps/animatrona/schema/models/{media,settings,watch,anime}.zmodel`. `nx zenstack:generate` →
+`nx db:push animatrona` подтвердил «database is already in sync» (только перенос объявлений между
+файлами, набор значений/полей не менялся структурно — миграция не нужна). `typecheck:tsgo`/`lint`
+— зелёные. Коммит `45771cd6`.

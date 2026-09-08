@@ -4,6 +4,19 @@
 
 ## [Unreleased]
 
+## [0.55.70] - 2026-09-08
+
+### Changed
+
+- **`TrackPreference`/`WatchStatus`/`RelationKind` вынесены в общий фрагмент
+  `libs/zenstack-fragments/src/animatrona.zmodel`.** Задача координатора экосистемы —
+  переиспользование `animatrona-ipfs-player`/`animatrona-tracker`. `WatchStatus` дополнен
+  значением `PLANNED` — отсутствовало в исходном предложении координатора, но реально
+  используется в UI (`WatchStatusSelector`, `AnimeHero`, `mobile-ui`). `DiscoverWatchProgress`
+  переведён на миксин `WatchProgressFields`, устранён дубль шести полей с `WatchProgress`
+  (IPFS Player). Только перенос объявлений — `nx db:push` подтвердил отсутствие структурных
+  изменений, миграция не нужна.
+
 ## [0.55.69] - 2026-09-08
 
 ### Changed
