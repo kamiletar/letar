@@ -3583,3 +3583,6 @@ bun-симлинк (`node_modules/@letar/<lib>` создаёт только `bun
   Приложений проверено: 56.» (6 приватных submodule не выкачаны в этом чекауте — не проверены,
   ожидаемо). Долг из §169 закрыт полностью — можно поднимать `nx-graph-deps` в
   `scripts/check-all.mjs` с `warn` до `gate` (условие поднятия, сформулированное выше, выполнено).
+- **2026-09-09: `nx-graph-deps` поднята до `gate` в `scripts/check-all.mjs`** (по образцу
+  `transpile-packages`, §162). `bun scripts/check-all.mjs --group=deps` — все gate-проверки
+  зелёные, `nx-graph-deps` в их числе.

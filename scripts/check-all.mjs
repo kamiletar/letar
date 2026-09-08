@@ -107,14 +107,14 @@ const CHECKS = [
     group: 'deps',
     title: 'импортируемые @letar/* без записи ни в dependencies, ни в nx.implicitDependencies',
     run: ['node', ['scripts/check-nx-graph-deps.mjs']],
-    // warn: долг на момент регистрации (2026-09-08) — 22 из 56 приложений (~39%),
-    // найдено на animatrona-tracker (8 из 17 импортов), разово починенном в той же
-    // сессии. Слишком большой объём для немедленного gate — поднять до gate, когда
-    // список на чистом дереве опустеет (см. прецедент transpile-packages).
+    // gate с 2026-09-09: долг на момент регистрации (2026-09-08, 22 из 56 приложений,
+    // ~39%) закрыт полностью — на чистом дереве 0 разрывов (56 приложений проверено,
+    // §169 PLAN-INFRA-6.md). Условие поднятия из warn выполнено, см. прецедент
+    // transpile-packages ниже.
     // Отличие от implicit-deps выше: та проверка — про узкий симптом (пакет только
     // в implicitDependencies рвёт vitest через sibling-spec), эта — про полноту
     // графа Nx вообще (nx affected не видит ребро зависимости).
-    severity: 'warn',
+    severity: 'gate',
     ci: 'partial',
     ciNote: 'приватные submodule не выкачаны — их package.json/исходники не проверены',
     doc: 'PLAN-INFRA.md §169',
