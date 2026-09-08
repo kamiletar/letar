@@ -4,6 +4,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.1] - 2026-09-08
+
+### Added
+
+- **`TestForm` (`./testing`) — новый `onFormReady?: (form) => void`.** Отдаёт наружу инстанс
+  TanStack Form, чтобы спеки UI-скинов могли проверить `form.state.values` после DOM-
+  взаимодействия — итоговый контракт значения поля (что реально «отправилось» бы при submit),
+  а не только его видимое поведение. Часть unified test-suite для `EditIntentValue<T>` — до
+  этого `forms-shadcn` не имел способа проверить финальную форму `{isEdited, value}` без
+  полноценного `createForm()`/кнопки submit, которых у поле-only скина нет.
+
 ## [0.6.0] - 2026-09-08
 
 ### Fixed
