@@ -76,6 +76,22 @@ AST не содержит полей миксина (они в `model.mixins`), 
 
 ---
 
+## Версия 0.6.1 (2026-09-09) — консолидация TrackPreference во фрагмент
+
+Последний пункт § «Отложено намеренно» закрыт. Задача была передана `animatrona-coordinator-dev`
+(тред `trackpreference-fragment-consolidation`) ещё 2026-09-08, поскольку перенос требовал
+одновременной правки `apps/animatrona/schema/media.zmodel` — вне объёма этого приложения.
+`animatrona-dev` выполнил(а) задачу одним коммитом: убрал(а) локальные `TrackPreference`/
+`WatchStatus` из `apps/animatrona/schema/`, подключил(а) фрагмент через `settings.zmodel`
+(координатор поправил изначальное предложение — импорт нужен там, где реально используется
+`Settings.trackPreference`, а не в `media.zmodel`), и заодно перевёл(а) `DiscoverWatchProgress`
+на `with WatchProgressFields`.
+
+С нашей стороны — убрана локальная копия `enum TrackPreference` из `schema.zmodel` (7 строк),
+она резолвится через уже существующий импорт фрагмента в шапке файла. `zenstack:generate`/
+`db:push`/`typecheck:tsgo`/`lint` зелёные, `db:push` подтвердил «already in sync» (перенос
+декларации в миксин, не структурное изменение — новая миграция не нужна).
+
 ## Версия 0.6.0 (2026-09-08) — Фаза 1: сохранение прогресса просмотра
 
 - `releaseKey` реально вычисляется в `manifest:openByCid`: `AnimeManifest.animeInfoCid` →
