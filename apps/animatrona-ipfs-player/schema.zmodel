@@ -1,0 +1,155 @@
+import "../../libs/zenstack-fragments/src/animatrona"
+
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider      = "prisma-client-js"
+  output        = "./prisma"
+  binaryTargets = ["native", "windows"]
+}
+
+plugin policy {
+  provider = "@zenstackhq/plugin-policy"
+}
+
+plugin prisma {
+  provider = "@core/prisma"
+  output   = "./renderer/src/generated/schema.prisma"
+}
+
+plugin formSchema {
+  provider = "../../libs/zenstack-form-plugin/dist/index.js"
+  output   = "./renderer/src/generated/form-schemas"
+}
+
+/// Предпочтение дорожек при первом просмотре
+///
+/// ⚠️ Временная локальная копия enum'а из `apps/animatrona/schema/models/media.zmodel`.
+/// Консолидация во фрагмент отложена намеренно — см. PLAN.md § «Отложено намеренно».
+enum TrackPreference {
+  /// Русская озвучка + субтитры надписей
+  RUSSIAN_DUB
+  /// Оригинальная дорожка + полные субтитры
+  ORIGINAL_SUB
+  /// Автовыбор по доступности
+  AUTO
+}
+
+/// Трекер — источник раздач. Все поля из общего миксина, своих не нужно.
+model Tracker with TrackerFields {
+  /// Обратная сторона relation — раздачи, открытые через этот трекер
+  recentReleases RecentRelease[]
+}
+
+/// Недавно открытая раздача — тонкая карточка для списка «недавнее».
+///
+/// НЕ кеш метаданных: всё содержательное лежит в IPFS по `directoryCid` и неизменяемо.
+/// Здесь ровно то, чем нарисовать карточку, когда сети нет.
+model RecentRelease {
+  id             String    @id @default(cuid())
+
+  /// CID директории раздачи — что именно открывали
+  directoryCid   String    @unique
+
+  /// Название (из манифеста, для отображения)
+  name           String
+
+  /// CID постера
+  posterCid      String?
+
+  /// Количество эпизодов в раздаче
+  episodesCount  Int       @default(0)
+
+  /// Shikimori ID — стабильный ключ раздачи между её версиями
+  shikimoriId    Int?
+
+  /// Откуда пришла раздача; null — CID ввели руками
+  trackerId      String?
+  tracker        Tracker?  @relation(fields: [trackerId], references: [id], onDelete: SetNull)
+
+  firstOpenedAt  DateTime  @default(now())
+  lastOpenedAt   DateTime  @default(now())
+
+  // Desktop-приложение без аутентификации
+  @@allow('all', true)
+
+  @@index([lastOpenedAt])
+  @@index([shikimoriId])
+}
+
+/// Прогресс просмотра — без FK на библиотеку (её у плеера нет).
+///
+/// Смысловой аналог `DiscoverWatchProgress` из Animatrona, но ключ другой — см. PLAN.md
+/// § «Ключ прогресса просмотра».
+model WatchProgress {
+  id                      String   @id @default(cuid())
+
+  /// Стабильный ключ раздачи: `shikimori:<id>` либо `cid:<directoryCid>`
+  releaseKey              String
+  /// Номер эпизода
+  episodeNumber           Int
+
+  /// Текущая позиция (сек)
+  currentTime             Float    @default(0)
+  /// Длительность (сек)
+  duration                Float    @default(0)
+  /// Досмотрен до конца
+  completed               Boolean  @default(false)
+
+  /// ID выбранной аудиодорожки из манифеста
+  selectedAudioTrackId    String?
+  /// ID выбранных субтитров из манифеста (null — выключены)
+  selectedSubtitleTrackId String?
+
+  lastWatchedAt           DateTime @default(now())
+
+  @@allow('all', true)
+
+  @@unique([releaseKey, episodeNumber])
+  @@index([lastWatchedAt])
+}
+
+/// Настройки приложения (singleton) — 12 полей против 30 у Animatrona
+model Settings {
+  id                   String          @id @default("default")
+
+  // === IPFS ===
+
+  /// Путь к репозиторию Kubo
+  ipfsRepoPath         String?         @meta("form.title", "Папка IPFS-хранилища")
+
+  ipfsStorageMaxGb     Int             @default(100) @meta("form.title", "Макс. размер IPFS хранилища (ГБ)") @meta("form.fieldType", "slider") @meta("form.props.min", 10) @meta("form.props.max", 4000) @meta("form.props.step", 10) @meta("form.props.showValue", true)
+
+  // === Системный трей ===
+
+  minimizeToTray       Boolean         @default(true) @meta("form.title", "Сворачивать в трей") @meta("form.fieldType", "switch")
+
+  closeToTray          Boolean         @default(true) @meta("form.title", "Закрытие окна в трей") @meta("form.fieldType", "switch")
+
+  showTrayNotification Boolean         @default(true) @meta("form.title", "Уведомление при сворачивании") @meta("form.fieldType", "switch")
+
+  // === Интерфейс ===
+
+  darkMode             Boolean         @default(true) @meta("form.title", "Тёмная тема") @meta("form.fieldType", "switch")
+
+  language             String          @default("ru") @meta("form.title", "Язык интерфейса") @meta("form.fieldType", "select") @meta("form.props.options", ["ru","en","ja"])
+
+  // === Плеер ===
+
+  skipOpening          Boolean         @default(false) @meta("form.title", "Автопропуск опенинга") @meta("form.fieldType", "switch")
+
+  skipEnding           Boolean         @default(false) @meta("form.title", "Автопропуск эндинга") @meta("form.fieldType", "switch")
+
+  autoplay             Boolean         @default(true) @meta("form.title", "Автовоспроизведение") @meta("form.fieldType", "switch")
+
+  trackPreference      TrackPreference @default(AUTO) @meta("form.title", "Предпочтение дорожек") @meta("form.fieldType", "radioCard")
+
+  /// Громкость плеера (0–1) — общая, а не на каждый эпизод
+  volume               Float           @default(1)
+
+  updatedAt            DateTime        @updatedAt
+
+  @@allow('all', true)
+}

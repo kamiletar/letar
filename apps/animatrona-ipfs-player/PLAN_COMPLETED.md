@@ -51,11 +51,28 @@ AST не содержит полей миксина (они в `model.mixins`), 
 Механизм, проверенные границы и ловушки —
 [zenstack-shared-fragments-across-apps](/.claude/docs/zenstack-shared-fragments-across-apps.md).
 
-### Что осталось на следующую сессию
+### 0.5/0.6 — схема плеера заведена, таргеты добавлены (2026-09-08, вторая сессия)
 
-Шаги 0.5 (написать `schema.zmodel` плеера) и 0.6 (завести таргеты `zenstack:generate`/`db:push`
-в `project.json`) — готовое задание с полным текстом схемы и чек-листом граблей лежит в
-[PLAN.md](./PLAN.md) § «Задание на реализацию (шаги 0.5 и 0.6)».
+`schema.zmodel` вставлен из готового задания почти как есть — одна правка: у `Tracker`
+понадобилось обратное поле `recentReleases RecentRelease[]` (без него `zenstack generate`
+падает на `RecentRelease.tracker` — «missing opposite relation field»). Таргеты
+`zenstack:generate`/`db:push`/`db:push:data-loss`/`db:migrate`/`db:migrate:deploy`/`db:studio`
+добавлены в `project.json` по образцу `apps/animatrona`.
+
+`nx zenstack:generate animatrona-ipfs-player` → 4 модели + `TrackPreference` во всех трёх
+выходах (Prisma schema, Prisma Client, `form-schemas/*.form.ts` — form-плагин v4.0.1 корректно
+разворачивает поля миксина `TrackerFields` в `Tracker.form.ts`). `nx typecheck:tsgo` и `nx lint`
+зелёные.
+
+**Найдена и исправлена независимая проблема** в скопированном `prisma.config.ts`: относительный
+путь `../../../prisma/data/app.db`, взятый дословно из `apps/animatrona`, у плеера резолвился
+не в `apps/animatrona-ipfs-player/prisma/data/`, а в `C:\web\prisma\data\app.db` — на уровень
+выше корня репозитория целиком. Почему у Animatrona тот же путь ведёт себя иначе — не
+выяснено. Фикс — `file:prisma/data/app.db` (без всплытия, относительно `cwd` таргета, который
+уже указывает на корень приложения). Ошибочно созданный файл вне репозитория удалён,
+`prisma/data/` добавлена в `.gitignore` приложения (не была унаследована из шаблона генератора).
+
+Готово к MVP-разделу Фазы 1: бизнес-логика в `main/services/`, IPC-хендлеры, UI.
 
 ---
 

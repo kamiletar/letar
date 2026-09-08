@@ -174,12 +174,12 @@
       Проверено независимо с нашей стороны: состав `Tracker` в её сгенерированной
       `schema.prisma` **совпал со слепком до перевода** — те же 24 строки полей/атрибутов/
       индексов, дрейфа нет, миграция не потребовалась. Путь для схемы плеера свободен.
-- [ ] **0.5 Завести `schema.zmodel` плеера** на готовом фрагменте: `datasource` sqlite,
-      `plugin policy` (обязателен, иначе `@@allow` из фрагмента не резолвится), `plugin prisma`,
-      свои модели (кэш раздачи по CID, урезанный `Settings`).
-- [ ] **0.6 Добавить таргеты в `project.json` плеера** — сейчас там только
-      `dev`/`build:win`/`lint`/`typecheck:tsgo`/`format`, ни `zenstack:generate`, ни `db:push`
-      нет вовсе. Брать за образец `apps/animatrona/project.json`.
+- [x] **0.5 Завести `schema.zmodel` плеера** — ✅ выполнено 2026-09-08, текст вставлен как есть
+      из задания ниже (с одной правкой: у `Tracker` добавлена обратная сторона relation
+      `recentReleases RecentRelease[]` — без неё `zenstack generate` требует opposite field).
+- [x] **0.6 Добавить таргеты в `project.json` плеера** — ✅ выполнено 2026-09-08, по образцу
+      `apps/animatrona/project.json` (`zenstack:generate`/`db:push`/`db:push:data-loss`/
+      `db:migrate`/`db:migrate:deploy`/`db:studio`).
 - [x] **0.7 Баг form-плагина** — ✅ снят 2026-09-08, исправлен в `@letar/zenstack-form-plugin`
       v4.0.1 (`collectAllFields()` разворачивает `model.mixins` рекурсивно). Проверено повторным
       прогоном контрольного опыта: form-схема через миксин и через прямое объявление —
@@ -509,6 +509,29 @@ model Settings {
 Приёмка шага: `nx zenstack:generate animatrona-ipfs-player` отрабатывает, в
 `renderer/src/generated/schema.prisma` четыре модели и enum, `nx typecheck:tsgo` и `nx lint`
 зелёные.
+
+✅ **Выполнено 2026-09-08** — все условия приёмки подтверждены. Дополнительно найдены и
+исправлены две проблемы, которых не было в задании:
+
+1. **Missing opposite relation.** `RecentRelease.tracker` требует обратного поля на `Tracker`
+   (`Could not resolve...` при генерации без него) — добавлено `recentReleases
+   RecentRelease[]` в модель `Tracker`.
+2. **Путь к SQLite-файлу резолвился НЕ туда.** Скопированный из `apps/animatrona/prisma.config.ts`
+   `url: 'file:../../../prisma/data/app.db'` для этого приложения (`cwd` таргетов —
+   `apps/animatrona-ipfs-player`, та же глубина от корня репо, что и у `apps/animatrona`)
+   создавал БД на уровень **выше корня всего репозитория** — `C:\web\prisma\data\app.db`, а не
+   `apps/animatrona-ipfs-player/prisma/data/app.db`. Почему у Animatrona тот же относительный
+   путь резолвится иначе — не выяснено (возможно, её реальная dev-БД создаётся не через
+   `nx db:push`, а рантаймом самого приложения по другому пути; сама CLI-команда `nx db:push
+   animatrona` при этом относительном пути могла молча писать БД в то же чужое место, никем не
+   замеченная). Фикс для плеера — путь без `../../../`, просто `file:prisma/data/app.db`
+   (относительно `cwd`, которым уже является корень приложения). Ошибочно созданный файл вне
+   репозитория удалён. `prisma/data/` добавлена в `.gitignore` приложения (у плеера её не было —
+   в отличие от Animatrona, где `.gitignore` эту папку игнорирует с самого начала).
+
+Также создана и закоммичена начальная миграция `20260908100205_init` (`nx db:migrate`) —
+pre-commit `schema-migration-check` верно потребовал миграцию в том же коммите, что и первый
+`schema.zmodel`; это не ложное срабатывание, обходить флагом не пришлось.
 
 ### Отложено намеренно (не делать в этой итерации)
 

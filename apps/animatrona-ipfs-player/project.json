@@ -37,6 +37,80 @@
     },
     "format": {
       "command": "dprint fmt apps/animatrona-ipfs-player/**/*.{ts,tsx,json}"
+    },
+    "zenstack:generate": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        {
+          "projects": ["@letar/zenstack-form-plugin"],
+          "target": "build"
+        }
+      ],
+      "options": {
+        "commands": [
+          "zenstack generate --schema schema.zmodel",
+          "prisma generate",
+          "node -e \"const fs=require('fs'),p=require('path');const j='renderer/src/generated/migrations',t='prisma/migrations';if(!fs.existsSync(j)){fs.symlinkSync(p.resolve(t),p.resolve(j),'junction');console.log('Junction created: migrations')}\""
+        ],
+        "cwd": "apps/animatrona-ipfs-player",
+        "parallel": false
+      }
+    },
+    "db:push": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["zenstack:generate"],
+      "cache": false,
+      "options": {
+        "command": "prisma db push",
+        "cwd": "apps/animatrona-ipfs-player"
+      }
+    },
+    "db:push:data-loss": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["zenstack:generate"],
+      "cache": false,
+      "metadata": {
+        "description": "Сбросить dev БД и применить схему (потеря данных!)",
+        "technologies": ["prisma"]
+      },
+      "options": {
+        "command": "prisma db push --accept-data-loss --force-reset",
+        "cwd": "apps/animatrona-ipfs-player"
+      }
+    },
+    "db:migrate": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["zenstack:generate"],
+      "cache": false,
+      "metadata": {
+        "description": "Создать миграцию",
+        "technologies": ["prisma", "electron"]
+      },
+      "options": {
+        "command": "cross-env CI= VERCEL= GITHUB_ACTIONS= GITLAB= NETLIFY= HEROKU= prisma migrate dev {args}",
+        "forwardAllArgs": true,
+        "cwd": "apps/animatrona-ipfs-player"
+      }
+    },
+    "db:migrate:deploy": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "metadata": {
+        "description": "Apply pending migrations (production)",
+        "technologies": ["prisma"]
+      },
+      "options": {
+        "command": "prisma migrate deploy",
+        "cwd": "apps/animatrona-ipfs-player"
+      }
+    },
+    "db:studio": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["zenstack:generate"],
+      "options": {
+        "command": "prisma studio",
+        "cwd": "apps/animatrona-ipfs-player"
+      }
     }
   }
 }

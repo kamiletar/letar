@@ -6,6 +6,12 @@
 
 ### Added
 
+- **Шаги 0.5/0.6 Фазы 0 закрыты**: заведён `schema.zmodel` (4 модели + `TrackPreference`),
+  таргеты `zenstack:generate`/`db:push`/`db:push:data-loss`/`db:migrate`/`db:migrate:deploy`/
+  `db:studio` в `project.json`. `nx typecheck:tsgo`/`nx lint` зелёные, `nx db:push` синхронизирует
+  локальную SQLite. По пути найден и исправлен независимый баг скопированного
+  `prisma.config.ts` — относительный путь к БД резолвился на уровень выше корня репозитория,
+  фикс — `file:prisma/data/app.db`.
 - Каркас приложения (`nx g @letar/generators:electron-app`).
 - **Задание на реализацию шагов 0.5/0.6** — готовый к вставке `schema.zmodel` целиком (4 модели
   - enum, синтаксис прогнан на реальном `zenstack generate`), функция `getReleaseKey()`,

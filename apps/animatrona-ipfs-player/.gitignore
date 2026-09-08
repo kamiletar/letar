@@ -12,3 +12,6 @@ next-env.d.ts
 /renderer/.next/
 /renderer/out/
 /output/
+
+# База данных (локальные данные)
+/prisma/data/
