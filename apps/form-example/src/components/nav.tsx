@@ -32,6 +32,7 @@ const examples = [
   { href: '/examples/calculated', label: 'Calculated Fields' },
   { href: '/examples/utility', label: 'Utility Components' },
   { href: '/examples/security', label: 'Security' },
+  { href: '/examples/edit-intent', label: 'EditIntent' },
   { href: '/examples/signature', label: 'Signature' },
   { href: '/examples/documents', label: 'Russian Documents' },
   { href: '/examples/table-editor', label: 'Table Editor' },
