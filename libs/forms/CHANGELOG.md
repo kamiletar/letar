@@ -4,6 +4,21 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.13.0] - 2026-09-09
+
+### Added
+
+- **`Form.Field.Currency` — проп `minorUnitScale`** (от `domwellbes-dev`, backlog, паттерн — три
+  приложения, минимум 9 мест с одним и тем же дублированием). Хранение значения поля в minor
+  units (копейки/центы, целое число — типовой паттерн `*Kopecks`-полей ZenStack-моделей), при
+  этом поле показывает и принимает major units (рубли). По умолчанию `1` — без scale, поведение
+  не меняется. Value-transform по аналогии с `Form.Field.Slug`: `displayedValue =
+  storedValue / minorUnitScale`, обратно — `Math.round(displayed * minorUnitScale)` (округление
+  только при `scale !== 1` — иначе портит существующие дробные значения плавающей точкой).
+  ```tsx
+  <Form.Field.Currency name="priceKopecks" label="Цена" minorUnitScale={100} />
+  ```
+
 ## [2.12.3] - 2026-09-09
 
 ### Fixed

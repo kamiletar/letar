@@ -30,6 +30,11 @@ import { createField, FieldWrapper } from '../base'
  *   currencyDisplay="code"
  * />
  * ```
+ *
+ * @example Значение хранится в копейках (целое число), отображается/редактируется в рублях
+ * ```tsx
+ * <Form.Field.Currency name="priceKopecks" label="Цена" minorUnitScale={100} />
+ * ```
  */
 /** Currency field state */
 interface CurrencyFieldState {
@@ -62,19 +67,31 @@ export const FieldCurrency = createField<CurrencyFieldProps, number | undefined,
   },
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
-    const value = field.state.value as number | undefined
+    const storedValue = field.state.value as number | undefined
 
-    const { min, max, step = 0.01, size } = componentProps
+    const { min, max, step = 0.01, size, minorUnitScale = 1 } = componentProps
 
     const { formatOptions, locale } = fieldState
+
+    // Форма хранит/сериализует значение в minor units (копейки), поле показывает/принимает major
+    // units (рубли) — тот же принцип value-transform, что у Form.Field.Slug (вычисляемое значение
+    // поверх обычного поля), но в обе стороны и без промежуточного локального состояния.
+    const displayedValue = storedValue === undefined ? undefined : storedValue / minorUnitScale
 
     return (
       <FieldWrapper resolved={resolved} hasError={hasError} errorMessage={errorMessage} fullPath={fullPath}>
         <NumberInput.Root
-          value={value?.toString() ?? ''}
+          value={displayedValue?.toString() ?? ''}
           onValueChange={(details: { valueAsNumber: number }) => {
             const num = details.valueAsNumber
-            field.handleChange(Number.isNaN(num) ? undefined : num)
+            if (Number.isNaN(num)) {
+              field.handleChange(undefined)
+              return
+            }
+            // scale=1 (по умолчанию) сохраняет исходное поведение как есть — Math.round здесь
+            // только для scale!=1, где `num * minorUnitScale` рискует накопить погрешность
+            // плавающей точки (например `123.45 * 100 = 12345.000000000002`).
+            field.handleChange(minorUnitScale === 1 ? num : Math.round(num * minorUnitScale))
           }}
           onBlur={field.handleBlur}
           min={min}

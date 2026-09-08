@@ -86,4 +86,60 @@ describe('FieldCurrency', () => {
       expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ price: 234.65 }))
     })
   })
+
+  describe('minorUnitScale (копейки↔рубли)', () => {
+    it('без minorUnitScale ведёт себя как раньше (scale=1)', () => {
+      render(
+        <Form initialValue={{ price: 123.45 }} onSubmit={vi.fn()}>
+          <Form.Field.Currency name="price" />
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      // U+00A0 (неразрывный пробел) между кодом валюты и суммой — вывод Intl.NumberFormat/@internationalized/number
+      expect(screen.getByRole('spinbutton')).toHaveValue('RUB 123.45')
+    })
+
+    it('отображает значение в major units (рубли), храня minor units (копейки)', () => {
+      render(
+        <Form initialValue={{ priceKopecks: 12345 }} onSubmit={vi.fn()}>
+          <Form.Field.Currency name="priceKopecks" minorUnitScale={100} />
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      // U+00A0 (неразрывный пробел) между кодом валюты и суммой — вывод Intl.NumberFormat/@internationalized/number
+      expect(screen.getByRole('spinbutton')).toHaveValue('RUB 123.45')
+    })
+
+    it('при вводе рублей сохраняет в форме целое число копеек', async () => {
+      const user = userEvent.setup()
+      const onSubmit = vi.fn()
+      render(
+        <Form initialValue={{ priceKopecks: undefined }} onSubmit={onSubmit}>
+          <Form.Field.Currency name="priceKopecks" minorUnitScale={100} />
+          <Form.Button.Submit>Submit</Form.Button.Submit>
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      const input = screen.getByRole('spinbutton')
+      await user.click(input)
+      await user.paste('123.45')
+      await user.click(screen.getByRole('button', { name: 'Submit' }))
+
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ priceKopecks: 12345 }))
+    })
+
+    it('пустое значение остаётся пустым независимо от scale', () => {
+      render(
+        <Form initialValue={{ priceKopecks: undefined }} onSubmit={vi.fn()}>
+          <Form.Field.Currency name="priceKopecks" minorUnitScale={100} />
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      expect(screen.getByRole('spinbutton')).toHaveValue('')
+    })
+  })
 })

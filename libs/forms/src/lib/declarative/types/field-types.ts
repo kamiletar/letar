@@ -176,6 +176,21 @@ export interface CurrencyFieldProps extends BaseFieldProps {
   step?: number
   /** Size */
   size?: 'xs' | 'sm' | 'md' | 'lg'
+  /**
+   * Scale between the stored field value (minor currency units, e.g. kopecks/cents) and the
+   * displayed/edited value (major units, e.g. rubles). Default `1` — no transform, current
+   * behaviour unchanged.
+   *
+   * With `minorUnitScale={100}`, a field value of `12345` displays and edits as `123.45`; typing
+   * `123.45` stores back `12345`. `min`/`max`/`step` are in DISPLAYED (major-unit) terms, same as
+   * without the scale.
+   *
+   * @example DB/Prisma stores an integer `priceKopecks` field
+   * ```tsx
+   * <Form.Field.Currency name="priceKopecks" label="Цена" minorUnitScale={100} />
+   * ```
+   */
+  minorUnitScale?: number
 }
 
 /**
