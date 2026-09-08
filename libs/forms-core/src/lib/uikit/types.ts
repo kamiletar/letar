@@ -122,6 +122,13 @@ export interface UIKitNumberInputProps {
   step?: number
   disabled?: boolean
   readOnly?: boolean
+  /**
+   * Локаль для разбора десятичного разделителя (из `useFormI18n()?.locale` на стороне поля).
+   * Без неё — только точка (как раньше у нативного `<input type="number">`). С `"ru"` (и любой
+   * другой локалью, где `Intl.NumberFormat` использует запятую) — запятая тоже разбирается как
+   * десятичный разделитель, точка продолжает работать в любом случае.
+   */
+  locale?: string
   'data-field-name'?: string
 }
 
