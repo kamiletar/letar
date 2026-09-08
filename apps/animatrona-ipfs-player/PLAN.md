@@ -583,7 +583,11 @@ pre-commit `schema-migration-check` верно потребовал миграц
       `@letar/video-player-react`/`@letar/video-player-core`), см. раздел «Видеоплеер эпизода»
       ниже
 - [x] Сохранение прогресса просмотра (`WatchProgress`) — см. раздел «Прогресс просмотра» ниже
-- [ ] Проверка dev-режима и упакованной сборки (`nx build:win animatrona-ipfs-player`)
+- [x] Проверка упакованной сборки (`nx build:win animatrona-ipfs-player`) — `next build` →
+      `webpack` → `electron-builder --win` прошли зелёными, `dist/win-unpacked/Animatrona IPFS
+      Player.exe` и NSIS-инсталлятор `Animatrona IPFS Player Setup 0.6.0.exe` собраны. Живой
+      запуск установленного приложения не проверялся (GUI-уровень Electron нельзя проверить в
+      сендбоксе — см. `verification-pitfalls.md`), только успешная сборка/упаковка.
 
 ### Видеоплеер эпизода (2026-09-08)
 

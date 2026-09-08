@@ -6,6 +6,11 @@
 
 ### Added
 
+- **Упакованная сборка (`nx build:win`) проверена.** `next build` → `webpack` →
+  `electron-builder --win` прошли без ошибок, собраны `dist/win-unpacked/Animatrona IPFS
+  Player.exe` и NSIS-инсталлятор `Animatrona IPFS Player Setup 0.6.0.exe`. Все пункты Фазы 1
+  MVP из PLAN.md закрыты. Живой запуск установленного приложения не проверялся (GUI Electron
+  нельзя проверить в сендбоксе).
 - **Сохранение прогресса просмотра.** `main/ipc/watch-progress.handlers.ts`
   (`watchProgress:get`/`listForRelease`/`upsert`) поверх модели `WatchProgress`. `releaseKey`
   теперь реально вычисляется в `manifest:openByCid` (`AnimeManifest.animeInfoCid` →
