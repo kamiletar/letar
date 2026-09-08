@@ -1,6 +1,6 @@
 ---
 title: Текстовые поля
-description: Поля ввода текста — String, Textarea, Password, MaskedInput, RichText
+description: Поля ввода текста — String, Textarea, Password, MaskedInput, RichText, Slug
 ---
 
 import { DemoContainer } from '@/components/demo-container'
@@ -125,6 +125,36 @@ const Schema = z.object({
 ```
 
 Требуются peer-зависимости: `@tiptap/react` и `@tiptap/starter-kit`.
+
+## Slug
+
+**API:** `Form.Field.Slug`
+
+Текстовое поле-«зеркало»: значение — URL-слаг, производный от соседнего поля (обычно названия),
+пока пользователь не отредактирует слаг вручную — после этого зеркалирование выключается
+навсегда для этой формы.
+
+```tsx
+const Schema = z.object({
+  name: z.string().meta({ ui: { title: 'Название' } }),
+  slug: z.string().meta({ ui: { title: 'URL' } }),
+})
+
+<Form.Field.String name="name" />
+<Form.Field.Slug name="slug" source="name" />
+```
+
+**На форме редактирования** (слаг уже непустой при монтировании — у записи опубликованный
+адрес) зеркалирование по умолчанию **выключено**: молча менять URL, на который уже ведут внешние
+ссылки, нельзя. Включить — `syncOnEdit`:
+
+```tsx
+<Form.Field.Slug name="slug" source="name" syncOnEdit={!isPublished} />
+```
+
+**Props:** `source` (обязательно — имя соседнего поля в той же группе), `syncOnEdit` (по
+умолчанию `false`), `slugify` (кастомная функция транслитерации, по умолчанию `slugify()` из
+`@letar/format-utils`, транслитерация кириллицы по ГОСТ 7.79-2000), `maxLength`, `autoComplete`.
 
 ## Editable
 

@@ -1,6 +1,6 @@
 ---
 title: String Fields
-description: Text input fields — String, Textarea, Password, MaskedInput, RichText
+description: Text input fields — String, Textarea, Password, MaskedInput, RichText, Slug
 ---
 
 import { DemoContainer } from '@/components/demo-container'
@@ -125,6 +125,35 @@ const Schema = z.object({
 ```
 
 Requires `@tiptap/react` and `@tiptap/starter-kit` as peer dependencies.
+
+## Slug
+
+**API:** `Form.Field.Slug`
+
+A text field that mirrors a URL slug derived from a sibling field (usually a title) — until the
+user edits the slug by hand, after which mirroring stops permanently for that form session.
+
+```tsx
+const Schema = z.object({
+  name: z.string().meta({ ui: { title: 'Name' } }),
+  slug: z.string().meta({ ui: { title: 'URL' } }),
+})
+
+<Form.Field.String name="name" />
+<Form.Field.Slug name="slug" source="name" />
+```
+
+On an **edit** form (the slug already has a non-empty value on mount — the record has a published
+address), auto-mirroring defaults to **off**, since silently changing a URL that external links
+already point to would break them. Opt in with `syncOnEdit`:
+
+```tsx
+<Form.Field.Slug name="slug" source="name" syncOnEdit={!isPublished} />
+```
+
+**Props:** `source` (required — sibling field name in the same group), `syncOnEdit` (default
+`false`), `slugify` (custom transliteration function, defaults to `slugify()` from
+`@letar/format-utils`, ГОСТ 7.79-2000 Cyrillic transliteration), `maxLength`, `autoComplete`.
 
 ## Editable
 
