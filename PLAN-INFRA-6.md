@@ -3454,7 +3454,7 @@ bump SHA в letar, `apps/aira-web-e2e`, `apps/animatrona-e2e` (конфиг + 2 
 `aboi-e2e`, отдельно ждёт push submodule перед push letar по правилу
 [git.md § Порядок push нерушим](/.claude/rules/git.md)).
 
-## §169 — Разрыв графа Nx: импортируемые `@letar/*` без записи в `dependencies`/`implicitDependencies` — 22 из 56 приложений ⚠️ ЗАВЕДЕНО, починены animatrona-tracker (2026-09-08) и animatrona (2026-09-09)
+## §169 — Разрыв графа Nx: импортируемые `@letar/*` без записи в `dependencies`/`implicitDependencies` — 22 из 56 приложений ✅ ЗАКРЫТО (2026-09-09), все 22 починены
 
 **Повод.** У `animatrona-tracker` часть импортируемых `@letar/*`-библиотек не была объявлена ни в
 `dependencies`, ни в `nx.implicitDependencies` его `package.json` — граф Nx не видел эти рёбра, и
@@ -3560,3 +3560,26 @@ bun-симлинк (`node_modules/@letar/<lib>` создаёт только `bun
 в параллельной сессии (`git add` состоялся, а перед `git commit` этого файла другой агент успел
 закоммитить без pathspec и захватил застейдженный файл); содержимое в `HEAD` корректно, история
 не переписывалась.
+
+**2026-09-09: оставшиеся 20 приложений из списка починены, §169 закрыт.** Отдельная сессия
+(параллельная разработке в остальных секциях выше) прошла список приложение за приложением тем
+же паттерном, что `animatrona-tracker`: добавить недостающие `@letar/*` в `dependencies`
+(`workspace:*`), `bun install`, `format`/`lint`/`typecheck:tsgo` (`build` там, где успел пройти
+до конкурентного обрыва фонового прогона), коммит точными путями.
+
+- **Починены в этой сессии** (обычные приложения, коммит напрямую в letar): `animatrona-folder-
+  player`, `animatrona-tv`, `archetest`, `auth-hub`, `auth-hub-e2e`, `dashboard`, `form-develop-
+  app`, `form-develop-app-shadcn`, `form-docs`, `form-example`, `kami`, `label-printer-desktop`,
+  `mandala`, `time`.
+- **Починены как submodule** (коммит внутри submodule + отдельный `chore: bump <app> submodule`
+  в letar): `driving-school`, `poster-microtext-desktop`, `studio`, `svoichuzhie`.
+- **Починены параллельными сессиями независимо**, до того как эта сессия до них дошла —
+  подтверждено `git log`/`git diff --cached`, повторной правки не потребовалось: `animatrona`
+  (см. запись выше, 2026-09-09), `animatrona-mobile` (коммит `ef875662`, попутно с
+  `@letar/hooks`), `animatrona-ipfs-player` (застейджено в чужом in-flight коммите на момент
+  проверки этой сессией; финальная сверка `check-nx-graph-deps.mjs` подтверждает — уехало в
+  `HEAD`, повторной правки не нужно).
+- **Итоговая проверка:** `node scripts/check-nx-graph-deps.mjs` — «Разрывов графа Nx не найдено.
+  Приложений проверено: 56.» (6 приватных submodule не выкачаны в этом чекауте — не проверены,
+  ожидаемо). Долг из §169 закрыт полностью — можно поднимать `nx-graph-deps` в
+  `scripts/check-all.mjs` с `warn` до `gate` (условие поднятия, сформулированное выше, выполнено).
