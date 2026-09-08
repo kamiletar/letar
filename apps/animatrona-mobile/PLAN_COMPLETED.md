@@ -2,6 +2,37 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 0.7.11
+
+### Снят локальный пин react-native/@react-native/* (2026-09-08)
+
+Задача от координатора экосистемы Animatrona (письмо #1408): `react-native`,
+`@react-native/codegen`, `@react-native/gradle-plugin` пинились локально на `0.87.0`, тогда как
+корневой `package.json` уже стоял на `0.87.1` — тот же класс проблемы, что дважды чинили раньше в
+каскаде RN 0.87 (`react`, `react-native-gesture-handler`): локальный пин перекрывает корневой
+через bun workspace resolution, `metro.config.js` тянул `@react-native/metro-config` из корня, а
+сам `react-native` — из приложения, разные версии.
+
+Три строки заменены на `"*"` — версия резолвится только из корня, как у `animatrona-tv`.
+`bun install --force` потребовался, потому что обычный прогон не пронул устаревшие isolated-копии
+`0.87.0` в `node_modules/.bun` (см. `.claude/docs/bun-install-stale-isolated-cache.md`) — проверено
+symlink'ами (`node_modules/react-native`, `node_modules/@react-native/{codegen,gradle-plugin}`),
+все резолвятся в `0.87.1`.
+
+**Проверка:** `typecheck:tsgo` зелёный, `nx lint` зелёный. Сборка debug APK (`react-native bundle`
+
+- `gradlew assembleDebug`) прошла чисто — ловушки со смешанным резолвом (`TS2719`, «Tried to
+  register two views»), которые уже возникали в прошлом каскаде, не воспроизвелись.
+
+Заодно поймана и обойдена независимая проблема сборки: ninja падал на `armeabi-v7a` из-за
+превышения лимита длины пути Windows (260 символов) на сгенерированном codegen-объекте
+`react-native-gesture-handler` — воспроизводится и на `0.87.0`, не связано с версией RN (тот же
+класс, что в `.claude/docs/android-agp9-windows-toolchain-pitfalls.md`). Обход в сессии — разовый
+`subst X: C:\web\letar` (сессионный, не сохраняется); постоянного фикса (короче путь репо либо
+отключить `armeabi-v7a`) не делалось — вне объёма задачи, занесено в `PLAN.md` открытым вопросом.
+
+Коммит `df74f51c`.
+
 ## Версия 0.7.10
 
 ### 4 предупреждения `react-hooks/exhaustive-deps` в плеере закрыты (2026-09-08)

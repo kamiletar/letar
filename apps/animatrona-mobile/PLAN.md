@@ -29,6 +29,18 @@
       Постоянного фикса (короче путь репо, либо отключить `armeabi-v7a`) не делалось — вне
       объёма этой задачи.
 
+- [ ] ⚠️ **Открытый вопрос: сборка `armeabi-v7a` на Windows ломается лимитом длины пути (260
+      симв.)** — ninja не может разместить codegen-объект `react-native-gesture-handler`
+      (`.cxx/Debug/<hash>/armeabi-v7a/rngesturehandler_codegen_autolinked_build/...`), путь
+      репозитория `C:\web\letar\...` слишком длинный. Не связано с версией react-native
+      (воспроизводится и на `0.87.0`, и на `0.87.1`), класс проблемы тот же, что в
+      `.claude/docs/android-agp9-windows-toolchain-pitfalls.md` (ninja игнорирует
+      `LongPathsEnabled`). Обход разовый — `subst X: C:\web\letar` перед сборкой (не
+      сохраняется между сессиями). Решение за владельцем: либо укоротить путь репозитория
+      постоянно (`subst`/junction), либо убрать `armeabi-v7a` из
+      `android/gradle.properties` `reactNativeArchitectures` (проверить, нужен ли ещё 32-битный
+      таргет для реальных устройств).
+
 - [x] ⚠️ **ESLint не запускался для этого приложения вообще** (закрыто 2026-09-08). Не было
       `eslint.config.*`, поэтому `@nx/eslint/plugin` не заводил inferred-таргет, а блок `"lint"`
       в `project.json` — только `options` без `executor`, мёртвая добавка к несуществующему
