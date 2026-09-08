@@ -3285,3 +3285,33 @@ nx show projects --affected --files=libs/zenstack-fragments/src/better-auth.zmod
 [zenstack-shared-fragments-across-apps](/.claude/docs/zenstack-shared-fragments-across-apps.md)
 делает исполняемым существовавшее там предупреждение «заводишь нового потребителя — добавь обе
 записи».
+
+## §164 — аудит связей `apps/*-e2e` ↔ приложение в графе Nx ✅ ЗАКРЫТО (2026-09-08)
+
+**Проблема.** При работе над §162 бросилось в глаза: правка `aprel8008` не помечает
+`aprel8008-e2e` как affected, хотя у большинства `apps/*-e2e` есть
+`implicitDependencies: ["<app>"]`. Прогнан аудит по всем 24 e2e-проектам (грепом на
+`implicitDependencies` в `project.json`/`package.json`, включая submodule — обычным
+рекурсивным grep, не `git grep`).
+
+**Находка.** Три e2e-проекта без связи со своим приложением: `aprel8008-e2e`, `dsperevod-e2e`,
+`svoichuzhie-e2e` (последние два держат `implicitDependencies` только на общие либы
+`@letar/env-load`/`@letar/e2e-testing`, не на приложение).
+
+**Проверено по git-истории — не баг, осознанное решение.** Коммит `7ef25dd4` (2026-08-11) убрал
+эту связь намеренно: `apps/dsperevod`/`svoichuzhie`/`aprel8008` — приватные submodule, а их
+e2e-пакеты — **публичные** каталоги (не submodule). CI чекаутит без submodule
+(`submodules: false`) — `implicitDependencies` на несуществующий на раннере проект роняет весь
+граф Nx через `assertWorkspaceValidity` ещё до `lint`/`typecheck`/`test`, не только для этого
+e2e-проекта. У остальных четырёх (`aboi-e2e`, `driving-school-e2e`, `studio-e2e`,
+`domwellbes-e2e`) та же связь безопасна, потому что они **сами submodule** и на CI-чекауте без
+submodule не существуют вовсе — конфликта по построению нет.
+
+**Правок конфигурации не делал** — возврат связи воспроизведёт исходный `WorkspaceValidityError`.
+Задокументировано в
+[nx-e2e-implicit-deps-public-repo-private-app-exception](/.claude/docs/nx-e2e-implicit-deps-public-repo-private-app-exception.md),
+ссылка добавлена в индекс `CLAUDE.md` (коммит `0bee5541`).
+
+**Практическое следствие (уже действовавшее, теперь явно записано):** для `dsperevod`,
+`svoichuzhie`, `aprel8008` `nx affected -t e2e` не запускает e2e автоматически ни локально, ни
+в CI — при правке одного из этих трёх приложений нужно гонять `nx e2e <app>-e2e` явно.
