@@ -192,6 +192,10 @@ nx clean animatrona-tv
 - [x] Добавить выбор аудиодорожки в UI плеера (TVTrackSelector)
 - [x] Добавить настройки (TVSettingsScreen с изменением сервера, отключением)
 - [x] Улучшить фокус-стейты: толстые бордеры (4px), яркие цвета, elevation, scale transforms
+- [x] Keep screen on — `WAKE_LOCK` был объявлен в манифесте, но ничего его не использовало;
+      экран уходил в системный скринсейвер посреди серии (D-pad трогают редко). Фикс —
+      `FLAG_KEEP_SCREEN_ON` на весь `MainActivity` (не JS/TurboModule — TV всегда от розетки,
+      батарею жалеть незачем, в отличие от `useWakeLock` в animatrona-mobile)
 - [ ] Тестирование на реальном Android TV устройстве
 
 ---

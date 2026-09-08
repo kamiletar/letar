@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.6.1] - 2026-09-08
+
+### Fixed
+
+- Экран уходил в системный скринсейвер посреди воспроизведения — `WAKE_LOCK` был объявлен в
+  `AndroidManifest.xml`, но ничего его не использовало (на TV D-pad трогают редко, в отличие от
+  тач-экрана). Фикс — `WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON` на `MainActivity.onCreate()`,
+  держится весь activity lifecycle, а не только на экране плеера (TV всегда от розетки — в
+  отличие от `useWakeLock` в animatrona-mobile через TurboModule, батарею жалеть незачем). Не
+  требует JS-моста/TurboModule (в tv их инфраструктуры нет вообще, в отличие от mobile). Заодно
+  убран сам `WAKE_LOCK` permission из манифеста — был объявлен под несуществующий
+  `PowerManager.WakeLock`, вводил в заблуждение
+
+### Changed
+
+- Убраны локальные пины `react-native`/`@react-native/codegen`/`@react-native/gradle-plugin` в
+  `package.json` (были `0.87.0`, корень уже на `0.87.1` — тот же класс дрейфа, что раньше был у
+  `react`). Заменены на `"*"`, резолв только через hoisting из корня — найдено
+  `animatrona-mobile-dev`, подтверждено координатором
+
 ## [0.6.0] - 2026-08-25
 
 ### Fixed
