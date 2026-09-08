@@ -2,6 +2,28 @@
 
 > История старше ~2026-08-08 — в [PLAN_COMPLETED_2026_09_08.md](./PLAN_COMPLETED_2026_09_08.md).
 
+## Сессия 2026-09-08 (4): починка графа зависимостей Nx
+
+8 из 17 импортируемых в коде `@letar/*`-библиотек не были объявлены ни в `dependencies`, ни в
+`nx.implicitDependencies` `package.json` — граф Nx не видел эти рёбра, `nx affected` не помечал
+трекер затронутым при изменении этих библиотек (не пересобирал, не прогонял lint/typecheck/тесты).
+
+Замер (скрипт: обход `src`/`prisma`/`scripts` регэкспом `from '@letar/...'`, сверка с объединением
+`dependencies` + `nx.implicitDependencies`): недостающие —
+`@letar/animatrona-franchise-graph`, `@letar/animatrona-types`, `@letar/animatrona-utils`,
+`@letar/auth`, `@letar/forms`, `@letar/query-provider`, `@letar/ui`, `@letar/video-player-react`.
+Все восемь — реальные импорты кода (в т.ч. типовые), не тестовые заглушки. Добавлены в
+`dependencies` с `workspace:*` (не в `implicitDependencies` — для всех есть прямой импорт).
+
+Проверено: `bun install` без изменений в lockfile → `nx graph` видит все 8 новых рёбер →
+`format`/`lint`/`typecheck:tsgo`/`build` зелёные (build — с обходом `NX_PREFER_NODE_STRIP_TYPES=false`,
+предсуществующая гонка Node.js при загрузке `apps/mandala-e2e/playwright.config.ts` в графе Nx,
+не связана с этой правкой).
+
+Тот же замер по всем `apps/*` показал массовый разрыв — 22 из 56 приложений (~39%). Разовая
+ручная починка не защищает от повторения — заведено отдельным пунктом в `PLAN-INFRA.md` с
+предложением gate-проверки по образцу `check-transpile-packages`.
+
 ## Сессия 2026-09-08 (3): DRY-консолидация словарей и утилит (каскад от координатора)
 
 Каскадная задача от `animatrona-coordinator-dev` — 4 находки DRY, все перепроверены по реальному

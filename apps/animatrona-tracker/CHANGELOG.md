@@ -7,6 +7,20 @@
 
 ---
 
+## [0.12.1] — 2026-09-08
+
+### Исправлено
+
+- **Граф зависимостей Nx — 8 недостающих `@letar/*` в `package.json`.** Импортировались в коде,
+  но не были объявлены ни в `dependencies`, ни в `nx.implicitDependencies`:
+  `@letar/animatrona-franchise-graph`, `@letar/animatrona-types`, `@letar/animatrona-utils`,
+  `@letar/auth`, `@letar/forms`, `@letar/query-provider`, `@letar/ui`, `@letar/video-player-react`.
+  Из-за этого `nx affected` не помечал трекер затронутым при изменении этих библиотек — не
+  пересобирал, не прогонял lint/typecheck/тесты. Добавлены в `dependencies` (`workspace:*`).
+  Проверено: `nx graph` теперь видит все 8 рёбер, `format`/`lint`/`typecheck:tsgo`/`build` зелёные.
+  Разрыв оказался массовым (22 из 56 приложений монорепо) — заведён как отдельный пункт в
+  `PLAN-INFRA.md` с предложением gate-проверки.
+
 ## [0.12.0] — 2026-09-08
 
 ### Изменено
