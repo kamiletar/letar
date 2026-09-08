@@ -586,8 +586,20 @@ protocol.registerSchemesAsPrivileged([
       Проверено: `nx typecheck:tsgo animatrona-player`, `nx lint animatrona-player`,
       `webpack --config main/webpack.config.js` — все зелёные. GUI-уровень (реальное
       восстановление позиции окна) не проверялся — недоступно в сендбоксе.
-- [ ] Кэш probe на диске, а не только LRU в памяти: ключ `путь + mtime + размер`. Повторное
-      открытие той же папки не должно снова пробивать все серии
+- [x] Кэш probe на диске, а не только LRU в памяти: ключ `путь + mtime + размер`. Повторное
+      открытие той же папки не должно снова пробивать все серии (2026-09-08).
+      `main/services/probe-disk-cache.service.ts` — JSON-стор через `@letar/electron-storage`
+      (`probe-cache.json` в userData, `atomic: true`, `mergeDefaults: true`), ключ — путь к
+      файлу, значение — `{ mtimeMs, size, data: MediaInfo, probedAt }`. Хит только при
+      совпадении `mtimeMs`/`size` с текущим состоянием файла на диске (`fs.stat`) — TTL по
+      времени не нужен, замена/перекодирование файла того же имени сама инвалидирует запись.
+      Эвикция самых старых по `probedAt` при превышении 500 записей. `main/ipc/probe.handlers.ts`
+      оборачивает `mediaInfoWasmProber.probe()` в `getCachedProbe()` — контракт `probe:file`
+      не изменился, кэш прозрачен для `FolderPlayerHost`/renderer. In-memory LRU рендерера
+      (`libs/folder-player-react/src/lib/probe-cache.ts`) не тронут — он экономит IPC-вызовы
+      внутри одного запуска, дисковый кэш — между запусками, слои не конфликтуют.
+      Проверено: `nx typecheck:tsgo animatrona-folder-player`, `nx lint animatrona-folder-player`,
+      `webpack --config main/webpack.config.js` — зелёные.
 - [ ] Проверить, что 1080p/4K декодируются на GPU, а не на CPU (`chrome://gpu` в devtools окна;
       на Linux может понадобиться флаг VAAPI)
 
