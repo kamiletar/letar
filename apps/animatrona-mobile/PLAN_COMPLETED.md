@@ -2,6 +2,40 @@
 
 Детальное описание всех реализованных фич.
 
+## Версия 0.7.13
+
+### `useDebounce` из `@letar/hooks` в `LibraryScreen.tsx` (2026-09-09)
+
+Follow-up к разделению `@letar/hooks` на подпути `utility/browser/query` (коммит `68bde65f`).
+Второй пункт письма координатора был ранее (2026-09-08) отклонён, потому что у `@letar/hooks`
+был только барабанный экспорт `.` — он затянул бы в граф Metro browser-хуки и
+`@tanstack/react-query`, которого нет в зависимостях приложения. После появления подпутей
+причина отказа исчезла — `./query` теперь изолирует `@tanstack/react-query`.
+
+Сделано:
+
+- `package.json` — `@letar/hooks: "*"` в зависимостях, `bun install` из корня создал симлинк
+  `apps/animatrona-mobile/node_modules/@letar/hooks`.
+- `metro.config.js` — `@letar/hooks` и все три подпути (`./utility`, `./browser`, `./query`)
+  прописаны **поимённо** в `extraNodeModules`. Metro не резолвит `exports`-подпути пакета сам по
+  себе — нужна отдельная запись `path.resolve(...)` на каждый файл, иначе `@letar/hooks/utility`
+  не резолвится вообще (падение сборки бандла, не типов).
+- `tsconfig.json` — добавлен `"dom"` в `lib` и `paths` на все три подпути `@letar/hooks/*`
+  (полный набор из `exports`, не только использованный — правило из `libs.md § Несколько точек
+  входа`). `"dom"` понадобился, потому что физический файл `libs/hooks/src/utility.ts` сам —
+  барабан четырёх хуков (`useDebounce`+`useLocalStorage`+`usePrevious`+`useThrottle`), и
+  `useLocalStorage` использует `window`/`StorageEvent`. Без `"dom"` `typecheck:tsgo` падал
+  `TS2304` на чужом файле библиотеки, хотя используемый `useDebounce` DOM не касается — тот же
+  класс, что в `.claude/docs/lib-consumer-missing-lib-dom.md` (доку заодно поправил: она
+  утверждала, что `typecheck:tsgo`-потребители этому не подвержены — неверно, зависит от набора
+  `lib`, не от движка типизации).
+- `LibraryScreen.tsx` — ручной `useEffect`+`setTimeout` дебаунс поиска (300мс) заменён на
+  `const debouncedSearch = useDebounce(search, 300)`.
+
+Проверено: `typecheck:tsgo` и `lint` зелёные, `react-native bundle --platform android --dev
+false` резолвит `@letar/hooks/utility` без `Unable to resolve module`, код `useDebounce`
+подтверждён в выходном бандле (grep).
+
 ## Версия 0.7.12
 
 ### Заведено unit-тестирование — vitest, 26 тестов на api/client.ts (2026-09-08)
