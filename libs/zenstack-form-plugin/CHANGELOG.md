@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.0.1] - 2026-09-08
+
+### Fixed
+
+- **`extractModelInfo` молча теряла поля `type`-миксина** (`model X with XFields { ... }`,
+  паттерн `@letar/zenstack-fragments`, см.
+  [zenstack-shared-fragments-across-apps.md](/.claude/docs/zenstack-shared-fragments-across-apps.md)).
+  Причина — `model.fields` в Langium AST содержит только поля, объявленные непосредственно в
+  блоке модели; поля миксина хранятся отдельно в `model.mixins` (`Array<Reference<TypeDef>>`) и
+  не разворачиваются в `fields` заранее. Функция итерировала только `model.fields`, поэтому
+  форма получала лишь собственные поля модели поверх миксина — без warning'а и без ошибки
+  генерации (exit 0, правдоподобный неполный `<Model>.form.ts`).
+- Фикс — новая функция `collectAllFields(model)`: разворачивает `model.mixins` рекурсивно
+  (миксин может сам иметь `mixins` — миксин от миксина) и собирает плоский список полей в том же
+  порядке, что попадает в сгенерированный `schema.prisma` (поля миксинов, затем собственные поля
+  модели). `extractModelInfo` теперь итерирует его вместо `model.fields`.
+- Регресс сообщил `animatrona-ipfs-player-dev` (msg 1329, тред `form-plugin-mixin-fields-lost`) —
+  контрольный опыт с моделью `Tracker`/`TrackerFields` воспроизведён двумя новыми тестами в
+  `model-generator.spec.ts`.
+
 ## [4.0.0] - 2026-09-05
 
 ### Removed (breaking)

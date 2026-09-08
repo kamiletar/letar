@@ -1,4 +1,11 @@
-import type { DataField, DataFieldAttribute, DataModel, DataModelAttribute, Expression } from '@zenstackhq/language/ast'
+import type {
+  DataField,
+  DataFieldAttribute,
+  DataModel,
+  DataModelAttribute,
+  Expression,
+  TypeDef,
+} from '@zenstackhq/language/ast'
 import { findUnknownMetaFormPaths, parseMetaAttributes } from './parser.js'
 import type {
   FormFieldMeta,
@@ -620,6 +627,31 @@ function warnUnknownFormDirectives(modelName: string, fieldName: string, metaPat
 }
 
 /**
+ * Разворачивает `type`-миксины модели (`model X with XFields`) в плоский список полей.
+ *
+ * `model.fields` в AST содержит только поля, объявленные непосредственно в блоке модели —
+ * поля миксина ZenStack хранит отдельно в `model.mixins` (ссылки на `TypeDef`), не разворачивая
+ * их в `fields` заранее. `TypeDef` тоже может иметь свои `mixins` (миксин от миксина), поэтому
+ * обход рекурсивный. `visited` защищает от цикла (даже если сама схема такой цикл не допустит).
+ *
+ * Порядок — миксины сначала (в порядке объявления `with A, B`), затем собственные поля модели:
+ * так же порядок полей ложится в сгенерированный `schema.prisma`.
+ */
+function collectAllFields(model: DataModel, visited = new Set<TypeDef>()): DataField[] {
+  const mixinFields = model.mixins.flatMap((ref) => collectTypeDefFields(ref.ref, visited))
+  return [...mixinFields, ...model.fields]
+}
+
+function collectTypeDefFields(typeDef: TypeDef | undefined, visited: Set<TypeDef>): DataField[] {
+  if (!typeDef || visited.has(typeDef)) {
+    return []
+  }
+  visited.add(typeDef)
+  const nestedMixinFields = typeDef.mixins.flatMap((ref) => collectTypeDefFields(ref.ref, visited))
+  return [...nestedMixinFields, ...typeDef.fields]
+}
+
+/**
  * Extract model information from AST.
  */
 export function extractModelInfo(model: DataModel, enumNames: Set<string>): ModelInfo {
@@ -629,7 +661,7 @@ export function extractModelInfo(model: DataModel, enumNames: Set<string>): Mode
   // System fields that are always excluded
   const systemFields = ['id', 'createdAt', 'updatedAt']
 
-  for (const field of model.fields) {
+  for (const field of collectAllFields(model)) {
     const fieldType = getFieldType(field)
     // Фаза 4 (v4.0.0) — legacy comment-синтаксис @form.* убран целиком, @meta("form.*", …)
     // единственный источник UI-метаданных.

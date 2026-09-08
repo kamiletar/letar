@@ -1,4 +1,4 @@
-import type { DataField, DataModel } from '@zenstackhq/language/ast'
+import type { DataField, DataModel, TypeDef } from '@zenstackhq/language/ast'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { extractModelInfo, generateModelCode } from './model-generator.js'
 import type { ModelFieldInfo, ModelInfo } from './types.js'
@@ -43,6 +43,7 @@ function makeModel(
   name: string,
   fields: DataField[],
   modelAttributes: Array<{ refText: string; args?: unknown[] }> = [],
+  mixins: TypeDef[] = [],
 ): DataModel {
   return {
     $type: 'DataModel',
@@ -55,7 +56,24 @@ function makeModel(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     })) as any,
     isView: false,
-    mixins: [],
+    mixins: mixins.map((ref) => ({ ref })),
+    fields,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any
+}
+
+/**
+ * Минимальный `type`-миксин (`type XFields { ... }`), на который ссылается `DataModel.mixins`.
+ * Реальный AST хранит ссылку как `langium.Reference<TypeDef>` (`{ ref: TypeDef }`) —
+ * `makeModel` заворачивает переданные `TypeDef` в такую ссылку сам.
+ */
+function makeTypeDef(name: string, fields: DataField[], mixins: TypeDef[] = []): TypeDef {
+  return {
+    $type: 'TypeDef',
+    name,
+    comments: [],
+    attributes: [],
+    mixins: mixins.map((ref) => ({ ref })),
     fields,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any
@@ -85,6 +103,36 @@ describe('extractModelInfo', () => {
 
     expect(info.excludedFields).toEqual(expect.arrayContaining(['id', 'createdAt', 'updatedAt']))
     expect(info.fields.map((f) => f.name)).toEqual(['name'])
+  })
+
+  it('разворачивает поля type-миксина (model X with XFields) — регресс msg 1329', () => {
+    const trackerFields = makeTypeDef('TrackerFields', [
+      makeField({ name: 'url', type: 'String' }),
+      makeField({ name: 'name', type: 'String' }),
+      makeField({ name: 'state', type: 'String' }),
+    ])
+    const model = makeModel(
+      'Tracker',
+      [
+        makeField({ name: 'note', type: 'String' }),
+      ],
+      [],
+      [trackerFields],
+    )
+
+    const info = extractModelInfo(model, enumNames)
+
+    expect(info.fields.map((f) => f.name)).toEqual(['url', 'name', 'state', 'note'])
+  })
+
+  it('разворачивает вложенные миксины (миксин от миксина)', () => {
+    const base = makeTypeDef('BaseFields', [makeField({ name: 'baseField', type: 'String' })])
+    const extended = makeTypeDef('ExtendedFields', [makeField({ name: 'extendedField', type: 'String' })], [base])
+    const model = makeModel('Leaf', [makeField({ name: 'ownField', type: 'String' })], [], [extended])
+
+    const info = extractModelInfo(model, enumNames)
+
+    expect(info.fields.map((f) => f.name)).toEqual(['baseField', 'extendedField', 'ownField'])
   })
 
   it('исключает FK-поле с атрибутом @relation', () => {
