@@ -13,6 +13,16 @@ expectedSecret) return 401` — при не заданном `TELEGRAM_WEBHOOK_S
 
 ⚠️ Открытый вопрос — см. `PLAN.md` § «Открытые вопросы».
 
+## Консолидация fail-closed проверки секрета через `@letar/api-server` (2026-09-08)
+
+Ручная проверка `expectedSecret`/`secretHeader` в `telegramWebhook` (см. выше) переписана на
+общую `verifySharedSecret` из `libs/api-server`. `ctx.headers` в better-auth `createAuthEndpoint`
+— голый `Headers`, не `Request`, поэтому сигнатура `verifySharedSecret` расширена на приём
+обоих (`Request | Headers`), обратная совместимость с `cron-secret.ts` сохранена и покрыта
+существующими тестами. `@letar/api-server` подключён в `dependencies`/`implicitDependencies`/
+`tsconfig.paths`. Поведение не изменилось (по-прежнему fail-closed), открытый вопрос про
+непрописанный секрет в проде — тот же, см. выше.
+
 ## Фикс: e2e-регрессия — локаторы `input[name=...]` не находят поля `@letar/forms` (2026-09-03)
 
 Прогон staging e2e на коммите `6e8620b67` уронил 2 теста из 10: `01-public.spec.ts` «форма

@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Ручная проверка `TELEGRAM_WEBHOOK_SECRET` в `telegramWebhook` (better-auth плагин) заменена
+  на общую `verifySharedSecret` из `@letar/api-server` (та же fail-closed логика, что уже
+  используется в cron-эндпоинтах). Поведение не изменилось.
+
 ### Fixed
 
 - `auth-hub-e2e`: локаторы `input[name="email"/"password"]` на `/sign-in` не находили поля после
