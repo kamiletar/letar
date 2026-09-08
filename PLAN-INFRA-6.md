@@ -3370,3 +3370,26 @@ submodule не существуют вовсе — конфликта по по�
 
 **Коммиты:** три отдельных коммита (разные `apps/*` scope). Не запушено — ждёт одобрения
 владельца.
+
+## §167 — media-server: тот же баг Cache-Control-на-403, что был закрыт в gateway-cache (§57) ✅ ЗАКРЫТО (2026-09-08)
+
+**Проблема.** `infra/media-server/nginx.conf`, `location /v/` — `add_header Cache-Control
+"public, max-age=31536000, immutable" always;` с флагом `always` применялся и к 403-ответу
+anti-hotlink гейта (`valid_referers`/`if ($invalid_referer) { return 403; }`), то есть отказ по
+Referer браузер кешировал как immutable на год. Ровно тот же баг уже был найден и исправлен в
+тот же день в `infra/gateway-cache/nginx.conf` (коммит `ae76d298`, §57) — независимая находка на
+соседнем infra-сервисе с идентичной конструкцией (add_header + always + valid_referers-гейт в
+одном location).
+
+**Фикс.** Убран `always` у директивы — без него `add_header` не применяется к 4xx/5xx, только к
+2xx/3xx (то же решение, что в §57).
+
+**Коммит:** `e7a384c6` — не запушен (владелец попросил не пушить самому). Деплой запрошен через
+`deploy-agent-dev` (thread `deploy-media-server-cache-control-403`, agent-mail) — push, `git
+pull` на s3, `deploy_infra({ service: "media-server", server: "s3" })`, живая проверка 403 без
+immutable-заголовка + 200 с валидным Referer сразу следом. На момент закрытия задачи в этой
+сессии — деплой ещё не подтверждён, ждёт своей очереди у deploy-agent-dev.
+
+⚠️ **Открытый вопрос на будущее:** если в репозитории появится третий `nginx.conf` с той же
+парой (`add_header ... always` + `valid_referers`-гейт), стоит поискать грепом по всем
+`infra/*/nginx.conf` сразу, а не находить по одному — паттерн уже повторился дважды независимо.
