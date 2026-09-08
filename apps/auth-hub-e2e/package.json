@@ -9,6 +9,7 @@
     ]
   },
   "dependencies": {
+    "@letar/e2e-testing": "workspace:*",
     "@letar/env-load": "workspace:*"
   }
 }
