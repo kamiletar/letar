@@ -108,6 +108,25 @@ describe('createJsonStore', () => {
     expect(DEFAULTS.font).toBe('Arial')
   })
 
+  it('без mergeDefaults отсутствие файла ТОЖЕ отдаёт свежую копию — два loadSync() подряд не возвращают одну ссылку', () => {
+    const store = createJsonStore<{ items: string[] }>('never-created.json', { items: [] }, { dir })
+    const first = store.loadSync()
+    first.items.push('мутация на месте')
+    const second = store.loadSync()
+    expect(second.items).toEqual([])
+  })
+
+  it('мутация fallback-значения не переживает даже после того, как файл появился и снова пропал', () => {
+    const defaultValue = { items: [] as string[] }
+    const store = createJsonStore<{ items: string[] }>('roundtrip.json', defaultValue, { dir })
+    const before = store.loadSync()
+    before.items.push('испортили дефолт мутацией на месте')
+    // Файла всё ещё нет — второй вызов должен снова отдать чистый дефолт,
+    // а не результат мутации первого (регрессия ссылки на defaultValue).
+    expect(store.loadSync()).toEqual({ items: [] })
+    expect(defaultValue.items).toEqual([])
+  })
+
   it('getPath() указывает на filename внутри dir', () => {
     const store = createJsonStore('settings.json', DEFAULTS, { dir })
     expect(store.getPath()).toBe(join(dir, 'settings.json'))
