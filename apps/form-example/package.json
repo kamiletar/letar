@@ -1,6 +1,6 @@
 {
   "name": "form-example",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "private": true,
   "nx": {
     "name": "form-example",
@@ -14,8 +14,9 @@
     ]
   },
   "dependencies": {
+    "@letar/demo-protection": "workspace:*",
+    "@letar/forms-core": "workspace:*",
     "@letar/glitchtip": "workspace:*",
-    "@letar/pg-url": "workspace:*",
-    "@letar/demo-protection": "workspace:*"
+    "@letar/pg-url": "workspace:*"
   }
 }
