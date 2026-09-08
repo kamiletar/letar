@@ -2,19 +2,17 @@
  * Анализатор медиафайлов — сканирование папок и организация контента
  */
 
-import { getSubtitleInfo, matchFonts, type SubtitleInfo } from '@letar/folder-scan'
+import {
+  AUDIO_EXTENSIONS,
+  getSubtitleInfo,
+  matchFonts,
+  SELECTABLE_SUBTITLE_EXTENSIONS,
+  type SubtitleInfo,
+  VIDEO_EXTENSIONS,
+} from '@letar/folder-scan'
 import * as fs from 'fs'
 import * as path from 'path'
 import { type AudioTrack, type MediaInfo, probeFile } from '../ffmpeg'
-
-/** Расширения видеофайлов */
-const VIDEO_EXTENSIONS = ['.mkv', '.mp4', '.avi', '.webm', '.mov', '.wmv']
-
-/** Расширения аудиофайлов */
-const AUDIO_EXTENSIONS = ['.mka', '.mp3', '.aac', '.flac', '.ogg', '.opus']
-
-/** Расширения субтитров */
-const SUBTITLE_EXTENSIONS = ['.ass', '.ssa', '.srt', '.vtt', '.sub']
 
 /**
  * Паттерны для определения языка из пути файла
@@ -172,11 +170,11 @@ export async function analyzeFolder(rootPath: string): Promise<FolderAnalysis> {
         } else {
           const ext = path.extname(entry).toLowerCase()
 
-          if (VIDEO_EXTENSIONS.includes(ext)) {
+          if (VIDEO_EXTENSIONS.has(ext)) {
             videoFiles.push(fullPath)
-          } else if (AUDIO_EXTENSIONS.includes(ext)) {
+          } else if (AUDIO_EXTENSIONS.has(ext)) {
             audioFiles.push(fullPath)
-          } else if (SUBTITLE_EXTENSIONS.includes(ext)) {
+          } else if (SELECTABLE_SUBTITLE_EXTENSIONS.has(ext)) {
             subtitleFiles.push(fullPath)
           }
         }

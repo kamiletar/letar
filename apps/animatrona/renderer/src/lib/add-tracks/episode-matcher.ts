@@ -56,16 +56,9 @@ export interface EpisodeMatch {
   confidence: 'auto' | 'manual' | 'unmatched'
 }
 
-/** Расширения видеофайлов */
-const VIDEO_EXTENSIONS = new Set(['.mkv', '.mp4', '.avi', '.webm', '.m4v', '.mov'])
-
-/** Расширения аудиофайлов */
-const AUDIO_EXTENSIONS = new Set(['.mp3', '.aac', '.flac', '.opus', '.m4a', '.wav', '.ogg', '.ac3', '.dts', '.mka'])
-
-/** Расширения субтитров */
-const SUBTITLE_EXTENSIONS = new Set(['.ass', '.ssa', '.srt', '.vtt', '.sub'])
-
 import { parseEpisodeNumber } from '@letar/folder-player-react'
+// Подпуть, а не барель: барель @letar/folder-scan тянет node:fs, в рендерере это не резолвится
+import { AUDIO_EXTENSIONS, SELECTABLE_SUBTITLE_EXTENSIONS, VIDEO_EXTENSIONS } from '@letar/folder-scan/media-extensions'
 
 // Реэкспорт как extractEpisodeNumber для обратной совместимости
 export const extractEpisodeNumber = parseEpisodeNumber
@@ -105,7 +98,7 @@ export function getFileType(fileName: string): DonorFileType | null {
   if (AUDIO_EXTENSIONS.has(ext)) {
     return 'audio'
   }
-  if (SUBTITLE_EXTENSIONS.has(ext)) {
+  if (SELECTABLE_SUBTITLE_EXTENSIONS.has(ext)) {
     return 'subtitle'
   }
 

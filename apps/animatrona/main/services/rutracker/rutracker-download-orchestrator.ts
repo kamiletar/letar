@@ -12,6 +12,7 @@
  * Renderer подписывается на события торрента для отображения прогресса.
  */
 
+import { PLAYABLE_VIDEO_EXTENSIONS } from '@letar/folder-scan'
 import { app } from 'electron'
 import path from 'path'
 
@@ -28,9 +29,6 @@ import { getTorrentService, initTorrentService } from '../torrent'
 import type { RutrackerImportResult } from './rutracker-import'
 
 const log = createModuleLogger('RutrackerOrchestrator')
-
-/** Расширения видеофайлов */
-const VIDEO_EXTENSIONS = new Set(['.mkv', '.mp4', '.avi', '.webm', '.ts', '.m2ts'])
 
 /** Данные для запуска скачивания */
 export interface StartDownloadParams {
@@ -280,7 +278,9 @@ class RutrackerDownloadOrchestrator {
     // Фильтруем видеофайлы
     const videoFiles = torrentInfo.files.filter((f) => {
       const ext = path.extname(f.name).toLowerCase()
-      return VIDEO_EXTENSIONS.has(ext)
+      // PLAYABLE — с транспортными потоками: .ts в списке файлов торрента
+      // не рискует спутаться с исходниками TypeScript, в отличие от скана папки
+      return PLAYABLE_VIDEO_EXTENSIONS.has(ext)
     })
 
     // Формируем список файлов для ImportQueue
