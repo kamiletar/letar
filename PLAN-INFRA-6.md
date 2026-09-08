@@ -3343,3 +3343,30 @@ submodule не существуют вовсе — конфликта по по�
 **Коммиты:** `d26aaac` внутри submodule `domwellbes`, `9e0e798f` в letar (bump SHA `domwellbes` +
 три остальных `next.config.*`, `GIT_ALLOW_MULTI_SCOPE_COMMIT=1` — четыре разных приложения,
 осознанно). Не запушено — ждёт одобрения владельца.
+
+## §166 — `outputs` у `zenstack:generate` выровнены для трёх приложений с нестандартным путём генерации ✅ ЗАКРЫТО (2026-09-08)
+
+**Проблема.** §163 закрыл `inputs`, но пометил как «по желанию» отдельную мелочь: у трёх
+приложений таргет `zenstack:generate` не объявлял `outputs`, хотя у остальных 17 есть
+`"outputs": ["{projectRoot}/src/generated"]`. Копировать это значение вслепую было бы неверно —
+у всех трёх реальный выходной каталог другой (Prisma Client и form-schemas генерируются в
+`renderer/src/generated`, не в `src/generated`, из-за плагина `prisma`/`formSchema` с явным
+`output = "./renderer/src/generated/..."` в `schema.zmodel`).
+
+**Определено по факту** (парсинг `schema.zmodel` каждого приложения + контрольный прогон
+`nx zenstack:generate <app>`, лог `prisma generate` печатает реальный путь):
+
+- `apps/animatrona/project.json` → `outputs: ["{projectRoot}/renderer/src/generated"]`
+  (подтверждено логом: `Generated Prisma Client ... to .\renderer\src\generated\prisma`)
+- `apps/label-printer-desktop/project.json` → `outputs: ["{projectRoot}/src/generated"]` —
+  этот путь совпал со стандартным (подтверждено: `.\src\generated\prisma`)
+- `apps/animatrona-ipfs-player/project.json` → `outputs: ["{projectRoot}/renderer/src/generated"]`
+  (подтверждено: `.\renderer\src\generated\prisma`)
+
+**Верификация.** `bun scripts/check-all.mjs --only=zenstack-generate-inputs` — без изменений,
+0 находок (эта проверка про `inputs`, не про `outputs`, править её не требовалось).
+`nx zenstack:generate` прогнан для всех трёх приложений — `git status` после прогона чист
+(генерируемые файлы в `.gitignore`, дрейфа нет).
+
+**Коммиты:** три отдельных коммита (разные `apps/*` scope). Не запушено — ждёт одобрения
+владельца.
