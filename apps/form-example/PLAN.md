@@ -40,7 +40,8 @@ Example-приложение @letar/forms: демо + стартовый шаб�
 
 ## P3 — Качество кода
 
-- [ ] Единообразие кода — .meta({ui}), compound components, комментарии
+- [x] Единообразие кода — .meta({ui}), compound components, комментарии (аудит без правок —
+      расхождения оказались намеренными паттернами, не дефектами, см. PLAN_COMPLETED.md)
 - [x] E2E тесты — Basic, Validation, Multi-Step, Products CRUD, Conditional
 
 ## Журнал сессий
@@ -57,3 +58,4 @@ Example-приложение @letar/forms: демо + стартовый шаб�
 | 2026-09-09 | ✅ P2 Категоризация сайдбара — 6 групп (BASICS/LAYOUT/FIELDS/GENERATION/PATTERNS/ADVANCED), все 46 examples распределены; заодно устранён дубль секции P2 в этом файле, см. PLAN_COMPLETED.md                                                       |
 | 2026-09-09 | ✅ P2 README — полностью переписан: реальные monorepo-команды (`nx dev form-example` вместо несуществующего standalone-репозитория), таблицы всех 46 examples по 6 категориям, актуальный tech stack, см. PLAN_COMPLETED.md                         |
 | 2026-09-09 | ✅ P1.5 — проверены все 6 DX-страниц; 5 уже были реализованы по-настоящему (analytics/server-errors/readonly/skeleton/comparison), Undo/Redo был текстовой заглушкой — подключён реальный `useFormHistory`+`HistoryControls`, см. PLAN_COMPLETED.md |
+| 2026-09-09 | ✅ P3 Единообразие кода — аудит 46 страниц: 16 без `.meta({ui})` оказались легитимными паттернами (без схемы / сгенерированная схема / wrapped-схема), правок не потребовалось, см. PLAN_COMPLETED.md                                               |
