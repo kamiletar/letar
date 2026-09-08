@@ -119,12 +119,15 @@ model Verification with VerificationFields {
 После правки: `nx zenstack:generate <app>` → сверить `git diff apps/<app>/src/generated/schema.prisma`
 на отсутствие дрейфа (поля должны остаться теми же) → `nx typecheck:tsgo <app>`.
 
-**Мигрированные приложения (пилот, 2026-07-30):** `aprel8008`, `archetest`, `dashboard`.
+**На фрагменте `better-auth` (пилот 2026-07-30 + `domwellbes` позже):** `aprel8008`,
+`archetest`, `dashboard`, `domwellbes`.
 
-**Не мигрированы** (не тронуты умышленно, чтобы не форсировать риск на проде без нужды):
-остальные 12 приложений из первоначального списка (`aboi`, `studio`, `dsperevod`,
-`animatrona-tracker`, `time`, `mandala`, `kami`, `driving-school`, `auth-hub`, `svoichuzhie`,
-`grandslamcup`, `domwellbes`). Миграция безопасна (проверено на 3 разных стилях политик), но
+**На фрагменте `animatrona`:** `animatrona` (с 2026-09-08), `animatrona-ipfs-player` —
+по мере реализации его схемы.
+
+**Не мигрированы на `better-auth`** (не тронуты умышленно, чтобы не форсировать риск на проде
+без нужды): `aboi`, `studio`, `dsperevod`, `animatrona-tracker`, `time`, `mandala`, `kami`,
+`driving-school`, `auth-hub`, `svoichuzhie`, `grandslamcup`. Миграция безопасна (проверено на 3 разных стилях политик), но
 требует того же ритуала (`zenstack:generate` + сверка diff + typecheck) на каждом — делать по
 мере необходимости, не пачкой.
 
