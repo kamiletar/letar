@@ -480,20 +480,24 @@ model Settings {
 
 ### Чек-лист исполнителю — грабли, на которых легко потерять час
 
-1. **Перед первой генерацией — `nx build zenstack-form-plugin`.** Плагин подключается путём к
-   `dist/`, а `dist/` не коммитится. Проверка, что артефакт свежий:
-   `grep -c collectAllFields libs/zenstack-form-plugin/dist/model-generator.js` → должно быть > 0.
-   Иначе поля миксина молча пропадут из form-схем (баг был закрыт в v4.0.1 — но старый `dist`
-   вернёт его).
+1. **В `zenstack:generate` обязателен `dependsOn` на сборку form-плагина** — тот же, что у
+   остальных 14 приложений:
+   `"dependsOn": [{ "projects": ["@letar/zenstack-form-plugin"], "target": "build" }]`.
+   Плагин подключается путём к `dist/`, а `dist/` не коммитится; с этим `dependsOn` Nx
+   пересобирает его сам перед генерацией, без него приложение станет единственным, где старый
+   артефакт молча съест поля миксина. Запуская генерацию **мимо Nx** (прямой бинарник, worktree),
+   собирай руками: `nx build zenstack-form-plugin`, проверка —
+   `grep -c collectAllFields libs/zenstack-form-plugin/dist/model-generator.js` > 0.
 2. **`plugin policy` обязателен.** Без него `@@allow` из фрагмента не резолвится, и ошибка
    покажет на строку **фрагмента**, хотя причина в схеме приложения.
 3. **`import` — первой строкой**, до `datasource`/`generator`/`plugin`. Иначе
    `Expecting token of type 'EOF' but found 'import'`.
 4. **Не переопределять поля миксина.** Добавить `@unique` к `url` «для надёжности» нельзя —
    `Duplicated declaration name`. Оно там уже есть.
-5. **Nx не свяжет фрагмент с приложением.** После любой правки
-   `libs/zenstack-fragments/src/animatrona.zmodel` регенерацию каждого потребителя запускать
-   руками, `nx affected` их не увидит.
+5. **Nx не свяжет ФРАГМЕНТ с приложением** (в отличие от плагина — там связь есть через
+   `dependsOn`). Замер: правка `libs/zenstack-fragments/src/animatrona.zmodel` даёт в
+   `nx show projects --affected` только сам `@letar/zenstack-fragments`, приложений в списке нет.
+   Значит после любой правки фрагмента регенерацию каждого потребителя запускать руками.
 6. **Pre-commit `schema-migration-check` может ложно сработать.** На переводе Animatrona
    (коммит `0da07607`) хук принял удаление полей, уехавших в миксин, за структурное изменение
    схемы и потребовал миграцию, которой не нужно. Обходится
