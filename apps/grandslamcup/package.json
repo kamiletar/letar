@@ -19,13 +19,15 @@
       "@letar/seed-utils",
       "@letar/pg-url",
       "@letar/env-load",
-      "@letar/upload-validation"
+      "@letar/upload-validation",
+      "@letar/api-server"
     ]
   },
   "dependencies": {
     "@letar/glitchtip": "workspace:*",
     "@letar/seed-utils": "workspace:*",
     "@letar/pg-url": "workspace:*",
-    "@letar/env-load": "workspace:*"
+    "@letar/env-load": "workspace:*",
+    "@letar/api-server": "workspace:*"
   }
 }

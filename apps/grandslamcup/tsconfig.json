@@ -151,6 +151,9 @@
       ],
       "@letar/image-upload/server/versioned-upload-url": [
         "../../libs/image-upload/src/server/versioned-upload-url.ts"
+      ],
+      "@letar/api-server": [
+        "../../libs/api-server/src/index.ts"
       ]
     }
   },
