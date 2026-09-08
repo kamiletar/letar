@@ -133,6 +133,9 @@
       ],
       "@letar/forms-react/testing": [
         "../../libs/forms-react/src/lib/testing/index.ts"
+      ],
+      "@letar/api-server": [
+        "../../libs/api-server/src/index.ts"
       ]
     }
   },
