@@ -10,8 +10,9 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
 import type { ServerConfig, ServerType } from '@/types/server'
+import { logger } from '@/utils/logger'
 
-console.log('[servers.ts] v0.7.0 — multi-server store загружен')
+logger.log('[servers.ts] v0.7.0 — multi-server store загружен')
 
 /** Генерация уникального ID (простой nanoid-подобный) */
 function generateId(): string {
@@ -135,10 +136,10 @@ export const useServersStore = create<ServersState>()(
 
           // Для Desktop проверяем /api/status, для Tracker — /api/anime?limit=1
           const endpoint = server.type === 'desktop' ? `${server.url}/api/status` : `${server.url}/api/anime?limit=1`
-          console.log('[servers] checkConnection →', endpoint)
+          logger.log('[servers] checkConnection →', endpoint)
 
           const response = await fetch(endpoint, { method: 'GET', headers })
-          console.log('[servers] checkConnection response:', response.status)
+          logger.log('[servers] checkConnection response:', response.status)
 
           if (!response.ok) {
             if (response.status === 401) {
@@ -208,7 +209,7 @@ async function migrateFromOldFormat(store: ServersState) {
           url: connection.serverUrl,
         })
         store.setActiveServer(server.id)
-        console.log('[servers] Мигрирован Desktop сервер:', connection.serverUrl)
+        logger.log('[servers] Мигрирован Desktop сервер:', connection.serverUrl)
       }
       // Удаляем старый ключ
       await AsyncStorage.removeItem('animatrona-connection')

@@ -55,22 +55,51 @@
       плагинов апстримом — перепроверять при каждом `deps update`. Из RN-пресета сейчас взято
       вручную то, что работает: плагин `@react-native` (`no-deep-imports`) и список глобалов.
 
-- [ ] **Долг: 9 предупреждений `no-console`** (`index.js:11`, `src/navigation/RootNavigator.tsx:70`,
-      `src/screens/ConnectScreen.tsx:65,67,86`, `src/store/servers.ts:14,138,141,211`).
-      Правило корневого конфига разрешает только `console.warn`/`console.error`. Механически
-      заменять на `warn` **нельзя**: это засорит LogBox жёлтыми оверлеями на каждом запуске,
-      а лог версии бандла в `index.js` вообще предписан `CLAUDE.md` этого приложения как
-      обязательный (борьба с кэшированием Metro/Gradle). Правильное закрытие — маленький
-      логгер, гасящий вывод вне `__DEV__`, и точечный `eslint-disable` на версионных строках.
-      Отдельная задача, не часть настройки линта.
+- [x] **Долг: 9 предупреждений `no-console`** (закрыто 2026-09-08). Заведён `src/utils/logger.ts` —
+      `log`/`info`/`debug`, no-op вне `__DEV__`, единственная точка `eslint-disable no-console`
+      внутри модуля. `libs/*` не подошли: единственные кандидаты (`label-printer-core`,
+      `ipfs-kubo-core`, `folder-scan`) построены на `winston`/`node:path`, Node-only, не для Metro.
+      Точки из `RootNavigator.tsx`, `ConnectScreen.tsx`, `store/servers.ts` переведены на логгер.
+      Версионная строка в `index.js` (`JS_VERSION`) оставлена прямым `console.log` с точечным
+      `eslint-disable-next-line` — она обязана печататься и вне `__DEV__`, см. `CLAUDE.md`
+      «⚠️ ОБЯЗАТЕЛЬНО: Версионирование в логах». `PlayerScreen.tsx` не содержал версионного
+      `console.log` на момент проверки (в `CLAUDE.md` пример историчный/аспirational).
+      Проверено по числу файлов (`eslint . -f json`): 86 файлов (было 85 + новый `logger.ts`),
+      **0 предупреждений и 0 ошибок** — лучше, чем ожидавшиеся 4 (`react-hooks/exhaustive-deps`
+      из соседнего пункта ниже, похоже, уже закрыты отдельно к этому моменту, хотя чек-лист ниже
+      не был отмечен — не проверялось построчно в этой сессии, вне её объёма).
 
-- [ ] **Долг: 4 предупреждения `react-hooks/exhaustive-deps`**
-      (`src/hooks/usePictureInPicture.ts:128` — `enterPipMode`;
-      `src/screens/PlayerScreen.tsx:223` — `pip`, `:424` — `applyViewingModeToEpisode`,
-      `preferredAudioIndex`, `preferredSubtitleIndex`, `viewingMode`, `:575` — `episodeId`).
-      Все четыре — в плеере, где порядок эффектов завязан на жизненный цикл ExoPlayer:
-      добавление зависимости может перезапустить эффект на каждом кадре воспроизведения.
-      Разбирать по одному с проверкой на устройстве, не пакетным «дописать в массив».
+- [x] **Долг: 4 предупреждения `react-hooks/exhaustive-deps`** (закрыто 2026-09-08). Разобраны
+      по отдельности, не пакетным «дописать в массив»:
+      - `usePictureInPicture.ts:128` (подписка на `AppState` для auto-enter) — `enterPipMode`
+      нестабилен (дефолт `aspectRatio = [16, 9]` пересоздаёт массив каждый рендер → новая
+      функция), добавление в deps резавязывало бы подписку на каждый рендер. Фикс — тот же
+      ref-паттерн, что уже был у `onPipActionRef`: `enterPipModeRef`, обновляется в отдельном
+      `useEffect` без deps, вызывается через `.current()`.
+      - `PlayerScreen.tsx:223` (синхронизация `isPlaying` → PiP) — ESLint требовал не
+      member-expression `pip.updatePlaybackState`, а весь `pip` (новый объект каждый рендер).
+      Фикс — деструктурировать `const { updatePlaybackState } = pip` и зависеть от него
+      напрямую; сама функция стабильна (`useCallback` с deps `[isPipAvailable]`, а
+      `isPipAvailable` не меняется после монтирования).
+      - `PlayerScreen.tsx:424` (эффект загрузки эпизода, `getAnimeDetails`) — `viewingMode`/
+      `preferredAudioIndex`/`preferredSubtitleIndex` читаются внутри как значение на момент
+      загрузки, а не как триггер: это состояния из zustand-стора настроек, меняются при
+      обычном действии пользователя (смена аудио/сабов во время просмотра) — включение их в
+      deps перезапускало бы весь fetch `getAnimeDetails` и сбрасывало видео на каждый такой
+      клик. Оставлены осознанно вне массива, с `eslint-disable-next-line` и комментарием
+      почему. `applyViewingModeToEpisode` добавлен в deps без риска — у него пустой массив
+      зависимостей в собственном `useCallback`, стабилен всю жизнь компонента.
+      - `PlayerScreen.tsx:575` (`selectExternalAudio`) — `episodeId` использовался в
+      `getEpisodeAudioUrl(episodeId, ...)`, но отсутствовал в deps: настоящий пропуск, не
+      интонированное решение. Добавлен как обычная зависимость — `useCallback`-deps не
+      запускают ничего автоматически, риска перезапуска эффекта на кадре нет.
+
+      ⚠️ **Открытый вопрос: правки не проверены на устройстве.** В среде сессии не было
+      подключённого Android-устройства (`adb devices` — пусто). Изменения проверены только
+      `typecheck:tsgo`/`lint`/`format` — они не подтверждают поведение плеера (PiP,
+      автовыбор аудио/сабов при загрузке эпизода, смена аудиодорожки). Нужно вживую проверить:
+      запуск эпизода, пауза/возобновление, перемотка, вход/выход из PiP, переключение
+      аудиодорожки и субтитров — как уже случалось при миграции на RN 0.87.
 
 - [ ] **Вернуть обратную связь на тапы (haptic)** — удалён `react-native-haptic-feedback`, но `NativeHapticsModule` (TurboModule) уже есть. Нужно подключить `Haptics.light()` / `Haptics.medium()` в кнопки плеера, жесты, тапы по карточкам
 - [ ] **QR-сканер на ConnectScreen** — сейчас только ручной ввод адреса, нужна кнопка «Сканировать QR-код» для подключения к Desktop/Tracker

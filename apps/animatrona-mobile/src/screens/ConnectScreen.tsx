@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { QRScannerModal, type QRScanResult } from '@/components/QRScannerModal'
 import { useServersStore } from '@/store/servers'
 import type { ServerType } from '@/types/server'
+import { logger } from '@/utils/logger'
 
 export function ConnectScreen() {
   const navigation = useNavigation()
@@ -62,9 +63,9 @@ export function ConnectScreen() {
 
       const endpoint = serverType === 'desktop' ? `${url}/api/status` : `${url}/api/anime?limit=1`
 
-      console.log('[ConnectScreen] Проверка подключения:', endpoint)
+      logger.log('[ConnectScreen] Проверка подключения:', endpoint)
       const response = await fetch(endpoint, { method: 'GET', headers })
-      console.log('[ConnectScreen] Ответ:', response.status)
+      logger.log('[ConnectScreen] Ответ:', response.status)
 
       if (!response.ok) {
         const errorText = response.status === 401 ? 'Неверный API Key' : `Сервер вернул ошибку: ${response.status}`
@@ -83,7 +84,7 @@ export function ConnectScreen() {
       const server = addServer({ name, type: serverType, url, apiKey: key })
       setActiveServer(server.id)
       useServersStore.getState().setConnectionStatus('connected')
-      console.log('[ConnectScreen] Сервер добавлен:', server.name, server.id)
+      logger.log('[ConnectScreen] Сервер добавлен:', server.name, server.id)
 
       setIsConnecting(false)
 

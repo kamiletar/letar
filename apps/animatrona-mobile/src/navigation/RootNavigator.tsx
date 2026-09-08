@@ -19,6 +19,7 @@ import { LibraryScreen } from '@/screens/LibraryScreen'
 import { PlayerScreen } from '@/screens/PlayerScreen'
 import { SettingsScreen } from '@/screens/SettingsScreen'
 import { useServersStore } from '@/store/servers'
+import { logger } from '@/utils/logger'
 
 import type { RootStackParamList } from './types'
 
@@ -67,7 +68,7 @@ export function RootNavigator() {
   }
 
   const initialRoute = hasServers ? 'Library' : 'Connect'
-  console.log('[RootNavigator] initialRoute:', initialRoute)
+  logger.log('[RootNavigator] initialRoute:', initialRoute)
 
   return (
     <NavigationContainer theme={DarkTheme}>

@@ -6,6 +6,35 @@
 
 ## [Unreleased]
 
+## [0.7.10] - 2026-09-08
+
+### Fixed
+
+- Закрыты все 4 предупреждения `react-hooks/exhaustive-deps` в плеере (`usePictureInPicture.ts:128`,
+  `PlayerScreen.tsx:223,424,575`), первый прогон ESLint 2026-09-08. Разобраны индивидуально:
+  `enterPipModeRef` для нестабильного `enterPipMode` (по образцу существующего `onPipActionRef`),
+  деструктурированный `updatePlaybackState` вместо member-expression `pip.updatePlaybackState`,
+  осознанный пропуск `viewingMode`/`preferredAudioIndex`/`preferredSubtitleIndex` в эффекте
+  загрузки эпизода (с `eslint-disable-next-line` и обоснованием — иначе смена аудио/сабов во
+  время просмотра перезапускала бы `getAnimeDetails` и сбрасывала видео), и настоящий пропуск
+  `episodeId` в `selectExternalAudio` — добавлен как обычная зависимость.
+  ⚠️ Не проверено на реальном устройстве (в среде сессии не было подключённого Android-девайса) —
+  открытый вопрос занесён в `PLAN.md`.
+
+## [0.7.9] - 2026-09-08
+
+### Added
+
+- Заведён `src/utils/logger.ts` — единый dev-логгер (`log`/`info`/`debug`, no-op вне `__DEV__`)
+  вместо 9 разрозненных `console.log`, найденных при первом прогоне ESLint (`index.js:11`,
+  `RootNavigator.tsx:70`, `ConnectScreen.tsx:65,67,86`, `store/servers.ts:14,138,141,211`).
+  Единственная точка `eslint-disable no-console` в модуле. Существующие `libs/*`-логгеры
+  (`label-printer-core`, `ipfs-kubo-core`, `folder-scan`) не подошли — построены на `winston`/
+  `node:path`, для Metro/React Native непригодны. Версионная строка в `index.js` (`JS_VERSION`)
+  оставлена прямым `console.log` с точечным `eslint-disable-next-line` — обязана печататься и
+  вне `__DEV__`, см. `CLAUDE.md` «⚠️ ОБЯЗАТЕЛЬНО: Версионирование в логах». Итог:
+  `nx lint animatrona-mobile` — 0 предупреждений, 0 ошибок (86 файлов).
+
 ## [0.7.8] - 2026-09-08
 
 ### Added
