@@ -3454,7 +3454,7 @@ bump SHA в letar, `apps/aira-web-e2e`, `apps/animatrona-e2e` (конфиг + 2 
 `aboi-e2e`, отдельно ждёт push submodule перед push letar по правилу
 [git.md § Порядок push нерушим](/.claude/rules/git.md)).
 
-## §169 — Разрыв графа Nx: импортируемые `@letar/*` без записи в `dependencies`/`implicitDependencies` — 22 из 56 приложений ⚠️ ЗАВЕДЕНО, починен только animatrona-tracker (2026-09-08)
+## §169 — Разрыв графа Nx: импортируемые `@letar/*` без записи в `dependencies`/`implicitDependencies` — 22 из 56 приложений ⚠️ ЗАВЕДЕНО, починены animatrona-tracker (2026-09-08) и animatrona (2026-09-09)
 
 **Повод.** У `animatrona-tracker` часть импортируемых `@letar/*`-библиотек не была объявлена ни в
 `dependencies`, ни в `nx.implicitDependencies` его `package.json` — граф Nx не видел эти рёбра, и
@@ -3472,11 +3472,11 @@ bump SHA в letar, `apps/aira-web-e2e`, `apps/animatrona-e2e` (конфиг + 2 
 `format`/`lint`/`typecheck:tsgo`/`build` зелёные.
 
 **Тот же замер по всем `apps/*`** (скрипт теперь — `scripts/check-nx-graph-deps.mjs`, см. ниже)
-показал разрыв у **22 из 56** приложений (~39%) — не редкое исключение, системная проблема:
+показал разрыв у **22 из 56** приложений (~39%) — не редкое исключение, системная проблема.
+Список ниже — оставшиеся **20** после того, как `animatrona-tracker` (в этой же сессии) и
+`animatrona` (2026-09-09, см. ниже) были починены:
 
 ```
-animatrona (7): animatrona-types, animatrona-ui, animatrona-utils, forms, ui,
-                video-player-core, video-player-react
 animatrona-folder-player (1): chakra-provider
 animatrona-ipfs-player (1): chakra-provider
 animatrona-mobile (2): exoplayer-ass, exoplayer-sync
@@ -3516,8 +3516,25 @@ time (1): ui
 `dependencies`), что рвёт vitest-резолвер через sibling-spec файл. Эта — про полноту графа Nx
 вообще, симптом «`nx affected` не видит ребро», не «vitest падает».
 
-**Не сделано в этой сессии, осознанно.** Остальные 21 приложение (kami, driving-school, mandala,
+**Не сделано в этих сессиях, осознанно.** Остальные 20 приложений (kami, driving-school, mandala,
 auth-hub и др.) НЕ починены — по прямой инструкции не чинить массовую находку целиком в одной
 сессии без отдельного решения. Следующий шаг для владельца/следующей сессии — разобрать список
 выше приложение за приложением тем же паттерном, что animatrona-tracker (добавить в `dependencies`
 с `workspace:*`, `bun install`, проверить граф, прогнать format/lint/typecheck/build).
+
+**2026-09-09: `animatrona` починен, найдена и здесь неточность формулировки повода.** 7 из 8
+импортируемых библиотек (`animatrona-types`, `animatrona-ui`, `animatrona-utils`, `forms`, `ui`,
+`video-player-core`, `video-player-react`) дописаны в `dependencies` (детали и коммит —
+`apps/animatrona/PLAN_COMPLETED-1.md` § «§169 PLAN-INFRA-6.md»). ⚠️ **Уточнение к формулировке
+повода выше** («граф Nx не видел эти рёбра, `nx affected` не помечал приложение затронутым»):
+эмпирическая проверка (`nx show projects --affected --files=libs/<lib>/src/index.ts` по каждой
+библиотеке, ДО правки package.json) показала, что для `animatrona`/`animatrona-main`/
+`animatrona-renderer` `nx affected` уже корректно видел изменение — граф Nx строится не только
+из `package.json`/`implicitDependencies`, но и парсингом TS-импортов плагином `@nx/js` по всему
+воркспейсу независимо от package.json. Не проверено, верно ли то же самое для остальных
+19 (`animatrona-tracker` из этого §169 тоже не перепроверялся задним числом) — не считать
+проверенным без отдельного замера per-app. Реальная (подтверждённая) проблема, которую правка
+package.json решает — не разрыв `nx affected`, а отсутствие реальных `dependencies` →
+отсутствие симлинков в `node_modules/@letar/` под изолированным линковщиком bun (риск для
+любого пути резолва мимо `tsconfig.paths`, см. `.claude/rules/libs.md` § «Оговорка неверна для
+библиотеки...» и `vitest-unlinked-workspace-lib-imports.md`).
