@@ -33,6 +33,18 @@
    умолчанию (history, subscriptions, templates, трекеры и контент федерации) вызывающий код мутирует
    на месте — `push`/`splice`/`unshift`. Наружу теперь идёт копия; то же для объектных дефолтов
    bonus-points и настроек федерации.
+
+   **Обновление 2026-09-09:** заплатки на стороне потребителей были обходом, причина осталась в
+   библиотеке — исправлено в самой `@letar/electron-storage`. `fallbackValue()` теперь всегда
+   отдаёт глубокую копию (`structuredClone(defaultValue)`), независимо от `mergeDefaults` — и не
+   только верхний уровень, как было раньше при `{ ...defaultValue }`. Заплатки у потребителей
+   (`[...store.loadSync()]`/`{ ...store.loadSync() }`) остались как есть — избыточны, но безвредны.
+   Попутный аудит всех `createJsonStore` по монорепо нашёл три реальных, ничем не прикрытых
+   случая того же бага в `label-printer-desktop` (`profiles.handlers.ts`, `database.handlers.ts`,
+   `export.handlers.ts` — `push`/`splice`/`sort` на фолбэке без `mergeDefaults`); они закрылись
+   фиксом библиотеки автоматически, без правки этих файлов. Тесты-регрессия и разбор —
+   `libs/electron-storage/src/lib/json-store.spec.ts`,
+   [electron-storage-shared-default-value-mutation](/.claude/docs/electron-storage-shared-default-value-mutation.md).
 2. `createJsonStore.ensureDir` создаёт только свой корень (`userData`), не подпапку из имени файла.
    Агент вынес гарантию существования `federation/` в отдельную функцию и оставил её на читающих
    методах, обосновав тем, что «остальные пути получают её через предшествующий `getXxx()`». Схема
