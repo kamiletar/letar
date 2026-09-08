@@ -380,7 +380,7 @@
     },
     "apps/animatrona": {
       "name": "@letar/animatrona",
-      "version": "0.55.68",
+      "version": "0.55.69",
       "dependencies": {
         "@letar/electron-storage": "workspace:*",
         "@letar/folder-scan": "workspace:*",
@@ -397,7 +397,7 @@
     },
     "apps/animatrona-folder-player": {
       "name": "@letar/animatrona-folder-player",
-      "version": "0.6.2",
+      "version": "0.6.6",
       "dependencies": {
         "@letar/electron-storage": "workspace:*",
         "@letar/folder-player-react": "workspace:*",
@@ -416,9 +416,13 @@
     },
     "apps/animatrona-ipfs-player": {
       "name": "@letar/animatrona-ipfs-player",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "dependencies": {
         "@letar/icon-generator": "workspace:*",
+        "@letar/ipfs-kubo-core": "workspace:*",
+        "@letar/video-player-core": "workspace:*",
+        "@letar/video-player-react": "workspace:*",
+        "shaka-player": "^5.2.9",
       },
       "devDependencies": {
         "electron": "44.2.0",
@@ -1576,7 +1580,7 @@
     },
     "libs/video-player-react": {
       "name": "@letar/video-player-react",
-      "version": "0.2.3",
+      "version": "0.2.6",
       "peerDependencies": {
         "@letar/video-player-core": "workspace:*",
         "react": "^19.0.0",
