@@ -13,7 +13,7 @@
 - Исследование разделения `schema.zmodel` с Animatrona: раздел «Разделение схемы БД с Animatrona»
   в `PLAN.md` — какие модели идут в общий фрагмент и каким способом, плюс ограничение «миксин —
   это пересечение, а не объединение». Механизм проверен эмпирически (zenstack 3.9.3), разбор
-  границ —
+  границ (баг form-плагина из этого разбора исправлен в v4.0.1, шаг 0.7 закрыт) —
   [zenstack-shared-fragments-across-apps](/.claude/docs/zenstack-shared-fragments-across-apps.md).
   Найдена ловушка: `@letar/zenstack-form-plugin` молча теряет все поля `type`-миксина — баг
   передан владельцу `libs/forms`.
