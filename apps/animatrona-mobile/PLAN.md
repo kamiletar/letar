@@ -53,6 +53,14 @@
       этот проект живёт в `apps/animatrona/mobile-ui` и к React Native отношения не имеет —
       его конфиг это три строки поверх корневого, RN-специфики в нём нет.
 
+- [x] **Приложение не имело ни одного unit-теста — заведено vitest-тестирование (2026-09-08).**
+      Добавлены `vitest.config.mts` (по образцу `animatrona-tv`: alias `@` → `src`,
+      `environment: 'node'`) и `vitest/globals` в `types` `tsconfig.json`. Первый спек —
+      `src/api/client.spec.ts`, 26 тестов на весь слой `client.ts` (не тонкая обёртка, в отличие
+      от `animatrona-tv`: кэширование адаптера по `activeServerId`, `withCacheFallback` для
+      оффлайн-режима, приоритет скачанных файлов над серверным адаптером). Детали — в
+      `PLAN_COMPLETED.md` и `PLAN_TESTING.md`.
+
 - [ ] **Долг: правила `eslint-plugin-react-native` недоступны на ESLint 10.** Плагин
       `eslint-plugin-react-native@5.0.0` (и `eslint-plugin-eslint-comments@3.2.0`, который тянет
       пресет `@react-native/eslint-config/flat`) падают на ESLint 10 с
