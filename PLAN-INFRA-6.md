@@ -3453,3 +3453,71 @@ bump SHA в letar, `apps/aira-web-e2e`, `apps/animatrona-e2e` (конфиг + 2 
 `apps/dashboard-agent`, `apps/form-example`). Не запушено — ждёт одобрения владельца (и, для
 `aboi-e2e`, отдельно ждёт push submodule перед push letar по правилу
 [git.md § Порядок push нерушим](/.claude/rules/git.md)).
+
+## §169 — Разрыв графа Nx: импортируемые `@letar/*` без записи в `dependencies`/`implicitDependencies` — 22 из 56 приложений ⚠️ ЗАВЕДЕНО, починен только animatrona-tracker (2026-09-08)
+
+**Повод.** У `animatrona-tracker` часть импортируемых `@letar/*`-библиотек не была объявлена ни в
+`dependencies`, ни в `nx.implicitDependencies` его `package.json` — граф Nx не видел эти рёбра, и
+`nx affected` не помечал приложение затронутым при изменении этих библиотек: не пересобирал, не
+прогонял lint/typecheck/тесты. Регрессия в такой библиотеке молча доезжает до прод-сборки
+приложения, минуя весь его CI.
+
+**Замер на animatrona-tracker.** Скрипт-сверка импортов `from '@letar/...'` в `src/`/`prisma/`/
+`scripts/` с объединением `dependencies` + `nx.implicitDependencies`: импортируется 17 библиотек,
+не объявлены 8 — `@letar/animatrona-franchise-graph`, `@letar/animatrona-types`,
+`@letar/animatrona-utils`, `@letar/auth`, `@letar/forms`, `@letar/query-provider`, `@letar/ui`,
+`@letar/video-player-react`. Все восемь — реальные импорты кода (в т.ч. типовые), не тестовые
+заглушки. **Починено в той же сессии:** добавлены в `dependencies` (`workspace:*`); проверено —
+`bun install` без изменений lockfile → `nx graph` видит все 8 новых рёбер →
+`format`/`lint`/`typecheck:tsgo`/`build` зелёные.
+
+**Тот же замер по всем `apps/*`** (скрипт теперь — `scripts/check-nx-graph-deps.mjs`, см. ниже)
+показал разрыв у **22 из 56** приложений (~39%) — не редкое исключение, системная проблема:
+
+```
+animatrona (7): animatrona-types, animatrona-ui, animatrona-utils, forms, ui,
+                video-player-core, video-player-react
+animatrona-folder-player (1): chakra-provider
+animatrona-ipfs-player (1): chakra-provider
+animatrona-mobile (2): exoplayer-ass, exoplayer-sync
+animatrona-tv (2): exoplayer-ass, exoplayer-sync
+archetest (1): forms
+auth-hub (3): auth, email, forms
+auth-hub-e2e (1): e2e-testing
+dashboard (1): auth
+driving-school (7): auth, contract-generator, driving-school-db, email, forms,
+                     pin-auth, validation-utils
+form-develop-app (1): forms-core
+form-develop-app-shadcn (2): forms-core, forms-react
+form-docs (1): forms-core
+form-example (1): forms-core
+kami (4): auth, email, forms, ui
+label-printer-desktop (3): chakra-provider, forms, label-printer-core
+mandala (5): admin-ui, auth, email, pin-auth, query-provider
+poster-microtext-desktop (1): chakra-provider
+studio (1): forms
+svoichuzhie (1): redis-client
+time (1): ui
+```
+
+**Решение — не разовая ручная починка, а gate-проверка.** По образцу `check-transpile-packages.mjs`
+заведён `scripts/check-nx-graph-deps.mjs`: обходит `src`/`app`/`pages`/`main`/`renderer`/`prisma`/
+`scripts` каждого приложения, сверяет импортируемые `@letar/*` с объединением
+`dependencies`+`devDependencies`+`peerDependencies`+`nx.implicitDependencies`. Зарегистрирован в
+`scripts/check-all.mjs` как `nx-graph-deps` (группа `deps`).
+
+⚠️ **Зарегистрирован как `warn`, не `gate`** — долг слишком большой (22 приложения) для
+немедленного gate без отдельной сессии на разгребание остальных 21. Прецедент — `transpile-packages`
+тоже стал `gate` только после того, как долг был закрыт (§162 контекст). Условие поднятия до
+`gate` — список на чистом дереве должен опустеть.
+
+**Отличие от уже существующей `implicit-deps`-проверки** (`scripts/check-implicit-deps.mjs`): та
+проверка про другой, более узкий симптом — пакет объявлен ТОЛЬКО в `implicitDependencies` (без
+`dependencies`), что рвёт vitest-резолвер через sibling-spec файл. Эта — про полноту графа Nx
+вообще, симптом «`nx affected` не видит ребро», не «vitest падает».
+
+**Не сделано в этой сессии, осознанно.** Остальные 21 приложение (kami, driving-school, mandala,
+auth-hub и др.) НЕ починены — по прямой инструкции не чинить массовую находку целиком в одной
+сессии без отдельного решения. Следующий шаг для владельца/следующей сессии — разобрать список
+выше приложение за приложением тем же паттерном, что animatrona-tracker (добавить в `dependencies`
+с `workspace:*`, `bun install`, проверить граф, прогнать format/lint/typecheck/build).
