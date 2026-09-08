@@ -17,6 +17,7 @@
     "paths": {
       "*": ["./*"],
       "@/*": ["./renderer/*"],
+      "@shared/*": ["./shared/*"],
       "@letar/forms": ["../../libs/forms/src/index.ts"],
       "@letar/forms-core": ["../../libs/forms-core/src/index.ts"],
       "@letar/forms-core/credit-card": ["../../libs/forms-core/src/lib/credit-card/index.ts"],
@@ -58,6 +59,7 @@
   },
   "include": [
     "main/**/*.ts",
+    "shared/**/*.ts",
     "renderer/**/*.ts",
     "renderer/**/*.tsx",
     "next-env.d.ts",

@@ -37,6 +37,44 @@ interface EmbeddedSubtitlesResult {
   error?: string
 }
 
+/** Состояние ffmpeg — «расширенная поддержка форматов», см. main/services/ffmpeg */
+interface FfmpegStatus {
+  available: boolean
+  source: 'downloaded' | 'system' | null
+  ffmpegPath: string | null
+  ffprobePath: string | null
+  version: string | null
+  missingDecoders: string[]
+  installSupported: boolean
+}
+
+interface FfmpegInstallProgress {
+  stage: 'downloading' | 'extracting' | 'verifying' | 'done'
+  percent?: number
+  receivedBytes?: number
+  totalBytes?: number
+}
+
+interface FfmpegInstallResult {
+  success: boolean
+  status?: FfmpegStatus
+  error?: string
+}
+
+interface TranscodeProgress {
+  percent?: number
+  processedSec: number
+  totalSec: number
+  speed: number | null
+}
+
+interface TranscodeIpcResult {
+  success: boolean
+  outputPath?: string
+  fromCache?: boolean
+  error?: string
+}
+
 /**
  * API, доступный в renderer process через window.electronAPI.
  * Добавляй новые методы сюда и в main/ipc/*.handlers.ts — IPC единственный
@@ -75,6 +113,31 @@ const electronAPI = {
   },
   power: {
     setPreventSleep: (enabled: boolean): Promise<void> => ipcRenderer.invoke('power:setPreventSleep', enabled),
+  },
+  ffmpeg: {
+    getStatus: (): Promise<FfmpegStatus> => ipcRenderer.invoke('ffmpeg:getStatus'),
+    getDownloadedSize: (): Promise<number> => ipcRenderer.invoke('ffmpeg:getDownloadedSize'),
+    install: (): Promise<FfmpegInstallResult> => ipcRenderer.invoke('ffmpeg:install'),
+    cancelInstall: (): Promise<void> => ipcRenderer.invoke('ffmpeg:cancelInstall'),
+    uninstall: (): Promise<FfmpegStatus> => ipcRenderer.invoke('ffmpeg:uninstall'),
+    /** Прогресс идущей установки. Возвращает функцию отписки. */
+    onInstallProgress: (callback: (progress: FfmpegInstallProgress) => void): () => void => {
+      const listener = (_event: Electron.IpcRendererEvent, progress: FfmpegInstallProgress) => callback(progress)
+      ipcRenderer.on('ffmpeg:installProgress', listener)
+      return () => ipcRenderer.removeListener('ffmpeg:installProgress', listener)
+    },
+  },
+  transcode: {
+    /** Готовит файл к воспроизведению; `request` — см. TranscodeRequest в main/services/ffmpeg */
+    prepare: (request: unknown): Promise<TranscodeIpcResult> => ipcRenderer.invoke('transcode:prepare', request),
+    cancel: (): Promise<void> => ipcRenderer.invoke('transcode:cancel'),
+    getCacheSize: (): Promise<number> => ipcRenderer.invoke('transcode:getCacheSize'),
+    clearCache: (): Promise<void> => ipcRenderer.invoke('transcode:clearCache'),
+    onProgress: (callback: (progress: TranscodeProgress) => void): () => void => {
+      const listener = (_event: Electron.IpcRendererEvent, progress: TranscodeProgress) => callback(progress)
+      ipcRenderer.on('transcode:progress', listener)
+      return () => ipcRenderer.removeListener('transcode:progress', listener)
+    },
   },
   /** Путь на диске для перетащенного `File` — `File.path` удалён в Electron ≥32 */
   getPathForFile: (file: File): string => webUtils.getPathForFile(file),

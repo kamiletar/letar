@@ -14,6 +14,8 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.js'],
     alias: {
+      // Рантайм-код, общий для main и renderer (codec-support, transcode-plan) — см. shared/
+      '@shared': path.resolve(__dirname, '../shared'),
       '@letar/folder-scan': path.resolve(__dirname, '../../../libs/folder-scan/src'),
       '@letar/electron-storage': path.resolve(__dirname, '../../../libs/electron-storage/src'),
     },

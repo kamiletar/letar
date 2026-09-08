@@ -12,3 +12,7 @@ next-env.d.ts
 /renderer/.next/
 /renderer/out/
 /output/
+/out-tsc/
+
+# CJS-бандл сервисов main-процесса для headless-проверок (scripts/verify-*.cjs)
+/scripts/.bundle/

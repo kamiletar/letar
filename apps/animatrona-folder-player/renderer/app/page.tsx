@@ -13,10 +13,13 @@ import type { DragEvent } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { LuFolderOpen } from 'react-icons/lu'
 
+import type { MediaInfo } from '@letar/folder-scan'
+
+import type { CodecSupportResult } from '@shared/codec-support'
+import { checkCodecSupport } from '@shared/codec-support'
+import { ExtendedFormatsPanel } from './_components/ExtendedFormatsPanel'
 import type { VideoPlayerSubtitle } from './_components/VideoPlayer'
 import { VideoPlayer } from './_components/VideoPlayer'
-import type { CodecSupportResult } from './_lib/codec-support'
-import { checkCodecSupport } from './_lib/codec-support'
 import { isVideoFilePath } from './_lib/dropped-path'
 import { toMediaUrl } from './_lib/media-url'
 
@@ -182,8 +185,10 @@ export default function HomePage() {
   // MediaInfo с videoTracks), в обход host.probe() — тот отдаёт узкий MediaProbeInfo без
   // видеодорожек (нужны только audio/subtitle-селекторам, см. @letar/folder-player-react/host.ts)
   const [codecSupport, setCodecSupport] = useState<CodecSupportResult | null>(null)
+  const [mediaInfo, setMediaInfo] = useState<MediaInfo | null>(null)
   useEffect(() => {
     setCodecSupport(null)
+    setMediaInfo(null)
     if (!mounted || !currentVideoPath) {
       return
     }
@@ -192,12 +197,23 @@ export default function HomePage() {
       if (cancelled || !result.success || !result.data) {
         return
       }
-      setCodecSupport(checkCodecSupport(result.data.videoTracks, result.data.audioTracks))
+      setMediaInfo(result.data)
+      setCodecSupport(checkCodecSupport(result.data.videoTracks, result.data.audioTracks, currentVideoPath))
     })
     return () => {
       cancelled = true
     }
   }, [mounted, currentVideoPath])
+
+  /**
+   * Путь к подготовленной ffmpeg копии текущего файла (Фаза 6). Пока он есть — играем именно
+   * его, а субтитры и прогресс просмотра остаются привязанными к ОРИГИНАЛЬНОМУ пути:
+   * встроенные дорожки читаются из исходного MKV, история не раздваивается на копию в кэше.
+   */
+  const [preparedPath, setPreparedPath] = useState<string | null>(null)
+  useEffect(() => {
+    setPreparedPath(null)
+  }, [currentVideoPath])
 
   const [openInSystemPlayerError, setOpenInSystemPlayerError] = useState<string | null>(null)
   const handleOpenInSystemPlayer = useCallback(() => {
@@ -319,18 +335,22 @@ export default function HomePage() {
       )}
 
       <Box flex={1} bg="black" position="relative">
-        {currentVideoPath && codecSupport && !codecSupport.supported
+        {currentVideoPath && codecSupport && !codecSupport.supported && !preparedPath
           ? (
             <Center h="full" p={8}>
               <VStack gap={4} maxW="lg" color="white" textAlign="center">
                 <Text fontSize="xl" fontWeight="bold">Плеер не может проиграть этот файл</Text>
                 {codecSupport.issues.map((issue) => <Text key={issue.kind} color="fg.muted">{issue.message}</Text>)}
+                {mediaInfo && (
+                  <ExtendedFormatsPanel
+                    filePath={currentVideoPath}
+                    mediaInfo={mediaInfo}
+                    onReady={setPreparedPath}
+                  />
+                )}
                 <Flex gap={3} wrap="wrap" justify="center">
-                  <Button colorPalette="brand" onClick={handleOpenInSystemPlayer}>
+                  <Button variant="ghost" onClick={handleOpenInSystemPlayer}>
                     Открыть в системном плеере
-                  </Button>
-                  <Button variant="outline" disabled title="Появится в следующей версии">
-                    Включить расширенную поддержку форматов
                   </Button>
                 </Flex>
                 {openInSystemPlayerError && <Text color="fg.error">{openInSystemPlayerError}</Text>}
@@ -339,8 +359,8 @@ export default function HomePage() {
           )
           : currentVideoPath && (
             <VideoPlayer
-              key={currentVideoPath}
-              src={toMediaUrl(currentVideoPath)}
+              key={preparedPath ?? currentVideoPath}
+              src={toMediaUrl(preparedPath ?? currentVideoPath)}
               subtitle={subtitle}
               startTime={resumeTime}
               hasPrev={player.hasPrev}
