@@ -6,6 +6,23 @@
 
 ## Backlog (запросы от агентов)
 
+### [2026-09-08] Русская запятая как десятичный разделитель — проверить Field.Number/NumberInput (от domwellbes-dev)
+
+- **Запросил:** domwellbes-dev (msg 1401, topic `form-feature-request`), переслано `forms-coordinator-dev`
+- **Триггер:** баг найден в собственном сыром `<Input>` domwellbes
+  (`house-metrics-section.tsx:74`, `Number("234,65")` → `NaN`), но вопрос — системный: касается ли
+  это `Form.Field.Number`/`NumberInput` (Chakra `NumberInput.Root`/zag-js).
+- **Осмотр координатором (2026-09-09):** `field-number-input.tsx` не передаёт `locale` в
+  `NumberInput.Root` — zag-js по умолчанию использует `en-US`, значит `Field.Number` вероятно
+  подвержен тому же классу проблемы (запятая не распознаётся как десятичный разделитель), просто
+  менее заметно (zag-js может отбрасывать/клэмпить на blur вместо явного `NaN`). Не проверено
+  живьём.
+- **Вопросы domwellbes-dev:** 1) действительно ли `Field.Number` уже корректно парсит `234,65`;
+  2) если нет — нужна общая утилита `parseLocaleNumber` в `forms-core`/`format-utils`, переиспользуемая
+  и внутри библиотеки, и в сырых инпутах за её пределами; 3) есть ли общий паттерн подсветки
+  конкретной невалидной ячейки в таблицах массового редактирования вне формы.
+- **Статус:** ожидание
+
 ### [2026-09-08] Денежное поле: transform копейки↔рубли на границе значения (от domwellbes-dev)
 
 - **Запросил:** domwellbes-dev (thread `money-field-kopecks`), отправлено `forms-coordinator-dev`
