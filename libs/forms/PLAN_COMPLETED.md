@@ -1,5 +1,25 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-09 (сессия 2) — Разбор очереди forms-coordinator-dev: 6 тредов, 1 реальный фикс
+
+Продолжение предыдущей сессии этого же дня. Начало — 6 непрочитанных сообщений (topic
+`forms-task`) от `forms-coordinator-dev`. Триаж по CHANGELOG показал: 5 из 6 уже реализованы
+именно в той предыдущей сессии (`Sortable` hydration — v2.13.1, `FieldWrapper` helper-slot —
+v2.13.2, `forms-shadcn` locale parity, comma-decimal-separator — v2.12.3, `minorUnitScale` —
+v2.13.0), просто без явного ответа в тредах — разослал подтверждения, действий не требовалось.
+
+Один реальный фикс:
+
+1. **`createForm()` не переносил группу `Form.Document.*` на app-инстанс** (v2.13.3, коммиты
+   `d06ff41b`, `9f05425d`). `Object.assign` внутри `create-form.tsx` переносил `Group`/`Field`/
+   `Button`/`Select`/`Combobox`/`Listbox`/`Steps`, но не `Document` — `MyAppForm.Document.INN`
+   был недоступен, только базовый `Form.Document.INN`. Добавлено `Document: Form.Document` в
+   `Object.assign` и в тип `ExtendedForm`. Тест на app-инстансе в `create-form.spec.tsx`, пример
+   в README. domwellbes может снять локальный обход в `domwellbes-form.tsx`. `lint`/
+   `typecheck:tsgo`/`test` зелёные.
+
+Все 6 тредов получили ответ в agent-mail, backlog-запись в `PLAN.md` отмечена `✅`.
+
 ## 2026-09-09 — Разбор очереди forms-coordinator-dev: 8 тредов, 2 реальных фикса
 
 Начало сессии — 10 непрочитанных сообщений (topic `forms-task`) от `forms-coordinator-dev`.
