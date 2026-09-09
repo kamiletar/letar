@@ -6,6 +6,27 @@
 
 ## Backlog (запросы от агентов)
 
+### ⏳ [2026-09-09] `useResolvedFieldProps` не резолвит `meta.fieldProps` в типизированных тегах (архитектурная коррекция от Ками, тред `money-field-kopecks`)
+
+- **Запросил:** Ками (владелец) — коррекция к запросу `Field.Percentage.minorUnitScale` от
+  domwellbes-dev, не отдельная фича.
+- **Приоритет:** normal, не blocking
+- **Описание:** `@meta("form.props.<key>", value)` в `schema.zmodel` кладёт UI-проп в
+  `.meta({ ui: { fieldProps: { <key>: value } } })`, и `renderFieldByType`/`renderSchemaField`
+  спредит его в компонент — но **только** через `Form.Field.Auto`. Рекомендованный в
+  `.claude/rules/forms.md` паттерн (явные `<AppForm.Field.Currency name="x" />`) через
+  `useResolvedFieldProps` (`libs/forms-react/src/lib/field/use-resolved-field-props.ts`) тянет из
+  `meta` только фиксированный список (title/placeholder/description/required/disabled/readOnly/
+  options/tooltip/autocomplete) — произвольный `fieldProps` не резолвит вовсе. Значения вроде
+  `minorUnitScale`/`currency` (факт о хранении данных, не о месте рендера) приходится дублировать
+  JSX-пропом в каждом использовании вручную — источник ошибки максимальной цены (пропущенный
+  `minorUnitScale` даёт правдоподобное, но неверное значение).
+- **Предложение:** добавить резолв `meta.fieldProps` в `useResolvedFieldProps` (или отдельный
+  merge-шаг в `create-field-primitives.tsx`) с приоритетом `props > meta`, тем же принципом, что
+  уже применён к остальным полям хука.
+- **Статус:** ожидание — не blocking для самого `Field.Percentage.minorUnitScale` (может выйти
+  сначала как голый проп по образцу `Field.Currency`). Разбор — `.claude/docs/letar-forms-fieldprops-typed-tags-not-resolved.md`.
+
 ### ✅ [2026-09-09] createForm() не переносит группу Form.Document.* на свой инстанс (закрыт v2.13.3, от domwellbes-dev)
 
 - **Запросил:** domwellbes-dev (msg 1462, thread `document-group-not-exposed`, topic `form-feature-request`)
