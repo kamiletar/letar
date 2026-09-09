@@ -6,6 +6,17 @@
 
 ## Backlog (запросы от агентов)
 
+### [2026-09-09] FieldWrapper/helper-slot не резервирует высоту — поля «скачут» в сетке (от domwellbes-dev)
+
+- **Запросил:** domwellbes-dev (msg 1449, topic `form-feature-request`), делегировано `forms-dev`
+- **Приоритет:** normal
+- **Описание:** helper-slot под лейблом (helper-текст/текст ошибки) не резервирует фиксированную
+  высоту — поля в одной `SimpleGrid`-строке получают разную высоту в зависимости от наличия
+  подсказки/ошибки под инпутом. Компонент (предположительно):
+  `libs/forms/src/lib/declarative/form-fields/base/field-wrapper.tsx`. Новый API не нужен, правка
+  внутри существующего компонента.
+- **Статус:** ожидание (детали — в agent-mail, thread `forms-fieldwrapper-helper-slot-height`)
+
 ### [2026-09-08] Sortable Group.List — hydration mismatch на `aria-describedby` (от form-example-dev)
 
 - **Запросил:** form-example-dev (обнаружено при работе над PLAN.md P0 «Groups — sortable
