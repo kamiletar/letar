@@ -41,6 +41,13 @@
   `Currency` (не только у `Percentage`), добавлено на оба поля разом с тестами.
 - **Не в этом фиксе:** архитектурная коррекция выше (`useResolvedFieldProps` не резолвит
   `meta.fieldProps`) — отдельная, не blocking задача, годится и после этого фикса.
+- **Побочная находка (владелец спросил, почему нет в докс):** `FormFieldComponents['Currency'/
+  'Percentage']` (`form-compound-types.ts`) — ручной упрощённый тип пропсов `Form.Field.Currency`/
+  `Percentage` не включал `minorUnitScale` вообще (даже для уже выпущенного в v2.13.0 `Currency`),
+  из-за чего голый `<Form.Field.Currency minorUnitScale={...} />` (не через `createForm()`) не
+  компилировался. Это, по всей видимости, и есть причина, почему демо в `form-develop-app`/
+  `form-docs`/`form-example` не добавили ни для v2.13.0, ни изначально для этого фикса — типы не
+  давали. Тип исправлен, демо во всех трёх приложениях добавлены (Группы 2-4 воркфлоу).
 
 ### ✅ [2026-09-09] createForm() не переносит группу Form.Document.* на свой инстанс (закрыт v2.13.3, от domwellbes-dev)
 

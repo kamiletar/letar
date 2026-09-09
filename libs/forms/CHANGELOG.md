@@ -6,6 +6,17 @@
 
 ## [2.14.0] - 2026-09-09
 
+### Fixed
+
+- **`FormFieldComponents['Currency'/'Percentage']` (`form-compound-types.ts`) — ручной
+  упрощённый тип пропсов `Form.Field.Currency`/`Form.Field.Percentage` не включал
+  `minorUnitScale` (и `Percentage` — `decimalScale`), хотя рантайм давно принимал оба пропа.
+  Найдено при попытке добавить пример `minorUnitScale` в демо `form-develop-app`/`form-docs`/
+  `form-example` — все три упали typecheck'ом на голом `Form.Field.Currency` (не через
+  `createForm()`, там типы берутся из настоящего `CurrencyFieldProps`). Вероятная причина, почему
+  ни v2.13.0 (`Currency.minorUnitScale`), ни исходный запрос domwellbes-dev не добрались до
+  демо-приложений — правка казалась "не компилируется", хотя баг был в типе, не в демо.
+
 ### Added
 
 - **`Form.Field.Percentage` — проп `minorUnitScale`** (от `domwellbes-dev`, зеркало

@@ -2,6 +2,12 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.6.8] - 2026-09-09
+
+### Added
+
+- `demo/number`: пример `Form.Field.Currency minorUnitScale={100}` (копейки→рубли).
+
 ## [0.6.7] - 2026-09-09
 
 ### Fixed

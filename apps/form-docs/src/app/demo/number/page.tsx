@@ -14,6 +14,7 @@ const Schema = z.object({
     .max(100)
     .meta({ ui: { title: 'Slider (0-100)' } }),
   price: z.number().meta({ ui: { title: 'Currency ($)' } }),
+  priceKopecks: z.number().int().meta({ ui: { title: 'Currency, minorUnitScale=100 (копейки→рубли)' } }),
   rating: z
     .number()
     .min(1)
@@ -28,7 +29,7 @@ export default function NumberDemoPage() {
     <ChakraProvider value={defaultSystem}>
       <Form
         schema={Schema}
-        initialValue={{ quantity: 1, volume: 50, price: 0, rating: 3 }}
+        initialValue={{ quantity: 1, volume: 50, price: 0, priceKopecks: 15000, rating: 3 }}
         onSubmit={(data) => setSubmitted(data)}
       >
         <Stack gap={4}>
@@ -36,6 +37,7 @@ export default function NumberDemoPage() {
           <Form.Field.Number name="quantity" />
           <Form.Field.Slider name="volume" />
           <Form.Field.Currency name="price" />
+          <Form.Field.Currency name="priceKopecks" minorUnitScale={100} />
           <Form.Field.Rating name="rating" />
           <Form.DebugValues showInProduction />
           <Form.Button.Submit>Submit</Form.Button.Submit>

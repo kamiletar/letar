@@ -49,6 +49,14 @@ const NumericSchema = z.object({
       ui: { title: 'Price (EUR)', description: 'Price in Euros' },
     }),
 
+  priceKopecks: z
+    .number()
+    .int()
+    .min(0)
+    .meta({
+      ui: { title: 'Price (kopecks, minorUnitScale=100)', description: 'Stored as integer kopecks, edited as rubles' },
+    }),
+
   // Percentage fields
   discount: z
     .number()
@@ -73,6 +81,17 @@ const NumericSchema = z.object({
     .meta({
       ui: { title: 'Profit Margin', description: 'Maximum 50%' },
     }),
+
+  annualRateBps: z
+    .number()
+    .int()
+    .min(0)
+    .meta({
+      ui: {
+        title: 'Annual rate (basis points, minorUnitScale=100)',
+        description: 'Stored as integer basis points, edited as percent',
+      },
+    }),
 })
 
 type NumericFormData = z.infer<typeof NumericSchema>
@@ -83,9 +102,11 @@ const initialValues: NumericFormData = {
   priceRub: 1500,
   priceUsd: 99.99,
   priceEur: 49.5,
+  priceKopecks: 150000,
   discount: 10,
   taxRate: 20,
   margin: 25,
+  annualRateBps: 1350,
 }
 
 export default function NumericDemoPage() {
@@ -134,6 +155,7 @@ export default function NumericDemoPage() {
               <Form.Field.Currency name="priceRub" currency="RUB" />
               <Form.Field.Currency name="priceUsd" currency="USD" />
               <Form.Field.Currency name="priceEur" currency="EUR" />
+              <Form.Field.Currency name="priceKopecks" currency="RUB" minorUnitScale={100} />
             </VStack>
           </Box>
 
@@ -146,6 +168,7 @@ export default function NumericDemoPage() {
               <Form.Field.Percentage name="discount" />
               <Form.Field.Percentage name="taxRate" />
               <Form.Field.Percentage name="margin" max={50} />
+              <Form.Field.Percentage name="annualRateBps" min={0} max={10000} decimalScale={1} minorUnitScale={100} />
             </VStack>
           </Box>
 

@@ -96,11 +96,17 @@ const Schema = z.object({
     .max(100)
     .meta({ ui: { title: 'Slider (0-100)' } }),
   price: z.number().meta({ ui: { title: 'Currency ($)' } }),
+  priceKopecks: z.number().int().meta({ ui: { title: 'Currency, minorUnitScale=100 (копейки→рубли)' } }),
   discount: z
     .number()
     .min(0)
     .max(100)
     .meta({ ui: { title: 'Percentage' } }),
+  annualRateBps: z
+    .number()
+    .int()
+    .min(0)
+    .meta({ ui: { title: 'Percentage, minorUnitScale=100 (базисные пункты→%)' } }),
   rating: z
     .number()
     .min(1)
@@ -202,7 +208,9 @@ export default function AllFieldsPage() {
           itemCount: 5,
           volume: 50,
           price: 0,
+          priceKopecks: 15000,
           discount: 10,
+          annualRateBps: 1350,
           rating: 3,
           // Выбор
           framework: '',
@@ -260,7 +268,9 @@ export default function AllFieldsPage() {
           <Form.Field.NumberInput name="itemCount" min={0} max={999} step={1} />
           <Form.Field.Slider name="volume" />
           <Form.Field.Currency name="price" />
+          <Form.Field.Currency name="priceKopecks" minorUnitScale={100} />
           <Form.Field.Percentage name="discount" />
+          <Form.Field.Percentage name="annualRateBps" min={0} max={10000} decimalScale={1} minorUnitScale={100} />
           <Form.Field.Rating name="rating" />
 
           <Separator />

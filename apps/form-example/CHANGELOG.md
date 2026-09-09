@@ -2,6 +2,13 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.20] - 2026-09-09
+
+### Added
+
+- `examples/all-fields`: примеры `minorUnitScale` на `Form.Field.Currency`/`Form.Field.Percentage`
+  (копейки↔рубли, базисные пункты↔%).
+
 ## [0.1.19] - 2026-09-09
 
 ### Fixed

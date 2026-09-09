@@ -122,8 +122,25 @@ export interface FormFieldComponents {
   NumberInput: (props: NumberInputFieldProps) => ReactElement
   Slider: (props: SliderFieldProps) => ReactElement
   Rating: (props: RatingFieldProps) => ReactElement
-  Currency: (props: { name?: string; label?: string; currency?: string; decimalScale?: number }) => ReactElement
-  Percentage: (props: { name?: string; label?: string; min?: number; max?: number }) => ReactElement
+  Currency: (
+    props: {
+      name?: string
+      label?: string
+      currency?: string
+      decimalScale?: number
+      minorUnitScale?: number
+    },
+  ) => ReactElement
+  Percentage: (
+    props: {
+      name?: string
+      label?: string
+      min?: number
+      max?: number
+      decimalScale?: number
+      minorUnitScale?: number
+    },
+  ) => ReactElement
 
   // Date и time
   Date: (props: DateFieldProps) => ReactElement
