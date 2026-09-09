@@ -4,6 +4,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.13.4] - 2026-09-09
+
+### Fixed
+
+- **`createForm()` не переносил ещё 9 top-level компонентов `Form.*` на app-specific инстанс**
+  (от `domwellbes-dev`, тот же класс бага, что и `Document` в v2.13.3, начали с `Subscribe`).
+  `Object.assign` в `create-form.tsx` переносил не весь набор экспортов `Form` — не хватало
+  `Subscribe`, `Watch`, `InfoBlock`, `Divider`, `OfflineIndicator`, `SyncStatus`, `Builder`,
+  `FromTemplate`. Отдельно `DebugValues` был перенесён в рантайме, но отсутствовал в типе
+  `ExtendedForm` — на TS-уровне был недоступен на инстансе, хотя работал. Добавлен регресс-тест
+  на весь список top-level компонентов разом, чтобы следующий добавленный в `Form.*` компонент
+  не повторил ту же ошибку молча.
+
 ## [2.13.3] - 2026-09-09
 
 ### Fixed

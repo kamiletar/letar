@@ -280,6 +280,16 @@ export interface ExtendedForm {
   AutoFields: (props: AutoFieldsProps) => ReactElement
   FromSchema: <TData extends object>(props: FormFromSchemaProps<TData>) => ReactElement
   Document: typeof Form.Document
+  DebugValues: typeof Form.DebugValues
+  InfoBlock: typeof Form.InfoBlock
+  Divider: typeof Form.Divider
+  Watch: typeof Form.Watch
+  OfflineIndicator: typeof Form.OfflineIndicator
+  SyncStatus: typeof Form.SyncStatus
+  Builder: typeof Form.Builder
+  FromTemplate: typeof Form.FromTemplate
+  Subscribe: typeof Form.Subscribe
+  UrlSync: typeof Form.UrlSync
 }
 
 /**
@@ -384,6 +394,15 @@ export function createForm(options: CreateFormOptions = {}): ExtendedForm {
       AutoFields: Form.AutoFields,
       FromSchema: Form.FromSchema,
       Document: Form.Document,
+      InfoBlock: Form.InfoBlock,
+      Divider: Form.Divider,
+      Watch: Form.Watch,
+      OfflineIndicator: Form.OfflineIndicator,
+      SyncStatus: Form.SyncStatus,
+      Builder: Form.Builder,
+      FromTemplate: Form.FromTemplate,
+      Subscribe: Form.Subscribe,
+      UrlSync: Form.UrlSync,
     },
   )
 

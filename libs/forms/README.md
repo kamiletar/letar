@@ -107,13 +107,15 @@ const Schema = z.object({
 (`live`/`off`) и когда маска не подходит (критерий фиксированной длины) —
 [MASK_ENGINE.md](./MASK_ENGINE.md).
 
-`Document.*` доступна и на app-specific инстансе, созданном через `createForm()` — не только
-на базовом `Form`:
+`Document.*` и все остальные top-level компоненты `Form.*` (`Subscribe`, `Watch`, `InfoBlock`,
+`Divider`, `OfflineIndicator`, `SyncStatus`, `Builder`, `FromTemplate`, `DebugValues`) доступны и
+на app-specific инстансе, созданном через `createForm()` — не только на базовом `Form`:
 
 ```tsx
 export const AppForm = createForm({ /* ... */ })
 
 <AppForm.Document.INN name="inn" label="ИНН" />
+<AppForm.Subscribe>{(values) => <Preview values={values} />}</AppForm.Subscribe>
 ```
 
 ### Form-level компоненты

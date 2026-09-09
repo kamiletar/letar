@@ -77,6 +77,24 @@ describe('createForm', () => {
       expect(AppForm.Document.SNILS).toBe(Form.Document.SNILS)
     })
 
+    it('переносит все top-level компоненты Form.* на app-инстанс (не только Group/Field/Document)', () => {
+      // Регресс на класс бага: Object.assign в createForm() исторически "терял" отдельно
+      // стоящие top-level экспорты Form.* (Document, затем Subscribe) — проверяем весь набор
+      // разом, чтобы следующий добавленный в Form.* компонент не повторил ту же ошибку молча.
+      const AppForm = createForm()
+
+      expect(AppForm.DebugValues).toBe(Form.DebugValues)
+      expect(AppForm.InfoBlock).toBe(Form.InfoBlock)
+      expect(AppForm.Divider).toBe(Form.Divider)
+      expect(AppForm.Watch).toBe(Form.Watch)
+      expect(AppForm.OfflineIndicator).toBe(Form.OfflineIndicator)
+      expect(AppForm.SyncStatus).toBe(Form.SyncStatus)
+      expect(AppForm.Builder).toBe(Form.Builder)
+      expect(AppForm.FromTemplate).toBe(Form.FromTemplate)
+      expect(AppForm.Subscribe).toBe(Form.Subscribe)
+      expect(AppForm.UrlSync).toBe(Form.UrlSync)
+    })
+
     it('рендерит форму с базовыми полями', () => {
       const AppForm = createForm()
 

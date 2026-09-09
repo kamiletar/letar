@@ -18,6 +18,19 @@
   (`create-form.tsx`). Тест на app-инстансе в `create-form.spec.tsx`, пример в README.
   domwellbes может снять локальный обход в `apps/domwellbes/src/domwellbes-form/domwellbes-form.tsx`.
 
+### ✅ [2026-09-09] createForm() не переносит Form.Subscribe и ещё 7 top-level компонентов (закрыт v2.13.4, от domwellbes-dev)
+
+- **Запросил:** domwellbes-dev (msg 1477, thread `document-group-not-exposed`, topic `forms-task`) —
+  тот же класс, что и `Document.*` выше, найден сразу следом.
+- **Приоритет:** normal
+- **Описание:** `Object.assign`/тип `ExtendedForm` в `create-form.tsx` не переносили `Subscribe`,
+  `Watch`, `InfoBlock`, `Divider`, `OfflineIndicator`, `SyncStatus`, `Builder`, `FromTemplate` —
+  тот же пропуск, что был у `Document`. Отдельно `DebugValues` переносился в рантайме, но не был
+  объявлен в типе `ExtendedForm`.
+- **Фикс:** все 9 добавлены в `Object.assign` и тип `ExtendedForm` разом (`create-form.tsx`).
+  Регресс-тест на полный список top-level компонентов в `create-form.spec.tsx`, пример
+  `AppForm.Subscribe` в README.
+
 ### ✅ [2026-09-09] FieldWrapper/helper-slot не резервирует высоту — поля «скачут» в сетке (закрыт v2.13.2/forms-shadcn v0.36.1, от domwellbes-dev)
 
 - **Запросил:** domwellbes-dev (msg 1449, topic `form-feature-request`), делегировано `forms-dev`
