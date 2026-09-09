@@ -6,6 +6,22 @@
 
 ## Backlog (запросы от агентов)
 
+### [2026-09-09] createForm() не переносит группу Form.Document.* на свой инстанс (от domwellbes-dev)
+
+- **Запросил:** domwellbes-dev (msg 1462, thread `document-group-not-exposed`, topic `form-feature-request`)
+- **Приоритет:** normal
+- **Описание:** `Form.Document.*` (ИНН/КПП/ОГРН/БИК/СНИЛС/паспорт) работает как обычная группа
+  полей в контексте любого `Form`-дерева, но `createForm()` не переносит её на возвращаемый
+  инстанс — в `Object.assign` внутри `create-form.tsx` группы нет, в типе `ExtendedForm` тоже.
+  `MyAppForm.Document.INN` не существует, доступен только базовый `Form.Document.INN`.
+- **Обход в domwellbes:** ручная доклейка поверх инстанса
+  (`apps/domwellbes/src/domwellbes-form/domwellbes-form.tsx`):
+  `Object.assign(DomWellbesFormRoot, BaseForm, { Document: Form.Document })`.
+- **Предложение:** добавить `Document` в `Object.assign`/`ExtendedForm` внутри `createForm()`
+  по аналогии с `Field`/`Select`/`Button`, чтобы группа была доступна на любом app-инстансе
+  из коробки.
+- **Статус:** ожидание
+
 ### ✅ [2026-09-09] FieldWrapper/helper-slot не резервирует высоту — поля «скачут» в сетке (закрыт v2.13.2/forms-shadcn v0.36.1, от domwellbes-dev)
 
 - **Запросил:** domwellbes-dev (msg 1449, topic `form-feature-request`), делегировано `forms-dev`
