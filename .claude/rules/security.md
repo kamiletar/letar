@@ -102,6 +102,24 @@ python3 -c "import secrets; print(secrets.token_urlsafe(32))"
 
 Это касается: паролей к NPM, БД, admin-панелям, API-ключей, SMTP, любых учёток.
 
+### ⚠️ Токены, которые попадают в URL query-параметр (`DEV_SESSION_TOKEN` и аналоги) — генерируй в base64url-алфавите
+
+Обычный `openssl rand -base64 32` почти всегда содержит `+`/`/`. Если такой токен передаётся как
+query-параметр (`?token=...`), `+` декодируется по правилам `application/x-www-form-urlencoded`
+как пробел ещё до сравнения на сервере — токен, вставленный в адресную строку/curl без ручного
+`%2B`, не совпадёт с ожидаемым (см. разбор —
+[dev-session-token-plus-char-query-corruption.md](/.claude/docs/dev-session-token-plus-char-query-corruption.md)).
+`createDevSessionRoute` (`libs/auth`) нормализует пробел обратно в `+` при сравнении, но для
+**новых** токенов, которые будут передаваться в query, надёжнее не создавать проблему вовсе:
+
+```bash
+# OpenSSL, без +// в алфавите
+openssl rand -base64 32 | tr '+/' '-_'
+
+# Python — сразу base64url
+python3 -c "import secrets; print(secrets.token_urlsafe(32))"
+```
+
 ## Secrets
 
 ```bash
