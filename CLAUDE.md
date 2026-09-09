@@ -228,6 +228,12 @@ select ·
 вывод `@letar/zenstack-form-plugin` для nullable enum) — резолвер не разворачивает
 `ZodNullable`/`ZodOptional` перед поиском `.meta()`, дропдаун рендерится пустым, хотя значение
 хранится и сабмитится корректно ·
+[letar-forms-fieldprops-typed-tags-not-resolved](/.claude/docs/letar-forms-fieldprops-typed-tags-not-resolved.md)
+⚠️ `@meta("form.props.<key>", value)` доходит до компонента только через `Form.Field.Auto` —
+рекомендованный явный `<AppForm.Field.X>` (`.claude/rules/forms.md`) UI-пропсы из схемы
+(`minorUnitScale`, `currency`, `showValue`, `layout`, `count`...) не резолвит вовсе,
+`useResolvedFieldProps` тянет из meta только фиксированный список полей; значение приходится
+дублировать JSX-пропом на каждом месте использования вручную ·
 [ui-components](/.claude/docs/ui-components.md) · [images](/.claude/docs/images.md) ·
 [upload-storage-backend](/.claude/docs/upload-storage-backend.md) `StorageBackend` в
 `@letar/image-upload/server` — точка расширения на будущее S3-совместимое хранилище, S3-backend
