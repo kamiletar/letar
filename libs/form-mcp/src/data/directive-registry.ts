@@ -56,7 +56,14 @@ const KNOWN_DIRECTIVES: DirectiveInfo[] = [
     description:
       'Field properties. Automatically split into Zod constraints (min, max, step) and UI props (layout, count). '
       + '⚠️ @meta не принимает объектный литерал (Unsupported attribute arg value: ObjectExpr — ломает '
-      + 'zenstack generate целиком, ограничение upstream-генератора TS-схемы, не плагина) — каждый ключ отдельным вызовом @meta с плоским dot-path.',
+      + 'zenstack generate целиком, ограничение upstream-генератора TS-схемы, не плагина) — каждый ключ отдельным вызовом @meta с плоским dot-path. '
+      + '⚠️ UI-пропсы (не min/max/step — те идут в Zod constraints) реально доходят до компонента ТОЛЬКО через '
+      + 'Form.Field.Auto/renderSchemaField. Явные типизированные теги (<AppForm.Field.Currency name="x" />) — '
+      + 'рекомендованный в .claude/rules/forms.md паттерн — их не резолвят вовсе: useResolvedFieldProps тянет из '
+      + 'meta только фиксированный список (title/placeholder/description/required/disabled/readOnly/options/'
+      + 'tooltip/autocomplete), произвольный fieldProps (minorUnitScale, currency, showValue, layout, count...) '
+      + 'нет. В типизированном пути такой проп нужно продублировать в JSX явно, схема его не подставит сама — '
+      + 'см. .claude/docs/letar-forms-fieldprops-typed-tags-not-resolved.md.',
     example: '@meta("form.props.min", 1) @meta("form.props.max", 100) @meta("form.props.step", 0.5)',
     output: 'z.number().min(1).max(100).step(0.5)',
   },
