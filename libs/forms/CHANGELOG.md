@@ -4,6 +4,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.13.3] - 2026-09-09
+
+### Fixed
+
+- **`createForm()` не переносил группу `Document.*` на app-specific инстанс** (от `domwellbes-dev`,
+  найдено при аудите specialized-fields). `Object.assign` в `create-form.tsx` переносил
+  `Group`/`Field`/`Button`/`Select`/`Combobox`/`Listbox`/`Steps`, но не `Document` — `Document.INN`
+  и т.п. были доступны только через базовый `Form.Document`, не через инстанс `createForm()`.
+  Добавлено в объединение и в тип `ExtendedForm`.
+
 ## [2.13.2] - 2026-09-09
 
 ### Fixed

@@ -107,6 +107,15 @@ const Schema = z.object({
 (`live`/`off`) и когда маска не подходит (критерий фиксированной длины) —
 [MASK_ENGINE.md](./MASK_ENGINE.md).
 
+`Document.*` доступна и на app-specific инстансе, созданном через `createForm()` — не только
+на базовом `Form`:
+
+```tsx
+export const AppForm = createForm({ /* ... */ })
+
+<AppForm.Document.INN name="inn" label="ИНН" />
+```
+
 ### Form-level компоненты
 
 ```tsx

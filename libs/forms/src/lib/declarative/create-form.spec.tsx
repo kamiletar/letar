@@ -68,6 +68,15 @@ describe('createForm', () => {
       expect(AppForm.FromSchema).toBeDefined()
     })
 
+    it('сохраняет группу Document', () => {
+      const AppForm = createForm()
+
+      expect(AppForm.Document).toBeDefined()
+      expect(AppForm.Document.INN).toBe(Form.Document.INN)
+      expect(AppForm.Document.KPP).toBe(Form.Document.KPP)
+      expect(AppForm.Document.SNILS).toBe(Form.Document.SNILS)
+    })
+
     it('рендерит форму с базовыми полями', () => {
       const AppForm = createForm()
 

@@ -279,6 +279,7 @@ export interface ExtendedForm {
   Captcha: (props: CaptchaFieldProps) => ReactElement | null
   AutoFields: (props: AutoFieldsProps) => ReactElement
   FromSchema: <TData extends object>(props: FormFromSchemaProps<TData>) => ReactElement
+  Document: typeof Form.Document
 }
 
 /**
@@ -382,6 +383,7 @@ export function createForm(options: CreateFormOptions = {}): ExtendedForm {
       Steps: Form.Steps,
       AutoFields: Form.AutoFields,
       FromSchema: Form.FromSchema,
+      Document: Form.Document,
     },
   )
 
