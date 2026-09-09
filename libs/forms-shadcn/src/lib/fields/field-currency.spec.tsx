@@ -84,4 +84,51 @@ describe('FieldCurrency (shadcn)', () => {
       expect(input).toHaveAttribute('aria-valuenow', '234.65')
     })
   })
+
+  describe('minorUnitScale (копейки↔рубли)', () => {
+    it('без minorUnitScale ведёт себя как раньше (scale=1)', () => {
+      render(
+        <TestForm defaultValues={{ price: 123.45 }}>
+          <FieldCurrency name="price" />
+        </TestForm>,
+      )
+
+      expect(screen.getByRole('spinbutton')).toHaveValue('123.45')
+    })
+
+    it('отображает значение в major units (рубли), храня minor units (копейки)', () => {
+      render(
+        <TestForm defaultValues={{ priceKopecks: 12345 }}>
+          <FieldCurrency name="priceKopecks" minorUnitScale={100} />
+        </TestForm>,
+      )
+
+      expect(screen.getByRole('spinbutton')).toHaveValue('123.45')
+    })
+
+    it('при вводе рублей сохраняет в форме целое число копеек', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- см. TestForm.onFormReady
+      let form: any
+      render(
+        <TestForm defaultValues={{ priceKopecks: undefined }} onFormReady={(f) => (form = f)}>
+          <FieldCurrency name="priceKopecks" minorUnitScale={100} />
+        </TestForm>,
+      )
+
+      const input = screen.getByRole('spinbutton')
+      fireEvent.change(input, { target: { value: '123.45' } })
+
+      expect(form.state.values.priceKopecks).toBe(12345)
+    })
+
+    it('пустое значение остаётся пустым независимо от scale', () => {
+      render(
+        <TestForm defaultValues={{ priceKopecks: undefined }}>
+          <FieldCurrency name="priceKopecks" minorUnitScale={100} />
+        </TestForm>,
+      )
+
+      expect(screen.getByRole('spinbutton')).toHaveValue('')
+    })
+  })
 })

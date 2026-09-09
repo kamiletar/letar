@@ -1,5 +1,6 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -59,6 +60,60 @@ describe('FieldPercentage', () => {
       )
 
       expect(screen.getByText('От 0 до 100')).toBeInTheDocument()
+    })
+  })
+
+  describe('minorUnitScale (базисные пункты↔%)', () => {
+    it('без minorUnitScale ведёт себя как раньше (scale=1)', () => {
+      render(
+        <Form initialValue={{ discount: 13 }} onSubmit={vi.fn()}>
+          <Form.Field.Percentage name="discount" />
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      expect(screen.getByRole('spinbutton')).toHaveValue('13%')
+    })
+
+    it('отображает значение в major units (%), храня minor units (б.п.)', () => {
+      render(
+        <Form initialValue={{ annualRateBps: 1350 }} onSubmit={vi.fn()}>
+          <Form.Field.Percentage name="annualRateBps" minorUnitScale={100} decimalScale={1} />
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      expect(screen.getByRole('spinbutton')).toHaveValue('13.5%')
+    })
+
+    it('при вводе процентов сохраняет в форме целое число базисных пунктов', async () => {
+      const user = userEvent.setup()
+      const onSubmit = vi.fn()
+      render(
+        <Form initialValue={{ annualRateBps: undefined }} onSubmit={onSubmit}>
+          <Form.Field.Percentage name="annualRateBps" minorUnitScale={100} decimalScale={1} />
+          <Form.Button.Submit>Submit</Form.Button.Submit>
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      const input = screen.getByRole('spinbutton')
+      await user.click(input)
+      await user.paste('13.5')
+      await user.click(screen.getByRole('button', { name: 'Submit' }))
+
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ annualRateBps: 1350 }))
+    })
+
+    it('пустое значение остаётся пустым независимо от scale', () => {
+      render(
+        <Form initialValue={{ annualRateBps: undefined }} onSubmit={vi.fn()}>
+          <Form.Field.Percentage name="annualRateBps" minorUnitScale={100} />
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      expect(screen.getByRole('spinbutton')).toHaveValue('')
     })
   })
 })

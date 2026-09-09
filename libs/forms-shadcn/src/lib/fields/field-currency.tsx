@@ -35,16 +35,23 @@ export const FieldCurrency = createField<CurrencyFieldProps, number | undefined,
   },
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
-    const { min, max, step = 0.01 } = componentProps
-    const value = field.state.value as number | undefined
+    const { min, max, step = 0.01, minorUnitScale = 1 } = componentProps
+    const storedValue = field.state.value as number | undefined
+
+    // Форма хранит/сериализует значение в minor units (копейки), поле показывает/принимает major
+    // units (рубли) — тот же принцип, что в Chakra-скине.
+    const displayedValue = storedValue === undefined ? undefined : storedValue / minorUnitScale
 
     return (
       <FieldWrapper resolved={resolved} hasError={hasError} errorMessage={errorMessage} fullPath={fullPath}>
         <div className="flex items-center gap-2">
           <div className="flex-1">
             <shadcnUIKit.NumberInput
-              value={value ?? null}
-              onChange={(v) => field.handleChange(v ?? undefined)}
+              value={displayedValue ?? null}
+              onChange={(v) =>
+                field.handleChange(
+                  v === null || v === undefined ? undefined : minorUnitScale === 1 ? v : Math.round(v * minorUnitScale),
+                )}
               onBlur={field.handleBlur}
               min={min}
               max={max}

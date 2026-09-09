@@ -4,6 +4,20 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.14.0] - 2026-09-09
+
+### Added
+
+- **`Form.Field.Percentage` — проп `minorUnitScale`** (от `domwellbes-dev`, зеркало
+  `Currency.minorUnitScale` из v2.13.0, только для базисных пунктов вместо копеек). Хранение
+  значения поля в minor units (б.п., целое число), при этом поле показывает и принимает major
+  units (%). По умолчанию `1` — без scale, поведение не меняется.
+  ```tsx
+  <Form.Field.Percentage name="annualRateBps" label="Ставка" minorUnitScale={100} />
+  ```
+  Заодно синхронизировано с `forms-shadcn` (v0.37.0) — там `minorUnitScale` добавлен и на
+  `Field.Currency` (не было вовсе), и на `Field.Percentage`.
+
 ## [2.13.4] - 2026-09-09
 
 ### Fixed

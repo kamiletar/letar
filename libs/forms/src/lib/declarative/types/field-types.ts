@@ -207,6 +207,21 @@ export interface PercentageFieldProps extends BaseFieldProps {
   decimalScale?: number
   /** Size */
   size?: 'xs' | 'sm' | 'md' | 'lg'
+  /**
+   * Scale between the stored field value (basis points/minor units) and the displayed/edited
+   * value (percent). Default `1` — no transform, current behaviour unchanged. Mirrors
+   * `CurrencyFieldProps.minorUnitScale`.
+   *
+   * With `minorUnitScale={100}`, a field value of `1350` displays and edits as `13.5`; typing
+   * `13.5` stores back `1350`. `min`/`max`/`step` are in DISPLAYED (percent) terms, same as
+   * without the scale.
+   *
+   * @example DB/Prisma stores an integer `annualRateBps` field (basis points)
+   * ```tsx
+   * <Form.Field.Percentage name="annualRateBps" label="Ставка" minorUnitScale={100} />
+   * ```
+   */
+  minorUnitScale?: number
 }
 
 // ============================================================================

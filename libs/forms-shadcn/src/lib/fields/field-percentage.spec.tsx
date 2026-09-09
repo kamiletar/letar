@@ -86,4 +86,51 @@ describe('FieldPercentage (shadcn)', () => {
       expect(input).toHaveAttribute('aria-valuenow', '42.5')
     })
   })
+
+  describe('minorUnitScale (базисные пункты↔%)', () => {
+    it('без minorUnitScale ведёт себя как раньше (scale=1)', () => {
+      render(
+        <TestForm defaultValues={{ discount: 13 }}>
+          <FieldPercentage name="discount" />
+        </TestForm>,
+      )
+
+      expect(screen.getByRole('spinbutton')).toHaveValue('13')
+    })
+
+    it('отображает значение в major units (%), храня minor units (б.п.)', () => {
+      render(
+        <TestForm defaultValues={{ annualRateBps: 1350 }}>
+          <FieldPercentage name="annualRateBps" minorUnitScale={100} />
+        </TestForm>,
+      )
+
+      expect(screen.getByRole('spinbutton')).toHaveValue('13.5')
+    })
+
+    it('при вводе процентов сохраняет в форме целое число базисных пунктов', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- см. TestForm.onFormReady
+      let form: any
+      render(
+        <TestForm defaultValues={{ annualRateBps: undefined }} onFormReady={(f) => (form = f)}>
+          <FieldPercentage name="annualRateBps" minorUnitScale={100} />
+        </TestForm>,
+      )
+
+      const input = screen.getByRole('spinbutton')
+      fireEvent.change(input, { target: { value: '13.5' } })
+
+      expect(form.state.values.annualRateBps).toBe(1350)
+    })
+
+    it('пустое значение остаётся пустым независимо от scale', () => {
+      render(
+        <TestForm defaultValues={{ annualRateBps: undefined }}>
+          <FieldPercentage name="annualRateBps" minorUnitScale={100} />
+        </TestForm>,
+      )
+
+      expect(screen.getByRole('spinbutton')).toHaveValue('')
+    })
+  })
 })

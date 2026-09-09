@@ -27,6 +27,21 @@
 - **Статус:** ожидание — не blocking для самого `Field.Percentage.minorUnitScale` (может выйти
   сначала как голый проп по образцу `Field.Currency`). Разбор — `.claude/docs/letar-forms-fieldprops-typed-tags-not-resolved.md`.
 
+### ✅ [2026-09-09] Field.Percentage.minorUnitScale (закрыт v2.14.0/forms-shadcn v0.37.0, от domwellbes-dev)
+
+- **Запросил:** domwellbes-dev (msg 1478, thread `money-field-kopecks`, topic `forms-task`) —
+  зеркало `Field.Currency.minorUnitScale` (v2.13.0), только для базисных пунктов вместо копеек.
+- **Приоритет:** normal, не urgent (domwellbes временно обходился live-recalc хинтом)
+- **Кейс:** `financing-program.schema.ts` (domwellbes) — 4 поля в б.п.
+  (`annualRateBps`, `minDownPaymentBps`, `maxDownPaymentBps`, `previewDownPaymentBps`).
+- **Фикс:** `minorUnitScale?: number` добавлен в `PercentageFieldProps`, value-transform в
+  `field-percentage.tsx` зеркалит `field-currency.tsx` (Chakra-скин). Регресс-тесты по образцу
+  Currency (scale=1 без изменений, отображение major/minor, round-trip, пустое значение).
+  Заодно закрыт смежный пробел в `forms-shadcn` — там `minorUnitScale` не было вовсе даже у
+  `Currency` (не только у `Percentage`), добавлено на оба поля разом с тестами.
+- **Не в этом фиксе:** архитектурная коррекция выше (`useResolvedFieldProps` не резолвит
+  `meta.fieldProps`) — отдельная, не blocking задача, годится и после этого фикса.
+
 ### ✅ [2026-09-09] createForm() не переносит группу Form.Document.* на свой инстанс (закрыт v2.13.3, от domwellbes-dev)
 
 - **Запросил:** domwellbes-dev (msg 1462, thread `document-group-not-exposed`, topic `form-feature-request`)

@@ -23,16 +23,23 @@ export const FieldPercentage = createField<PercentageFieldProps, number | undefi
   useFieldState: (): PercentageFieldState => ({ locale: useFormI18n()?.locale }),
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
-    const { min = 0, max = 100, step = 1 } = componentProps
-    const value = field.state.value as number | undefined
+    const { min = 0, max = 100, step = 1, minorUnitScale = 1 } = componentProps
+    const storedValue = field.state.value as number | undefined
+
+    // Форма хранит/сериализует значение в minor units (базисные пункты), поле показывает/
+    // принимает major units (%) — тот же принцип, что в Chakra-скине/Form.Field.Currency.
+    const displayedValue = storedValue === undefined ? undefined : storedValue / minorUnitScale
 
     return (
       <FieldWrapper resolved={resolved} hasError={hasError} errorMessage={errorMessage} fullPath={fullPath}>
         <div className="flex items-center gap-2">
           <div className="flex-1">
             <shadcnUIKit.NumberInput
-              value={value ?? null}
-              onChange={(v) => field.handleChange(v ?? undefined)}
+              value={displayedValue ?? null}
+              onChange={(v) =>
+                field.handleChange(
+                  v === null || v === undefined ? undefined : minorUnitScale === 1 ? v : Math.round(v * minorUnitScale),
+                )}
               onBlur={field.handleBlur}
               min={min}
               max={max}

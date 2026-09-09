@@ -26,6 +26,11 @@ import { createField, FieldWrapper } from '../base'
  * ```tsx
  * <Form.Field.Percentage name="rate" label="Rate" decimalScale={2} step={0.1} />
  * ```
+ *
+ * @example Значение хранится в базисных пунктах (целое число), отображается/редактируется в %
+ * ```tsx
+ * <Form.Field.Percentage name="annualRateBps" label="Ставка" minorUnitScale={100} />
+ * ```
  */
 /** Percentage field state */
 interface PercentageFieldState {
@@ -59,19 +64,30 @@ export const FieldPercentage = createField<PercentageFieldProps, number | undefi
   },
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
-    const value = field.state.value as number | undefined
+    const storedValue = field.state.value as number | undefined
 
-    const { min = 0, max = 100, step = 1, size } = componentProps
+    const { min = 0, max = 100, step = 1, size, minorUnitScale = 1 } = componentProps
 
     const { formatOptions, locale } = fieldState
+
+    // Форма хранит/сериализует значение в minor units (базисные пункты), поле показывает/принимает
+    // major units (%) — тот же принцип value-transform, что у Form.Field.Currency.
+    const displayedValue = storedValue === undefined ? undefined : storedValue / minorUnitScale
 
     return (
       <FieldWrapper resolved={resolved} hasError={hasError} errorMessage={errorMessage} fullPath={fullPath}>
         <NumberInput.Root
-          value={value?.toString() ?? ''}
+          value={displayedValue?.toString() ?? ''}
           onValueChange={(details: { valueAsNumber: number }) => {
             const num = details.valueAsNumber
-            field.handleChange(Number.isNaN(num) ? undefined : num)
+            if (Number.isNaN(num)) {
+              field.handleChange(undefined)
+              return
+            }
+            // scale=1 (по умолчанию) сохраняет исходное поведение как есть — Math.round здесь
+            // только для scale!=1, где `num * minorUnitScale` рискует накопить погрешность
+            // плавающей точки.
+            field.handleChange(minorUnitScale === 1 ? num : Math.round(num * minorUnitScale))
           }}
           onBlur={field.handleBlur}
           min={min}

@@ -4,6 +4,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.37.0] - 2026-09-09
+
+### Added
+
+- **`Field.Currency`/`Field.Percentage` — проп `minorUnitScale`.** Паритет с Chakra-скином
+  (`@letar/forms` v2.13.0/v2.14.0) — Currency в shadcn-скине не имел этого пропа вовсе, только
+  Chakra-версия. Хранение значения в minor units (копейки/базисные пункты), отображение в major
+  units (рубли/%). По умолчанию `1` — без scale, поведение не меняется.
+  ```tsx
+  <Form.Field.Currency name="priceKopecks" minorUnitScale={100} />
+  <Form.Field.Percentage name="annualRateBps" minorUnitScale={100} />
+  ```
+
 ## [0.36.1] - 2026-09-09
 
 ### Fixed

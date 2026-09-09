@@ -480,6 +480,17 @@ export interface CurrencyFieldProps extends BaseFieldProps {
   max?: number
   /** Шаг изменения (по умолчанию 0.01) */
   step?: number
+  /**
+   * Масштаб между хранимым значением поля (минорные единицы валюты — копейки/центы) и
+   * отображаемым/редактируемым значением (мажорные единицы — рубли). По умолчанию `1` — без
+   * трансформации, поведение не меняется. Паритет с Chakra-скином.
+   *
+   * @example В БД хранится целочисленное поле `priceKopecks`
+   * ```tsx
+   * <Form.Field.Currency name="priceKopecks" label="Цена" minorUnitScale={100} />
+   * ```
+   */
+  minorUnitScale?: number
 }
 
 /**
@@ -492,6 +503,17 @@ export interface PercentageFieldProps extends BaseFieldProps {
   max?: number
   /** Шаг изменения (по умолчанию 1) */
   step?: number
+  /**
+   * Масштаб между хранимым значением поля (базисные пункты) и отображаемым/редактируемым
+   * значением (%). По умолчанию `1` — без трансформации. Паритет с Chakra-скином и с
+   * `CurrencyFieldProps.minorUnitScale`.
+   *
+   * @example В БД хранится целочисленное поле `annualRateBps`
+   * ```tsx
+   * <Form.Field.Percentage name="annualRateBps" label="Ставка" minorUnitScale={100} />
+   * ```
+   */
+  minorUnitScale?: number
 }
 
 /**
