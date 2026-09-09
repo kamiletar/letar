@@ -192,6 +192,13 @@ upstream-генераторе TS-схемы, `ObjectExpr` не поддержа�
 ⚠️ field-level `@allow` только добавляет разрешение поверх модельной `@@allow`, не сужает —
 сужение только через field-level `@deny`; найдено трижды подряд (`User.roles` privilege
 escalation, `Payment.settlementId`, `DeliveryDiscrepancy`) ·
+[role-gate-vs-model-policy-drift](/.claude/docs/role-gate-vs-model-policy-drift.md) ⚠️ парный
+класс уровнем выше: список ролей в `requireRole` шире (или у́же) `@@allow` модели, в которую
+действие реально пишет — роль проходит гейт, видит кнопки и падает на записи необработанным
+отказом, а в обратную сторону функция просто не работает у тех, для кого задумана; typecheck и
+тесты с моком клиента БД слепы к этому по построению, ловушка второго порядка — хелпер, лениво
+создающий родительскую запись (версию/ревизию), требует прав на неё и даёт отказ, зависящий от
+данных ·
 [precommit-hook-install-staleness](/.claude/docs/precommit-hook-install-staleness.md) ⚠️
 установленный pre-commit-хук — копия на момент последнего `install.sh`, не симлинк: новый скрипт
 в `scripts/hooks/` (например `schema-migration-check`) не появляется в уже установленных
