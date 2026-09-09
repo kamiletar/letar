@@ -459,6 +459,12 @@ JSX-transform у esbuild на `"jsx": "preserve"` из `tsconfig.next-app.json`,
 «14 из 15 приложений с темой пробел не закрыли» — на 2026-08-19, каталог `src/theme` сейчас у 16
 приложений (`ls -d apps/*/src/theme`), кто из них закрыл контракт после того замера — не
 перепроверялось ·
+[chakra-inverted-surface-color-contrast](/.claude/docs/chakra-inverted-surface-color-contrast.md)
+⚠️ соседний, но другой класс — `Tooltip.Content` рисуется на `bg.inverted`/`fg.inverted`
+(буквальный обмен `_light`↔`_dark` относительно DEFAULT), обычный семантический цвет
+(`green.fg` и т.п.) внутри резолвится по теме страницы, не по инвертированной поверхности слота
+— низкий контраст только в одной из двух тем; фикс — вручную поменять `_light`/`_dark` местами,
+не просто подобрать «цвет получше» ·
 [chakra-typegen-shared-node-modules-race](/.claude/docs/chakra-typegen-shared-node-modules-race.md)
 ⚠️ `theme:typegen` пишет в общий физический файл `node_modules/@chakra-ui/react` — параллельный
 `theme:typegen` другого приложения молча откатывает кастомные recipe-варианты, `typecheck:tsgo`
