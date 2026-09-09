@@ -343,15 +343,25 @@ docker compose pull && docker compose up -d
 | -------------------------- | -------------- | --------------------------------- | -------------- |
 | `postgres-driving-school`  | driving_school | 5432 (dev)                        | —              |
 | `postgres-kami`            | lena_kami      | 5437 (dev)                        | —              |
-| `postgres-kami-prod`       | lena_kami      | туннель 5455 → s2:5437            | `kami_ro`      |
+| `postgres-kami-prod`       | lena_kami      | туннель 5455 → 185.28.85.195:5437 | `kami_ro`      |
 | `postgres-kami-prod-write` | lena_kami      | туннель 5455 → s2:5437            | нет (полный)   |
 | `postgres-grandslamcup`    | grandslamcup   | 5453 (dev)                        | —              |
 | `postgres-studio`          | studio_dev     | 5446 (dev)                        | —              |
-| `postgres-studio-prod`     | studio         | туннель 5456 → s2:5455            | `studio_ro`    |
+| `postgres-studio-prod`     | studio         | туннель 5456 → 185.28.85.195:5455 | `studio_ro`    |
 | `postgres-domwellbes`      | domwellbes     | 5444 (dev)                        | —              |
 | `postgres-domwellbes-prod` | domwellbes     | туннель 5457 → 185.28.85.195:5456 | —              |
 
 Остальные БД (mandala, archetest, time, animatrona-tracker, dashboard, form-develop) можно добавить в `.mcp.json` по аналогии — см. скилл `mcp-postgres-setup`.
+
+⚠️ **Хост SSH-туннеля в `.mcp.json` — только литеральный IP, не `s2.letar.best`.** Под
+TUN-VPN хостнейм резолвится в Fake-IP из диапазона `198.18.0.0/15` (`ping s2.letar.best` →
+`198.18.0.13`), SSH туда не доходит вовсе, и сервер падает на старте с `CONNECTION_CLOSED` —
+сообщение ничего не говорит ни про DNS, ни про VPN, выглядит как «MCP не настроен». Так молча
+не работали `postgres-kami-prod` и `postgres-studio-prod`, пока `postgres-domwellbes-prod`
+(изначально прописанный через `185.28.85.195`) работал рядом; починено 2026-09-09 заменой хоста
+в обеих записях. Тот же класс ловушки, что и в
+[electron-net-fetch-tun-vpn](/.claude/docs/electron-net-fetch-tun-vpn.md): DNS-проверки с рабочей
+машины под TUN-VPN врут о доступности хоста.
 
 ⚠️ **Прод и dev легко перепутать по названию сервера.** Прецедент 2026-07-30: диагностику
 прод-инцидента studio (500 из-за пропущенной миграции) увело в ложный вывод «drift безобиден»,
@@ -408,7 +418,7 @@ mcp__postgres_kami__query({
 репозиторий. Сырое значение — в `.env.mcp` (в `.gitignore`, не коммитится) как бэкап для
 копирования в `setx`, но сам файл Claude Code не читает.
 
-Остальные записи в `.mcp.json` (`root@s2.letar.best` для `postgres-*-prod` туннелей) — не
+Остальные записи в `.mcp.json` (`root@185.28.85.195` для `postgres-*-prod` туннелей) — не
 секреты: SSH-доступ туда требует ключа из `~/.ssh/`, сам по себе хост/юзер в открытом виде не
 даёт доступа. Токен деплой-агента и пароли БД в `.mcp.json` не хранятся вовсе (см. ниже).
 
