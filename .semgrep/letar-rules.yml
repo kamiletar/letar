@@ -129,6 +129,50 @@ rules:
           metavariable: $COMPONENT
           regex: ^[A-Z]
 
+  # ⚠️ AST-паттерн `<$FORM.Field.Number name="$NAME" ... />` (metavariable как объект
+  # трёхуровневого JSX member-expression типа DomWellbesForm.Field.Number) НЕ матчится вовсе —
+  # проверено эмпирически (2026-09-09): с буквальным именем компонента вместо метапеременной
+  # правило находит все 10 вхождений в контрольном файле, с `$FORM` — 0. Каждое приложение
+  # монорепо заводит свой `createForm()`-инстанс под собственным именем (DomWellbesForm,
+  # DrivingSchoolForm, ...) — перечислить их все литералом нельзя, писать отдельное правило на
+  # каждое приложение бессмысленно. Поэтому здесь `pattern-regex` (language: generic) вместо
+  # AST-паттерна — грубее (не видит контекста JSX-дерева), но матчит текст независимо от имени
+  # инстанса формы.
+  - id: letar-forms-number-field-money-or-percent-name
+    languages: [generic]
+    severity: WARNING
+    paths:
+      include:
+        - '*.tsx'
+    message: >-
+      Имя поля выглядит как деньги (…Kopecks) или проценты (…Pct/…Percent), но привязано к
+      Field.Number. В @letar/forms есть Field.Currency (форматирование + minorUnitScale для
+      копеек↔рублей на границе поля) и Field.Percentage (0-100). Field.Number отдаёт сырое
+      число без форматирования и легко теряет единицы измерения на глаз. Проверь
+      `form-mcp list_fields`, прежде чем оставлять Field.Number — если это осознанный выбор
+      (например поле хранит долю 0-1, а не проценты 0-100 — Field.Percentage бы испортил
+      данные — или значение намеренно не форматируется), оставь как есть.
+      См. .claude/rules/forms.md, apps/domwellbes/PLAN_OBSERVATIONS.md (money-field-kopecks).
+    pattern-regex: '\.Field\.Number\b[^>]*\bname="[A-Za-z]*(Kopecks|Pct|Percent)"'
+
+  - id: letar-forms-string-field-specialized-name
+    languages: [generic]
+    severity: WARNING
+    paths:
+      include:
+        - '*.tsx'
+    message: >-
+      Имя поля похоже на домен со специализированным компонентом в @letar/forms:
+      ИНН/КПП/ОГРН/БИК/СНИЛС/паспорт — Form.Document.* (реальная checksum-валидация вместо
+      голой строки); телефон — Field.Phone; город/адрес — Field.City/Field.Address (только
+      если в приложении настроен DaData-токен — без него они деградируют до обычного текста,
+      проверь перед заменой). Field.String ничего из этого не даёт. Проверь
+      `form-mcp list_fields`/`get_directives`, прежде чем оставлять Field.String.
+      ⚠️ `createForm()` не переносит группу Form.Document.* на свой инстанс — если её ещё нет
+      на инстансе приложения, доклей вручную по образцу
+      apps/domwellbes/src/domwellbes-form/domwellbes-form.tsx. См. .claude/rules/forms.md.
+    pattern-regex: '\.Field\.String\b[^>]*\bname="(inn|kpp|ogrn|bik|snils|passport|phone|[A-Za-z]*Phone|city|[A-Za-z]*City)"'
+
   - id: letar-dev-session-vars-in-prod-env
     languages: [generic]
     paths:
