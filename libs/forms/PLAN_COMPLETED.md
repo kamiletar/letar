@@ -1,5 +1,41 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-09 (сессия 3) — Field.Percentage.minorUnitScale + архитектурная коррекция meta.fieldProps
+
+Продолжение сессии 2 того же дня (тред `money-field-kopecks`, msg 1478 от domwellbes-dev).
+
+**1. `Field.Percentage.minorUnitScale`** (v2.14.0, `@letar/forms-shadcn` v0.37.0) — зеркало
+`Field.Currency.minorUnitScale` (v2.13.0) для базисных пунктов вместо копеек: хранит целое число
+б.п., отображает/принимает проценты. Value-transform в `field-percentage.tsx` идентичен
+`field-currency.tsx`. Regression-тесты: scale=1 без изменений, отображение major/minor,
+round-trip через ввод, пустое значение. Заодно закрыт смежный пробел в `forms-shadcn`, где у
+`Field.Currency` `minorUnitScale` не было вовсе (`libs/forms-shadcn/src/lib/fields/types.ts`,
+`field-currency.tsx`, `field-percentage.tsx`).
+
+По прямому вопросу владельца («а почему `Currency.minorUnitScale` тоже не в fields.md — забыли?»)
+найден и исправлен реальный root cause: `FormComponent` (`form-compound-types.ts`) — отдельный
+хand-maintained тип пропсов для голого `Form.Field.*` (не через `createForm()`), не
+синхронизированный с настоящими `CurrencyFieldProps`/`PercentageFieldProps` — не содержал
+`minorUnitScale` вовсе, из-за чего демо-примеры в `form-develop-app`/`form-docs`/`form-example`
+падали typecheck'ом. Задним числом добавлены примеры `minorUnitScale` для Currency (был пробел
+с v2.13.0) и для нового Percentage во всех трёх demo-приложениях.
+
+**2. Архитектурная коррекция (владелец, msg 1480) — `useResolvedFieldProps` резолвит
+`meta.fieldProps`** (`@letar/forms-react` v0.7.0, коммит `b941cf19`). `@meta("form.props.<key>",
+value)` из `schema.zmodel` раньше доходил до компонента только через `Form.Field.Auto`
+(`renderFieldByType`) — рекомендованный явный `<AppForm.Field.Currency>` игнорировал произвольный
+`fieldProps`, значение приходилось дублировать JSX-пропом вручную (источник максимально дорогой
+ошибки — пропущенный `minorUnitScale` даёт правдоподобный, но неверный результат).
+`useResolvedFieldProps` теперь отдаёт сырой `meta.fieldProps`; `createField`
+(`create-field-primitives.tsx`) мержит его в `componentProps` с приоритетом `props > meta` —
+единая точка для обоих UI-скинов (Chakra + shadcn), фикс подключён один раз в `forms-react`.
+Тесты: 3 новых кейса в `use-resolved-field-props.spec.ts` (резолв, отсутствие ключа, несколько
+ключей), 2 интеграционных в `field-currency.spec.tsx` (Chakra) через реальный `Form`+`schema`.
+
+Полный прогон: `forms` 789/789, `forms-react` 100/100, `forms-shadcn` 261/261 — зелёные,
+typecheck/lint чистые. Оба треда (`money-field-kopecks`) закрыты ответом координатору, backlog
+в `PLAN.md` отмечен `✅`.
+
 ## 2026-09-09 (сессия 2) — Разбор очереди forms-coordinator-dev: 6 тредов, 1 реальный фикс
 
 Продолжение предыдущей сессии этого же дня. Начало — 6 непрочитанных сообщений (topic
