@@ -6,31 +6,34 @@
 
 ## Backlog (запросы от агентов)
 
-### [2026-09-09] FieldWrapper/helper-slot не резервирует высоту — поля «скачут» в сетке (от domwellbes-dev)
+### ✅ [2026-09-09] FieldWrapper/helper-slot не резервирует высоту — поля «скачут» в сетке (закрыт v2.13.2/forms-shadcn v0.36.1, от domwellbes-dev)
 
 - **Запросил:** domwellbes-dev (msg 1449, topic `form-feature-request`), делегировано `forms-dev`
 - **Приоритет:** normal
-- **Описание:** helper-slot под лейблом (helper-текст/текст ошибки) не резервирует фиксированную
-  высоту — поля в одной `SimpleGrid`-строке получают разную высоту в зависимости от наличия
-  подсказки/ошибки под инпутом. Компонент (предположительно):
-  `libs/forms/src/lib/declarative/form-fields/base/field-wrapper.tsx`. Новый API не нужен, правка
-  внутри существующего компонента.
-- **Статус:** ожидание (детали — в agent-mail, thread `forms-fieldwrapper-helper-slot-height`)
+- **Описание:** helper-slot под лейблом (helper-текст/текст ошибки) не резервировал фиксированную
+  высоту — поля в одной `SimpleGrid`-строке получали разную высоту в зависимости от наличия
+  подсказки/ошибки под инпутом.
+- **Фикс:** `FieldError` (`libs/forms/src/lib/declarative/form-fields/base/field-error.tsx`) и его
+  эквивалент в `forms-shadcn` (`uikit/primitives/field-error.tsx`) возвращали `null` при пустых
+  `errorMessage`/`helperText`. Теперь всегда рендерят слот того же размера (`Field.HelperText`/
+  `<p>`), скрытый через `visibility: hidden`/`invisible` + `aria-hidden` — место в layout
+  сохраняется, скринридер контент не читает. Старый тест, проверявший именно отсутствие рендера,
+  заменён на проверку скрытого слота. Проверено визуально на `form-develop-app` `/numeric-demo`.
 
-### [2026-09-08] Sortable Group.List — hydration mismatch на `aria-describedby` (от form-example-dev)
+### ✅ [2026-09-08] Sortable Group.List — hydration mismatch на `aria-describedby` (закрыт v2.13.1, от form-example-dev)
 
 - **Запросил:** form-example-dev (обнаружено при работе над PLAN.md P0 «Groups — sortable
   drag&drop + вложенные массивы»)
 - **Приоритет:** high
-- **Описание:** `SortableWrapper` (`form-group-list-sortable.tsx`) рендерит `<DndContext>` без
-  явного `id` — `@dnd-kit/utilities` `useUniqueId("DndDescribedBy", id)` без `value` берёт номер
+- **Описание:** `SortableWrapper` (`form-group-list-sortable.tsx`) рендерил `<DndContext>` без
+  явного `id` — `@dnd-kit/utilities` `useUniqueId("DndDescribedBy", id)` без `value` брал номер
   из module-level счётчика, не детерминированного между SSR и клиентской гидратацией. Результат —
   hydration mismatch на `aria-describedby="DndDescribedBy-N"` на каждой странице с
   `Form.Group.List sortable` (воспроизведено на `/examples/groups`, секция 2).
-- **Предлагаемый фикс:** прокинуть уже вычисляемый `fullPath` (детерминированный, есть в
-  `form-group-list-declarative.tsx`) как явный `id` в `SortableWrapper`/`DndContext` — при
-  заданном `value` `useUniqueId` счётчик не трогает вовсе.
-- **Статус:** ожидание (детали и код — в agent-mail, thread `forms-bug-sortable-dnddescribedby`)
+- **Фикс:** `SortableWrapper` теперь требует обязательный проп `id: string` — `Group.List`/
+  `Field.TableEditor` прокидывают уже вычисляемый детерминированный `fullPath` поля.
+  ⚠️ Breaking для прямых потребителей `SortableWrapper` вне библиотеки — их не нашлось (грепом
+  по `apps/*`). `typecheck:tsgo`/`lint` зелёные.
 
 ### ✅ [2026-09-09] `apps/form-example` не подключает `FormI18nProvider` (закрыт, от forms-coordinator-dev)
 
