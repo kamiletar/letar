@@ -194,4 +194,23 @@ describe('FieldString', () => {
       expect(screen.getByRole('textbox')).toHaveAttribute('data-field-name', 'username')
     })
   })
+
+  describe('tooltip', () => {
+    it('рендерит иконку тултипа рядом с label', () => {
+      const { container } = render(
+        <TestWrapper>
+          <Form initialValue={{ name: '' }} onSubmit={vi.fn()}>
+            <Form.Field.String
+              name="name"
+              label="Название"
+              tooltip={{ description: 'Подсказка в тултипе' }}
+            />
+          </Form>
+        </TestWrapper>,
+      )
+
+      expect(screen.getByText('Название')).toBeInTheDocument()
+      expect(container.querySelector('svg')).toBeInTheDocument()
+    })
+  })
 })

@@ -59,7 +59,12 @@ export function FieldTooltip({ title, description, example, impact }: FieldToolt
                 </Box>
               )}
               {impact && (
-                <Text fontSize="xs" color="green.fg">
+                // Tooltip.Content всегда рисуется на `bg.inverted` (белый в тёмной теме,
+                // тёмный в светлой — контраст с текущей темой страницы, не с ней самой).
+                // Обычный `green.fg` — по мысли для обычной, не инвертированной поверхности:
+                // в тёмной теме он резолвится в светло-зелёный и на белом фоне тултипа почти
+                // не читается. Инвертируем вручную, той же логикой, что и сама поверхность.
+                <Text fontSize="xs" color={{ _light: 'green.300', _dark: 'green.700' }}>
                   {impact}
                 </Text>
               )}

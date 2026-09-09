@@ -76,7 +76,7 @@ export const FieldString = createField<StringFieldProps, string>({
         disabled={resolved.disabled}
         readOnly={resolved.readOnly}
       >
-        <chakraUIKit.FieldLabel label={resolved.label} required={resolved.required} />
+        <chakraUIKit.FieldLabel label={resolved.label} required={resolved.required} tooltip={resolved.tooltip} />
         <chakraUIKit.Input
           type={type}
           inputMode={inputMode}
