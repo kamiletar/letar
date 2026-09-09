@@ -155,7 +155,17 @@ export function createDevSessionRoute(options: CreateDevSessionRouteOptions) {
     }
 
     const url = new URL(request.url)
-    const providedToken = url.searchParams.get('token') ?? request.headers.get('x-dev-session-token') ?? ''
+    // Query-параметр декодируется по правилам application/x-www-form-urlencoded — `+` превращается
+    // в пробел ещё до попадания сюда (URLSearchParams.get). Токен генерируется как base64
+    // (`openssl rand -base64 32`) и почти всегда содержит `+`, поэтому незакодированный `+` в адресной
+    // строке/curl-вызове (без ручного %2B) долетает как пробел и не совпадает с DEV_SESSION_TOKEN —
+    // токен по построению не может содержать литеральный пробел, так что обратная замена безопасна.
+    // Заголовок x-dev-session-token URL-декодированию не подвергается — там `+` не портится, трогать
+    // его не нужно.
+    const tokenFromQuery = url.searchParams.get('token')
+    const providedToken = (tokenFromQuery !== null ? tokenFromQuery.replace(/ /g, '+') : null)
+      ?? request.headers.get('x-dev-session-token')
+      ?? ''
     if (!timingSafeEqualStr(providedToken, expectedToken)) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 403 })
     }
