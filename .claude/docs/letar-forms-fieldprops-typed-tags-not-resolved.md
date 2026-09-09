@@ -1,7 +1,10 @@
-# `form.props.<key>` не резолвится в типизированных `<AppForm.Field.X>` тегах
+# `form.props.<key>` не резолвился в типизированных `<AppForm.Field.X>` тегах — ЗАКРЫТО
 
-⚠️ Разрыв между тем, что умеет `@meta("form.props.<key>", value)` в schema.zmodel, и тем, что
-реально доходит до компонента в рекомендованном паттерне написания форм.
+✅ **Закрыто в `@letar/forms-react` v0.7.0 (2026-09-09, коммит `b941cf19`).** Ниже — разбор
+проблемы, каким он был на момент обнаружения, для истории и на случай регрессии.
+
+Разрыв был между тем, что умел `@meta("form.props.<key>", value)` в schema.zmodel, и тем, что
+реально доходило до компонента в рекомендованном паттерне написания форм.
 
 ## Что работает
 
@@ -23,10 +26,10 @@
 `autocomplete`. Произвольный `meta.fieldProps` (тот самый bag, куда `form.props.<key>` кладёт
 UI-пропсы) хук не читает вообще.
 
-Следствие: в типизированном пути значение вроде `minorUnitScale` живёт **только** как JSX-проп
-(`<AppForm.Field.Currency name="priceKopecks" minorUnitScale={100} />`). Задать его в
+Следствие (до фикса): в типизированном пути значение вроде `minorUnitScale` жило **только** как
+JSX-проп (`<AppForm.Field.Currency name="priceKopecks" minorUnitScale={100} />`). Задать его в
 `schema.zmodel` через `@meta("form.props.minorUnitScale", 100)` и рассчитывать, что оно само
-подставится в любой рендер поля — не сработает, если рендер идёт не через `Form.Field.Auto`.
+подставится в любой рендер поля — не срабатывало, если рендер шёл не через `Form.Field.Auto`.
 
 ## Почему это не мелочь
 
@@ -36,16 +39,22 @@ UI-пропсы) хук не читает вообще.
 цены: пропущенный/неверный `minorUnitScale` даёт правдоподобное, но неверное значение (например
 `annualRateBps = 13` вместо `1300`), а не явную ошибку валидации.
 
-## Статус
+## Статус — закрыто
 
 Найдено 2026-09-09 (domwellbes → forms-coordinator, запрос `Field.Percentage.minorUnitScale`).
-Отправлено forms-dev как коррекция к задаче (agent-mail тред `money-field-kopecks`) — расширить
-`useResolvedFieldProps` резолвом `meta.fieldProps` с приоритетом `props > meta` (тот же принцип,
-что уже применён к остальным полям хука). Не blocking для самого `Field.Percentage.minorUnitScale`
-— проп может выйти сначала как голый JSX-параметр (по образцу `Field.Currency`, v2.13.0), связку
-со схемой закрыть отдельным шагом.
+Отправлено forms-dev как коррекция к задаче (agent-mail тред `money-field-kopecks`, ack msg 1484).
 
-**Если ты работаешь с `form.props.<key>` для UI-пропса (не `min`/`max`/`step` — те идут в Zod
-constraints и резолвятся отдельно, разрыва не касается) — проверь, не читаешь ли эту доку устаревшей.**
-Если `useResolvedFieldProps` к моменту чтения уже резолвит `meta.fieldProps` — разрыва больше нет,
-обнови этот файл и `CHANGELOG.md`/`PLAN.md` библиотеки.
+**Фикс:** `useResolvedFieldProps` (`libs/forms-react/src/lib/field/use-resolved-field-props.ts`)
+теперь отдаёт сырой `meta.fieldProps` новым полем в возвращаемом объекте. Мерж с приоритетом
+`props > meta` сделан в `createField` (`create-field-primitives.tsx`):
+`{ ...fieldProps, ...componentProps }` — JSX-пропы спредятся после и побеждают. Общая точка входа
+для обоих UI-скинов (`@letar/forms` Chakra и `@letar/forms-shadcn`) — правка одна, действует в
+обоих без отдельного патча shadcn-скина.
+
+Теперь `@meta("form.props.<key>", value)` в `schema.zmodel` работает одинаково что через
+`Form.Field.Auto`, что через любой явный `<AppForm.Field.X>` — и не только для `minorUnitScale`,
+а для всех fieldProps-ключей сразу (`showValue`, `layout`, `count`, `allowHalf`, `currency` и т.д.),
+поскольку фикс общий, не point-fix под один ключ. JSX-проп остался рабочим override-путём.
+
+Тесты: `use-resolved-field-props.spec.ts` (резолв `meta.fieldProps`, приоритет `props > meta`),
+`field-currency.spec.tsx` (интеграционные кейсы через реальный `Form`+`schema`).
