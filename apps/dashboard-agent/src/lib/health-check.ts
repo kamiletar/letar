@@ -77,7 +77,7 @@ async function checkMetricThresholds(state: HealthCheckState): Promise<{
     { key: 'cpu', label: 'CPU', value: cpu.currentLoad, threshold: CPU_THRESHOLD, type: 'CPU_HIGH' },
     {
       key: 'memory',
-      label: 'Память',
+      label: 'Память (RAM)',
       value: memory.usedPercent ?? 0,
       threshold: MEMORY_THRESHOLD,
       type: 'MEMORY_HIGH',
@@ -100,7 +100,7 @@ async function checkMetricThresholds(state: HealthCheckState): Promise<{
   for (const [fs, disk] of uniqueDisks) {
     checks.push({
       key: `disk:${fs}`,
-      label: `Диск ${disk.mount}`,
+      label: `Диск ${disk.mount} (SSD)`,
       value: disk.usedPercent,
       threshold: DISK_THRESHOLD,
       type: 'DISK_HIGH',
