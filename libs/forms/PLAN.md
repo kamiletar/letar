@@ -6,7 +6,7 @@
 
 ## Backlog (запросы от агентов)
 
-### ⏳ [2026-09-09] `useResolvedFieldProps` не резолвит `meta.fieldProps` в типизированных тегах (архитектурная коррекция от Ками, тред `money-field-kopecks`)
+### ✅ [2026-09-09] `useResolvedFieldProps` не резолвит `meta.fieldProps` в типизированных тегах (закрыт forms-react v0.7.0, архитектурная коррекция от Ками, тред `money-field-kopecks`)
 
 - **Запросил:** Ками (владелец) — коррекция к запросу `Field.Percentage.minorUnitScale` от
   domwellbes-dev, не отдельная фича.
@@ -21,11 +21,18 @@
   `minorUnitScale`/`currency` (факт о хранении данных, не о месте рендера) приходится дублировать
   JSX-пропом в каждом использовании вручную — источник ошибки максимальной цены (пропущенный
   `minorUnitScale` даёт правдоподобное, но неверное значение).
-- **Предложение:** добавить резолв `meta.fieldProps` в `useResolvedFieldProps` (или отдельный
-  merge-шаг в `create-field-primitives.tsx`) с приоритетом `props > meta`, тем же принципом, что
-  уже применён к остальным полям хука.
-- **Статус:** ожидание — не blocking для самого `Field.Percentage.minorUnitScale` (может выйти
-  сначала как голый проп по образцу `Field.Currency`). Разбор — `.claude/docs/letar-forms-fieldprops-typed-tags-not-resolved.md`.
+- **Фикс:** `useResolvedFieldProps` отдаёт сырой `meta.fieldProps` новым полем `fieldProps` в
+  возвращаемом объекте; `createField` (`create-field-primitives.tsx`) мержит его в
+  `componentProps` с приоритетом `props > meta` (`{ ...fieldProps, ...componentProps }`) —
+  явный JSX-проп на компоненте побеждает значение из схемы. Единая точка для обоих UI-скинов
+  (`@letar/forms` Chakra, `@letar/forms-shadcn`) — фикс подключён один раз в `forms-react` и
+  действует в обоих без отдельной правки скина. `@meta("form.props.minorUnitScale", 100)` в
+  `schema.zmodel` теперь работает одинаково что через `Form.Field.Auto`, что через
+  `<AppForm.Field.Currency>`/`<AppForm.Field.Percentage>`.
+- **Тесты:** `use-resolved-field-props.spec.ts` — 3 новых кейса (резолв `meta.fieldProps`,
+  отсутствие ключа, несколько ключей без потери значений). `field-currency.spec.tsx` (Chakra) —
+  2 интеграционных кейса через реальный `Form`+`schema`: резолв без JSX-пропа, приоритет
+  `props > meta` на конкретном значении (`minorUnitScale`).
 
 ### ✅ [2026-09-09] Field.Percentage.minorUnitScale (закрыт v2.14.0/forms-shadcn v0.37.0, от domwellbes-dev)
 

@@ -4,6 +4,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
+import { z } from 'zod/v4'
 
 import { Form } from '../../'
 
@@ -163,6 +164,42 @@ describe('FieldCurrency', () => {
       )
 
       expect(screen.getByRole('spinbutton')).toHaveValue('')
+    })
+  })
+
+  describe('minorUnitScale из schema.zmodel (@meta("form.props.minorUnitScale", value))', () => {
+    it('резолвится из meta.fieldProps без JSX-пропа', () => {
+      const Schema = z.object({
+        priceKopecks: z.number().meta({ ui: { fieldProps: { minorUnitScale: 100 } } }),
+      })
+
+      render(
+        <Form schema={Schema} initialValue={{ priceKopecks: 12345 }} onSubmit={vi.fn()}>
+          <Form.Field.Currency name="priceKopecks" />
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      // Без явного JSX-пропа minorUnitScale={100} значение всё равно резолвится из схемы —
+      // 12345 копеек показываются как 123.45 рублей.
+      // U+00A0 (неразрывный пробел) между кодом валюты и суммой — вывод Intl.NumberFormat/@internationalized/number
+      expect(screen.getByRole('spinbutton')).toHaveValue('RUB 123.45')
+    })
+
+    it('явный JSX-проп побеждает значение из meta.fieldProps (props > meta)', () => {
+      const Schema = z.object({
+        // Схема намеренно указывает "неверный" scale — проп должен его перебить
+        priceKopecks: z.number().meta({ ui: { fieldProps: { minorUnitScale: 1 } } }),
+      })
+
+      render(
+        <Form schema={Schema} initialValue={{ priceKopecks: 12345 }} onSubmit={vi.fn()}>
+          <Form.Field.Currency name="priceKopecks" minorUnitScale={100} />
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      expect(screen.getByRole('spinbutton')).toHaveValue('RUB 123.45')
     })
   })
 })

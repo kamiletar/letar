@@ -4,6 +4,24 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.7.0] - 2026-09-09
+
+### Added
+
+- **`useResolvedFieldProps` резолвит `meta.fieldProps` из `schema.zmodel`** —
+  `@meta("form.props.<key>", value)` теперь работает одинаково и через `Form.Field.Auto`
+  (уже умел это раньше через `renderFieldByType`), и через явные типизированные теги
+  (`<AppForm.Field.Currency name="x" />`), рекомендованный в `.claude/rules/forms.md` паттерн.
+  Раньше произвольный `fieldProps` резолвился только в первом пути — значения вроде
+  `minorUnitScale`/`currency` (факт о хранении данных, не о месте рендера) приходилось
+  дублировать JSX-пропом в каждом использовании вручную. Хук отдаёт сырой `meta.fieldProps`
+  новым полем `fieldProps` в возвращаемом объекте; мерж с приоритетом `props > meta` сделан в
+  `createField` (`create-field-primitives.tsx`) — единой точке для обоих UI-скинов
+  (`@letar/forms` Chakra и `@letar/forms-shadcn`), так что фикс автоматически действует в
+  обоих без отдельной правки скина. Архитектурная коррекция от владельца (Ками) к запросу
+  `Field.Percentage.minorUnitScale`, тред agent-mail `money-field-kopecks` — разбор в
+  `libs/forms/PLAN.md` Backlog.
+
 ## [0.6.1] - 2026-09-08
 
 ### Added

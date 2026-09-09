@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.14.1] - 2026-09-09
+
+### Added
+
+- Регресс-тест на `Form.Field.Currency`: `minorUnitScale` резолвится из
+  `@meta("form.props.minorUnitScale", value)` схемы без JSX-пропа, и явный проп побеждает
+  значение из схемы (`props > meta`). Само поведение — фикс `@letar/forms-react` v0.7.0
+  (`useResolvedFieldProps`/`createField`), здесь только подтверждение через `Form` этого скина.
+
 ## [2.14.0] - 2026-09-09
 
 ### Fixed

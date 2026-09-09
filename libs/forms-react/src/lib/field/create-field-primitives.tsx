@@ -278,9 +278,21 @@ export function createFieldPrimitives(uikit: FieldPrimitivesUIKit): FieldPrimiti
         autocomplete: resolvedRest.autocomplete,
       }
 
+      // `@meta("form.props.<key>", value)` из schema.zmodel — факт о хранении данных
+      // (minorUnitScale, currency и т.п.), не о месте рендера. Явный JSX-проп на компоненте
+      // побеждает значение из схемы (props > meta, тот же приоритет, что и у остальных
+      // резолвящихся полей выше) — поэтому componentProps спредится ПОСЛЕ fieldProps.
+      const resolvedComponentProps = resolvedRest.fieldProps
+        ? { ...resolvedRest.fieldProps, ...componentProps }
+        : componentProps
+
       // Call useFieldState at the top level (before form.Field)
       // This allows using hooks inside useFieldState
-      const fieldState = useFieldState(componentProps as Omit<P, keyof BaseFieldProps>, resolved, { form, fullPath })
+      const fieldState = useFieldState(
+        resolvedComponentProps as Omit<P, keyof BaseFieldProps>,
+        resolved,
+        { form, fullPath },
+      )
 
       // Async validation (from props or schema meta)
       const declarativeCtx = useDeclarativeFormOptional()
@@ -325,7 +337,7 @@ export function createFieldPrimitives(uikit: FieldPrimitivesUIKit): FieldPrimiti
                 errorMessage,
                 isValidating,
                 fieldState,
-                componentProps: componentProps as Omit<P, keyof BaseFieldProps>,
+                componentProps: resolvedComponentProps as Omit<P, keyof BaseFieldProps>,
               })
             }}
           </form.Field>

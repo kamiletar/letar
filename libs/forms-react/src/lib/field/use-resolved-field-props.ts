@@ -55,6 +55,13 @@ export function useResolvedFieldProps(
   options: FieldOptionMeta[] | undefined
   /** HTML autocomplete атрибут (авто-определение по имени поля + meta override) */
   autocomplete: string | undefined
+  /**
+   * Произвольные проп-значения из `@meta("form.props.<key>", value)` (`schema.zmodel`) —
+   * факты о хранении данных (`minorUnitScale`, `currency` и т.п.), не о месте рендера.
+   * Приоритет разруливает вызывающая сторона: явный JSX-проп на компоненте должен
+   * побеждать значение отсюда (props > meta), сам хук порядок не навязывает.
+   */
+  fieldProps: Record<string, unknown> | undefined
 } {
   const {
     form,
@@ -104,5 +111,7 @@ export function useResolvedFieldProps(
     options: localizedOptions,
     // HTML autocomplete (авто-определение по имени + meta override)
     autocomplete: resolveAutoComplete(fullPath, meta?.autocomplete),
+    // Сырые form.props.* из schema.zmodel — мерж с приоритетом props > meta делает вызывающая сторона
+    fieldProps: meta?.fieldProps,
   }
 }

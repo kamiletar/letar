@@ -280,6 +280,52 @@ describe('useResolvedFieldProps', () => {
     })
   })
 
+  describe('fieldProps resolution (form.props.* из schema.zmodel)', () => {
+    it('возвращает fieldProps из schema meta (meta.fieldProps)', async () => {
+      const Schema = z.object({
+        priceKopecks: z.number().meta({ ui: { fieldProps: { minorUnitScale: 100 } } }),
+      })
+      const context = createMockFormContext(Schema)
+      const wrapper = createContextWrapper(context)
+
+      const { result } = renderHook(() => useResolvedFieldProps('priceKopecks', {}), { wrapper })
+
+      await waitFor(() => {
+        expect(result.current.fieldProps).toEqual({ minorUnitScale: 100 })
+      })
+    })
+
+    it('fieldProps не определён, если в schema meta их нет', async () => {
+      const context = createMockFormContext()
+      const wrapper = createContextWrapper(context)
+
+      const { result } = renderHook(() => useResolvedFieldProps('name', {}), { wrapper })
+
+      await waitFor(() => {
+        expect(result.current.fieldProps).toBeUndefined()
+      })
+    })
+
+    // Сам мерж props > meta.fieldProps происходит в createField (create-field-primitives.tsx),
+    // не в этом хуке — хук лишь отдаёт сырой meta.fieldProps, приоритет разруливает вызывающая
+    // сторона. Здесь фиксируем контракт: значение из схемы приходит как есть, без потерь ключей.
+    it('отдаёт несколько ключей fieldProps без потери значений', async () => {
+      const Schema = z.object({
+        annualRateBps: z
+          .number()
+          .meta({ ui: { fieldProps: { minorUnitScale: 100, decimalScale: 1 } } }),
+      })
+      const context = createMockFormContext(Schema)
+      const wrapper = createContextWrapper(context)
+
+      const { result } = renderHook(() => useResolvedFieldProps('annualRateBps', {}), { wrapper })
+
+      await waitFor(() => {
+        expect(result.current.fieldProps).toEqual({ minorUnitScale: 100, decimalScale: 1 })
+      })
+    })
+  })
+
   describe('fullPath', () => {
     it('возвращает имя поля как fullPath', async () => {
       const context = createMockFormContext()
