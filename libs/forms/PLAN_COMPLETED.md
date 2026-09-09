@@ -1,5 +1,34 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-09 — Разбор очереди forms-coordinator-dev: 8 тредов, 2 реальных фикса
+
+Начало сессии — 10 непрочитанных сообщений (topic `forms-task`) от `forms-coordinator-dev`.
+Триаж показал: 3 треда уже закрыты координатором ранее (Steps/Tabs регрессия, EditIntentValue
+хвосты, zenstack-миксин), 6 из 8 «открытых» на деле уже реализованы предыдущими сессиями
+(`Field.Combobox` initial value — v2.11.5, `Field.Slug` — v2.12.0, `minorUnitScale` — v2.13.0,
+`forms-shadcn` locale-parity — v0.36.0, версия `@tanstack/react-table` — v2.11.1, ответы на
+вопросы про русскую запятую — v2.12.3) — во все треды отправлены подтверждающие ответы, действий
+не требовалось.
+
+Два реальных фикса:
+
+1. **`SortableWrapper` — hydration mismatch на `aria-describedby`** (v2.13.1, коммит `a6934a87`).
+   `DndContext` без явного `id` брал номер из module-level счётчика `@dnd-kit`, не совпадающего
+   между SSR и клиентом. Root cause и готовый патч — от `form-example-dev`. Проп `id: string`
+   стал обязательным на `SortableWrapper`, `Group.List`/`Field.TableEditor` прокидывают уже
+   вычисляемый `fullPath`. Breaking change для прямых внешних потребителей `SortableWrapper` —
+   таких не нашлось (грепом по `apps/*`).
+
+2. **`FieldError`/helper-slot не резервировал высоту без контента** (forms v2.13.2, forms-shadcn
+   v0.36.1, коммит `52e75ee0`). Поля в одной `SimpleGrid`-строке получали разную высоту в
+   зависимости от наличия helper/error текста у соседа. Фикс в обоих скинах — вместо `null`
+   слот теперь всегда рендерит элемент того же размера, скрытый через `visibility: hidden`/
+   `invisible` + `aria-hidden`. Старый тест, проверявший отсутствие рендера, заменён на проверку
+   скрытого слота. `typecheck:tsgo`/`lint`/`test` зелёные на обоих пакетах (forms 781 тест,
+   forms-shadcn 253), визуально проверено на `form-develop-app` `/numeric-demo`.
+
+Все 10 тредов получили ответ в agent-mail, backlog в `PLAN.md` отмечен `✅`.
+
 ## 2026-09-09 — Русская запятая: ru-точка тоже работает (Chakra) + locale-parity в shadcn-скине
 
 Продолжение сессии v2.12.3 (comma-decimal-separator фикс). Три части:
