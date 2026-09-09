@@ -4,6 +4,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.13.1] - 2026-09-09
+
+### Fixed
+
+- **`Form.Group.List`/`Form.Field.TableEditor` (sortable-режим) — hydration mismatch на
+  `aria-describedby`** (root cause и патч — от `form-example-dev`). `SortableWrapper` рендерил
+  `<DndContext>` без явного `id` — `@dnd-kit/core` брал номер из module-level счётчика
+  `useUniqueId`, не детерминированного между SSR и клиентской гидратацией, отсюда расхождение
+  `aria-describedby=DndDescribedBy-N`. Фикс — обязательный проп `id` на `SortableWrapper`,
+  прокидывается вызывающей стороной как уже вычисляемый детерминированный `fullPath` пути поля.
+  ⚠️ **Breaking для прямых потребителей `SortableWrapper`** (не через `Form.Group.List`/
+  `Form.Field.TableEditor` — они уже передают `id` сами): проп `id` теперь обязателен.
+
 ## [2.13.0] - 2026-09-09
 
 ### Added

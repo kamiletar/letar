@@ -289,6 +289,7 @@ export function FieldTableEditor({
                       : sortable && !readOnly
                       ? (
                         <SortableWrapper
+                          id={fullPath}
                           items={rows.map((_, i) => `${fullPath}-${i}`)}
                           onReorder={(oldIdx, newIdx) => moveRow(oldIdx, newIdx)}
                         >

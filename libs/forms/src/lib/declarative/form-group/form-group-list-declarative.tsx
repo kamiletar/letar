@@ -147,7 +147,7 @@ export function FormGroupListDeclarative({
           // Wrap in SortableWrapper if sortable
           if (sortable) {
             return (
-              <SortableWrapper items={sortableIds} onReorder={handleReorder}>
+              <SortableWrapper id={fullPath} items={sortableIds} onReorder={handleReorder}>
                 {items}
               </SortableWrapper>
             )

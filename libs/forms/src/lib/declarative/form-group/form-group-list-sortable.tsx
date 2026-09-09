@@ -78,6 +78,13 @@ export function useSortableRow(id: string): {
  * Props for SortableWrapper
  */
 export interface SortableWrapperProps {
+  /**
+   * Детерминированный между SSR и клиентом id для `DndContext` — без него
+   * `@dnd-kit/core` берёт номер из module-level счётчика `useUniqueId`,
+   * который на сервере и клиенте не совпадает, и React ловит hydration
+   * mismatch на `aria-describedby=DndDescribedBy-N`.
+   */
+  id: string
   /** Array of unique IDs for sortable items */
   items: string[]
   /** Callback when drag ends - receives old and new indices */
@@ -91,7 +98,7 @@ export interface SortableWrapperProps {
  *
  * @example
  * ```tsx
- * <SortableWrapper items={['id-1', 'id-2']} onReorder={handleReorder}>
+ * <SortableWrapper id="my-list" items={['id-1', 'id-2']} onReorder={handleReorder}>
  *   {items.map(item => (
  *     <SortableItem key={item.id} id={item.id}>
  *       <ItemContent />
@@ -100,7 +107,7 @@ export interface SortableWrapperProps {
  * </SortableWrapper>
  * ```
  */
-export function SortableWrapper({ items, onReorder, children }: SortableWrapperProps): ReactElement {
+export function SortableWrapper({ id, items, onReorder, children }: SortableWrapperProps): ReactElement {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -126,7 +133,7 @@ export function SortableWrapper({ items, onReorder, children }: SortableWrapperP
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+    <DndContext id={id} sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={items} strategy={verticalListSortingStrategy}>
         {children}
       </SortableContext>
