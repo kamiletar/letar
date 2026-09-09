@@ -25,7 +25,7 @@ export function FieldError({
   errorMessage: string
   helperText: ReactNode
   isValidating?: boolean
-}): ReactElement | null {
+}): ReactElement {
   if (isValidating) {
     return (
       <Field.HelperText color="blue.500">
@@ -42,5 +42,12 @@ export function FieldError({
   if (helperText) {
     return <Field.HelperText>{helperText}</Field.HelperText>
   }
-  return null
+  // Пустой слот того же размера, что и заполненный (не `null`) — иначе поля в одной строке
+  // `SimpleGrid`/ряда получают разную высоту в зависимости от того, есть ли у соседа
+  // helper/error текст. `visibility: hidden` убирает контент из видимости, но не из layout.
+  return (
+    <Field.HelperText aria-hidden visibility="hidden">
+      &nbsp;
+    </Field.HelperText>
+  )
 }

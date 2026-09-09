@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.36.1] - 2026-09-09
+
+### Fixed
+
+- **Helper/error-слот (`uikit/primitives/field-error.tsx`) не резервировал высоту без ошибки/
+  `helperText`** — тот же фикс, что в Chakra-скине (`forms-coordinator-dev`, тред
+  `forms-fieldwrapper-helper-slot-height`): вместо `null` слот рендерит пустой `<p>` того же
+  класса, скрытый через `invisible`/`aria-hidden` — место в layout сохраняется.
+
 ## [0.36.0] - 2026-09-09
 
 ### Fixed

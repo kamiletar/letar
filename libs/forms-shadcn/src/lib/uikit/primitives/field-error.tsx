@@ -18,5 +18,12 @@ export function FieldError({ hasError, errorMessage, helperText }: UIKitFieldErr
       </p>
     )
   }
-  return null
+  // Пустой слот того же размера, что и заполненный — иначе поля в одном ряду получают разную
+  // высоту в зависимости от того, есть ли у соседа helper/error текст (тот же фикс, что в
+  // Chakra-скине — `invisible` убирает из видимости, но не из layout).
+  return (
+    <p data-slot="field-helper" aria-hidden className="text-muted-foreground text-sm invisible">
+      &nbsp;
+    </p>
+  )
 }

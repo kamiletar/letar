@@ -4,6 +4,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.13.2] - 2026-09-09
+
+### Fixed
+
+- **Helper/error-слот под полем (`FieldError`/`Chakra.Field.HelperText`, аналогично в
+  `forms-shadcn`) не резервировал высоту, если у поля нет ни ошибки, ни `helperText`** — поля в
+  одной строке `SimpleGrid`/ряда получали разную высоту в зависимости от того, есть ли у соседа
+  helper/error текст ("скачущая" сетка). Фикс — вместо `null` слот теперь всегда рендерит
+  пустой `Field.HelperText`/`<p>` того же размера, скрытый через `visibility: hidden`/`invisible`
+  (`aria-hidden`, не читается скринридером) — контент не виден, но место в layout занято.
+
 ## [2.13.1] - 2026-09-09
 
 ### Fixed

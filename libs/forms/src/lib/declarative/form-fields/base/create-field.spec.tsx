@@ -385,7 +385,7 @@ describe('FieldError', () => {
     expect(screen.getByText('Это подсказка')).toBeInTheDocument()
   })
 
-  it('не рендерит ничего когда нет ошибки и helperText', () => {
+  it('рендерит скрытый слот той же высоты когда нет ошибки и helperText (резервирует место в layout)', () => {
     const { container } = render(
       <TestWrapper>
         <Field.Root>
@@ -394,7 +394,9 @@ describe('FieldError', () => {
       </TestWrapper>,
     )
 
-    // Field.Root должен быть пустым (кроме самого div)
-    expect(container.querySelector('[data-part="root"]')?.children.length).toBe(0)
+    const helperSlot = container.querySelector('[data-part="helper-text"]')
+    expect(helperSlot).toBeInTheDocument()
+    expect(helperSlot).toHaveAttribute('aria-hidden')
+    expect(helperSlot).toHaveStyle({ visibility: 'hidden' })
   })
 })
