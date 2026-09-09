@@ -222,17 +222,17 @@
         "@marsidev/react-turnstile": "^1.6.1",
         "@next/bundle-analyzer": "^16.3.4",
         "@next/eslint-plugin-next": "^16.3.4",
-        "@nx/devkit": "23.2.0",
-        "@nx/esbuild": "23.2.0",
-        "@nx/eslint": "23.2.0",
-        "@nx/eslint-plugin": "23.2.0",
-        "@nx/js": "23.2.0",
-        "@nx/next": "23.2.0",
-        "@nx/node": "23.2.0",
-        "@nx/playwright": "23.2.0",
-        "@nx/react": "23.2.0",
-        "@nx/vitest": "23.2.0",
-        "@nx/workspace": "23.2.0",
+        "@nx/devkit": "23.2.1",
+        "@nx/esbuild": "23.2.1",
+        "@nx/eslint": "23.2.1",
+        "@nx/eslint-plugin": "23.2.1",
+        "@nx/js": "23.2.1",
+        "@nx/next": "23.2.1",
+        "@nx/node": "23.2.1",
+        "@nx/playwright": "23.2.1",
+        "@nx/react": "23.2.1",
+        "@nx/vitest": "23.2.1",
+        "@nx/workspace": "23.2.1",
         "@playwright/test": "^1.62.1",
         "@prisma/adapter-pg": "^7.10.0",
         "@prisma/client": "^7.10.0",
@@ -307,7 +307,7 @@
         "nextron": "^10.3.0",
         "ntsuspend": "^1.0.2",
         "numeralize-ru": "^2.0.0",
-        "nx": "23.2.0",
+        "nx": "23.2.1",
         "oxlint": "1.81.0",
         "playwright": "^1.62.1",
         "prisma": "^7.10.0",
@@ -404,7 +404,7 @@
     },
     "apps/animatrona-folder-player": {
       "name": "@letar/animatrona-folder-player",
-      "version": "0.7.1",
+      "version": "0.7.2",
       "dependencies": {
         "@letar/chakra-provider": "workspace:*",
         "@letar/electron-storage": "workspace:*",
@@ -425,7 +425,7 @@
     },
     "apps/animatrona-ipfs-player": {
       "name": "@letar/animatrona-ipfs-player",
-      "version": "0.6.0",
+      "version": "0.6.1",
       "dependencies": {
         "@letar/chakra-provider": "workspace:*",
         "@letar/icon-generator": "workspace:*",
@@ -452,11 +452,12 @@
     },
     "apps/animatrona-mobile": {
       "name": "@letar/animatrona-mobile",
-      "version": "0.7.12",
+      "version": "0.7.14",
       "dependencies": {
         "@letar/animatrona-shared": "*",
         "@letar/exoplayer-ass": "*",
         "@letar/exoplayer-sync": "*",
+        "@letar/hooks": "*",
         "@react-native/codegen": "*",
         "@react-native/gradle-plugin": "*",
         "react-native": "*",
@@ -467,7 +468,7 @@
     },
     "apps/animatrona-tracker": {
       "name": "@letar/animatrona-tracker",
-      "version": "0.12.1",
+      "version": "0.13.0",
       "dependencies": {
         "@letar/animatrona-franchise-graph": "workspace:*",
         "@letar/animatrona-types": "workspace:*",
@@ -491,7 +492,7 @@
     },
     "apps/animatrona-tv": {
       "name": "@letar/animatrona-tv",
-      "version": "0.6.3",
+      "version": "0.6.4",
       "dependencies": {
         "@letar/animatrona-shared": "*",
         "@letar/exoplayer-ass": "*",
@@ -517,7 +518,7 @@
     },
     "apps/archetest": {
       "name": "@letar/archetest",
-      "version": "0.27.19",
+      "version": "0.27.20",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/forms": "workspace:*",
@@ -532,10 +533,14 @@
     },
     "apps/auth-hub": {
       "name": "auth-hub",
-      "version": "0.7.18",
+      "version": "0.7.20",
       "dependencies": {
+        "@letar/api-server": "workspace:*",
+        "@letar/auth": "workspace:*",
         "@letar/demo-protection": "workspace:*",
+        "@letar/email": "workspace:*",
         "@letar/env-load": "workspace:*",
+        "@letar/forms": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "@letar/seed-utils": "workspace:*",
@@ -551,12 +556,13 @@
       "name": "@letar/auth-hub-e2e",
       "version": "0.0.1",
       "dependencies": {
+        "@letar/e2e-testing": "workspace:*",
         "@letar/env-load": "workspace:*",
       },
     },
     "apps/dashboard": {
       "name": "@letar/dashboard",
-      "version": "1.26.5",
+      "version": "1.26.6",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/analytics": "workspace:*",
@@ -595,7 +601,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.189.1",
+      "version": "0.200.0",
       "dependencies": {
         "@letar/analytics": "workspace:*",
         "@letar/consent": "workspace:*",
@@ -606,6 +612,7 @@
         "@letar/file-scan": "workspace:*",
         "@letar/format-utils": "workspace:*",
         "@letar/glitchtip": "workspace:*",
+        "@letar/hooks": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "@letar/query-provider": "workspace:*",
         "@letar/slug-resolver": "workspace:*",
@@ -613,12 +620,17 @@
         "@letar/ui": "workspace:*",
         "@letar/undo-toast": "workspace:*",
         "@letar/url-query-state": "workspace:*",
+        "@modelcontextprotocol/sdk": "^1.30.0",
         "@tanstack/react-devtools": "^0.10.12",
         "@tanstack/react-form-devtools": "^0.2.34",
         "@tanstack/react-query": "^5.102.8",
         "@tanstack/react-query-devtools": "^5.102.8",
         "imapflow": "^1.7.1",
+        "pdfjs-dist": "^6.3.289",
         "tus-js-client": "^4.3.1",
+      },
+      "devDependencies": {
+        "@letar/mcp-test-kit": "workspace:*",
       },
     },
     "apps/domwellbes-e2e": {
@@ -631,15 +643,22 @@
     },
     "apps/driving-school": {
       "name": "driving-school",
-      "version": "0.240.22",
+      "version": "0.240.23",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
+        "@letar/auth": "workspace:*",
+        "@letar/contract-generator": "workspace:*",
+        "@letar/driving-school-db": "workspace:*",
+        "@letar/email": "workspace:*",
         "@letar/env-load": "workspace:*",
+        "@letar/forms": "workspace:*",
         "@letar/forms-core": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/hooks": "workspace:*",
         "@letar/jobs": "workspace:*",
         "@letar/pg-url": "workspace:*",
+        "@letar/pin-auth": "workspace:*",
+        "@letar/validation-utils": "workspace:*",
       },
     },
     "apps/driving-school-e2e": {
@@ -679,7 +698,7 @@
     },
     "apps/form-develop-app": {
       "name": "form-develop-app",
-      "version": "0.1.11",
+      "version": "0.1.13",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -692,7 +711,7 @@
     },
     "apps/form-develop-app-shadcn": {
       "name": "@letar/form-develop-app-shadcn",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
         "@letar/forms-react": "workspace:*",
@@ -700,7 +719,7 @@
     },
     "apps/form-docs": {
       "name": "form-docs",
-      "version": "0.6.6",
+      "version": "0.6.8",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -712,7 +731,7 @@
     },
     "apps/form-example": {
       "name": "form-example",
-      "version": "0.1.10",
+      "version": "0.1.20",
       "dependencies": {
         "@letar/demo-protection": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -726,8 +745,9 @@
     },
     "apps/grandslamcup": {
       "name": "@letar/grandslamcup",
-      "version": "3.39.15",
+      "version": "3.39.16",
       "dependencies": {
+        "@letar/api-server": "workspace:*",
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/pg-url": "workspace:*",
@@ -740,7 +760,7 @@
     },
     "apps/kami": {
       "name": "kami",
-      "version": "0.35.1",
+      "version": "0.35.2",
       "dependencies": {
         "@letar/auth": "workspace:*",
         "@letar/email": "workspace:*",
@@ -782,7 +802,7 @@
     },
     "apps/label-printer-desktop": {
       "name": "@letar/label-printer-desktop",
-      "version": "0.5.12",
+      "version": "0.5.13",
       "dependencies": {
         "@letar/chakra-provider": "workspace:*",
         "@letar/forms": "workspace:*",
@@ -809,7 +829,7 @@
     },
     "apps/mandala": {
       "name": "@letar/mandala",
-      "version": "0.40.28",
+      "version": "0.40.29",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/auth": "workspace:*",
@@ -828,7 +848,7 @@
     },
     "apps/poster-microtext-desktop": {
       "name": "@letar/poster-microtext-desktop",
-      "version": "0.19.0",
+      "version": "0.19.1",
       "dependencies": {
         "@letar/chakra-provider": "workspace:*",
         "@letar/icon-generator": "workspace:*",
@@ -858,7 +878,7 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.69.2",
+      "version": "0.69.8",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/consent": "workspace:*",
@@ -891,7 +911,7 @@
     },
     "apps/svoichuzhie": {
       "name": "@letar/svoichuzhie",
-      "version": "0.10.53",
+      "version": "0.10.54",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/api-server": "workspace:*",
@@ -926,7 +946,7 @@
     },
     "apps/time": {
       "name": "@letar/time",
-      "version": "0.5.15",
+      "version": "0.5.16",
       "dependencies": {
         "@letar/api-server": "workspace:*",
         "@letar/env-load": "workspace:*",
@@ -1193,7 +1213,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.12.2",
+      "version": "2.14.2",
       "dependencies": {
         "@letar/format-utils": "workspace:*",
         "@tanstack/react-table": "^9.2.4",
@@ -1246,14 +1266,14 @@
     },
     "libs/forms-core": {
       "name": "@letar/forms-core",
-      "version": "0.12.0",
+      "version": "0.12.1",
       "dependencies": {
         "@tanstack/table-core": "^9.1.2",
       },
     },
     "libs/forms-react": {
       "name": "@letar/forms-react",
-      "version": "0.6.1",
+      "version": "0.7.0",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },
@@ -1268,7 +1288,7 @@
     },
     "libs/forms-shadcn": {
       "name": "@letar/forms-shadcn",
-      "version": "0.35.1",
+      "version": "0.37.0",
       "devDependencies": {
         "@letar/eager-jsx-check": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -1399,7 +1419,7 @@
     },
     "libs/hooks": {
       "name": "@letar/hooks",
-      "version": "0.6.0",
+      "version": "0.6.1",
       "peerDependencies": {
         "@tanstack/react-query": ">=5.0.0",
         "react": ">=18.0.0",
@@ -3003,55 +3023,55 @@
 
     "@nolyfill/is-core-module": ["@nolyfill/is-core-module@1.0.39", "", {}, "sha512-nn5ozdjYQpUCZlWGuxcJY/KpxkWQs4DcbMCmKojjyrYDEAGy4Ce19NN4v5MduafTwJlbKc99UA8YhSVqq9yPZA=="],
 
-    "@nx/devkit": ["@nx/devkit@23.2.0", "", { "dependencies": { "ejs": "5.0.1", "minimatch": "10.2.5", "semver": "^7.6.3", "tslib": "^2.3.0", "yargs-parser": "21.1.1" }, "peerDependencies": { "nx": ">= 22 <= 24 || ^23.0.0-0" } }, "sha512-srj04UsYqq2nG7Z9DxM00D8XpSpmSM7XQafCkD4FIOE2NPMCu0QvypJLe8S7a1/YAW9rqlnYrdadaQte687eAw=="],
+    "@nx/devkit": ["@nx/devkit@23.2.1", "", { "dependencies": { "ejs": "5.0.1", "minimatch": "10.2.5", "semver": "^7.6.3", "tslib": "^2.3.0", "yargs-parser": "21.1.1" }, "peerDependencies": { "nx": ">= 22 <= 24 || ^23.0.0-0" } }, "sha512-uMGbMJpCi+y7eHBEWqygA8JITNgzFZdzVmcKX17EXnFreu14aWZ1kyo6Qh9pKIcbJigO3F46w6ANlYp6wgCovQ=="],
 
-    "@nx/docker": ["@nx/docker@23.2.0", "", { "dependencies": { "@nx/devkit": "23.2.0", "tslib": "^2.3.0" } }, "sha512-PcNOXtTlpwnLrQsy1KLmjknBobvevOHZghPWbVbNXvJr00KX6EGkUHzDSd0P7WGyc4hkfnueWhTZ+azhx9zGww=="],
+    "@nx/docker": ["@nx/docker@23.2.1", "", { "dependencies": { "@nx/devkit": "23.2.1", "tslib": "^2.3.0" } }, "sha512-CMorXMo8zmczRF8qs33ipS5Ipp4U5gEPmbMmbeNWf7hG/1wcx1ueNBAZ2YPXRLJRB1eIM0OqeI8ReBDS8ANs0Q=="],
 
-    "@nx/esbuild": ["@nx/esbuild@23.2.0", "", { "dependencies": { "@nx/devkit": "23.2.0", "@nx/js": "23.2.0", "picocolors": "^1.1.0", "tinyglobby": "^0.2.12", "tsconfig-paths": "^4.1.2", "tslib": "^2.3.0" }, "peerDependencies": { "esbuild": ">=0.19.2 <1.0.0" }, "optionalPeers": ["esbuild"] }, "sha512-365bqL/6OK9DtieYEr2m7jnzKWY4V0vxoUamvdzvaEmeFvMdiz5HEXfS8EsMg9R2KNmJ2m4E7Vqxz09KOUyzGw=="],
+    "@nx/esbuild": ["@nx/esbuild@23.2.1", "", { "dependencies": { "@nx/devkit": "23.2.1", "@nx/js": "23.2.1", "picocolors": "^1.1.0", "tinyglobby": "^0.2.12", "tsconfig-paths": "^4.1.2", "tslib": "^2.3.0" }, "peerDependencies": { "esbuild": ">=0.19.2 <1.0.0" }, "optionalPeers": ["esbuild"] }, "sha512-TpN8jf4R2r/e7a+qlHLTDikuMteL8xFV2zMWHWz4/6/IrfvBIrBm8EHmpivXhrY5008rc50YR0klmMSYMTeyVg=="],
 
-    "@nx/eslint": ["@nx/eslint@23.2.0", "", { "dependencies": { "@nx/devkit": "23.2.0", "@nx/js": "23.2.0", "semver": "^7.6.3", "tslib": "^2.3.0", "typescript": "~6.0.3" }, "peerDependencies": { "@nx/jest": "23.2.0", "@zkochan/js-yaml": "0.0.7", "eslint": "^9.0.0 || ^10.0.0" }, "optionalPeers": ["@nx/jest", "@zkochan/js-yaml"] }, "sha512-ecVhJ4eU9wHw9xo9e8FKBzme8NjM4X3YQdeU0boOXJczqV7yoArAQbMfCwd9O64Ez/emaTWZKQ5sMeUCdKEyTw=="],
+    "@nx/eslint": ["@nx/eslint@23.2.1", "", { "dependencies": { "@nx/devkit": "23.2.1", "@nx/js": "23.2.1", "semver": "^7.6.3", "tslib": "^2.3.0", "typescript": "~6.0.3" }, "peerDependencies": { "@nx/jest": "23.2.1", "@zkochan/js-yaml": "0.0.7", "eslint": "^9.0.0 || ^10.0.0" }, "optionalPeers": ["@nx/jest", "@zkochan/js-yaml"] }, "sha512-cqvudRspelZJVxASZIImeGlBXMrZ+83T1IVadFSOwShSNvJiwfpzPs+7jDduspTvgJkOgndxAasawbZ8L6Qxaw=="],
 
-    "@nx/eslint-plugin": ["@nx/eslint-plugin@23.2.0", "", { "dependencies": { "@nx/devkit": "23.2.0", "@nx/js": "23.2.0", "@phenomnomnominal/tsquery": "~6.2.0", "@typescript-eslint/type-utils": "^8.0.0", "@typescript-eslint/utils": "^8.0.0", "confusing-browser-globals": "^1.0.9", "globals": "^17.0.0", "jsonc-eslint-parser": "^2.1.0", "picocolors": "^1.1.0", "semver": "^7.6.3", "tslib": "^2.3.0" }, "peerDependencies": { "@typescript-eslint/parser": "^8.0.0", "eslint-config-prettier": "^10.0.0" }, "optionalPeers": ["@typescript-eslint/parser", "eslint-config-prettier"] }, "sha512-A1TrFTXdGPHU9SmIcLnZPdL5m5vk34edXqhu8aqNPUF1jxnhXk0FURljbIkRdFwBMBDYRrJ3j9dGjXSNWUbitg=="],
+    "@nx/eslint-plugin": ["@nx/eslint-plugin@23.2.1", "", { "dependencies": { "@nx/devkit": "23.2.1", "@nx/js": "23.2.1", "@phenomnomnominal/tsquery": "~6.2.0", "@typescript-eslint/type-utils": "^8.0.0", "@typescript-eslint/utils": "^8.0.0", "confusing-browser-globals": "^1.0.9", "globals": "^17.0.0", "jsonc-eslint-parser": "^2.1.0", "picocolors": "^1.1.0", "semver": "^7.6.3", "tslib": "^2.3.0" }, "peerDependencies": { "@typescript-eslint/parser": "^8.0.0", "eslint-config-prettier": "^10.0.0" }, "optionalPeers": ["@typescript-eslint/parser", "eslint-config-prettier"] }, "sha512-hvGaCALUQ5t/I8Loexrk5/Ggwikh1Z38iuf+9Eh37HfiedCYtXnW+QeZH+yZkVDQ44ytJGRQ7jJKqDv/ghhTtg=="],
 
-    "@nx/jest": ["@nx/jest@23.2.0", "", { "dependencies": { "@jest/reporters": "^30.0.2", "@jest/test-result": "^30.0.2", "@nx/devkit": "23.2.0", "@nx/js": "23.2.0", "@phenomnomnominal/tsquery": "~6.2.0", "identity-obj-proxy": "3.0.0", "jest-config": "^30.0.2", "jest-resolve": "^30.0.2", "jest-util": "^30.0.2", "jsonc-parser": "^3.2.0", "minimatch": "10.2.5", "picocolors": "^1.1.0", "resolve.exports": "2.0.3", "semver": "^7.6.3", "tslib": "^2.3.0", "yargs-parser": "21.1.1" }, "peerDependencies": { "jest": "^29.0.0 || ^30.0.0", "ts-jest": "^29.0.0" }, "optionalPeers": ["jest", "ts-jest"] }, "sha512-VHCqAItC8hNzIV34vLRtEo5fhw6tCqryOy1XqZvczE6qM0hQEF44ecbCnH8SrgU83NcgVjTnscbI/46V3Uh/kA=="],
+    "@nx/jest": ["@nx/jest@23.2.1", "", { "dependencies": { "@jest/reporters": "^30.0.2", "@jest/test-result": "^30.0.2", "@nx/devkit": "23.2.1", "@nx/js": "23.2.1", "@phenomnomnominal/tsquery": "~6.2.0", "identity-obj-proxy": "3.0.0", "jest-config": "^30.0.2", "jest-resolve": "^30.0.2", "jest-util": "^30.0.2", "jsonc-parser": "^3.2.0", "minimatch": "10.2.5", "picocolors": "^1.1.0", "resolve.exports": "2.0.3", "semver": "^7.6.3", "tslib": "^2.3.0", "yargs-parser": "21.1.1" }, "peerDependencies": { "jest": "^29.0.0 || ^30.0.0", "ts-jest": "^29.0.0" }, "optionalPeers": ["jest", "ts-jest"] }, "sha512-iMxP4FDNLihk665gz5bdeRNsFuSKEeVYE4wJPibp+ynAUB6dooh/75tpSnoeRl9bE22shBWreN07nW3eiLOwdw=="],
 
-    "@nx/js": ["@nx/js@23.2.0", "", { "dependencies": { "@babel/core": "^7.29.6", "@babel/plugin-proposal-decorators": "^7.22.7", "@babel/plugin-transform-class-properties": "^7.22.5", "@babel/plugin-transform-class-static-block": "^7.22.5", "@babel/plugin-transform-private-methods": "^7.22.5", "@babel/plugin-transform-private-property-in-object": "^7.22.5", "@babel/plugin-transform-runtime": "^7.23.2", "@babel/preset-env": "^7.23.2", "@babel/preset-typescript": "^7.22.5", "@babel/runtime": "^7.22.6", "@nx/devkit": "23.2.0", "@nx/workspace": "23.2.0", "@zkochan/js-yaml": "0.0.7", "babel-plugin-const-enum": "^1.0.1", "babel-plugin-macros": "^3.1.0", "babel-plugin-transform-typescript-metadata": "^0.3.1", "chalk": "^4.1.0", "columnify": "^1.6.0", "detect-port": "^2.1.0", "ignore": "^7.0.5", "js-tokens": "^4.0.0", "jsonc-parser": "^3.2.0", "npm-run-path": "^4.0.1", "picocolors": "^1.1.0", "picomatch": "4.0.4", "semver": "^7.6.3", "source-map-support": "0.5.19", "tinyglobby": "^0.2.12", "tslib": "^2.3.0" }, "peerDependencies": { "@swc/cli": ">=0.6.0 <0.9.0", "verdaccio": "^6.0.5" }, "optionalPeers": ["@swc/cli", "verdaccio"] }, "sha512-pm3YJK6NO7r8oDLTffV3OBaImaEKdLrGtMM7NjxrS7a0FBS4FQ7k+vPXmV9i/XZIVdC5CBHby5FWJ2SpZxzTag=="],
+    "@nx/js": ["@nx/js@23.2.1", "", { "dependencies": { "@babel/core": "^7.29.6", "@babel/plugin-proposal-decorators": "^7.22.7", "@babel/plugin-transform-class-properties": "^7.22.5", "@babel/plugin-transform-class-static-block": "^7.22.5", "@babel/plugin-transform-private-methods": "^7.22.5", "@babel/plugin-transform-private-property-in-object": "^7.22.5", "@babel/plugin-transform-runtime": "^7.23.2", "@babel/preset-env": "^7.23.2", "@babel/preset-typescript": "^7.22.5", "@babel/runtime": "^7.22.6", "@nx/devkit": "23.2.1", "@nx/workspace": "23.2.1", "@zkochan/js-yaml": "0.0.7", "babel-plugin-const-enum": "^1.0.1", "babel-plugin-macros": "^3.1.0", "babel-plugin-transform-typescript-metadata": "^0.3.1", "chalk": "^4.1.0", "columnify": "^1.6.0", "detect-port": "^2.1.0", "ignore": "^7.0.5", "js-tokens": "^4.0.0", "jsonc-parser": "^3.2.0", "npm-run-path": "^4.0.1", "picocolors": "^1.1.0", "picomatch": "4.0.4", "semver": "^7.6.3", "source-map-support": "0.5.19", "tinyglobby": "^0.2.12", "tslib": "^2.3.0" }, "peerDependencies": { "@swc/cli": ">=0.6.0 <0.9.0", "verdaccio": "^6.0.5" }, "optionalPeers": ["@swc/cli", "verdaccio"] }, "sha512-52vAau7gmL4oFIohwAQ+rhnbbKeIAir6bKam0+lURvwSFHpkHPzMa0m8L/IlCO9mbRp2vx0gYONsPtL1k7jbqA=="],
 
-    "@nx/next": ["@nx/next@23.2.0", "", { "dependencies": { "@babel/plugin-proposal-decorators": "^7.22.7", "@nx/devkit": "23.2.0", "@nx/eslint": "23.2.0", "@nx/js": "23.2.0", "@nx/react": "23.2.0", "@nx/web": "23.2.0", "@phenomnomnominal/tsquery": "~6.2.0", "copy-webpack-plugin": "^14.0.0", "ignore": "^7.0.5", "semver": "^7.6.3", "tslib": "^2.3.0", "webpack-merge": "^5.8.0" }, "peerDependencies": { "@nx/webpack": "23.2.0", "next": ">=14.0.0 <17.0.0" }, "optionalPeers": ["@nx/webpack"] }, "sha512-Wcl6PPIJ9wkkw0LlyZki5CUkEybL847SsMNMh9YyRYHm8WgmFoM4yXq2oO1s0AkdlNRrYmtqMfcv96VU8zmEyg=="],
+    "@nx/next": ["@nx/next@23.2.1", "", { "dependencies": { "@babel/plugin-proposal-decorators": "^7.22.7", "@nx/devkit": "23.2.1", "@nx/eslint": "23.2.1", "@nx/js": "23.2.1", "@nx/react": "23.2.1", "@nx/web": "23.2.1", "@phenomnomnominal/tsquery": "~6.2.0", "copy-webpack-plugin": "^14.0.0", "ignore": "^7.0.5", "semver": "^7.6.3", "tslib": "^2.3.0", "webpack-merge": "^5.8.0" }, "peerDependencies": { "@nx/webpack": "23.2.1", "next": ">=14.0.0 <17.0.0" }, "optionalPeers": ["@nx/webpack"] }, "sha512-B/EOl6YrIQsZGNITBMJM6GqriIPrYzKDC9zECTVNbN6+kyHKKtZEUZnL4q/BoTvTjDFaEv99LOiSZzKveD3qpA=="],
 
-    "@nx/node": ["@nx/node@23.2.0", "", { "dependencies": { "@nx/devkit": "23.2.0", "@nx/docker": "23.2.0", "@nx/eslint": "23.2.0", "@nx/jest": "23.2.0", "@nx/js": "23.2.0", "kill-port": "^1.6.1", "semver": "^7.6.3", "tcp-port-used": "^1.0.2", "tslib": "^2.3.0" }, "peerDependencies": { "express": ">=4.0.0 <6.0.0", "fastify": ">=4.0.0 <6.0.0", "koa": ">=2.0.0 <4.0.0" }, "optionalPeers": ["express", "fastify", "koa"] }, "sha512-bYDbfh6mzIjsm8mCgsOEQuCbqlaJxR4W5RGFBni3jW+rc4AtjjX52HnTvnVLbizo4hyO7zbA7MGefNCnA9a21g=="],
+    "@nx/node": ["@nx/node@23.2.1", "", { "dependencies": { "@nx/devkit": "23.2.1", "@nx/docker": "23.2.1", "@nx/eslint": "23.2.1", "@nx/jest": "23.2.1", "@nx/js": "23.2.1", "kill-port": "^1.6.1", "semver": "^7.6.3", "tcp-port-used": "^1.0.2", "tslib": "^2.3.0" }, "peerDependencies": { "express": ">=4.0.0 <6.0.0", "fastify": ">=4.0.0 <6.0.0", "koa": ">=2.0.0 <4.0.0" }, "optionalPeers": ["express", "fastify", "koa"] }, "sha512-mcn2IY4Ztb24wQxu3FhOYh27ghxL2NuivsnZ1Vegq0ZMBZJmMg+ZFPdukBSs7v9PnpsMxAayyepdz1Y+/j4mhw=="],
 
-    "@nx/nx-darwin-arm64": ["@nx/nx-darwin-arm64@23.2.0", "", { "os": "darwin", "cpu": "arm64" }, "sha512-nael5WwtqBX/YZDU0iv8M4rJ8auF9kF+sU5pYpronIbvu/LdDptq31vWT06ivW8eXRaLxDqFmpXR8tS5IYDmdw=="],
+    "@nx/nx-darwin-arm64": ["@nx/nx-darwin-arm64@23.2.1", "", { "os": "darwin", "cpu": "arm64" }, "sha512-majzvZlhlWL8MSDEKbQoGv3qM1u7v8Pk7X86srWsySbGDnCJ5BpMFyqMeroQ3AY4lxRjLYWACX5YXVPy2ttRtQ=="],
 
-    "@nx/nx-darwin-x64": ["@nx/nx-darwin-x64@23.2.0", "", { "os": "darwin", "cpu": "x64" }, "sha512-jZ7c6ktp8Wdroru6lj8WxvYDiK70B2cE3GdV9pcgCcVQvK6PLJXgOaHvQjALMINraYhzlsWX/FkWMy4eMMlJzg=="],
+    "@nx/nx-darwin-x64": ["@nx/nx-darwin-x64@23.2.1", "", { "os": "darwin", "cpu": "x64" }, "sha512-C+KkJwGOZ3h2RjEoQk2SWBdMlKq4BdMfTtxCJ9YgCxjPKqT8V/57tn1Dzz9fnw76P8+PocsfRdjIS0cj9r7isA=="],
 
-    "@nx/nx-freebsd-x64": ["@nx/nx-freebsd-x64@23.2.0", "", { "os": "freebsd", "cpu": "x64" }, "sha512-5MDLl4q0kYZcX6CLu5x1YEq5YUUmo6CqoWApgC/2Ky2kEX9Kz+9fuTJlKlwwSlAxlb3TyQVKXrjGfwF0M30ygA=="],
+    "@nx/nx-freebsd-x64": ["@nx/nx-freebsd-x64@23.2.1", "", { "os": "freebsd", "cpu": "x64" }, "sha512-GxxMtUlZWy74b15iyHVw+c4a0V2pSHR6RKbvmaSJQ3BXJrJarIqaWys/JrvcV2I/AjtrN7Tq7cFxCEaxkwCsEA=="],
 
-    "@nx/nx-linux-arm-gnueabihf": ["@nx/nx-linux-arm-gnueabihf@23.2.0", "", { "os": "linux", "cpu": "arm" }, "sha512-YBY7VGEyrzWNPG6M1knOjykMbsHmX/uN5TywwtLYp2mp6PaDC9MNO9z2BDaVmdS+Y8u030RrDpESwLkB0f9d4g=="],
+    "@nx/nx-linux-arm-gnueabihf": ["@nx/nx-linux-arm-gnueabihf@23.2.1", "", { "os": "linux", "cpu": "arm" }, "sha512-Wr/VLZkPhEsDN7GGx0wOmvZ6v7yMrMf9WpLfrcTVe10NPUB/y6xYaoTDo8teKOBNLsPJ73C40bj2ZBmWtGPg7Q=="],
 
-    "@nx/nx-linux-arm64-gnu": ["@nx/nx-linux-arm64-gnu@23.2.0", "", { "os": "linux", "cpu": "arm64" }, "sha512-CzDkhtI+HYKGWPbjfMhslrgGpWer/qGd6MOFwkjxI8JYdqRV0BYivnAuqogsyPpBDNzalxK8xM55MD/f+edQ+w=="],
+    "@nx/nx-linux-arm64-gnu": ["@nx/nx-linux-arm64-gnu@23.2.1", "", { "os": "linux", "cpu": "arm64" }, "sha512-lGPhJYkJbIlTWj38FrHZ3qnaGkAfafPrK+6KjGdt+ubDOt9fp0lyUbEhfdg9JuIL++hOgcTHvz0FOA6S+7k3nA=="],
 
-    "@nx/nx-linux-arm64-musl": ["@nx/nx-linux-arm64-musl@23.2.0", "", { "os": "linux", "cpu": "arm64" }, "sha512-poDmLBCX4WHcYwlklFingeqHVSaTdeUe5jhuQhR6BygDpFdVk4kibovEHh4A5LRkPag4SACNRy1VRBKoaoEyUA=="],
+    "@nx/nx-linux-arm64-musl": ["@nx/nx-linux-arm64-musl@23.2.1", "", { "os": "linux", "cpu": "arm64" }, "sha512-HrHBmBjh++NBE1p0DBjnc53Ech86/4gy4V1bAUJRViG1/FSJAopKE8qQqanYfShOUsHXk6ohPIhf6nlC8LsFFQ=="],
 
-    "@nx/nx-linux-x64-gnu": ["@nx/nx-linux-x64-gnu@23.2.0", "", { "os": "linux", "cpu": "x64" }, "sha512-8E8IAkJJw1+eF9UNZKZnc1UDDNOmRaGQbb/AXL8Ix0MP3LObDjIyX9NLYxrtcb9HUcWrygcuKsySum+E5C4s3w=="],
+    "@nx/nx-linux-x64-gnu": ["@nx/nx-linux-x64-gnu@23.2.1", "", { "os": "linux", "cpu": "x64" }, "sha512-D1mSU/kdC1N8aeo7RpmuXWOl77GR4QIbam4dpUmezAwdNkIHlIq7hwqec+4HDWum9nlNmQX/dZn0nZaBem0rRA=="],
 
-    "@nx/nx-linux-x64-musl": ["@nx/nx-linux-x64-musl@23.2.0", "", { "os": "linux", "cpu": "x64" }, "sha512-X/i1GfhqeOM1pGNBDDeIDKhtpXKnYjBR8hv8YoVW9pHQXAJ2iUux6SCP1Gg5tIKUYTdZRvsknf0g7KEw3p1sug=="],
+    "@nx/nx-linux-x64-musl": ["@nx/nx-linux-x64-musl@23.2.1", "", { "os": "linux", "cpu": "x64" }, "sha512-p8Lc4RLu7cj4iP7NCnivLv4Qw+RorrLRO6s2J0LNIMH4nI1PAu5p5IztsCb3lsRo0f/ERCQ8DGwBn2BM1J8Blg=="],
 
-    "@nx/nx-win32-arm64-msvc": ["@nx/nx-win32-arm64-msvc@23.2.0", "", { "os": "win32", "cpu": "arm64" }, "sha512-MSXbpHVSduWYnCu8MyPs88H6XnbU20jHWUvtPFDFkxgA8Slhl09hzpp2xq8TS4M8dS2OxK4QWcZyszqRMkwQrw=="],
+    "@nx/nx-win32-arm64-msvc": ["@nx/nx-win32-arm64-msvc@23.2.1", "", { "os": "win32", "cpu": "arm64" }, "sha512-XWYG+6P368xOZXU1z3QH4jXlaajQDxlXVGzYXogp+i09twEAhE7LV6fmv8gQptBta67EZy610KcKu38IVn6x7Q=="],
 
-    "@nx/nx-win32-x64-msvc": ["@nx/nx-win32-x64-msvc@23.2.0", "", { "os": "win32", "cpu": "x64" }, "sha512-OZKEU4d5YmOht1id5wyWhVfvuNEo0hl4DYRFzDh/r94nbTqfNEPcY0bTDfvtjZ79ZM5tPC1Z1k8/L4dkhMpFhw=="],
+    "@nx/nx-win32-x64-msvc": ["@nx/nx-win32-x64-msvc@23.2.1", "", { "os": "win32", "cpu": "x64" }, "sha512-qZQBNB4L/yljM81Fm5M/LoyCMoGJc7yc//KePQ5xiyhzZjJENooHsFkB8ps/pSv4cfHKfYJbvgBAMPOLXeHqqA=="],
 
-    "@nx/playwright": ["@nx/playwright@23.2.0", "", { "dependencies": { "@nx/devkit": "23.2.0", "@nx/eslint": "23.2.0", "@nx/js": "23.2.0", "https-proxy-agent": "^7.0.6", "minimatch": "10.2.5", "semver": "^7.6.3", "tslib": "^2.3.0" }, "peerDependencies": { "@playwright/test": "^1.36.0" }, "optionalPeers": ["@playwright/test"] }, "sha512-BSNXOareLfluQUIXH8bmXVJ72piJet4TOqldo96zBrI4c1qlfO6oQdtFyqkvv/dmEvUrxkUaVqKrcbc8m3jLeg=="],
+    "@nx/playwright": ["@nx/playwright@23.2.1", "", { "dependencies": { "@nx/devkit": "23.2.1", "@nx/eslint": "23.2.1", "@nx/js": "23.2.1", "https-proxy-agent": "^7.0.6", "minimatch": "10.2.5", "semver": "^7.6.3", "tslib": "^2.3.0" }, "peerDependencies": { "@playwright/test": "^1.36.0" }, "optionalPeers": ["@playwright/test"] }, "sha512-lfUqS8gGXWvvPAlUs9DhE4y50jowh+xqdnpWbfcp2RrWRH7eXjAYmm1kHPX6d8ZNtS8wvq7PVkWlIarJxr31IA=="],
 
-    "@nx/react": ["@nx/react@23.2.0", "", { "dependencies": { "@babel/preset-react": "^7.22.5", "@nx/devkit": "23.2.0", "@nx/eslint": "23.2.0", "@nx/js": "23.2.0", "@nx/web": "23.2.0", "@phenomnomnominal/tsquery": "~6.2.0", "minimatch": "10.2.5", "semver": "^7.6.3", "tslib": "^2.3.0" }, "optionalDependencies": { "@nx/vite": "23.2.0" }, "peerDependencies": { "@nx/module-federation": "23.2.0", "babel-plugin-react-compiler": "^1.0.0", "express": "^4.21.2", "http-proxy-middleware": "^3.0.7", "react": ">=18.0.0 <20.0.0", "react-dom": ">=18.0.0 <20.0.0" }, "optionalPeers": ["@nx/module-federation", "babel-plugin-react-compiler", "express", "http-proxy-middleware"] }, "sha512-YE+DbAQsi5lKPLefhzWzdiUEyuKymyf0jUAu93JG+Bdj9iLN725zQYyH/SkD4DwiAdg1KrT9yIT0o/ucNMfEww=="],
+    "@nx/react": ["@nx/react@23.2.1", "", { "dependencies": { "@babel/preset-react": "^7.22.5", "@nx/devkit": "23.2.1", "@nx/eslint": "23.2.1", "@nx/js": "23.2.1", "@nx/web": "23.2.1", "@phenomnomnominal/tsquery": "~6.2.0", "minimatch": "10.2.5", "semver": "^7.6.3", "tslib": "^2.3.0" }, "optionalDependencies": { "@nx/vite": "23.2.1" }, "peerDependencies": { "@nx/module-federation": "23.2.1", "babel-plugin-react-compiler": "^1.0.0", "express": "^4.21.2", "http-proxy-middleware": "^3.0.7", "react": ">=18.0.0 <20.0.0", "react-dom": ">=18.0.0 <20.0.0" }, "optionalPeers": ["@nx/module-federation", "babel-plugin-react-compiler", "express", "http-proxy-middleware"] }, "sha512-4HaDbqJCEjY6gFeEjlpDm89I93cPSGdz/+PnfnoyUktkyKlOkoDKE+iFlPEdF4+MLFprlHm/lVC1IQGaHEN0IA=="],
 
-    "@nx/vite": ["@nx/vite@23.2.0", "", { "dependencies": { "@nx/devkit": "23.2.0", "@nx/js": "23.2.0", "@nx/vitest": "23.2.0", "@phenomnomnominal/tsquery": "~6.2.0", "ajv": "^8.0.0", "picomatch": "4.0.4", "semver": "^7.6.3", "tsconfig-paths": "^4.1.2", "tslib": "^2.3.0" }, "peerDependencies": { "vite": "^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0" } }, "sha512-5DsInkt1kjl4eqmL1h/4vxZqD7LDHcBFeUT6uKEZC9zjKrFC0K5nkM0wST4jrdhdA6R1KfiRXUXgQbLll2Y2ow=="],
+    "@nx/vite": ["@nx/vite@23.2.1", "", { "dependencies": { "@nx/devkit": "23.2.1", "@nx/js": "23.2.1", "@nx/vitest": "23.2.1", "@phenomnomnominal/tsquery": "~6.2.0", "ajv": "^8.0.0", "picomatch": "4.0.4", "semver": "^7.6.3", "tsconfig-paths": "^4.1.2", "tslib": "^2.3.0" }, "peerDependencies": { "vite": "^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0" } }, "sha512-Bjka3BcMn3pdC1qqdtpTSnQIWkqCUxEDKHBG+2ZIp1JtsMbl/xOhZv7zNeiBVf9KinpFD33n36bu7DaTpp2B6w=="],
 
-    "@nx/vitest": ["@nx/vitest@23.2.0", "", { "dependencies": { "@nx/devkit": "23.2.0", "@nx/js": "23.2.0", "@phenomnomnominal/tsquery": "~6.2.0", "semver": "^7.6.3", "tslib": "^2.3.0" }, "peerDependencies": { "@nx/eslint": "23.2.0", "vite": "^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0", "vitest": "^3.0.0 || ^4.0.0" }, "optionalPeers": ["@nx/eslint", "vite", "vitest"] }, "sha512-bBNhm0d3HyAskMtXybzV2CBBh/phi/gu0rnKreurTRD6AaqhI4Re8atKnJ3nOxbBIA3KMM9HFjI+Q7n0zAwn6g=="],
+    "@nx/vitest": ["@nx/vitest@23.2.1", "", { "dependencies": { "@nx/devkit": "23.2.1", "@nx/js": "23.2.1", "@phenomnomnominal/tsquery": "~6.2.0", "semver": "^7.6.3", "tslib": "^2.3.0" }, "peerDependencies": { "@nx/eslint": "23.2.1", "vite": "^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0", "vitest": "^3.0.0 || ^4.0.0" }, "optionalPeers": ["@nx/eslint", "vite", "vitest"] }, "sha512-LL0C5wDKhL8qEZ+XX4ec/EoGMP3BLQiqswPR/bgH9OssK9hBBBNndcQiJvEyh3+M+4ULxrT+NAXIOgIpCrVVww=="],
 
-    "@nx/web": ["@nx/web@23.2.0", "", { "dependencies": { "@nx/devkit": "23.2.0", "@nx/js": "23.2.0", "detect-port": "^2.1.0", "http-server": "^14.1.0", "picocolors": "^1.1.0", "tslib": "^2.3.0" }, "peerDependencies": { "@nx/cypress": "23.2.0", "@nx/eslint": "23.2.0", "@nx/jest": "23.2.0", "@nx/playwright": "23.2.0", "@nx/vite": "23.2.0", "@nx/webpack": "23.2.0" }, "optionalPeers": ["@nx/cypress", "@nx/eslint", "@nx/jest", "@nx/playwright", "@nx/vite", "@nx/webpack"] }, "sha512-KDZa0cC/EBudfrReXAzcojWXisTkoSTui9dRFqxqGlM/OEZtfqJaJ+1izZxW8iRTxQbiMq79256VzW5M6m7kVQ=="],
+    "@nx/web": ["@nx/web@23.2.1", "", { "dependencies": { "@nx/devkit": "23.2.1", "@nx/js": "23.2.1", "detect-port": "^2.1.0", "http-server": "^14.1.0", "picocolors": "^1.1.0", "tslib": "^2.3.0" }, "peerDependencies": { "@nx/cypress": "23.2.1", "@nx/eslint": "23.2.1", "@nx/jest": "23.2.1", "@nx/playwright": "23.2.1", "@nx/vite": "23.2.1", "@nx/webpack": "23.2.1" }, "optionalPeers": ["@nx/cypress", "@nx/eslint", "@nx/jest", "@nx/playwright", "@nx/vite", "@nx/webpack"] }, "sha512-XmlnwbNP4cjNHmD9G7C/aWigxujmDhIB6mTFw9qCq27c7q52baDRFVQhQsS9JZxla44Z4oUhc9Jgf0Rvn35qMA=="],
 
-    "@nx/workspace": ["@nx/workspace@23.2.0", "", { "dependencies": { "@nx/devkit": "23.2.0", "@zkochan/js-yaml": "0.0.7", "chalk": "^4.1.0", "nx": "23.2.0", "picomatch": "4.0.4", "semver": "^7.6.3", "tslib": "^2.3.0", "yargs-parser": "21.1.1" } }, "sha512-8aBm/rnAwqDSEQ8aKlc04b9/6WlgU9JvhkA4DGqoc2n8G4FwGghc+TZLhWaBcrJnTz3xuKK8PSYOLCzw8uv84g=="],
+    "@nx/workspace": ["@nx/workspace@23.2.1", "", { "dependencies": { "@nx/devkit": "23.2.1", "@zkochan/js-yaml": "0.0.7", "chalk": "^4.1.0", "nx": "23.2.1", "picomatch": "4.0.4", "semver": "^7.6.3", "tslib": "^2.3.0", "yargs-parser": "21.1.1" } }, "sha512-lC5NdIQUK7tmz4SeJE0zJ+DTDTAYvbs88gZJQZBwAqkky20ZlRnJiebrOXHlhhVn6Cn35XVLmEkhEsZVda1R0A=="],
 
     "@one-ini/wasm": ["@one-ini/wasm@0.1.1", "", {}, "sha512-XuySG1E38YScSJoMlqovLru4KTUNSjgVTIjyh7qMX6aNN5HY5Ct5LhRJdxO79JtTzKfzV/bnWpz+zquYrISsvw=="],
 
@@ -6701,7 +6721,7 @@
 
     "numeralize-ru": ["numeralize-ru@2.0.0", "", {}, "sha512-6EDlOoJ/Bf7vhNzotsbDo9pWQBMd3aYDom3yAl2lj6sYeNEcNbZFbuWgstBq2w2HGXoBOhvSWdNhicZSetTiFQ=="],
 
-    "nx": ["nx@23.2.0", "", { "dependencies": { "@clack/core": "1.4.3", "@clack/prompts": "1.7.0", "@emnapi/core": "1.4.5", "@emnapi/runtime": "1.4.5", "@emnapi/wasi-threads": "1.0.4", "@jest/diff-sequences": "30.0.1", "@napi-rs/wasm-runtime": "0.2.4", "@tybys/wasm-util": "0.9.0", "@yarnpkg/lockfile": "1.1.0", "@zkochan/js-yaml": "0.0.7", "agent-base": "6.0.2", "ansi-regex": "5.0.1", "ansi-styles": "4.3.0", "argparse": "2.0.1", "asynckit": "0.4.0", "axios": "1.18.1", "balanced-match": "4.0.3", "base64-js": "1.5.1", "bl": "4.1.0", "brace-expansion": "5.0.9", "buffer": "5.7.1", "bundle-name": "4.1.0", "call-bind-apply-helpers": "1.0.2", "chalk": "4.1.2", "cli-cursor": "3.1.0", "cli-spinners": "2.6.1", "cliui": "8.0.1", "clone": "1.0.4", "color-convert": "2.0.1", "color-name": "1.1.4", "combined-stream": "1.0.8", "debug": "4.4.3", "default-browser": "5.2.1", "default-browser-id": "5.0.0", "defaults": "1.0.4", "define-lazy-prop": "3.0.0", "delayed-stream": "1.0.0", "dotenv": "16.4.7", "dotenv-expand": "12.0.3", "dunder-proto": "1.0.1", "ejs": "5.0.1", "emoji-regex": "8.0.0", "end-of-stream": "1.4.5", "es-define-property": "1.0.1", "es-errors": "1.3.0", "es-object-atoms": "1.1.1", "es-set-tostringtag": "2.1.0", "escalade": "3.2.0", "escape-string-regexp": "1.0.5", "fast-string-truncated-width": "3.0.3", "fast-string-width": "3.0.2", "fast-wrap-ansi": "0.2.0", "figures": "3.2.0", "flat": "5.0.2", "follow-redirects": "1.16.0", "form-data": "4.0.6", "fs-constants": "1.0.0", "function-bind": "1.1.2", "get-caller-file": "2.0.5", "get-intrinsic": "1.3.0", "get-proto": "1.0.1", "gopd": "1.2.0", "has-flag": "4.0.0", "has-symbols": "1.1.0", "has-tostringtag": "1.0.2", "hasown": "2.0.4", "https-proxy-agent": "5.0.1", "ieee754": "1.2.1", "ignore": "7.0.5", "inherits": "2.0.4", "is-docker": "3.0.0", "is-fullwidth-code-point": "3.0.0", "is-inside-container": "1.0.0", "is-interactive": "1.0.0", "is-unicode-supported": "0.1.0", "is-wsl": "3.1.0", "isexe": "2.0.0", "json5": "2.2.3", "jsonc-parser": "3.3.1", "lines-and-columns": "2.0.3", "log-symbols": "4.1.0", "math-intrinsics": "1.1.0", "mime-db": "1.52.0", "mime-types": "2.1.35", "mimic-fn": "2.1.0", "minimatch": "10.2.5", "minimist": "1.2.8", "ms": "2.1.3", "npm-run-path": "4.0.1", "once": "1.4.0", "onetime": "5.1.2", "open": "10.1.0", "ora": "5.4.1", "path-key": "3.1.1", "picocolors": "1.1.1", "proxy-from-env": "2.1.0", "readable-stream": "3.6.2", "require-directory": "2.1.1", "resolve.exports": "2.0.3", "restore-cursor": "3.1.0", "run-applescript": "7.0.0", "safe-buffer": "5.2.1", "semver": "7.8.4", "signal-exit": "3.0.7", "sisteransi": "1.0.5", "smol-toml": "1.6.1", "string-width": "4.2.3", "string_decoder": "1.3.0", "strip-ansi": "6.0.1", "strip-bom": "3.0.0", "supports-color": "7.2.0", "tar-stream": "2.2.0", "tmp": "0.2.7", "tsconfig-paths": "4.2.0", "tslib": "2.8.1", "util-deprecate": "1.0.2", "wcwidth": "1.0.1", "which": "3.0.1", "wrap-ansi": "7.0.0", "wrappy": "1.0.2", "y18n": "5.0.8", "yaml": "2.9.0", "yargs": "17.7.2", "yargs-parser": "21.1.1" }, "optionalDependencies": { "@nx/nx-darwin-arm64": "23.2.0", "@nx/nx-darwin-x64": "23.2.0", "@nx/nx-freebsd-x64": "23.2.0", "@nx/nx-linux-arm-gnueabihf": "23.2.0", "@nx/nx-linux-arm64-gnu": "23.2.0", "@nx/nx-linux-arm64-musl": "23.2.0", "@nx/nx-linux-x64-gnu": "23.2.0", "@nx/nx-linux-x64-musl": "23.2.0", "@nx/nx-win32-arm64-msvc": "23.2.0", "@nx/nx-win32-x64-msvc": "23.2.0" }, "peerDependencies": { "@swc-node/register": "^1.11.1", "@swc/core": "^1.15.8" }, "optionalPeers": ["@swc-node/register", "@swc/core"], "bin": { "nx": "./dist/bin/nx.js", "nx-cloud": "./dist/bin/nx-cloud.js" } }, "sha512-EWscwgKDr40bpsy2Dpijx0+wdkQjF8Z5Gvo91qLh3Ot2qkoYCznAzrqT2hXkkc1USC1TvX64t5IgsQq0Wtg1nA=="],
+    "nx": ["nx@23.2.1", "", { "dependencies": { "@clack/core": "1.4.3", "@clack/prompts": "1.7.0", "@emnapi/core": "1.4.5", "@emnapi/runtime": "1.4.5", "@emnapi/wasi-threads": "1.0.4", "@jest/diff-sequences": "30.0.1", "@napi-rs/wasm-runtime": "0.2.4", "@tybys/wasm-util": "0.9.0", "@yarnpkg/lockfile": "1.1.0", "@zkochan/js-yaml": "0.0.7", "agent-base": "6.0.2", "ansi-regex": "5.0.1", "ansi-styles": "4.3.0", "argparse": "2.0.1", "asynckit": "0.4.0", "axios": "1.18.1", "balanced-match": "4.0.3", "base64-js": "1.5.1", "bl": "4.1.0", "brace-expansion": "5.0.9", "buffer": "5.7.1", "bundle-name": "4.1.0", "call-bind-apply-helpers": "1.0.2", "chalk": "4.1.2", "cli-cursor": "3.1.0", "cli-spinners": "2.6.1", "cliui": "8.0.1", "clone": "1.0.4", "color-convert": "2.0.1", "color-name": "1.1.4", "combined-stream": "1.0.8", "debug": "4.4.3", "default-browser": "5.2.1", "default-browser-id": "5.0.0", "defaults": "1.0.4", "define-lazy-prop": "3.0.0", "delayed-stream": "1.0.0", "dotenv": "16.4.7", "dotenv-expand": "12.0.3", "dunder-proto": "1.0.1", "ejs": "5.0.1", "emoji-regex": "8.0.0", "end-of-stream": "1.4.5", "es-define-property": "1.0.1", "es-errors": "1.3.0", "es-object-atoms": "1.1.1", "es-set-tostringtag": "2.1.0", "escalade": "3.2.0", "escape-string-regexp": "1.0.5", "fast-string-truncated-width": "3.0.3", "fast-string-width": "3.0.2", "fast-wrap-ansi": "0.2.0", "figures": "3.2.0", "flat": "5.0.2", "follow-redirects": "1.16.0", "form-data": "4.0.6", "fs-constants": "1.0.0", "function-bind": "1.1.2", "get-caller-file": "2.0.5", "get-intrinsic": "1.3.0", "get-proto": "1.0.1", "gopd": "1.2.0", "has-flag": "4.0.0", "has-symbols": "1.1.0", "has-tostringtag": "1.0.2", "hasown": "2.0.4", "https-proxy-agent": "5.0.1", "ieee754": "1.2.1", "ignore": "7.0.5", "inherits": "2.0.4", "is-docker": "3.0.0", "is-fullwidth-code-point": "3.0.0", "is-inside-container": "1.0.0", "is-interactive": "1.0.0", "is-unicode-supported": "0.1.0", "is-wsl": "3.1.0", "isexe": "2.0.0", "json5": "2.2.3", "jsonc-parser": "3.3.1", "lines-and-columns": "2.0.3", "log-symbols": "4.1.0", "math-intrinsics": "1.1.0", "mime-db": "1.52.0", "mime-types": "2.1.35", "mimic-fn": "2.1.0", "minimatch": "10.2.5", "minimist": "1.2.8", "ms": "2.1.3", "npm-run-path": "4.0.1", "once": "1.4.0", "onetime": "5.1.2", "open": "10.1.0", "ora": "5.4.1", "path-key": "3.1.1", "picocolors": "1.1.1", "proxy-from-env": "2.1.0", "readable-stream": "3.6.2", "require-directory": "2.1.1", "resolve.exports": "2.0.3", "restore-cursor": "3.1.0", "run-applescript": "7.0.0", "safe-buffer": "5.2.1", "semver": "7.8.4", "signal-exit": "3.0.7", "sisteransi": "1.0.5", "smol-toml": "1.6.1", "string-width": "4.2.3", "string_decoder": "1.3.0", "strip-ansi": "6.0.1", "strip-bom": "3.0.0", "supports-color": "7.2.0", "tar-stream": "2.2.0", "tmp": "0.2.7", "tsconfig-paths": "4.2.0", "tslib": "2.8.1", "util-deprecate": "1.0.2", "wcwidth": "1.0.1", "which": "3.0.1", "wrap-ansi": "7.0.0", "wrappy": "1.0.2", "y18n": "5.0.8", "yaml": "2.9.0", "yargs": "17.7.2", "yargs-parser": "21.1.1" }, "optionalDependencies": { "@nx/nx-darwin-arm64": "23.2.1", "@nx/nx-darwin-x64": "23.2.1", "@nx/nx-freebsd-x64": "23.2.1", "@nx/nx-linux-arm-gnueabihf": "23.2.1", "@nx/nx-linux-arm64-gnu": "23.2.1", "@nx/nx-linux-arm64-musl": "23.2.1", "@nx/nx-linux-x64-gnu": "23.2.1", "@nx/nx-linux-x64-musl": "23.2.1", "@nx/nx-win32-arm64-msvc": "23.2.1", "@nx/nx-win32-x64-msvc": "23.2.1" }, "peerDependencies": { "@swc-node/register": "^1.11.1", "@swc/core": "^1.15.8" }, "optionalPeers": ["@swc-node/register", "@swc/core"], "bin": { "nx": "./dist/bin/nx.js", "nx-cloud": "./dist/bin/nx-cloud.js" } }, "sha512-QOgM7EcJ6gvLKZ3Azno7wdoXXhRhZHbRDN79gCmGXsBxH9WBXCeSy3DyGdee/d5Fa6GnxVOgwKTCx8l0eA+vHw=="],
 
     "nypm": ["nypm@0.6.5", "", { "dependencies": { "citty": "^0.2.0", "pathe": "^2.0.3", "tinyexec": "^1.0.2" }, "bin": { "nypm": "dist/cli.mjs" } }, "sha512-K6AJy1GMVyfyMXRVB88700BJqNUkByijGJM8kEHpLdcAt+vSQAVfkWWHYzuRXHSY6xA2sNc5RjTj0p9rE2izVQ=="],
 
