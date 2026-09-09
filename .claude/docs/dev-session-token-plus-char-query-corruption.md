@@ -1,5 +1,12 @@
 # `DEV_SESSION_TOKEN` с `+` в query-параметре — 403 при корректном токене
 
+⚠️ **Почищено 2026-09-09.** `create-dev-session-route.ts` теперь сам восстанавливает пробел
+обратно в `+` для query-параметра `token` перед сравнением (заголовок `x-dev-session-token` не
+трогается — там декодирования нет и не было). Раздел «Фикс» ниже описывает воркэраунды, актуальные
+только для версий библиотеки до этого коммита или если правка почему-то не докатилась (например
+приложение держит несмёрженный форк роута вместо общей фабрики — на 2026-09-09 таких нет, см.
+`.claude/rules/libs.md`). Раздел «Причина» остаётся верным описанием механизма бага.
+
 `createDevSessionRoute` (`@letar/auth/server`, [libs/auth/src/server/factories/create-dev-session-route.ts](/libs/auth/src/server/factories/create-dev-session-route.ts))
 принимает токен как `?token=<...>` или заголовок `x-dev-session-token`. Токен генерируется как
 обычно — `openssl rand -base64 32` (см. [security.md](/.claude/rules/security.md)) — и base64

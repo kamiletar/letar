@@ -695,7 +695,11 @@ scoped cookie, без утечки токена в лог/`Referer` ·
 ⚠️ `prismaAdapter()` требует нативный `PrismaClient` — ZenStack ORM-клиент (Kysely под капотом)
 несовместим, любой `/api/auth/*` падает 500 без единой строки в логах; фикс — отдельный
 `lib/prisma.ts`, найдено и починено в 5 приложениях (mandala, domwellbes, svoichuzhie, dsperevod,
-studio)
+studio) ·
+[dev-session-token-plus-char-query-corruption](/.claude/docs/dev-session-token-plus-char-query-corruption.md)
+⚠️ `+` в query-параметре `?token=` `application/x-www-form-urlencoded`-декодируется в пробел до
+сравнения — base64-токен без ручного `%2B` даёт 403 при формально верном значении; починено
+2026-09-09 в `createDevSessionRoute` (общая фабрика всех 11 приложений с dev-session route)
 
 **Электрон и десктоп:** [electron-app-protocol](/.claude/docs/electron-app-protocol.md) ⚠️ origin
 `null` под `file://` блокирует Worker и WASM ·
