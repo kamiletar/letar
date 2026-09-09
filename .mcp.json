@@ -153,7 +153,7 @@
         "MCP_PROD_RO_URL",
         "--tunnel",
         "5455",
-        "root@s2.letar.best",
+        "root@185.28.85.195",
         "5437"
       ]
     },
@@ -184,7 +184,7 @@
         "MCP_PROD_RO_URL",
         "--tunnel",
         "5456",
-        "root@s2.letar.best",
+        "root@185.28.85.195",
         "5455"
       ]
     },
