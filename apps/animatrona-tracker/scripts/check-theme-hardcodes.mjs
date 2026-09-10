@@ -29,6 +29,9 @@ const allowedMatches = new Map([
   // шкалы; 0.85 — close-триггер тега, тот же класс; 1.1 — рост thumb слайдера при захвате, а не
   // проседание (другая механика по семантике, не глубина нажатия).
   ['src/app/_components/ui/provider.tsx', new Set([`transform: 'scale(0.9)`, `transform: 'scale(0.85)`, `transform: 'scale(1.1)`])],
+  // src/app/_components/ui/slotRecipes.ts — радио вынесено из provider.tsx (фикс ключа регистрации
+  // radio→radioGroup), тот же класс исключения, что control радио выше.
+  ['src/app/_components/ui/slotRecipes.ts', new Set([`transform: 'scale(0.9)`])],
   // Рост при наведении, не проседание — другая механика, pressScale не подходит по семантике
   // (см. её JSDoc в libs/ui/src/lib/press-scale.ts).
   ['src/app/anime/[id]/_components/video-section.tsx', new Set([`transform: 'scale(1.02)`])],
@@ -40,9 +43,9 @@ await runThemeCheckCli({
   sourceDirName: 'src',
   ignoredDirectories,
   // Приложение не имеет каталога src/theme/ — палитра/семантические токены/recipes живут в
-  // одном файле provider.tsx (тот же случай, что у apps/kami — themePrefix матчится через
-  // startsWith на путь, не обязательно на директорию, см.
-  // .claude/docs/theme-hardcode-gate-coverage.md § «kami — особый случай»).
-  themePrefix: 'src/app/_components/ui/provider.tsx',
+  // src/app/_components/ui/ (provider.tsx + slotRecipes.ts), тот же случай, что у apps/kami —
+  // themePrefix матчится через startsWith на путь, здесь — на директорию, см.
+  // .claude/docs/theme-hardcode-gate-coverage.md § «kami — особый случай».
+  themePrefix: 'src/app/_components/ui/',
   allowedMatches,
 })

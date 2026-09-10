@@ -2,6 +2,41 @@
 
 > История старше ~2026-08-08 — в [PLAN_COMPLETED_2026_09_08.md](./PLAN_COMPLETED_2026_09_08.md).
 
+## Сессия 2026-09-10: фикс radio slot recipe (ключ регистрации + legacy-анатомия)
+
+`radioRecipe` в `provider.tsx` регистрировался в `slotRecipes` под ключом `radio` — Chakra v3
+регистрирует стоковый рецепт RadioGroup под ключом `radioGroup` (`node_modules/@chakra-ui/react/
+dist/esm/theme/slot-recipes.js`), поэтому кастомная стилизация (`colorPalette: 'brand'`,
+тактильный `_active`-отклик) никогда не применялась к реальному компоненту — тот же баг только что
+был найден и исправлен в driving-school (коммит `8ce23a7`) и grandslamcup (`6afc4421`).
+
+Заодно `slots: ['root', 'label', 'control', 'indicator', 'group']` был legacy v2-именованием, не
+реальной `radioGroupAnatomy` Chakra v3 (`root`/`label`/`item`/`itemText`/`itemControl`/`indicator`/
+`itemAddon`/`itemIndicator`). Исправление только ключа регистрации без исправления анатомии дало
+бы новый класс бага — `createSystem(defaultConfig, appConfig)` мержит массивы `slots` ПОЗИЦИОННО
+(`target[i] = source[i]` по индексу, не по имени), короткий/неверно именованный массив молча
+теряет реальные слоты стокового рецепта.
+
+Живого использования `RadioGroup` в `apps/animatrona-tracker/src` на момент фикса не найдено
+(`grep -r "RadioGroup" src` — пусто), поэтому визуальной проверки через Browser pane не
+потребовалось — фикс превентивный.
+
+Изменения:
+
+- Рецепт вынесен из `provider.tsx` в отдельный `src/app/_components/ui/slotRecipes.ts` (по образцу
+  `apps/driving-school/src/theme/recipes/slotRecipes.ts` и `apps/aboi/src/theme/slotRecipes/
+  fields.ts`) — так тест мог импортировать `radioRecipe` изолированно, не утаскивая `provider.tsx`
+  целиком (тот тянет `@letar/chakra-provider`, который vitest не резолвит вне React-рендера).
+- `slots` переписан на реальную `radioGroupAnatomyOrder`, базовые стили `control`→`itemControl`.
+- Ключ регистрации `radio: radioRecipe` → `radioGroup: radioRecipe` в `provider.tsx`.
+- `slotRecipes.test.ts` — regression-тест по образцу `apps/driving-school/src/theme/recipes/
+  slotRecipes.test.ts`: симулирует позиционный мерж `radioRecipe.slots` с реальной
+  `radioGroupAnatomy` (`@chakra-ui/react/anatomy`), проверяет отсутствие потери слотов.
+- `scripts/check-theme-hardcodes.mjs` — `themePrefix` расширен с точного пути `provider.tsx` до
+  директории `src/app/_components/ui/` (совпадение по-прежнему через `startsWith`, как у `kami`),
+  плюс отдельная запись `allowedMatches` для `slotRecipes.ts` (`scale(0.9)` — тот же класс
+  исключения «мелкая поверхность», что и `control` чекбокса/радио в `provider.tsx`).
+
 ## Сессия 2026-09-08 (5): идемпотентный сид демо-данных
 
 Закрыт открытый вопрос из `PLAN.md` — «нечем проверить UI локально, нет сида/фикстур». Две

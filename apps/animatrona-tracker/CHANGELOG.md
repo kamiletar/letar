@@ -7,6 +7,21 @@
 
 ---
 
+## [0.13.1] — 2026-09-10
+
+### Исправлено
+
+- **Radio slot recipe — неверный ключ регистрации + legacy-анатомия v2.** `radioRecipe`
+  регистрировался в `slotRecipes` под ключом `radio`, а Chakra v3 регистрирует стоковый рецепт
+  RadioGroup под ключом `radioGroup` — кастомная стилизация (brand palette, тактильный отклик)
+  никогда не применялась к реальному компоненту. Заодно `slots` перечислял legacy v2-именование
+  (`control`/`group`) вместо реальной `radioGroupAnatomy` (`item`/`itemControl`/`itemIndicator`/...)
+  — после фикса ключа это привело бы к позиционной потере слотов при мерже
+  (`createSystem(defaultConfig, appConfig)` мержит массивы `slots` по индексу, не по имени). Рецепт
+  вынесен из `provider.tsx` в отдельный `slotRecipes.ts` (по образцу driving-school/grandslamcup) —
+  добавлен regression-тест на позиционный мерж. Тот же класс бага только что был закрыт в
+  driving-school и grandslamcup.
+
 ## [0.13.0] — 2026-09-08
 
 ### Добавлено

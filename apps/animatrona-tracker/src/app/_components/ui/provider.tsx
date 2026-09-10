@@ -12,6 +12,7 @@ import { ColorModeProvider, type ColorModeProviderProps } from '@letar/chakra-pr
 import { FormI18nProvider } from '@letar/forms'
 import { pressableConfig, pressScale } from '@letar/ui'
 import { useEffect } from 'react'
+import { radioRecipe } from './slotRecipes'
 
 // ─── Recipes с :active тактильной обратной связью ──────────────────────
 // Глубина нажатия — общая шкала pressScale (@letar/ui), см. её JSDoc за логикой шагов
@@ -112,21 +113,6 @@ const checkboxRecipe = defineSlotRecipe({
       cursor: 'pointer',
       transition: 'all 0.1s ease-out',
       // Мелкая поверхность (control чекбокса) — вне диапазона pressScale, см. её JSDoc.
-      _active: { transform: 'scale(0.9)' },
-    },
-  },
-})
-
-/** Радио: scale при нажатии + brand palette */
-const radioRecipe = defineSlotRecipe({
-  slots: ['root', 'label', 'control', 'indicator', 'group'],
-  base: {
-    root: { colorPalette: 'brand', cursor: 'pointer' },
-    label: { cursor: 'pointer' },
-    control: {
-      cursor: 'pointer',
-      transition: 'all 0.1s ease-out',
-      // Мелкая поверхность (control радио) — вне диапазона pressScale, см. её JSDoc.
       _active: { transform: 'scale(0.9)' },
     },
   },
@@ -248,7 +234,7 @@ const animatronaConfig = defineConfig({
       menu: menuRecipe,
       accordion: accordionRecipe,
       checkbox: checkboxRecipe,
-      radio: radioRecipe,
+      radioGroup: radioRecipe,
       switch: switchRecipe,
       tag: tagRecipe,
       slider: sliderRecipe,
