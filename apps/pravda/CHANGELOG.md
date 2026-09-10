@@ -7,6 +7,18 @@
 
 ## [Unreleased]
 
+## [1.9.6] - 2026-09-10
+
+### Fixed
+
+- `src/theme/recipes/slotRecipes.ts`: `menuRecipe`/`tabsRecipe` объявляли короткий массив
+  `slots` — `createSystem(defaultConfig, appConfig)` мержит такие массивы ПОЗИЦИОННО
+  (`target[i] = source[i]`, не по имени), из-за чего молча терялись реальные слоты стоковой
+  anatomy (`positioner`/`contextTrigger`/`arrow`/`arrowTip` у меню, `contentGroup` у табов).
+  Фикс — полный anatomy-ordered массив слотов, по образцу
+  `apps/domwellbes/src/theme/recipes/controls.ts`. Регрессионный тест —
+  `src/theme/recipes/slotRecipes.test.ts`.
+
 ## [1.9.5] - 2026-09-03
 
 ### Fixed
