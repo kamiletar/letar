@@ -342,6 +342,7 @@
         "@letar/analytics": "workspace:*",
         "@letar/api-server": "workspace:*",
         "@letar/auth": "workspace:*",
+        "@letar/cdek": "workspace:*",
         "@letar/demo-protection": "workspace:*",
         "@letar/email": "workspace:*",
         "@letar/env-load": "workspace:*",
