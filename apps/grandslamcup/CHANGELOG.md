@@ -2,6 +2,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.39.17] - 2026-09-10
+
+### Fixed
+
+- `src/theme/recipes/slotRecipes.ts`: `menuRecipe`/`tabsRecipe`/`sliderRecipe` объявляли
+  короткий или переставленный массив `slots` — `createSystem(defaultConfig, appConfig)` мержит
+  такие массивы ПОЗИЦИОННО (`target[i] = source[i]`, не по имени), из-за чего молча терялись
+  реальные слоты стоковой anatomy (`positioner`/`contextTrigger`/`arrow`/`arrowTip` у меню,
+  `contentGroup` у табов, `draggingIndicator` у слайдера). Фикс — полный anatomy-ordered массив
+  слотов, по образцу `apps/domwellbes/src/theme/recipes/controls.ts`. Регрессионный тест —
+  `src/theme/recipes/slotRecipes.test.ts`.
+
 ## [3.39.16] - 2026-09-08
 
 ### Changed
