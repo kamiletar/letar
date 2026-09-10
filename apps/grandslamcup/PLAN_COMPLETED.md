@@ -2,6 +2,15 @@
 
 Детальное описание всех реализованных фич.
 
+## Фикс truncation-бага в defineSlotRecipe (2026-09-10)
+
+Аудит по монорепо на баг positional-merge Chakra (`createSystem` мержит массивы `slots`
+позиционно, `target[i] = source[i]`, не по имени слота — короткий/переставленный массив молча
+теряет реальные слоты стоковой anatomy, найдено и впервые исправлено в domwellbes). В
+`src/theme/recipes/slotRecipes.ts` нашлись три сломанных рецепта: `menuRecipe`, `tabsRecipe`
+(терял `contentGroup`), `sliderRecipe` (терял `draggingIndicator`). Исправлено — полный
+anatomy-ordered массив слотов. Регрессионный тест — `src/theme/recipes/slotRecipes.test.ts`.
+
 ## Fail-open Telegram webhook secret (2026-09-08)
 
 Аудит безопасности (`.claude/rules/env-files.md`-класс: «нет переменной — значит пускаем»,
