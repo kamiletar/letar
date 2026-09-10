@@ -3586,3 +3586,51 @@ bun-симлинк (`node_modules/@letar/<lib>` создаёт только `bun
 - **2026-09-09: `nx-graph-deps` поднята до `gate` в `scripts/check-all.mjs`** (по образцу
   `transpile-packages`, §162). `bun scripts/check-all.mjs --group=deps` — все gate-проверки
   зелёные, `nx-graph-deps` в их числе.
+
+## §170 (2026-09-10) `/infra:deps-update` — react 19.3.0, nx 23.2.1, security-фиксы, sync electron
+
+Плановый прогон `/infra:deps-update`, 5 коммитов, каждый проверен `check-all.mjs --group=deps`
+(gate-проверки) + typecheck/lint spot-check на `mandala`/`kami`/`driving-school`/
+`animatrona-mobile`/`animatrona`/`poster-microtext-desktop`.
+
+- **`nx` 23.2.0 → 23.2.1** — чистый patch, все `@nx/*`-пакеты синхронно (входят в
+  intentional-pins «группа nx»). По ходу всплыла и почищена отдельная поломка: глобальная
+  bun-установка `nx` (`~/.bun/install/global`) была в битом состоянии (`node_modules/nx`
+  отсутствовал целиком при заявленном в глобальном `package.json` `nx@^23.2.1`) — не связано с
+  этим бампом, `bun install` из глобального каталога починил.
+- **`react`/`react-dom`/`@types/react`/`@types/react-dom` 19.2.x → 19.3.0.** Проверено заранее:
+  `react-native@0.87.1` требует `react@^19.2.3` (совместимо), `libs/video-player-react` и
+  `libs/forms-react` держат peerDependency `react@^19.0.0` (совместимо), патчи
+  (`@chakra-ui/react`, `@react-pdf/hyphenate`) привязаны не к react — не задеты. В самом релизе
+  React 19.3.0 нет breaking changes, только аддитивные API (`browser()` + `onBrowserBailout` в
+  react-dom — потенциальная замена самодельных обходов SSR/hydration из
+  [nextjs-ssr-browser-only-libs.md](/.claude/docs/nextjs-ssr-browser-only-libs.md) и
+  [nextjs-dynamic-ssr-false-still-server-compiled.md](/.claude/docs/nextjs-dynamic-ssr-false-still-server-compiled.md) —
+  не применялось, отдельная задача на будущее) и фиксы Fast Refresh для `lazy()`/`memo()`.
+- **`bun audit fix`: 95 из 109 транзитивных уязвимостей закрыты** в рамках существующих
+  semver-диапазонов (babel, browserslist, nanoid, ws, js-yaml, tmp и др., два прохода —
+  второй добил `tmp@0.2.6→0.2.7`, у которого была отдельная advisory). 14 уязвимостей остаются
+  заблокированы диапазоном зависимого пакета (`nx > smol-toml`, `prisma > mysql2`,
+  `satori > fflate`, `express-rate-limit > ip-address`, `meow(mdx) > trim-newlines`) или без
+  опубликованного фикса вовсе (`image-size@1.2.1`) — требуют отдельного решения о major-бампе
+  соответствующего инструмента, не тронуто в этой сессии.
+- **Безопасные minor-бампы внутри диапазонов:** `@ai-sdk/anthropic`, `@ai-sdk/react`, `ai`,
+  `dompurify`, `fumadocs-core`/`fumadocs-ui`, `googleapis`, `import-in-the-middle`, `jose`,
+  `lucide-react`/`lucide-react-native`, `@tanstack/react-virtual`; dev: `@playwright/test`,
+  `playwright`, `dprint`, `eslint`, `typescript-eslint`.
+- **`electron` 44.2.0 → 44.3.0, синхронизирован по [electron-version-drift.md](/.claude/docs/electron-version-drift.md).**
+  Задело корневой `package.json` + 5 приложений основного репо (`animatrona`,
+  `animatrona-ipfs-player`, `animatrona-folder-player`, `label-printer-desktop`,
+  `kami-key-the`) + захардкоженную версию в `postinstall`/`postinstall:dev` у `animatrona`
+  (`@electron/rebuild -v`, отдельный класс дрейфа, описанный в том же доке) +
+  `poster-microtext-desktop` (submodule — коммит `c67a95f` внутри него, затем bump SHA в letar).
+  `bash scripts/check-electron-drift.sh` после — «версии синхронны: 44.3.0».
+- **Оставленные без действия сознательно:** `zod` (пин `4.4.3`, снятие требует проверки
+  `unpinWhen` в реестре — не проверялось), `typescript` 6→7 (major), `prisma` 7→8-rc (ещё RC),
+  `@babel/*` 7→8, `imapflow` 1→2, `nodemailer` 9→10, `fast-check` 3→4 — все требуют отдельной
+  сессии с разбором breaking changes, не тронуты.
+- **Коммиты (не запушены на конец сессии, ждут отдельного одобрения на push):** `8a2407bb` (nx),
+  `55b5748c` (react), `c5afb140` (audit fix), `5252e872` (minor-бампы + electron sync),
+  `57a37b82` (bump submodule poster-microtext-desktop). Порядок push при одобрении: сначала
+  `git -C apps/poster-microtext-desktop push origin main`, потом `git push` в letar — иначе
+  `pre-push`-хук блокирует по [git-multi-agent-incidents.md](/.claude/docs/git-multi-agent-incidents.md).
