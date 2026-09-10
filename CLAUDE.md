@@ -444,6 +444,13 @@ JSX-transform у esbuild на `"jsx": "preserve"` из `tsconfig.next-app.json`,
 ⚠️ в своём `defineRecipe`/`defineSlotRecipe` порядок ключей в JS не совпадает с порядком CSS-
 каскада — `textStyle` тихо перебивает соседний `fontSize`, вариантный `_hover` наследуется мимо
 `base._hover` ·
+[chakra-slot-recipe-array-merge-truncation](/.claude/docs/chakra-slot-recipe-array-merge-truncation.md)
+⚠️ `createSystem()` мержит `theme.slotRecipes.*.slots` ПО ИНДЕКСУ массива, не по значению —
+короткий `slots: ['input','trigger']` в partial-override молча вычёркивает `root`/другие слоты
+настоящей anatomy на тех же индексах; если на вычеркнутом слоте висели CSS custom properties
+(высота/паддинги через `--component-*`), стили другого слота, ссылающиеся на них через `var()`,
+браузер просто дропает — найдено на `Field.Combobox` (domwellbes), `select`/`nativeSelect` та же
+ошибка ловится незаметно ·
 [pressable-overflow-clips-focus-ring](/.claude/docs/pressable-overflow-clips-focus-ring.md) ⚠️
 `Pressable` из `@letar/ui` даёт `overflow: hidden` под ripple — обрезает focus ring обёрнутой
 кнопки, если их прямоугольники совпадают; `getComputedStyle` на кнопке врёт, свойство применено,
