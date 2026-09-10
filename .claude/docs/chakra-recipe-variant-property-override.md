@@ -79,6 +79,16 @@ raw-свойство и как компаунд-токен рядом — нуж
 Найдено на `apps/studio` (submodule `letar-private-studio`), редизайн Э5 «Компоненты»,
 `src/theme/phosphor/recipes.ts`, коммит `9744e5b`, 2026-08-19.
 
+⚠️ **Найдено повторно на `apps/aboi` (submodule), 2026-09-10, коммит `c03a0e6`** — тот же
+механизм «Баг 2», но между СВОИМ `base` и СТОКОВЫМ `variant` (не между своим `base` и своим
+`variant`, как в примере выше). `inputRecipe.base` задавал `fontSize`/`minH`/`bg`/`borderColor`;
+стоковый Chakra `input.js` несёт `fontSize` через `variants.size.md.textStyle` и `bg`/`borderColor`
+через `variants.variant.outline` — все четыре свойства из `base` молча проигрывали, подтверждено
+`getComputedStyle` на реальном `<Input>` (`font-size: 14px` вместо `16px`, `background-color:
+transparent` вместо ожидаемого). Фикс — перенести оверрайд в `variants.size.*` (на все размеры) и
+`variants.variant.outline`, зеркалируя структуру стокового рецепта. Разбор — `CHANGELOG.md` v0.83.8
+приложения (приватный submodule).
+
 ## Смежные документы
 
 - [chakra-hover-condition-already-media-gated.md](/.claude/docs/chakra-hover-condition-already-media-gated.md) —
