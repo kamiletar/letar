@@ -2,6 +2,24 @@
 
 Детальное описание всех реализованных фич.
 
+## Фикс неверного ключа регистрации radioRecipe (2026-09-10)
+
+Аудит ключей `slotRecipes` в `src/theme/index.ts` (продолжение находки truncation-бага ниже)
+нашёл, что `radioRecipe` был зарегистрирован под ключом `radio`, а не `radioGroup` — единственный
+ключ, который читает стоковый компонент `RadioGroup`. `createSystem(defaultConfig, appConfig)`
+мержит конфиги по объектным ключам, поэтому `radio` создавал новый, никем не читаемый рецепт —
+кастомная `colorPalette: 'brand'` для радио-кнопок не применялась к реальному компоненту НИ РАЗУ
+(эталон верного ключа — `apps/aboi/src/theme/slotRecipes/fields.ts`, `radioGroup:
+radioSlotRecipe`). Живой пример `RadioGroup` в `apps/grandslamcup/src` на 2026-09-10 не найден
+(компонент пока нигде не используется в этом приложении), поэтому визуальной проверки в браузере
+не было — фикс проверен regression-тестом на реальную `radioGroupAnatomy`.
+
+После фикса ключа `radioRecipe.slots` впервые реально замержился с настоящей `radioGroupAnatomy`
+— старый v2-стиль слотов не совпадает с реальными v3-слотами, тот же класс truncation-бага, что
+ниже, но обнажившийся только теперь, когда ключ стал верным. Слоты и стили переписаны на
+`item`/`itemControl`/`itemIndicator`/..., регрессионный тест дополнен в
+`src/theme/recipes/slotRecipes.test.ts`.
+
 ## Фикс truncation-бага в defineSlotRecipe (2026-09-10)
 
 Аудит по монорепо на баг positional-merge Chakra (`createSystem` мержит массивы `slots`

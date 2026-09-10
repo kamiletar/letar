@@ -43,6 +43,17 @@ const sliderAnatomyOrder = [
   'markerLabel',
 ] as const
 
+const radioGroupAnatomyOrder = [
+  'root',
+  'label',
+  'item',
+  'itemText',
+  'itemControl',
+  'indicator',
+  'itemAddon',
+  'itemIndicator',
+] as const
+
 /**
  * Card slot recipe с transition для интерактивных вариантов
  */
@@ -172,10 +183,13 @@ export const checkboxRecipe = defineSlotRecipe({
 })
 
 /**
- * Radio recipe
+ * Radio recipe (RadioGroup, регистрируется под ключом `radioGroup` в index.ts)
+ *
+ * Слоты — реальная `radioGroupAnatomy` Chakra v3 (`item`/`itemControl`/`itemIndicator`/...),
+ * не legacy-именование v2 (`control`/`group`) — см. предупреждение о позиционном мерже выше.
  */
 export const radioRecipe = defineSlotRecipe({
-  slots: ['root', 'label', 'control', 'indicator', 'group'],
+  slots: [...radioGroupAnatomyOrder],
   base: {
     root: {
       colorPalette: 'brand',
@@ -184,7 +198,7 @@ export const radioRecipe = defineSlotRecipe({
     label: {
       cursor: 'pointer',
     },
-    control: {
+    itemControl: {
       cursor: 'pointer',
       transition: 'all 0.1s ease-out',
       _active: {

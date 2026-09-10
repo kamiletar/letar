@@ -2,6 +2,20 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [3.39.18] - 2026-09-10
+
+### Fixed
+
+- `src/theme/index.ts`: `radioRecipe` был зарегистрирован в `slotRecipes` под ключом `radio` —
+  Chakra регистрирует стоковый рецепт `RadioGroup` под ключом `radioGroup`
+  (`node_modules/@chakra-ui/react/dist/esm/theme/slot-recipes.js`), поэтому кастомные
+  `colorPalette: 'brand'` и tactile-feedback `_active` для радио-кнопок ни разу не применялись к
+  реальному компоненту с момента написания. Ключ исправлен на `radioGroup` (по образцу
+  `apps/aboi/src/theme/slotRecipes/fields.ts`). После фикса `radioRecipe.slots` впервые реально
+  замержился с настоящей `radioGroupAnatomy` — старый v2-стиль слотов (`control`/`group`)
+  переписан на реальные v3-слоты (`item`/`itemControl`/`itemIndicator`/...). Регрессионный тест
+  дополнен в `src/theme/recipes/slotRecipes.test.ts`.
+
 ## [3.39.17] - 2026-09-10
 
 ### Fixed

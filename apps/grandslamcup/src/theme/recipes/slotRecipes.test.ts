@@ -1,6 +1,6 @@
-import { menuAnatomy, sliderAnatomy, tabsAnatomy } from '@chakra-ui/react/anatomy'
+import { menuAnatomy, radioGroupAnatomy, sliderAnatomy, tabsAnatomy } from '@chakra-ui/react/anatomy'
 import { describe, expect, it } from 'vitest'
-import { menuRecipe, sliderRecipe, tabsRecipe } from './slotRecipes'
+import { menuRecipe, radioRecipe, sliderRecipe, tabsRecipe } from './slotRecipes'
 
 /**
  * Регрессия на баг positional-merge: `createSystem(defaultConfig, appConfig)` мержит массивы
@@ -36,6 +36,14 @@ describe('slotRecipes — anatomy truncation regression', () => {
   it('sliderRecipe.slots не теряет ни один слот реальной sliderAnatomy', () => {
     const real = sliderAnatomy.keys()
     const merged = simulateMerge(real, sliderRecipe.slots as string[])
+    for (const slot of real) {
+      expect(merged.has(slot)).toBe(true)
+    }
+  })
+
+  it('radioRecipe.slots не теряет ни один слот реальной radioGroupAnatomy', () => {
+    const real = radioGroupAnatomy.keys()
+    const merged = simulateMerge(real, radioRecipe.slots as string[])
     for (const slot of real) {
       expect(merged.has(slot)).toBe(true)
     }

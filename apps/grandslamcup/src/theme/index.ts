@@ -50,7 +50,7 @@ const grandslamcupConfig = defineConfig({
       segmentGroup: segmentGroupRecipe,
       switch: switchRecipe,
       checkbox: checkboxRecipe,
-      radio: radioRecipe,
+      radioGroup: radioRecipe,
       slider: sliderRecipe,
       tag: tagRecipe,
     },
