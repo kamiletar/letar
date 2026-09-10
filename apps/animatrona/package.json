@@ -19,8 +19,8 @@
     ]
   },
   "scripts": {
-    "postinstall": "node -e \"process.platform!=='linux'&&require('child_process').execFileSync('npx', ['--no','@electron/rebuild','-f','-w','classic-level','-v','44.2.0'],{stdio:'inherit',shell:true})\" && node -e \"process.platform==='win32'&&require('child_process').execFileSync('node', ['../../node_modules/ntsuspend/install.cjs'],{stdio:'inherit',cwd:__dirname})\"",
-    "postinstall:dev": "npx --no @electron/rebuild -f -w classic-level -v 44.2.0 && node -e \"process.platform==='win32'&&require('child_process').execFileSync('node', ['../../node_modules/ntsuspend/install.cjs'],{stdio:'inherit',cwd:__dirname})\""
+    "postinstall": "node -e \"process.platform!=='linux'&&require('child_process').execFileSync('npx', ['--no','@electron/rebuild','-f','-w','classic-level','-v','44.3.0'],{stdio:'inherit',shell:true})\" && node -e \"process.platform==='win32'&&require('child_process').execFileSync('node', ['../../node_modules/ntsuspend/install.cjs'],{stdio:'inherit',cwd:__dirname})\"",
+    "postinstall:dev": "npx --no @electron/rebuild -f -w classic-level -v 44.3.0 && node -e \"process.platform==='win32'&&require('child_process').execFileSync('node', ['../../node_modules/ntsuspend/install.cjs'],{stdio:'inherit',cwd:__dirname})\""
   },
   "dependencies": {
     "cheerio": "^1.2.0",
@@ -40,6 +40,6 @@
     "@letar/video-player-react": "workspace:*"
   },
   "devDependencies": {
-    "electron": "44.2.0"
+    "electron": "44.3.0"
   }
 }
