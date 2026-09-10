@@ -47,6 +47,12 @@ projects --with-target` этого не ловит ·
 `--max-old-space-size`), раздутый безусловной (без `include`) регистрацией `@nx/vitest` в
 `nx.json`, цепляющей `vitest.config.*` внутри вложенных `node_modules`; воркэраунд —
 `NODE_OPTIONS=--max-old-space-size=8192` (форвардится воркеру как есть) ·
+[nextjs-build-worker-count-oom-shared-host](/.claude/docs/nextjs-build-worker-count-oom-shared-host.md)
+⚠️ `next build` дважды подряд падал system-wide OOM на фазе «Collecting page data using 7
+workers» (не на компиляции Turbopack) — соседний, но другой класс: дефолт
+`experimental.cpus = os.cpus().length - 1` сайзит число воркеров по CPU хоста, не по свободной
+памяти (`memoryBasedWorkersCount` по умолчанию `false`); фикс — явный низкий `experimental.cpus`
+в `next.config.mjs` приложения, не глобальная настройка ·
 [nx-playwright-plugin-project-graph-race](/.claude/docs/nx-playwright-plugin-project-graph-race.md)
 ⚠️ `Failed to process project graph` на `@nx/playwright/plugin` («Unexpected module status 0»,
 «race condition ... Promise.all()») — гонка загрузчика ESM при параллельном чтении конфигов
