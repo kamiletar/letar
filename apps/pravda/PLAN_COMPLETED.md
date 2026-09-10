@@ -1,5 +1,14 @@
 # Pravda - Выполненные задачи
 
+## Фикс truncation-бага в defineSlotRecipe (2026-09-10, v1.9.6)
+
+Аудит по монорепо на баг positional-merge Chakra (`createSystem` мержит массивы `slots`
+позиционно, `target[i] = source[i]`, не по имени слота — короткий массив молча теряет реальные
+слоты стоковой anatomy, найдено и впервые исправлено в domwellbes). В
+`src/theme/recipes/slotRecipes.ts` нашлись два сломанных рецепта: `menuRecipe`, `tabsRecipe`
+(терял `contentGroup`). Исправлено — полный anatomy-ordered массив слотов. Регрессионный тест —
+`src/theme/recipes/slotRecipes.test.ts`.
+
 ## Фикс: выключение оффлайн-режима не снимало Service Worker (2026-09-03, v1.9.5)
 
 `service-worker-registration.tsx` снимал регистрацию через `registrationRef` с текущей загрузки
