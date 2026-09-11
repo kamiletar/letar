@@ -139,12 +139,51 @@ Argument of type 'string' is not assignable to parameter of type 'ZodRawShapeCom
 grep -n '"@letar/deploy-mcp"' -A3 bun.lock | grep modelcontextprotocol
 ```
 
-Затем `bun install` заново. Все три существующие MCP-либы (`deploy-mcp`, `form-mcp`,
-`studio-time-mcp`) сейчас на точном пине `1.29.0` — `form-mcp` был последним с диапазоном,
+Затем `bun install` заново. Все семь MCP-либ (`deploy-mcp`, `form-mcp`, `glitchtip-mcp`,
+`mcp-test-kit`, `studio-mcp`, `studio-time-mcp`, `umami-mcp`) держат точный пин SDK (на
+2026-09-11 — `1.30.0`, синхронно с корневым `^1.30.0`) — `form-mcp` был последним с диапазоном,
 починен 2026-08-06 (диагностировано через `nx typecheck @letar/form-mcp`: `No overload matches
 this call ... ZodRawShapeCompat` на каждом `server.tool()`/`server.prompt()`; после точного пина
 и `bun install` — зелёный). `@letar/mcp-server-kit` от этой ловушки не зависит — сам SDK не
 импортирует, версию `@modelcontextprotocol/sdk` не резолвит.
+
+### ⚠️ 2026-09-11: пина SDK недостаточно — нужен ещё пин `zod` под саму SDK
+
+Точный пин `@modelcontextprotocol/sdk` (выше) решает только расхождение версий **самого SDK**
+между копиями. Он не защищает от второго, независимого источника той же по симптомам ошибки:
+`bun update` в корне поднял `better-auth` до версии, которая сама требует `zod: "^4.5.4"` —
+диапазон уже, чем текущий корневой пин `zod@4.4.3` (§134,
+[root-pin-peer-drift.md](/.claude/docs/root-pin-peer-drift.md)). Это заставило bun выделить
+**отдельную вложенную копию** `zod` персонально для `@modelcontextprotocol/sdk` (её видно как
+`"@modelcontextprotocol/sdk/zod"` в `bun.lock`), даже когда версия самого SDK у всех копий
+синхронна. `z.string()`/`z.enum()` и т.п. из лишь БЛИЗКОЙ, но другой физической копии `zod`
+(взятой из корневого пина или из собственного `"zod"` поля либы) не совпадают по типу с
+`AnySchema`/`ZodTypeAny`, которые ждёт SDK — та же by-symptom ошибка `TS2322: Type 'ZodString' is
+not assignable to type 'AnySchema'` на каждом `server.tool()`.
+
+**Лечится вторым точным пином — `"zod"` в самой либе, версией, которая совпадает с тем, что
+резолвится под SDK:**
+
+```bash
+grep -n '"@modelcontextprotocol/sdk/zod"' bun.lock
+# "@modelcontextprotocol/sdk/zod": ["zod@4.6.2", ...]  ← вот эту версию и пинуй
+```
+
+```json
+"zod": "4.6.2"
+```
+
+Затронуты все семь MCP-либ разом (все использовали общий корневой пин `zod@4.4.3`, ни один из
+семи не переживёт следующего чужого апдейта `better-auth`/`@zenstackhq/*`/другого потребителя
+`zod` без повторной сверки). Плюс два приложения, использующих SDK напрямую без обёртки-либы
+(`domwellbes`, `synth` — `src/mcp/server.ts`) — им нужен собственный явный `"zod"` в
+`dependencies` того же значения, иначе они наследуют корневой `zod@4.4.3` и ловят ту же ошибку.
+
+Эта развязка zod/SDK хрупкая по конструкции: она зависит не от версии самого SDK, а от того, что
+требует zod-diапазон САМЫЙ строгий из ВСЕХ потребителей zod в графе на момент установки — при
+следующем `bun update` версия под `@modelcontextprotocol/sdk/zod` может снова сдвинуться, и пин
+опять разъедется. Проверять этой же командой (`grep '"@modelcontextprotocol/sdk/zod"' bun.lock`)
+при каждом `infra:deps-update`, если он трогает `better-auth`/`zod`/сам SDK.
 
 ## Формат ответа тула — `@letar/mcp-server-kit`
 
