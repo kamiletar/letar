@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.4.1] - 2026-09-11
+
+### Fixed
+
+- Условный `flexWrap` в hero-секции (`flexWrap={{ base: 'nowrap', sm: 'wrap' }}` вместо
+  безусловного `"wrap"`) — на mobile-брейкпоинте (`direction="column"`) `wrap` идёт по
+  cross-axis, т.е. горизонтали, риск переполнения документа. Разбор класса бага —
+  [.claude/docs/chakra-flexwrap-column-direction-overflow.md](../../.claude/docs/chakra-flexwrap-column-direction-overflow.md).
+
 ## [0.2.2] - 2026-09-02
 
 ### Added

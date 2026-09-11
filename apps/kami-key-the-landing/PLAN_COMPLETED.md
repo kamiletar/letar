@@ -1,5 +1,16 @@
 # Выполненные задачи
 
+## Версия 0.4.1 — фикс flexWrap в hero-секции на mobile (2026-09-11)
+
+Часть кросс-приложенческого аудита нового класса бага (root `.claude/docs/chakra-flexwrap-column-direction-overflow.md`,
+найден изначально в domwellbes на `PeriodRangeForm`): `Flex` с
+`direction={{ base: 'column', sm: 'row' }}` и безусловным `flexWrap="wrap"` — на `base`
+(`direction="column"`) `wrap` переносит элементы по cross-axis, т.е. горизонтально, а не вниз.
+В hero-секции (`_components/hero-section.tsx`, блок из 4 карточек `HERO_MAPPINGS`) реального
+переполнения на 375px замерами не подтверждено (нет жёсткого `maxH`), фикс превентивный —
+`flexWrap={{ base: 'nowrap', sm: 'wrap' }}`, wrap включается только при `direction="row"` (`sm`+).
+`nx typecheck:tsgo`/`nx lint` зелёные.
+
 ## Версия 0.4.0 — реальное скачивание + страница /changelog (2026-09-06)
 
 Заглушка «Скоро» на секции «Скачать» и hero-бейдже заменена на реальную ссылку —
