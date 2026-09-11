@@ -101,8 +101,57 @@ git grep -n 'flexWrap="wrap"' -- '*.tsx'
 +   flexWrap={{ base: 'nowrap', sm: 'wrap' }}
 ```
 
-Остальные submodule (`aboi`, `driving-school`, `aprel8008`, `svoichuzhie`, `dsperevod`, `studio` и
-т.д.) этим аудитом не проверялись — `git grep` из публичного репо не заходит в submodule (gitlink,
-не каталог, см.
-[verification-pitfalls § git grep и приватные submodule](/.claude/docs/verification-pitfalls.md#парный-к-предыдущему-git-grep-врёт-в-успокаивающую-сторону--он-не-заходит-в-приватные-submodule)) —
-для полного покрытия нужен рекурсивный `grep` по каждому submodule отдельно.
+### Аудит приватных submodule (2026-09-11)
+
+Рекурсивный `grep -rn "direction={{ base: 'column'" --include='*.tsx'` (исключая `.next`/
+`node_modules`) по каждому submodule отдельно — `git grep` из публичного репо их не видит (см.
+предупреждение выше). Для каждого совпадения — проверка, стоит ли `flexWrap="wrap"`/`wrap="wrap"`
+(безусловно, не объектной формы) **на том же теге**, включая многострочные JSX-теги (не только
+совпадения в одной строке грепа).
+
+| Приложение                 | direction-кандидатов                                   | Найдено багов                                                                                       |
+| -------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| `aboi`                     | 3                                                      | 0                                                                                                   |
+| `driving-school`           | 11                                                     | 0 (2 места уже используют `wrap={{ sm: 'wrap' }}` — безопасно)                                      |
+| `dsperevod`                | 9                                                      | 0                                                                                                   |
+| `studio`                   | 1                                                      | 0                                                                                                   |
+| `svoichuzhie`              | 2                                                      | 2 — ✅ починено (`src/app/_components/footer.tsx`, коммит `16c9325`)                                |
+| `aprel8008`                | 1                                                      | 0                                                                                                   |
+| `poster-microtext-desktop` | 0 (нет `*.tsx` с этим паттерном)                       | —                                                                                                   |
+| `domwellbes`               | 35 (без учёта уже починенного `period-range-form.tsx`) | 4 — ✅ починено (`payment-request-board.tsx` ×3, `partner-referral-panel.tsx` ×1, коммит `d5f03fd`) |
+
+**Живые находки этого аудита** (кроме уже известных `domwellbes/period-range-form.tsx` и
+`kami-key-the-landing/hero-section.tsx`):
+
+```diff
+// apps/domwellbes/src/app/(admin)/admin/treasury/payment-requests/_components/payment-request-board.tsx
+// apps/domwellbes/src/app/(admin)/admin/deals/_components/partner-referral-panel.tsx
+- <Stack direction={{ base: 'column', md: 'row' }} gap={3} flexWrap="wrap">
++ <Stack direction={{ base: 'column', md: 'row' }} gap={3} flexWrap={{ base: 'nowrap', md: 'wrap' }}>
+```
+
+```diff
+// apps/svoichuzhie/src/app/_components/footer.tsx — правовая полоса, два вложенных Flex
+  <Flex
+    direction={{ base: 'column', md: 'row' }}
+    align={{ base: 'flex-start', md: 'center' }}
+    justify="space-between"
+    gap="4"
+-   wrap="wrap"
++   wrap={{ base: 'nowrap', md: 'wrap' }}
+  >
+-   <Flex gap={{ base: '4', md: '6' }} direction={{ base: 'column', md: 'row' }} wrap="wrap">
++   <Flex
++     gap={{ base: '4', md: '6' }}
++     direction={{ base: 'column', md: 'row' }}
++     wrap={{ base: 'nowrap', md: 'wrap' }}
++   >
+```
+
+**Важный нюанс проверки:** многие ложные совпадения — `flexWrap`/`wrap` стоит на **соседнем,
+вложенном** элементе (обычно `HStack` внутри тега с адаптивным `direction`), а не на самом теге с
+`direction`. Одного текстового соседства строк в файле недостаточно — нужно читать JSX-структуру
+и убеждаться, что оба пропа принадлежат одному открывающему тегу. Примеры подтверждённых
+ложных срабатываний из этого аудита: `dsperevod/src/app/_components/footer.tsx` (direction на
+`Flex`, `wrap="wrap"` — на дочернем `HStack`), `domwellbes/.../start-production-panel.tsx`
+(аналогично).
