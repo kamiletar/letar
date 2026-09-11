@@ -569,6 +569,10 @@ unit-тест с настоящими (не замоканными) запрос
 ⚠️ якорный `RegExp` (`^`) в `testMatch`/`testIgnore` матчится против абсолютного пути файла, не
 относительно `testDir` — никогда не совпадает, чинится glob-строкой ·
 [unit-testing](/.claude/docs/unit-testing.md) ⚠️ обязательный `tsconfig.spec.json` ·
+[vitest-jsdom-formdata-request-hang](/.claude/docs/vitest-jsdom-formdata-request-hang.md) ⚠️
+Route Handler-тест с `Request`+`FormData` под глобальным `environment: 'jsdom'` — `await
+request.formData()` зависает до таймаута вместо ошибки, фикс — `@vitest-environment node` в
+docblock файла ·
 [dprint-worktree-submodule-scope](/.claude/docs/dprint-worktree-submodule-scope.md) ⚠️ dprint не видит
 границ worktree/submodule ·
 [dprint-format-project-scope-not-file-scope](/.claude/docs/dprint-format-project-scope-not-file-scope.md)
