@@ -103,7 +103,7 @@ export function HeroSection() {
             direction={{ base: 'column', sm: 'row' }}
             gap={3}
             justify="center"
-            flexWrap="wrap"
+            flexWrap={{ base: 'nowrap', sm: 'wrap' }}
             className="animate-fade-in-up delay-300"
             style={{ opacity: 0 }}
           >
