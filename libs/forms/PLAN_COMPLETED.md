@@ -1,5 +1,31 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-12 — Field.String/Textarea/Number не принимали `size` (найдено в domwellbes)
+
+Владелец нашёл вживую в domwellbes: `Field.Select` и `Field.String` в одном ряду (форма загрузки
+чертежа дома, `house-drawings-section.tsx`) отличались высотой. Root cause — `Field.Select` уже
+форвардил `size` в Chakra-скин, текстовые поля нет: `UIKitInputProps` (`forms-core`,
+`lib/uikit/types.ts`) не объявлял `size` вовсе (в отличие от `UIKitSelectProps`/
+`UIKitCheckboxProps`), `chakraUIKit.Input` (`uikit-chakra.tsx`) его не принимал,
+`StringFieldProps`/`TextareaFieldProps`/`NumberFieldProps` (базовый `Field.Number`, не
+`NumberInput`) поле не декларировали.
+
+**Фикс:** `UIKitInputProps.size?: string` добавлен в контракт; `chakraUIKit.Input` деструктурирует
+и форвардит `size` в `ChakraInput` (тот же паттерн, что уже был у `Select`); три Chakra-типа
+пропсов получили `size?: FieldSize`; `FieldString`/`FieldTextarea`/`FieldNumber` форвардят
+`componentProps.size`. `Field.Currency`/`Field.Percentage`/`Field.NumberInput` уже форвардили
+`size` — не тронуты.
+
+Аудит заодно нашёл тот же пробел у `Field.Password` и `Field.MaskedInput` (прямой импорт `Input`
+из Chakra, `size` не пробрасывается) — вне скоупа этой сессии, не тронуты, см. backlog в
+`PLAN.md`.
+
+В domwellbes восстановлен `size="sm"` у обоих полей в `house-drawings-section.tsx` (v0.244.1) —
+раньше оба падали на дефолтный `md`, потому что `Field.String` `size` не принимал.
+
+typecheck:tsgo и lint (`forms`, `forms-core`) зелёные. Коммиты: `cb724317` (libs/forms +
+forms-core), домвеллбес `d2552bd`.
+
 ## 2026-09-09 (сессия 3) — Field.Percentage.minorUnitScale + архитектурная коррекция meta.fieldProps
 
 Продолжение сессии 2 того же дня (тред `money-field-kopecks`, msg 1478 от domwellbes-dev).
