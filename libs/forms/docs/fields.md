@@ -51,6 +51,22 @@
 | `Form.Field.SegmentedGroup`  | Segmented control                            |
 | `Form.Field.ImageChoice`     | Визуальный выбор из карточек с изображениями |
 
+### Async-поиск в `Form.Field.Combobox`
+
+`useQuery`-проп ждёт хук вида `(search: string) => { data?, isLoading?, error? }`, вызываемый на
+каждый ре-рендер (debounce и `minChars` уже внутри `useAsyncSearch`, менять их не нужно).
+
+- **Источник уже отдаёт данные синхронно** (ZenStack `useFindManyX` и подобные) — подключай
+  напрямую: `useQuery={(search) => useFindManyUser({ where: { name: { contains: search } } })}`.
+- **Источник — плоская async-функция** (server action, `@fuzzy`/`@fullText` full-text search) —
+  оборачивай через `createAsyncActionQuery`, не пиши свой `useState`/`useEffect`/cancel-flag:
+  ```tsx
+  import { createAsyncActionQuery } from '@letar/forms'
+
+  <Form.Field.Combobox name="materialId" useQuery={createAsyncActionQuery(searchMaterialsAction)} />
+  ```
+  Гонка устаревших ответов при быстром наборе текста обрабатывается внутри хука.
+
 ## Множественный выбор
 
 | Компонент                 | Описание                   |

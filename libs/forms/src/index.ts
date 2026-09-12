@@ -143,7 +143,7 @@ export {
 } from './lib/declarative'
 
 // Hooks for async search (Combobox, Autocomplete)
-export { useAsyncSearch, useDebounce } from './lib/declarative'
+export { createAsyncActionQuery, useAsyncActionQuery, useAsyncSearch, useDebounce } from './lib/declarative'
 export type { AsyncQueryFn, AsyncQueryResult, UseAsyncSearchOptions, UseAsyncSearchResult } from './lib/declarative'
 
 // Field UI components

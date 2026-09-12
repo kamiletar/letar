@@ -6,22 +6,24 @@
 
 ## Backlog (запросы от агентов)
 
-### 🔄 [2026-09-12] Автоматизировать создание async-Combobox (в работе → forms-dev, от domwellbes-dev)
+### ✅ [2026-09-12] Автоматизировать создание async-Combobox (закрыт v2.14.6/forms-react v0.8.0, от domwellbes-dev)
 
-- **Запросил:** domwellbes-dev (msg 1527, topic `form-feature-request`)
-- **Приоритет:** normal, не blocking
+- **Запросил:** domwellbes-dev (msg 1527/1529, topic `form-feature-request`)
 - **Описание:** третий независимый вручную написанный async-поисковый Combobox подряд
   (`ComboboxStudent` в driving-school через ZenStack `useFindManyUser`,
-  `useClientSearchOptions` в domwellbes через server action, теперь `ComboboxMaterial` через
-  `@fuzzy`) — одинаковый скелет (`useState`+`useEffect`+cancel-флаг, `getLabel`/`getValue`,
-  регистрация в `lazyComboboxes`) копипастится в каждое приложение. Предложены два варианта:
-  декларативная обёртка `createAsyncActionCombobox({ action, minChars, debounce, emptyMessage })`
-  или генератор `nx g @letar/generators:new-async-combobox`.
-- **Открытый вопрос:** одна обёртка на оба источника данных (server action и ZenStack
-  `useFindMany*`) или два отдельных helper'а — источники в driving-school и domwellbes разные.
-- **Делегировано:** forms-dev (thread `forms-async-combobox-generator`), с учётом только что
-  добавленного `initialSearchValue` в `ComboboxFieldProps`.
-- **Статус:** ожидание ответа forms-dev.
+  `useClientSearchOptions` в domwellbes через server action, `ComboboxMaterial` через `@fuzzy`) —
+  одинаковый скелет (`useState`+`useEffect`+cancel-флаг) копипастился в каждое приложение.
+- **Разведка показала более узкий скоуп, чем в запросе:** `Form.Field.Combobox` уже поддерживает
+  `useQuery: AsyncQueryFn` и уже работает без единой строчки boilerplate для источников,
+  синхронно отдающих `{data, isLoading, error}` (ZenStack-хуки — `ComboboxStudent` тому пример).
+  Реальный дубль — не вся обвязка комбобокса, а только приведение **плоской async-функции**
+  (server action, `@fuzzy`) к этой синхронной форме.
+- **Решение (согласовано с владельцем):** НЕ генератор и НЕ обёртка над самим Combobox — один
+  переиспользуемый хук `useAsyncActionQuery`/`createAsyncActionQuery` в `@letar/forms-react`
+  v0.8.0, реэкспортирован из `@letar/forms` v2.14.6. `useQuery={createAsyncActionQuery(action)}`.
+  Подробности API и cancel-flag против устаревших ответов — `docs/fields.md` §«Async-поиск в
+  `Form.Field.Combobox`», CHANGELOG обоих пакетов.
+- **Статус:** закрыто, ответ отправлен domwellbes-dev в тред `forms-async-combobox-generator`.
 
 ### ✅ [2026-09-12] Маска NumberInput с автоформатированием сбрасывается при удалении цифры (закрыт v2.14.3, от domwellbes-dev)
 

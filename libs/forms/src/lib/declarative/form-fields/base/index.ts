@@ -26,6 +26,9 @@ export { useDebounce } from './use-debounce'
 // Async search with debounce
 export { useAsyncSearch } from './use-async-search'
 
+// Адаптер плоской async-функции поиска (server action и т.п.) под useQuery — см. докстринг файла
+export { createAsyncActionQuery, useAsyncActionQuery } from './use-async-search'
+
 // Async field validation
 export { useAsyncFieldValidation } from './use-async-field-validation'
 export type { AsyncFieldValidators, AsyncValidateConfig } from './use-async-field-validation'

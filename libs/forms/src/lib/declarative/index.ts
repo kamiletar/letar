@@ -592,6 +592,8 @@ export {
 export {
   type AsyncQueryFn,
   type AsyncQueryResult,
+  createAsyncActionQuery,
+  useAsyncActionQuery,
   useAsyncSearch,
   type UseAsyncSearchOptions,
   type UseAsyncSearchResult,

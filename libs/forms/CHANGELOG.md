@@ -4,6 +4,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.14.6] - 2026-09-12
+
+### Added
+
+- **`useAsyncActionQuery`/`createAsyncActionQuery`** реэкспортированы из `@letar/forms-react`
+  v0.8.0 — адаптер плоской async-функции (server action, `@fuzzy`/`@fullText` full-text search)
+  под `useQuery`-проп `Form.Field.Combobox`. Закрывает трёхкратный дубль
+  (`forms-async-combobox-generator` backlog): `useQuery={createAsyncActionQuery(action)}` вместо
+  ручного хука с `useState`/`useEffect`/cancel-flag на каждый комбобокс. Синхронные источники
+  (ZenStack `useFindManyX` и т.п.) по-прежнему подключаются напрямую, без адаптера — см. README.
+
 ## [2.14.5] - 2026-09-12
 
 ### Fixed
