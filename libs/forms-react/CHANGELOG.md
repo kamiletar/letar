@@ -4,7 +4,24 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
-## [0.7.0] - 2026-09-09
+## [0.8.0] - 2026-09-12
+
+### Added
+
+- **`useAsyncActionQuery`/`createAsyncActionQuery`** — адаптер плоской async-функции поиска
+  (server action, `@fuzzy`/`@fullText` full-text search и т.п.) под контракт `AsyncQueryFn`,
+  который ждёт `useQuery`-проп `Form.Field.Combobox`. Раньше это переиспользуемое поведение
+  (debounce уже даёт `useAsyncSearch`, но приведение «плоский async → синхронная форма
+  `{data, isLoading, error}`» каждый раз писалось руками — 3 независимых копии в domwellbes:
+  `ComboboxStudent`, `useClientSearchOptions`, `ComboboxMaterial`) закрыто одним хуком.
+  `createAsyncActionQuery(action)` — эргономичная фабрика, отдаёт готовый `useQuery`:
+  ```tsx
+  <Combobox useQuery={createAsyncActionQuery(searchMaterialsAction)} />
+  ```
+  Гонка устаревших ответов при быстром наборе текста игнорируется (cancel-flag в cleanup
+  эффекта). Хуком не покрыт (и не должен быть) случай, где данные и так приходят в форме
+  `{data, isLoading, error}` синхронно (ZenStack `useFindManyX` и т.п.) — там `useQuery`
+  подключается напрямую, без адаптера.
 
 ### Added
 

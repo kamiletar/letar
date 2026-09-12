@@ -38,6 +38,7 @@ export { createLazyComponent, type LazyComponentImport } from './lib/lazy/create
 export { resolveAutoComplete } from './lib/field/autocomplete-map'
 export { useDeclarativeField } from './lib/field/base-field'
 export { type FieldErrorsResult, formatFieldErrors, getFieldErrors, hasFieldErrors } from './lib/field/field-utils'
+export { createAsyncActionQuery, useAsyncActionQuery } from './lib/field/use-async-action-query'
 export { useAsyncFieldValidation } from './lib/field/use-async-field-validation'
 export type { AsyncFieldValidators, AsyncValidateConfig } from './lib/field/use-async-field-validation'
 export { useAsyncSearch } from './lib/field/use-async-search'
