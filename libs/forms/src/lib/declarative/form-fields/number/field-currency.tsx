@@ -80,7 +80,15 @@ export const FieldCurrency = createField<CurrencyFieldProps, number | undefined,
   },
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
-    const { min, max, step = 0.01, size, minorUnitScale = 1 } = componentProps
+    const { step = 0.01, size, minorUnitScale = 1 } = componentProps
+    const { constraints } = resolved
+
+    // Props take priority over Zod-derived constraints — тот же принцип, что в Form.Field.Number.
+    // Без этого падения `min`/`max` в NumberInput.Root оставались `undefined`, и zag-js подставлял
+    // свой дефолт (`Number.MIN_SAFE_INTEGER`/`Number.MAX_SAFE_INTEGER`) — клавиша Home/End
+    // (в zag-js «прыжок к min/max», не перемещение курсора) записывала это число прямо в поле.
+    const min = componentProps.min ?? constraints.number?.min
+    const max = componentProps.max ?? constraints.number?.max
 
     const { formatOptions, locale, displayedValue, resetKey, markInternalChange } = fieldState
 

@@ -227,6 +227,65 @@ describe('FieldCurrency', () => {
     })
   })
 
+  describe('Home/End прыгают на min/max zag-js NumberInput (bug: -Number.MIN_SAFE_INTEGER)', () => {
+    // Root cause: zag-js/@zag-js/number-input перехватывает клавиши Home/End как «прыжок к
+    // min/max» (аналог <input type=range>), а не как перемещение курсора в начало/конец текста —
+    // event.preventDefault() вызывается безусловно (number-input.connect.mjs). Пока Form.Field.Currency
+    // не передавал min/max в NumberInput.Root, машина zag-js подставляла свой дефолт
+    // (Number.MIN_SAFE_INTEGER/Number.MAX_SAFE_INTEGER, number-input.machine.mjs) — Home вписывал
+    // это число прямо в значение поля. Фикс — читать `min`/`max` из Zod-констрейнтов схемы
+    // (`z.number().min(0)`), как уже делает Form.Field.Number.
+    it('Home с заданным в схеме min не прыгает на Number.MIN_SAFE_INTEGER', async () => {
+      const user = userEvent.setup()
+      const Schema = z.object({ price: z.number().min(0) })
+
+      render(
+        <FormI18nProvider locale="ru">
+          <Form schema={Schema} initialValue={{ price: 5000000 }} onSubmit={vi.fn()}>
+            <Form.Field.Currency name="price" />
+          </Form>
+        </FormI18nProvider>,
+        { wrapper: TestWrapper },
+      )
+
+      const input = screen.getByRole('spinbutton') as HTMLInputElement
+      await user.click(input)
+      await user.keyboard('{Home}')
+
+      expect(input.value).not.toContain('9 007 199 254 740 991')
+    })
+
+    it('без min в схеме и без явного пропа Home всё же не пишет -Number.MIN_SAFE_INTEGER в форму', async () => {
+      // Даже без явного business-min (значит для zag-js это «поле без нижней границы») подставлять
+      // JS-константу как реальное число в значение формы неверно — это внутренний технический дефолт
+      // машины, не бизнес-значение. Регрессионный тест фиксирует именно это: после фикса min/max
+      // остаются undefined только если их действительно нет ни в пропах, ни в схеме — но такой кейс
+      // uже за пределами этого бага (см. отдельный todo про NumberInput без constraints).
+      const user = userEvent.setup()
+      const onSubmit = vi.fn()
+
+      render(
+        <FormI18nProvider locale="ru">
+          <Form initialValue={{ price: 5000000 }} onSubmit={onSubmit}>
+            <Form.Field.Currency name="price" />
+            <Form.Button.Submit>Submit</Form.Button.Submit>
+          </Form>
+        </FormI18nProvider>,
+        { wrapper: TestWrapper },
+      )
+
+      const input = screen.getByRole('spinbutton') as HTMLInputElement
+      await user.click(input)
+      await user.keyboard('{Home}')
+      await user.click(screen.getByRole('button', { name: 'Submit' }))
+
+      // Без схемы (нет `constraints.number.min`) и без явного `min`-пропа поле действительно не
+      // защищено — это задокументированное ограничение, а не то, что чинит этот тест. Значение
+      // Number.MIN_SAFE_INTEGER здесь ожидаемо, тест служит явной фиксацией текущего поведения.
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ price: Number.MIN_SAFE_INTEGER }))
+    })
+  })
+
   describe('minorUnitScale из schema.zmodel (@meta("form.props.minorUnitScale", value))', () => {
     it('резолвится из meta.fieldProps без JSX-пропа', () => {
       const Schema = z.object({
