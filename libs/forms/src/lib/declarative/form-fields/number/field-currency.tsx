@@ -2,9 +2,10 @@
 
 import { NumberInput } from '@chakra-ui/react'
 import { useFormI18n } from '@letar/forms-react'
+import { useStore } from '@tanstack/react-form'
 import { type ReactElement, useMemo } from 'react'
 import type { CurrencyFieldProps } from '../../types'
-import { createField, FieldWrapper } from '../base'
+import { createField, FieldWrapper, useUncontrolledNumberSync } from '../base'
 
 /**
  * Form.Field.Currency - Currency input field
@@ -42,13 +43,18 @@ interface CurrencyFieldState {
   formatOptions: Intl.NumberFormatOptions
   /** BCP-47 locale для парсинга/форматирования — из `FormI18nProvider`, влияет на десятичный разделитель */
   locale: string | undefined
+  /** major units, вычисленные из хранимого значения (см. minorUnitScale) */
+  displayedValue: number | undefined
+  /** См. `useUncontrolledNumberSync` — обход бага контролируемого NumberInput.Root */
+  resetKey: number
+  markInternalChange: (value: number | undefined) => void
 }
 
 export const FieldCurrency = createField<CurrencyFieldProps, number | undefined, CurrencyFieldState>({
   displayName: 'FieldCurrency',
 
-  useFieldState: (props) => {
-    const { currency = 'RUB', currencyDisplay = 'symbol', decimalScale = 2 } = props
+  useFieldState: (props, _resolved, { form, fullPath }) => {
+    const { currency = 'RUB', currencyDisplay = 'symbol', decimalScale = 2, minorUnitScale = 1 } = props
     const locale = useFormI18n()?.locale
 
     // Memoize formatOptions at component top level
@@ -63,27 +69,29 @@ export const FieldCurrency = createField<CurrencyFieldProps, number | undefined,
       [currency, currencyDisplay, decimalScale],
     )
 
-    return { formatOptions, locale }
-  },
-
-  render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
-    const storedValue = field.state.value as number | undefined
-
-    const { min, max, step = 0.01, size, minorUnitScale = 1 } = componentProps
-
-    const { formatOptions, locale } = fieldState
-
     // Форма хранит/сериализует значение в minor units (копейки), поле показывает/принимает major
     // units (рубли) — тот же принцип value-transform, что у Form.Field.Slug (вычисляемое значение
     // поверх обычного поля), но в обе стороны и без промежуточного локального состояния.
+    const storedValue = useStore(form.store, () => form.getFieldValue(fullPath)) as number | undefined
     const displayedValue = storedValue === undefined ? undefined : storedValue / minorUnitScale
+    const { resetKey, markInternalChange } = useUncontrolledNumberSync(displayedValue)
+
+    return { formatOptions, locale, displayedValue, resetKey, markInternalChange }
+  },
+
+  render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
+    const { min, max, step = 0.01, size, minorUnitScale = 1 } = componentProps
+
+    const { formatOptions, locale, displayedValue, resetKey, markInternalChange } = fieldState
 
     return (
       <FieldWrapper resolved={resolved} hasError={hasError} errorMessage={errorMessage} fullPath={fullPath}>
         <NumberInput.Root
-          value={displayedValue?.toString() ?? ''}
+          key={resetKey}
+          defaultValue={displayedValue?.toString() ?? ''}
           onValueChange={(details: { valueAsNumber: number }) => {
             const num = details.valueAsNumber
+            markInternalChange(Number.isNaN(num) ? undefined : num)
             if (Number.isNaN(num)) {
               field.handleChange(undefined)
               return

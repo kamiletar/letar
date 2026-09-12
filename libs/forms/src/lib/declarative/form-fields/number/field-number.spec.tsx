@@ -189,4 +189,30 @@ describe('FieldNumber', () => {
       expect(screen.getByRole('spinbutton')).toHaveAttribute('data-field-name', 'quantity')
     })
   })
+
+  describe('редактирование значения (тот же класс, что msg 1523/1525, Field.Currency)', () => {
+    it('Form.Button.Reset (внешний сброс, не набор пользователем) возвращает исходное значение', async () => {
+      const user = userEvent.setup()
+      render(
+        <TestWrapper>
+          <Form initialValue={{ count: 5000000 }} onSubmit={vi.fn()}>
+            <Form.Field.Number name="count" />
+            <Form.Button.Reset>Reset</Form.Button.Reset>
+          </Form>
+        </TestWrapper>,
+      )
+
+      const input = screen.getByRole('spinbutton') as HTMLInputElement
+      const initial = input.value
+
+      await user.click(input)
+      input.setSelectionRange(1, 1)
+      await user.keyboard('{Backspace}')
+
+      await user.click(screen.getByRole('button', { name: 'Reset' }))
+      // NumberInput.Root неконтролируем (defaultValue) — внешний form.reset() ремаунтит поле по
+      // `key`, заменяя DOM-узел `<input>` целиком, поэтому запрашиваем элемент заново.
+      expect(screen.getByRole('spinbutton')).toHaveValue(initial)
+    })
+  })
 })

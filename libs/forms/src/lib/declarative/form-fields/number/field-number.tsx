@@ -2,9 +2,10 @@
 
 import { NumberInput } from '@chakra-ui/react'
 import { useFormI18n } from '@letar/forms-react'
+import { useStore } from '@tanstack/react-form'
 import { type ReactElement, useMemo } from 'react'
 import type { NumberFieldProps } from '../../types'
-import { createField, FieldWrapper } from '../base'
+import { createField, FieldWrapper, useUncontrolledNumberSync } from '../base'
 
 /**
  * Form.Field.Number - Number input field
@@ -37,18 +38,23 @@ interface NumberFieldState {
    * разделитель для остальных языков.
    */
   formatOptions: Intl.NumberFormatOptions
+  /** См. `useUncontrolledNumberSync` — обход бага контролируемого NumberInput.Root */
+  resetKey: number
+  markInternalChange: (value: number | undefined) => void
 }
 
 export const FieldNumber = createField<NumberFieldProps, number | undefined, NumberFieldState>({
   displayName: 'FieldNumber',
 
-  useFieldState: () => {
+  useFieldState: (_props, _resolved, { form, fullPath }) => {
     const locale = useFormI18n()?.locale
     const formatOptions = useMemo<Intl.NumberFormatOptions>(
       () => ({ useGrouping: false, maximumFractionDigits: 20 }),
       [],
     )
-    return { locale, formatOptions }
+    const storedValue = useStore(form.store, () => form.getFieldValue(fullPath)) as number | undefined
+    const { resetKey, markInternalChange } = useUncontrolledNumberSync(storedValue)
+    return { locale, formatOptions, resetKey, markInternalChange }
   },
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
@@ -69,10 +75,13 @@ export const FieldNumber = createField<NumberFieldProps, number | undefined, Num
     return (
       <FieldWrapper resolved={resolved} hasError={hasError} errorMessage={errorMessage} fullPath={fullPath}>
         <NumberInput.Root
-          value={value?.toString() ?? ''}
+          key={fieldState.resetKey}
+          defaultValue={value?.toString() ?? ''}
           onValueChange={(details: { valueAsNumber: number }) => {
             const num = details.valueAsNumber
-            field.handleChange(Number.isNaN(num) ? undefined : num)
+            const next = Number.isNaN(num) ? undefined : num
+            fieldState.markInternalChange(next)
+            field.handleChange(next)
           }}
           onBlur={field.handleBlur}
           min={shouldApplyMinMax ? min : undefined}

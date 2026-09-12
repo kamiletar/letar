@@ -2,9 +2,10 @@
 
 import { NumberInput } from '@chakra-ui/react'
 import { useFormI18n } from '@letar/forms-react'
+import { useStore } from '@tanstack/react-form'
 import { type ReactElement, useMemo } from 'react'
 import type { PercentageFieldProps } from '../../types'
-import { createField, FieldWrapper } from '../base'
+import { createField, FieldWrapper, useUncontrolledNumberSync } from '../base'
 
 /**
  * Form.Field.Percentage - Percentage input field
@@ -38,13 +39,18 @@ interface PercentageFieldState {
   formatOptions: Intl.NumberFormatOptions
   /** BCP-47 locale для парсинга/форматирования — из `FormI18nProvider`, влияет на десятичный разделитель */
   locale: string | undefined
+  /** major units, вычисленные из хранимого значения (см. minorUnitScale) */
+  displayedValue: number | undefined
+  /** См. `useUncontrolledNumberSync` — обход бага контролируемого NumberInput.Root */
+  resetKey: number
+  markInternalChange: (value: number | undefined) => void
 }
 
 export const FieldPercentage = createField<PercentageFieldProps, number | undefined, PercentageFieldState>({
   displayName: 'FieldPercentage',
 
-  useFieldState: (props) => {
-    const { decimalScale = 0 } = props
+  useFieldState: (props, _resolved, { form, fullPath }) => {
+    const { decimalScale = 0, minorUnitScale = 1 } = props
     const locale = useFormI18n()?.locale
 
     // Use 'unit' style with percent to store whole numbers (50 = 50%)
@@ -60,26 +66,28 @@ export const FieldPercentage = createField<PercentageFieldProps, number | undefi
       [decimalScale],
     )
 
-    return { formatOptions, locale }
+    // Форма хранит/сериализует значение в minor units (базисные пункты), поле показывает/принимает
+    // major units (%) — тот же принцип value-transform, что у Form.Field.Currency.
+    const storedValue = useStore(form.store, () => form.getFieldValue(fullPath)) as number | undefined
+    const displayedValue = storedValue === undefined ? undefined : storedValue / minorUnitScale
+    const { resetKey, markInternalChange } = useUncontrolledNumberSync(displayedValue)
+
+    return { formatOptions, locale, displayedValue, resetKey, markInternalChange }
   },
 
   render: ({ field, fullPath, resolved, hasError, errorMessage, componentProps, fieldState }): ReactElement => {
-    const storedValue = field.state.value as number | undefined
-
     const { min = 0, max = 100, step = 1, size, minorUnitScale = 1 } = componentProps
 
-    const { formatOptions, locale } = fieldState
-
-    // Форма хранит/сериализует значение в minor units (базисные пункты), поле показывает/принимает
-    // major units (%) — тот же принцип value-transform, что у Form.Field.Currency.
-    const displayedValue = storedValue === undefined ? undefined : storedValue / minorUnitScale
+    const { formatOptions, locale, displayedValue, resetKey, markInternalChange } = fieldState
 
     return (
       <FieldWrapper resolved={resolved} hasError={hasError} errorMessage={errorMessage} fullPath={fullPath}>
         <NumberInput.Root
-          value={displayedValue?.toString() ?? ''}
+          key={resetKey}
+          defaultValue={displayedValue?.toString() ?? ''}
           onValueChange={(details: { valueAsNumber: number }) => {
             const num = details.valueAsNumber
+            markInternalChange(Number.isNaN(num) ? undefined : num)
             if (Number.isNaN(num)) {
               field.handleChange(undefined)
               return

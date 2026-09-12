@@ -167,6 +167,66 @@ describe('FieldCurrency', () => {
     })
   })
 
+  describe('редактирование отформатированного значения (bug: msg 1523/1525, domwellbes-dev)', () => {
+    it('удаление цифры из целой части не корёжит соседние разряды и не сбрасывает значение', async () => {
+      const user = userEvent.setup()
+      const onSubmit = vi.fn()
+      render(
+        <FormI18nProvider locale="ru">
+          <Form initialValue={{ price: 5000000 }} onSubmit={onSubmit}>
+            <Form.Field.Currency name="price" />
+            <Form.Button.Submit>Submit</Form.Button.Submit>
+          </Form>
+        </FormI18nProvider>,
+        { wrapper: TestWrapper },
+      )
+
+      const input = screen.getByRole('spinbutton') as HTMLInputElement
+      // "5 000 000,00 ₽" — сгруппированное отображение с символом валюты
+      expect(input.value).toContain('5')
+
+      await user.click(input)
+      // курсор сразу после первой группы разрядов ("5 000|000,00 ₽")
+      input.setSelectionRange(5, 5)
+      await user.keyboard('{Backspace}')
+      // до фикса: раунд-трип через контролируемый `value` рвал середину строки на несколько
+      // символов (regression-репро: значение схлопывалось до "0" за 2-3 подряд Backspace)
+      await user.keyboard('{Backspace}')
+
+      await user.click(screen.getByRole('button', { name: 'Submit' }))
+      // "5 000 000" минус две цифры из первой группы → "50 000"
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ price: 50000 }))
+    })
+
+    it('Form.Button.Reset (внешний сброс, не набор пользователем) возвращает исходное отформатированное значение', async () => {
+      const user = userEvent.setup()
+      render(
+        <FormI18nProvider locale="ru">
+          <Form initialValue={{ price: 5000000 }} onSubmit={vi.fn()}>
+            <Form.Field.Currency name="price" />
+            <Form.Button.Reset>Reset</Form.Button.Reset>
+          </Form>
+        </FormI18nProvider>,
+        { wrapper: TestWrapper },
+      )
+
+      const input = screen.getByRole('spinbutton') as HTMLInputElement
+      const initial = input.value
+
+      await user.click(input)
+      input.setSelectionRange(5, 5)
+      await user.keyboard('{Backspace}')
+
+      await user.click(screen.getByRole('button', { name: 'Reset' }))
+      // NumberInput.Root неконтролируем (defaultValue) — внешний form.reset() ремаунтит поле по
+      // `key`, заменяя DOM-узел `<input>` целиком. Старая ссылка `input` после этого указывает на
+      // отсоединённый узел (его `.value` может ловить искажённую запись от отложенного `raf()`
+      // старого инстанса — тот же класс порчи, что и в исходном баге, просто на «осиротевшем»
+      // узле) — поэтому запрашиваем элемент заново, а не переиспользуем старую ссылку.
+      expect(screen.getByRole('spinbutton')).toHaveValue(initial)
+    })
+  })
+
   describe('minorUnitScale из schema.zmodel (@meta("form.props.minorUnitScale", value))', () => {
     it('резолвится из meta.fieldProps без JSX-пропа', () => {
       const Schema = z.object({

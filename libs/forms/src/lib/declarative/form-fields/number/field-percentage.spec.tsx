@@ -116,4 +116,50 @@ describe('FieldPercentage', () => {
       expect(screen.getByRole('spinbutton')).toHaveValue('')
     })
   })
+
+  describe('редактирование отформатированного значения (тот же класс, что msg 1523/1525, Field.Currency)', () => {
+    it('удаление цифры из целой части не корёжит соседние разряды и не сбрасывает значение', async () => {
+      const user = userEvent.setup()
+      const onSubmit = vi.fn()
+      render(
+        <Form initialValue={{ discount: 5000000 }} onSubmit={onSubmit}>
+          <Form.Field.Percentage name="discount" min={0} max={99999999} />
+          <Form.Button.Submit>Submit</Form.Button.Submit>
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      const input = screen.getByRole('spinbutton') as HTMLInputElement
+      await user.click(input)
+      input.setSelectionRange(5, 5)
+      await user.keyboard('{Backspace}')
+      await user.keyboard('{Backspace}')
+
+      await user.click(screen.getByRole('button', { name: 'Submit' }))
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ discount: 50000 }))
+    })
+
+    it('Form.Button.Reset (внешний сброс, не набор пользователем) возвращает исходное отформатированное значение', async () => {
+      const user = userEvent.setup()
+      render(
+        <Form initialValue={{ discount: 5000000 }} onSubmit={vi.fn()}>
+          <Form.Field.Percentage name="discount" min={0} max={99999999} />
+          <Form.Button.Reset>Reset</Form.Button.Reset>
+        </Form>,
+        { wrapper: TestWrapper },
+      )
+
+      const input = screen.getByRole('spinbutton') as HTMLInputElement
+      const initial = input.value
+
+      await user.click(input)
+      input.setSelectionRange(1, 1)
+      await user.keyboard('{Backspace}')
+
+      await user.click(screen.getByRole('button', { name: 'Reset' }))
+      // NumberInput.Root неконтролируем (defaultValue) — внешний form.reset() ремаунтит поле по
+      // `key`, заменяя DOM-узел `<input>` целиком, поэтому запрашиваем элемент заново.
+      expect(screen.getByRole('spinbutton')).toHaveValue(initial)
+    })
+  })
 })
