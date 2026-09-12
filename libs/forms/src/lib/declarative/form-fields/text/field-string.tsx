@@ -88,6 +88,7 @@ export const FieldString = createField<StringFieldProps, string>({
           minLength={minLength}
           pattern={pattern}
           autoComplete={componentProps.autoComplete ?? resolved.autocomplete}
+          size={componentProps.size}
           data-field-name={fullPath}
         />
         <chakraUIKit.FieldError

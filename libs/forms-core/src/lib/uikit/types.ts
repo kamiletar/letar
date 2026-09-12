@@ -62,6 +62,7 @@ export interface UIKitInputProps {
   autoComplete?: string
   disabled?: boolean
   readOnly?: boolean
+  size?: string
   'data-field-name'?: string
 }
 

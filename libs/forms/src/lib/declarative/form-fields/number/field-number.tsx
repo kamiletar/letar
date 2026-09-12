@@ -80,6 +80,7 @@ export const FieldNumber = createField<NumberFieldProps, number | undefined, Num
           step={step}
           locale={fieldState.locale}
           formatOptions={fieldState.formatOptions}
+          size={componentProps.size}
         >
           <NumberInput.Control>
             <NumberInput.IncrementTrigger />

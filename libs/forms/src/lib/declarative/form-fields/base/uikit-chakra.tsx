@@ -100,6 +100,7 @@ export const chakraUIKit: ChakraUIKit = {
     autoComplete,
     disabled,
     readOnly,
+    size,
     ...rest
   }) {
     return (
@@ -116,6 +117,7 @@ export const chakraUIKit: ChakraUIKit = {
         autoComplete={autoComplete}
         disabled={disabled}
         readOnly={readOnly}
+        size={(size as 'xs' | 'sm' | 'md' | 'lg') ?? 'md'}
         data-field-name={rest['data-field-name']}
       />
     )

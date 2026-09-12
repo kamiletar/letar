@@ -3,6 +3,7 @@
 import type { PhoneCountry } from '@letar/forms-core/phone'
 import type { BaseFieldProps } from '@letar/forms-react'
 import type { ReactNode } from 'react'
+import type { FieldSize } from './size-types'
 
 /**
  * `BaseFieldProps` переехал в `@letar/forms-react` (Фаза 7.3): он одинаков для любого скина —
@@ -31,6 +32,8 @@ export interface StringFieldProps extends BaseFieldProps {
   autoComplete?: string
   /** HTML inputMode attribute for mobile keyboard. Auto-detected from type. */
   inputMode?: 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url'
+  /** Size */
+  size?: FieldSize
 }
 
 /**
@@ -45,6 +48,8 @@ export interface TextareaFieldProps extends BaseFieldProps {
   resize?: 'none' | 'vertical' | 'horizontal' | 'both'
   /** Maximum length */
   maxLength?: number
+  /** Size */
+  size?: FieldSize
 }
 
 /**
@@ -120,6 +125,8 @@ export interface NumberFieldProps extends BaseFieldProps {
   max?: number
   /** Change step */
   step?: number
+  /** Size */
+  size?: FieldSize
 }
 
 /**
