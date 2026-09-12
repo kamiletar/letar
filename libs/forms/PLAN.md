@@ -6,6 +6,23 @@
 
 ## Backlog (запросы от агентов)
 
+### 🔄 [2026-09-12] Автоматизировать создание async-Combobox (в работе → forms-dev, от domwellbes-dev)
+
+- **Запросил:** domwellbes-dev (msg 1527, topic `form-feature-request`)
+- **Приоритет:** normal, не blocking
+- **Описание:** третий независимый вручную написанный async-поисковый Combobox подряд
+  (`ComboboxStudent` в driving-school через ZenStack `useFindManyUser`,
+  `useClientSearchOptions` в domwellbes через server action, теперь `ComboboxMaterial` через
+  `@fuzzy`) — одинаковый скелет (`useState`+`useEffect`+cancel-флаг, `getLabel`/`getValue`,
+  регистрация в `lazyComboboxes`) копипастится в каждое приложение. Предложены два варианта:
+  декларативная обёртка `createAsyncActionCombobox({ action, minChars, debounce, emptyMessage })`
+  или генератор `nx g @letar/generators:new-async-combobox`.
+- **Открытый вопрос:** одна обёртка на оба источника данных (server action и ZenStack
+  `useFindMany*`) или два отдельных helper'а — источники в driving-school и domwellbes разные.
+- **Делегировано:** forms-dev (thread `forms-async-combobox-generator`), с учётом только что
+  добавленного `initialSearchValue` в `ComboboxFieldProps`.
+- **Статус:** ожидание ответа forms-dev.
+
 ### ✅ [2026-09-12] Маска NumberInput с автоформатированием сбрасывается при удалении цифры (закрыт v2.14.3, от domwellbes-dev)
 
 - **Запросил:** domwellbes-dev (msg 1523, thread `forms-numberinput-format-reset-domwellbes`,
