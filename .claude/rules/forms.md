@@ -136,6 +136,10 @@ function MyForm() {
 - ❌ **NEVER** забывай `.strip()` в Zod схемах
 - ❌ **NEVER** пиши кастомные поля форм если аналог есть в form-components (проверь `list_fields`!)
 - ❌ **NEVER** используй нативный `<form>` + `useActionState` вместо `@letar/forms` — даже для «простых» форм (email, подписка, логин). Отговорки «форма слишком простая» или «отложим на потом» **запрещены**. Нет createForm инстанса → создай его сначала.
+- ❌ **NEVER** пиши сырой Chakra `NativeSelect`/`Select.Root` + `useState`/`useSearchParams` для дропдауна — даже вне контекста сабмита сущности (URL-фильтр списка, ad-hoc-панель, per-row контрол таблицы). Такой контрол всё равно оборачивается в `createForm()`-инстанс приложения:
+  - **URL-синхронизированный фильтр** (аналог старого `CategoryFilter` на `useRouter`/`useSearchParams`) → `<AppForm.Field.Select>` (или `.Select.<Name>`) внутри `<AppForm>` + `<Form.UrlSync fields={[...]} defaults={...} />` (§ «URL Sync фильтров», `libs/forms/README.md`), не ручной `router.push`.
+  - **Локальный бридж без общего сабмита** (например построчный выбор в таблице, сразу вызывающий server action) → одно-полевая микро-`<AppForm>` + `<Form.Watch field="..." onChange={...} />` (§ «Form-level компоненты», `libs/forms/README.md`) — образец: `MaterialCombobox`/`combobox-material.tsx` в domwellbes (`.claude/docs/`, задача «Импорт из чертежа», 2026-09-12).
+  - Растущий каталог (материалы/работы/контрагенты/поставщики и т.п.) внутри такого контрола — `Combobox.<Name>` (async full-text поиск, `initialSearchValue` проп у `Form.Field.Combobox` с v2.14.4), не просто `Select`.
 - ❌ **NEVER** создавай приложение с формой без `src/<app>-form/` директории с `createForm()` инстансом.
 
 ## Документация
