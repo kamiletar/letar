@@ -96,6 +96,13 @@ export interface ComboboxFieldProps<T = string, TData = unknown> extends BaseFie
   minChars?: number
 
   /**
+   * Pre-fills the search input (and fires the initial `useQuery` search) on mount, without
+   * the user typing anything — useful when context already hints at the query (e.g. a label
+   * extracted from an imported document that should seed a catalog search).
+   */
+  initialSearchValue?: string
+
+  /**
    * Show clear button
    * Auto-determined from schema if not specified
    */
@@ -180,6 +187,12 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
     resolved: ResolvedFieldProps,
     { form, fullPath },
   ): ComboboxFieldState => {
+    // `useStore` (не render-prop `<form.Field>`) — даёт значение поля до монтирования
+    // `<form.Field>`, как и в `field-city.tsx`/`field-address.tsx`. Читаем его ДО
+    // `useAsyncSearch`, чтобы решить, нужно ли сеять `initialSearchValue` — у уже выбранного
+    // значения приоритет: показывать вместо него текст затравки было бы неверно.
+    const fieldValue = useStore(form.store, () => form.getFieldValue(fullPath)) as string | undefined
+
     // Async search with debounce via shared hook
     const {
       inputValue,
@@ -190,16 +203,14 @@ export const FieldCombobox = createField<ComboboxFieldProps, string, ComboboxFie
       useQuery: componentProps.useQuery,
       debounce: componentProps.debounce ?? 300,
       minChars: componentProps.minChars ?? 1,
+      initialValue: fieldValue ? undefined : componentProps.initialSearchValue,
     })
 
     // Инициализация `inputValue` из значения поля (сценарий `defaultValues` при редактировании).
     // `Combobox.Root` контролируем по `inputValue` отдельно от `value` (см. `render` ниже) —
     // `useAsyncSearch` стартует с пустой строкой независимо от того, что значение уже выбрано,
     // поэтому без явной синхронизации поле показывает пустой инпут при непустом значении.
-    // `useStore` (не render-prop `<form.Field>`) — даёт значение поля до монтирования
-    // `<form.Field>`, как и в `field-city.tsx`/`field-address.tsx`.
     const initializedRef = useRef(false)
-    const fieldValue = useStore(form.store, () => form.getFieldValue(fullPath)) as string | undefined
     useEffect(() => {
       if (initializedRef.current || !fieldValue || inputValue) {
         return
