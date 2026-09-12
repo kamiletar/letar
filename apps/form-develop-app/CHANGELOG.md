@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.14] - 2026-09-12
+
+### Fixed
+
+- `numeric-demo`: подтверждено вручную (rAF-раса контролируемого `NumberInput.Root`) — быстрое
+  удаление цифр (`Backspace` подряд) в `Form.Field.Currency`/`Form.Field.Percentage` больше не
+  ломает форматирование и не сбрасывает значение. Фикс в `@letar/forms` v2.14.3, демо-страница
+  без изменений кода.
+
 ## [0.1.13] - 2026-09-09
 
 ### Added
