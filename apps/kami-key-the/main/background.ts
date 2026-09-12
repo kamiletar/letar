@@ -32,6 +32,7 @@ import { destroyOverlay, hideOverlay, initOverlay, rebuildVkMap, showOverlay } f
 import { incrementStat, initStats, shutdownStats } from '../src/stats'
 import type { KeymapConfig } from '../src/types'
 import { registerAllHandlers } from './ipc'
+import { checkForUpdatesManually, initAutoUpdater } from './updater'
 
 const VERSION = '1.0.0'
 
@@ -222,6 +223,11 @@ function updateTrayMenu(): void {
     },
     { type: 'separator' },
     {
+      label: 'Проверить обновления',
+      click: () => void checkForUpdatesManually(),
+    },
+    { type: 'separator' },
+    {
       label: 'Автозагрузка',
       type: 'checkbox',
       checked: autostartEnabled,
@@ -365,6 +371,9 @@ app.whenReady().then(() => {
 
   // Создаём иконку в трее
   createTray()
+
+  // Автообновление — тихая проверка при старте (10с задержка), см. main/updater.ts
+  initAutoUpdater()
 
   console.log('KamiKeyThe активен. Используйте AltGr+клавиша для ввода символов.')
 })

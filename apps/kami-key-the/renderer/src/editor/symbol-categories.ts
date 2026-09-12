@@ -23,6 +23,7 @@ export const SYMBOL_CATEGORIES: SymbolCategory[] = [
   },
   { id: 'arrows', label: 'Стрелки', ranges: [[0x2190, 0x21ff]] },
   { id: 'math', label: 'Математика', ranges: [[0x2200, 0x22ff]] },
+  { id: 'super-sub', label: 'Индексы', ranges: [[0x2070, 0x209f]] },
   {
     id: 'letterlike',
     label: 'Буквенные',
