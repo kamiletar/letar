@@ -57,7 +57,38 @@
   числовых поля) в отдельных сценариях удаления цифр схлопывается в `-9 007 199 254 740 991`
   (`-Number.MIN_SAFE_INTEGER`) — подтверждено воспроизводимым **и на коде до этого фикса**, то
   есть отдельный, не связанный с контролируемостью `NumberInput.Root` баг. Вынесено отдельной
-  задачей (не блокирует этот фикс).
+  задачей (не блокирует этот фикс). **Закрыто 2026-09-12, см. пункт ниже.**
+
+### ✅ [2026-09-12] `Field.Currency` пишет `Number.MIN_SAFE_INTEGER` при нажатии Home (закрыт v2.14.5)
+
+- **Запросил:** делегировано из репро-шагов bug report о NumberInput (см. предыдущий пункт,
+  «отдельно найдено, не в скоупе»).
+- **Root cause:** это НЕ баг парсинга/`@internationalized/number` — гипотеза «NaN клэмпится в
+  MIN_SAFE_INTEGER как sentinel» опровергнута (`@zag-js/utils` `clampValue`/`nan()` превращают
+  `NaN` в `0`, не в min). Настоящая причина — `@zag-js/number-input` перехватывает клавишу **Home**
+  как «прыжок к min» (та же логика, что у `<input type=range>`, `End` → прыжок к max),
+  `event.preventDefault()` вызывается безусловно (`number-input.connect.mjs`), это не движение
+  курсора. Если `min` не задан, машина подставляет дефолт `Number.MIN_SAFE_INTEGER`
+  (`number-input.machine.mjs`). `Field.Currency` не читал `min`/`max` из
+  `resolved.constraints.number` (Zod `.min()`/`.max()`) в отличие от уже корректного `Field.Number`
+  — поэтому `z.number().min(0)` в схеме никак не доходил до `NumberInput.Root`, и Home записывал
+  сентинел прямо в значение поля (репро «Home + 5×ArrowRight, затем Backspace» ломается уже на
+  самом Home, Backspace лишь редактирует уже испорченную строку).
+- **Фикс:** `field-currency.tsx` теперь читает `min`/`max` тем же паттерном `props > constraints`,
+  что и `Field.Number`. `Field.Percentage` бага не имел — уже хардкодит `min=0, max=100`.
+- **Тесты:** 2 регресс-теста в `field-currency.spec.tsx` — с `.min(0)` в схеме Home больше не
+  пишет сентинел; без схемы/пропа поведение задокументировано как есть (не регрессия этого
+  фикса, а pre-existing свойство, общее с `Field.Number`).
+- **Не в скоупе:** поле совсем без `min`/`max` (ни пропом, ни через схему) всё ещё уязвимо к Home
+  → `Number.MIN_SAFE_INTEGER` — то же самое верно и для `Field.Number` уже сегодня. Системный
+  фикс (например: не позволять zag-js использовать сырой `Number.MIN_SAFE_INTEGER`/`MAX_SAFE_INTEGER`
+  как значение поля, только как внутренний технический дефолт) не сделан — задокументирован как
+  открытый вопрос ниже.
+- **⚠️ Открытый вопрос:** стоит ли вводить общий safety-net на уровне `createField`/базового хука
+  числовых полей — не пропускать `Number.MIN_SAFE_INTEGER`/`Number.MAX_SAFE_INTEGER` в
+  `field.handleChange()` как реальное значение, если оно пришло от `INPUT.HOME`/`INPUT.END` без
+  явно заданного бизнес-`min`/`max`? Требует решения владельца — задевает `Field.Number` тоже, не
+  только `Field.Currency`.
 
 ### ✅ [2026-09-09] `useResolvedFieldProps` не резолвит `meta.fieldProps` в типизированных тегах (закрыт forms-react v0.7.0, архитектурная коррекция от Ками, тред `money-field-kopecks`)
 

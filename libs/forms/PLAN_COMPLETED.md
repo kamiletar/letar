@@ -1,5 +1,30 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-12 (продолжение 2) — Field.Currency: Home записывал `Number.MIN_SAFE_INTEGER`
+
+Расследование бага из репро: `/numeric-demo`, поле «Price (RUB)», значение `5000000`, Home + 5×
+ArrowRight + Backspace → значение схлопывалось в `-9 007 199 254 740 991,00 ₽` с Zod-ошибкой
+«Too small: expected number to be >=0».
+
+**Root cause:** не парсинг. `@zag-js/number-input` перехватывает Home/End как «прыжок к
+min/max» (конвенция `<input type=range>`), `event.preventDefault()` безусловный
+(`number-input.connect.mjs`). Дефолт машины для незаданных `min`/`max` —
+`Number.MIN_SAFE_INTEGER`/`Number.MAX_SAFE_INTEGER` (`number-input.machine.mjs`).
+`field-currency.tsx` не читал `min`/`max` из `resolved.constraints.number` (Zod `.min()`/`.max()`),
+в отличие от `field-number.tsx` — поэтому `z.number().min(0)` из демо-схемы не попадал в
+`NumberInput.Root`, и Home записывал сентинел напрямую в значение поля. Гипотеза «NaN клэмпится в
+MIN_SAFE_INTEGER» (из исходного бага-репорта) опровергнута чтением `@zag-js/utils`
+(`clampValue`/`nan()` превращают `NaN` в `0`, не в min).
+
+**Фикс:** `field-currency.tsx` — `min`/`max` теперь читаются с приоритетом `props > constraints`,
+как в `field-number.tsx`. `field-percentage.tsx` бага не имел (хардкодит `min=0, max=100`).
+
+**Тесты:** 2 регресс-теста в `field-currency.spec.tsx` (16/16 зелёных), typecheck:tsgo и lint
+(`forms`) зелёные. Версия `2.14.5`, запись в `CHANGELOG.md`.
+
+**Не в скоупе, открытый вопрос в `PLAN.md`:** поле совсем без `min`/`max` (ни пропом, ни схемой)
+всё ещё уязвимо — нужно решение владельца по системному safety-net.
+
 ## 2026-09-12 (продолжение) — Field.Password/Field.MaskedInput не принимали `size`
 
 Добивание пробела, найденного в сессии выше (тот же день) — `Field.Password` и
