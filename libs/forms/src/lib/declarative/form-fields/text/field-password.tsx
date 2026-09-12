@@ -78,6 +78,7 @@ export const FieldPassword = createField<PasswordFieldProps, string, PasswordFie
           placeholder={resolved.placeholder}
           maxLength={componentProps.maxLength}
           autoComplete={componentProps.autoComplete ?? resolved.autocomplete}
+          size={componentProps.size}
           data-field-name={fullPath}
         />
       </InputGroup>

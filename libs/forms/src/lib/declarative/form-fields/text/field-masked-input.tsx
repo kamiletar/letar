@@ -108,6 +108,7 @@ export const FieldMaskedInput = createField<MaskedInputFieldProps, string, Maske
             field.handleBlur()
           }}
           placeholder={resolved.placeholder}
+          size={componentProps.size}
           data-field-name={fullPath}
           aria-describedby={descriptionId}
         />

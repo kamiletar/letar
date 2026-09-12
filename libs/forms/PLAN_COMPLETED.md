@@ -1,5 +1,18 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-12 (продолжение) — Field.Password/Field.MaskedInput не принимали `size`
+
+Добивание пробела, найденного в сессии выше (тот же день) — `Field.Password` и
+`Field.MaskedInput` импортируют Chakra `Input` напрямую (не через `chakraUIKit`) и не
+пробрасывали `size`.
+
+**Фикс:** `size?: FieldSize` добавлен в `PasswordFieldProps` и `MaskedInputFieldProps`
+(`declarative/types/field-types.ts`); `FieldPassword`/`FieldMaskedInput` форвардят
+`componentProps.size` в основной `<Input>` (кнопку показать/скрыть пароль внутри `InputGroup`
+не трогали — у неё свой фиксированный `size="sm"`).
+
+typecheck:tsgo и lint (`forms`) зелёные.
+
 ## 2026-09-12 — Field.String/Textarea/Number не принимали `size` (найдено в domwellbes)
 
 Владелец нашёл вживую в domwellbes: `Field.Select` и `Field.String` в одном ряду (форма загрузки

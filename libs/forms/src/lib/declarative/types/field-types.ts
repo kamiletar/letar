@@ -62,6 +62,7 @@ export interface PasswordFieldProps extends BaseFieldProps {
   defaultVisible?: boolean
   /** HTML autocomplete attribute */
   autoComplete?: string
+  size?: FieldSize
 }
 
 /**
@@ -345,6 +346,7 @@ export interface MaskedInputFieldProps extends BaseFieldProps {
    * сам отфильтрует недопустимые символы. Варианта `truncate` нет (MASK_ENGINE.md §6.6).
    */
   onPaste?: 'normalize' | 'reject'
+  size?: FieldSize
 }
 
 /**
