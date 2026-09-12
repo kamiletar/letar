@@ -173,6 +173,36 @@ rules:
       apps/domwellbes/src/domwellbes-form/domwellbes-form.tsx. См. .claude/rules/forms.md.
     pattern-regex: '\.Field\.String\b[^>]*\bname="(inn|kpp|ogrn|bik|snils|passport|phone|[A-Za-z]*Phone|city|[A-Za-z]*City)"'
 
+  # ⚠️ Severity WARNING сразу, не временное понижение (в отличие от letar-chakra-as-prop-forbidden
+  # выше) — при заводе правила уже 357 срабатываний в 108 файлах почти во всех приложениях
+  # монорепо (аудит 2026-09-12, .claude/rules/forms.md уже запрещает это текстом, но правило не
+  # исполняемо и не грузится в контекст агента вне *-form.tsx/*Form.tsx — эта проверка тот же
+  # разрыв закрывает на уровне git-хука, для любого файла). Поднимать до ERROR нет смысла: долг
+  # такого масштаба сразу заблокировал бы почти любой коммит в затронутые приложения.
+  - id: letar-forms-raw-select-combobox-outside-lib
+    languages: [generic]
+    severity: WARNING
+    paths:
+      include:
+        - '*.tsx'
+      exclude:
+        - libs/forms/**
+        - libs/forms-core/**
+        - libs/forms-react/**
+        - libs/forms-shadcn/**
+        - libs/forms-vue/**
+        - libs/forms-vue-shadcn/**
+        - libs/forms-angular/**
+    message: >-
+      Сырой Chakra NativeSelect.Root/Select.Root/Combobox.Root вне @letar/forms — даже готовые
+      внутренние Select/Combobox для extraSelects/extraComboboxes (см. образец
+      apps/driving-school/src/driving-school-form/selects/) оборачивают @letar/forms
+      FieldSelect/Form.Field.Combobox, а не эти примитивы напрямую. Ad-hoc дропдаун вне
+      createForm()-инстанса — URL-фильтр, per-row контрол таблицы, ad-hoc-панель — тоже должен
+      идти через createForm() (микро-форма + Form.Watch/Form.UrlSync), не через голый Chakra.
+      См. .claude/rules/forms.md § «Не делай» (правило про NativeSelect/Select.Root).
+    pattern-regex: '<(NativeSelect|Select|Combobox)\.Root\b'
+
   - id: letar-dev-session-vars-in-prod-env
     languages: [generic]
     paths:

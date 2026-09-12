@@ -140,6 +140,11 @@ function MyForm() {
   - **URL-синхронизированный фильтр** (аналог старого `CategoryFilter` на `useRouter`/`useSearchParams`) → `<AppForm.Field.Select>` (или `.Select.<Name>`) внутри `<AppForm>` + `<Form.UrlSync fields={[...]} defaults={...} />` (§ «URL Sync фильтров», `libs/forms/README.md`), не ручной `router.push`.
   - **Локальный бридж без общего сабмита** (например построчный выбор в таблице, сразу вызывающий server action) → одно-полевая микро-`<AppForm>` + `<Form.Watch field="..." onChange={...} />` (§ «Form-level компоненты», `libs/forms/README.md`) — образец: `MaterialCombobox`/`combobox-material.tsx` в domwellbes (`.claude/docs/`, задача «Импорт из чертежа», 2026-09-12).
   - Растущий каталог (материалы/работы/контрагенты/поставщики и т.п.) внутри такого контрола — `Combobox.<Name>` (async full-text поиск, `initialSearchValue` проп у `Form.Field.Combobox` с v2.14.4), не просто `Select`.
+  - ⚠️ Исполняемая версия этого правила — semgrep `letar-forms-raw-select-combobox-outside-lib`
+    (`.semgrep/letar-rules.yml`, WARNING, не блокирует коммит): ловит `NativeSelect.Root`/
+    `Select.Root`/`Combobox.Root` вне пакетов `@letar/forms*`. На момент завода (2026-09-12) —
+    357 существующих срабатываний в 108 файлах по всему монорепо, поэтому не ERROR; не игнорируй
+    предупреждение в НОВОМ коде.
 - ❌ **NEVER** создавай приложение с формой без `src/<app>-form/` директории с `createForm()` инстансом.
 
 ## Документация
