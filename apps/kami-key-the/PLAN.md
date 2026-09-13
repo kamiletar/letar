@@ -225,10 +225,14 @@ electron-updater всегда бьёт в repo-wide `GET /releases/latest`, чт
 должны дословно совпадать с `latest.yml` — `gh release upload` не сам сортирует пробелы→дефисы
 как это делает встроенный publish у electron-builder) — в CHANGELOG.md 1.7.4.
 
-**Не проверено на практике:** нет подтверждения от animatrona, что тот же repo-wide баг у неё
-реально не проявлялся — она использует штатный `GithubProvider` на тот же `kamiletar/letar` без
-аналогичной защиты. Не входит в объём этой задачи (другое приложение), но стоит поднять при
-следующей работе с animatrona.
+**✅ Закрыто 2026-09-13.** Проверка подтвердила: `animatrona` реально ловила тот же repo-wide баг
+(её `main/updater.ts` вызывал голый `autoUpdater.checkForUpdates()` без установки feed URL).
+Инлайновая логика `findOwnLatestTag`/`pointFeedAtOwnRelease` вынесена в общую библиотеку
+`@letar/electron-monorepo-updater`, оба приложения (`kami-key-the` и `animatrona`) переведены на
+неё — устранён дубль ~50 строк. Заодно пересмотрена вся схема релизов Electron-приложений в общем
+репозитории — единый стандарт задокументирован в
+[electron-monorepo-shared-releases.md](/.claude/docs/electron-monorepo-shared-releases.md).
+Детали — `apps/animatrona/PLAN_COMPLETED-1.md` § 2026-09-13.
 
 Релиз публикуется вручную (не `electron-builder --publish always`, см. предупреждение выше):
 `nx build:win kami-key-the` → `git tag kami-key-the-vX.Y.Z && git push origin
