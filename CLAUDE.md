@@ -251,6 +251,10 @@ select ·
 `<AppForm.Field.X>` (`.claude/rules/forms.md`) игнорировал произвольный `meta.fieldProps`;
 теперь `useResolvedFieldProps`/`createField` резолвит его с приоритетом `props > meta` в обоих
 UI-скинах. Файл — разбор проблемы для истории и на случай регрессии ·
+[letar-forms-urlsync-missing-router-no-rsc-refetch](/.claude/docs/letar-forms-urlsync-missing-router-no-rsc-refetch.md)
+⚠️ `Form.UrlSync` без явного `router` пишет URL мимо Next.js router (`history.replaceState`) —
+Server Component страницы не перечитывает `searchParams`, URL меняется, данные — нет; проверять
+`read_network_requests` на `_rsc=` после изменения, не только глазами на URL ·
 [ui-components](/.claude/docs/ui-components.md) · [images](/.claude/docs/images.md) ·
 [upload-storage-backend](/.claude/docs/upload-storage-backend.md) `StorageBackend` в
 `@letar/image-upload/server` — точка расширения на будущее S3-совместимое хранилище, S3-backend
