@@ -741,6 +741,11 @@ studio) ·
 
 **Электрон и десктоп:** [electron-app-protocol](/.claude/docs/electron-app-protocol.md) ⚠️ origin
 `null` под `file://` блокирует Worker и WASM ·
+[electron-monorepo-shared-releases](/.claude/docs/electron-monorepo-shared-releases.md) ⭐
+несколько Electron-приложений публикуют GitHub Releases в один общий `kamiletar/letar` —
+repo-wide `/releases/latest` вернёт чужой релиз; единая схема (тег `<app>-v<semver>`,
+`--publish never` + `gh release`, рантайм `@letar/electron-monorepo-updater`) на все такие
+приложения, чек-лист для нового ·
 [animatrona-dual-build-alias-drift](/.claude/docs/animatrona-dual-build-alias-drift.md) ⚠️
 `apps/animatrona/main/` собирается webpack (`animatrona:build`) и esbuild
 (`animatrona-main:build`) независимо, каждый со своим списком `@letar/*`-алиасов
