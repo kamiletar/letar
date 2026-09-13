@@ -46,18 +46,6 @@
         "parallel": false
       }
     },
-    "release:win": {
-      "executor": "nx:run-commands",
-      "options": {
-        "commands": [
-          "next build renderer",
-          "npx webpack --config main/webpack.config.js",
-          "npx electron-builder --win --publish always"
-        ],
-        "cwd": "apps/animatrona-folder-player",
-        "parallel": false
-      }
-    },
     "lint": {
       "executor": "@nx/eslint:lint",
       "options": {
