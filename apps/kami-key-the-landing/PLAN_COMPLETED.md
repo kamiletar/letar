@@ -1,5 +1,25 @@
 # Выполненные задачи
 
+## Версия 0.4.3 — автогенерация download-info из GitHub Releases (2026-09-13)
+
+Закрыт открытый вопрос из версии 0.4.2 (`download-info.ts` было ручным полем, забыли обновить
+при релизе 1.7.4 — сайт показывал v1.7.2). Новый `getLatestDownload()` (`src/lib/github.ts`)
+переиспользует `fetchLatestRelease()` из `@letar/github-releases` (тот же источник, что уже
+использует `/changelog`), находит `.exe`-ассет последнего релиза `kami-key-the-v*` и берёт его
+`name`/`browser_download_url` из GitHub API как есть — без конструирования URL по шаблону, чтобы
+не повторить баг с сменой точки→дефис в имени ассета между релизами.
+
+`page.tsx` стал `async` Server Component, один раз запрашивает `download` и передаёт пропом в
+`HeroSection`/`DownloadsSection` — обе остались Client Components (typing-эффект, hover-состояние),
+просто получают данные не из констант, а из пропа. `download-info.ts` оставлен только как
+`FALLBACK_DOWNLOAD` на случай сбоя GitHub API. ISR-кеширование то же, что у `/changelog` — 1ч
+(`next.revalidate` внутри самого `fetch` в `@letar/github-releases`, без отдельного
+`export const revalidate` на странице).
+
+Проверено живьём через dev-сервер (webpack, порт 3011): секция «Скачать» и hero показывают
+`v1.7.4 · 107.4 MB`, ссылка `.exe` — `KamiKeyThe-Setup-1.7.4.exe` (дефисы, реальный ассет с
+GitHub), без ошибок в консоли. `nx typecheck:tsgo`/`nx lint`/`nx run-many -t format` зелёные.
+
 ## Версия 0.4.1 — фикс flexWrap в hero-секции на mobile (2026-09-11)
 
 Часть кросс-приложенческого аудита нового класса бага (root `.claude/docs/chakra-flexwrap-column-direction-overflow.md`,
