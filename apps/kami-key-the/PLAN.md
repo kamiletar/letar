@@ -205,17 +205,36 @@ ENOENT на `from:`-пути (громкий сбой сборки, не тих�
 
 ---
 
-### Автообновление — ✅ 2026-09-12
+### Автообновление — ✅ 2026-09-13
 
-`main/updater.ts` — `electron-updater` поверх уже настроенного в `electron-builder.yml`
-`publish.provider: github`. Тихая проверка при старте (10с задержка, без диалога об отсутствии
-обновлений — не мешать пользователю), плюс пункт трея «Проверить обновления» для ручной проверки
-с явным результатом («обновлений нет» / диалог скачивания). Скачивание и установка только по
-подтверждению в диалоге (`autoDownload: false`, `autoInstallOnAppQuit: true`).
-
+`main/updater.ts` — `electron-updater`. Тихая проверка при старте (10с задержка, без диалога об
+отсутствии обновлений — не мешать пользователю), плюс пункт трея «Проверить обновления» для
+ручной проверки с явным результатом («обновлений нет» / диалог скачивания). Скачивание и
+установка только по подтверждению в диалоге (`autoDownload: false`, `autoInstallOnAppQuit: true`).
 Взят паттерн `label-printer-desktop` (диалоговый UX, `dialog.showMessageBox`), не `animatrona`
-(toast/IPC-стрим статуса в renderer) — у KamiKeyThe нет постоянно открытого окна, приложение живёт
-в трее, стримить прогресс в закрытый renderer некуда.
+(toast/IPC-стрим статуса в renderer) — у KamiKeyThe нет постоянно открытого окна.
+
+⚠️ **Не встроенный `GithubProvider` — репозиторий общий с animatrona.** Штатный механизм
+electron-updater всегда бьёт в repo-wide `GET /releases/latest`, что в общем `kamiletar/letar`
+означает «самый свежий релиз любого приложения», не обязательно kami-key-the. Нашли это только
+на попытке первой публикации — первый `electron-builder --publish always` реально создал релиз
+(тег `v1.7.4`, без префикса приложения), пришлось удалять. Фикс: сами находим свой релиз через
+`GET /releases` (без `/latest`) по префиксу тега `kami-key-the-v`, дальше `autoUpdater.setFeedURL`
+с `generic`-провайдером на URL конкретного релиза — стандартная механика sha512/blockmap-diff
+после этого работает как обычно. Полный разбор, включая вторую граблю (имена ассетов на GitHub
+должны дословно совпадать с `latest.yml` — `gh release upload` не сам сортирует пробелы→дефисы
+как это делает встроенный publish у electron-builder) — в CHANGELOG.md 1.7.4.
+
+**Не проверено на практике:** нет подтверждения от animatrona, что тот же repo-wide баг у неё
+реально не проявлялся — она использует штатный `GithubProvider` на тот же `kamiletar/letar` без
+аналогичной защиты. Не входит в объём этой задачи (другое приложение), но стоит поднять при
+следующей работе с animatrona.
+
+Релиз публикуется вручную (не `electron-builder --publish always`, см. предупреждение выше):
+`nx build:win kami-key-the` → `git tag kami-key-the-vX.Y.Z && git push origin
+kami-key-the-vX.Y.Z` → `gh release create kami-key-the-vX.Y.Z <exe> <exe.blockmap> <latest.yml>
+--repo kamiletar/letar` — с переименованием локальных файлов под дефисы перед загрузкой (см.
+CHANGELOG.md).
 
 ---
 

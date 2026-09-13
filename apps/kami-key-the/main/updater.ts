@@ -1,14 +1,36 @@
 /**
- * Автообновление через electron-updater — источник GitHub Releases
- * (тот же provider, что уже настроен в electron-builder.yml: publish.provider=github).
+ * Автообновление через electron-updater — источник GitHub Releases.
  *
- * Диалоговый UX по образцу label-printer-desktop (main/services/updater.service.ts) — не
- * toast/renderer-интеграция, как у animatrona: у KamiKeyThe нет постоянно открытого окна
- * (приложение живёт в трее), поэтому статус обновления некуда стримить, когда окно закрыто.
+ * ⚠️ НЕ используем встроенный GithubProvider электрон-апдейтера напрямую.
+ * `kamiletar/letar` — общий монорепо-репозиторий: animatrona публикует туда же свои релизы.
+ * `GithubProvider.getLatestTagName()` всегда бьёт в репозиторий-wide
+ * `GET /repos/{owner}/{repo}/releases/latest` — это САМЫЙ СВЕЖИЙ релиз ВСЕГО репозитория,
+ * не конкретного приложения. Если animatrona выпустит релиз позже, чем последний релиз
+ * KamiKeyThe, автообновление KamiKeyThe найдёт релиз animatrona (более новый по дате) и
+ * предложит скачать/установить его инсталлятор — подмена приложения при апдейте.
+ *
+ * Поэтому сами находим свой тег по префиксу `kami-key-the-v` через список релизов
+ * (`GET /releases`, не `/releases/latest`) и подставляем electron-updater
+ * `generic`-провайдер с URL конкретного релиза — дальше вся стандартная механика
+ * (проверка sha512, blockmap-diff, `quitAndInstall`) работает как обычно, просто указана
+ * на правильный релиз явно, а не через репозиторий-wide эвристику.
+ *
+ * Диалоговый UX (не toast/renderer-стрим, как у animatrona) — по образцу
+ * label-printer-desktop: у KamiKeyThe нет постоянно открытого окна (приложение живёт в трее).
  */
 
-import { app, dialog } from 'electron'
+import { app, dialog, net } from 'electron'
 import { autoUpdater, type UpdateInfo } from 'electron-updater'
+
+const REPO_OWNER = 'kamiletar'
+const REPO_NAME = 'letar'
+const TAG_PREFIX = 'kami-key-the-v'
+
+interface GithubReleaseSummary {
+  tag_name: string
+  draft: boolean
+  prerelease: boolean
+}
 
 let initialized = false
 
@@ -19,6 +41,37 @@ function configureLogger(): void {
     error: (message: string) => console.error(`[Updater] ${message}`),
     debug: (message: string) => console.log(`[Updater:debug] ${message}`),
   }
+}
+
+/** Найти тег последнего релиза именно KamiKeyThe в общем репозитории kamiletar/letar */
+async function findOwnLatestTag(): Promise<string | null> {
+  const response = await net.fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases?per_page=50`, {
+    headers: { 'User-Agent': 'KamiKeyThe-Update-Client', Accept: 'application/vnd.github+json' },
+  })
+  if (!response.ok) {
+    throw new Error(`GitHub API вернул ${response.status}`)
+  }
+  // GitHub возвращает релизы отсортированными по дате публикации (свежие первыми)
+  const releases = (await response.json()) as GithubReleaseSummary[]
+  const own = releases.find((r) => !r.draft && !r.prerelease && r.tag_name.startsWith(TAG_PREFIX))
+  return own?.tag_name ?? null
+}
+
+/**
+ * Направить electron-updater на релиз конкретно KamiKeyThe (не repo-wide "latest").
+ * Возвращает false, если свой релиз не найден (например, ни разу не публиковались).
+ */
+async function pointFeedAtOwnRelease(): Promise<boolean> {
+  const tag = await findOwnLatestTag()
+  if (!tag) {
+    console.warn(`[Updater] Не найден релиз с префиксом тега "${TAG_PREFIX}" в ${REPO_OWNER}/${REPO_NAME}`)
+    return false
+  }
+  autoUpdater.setFeedURL({
+    provider: 'generic',
+    url: `https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/download/${tag}`,
+  })
+  return true
 }
 
 /**
@@ -82,9 +135,16 @@ export function initAutoUpdater(): void {
   // Тихая проверка при старте — без диалога «обновлений нет», чтобы не мешать
   // (приложение живёт в трее, пользователь не ждёт ответа на этот вызов)
   setTimeout(() => {
-    autoUpdater.checkForUpdates().catch((err: unknown) => {
-      console.error('[Updater] Ошибка проверки при старте:', err)
-    })
+    pointFeedAtOwnRelease()
+      .then((found) => {
+        if (found) {
+          return autoUpdater.checkForUpdates()
+        }
+        return undefined
+      })
+      .catch((err: unknown) => {
+        console.error('[Updater] Ошибка проверки при старте:', err)
+      })
   }, 10_000)
 }
 
@@ -103,6 +163,16 @@ export async function checkForUpdatesManually(): Promise<void> {
   }
 
   try {
+    const found = await pointFeedAtOwnRelease()
+    if (!found) {
+      await dialog.showMessageBox({
+        type: 'info',
+        title: 'Обновлений нет',
+        message: `Релизы KamiKeyThe не найдены (у вас установлена ${app.getVersion()})`,
+      })
+      return
+    }
+
     const result = await autoUpdater.checkForUpdates()
     if (!result?.updateInfo || result.updateInfo.version === app.getVersion()) {
       await dialog.showMessageBox({

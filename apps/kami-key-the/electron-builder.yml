@@ -37,7 +37,16 @@ nsis:
   shortcutName: KamiKeyThe
 
 # Публикация на GitHub Releases — kamiletar/letar (публичный монорепо), релизы тегаются
-# префиксом kami-key-the-v* (тот же паттерн, что animatrona/label-printer-desktop)
+# префиксом kami-key-the-v* (тот же паттерн, что animatrona/label-printer-desktop).
+#
+# ⚠️ НЕ запускать `electron-builder --publish always` напрямую — kamiletar/letar общий на
+# несколько приложений, встроенный auto-tag electron-builder вычисляет тег как `v${version}`
+# (без префикса приложения), а не `kami-key-the-v${version}`. Кроме путаницы с реальным
+# соглашением тегов репозитория, это ломает и main/updater.ts (см. комментарий там) —
+# electron-updater ищет свой релиз по префиксу тега, а не через repo-wide "latest".
+# Собирать с `--publish never` (см. build:win в project.json), затем тег/релиз/загрузку
+# assets (exe + .blockmap + latest.yml из dist-electron/) делать вручную через `gh release
+# create kami-key-the-vX.Y.Z ...` с явным тегом.
 publish:
   provider: github
   owner: kamiletar
