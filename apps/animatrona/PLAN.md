@@ -512,6 +512,19 @@ creator-only: `EncodingProfilesCard`, `TranscodingSettingsCard`, `QBittorrentSet
 
 ## Открытые задачи
 
+- [ ] ⚠️ **Открытый вопрос: новый `release-animatrona.yml` (2026-09-13, прямая публикация в
+      `kamiletar/letar` вместо зеркала `kamiletar/animatrona`) не проверен реальным релизом.**
+      Синтаксис подтверждён только `python3 -c "import yaml"` и визуальной сверкой с рабочим
+      `release-animatrona-folder-player.yml` — `actionlint` в системе не было. Пуш тега
+      `animatrona-v*.*.*` — необратимое публичное действие, потенциально триггерящее
+      автообновление у уже установленных копий, поэтому не выполнялось самостоятельно. Нужно
+      согласовать с владельцем перед первым реальным использованием нового workflow. Детали —
+      [electron-monorepo-shared-releases.md](/.claude/docs/electron-monorepo-shared-releases.md),
+      [PLAN_COMPLETED-1.md § 2026-09-13](./PLAN_COMPLETED-1.md).
+- [ ] ⚠️ **Открытый вопрос: судьба репозитория `kamiletar/animatrona`** (отдельный зеркальный
+      репозиторий старой схемы релизов, признан устаревшим 2026-09-13). Новый CI-workflow
+      перестал в него писать, но сам репозиторий не архивирован и не удалён — решение
+      целиком за владельцем (действие на GitHub, вне зоны ответственности CI/агента).
 - [ ] ⚠️ **Открытый вопрос: `nx dev animatrona` (интерактивный Electron dev через nextron)
       по-прежнему запускает renderer через Turbopack, не webpack.** Закрыт основной риск
       Turbopack+Emotion hydration (2026-08-25, см. PLAN_COMPLETED.md) — `--webpack` добавлен в

@@ -729,3 +729,55 @@ alias'ы `vite.config.ts`, не через `node_modules`) — вне уже с�
 
 Остальные 21 приложение из §169 не тронуты (по границам задачи — часть приватные submodule,
 чинить не в эту сессию).
+
+## 2026-09-13: Единая архитектура релизов/автообновления для Electron-приложений в `kamiletar/letar`
+
+Расследование бага «animatrona может получить чужое обновление» (repo-wide `GET /releases/latest`
+у встроенного `GithubProvider` electron-updater — не различает приложения в общем публичном
+монорепо) переросло в архитектурный пересмотр всей схемы релизов трёх Electron-приложений
+(`animatrona`, `kami-key-the`, `animatrona-folder-player`). Явное решение владельца:
+`kamiletar/animatrona` (отдельный зеркальный репозиторий, куда до этой сессии реально публиковались
+релизы animatrona через rsync+PAT) — устаревшая схема, воспроизводить её не нужно.
+
+**Сделано:**
+
+- Новая общая рантайм-библиотека `libs/electron-monorepo-updater` (`@letar/electron-monorepo-updater`) —
+  `findOwnLatestTag`/`pointFeedAtOwnRelease`: ищет свой релиз через `GET /releases` (не `/latest`)
+  по префиксу тега, направляет `electron-updater` на `generic`-фид конкретного релиза. 7 юнит-тестов.
+- `apps/animatrona/main/updater.ts` и `apps/kami-key-the/main/updater.ts` мигрированы на общую
+  либу — устранён дубль ~50 строк инлайновой логики между приложениями.
+- `.github/workflows/release-animatrona.yml` переписан целиком: было — клонирование и rsync
+  исходников в `kamiletar/animatrona` (PAT `secrets.GH_TOKEN`) + публикация релиза там; стало —
+  прямая публикация в `kamiletar/letar` штатным `secrets.GITHUB_TOKEN`, по образцу рабочего
+  `release-animatrona-folder-player.yml`. Добавлены шаги переименования ассетов (пробелы → дефисы)
+  перед `gh release upload` — грабля из CHANGELOG kami-key-the [1.7.4] (`gh` иначе заменяет пробелы
+  на точки, ломая соответствие с `latest.yml`).
+- Убраны опасные `--publish always` targets: `release:win`/`release:mac`/`release:linux`/
+  `release:win-linux` из `apps/animatrona/project.json` (CI их не вызывал, но `nx release:win
+  animatrona` вручную создал бы неверно тегированный релиз `vX.Y.Z` без префикса — тот же класс
+  бага, что уже ловил kami-key-the на первой попытке публикации).
+- Документация: новый `.claude/docs/electron-monorepo-shared-releases.md` (схема целиком, чек-лист
+  для нового Electron-приложения, разбор грабли с именами ассетов, почему отдельный
+  зеркальный репозиторий — не нужный паттерн); ссылка добавлена в индекс корневого `CLAUDE.md` и в
+  `.claude/rules/animatrona.md`.
+
+**Вне скоупа (оставлено владельцу):** архивация/удаление репозитория `kamiletar/animatrona` на
+GitHub; пуш реального тега `animatrona-v*.*.*` для сквозной проверки нового workflow (необратимое
+публичное действие — намеренно не выполнялось в этой сессии).
+
+⚠️ **Открытый вопрос:** новый `release-animatrona.yml` не проверен реальным релизом — синтаксис
+подтверждён только `python3 -c "import yaml"` (парсится) и визуальной сверкой с рабочим
+`release-animatrona-folder-player.yml`, `actionlint` в системе не было. Первый реальный пуш тега
+`animatrona-v*.*.*` нужно согласовать с владельцем отдельно, до того как полагаться на
+автообновление существующих установленных копий.
+
+Коммиты (по scope): `libs/electron-monorepo-updater` (`5d3e85d6`), `apps/animatrona/main/updater.ts`
+(`db5eff04` → рефакторинг на либу `8c978a70`), `apps/kami-key-the/main/updater.ts` (`e56e3b3a`),
+`.github/workflows/release-animatrona.yml` (`d1c4a833`), `apps/animatrona/project.json` (удаление
+`release:*` targets), `.claude/docs/electron-monorepo-shared-releases.md` + `CLAUDE.md` +
+`.claude/rules/animatrona.md` (`a26d6eee`, `b36aec2b`).
+
+`nx run-many -t typecheck:tsgo,lint,test --projects=animatrona,kami-key-the,
+electron-monorepo-updater,animatrona-folder-player` — зелёный, кроме `animatrona:test`
+(`main/ffmpeg/__tests__/cropdetect.spec.ts`, локально сломанная установка Electron — не связано
+с этой сессией, 130 остальных тестов прошли).
