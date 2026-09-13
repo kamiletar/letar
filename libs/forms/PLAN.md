@@ -6,6 +6,16 @@
 
 ## Backlog (запросы от агентов)
 
+### [2026-09-13] Form.Field.Select — группировка опций (optgroup) через getGroup (от domwellbes-dev)
+
+- **Запросил:** domwellbes-dev (msg 1533, thread `forms-select-optgroup`)
+- **Приоритет:** high
+- **Описание:** `Form.Field.Combobox` уже поддерживает `getGroup?: (item) => string | undefined`
+  (группировка в выпадающем списке, `field-combobox.tsx:79`), у `Form.Field.Select`
+  (`field-select.tsx`) той же возможности нет вовсе — `SelectFieldProps` не содержит группировки,
+  подтверждено чтением исходника (не «почти есть», а чистый пробел).
+- **Статус:** делегировано forms-dev.
+
 ### ✅ [2026-09-12] Автоматизировать создание async-Combobox (закрыт v2.14.6/forms-react v0.8.0, от domwellbes-dev)
 
 - **Запросил:** domwellbes-dev (msg 1527/1529, topic `form-feature-request`)
