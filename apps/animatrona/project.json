@@ -86,30 +86,6 @@
         }
       }
     },
-    "release:win": {
-      "executor": "nx:run-commands",
-      "dependsOn": [
-        "db:template"
-      ],
-      "options": {
-        "commands": [
-          "npx tsx scripts/update-splash-version.ts",
-          "npx tsx scripts/download-ffmpeg.ts",
-          "npx tsx scripts/download-fpcalc.ts",
-          "cd renderer && next build --webpack",
-          "npx tsx scripts/fix-standalone.ts",
-          "npx webpack --config main/webpack.config.js",
-          "node web-player/build.mjs --prod",
-          "cd mobile-ui && bun run build",
-          "npx electron-builder --win --publish always"
-        ],
-        "cwd": "apps/animatrona",
-        "parallel": false,
-        "env": {
-          "NODE_OPTIONS": "--max-old-space-size=8192"
-        }
-      }
-    },
     "build:linux": {
       "executor": "nx:run-commands",
       "dependsOn": [
@@ -133,29 +109,6 @@
         }
       }
     },
-    "release:linux": {
-      "executor": "nx:run-commands",
-      "dependsOn": [
-        "db:template"
-      ],
-      "options": {
-        "commands": [
-          "npx tsx scripts/update-splash-version.ts",
-          "npx tsx scripts/download-ffmpeg.ts",
-          "npx tsx scripts/download-fpcalc.ts",
-          "cd renderer && next build --webpack",
-          "npx webpack --config main/webpack.config.js",
-          "node web-player/build.mjs --prod",
-          "cd mobile-ui && bun run build",
-          "npx electron-builder --linux --publish always"
-        ],
-        "cwd": "apps/animatrona",
-        "parallel": false,
-        "env": {
-          "NODE_OPTIONS": "--max-old-space-size=8192"
-        }
-      }
-    },
     "build:mac": {
       "executor": "nx:run-commands",
       "dependsOn": [
@@ -169,54 +122,6 @@
           "node web-player/build.mjs --prod",
           "cd mobile-ui && bun run build",
           "npx electron-builder --mac --publish never"
-        ],
-        "cwd": "apps/animatrona",
-        "parallel": false,
-        "env": {
-          "NODE_OPTIONS": "--max-old-space-size=8192"
-        }
-      }
-    },
-    "release:mac": {
-      "executor": "nx:run-commands",
-      "dependsOn": [
-        "db:template"
-      ],
-      "options": {
-        "commands": [
-          "npx tsx scripts/update-splash-version.ts",
-          "cd renderer && next build --webpack",
-          "npx webpack --config main/webpack.config.js",
-          "node web-player/build.mjs --prod",
-          "cd mobile-ui && bun run build",
-          "npx electron-builder --mac --publish always"
-        ],
-        "cwd": "apps/animatrona",
-        "parallel": false,
-        "env": {
-          "NODE_OPTIONS": "--max-old-space-size=8192"
-        }
-      }
-    },
-    "release:win-linux": {
-      "executor": "nx:run-commands",
-      "dependsOn": [
-        "db:template"
-      ],
-      "metadata": {
-        "description": "Release для Windows и Linux (можно запускать с Windows)"
-      },
-      "options": {
-        "commands": [
-          "npx tsx scripts/update-splash-version.ts",
-          "npx tsx scripts/download-ffmpeg.ts --platform all",
-          "npx tsx scripts/download-fpcalc.ts --platform all",
-          "cd renderer && next build --webpack",
-          "npx tsx scripts/fix-standalone.ts",
-          "npx webpack --config main/webpack.config.js",
-          "node web-player/build.mjs --prod",
-          "cd mobile-ui && bun run build",
-          "npx electron-builder --win --linux --publish always"
         ],
         "cwd": "apps/animatrona",
         "parallel": false,

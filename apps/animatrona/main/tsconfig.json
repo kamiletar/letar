@@ -16,6 +16,7 @@
       "@/*": ["./src/*"],
       "@letar/animatrona-types": ["../../../libs/animatrona-types/src/index.ts"],
       "@letar/animatrona-utils": ["../../../libs/animatrona-utils/src/index.ts"],
+      "@letar/electron-monorepo-updater": ["../../../libs/electron-monorepo-updater/src/index.ts"],
       "@letar/electron-storage": ["../../../libs/electron-storage/src/index.ts"],
       "@letar/folder-scan": ["../../../libs/folder-scan/src/index.ts"],
       "@letar/folder-scan/media-extensions": ["../../../libs/folder-scan/src/lib/media-extensions.ts"],

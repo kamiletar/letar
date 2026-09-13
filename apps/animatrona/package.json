@@ -27,6 +27,7 @@
     "@letar/animatrona-types": "workspace:*",
     "@letar/animatrona-ui": "workspace:*",
     "@letar/animatrona-utils": "workspace:*",
+    "@letar/electron-monorepo-updater": "workspace:*",
     "@letar/electron-storage": "workspace:*",
     "@letar/folder-scan": "workspace:*",
     "@letar/forms": "workspace:*",
