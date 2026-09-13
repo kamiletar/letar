@@ -82,6 +82,8 @@ export interface UIKitSelectOption<TNode = unknown> {
   value: string
   label: TNode
   disabled?: boolean
+  /** Group key for optgroup-style rendering. Options without it render flat, ungrouped. */
+  group?: string
 }
 
 export interface UIKitSelectProps<TNode = unknown> {
