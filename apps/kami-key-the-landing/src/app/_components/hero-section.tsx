@@ -1,9 +1,9 @@
 'use client'
 
+import type { DownloadInfo } from '@/lib/github'
 import { Box, Container, Flex, HStack, Text, VStack } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { FaDownload, FaWindows } from 'react-icons/fa6'
-import { DOWNLOAD_VERSION } from './download-info'
 
 /** Примеры маппингов для демонстрации в герое */
 const HERO_MAPPINGS = [
@@ -16,11 +16,16 @@ const HERO_MAPPINGS = [
 /** Текст для typing-эффекта */
 const TYPING_TEXT = 'Типографские символы одной клавишей'
 
+interface HeroSectionProps {
+  /** Данные последнего релиза для строки под кнопкой скачивания */
+  download: DownloadInfo
+}
+
 /**
  * Герой-секция — первый экран лендинга
  * Большой заголовок, typing-эффект, примеры маппингов, кнопка скачивания
  */
-export function HeroSection() {
+export function HeroSection({ download }: HeroSectionProps) {
   const [typedLength, setTypedLength] = useState(0)
   const [showCursor, setShowCursor] = useState(true)
   const [activeMapping, setActiveMapping] = useState(0)
@@ -187,7 +192,7 @@ export function HeroSection() {
             </Box>
 
             <Text className="font-mono" fontSize="xs" color="gray.500">
-              v{DOWNLOAD_VERSION} {'\u00B7'} Windows 10+ {'\u00B7'} Бесплатно
+              v{download.version} {'\u00B7'} Windows 10+ {'\u00B7'} Бесплатно
             </Text>
           </VStack>
         </VStack>

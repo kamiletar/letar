@@ -35,10 +35,15 @@
 - [x] `download-info.ts` обновлён до v1.7.4 (2026-09-13) — после релиза kami-key-the 1.7.4
       забыли синхронно поправить лендинг, сайт продолжал показывать v1.7.2/107 MB. Заодно URL
       переведён на дефисы в имени ассета (`KamiKeyThe-Setup-X.Y.Z.exe`) — с 1.7.4 релизные
-      ассеты называются так (см. CHANGELOG kami-key-the 1.7.4). ⚠️ **Открытый вопрос:** это
-      ручное поле, отставание повторится при следующем релизе — стоит рассмотреть автогенерацию
-      `download-info.ts` из GitHub Releases API (та же `@letar/github-releases`, что уже
-      используется на `/changelog`) вместо ручного обновления двух констант.
+      ассеты называются так (см. CHANGELOG kami-key-the 1.7.4).
+- [x] Открытый вопрос выше закрыт (2026-09-13, v0.4.3) — `download-info.ts` больше не ручное
+      поле. `getLatestDownload()` (`src/lib/github.ts`) переиспользует тот же `fetchLatestRelease()`
+      из `@letar/github-releases`, что и `/changelog`, находит `.exe`-ассет последнего релиза и
+      берёт его `name`/`browser_download_url` из GitHub API как есть (не конструирует по
+      шаблону — иначе повторная смена точки→дефис в имени ассета снова молча сломает ссылку).
+      `page.tsx` стал `async` Server Component, передаёт `download` пропом в `HeroSection`/
+      `DownloadsSection` (остались Client Components). `download-info.ts` оставлен только как
+      `FALLBACK_DOWNLOAD` на случай сбоя GitHub API.
 - [x] Базовый E2E-сьют (`apps/kami-key-the-landing-e2e`) — 8 тестов Playwright: загрузка главной,
       навигация, CTA "Скачать для Windows", секции "Возможности"/"Скачать", FAQ-аккордеон, футер,
       health-check, 404 на несуществующем маршруте. Нужен для тиража staging-e2e-гейта (PLAN.md

@@ -2,6 +2,20 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.4.3] - 2026-09-13
+
+### Changed
+
+- Версия/размер/URL кнопки скачивания (hero-секция + секция «Скачать») больше не хранятся
+  вручную в `download-info.ts` — берутся динамически из GitHub Releases тем же путём, что и
+  `/changelog` (`fetchLatestRelease()` из `@letar/github-releases`, ISR revalidate 1ч). Новый
+  `getLatestDownload()` в `lib/github.ts` находит `.exe`-ассет последнего релиза и берёт его
+  `name`/`browser_download_url` как есть — без конструирования по шаблону, чтобы не наступить
+  повторно на смену точки→дефис в имени ассета (см. запись 0.4.2 ниже). `hero-section.tsx` и
+  `downloads-section.tsx` остались Client Components, но теперь принимают `download` пропом от
+  `page.tsx` (стал `async` Server Component). `download-info.ts` оставлен только как
+  `FALLBACK_DOWNLOAD` на случай сбоя GitHub API.
+
 ## [0.4.2] - 2026-09-13
 
 ### Fixed

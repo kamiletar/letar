@@ -1,14 +1,19 @@
 'use client'
 
+import type { DownloadInfo } from '@/lib/github'
 import { Box, Container, Heading, HStack, Text, VStack } from '@chakra-ui/react'
 import { FaWindows } from 'react-icons/fa6'
 import { LuDownload, LuTriangleAlert } from 'react-icons/lu'
-import { DOWNLOAD_SIZE, DOWNLOAD_URL, DOWNLOAD_VERSION } from './download-info'
+
+interface DownloadsSectionProps {
+  /** Данные последнего релиза — версия, размер и URL exe-ассета */
+  download: DownloadInfo
+}
 
 /**
  * Секция скачивания — карточка с информацией о загрузке
  */
-export function DownloadsSection() {
+export function DownloadsSection({ download }: DownloadsSectionProps) {
   return (
     <Box as="section" id="downloads" py={{ base: 16, md: 24 }}>
       <Container maxW="4xl" px={{ base: 4, md: 8 }}>
@@ -50,9 +55,9 @@ export function DownloadsSection() {
                   Windows 10+
                 </Text>
                 <HStack gap={3} color="gray.500" fontSize="xs" className="font-mono">
-                  <Text>v{DOWNLOAD_VERSION}</Text>
+                  <Text>v{download.version}</Text>
                   <Text>{'\u00B7'}</Text>
-                  <Text>{DOWNLOAD_SIZE}</Text>
+                  <Text>{download.size}</Text>
                   <Text>{'\u00B7'}</Text>
                   <Text>Electron</Text>
                 </HStack>
@@ -69,7 +74,7 @@ export function DownloadsSection() {
                 asChild
               >
                 <a
-                  href={DOWNLOAD_URL}
+                  href={download.url}
                   style={{
                     width: '100%',
                     display: 'flex',
@@ -83,7 +88,7 @@ export function DownloadsSection() {
                     fontFamily: "'JetBrains Mono', monospace",
                     textDecoration: 'none',
                   }}
-                  aria-label={`Скачать KamiKeyThe v${DOWNLOAD_VERSION} для Windows (.exe)`}
+                  aria-label={`Скачать KamiKeyThe v${download.version} для Windows (.exe)`}
                 >
                   <LuDownload size={16} />
                   Скачать .exe

@@ -1,4 +1,4 @@
-import { fetchReleases, formatFileSize, type GitHubRelease } from '@letar/github-releases'
+import { fetchLatestRelease, fetchReleases, formatFileSize, type GitHubRelease } from '@letar/github-releases'
 
 const OWNER = 'kamiletar'
 const REPO = 'letar'
@@ -11,6 +11,40 @@ export interface ParsedRelease {
   body: string | null
   exeSize: string | null
   exeUrl: string | null
+}
+
+export interface DownloadInfo {
+  version: string
+  size: string
+  url: string
+}
+
+/**
+ * Данные для кнопки скачивания на главной (hero + секция «Скачать») — версия, размер и URL
+ * exe-ассета последнего релиза, напрямую из GitHub API (без ручного обновления констант).
+ *
+ * Имя ассета берём как есть из `asset.name`/`browser_download_url` — оно менялось между
+ * релизами (точки → дефисы, см. `download-info.ts`), поэтому конструировать URL по шаблону
+ * нельзя.
+ */
+export async function getLatestDownload(): Promise<DownloadInfo | null> {
+  const release = await fetchLatestRelease({
+    owner: OWNER,
+    repo: REPO,
+    tagPrefix: TAG_PREFIX,
+    token: process.env.GITHUB_TOKEN,
+  })
+
+  const exeAsset = release?.assets.find((asset) => asset.name.endsWith('.exe'))
+  if (!release || !exeAsset) {
+    return null
+  }
+
+  return {
+    version: release.tag_name.replace(TAG_PREFIX, ''),
+    size: formatFileSize(exeAsset.size),
+    url: exeAsset.browser_download_url,
+  }
 }
 
 function parseRelease(release: GitHubRelease): ParsedRelease {
