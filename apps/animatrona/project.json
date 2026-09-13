@@ -329,16 +329,6 @@
         "cwd": "apps/animatrona"
       }
     },
-    "release": {
-      "command": "scripts/release.bat",
-      "metadata": {
-        "description": "Создать тег из текущей версии package.json и запушить для запуска GitHub Actions. ВАЖНО: версию нужно обновить вручную перед запуском!",
-        "technologies": [
-          "git",
-          "github-actions"
-        ]
-      }
-    },
     "build:web-player": {
       "executor": "nx:run-commands",
       "metadata": {

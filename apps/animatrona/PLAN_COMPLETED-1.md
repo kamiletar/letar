@@ -781,3 +781,10 @@ GitHub; пуш реального тега `animatrona-v*.*.*` для сквоз
 electron-monorepo-updater,animatrona-folder-player` — зелёный, кроме `animatrona:test`
 (`main/ffmpeg/__tests__/cropdetect.spec.ts`, локально сломанная установка Electron — не связано
 с этой сессией, 130 остальных тестов прошли).
+
+**2026-09-13, отдельная находка (не часть той же задачи):** при повторном чтении
+`apps/animatrona/project.json` обнаружен ещё один мёртвый target — `release`, ссылавшийся на
+`scripts/release.bat`, которого не существовало ни на диске, ни в истории git (`git log --all`
+по пути пуст). Удалён целиком. Актуальная схема релиза не нуждается в nx-таргете — тег
+`animatrona-v<semver>` пушится вручную, дальше работает `.github/workflows/release-animatrona.yml`
+(см. `.claude/docs/electron-monorepo-shared-releases.md`).
