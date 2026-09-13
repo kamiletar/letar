@@ -5,6 +5,20 @@
  * Поддерживает GitHub Releases как источник обновлений.
  *
  * Улучшенная версия: без блокирующих диалогов, с changelog из GitHub API
+ *
+ * ⚠️ НЕ используем встроенный GithubProvider электрон-апдейтера напрямую (через голый
+ * `autoUpdater.checkForUpdates()` без предварительной установки feed URL).
+ * `kamiletar/letar` — общий монорепо-репозиторий: kami-key-the публикует туда же свои релизы.
+ * `GithubProvider.getLatestTagName()` всегда бьёт в репозиторий-wide
+ * `GET /repos/{owner}/{repo}/releases/latest` — это САМЫЙ СВЕЖИЙ релиз ВСЕГО репозитория,
+ * не конкретно Animatrona. Если kami-key-the выпустит релиз позже последнего релиза Animatrona,
+ * автообновление Animatrona найдёт релиз kami-key-the (более новый по дате) и попытается
+ * применить его как обновление Animatrona.
+ *
+ * Поэтому перед каждым `checkForUpdates()` сами находим свой тег по префиксу `animatrona-v`
+ * через список релизов (`GET /releases`, не `/releases/latest`) и подставляем
+ * electron-updater `generic`-провайдер с URL конкретного релиза. Тот же фикс —
+ * `apps/kami-key-the/main/updater.ts`, разбор — `.claude/docs/` (см. апдейтер kami-key-the).
  */
 
 import type { BrowserWindow } from 'electron'
@@ -14,6 +28,47 @@ import { autoUpdater, type ProgressInfo, type UpdateDownloadedEvent, type Update
 import { createModuleLogger } from './utils/logger'
 
 const log = createModuleLogger('Updater')
+
+const REPO_OWNER = 'kamiletar'
+const REPO_NAME = 'letar'
+const TAG_PREFIX = 'animatrona-v'
+
+interface GithubReleaseSummary {
+  tag_name: string
+  draft: boolean
+  prerelease: boolean
+}
+
+/** Найти тег последнего релиза именно Animatrona в общем репозитории kamiletar/letar */
+async function findOwnLatestTag(): Promise<string | null> {
+  const response = await net.fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases?per_page=50`, {
+    headers: { 'User-Agent': 'Animatrona-Update-Client', Accept: 'application/vnd.github+json' },
+  })
+  if (!response.ok) {
+    throw new Error(`GitHub API вернул ${response.status}`)
+  }
+  // GitHub возвращает релизы отсортированными по дате публикации (свежие первыми)
+  const releases = (await response.json()) as GithubReleaseSummary[]
+  const own = releases.find((r) => !r.draft && !r.prerelease && r.tag_name.startsWith(TAG_PREFIX))
+  return own?.tag_name ?? null
+}
+
+/**
+ * Направить electron-updater на релиз конкретно Animatrona (не repo-wide "latest").
+ * Возвращает false, если свой релиз не найден (например, ни разу не публиковались).
+ */
+async function pointFeedAtOwnRelease(): Promise<boolean> {
+  const tag = await findOwnLatestTag()
+  if (!tag) {
+    log.warn(`Не найден релиз с префиксом тега "${TAG_PREFIX}" в ${REPO_OWNER}/${REPO_NAME}`)
+    return false
+  }
+  autoUpdater.setFeedURL({
+    provider: 'generic',
+    url: `https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/download/${tag}`,
+  })
+  return true
+}
 
 // Настройки автообновления
 autoUpdater.autoDownload = false // Не скачивать автоматически
@@ -371,6 +426,10 @@ export function initAutoUpdater(mainWindow: BrowserWindow): void {
  */
 export async function checkForUpdates(): Promise<void> {
   try {
+    const found = await pointFeedAtOwnRelease()
+    if (!found) {
+      return
+    }
     await autoUpdater.checkForUpdates()
   } catch {
     // Ошибка проверки обновлений — игнорируем
