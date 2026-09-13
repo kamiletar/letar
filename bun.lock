@@ -632,7 +632,7 @@
         "imapflow": "^1.7.1",
         "pdfjs-dist": "^6.3.289",
         "tus-js-client": "^4.3.1",
-        "zod": "4.6.2",
+        "zod": "4.4.3",
       },
       "devDependencies": {
         "@letar/mcp-test-kit": "workspace:*",
@@ -704,7 +704,7 @@
     },
     "apps/form-develop-app": {
       "name": "form-develop-app",
-      "version": "0.1.14",
+      "version": "0.1.15",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -1227,7 +1227,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.14.6",
+      "version": "2.14.7",
       "dependencies": {
         "@letar/format-utils": "workspace:*",
         "@tanstack/react-table": "^9.2.4",
@@ -1280,7 +1280,7 @@
     },
     "libs/forms-core": {
       "name": "@letar/forms-core",
-      "version": "0.12.1",
+      "version": "0.12.2",
       "dependencies": {
         "@tanstack/table-core": "^9.1.2",
       },
@@ -8310,8 +8310,6 @@
     "@letar/animatrona-mobile/react-native-vision-camera": ["react-native-vision-camera@4.7.3", "", { "peerDependencies": { "@shopify/react-native-skia": "*", "react": "*", "react-native": "*", "react-native-reanimated": "*", "react-native-worklets-core": "*" }, "optionalPeers": ["@shopify/react-native-skia", "react-native-reanimated", "react-native-worklets-core"] }, "sha512-g1/neOyjSqn1kaAa2FxI/qp5KzNvPcF0bnQw6NntfbxH6tm0+8WFZszlgb5OV+iYlB6lFUztCbDtyz5IpL47OA=="],
 
     "@letar/deploy-mcp/zod": ["zod@4.6.2", "", {}, "sha512-lh5RCAGFa1Cm2hjtNwLQhSs/AsqdWnTQaBER9fEwN/88pSh7KOtJavtBx/0VlkN/uFd61SwYmljLMDAsHlvzBQ=="],
-
-    "@letar/domwellbes/zod": ["zod@4.6.2", "", {}, "sha512-lh5RCAGFa1Cm2hjtNwLQhSs/AsqdWnTQaBER9fEwN/88pSh7KOtJavtBx/0VlkN/uFd61SwYmljLMDAsHlvzBQ=="],
 
     "@letar/glitchtip-mcp/zod": ["zod@4.6.2", "", {}, "sha512-lh5RCAGFa1Cm2hjtNwLQhSs/AsqdWnTQaBER9fEwN/88pSh7KOtJavtBx/0VlkN/uFd61SwYmljLMDAsHlvzBQ=="],
 
