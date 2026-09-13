@@ -158,15 +158,36 @@ export const chakraUIKit: ChakraUIKit = {
     variant,
     ...rest
   }): ReactElement {
+    const hasGroups = useMemo(() => options.some((opt) => opt.group), [options])
+
     const collection = useMemo(
       () =>
         createListCollection({
           items: options,
-          itemToString: (item) => (typeof item.label === 'string' ? item.label : item.value),
-          itemToValue: (item) => item.value,
+          itemToString: (item: (typeof options)[number]) => (typeof item.label === 'string' ? item.label : item.value),
+          itemToValue: (item: (typeof options)[number]) => item.value,
+          isItemDisabled: (item: (typeof options)[number]) => item.disabled ?? false,
+          ...(hasGroups && { groupBy: (item: (typeof options)[number]) => item.group ?? '' }),
         }),
-      [options],
+      [options, hasGroups],
     )
+
+    // Одна и та же Map строится и для группировки в `<Select.Content>`, и как признак «есть
+    // группы вообще» — не пересчитывать дважды тем же способом, что уже делает `useGroupedOptions`
+    // для Combobox/Listbox (`use-grouped-options.ts`), но здесь нет отдельного generic-хука на
+    // сырых UIKit-опциях, поэтому логика инлайн.
+    const groups = useMemo(() => {
+      if (!hasGroups) {
+        return null
+      }
+      const groupMap = new Map<string, typeof options>()
+      for (const opt of options) {
+        const groupName = opt.group ?? ''
+        const existing = groupMap.get(groupName) ?? []
+        groupMap.set(groupName, [...existing, opt])
+      }
+      return groupMap
+    }, [options, hasGroups])
 
     return (
       <ChakraSelect.Root
@@ -197,12 +218,24 @@ export const chakraUIKit: ChakraUIKit = {
         <Portal>
           <ChakraSelect.Positioner>
             <ChakraSelect.Content>
-              {options.map((opt) => (
-                <ChakraSelect.Item item={opt} key={opt.value}>
-                  {opt.label}
-                  <ChakraSelect.ItemIndicator />
-                </ChakraSelect.Item>
-              ))}
+              {groups
+                ? Array.from(groups.entries()).map(([groupName, groupOptions]) => (
+                  <ChakraSelect.ItemGroup key={groupName}>
+                    {groupName && <ChakraSelect.ItemGroupLabel>{groupName}</ChakraSelect.ItemGroupLabel>}
+                    {groupOptions.map((opt) => (
+                      <ChakraSelect.Item item={opt} key={opt.value}>
+                        {opt.label}
+                        <ChakraSelect.ItemIndicator />
+                      </ChakraSelect.Item>
+                    ))}
+                  </ChakraSelect.ItemGroup>
+                ))
+                : options.map((opt) => (
+                  <ChakraSelect.Item item={opt} key={opt.value}>
+                    {opt.label}
+                    <ChakraSelect.ItemIndicator />
+                  </ChakraSelect.Item>
+                ))}
             </ChakraSelect.Content>
           </ChakraSelect.Positioner>
         </Portal>

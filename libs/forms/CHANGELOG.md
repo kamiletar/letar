@@ -4,6 +4,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.14.7] - 2026-09-13
+
+### Added
+
+- **`Form.Field.Select` — группировка опций через `getGroup`** (msg 1533/1547, `forms-select-optgroup`,
+  от domwellbes-dev). Симметрично `Form.Field.Combobox.getGroup`, но для статичного массива
+  `options`: `<Form.Field.Select options={categories} getGroup={(opt) => opt.parentLabel} />`
+  рендерит опции секциями (`optgroup`-подобная разметка UIKit `Select`-контракта). Без пропа
+  поведение не меняется — плоский список, как раньше. Реализовано на уровне `UIKit`-контракта
+  (`UIKitSelectOption.group` в `@letar/forms-core` v0.12.2) — доступно только Chakra-скину
+  (`@letar/forms`), `forms-shadcn`-скину группировка Select пока не перенесена.
+
 ## [2.14.6] - 2026-09-12
 
 ### Added

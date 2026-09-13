@@ -142,6 +142,43 @@ describe('FieldSelect', () => {
     })
   })
 
+  describe('группировка опций (getGroup)', () => {
+    const groupedOptions = [
+      { label: 'React', value: 'react', parentLabel: 'Frontend' },
+      { label: 'Vue', value: 'vue', parentLabel: 'Frontend' },
+      { label: 'Express', value: 'express', parentLabel: 'Backend' },
+    ]
+
+    it('рендерится без ошибок с getGroup и показывает выбранное значение', () => {
+      render(
+        <TestWrapper>
+          <Form initialValue={{ framework: 'express' }} onSubmit={vi.fn()}>
+            <Form.Field.Select
+              name="framework"
+              options={groupedOptions}
+              getGroup={(opt) => (opt as { parentLabel?: string }).parentLabel}
+            />
+          </Form>
+        </TestWrapper>,
+      )
+
+      const trigger = screen.getByRole('combobox')
+      expect(trigger).toHaveTextContent('Express')
+    })
+
+    it('без getGroup ведёт себя как раньше (плоский список, без группировки)', () => {
+      render(
+        <TestWrapper>
+          <Form initialValue={{ framework: 'react' }} onSubmit={vi.fn()}>
+            <Form.Field.Select name="framework" options={testOptions} />
+          </Form>
+        </TestWrapper>,
+      )
+
+      expect(screen.getByRole('combobox')).toHaveTextContent('React')
+    })
+  })
+
   describe('data attributes', () => {
     it('устанавливает data-field-name', () => {
       render(

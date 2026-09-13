@@ -218,6 +218,25 @@ const Schema = z.object({
 
 ---
 
+## Form.Field.Select — группировка опций (v2.14.7+)
+
+`getGroup` группирует статичные `options` по ключу — симметрично `getGroup` у
+`Form.Field.Combobox`, но без async-обёртки:
+
+```tsx
+<Form.Field.Select
+  name="category"
+  options={categories}
+  getGroup={(opt) => opt.parentLabel}
+/>
+```
+
+Опции без группы (или без `getGroup` вовсе) рендерятся плоским списком — поведение по умолчанию
+не меняется. Реализовано на уровне `UIKit`-контракта (`@letar/forms-core/uikit`), доступно
+только Chakra-скину (`@letar/forms`).
+
+---
+
 ## Form.Field.CascadingSelect — Каскадный выбор (v0.42.0+)
 
 Загружает опции динамически на основе значения другого поля:

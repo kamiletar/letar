@@ -6,15 +6,32 @@
 
 ## Backlog (запросы от агентов)
 
-### [2026-09-13] Form.Field.Select — группировка опций (optgroup) через getGroup (от domwellbes-dev)
+### ✅ [2026-09-13] Form.Field.Select — группировка опций (optgroup) через getGroup (закрыт v2.14.7, от domwellbes-dev)
 
-- **Запросил:** domwellbes-dev (msg 1533, thread `forms-select-optgroup`)
+- **Запросил:** domwellbes-dev (msg 1533/1547, thread `forms-select-optgroup`)
 - **Приоритет:** high
 - **Описание:** `Form.Field.Combobox` уже поддерживает `getGroup?: (item) => string | undefined`
   (группировка в выпадающем списке, `field-combobox.tsx:79`), у `Form.Field.Select`
   (`field-select.tsx`) той же возможности нет вовсе — `SelectFieldProps` не содержит группировки,
   подтверждено чтением исходника (не «почти есть», а чистый пробел).
-- **Статус:** делегировано forms-dev.
+- **Фикс:** `getGroup?: (option: BaseOption<string | number>) => string | undefined` в
+  `SelectFieldProps` (`field-select.tsx`) — символично с Combobox, но применяется к статичному
+  `options`, без async-обёртки. Группировка реализована на уровне `UIKit`-контракта:
+  `UIKitSelectOption.group?: string` добавлен в `@letar/forms-core` v0.12.2, Chakra-адаптер
+  (`uikit-chakra.tsx`) строит `createListCollection` с `groupBy` при наличии хотя бы одной
+  группы и рендерит `Select.ItemGroup`/`Select.ItemGroupLabel` (тот же паттерн, что
+  `use-grouped-options.ts` уже использует для Combobox/Listbox — здесь инлайн, т.к. хук работает
+  на `GroupableOption` декларативного слоя, а UIKit-примитив — на сыром `UIKitSelectOption`).
+  Без `getGroup` поведение не меняется — плоский список.
+- **Не в этом фиксе:** `forms-shadcn`-скин группировку Select не получил — координатор запросил
+  только Chakra-скин (domwellbes использует его), задача явно скоуплена файлом `field-select.tsx`
+  в `libs/forms`.
+- **Тесты:** `field-select.spec.tsx` — 2 новых кейса (рендер с `getGroup` и выбранным значением;
+  регресс — без `getGroup` список остаётся плоским). Открытие dropdown и визуальная проверка
+  группировки — вручную через `form-develop-app` (`select-demo`, секция «Grouped Select»,
+  подтверждено в браузере: опции разбиваются на Frontend/Backend/Mobile).
+- **Демо:** `apps/form-develop-app/src/app/select-demo/page.tsx` — секция «Grouped Select
+  (getGroup)».
 
 ### ✅ [2026-09-12] Автоматизировать создание async-Combobox (закрыт v2.14.6/forms-react v0.8.0, от domwellbes-dev)
 

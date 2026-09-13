@@ -10,6 +10,7 @@ interface NormalizedOption {
   label: React.ReactNode
   value: string
   disabled?: boolean
+  group?: string
 }
 
 /**
@@ -18,6 +19,20 @@ interface NormalizedOption {
 export interface SelectFieldProps extends BaseFieldProps {
   /** Options for selection (string or number values). If not specified, taken from schema meta */
   options?: BaseOption<string | number>[]
+  /**
+   * Get group key (optgroup) from an option — symmetric to `Form.Field.Combobox`'s `getGroup`.
+   * Options without a group (or when the prop is omitted) render flat, ungrouped.
+   *
+   * @example
+   * ```tsx
+   * <Form.Field.Select
+   *   name="category"
+   *   options={categories}
+   *   getGroup={(opt) => opt.parentLabel}
+   * />
+   * ```
+   */
+  getGroup?: (option: BaseOption<string | number>) => string | undefined
   /** Value type: 'string' (by default) or 'number' */
   valueType?: 'string' | 'number'
   /** Show clear button (auto-determined: true if optional, false if required) */
@@ -70,12 +85,14 @@ export const FieldSelect = createField<SelectFieldProps, string | number, Select
     const normalizedOptions: NormalizedOption[] = useMemo(() => {
       // Options: props take priority, fallback to schema meta
       const sourceOptions = componentProps.options ?? resolved.options ?? []
+      const getGroup = componentProps.getGroup
       return sourceOptions.map((opt) => ({
         label: opt.label,
         value: String(opt.value),
         disabled: opt.disabled,
+        group: getGroup?.(opt),
       }))
-    }, [componentProps.options, resolved.options])
+    }, [componentProps.options, componentProps.getGroup, resolved.options])
 
     // Auto-determine clearable: show clear button if field is optional
     const resolvedClearable = componentProps.clearable ?? !resolved.required
@@ -104,6 +121,7 @@ export const FieldSelect = createField<SelectFieldProps, string | number, Select
             value: opt.value,
             label: getOptionLabel(opt),
             disabled: opt.disabled,
+            group: opt.group,
           }))}
           label={resolved.label
             ? <SelectionFieldLabel label={resolved.label} tooltip={resolved.tooltip} required={resolved.required} />
