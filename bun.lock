@@ -386,6 +386,7 @@
         "@letar/animatrona-types": "workspace:*",
         "@letar/animatrona-ui": "workspace:*",
         "@letar/animatrona-utils": "workspace:*",
+        "@letar/electron-monorepo-updater": "workspace:*",
         "@letar/electron-storage": "workspace:*",
         "@letar/folder-scan": "workspace:*",
         "@letar/forms": "workspace:*",
@@ -602,7 +603,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.242.0",
+      "version": "0.245.0",
       "dependencies": {
         "@letar/analytics": "workspace:*",
         "@letar/consent": "workspace:*",
@@ -703,7 +704,7 @@
     },
     "apps/form-develop-app": {
       "name": "form-develop-app",
-      "version": "0.1.13",
+      "version": "0.1.14",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -789,14 +790,17 @@
     },
     "apps/kami-key-the": {
       "name": "kami-key-the",
-      "version": "1.7.2",
+      "version": "1.7.4",
+      "dependencies": {
+        "@letar/electron-monorepo-updater": "workspace:*",
+      },
       "devDependencies": {
         "electron": "44.3.0",
       },
     },
     "apps/kami-key-the-landing": {
       "name": "@letar/kami-key-the-landing",
-      "version": "0.4.1",
+      "version": "0.4.3",
       "dependencies": {
         "@letar/glitchtip": "workspace:*",
       },
@@ -1137,6 +1141,10 @@
       "name": "@letar/eager-jsx-check",
       "version": "0.1.0",
     },
+    "libs/electron-monorepo-updater": {
+      "name": "@letar/electron-monorepo-updater",
+      "version": "0.1.0",
+    },
     "libs/electron-storage": {
       "name": "@letar/electron-storage",
       "version": "0.1.0",
@@ -1219,7 +1227,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.14.2",
+      "version": "2.14.6",
       "dependencies": {
         "@letar/format-utils": "workspace:*",
         "@tanstack/react-table": "^9.2.4",
@@ -1279,7 +1287,7 @@
     },
     "libs/forms-react": {
       "name": "@letar/forms-react",
-      "version": "0.7.0",
+      "version": "0.8.0",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },
@@ -2668,6 +2676,8 @@
     "@letar/e2e-testing": ["@letar/e2e-testing@workspace:libs/e2e-testing"],
 
     "@letar/eager-jsx-check": ["@letar/eager-jsx-check@workspace:libs/eager-jsx-check"],
+
+    "@letar/electron-monorepo-updater": ["@letar/electron-monorepo-updater@workspace:libs/electron-monorepo-updater"],
 
     "@letar/electron-storage": ["@letar/electron-storage@workspace:libs/electron-storage"],
 
