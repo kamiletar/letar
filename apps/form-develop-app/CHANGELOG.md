@@ -2,6 +2,13 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.15] - 2026-09-13
+
+### Added
+
+- `select-demo`: секция «Grouped Select (getGroup)» — демонстрирует новую группировку опций
+  `Form.Field.Select` (`@letar/forms` v2.14.7), опции разбиты на Frontend/Backend/Mobile.
+
 ## [0.1.14] - 2026-09-12
 
 ### Fixed

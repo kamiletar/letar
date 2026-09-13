@@ -48,6 +48,14 @@ const DemoSchema = z
           ui: { title: 'District', placeholder: 'Select district...' },
         }),
     }),
+
+    // Group.Field.Select с getGroup (optgroup)
+    technology: z
+      .string()
+      .optional()
+      .meta({
+        ui: { title: 'Technology (grouped)', placeholder: 'Select technology...' },
+      }),
   })
   .strip()
 
@@ -63,6 +71,7 @@ const initialData: DemoData = {
     region: '',
     district: undefined,
   },
+  technology: undefined,
 }
 
 // Данные для NativeSelect
@@ -115,6 +124,16 @@ const regions = [
   { label: 'Moscow Region', value: 'msk_reg' },
   { label: 'Leningrad Region', value: 'len_reg' },
   { label: 'Krasnodar Region', value: 'krd_reg' },
+]
+
+// Данные для группированного Select (getGroup)
+const technologies = [
+  { label: 'React', value: 'react', category: 'Frontend' },
+  { label: 'Vue', value: 'vue', category: 'Frontend' },
+  { label: 'Svelte', value: 'svelte', category: 'Frontend' },
+  { label: 'Express', value: 'express', category: 'Backend' },
+  { label: 'NestJS', value: 'nestjs', category: 'Backend' },
+  { label: 'React Native', value: 'react-native', category: 'Mobile' },
 ]
 
 const districtsByRegion: Record<string, { label: string; value: string }[]> = {
@@ -215,6 +234,21 @@ export default function SelectDemoPage() {
               }}
             />
           </VStack>
+        </Box>
+
+        {/* Группированный Select (getGroup) */}
+        <Box borderWidth={1} borderRadius="md" p={4} mb={6}>
+          <Heading size="md" mb={4}>
+            Grouped Select (getGroup)
+          </Heading>
+          <Text color="fg.muted" mb={4}>
+            Опции сгруппированы по категории (optgroup) — симметрично группировке в Form.Field.Combobox
+          </Text>
+          <Form.Field.Select
+            name="technology"
+            options={technologies}
+            getGroup={(opt) => (opt as (typeof technologies)[number]).category}
+          />
         </Box>
 
         <Form.Button.Submit>Submit</Form.Button.Submit>
