@@ -1971,3 +1971,17 @@ protocol.registerSchemesAsPrivileged([
       измерения и ловушки, применимые где угодно ещё. Тот же выбор движка применим к
       `apps/animatrona` (свой ffmpeg-стек, та же проблема Hi10P) — задача не заведена, только
       указатель в общем доке.
+
+### 24. Убран опасный `release:win --publish always` (2026-09-13)
+
+Часть кросс-приложенческого пересмотра схемы релизов Electron-приложений в `kamiletar/letar`
+(детали — `apps/animatrona/PLAN_COMPLETED-1.md` § 2026-09-13,
+[electron-monorepo-shared-releases.md](/.claude/docs/electron-monorepo-shared-releases.md)).
+`project.json` держал target `release:win` с `npx electron-builder --win --publish always` — тот
+же класс опасности, что уже реально сработал у `kami-key-the` (создание релиза с неверным тегом
+`vX.Y.Z` без префикса приложения, коллизия с чужим `/releases/latest` в общем репозитории). Ни
+один CI-пайплайн этот target не вызывал (реальная сборка/публикация идёт через
+`.github/workflows/release-animatrona-folder-player.yml` с `--publish never` + `gh release`) —
+target удалён как неиспользуемая, но опасная ловушка. Автообновления у этого приложения нет
+(`electron-builder.yml` без auto-update канала), поэтому `@letar/electron-monorepo-updater` ему
+не нужен — только сам факт правильного тегирования CI.
