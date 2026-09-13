@@ -10,6 +10,7 @@
     "sourceMap": true,
     "paths": {
       "@/*": ["./src/*"],
+      "@letar/electron-monorepo-updater": ["../../libs/electron-monorepo-updater/src/index.ts"],
       "@letar/electron-storage": ["../../libs/electron-storage/src/index.ts"]
     },
     "types": ["node"],
@@ -17,6 +18,12 @@
     "noUncheckedSideEffectImports": false,
     "ignoreDeprecations": "6.0"
   },
-  "include": ["src/**/*.ts", "main/**/*.ts", "shared/**/*.ts", "../../libs/electron-storage/src/**/*.ts"],
+  "include": [
+    "src/**/*.ts",
+    "main/**/*.ts",
+    "shared/**/*.ts",
+    "../../libs/electron-storage/src/**/*.ts",
+    "../../libs/electron-monorepo-updater/src/**/*.ts"
+  ],
   "exclude": ["node_modules", "dist", "app", "renderer", "../../libs/**/*.spec.ts"]
 }

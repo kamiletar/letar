@@ -1,36 +1,22 @@
 /**
  * Автообновление через electron-updater — источник GitHub Releases.
  *
- * ⚠️ НЕ используем встроенный GithubProvider электрон-апдейтера напрямую.
- * `kamiletar/letar` — общий монорепо-репозиторий: animatrona публикует туда же свои релизы.
- * `GithubProvider.getLatestTagName()` всегда бьёт в репозиторий-wide
- * `GET /repos/{owner}/{repo}/releases/latest` — это САМЫЙ СВЕЖИЙ релиз ВСЕГО репозитория,
- * не конкретного приложения. Если animatrona выпустит релиз позже, чем последний релиз
- * KamiKeyThe, автообновление KamiKeyThe найдёт релиз animatrona (более новый по дате) и
- * предложит скачать/установить его инсталлятор — подмена приложения при апдейте.
- *
- * Поэтому сами находим свой тег по префиксу `kami-key-the-v` через список релизов
- * (`GET /releases`, не `/releases/latest`) и подставляем electron-updater
- * `generic`-провайдер с URL конкретного релиза — дальше вся стандартная механика
- * (проверка sha512, blockmap-diff, `quitAndInstall`) работает как обычно, просто указана
- * на правильный релиз явно, а не через репозиторий-wide эвристику.
+ * ⚠️ НЕ используем встроенный GithubProvider электрон-апдейтера напрямую — `kamiletar/letar`
+ * общий для нескольких приложений, репозиторий-wide `/releases/latest` вернёт чужой релиз.
+ * Разбор и общая реализация обхода — `@letar/electron-monorepo-updater`
+ * (`.claude/docs/electron-monorepo-shared-releases.md`).
  *
  * Диалоговый UX (не toast/renderer-стрим, как у animatrona) — по образцу
  * label-printer-desktop: у KamiKeyThe нет постоянно открытого окна (приложение живёт в трее).
  */
 
+import { pointFeedAtOwnRelease } from '@letar/electron-monorepo-updater'
 import { app, dialog, net } from 'electron'
 import { autoUpdater, type UpdateInfo } from 'electron-updater'
 
 const REPO_OWNER = 'kamiletar'
 const REPO_NAME = 'letar'
 const TAG_PREFIX = 'kami-key-the-v'
-
-interface GithubReleaseSummary {
-  tag_name: string
-  draft: boolean
-  prerelease: boolean
-}
 
 let initialized = false
 
@@ -43,35 +29,16 @@ function configureLogger(): void {
   }
 }
 
-/** Найти тег последнего релиза именно KamiKeyThe в общем репозитории kamiletar/letar */
-async function findOwnLatestTag(): Promise<string | null> {
-  const response = await net.fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases?per_page=50`, {
-    headers: { 'User-Agent': 'KamiKeyThe-Update-Client', Accept: 'application/vnd.github+json' },
+/** Направить electron-updater на релиз конкретно KamiKeyThe (не repo-wide "latest") */
+function pointOwnFeed(): Promise<boolean> {
+  return pointFeedAtOwnRelease(autoUpdater, {
+    fetchFn: net.fetch,
+    owner: REPO_OWNER,
+    repo: REPO_NAME,
+    tagPrefix: TAG_PREFIX,
+    userAgent: 'KamiKeyThe-Update-Client',
+    onNotFound: (message) => console.warn(`[Updater] ${message}`),
   })
-  if (!response.ok) {
-    throw new Error(`GitHub API вернул ${response.status}`)
-  }
-  // GitHub возвращает релизы отсортированными по дате публикации (свежие первыми)
-  const releases = (await response.json()) as GithubReleaseSummary[]
-  const own = releases.find((r) => !r.draft && !r.prerelease && r.tag_name.startsWith(TAG_PREFIX))
-  return own?.tag_name ?? null
-}
-
-/**
- * Направить electron-updater на релиз конкретно KamiKeyThe (не repo-wide "latest").
- * Возвращает false, если свой релиз не найден (например, ни разу не публиковались).
- */
-async function pointFeedAtOwnRelease(): Promise<boolean> {
-  const tag = await findOwnLatestTag()
-  if (!tag) {
-    console.warn(`[Updater] Не найден релиз с префиксом тега "${TAG_PREFIX}" в ${REPO_OWNER}/${REPO_NAME}`)
-    return false
-  }
-  autoUpdater.setFeedURL({
-    provider: 'generic',
-    url: `https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/download/${tag}`,
-  })
-  return true
 }
 
 /**
@@ -135,7 +102,7 @@ export function initAutoUpdater(): void {
   // Тихая проверка при старте — без диалога «обновлений нет», чтобы не мешать
   // (приложение живёт в трее, пользователь не ждёт ответа на этот вызов)
   setTimeout(() => {
-    pointFeedAtOwnRelease()
+    pointOwnFeed()
       .then((found) => {
         if (found) {
           return autoUpdater.checkForUpdates()
@@ -163,7 +130,7 @@ export async function checkForUpdatesManually(): Promise<void> {
   }
 
   try {
-    const found = await pointFeedAtOwnRelease()
+    const found = await pointOwnFeed()
     if (!found) {
       await dialog.showMessageBox({
         type: 'info',

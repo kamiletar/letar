@@ -12,6 +12,9 @@
       "@letar/ui"
     ]
   },
+  "dependencies": {
+    "@letar/electron-monorepo-updater": "workspace:*"
+  },
   "devDependencies": {
     "electron": "44.3.0"
   }
