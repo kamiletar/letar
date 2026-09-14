@@ -1,5 +1,19 @@
 # Выполненные задачи — form-example
 
+## useFormServerAction на `/examples/server-errors` (2026-09-14)
+
+Дополнена секцией «useFormServerAction — та же связка в один вызов» рядом с уже существующим
+explorer `mapServerErrors()`. Живая форма (`SignupSchema`, поле `email`) + `useFormRef` +
+`useFormServerAction(formRef, { fieldMap })`: `taken@example.com` имитирует ошибку Prisma P2002 на
+уникальном поле (`fakeCreateUser` бросает `{ code: 'P2002', meta: { target: ['email'] } }`) —
+`run()` ловит её сам, применяет `mapServerErrors`/`applyServerErrors` к форме, `pending` отражает
+статус запроса под кнопкой сабмита. Toaster не подключён — в этом приложении нет готовой Chakra
+toaster-инфраструктуры (`useFormServerAction`'s `toaster` — опциональный параметр).
+
+Запрос от domwellbes-dev через `forms-coordinator-dev` (тред agent-mail
+`forms-submit-orchestration-helper`), реализация хука — `@letar/forms-react` v0.9.0 /
+`@letar/forms` v2.14.13. Полное решение и API хука — `libs/forms/PLAN.md` Backlog.
+
 ## P3: Единообразие кода — аудит (2026-09-09)
 
 Задача PLAN.md звучала как «унифицировать `.meta({ui})`, compound components, комментарии».

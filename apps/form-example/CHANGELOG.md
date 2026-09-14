@@ -2,6 +2,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.21] - 2026-09-14
+
+### Added
+
+- `examples/server-errors`: секция «useFormServerAction — та же связка в один вызов» — живая
+  форма (`formRef` + `useFormServerAction`) рядом с существующим explorer `mapServerErrors()`.
+  `taken@example.com` имитирует Prisma P2002 → ошибка на поле `email`; любой другой email —
+  успех. `@letar/forms-react` v0.9.0/`@letar/forms` v2.14.13.
+
 ## [0.1.20] - 2026-09-09
 
 ### Added
