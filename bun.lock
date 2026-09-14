@@ -336,7 +336,7 @@
     },
     "apps/aboi": {
       "name": "@letar/aboi",
-      "version": "0.83.8",
+      "version": "0.83.10",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/analytics": "workspace:*",
@@ -603,7 +603,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.245.0",
+      "version": "0.247.2",
       "dependencies": {
         "@letar/analytics": "workspace:*",
         "@letar/consent": "workspace:*",
@@ -649,7 +649,7 @@
     },
     "apps/driving-school": {
       "name": "driving-school",
-      "version": "0.240.26",
+      "version": "0.240.28",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/auth": "workspace:*",
@@ -838,10 +838,12 @@
     },
     "apps/mandala": {
       "name": "@letar/mandala",
-      "version": "0.40.29",
+      "version": "0.40.31",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
+        "@letar/api-server": "workspace:*",
         "@letar/auth": "workspace:*",
+        "@letar/demo-protection": "workspace:*",
         "@letar/email": "workspace:*",
         "@letar/env-load": "workspace:*",
         "@letar/glitchtip": "workspace:*",
@@ -1050,7 +1052,7 @@
     },
     "libs/auth": {
       "name": "@letar/auth",
-      "version": "0.13.0",
+      "version": "0.14.0",
       "dependencies": {
         "@better-auth/utils": "^0.4.2",
         "@letar/pin-auth": "workspace:*",
@@ -1151,7 +1153,7 @@
     },
     "libs/email": {
       "name": "@letar/email",
-      "version": "0.5.1",
+      "version": "0.7.0",
       "dependencies": {
         "imapflow": "^1.7.1",
         "nodemailer": "^9.1.1",
@@ -1280,7 +1282,7 @@
     },
     "libs/forms-core": {
       "name": "@letar/forms-core",
-      "version": "0.12.2",
+      "version": "0.12.3",
       "dependencies": {
         "@tanstack/table-core": "^9.1.2",
       },
@@ -1302,7 +1304,7 @@
     },
     "libs/forms-shadcn": {
       "name": "@letar/forms-shadcn",
-      "version": "0.37.0",
+      "version": "0.37.2",
       "devDependencies": {
         "@letar/eager-jsx-check": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -1519,8 +1521,9 @@
     },
     "libs/pin-auth": {
       "name": "@letar/pin-auth",
-      "version": "0.2.1",
+      "version": "0.5.0",
       "dependencies": {
+        "@letar/api-server": "workspace:*",
         "@letar/hooks": "workspace:*",
       },
       "peerDependencies": {

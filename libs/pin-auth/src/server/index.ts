@@ -21,3 +21,6 @@ export {
   type TokenManagerAdapter,
   type TokenManagerConfig,
 } from './token-manager'
+
+// IP-based rate-limit поверх счётчика попыток на email
+export { createPinVerifyRateLimiter } from './pin-rate-limit'

@@ -154,6 +154,30 @@ const result = await validator.verifyPin(
 `incrementAttempts`-пути (race-prone, см. выше). Миграция не обязательна, но рекомендована для
 приложений, где важна защита от параллельного перебора PIN.
 
+### createPinVerifyRateLimiter
+
+`reserveAttempt`/`incrementAttempts` выше считают попытки на один email. Это не мешает
+перебирать PIN разных адресов с одного IP — для этого отдельный IP-based rate-limit поверх
+`@letar/api-server`:
+
+```typescript
+import { createPinVerifyRateLimiter } from '@letar/pin-auth/server'
+import { headers } from 'next/headers'
+
+// getClientIp внедряется приложением — способ получить IP у каждого свой
+const isPinVerifyRateLimited = createPinVerifyRateLimiter(async () => getClientIp({ headers: await headers() }))
+
+// В server action, до проверки PIN
+if (await isPinVerifyRateLimited()) {
+  return { success: false, error: 'RATE_LIMITED' }
+}
+```
+
+По умолчанию окно 15 минут / 30 запросов — переопределяется вторым аргументом
+(`{ windowMs, maxRequests, cleanupIntervalMs }`, см. `RateLimiterConfig` из `@letar/api-server`).
+Хранилище in-memory: приложение работает одним контейнером, рестарт обнуляет лимит — приемлемо,
+основной барьер всё равно `reserveAttempt` на email.
+
 ### createTokenManager
 
 Управление токенами для повторной отправки PIN.
