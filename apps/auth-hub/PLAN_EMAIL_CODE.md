@@ -89,27 +89,30 @@ emailAndPassword: { ..., revokeSessionsOnPasswordReset: true },
 
 ### 0.1. `@letar/email` — срок кода в письме и код без ссылки в письме сброса
 
-⚠️ **Частично закрыто 2026-09-14** (сессия по своду трёх копий PIN-письма, см.
-`libs/pin-auth/CHANGELOG.md` 0.4.0 и `libs/email/CHANGELOG.md` 0.6.0) — параметризация срока
-кода сделана, `resetUrl`-необязательность и `throw`-инвариант **не** тронуты (не требовались для
-той задачи, остаются на Фазу 0.1 целиком):
+✅ **Закрыто целиком 2026-09-14** — двумя сессиями подряд: сначала параметризация срока кода
+(см. `libs/pin-auth/CHANGELOG.md` 0.4.0 и `libs/email/CHANGELOG.md` 0.6.0), затем
+`resetUrl`-необязательность и `throw`-инвариант (`libs/email/CHANGELOG.md` 0.7.0).
 
 - [x] `libs/email/src/types.ts`: в `VerificationEmailParams` добавлено `pinExpiresInMinutes?: number`;
       в `PasswordResetEmailParams` добавлено `expiresInMinutes?: number` (имя как в шаблоне, не
-      `pinExpiresInMinutes` — используется и для ссылки, и для PIN одновременно, как и раньше).
-      ⛔ `resetUrl` **остался обязательным** — необязательность и инвариант «есть `resetUrl` или
-      `pin`» (`throw` в `sendPasswordResetEmail`) не сделаны, нужны отдельно для R3.
+      `pinExpiresInMinutes` — используется и для ссылки, и для PIN одновременно, как и раньше) и
+      `pinExpiresInMinutes?: number`; `resetUrl` сделан опциональным.
 - [x] `libs/email/src/templates/verification.ts`: `createPinBlock(pin, 10, ...)` был зашит
       литералом — теперь `pinExpiresInMinutes = 10` (тот же дефолт).
-- [ ] `libs/email/src/templates/password-reset.ts`: **не тронут** — кнопка и ссылка рендерятся
-      всегда (не готово к письму «только код» для R3). Срок кода уже брался из `expiresInMinutes`
-      и раньше (общий с сроком ссылки) — отдельный `pinExpiresInMinutes` для password-reset не
-      заводили, посчитали избыточным вне контекста R3.
+- [x] `libs/email/src/templates/password-reset.ts`: кнопка/ссылка рендерятся только при наличии
+      `resetUrl`; без него — код + предупреждение «Никому не передавайте этот код» вместо
+      предупреждения про ссылку. `pinExpiresInMinutes` независим от `expiresInMinutes` ссылки.
+- [x] `libs/email/src/service.ts`: `sendVerificationEmail`/`sendPasswordResetEmail` бросают
+      `Error`, если нет ни `verificationUrl`/`resetUrl`, ни `pin`.
 - [x] Тесты — `libs/email/src/templates/pin-expiry.spec.ts` (не рядом с шаблонами по одному, один
       файл на оба): срок кода попадает и в HTML, и в text для обоих писем, дефолт и кастомное
-      значение. Кейсы «без `resetUrl`»/«без `pin` и без `resetUrl` → ошибка» не покрыты — они
-      относятся к недоделанной части (см. выше).
-- [x] `nx test email` · `nx lint email` · `nx typecheck:tsgo email` — зелёные.
+      значение; code-only режим `password-reset` (без `resetUrl`) и обычный (без `pin`) покрыты.
+      `libs/email/src/service.spec.ts` (новый): оба throw-инварианта.
+- [x] `nx test email` · `nx lint email` · `nx typecheck:tsgo email` — зелёные. Потребители
+      (`driving-school`, `auth-hub`) typecheck проходят; `mandala`/`aboi` падают на
+      предсуществующих несвязанных багах (`tsgo-excessive-stack-depth-zenstack`, устаревший
+      typegen Chakra `Badge`/`Button` `variant`) — подтверждено грепом по выводу typecheck на
+      отсутствие упоминаний `auth.ts`/`resetUrl`/`sendPasswordResetEmail`/`sendVerificationEmail`.
 
 ### 0.2. `@letar/auth/server` — подписанный ключ потока
 
