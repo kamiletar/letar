@@ -2,6 +2,16 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.16] - 2026-09-14
+
+### Added
+
+- `server-errors-demo`: секция «useFormServerAction — та же связка в один вызов» —
+  живой пример `useFormServerAction` (`@letar/forms-react` v0.9.0, реэкспорт `@letar/forms`
+  v2.14.13) поверх `formRef` + существующего примера `mapServerErrors`/`applyServerErrors` на
+  той же странице. Форма с полем `email`: `taken@example.com` имитирует Prisma P2002 → ошибка на
+  поле + error-toast; любой другой email — успех + success-toast. Показывает `pending`.
+
 ## [0.1.15] - 2026-09-13
 
 ### Added

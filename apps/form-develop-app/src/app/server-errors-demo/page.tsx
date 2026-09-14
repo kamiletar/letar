@@ -1,9 +1,11 @@
 'use client'
 
 import { Box, Code, Heading, HStack, Text, VStack } from '@chakra-ui/react'
-import { mapServerErrors } from '@letar/forms'
+import { Form, mapServerErrors, useFormRef, useFormServerAction } from '@letar/forms'
 import { useState } from 'react'
+import { z } from 'zod/v4'
 import { DemoPageLayout } from '../_components'
+import { toaster } from '../_components/toaster'
 
 // Имитация серверных ошибок разных типов
 const ERROR_EXAMPLES = {
@@ -29,6 +31,56 @@ const ERROR_EXAMPLES = {
   'Error объект': new Error('Что-то пошло не так'),
   null: null,
 } as const
+
+// --- Живой пример useFormServerAction ---
+
+const SignupSchema = z.object({
+  email: z.string().min(1).meta({ ui: { title: 'Email' } }),
+}).strip()
+
+type SignupData = z.infer<typeof SignupSchema>
+
+/** Имитация server action — «занятый» email ведёт себя как Prisma P2002 на уникальном поле. */
+async function fakeCreateUser(data: SignupData): Promise<{ id: string }> {
+  await new Promise((resolve) => setTimeout(resolve, 600))
+  if (data.email === 'taken@example.com') {
+    throw { code: 'P2002', message: 'Unique constraint failed', meta: { target: ['email'] } }
+  }
+  return { id: crypto.randomUUID() }
+}
+
+function UseFormServerActionDemo() {
+  const formRef = useFormRef()
+  const { run, pending } = useFormServerAction(formRef, {
+    fieldMap: { email: { field: 'email', message: 'Этот email уже зарегистрирован' } },
+    toaster,
+    successMessage: 'Пользователь создан',
+  })
+
+  return (
+    <VStack align="stretch" gap={3} maxW="sm">
+      <Text fontSize="sm" color="fg.muted">
+        Введите{' '}
+        <Code>taken@example.com</Code>, чтобы увидеть маппинг ошибки на поле + toast. Любой другой email — успех.
+      </Text>
+      <Form
+        schema={SignupSchema}
+        initialValue={{ email: '' }}
+        formRef={formRef}
+        onSubmit={async (data) => {
+          await run(() => fakeCreateUser(data))
+        }}
+      >
+        <Form.Errors />
+        <Form.Field.String name="email" />
+        <Form.Button.Submit loadingText="Отправка...">Создать</Form.Button.Submit>
+      </Form>
+      <Text fontSize="xs" color="fg.muted">
+        pending: <Code>{String(pending)}</Code>
+      </Text>
+    </VStack>
+  )
+}
 
 export default function ServerErrorsDemoPage() {
   const [selectedError, setSelectedError] = useState<string>('Prisma P2002 (unique)')
@@ -135,6 +187,18 @@ export default function ServerErrorsDemoPage() {
   <Form.Errors /> {/* Покажет ошибки из applyServerErrors */}
 </Form>`}
           </Code>
+        </Box>
+
+        {/* useFormServerAction — та же связка в один вызов */}
+        <Box>
+          <Heading size="md" mb={3}>
+            useFormServerAction — та же связка в один вызов
+          </Heading>
+          <Text fontSize="sm" color="fg.muted" mb={3}>
+            Обёртка над примером выше: `formRef` + `mapServerErrors`/`applyServerErrors` + pending-состояние +
+            опциональный toaster в одном хуке, без `middleware.onError`.
+          </Text>
+          <UseFormServerActionDemo />
         </Box>
 
         {/* Поддерживаемые форматы */}

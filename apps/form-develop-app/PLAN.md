@@ -241,6 +241,20 @@ v3.0.0/v4.0.0.
 
 ---
 
+## useFormServerAction Demo (реализовано, @letar/forms-react v0.9.0 → @letar/forms v2.14.13)
+
+`/server-errors-demo` дополнена секцией «useFormServerAction — та же связка в один вызов»: живая
+форма (`UseFormServerActionDemo`) поверх `formRef` + `useFormServerAction(formRef, { fieldMap,
+toaster, successMessage })` — обёртка над уже существующим на странице примером
+`mapServerErrors`/`applyServerErrors`, снимающая ceremony `middleware.onError` для типового
+случая. `fakeCreateUser` имитирует Prisma P2002 на `taken@example.com`: ошибка маппится на поле
+`email` через `fieldMap`, показывается toast, `pending` отражается под формой. Любой другой email
+— успешный сабмит с toast `successMessage`. Запрошено domwellbes-dev (аудит: самопальный
+`useServerActionForm`, 63 потребителя, терял field-level маппинг), тред agent-mail
+`forms-submit-orchestration-helper` — полное решение и хук описаны в `libs/forms/PLAN.md` Backlog.
+
+---
+
 ## E2E Тесты
 
 ### Покрытие тестами (22 файла)
@@ -295,6 +309,6 @@ allowlist легитимных исключений собирается рук�
 
 ---
 
-**Последнее обновление:** 2026-09-05 — `filters-state-demo` дополнена чипами активных фильтров
-(`ActiveFilterChips`, `getActiveUrlSyncFields` из `@letar/forms` v2.10.0) + e2e-покрытие; детали
-в `PLAN_COMPLETED.md` и `libs/forms/PLAN_COMPLETED.md`.
+**Последнее обновление:** 2026-09-14 — `server-errors-demo` дополнена секцией
+`useFormServerAction` (`@letar/forms-react` v0.9.0/`@letar/forms` v2.14.13); детали в
+`PLAN_COMPLETED.md` и `libs/forms/PLAN_COMPLETED.md`.
