@@ -43,9 +43,16 @@ export const FieldDate = createField<DateFieldProps, string | Date>({
       stringValue = rawValue
     }
 
+    // Коммитим Date только если схема реально требует Date (z.date()/z.coerce.date()) —
+    // иначе строку YYYY-MM-DD. Без схемы вовсе (типичный Form.UrlSync-фильтр по дате,
+    // defaults там строковые) constraints.schemaType не 'date', и поле безопасно
+    // сравнивается с URL-дефолтом через === без стирания Date.toString() в query.
+    // Разбор: .claude/docs/letar-forms-field-date-urlsync-date-object.md
+    const requiresDateValue = constraints?.schemaType === 'date'
+
     // Props take priority over constraints
-    const min = componentProps.min ?? constraints.date?.min
-    const max = componentProps.max ?? constraints.date?.max
+    const min = componentProps.min ?? constraints?.date?.min
+    const max = componentProps.max ?? constraints?.date?.max
 
     return (
       <FieldWrapper resolved={resolved} hasError={hasError} errorMessage={errorMessage} fullPath={fullPath}>
@@ -54,11 +61,12 @@ export const FieldDate = createField<DateFieldProps, string | Date>({
           value={stringValue}
           onChange={(e) => {
             const raw = (e.target as HTMLInputElement).value
-            // Коммитим Date, а не строку из DOM: FieldDate автоселектится resolveFieldType
-            // только для схем с zodType === 'date' (z.date()/z.coerce.date()) — рантайм-значение
-            // обязано совпадать с выведенным TS-типом поля, иначе values.field.toISOString()
-            // падает в рантайме, а typecheck этого не ловит (расхождение из-за coerce).
-            field.handleChange(raw ? new Date(raw) : undefined)
+            // requiresDateValue=true: коммитим Date, а не строку из DOM — рантайм-значение
+            // обязано совпадать с выведенным TS-типом поля (z.date()/z.coerce.date()), иначе
+            // values.field.toISOString() падает в рантайме, а typecheck этого не ловит.
+            // requiresDateValue=false (нет схемы или схема не date): коммитим строку —
+            // см. requiresDateValue выше.
+            field.handleChange(raw ? (requiresDateValue ? new Date(raw) : raw) : undefined)
           }}
           onBlur={field.handleBlur}
           placeholder={resolved.placeholder}

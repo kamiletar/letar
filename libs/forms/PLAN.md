@@ -24,7 +24,7 @@
   дополнительную проверку `result.startsWith(key)`, которой нет в трёх унифицированных местах.
 - **Статус:** закрыто, коммит `e1e9bcbee`.
 
-### [2026-09-15] `Form.Field.Date` несовместим с `Form.UrlSync` (от letar-dev, по запросу пользователя)
+### ✅ [2026-09-15] `Form.Field.Date` несовместим с `Form.UrlSync` (закрыт v2.14.17, от letar-dev)
 
 - **Запросил:** letar-dev (тред agent-mail `form-feature-request`, письмо от 2026-09-15 →
   forms-coordinator-dev)
@@ -38,9 +38,16 @@
 - **Предложенные варианты:** (1) `FieldDate` коммитит строку, если схема реально не требует
   `Date` (`zodType !== 'date'`); (2) `Form.UrlSync` учится сериализовывать/сравнивать `Date`
   корректно (`YYYY-MM-DD`, не голый `===`).
-- **Рекомендация координатора:** вариант (1) — изолирован в `field-date.tsx`, не трогает
-  сравнение `Form.UrlSync` для остальных полей. Финальное решение — за forms-dev.
-- **Статус:** делегировано forms-dev (тред `forms-date-urlsync`, 2026-09-14)
+- **Фикс (вариант 1, по рекомендации координатора):** `field-date.tsx` уже получает
+  `resolved.constraints.schemaType` (тот же сигнал, что `getZodConstraints` заполняет для
+  min/max-хинтов) — новый `requiresDateValue = constraints?.schemaType === 'date'` управляет
+  веткой `onChange`: коммитим `new Date(raw)` только когда схема поля реально `z.date()`/
+  `z.coerce.date()`, иначе коммитим строку `YYYY-MM-DD`. Изолировано в `field-date.tsx`, `Form.UrlSync`
+  не тронут — не нужна была отдельная функция резолва zodType, `getZodConstraints` уже вычисляет
+  `schemaType` по пути поля и прокидывает его через `useResolvedFieldProps`.
+- **Тесты:** 3 новых кейса в `field-date.spec.tsx` — без схемы коммитит строку, со схемой
+  `z.string()` коммитит строку, со схемой `z.date()` коммитит `Date` (обратная совместимость).
+- **Статус:** закрыто, `@letar/forms` 2.14.16 → 2.14.17.
 
 ### ✅ [2026-09-15] `Form.Errors` — дефолтный заголовок захардкожен на английском (от пользователя)
 

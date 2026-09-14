@@ -4,6 +4,22 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.14.17] - 2026-09-15
+
+### Fixed
+
+- **`Form.Field.Date` несовместим с `Form.UrlSync`.** Компонент коммитил `new Date(raw)`
+  безусловно, даже когда у формы вообще нет `schema` (типичный `Form.UrlSync`-фильтр по дате) —
+  `Form.UrlSync` сравнивал результат со строковым `defaults` через строгое `===`, поле навсегда
+  считалось «активным», в URL уезжал `Date.toString()` вместо `YYYY-MM-DD`. Теперь `FieldDate`
+  коммитит `Date` только если `resolved.constraints.schemaType === 'date'` (реальный
+  `z.date()`/`z.coerce.date()` в схеме поля) — во всех остальных случаях (нет схемы, схема не
+  `z.date()`) коммитит строку `YYYY-MM-DD`. Обратная совместимость для существующих
+  `z.date()`-форм сохранена. Разбор —
+  [.claude/docs/letar-forms-field-date-urlsync-date-object.md](../../.claude/docs/letar-forms-field-date-urlsync-date-object.md).
+- Запрошено letar-dev (тред agent-mail `forms-date-urlsync`), найдено при миграции
+  `apps/studio` owner/time фильтров на `@letar/forms`.
+
 ## [2.14.16] - 2026-09-15
 
 ### Changed

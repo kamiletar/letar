@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
+import { z } from 'zod/v4'
 
 import { Form } from '../../'
 
@@ -176,6 +177,64 @@ describe('FieldDate', () => {
       await userEvent.type(input, '2024-07-04')
 
       expect(input).toHaveValue('2024-07-04')
+    })
+  })
+
+  describe('тип коммитимого значения (совместимость с Form.UrlSync)', () => {
+    it('без schema коммитит строку YYYY-MM-DD, не Date', async () => {
+      const onSubmit = vi.fn()
+      render(
+        <TestWrapper>
+          <Form initialValue={{ date: '' }} onSubmit={onSubmit}>
+            <Form.Field.Date name="date" />
+            <Form.Button.Submit>Submit</Form.Button.Submit>
+          </Form>
+        </TestWrapper>,
+      )
+
+      await userEvent.type(getDateInput(), '2024-07-04')
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ date: '2024-07-04' }))
+    })
+
+    it('со schema без z.date() (например z.string()) коммитит строку', async () => {
+      const onSubmit = vi.fn()
+      const Schema = z.object({ date: z.string() })
+      render(
+        <TestWrapper>
+          <Form schema={Schema} initialValue={{ date: '' }} onSubmit={onSubmit}>
+            <Form.Field.Date name="date" />
+            <Form.Button.Submit>Submit</Form.Button.Submit>
+          </Form>
+        </TestWrapper>,
+      )
+
+      await userEvent.type(getDateInput(), '2024-07-04')
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+
+      expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ date: '2024-07-04' }))
+    })
+
+    it('со schema z.date() коммитит Date (обратная совместимость)', async () => {
+      const onSubmit = vi.fn()
+      const Schema = z.object({ date: z.date() })
+      render(
+        <TestWrapper>
+          <Form schema={Schema} initialValue={{ date: new Date('2024-01-01') }} onSubmit={onSubmit}>
+            <Form.Field.Date name="date" />
+            <Form.Button.Submit>Submit</Form.Button.Submit>
+          </Form>
+        </TestWrapper>,
+      )
+
+      await userEvent.clear(getDateInput())
+      await userEvent.type(getDateInput(), '2024-07-04')
+      await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+
+      const [values] = onSubmit.mock.calls[0]
+      expect(values.date).toBeInstanceOf(Date)
+      expect((values.date as Date).toISOString().split('T')[0]).toBe('2024-07-04')
     })
   })
 
