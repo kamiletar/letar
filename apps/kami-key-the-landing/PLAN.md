@@ -17,6 +17,17 @@
 
 ### Сделано
 
+- [x] Починен провалившийся деплой в production (2026-09-13) — `--frozen-lockfile` падал из-за
+      расхождения `bun.lock` с версиями `package.json` нескольких приложений монорепо (не
+      специфично для этого приложения: kami-key-the-landing 0.4.1→0.4.3, kami-key-the
+      1.7.2→1.7.4, domwellbes, forms, forms-react, form-develop-app — версии копились без
+      пересохранения лока, плюс не попала новая либа `libs/electron-monorepo-updater`). Прогнан
+      `bun install`, проверено `bun scripts/check-all.mjs --group=deps` (все gate зелёные),
+      закоммичен `bun.lock` (`1955bbf2`). Попутно обнаружен и запушен непушнутый submodule-коммит
+      `domwellbes` (чисто docs), который блокировал бы деплой ЛЮБОГО приложения монорепо
+      (`not our ref` в `git submodule update`). После фикса — успешный zero-downtime rollout на
+      s2, `Next.js 16.3.5 Ready`.
+
 - [x] Страница `/changelog` — история релизов, живой fetch GitHub Releases API
       (`kamiletar/letar`, `tagPrefix: 'kami-key-the-v'`) через общий `@letar/github-releases`
       (`libs/github-releases`, ISR 1ч, без своей БД). Ссылка на скачивание .exe и размер файла —

@@ -1,5 +1,22 @@
 # Выполненные задачи
 
+## Починка провалившегося деплоя — bun.lock drift (2026-09-13)
+
+Приложение само по себе не менялось — сессия целиком про доставку уже готового 0.4.3 в
+production. `deploy-agent-dev` остановил деплой на `--frozen-lockfile`: версии в `package.json`
+нескольких приложений монорепо (kami-key-the-landing, kami-key-the, domwellbes, forms,
+forms-react, form-develop-app) успели уйти вперёд закоммиченного `bun.lock`, плюс в лок не
+попала новая либа `libs/electron-monorepo-updater` — накопившийся репо-широкий долг, не ошибка
+конкретно этой сессии.
+
+Фикс: обычный `bun install` (без изменений в дереве зависимостей, только пересохранение версий),
+`bun scripts/check-all.mjs --group=deps` зелёный, коммит `bun.lock` (`1955bbf2`). Отдельно
+всплыл непушнутый submodule-коммит `domwellbes` (чисто docs) — `check-submodule-push-state.sh`
+показал бы, что он заблокировал бы деплой **любого** приложения монорепо (`not our ref` ещё до
+выбора приложения на сервере), не только этого. Запушен первым, по правилу «сначала submodule,
+потом letar». После обоих пушей повторный deploy-request прошёл: zero-downtime rollout на s2,
+`Next.js 16.3.5 Ready`.
+
 ## Версия 0.4.3 — автогенерация download-info из GitHub Releases (2026-09-13)
 
 Закрыт открытый вопрос из версии 0.4.2 (`download-info.ts` было ручным полем, забыли обновить
