@@ -24,19 +24,25 @@
   server-errors.md` § «С декларативным `<Form>`».
 - **Статус:** передано forms-dev (тред `forms-submit-orchestration-helper`).
 
-### ✅ [2026-09-14] Better Auth throw-bridge — задокументирован канонический паттерн (от domwellbes-dev)
+### ✅ [2026-09-14] Better Auth throw-bridge — `assertAuthOk` в `@letar/auth/client` (от domwellbes-dev)
 
 - **Запросил:** domwellbes-dev
 - **Приоритет:** normal
 - **Описание:** `authClient.*` (Better Auth) возвращает `{ data, error }`, не бросает — контракт
   `@letar/forms` требует, чтобы `onSubmit` бросал. Паттерн `if (result.error) throw new
   Error(...)` продублирован в 4 auth-формах domwellbes.
-- **Решение:** только документация — новый раздел «Better Auth — throw-bridge» в
-  `docs/server-errors.md` (v2.14.12). Экспортируемый хелпер в `@letar/auth` (структурный тип по
-  образцу `ResendCapableAuthClient`) откладывается до появления третьего независимого
-  потребителя — сейчас `@letar/forms` для auth-страниц использует только domwellbes (aboi,
-  dsperevod, studio, svoichuzhie всё ещё на сыром `useState`+native `<form>`, отдельная и куда
-  большая задача миграции, вне скоупа этого запроса).
+- **Решение (пересмотрено в тот же день):** изначально закрыто только документацией — заводить
+  хелпер под одного потребителя посчитали преждевременным. Владелец сообщил, что миграция
+  auth-страниц aboi/dsperevod/studio/svoichuzhie на `@letar/forms` уже ставится в план — это
+  четыре новых независимых потребителя того же паттерна на подходе, ждать «третьего по факту»
+  больше не имело смысла (дублировать один и тот же `if (result.error) throw ...` ещё 4 раза,
+  чтобы потом консолидировать — хуже, чем сделать это один раз сейчас). Добавлен
+  `assertAuthOk(result, defaultMessage?)` + `AuthResultLike` в `@letar/auth/client`
+  (`libs/auth/src/client/assert-auth-ok.ts`, v0.14.0) — структурный тип по образцу
+  `ResendCapableAuthClient`, не завязан на полный клиент. `docs/server-errors.md` обновлён на
+  реальный пример использования.
+- **Ссылки:** `libs/auth/src/client/assert-auth-ok.ts` (+ `.spec.ts`, 5 тестов),
+  `libs/forms/docs/server-errors.md` §«Better Auth — throw-bridge».
 - **Статус:** закрыто.
 
 ### ✅ [2026-09-14] Добит неполный набор subpath-paths `@letar/forms-core` в `tsconfig.spec.json` (закрыт v2.14.11)

@@ -188,12 +188,15 @@ function MaterialForm() {
 `signUp.email`, `resetPassword`, `requestPasswordReset`, ...) так не работают — они возвращают
 `{ data, error }` и никогда не бросают сами.
 
-Канонический мост — бросить самому, сразу после вызова:
+Канонический мост — `assertAuthOk` из `@letar/auth/client`:
 
 ```ts
-const result = await authClient.signIn.email(data)
-if (result.error) {
-  throw new Error(result.error.message ?? 'Не удалось войти')
+import { assertAuthOk } from '@letar/auth/client'
+
+async function handleSubmit(data: SignUpData) {
+  const result = await authClient.signUp.email(data)
+  assertAuthOk(result, 'Ошибка регистрации')
+  setDoneEmail(data.email)
 }
 ```
 
@@ -202,11 +205,18 @@ if (result.error) {
 нужен field-level маппинг конкретных `result.error.code` — передай `fieldMap`, как для любого
 другого источника ошибок.
 
-Дублировать эту проверку в каждой auth-форме (sign-in/sign-up/reset-password/forgot-password) —
-нормально при одном-двух потребителях; готового экспортируемого хелпера в `@letar/auth` под это
-пока нет (кандидат — структурный тип по образцу `ResendCapableAuthClient`, `libs/auth/src/client/
-resend-verification-button.tsx`, не завязанный на полный тип клиента). Стоит завести, когда
-появится третий независимый потребитель — до тех пор это не библиотечная, а разовая строка.
+`assertAuthOk` не заменяет ветвление по конкретному `result.error.code` (например показ кнопки
+повторной отправки письма при `EMAIL_NOT_VERIFIED`) — такую проверку по-прежнему нужно делать
+до вызова, сама функция только устраняет финальный `if (result.error) throw new Error(...)`:
+
+```ts
+const result = await authClient.signIn.email(data)
+if (result.error?.code === 'EMAIL_NOT_VERIFIED') {
+  setShowResend(true)
+  throw new Error('Email не подтверждён. Отправьте письмо повторно и перейдите по ссылке.')
+}
+assertAuthOk(result, 'Ошибка входа')
+```
 
 ## fieldMap — кастомный маппинг
 
