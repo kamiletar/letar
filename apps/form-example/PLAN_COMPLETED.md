@@ -6,13 +6,22 @@
 explorer `mapServerErrors()`. Живая форма (`SignupSchema`, поле `email`) + `useFormRef` +
 `useFormServerAction(formRef, { fieldMap })`: `taken@example.com` имитирует ошибку Prisma P2002 на
 уникальном поле (`fakeCreateUser` бросает `{ code: 'P2002', meta: { target: ['email'] } }`) —
-`run()` ловит её сам, применяет `mapServerErrors`/`applyServerErrors` к форме, `pending` отражает
-статус запроса под кнопкой сабмита. Toaster не подключён — в этом приложении нет готовой Chakra
-toaster-инфраструктуры (`useFormServerAction`'s `toaster` — опциональный параметр).
+`run()` применяет `mapServerErrors`/`applyServerErrors` к форме, показывает поле с ошибкой и
+перебрасывает исходную ошибку дальше (обязательно — иначе `<Form>` посчитал бы сабмит успешным и
+стёр бы применённую ошибку своим post-submit `reset()`), `pending` отражает статус запроса под
+кнопкой сабмита. Toaster не подключён — в этом приложении нет готовой Chakra toaster-
+инфраструктуры (`useFormServerAction`'s `toaster` — опциональный параметр).
 
 Запрос от domwellbes-dev через `forms-coordinator-dev` (тред agent-mail
 `forms-submit-orchestration-helper`), реализация хука — `@letar/forms-react` v0.9.0 /
 `@letar/forms` v2.14.13. Полное решение и API хука — `libs/forms/PLAN.md` Backlog.
+
+⚠️ Живая браузерная проверка (не unit-тесты) вскрыла два реальных бага, пофикшены тем же днём:
+(1) `run` изначально глотала ошибку вместо переброса — фикс выше; (2) `applyServerErrors`
+писала в производный `meta.errors` вместо `errorMap.onServer` — поле не показывало ошибку
+визуально, хотя маппинг был верный (`@letar/forms-core` v0.12.4, затрагивает всех потребителей
+`applyServerErrors` монорепо-wide). Оба фикса подтверждены на этой странице: `taken@example.com`
+→ видимая ошибка на поле (`aria-invalid=true`).
 
 ## P3: Единообразие кода — аудит (2026-09-09)
 
