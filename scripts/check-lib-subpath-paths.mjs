@@ -1,5 +1,7 @@
 #!/usr/bin/env node
-// Проверяет, что каждый tsconfig.json приложения-потребителя, у которого в
+// Проверяет, что каждый tsconfig.json потребителя (внутри apps/ или внутри
+// libs/ — библиотеки тоже потребляют подпути друг друга через свои
+// tsconfig.json/tsconfig.lib.json/tsconfig.spec.json), у которого в
 // compilerOptions.paths есть хотя бы одна запись "@letar/<lib>" или
 // "@letar/<lib>/<subpath>", покрывает ВСЕ subpath-экспорты этой библиотеки из
 // libs/<lib>/package.json → exports — а не только те, что были нужны на момент
@@ -41,7 +43,7 @@ function collectLibSubpaths() {
     return statSync(full).isDirectory()
   })
 
-  const libs = new Map() // "@letar/<lib>" -> Set<subpath alias, напр. "@letar/forms-core/schema">
+  const libs = new Map() // "@letar/<lib>" -> { subpaths: Set<alias>, libDir: "<lib>" }
 
   for (const libName of libNames) {
     const pkgPath = path.join(libsDir, libName, 'package.json')
@@ -62,17 +64,34 @@ function collectLibSubpaths() {
       subpaths.add(alias)
     }
     if (subpaths.size > 0) {
-      libs.set(pkgAlias, subpaths)
+      libs.set(pkgAlias, { subpaths, libDir: libName })
     }
   }
 
   return libs
 }
 
-// --- 2. Находим все tsconfig.json потребителей внутри apps/ (включая приватные submodule) ---
+// --- 2. Находим tsconfig потребителей: внутри apps/ (включая приватные submodule)
+//        и внутри libs/ (библиотеки тоже потребляют подпути друг друга) ---
 
 function findTsconfigs(dir, depth) {
   return walk(dir, (entry) => entry === 'tsconfig.json', depth)
+}
+
+// В apps/ потребитель — один tsconfig.json на приложение. В libs/ реальный набор
+// paths часто размазан по tsconfig.lib.json/tsconfig.spec.json (см. libs/forms-core,
+// libs/forms) — проверяем все три, а не только базовый tsconfig.json.
+const LIB_TSCONFIG_NAMES = ['tsconfig.json', 'tsconfig.lib.json', 'tsconfig.spec.json']
+
+function findLibTsconfigs(libsDir) {
+  return walk(libsDir, (entry) => LIB_TSCONFIG_NAMES.includes(entry), 1)
+}
+
+// Имя библиотеки-владельца по пути tsconfig внутри libs/<lib>/... — нужно, чтобы
+// исключить самоссылку (forms-core не обязан держать paths на свои же подпути).
+function ownerLibDir(libsDir, tsconfigPath) {
+  const relPath = path.relative(libsDir, tsconfigPath)
+  return relPath.split(path.sep)[0]
 }
 
 // tsconfig.json могут содержать JSONC-комментарии (см. apps/aboi-e2e/tsconfig.json) —
@@ -91,7 +110,10 @@ function readTsconfigPaths(tsconfigPath) {
 function main() {
   const libs = collectLibSubpaths()
   const appsDir = path.join(repoRoot, 'apps')
-  const tsconfigFiles = findTsconfigs(appsDir, 3).sort()
+  const libsDir = path.join(repoRoot, 'libs')
+  const appTsconfigFiles = findTsconfigs(appsDir, 3)
+  const libTsconfigFiles = findLibTsconfigs(libsDir)
+  const tsconfigFiles = [...appTsconfigFiles, ...libTsconfigFiles].sort()
 
   const findings = [] // { tsconfigPath, pkgAlias, missing: string[] }
   let checkedConsumers = 0
@@ -101,8 +123,12 @@ function main() {
     if (!paths) { continue }
 
     const pathKeys = new Set(Object.keys(paths))
+    const isLibTsconfig = tsconfigPath.startsWith(libsDir + path.sep)
+    const selfLibDir = isLibTsconfig ? ownerLibDir(libsDir, tsconfigPath) : null
 
-    for (const [pkgAlias, subpaths] of libs) {
+    for (const [pkgAlias, { subpaths, libDir }] of libs) {
+      if (selfLibDir !== null && libDir === selfLibDir) { continue } // не требуем paths на самого себя
+
       const referencesLib = [...pathKeys].some(
         (key) => key === pkgAlias || key.startsWith(`${pkgAlias}/`),
       )
