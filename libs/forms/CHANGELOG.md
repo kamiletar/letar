@@ -4,6 +4,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.14.11] - 2026-09-14
+
+### Fixed
+
+- **Неполный набор subpath-paths `@letar/forms-core` в `tsconfig.spec.json`** — библиотека
+  импортирует не только `.`/`validators/ru`/`schema`/`server-errors`/`utils`/`security`/
+  `offline`/`captcha`/`analytics`/`testing`, но и остальные подпути из `forms-core/package.json`
+  (`credit-card`, `edit-intent`, `phone`, `mask`, `field-widgets`, `table`, `address`, `i18n`,
+  `uikit`) — их не было в `paths`. Тот же класс ловушки, что описан в
+  `.claude/rules/libs.md` § «Потребителю нужны `paths` и на транзитивные `@letar/*`, и на все их
+  подпути»: пока внутренний слой не использовал недостающий подпуть — не всплывало.
+
 ## [2.14.10] - 2026-09-14
 
 ### Changed
