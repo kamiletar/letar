@@ -88,6 +88,55 @@ function MaterialForm() {
 - Не забудь `<Form.Errors />` в JSX — иначе `formErrors` (например `P2025`/`rejected-by-policy`) будут применены к форме, но нигде не отрисуются.
 - Рабочий пример — `apps/domwellbes/src/app/(admin)/admin/materials/_components/material-form.tsx`.
 
+## useFormServerAction — та же связка в один вызов
+
+Секции выше показывают полный контроль над `formRef` + `middleware.onError` +
+`mapServerErrors`/`applyServerErrors` — нужен, когда обработка ошибки различается по её типу.
+Для типового случая (просто применить ошибку к полям + показать pending + опциональный toast)
+`useFormServerAction` (`@letar/forms-react`) снимает эту ceremony одним хуком:
+
+```tsx
+import { Form, useFormRef, useFormServerAction } from '@letar/forms'
+
+function SignupForm() {
+  const formRef = useFormRef()
+  const { run, pending } = useFormServerAction(formRef, {
+    fieldMap: { email: { field: 'email', message: 'Этот email уже зарегистрирован' } },
+    toaster,
+    successMessage: 'Пользователь создан',
+  })
+
+  return (
+    <Form schema={SignupSchema} initialValue={{ email: '' }} formRef={formRef}
+      onSubmit={async (data) => {
+        await run(() => createUser(data))
+      }}
+    >
+      <Form.Errors />
+      <Form.Field.String name="email" />
+      <Form.Button.Submit loadingText="Отправка...">Создать</Form.Button.Submit>
+    </Form>
+  )
+}
+```
+
+- `run(action, onSuccess?)` вызывает `action`; при ошибке применяет `mapServerErrors`/
+  `applyServerErrors` и показывает toast, а затем **перебрасывает исходную ошибку** — это
+  обязательно, не косметика: если бы `run` глотала ошибку, `<Form>` посчитал бы сабмит успешным
+  и своим post-submit `reset()` стёр бы только что применённые field-level ошибки раньше, чем
+  пользователь успел бы их увидеть. `try/catch` в `onSubmit` всё равно не нужен — `<Form>` сам
+  ловит исключение из `onSubmit` в том же месте, где уже ловит `throw` из `middleware.onError`.
+- При ошибке — тот же `mapServerErrors` + `applyServerErrors(formRef.current, mapped)`, что и
+  выше, плюс `toaster.create({ type: 'error', ... })`, если `toaster` передан (текст берётся из
+  `formErrors`, иначе из первого `fieldErrors`, иначе `defaultMessage`).
+- При успехе — опциональный `toaster.create({ type: 'success', title: successMessage })` и вызов
+  `onSuccess?.(result)` со значением, которое вернул `action`.
+- `pending` — булево состояние на время выполнения `action`, для кастомного индикатора рядом с
+  `<Form.Button.Submit loadingText="...">`.
+- Низкоуровневый путь (`middleware.onError` из раздела выше) остаётся рабочим — берите его, если
+  нужно разное поведение по типу ошибки (например не показывать toast на одних ошибках и
+  показывать на других).
+
 ## Поддерживаемые форматы
 
 | Формат            | Пример                                                  | Результат                                |
