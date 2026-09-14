@@ -1,6 +1,7 @@
 'use client'
 
 import { Alert, Box, List, Text } from '@chakra-ui/react'
+import { useFormI18n } from '@letar/forms-react'
 import type { ReactElement, ReactNode } from 'react'
 import { useDeclarativeForm } from './form-context'
 
@@ -9,6 +10,48 @@ interface FormErrorsProps {
   title?: ReactNode
   /** Show errors before first submit attempt (by default false) */
   showBeforeSubmit?: boolean
+}
+
+const DEFAULT_ERRORS_TITLE = 'Please fix the following errors:'
+const ERRORS_TITLE_KEY = 'formErrors.title'
+
+/**
+ * Встроенный словарь заголовка блока ошибок — отдельный от `validation.*`
+ * (`builtin-error-translations.ts`), потому что это не сообщение об ошибке валидации,
+ * а статичный заголовок секции. Резолвится по `locale` из `FormI18nProvider`, даже
+ * если приложение не передало свой `t` — как и `generateConstraintHint`
+ * (`constraint-hints.ts`), не только `createFormErrorMap`.
+ */
+const BUILTIN_ERRORS_TITLE: Record<string, string> = {
+  en: DEFAULT_ERRORS_TITLE,
+  ru: 'Пожалуйста, исправьте следующие ошибки:',
+}
+
+/**
+ * Резолвит дефолтный заголовок `Form.Errors` без явного `title`-пропа.
+ *
+ * Порядок: перевод приложения по ключу `formErrors.title` (если `FormI18nProvider`
+ * получил `t`) → встроенный словарь по `locale` (ru/en) → жёстко заданный английский
+ * текст — совпадает с прежним поведением, если провайдера в дереве нет вовсе.
+ */
+function resolveDefaultErrorsTitle(i18n: ReturnType<typeof useFormI18n>): string {
+  if (!i18n) {
+    return DEFAULT_ERRORS_TITLE
+  }
+
+  if (i18n.enabled) {
+    try {
+      const translated = i18n.t(ERRORS_TITLE_KEY)
+      if (translated && translated !== ERRORS_TITLE_KEY) {
+        return translated
+      }
+    } catch {
+      // игнорируем — падаем на встроенный словарь
+    }
+  }
+
+  const lang = i18n.locale.split('-')[0] ?? i18n.locale
+  return BUILTIN_ERRORS_TITLE[lang] ?? DEFAULT_ERRORS_TITLE
 }
 
 interface ZodIssue {
@@ -73,11 +116,10 @@ function extractAllErrors(errors: unknown[]): string[] {
  * </Form>
  * ```
  */
-export function FormErrors({
-  title = 'Please fix the following errors:',
-  showBeforeSubmit = false,
-}: FormErrorsProps): ReactElement | null {
+export function FormErrors({ title, showBeforeSubmit = false }: FormErrorsProps): ReactElement | null {
   const { form, apiState } = useDeclarativeForm()
+  const i18n = useFormI18n()
+  const resolvedTitle = title ?? resolveDefaultErrorsTitle(i18n)
 
   // Extract server error message if available
   const serverError = apiState?.mutationError
@@ -106,7 +148,7 @@ export function FormErrors({
           <Alert.Root status="error">
             <Alert.Indicator />
             <Box>
-              <Alert.Title>{title}</Alert.Title>
+              <Alert.Title>{resolvedTitle}</Alert.Title>
               <Alert.Description>
                 <List.Root>
                   {serverErrorMessage && (

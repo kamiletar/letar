@@ -1,4 +1,5 @@
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
+import { FormI18nProvider } from '@letar/forms-react'
 import { render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { createElement } from 'react'
@@ -80,6 +81,36 @@ describe('FormErrors', () => {
       render(<FormErrors title="Пожалуйста, исправьте ошибки:" />, { wrapper })
 
       expect(screen.getByText('Пожалуйста, исправьте ошибки:')).toBeInTheDocument()
+    })
+
+    it('показывает локализованный заголовок по умолчанию из FormI18nProvider (ru)', () => {
+      const context = createMockFormContext([{ name: [{ message: 'Required' }] }])
+      const contextWrapper = createContextWrapper(context)
+      const wrapper = ({ children }: { children: ReactNode }) =>
+        createElement(
+          FormI18nProvider,
+          { locale: 'ru' },
+          createElement(contextWrapper, null, children),
+        )
+
+      render(<FormErrors />, { wrapper })
+
+      expect(screen.getByText('Пожалуйста, исправьте следующие ошибки:')).toBeInTheDocument()
+    })
+
+    it('явный title-проп побеждает локализованный дефолт из FormI18nProvider', () => {
+      const context = createMockFormContext([{ name: [{ message: 'Required' }] }])
+      const contextWrapper = createContextWrapper(context)
+      const wrapper = ({ children }: { children: ReactNode }) =>
+        createElement(
+          FormI18nProvider,
+          { locale: 'ru' },
+          createElement(contextWrapper, null, children),
+        )
+
+      render(<FormErrors title="Custom title" />, { wrapper })
+
+      expect(screen.getByText('Custom title')).toBeInTheDocument()
     })
   })
 
