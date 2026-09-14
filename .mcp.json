@@ -121,6 +121,19 @@
         "apps/domwellbes/src/mcp/cli.ts"
       ]
     },
+    "domwellbes-assist-mcp-prod": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "bunx",
+        "tsx",
+        "apps/domwellbes/src/mcp/cli.ts"
+      ],
+      "env": {
+        "ASSIST_TARGET": "prod"
+      }
+    },
     "agent-mail": {
       "type": "http",
       "url": "http://127.0.0.1:8765/mcp"
