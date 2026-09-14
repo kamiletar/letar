@@ -1,6 +1,6 @@
 {
   "name": "@letar/pin-auth",
-  "version": "0.2.1",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "main": "./src/index.ts",
@@ -20,11 +20,6 @@
       "types": "./src/client/index.ts",
       "import": "./src/client/index.ts",
       "default": "./src/client/index.ts"
-    },
-    "./email": {
-      "types": "./src/email/index.ts",
-      "import": "./src/email/index.ts",
-      "default": "./src/email/index.ts"
     },
     "./schemas": {
       "types": "./src/schemas/index.ts",

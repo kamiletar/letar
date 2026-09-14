@@ -9,8 +9,5 @@ export * from './server'
 // Client
 export * from './client'
 
-// Email
-export * from './email'
-
 // Schemas
 export * from './schemas'

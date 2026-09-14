@@ -20,8 +20,11 @@ bun add @chakra-ui/react react-icons
 | ------------------------- | --------------------------------------------- |
 | `@letar/pin-auth/server`  | Генерация PIN, валидация, управление токенами |
 | `@letar/pin-auth/client`  | React хуки для верификации                    |
-| `@letar/pin-auth/email`   | Шаблоны email-писем                           |
 | `@letar/pin-auth/schemas` | Zod-схемы валидации                           |
+
+Шаблоны email-писем с PIN-кодом — в `@letar/email` (`sendVerificationEmail`,
+`sendPasswordResetEmail`), не здесь: `./email` был третьей независимой копией того же письма и
+удалён 2026-09-14 (потребителей не было).
 
 ## Server
 
@@ -80,6 +83,76 @@ if (result.success) {
   // Авто-логин с result.token
 }
 ```
+
+### Race-safe лимит попыток — `reserveAttempt`
+
+Путь по умолчанию (`incrementAttempts` выше) — **check-then-act**: валидатор читает `pinAttempts`
+вместе с токеном и лишь потом, после сравнения PIN, вызывает `incrementAttempts`. Под
+параллельной нагрузкой (несколько запросов на один email одновременно, например скрипт-перебор)
+все они читают один и тот же счётчик и успевают сравнить PIN, прежде чем хоть один инкремент
+применится — `maxAttempts` не соблюдается, пачка из N параллельных запросов даёт N сравнений.
+
+Чтобы это исключить, реализуйте в адаптере опциональный `reserveAttempt(identifier)` — валидатор
+вызовет его вместо `pinAttempts`/`incrementAttempts`. Метод обязан быть **compare-and-swap**
+(прочитать текущее значение → атомарно обновить, только если оно не изменилось → повторить при
+конфликте), а не read-then-write:
+
+```typescript
+async function reserveAttempt(identifier: string): Promise<number> {
+  const key = `pin-attempts:${identifier}`
+
+  for (;;) {
+    const row = await store.findCounter(key)
+
+    if (!row) {
+      // Первая попытка — создать счётчик; если параллельный запрос уже создал его
+      // (нарушение уникальности), перечитываем и продолжаем цикл
+      const created = await store.tryCreateCounter(key)
+      if (created) {
+        return 0
+      }
+      continue
+    }
+
+    // Атомарное обновление ТОЛЬКО если значение не изменилось с момента чтения —
+    // update ... where value = row.value (affected rows === 0 означает проигранную гонку)
+    const updated = await store.tryIncrementCounter(key, row.value)
+    if (updated) {
+      return row.value
+    }
+    // Конфликт — параллельный запрос успел обновить счётчик первым, пробуем снова
+  }
+}
+```
+
+```typescript
+const validator = createPinValidator({ maxAttempts: 5 })
+
+const result = await validator.verifyPin(
+  email,
+  pin,
+  {
+    findToken: (id) => prisma.verificationToken.findFirst({ where: { identifier: id } }),
+    // pinAttempts из findToken игнорируется, когда задан reserveAttempt — incrementAttempts
+    // тоже не вызывается, можно оставить пустой функцией
+    incrementAttempts: async () => {},
+    reserveAttempt,
+    findUser: (email) => prisma.user.findUnique({ where: { email } }),
+    verifyUserEmail: (userId) => prisma.user.update({ where: { id: userId }, data: { emailVerified: new Date() } }),
+    updateTokenForAutoLogin: async (oldToken, newToken, expires) => {
+      await prisma.verificationToken.update({
+        where: { token: oldToken },
+        data: { token: newToken, expires, pin: null },
+      })
+    },
+  },
+  generateToken,
+)
+```
+
+⚠️ `reserveAttempt` опционален — адаптеры без него продолжают работать на старом
+`incrementAttempts`-пути (race-prone, см. выше). Миграция не обязательна, но рекомендована для
+приложений, где важна защита от параллельного перебора PIN.
 
 ### createTokenManager
 
@@ -172,45 +245,6 @@ const { verifiedInOtherTab } = useVerificationStream({
   email,
   onVerified: () => console.log('Verified in other tab'),
 })
-```
-
-## Email
-
-### formatVerificationEmail
-
-Генерирует HTML и текстовое содержимое письма верификации.
-
-```typescript
-import { formatVerificationEmail } from '@letar/pin-auth/email'
-
-const { html, text, subject } = formatVerificationEmail(
-  {
-    userName: 'Иван',
-    verificationUrl: 'https://my-app.com/verify/token123',
-    pin: '123456',
-  },
-  {
-    appUrl: 'https://my-app.com',
-    appName: 'MyApp',
-    primaryColor: '#1a365d',
-    accentColor: '#CA9E67',
-  },
-)
-
-await emailProvider.send({ to: email, subject, html, text })
-```
-
-### formatResetPasswordEmail
-
-Генерирует письмо для сброса пароля.
-
-```typescript
-import { formatResetPasswordEmail } from '@letar/pin-auth/email'
-
-const { html, text, subject } = formatResetPasswordEmail(
-  { userName: 'Иван', resetUrl: 'https://...', pin: '123456' },
-  { appUrl: 'https://my-app.com', appName: 'MyApp' },
-)
 ```
 
 ## Schemas

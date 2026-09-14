@@ -7,6 +7,42 @@
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-14
+
+### Removed
+
+- Подпуть `./email` (`formatVerificationEmail`, `formatResetPasswordEmail`) — была третья
+  независимая копия шаблона PIN-письма (после `@letar/email/templates/verification.ts` и
+  `password-reset.ts`). Аудитом (грепом по `apps/` и `libs/`, включая приватные submodule)
+  подтверждено, что подпуть не использовал ни один потребитель — только `tsconfig.json` двух
+  приложений (`mandala`, `driving-school`) держали `paths` на него впрок, без единого импорта.
+  Общий кусок письма — `createPinBlock` в `libs/email/src/templates/base.ts`; отправка — через
+  `sendVerificationEmail`/`sendPasswordResetEmail` из `@letar/email`.
+
+## [0.3.0] - 2026-09-14
+
+### Race-safe лимит попыток — `PinValidatorAdapter.reserveAttempt`
+
+`createPinValidator().verifyPin` раньше читал `pinAttempts` из `findToken` и только потом (после
+сравнения PIN) звал `incrementAttempts` — классический check-then-act. Под параллельной нагрузкой
+(несколько запросов на один email одновременно) все они читали один и тот же счётчик и успевали
+сравнить PIN, прежде чем хоть один инкремент применялся: `maxAttempts` не соблюдался, пачка из N
+параллельных запросов давала N сравнений вместо ограничения.
+
+**Added:**
+
+- Новый опциональный метод адаптера `reserveAttempt(identifier): Promise<number>` — атомарно
+  резервирует попытку (обязана быть compare-and-swap реализацией) и возвращает число попыток ДО
+  неё. Валидатор вызывает его вместо `pinAttempts`/`incrementAttempts`, когда адаптер его
+  реализует. См. README, раздел «Race-safe лимит попыток».
+- Тесты в `pin-validator.spec.ts`: 20 параллельных неверных попыток с `reserveAttempt` дают не
+  более `maxAttempts` сравнений PIN (interleaving CAS-фейк); без `reserveAttempt` — race-prone
+  поведение задокументировано отдельным тестом (все 20 параллельных запросов проходят сравнение).
+
+**Обратная совместимость:** `reserveAttempt` опционален. Адаптеры со старым
+`incrementAttempts`-путём продолжают работать без изменений (race-prone, как и раньше) — миграция
+не обязательна, но рекомендована для защиты от параллельного перебора.
+
 ## [0.2.1] - 2026-08-19
 
 ### Refactor: `useVerificationStream` на общем `useEventSource`
