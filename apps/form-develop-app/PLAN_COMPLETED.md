@@ -2,6 +2,15 @@
 
 Детальное описание всех реализованных фич.
 
+## `filters-state-demo` — поле `Form.Field.Date` + `Form.UrlSync` (2026-09-15)
+
+Добавлено поле «Создано с» (`Form.Field.Date`, схема `since: z.string()` — без `z.date()`) в
+состав `Form.UrlSync`, демонстрирующее фикс `@letar/forms` 2.14.17 (`FieldDate` коммитит строку
+`YYYY-MM-DD`, если схема реально не требует `Date`). Демо-данные (`allItems`) дополнены полем
+`createdAt`, фильтрация по нему добавлена в `FilteredResults`. Страница читается напрямую
+`apps/form-docs` guide `filters-state`(.ru).mdx через `SkinCodeFile` — обновление кода демо
+автоматически попало и в документацию. Детали фикса — `libs/forms/PLAN_COMPLETED.md`.
+
 ## `nx build` падал на пререндере — баг библиотеки `@letar/forms`, не демо-страниц (2026-08-26)
 
 `/controlled-state-demo` и `/filters-state-demo` роняли `next build`: `` `formContext` only
