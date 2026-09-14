@@ -365,9 +365,9 @@ emailAndPassword: { ..., revokeSessionsOnPasswordReset: true },
       - Сессии нет → «Войти» на `/sign-in?email=...&callbackUrl=...` (ссылка открыта на другом
       устройстве — cookie здесь нет, «вы вошли» было бы неправдой).
 
-### A.4. Сброс пароля кодом (новая функция)
+### A.4. Сброс пароля кодом ✅ (2026-09-15)
 
-- [ ] Страница `(auth)/forgot-password/page.tsx` (server, `metadata`) + `_components/forgot-password-flow.tsx`:
+- [x] Страница `(auth)/forgot-password/page.tsx` (server, `metadata`) + `_components/forgot-password-flow.tsx`:
       шаг 1 — email (`AuthHubForm`) → `authClient.emailOtp.requestPasswordReset({ email })`; всегда
       переходить на шаг 2 с текстом «Если такой адрес зарегистрирован, мы отправили код» (не
       выдавать наличие аккаунта); шаг 2 — код + новый пароль + повтор пароля
@@ -376,38 +376,65 @@ emailAndPassword: { ..., revokeSessionsOnPasswordReset: true },
       Отдельный шаг проверки кода (`checkVerificationOtp`) не делать: он тратит попытку, а
       `resetPassword` всё равно проверяет код заново.
       «Отправить код повторно» с отсчётом 60 с — `useResendCountdown`.
-- [ ] Ссылка «Забыли пароль?» в `login-form.tsx` (с сохранением query).
-- [ ] ⚠️ **Вход по привязанному email (Этап 8.5).** Better Auth ищет пользователя строго по
-      `User.email`. Если человек вводит привязанный (не основной) адрес, плагин молча ответит
-      `success` и ничего не пошлёт. Решение: шаг 1 делать через server action, который сначала
-      резолвит адрес существующим `resolveLoginEmail` (есть тест `resolve-login-email.spec.ts`)
-      и вызывает `auth.api.requestPasswordResetEmailOTP` / `auth.api.forgetPasswordEmailOTP`
-      (проверить точное имя в `auth.api`) с **основным** email; на шаге 2 использовать тот же
-      основной email, но показывать пользователю введённый. Основной email клиенту не отдавать —
-      держать в подписанном значении или повторно резолвить на сервере в экшне шага 2.
+- [x] Ссылка «Забыли пароль?» в `login-form.tsx` (с сохранением query).
+- [x] ⚠️ **Вход по привязанному email (Этап 8.5).** Реализовано через server actions
+      `forgot-password.action.ts` (`requestPasswordReset`/`resetPasswordWithCode`) — оба шага
+      резолвят адрес через `resolveLoginEmail` ДО вызова Better Auth (`auth.api.requestPasswordResetEmailOTP`/
+      `auth.api.resetPasswordEmailOTP`, структурный каст `EmailOTPServerApi` — тот же
+      type-erasure factory-баг, что и в A.1/`auth-email.ts`, не факт отсутствия метода).
+      Основной email клиенту не передаётся — резолв происходит на сервере на обоих шагах.
 - [ ] OAuth-пользователь без пароля после сброса получит credential-аккаунт (поведение плагина,
       см. факты выше) — это желаемо, но проверить руками, что после этого вход и через OAuth, и
       паролем работают, а привязанные аккаунты на `/profile/connected-accounts` не пропали.
+      **Не проверено вручную в этой сессии** — перенесено в A.7.
 
-### A.5. Rate limit фабрики
+### A.5. Rate limit фабрики ✅ (2026-09-15)
 
-- [ ] В `customRules` фабрики (`libs/auth/src/server/create-auth/index.ts` ~236–260) уже есть
-      `/send-verification-email`. Убедиться, что правила плагина `emailOTP` для `/email-otp/*`
-      не перекрываются общим дефолтом и что `/api/auth/verification-stream` **не** проходит через
-      лимитер Better Auth (это Next route, не эндпоинт Better Auth — должен не проходить).
+- [x] `customRules` фабрики (`libs/auth/src/server/create-auth/index.ts` ~111–115) содержит
+      только `/send-verification-email` (+ overrides конкретного приложения) — `/email-otp/*`
+      там не упомянут вообще, поэтому получает **дефолтный** лимит самого плагина `emailOTP`
+      (`window: 60, max: 3`, задокументирован в §«Факты из исходников» этого плана) без
+      перекрытия общими правилами фабрики. Конфликта нет — это два разных namespace путей.
+- [x] `/api/auth/verification-stream/route.ts` — обычный Next.js Route Handler (`export const
+      GET`), не зарегистрирован под catch-all `/api/auth/[...all]` Better Auth — по построению
+      не проходит через `rateLimit`-middleware Better Auth (тот навешан только на её собственный
+      handler). Отдельного лимитера ему тоже не нужно: эндпоинт не мутирует состояние и не
+      раскрывает существование аккаунта (см. A.1 — `isEmailVerified` не даёт 404 неизвестному
+      email).
 
-### A.6. Тесты
+### A.6. Тесты ✅ (2026-09-15)
 
-- [ ] vitest: `register.action` — разбор `body.code`; server action сброса — резолв привязанного
-      email (мок `resolveLoginEmail` и `auth.api`).
-- [ ] e2e `apps/auth-hub-e2e`:
-      - починить локаторы `/sign-up` на `[data-field-name="..."]` (как в 2026-09-03, §18.7.1);
-      - новый spec `05-sign-up-code.spec.ts` (только локальный dev, `test.skip(!isLocalDev)` как в
-      `04-*`): регистрация через UI → видно поле кода → ввести `000000` → «Неверный код» →
-      отметить `emailVerified = true` через `helpers/db.helpers.ts` → вкладка сама
-      показывает «Email подтверждён». Успешный ввод настоящего кода e2e не покрывает (код
-      хранится хешем — прочитать нельзя, и так и должно быть); он в ручной проверке A.7.
-      - `/forgot-password`: шаг 1 → шаг 2 виден для несуществующего email (без утечки).
+- [x] vitest: `register.action.spec.ts` (успех/фолбэк имени/все коды ошибок) и
+      `forgot-password.action.spec.ts` (резолв привязанного email на обоих шагах, всегда
+      `{success:true}` на шаге 1 даже при throw, все коды ошибок шага 2 через `it.each`,
+      фолбэк на неизвестный код) — 21/21 тестов зелёные (`nx test auth-hub`).
+- [x] e2e `apps/auth-hub-e2e` (`nx e2e auth-hub-e2e -- --project=chromium`):
+      - починены локаторы `/sign-up` на `[data-field-name="..."]` (`01-public.spec.ts`);
+      - `05-sign-up-code.spec.ts` — **два независимых сценария на разных аккаунтах**, не один
+      флоу: (1) регистрация → код → неверный `000000` → «Неверный код»; (2) регистрация → код →
+      прямая пометка `emailVerified=true` в БД (симуляция перехода по ссылке в другой вкладке,
+      БЕЗ попытки ввода кода в этой) → SSE (`/api/auth/verification-stream`) сам показывает
+      «Email подтверждён». Разделение на два теста обязательно — баг найден при написании:
+      `useEmailCodeVerification.submitCode` закрывает SSE-стрим перед КАЖДЫМ submit (успешным
+      или нет) и осознанно не переоткрывает при ошибке — попытка неверного кода в одном флоу с
+      проверкой SSE навсегда глушит стрим для этой вкладки (см. комментарий в шапке спека и в
+      `libs/pin-auth/src/client/use-email-code-verification.ts`). Успешный ввод настоящего кода
+      e2e не покрывает (код хранится хешем — прочитать нельзя, и так и должно быть); он в ручной
+      проверке A.7.
+      - `06-forgot-password.spec.ts` — шаг 1 → шаг 2 виден и для несуществующего email (без
+      утечки наличия аккаунта, нейтральный текст); ссылка «Забыли пароль?» на `/sign-in` ведёт
+      на `/forgot-password`.
+      - ⚠️ Оба новых спека нуждались в `page.waitForLoadState('load')` сразу после первого
+      `goto` на свою страницу в процессе Playwright: dev-сервер компилирует роут "на лету"
+      (`Compiling...`), гидратация не успевала до клика по сабмиту — клик уходил нативным
+      `POST /sign-up`/`/forgot-password` вместо React-обработчика, и страница перезагружалась
+      пустой (полностью воспроизведено через `--trace=on`: в HAR виден дублирующийся
+      `main-app.js`/`webpack.js` с разными `?v=` и голый `POST` без `next-action`-заголовка).
+      `networkidle` здесь не годится — запрещён ESLint-правилом `playwright/no-networkidle`.
+      - `input[data-field-name="acceptPrivacy"]` (чекбокс регистрации) не матчился: у
+      `Checkbox` (`libs/forms/.../base/uikit-chakra.tsx`) `data-field-name` висит на
+      `Checkbox.Root` (это `<label>`), не на скрытом нативном `Checkbox.HiddenInput` — локатор
+      без `input` + `.click()` вместо `.check()`.
 
 ### A.7. Ручная проверка (Browser pane + реальная почта dev/staging)
 
@@ -430,12 +457,23 @@ emailAndPassword: { ..., revokeSessionsOnPasswordReset: true },
 
 ### A.8. Завершение
 
-- [ ] `PLAN.md` (ссылка на этот файл + отметки), `CHANGELOG.md`, версия в `package.json` (minor).
-- [ ] `nx run-many -t format --projects=auth-hub,auth-hub-e2e` → `nx lint auth-hub` →
-      `nx typecheck:tsgo auth-hub` → `nx test auth-hub` → `nx build auth-hub` (новые импорты из
-      `libs/*` — build обязателен, см. `.claude/rules/deploy-coordination.md` п.4).
-- [ ] Коммит своими файлами. **Push — только с одобрения владельца.** Деплой — только
-      deploy-request в `deploy-agent-dev`; сначала staging + e2e, затем прод.
+- [x] `CHANGELOG.md`, версия в `package.json` (0.7.21 → 0.7.22 patch — новая функция + фиксы,
+      без breaking changes). `PLAN.md` не трогался отдельно — весь трекинг A.2-A.8 в этом файле.
+- [x] `nx run-many -t format --projects=auth-hub,auth-hub-e2e` → `nx lint auth-hub` (+
+      `auth-hub-e2e`, после фикса `playwright/no-networkidle`) → `nx typecheck:tsgo auth-hub` (+
+      `nx typecheck auth-hub-e2e`) → `nx test auth-hub` (21/21) → `nx build auth-hub` — все
+      зелёные.
+- [x] Коммит своими файлами (`GIT_ALLOW_MULTI_SCOPE_COMMIT=1` — `apps/auth-hub` + `apps/auth-hub-e2e`,
+      один логический батч A.4/A.6). **Push НЕ выполнен — ждёт явного одобрения владельца**
+      (сессия шла автономно по инструкции «делай всё до конца», но push/деплой это правило не
+      снимает, см. `.claude/rules/git.md`). Деплой — только deploy-request в `deploy-agent-dev`
+      после push; сначала staging + e2e, затем прод.
+- [ ] A.7 (ручная проверка) — выполнена частично в предыдущих итерациях сессии (регистрация,
+      экран кода, SSE-безлик, неверный код, автосабмит после фикса `Field.PinInput`). Не
+      выполнено: успешный ввод настоящего кода из реального письма, OIDC-флоу регистрации,
+      сброс пароля с реальным кодом (основной/привязанный/OAuth-only email), 5 неверных попыток →
+      lockout, истёкший код, SSO-регресс на двух клиентских приложениях, magic-link/passkey
+      регресс. Требует реальной почты dev/staging — не покрывается автономно без владельца.
 
 ## Открытые вопросы к владельцу (не блокируют Фазу 0)
 

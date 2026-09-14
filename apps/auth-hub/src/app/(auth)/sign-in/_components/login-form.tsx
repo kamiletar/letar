@@ -4,9 +4,10 @@ import { loginUser } from '@/app/(auth)/_actions/login.action'
 import { type LoginData, LoginSchema } from '@/app/(auth)/_schemas/login.schema'
 import { AuthHubForm } from '@/auth-hub-form'
 import { authClient } from '@/lib/auth-client'
-import { Stack, Text } from '@chakra-ui/react'
+import { Box, Stack, Text } from '@chakra-ui/react'
 import { ResendVerificationButton } from '@letar/auth/client'
-import { useRouter } from 'next/navigation'
+import NextLink from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { usePostSignInCallback } from '../../_hooks/use-post-sign-in-callback'
 import { usePasskeyConditionalAuth } from '../_hooks/use-passkey-conditional-auth'
@@ -17,6 +18,9 @@ import { usePasskeyConditionalAuth } from '../_hooks/use-passkey-conditional-aut
  */
 export function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const query = searchParams.toString()
+  const forgotPasswordHref = query ? `/forgot-password?${query}` : '/forgot-password'
   // Поддерживает OIDC flow — возвращает /oauth2/authorize?<query> если страница
   // открыта с OIDC параметрами, иначе обычный callbackUrl из query
   const callbackUrl = usePostSignInCallback()
@@ -64,6 +68,10 @@ export function LoginForm() {
           autoComplete="current-password"
           placeholder="••••••••"
         />
+
+        <Box asChild alignSelf="flex-end" fontSize="sm" color="colorPalette.fg" fontWeight="medium">
+          <NextLink href={forgotPasswordHref}>Забыли пароль?</NextLink>
+        </Box>
 
         {error && (
           <Text color="fg.error" fontSize="sm">

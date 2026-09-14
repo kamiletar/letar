@@ -6,14 +6,9 @@ import { EmailCodePanel, useEmailCodeVerification } from '@letar/pin-auth/client
 import { createPinSchema } from '@letar/pin-auth/schemas'
 import { VerifiedElsewhere } from './verified-elsewhere'
 
-const PinSchema = createPinSchema({
-  length: 6,
-  uiMeta: {
-    title: 'Код подтверждения',
-    fieldType: 'pinInput',
-    fieldProps: { count: 6, otp: true },
-  },
-})
+// Без uiMeta.fieldType — поле рендерится явным тегом Field.PinInput ниже, схема нужна
+// только для валидации длины кода.
+const PinSchema = createPinSchema({ length: 6 })
 
 interface VerifyEmailCodeProps {
   email: string
@@ -56,7 +51,15 @@ export function VerifyEmailCode({ email, callbackUrl }: VerifyEmailCodeProps) {
       elsewhere={<VerifiedElsewhere email={email} callbackUrl={callbackUrl} />}
       renderCodeForm={({ formKey, disabled, onComplete }) => (
         <AuthHubForm key={formKey} schema={PinSchema} initialValue={{ pin: '' }} onSubmit={() => {}}>
-          <AuthHubForm.Field.Auto name="pin" disabled={disabled} onComplete={onComplete} />
+          {
+            /* Явный тег Field.PinInput, не Field.Auto: Field.Auto с meta.fieldType не
+              прокидывает произвольные props вроде onComplete в renderFieldByType — только
+              явно перечисленный подмножество (label/placeholder/disabled/…), см.
+              libs/forms/src/lib/declarative/form-fields/auto/field-auto.tsx. Найдено вживую
+              на этом экране (автосабмит молчал), не переносить обратно на Field.Auto без
+              починки библиотеки. */
+          }
+          <AuthHubForm.Field.PinInput name="pin" count={6} otp disabled={disabled} onComplete={onComplete} />
         </AuthHubForm>
       )}
     />

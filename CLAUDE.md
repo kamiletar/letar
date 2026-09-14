@@ -266,6 +266,12 @@ select ·
 `<AppForm.Field.X>` (`.claude/rules/forms.md`) игнорировал произвольный `meta.fieldProps`;
 теперь `useResolvedFieldProps`/`createField` резолвит его с приоритетом `props > meta` в обоих
 UI-скинах. Файл — разбор проблемы для истории и на случай регрессии ·
+[letar-forms-field-auto-fieldtype-drops-extra-props](/.claude/docs/letar-forms-field-auto-fieldtype-drops-extra-props.md)
+⚠️ Зеркальный, но другой баг — `Field.Auto` с заданным `meta.ui.fieldType` не спредит
+`baseProps` в `renderFieldByType` (в отличие от fallback-ветки по типу схемы), любой проп
+сверх явно перечисленных (`onComplete` у `PinInputFieldProps` и т.п.) молча теряется без
+единой ошибки; обход — явный тег (`Field.PinInput`), не `Field.Auto`, найдено на auth-hub
+(автосабмит кода из письма молчал) ·
 [letar-forms-urlsync-missing-router-no-rsc-refetch](/.claude/docs/letar-forms-urlsync-missing-router-no-rsc-refetch.md)
 ⚠️ `Form.UrlSync` без явного `router` пишет URL мимо Next.js router (`history.replaceState`) —
 Server Component страницы не перечитывает `searchParams`, URL меняется, данные — нет; проверять

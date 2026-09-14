@@ -42,8 +42,10 @@ test.describe('Sign-up', () => {
 
   test('форма регистрации видна', async ({ page }) => {
     await page.goto('/sign-up')
-    await expect(page.locator('input[name="email"]')).toBeVisible()
-    await expect(page.locator('input[name="password"]')).toBeVisible()
+    // register-form.tsx переведён на @letar/forms (PLAN_EMAIL_CODE.md A.2) — нативного `name`
+    // нет, локатор через data-field-name, как на /sign-in (см. выше).
+    await expect(page.locator('input[data-field-name="email"]')).toBeVisible()
+    await expect(page.locator('input[data-field-name="password"]')).toBeVisible()
     await expect(page.getByRole('button', { name: 'Зарегистрироваться' })).toBeVisible()
   })
 })

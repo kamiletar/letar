@@ -22,6 +22,8 @@ loadEnvCascade(projectDir)
 interface AuthHubPrismaClient {
   user: {
     findUnique: (args: { where: { email: string } }) => Promise<{ id: string; email: string } | null>
+    update: (args: { where: { email: string }; data: { emailVerified: boolean } }) => Promise<unknown>
+    deleteMany: (args: { where: { email: string } }) => Promise<unknown>
   }
   userEmail: {
     upsert: (args: {
@@ -74,6 +76,25 @@ export async function ensureVerifiedLinkedEmail(ownerUserId: string, linkedEmail
 export async function deleteUserEmail(linkedEmail: string) {
   const db = await getPrisma()
   await db.userEmail.deleteMany({ where: { email: linkedEmail.toLowerCase().trim() } })
+}
+
+/**
+ * Отмечает email пользователя подтверждённым напрямую в БД — имитирует переход по ссылке
+ * из письма в другой вкладке/на другом устройстве (PLAN_EMAIL_CODE.md A.6). Код из письма
+ * хранится хешем (`storeOTP: 'hashed'`) — вводить настоящий код в e2e нельзя, поэтому
+ * успешную верификацию симулируем этим путём, а не через `/email-otp/verify-email`.
+ */
+export async function markEmailVerified(email: string) {
+  const db = await getPrisma()
+  await db.user.update({ where: { email: email.toLowerCase().trim() }, data: { emailVerified: true } })
+}
+
+/**
+ * Удаляет пользователя по email — очистка между прогонами.
+ */
+export async function deleteUser(email: string) {
+  const db = await getPrisma()
+  await db.user.deleteMany({ where: { email: email.toLowerCase().trim() } })
 }
 
 export async function disconnectDb() {
