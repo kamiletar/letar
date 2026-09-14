@@ -30,6 +30,7 @@
     "@letar/electron-monorepo-updater": "workspace:*",
     "@letar/electron-storage": "workspace:*",
     "@letar/folder-scan": "workspace:*",
+    "@letar/format-utils": "workspace:*",
     "@letar/forms": "workspace:*",
     "@letar/hooks": "workspace:*",
     "@letar/icon-generator": "workspace:*",

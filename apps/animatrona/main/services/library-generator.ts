@@ -4,6 +4,7 @@
  * Формирует структуру PublishedLibrary для публикации через IPNS.
  */
 
+import { slugify as slugifyBase } from '@letar/format-utils'
 import type { PublishedAnime, PublishedEpisode, PublishedLibrary } from '../../shared/types/ipfs'
 import { prisma } from '../utils/db'
 import { createModuleLogger } from '../utils/logger'
@@ -50,50 +51,7 @@ export interface EpisodeData {
  * Кириллица транслитерируется, спецсимволы заменяются на дефисы.
  */
 export function slugify(name: string): string {
-  const translitMap: Record<string, string> = {
-    а: 'a',
-    б: 'b',
-    в: 'v',
-    г: 'g',
-    д: 'd',
-    е: 'e',
-    ё: 'yo',
-    ж: 'zh',
-    з: 'z',
-    и: 'i',
-    й: 'y',
-    к: 'k',
-    л: 'l',
-    м: 'm',
-    н: 'n',
-    о: 'o',
-    п: 'p',
-    р: 'r',
-    с: 's',
-    т: 't',
-    у: 'u',
-    ф: 'f',
-    х: 'kh',
-    ц: 'ts',
-    ч: 'ch',
-    ш: 'sh',
-    щ: 'shch',
-    ъ: '',
-    ы: 'y',
-    ь: '',
-    э: 'e',
-    ю: 'yu',
-    я: 'ya',
-  }
-
-  return name
-    .toLowerCase()
-    .split('')
-    .map((c) => translitMap[c] ?? c)
-    .join('')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 80)
+  return slugifyBase(name).slice(0, 80)
 }
 
 /**
