@@ -36,6 +36,28 @@ const mapped = items.map((item: (typeof items)[number]) => ({ id: item.id, total
 запрос — вложенность типа-результата запроса (`include`/`select` в несколько уровней) сама по
 себе не падает, падает только последующее structural comparison с телом callback.
 
+⚠️ **`(typeof items)[number]` иногда не спасает — тогда нужен явный минимальный тип.** На
+svoichuzhie (2026-09-14, `src/app/admin/orders/[id]/page.tsx` +
+`src/app/merch/orders/[token]/page.tsx`, `order.items.map(...)` внутри JSX) `typeof`-алиас
+по-прежнему падал с той же ошибкой — резолв самого алиаса уже требует структурной экспансии
+глубокого типа. Сработал более сильный вариант: отдельный локальный `type OrderItemRow = { ... }`
+только с реально используемыми в теле callback полями + явная аннотация переменной перед `.map()`
+(`const orderItems: OrderItemRow[] = order.items`), а не аннотация самого параметра callback:
+
+```typescript
+// ❌ (typeof items)[number] тоже падает в некоторых случаях — сам typeof уже требует
+// структурной экспансии MapType<Schema, ?>
+const mapped = order.items.map((item: (typeof order.items)[number]) => ...)
+
+// ✅ узкий вручную написанный тип с нужными полями + аннотация переменной, не параметра
+type OrderItemRow = { id: string; productName: string; quantity: number; price: number }
+const orderItems: OrderItemRow[] = order.items
+const mapped = orderItems.map((item) => ...)
+```
+
+Пробуй `(typeof items)[number]` первым (дешевле, не требует ручного списка полей) — если не
+помогло, переходи к явному узкому типу.
+
 ### 2. Деструктуризация `Promise.all([...])` из разных ZenStack-запросов
 
 ```typescript
