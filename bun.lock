@@ -1126,7 +1126,7 @@
         "@letar/infra-config": "workspace:*",
         "@letar/mcp-server-kit": "workspace:*",
         "@modelcontextprotocol/sdk": "1.30.0",
-        "zod": "4.6.2",
+        "zod": "4.4.3",
       },
     },
     "libs/driving-school-db": {
@@ -1425,7 +1425,7 @@
       "dependencies": {
         "@letar/mcp-server-kit": "workspace:*",
         "@modelcontextprotocol/sdk": "1.30.0",
-        "zod": "4.6.2",
+        "zod": "4.4.3",
       },
       "devDependencies": {
         "@letar/mcp-test-kit": "workspace:*",
@@ -1499,7 +1499,7 @@
         "@modelcontextprotocol/sdk": "1.30.0",
       },
       "devDependencies": {
-        "zod": "4.6.2",
+        "zod": "4.4.3",
       },
     },
     "libs/media-client": {
@@ -1575,7 +1575,7 @@
       "dependencies": {
         "@letar/mcp-server-kit": "workspace:*",
         "@modelcontextprotocol/sdk": "1.30.0",
-        "zod": "4.6.2",
+        "zod": "4.4.3",
       },
       "devDependencies": {
         "@letar/mcp-test-kit": "workspace:*",
@@ -1587,7 +1587,7 @@
       "dependencies": {
         "@letar/mcp-server-kit": "workspace:*",
         "@modelcontextprotocol/sdk": "1.30.0",
-        "zod": "4.6.2",
+        "zod": "4.4.3",
       },
       "devDependencies": {
         "@letar/mcp-test-kit": "workspace:*",
@@ -1626,7 +1626,7 @@
       "dependencies": {
         "@letar/mcp-server-kit": "workspace:*",
         "@modelcontextprotocol/sdk": "1.30.0",
-        "zod": "4.6.2",
+        "zod": "4.4.3",
       },
       "devDependencies": {
         "@letar/mcp-test-kit": "workspace:*",
@@ -8309,23 +8309,11 @@
 
     "@letar/animatrona-mobile/react-native-vision-camera": ["react-native-vision-camera@4.7.3", "", { "peerDependencies": { "@shopify/react-native-skia": "*", "react": "*", "react-native": "*", "react-native-reanimated": "*", "react-native-worklets-core": "*" }, "optionalPeers": ["@shopify/react-native-skia", "react-native-reanimated", "react-native-worklets-core"] }, "sha512-g1/neOyjSqn1kaAa2FxI/qp5KzNvPcF0bnQw6NntfbxH6tm0+8WFZszlgb5OV+iYlB6lFUztCbDtyz5IpL47OA=="],
 
-    "@letar/deploy-mcp/zod": ["zod@4.6.2", "", {}, "sha512-lh5RCAGFa1Cm2hjtNwLQhSs/AsqdWnTQaBER9fEwN/88pSh7KOtJavtBx/0VlkN/uFd61SwYmljLMDAsHlvzBQ=="],
-
-    "@letar/glitchtip-mcp/zod": ["zod@4.6.2", "", {}, "sha512-lh5RCAGFa1Cm2hjtNwLQhSs/AsqdWnTQaBER9fEwN/88pSh7KOtJavtBx/0VlkN/uFd61SwYmljLMDAsHlvzBQ=="],
-
     "@letar/label-printer-desktop/pdfjs-dist": ["pdfjs-dist@4.10.38", "", { "optionalDependencies": { "@napi-rs/canvas": "^0.1.65" } }, "sha512-/Y3fcFrXEAsMjJXeL9J8+ZG9U01LbuWaYypvDW2ycW1jL269L3js3DVBjDJ0Up9Np1uqDXsDrRihHANhZOlwdQ=="],
-
-    "@letar/mcp-test-kit/zod": ["zod@4.6.2", "", {}, "sha512-lh5RCAGFa1Cm2hjtNwLQhSs/AsqdWnTQaBER9fEwN/88pSh7KOtJavtBx/0VlkN/uFd61SwYmljLMDAsHlvzBQ=="],
 
     "@letar/number-words/to-words": ["to-words@5.7.0", "", { "bin": { "to-words": "dist/cjs/cli.js" } }, "sha512-D6Scrd19yCs/GZC70U/5ClQwcn9heojeFyvghQIXgqHK8YVGrbByjEshvLm9aHqzsCRxBAW0VTFm4tR+UQl9EQ=="],
 
-    "@letar/studio-mcp/zod": ["zod@4.6.2", "", {}, "sha512-lh5RCAGFa1Cm2hjtNwLQhSs/AsqdWnTQaBER9fEwN/88pSh7KOtJavtBx/0VlkN/uFd61SwYmljLMDAsHlvzBQ=="],
-
-    "@letar/studio-time-mcp/zod": ["zod@4.6.2", "", {}, "sha512-lh5RCAGFa1Cm2hjtNwLQhSs/AsqdWnTQaBER9fEwN/88pSh7KOtJavtBx/0VlkN/uFd61SwYmljLMDAsHlvzBQ=="],
-
     "@letar/synth/zod": ["zod@4.6.2", "", {}, "sha512-lh5RCAGFa1Cm2hjtNwLQhSs/AsqdWnTQaBER9fEwN/88pSh7KOtJavtBx/0VlkN/uFd61SwYmljLMDAsHlvzBQ=="],
-
-    "@letar/umami-mcp/zod": ["zod@4.6.2", "", {}, "sha512-lh5RCAGFa1Cm2hjtNwLQhSs/AsqdWnTQaBER9fEwN/88pSh7KOtJavtBx/0VlkN/uFd61SwYmljLMDAsHlvzBQ=="],
 
     "@libmedia/cheap/commander": ["commander@13.1.0", "", {}, "sha512-/rFeCpNJQbhSZjGVwO9RFV3xPqbnERS8MmIQzCtD/zl6gpJuV/bMLuN92oG3F7d8oDEHHRrujSXNUr8fpjntKw=="],
 
