@@ -4,6 +4,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.14.10] - 2026-09-14
+
+### Changed
+
+- **Мок Canvas 2D API вынесен в `@letar/forms-core/testing` (`mockCanvas2D`)** — блок,
+  добавленный в 2.14.9, был дословно продублирован в `libs/forms-shadcn/vitest.setup.ts`
+  (0.37.1). `vitest.setup.ts` теперь вызывает `mockCanvas2D()` вместо инлайна; поведение не
+  изменилось. `forms-vue`/`forms-vue-shadcn`/`forms-angular` держат свои per-spec `beforeEach`
+  стабы (`app-form.stage5.spec.ts` ×2, `app-form.stage-g.spec.ts`) — не переведены: другая форма
+  (минимальный `vi.fn()`-стаб, не глобальный setup) и другой набор методов, перенос не упрощает
+  код.
+
 ## [2.14.9] - 2026-09-14
 
 ### Fixed

@@ -14,7 +14,8 @@
       "@letar/forms-core/security": ["../../libs/forms-core/src/lib/security/index.ts"],
       "@letar/forms-core/offline": ["../../libs/forms-core/src/lib/offline/index.ts"],
       "@letar/forms-core/captcha": ["../../libs/forms-core/src/lib/captcha/index.ts"],
-      "@letar/forms-core/analytics": ["../../libs/forms-core/src/lib/analytics/index.ts"]
+      "@letar/forms-core/analytics": ["../../libs/forms-core/src/lib/analytics/index.ts"],
+      "@letar/forms-core/testing": ["../../libs/forms-core/src/lib/testing/index.ts"]
     }
   },
   "include": ["vitest.setup.ts", "src/**/*.ts", "src/**/*.tsx"],

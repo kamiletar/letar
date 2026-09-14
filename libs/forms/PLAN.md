@@ -6,6 +6,31 @@
 
 ## Backlog (запросы от агентов)
 
+### ✅ [2026-09-14] Вынос мока Canvas 2D в `@letar/forms-core/testing` (закрыт v2.14.10)
+
+- **Контекст:** мок Canvas 2D API (детерминированный no-op для `HTMLCanvasElement.prototype.getContext('2d')`/`toDataURL`,
+  ~50 строк) был найден и починен в `libs/forms/vitest.setup.ts` (2.14.9), затем превентивно
+  скопирован дословно в `libs/forms-shadcn/vitest.setup.ts` (0.37.1) — два идентичных блока.
+- **Фикс:** функция `mockCanvas2D()` вынесена в `libs/forms-core/src/lib/testing/index.ts`
+  (подпуть `@letar/forms-core/testing`, уже существовал ради `buildFormsCoreAlias`). Реализация
+  инлайн в `index.ts`, не в отдельном файле с реэкспортом — та же причина, что уже
+  задокументирована у `buildFormsCoreAlias`: `vitest.setup.ts`/`vitest.config.mts` резолвятся
+  нативным Node-загрузчиком Nx, который не умеет extensionless относительные импорты внутри
+  `.ts`-модуля, полученного через bare-специфайер (`ERR_MODULE_NOT_FOUND` — обнаружено при
+  первой попытке вынести в `mock-canvas-2d.ts`).
+- **Затронуто:** `libs/forms/vitest.setup.ts` и `libs/forms-shadcn/vitest.setup.ts` теперь
+  вызывают `mockCanvas2D()` вместо инлайн-блока. `libs/forms/tsconfig.spec.json` — добавлена
+  строка `@letar/forms-core/testing` в `paths` (потребовалась typecheck'у, набор subpath-paths
+  там и так неполный относительно `forms-core/package.json` exports — не расширялся сверх
+  необходимого для этой задачи).
+- **Не тронуто:** `forms-vue`/`forms-vue-shadcn`/`forms-angular` держат свои per-spec
+  `beforeEach`-стабы (`app-form.stage5.spec.ts` ×2, `app-form.stage-g.spec.ts`) — другая форма
+  (локальный минимальный `vi.fn()`-стаб на 2 метода, не глобальный `vitest.setup.ts` на ~25
+  методов) и другая структура подключения, перенос не упрощает код без риска регрессии.
+- **Проверка:** `nx test`/`typecheck:tsgo`/`lint` зелёные на `forms-core`, `forms`,
+  `forms-shadcn`; `scripts/check-lib-subpath-paths.mjs` — без новых расхождений (1
+  предсуществующий у `aboi`/`@letar/hooks`, не связан).
+
 ### ✅ [2026-09-14] Дедуп группировки опций по `group` между use-grouped-options.ts и uikit-chakra.tsx (закрыт v2.14.8)
 
 - **Контекст:** прямое следствие предыдущего пункта (getGroup на Select, v2.14.7) — при его

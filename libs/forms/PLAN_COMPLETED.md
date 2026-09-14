@@ -1,5 +1,29 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-14 (сессия 3) — Вынос мока Canvas 2D в `@letar/forms-core/testing`
+
+**Задача:** закрыть техдолг, оставленный сессией 2 (запись ниже) — дословный дубль мока Canvas
+2D API (~50 строк) в `libs/forms/vitest.setup.ts` и `libs/forms-shadcn/vitest.setup.ts`.
+
+**Фикс:** функция `mockCanvas2D()` вынесена в `libs/forms-core/src/lib/testing/index.ts`
+(подпуть `@letar/forms-core/testing`, уже использовался для `buildFormsCoreAlias`). Оба
+`vitest.setup.ts` теперь вызывают её вместо инлайн-блока.
+
+**Грабля:** первая попытка — отдельный файл `mock-canvas-2d.ts` с реэкспортом из `index.ts` —
+дала `ERR_MODULE_NOT_FOUND` при `nx test` (project graph): `vitest.config.mts`/`vitest.setup.ts`
+резолвятся нативным Node ESM-загрузчиком Nx, который не умеет extensionless относительные
+импорты внутри `.ts`-модуля, полученного через bare-специфайер пакета — та же причина, что уже
+задокументирована прямо в этом файле у `buildFormsCoreAlias`. Фикс — инлайн-реализация прямо в
+`index.ts`, без промежуточного файла.
+
+**Не тронуто:** `forms-vue`/`forms-vue-shadcn`/`forms-angular` — их per-spec `beforeEach`-стабы
+меньше и устроены иначе (локальный `vi.fn()` на 2 метода, не глобальный setup), перенос не
+упрощает код без риска.
+
+**Проверка:** `nx test`/`typecheck:tsgo`/`lint` зелёные на `forms-core` (0.12.2→0.12.3), `forms`
+(2.14.9→2.14.10), `forms-shadcn` (0.37.1→0.37.2). `scripts/check-lib-subpath-paths.mjs` — без
+новых расхождений. Разбор — `PLAN.md` § «Вынос мока Canvas 2D…».
+
 ## 2026-09-14 (сессия 2) — Аудит Canvas 2D моков в сестринских библиотеках, фикс forms-shadcn
 
 **Задача:** после фикса флаки-таймаута `field-signature.spec.tsx` в `@letar/forms` (2.14.9, см.
