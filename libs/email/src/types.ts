@@ -58,6 +58,8 @@ export interface VerificationEmailParams {
   verificationUrl?: string
   /** PIN-код (обязателен если нет verificationUrl) */
   pin?: string
+  /** Срок действия PIN-кода в минутах (по умолчанию 10) */
+  pinExpiresInMinutes?: number
 }
 
 export interface PasswordResetEmailParams {
@@ -69,6 +71,8 @@ export interface PasswordResetEmailParams {
   resetUrl: string
   /** PIN-код (опционально) */
   pin?: string
+  /** Срок действия ссылки и PIN-кода в минутах (по умолчанию 60) */
+  expiresInMinutes?: number
 }
 
 export interface MagicLinkEmailParams {

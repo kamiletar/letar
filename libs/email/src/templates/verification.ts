@@ -20,6 +20,8 @@ export interface VerificationTemplateParams {
   verificationUrl?: string
   /** PIN-код (опционально если есть verificationUrl) */
   pin?: string
+  /** Срок действия PIN-кода в минутах (по умолчанию 10) */
+  pinExpiresInMinutes?: number
   /** Брендинг */
   branding: BrandingConfig
 }
@@ -28,7 +30,7 @@ export interface VerificationTemplateParams {
  * Создаёт HTML для письма верификации
  */
 export function createVerificationEmailHtml(params: VerificationTemplateParams): string {
-  const { userName, verificationUrl, pin, branding } = params
+  const { userName, verificationUrl, pin, pinExpiresInMinutes = 10, branding } = params
 
   let content = createGreeting(userName)
   content += createParagraph(
@@ -36,7 +38,7 @@ export function createVerificationEmailHtml(params: VerificationTemplateParams):
   )
 
   if (pin) {
-    content += createPinBlock(pin, 10, branding.headerColor)
+    content += createPinBlock(pin, pinExpiresInMinutes, branding.headerColor)
   }
 
   // Кнопка и ссылка только если есть URL
@@ -61,9 +63,9 @@ export function createVerificationEmailHtml(params: VerificationTemplateParams):
  * Создаёт текстовую версию письма верификации
  */
 export function createVerificationEmailText(params: VerificationTemplateParams): string {
-  const { userName, verificationUrl, pin, branding } = params
+  const { userName, verificationUrl, pin, pinExpiresInMinutes = 10, branding } = params
 
-  const pinText = pin ? `\nВаш код подтверждения: ${pin}\nКод действителен 10 минут.\n` : ''
+  const pinText = pin ? `\nВаш код подтверждения: ${pin}\nКод действителен ${pinExpiresInMinutes} минут.\n` : ''
   const urlText = verificationUrl
     ? `\nПодтвердить email: ${verificationUrl}\nСсылка действительна в течение 24 часов.\n`
     : ''

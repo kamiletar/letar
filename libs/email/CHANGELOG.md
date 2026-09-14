@@ -7,6 +7,23 @@
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-09-14
+
+### Added
+
+- `pinExpiresInMinutes` в `VerificationEmailParams`/шаблоне верификации — срок PIN-кода в письме
+  подтверждения email раньше был зашит литералом (`createPinBlock(pin, 10, ...)` и «Код
+  действителен 10 минут» в text-версии), параметра не было вовсе. Дефолт 10 минут сохранён.
+- `expiresInMinutes` в `PasswordResetEmailParams` — сам шаблон (`password-reset.ts`) уже принимал
+  этот параметр и использовал его и для срока ссылки, и для срока PIN-кода, но публичный тип
+  `sendPasswordResetEmail` его не объявлял, так что передать снаружи было нельзя. Дефолт 60 минут
+  сохранён.
+- Тесты (`templates/pin-expiry.spec.ts`): срок кода попадает и в HTML, и в text-версию обоих
+  писем при дефолте и при явном значении.
+
+Найдено при своде трёх независимых копий письма с PIN-кодом (`@letar/email`,
+`@letar/pin-auth/email`) — вторая копия удалена, см. `libs/pin-auth/CHANGELOG.md` 0.4.0.
+
 ### Security
 
 - Обновлён `nodemailer` `^6.9.16` → `^9.1.1` (и `@types/nodemailer` до `^8.0.1`, синхронно с
