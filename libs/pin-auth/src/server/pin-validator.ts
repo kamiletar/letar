@@ -44,7 +44,17 @@ export interface VerificationTokenData {
 export interface PinValidatorAdapter {
   /** Найти токен по email */
   findToken(identifier: string): Promise<VerificationTokenData | null>
-  /** Увеличить счётчик неудачных попыток */
+  /**
+   * Увеличить счётчик неудачных попыток.
+   *
+   * ⚠️ Race-prone путь: используется, только если адаптер НЕ реализует `reserveAttempt`.
+   * Валидатор читает `pinAttempts` из `findToken`, сравнивает PIN, и лишь потом вызывает
+   * этот метод — классический check-then-act. Под параллельной нагрузкой (несколько
+   * запросов на один email одновременно) все они читают один и тот же счётчик и успевают
+   * сравнить PIN, прежде чем хоть один из них успешно увеличит его, так что `maxAttempts`
+   * не соблюдается — пачка из N параллельных запросов даёт N сравнений, а не `maxAttempts`.
+   * Реализуйте `reserveAttempt`, если приложению важна защита от параллельного перебора.
+   */
   incrementAttempts(token: string): Promise<void>
   /** Найти пользователя по email */
   findUser(email: string): Promise<{ id: string } | null>
@@ -60,6 +70,19 @@ export interface PinValidatorAdapter {
    * входа, чтобы повторное предъявление было отклонено.
    */
   updateTokenForAutoLogin(oldToken: string, newToken: string, expires: Date): Promise<void>
+  /**
+   * Атомарно резервирует попытку ввода PIN и возвращает число попыток, сделанных ДО неё.
+   *
+   * Когда реализован, валидатор вызывает его вместо чтения `pinAttempts`/`incrementAttempts` —
+   * резервация происходит ДО сравнения PIN, так что параллельные запросы получают разные
+   * порядковые номера попытки вместо гонки за один и тот же счётчик (см. предупреждение у
+   * `incrementAttempts`). Реализация ОБЯЗАНА быть compare-and-swap (прочитать текущее
+   * значение → атомарно обновить только если оно не изменилось → повторить при конфликте),
+   * а не read-then-write — иначе не даёт гарантии, ради которой существует.
+   *
+   * Опционален для обратной совместимости со старыми адаптерами (см. `incrementAttempts`).
+   */
+  reserveAttempt?(identifier: string): Promise<number>
 }
 
 /**
@@ -101,8 +124,15 @@ export function createPinValidator(config: PinValidationConfig = {}) {
           return { success: false, error: 'NOT_FOUND' }
         }
 
+        // Резервируем попытку атомарно (race-safe), если адаптер это поддерживает — иначе
+        // используем pinAttempts, прочитанный вместе с токеном (race-prone legacy-путь,
+        // см. предупреждение у `incrementAttempts` в PinValidatorAdapter).
+        const attemptsBefore = adapter.reserveAttempt
+          ? await adapter.reserveAttempt(identifier)
+          : verificationToken.pinAttempts
+
         // Проверяем количество попыток
-        if (verificationToken.pinAttempts >= maxAttempts) {
+        if (attemptsBefore >= maxAttempts) {
           return { success: false, error: 'TOO_MANY_ATTEMPTS' }
         }
 
@@ -113,7 +143,10 @@ export function createPinValidator(config: PinValidationConfig = {}) {
 
         // Проверяем PIN в постоянном времени (защита от timing-атак, §13.2)
         if (verificationToken.pin === null || !timingSafeEqualStr(verificationToken.pin, pin)) {
-          await adapter.incrementAttempts(verificationToken.token)
+          if (!adapter.reserveAttempt) {
+            // Попытка уже учтена атомарно в reserveAttempt выше — легаси-путь инкрементирует здесь
+            await adapter.incrementAttempts(verificationToken.token)
+          }
           return { success: false, error: 'INVALID_PIN' }
         }
 
