@@ -80,27 +80,32 @@ EMAIL_UNSUBSCRIBE_URL=https://app.com/unsubscribe
 
 #### `sendVerificationEmail(params, branding?)`
 
-Письмо подтверждения email.
+Письмо подтверждения email. Нужен `verificationUrl` или `pin` (можно оба сразу) — без обоих
+бросает `Error`.
 
 ```typescript
 await sendVerificationEmail({
   to: 'user@example.com',
   userName: 'Иван', // опционально
   verificationUrl: 'https://...',
-  pin: '123456', // опционально — PIN вместо ссылки
+  pin: '123456', // опционально — PIN вместо/вместе со ссылкой
+  pinExpiresInMinutes: 10, // опционально, по умолчанию 10
 })
 ```
 
 #### `sendPasswordResetEmail(params, branding?)`
 
-Письмо сброса пароля.
+Письмо сброса пароля. Нужен `resetUrl` или `pin` (можно оба сразу) — без обоих бросает `Error`.
+Без `resetUrl` письмо содержит только код (кнопка и ссылка не рендерятся).
 
 ```typescript
 await sendPasswordResetEmail({
   to: 'user@example.com',
   userName: 'Иван', // опционально
-  resetUrl: 'https://...',
+  resetUrl: 'https://...', // опционально, если есть pin
+  pin: '123456', // опционально, если есть resetUrl
   expiresInMinutes: 60, // опционально, по умолчанию 60
+  pinExpiresInMinutes: 10, // опционально, по умолчанию — тот же срок, что у ссылки
 })
 ```
 

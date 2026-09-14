@@ -7,6 +7,23 @@
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-09-14
+
+### Added
+
+- `resetUrl` в `PasswordResetEmailParams` стал опциональным — письмо сброса пароля теперь можно
+  отправить только кодом, без ссылки (нужен `resetUrl` или `pin`, можно оба сразу).
+  `createPasswordResetEmailHtml`/`Text` рендерят кнопку/ссылку только при наличии `resetUrl`; без
+  него — предупреждение «Никому не передавайте этот код» вместо предупреждения про ссылку.
+- Runtime-инвариант в `sendVerificationEmail`/`sendPasswordResetEmail` — обе функции бросают
+  `Error`, если не передано ни `verificationUrl`/`resetUrl`, ни `pin`. Раньше отсутствие обоих
+  тихо давало письмо без единого способа подтвердить действие.
+- Тесты (`service.spec.ts`, новый; `templates/pin-expiry.spec.ts`, расширен): оба инварианта и
+  code-only режим `sendPasswordResetEmail` покрыты.
+
+Завершает Фазу 0.1 плана `apps/auth-hub/PLAN_EMAIL_CODE.md` — resetUrl-необязательность и
+throw-инвариант были намеренно оставлены открытыми в 0.6.0.
+
 ## [0.6.0] - 2026-09-14
 
 ### Added

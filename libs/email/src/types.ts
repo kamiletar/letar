@@ -67,12 +67,14 @@ export interface PasswordResetEmailParams {
   to: string
   /** Имя пользователя */
   userName?: string
-  /** URL для сброса пароля */
-  resetUrl: string
-  /** PIN-код (опционально) */
+  /** URL для сброса пароля (обязателен если нет pin) */
+  resetUrl?: string
+  /** PIN-код (обязателен если нет resetUrl) */
   pin?: string
-  /** Срок действия ссылки и PIN-кода в минутах (по умолчанию 60) */
+  /** Срок действия ссылки в минутах (по умолчанию 60) */
   expiresInMinutes?: number
+  /** Срок действия PIN-кода в минутах (по умолчанию — тот же, что у ссылки) */
+  pinExpiresInMinutes?: number
 }
 
 export interface MagicLinkEmailParams {

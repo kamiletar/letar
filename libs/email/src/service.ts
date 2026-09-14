@@ -60,6 +60,10 @@ export async function sendVerificationEmail(
   params: VerificationEmailParams,
   branding?: Partial<BrandingConfig>,
 ): Promise<SendEmailResult> {
+  if (!params.verificationUrl && !params.pin) {
+    throw new Error('sendVerificationEmail: нужен verificationUrl или pin')
+  }
+
   const brand = { ...getBrandingFromEnv(), ...branding }
   const provider = createEmailProvider(getConfigFromEnv())
 
@@ -78,6 +82,9 @@ export async function sendVerificationEmail(
 /**
  * Отправляет письмо сброса пароля
  *
+ * Нужен `resetUrl` или `pin` (можно оба сразу); без обоих — throw. Без `resetUrl` письмо
+ * содержит только код (кнопка и ссылка не рендерятся).
+ *
  * @example
  * ```ts
  * await sendPasswordResetEmail({
@@ -91,6 +98,10 @@ export async function sendPasswordResetEmail(
   params: PasswordResetEmailParams,
   branding?: Partial<BrandingConfig>,
 ): Promise<SendEmailResult> {
+  if (!params.resetUrl && !params.pin) {
+    throw new Error('sendPasswordResetEmail: нужен resetUrl или pin')
+  }
+
   const brand = { ...getBrandingFromEnv(), ...branding }
   const provider = createEmailProvider(getConfigFromEnv())
 
