@@ -55,7 +55,7 @@ interface SelectFieldState {
  * Styled select component with customizable appearance,
  * animations and advanced features (search, clear, custom rendering).
  *
- * For simple cases or better mobile UX use Form.Field.NativeSelect.
+ * Default choice for all dropdowns, including mobile — `Form.Field.NativeSelect` is deprecated.
  *
  * @example Basic usage
  * ```tsx

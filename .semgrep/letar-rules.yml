@@ -203,6 +203,27 @@ rules:
       См. .claude/rules/forms.md § «Не делай» (правило про NativeSelect/Select.Root).
     pattern-regex: '<(NativeSelect|Select|Combobox)\.Root\b'
 
+  - id: letar-forms-native-select-deprecated
+    languages: [generic]
+    severity: WARNING
+    paths:
+      include:
+        - '*.tsx'
+      exclude:
+        - libs/forms/**
+        - libs/forms-core/**
+        - libs/forms-react/**
+        - libs/forms-shadcn/**
+        - libs/forms-vue/**
+        - libs/forms-vue-shadcn/**
+        - libs/forms-angular/**
+    message: >-
+      Form.Field.NativeSelect устарел — используй Form.Field.Select, он закрывает те же случаи,
+      включая мобильный UX, собственным стилем библиотеки. NativeSelect остаётся только ради
+      уже существующих мест использования, новых он не должен приобретать.
+      См. .claude/rules/forms.md § «Не делай».
+    pattern-regex: '\.Field\.NativeSelect\b'
+
   - id: letar-dev-session-vars-in-prod-env
     languages: [generic]
     paths:

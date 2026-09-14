@@ -135,6 +135,13 @@ function MyForm() {
 - ❌ **NEVER** импортируй из `@tanstack/react-form` напрямую
 - ❌ **NEVER** забывай `.strip()` в Zod схемах
 - ❌ **NEVER** пиши кастомные поля форм если аналог есть в form-components (проверь `list_fields`!)
+- ❌ **NEVER** используй `Field.NativeSelect`/`<AppForm.Field.NativeSelect>` в новом коде —
+  компонент помечен `@deprecated` (2026-09-15). Всегда `Field.Select` — он закрывает те же
+  случаи, включая мобильный UX, собственным стилем библиотеки (поиск, кнопка очистки).
+  `NativeSelect` остаётся только ради уже существующих мест использования, новых фич в него не
+  добавляют. Исполняемая версия — semgrep `letar-forms-native-select-deprecated`
+  (`.semgrep/letar-rules.yml`, WARNING, не блокирует коммит — на момент завода сотни существующих
+  срабатываний по всему монорепо, миграция не форсируется).
 - ❌ **NEVER** используй нативный `<form>` + `useActionState` вместо `@letar/forms` — даже для «простых» форм (email, подписка, логин). Отговорки «форма слишком простая» или «отложим на потом» **запрещены**. Нет createForm инстанса → создай его сначала.
 - ❌ **NEVER** пиши сырой Chakra `NativeSelect`/`Select.Root` + `useState`/`useSearchParams` для дропдауна — даже вне контекста сабмита сущности (URL-фильтр списка, ad-hoc-панель, per-row контрол таблицы). Такой контрол всё равно оборачивается в `createForm()`-инстанс приложения:
   - **URL-синхронизированный фильтр** (аналог старого `CategoryFilter` на `useRouter`/`useSearchParams`) → `<AppForm.Field.Select>` (или `.Select.<Name>`) внутри `<AppForm>` + `<Form.UrlSync fields={[...]} defaults={...} />` (§ «URL Sync фильтров», `libs/forms/README.md`), не ручной `router.push`.

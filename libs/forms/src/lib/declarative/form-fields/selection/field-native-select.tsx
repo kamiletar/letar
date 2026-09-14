@@ -15,8 +15,9 @@ export interface NativeSelectFieldProps<T = string> extends BaseFieldProps {
 /**
  * Form.Field.NativeSelect - Native browser select dropdown
  *
- * Renders a Chakra NativeSelect with automatic form integration and error display.
- * Uses native browser select for best mobile UX (shows system picker on iOS/Android).
+ * @deprecated Use `Form.Field.Select` instead — it covers the same cases (including mobile) with
+ * the library's own styling, search and clear button. `NativeSelect` stays only for existing
+ * usages and will not gain new features. See `.claude/rules/forms.md` § «Не делай».
  *
  * @example
  * ```tsx

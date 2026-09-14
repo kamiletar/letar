@@ -4,6 +4,18 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.14.15] - 2026-09-15
+
+### Deprecated
+
+- **`Form.Field.NativeSelect` помечен `@deprecated`** — используй `Form.Field.Select` вместо
+  него, он закрывает те же случаи (включая мобильный UX) собственным стилем библиотеки. Заодно
+  убрана рекомендация «для мобильного UX используй NativeSelect» из docstring `Field.Select` —
+  она указывала в обратную сторону. Добавлен semgrep-гейт
+  `letar-forms-native-select-deprecated` (WARNING, не блокирует коммит — существующих
+  использований в монорепо сотни, принудительной миграции нет). Правило зафиксировано в
+  `.claude/rules/forms.md` § «Не делай».
+
 ## [2.14.14] - 2026-09-15
 
 ### Fixed
