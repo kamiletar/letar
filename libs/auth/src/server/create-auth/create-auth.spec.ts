@@ -302,6 +302,55 @@ describe('createAuth', () => {
       })
     })
 
+    it('пробрасывает disabledPaths', () => {
+      const auth = createAuth({
+        mode: 'hub-provider',
+        database: {} as never,
+        baseURL: 'http://localhost:3014',
+        email: makeEmailCallbacks(),
+        disabledPaths: ['/sign-in/email-otp'],
+      })
+      const cfg = (auth as unknown as { _config: Record<string, unknown> })._config
+      expect(cfg.disabledPaths).toEqual(['/sign-in/email-otp'])
+    })
+
+    it('без disabledPaths поле отсутствует в конфиге', () => {
+      const auth = createAuth({
+        mode: 'hub-provider',
+        database: {} as never,
+        baseURL: 'http://localhost:3014',
+        email: makeEmailCallbacks(),
+      })
+      const cfg = (auth as unknown as { _config: Record<string, unknown> })._config
+      expect(cfg.disabledPaths).toBeUndefined()
+    })
+
+    it('пробрасывает revokeSessionsOnPasswordReset в emailAndPassword', () => {
+      const auth = createAuth({
+        mode: 'hub-provider',
+        database: {} as never,
+        baseURL: 'http://localhost:3014',
+        email: makeEmailCallbacks(),
+        revokeSessionsOnPasswordReset: true,
+      })
+      const cfg = (auth as unknown as { _config: Record<string, unknown> })._config
+      expect((cfg.emailAndPassword as { revokeSessionsOnPasswordReset?: boolean }).revokeSessionsOnPasswordReset).toBe(
+        true,
+      )
+    })
+
+    it('без revokeSessionsOnPasswordReset поле не задано', () => {
+      const auth = createAuth({
+        mode: 'hub-provider',
+        database: {} as never,
+        baseURL: 'http://localhost:3014',
+        email: makeEmailCallbacks(),
+      })
+      const cfg = (auth as unknown as { _config: Record<string, unknown> })._config
+      expect((cfg.emailAndPassword as { revokeSessionsOnPasswordReset?: boolean }).revokeSessionsOnPasswordReset)
+        .toBeUndefined()
+    })
+
     it('nextCookies последний в массиве plugins', async () => {
       const { nextCookies } = vi.mocked(await import('better-auth/next-js'))
       const auth = createAuth({

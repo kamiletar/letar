@@ -7,6 +7,16 @@
 
 ## [Unreleased]
 
+## [0.15.2] - 2026-09-15
+
+### Added
+
+- **`HubProviderAuthProfile`: новые необязательные поля `disabledPaths` и
+  `revokeSessionsOnPasswordReset`** (PLAN_EMAIL_CODE.md Фаза A, auth-hub) — пробрасываются в
+  верхнеуровневые опции `betterAuth()` (`disabledPaths`) и в `emailAndPassword` соответственно.
+  Оба необязательны и по умолчанию отсутствуют в итоговом конфиге — существующие потребители не
+  затронуты.
+
 ## [0.15.1] - 2026-09-15
 
 ### Fixed

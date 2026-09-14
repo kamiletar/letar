@@ -189,6 +189,7 @@ function buildHubProviderAuth<TProfile extends HubProviderAuthProfile>(profile: 
     ...(profile.secondaryStorage && { secondaryStorage: profile.secondaryStorage }),
     baseURL: profile.baseURL,
     trustedOrigins: profile.trustedOrigins,
+    ...(profile.disabledPaths && { disabledPaths: profile.disabledPaths }),
 
     emailAndPassword: {
       enabled: true,
@@ -196,6 +197,7 @@ function buildHubProviderAuth<TProfile extends HubProviderAuthProfile>(profile: 
       // В dev окружении верификация не требуется для удобства разработки
       requireEmailVerification: process.env.NODE_ENV === 'production',
       ...(profile.password && { password: profile.password }),
+      ...(profile.revokeSessionsOnPasswordReset && { revokeSessionsOnPasswordReset: true }),
       ...(email.sendPasswordResetEmail && {
         sendResetPassword: async ({ user, url }: { user: { email: string; name?: string | null }; url: string }) => {
           // email.sendPasswordResetEmail (провайдер @letar/email) уже вызывает reportEmailFailure

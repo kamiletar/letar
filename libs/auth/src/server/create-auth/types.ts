@@ -149,6 +149,17 @@ export interface HubProviderAuthProfile extends AuthProfileBase {
   account?: {
     accountLinking?: AccountLinkingConfig
   }
+  /**
+   * Пути Better Auth, отдающие 404 до обработчика (`disabledPaths` в верхнеуровневых опциях).
+   * Используется, например, чтобы закрыть неиспользуемые пути плагина `emailOTP`
+   * (см. `EMAIL_CODE_DISABLED_PATHS` в `@letar/auth/server`).
+   */
+  disabledPaths?: NonNullable<BetterAuthOptions['disabledPaths']>
+  /**
+   * Отзыв всех сессий пользователя после сброса пароля (PLAN_EMAIL_CODE.md, Фаза A).
+   * Пробрасывается в `emailAndPassword.revokeSessionsOnPasswordReset`.
+   */
+  revokeSessionsOnPasswordReset?: boolean
 }
 
 export type AuthProfile = StandaloneAuthProfile | HubClientAuthProfile | HubProviderAuthProfile
