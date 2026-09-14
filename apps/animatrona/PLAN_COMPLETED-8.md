@@ -3,6 +3,24 @@
 > Точка входа и карта всех частей — [PLAN_COMPLETED.md](./PLAN_COMPLETED.md).
 > Диапазон: 2026-09-07 (перенос из PLAN.md при архивации).
 
+## Общая `slugify` из `@letar/format-utils` (2026-09-15)
+
+Найдено при выносе дублей `slugify` в svoichuzhie — репо-широкий grep вскрыл ещё 5 копий вне
+той сессии. `main/services/library-generator.ts` буквально совпадал (ГОСТ 7.79-2000) — заменён
+импортом, сохранена обрезка до 80 символов. `@letar/format-utils` добавлена в **оба**
+независимых сборщика main-процесса — webpack `resolve.alias` (`main/webpack.config.js`) и
+esbuild через `main/tsconfig.json` `paths` (см.
+[animatrona-dual-build-alias-drift.md](/.claude/docs/animatrona-dual-build-alias-drift.md)) —
+иначе один из двух билдов молча ломается. Оба билда (`nx build animatrona`,
+`nx build animatrona-main`) прогнаны и прошли.
+
+`main/services/ipfs/anime-directory-builder.ts` **не тронут** — его `slugify()` оказался не
+дубликатом: не транслитерирует, оставляет кириллицу как есть, только заменяет не-буквенно-
+цифровые символы на дефисы. Замена изменила бы поведение сильнее, чем задумывалось.
+
+`nx lint animatrona`/`animatrona-main`, `typecheck:tsgo animatrona` (main+renderer) — зелёные.
+Коммит `fe275de99`.
+
 ## Animatrona — перенос из PLAN.md (2026-09-07)
 
 > Блоки ниже перенесены из активного `PLAN.md` при архивации 2026-09-07 — все полностью
