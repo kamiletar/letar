@@ -1,5 +1,42 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-15 (сессия 4) — миграция `Field.NativeSelect` → `Field.Select` в приложениях (первая волна)
+
+**Задача:** после того как `Field.NativeSelect` был помечен `@deprecated` (сессия 2026-09-15,
+`.claude/rules/forms.md` § «Не делай», semgrep `letar-forms-native-select-deprecated` в
+`.semgrep/letar-rules.yml`), найти все реальные использования `Field.NativeSelect` в `apps/*` и
+перевести их на `Field.Select`.
+
+**Сделано:** грепом `\.Field\.NativeSelect\b` по `apps/**/*.tsx` найдено 13 файлов, из них 4 —
+демо-приложения (`form-develop-app`, `form-example`, `form-docs`), намеренно показывающие оба
+варианта, не трогались. Из оставшихся 9 реальных мест мигрировано **8 файлов в 3 приложениях**:
+
+- `kami` (5 файлов): `admin/skills/skill-form.tsx`, `consulting/consulting-form.tsx`,
+  `hire/steps/step-team.tsx`, `hire/steps/step-conditions.tsx`, `hire/steps/step-company.tsx`.
+- `dsperevod` (приватный submodule, 2 файла): `hero-quote-form.tsx`,
+  `(marketing)/zakaz/order-form.tsx`.
+- `driving-school` (приватный submodule, 1 файл): `locations/[schoolId]/location-form.tsx`.
+
+Помимо замены самого компонента, везде переведён формат опций с `NativeSelectOption`
+(`{title, value}`) на `BaseOption` (`{label, value}`) — в местах, где массив опций использовался
+только этим одним полем (не шарился с `RadioGroup`/другим полем на `label`).
+
+**Не найдено использований** в остальных приложениях из списка задачи (`grandslamcup`, `mandala`,
+`domwellbes`, `aboi`, `animatrona`, `auth-hub`, `dashboard`, `label-printer-desktop`,
+`poster-microtext-desktop`) — грепом `Field.NativeSelect` там ничего не нашлось, мигрировать
+нечего.
+
+**Проверка:** `nx typecheck:tsgo`/`nx lint` зелёные на `kami`, `dsperevod`, `driving-school`
+(driving-school: единственная ошибка typecheck — предсуществующая, в
+`libs/forms-core/src/lib/i18n/create-form-error-map.ts`, не связана с этой правкой и не
+трогалась — похоже на чужую незавершённую работу в рабочем дереве). Коммиты: `099adbd13`
+(kami), `66ff7a5` + `8fc7f2397` (dsperevod submodule + bump), `9614c7f` + `dbc97eaf3`
+(driving-school submodule + bump).
+
+**Осталось:** остаток задачи (нет открытых пунктов — грепом покрыты все `apps/*`, кроме
+демо-приложений). Если позже появятся новые использования `Field.NativeSelect` — semgrep
+`letar-forms-native-select-deprecated` их подсветит (WARNING, не блокирует коммит).
+
 ## 2026-09-15 (сессия 3) — общий `resolveTranslation` вместо трёх копий fallback-логики i18n
 
 **Задача:** пользователь заметил повторяющийся паттерн «попробовать `t(key)`, если пусто/равно
