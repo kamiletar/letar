@@ -20,3 +20,14 @@ export {
   type UseVerificationStreamConfig,
   type UseVerificationStreamResult,
 } from './use-verification-stream'
+
+// Код из письма (PLAN_EMAIL_CODE.md §0.5) — плагин Better Auth emailOTP
+export { EmailCodePanel, type EmailCodePanelProps, type EmailCodePanelTexts } from './email-code-panel'
+export {
+  type EmailCodeVerificationStatus,
+  type ResendResult,
+  useEmailCodeVerification,
+  type UseEmailCodeVerificationConfig,
+  type UseEmailCodeVerificationResult,
+  type VerifyResult,
+} from './use-email-code-verification'

@@ -61,6 +61,11 @@ export interface PinVerificationActions {
  *
  * Объединяет логику проверки PIN, повторной отправки, SSE и состояния формы.
  *
+ * @deprecated Использует легаси-хранилище кодов приложения (`@letar/pin-auth/server`), не
+ * плагин Better Auth `emailOTP`. Для нового кода из письма — {@link useEmailCodeVerification}
+ * (PLAN_EMAIL_CODE.md §0.5). Не переписан на новый хук здесь: ни один потребитель монорепо не
+ * импортирует этот хук на 2026-09-14 — удаление отдельной задачей.
+ *
  * @example
  * ```tsx
  * const {
