@@ -34,8 +34,11 @@ Bearer-токен).
 
 ## Запуск
 
-Регистрируется в корневом `.mcp.json` как `umami-mcp` (`bunx tsx libs/umami-mcp/src/cli.ts`),
-запускается из корня репозитория. Env-override `UMAMI_MCP_REPO_ROOT` — если cwd не корень репо.
+В монорепо не регистрируется отдельно — с 2026-09-14 это одна из частей объединённого MCP-сервера
+`letar` (`.claude/mcp/letar.ts`, см. [mcp-servers.md](/.claude/docs/mcp-servers.md#letar)),
+подключается через `createUmamiMcpServer()`. Как самостоятельный процесс — `bunx tsx
+libs/umami-mcp/src/cli.ts` из корня репозитория, как раньше. Env-override `UMAMI_MCP_REPO_ROOT` —
+если cwd не корень репо.
 
 ## Команды
 

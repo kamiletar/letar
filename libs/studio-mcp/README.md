@@ -82,8 +82,11 @@ MCP-сервер: Claude Code агент полностью управляет �
 
 ## Запуск
 
-Регистрируется в корневом `.mcp.json` как `studio-mcp` (`bunx tsx libs/studio-mcp/src/cli.ts`),
-запускается из корня репозитория. Env-override `STUDIO_MCP_REPO_ROOT` — если cwd не корень репо.
+В монорепо не регистрируется отдельно — с 2026-09-14 это одна из частей объединённого MCP-сервера
+`letar` (`.claude/mcp/letar.ts`, см. [mcp-servers.md](/.claude/docs/mcp-servers.md#letar)),
+подключается через `createStudioAdminMcpServer()`. Как самостоятельный процесс — `bunx tsx
+libs/studio-mcp/src/cli.ts` из корня репозитория, как раньше. Env-override
+`STUDIO_MCP_REPO_ROOT` — если cwd не корень репо.
 
 ## Команды
 

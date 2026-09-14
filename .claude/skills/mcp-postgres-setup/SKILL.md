@@ -1,23 +1,19 @@
 ---
 name: mcp-postgres-setup
 description: |
-  Настройка MCP postgres для нового приложения. Используй при:
+  Регистрация Postgres-базы нового приложения в letar-db. Используй при:
   - Добавлении нового приложения с PostgreSQL
-  - Настройке postgres-* MCP серверов в .mcp.json
   - Подключении к локальной и/или прод БД через Claude Code
   - Создании read-only пользователя для прод БД
 ---
 
 # MCP Postgres Setup
 
-Добавление postgres MCP серверов для нового приложения. Пароли хранятся только в `.env` файлах — не в `.mcp.json`.
-
-## Архитектура
-
-- **pg-wrapper.mjs** — обёртка, читает connection string из `.env` файла
-- **Локальная БД** → `.env.local` → полный доступ (write разрешён)
-- **Прод БД read-only** → `.env.docker` → только SELECT, без permission prompt
-- **Прод БД write** → `.env.docker` → полный доступ, требует permission prompt
+Все Postgres-базы монорепо обслуживает один MCP-сервер `letar-db`
+(`.claude/mcp/letar-db.ts`, см. [mcp-servers.md](/.claude/docs/mcp-servers.md#letar-db)).
+Добавить базу = добавить запись в реестр `.claude/mcp/databases.json` — **без правки
+`.mcp.json` и без рестарта сессии** (реестр перечитывается на каждый вызов `dbs`/`sql`/`schema`).
+Пароли остаются только в `.env`-файлах — `databases.json` их не содержит.
 
 ## Шаг 1 — Узнать порт локального контейнера
 
@@ -27,13 +23,7 @@ docker ps --format "table {{.Names}}\t{{.Ports}}" | grep <app>
 
 Пример вывода: `kami-postgres  0.0.0.0:5437->5432/tcp` → порт `5437`.
 
-Посмотреть credentials контейнера:
-
-```bash
-docker exec <app>-postgres env | grep POSTGRES
-```
-
-## Шаг 2 — Добавить MCP_LOCAL_URL в .env.local
+## Шаг 2 — Добавить MCP_LOCAL_URL в .env.local (если DATABASE_URL не годится напрямую)
 
 ```env
 # ============================================
@@ -42,66 +32,48 @@ docker exec <app>-postgres env | grep POSTGRES
 MCP_LOCAL_URL=postgresql://<user>:<password>@localhost:<local-port>/<db>
 ```
 
-> Если `DATABASE_URL` в `.env.local` уже указывает на правильный порт и пользователя — можно не добавлять `MCP_LOCAL_URL` и использовать `DATABASE_URL` напрямую.
+Если `DATABASE_URL` в `.env.local` уже указывает на правильный порт и пользователя — отдельная
+переменная не нужна, `urlVar` в реестре можно не указывать (умолчание `DATABASE_URL`).
 
-## Шаг 3 — Добавить запись в .mcp.json
-
-Открой `C:/web/letar/.mcp.json` и добавь секцию рядом с другими `postgres-*`:
+## Шаг 3 — Добавить запись в `.claude/mcp/databases.json`
 
 ```json
-"postgres-<app>": {
-  "type": "stdio",
-  "command": "node",
-  "args": [".claude/mcp/pg-wrapper.mjs", "apps/<app>/.env.local", "MCP_LOCAL_URL"]
+{
+  "name": "<app>",
+  "envFile": "apps/<app>/.env.local",
+  "urlVar": "MCP_LOCAL_URL",
+  "mode": "rw"
 }
 ```
 
-Если `DATABASE_URL` уже корректный — можно без третьего аргумента (умолчание `DATABASE_URL`):
-
-```json
-"postgres-<app>": {
-  "type": "stdio",
-  "command": "node",
-  "args": [".claude/mcp/pg-wrapper.mjs", "apps/<app>/.env.local"]
-}
-```
-
-## Шаг 4 — Зарегистрировать в settings.local.json
-
-Открой `C:/web/letar/.claude/settings.local.json` и добавь в два места:
-
-**1. В `permissions.allow`** (разрешить без prompt):
-
-```json
-"mcp__postgres-<app>__*",
-```
-
-**2. В `enabledMcpjsonServers`**:
-
-```json
-"postgres-<app>",
-```
+`urlVar` опустить, если используется `DATABASE_URL`. `mode: "rw"` — обычный дев-доступ (пишет и
+читает); `mode: "ro"` — каждый `sql` на этой базе выполняется в `BEGIN TRANSACTION READ ONLY` с
+`ROLLBACK` в конце, писать в принципе нельзя независимо от текста запроса — используй `ro` для
+всего, что не должно принимать запись через MCP (в первую очередь любой прод).
 
 ## Проверка
 
-Перезапусти Claude Code. После перезапуска в system-reminder должен появиться `mcp__postgres-<app>__query`.
+Новая запись подхватывается сразу, рестарт сессии не нужен:
 
-Проверить подключение:
-
-```sql
-SELECT 'ok' as status, count(*) as tables
-FROM information_schema.tables
-WHERE table_schema = 'public';
+```typescript
+mcp__letar - db__dbs()
+mcp__letar - db__sql({
+  db: '<app>',
+  sql: "SELECT 'ok' as status, count(*) as tables FROM information_schema.tables WHERE table_schema = 'public'",
+})
 ```
+
+Разрешение `mcp__letar-db__*` в `permissions.allow` — уже общее на все базы (безопасность держится
+на `mode`, не на пермишенах), отдельно регистрировать новую базу в `settings.local.json` не нужно.
 
 ---
 
-## Опционально: прод MCP (если нужен доступ к production БД)
+## Опционально: прод-доступ (read-only)
 
 ### Шаг P1 — Найти порт на проде
 
 ```bash
-ssh root@s2.letar.best "docker ps --format 'table {{.Names}}\t{{.Ports}}' | grep <app>"
+ssh root@185.28.85.195 "docker ps --format 'table {{.Names}}\t{{.Ports}}' | grep <app>"
 ```
 
 Пример: `<app>-postgres  0.0.0.0:5438->5432/tcp` → порт `5438`.
@@ -109,7 +81,7 @@ ssh root@s2.letar.best "docker ps --format 'table {{.Names}}\t{{.Ports}}' | grep
 ### Шаг P2 — Создать read-only пользователя на проде
 
 ```bash
-ssh root@s2.letar.best "docker exec <app>-postgres psql -U <prod-user> -d <prod-db> -c \"
+ssh root@185.28.85.195 "docker exec <app>-postgres psql -U <prod-user> -d <prod-db> -c \"
 CREATE USER <app>_ro WITH PASSWORD '<генерировать: openssl rand -hex 16>';
 GRANT CONNECT ON DATABASE <prod-db> TO <app>_ro;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO <app>_ro;
@@ -123,73 +95,41 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO <app>_ro;
 ```env
 # MCP postgres подключения (только для Claude Code)
 MCP_PROD_RO_URL=postgresql://<app>_ro:<ro-password>@localhost:<tunnel-port>/<prod-db>
-MCP_PROD_RW_URL=postgresql://<prod-user>:<prod-password>@localhost:<tunnel-port>/<prod-db>
 ```
 
-Выбери свободный tunnel-port (проверить занятые: `netstat -an | grep LISTEN`).
-Занятые порты в проекте: 5432 (driving-school), 5437 (kami dev), 5446 (studio dev),
-5453 (grandslamcup), 5455 (туннель kami-prod), 5456 (туннель studio-prod).
+Выбери свободный tunnel-port (проверить занятые: `netstat -an | grep LISTEN`). Занятые порты в
+`databases.json`: 5455 (`kami-prod`), 5456 (`studio-prod`), 5457 (`domwellbes-prod`).
 
-### Шаг P4 — Добавить прод серверы в .mcp.json
+⚠️ **Хост туннеля — только литеральный IP `185.28.85.195`, не `s2.letar.best`.** Под TUN-VPN
+хостнейм резолвится в Fake-IP, SSH туда не доходит — см.
+[mcp-servers.md](/.claude/docs/mcp-servers.md#letar-db).
+
+### Шаг P4 — Добавить запись в `databases.json`
 
 ```json
-"postgres-<app>-prod": {
-  "type": "stdio",
-  "command": "node",
-  "args": [
-    ".claude/mcp/pg-wrapper.mjs",
-    "apps/<app>/.env.docker",
-    "MCP_PROD_RO_URL",
-    "--tunnel", "<tunnel-port>", "root@s2.letar.best", "<prod-port>"
-  ]
-},
-"postgres-<app>-prod-write": {
-  "type": "stdio",
-  "command": "node",
-  "args": [
-    ".claude/mcp/pg-wrapper.mjs",
-    "apps/<app>/.env.docker",
-    "MCP_PROD_RW_URL",
-    "--tunnel", "<tunnel-port>", "root@s2.letar.best", "<prod-port>"
-  ]
+{
+  "name": "<app>-prod",
+  "envFile": "apps/<app>/.env.docker",
+  "urlVar": "MCP_PROD_RO_URL",
+  "mode": "ro",
+  "tunnel": { "localPort": <tunnel-port>, "sshHost": "root@185.28.85.195", "remotePort": <prod-port> }
 }
 ```
 
-### Шаг P5 — Зарегистрировать в settings.local.json
+`mode: "ro"` обязателен для прод-записи — намеренно не оставляй `rw`, чтобы записи на прод было
+структурно невозможно совершить через `sql`, а не только через договорённость.
 
-В `permissions.allow` добавить **только read-only** (write — намеренно НЕ добавлять):
+## Справочник: текущие базы
 
-```json
-"mcp__postgres-<app>-prod__*",
-```
+Полная и актуальная таблица — в [mcp-servers.md § letar-db](/.claude/docs/mcp-servers.md#letar-db),
+не дублируется здесь во избежание расхождения.
 
-В `enabledMcpjsonServers` добавить оба:
-
-```json
-"postgres-<app>-prod",
-"postgres-<app>-prod-write",
-```
-
-> `postgres-<app>-prod-write` не в allowlist → каждый раз при использовании Claude Code будет запрашивать явное разрешение пользователя.
-
-## Справочник: текущие MCP серверы
-
-✅ **`postgres-kami` — расхождение `MCP_LOCAL_URL`/`DATABASE_URL` закрыто 2026-08-31.** Раньше
+✅ **`kami` — расхождение `MCP_LOCAL_URL`/`DATABASE_URL` закрыто 2026-08-31.** Раньше
 `DATABASE_URL` в `apps/kami/.env.local` указывал на порт 5432 (`premium-rosstil-postgres`) — не
 просто другую базу, а битую строку подключения (роль `postgres` там не существует). Теперь оба
 значения указывают на один и тот же канонический дев-контейнер `kami-postgres` (порт 5437,
-`lena_kami`, совпадает с `docker-compose.production.yml`). Разбор инцидента и его закрытие —
+`lena_kami`). Разбор —
 [verification-pitfalls.md](/.claude/docs/verification-pitfalls.md#тот-же-класс-но-не-про-инструмент-а-про-mcp-сервер-postgres-app-может-смотреть-не-в-ту-бд-что-database_url-приложения).
-Для нового приложения `MCP_LOCAL_URL` имеет смысл только когда он реально смотрит на тот же
-контейнер, что и `DATABASE_URL` — иначе используй вариант по умолчанию из Шага 2/3 выше (без
-третьего аргумента, читает `DATABASE_URL` напрямую), там расхождение структурно невозможно.
-
-| Сервер                     | Env файл                         | Переменная        | Туннель         |
-| -------------------------- | -------------------------------- | ----------------- | --------------- |
-| `postgres-kami` ⚠️          | `apps/kami/.env.local`           | `MCP_LOCAL_URL`   | нет (порт 5437) |
-| `postgres-kami-prod`       | `apps/kami/.env.docker`          | `MCP_PROD_RO_URL` | 5455 → s2:5437  |
-| `postgres-kami-prod-write` | `apps/kami/.env.docker`          | `MCP_PROD_RW_URL` | 5455 → s2:5437  |
-| `postgres-driving-school`  | `apps/driving-school/.env.local` | `DATABASE_URL`    | нет (порт 5432) |
-| `postgres-grandslamcup`    | `apps/grandslamcup/.env.local`   | `DATABASE_URL`    | нет (порт 5453) |
-| `postgres-studio`          | `apps/studio/.env.local`         | `DATABASE_URL`    | нет (порт 5446) |
-| `postgres-studio-prod`     | `apps/studio/.env.docker`        | `MCP_PROD_RO_URL` | 5456 → s2:5455  |
+Для нового приложения `MCP_LOCAL_URL`/`urlVar` имеет смысл только когда он реально смотрит на тот
+же контейнер, что и `DATABASE_URL` приложения — иначе используй вариант по умолчанию (без
+`urlVar`, читает `DATABASE_URL` напрямую), там расхождение структурно невозможно.

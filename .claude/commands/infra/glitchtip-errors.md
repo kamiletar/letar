@@ -9,11 +9,12 @@ arguments: <app> [environment]
 необработанные ошибки приложения `$1`, сгруппируй, приоритизируй и предложи план фикса по
 топовым. Опциональный `$2` — фильтр окружения (`staging`/`production`), по умолчанию оба.
 
-Используется MCP-сервер `glitchtip-mcp` (`@letar/glitchtip-mcp`,
-[README](/libs/glitchtip-mcp/README.md)) — read-only обёртка над REST API GlitchTip
-([libs/glitchtip/README.md](/libs/glitchtip/README.md), эндпоинты `/api/0/...`), а не сырой
-curl. Если инструменты `mcp__glitchtip-mcp__*` недоступны (сервер ещё грузится/не подключён) —
-дождись их через `ToolSearch` с запросом `glitchtip`, не переходи на curl в обход MCP.
+Используется часть `glitchtip` объединённого MCP-сервера `letar` (`@letar/glitchtip-mcp`,
+[README](/libs/glitchtip-mcp/README.md); до 2026-09-14 — отдельный сервер `glitchtip-mcp`) —
+read-only обёртка над REST API GlitchTip ([libs/glitchtip/README.md](/libs/glitchtip/README.md),
+эндпоинты `/api/0/...`), а не сырой curl. Если инструменты `mcp__letar__glitchtip_*` недоступны
+(сервер ещё грузится/не подключён) — дождись их через `ToolSearch` с запросом `glitchtip`, не
+переходи на curl в обход MCP.
 
 ## Подготовка
 
@@ -45,7 +46,7 @@ EOF
 ### 1. Список необработанных issues (14 дней, по частоте)
 
 ```
-mcp__glitchtip-mcp__glitchtip_list_issues({ project: "$1", environment: "$2" })
+mcp__letar__glitchtip_list_issues({ project: "$1", environment: "$2" })
 ```
 
 `environment` передавай, только если `$2` задан. По умолчанию инструмент отдаёт `is:unresolved`
@@ -59,7 +60,7 @@ Sentry-совместимый набор значений `sort`, см. [glitcht
 Для каждого issue из топа — последнее событие со стектрейсом:
 
 ```
-mcp__glitchtip-mcp__glitchtip_get_issue_event({ issueId: "<id из шага 1>" })
+mcp__letar__glitchtip_get_issue_event({ issueId: "<id из шага 1>" })
 ```
 
 ### 3. Группировка

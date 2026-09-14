@@ -2,247 +2,147 @@
 
 **ВАЖНО:** Всегда используй MCP серверы для актуальной документации вместо предположений о знаниях.
 
+## Ревизия 2026-09-14: 22 записи в `.mcp.json` → 4
+
+Каждая сессия Claude Code поднимает **все** записи `.mcp.json`, нужны они этой сессии или нет.
+При нескольких параллельных сессиях (обычная практика в этом репозитории) это давало десятки
+процессов и заметный расход RAM: `cmd /c bunx tsx` — цепочка процессов на каждый из 9 наших
+TS-серверов, `pg-wrapper.mjs` порождал ещё дочерний Node или Python на каждую из 8 баз (3 из них
+поднимали `uvx postgres-mcp` ради Pro-инструментов — EXPLAIN/health-check/подбор индексов, за всю
+историю вызванных ~9 раз и регулярно не укладывавшихся в 30-секундный таймаут подключения).
+
+Замер «до» (несколько живых сессий): 385 процессов, ~966 МБ working set, из них python 28,
+uv/uvx 28, cmd 108.
+
+**Решение:** 9 наших TS-серверов (studio-time, studio, umami, glitchtip, deploy, form, synth,
+domwellbes-assist ×2) слиты в один процесс `letar`; 8 Postgres-серверов — в один процесс
+`letar-db`, без Python. `chakra-ui`, `next-devtools` и проектный `context7` удалены — 25/17/39
+вызовов за 1779 сессий, next-devtools к тому же регулярно падал на старте (см. ниже), context7
+дублирует desktop-расширение (`mcp__Context7__*`). `nx-mcp` остался, но с закреплённой версией.
+
+Итог: 4 записи в `.mcp.json` (`nx-mcp`, `letar`, `letar-db`, `agent-mail`), 3 stdio-процесса на
+сессию вместо 21.
+
 ## Доступные MCP серверы
 
-| MCP Сервер                   | Пакет                                               | Назначение                                                                                                                                                                                                                                                                           |
-| ---------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **nx-mcp**                   | `nx mcp`                                            | Операции с Nx воркспейсом, проекты, таргеты, документация                                                                                                                                                                                                                            |
-| **next-devtools**            | `next-devtools-mcp`                                 | Документация Next.js 16, рантайм dev сервера, ошибки                                                                                                                                                                                                                                 |
-| **chakra-ui**                | `@chakra-ui/react-mcp`                              | Компоненты Chakra UI v3, props, примеры, темизация                                                                                                                                                                                                                                   |
-| **context7**                 | `@upstash/context7-mcp`                             | Документация любых библиотек (React, TanStack, etc.)                                                                                                                                                                                                                                 |
-| **form-mcp**                 | `@letar/form-mcp` (local) / `@letar/form-mcp` (npm) | 40+ field-компонентов, паттерны форм, @meta("form.\*", value) директивы                                                                                                                                                                                                              |
-| **deploy-mcp**               | `@letar/deploy-mcp` (local)                         | Деплой через dashboard-agent (SSH-туннель): deploy_app, deploy_status, git_status, agent_health                                                                                                                                                                                      |
-| **postgres-driving-school**  | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД driving-school (read-only)                                                                                                                                                                                                                                          |
-| **postgres-kami**            | `@modelcontextprotocol/server-postgres`             | SQL запросы к dev-БД kami (read-only)                                                                                                                                                                                                                                                |
-| **postgres-kami-prod**       | `@modelcontextprotocol/server-postgres`             | Прод-БД kami через SSH-туннель, read-only юзер                                                                                                                                                                                                                                       |
-| **postgres-grandslamcup**    | `@modelcontextprotocol/server-postgres`             | SQL запросы к БД grandslamcup (read-only)                                                                                                                                                                                                                                            |
-| **postgres-studio**          | `@modelcontextprotocol/server-postgres`             | SQL запросы к dev-БД studio (read-only)                                                                                                                                                                                                                                              |
-| **postgres-studio-prod**     | `@modelcontextprotocol/server-postgres`             | Прод-БД studio через SSH-туннель, read-only юзер                                                                                                                                                                                                                                     |
-| **postgres-domwellbes**      | `@modelcontextprotocol/server-postgres`             | SQL запросы к dev-БД domwellbes (read-only)                                                                                                                                                                                                                                          |
-| **postgres-domwellbes-prod** | `@modelcontextprotocol/server-postgres`             | Прод-БД domwellbes через SSH-туннель, read-only юзер                                                                                                                                                                                                                                 |
-| **studio-time-mcp**          | `libs/studio-time-mcp` (local)                      | Тайм-трекер studio: `time_start`/`time_switch`/`time_stop`/`time_pause`/`time_status`/`time_note`/`time_log`. Когда стартовать/останавливать — см. [time-tracking.md](/.claude/rules/time-tracking.md)                                                                               |
-| **studio-mcp**               | `libs/studio-mcp` (local)                           | Полное управление студией через агента: клиенты/проекты/абонентки/счета (`studio_client_*`/`studio_project_*`/`studio_recurring_*`/`studio_invoice_*`) через `/api/mcp/admin/*`, отдельный секрет `X-Admin-Mcp-Secret` — см. [libs/studio-mcp/README.md](/libs/studio-mcp/README.md) |
-| **synth-mcp**                | `apps/synth/src/mcp` (local)                        | Демонстрация синтезатора агентом-ментором для владельца: `load_patch`/`play_demo`/`send_midi_sequence`/`generate_chord_pattern`/`highlight_param`/`focus_section`/`dim_all`. Контекст роли — см. `.claude/commands/synth.md`                                                         |
-| **umami-mcp**                | `libs/umami-mcp` (local)                            | Self-hosted аналитика Umami через REST API (без ручного логина в панель): `umami_list_websites`/`umami_find_website`/`umami_get_website_stats`/`umami_create_website`                                                                                                                |
+| MCP Сервер     | Реализация                                                      | Назначение                                                                                 |
+| -------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| **nx-mcp**     | `bunx nx-mcp@<закреплённая версия>`                             | Операции с Nx воркспейсом, проекты, таргеты, документация                                  |
+| **letar**      | `.claude/mcp/letar.ts` (объединяет 9 наших фабрик, см. ниже)    | Тайм-трекер, деплой, формы, студия, аналитика, GlitchTip, синтезатор, наставник domwellbes |
+| **letar-db**   | `.claude/mcp/letar-db.ts` (реестр `.claude/mcp/databases.json`) | SQL/схема ко всем Postgres-базам монорепо                                                  |
+| **agent-mail** | HTTP, `http://127.0.0.1:8765/mcp`                               | Координация нескольких Claude Code сессий (см. ниже)                                       |
 
-## Воркфлоу работы с Context7
+Документация любых внешних библиотек (React, TanStack и т.п.) — desktop-расширение Context7
+(`mcp__Context7__resolve-library-id` + `get-library-docs`), не отдельный проектный сервер.
 
-Context7 используется для получения актуальной документации любых библиотек:
+⚠️ **`nx-mcp` запускается с `--minimal false`.** По умолчанию флаг равен `true`, и сервер отдаёт
+только `nx_docs` и три `ci_*` — `nx_workspace`, `nx_project_details`, `nx_generators` при этом
+отсутствуют в списке инструментов, хотя инструкции их требуют. Версия закреплена в `.mcp.json`
+(не `@latest`) — см. «Гонка распаковки bunx» ниже.
 
-1. **Используй `resolve_library_id`** чтобы найти правильный ID библиотеки
+## letar — объединённый сервер наших TS-инструментов {#letar}
 
-   ```typescript
-   resolve_library_id({ libraryName: 'react' })
-   // Результат: '/facebook/react' или '/facebook/react/v18.2.0'
-   ```
+`.claude/mcp/letar.ts` — скрипт вне графа Nx (как раньше `pg-wrapper.mjs`), запускается напрямую
+`bun` (без `bunx`/`cmd`). Каждая часть строится своей обычной фабрикой (`createXMcpServer` из
+`libs/*`, `apps/synth`, `apps/domwellbes`), подключается к внутреннему in-memory MCP-клиенту (тот
+же приём, что `libs/mcp-test-kit` использует в тестах — `InMemoryTransport.createLinkedPair()`),
+и наружу отдаётся один слитый список инструментов/ресурсов/промптов. **Код библиотек и их
+`server.spec.ts` не меняются** — они по-прежнему тестируются через `connectedClient` напрямую.
 
-2. **Используй `query_docs`** с полученным ID для получения актуальной документации
+Изоляция сбоев: если файл части отсутствует (приватный submodule `apps/domwellbes` может не быть
+на диске — CI, чужая машина) или падает при импорте/старте — эта часть пропускается со строкой
+в stderr, остальные части продолжают работать.
 
-   ```typescript
-   query_docs({
-     libraryId: '/facebook/react',
-     query: 'how to use hooks',
-   })
-   ```
+### Части и их инструменты
 
-3. **Используй документацию** для правильной реализации функций
+| Часть       | Источник                              | Инструменты (префикс)                                                                                                                              |
+| ----------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| studio-time | `libs/studio-time-mcp`                | `time_*` — тайм-трекер, см. [time-tracking.md](/.claude/rules/time-tracking.md)                                                                    |
+| studio      | `libs/studio-mcp`                     | `studio_client_*`/`studio_project_*`/`studio_recurring_*`/`studio_invoice_*`                                                                       |
+| umami       | `libs/umami-mcp`                      | `umami_*` — см. ниже                                                                                                                               |
+| glitchtip   | `libs/glitchtip-mcp`                  | `glitchtip_*`                                                                                                                                      |
+| deploy      | `libs/deploy-mcp`                     | `deploy_*`, `run_e2e`, `e2e_status` — см. ниже                                                                                                     |
+| form        | `libs/form-mcp`                       | `list_fields`, `get_field_props`, `get_field_example`, `get_form_pattern`, `get_directives`, `generate_form` + resources `form-docs://*` + prompts |
+| synth       | `apps/synth/src/mcp`                  | `load_patch`, `play_demo`, `send_midi_sequence`, `generate_chord_pattern`, `highlight_param`, `focus_section`, `dim_all`                           |
+| assist      | `apps/domwellbes/src/mcp` (submodule) | `assist_*` — наставник domwellbes, см. ниже                                                                                                        |
 
-### Context7 — поиск документации
+**Переименования во внешнем списке** (внутри своих лиц имена не менялись, только то, что видит
+наружу `letar`): у deploy `list_servers`/`git_status`/`agent_health` стали `deploy_list_servers`/
+`deploy_git_status`/`deploy_agent_health` — были голыми именами без префикса, риск столкновения
+с чужим сервером. Всё остальное уже было с уникальным префиксом.
 
-Формат запроса к `query_docs`:
+### Наставник domwellbes: dev/prod через параметр `target`
 
-- **`libraryId`** — ID библиотеки из `resolve_library_id`
-- **`query`** — конкретный вопрос или тема для поиска
+Раньше — два отдельных stdio-процесса (`domwellbes-assist-mcp` и `domwellbes-assist-mcp-prod`),
+переключение требовало почти всегда рестарта сессии (Claude Code не даёт реконнектить один
+project-сервер из `.mcp.json` без рестарта всей сессии). Теперь один набор инструментов
+`assist_*`, и у каждого — необязательный параметр `target: "dev" | "prod"` (по умолчанию `dev`).
+Секреты (`ASSIST_MCP_SECRET`/`ASSIST_MCP_SECRET_PROD`, `ASSIST_BASE_URL`/`ASSIST_BASE_URL_PROD`)
+берутся из `apps/domwellbes/.env.local` через `loadEnvCascade`, ровно как раньше. Если
+`ASSIST_MCP_SECRET_PROD` не задан — `target: "prod"` в схеме инструмента просто не появляется,
+недоступен только этот вариант, dev продолжает работать.
 
-## Подключение к MCP Next.js Dev Server
+## letar-db — Postgres-сервер {#letar-db}
 
-**ВАЖНО:** Для доступа к диагностике рантайма, ошибкам, роутам и логам работающего Next.js dev сервера:
+`.claude/mcp/letar-db.ts` + реестр `.claude/mcp/databases.json` (без секретов — только пути к
+env-файлам, имена переменных, режим доступа и параметры туннеля). Три инструмента:
 
-### 1. Проверь порт в .env файле
+| Инструмент | Описание                                                                                                                                                                                                          |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dbs`      | Список зарегистрированных баз: имя, режим (`rw`/`ro`), поднят ли SSH-туннель                                                                                                                                      |
+| `sql`      | Выполняет SQL на указанной базе (параметр `db`) — на `ro`-базах всегда в `READ ONLY` транзакции с `ROLLBACK`, на `rw` без обёртки (нужно для `CREATE INDEX CONCURRENTLY`/`VACUUM`). Вывод обрезается до 500 строк |
+| `schema`   | Без `table` — список таблиц публичной схемы; с `table` — колонки и индексы                                                                                                                                        |
 
-Порт настроен в `.env` файле каждого приложения:
+### Доступные базы
 
-| Приложение     | Файл                       | Порт |
-| -------------- | -------------------------- | ---- |
-| dashboard      | `apps/dashboard/.env`      | 3002 |
-| driving-school | `apps/driving-school/.env` | 3003 |
-| mandala        | `apps/mandala/.env`        | 3004 |
-| kami           | `apps/kami/.env`           | 3005 |
+| База              | Режим | БД             | Подключение                       |
+| ----------------- | ----- | -------------- | --------------------------------- |
+| `domwellbes`      | rw    | domwellbes     | 5444 (dev)                        |
+| `studio`          | rw    | studio_dev     | 5446 (dev)                        |
+| `driving-school`  | rw    | driving_school | 5432 (dev)                        |
+| `kami`            | ro    | lena_kami      | 5437 (dev), `MCP_LOCAL_URL`       |
+| `grandslamcup`    | ro    | grandslamcup   | 5453 (dev)                        |
+| `kami-prod`       | ro    | lena_kami      | туннель 5455 → 185.28.85.195:5437 |
+| `studio-prod`     | ro    | studio         | туннель 5456 → 185.28.85.185:5455 |
+| `domwellbes-prod` | ro    | domwellbes     | туннель 5457 → 185.28.85.195:5456 |
 
-⚠️ **НЕ предполагай порт 3000** - всегда проверяй .env файл!
+`rw` = раньше `--pro restricted` (Postgres MCP Pro в режиме restricted — писать можно, DDL не
+блокируется кодом; это НЕ было read-only, вопреки внешнему виду прежнего названия). `ro` = раньше
+плоский `server-postgres` (каждый запрос всегда шёл в `BEGIN TRANSACTION READ ONLY`). **Запрет
+записи в прод держится в коде** (`mode: "ro"` в реестре), не в разрешениях Claude Code — поэтому
+`mcp__letar-db__*` можно смело держать в общем allow-листе.
 
-### 2. Подключайся напрямую к порту из .env
+**Добавить базу** — запись в `databases.json`, без рестарта сессии (реестр перечитывается на
+каждый вызов `dbs`/`sql`/`schema`). Остальные БД монорепо (mandala, archetest, time,
+animatrona-tracker, dashboard, form-develop) можно добавить по аналогии.
 
-```typescript
-// Используй правильный порт из .env
-mcp_nextjs_runtime({
-  action: 'list_tools',
-  port: '3001', // Порт из .env
-})
-```
+⚠️ **Хост SSH-туннеля — только литеральный IP, не `s2.letar.best`.** Под TUN-VPN хостнейм
+резолвится в Fake-IP из диапазона `198.18.0.0/15`, SSH туда не доходит вовсе — тот же класс
+ловушки, что [electron-net-fetch-tun-vpn](/.claude/docs/electron-net-fetch-tun-vpn.md).
 
-### 3. Автообнаружение (может не работать)
+⚠️ **Прод и dev легко перепутать по имени базы.** Для проверки прод-состояния использовать
+только `<app>-prod`.
 
-```typescript
-mcp_nextjs_runtime({
-  action: 'discover_servers',
-})
-```
-
-Если автообнаружение не находит серверов:
-
-1. Спроси пользователя, на каком порту запущен dev сервер
-2. Вызови инструмент снова с параметром `port`
-
-## Доступные инструменты рантайма
-
-После подключения к Next.js MCP доступны следующие инструменты:
-
-| Инструмент                  | Описание                                   |
-| --------------------------- | ------------------------------------------ |
-| **get_errors**              | Текущие ошибки (глобальные, рантайм, билд) |
-| **get_routes**              | Все роуты App Router и Pages Router        |
-| **get_project_metadata**    | Путь проекта, URL dev сервера              |
-| **get_page_metadata**       | Метаданные рендера активной страницы       |
-| **get_logs**                | Путь к лог-файлу Next.js dev               |
-| **get_server_action_by_id** | Найти Server Action по ID                  |
-
-## Когда использовать MCP инструменты рантайма
-
-**✅ Используй MCP Next.js инструменты когда:**
-
-- Перед реализацией изменений - проверь текущее состояние
-- Отладка ошибок - получи информацию об ошибках в реальном времени
-- Понимание роутов - посмотри все доступные роуты
-- Исследование проблем - доступ к логам и диагностике
-
-**❌ НЕ используй когда:**
-
-- Нужно просто прочитать файл - используй Read
-- Нужна документация Next.js - используй `next-devtools` MCP или `nextjs_docs`
-- Dev сервер не запущен
-
-## Примеры использования
-
-### Получить ошибки из работающего приложения
-
-```typescript
-// 1. Сначала получи список инструментов
-mcp_nextjs_runtime({
-  action: 'list_tools',
-  port: '3001',
-})
-
-// 2. Получи текущие ошибки
-mcp_nextjs_runtime({
-  action: 'get_errors',
-  port: '3001',
-})
-```
-
-### Получить документацию Zod v4
-
-Отдельный сервер под Zod (`inkeepMcp`) удалён 2026-08-10 за ненадобностью — документация Zod
-берётся через context7: сначала `resolve-library-id` с `libraryName: "zod"`, затем `query-docs`
-с полученным id. Инструменты пишутся с дефисами, поэтому в примере кода их не привожу —
-dprint форматирует такую строку как вычитание.
-
-### Получить документацию Chakra UI компонента
-
-```typescript
-// Получить свойства компонента
-get_component_props({ component: 'Button' })
-
-// Получить примеры использования
-get_component_example({ component: 'Button' })
-```
-
-### Получить документацию любой библиотеки
-
-```typescript
-// 1. Найти ID библиотеки
-resolve_library_id({ libraryName: 'framer-motion' })
-
-// 2. Получить документацию
-query_docs({
-  libraryId: '/framer-motion/motion',
-  query: 'animations',
-})
-```
-
-## Требования
-
-### Next.js MCP
-
-- **Версия Next.js:** 16 или выше (MCP поддержка добавлена в v16)
-- **Dev сервер:** Должен быть запущен
-- **Порт:** Указан в `.env` файле приложения
-
-⚠️ Если используешь Next.js 15 или ниже - сначала обнови до Next.js 16.
-
-### Другие MCP серверы
-
-- Настроены в `.mcp.json` в корне проекта
-- Запускаются через `bunx` при старте Claude Code
-- Доступны после перезапуска CLI
-
----
-
-## Form MCP (@letar/form-mcp)
-
-MCP сервер для AI-ассистентов, работающих с @letar/forms и @letar/zenstack-form-plugin. Предоставляет полный контекст о 40+ field-компонентах, паттернах форм и директивах.
-
-**npm:** `@letar/form-mcp` | **Локально:** `libs/form-mcp/`
-
-### Tools
-
-| Инструмент          | Описание                                                                                                                                            |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `list_fields`       | Список 40+ типов полей, фильтр по категории (text, number, date, select, special)                                                                   |
-| `get_field_props`   | Пропсы и документация конкретного поля                                                                                                              |
-| `get_field_example` | TSX код-пример использования поля                                                                                                                   |
-| `get_form_pattern`  | Полные примеры: crud-create, crud-edit, multi-step, offline, i18n, from-schema, declarative, server-action                                          |
-| `get_directives`    | Описание директив zenstack-form-plugin — возвращает и основной `@meta("form.*", value)` (поле `example`), и legacy `@form.*` (поле `legacyExample`) |
-| `generate_form`     | Генерация кода формы по спецификации полей                                                                                                          |
-
-### Resources
-
-Документация доступна через `form-docs://` URI:
-
-- `form-docs://fields` — 40+ field-компонентов
-- `form-docs://form-level` — Steps, When, Errors, DirtyGuard
-- `form-docs://schema-generation` — FromSchema, AutoFields, Builder
-- `form-docs://offline` — useOfflineForm, sync queue
-- `form-docs://i18n` — FormI18nProvider, локализация
-- `form-docs://zenstack` — @meta("form.\*", value) директивы (+ legacy @form.\*), генерация из schema.zmodel
-- `form-docs://api-reference` — Hooks, contexts, типы
-
-### Prompts
-
-- `create-form` — шаблон CRUD формы
-- `add-field` — добавление поля
-- `migrate-form` — миграция с RHF/Formik/Conform
+**Timestamp/timestamptz/date отдаются сырым текстом** (`pg.types.setTypeParser`) — закрывает
+известный сдвиг TZ старых `postgres-*` MCP.
 
 ### Пример
 
 ```typescript
-// Получить все числовые поля
-list_fields({ category: 'number' })
-
-// Получить пример CRUD формы
-get_form_pattern({ pattern: 'crud-create' })
-
-// Сгенерировать форму
-generate_form({
-  fields: [
-    { name: 'title', type: 'String', label: 'Заголовок', required: true },
-    { name: 'price', type: 'Currency', label: 'Цена' },
-  ],
-  formName: 'ProductForm',
-})
+mcp__letar - db__sql({ db: 'domwellbes', sql: 'SELECT count(*) FROM "User"' })
+mcp__letar - db__schema({ db: 'kami', table: 'Product' })
 ```
 
----
+## Гонка распаковки `bunx @latest` {#bunx-race}
+
+`bunx pkg@latest` использует одну общую temp-папку на все сессии
+(`%LOCALAPPDATA%\Temp\bunx-<hash>-<pkg>@latest`) — при параллельном старте нескольких сессий
+пакет перераспаковывается заново, и одна из сессий может подхватить процесс в момент, когда
+файл рантайма ещё не на месте. Это была настоящая причина регулярных падений `next-devtools`
+(`Cannot find module`/`ENOENT` на разные файлы каждый раз) — **не** отсутствие запущенного Next
+dev-сервера, как можно было бы предположить. `nx-mcp@latest` подвержен тому же риску. Фикс —
+закреплённая версия в `.mcp.json` (`nx-mcp@<версия>`, не `@latest`) — конкретная версия уже
+лежит в кэше и не перераспаковывается. Обновлять версию вручную, когда нужно.
 
 ## Context Mode {#context-mode}
 
@@ -267,7 +167,7 @@ generate_form({
 
 Особенно полезен при: grep по большим файлам, Playwright снапшотах, анализе логов, GitHub API с длинными списками.
 
-**Правило использования `index`:** Индекс эфемерный — живёт только в текущей сессии. Не нужно индексировать всю документацию заранее. Используй `index` точечно: перед работой с конкретным файлом/библиотекой, чтобы потом искать по нему через `search`. Например: проиндексировал `libs/forms/README.md` → работаешь с формами → ищешь нужное через `search(queries: [...])` без перечитывания файла.
+**Правило использования `index`:** Индекс эфемерный — живёт только в текущей сессии. Используй `index` точечно перед работой с конкретным файлом/библиотекой, потом ищи через `search`.
 
 ---
 
@@ -295,10 +195,6 @@ cd C:/web/letar/infra/agent-mail/mcp_agent_mail
 docker compose pull && docker compose up -d
 ```
 
-### История
-
-Изначально был форк upstream с переходом на PostgreSQL (из-за SQLite deadlock на Windows при конкурентных MCP-соединениях). Upstream выпустил v0.3.4 с фиксами, а также опубликовал готовый Docker-образ на GHCR — поэтому вернулись на оригинальный образ + SQLite (2026-06-18).
-
 ### После переустановки сервера / пересоздания volume
 
 При `docker compose down -v` или переустановке хоста SQLite volume уничтожается: все проекты, агенты, сообщения и резервации теряются.
@@ -307,8 +203,7 @@ docker compose pull && docker compose up -d
 
 1. Каждый агент при следующем старте сессии вызывает `macro_start_session` — проект и агент создаются заново автоматически.
 2. `human_key: "C:/web/letar"` остаётся стабильным идентификатором — именно по нему проект находится/создаётся.
-3. **Slug проекта может измениться** (например `c-web-letar` → `c-web-letar`) — это нормально, routing идёт по `project_id`, не по slug. Не нужно исправлять старые конфиги.
-4. Все исторические треды (темы, сообщения, inbox прошлых агентов) безвозвратно утеряны — воспринимай как чистый лист.
+3. Все исторические треды (темы, сообщения, inbox прошлых агентов) безвозвратно утеряны — воспринимай как чистый лист.
 
 **Симптом что volume пересоздан:** `macro_start_session` возвращает 403 Forbidden → пробуй ещё раз после перезапуска контейнера (`docker compose up -d`).
 
@@ -322,67 +217,73 @@ docker compose pull && docker compose up -d
 | `list_agents`            | Список всех активных агентов                           |
 | `file_reservation_paths` | Зарезервировать файлы для эксклюзивного редактирования |
 
-### Воркфлоу
-
-1. Запустить контейнер (`docker compose up -d`)
-2. При старте сессии вызвать `macro_start_session` с `human_key: "C:/web/letar"`, `program: "claude-code"` и описанием задачи
-3. Зарезервировать файлы через `file_reservation_paths`
-4. Периодически проверять `fetch_inbox` для входящих
-5. Отправлять сообщения через `send_message` для координации
-
 ---
 
-## PostgreSQL MCP (server-postgres)
+## Deploy (@letar/deploy-mcp) {#deploy-mcp}
 
-Прямые SQL запросы к базам данных. Read-only по умолчанию — безопасно для исследования данных.
-Прод-серверы ходят через SSH-туннель, который `pg-wrapper.mjs` поднимает сам при первом запросе.
+Структурированный слой над REST API `dashboard-agent` для управления деплоем — деплой
+через типизированные инструменты вместо сырого SSH + парсинга stdout. Полная документация:
+[libs/deploy-mcp/README.md](/libs/deploy-mcp/README.md).
 
-### Доступные БД
+Внутри `letar` (см. выше). В первую очередь для **deploy-agent-dev** (deploy agent).
 
-| MCP сервер                 | БД             | Порт                              | Read-only юзер |
-| -------------------------- | -------------- | --------------------------------- | -------------- |
-| `postgres-driving-school`  | driving_school | 5432 (dev)                        | —              |
-| `postgres-kami`            | lena_kami      | 5437 (dev)                        | —              |
-| `postgres-kami-prod`       | lena_kami      | туннель 5455 → 185.28.85.195:5437 | `kami_ro`      |
-| `postgres-kami-prod-write` | lena_kami      | туннель 5455 → s2:5437            | нет (полный)   |
-| `postgres-grandslamcup`    | grandslamcup   | 5453 (dev)                        | —              |
-| `postgres-studio`          | studio_dev     | 5446 (dev)                        | —              |
-| `postgres-studio-prod`     | studio         | туннель 5456 → 185.28.85.195:5455 | `studio_ro`    |
-| `postgres-domwellbes`      | domwellbes     | 5444 (dev)                        | —              |
-| `postgres-domwellbes-prod` | domwellbes     | туннель 5457 → 185.28.85.195:5456 | —              |
+### Tools
 
-Остальные БД (mandala, archetest, time, animatrona-tracker, dashboard, form-develop) можно добавить в `.mcp.json` по аналогии — см. скилл `mcp-postgres-setup`.
+| Инструмент            | Описание                                                                                                                |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `deploy_list_servers` | Серверы + маппинг «приложение → сервер» (из `@letar/infra-config`)                                                      |
+| `deploy_agent_health` | Health-check (`GET /health`) — «сервер недоступен» vs «токен неверный»                                                  |
+| `deploy_git_status`   | Ветка, незапушенные/входящие коммиты — проверять перед деплоем                                                          |
+| `deploy_status`       | Статус деплоя + инкрементальные логи по курсору `sinceLine`; включает `phases[]`/`stalled`                              |
+| `deploy_wait`         | Long-poll вместо ручного поллинга — отпускает раньше `waitSeconds` (≤120с) при смене фазы/терминале (PLAN-INFRA.md §38) |
+| `deploy_cancel`       | Отмена текущего деплоя (SIGTERM)                                                                                        |
+| `deploy_app`          | Запуск деплоя (`target`: `production`\|`staging`; staging → s3) + e2e-gate                                              |
+| `run_e2e`             | Playwright e2e на s3 против staging-контейнера (Фаза 2)                                                                 |
+| `e2e_status`          | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)                                                       |
 
-⚠️ **Хост SSH-туннеля в `.mcp.json` — только литеральный IP, не `s2.letar.best`.** Под
-TUN-VPN хостнейм резолвится в Fake-IP из диапазона `198.18.0.0/15` (`ping s2.letar.best` →
-`198.18.0.13`), SSH туда не доходит вовсе, и сервер падает на старте с `CONNECTION_CLOSED` —
-сообщение ничего не говорит ни про DNS, ни про VPN, выглядит как «MCP не настроен». Так молча
-не работали `postgres-kami-prod` и `postgres-studio-prod`, пока `postgres-domwellbes-prod`
-(изначально прописанный через `185.28.85.195`) работал рядом; починено 2026-09-09 заменой хоста
-в обеих записях. Тот же класс ловушки, что и в
-[electron-net-fetch-tun-vpn](/.claude/docs/electron-net-fetch-tun-vpn.md): DNS-проверки с рабочей
-машины под TUN-VPN врут о доступности хоста.
+### Соединение и секреты
 
-⚠️ **Прод и dev легко перепутать по названию сервера.** Прецедент 2026-07-30: диагностику
-прод-инцидента studio (500 из-за пропущенной миграции) увело в ложный вывод «drift безобиден»,
-потому что запросы шли в `postgres-studio` (dev-база, колонки уже на месте), а не в прод.
-Для проверки прод-состояния использовать только `postgres-<app>-prod`.
+- **SSH-туннель** `ssh -L <localPort>:localhost:3100 -N deploy@<host>` (s2 → 13100, s3 → 13101), поднимается лениво.
+- **Bearer-токен** читается из `apps/dashboard-agent/.env.docker` (или расшифровывается из `.env.docker.enc` через `sops`) — не хранится в `.mcp.json`.
+- **Диагностика:** начинай с `deploy_agent_health` — различает недоступность сервера и неверный токен.
 
-### Пример
+## Umami (@letar/umami-mcp) {#umami-mcp}
 
-```typescript
-// Посмотреть количество пользователей
-mcp__postgres_driving_school__query({
-  sql: 'SELECT count(*) FROM "User"',
-})
+Доступ к self-hosted Umami (`stats.letar.best`) через её REST API. Полная документация:
+[libs/umami-mcp/README.md](/libs/umami-mcp/README.md). Внутри `letar` (см. выше).
 
-// Посмотреть структуру таблицы
-mcp__postgres_kami__query({
-  sql: "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'Product'",
-})
-```
+| Инструмент                                        | Описание                                   |
+| ------------------------------------------------- | ------------------------------------------ |
+| `umami_list_websites`                             | Все сайты, заведённые в Umami              |
+| `umami_find_website({ domain })`                  | Проверить, заведён ли домен                |
+| `umami_get_website_stats({ websiteId, period? })` | Статистика сайта за период (1h/24h/7d/30d) |
+| `umami_create_website({ name, domain })`          | Завести новый сайт в Umami                 |
 
----
+## Form (@letar/form-mcp) {#form-mcp}
+
+MCP для AI-ассистентов, работающих с @letar/forms и @letar/zenstack-form-plugin. Полный контекст
+о 40+ field-компонентах, паттернах форм и директивах. **npm:** `@letar/form-mcp` — тот же пакет
+публикуется отдельно и работает как самостоятельный сервер вне монорепо. Внутри `letar` (см. выше).
+
+### Tools
+
+| Инструмент          | Описание                                                                                                                                            |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `list_fields`       | Список 40+ типов полей, фильтр по категории (text, number, date, select, special)                                                                   |
+| `get_field_props`   | Пропсы и документация конкретного поля                                                                                                              |
+| `get_field_example` | TSX код-пример использования поля                                                                                                                   |
+| `get_form_pattern`  | Полные примеры: crud-create, crud-edit, multi-step, offline, i18n, from-schema, declarative, server-action                                          |
+| `get_directives`    | Описание директив zenstack-form-plugin — возвращает и основной `@meta("form.*", value)` (поле `example`), и legacy `@form.*` (поле `legacyExample`) |
+| `generate_form`     | Генерация кода формы по спецификации полей                                                                                                          |
+
+### Resources
+
+Документация доступна через `form-docs://` URI: `fields`, `form-level`, `schema-generation`,
+`offline`, `i18n`, `zenstack`, `api-reference`.
+
+### Prompts
+
+`create-form`, `add-field`, `migrate-form`.
 
 ## Конфигурация
 
@@ -391,98 +292,36 @@ mcp__postgres_kami__query({
 ```json
 {
   "mcpServers": {
-    "nx-mcp": {
-      "command": "cmd",
-      "args": ["/c", "bunx", "nx-mcp@latest", "C:/web/letar", "--minimal", "false"]
-    },
-    "chakra-ui": { "command": "cmd", "args": ["/c", "bunx", "@chakra-ui/react-mcp"] },
-    "postgres-studio": {
-      "command": "node",
-      "args": [".claude/mcp/pg-wrapper.mjs", "apps/studio/.env.local", "--pro", "restricted"]
-    }
+    "nx-mcp": { "command": "cmd", "args": ["/c", "bunx", "nx-mcp@0.25.0", "C:/web/letar", "--minimal", "false"] },
+    "letar": { "command": "bun", "args": [".claude/mcp/letar.ts"] },
+    "letar-db": { "command": "bun", "args": [".claude/mcp/letar-db.ts"] },
+    "agent-mail": { "type": "http", "url": "http://127.0.0.1:8765/mcp" }
   }
 }
 ```
 
-После изменения `.mcp.json` требуется перезапуск Claude Code.
+После изменения `.mcp.json` требуется перезапуск Claude Code — за исключением новой базы в
+`databases.json` (letar-db) или другой части в `letar`, которые подхватываются самим скриптом
+без правки `.mcp.json`, но **процесс всё равно перезапускается только с новой сессией** (Claude
+Code не даёт реконнектить project-сервер без рестарта).
 
-⚠️ **`--minimal false` у `nx-mcp` — не украшение.** По умолчанию флаг равен `true`, и сервер
-отдаёт только `nx_docs` и три `ci_*`; `nx_workspace`, `nx_project_details`, `nx_generators` при
-этом отсутствуют в списке инструментов, хотя инструкции их требуют.
+✅ **`.mcp.json` версионируется** — в нём нет секретов: пароли БД лежат в `.env.local`/`.env.docker`
+(gitignored), `databases.json` содержит только пути к этим файлам, токен деплой-агента читается
+из `apps/dashboard-agent/.env.docker`. `root@185.28.85.195` для туннелей — не секрет, SSH-доступ
+туда требует ключа из `~/.ssh/`.
 
-✅ **`.mcp.json` версионируется** (с 2026-08-10) — ключ Context7 вынесен в
-`${CONTEXT7_API_KEY}`. Подстановка `${VAR}` в `.mcp.json` у Claude Code читается из
-**OS-окружения процесса на момент запуска `claude`**, не из какого-либо project `.env`
-файла — эту переменную нужно завести как persistent env var (`setx CONTEXT7_API_KEY "..."`
-в PowerShell на Windows, перезапуск терминала обязателен) на каждой машине, где клонируют
-репозиторий. Сырое значение — в `.env.mcp` (в `.gitignore`, не коммитится) как бэкап для
-копирования в `setx`, но сам файл Claude Code не читает.
+## Смоук-проверка без Claude {#smoke}
 
-Остальные записи в `.mcp.json` (`root@185.28.85.195` для `postgres-*-prod` туннелей) — не
-секреты: SSH-доступ туда требует ключа из `~/.ssh/`, сам по себе хост/юзер в открытом виде не
-даёт доступа. Токен деплой-агента и пароли БД в `.mcp.json` не хранятся вовсе (см. ниже).
+`.claude/mcp/smoke.ts` поднимает `letar`/`letar-db` как реальный дочерний stdio-процесс и печатает
+`listTools`/`listResources`/`listPrompts`:
 
-## Deploy MCP (@letar/deploy-mcp)
+```bash
+bun .claude/mcp/smoke.ts letar
+bun .claude/mcp/smoke.ts letar-db
+```
 
-Структурированный слой над REST API `dashboard-agent` для управления деплоем — деплой
-через типизированные инструменты вместо сырого SSH + парсинга stdout. Тонкие HTTP-обёртки
-поверх уже существующего API агента, через SSH-туннель. Полная документация:
-[libs/deploy-mcp/README.md](/libs/deploy-mcp/README.md).
+`.claude/mcp/smoke-call.ts` — разовый вызов конкретного инструмента:
 
-**Локально:** `libs/deploy-mcp/` | В первую очередь для **deploy-agent-dev** (deploy agent).
-
-### Tools
-
-| Инструмент      | Описание                                                                                                                |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `list_servers`  | Серверы + маппинг «приложение → сервер» (из `@letar/infra-config`)                                                      |
-| `agent_health`  | Health-check (`GET /health`) — «сервер недоступен» vs «токен неверный»                                                  |
-| `git_status`    | Ветка, незапушенные/входящие коммиты — проверять перед деплоем                                                          |
-| `deploy_status` | Статус деплоя + инкрементальные логи по курсору `sinceLine`; включает `phases[]`/`stalled`                              |
-| `deploy_wait`   | Long-poll вместо ручного поллинга — отпускает раньше `waitSeconds` (≤120с) при смене фазы/терминале (PLAN-INFRA.md §38) |
-| `deploy_cancel` | Отмена текущего деплоя (SIGTERM)                                                                                        |
-| `deploy_app`    | Запуск деплоя (`target`: `production`\|`staging`; staging → s3) + e2e-gate                                              |
-| `run_e2e`       | Playwright e2e на s3 против staging-контейнера (Фаза 2)                                                                 |
-| `e2e_status`    | Статус e2e-прогона + персистентный `lastStatus` (что читает gate)                                                       |
-
-### Соединение и секреты
-
-- **SSH-туннель** `ssh -L <localPort>:localhost:3100 -N deploy@<host>` (s2 → 13100, s3 → 13101),
-  поднимается лениво. Порт агента 3100 не обязан быть открыт в интернет.
-- **Bearer-токен** читается из `apps/dashboard-agent/.env.docker` (или расшифровывается из
-  `.env.docker.enc` через `sops`) — не хранится в `.mcp.json`. s3 — отдельный `AGENT_TOKEN_S3`.
-- **Диагностика:** начинай с `agent_health` — различает недоступность сервера и неверный токен.
-
-### Ограничения
-
-- Модель доверия процедурная (см. [deploy-coordination](/.claude/rules/deploy-coordination.md)) —
-  деплоит только deploy-agent-dev по конвенции, технического ограничения по вызывающему нет.
-- Полный список инструментов, воркфлоу и e2e-gate — [libs/deploy-mcp/README.md](/libs/deploy-mcp/README.md).
-
-## Umami MCP (@letar/umami-mcp)
-
-Доступ к self-hosted Umami (`stats.letar.best`) через её REST API — без браузерной
-автоматизации и без ручного ввода пароля агентом (правила безопасности запрещают агенту вводить
-пароли в формы, даже свои собственные). Логин по username/password (тот же механизм, что
-`apps/dashboard/src/app/api/analytics` использует для проксирования Umami в дашборд), токен
-кэшируется на весь stdio-сеанс. Полная документация: [libs/umami-mcp/README.md](/libs/umami-mcp/README.md).
-
-**Локально:** `libs/umami-mcp/`
-
-### Tools
-
-| Инструмент                                        | Описание                                                      |
-| ------------------------------------------------- | ------------------------------------------------------------- |
-| `umami_list_websites`                             | Все сайты, заведённые в Umami (имя, домен, id, дата создания) |
-| `umami_find_website({ domain })`                  | Проверить, заведён ли домен (точное совпадение)               |
-| `umami_get_website_stats({ websiteId, period? })` | Статистика сайта за период (1h/24h/7d/30d)                    |
-| `umami_create_website({ name, domain })`          | Завести новый сайт в Umami                                    |
-
-### Соединение и секреты
-
-- `UMAMI_API_URL`/`UMAMI_API_USER`/`UMAMI_API_PASSWORD` — из `process.env`, иначе из
-  `apps/dashboard/.env.docker` (тот же паттерн, что `studio-time-mcp` использует для
-  `apps/studio/.env.local`).
-- `umami_create_website` только создаёт сайт и возвращает `websiteId` — прописать его в
-  `.env.docker.enc`/`docker-compose.production.yml` приложения нужно отдельно, вручную (см.
-  «Новая переменная окружения» в [env-files.md](/.claude/rules/env-files.md)).
+```bash
+bun .claude/mcp/smoke-call.ts letar-db sql '{"db":"domwellbes","sql":"select 1"}'
+```

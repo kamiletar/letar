@@ -950,19 +950,19 @@ tsconfig приватных приложений. Раннер печатает 
 
 **Окружение:** Windows (нативный), `nx` и `bun` глобальные (❌ НЕ `bunx nx`/`npx nx`). При передаче аргументов в underlying tool: `nx e2e app-e2e -- --project=chromium`
 
-**MCP серверы:** nx-mcp, next-devtools, chakra-ui, **form-mcp**, **deploy-mcp**, context7, context-mode (плагин), agent-mail, **postgres-\*** (driving-school, kami, grandslamcup, studio), studio-time-mcp, synth-mcp. Подробнее: [MCP серверы](/.claude/docs/mcp-servers.md)
+**MCP серверы:** nx-mcp, **letar** (объединяет studio-time/studio/umami/glitchtip/deploy/form/synth/
+domwellbes-assist в один процесс), **letar-db** (все Postgres-базы), context-mode (плагин),
+agent-mail. Документация внешних библиотек — desktop-расширение Context7, не проектный сервер.
+Подробнее: [MCP серверы](/.claude/docs/mcp-servers.md)
 
-⚠️ **Ревизия 2026-08-10: состав серверов сокращён с 23 до 15 по фактической статистике вызовов**
-(подсчёт по 487 транскриптам сессий). Удалены `socraticode`, `letar-consultant`, `prisma`,
-`sequential-thinking`, `inkeepMcp`, `playwright`, `postgres-kami-prod-write`, дубли `context-mode`
-и `context7`. Прежде чем возвращать что-то из этого списка — проверь, что инструмент будет
-вызываться, а не просто числиться. Браузерная работа идёт через встроенный Claude Browser,
-семантический поиск — через Grep и субагента Explore.
-
-**Postgres MCP Pro:** dev-базы `studio` и `driving-school` подключены флагом `--pro` у
-`.claude/mcp/pg-wrapper.mjs` — вместо одного `query` доступны EXPLAIN, health-checks и подбор
-индексов (9 инструментов). Подбор индексов пока не работает: нужны расширения `pg_stat_statements`
-и `hypopg`, см. [PLAN-INFRA-4 §71](/PLAN-INFRA-4.md).
+⚠️ **Ревизия 2026-09-14: 22 записи в `.mcp.json` → 4.** 9 наших TS-серверов слиты в `letar`,
+8 Postgres-серверов — в `letar-db` (без Python — Pro-инструменты вызывались ~9 раз за всю
+историю и регулярно не укладывались в 30-секундный таймаут). `chakra-ui`, `next-devtools` и
+проектный `context7` удалены (25/17/39 вызовов за 1779 сессий; next-devtools к тому же регулярно
+падал на старте из-за гонки распаковки `bunx @latest`, не из-за выключенного Next). Прежде чем
+возвращать что-то из этого списка — проверь, что инструмент будет вызываться, а не просто
+числиться. Браузерная работа идёт через встроенный Claude Browser, семантический поиск — через
+Grep и субагента Explore. Подробный разбор — [mcp-servers.md](/.claude/docs/mcp-servers.md).
 
 ⚠️ **`nx-mcp` запускается с `--minimal false`.** По умолчанию флаг `--minimal` у сервера равен
 `true`, и он прячет ровно те инструменты, ради которых его ставят: `nx_workspace`,

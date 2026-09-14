@@ -58,11 +58,11 @@ model: opus
 - `@letar/chakra-provider` — провайдер темы
 - `@letar/forms` — компоненты форм
 
-### MCP серверы
+### Документация Chakra UI v3
 
-- `chakra-ui` — актуальная документация Chakra UI v3
-- Используй `mcp__chakra-ui__get_component_props` для props
-- Используй `mcp__chakra-ui__get_component_example` для примеров
+Проектный сервер `chakra-ui` удалён 2026-09-14 (25 вызовов за 1779 сессий) — используй
+desktop-расширение Context7: `resolve-library-id({ libraryName: "chakra-ui" })`, затем
+`get-library-docs` с полученным id и вопросом про нужный компонент/пропсы/пример.
 
 ### Паттерны компонентов
 

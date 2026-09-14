@@ -107,8 +107,10 @@ Claude Code.
 
 ## Запуск
 
-Регистрируется в корневом `.mcp.json` как `studio-time-mcp`
-(`bunx tsx libs/studio-time-mcp/src/cli.ts`), запускается из корня репозитория.
+В монорепо не регистрируется отдельно — с 2026-09-14 это одна из частей объединённого MCP-сервера
+`letar` (`.claude/mcp/letar.ts`, см. [mcp-servers.md](/.claude/docs/mcp-servers.md#letar)),
+подключается через `createStudioTimeMcpServer()`. Как самостоятельный процесс — `bunx tsx
+libs/studio-time-mcp/src/cli.ts` из корня репозитория, как раньше.
 Env-override `STUDIO_TIME_MCP_REPO_ROOT` — если cwd не корень репо.
 
 ## Команды

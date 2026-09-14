@@ -38,8 +38,11 @@ GlitchTip. Это осознанное решение (см. `.claude/commands/i
 
 ## Запуск
 
-Регистрируется в корневом `.mcp.json` как `glitchtip-mcp` (`bunx tsx libs/glitchtip-mcp/src/cli.ts`),
-запускается из корня репозитория. Env-override `GLITCHTIP_MCP_REPO_ROOT` — если cwd не корень репо.
+В монорепо не регистрируется отдельно — с 2026-09-14 это одна из частей объединённого MCP-сервера
+`letar` (`.claude/mcp/letar.ts`, см. [mcp-servers.md](/.claude/docs/mcp-servers.md#letar)),
+подключается через `createGlitchtipMcpServer()`. Как самостоятельный процесс (например для
+использования вне этого монорепо) — `bunx tsx libs/glitchtip-mcp/src/cli.ts` из корня репозитория,
+как раньше. Env-override `GLITCHTIP_MCP_REPO_ROOT` — если cwd не корень репо.
 
 ## Команды
 

@@ -113,11 +113,9 @@ ANALYZE=true nx build <app>
 
 ### Chakra UI
 
-```
-mcp__chakra-ui__get_component_props — актуальные props
-mcp__chakra-ui__get_component_example — примеры использования
-mcp__chakra-ui__v2_to_v3_code_review — миграционные паттерны
-```
+Проектный сервер `chakra-ui` удалён 2026-09-14 — документация через desktop-расширение Context7:
+`resolve-library-id({ libraryName: "chakra-ui" })`, затем `get-library-docs` с вопросом про
+props/пример/миграцию v2→v3.
 
 ### Browser Automation
 

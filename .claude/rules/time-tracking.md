@@ -1,7 +1,8 @@
 # Тайм-трекер studio — когда стартовать, переключать и останавливать
 
-Инструменты: `studio-time-mcp` (`time_start`, `time_switch`, `time_stop`, `time_pause`,
-`time_status`, `time_note`, `time_log`).
+Инструменты: `time_*` сервера `letar` (до 2026-09-14 — отдельный сервер `studio-time-mcp`,
+теперь одна из частей объединённого `letar`, см. [mcp-servers.md](/.claude/docs/mcp-servers.md#letar)):
+`time_start`, `time_switch`, `time_stop`, `time_pause`, `time_status`, `time_note`, `time_log`.
 
 ## Главное правило
 

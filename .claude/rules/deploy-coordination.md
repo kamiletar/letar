@@ -68,20 +68,21 @@ send_message(
 
 Если ты сам Deploy Agent (имя агента = `deploy-agent-dev`) — ты выполняешь деплой.
 
-### deploy-agent-dev: деплой через deploy-mcp (предпочтительно), SSH — резервный канал
+### deploy-agent-dev: деплой через letar (deploy-часть, предпочтительно), SSH — резервный канал
 
-Основной путь — MCP-инструменты `deploy-mcp` (структурированный статус вместо парсинга stdout):
+Основной путь — инструменты `deploy_*` сервера `letar` (структурированный статус вместо парсинга
+stdout; до 2026-09-14 это был отдельный сервер `deploy-mcp` с голыми именами без префикса):
 
 ```
-git_status({ server: "s2" })                     # коммиты запушены?
+deploy_git_status({ server: "s2" })                  # коммиты запушены?
 deploy_app({ app: "<app>", target: "production" })   # → deployId
 deploy_status({ server: "s2", deployId, sinceLine: 0 })  # поллинг (sinceLine = totalLines из прошлого ответа)
 ```
 
 - `target: "staging"` резолвится на s3 (образ `<app>:staging`).
 - `seed: true` → добавляет `--seed` (`nx run <app>:db:seed` после успешного деплоя) — теперь не требует SSH-резерва.
-- `agent_health({ server })` — при проблемах: различает недоступность сервера и неверный токен.
-- Подробности: [mcp-servers.md § Deploy MCP](/.claude/docs/mcp-servers.md#deploy-mcp-letardeploy-mcp), [libs/deploy-mcp/README.md](/libs/deploy-mcp/README.md).
+- `deploy_agent_health({ server })` — при проблемах: различает недоступность сервера и неверный токен.
+- Подробности: [mcp-servers.md § Deploy](/.claude/docs/mcp-servers.md#deploy-mcp), [libs/deploy-mcp/README.md](/libs/deploy-mcp/README.md).
 
 ⚠️ **Наличие переменной в `.env.docker`/`.env.docker.enc` не означает, что она попала в БД.** Если
 приложение сидит настройки из env через идемпотентный upsert-скрипт (например

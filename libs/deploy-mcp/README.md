@@ -105,8 +105,13 @@ deploy_wait({ server: "s2", deployId, waitSeconds: 90 })  // ждёт смены
 
 ## Запуск
 
-Регистрируется в корневом `.mcp.json` как `deploy-mcp` (`bunx tsx libs/deploy-mcp/src/cli.ts`),
-запускается из корня репозитория. Env-override `DEPLOY_MCP_REPO_ROOT` — если cwd не корень репо.
+В монорепо не регистрируется отдельно — с 2026-09-14 это одна из частей объединённого MCP-сервера
+`letar` (`.claude/mcp/letar.ts`, см. [mcp-servers.md](/.claude/docs/mcp-servers.md#letar)),
+подключается через `createDeployMcpServer()`; во внешнем списке инструменты видны с префиксом
+`deploy_` (`list_servers`/`git_status`/`agent_health` → `deploy_list_servers`/`deploy_git_status`/
+`deploy_agent_health` — были голыми именами, риск столкновения с чужим сервером). Как
+самостоятельный процесс — `bunx tsx libs/deploy-mcp/src/cli.ts` из корня репозитория, как раньше.
+Env-override `DEPLOY_MCP_REPO_ROOT` — если cwd не корень репо.
 
 ## Ограничения
 
