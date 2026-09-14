@@ -13,6 +13,7 @@ import {
   Select as ChakraSelect,
   Text,
 } from '@chakra-ui/react'
+import { getOptionLabel, groupOptions } from '@letar/forms-core/uikit'
 import type { UIKitCorePrimitives, UIKitExtendedPrimitives, UIKitTone } from '@letar/forms-core/uikit'
 import type { ReactElement, ReactNode } from 'react'
 import { useMemo } from 'react'
@@ -158,36 +159,22 @@ export const chakraUIKit: ChakraUIKit = {
     variant,
     ...rest
   }): ReactElement {
-    const hasGroups = useMemo(() => options.some((opt) => opt.group), [options])
+    // Группировка — та же framework-free логика, что использует `useGroupedOptions` для
+    // Combobox/Listbox (`use-grouped-options.ts`) — вынесена в `@letar/forms-core/uikit`.
+    // Здесь остаётся только Chakra-специфичная обвязка (`createListCollection`).
+    const groups = useMemo(() => groupOptions(options), [options])
 
     const collection = useMemo(
       () =>
         createListCollection({
           items: options,
-          itemToString: (item: (typeof options)[number]) => (typeof item.label === 'string' ? item.label : item.value),
+          itemToString: (item: (typeof options)[number]) => getOptionLabel(item),
           itemToValue: (item: (typeof options)[number]) => item.value,
           isItemDisabled: (item: (typeof options)[number]) => item.disabled ?? false,
-          ...(hasGroups && { groupBy: (item: (typeof options)[number]) => item.group ?? '' }),
+          ...(groups && { groupBy: (item: (typeof options)[number]) => item.group ?? '' }),
         }),
-      [options, hasGroups],
+      [options, groups],
     )
-
-    // Одна и та же Map строится и для группировки в `<Select.Content>`, и как признак «есть
-    // группы вообще» — не пересчитывать дважды тем же способом, что уже делает `useGroupedOptions`
-    // для Combobox/Listbox (`use-grouped-options.ts`), но здесь нет отдельного generic-хука на
-    // сырых UIKit-опциях, поэтому логика инлайн.
-    const groups = useMemo(() => {
-      if (!hasGroups) {
-        return null
-      }
-      const groupMap = new Map<string, typeof options>()
-      for (const opt of options) {
-        const groupName = opt.group ?? ''
-        const existing = groupMap.get(groupName) ?? []
-        groupMap.set(groupName, [...existing, opt])
-      }
-      return groupMap
-    }, [options, hasGroups])
 
     return (
       <ChakraSelect.Root
@@ -219,10 +206,10 @@ export const chakraUIKit: ChakraUIKit = {
           <ChakraSelect.Positioner>
             <ChakraSelect.Content>
               {groups
-                ? Array.from(groups.entries()).map(([groupName, groupOptions]) => (
+                ? Array.from(groups.entries()).map(([groupName, groupItems]) => (
                   <ChakraSelect.ItemGroup key={groupName}>
                     {groupName && <ChakraSelect.ItemGroupLabel>{groupName}</ChakraSelect.ItemGroupLabel>}
-                    {groupOptions.map((opt) => (
+                    {groupItems.map((opt) => (
                       <ChakraSelect.Item item={opt} key={opt.value}>
                         {opt.label}
                         <ChakraSelect.ItemIndicator />

@@ -4,6 +4,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.14.8] - 2026-09-14
+
+### Changed
+
+- **Дедуп группировки опций по полю `group`** — `use-grouped-options.ts` (Combobox/Listbox) и
+  Chakra `Select`-примитив (`uikit-chakra.tsx`) держали две независимые копии одной и той же
+  логики построения `Map<string, T[]>` (вторая появилась в 2.14.7 при реализации `getGroup` на
+  `Form.Field.Select`, поскольку `Select` работает на `UIKitSelectOption`, а не на
+  `GroupableOption`). Обе теперь переиспользуют `groupOptions`/`getOptionLabel` из
+  `@letar/forms-core/uikit` (framework-free, уже существовали в форм-ядре) — Chakra-специфичной
+  осталась только сборка `createListCollection`. Публичный API (`useGroupedOptions`,
+  `getOptionLabel` из `base/index.ts`) не изменился, поведение группировки не меняется.
+
 ## [2.14.7] - 2026-09-13
 
 ### Added

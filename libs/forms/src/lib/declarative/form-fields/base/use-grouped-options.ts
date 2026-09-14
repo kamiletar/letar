@@ -1,6 +1,7 @@
 'use client'
 
 import { createListCollection } from '@chakra-ui/react'
+import { getOptionLabel as getOptionLabelCore, groupOptions } from '@letar/forms-core/uikit'
 import type { ReactNode } from 'react'
 import { useMemo } from 'react'
 import type { GroupableOption } from '../../types'
@@ -29,7 +30,7 @@ export interface GroupedOptionsResult<T = string> {
  * ```
  */
 export function getOptionLabel<T>(item: { label?: string | ReactNode; value: T }): string {
-  return typeof item.label === 'string' ? item.label : String(item.value)
+  return getOptionLabelCore(item)
 }
 
 /**
@@ -60,36 +61,24 @@ export function getOptionLabel<T>(item: { label?: string | ReactNode; value: T }
  * ```
  */
 export function useGroupedOptions<T = string>(options: GroupableOption<T>[]): GroupedOptionsResult<T> {
-  // Create collection with optional grouping
-  const collection = useMemo(() => {
-    const hasGroups = options.some((opt) => opt.group)
+  // Grouping (the `group` Map itself) is framework-free logic shared with the Chakra Select
+  // primitive (`uikit-chakra.tsx`) — see `@letar/forms-core/uikit` `groupOptions`. Only the
+  // Ark UI `ListCollection` below is Chakra-specific and stays local to this hook.
+  const groups = useMemo(() => groupOptions(options), [options])
 
-    return createListCollection({
-      items: options,
-      itemToString: getOptionLabel,
-      itemToValue: (item) => item.value as string,
-      isItemDisabled: (item: GroupableOption<T>) => item.disabled ?? false,
-      ...(hasGroups && {
-        groupBy: (item: GroupableOption<T>) => item.group ?? '',
+  const collection = useMemo(
+    () =>
+      createListCollection({
+        items: options,
+        itemToString: getOptionLabel,
+        itemToValue: (item) => item.value as string,
+        isItemDisabled: (item: GroupableOption<T>) => item.disabled ?? false,
+        ...(groups && {
+          groupBy: (item: GroupableOption<T>) => item.group ?? '',
+        }),
       }),
-    })
-  }, [options])
-
-  // Check for groups and create Map
-  const groups = useMemo(() => {
-    const hasGroups = options.some((opt) => opt.group)
-    if (!hasGroups) {
-      return null
-    }
-
-    const groupMap = new Map<string, GroupableOption<T>[]>()
-    for (const opt of options) {
-      const group = opt.group ?? ''
-      const existing = groupMap.get(group) ?? []
-      groupMap.set(group, [...existing, opt])
-    }
-    return groupMap
-  }, [options])
+    [options, groups],
+  )
 
   return { collection, groups }
 }
