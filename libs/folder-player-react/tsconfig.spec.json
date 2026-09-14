@@ -6,7 +6,8 @@
     "rootDir": "..",
     "jsx": "react-jsx",
     "paths": {
-      "@letar/folder-scan": ["../folder-scan/src/index.ts"]
+      "@letar/folder-scan": ["../folder-scan/src/index.ts"],
+      "@letar/folder-scan/media-extensions": ["../folder-scan/src/lib/media-extensions.ts"]
     }
   },
   "include": [

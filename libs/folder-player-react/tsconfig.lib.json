@@ -9,7 +9,8 @@
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
     "ignoreDeprecations": "6.0",
     "paths": {
-      "@letar/folder-scan": ["../folder-scan/src/index.ts"]
+      "@letar/folder-scan": ["../folder-scan/src/index.ts"],
+      "@letar/folder-scan/media-extensions": ["../folder-scan/src/lib/media-extensions.ts"]
     }
   },
   "exclude": [

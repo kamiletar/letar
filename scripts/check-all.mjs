@@ -186,11 +186,11 @@ const CHECKS = [
     // друга (пример: libs/forms/tsconfig.spec.json держал paths на
     // @letar/forms-core/*, и именно там нашли неполный набор 2026-09-14).
     // Расширение сразу вскрыло 8 новых потребителей с неполными paths внутри
-    // libs/ (forms, forms-react, forms-shadcn, folder-player-react) — это
-    // накопленный долг, не регрессия текущей сессии, чинить его — отдельная
-    // задача. Понижено до warn, пока долг не разгребён; вернуть в gate можно
-    // будет тем же способом, что раньше (прогон чистый → severity: 'gate').
-    severity: 'warn',
+    // libs/ (forms, forms-react, forms-shadcn, folder-player-react) — временно
+    // понижалось до warn. Долг разгребён тем же днём (2026-09-14) — недостающие
+    // строки paths добавлены во все 7 файлов, typecheck:tsgo зелёный на всех
+    // четырёх затронутых библиотеках, прогон снова чистый → вернули в gate.
+    severity: 'gate',
     ci: 'partial',
     ciNote: 'приватные submodule не выкачаны — их tsconfig не проверены',
     doc: '.claude/rules/libs.md',
