@@ -6,6 +6,24 @@
 
 ## Backlog (запросы от агентов)
 
+### ✅ [2026-09-14] Дедуп группировки опций по `group` между use-grouped-options.ts и uikit-chakra.tsx (закрыт v2.14.8)
+
+- **Контекст:** прямое следствие предыдущего пункта (getGroup на Select, v2.14.7) — при его
+  реализации инлайн-копия логики группировки была осознанным компромиссом («здесь инлайн, т.к.
+  хук работает на `GroupableOption`, а UIKit-примитив — на сыром `UIKitSelectOption`»). Оказалось,
+  что framework-free версия этой логики (`groupOptions`/`hasGroups`/`getOptionLabel`) уже
+  существовала в `@letar/forms-core/uikit` (`group-options.ts`, выделена ещё в Фазе 7.3) — просто
+  `uikit-chakra.tsx` про неё не знал.
+- **Фикс:** `use-grouped-options.ts` (Combobox/Listbox) и Select-примитив `uikit-chakra.tsx`
+  теперь оба вызывают `groupOptions`/`getOptionLabel` из `@letar/forms-core/uikit` вместо
+  собственных копий построения `Map<string, T[]>`. Chakra-специфичной осталась только сборка
+  `createListCollection`. Публичный API (`useGroupedOptions`, `getOptionLabel` из `base/index.ts`)
+  не изменился.
+- **Тесты:** без изменений (регресс на группировку уже покрыт `field-select.spec.tsx` из
+  предыдущего пункта) — `nx test @letar/forms` 799/799, `typecheck:tsgo`/`lint` чисто.
+- **Не сделано:** `forms-shadcn`-скин по-прежнему без группировки Select (как и в v2.14.7) —
+  не в скоупе этой задачи.
+
 ### ✅ [2026-09-13] Form.Field.Select — группировка опций (optgroup) через getGroup (закрыт v2.14.7, от domwellbes-dev)
 
 - **Запросил:** domwellbes-dev (msg 1533/1547, thread `forms-select-optgroup`)
@@ -5655,6 +5673,5 @@ DOM-поведении минимален. Юнит/компонентные т�
 
 ---
 
-**Последнее обновление:** 2026-08-26 — фикс расколотого React-контекста в `Form.Subscribe`/
-`Form.UrlSync`/`useActiveFiltersCount`/typed-хуках (2.7.6) + regression-тесты на все пять API
-внутри настоящего декларативного `<Form>`, детали в `PLAN_COMPLETED.md`.
+**Последнее обновление:** 2026-09-14 — фикс флаки-таймаута `field-signature.spec.tsx` (мок Canvas
+2D API в `vitest.setup.ts`, 2.14.9), детали в `PLAN_COMPLETED.md`.
