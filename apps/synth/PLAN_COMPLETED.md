@@ -1,5 +1,14 @@
 # PLAN_COMPLETED — synth
 
+## 2026-09-15 (общая `slugify` из `@letar/format-utils`)
+
+Локальная `slugify()` в `src/lib/storage/patches-db.ts` (id патчей) использовала упрощённую
+транскрипцию (х→h, щ→sch, ё→e) вместо общей ГОСТ-таблицы (kh/shch/yo) — заменена импортом из
+`@letar/format-utils` (добавлена в зависимости, её раньше не было), сохранены обрезка до 40
+символов и fallback `'patch'` при пустом результате. Осознанное расхождение: влияет только на
+генерацию новых слагов патчей. `nx lint synth`/`typecheck:tsgo synth` — зелёные. Коммит
+`f81bdac68`.
+
 ## 2026-08-19 (применён Pressable к главным CTA)
 
 Тема подключала `pressableConfig` из `@letar/ui` (keyframes + `globalCss` целиком) со скаффолда,
