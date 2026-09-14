@@ -3634,3 +3634,24 @@ bun-симлинк (`node_modules/@letar/<lib>` создаёт только `bun
   `57a37b82` (bump submodule poster-microtext-desktop). Порядок push при одобрении: сначала
   `git -C apps/poster-microtext-desktop push origin main`, потом `git push` в letar — иначе
   `pre-push`-хук блокирует по [git-multi-agent-incidents.md](/.claude/docs/git-multi-agent-incidents.md).
+
+## §171 (2026-09-14) Дрейф `zod`-пина вернулся в 6 `libs/*-mcp` — починено, `apps/synth` не тронут
+
+**Контекст:** намеренный корневой пин `zod: 4.4.3` (§134) — под bun isolated linker каждый
+потребитель может тихо завести **собственный** точный пин, который не дедупает с корневым при
+несовпадении буквальной строки версии (см.
+[zod-per-package-pin-drift.md](/.claude/docs/zod-per-package-pin-drift.md), найдено раньше на
+domwellbes). На этот раз разъехались 6 внутренних библиотек: `libs/deploy-mcp`,
+`libs/glitchtip-mcp`, `libs/mcp-test-kit`, `libs/studio-mcp`, `libs/studio-time-mcp`,
+`libs/umami-mcp` — у всех был `"zod": "4.6.2"` вместо корневого `4.4.3`.
+
+**Правки package.json в этих 6 либах уже были сделаны кем-то до начала этой сессии** (рабочее
+дерево пришло с ними как unstaged) — сессия довела дело до конца: `bun install --force` из
+корня (обычный `bun install` не всегда чистит уже существующую изолированную копию —
+`bun.lock` до этого не менялся), `nx typecheck:tsgo` по всем 6 — зелёный, коммит `31cec89da`
+(`GIT_ALLOW_MULTI_SCOPE_COMMIT=1`, все gate-проверки `check-all.mjs` зелёные). Не запушено.
+
+**Найдено, но не тронуто в этой сессии:** `apps/synth/package.json` держит тот же дрейф
+(`"zod": "4.6.2"`) — не входило в изначальный скоуп задачи. Заведена отдельная задача-чип
+(`spawn_task`, title «Выровнять zod-пин в apps/synth с корневым 4.4.3») — если она ещё не
+запущена/не закрыта на момент чтения этого пункта, взять её.
