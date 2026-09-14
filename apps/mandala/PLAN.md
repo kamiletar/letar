@@ -116,6 +116,13 @@
       2026-08-13 при отладке e2e (`04-checkout.guest.spec.ts`). Не блокирует релиз, но стоит
       добавить проверку существования товара при чтении корзины из localStorage
       (`apps/mandala/src/app/[locale]/(main)/cart/_components/cart-items.tsx` и hook `useCart`).
+- [ ] ⚠️ Открытый вопрос (2026-09-14): `api/auth/verification-stream/[email]/route.ts` (polling
+      для второй вкладки при регистрации) ключуется по email прямо в URL, а не по непубличному
+      `streamToken` из `TokenManagerAdapter` (`@letar/pin-auth`). Ответ — только
+      `{verified: boolean}`, сам токен не раскрывается, поэтому не блокирует — но подбором email
+      можно узнавать факт верификации чужой почты. Не сделано при фиксе PIN-входа (v0.40.30, см.
+      `PLAN_COMPLETED.md`) — низкий приоритет по явному указанию задачи. Образец переноса на
+      `streamToken` — `apps/driving-school/src/app/(auth)/_adapters/stream-tokens.ts`.
 - [x] ~~Нестабильность shop→product/cart/checkout навигации в полном e2e-прогоне на staging~~ —
       найдено 2026-08-25 (Раунд 6), закрыто полностью 2026-09-01 (Раунды 7—8), разбор в
       [PLAN_COMPLETED.md § Раунд 7](./PLAN_COMPLETED.md#стейджинг-e2e--раунд-7-root-cause-найден-и-починен-2026-09-01)
