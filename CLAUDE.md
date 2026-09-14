@@ -270,6 +270,11 @@ UI-скинах. Файл — разбор проблемы для истори�
 ⚠️ `Form.UrlSync` без явного `router` пишет URL мимо Next.js router (`history.replaceState`) —
 Server Component страницы не перечитывает `searchParams`, URL меняется, данные — нет; проверять
 `read_network_requests` на `_rsc=` после изменения, не только глазами на URL ·
+[letar-forms-field-date-urlsync-date-object](/.claude/docs/letar-forms-field-date-urlsync-date-object.md)
+⚠️ `Form.Field.Date` всегда коммитит `Date` в состояние формы (даже без `schema`) — `Form.UrlSync`
+сравнивает его со строковым `defaults` через `===`, поле навсегда «активно», в URL уезжает
+`Date.toString()` вместо `YYYY-MM-DD`; обход — date-range вне декларативной Field-системы, см.
+`apps/studio` `owner/time` фильтры ·
 [external-state-alongside-createform-pattern](/.claude/docs/external-state-alongside-createform-pattern.md)
 внешний `useState` рядом с `createForm`-инстансом — согласия 152-ФЗ и значения с независимым
 жизненным циклом (immediate-upload), не обход схемы для обычных полей; ⚠️ там же — опечатка
