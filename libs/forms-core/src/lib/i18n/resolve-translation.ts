@@ -1,5 +1,20 @@
 import type { TranslateFunction, TranslateParams } from './types'
 
+export interface ResolveTranslationOptions {
+  /**
+   * `'exact'` (по умолчанию) — отклоняет только результат, буквально равный `key` (стандартный
+   * fallback next-intl при отсутствии перевода).
+   *
+   * `'prefix'` — дополнительно отклоняет результат, лишь НАЧИНАЮЩИЙСЯ с `key` (например
+   * `t()` вернул сам путь с довеском вместо перевода). Нужен там, где `key` — не полный,
+   * самодостаточный путь перевода, а один из двух кандидатов в построении по частям
+   * (`{prefix}.{code}.{origin}` → `{prefix}.{code}`, см. `createFormErrorMap`): без этой
+   * проверки более короткий `baseKey` рискует "поймать" фрагмент чужого пути как валидный
+   * перевод.
+   */
+  matchMode?: 'exact' | 'prefix'
+}
+
 /**
  * Пытается получить перевод по ключу через `t()`.
  *
@@ -14,6 +29,7 @@ export function resolveTranslation(
   t: TranslateFunction | undefined,
   key: string,
   params?: TranslateParams,
+  options?: ResolveTranslationOptions,
 ): string | undefined {
   if (!t) {
     return undefined
@@ -22,6 +38,9 @@ export function resolveTranslation(
   try {
     const result = t(key, params)
     if (!result || result === key) {
+      return undefined
+    }
+    if (options?.matchMode === 'prefix' && result.startsWith(key)) {
       return undefined
     }
     return result

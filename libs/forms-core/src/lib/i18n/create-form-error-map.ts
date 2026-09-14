@@ -1,3 +1,4 @@
+import { resolveTranslation } from './resolve-translation'
 import type { TranslateFunction, TranslateParams } from './types'
 
 /**
@@ -117,23 +118,6 @@ function getIssueOrigin(issue: ZodIssue): string | undefined {
 }
 
 /**
- * Пытается получить перевод по ключу
- * @returns переведённая строка или undefined если перевод не найден
- */
-function tryTranslate(t: TranslateFunction, key: string, params: TranslateParams): string | undefined {
-  try {
-    const result = t(key, params)
-    // next-intl возвращает ключ при отсутствии перевода
-    if (!result || result === key || result.startsWith(key)) {
-      return undefined
-    }
-    return result
-  } catch {
-    return undefined
-  }
-}
-
-/**
  * Создаёт Zod error map с поддержкой i18n
  *
  * Error map преобразует Zod ошибки в переведённые сообщения.
@@ -186,11 +170,11 @@ export function createFormErrorMap(config: FormErrorMapConfig) {
     let translated: string | undefined
 
     if (originKey) {
-      translated = tryTranslate(t, originKey, params)
+      translated = resolveTranslation(t, originKey, params, { matchMode: 'prefix' })
     }
 
     if (!translated) {
-      translated = tryTranslate(t, baseKey, params)
+      translated = resolveTranslation(t, baseKey, params, { matchMode: 'prefix' })
     }
 
     // Возвращаем undefined чтобы Zod использовал дефолтное сообщение

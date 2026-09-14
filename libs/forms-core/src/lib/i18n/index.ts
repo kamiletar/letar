@@ -2,4 +2,5 @@ export { BUILTIN_ERROR_TRANSLATION_LOCALES, createBuiltinTranslateFunction } fro
 export { createFormErrorMap, SIZE_ORIGINS, STRING_FORMATS, ZOD_ERROR_CODES } from './create-form-error-map'
 export type { FormErrorMapConfig, ZodErrorCode } from './create-form-error-map'
 export { resolveTranslation } from './resolve-translation'
+export type { ResolveTranslationOptions } from './resolve-translation'
 export type { TranslateFunction, TranslateParams } from './types'
