@@ -96,7 +96,7 @@ export function SkillForm({ skill, categories, locale }: SkillFormProps) {
   // Опции для select категории
   const categoryOptions = categories.map((cat) => ({
     value: cat.id,
-    title: cat.name,
+    label: cat.name,
   }))
 
   // Начальные значения для формы
@@ -148,7 +148,7 @@ export function SkillForm({ skill, categories, locale }: SkillFormProps) {
 
               {/* Категория и уровень */}
               <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
-                <KamiForm.Field.NativeSelect name="categoryId" label="Категория" options={categoryOptions} required />
+                <KamiForm.Field.Select name="categoryId" label="Категория" options={categoryOptions} required />
                 <KamiForm.Select.SkillLevel name="level" label="Уровень" />
               </SimpleGrid>
 

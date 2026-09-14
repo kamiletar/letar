@@ -102,25 +102,25 @@ export function ConsultingForm() {
 
             {/* Детали проекта */}
             <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
-              <KamiForm.Field.NativeSelect
+              <KamiForm.Field.Select
                 name="serviceType"
                 label={t('form.serviceType')}
                 placeholder={t('form.selectService')}
                 options={serviceTypeOptions}
               />
-              <KamiForm.Field.NativeSelect
+              <KamiForm.Field.Select
                 name="projectType"
                 label={t('form.projectType')}
                 placeholder={t('form.selectProject')}
                 options={projectTypeOptions}
               />
-              <KamiForm.Field.NativeSelect
+              <KamiForm.Field.Select
                 name="budget"
                 label={t('form.budget')}
                 placeholder={t('form.selectBudget')}
                 options={budgetOptions}
               />
-              <KamiForm.Field.NativeSelect
+              <KamiForm.Field.Select
                 name="timeline"
                 label={t('form.timeline')}
                 placeholder={t('form.selectTimeline')}

@@ -26,7 +26,7 @@ export function StepConditions() {
           />
           <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
             <KamiForm.Field.String name="location" label={t('location')} placeholder={t('locationPlaceholder')} />
-            <KamiForm.Field.NativeSelect
+            <KamiForm.Field.Select
               name="timezone"
               label={t('timezone')}
               placeholder={t('selectPlaceholder')}

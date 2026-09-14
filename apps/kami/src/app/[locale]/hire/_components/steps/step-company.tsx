@@ -22,7 +22,7 @@ export function StepCompany() {
           <KamiForm.Field.String name="companyName" label={t('companyName')} required />
           <KamiForm.Field.String name="companyWebsite" label={t('companyWebsite')} placeholder="https://" />
           <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
-            <KamiForm.Field.NativeSelect
+            <KamiForm.Field.Select
               name="companySize"
               label={t('companySize')}
               placeholder={t('selectPlaceholder')}

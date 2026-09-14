@@ -1,33 +1,33 @@
 import { z } from 'zod/v4'
 
-// Опции для NativeSelect (используют title вместо label)
+// Опции для Select
 export const companySizeOptions = [
-  { value: 'startup', title: 'Стартап (1-10)' },
-  { value: 'small', title: 'Малый (11-50)' },
-  { value: 'medium', title: 'Средний (51-200)' },
-  { value: 'large', title: 'Крупный (201-1000)' },
-  { value: 'enterprise', title: 'Корпорация (1000+)' },
+  { value: 'startup', label: 'Стартап (1-10)' },
+  { value: 'small', label: 'Малый (11-50)' },
+  { value: 'medium', label: 'Средний (51-200)' },
+  { value: 'large', label: 'Крупный (201-1000)' },
+  { value: 'enterprise', label: 'Корпорация (1000+)' },
 ]
 
 export const teamSizeOptions = [
-  { value: '1-3', title: '1-3 человека' },
-  { value: '4-7', title: '4-7 человек' },
-  { value: '8-15', title: '8-15 человек' },
-  { value: '15+', title: 'Больше 15' },
+  { value: '1-3', label: '1-3 человека' },
+  { value: '4-7', label: '4-7 человек' },
+  { value: '8-15', label: '8-15 человек' },
+  { value: '15+', label: 'Больше 15' },
 ]
 
 export const timezoneOptions = [
-  { value: 'UTC+0', title: 'UTC+0 (Лондон)' },
-  { value: 'UTC+1', title: 'UTC+1 (Берлин)' },
-  { value: 'UTC+2', title: 'UTC+2 (Киев)' },
-  { value: 'UTC+3', title: 'UTC+3 (Москва)' },
-  { value: 'UTC+4', title: 'UTC+4 (Дубай)' },
-  { value: 'UTC+5', title: 'UTC+5 (Ташкент)' },
-  { value: 'UTC+5:30', title: 'UTC+5:30 (Мумбаи)' },
-  { value: 'UTC+8', title: 'UTC+8 (Пекин)' },
-  { value: 'UTC-5', title: 'UTC-5 (Нью-Йорк)' },
-  { value: 'UTC-8', title: 'UTC-8 (Лос-Анджелес)' },
-  { value: 'any', title: 'Любой' },
+  { value: 'UTC+0', label: 'UTC+0 (Лондон)' },
+  { value: 'UTC+1', label: 'UTC+1 (Берлин)' },
+  { value: 'UTC+2', label: 'UTC+2 (Киев)' },
+  { value: 'UTC+3', label: 'UTC+3 (Москва)' },
+  { value: 'UTC+4', label: 'UTC+4 (Дубай)' },
+  { value: 'UTC+5', label: 'UTC+5 (Ташкент)' },
+  { value: 'UTC+5:30', label: 'UTC+5:30 (Мумбаи)' },
+  { value: 'UTC+8', label: 'UTC+8 (Пекин)' },
+  { value: 'UTC-5', label: 'UTC-5 (Нью-Йорк)' },
+  { value: 'UTC-8', label: 'UTC-8 (Лос-Анджелес)' },
+  { value: 'any', label: 'Любой' },
 ]
 
 // Опции для RadioGroup (используют label)

@@ -19,7 +19,7 @@ export function StepTeam() {
       </Card.Header>
       <Card.Body>
         <Stack gap={4}>
-          <KamiForm.Field.NativeSelect
+          <KamiForm.Field.Select
             name="teamSize"
             label={t('teamSize')}
             placeholder={t('selectPlaceholder')}

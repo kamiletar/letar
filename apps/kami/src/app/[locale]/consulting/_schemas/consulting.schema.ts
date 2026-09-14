@@ -1,36 +1,36 @@
 import { z } from 'zod/v4'
 
-// Типы услуг (NativeSelect требует title)
+// Типы услуг
 export const serviceTypeOptions = [
-  { value: 'architecture', title: 'Архитектура' },
-  { value: 'code-review', title: 'Код-ревью' },
-  { value: 'audit', title: 'Технический аудит' },
-  { value: 'mentoring', title: 'Менторинг' },
+  { value: 'architecture', label: 'Архитектура' },
+  { value: 'code-review', label: 'Код-ревью' },
+  { value: 'audit', label: 'Технический аудит' },
+  { value: 'mentoring', label: 'Менторинг' },
 ]
 
-// Типы проектов (NativeSelect требует title)
+// Типы проектов
 export const projectTypeOptions = [
-  { value: 'web', title: 'Web-приложение' },
-  { value: 'mobile', title: 'Мобильное приложение' },
-  { value: 'desktop', title: 'Desktop-приложение' },
-  { value: 'other', title: 'Другое' },
+  { value: 'web', label: 'Web-приложение' },
+  { value: 'mobile', label: 'Мобильное приложение' },
+  { value: 'desktop', label: 'Desktop-приложение' },
+  { value: 'other', label: 'Другое' },
 ]
 
 // Бюджет
 export const budgetOptions = [
-  { value: 'under-1k', title: 'До $1,000' },
-  { value: '1k-5k', title: '$1,000 - $5,000' },
-  { value: '5k-10k', title: '$5,000 - $10,000' },
-  { value: 'over-10k', title: 'Более $10,000' },
-  { value: 'discuss', title: 'Обсудим' },
+  { value: 'under-1k', label: 'До $1,000' },
+  { value: '1k-5k', label: '$1,000 - $5,000' },
+  { value: '5k-10k', label: '$5,000 - $10,000' },
+  { value: 'over-10k', label: 'Более $10,000' },
+  { value: 'discuss', label: 'Обсудим' },
 ]
 
 // Сроки
 export const timelineOptions = [
-  { value: 'asap', title: 'Как можно скорее' },
-  { value: '1-week', title: 'В течение недели' },
-  { value: '1-month', title: 'В течение месяца' },
-  { value: 'flexible', title: 'Гибкие сроки' },
+  { value: 'asap', label: 'Как можно скорее' },
+  { value: '1-week', label: 'В течение недели' },
+  { value: '1-month', label: 'В течение месяца' },
+  { value: 'flexible', label: 'Гибкие сроки' },
 ]
 
 // Zod схема формы заявки на консультацию
