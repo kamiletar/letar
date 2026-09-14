@@ -264,6 +264,10 @@ UI-скинах. Файл — разбор проблемы для истори�
 ⚠️ `Form.UrlSync` без явного `router` пишет URL мимо Next.js router (`history.replaceState`) —
 Server Component страницы не перечитывает `searchParams`, URL меняется, данные — нет; проверять
 `read_network_requests` на `_rsc=` после изменения, не только глазами на URL ·
+[external-state-alongside-createform-pattern](/.claude/docs/external-state-alongside-createform-pattern.md)
+внешний `useState` рядом с `createForm`-инстансом — согласия 152-ФЗ и значения с независимым
+жизненным циклом (immediate-upload), не обход схемы для обычных полей; ⚠️ там же — опечатка
+`SubmitButtonProps.width` vs Chakra-алиас `w` ·
 [ui-components](/.claude/docs/ui-components.md) · [images](/.claude/docs/images.md) ·
 [upload-storage-backend](/.claude/docs/upload-storage-backend.md) `StorageBackend` в
 `@letar/image-upload/server` — точка расширения на будущее S3-совместимое хранилище, S3-backend
@@ -746,7 +750,11 @@ studio) ·
 [dev-session-token-plus-char-query-corruption](/.claude/docs/dev-session-token-plus-char-query-corruption.md)
 ⚠️ `+` в query-параметре `?token=` `application/x-www-form-urlencoded`-декодируется в пробел до
 сравнения — base64-токен без ручного `%2B` даёт 403 при формально верном значении; починено
-2026-09-09 в `createDevSessionRoute` (общая фабрика всех 11 приложений с dev-session route)
+2026-09-09 в `createDevSessionRoute` (общая фабрика всех 11 приложений с dev-session route) ·
+[email-code-verification-pattern](/.claude/docs/email-code-verification-pattern.md) код из письма
+(плагин Better Auth `emailOTP`) + SSE-уведомление других вкладок через подписанную cookie —
+почему `overrideDefaultEmailVerification` не работает (`defu`-склейка опций), общий слой
+`@letar/auth/server`/`@letar/pin-auth/client`
 
 **Электрон и десктоп:** [electron-app-protocol](/.claude/docs/electron-app-protocol.md) ⚠️ origin
 `null` под `file://` блокирует Worker и WASM ·
