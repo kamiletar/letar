@@ -73,6 +73,7 @@ export {
   useDeclarativeForm,
   useDeclarativeFormOptional,
   useFormRef,
+  useFormServerAction,
   useFormUrlSync,
   useRelationFieldContext,
   useRelationOptions,
@@ -83,6 +84,7 @@ export {
 } from './lib/declarative'
 
 export type { FormSubscribeProps, FormUrlSyncOptions, FormUrlSyncProps } from './lib/declarative'
+export type { FormServerActionToaster, UseFormServerActionOptions, UseFormServerActionResult } from './lib/declarative'
 
 export type {
   BaseFieldProps,

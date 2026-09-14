@@ -4,6 +4,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.14.13] - 2026-09-14
+
+### Added
+
+- **`useFormServerAction`** реэкспортирован из `@letar/forms-react` v0.9.0 — облегчённая обёртка
+  над существующей связкой `formRef`+`middleware.onError`+`mapServerErrors`/`applyServerErrors`,
+  документирована в `docs/server-errors.md` §«useFormServerAction — та же связка в один вызов».
+  Реализация — в `forms-react` (framework-free относительно UI-скина), здесь только реэкспорт под
+  публичный путь `@letar/forms`. Закрывает backlog-запрос domwellbes-dev (аудит форм нашёл
+  самопальный `useServerActionForm`, 63 потребителя без field-level мэппинга ошибок).
+
 ## [2.14.12] - 2026-09-14
 
 ### Docs

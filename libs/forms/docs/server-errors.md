@@ -180,6 +180,61 @@ function MaterialForm() {
 - Не забудь `<Form.Errors />` в JSX — иначе `formErrors` (например `P2025`/`rejected-by-policy`) будут применены к форме, но нигде не отрисуются.
 - Рабочий пример — `apps/domwellbes/src/app/(admin)/admin/materials/_components/material-form.tsx`.
 
+## useFormServerAction — та же связка в один вызов
+
+Пример выше даёт полный контроль, но требует завести `formRef`, подключить `middleware.onError`
+и вызвать `mapServerErrors`/`applyServerErrors` руками в каждой форме — при большом количестве
+однотипных форм ceremony оказывается выше порога, при котором тянутся к самопальному
+pending/error-стейту вокруг `useState`. `useFormServerAction` — та же связка, обёрнутая в один
+хук с pending-состоянием и опциональным toaster:
+
+```tsx
+import { useFormRef, useFormServerAction } from '@letar/forms'
+
+function MaterialForm() {
+  const formRef = useFormRef()
+  const { run, pending } = useFormServerAction(formRef, {
+    fieldMap: { sku: { field: 'sku', message: 'Такой артикул уже используется' } },
+    toaster: adminToaster, // опционально — из createAppToaster() (@letar/ui) или совместимый
+    successMessage: 'Материал сохранён', // опционально — без него toaster.success не вызывается
+  })
+
+  async function handleSubmit(data: MaterialFormData) {
+    await run(() => createMaterial(data), () => router.push('/admin/materials/'))
+  }
+
+  return (
+    <DomWellbesForm schema={MaterialSchema} initialValue={initialValue} onSubmit={handleSubmit} formRef={formRef}>
+      <DomWellbesForm.Errors />
+      <DomWellbesForm.Field.String name="sku" />
+      <DomWellbesForm.Button.Submit loading={pending} />
+    </DomWellbesForm>
+  )
+}
+```
+
+Ключевые моменты:
+
+- `run(action, onSuccess?)` выполняет `action`, отслеживает `pending`, и при ошибке сам вызывает
+  `mapServerErrors`/`applyServerErrors` через переданный `formRef` — `middleware.onError` не
+  нужен вовсе, `action` просто бросает (как и в примере выше).
+- При ошибке `run` применяет её к форме, показывает toast и **перебрасывает исходную ошибку**
+  дальше (тип — `Promise<TData>`, не `Promise<TData | undefined>`) — это обязательно, не
+  косметика: если бы `run` глотала ошибку, декларативный `<Form>` считал бы сабмит успешным и
+  своим post-submit `reset()` стирал бы только что применённые field-level ошибки раньше, чем
+  пользователь успевал бы их увидеть. Вызывающему коду свой `try/catch` всё равно не нужен —
+  `<Form>` сам ловит исключение из `onSubmit` там же, где уже ловит `throw` из
+  `middleware.onError`. При успехе `run` резолвится результатом `action`.
+- `toaster` — опционален, минимальный контракт `{ create: (opts: { type: 'error' | 'success';
+  title: string }) => void }`, совпадает с `createAppToaster()` из `@letar/ui`. Без него
+  единственный канал ошибки — `<Form.Errors />` (для `formErrors`) и подсветка поля (для
+  `fieldErrors`).
+- `successMessage` — опционален; без него `toaster.create({ type: 'success' })` не вызывается
+  (молчаливый успех — валидный случай, например когда сразу следует `router.push`).
+- Низкоуровневый путь (`formRef` + `middleware.onError` вручную, пример выше) остаётся рабочим
+  для тех, кому нужен полный контроль — например разное поведение `onError` в зависимости от
+  типа ошибки. `useFormServerAction` не заменяет его, а снимает ceremony для типового случая.
+
 ## Better Auth — throw-bridge
 
 `@letar/forms` (и `mapServerErrors`/`applyServerErrors`) требует, чтобы `onSubmit` **бросал**

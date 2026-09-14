@@ -6,23 +6,63 @@
 
 ## Backlog (запросы от агентов)
 
-### [2026-09-14] Хелпер submit-оркестрации (pending/toast/server-error mapping в один вызов) (от domwellbes-dev)
+### ✅ [2026-09-14] Хелпер submit-оркестрации (pending/toast/server-error mapping в один вызов) (закрыт forms-react v0.9.0/forms v2.14.13/forms-core v0.12.4, от domwellbes-dev)
 
-- **Запросил:** domwellbes-dev
+- **Запросил:** domwellbes-dev (тред `forms-submit-orchestration-helper`)
 - **Приоритет:** normal
 - **Описание:** аудит форм domwellbes нашёл собственный хук `useServerActionForm` (63
   потребителя), не использующий `mapServerErrors`/`applyServerErrors` — все серверные ошибки
   схлопываются в одну строку без field-level мэппинга. Документированный путь (`formRef` +
   `middleware.onError` + `mapServerErrors`/`applyServerErrors` + `<Form.Errors />`) существует
   и работает (образец — `material-form.tsx`), но ceremony оказалась выше порога, при котором
-  разработчик тянется к самопальному хуку. Нужна одна точка входа поверх существующего пути
-  (набросок API — `useFormServerAction(formRef, { fieldMap, toaster })`), не новая возможность.
+  разработчик тянется к самопальному хуку.
+- **Решение:** `useFormServerAction(formRef, { fieldMap, toaster, successMessage })` в
+  `@letar/forms-react` (framework-free относительно UI-скина, `libs/forms-react/src/lib/form/
+  use-form-server-action.ts`) — реэкспортирован из `@letar/forms` v2.14.13 (единственный
+  потребитель declarative `<Form>` сейчас; `forms-shadcn` не участвует — тот же класс, что
+  `createAsyncActionQuery`, `formRef`/`AppFormApi` пока Chakra-скин-only концепция). `run(action,
+  onSuccess?)` выполняет `action`, отслеживает `pending`, при ошибке сам вызывает
+  `mapServerErrors`/`applyServerErrors` через `formRef` (без `middleware.onError`), опциональный
+  toaster показывает `formErrors.join('. ')` или, если `formErrors` пуст (например `P2002` с
+  попаданием в `fieldMap` — ошибка целиком ушла в конкретное поле), сообщения `fieldErrors`.
+  `successMessage` опционален — без него `toaster.create({type:'success'})` не вызывается
+  (молчаливый успех валиден, например перед `router.push`).
+- **⚠️ Исправлено ПОСЛЕ первого закрытия (живой браузерной проверкой, не unit-тестами):**
+  1. `run` изначально глотала ошибку (`return undefined` в catch) — из-за этого декларативный
+     `<Form>` считал сабмит успешным и своим post-submit `reset()` стирал только что применённые
+     через `applyServerErrors` field-level ошибки раньше, чем пользователь успевал их увидеть.
+     Теперь `run` **перебрасывает** исходную ошибку после применения
+     `mapServerErrors`/`applyServerErrors` и показа toast — тип `run` изменился с
+     `Promise<TData | undefined>` на `Promise<TData>`. Вызывающему коду свой `try/catch`
+     по-прежнему не нужен: `<Form>` сам ловит исключение из `onSubmit` там же, где уже ловит
+     `throw` из `middleware.onError`.
+  2. Даже после (1) ошибка визуально не отображалась на поле — `applyServerErrors`
+     (`@letar/forms-core`) писала сообщение в плоский `meta.errors`, а TanStack Form
+     пересчитывает `meta.errors` из `meta.errorMap` при каждом обновлении стора, так что прямой
+     push переживал ровно до следующего пересчёта (тот же тик). Фикс — `errorMap.onServer`
+     (штатный ключ TanStack Form для внешне применяемых ошибок), см. `@letar/forms-core`
+     CHANGELOG v0.12.4. **Затрагивает ВСЕХ потребителей `applyServerErrors` монорепо-wide**, не
+     только этот хук — включая существующие auth-страницы domwellbes и dsperevod.
+  - Не в этом фиксе: сам `useServerActionForm` в domwellbes не удалён и 63 потребителя не
+    мигрированы — задача закрывает только саму возможность в библиотеке; миграция потребителей
+    на новый хук (или явное решение оставить как есть, раз старый хук работает) — на усмотрение
+    domwellbes-dev, отдельная задача не заводилась.
+- **Тесты:** `use-form-server-action.spec.ts` (forms-react) — pending true/false, onSuccess с
+  результатом, toaster.success только при заданном `successMessage`, field-only ошибка
+  (P2002+fieldMap) не трогает `setErrorMap`, toaster.error с сообщением поля при пустом
+  `formErrors`, toaster.error+`setErrorMap` при form-level ошибке, formRef.current===null не
+  роняет `run`, **ошибка перебрасывается** (`rejects.toBe`) во всех кейсах выше. Плюс
+  `map-server-errors.spec.ts` (forms-core) — `applyServerErrors` пишет в `errorMap.onServer`, не
+  в плоский `errors`, сохраняет соседние ключи `errorMap`, маппит несколько полей,
+  form-level через `setErrorMap`.
+- **Документация:** `docs/server-errors.md` §«useFormServerAction — та же связка в один вызов» —
+  рядом с низкоуровневым путём (не заменяет его), README обеих библиотек (таблица «Что внутри» у
+  forms-react, таблица документации у forms).
 - **Ссылки:** `apps/domwellbes/src/_hooks/use-server-action-form.ts` (самопальный хук, 63
   потребителя), `apps/domwellbes/src/app/(admin)/admin/materials/_components/material-form.tsx`
   (правильный образец), `apps/domwellbes/src/app/(admin)/admin/warehouses/[id]/_components/
   stock-document-forms.tsx` (дубль error-стейта ×4 в одном файле), `libs/forms/docs/
   server-errors.md` § «С декларативным `<Form>`».
-- **Статус:** передано forms-dev (тред `forms-submit-orchestration-helper`).
 
 ### ✅ [2026-09-14] Better Auth throw-bridge — `assertAuthOk` в `@letar/auth/client` (от domwellbes-dev)
 
