@@ -1,5 +1,15 @@
 # План разработки auth-hub
 
+## Код из письма + уведомление других вкладок (запланировано 2026-09-14, не начато)
+
+Подтверждение email 6-значным кодом (плагин Better Auth `emailOTP`), сброс пароля кодом (сейчас
+сброса пароля в auth-hub нет вообще), SSE-уведомление «email подтверждён в другой вкладке».
+Общие куски — в `libs/email`, `libs/auth`, `libs/pin-auth`. Полный пошаговый план —
+[PLAN_EMAIL_CODE.md](./PLAN_EMAIL_CODE.md).
+
+- [ ] Фаза 0 — общий слой (libs)
+- [ ] Фаза A — auth-hub (после пилота во втором приложении)
+
 ## ⚠️ Открытый вопрос: `TELEGRAM_WEBHOOK_SECRET` не настроен в проде (2026-09-08)
 
 После фикса fail-open проверки (`PLAN_COMPLETED.md` § «Fail-open Telegram webhook secret»)
