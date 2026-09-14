@@ -5674,4 +5674,27 @@ DOM-поведении минимален. Юнит/компонентные т�
 ---
 
 **Последнее обновление:** 2026-09-14 — фикс флаки-таймаута `field-signature.spec.tsx` (мок Canvas
-2D API в `vitest.setup.ts`, 2.14.9), детали в `PLAN_COMPLETED.md`.
+2D API в `vitest.setup.ts`, 2.14.9), детали в `PLAN_COMPLETED.md`. Аудит сестринских библиотек в
+тот же день — см. ниже.
+
+### Аудит Canvas 2D моков в сестринских библиотеках форм-экосистемы (2026-09-14)
+
+Проверка, не подвержены ли `forms-shadcn`/`forms-vue`/`forms-vue-shadcn`/`forms-angular` тому же
+классу флаки (нативный `.node`-аддон пакета `canvas`, peer dependency jsdom, переинициализация в
+каждом spec-файле при test isolation):
+
+- **`forms-vue`, `forms-vue-shadcn`, `forms-angular`** — уже защищены. Их `useSignatureField`/
+  `FieldSignatureComponent` реально вызывает `canvas.getContext('2d')`, но соответствующие
+  spec-файлы (`app-form.stage5.spec.ts` × 2, `app-form.stage-g.spec.ts`) держат собственный
+  `beforeEach`-стаб `HTMLCanvasElement.prototype.getContext`/`toDataURL` — нативный аддон там
+  не грузится вовсе. Правки не требуются.
+- **`forms-shadcn`** — был уязвим: `FieldSignature` вызывает `canvas.getContext('2d')` уже в
+  `useEffect` при монтировании (`initCanvas`), а `field-signature.spec.tsx` (5 тестов) не имел
+  никакого мока — каждый тест грузил настоящий нативный аддон (подтверждено эмпирически:
+  `jsdom.getContext('2d')` в изолированном Node-прогоне вернул реальный `CanvasRenderingContext2D`,
+  не `null`). 3 прогона `nx test forms-shadcn --skip-nx-cache` подряд не воспроизвели таймаут
+  (53 spec-файла — меньше, чем 109 у `libs/forms`, где баг проявлялся не при каждом прогоне), но
+  механизм идентичен. Фикс применён превентивно — тот же мок Canvas 2D API, что в
+  `libs/forms/vitest.setup.ts`, скопирован в `libs/forms-shadcn/vitest.setup.ts`. Прогон
+  `field-signature.spec.tsx` изолированно ускорился с ~5с до ~2.9с (полный прогон библиотеки —
+  без изменений, время съедает создание jsdom-окружения на 53 файла, не сам canvas-мок).
