@@ -245,6 +245,12 @@ boolean с явным «наследовать» через строковый �
 ⚠️ пост-сабмит `reset(dataToSubmit)` снимает `isTouched` — следующий рендер со статическим
 `initialValue` (не «что реально отправлено») перетирает поле, бьёт по любому полю, не только
 select ·
+[letar-forms-server-errors-errormap-onserver](/.claude/docs/letar-forms-server-errors-errormap-onserver.md)
+⚠️ `applyServerErrors` обязан писать в `field.state.meta.errorMap.onServer`, не в производный
+`meta.errors` напрямую — TanStack Form пересчитывает `errors` из `errorMap` на каждом
+обновлении стора, прямой push переживает ровно до следующего пересчёта (тот же тик); мок
+`formRef` в unit-тесте (`vi.fn()` без реального стора) этого не ловит — нужна живая браузерная
+проверка ·
 [letar-forms-missing-i18nprovider-english-hints](/.claude/docs/letar-forms-missing-i18nprovider-english-hints.md)
 ⚠️ без `<FormI18nProvider locale="ru">` в дереве провайдеров подсказки валидации
 (`z.string().min/max`) молча остаются на английском, хотя RU-локализация в библиотеке уже
