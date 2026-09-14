@@ -7,6 +7,18 @@
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-14
+
+### Added
+
+- `createPinVerifyRateLimiter(getClientIp, config?)` в `@letar/pin-auth/server` — IP-based
+  rate-limit поверх `@letar/api-server` (окно 15 мин / 30 запросов по умолчанию), поверх
+  счётчика попыток на email (`reserveAttempt`/`incrementAttempts`). Оба потребителя
+  (`driving-school`, `mandala`) держали почти дословную копию этого хелпера в своих
+  `_lib/pin-rate-limit.ts` — отличались только источником IP; дедуплицировано, оба переведены
+  на общий хелпер. См. README, раздел «`createPinVerifyRateLimiter`».
+- Новая зависимость: `@letar/api-server` (`workspace:*`).
+
 ## [0.4.0] - 2026-09-14
 
 ### Removed
