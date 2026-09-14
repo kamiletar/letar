@@ -87,6 +87,21 @@ const CHECKS = [
     doc: '.claude/docs/root-pin-peer-drift.md',
   },
   {
+    id: 'pin-drift',
+    group: 'deps',
+    title: 'apps/libs package.json разошлись с корневым намеренным точным пином',
+    run: ['bun', ['scripts/check-pin-drift.mjs']],
+    // warn: находка на регистрации (2026-09-13) — 8 пакетов сразу разошлись с
+    // корневым zod@4.4.3 (caret-диапазон потребителя резолвится bun isolated
+    // linker независимо от корня, дедуп только по буквальному совпадению строки
+    // версии). Блокировать этим существующие коммиты одним махом не нужно —
+    // поднять до gate после того, как долг разгребён.
+    severity: 'warn',
+    ci: 'partial',
+    ciNote: 'приватные submodule не выкачаны — их package.json не проверены',
+    doc: '.claude/docs/zod-per-package-pin-drift.md',
+  },
+  {
     id: 'implicit-deps',
     group: 'deps',
     title: '@letar/*-пакеты в nx.implicitDependencies без записи в dependencies',
