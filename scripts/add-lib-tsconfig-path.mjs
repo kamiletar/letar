@@ -1,8 +1,14 @@
 #!/usr/bin/env node
 // Добавляет строку в compilerOptions.paths всех apps/*/tsconfig.json (включая
-// apps/<app>/renderer|main|.../tsconfig.json), где уже есть путь-алиас библиотеки-якоря.
+// apps/<app>/renderer|main|.../tsconfig.json) и libs/*/tsconfig.json|tsconfig.lib.json|
+// tsconfig.spec.json (библиотеки тоже потребляют подпути друг друга — см.
+// scripts/check-lib-subpath-paths.mjs), где уже есть путь-алиас библиотеки-якоря.
 // Relative-prefix ("../../" vs "../../../") вычисляется по фактическому расположению
 // каждого tsconfig.json — не передаётся руками.
+//
+// Библиотека-владелец правки сама пропускается внутри libs/ (не добавляем
+// самоссылку на свои же подпути) — владелец вычисляется из --package
+// ("@letar/forms-core/security" → каталог "forms-core").
 //
 // Использование:
 //   node scripts/add-lib-tsconfig-path.mjs \
@@ -53,12 +59,31 @@ if (!packageName || !target) {
 
 const targetAbs = path.resolve(repoRoot, target)
 
+// Каталог библиотеки-владельца правки (для исключения самоссылки внутри libs/) —
+// "@letar/forms-core/security" → "forms-core", "@letar/forms" → "forms".
+const ownerLibDirOfPackage = packageName.replace(/^@letar\//, '').split('/')[0]
+
 function findTsconfigs(dir, depth) {
   return walk(dir, (entry) => entry === 'tsconfig.json', depth)
 }
 
+const LIB_TSCONFIG_NAMES = ['tsconfig.json', 'tsconfig.lib.json', 'tsconfig.spec.json']
+
+function findLibTsconfigs(libsDir) {
+  return walk(libsDir, (entry) => LIB_TSCONFIG_NAMES.includes(entry), 1)
+}
+
+function ownerLibDir(libsDir, tsconfigPath) {
+  return path.relative(libsDir, tsconfigPath).split(path.sep)[0]
+}
+
 const appsDir = path.join(repoRoot, 'apps')
-const tsconfigFiles = findTsconfigs(appsDir, 2).sort()
+const libsDir = path.join(repoRoot, 'libs')
+const appTsconfigFiles = findTsconfigs(appsDir, 2)
+const libTsconfigFiles = findLibTsconfigs(libsDir).filter(
+  (p) => ownerLibDir(libsDir, p) !== ownerLibDirOfPackage,
+)
+const tsconfigFiles = [...appTsconfigFiles, ...libTsconfigFiles].sort()
 
 function extractPathsBlock(text) {
   const keyMatch = text.match(/"paths"\s*:\s*\{/)
@@ -139,8 +164,15 @@ for (const tsconfigPath of tsconfigFiles) {
   const indentMatch = inner.match(/\n(\s*)"/)
   const indent = indentMatch ? indentMatch[1] : '      '
 
+  // Существующие записи в paths (и в apps/, и в libs/) выражают путь не как кратчайший
+  // относительный (для соседних библиотек внутри libs/ он был бы короче), а как «подняться до
+  // корня репо, затем спуститься по пути от корня» — например "../../libs/forms-core/..." из
+  // libs/forms-react, хотя "../forms-core/..." резолвится в тот же файл. Повторяем эту
+  // конвенцию, а не самый короткий путь, чтобы новая строка не отличалась стилем от соседей.
   const tsconfigDir = path.dirname(tsconfigPath)
-  let relPath = path.relative(tsconfigDir, targetAbs).split(path.sep).join('/')
+  const upToRoot = path.relative(tsconfigDir, repoRoot).split(path.sep).join('/')
+  const targetFromRoot = path.relative(repoRoot, targetAbs).split(path.sep).join('/')
+  let relPath = upToRoot ? `${upToRoot}/${targetFromRoot}` : `./${targetFromRoot}`
   if (!relPath.startsWith('.')) { relPath = './' + relPath }
 
   const newEntry = `"${packageName}": ["${relPath}"]`
