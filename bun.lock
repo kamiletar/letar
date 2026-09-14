@@ -546,6 +546,7 @@
         "@letar/forms": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/pg-url": "workspace:*",
+        "@letar/pin-auth": "workspace:*",
         "@letar/seed-utils": "workspace:*",
         "@simplewebauthn/browser": "^13.3.0",
         "@simplewebauthn/server": "^13.3.1",

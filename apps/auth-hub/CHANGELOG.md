@@ -4,6 +4,23 @@
 
 ## [Unreleased]
 
+## [0.7.21] - 2026-09-15
+
+### Added
+
+- Регистрация показывает инлайн-ввод 6-значного кода вместо «Проверьте почту» (PLAN_EMAIL_CODE.md,
+  Фаза A.2/A.3): `verify-email-code.tsx` (`useEmailCodeVerification` + `EmailCodePanel` из
+  `@letar/pin-auth/client`), автосабмит на шестой цифре, «Отправить код повторно» с отсчётом.
+- Кросс-вкладочное определение «подтверждено по ссылке в другой вкладке/на другом устройстве»
+  (`verified-elsewhere.tsx`) через SSE-поток `/api/auth/verification-stream`.
+- Ссылки `/sign-in` ↔ `/sign-up` сохраняют query-строку — не теряют OIDC-параметры при переходе
+  между входом и регистрацией.
+
+### Changed
+
+- `register-form.tsx` переведён с ручного `useActionState` на `AuthHubForm` (`.claude/rules/forms.md`).
+- `register.action.ts`: ошибки разбираются по стабильному `body.code`, не по тексту `message`.
+
 ## [0.7.20] - 2026-09-09
 
 ### Changed

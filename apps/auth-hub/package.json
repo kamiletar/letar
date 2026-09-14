@@ -1,6 +1,6 @@
 {
   "name": "auth-hub",
-  "version": "0.7.20",
+  "version": "0.7.21",
   "private": true,
   "nx": {
     "implicitDependencies": [
@@ -28,6 +28,7 @@
     "@letar/forms": "workspace:*",
     "@letar/glitchtip": "workspace:*",
     "@letar/pg-url": "workspace:*",
+    "@letar/pin-auth": "workspace:*",
     "@letar/seed-utils": "workspace:*"
   },
   "devDependencies": {

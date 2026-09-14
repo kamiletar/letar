@@ -338,43 +338,32 @@ emailAndPassword: { ..., revokeSessionsOnPasswordReset: true },
 - [x] `src/lib/auth-client.ts`: добавлен `emailOTPClient()` рядом с `magicLinkClient()`.
 - [x] `nx typecheck:tsgo auth-hub` / `nx lint auth-hub` — зелёные.
 
-### A.2. Регистрация → код
+### A.2. Регистрация → код ✅ (2026-09-15)
 
-- [ ] `register-form.tsx` перевести на `AuthHubForm` (поля name/email/password/acceptPrivacy по
-      существующей `RegisterSchema`; галочку согласия с политикой **сохранить** — это 152-ФЗ).
-      `data-field-name` у полей появится сам — e2e-локаторы `input[name="email"]` на `/sign-up`
-      сломаются, чинить в A.6.
-- [ ] `register.action.ts`: разбирать ошибку по `body.code` (`USER_ALREADY_EXISTS`,
-      `USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL`, `PASSWORD_TOO_SHORT`, `PASSWORD_TOO_LONG`), как уже
-      сделано в `login.action.ts`, а не по `message.includes`. ⚠️ Проверить, доезжает ли cookie
-      потока из server action: вызов `auth.api.signUpEmail({ headers })` в server action + плагин
-      `nextCookies` — Set-Cookie должен появиться в ответе. Проверять по `read_network_requests`,
-      не на глаз.
-- [ ] Вместо «Проверьте почту» — новый клиентский компонент
-      `(auth)/sign-up/_components/verify-email-code.tsx`:
-      - `useEmailCodeVerification({ verify: (code) => authClient.emailOtp.verifyEmail({ email, otp: code }) → {ok}/{ok:false, code: error.code}, resend: () => authClient.sendVerificationEmail({ email, callbackURL }) , onVerified })`;
-      - повторная отправка идёт через **`/send-verification-email`**, а не
-      `/email-otp/send-verification-otp`: только так приходит письмо со ссылкой и кодом (R2) и
-      обновляется cookie потока;
-      - `onVerified`: `window.location.href = callback`, где `callback` — результат
-      `usePostSignInCallback()` (OIDC-продолжение, если форма открыта из OIDC-флоу, иначе `/`).
-      Полная навигация, не `router.push`: сессия только что поставлена cookie;
-      - `renderCodeForm`: `AuthHubForm` со схемой `createPinSchema({ length: 6 })`,
-      `AuthHubForm.Field.Auto name="pin" onComplete={onComplete}`, `key={formKey}`;
-      - `elsewhere` — компонент из A.3.
-- [ ] Ссылка «Зарегистрироваться» на `/sign-in` (и обратно на `/sign-up`) должна **сохранять
-      query-строку**, иначе регистрация из OIDC-флоу теряет возврат в клиентское приложение.
-      Сейчас ссылки со `/sign-in` на `/sign-up` нет — найти, откуда пользователь попадает на
-      регистрацию, и прокинуть `searchParams`.
+- [x] `register-form.tsx` переведён на `AuthHubForm` (поля name/email/password/acceptPrivacy по
+      существующей `RegisterSchema`; галочка согласия с политикой сохранена — 152-ФЗ).
+      `data-field-name` у полей появился сам — починка e2e-локаторов `/sign-up` — задача A.6.
+- [x] `register.action.ts`: ошибка разбирается по `body.code` (`USER_ALREADY_EXISTS`,
+      `USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL`, `PASSWORD_TOO_SHORT`/`PASSWORD_TOO_LONG`), как в
+      `login.action.ts`, не по `message.includes`. Доставка cookie потока из server action —
+      проверка `read_network_requests` перенесена в ручную проверку A.7 (нужен живой dev-сервер).
+- [x] Вместо «Проверьте почту» — клиентский компонент
+      `(auth)/sign-up/_components/verify-email-code.tsx`: `useEmailCodeVerification` с
+      `verify`/`resend` через `authClient.emailOtp.verifyEmail`/`authClient.sendVerificationEmail`
+      (повторная отправка — через `/send-verification-email`, не `/email-otp/send-verification-otp`,
+      см. план); `onVerified` → `window.location.href = callbackUrl` (полная навигация, не
+      `router.push`); `renderCodeForm` — `AuthHubForm` со схемой `createPinSchema({ length: 6 })` +
+      `AuthHubForm.Field.Auto name="pin" onComplete={onComplete}`; `elsewhere` — компонент A.3.
+- [x] Ссылки `/sign-in` ↔ `/sign-up` сохраняют query-строку (`sign-in/page.tsx`,
+      `sign-up/page.tsx` — обе стали `async` с `searchParams`, вычисляют `signUpHref`/`signInHref`).
 
-### A.3. «Подтверждено в другой вкладке» — честный текст
+### A.3. «Подтверждено в другой вкладке» — честный текст ✅ (2026-09-15)
 
-- [ ] Компонент `verified-elsewhere.tsx`: при монтировании `authClient.getSession({ query: { disableCookieCache: true } })`.
-      - Сессия есть и `user.emailVerified` → «Email подтверждён» + кнопка «Продолжить»
-      (`window.location.href = callback`). Так бывает, если ссылку открыли в этом же браузере.
-      - Сессии нет → «Email подтверждён. Войдите с паролем» + кнопка на `/sign-in?<те же query>`
-      с подставленным email. Так бывает, если ссылку открыли на телефоне: cookie на этом
-      компьютере нет, «вы вошли» было бы неправдой.
+- [x] Компонент `verified-elsewhere.tsx`: при монтировании
+      `authClient.getSession({ query: { disableCookieCache: true } })`.
+      - Сессия есть и `emailVerified` → «Продолжить» (`window.location.href = callbackUrl`).
+      - Сессии нет → «Войти» на `/sign-in?email=...&callbackUrl=...` (ссылка открыта на другом
+      устройстве — cookie здесь нет, «вы вошли» было бы неправдой).
 
 ### A.4. Сброс пароля кодом (новая функция)
 

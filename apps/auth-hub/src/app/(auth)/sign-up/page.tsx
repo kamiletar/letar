@@ -12,7 +12,11 @@ export const metadata: Metadata = {
 /**
  * Страница регистрации
  */
-export default function SignUpPage() {
+export default async function SignUpPage({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
+  const params = await searchParams
+  const query = new URLSearchParams(params).toString()
+  const signInHref = query ? `/sign-in?${query}` : '/sign-in'
+
   return (
     <Card.Root maxW="4xl" w="full" mx={4}>
       <Card.Body>
@@ -42,7 +46,7 @@ export default function SignUpPage() {
         <Text fontSize="sm" color="fg.muted">
           Уже есть аккаунт?{' '}
           <Box asChild color="colorPalette.fg" fontWeight="medium">
-            <NextLink href="/sign-in">Войти</NextLink>
+            <NextLink href={signInHref}>Войти</NextLink>
           </Box>
         </Text>
       </Card.Footer>

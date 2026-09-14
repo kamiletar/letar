@@ -1,6 +1,7 @@
 import { BLOCKED_FOR_RU, getCountryCode } from '@/lib/geo'
-import { Card, Heading, HStack, Separator, Stack, Text } from '@chakra-ui/react'
+import { Box, Card, Heading, HStack, Separator, Stack, Text } from '@chakra-ui/react'
 import type { Metadata } from 'next'
+import NextLink from 'next/link'
 import { Suspense } from 'react'
 import { LoginForm } from './_components/login-form'
 import { MagicLinkForm } from './_components/magic-link-form'
@@ -38,6 +39,9 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
   const countryCode = await getCountryCode()
   const isRussianIp = countryCode === 'RU'
   const allowedProviders = ALL_OAUTH_PROVIDERS.filter((p): p is OAuthProvider => !isRussianIp || !BLOCKED_FOR_RU.has(p))
+
+  const query = new URLSearchParams(params).toString()
+  const signUpHref = query ? `/sign-up?${query}` : '/sign-up'
 
   return (
     <Card.Root maxW="4xl" w="full" mx={4}>
@@ -80,9 +84,17 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
         </HStack>
       </Card.Body>
       <Card.Footer justifyContent="center">
-        <Text fontSize="xs" color="fg.subtle" textAlign="center">
-          Единый аккаунт для всех сервисов *.letar.best
-        </Text>
+        <Stack gap={1} align="center">
+          <Text fontSize="sm" color="fg.muted">
+            Нет аккаунта?{' '}
+            <Box asChild color="colorPalette.fg" fontWeight="medium">
+              <NextLink href={signUpHref}>Зарегистрироваться</NextLink>
+            </Box>
+          </Text>
+          <Text fontSize="xs" color="fg.subtle" textAlign="center">
+            Единый аккаунт для всех сервисов *.letar.best
+          </Text>
+        </Stack>
       </Card.Footer>
     </Card.Root>
   )
