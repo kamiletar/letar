@@ -1,5 +1,14 @@
 # Выполненные задачи — Kami
 
+## Общая `slugify` из `@letar/format-utils` (2026-09-15)
+
+Найдено при выносе дублей `slugify` в svoichuzhie — репо-широкий grep вскрыл ещё 5 копий вне
+той сессии, kami была одной из них. Локальная таблица транслитерации в
+`src/lib/utils/slugify.ts` буквально совпадала с `libs/format-utils/src/lib/slugify.ts` (ГОСТ
+7.79-2000) — заменена импортом, сохранены `uniqueSlug()` и обрезка до 100 символов. `@letar/
+format-utils` добавлена в `dependencies`. `nx lint kami`/`typecheck:tsgo kami` — зелёные.
+Коммит `5126b6294`.
+
 ## Разбор падения `nx build` на discovery-fetch better-auth (2026-09-02)
 
 Попутно при верификации фикса §33 `PLAN-INFRA-2.md` (индексация staging через `robots.ts`)
