@@ -1,5 +1,24 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-15 (сессия 5) — `Form.Field.Date` + `Form.UrlSync` совместимость (закрыт v2.14.17)
+
+**Задача:** единственная нерешённая задача в очереди `forms-coordinator-dev` (high priority, от
+letar-dev, тред `forms-date-urlsync`) — `FieldDate` безусловно коммитил `new Date(raw)`, даже
+когда схема поля не требует `Date` (типичный `Form.UrlSync`-фильтр без схемы или со строковой
+схемой). `Form.UrlSync` сравнивал результат со строковым `defaults` через строгое `===`, поле
+навсегда считалось «активным», в URL уезжал `Date.toString()` вместо `YYYY-MM-DD`.
+
+**Сделано:** реализован вариант 1 из разбора координатора
+(`.claude/docs/letar-forms-field-date-urlsync-date-object.md`), изолирован в `field-date.tsx`.
+`onChange` коммитит `Date` только при `resolved.constraints.schemaType === 'date'` (реальный
+`z.date()`/`z.coerce.date()`), иначе — строку. Signal уже вычислялся `getZodConstraints` для
+min/max-хинтов — отдельный резолвер zodType не понадобился. 3 новых теста в
+`field-date.spec.tsx` (без схемы → строка, схема `z.string()` → строка, схема `z.date()` → `Date`,
+обратная совместимость). `@letar/forms` 2.14.16 → 2.14.17.
+
+**Проверка:** `nx test @letar/forms` — 804/804 зелёных; `nx typecheck:tsgo`/`nx lint` — зелёные.
+Ответ отправлен `forms-coordinator-dev` в тред `forms-date-urlsync`.
+
 ## 2026-09-15 (сессия 4) — миграция `Field.NativeSelect` → `Field.Select` в приложениях (первая волна)
 
 **Задача:** после того как `Field.NativeSelect` был помечен `@deprecated` (сессия 2026-09-15,
