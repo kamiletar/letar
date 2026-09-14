@@ -954,6 +954,7 @@
       "name": "@letar/synth",
       "version": "0.22.5",
       "dependencies": {
+        "@letar/format-utils": "workspace:*",
         "@letar/hooks": "workspace:*",
         "@modelcontextprotocol/sdk": "^1.30.0",
         "zod": "4.4.3",
@@ -1055,7 +1056,7 @@
     },
     "libs/auth": {
       "name": "@letar/auth",
-      "version": "0.15.1",
+      "version": "0.15.2",
       "dependencies": {
         "@better-auth/utils": "^0.4.2",
         "@letar/pin-auth": "workspace:*",

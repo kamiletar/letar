@@ -1,5 +1,6 @@
 import type { Patch } from '@/lib/patch/schema'
 import { createKvStore } from '@/lib/storage/indexeddb-kv'
+import { slugify as slugifyBase } from '@letar/format-utils'
 
 // Приватное локальное хранилище патчей — IndexedDB браузера, ничего не покидает машину
 // (см. claude.md §6 «Приватность»). Публикация в /gallery — отдельный ручной шаг (копия в patches/*.json).
@@ -11,52 +12,15 @@ const store = createKvStore<Patch>('synth-patches', 'patches', {
   ],
 })
 
-// Транслитерация имени в id-совместимый слаг (схема патча требует /^[a-z0-9-]+$/)
+/**
+ * Транслитерация имени в id-совместимый слаг (схема патча требует /^[a-z0-9-]+$/).
+ *
+ * Использует общую транслитерацию @letar/format-utils (ГОСТ 7.79-2000, х→kh, щ→shch, ё→yo) —
+ * раньше локальная таблица использовала упрощённую транскрипцию (х→h, щ→sch, ё→e). Влияет
+ * только на генерацию новых слагов.
+ */
 export function slugify(name: string): string {
-  const map: Record<string, string> = {
-    а: 'a',
-    б: 'b',
-    в: 'v',
-    г: 'g',
-    д: 'd',
-    е: 'e',
-    ё: 'e',
-    ж: 'zh',
-    з: 'z',
-    и: 'i',
-    й: 'y',
-    к: 'k',
-    л: 'l',
-    м: 'm',
-    н: 'n',
-    о: 'o',
-    п: 'p',
-    р: 'r',
-    с: 's',
-    т: 't',
-    у: 'u',
-    ф: 'f',
-    х: 'h',
-    ц: 'ts',
-    ч: 'ch',
-    ш: 'sh',
-    щ: 'sch',
-    ъ: '',
-    ы: 'y',
-    ь: '',
-    э: 'e',
-    ю: 'yu',
-    я: 'ya',
-  }
-  const translit = name
-    .toLowerCase()
-    .split('')
-    .map((ch) => map[ch] ?? ch)
-    .join('')
-  const slug = translit
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 40)
+  const slug = slugifyBase(name).slice(0, 40)
   return slug || 'patch'
 }
 
