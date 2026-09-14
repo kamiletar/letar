@@ -22,6 +22,26 @@
 import { createAuthClient, OnlyFor, SessionProvider } from '@letar/auth/client'
 ```
 
+#### ResendVerificationButton — передавай `authClient` напрямую, без адаптера
+
+`ResendVerificationButton` принимает узкий структурный тип `ResendCapableAuthClient`
+(`{ sendVerificationEmail(params) }`), а не полный тип клиента Better Auth — но это сделано
+ради изоляции контракта, а не потому что настоящий клиент ему не подходит. Реальный
+`authClient` (включая обёрнутый `createAuthClientWithOAuth`) уже структурно совместим:
+`sendVerificationEmail` принимает совместимые параметры и возвращает объект, из которого TS
+спокойно вычленяет нужное поле `error`. Оборачивать его в `useMemo`-адаптер не нужно:
+
+```tsx
+import { authClient } from '@/lib/auth-client'
+import { ResendVerificationButton } from '@letar/auth/client'
+
+<ResendVerificationButton authClient={authClient} email={email} callbackURL="/dashboard" />
+```
+
+⚠️ Найдено 9 приложений (2026-09-15), независимо заведших дословно одинаковый
+`const resendClient = useMemo(() => ({ sendVerificationEmail: ... }), [])` — во всех случаях
+адаптер был лишним, `nx typecheck:tsgo` зелёный и без него.
+
 ### @letar/auth/server
 
 Серверные хелперы для Server Components и Server Actions.

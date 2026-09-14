@@ -7,6 +7,41 @@
 
 ## [Unreleased]
 
+## [0.15.1] - 2026-09-15
+
+### Fixed
+
+- **README: задокументировано, что `ResendVerificationButton` принимает `authClient` напрямую —
+  адаптер не нужен.** Найдено при переносе auth-страниц aboi на `@letar/forms`: 9 приложений
+  (aboi ×2, domwellbes ×2, dsperevod ×2, svoichuzhie ×3) независимо завели дословно одинаковый
+  `const resendClient = useMemo(() => ({ sendVerificationEmail: ... }), [])`, хотя
+  `ResendCapableAuthClient` — узкий структурный тип именно ради того, чтобы полный клиент Better
+  Auth (включая `createAuthClientWithOAuth`) в него укладывался без обёртки: `auth-hub` и
+  `domwellbes/cabinet` уже передавали `authClient` напрямую и типчекались чисто. Адаптеры убраны
+  из всех 9 мест, `nx typecheck:tsgo`/`nx lint` зелёные на всех пяти затронутых приложениях
+  (aboi, domwellbes, dsperevod, svoichuzhie, auth-hub). Изменений в самом компоненте нет — только
+  README получил явный пример и предупреждение.
+
+## [0.15.0] - 2026-09-15
+
+### Added
+
+- **Код из письма + уведомление других вкладок — общий серверный слой** (Фаза 0
+  `PLAN_EMAIL_CODE.md`, R1–R6): `createVerificationStreamToken`/`readVerificationStreamToken`
+  (`./server`) — подписанный HMAC-SHA256 токен SSE-потока подтверждения email вместо email в URL
+  (ключ HMAC производный от `secret`, не сам `secret`); `verificationStreamCookie()` — Better
+  Auth плагин, ставящий httpOnly-cookie с этим токеном после `/sign-up/email` и
+  `/send-verification-email` (⚠️ должен стоять в `plugins` до `nextCookies()`);
+  `createVerificationStreamRoute(options)` — фабрика Next.js Route Handler для самого SSE-потока
+  (401 без валидной cookie, не 404 для неизвестного email — иначе роут превращается в оракул
+  «есть ли аккаунт»); `createEmailCodeOptions(deps)`/`EMAIL_CODE_DEFAULTS`/
+  `EMAIL_CODE_DISABLED_PATHS`/`createEmailVerificationCode` — общая сборка опций плагина
+  `emailOTP` и хелпер R2 (код создаётся через `auth.api.createVerificationOTP` внутри
+  `sendVerificationEmail` приложения, не через встроенный `sendVerificationOnSignUp` плагина —
+  `overrideDefaultEmailVerification` не работает из-за `defu`-склейки опций в `runPluginInit`
+  better-auth). Оба приложения-потребителя (auth-hub, приватный пилот) реализуют по этому слою
+  свою Фазу A/аналог — сам этот слой ничего не меняет в существующих потребителях `@letar/auth`.
+
 ## [0.14.0] - 2026-09-14
 
 ### Added
