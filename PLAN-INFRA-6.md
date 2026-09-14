@@ -309,6 +309,15 @@ caret-диапазону `^3.36.1`. Проверено эмпирически н
       `scripts/check-all.mjs` понижена обратно `gate` → `warn` до разгребания долга (тот же
       механизм, что уже применялся выше — вернуть в `gate` можно тем же способом, что 2026-08-28).
       Разбор — `.claude/rules/libs.md` § «Потребителю нужны `paths`…». Коммит `814ef4c42`.
+- [x] ✅ **Долг из `libs/*` разгребён, `lib-subpath-paths` снова `gate` (2026-09-14, тем же днём).**
+      8 потребителей из предыдущего пункта (`folder-player-react`, `forms-react`, `forms-shadcn`,
+      `forms` — 7 файлов `tsconfig.lib.json`/`tsconfig.spec.json`) получили недостающие строки
+      `paths` на `@letar/forms-core/*`, `@letar/forms-react/testing`,
+      `@letar/folder-scan/media-extensions`. `nx run-many -t typecheck:tsgo -p
+      folder-player-react,forms-react,forms-shadcn,forms` зелёный, `node
+      scripts/check-lib-subpath-paths.mjs` — чистый exit 0. `severity` в `scripts/check-all.mjs`
+      вернулась `warn` → `gate`, `.claude/rules/libs.md` переписан в прошедшем времени. Коммит
+      `0aaa2ec56`.
 - [ ] ⚠️ **Открытый вопрос: push ждёт одобрения.** Коммиты `f416de2a` (скрипт), `5ec8a3c6`
       (чеклист + док), `2f99168b` (эта секция) лежат локально — вместе с более ранними
       `8f610b5a`/`47c4754b`/`adff3120` из самой сессии патча.
