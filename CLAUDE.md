@@ -78,6 +78,11 @@ generic-обёртка (`TArgs extends unknown[]`, `createHandler` в animatrona
 callback-параметром вида `(x = default) => ...` — tsgo выводит `TArgs` как `unknown[]`; фикс не
 явная аннотация+eslint-disable, а `x: T | undefined` (или `?:` после уже опционального
 параметра) с `?? default` в теле, без конфликта с `no-inferrable-types` ·
+[tsgo-excessive-stack-depth-zenstack](/.claude/docs/tsgo-excessive-stack-depth-zenstack.md) ⚠️
+`TS2321: Excessive stack depth` при структурном сравнении вложенных ZenStack-типов — три
+подпаттерна фикса (аннотация callback-параметра, раздельные `await` вместо `Promise.all`,
+явная аннотация возврата в generic-фабрике) и крайний `as any[]` для обязательного
+`$transaction`; платформенная нестабильность Windows/Linux — неподтверждённая гипотеза ·
 [bun-lockfile-private-submodules](/.claude/docs/bun-lockfile-private-submodules.md) ⚠️
 `--frozen-lockfile` падает везде, где submodule не выкачаны; чистка `bun.lock` не держится ·
 [bun-lock-drift-unpushed-commits-blocks-all-deploys](/.claude/docs/bun-lock-drift-unpushed-commits-blocks-all-deploys.md)
@@ -107,6 +112,10 @@ bun от **root**, не от `deploy` (`/usr/local/bin/bun` → симлинк �
   бага, JSON объяснить не может — `deps update` снимает его как любую отставшую версию (так
   вернулось падение прод-сборки, §142), причины намеренных пинов живут в
   `scripts/intentional-pins.json` и сверяются gate-проверкой `intentional-pins` ·
+  [zod-per-package-pin-drift](/.claude/docs/zod-per-package-pin-drift.md) ⚠️ caret-диапазон
+  потребителя (`^4.4.3`) НЕ дедупает с точным корневым пином (`4.4.3`) под bun isolated linker —
+  только буквальное совпадение строки версии; 8 пакетов repo-wide независимо развели свой
+  точный пин `4.6.2`, блокировало деплой domwellbes (2026-09-13) ·
   [nested-package-resolution-under-bun-isolated-installs](/.claude/docs/nested-package-resolution-under-bun-isolated-installs.md)
   ⚠️ голый `import('@foo/bar')` от скрипта в `scripts/` не резолвит транзитивную зависимость чужого
   пакета под изолированной установкой bun, хотя она есть в `bun.lock` — фикс: `createRequire` от
