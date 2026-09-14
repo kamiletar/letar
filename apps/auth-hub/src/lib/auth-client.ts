@@ -2,7 +2,7 @@
 
 import type { UserRole } from '@/generated/prisma'
 import { createAuthClientWithOAuth, createOAuthButtons, createTypedUseSession } from '@letar/auth/client'
-import { magicLinkClient } from 'better-auth/client/plugins'
+import { emailOTPClient, magicLinkClient } from 'better-auth/client/plugins'
 
 /**
  * Better Auth клиент для Ключницы
@@ -10,7 +10,7 @@ import { magicLinkClient } from 'better-auth/client/plugins'
  * Использует createAuthClientWithOAuth для поддержки genericOAuth (Yandex)
  */
 export const authClient = createAuthClientWithOAuth({
-  plugins: [magicLinkClient()],
+  plugins: [magicLinkClient(), emailOTPClient()],
 })
 
 export const { signIn, signOut, signUp } = authClient

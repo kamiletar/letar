@@ -1,8 +1,16 @@
 import type { UserRole } from '@/generated/prisma'
-import { createAuth, createRedisStorage, createVkGetUserInfo } from '@letar/auth/server'
-import { reportEmailFailure, sendMagicLinkEmail, sendVerificationEmail } from '@letar/email'
+import {
+  createAuth,
+  createEmailCodeOptions,
+  createRedisStorage,
+  createVkGetUserInfo,
+  EMAIL_CODE_DISABLED_PATHS,
+  verificationStreamCookie,
+} from '@letar/auth/server'
+import { reportEmailFailure, sendMagicLinkEmail, sendPasswordResetEmail, sendVerificationEmail } from '@letar/email'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
-import { genericOAuth, magicLink } from 'better-auth/plugins'
+import { emailOTP, genericOAuth, magicLink } from 'better-auth/plugins'
+import { sendVerificationEmailWithCode } from './auth-email'
 import { passkeyPlugin } from './passkey/plugin'
 import { prisma } from './prisma'
 import { telegramPlugin } from './telegram/plugin'
@@ -34,10 +42,12 @@ export const auth = createAuth({
     ...(process.env.TRUSTED_ORIGINS ? process.env.TRUSTED_ORIGINS.split(',').map((s) => s.trim()) : []),
   ],
 
+  // Код из письма + уведомление других вкладок (PLAN_EMAIL_CODE.md Фаза A)
+  disabledPaths: [...EMAIL_CODE_DISABLED_PATHS],
+  revokeSessionsOnPasswordReset: true,
+
   email: {
-    sendVerificationEmail: async ({ to, userName, verificationUrl }) => {
-      return sendVerificationEmail({ to, userName, verificationUrl })
-    },
+    sendVerificationEmail: sendVerificationEmailWithCode,
     reportEmailFailure: ({ type, to, error }) => {
       reportEmailFailure({ type, to, error })
     },
@@ -90,6 +100,17 @@ export const auth = createAuth({
   // Дополнительные плагины поверх стандартных hub-provider
   // (oidcProvider и nextCookies добавляются фабрикой автоматически)
   plugins: [
+    // Код из письма (PLAN_EMAIL_CODE.md Фаза A): регистрация → 6-значный код, сброс пароля кодом
+    // (R3 — без ссылки в письме сброса).
+    emailOTP(createEmailCodeOptions({
+      sendVerificationEmail: async ({ to, pin, pinExpiresInMinutes }) =>
+        sendVerificationEmail({ to, pin, pinExpiresInMinutes }),
+      sendPasswordResetEmail: async ({ to, pin, pinExpiresInMinutes }) =>
+        sendPasswordResetEmail({ to, pin, pinExpiresInMinutes }),
+    })),
+    // Cookie для SSE-уведомления «email подтверждён в другой вкладке»
+    verificationStreamCookie(),
+
     // Magic Link
     magicLink({
       sendMagicLink: async ({ email, url }) => {

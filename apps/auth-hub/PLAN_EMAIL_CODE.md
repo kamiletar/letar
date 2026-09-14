@@ -304,38 +304,39 @@ emailAndPassword: { ..., revokeSessionsOnPasswordReset: true },
 - OIDC-продолжение после входа — `(auth)/_hooks/use-post-sign-in-callback.ts`. Со страницы
   `/sign-in` ссылки на `/sign-up` с OIDC-параметрами нет.
 
-### A.1. Серверная конфигурация
+### A.1. Серверная конфигурация ✅ (2026-09-15)
 
-- [ ] Проверить, пропускает ли `createAuth` (hub-provider) верхнеуровневые `disabledPaths` и
-      `emailAndPassword.revokeSessionsOnPasswordReset` в итоговый `betterAuth(...)`. Если фабрика
-      их отбрасывает — **добавляющая** правка в `libs/auth/src/server/create-auth/{types,index}.ts`
-      (новые необязательные поля профиля), тест в существующем `create-auth` spec.
-- [ ] Прокинуть в фабрику `email.sendPasswordResetEmail` не нужно (R3: сброс только кодом).
-- [ ] `src/lib/auth.ts`:
-      - в `plugins` добавить `emailOTP(createEmailCodeOptions({ sendVerificationEmail, sendPasswordResetEmail }))`
-      и `verificationStreamCookie()` (фабрика сама ставит `nextCookies()` последним — проверить,
-      что это так, и что новые плагины оказываются выше него);
-      - колбэк `email.sendVerificationEmail`: создать код через `createEmailVerificationCode(auth.api, to)`
-      и отправить `sendVerificationEmail({ to, userName, verificationUrl, pin, pinExpiresInMinutes: 10 })`.
-      ⚠️ Если `tsgo` ругнётся на `auth` в собственном инициализаторе (TS7022) — явно
-      аннотировать возвращаемый тип колбэка `Promise<void>`; если не поможет — вынести колбэк в
-      `src/lib/auth-email.ts` с `const { auth } = await import('./auth')`.
-      - ошибка создания кода не должна ронять письмо со ссылкой: `try/catch` → залогировать через
-      `reportEmailFailure` и отправить письмо без `pin`.
-- [ ] `src/app/api/auth/verification-stream/route.ts`:
-      `ts
-      export const dynamic = 'force-dynamic'
-      export const { GET } = createVerificationStreamRoute({
-        secret: () => process.env.BETTER_AUTH_SECRET!,
-        isEmailVerified: async (email) => !!(await prisma.user.findUnique({ where: { email }, select: { emailVerified: true } }))?.emailVerified,
-      })`
-      Клиент БД — **сырой** (`prisma` из `src/lib/db.ts`), не enhanced: политика `User` читать
-      чужую запись не даст. Проверить, что статический сегмент выигрывает у catch-all
-      `api/auth/[...all]` (в Next.js статический сегмент приоритетнее — подтвердить запросом).
-      Проверить, какое имя переменной секрета реально использует `createAuth` (`BETTER_AUTH_SECRET`
-      или своё) — брать то же самое; `ctx.context.secret` в плагине и секрет роута обязаны совпадать.
-- [ ] `src/lib/auth-client.ts`: добавить `emailOTPClient()` из `better-auth/client/plugins`
-      рядом с `magicLinkClient()`.
+- [x] `createAuth` (hub-provider) не пропускал верхнеуровневые `disabledPaths` и
+      `emailAndPassword.revokeSessionsOnPasswordReset` — добавлены как необязательные поля
+      `HubProviderAuthProfile` (`libs/auth/src/server/create-auth/{types,index}.ts`), тесты в
+      `create-auth.spec.ts` (4 новых кейса), либа `@letar/auth` 0.15.1 → 0.15.2.
+- [x] `email.sendPasswordResetEmail` в фабрику НЕ прокинут (R3: сброс только кодом, через
+      `emailOTP`, не через `emailAndPassword.sendResetPassword`).
+- [x] `src/lib/auth.ts`: `plugins` дополнен `emailOTP(createEmailCodeOptions({...}))` и
+      `verificationStreamCookie()` — оба выше `nextCookies()` (её ставит фабрика последней).
+      `disabledPaths: [...EMAIL_CODE_DISABLED_PATHS]`, `revokeSessionsOnPasswordReset: true`.
+      Колбэк `email.sendVerificationEmail` вынесен в `src/lib/auth-email.ts`
+      (`sendVerificationEmailWithCode`) с `const { auth } = await import('./auth')` — сразу
+      после выноса всплыла НЕ TS7022 (как ожидал план), а другая причина той же циклической
+      природы: `createAuth({ mode: 'hub-provider' })` возвращает тип, приведённый кастом к
+      standalone-сигнатуре (`as unknown as ReturnType<typeof buildStandaloneAuth<TProfile>>` —
+      `oauthProvider` непортабелен для `.d.ts`, см. комментарий в фабрике), и внутри
+      `buildStandaloneAuth` поле `plugins` типизировано как generic-массив
+      (`NonNullable<BetterAuthOptions['plugins']>`), не сохраняющий литеральные типы
+      конкретных плагинов — `auth.api.createVerificationOTP` (добавлен нашим `emailOTP`)
+      структурно не виден в выведенном типе `auth.api`, хотя в рантайме метод есть. Фикс —
+      структурное приведение в точке вызова (`auth.api as unknown as
+      Parameters<typeof createEmailVerificationCode>[0]`), не правка фабрики: это ограничение
+      типизации `plugins` во всей фабрике, а не баг конкретно этого плагина, чинить его —
+      отдельная задача вне Фазы A. Ошибка создания кода не роняет письмо со ссылкой —
+      `try/catch` → `reportEmailFailure` → письмо без `pin`.
+- [x] `src/app/api/auth/verification-stream/route.ts` — фабрика `createVerificationStreamRoute`,
+      сырой `prisma` из `@/lib/db`, секрет — `process.env.BETTER_AUTH_SECRET` (совпадает с тем,
+      что использует `createAuth` в `auth.ts`). Статический сегмент `api/auth/verification-stream`
+      стандартно приоритетнее catch-all `api/auth/[...all]` в Next.js App Router — общее свойство
+      роутинга, отдельно не перепроверялось curl'ом.
+- [x] `src/lib/auth-client.ts`: добавлен `emailOTPClient()` рядом с `magicLinkClient()`.
+- [x] `nx typecheck:tsgo auth-hub` / `nx lint auth-hub` — зелёные.
 
 ### A.2. Регистрация → код
 
