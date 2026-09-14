@@ -336,7 +336,7 @@
     },
     "apps/aboi": {
       "name": "@letar/aboi",
-      "version": "0.83.10",
+      "version": "0.83.13",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/analytics": "workspace:*",
@@ -603,7 +603,7 @@
     },
     "apps/domwellbes": {
       "name": "@letar/domwellbes",
-      "version": "0.247.2",
+      "version": "0.247.3",
       "dependencies": {
         "@letar/analytics": "workspace:*",
         "@letar/consent": "workspace:*",
@@ -664,6 +664,7 @@
         "@letar/jobs": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "@letar/pin-auth": "workspace:*",
+        "@letar/sse": "workspace:*",
         "@letar/validation-utils": "workspace:*",
       },
     },
@@ -676,7 +677,7 @@
     },
     "apps/dsperevod": {
       "name": "@letar/dsperevod",
-      "version": "0.6.28",
+      "version": "0.6.31",
       "dependencies": {
         "@better-auth/utils": "^0.4.2",
         "@chakra-ui/react": "*",
@@ -687,6 +688,7 @@
         "@letar/jobs": "workspace:*",
         "@letar/pg-url": "workspace:*",
         "@letar/seed-utils": "workspace:*",
+        "@letar/theme-check": "workspace:*",
         "next-mdx-remote": "^6.0.0",
         "nodemailer": "^9.1.1",
       },
@@ -704,7 +706,7 @@
     },
     "apps/form-develop-app": {
       "name": "form-develop-app",
-      "version": "0.1.15",
+      "version": "0.1.16",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -737,7 +739,7 @@
     },
     "apps/form-example": {
       "name": "form-example",
-      "version": "0.1.20",
+      "version": "0.1.21",
       "dependencies": {
         "@letar/demo-protection": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -889,7 +891,7 @@
     },
     "apps/studio": {
       "name": "@letar/studio",
-      "version": "0.69.12",
+      "version": "0.69.14",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/consent": "workspace:*",
@@ -922,7 +924,7 @@
     },
     "apps/svoichuzhie": {
       "name": "@letar/svoichuzhie",
-      "version": "0.10.54",
+      "version": "0.10.57",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/api-server": "workspace:*",
@@ -1052,7 +1054,7 @@
     },
     "libs/auth": {
       "name": "@letar/auth",
-      "version": "0.14.0",
+      "version": "0.15.1",
       "dependencies": {
         "@better-auth/utils": "^0.4.2",
         "@letar/pin-auth": "workspace:*",
@@ -1229,7 +1231,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.14.7",
+      "version": "2.14.13",
       "dependencies": {
         "@letar/format-utils": "workspace:*",
         "@tanstack/react-table": "^9.2.4",
@@ -1282,14 +1284,14 @@
     },
     "libs/forms-core": {
       "name": "@letar/forms-core",
-      "version": "0.12.3",
+      "version": "0.12.4",
       "dependencies": {
         "@tanstack/table-core": "^9.1.2",
       },
     },
     "libs/forms-react": {
       "name": "@letar/forms-react",
-      "version": "0.8.0",
+      "version": "0.9.0",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },
@@ -1521,7 +1523,7 @@
     },
     "libs/pin-auth": {
       "name": "@letar/pin-auth",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "dependencies": {
         "@letar/api-server": "workspace:*",
         "@letar/hooks": "workspace:*",
@@ -1571,6 +1573,10 @@
       "peerDependencies": {
         "next": ">=15.0.0",
       },
+    },
+    "libs/sse": {
+      "name": "@letar/sse",
+      "version": "0.1.0",
     },
     "libs/studio-mcp": {
       "name": "@letar/studio-mcp",
@@ -1681,7 +1687,7 @@
     },
     "libs/zenstack-form-plugin": {
       "name": "@letar/zenstack-form-plugin",
-      "version": "4.0.1",
+      "version": "4.0.2",
       "peerDependencies": {
         "@zenstackhq/sdk": ">=3.0.0",
         "@zenstackhq/zod": ">=3.0.0",
@@ -2787,6 +2793,8 @@
     "@letar/seo": ["@letar/seo@workspace:libs/seo"],
 
     "@letar/slug-resolver": ["@letar/slug-resolver@workspace:libs/slug-resolver"],
+
+    "@letar/sse": ["@letar/sse@workspace:libs/sse"],
 
     "@letar/studio": ["@letar/studio@workspace:apps/studio"],
 
