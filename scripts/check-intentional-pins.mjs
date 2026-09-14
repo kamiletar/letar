@@ -33,25 +33,15 @@
 // package.json И удаление записи из реестра одним коммитом, а не подавление
 // красной проверки.
 
-import { readFileSync } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
+import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { FIELDS, isExact, readJson as readJsonFrom } from './lib/pins.mjs'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const REGISTRY = 'scripts/intentional-pins.json'
 
-// Поля package.json, в которых вообще ищем версии.
-const FIELDS = ['dependencies', 'devDependencies', 'optionalDependencies']
-
 function readJson(relPath) {
-  return JSON.parse(readFileSync(join(repoRoot, relPath), 'utf8'))
-}
-
-// Точный пин — значение, начинающееся с цифры: «4.4.3», «0.87.1»,
-// «2.0.0-rc.26», «3.3.0-nightly-20260824-5de6d2358». Всё остальное —
-// диапазон (^ ~ >= *), алиас (npm:), workspace/file/git-спецификатор.
-function isExact(spec) {
-  return typeof spec === 'string' && /^\d/.test(spec)
+  return readJsonFrom(repoRoot, relPath)
 }
 
 const pkgJson = readJson('package.json')

@@ -30,17 +30,13 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { FIELDS, isExact, readJson as readJsonFrom } from './lib/pins.mjs'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const REGISTRY = 'scripts/intentional-pins.json'
-const FIELDS = ['dependencies', 'devDependencies', 'optionalDependencies']
 
 function readJson(relPath) {
-  return JSON.parse(readFileSync(join(repoRoot, relPath), 'utf8'))
-}
-
-function isExact(spec) {
-  return typeof spec === 'string' && /^\d/.test(spec)
+  return readJsonFrom(repoRoot, relPath)
 }
 
 function listWorkspacePackageJsons(rootRelDir) {
