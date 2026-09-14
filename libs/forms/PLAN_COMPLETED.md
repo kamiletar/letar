@@ -1,5 +1,32 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-14 (сессия 2) — Аудит Canvas 2D моков в сестринских библиотеках, фикс forms-shadcn
+
+**Задача:** после фикса флаки-таймаута `field-signature.spec.tsx` в `@letar/forms` (2.14.9, см.
+запись ниже) — проверить, подвержены ли тому же классу флаки (нативный `.node`-аддон пакета
+`canvas`, peer dependency jsdom, переинициализация при test isolation) сестринские библиотеки
+форм-экосистемы: `forms-shadcn`, `forms-vue`, `forms-vue-shadcn`, `forms-angular`.
+
+**Находка:**
+
+- `forms-vue`/`forms-vue-shadcn`/`forms-angular` уже защищены — их signature-spec-файлы
+  (`app-form.stage5.spec.ts` × 2, `app-form.stage-g.spec.ts`) держат собственный `beforeEach`-стаб
+  `HTMLCanvasElement.prototype.getContext`/`toDataURL`, нативный аддон не грузится.
+- `forms-shadcn` был уязвим — `FieldSignature` вызывает `canvas.getContext('2d')` уже в
+  `useEffect` при монтировании (`initCanvas`), а `field-signature.spec.tsx` не мокал контекст
+  вовсе. Подтверждено эмпирически (изолированный Node-прогон jsdom `getContext('2d')` вернул
+  настоящий `CanvasRenderingContext2D`, не `null`). Флаки не воспроизведён в 3 прогонах подряд
+  (53 spec-файла против 109 у `libs/forms`), но механизм идентичен.
+
+**Фикс:** тот же детерминированный no-op мок Canvas 2D API, что в `libs/forms/vitest.setup.ts`,
+скопирован в `libs/forms-shadcn/vitest.setup.ts` (0.37.0 → 0.37.1). Прогон изолированного
+`field-signature.spec.tsx` ускорился с ~5с до ~2.9с. `typecheck:tsgo`/`lint`/`test` зелёные.
+Разбор — `PLAN.md` § «Аудит Canvas 2D моков…». Коммиты `1443eebf9` (фикс) + `026b249b9` (доки).
+
+**Оставлено на потом (заведена отдельная задача через `spawn_task`):** мок теперь дублируется
+дословно в двух `vitest.setup.ts` (`forms` и `forms-shadcn`) — кандидат на вынос в
+`@letar/forms-core/testing` как переиспользуемую функцию.
+
 ## 2026-09-14 — Дедуп группировки опций по `group`: use-grouped-options.ts ↔ uikit-chakra.tsx (v2.14.8)
 
 **Задача:** после реализации `getGroup` на `Form.Field.Select` (v2.14.7, предыдущая запись ниже)
