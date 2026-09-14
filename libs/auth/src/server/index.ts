@@ -94,3 +94,14 @@ export {
   type PrismaWithSocialProviderCrud,
   type SocialProviderActions,
 } from './social-providers'
+
+// Код из письма + уведомление других вкладок (PLAN_EMAIL_CODE.md Фаза 0)
+export {
+  createEmailCodeOptions,
+  createEmailVerificationCode,
+  EMAIL_CODE_DEFAULTS,
+  EMAIL_CODE_DISABLED_PATHS,
+} from './email-code'
+export { VERIFICATION_STREAM_COOKIE, verificationStreamCookie } from './verification-stream/plugin'
+export { createVerificationStreamRoute, type CreateVerificationStreamRouteOptions } from './verification-stream/route'
+export { createVerificationStreamToken, readVerificationStreamToken } from './verification-stream/stream-token'
