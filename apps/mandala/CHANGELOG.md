@@ -2,6 +2,22 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.40.31] - 2026-09-14
+
+### Changed
+
+- **Атомарная резервация попытки PIN перенесена в `reserveAttempt`** — `@letar/pin-auth` v0.3.0
+  сделал `PinValidatorAdapter.reserveAttempt(identifier)` официальным контрактом (см.
+  `driving-school`, мигрировано в той же сессии). У mandala уже была собственная race-safe
+  реализация (атомарный `prisma.verification.update({ data: { pinAttempts: { increment: 1 } } })`
+  прямо внутри `findToken`, добавленный в 0.40.30), просто не через новый хук. Перенесена без
+  изменения самой Postgres-логики: `findToken` больше не трогает `pinAttempts` (возвращает `0`,
+  валидатор его не читает при наличии `reserveAttempt`), `reserveAttempt` делает свой `findFirst`
+  по `identifier` + атомарный `update`. Try/catch на удалённую конкурентно запись (resend/логин
+  успели удалить токен) сохранён, но fail-closed веткой стал `Number.POSITIVE_INFINITY`
+  (→ `TOO_MANY_ATTEMPTS`) вместо `null` (→ `NOT_FOUND`) — единственный вариант, совместимый с
+  сигнатурой `reserveAttempt(): Promise<number>`.
+
 ## [0.40.30] - 2026-09-14
 
 ### Security

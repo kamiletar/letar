@@ -20,6 +20,31 @@ export const pinValidatorAdapter: PinValidatorAdapter = {
       return null
     }
 
+    return {
+      token: token.value, // value в Better Auth схеме
+      identifier: token.identifier,
+      pin: token.pin,
+      pinExpires: token.pinExpires,
+      pinAttempts: 0, // не используется — валидатор берёт счётчик из reserveAttempt ниже
+      expires: token.expiresAt, // expiresAt в Better Auth схеме
+    }
+  },
+
+  // Атомарная резервация попытки (race-safe путь @letar/pin-auth/server, с v0.3.0) — валидатор
+  // вызывает её ДО сравнения PIN вместо связки pinAttempts/incrementAttempts.
+  async reserveAttempt(identifier) {
+    const token = await prisma.verification.findFirst({
+      where: { identifier },
+      orderBy: { expiresAt: 'desc' },
+    })
+
+    if (!token) {
+      // Запись успела исчезнуть между findToken() и этим вызовом (конкурентный resend/логин) —
+      // fail-closed, как и в catch ниже: валидатор ответит TOO_MANY_ATTEMPTS, не рискуя считать
+      // попытку разрешённой.
+      return Number.POSITIVE_INFINITY
+    }
+
     // Попытка резервируется атомарно ДО сравнения PIN, а не после (было). При прежнем порядке
     // «прочитать pinAttempts → сравнить PIN → увеличить» параллельная пачка запросов читала
     // один и тот же счётчик и каждый успевал сравнить свой PIN до того, как счётчик вырастал —
@@ -27,31 +52,22 @@ export const pinValidatorAdapter: PinValidatorAdapter = {
     // атомарен на уровне строки Postgres (row lock), поэтому параллельные вызовы всегда получают
     // уникальные последовательные значения — независимо от того, что каждый прочитал в findFirst
     // выше (используем именно результат update, а не token.pinAttempts).
-    let pinAttempts: number
     try {
       const reserved = await prisma.verification.update({
         where: { id: token.id },
         data: { pinAttempts: { increment: 1 } },
         select: { pinAttempts: true },
       })
-      pinAttempts = reserved.pinAttempts - 1
+      return reserved.pinAttempts - 1
     } catch {
-      // Запись успел удалить параллельный resend/успешный вход — токен больше не действителен
-      return null
-    }
-
-    return {
-      token: token.value, // value в Better Auth схеме
-      identifier: token.identifier,
-      pin: token.pin,
-      pinExpires: token.pinExpires,
-      pinAttempts,
-      expires: token.expiresAt, // expiresAt в Better Auth схеме
+      // Запись успел удалить параллельный resend/успешный вход — токен больше не действителен;
+      // fail-closed вместо риска пропустить попытку без счёта.
+      return Number.POSITIVE_INFINITY
     }
   },
 
   async incrementAttempts(_token) {
-    // Счётчик уже увеличен атомарно в findToken (до сравнения PIN) — повторно не считаем.
+    // Не вызывается: попытка уже зарезервирована атомарно в reserveAttempt выше.
   },
 
   async findUser(email) {

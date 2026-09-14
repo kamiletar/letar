@@ -2149,3 +2149,20 @@ admin.id`, плюс `deleteMany` legacy-строки по старому клю�
       `@letar/query-provider` реально импортировались в коде, но не были объявлены ни в
       `dependencies`, ни в `nx.implicitDependencies` (PLAN-INFRA-6.md §169). Добавлены в
       `dependencies` (`workspace:*`), проверено format/lint/typecheck:tsgo.
+
+## Миграция на `reserveAttempt` из `@letar/pin-auth` v0.3.0 (2026-09-14)
+
+- [x] Собственная атомарная резервация попытки PIN (`prisma.verification.update` с
+      `pinAttempts: { increment: 1 }`, добавлена в 0.40.30) перенесена из `findToken` в
+      `PinValidatorAdapter.reserveAttempt(identifier)` — новый официальный хук библиотеки,
+      которым `pin-validator.ts` вызывает резервацию ДО сравнения PIN вместо связки
+      `pinAttempts`/`incrementAttempts`. `findToken` больше не трогает `pinAttempts` (отдаёт `0`,
+      валидатор его не читает при наличии `reserveAttempt`) и не делает update.
+      `reserveAttempt` делает свой `findFirst` по `identifier` + тот же атомарный `update`,
+      try/catch на конкурентное удаление записи (resend/успешный вход) сохранён — только
+      fail-closed веткой стал `Number.POSITIVE_INFINITY` (→ `TOO_MANY_ATTEMPTS`), а не `null`
+      (→ `NOT_FOUND`, как раньше внутри `findToken`) — единственный вариант, совместимый с
+      сигнатурой `reserveAttempt(): Promise<number>`. Postgres-логика инкремента не менялась,
+      только перемещена. `nx test/lint/typecheck:tsgo mandala` зелёные — включая
+      `verify-pin.action.spec.ts` (лимит 5 попыток и параллельный перебор 20 неверных PIN)
+      без изменений в самом тесте.
