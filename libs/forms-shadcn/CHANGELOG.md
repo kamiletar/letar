@@ -4,6 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.37.2] - 2026-09-14
+
+### Changed
+
+- **Мок Canvas 2D API вынесен в `@letar/forms-core/testing` (`mockCanvas2D`)** — дедуп с
+  `@letar/forms` 2.14.10: `vitest.setup.ts` теперь вызывает общую функцию вместо своей копии
+  блока из 0.37.1. Поведение не изменилось.
+
 ## [0.37.1] - 2026-09-14
 
 ### Fixed
