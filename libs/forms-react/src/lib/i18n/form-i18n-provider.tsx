@@ -1,7 +1,7 @@
 'use client'
 
 import type { TranslateFunction, TranslateParams } from '@letar/forms-core/i18n'
-import { createBuiltinTranslateFunction, createFormErrorMap } from '@letar/forms-core/i18n'
+import { createBuiltinTranslateFunction, createFormErrorMap, resolveTranslation } from '@letar/forms-core/i18n'
 import { createContext, type ReactNode, useContext, useEffect } from 'react'
 import { z } from 'zod/v4'
 
@@ -106,19 +106,7 @@ export function FormI18nProvider({ t, locale, children, setupZodErrorMap = false
     }
 
     const builtinT = createBuiltinTranslateFunction(locale)
-    const combinedT: TranslateFunction = (key, params) => {
-      if (t) {
-        try {
-          const custom = t(key, params)
-          if (custom && custom !== key) {
-            return custom
-          }
-        } catch {
-          // игнорируем — падаем на встроенный словарь
-        }
-      }
-      return builtinT(key, params)
-    }
+    const combinedT: TranslateFunction = (key, params) => resolveTranslation(t, key, params) ?? builtinT(key, params)
 
     const errorMap = createFormErrorMap({ t: combinedT })
     // Type assertion: наш error map совместим с Zod v4 API,
@@ -172,18 +160,5 @@ export function getLocalizedValue(
     return fallback
   }
 
-  try {
-    const fullKey = `${i18nKey}.${property}`
-    const translated = i18n.t(fullKey)
-
-    // Если перевод пустой или равен ключу (next-intl возвращает ключ при отсутствии перевода)
-    if (!translated || translated === fullKey) {
-      return fallback
-    }
-
-    return translated
-  } catch {
-    // При ошибке возвращаем fallback
-    return fallback
-  }
+  return resolveTranslation(i18n.t, `${i18nKey}.${property}`) ?? fallback
 }

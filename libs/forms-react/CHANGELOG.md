@@ -4,6 +4,15 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.9.1] - 2026-09-15
+
+### Changed
+
+- `combinedT` (`FormI18nProvider`, Zod error map) и `getLocalizedValue` теперь используют общий
+  `resolveTranslation` из `@letar/forms-core/i18n` вместо собственной копии логики «попробовать
+  `t()`, откатиться при пустом результате/совпадении с ключом/исключении» — поведение не
+  изменилось, дублирование убрано.
+
 ## [0.9.0] - 2026-09-14
 
 ### Added

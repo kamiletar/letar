@@ -4,6 +4,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.14.16] - 2026-09-15
+
+### Changed
+
+- `resolveDefaultErrorsTitle` (`Form.Errors`) теперь использует общий `resolveTranslation` из
+  `@letar/forms-core/i18n` вместо собственной копии try/catch-логики «перевод пустой или равен
+  ключу» — поведение заголовка по умолчанию не изменилось.
+
 ## [2.14.15] - 2026-09-15
 
 ### Deprecated

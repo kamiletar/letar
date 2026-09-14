@@ -1,6 +1,7 @@
 'use client'
 
 import { Alert, Box, List, Text } from '@chakra-ui/react'
+import { resolveTranslation } from '@letar/forms-core/i18n'
 import { useFormI18n } from '@letar/forms-react'
 import type { ReactElement, ReactNode } from 'react'
 import { useDeclarativeForm } from './form-context'
@@ -39,15 +40,9 @@ function resolveDefaultErrorsTitle(i18n: ReturnType<typeof useFormI18n>): string
     return DEFAULT_ERRORS_TITLE
   }
 
-  if (i18n.enabled) {
-    try {
-      const translated = i18n.t(ERRORS_TITLE_KEY)
-      if (translated && translated !== ERRORS_TITLE_KEY) {
-        return translated
-      }
-    } catch {
-      // игнорируем — падаем на встроенный словарь
-    }
+  const translated = i18n.enabled ? resolveTranslation(i18n.t, ERRORS_TITLE_KEY) : undefined
+  if (translated) {
+    return translated
   }
 
   const lang = i18n.locale.split('-')[0] ?? i18n.locale

@@ -4,6 +4,24 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.12.5] - 2026-09-15
+
+### Added
+
+- **`resolveTranslation(t, key, params?)`** (`@letar/forms-core/i18n`) — общий примитив паттерна
+  «попробовать `t()`, откатиться на fallback, если перевод пустой/равен ключу/`t` бросил
+  исключение» (next-intl сигналит отсутствие перевода возвратом самого ключа). Раньше был
+  реализован независимо и почти дословно в трёх местах: `combinedT` и `getLocalizedValue`
+  (`@letar/forms-react`), `resolveDefaultErrorsTitle` (`@letar/forms`). Извлечён без изменения
+  поведения ни одного из трёх — источники встроенных словарей (`createBuiltinTranslateFunction`,
+  локальный `Record`) и дефолты по-прежнему решаются на месте вызова.
+
+### Internal
+
+- `create-form-error-map.ts` не тронут — его приватный `tryTranslate` содержит дополнительную
+  проверку `result.startsWith(key)`, которой нет ни в одном из трёх унифицированных мест, и
+  унификация с ним не входила в задачу.
+
 ## [0.12.4] - 2026-09-14
 
 ### Fixed
