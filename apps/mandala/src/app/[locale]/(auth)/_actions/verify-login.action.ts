@@ -1,15 +1,23 @@
 'use server'
 
+import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
-import crypto from 'crypto'
-import { cookies } from 'next/headers'
+import { getClientIp } from '@letar/demo-protection'
+import { createHmac } from 'crypto'
+import { cookies, headers } from 'next/headers'
 
 /**
  * Server action для авто-логина после верификации PIN
  *
- * Создаёт сессию напрямую в БД, минуя Better Auth API.
- * Это необходимо для credentials flow после PIN верификации.
- * Адаптировано под Better Auth схему.
+ * Создаёт сессию через сам Better Auth (`internalAdapter.createSession`), а не напрямую в БД в
+ * обход его — иначе формат записи/срок жизни могут разойтись с обычным входом.
+ *
+ * ⚠️ Cookie ставится строго с именем/атрибутами/секретом из контекста Better Auth
+ * (`auth.$context`), а значение — В ПОДПИСАННОМ формате `<token>.<HMAC-SHA256(secret, token)>`
+ * (`signCookieValue` из better-call). `getSession()` читает cookie через `getSignedCookie` и
+ * требует именно эту подпись — сырой токен без неё сессию не распознаёт. За https
+ * (BETTER_AUTH_URL) имя cookie ещё и с префиксом `__Secure-` — захардкоженное имя без него не
+ * читалось бы вовсе.
  */
 export async function verifyAndLoginUser(
   email: string,
@@ -21,7 +29,11 @@ export async function verifyAndLoginUser(
       where: { value: verificationToken },
     })
 
-    if (!token || token.expiresAt < new Date() || token.identifier !== email) {
+    // `pin !== null` означает, что PIN ещё не был введён верно — эта запись ещё не прошла
+    // через updateTokenForAutoLogin (который её обнуляет). Без этой проверки server action
+    // (публично вызываемый эндпоинт) давал бы вход по одному только знанию исходного
+    // токена регистрационной ссылки, минуя проверку PIN целиком.
+    if (!token || token.expiresAt < new Date() || token.identifier !== email || token.pin !== null) {
       return { success: false, error: 'Токен недействителен или истёк' }
     }
 
@@ -31,32 +43,28 @@ export async function verifyAndLoginUser(
       return { success: false, error: 'Пользователь не найден' }
     }
 
-    // Создаём сессию напрямую в БД (Better Auth формат)
-    const sessionToken = crypto.randomBytes(32).toString('hex')
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 дней
+    // Удаляем использованный токен — одноразовый, повторное предъявление должно быть отклонено
+    await prisma.verification.delete({ where: { value: verificationToken } })
 
-    await prisma.$transaction([
-      // Удаляем использованный токен
-      prisma.verification.delete({ where: { value: verificationToken } }),
-      // Создаём сессию (Better Auth: token вместо sessionToken, expiresAt вместо expires)
-      prisma.session.create({
-        data: {
-          id: crypto.randomUUID(),
-          token: sessionToken, // sessionToken → token
-          userId: user.id,
-          expiresAt, // expires → expiresAt
-        },
-      }),
-    ])
+    const headersObj = await headers()
+    const ctx = await auth.$context
 
-    // Устанавливаем cookie сессии
+    const session = await ctx.internalAdapter.createSession(user.id, false, {
+      ipAddress: await getClientIp(),
+      userAgent: headersObj.get('user-agent'),
+    })
+
+    const { name, attributes } = ctx.authCookies.sessionToken
+    const signature = createHmac('sha256', ctx.secret).update(session.token).digest('base64')
+
     const cookieStore = await cookies()
-    cookieStore.set('better-auth.session_token', sessionToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      expires: expiresAt,
-      path: '/',
+    cookieStore.set(name, `${session.token}.${signature}`, {
+      httpOnly: attributes.httpOnly,
+      secure: attributes.secure,
+      sameSite: String(attributes.sameSite ?? 'lax').toLowerCase() as 'lax' | 'strict' | 'none',
+      path: attributes.path ?? '/',
+      domain: attributes.domain,
+      expires: session.expiresAt,
     })
 
     return { success: true }

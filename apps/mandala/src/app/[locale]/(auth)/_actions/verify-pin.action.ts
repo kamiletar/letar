@@ -1,7 +1,8 @@
 'use server'
 
-import { createPinValidator, generateToken } from '@letar/pin-auth/server'
+import { createPinValidator, generateToken, type PinValidationResult } from '@letar/pin-auth/server'
 import { pinValidatorAdapter } from '../_adapters/pin-auth-adapters'
+import { isPinVerifyRateLimited } from '../_lib/pin-rate-limit'
 
 export type { PinValidationResult as VerifyPinResult } from '@letar/pin-auth/server'
 
@@ -14,8 +15,12 @@ const pinValidator = createPinValidator({
 })
 
 /**
- * Server action для верификации email по PIN-коду
+ * Server action для верификации email по PIN-коду.
+ * Лимиты: 5 попыток на email (атомарный счётчик в БД, см. pin-auth-adapters.ts) и общий лимит по IP.
  */
-export async function verifyPinAction(email: string, pin: string) {
+export async function verifyPinAction(email: string, pin: string): Promise<PinValidationResult> {
+  if (await isPinVerifyRateLimited()) {
+    return { success: false, error: 'TOO_MANY_ATTEMPTS' }
+  }
   return pinValidator.verifyPin(email, pin, pinValidatorAdapter, generateToken)
 }

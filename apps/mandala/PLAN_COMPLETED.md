@@ -1,5 +1,42 @@
 # Выполненные задачи: Mandala
 
+## Фикс безопасности: PIN-вход — cookie сессии, гонка попыток, auto-login токен (2026-09-14, v0.40.30)
+
+Три независимые находки в PIN-потоке (сверка с уже исправленным driving-school):
+
+1. **Cookie сессии не работала на staging/prod (https).** `verify-login.action.ts` ставил
+   `better-auth.session_token` СЫРЫМ значением. Better Auth 1.7.4 (`getSignedCookie`) требует
+   подписанный формат `<token>.<base64 HMAC-SHA256>`, а за https имя cookie —
+   `__Secure-better-auth.session_token`. Итог — авто-логин после верификации PIN формально
+   отрабатывал успешно, но реальной рабочей сессии не создавал: пользователь оставался
+   разлогинен. Фикс — сессия через `auth.$context.internalAdapter.createSession`, имя/
+   атрибуты/секрет cookie из того же контекста, подпись `createHmac('sha256', secret)`.
+2. **Race condition в лимите попыток (`maxAttempts: 5`).** `pinValidatorAdapter.findToken`
+   читал `pinAttempts` ДО сравнения PIN и увеличивал счётчик только при ошибке — параллельная
+   пачка запросов (например автоматизированный перебор) читала один и тот же счётчик и почти
+   вся успевала сравнить свой вариант PIN до того, как счётчик реально вырастал. Фикс —
+   атомарный `UPDATE ... SET pinAttempts = pinAttempts + 1` (Postgres row lock) ДО сравнения,
+   `incrementAttempts` стал no-op. Плюс добавлен независимый лимит по IP (`@letar/api-server`,
+   30 проверок / 15 минут) — счётчик на email не мешает перебирать PIN разных адресов с одного
+   IP. Заодно убран ошибочный `'use server'` на файле-адаптере (это не модуль server actions).
+3. **`verifyAndLoginUser` принимал любой токен с `identifier === email`**, включая исходный
+   токен регистрационной ссылки, ещё не прошедший PIN-верификацию — server action вызываем
+   напрямую в обход UI. Фикс — принимается только токен, реально прошедший
+   `updateTokenForAutoLogin` (у mandala это выражается как `pin === null`: этот метод обнуляет
+   поле, схема mandala не разносит токены по `type`, в отличие от driving-school).
+
+Тесты — TDD, `_actions/__tests__/verify-pin.action.spec.ts` + `verify-login.action.spec.ts`,
+in-memory `fake-prisma.ts` (адаптирован под схему mandala — одна строка на identifier с
+pin/pinExpires/pinAttempts, без поля `type`). Параллельный прогон 20 неверных PIN через
+`Promise.all` — не больше 5 реальных сравнений. 262/262 существующих теста mandala остались
+зелёными, `typecheck:tsgo`/`lint` без новых ошибок (две существующие ошибки `TS2321` в
+`admin/orders`, `admin/products` — не связаны, известный класс `tsgo-excessive-stack-depth-
+zenstack`).
+
+Не сделано в этой сессии (низкий приоритет, см. CHANGELOG): `verification-stream/[email]`
+ключуется по email в URL, не по непубличному `streamToken` — возможность узнать факт
+верификации почты перебором email (сам токен не раскрывается).
+
 ## Фикс: выключение оффлайн-режима не снимало Service Worker (2026-09-03, v0.40.28)
 
 `service-worker-registration.tsx` снимал регистрацию через `registrationRef` с текущей загрузки

@@ -1,5 +1,3 @@
-'use server'
-
 import { prisma } from '@/lib/db'
 import type { PinValidatorAdapter, TokenManagerAdapter } from '@letar/pin-auth/server'
 
@@ -7,6 +5,9 @@ import type { PinValidatorAdapter, TokenManagerAdapter } from '@letar/pin-auth/s
  * Адаптер для валидации PIN-кодов.
  * Реализует интерфейс PinValidatorAdapter из @letar/pin-auth.
  * Адаптирован под Better Auth схему (Verification вместо VerificationToken).
+ *
+ * ⚠️ Это НЕ модуль server actions (объекты-адаптеры, не async-функции верхнего уровня) —
+ * `'use server'` здесь неуместен и раньше стоял ошибочно.
  */
 export const pinValidatorAdapter: PinValidatorAdapter = {
   async findToken(identifier) {
@@ -19,21 +20,38 @@ export const pinValidatorAdapter: PinValidatorAdapter = {
       return null
     }
 
+    // Попытка резервируется атомарно ДО сравнения PIN, а не после (было). При прежнем порядке
+    // «прочитать pinAttempts → сравнить PIN → увеличить» параллельная пачка запросов читала
+    // один и тот же счётчик и каждый успевал сравнить свой PIN до того, как счётчик вырастал —
+    // classic check-then-act, обходящий maxAttempts. `UPDATE ... SET pinAttempts = pinAttempts + 1`
+    // атомарен на уровне строки Postgres (row lock), поэтому параллельные вызовы всегда получают
+    // уникальные последовательные значения — независимо от того, что каждый прочитал в findFirst
+    // выше (используем именно результат update, а не token.pinAttempts).
+    let pinAttempts: number
+    try {
+      const reserved = await prisma.verification.update({
+        where: { id: token.id },
+        data: { pinAttempts: { increment: 1 } },
+        select: { pinAttempts: true },
+      })
+      pinAttempts = reserved.pinAttempts - 1
+    } catch {
+      // Запись успел удалить параллельный resend/успешный вход — токен больше не действителен
+      return null
+    }
+
     return {
       token: token.value, // value в Better Auth схеме
       identifier: token.identifier,
       pin: token.pin,
       pinExpires: token.pinExpires,
-      pinAttempts: token.pinAttempts,
+      pinAttempts,
       expires: token.expiresAt, // expiresAt в Better Auth схеме
     }
   },
 
-  async incrementAttempts(token) {
-    await prisma.verification.update({
-      where: { value: token }, // value уникален
-      data: { pinAttempts: { increment: 1 } },
-    })
+  async incrementAttempts(_token) {
+    // Счётчик уже увеличен атомарно в findToken (до сравнения PIN) — повторно не считаем.
   },
 
   async findUser(email) {

@@ -2,6 +2,46 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.40.30] - 2026-09-14
+
+### Security
+
+- **PIN-вход не создавал рабочую сессию на staging/prod (https)** — `verify-login.action.ts`
+  ставил cookie `better-auth.session_token` с СЫРЫМ токеном сессии. Better Auth 1.7.4 читает
+  сессию через `getSignedCookie` и требует подписанный формат `<token>.<HMAC-SHA256>`, а за
+  https имя cookie — `__Secure-better-auth.session_token`, не голое имя. Исправлено по образцу
+  driving-school: сессия создаётся через `auth.$context.internalAdapter.createSession`, имя/
+  атрибуты/секрет cookie берутся из того же контекста, подпись — `createHmac('sha256', secret)`.
+- **Race condition в лимите попыток PIN (`maxAttempts: 5`)** — `pin-auth-adapters.ts` читал
+  `pinAttempts`, сравнивал PIN и только потом увеличивал счётчик (check-then-act). Параллельная
+  пачка запросов читала один и тот же счётчик и каждый успевал сравнить свой PIN до инкремента —
+  реальный лимит перебора был не 5, а фактически не ограничен. Исправлено: `findToken` теперь
+  атомарно резервирует попытку через `UPDATE ... SET pinAttempts = pinAttempts + 1` (атомарно на
+  уровне строки Postgres) ДО сравнения PIN и возвращает значение ДО инкремента;
+  `incrementAttempts` стал no-op. Добавлен лимит по IP (`@letar/api-server` `createRateLimiter`,
+  30 проверок / 15 мин) поверх лимита на email — не даёт перебирать PIN разных адресов с одного
+  IP. Ошибочный `'use server'` на файле адаптеров (не модуль server actions) убран.
+- **`verifyAndLoginUser` принимал любой токен верификации с `identifier === email`** — включая
+  ещё не прошедший PIN-проверку (изначальная регистрационная ссылка). Server action публично
+  вызываем напрямую, в обход UI — теперь принимается только токен, реально прошедший
+  `updateTokenForAutoLogin` (проверка `token.pin !== null`, поле обнуляется именно этим методом).
+
+### Added
+
+- `apps/mandala/package.json`: `@letar/api-server`, `@letar/demo-protection` в `dependencies` —
+  общий rate-limiter и `getClientIp()` (Traefik-корректный разбор `x-forwarded-for`).
+- Тесты (TDD, `_actions/__tests__/`, `_adapters/__tests__/fake-prisma.ts`): параллельный перебор
+  20 неверных PIN даёт не больше 5 реальных сравнений; cookie сессии — с именем/подписью/секретом
+  из контекста Better Auth; отклонение пред-PIN и чужого/истёкшего токена авто-логина.
+
+### Deferred
+
+- `api/auth/verification-stream/[email]/route.ts` (polling для второй вкладки) ключуется по
+  email в URL, не по непубличному `streamToken` — низкий приоритет (ответ — только
+  `{verified: boolean}`, токен не раскрывается), но потенциально позволяет перебором email
+  узнавать факт верификации почты. Не сделано в этой сессии — см. `@letar/pin-auth`
+  `TokenManagerAdapter.streamToken`/образец в driving-school (`_adapters/stream-tokens.ts`).
+
 ## [0.40.29] - 2026-09-09
 
 ### Fixed

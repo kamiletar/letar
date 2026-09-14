@@ -17,8 +17,14 @@
       "@letar/chakra-provider": [
         "../../libs/chakra-provider/src/index.ts"
       ],
+      "@letar/api-server": [
+        "../../libs/api-server/src/index.ts"
+      ],
       "@letar/auth": [
         "../../libs/auth/src/index.ts"
+      ],
+      "@letar/demo-protection": [
+        "../../libs/demo-protection/src/index.ts"
       ],
       "@letar/auth/client": [
         "../../libs/auth/src/client/index.ts"
@@ -172,9 +178,6 @@
       ],
       "@letar/image-upload/server/versioned-upload-url": [
         "../../libs/image-upload/src/server/versioned-upload-url.ts"
-      ],
-      "@letar/pin-auth/email": [
-        "../../libs/pin-auth/src/email/index.ts"
       ],
       "@letar/pin-auth/schemas": [
         "../../libs/pin-auth/src/schemas/index.ts"
