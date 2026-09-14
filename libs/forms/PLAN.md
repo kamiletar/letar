@@ -6,6 +6,22 @@
 
 ## Backlog (запросы от агентов)
 
+### [2026-09-15] `Form.Field.Date` несовместим с `Form.UrlSync` (от letar-dev, по запросу пользователя)
+
+- **Запросил:** letar-dev (тред agent-mail `form-feature-request`, письмо от 2026-09-15 →
+  forms-coordinator-dev)
+- **Приоритет:** high (дата/диапазон дат — частый паттерн URL-фильтра, не разовый кейс)
+- **Описание:** `FieldDate` всегда коммитит `new Date(raw)` в состояние формы независимо от
+  наличия `schema`/её типа. `Form.UrlSync`/`isDefaultValue` сравнивает значение со строковым
+  `defaults` через строгое `===` — поле навсегда «активно», в URL уезжает `Date.toString()`
+  вместо `YYYY-MM-DD`. Найдено при миграции `apps/studio` owner/time фильтров на `@letar/forms`
+  (коммит `d83bd8c`) — обход: `from`/`to` оставлены вне декларативной Field-системы.
+- **Разбор:** [.claude/docs/letar-forms-field-date-urlsync-date-object.md](/.claude/docs/letar-forms-field-date-urlsync-date-object.md)
+- **Предложенные варианты:** (1) `FieldDate` коммитит строку, если схема реально не требует
+  `Date` (`zodType !== 'date'`); (2) `Form.UrlSync` учится сериализовывать/сравнивать `Date`
+  корректно (`YYYY-MM-DD`, не голый `===`).
+- **Статус:** ожидание
+
 ### ✅ [2026-09-15] `Form.Errors` — дефолтный заголовок захардкожен на английском (от пользователя)
 
 - **Запросил:** пользователь напрямую, живой браузерной проверкой на `aboi` sign-in
