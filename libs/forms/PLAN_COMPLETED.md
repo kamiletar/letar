@@ -1,5 +1,31 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-15 (сессия 2) — `Field.NativeSelect` помечен `@deprecated` в пользу `Field.Select`
+
+**Задача:** владелец попросил, чтобы другие агенты перестали использовать
+`Form.Field.NativeSelect` и использовали `Form.Field.Select` вместо него.
+
+**Фикс:**
+
+- `@deprecated` JSDoc на `FieldNativeSelect` (`field-native-select.tsx`) с указанием на замену.
+- Docstring `Field.Select` (`field-select.tsx`) правился в обратную сторону — раньше советовал
+  «для мобильного UX используй NativeSelect», теперь называет `Select` дефолтным выбором везде.
+- `.claude/rules/forms.md` § «Не делай» — явный запрет на `Field.NativeSelect` в новом коде.
+- semgrep `letar-forms-native-select-deprecated` (`.semgrep/letar-rules.yml`, WARNING, не
+  блокирует коммит) — ловит `.Field.NativeSelect` в новом `*.tsx` вне пакетов `@letar/forms*`,
+  по образцу уже существующего `letar-forms-raw-select-combobox-outside-lib`.
+- Broadcast всем зарегистрированным агентам (`api-change` topic).
+
+`@letar/forms` 2.14.14 → 2.14.15.
+
+**Осознанно не сделано:** массовая миграция ~90 существующих мест использования по всему
+монорепо (driving-school, grandslamcup, kami, dsperevod, mandala, domwellbes и др.) —
+за пределами разумного объёма одной сессии, гейт стоит на WARNING именно поэтому. Ниже заведён
+`spawn_task` на постепенную миграцию, не блокирующую остальную работу.
+
+**Проверка:** `nx typecheck:tsgo forms` зелёный (кеш пересчитан), `nx run-many -t format
+--projects=forms` применён.
+
 ## 2026-09-15 — Локализация дефолтного заголовка `Form.Errors`
 
 **Задача:** `title = 'Please fix the following errors:'` в `form-errors.tsx` был захардкожен на
