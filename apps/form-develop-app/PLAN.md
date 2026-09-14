@@ -253,6 +253,11 @@ toaster, successMessage })` — обёртка над уже существую�
 `useServerActionForm`, 63 потребителя, терял field-level маппинг), тред agent-mail
 `forms-submit-orchestration-helper` — полное решение и хук описаны в `libs/forms/PLAN.md` Backlog.
 
+⚠️ Живая браузерная проверка этой демо-страницы (не unit-тесты) вскрыла два реальных бага в
+самом хуке/`applyServerErrors`, оба пофикшены тем же днём (`@letar/forms-react` rethrow +
+`@letar/forms-core` v0.12.4 `errorMap.onServer`) — до фикса поле визуально не показывало ошибку,
+хотя `mapServerErrors` отрабатывал верно. Детали — `libs/forms/PLAN.md` Backlog, тот же пункт.
+
 ---
 
 ## E2E Тесты
