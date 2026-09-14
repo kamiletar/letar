@@ -1,5 +1,37 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-14 — Дедуп группировки опций по `group`: use-grouped-options.ts ↔ uikit-chakra.tsx (v2.14.8)
+
+**Задача:** после реализации `getGroup` на `Form.Field.Select` (v2.14.7, предыдущая запись ниже)
+в `uikit-chakra.tsx` осталась инлайн-копия логики группировки (построение `Map<string, T[]>` по
+полю `group`), сознательно оставленная инлайн, т.к. `use-grouped-options.ts` работает на
+`GroupableOption` декларативного слоя, а Select-примитив UIKit — на сыром `UIKitSelectOption`.
+Задача — вынести общую часть в переиспользуемую функцию.
+
+**Находка:** framework-free версия этой логики (`groupOptions`/`hasGroups`/`getOptionLabel`) уже
+существовала в `@letar/forms-core/uikit` (`group-options.ts`) — выделена ещё в Фазе 7.3
+(«Split out of `libs/forms` `use-grouped-options.ts`... pure grouping logic vs Ark UI
+`ListCollection`»), но `uikit-chakra.tsx` о ней не знал и продублировал ровно ту же логику заново
+при реализации `getGroup`. Не потребовалось создавать новую функцию — только подключить
+существующую в обоих местах.
+
+**Фикс:**
+
+- `use-grouped-options.ts` (`useGroupedOptions`) — Map группировки теперь строит `groupOptions()`
+  из `@letar/forms-core/uikit`, `getOptionLabel` делегирует туда же. Собственной осталась только
+  сборка Chakra `createListCollection`.
+- `uikit-chakra.tsx` (`Select`-примитив) — та же замена: `groupOptions`/`getOptionLabel` вместо
+  инлайн `useMemo` с ручным построением Map. Заодно убран лишний повторный проход по опциям
+  (`hasGroups` больше не считается отдельно — `groups !== null` используется как признак).
+- Публичный API (`useGroupedOptions`, `getOptionLabel` из `base/index.ts`) не менялся.
+
+**Тесты:** без изменений в спеках — регресс на группировку Select уже покрыт `field-select.spec.tsx`
+(2 кейса из v2.14.7). `nx test @letar/forms` — 799/799 зелёных, `typecheck:tsgo`/`lint` — чисто.
+
+**Не в скоупе:** `forms-shadcn`-скин по-прежнему без группировки Select.
+
+Коммит `78148b7ad`.
+
 ## 2026-09-14 (продолжение) — Флаки-таймаут field-signature.spec.tsx (v2.14.9)
 
 **Задача:** `nx test @letar/forms` (полный прогон, без фильтра) иногда падал на одном тесте из
