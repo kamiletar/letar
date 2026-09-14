@@ -7,6 +7,33 @@
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-09-15
+
+### Changed
+
+- **BREAKING:** `usePinVerification` (`./client`) заменён на реализацию из `apps/driving-school`
+  — единственного реального потребителя механизма. Старый API (`config`+`actions` двумя
+  аргументами, `state: 'idle'|'verifying'|...`, `onVerified(token: string)`,
+  `verificationStreamUrl`) удалён без миграции: ни один потребитель монорепо не импортировал его
+  (JSDoc `@deprecated` с v0.6.0 подтвердился). Новый API — один объект конфигурации,
+  `sseEndpoint` (уже с подставленным непубличным `streamToken`), `sseEvents: {completedField,
+  openedField?}` для регистрации/сброса пароля одним хуком, `onVerified(result: {token?,
+  resetToken?})`, состояние плоским объектом (`error`, `isVerifying`, `completedInOtherTab`,
+  `openedInOtherTab`, ...) вместо `state`-машины. Пробрасывает `NEXT_REDIRECT` — не глотает
+  исключение редиректа Next.js.
+- Типы результатов переименованы во избежание коллизии с одноимёнными экспортами
+  `useEmailCodeVerification` в том же `client/index.ts`: `VerifyResult` → `PinVerifyResult`,
+  `ResendResult` → `PinResendResult`.
+- `useResendCountdown`/`useVerificationStream` не изменились — оба остаются внутренней
+  зависимостью `useEmailCodeVerification`.
+
+### Added
+
+- **`PinVerificationForm`** (`./client`) — 4-экранный Chakra-компонент (ввод кода / верифицировано
+  / завершено в другой вкладке / открыто в другой вкладке, тексты пропом `texts`), перенесён из
+  `apps/driving-school`. По образцу соседнего `EmailCodePanel` не зависит от `@letar/forms` — поле
+  ввода кода рендерит приложение через render-prop `renderCodeForm` своим инстансом `createForm`.
+
 ## [0.6.0] - 2026-09-15
 
 ### Added

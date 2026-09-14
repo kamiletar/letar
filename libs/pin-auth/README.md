@@ -213,38 +213,105 @@ if (result.success) {
 
 ### usePinVerification
 
-Управление процессом верификации PIN.
+Управление процессом верификации PIN — общий хук для регистрации и сброса пароля. Один общий
+для обоих сценариев компонент — `sseEvents` различает их.
 
 ```tsx
 import { usePinVerification } from '@letar/pin-auth/client'
 
-function VerifyPinForm({ email }: { email: string }) {
-  const { state, error, isVerifying, canResend, resendSecondsLeft, formKey, verifyPin, resendPin } = usePinVerification(
-    {
-      email,
-      onVerified: async (token) => {
-        await autoLogin(token)
-        router.push('/dashboard')
-      },
+function VerifyPinForm({ email, streamToken }: { email: string; streamToken: string }) {
+  const {
+    error,
+    isVerifying,
+    isResending,
+    resendCountdown,
+    canResend,
+    completedInOtherTab,
+    formKey,
+    handleVerify,
+    handleResend,
+  } = usePinVerification({
+    email,
+    // Непубличный streamToken — вместо email в URL, исключает enumeration чужих email
+    sseEndpoint: `/api/auth/verification-stream/${streamToken}`,
+    verifyAction: verifyPinAction,
+    resendAction: resendPinAction,
+    sseEvents: { completedField: 'verified' },
+    onVerified: async (result) => {
+      await autoLogin(result.token)
+      router.push('/dashboard')
     },
-    {
-      onVerifyPin: verifyPinAction,
-      onResendPin: resendPinAction,
-    },
-  )
+  })
+
+  if (completedInOtherTab) {
+    return <Text>Подтверждено в другой вкладке</Text>
+  }
 
   return (
-    <form key={formKey} onSubmit={handleSubmit}>
-      <PinInput onComplete={verifyPin} disabled={isVerifying} />
+    <form key={formKey} onSubmit={(e) => e.preventDefault()}>
+      <PinInput onComplete={handleVerify} disabled={isVerifying} />
       {error && <Text color="red">{error}</Text>}
 
       {canResend
-        ? <Button onClick={resendPin}>Отправить повторно</Button>
-        : <Text>Повторно через {resendSecondsLeft} сек</Text>}
+        ? <Button loading={isResending} onClick={handleResend}>Отправить повторно</Button>
+        : <Text>Повторно через {resendCountdown} сек</Text>}
     </form>
   )
 }
 ```
+
+`verifyAction`/`resendAction` — server actions приложения, `verifyAction` может вернуть
+`token` (авто-логин) или `resetToken` (переход на страницу сброса пароля) — `onVerified`
+получает оба поля опционально. `sseEvents.openedField` (для сброса пароля — «открыто в другой
+вкладке») опционален, есть только у сценария сброса пароля.
+
+### PinVerificationForm
+
+Готовый 4-экранный Chakra UI компонент поверх `usePinVerification` — ввод кода / верифицировано /
+завершено в другой вкладке / открыто в другой вкладке (для сброса пароля). Как и
+`EmailCodePanel`, не тянет `@letar/forms` в зависимости — поле кода рендерит приложение своим
+инстансом `createForm` через render-prop `renderCodeForm`.
+
+```tsx
+import { PinVerificationForm } from '@letar/pin-auth/client'
+import { VerifyPinSchema } from '@letar/pin-auth/schemas'
+
+<PinVerificationForm
+  email={email}
+  sseEndpoint={`/api/auth/verification-stream/${streamToken}`}
+  verifyAction={verifyPinAction}
+  resendAction={resendPinAction}
+  sseEvents={{ completedField: 'verified' }}
+  onVerified={(result) => autoLoginAndRedirect(result.token)}
+  texts={{
+    title: 'Подтвердите email',
+    subtitle: (
+      <>
+        Мы отправили код на <strong>{email}</strong>
+      </>
+    ),
+    verifiedTitle: 'Email подтверждён!',
+    verifiedMessage: 'Выполняется вход в аккаунт...',
+    otherTabCompletedTitle: 'Email подтверждён!',
+    otherTabCompletedMessage: 'Вы вошли в другой вкладке.',
+  }}
+  renderCodeForm={({ formKey, disabled, onComplete }) => (
+    <AppForm
+      key={formKey}
+      initialValue={{ pin: '' }}
+      schema={VerifyPinSchema}
+      onSubmit={(d) => onComplete(d.pin)}
+    >
+      <AppForm.Field.Auto name="pin" size="lg" disabled={disabled} onComplete={onComplete} />
+      <AppForm.Button.Submit>Подтвердить</AppForm.Button.Submit>
+    </AppForm>
+  )}
+/>
+```
+
+Для сброса пароля дополнительно передаются `texts.otherTabOpenedTitle`/`otherTabOpenedMessage` и
+`sseEvents.openedField` — без них экран «открыто в другой вкладке» не показывается (актуально
+только для сброса пароля: «открыто» значит «перешли по ссылке из письма в другом окне»).
 
 ### useResendCountdown
 

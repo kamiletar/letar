@@ -1,226 +1,242 @@
 'use client'
 
-import { useCallback, useState } from 'react'
-import { useResendCountdown } from './use-resend-countdown'
-import { useVerificationStream } from './use-verification-stream'
+import { useEventSource } from '@letar/hooks'
+import { useCallback, useEffect, useState } from 'react'
 
-export type PinVerificationState = 'idle' | 'verifying' | 'verified' | 'error'
-
-export interface UsePinVerificationConfig {
-  /** Email пользователя */
-  email: string
-  /** Длина PIN-кода (по умолчанию 6) */
-  pinLength?: number
-  /** Время cooldown для повторной отправки в секундах (по умолчанию 60) */
-  resendCooldownSeconds?: number
-  /** URL для SSE верификации */
-  verificationStreamUrl?: string
-  /** Callback при успешной верификации */
-  onVerified?: (token: string) => void | Promise<void>
-  /** Callback при верификации в другой вкладке */
-  onVerifiedInOtherTab?: () => void
-}
-
-export interface UsePinVerificationResult {
-  /** Текущее состояние верификации */
-  state: PinVerificationState
-  /** Сообщение об ошибке */
+/**
+ * Результат верификации PIN-кода.
+ */
+export type PinVerifyResult = { success: true; token?: string; resetToken?: string } | {
+  success: false
   error: string
-  /** Верификация произошла в другой вкладке */
-  verifiedInOtherTab: boolean
-  /** Идёт проверка PIN */
-  isVerifying: boolean
-  /** Идёт повторная отправка */
-  isResending: boolean
-  /** Можно ли отправить повторно */
-  canResend: boolean
-  /** Секунды до повторной отправки */
-  resendSecondsLeft: number
-  /** Key для сброса формы */
-  formKey: number
-  /** Проверить PIN */
-  verifyPin: (pin: string) => Promise<void>
-  /** Отправить PIN повторно */
-  resendPin: () => Promise<void>
-  /** Сбросить ошибку */
-  clearError: () => void
-}
-
-export interface PinVerificationActions {
-  /** Server action для верификации PIN */
-  onVerifyPin: (
-    email: string,
-    pin: string,
-  ) => Promise<{ success: true; token: string } | { success: false; error: string }>
-  /** Server action для повторной отправки PIN */
-  onResendPin: (email: string) => Promise<{ success: true } | { success: false; error: string }>
 }
 
 /**
- * Хук для управления процессом верификации PIN-кода.
+ * Результат повторной отправки PIN-кода.
+ */
+export type PinResendResult = { success: true } | { success: false; error: string }
+
+/**
+ * Типы ошибок PIN-верификации.
+ */
+export type PinError =
+  | 'INVALID_PIN'
+  | 'PIN_EXPIRED'
+  | 'TOO_MANY_ATTEMPTS'
+  | 'RATE_LIMITED'
+  | 'NOT_FOUND'
+  | 'UNKNOWN_ERROR'
+
+/**
+ * Конфигурация хука PIN-верификации.
+ */
+export interface UsePinVerificationConfig {
+  email: string
+  /**
+   * URL SSE-эндпоинта потока верификации. Компонует непубличный `streamToken` в путь сам
+   * вызывающий код — либа URL не собирает (см. §13.1 в `.claude/docs/`).
+   */
+  sseEndpoint: string
+  verifyAction: (email: string, pin: string) => Promise<PinVerifyResult>
+  resendAction: (email: string) => Promise<PinResendResult>
+  onVerified: (result: { token?: string; resetToken?: string }) => void | Promise<void>
+  /**
+   * SSE-события для разных сценариев
+   * - регистрация: `{ verified: boolean }`
+   * - сброс пароля: `{ reset: boolean, opened: boolean }`
+   */
+  sseEvents: {
+    /** Поле в data для события «завершено в другой вкладке» */
+    completedField: string
+    /** Поле в data для события «открыто в другой вкладке» (опционально) */
+    openedField?: string
+  }
+}
+
+/**
+ * Состояние хука PIN-верификации.
+ */
+export interface PinVerificationState {
+  error: string
+  isVerifying: boolean
+  isResending: boolean
+  resendCountdown: number
+  canResend: boolean
+  isVerified: boolean
+  completedInOtherTab: boolean
+  openedInOtherTab: boolean
+  formKey: number
+}
+
+/**
+ * Действия хука PIN-верификации.
+ */
+export interface PinVerificationActions {
+  handleVerify: (pin: string) => Promise<void>
+  handleResend: () => Promise<void>
+  closeEventSource: () => void
+}
+
+export type UsePinVerificationResult = PinVerificationState & PinVerificationActions
+
+/**
+ * Хук для логики PIN-верификации — общий для регистрации и сброса пароля.
  *
- * Объединяет логику проверки PIN, повторной отправки, SSE и состояния формы.
- *
- * @deprecated Использует легаси-хранилище кодов приложения (`@letar/pin-auth/server`), не
- * плагин Better Auth `emailOTP`. Для нового кода из письма — {@link useEmailCodeVerification}
- * (PLAN_EMAIL_CODE.md §0.5). Не переписан на новый хук здесь: ни один потребитель монорепо не
- * импортирует этот хук на 2026-09-14 — удаление отдельной задачей.
+ * Объединяет проверку PIN, повторную отправку с отсчётом и SSE-подписку на верификацию
+ * в другой вкладке/устройстве (событие берётся из состояния БД, не из шины сообщений).
  *
  * @example
  * ```tsx
- * const {
- *   state,
- *   error,
- *   isVerifying,
- *   canResend,
- *   resendSecondsLeft,
- *   verifyPin,
- *   resendPin,
- * } = usePinVerification({
+ * const { error, isVerifying, canResend, resendCountdown, handleVerify, handleResend } = usePinVerification({
  *   email,
- *   onVerified: (token) => autoLogin(token),
- * }, {
- *   onVerifyPin: verifyPinAction,
- *   onResendPin: resendPinAction,
+ *   sseEndpoint: `/api/auth/verification-stream/${streamToken}`,
+ *   verifyAction: verifyPinAction,
+ *   resendAction: resendPinAction,
+ *   sseEvents: { completedField: 'verified' },
+ *   onVerified: (result) => autoLogin(result.token),
  * })
  * ```
  */
-export function usePinVerification(
-  config: UsePinVerificationConfig,
-  actions: PinVerificationActions,
-): UsePinVerificationResult {
-  const {
-    email,
-    pinLength = 6,
-    resendCooldownSeconds = 60,
-    verificationStreamUrl,
-    onVerified,
-    onVerifiedInOtherTab,
-  } = config
+export function usePinVerification(config: UsePinVerificationConfig): UsePinVerificationResult {
+  const { email, sseEndpoint, verifyAction, resendAction, onVerified, sseEvents } = config
 
-  const [state, setState] = useState<PinVerificationState>('idle')
   const [error, setError] = useState('')
+  const [isVerifying, setIsVerifying] = useState(false)
   const [isResending, setIsResending] = useState(false)
+  const [resendCountdown, setResendCountdown] = useState(60)
+  // canResend форсируется явными событиями (ошибка PIN_EXPIRED), либо выводится из countdown —
+  // без отдельного эффекта на «countdown достиг нуля»
+  const [forceCanResend, setForceCanResend] = useState(false)
+  const canResend = forceCanResend || resendCountdown <= 0
+  const [isVerified, setIsVerified] = useState(false)
+  const [completedInOtherTab, setCompletedInOtherTab] = useState(false)
+  const [openedInOtherTab, setOpenedInOtherTab] = useState(false)
   const [formKey, setFormKey] = useState(0)
 
-  // Таймер для повторной отправки
-  const {
-    secondsLeft: resendSecondsLeft,
-    canResend,
-    reset: resetCountdown,
-  } = useResendCountdown({ initialSeconds: resendCooldownSeconds })
+  // Таймер для обратного отсчёта resend (синхронизация с внешней системой — setTimeout)
+  useEffect(() => {
+    if (resendCountdown <= 0) {
+      return
+    }
+    const timer = setTimeout(() => setResendCountdown((c) => c - 1), 1000)
+    return () => clearTimeout(timer)
+  }, [resendCountdown])
 
-  // SSE для отслеживания верификации
-  const { verifiedInOtherTab } = useVerificationStream({
-    email,
-    streamUrl: verificationStreamUrl,
-    onVerified: onVerifiedInOtherTab,
+  // SSE подписка для real-time уведомлений; ошибка не критична — пользователь может ввести пинкод сам
+  const { disconnect: closeEventSource } = useEventSource({
+    url: sseEndpoint,
+    reconnect: 'none',
+    events: {
+      message: (event) => {
+        const data = JSON.parse(event.data)
+
+        // Событие «завершено в другой вкладке»
+        if (data[sseEvents.completedField]) {
+          closeEventSource()
+          setCompletedInOtherTab(true)
+        }
+
+        // Событие «открыто в другой вкладке» (для сброса пароля)
+        if (sseEvents.openedField && data[sseEvents.openedField]) {
+          setOpenedInOtherTab(true)
+        }
+      },
+    },
   })
 
-  // Проверка PIN
-  const verifyPin = useCallback(
-    async (pin: string) => {
-      if (pin.length !== pinLength) {
-        setError(`Введите ${pinLength}-значный код`)
+  // Проверка пинкода
+  const handleVerify = useCallback(
+    async (pinValue: string) => {
+      if (pinValue.length !== 6) {
+        setError('Введите 6-значный код')
         return
       }
 
-      setState('verifying')
+      setIsVerifying(true)
       setError('')
 
       try {
-        const result = await actions.onVerifyPin(email, pin)
+        const result = await verifyAction(email, pinValue)
 
         if (result.success) {
-          setState('verified')
-          await onVerified?.(result.token)
+          // Закрываем SSE до редиректа чтобы избежать race condition
+          closeEventSource()
+          setIsVerified(true)
+
+          // Вызываем callback с результатом
+          // ВАЖНО: redirect() может бросить NEXT_REDIRECT исключение
+          await onVerified({ token: result.token, resetToken: result.resetToken })
         } else {
-          setState('error')
-          setError(getPinErrorMessage(result.error))
+          // Обработка ошибок
+          const errorMessages: Record<string, string> = {
+            INVALID_PIN: 'Неверный код',
+            PIN_EXPIRED: 'Код истёк. Запросите новый код.',
+            TOO_MANY_ATTEMPTS: 'Слишком много попыток. Подождите 15 минут.',
+          }
+          setError(errorMessages[result.error] || 'Произошла ошибка. Попробуйте ещё раз.')
+
+          if (result.error === 'PIN_EXPIRED') {
+            setForceCanResend(true)
+          }
+          setIsVerifying(false)
         }
-      } catch {
-        setState('error')
+      } catch (error) {
+        // НЕ перехватываем NEXT_REDIRECT — это исключение Next.js для редиректов
+        if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
+          throw error
+        }
+        // Также проверяем digest для Next.js 14+ формата
+        const errorObj = error as { digest?: string }
+        if (errorObj.digest?.startsWith('NEXT_REDIRECT')) {
+          throw error
+        }
         setError('Произошла ошибка. Попробуйте ещё раз.')
+        setIsVerifying(false)
       }
     },
-    [email, pinLength, actions, onVerified],
+    [email, verifyAction, onVerified, closeEventSource],
   )
 
-  // Повторная отправка
-  const resendPin = useCallback(async () => {
+  // Повторная отправка пинкода
+  const handleResend = useCallback(async () => {
     setIsResending(true)
     setError('')
 
     try {
-      const result = await actions.onResendPin(email)
+      const result = await resendAction(email)
 
       if (result.success) {
-        resetCountdown()
-        setFormKey((k) => k + 1) // Сброс формы
+        setResendCountdown(60)
+        setForceCanResend(false)
+        // Сбрасываем форму через key-based reset
+        setFormKey((k) => k + 1)
       } else {
-        setError(getResendErrorMessage(result.error))
+        const errorMessages: Record<string, string> = {
+          RATE_LIMITED: 'Подождите перед повторной отправкой',
+        }
+        setError(errorMessages[result.error] || 'Не удалось отправить код')
       }
     } catch {
       setError('Не удалось отправить код')
     } finally {
       setIsResending(false)
     }
-  }, [email, actions, resetCountdown])
-
-  const clearError = useCallback(() => {
-    setError('')
-    if (state === 'error') {
-      setState('idle')
-    }
-  }, [state])
+  }, [email, resendAction])
 
   return {
-    state,
+    // Состояние
     error,
-    verifiedInOtherTab,
-    isVerifying: state === 'verifying',
+    isVerifying,
     isResending,
+    resendCountdown,
     canResend,
-    resendSecondsLeft,
+    isVerified,
+    completedInOtherTab,
+    openedInOtherTab,
     formKey,
-    verifyPin,
-    resendPin,
-    clearError,
-  }
-}
-
-/**
- * Преобразует ошибку верификации PIN в понятное сообщение.
- */
-function getPinErrorMessage(error: string): string {
-  switch (error) {
-    case 'INVALID_PIN':
-      return 'Неверный код'
-    case 'PIN_EXPIRED':
-      return 'Код истёк. Запросите новый код.'
-    case 'TOO_MANY_ATTEMPTS':
-      return 'Слишком много попыток. Подождите 15 минут.'
-    case 'NOT_FOUND':
-      return 'Код не найден. Запросите новый код.'
-    case 'USER_NOT_FOUND':
-      return 'Пользователь не найден.'
-    default:
-      return 'Произошла ошибка. Попробуйте ещё раз.'
-  }
-}
-
-/**
- * Преобразует ошибку повторной отправки в понятное сообщение.
- */
-function getResendErrorMessage(error: string): string {
-  switch (error) {
-    case 'RATE_LIMITED':
-      return 'Подождите перед повторной отправкой'
-    case 'ALREADY_VERIFIED':
-      return 'Email уже подтверждён'
-    case 'NOT_FOUND':
-      return 'Пользователь не найден'
-    default:
-      return 'Не удалось отправить код'
+    // Действия
+    handleVerify,
+    handleResend,
+    closeEventSource,
   }
 }

@@ -1,11 +1,18 @@
-// Хук для управления верификацией PIN
+// Хук для управления верификацией PIN (легаси-хранилище кодов приложения, не плагин emailOTP)
 export {
+  type PinError,
+  type PinResendResult,
   type PinVerificationActions,
   type PinVerificationState,
+  type PinVerifyResult,
   usePinVerification,
   type UsePinVerificationConfig,
   type UsePinVerificationResult,
 } from './use-pin-verification'
+
+// Компонент формы PIN-верификации (4 экрана: ввод / верифицировано / завершено в другой
+// вкладке / открыто в другой вкладке) — поле кода рендерит приложение своим инстансом createForm
+export { PinVerificationForm, type PinVerificationFormProps, type PinVerificationTexts } from './pin-verification-form'
 
 // Хук для таймера повторной отправки
 export {
