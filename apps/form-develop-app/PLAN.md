@@ -260,6 +260,17 @@ toaster, successMessage })` — обёртка над уже существую�
 
 ---
 
+## Form.Field.Date + Form.UrlSync Demo (реализовано, @letar/forms v2.14.17)
+
+`/filters-state-demo` дополнена полем «Создано с» (`Form.Field.Date`, поле схемы без `z.date()`)
+в составе `Form.UrlSync` — демонстрирует фикс библиотеки: `FieldDate` теперь коммитит строку
+`YYYY-MM-DD`, если схема реально не требует `Date` (`resolved.constraints.schemaType !== 'date'`),
+вместо безусловного `new Date(raw)`. До фикса такое поле было несовместимо с `Form.UrlSync`
+(`Date !== string` в сравнении с URL-дефолтом, `Date.toString()` в query). Полное решение —
+`libs/forms/PLAN.md` Backlog, `.claude/docs/letar-forms-field-date-urlsync-date-object.md`.
+
+---
+
 ## E2E Тесты
 
 ### Покрытие тестами (22 файла)
@@ -314,6 +325,5 @@ allowlist легитимных исключений собирается рук�
 
 ---
 
-**Последнее обновление:** 2026-09-14 — `server-errors-demo` дополнена секцией
-`useFormServerAction` (`@letar/forms-react` v0.9.0/`@letar/forms` v2.14.13); детали в
-`PLAN_COMPLETED.md` и `libs/forms/PLAN_COMPLETED.md`.
+**Последнее обновление:** 2026-09-15 — `filters-state-demo` дополнена полем `Form.Field.Date` +
+`Form.UrlSync` (`@letar/forms` v2.14.17); детали в `libs/forms/PLAN.md` Backlog.

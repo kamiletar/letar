@@ -2,6 +2,14 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.1.17] - 2026-09-15
+
+### Added
+
+- `filters-state-demo`: поле «Создано с» (`Form.Field.Date`, схема без `z.date()`) добавлено в
+  `Form.UrlSync` — демонстрирует фикс `@letar/forms` 2.14.17 (`FieldDate` коммитит строку
+  `YYYY-MM-DD`, если схема реально не требует `Date`).
+
 ## [0.1.16] - 2026-09-14
 
 ### Added

@@ -16,6 +16,11 @@ const FiltersSchema = z.object({
     .meta({ ui: { title: 'Минимальный рейтинг' } }),
   tags: z.array(z.string()).meta({ ui: { title: 'Теги' } }),
   onlyFavorites: z.boolean().meta({ ui: { title: 'Только избранные' } }),
+  // Схема без z.date() — Form.Field.Date коммитит строку YYYY-MM-DD, а не Date. Это и есть фикс
+  // 2.14.17: URL-фильтр по дате раньше был возможен только вне декларативной Field-системы
+  // (см. .claude/docs/letar-forms-field-date-urlsync-date-object.md), теперь работает как обычное
+  // поле с Form.UrlSync.
+  since: z.string().meta({ ui: { title: 'Создано с' } }),
 })
 
 type Filters = z.infer<typeof FiltersSchema>
@@ -26,19 +31,84 @@ const defaultFilters: Filters = {
   minRating: 0,
   tags: [],
   onlyFavorites: false,
+  since: '',
 }
 
 // --- Демо-данные ---
 
 const allItems = [
-  { id: 1, title: 'React', category: 'frontend', rating: 5, tags: ['ui', 'jsx'], favorite: true },
-  { id: 2, title: 'TypeScript', category: 'frontend', rating: 5, tags: ['types', 'js'], favorite: true },
-  { id: 3, title: 'Node.js', category: 'backend', rating: 4, tags: ['js', 'server'], favorite: false },
-  { id: 4, title: 'PostgreSQL', category: 'backend', rating: 4, tags: ['sql', 'database'], favorite: true },
-  { id: 5, title: 'Docker', category: 'devops', rating: 4, tags: ['containers', 'devops'], favorite: false },
-  { id: 6, title: 'Nginx', category: 'devops', rating: 3, tags: ['server', 'proxy'], favorite: false },
-  { id: 7, title: 'Vue.js', category: 'frontend', rating: 4, tags: ['ui', 'framework'], favorite: false },
-  { id: 8, title: 'Prisma', category: 'backend', rating: 5, tags: ['orm', 'database'], favorite: true },
+  {
+    id: 1,
+    title: 'React',
+    category: 'frontend',
+    rating: 5,
+    tags: ['ui', 'jsx'],
+    favorite: true,
+    createdAt: '2024-01-15',
+  },
+  {
+    id: 2,
+    title: 'TypeScript',
+    category: 'frontend',
+    rating: 5,
+    tags: ['types', 'js'],
+    favorite: true,
+    createdAt: '2024-02-10',
+  },
+  {
+    id: 3,
+    title: 'Node.js',
+    category: 'backend',
+    rating: 4,
+    tags: ['js', 'server'],
+    favorite: false,
+    createdAt: '2024-03-01',
+  },
+  {
+    id: 4,
+    title: 'PostgreSQL',
+    category: 'backend',
+    rating: 4,
+    tags: ['sql', 'database'],
+    favorite: true,
+    createdAt: '2024-04-20',
+  },
+  {
+    id: 5,
+    title: 'Docker',
+    category: 'devops',
+    rating: 4,
+    tags: ['containers', 'devops'],
+    favorite: false,
+    createdAt: '2024-05-05',
+  },
+  {
+    id: 6,
+    title: 'Nginx',
+    category: 'devops',
+    rating: 3,
+    tags: ['server', 'proxy'],
+    favorite: false,
+    createdAt: '2024-06-12',
+  },
+  {
+    id: 7,
+    title: 'Vue.js',
+    category: 'frontend',
+    rating: 4,
+    tags: ['ui', 'framework'],
+    favorite: false,
+    createdAt: '2024-07-18',
+  },
+  {
+    id: 8,
+    title: 'Prisma',
+    category: 'backend',
+    rating: 5,
+    tags: ['orm', 'database'],
+    favorite: true,
+    createdAt: '2024-08-22',
+  },
 ]
 
 // --- Секция с результатами (использует Form.Subscribe) ---
@@ -62,6 +132,9 @@ function FilteredResults() {
             return false
           }
           if (filters.tags.length > 0 && !filters.tags.some((tag) => item.tags.includes(tag))) {
+            return false
+          }
+          if (filters.since && item.createdAt < filters.since) {
             return false
           }
           return true
@@ -146,7 +219,7 @@ function ActiveFilterChips({ formRef }: { formRef: ReturnType<typeof useFormRef<
         const filters = values as unknown as Filters
         const active = getActiveUrlSyncFields(
           filters,
-          ['search', 'category', 'minRating', 'onlyFavorites'],
+          ['search', 'category', 'minRating', 'onlyFavorites', 'since'],
           defaultFilters,
         )
         if (active.length === 0) {
@@ -226,7 +299,7 @@ function ExternalControls({ formRef }: { formRef: ReturnType<typeof useFormRef<F
 export default function FiltersStateDemoPage() {
   // useFormUrlSync читает начальные значения из URL
   const { initialValue } = useFormUrlSync({
-    fields: ['search', 'category', 'minRating', 'onlyFavorites'],
+    fields: ['search', 'category', 'minRating', 'onlyFavorites', 'since'],
     defaults: defaultFilters,
     debounce: 400,
   })
@@ -250,7 +323,7 @@ export default function FiltersStateDemoPage() {
         <Form initialValue={initialValue} schema={FiltersSchema} formRef={formRef}>
           {/* Form.UrlSync: записывает фильтры в URL с дебаунсом */}
           <Form.UrlSync
-            fields={['search', 'category', 'minRating', 'onlyFavorites']}
+            fields={['search', 'category', 'minRating', 'onlyFavorites', 'since']}
             defaults={defaultFilters}
             debounce={400}
           />
@@ -287,6 +360,11 @@ export default function FiltersStateDemoPage() {
                     colorPalette="yellow"
                   />
                   <Form.Field.Checkbox name="onlyFavorites" />
+                  {
+                    /* Фикс 2.14.17: без z.date() в схеме коммитит строку YYYY-MM-DD, поэтому
+                      совместимо с Form.UrlSync (раньше падало в Date.toString() в URL). */
+                  }
+                  <Form.Field.Date name="since" />
                   <Form.Button.Reset colorPalette="gray" variant="ghost">
                     Сбросить фильтры
                   </Form.Button.Reset>
