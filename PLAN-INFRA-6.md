@@ -3683,3 +3683,11 @@ domwellbes). На этот раз разъехались 6 внутренних 
   Коммиты: `5c7924513` (сама проверка), `f2621c7ec` (фикс синтхи/deploy-engine +
   `GIT_ALLOW_MULTI_SCOPE_COMMIT=1`, все gate-проверки `check-all.mjs` зелёные, включая
   `patched-deps`/`intentional-pins`). Не запушено.
+
+## §173 (2026-09-14) Дедуп `isExact`/`readJson`/`FIELDS` между `check-intentional-pins.mjs` и `check-pin-drift.mjs`
+
+Чистый рефакторинг вслед за §172: новый `check-pin-drift.mjs` независимо переопределил три
+вспомогательные вещи, уже жившие в `check-intentional-pins.mjs`. Вынесены в
+`scripts/lib/pins.mjs` (по образцу `fs-walk.mjs`/`repo-root.mjs`/`submodules.mjs`), оба скрипта
+переиспользуют. Поведение не менялось — вывод обоих скриптов сверен `diff` байт-в-байт до/после
+рефакторинга, `bun scripts/check-all.mjs --group=deps` зелёный. Коммит: `395f699e0`. Не запушено.
