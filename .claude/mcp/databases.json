@@ -1,0 +1,57 @@
+{
+  "//": "Реестр Postgres-баз для letar-db (.claude/mcp/letar-db.ts). Без секретов — только пути к",
+  "//2": "env-файлам, имена переменных и режим доступа. Добавить базу = добавить запись сюда, без",
+  "//3": "перезапуска сессии Claude Code (реестр перечитывается при каждом вызове dbs/sql/schema).",
+  "//4": "mode: rw — как раньше `--pro restricted` (пишет и читает, DDL/DML не блокируются кодом);",
+  "//5": "ro — как раньше плоский server-postgres (каждый sql всегда в BEGIN READ ONLY … ROLLBACK).",
+  "//6": "tunnel.sshHost — только литеральный IP 185.28.85.195, не домен (см. .claude/docs/mcp-servers.md).",
+  "databases": [
+    {
+      "name": "domwellbes",
+      "envFile": "apps/domwellbes/.env.local",
+      "mode": "rw"
+    },
+    {
+      "name": "studio",
+      "envFile": "apps/studio/.env.local",
+      "mode": "rw"
+    },
+    {
+      "name": "driving-school",
+      "envFile": "apps/driving-school/.env.local",
+      "mode": "rw"
+    },
+    {
+      "name": "kami",
+      "envFile": "apps/kami/.env.local",
+      "urlVar": "MCP_LOCAL_URL",
+      "mode": "ro"
+    },
+    {
+      "name": "grandslamcup",
+      "envFile": "apps/grandslamcup/.env.local",
+      "mode": "ro"
+    },
+    {
+      "name": "kami-prod",
+      "envFile": "apps/kami/.env.docker",
+      "urlVar": "MCP_PROD_RO_URL",
+      "mode": "ro",
+      "tunnel": { "localPort": 5455, "sshHost": "root@185.28.85.195", "remotePort": 5437 }
+    },
+    {
+      "name": "studio-prod",
+      "envFile": "apps/studio/.env.docker",
+      "urlVar": "MCP_PROD_RO_URL",
+      "mode": "ro",
+      "tunnel": { "localPort": 5456, "sshHost": "root@185.28.85.195", "remotePort": 5455 }
+    },
+    {
+      "name": "domwellbes-prod",
+      "envFile": "apps/domwellbes/.env.docker",
+      "urlVar": "MCP_PROD_RO_URL",
+      "mode": "ro",
+      "tunnel": { "localPort": 5457, "sshHost": "root@185.28.85.195", "remotePort": 5456 }
+    }
+  ]
+}
