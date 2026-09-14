@@ -4,6 +4,31 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [0.9.0] - 2026-09-14
+
+### Added
+
+- **`useFormServerAction`** — облегчённая по ceremony обёртка над связкой `formRef` +
+  `middleware.onError` + `mapServerErrors`/`applyServerErrors` (см.
+  `libs/forms/docs/server-errors.md` §«С декларативным `<Form>`»). Одна точка входа с
+  pending-состоянием и опциональным toaster: `const { run, pending } = useFormServerAction(formRef,
+  { fieldMap, toaster, successMessage })`, дальше
+  `onSubmit={async (data) => { await run(() => action(data)) }}`. `run` **перебрасывает** исходную
+  ошибку после применения `mapServerErrors`/`applyServerErrors` (не глотает её) — иначе
+  декларативный `<Form>` посчитал бы сабмит успешным и своим post-submit `reset()` стёр бы
+  только что применённые field-level ошибки раньше, чем пользователь успел бы их увидеть.
+  Вызывающему коду свой `try/catch` всё равно не нужен — `<Form>` сам ловит исключение из
+  `onSubmit` в том же месте, где уже ловит `throw` из `middleware.onError`. Не новая возможность —
+  существующий путь работает и остаётся рабочим для тех, кому нужен полный контроль (разное
+  поведение `onError` по типу ошибки); хук просто снимает ceremony для типового случая. Найдено
+  при аудите форм domwellbes: самопальный `useServerActionForm` (63 потребителя) не использовал
+  `mapServerErrors`/`applyServerErrors` вовсе — все серверные ошибки схлопывались в одну строку
+  без field-level мэппинга, при том что документированный путь уже существовал
+  (`material-form.tsx`), просто ceremony оказалась выше порога, при котором тянутся к
+  самопальному хуку. Тред agent-mail `forms-submit-orchestration-helper`.
+- Попутно найден и починен структурный баг в `applyServerErrors` (`@letar/forms-core`,
+  затрагивает ВСЕХ потребителей, не только этот хук) — см. `@letar/forms-core` CHANGELOG.
+
 ## [0.8.0] - 2026-09-12
 
 ### Added

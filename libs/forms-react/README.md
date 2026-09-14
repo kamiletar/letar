@@ -69,14 +69,15 @@ export const FieldString = createField<StringFieldProps, string>({
 
 ## Что внутри
 
-| Область     | Содержимое                                                                                                                 |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Контекст    | `DeclarativeFormContext`, `useDeclarativeForm(Optional)`, `FormGroup`/`useFormGroup`                                       |
-| Сборка поля | `createFieldPrimitives` → `createField`, `FieldWrapper`, `FieldErrorBoundary`                                              |
-| Хуки поля   | `useResolvedFieldProps`, `useDeclarativeField`, `useAsyncFieldValidation`, `useAsyncSearch`, `useDebounce`, `useMaskField` |
-| Утилиты     | `formatFieldErrors`, `hasFieldErrors`, `getFieldErrors`, `resolveAutoComplete`                                             |
-| i18n        | `FormI18nProvider`, `useFormI18n`, `useLocalizedOptions`, `getLocalizedValue`                                              |
-| Типы        | `BaseFieldProps`, `DeclarativeFormContextValue`, `ResolvedFieldProps`, `AppFormApi`                                        |
+| Область     | Содержимое                                                                                                                        |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Контекст    | `DeclarativeFormContext`, `useDeclarativeForm(Optional)`, `FormGroup`/`useFormGroup`                                              |
+| Сборка поля | `createFieldPrimitives` → `createField`, `FieldWrapper`, `FieldErrorBoundary`                                                     |
+| Хуки поля   | `useResolvedFieldProps`, `useDeclarativeField`, `useAsyncFieldValidation`, `useAsyncSearch`, `useDebounce`, `useMaskField`        |
+| Хуки формы  | `useFormServerAction` — pending/toast/`mapServerErrors`+`applyServerErrors` в один вызов (см. `libs/forms/docs/server-errors.md`) |
+| Утилиты     | `formatFieldErrors`, `hasFieldErrors`, `getFieldErrors`, `resolveAutoComplete`                                                    |
+| i18n        | `FormI18nProvider`, `useFormI18n`, `useLocalizedOptions`, `getLocalizedValue`                                                     |
+| Типы        | `BaseFieldProps`, `DeclarativeFormContextValue`, `ResolvedFieldProps`, `AppFormApi`                                               |
 
 `BaseFieldProps` живёт здесь, а не в скине, именно потому, что в нём нет ни одного пропа про
 оформление. `size`, `variant`, `colorPalette` — словарь конкретной библиотеки, они остаются в

@@ -59,6 +59,12 @@ export type {
 } from './lib/field/use-mask-field'
 export { useMaskField } from './lib/field/use-mask-field'
 export { useResolvedFieldProps } from './lib/field/use-resolved-field-props'
+export type {
+  FormServerActionToaster,
+  UseFormServerActionOptions,
+  UseFormServerActionResult,
+} from './lib/form/use-form-server-action'
+export { useFormServerAction } from './lib/form/use-form-server-action'
 
 // Реестр чувствительных полей (EditIntentValue security-инфраструктура)
 export {
