@@ -2,6 +2,44 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## Код из письма — Фаза 0 общего слоя (2026-09-15)
+
+Кросс-приложенческая задача (`libs/auth`, `libs/pin-auth`) — общий слой для будущей Фазы A
+auth-hub и приватного пилота, сам auth-hub пока не тронут. Полный разбор решений R1–R6 —
+`PLAN_EMAIL_CODE.md` и `.claude/docs/email-code-verification-pattern.md`.
+
+**`libs/auth/src/server/`:**
+
+- `verification-stream/stream-token.ts` — HMAC-SHA256-подписанный токен (ключ производный от
+  `secret`, не сам `secret`) для SSE-подписки на подтверждение email без email в URL.
+- `verification-stream/plugin.ts` — Better Auth плагин `verificationStreamCookie()`, ставит
+  httpOnly-cookie с токеном после `/sign-up/email`/`/send-verification-email`. Должен стоять в
+  `plugins` **до** `nextCookies()`. Внутри — локальная копия не экспортируемого из better-auth
+  `getEndpointResponse` (используется только публичный `isAPIError`).
+- `verification-stream/route.ts` — фабрика Route Handler для самого SSE-потока: 401 без
+  валидной cookie, но не 404 для неизвестного email (иначе роут — оракул enumeration).
+- `email-code.ts` — `createEmailCodeOptions`/`createEmailVerificationCode`: код создаётся вручную
+  через `auth.api.createVerificationOTP` внутри `sendVerificationEmail` приложения, а не через
+  встроенный `sendVerificationOnSignUp` плагина `emailOTP` — `overrideDefaultEmailVerification` не
+  работает, потому что `runPluginInit` better-auth склеивает опции как
+  `defu(options, опции_плагина)` (опции приложения побеждают).
+
+**`libs/pin-auth/src/client/`:**
+
+- `useEmailCodeVerification` + `EmailCodePanel` — проверка кода, повторная отправка с отсчётом,
+  SSE-подписка на подтверждение в другой вкладке/устройстве. Закрывает поток **до** вызова
+  собственного `verify` — иначе успешная проверка в этой же вкладке прилетает как «подтверждено в
+  другой» (обе ветки читают одну и ту же запись `User`).
+- `useVerificationStream` — новый httpOnly-cookie режим (без email/токена в URL) + событие
+  `timeout`.
+- `usePinVerification` помечен `@deprecated` — заменён, ни один потребитель на 2026-09-14 не
+  импортирует.
+
+Тесты на всех уровнях (stream-token, plugin matcher/extractor, route через fake-таймеры, клиентские
+хуки с hand-rolled `MockEventSource`), `nx lint`/`typecheck:tsgo`/`test` зелёные на обеих
+библиотеках. Фаза A (реальная интеграция в auth-hub — server config, UI-флоу, rate-limit) не
+начата — отдельная задача.
+
 ## Починка графа Nx (2026-09-09)
 
 `package.json`: `@letar/auth`, `@letar/email`, `@letar/forms` реально импортируются в коде, но
