@@ -224,8 +224,11 @@ Tier — это **не отдельная ось**, а проекция выбо
 
 - **`@letar/pin-auth`** — уже реализует всё ценное: `server` (`generatePin/generateToken`, `createPinValidator`
   с `maxAttempts`, `createTokenManager` с cooldown), `client` (`usePinVerification`, `useResendCountdown`,
-  `useVerificationStream` — SSE cross-tab), `email` (`formatVerificationEmail` — PIN + ссылка), `schemas`.
+  `useVerificationStream` — SSE cross-tab), `schemas`.
   **БД-агностична** (адаптеры-callbacks); эталон-потребитель — `driving-school`.
+  ⚠️ Подпуть `email` (`formatVerificationEmail`) удалён 2026-09-14 — третья независимая копия
+  письма с PIN-кодом без единого потребителя; письма — через `sendVerificationEmail`/
+  `sendPasswordResetEmail` из `@letar/email`.
   ⚠️ Спроектирована под `emailVerified: DateTime` + модель `verificationToken`; Better Auth — `Boolean` +
   таблица `verification`. Адаптеры разруливают, но это работа Этапа 1.
 - **`@letar/auth/client`** — фабрики клиента, `OnlyFor`, `SessionProvider`, OAuth-кнопки, connected-accounts,
