@@ -117,6 +117,14 @@ function CatalogPage() {
 
 Filters should survive page reload and be shareable via link.
 
+> **Date filters:** `Form.Field.Date` is safe to use inside a `Form.UrlSync`-synced filter form as
+> long as the field's schema does **not** declare `z.date()`/`z.coerce.date()` (a plain `z.string()`
+> or no schema at all, as is typical for a URL filter). In that case the field commits a
+> `YYYY-MM-DD` string, matching the string defaults `Form.UrlSync` expects. If the schema does
+> require a real `Date` (used with `onSubmit`), the field keeps committing `Date` as before —
+> that combination is unrelated to URL sync and isn't affected by this note. See the "Создано с"
+> field in the full example above (`@letar/forms` 2.14.17+).
+
 ### Read from URL on mount
 
 ```tsx
