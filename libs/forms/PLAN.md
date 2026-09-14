@@ -6,6 +6,22 @@
 
 ## Backlog (запросы от агентов)
 
+### ✅ [2026-09-14] Добит неполный набор subpath-paths `@letar/forms-core` в `tsconfig.spec.json` (закрыт v2.14.11)
+
+- **Контекст:** предыдущая запись (Canvas 2D, v2.14.10) явно отметила, что набор subpath-paths
+  `@letar/forms-core` в `libs/forms/tsconfig.spec.json` неполный относительно
+  `forms-core/package.json` exports — там было 9 подпутей из 18 (без учёта `.`).
+- **Фикс:** добавлены недостающие 9 строк — `credit-card`, `edit-intent`, `phone`, `mask`,
+  `field-widgets`, `table`, `address`, `i18n`, `uikit`. Класс ловушки — `.claude/rules/libs.md`
+  § «Потребителю нужны paths и на транзитивные `@letar/*`, и на все их подпути»: пока внутренний
+  слой `forms` не использовал недостающий подпуть — не всплывало, первое использование положило
+  бы typecheck разом.
+- **Проверка:** `nx typecheck:tsgo forms` и `nx test forms` зелёные; `scripts/check-lib-subpath-paths.mjs`
+  без расхождений (⚠️ скрипт сканирует только `apps/*/tsconfig.json`, не `libs/*/tsconfig.spec.json`
+  — это расхождение НЕ покрывает; см. заведённую отдельную задачу на расширение скрипта). 3 теста
+  упали при полном прогоне (`table-selection.spec.tsx`, `field-rich-text.spec.tsx` ×2) — таймауты
+  под нагрузкой, изолированный повтор тех же файлов дал 5/5 зелёных, к правке не относится.
+
 ### ✅ [2026-09-14] Вынос мока Canvas 2D в `@letar/forms-core/testing` (закрыт v2.14.10)
 
 - **Контекст:** мок Canvas 2D API (детерминированный no-op для `HTMLCanvasElement.prototype.getContext('2d')`/`toDataURL`,
