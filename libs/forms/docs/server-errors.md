@@ -180,6 +180,34 @@ function MaterialForm() {
 - Не забудь `<Form.Errors />` в JSX — иначе `formErrors` (например `P2025`/`rejected-by-policy`) будут применены к форме, но нигде не отрисуются.
 - Рабочий пример — `apps/domwellbes/src/app/(admin)/admin/materials/_components/material-form.tsx`.
 
+## Better Auth — throw-bridge
+
+`@letar/forms` (и `mapServerErrors`/`applyServerErrors`) требует, чтобы `onSubmit` **бросал**
+ошибку — низкоуровневый `useAppForm` ловит её напрямую, декларативный `<Form>` через
+`middleware.onError` (см. выше). Методы клиента Better Auth (`authClient.signIn.email`,
+`signUp.email`, `resetPassword`, `requestPasswordReset`, ...) так не работают — они возвращают
+`{ data, error }` и никогда не бросают сами.
+
+Канонический мост — бросить самому, сразу после вызова:
+
+```ts
+const result = await authClient.signIn.email(data)
+if (result.error) {
+  throw new Error(result.error.message ?? 'Не удалось войти')
+}
+```
+
+`mapServerErrors` дальше разбирает обычный `Error`/строку как `ActionResult`-формат (см. раздел
+выше) — отдельного парсера под Better Auth не требуется, сообщение уйдёт в `formErrors`. Если
+нужен field-level маппинг конкретных `result.error.code` — передай `fieldMap`, как для любого
+другого источника ошибок.
+
+Дублировать эту проверку в каждой auth-форме (sign-in/sign-up/reset-password/forgot-password) —
+нормально при одном-двух потребителях; готового экспортируемого хелпера в `@letar/auth` под это
+пока нет (кандидат — структурный тип по образцу `ResendCapableAuthClient`, `libs/auth/src/client/
+resend-verification-button.tsx`, не завязанный на полный тип клиента). Стоит завести, когда
+появится третий независимый потребитель — до тех пор это не библиотечная, а разовая строка.
+
 ## fieldMap — кастомный маппинг
 
 Ключи fieldMap:

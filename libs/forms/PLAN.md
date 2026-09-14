@@ -6,6 +6,39 @@
 
 ## Backlog (запросы от агентов)
 
+### [2026-09-14] Хелпер submit-оркестрации (pending/toast/server-error mapping в один вызов) (от domwellbes-dev)
+
+- **Запросил:** domwellbes-dev
+- **Приоритет:** normal
+- **Описание:** аудит форм domwellbes нашёл собственный хук `useServerActionForm` (63
+  потребителя), не использующий `mapServerErrors`/`applyServerErrors` — все серверные ошибки
+  схлопываются в одну строку без field-level мэппинга. Документированный путь (`formRef` +
+  `middleware.onError` + `mapServerErrors`/`applyServerErrors` + `<Form.Errors />`) существует
+  и работает (образец — `material-form.tsx`), но ceremony оказалась выше порога, при котором
+  разработчик тянется к самопальному хуку. Нужна одна точка входа поверх существующего пути
+  (набросок API — `useFormServerAction(formRef, { fieldMap, toaster })`), не новая возможность.
+- **Ссылки:** `apps/domwellbes/src/_hooks/use-server-action-form.ts` (самопальный хук, 63
+  потребителя), `apps/domwellbes/src/app/(admin)/admin/materials/_components/material-form.tsx`
+  (правильный образец), `apps/domwellbes/src/app/(admin)/admin/warehouses/[id]/_components/
+  stock-document-forms.tsx` (дубль error-стейта ×4 в одном файле), `libs/forms/docs/
+  server-errors.md` § «С декларативным `<Form>`».
+- **Статус:** передано forms-dev (тред `forms-submit-orchestration-helper`).
+
+### ✅ [2026-09-14] Better Auth throw-bridge — задокументирован канонический паттерн (от domwellbes-dev)
+
+- **Запросил:** domwellbes-dev
+- **Приоритет:** normal
+- **Описание:** `authClient.*` (Better Auth) возвращает `{ data, error }`, не бросает — контракт
+  `@letar/forms` требует, чтобы `onSubmit` бросал. Паттерн `if (result.error) throw new
+  Error(...)` продублирован в 4 auth-формах domwellbes.
+- **Решение:** только документация — новый раздел «Better Auth — throw-bridge» в
+  `docs/server-errors.md` (v2.14.12). Экспортируемый хелпер в `@letar/auth` (структурный тип по
+  образцу `ResendCapableAuthClient`) откладывается до появления третьего независимого
+  потребителя — сейчас `@letar/forms` для auth-страниц использует только domwellbes (aboi,
+  dsperevod, studio, svoichuzhie всё ещё на сыром `useState`+native `<form>`, отдельная и куда
+  большая задача миграции, вне скоупа этого запроса).
+- **Статус:** закрыто.
+
 ### ✅ [2026-09-14] Добит неполный набор subpath-paths `@letar/forms-core` в `tsconfig.spec.json` (закрыт v2.14.11)
 
 - **Контекст:** предыдущая запись (Canvas 2D, v2.14.10) явно отметила, что набор subpath-paths

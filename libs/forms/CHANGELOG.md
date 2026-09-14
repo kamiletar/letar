@@ -4,6 +4,17 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.14.12] - 2026-09-14
+
+### Docs
+
+- **`docs/server-errors.md` — новый раздел «Better Auth — throw-bridge».** Документирует
+  канонический мост между `authClient.*` (возвращает `{ data, error }`, не бросает) и
+  контрактом `@letar/forms` (`onSubmit` обязан бросать). Найдено domwellbes-dev: паттерн
+  `if (result.error) throw new Error(...)` продублирован в 4 auth-формах. Решение — только
+  документация; экспортируемый хелпер в `@letar/auth` (по образцу `ResendCapableAuthClient`)
+  откладывается до третьего независимого потребителя.
+
 ## [2.14.11] - 2026-09-14
 
 ### Fixed
