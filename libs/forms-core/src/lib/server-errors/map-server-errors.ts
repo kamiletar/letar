@@ -106,6 +106,16 @@ function parseByFormat(
  * Применяет MappedServerErrors к TanStack Form инстансу.
  * Устанавливает ошибки на конкретные поля через form.setFieldMeta.
  *
+ * ⚠️ Пишет message в `errorMap.onServer`, НЕ в плоский `meta.errors` напрямую. TanStack Form
+ * (`@tanstack/form-core`) держит `meta.errors` как ПРОИЗВОДНОЕ значение — оно пересчитывается из
+ * `errorMap` (`Object.values(errorMap)...`) при каждом обновлении стора, в том числе при самом
+ * вызове `setFieldMeta`. Прямой push в `errors` (было до 2026-09-14) переживал ровно до следующего
+ * пересчёта — на живой странице это следующий же тик, поэтому ошибка исчезала до того, как
+ * пользователь успевал её увидеть, хотя `mapServerErrors` отработал верно. `onServer` — штатный
+ * ключ `ValidationErrorMap` именно для этого канала (`getErrorMapKey('server') === 'onServer'` в
+ * `@tanstack/form-core`), не занят валидаторами `onMount`/`onChange`/`onBlur`/`onSubmit` — значит
+ * не перетирается их обычными циклами валидации.
+ *
  * @example
  * ```tsx
  * const mapped = mapServerErrors(error)
@@ -114,16 +124,19 @@ function parseByFormat(
  */
 export function applyServerErrors(
   form: {
-    setFieldMeta: (field: string, updater: (prev: { errors: unknown[] }) => { errors: unknown[] }) => void
+    setFieldMeta: (
+      field: string,
+      updater: (prev: { errorMap?: Record<string, unknown> }) => { errorMap: Record<string, unknown> },
+    ) => void
     setErrorMap: (errorMap: { onSubmit: string }) => void
   },
   mapped: MappedServerErrors,
 ): void {
-  // Устанавливаем ошибки на поля
+  // Устанавливаем ошибки на поля — через errorMap.onServer, не напрямую в errors (см. JSDoc выше)
   for (const { field, message } of mapped.fieldErrors) {
     form.setFieldMeta(field, (prev) => ({
       ...prev,
-      errors: [...prev.errors, message],
+      errorMap: { ...prev.errorMap, onServer: message },
     }))
   }
 

@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { mapServerErrors } from './map-server-errors'
+import { describe, expect, it, vi } from 'vitest'
+import { applyServerErrors, mapServerErrors } from './map-server-errors'
 
 describe('mapServerErrors', () => {
   // --- Prisma P2002 (unique constraint) ---
@@ -236,5 +236,77 @@ describe('mapServerErrors', () => {
 
       expect(result.fieldErrors).toEqual([{ field: 'email', message: 'email уже существует' }])
     })
+  })
+})
+
+describe('applyServerErrors', () => {
+  /**
+   * Мини-модель TanStack Form: `setFieldMeta` реально прогоняет `updater` через сохранённое
+   * состояние поля (как это делает настоящий стор), а не просто фиксирует факт вызова — иначе
+   * тест не отличил бы правильный `errorMap.onServer` от регресса обратно на плоский `errors`
+   * (см. JSDoc `applyServerErrors` — именно это отличие однажды не работало в браузере, хотя
+   * мок с `vi.fn()` был зелёным).
+   */
+  function createFakeForm() {
+    const fieldMeta: Record<string, { errorMap?: Record<string, unknown> }> = {}
+    const setFieldMeta = vi.fn(
+      (
+        field: string,
+        updater: (prev: { errorMap?: Record<string, unknown> }) => { errorMap: Record<string, unknown> },
+      ) => {
+        fieldMeta[field] = updater(fieldMeta[field] ?? {})
+      },
+    )
+    const setErrorMap = vi.fn()
+    return { fieldMeta, setFieldMeta, setErrorMap }
+  }
+
+  it('кладёт field-level ошибку в errorMap.onServer, не в плоский errors', () => {
+    const form = createFakeForm()
+
+    applyServerErrors(form, { fieldErrors: [{ field: 'email', message: 'Занято' }], formErrors: [] })
+
+    expect(form.fieldMeta.email?.errorMap).toEqual({ onServer: 'Занято' })
+    expect(form.fieldMeta.email).not.toHaveProperty('errors')
+  })
+
+  it('сохраняет уже стоящие ключи errorMap соседних валидаторов при установке onServer', () => {
+    const form = createFakeForm()
+    form.fieldMeta.email = { errorMap: { onChange: 'Некорректный формат' } }
+
+    applyServerErrors(form, { fieldErrors: [{ field: 'email', message: 'Занято' }], formErrors: [] })
+
+    expect(form.fieldMeta.email?.errorMap).toEqual({ onChange: 'Некорректный формат', onServer: 'Занято' })
+  })
+
+  it('маппит несколько field-level ошибок на разные поля', () => {
+    const form = createFakeForm()
+
+    applyServerErrors(form, {
+      fieldErrors: [
+        { field: 'email', message: 'Занято' },
+        { field: 'sku', message: 'Такой артикул уже используется' },
+      ],
+      formErrors: [],
+    })
+
+    expect(form.fieldMeta.email?.errorMap).toEqual({ onServer: 'Занято' })
+    expect(form.fieldMeta.sku?.errorMap).toEqual({ onServer: 'Такой артикул уже используется' })
+  })
+
+  it('устанавливает form-level ошибки через setErrorMap, объединяя через ". "', () => {
+    const form = createFakeForm()
+
+    applyServerErrors(form, { fieldErrors: [], formErrors: ['Нет доступа', 'Попробуйте позже'] })
+
+    expect(form.setErrorMap).toHaveBeenCalledWith({ onSubmit: 'Нет доступа. Попробуйте позже' })
+  })
+
+  it('не вызывает setErrorMap, если formErrors пуст', () => {
+    const form = createFakeForm()
+
+    applyServerErrors(form, { fieldErrors: [{ field: 'email', message: 'Занято' }], formErrors: [] })
+
+    expect(form.setErrorMap).not.toHaveBeenCalled()
   })
 })
