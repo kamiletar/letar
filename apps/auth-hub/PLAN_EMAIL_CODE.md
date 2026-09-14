@@ -114,25 +114,18 @@ emailAndPassword: { ..., revokeSessionsOnPasswordReset: true },
       typegen Chakra `Badge`/`Button` `variant`) — подтверждено грепом по выводу typecheck на
       отсутствие упоминаний `auth.ts`/`resetUrl`/`sendPasswordResetEmail`/`sendVerificationEmail`.
 
-### 0.2. `@letar/auth/server` — подписанный ключ потока
+### 0.2. `@letar/auth/server` — подписанный ключ потока ✅ (2026-09-15)
 
 Новый каталог `libs/auth/src/server/verification-stream/`.
 
-- [ ] `stream-token.ts`, чистые функции без better-auth:
-      `ts
-      export function createVerificationStreamToken(input: { email: string; secret: string; ttlSec?: number; now?: number }): string
-      export function readVerificationStreamToken(token: string, input: { secret: string; now?: number }): { email: string } | null`
-      Формат: `base64url(JSON {e: emailLowercase, x: expUnixSec})` + `.` + `base64url(HMAC-SHA256)`.
-      Ключ HMAC — не сам `secret`, а производный: `createHmac('sha256', secret).update('letar:verification-stream:v1')`.
-      Сравнение подписи — `timingSafeEqual` (длины сравнить до вызова). Дефолт `ttlSec` — 1800.
-      Любая ошибка разбора → `null`, без `throw`.
-- [ ] `stream-token.spec.ts`: круговой тест; истёкший токен → `null`; подменённый email при
-      старой подписи → `null`; другой секрет → `null`; мусор/пустая строка/без точки → `null`;
-      email приводится к нижнему регистру.
+- [x] `stream-token.ts` — `createVerificationStreamToken`/`readVerificationStreamToken`, формат и
+      HMAC-производный ключ как в спеке; `timingSafeEqual`, любая ошибка разбора → `null`.
+- [x] `stream-token.spec.ts` — круговой тест, истёкший/граничный токен, подменённый email,
+      другой секрет, мусорные строки, lowercase email. 10/10 зелёных.
 
-### 0.3. `@letar/auth/server` — плагин, ставящий cookie, и фабрика SSE-роута
+### 0.3. `@letar/auth/server` — плагин, ставящий cookie, и фабрика SSE-роута ✅ (2026-09-15)
 
-- [ ] `plugin.ts` — `verificationStreamCookie(options?: { cookieName?: string; ttlSec?: number })`,
+- [x] `plugin.ts` — `verificationStreamCookie(options?: { cookieName?: string; ttlSec?: number })`,
       Better Auth плагин с `id: 'letar-verification-stream'` и одним `hooks.after`:
       - `matcher`: `ctx.path === '/sign-up/email' || ctx.path === '/send-verification-email'`;
       - email: для `/sign-up/email` — `user.email` из ответа эндпоинта (`getEndpointResponse`, как
@@ -143,7 +136,11 @@ emailAndPassword: { ..., revokeSessionsOnPasswordReset: true },
       `VERIFICATION_STREAM_COOKIE`.
       - ⚠️ Плагин должен стоять в `plugins` **до** `nextCookies()`, иначе cookie не доедет из
       server action (`nextCookies` форвардит Set-Cookie только плагинов выше себя).
-- [ ] `route.ts` — фабрика обработчика Next.js:
+      ⚠️ Реализация: `getEndpointResponse` из better-auth не публичный (нет в `exports` пакета)
+      — заменён локальной мини-репликой (`resolveVerificationStreamEmail`/
+      `getSignUpEmailResponse` в `plugin.ts`) через публичные `isAPIError`/`createAuthMiddleware`
+      из `better-auth/api`.
+- [x] `route.ts` — фабрика обработчика Next.js:
       `ts
       export function createVerificationStreamRoute(options: {
         secret: string | (() => string)
@@ -168,22 +165,23 @@ emailAndPassword: { ..., revokeSessionsOnPasswordReset: true },
       `Cache-Control: no-cache, no-transform`, `Connection: keep-alive`, `X-Accel-Buffering: no`.
       - `export const dynamic = 'force-dynamic'` ставит **приложение** в своём `route.ts` (фабрика
       этого сделать не может).
-- [ ] `route.spec.ts` (vitest, `@vitest-environment node`, fake timers): 401 без cookie; сразу
-      verified; verified на третьем опросе → событие и закрытие; heartbeat уходит; таймаут;
+- [x] `route.spec.ts` (vitest, `node`, fake timers): 401 без cookie; невалидный токен → 401;
+      сразу verified; verified на третьем опросе → событие и закрытие; heartbeat уходит; таймаут;
       `abort` останавливает опрос (счётчик вызовов `isEmailVerified` не растёт); неизвестный email
-      не даёт 404.
-- [ ] `plugin.spec.ts`: поднять `betterAuth` в памяти, как в существующих тестах `libs/auth`
-      (найти образец грепом по `memoryAdapter` / `getTestInstance`; если образца нет — проверить
-      только `matcher` и функцию извлечения email, вынесенную отдельно).
-- [ ] Экспорт из `libs/auth/src/server/index.ts`: `createVerificationStreamToken`,
+      не даёт 404. 8/8 зелёных.
+- [x] `plugin.spec.ts`: образца `memoryAdapter`/`getTestInstance` в `libs/auth` не нашлось —
+      применён запасной вариант из плана: `matcher` и `resolveVerificationStreamEmail`
+      (email-экстракция) вынесены в отдельные экспортируемые функции и протестированы напрямую,
+      без поднятия `betterAuth()`. 9/9 зелёных.
+- [x] Экспорт из `libs/auth/src/server/index.ts`: `createVerificationStreamToken`,
       `readVerificationStreamToken`, `verificationStreamCookie`, `createVerificationStreamRoute`,
       `VERIFICATION_STREAM_COOKIE`.
 
-### 0.4. `@letar/auth/server` — сборка опций `emailOTP` и отправка письма
+### 0.4. `@letar/auth/server` — сборка опций `emailOTP` и отправка письма ✅ (2026-09-15)
 
 Чтобы два приложения не разошлись в параметрах R1 и логике писем.
 
-- [ ] `libs/auth/src/server/email-code.ts`:
+- [x] `libs/auth/src/server/email-code.ts`:
       ```ts
       export const EMAIL_CODE_DEFAULTS = { otpLength: 6, expiresInSec: 600, allowedAttempts: 5 } as const
       export const EMAIL_CODE_DISABLED_PATHS = ['/sign-in/email-otp', '/email-otp/request-email-change', '/email-otp/change-email'] as const
@@ -198,26 +196,27 @@ emailAndPassword: { ..., revokeSessionsOnPasswordReset: true },
       с кодом (сюда попадёт только прямой вызов `/email-otp/send-verification-otp`, UI его не
       использует); `forget-password` → письмо сброса с кодом; остальные типы → `throw` (их пути
       закрыты `disabledPaths`, сюда попасть не должны).
-- [ ] Хелпер для R2 — вызывается из `emailVerification.sendVerificationEmail` приложения:
+- [x] Хелпер для R2 — вызывается из `emailVerification.sendVerificationEmail` приложения:
       `ts
       export async function createEmailVerificationCode(
         api: { createVerificationOTP: (a: { body: { email: string; type: 'email-verification' } }) => Promise<string> },
         email: string,
       ): Promise<string>`
       Структурный тип `api`, а не `typeof auth` — иначе циклическая зависимость типов в `lib/auth.ts`.
-- [ ] `email-code.spec.ts`: маршрутизация по `type`, срок в минутах = `expiresInSec / 60`.
+- [x] `email-code.spec.ts`: маршрутизация по `type`, срок в минутах = `expiresInSec / 60`, throw
+      на неожиданном `type` (sign-in/change-email должны быть закрыты `disabledPaths`). 4/4 зелёных.
 
-### 0.5. `@letar/pin-auth/client` — хук и экраны
+### 0.5. `@letar/pin-auth/client` — хук и экраны ✅ (2026-09-15)
 
 Сейчас `usePinVerification`/`useVerificationStream` не импортирует ни одно приложение (проверено
 грепом 2026-09-14: `@letar/pin-auth/client` использует только `libs/auth` ради
 `useResendCountdown`). API можно менять, **`useResendCountdown` не трогать**.
 
-- [ ] `use-verification-stream.ts`: режим cookie — если не переданы ни `streamToken`, ни
+- [x] `use-verification-stream.ts`: режим cookie — если не переданы ни `streamToken`, ни
       `email`, URL = `streamUrl` без хвоста. Добавить `enabled?: boolean`. Возвращать
       `{ verifiedInOtherTab, close }`. Событие `timeout` — не ошибка (просто перестать слушать).
       `reconnect: 'none'` оставить: код можно ввести и без потока.
-- [ ] Новый хук `use-email-code-verification.ts` (старый `usePinVerification` оставить, пометить
+- [x] Новый хук `use-email-code-verification.ts` (старый `usePinVerification` оставить, пометить
       `@deprecated` в JSDoc — удалить отдельной задачей):
       `ts
       useEmailCodeVerification(config: {
@@ -243,7 +242,7 @@ emailAndPassword: { ..., revokeSessionsOnPasswordReset: true },
       новый», `TOO_MANY_ATTEMPTS` → «Слишком много попыток — отправьте новый код»,
       `429`/`TOO_MANY_REQUESTS` → «Слишком часто. Подождите минуту»; остальное →
       «Не удалось проверить код. Попробуйте ещё раз».
-- [ ] `email-code-panel.tsx` (Chakra — peer уже есть в `package.json` либы):
+- [x] `email-code-panel.tsx` (Chakra — peer уже есть в `package.json` либы):
       `ts
       EmailCodePanel(props: {
         email: string
@@ -258,25 +257,29 @@ emailAndPassword: { ..., revokeSessionsOnPasswordReset: true },
       повторно» / «Отправить повторно через N с» + подпись «Или перейдите по ссылке в письме».
       Никакого полноэкранного оверлея `zIndex 9999`, как в driving-school, — обычная замена
       содержимого карточки.
-- [ ] Схема поля: `createPinSchema` из `@letar/pin-auth/schemas` уже умеет `fieldType: 'pinInput'`,
-      `fieldProps: { count: 6, otp: true }` — переиспользовать, не заводить новую.
-- [ ] Тесты (`jsdom`, `@testing-library/react`, мок `EventSource` глобально): закрытие потока до
+- [x] Схема поля: `createPinSchema` из `@letar/pin-auth/schemas` уже умеет `fieldType: 'pinInput'`,
+      `fieldProps: { count: 6, otp: true }` — переиспользовать, не заводить новую (переиспользуется
+      приложениями через `renderCodeForm`, сама `EmailCodePanel` схему не задаёт).
+- [x] Тесты (`jsdom`, `@testing-library/react`, мок `EventSource` глобально): закрытие потока до
       `verify`; `verifiedElsewhere` по событию; ошибка → перевод; `resend` сбрасывает отсчёт и
       увеличивает `formKey`; двойной `submitCode` не зовёт `verify` дважды; `NEXT_REDIRECT`
-      пробрасывается.
-- [ ] Экспорт из `libs/pin-auth/src/client/index.ts`.
+      пробрасывается. 6/6 зелёных.
+- [x] Экспорт из `libs/pin-auth/src/client/index.ts`.
 
-### 0.6. Проверка фазы 0
+### 0.6. Проверка фазы 0 ✅ (2026-09-15)
 
-- [ ] `nx run-many -t format --projects=email,auth,pin-auth`
-- [ ] `nx run-many -t lint,typecheck:tsgo,test --projects=email,auth,pin-auth`
-- [ ] Потребители не сломаны: `nx run-many -t typecheck:tsgo --projects=driving-school,mandala,auth-hub`
-      плюс приватное приложение-пилот.
-- [ ] Новый публичный экспорт `libs/auth` → broadcast в Agent Mail `api-change: ...` (см.
-      `.claude/rules/agent-mail.md`).
-- [ ] Коммиты по одному на либу, только своими файлами (`.claude/rules/git.md`).
-- [ ] Док `.claude/docs/email-code-verification-pattern.md` (паттерн, R1–R5, ловушка `defu` из
-      R2) + строка в индексе корневого `CLAUDE.md`.
+- [x] `nx run-many -t format --projects=auth,pin-auth` (0.1/`email` форматировался отдельно раньше)
+- [x] `nx run-many -t lint,typecheck --projects=auth,pin-auth` — зелёные (у `libs/auth`/`libs/pin-auth`
+      нет отдельного таргета `typecheck:tsgo`, только `typecheck` через `tsc --build`).
+- [x] Потребители не сломаны: `nx run-many -t typecheck:tsgo --projects=driving-school,mandala,auth-hub` —
+      `driving-school`/`auth-hub` зелёные; `mandala` падает на предсуществующем несвязанном баге
+      (`tsgo-excessive-stack-depth-zenstack`, TS2321 на `db.order.findMany`/`db.product.findMany`,
+      не касается этого изменения). Приватное приложение-пилот — по решению его собственной сессии.
+- [x] Новый публичный экспорт `libs/auth` → broadcast в Agent Mail отправлен (`api-change:
+      @letar/auth/server — код из письма + SSE-поток`, thread `email-code-phase0`).
+- [x] Коммиты по одному на либу, только своими файлами.
+- [x] Док [email-code-verification-pattern.md](/.claude/docs/email-code-verification-pattern.md)
+      + строка в индексе корневого `CLAUDE.md`.
 
 ---
 
