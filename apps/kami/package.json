@@ -27,6 +27,7 @@
     "@letar/auth": "workspace:*",
     "@letar/email": "workspace:*",
     "@letar/env-load": "workspace:*",
+    "@letar/format-utils": "workspace:*",
     "@letar/forms": "workspace:*",
     "@letar/glitchtip": "workspace:*",
     "@letar/i18n-proxy": "workspace:*",

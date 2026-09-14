@@ -1,50 +1,8 @@
-/** Таблица транслитерации кириллицы */
-const TRANSLIT: Record<string, string> = {
-  а: 'a',
-  б: 'b',
-  в: 'v',
-  г: 'g',
-  д: 'd',
-  е: 'e',
-  ё: 'yo',
-  ж: 'zh',
-  з: 'z',
-  и: 'i',
-  й: 'y',
-  к: 'k',
-  л: 'l',
-  м: 'm',
-  н: 'n',
-  о: 'o',
-  п: 'p',
-  р: 'r',
-  с: 's',
-  т: 't',
-  у: 'u',
-  ф: 'f',
-  х: 'kh',
-  ц: 'ts',
-  ч: 'ch',
-  ш: 'sh',
-  щ: 'shch',
-  ъ: '',
-  ы: 'y',
-  ь: '',
-  э: 'e',
-  ю: 'yu',
-  я: 'ya',
-}
+import { slugify as slugifyBase } from '@letar/format-utils'
 
-/** Генерация slug из строки (транслит + lowercase + дефисы) */
+/** Генерация slug из строки (транслит + lowercase + дефисы), обрезано до 100 символов */
 export function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .split('')
-    .map((char) => TRANSLIT[char] ?? char)
-    .join('')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .substring(0, 100)
+  return slugifyBase(text).substring(0, 100)
 }
 
 /** Интерфейс для проверки уникальности slug */

@@ -649,7 +649,7 @@
     },
     "apps/driving-school": {
       "name": "driving-school",
-      "version": "0.240.28",
+      "version": "0.240.30",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/auth": "workspace:*",
@@ -677,7 +677,7 @@
     },
     "apps/dsperevod": {
       "name": "@letar/dsperevod",
-      "version": "0.6.31",
+      "version": "0.6.32",
       "dependencies": {
         "@better-auth/utils": "^0.4.2",
         "@chakra-ui/react": "*",
@@ -706,7 +706,7 @@
     },
     "apps/form-develop-app": {
       "name": "form-develop-app",
-      "version": "0.1.16",
+      "version": "0.1.17",
       "dependencies": {
         "@letar/env-load": "workspace:*",
         "@letar/forms-core": "workspace:*",
@@ -773,6 +773,7 @@
         "@letar/auth": "workspace:*",
         "@letar/email": "workspace:*",
         "@letar/env-load": "workspace:*",
+        "@letar/format-utils": "workspace:*",
         "@letar/forms": "workspace:*",
         "@letar/glitchtip": "workspace:*",
         "@letar/i18n-proxy": "workspace:*",
@@ -924,7 +925,7 @@
     },
     "apps/svoichuzhie": {
       "name": "@letar/svoichuzhie",
-      "version": "0.10.57",
+      "version": "0.10.59",
       "dependencies": {
         "@letar/admin-ui": "workspace:*",
         "@letar/api-server": "workspace:*",
@@ -1231,7 +1232,7 @@
     },
     "libs/forms": {
       "name": "@letar/forms",
-      "version": "2.14.13",
+      "version": "2.14.17",
       "dependencies": {
         "@letar/format-utils": "workspace:*",
         "@tanstack/react-table": "^9.2.4",
@@ -1284,14 +1285,14 @@
     },
     "libs/forms-core": {
       "name": "@letar/forms-core",
-      "version": "0.12.4",
+      "version": "0.12.6",
       "dependencies": {
         "@tanstack/table-core": "^9.1.2",
       },
     },
     "libs/forms-react": {
       "name": "@letar/forms-react",
-      "version": "0.9.0",
+      "version": "0.9.1",
       "dependencies": {
         "@letar/forms-core": "workspace:*",
       },
@@ -1523,7 +1524,7 @@
     },
     "libs/pin-auth": {
       "name": "@letar/pin-auth",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "dependencies": {
         "@letar/api-server": "workspace:*",
         "@letar/hooks": "workspace:*",
