@@ -7,6 +7,21 @@
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-09-14
+
+### Added
+
+- **`assertAuthOk(result, defaultMessage?)`, `AuthResultLike`** (`@letar/auth/client`) —
+  throw-bridge между Better Auth `authClient.*` (`{ data, error }`, не бросает) и контрактом
+  `@letar/forms` (`onSubmit` обязан бросать). Структурный тип по образцу
+  `ResendCapableAuthClient` — не завязан на полный тип клиента. Заведён проактивно перед
+  миграцией auth-страниц aboi/dsperevod/studio/svoichuzhie на `@letar/forms` (после domwellbes —
+  четвёртый независимый потребитель одного и того же паттерна, дублировать его ещё 4 раза не
+  имело смысла). Не заменяет ветвление по `result.error.code` (например показ кнопки повторной
+  отправки письма при `EMAIL_NOT_VERIFIED`) — только устраняет финальный
+  `if (result.error) throw new Error(...)`. См. `libs/forms/docs/server-errors.md`
+  §«Better Auth — throw-bridge».
+
 ## [0.13.0] - 2026-08-31
 
 ### Added
