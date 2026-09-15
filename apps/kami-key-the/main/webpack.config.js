@@ -44,6 +44,15 @@ module.exports = {
     // Koffi — нативный модуль с .node файлами
     koffi: 'commonjs koffi',
   },
+  optimization: {
+    // Scope hoisting (ModuleConcatenationPlugin) ломает циклическую загрузку CJS внутри
+    // js-yaml (транзитивная зависимость electron-updater, main/updater.ts) — конструктор
+    // Type() вызывается без `new`, this === undefined, падает на `this.options = t`.
+    // Воспроизводится только в production-сборке (`--mode production`), где concatenateModules
+    // включён по умолчанию; в dev-режиме webpack его не включает, поэтому баг не был виден
+    // до установки собранного .exe. Разбор — TypeError при запуске KamiKeyThe после установки.
+    concatenateModules: false,
+  },
   node: {
     __dirname: false,
     __filename: false,

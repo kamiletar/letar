@@ -23,7 +23,17 @@ export const SYMBOL_CATEGORIES: SymbolCategory[] = [
   },
   { id: 'arrows', label: 'Стрелки', ranges: [[0x2190, 0x21ff]] },
   { id: 'math', label: 'Математика', ranges: [[0x2200, 0x22ff]] },
-  { id: 'super-sub', label: 'Индексы', ranges: [[0x2070, 0x209f]] },
+  {
+    id: 'super-sub',
+    label: 'Индексы',
+    // Верхние индексы 1/2/3 — наследие Latin-1 (ISO-8859-1), не входят в блок 2070–209F,
+    // где стоят остальные надстрочные/подстрочные цифры и знаки
+    ranges: [
+      [0x2070, 0x209f],
+      [0x00b9, 0x00b9],
+      [0x00b2, 0x00b3],
+    ],
+  },
   {
     id: 'letterlike',
     label: 'Буквенные',

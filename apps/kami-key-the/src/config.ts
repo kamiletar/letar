@@ -16,7 +16,7 @@ export function getConfigPath(): string {
   return store.getPath()
 }
 
-/** Дефолтный конфиг с 25 маппингами (литералы, без импорта из keymap.ts) */
+/** Дефолтный конфиг: раскладки «Типографика» и «Индексы» (литералы, без импорта из keymap.ts) */
 export function getDefaultConfig(): KeymapConfig {
   return {
     version: 2,
@@ -26,35 +26,59 @@ export function getDefaultConfig(): KeymapConfig {
       {
         name: 'Типографика',
         mappings: [
-          { vk: 0xbd, char: '\u2014', shiftChar: '\u2013', label: '— длинное тире', shiftLabel: '– короткое тире' },
-          { vk: 0xdb, char: '\u00AB', shiftChar: '\u201E', label: '« кавычка откр.', shiftLabel: '„ нижняя кавычка' },
+          { vk: 0xbd, char: '—', shiftChar: '–', label: '— длинное тире', shiftLabel: '– короткое тире' },
+          { vk: 0xdb, char: '«', shiftChar: '„', label: '« кавычка откр.', shiftLabel: '„ нижняя кавычка' },
           {
             vk: 0xdd,
-            char: '\u00BB',
-            shiftChar: '\u201C',
+            char: '»',
+            shiftChar: '“',
             label: '» кавычка закр.',
-            shiftLabel: '\u201C верхняя кавычка',
+            shiftLabel: '“ верхняя кавычка',
           },
-          { vk: 0xbe, char: '\u2026', label: '… многоточие' },
-          { vk: 0x20, char: '\u2009', label: '(тонкий пробел)' },
-          { vk: 0x43, char: '\u00A9', shiftChar: '\u00A2', label: '© копирайт', shiftLabel: '¢ цент' },
-          { vk: 0x52, char: '\u00AE', shiftChar: '\u2122', label: '® рег. знак', shiftLabel: '™ торговая марка' },
-          { vk: 0x53, char: '\u00A7', label: '§ параграф' },
-          { vk: 0x4e, char: '\u2116', label: '№ номер' },
-          { vk: 0x44, char: '\u00B0', label: '° градус' },
-          { vk: 0x45, char: '\u20AC', label: '€ евро' },
-          { vk: 0x59, char: '\u00A5', label: '¥ иена' },
-          { vk: 0x4c, char: '\u00A3', label: '£ фунт' },
-          { vk: 0x58, char: '\u00D7', label: '× умножение' },
-          { vk: 0xbf, char: '\u00F7', label: '÷ деление' },
-          { vk: 0x50, char: '\u00B1', label: '± плюс-минус' },
-          { vk: 0x38, char: '\u2022', label: '• маркер списка' },
-          { vk: 0xbb, char: '\u2260', shiftChar: '\u2248', label: '≠ не равно', shiftLabel: '≈ приблизительно' },
-          { vk: 0x0d, char: '\u0301', label: '◌́ ударение (U+0301)' },
-          { vk: 0x26, char: '\u2191', label: '↑ стрелка вверх' },
-          { vk: 0x25, char: '\u2190', label: '← стрелка влево' },
-          { vk: 0x28, char: '\u2193', label: '↓ стрелка вниз' },
-          { vk: 0x27, char: '\u2192', label: '→ стрелка вправо' },
+          { vk: 0xbe, char: '…', label: '… многоточие' },
+          { vk: 0x20, char: ' ', label: '(тонкий пробел)' },
+          { vk: 0x43, char: '©', shiftChar: '¢', label: '© копирайт', shiftLabel: '¢ цент' },
+          { vk: 0x52, char: '®', shiftChar: '™', label: '® рег. знак', shiftLabel: '™ торговая марка' },
+          { vk: 0x53, char: '§', label: '§ параграф' },
+          { vk: 0x4e, char: '№', label: '№ номер' },
+          { vk: 0x44, char: '°', label: '° градус' },
+          { vk: 0x45, char: '€', label: '€ евро' },
+          { vk: 0x59, char: '¥', label: '¥ иена' },
+          { vk: 0x4c, char: '£', label: '£ фунт' },
+          { vk: 0x58, char: '×', label: '× умножение' },
+          { vk: 0xbf, char: '÷', label: '÷ деление' },
+          { vk: 0x50, char: '±', label: '± плюс-минус' },
+          { vk: 0x38, char: '•', label: '• маркер списка' },
+          { vk: 0xbb, char: '≠', shiftChar: '≈', label: '≠ не равно', shiftLabel: '≈ приблизительно' },
+          { vk: 0x0d, char: '́', label: '◌́ ударение (U+0301)' },
+          { vk: 0x26, char: '↑', label: '↑ стрелка вверх' },
+          { vk: 0x25, char: '←', label: '← стрелка влево' },
+          { vk: 0x28, char: '↓', label: '↓ стрелка вниз' },
+          { vk: 0x27, char: '→', label: '→ стрелка вправо' },
+        ],
+      },
+      {
+        name: 'Индексы',
+        mappings: [
+          // Цифры 0-9: без Shift — подстрочный индекс (U+2080-2089), с Shift — надстрочный.
+          // 1/2/3 надстрочные — не 2074/2075 (блок 2070-209F), а historical Latin-1 00B9/00B2/00B3
+          { vk: 0x30, char: '₀', shiftChar: '⁰', label: '₀ подстр. 0', shiftLabel: '⁰ надстр. 0' },
+          { vk: 0x31, char: '₁', shiftChar: '¹', label: '₁ подстр. 1', shiftLabel: '¹ надстр. 1' },
+          { vk: 0x32, char: '₂', shiftChar: '²', label: '₂ подстр. 2', shiftLabel: '² надстр. 2' },
+          { vk: 0x33, char: '₃', shiftChar: '³', label: '₃ подстр. 3', shiftLabel: '³ надстр. 3' },
+          { vk: 0x34, char: '₄', shiftChar: '⁴', label: '₄ подстр. 4', shiftLabel: '⁴ надстр. 4' },
+          { vk: 0x35, char: '₅', shiftChar: '⁵', label: '₅ подстр. 5', shiftLabel: '⁵ надстр. 5' },
+          { vk: 0x36, char: '₆', shiftChar: '⁶', label: '₆ подстр. 6', shiftLabel: '⁶ надстр. 6' },
+          { vk: 0x37, char: '₇', shiftChar: '⁷', label: '₇ подстр. 7', shiftLabel: '⁷ надстр. 7' },
+          { vk: 0x38, char: '₈', shiftChar: '⁸', label: '₈ подстр. 8', shiftLabel: '⁸ надстр. 8' },
+          { vk: 0x39, char: '₉', shiftChar: '⁹', label: '₉ подстр. 9', shiftLabel: '⁹ надстр. 9' },
+          // Операторы формул (например xⁿ⁺¹) — физические клавиши подобраны по смыслу:
+          // -/+ на своих OEM-клавишах, [ ] → ( ) как визуально близкие к скобкам
+          { vk: 0xbd, char: '₋', shiftChar: '⁻', label: '₋ подстр. минус', shiftLabel: '⁻ надстр. минус' },
+          { vk: 0xbb, char: '₊', shiftChar: '⁺', label: '₊ подстр. плюс', shiftLabel: '⁺ надстр. плюс' },
+          { vk: 0xdc, char: '₌', shiftChar: '⁼', label: '₌ подстр. равно', shiftLabel: '⁼ надстр. равно' },
+          { vk: 0xdb, char: '₍', shiftChar: '⁽', label: '₍ подстр. (', shiftLabel: '⁽ надстр. (' },
+          { vk: 0xdd, char: '₎', shiftChar: '⁾', label: '₎ подстр. )', shiftLabel: '⁾ надстр. )' },
         ],
       },
     ],
@@ -87,7 +111,27 @@ export function loadConfig(): KeymapConfig {
     return getDefaultConfig()
   }
 
-  return parsed
+  return migrateBuiltInLayouts(parsed)
+}
+
+/**
+ * Добавить новые встроенные раскладки в уже сохранённый на диске конфиг.
+ *
+ * getDefaultConfig() применяется только при первом запуске (файла ещё нет) — у пользователя
+ * с существующим keymap.json новая раскладка, добавленная в дефолт при обновлении приложения,
+ * иначе никогда бы не появилась сама. Не трогает раскладки, которые пользователь уже завёл
+ * под тем же именем (считаем их намеренной кастомизацией, не перезаписываем).
+ */
+function migrateBuiltInLayouts(config: KeymapConfig): KeymapConfig {
+  const existingNames = new Set(config.layouts.map((l) => l.name))
+  const missing = getDefaultConfig().layouts.filter((l) => !existingNames.has(l.name))
+  if (missing.length === 0) {
+    return config
+  }
+  console.log(`Добавляю новые встроенные раскладки: ${missing.map((l) => l.name).join(', ')}`)
+  const migrated: KeymapConfig = { ...config, layouts: [...config.layouts, ...missing] }
+  saveConfig(migrated)
+  return migrated
 }
 
 /** Атомарная запись конфига: tmp + renameSync */
