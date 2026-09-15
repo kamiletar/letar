@@ -51,19 +51,27 @@ better-auth.
 `pages` не содержит — дублирования там нет.
 
 Приложения на `createAuth()`-фабрике (`aprel8008`, `auth-hub`, `driving-school`, `kami`,
-`svoichuzhie`, `time`) сам блок не пишут — они передают `pages` как опцию профиля в
-`createAuth({ pages: {...} })`, и это тоже ничего не делает по той же причине, но исправление
-там требует править саму библиотеку `@letar/auth` (шире затронутый код, другой блаcт-радиус) —
-не входит в рамки этой находки.
+`svoichuzhie`, `time`) сам блок не писали — они передавали `pages` как опцию профиля в
+`createAuth({ pages: {...} })`, и это тоже ничего не делало по той же причине. **Закрыто
+2026-09-16** — грепом по всем шести приложениям подтверждено, что ни один кастомный код не
+читает `auth.options.pages` напрямую (только `data?.pages`/`result.pages` от TanStack Query
+`useInfiniteQuery` в несвязанных местах — другое поле, другая семантика). Решение — убрать
+опцию из типа профиля целиком, не оставлять декоративной:
 
-## Что делать при следующей встрече
+- `libs/auth/src/server/create-auth/types.ts` — `pages?: AuthPages` и сам интерфейс `AuthPages`
+  удалены из `AuthProfileBase`.
+- `libs/auth/src/server/create-auth/index.ts` — три спреда `pages: profile.pages` (в
+  `buildStandaloneAuth`, `buildHubClientAuth`, `buildHubProviderAuth`) удалены.
+- `libs/auth/docs/api-reference.md` — строка `pages` убрана из таблицы опций профиля.
+- Вызовы `pages: {...}` убраны из `createAuth({...})` во всех шести приложениях: `apps/time`,
+  `apps/aprel8008`, `apps/kami`, `apps/auth-hub` (public), `apps/driving-school`,
+  `apps/svoichuzhie` (private submodule).
 
-- В **standalone**-приложении (прямой `betterAuth()`) — блок `pages` можно удалять как мёртвый
-  код, без риска регрессии (проверено — нигде не читается).
-- В `libs/auth` (`createAuth()`/`createAuthAsync()`) — трогать отдельно и осторожно: это общая
-  фабрика для ~6 приложений, `pages?: AuthPages` в публичном типе профиля тоже стоит либо
-  убрать, либо задокументировать в JSDoc типа как декоративный (по факту он не влияет на
-  редиректы better-auth — те делает сам код приложения через `requireAuth`/`redirect()`).
-- Редиректы `/sign-in`, `/sign-up` и т.п. в better-auth в принципе не настраиваются через опции
-  конфига — better-auth не рендерит собственные страницы (headless), редиректы — обязанность
-  кода самого Next.js-приложения (`requireAuth()`, `middleware`/`proxy.ts`, серверные экшены).
+`typecheck:tsgo` + `lint` зелёные на `@letar/auth`-потребителях после удаления (обе части
+находки — standalone-приложения и `createAuth()`-фабрика — теперь закрыты).
+
+## Справочно: почему опция изначально не работала
+
+Редиректы `/sign-in`, `/sign-up` и т.п. в better-auth в принципе не настраиваются через опции
+конфига — better-auth не рендерит собственные страницы (headless), редиректы — обязанность
+кода самого Next.js-приложения (`requireAuth()`, `middleware`/`proxy.ts`, серверные экшены).
