@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [0.5.14] - 2026-09-15
+
+### Fixed
+
+- Критичный prod-only краш main-процесса сразу при запуске (`TypeError: Cannot set properties of
+  undefined (setting 'options')`, до `app.whenReady()`) — `optimization.concatenateModules`
+  webpack'а (scope hoisting, включён по умолчанию в `mode: production`) ломает циклическую CJS-
+  загрузку внутри `js-yaml` (транзитивная зависимость `electron-updater`, используемого в
+  `main/services/updater.service.ts`). `nx dev` баг не воспроизводит — только собранный
+  инсталлятор. Фикс — `optimization: { concatenateModules: false }` в `main/webpack.config.js`.
+  Разбор — [webpack-concatenatemodules-electron-updater-jsyaml-crash.md](/.claude/docs/webpack-concatenatemodules-electron-updater-jsyaml-crash.md).
+
 ## [0.5.13] - 2026-09-09
 
 ### Fixed

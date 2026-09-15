@@ -60,6 +60,11 @@ module.exports = {
     serialport: 'commonjs serialport',
     '@serialport/bindings-cpp': 'commonjs @serialport/bindings-cpp',
   },
+  optimization: {
+    // js-yaml (транзитивная зависимость electron-updater) ломается scope hoisting'ом
+    // на циклических CJS require — см. .claude/docs/webpack-concatenatemodules-electron-updater-jsyaml-crash.md
+    concatenateModules: false,
+  },
   node: {
     __dirname: false,
     __filename: false,
