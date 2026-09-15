@@ -688,6 +688,12 @@ Playwright-скрипт через Bash вместо navigate/UI-логина ·
 успешно, но пишущий код молча создаёт директорию в writable-слое контейнера мимо хоста, ошибка
 не долетает никуда, байты пропадают на следующем деплое — найдено на приватных файлах domwellbes
 (2026-09-15), не восстановить, только перезалить ·
+[docker-bind-mount-uid-gid-mismatch](/.claude/docs/docker-bind-mount-uid-gid-mismatch.md) ⚠️
+соседний, но другой класс — путь монтирования верный, но хостовая директория и рантайм-
+пользователь контейнера расходятся по uid/gid, права `other` блокируют запись (`EACCES`);
+отличать по `docker exec <container> id` vs `stat -c '%u:%g' <host-path>`, быстрая проверка —
+`docker exec <container> sh -c 'touch <path>/testwrite && rm <path>/testwrite'`; найдено на
+`private-uploads` domwellbes (2026-09-15), фикс — `chown` директории на хосте ·
 [docker-bare-bun-workspace-deps](/.claude/docs/docker-bare-bun-workspace-deps.md) ·
 [alpine-cdn-unreachable-s3](/.claude/docs/alpine-cdn-unreachable-s3.md) ⚠️ с s3 нет пути до
 `dl-cdn.alpinelinux.org` вообще (ни IPv4, ни IPv6, ни с хоста, ни из контейнера) при рабочих
