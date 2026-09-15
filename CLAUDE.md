@@ -594,6 +594,10 @@ unit-тест с настоящими (не замоканными) запрос
 легитимный мейнтейнер, не supply-chain compromise, действие не требуется
 
 **Тесты и форматирование:** [e2e-testing](/.claude/docs/e2e-testing.md) ·
+[e2e-testing § unscoped Playwright assertions + Zag.js Select scoping](/.claude/docs/e2e-testing.md#unscopedтривиальный-assertion--ловит-не-то-под-параллельной-нагрузкой)
+⚠️ `getByText`/`getByRole('row')`/`.first()` без скоупа матчит чужой похожий виджет на странице
+под параллельной нагрузкой (`--workers=12`) — фикс через `aria-controls` триггера для Zag.js
+Select (Chakra UI v3), готовый хелпер `selectFirstChakraOption` в domwellbes-e2e ·
 [persistent-e2e-user-resource-exhaustion](/.claude/docs/persistent-e2e-user-resource-exhaustion.md)
 ⚠️ фиксированная identity e2e-теста против персистентной staging-БД со временем
 исчерпывает любой конечный per-identity ресурс (не только вопросы квиза) — симптом
