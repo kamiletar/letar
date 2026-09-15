@@ -3873,3 +3873,57 @@ PowerShell-скрипт в сессии, прозаически описанны
 требует отдельного одобрения — `.claude/rules/git.md` § «Порядок push нерушим»).
 
 Небиллируемая внутренняя инфраструктурная сессия (координация `libs/ui`), не клиентский проект.
+
+## §179 (2026-09-16) `/infra:deps-update` — patch/minor-бамп + находка бага bun isolated linker
+
+Штатный `/infra:deps-update`: `bun update` в рамках существующих caret-диапазонов (все
+намеренные пины из `scripts/intentional-pins.json` сверены и не тронуты — `zod@4.4.3`,
+`oxlint@1.81.0`, `typescript@6.0.3`, nightly `react-native-gesture-handler`,
+`hermes-compiler`). Затронуты `@ai-sdk/*`, `better-auth`/`@better-auth/oauth-provider`,
+`next-intl`, `fumadocs-*`, `framer-motion`, `react-router-dom`, `electron` и ~30 dev-зависимостей.
+
+⚠️ **Открытый вопрос (не решён в этой сессии):** у `@modelcontextprotocol/typescript-sdk`
+вышла major-версия 2.x — не входила в объём этого прогона (`/infra:deps-update` берёт только
+patch/minor в рамках существующих caret-диапазонов, здесь `^1.30.0`). Апгрейд на v2 нужно делать
+отдельной сессией: проверить breaking changes апстрима, и учесть, что именно этот пакет сейчас
+держит scoped override на zod (см. ниже) — миграция может сделать override ненужным либо
+потребовать его пересмотра.
+
+Electron-дрейф: `electron-drift` gate упал сразу после `bun update` (корень поднялся до
+44.4.0, 6 Electron-приложений держали 44.3.0) — синхронизированы `animatrona`,
+`animatrona-folder-player`, `animatrona-ipfs-player`, `kami-key-the`, `label-printer-desktop`,
+`poster-microtext-desktop` (submodule, отдельный коммит `49a83cf` внутри + bump SHA `c7ea6108f`).
+
+**Находка вне плана — регрессия bun isolated linker.** После `bun update`
+`nx run-many -t typecheck:tsgo` показал новые красные: 19 ошибок `ZodTypeAny` в `synth`
+(`src/mcp/server.ts`), 36 аналогичных в `domwellbes` (свой assist-MCP), 4 новых
+`TS2321 Excessive stack depth` в `grandslamcup`. Бисекцией (полный `bun install --force` на
+чистом `HEAD` до апдейта, затем пошагово) установлено: `bun.lock` завёл
+`@modelcontextprotocol/sdk` и `@zenstackhq/cli` в приватный bucket `zod@4.6.5` вместо
+переиспользования запиненного корневого `zod@4.4.3` — при том что диапазоны обоих пакетов
+(`^3.25 || ^4.0` и `^4.0.0`) полностью совместимы с 4.4.3. Конкретный пакет-триггер бисекцией
+не найден (откат `fumadocs-mdx` 15.4.1→15.4.0 не помог, хотя у него тоже всплыл такой же
+приватный bucket без единой ошибки типов) — резолверная механика bun при полном пересчёте
+графа, не конфликт версий на бумаге.
+
+Фикс — scoped `overrides` в корневом `package.json`:
+`{"@modelcontextprotocol/sdk": {"zod": "4.4.3"}, "@zenstackhq/cli": {"zod": "4.4.3"}}`.
+Сработало на bun 1.4.2 (важное отличие от вывода `root-pin-peer-drift.md` про bun 1.3.14, где
+scoped override не работал ни в одной форме). После фикса `nx run-many -t typecheck:tsgo`
+по всем 90 проектам не даёт ни одной новой ошибки против baseline до апдейта — оставшиеся
+падения (`dashboard`, `mandala`, `grandslamcup`, `animatrona-tracker`, `domwellbes`,
+`animatrona-renderer`) подтверждены бисекцией как пред-существующий техдолг
+(`tsgo-excessive-stack-depth-zenstack` и stale `.next/types` у `animatrona-renderer`),
+не связанный с этой сессией.
+
+Разбор и рецепт на будущее — новый
+[bun-isolated-linker-shared-zod-bucket-drift.md](/.claude/docs/bun-isolated-linker-shared-zod-bucket-drift.md),
+запись в `scripts/intentional-pins.json` под новым разделом `overridePins` (не проверяется
+`check-intentional-pins.mjs` автоматически — чисто документационная память для будущих сессий).
+
+Коммиты в letar: `5be68a11c` (deps + overrides + доки), `49a83cf` (submodule
+poster-microtext-desktop), `c7ea6108f` (bump SHA). Push не делал, ждёт отдельного одобрения.
+
+Небиллируемая внутренняя инфраструктурная сессия (`bun scripts/check-all.mjs --group=deps`
+все gate зелёные), не клиентский проект. Таймер studio не запускался (сессия начата напрямую
+`/infra:deps-update`, без `/​<app>`-обёртки).
