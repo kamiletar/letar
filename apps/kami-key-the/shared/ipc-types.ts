@@ -51,8 +51,13 @@ export interface ElectronAPI {
     setAutostart(on: boolean): Promise<boolean>
     isHotkeyEnabled(): Promise<boolean>
     setHotkeyEnabled(on: boolean): Promise<void>
+    checkForUpdates(): Promise<void>
   }
+  /** Платформа процесса (process.platform) — нужна для расчёта отступа под системные кнопки окна */
+  platform: string
   on: {
     configChanged(cb: (config: KeymapConfig) => void): () => void
+    hotkeyEnabledChanged(cb: (on: boolean) => void): () => void
+    navigate(cb: (page: 'editor' | 'settings') => void): () => void
   }
 }

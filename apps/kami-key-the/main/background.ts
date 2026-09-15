@@ -6,7 +6,7 @@
  * Koffi модули (hotkeys, overlay, notification) работают без изменений.
  */
 
-import { app, BrowserWindow, Menu, nativeImage, Tray } from 'electron'
+import { app, BrowserWindow, Menu, Tray } from 'electron'
 import path from 'path'
 import { cycleLayout, loadConfig, saveConfig } from '../src/config'
 import { setAppProfiles, setExcludedProcesses } from '../src/exclusions'
@@ -31,10 +31,10 @@ import { destroyNotification, initNotification, showNotification } from '../src/
 import { destroyOverlay, hideOverlay, initOverlay, rebuildVkMap, showOverlay } from '../src/overlay'
 import { incrementStat, initStats, shutdownStats } from '../src/stats'
 import type { KeymapConfig } from '../src/types'
+import { loadAppIconPath, loadTrayIcon } from './app-icon'
 import { registerAllHandlers } from './ipc'
 import { checkForUpdatesManually, initAutoUpdater } from './updater'
-
-const VERSION = '1.0.0'
+import { editorWindowOptions, watchNativeTheme } from './window-chrome'
 
 /** Текущий конфиг (мутабельный — обновляется при cycleLayout / save) */
 let config: KeymapConfig
@@ -99,6 +99,17 @@ export function setHotkeyEnabled(on: boolean): void {
     console.log('Перехват AltGr выключен')
   }
   updateTrayMenu()
+  broadcastHotkeyEnabledChanged()
+}
+
+/** Отправить состояние перехвата во все окна renderer — трей и переключатель в шапке синхронны */
+function broadcastHotkeyEnabledChanged(): void {
+  const windows = BrowserWindow.getAllWindows()
+  for (const win of windows) {
+    if (!win.isDestroyed()) {
+      win.webContents.send('system:hotkeyEnabledChanged', hotkeysEnabled)
+    }
+  }
 }
 
 /** Отправить обновлённый конфиг во все окна renderer */
@@ -117,35 +128,31 @@ function getPreloadPath(): string {
   return path.join(__dirname, 'preload.js')
 }
 
-export function openEditorWindow(hash = 'editor'): void {
+export function openEditorWindow(page: 'editor' | 'settings' = 'editor'): void {
   if (editorWindow && !editorWindow.isDestroyed()) {
-    // Если окно уже открыто — переключить hash и сфокусировать
-    if (VITE_DEV_SERVER_URL) {
-      editorWindow.loadURL(`${VITE_DEV_SERVER_URL}#${hash}`)
-    } else {
-      editorWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'), { hash })
+    // Окно уже открыто — переключаем страницу через IPC, не перезагружаем (иначе теряются
+    // несохранённые правки в редакторе)
+    if (editorWindow.isMinimized()) {
+      editorWindow.restore()
     }
+    editorWindow.webContents.send('app:navigate', page)
+    editorWindow.show()
     editorWindow.focus()
     return
   }
 
-  editorWindow = new BrowserWindow({
-    width: 1050,
-    height: 750,
-    autoHideMenuBar: true,
-    webPreferences: {
-      preload: getPreloadPath(),
-      contextIsolation: true,
-      nodeIntegration: false,
-      sandbox: false,
-    },
+  editorWindow = new BrowserWindow(editorWindowOptions(loadAppIconPath(), getPreloadPath()))
+  editorWindow.removeMenu()
+
+  editorWindow.once('ready-to-show', () => {
+    editorWindow?.show()
   })
 
   if (VITE_DEV_SERVER_URL) {
-    editorWindow.loadURL(`${VITE_DEV_SERVER_URL}#${hash}`)
+    editorWindow.loadURL(`${VITE_DEV_SERVER_URL}#${page}`)
     editorWindow.webContents.openDevTools()
   } else {
-    editorWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'), { hash })
+    editorWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'), { hash: page })
   }
 
   editorWindow.on('closed', () => {
@@ -161,35 +168,7 @@ export function openSettingsWindow(): void {
 // === Tray ===
 
 function createTray(): void {
-  // Загрузка иконки — поддержка dev и production путей
-  // .png надёжнее .ico с nativeImage на Windows
-  const iconCandidates = [
-    path.join(__dirname, '..', 'resources', 'icon.png'),
-    path.join(__dirname, '..', 'resources', 'icon.ico'),
-    path.join(process.resourcesPath ?? '', 'icon.png'),
-    path.join(process.resourcesPath ?? '', 'icon.ico'),
-  ]
-
-  let icon = nativeImage.createEmpty()
-  for (const candidate of iconCandidates) {
-    try {
-      const loaded = nativeImage.createFromPath(candidate)
-      if (!loaded.isEmpty()) {
-        // Масштабируем до 16x16 для системного трея
-        icon = loaded.resize({ width: 16, height: 16 })
-        console.log(`Иконка трея: ${candidate}`)
-        break
-      }
-    } catch {
-      // Пробуем следующий путь
-    }
-  }
-
-  if (icon.isEmpty()) {
-    console.warn('Не удалось загрузить иконку трея, пути:', iconCandidates)
-  }
-
-  tray = new Tray(icon)
+  tray = new Tray(loadTrayIcon())
   tray.setToolTip('KamiKeyThe — типографские символы через AltGr')
 
   // Даблклик по иконке → открыть редактор
@@ -267,7 +246,7 @@ function shutdown(): void {
 // === Запуск приложения ===
 
 app.whenReady().then(() => {
-  console.log(`KamiKeyThe v${VERSION} — запуск...`)
+  console.log(`KamiKeyThe v${app.getVersion()} — запуск...`)
   console.log(`Платформа: ${process.platform} ${process.arch}`)
   console.log(`Electron: ${process.versions.electron}, Node: ${process.version}`)
   console.log()
@@ -374,6 +353,14 @@ app.whenReady().then(() => {
 
   // Автообновление — тихая проверка при старте (10с задержка), см. main/updater.ts
   initAutoUpdater()
+
+  // Синхронизация titleBarOverlay/фона окна с системной темой Windows
+  watchNativeTheme(() => (editorWindow ? [editorWindow] : []))
+
+  // В dev открываем окно редактора сразу — иначе его видно только через трей/хоткей
+  if (VITE_DEV_SERVER_URL) {
+    openEditorWindow()
+  }
 
   console.log('KamiKeyThe активен. Используйте AltGr+клавиша для ввода символов.')
 })

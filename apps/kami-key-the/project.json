@@ -78,8 +78,12 @@
     "typecheck:tsgo": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsgo --noEmit -p apps/kami-key-the/tsconfig.json",
-        "cwd": "."
+        "commands": [
+          "tsgo --noEmit -p apps/kami-key-the/tsconfig.json",
+          "tsgo --noEmit -p apps/kami-key-the/renderer/tsconfig.json"
+        ],
+        "cwd": ".",
+        "parallel": false
       }
     },
     "typecheck": {

@@ -33,12 +33,24 @@ const electronAPI: ElectronAPI = {
     setAutostart: (on: boolean): Promise<boolean> => ipcRenderer.invoke('system:setAutostart', on),
     isHotkeyEnabled: () => ipcRenderer.invoke('system:isHotkeyEnabled'),
     setHotkeyEnabled: (on: boolean) => ipcRenderer.invoke('system:setHotkeyEnabled', on),
+    checkForUpdates: () => ipcRenderer.invoke('system:checkForUpdates'),
   },
+  platform: process.platform,
   on: {
     configChanged: (cb: (config: KeymapConfig) => void) => {
       const handler = (_event: Electron.IpcRendererEvent, config: KeymapConfig) => cb(config)
       ipcRenderer.on('config:changed', handler)
       return () => ipcRenderer.removeListener('config:changed', handler)
+    },
+    hotkeyEnabledChanged: (cb: (on: boolean) => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, on: boolean) => cb(on)
+      ipcRenderer.on('system:hotkeyEnabledChanged', handler)
+      return () => ipcRenderer.removeListener('system:hotkeyEnabledChanged', handler)
+    },
+    navigate: (cb: (page: 'editor' | 'settings') => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, page: 'editor' | 'settings') => cb(page)
+      ipcRenderer.on('app:navigate', handler)
+      return () => ipcRenderer.removeListener('app:navigate', handler)
     },
   },
 }

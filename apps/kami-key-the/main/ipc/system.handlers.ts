@@ -10,6 +10,7 @@
 import { app, ipcMain } from 'electron'
 import type { LayoutInfo } from '../../shared/ipc-types'
 import { getConfig, isHotkeyEnabled, setHotkeyEnabled } from '../background'
+import { checkForUpdatesManually } from '../updater'
 
 export function registerSystemHandlers(): void {
   ipcMain.handle('system:getVersion', (): string => {
@@ -41,5 +42,9 @@ export function registerSystemHandlers(): void {
 
   ipcMain.handle('system:setHotkeyEnabled', (_event, on: boolean): void => {
     setHotkeyEnabled(on)
+  })
+
+  ipcMain.handle('system:checkForUpdates', (): Promise<void> => {
+    return checkForUpdatesManually()
   })
 }

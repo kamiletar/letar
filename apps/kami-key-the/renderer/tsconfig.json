@@ -8,12 +8,15 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "types": ["vite/client"],
+    "noEmit": true,
+    "types": ["vite/client", "node"],
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "noUncheckedSideEffectImports": false,
-    "ignoreDeprecations": "6.0"
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@letar/ui": ["../../../libs/ui/src/index.ts"],
+      "@letar/hooks": ["../../../libs/hooks/src/index.ts"]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "dist"]

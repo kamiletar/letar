@@ -3,15 +3,32 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark light" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <title>KamiKeyThe</title>
     <style>
+      /* Фон html задан заранее (до маунта React) — иначе окно на старте мигает белым */
+      html {
+        background: #f4f7f4;
+      }
+      @media (prefers-color-scheme: dark) {
+        html {
+          background: #0b0e0c;
+        }
+      }
       body {
         margin: 0;
         padding: 0;
-        overflow: hidden;
       }
     </style>
+    <script>
+      // Шим для barrel-экспорта @letar/ui: он реэкспортирует next/link, next/image,
+      // next/navigation, которые читают process.env.* при загрузке модуля. В Vite dev/Electron
+      // renderer (contextIsolation) глобального process нет — без шима падает с
+      // "process is not defined" ещё до рендера. Подробности —
+      // .claude/docs/vite-dev-letar-ui-barrel-process-undefined.md
+      window.process = window.process || { env: {} }
+    </script>
   </head>
   <body>
     <div id="root"></div>
