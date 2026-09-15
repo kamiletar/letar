@@ -195,12 +195,6 @@ export const auth = createAuth({
       allowDifferentEmails: true,
     },
   },
-
-  pages: {
-    signIn: '/sign-in',
-    signUp: '/sign-up',
-    error: '/sign-in',
-  },
 })
 
 // Экспорт типов
