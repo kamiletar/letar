@@ -3715,6 +3715,27 @@ domwellbes). На этот раз разъехались 6 внутренних 
 переиспользуют. Поведение не менялось — вывод обоих скриптов сверен `diff` байт-в-байт до/после
 рефакторинга, `bun scripts/check-all.mjs --group=deps` зелёный. Коммит: `395f699e0`. Не запушено.
 
+## §175 (2026-09-15) Долг класса 2 из §174 дозаполнен во всех 6 приложениях
+
+Отдельная задача по итогу §174: 6 приложений (aboi, auth-hub, domwellbes, driving-school,
+grandslamcup, mandala) не перечисляли в `transpilePackages` часть реально импортируемых
+`@letar/*`-пакетов (ключ уже был, список неполон — дрейф соглашения, не поломка сборки).
+Дозаполнено по факту вывода `node scripts/check-transpile-packages.mjs`:
+
+- `apps/aboi/next.config.mjs` — `@letar/hooks`
+- `apps/auth-hub/next.config.ts` — `@letar/api-server`, `@letar/pin-auth`
+- `apps/domwellbes/next.config.mjs` — `@letar/pin-auth`
+- `apps/driving-school/next.config.js` — `@letar/sse`
+- `apps/grandslamcup/next.config.mjs` — `@letar/api-server`
+- `apps/mandala/next.config.js` — `@letar/demo-protection`
+
+`auth-hub` в процессе выяснилось, что не submodule, а обычная директория публичного `letar`
+(правился прямо там, не через `git checkout main` внутри submodule).
+
+`bun scripts/check-all.mjs --only=transpile-packages` зелёный (было 6 неполных из 26, стало 0).
+Коммиты по одному на приложение/scope + bump SHA submodule (aboi/domwellbes/driving-school) в
+letar. **Не запушено** — ждёт одобрения пользователя на push.
+
 ## §174 (2026-09-15) Гейт `check-transpile-packages` не покрывал build-breaking случай — расширен
 
 Разбор задачи из forms-coordinator-dev (2026-09-15): падение прод-билда `apps/form-example`
@@ -3738,6 +3759,5 @@ domwellbes). На этот раз разъехались 6 внутренних 
 - Коммит: `59219db93` (`GIT_ALLOW_MULTI_SCOPE_COMMIT=1`, затронуты `scripts/` + `.claude/docs/`).
   Не запушено.
 
-⚠️ Открытый вопрос (не решался в этой сессии): 6 приложений с неполным `transpilePackages`
-(класс 2, см. выше) — это накопленный долг, не блокирующий сборку. Разгрести можно отдельной
-задачей (добавить недостающие пакеты в массив каждого `next.config.*`), приоритет не выбирался.
+✅ Открытый вопрос закрыт отдельной сессией 2026-09-15 (см. §175) — все 6 находок класса 2
+дозаполнены.
