@@ -60,10 +60,6 @@ export const auth = betterAuth({
       maxAge: 5 * 60, // 5 минут
     },
   },
-
-  pages: {
-    signIn: '/sign-in',
-  },
 })
 
 // Экспорт типов
