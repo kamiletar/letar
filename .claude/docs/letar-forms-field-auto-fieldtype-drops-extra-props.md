@@ -1,5 +1,7 @@
 # `Field.Auto` с `meta.ui.fieldType` не прокидывает произвольные props (например `onComplete`)
 
+✅ Закрыто в `@letar/forms` v2.14.18 (2026-09-15) — см. «Настоящий фикс» ниже.
+
 ⚠️ Найдено на `auth-hub`, PLAN_EMAIL_CODE.md A.2 (2026-09-15) — экран ввода кода из письма
 (`verify-email-code.tsx`) молчал: код набирался, но автосабмит не срабатывал, ни ошибки, ни
 запроса в сеть.
@@ -37,10 +39,16 @@
 `.claude/rules/forms.md` для похожего класса проблем. `meta.ui.fieldType`/`fieldProps` на схеме
 в этом случае можно не задавать вовсе — они нужны только когда рендер идёт через `Field.Auto`.
 
-## Настоящий фикс (не сделан, кандидат для `@letar/forms`)
+## Настоящий фикс — сделан в v2.14.18
 
-`FieldAuto` должен спредить остаточные `baseProps` (то, что не попало в явно перечисленный
-список) в объект, передаваемый `renderFieldByType`, точно так же, как это уже делает
-fallback-ветка по `zodType`. Требует delegation через `.claude/rules/form-delegation.md`
-(`forms-coordinator-dev`) — не исправлено в рамках PLAN_EMAIL_CODE.md, чтобы не трогать чужую
-библиотеку без её координатора.
+`FieldAuto` теперь собирает остаточные props (то, что не попало в явно перечисленный список —
+`label`/`placeholder`/`helperText`/`required`/`disabled`/`readOnly`) и сливает их в `fieldProps`
+вместе с `uiMeta.fieldProps` перед вызовом `renderFieldByType` — прямой JSX-проп приоритетнее,
+как более специфичный. `AutoFieldProps` получил index signature `[key: string]: unknown`, чтобы
+такие props типизированно принимались на `<Form.Field.Auto>`. Регрессионный тест —
+`libs/forms/src/lib/declarative/form-fields/auto/field-auto.spec.tsx` (полный цикл через
+`<Form>` + `z.string().meta({ ui: { fieldType: 'pinInput' } })` + `onComplete`, подтверждено что
+без фикса тест красный). См. `libs/forms/CHANGELOG.md` [2.14.18].
+
+Обход из предыдущей версии этого документа (рендерить явным тегом `AppForm.Field.PinInput`)
+остаётся рабочим и по-прежнему допустим, но больше не обязателен.
