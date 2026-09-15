@@ -14,6 +14,19 @@ const config: NextConfig = {
   experimental: {
     optimizePackageImports: ['@chakra-ui/react'],
   },
+  // instrumentation-client.ts импортирует libs/glitchtip — файл вне apps/form-example.
+  // Без transpilePackages Next.js ограничивает свой ts/js loader `include: [dir]`
+  // (см. shouldIncludeExternalDirs в next/dist/build/webpack-config.js) и молча
+  // отказывается обрабатывать внешние .ts — «no loaders configured».
+  transpilePackages: [
+    '@letar/analytics',
+    '@letar/demo-protection',
+    '@letar/forms',
+    '@letar/forms-core',
+    '@letar/glitchtip',
+    '@letar/pg-url',
+    '@letar/seo',
+  ],
   // Трейсер standalone-вывода (@vercel/nft) не докопировал @swc/helpers из bun-хранилища
   // node_modules/.bun/ — контейнер падал в crash loop на старте: "Cannot find module
   // '.../next/node_modules/@swc/helpers/esm/_interop_require_default.js'" (staging, 2026-08-15).
