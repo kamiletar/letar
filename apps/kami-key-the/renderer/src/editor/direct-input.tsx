@@ -6,7 +6,7 @@
  * - Символ напрямую: ₽, ©, →
  */
 
-import { Box, Button, Flex, Input, Text } from '@chakra-ui/react'
+import { Box, chakra, Flex, Input, Text } from '@chakra-ui/react'
 import { useState } from 'react'
 
 interface DirectInputProps {
@@ -60,60 +60,63 @@ export function DirectInput({ onAssign, keyLabel }: DirectInputProps) {
   }
 
   return (
-    <Box mt="3" pt="3" borderTop="1px solid #3a3a5a">
-      <Text color="#666" fontSize="xs" mb="1">
-        Или введите символ или Unicode-код:
+    <Box bg="bg.panel" borderWidth="1px" borderColor="border" rounded="l3" p="3">
+      <Text fontSize="xs" fontWeight="600" textTransform="uppercase" letterSpacing="0.05em" color="fg.subtle" mb="2">
+        Свой символ или код
       </Text>
-      <Flex align="center" gap="2">
+      <Flex align="center" gap="2" mb="2">
         <Input
-          w="110px"
           placeholder="₽ или U+20BD"
           maxLength={7}
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          bg="#1a1a2e"
-          border="1px solid #3a3a5a"
-          color="white"
-          fontFamily="monospace"
-          fontSize="sm"
-          _focus={{ borderColor: '#6c7ae0' }}
-          _placeholder={{ color: '#555' }}
+          fontFamily="mono"
         />
         {parsed && (
-          <>
-            <Box fontSize="3xl" w="40px" textAlign="center">
-              {parsed.char}
-            </Box>
-            <Text color="#666" fontSize="xs" fontFamily="monospace">
+          <Flex align="center" gap="1" flexShrink={0}>
+            <chakra.span fontSize="2xl">{parsed.char}</chakra.span>
+            <Text color="fg.subtle" fontSize="xs" fontFamily="mono">
               {parsed.label}
             </Text>
-          </>
+          </Flex>
         )}
-        <Button
-          size="sm"
-          bg="#1e3a4a"
-          color="#4ac"
-          border="1px solid #2a5a6a"
-          _hover={{ bg: '#2a5a6a' }}
+      </Flex>
+      <Flex gap="2">
+        <chakra.button
+          type="button"
+          flex="1"
+          px="3"
+          py="1.5"
+          rounded="l2"
+          fontSize="sm"
+          bg="brand.subtle"
+          color="brand.fg"
+          _hover={{ bg: 'brand.emphasized' }}
+          _disabled={{ opacity: 0.4, cursor: 'default' }}
           disabled={!parsed}
           onClick={() => assign('char')}
         >
           AltGr+{keyLabel}
-        </Button>
-        <Button
-          size="sm"
-          bg="#1e2a4a"
-          color="#6c7ae0"
-          border="1px solid #3a4a7a"
-          _hover={{ bg: '#2a3a6a' }}
+        </chakra.button>
+        <chakra.button
+          type="button"
+          flex="1"
+          px="3"
+          py="1.5"
+          rounded="l2"
+          fontSize="sm"
+          bg="accent.subtle"
+          color="accent.fg"
+          _hover={{ bg: 'accent.emphasized' }}
+          _disabled={{ opacity: 0.4, cursor: 'default' }}
           disabled={!parsed}
           onClick={() => assign('shiftChar')}
         >
-          AltGr+Shift+{keyLabel}
-        </Button>
+          +Shift+{keyLabel}
+        </chakra.button>
       </Flex>
       {value.trim() && !parsed && (
-        <Text color="#a44" fontSize="xs" mt="1">
+        <Text color="fg.error" fontSize="xs" mt="1">
           Введите один символ или hex-код (например U+20BD)
         </Text>
       )}

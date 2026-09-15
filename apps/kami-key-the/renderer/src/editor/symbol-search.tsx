@@ -6,7 +6,9 @@
  * - Клавиатурная навигация (стрелки вверх/вниз, Enter)
  * - Недавно использованные символы
  * - Фильтрация по категориям Unicode-блоков
- * - Drag-and-drop символов на клавиши клавиатуры
+ * - Drag-and-drop символов на клавиши клавиатуры (доступен только на клавиатуре — здесь клавиши
+ *   не видны, компонент используется со страницы одной клавиши; код DnD оставлен рабочим на
+ *   будущее, см. PLAN.md)
  *
  * Производительность на ~1700 символах: `toLowerCase()`/`parseInt(hex)` для каждого символа
  * посчитаны один раз в `searchIndex` (при загрузке `symbols`, а не на каждое нажатие) — сам поиск
@@ -16,10 +18,11 @@
  * инвалидация при обновлении базы символов) добавила бы сложность без измеримой выгоды.
  */
 
-import { Box, Button, Flex, Input, Text } from '@chakra-ui/react'
+import { Box, chakra, Flex, Input, InputGroup, Kbd, Text } from '@chakra-ui/react'
 import { useDebounce } from '@letar/hooks'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { LuSearch } from 'react-icons/lu'
 import type { SymbolEntry } from '../../../shared/ipc-types'
 import { matchesCategory, SYMBOL_CATEGORIES } from './symbol-categories'
 
@@ -27,6 +30,8 @@ const RECENT_KEY = 'kami-key-the-recent-symbols'
 const MAX_RECENT = 8
 /** Оценка высоты строки для виртуализатора — уточняется через measureElement (описание может занять 2 строки) */
 const ROW_HEIGHT_ESTIMATE = 44
+
+const EMPTY_STATE_SUGGESTIONS = ['тире', 'кавычки', 'стрелка', 'градус', 'валюта']
 
 /** Загрузить недавние символы из localStorage */
 function loadRecent(): string[] {
@@ -148,19 +153,12 @@ export function SymbolSearch({ symbols, onAssign, keyLabel, category, onCategory
     const ch = String.fromCodePoint(cp)
     e.dataTransfer.setData('application/json', JSON.stringify({ char: ch, name: entry.n }))
     e.dataTransfer.effectAllowed = 'copy'
-    // Визуальный drag-preview: символ крупно
-    const preview = document.createElement('div')
-    preview.textContent = ch
-    preview.style.cssText =
-      'font-size:32px;padding:4px 8px;background:#1e2a4a;color:#6c7ae0;border-radius:6px;position:absolute;top:-1000px'
-    document.body.appendChild(preview)
-    e.dataTransfer.setDragImage(preview, 24, 24)
-    requestAnimationFrame(() => document.body.removeChild(preview))
   }
 
   const fullList = results.length > 0 ? results : query.trim().length < 2 && categoryId === 'all' ? recentSymbols : []
   const showingRecent = results.length === 0 && query.trim().length < 2 && categoryId === 'all'
     && recentSymbols.length > 0
+  const isEmptyState = query.trim().length === 0 && categoryId === 'all' && recentSymbols.length === 0
 
   // oxlint-disable-next-line react/incompatible-library -- @tanstack/react-virtual возвращает немемоизируемые функции (getVirtualItems/measureElement) намеренно; строки ниже не обёрнуты в memo, устаревший UI не грозит
   const virtualizer = useVirtualizer({
@@ -199,55 +197,79 @@ export function SymbolSearch({ symbols, onAssign, keyLabel, category, onCategory
   }
 
   return (
-    <Box>
+    <Flex direction="column" flex="1" minH="0" w="full">
       {/* Фильтр по категориям */}
-      <Flex gap="1" mb="2" flexWrap="wrap">
+      <Flex gap="1" mb="2" flexWrap="wrap" flexShrink={0}>
         {visibleCategories.map((cat) => (
-          <Box
+          <chakra.button
             key={cat.id}
-            px="2"
-            py="0.5"
-            borderRadius="4px"
+            type="button"
+            aria-pressed={categoryId === cat.id}
+            px="2.5"
+            py="1"
+            rounded="l1"
             fontSize="xs"
-            cursor="pointer"
-            userSelect="none"
-            bg={categoryId === cat.id ? '#3a3a6a' : 'transparent'}
-            color={categoryId === cat.id ? '#8a9af0' : '#666'}
-            border={categoryId === cat.id ? '1px solid #5a5a8a' : '1px solid transparent'}
-            _hover={{ color: '#aaa', bg: '#2a2a4a' }}
+            bg={categoryId === cat.id ? 'brand.subtle' : 'transparent'}
+            color={categoryId === cat.id ? 'brand.fg' : 'fg.subtle'}
+            borderWidth="1px"
+            borderColor={categoryId === cat.id ? 'brand.border' : 'transparent'}
+            _hover={{ bg: 'bg.muted', color: 'fg' }}
             onClick={() => onCategoryChange(cat.id)}
           >
             {cat.label}
             {cat.id !== 'all' && (
-              <Text as="span" color="#555" ml="1">
+              <chakra.span color="fg.subtle" ml="1">
                 {categoryCounts.get(cat.id)}
-              </Text>
+              </chakra.span>
             )}
-          </Box>
+          </chakra.button>
         ))}
       </Flex>
 
-      <Input
-        placeholder="Поиск символа по названию..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={handleKeyDown}
-        bg="#1a1a2e"
-        border="1px solid #3a3a5a"
-        color="white"
-        mb="2"
-        _focus={{ borderColor: '#6c7ae0' }}
-        _placeholder={{ color: '#666' }}
-      />
+      <InputGroup startElement={<LuSearch size={15} />} flexShrink={0} mb="2">
+        <Input
+          autoFocus
+          placeholder="Поиск символа по названию..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
+        />
+      </InputGroup>
 
       {showingRecent && (
-        <Text color="#666" fontSize="xs" mb="1" px="1">
+        <Text color="fg.subtle" fontSize="xs" mb="1" px="1" flexShrink={0}>
           Недавние:
         </Text>
       )}
 
+      {isEmptyState && (
+        <Flex direction="column" gap="2" flex="1" align="center" justify="center" px="4">
+          <Text color="fg.subtle" fontSize="sm" textAlign="center">
+            Начните вводить название или выберите категорию
+          </Text>
+          <Flex gap="1.5" flexWrap="wrap" justify="center">
+            {EMPTY_STATE_SUGGESTIONS.map((s) => (
+              <chakra.button
+                key={s}
+                type="button"
+                px="2.5"
+                py="1"
+                rounded="l1"
+                fontSize="xs"
+                bg="bg.muted"
+                color="fg.muted"
+                _hover={{ bg: 'bg.emphasized', color: 'fg' }}
+                onClick={() => setQuery(s)}
+              >
+                {s}
+              </chakra.button>
+            ))}
+          </Flex>
+        </Flex>
+      )}
+
       {fullList.length > 0 && (
-        <Box ref={resultsRef} maxH="300px" overflowY="auto" border="1px solid #3a3a5a" borderRadius="6px">
+        <Box ref={resultsRef} flex="1" minH="0" overflowY="auto" borderWidth="1px" borderColor="border" rounded="l2">
           <Box position="relative" width="100%" height={`${virtualizer.getTotalSize()}px`}>
             {virtualizer.getVirtualItems().map((virtualRow) => {
               const s = fullList[virtualRow.index]
@@ -268,9 +290,10 @@ export function SymbolSearch({ symbols, onAssign, keyLabel, category, onCategory
                   gap="2"
                   px="3"
                   py="1.5"
-                  borderBottom="1px solid #2a2a4a"
-                  bg={isHighlighted ? '#3a3a6a' : 'transparent'}
-                  _hover={{ bg: '#2a2a4a' }}
+                  borderBottomWidth="1px"
+                  borderColor="border.subtle"
+                  bg={isHighlighted ? 'bg.muted' : 'transparent'}
+                  _hover={{ bg: 'bg.muted' }}
                   cursor="grab"
                   draggable
                   onDragStart={(e) => handleDragStart(e, s)}
@@ -279,50 +302,60 @@ export function SymbolSearch({ symbols, onAssign, keyLabel, category, onCategory
                   onClick={() =>
                     handleAssign(s, 'char')}
                 >
-                  <Text fontSize="2xl" w="36px" textAlign="center" pointerEvents="none">
-                    {ch}
-                  </Text>
-                  <Text color="#6c7ae0" fontSize="xs" fontFamily="monospace" w="60px" pointerEvents="none">
-                    U+{s.c}
-                  </Text>
-                  <Text flex="1" fontSize="sm" pointerEvents="none">
-                    {s.n}
-                    {s.s && (
-                      <Text as="span" color="#888">
-                        {' — '}
-                        {s.s}
-                      </Text>
-                    )}
-                  </Text>
-                  <Flex gap="1">
-                    <Button
-                      size="xs"
-                      bg="#1e3a4a"
-                      color="#4ac"
-                      border="1px solid #2a5a6a"
-                      _hover={{ bg: '#2a5a6a' }}
+                  <Flex align="center" justify="center" w="36px" h="36px" rounded="l1" bg="bg.muted" flexShrink={0}>
+                    <chakra.span fontSize="xl" pointerEvents="none">
+                      {ch}
+                    </chakra.span>
+                  </Flex>
+                  <Box flex="1" minW="0" pointerEvents="none">
+                    <Text fontSize="sm" color="fg" truncate>
+                      {s.n}
+                      {s.s && (
+                        <chakra.span color="fg.subtle">
+                          {' — '}
+                          {s.s}
+                        </chakra.span>
+                      )}
+                    </Text>
+                    <Text fontSize="xs" color="fg.subtle" fontFamily="mono">
+                      U+{s.c}
+                    </Text>
+                  </Box>
+                  <Flex gap="1" flexShrink={0}>
+                    <chakra.button
+                      type="button"
+                      px="2"
+                      py="1"
+                      rounded="l1"
+                      fontSize="xs"
+                      bg="brand.subtle"
+                      color="brand.fg"
+                      _hover={{ bg: 'brand.emphasized' }}
+                      title={`Назначить на AltGr+${keyLabel}`}
                       onClick={(e) => {
                         e.stopPropagation()
                         handleAssign(s, 'char')
                       }}
-                      title={`Назначить на AltGr+${keyLabel}`}
                     >
-                      AltGr+{keyLabel}
-                    </Button>
-                    <Button
-                      size="xs"
-                      bg="#1e2a4a"
-                      color="#6c7ae0"
-                      border="1px solid #3a4a7a"
-                      _hover={{ bg: '#2a3a6a' }}
+                      AltGr
+                    </chakra.button>
+                    <chakra.button
+                      type="button"
+                      px="2"
+                      py="1"
+                      rounded="l1"
+                      fontSize="xs"
+                      bg="accent.subtle"
+                      color="accent.fg"
+                      _hover={{ bg: 'accent.emphasized' }}
+                      title={`Назначить на AltGr+Shift+${keyLabel}`}
                       onClick={(e) => {
                         e.stopPropagation()
                         handleAssign(s, 'shiftChar')
                       }}
-                      title={`Назначить на AltGr+Shift+${keyLabel}`}
                     >
-                      +Shift+{keyLabel}
-                    </Button>
+                      +Shift
+                    </chakra.button>
                   </Flex>
                 </Flex>
               )
@@ -332,16 +365,21 @@ export function SymbolSearch({ symbols, onAssign, keyLabel, category, onCategory
       )}
 
       {query.trim().length >= 2 && results.length === 0 && (
-        <Text color="#666" p="2" fontSize="sm">
+        <Text color="fg.subtle" p="2" fontSize="sm">
           Ничего не найдено
         </Text>
       )}
 
       {fullList.length > 0 && (
-        <Text color="#555" fontSize="xs" mt="1" px="1">
-          {'↑↓'} навигация, Enter — AltGr, Shift+Enter — +Shift, перетащи на клавишу
-        </Text>
+        <Flex gap="1.5" align="center" mt="1.5" px="1" fontSize="xs" color="fg.subtle" flexShrink={0}>
+          <Kbd size="sm">↑↓</Kbd>
+          выбор
+          <Kbd size="sm">Enter</Kbd>
+          AltGr
+          <Kbd size="sm">Shift+Enter</Kbd>
+          AltGr+Shift
+        </Flex>
       )}
-    </Box>
+    </Flex>
   )
 }
