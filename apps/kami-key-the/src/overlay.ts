@@ -46,17 +46,17 @@ const PS_SOLID = 0
 
 const OVERLAY_ALPHA = 200 // 0-255, ~78% — полупрозрачность
 
-const KEY_SIZE = 56 // px — стандартная клавиша
-const KEY_GAP = 4 // px между клавишами
-const KEY_RADIUS = 6 // px скругление
-const UNIT = KEY_SIZE + KEY_GAP // 60px — шаг сетки
+const KEY_SIZE = 70 // px — стандартная клавиша (было мелко — увеличено на ~25%)
+const KEY_GAP = 5 // px между клавишами
+const KEY_RADIUS = 7 // px скругление
+const UNIT = KEY_SIZE + KEY_GAP // 75px — шаг сетки
 
 // Размер окна вычисляется из содержимого
-const CONTENT_WIDTH = 15 * UNIT - KEY_GAP // 896
-const CONTENT_HEIGHT = 5 * UNIT - KEY_GAP // 296
-const PAD = 20 // отступ от края окна
-const OVERLAY_WIDTH = CONTENT_WIDTH + PAD * 2 // 936
-const OVERLAY_HEIGHT = CONTENT_HEIGHT + PAD * 2 // 336
+const CONTENT_WIDTH = 15 * UNIT - KEY_GAP // 1120
+const CONTENT_HEIGHT = 5 * UNIT - KEY_GAP // 370
+const PAD = 25 // отступ от края окна
+const OVERLAY_WIDTH = CONTENT_WIDTH + PAD * 2 // 1170
+const OVERLAY_HEIGHT = CONTENT_HEIGHT + PAD * 2 // 420
 
 // --- Цвета (COLORREF = 0x00BBGGRR) ---
 //
@@ -371,7 +371,7 @@ function paintOverlay(hwnd: unknown): void {
       //   верх-лево: EN label            верх-право: AltGr+Shift (циан)
       //   низ-лево:  RU label            низ-право:  AltGr base (зелёный)
 
-      const p = 7 // внутренний отступ
+      const p = 9 // внутренний отступ
       const halfW = Math.round(keyW / 2)
 
       if (key.ru || mapping) {
@@ -455,9 +455,9 @@ export function initOverlay(): boolean {
     activeBrush = CreateSolidBrush(COLOR_KEY_ACTIVE)
     borderPen = CreatePen(PS_SOLID, 1, COLOR_BORDER)
     activeBorderPen = CreatePen(PS_SOLID, 1, COLOR_BORDER_ACTIVE)
-    fontLabel = CreateFontW(-15, 0, 0, 0, FW_NORMAL, 0, 0, 0, 1, 0, 0, 5, 0, 'Segoe UI')
+    fontLabel = CreateFontW(-19, 0, 0, 0, FW_NORMAL, 0, 0, 0, 1, 0, 0, 5, 0, 'Segoe UI')
     // Один размер/начертание для обоих AltGr-символов (базового и Shift) — как в key-button.tsx
-    fontSymbol = CreateFontW(-16, 0, 0, 0, FW_BOLD, 0, 0, 0, 1, 0, 0, 5, 0, 'Segoe UI')
+    fontSymbol = CreateFontW(-20, 0, 0, 0, FW_BOLD, 0, 0, 0, 1, 0, 0, 5, 0, 'Segoe UI')
     gdiReady = true
 
     const hInstance = GetModuleHandleW(null)
