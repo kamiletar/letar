@@ -97,11 +97,6 @@ export const auth = betterAuth({
       '/oauth2/*': { window: 60, max: 30 },
     },
   },
-
-  // Страница входа
-  pages: {
-    signIn: '/auth/signin',
-  },
 })
 
 /**
