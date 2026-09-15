@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- **`nx typecheck:tsgo animatrona-renderer` давал 76 ложных `TS6305`** под
+  `.next/types/app/**` — устаревший локальный `.next` (гитигнорится, пережил обновление версии
+  `next` в рамках `/infra:deps-update`) рассинхронизировался со сгенерированными
+  type-check-хелперами. Не код-баг: `rm -rf .next tsconfig.tsbuildinfo` (оба в `.gitignore`) —
+  typecheck зелёный без единой правки исходников. Разбор —
+  [.claude/docs/nextjs-stale-dotnext-types-tsgo-ts6305.md](/.claude/docs/nextjs-stale-dotnext-types-tsgo-ts6305.md).
+
 ## [0.55.74] - 2026-09-15
 
 ### Fixed
