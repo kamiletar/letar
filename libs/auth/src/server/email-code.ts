@@ -40,6 +40,13 @@ export function createEmailCodeOptions(deps: CreateEmailCodeOptionsDeps): EmailO
     otpLength: EMAIL_CODE_DEFAULTS.otpLength,
     expiresIn: EMAIL_CODE_DEFAULTS.expiresInSec,
     allowedAttempts: EMAIL_CODE_DEFAULTS.allowedAttempts,
+    // Плагин emailOTP вешает на /email-otp/verify-email СВОЙ собственный rate-limit
+    // (по умолчанию max: 3), независимый от allowedAttempts — без переопределения
+    // общий 429 "Too many requests" срабатывал раньше специфичной ошибки TOO_MANY_ATTEMPTS
+    // уже на 4-й попытке. Роут сравнивает usedAttempts (до инкремента) >= allowedAttempts,
+    // поэтому TOO_MANY_ATTEMPTS реально возвращается на (allowedAttempts + 1)-м запросе —
+    // max должен пропустить хотя бы столько запросов, иначе рейт-лимитер снова опередит его.
+    rateLimit: { window: 60, max: EMAIL_CODE_DEFAULTS.allowedAttempts + 1 },
     storeOTP: 'hashed',
     disableSignUp: true,
     sendVerificationOnSignUp: false,
