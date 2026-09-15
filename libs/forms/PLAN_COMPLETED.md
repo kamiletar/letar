@@ -1,5 +1,26 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-15 (сессия 6) — `Field.Auto` с `meta.ui.fieldType` теряло произвольные props (закрыт v2.14.18)
+
+**Задача:** делегированный запрос (найдено на auth-hub, `verify-email-code.tsx`, разбор —
+`.claude/docs/letar-forms-field-auto-fieldtype-drops-extra-props.md`) — `FieldAuto` при заданном
+`meta.ui.fieldType` вызывал `renderFieldByType` с явно перечисленным подмножеством props
+(`label`/`placeholder`/`helperText`/`required`/`disabled`/`readOnly`), не спредя остаточные
+props, в отличие от fallback-ветки по `zodType`. Проп сверх списка (`onComplete` у
+`PinInputFieldProps`) молча терялся без ошибки — автосабмит по завершении ввода кода не
+срабатывал.
+
+**Сделано:** ветка `uiMeta?.fieldType` теперь собирает остаточные props (всё, что не попало в
+явно перечисленные поля) и сливает их в `fieldProps` вместе с `uiMeta.fieldProps` (прямой
+JSX-проп приоритетнее). `AutoFieldProps` получил index signature `[key: string]: unknown` для
+типизированного приёма таких props. Добавлен регрессионный тест
+`field-auto.spec.tsx` — полный цикл через `<Form>` + `z.string().meta({ui:{fieldType:
+'pinInput'}})` + `onComplete`, подтверждено вручную (временный откат фикса), что без него тест
+красный. `@letar/forms` 2.14.17 → 2.14.18.
+
+**Проверка:** `nx test forms` — 805/805 зелёных; `nx typecheck:tsgo forms`/`nx lint forms` —
+зелёные.
+
 ## 2026-09-15 (сессия 5) — `Form.Field.Date` + `Form.UrlSync` совместимость (закрыт v2.14.17)
 
 **Задача:** единственная нерешённая задача в очереди `forms-coordinator-dev` (high priority, от
