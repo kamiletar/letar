@@ -814,6 +814,13 @@ repo-wide `/releases/latest` вернёт чужой релиз; единая с
 [electron-net-fetch-tun-vpn](/.claude/docs/electron-net-fetch-tun-vpn.md) ⚠️ `net.fetch` падает под
 TUN-VPN; DNS-проверки с рабочей машины врут ·
 [electron-sqlite](/.claude/docs/electron-sqlite.md) ·
+[electron-window-controls-overlay-pattern](/.claude/docs/electron-window-controls-overlay-pattern.md)
+`titleBarStyle: 'hidden'` + `titleBarOverlay` вместо `frame: false` — сохраняет нативные Snap
+Layouts Windows 11, `env(titlebar-area-*)` под безопасную зону системных кнопок ·
+[vite-dev-letar-ui-barrel-process-undefined](/.claude/docs/vite-dev-letar-ui-barrel-process-undefined.md)
+⚠️ импорт из barrel `@letar/ui` под Vite dev тянет `next/*` в пребандл, `process.env` на верхнем
+уровне модуля падает `ReferenceError` в Electron renderer без `process` — временный шим в
+`index.html`, корневой фикс — подпути-экспорты либы ·
 [react-native-087-breaking-changes](/.claude/docs/react-native-087-breaking-changes.md) ⚠️ миграция
 RN 0.85→0.87: пути codegen-типов, `PressableStateCallbackType` interface→type ломает declaration
 merging без ошибки компиляции, и другие TS-грабли ·
