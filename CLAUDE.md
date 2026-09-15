@@ -380,6 +380,11 @@ ref/DOM не перезапускается ·
 `renderer/tsconfig.json` с независимым набором `@letar/*`-путей — `typecheck:tsgo` читает
 верхнеуровневый `tsconfig.json`, `next build` читает `renderer/tsconfig.json`; новый алиас,
 добавленный только в один файл, даёт зелёный typecheck и красный `Module not found` на билде ·
+[nextron-npx-next-build-windows-project-dir](/.claude/docs/nextron-npx-next-build-windows-project-dir.md)
+⚠️ ручная диагностика через `npx next build`/`next.exe` из `renderer/` (Nextron-приложение без
+своего `package.json`) на Windows резолвит project dir на уровень выше — TS6305 родительского
+`tsconfig.json`, реальных `nx build`/`nx build:win` (executor `nx:run-commands`, без `npx`) не
+касается; диагностировать через `node .../next/dist/bin/next build` напрямую ·
 [nextjs-standalone-tracing](/.claude/docs/nextjs-standalone-tracing.md)
 ECONNREFUSED/ERR_DLOPEN_FAILED при зелёном билде ·
 [nextjs-dynamic-fs-path-tracing](/.claude/docs/nextjs-dynamic-fs-path-tracing.md) ⚠️ обратный
