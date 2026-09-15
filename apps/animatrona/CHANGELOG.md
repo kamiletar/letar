@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [0.55.74] - 2026-09-15
+
+### Fixed
+
+- **Потенциальный прод-краш main-процесса при старте**: `optimization.concatenateModules: false`
+  в `main/webpack.config.js`. Scope hoisting (включён по умолчанию в `mode: 'production'`) ломает
+  циклическую CJS-загрузку внутри `js-yaml` (транзитивная зависимость `electron-updater`,
+  импортируемого top-level в `main/updater.ts`) — воспроизведено изолированным тест-бандлом
+  (`TypeError: Cannot set properties of undefined (setting 'options')`), после фикса не
+  воспроизводится. `nx dev` баг не ловит — только реальный production-бандл. Разбор —
+  [.claude/docs/webpack-concatenatemodules-electron-updater-jsyaml-crash.md](/.claude/docs/webpack-concatenatemodules-electron-updater-jsyaml-crash.md).
+
 ## [0.55.72] - 2026-09-08
 
 ### Changed

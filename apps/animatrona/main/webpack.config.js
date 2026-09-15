@@ -59,6 +59,12 @@ module.exports = {
     new webpack.NormalModuleReplacementPlugin(/^node-datachannel(\/polyfill)?$/, nodeDatchannelMock),
     new webpack.NormalModuleReplacementPlugin(/^@libp2p\/webrtc$/, libp2pWebrtcMock),
   ],
+  optimization: {
+    // electron-updater → builder-util-runtime → js-yaml использует циклические CJS require
+    // между schema.js и type.js; scope hoisting (по умолчанию в mode: 'production') ломает
+    // эту загрузку — см. .claude/docs/webpack-concatenatemodules-electron-updater-jsyaml-crash.md
+    concatenateModules: false,
+  },
   externals: {
     // Electron и Node.js модули не бандлятся
     electron: 'commonjs electron',

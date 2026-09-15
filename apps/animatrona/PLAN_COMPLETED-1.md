@@ -1,7 +1,29 @@
 # Animatrona — Выполненные задачи (Часть 1)
 
 > Точка входа и карта всех частей — [PLAN_COMPLETED.md](./PLAN_COMPLETED.md).
-> Диапазон: 2026-09-04 — 2026-09-08.
+> Диапазон: 2026-09-04 — 2026-09-15.
+
+## Фикс прод-краша main-процесса: `concatenateModules` ломает electron-updater (2026-09-15, v0.55.74)
+
+**Контекст:** в `kami-key-the` найден и починен прод-краш main-процесса при старте
+(`TypeError: Cannot set properties of undefined (setting 'options')`) — webpack
+`optimization.concatenateModules` (scope hoisting, включён по умолчанию в `mode: 'production'`)
+ломает циклическую CJS-загрузку внутри `js-yaml`, транзитивной зависимости `electron-updater`.
+`apps/animatrona/main/updater.ts` импортирует `electron-updater` тем же способом (top-level
+`import { autoUpdater } from 'electron-updater'`), поэтому проверена та же мина.
+
+**Проверка:** полный `build:win` (renderer + mobile-ui + установщик) слишком тяжёл для быстрой
+проверки гипотезы, поэтому собран изолированный webpack-бандл с тем же `main/webpack.config.js`
+и единственным entry `import { autoUpdater } from 'electron-updater'`. Баг воспроизвёлся
+(тот же `TypeError`) при запуске бандла напрямую через `electron.exe <bundle.js>` — до фикса.
+После добавления `optimization.concatenateModules: false` в `main/webpack.config.js` тот же тест
+зелёный, `autoUpdater` инициализируется штатно.
+
+**Не проверено полным `build:win`/установленным инсталлятором** (риск фикса минимален — не
+влияет на размер бандла, затрагивает только межмодульную оптимизацию вызовов) — при следующем
+реальном релизе стоит один раз проверить живым запуском `win-unpacked/*.exe`.
+
+Разбор — [.claude/docs/webpack-concatenatemodules-electron-updater-jsyaml-crash.md](/.claude/docs/webpack-concatenatemodules-electron-updater-jsyaml-crash.md).
 
 ## DRY-рефакторинг экосистемы Animatrona (2026-09-08, v0.55.72)
 
