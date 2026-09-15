@@ -3832,3 +3832,39 @@ PowerShell-скрипт в сессии, прозаически описанны
 
 Небиллируемая внутренняя инфраструктурная сессия (`time_discard`/`time_fix_internal_billable`),
 не клиентский проект.
+
+## §178 (2026-09-15) `@letar/ui` v0.22.0 — подпути-экспорты, фикс barrel+next/* под Vite dev
+
+Баг-репорт от `kami-key-the-dev` агенту `ui-coordinator-dev` (Agent Mail, thread
+`ui-barrel-next-process-undefined`): `libs/ui/src/index.ts` — barrel, реэкспортирующий всё
+разом одним модулем. Под Vite dev-пребандлом non-Next потребителя (Electron renderer,
+`contextIsolation: true`) импорт даже одного компонента (`Tooltip`) тянет в пребандл весь
+модуль целиком, включая куски вокруг `next/link`/`next/image`/`next/navigation` — они читают
+`process.env.*` на верхнем уровне и падают `ReferenceError: process is not defined` до рендера.
+Не воспроизводится в prod (tree-shaking). Разбор — уже существовавший
+[vite-dev-letar-ui-barrel-process-undefined.md](/.claude/docs/vite-dev-letar-ui-barrel-process-undefined.md).
+
+Фикс: подпути-экспорты в `libs/ui/package.json` по одному на каждый файл `src/lib/*` (50 штук,
+`@letar/ui/tooltip`, `@letar/ui/app-toaster` и т.д.) в дополнение к корневому `.` — тот же
+паттерн, что `@letar/hooks` (utility/browser/query, §169-соседняя сессия). Корневой barrel не
+тронут, обратная совместимость полная. `peerDependencies.next` → `peerDependenciesMeta.next.optional`.
+
+Побочный эффект, ожидаемый и починенный в той же сессии: `scripts/check-lib-subpath-paths.mjs`
+(gate-проверка) требует у любого потребителя, уже державшего path-алиас `@letar/ui`, **полный**
+набор подпутей — иначе красный разом для всего репо. `scripts/add-lib-tsconfig-path.mjs`
+прогнан по всем 50 подпутям → обновлены tsconfig.json 26 потребителей (19 публичных приложений
+
+- 7 приватных submodule: aboi, aprel8008, domwellbes, driving-school, dsperevod, studio,
+  svoichuzhie). Проверка снова зелёная (единственная оставшаяся находка — несвязанный пробел
+  `@letar/hooks` в `kami-key-the`, не наш).
+
+Коммиты в letar (не запушены, ждут одобрения владельца):
+
+- `376b0203d` — `libs/ui` (package.json/README/CHANGELOG, v0.22.0)
+- `39823b247` — tsconfig.json 19 публичных приложений
+- 7 bump-коммитов submodule SHA (по одному на каждый)
+
+Внутри каждого submodule — свой коммит `tsconfig.json` (тоже не запушен, push submodule
+требует отдельного одобрения — `.claude/rules/git.md` § «Порядок push нерушим»).
+
+Небиллируемая внутренняя инфраструктурная сессия (координация `libs/ui`), не клиентский проект.
