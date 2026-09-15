@@ -285,7 +285,6 @@ interface AuthProfileBase {
   user?: BetterAuthOptions['user'] // additionalFields (role/roles и т.д.)
   session?: Partial<BetterAuthOptions['session']>
   plugins?: BetterAuthOptions['plugins']
-  pages?: { signIn?: string; signUp?: string; error?: string; resetPassword?: string }
   secondaryStorage?: BetterAuthOptions['secondaryStorage'] // createRedisStorage(url)
 }
 
