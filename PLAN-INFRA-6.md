@@ -3761,3 +3761,47 @@ letar. **Не запушено** — ждёт одобрения пользов�
 
 ✅ Открытый вопрос закрыт отдельной сессией 2026-09-15 (см. §175) — все 6 находок класса 2
 дозаполнены.
+
+## §176 (2026-09-15) Аудит Turbopack build filesystem cache OOM — ещё 2 приложения на s2 без флага
+
+Повод: `domwellbes` (production, s2) дважды убит OOM-killer'ом на фазе компиляции Turbopack —
+`.claude/docs/turbopack-build-filesystem-cache-oom.md` (создан этим же днём, до этой сессии),
+фикс `turbopackFileSystemCacheForBuild: false` там уже применён.
+
+Проверил остальные Next.js-приложения монорепо на движок сборки (Turbopack vs
+`next build --webpack`) и хост деплоя. Все production-приложения по канону `SERVER_APPS`
+(`libs/infra-config/src/index.ts`) идут на **s2** — тот же хост, что уронил domwellbes; s3 —
+только staging/e2e-раннер. Из Turbopack-приложений без флага, реально деплоящихся на s2 (не
+Electron/desktop — у тех сборка локальная/CI, другой профиль памяти), нашлось три:
+`svoichuzhie` (141 page + 39 route), `dsperevod` (118 page + 16 route), `aprel8008` (27 page +
+3 route).
+
+Два крупнейших измерены тем же локальным методом (отдельный `distDir`,
+`TURBO_TASKS_AVAILABLE_PARALLELISM=8`, сумма приватной памяти дерева процессов):
+
+| Приложение    | Пустой кеш (пик) | Кеш выключен (пик) |
+| ------------- | ---------------- | ------------------ |
+| `svoichuzhie` | 11.2 ГБ          | 5.9 ГБ (−47%)      |
+| `dsperevod`   | 11.7 ГБ          | 6.3 ГБ (−46%)      |
+
+Тот же паттерн, что у domwellbes: пустой кеш уже на грани бюджета хоста (~11 ГБ на сборку), а
+сброшенный (после правки `next.config`/зависимостей, не пустой) — канонически ещё тяжелее.
+Флаг `turbopackFileSystemCacheForBuild: false` включён превентивно в обоих
+(`apps/svoichuzhie/next.config.mjs`, `apps/dsperevod/next.config.mjs`); второй флаг фикса
+domwellbes (`turbopackInputSourceMaps: false`) не добавлял — запас с одним выключенным кешем
+уже достаточный. `aprel8008` (на порядок меньше) не трогал — не копировать флаг бездумно в
+маленькие приложения, им тёплый кеш полезен.
+
+`dsperevod` при первом замере падал на «Collecting page data» (`ECONNREFUSED` — обращение к
+БД через `libs/auth/src/server/social-loader.ts`) без поднятого `dsperevod-postgres-dev`;
+поднял контейнер на время замера, после — остановил обратно.
+
+Публичный `.claude/docs/turbopack-build-filesystem-cache-oom.md` дополнен разделом «Аудит
+других приложений» (метод + числа, без имён — секция написана до того, как выяснилось, что
+сам файл и так свободно называет приватные приложения в других местах монорепо; переписывать
+задним числом не стал). Точные имена/числа продублированы в `.claude/private/PLAN-JOURNAL.md`.
+
+Коммиты: `svoichuzhie` (`a36d65d2d`), `dsperevod` (`886761955`), `.claude/private`
+(`3a623dce7`) — каждый внутри своего submodule; в letar — доковый коммит (`b822cb10c`) +
+три bump-SHA (`f9b8bf9d5`, `29c47a48a`, `1f8dde622`). **Не запушено** — ждёт одобрения
+пользователя на push.
