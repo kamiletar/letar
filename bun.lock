@@ -607,6 +607,7 @@
       "name": "@letar/domwellbes",
       "version": "0.250.0",
       "dependencies": {
+        "@letar/admin-ui": "workspace:*",
         "@letar/analytics": "workspace:*",
         "@letar/consent": "workspace:*",
         "@letar/data-export": "workspace:*",
@@ -668,6 +669,7 @@
         "@letar/pg-url": "workspace:*",
         "@letar/pin-auth": "workspace:*",
         "@letar/sse": "workspace:*",
+        "@letar/ui": "workspace:*",
         "@letar/validation-utils": "workspace:*",
       },
     },
