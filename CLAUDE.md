@@ -839,6 +839,11 @@ TUN-VPN; DNS-проверки с рабочей машины врут ·
 [electron-window-controls-overlay-pattern](/.claude/docs/electron-window-controls-overlay-pattern.md)
 `titleBarStyle: 'hidden'` + `titleBarOverlay` вместо `frame: false` — сохраняет нативные Snap
 Layouts Windows 11, `env(titlebar-area-*)` под безопасную зону системных кнопок ·
+[native-win32-ui-verification-screenshot](/.claude/docs/native-win32-ui-verification-screenshot.md)
+живая проверка UI, не существующего для Browser pane (GDI-оверлей, трей, нативные диалоги) —
+PowerShell `keybd_event` (физическая клавиша, не `SendMessage`) + `CopyFromScreen`; ⚠️ двоение
+на скриншоте — не баг рендера, а параллельно работающая прод-копия того же Electron-приложения,
+тоже слушающая `GetAsyncKeyState` ·
 [vite-dev-letar-ui-barrel-process-undefined](/.claude/docs/vite-dev-letar-ui-barrel-process-undefined.md)
 ⚠️ импорт из barrel `@letar/ui` под Vite dev тянет `next/*` в пребандл, `process.env` на верхнем
 уровне модуля падает `ReferenceError` в Electron renderer без `process` — временный шим в
