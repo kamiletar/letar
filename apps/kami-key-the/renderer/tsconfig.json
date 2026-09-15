@@ -65,7 +65,10 @@
       "@letar/ui/use-scroll-gate": ["../../../libs/ui/src/lib/use-scroll-gate.ts"],
       "@letar/ui/use-service-worker": ["../../../libs/ui/src/lib/use-service-worker.ts"],
       "@letar/ui/use-share": ["../../../libs/ui/src/lib/use-share.ts"],
-      "@letar/ui/user-menu": ["../../../libs/ui/src/lib/user-menu.tsx"]
+      "@letar/ui/user-menu": ["../../../libs/ui/src/lib/user-menu.tsx"],
+      "@letar/hooks/browser": ["../../../libs/hooks/src/browser.ts"],
+      "@letar/hooks/query": ["../../../libs/hooks/src/query.ts"],
+      "@letar/hooks/utility": ["../../../libs/hooks/src/utility.ts"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
