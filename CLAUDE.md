@@ -135,7 +135,14 @@ bun от **root**, не от `deploy` (`/usr/local/bin/bun` → симлинк �
   ⚠️ Emscripten-обвязка (`harfbuzzjs` у `satori`, прямой импорт — только в `grandslamcup`) ищет
   свой `.wasm` по runtime-строке — webpack компилирует JS-чанк, но не копирует сам бинарник;
   билд не падает, ловится на пререндере (SSG) или на первом реальном запросе (SSR) —
-  `ENOENT .../chunks/<имя>.wasm`; фикс — ручное копирование через `compiler.hooks.afterEmit`
+  `ENOENT .../chunks/<имя>.wasm`; фикс — ручное копирование через `compiler.hooks.afterEmit` ·
+  [webpack-concatenatemodules-electron-updater-jsyaml-crash](/.claude/docs/webpack-concatenatemodules-electron-updater-jsyaml-crash.md)
+  ⚠️ Electron-приложение с `electron-updater`, забандленным webpack'ом (не `externals` — деплой
+  не включает `node_modules`) — `optimization.concatenateModules` (scope hoisting, дефолт в
+  `mode: production`) ломает циклическую CJS-загрузку внутри `js-yaml`, конструктор `Type`
+  вызывается без `new`; падает **только** собранный prod-инсталлятор, `nx dev` не ловит; фикс —
+  `concatenateModules: false`, найдено и починено в `kami-key-the`, `animatrona`/
+  `label-printer-desktop` на момент находки не проверены
 
 **MCP-серверы:** [mcp-servers](/.claude/docs/mcp-servers.md) состав и назначение ·
 [mcp-server-pattern](/.claude/docs/mcp-server-pattern.md) тонкий локальный сервер по stdio ·
