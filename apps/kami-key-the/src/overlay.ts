@@ -175,6 +175,14 @@ export function rebuildVkMap(): void {
   for (const m of getKeymap()) {
     vkMap.set(m.vk, { char: m.char, shiftChar: m.shiftChar })
   }
+
+  // Оверлей может быть уже показан (AltGr зажат) в момент переключения раскладки
+  // (AltGr+Ё) — без явной перерисовки WM_PAINT не придёт сам, и подсказка останется
+  // со старыми символами до следующего показа.
+  if (overlayHwnd) {
+    InvalidateRect(overlayHwnd, null, 1)
+    UpdateWindow(overlayHwnd)
+  }
 }
 
 /** Отображаемый AltGr-символ (спецобработка невидимых) */
