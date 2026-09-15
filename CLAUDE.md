@@ -387,6 +387,10 @@ ref/DOM не перезапускается ·
 касается; диагностировать через `node .../next/dist/bin/next build` напрямую ·
 [nextjs-standalone-tracing](/.claude/docs/nextjs-standalone-tracing.md)
 ECONNREFUSED/ERR_DLOPEN_FAILED при зелёном билде ·
+[nextjs-stale-dotnext-types-tsgo-ts6305](/.claude/docs/nextjs-stale-dotnext-types-tsgo-ts6305.md)
+⚠️ устаревший локальный `.next/types` (в `.gitignore`, переживший `bun update` версии `next`) даёт
+`TS6305` в `typecheck:tsgo`, не связанную с текущими правками — git-бисекция это не ловит,
+`.next` не отслеживается; фикс — `rm -rf .next tsconfig.tsbuildinfo`, не правка `project.json` ·
 [nextjs-dynamic-fs-path-tracing](/.claude/docs/nextjs-dynamic-fs-path-tracing.md) ⚠️ обратный
 случай того же класса — рантайм-путь в `fs`-вызове (`path.join(uploadsRoot, categoryFolder)` в
 `@letar/image-upload`) заставляет трейсер утащить в `.next/standalone` весь проект целиком
