@@ -79,6 +79,9 @@ const customConfig = defineConfig({
           // 400/600 — обе стороны ≥6.7:1 на своём bg; не осветлять в тёмной теме до 500
           // (даёт 4.0:1, ближе к порогу).
           subtle: { value: { _light: '{colors.gray.600}', _dark: '{colors.gray.400}' } },
+          // RU-подпись клавиши (key-button.tsx) — тот же уровень приглушённости, что и subtle,
+          // но с тёплым красноватым оттенком, чтобы визуально отличаться от EN-подписи
+          ru: { value: { _light: '#7d5a5c', _dark: '#b28c8e' } },
           error: { value: { _light: '#c62828', _dark: '#ff7a7a' } },
           warning: { value: { _light: '#8a5300', _dark: '#ffc857' } },
           success: { value: { _light: '#0b7a0b', _dark: '{colors.brand.400}' } },

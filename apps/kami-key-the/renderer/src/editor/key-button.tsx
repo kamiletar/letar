@@ -132,13 +132,13 @@ export function KeyButton({ keyDef, mapping, isSelected, isFlashing, unit, gap, 
             >
               {keyDef.label}
             </chakra.span>
-            {/* RU — низ-лево */}
+            {/* RU — низ-лево, приглушённый красноватый оттенок (отличает от EN) */}
             {keyDef.ru && (
               <chakra.span
                 position="absolute"
                 bottom="2px"
                 left="4px"
-                color="fg.subtle"
+                color="fg.ru"
                 fontSize={`${Math.max(9, unit * 0.16)}px`}
                 userSelect="none"
               >

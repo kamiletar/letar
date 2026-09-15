@@ -59,13 +59,21 @@ const OVERLAY_WIDTH = CONTENT_WIDTH + PAD * 2 // 936
 const OVERLAY_HEIGHT = CONTENT_HEIGHT + PAD * 2 // 336
 
 // --- Цвета (COLORREF = 0x00BBGGRR) ---
+//
+// Та же палитра, что и в редакторе (renderer/src/theme.ts, тёмная тема) — значения сняты
+// напрямую с отрендеренных элементов (getComputedStyle), не подобраны на глаз. GDI не умеет
+// alpha-blending кистей/перьев, поэтому полупрозрачные токены (`brand.subtle` 9%, `brand.border`
+// 50%) заранее смешаны с фоном overlay (bg #0B0E0C) в сплошной цвет.
 
-const COLOR_BG = 0x00f5eee8 // #E8EEF5 светло-голубой фон
-const COLOR_KEY = 0x00ffffff // #FFFFFF белая клавиша
-const COLOR_KEY_ACTIVE = 0x00f0d4c0 // #C0D4F0 клавиша с AltGr-маппингом
-const COLOR_BORDER = 0x00ccb0a0 // #A0B0CC обводка
-const COLOR_TEXT = 0x00444444 // #444444 обычный текст
-const COLOR_ALTGR = 0x00a83d1a // #1A3DA8 синий AltGr-символ
+const COLOR_BG = 0x000c0e0b // #0B0E0C — bg (тёмная тема)
+const COLOR_KEY = 0x001c211b // #1B211C — bg.muted (клавиша без маппинга)
+const COLOR_KEY_ACTIVE = 0x000d240f // #0F240D — brand.subtle (rgba(57,255,20,.09)) поверх bg
+const COLOR_BORDER = 0x002b322a // #2A322B — border (клавиша без маппинга)
+const COLOR_BORDER_ACTIVE = 0x00108722 // #228710 — brand.border (rgba(57,255,20,.5)) поверх bg
+const COLOR_TEXT = 0x0095a093 // #93A095 — fg.subtle (EN подпись)
+const COLOR_TEXT_RU = 0x008e8cb2 // #B28C8E — fg.ru (RU подпись, тёплый красноватый оттенок)
+const COLOR_BRAND = 0x0014ff39 // #39FF14 — brand.fg, AltGr-символ (низ-право)
+const COLOR_ACCENT = 0x00eed322 // #22D3EE — accent.fg, AltGr+Shift-символ (верх-право)
 
 // --- Определение клавиш ---
 
@@ -285,9 +293,9 @@ let bgBrush: unknown = null
 let keyBrush: unknown = null
 let activeBrush: unknown = null
 let borderPen: unknown = null
+let activeBorderPen: unknown = null
 let fontLabel: unknown = null
-let fontAltGr: unknown = null
-let fontShift: unknown = null
+let fontSymbol: unknown = null
 
 // Переиспользуемый RECT — избегаем аллокации inline объектов в paint loop
 const tmpRect = { left: 0, top: 0, right: 0, bottom: 0 }
@@ -353,13 +361,15 @@ function paintOverlay(hwnd: unknown): void {
       const mapping = key.vk !== null && key.vk !== undefined ? vkMap.get(key.vk) : undefined
       const half = Math.round(keyH / 2)
 
-      // Фон клавиши (скруглённый прямоугольник)
+      // Фон + обводка клавиши (скруглённый прямоугольник) — те же токены, что и активная/
+      // неактивная клавиша в редакторе (key-button.tsx)
       SelectObject(hdc, mapping ? activeBrush : keyBrush)
+      SelectObject(hdc, mapping ? activeBorderPen : borderPen)
       RoundRect(hdc, x, y, x + keyW, y + keyH, KEY_RADIUS * 2, KEY_RADIUS * 2)
 
-      // 4-угольная раскладка:
-      //   верх-лево: EN label     верх-право: AltGr shift (синий)
-      //   низ-лево:  AltGr base (синий)   низ-право: RU label
+      // Та же раскладка углов, что в key-button.tsx (renderer):
+      //   верх-лево: EN label            верх-право: AltGr+Shift (циан)
+      //   низ-лево:  RU label            низ-право:  AltGr base (зелёный)
 
       const p = 7 // внутренний отступ
       const halfW = Math.round(keyW / 2)
@@ -372,30 +382,31 @@ function paintOverlay(hwnd: unknown): void {
         SetTextColor(hdc, COLOR_TEXT)
         drawText(hdc, key.label, x + p, y + p, x + halfW, y + half, DT_BASE | DT_LEFT | DT_VCENTER)
 
-        // Низ-право: русский символ
+        // Низ-лево: русский символ (приглушённый красноватый — отличает от EN)
         if (key.ru) {
-          drawText(hdc, key.ru, x + halfW, y + half, x + keyW - p, y + keyH - p, DT_BASE | DT_RIGHT | DT_VCENTER)
+          SetTextColor(hdc, COLOR_TEXT_RU)
+          drawText(hdc, key.ru, x + p, y + half, x + halfW, y + keyH - p, DT_BASE | DT_LEFT | DT_VCENTER)
         }
 
-        // AltGr символы (синие)
+        // AltGr символы — одинаковый размер, разный цвет/угол (как в редакторе)
         if (mapping) {
-          SetTextColor(hdc, COLOR_ALTGR)
+          SelectObject(hdc, fontSymbol)
 
-          // Низ-лево: AltGr base символ
-          SelectObject(hdc, fontAltGr)
+          // Низ-право: AltGr base символ (зелёный)
+          SetTextColor(hdc, COLOR_BRAND)
           drawText(
             hdc,
             displayChar(mapping.char),
-            x + p,
-            y + half,
             x + halfW,
+            y + half,
+            x + keyW - p,
             y + keyH - p,
-            DT_BASE | DT_LEFT | DT_VCENTER,
+            DT_BASE | DT_RIGHT | DT_VCENTER,
           )
 
-          // Верх-право: AltGr shift символ (если есть)
+          // Верх-право: AltGr+Shift символ (циан), если есть
           if (mapping.shiftChar) {
-            SelectObject(hdc, fontShift)
+            SetTextColor(hdc, COLOR_ACCENT)
             drawText(hdc, mapping.shiftChar, x + halfW, y + p, x + keyW - p, y + half, DT_BASE | DT_RIGHT | DT_VCENTER)
           }
         }
@@ -443,9 +454,10 @@ export function initOverlay(): boolean {
     keyBrush = CreateSolidBrush(COLOR_KEY)
     activeBrush = CreateSolidBrush(COLOR_KEY_ACTIVE)
     borderPen = CreatePen(PS_SOLID, 1, COLOR_BORDER)
+    activeBorderPen = CreatePen(PS_SOLID, 1, COLOR_BORDER_ACTIVE)
     fontLabel = CreateFontW(-15, 0, 0, 0, FW_NORMAL, 0, 0, 0, 1, 0, 0, 5, 0, 'Segoe UI')
-    fontAltGr = CreateFontW(-18, 0, 0, 0, FW_BOLD, 0, 0, 0, 1, 0, 0, 5, 0, 'Segoe UI')
-    fontShift = CreateFontW(-12, 0, 0, 0, FW_NORMAL, 0, 0, 0, 1, 0, 0, 5, 0, 'Segoe UI')
+    // Один размер/начертание для обоих AltGr-символов (базового и Shift) — как в key-button.tsx
+    fontSymbol = CreateFontW(-16, 0, 0, 0, FW_BOLD, 0, 0, 0, 1, 0, 0, 5, 0, 'Segoe UI')
     gdiReady = true
 
     const hInstance = GetModuleHandleW(null)
@@ -557,22 +569,22 @@ export function destroyOverlay(): void {
     if (borderPen) {
       DeleteObject(borderPen)
     }
+    if (activeBorderPen) {
+      DeleteObject(activeBorderPen)
+    }
     if (fontLabel) {
       DeleteObject(fontLabel)
     }
-    if (fontAltGr) {
-      DeleteObject(fontAltGr)
-    }
-    if (fontShift) {
-      DeleteObject(fontShift)
+    if (fontSymbol) {
+      DeleteObject(fontSymbol)
     }
     bgBrush = null
     keyBrush = null
     activeBrush = null
     borderPen = null
+    activeBorderPen = null
     fontLabel = null
-    fontAltGr = null
-    fontShift = null
+    fontSymbol = null
     gdiReady = false
   }
 }
