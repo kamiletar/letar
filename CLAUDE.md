@@ -765,6 +765,11 @@ scoped cookie, без утечки токена в лог/`Referer` ·
 падение требует ОБА cookie сразу, поэтому «воспроизвелось в чистом контексте без cookie»
 технически невозможно; прод не затронут (host-only cookie, разные домены), риск вернёт только
 включение `crossSubDomainCookies` ·
+[better-auth-pages-option-dead-code](/.claude/docs/better-auth-pages-option-dead-code.md) ⚠️
+`pages: {signIn, signUp, ...}` в объекте `betterAuth({...})` — не существующая опция ядра (нет ни
+в одной версии `better-auth`/`@better-auth/core` в `node_modules/.bun`), молча проходит typecheck
+из-за generic-сигнатуры `<Options extends BetterAuthOptions>(options: Options & {})`, отключающей
+excess-property-check; дублирующийся мёртвый блок нашёлся сразу в 7 standalone-приложениях ·
 [better-auth-1.7-oidc-provider-removed](/.claude/docs/better-auth-1.7-oidc-provider-removed.md) ⚠️
 `bun update` в пределах `^1.6.x` поднимает better-auth до 1.7 — `oidcProvider`/`genericOAuthClient`
 убраны из ядра, замена — `@better-auth/oauth-provider` + `jwt()`-плагин, клиент — `signIn.social` ·
