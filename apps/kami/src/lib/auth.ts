@@ -74,8 +74,6 @@ export const auth = createAuth({
       },
     }),
   ],
-
-  pages: { signIn: '/sign-in', error: '/sign-in' },
 })
 
 export type Session = typeof auth.$Infer.Session
