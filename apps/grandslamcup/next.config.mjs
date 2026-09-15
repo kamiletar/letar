@@ -55,6 +55,7 @@ const nextConfig = {
   // транспилирует сам. См. .claude/docs/nextjs-nx-composeplugins-migration.md
   transpilePackages: [
     '@letar/analytics',
+    '@letar/api-server',
     '@letar/auth',
     '@letar/chakra-provider',
     '@letar/consent',
