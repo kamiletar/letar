@@ -200,18 +200,25 @@ const CHECKS = [
     group: 'tsconfig',
     title: 'transpilePackages next.config.* покрывает импортируемые @letar/*-алиасы tsconfig',
     run: ['node', ['scripts/check-transpile-packages.mjs']],
-    // ⚠️ Красный прогон = «список разъехался с tsconfig», НЕ «прод-сборка сломана».
-    // Next читает только НАЛИЧИЕ ключа transpilePackages (`!!config.transpilePackages` в
-    // webpack-config.js), а не его содержимое: bun линкует @letar/* симлинком, webpack
-    // резолвит его в реальный путь libs/… без node_modules, и exclude отсеивает файл
-    // раньше, чем дело дойдёт до isResourceInPackages. Отсутствие записи о конкретном
-    // пакете сборку не ломает — ломает только удаление ключа целиком (доказано тремя
-    // сборками studio, .claude/docs/transpile-packages-array-presence-not-content.md).
-    // Проверка держит соглашение о единообразии литерала с @letar/*-алиасами tsconfig и
-    // страхует смену раскладки node_modules (публикация @letar/* в npm, смена линкера
-    // bun) — тогда содержимое списка станет работающим по назначению.
+    // ⚠️ Скрипт ловит ДВА разных по тяжести класса, и печатает их раздельно:
+    //   1. Ключ transpilePackages отсутствует ЦЕЛИКОМ, хотя приложение импортирует
+    //      внешние @letar/*-пакеты — build-breaking. Next читает только НАЛИЧИЕ ключа
+    //      (`!!config.transpilePackages` в webpack-config.js): bun линкует @letar/*
+    //      симлинком, webpack резолвит его в реальный путь libs/… без node_modules, и
+    //      без снятого ключом include файл никогда не попадёт в SWC-компиляцию — прод-билд
+    //      падает `Module parse failed`. До 2026-09-15 эта ветка была НЕ покрыта: цикл
+    //      молча пропускал приложение целиком, если ключа не было (`if (!transpiled)
+    //      continue`) — именно так apps/form-example тихо накопил падающий прод-билд.
+    //   2. Ключ есть, но конкретный импортируемый пакет в списке не перечислен —
+    //      дрейф соглашения о единообразии литерала с @letar/*-алиасами tsconfig,
+    //      сборку НЕ ломает (доказано тремя сборками studio,
+    //      .claude/docs/transpile-packages-array-presence-not-content.md).
+    // Оба класса роняют прогон одинаково (gate) — критично уже само наличие любого
+    // из них, а не только класса 1; разбор, какой именно случай сработал — в выводе
+    // скрипта (🔴 КРИТИЧНО vs ⚠️ неполнота списка).
     // На момент регистрации (2026-09-01) долг из 3 приложений (auth-hub, form-docs,
-    // animatrona/renderer) закрыт правкой их next.config.* в том же коммите.
+    // animatrona/renderer) закрыт правкой их next.config.* в том же коммите; долг класса 1
+    // (apps/form-example) найден и закрыт 2026-09-15, тем же коммитом расширен скрипт.
     severity: 'gate',
     ci: 'partial',
     ciNote: 'приватные submodule не выкачаны — их next.config.*/tsconfig не проверены',

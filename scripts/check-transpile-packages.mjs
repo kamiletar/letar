@@ -1,44 +1,42 @@
 #!/usr/bin/env node
-// Проверяет, что `transpilePackages` в next.config.* каждого приложения содержит
-// ВСЕ пакеты @letar/*, которые реально импортируются где-то в src/ этого
-// приложения — а не только те, что были нужны на момент миграции с withNx.
+// Проверяет `transpilePackages` в next.config.* каждого приложения на ДВА
+// НЕЗАВИСИМЫХ по тяжести класса расхождения с реально импортируемыми в src/
+// пакетами @letar/* (взятыми из paths tsconfig.json приложения):
 //
-// ⚠️ Чего эта проверка НЕ означает. Отсутствие конкретного пакета в списке
-// прод-сборку НЕ ломает. В next/dist/build/webpack-config.js (16.3.4, строки
-// 382–396) выражение `shouldIncludeExternalDirs = config.experimental.externalDir
-// || !!config.transpilePackages` читает только НАЛИЧИЕ массива — снимает
-// ограничение `include: [dir]`. Содержимое до @letar/* не доходит вовсе: bun
-// линкует workspace-либы симлинком (apps/<app>/node_modules/@letar/x ->
-// ../../../../libs/x/), webpack резолвит симлинк в реальный путь `libs/…` без
-// `node_modules` в нём, и `exclude` отсеивает файл раньше, чем дело дойдёт до
-// `isResourceInPackages` — единственного места, где список вообще читается.
-// Доказано тремя сборками studio: 18 пакетов — зелёный; ключ удалён — `Module
-// parse failed`; `transpilePackages: ['@letar/ui']` — зелёный, хотя
-// @letar/glitchtip (на котором падало без ключа) из списка убран. Механизм и
-// замеры — .claude/docs/transpile-packages-array-presence-not-content.md.
+//   1. КРИТИЧНО, build-breaking: ключ `transpilePackages` отсутствует в
+//      next.config.* ЦЕЛИКОМ, а приложение импортирует внешние @letar/*-пакеты.
+//      В next/dist/build/webpack-config.js (16.3.4, строки 382–396) выражение
+//      `shouldIncludeExternalDirs = config.experimental.externalDir ||
+//      !!config.transpilePackages` читает только НАЛИЧИЕ ключа — снимает
+//      ограничение `include: [dir]` webpack-резолвера. bun линкует workspace-либы
+//      симлинком (apps/<app>/node_modules/@letar/x -> ../../../../libs/x/),
+//      webpack резолвит символьную ссылку в реальный путь `libs/…` БЕЗ
+//      `node_modules` в нём — без снятого `include` такой файл никогда не
+//      попадёт в SWC-компиляцию, и прод-сборка (`next build --webpack`) падает
+//      `Module parse failed: Unexpected token` на первом же `.ts`-синтаксисе
+//      снаружи `apps/<app>/src`. Найдено и починено на apps/form-example
+//      (2026-09-15, падал на libs/glitchtip/src/client/index.ts).
+//   2. Соглашение о единообразии (НЕ build-breaking): ключ есть, но КОНКРЕТНЫЙ
+//      импортируемый пакет в списке не перечислен. `next` до содержимого массива
+//      в этом случае не доходит вовсе — `isResourceInPackages` не участвует в
+//      решении, симлинк уже снял `include` ключом как таковым. Отсутствие записи
+//      о конкретном пакете сборку НЕ ломает — это дрейф литерала, вычисленного
+//      вручную на момент миграции с @nx/next withNx (PLAN.md §73,
+//      .claude/docs/nextjs-nx-composeplugins-migration.md), от которого больше
+//      никто не синхронизирует список автоматически.
 //
-// Зачем тогда проверка — две причины, и ни одна из них не «иначе сборка упадёт»:
-//   1. Соглашение о единообразии. После ухода от @nx/next composePlugins/withNx
-//      (PLAN.md §73, .claude/docs/nextjs-nx-composeplugins-migration.md) список —
-//      статический литерал, вычисленный вручную на момент миграции; раньше его
-//      синхронизировал withNx по графу Nx, теперь не синхронизирует никто.
-//      Проверка держит литерал сверенным с @letar/*-алиасами tsconfig, чтобы он
-//      не превращался в археологический слой.
-//   2. Страховка на смену раскладки node_modules. Если @letar/* когда-нибудь
-//      окажутся физически внутри node_modules (публикация в npm, смена линкера
-//      bun на раскладку с реальными каталогами вместо симлинков) — реальный путь
-//      начнёт содержать `node_modules`, и содержимое списка станет работающим по
-//      назначению. Вот тогда расхождение станет настоящим багом сборки.
-//
-// Красный прогон читать как «список разъехался с tsconfig», НЕ как «прод-сборка
-// сломана». Отсутствие записи не объясняет падение сборки — причину ищи в другом
-// месте.
+// Оба случая разобраны и замерены — .claude/docs/transpile-packages-array-presence-not-content.md.
+// Пустой массив `transpilePackages: []` НЕ считается классом 1 — `!![]` истинно,
+// снимает `include` ровно как непустой список (см. `extractTranspilePackages`:
+// возвращает пустой `Set`, отличимый от `null` — ключа нет вовсе).
 //
 // Использование:
 //   node scripts/check-transpile-packages.mjs
 //
-// Exit code 0 — расхождений нет. Exit code 1 — найдены импортируемые пакеты,
-// отсутствующие в transpilePackages (список выводится в консоль).
+// Exit code 0 — расхождений не найдено ни одного класса.
+// Exit code 1 — найден хотя бы один случай класса 1 (критично) и/или класса 2
+// (список неполон); при exit 1 всегда выводится, к какому классу относится
+// каждая находка — не путать критичное с соглашением при разборе красного прогона.
 
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
@@ -123,13 +121,11 @@ function main() {
   const appsDir = path.join(repoRoot, 'apps')
   const configs = findNextConfigs(appsDir)
 
-  const findings = [] // { configPath, missing: string[] }
+  const criticalFindings = [] // { configPath, imported: string[] } — ключа нет вовсе, build-breaking
+  const findings = [] // { configPath, missing: string[] } — ключ есть, список неполон
   let checkedApps = 0
 
   for (const configPath of configs) {
-    const transpiled = extractTranspilePackages(configPath)
-    if (!transpiled) { continue } // приложение без transpilePackages — вне охвата этой проверки
-
     const appDir = path.dirname(configPath)
     const tsconfigPath = path.join(appDir, 'tsconfig.json')
     const tsconfigBases = readTsconfigLetarBases(tsconfigPath)
@@ -144,41 +140,78 @@ function main() {
     // .claude/docs/nextjs-nx-composeplugins-migration.md). Пакет, импортируемый без записи в
     // paths (резолвится через customConditions/node_modules-симлинк bun, см. .claude/rules/libs.md
     // «paths — вспомогательные, не обязательные») — вне охвата этой проверки.
-    checkedApps++
     const candidates = [...imported].filter((base) => tsconfigBases.has(base))
+    if (candidates.length === 0) { continue } // импорты есть, но ни один не внешний @letar-алиас
+
+    checkedApps++
+
+    // extractTranspilePackages различает «ключа нет вовсе» (null) от «ключ есть,
+    // возможно пустой массив» (Set, в т.ч. пустой) — это ровно граница между
+    // классом 1 (build-breaking) и классом 2 (неполный список) из шапки файла.
+    const transpiled = extractTranspilePackages(configPath)
+    if (transpiled === null) {
+      criticalFindings.push({ configPath, imported: candidates.sort() })
+      continue
+    }
+
     const missing = candidates.filter((base) => !transpiled.has(base)).sort()
     if (missing.length > 0) {
       findings.push({ configPath, missing, tsconfigPath })
     }
   }
 
-  if (findings.length === 0) {
+  if (criticalFindings.length === 0 && findings.length === 0) {
     console.log(`✅ Расхождений не найдено.`)
-    console.log(`next.config.* с transpilePackages: проверено ${checkedApps} из ${configs.length} найденных.`)
+    console.log(
+      `next.config.* приложений с внешними @letar/*-импортами: проверено ${checkedApps} из ${configs.length} найденных.`,
+    )
     process.exit(0)
   }
 
-  console.log(
-    `❌ Найдены пакеты, импортируемые в src/, но отсутствующие в transpilePackages — ${findings.length} приложени(е/я/й):\n`,
-  )
-  for (const { configPath, missing } of findings) {
-    console.log(`${rel(configPath)}`)
-    console.log(`  не хватает в transpilePackages (${missing.length}):`)
-    for (const base of missing) { console.log(`    - ${base}`) }
-    console.log('')
+  if (criticalFindings.length > 0) {
+    console.log(
+      `🔴 КРИТИЧНО (build-breaking): ключ transpilePackages отсутствует ЦЕЛИКОМ, хотя приложение импортирует внешние @letar/*-пакеты — ${criticalFindings.length} приложени(е/я/й):\n`,
+    )
+    for (const { configPath, imported } of criticalFindings) {
+      console.log(`${rel(configPath)}`)
+      console.log(`  импортирует, но ключа transpilePackages нет вовсе (${imported.length}):`)
+      for (const base of imported) { console.log(`    - ${base}`) }
+      console.log('')
+    }
+    console.log(
+      `Прод-билд (next build --webpack) упадёт «Module parse failed» на первом же .ts-синтаксисе`,
+    )
+    console.log(
+      `снаружи apps/<app>/src — добавь ключ transpilePackages: ['<любой из списка выше>', ...] в next.config.*.`,
+    )
+    console.log(
+      `Разбор — .claude/docs/transpile-packages-array-presence-not-content.md.\n`,
+    )
+  }
+
+  if (findings.length > 0) {
+    console.log(
+      `⚠️ Неполнота списка (соглашение, НЕ поломка сборки) — ${findings.length} приложени(е/я/й):\n`,
+    )
+    for (const { configPath, missing } of findings) {
+      console.log(`${rel(configPath)}`)
+      console.log(`  не хватает в transpilePackages (${missing.length}):`)
+      for (const base of missing) { console.log(`    - ${base}`) }
+      console.log('')
+    }
+    console.log(
+      `Добавь недостающие пакеты в массив transpilePackages next.config.* — это дрейф соглашения,`,
+    )
+    console.log(
+      `ключ уже присутствует и include уже снят, отсутствие конкретной записи сборку не ломает.`,
+    )
+    console.log(
+      `Разбор — .claude/docs/transpile-packages-array-presence-not-content.md.\n`,
+    )
   }
 
   console.log(
-    `Итого: ${findings.length} приложени(е/я/й) с неполным transpilePackages из ${checkedApps} проверенных.`,
-  )
-  console.log(
-    `Добавь недостающие пакеты в массив transpilePackages next.config.*.`,
-  )
-  console.log(
-    `⚠️ Это расхождение соглашения, а НЕ поломка сборки: Next читает только наличие ключа`,
-  )
-  console.log(
-    `transpilePackages, а не его содержимое — .claude/docs/transpile-packages-array-presence-not-content.md.`,
+    `Итого: ${criticalFindings.length} критичн(ая/ых) + ${findings.length} неполн(ая/ых) из ${checkedApps} проверенных.`,
   )
   process.exit(1)
 }
