@@ -176,6 +176,13 @@
       "port": 3011
     },
     {
+      "name": "kami-key-the-renderer",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["../../../node_modules/vite/bin/vite.js", "--port", "5188", "--strictPort"],
+      "cwd": "apps/kami-key-the/renderer",
+      "port": 5188
+    },
+    {
       "name": "animatrona-landing",
       "runtimeExecutable": "nx",
       "runtimeArgs": ["dev", "animatrona-landing"],
