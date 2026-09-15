@@ -40,6 +40,7 @@ const nextConfig = {
     '@letar/auth',
     '@letar/chakra-provider',
     '@letar/consent',
+    '@letar/demo-protection',
     '@letar/email',
     '@letar/env-load',
     '@letar/format-utils',
