@@ -1,10 +1,11 @@
 /**
- * Переключатель автозагрузки
+ * Переключатель автозагрузки — вместе со справочником горячих клавиш, секция «Общие»
  */
 
-import { Box, Flex, Switch, Text } from '@chakra-ui/react'
+import { Flex, Kbd, Stack, Switch, Text } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { toaster } from '../lib/toaster'
+import { SettingsCard } from './settings-card'
 
 export function AutostartToggle() {
   const [enabled, setEnabled] = useState(false)
@@ -35,16 +36,35 @@ export function AutostartToggle() {
   }
 
   return (
-    <Box bg="#222244" borderRadius="8px" p="4" border="1px solid #3a3a5a">
-      <Flex align="center" gap="3">
-        <Switch.Root checked={enabled} onCheckedChange={() => toggle()}>
-          <Switch.HiddenInput />
-          <Switch.Control>
-            <Switch.Thumb />
-          </Switch.Control>
-        </Switch.Root>
-        <Text>Автозагрузка при старте Windows</Text>
-      </Flex>
-    </Box>
+    <SettingsCard title="Общие">
+      <Stack gap="3">
+        <Flex align="center" justify="space-between">
+          <Text fontSize="sm" color="fg">
+            Запускать вместе с Windows
+          </Text>
+          <Switch.Root checked={enabled} onCheckedChange={() => toggle()}>
+            <Switch.HiddenInput />
+            <Switch.Control>
+              <Switch.Thumb />
+            </Switch.Control>
+          </Switch.Root>
+        </Flex>
+
+        <Stack gap="1.5" fontSize="xs" color="fg.subtle" pt="2" borderTopWidth="1px" borderColor="border.subtle">
+          <Flex align="center" gap="2">
+            <Kbd size="sm">AltGr+Ё</Kbd>
+            следующая раскладка
+          </Flex>
+          <Flex align="center" gap="2">
+            <Kbd size="sm">AltGr+Shift+Ё</Kbd>
+            открыть это окно
+          </Flex>
+          <Flex align="center" gap="2">
+            <Kbd size="sm">AltGr+Shift+Backspace</Kbd>
+            «Камикадзе» — очистка строки
+          </Flex>
+        </Stack>
+      </Stack>
+    </SettingsCard>
   )
 }

@@ -3,8 +3,10 @@
  * для которых хоткеи KamiKeyThe отключены.
  */
 
-import { Box, Button, Flex, Heading, IconButton, Input, Stack, Text } from '@chakra-ui/react'
+import { chakra, Flex, IconButton, Input, Stack, Text } from '@chakra-ui/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { LuCrosshair, LuX } from 'react-icons/lu'
+import { SettingsCard } from './settings-card'
 
 export function ExclusionsSection() {
   const [processes, setProcesses] = useState<string[]>([])
@@ -91,41 +93,35 @@ export function ExclusionsSection() {
   }, [])
 
   return (
-    <Box bg="#222244" borderRadius="8px" p="4" border="1px solid #3a3a5a">
-      <Heading as="h3" size="md" mb="3" color="#e0e0e0">
-        Исключения
-      </Heading>
-      <Text fontSize="sm" color="#888" mb="3">
-        Процессы, для которых хоткеи отключены. AltGr-комбинации не будут перехватываться в этих приложениях.
-      </Text>
-
-      {/* Список исключённых процессов */}
+    <SettingsCard
+      title="Исключения"
+      description="Процессы, для которых хоткеи отключены. AltGr-комбинации не будут перехватываться в этих приложениях."
+    >
       <Stack gap="2" mb="3">
         {processes.length === 0 && (
-          <Text fontSize="sm" color="#666" fontStyle="italic">
+          <Text fontSize="sm" color="fg.subtle" fontStyle="italic">
             Нет исключений — хоткеи работают везде
           </Text>
         )}
         {processes.map((name, i) => (
-          <Flex key={name} align="center" gap="2" bg="#1a1a2e" p="2" borderRadius="6px">
-            <Text flex="1" fontSize="sm" fontFamily="'Consolas', monospace" color="#c0c0c0">
+          <Flex key={name} align="center" gap="2" bg="bg.muted" p="2" rounded="l2">
+            <Text flex="1" fontSize="sm" fontFamily="mono" color="fg">
               {name}
             </Text>
             <IconButton
               aria-label={`Удалить ${name}`}
               size="xs"
               variant="ghost"
-              color="#888"
-              _hover={{ color: '#ff6b6b', bg: '#3a1a2e' }}
+              color="fg.muted"
+              _hover={{ color: 'fg.error', bg: 'bg.error' }}
               onClick={() => remove(i)}
             >
-              ✕
+              <LuX size={14} />
             </IconButton>
           </Flex>
         ))}
       </Stack>
 
-      {/* Добавление вручную */}
       <Flex gap="2" mb="2">
         <Input
           size="sm"
@@ -133,39 +129,47 @@ export function ExclusionsSection() {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && addManual()}
-          bg="#1a1a2e"
-          border="1px solid #3a3a5a"
-          color="#e0e0e0"
-          _placeholder={{ color: '#666' }}
-          fontFamily="'Consolas', monospace"
+          fontFamily="mono"
           flex="1"
         />
-        <Button
-          size="sm"
-          variant="outline"
-          color="#6c7ae0"
-          borderColor="#6c7ae0"
-          _hover={{ bg: '#6c7ae020' }}
-          onClick={addManual}
+        <chakra.button
+          type="button"
+          px="3"
+          rounded="l2"
+          fontSize="sm"
+          borderWidth="1px"
+          borderColor="brand.border"
+          color="brand.fg"
+          _hover={{ bg: 'brand.subtle' }}
+          _disabled={{ opacity: 0.4, cursor: 'default' }}
           disabled={!inputValue.trim()}
+          onClick={addManual}
         >
           Добавить
-        </Button>
+        </chakra.button>
       </Flex>
 
-      {/* Добавить текущее приложение */}
-      <Button
-        size="sm"
-        variant="outline"
-        color="#888"
-        borderColor="#3a3a5a"
-        _hover={{ color: '#6c7ae0', borderColor: '#6c7ae0' }}
-        onClick={detectForeground}
-        disabled={countdown > 0}
+      <chakra.button
+        type="button"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        gap="2"
         w="full"
+        py="2"
+        rounded="l2"
+        fontSize="sm"
+        borderWidth="1px"
+        borderColor="border"
+        color="fg.muted"
+        _hover={{ color: 'brand.fg', borderColor: 'brand.border' }}
+        _disabled={{ opacity: 0.6, cursor: 'default' }}
+        disabled={countdown > 0}
+        onClick={detectForeground}
       >
-        {countdown > 0 ? `Переключитесь на нужное приложение... ${countdown}` : '🎯 Добавить текущее приложение'}
-      </Button>
-    </Box>
+        <LuCrosshair size={14} />
+        {countdown > 0 ? `Переключитесь на нужное приложение... ${countdown}` : 'Добавить текущее приложение'}
+      </chakra.button>
+    </SettingsCard>
   )
 }

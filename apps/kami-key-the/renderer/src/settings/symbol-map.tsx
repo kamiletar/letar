@@ -1,60 +1,25 @@
 /**
- * Карта символов — отображение текущих маппингов в моноширинном формате
+ * Шпаргалка раскладки — таблица «клавиша → AltGr → AltGr+Shift» в порядке клавиатуры
  */
 
-import { Box, Heading, Text } from '@chakra-ui/react'
+import { chakra, Table, Text } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import type { KeymapConfig, KeyMapping } from '../../../src/types'
-import { displayChar } from '../editor/keyboard-data'
+import { ARROW_KEYS, displayChar, KEYBOARD_ROWS } from '../editor/keyboard-data'
+import type { KeyDef } from '../editor/keyboard-data'
+import { SettingsCard } from './settings-card'
 
-/** Название клавиши по VK */
-const VK_DISPLAY: Record<number, string> = {
-  0x08: 'Bksp',
-  0x0d: 'Enter',
-  0x20: 'Space',
-  0xbb: '=',
-  0xbd: '-',
-  0xbe: '.',
-  0xdb: '[',
-  0xdd: ']',
-}
+const ORDERED_KEYS: KeyDef[] = [
+  ...KEYBOARD_ROWS.flat(),
+  ARROW_KEYS.up,
+  ARROW_KEYS.left,
+  ARROW_KEYS.down,
+  ARROW_KEYS.right,
+]
 
-function vkName(vk: number): string {
-  if (VK_DISPLAY[vk]) {
-    return VK_DISPLAY[vk]
-  }
-  if (vk >= 0x41 && vk <= 0x5a) {
-    return String.fromCharCode(vk)
-  }
-  return `0x${vk.toString(16)}`
-}
-
-function generateMapLines(config: KeymapConfig): string[] {
-  const layout = config.layouts.find((l) => l.name === config.activeLayout) ?? config.layouts[0]
-  if (!layout) {
-    return ['Нет раскладок']
-  }
-
-  const lines: string[] = [`Раскладка: ${layout.name}`, '']
-
-  lines.push('AltGr + клавиша:')
-  for (const m of layout.mappings) {
-    lines.push(`  ${vkName(m.vk).padEnd(6)}\u2192  ${displayChar(m.char)}  ${m.label}`)
-  }
-
-  const shifted = layout.mappings.filter(
-    (m: KeyMapping) => m.shiftChar !== null && m.shiftChar !== undefined,
-  )
-  if (shifted.length > 0) {
-    lines.push('')
-    lines.push('AltGr + Shift:')
-    for (const m of shifted) {
-      // shiftChar гарантирован фильтром выше
-      lines.push(`  ${vkName(m.vk).padEnd(6)}\u2192  ${displayChar(m.shiftChar as string)}  ${m.shiftLabel ?? ''}`)
-    }
-  }
-
-  return lines
+/** Убрать повтор символа в начале подписи («— длинное тире» → «длинное тире») */
+function stripLeadingChar(char: string, label: string): string {
+  return label.startsWith(char) ? label.slice(char.length).trim() : label
 }
 
 export function SymbolMap() {
@@ -69,20 +34,81 @@ export function SymbolMap() {
     return null
   }
 
-  const lines = generateMapLines(config)
+  const layout = config.layouts.find((l) => l.name === config.activeLayout) ?? config.layouts[0]
+  if (!layout) {
+    return null
+  }
+
+  const mappingByVk = new Map<number, KeyMapping>(layout.mappings.map((m) => [m.vk, m]))
+  const rows = ORDERED_KEYS.filter((k) => mappingByVk.has(k.vk))
 
   return (
-    <Box bg="#222244" borderRadius="8px" p="4" border="1px solid #3a3a5a">
-      <Heading as="h3" size="sm" mb="3" color="white">
-        Карта символов
-      </Heading>
-      <Box fontFamily="'Consolas', monospace" fontSize="sm" whiteSpace="pre" overflowX="auto">
-        {lines.map((line, i) => (
-          <Text key={i} lineHeight="1.6">
-            {line}
+    <SettingsCard title="Шпаргалка раскладки" description={`Раскладка «${layout.name}»`}>
+      {rows.length === 0
+        ? (
+          <Text fontSize="sm" color="fg.subtle" fontStyle="italic">
+            В этой раскладке нет назначений
           </Text>
-        ))}
-      </Box>
-    </Box>
+        )
+        : (
+          <Table.ScrollArea borderWidth="1px" borderColor="border" rounded="l2">
+            <Table.Root size="sm">
+              <Table.Header>
+                <Table.Row>
+                  <Table.ColumnHeader>Клавиша</Table.ColumnHeader>
+                  <Table.ColumnHeader>AltGr</Table.ColumnHeader>
+                  <Table.ColumnHeader>AltGr+Shift</Table.ColumnHeader>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {rows.map((key) => {
+                  const m = mappingByVk.get(key.vk)
+                  if (!m) {
+                    return null
+                  }
+                  return (
+                    <Table.Row key={key.vk}>
+                      <Table.Cell>
+                        <Text fontSize="sm" color="fg">
+                          {key.label || 'Пробел'}
+                          {key.ru && (
+                            <chakra.span color="fg.subtle" ml="1">
+                              / {key.ru}
+                            </chakra.span>
+                          )}
+                        </Text>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Text fontSize="sm" color="brand.fg">
+                          {displayChar(m.char)}
+                          <chakra.span color="fg.subtle" ml="1.5" fontSize="xs">
+                            {stripLeadingChar(m.char, m.label)}
+                          </chakra.span>
+                        </Text>
+                      </Table.Cell>
+                      <Table.Cell>
+                        {m.shiftChar
+                          ? (
+                            <Text fontSize="sm" color="accent.fg">
+                              {displayChar(m.shiftChar)}
+                              <chakra.span color="fg.subtle" ml="1.5" fontSize="xs">
+                                {stripLeadingChar(m.shiftChar, m.shiftLabel ?? '')}
+                              </chakra.span>
+                            </Text>
+                          )
+                          : (
+                            <Text fontSize="sm" color="fg.subtle">
+                              —
+                            </Text>
+                          )}
+                      </Table.Cell>
+                    </Table.Row>
+                  )
+                })}
+              </Table.Body>
+            </Table.Root>
+          </Table.ScrollArea>
+        )}
+    </SettingsCard>
   )
 }
