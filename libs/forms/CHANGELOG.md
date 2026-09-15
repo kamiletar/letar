@@ -4,6 +4,21 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.14.18] - 2026-09-15
+
+### Fixed
+
+- **`Form.Field.Auto` с `meta.ui.fieldType` терял произвольные props (напр. `onComplete` у
+  PinInput).** Ветка рендера через `renderFieldByType` передавала только явно перечисленное
+  подмножество props (`label`/`placeholder`/`helperText`/`required`/`disabled`/`readOnly`),
+  в отличие от fallback-ветки по `zodType`, спредящей `{...baseProps}` целиком. Любой проп
+  сверх списка терялся молча — без ошибки, без предупреждения, привязка значения к форме
+  продолжала работать. Теперь остаточные props сливаются в `fieldProps` (приоритетнее
+  `meta.ui.fieldProps` из схемы). `AutoFieldProps` получил index signature для типизированного
+  приёма таких props. Найдено на auth-hub (`verify-email-code.tsx` — автосабмит по завершении
+  ввода кода не срабатывал). Разбор —
+  [.claude/docs/letar-forms-field-auto-fieldtype-drops-extra-props.md](../../.claude/docs/letar-forms-field-auto-fieldtype-drops-extra-props.md).
+
 ## [2.14.17] - 2026-09-15
 
 ### Fixed

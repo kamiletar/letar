@@ -6,6 +6,26 @@
 
 ## Backlog (запросы от агентов)
 
+### ✅ [2026-09-15] `Field.Auto` с `meta.ui.fieldType` терял произвольные props (напр. `onComplete`)
+
+- **Запросил:** auth-hub (найдено на `verify-email-code.tsx`, PLAN_EMAIL_CODE.md A.2) —
+  делегировано через `.claude/rules/form-delegation.md`, зафиксировано в
+  [.claude/docs/letar-forms-field-auto-fieldtype-drops-extra-props.md](/.claude/docs/letar-forms-field-auto-fieldtype-drops-extra-props.md).
+- **Описание:** `FieldAuto` (`libs/forms/src/lib/declarative/form-fields/auto/field-auto.tsx`)
+  имел два пути рендера — fallback по `zodType` спредил `{...baseProps}` целиком, а ветка
+  `uiMeta?.fieldType` вызывала `renderFieldByType` с явно перечисленным подмножеством полей, не
+  прокидывая остаточные props. Проп, отсутствующий в списке (`onComplete` у `PinInputFieldProps`
+  и аналогичные у других специализированных полей), молча терялся — без ошибки, значение поля
+  продолжало биндиться корректно.
+- **Решение:** ветка `uiMeta?.fieldType` теперь собирает остаточные props (всё, что не попало в
+  явно перечисленные `label`/`placeholder`/`helperText`/`required`/`disabled`/`readOnly`) и
+  сливает их в `fieldProps` вместе с `uiMeta.fieldProps` (прямой JSX-проп приоритетнее —
+  специфичнее, чем дефолт из схемы). `AutoFieldProps` получил index signature `[key: string]:
+  unknown`, чтобы такие props типизированно принимались на `<Form.Field.Auto>`. Тест-регрессия —
+  `field-auto.spec.tsx` (полный цикл через `<Form>` + `z.string().meta({ ui: { fieldType:
+  'pinInput' } })`, проверено что без фикса тест красный).
+- **Статус:** закрыто, v2.14.18.
+
 ### ✅ [2026-09-15] Дублирование fallback-логики i18n (t() → встроенный словарь → дефолт) в трёх местах (закрыт forms-core v0.12.5/forms-react v0.9.1/forms v2.14.16, от пользователя)
 
 - **Запросил:** пользователь напрямую — заметил, что предыдущая сессия (локализация заголовка

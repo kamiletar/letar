@@ -42,6 +42,12 @@ export interface AutoFieldConfig {
 export interface AutoFieldProps extends BaseFieldProps {
   /** Auto-detection configuration */
   config?: AutoFieldConfig
+  /**
+   * Проп конкретного поля (например `onComplete` у PinInput), нужный только когда
+   * `meta.ui.fieldType` рендерит специализированный компонент через `renderFieldByType`.
+   * Такие пропсы прокидываются как `fieldProps` — см. ветку `uiMeta?.fieldType` в `FieldAuto`.
+   */
+  [key: string]: unknown
 }
 
 /**
@@ -252,17 +258,20 @@ export function FieldAuto({ name, config, ...baseProps }: AutoFieldProps): React
   // If explicit fieldType in meta — use renderFieldByType
   if (uiMeta?.fieldType) {
     const constraints = getZodConstraints(schema, fullPath)
+    const { label: _label, placeholder, helperText, required, disabled, readOnly, ...restProps } = baseProps
     return renderFieldByType(uiMeta.fieldType, {
       name,
       label,
-      placeholder: baseProps.placeholder ?? uiMeta.placeholder,
-      helperText: baseProps.helperText ?? uiMeta.description,
-      required: baseProps.required,
-      disabled: baseProps.disabled,
-      readOnly: baseProps.readOnly,
+      placeholder: (placeholder as string | undefined) ?? uiMeta.placeholder,
+      helperText: (helperText as BaseFieldProps['helperText']) ?? uiMeta.description,
+      required: required as boolean | undefined,
+      disabled: disabled as boolean | undefined,
+      readOnly: readOnly as boolean | undefined,
       enumValues,
       constraints,
-      fieldProps: uiMeta.fieldProps,
+      // Остаточные props (напр. onComplete у PinInput) — приоритетнее meta.ui.fieldProps,
+      // как более специфичные (заданы прямо в JSX, а не в schema.zmodel)
+      fieldProps: { ...uiMeta.fieldProps, ...restProps },
     })
   }
 
