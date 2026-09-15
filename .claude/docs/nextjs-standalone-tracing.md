@@ -245,6 +245,52 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
 версий `pg` в `bun.lock` (`grep -A1 '"pg"' bun.lock` или смотри `node_modules/.bun/pg@*`) и
 используется `@prisma/adapter-pg` — превентивно применяй тот же паттерн.
 
+## Аудит остальных `.bun`-глобов на тот же риск (2026-09-16)
+
+После фикса `pdfjs-dist` у `domwellbes` — проверка всех остальных `outputFileTracingIncludes` с
+паттерном `node_modules/.bun/...` в монорепо (`grep -rn "node_modules/.bun" --include=next.config.mjs
+--include=next.config.js apps/`) на тот же класс бага, по критерию из таблицы выше: пакет виден в
+собранных чанках обычным `require`/`import` → узкий `.bun`-путь рабочий; пакет достижим только через
+инлайнящийся динамический `import()` → нужен глоб через корневой симлинк.
+
+| Приложения                                                                       | Пакет                     | Как используется                                                                                                                           | Вывод                                         |
+| -------------------------------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
+| `time`, `dsperevod`, `aprel8008`, `svoichuzhie`, `mandala`, `aboi`, `domwellbes` | `@swc/helpers`            | компилятор SWC сам эмитит `require()` этого пакета в каждый чанк — не может быть динамическим `import()` по построению                     | ✅ безопасно, менять не нужно                 |
+| `mandala`, `grandslamcup`, `aboi`, `driving-school`, `kami`                      | `@img/sharp-libvips-*`    | `sharp` резолвит нативный биндинг через `require(`@img/sharp-libvips-${platform}/lib`)` в `libvips.cjs` — обычный `require`, не `import()` | ✅ безопасно, менять не нужно                 |
+| `studio`                                                                         | `pdfkit` (standard-fonts) | `@react-pdf/font` делает `import PDFDocument from 'pdfkit'` — обычный статический импорт, не инлайнится и не прячется за `turbopackIgnore` | ✅ безопасно, менять не нужно                 |
+| `domwellbes`                                                                     | `pdfjs-dist`              | `import('pdfjs-dist/legacy/build/pdf.mjs')` за `/* turbopackIgnore: true */` — инлайнится в чанк, обычного require/import не остаётся      | зафиксировано выше, уже исправлено 2026-09-16 |
+
+**Живая проверка (не только чтение исходников):** для `studio` и `mandala` подтверждено на
+работающих прод-контейнерах на s2 — не просто «файл где-то есть», а по критерию из раздела выше
+(«буквальный путь резолва»):
+
+```bash
+docker exec studio-app sh -c 'ls /app/node_modules/.bun/pdfkit@0.20.1/node_modules/pdfkit/js/standard-fonts/'
+# → Courier.cjs, Helvetica.cjs, ... — файлы физически на месте по пути, куда резолвит require.resolve()
+docker exec mandala-app-15 sh -c 'find /app -iname "libvips-cpp.so*"'
+# → .so-файлы физически на месте в каждой .bun-версии пакета
+docker logs studio-app --tail 50 | grep -i 'MODULE_NOT_FOUND\|pdfkit'
+docker logs mandala-app-15 --tail 200 | grep -i 'MODULE_NOT_FOUND\|sharp\|libvips'
+# → пусто на обоих — ни одного падения этого класса
+```
+
+Для `studio` дополнительно подтверждён сам механизм: `pdfkit` резолвится через обычный `require`
+внутри `@react-pdf/font` (не за `import()`/`turbopackIgnore`), поэтому Next создаёт нормальную
+цепочку симлинков `node_modules/.bun/@react-pdf+font@*/node_modules/pdfkit` →
+`../../pdfkit@0.20.1/node_modules/pdfkit`, и узкий `.bun`-глоб на `standard-fonts/**/*` кладёт
+файлы туда же, куда резолвится настоящий require — то есть это ровно исходный класс бага из
+начала статьи (fs-читаемые данные пакета, не видные трейсеру статически), а не более новый класс
+«скрытый от трейсера сам факт использования пакета» из раздела про `domwellbes` выше. Комментарий
+в `apps/studio/next.config.mjs` при фиксе 2026-09-15 сформулирован по образцу `pdfjs-dist` и
+может читаться как тот же риск — это не так, механизм другой, и текущий узкий глоб для него
+корректен.
+
+**@swc/helpers и sharp-libvips проверены только по механизму + факту, что все 7+5 приложений
+работают в проде без crash-loop** (список контейнеров, `docker ps` на s2, 2026-09-16) — отдельная
+`require.resolve()`-проверка пути не делалась для каждого приложения, механизм (обычный `require`,
+не инлайнящийся `import()`) одинаков для всех и уже был предметно проверен на `aboi`/`time`
+(раздел выше, с симлинком).
+
 ## ⚠️ Не только `node_modules` — файловый контент приложения тоже не трейсится
 
 Трейсер видит только статически анализируемые `require()`/`import`. Каталог с данными,
