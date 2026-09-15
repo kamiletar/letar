@@ -2,6 +2,26 @@
 
 Детальное описание всех реализованных фич Label Printer Desktop.
 
+## Фикс краша main-процесса electron-updater/js-yaml в prod-сборке (2026-09-15)
+
+Проверка гипотезы из `.claude/docs/webpack-concatenatemodules-electron-updater-jsyaml-crash.md`
+(разбор найден и починен в `kami-key-the` в тот же день): webpack `optimization.concatenateModules`
+(scope hoisting, включён по умолчанию в `mode: production`) ломает циклическую CJS-загрузку внутри
+`js-yaml` — транзитивной зависимости `electron-updater`, используемого в
+`main/services/updater.service.ts`. Приложение падало сразу при запуске установленной версии
+(`TypeError: Cannot set properties of undefined (setting 'options')`, до `app.whenReady()`);
+`nx dev` баг не воспроизводит — только собранный `--mode production` бандл.
+
+Полную GUI-сборку (`build:win`, электрон-билдер + renderer) собрать не удалось — независимая от
+этого бага поломка `next build` на композитном `tsconfig.spec.json` (`TS6305`/`TS6307`/`TS6059`,
+задокументирована отдельно как открытая проблема в `PLAN.md`, не чинилась в этой сессии). Вместо
+этого баг подтверждён и фикс проверен headless-способом (`.claude/rules/electron.md` §
+«GUI-уровень»): собран production main-бандл напрямую (`NODE_ENV=production npx webpack --config
+main/webpack.config.js`), затем `require('../app/background.js')` внутри `electron
+scripts/verify-*.cjs` — тот же `TypeError` воспроизведён на этапе `require`. После
+`optimization.concatenateModules: false` в `main/webpack.config.js` тот же `require` проходит без
+исключения (размер бандла не изменился — 2.58 MiB → 2.56 MiB).
+
 ## overflowX на Card.Body вокруг Table.Root (2026-09-01)
 
 Точечный аудит по образцу найденного в `domwellbes` бага (61 место): `<Table.Root>` внутри
