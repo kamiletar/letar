@@ -26,12 +26,14 @@ const nextConfig: NextConfig = {
   // этого не получает бесплатно, в отличие от Turbopack. Тот же фикс — form-docs/next.config.mjs.
   transpilePackages: [
     '@letar/analytics',
+    '@letar/api-server',
     '@letar/auth',
     '@letar/chakra-provider',
     '@letar/consent',
     '@letar/email',
     '@letar/forms',
     '@letar/glitchtip',
+    '@letar/pin-auth',
     '@letar/ui',
   ],
 
