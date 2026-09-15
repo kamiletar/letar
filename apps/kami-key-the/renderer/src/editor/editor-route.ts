@@ -44,6 +44,17 @@ export function syncRouteToLocation(route: EditorRoute): void {
   window.history.replaceState(null, '', url)
 }
 
+/**
+ * Записать route НОВОЙ записью истории — используется для «прямых» шагов навигации
+ * (выбрать клавишу, открыть категорию), чтобы аппаратная/браузерная кнопка «Назад»
+ * (см. main/background.ts app-command, App.tsx popstate) могла их отменить.
+ */
+export function pushRouteToLocation(route: EditorRoute): void {
+  const hash = buildHash(route)
+  const url = hash || window.location.pathname + window.location.search
+  window.history.pushState(null, '', url)
+}
+
 /** Один шаг «назад»: сначала закрыть категорию пикера, потом — саму клавишу */
 export function stepBack(route: EditorRoute): EditorRoute {
   if (route.category != null) {

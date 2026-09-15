@@ -13,7 +13,7 @@ import type { SymbolEntry } from '../../../shared/ipc-types'
 import type { KeymapConfig, KeyMapping } from '../../../src/types'
 import { toaster } from '../lib/toaster'
 import { ActionBar } from './action-bar'
-import { parseRoute, stepBack, syncRouteToLocation } from './editor-route'
+import { type EditorRoute, parseRoute, pushRouteToLocation, stepBack, syncRouteToLocation } from './editor-route'
 import { KeyPage } from './key-page'
 import { findKeyByVk } from './keyboard-data'
 import { KeyboardView } from './keyboard-view'
@@ -21,6 +21,14 @@ import { LayoutTabs } from './layout-tabs'
 import { describeSymbolConflict, findSymbolConflict } from './symbol-conflict'
 
 const MAX_UNDO = 50
+
+/** Глубина route — 0 клавиатура, 1 выбрана клавиша, 2 ещё открыта категория пикера */
+function routeDepth(route: EditorRoute): number {
+  if (route.keyVk == null) {
+    return 0
+  }
+  return route.category == null ? 1 : 2
+}
 
 interface EditorPageProps {
   isActive: boolean
@@ -91,16 +99,42 @@ export function EditorPage({ isActive }: EditorPageProps) {
     })
   }, [])
 
-  // Зеркалим route в адресную строку — только пока страница активна, иначе перезапишет #settings
+  // Зеркалим route в адресную строку — только пока страница активна, иначе перезапишет #settings.
+  // Шаг «вглубь» (выбрали клавишу/категорию) — новая запись истории, чтобы аппаратная/браузерная
+  // кнопка «Назад» (main/background.ts app-command, popstate ниже) могла его отменить; шаг «наружу»
+  // или на то же место — замена текущей записи, отдельного «назад»-состояния для него не нужно.
+  const prevRouteRef = useRef(route)
   useEffect(() => {
-    if (isActive) {
+    if (!isActive) {
+      return
+    }
+    if (routeDepth(route) > routeDepth(prevRouteRef.current)) {
+      pushRouteToLocation(route)
+    } else {
       syncRouteToLocation(route)
     }
+    prevRouteRef.current = route
   }, [route, isActive])
 
+  // Кнопка «Назад» браузера/мыши/Electron app-command — переигрывает route из истории
+  useEffect(() => {
+    if (!isActive) {
+      return
+    }
+    const handler = () => setRoute(parseRoute(window.location.hash))
+    window.addEventListener('popstate', handler)
+    return () => window.removeEventListener('popstate', handler)
+  }, [isActive])
+
   const goBack = useCallback(() => {
-    setRoute(stepBack)
-  }, [])
+    if (isActive) {
+      // history.back() запустит popstate выше — состояние route обновится из адресной строки,
+      // а не будет пересчитано вручную здесь (единый источник истины — история браузера)
+      window.history.back()
+    } else {
+      setRoute(stepBack)
+    }
+  }, [isActive])
 
   const onCategoryChange = useCallback((id: string) => {
     setRoute((prev) => ({ ...prev, category: id === 'all' ? null : id }))

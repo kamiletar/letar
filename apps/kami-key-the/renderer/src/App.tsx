@@ -21,11 +21,16 @@ export function App() {
   useEffect(() => window.electronAPI.on.navigate(setPage), [])
 
   const navigate = (next: Page) => {
+    if (next === page) {
+      return
+    }
     setPage(next)
+    // pushState (не replaceState) — переключение Редактор/Настройки должно откатываться
+    // аппаратной/браузерной кнопкой «Назад» (main/background.ts app-command), см. editor-route.ts
     if (next === 'settings') {
-      window.history.replaceState(null, '', '#settings')
+      window.history.pushState(null, '', '#settings')
     } else {
-      window.history.replaceState(null, '', window.location.pathname + window.location.search)
+      window.history.pushState(null, '', window.location.pathname + window.location.search)
     }
   }
 

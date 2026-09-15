@@ -148,6 +148,16 @@ export function openEditorWindow(page: 'editor' | 'settings' = 'editor'): void {
     editorWindow?.show()
   })
 
+  // Аппаратная/мышиная кнопка «Назад» — ведёт себя как в браузере, попадает в тот же стек
+  // истории, что и pushState-навигация renderer (App.tsx/editor-route.ts)
+  editorWindow.on('app-command', (_event, command) => {
+    if (command === 'browser-backward' && editorWindow?.webContents.navigationHistory.canGoBack()) {
+      editorWindow.webContents.navigationHistory.goBack()
+    } else if (command === 'browser-forward' && editorWindow?.webContents.navigationHistory.canGoForward()) {
+      editorWindow.webContents.navigationHistory.goForward()
+    }
+  })
+
   if (VITE_DEV_SERVER_URL) {
     editorWindow.loadURL(`${VITE_DEV_SERVER_URL}#${page}`)
     editorWindow.webContents.openDevTools()
