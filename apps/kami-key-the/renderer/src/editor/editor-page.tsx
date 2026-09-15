@@ -2,25 +2,29 @@
  * Страница редактора маппингов
  *
  * Оркестратор: config state, undo/redo (max 50), dirty detection,
- * горячие клавиши Ctrl+S/Z/Y/Escape.
+ * горячие клавиши Ctrl+S/Z/Y/Escape (только пока страница активна — см. `isActive`).
  *
  * Toast-уведомления, валидация импорта, flash-анимация клавиш.
  */
 
-import { Box, Flex, Heading } from '@chakra-ui/react'
+import { Box, Flex } from '@chakra-ui/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { SymbolEntry } from '../../../shared/ipc-types'
 import type { KeymapConfig, KeyMapping } from '../../../src/types'
 import { toaster } from '../lib/toaster'
+import { ActionBar } from './action-bar'
 import { parseRoute, stepBack, syncRouteToLocation } from './editor-route'
 import { KeyPage } from './key-page'
 import { findKeyByVk } from './keyboard-data'
 import { KeyboardView } from './keyboard-view'
 import { LayoutTabs } from './layout-tabs'
 import { describeSymbolConflict, findSymbolConflict } from './symbol-conflict'
-import { Toolbar } from './toolbar'
 
 const MAX_UNDO = 50
+
+interface EditorPageProps {
+  isActive: boolean
+}
 
 /** Валидация структуры импортируемой раскладки */
 function validateImportData(data: unknown): data is { name: string; mappings: KeyMapping[] } {
@@ -51,7 +55,7 @@ function validateImportData(data: unknown): data is { name: string; mappings: Ke
   return true
 }
 
-export function EditorPage() {
+export function EditorPage({ isActive }: EditorPageProps) {
   const [config, setConfig] = useState<KeymapConfig | null>(null)
   const [symbols, setSymbols] = useState<SymbolEntry[]>([])
   const [route, setRoute] = useState(() => parseRoute(window.location.hash))
@@ -87,10 +91,12 @@ export function EditorPage() {
     })
   }, [])
 
-  // Зеркалим route в адресную строку — адресуемое состояние экрана (клавиша + категория пикера)
+  // Зеркалим route в адресную строку — только пока страница активна, иначе перезапишет #settings
   useEffect(() => {
-    syncRouteToLocation(route)
-  }, [route])
+    if (isActive) {
+      syncRouteToLocation(route)
+    }
+  }, [route, isActive])
 
   const goBack = useCallback(() => {
     setRoute(stepBack)
@@ -171,8 +177,11 @@ export function EditorPage() {
     toaster.create({ title: 'Сброшено к сохранённой версии', type: 'info', duration: 2000 })
   }, [])
 
-  // Горячие клавиши
+  // Горячие клавиши — только пока страница активна
   useEffect(() => {
+    if (!isActive) {
+      return
+    }
     const handler = (e: KeyboardEvent) => {
       if (e.ctrlKey && !e.shiftKey && e.key === 'z') {
         e.preventDefault()
@@ -189,7 +198,7 @@ export function EditorPage() {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [doUndo, doRedo, doSave, goBack])
+  }, [isActive, doUndo, doRedo, doSave, goBack])
 
   // Flash-анимация на клавише
   const triggerFlash = useCallback((vk: number) => {
@@ -199,20 +208,23 @@ export function EditorPage() {
   }, [])
 
   // Экспорт/Импорт
-  const doExport = useCallback(() => {
-    if (!config) {
-      return
-    }
-    const layout = config.layouts[activeLayoutIndex]
-    const data = JSON.stringify({ name: layout.name, mappings: layout.mappings }, null, 2)
-    const blob = new Blob([data], { type: 'application/json' })
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob)
-    a.download = layout.name.replace(/[^a-zA-Zа-яА-Я0-9_-]/g, '_') + '.json'
-    a.click()
-    URL.revokeObjectURL(a.href)
-    toaster.success({ title: `Раскладка "${layout.name}" экспортирована`, duration: 2000 })
-  }, [config, activeLayoutIndex])
+  const doExport = useCallback(
+    (layoutIndex: number) => {
+      if (!config) {
+        return
+      }
+      const layout = config.layouts[layoutIndex]
+      const data = JSON.stringify({ name: layout.name, mappings: layout.mappings }, null, 2)
+      const blob = new Blob([data], { type: 'application/json' })
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = layout.name.replace(/[^a-zA-Zа-яА-Я0-9_-]/g, '_') + '.json'
+      a.click()
+      URL.revokeObjectURL(a.href)
+      toaster.success({ title: `Раскладка "${layout.name}" экспортирована`, duration: 2000 })
+    },
+    [config],
+  )
 
   const doImport = useCallback(
     (file: File) => {
@@ -363,107 +375,106 @@ export function EditorPage() {
     [config, selectedKey, activeLayoutIndex, pushUndo],
   )
 
-  if (!config) {
-    return (
-      <Flex h="100vh" align="center" justify="center" bg="#1a1a2e" color="#e0e0e0">
-        Загрузка...
-      </Flex>
-    )
-  }
-
-  const activeLayout = config.layouts[activeLayoutIndex]
-  const mappingByVk = new Map<number, KeyMapping>()
-  for (const m of activeLayout.mappings) {
-    mappingByVk.set(m.vk, m)
-  }
-
   return (
-    <Box bg="#1a1a2e" minH="100vh" p="4" color="#e0e0e0" fontFamily="'Segoe UI', system-ui, sans-serif">
-      <Heading as="h1" size="lg" mb="3">
-        <Box as="span" color="#6c7ae0">
-          KamiKeyThe
-        </Box>
-        {' \u2014 \u0420\u0435\u0434\u0430\u043A\u0442\u043E\u0440 \u043C\u0430\u043F\u043F\u0438\u043D\u0433\u043E\u0432'}
-      </Heading>
-
-      <LayoutTabs
-        config={config}
-        activeIndex={activeLayoutIndex}
-        onSelect={(i) => {
-          setActiveLayoutIndex(i)
-          setRoute({ keyVk: null, category: null })
-        }}
-        onAdd={(name) => {
-          pushUndo()
-          const newConfig = {
-            ...config,
-            layouts: [...config.layouts, { name, mappings: [] }],
-          }
-          setConfig(newConfig)
-          setActiveLayoutIndex(newConfig.layouts.length - 1)
-          setRoute({ keyVk: null, category: null })
-          toaster.success({ title: `Раскладка "${name}" создана`, duration: 2000 })
-        }}
-        onDelete={(i) => {
-          pushUndo()
-          const deletedName = config.layouts[i].name
-          const layouts = config.layouts.filter((_, idx) => idx !== i)
-          const newIdx = Math.min(activeLayoutIndex, layouts.length - 1)
-          setConfig({ ...config, layouts, activeLayout: layouts[newIdx].name })
-          setActiveLayoutIndex(newIdx)
-          setRoute({ keyVk: null, category: null })
-          toaster.create({ title: `Раскладка "${deletedName}" удалена`, type: 'info', duration: 2000 })
-        }}
-        onRename={(i, name) => {
-          pushUndo()
-          const layouts = config.layouts.map((l, idx) => (idx === i ? { ...l, name } : l))
-          const newConfig = {
-            ...config,
-            layouts,
-            activeLayout: i === activeLayoutIndex ? name : config.activeLayout,
-          }
-          setConfig(newConfig)
-        }}
-      />
-
-      {selectedKey
+    <Flex direction="column" h="full" display={isActive ? 'flex' : 'none'}>
+      {!config
         ? (
-          <KeyPage
-            keyDef={selectedKey}
-            mapping={mappingByVk.get(selectedKey.vk) ?? null}
-            symbols={symbols}
-            isDirty={isDirty}
-            category={route.category}
-            onCategoryChange={onCategoryChange}
-            onAssign={assignSymbol}
-            onRemove={removeMapping}
-            onSave={doSave}
-            onBack={goBack}
-          />
+          <Flex flex="1" align="center" justify="center" color="fg.subtle">
+            Загрузка...
+          </Flex>
         )
         : (
-          <KeyboardView
-            mappingByVk={mappingByVk}
-            selectedVk={null}
-            flashVk={flashVk}
-            onKeyClick={(key) => setRoute({ keyVk: key.vk, category: null })}
-            onDropOnKey={dropOnKey}
-          />
-        )}
+          <>
+            <Box px="5" pt="4" pb="3" flexShrink={0}>
+              <LayoutTabs
+                config={config}
+                activeIndex={activeLayoutIndex}
+                onSelect={(i) => {
+                  setActiveLayoutIndex(i)
+                  setRoute({ keyVk: null, category: null })
+                }}
+                onAdd={(name) => {
+                  pushUndo()
+                  const newConfig = {
+                    ...config,
+                    layouts: [...config.layouts, { name, mappings: [] }],
+                  }
+                  setConfig(newConfig)
+                  setActiveLayoutIndex(newConfig.layouts.length - 1)
+                  setRoute({ keyVk: null, category: null })
+                  toaster.success({ title: `Раскладка "${name}" создана`, duration: 2000 })
+                }}
+                onDelete={(i) => {
+                  pushUndo()
+                  const deletedName = config.layouts[i].name
+                  const layouts = config.layouts.filter((_, idx) => idx !== i)
+                  const wasActiveLayoutDeleted = config.layouts[i].name === config.activeLayout
+                  const newActiveLayout = wasActiveLayoutDeleted ? layouts[0].name : config.activeLayout
+                  setConfig({ ...config, layouts, activeLayout: newActiveLayout })
+                  setActiveLayoutIndex((prev) => (i <= prev ? Math.max(0, prev - 1) : prev))
+                  setRoute({ keyVk: null, category: null })
+                  toaster.create({ title: `Раскладка "${deletedName}" удалена`, type: 'info', duration: 2000 })
+                }}
+                onRename={(i, name) => {
+                  pushUndo()
+                  const layouts = config.layouts.map((l, idx) => (idx === i ? { ...l, name } : l))
+                  const newConfig = {
+                    ...config,
+                    layouts,
+                    activeLayout: config.layouts[i].name === config.activeLayout ? name : config.activeLayout,
+                  }
+                  setConfig(newConfig)
+                }}
+                onMakeActive={(i) => {
+                  pushUndo()
+                  setConfig({ ...config, activeLayout: config.layouts[i].name })
+                  toaster.success({ title: `Раскладка "${config.layouts[i].name}" теперь активна`, duration: 2000 })
+                }}
+                onExport={doExport}
+                onImport={doImport}
+              />
+            </Box>
 
-      <Toolbar
-        isDirty={isDirty}
-        canUndo={undoStack.length > 0}
-        canRedo={redoStack.length > 0}
-        undoCount={undoStack.length}
-        redoCount={redoStack.length}
-        onSave={doSave}
-        onReset={doReset}
-        onUndo={doUndo}
-        onRedo={doRedo}
-        onExport={doExport}
-        onImport={doImport}
-      />
-    </Box>
+            <Box flex="1" minH="0" overflowY="auto" px="5" pb="4">
+              {selectedKey
+                ? (
+                  <KeyPage
+                    keyDef={selectedKey}
+                    mapping={config.layouts[activeLayoutIndex].mappings.find((m) => m.vk === selectedKey.vk) ?? null}
+                    symbols={symbols}
+                    isDirty={isDirty}
+                    category={route.category}
+                    onCategoryChange={onCategoryChange}
+                    onAssign={assignSymbol}
+                    onRemove={removeMapping}
+                    onSave={doSave}
+                    onBack={goBack}
+                  />
+                )
+                : (
+                  <KeyboardView
+                    mappingByVk={new Map<number, KeyMapping>(
+                      config.layouts[activeLayoutIndex].mappings.map((m) => [m.vk, m]),
+                    )}
+                    selectedVk={null}
+                    flashVk={flashVk}
+                    onKeyClick={(key) => setRoute({ keyVk: key.vk, category: null })}
+                    onDropOnKey={dropOnKey}
+                  />
+                )}
+            </Box>
+
+            <ActionBar
+              isDirty={isDirty}
+              canUndo={undoStack.length > 0}
+              canRedo={redoStack.length > 0}
+              onSave={doSave}
+              onReset={doReset}
+              onUndo={doUndo}
+              onRedo={doRedo}
+            />
+          </>
+        )}
+    </Flex>
   )
 }

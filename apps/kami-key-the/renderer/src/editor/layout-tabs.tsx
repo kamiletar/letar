@@ -1,11 +1,15 @@
 /**
- * Табы раскладок — переключение, добавление, удаление, переименование
+ * Вкладки раскладок — переключение, добавление, переименование, экспорт/импорт, удаление
  *
- * Используем Chakra Dialog вместо browser prompt/confirm
+ * Вкладка, совпадающая с `config.activeLayout` (работает сейчас в системе через AltGr+Ё),
+ * отмечена зелёной точкой — это может отличаться от выбранной в UI вкладки (`activeIndex`).
+ * Меню «⋯» — только у выбранной вкладки, действия применяются к ней по индексу, не по
+ * подразумеваемому activeIndex (баг старой версии: удаление всегда стирало именно activeIndex).
  */
 
-import { Box, Button, Dialog, Flex, Input, Portal, Text } from '@chakra-ui/react'
+import { chakra, Dialog, Flex, IconButton, Input, Menu, Portal, Text, Tooltip as ChakraTooltip } from '@chakra-ui/react'
 import { useRef, useState } from 'react'
+import { LuDownload, LuEllipsis, LuPencil, LuPlus, LuTrash2, LuUpload } from 'react-icons/lu'
 import type { KeymapConfig } from '../../../src/types'
 
 interface LayoutTabsProps {
@@ -15,9 +19,14 @@ interface LayoutTabsProps {
   onAdd: (name: string) => void
   onDelete: (index: number) => void
   onRename: (index: number, name: string) => void
+  onMakeActive: (index: number) => void
+  onExport: (index: number) => void
+  onImport: (file: File) => void
 }
 
-export function LayoutTabs({ config, activeIndex, onSelect, onAdd, onDelete, onRename }: LayoutTabsProps) {
+export function LayoutTabs(
+  { config, activeIndex, onSelect, onAdd, onDelete, onRename, onMakeActive, onExport, onImport }: LayoutTabsProps,
+) {
   // Диалог переименования
   const [renameOpen, setRenameOpen] = useState(false)
   const [renameIndex, setRenameIndex] = useState(0)
@@ -31,8 +40,17 @@ export function LayoutTabs({ config, activeIndex, onSelect, onAdd, onDelete, onR
 
   // Диалог удаления
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleteIndex, setDeleteIndex] = useState(0)
+
+  const importInputRef = useRef<HTMLInputElement>(null)
 
   const existingNames = config.layouts.map((l) => l.name)
+
+  const openRename = (i: number) => {
+    setRenameIndex(i)
+    setRenameName(config.layouts[i].name)
+    setRenameOpen(true)
+  }
 
   const handleRenameConfirm = () => {
     const trimmed = renameName.trim()
@@ -52,76 +70,129 @@ export function LayoutTabs({ config, activeIndex, onSelect, onAdd, onDelete, onR
   }
 
   const handleDeleteConfirm = () => {
-    onDelete(activeIndex)
+    onDelete(deleteIndex)
     setDeleteOpen(false)
   }
 
   return (
     <>
-      <Flex gap="1.5" align="center" mb="4" flexWrap="wrap">
+      <Flex gap="1.5" align="center" flexWrap="wrap">
         {config.layouts.map((layout, i) => (
-          <Box
-            key={i}
-            px="4"
-            py="1.5"
-            borderRadius="6px"
-            bg={i === activeIndex ? '#4a4a8a' : '#2a2a4a'}
-            border={i === activeIndex ? '1px solid #6c7ae0' : '1px solid #3a3a5a'}
-            color={i === activeIndex ? 'white' : '#aaa'}
-            fontWeight={i === activeIndex ? '600' : 'normal'}
-            cursor="pointer"
-            fontSize="sm"
-            userSelect="none"
-            _hover={{ bg: '#3a3a5a', color: 'white' }}
-            onClick={() => onSelect(i)}
-            onDoubleClick={() => {
-              setRenameIndex(i)
-              setRenameName(layout.name)
-              setRenameOpen(true)
-            }}
-          >
-            {layout.name}
-          </Box>
+          <Flex key={i} align="center" gap="0.5">
+            <ChakraTooltip.Root open={layout.name === config.activeLayout ? undefined : false} openDelay={300}>
+              <ChakraTooltip.Trigger asChild>
+                <chakra.button
+                  type="button"
+                  role="tab"
+                  aria-selected={i === activeIndex}
+                  display="flex"
+                  alignItems="center"
+                  gap="1.5"
+                  px="3.5"
+                  py="1.5"
+                  rounded="l2"
+                  bg={i === activeIndex ? 'brand.subtle' : 'bg.muted'}
+                  borderWidth="1px"
+                  borderColor={i === activeIndex ? 'brand.border' : 'border'}
+                  color={i === activeIndex ? 'brand.fg' : 'fg.muted'}
+                  fontWeight={i === activeIndex ? '600' : '500'}
+                  fontSize="sm"
+                  userSelect="none"
+                  _hover={{ bg: i === activeIndex ? 'brand.emphasized' : 'bg.emphasized' }}
+                  _focusVisible={{ outline: '2px solid', outlineColor: 'brand.focusRing', outlineOffset: '2px' }}
+                  onClick={() => onSelect(i)}
+                  onDoubleClick={() => openRename(i)}
+                >
+                  {layout.name === config.activeLayout && (
+                    <chakra.span w="6px" h="6px" rounded="full" bg="brand.solid" flexShrink={0} />
+                  )}
+                  {layout.name}
+                </chakra.button>
+              </ChakraTooltip.Trigger>
+              <Portal>
+                <ChakraTooltip.Positioner>
+                  <ChakraTooltip.Content>Работает сейчас · переключение AltGr+Ё</ChakraTooltip.Content>
+                </ChakraTooltip.Positioner>
+              </Portal>
+            </ChakraTooltip.Root>
+
+            {i === activeIndex && (
+              <Menu.Root>
+                <Menu.Trigger asChild>
+                  <IconButton aria-label="Действия с раскладкой" size="xs" variant="ghost" color="fg.muted">
+                    <LuEllipsis size={14} />
+                  </IconButton>
+                </Menu.Trigger>
+                <Portal>
+                  <Menu.Positioner>
+                    <Menu.Content>
+                      {layout.name !== config.activeLayout && (
+                        <Menu.Item
+                          value="make-active"
+                          onClick={() => onMakeActive(i)}
+                        >
+                          Сделать активной
+                        </Menu.Item>
+                      )}
+                      <Menu.Item value="rename" onClick={() => openRename(i)}>
+                        <LuPencil size={14} />
+                        Переименовать
+                      </Menu.Item>
+                      <Menu.Item value="export" onClick={() => onExport(i)}>
+                        <LuDownload size={14} />
+                        Экспорт в файл
+                      </Menu.Item>
+                      <Menu.Item value="import" onClick={() => importInputRef.current?.click()}>
+                        <LuUpload size={14} />
+                        Импорт из файла
+                      </Menu.Item>
+                      <Menu.Separator />
+                      <Menu.Item
+                        value="delete"
+                        color="fg.error"
+                        disabled={config.layouts.length <= 1}
+                        onClick={() => {
+                          setDeleteIndex(i)
+                          setDeleteOpen(true)
+                        }}
+                      >
+                        <LuTrash2 size={14} />
+                        Удалить
+                      </Menu.Item>
+                    </Menu.Content>
+                  </Menu.Positioner>
+                </Portal>
+              </Menu.Root>
+            )}
+          </Flex>
         ))}
 
-        {/* Кнопка добавления */}
-        <Box
-          px="4"
-          py="1.5"
-          borderRadius="6px"
-          bg="#1e3a1e"
-          border="1px solid #2a5a2a"
-          color="#4a8"
-          cursor="pointer"
-          fontSize="sm"
-          userSelect="none"
-          _hover={{ bg: '#2a5a2a' }}
+        <IconButton
+          aria-label="Новая раскладка"
+          size="sm"
+          variant="ghost"
+          color="brand.fg"
           onClick={() => {
             setAddName('')
             setAddOpen(true)
           }}
         >
-          + Новая
-        </Box>
+          <LuPlus size={16} />
+        </IconButton>
 
-        {/* Кнопка удаления (только если > 1 раскладки) */}
-        {config.layouts.length > 1 && (
-          <Box
-            px="2.5"
-            py="1.5"
-            borderRadius="6px"
-            bg="#3a1e1e"
-            border="1px solid #5a2a2a"
-            color="#a44"
-            cursor="pointer"
-            fontSize="sm"
-            userSelect="none"
-            _hover={{ bg: '#5a2a2a' }}
-            onClick={() => setDeleteOpen(true)}
-          >
-            {'\uD83D\uDDD1'}
-          </Box>
-        )}
+        <input
+          ref={importInputRef}
+          type="file"
+          accept=".json"
+          style={{ display: 'none' }}
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file) {
+              onImport(file)
+            }
+            e.target.value = ''
+          }}
+        />
       </Flex>
 
       {/* Диалог переименования */}
@@ -133,10 +204,10 @@ export function LayoutTabs({ config, activeIndex, onSelect, onAdd, onDelete, onR
         size="sm"
       >
         <Portal>
-          <Dialog.Backdrop bg="blackAlpha.700" />
+          <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content bg="#222244" color="#e0e0e0" borderColor="#3a3a5a">
-              <Dialog.Header borderBottom="1px solid #3a3a5a">
+            <Dialog.Content>
+              <Dialog.Header>
                 <Dialog.Title>Переименовать раскладку</Dialog.Title>
               </Dialog.Header>
               <Dialog.Body py="4">
@@ -149,34 +220,43 @@ export function LayoutTabs({ config, activeIndex, onSelect, onAdd, onDelete, onR
                       handleRenameConfirm()
                     }
                   }}
-                  bg="#1a1a2e"
-                  border="1px solid #3a3a5a"
-                  _focus={{ borderColor: '#6c7ae0' }}
                   placeholder="Имя раскладки"
                 />
                 {renameName.trim() && existingNames.some((n, i) => i !== renameIndex && n === renameName.trim()) && (
-                  <Text color="#c66" fontSize="xs" mt="1">
+                  <Text color="fg.error" fontSize="xs" mt="1">
                     Раскладка с таким именем уже существует
                   </Text>
                 )}
               </Dialog.Body>
-              <Dialog.Footer borderTop="1px solid #3a3a5a">
+              <Dialog.Footer>
                 <Dialog.ActionTrigger asChild>
-                  <Button size="sm" bg="#2a2a4a" color="#aaa" border="1px solid #3a3a5a" _hover={{ bg: '#3a3a5a' }}>
+                  <chakra.button
+                    px="3"
+                    py="1.5"
+                    rounded="l2"
+                    fontSize="sm"
+                    color="fg.muted"
+                    _hover={{ bg: 'bg.muted' }}
+                  >
                     Отмена
-                  </Button>
+                  </chakra.button>
                 </Dialog.ActionTrigger>
-                <Button
-                  size="sm"
-                  bg="#2a6a2a"
-                  color="white"
-                  _hover={{ bg: '#3a8a3a' }}
+                <chakra.button
+                  px="3"
+                  py="1.5"
+                  rounded="l2"
+                  fontSize="sm"
+                  fontWeight="600"
+                  bg="brand.solid"
+                  color="brand.contrast"
+                  _hover={{ bg: 'brand.emphasized' }}
+                  _disabled={{ opacity: 0.5, cursor: 'default' }}
                   disabled={!renameName.trim()
                     || existingNames.some((n, i) => i !== renameIndex && n === renameName.trim())}
                   onClick={handleRenameConfirm}
                 >
                   Сохранить
-                </Button>
+                </chakra.button>
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>
@@ -192,10 +272,10 @@ export function LayoutTabs({ config, activeIndex, onSelect, onAdd, onDelete, onR
         size="sm"
       >
         <Portal>
-          <Dialog.Backdrop bg="blackAlpha.700" />
+          <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content bg="#222244" color="#e0e0e0" borderColor="#3a3a5a">
-              <Dialog.Header borderBottom="1px solid #3a3a5a">
+            <Dialog.Content>
+              <Dialog.Header>
                 <Dialog.Title>Новая раскладка</Dialog.Title>
               </Dialog.Header>
               <Dialog.Body py="4">
@@ -208,33 +288,42 @@ export function LayoutTabs({ config, activeIndex, onSelect, onAdd, onDelete, onR
                       handleAddConfirm()
                     }
                   }}
-                  bg="#1a1a2e"
-                  border="1px solid #3a3a5a"
-                  _focus={{ borderColor: '#6c7ae0' }}
                   placeholder="Имя раскладки"
                 />
                 {addName.trim() && existingNames.includes(addName.trim()) && (
-                  <Text color="#c66" fontSize="xs" mt="1">
+                  <Text color="fg.error" fontSize="xs" mt="1">
                     Раскладка с таким именем уже существует
                   </Text>
                 )}
               </Dialog.Body>
-              <Dialog.Footer borderTop="1px solid #3a3a5a">
+              <Dialog.Footer>
                 <Dialog.ActionTrigger asChild>
-                  <Button size="sm" bg="#2a2a4a" color="#aaa" border="1px solid #3a3a5a" _hover={{ bg: '#3a3a5a' }}>
+                  <chakra.button
+                    px="3"
+                    py="1.5"
+                    rounded="l2"
+                    fontSize="sm"
+                    color="fg.muted"
+                    _hover={{ bg: 'bg.muted' }}
+                  >
                     Отмена
-                  </Button>
+                  </chakra.button>
                 </Dialog.ActionTrigger>
-                <Button
-                  size="sm"
-                  bg="#2a6a2a"
-                  color="white"
-                  _hover={{ bg: '#3a8a3a' }}
+                <chakra.button
+                  px="3"
+                  py="1.5"
+                  rounded="l2"
+                  fontSize="sm"
+                  fontWeight="600"
+                  bg="brand.solid"
+                  color="brand.contrast"
+                  _hover={{ bg: 'brand.emphasized' }}
+                  _disabled={{ opacity: 0.5, cursor: 'default' }}
                   disabled={!addName.trim() || existingNames.includes(addName.trim())}
                   onClick={handleAddConfirm}
                 >
                   Создать
-                </Button>
+                </chakra.button>
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>
@@ -244,30 +333,47 @@ export function LayoutTabs({ config, activeIndex, onSelect, onAdd, onDelete, onR
       {/* Диалог удаления */}
       <Dialog.Root lazyMount role="alertdialog" open={deleteOpen} onOpenChange={(e) => setDeleteOpen(e.open)} size="sm">
         <Portal>
-          <Dialog.Backdrop bg="blackAlpha.700" />
+          <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content bg="#222244" color="#e0e0e0" borderColor="#3a3a5a">
-              <Dialog.Header borderBottom="1px solid #3a3a5a">
+            <Dialog.Content>
+              <Dialog.Header>
                 <Dialog.Title>Удалить раскладку</Dialog.Title>
               </Dialog.Header>
               <Dialog.Body py="4">
                 <Text>
-                  {'Удалить раскладку \u00AB'}
-                  <Text as="span" fontWeight="600" color="white">
-                    {config.layouts[activeIndex]?.name}
-                  </Text>
-                  {'\u00BB? Это действие можно отменить через Undo.'}
+                  {'Удалить раскладку «'}
+                  <chakra.span fontWeight="600" color="fg">
+                    {config.layouts[deleteIndex]?.name}
+                  </chakra.span>
+                  {'»? Это действие можно отменить через Undo.'}
                 </Text>
               </Dialog.Body>
-              <Dialog.Footer borderTop="1px solid #3a3a5a">
+              <Dialog.Footer>
                 <Dialog.ActionTrigger asChild>
-                  <Button size="sm" bg="#2a2a4a" color="#aaa" border="1px solid #3a3a5a" _hover={{ bg: '#3a3a5a' }}>
+                  <chakra.button
+                    px="3"
+                    py="1.5"
+                    rounded="l2"
+                    fontSize="sm"
+                    color="fg.muted"
+                    _hover={{ bg: 'bg.muted' }}
+                  >
                     Отмена
-                  </Button>
+                  </chakra.button>
                 </Dialog.ActionTrigger>
-                <Button size="sm" bg="#5a2a2a" color="#e66" _hover={{ bg: '#6a3a3a' }} onClick={handleDeleteConfirm}>
+                <chakra.button
+                  px="3"
+                  py="1.5"
+                  rounded="l2"
+                  fontSize="sm"
+                  fontWeight="600"
+                  bg="border.error"
+                  color="white"
+                  _hover={{ opacity: 0.85 }}
+                  onClick={handleDeleteConfirm}
+                >
                   Удалить
-                </Button>
+                </chakra.button>
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>

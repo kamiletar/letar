@@ -1,34 +1,43 @@
 /**
  * Одна клавиша визуальной клавиатуры
  *
- * 4 угла: EN (верх-лево), AltGr+Shift (верх-право),
- * AltGr (низ-лево), RU (низ-право)
- *
- * Поддержка flash-анимации и drag-and-drop (drop target)
+ * EN — верх-лево, RU — низ-лево, символ AltGr — крупно по центру, AltGr+Shift — верх-право.
+ * Поддержка flash-анимации и drag-and-drop (drop target). Размер клавиши (`unit`/`gap`) приходит
+ * снаружи — клавиатура целиком масштабируется под ширину контейнера (см. keyboard-view.tsx).
  */
 
-import { Box } from '@chakra-ui/react'
+import { chakra } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import type { KeyMapping } from '../../../src/types'
 import type { KeyDef } from './keyboard-data'
 import { displayChar, MODIFIER_VKS } from './keyboard-data'
-
-const KEY_SIZE = 56
-const KEY_GAP = 4
-const UNIT = KEY_SIZE + KEY_GAP
 
 interface KeyButtonProps {
   keyDef: KeyDef
   mapping?: KeyMapping
   isSelected: boolean
   isFlashing: boolean
+  unit: number
+  gap: number
   onClick: () => void
   onDrop?: (char: string, name: string, slot: 'char' | 'shiftChar') => void
 }
 
-export function KeyButton({ keyDef, mapping, isSelected, isFlashing, onClick, onDrop }: KeyButtonProps) {
+/** Строит aria-label вида «E / У: AltGr — € евро; AltGr+Shift — не назначено» */
+function buildAriaLabel(keyDef: KeyDef, mapping: KeyMapping | undefined): string {
+  const label = keyDef.label || 'пробел'
+  const ru = keyDef.ru ? ` / ${keyDef.ru}` : ''
+  const altGr = mapping ? `${displayChar(mapping.char)} ${mapping.label}` : 'не назначено'
+  const altGrShift = mapping?.shiftChar
+    ? `${displayChar(mapping.shiftChar)} ${mapping.shiftLabel ?? ''}`
+    : 'не назначено'
+  return `${label}${ru}: AltGr — ${altGr}; AltGr+Shift — ${altGrShift}`
+}
+
+export function KeyButton({ keyDef, mapping, isSelected, isFlashing, unit, gap, onClick, onDrop }: KeyButtonProps) {
   const w = keyDef.w ?? 1
-  const width = w * UNIT - KEY_GAP
+  const width = w * unit - gap
+  const height = unit - gap
   const hasMapped = !!mapping
   const isModifier = MODIFIER_VKS.has(keyDef.vk)
 
@@ -46,30 +55,6 @@ export function KeyButton({ keyDef, mapping, isSelected, isFlashing, onClick, on
 
   // Drag-over состояние
   const [dragOver, setDragOver] = useState(false)
-
-  const bgColor = dragOver
-    ? '#2a4a5a' // синий при drag-over
-    : flashActive
-    ? '#2a5a3a' // зелёный flash
-    : hasMapped
-    ? '#1e2a4a'
-    : '#2a2a4a'
-
-  const borderStyle = isSelected
-    ? '2px solid #6c7ae0'
-    : dragOver
-    ? '2px solid #4ac'
-    : flashActive
-    ? '2px solid #4a8a4a'
-    : '1px solid #3a3a5a'
-
-  const shadowStyle = isSelected
-    ? '0 0 8px rgba(108,122,224,0.4)'
-    : dragOver
-    ? '0 0 12px rgba(68,170,204,0.5)'
-    : flashActive
-    ? '0 0 12px rgba(74,138,74,0.6)'
-    : undefined
 
   const handleDragOver = (e: React.DragEvent) => {
     if (e.dataTransfer.types.includes('application/json')) {
@@ -98,19 +83,22 @@ export function KeyButton({ keyDef, mapping, isSelected, isFlashing, onClick, on
   }
 
   return (
-    <Box
+    <chakra.button
+      type="button"
+      aria-label={buildAriaLabel(keyDef, mapping)}
+      aria-pressed={isSelected}
       w={`${width}px`}
-      h={`${KEY_SIZE}px`}
-      borderRadius="6px"
-      bg={bgColor}
-      border={borderStyle}
-      boxShadow={shadowStyle}
+      h={`${height}px`}
+      rounded="l2"
+      bg={dragOver ? 'accent.subtle' : flashActive ? 'brand.emphasized' : hasMapped ? 'brand.subtle' : 'bg.muted'}
+      borderWidth="1px"
+      borderColor={isSelected ? 'brand.border' : dragOver ? 'accent.border' : flashActive ? 'brand.border' : 'border'}
       position="relative"
-      cursor="pointer"
       flexShrink={0}
       overflow="hidden"
-      transition="background 0.3s, border-color 0.3s, box-shadow 0.3s"
-      _hover={{ borderColor: '#6c7ae0' }}
+      transition="background 0.3s, border-color 0.3s"
+      _hover={{ borderColor: 'brand.border' }}
+      _focusVisible={{ outline: '2px solid', outlineColor: 'brand.focusRing', outlineOffset: '2px' }}
       onClick={onClick}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -119,52 +107,75 @@ export function KeyButton({ keyDef, mapping, isSelected, isFlashing, onClick, on
       {isModifier && !hasMapped
         ? (
           // Спец. клавиша — label по центру
-          <Box
+          <chakra.span
             position="absolute"
             top="50%"
             left="50%"
             transform="translate(-50%, -50%)"
-            color="#888"
-            fontSize="12px"
+            color="fg.subtle"
+            fontSize={`${Math.max(9, unit * 0.17)}px`}
             userSelect="none"
           >
             {keyDef.label}
-          </Box>
+          </chakra.span>
         )
         : (
           <>
             {/* EN — верх-лево */}
-            <Box position="absolute" top="3px" left="5px" color="#888" fontSize="11px" userSelect="none">
+            <chakra.span
+              position="absolute"
+              top="2px"
+              left="4px"
+              color="fg.subtle"
+              fontSize={`${Math.max(10, unit * 0.19)}px`}
+              userSelect="none"
+            >
               {keyDef.label}
-            </Box>
-            {/* RU — низ-право */}
+            </chakra.span>
+            {/* RU — низ-лево */}
             {keyDef.ru && (
-              <Box position="absolute" bottom="3px" right="5px" color="#666" fontSize="11px" userSelect="none">
-                {keyDef.ru}
-              </Box>
-            )}
-            {/* AltGr — низ-лево (синий, крупный) */}
-            {mapping && (
-              <Box
+              <chakra.span
                 position="absolute"
-                bottom="3px"
-                left="5px"
-                color="#6c7ae0"
-                fontSize="14px"
+                bottom="2px"
+                left="4px"
+                color="fg.subtle"
+                fontSize={`${Math.max(9, unit * 0.16)}px`}
+                userSelect="none"
+              >
+                {keyDef.ru}
+              </chakra.span>
+            )}
+            {/* AltGr — крупно по центру */}
+            {mapping && (
+              <chakra.span
+                position="absolute"
+                top="50%"
+                left="50%"
+                transform="translate(-50%, -50%)"
+                color="brand.fg"
+                fontSize={`${Math.max(16, unit * 0.4)}px`}
                 fontWeight="700"
                 userSelect="none"
               >
                 {displayChar(mapping.char)}
-              </Box>
+              </chakra.span>
             )}
             {/* AltGr+Shift — верх-право */}
             {mapping?.shiftChar && (
-              <Box position="absolute" top="3px" right="5px" color="#4a6ae0" fontSize="11px" userSelect="none">
-                {mapping.shiftChar}
-              </Box>
+              <chakra.span
+                position="absolute"
+                top="2px"
+                right="4px"
+                color="accent.fg"
+                fontSize={`${Math.max(10, unit * 0.22)}px`}
+                fontWeight="600"
+                userSelect="none"
+              >
+                {displayChar(mapping.shiftChar)}
+              </chakra.span>
             )}
           </>
         )}
-    </Box>
+    </chakra.button>
   )
 }
