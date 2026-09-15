@@ -9,7 +9,6 @@ export const auth = createAuth({
     clientSecret: process.env.OIDC_CLIENT_SECRET,
     discoveryUrl: process.env.OIDC_DISCOVERY_URL,
   },
-  pages: { signIn: '/sign-in' },
 })
 
 export type Session = typeof auth.$Infer.Session
