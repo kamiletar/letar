@@ -2,6 +2,49 @@
 
 Детальное описание всех реализованных фич auth-hub.
 
+## Код из письма — Фаза A.4/A.6: сброс пароля + тесты (2026-09-15)
+
+Продолжение Фазы A (A.2/A.3 — предыдущая сессия). Полный разбор — `PLAN_EMAIL_CODE.md` A.4-A.6.
+
+**A.4 — сброс пароля кодом:**
+
+- `_schemas/forgot-password.schema.ts` — `ForgotPasswordRequestSchema` (email) и
+  `ResetPasswordSchema` (pin + strongPasswordSchema + confirmPassword).
+- `_actions/forgot-password.action.ts` — `requestPasswordReset`/`resetPasswordWithCode`,
+  структурный каст `EmailOTPServerApi` (тот же type-erasure factory-баг `@letar/auth`, что в A.1)
+  для `auth.api.requestPasswordResetEmailOTP`/`resetPasswordEmailOTP`. Оба шага резолвят email
+  через `resolveLoginEmail` — код уходит и проверяется по основному адресу, даже если пользователь
+  ввёл привязанный (Этап 8.5).
+- `forgot-password/_components/forgot-password-flow.tsx` + `page.tsx` — 3-шаговый флоу
+  (email → код+пароль → готово), ссылка «Забыли пароль?» на `/sign-in`.
+
+**A.6 — тесты, два реальных бага найдены попутно:**
+
+- vitest: `forgot-password.action.spec.ts` + `register.action.spec.ts`, `vi.hoisted()` для мока
+  функций, используемых и в `vi.mock()`-фабрике, и в assertions напрямую.
+- e2e: `05-sign-up-code.spec.ts` (регистрация → неверный код; регистрация → пометка `emailVerified`
+  в БД → SSE переключает экран) и `06-forgot-password.spec.ts` (no-leak для несуществующего
+  email). **Баг №1** (продуктовый): `useEmailCodeVerification.submitCode`
+  (`libs/pin-auth/src/client/`) закрывает SSE-стрим перед КАЖДЫМ submit (успешным или нет) и
+  осознанно не переоткрывает при ошибке — попытка неверного кода в одном флоу с проверкой SSE
+  навсегда глушит стрим; решение — два независимых теста на разных аккаунтах, не фикс библиотеки
+  (поведение задокументировано как намеренное в самом коде). **Баг №2** (форма): `Field.Auto` с
+  `meta.ui.fieldType` не спредит `baseProps` в `renderFieldByType` — `onComplete` у
+  `PinInputFieldProps` молча терялся, автосабмит кода не срабатывал; фикс — явный
+  `Field.PinInput` вместо `Field.Auto` в `verify-email-code.tsx`, задокументировано в
+  `.claude/docs/letar-forms-field-auto-fieldtype-drops-extra-props.md` (реальный фикс требует
+  delegation в `forms-coordinator-dev`, не сделан в этой сессии).
+- Инфраструктурные находки в самих e2e (не баги приложения): гонка гидратации на первом заходе
+  на новый Next.js dev-роут в процессе Playwright (клик по сабмиту уходил нативным `POST` вместо
+  React-обработчика до завершения гидратации — фикс `page.waitForLoadState('load')`, не
+  `networkidle`, запрещён `playwright/no-networkidle`); локатор чекбокса регистрации —
+  `data-field-name` висит на `Checkbox.Root` (`<label>`), не на скрытом `Checkbox.HiddenInput`.
+
+**Не сделано в этой сессии:** A.7 (ручная проверка с реальным письмом — успешный ввод кода,
+сброс пароля с реальным кодом, 5 попыток/lockout, истёкший код, SSO-регресс) и A.8 push/деплой —
+ждёт одобрения владельца (сессия шла автономно по его инструкции «делай всё до конца», push
+остаётся под отдельным одобрением per `.claude/rules/git.md`). Коммит `de9ab18e7`.
+
 ## Код из письма — Фаза 0 общего слоя (2026-09-15)
 
 Кросс-приложенческая задача (`libs/auth`, `libs/pin-auth`) — общий слой для будущей Фазы A
