@@ -682,6 +682,12 @@ Playwright-скрипт через Bash вместо navigate/UI-логина ·
 исключением `.claude/worktrees`/`.nx`, прецедент — `theme:check` (1 вместо 4) ·
 [docker-bind-mount-pitfalls](/.claude/docs/docker-bind-mount-pitfalls.md) ⚠️
 `compose up -d` не перечитывает смонтированный конфиг ·
+[nextjs-standalone-bind-mount-wrong-cwd](/.claude/docs/nextjs-standalone-bind-mount-wrong-cwd.md)
+⚠️ standalone `server.js` делает `process.chdir()` в свою директорию — реальный `process.cwd()`
+рантайма `/app/apps/<app>`, не `WORKDIR /app` образа; бинд-маунт на «наивный» путь монтируется
+успешно, но пишущий код молча создаёт директорию в writable-слое контейнера мимо хоста, ошибка
+не долетает никуда, байты пропадают на следующем деплое — найдено на приватных файлах domwellbes
+(2026-09-15), не восстановить, только перезалить ·
 [docker-bare-bun-workspace-deps](/.claude/docs/docker-bare-bun-workspace-deps.md) ·
 [alpine-cdn-unreachable-s3](/.claude/docs/alpine-cdn-unreachable-s3.md) ⚠️ с s3 нет пути до
 `dl-cdn.alpinelinux.org` вообще (ни IPv4, ни IPv6, ни с хоста, ни из контейнера) при рабочих
