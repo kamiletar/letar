@@ -6,6 +6,23 @@
 
 ## Backlog (запросы от агентов)
 
+### ✅ [2026-09-15] `apps/form-example` — отсутствовал `transpilePackages`, падал прод-деплой (от deploy-agent-dev)
+
+- **Запросил:** deploy-agent-dev (отчёт о неудачном деплое, тред `deploy-request: form-docs,
+  form-example`) — прогон случился по обычному запросу форм-координатора на деплой готовых фиксов
+  `useFormServerAction`/`Field.Date`.
+- **Описание:** `apps/form-example/next.config.ts` не содержал ключ `transpilePackages` вовсе (не
+  пустой массив — отсутствующее поле). `instrumentation-client.ts` импортирует `libs/glitchtip` —
+  внешний `.ts`-файл вне `apps/form-example`; без `transpilePackages` webpack не может его
+  распарсить (`Module parse failed: Unexpected token` на `export interface`). Тот же класс
+  ловушки уже разобран и закрыт в `form-docs` (см.
+  `.claude/docs/transpile-packages-array-presence-not-content.md`) — там ключ есть с тем же
+  комментарием, form-example его, по всей видимости, никогда не получил при заведении конфига.
+- **Фикс:** добавлен `transpilePackages` со всеми `@letar/*`-пакетами, реально импортируемыми в
+  `src/` (`analytics`, `demo-protection`, `forms`, `forms-core`, `glitchtip`, `pg-url`, `seo`).
+  Локальный `nx build form-example` зелёный (46.5s). Коммит `4a744ea22`.
+- **Статус:** закрыто, деплой запрошен повторно у deploy-agent-dev.
+
 ### ✅ [2026-09-15] `Field.Auto` с `meta.ui.fieldType` терял произвольные props (напр. `onComplete`)
 
 - **Запросил:** auth-hub (найдено на `verify-email-code.tsx`, PLAN_EMAIL_CODE.md A.2) —
