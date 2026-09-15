@@ -17,6 +17,25 @@
     "в PLAN-INFRA-*, почему причина отпала."
   ],
 
+  "overridePins": [
+    {
+      "package": "@modelcontextprotocol/sdk",
+      "override": { "zod": "4.4.3" },
+      "since": "2026-09-16",
+      "reason": "Обычный `/infra:deps-update` (bun update в рамках существующих caret-диапазонов) внезапно развёл zod на две физические копии под isolated linker: bun завёл SDK-у приватный `zod@4.6.5` вместо переиспользования корневого запиненного `4.4.3`, хотя собственный диапазон SDK (`^3.25 || ^4.0`) 4.4.3 полностью устраивает. Не баг апстрима — резолверная механика bun, триггер не установлен (не воспроизводится детерминированно бисекцией отдельных пакетов). Следствие — 19 TS2322-ошибок `ZodTypeAny` в synth (src/mcp/server.ts) и 36 аналогичных в domwellbes. Scoped override (`\"@modelcontextprotocol/sdk\": { \"zod\": \"4.4.3\" }` в package.json.overrides) убирает приватную копию полностью — в отличие от прежнего вывода root-pin-peer-drift.md (bun 1.3.14, scoped override не работал ни в одной форме), на bun 1.4.2 сработало.",
+      "doc": "PLAN-INFRA-*.md — деплой-запись про /infra:deps-update 2026-09-16",
+      "unpinWhen": "grep -n '\"@modelcontextprotocol/sdk/zod\"' bun.lock даёт пусто и БЕЗ override — тогда убрать override и эту запись одним коммитом."
+    },
+    {
+      "package": "@zenstackhq/cli",
+      "override": { "zod": "4.4.3" },
+      "since": "2026-09-16",
+      "reason": "Тот же класс, тот же прогон deps-update, соседний пакет: @zenstackhq/cli (dependencies.zod: \"^4.0.0\", совместим с 4.4.3) тоже получил приватную копию zod@4.6.5 под bun isolated linker. Следствие — TS2321 'Excessive stack depth comparing types MapType<Schema,?>' (класс уже описан в tsgo-excessive-stack-depth-zenstack.md) в 4 НОВЫХ местах grandslamcup (citySlug-страницы) сверх уже существовавшего техдолга, плюс годная копия сохранилась в domwellbes только благодаря совпадению с MCP-фиксом.",
+      "doc": "PLAN-INFRA-*.md — деплой-запись про /infra:deps-update 2026-09-16",
+      "unpinWhen": "grep -n '\"@zenstackhq/cli/zod\"' bun.lock даёт пусто и БЕЗ override — тогда убрать override и эту запись одним коммитом."
+    }
+  ],
+
   "pins": [
     {
       "package": "oxlint",
