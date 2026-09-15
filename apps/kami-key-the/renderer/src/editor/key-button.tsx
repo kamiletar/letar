@@ -145,22 +145,21 @@ export function KeyButton({ keyDef, mapping, isSelected, isFlashing, unit, gap, 
                 {keyDef.ru}
               </chakra.span>
             )}
-            {/* AltGr — крупно, чуть ниже центра (место над ним освобождено под увеличенный Shift-символ) */}
+            {/* AltGr — низ-право, тот же размер, что и Shift-символ */}
             {mapping && (
               <chakra.span
                 position="absolute"
-                top="60%"
-                left="50%"
-                transform="translate(-50%, -50%)"
+                bottom="2px"
+                right="4px"
                 color="brand.fg"
-                fontSize={`${Math.max(16, unit * 0.4)}px`}
+                fontSize={`${Math.max(13, unit * 0.28)}px`}
                 fontWeight="700"
                 userSelect="none"
               >
                 {displayChar(mapping.char)}
               </chakra.span>
             )}
-            {/* AltGr+Shift — верх-право, крупнее прежнего */}
+            {/* AltGr+Shift — верх-право, тот же размер, что и базовый символ */}
             {mapping?.shiftChar && (
               <chakra.span
                 position="absolute"
@@ -168,7 +167,7 @@ export function KeyButton({ keyDef, mapping, isSelected, isFlashing, unit, gap, 
                 right="4px"
                 color="accent.fg"
                 fontSize={`${Math.max(13, unit * 0.28)}px`}
-                fontWeight="600"
+                fontWeight="700"
                 userSelect="none"
               >
                 {displayChar(mapping.shiftChar)}
