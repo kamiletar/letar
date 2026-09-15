@@ -10,6 +10,37 @@ Shared UI компоненты для приложений Letar.
 import { ConfirmDialog, RatingStars, TopLoader } from '@letar/ui'
 ```
 
+### Подпути-импорты для non-Next потребителей (Electron, React Native)
+
+`@letar/ui` — barrel-библиотека: `index.ts` реэкспортирует все компоненты разом одним модулем.
+Под Vite dev-пребандлом (Electron renderer, `nx dev` без Next.js) это означает, что импорт даже
+одного компонента через `from '@letar/ui'` затягивает в пребандл **весь** модуль целиком —
+включая куски, обёрнутые вокруг `next/link`/`next/image`/`next/navigation`. Эти next-модули
+читают `process.env.*` на верхнем уровне при загрузке, а в Electron renderer с
+`contextIsolation: true` глобального `process` нет → `ReferenceError: process is not defined`
+ещё до рендера приложения. В production (`nx build`) не воспроизводится — tree-shaking режет
+неиспользуемый код при финальной сборке. Разбор —
+[vite-dev-letar-ui-barrel-process-undefined.md](/.claude/docs/vite-dev-letar-ui-barrel-process-undefined.md).
+
+Для такого потребителя импортируй компонент напрямую по подпути `@letar/ui/<файл>` вместо
+корневого barrel — тогда Vite пребандлит только этот модуль и то, что он реально импортирует
+(без next, если сам компонент от next не зависит):
+
+```typescript
+import { createAppToaster } from '@letar/ui/app-toaster'
+import { Tooltip } from '@letar/ui/tooltip'
+```
+
+Имя подпути = имя файла в `src/lib/` (kebab-case, без расширения) — полный список подпутей в
+`exports` `package.json`. Компоненты, сами обёрнутые вокруг `next/link`/`next/image`
+(`CoverImage`, `TouchLink`, `Header`, `PriorityNav`, `UserMenu` и т.п.), тянут `next/*` в любом
+случае — подпуть здесь не спасает, next остаётся обязательной зависимостью для них.
+
+⚠️ Приложение, использующее хотя бы один подпуть, обязано прописать **все** подпути
+`@letar/ui` в своём `tsconfig.json` (`paths`) — иначе упадёт `scripts/check-lib-subpath-paths.mjs`
+(разбор требования — `.claude/rules/libs.md` § «Несколько точек входа»). Проще всего —
+`node scripts/add-lib-tsconfig-path.mjs`.
+
 ## Компоненты
 
 ### TopLoader

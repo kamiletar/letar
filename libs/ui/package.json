@@ -1,6 +1,6 @@
 {
   "name": "@letar/ui",
-  "version": "0.21.0",
+  "version": "0.22.0",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
@@ -8,6 +8,256 @@
       "types": "./src/index.ts",
       "import": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./admin-edit-overlay": {
+      "types": "./src/lib/admin-edit-overlay.tsx",
+      "import": "./src/lib/admin-edit-overlay.tsx",
+      "default": "./src/lib/admin-edit-overlay.tsx"
+    },
+    "./analytics-gate": {
+      "types": "./src/lib/analytics-gate.tsx",
+      "import": "./src/lib/analytics-gate.tsx",
+      "default": "./src/lib/analytics-gate.tsx"
+    },
+    "./app-toaster": {
+      "types": "./src/lib/app-toaster.tsx",
+      "import": "./src/lib/app-toaster.tsx",
+      "default": "./src/lib/app-toaster.tsx"
+    },
+    "./bar-chart": {
+      "types": "./src/lib/bar-chart.tsx",
+      "import": "./src/lib/bar-chart.tsx",
+      "default": "./src/lib/bar-chart.tsx"
+    },
+    "./build-version": {
+      "types": "./src/lib/build-version.tsx",
+      "import": "./src/lib/build-version.tsx",
+      "default": "./src/lib/build-version.tsx"
+    },
+    "./chakra-color-var": {
+      "types": "./src/lib/chakra-color-var.ts",
+      "import": "./src/lib/chakra-color-var.ts",
+      "default": "./src/lib/chakra-color-var.ts"
+    },
+    "./confirm-dialog": {
+      "types": "./src/lib/confirm-dialog.tsx",
+      "import": "./src/lib/confirm-dialog.tsx",
+      "default": "./src/lib/confirm-dialog.tsx"
+    },
+    "./consent-types": {
+      "types": "./src/lib/consent-types.ts",
+      "import": "./src/lib/consent-types.ts",
+      "default": "./src/lib/consent-types.ts"
+    },
+    "./cookie-banner": {
+      "types": "./src/lib/cookie-banner.tsx",
+      "import": "./src/lib/cookie-banner.tsx",
+      "default": "./src/lib/cookie-banner.tsx"
+    },
+    "./cookie-settings-button": {
+      "types": "./src/lib/cookie-settings-button.tsx",
+      "import": "./src/lib/cookie-settings-button.tsx",
+      "default": "./src/lib/cookie-settings-button.tsx"
+    },
+    "./copy-to-clipboard-button": {
+      "types": "./src/lib/copy-to-clipboard-button.tsx",
+      "import": "./src/lib/copy-to-clipboard-button.tsx",
+      "default": "./src/lib/copy-to-clipboard-button.tsx"
+    },
+    "./cover-image": {
+      "types": "./src/lib/cover-image.tsx",
+      "import": "./src/lib/cover-image.tsx",
+      "default": "./src/lib/cover-image.tsx"
+    },
+    "./delete-account-zone": {
+      "types": "./src/lib/delete-account-zone.tsx",
+      "import": "./src/lib/delete-account-zone.tsx",
+      "default": "./src/lib/delete-account-zone.tsx"
+    },
+    "./empty-state": {
+      "types": "./src/lib/empty-state.tsx",
+      "import": "./src/lib/empty-state.tsx",
+      "default": "./src/lib/empty-state.tsx"
+    },
+    "./external-link": {
+      "types": "./src/lib/external-link.tsx",
+      "import": "./src/lib/external-link.tsx",
+      "default": "./src/lib/external-link.tsx"
+    },
+    "./faq-accordion": {
+      "types": "./src/lib/faq-accordion.tsx",
+      "import": "./src/lib/faq-accordion.tsx",
+      "default": "./src/lib/faq-accordion.tsx"
+    },
+    "./file-trigger": {
+      "types": "./src/lib/file-trigger.tsx",
+      "import": "./src/lib/file-trigger.tsx",
+      "default": "./src/lib/file-trigger.tsx"
+    },
+    "./header": {
+      "types": "./src/lib/header/index.ts",
+      "import": "./src/lib/header/index.ts",
+      "default": "./src/lib/header/index.ts"
+    },
+    "./header-scroll-padding": {
+      "types": "./src/lib/header-scroll-padding.tsx",
+      "import": "./src/lib/header-scroll-padding.tsx",
+      "default": "./src/lib/header-scroll-padding.tsx"
+    },
+    "./image-magnifier": {
+      "types": "./src/lib/image-magnifier.tsx",
+      "import": "./src/lib/image-magnifier.tsx",
+      "default": "./src/lib/image-magnifier.tsx"
+    },
+    "./lightbox-viewer": {
+      "types": "./src/lib/lightbox-viewer.tsx",
+      "import": "./src/lib/lightbox-viewer.tsx",
+      "default": "./src/lib/lightbox-viewer.tsx"
+    },
+    "./mobile-auth-section": {
+      "types": "./src/lib/mobile-auth-section.tsx",
+      "import": "./src/lib/mobile-auth-section.tsx",
+      "default": "./src/lib/mobile-auth-section.tsx"
+    },
+    "./offline-consent-banner": {
+      "types": "./src/lib/offline-consent-banner.tsx",
+      "import": "./src/lib/offline-consent-banner.tsx",
+      "default": "./src/lib/offline-consent-banner.tsx"
+    },
+    "./optimized-avatar": {
+      "types": "./src/lib/optimized-avatar.tsx",
+      "import": "./src/lib/optimized-avatar.tsx",
+      "default": "./src/lib/optimized-avatar.tsx"
+    },
+    "./password-input": {
+      "types": "./src/lib/password-input.tsx",
+      "import": "./src/lib/password-input.tsx",
+      "default": "./src/lib/password-input.tsx"
+    },
+    "./photo-gallery": {
+      "types": "./src/lib/photo-gallery.tsx",
+      "import": "./src/lib/photo-gallery.tsx",
+      "default": "./src/lib/photo-gallery.tsx"
+    },
+    "./press-scale": {
+      "types": "./src/lib/press-scale.ts",
+      "import": "./src/lib/press-scale.ts",
+      "default": "./src/lib/press-scale.ts"
+    },
+    "./pressable": {
+      "types": "./src/lib/pressable.tsx",
+      "import": "./src/lib/pressable.tsx",
+      "default": "./src/lib/pressable.tsx"
+    },
+    "./pressable-button": {
+      "types": "./src/lib/pressable-button.tsx",
+      "import": "./src/lib/pressable-button.tsx",
+      "default": "./src/lib/pressable-button.tsx"
+    },
+    "./priority-nav": {
+      "types": "./src/lib/priority-nav.tsx",
+      "import": "./src/lib/priority-nav.tsx",
+      "default": "./src/lib/priority-nav.tsx"
+    },
+    "./quantity-stepper": {
+      "types": "./src/lib/quantity-stepper.tsx",
+      "import": "./src/lib/quantity-stepper.tsx",
+      "default": "./src/lib/quantity-stepper.tsx"
+    },
+    "./rating-display": {
+      "types": "./src/lib/rating-display.tsx",
+      "import": "./src/lib/rating-display.tsx",
+      "default": "./src/lib/rating-display.tsx"
+    },
+    "./rating-distribution": {
+      "types": "./src/lib/rating-distribution.tsx",
+      "import": "./src/lib/rating-distribution.tsx",
+      "default": "./src/lib/rating-distribution.tsx"
+    },
+    "./rating-stars": {
+      "types": "./src/lib/rating-stars.tsx",
+      "import": "./src/lib/rating-stars.tsx",
+      "default": "./src/lib/rating-stars.tsx"
+    },
+    "./review-card": {
+      "types": "./src/lib/review-card.tsx",
+      "import": "./src/lib/review-card.tsx",
+      "default": "./src/lib/review-card.tsx"
+    },
+    "./route-announcer": {
+      "types": "./src/lib/route-announcer.tsx",
+      "import": "./src/lib/route-announcer.tsx",
+      "default": "./src/lib/route-announcer.tsx"
+    },
+    "./service-worker-registration": {
+      "types": "./src/lib/service-worker-registration.tsx",
+      "import": "./src/lib/service-worker-registration.tsx",
+      "default": "./src/lib/service-worker-registration.tsx"
+    },
+    "./stat-card": {
+      "types": "./src/lib/stat-card.tsx",
+      "import": "./src/lib/stat-card.tsx",
+      "default": "./src/lib/stat-card.tsx"
+    },
+    "./status-badge": {
+      "types": "./src/lib/status-badge.tsx",
+      "import": "./src/lib/status-badge.tsx",
+      "default": "./src/lib/status-badge.tsx"
+    },
+    "./sticky-action-bar": {
+      "types": "./src/lib/sticky-action-bar.tsx",
+      "import": "./src/lib/sticky-action-bar.tsx",
+      "default": "./src/lib/sticky-action-bar.tsx"
+    },
+    "./studio-credit": {
+      "types": "./src/lib/studio-credit.tsx",
+      "import": "./src/lib/studio-credit.tsx",
+      "default": "./src/lib/studio-credit.tsx"
+    },
+    "./tooltip": {
+      "types": "./src/lib/tooltip.tsx",
+      "import": "./src/lib/tooltip.tsx",
+      "default": "./src/lib/tooltip.tsx"
+    },
+    "./top-loader": {
+      "types": "./src/lib/top-loader.tsx",
+      "import": "./src/lib/top-loader.tsx",
+      "default": "./src/lib/top-loader.tsx"
+    },
+    "./touch-link": {
+      "types": "./src/lib/touch-link.tsx",
+      "import": "./src/lib/touch-link.tsx",
+      "default": "./src/lib/touch-link.tsx"
+    },
+    "./use-analytics-consent": {
+      "types": "./src/lib/use-analytics-consent.ts",
+      "import": "./src/lib/use-analytics-consent.ts",
+      "default": "./src/lib/use-analytics-consent.ts"
+    },
+    "./use-copy-to-clipboard": {
+      "types": "./src/lib/use-copy-to-clipboard.ts",
+      "import": "./src/lib/use-copy-to-clipboard.ts",
+      "default": "./src/lib/use-copy-to-clipboard.ts"
+    },
+    "./use-scroll-gate": {
+      "types": "./src/lib/use-scroll-gate.ts",
+      "import": "./src/lib/use-scroll-gate.ts",
+      "default": "./src/lib/use-scroll-gate.ts"
+    },
+    "./use-service-worker": {
+      "types": "./src/lib/use-service-worker.ts",
+      "import": "./src/lib/use-service-worker.ts",
+      "default": "./src/lib/use-service-worker.ts"
+    },
+    "./use-share": {
+      "types": "./src/lib/use-share.ts",
+      "import": "./src/lib/use-share.ts",
+      "default": "./src/lib/use-share.ts"
+    },
+    "./user-menu": {
+      "types": "./src/lib/user-menu.tsx",
+      "import": "./src/lib/user-menu.tsx",
+      "default": "./src/lib/user-menu.tsx"
     },
     "./package.json": "./package.json"
   },
@@ -18,6 +268,11 @@
     "react-dom": ">=18.0.0",
     "react-icons": ">=5.0.0",
     "yet-another-react-lightbox": "^3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "next": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@letar/hooks": "workspace:*"
