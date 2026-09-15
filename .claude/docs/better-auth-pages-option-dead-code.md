@@ -37,15 +37,15 @@ better-auth.
 
 Приложения, собирающие `betterAuth()` напрямую (не через `createAuth()`), скопировали этот
 `pages`-блок по образцу друг друга — дублирующийся мёртвый код, найден одновременно в 7
-приложениях (аудит 2026-09-15):
+приложениях (аудит 2026-09-15). **Удалено во всех семи** (второй проход того же дня):
 
-- `apps/aboi/src/lib/auth.ts`
-- `apps/archetest/src/lib/auth.ts`
-- `apps/dashboard/src/lib/auth.ts`
-- `apps/domwellbes/src/lib/auth.ts` — **удалено** в этом же аудите
-- `apps/grandslamcup/src/lib/auth.ts`
-- `apps/mandala/src/lib/auth.ts`
-- `apps/studio/src/lib/auth.ts`
+- `apps/aboi/src/lib/auth.ts` — **удалено**
+- `apps/archetest/src/lib/auth.ts` — **удалено**
+- `apps/dashboard/src/lib/auth.ts` — **удалено**
+- `apps/domwellbes/src/lib/auth.ts` — **удалено**
+- `apps/grandslamcup/src/lib/auth.ts` — **удалено**
+- `apps/mandala/src/lib/auth.ts` — **удалено**
+- `apps/studio/src/lib/auth.ts` — **удалено**
 
 `apps/dsperevod` (второй standalone-конфиг, упомянутый как образец в задаче аудита) блока
 `pages` не содержит — дублирования там нет.
