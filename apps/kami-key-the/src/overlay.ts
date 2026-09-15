@@ -9,6 +9,7 @@
  */
 
 import koffi from 'koffi'
+import { KEYBOARD_ROWS } from '../shared/keyboard-layout'
 import { getKeymap } from './keymap.js'
 import { getCenterOnActiveMonitor } from './monitor.js'
 
@@ -74,99 +75,6 @@ const COLOR_TEXT = 0x0095a093 // #93A095 — fg.subtle (EN подпись)
 const COLOR_TEXT_RU = 0x008e8cb2 // #B28C8E — fg.ru (RU подпись, тёплый красноватый оттенок)
 const COLOR_BRAND = 0x0014ff39 // #39FF14 — brand.fg, AltGr-символ (низ-право)
 const COLOR_ACCENT = 0x00eed322 // #22D3EE — accent.fg, AltGr+Shift-символ (верх-право)
-
-// --- Определение клавиш ---
-
-interface KeyDef {
-  /** Английский символ (верх-лево) */
-  label: string
-  /** Русский символ (низ-право) */
-  ru?: string
-  /** Ширина в единицах (по умолчанию 1) */
-  w?: number
-  /** VK код для поиска в KEYMAP */
-  vk?: number
-}
-
-/** 5 рядов ANSI клавиатуры с русской раскладкой (ЙЦУКЕН) */
-const KEYBOARD_ROWS: KeyDef[][] = [
-  // Ряд 0: цифровой
-  [
-    { label: '`', ru: 'Ё', vk: 0xc0 },
-    { label: '1', vk: 0x31 },
-    { label: '2', vk: 0x32 },
-    { label: '3', vk: 0x33 },
-    { label: '4', vk: 0x34 },
-    { label: '5', vk: 0x35 },
-    { label: '6', vk: 0x36 },
-    { label: '7', vk: 0x37 },
-    { label: '8', vk: 0x38 },
-    { label: '9', vk: 0x39 },
-    { label: '0', vk: 0x30 },
-    { label: '-', vk: 0xbd },
-    { label: '=', vk: 0xbb },
-    { label: 'Bksp', w: 2, vk: 0x08 },
-  ],
-  // Ряд 1: QWERTY / ЙЦУКЕН
-  [
-    { label: 'Tab', w: 1.5, vk: 0x09 },
-    { label: 'Q', ru: 'Й', vk: 0x51 },
-    { label: 'W', ru: 'Ц', vk: 0x57 },
-    { label: 'E', ru: 'У', vk: 0x45 },
-    { label: 'R', ru: 'К', vk: 0x52 },
-    { label: 'T', ru: 'Е', vk: 0x54 },
-    { label: 'Y', ru: 'Н', vk: 0x59 },
-    { label: 'U', ru: 'Г', vk: 0x55 },
-    { label: 'I', ru: 'Ш', vk: 0x49 },
-    { label: 'O', ru: 'Щ', vk: 0x4f },
-    { label: 'P', ru: 'З', vk: 0x50 },
-    { label: '[', ru: 'Х', vk: 0xdb },
-    { label: ']', ru: 'Ъ', vk: 0xdd },
-    { label: '\\', w: 1.5, vk: 0xdc },
-  ],
-  // Ряд 2: ASDF / ФЫВАПРОЛД
-  [
-    { label: 'Caps', w: 1.75, vk: 0x14 },
-    { label: 'A', ru: 'Ф', vk: 0x41 },
-    { label: 'S', ru: 'Ы', vk: 0x53 },
-    { label: 'D', ru: 'В', vk: 0x44 },
-    { label: 'F', ru: 'А', vk: 0x46 },
-    { label: 'G', ru: 'П', vk: 0x47 },
-    { label: 'H', ru: 'Р', vk: 0x48 },
-    { label: 'J', ru: 'О', vk: 0x4a },
-    { label: 'K', ru: 'Л', vk: 0x4b },
-    { label: 'L', ru: 'Д', vk: 0x4c },
-    { label: ';', ru: 'Ж', vk: 0xba },
-    { label: "'", ru: 'Э', vk: 0xde },
-    { label: 'Enter', w: 2.25, vk: 0x0d },
-  ],
-  // Ряд 3: ZXCV / ЯЧСМИТЬ
-  [
-    { label: 'Shift', w: 2.25, vk: 0xa0 },
-    { label: 'Z', ru: 'Я', vk: 0x5a },
-    { label: 'X', ru: 'Ч', vk: 0x58 },
-    { label: 'C', ru: 'С', vk: 0x43 },
-    { label: 'V', ru: 'М', vk: 0x56 },
-    { label: 'B', ru: 'И', vk: 0x42 },
-    { label: 'N', ru: 'Т', vk: 0x4e },
-    { label: 'M', ru: 'Ь', vk: 0x4d },
-    { label: ',', ru: 'Б', vk: 0xbc },
-    { label: '.', ru: 'Ю', vk: 0xbe },
-    { label: '/', vk: 0xbf },
-    { label: 'Shift', w: 2.75, vk: 0xa1 },
-  ],
-  // Ряд 4: модификаторы
-  [
-    { label: 'Ctrl', w: 1.25, vk: 0xa2 },
-    { label: 'Win', w: 1.25, vk: 0x5b },
-    { label: 'Alt', w: 1.25, vk: 0xa4 },
-    { label: '', w: 6.25, vk: 0x20 },
-    { label: 'AltGr', w: 1.25, vk: 0xa5 },
-    { label: 'Win', w: 1.25, vk: 0x5c },
-    { label: 'Menu', w: 1.25, vk: 0x5d },
-    { label: 'Ctrl', w: 1.25, vk: 0xa3 },
-  ],
-]
 
 // --- Быстрый поиск маппинга по VK коду ---
 

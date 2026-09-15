@@ -7,6 +7,14 @@
 
 ## [Unreleased]
 
+## [1.9.2] - 2026-09-16
+
+### Changed
+
+- Физическая раскладка клавиатуры (`KEYBOARD_ROWS`/`KeyDef`) вынесена из двух независимых копий
+  (`renderer/src/editor/keyboard-data.ts` и `src/overlay.ts`) в общий `shared/keyboard-layout.ts`
+  — рефакторинг источника данных, сама раскладка не менялась.
+
 ## [1.9.1] - 2026-09-16
 
 ### Changed

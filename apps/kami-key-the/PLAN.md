@@ -275,6 +275,19 @@ CHANGELOG.md).
 (PowerShell `keybd_event` + `System.Drawing.CopyFromScreen`, см.
 [native-win32-ui-verification-screenshot.md](/.claude/docs/native-win32-ui-verification-screenshot.md)).
 
+### ~~Дублирование физической раскладки клавиатуры между overlay.ts и keyboard-data.ts~~ ✅ 2026-09-16
+
+**Сделано.** `KEYBOARD_ROWS`/`KeyDef` (5 рядов ANSI с русской раскладкой ЙЦУКЕН) существовали
+двумя независимыми копиями: `renderer/src/editor/keyboard-data.ts` (визуальная клавиатура
+редактора) и `src/overlay.ts` (нативный GDI-оверлей, main-процесс). Вынесены в общий
+`shared/keyboard-layout.ts` — по образцу `shared/window-chrome.ts`/`shared/ipc-types.ts`, уже
+резолвящихся и в webpack (`main/webpack.config.js`), и в Vite (`renderer/vite.config.ts`) без
+доп. настройки алиасов. `keyboard-data.ts` реэкспортирует `KEYBOARD_ROWS`/`KeyDef` из shared и
+оставляет себе то, что нужно только редактору: `ARROW_KEYS`, `MODIFIER_VKS`, `findKeyByVk`.
+Чисто рефакторинг источника данных, сама раскладка не менялась — проверено живым скриншотом
+GDI-оверлея при симулированном удержании AltGr (см. `native-win32-ui-verification-screenshot.md`)
+и визуальной клавиатурой редактора в Browser pane.
+
 ### Drag-and-drop символа на клавиатуру стал недостижим
 
 До редизайна v1.8.0 страница клавиши была разворачиванием панели прямо под клавиатурой — можно
