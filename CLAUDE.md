@@ -53,6 +53,13 @@ workers» (не на компиляции Turbopack) — соседний, но 
 `experimental.cpus = os.cpus().length - 1` сайзит число воркеров по CPU хоста, не по свободной
 памяти (`memoryBasedWorkersCount` по умолчанию `false`); фикс — явный низкий `experimental.cpus`
 в `next.config.mjs` приложения, не глобальная настройка ·
+[turbopack-build-filesystem-cache-oom](/.claude/docs/turbopack-build-filesystem-cache-oom.md)
+⚠️ третий класс того же симптома, уже на **компиляции** (`Creating an optimized production build`
+→ `Killed`): постоянный кеш сборки Turbopack (`turbopackFileSystemCacheForBuild`, молча включён с
+16.3.0) держит сборку дешёвой, пока тёплый, а правка `next.config`/зависимостей его сбрасывает, и
+сборка раздувается кратно — замер: > 23 ГБ на сброшенном кеше, 14.9 ГБ на пустом, 8.2 ГБ с
+выключенным кешем; `experimental.cpus`, `turbopackMemoryEviction` (только dev) и
+`--max-old-space-size` не помогают; ложный след — «хост перегружен чужими сборками» ·
 [nx-playwright-plugin-project-graph-race](/.claude/docs/nx-playwright-plugin-project-graph-race.md)
 ⚠️ `Failed to process project graph` на `@nx/playwright/plugin` («Unexpected module status 0»,
 «race condition ... Promise.all()») — гонка загрузчика ESM при параллельном чтении конфигов

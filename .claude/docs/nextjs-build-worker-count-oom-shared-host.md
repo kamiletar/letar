@@ -115,6 +115,12 @@ experimental: {
 
 ## Диагностика на будущее — как отличить этот класс OOM от других
 
+⚠️ Если лог обрывается ещё **до** `Compiled successfully` (на `Creating an optimized production
+build ...`), это не этот класс, и `experimental.cpus` не поможет. Причина — постоянный кеш сборки
+Turbopack, сброшенный правкой `next.config` или зависимостей: см.
+[turbopack-build-filesystem-cache-oom](turbopack-build-filesystem-cache-oom.md) (найдено на том же
+приложении и хосте 2026-09-15).
+
 - `dmesg | grep -i "oom\|killed process"` — если жертва `next-build`/`node` и упоминания cgroup
   нет — это system-wide OOM, не лимит контейнера.
 - Момент падения (`Compiled successfully` уже напечатан, крах позже, на "Collecting page data")
