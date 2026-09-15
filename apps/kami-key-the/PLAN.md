@@ -478,6 +478,13 @@ main-процессе транслируется в `navigationHistory.goBack()/
 Разбор находок редизайна — [electron-window-controls-overlay-pattern.md](/.claude/docs/electron-window-controls-overlay-pattern.md),
 [vite-dev-letar-ui-barrel-process-undefined.md](/.claude/docs/vite-dev-letar-ui-barrel-process-undefined.md).
 
+⚠️ **Открытый вопрос (2026-09-15):** баг barrel `@letar/ui` (`process is not defined` под Vite
+dev) отправлен bug-report'ом `ui-coordinator-dev` (Agent Mail, thread
+`ui-barrel-next-process-undefined`) с предложением корневого фикса — подпути-экспорты в
+`libs/ui/package.json`. Пока фикс не сделан в `libs/ui`, у нас остаётся временный шим
+`window.process` в `apps/kami-key-the/renderer/index.html` — не убирать его раньше, чем придёт
+ответ/фикс от `ui-coordinator-dev`.
+
 ---
 
 ## Безопасность
