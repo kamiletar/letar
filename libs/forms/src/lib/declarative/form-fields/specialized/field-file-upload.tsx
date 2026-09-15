@@ -222,14 +222,14 @@ export const FieldFileUpload = createField<FileUploadFieldProps, File[], FileUpl
       variant = 'button',
       showSize = false,
       clearable = true,
-      dropzoneLabel = 'Drag and drop files here',
+      dropzoneLabel = 'Перетащите файлы сюда',
       dropzoneDescription,
-      buttonText = 'Upload file',
+      buttonText = 'Загрузить файл',
       security,
     } = componentProps
     const { securityError, setSecurityError } = fieldState
 
-    const placeholder = resolved.placeholder ?? 'Select file(s)'
+    const placeholder = resolved.placeholder ?? 'Выберите файл(ы)'
 
     // Normalize accept to array for Chakra
     const normalizedAccept = accept
@@ -316,7 +316,7 @@ export const FieldFileUpload = createField<FileUploadFieldProps, File[], FileUpl
                       return <span>{acceptedFiles[0].name}</span>
                     }
                     if (acceptedFiles.length > 1) {
-                      return <span>{acceptedFiles.length} files</span>
+                      return <span>{acceptedFiles.length} файлов</span>
                     }
                     return <Text color="fg.subtle">{placeholder}</Text>
                   }}

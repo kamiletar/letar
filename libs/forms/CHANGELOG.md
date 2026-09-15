@@ -4,6 +4,19 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/).
 
+## [2.14.19] - 2026-09-15
+
+### Fixed
+
+- **`Field.FileUpload` — дефолтные тексты были захардкожены по-английски.** `dropzoneLabel`
+  ("Drag and drop files here"), `buttonText` ("Upload file"), `placeholder` ("Select file(s)")
+  и счётчик файлов в `variant="input"` ("N files") не проходили через `FormI18nProvider` (тот
+  локализует только сообщения валидации и подписи опций select) и не совпадали с остальным
+  RU-first монорепо. Дефолты переведены на русский — единственное место в `form-fields` с
+  захардкоженным английским текстом, остальные компоненты уже были на русском. Переопределение
+  через явные пропы `dropzoneLabel`/`buttonText`/`resolved.placeholder` работает как раньше.
+  Найдено на domwellbes (`house-drawings-section.tsx` — кнопка «Upload file» в русской форме).
+
 ## [2.14.18] - 2026-09-15
 
 ### Fixed
