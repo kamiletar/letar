@@ -14,6 +14,14 @@ ZenStack-запроса) — сам тип синтаксически корре
 коммиты `71bfb65` и `46a947d`) — деблокировало продакшен-деплой. 12 файлов, три независимых
 подпаттерна.
 
+Повторно всплыло 2026-09-15 (тот же `domwellbes`) — 5 файлов, 4 из них были в исходном отчёте
+об ошибке, пятый (`src/app/houses/[slug]/configure/page.tsx`) обнаружился только по ходу починки
+остальных (не воспроизводился в изначальном списке из 4 ошибок — либо был скрыт порядком
+компиляции, либо стал видимым после `nx zenstack:generate --skip-nx-cache`, точная причина не
+выяснена). В 3 из 5 файлов лёгкий вариант подпаттерна 1 (`(typeof items)[number]`) не спасал —
+пришлось сразу эскалировать до ручного `interface`, как и предсказывает предупреждение внутри
+подпаттерна 1 ниже. Один файл дал новый вариант — см. 1a.
+
 ## Три подпаттерна
 
 ### 1. `.map()`/`.filter()`-callback без явной аннотации параметра над результатом ZenStack-запроса
@@ -57,6 +65,42 @@ const mapped = orderItems.map((item) => ...)
 
 Пробуй `(typeof items)[number]` первым (дешевле, не требует ручного списка полей) — если не
 помогло, переходи к явному узкому типу.
+
+#### 1a. Тип-алиас через `NonNullable<Awaited<ReturnType<typeof fn>>>` падает уже на объявлении, не на использовании
+
+Найдено 2026-09-15 (`domwellbes`, `src/lib/configuration/public-configuration-dal.ts`) — тот же
+класс ошибки, но точка падения не `.map()`, а сама строка объявления типа:
+
+```typescript
+// ❌ падает прямо здесь, ещё до любого использования — вывод типа через ReturnType
+// разворачивает полный тип результата ZenStack-запроса функции целиком
+async function loadHouseVersionForConfiguration(id: string) {
+  return db.houseVersion.findFirst({ include: { items: { include: { work: true, material: true } } } })
+}
+type LoadedHouseVersion = NonNullable<Awaited<ReturnType<typeof loadHouseVersionForConfiguration>>>
+```
+
+```typescript
+// ✅ ручной interface вместо вывода из сигнатуры функции + явный Promise<...>-возврат у самой
+// функции — вывод типа нигде не пересобирается заново из глубокого ZenStack-результата
+interface LoadedHouseVersion {
+  id: string
+  items: { id: string; work: LoadedWork | null; material: LoadedMaterial | null }[]
+}
+
+async function loadHouseVersionForConfiguration(id: string): Promise<LoadedHouseVersion | null> {
+  const houseVersion: LoadedHouseVersion | null = await db.houseVersion.findFirst({
+    include: { items: { include: { work: true, material: true } } },
+  })
+  return houseVersion
+}
+```
+
+Отличие от 1: здесь аннотировать нечего — нет ни `.map()`, ни callback-параметра, сам алиас
+`NonNullable<Awaited<ReturnType<typeof ...>>>` уже требует структурной экспансии на моменте
+своего объявления. Лечится тем же приёмом (ручной `interface` вместо вывода), но применённым к
+объявлению типа, а не к точке использования — если встретишь ошибку прямо на `type X = ...`, а
+не внутри функции ниже, сразу ищи здесь, не трать время на подпаттерн 1.
 
 ### 2. Деструктуризация `Promise.all([...])` из разных ZenStack-запросов
 
