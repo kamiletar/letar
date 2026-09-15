@@ -424,6 +424,11 @@ the Next.js package» ·
 [ssr-hydration-persisted-state](/.claude/docs/ssr-hydration-persisted-state.md) ⚠️ чтение
 localStorage/cookie в инициализаторе `useState` — не ошибка гидратации в консоли, а тихо
 неработающий клик ·
+[react19-svg-title-array-children-hydration](/.claude/docs/react19-svg-title-array-children-hydration.md)
+⚠️ JSX `<title>{текст} {expr}...</title>` (в т.ч. внутри `<svg>`) даёт React `children`-массив —
+React требует одну строку у любого `<title>`, сервер обрезает до первого куска, гидратация рвётся,
+recoverable-пересборка поддерева ломает клики соседних Zag.js-компонентов (`Tabs`) — выглядит как
+баг самих вкладок, а не как ошибка гидратации ·
 [nextjs-public-env-build-time-inlining](/.claude/docs/nextjs-public-env-build-time-inlining.md) ⚠️
 `NEXT_PUBLIC_*` литералом в `docker-compose.yml` не попадает в клиентский бандл — нужен `.env.docker` ·
 [nextjs-root-notfound-no-root-layout](/.claude/docs/nextjs-root-notfound-no-root-layout.md) ⚠️
