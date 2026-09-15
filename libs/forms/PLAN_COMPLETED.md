@@ -1,5 +1,37 @@
 # Выполненные задачи — @letar/forms
 
+## 2026-09-15 (сессия 7, forms-coordinator-dev) — разбор накопившегося inbox координатора
+
+**Контекст:** сессия `/forms-coordinator` — не разработка новой фичи, а разбор очереди накопленных
+за прошлые сессии запросов и статусов в agent-mail (большинство фич уже были реализованы
+forms-dev/владельцем в предыдущих сессиях, требовалось только триаж/доставка/замыкание тредов).
+
+**Сделано:**
+
+1. **Найден и починен блокирующий баг деплоя `apps/form-example`.** `next.config.ts` не содержал
+   ключ `transpilePackages` вовсе (не пустой массив — отсутствующее поле целиком) — прод-билд падал
+   на `Module parse failed` в `libs/glitchtip/src/client/index.ts` (тот же класс ловушки, что уже
+   закрыт в `form-docs`, см. `.claude/docs/transpile-packages-array-presence-not-content.md`).
+   Добавлен полный список реально импортируемых `@letar/*`-пакетов. Локальный `nx build
+   form-example` зелёный (46.5s), деплой подтверждён успешным на s2 (deploy-agent-dev). Коммит
+   `4a744ea22`.
+2. Закрыт архитектурный вопрос studio-dev (label enum'ов `///`-doc-comment vs `@meta`) —
+   подтверждён ответ прошлой сессии: осознанная граница (`@meta` не умеет объектный литерал для
+   опций), не техдолг.
+3. Закрыт запрос domwellbes-dev про Better-Auth throw-bridge — подтверждено, что `assertAuthOk`
+   (`@letar/auth/client`) уже реализован и задокументирован в `docs/server-errors.md`.
+4. Доставлены до фактических адресатов два готовых фикса forms-dev, которые не попали в общий
+   тред с реальным заказчиком (letar-dev по `Form.Field.Date`+`Form.UrlSync`, domwellbes-dev по
+   `useFormServerAction`) — координатор был единственным связующим звеном между запросом и
+   ответом, оба сообщения ушли адресатам напрямую.
+5. Попутно разблокирован push в летар: 7 submodule (aboi, domwellbes, domwellbes-e2e,
+   driving-school, dsperevod, studio, svoichuzhie) были впереди своего `origin/main` — по решению
+   владельца запушены все.
+
+**Не в этой сессии:** новых фич в библиотеку не добавлялось — весь функционал (`useFormServerAction`,
+фикс `Field.Date`, группировка `Select`, `assertAuthOk`) реализован предыдущими сессиями forms-dev,
+эта сессия только доводила координацию и деплой до конца.
+
 ## 2026-09-15 (сессия 6) — `Field.Auto` с `meta.ui.fieldType` теряло произвольные props (закрыт v2.14.18)
 
 **Задача:** делегированный запрос (найдено на auth-hub, `verify-email-code.tsx`, разбор —
