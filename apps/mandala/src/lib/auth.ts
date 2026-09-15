@@ -125,13 +125,6 @@ export const auth = betterAuth({
       },
     },
   },
-
-  // Страницы
-  pages: {
-    signIn: '/sign-in',
-    signUp: '/sign-up',
-    error: '/sign-in',
-  },
 })
 
 // Экспорт типов
