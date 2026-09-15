@@ -26,20 +26,6 @@ Electron desktop приложение для печати этикеток "Че
 - **Цель:** v1.0.0
 - **Последнее обновление:** 2026-09-15
 
-## ⚠️ Известная проблема: `next build` (renderer) падает на composite tsconfig
-
-Обнаружено 2026-09-15 при проверке краша electron-updater (не связано с ним). `cd renderer &&
-next build` (таргет `build`/`build:win`) падает на этапе «Running TypeScript» с `TS6305`/`TS6307`/
-`TS6059` вокруг `tsconfig.spec.json` (`out-tsc/spec` не собран композитно — при полном `tsc -b
-tsconfig.spec.json` дальше вылезают структурные ошибки `rootDir` для файлов
-`libs/label-printer-core/src/**`, не входящих в его `include`). `next.config.js` уже держит
-`typescript.ignoreBuildErrors: true`, но эти ошибки — не диагностика типов, а отказ построить
-программу project-reference, поэтому флаг их не гасит. Не чинилось в рамках сессии по
-electron-updater (не входило в её скоуп) — production main-бандл и headless-проверка краша
-собраны и прогнаны в обход `next build` напрямую через `npx webpack --config main/webpack.config.js`.
-Нужно почистить композитный tsconfig отдельной задачей, прежде чем следующий раз понадобится
-полный `nx build:win`.
-
 ## Приоритеты
 
 1. **Фаза 3** — стабилизация и тесты

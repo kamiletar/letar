@@ -81,7 +81,7 @@ async function main() {
     console.log('Создание БД через db push...')
     await runCommand(
       'npx',
-      ['prisma', 'db', 'push', '--schema', 'src/generated/schema.prisma', '--accept-data-loss', '--skip-generate'],
+      ['prisma', 'db', 'push', '--schema', 'src/generated/schema.prisma', '--accept-data-loss'],
       env,
     )
 

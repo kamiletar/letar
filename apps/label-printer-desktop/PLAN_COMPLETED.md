@@ -2,6 +2,41 @@
 
 Детальное описание всех реализованных фич Label Printer Desktop.
 
+## Фикс composite tsconfig, ломавшего `next build` (2026-09-15)
+
+Открытая проблема из предыдущей сессии (краш electron-updater/js-yaml) — `cd renderer && next
+build` падал на этапе «Running TypeScript» с `TS6305` вокруг `shared/constants.ts`/`shared/types.ts`.
+
+**Реальный root cause оказался не в `next build`, а в способе его ручной проверки.** `nx build
+label-printer-desktop` на полностью чистом дереве (без кешей) отрабатывал зелёным и раньше — баг
+воспроизводился только при вызове `npx next build`/`node_modules/.bin/next.exe` напрямую из
+`renderer/`: подтверждено инструментальным патчем `verify-typescript-setup.js` (Next.js), что
+`npx`/скомпилированный Bun-шим `next.exe` на Windows резолвит `dir` (корень проекта для поиска
+`tsconfig.json`) на уровень выше — в `apps/label-printer-desktop/` вместо `renderer/`. Прямой
+вызов `node ../../../node_modules/next/dist/bin/next build` из `renderer/` резолвит `dir` верно и
+собирается без единой TS-ошибки. `nx:run-commands`, которым реально пользуются таргеты
+`build`/`build:win`, добавляет `node_modules/.bin` в `PATH` и запускает `next` напрямую (не через
+`npx`) — поэтому реальные nx-таргеты этой ловушке не подвержены вовсе.
+
+**Тем не менее найденная композитная структура `tsconfig.spec.json` была объективно неправильной**
+(что и делает `npx next build`/`tsc -b` настолько хрупкими к малейшему отклонению): `include`
+дублировал `shared/**/*.ts`, который уже покрыт `include` корневого `tsconfig.json` — по паттерну
+из `.claude/docs/unit-testing.md` § «Обратный случай — poster-microtext-desktop» это заставляет
+composite-проект объявить себя владельцем этих файлов и ломает любого стороннего импортёра через
+project-reference redirect (`TS6305`). Фикс — убрать `shared/**/*.ts` из `include`
+`tsconfig.spec.json`, оставив полный `main/**/*.ts` (обязателен по соседнему разделу того же дока
+— электрон-кейс, `main/` исключён из корневого `tsconfig.json`, oxc требует покрытия каждого файла).
+
+Заодно найден и починен независимый блокер `nx build:win`: `scripts/db-template-safe.ts` вызывал
+`prisma db push --skip-generate` — флаг убран в Prisma 7 (`^7.10.0` в корневом `package.json`),
+`db:template` падал на `unknown or unexpected option`. Убран из аргументов.
+
+**Проверено:** `nx test`, `nx typecheck:tsgo`, `nx build`, полный `nx build:win` (электрон-билдер +
+renderer, с нуля, без кеша Nx) — все зелёные, `Label Printer Desktop Setup 0.5.14.exe` собран.
+Запуск `win-unpacked/*.exe` в сендбоксе даёт краш Chromium network/GPU service — задокументированное
+ограничение среды (`.claude/rules/electron.md` § «GUI-уровень»), не баг приложения; живой запуск на
+машине пользователя не проверялся в рамках сессии.
+
 ## Фикс краша main-процесса electron-updater/js-yaml в prod-сборке (2026-09-15)
 
 Проверка гипотезы из `.claude/docs/webpack-concatenatemodules-electron-updater-jsyaml-crash.md`

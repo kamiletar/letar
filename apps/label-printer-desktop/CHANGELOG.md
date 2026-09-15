@@ -4,6 +4,19 @@
 
 ## [Unreleased]
 
+## [0.5.15] - 2026-09-15
+
+### Fixed
+
+- `tsconfig.spec.json` дублировал `shared/**/*.ts` в своём `include`, хотя эти файлы уже покрыты
+  корневым `tsconfig.json` — composite-проект объявлял себя владельцем этих файлов, из-за чего
+  `next build`, вызванный напрямую через `npx`/`next.exe` (Windows-специфичная ловушка резолва
+  корня проекта, не задевает реальные nx-таргеты `build`/`build:win`), падал на `TS6305`. Убрано
+  дублирование, оставлен обязательный полный `main/**/*.ts` (Electron-кейс, `main/` исключён из
+  корневого tsconfig). Разбор в `PLAN_COMPLETED.md`.
+- `scripts/db-template-safe.ts` вызывал `prisma db push --skip-generate` — флаг удалён в Prisma 7,
+  `db:template` (зависимость `build:win`) падал на `unknown or unexpected option`.
+
 ## [0.5.14] - 2026-09-15
 
 ### Fixed

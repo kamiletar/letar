@@ -9,6 +9,13 @@
     "types": ["vitest/globals", "node"],
     "rootDir": "."
   },
-  "include": ["vitest.config.mts", "main/**/*.ts", "shared/**/*.ts"],
+  // `main/` исключён из корневого tsconfig.json (не должен попадать в typecheck рендерера) —
+  // oxc требует покрытия КАЖДОГО файла main/*.ts, поэтому здесь нужен полный `main/**/*.ts`
+  // (см. .claude/docs/unit-testing.md § «Особый случай — Electron-приложения»).
+  // `shared/**/*.ts`, наоборот, УЖЕ входит в include корневого tsconfig.json — дублировать
+  // его здесь нельзя: composite-проект объявит себя владельцем этих файлов, и next build,
+  // попавший на этот tsconfig через references родителя, упадёт на TS6305 (см. «обратный
+  // случай — poster-microtext-desktop» в том же доке).
+  "include": ["vitest.config.mts", "main/**/*.ts"],
   "exclude": ["out-tsc", "dist", "node_modules", ".next"]
 }
