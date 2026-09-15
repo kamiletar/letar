@@ -28,14 +28,6 @@ export interface HubClientOidcConfig {
   discoveryUrl?: string
 }
 
-/** Страницы авторизации приложения */
-export interface AuthPages {
-  signIn?: string
-  signUp?: string
-  error?: string
-  resetPassword?: string
-}
-
 /**
  * Привязка аккаунтов по email от доверенных провайдеров.
  *
@@ -59,7 +51,6 @@ interface AuthProfileBase {
   session?: Partial<NonNullable<BetterAuthOptions['session']>>
   /** Дополнительные плагины поверх стандартных для режима */
   plugins?: NonNullable<BetterAuthOptions['plugins']>
-  pages?: AuthPages
   /**
    * Redis или другой secondaryStorage — для rate-limit и сессионного кэша.
    * Создаётся через createRedisStorage(url) из @letar/auth/server.

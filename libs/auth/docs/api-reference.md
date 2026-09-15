@@ -20,7 +20,6 @@
 | `user`           | `BetterAuthOptions['user']`                      | `additionalFields` и пр.                                |
 | `session`        | `Partial<SessionConfig>`                         | Переопределение expiresIn/cookieCache                   |
 | `plugins`        | `BetterAuthPlugin[]`                             | Доп. плагины поверх режимных                            |
-| `pages`          | `AuthPages`                                      | Кастомные URL страниц                                   |
 | `rateLimit`      | `{ customRules }`                                | Кастомные правила rate-limit (standalone/hub-provider)  |
 
 ### `createSessionHelpers<TSession>(auth)`

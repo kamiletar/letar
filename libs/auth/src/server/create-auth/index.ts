@@ -121,7 +121,6 @@ function buildStandaloneAuth<TProfile extends StandaloneAuthProfile | HubProvide
     user: profile.user,
     session: buildSessionConfig(profile.session),
     plugins: [...(profile.plugins ?? []), nextCookies()],
-    pages: profile.pages,
     advanced: ADVANCED_IP_CONFIG,
     ...(profile.account && { account: profile.account }),
   })
@@ -164,7 +163,6 @@ function buildHubClientAuth<TProfile extends HubClientAuthProfile>(profile: TPro
     user: profile.user,
     session: buildSessionConfig(profile.session),
     plugins: [nextCookies(), oidcPlugin, ...(profile.plugins ?? [])],
-    pages: profile.pages,
     advanced: ADVANCED_IP_CONFIG,
     ...(profile.rateLimit && {
       rateLimit: {
@@ -270,7 +268,6 @@ function buildHubProviderAuth<TProfile extends HubProviderAuthProfile>(profile: 
       storeInDatabase: true,
     },
 
-    pages: profile.pages,
     advanced: ADVANCED_IP_CONFIG,
 
     plugins: [
