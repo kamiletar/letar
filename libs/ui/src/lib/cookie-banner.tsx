@@ -171,8 +171,12 @@ export function CookieBanner({
         <Stack gap={2}>
           <Stack direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ md: 'center' }} gap={2}>
             <Text fontSize="xs" color="fg.muted">
-              Мы используем cookie. Необходимые — всегда активны.{' '}
-              <Box asChild color="brand.solid" _hover={{ textDecoration: 'underline' }} display="inline">
+              Мы используем cookie. Необходимые — всегда активны. {
+                /* Постоянный underline, не только по `_hover` — иначе ссылка отличается от
+                  окружающего текста только цветом (WCAG 1.4.1), axe (link-in-text-block) ловит
+                  это в WebKit при недостаточном контрасте brand.solid/fg.muted. */
+              }
+              <Box asChild color="brand.solid" textDecoration="underline" textUnderlineOffset="2px" display="inline">
                 <Link href={privacyUrl}>Подробнее в политике ПДн</Link>
               </Box>
             </Text>

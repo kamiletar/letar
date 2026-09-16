@@ -1,5 +1,16 @@
 # Changelog — @letar/ui
 
+## [0.22.1] — 2026-09-17
+
+### Fixed
+
+- `CookieBanner` — ссылка «Подробнее в политике ПДн» получила постоянный `textDecoration:
+  underline` вместо только `_hover`. Отличалась от окружающего текста лишь цветом
+  (`brand.solid` на `fg.muted`, контраст 1.53:1 при пороге WCAG 3:1) — axe (`link-in-text-block`)
+  ловил это в WebKit (`design-system.spec.ts`, `sales-funnel-a11y.spec.ts`,
+  `configurator.spec.ts` в `domwellbes-e2e`), хотя вычисленные цвета идентичны во всех
+  браузерах — разница только в том, распознаёт ли конкретный движок axe нарушение.
+
 ## [0.22.0] — 2026-09-15
 
 ### Added
