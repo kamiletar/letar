@@ -20,7 +20,7 @@ import {
   SERVERS,
 } from '@letar/infra-config'
 import { errorText, pretty, text } from '@letar/mcp-server-kit'
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import { McpServer } from '@modelcontextprotocol/server'
 import { z } from 'zod'
 import { agentRequest, type AgentResponse } from './client.js'
 import { isAffectedSince, originMainSha } from './config.js'
@@ -130,98 +130,96 @@ export function createDeployMcpServer(): McpServer {
   const server = new McpServer({ name: '@letar/deploy-mcp', version: '0.1.0' }, { capabilities: { tools: {} } })
 
   // ─── list_servers ────────────────────────────────────────────────────────────
-  server.tool(
-    'list_servers',
-    'Список серверов деплоя и маппинг «приложение → сервер». Используй, чтобы не угадывать, где живёт приложение.',
-    {},
-    async () => {
-      return text(
-        [
-          '## Серверы',
-          pretty(SERVERS),
-          '',
-          '## Приложение → сервер (production)',
-          pretty(SERVER_APPS),
-          '',
-          '_staging любого приложения резолвится на s3 (target: "staging")._',
-        ].join('\n'),
-      )
-    },
-  )
+  server.registerTool('list_servers', {
+    description:
+      'Список серверов деплоя и маппинг «приложение → сервер». Используй, чтобы не угадывать, где живёт приложение.',
+    inputSchema: z.object({}),
+  }, async () => {
+    return text(
+      [
+        '## Серверы',
+        pretty(SERVERS),
+        '',
+        '## Приложение → сервер (production)',
+        pretty(SERVER_APPS),
+        '',
+        '_staging любого приложения резолвится на s3 (target: "staging")._',
+      ].join('\n'),
+    )
+  })
 
   // ─── agent_health ──────────────────────────────────────────────────────────────
-  server.tool(
-    'agent_health',
-    'Health-check dashboard-agent на сервере (GET /health, без авторизации). Отличает «сервер недоступен» от «токен неверный».',
-    { server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s3 (staging)') },
-    async ({ server = 's2' }) => {
-      try {
-        const res = await agentRequest(server as InfraServer, { path: '/health', auth: false, timeoutMs: 10000 })
-        return text(`✅ Агент на **${server}** отвечает.\n\n${pretty(res)}`)
-      } catch (err) {
-        return errorText(`❌ Агент на **${server}** недоступен: ${err instanceof Error ? err.message : String(err)}`)
-      }
-    },
-  )
+  server.registerTool('agent_health', {
+    description:
+      'Health-check dashboard-agent на сервере (GET /health, без авторизации). Отличает «сервер недоступен» от «токен неверный».',
+    inputSchema: z.object({
+      server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s3 (staging)'),
+    }),
+  }, async ({ server = 's2' }) => {
+    try {
+      const res = await agentRequest(server as InfraServer, { path: '/health', auth: false, timeoutMs: 10000 })
+      return text(`✅ Агент на **${server}** отвечает.\n\n${pretty(res)}`)
+    } catch (err) {
+      return errorText(`❌ Агент на **${server}** недоступен: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  })
 
   // ─── git_status ────────────────────────────────────────────────────────────────
-  server.tool(
-    'git_status',
-    'Git-статус репозитория на сервере (GET /api/git/status): ветка, незапушенные/входящие коммиты. Проверяй перед деплоем.',
-    { server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s3 (staging)') },
-    async ({ server = 's2' }) => {
-      try {
-        const res = await agentRequest(server as InfraServer, { path: '/api/git/status' })
-        if (!res.success) {
-          return errorText(`❌ git_status на ${server}: ${res.error ?? 'неизвестная ошибка'}`)
-        }
-        return text(`## Git-статус ${server}\n\n${pretty(res.data)}`)
-      } catch (err) {
-        return errorText(`❌ git_status на ${server}: ${err instanceof Error ? err.message : String(err)}`)
+  server.registerTool('git_status', {
+    description:
+      'Git-статус репозитория на сервере (GET /api/git/status): ветка, незапушенные/входящие коммиты. Проверяй перед деплоем.',
+    inputSchema: z.object({
+      server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s3 (staging)'),
+    }),
+  }, async ({ server = 's2' }) => {
+    try {
+      const res = await agentRequest(server as InfraServer, { path: '/api/git/status' })
+      if (!res.success) {
+        return errorText(`❌ git_status на ${server}: ${res.error ?? 'неизвестная ошибка'}`)
       }
-    },
-  )
+      return text(`## Git-статус ${server}\n\n${pretty(res.data)}`)
+    } catch (err) {
+      return errorText(`❌ git_status на ${server}: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  })
 
   // ─── deploy_status ───────────────────────────────────────────────────────────
-  server.tool(
-    'deploy_status',
-    [
+  server.registerTool('deploy_status', {
+    description: [
       'Статус деплоя на сервере (GET /api/deploy/status).',
       'Без deployId — текущий/последний деплой. sinceLine — курсор: вернёт только новые строки лога',
       '(экономит контекст при поллинге). В ответе totalLines/fromLine для следующего sinceLine.',
     ].join('\n'),
-    {
+    inputSchema: z.object({
       server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s3 (staging)'),
       deployId: z.string().optional().describe('ID конкретного деплоя из истории (без него — текущий/последний)'),
       sinceLine: z.number().int().min(0).optional().describe('Вернуть строки лога начиная с этого номера (курсор)'),
-    },
-    async ({ server = 's2', deployId, sinceLine }) => {
-      const params = new URLSearchParams()
-      if (deployId) {
-        params.set('deployId', deployId)
+    }),
+  }, async ({ server = 's2', deployId, sinceLine }) => {
+    const params = new URLSearchParams()
+    if (deployId) {
+      params.set('deployId', deployId)
+    }
+    if (sinceLine !== undefined) {
+      params.set('sinceLine', String(sinceLine))
+    }
+    const qs = params.toString()
+    try {
+      const res = await agentRequest(server as InfraServer, {
+        path: `/api/deploy/status${qs ? `?${qs}` : ''}`,
+      })
+      if (!res.success) {
+        return errorText(`ℹ️ ${server}: ${res.error ?? 'нет данных о деплое'}`)
       }
-      if (sinceLine !== undefined) {
-        params.set('sinceLine', String(sinceLine))
-      }
-      const qs = params.toString()
-      try {
-        const res = await agentRequest(server as InfraServer, {
-          path: `/api/deploy/status${qs ? `?${qs}` : ''}`,
-        })
-        if (!res.success) {
-          return errorText(`ℹ️ ${server}: ${res.error ?? 'нет данных о деплое'}`)
-        }
-        return text(`## Деплой на ${server}\n\n${pretty(res.data)}`)
-      } catch (err) {
-        return errorText(`❌ deploy_status на ${server}: ${err instanceof Error ? err.message : String(err)}`)
-      }
-    },
-  )
+      return text(`## Деплой на ${server}\n\n${pretty(res.data)}`)
+    } catch (err) {
+      return errorText(`❌ deploy_status на ${server}: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  })
 
   // ─── deploy_wait ─────────────────────────────────────────────────────────────
-  server.tool(
-    'deploy_wait',
-    [
+  server.registerTool('deploy_wait', {
+    description: [
       'Long-poll ожидание прогресса деплоя (GET /api/deploy/wait) — вместо будильника с ручным',
       'опросом deploy_status по таймеру. Зеркалит deploy_status (тот же снапшот), но держит запрос',
       'открытым и отпускает РАНЬШЕ waitSeconds при: терминальном статусе, смене фазы или смене',
@@ -230,61 +228,60 @@ export function createDeployMcpServer(): McpServer {
       'waitSeconds капается на сервере (максимум ~120с — ограничение Fastify/nginx-таймаутов',
       'на туннеле) — при большом деплое зови повторно, пока `running: true`.',
     ].join('\n'),
-    {
+    inputSchema: z.object({
       server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s3 (staging)'),
       deployId: z.string().optional().describe('ID конкретного деплоя из истории (без него — текущий/последний)'),
       waitSeconds: z.number().int().min(1).max(120).optional().describe(
         'Сколько максимум ждать (сервер капает до 120с)',
       ),
-    },
-    async ({ server = 's2', deployId, waitSeconds }) => {
-      const params = new URLSearchParams()
-      if (deployId) {
-        params.set('deployId', deployId)
+    }),
+  }, async ({ server = 's2', deployId, waitSeconds }) => {
+    const params = new URLSearchParams()
+    if (deployId) {
+      params.set('deployId', deployId)
+    }
+    if (waitSeconds !== undefined) {
+      params.set('waitSeconds', String(waitSeconds))
+    }
+    const qs = params.toString()
+    try {
+      const res = await agentRequest(server as InfraServer, {
+        path: `/api/deploy/wait${qs ? `?${qs}` : ''}`,
+        // Long-poll держит HTTP-соединение открытым до waitSeconds (капается сервером на 120с) —
+        // дефолтный agentRequest-таймаут 30с оборвал бы его раньше, чем сервер сам отпустит ответ.
+        timeoutMs: (Math.min(waitSeconds ?? 60, 120) + 15) * 1000,
+      })
+      if (!res.success) {
+        return errorText(`ℹ️ ${server}: ${res.error ?? 'нет данных о деплое'}`)
       }
-      if (waitSeconds !== undefined) {
-        params.set('waitSeconds', String(waitSeconds))
-      }
-      const qs = params.toString()
-      try {
-        const res = await agentRequest(server as InfraServer, {
-          path: `/api/deploy/wait${qs ? `?${qs}` : ''}`,
-          // Long-poll держит HTTP-соединение открытым до waitSeconds (капается сервером на 120с) —
-          // дефолтный agentRequest-таймаут 30с оборвал бы его раньше, чем сервер сам отпустит ответ.
-          timeoutMs: (Math.min(waitSeconds ?? 60, 120) + 15) * 1000,
-        })
-        if (!res.success) {
-          return errorText(`ℹ️ ${server}: ${res.error ?? 'нет данных о деплое'}`)
-        }
-        return text(`## Деплой на ${server}\n\n${pretty(res.data)}`)
-      } catch (err) {
-        return errorText(`❌ deploy_wait на ${server}: ${err instanceof Error ? err.message : String(err)}`)
-      }
-    },
-  )
+      return text(`## Деплой на ${server}\n\n${pretty(res.data)}`)
+    } catch (err) {
+      return errorText(`❌ deploy_wait на ${server}: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  })
 
   // ─── deploy_cancel ───────────────────────────────────────────────────────────
-  server.tool(
-    'deploy_cancel',
-    'Отменяет текущий деплой на сервере (POST /api/deploy/cancel, SIGTERM процессу). ⚠️ Прерывает деплой на полпути.',
-    { server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s3 (staging)') },
-    async ({ server = 's2' }) => {
-      try {
-        const res = await agentRequest(server as InfraServer, { method: 'POST', path: '/api/deploy/cancel' })
-        if (!res.success) {
-          return errorText(`❌ deploy_cancel на ${server}: ${res.error ?? 'нет активного деплоя'}`)
-        }
-        return text(`🛑 Деплой на ${server} отменён.\n\n${pretty(res.data)}`)
-      } catch (err) {
-        return errorText(`❌ deploy_cancel на ${server}: ${err instanceof Error ? err.message : String(err)}`)
+  server.registerTool('deploy_cancel', {
+    description:
+      'Отменяет текущий деплой на сервере (POST /api/deploy/cancel, SIGTERM процессу). ⚠️ Прерывает деплой на полпути.',
+    inputSchema: z.object({
+      server: serverEnum.optional().describe('Сервер: s2 (прод, по умолчанию) или s3 (staging)'),
+    }),
+  }, async ({ server = 's2' }) => {
+    try {
+      const res = await agentRequest(server as InfraServer, { method: 'POST', path: '/api/deploy/cancel' })
+      if (!res.success) {
+        return errorText(`❌ deploy_cancel на ${server}: ${res.error ?? 'нет активного деплоя'}`)
       }
-    },
-  )
+      return text(`🛑 Деплой на ${server} отменён.\n\n${pretty(res.data)}`)
+    } catch (err) {
+      return errorText(`❌ deploy_cancel на ${server}: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  })
 
   // ─── deploy_app ────────────────────────────────────────────────────────────────
-  server.tool(
-    'deploy_app',
-    [
+  server.registerTool('deploy_app', {
+    description: [
       'Запускает деплой приложения (POST /api/deploy/app) — замена сырого SSH + deploy-affected.sh.',
       'target: "production" (по умолчанию, → сервер приложения) или "staging" (→ s3, образ <app>:staging).',
       'seed: true → deploy-affected.sh --seed (nx run <app>:db:seed после успешного деплоя).',
@@ -293,7 +290,7 @@ export function createDeployMcpServer(): McpServer {
       `⛔ Для приложений из HARD_GATED_APPS (${HARD_GATED_APPS.join(', ')}) production-деплой`,
       'ОТКАЗЫВАЕТ без свежего зелёного e2e на staging для текущего коммита — не обходится флагом.',
     ].join('\n'),
-    {
+    inputSchema: z.object({
       app: z
         .string()
         .regex(/^[a-z0-9-]+$/, 'Имя приложения: строчные буквы, цифры, дефис')
@@ -303,68 +300,66 @@ export function createDeployMcpServer(): McpServer {
         .optional()
         .describe('production (по умолчанию, сервер приложения) или staging (s3)'),
       seed: z.boolean().optional().describe('Запустить nx run <app>:db:seed после успешного деплоя (--seed)'),
-    },
-    async ({ app, target = 'production', seed = false }) => {
-      const server = resolveDeployServer(app, target as DeployTarget)
-      const staging = target === 'staging'
-      const gated = !staging && E2E_GATED_APPS.includes(app)
-      const hardGated = !staging && HARD_GATED_APPS.includes(app)
-      // e2e-gate: только для production и только для приложений из E2E_GATED_APPS — у остальных
-      // нет staging-e2e инфры, проверка была бы чистым шумом (§126 PLAN-INFRA-4.md). Внутри
-      // gated-приложений: HARD_GATED_APPS — fail-closed (блокирует деплой), остальные — старое
-      // warn-only поведение Фазы 2 (только предупреждает).
-      const gate = gated ? await evaluateE2eGate(app, hardGated) : { blocked: false, reasons: [] }
-      if (gate.blocked) {
+    }),
+  }, async ({ app, target = 'production', seed = false }) => {
+    const server = resolveDeployServer(app, target as DeployTarget)
+    const staging = target === 'staging'
+    const gated = !staging && E2E_GATED_APPS.includes(app)
+    const hardGated = !staging && HARD_GATED_APPS.includes(app)
+    // e2e-gate: только для production и только для приложений из E2E_GATED_APPS — у остальных
+    // нет staging-e2e инфры, проверка была бы чистым шумом (§126 PLAN-INFRA-4.md). Внутри
+    // gated-приложений: HARD_GATED_APPS — fail-closed (блокирует деплой), остальные — старое
+    // warn-only поведение Фазы 2 (только предупреждает).
+    const gate = gated ? await evaluateE2eGate(app, hardGated) : { blocked: false, reasons: [] }
+    if (gate.blocked) {
+      return errorText(
+        [
+          `⛔ deploy_app(${app}, production) заблокирован hard e2e-gate:`,
+          ...gate.reasons.map((r) => `- ${r}`),
+          '',
+          'Чтобы снять блок: deploy_app({ app, target: "staging" }) → run_e2e({ app, baseUrl: '
+          + `"https://${app}-stage.s3.letar.best" }) → дождаться passed:true на текущем коммите → повторить deploy_app.`,
+        ].join('\n'),
+      )
+    }
+    const gatePrefix = gate.reasons.length > 0 ? [...gate.reasons.map((r) => `⚠️ e2e-gate: ${r}.`), ''] : []
+    try {
+      const res = await agentRequest(server, {
+        method: 'POST',
+        path: '/api/deploy/app',
+        body: { appName: app, staging, seed },
+      })
+      if (!res.success) {
         return errorText(
-          [
-            `⛔ deploy_app(${app}, production) заблокирован hard e2e-gate:`,
-            ...gate.reasons.map((r) => `- ${r}`),
-            '',
-            'Чтобы снять блок: deploy_app({ app, target: "staging" }) → run_e2e({ app, baseUrl: '
-            + `"https://${app}-stage.s3.letar.best" }) → дождаться passed:true на текущем коммите → повторить deploy_app.`,
-          ].join('\n'),
+          [...gatePrefix, `❌ Не удалось запустить деплой ${app} (${target}) на ${server}: ${res.error}`].join('\n'),
         )
       }
-      const gatePrefix = gate.reasons.length > 0 ? [...gate.reasons.map((r) => `⚠️ e2e-gate: ${r}.`), ''] : []
-      try {
-        const res = await agentRequest(server, {
-          method: 'POST',
-          path: '/api/deploy/app',
-          body: { appName: app, staging, seed },
-        })
-        if (!res.success) {
-          return errorText(
-            [...gatePrefix, `❌ Не удалось запустить деплой ${app} (${target}) на ${server}: ${res.error}`].join('\n'),
-          )
-        }
-        const data = res.data as { deployId?: string } | undefined
-        return text(
-          [
-            ...gatePrefix,
-            `🚀 Деплой **${app}** (${target}) запущен на **${server}**.`,
-            '',
-            `Опрашивай прогресс: \`deploy_status({ server: "${server}", deployId: "${
-              data?.deployId ?? ''
-            }", sinceLine: 0 })\``,
-            '',
-            pretty(res.data),
-          ].join('\n'),
-        )
-      } catch (err) {
-        return errorText(
-          [
-            ...gatePrefix,
-            `❌ deploy_app ${app} (${target}) на ${server}: ${err instanceof Error ? err.message : String(err)}`,
-          ].join('\n'),
-        )
-      }
-    },
-  )
+      const data = res.data as { deployId?: string } | undefined
+      return text(
+        [
+          ...gatePrefix,
+          `🚀 Деплой **${app}** (${target}) запущен на **${server}**.`,
+          '',
+          `Опрашивай прогресс: \`deploy_status({ server: "${server}", deployId: "${
+            data?.deployId ?? ''
+          }", sinceLine: 0 })\``,
+          '',
+          pretty(res.data),
+        ].join('\n'),
+      )
+    } catch (err) {
+      return errorText(
+        [
+          ...gatePrefix,
+          `❌ deploy_app ${app} (${target}) на ${server}: ${err instanceof Error ? err.message : String(err)}`,
+        ].join('\n'),
+      )
+    }
+  })
 
   // ─── deploy_infra ──────────────────────────────────────────────────────────────
-  server.tool(
-    'deploy_infra',
-    [
+  server.registerTool('deploy_infra', {
+    description: [
       'Деплой инфраструктурного сервиса infra/<service> (POST /api/deploy/infra) — запускает',
       'scripts/deploy-infra.sh на сервере: расшифровывает секреты по',
       'infra/<service>/secrets/deploy.conf (если он есть у сервиса) и поднимает docker compose up -d.',
@@ -374,47 +369,45 @@ export function createDeployMcpServer(): McpServer {
       '⚠️ Изменяет инфраструктуру сервера напрямую. Перед деплоем убедись, что коммиты запушены',
       '(git_status) — как и для deploy_app, скрипт поднимает то, что уже в рабочем дереве сервера.',
     ].join('\n'),
-    {
+    inputSchema: z.object({
       service: z
         .string()
         .regex(/^[a-z0-9-]+$/, 'Имя сервиса: строчные буквы, цифры, дефис')
         .describe('Имя infra/<service>, например "traefik" или "acme-dns"'),
       server: serverEnum.describe('Сервер, на котором живёт сервис (traefik — s3, acme-dns — s2)'),
-    },
-    async ({ service, server }) => {
-      try {
-        const res = await agentRequest(server as InfraServer, {
-          method: 'POST',
-          path: '/api/deploy/infra',
-          body: { service },
-        })
-        if (!res.success) {
-          return errorText(`❌ Не удалось запустить деплой инфра-сервиса ${service} на ${server}: ${res.error}`)
-        }
-        const data = res.data as { deployId?: string } | undefined
-        return text(
-          [
-            `🚀 Деплой инфра-сервиса **${service}** запущен на **${server}**.`,
-            '',
-            `Опрашивай прогресс: \`deploy_status({ server: "${server}", deployId: "${
-              data?.deployId ?? ''
-            }", sinceLine: 0 })\``,
-            '',
-            pretty(res.data),
-          ].join('\n'),
-        )
-      } catch (err) {
-        return errorText(
-          `❌ deploy_infra ${service} на ${server}: ${err instanceof Error ? err.message : String(err)}`,
-        )
+    }),
+  }, async ({ service, server }) => {
+    try {
+      const res = await agentRequest(server as InfraServer, {
+        method: 'POST',
+        path: '/api/deploy/infra',
+        body: { service },
+      })
+      if (!res.success) {
+        return errorText(`❌ Не удалось запустить деплой инфра-сервиса ${service} на ${server}: ${res.error}`)
       }
-    },
-  )
+      const data = res.data as { deployId?: string } | undefined
+      return text(
+        [
+          `🚀 Деплой инфра-сервиса **${service}** запущен на **${server}**.`,
+          '',
+          `Опрашивай прогресс: \`deploy_status({ server: "${server}", deployId: "${
+            data?.deployId ?? ''
+          }", sinceLine: 0 })\``,
+          '',
+          pretty(res.data),
+        ].join('\n'),
+      )
+    } catch (err) {
+      return errorText(
+        `❌ deploy_infra ${service} на ${server}: ${err instanceof Error ? err.message : String(err)}`,
+      )
+    }
+  })
 
   // ─── run_e2e ─────────────────────────────────────────────────────────────────
-  server.tool(
-    'run_e2e',
-    [
+  server.registerTool('run_e2e', {
+    description: [
       'Запускает Playwright e2e-прогон на s3 (POST /api/e2e/run) против staging-контейнера приложения.',
       'Приложение должно быть уже задеплоено на staging (deploy_app target:"staging"). baseUrl — куда бить',
       '⚠️ ВСЕГДА реальный публичный HTTPS-домен `https://<app>-stage.s3.letar.best`, НИКОГДА',
@@ -429,7 +422,7 @@ export function createDeployMcpServer(): McpServer {
       'теста/describe-блока (подстрока) или regex. Экономит время, когда нужно подтвердить фикс в паре',
       'тестов, а не гонять все ~100+ (типовой кейс: точечная проверка после фикса конкретной страницы).',
     ].join('\n'),
-    {
+    inputSchema: z.object({
       app: z
         .string()
         .regex(/^[a-z0-9-]+$/, 'Имя приложения: строчные буквы, цифры, дефис')
@@ -466,69 +459,66 @@ export function createDeployMcpServer(): McpServer {
             + 'шаги (scrypt-хеширование, geolocation-таймауты) флейкуют при полном параллелизме и стабильно '
             + 'проходят при workers=1 (aboi, 2026-08-08). Используй при подозрении на ресурсный флейк.',
         ),
-    },
-    async ({ app, baseUrl, project, grep, workers }) => {
-      try {
-        const res = await agentRequest('s3', {
-          method: 'POST',
-          path: '/api/e2e/run',
-          body: { app, baseUrl, project, grep, workers },
-        })
-        if (!res.success) {
-          return errorText(`❌ Не удалось запустить e2e для ${app}: ${res.error}`)
-        }
-        const data = res.data as { runId?: string } | undefined
-        return text(
-          [
-            `🧪 E2E для **${app}** запущен на **s3**.`,
-            '',
-            `Опрашивай прогресс: \`e2e_status({ app: "${app}", runId: "${data?.runId ?? ''}", sinceLine: 0 })\``,
-            '',
-            pretty(res.data),
-          ].join('\n'),
-        )
-      } catch (err) {
-        return errorText(`❌ run_e2e ${app}: ${err instanceof Error ? err.message : String(err)}`)
+    }),
+  }, async ({ app, baseUrl, project, grep, workers }) => {
+    try {
+      const res = await agentRequest('s3', {
+        method: 'POST',
+        path: '/api/e2e/run',
+        body: { app, baseUrl, project, grep, workers },
+      })
+      if (!res.success) {
+        return errorText(`❌ Не удалось запустить e2e для ${app}: ${res.error}`)
       }
-    },
-  )
+      const data = res.data as { runId?: string } | undefined
+      return text(
+        [
+          `🧪 E2E для **${app}** запущен на **s3**.`,
+          '',
+          `Опрашивай прогресс: \`e2e_status({ app: "${app}", runId: "${data?.runId ?? ''}", sinceLine: 0 })\``,
+          '',
+          pretty(res.data),
+        ].join('\n'),
+      )
+    } catch (err) {
+      return errorText(`❌ run_e2e ${app}: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  })
 
   // ─── e2e_status ──────────────────────────────────────────────────────────────
-  server.tool(
-    'e2e_status',
-    [
+  server.registerTool('e2e_status', {
+    description: [
       'Статус e2e-прогона на s3 (GET /api/e2e/status). Без runId — последний прогон приложения.',
       'sinceLine — курсор лога. Всегда возвращает lastStatus (персистентный .last-e2e-status/<app>.json),',
       'даже если сейчас ничего не запущено — это то, что читает warn-gate в deploy_app(production).',
     ].join('\n'),
-    {
+    inputSchema: z.object({
       app: z.string().optional().describe('Имя приложения (для lastStatus и последнего прогона)'),
       runId: z.string().optional().describe('ID конкретного прогона из истории'),
       sinceLine: z.number().int().min(0).optional().describe('Курсор лога'),
-    },
-    async ({ app, runId, sinceLine }) => {
-      const params = new URLSearchParams()
-      if (app) {
-        params.set('app', app)
+    }),
+  }, async ({ app, runId, sinceLine }) => {
+    const params = new URLSearchParams()
+    if (app) {
+      params.set('app', app)
+    }
+    if (runId) {
+      params.set('runId', runId)
+    }
+    if (sinceLine !== undefined) {
+      params.set('sinceLine', String(sinceLine))
+    }
+    const qs = params.toString()
+    try {
+      const res = await agentRequest('s3', { path: `/api/e2e/status${qs ? `?${qs}` : ''}` })
+      if (!res.success) {
+        return errorText(`ℹ️ e2e на s3: ${res.error ?? 'нет данных'}`)
       }
-      if (runId) {
-        params.set('runId', runId)
-      }
-      if (sinceLine !== undefined) {
-        params.set('sinceLine', String(sinceLine))
-      }
-      const qs = params.toString()
-      try {
-        const res = await agentRequest('s3', { path: `/api/e2e/status${qs ? `?${qs}` : ''}` })
-        if (!res.success) {
-          return errorText(`ℹ️ e2e на s3: ${res.error ?? 'нет данных'}`)
-        }
-        return text(`## E2E статус${app ? ` (${app})` : ''}\n\n${pretty(res.data)}`)
-      } catch (err) {
-        return errorText(`❌ e2e_status: ${err instanceof Error ? err.message : String(err)}`)
-      }
-    },
-  )
+      return text(`## E2E статус${app ? ` (${app})` : ''}\n\n${pretty(res.data)}`)
+    } catch (err) {
+      return errorText(`❌ e2e_status: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  })
 
   return server
 }
