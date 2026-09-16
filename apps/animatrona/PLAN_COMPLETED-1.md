@@ -3,6 +3,34 @@
 > Точка входа и карта всех частей — [PLAN_COMPLETED.md](./PLAN_COMPLETED.md).
 > Диапазон: 2026-09-04 — 2026-09-16.
 
+## Чистка legacy NVENC-путей после унификации (2026-09-16, v0.56.1)
+
+Хвост задачи «NVENC: временной фильтр, lookahead и 10 бит» ниже — два оставшихся пункта из
+раздела «Что осталось» в [PLAN.md](./PLAN.md).
+
+- **Мёртвый код удалён.** `main/src/ffmpeg/transcode.ts` (`transcodeVideo`, `transcodeAudio`,
+  `defaultVideoOptions`, `defaultAudioOptions`) экспортировался через баррель
+  `main/src/ffmpeg/index.ts`, но ни одна функция из него нигде не импортировалась — подтверждено
+  грепом по `main`/`renderer`/`preload`/IPC (живые импорты из того же барреля — только
+  `findOptimalCQ`, `calculateVMAF*`, `cleanupSamples`, `extractSamples`). Файл удалён целиком,
+  строка экспорта убрана из `index.ts`.
+- **Легаси-путь `useTranscode` переведён на `buildNvencEncodeArgs`.** `transcodeVideo` в
+  `main/ffmpeg/transcode.ts` — не мёртвый код, живой путь одного файла:
+  `useTranscode.ts` (renderer) → `api.ffmpeg.transcodeVideo` → IPC `ffmpeg:transcodeVideo`
+  (`ffmpeg.handlers.ts`) → эта функция. Раньше держал свой захардкоженный набор NVENC-аргументов
+  (`-tune hq`, `-rc constqp` + `-cq` — баг: constqp требует `-qp`, не `-cq`, см. комментарий в
+  `nvenc-args.ts`; GOP 360, `-aq-strength 15`, без lookahead/multipass/temporal filter). Теперь
+  вызывает `buildNvencEncodeArgs(options, { temporalFilterSupported })` с
+  `getGpuCapability().supportsTemporalFilter`, как VideoPool и VMAF-сэмплы — тот же источник
+  аргументов, что описан в разделе выше.
+- **Найдено, но не тронуто (открытый вопрос владельцу):** CPU-фоллбэк VideoPool после краша
+  NVENC (`buildSvtAv1Args` в `main/services/pools/video-pool.ts`) всегда кодирует в `libsvtav1`
+  (AV1) вне зависимости от `options.codec` — даже если профиль был HEVC или H.264. Легаси-путь
+  `main/ffmpeg/transcode.ts` для сравнения корректно маппит кодек на `libx265`/`libx264`. Не
+  чинил — не было ясности, баг это или намеренное решение (переключение кодека на лету при
+  краше может быть нежелательным).
+- Проверки: `format` → `lint` → `typecheck:tsgo` → `test` (192/192) — все зелёные.
+
 ## NVENC: временной фильтр, lookahead и 10 бит (2026-09-16, v0.56.0)
 
 Что сделано и замеры — в разделе «NVENC» [PLAN.md](./PLAN.md). Здесь — как это устроено.

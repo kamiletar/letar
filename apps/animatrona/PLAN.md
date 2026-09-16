@@ -612,8 +612,13 @@ creator-only: `EncodingProfilesCard`, `TranscodingSettingsCard`, `QBittorrentSet
       в `nvenc-args.ts`, `-tune hq`, GOP 360, AQ 15 без lookahead/multipass/фильтра). Теперь берёт
       аргументы из `buildNvencEncodeArgs(options, { temporalFilterSupported })` с
       `getGpuCapability()`, как VideoPool и VMAF-сэмплы.
-- [ ] CPU-фоллбэк VideoPool после краша NVENC всегда кодирует в `libsvtav1`, даже если профиль
-      HEVC или H.264 — **не трогать без решения владельца**, см. разбор ниже.
+- [ ] ⚠️ **Открытый вопрос: CPU-фоллбэк VideoPool после краша NVENC игнорирует кодек профиля.**
+      `buildSvtAv1Args` (`main/services/pools/video-pool.ts`) всегда кодирует в `libsvtav1` (AV1),
+      даже если профиль был HEVC или H.264 — `options.codec` не читается вовсе. Легаси-путь
+      `main/ffmpeg/transcode.ts` для сравнения корректно маппит кодек CPU-фолбэка на
+      `libx265`/`libx264`. Не чинил: неясно, баг это (должен маппить как легаси-путь) или
+      намеренное решение (не переключать формат вывода на лету при краше NVENC) — решение за
+      владельцем.
 
 ## Открытые задачи
 
