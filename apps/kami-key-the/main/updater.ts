@@ -81,22 +81,20 @@ function scheduleRelaunchAfterSilentInstall(): void {
     `    echo [!date! !time!] starting "${exePath}" >> "${debugLogPath}"`,
     // ⚠️ 1.9.20 доказал, что запуск сам по себе работает (schtasks успешно вырывает из job) —
     // новый процесс жил минимум 3с (подтверждено tasklist), но пропадал бесследно ещё до
-    // следующей ручной проверки (1-2 мин спустя), без записи в Event Log (чистый выход, не краш)
-    // и БЕЗ перехваченного stdout/stderr — `start` без `/B` не даёт указать редирект. Добавляем
-    // `/B`, чтобы не открывать новое окно консоли и унаследовать редирект вывода в файл — так
-    // увидим, что процесс сам пишет в консоль перед выходом (по аналогии со Start-Process
-    // редиректом, которым мы ловили `[Updater]`-сообщения у живых ручных тестов).
-    `    start "" /B "${exePath}" >> "${appOutputLogPath}" 2>&1`,
-    `    echo [!date! !time!] start command issued, errorlevel=!errorlevel! >> "${debugLogPath}"`,
-    '    timeout /t 3 /nobreak >nul',
-    `    echo [!date! !time!] tasklist at +3s: >> "${debugLogPath}"`,
-    `    tasklist /fi "imagename eq ${basename(exePath)}" >> "${debugLogPath}"`,
-    '    timeout /t 12 /nobreak >nul',
-    `    echo [!date! !time!] tasklist at +15s: >> "${debugLogPath}"`,
-    `    tasklist /fi "imagename eq ${basename(exePath)}" >> "${debugLogPath}"`,
-    '    timeout /t 30 /nobreak >nul',
-    `    echo [!date! !time!] tasklist at +45s: >> "${debugLogPath}"`,
-    `    tasklist /fi "imagename eq ${basename(exePath)}" >> "${debugLogPath}"`,
+    // следующей ручной проверки (1-2 мин спустя), без записи в Event Log (чистый выход, не краш).
+    // 1.9.21 попробовал `start "" /B "exe" >> log 2>&1` — файл `app-output.log` не появился
+    // вообще, ни пустым, ни с содержимым: `start /B` с редиректом для GUI-процесса (Windows
+    // subsystem, без консоли) на практике не создаёт файл через cmd-редирект надёжно. В 1.9.22
+    // убираем `start` целиком — вызываем `exePath` напрямую как последнюю команду `.bat`: cmd
+    // создаёт файловые хендлы для `>>`/`2>&1` и передаёт их дочернему процессу через
+    // STARTUPINFO при `CreateProcess`, независимо от GUI/консольного subsystem — тем же
+    // механизмом, каким `Start-Process -RedirectStandardOutput` уже ловил `[Updater]`-сообщения
+    // на ручных тестах. Без `start` эта строка синхронно блокирует `.bat`, пока `exePath` не
+    // завершится — не проблема, `.bat` и так уже запущен независимо через `schtasks`, никто не
+    // ждёт его завершения. Взамен получаем точный exit-код и момент выхода вместо периодических
+    // проверок `tasklist`.
+    `    "${exePath}" >> "${appOutputLogPath}" 2>&1`,
+    `    echo [!date! !time!] app process exited, errorlevel=!errorlevel! >> "${debugLogPath}"`,
     '    goto :done',
     '  )',
     '  timeout /t 1 /nobreak >nul',
