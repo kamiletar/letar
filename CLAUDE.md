@@ -289,6 +289,7 @@
 - [electron-version-drift](/.claude/docs/electron-version-drift.md) точная версия electron расходится без ошибок сборки
 - [electron-net-fetch-tun-vpn](/.claude/docs/electron-net-fetch-tun-vpn.md) ⚠️ `net.fetch` падает под TUN-VPN
 - [electron-sqlite](/.claude/docs/electron-sqlite.md) SQLite в Electron
+- [electron-shared-runtime-and-settings-patterns](/.claude/docs/electron-shared-runtime-and-settings-patterns.md) `shared/`-рантайм и единый объект настроек — общий паттерн Electron-приложений
 - [electron-window-controls-overlay-pattern](/.claude/docs/electron-window-controls-overlay-pattern.md) `titleBarOverlay` вместо `frame: false`
 - [native-win32-ui-verification-screenshot](/.claude/docs/native-win32-ui-verification-screenshot.md) проверка UI вне Browser pane; ⚠️ двоение — чужая прод-копия
 - [vite-dev-letar-ui-barrel-process-undefined](/.claude/docs/vite-dev-letar-ui-barrel-process-undefined.md) ⚠️ баррель `@letar/ui` тянет `next/*`, `process` не определён
