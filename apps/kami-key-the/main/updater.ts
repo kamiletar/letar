@@ -68,6 +68,7 @@ function scheduleRelaunchAfterSilentInstall(): void {
   // полагаемся на аккуратную склейку строк через разделитель.
   const batPath = join(tmpdir(), `kamikeythe-relaunch-${Date.now()}.bat`)
   const debugLogPath = join(tmpdir(), 'kamikeythe-relauncher-debug.log')
+  const appOutputLogPath = join(tmpdir(), 'kamikeythe-app-output.log')
   const batContent = [
     '@echo off',
     'setlocal enabledelayedexpansion',
@@ -78,9 +79,23 @@ function scheduleRelaunchAfterSilentInstall(): void {
     '  if not errorlevel 1 (',
     '    timeout /t 2 /nobreak >nul',
     `    echo [!date! !time!] starting "${exePath}" >> "${debugLogPath}"`,
-    `    start "" "${exePath}"`,
+    // ⚠️ 1.9.20 доказал, что запуск сам по себе работает (schtasks успешно вырывает из job) —
+    // новый процесс жил минимум 3с (подтверждено tasklist), но пропадал бесследно ещё до
+    // следующей ручной проверки (1-2 мин спустя), без записи в Event Log (чистый выход, не краш)
+    // и БЕЗ перехваченного stdout/stderr — `start` без `/B` не даёт указать редирект. Добавляем
+    // `/B`, чтобы не открывать новое окно консоли и унаследовать редирект вывода в файл — так
+    // увидим, что процесс сам пишет в консоль перед выходом (по аналогии со Start-Process
+    // редиректом, которым мы ловили `[Updater]`-сообщения у живых ручных тестов).
+    `    start "" /B "${exePath}" >> "${appOutputLogPath}" 2>&1`,
     `    echo [!date! !time!] start command issued, errorlevel=!errorlevel! >> "${debugLogPath}"`,
     '    timeout /t 3 /nobreak >nul',
+    `    echo [!date! !time!] tasklist at +3s: >> "${debugLogPath}"`,
+    `    tasklist /fi "imagename eq ${basename(exePath)}" >> "${debugLogPath}"`,
+    '    timeout /t 12 /nobreak >nul',
+    `    echo [!date! !time!] tasklist at +15s: >> "${debugLogPath}"`,
+    `    tasklist /fi "imagename eq ${basename(exePath)}" >> "${debugLogPath}"`,
+    '    timeout /t 30 /nobreak >nul',
+    `    echo [!date! !time!] tasklist at +45s: >> "${debugLogPath}"`,
     `    tasklist /fi "imagename eq ${basename(exePath)}" >> "${debugLogPath}"`,
     '    goto :done',
     '  )',
